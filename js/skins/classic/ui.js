@@ -618,7 +618,7 @@ function renderPanel() {
   // tech bars
   const tb = el('section', { class: 'box' }, el('h3', null, 'Technology'));
   const techSpend = spendable * p.budget.tech;
-  const tents = HO.TECHS.map(k => ({ key: k, get: () => p.talloc[k], set: (v) => p.talloc[k] = v }));
+  const tents = HO.TECHS.filter(k => !(k === 'radical' && HO.feature(G, 'noRadical'))).map(k => ({ key: k, get: () => p.talloc[k], set: (v) => p.talloc[k] = v }));
   let tt = tents.reduce((a, e) => a + e.get(), 0) || 1; tents.forEach(e => e.set(e.get() / tt));
   const tnames = { range: 'Range', speed: 'Speed', weapons: 'Weapons', shields: 'Shields', mini: 'Mini', radical: 'Radical' };
   tents.forEach((e, i) => {
@@ -658,8 +658,9 @@ function planetBox(sid) {
           el('span', null, 'Mine'));
         box.append(sl);
       } else box.append(el('p', { class: 'note' }, !terraOK && !metalOK ? 'Fully terraformed and mined out. Its budget goes to savings.' : !terraOK ? 'Fully terraformed; its budget goes to mining.' : 'No metal left; its budget goes to terraforming.'));
+      if (HO.feature(G, 'buildQueue')) box.append(yardBox(s));
       box.append(el('div', { class: 'btns' },
-        el('button', { onclick: () => openBuild(sid) }, 'Build ships…'),
+        el('button', { onclick: () => openBuild(sid) }, HO.feature(G, 'buildQueue') ? 'Queue ships…' : 'Build ships…'),
         s.id !== p.homeStar || HO.colonies(G, 0).length > 1 ? el('button', { class: 'quiet', onclick: () => confirmBox(`Evacuate ${s.name}? Your colonists will leave; satellites stay.`, () => { HO.evacuate(G, 0, sid); Sound.play(7002); renderPanel(); draw(); save(); }) }, 'Evacuate') : null));
     } else if (k.owner > 0) {
       box.append(row('Population', k.pop ? '~' + fmt(k.pop * 1e6) : '?'));
@@ -674,7 +675,12 @@ function planetBox(sid) {
     for (const f of inbound) fl.append(fleetRow(f, true));
     box.append(fl);
     const mine = here.filter(f => f.owner === 0 && !f.sat);
-    if (mine.length > 1) box.append(el('div', { class: 'btns' }, el('button', { class: 'quiet', onclick: () => { const [a, ...rest] = mine; rest.forEach(b => HO.mergeFleets(G, a, b)); UI.selFleet = a.id; renderPanel(); draw(); save(); } }, 'Merge all fleets here')));
+    const mergeable = mine.some((a, i) => mine.some((b, j) => j > i && HO.canMerge(G, a, b)));
+    if (mergeable) box.append(el('div', { class: 'btns' }, el('button', { class: 'quiet', onclick: () => {
+      // merge each fleet into the first one it may join (one ship type per fleet under the DOS rules)
+      for (let i = 0; i < mine.length; i++) for (let j = i + 1; j < mine.length; j++)
+        if (G.fleets.includes(mine[i]) && G.fleets.includes(mine[j]) && HO.canMerge(G, mine[i], mine[j])) HO.mergeFleets(G, mine[i], mine[j]);
+      UI.selFleet = mine[0].id; renderPanel(); draw(); save(); } }, HO.feature(G, 'singleTypeFleets') ? 'Merge fleets of the same type' : 'Merge all fleets here')));
   }
   const b = [...G.battles].reverse().find(b => b.star === sid && b.sides.includes(0));
   if (b) box.append(el('div', { class: 'btns' }, el('button', { class: 'quiet', onclick: () => openBattle(b.id) }, `Review battle (${b.year})`)));
@@ -847,8 +853,12 @@ function openRanks() {
     ...pr.games.slice(-30).reverse().map(g => el('tr', null, el('td', null, g.date), el('td', null, String(g.year)), el('td', null, String(g.difficulty)), el('td', null, fmt(g.points))))));
   modal('Rank history', body, { cls: 'mid' });
 }
-function doEndTurn() {
+function doEndTurn(confirmed) {
   if (!G || G.over) return;
+  if (confirmed !== true && HO.feature(G, 'buildQueue')) {
+    const starved = HO.colonies(G, 0).filter(s => s.id !== me().homeStar && !(me().budget.col[s.id] > 0));
+    if (starved.length) { confirmBox(`You aren’t spending any money on ${starved.map(s => s.name).join(', ')}. Ending the turn will abandon ${starved.length === 1 ? 'it' : 'them'}. Go ahead?`, () => doEndTurn(true)); return; }
+  }
   HO.endTurn(G);
   awardMasterPoints();
   Sound.play(11111);
@@ -886,10 +896,24 @@ function toast(t) {
 }
 
 // ----- build ships -----
+// shipbuilding under the DOS 2.0 rules: part of a colony's money pays for
+// the ships queued there, one at a time
+function yardBox(s) {
+  const p = me(), box = el('div', { class: 'yard' });
+  box.append(el('div', { class: 'tm' }, el('span', null, 'Shipbuilding'),
+    el('input', { type: 'range', min: 0, max: 100, value: Math.round((s.ship || 0) * 100), 'aria-label': 'Share of this colony’s money for shipbuilding', oninput: (ev) => { s.ship = ev.target.value / 100; ev.target.nextSibling.textContent = ev.target.value + '%'; }, onchange: save }),
+    el('span', null, Math.round((s.ship || 0) * 100) + '%')));
+  const q = s.queue || [];
+  if (q.length) {
+    const pr = HO.rules(G).yardProgress(G, p, s);
+    box.append(el('p', { class: 'sub' }, 'Queued: ' + q.map(it => { const d = HO.getDesign(G, 0, it.did); return d ? `${it.n} ${d.name}` : ''; }).join(', ') + (pr ? ` · first one ${pr.pct}% paid for` : '')));
+  } else box.append(el('p', { class: 'sub' }, 'Nothing queued.'));
+  return box;
+}
 function openBuild(sid) {
   const p = me(), s = G.stars[sid];
-  const types = ['scout', 'fighter', 'colony', 'satellite', 'tanker'];
-  for (const t of ['dread', 'bio', 'decoy']) if (HO.canBuildType(G, p, t)) types.push(t);
+  const types = ['scout', 'fighter', 'colony', 'satellite', 'tanker', 'dread', 'bio', 'decoy'].filter(t => HO.canBuildType(G, p, t));
+  const queue = HO.feature(G, 'buildQueue'); // DOS 2.0 rules: ships are queued and paid for over time
   const st = UI.build = UI.build || { type: 'fighter' };
   if (!types.includes(st.type)) st.type = 'fighter';
   const body = el('div', { class: 'build' });
@@ -898,19 +922,20 @@ function openBuild(sid) {
     const left = el('div', { class: 'blist' });
     left.append(el('div', { class: 'money' }, `Savings ${money(p.savings)} · Metal ${fmt(p.metal)}`));
     const designs = p.designs.filter(d => !d.scrapped && types.includes(d.type));
-    const builtHere = (did) => p.spentThisTurn.filter(e => e.sid === sid && e.did === did).length;
+    const builtHere = (did) => queue ? (s.queue || []).filter(it => it.did === did).reduce((a, it) => a + it.n, 0) : p.spentThisTurn.filter(e => e.sid === sid && e.did === did).length;
+    if (queue) left.append(el('p', { class: 'note' }, 'Ships you add here are queued. They are built as this colony’s shipbuilding money pays for them' + ((s.ship || 0) > 0 ? '.' : ' — give it a Shipbuilding share in the planet panel.')));
     for (const d of designs) {
       const c = HO.shipCostNow(G, p, d);
       const n = builtHere(d.id);
-      const can = (p.savings - c.money >= HO.borrowLimit(G, p)) && p.metal >= c.metal;
+      const can = queue || ((p.savings - c.money >= HO.borrowLimit(G, p)) && p.metal >= c.metal);
       left.append(el('div', { class: 'drow' },
         shipImgEl(d, 26),
         el('div', { class: 'dtext' }, el('b', null, d.name), el('div', { class: 'sub' }, `${HO.TYPES[d.type].name} · R${d.type === 'satellite' ? 0 : d.R} Sp${d.V} W${d.W} Sh${d.S} M${d.M}`),
           el('div', { class: 'sub' }, `${money(c.money)} · ${fmt(c.metal)} metal${c.proto ? ' (incl. prototype)' : ''}`)),
         el('div', { class: 'pm' },
-          el('button', { class: 'quiet', disabled: !n, 'aria-label': 'Remove one', onclick: () => { HO.unbuildShip(G, 0, sid, d.id); render(); renderPanel(); draw(); } }, '−'),
+          el('button', { class: 'quiet', disabled: !n, 'aria-label': 'Remove one', onclick: () => { if (queue) { const i = (s.queue || []).map(it => it.did).lastIndexOf(d.id); if (i >= 0) HO.unqueueShip(G, 0, sid, i); } else HO.unbuildShip(G, 0, sid, d.id); render(); renderPanel(); draw(); } }, '−'),
           el('span', { class: 'n' }, String(n)),
-          el('button', { disabled: !can, 'aria-label': 'Build one', onclick: () => { if (HO.buildShips(G, 0, sid, d.id, 1)) Sound.play(7006); render(); renderPanel(); draw(); } }, '+'))));
+          el('button', { disabled: !can, 'aria-label': queue ? 'Queue one' : 'Build one', onclick: () => { if (queue ? HO.queueShips(G, 0, sid, d.id, 1) : HO.buildShips(G, 0, sid, d.id, 1)) Sound.play(7006); render(); renderPanel(); draw(); } }, '+'))));
     }
     // designer
     const L = HO.designLimits(G, p, st.type);
@@ -933,7 +958,7 @@ function openBuild(sid) {
         el('b', null, `${st[k]}/${max}`)));
     }
     right.append(el('p', { class: 'sub' }, `${money(c.money)} and ${fmt(c.metal)} metal each` + (exists && exists.built ? '' : `, plus ${money(c.proto)} to build the prototype`) + '.'));
-    if (st.type === 'scout') right.append(el('p', { class: 'note' }, 'Scouts get 3 extra range but weaker weapons and shields. Each scout flies alone.'));
+    if (st.type === 'scout') right.append(el('p', { class: 'note' }, `Scouts get ${L.R - p.tech.range} extra range but weaker weapons and shields. Each scout flies alone.`));
     if (st.type === 'satellite') right.append(el('p', { class: 'note' }, 'Satellites can’t move. They shoot twice per round.'));
     if (st.type === 'colony') right.append(el('p', { class: 'note' }, 'Colony ships settle the first unowned planet they’re sent to.'));
     if (st.type === 'mini') {}
@@ -941,13 +966,14 @@ function openBuild(sid) {
       const lim = HO.rules(G).maxDesigns;
       if (lim && !exists && HO.liveDesigns(p) >= lim) { toast(HO.DATA.alerts[15] || 'Your assembly lines are full.'); return; }
       const d = HO.findOrCreateDesign(G, p, spec);
-      if (HO.buildShips(G, 0, sid, d.id, 1)) { Sound.play(7006); } else toast('Not enough money or metal.');
+      if (queue) { HO.queueShips(G, 0, sid, d.id, 1); Sound.play(7006); }
+      else if (HO.buildShips(G, 0, sid, d.id, 1)) { Sound.play(7006); } else toast('Not enough money or metal.');
       render(); renderPanel(); draw();
-    } }, exists && exists.built ? `Build another ${exists.name}` : 'Build the prototype')));
+    } }, queue ? (exists ? `Queue another ${exists.name}` : 'Create this type and queue one') : exists && exists.built ? `Build another ${exists.name}` : 'Build the prototype')));
     body.append(left, right);
   };
   render();
-  modal(`Build ships at ${s.name}`, body, { cls: 'wide', onClose: () => save() });
+  modal(`${queue ? 'Queue' : 'Build'} ships at ${s.name}`, body, { cls: 'wide', onClose: () => save() });
 }
 function openSplit(f) {
   const take = {};
@@ -1278,13 +1304,22 @@ function newGameDialog() {
     slider('o_density', 'Galaxy density', 0, 100, 25, 'Dense', 'Sparse'),
     sel('o_years', 'Years per turn', [['10', '10'], ['20', '20'], ['30', '30'], ['50', '50']], '10'),
     el('label', { class: 'chk' }, el('input', { type: 'checkbox', name: 'buddies' }), el('span', null, 'Computers are best buddies')));
+  // DOS 2.0 rules: the 2.0 Create Galaxy settings
+  const dosBox = el('div', { class: 'group' },
+    sel('d_skill', 'Your skill', [['novice', 'Novice'], ['beginner', 'Beginner'], ['normal', 'Normal'], ['advanced', 'Advanced'], ['expert', 'Expert']], 'normal'),
+    sel('d_iq', 'Computer skill', [['dumb', 'Dumb'], ['average', 'Average'], ['smart', 'Smart']], 'average'),
+    sel('d_size', 'Galaxy size', [['small', 'Small'], ['medium', 'Medium'], ['large', 'Large'], ['xl', 'Extra Large'], ['huge', 'Humongous']], 'medium'),
+    sel('d_shape', 'Map style', [['circle', 'Circle'], ['random', 'Random'], ['ring', 'Ring'], ['spiral', 'Spiral'], ['grid', 'Grid']], 'ring'),
+    sel('d_density', 'Density', [['dense', 'Dense'], ['sparse', 'Sparse']], 'dense'),
+    el('label', { class: 'chk' }, el('input', { type: 'checkbox', name: 'd_novas', checked: 'checked' }), el('span', null, 'Novas')));
+  const startSel = sel('start', 'Your home system', STARTS, 'normal');
   f.append(
     el('label', null, el('span', null, 'Your name'), el('input', { name: 'name', value: localStorage.getItem('ho5.name') || 'Jake', maxlength: 20 })),
     el('label', null, el('span', null, 'Galaxy name'), el('input', { name: 'galaxy', value: 'Milky Way', maxlength: 24 })),
     sel('female', 'Your hat', [['0', 'Cowboy'], ['1', 'Cowgirl']], '0'),
     sel('computers', 'Computer players', [...[1, 2, 3, 4, 5, 6, 7, 8].map(n => [String(n), String(n)]), ['any', 'Any (1-8)']], '4'),
-    sel('start', 'Your home system', STARTS, 'normal'),
-    claudeBox, origBox,
+    startSel,
+    claudeBox, origBox, dosBox,
     // last line: the rules, with the game difficulty rating beside them
     el('div', { class: 'lastrow' },
       sel('rules', 'Rules', HO.ruleOptions(), localStorage.getItem('ho5.rules') || 'claude'),
@@ -1298,11 +1333,11 @@ function newGameDialog() {
   const origOpts = (d) => ({ computers: d.computers === 'any' ? 4 : +d.computers, iqNum: +d.o_iq, start: d.start, cstart: d.o_cstart, shape: d.o_shape, size: +d.o_size, density: +d.o_density, buddies: !!d.buddies, yearsPerTurn: +d.o_years });
   const refresh = () => {
     const d = Object.fromEntries(new FormData(f).entries());
-    const orig = d.rules === 'original';
-    claudeBox.hidden = orig; origBox.hidden = !orig;
+    const orig = d.rules === 'original', dos = d.rules === 'dos';
+    claudeBox.hidden = orig || dos; origBox.hidden = !orig; dosBox.hidden = !dos; startSel.hidden = dos;
     f.querySelector('fieldset.opts').hidden = !orig;
     for (const o of f.querySelectorAll('.slider output')) { const inp = o.previousElementSibling; if (!o.querySelector('small')) o.textContent = inp.value; }
-    rating.textContent = orig ? String(HO.RULESETS.original.difficulty(origOpts(d))) : 'Not rated with Claude rules';
+    rating.textContent = orig ? String(HO.RULESETS.original.difficulty(origOpts(d))) : `Not rated with ${dos ? 'DOS 2.0' : 'Claude'} rules`;
     rating.className = orig ? '' : 'none';
   };
   f.addEventListener('input', refresh); f.addEventListener('change', refresh);
@@ -1315,6 +1350,8 @@ function newGameDialog() {
       localStorage.setItem('ho5.iq', d.o_iq);
       const o = origOpts(d);
       G = HO.newGame(Object.assign(common, o, { difficulty: HO.RULESETS.original.difficulty(o) }));
+    } else if (d.rules === 'dos') {
+      G = HO.newGame(Object.assign(common, { start: d.d_skill, iq: d.d_iq, size: d.d_size, shape: d.d_shape, density: d.d_density, novas: !!d.d_novas, alliances: false, luck: false }));
     } else G = HO.newGame(Object.assign(common, { iq: d.iq, cstart: d.cstart, shape: d.shape, size: d.size, density: d.density }));
     if (d.skin && d.skin !== HOSKINS.current) { save(); HOSKINS.switchTo(d.skin); return; } // opens in the other skin
     closeModal(); hideTitle();

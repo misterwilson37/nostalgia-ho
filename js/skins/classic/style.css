@@ -182,3 +182,4 @@ button:focus-visible { outline: 2px solid var(--hi); outline-offset: 1px; }
 @media (max-width: 640px) { .newgame .lastrow { grid-auto-flow: row; } }
 .newgame .lastrow > * { min-width: 0; }
 .newgame label:not(.chk) { grid-template-columns: minmax(0, 1fr); }
+.newgame [hidden] { display: none !important; }
