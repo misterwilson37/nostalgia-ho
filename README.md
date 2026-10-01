@@ -13,7 +13,10 @@ it needs to be served from a web address.
 
 - `index.html`, `css/style.css`: the page
 - `js/data.js`: names, tech-level names and tips from the original resources
-- `js/engine.js`: the game
+- `js/engine.js`: game mechanics shared by every ruleset (turns, fleets, movement,
+  exploring, colonizing, battle bookkeeping, saving)
+- `js/rules-claude.js`, `js/ai-claude.js`: the "Claude" rules and computer players
+  (reconstructed from the manual)
 - `js/ui.js`: map, panels, dialogs, battle replay, sound, title screen
 - `assets/`: sprites, sounds, exploration pictures and theme music, listed in `assets/manifest.json`
 - `docs/original-findings.md`: what the original program actually does

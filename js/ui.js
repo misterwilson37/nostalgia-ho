@@ -127,8 +127,8 @@ function planetSprite(p, s, metal) {
   return (metal <= 0 ? 'mined' : 'planet') + row;
 }
 function hatFor(p, s) {
-  const prof = s.pop * HO.PROD_PER_POP >= HO.BASE_UPKEEP;
-  const cls = HO.planetClass(HO.seenG(p, s));
+  const prof = HO.planetIncome(G, p, s) >= 0;
+  const cls = HO.planetClass(G, HO.seenG(p, s));
   const row = prof ? 0 : cls === 'good' ? 1 : cls === 'semi' ? 2 : 3;
   return 'white' + row + '_' + (p.female ? 1 : 0);
 }
@@ -487,8 +487,8 @@ function planetBox(sid) {
     const gs = src.g / p.homeG, ts = 72 + (src.t - p.homeT);
     box.append(row('Gravity', gs.toFixed(2) + 'G' + classNote(gs)), row('Temp', Math.round(ts) + '°'), row('Metal', fmt(src.metal)));
     if (s.owner === 0) {
-      const gross = s.pop * HO.PROD_PER_POP;
-      box.append(row('Population', fmt(s.pop * 1e6)), row('Max population', fmt(HO.maxPop(G, p, s) * 1e6)), row('Income', money(gross - HO.BASE_UPKEEP), gross < HO.BASE_UPKEEP ? 'neg' : ''));
+      const inc = HO.planetIncome(G, p, s);
+      box.append(row('Population', fmt(s.pop * 1e6)), row('Max population', fmt(HO.maxPop(G, p, s) * 1e6)), row('Income', money(inc), inc < 0 ? 'neg' : ''));
       const terraOK = Math.abs(HO.seenT(p, s) - 72) > 0.5, metalOK = s.metal > 0;
       if (terraOK && metalOK) {
         const sl = el('div', { class: 'tm' }, el('span', null, 'Terraform'),
@@ -518,7 +518,7 @@ function planetBox(sid) {
   if (b) box.append(el('div', { class: 'btns' }, el('button', { class: 'quiet', onclick: () => openBattle(b.id) }, `Review battle (${b.year})`)));
   return box;
 }
-function classNote(gs) { const c = HO.planetClass(gs); return c === 'inhospitable' ? ' · never profitable' : c === 'semi' ? ' · barely habitable' : ''; }
+function classNote(gs) { const c = HO.planetClass(G, gs); return c === 'inhospitable' ? ' · never profitable' : c === 'semi' ? ' · barely habitable' : ''; }
 function fleetRow(f, inbound) {
   const mine = f.owner === 0;
   const p = G.players[f.owner];
@@ -623,9 +623,7 @@ function toast(t) {
 function openBuild(sid) {
   const p = me(), s = G.stars[sid];
   const types = ['scout', 'fighter', 'colony', 'satellite', 'tanker'];
-  if (HO.techSum(p) >= HO.DREAD_TECH) types.push('dread');
-  if (p.hasBio) types.push('bio');
-  if (p.hasDecoy) types.push('decoy');
+  for (const t of ['dread', 'bio', 'decoy']) if (HO.canBuildType(G, p, t)) types.push(t);
   const st = UI.build = UI.build || { type: 'fighter' };
   if (!types.includes(st.type)) st.type = 'fighter';
   const body = el('div', { class: 'build' });
@@ -649,11 +647,11 @@ function openBuild(sid) {
           el('button', { disabled: !can, 'aria-label': 'Build one', onclick: () => { if (HO.buildShips(G, 0, sid, d.id, 1)) Sound.play(7006); render(); renderPanel(); draw(); } }, '+'))));
     }
     // designer
-    const L = HO.designLimits(p, st.type);
-    for (const k of ['R', 'V', 'W', 'S', 'M']) { if (st[k] == null || st._t !== st.type) st[k] = L[k]; st[k] = Math.max(1, Math.min(L[k] || 1, st[k])); }
+    const L = HO.designLimits(G, p, st.type);
+    for (const k of ['R', 'V', 'W', 'S', 'M']) { const lo = HO.designMin(G, k); if (st[k] == null || st._t !== st.type) st[k] = L[k]; st[k] = Math.max(lo, Math.min(Math.max(lo, L[k] || lo), st[k])); }
     st._t = st.type;
     const spec = { type: st.type, R: st.type === 'satellite' ? 0 : st.R, V: st.V, W: st.W, S: st.S, M: st.M };
-    const c = HO.designCost(spec);
+    const c = HO.designCost(G, spec);
     const exists = p.designs.find(d => d.type === spec.type && d.R === spec.R && d.V === spec.V && d.W === spec.W && d.S === spec.S && d.M === spec.M);
     const right = el('div', { class: 'designer' }, el('h4', null, 'Design a new type'));
     const tsel = el('div', { class: 'types' });
@@ -663,9 +661,9 @@ function openBuild(sid) {
     const lab = { R: 'Range', V: 'Speed', W: 'Weapons', S: 'Shields', M: 'Mini' };
     for (const k of ['R', 'V', 'W', 'S', 'M']) {
       if (k === 'R' && st.type === 'satellite') continue;
-      const max = L[k] || 1;
+      const min = HO.designMin(G, k), max = Math.max(min, L[k] || min);
       right.append(el('label', { class: 'slide' }, el('span', null, lab[k]),
-        el('input', { type: 'range', min: 1, max, value: st[k], disabled: max <= 1, oninput: (e) => { st[k] = +e.target.value; render(); } }),
+        el('input', { type: 'range', min, max, value: st[k], disabled: max <= min, oninput: (e) => { st[k] = +e.target.value; render(); } }),
         el('b', null, `${st[k]}/${max}`)));
     }
     right.append(el('p', { class: 'sub' }, `${money(c.money)} and ${fmt(c.metal)} metal each` + (exists && exists.built ? '' : `, plus ${money(c.proto)} to build the prototype`) + '.'));
@@ -854,7 +852,7 @@ function newGameDialog() {
     sel('shape', 'Galaxy shape', [['random', 'Random'], ['ring', 'Ring'], ['cluster', 'Cluster'], ['spiral', 'Spiral'], ['grid', 'Grid'], ['hex', 'Hex']], 'random'),
     sel('size', 'Galaxy size', [['small', 'Small'], ['medium', 'Medium'], ['large', 'Large'], ['huge', 'Humongous']], 'medium'),
     sel('density', 'Galaxy density', [['dense', 'Dense'], ['normal', 'Normal'], ['sparse', 'Sparse']], 'normal'),
-    sel('rules', 'Rules', [['claude', 'Claude (reconstructed from the manual)']], 'claude'),
+    sel('rules', 'Rules', HO.ruleOptions(), 'claude'),
     el('div', { class: 'btns right' }, el('button', { type: 'submit' }, 'Create galaxy')));
   const start = () => {
     const d = Object.fromEntries(new FormData(f).entries());
