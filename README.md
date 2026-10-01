@@ -38,9 +38,12 @@ it needs to be served from a web address.
 - `assets/`: sprites, sounds, the 25 rank pictures (`assets/explore/`) and theme music, listed in `assets/manifest.json`
 - `docs/original-findings.md`: what the original program actually does
 - `docs/dos-findings.md`: what the DOS 2.0 program does differently, and how its art was read
+- `docs/missing-assets.md`: what each skin still borrows or leaves silent (for future art)
+- `docs/decompiling.md`: how to decompile the Windows versions with Ghidra
 - `tools/test.js`: headless computer-vs-computer test (`node tools/test.js`, `node tools/test.js original` or `node tools/test.js dos`)
 - `tools/bundle.py`: builds `dist/spaceward-ho.html`, a single self-contained file with one
   skin built in (`python3 tools/bundle.py cozy` for another)
   (only needed for publishing somewhere that wants one file)
+- `tools/decompile/DumpAll.java`: Ghidra script that writes a whole program's decompiled code to one file
 - `tools/extract/`: scripts that pulled the art and sound out of the original game
   (`dos.py` does the same for the DOS 2.0 game's `HO.PRS` and `HOCOLOR.PRS`)

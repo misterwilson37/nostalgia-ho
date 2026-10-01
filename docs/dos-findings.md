@@ -27,6 +27,28 @@ time-boxed:
 - The money, research, battle and movement formulas were checked only where the same
   code shape showed up, and are assumed to match 5.0.5.
 
+## The Windows 3.1 and Windows 95 versions
+
+- **Spaceward Ho! 2.0 for Windows** (`WINHO.EXE`, 1992) is the same game as DOS 2.0.
+  - New World Computing published it; Steven Ohmert at Presage did the Windows
+    programming. The DOS version (1993) is a port of it.
+  - 392 of its 394 pictures are pixel-for-pixel the same as the DOS ones. It has the same
+    14 sounds and the same player-setup table: Novice $51,000 / 20,000 metal …
+    Expert $20,000 / 0.
+  - It differs only in its title card, its End Turn button picture and the "Windows
+    Programming" credit. So it needs no ruleset or skin of its own.
+  - It is a much cleaner program to decompile than the DOS one: no compression or
+    overlays (see `docs/decompiling.md`). Checking the INFERRED rows below against it is
+    the next step for this ruleset.
+- **Spaceward Ho! 4.0.5 for Windows 95** (`SPACEHO.EXE`, 1996) is a different, later game.
+  - It plays across platforms with the Mac 4.0.5. Its text includes alliances, best
+    buddies, Radical tech, Armageddon, and dreadnoughts, tankers, biologicals and decoys,
+    but no ranks.
+  - It has 684 pictures: the 2.0-style planets and ship parts, plus new "Version 4"
+    title art and landscapes. It also has 37 new spoken sounds ("Whoa!", "Shucks",
+    "Hyahh" …).
+  - It hasn't been turned into a ruleset or skin yet.
+
 ## How the program was read
 
 - `DOSHO.EXE` was built with Borland C++ 3.x and compressed with PKLITE.
