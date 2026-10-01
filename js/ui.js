@@ -1257,16 +1257,17 @@ function newGameDialog() {
     slider('o_size', 'Galaxy size', 0, 100, 50, 'Small', 'Large'),
     slider('o_density', 'Galaxy density', 0, 100, 25, 'Dense', 'Sparse'),
     sel('o_years', 'Years per turn', [['10', '10'], ['20', '20'], ['30', '30'], ['50', '50']], '10'),
-    el('label', { class: 'chk' }, el('input', { type: 'checkbox', name: 'buddies' }), el('span', null, 'Computers are best buddies')),
-    el('p', { class: 'sub' }, 'Game difficulty rating: ', rating));
+    el('label', { class: 'chk' }, el('input', { type: 'checkbox', name: 'buddies' }), el('span', null, 'Computers are best buddies')));
   f.append(
     el('label', null, el('span', null, 'Your name'), el('input', { name: 'name', value: localStorage.getItem('ho5.name') || 'Jake', maxlength: 20 })),
     el('label', null, el('span', null, 'Galaxy name'), el('input', { name: 'galaxy', value: 'Milky Way', maxlength: 24 })),
     sel('female', 'Your hat', [['0', 'Cowboy'], ['1', 'Cowgirl']], '0'),
-    sel('rules', 'Rules', HO.ruleOptions(), localStorage.getItem('ho5.rules') || 'claude'),
     sel('computers', 'Computer players', [...[1, 2, 3, 4, 5, 6, 7, 8].map(n => [String(n), String(n)]), ['any', 'Any (1-8)']], '4'),
     sel('start', 'Your home system', STARTS, 'normal'),
     claudeBox, origBox,
+    // last line: the rules, with the game difficulty rating beside them
+    sel('rules', 'Rules', HO.ruleOptions(), localStorage.getItem('ho5.rules') || 'claude'),
+    el('div', { class: 'rating' }, el('span', null, 'Game difficulty rating'), rating),
     el('fieldset', { class: 'opts' }, el('legend', null, 'Options'),
       el('label', { class: 'chk' }, el('input', { type: 'checkbox', name: 'alliances', checked: 'checked' }), el('span', null, 'Alliances')),
       el('label', { class: 'chk' }, el('input', { type: 'checkbox', name: 'luck' }), el('span', null, 'Luck in battles')),
@@ -1279,7 +1280,8 @@ function newGameDialog() {
     claudeBox.hidden = orig; origBox.hidden = !orig;
     f.querySelector('fieldset.opts').hidden = !orig;
     for (const o of f.querySelectorAll('.slider output')) { const inp = o.previousElementSibling; if (!o.querySelector('small')) o.textContent = inp.value; }
-    if (orig) rating.textContent = String(HO.RULESETS.original.difficulty(origOpts(d)));
+    rating.textContent = orig ? String(HO.RULESETS.original.difficulty(origOpts(d))) : 'Not rated with Claude rules';
+    rating.className = orig ? '' : 'none';
   };
   f.addEventListener('input', refresh); f.addEventListener('change', refresh);
   const start = () => {
