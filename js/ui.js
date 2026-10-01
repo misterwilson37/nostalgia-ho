@@ -306,8 +306,8 @@ function drawRoute(a, b, speed, color, frac, round) {
   cx.beginPath(); cx.moveTo(x1, y1); cx.lineTo(x2, y2); cx.stroke();
   arrowHead(x1, y1, x2, y2, color);
   if (round) arrowHead(x2, y2, x1, y1, color);
-  // turn ticks
-  const d = Math.hypot(b.x - a.x, b.y - a.y);
+  // turn ticks (trip length in the ruleset's own distance units)
+  const d = a.id != null && b.id != null ? HO.starDist(G, a.id, b.id) : Math.hypot(b.x - a.x, b.y - a.y);
   for (let t = speed; t < d - 1e-6; t += speed) {
     const fx = x1 + (x2 - x1) * t / d, fy = y1 + (y2 - y1) * t / d;
     cx.fillStyle = color; cx.beginPath(); cx.arc(fx, fy, 2.4, 0, Math.PI * 2); cx.fill();
@@ -846,18 +846,22 @@ function newGameDialog() {
     el('label', null, el('span', null, 'Galaxy name'), el('input', { name: 'galaxy', value: 'Milky Way', maxlength: 24 })),
     sel('female', 'Your hat', [['0', 'Cowboy'], ['1', 'Cowgirl']], '0'),
     sel('computers', 'Computer players', [1, 2, 3, 4, 5, 6, 7, 8].map(n => [String(n), String(n)]), '4'),
-    sel('iq', 'Computer IQ', [['dumb', 'Dumb'], ['average', 'Average'], ['smart', 'Smart']], 'average'),
+    sel('iq', 'Computer IQ', [['dumb', 'Dumb'], ['average', 'Average'], ['smart', 'Smart'], ['diabolical', 'Diabolical']], 'average'),
     sel('start', 'Your home system', [['outpost', 'Outpost'], ['barren', 'Barren'], ['backward', 'Backward'], ['normal', 'Normal'], ['advanced', 'Advanced'], ['thriving', 'Thriving'], ['abundant', 'Abundant']], 'normal'),
     sel('cstart', 'Computer home systems', [['outpost', 'Outpost'], ['barren', 'Barren'], ['backward', 'Backward'], ['normal', 'Normal'], ['advanced', 'Advanced'], ['thriving', 'Thriving'], ['abundant', 'Abundant']], 'normal'),
     sel('shape', 'Galaxy shape', [['random', 'Random'], ['ring', 'Ring'], ['cluster', 'Cluster'], ['spiral', 'Spiral'], ['grid', 'Grid'], ['hex', 'Hex']], 'random'),
     sel('size', 'Galaxy size', [['small', 'Small'], ['medium', 'Medium'], ['large', 'Large'], ['huge', 'Humongous']], 'medium'),
     sel('density', 'Galaxy density', [['dense', 'Dense'], ['normal', 'Normal'], ['sparse', 'Sparse']], 'normal'),
-    sel('rules', 'Rules', HO.ruleOptions(), 'claude'),
+    sel('rules', 'Rules', HO.ruleOptions(), localStorage.getItem('ho5.rules') || 'claude'),
+    el('fieldset', { class: 'opts' }, el('legend', null, 'Options (Original rules)'),
+      el('label', { class: 'chk' }, el('input', { type: 'checkbox', name: 'alliances', checked: 'checked' }), el('span', null, 'Alliances')),
+      el('label', { class: 'chk' }, el('input', { type: 'checkbox', name: 'luck' }), el('span', null, 'Luck in battles')),
+      el('label', { class: 'chk' }, el('input', { type: 'checkbox', name: 'novas', checked: 'checked' }), el('span', null, 'Novas'))),
     el('div', { class: 'btns right' }, el('button', { type: 'submit' }, 'Create galaxy')));
   const start = () => {
     const d = Object.fromEntries(new FormData(f).entries());
-    localStorage.setItem('ho5.name', d.name);
-    G = HO.newGame({ seed: (Math.random() * 2 ** 31) | 0, name: d.name || 'You', galaxy: d.galaxy || 'Milky Way', female: d.female === '1', computers: +d.computers, iq: d.iq, start: d.start, cstart: d.cstart, shape: d.shape, size: d.size, density: d.density, rules: d.rules });
+    localStorage.setItem('ho5.name', d.name); localStorage.setItem('ho5.rules', d.rules);
+    G = HO.newGame({ seed: (Math.random() * 2 ** 31) | 0, name: d.name || 'You', galaxy: d.galaxy || 'Milky Way', female: d.female === '1', computers: +d.computers, iq: d.iq, start: d.start, cstart: d.cstart, shape: d.shape, size: d.size, density: d.density, rules: d.rules, alliances: !!d.alliances, luck: !!d.luck, novas: !!d.novas });
     closeModal(); hideTitle();
     UI.sel = G.players[0].homeStar; UI.selFleet = null; UI.fitted = false; fit();
     Sound.play(128);

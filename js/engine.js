@@ -160,6 +160,7 @@ function addShipsToStar(G, pid, sid, d, n) {
   else f = G.fleets.find(x => x.owner === pid && x.star === sid && !x.sat && x.to == null && x.newThisTurn && !fleetHas(G, x, 'scout'));
   if (!f) f = newFleet(G, pid, sid, sat);
   f.ships[d.id] = (f.ships[d.id] || 0) + n;
+  if (d.type === 'colony' && !rules(G).colonyShipUsedUp) f.colonists = (f.colonists || 0) + 10 * n;
   if (!sat) f.fuel = fleetMaxRange(G, f);
   if (!f.name) f.name = d.name;
   return f;
@@ -170,13 +171,20 @@ function canReach(G, f, sid) {
 }
 function orderMove(G, f, sid) {
   if (f.sat || f.star == null) return false;
-  if (sid === f.star) { f.dest = null; return true; }
+  if (sid === f.star) { f.dest = null; f.path = null; return true; }
   if (!canReach(G, f, sid)) return false;
-  f.dest = sid; return true;
+  f.dest = sid; f.path = null; return true;
 }
-function cancelMove(G, f) { f.dest = null; }
+// multi-star path (waypoints): the fleet stops at each star, refuels, and goes on
+function orderPath(G, f, sids) {
+  if (f.sat || f.star == null || !sids.length || !feature(G, 'waypoints')) return false;
+  if (!canReach(G, f, sids[0])) return false;
+  f.dest = sids[0]; f.path = sids.slice(1); if (!f.path.length) f.path = null; return true;
+}
+function cancelMove(G, f) { f.dest = null; f.path = null; }
 function mergeFleets(G, a, b) { // b into a
   for (const k in b.ships) a.ships[k] = (a.ships[k] || 0) + b.ships[k];
+  if (b.colonists) a.colonists = (a.colonists || 0) + b.colonists;
   a.fuel = Math.min(a.fuel, b.fuel);
   a.dest = null;
   G.fleets.splice(G.fleets.indexOf(b), 1);
@@ -188,11 +196,20 @@ function splitFleet(G, f, take) { // take: {did:count}
     if (n > 0) { nf.ships[k] = n; f.ships[k] -= n; if (!f.ships[k]) delete f.ships[k]; }
   }
   nf.fuel = f.fuel; nf.name = f.name;
+  if (f.colonists) { // colonists go with the colony ships
+    const cs = (x) => fleetDesigns(G, x).filter(d => d.type === 'colony').reduce((a, d) => a + x.ships[d.id], 0);
+    const moved = Math.min(f.colonists, cs(nf) * 10); nf.colonists = moved; f.colonists -= moved;
+  }
   if (fleetCount(nf) === 0) { G.fleets.splice(G.fleets.indexOf(nf), 1); return null; }
   if (fleetCount(f) === 0) G.fleets.splice(G.fleets.indexOf(f), 1);
   return nf;
 }
-function isFriend(G, a, b) { return a === b; }
+// Alliances: each player lists who they want to ally with (p.allies) and be
+// best buddies with (p.buddies); a pact exists only when both sides want it.
+function wants(G, a, b, key) { const p = G.players[a]; return !!(p && p[key] && p[key].includes(b)); }
+function isAllied(G, a, b) { return a === b || (feature(G, 'alliances') && wants(G, a, b, 'allies') && wants(G, b, a, 'allies')); }
+function isBuddy(G, a, b) { return a === b || (isAllied(G, a, b) && wants(G, a, b, 'buddies') && wants(G, b, a, 'buddies')); }
+function isFriend(G, a, b) { return isAllied(G, a, b); }
 function hasColonyAt(G, pid, sid) { return G.stars[sid].owner === pid; }
 function fleetLabel(G, f) {
   const n = fleetCount(f);
@@ -360,10 +377,15 @@ function projected(G, p) { return rules(G).projected(G, p); }
 
 function departures(G) {
   for (const f of G.fleets.slice()) {
+    if (f.dest == null && f.path && f.path.length && f.star != null) f.dest = f.path.shift(); // next leg of a multi-star path
     if (f.dest == null || f.star == null || f.sat) continue;
     const d = starDist(G, f.star, f.dest);
-    if (d > f.fuel + 1e-9) { f.dest = null; continue; }
+    if (d > f.fuel + 1e-9) {
+      if (f.path) { msg(G, f.owner, `Your fleet of ${fleetLabel(G, f)} is waiting to refuel before it can continue on to ${G.stars[f.dest].name}.`, { icon: 'm9038', star: f.star, quiet: true }); continue; }
+      f.dest = null; continue;
+    }
     f.from = f.star; f.to = f.dest; f.dist = d; f.prog = 0; f.fuel -= d; f.star = null; f.dest = null;
+    if (f.path && !f.path.length) f.path = null;
   }
 }
 function movement(G) {
@@ -373,18 +395,22 @@ function movement(G) {
     f.prog += v;
     if (f.prog >= f.dist - 1e-9) { f.star = f.to; f.arrivedFrom = f.from; f.to = null; f.from = null; f.arrived = true; }
   }
+  const rs = rules(G);
+  if (rs.fleetArrives) for (const f of G.fleets.slice()) if (f.arrived && !rs.fleetArrives(G, f)) G.fleets.splice(G.fleets.indexOf(f), 1);
 }
 
 // ---------- star resolution: battles, exploration, colonization ----------
 function resolveStars(G) {
   const arrivedAt = new Set();
   for (const f of G.fleets) if (f.arrived) arrivedAt.add(f.star);
+  if (rules(G).battleEverywhere) for (const f of G.fleets) if (f.star != null && f.to == null) arrivedAt.add(f.star);
   for (const sid of arrivedAt) {
     const s = G.stars[sid];
     const present = G.fleets.filter(f => f.star === sid && f.to == null);
     const owners = new Set(present.map(f => f.owner));
     if (s.owner >= 0 && s.pop > 0) owners.add(s.owner);
-    if (owners.size > 1) battle(G, sid);
+    const ids = [...owners];
+    if (ids.some(a => ids.some(b => !isAllied(G, a, b)))) battle(G, sid);
   }
   // after battles: explore, colonize, arrival messages
   for (const f of G.fleets.slice()) {
@@ -402,11 +428,12 @@ function resolveStars(G) {
   }
 }
 function hostileAt(G, pid, sid) {
-  return G.fleets.some(f => f.star === sid && f.to == null && f.owner !== pid && fleetCount(f) > 0 && !fleetDesigns(G, f).every(d => d.type === 'decoy'));
+  return G.fleets.some(f => f.star === sid && f.to == null && !isAllied(G, f.owner, pid) && fleetCount(f) > 0 && !fleetDesigns(G, f).every(d => d.type === 'decoy'));
 }
 function colonize(G, p, f, s) {
   if (p.ai && p.ai.noColonize && p.ai.noColonize[s.id]) return;
   const rs = rules(G);
+  if (rs.canColonize && !rs.canColonize(G, p, f, s)) return;
   const d = fleetDesigns(G, f).find(d => d.type === 'colony');
   if (rs.colonyShipUsedUp) {
     f.ships[d.id]--; if (!f.ships[d.id]) delete f.ships[d.id];
@@ -443,7 +470,7 @@ function battleNews(G, sid, b) {
     const p = G.players[o];
     const k = know(G, p, sid);
     const mine = survivors[o] || 0;
-    const anyEnemyAlive = Object.keys(survivors).some(x => +x !== o && survivors[x] > 0);
+    const anyEnemyAlive = Object.keys(survivors).some(x => !isAllied(G, +x, o) && survivors[x] > 0);
     const won = mine > 0 && !anyEnemyAlive || (o === planetOwner && !planetDied && !anyEnemyAlive);
     if (mine > 0 || (o === s.owner)) observe(G, p, sid);
     else { k.battle = true; k.explored = k.explored; if (!k.explored) k.battleOnly = true; k.owner = Object.keys(survivors).map(Number).find(x => x !== o && survivors[x] > 0) ?? k.owner; k.seen = G.turn; k.enemyShips = Object.keys(survivors).filter(x => +x !== o).reduce((a, x) => a + survivors[x], 0); }
@@ -476,7 +503,7 @@ function scrapFleet(G, f) {
   if (f.star != null) {
     const s = G.stars[f.star];
     if (s.owner === f.owner) p.metal += metal; else s.metal += metal;
-  }
+  } else if (rules(G).scrapInSpace) rules(G).scrapInSpace(G, f, metal);
   G.fleets.splice(G.fleets.indexOf(f), 1);
   return metal;
 }
@@ -524,13 +551,14 @@ const API = {
   // randomness and helpers for rulesets and AIs
   R, RI, pick, shuffle, gauss, clamp,
   newGame, endTurn, buildShips, unbuildShip, designLimits, designMin, designCost, shipCostNow, canBuildType, findOrCreateDesign, getDesign,
-  fleetCount, fleetDesigns, fleetSpeed, fleetMaxRange, fleetHas, fleetKind, fleetLabel, orderMove, cancelMove, canReach,
+  fleetCount, fleetDesigns, fleetSpeed, fleetMaxRange, fleetHas, fleetKind, fleetLabel, orderMove, orderPath, cancelMove, canReach,
   newFleet, addShipsToStar, mergeFleets, splitFleet, scrapFleet, evacuate, colonies, seenG, seenT, maxPop, planetClass, planetIncome,
-  isFriend, hasColonyAt, hostileAt, know, observe, msg, starDist, dist, projected, techSum, score, save, load, borrowLimit, fmt,
+  isFriend, isAllied, isBuddy, hasColonyAt, designName, hostileAt, know, observe, msg, starDist, dist, projected, techSum, score, save, load, borrowLimit, fmt,
 };
 if (typeof module !== 'undefined') {
   module.exports = API;
   // under Node, load the rulesets and computer players too
   require('./rules-claude.js'); require('./ai-claude.js');
+  require('./rules-original.js'); require('./ai-original.js');
 } else root.HO = API;
 })(this);
