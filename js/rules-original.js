@@ -150,7 +150,7 @@ function research(G, p, spend) {
   }
 }
 function techMsg(G, p, k) {
-  const nm = (DATA.techNames[k] || [])[p.tech[k] - 1];
+  const nm = E.rules(G).plainTechMessages ? null : (DATA.techNames[k] || [])[p.tech[k] - 1];
   msg(G, p.id, nm && !/^\d+$/.test(nm) ? `You now have ${nm} ${TECHLABEL[k]} Technology (${p.tech[k]}).` : `Your ${TECHLABEL[k]} Technology has reached level ${p.tech[k]}.`, { icon: TECHICON[k], tech: k });
 }
 
@@ -630,7 +630,9 @@ function projected(G, p) {
 }
 // interest (FUN_100737b0), colony support (FUN_10073a80), terraforming and
 // mining (FUN_10073d70) and research (FUN_10074f90)
-function economy(G, p) {
+// opt.shipyard(G, p, s, spend) lets another ruleset take part of a colony's
+// money for shipbuilding first (the DOS 2.0 rules); it returns what is left.
+function economy(G, p, opt) {
   const cols = colonies(G, p.id);
   const limit = () => borrowLimit(G, p);
   const dip = dipAmount(p);
@@ -679,7 +681,8 @@ function economy(G, p) {
   const share = shares(G, p, cols);
   // colonies: terraforming, then mining
   for (const s of colonies(G, p.id)) {
-    const spend = trunc(D * share(p.budget.col[s.id] || 0));
+    let spend = trunc(D * share(p.budget.col[s.id] || 0));
+    if (opt && opt.shipyard) spend = opt.shipyard(G, p, s, spend);
     if (spend <= 0) continue;
     const h = hab(p, s);
     const terraOK = h.dT > 0, metalOK = s.metal > 0;

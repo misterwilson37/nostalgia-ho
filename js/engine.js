@@ -157,6 +157,8 @@ function addShipsToStar(G, pid, sid, d, n) {
   let f;
   if (sat) f = G.fleets.find(x => x.owner === pid && x.star === sid && x.sat);
   else if (d.type === 'scout') f = null; // scouts get their own fleet
+  else if (feature(G, 'singleTypeFleets')) // DOS 2.0: new ships join a fleet of the same type at the star
+    f = G.fleets.find(x => x.owner === pid && x.star === sid && !x.sat && x.to == null && x.dest == null && fleetDesigns(G, x).every(e => e.type === d.type));
   else f = G.fleets.find(x => x.owner === pid && x.star === sid && !x.sat && x.to == null && x.newThisTurn && !fleetHas(G, x, 'scout'));
   if (!f) f = newFleet(G, pid, sid, sat);
   f.ships[d.id] = (f.ships[d.id] || 0) + n;
@@ -182,6 +184,29 @@ function orderPath(G, f, sids) {
   f.dest = sids[0]; f.path = sids.slice(1); if (!f.path.length) f.path = null; return true;
 }
 function cancelMove(G, f) { f.dest = null; f.path = null; }
+// can fleet b join fleet a? (DOS 2.0 rules: a fleet holds only one ship type)
+function canMerge(G, a, b) {
+  if (a === b || a.owner !== b.owner || a.sat || b.sat) return false;
+  if (!feature(G, 'singleTypeFleets')) return true;
+  const t = fleetKind(G, a);
+  return fleetDesigns(G, b).every(d => d.type === t) && fleetDesigns(G, a).every(d => d.type === t);
+}
+// build queues (DOS 2.0 rules): ships wait at a colony until its shipbuilding
+// money has paid for them; the ruleset's economy builds them
+function queueShips(G, pid, sid, did, n) {
+  const s = G.stars[sid], d = getDesign(G, pid, did);
+  if (!d || s.owner !== pid || !canBuildType(G, G.players[pid], d.type) || n < 1) return 0;
+  s.queue = s.queue || [];
+  const last = s.queue[s.queue.length - 1];
+  if (last && last.did === did) last.n += n; else s.queue.push({ did, n });
+  return n;
+}
+function unqueueShip(G, pid, sid, i) {
+  const s = G.stars[sid];
+  if (s.owner !== pid || !s.queue || !s.queue[i]) return;
+  if (--s.queue[i].n <= 0) s.queue.splice(i, 1);
+  if (i === 0) s.yard = 0;
+}
 function mergeFleets(G, a, b) { // b into a
   for (const k in b.ships) a.ships[k] = (a.ships[k] || 0) + b.ships[k];
   if (b.colonists) a.colonists = (a.colonists || 0) + b.colonists;
@@ -744,7 +769,7 @@ const API = {
   // randomness and helpers for rulesets and AIs
   R, RI, pick, shuffle, gauss, clamp,
   newGame, endTurn, buildShips, unbuildShip, designLimits, designMin, designCost, shipCostNow, canBuildType, findOrCreateDesign, getDesign,
-  fleetCount, fleetDesigns, fleetSpeed, fleetMaxRange, fleetHas, fleetKind, fleetLabel, orderMove, orderPath, cancelMove, canReach,
+  fleetCount, fleetDesigns, fleetSpeed, fleetMaxRange, fleetHas, fleetKind, fleetLabel, orderMove, orderPath, cancelMove, canReach, canMerge, queueShips, unqueueShip,
   newFleet, addShipsToStar, mergeFleets, splitFleet, scrapFleet, evacuate, colonies, seenG, seenT, maxPop, planetClass, planetIncome,
   scrapDesign, liveDesigns, isFriend, isAllied, isBuddy, hasColonyAt, designName, report, setPact, give, surrender, sendChat, setArmageddon, hostileAt, know, observe, msg, starDist, dist, projected, techSum, score, save, load, borrowLimit, fmt,
 };
@@ -753,5 +778,6 @@ if (typeof module !== 'undefined') {
   // under Node, load the rulesets and computer players too
   require('./rules-claude.js'); require('./ai-claude.js');
   require('./rules-original.js'); require('./ai-original.js');
+  require('./rules-dos.js');
 } else root.HO = API;
 })(this);

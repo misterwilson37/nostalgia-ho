@@ -81,7 +81,7 @@ function aiDesign(G, p, type) {
   const ds = p.designs.filter(d => !d.scrapped && d.type === type);
   let best = null, bs = 1e9;
   for (const d of ds) { const sc = obsolete(p, d); if (sc < bs) { bs = sc; best = d; } }
-  if (!best || bs >= ai.redesign[type]) best = findOrCreateDesign(G, p, RS.aiSpec(p, type));
+  if (!best || bs >= ai.redesign[type]) best = findOrCreateDesign(G, p, (E.rules(G).aiSpec || RS.aiSpec)(p, type));
   return best;
 }
 function aiTurn(G, p) {
@@ -92,7 +92,8 @@ function aiTurn(G, p) {
   reloadColonyShips(G, p);
   // step 2: designs
   const D = {};
-  for (const t of ['scout', 'dread', 'fighter', 'tanker', 'colony', 'satellite']) D[t] = aiDesign(G, p, t);
+  // only the ship types this ruleset has (the DOS 2.0 rules have four)
+  for (const t of ['scout', 'dread', 'fighter', 'tanker', 'colony', 'satellite']) D[t] = E.rules(G).canBuild(G, p, t) ? aiDesign(G, p, t) : null;
   if (p.hasBio) D.bio = p.designs.find(d => d.type === 'bio' && !d.scrapped) || null;
   const C = {}; for (const t in D) if (D[t]) C[t] = RS.designCost(G, D[t]);
   // assembly lines are limited: scrap unused, superseded types (FUN_10086830)
