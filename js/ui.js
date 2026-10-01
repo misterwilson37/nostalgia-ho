@@ -733,7 +733,7 @@ function originalLook(m) {
   let [pic, snd] = hit.look;
   const id = 1000 + hit.i;
   if (snd === 'explore') snd = m.explore === 'good' ? 6000 : m.explore === 'mediocre' ? 6002 : 6001;
-  if (snd === 'elim') { const who = G.players.find(q => t.startsWith(q.name + ' ')); snd = who && HO.isAllied(G, 0, who.id) ? 2001 : 7021; }
+  if (snd === 'elim') { const who = G.players.find(q => t.startsWith(q.name + ' ')); snd = who && HO.isBuddy(G, 0, who.id) ? 2001 : 7021; }
   let icon;
   if (pic === 'tech') { const k = ['Range', 'Speed', 'Weapons', 'Shield', 'Miniaturization'].findIndex(n => t.includes(' ' + n + ' ')); icon = k >= 0 ? 'm' + (9039 + k) : m.icon; }
   else if (pic === 'face') icon = m.icon;
@@ -1190,33 +1190,66 @@ function hideTitle() { $('#titlescreen').hidden = true; clearInterval(UI.anim); 
 function newGameDialog() {
   const f = el('form', { class: 'newgame', onsubmit: (e) => { e.preventDefault(); start(); } });
   const sel = (name, label, opts, def) => el('label', null, el('span', null, label), el('select', { name }, ...opts.map(([v, t]) => el('option', { value: v, selected: v === def ? 'selected' : false }, t))));
+  const slider = (name, label, min, max, def, left, right) => el('label', null, el('span', null, label),
+    el('span', { class: 'slider' }, left ? el('small', null, left) : null, el('input', { type: 'range', name, min, max, value: def }), el('output', { for: name }, right ? el('small', null, right) : String(def))));
+  const STARTS = [['outpost', 'Outpost'], ['barren', 'Barren'], ['backward', 'Backward'], ['normal', 'Normal'], ['advanced', 'Advanced'], ['thriving', 'Thriving'], ['abundant', 'Abundant']];
+  // Claude rules: named settings
+  const claudeBox = el('div', { class: 'group' },
+    sel('iq', 'Computer IQ', [['dumb', 'Dumb'], ['average', 'Average'], ['smart', 'Smart'], ['diabolical', 'Diabolical']], 'average'),
+    sel('cstart', 'Computer home systems', STARTS, 'normal'),
+    sel('shape', 'Galaxy shape', [['random', 'Random'], ['ring', 'Ring'], ['cluster', 'Cluster'], ['spiral', 'Spiral'], ['grid', 'Grid'], ['hex', 'Hex']], 'random'),
+    sel('size', 'Galaxy size', [['small', 'Small'], ['medium', 'Medium'], ['large', 'Large'], ['huge', 'Humongous']], 'medium'),
+    sel('density', 'Galaxy density', [['dense', 'Dense'], ['normal', 'Normal'], ['sparse', 'Sparse']], 'normal'));
+  // Original rules: the original New Game window's controls
+  const rating = el('b', null, '');
+  const origBox = el('div', { class: 'group' },
+    slider('o_iq', 'Computer IQ', 50, 200, localStorage.getItem('ho5.iq') || 100),
+    sel('o_cstart', 'Computer home systems', [...STARTS, ['iq', 'Based on IQ']], 'iq'),
+    sel('o_shape', 'Galaxy shape', [['circle', 'Circle'], ['spiral', 'Spiral'], ['cluster', 'Cluster'], ['ring', 'Ring'], ['grid', 'Grid'], ['random', 'Random'], ['hex', 'Hex']], 'circle'),
+    slider('o_size', 'Galaxy size', 0, 100, 50, 'Small', 'Large'),
+    slider('o_density', 'Galaxy density', 0, 100, 25, 'Dense', 'Sparse'),
+    el('label', { class: 'chk' }, el('input', { type: 'checkbox', name: 'buddies' }), el('span', null, 'Computers are best buddies')),
+    el('p', { class: 'sub' }, 'Game difficulty rating: ', rating));
   f.append(
     el('label', null, el('span', null, 'Your name'), el('input', { name: 'name', value: localStorage.getItem('ho5.name') || 'Jake', maxlength: 20 })),
     el('label', null, el('span', null, 'Galaxy name'), el('input', { name: 'galaxy', value: 'Milky Way', maxlength: 24 })),
     sel('female', 'Your hat', [['0', 'Cowboy'], ['1', 'Cowgirl']], '0'),
-    sel('computers', 'Computer players', [1, 2, 3, 4, 5, 6, 7, 8].map(n => [String(n), String(n)]), '4'),
-    sel('iq', 'Computer IQ', [['dumb', 'Dumb'], ['average', 'Average'], ['smart', 'Smart'], ['diabolical', 'Diabolical']], 'average'),
-    sel('start', 'Your home system', [['outpost', 'Outpost'], ['barren', 'Barren'], ['backward', 'Backward'], ['normal', 'Normal'], ['advanced', 'Advanced'], ['thriving', 'Thriving'], ['abundant', 'Abundant']], 'normal'),
-    sel('cstart', 'Computer home systems', [['outpost', 'Outpost'], ['barren', 'Barren'], ['backward', 'Backward'], ['normal', 'Normal'], ['advanced', 'Advanced'], ['thriving', 'Thriving'], ['abundant', 'Abundant']], 'normal'),
-    sel('shape', 'Galaxy shape', [['random', 'Random'], ['ring', 'Ring'], ['cluster', 'Cluster'], ['spiral', 'Spiral'], ['grid', 'Grid'], ['hex', 'Hex']], 'random'),
-    sel('size', 'Galaxy size', [['small', 'Small'], ['medium', 'Medium'], ['large', 'Large'], ['huge', 'Humongous']], 'medium'),
-    sel('density', 'Galaxy density', [['dense', 'Dense'], ['normal', 'Normal'], ['sparse', 'Sparse']], 'normal'),
     sel('rules', 'Rules', HO.ruleOptions(), localStorage.getItem('ho5.rules') || 'claude'),
-    el('fieldset', { class: 'opts' }, el('legend', null, 'Options (Original rules)'),
+    sel('computers', 'Computer players', [...[1, 2, 3, 4, 5, 6, 7, 8].map(n => [String(n), String(n)]), ['any', 'Any (1-8)']], '4'),
+    sel('start', 'Your home system', STARTS, 'normal'),
+    claudeBox, origBox,
+    el('fieldset', { class: 'opts' }, el('legend', null, 'Options'),
       el('label', { class: 'chk' }, el('input', { type: 'checkbox', name: 'alliances', checked: 'checked' }), el('span', null, 'Alliances')),
       el('label', { class: 'chk' }, el('input', { type: 'checkbox', name: 'luck' }), el('span', null, 'Luck in battles')),
       el('label', { class: 'chk' }, el('input', { type: 'checkbox', name: 'novas', checked: 'checked' }), el('span', null, 'Novas'))),
     el('div', { class: 'btns right' }, el('button', { type: 'submit' }, 'Create galaxy')));
+  const origOpts = (d) => ({ computers: d.computers === 'any' ? 4 : +d.computers, iqNum: +d.o_iq, start: d.start, cstart: d.o_cstart, shape: d.o_shape, size: +d.o_size, density: +d.o_density, buddies: !!d.buddies });
+  const refresh = () => {
+    const d = Object.fromEntries(new FormData(f).entries());
+    const orig = d.rules === 'original';
+    claudeBox.hidden = orig; origBox.hidden = !orig;
+    f.querySelector('fieldset.opts').hidden = !orig;
+    for (const o of f.querySelectorAll('.slider output')) { const inp = o.previousElementSibling; if (!o.querySelector('small')) o.textContent = inp.value; }
+    if (orig) rating.textContent = String(HO.RULESETS.original.difficulty(origOpts(d)));
+  };
+  f.addEventListener('input', refresh); f.addEventListener('change', refresh);
   const start = () => {
     const d = Object.fromEntries(new FormData(f).entries());
     localStorage.setItem('ho5.name', d.name); localStorage.setItem('ho5.rules', d.rules);
-    G = HO.newGame({ seed: (Math.random() * 2 ** 31) | 0, name: d.name || 'You', galaxy: d.galaxy || 'Milky Way', female: d.female === '1', computers: +d.computers, iq: d.iq, start: d.start, cstart: d.cstart, shape: d.shape, size: d.size, density: d.density, rules: d.rules, alliances: !!d.alliances, luck: !!d.luck, novas: !!d.novas });
+    if (d.computers === 'any') d.computers = String(1 + Math.floor(Math.random() * 8));
+    const common = { seed: (Math.random() * 2 ** 31) | 0, name: d.name || 'You', galaxy: d.galaxy || 'Milky Way', female: d.female === '1', computers: +d.computers, start: d.start, rules: d.rules, alliances: !!d.alliances, luck: !!d.luck, novas: !!d.novas };
+    if (d.rules === 'original') {
+      localStorage.setItem('ho5.iq', d.o_iq);
+      const o = origOpts(d);
+      G = HO.newGame(Object.assign(common, o, { difficulty: HO.RULESETS.original.difficulty(o) }));
+    } else G = HO.newGame(Object.assign(common, { iq: d.iq, cstart: d.cstart, shape: d.shape, size: d.size, density: d.density }));
     closeModal(); hideTitle();
     UI.sel = G.players[0].homeStar; UI.selFleet = null; UI.fitted = false; fit();
     Sound.play(128);
     save(); renderPanel(); draw(); showMessages();
   };
   modal('Create galaxy', f, { cls: 'mid' });
+  refresh();
 }
 function continueGame() {
   try { G = HO.load(localStorage.getItem('ho5.save')); } catch (e) { toast('That saved game could not be read.'); return; }

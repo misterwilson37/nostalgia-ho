@@ -157,3 +157,11 @@ button:focus-visible { outline: 2px solid var(--hi); outline-offset: 1px; }
 .ptable tr.click:hover { background: #fff7d6; }
 .prefs { display: grid; gap: 8px; }
 .prefs label.chk { display: flex; gap: 8px; align-items: center; }
+.newgame .group { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; gap: 8px 14px; }
+.newgame .group[hidden], .newgame .opts[hidden] { display: none; }
+.newgame .group .sub { grid-column: 1 / -1; margin: 0; }
+.newgame .slider { display: flex; align-items: center; gap: 6px; }
+.newgame .slider input { flex: 1; min-width: 0; padding: 0; border: 0; }
+.newgame .slider output { min-width: 2.5em; color: var(--sub); }
+.newgame .slider small { color: var(--sub); }
+@media (max-width: 640px) { .newgame .group { grid-template-columns: 1fr; } }

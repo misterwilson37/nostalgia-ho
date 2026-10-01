@@ -48,8 +48,12 @@ const t10 = (t) => Math.round(t * 10);
 // Each Armageddon shrinks every distance to 3/4 (never below 3).
 function distance(G, a, b) {
   if (a === b) return 0;
-  const dx = Math.abs(a.x - b.x) * LY_PER_UNIT, dy = Math.abs(a.y - b.y) * LY_PER_UNIT;
-  let d = Math.max(1, Math.ceil(Math.max(dx, dy) + Math.min(dx, dy) / 3 - 1e-9));
+  let d;
+  if (a.x10 != null && b.x10 != null) d = dist10(a, b); // positions in tenths, as the original keeps them
+  else {
+    const dx = Math.abs(a.x - b.x) * LY_PER_UNIT, dy = Math.abs(a.y - b.y) * LY_PER_UNIT;
+    d = Math.max(1, Math.ceil(Math.max(dx, dy) + Math.min(dx, dy) / 3 - 1e-9));
+  }
   for (let i = 0; i < (G.armageddons || 0); i++) d = Math.max(3, trunc((d * 3 + 3) / 4));
   return d;
 }
@@ -311,6 +315,229 @@ function planetStrength(q, s) {
   return trunc(sh * w * w * Math.ceil(popU(s) / 2500) / 570);
 }
 
+// ---------- galaxy (FUN_1006c4d0 and one routine per shape) ----------
+// The original keeps star positions in tenths of a light-year. Settings come
+// from the New Game window: Size and Density are sliders from 0 to 100
+// (defaults 50 and 25), Shape is one of seven.
+const SHAPES = ['circle', 'spiral', 'cluster', 'ring', 'grid', 'random', 'hex'];
+// the original's sine/cosine tables: 100 x cos/sin of each whole degree,
+// rounded toward zero, with six entries a hair different
+const COS = [], SIN = [];
+for (let a = 0; a < 360; a++) { COS.push(trunc(100 * Math.cos(a * Math.PI / 180))); SIN.push(trunc(100 * Math.sin(a * Math.PI / 180))); }
+COS[180] = -99; COS[300] = 49; SIN[90] = 99; SIN[150] = 50; SIN[210] = -49; SIN[270] = -99;
+// distance in light-years between positions in tenths (FUN_100589f0)
+function dist10(a, b) {
+  const dx = Math.abs(a.x10 - b.x10), dy = Math.abs(a.y10 - b.y10);
+  return trunc((Math.max(dx, dy) + trunc(Math.min(dx, dy) / 3) + 9) / 10);
+}
+const up3 = (s) => (trunc((s - 1) / 3) + 1) * 3;
+// old saves and the test script use named sizes
+const sliderSize = (v) => typeof v === 'number' ? v : ({ small: 25, medium: 50, large: 75, huge: 100 }[v] ?? 50);
+const sliderDensity = (v) => typeof v === 'number' ? v : ({ dense: 0, normal: 25, sparse: 60 }[v] ?? 25);
+function starCount(G, shape, size) {
+  let n;
+  if (shape === 'grid') n = (Math.min(9, trunc(size / 10)) + 5) ** 2;
+  else if (shape === 'hex') { const k = Math.min(6, trunc(size / 15)); n = 3 * (k + 2) * (k + 3) + 1; }
+  else { const w = trunc(size / 10) + 6; n = 2 * size + RI(G, -w, w) + 19; }
+  return clamp(n, 19, 220);
+}
+function makeGalaxy(G, opts, nPlayers) {
+  const shape = SHAPES.includes(opts.shape) ? opts.shape : 'random';
+  const size = sliderSize(opts.size), dens = sliderDensity(opts.density);
+  const n = starCount(G, shape, size);
+  const P = [];
+  for (let i = 0; i < n; i++) P.push({ x10: 0, y10: 0 });
+  // a star must be at least 4 ly from every star placed before it
+  // (FUN_1006efb0), or after it for spirals, which fill from the end (FUN_1006f050)
+  const okFwd = (i) => { for (let j = 0; j < i; j++) if (dist10(P[j], P[i]) < 4) return false; return true; };
+  const okBack = (i) => { for (let j = n - 1; j > i; j--) if (dist10(P[j], P[i]) < 4) return false; return true; };
+  const k3 = clamp(trunc(dens / 34), 0, 2), step = k3 + 4, cap = (k3 + 5) * 7;
+  let S = 0, homes = null;
+  // rings of stars around the centre, 'step' ly apart (circle and ring)
+  const rings = (r0) => {
+    let idx = 0, acc = r0 * 44, r = r0;
+    while (idx < n) {
+      let as = trunc(360 / (trunc(acc / cap) + 1));
+      const rem = n - idx;
+      if (rem < trunc(360 / as)) as = trunc(360 / rem);
+      for (let a = 0; a < 360 && idx < n; a += as) {
+        for (let t = 0; t < 20; t++) {
+          P[idx].x10 = (S >> 1) * 10 + trunc(r * COS[a] / 10) + RI(G, -10, 10);
+          P[idx].y10 = (S >> 1) * 10 + trunc(r * SIN[a] / 10) + RI(G, -10, 10);
+          if (okFwd(idx)) { idx++; break; }
+        }
+      }
+      acc += step * 44; r += step;
+    }
+  };
+  if (shape === 'circle' || shape === 'ring') { // FUN_1006d460, FUN_1006d700
+    const r0 = shape === 'ring' ? clamp(trunc(n / 4), 7, 12) : 0;
+    let acc = r0 * 44, r = r0, c = 0;
+    while (c < n) { const cnt = trunc(acc / cap); acc += step * 44; r += step; c += cnt + 1; }
+    S = up3((r + (shape === 'ring' ? trunc(step / 2) : step)) * 2);
+    rings(r0);
+  } else if (shape === 'random') { // FUN_1006d280
+    S = up3(trunc(Math.sqrt(25 * n) * (70 + dens) / 63));
+    const h = trunc(S / 2), a = h - 2, b = S % 2 === 1 ? h - 2 : h - 3;
+    for (let i = 0, guard = 0; i < n;) {
+      P[i].x10 = RI(G, 0, b * 10) + RI(G, 0, a * 10) + 20;
+      P[i].y10 = RI(G, 0, b * 10) + RI(G, 0, a * 10) + 20;
+      if (okFwd(i) || ++guard > 20000) { i++; guard = 0; }
+    }
+    homes = [...Array(nPlayers).keys()];
+  } else if (shape === 'grid') { // FUN_1006e3c0
+    const sp = clamp(40 + trunc(2 * dens / 5), 40, 70);
+    let k = 1; while (k * k < n) k++;
+    S = up3(trunc(k * sp / 10));
+    let idx = 0;
+    for (let i = 0; i < k; i++) for (let j = 0; j < k; j++) if (idx < n) { P[idx].x10 = trunc(sp / 2) + i * sp; P[idx].y10 = trunc(sp / 2) + j * sp; idx++; }
+  } else if (shape === 'hex') { // FUN_1006e550
+    const sp = clamp(40 + trunc(2 * dens / 5), 40, 70), rowH = trunc(sp * 866 / 1000);
+    const m = trunc((trunc(Math.sqrt(8 * trunc((n - 1) / 6) + 1)) - 1) / 2), w = 2 * m + 1;
+    S = trunc(sp * w / 10);
+    const cy = trunc(S * 10 / 2), x0 = trunc(S / 2) * 10 - m * sp;
+    let idx = 0;
+    const row = (xs, y, cnt) => { for (let c = 0; c < cnt && idx < n; c++) { P[idx].x10 = xs + c * sp; P[idx].y10 = y; idx++; } };
+    for (let j = 0, xs = x0, y = cy; j <= m; j++, xs += trunc(sp / 2), y -= rowH) row(xs, y, w - j);
+    for (let j = 1, xs = x0, y = cy; j <= m; j++) { xs += trunc(sp / 2); y += rowH; row(xs, y, w - j); }
+  } else if (shape === 'spiral') { // FUN_1006d9e0
+    const core = Math.max(8, step * Math.sqrt(n) * 0.5), coreI = trunc(core);
+    let c = 0, acc = 0, rr = 0;
+    for (; c < n && rr < coreI; rr += step) { c += trunc(acc / cap) + 1; acc += step * 44; }
+    const arms = nPlayers || 6;
+    if (c < n) rr += trunc((arms + n - 1) / arms);
+    S = up3((rr + step * 2) * 2);
+    let idx = n - 1, r = 0;
+    acc = 0;
+    for (; idx >= 0 && r < coreI; r += step) {
+      for (let a = 0; a < 360 && idx >= 0; a += trunc(360 / (trunc(acc / cap) + 1))) {
+        for (let t = 0; t < 20; t++) {
+          P[idx].x10 = (S >> 1) * 10 + trunc(r * COS[a] / 10) + RI(G, -10, 10);
+          P[idx].y10 = (S >> 1) * 10 + trunc(r * SIN[a] / 10) + RI(G, -10, 10);
+          if (okBack(idx)) { idx--; break; }
+        }
+      }
+      acc += step * 44;
+    }
+    const as = trunc((trunc(arms / 2) + 360) / arms);
+    let twist = 0;
+    while (idx >= 0) {
+      twist = (twist + 6) % 360;
+      for (let j = 0; j < as * arms && idx >= 0; j += as) {
+        const ang = (j + twist) % 360;
+        const cx = (S >> 1) * 10 + trunc(r * COS[ang] / 10), cy = (S >> 1) * 10 + trunc(r * SIN[ang] / 10);
+        let ok = false;
+        for (let t = 0; t < 20 && !ok; t++) {
+          P[idx].x10 = cx + RI(G, -10, 10); P[idx].y10 = cy + RI(G, -10, 10);
+          ok = okBack(idx);
+        }
+        if (ok) idx--;
+        else if (idx < arms) { // the last few stars (arm tips) must be placed: widen the search
+          for (let wdt = 2, t = 0; ; ) {
+            P[idx].x10 = cx + RI(G, -wdt, wdt) * 10; P[idx].y10 = cy + RI(G, -wdt, wdt) * 10;
+            if (okBack(idx)) { idx--; break; }
+            if (++t > 20) { t = 0; wdt++; }
+          }
+        }
+      }
+      r += step - 1;
+    }
+    homes = shuffleHomes(G, nPlayers);
+  } else { // cluster, FUN_1006dff0: one cluster per player around a circle
+    const order = [...Array(nPlayers).keys()];
+    for (let i = 0; i < nPlayers; i++) { const j = RI(G, 0, nPlayers - 1); [order[i], order[j]] = [order[j], order[i]]; }
+    let s = trunc(4 * (1 + Math.sqrt(trunc(n / nPlayers))));
+    s = trunc(s * (dens + 100) / 100);
+    const h = trunc(s / 2), Rr = Math.max(h + 3, trunc((s + 6) * nPlayers / 6));
+    S = Rr + h + 3;
+    const as = trunc((trunc(nPlayers / 2) + 360) / nPlayers);
+    let w = h * 10;
+    for (let i = 0; i < n; i++) {
+      const ang = as * order[i % nPlayers];
+      let cx = (trunc(Rr * COS[ang] / 100) - h) * 10, cy = (trunc(Rr * SIN[ang] / 100) - h) * 10;
+      for (let t = 0; ; ) {
+        P[i].x10 = cx + RI(G, 0, w) + RI(G, 0, w); P[i].y10 = cy + RI(G, 0, w) + RI(G, 0, w);
+        if (++t > 50) { t = 0; w += 20; cx -= 20; cy -= 20; }
+        if (okFwd(i)) break;
+      }
+    }
+    homes = shuffleHomes(G, nPlayers);
+  }
+  // home stars (FUN_1006eb40): random, at least 20 ly apart if possible,
+  // relaxing 4 ly at a time
+  if (!homes) {
+    homes = [];
+    for (let p = 0; p < nPlayers; p++) {
+      let pickd = -1;
+      for (let minD = 20; minD >= 0 && pickd < 0; minD -= 4) {
+        for (let t = 0; t < 25; t++) {
+          let c = -1;
+          for (let u = 0; u < 20; u++) { const v = RI(G, 0, n - 1); if (!homes.includes(v)) { c = v; break; } }
+          if (c < 0) c = [...Array(n).keys()].find(v => !homes.includes(v));
+          if (homes.every(hh => dist10(P[hh], P[c]) >= minD)) { pickd = c; break; }
+        }
+      }
+      homes.push(pickd);
+    }
+  }
+  // shift the map so it starts 6 ly from the top-left edge (FUN_1006edc0)
+  const minX = Math.min(...P.map(q => trunc(q.x10 / 10))), minY = Math.min(...P.map(q => trunc(q.y10 / 10)));
+  for (const q of P) { q.x10 += (6 - minX) * 10; q.y10 += (6 - minY) * 10; }
+  const maxX = Math.max(...P.map(q => trunc((q.x10 + 9) / 10))), maxY = Math.max(...P.map(q => trunc((q.y10 + 9) / 10)));
+  S = Math.max(maxX + 6, maxY + 6) + 3;
+  return { W: S / LY_PER_UNIT, H: S / LY_PER_UNIT, pts: P.map(q => ({ x: q.x10 / 10 / LY_PER_UNIT, y: q.y10 / 10 / LY_PER_UNIT, x10: q.x10, y10: q.y10 })), homes };
+}
+function shuffleHomes(G, k) {
+  const h = [...Array(k).keys()];
+  for (let i = 0; i < k; i++) { const j = RI(G, 0, k - 1); [h[i], h[j]] = [h[j], h[i]]; }
+  return h;
+}
+// Each computer's skill and home system come from the IQ setting (50-200):
+// the computers are spread out from IQ-based skill upward (FUN_1006f640).
+// Skill 1-4 is Dumb, Average, Smart, Diabolical. "Based on IQ" home systems
+// are Barren, Normal, Advanced or Thriving to match.
+function computerSetup(G, opts, k, nComp) {
+  if (typeof opts.iqNum !== 'number') return null;
+  const spread = nComp < 2 ? 1 : trunc(25 / (nComp - 1));
+  const v = trunc((opts.iqNum - 50) * 2 / 3) + k * spread - 12;
+  const lvl = v < 25 ? 1 : v < 50 ? 2 : v < 75 ? 3 : 4;
+  const start = opts.cstart && opts.cstart !== 'iq' ? opts.cstart : ['barren', 'normal', 'advanced', 'thriving'][lvl - 1];
+  return { start, iq: ['dumb', 'average', 'smart', 'diabolical'][lvl - 1] };
+}
+
+// Game difficulty rating, 30-140 (FUN_100560a0), shown in the New Game
+// window and used for master points when you win. o: computers, iqNum,
+// start, cstart ('iq' = based on IQ), shape, size, density, buddies,
+// armageddons, won (did you win), year (the year you won; 0 for the preview).
+const START_ORDER = ['outpost', 'barren', 'backward', 'normal', 'advanced', 'thriving', 'abundant'];
+function difficulty(o) {
+  const nComp = o.computers | 0;
+  if (!nComp) return 0;
+  const buddies = o.buddies && nComp >= 2 ? 1 : 0;
+  const iq = o.iqNum ?? 100;
+  const you = Math.min(7, START_ORDER.indexOf(o.start || 'normal') + 1);
+  let them = o.cstart === 'iq' || !o.cstart ? trunc((iq - 50) / 22) + 1 : START_ORDER.indexOf(o.cstart) + 1;
+  const gap = them - you;
+  let a = gap === 5 ? 25 : gap === 4 ? 15 : gap === 6 ? 40 : gap + 7;
+  if (you === 7) a = Math.max(0, a - 4);
+  if (you === 6) a = Math.max(0, a - 2);
+  const b = 1 + (iq - 50) / 15;
+  const c = trunc(2 * buddies * (nComp - 1) + nComp + 2);
+  const shapeN = SHAPES.indexOf(o.shape) + 1;
+  const d = shapeN === 3 ? 4 : shapeN === 2 ? 7 : 10;
+  const e = 12 - (sliderSize(o.size) - 1) / 15, f = 12 - (sliderDensity(o.density) - 1) / 15;
+  const low = Math.min(a, c, b, d, e, f);
+  let sc = (10 * low + 2 * a + c + b + d + e + f) * 0.5 + 25;
+  sc *= 0.9 ** (o.armageddons || 0);
+  if (o.won != null) sc -= o.won ? 0 : 1; // humans who did not win
+  const y = o.year || 0;
+  if (y >= 2000 && y <= 3000) sc += 1;
+  if (y >= 5000) sc -= trunc(y / 5000);
+  return trunc(clamp(sc, 30, 140));
+}
+// master points for a win at that difficulty (FUN_10055f60)
+const masterPoints = (d) => d < 10 ? 0 : Math.min(10000000, trunc(3 ** ((Math.max(30, d) - 30) / 10)));
+
 // ---------- setup ----------
 function setupPlayer(G, p, home, start) {
   const st = START[start] || START.normal;
@@ -342,6 +569,17 @@ function defaultDesigns(G, p) {
   }
 }
 function afterSetup(G) {
+  // "Best Buddies" in the New Game window: the computers start as best
+  // buddies with each other, liking each other 1,000 points more (FUN_1006c4d0)
+  if (G.opts.buddies) {
+    const comps = G.players.filter(q => !q.human);
+    for (const a of comps) for (const b of comps) if (a !== b) {
+      a.allies = a.allies || []; a.buddies = a.buddies || [];
+      if (!a.allies.includes(b.id)) a.allies.push(b.id);
+      if (!a.buddies.includes(b.id)) a.buddies.push(b.id);
+      if (a.ai && a.ai.att) a.ai.att[b.id] = (a.ai.att[b.id] || 0) + 1000;
+    }
+  }
   for (const p of G.players) {
     refillDeck(G, p);
     const home = G.stars[p.homeStar];
@@ -830,7 +1068,7 @@ E.registerRules('original', {
   HIT, hit, hab, popU, setPopU, maxPopU, incomeU, interestOn, mineMoney, mineMetal, terraCost, terraStep, aiSpec,
   fleetStrength, planetStrength, techLevelCost, disposable, START, research,
   distance,
-  newStar, setupPlayer, afterSetup, defaultDesigns,
+  newStar, setupPlayer, afterSetup, defaultDesigns, makeGalaxy, computerSetup, SHAPES, difficulty, masterPoints,
   maxPop: (G, p, s) => maxPopU(p, s) / 1000,
   planetClass, planetIncome,
   designLimits, designCost,

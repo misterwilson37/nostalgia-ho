@@ -386,20 +386,28 @@ function newGame(opts) {
     opts, stat: { battles: 0, captures: 0, colonized: 0 }, stars: [], players: [], fleets: [], battles: [], inbox: [], over: false, winner: -1, log: [],
   };
   const rs = rules(G);
-  const [n0, W0, H0] = rs.galaxySizes[opts.size] || rs.galaxySizes.medium;
-  const dens = { sparse: 1.25, normal: 1.0, dense: 0.82 }[opts.density || 'normal'];
-  const W = W0 * dens, H = H0 * dens, n = n0;
-  G.W = W; G.H = H;
-  const pts = placeStars(G, n, W, H, opts.shape || 'random');
+  const nComp = clamp(opts.computers | 0, 1, 15);
+  const nPlayers = nComp + 1;
+  // a ruleset may lay out the galaxy itself (and pick the home stars)
+  const gal = rs.makeGalaxy ? rs.makeGalaxy(G, opts, nPlayers) : null;
+  let pts;
+  if (gal) { G.W = gal.W; G.H = gal.H; pts = gal.pts; }
+  else {
+    const [n0, W0, H0] = rs.galaxySizes[opts.size] || rs.galaxySizes.medium;
+    const dens = { sparse: 1.25, normal: 1.0, dense: 0.82 }[opts.density || 'normal'];
+    const W = W0 * dens, H = H0 * dens, n = n0;
+    G.W = W; G.H = H;
+    pts = placeStars(G, n, W, H, opts.shape || 'random');
+  }
   const names = shuffle(G, DATA.starNames.slice());
   pts.forEach((pt, i) => {
     const st = rs.newStar(G);
-    G.stars.push({ id: i, name: names[i % names.length] || ('Star ' + i), x: pt.x, y: pt.y, g: st.g, t: st.t, metal: st.metal, owner: -1, pop: 0, terra: 0.5, nova: 0, debris: 0, everProfit: false });
+    const s = { id: i, name: names[i % names.length] || ('Star ' + i), x: pt.x, y: pt.y, g: st.g, t: st.t, metal: st.metal, owner: -1, pop: 0, terra: 0.5, nova: 0, debris: 0, everProfit: false };
+    if (pt.x10 != null) { s.x10 = pt.x10; s.y10 = pt.y10; }
+    G.stars.push(s);
   });
   // players
-  const nComp = clamp(opts.computers | 0, 1, 15);
-  const nPlayers = nComp + 1;
-  const homes = chooseHomes(G, nPlayers);
+  const homes = gal && gal.homes ? gal.homes : chooseHomes(G, nPlayers);
   const usedNames = new Set();
   const faces = shuffle(G, [...Array(16).keys()]);
   const AI = aiOf(G);
@@ -411,7 +419,9 @@ function newGame(opts) {
     else { do { name = pick(G, female ? DATA.femaleNames : DATA.maleNames) || ('Computer ' + i); } while (usedNames.has(name) && usedNames.size < 40); }
     usedNames.add(name);
     const home = G.stars[homes[i]];
-    const start = human ? (opts.start || 'normal') : (opts.cstart || 'normal');
+    // a ruleset may give each computer its own skill and home system
+    const cs = !human && rs.computerSetup ? rs.computerSetup(G, opts, i - 1, nComp) : null;
+    const start = human ? (opts.start || 'normal') : cs ? cs.start : (opts.cstart || 'normal');
     const p = {
       id: i, name, human, female, face: human ? -1 : faces[i % 16], alive: true, surrendered: false,
       homeG: home.g, homeT: home.t, homeStar: home.id,
@@ -423,7 +433,7 @@ function newGame(opts) {
     rs.setupPlayer(G, p, home, start);
     for (const s of G.stars) know(G, p, s.id);
     observe(G, p, home.id);
-    if (!human) p.ai = AI.make(G, p, opts.iq || 'average');
+    if (!human) p.ai = AI.make(G, p, cs ? cs.iq : (opts.iq || 'average'));
     rs.defaultDesigns(G, p);
   }
   rs.afterSetup(G);
