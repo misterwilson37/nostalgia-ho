@@ -1,3 +1,5 @@
+/* Spaceward Ho! — classic skin */
+@import url("https://fonts.googleapis.com/css2?family=Rye&display=swap");
 :root {
   --plat: #dedede; --plat2: #cfcfcf; --edge: #8e8e8e; --ink: #1d1b22; --sub: #5d5a66;
   --hi: #2f4fb8; --hat: #a8322b; --gold: #e2b33c; --space: #04030c; --neg: #a8322b;
@@ -176,3 +178,7 @@ button:focus-visible { outline: 2px solid var(--hi); outline-offset: 1px; }
 .win { max-width: calc(100vw - 24px); }
 .newgame > *, .newgame .group > * { min-width: 0; }
 .newgame input, .newgame select { max-width: 100%; box-sizing: border-box; }
+.newgame .lastrow { grid-column: 1 / -1; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 8px 14px; }
+@media (max-width: 640px) { .newgame .lastrow { grid-auto-flow: row; } }
+.newgame .lastrow > * { min-width: 0; }
+.newgame label:not(.chk) { grid-template-columns: minmax(0, 1fr); }

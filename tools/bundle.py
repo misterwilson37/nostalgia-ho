@@ -3,9 +3,9 @@
 publishing to claude.ai. Output: dist/spaceward-ho.html. GitHub Pages serves
 the repo files directly and does not need this.
 
-Run from anywhere:  python3 tools/bundle.py
+Run from anywhere:  python3 tools/bundle.py [skin]   (default: classic)
 """
-import base64, json, os, re
+import base64, json, os, re, sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 P = lambda *a: os.path.join(ROOT, *a)
 
@@ -20,14 +20,19 @@ assets = {
     'theme': uri(P('assets', 'theme.mp3'), 'audio/mpeg'),
 }
 page = open(P('index.html')).read()
-css = open(P('js', 'skins', 'classic', 'style.css')).read()
-page = page.replace('<link rel="stylesheet" href="js/skins/classic/style.css">', '<style>\n' + css + '</style>')
 
 def inline(m):
     src = m.group(1)
     return '<script>\n' + open(P(src)).read() + '\n</script>'
 
 page = re.sub(r'<script src="([^"]+)"></script>', inline, page)
+# one skin is built in (python3 tools/bundle.py <skin>, default classic);
+# js/skins.js is told not to load one itself
+skin = sys.argv[1] if len(sys.argv) > 1 else 'classic'
+css = open(P('js', 'skins', skin, 'style.css')).read()
+js = open(P('js', 'skins', skin, 'ui.js')).read()
+page = page.replace('</body>', '<style>\n' + css + '</style>\n<script>\n' + js + '\n</script>\n</body>')
+page = page.replace('<script>\n', '<script>window.HOSKINS_INLINE=' + json.dumps(skin) + ';</script>\n<script>\n', 1)
 page = page.replace('<script>\n', '<script>window.ASSETS=' + json.dumps(assets) + ';</script>\n<script>\n', 1)
 os.makedirs(P('dist'), exist_ok=True)
 out = P('dist', 'spaceward-ho.html')

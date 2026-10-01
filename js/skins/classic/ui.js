@@ -1,6 +1,25 @@
-// Spaceward Ho! web remake — interface
+// Spaceward Ho! web remake — the classic skin (see js/skins.js)
 (function () {
 'use strict';
+// the classic skin's page
+const PAGE = `
+<div id="app">
+  <nav id="menubar" aria-label="Menus"><span class="logo">Ho!</span><span id="title"></span></nav>
+  <div id="main">
+    <aside id="panel" aria-label="Budget, technology and planet"></aside>
+    <div id="mapwrap"><canvas id="map" aria-label="Star map"></canvas><div id="msg" aria-live="polite"></div></div>
+  </div>
+</div>
+<div id="titlescreen" hidden>
+  <div class="tcard">
+    <h1>Spaceward Ho!</h1>
+    <p class="by">by Peter Commons &amp; Joe Williams · Delta Tao Software</p>
+    <canvas id="tframe" width="304" height="200" role="img" aria-label="The Spaceward Ho! cowboy planet"></canvas>
+    <div class="tbtns"><button id="tnew">New game</button><button id="tcont" hidden>Continue</button><button id="thelp" class="quiet">How to play</button></div>
+    <p class="credit">A personal web remake built from Jake’s own copy of Spaceward Ho! 5.0.5. Art by Howard Vives and Bob Van de walle.</p>
+  </div>
+</div>
+`;
 // Assets: the single-file build (tools/bundle.py) embeds them as window.ASSETS;
 // otherwise they are fetched by name from assets/ (see assets/manifest.json).
 const A = window.ASSETS || { img: {}, snd: {}, jpg: [], theme: 'assets/theme.mp3' };
@@ -1250,6 +1269,7 @@ function newGameDialog() {
     sel('density', 'Galaxy density', [['dense', 'Dense'], ['normal', 'Normal'], ['sparse', 'Sparse']], 'normal'));
   // Original rules: the original New Game window's controls
   const rating = el('b', null, '');
+  const skins = (window.HOSKINS && HOSKINS.list) || [];
   const origBox = el('div', { class: 'group' },
     slider('o_iq', 'Computer IQ', 50, 200, localStorage.getItem('ho5.iq') || 100),
     sel('o_cstart', 'Computer home systems', [...STARTS, ['iq', 'Based on IQ']], 'iq'),
@@ -1266,8 +1286,10 @@ function newGameDialog() {
     sel('start', 'Your home system', STARTS, 'normal'),
     claudeBox, origBox,
     // last line: the rules, with the game difficulty rating beside them
-    sel('rules', 'Rules', HO.ruleOptions(), localStorage.getItem('ho5.rules') || 'claude'),
-    el('div', { class: 'rating' }, el('span', null, 'Game difficulty rating'), rating),
+    el('div', { class: 'lastrow' },
+      sel('rules', 'Rules', HO.ruleOptions(), localStorage.getItem('ho5.rules') || 'claude'),
+      skins.length > 1 ? sel('skin', 'Skin', skins.map(k => [k.id, k.name]), window.HOSKINS.current) : null,
+      el('div', { class: 'rating' }, el('span', null, 'Game difficulty rating'), rating)),
     el('fieldset', { class: 'opts' }, el('legend', null, 'Options'),
       el('label', { class: 'chk' }, el('input', { type: 'checkbox', name: 'alliances', checked: 'checked' }), el('span', null, 'Alliances')),
       el('label', { class: 'chk' }, el('input', { type: 'checkbox', name: 'luck' }), el('span', null, 'Luck in battles')),
@@ -1294,6 +1316,7 @@ function newGameDialog() {
       const o = origOpts(d);
       G = HO.newGame(Object.assign(common, o, { difficulty: HO.RULESETS.original.difficulty(o) }));
     } else G = HO.newGame(Object.assign(common, { iq: d.iq, cstart: d.cstart, shape: d.shape, size: d.size, density: d.density }));
+    if (d.skin && d.skin !== HOSKINS.current) { save(); HOSKINS.switchTo(d.skin); return; } // opens in the other skin
     closeModal(); hideTitle();
     UI.sel = G.players[0].homeStar; UI.selFleet = null; UI.fitted = false; fit();
     Sound.play(128);
@@ -1302,10 +1325,12 @@ function newGameDialog() {
   modal('Create galaxy', f, { cls: 'mid' });
   refresh();
 }
-function continueGame() {
+// resumed: the game was just started (or saved) in another skin, so keep its messages
+function continueGame(resumed) {
   try { G = HO.load(localStorage.getItem('ho5.save')); } catch (e) { toast('That saved game could not be read.'); return; }
   hideTitle(); UI.sel = G.players[0].homeStar; UI.fitted = false; fit(); renderPanel(); draw();
-  G.inbox = [{ text: `Welcome back. It’s the year ${G.year}.`, icon: 'm9024' }]; showMessages();
+  if (resumed !== true || !G.inbox.length) G.inbox = [{ text: `Welcome back. It’s the year ${G.year}.`, icon: 'm9024' }];
+  showMessages();
 }
 function save() { if (!G) return; try { localStorage.setItem('ho5.save', HO.save(G)); } catch (e) {} }
 
@@ -1360,11 +1385,13 @@ document.addEventListener('keydown', (e) => {
 
 // ---------- boot ----------
 window.addEventListener('DOMContentLoaded', () => {
+  document.body.insertAdjacentHTML('afterbegin', PAGE);
   Object.assign(HO.DATA, window.HODATA);
   setupMenus();
   $('#tnew').addEventListener('click', newGameDialog);
-  $('#tcont').addEventListener('click', continueGame);
+  $('#tcont').addEventListener('click', () => continueGame());
   $('#thelp').addEventListener('click', openHelp);
-  loadManifest(() => loadImages(() => { setupMap(); titleScreen(); }));
+  const resume = window.HOSKINS && HOSKINS.takeResume() && localStorage.getItem('ho5.save');
+  loadManifest(() => loadImages(() => { setupMap(); if (resume) continueGame(true); else titleScreen(); }));
 });
 })();

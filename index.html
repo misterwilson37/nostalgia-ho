@@ -4,34 +4,16 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Spaceward Ho!</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Rye&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="js/skins/classic/style.css">
 </head>
 <body>
-<div id="app">
-  <nav id="menubar" aria-label="Menus"><span class="logo">Ho!</span><span id="title"></span></nav>
-  <div id="main">
-    <aside id="panel" aria-label="Budget, technology and planet"></aside>
-    <div id="mapwrap"><canvas id="map" aria-label="Star map"></canvas><div id="msg" aria-live="polite"></div></div>
-  </div>
-</div>
-<div id="titlescreen" hidden>
-  <div class="tcard">
-    <h1>Spaceward Ho!</h1>
-    <p class="by">by Peter Commons &amp; Joe Williams · Delta Tao Software</p>
-    <canvas id="tframe" width="304" height="200" role="img" aria-label="The Spaceward Ho! cowboy planet"></canvas>
-    <div class="tbtns"><button id="tnew">New game</button><button id="tcont" hidden>Continue</button><button id="thelp" class="quiet">How to play</button></div>
-    <p class="credit">A personal web remake built from Jake’s own copy of Spaceward Ho! 5.0.5. Art by Howard Vives and Bob Van de walle.</p>
-  </div>
-</div>
+<!-- the game: no drawing here -->
 <script src="js/data.js"></script>
 <script src="js/engine.js"></script>
 <script src="js/rules-claude.js"></script>
 <script src="js/ai-claude.js"></script>
 <script src="js/rules-original.js"></script>
 <script src="js/ai-original.js"></script>
-<script src="js/skins/classic/ui.js"></script>
+<!-- the skin: picks js/skins/<name>/ and loads its style.css and ui.js -->
+<script src="js/skins.js"></script>
 </body>
 </html>
