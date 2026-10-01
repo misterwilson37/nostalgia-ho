@@ -763,6 +763,7 @@ function randomEvents(G) {
         }
       } else {
         s.nova = 0;
+        for (const p of G.players) know(G, p, s.id).nova = 0;
         if (s.owner >= 0) msg(G, s.owner, `It's a miracle! Your scientists have figured out to prevent ${s.name} from going supernova.`, { icon: 'm9010', star: s.id });
         for (const p of G.players) if (p.id !== s.owner && know(G, p, s.id).explored) msg(G, p.id, `Wow, that's weird! ${s.name} is no longer red and appears not to be in danger of going nova.`, { star: s.id, quiet: true });
       }
@@ -774,7 +775,12 @@ function randomEvents(G) {
     if (free.length) { const s = pick(G, free); s.nova = RI(G, 0, 10) * 10 + 10; }
   }
   for (const s of G.stars) if (s.nova >= 10 && s.nova < 210)
-    for (const p of G.players) if (p.alive && know(G, p, s.id).explored) msg(G, p.id, `Uh-oh! ${s.name} has started growing and is turning bright red in hue!`, { icon: 'm9036', star: s.id, quiet: true });
+    for (const p of G.players) {
+      const k = know(G, p, s.id);
+      if (!p.alive || !k.explored) continue;
+      if (!k.nova) msg(G, p.id, `Uh-oh! ${s.name} has started growing and is turning bright red in hue!`, { icon: 'm9036', star: s.id });
+      k.nova = s.nova;
+    }
   // the shock wave hits nearby colonies
   for (const sid in thrown) {
     const s = G.stars[sid]; if (s.owner < 0) continue;

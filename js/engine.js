@@ -235,6 +235,11 @@ function observe(G, p, sid) {
 }
 
 // ---------- messages ----------
+// report n from the original's STR# 6020 (js/data.js), filled like printf
+function report(n, ...args) {
+  let i = 0;
+  return ((DATA.reports || [])[n - 1] || '').replace(/%(\.\*)?[sd]|%%/g, (m) => m === '%%' ? '%' : String(args[i++] ?? ''));
+}
 function msg(G, pid, text, opt) {
   if (pid == null) return;
   const p = G.players[pid];
@@ -242,6 +247,136 @@ function msg(G, pid, text, opt) {
   G.inbox.push(Object.assign({ text }, opt || {}));
 }
 function fmt(n) { return Math.round(n).toLocaleString('en-US'); }
+
+// ---------- diplomacy: alliances, best buddies, gifts, surrender, chat ----------
+function setPact(G, pid, other, kind, on) {
+  if (!feature(G, 'alliances') || pid === other) return;
+  const p = G.players[pid], key = kind === 'buddy' ? 'buddies' : 'allies';
+  p[key] = (p[key] || []).filter(x => x !== other);
+  if (on) p[key].push(other);
+  if (kind === 'ally' && !on) p.buddies = (p.buddies || []).filter(x => x !== other);
+  if (kind === 'buddy' && on && !(p.allies || []).includes(other)) (p.allies = p.allies || []).push(other);
+}
+// up to three gifts a turn; they arrive at the end of the turn
+function give(G, from, to, money, metal) {
+  const p = G.players[from];
+  money = Math.max(0, Math.floor(money || 0)); metal = Math.max(0, Math.floor(metal || 0));
+  if (!feature(G, 'gifts') || from === to || !G.players[to] || !G.players[to].alive) return 'no';
+  if ((p.giftsThisTurn || 0) >= 3) return 'limit';
+  if (money > Math.max(0, p.savings) || metal > p.metal || (!money && !metal)) return 'short';
+  p.savings -= money; p.metal -= metal; p.giftsThisTurn = (p.giftsThisTurn || 0) + 1;
+  (G.gifts = G.gifts || []).push({ from, to, money, metal });
+  msg(G, from, money ? report(103, G.players[to].name, fmt(money)) : report(104, G.players[to].name, fmt(metal)), { icon: 'm9048', quiet: true });
+  return 'ok';
+}
+// surrender to a player, or to no one (to = -1); null cancels
+function surrender(G, pid, to) {
+  if (!feature(G, 'surrender')) return;
+  G.players[pid].surrenderTo = to;
+  if (to == null) msg(G, pid, (DATA.alerts || [])[2] || 'You are no longer surrendering to anyone.', { quiet: true });
+}
+function sendChat(G, from, to, text) {
+  if (!feature(G, 'chat')) return;
+  const p = G.players[from];
+  if (G.players[to].human) msg(G, to, report(55, p.name, text), { icon: p.human ? 'm9024' : 'bad' + p.face + '_' + (p.female ? 1 : 0), chat: true });
+  if (p.human) msg(G, from, report(71, G.players[to].name, text), { quiet: true });
+  (G.players[to].news = G.players[to].news || []).push({ type: 'chat', from, text });
+}
+function setArmageddon(G, pid, on) {
+  if (!feature(G, 'armageddon')) return;
+  const p = G.players[pid];
+  if (!!p.armageddon === !!on) return;
+  p.armageddon = !!on;
+  for (const q of G.players) if (q.id !== pid) msg(G, q.id, report(on ? 137 : 138, p.name), { icon: 'm9036' });
+}
+// surrender: fleets are dismantled; planets, savings and metal go to the winner (FUN_100742b0)
+function processSurrenders(G) {
+  G.handovers = [];
+  for (const p of G.players) {
+    if (p.surrenderTo == null || !p.alive || p.surrendered) continue;
+    const to = p.surrenderTo; p.surrenderTo = null;
+    const h = { from: p.id, to, money: Math.max(0, p.savings + Math.max(0, p.lastGross || 0)), metal: Math.max(0, p.metal), stars: colonies(G, p.id).map(s => s.id) };
+    G.fleets = G.fleets.filter(f => f.owner !== p.id);
+    for (const sid of h.stars) { const s = G.stars[sid]; s.owner = -1; s.pop = 0; }
+    p.savings = 0; p.metal = 0; p.surrendered = true; p.armageddon = false;
+    for (const q of G.players) {
+      if (q.id === p.id) msg(G, q.id, to >= 0 ? report(108, G.players[to].name) : report(107), { icon: 'p3040', sound: 7020 });
+      else msg(G, q.id, to >= 0 ? report(106, p.name, G.players[to].name) : report(105, p.name), { icon: 'm9036' });
+    }
+    if (to >= 0) G.handovers.push(h);
+  }
+}
+function processHandovers(G) {
+  for (const h of G.handovers || []) {
+    const q = G.players[h.to]; if (!q || !q.alive) continue;
+    const from = G.players[h.from].name;
+    q.savings += h.money; q.metal += h.metal;
+    msg(G, q.id, report(148, from, fmt(h.money)), { icon: 'm9048' });
+    msg(G, q.id, report(149, from, fmt(h.metal)), { icon: 'm9046' });
+    for (const sid of h.stars) {
+      const s = G.stars[sid];
+      if (s.owner >= 0 || G.fleets.some(f => f.star === sid && f.to == null && !isAllied(G, f.owner, q.id))) continue;
+      msg(G, q.id, report(150, from, s.name), { icon: 'm9031', star: sid });
+      s.owner = q.id; s.pop = 0.001; s.everProfit = false; s.oInc = -7501; s.oNew = true; s.oSink = 0;
+      observe(G, q, sid);
+    }
+  }
+  G.handovers = [];
+}
+function deliverGifts(G) {
+  for (const g of G.gifts || []) {
+    const q = G.players[g.to]; if (!q.alive) continue;
+    q.savings += g.money; q.metal += g.metal;
+    if (g.money) msg(G, q.id, report(101, G.players[g.from].name, fmt(g.money)), { icon: 'm9048' });
+    if (g.metal) msg(G, q.id, report(102, G.players[g.from].name, fmt(g.metal)), { icon: 'm9046' });
+    (q.news = q.news || []).push({ type: 'gift', from: g.from, money: g.money, metal: g.metal });
+  }
+  G.gifts = [];
+  for (const p of G.players) p.giftsThisTurn = 0;
+}
+// report changes in alliances and best-buddy pacts (FUN_100761c0)
+function pactNews(G) {
+  const prev = G.pactPrev || {};
+  const cur = {};
+  for (const p of G.players) cur[p.id] = { allies: (p.allies || []).slice(), buddies: (p.buddies || []).slice() };
+  const had = (snap, a, b, key) => !!(snap[a] && snap[a][key].includes(b));
+  for (const p of G.players) for (const q of G.players) {
+    if (p.id === q.id || !p.alive || !q.alive) continue;
+    const name = q.name;
+    const wasAlly = had(prev, p.id, q.id, 'allies') && had(prev, q.id, p.id, 'allies');
+    const isAlly = had(cur, p.id, q.id, 'allies') && had(cur, q.id, p.id, 'allies');
+    const wasBud = wasAlly && had(prev, p.id, q.id, 'buddies') && had(prev, q.id, p.id, 'buddies');
+    const isBud = isAlly && had(cur, p.id, q.id, 'buddies') && had(cur, q.id, p.id, 'buddies');
+    const say = (n) => msg(G, p.id, report(n, name), { icon: 'm9024', quiet: n === 88 || n === 94 ? false : true });
+    if (isAlly && !wasAlly) { say(92); (p.news = p.news || []).push({ type: 'allied', with: q.id }); }
+    else if (!isAlly && wasAlly) { say(93); (p.news = p.news || []).push({ type: 'broken', with: q.id }); }
+    else if (!isAlly) {
+      if (had(cur, q.id, p.id, 'allies') && !had(prev, q.id, p.id, 'allies')) say(88);
+      if (!had(cur, q.id, p.id, 'allies') && had(prev, q.id, p.id, 'allies')) say(89);
+      if (had(cur, p.id, q.id, 'allies') && !had(prev, p.id, q.id, 'allies')) say(90);
+      if (!had(cur, p.id, q.id, 'allies') && had(prev, p.id, q.id, 'allies')) say(91);
+    }
+    if (isBud && !wasBud) say(98);
+    else if (!isBud && wasBud && isAlly) say(99);
+    else if (isAlly && !isBud) {
+      if (had(cur, q.id, p.id, 'buddies') && !had(prev, q.id, p.id, 'buddies')) say(94);
+      if (!had(cur, q.id, p.id, 'buddies') && had(prev, q.id, p.id, 'buddies')) say(95);
+      if (had(cur, p.id, q.id, 'buddies') && !had(prev, p.id, q.id, 'buddies')) say(96);
+      if (!had(cur, p.id, q.id, 'buddies') && had(prev, p.id, q.id, 'buddies')) say(97);
+    }
+  }
+  G.pactPrev = cur;
+}
+// best buddies tell each other about the stars they explore (FUN_10078390)
+function shareMaps(G) {
+  for (const p of G.players) for (const q of G.players) {
+    if (p.id === q.id || !p.alive || !q.alive || !isBuddy(G, p.id, q.id)) continue;
+    for (const sid in q.know) {
+      const a = know(G, p, +sid), b = q.know[sid];
+      if (b.explored && b.seen > a.seen) Object.assign(a, b);
+    }
+  }
+}
 
 // ---------- galaxy creation ----------
 function newGame(opts) {
@@ -357,13 +492,17 @@ function endTurn(G) {
   G.inbox = [];
   for (const p of G.players) if (p.alive && !p.human) AI.turn(G, p);
   if (G.players[0].auto && G.players[0].alive) AI.turn(G, G.players[0]);
-  for (const p of G.players) if (p.alive) rs.economy(G, p);
+  if (feature(G, 'surrender')) processSurrenders(G);
+  for (const p of G.players) if (p.alive && !p.surrendered) rs.economy(G, p);
   departures(G);
   movement(G);
   resolveStars(G);
   rs.refuel(G);
   if (rs.afterMovement) for (const p of G.players) if (p.alive) rs.afterMovement(G, p);
   rs.randomEvents(G);
+  if (feature(G, 'gifts')) deliverGifts(G);
+  if (feature(G, 'surrender')) processHandovers(G);
+  if (feature(G, 'alliances')) { pactNews(G); shareMaps(G); }
   checkElimination(G);
   for (const p of G.players) { p.spentThisTurn = []; recordHistory(G, p); }
   for (const f of G.fleets) f.newThisTurn = false;
@@ -521,6 +660,14 @@ function checkElimination(G) {
     }
   }
   const alive = G.players.filter(p => p.alive);
+  // with alliances on, the game ends when every survivor is allied with every other
+  const allAllied = feature(G, 'alliances') && alive.length > 1 && alive.every(a => alive.every(b => isAllied(G, a.id, b.id)));
+  if (!G.over && allAllied) {
+    G.over = true; G.winner = alive.some(p => p.id === 0) ? 0 : alive[0].id; G.winners = alive.map(p => p.id);
+    for (const p of alive) if (p.id !== 0 && G.winner === 0) msg(G, 0, report(78, p.name), { icon: 'p3030' });
+    if (G.winner === 0) msg(G, 0, 'Wow! You won! You and your allies have conquered the galaxy. Congratulations!', { icon: 'p3030', sound: 7021, big: 'p3030' });
+    else msg(G, 0, `${alive.map(p => p.name).join(' and ')} have just won the game.`, { icon: 'p3040', sound: 7020, big: 'p3040' });
+  }
   if (!G.over && alive.length <= 1) {
     G.over = true; G.winner = alive.length ? alive[0].id : -1;
     if (G.winner === 0) msg(G, 0, 'Wow! You won! You have conquered the galaxy. Congratulations!', { icon: 'p3030', sound: 7021, big: 'p3030' });
@@ -553,7 +700,7 @@ const API = {
   newGame, endTurn, buildShips, unbuildShip, designLimits, designMin, designCost, shipCostNow, canBuildType, findOrCreateDesign, getDesign,
   fleetCount, fleetDesigns, fleetSpeed, fleetMaxRange, fleetHas, fleetKind, fleetLabel, orderMove, orderPath, cancelMove, canReach,
   newFleet, addShipsToStar, mergeFleets, splitFleet, scrapFleet, evacuate, colonies, seenG, seenT, maxPop, planetClass, planetIncome,
-  isFriend, isAllied, isBuddy, hasColonyAt, designName, hostileAt, know, observe, msg, starDist, dist, projected, techSum, score, save, load, borrowLimit, fmt,
+  isFriend, isAllied, isBuddy, hasColonyAt, designName, report, setPact, give, surrender, sendChat, setArmageddon, hostileAt, know, observe, msg, starDist, dist, projected, techSum, score, save, load, borrowLimit, fmt,
 };
 if (typeof module !== 'undefined') {
   module.exports = API;

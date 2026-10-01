@@ -108,8 +108,18 @@ function shipImgEl(d, h) {
 }
 
 // ---------- star appearance ----------
+// novas (Original rules): 10..209 = turning red (nova0-4); a star that has
+// gone supernova shows the explosion the turn it happens, then its wreck.
+function novaLook(k) {
+  const n = k.nova || 0;
+  if (n >= 10 && n < 210) return 'nova' + Math.min(4, Math.floor((n - 10) / 40));
+  if (n >= 210) return n >= G.year ? 'nova12' : 'nova18';
+  return null;
+}
 function starLook(sid) {
   const p = me(), s = G.stars[sid], k = HO.know(G, p, sid);
+  const nv = novaLook(s.owner === 0 ? s : k);
+  if (nv) return { base: nv };
   if (s.owner === 0) return { base: planetSprite(p, s, s.metal), hat: hatFor(p, s), metal: s.metal };
   if (!k.explored) {
     if (k.battleOnly) return { base: 'battle' };
@@ -204,6 +214,15 @@ function draw() {
     } else if (f.dest != null) {
       drawRoute(G.stars[f.star], G.stars[f.dest], HO.fleetSpeed(G, f), '#ffe066', 0, f.fuel >= 2 * HO.starDist(G, f.star, f.dest));
     }
+    // later legs of a multi-star route
+    if (f.path && f.path.length) {
+      let a = G.stars[f.to != null ? f.to : f.dest != null ? f.dest : f.star];
+      for (const sid of f.path) { const b = G.stars[sid]; drawRoute(a, b, HO.fleetSpeed(G, f), 'rgba(255,224,102,0.55)', 0); a = b; }
+    }
+  }
+  if (UI.route) {
+    const f = G.fleets.find(x => x.id === UI.route.fleet);
+    if (f) { let a = G.stars[f.star]; for (const sid of UI.route.stops) { const b = G.stars[sid]; drawRoute(a, b, HO.fleetSpeed(G, f), '#ffffff', 0); a = b; } }
   }
   // stars
   for (const s of G.stars) {
@@ -227,6 +246,7 @@ function draw() {
       cx.strokeStyle = sats.some(f => f.owner === 0) ? 'rgba(120,230,255,0.9)' : 'rgba(255,120,200,0.9)';
       cx.lineWidth = 1.5; cx.beginPath(); cx.ellipse(x, y, ps * 0.62, ps * 0.62, 0, 0, Math.PI * 2); cx.stroke();
     }
+    if (s.owner > 0 && HO.feature(G, 'alliances') && HO.isAllied(G, 0, s.owner) && HO.know(G, me(), s.id).explored && IMG.haloAlly) cx.drawImage(IMG.haloAlly, x - ps * 0.6, y + ps * 0.28, ps * 1.2, ps * 0.4);
     if (look.hat && IMG[look.hat]) { const h = ps * 1.18; cx.drawImage(IMG[look.hat], x - h / 2, y - h * 0.62, h, h * (IMG[look.hat].height / IMG[look.hat].width)); }
     // name
     if (UI.view.s > 18) {
@@ -352,6 +372,15 @@ function onUp(e) {
   if (!G || !d) return;
   const px = e.offsetX, py = e.offsetY;
   if (d.pan) {
+    if (!d.moved && UI.route) {
+      const s = starAt(px, py), f = G.fleets.find(x => x.id === UI.route.fleet);
+      if (s != null && f) {
+        const prev = UI.route.stops.length ? UI.route.stops[UI.route.stops.length - 1] : f.star;
+        if (s !== prev) { if (HO.starDist(G, prev, s) <= HO.fleetMaxRange(G, f)) UI.route.stops.push(s); else toast(`${G.stars[s].name} is too far for one hop.`); }
+        renderRouteBar(); draw();
+      }
+      return;
+    }
     if (!d.moved) { const s = starAt(px, py); UI.sel = s; UI.selFleet = null; renderPanel(); draw(); }
     return;
   }
@@ -539,10 +568,34 @@ function fleetRow(f, inbound) {
     const acts = el('div', { class: 'facts' });
     if (f.dest != null) acts.append(el('button', { class: 'quiet', onclick: (e) => { e.stopPropagation(); HO.cancelMove(G, f); Sound.play(4000); renderPanel(); draw(); } }, 'Stay here'));
     if (HO.fleetCount(f) > 1) acts.append(el('button', { class: 'quiet', onclick: (e) => { e.stopPropagation(); openSplit(f); } }, 'Split…'));
+    if (HO.feature(G, 'waypoints')) acts.append(el('button', { class: 'quiet', onclick: (e) => { e.stopPropagation(); startRoute(f); } }, 'Plan route…'));
+    if (HO.feature(G, 'stances')) acts.append(el('select', { 'aria-label': 'Battle stance', onclick: (e) => e.stopPropagation(), onchange: (e) => { f.stance = e.target.value; save(); } },
+      ...[['normal', 'Normal'], ['offensive', 'Offensive'], ['defensive', 'Defensive']].map(([v, t]) => el('option', { value: v, selected: (f.stance || 'normal') === v ? 'selected' : false }, t))));
+    if (HO.feature(G, 'lateArrival')) acts.append(el('label', { class: 'chk', onclick: (e) => e.stopPropagation() }, el('input', { type: 'checkbox', checked: f.delayed ? 'checked' : false, onchange: (e) => { f.delayed = e.target.checked; save(); } }), el('span', null, 'Arrive late')));
     acts.append(el('button', { class: 'quiet', onclick: (e) => { e.stopPropagation(); confirmBox(`Scrap this fleet for ${Math.round(HO.TYPES ? 75 : 75)}% of its metal?`, () => { const m = HO.scrapFleet(G, f); Sound.play(7003); toast(`Scrapped for ${fmt(m)} metal.`); UI.selFleet = null; renderPanel(); draw(); save(); }); } }, 'Scrap'));
     r.append(acts);
   }
+  if (sel && mine && inbound && HO.rules(G).scrapInSpace) {
+    r.append(el('div', { class: 'facts' }, el('button', { class: 'quiet', onclick: (e) => { e.stopPropagation(); confirmBox('Dismantle this fleet in hyperspace? Its metal will rain down on its destination as a meteor shower.', () => { HO.scrapFleet(G, f); Sound.play(7003); UI.selFleet = null; renderPanel(); draw(); save(); }); } }, 'Dismantle in hyperspace')));
+  }
+  if (mine && f.path && f.path.length) r.querySelector('.sub').append(' · then ' + f.path.map(x => G.stars[x].name).join(' → '));
   return r;
+}
+// multi-star route: click stars in order, then Done
+function startRoute(f) {
+  UI.route = { fleet: f.id, stops: [] };
+  toast('Click the stars to visit in order, then press Done.');
+  renderRouteBar();
+}
+function renderRouteBar() {
+  let bar = $('#routebar');
+  if (!UI.route) { if (bar) bar.remove(); return; }
+  if (!bar) { bar = el('div', { id: 'routebar', class: 'card' }); $('#mapwrap').append(bar); }
+  const f = G.fleets.find(x => x.id === UI.route.fleet);
+  bar.innerHTML = '';
+  bar.append(el('span', null, 'Route: ' + (UI.route.stops.length ? UI.route.stops.map(x => G.stars[x].name).join(' → ') : 'click stars…')),
+    el('button', { onclick: () => { if (f && UI.route.stops.length && HO.orderPath(G, f, UI.route.stops)) Sound.play(4001); else if (UI.route.stops.length) toast('The first stop is out of range.'); UI.route = null; renderRouteBar(); renderPanel(); draw(); save(); } }, 'Done'),
+    el('button', { class: 'quiet', onclick: () => { UI.route = null; renderRouteBar(); draw(); } }, 'Cancel'));
 }
 
 // ---------- messages ----------
@@ -784,17 +837,33 @@ function openBattle(bid) {
 // ----- players -----
 function openPlayers() {
   const rows = G.players.map(p => ({ p, sc: HO.score(G, p) })).sort((a, b) => b.sc - a.sc);
-  const t = el('table', { class: 'ptable' }, el('thead', null, el('tr', null, el('th', null, ''), el('th', null, 'Player'), el('th', null, 'Colonies seen'), el('th', null, 'Status'))));
+  const pacts = HO.feature(G, 'alliances');
+  const t = el('table', { class: 'ptable' }, el('thead', null, el('tr', null, el('th', null, ''), el('th', null, 'Player'), el('th', null, 'Colonies seen'), el('th', null, 'Status'),
+    pacts ? el('th', null, 'Ally') : null, pacts ? el('th', null, 'Best buddy') : null)));
   const tb = el('tbody');
+  const mine = me();
   for (const { p } of rows) {
     const face = p.human ? 'white0_' + (p.female ? 1 : 0) : 'bad' + p.face + '_' + (p.female ? 1 : 0);
     const seen = p.human ? HO.colonies(G, 0).length : G.stars.filter(s => { const k = HO.know(G, me(), s.id); return k.explored && k.owner === p.id; }).length;
-    tb.append(el('tr', { class: p.alive ? '' : 'dead' }, el('td', null, el('img', { src: A.img[face], alt: '', class: 'face' })), el('td', null, p.human ? p.name + ' (you)' : p.name), el('td', null, String(seen)), el('td', null, p.alive ? 'In the game' : 'Eliminated')));
+    let status = p.surrendered ? 'Surrendered' : p.alive ? 'In the game' : 'Eliminated';
+    if (pacts && p.id !== 0 && p.alive) {
+      const they = (p.allies || []).includes(0), we = (mine.allies || []).includes(p.id);
+      if (HO.isBuddy(G, 0, p.id)) status = 'Your best buddy';
+      else if (HO.isAllied(G, 0, p.id)) status = 'Your ally' + ((p.buddies || []).includes(0) ? ' (offers best buddies)' : '');
+      else if (they) status = 'Offers to ally';
+      else if (we) status = 'You offered to ally';
+    }
+    const chk = (kind, on) => el('input', { type: 'checkbox', checked: on ? 'checked' : false, 'aria-label': (kind === 'ally' ? 'Ally with ' : 'Best buddies with ') + p.name,
+      onchange: (e) => { HO.setPact(G, 0, p.id, kind, e.target.checked); save(); closeModal(); openPlayers(); } });
+    tb.append(el('tr', { class: p.alive ? '' : 'dead' }, el('td', null, el('img', { src: A.img[face], alt: '', class: 'face' })), el('td', null, p.human ? p.name + ' (you)' : p.name), el('td', null, String(seen)), el('td', null, status),
+      pacts ? el('td', null, p.id === 0 || !p.alive ? '' : chk('ally', (mine.allies || []).includes(p.id))) : null,
+      pacts ? el('td', null, p.id === 0 || !p.alive ? '' : chk('buddy', (mine.buddies || []).includes(p.id))) : null));
   }
   t.append(tb);
   const h = me().hist;
   const g = el('canvas', { width: 520, height: 160, class: 'graph' });
-  const body = el('div', null, t, el('h4', null, 'Your history'), g, el('p', { class: 'sub' }, 'Gold: total population. Blue: income. Green: tech.'));
+  const note = pacts ? el('p', { class: 'sub' }, 'An alliance or best-buddy pact starts when both sides tick it. Allies don’t fight each other, refuel at each other’s colonies, and win together if every survivor is allied. Best buddies also share what they explore.') : null;
+  const body = el('div', null, t, note, el('h4', null, 'Your history'), g, el('p', { class: 'sub' }, 'Gold: total population. Blue: income. Green: tech.'));
   modal('Players', body, { cls: 'mid' });
   const x = g.getContext('2d');
   x.fillStyle = '#0b0a1a'; x.fillRect(0, 0, 520, 160);
@@ -806,6 +875,65 @@ function openPlayers() {
     x.stroke();
   };
   plot('pop', '#ffd166'); plot('inc', '#7fd0ff'); plot('tech', '#7be37b');
+}
+const others = () => G.players.filter(p => p.id !== 0 && p.alive && !p.surrendered);
+function playerSelect(name) { return el('select', { name }, ...others().map(p => el('option', { value: p.id }, p.name))); }
+function openGive() {
+  if (!others().length) { toast(HO.DATA.alerts[6] || 'There is no one else to give anything to.'); return; }
+  const f = el('form', { class: 'newgame', onsubmit: (e) => {
+    e.preventDefault();
+    const d = Object.fromEntries(new FormData(f).entries());
+    const r = HO.give(G, 0, +d.to, +d.money || 0, +d.metal || 0);
+    if (r === 'limit') toast(HO.DATA.alerts[5] || 'Sorry, but you may only give 3 gifts per turn.');
+    else if (r === 'short') toast('You don’t have that much to give.');
+    else if (r === 'ok') { Sound.play(5000); closeModal(); renderPanel(); save(); }
+  } });
+  f.append(el('label', null, el('span', null, 'Give to'), playerSelect('to')),
+    el('label', null, el('span', null, `Money (you have ${money(Math.max(0, me().savings))})`), el('input', { name: 'money', type: 'number', min: 0, step: 1000, value: 0 })),
+    el('label', null, el('span', null, `Metal (you have ${fmt(me().metal)})`), el('input', { name: 'metal', type: 'number', min: 0, step: 100, value: 0 })),
+    el('p', { class: 'sub' }, 'Gifts arrive at the end of the turn. You can give three a turn.'),
+    el('div', { class: 'btns right' }, el('button', { type: 'submit' }, 'Give')));
+  modal('Give money or metal', f, { cls: 'mid' });
+}
+function openChat() {
+  if (!others().length) { toast(HO.DATA.alerts[6] || 'There is no one else to send something to.'); return; }
+  const lines = ['Thank You!', 'Sorry!', '#!$@*$&@•™!', 'I need money.', 'I need metal.', 'I like you.', 'I hate you.', 'Let’s be allies.'];
+  const f = el('form', { class: 'newgame', onsubmit: (e) => {
+    e.preventDefault();
+    const d = Object.fromEntries(new FormData(f).entries());
+    const text = (d.custom || '').trim() || d.line;
+    HO.sendChat(G, 0, +d.to, text); Sound.play(5000); closeModal(); save();
+  } });
+  f.append(el('label', null, el('span', null, 'Send to'), playerSelect('to')),
+    el('label', null, el('span', null, 'Say'), el('select', { name: 'line' }, ...lines.map(l => el('option', { value: l }, l)))),
+    el('label', null, el('span', null, 'Or type your own'), el('input', { name: 'custom', maxlength: 80 })),
+    el('div', { class: 'btns right' }, el('button', { type: 'submit' }, 'Send')));
+  modal('Send a message', f, { cls: 'mid' });
+}
+function openDip() {
+  const p = me();
+  const f = el('form', { class: 'newgame', onsubmit: (e) => { e.preventDefault(); p.dip = +new FormData(f).get('dip'); closeModal(); renderPanel(); save(); } });
+  const out = el('b', null, (p.dip || 0) + '%');
+  f.append(el('label', null, el('span', null, 'Each turn, move this share of your savings into the budget'),
+    el('input', { name: 'dip', type: 'range', min: 0, max: 100, step: 5, value: p.dip || 0, oninput: (e) => { out.textContent = e.target.value + '%'; } }), out),
+    el('div', { class: 'btns right' }, el('button', { type: 'submit' }, 'OK')));
+  modal('Dip into savings', f, { cls: 'small' });
+}
+function openSurrender() {
+  const p = me();
+  if (p.surrenderTo != null) { confirmBox('You are surrendering at the end of this turn. Take it back?', () => { HO.surrender(G, 0, null); save(); }); return; }
+  const sel = el('select', { name: 'to' }, ...others().map(q => el('option', { value: q.id }, q.name)), el('option', { value: -1 }, 'No one'));
+  const f = el('form', { class: 'newgame', onsubmit: (e) => { e.preventDefault(); HO.surrender(G, 0, +sel.value); closeModal(); save(); toast('You will surrender at the end of this turn.'); } });
+  f.append(el('p', null, HO.DATA.alerts[1] || 'Do you really want to surrender?'),
+    el('label', null, el('span', null, 'Surrender to'), sel),
+    el('p', { class: 'sub' }, 'Your fleets are dismantled. Whoever you surrender to gets your savings, your metal, and your planets.'),
+    el('div', { class: 'btns right' }, el('button', { type: 'button', class: 'quiet', onclick: closeModal }, 'Cancel'), el('button', { type: 'submit' }, 'Surrender')));
+  modal('Surrender', f, { cls: 'mid' });
+}
+function toggleArmageddon() {
+  const p = me();
+  if (p.armageddon) { HO.setArmageddon(G, 0, false); toast(HO.DATA.alerts[4] || 'Whew!'); save(); return; }
+  confirmBox(HO.DATA.alerts[3] || 'Are you sure you want to destroy half the galaxy?', () => { HO.setArmageddon(G, 0, true); save(); toast('The armageddon device is on. It fires when every human player has turned theirs on.'); });
 }
 
 // ----- help -----
@@ -881,6 +1009,13 @@ function setupMenus() {
   const menus = {
     Game: [['New game…', newGameDialog], ['Players and history', () => G && openPlayers()], ['Auto-play this turn', () => { if (!G || G.over) return; me().auto = true; doEndTurn(); me().auto = false; }], ['-'], ['Quit to title', () => { save(); Sound.play(7002); G = null; renderPanel(); draw(); $('#panel').innerHTML = ''; $('#msg').innerHTML = ''; titleScreen(); }]],
     Ships: [['Build ships at selected colony…', () => { if (G && UI.sel != null && G.stars[UI.sel].owner === 0) openBuild(UI.sel); else toast('Select one of your colonies first.'); }], ['Review last battle', () => { const b = G && [...G.battles].reverse().find(b => b.sides.includes(0)); if (b) openBattle(b.id); else toast('No battles yet.'); }], ['Next fleet', nextFleet]],
+    Galaxy: [['Players and alliances…', () => G && openPlayers()],
+      ['Give money or metal…', () => G && !G.over && openGive(), 'gifts'],
+      ['Send a message…', () => G && !G.over && openChat(), 'chat'],
+      ['Dip into savings…', () => G && !G.over && openDip(), 'dip'],
+      ['-'],
+      [() => (G && me().surrenderTo != null ? 'Take back surrender' : 'Surrender…'), () => G && !G.over && openSurrender(), 'surrender'],
+      [() => (G && me().armageddon ? 'Turn off the armageddon device' : 'Armageddon device…'), () => G && !G.over && toggleArmageddon(), 'armageddon']],
     View: [['Zoom in', () => zoomAt(mapW / 2, mapH / 2, 1.3)], ['Zoom out', () => zoomAt(mapW / 2, mapH / 2, 1 / 1.3)], ['Fit galaxy', () => { UI.fitted = false; fit(); draw(); }], ['-'], [() => (Sound.on ? 'Turn sound off' : 'Turn sound on'), () => { Sound.on = !Sound.on; savePrefs(); }], [() => (Sound.music ? 'Turn theme music off' : 'Turn theme music on'), () => { Sound.music = !Sound.music; savePrefs(); if (Sound.music && !$('#titlescreen').hidden) Sound.startTheme(); else Sound.stopTheme(); }]],
     Help: [['How to play', openHelp]],
   };
@@ -894,8 +1029,9 @@ function setupMenus() {
       document.querySelectorAll('.dropdown.open').forEach(d => d.classList.remove('open'));
       if (open) return;
       dd.innerHTML = '';
-      for (const [label, fn] of menus[name]) {
+      for (const [label, fn, feat] of menus[name]) {
         if (label === '-') { dd.append(el('hr')); continue; }
+        if (feat && !(G && HO.feature(G, feat))) continue;
         dd.append(el('button', { role: 'menuitem', onclick: () => { dd.classList.remove('open'); fn(); } }, typeof label === 'function' ? label() : label));
       }
       dd.classList.add('open');

@@ -147,3 +147,7 @@ button:focus-visible { outline: 2px solid var(--hi); outline-offset: 1px; }
 .newgame .opts { grid-column: 1 / -1; display: flex; gap: 14px; flex-wrap: wrap; border: 1px solid #999; padding: 4px 8px; }
 .newgame .opts legend { color: var(--sub); }
 .newgame label.chk { display: flex; gap: 6px; align-items: center; }
+
+.facts select { font: inherit; }
+.facts label.chk { display: flex; gap: 4px; align-items: center; }
+#routebar { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; align-items: center; padding: 6px 10px; z-index: 5; }
