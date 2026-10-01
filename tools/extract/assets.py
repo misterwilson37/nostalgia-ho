@@ -57,6 +57,7 @@ for bi,by in ((0,1),(4,448)):
 # fixed: block offsets inside blocks (rows at 1,14,27,40)
 ships=Image.open(I+'11000.png').convert('RGBA');mk=Image.open(I+'11001.png').convert('L').point(lambda v:255 if v<128 else 0)
 ships.putalpha(mk)
+put("ships",ships)  # whole sheet: the game builds ships from it (see js/ui.js shipPic)
 R=[(0,45),(45,82),(82,125),(125,166)]
 for r in range(4):
     for c in range(30):

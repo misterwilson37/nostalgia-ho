@@ -84,29 +84,90 @@ const UI = {
 };
 
 // ---------- ship pictures ----------
+// Built the way the original builds them (FUN_100ad750 / FUN_100af8e0), from
+// the ship sheet (PICT 11000, assets/sprites/ships.png). The sheet has four
+// rows of 30 parts, 41 pixels apart: engines (picked by Range + Speed - 8),
+// hulls (Shields), weapon noses (Weapons) and satellite orbs (Weapons).
+// Tankers, colony ships and dreadnoughts swap the hull for a body of their
+// own; a few designs get a whole picture of their own instead. Ships face
+// right. Rectangles are [x1, y1, x2, y2] on the sheet.
+const SHIP_CODE = { scout: 0, dread: 1, fighter: 2, decoy: 2, tanker: 3, colony: 4, satellite: 5, bio: 6 };
+function specialShip(t, d) {
+  const { R, V, W, S, M } = d;
+  if (t === 6) return W < 7 ? [0, 320, 120, 360] : (W > 12 && W < 16) ? [692, 279, 892, 339] : [692, 165, 876, 221];
+  if (t === 0 && W === 1) return [270, 236, 366, 289];
+  if (t === 1 && W > 30) return [481, 165, 691, 255];
+  if (t === 1 && W === 8 && R > 10 && R < 14 && M > 1) return [270, 165, 480, 235];
+  if (t === 2 && W < 9 && V > 5) return [692, 222, 890, 278];
+  if (t === 2 && W === 12 && S < 11) return [69, 254, 269, 314];
+  if (t === 5 && W === 5 && S > 3 && S < 7) return [120, 320, 160, 360];
+  if (t === 5 && W === 15 && S > 13 && S < 17) return [161, 320, 201, 360];
+  if (t === 5 && W < 9 && S > 9 && S < 15) return [202, 320, 242, 360];
+  if (t === 5 && S < 5 && W > 15 && W < 21) return [243, 320, 283, 360];
+  return null;
+}
+function shipParts(d) {
+  const t = SHIP_CODE[d.type] != null ? SHIP_CODE[d.type] : 2;
+  const col = (v) => 41 * Math.max(0, Math.min(29, v)) + 1;
+  const part = (v, y) => [col(v), y, col(v) + 40, y + 40];
+  const ops = []; // [source rect, destination rect around the ship's centre]
+  const sp = specialShip(t, d);
+  if (sp) {
+    const w = sp[2] - sp[0], h = sp[3] - sp[1], x = -Math.trunc(w / 2), y = -Math.trunc(h / 2);
+    ops.push([sp, [x, y, x + w, y + h]]);
+  } else if (t === 5) ops.push([part(d.W - 1, 124), [-20, -20, 20, 20]]);
+  else {
+    const eng = part((d.R || 0) + (d.V || 0) - 8, 1), nose = part(d.W - 1, 83);
+    if (t === 1) {
+      ops.push([[138, 165, 269, 253], [-65, -44, 66, 44]]);
+      for (const r of [[52, -42, 92, -2], [52, 11, 92, 51], [65, -17, 105, 23]]) ops.push([nose, r]);
+      for (const r of [[-91, -45, -51, -5], [-91, 8, -51, 48], [-104, -20, -64, 20]]) ops.push([eng, r]);
+    } else {
+      const body = t === 4 ? [[67, 165, 137, 221], [-35, -28, 35, 28]]
+        : t === 3 ? [[1, 165, 66, 209], [-32, -22, 33, 22]]
+        : [part(d.S - 1, 42), [-20, -20, 20, 20]];
+      const [l, r] = [body[1][0], body[1][2]];
+      ops.push(body, [nose, [r, -20, r + 40, 20]], [eng, [l - 40, -20, l, 20]]);
+    }
+  }
+  return { t, ops };
+}
 const shipCache = {};
-function shipPic(d) {
-  const key = d.type + ':' + d.R + ':' + d.V + ':' + d.W + ':' + d.S;
+function shipPic(d, owner) {
+  const p = G && G.players[owner == null ? 0 : owner];
+  // a design whose weapons and shields are both more than 3 levels behind
+  // its owner's research is drawn rusty (design flag +0xd, FUN_10074c10)
+  const rusty = !!(p && p.tech && d.type !== 'bio' && p.tech.weapons - d.W > 3 && p.tech.shields - d.S > 3);
+  const key = [d.type, d.R, d.V, d.W, d.S, d.M, rusty].join(':');
   if (shipCache[key]) return shipCache[key];
+  const { ops } = shipParts(d);
+  let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+  for (const [, r] of ops) { x0 = Math.min(x0, r[0]); y0 = Math.min(y0, r[1]); x1 = Math.max(x1, r[2]); y1 = Math.max(y1, r[3]); }
   const c = document.createElement('canvas');
-  const cl = (v) => Math.max(0, Math.min(29, v - 1));
-  if (d.type === 'scout' || d.type === 'fighter') {
-    c.width = 104; c.height = 45;
-    const x = c.getContext('2d');
-    x.drawImage(IMG['part0_' + cl(d.V)], 0, 0);
-    x.drawImage(IMG['part1_' + cl(Math.round(d.R * (d.type === 'scout' ? 0.6 : 1)))], 30, 4);
-    x.drawImage(IMG['part2_' + cl(d.W)], 62, 1);
-  } else {
-    const k = { dread: 'dread', colony: 'colony', satellite: 'satellite', tanker: 'tanker', decoy: 'decoy', bio: 'bio' + Math.min(3, Math.floor((d.W - 1) / 3)) }[d.type] || 'colony';
-    const im = IMG[k];
-    c.width = im.width; c.height = im.height;
-    c.getContext('2d').drawImage(im, 0, 0);
+  c.width = x1 - x0; c.height = y1 - y0;
+  const x = c.getContext('2d'), sh = IMG.ships;
+  for (const [s, r] of ops) {
+    const w = s[2] - s[0], h = s[3] - s[1];
+    if (!rusty) { x.drawImage(sh, s[0], s[1], w, h, r[0] - x0, r[1] - y0, r[2] - r[0], r[3] - r[1]); continue; }
+    const t = document.createElement('canvas'); t.width = w; t.height = h;
+    const tx = t.getContext('2d');
+    tx.drawImage(sh, s[0], s[1], w, h, 0, 0, w, h);
+    tx.globalCompositeOperation = 'source-atop';
+    tx.drawImage(sh, 904, 169, w, h, 0, 0, w, h);
+    x.drawImage(t, 0, 0, w, h, r[0] - x0, r[1] - y0, r[2] - r[0], r[3] - r[1]);
   }
   shipCache[key] = c;
   return c;
 }
-function shipImgEl(d, h) {
-  const c = shipPic(d);
+// what the original draws for the planet itself in a battle
+function planetBattlePic() {
+  if (shipCache.planet) return shipCache.planet;
+  const c = document.createElement('canvas'); c.width = 62; c.height = 62;
+  c.getContext('2d').drawImage(IMG.ships, 1, 222, 62, 62, 0, 0, 62, 62);
+  return (shipCache.planet = c);
+}
+function shipImgEl(d, h, owner) {
+  const c = shipPic(d, owner);
   const i = new Image(); i.src = c.toDataURL(); i.style.height = (h || 28) + 'px'; i.alt = HO.TYPES[d.type].name; i.className = 'shippic';
   return i;
 }
@@ -749,7 +810,7 @@ function openSplit(f) {
   for (const k in f.ships) {
     const d = HO.getDesign(G, f.owner, +k); take[k] = 0;
     const n = el('b', null, '0');
-    body.append(el('div', { class: 'drow' }, shipImgEl(d, 22), el('div', { class: 'dtext' }, `${d.name} (${f.ships[k]})`),
+    body.append(el('div', { class: 'drow' }, shipImgEl(d, 22, f.owner), el('div', { class: 'dtext' }, `${d.name} (${f.ships[k]})`),
       el('div', { class: 'pm' }, el('button', { class: 'quiet', onclick: () => { take[k] = Math.max(0, take[k] - 1); n.textContent = take[k]; } }, '−'), n,
         el('button', { class: 'quiet', onclick: () => { take[k] = Math.min(f.ships[k], take[k] + 1); n.textContent = take[k]; } }, '+'))));
   }
@@ -801,14 +862,14 @@ function openBattle(bid) {
     if (pl.x >= 0) {
       const s = G.stars[b.star]; const p = me();
       x.globalAlpha = pop > 0.01 ? 1 : 0.3;
-      x.drawImage(IMG[planetSprite(p, s, 1)], pl.x - 22, pl.y - 22, 44, 44);
+      x.drawImage(planetBattlePic(), pl.x - 24, pl.y - 24, 48, 48);
       x.globalAlpha = 1;
       x.fillStyle = '#ccc'; x.font = '11px Geneva, Verdana, sans-serif'; x.fillText(`pop ${fmt(pop * 1e6)}`, pl.x, pl.y + 36);
     }
     b.start.forEach((u, i) => {
       if (!alive[i]) return;
       const d = HO.getDesign(G, u.o, u.did) || { type: u.t, R: 1, V: 1, W: 1, S: 1 };
-      const im = shipPic(d); const P = pos[i];
+      const im = shipPic(d, u.o); const P = pos[i];
       const sc = Math.min(P.w / im.width, P.h / im.height) * 0.92;
       x.save(); x.translate(P.x + P.w / 2, P.y + P.h / 2); if (P.mirror) x.scale(-1, 1);
       x.drawImage(im, -im.width * sc / 2, -im.height * sc / 2, im.width * sc, im.height * sc); x.restore();
