@@ -56,7 +56,7 @@ for r in range(8):
 for r in range(4):
     for c in range(2):
         put(f'white{r}_{c}',keywhite(sheet.crop((793+52*c,233+52*r,843+52*c,283+52*r)),245))
-for bi,by in ((0,1),(4,448)):
+for bi,by in ((0,1),(1,61),(2,121),(3,181),(4,448)):  # 1 = low on fuel or empty colony ship, 2 = old weapons, 3 = both, 4 = enemy
     for row in range(4):
         for col in range(7):
             put(f'dot{bi}_{col}_{row}',keywhite(sheet.crop((802+13*col,by+13*row+(0 if by==1 else 0),813+13*col,by+11+13*row)),225))

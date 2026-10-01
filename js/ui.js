@@ -351,12 +351,8 @@ function draw() {
     if (f.owner !== 0 || f.to == null) continue;
     const a = G.stars[f.from], b = G.stars[f.to], t = Math.min(1, f.prog / f.dist);
     const x = sx(a.x + (b.x - a.x) * t), y = sy(a.y + (b.y - a.y) * t);
-    const kind = HO.fleetKind(G, f), T = HO.TYPES[kind];
-    const im = IMG['dot0_' + T.dot + '_' + countBucket(HO.fleetCount(f))];
-    const w = 14;
-    cx.fillStyle = '#f4f7ff'; cx.beginPath(); cx.roundRect(x - w / 2 - 2, y - w / 2 - 2, w + 4, w + 4, 3); cx.fill();
-    cx.drawImage(im, x - w / 2, y - w / 2, w, w);
-    UI.dots.push({ x: x - w / 2, y: y - w / 2, w, h: w, f: f.id, transit: true });
+    const w = 14, box = drawMarkers(f, x - w / 2, y - w / 2, w, 1);
+    UI.dots.push({ x: box.x, y: y - w / 2, w: box.w, h: w, f: f.id, transit: true });
   }
   // dragging
   if (UI.drag && UI.drag.fleet != null && UI.drag.moved) {
@@ -391,6 +387,38 @@ function visibleTo(sid) {
   if (G.stars[sid].owner === 0) return true;
   return G.fleets.some(f => f.owner === 0 && f.star === sid && f.to == null);
 }
+// Fleet markers (FUN_10091640): one small square per design in the fleet,
+// side by side; the picture's column is the ship type and its row the
+// number of ships (1, 2-10, 11-30, 31+). Your own markers come in four
+// sets: plain, striped (the fleet is not fully fuelled, or a colony ship is
+// empty), faded (that design's weapons are more than 3 levels behind
+// yours) and both; everyone else's are pink.
+function fleetMarkers(f) {
+  const p = G.players[f.owner], mine = f.owner === 0;
+  const low = !f.sat && f.fuel < HO.fleetMaxRange(G, f) - 1e-9;
+  const keep = !HO.rules(G).colonyShipUsedUp;
+  const out = [];
+  for (const k of Object.keys(f.ships)) {
+    const n = f.ships[k], d = HO.getDesign(G, f.owner, +k);
+    if (!d || !(n > 0)) continue;
+    let set = 4;
+    if (mine) {
+      set = 0;
+      if (low || (keep && d.type === 'colony' && !(f.colonists > 0))) set += 1;
+      if (p.tech && d.W + 3 < p.tech.weapons) set += 2;
+    }
+    out.push(IMG['dot' + set + '_' + HO.TYPES[d.type].dot + '_' + countBucket(n)]);
+  }
+  return out;
+}
+function drawMarkers(f, dx, dy, w, dir) {
+  const ims = fleetMarkers(f), n = Math.max(1, ims.length), span = n * w + (n - 1) * 2;
+  const left = dir < 0 ? dx + w - span : dx;
+  cx.fillStyle = UI.selFleet === f.id ? '#ffe066' : (f.owner === 0 ? '#f4f7ff' : '#ffe3f1');
+  cx.beginPath(); cx.roundRect(left - 2, dy - 2, span + 4, w + 4, 3); cx.fill();
+  ims.forEach((im, i) => { if (im) cx.drawImage(im, dir < 0 ? dx - i * (w + 2) : dx + i * (w + 2), dy, w, w); });
+  return { x: left, w: span };
+}
 function drawDots(s, x, y, ps) {
   const here = G.fleets.filter(f => f.star === s.id && f.to == null && (f.owner === 0 || visibleTo(s.id)));
   if (!here.length) return;
@@ -398,16 +426,12 @@ function drawDots(s, x, y, ps) {
   let ri = 0, li = 0;
   for (const f of here) {
     const mine = f.owner === 0;
-    const kind = f.sat ? 'satellite' : HO.fleetKind(G, f);
-    const im = IMG['dot' + (mine ? 0 : 4) + '_' + HO.TYPES[kind].dot + '_' + countBucket(HO.fleetCount(f))];
-    let dx, dy;
-    if (f.sat) { dx = x - ps / 2 - w - 1; dy = y - ps / 2 + li * (w + 2); li++; }
+    let dx, dy, dir = 1;
+    if (f.sat) { dx = x - ps / 2 - w - 1; dy = y - ps / 2 + li * (w + 2); li++; dir = -1; }
     else { dx = x + ps / 2 + 1; dy = y - ps / 2 + ri * (w + 2); ri++; }
-    cx.fillStyle = UI.selFleet === f.id ? '#ffe066' : (mine ? '#f4f7ff' : '#ffe3f1');
-    cx.beginPath(); cx.roundRect(dx - 2, dy - 2, w + 4, w + 4, 3); cx.fill();
-    cx.drawImage(im, dx, dy, w, w);
-    if (f.dest != null && mine) { cx.fillStyle = '#ffe066'; cx.fillRect(dx + w - 4, dy, 4, 4); }
-    UI.dots.push({ x: dx, y: dy, w, h: w, f: f.id, star: s.id, mine, sat: f.sat });
+    const box = drawMarkers(f, dx, dy, w, dir);
+    if (f.dest != null && mine) { cx.fillStyle = '#ffe066'; cx.fillRect(box.x + box.w - 4, dy, 4, 4); }
+    UI.dots.push({ x: box.x, y: dy, w: box.w, h: w, f: f.id, star: s.id, mine, sat: f.sat });
   }
 }
 function drawRoute(a, b, speed, color, frac, round) {
