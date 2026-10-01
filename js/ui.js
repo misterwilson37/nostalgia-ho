@@ -713,6 +713,33 @@ function renderRouteBar() {
 }
 
 // ---------- messages ----------
+// Each report line in the original comes with its own picture and sound
+// (HO.DATA.reportLook). A message whose text starts like one of those lines
+// gets that line's picture and sound; longer lines are tried first so
+// "has run out of metal. You should probably evacuate it." wins over
+// "has run out of metal."
+let LOOKS = null;
+function originalLook(m) {
+  if (!LOOKS) {
+    const R = HO.DATA.reports || [], L = HO.DATA.reportLook || [];
+    const esc = (t) => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    LOOKS = R.map((t, i) => ({ i, len: t.length, look: L[i],
+      re: new RegExp('^' + t.split(/(%(?:\.\*|\d*\.?\d*)?[sd]|%%)/).map((x, j) => j % 2 ? (x === '%%' ? '%' : '(.*?)') : esc(x)).join('')) }))
+      .filter(o => o.look && o.len > 8).sort((a, b) => b.len - a.len);
+  }
+  const t = String(m.text || '');
+  const hit = LOOKS.find(o => o.re.test(t));
+  if (!hit) return null;
+  let [pic, snd] = hit.look;
+  const id = 1000 + hit.i;
+  if (snd === 'explore') snd = m.explore === 'good' ? 6000 : m.explore === 'mediocre' ? 6002 : 6001;
+  if (snd === 'elim') { const who = G.players.find(q => t.startsWith(q.name + ' ')); snd = who && HO.isAllied(G, 0, who.id) ? 2001 : 7021; }
+  let icon;
+  if (pic === 'tech') { const k = ['Range', 'Speed', 'Weapons', 'Shield', 'Miniaturization'].findIndex(n => t.includes(' ' + n + ' ')); icon = k >= 0 ? 'm' + (9039 + k) : m.icon; }
+  else if (pic === 'face') icon = m.icon;
+  else icon = pic >= 0 ? 'm' + (9000 + pic) : null;
+  return { id, icon: icon && A.img[icon] ? icon : m.icon, sound: snd };
+}
 function showMessages() {
   UI.inbox = G.inbox.slice(); UI.msgIdx = 0;
   renderMsg();
@@ -728,12 +755,14 @@ function renderMsg() {
   if (UI.msgIdx < UI.inbox.length) {
     const m = UI.inbox[UI.msgIdx];
     if (Prefs.important && m.quiet && !m.battle && UI.msgIdx < UI.inbox.length - 1) { UI.msgIdx++; return renderMsg(); }
-    if (m.sound) Sound.play(m.sound);
+    const look = originalLook(m);
+    const sound = look ? look.sound : m.sound, icon = look ? look.icon : m.icon;
+    if (sound) Sound.play(sound);
     if (Prefs.review && m.battle && !m._reviewed) { m._reviewed = true; setTimeout(() => openBattle(m.battle), 50); }
     const card = el('div', { class: 'card', tabindex: 0, role: 'button', 'aria-label': 'Next message' });
     const big = m.big || (m.jpg != null ? 'jpg' : null);
     if (m.jpg != null) card.append(el('img', { class: 'jpg', src: A.jpg[m.jpg], alt: '' }));
-    else if (m.icon && A.img[m.icon]) card.append(el('img', { class: m.big ? 'bigicon' : 'icon', src: A.img[m.icon], alt: '' }));
+    else if (icon && A.img[icon]) card.append(el('img', { class: m.big ? 'bigicon' : 'icon', src: A.img[icon], alt: '' }));
     const body = el('div', { class: 'mtext' }, el('p', null, degText(m.text)));
     const extra = el('div', { class: 'mbtns' });
     if (m.battle) extra.append(el('button', { class: 'quiet', onclick: (e) => { e.stopPropagation(); openBattle(m.battle); } }, 'Review battle'));

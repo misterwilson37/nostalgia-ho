@@ -596,7 +596,7 @@ function exploreMsg(G, p, s) {
   const snd = quality === 'good' ? 6000 : quality === 'mediocre' ? 6002 : 6001;
   const icon = quality === 'good' ? 'm9027' : quality === 'mediocre' ? 'm9028' : 'm9029';
   const gStr = gs.toFixed(2) + 'G';
-  msg(G, p.id, `You have explored ${s.name}. Gravity: ${gStr}. Temp: ${Math.round(ts)}°. Metal: ${fmt(s.metal)}.`, { icon, sound: snd, star: s.id, explore: quality, jpg: (s.id * 7) % 25 });
+  msg(G, p.id, `You have explored ${s.name}. Gravity: ${gStr}. Temp: ${Math.round(ts)}°. Metal: ${fmt(s.metal)}.`, { icon, sound: snd, star: s.id, explore: quality });
 }
 
 // ---------- battles ----------

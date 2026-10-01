@@ -527,10 +527,23 @@ function settle(G, p, s, f) {
   const D = Math.max(1, disposable(G, p).D);
   p.budget.col[s.id] = D > 20000 ? 7500 / D : 0;
 }
+// FUN_10072100: the star's rating, 0..20, from how close its gravity and
+// temperature are to yours (+1 for more than 10,000 metal). 0 means it can
+// never be profitable. The exploration sound is the "good" one at 15 or
+// more, the "so-so" one from 1 to 14 and the "bad" one at 0 (FUN_1009d2e8).
+function starRating(p, s) {
+  const { gR, dT } = hab(p, s);
+  let r = 0;
+  if (gR <= 256 && (gR <= 200 || dT <= 500)) {
+    const a = trunc(gR / 10), b = trunc(dT / 330);
+    r = trunc(Math.max(23, 100 - (a - 10) * (a - 9)) * Math.max(40, 100 - b * (b + 1)) / 527) + 2;
+  }
+  if (s.metal > 10000) r = Math.min(20, r + 1);
+  return r;
+}
 function exploreQuality(G, p, s) {
-  const h = hab(p, s);
-  const m = Math.max(10, 500000 - 12 * h.H);
-  return h.gR > 256 ? 'bad' : m > 300000 ? 'good' : m > 100000 ? 'mediocre' : 'bad';
+  const r = starRating(p, s);
+  return r >= 15 ? 'good' : r > 0 ? 'mediocre' : 'bad';
 }
 // what the computers remember about a star
 function observeHook(G, p, s, k) {
