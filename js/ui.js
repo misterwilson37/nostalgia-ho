@@ -185,21 +185,50 @@ function starLook(sid) {
   const p = me(), s = G.stars[sid], k = HO.know(G, p, sid);
   const nv = novaLook(s.owner === 0 ? s : k);
   if (nv) return { base: nv };
-  if (s.owner === 0) return { base: planetSprite(p, s, s.metal), hat: hatFor(p, s), metal: s.metal };
+  if (s.owner === 0) return { base: planetSprite(p, s, s.metal), pic: planetPic(p, s, s.metal), hat: hatFor(p, s) };
   if (!k.explored) {
     if (k.battleOnly) return { base: 'battle' };
     const coming = G.fleets.some(f => f.owner === 0 && (f.to === sid || f.dest === sid));
     return { base: coming ? 'soon' : 'unknown' };
   }
-  const look = { base: planetSprite(p, { g: k.g, t: k.t, id: sid }, k.metal), metal: k.metal };
+  const look = { base: planetSprite(p, k, k.metal), pic: planetPic(p, k, k.metal) };
   if (k.owner > 0 && G.players[k.owner]) { const o = G.players[k.owner]; look.hat = 'bad' + o.face + '_' + (o.female ? 1 : 0); }
   return look;
 }
-function planetSprite(p, s, metal) {
-  const gs = s.g / p.homeG;
-  let row;
-  if (gs > 2.5) row = 0; else if (gs > 2.0) row = 1; else if (gs >= 0.5) row = 2 + (s.id % 3); else if (gs >= 0.4) row = 5; else row = 6;
-  return (metal <= 0 ? 'mined' : 'planet') + row;
+// The original (FUN_10090170) picks one of seven planet sizes from the
+// planet's gravity as a percentage of your home gravity, uses the reddish
+// "Mined" picture once fewer than 100 units of metal are left, and lays the
+// metal, heat and ice pictures over it, each cut to the planet's shape.
+function planetRow(p, g) {
+  const pct = Math.trunc(Math.round(g * 100) * 100 / Math.max(1, Math.round(p.homeG * 100)));
+  return [252, 201, 126, 76, 51, 39].filter(v => pct < v).length;
+}
+function planetSprite(p, s, metal) { return (metal < 100 ? 'mined' : 'planet') + planetRow(p, s.g); }
+const planetCache = {};
+function planetPic(p, s, metal) {
+  const row = planetRow(p, s.g);
+  const T = Math.round(s.t * 10) - Math.round(p.homeT * 10) + 720; // 72.0 = just right
+  const heat = T > 770 ? Math.min(100, Math.trunc((T - 770) / 30)) : 0;
+  const cap = T < 650 ? Math.min(20, Math.trunc((650 - T) / 150)) + row : 0;
+  const ml = metal < 100 ? -1 : [1000, 2500, 5000, 10000].filter(v => metal >= v).length;
+  const key = [row, ml, heat, cap].join(':');
+  if (planetCache[key]) return planetCache[key];
+  const c = document.createElement('canvas'); c.width = c.height = 40;
+  const x = c.getContext('2d');
+  x.drawImage(IMG[(ml < 0 ? 'mined' : 'planet') + row], 0, 0, 40, 40);
+  const masked = (fn) => { // draw through the planet-shaped mask
+    const t = document.createElement('canvas'); t.width = t.height = 40;
+    const tx = t.getContext('2d'); fn(tx);
+    tx.globalCompositeOperation = 'destination-in'; tx.drawImage(IMG['pmask' + row], 0, 0);
+    x.drawImage(t, 0, 0);
+  };
+  if (heat) masked(tx => { tx.globalAlpha = heat / 100; tx.drawImage(IMG.hot, 0, 0); });
+  if (cap) masked(tx => { // polar caps grow from the top and bottom as it gets colder
+    tx.drawImage(IMG.icecap, 0, 0, 40, 20, 0, cap - 20, 40, 20);
+    tx.drawImage(IMG.icecap, 0, 20, 40, 20, 0, 40 - cap, 40, 20);
+  });
+  if (ml >= 0) masked(tx => tx.drawImage(IMG['metal' + ml], 0, 0, 40, 40));
+  return (planetCache[key] = c);
 }
 function hatFor(p, s) {
   const prof = HO.planetIncome(G, p, s) >= 0;
@@ -299,12 +328,8 @@ function draw() {
       g.addColorStop(0, 'rgba(255,240,170,0.75)'); g.addColorStop(1, 'rgba(255,200,80,0)');
       cx.fillStyle = g; cx.beginPath(); cx.arc(x, y, ps * 0.95, 0, Math.PI * 2); cx.fill();
     }
-    const im = IMG[look.base];
+    const im = look.pic || IMG[look.base];
     if (im) cx.drawImage(im, x - ps / 2, y - ps / 2, ps, ps);
-    if (look.metal > 0 && look.base.startsWith('planet')) {
-      const lv = Math.min(4, Math.floor(look.metal / 5000));
-      cx.globalAlpha = 0.75; cx.drawImage(IMG['metal' + lv], x - ps / 2, y - ps / 2, ps, ps); cx.globalAlpha = 1;
-    }
     // satellites ring
     const sats = G.fleets.filter(f => f.star === s.id && f.sat && (f.owner === 0 || visibleTo(s.id)));
     if (sats.length) {
@@ -572,7 +597,7 @@ function planetBox(sid) {
   const look = starLook(sid);
   const box = el('section', { class: 'box planet' });
   const pic = el('div', { class: 'ppic' });
-  pic.append(el('img', { src: A.img[look.base], alt: '' }));
+  pic.append(el('img', { src: look.pic ? look.pic.toDataURL() : A.img[look.base], alt: '' }));
   if (look.hat) pic.append(el('img', { src: A.img[look.hat], class: 'phat', alt: '' }));
   const ownerName = s.owner === 0 ? 'You' : k.explored && k.owner > 0 ? G.players[k.owner].name : k.explored ? 'No one' : 'Unknown';
   box.append(el('div', { class: 'phead' }, pic, el('div', null, el('h3', null, s.name), el('div', { class: 'sub' }, ownerName + (k.explored && s.owner !== 0 && k.seen >= 0 && k.seen < G.turn ? ` (seen ${2000 + k.seen * 10})` : '')))));

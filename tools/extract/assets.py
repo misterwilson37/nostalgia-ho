@@ -35,6 +35,12 @@ put('sun',floodwhite(sheet.crop((116,18,156,58))))
 put('unknown',floodwhite(sheet.crop((158,18,198,58))))
 put('soon',floodwhite(sheet.crop((158,60,198,100))))
 put('battle',floodwhite(sheet.crop((158,102,198,142))))
+# planet-shaped masks (one per size row), the ice-cap strip and the heat glow
+for k in range(7):
+    a=np.array(sheet.crop((20+82*k,528,60+82*k,568)).convert('L'));o=np.zeros((40,40,4),np.uint8);o[...,3]=np.where(a<128,255,0)
+    put(f'pmask{k}',Image.fromarray(o))
+put('icecap',sheet.crop((116,60,156,100)))
+put('hot',sheet.crop((116,18,156,58)))
 for k in range(5): put(f'metal{k}',keywhite(sheet.crop((6+42*k,335,46+42*k,375))))
 def nomag(im):
     a=np.array(im);m=(a[:,:,0]>200)&(a[:,:,1]<90)&(a[:,:,2]>200);a[m,3]=0;return trim(Image.fromarray(a))
