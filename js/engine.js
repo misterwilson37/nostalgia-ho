@@ -561,7 +561,12 @@ function resolveStars(G) {
     const wasExplored = k.explored;
     observe(G, p, s.id);
     if (!wasExplored) exploreMsg(G, p, s);
-    else if (p.human && s.owner !== p.id && !fleetHas(G, f, 'colony')) msg(G, p.id, `Your fleet of ${fleetLabel(G, f)} has arrived at ${s.name}.`, { icon: 'm9038', star: s.id, quiet: true });
+    else if (p.human && s.owner !== p.id && !fleetHas(G, f, 'colony')) {
+      if (f.path && f.path.length) msg(G, p.id, report(25, fleetLabel(G, f), s.name, G.stars[f.path[0]].name), { icon: 'm9038', star: s.id, quiet: true });
+      else msg(G, p.id, `Your fleet of ${fleetLabel(G, f)} has arrived at ${s.name}.`, { icon: 'm9038', star: s.id, quiet: true });
+    }
+    if (feature(G, 'arrivalNotices') && s.owner >= 0 && s.owner !== f.owner && G.fleets.includes(f))
+      msg(G, s.owner, report(26, p.name, fleetLabel(G, f), s.name), { icon: 'm9038', star: s.id });
     // colonize
     if (s.owner < 0 && fleetHas(G, f, 'colony') && !hostileAt(G, p.id, s.id)) colonize(G, p, f, s);
   }
@@ -647,6 +652,28 @@ function scrapFleet(G, f) {
   return metal;
 }
 
+// Ships > Scrap Ship Types: every ship of a design is dismantled and the
+// design is retired (STR# 6020 #21)
+function scrapDesign(G, pid, did) {
+  const p = G.players[pid], d = getDesign(G, pid, did);
+  if (!d) return 0;
+  const rate = rules(G).scrapReturn(G, p);
+  const unit = designCost(G, d).metal;
+  let n = 0, metal = 0;
+  for (const f of G.fleets.slice()) {
+    if (f.owner !== pid || !f.ships[did]) continue;
+    const c = f.ships[did]; n += c;
+    const m = Math.floor(unit * c * rate); metal += m;
+    if (f.star != null) { const s = G.stars[f.star]; if (s.owner === pid) p.metal += m; else s.metal += m; }
+    else if (rules(G).scrapInSpace) rules(G).scrapInSpace(G, { owner: pid, to: f.to, ships: { [did]: c } }, m);
+    delete f.ships[did];
+    if (!fleetCount(f)) G.fleets.splice(G.fleets.indexOf(f), 1);
+  }
+  d.scrapped = true;
+  msg(G, pid, report(21, d.name, n, fmt(metal)), { icon: 'm9014', quiet: true });
+  return metal;
+}
+function liveDesigns(p) { return p.designs.filter(d => !d.scrapped).length; }
 function checkElimination(G) {
   for (const p of G.players) {
     if (!p.alive) continue;
@@ -700,7 +727,7 @@ const API = {
   newGame, endTurn, buildShips, unbuildShip, designLimits, designMin, designCost, shipCostNow, canBuildType, findOrCreateDesign, getDesign,
   fleetCount, fleetDesigns, fleetSpeed, fleetMaxRange, fleetHas, fleetKind, fleetLabel, orderMove, orderPath, cancelMove, canReach,
   newFleet, addShipsToStar, mergeFleets, splitFleet, scrapFleet, evacuate, colonies, seenG, seenT, maxPop, planetClass, planetIncome,
-  isFriend, isAllied, isBuddy, hasColonyAt, designName, report, setPact, give, surrender, sendChat, setArmageddon, hostileAt, know, observe, msg, starDist, dist, projected, techSum, score, save, load, borrowLimit, fmt,
+  scrapDesign, liveDesigns, isFriend, isAllied, isBuddy, hasColonyAt, designName, report, setPact, give, surrender, sendChat, setArmageddon, hostileAt, know, observe, msg, starDist, dist, projected, techSum, score, save, load, borrowLimit, fmt,
 };
 if (typeof module !== 'undefined') {
   module.exports = API;

@@ -64,8 +64,12 @@ const Sound = {
   },
   stopTheme() { if (this.theme) this.theme.pause(); },
 };
-try { const s = JSON.parse(localStorage.getItem('ho5.prefs') || '{}'); if (s.sound === false) Sound.on = false; if (s.music) Sound.music = true; } catch (e) {}
-function savePrefs() { try { localStorage.setItem('ho5.prefs', JSON.stringify({ sound: Sound.on, music: Sound.music })); } catch (e) {} }
+// preferences (the original's Preferences window: Celsius, only important messages, review battles, hints)
+const Prefs = { celsius: false, important: false, review: false, hints: true };
+try { const s = JSON.parse(localStorage.getItem('ho5.prefs') || '{}'); if (s.sound === false) Sound.on = false; if (s.music) Sound.music = true; for (const k in Prefs) if (s[k] != null) Prefs[k] = s[k]; } catch (e) {}
+function savePrefs() { try { localStorage.setItem('ho5.prefs', JSON.stringify(Object.assign({ sound: Sound.on, music: Sound.music }, Prefs))); } catch (e) {} }
+const degF = (f) => Prefs.celsius ? Math.round((f - 32) * 5 / 9) + '°C' : Math.round(f) + '°';
+const degText = (t) => Prefs.celsius ? t.replace(/(-?\d+)°(F)?/g, (m, n) => Math.round((+n - 32) * 5 / 9) + '°C') : t;
 
 // ---------- state ----------
 let G = null;            // game
@@ -514,7 +518,7 @@ function planetBox(sid) {
   if (s.owner === 0 || k.explored) {
     const src = s.owner === 0 ? s : k;
     const gs = src.g / p.homeG, ts = 72 + (src.t - p.homeT);
-    box.append(row('Gravity', gs.toFixed(2) + 'G' + classNote(gs)), row('Temp', Math.round(ts) + '°'), row('Metal', fmt(src.metal)));
+    box.append(row('Gravity', gs.toFixed(2) + 'G' + classNote(gs)), row('Temp', degF(ts)), row('Metal', fmt(src.metal)));
     if (s.owner === 0) {
       const inc = HO.planetIncome(G, p, s);
       box.append(row('Population', fmt(s.pop * 1e6)), row('Max population', fmt(HO.maxPop(G, p, s) * 1e6)), row('Income', money(inc), inc < 0 ? 'neg' : ''));
@@ -613,12 +617,14 @@ function renderMsg() {
   }
   if (UI.msgIdx < UI.inbox.length) {
     const m = UI.inbox[UI.msgIdx];
+    if (Prefs.important && m.quiet && !m.battle && UI.msgIdx < UI.inbox.length - 1) { UI.msgIdx++; return renderMsg(); }
     if (m.sound) Sound.play(m.sound);
+    if (Prefs.review && m.battle && !m._reviewed) { m._reviewed = true; setTimeout(() => openBattle(m.battle), 50); }
     const card = el('div', { class: 'card', tabindex: 0, role: 'button', 'aria-label': 'Next message' });
     const big = m.big || (m.jpg != null ? 'jpg' : null);
     if (m.jpg != null) card.append(el('img', { class: 'jpg', src: A.jpg[m.jpg], alt: '' }));
     else if (m.icon && A.img[m.icon]) card.append(el('img', { class: m.big ? 'bigicon' : 'icon', src: A.img[m.icon], alt: '' }));
-    const body = el('div', { class: 'mtext' }, el('p', null, m.text));
+    const body = el('div', { class: 'mtext' }, el('p', null, degText(m.text)));
     const extra = el('div', { class: 'mbtns' });
     if (m.battle) extra.append(el('button', { class: 'quiet', onclick: (e) => { e.stopPropagation(); openBattle(m.battle); } }, 'Review battle'));
     body.append(extra, el('div', { class: 'count' }, `${UI.msgIdx + 1} of ${UI.inbox.length} · click to continue`));
@@ -644,6 +650,7 @@ function doEndTurn() {
   // keep selection valid
   if (UI.selFleet != null && !G.fleets.some(f => f.id === UI.selFleet)) UI.selFleet = null;
   renderPanel(); draw();
+  if (Prefs.hints && G.turn % 7 === 3 && (HO.DATA.hints || []).length) { const h = HO.DATA.hints; G.inbox.push({ text: h[G.turn % Math.min(h.length, 40)], icon: 'm9024', quiet: true }); }
   if (!G.inbox.length) G.inbox.push({ text: `Year ${G.year}. Nothing much happened.`, icon: 'm9024', quiet: true });
   showMessages();
 }
@@ -725,6 +732,8 @@ function openBuild(sid) {
     if (st.type === 'colony') right.append(el('p', { class: 'note' }, 'Colony ships settle the first unowned planet they’re sent to.'));
     if (st.type === 'mini') {}
     right.append(el('div', { class: 'btns' }, el('button', { onclick: () => {
+      const lim = HO.rules(G).maxDesigns;
+      if (lim && !exists && HO.liveDesigns(p) >= lim) { toast(HO.DATA.alerts[15] || 'Your assembly lines are full.'); return; }
       const d = HO.findOrCreateDesign(G, p, spec);
       if (HO.buildShips(G, 0, sid, d.id, 1)) { Sound.play(7006); } else toast('Not enough money or metal.');
       render(); renderPanel(); draw();
@@ -936,6 +945,79 @@ function toggleArmageddon() {
   confirmBox(HO.DATA.alerts[3] || 'Are you sure you want to destroy half the galaxy?', () => { HO.setArmageddon(G, 0, true); save(); toast('The armageddon device is on. It fires when every human player has turned theirs on.'); });
 }
 
+function table(head, rows) {
+  return el('table', { class: 'ptable list' }, el('thead', null, el('tr', null, ...head.map(h => el('th', null, h)))), el('tbody', null, ...rows));
+}
+function openFleetList() {
+  const mine = G.fleets.filter(f => f.owner === 0);
+  const rows = mine.map(f => {
+    const where = f.star != null ? G.stars[f.star].name : `${G.stars[f.from].name} → ${G.stars[f.to].name}`;
+    const go = f.dest != null ? G.stars[f.dest].name + (f.path && f.path.length ? ' → …' : '') : f.to != null ? `${Math.ceil((f.dist - f.prog) / HO.fleetSpeed(G, f))} turn(s)` : '';
+    return el('tr', { class: 'click', onclick: () => { UI.selFleet = f.id; UI.sel = f.star != null ? f.star : f.to; closeModal(); renderPanel(); draw(); } },
+      el('td', null, HO.fleetLabel(G, f)), el('td', null, where), el('td', null, go), el('td', null, f.sat ? '' : `${Math.floor(f.fuel)}/${HO.fleetMaxRange(G, f)}`));
+  });
+  modal('All your fleets', mine.length ? table(['Fleet', 'Where', 'Going to', 'Fuel'], rows) : el('p', null, 'You have no fleets.'), { cls: 'mid' });
+}
+function openScrapTypes() {
+  const p = me();
+  const count = {}; for (const f of G.fleets) if (f.owner === 0) for (const k in f.ships) count[k] = (count[k] || 0) + f.ships[k];
+  const rows = p.designs.filter(d => !d.scrapped).map(d => el('tr', null, el('td', null, shipImgEl(d, 18), ' ', d.name), el('td', null, HO.TYPES[d.type].name), el('td', null, String(count[d.id] || 0)),
+    el('td', null, el('button', { class: 'quiet', onclick: () => confirmBox(HO.DATA.alerts[7] || 'Do you really want to scrap all existing ships of this type?', () => { const m = HO.scrapDesign(G, 0, d.id); toast(`Scrapped for ${fmt(m)} metal.`); renderPanel(); draw(); save(); }) }, 'Scrap'))));
+  modal('Scrap ship types', el('div', null, el('p', { class: 'sub' }, `Retiring a type frees an assembly line${HO.rules(G).maxDesigns ? ` (you can have ${HO.rules(G).maxDesigns})` : ''} and scraps every ship of that type.`), table(['Type', 'Class', 'Ships', ''], rows)), { cls: 'mid' });
+}
+function openBattleList() {
+  const bs = G.battles.filter(b => b.sides.includes(0)).reverse();
+  if (!bs.length) { toast('No battles yet.'); return; }
+  const rows = bs.map(b => el('tr', { class: 'click', onclick: () => { closeModal(); openBattle(b.id); } }, el('td', null, G.stars[b.star].name), el('td', null, String(b.year)),
+    el('td', null, b.sides.filter(o => o !== 0).map(o => G.players[o].name).join(', ')), el('td', null, `${b.lost[0] || 0} / ${b.sides.filter(o => o !== 0).reduce((a, o) => a + (b.lost[o] || 0), 0)}`)));
+  modal('Review battle', table(['Star', 'Year', 'Against', 'Lost (you / them)'], rows), { cls: 'mid' });
+}
+function openStarList() {
+  const p = me();
+  const ks = G.stars.map(s => ({ s, k: HO.know(G, p, s.id) })).filter(o => o.k.explored);
+  const rows = ks.map(({ s, k }) => {
+    const src = s.owner === 0 ? s : k;
+    const owner = s.owner === 0 ? 'You' : k.owner >= 0 && G.players[k.owner] ? G.players[k.owner].name : '';
+    return el('tr', { class: 'click', onclick: () => { UI.sel = s.id; closeModal(); renderPanel(); draw(); } }, el('td', null, s.name), el('td', null, (src.g / p.homeG).toFixed(2) + 'G'),
+      el('td', null, degF(72 + (src.t - p.homeT))), el('td', null, fmt(src.metal)), el('td', null, owner), el('td', null, src.pop ? fmt(src.pop * 1e6) : ''));
+  });
+  modal('Explored stars', table(['Star', 'Gravity', 'Temp', 'Metal', 'Owner', 'Population'], rows), { cls: 'mid' });
+}
+// Auto Play: keep ending turns until something interesting happens
+function openAutoPlay() {
+  const f = el('form', { class: 'newgame', onsubmit: (e) => {
+    e.preventDefault();
+    const d = Object.fromEntries(new FormData(f).entries());
+    closeModal(); runAutoPlay({ turns: +d.turns || 10, computer: d.mode === 'computer', won: !!d.won, lost: !!d.lost, news: !!d.news });
+  } });
+  f.append(el('label', null, el('span', null, 'Play'), el('select', { name: 'mode' }, el('option', { value: 'computer' }, 'Have the computer play for me'), el('option', { value: 'end' }, 'Just end my turns'))),
+    el('label', null, el('span', null, 'For up to this many turns'), el('input', { name: 'turns', type: 'number', min: 1, max: 500, value: 20 })),
+    el('fieldset', { class: 'opts' }, el('legend', null, 'Stop when something interesting happens'),
+      el('label', { class: 'chk' }, el('input', { type: 'checkbox', name: 'won', checked: 'checked' }), el('span', null, 'Battles I win')),
+      el('label', { class: 'chk' }, el('input', { type: 'checkbox', name: 'lost', checked: 'checked' }), el('span', null, 'Battles I lose')),
+      el('label', { class: 'chk' }, el('input', { type: 'checkbox', name: 'news', checked: 'checked' }), el('span', null, 'Colonies, tech levels and other news'))),
+    el('div', { class: 'btns right' }, el('button', { type: 'submit' }, 'Start')));
+  modal('Auto play', f, { cls: 'mid' });
+}
+function runAutoPlay(o) {
+  let n = 0;
+  const step = () => {
+    if (!G || G.over || n++ >= o.turns || UI.modal) { renderMsg(); return; }
+    me().auto = o.computer; HO.endTurn(G); me().auto = false; save();
+    renderPanel(); draw();
+    const stop = G.inbox.some(m => (o.won && m.battle && m.sound === 7027) || (o.lost && m.battle && m.sound !== 7027) || (o.news && !m.quiet && !m.battle && !m.chat));
+    $('#title').textContent = `${me().name} in ${G.opts.galaxy || 'Milky Way'} in ${G.year} (auto play)`;
+    if (stop || G.over) { showMessages(); return; }
+    setTimeout(step, 120);
+  };
+  step();
+}
+function openPrefs() {
+  const box = (k, label) => el('label', { class: 'chk' }, el('input', { type: 'checkbox', checked: Prefs[k] ? 'checked' : false, onchange: (e) => { Prefs[k] = e.target.checked; savePrefs(); renderPanel(); } }), el('span', null, label));
+  modal('Preferences', el('div', { class: 'prefs' }, box('important', 'Show only the most important messages'), box('review', 'Review battles as they happen'),
+    box('hints', 'Give helpful game play hints'), box('celsius', 'Temperatures in Celsius (not °F)')), { cls: 'small' });
+}
+
 // ----- help -----
 function openHelp() {
   const tips = HO.DATA.tips || [];
@@ -1007,9 +1089,9 @@ function save() { if (!G) return; try { localStorage.setItem('ho5.save', HO.save
 // ---------- menus ----------
 function setupMenus() {
   const menus = {
-    Game: [['New game…', newGameDialog], ['Players and history', () => G && openPlayers()], ['Auto-play this turn', () => { if (!G || G.over) return; me().auto = true; doEndTurn(); me().auto = false; }], ['-'], ['Quit to title', () => { save(); Sound.play(7002); G = null; renderPanel(); draw(); $('#panel').innerHTML = ''; $('#msg').innerHTML = ''; titleScreen(); }]],
-    Ships: [['Build ships at selected colony…', () => { if (G && UI.sel != null && G.stars[UI.sel].owner === 0) openBuild(UI.sel); else toast('Select one of your colonies first.'); }], ['Review last battle', () => { const b = G && [...G.battles].reverse().find(b => b.sides.includes(0)); if (b) openBattle(b.id); else toast('No battles yet.'); }], ['Next fleet', nextFleet]],
-    Galaxy: [['Players and alliances…', () => G && openPlayers()],
+    Game: [['New game…', newGameDialog], ['Players and history', () => G && openPlayers()], ['Auto-play this turn', () => { if (!G || G.over) return; me().auto = true; doEndTurn(); me().auto = false; }], ['Auto play…', () => G && !G.over && openAutoPlay()], ['Preferences…', openPrefs], ['-'], ['Quit to title', () => { save(); Sound.play(7002); G = null; renderPanel(); draw(); $('#panel').innerHTML = ''; $('#msg').innerHTML = ''; titleScreen(); }]],
+    Ships: [['Build ships at selected colony…', () => { if (G && UI.sel != null && G.stars[UI.sel].owner === 0) openBuild(UI.sel); else toast('Select one of your colonies first.'); }], ['Review battle…', () => G && openBattleList()], ['List all fleets…', () => G && openFleetList()], ['Scrap ship types…', () => G && openScrapTypes()], ['Next fleet', nextFleet]],
+    Galaxy: [['Players and alliances…', () => G && openPlayers()], ['List explored stars…', () => G && openStarList()],
       ['Give money or metal…', () => G && !G.over && openGive(), 'gifts'],
       ['Send a message…', () => G && !G.over && openChat(), 'chat'],
       ['Dip into savings…', () => G && !G.over && openDip(), 'dip'],
