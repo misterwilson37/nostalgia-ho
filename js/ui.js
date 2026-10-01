@@ -781,9 +781,57 @@ function renderMsg() {
     el('span', null, 'End turn'));
   box.append(clock);
 }
+// ---------- ranks and master points ----------
+// The original keeps a record of your wins. Each win in an Original-rules
+// game earns master points from its difficulty (3 to the power of
+// (difficulty - 30) / 10), and enough points raise your rank. The 25 rank
+// pictures are assets/explore/01.jpg to 25.jpg.
+function profile() {
+  try { return Object.assign({ points: 0, games: [] }, JSON.parse(localStorage.getItem('ho5.profile') || '{}')); } catch (e) { return { points: 0, games: [] }; }
+}
+function rankOf(points) { const R = HO.DATA.ranks || []; let i = 0; while (i + 1 < R.length && points >= R[i + 1][1]) i++; return i; }
+function awardMasterPoints(byComputer) {
+  if (!G || !G.over || G.mpDone || G.rules !== 'original') return;
+  G.mpDone = true;
+  const won = G.winner === 0 || (G.winners || []).includes(0);
+  if (!won || byComputer) return; // INFERRED: no points when the computer played your last turn
+  const RS = HO.RULESETS.original;
+  const d = RS.difficulty(Object.assign({}, G.opts, { armageddons: G.armageddons || 0, won: true, year: G.year }));
+  const pts = RS.masterPoints(d);
+  const pr = profile(), before = rankOf(pr.points);
+  pr.points += pts;
+  pr.games.push({ date: new Date().toISOString().slice(0, 10), year: G.year, difficulty: d, points: pts });
+  try { localStorage.setItem('ho5.profile', JSON.stringify(pr)); } catch (e) {}
+  G.inbox.push({ text: HO.report(79, d, fmt(pts)), icon: 'm9035' });
+  const after = rankOf(pr.points);
+  if (after > before) setTimeout(() => showRank(after), 300);
+}
+function showRank(i) {
+  const R = HO.DATA.ranks[i];
+  const body = el('div', { class: 'rank' },
+    el('img', { src: A.jpg[i], alt: '' }),
+    el('p', null, 'Congratulations! You have achieved the rank of:'), el('h3', null, R[0]));
+  if (R[2]) body.append(el('p', null, `You have earned the ability to ${R[2]}.`));
+  body.append(el('div', { class: 'btns right' }, el('button', { onclick: closeModal }, 'OK')));
+  Sound.play(7021);
+  modal('New rank', body, { cls: 'mid' });
+}
+function openRanks() {
+  const pr = profile(), cur = rankOf(pr.points), R = HO.DATA.ranks || [];
+  const body = el('div', { class: 'rank' },
+    el('img', { src: A.jpg[cur], alt: '' }),
+    el('h3', null, R[cur][0]), el('p', null, `Total master points: ${fmt(pr.points)}`),
+    el('p', { class: 'sub' }, 'You earn master points by winning games with Original rules. The harder the game, the more points.'),
+    el('table', { class: 'ptable' }, el('tr', null, el('th', null, 'Rank'), el('th', null, 'Points'), el('th', null, 'Unlocks')),
+      ...R.map((r, i) => el('tr', { class: i === cur ? 'me' : '' }, el('td', null, (i <= cur ? '★ ' : '') + r[0]), el('td', null, fmt(r[1])), el('td', null, r[2] || '')))));
+  if (pr.games.length) body.append(el('h4', null, 'Wins'), el('table', { class: 'ptable' }, el('tr', null, el('th', null, 'Date'), el('th', null, 'Year'), el('th', null, 'Difficulty'), el('th', null, 'Points')),
+    ...pr.games.slice(-30).reverse().map(g => el('tr', null, el('td', null, g.date), el('td', null, String(g.year)), el('td', null, String(g.difficulty)), el('td', null, fmt(g.points))))));
+  modal('Rank history', body, { cls: 'mid' });
+}
 function doEndTurn() {
   if (!G || G.over) return;
   HO.endTurn(G);
+  awardMasterPoints();
   Sound.play(11111);
   save();
   // keep selection valid
@@ -1142,7 +1190,7 @@ function runAutoPlay(o) {
   let n = 0;
   const step = () => {
     if (!G || G.over || n++ >= o.turns || UI.modal) { renderMsg(); return; }
-    me().auto = o.computer; HO.endTurn(G); me().auto = false; save();
+    me().auto = o.computer; HO.endTurn(G); me().auto = false; awardMasterPoints(o.computer); save();
     renderPanel(); draw();
     const stop = G.inbox.some(m => (o.won && m.battle && m.sound === 7027) || (o.lost && m.battle && m.sound !== 7027) || (o.news && !m.quiet && !m.battle && !m.chat));
     $('#title').textContent = `${me().name} in ${G.opts.galaxy || 'Milky Way'} in ${G.year} (auto play)`;
@@ -1208,6 +1256,7 @@ function newGameDialog() {
     sel('o_shape', 'Galaxy shape', [['circle', 'Circle'], ['spiral', 'Spiral'], ['cluster', 'Cluster'], ['ring', 'Ring'], ['grid', 'Grid'], ['random', 'Random'], ['hex', 'Hex']], 'circle'),
     slider('o_size', 'Galaxy size', 0, 100, 50, 'Small', 'Large'),
     slider('o_density', 'Galaxy density', 0, 100, 25, 'Dense', 'Sparse'),
+    sel('o_years', 'Years per turn', [['10', '10'], ['20', '20'], ['30', '30'], ['50', '50']], '10'),
     el('label', { class: 'chk' }, el('input', { type: 'checkbox', name: 'buddies' }), el('span', null, 'Computers are best buddies')),
     el('p', { class: 'sub' }, 'Game difficulty rating: ', rating));
   f.append(
@@ -1223,7 +1272,7 @@ function newGameDialog() {
       el('label', { class: 'chk' }, el('input', { type: 'checkbox', name: 'luck' }), el('span', null, 'Luck in battles')),
       el('label', { class: 'chk' }, el('input', { type: 'checkbox', name: 'novas', checked: 'checked' }), el('span', null, 'Novas'))),
     el('div', { class: 'btns right' }, el('button', { type: 'submit' }, 'Create galaxy')));
-  const origOpts = (d) => ({ computers: d.computers === 'any' ? 4 : +d.computers, iqNum: +d.o_iq, start: d.start, cstart: d.o_cstart, shape: d.o_shape, size: +d.o_size, density: +d.o_density, buddies: !!d.buddies });
+  const origOpts = (d) => ({ computers: d.computers === 'any' ? 4 : +d.computers, iqNum: +d.o_iq, start: d.start, cstart: d.o_cstart, shape: d.o_shape, size: +d.o_size, density: +d.o_density, buddies: !!d.buddies, yearsPerTurn: +d.o_years });
   const refresh = () => {
     const d = Object.fromEntries(new FormData(f).entries());
     const orig = d.rules === 'original';
@@ -1261,7 +1310,7 @@ function save() { if (!G) return; try { localStorage.setItem('ho5.save', HO.save
 // ---------- menus ----------
 function setupMenus() {
   const menus = {
-    Game: [['New game…', newGameDialog], ['Players and history', () => G && openPlayers()], ['Auto-play this turn', () => { if (!G || G.over) return; me().auto = true; doEndTurn(); me().auto = false; }], ['Auto play…', () => G && !G.over && openAutoPlay()], ['Preferences…', openPrefs], ['-'], ['Quit to title', () => { save(); Sound.play(7002); G = null; renderPanel(); draw(); $('#panel').innerHTML = ''; $('#msg').innerHTML = ''; titleScreen(); }]],
+    Game: [['New game…', newGameDialog], ['Players and history', () => G && openPlayers()], ['Auto-play this turn', () => { if (!G || G.over) return; me().auto = true; doEndTurn(); me().auto = false; }], ['Auto play…', () => G && !G.over && openAutoPlay()], ['Preferences…', openPrefs], ['Rank history…', openRanks], ['-'], ['Quit to title', () => { save(); Sound.play(7002); G = null; renderPanel(); draw(); $('#panel').innerHTML = ''; $('#msg').innerHTML = ''; titleScreen(); }]],
     Ships: [['Build ships at selected colony…', () => { if (G && UI.sel != null && G.stars[UI.sel].owner === 0) openBuild(UI.sel); else toast('Select one of your colonies first.'); }], ['Review battle…', () => G && openBattleList()], ['List all fleets…', () => G && openFleetList()], ['Scrap ship types…', () => G && openScrapTypes()], ['Next fleet', nextFleet]],
     Galaxy: [['Players and alliances…', () => G && openPlayers()], ['List explored stars…', () => G && openStarList()],
       ['Give money or metal…', () => G && !G.over && openGive(), 'gifts'],

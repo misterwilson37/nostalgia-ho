@@ -165,3 +165,7 @@ button:focus-visible { outline: 2px solid var(--hi); outline-offset: 1px; }
 .newgame .slider output { min-width: 2.5em; color: var(--sub); }
 .newgame .slider small { color: var(--sub); }
 @media (max-width: 640px) { .newgame .group { grid-template-columns: 1fr; } }
+.rank { text-align: center; }
+.rank img { max-width: 100%; width: 360px; border: 1px solid #555; }
+.rank table { margin: 6px auto; text-align: left; }
+.rank tr.me td { font-weight: bold; }

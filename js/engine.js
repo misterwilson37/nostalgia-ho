@@ -498,10 +498,21 @@ function chooseHomes(G, k) {
 // ---------- turn processing ----------
 function endTurn(G) {
   if (G.over) return;
-  const rs = rules(G), AI = aiOf(G);
   G.inbox = [];
-  for (const p of G.players) if (p.alive && !p.human) AI.turn(G, p);
-  if (G.players[0].auto && G.players[0].alive) AI.turn(G, G.players[0]);
+  // "Years per turn" (Original rules): one End Turn runs several 10-year
+  // turns; the computers only plan on the first and the winner is only
+  // checked on the last (FUN_100728d0)
+  const steps = feature(G, 'yearsPerTurn') ? Math.max(1, Math.round((G.opts.yearsPerTurn || 10) / 10)) : 1;
+  for (let i = 0; i < steps && !G.over; i++) turnStep(G, i === 0, i === steps - 1);
+  // keep battle records bounded
+  if (G.battles.length > 60) G.battles.splice(0, G.battles.length - 60);
+}
+function turnStep(G, first, last) {
+  const rs = rules(G), AI = aiOf(G);
+  if (first) {
+    for (const p of G.players) if (p.alive && !p.human) AI.turn(G, p);
+    if (G.players[0].auto && G.players[0].alive) AI.turn(G, G.players[0]);
+  }
   if (feature(G, 'surrender')) processSurrenders(G);
   for (const p of G.players) if (p.alive && !p.surrendered) rs.economy(G, p);
   departures(G);
@@ -513,12 +524,10 @@ function endTurn(G) {
   if (feature(G, 'gifts')) deliverGifts(G);
   if (feature(G, 'surrender')) processHandovers(G);
   if (feature(G, 'alliances')) { pactNews(G); shareMaps(G); }
-  checkElimination(G);
+  if (last) checkElimination(G);
   for (const p of G.players) { p.spentThisTurn = []; recordHistory(G, p); }
   for (const f of G.fleets) f.newThisTurn = false;
   G.turn++; G.year += rs.yearsPerTurn;
-  // keep battle records bounded
-  if (G.battles.length > 60) G.battles.splice(0, G.battles.length - 60);
 }
 
 function colonies(G, pid) { return G.stars.filter(s => s.owner === pid); }

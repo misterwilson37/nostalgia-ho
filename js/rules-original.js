@@ -1064,7 +1064,7 @@ E.registerRules('original', {
   colonyShipUsedUp: false,
   battleEverywhere: true,
   maxDesigns: 24,
-  features: { arrivalNotices: true, alliances: true, gifts: true, surrender: true, stances: true, lateArrival: true, waypoints: true, luck: true, supernova: true, armageddon: true, dip: true, chat: true },
+  features: { arrivalNotices: true, alliances: true, gifts: true, surrender: true, stances: true, lateArrival: true, waypoints: true, luck: true, supernova: true, armageddon: true, dip: true, chat: true, yearsPerTurn: true },
   HIT, hit, hab, popU, setPopU, maxPopU, incomeU, interestOn, mineMoney, mineMetal, terraCost, terraStep, aiSpec,
   fleetStrength, planetStrength, techLevelCost, disposable, START, research,
   distance,
