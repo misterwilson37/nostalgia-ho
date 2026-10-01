@@ -29,8 +29,25 @@ page = re.sub(r'<script src="([^"]+)"></script>', inline, page)
 # one skin is built in (python3 tools/bundle.py <skin>, default classic);
 # js/skins.js is told not to load one itself
 skin = sys.argv[1] if len(sys.argv) > 1 else 'classic'
-css = open(P('js', 'skins', skin, 'style.css')).read()
+def skin_css(path):
+    # a skin's CSS may @import another skin's CSS by relative url
+    css = open(path).read()
+    imp = lambda m: skin_css(os.path.normpath(os.path.join(os.path.dirname(path), m.group(1))))
+    return re.sub(r'@import url\("(\.[^"]+\.css)"\);', imp, css)
+
+css = skin_css(P('js', 'skins', skin, 'style.css'))
 js = open(P('js', 'skins', skin, 'ui.js')).read()
+# a skin built on another one loads that one's ui.js after its own
+for src in re.findall(r"document\.write\('<script src=\"(js/skins/[^\"]+)\"><\\/script>'\)", js):
+    js += '\n' + open(P(src)).read()
+# a skin's own art and sounds (assets/skins/<skin>/, see js/skins/classic/ui.js loadTheme)
+sm = P('assets', 'skins', skin, 'manifest.json')
+if os.path.exists(sm):
+    m = json.load(open(sm))
+    assets['skin'] = {
+        'img': {k: uri(P('assets', 'skins', skin, 'sprites', k + '.png'), 'image/png') for k in m['sprites']},
+        'snd': {str(k): uri(P('assets', 'skins', skin, 'sounds', f'{k}.wav'), 'audio/wav') for k in m['sounds']},
+    }
 page = page.replace('</body>', '<style>\n' + css + '</style>\n<script>\n' + js + '\n</script>\n</body>')
 page = page.replace('<script>\n', '<script>window.HOSKINS_INLINE=' + json.dumps(skin) + ';</script>\n<script>\n', 1)
 page = page.replace('<script>\n', '<script>window.ASSETS=' + json.dumps(assets) + ';</script>\n<script>\n', 1)

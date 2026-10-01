@@ -23,6 +23,7 @@
 'use strict';
 const SKINS = [
   { id: 'classic', name: 'Classic' },
+  { id: 'dos', name: 'DOS 2.0' },
 ];
 const store = {
   get(k) { try { return root.localStorage.getItem(k); } catch (e) { return null; } },

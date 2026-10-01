@@ -1,0 +1,50 @@
+/* Spaceward Ho! — DOS 2.0 skin: the classic skin's layout, dressed like the
+   1993 DOS version (Windows 3.1 style: navy title bars, grey 3-D buttons,
+   teal End Turn button, black space). */
+@import url("../classic/style.css");
+:root {
+  --plat: #c0c0c0; --plat2: #c0c0c0; --edge: #808080; --ink: #000; --sub: #404040;
+  --hi: #000080; --hat: #000080; --gold: #ffff00; --space: #000; --neg: #a00000;
+  --ui: "MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif; --west: "MS Sans Serif", Arial, sans-serif;
+}
+/* 3-D bevels */
+.box, .designer { background: var(--plat); border: 2px solid; border-color: #fff #808080 #808080 #fff; }
+#panel { background: var(--plat); border-right: 2px solid #000; }
+#menubar { background: #fff; border-bottom: 1px solid #000; }
+#menubar .logo { font: bold 14px var(--ui); color: #000080; }
+.mbtn:hover, .mbtn:focus-visible, .dropdown button:hover, .dropdown button:focus-visible { background: #000080; color: #fff; }
+.dropdown { background: #fff; border: 1px solid #000; box-shadow: 2px 2px 0 #000; }
+.box h3 { font: bold 13px var(--ui); color: #000080; }
+button:not(.mbtn):not(.close):not(.tbtn):not(.clock):not([role=menuitem]) {
+  background: #c0c0c0; border: 2px solid; border-color: #fff #404040 #404040 #fff; border-radius: 0; box-shadow: 1px 1px 0 #000; color: #000;
+}
+button:not(.mbtn):not(.close):not(.tbtn):not(.clock):not([role=menuitem]):not(.quiet) { border-width: 2px; border-radius: 0; font-weight: bold; }
+button:not(.mbtn):not(.close):not(.tbtn):not(.clock):not([role=menuitem]):active { border-color: #404040 #fff #fff #404040; }
+.track { background: #fff; border: 1px solid #000; }
+.fill { background: #000080; }
+.fill.tech { background: #808000; }
+.fill.sav { background: #008000; }
+.fill.tbar { background: #800000; }
+/* windows: navy title bar with a grey close box */
+.win { background: var(--plat); border: 2px solid; border-color: #dfdfdf #000 #000 #dfdfdf; box-shadow: none; outline: 1px solid #000; }
+.wtitle { background: #000080; border-bottom: 1px solid #000; height: 20px; }
+.wtitle span { background: none; color: #fff; }
+.close { background: #c0c0c0; border: 1px solid; border-color: #fff #404040 #404040 #fff; }
+.newgame input, .newgame select { border: 2px solid; border-color: #808080 #fff #fff #808080; }
+.tbtn { background: #c0c0c0; border: 2px solid; border-color: #fff #404040 #404040 #fff; border-radius: 0; }
+.tbtn.on { background: #000080; color: #fff; border-color: #000080; }
+/* messages: a plain dialog with a title bar */
+.card { background: #c0c0c0; border: 2px solid; border-color: #fff #000 #000 #fff; box-shadow: 2px 2px 0 #000; border-top: 18px solid #000080; }
+.card .icon { width: 48px; image-rendering: pixelated; }
+/* the End Turn button is teal, as in the DOS game */
+.clock { background: #00a0a0; color: #000; border: 2px solid; border-color: #80ffff #004040 #004040 #80ffff; box-shadow: 1px 1px 0 #000; font: bold 14px var(--ui); }
+.clock:hover { background: #00c0c0; }
+.frow.sel { background: #fff; border-color: #000080; }
+.ptable tr.click:hover { background: #fff; }
+.ppic img, .ppic .phat { image-rendering: pixelated; }
+/* title: the DOS credits picture on black */
+#titlescreen { background: #000; }
+.tcard h1, .tcard .by { display: none; }
+#tframe { width: min(383px, 86vw); background: #000; border: 0; image-rendering: pixelated; }
+.tbtns button { font: bold 14px var(--ui) !important; }
+.credit { color: #a0a0a0; }

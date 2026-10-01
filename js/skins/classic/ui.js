@@ -23,16 +23,45 @@ const PAGE = `
 // Assets: the single-file build (tools/bundle.py) embeds them as window.ASSETS;
 // otherwise they are fetched by name from assets/ (see assets/manifest.json).
 const A = window.ASSETS || { img: {}, snd: {}, jpg: [], theme: 'assets/theme.mp3' };
+// Another skin can reuse this one by setting window.HOTHEME before loading
+// it (see js/skins/dos/ui.js): its own art and sounds come from T.dir, and
+// a few hooks let it draw planets, ships, the selection and the title its
+// own way. Anything it leaves out looks and sounds as here.
+const T = window.HOTHEME || {};
 function loadManifest(done) {
-  if (window.ASSETS) return done();
+  const fin = () => loadTheme(done);
+  if (window.ASSETS) return fin();
   fetch('assets/manifest.json').then(r => r.json()).then(m => {
     for (const k of m.sprites) A.img[k] = 'assets/sprites/' + k + '.png';
     for (const k of m.sounds) A.snd[k] = 'assets/sounds/' + k + '.mp3';
     for (let i = 1; i <= m.explore; i++) A.jpg.push('assets/explore/' + String(i).padStart(2, '0') + '.jpg');
-    done();
+    fin();
   }).catch(() => {
     document.body.append(el('p', { class: 'warn' }, 'Could not load assets/manifest.json. Open this game from a web server (for example GitHub Pages), not straight from a file.'));
   });
+}
+// The theme's pictures are added as T.prefix + name; its sounds replace
+// ours with the same number, T.sounds maps our other sound numbers onto
+// its own (null = silent) and T.images shows one of its pictures in place
+// of one of ours.
+function loadTheme(done) {
+  if (!T.dir) return done();
+  const use = (sk) => {
+    for (const k in sk.img) A.img[T.prefix + k] = sk.img[k];
+    const snd = T.onlyOwnSounds ? {} : A.snd;
+    for (const id in sk.snd) snd[id] = sk.snd[id];
+    for (const id in T.sounds || {}) { if (T.sounds[id] == null) delete snd[id]; else snd[id] = sk.snd[T.sounds[id]]; }
+    A.snd = snd;
+    for (const k in T.images || {}) if (sk.img[T.images[k]]) A.img[k] = sk.img[T.images[k]];
+    done();
+  };
+  if (A.skin) return use(A.skin); // single-file build
+  fetch(T.dir + 'manifest.json').then(r => r.json()).then(m => {
+    const sk = { img: {}, snd: {} };
+    for (const k of m.sprites) sk.img[k] = T.dir + 'sprites/' + k + '.png';
+    for (const k of m.sounds) sk.snd[k] = T.dir + 'sounds/' + k + '.wav';
+    use(sk);
+  }).catch(() => done());
 }
 const $ = (s, el) => (el || document).querySelector(s);
 const el = (tag, attrs, ...kids) => {
@@ -159,6 +188,7 @@ function shipPic(d, owner) {
   const rusty = !!(p && p.tech && d.type !== 'bio' && p.tech.weapons - d.W > 3 && p.tech.shields - d.S > 3);
   const key = [d.type, d.R, d.V, d.W, d.S, d.M, rusty].join(':');
   if (shipCache[key]) return shipCache[key];
+  if (T.shipPic) { const t = T.shipPic(d, IMG, rusty); if (t) return (shipCache[key] = t); }
   const { ops } = shipParts(d);
   let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
   for (const [, r] of ops) { x0 = Math.min(x0, r[0]); y0 = Math.min(y0, r[1]); x1 = Math.max(x1, r[2]); y1 = Math.max(y1, r[3]); }
@@ -181,6 +211,7 @@ function shipPic(d, owner) {
 // what the original draws for the planet itself in a battle
 function planetBattlePic() {
   if (shipCache.planet) return shipCache.planet;
+  if (T.battlePlanet && IMG[T.battlePlanet]) return (shipCache.planet = IMG[T.battlePlanet]);
   const c = document.createElement('canvas'); c.width = 62; c.height = 62;
   c.getContext('2d').drawImage(IMG.ships, 1, 222, 62, 62, 0, 0, 62, 62);
   return (shipCache.planet = c);
@@ -201,6 +232,10 @@ function novaLook(k) {
   return null;
 }
 function starLook(sid) {
+  const look = ourStarLook(sid);
+  return (T.starLook && T.starLook(look, { G, p: me(), s: G.stars[sid], k: HO.know(G, me(), sid) })) || look;
+}
+function ourStarLook(sid) {
   const p = me(), s = G.stars[sid], k = HO.know(G, p, sid);
   const nv = novaLook(s.owner === 0 ? s : k);
   if (nv) return { base: nv };
@@ -342,13 +377,14 @@ function draw() {
     const x = sx(s.x), y = sy(s.y);
     if (x < -60 || y < -60 || x > mapW + 60 || y > mapH + 60) continue;
     const look = starLook(s.id);
-    if (UI.sel === s.id) {
+    if (UI.sel === s.id && T.select && IMG[T.select]) { const r = ps * 0.85; cx.drawImage(IMG[T.select], x - r, y - r, r * 2, r * 2); }
+    else if (UI.sel === s.id) {
       const g = cx.createRadialGradient(x, y, ps * 0.3, x, y, ps * 0.95);
       g.addColorStop(0, 'rgba(255,240,170,0.75)'); g.addColorStop(1, 'rgba(255,200,80,0)');
       cx.fillStyle = g; cx.beginPath(); cx.arc(x, y, ps * 0.95, 0, Math.PI * 2); cx.fill();
     }
     const im = look.pic || IMG[look.base];
-    if (im) cx.drawImage(im, x - ps / 2, y - ps / 2, ps, ps);
+    if (im) { const z = ps * (look.scale || 1); cx.drawImage(im, x - z / 2, y - z / 2, z, z); }
     // satellites ring
     const sats = G.fleets.filter(f => f.star === s.id && f.sat && (f.owner === 0 || visibleTo(s.id)));
     if (sats.length) {
@@ -1271,6 +1307,7 @@ function titleScreen() {
   const frame = $('#tframe'), fx = frame.getContext('2d');
   let i = 0;
   clearInterval(UI.anim);
+  if (T.title && T.title(frame, IMG, Sound)) { $('#tcont').hidden = !has; return; }
   const paint = (k) => { fx.fillStyle = '#fff'; fx.fillRect(0, 0, 304, 200); fx.drawImage(IMG.p6999, 0, 0); if (k != null) fx.drawImage(IMG['t' + (7000 + k)], 96, 1); };
   paint(null);
   setTimeout(() => {
@@ -1423,6 +1460,7 @@ document.addEventListener('keydown', (e) => {
 // ---------- boot ----------
 window.addEventListener('DOMContentLoaded', () => {
   document.body.insertAdjacentHTML('afterbegin', PAGE);
+  if (T.page) T.page(document);
   Object.assign(HO.DATA, window.HODATA);
   setupMenus();
   $('#tnew').addEventListener('click', newGameDialog);
