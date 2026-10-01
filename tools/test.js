@@ -1,5 +1,7 @@
-const HO=require('./src/engine.js');
-Object.assign(HO.DATA,require('./src/data.json'));
+// Headless AI-vs-AI test: node tools/test.js
+const path = require('path'), root = path.join(__dirname, '..');
+const HO=require(path.join(root, 'js/engine.js'));
+Object.assign(HO.DATA,require(path.join(root, 'js/data.js')));
 function run(seed,opts){
   const G=HO.newGame(Object.assign({seed,size:'medium',computers:4,iq:'average',shape:'random'},opts||{}));
   G.players[0].auto=true; // human on autoplay
