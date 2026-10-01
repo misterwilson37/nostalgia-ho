@@ -20,7 +20,7 @@ it needs to be served from a web address.
 - `js/rules-original.js`, `js/ai-original.js`: the "Original" rules and computer players
   (recovered from the original 5.0.5 program; see `docs/original-findings.md`)
 - `js/ui.js`: map, panels, dialogs, battle replay, sound, title screen
-- `assets/`: sprites, sounds, exploration pictures and theme music, listed in `assets/manifest.json`
+- `assets/`: sprites, sounds, the 25 rank pictures (`assets/explore/`) and theme music, listed in `assets/manifest.json`
 - `docs/original-findings.md`: what the original program actually does
 - `tools/test.js`: headless computer-vs-computer test (`node tools/test.js` or `node tools/test.js original`)
 - `tools/bundle.py`: builds `dist/spaceward-ho.html`, a single self-contained file
