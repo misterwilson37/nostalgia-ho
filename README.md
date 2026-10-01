@@ -11,7 +11,7 @@ it needs to be served from a web address.
 
 ## Layout
 
-- `index.html`, `css/style.css`: the page
+- `index.html`: the page
 - `js/data.js`: names, tech-level names and tips from the original resources
 - `js/engine.js`: game mechanics shared by every ruleset (turns, fleets, movement,
   exploring, colonizing, battle bookkeeping, saving)
@@ -19,7 +19,7 @@ it needs to be served from a web address.
   (reconstructed from the manual)
 - `js/rules-original.js`, `js/ai-original.js`: the "Original" rules and computer players
   (recovered from the original 5.0.5 program; see `docs/original-findings.md`)
-- `js/ui.js`: map, panels, dialogs, battle replay, sound, title screen
+- `js/skins/classic/`: the "classic" skin (`ui.js`: map, panels, dialogs, battle replay, sound, title screen; `style.css`)
 - `assets/`: sprites, sounds, the 25 rank pictures (`assets/explore/`) and theme music, listed in `assets/manifest.json`
 - `docs/original-findings.md`: what the original program actually does
 - `tools/test.js`: headless computer-vs-computer test (`node tools/test.js` or `node tools/test.js original`)

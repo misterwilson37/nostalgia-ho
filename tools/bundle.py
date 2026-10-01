@@ -20,8 +20,8 @@ assets = {
     'theme': uri(P('assets', 'theme.mp3'), 'audio/mpeg'),
 }
 page = open(P('index.html')).read()
-css = open(P('css', 'style.css')).read()
-page = page.replace('<link rel="stylesheet" href="css/style.css">', '<style>\n' + css + '</style>')
+css = open(P('js', 'skins', 'classic', 'style.css')).read()
+page = page.replace('<link rel="stylesheet" href="js/skins/classic/style.css">', '<style>\n' + css + '</style>')
 
 def inline(m):
     src = m.group(1)
