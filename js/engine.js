@@ -568,7 +568,9 @@ function endTurn(G) {
 function turnStep(G, first, last) {
   const rs = rules(G), AI = aiOf(G);
   if (first) {
-    for (const p of G.players) if (p.alive && !p.human) AI.turn(G, p);
+    // rs.outComputersPlay: a computer that is out of the game still gives its
+    // leftover fleets orders (1.2)
+    for (const p of G.players) if ((p.alive || (rs.outComputersPlay && !G.over)) && !p.human) AI.turn(G, p);
     for (const p of G.players) if (p.human && p.auto && p.alive) AI.turn(G, p);
   }
   if (feature(G, 'surrender')) processSurrenders(G);

@@ -253,7 +253,9 @@ function battleText(G, sid, b, o, x) {
 function checkElimination(G) {
   const humans = E.humans(G);
   for (const p of G.players) {
-    if (!p.alive) continue;
+    // CONFIRMED (DoGameEndStuff): a player who is out but has a colony
+    // again (a leftover colony ship landed) is back in the game
+    if (!p.alive) { if (!G.over && E.colonies(G, p.id).length) { p.alive = true; p.dying = false; } continue; }
     if (E.colonies(G, p.id).length) { p.dying = false; continue; }
     if (!p.dying) {
       p.dying = true;
@@ -262,8 +264,10 @@ function checkElimination(G) {
         else msg(G, q.id, `${p.name} has just been eliminated from the game.`, { icon: 'm9036', sound: 7020 });
       }
     } else {
+      // CONFIRMED: nothing removes the player's fleets; they still fight
+      // (the battle code never asks who is out) and a computer still moves
+      // them (EndTurn @a0004 runs DoComputerTurn for every computer slot)
       p.alive = false; p.dying = false;
-      G.fleets = G.fleets.filter(f => f.owner !== p.id);
     }
   }
   if (!G.over && G.year + 10 > 2009 && G.players.length > 1) {
@@ -297,6 +301,7 @@ E.registerRules('12', Object.assign({}, D, {
   welcome: WELCOME,
   economy, setupPlayer, settle, battle, battleText, checkElimination, designName,
   ai: '12',                // 1.2's own computer players (js/ai-12.js)
+  outComputersPlay: true,  // a computer that is out still commands its fleets (EndTurn @a0004)
   colOrder, att12, planetPower, x12,
 }));
 })(this);

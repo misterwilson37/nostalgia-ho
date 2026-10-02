@@ -154,7 +154,7 @@ puts more of its metal into defence: at least 70 % after a loss and at least 40 
 | Losing your last colony | at the end of each turn a player with no colonies is marked as dying, colony ships or not, and everyone is told "X has just been eliminated from the game." (STR# 1000.55–56) | CONFIRMED (`DoGameEndStuff @a4406`, `CheckEndGame @100702`) |
 | Out for good | still no colonies at the end of the next turn; a colony founded in between brings the player back | CONFIRMED (`DoGameEndStuff`) |
 | The winner | from 2010 on, with more than one player, the only player who is neither out nor dying: "Congratulations! You have just won the game." / "X has just won the game." (1000.57–58) | CONFIRMED (`CheckForWinner @a4948`, `CheckEndGame`) |
-| The fleets of a player out for good | 1.2 leaves them; the remake removes them | GUESS |
+| The fleets of a player out for good | nothing removes them. They still fight whoever comes (no battle routine checks who is out), and a computer keeps giving them orders: `EndTurn` runs `DoComputerTurn` for every computer slot whatever its state. A colony ship of theirs that lands brings the player back into the game: `DoGameEndStuff` sets an out player with a colony back to playing. Once someone has won, that stands. | CONFIRMED (`EndTurn @a0004`, `DoGameEndStuff @a4406`, `CheckForWinner @a4948`) |
 
 ## Computer players
 
