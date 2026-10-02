@@ -11,7 +11,8 @@ only needs image16.pff, sound.pff, texte.pff and p16.iff from disk 1 and
 looks for them anywhere under the folder it is given.)
 
 Writes assets/skins/amiga/: sprites/*.png, sounds/*.wav, strings.json
-(German) and manifest.json.
+(German) and manifest.json, plus sprites/endturn.png, an English copy of
+the German End Turn button.
 
 The Amiga game (German, 1994) is the DOS 2.0 game with the same pictures
 in the same order, so the sprites are written under the DOS skin's names
@@ -140,6 +141,42 @@ def picture(r, pal):
     return im.convert('RGBA')
 
 
+# An English End Turn button, drawn into the German one ("Zug Ende /
+# Amiga+Z", d5000) in the same lettering: E, n, d and u are copied from it,
+# T and r are made to match. Rows 0-6 are the capital height.
+GLYPHS = {
+    'E': ['#####', '.#..#', '.#...', '.###.', '.#...', '.#..#', '#####'],
+    'T': ['#####', '#.#.#', '..#..', '..#..', '..#..', '..#..', '.###.'],
+    'n': ['.....', '.....', '###..', '#..#.', '#..#.', '#..#.', '##.##'],
+    'd': ['..##.', '...#.', '.###.', '#..#.', '#..#.', '#..#.', '.##.#'],
+    'u': ['.....', '.....', '#..#.', '#..#.', '#..#.', '#..#.', '.##.#'],
+    'r': ['....', '....', '#.##', '##..', '#...', '#...', '##..'],
+}
+
+
+def end_turn(button):
+    im = button.copy()
+    px = im.load()
+    for y in range(6, 27):  # clear the German text
+        for x in range(3, 44):
+            px[x, y] = (51, 204, 255, 255)
+    for word, top in (('End', 6), ('Turn', 18)):
+        cols = []
+        for ch in word:
+            g = GLYPHS[ch]
+            cols += [[r[x] for r in g] for x in range(len(g[0]))]
+            if ch in 'ETr':  # the others end in a serif that touches the next letter
+                cols.append(['.'] * 7)
+        while all(v == '.' for v in cols[-1]):
+            cols.pop()
+        x0 = 3 + (41 - len(cols)) // 2
+        for i, col in enumerate(cols):
+            for y, v in enumerate(col):
+                if v == '#':
+                    px[x0 + i, top + y] = (0, 0, 0, 255)
+    return im
+
+
 def find(src, fn):
     for dp, _, fs in os.walk(src):
         for f in fs:
@@ -167,6 +204,9 @@ def main(src):
             im = edges_clear(im)
         im.save(os.path.join(OUT, 'sprites', key + '.png'), optimize=True)
         sprites.append(key)
+        if key == 'd5000':
+            end_turn(im).save(os.path.join(OUT, 'sprites', 'endturn.png'), optimize=True)
+            sprites.append('endturn')
     sounds = []
     for (sid, rate), r in zip(SOUNDS, records(find(src, 'sound.pff'))):
         with wave.open(os.path.join(OUT, 'sounds', '%d.wav' % sid), 'wb') as w:

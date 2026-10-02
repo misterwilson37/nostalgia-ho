@@ -4,7 +4,8 @@
 // is the DOS 2.0 game: the same pictures in the same order and the same
 // sounds. Its own look is the 16-colour set of those pictures, made for
 // Amigas without the AGA chips, plus its title picture and its End Turn
-// button ("Zug Ende", German for end of turn; Amiga+Z was the key). So
+// button (in German, "Zug Ende / Amiga+Z"; tools/extract/amiga.py redraws
+// it in English). So
 // this skin is the DOS skin (js/skins/dos/ui.js) pointed at the Amiga
 // pictures and sounds (tools/extract/amiga.py, which names them like the
 // DOS ones) with an Amiga Workbench-coloured page.
@@ -13,6 +14,8 @@
 const P = 'dos:'; // the DOS skin's name for its pictures
 window.HOTHEME_OVER = {
   dir: 'assets/skins/amiga/',
+  // the End Turn button in English, redrawn from the German one
+  endTurnPic: P + 'endturn',
   // the Amiga title picture is one piece
   title(frame, IMG, Sound) {
     const t = IMG[P + 'title'];

@@ -153,8 +153,9 @@ same pictures: 256 colours for AGA Amigas (identical to the DOS pictures, so not
 
 - **Its own:** the one-piece title picture ([`title`](../assets/skins/amiga/sprites/title.png))
   and the German End Turn button "Zug Ende / Amiga+Z"
-  ([`d5000`](../assets/skins/amiga/sprites/d5000.png)). A creative version could draw an
-  English one in the same style.
+  ([`d5000`](../assets/skins/amiga/sprites/d5000.png)). The skin shows an English copy
+  ([`endturn`](../assets/skins/amiga/sprites/endturn.png)) that `tools/extract/amiga.py`
+  draws into it: E, n, d and u copied from the German lettering, T and r made to match.
 - **Not in the Amiga set:** the DOS title halves (`d998`, `d999`; replaced by `title`),
   `d9999` and the unused icons `i128`, `i200`, `i202`, `i203`, `i3011`, `s200`–`202`.
 - **Amiga art not used yet:** three extra 40×40 planets

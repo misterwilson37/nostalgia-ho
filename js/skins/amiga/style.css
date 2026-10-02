@@ -20,5 +20,5 @@ button:not(.mbtn):not(.close):not(.tbtn):not(.clock):not([role=menuitem]) {
 .close, .tbtn { background: #aaaaaa; border-color: #fff #000 #000 #fff; }
 .card { background: #aaaaaa; border-top-color: #6688bb; }
 .frow.sel { border-color: #0055aa; }
-/* the End Turn button is the Amiga's own 48x32 "Zug Ende" picture */
+/* the End Turn button is a 48x32 picture: the Amiga's own "Zug Ende" one, redrawn in English */
 .clock.pic img { width: 96px; }
