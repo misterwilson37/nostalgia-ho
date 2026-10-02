@@ -10,6 +10,14 @@ The repository *is* the website: no build step. On GitHub, turn on
 Opening `index.html` straight from disk won't load the pictures and sounds;
 it needs to be served from a web address.
 
+## Several players on one computer
+
+New Game asks how many people are playing (up to 6). With more than one, everyone takes
+their turn in order, and a cover screen between turns asks the next person to sit down, so
+nobody sees anyone else's planets. The year moves on when the last person ends their turn.
+It works with every ruleset and skin. (The original games did this over a network with a
+shared game file; this remake doesn't have a server, so it's one computer, taking turns.)
+
 ## Layout
 
 - `index.html`: loads the game, then the skin (it has no page layout of its own)
