@@ -49,6 +49,8 @@ shared game file; this remake doesn't have a server, so it's one computer, takin
   pictures, sounds and title, and Workbench colours (art in `assets/skins/amiga/`). The
   Amiga game is the DOS game (same rules, same pictures in the same order), so play it with
   the DOS 2.0 rules
+- `js/skins/palm/`: the "5 (Palm OS)" skin: the classic page with the Palm OS game's art
+  and a Palm OS look (art in `assets/skins/palm/`, from `tools/extract/palm.py`)
 - `js/skins/mac12/` and `js/skins/mac3c/`: the Mac 1.2 (French, 1992, black and white) and
   Mac 3.0.1 colour skins, both the mac3 skin pointed at other pictures
 - `js/skins/mac3/`: the "Mac 3.0.1 (black and white)" skin: the DOS skin with the 1993 Mac

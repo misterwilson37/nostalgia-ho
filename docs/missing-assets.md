@@ -216,6 +216,25 @@ same names). Both use the DOS skin's code, so they are missing what the DOS skin
   and twinkling-star frames `p750`–`p758`.
 - **Not in 3.0.1:** `i128` and `i2499` (unused by the DOS skin too).
 
+## palm (Spaceward Ho! 5 for Palm OS, 1.0.4)
+
+The Palm game (MobileFreon, 2003) is 5.0 recompiled, and its pictures are 5.0.5's redrawn
+for 160×160 and 320×320 screens (the skin uses the 320×320 ones). It is the classic skin
+with Palm pictures where the Palm game has them (where each goes is in
+`docs/palm-findings.md`) and a Palm OS look.
+
+- **Its own:** the splash ([`b1007`](../assets/skins/palm/sprites/b1007.png)), planets drawn
+  whole in seven sizes (`b2101`–`b2107`; the classic skin builds them from layers), whole-ship
+  pictures for special designs (`b6000`–`b6015`) and three-part ships from 40×40 parts
+  (`b6100`–`b6404`), the won and lost pictures (`b9401`–`b9404`).
+- **No sounds at all:** the Palm game never got its sampled sounds (its release notes list
+  them as missing to the end). A creative version could add some.
+- **Palm art not used yet:** the smaller planets for tiny boxes (`b2201`–`b2207`), the
+  galaxy-shape icons (`b3201`–`b3207`), the Enemies and Allies marks (`b3300`–`b3302`), the
+  best-buddy halo (`b3401`), the explosion frames (`b5000`–`b5002`), the T/M bar (`b9500`).
+- **Borrowed from classic:** everything the classic skin draws by code, and any picture
+  5.0.5 has that the Palm game hasn't (the map uses Palm pictures throughout).
+
 ## w95 (4.0.5, Windows 95)
 
 Where 4.0.5 uses each picture and sound was read from SPACEHO.EXE. 4.0.5 sits between 2.0
