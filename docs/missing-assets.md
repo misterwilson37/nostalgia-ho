@@ -144,6 +144,29 @@ These are available in `assets/skins/dos/sprites/` for later:
 The Windows 3.1 build adds one picture the DOS one lacks: its own title card (`d1000`,
 "Windows Programming by Steven Ohmert"). It isn't extracted.
 
+## amiga (Amiga 2.0)
+
+The Amiga version (German, 1994; Amiga conversion by Stefan "Bebbo" Franke) is the DOS 2.0
+game, so it is missing everything the DOS skin is missing (above). It has two sets of the
+same pictures: 256 colours for AGA Amigas (identical to the DOS pictures, so not used) and
+16 colours for older Amigas, which is what this skin shows. Differences from the DOS skin:
+
+- **Its own:** the one-piece title picture ([`title`](../assets/skins/amiga/sprites/title.png))
+  and the German End Turn button "Zug Ende / Amiga+Z"
+  ([`d5000`](../assets/skins/amiga/sprites/d5000.png)). A creative version could draw an
+  English one in the same style.
+- **Not in the Amiga set:** the DOS title halves (`d998`, `d999`; replaced by `title`),
+  `d9999` and the unused icons `i128`, `i200`, `i202`, `i203`, `i3011`, `s200`–`202`.
+- **Amiga art not used yet:** three extra 40×40 planets
+  ([`d12758`](../assets/skins/amiga/sprites/d12758.png)–`d12760`), a help picture
+  ([`a539`](../assets/skins/amiga/sprites/a539.png)), an asterisk (`a536`) and the New
+  World Computing bird and name (`a537`, `a538`).
+- **Sounds:** the same 14 as DOS.
+- **Text:** the game's 838 German strings are in
+  [`strings.json`](../assets/skins/amiga/strings.json). The page itself stays in English.
+  The Amiga version also played by mail ("Briefspiel": each player's moves saved to a file
+  and merged) and over a network; neither can be done here (see hot seat in the README).
+
 ## w95 (4.0.5, Windows 95)
 
 Where 4.0.5 uses each picture and sound was read from SPACEHO.EXE. 4.0.5 sits between 2.0
