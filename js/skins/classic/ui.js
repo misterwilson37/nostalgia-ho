@@ -1635,7 +1635,7 @@ function newGameDialog() {
   const origOpts = (d) => ({ computers: d.computers === 'any' ? 4 : +d.computers, iqNum: +d.o_iq, start: d.start, cstart: d.o_cstart, shape: d.o_shape, size: +d.o_size, density: +d.o_density, buddies: !!d.buddies, yearsPerTurn: +d.o_years });
   const refresh = () => {
     const d = Object.fromEntries(new FormData(f).entries());
-    const orig = d.rules === 'original', dos = d.rules === 'dos', w95 = d.rules === '405', mac3 = d.rules === '301', mac12 = d.rules === '12';
+    const palm = d.rules === 'palm', orig = d.rules === 'original' || palm, dos = d.rules === 'dos', w95 = d.rules === '405', mac3 = d.rules === '301', mac12 = d.rules === '12';
     claudeBox.hidden = orig || dos || w95 || mac3 || mac12; origBox.hidden = !orig; dosBox.hidden = !dos; w95Box.hidden = !w95; mac3Box.hidden = !mac3; mac12Box.hidden = !mac12; startSel.hidden = dos || w95 || mac3 || mac12;
     // 1.2 fixes the computers (one) and has no women
     f.querySelector('select[name=computers]').closest('label').hidden = mac12;
@@ -1644,11 +1644,14 @@ function newGameDialog() {
     const csel = f.querySelector('select[name=computers]');
     for (const o of csel.options) if (/^\d+$/.test(o.value) && +o.value > 8) o.hidden = !w95 && !mac3;
     if (!w95 && !mac3 && +csel.value > 8) csel.value = '8';
+    // Palm OS 5 has no "Any" choice for the computers, and alliances, luck and novas are always on
+    csel.querySelector('option[value=any]').hidden = palm;
+    if (palm && csel.value === 'any') csel.value = '4';
     const nh = +d.humans || 1;
     for (const l of seats.querySelectorAll('[data-seat]')) l.hidden = +l.dataset.seat > nh;
     f.querySelector('select[name=computers] option[value="0"]').disabled = nh < 2;
     if (nh < 2 && d.computers === '0') f.querySelector('select[name=computers]').value = '1';
-    f.querySelector('fieldset.opts').hidden = !orig && !w95 && !mac3;
+    f.querySelector('fieldset.opts').hidden = (!orig && !w95 && !mac3) || palm;
     f.querySelector('input[name=novas]').closest('label').hidden = w95 || mac3; // 4.0.5 and 3.0.1 always have novas
     f.querySelector('input[name=luck]').closest('label').hidden = mac3; // 3.0.1 always has battle luck
     for (const o of f.querySelectorAll('.slider output')) { const inp = o.previousElementSibling; if (!o.querySelector('small')) o.textContent = inp.value; }
@@ -1669,7 +1672,7 @@ function newGameDialog() {
     if (nh < 2 && d.computers === '0') d.computers = '1';
     localStorage.setItem('ho5.modern', d.modern ? '1' : '0');
     const common = { modern: !!d.modern, humans, seed: (Math.random() * 2 ** 31) | 0, name: d.name || 'You', galaxy: d.galaxy || 'Milky Way', female: d.female === '1', computers: +d.computers, start: d.start, rules: d.rules, alliances: !!d.alliances, luck: !!d.luck, novas: !!d.novas };
-    if (d.rules === 'original') {
+    if (d.rules === 'original' || d.rules === 'palm') {
       localStorage.setItem('ho5.iq', d.o_iq);
       const o = origOpts(d);
       G = HO.newGame(Object.assign(common, o, { difficulty: HO.RULESETS.original.difficulty(o) }));

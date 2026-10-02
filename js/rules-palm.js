@@ -33,7 +33,7 @@ function afterSetup(G) {
 E.registerRules('palm', Object.assign({}, O, {
   label: 'Palm OS 5 (2003)',
   // the New Game window lists rulesets by year, then version (engine.js ruleOptions)
-  version: '1.0.4', platform: 'Palm OS', year: 2003,
+  version: '5', platform: 'Palm OS, version 1.0.4', year: 2003,
   maxStars: MAX_STARS,
   makeGalaxy, afterSetup,
 }));
