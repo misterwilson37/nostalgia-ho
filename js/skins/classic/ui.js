@@ -113,7 +113,7 @@ const Sound = {
   stopTheme() { if (this.theme) this.theme.pause(); },
 };
 // preferences (the original's Preferences window: Celsius, only important messages, review battles, hints)
-const Prefs = { celsius: false, important: false, review: false, hints: true, autoRoute: true };
+const Prefs = { celsius: false, important: false, review: false, hints: true, autoRoute: true, tips: true };
 try { const s = JSON.parse(localStorage.getItem('ho5.prefs') || '{}'); if (s.sound === false) Sound.on = false; if (s.music) Sound.music = true; for (const k in Prefs) if (s[k] != null) Prefs[k] = s[k]; } catch (e) {}
 function savePrefs() { try { localStorage.setItem('ho5.prefs', JSON.stringify(Object.assign({ sound: Sound.on, music: Sound.music }, Prefs))); } catch (e) {} }
 const degF = (f) => Prefs.celsius ? Math.round((f - 32) * 5 / 9) + '°C' : Math.round(f) + '°';
@@ -608,7 +608,7 @@ function bar(label, val, max, onSet, opts) {
     const f = Math.max(0, Math.min(1, cur + (ev.key === 'ArrowRight' ? 0.05 : -0.05)));
     fill.style.width = f * 100 + '%'; onSet(f, false); onSet(null, true);
   });
-  return el('div', { class: 'barrow' + (opts.rowCls ? ' ' + opts.rowCls : '') },
+  return el('div', { class: 'barrow' + (opts.rowCls ? ' ' + opts.rowCls : ''), 'data-help': opts.help || null },
     el('span', { class: 'blabel', title: opts.title || label }, label),
     track,
     el('span', { class: 'bval' }, opts.right || ''));
@@ -644,27 +644,27 @@ function renderPanel() {
   const pr = HO.projected(G, p);
   const net = pr.net;
   panel.append(el('section', { class: 'box info' },
-    row('Savings', money(p.savings), p.savings < 0 ? 'neg' : ''),
-    row('Income', money(pr.income), pr.income < 0 ? 'neg' : ''),
-    pr.interest ? row(pr.interest > 0 ? 'Interest' : 'Interest owed', money(pr.interest), pr.interest < 0 ? 'neg' : '') : null,
-    row('Metal', fmt(p.metal)),
+    row('Savings', money(p.savings), p.savings < 0 ? 'neg' : '', 'savings'),
+    row('Income', money(pr.income), pr.income < 0 ? 'neg' : '', 'income'),
+    pr.interest ? row(pr.interest > 0 ? 'Interest' : 'Interest owed', money(pr.interest), pr.interest < 0 ? 'neg' : '', 'interest') : null,
+    row('Metal', fmt(p.metal), '', 'metal'),
   ));
   // budget bars
   const ents = budgetEntries();
   const spendable = Math.max(0, net);
-  const bb = el('section', { class: 'box' }, el('h3', null, 'Budget'));
+  const bb = el('section', { class: 'box' }, el('h3', { 'data-help': 'budget' }, 'Budget'));
   ents.forEach((e, i) => {
     const s = e.star != null ? G.stars[e.star] : null;
     const amt = e.get() * spendable;
     bb.append(bar(e.label, e.get(), 1, (f, end) => {
       if (f != null) { setShare(ents, i, f); ents.forEach((x, j) => { const r = bb.querySelectorAll('.barrow')[j]; if (r) { r.querySelector('.fill').style.width = x.get() * 100 + '%'; r.querySelector('.bval').textContent = money(x.get() * spendable); } }); }
       if (end) { renderPanel(); save(); }
-    }, { right: money(amt), cls: e.key === 'tech' ? 'tech' : e.key === 'savings' ? 'sav' : 'col', rowCls: s && UI.sel === s.id ? 'hl' : '' }));
+    }, { right: money(amt), cls: e.key === 'tech' ? 'tech' : e.key === 'savings' ? 'sav' : 'col', rowCls: s && UI.sel === s.id ? 'hl' : '', help: e.key === 'tech' ? 'tech' : e.key === 'savings' ? 'savingsBar' : 'colonyBar' }));
   });
   if (net <= 0) bb.append(el('p', { class: 'warn' }, 'After supporting your colonies and paying interest, there is nothing left to spend.'));
   panel.append(bb);
   // tech bars
-  const tb = el('section', { class: 'box' }, el('h3', null, 'Technology'));
+  const tb = el('section', { class: 'box' }, el('h3', { 'data-help': 'tech' }, 'Technology'));
   const techSpend = spendable * p.budget.tech;
   const tents = HO.TECHS.filter(k => !(k === 'radical' && HO.feature(G, 'noRadical'))).map(k => ({ key: k, get: () => p.talloc[k], set: (v) => p.talloc[k] = v }));
   let tt = tents.reduce((a, e) => a + e.get(), 0) || 1; tents.forEach(e => e.set(e.get() / tt));
@@ -675,14 +675,14 @@ function renderPanel() {
     tb.append(bar(`${tnames[e.key]}${lvl !== '' ? ' ' + lvl : ''}`, e.get(), 1, (f, end) => {
       if (f != null) { setShare(tents, i, f); tents.forEach((x, j) => { const r = tb.querySelectorAll('.barrow')[j]; if (r) r.querySelector('.fill').style.width = x.get() * 100 + '%'; }); }
       if (end) { renderPanel(); save(); }
-    }, { right: money(e.get() * techSpend), cls: 'tbar', title: nm && !/^\d+$/.test(nm) ? nm : tnames[e.key] }));
+    }, { right: money(e.get() * techSpend), cls: 'tbar', title: nm && !/^\d+$/.test(nm) ? nm : tnames[e.key], help: e.key }));
   });
   panel.append(tb);
   // planet
   if (UI.sel != null) panel.append(planetBox(UI.sel));
   panel.scrollTop = scroll;
 }
-function row(k, v, cls) { return el('div', { class: 'kv ' + (cls || '') }, el('span', null, k), el('b', null, v)); }
+function row(k, v, cls, help) { return el('div', { class: 'kv ' + (cls || ''), 'data-help': help || null }, el('span', null, k), el('b', null, v)); }
 function planetBox(sid) {
   const p = me(), s = G.stars[sid], k = HO.know(G, p, sid);
   const look = starLook(sid);
@@ -695,10 +695,10 @@ function planetBox(sid) {
   if (s.owner === ME || k.explored) {
     const src = s.owner === ME ? s : k;
     const gs = src.g / p.homeG, ts = 72 + (src.t - p.homeT);
-    box.append(row('Gravity', gs.toFixed(2) + 'G' + classNote(gs)), row('Temp', degF(ts)), row('Metal', fmt(src.metal)));
+    box.append(row('Gravity', gs.toFixed(2) + 'G' + classNote(gs), '', 'gravity'), row('Temp', degF(ts), '', 'temp'), row('Metal', fmt(src.metal), '', 'planetMetal'));
     if (s.owner === ME) {
       const inc = HO.planetIncome(G, p, s);
-      box.append(row('Population', fmt(s.pop * 1e6)), row('Max population', fmt(HO.maxPop(G, p, s) * 1e6)), row('Income', money(inc), inc < 0 ? 'neg' : ''));
+      box.append(row('Population', fmt(s.pop * 1e6), '', 'population'), row('Max population', fmt(HO.maxPop(G, p, s) * 1e6), '', 'maxPop'), row('Income', money(inc), inc < 0 ? 'neg' : '', 'planetIncome'));
       const terraOK = Math.abs(HO.seenT(p, s) - 72) > 0.5, metalOK = s.metal > 0;
       if (terraOK && metalOK) {
         // a balance, not an amount: the colony's money is split between
@@ -710,12 +710,12 @@ function planetBox(sid) {
           oninput: (ev) => { s.terra = ev.target.value / 100; show(); }, onchange: save });
         const show = () => { inp.style.setProperty('--split', pct() + '%'); lt.textContent = pct() + '%'; rt.textContent = (100 - pct()) + '%'; inp.setAttribute('aria-valuetext', `${pct()}% terraforming, ${100 - pct()}% mining`); };
         show();
-        box.append(el('div', { class: 'tm' }, el('span', { class: 'tml' }, 'Terraform ', lt), inp, el('span', { class: 'tmr' }, rt, ' Mine')));
+        box.append(el('div', { class: 'tm', 'data-help': 'terraMine' }, el('span', { class: 'tml' }, 'Terraform ', lt), inp, el('span', { class: 'tmr' }, rt, ' Mine')));
       } else box.append(el('p', { class: 'note' }, !terraOK && !metalOK ? 'Fully terraformed and mined out. Its budget goes to savings.' : !terraOK ? 'Fully terraformed; its budget goes to mining.' : 'No metal left; its budget goes to terraforming.'));
       if (HO.feature(G, 'buildQueue')) box.append(yardBox(s));
       box.append(el('div', { class: 'btns' },
-        el('button', { onclick: () => openBuild(sid) }, HO.feature(G, 'buildQueue') ? 'Queue ships…' : 'Build ships…'),
-        s.id !== p.homeStar || HO.colonies(G, ME).length > 1 ? el('button', { class: 'quiet', onclick: () => confirmBox(`Evacuate ${s.name}? Your colonists will leave; satellites stay.`, () => { HO.evacuate(G, ME, sid); Sound.play(7002); renderPanel(); draw(); save(); }) }, 'Evacuate') : null));
+        el('button', { onclick: () => openBuild(sid), 'data-help': 'build' }, HO.feature(G, 'buildQueue') ? 'Queue ships…' : 'Build ships…'),
+        s.id !== p.homeStar || HO.colonies(G, ME).length > 1 ? el('button', { class: 'quiet', 'data-help': 'evacuate', onclick: () => confirmBox(`Evacuate ${s.name}? Your colonists will leave; satellites stay.`, () => { HO.evacuate(G, ME, sid); Sound.play(7002); renderPanel(); draw(); save(); }) }, 'Evacuate') : null));
     } else if (k.owner >= 0 && k.owner !== ME) {
       box.append(row('Population', k.pop ? '~' + fmt(k.pop * 1e6) : '?'));
     }
@@ -761,7 +761,7 @@ function fleetRow(f, inbound) {
     const acts = el('div', { class: 'facts' });
     if (f.dest != null) acts.append(el('button', { class: 'quiet', onclick: (e) => { e.stopPropagation(); HO.cancelMove(G, f); Sound.play(4000); renderPanel(); draw(); } }, 'Stay here'));
     if (HO.fleetCount(f) > 1) acts.append(el('button', { class: 'quiet', onclick: (e) => { e.stopPropagation(); openSplit(f); } }, 'Split…'));
-    if (HO.feature(G, 'waypoints')) acts.append(el('button', { class: 'quiet', onclick: (e) => { e.stopPropagation(); startRoute(f); } }, 'Plan route…'));
+    if (HO.feature(G, 'waypoints')) acts.append(el('button', { class: 'quiet', 'data-help': 'route', onclick: (e) => { e.stopPropagation(); startRoute(f); } }, 'Plan route…'));
     if (HO.feature(G, 'stances')) acts.append(el('select', { 'aria-label': 'Battle stance', onclick: (e) => e.stopPropagation(), onchange: (e) => { f.stance = e.target.value; save(); } },
       ...[['normal', 'Normal'], ['offensive', 'Offensive'], ['defensive', 'Defensive']].map(([v, t]) => el('option', { value: v, selected: (f.stance || 'normal') === v ? 'selected' : false }, t))));
     if (HO.feature(G, 'lateArrival')) acts.append(el('label', { class: 'chk', onclick: (e) => e.stopPropagation() }, el('input', { type: 'checkbox', checked: f.delayed ? 'checked' : false, onchange: (e) => { f.delayed = e.target.checked; save(); } }), el('span', null, 'Arrive late')));
@@ -857,10 +857,10 @@ function renderMsg() {
     return;
   }
   if (T.endTurnPic && A.img[T.endTurnPic]) { // the theme's own End Turn button picture
-    box.append(el('button', { class: 'clock pic', onclick: doEndTurn, 'aria-label': 'End turn' }, el('img', { src: A.img[T.endTurnPic], alt: '' })));
+    box.append(el('button', { class: 'clock pic', onclick: doEndTurn, 'aria-label': 'End turn', 'data-help': 'endTurn' }, el('img', { src: A.img[T.endTurnPic], alt: '' })));
     return;
   }
-  const clock = el('button', { class: 'clock', onclick: doEndTurn, 'aria-label': 'End turn' },
+  const clock = el('button', { class: 'clock', onclick: doEndTurn, 'aria-label': 'End turn', 'data-help': 'endTurn' },
     el('span', { class: 'face', html: '<svg viewBox="0 0 40 40" width="34" height="34" aria-hidden="true"><circle cx="20" cy="20" r="17" fill="#fffef6" stroke="#222" stroke-width="2.5"/><path d="M20 20V8M20 20l8 5" stroke="#222" stroke-width="3" stroke-linecap="round"/></svg>' }),
     el('span', null, 'End turn'));
   box.append(clock);
@@ -1401,7 +1401,8 @@ function openPrefs() {
   const box = (k, label) => el('label', { class: 'chk' }, el('input', { type: 'checkbox', checked: Prefs[k] ? 'checked' : false, onchange: (e) => { Prefs[k] = e.target.checked; savePrefs(); renderPanel(); } }), el('span', null, label));
   modal('Preferences', el('div', { class: 'prefs' }, box('important', 'Show only the most important messages'), box('review', 'Review battles as they happen'),
     box('hints', 'Give helpful game play hints'), box('celsius', 'Temperatures in Celsius (not °F)'),
-    box('autoRoute', 'Plan a route through my colonies when I send a fleet too far')), { cls: 'small' });
+    box('autoRoute', 'Plan a route through my colonies when I send a fleet too far'),
+    box('tips', 'Explain things when the pointer rests on them (text from the original manual)')), { cls: 'small' });
 }
 
 // ----- help -----
@@ -1591,6 +1592,50 @@ document.addEventListener('keydown', (e) => {
   if (UI.modal || !G) return;
   if (e.key === 'Tab' && e.target === document.body) { e.preventDefault(); nextFleet(); }
 });
+
+// ---------- hover help ----------
+// Anything with data-help="key" explains itself, in the words of the
+// original manual (js/help.js), when the pointer rests on it, when it gets
+// keyboard focus, or on a long press on a touch screen.
+const Tip = { el: null, timer: 0, at: null };
+function tipShow(target) {
+  const H = window.HOHELP || {}, h = H[target.dataset.help];
+  if (!h || !Prefs.tips) return;
+  if (!Tip.el) { Tip.el = el('div', { class: 'tip', role: 'tooltip', id: 'hotip' }); document.body.append(Tip.el); }
+  Tip.el.innerHTML = '';
+  Tip.el.append(el('p', null, h[0]), el('small', null, 'Adapted from the Spaceward Ho! manual: ' + h[1]));
+  Tip.el.hidden = false; Tip.at = target;
+  target.setAttribute('aria-describedby', 'hotip');
+  const r = target.getBoundingClientRect(), w = Math.min(320, window.innerWidth - 16);
+  Tip.el.style.width = w + 'px';
+  let x = Math.min(Math.max(8, r.left), window.innerWidth - w - 8);
+  let y = r.bottom + 6;
+  Tip.el.style.left = x + 'px'; Tip.el.style.top = y + 'px';
+  const th = Tip.el.getBoundingClientRect().height;
+  if (y + th > window.innerHeight - 8) Tip.el.style.top = Math.max(8, r.top - th - 6) + 'px';
+}
+function tipHide() {
+  clearTimeout(Tip.timer);
+  if (Tip.at) Tip.at.removeAttribute('aria-describedby');
+  if (Tip.el) Tip.el.hidden = true; Tip.at = null;
+}
+document.addEventListener('pointerover', (e) => {
+  if (e.pointerType === 'touch') return;
+  const t = e.target.closest && e.target.closest('[data-help]');
+  if (!t) { if (Tip.at) tipHide(); return; }
+  if (t === Tip.at) return;
+  tipHide(); Tip.timer = setTimeout(() => tipShow(t), 450);
+});
+document.addEventListener('pointerdown', (e) => {
+  tipHide();
+  if (e.pointerType !== 'touch') return;
+  const t = e.target.closest && e.target.closest('[data-help]');
+  if (t) Tip.timer = setTimeout(() => tipShow(t), 550); // long press
+});
+document.addEventListener('pointerup', (e) => { if (e.pointerType === 'touch' && !Tip.at) clearTimeout(Tip.timer); });
+document.addEventListener('focusin', (e) => { const t = e.target.closest && e.target.closest('[data-help]'); if (t) tipShow(t); });
+document.addEventListener('focusout', tipHide);
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') tipHide(); });
 
 // ---------- boot ----------
 window.addEventListener('DOMContentLoaded', () => {

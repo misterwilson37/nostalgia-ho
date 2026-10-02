@@ -197,3 +197,11 @@ button:focus-visible { outline: 2px solid var(--hi); outline-offset: 1px; }
 .tm input[type=range]::-moz-range-thumb { width: 8px; height: 18px; border-radius: 3px; background: #fff; border: 1px solid #222; cursor: ew-resize; }
 .tm .tml { color: #2f6e2f; white-space: nowrap; } .tm .tmr { color: #8a3d22; white-space: nowrap; }
 .tm .tmv { font-variant-numeric: tabular-nums; font-size: 11px; }
+/* hover help (text from the original manual, js/help.js) */
+.tip { position: fixed; z-index: 90; background: #fffbe6; color: var(--ink); border: 1px solid #222; box-shadow: 3px 3px 0 rgba(0,0,0,.45); padding: 7px 9px; font-size: 12px; line-height: 1.35; pointer-events: none; }
+.tip[hidden] { display: none; }
+.tip p { margin: 0 0 4px; }
+.tip small { color: var(--sub); font-style: italic; }
+[data-help] { cursor: help; }
+button[data-help] { cursor: pointer; }
+.barrow[data-help] .track, .tm[data-help] input { cursor: ew-resize; }
