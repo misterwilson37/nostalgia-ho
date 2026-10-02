@@ -265,11 +265,24 @@ function report(n, ...args) {
   let i = 0;
   return ((DATA.reports || [])[n - 1] || '').replace(/%(\.\*)?[sd]|%%/g, (m) => m === '%%' ? '%' : String(args[i++] ?? ''));
 }
+// Every human player has their own messages (p.inbox); computers get none.
 function msg(G, pid, text, opt) {
   if (pid == null) return;
   const p = G.players[pid];
   if (!p || !p.human) return;
-  G.inbox.push(Object.assign({ text }, opt || {}));
+  (p.inbox || (p.inbox = [])).push(Object.assign({ text }, opt || {}));
+}
+// news for every human player
+function msgAll(G, text, opt) { for (const p of G.players) msg(G, p.id, text, opt); }
+// Hot seat: several humans take turns on one computer. Humans are players
+// 0..n-1 and computers come after them; G.cur is the human whose turn it is
+// (only the skin uses it, the game rules don't).
+const humans = (G) => G.players.filter(p => p.human);
+// a saved game from before hot seat kept one shared inbox
+function upgradeSave(G) {
+  if (G.inbox) { if (G.players[0] && !G.players[0].inbox) G.players[0].inbox = G.inbox; delete G.inbox; }
+  if (G.cur == null) G.cur = 0;
+  return G;
 }
 function fmt(n) { return Math.round(n).toLocaleString('en-US'); }
 
@@ -408,11 +421,14 @@ function newGame(opts) {
   const G = {
     v: 1, rules: RULESETS[opts.rules] ? opts.rules : 'claude',
     rs: (opts.seed >>> 0) || ((Date.now() ^ 0x5eed) >>> 0), year: 2000, turn: 0, nextId: 1,
-    opts, stat: { battles: 0, captures: 0, colonized: 0 }, stars: [], players: [], fleets: [], battles: [], inbox: [], over: false, winner: -1, log: [],
+    opts, stat: { battles: 0, captures: 0, colonized: 0 }, stars: [], players: [], fleets: [], battles: [], cur: 0, over: false, winner: -1, log: [],
   };
   const rs = rules(G);
-  const nComp = clamp(opts.computers | 0, 1, 15);
-  const nPlayers = nComp + 1;
+  // opts.humans: [{ name, female }] for a hot-seat game; else one human from opts.name / opts.female
+  const H = Array.isArray(opts.humans) && opts.humans.length ? opts.humans.slice(0, 8) : [{ name: opts.name, female: opts.female }];
+  const nHum = H.length;
+  const nComp = clamp(opts.computers | 0, nHum > 1 ? 0 : 1, 16 - nHum);
+  const nPlayers = nComp + nHum;
   // a ruleset may lay out the galaxy itself (and pick the home stars)
   const gal = rs.makeGalaxy ? rs.makeGalaxy(G, opts, nPlayers) : null;
   let pts;
@@ -437,15 +453,15 @@ function newGame(opts) {
   const faces = shuffle(G, [...Array(16).keys()]);
   const AI = aiOf(G);
   for (let i = 0; i < nPlayers; i++) {
-    const human = i === 0;
-    const female = human ? !!opts.female : R(G) < 0.45;
+    const human = i < nHum;
+    const female = human ? !!H[i].female : R(G) < 0.45;
     let name;
-    if (human) name = opts.name || 'You';
+    if (human) name = H[i].name || (nHum > 1 ? 'Player ' + (i + 1) : 'You');
     else { do { name = pick(G, female ? DATA.femaleNames : DATA.maleNames) || ('Computer ' + i); } while (usedNames.has(name) && usedNames.size < 40); }
     usedNames.add(name);
     const home = G.stars[homes[i]];
     // a ruleset may give each computer its own skill and home system
-    const cs = !human && rs.computerSetup ? rs.computerSetup(G, opts, i - 1, nComp) : null;
+    const cs = !human && rs.computerSetup ? rs.computerSetup(G, opts, i - nHum, nComp) : null;
     const start = human ? (opts.start || 'normal') : cs ? cs.start : (opts.cstart || 'normal');
     const p = {
       id: i, name, human, female, face: human ? -1 : faces[i % 16], alive: true, surrendered: false,
@@ -463,9 +479,9 @@ function newGame(opts) {
   }
   rs.afterSetup(G);
   G.fleets.forEach(f => f.newThisTurn = false);
-  G.inbox = [];
-  msg(G, 0, 'Spaceward Ho! by Peter Commons. Designed by Joe Williams.', { icon: 'm9004', sound: 11111 });
-  msg(G, 0, 'Click here to make this message go away. Click on the clock to end your turn.', { icon: 'm9024' });
+  for (const p of G.players) p.inbox = [];
+  msgAll(G, 'Spaceward Ho! by Peter Commons. Designed by Joe Williams.', { icon: 'm9004', sound: 11111 });
+  msgAll(G, 'Click here to make this message go away. Click on the clock to end your turn.', { icon: 'm9024' });
   return G;
 }
 function placeStars(G, n, W, H, shape) {
@@ -523,7 +539,7 @@ function chooseHomes(G, k) {
 // ---------- turn processing ----------
 function endTurn(G) {
   if (G.over) return;
-  G.inbox = [];
+  for (const p of G.players) p.inbox = [];
   // "Years per turn" (Original rules): one End Turn runs several 10-year
   // turns; the computers only plan on the first and the winner is only
   // checked on the last (FUN_100728d0)
@@ -536,7 +552,7 @@ function turnStep(G, first, last) {
   const rs = rules(G), AI = aiOf(G);
   if (first) {
     for (const p of G.players) if (p.alive && !p.human) AI.turn(G, p);
-    if (G.players[0].auto && G.players[0].alive) AI.turn(G, G.players[0]);
+    for (const p of G.players) if (p.human && p.auto && p.alive) AI.turn(G, p);
   }
   if (feature(G, 'surrender')) processSurrenders(G);
   for (const p of G.players) if (p.alive && !p.surrendered) rs.economy(G, p);
@@ -726,25 +742,34 @@ function checkElimination(G) {
     if (!hasCol && !hasColShip) {
       p.alive = false;
       G.fleets = G.fleets.filter(f => f.owner !== p.id);
-      if (p.human) msg(G, 0, 'You have just been eliminated from the game.', { icon: 'p3040', sound: 7020, big: 'p3040' });
-      else msg(G, 0, `${p.name} has just been eliminated from the game.`, { icon: 'm9036', sound: 7020 });
+      for (const q of humans(G)) {
+        if (q === p) msg(G, q.id, 'You have just been eliminated from the game.', { icon: 'p3040', sound: 7020, big: 'p3040' });
+        else msg(G, q.id, `${p.name} has just been eliminated from the game.`, { icon: 'm9036', sound: 7020 });
+      }
     }
   }
   const alive = G.players.filter(p => p.alive);
   // with alliances on, the game ends when every survivor is allied with every other
   const allAllied = feature(G, 'alliances') && alive.length > 1 && alive.every(a => alive.every(b => isAllied(G, a.id, b.id)));
   if (!G.over && allAllied) {
-    G.over = true; G.winner = alive.some(p => p.id === 0) ? 0 : alive[0].id; G.winners = alive.map(p => p.id);
-    for (const p of alive) if (p.id !== 0 && G.winner === 0) msg(G, 0, report(78, p.name), { icon: 'p3030' });
-    if (G.winner === 0) msg(G, 0, 'Wow! You won! You and your allies have conquered the galaxy. Congratulations!', { icon: 'p3030', sound: 7021, big: 'p3030' });
-    else msg(G, 0, `${alive.map(p => p.name).join(' and ')} have just won the game.`, { icon: 'p3040', sound: 7020, big: 'p3040' });
+    const hw = alive.find(p => p.human);
+    G.over = true; G.winner = hw ? hw.id : alive[0].id; G.winners = alive.map(p => p.id);
+    for (const q of humans(G)) {
+      if (alive.includes(q)) {
+        for (const p of alive) if (p !== q) msg(G, q.id, report(78, p.name), { icon: 'p3030' });
+        msg(G, q.id, 'Wow! You won! You and your allies have conquered the galaxy. Congratulations!', { icon: 'p3030', sound: 7021, big: 'p3030' });
+      } else msg(G, q.id, `${alive.map(p => p.name).join(' and ')} have just won the game.`, { icon: 'p3040', sound: 7020, big: 'p3040' });
+    }
   }
   if (!G.over && alive.length <= 1) {
     G.over = true; G.winner = alive.length ? alive[0].id : -1;
-    if (G.winner === 0) msg(G, 0, 'Wow! You won! You have conquered the galaxy. Congratulations!', { icon: 'p3030', sound: 7021, big: 'p3030' });
-    else if (G.winner > 0) msg(G, 0, `${G.players[G.winner].name} has just won the game.`, { icon: 'p3040', sound: 7020, big: 'p3040' });
+    for (const q of humans(G)) {
+      if (G.winner === q.id) msg(G, q.id, 'Wow! You won! You have conquered the galaxy. Congratulations!', { icon: 'p3030', sound: 7021, big: 'p3030' });
+      else if (G.winner >= 0) msg(G, q.id, `${G.players[G.winner].name} has just won the game.`, { icon: 'p3040', sound: 7020, big: 'p3040' });
+    }
   }
-  if (!G.players[0].alive && !G.over) { G.over = true; G.winner = -2; }
+  // every human is out: the game ends for them
+  if (!G.over && !G.players.some(p => p.human && p.alive)) { G.over = true; G.winner = -2; }
 }
 function recordHistory(G, p) {
   const cols = colonies(G, p.id);
@@ -760,7 +785,7 @@ function score(G, p) {
 
 // ---------- serialization ----------
 function save(G) { return JSON.stringify(G); }
-function load(str) { const G = JSON.parse(str); if (!G.rules) G.rules = 'claude'; return G; }
+function load(str) { const G = JSON.parse(str); if (!G.rules) G.rules = 'claude'; return upgradeSave(G); }
 
 const API = {
   DATA, SHIP_TYPES, TYPES: SHIP_TYPES, TECHS,
@@ -771,7 +796,7 @@ const API = {
   newGame, endTurn, buildShips, unbuildShip, designLimits, designMin, designCost, shipCostNow, canBuildType, findOrCreateDesign, getDesign,
   fleetCount, fleetDesigns, fleetSpeed, fleetMaxRange, fleetHas, fleetKind, fleetLabel, orderMove, orderPath, cancelMove, canReach, canMerge, queueShips, unqueueShip,
   newFleet, addShipsToStar, mergeFleets, splitFleet, scrapFleet, evacuate, colonies, seenG, seenT, maxPop, planetClass, planetIncome,
-  scrapDesign, liveDesigns, isFriend, isAllied, isBuddy, hasColonyAt, designName, report, setPact, give, surrender, sendChat, setArmageddon, hostileAt, know, observe, msg, starDist, dist, projected, techSum, score, save, load, borrowLimit, fmt,
+  scrapDesign, liveDesigns, isFriend, isAllied, isBuddy, hasColonyAt, designName, report, setPact, give, surrender, sendChat, setArmageddon, hostileAt, know, observe, msg, msgAll, humans, starDist, dist, projected, techSum, score, save, load, borrowLimit, fmt,
 };
 if (typeof module !== 'undefined') {
   module.exports = API;

@@ -992,13 +992,13 @@ function randomEvents(G) {
   if (G.opts.armageddon !== false && humans.length && humans.every(p => p.armageddon)) {
     const quiet = G.stars.filter(s => !s.nova);
     for (const p of humans) p.armageddon = false;
-    if (quiet.length < 2) msg(G, 0, 'Hmm! The armadeddon device was activated, but there wasn\'t enough mass in the galaxy to get it to work…', { icon: 'm9036' });
+    if (quiet.length < 2) E.msgAll(G, 'Hmm! The armadeddon device was activated, but there wasn\'t enough mass in the galaxy to get it to work…', { icon: 'm9036' });
     else {
       const sh = E.shuffle(G, quiet.slice());
       for (let i = 0; i < trunc(sh.length / 2); i++) sh[i].nova = 200;
       G.armageddons = (G.armageddons || 0) + 1;
-      msg(G, 0, 'Oh No! It’s armageddon!', { icon: 'm9036', sound: 7020 });
-      msg(G, 0, 'The armageddon device has caused half of the stars to supernova!', { icon: 'm9036' });
+      E.msgAll(G, 'Oh No! It’s armageddon!', { icon: 'm9036', sound: 7020 });
+      E.msgAll(G, 'The armageddon device has caused half of the stars to supernova!', { icon: 'm9036' });
     }
   }
   const thrown = {};

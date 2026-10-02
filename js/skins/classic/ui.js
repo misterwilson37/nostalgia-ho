@@ -121,7 +121,9 @@ const degText = (t) => Prefs.celsius ? t.replace(/(-?\d+)°(F)?/g, (m, n) => Mat
 
 // ---------- state ----------
 let G = null;            // game
-const me = () => G.players[0];
+// whose turn it is (several humans can share one computer: hot seat)
+let ME = 0;
+const me = () => G.players[ME];
 const UI = {
   sel: null,             // selected star id
   selFleet: null,        // selected fleet id
@@ -237,16 +239,16 @@ function starLook(sid) {
 }
 function ourStarLook(sid) {
   const p = me(), s = G.stars[sid], k = HO.know(G, p, sid);
-  const nv = novaLook(s.owner === 0 ? s : k);
+  const nv = novaLook(s.owner === ME ? s : k);
   if (nv) return { base: nv };
-  if (s.owner === 0) return { base: planetSprite(p, s, s.metal), pic: planetPic(p, s, s.metal), hat: hatFor(p, s) };
+  if (s.owner === ME) return { base: planetSprite(p, s, s.metal), pic: planetPic(p, s, s.metal), hat: hatFor(p, s) };
   if (!k.explored) {
     if (k.battleOnly) return { base: 'battle' };
-    const coming = G.fleets.some(f => f.owner === 0 && (f.to === sid || f.dest === sid));
+    const coming = G.fleets.some(f => f.owner === ME && (f.to === sid || f.dest === sid));
     return { base: coming ? 'soon' : 'unknown' };
   }
   const look = { base: planetSprite(p, k, k.metal), pic: planetPic(p, k, k.metal) };
-  if (k.owner > 0 && G.players[k.owner]) { const o = G.players[k.owner]; look.hat = 'bad' + o.face + '_' + (o.female ? 1 : 0); }
+  if (k.owner >= 0 && k.owner !== ME && G.players[k.owner]) { const o = G.players[k.owner]; look.hat = 'bad' + o.face + '_' + (o.female ? 1 : 0); }
   return look;
 }
 // The original (FUN_10090170) picks one of seven planet sizes from the
@@ -355,7 +357,7 @@ function draw() {
   UI.dots = [];
   // routes of my fleets
   for (const f of G.fleets) {
-    if (f.owner !== 0) continue;
+    if (f.owner !== ME) continue;
     if (f.to != null) {
       const a = G.stars[f.from], b = G.stars[f.to];
       drawRoute(a, b, HO.fleetSpeed(G, f), '#7fd0ff', f.prog / f.dist);
@@ -386,24 +388,24 @@ function draw() {
     const im = look.pic || IMG[look.base];
     if (im) { const z = ps * (look.scale || 1); cx.drawImage(im, x - z / 2, y - z / 2, z, z); }
     // satellites ring
-    const sats = G.fleets.filter(f => f.star === s.id && f.sat && (f.owner === 0 || visibleTo(s.id)));
+    const sats = G.fleets.filter(f => f.star === s.id && f.sat && (f.owner === ME || visibleTo(s.id)));
     if (sats.length) {
-      cx.strokeStyle = sats.some(f => f.owner === 0) ? 'rgba(120,230,255,0.9)' : 'rgba(255,120,200,0.9)';
+      cx.strokeStyle = sats.some(f => f.owner === ME) ? 'rgba(120,230,255,0.9)' : 'rgba(255,120,200,0.9)';
       cx.lineWidth = 1.5; cx.beginPath(); cx.ellipse(x, y, ps * 0.62, ps * 0.62, 0, 0, Math.PI * 2); cx.stroke();
     }
-    if (s.owner > 0 && HO.feature(G, 'alliances') && HO.isAllied(G, 0, s.owner) && HO.know(G, me(), s.id).explored && IMG.haloAlly) cx.drawImage(IMG.haloAlly, x - ps * 0.6, y + ps * 0.28, ps * 1.2, ps * 0.4);
+    if (s.owner >= 0 && s.owner !== ME && HO.feature(G, 'alliances') && HO.isAllied(G, ME, s.owner) && HO.know(G, me(), s.id).explored && IMG.haloAlly) cx.drawImage(IMG.haloAlly, x - ps * 0.6, y + ps * 0.28, ps * 1.2, ps * 0.4);
     if (look.hat && IMG[look.hat]) { const h = ps * 1.18; cx.drawImage(IMG[look.hat], x - h / 2, y - h * 0.62, h, h * (IMG[look.hat].height / IMG[look.hat].width)); }
     // name
     if (UI.view.s > 18) {
       cx.font = `${Math.max(9, Math.min(12, UI.view.s / 3.6))}px Geneva, Verdana, sans-serif`;
-      cx.textAlign = 'center'; cx.fillStyle = s.owner === 0 ? '#fff6d0' : '#9aa3c7';
+      cx.textAlign = 'center'; cx.fillStyle = s.owner === ME ? '#fff6d0' : '#9aa3c7';
       cx.fillText(s.name, x, y + ps / 2 + 11);
     }
     drawDots(s, x, y, ps);
   }
   // in-transit dots
   for (const f of G.fleets) {
-    if (f.owner !== 0 || f.to == null) continue;
+    if (f.owner !== ME || f.to == null) continue;
     const a = G.stars[f.from], b = G.stars[f.to], t = Math.min(1, f.prog / f.dist);
     const x = sx(a.x + (b.x - a.x) * t), y = sy(a.y + (b.y - a.y) * t);
     const w = 14, box = drawMarkers(f, x - w / 2, y - w / 2, w, 1);
@@ -439,8 +441,8 @@ function draw() {
   }
 }
 function visibleTo(sid) {
-  if (G.stars[sid].owner === 0) return true;
-  return G.fleets.some(f => f.owner === 0 && f.star === sid && f.to == null);
+  if (G.stars[sid].owner === ME) return true;
+  return G.fleets.some(f => f.owner === ME && f.star === sid && f.to == null);
 }
 // Fleet markers (FUN_10091640): one small square per design in the fleet,
 // side by side; the picture's column is the ship type and its row the
@@ -449,7 +451,7 @@ function visibleTo(sid) {
 // empty), faded (that design's weapons are more than 3 levels behind
 // yours) and both; everyone else's are pink.
 function fleetMarkers(f) {
-  const p = G.players[f.owner], mine = f.owner === 0;
+  const p = G.players[f.owner], mine = f.owner === ME;
   const low = !f.sat && f.fuel < HO.fleetMaxRange(G, f) - 1e-9;
   const keep = !HO.rules(G).colonyShipUsedUp;
   const out = [];
@@ -469,18 +471,18 @@ function fleetMarkers(f) {
 function drawMarkers(f, dx, dy, w, dir) {
   const ims = fleetMarkers(f), n = Math.max(1, ims.length), span = n * w + (n - 1) * 2;
   const left = dir < 0 ? dx + w - span : dx;
-  cx.fillStyle = UI.selFleet === f.id ? '#ffe066' : (f.owner === 0 ? '#f4f7ff' : '#ffe3f1');
+  cx.fillStyle = UI.selFleet === f.id ? '#ffe066' : (f.owner === ME ? '#f4f7ff' : '#ffe3f1');
   cx.beginPath(); cx.roundRect(left - 2, dy - 2, span + 4, w + 4, 3); cx.fill();
   ims.forEach((im, i) => { if (im) cx.drawImage(im, dir < 0 ? dx - i * (w + 2) : dx + i * (w + 2), dy, w, w); });
   return { x: left, w: span };
 }
 function drawDots(s, x, y, ps) {
-  const here = G.fleets.filter(f => f.star === s.id && f.to == null && (f.owner === 0 || visibleTo(s.id)));
+  const here = G.fleets.filter(f => f.star === s.id && f.to == null && (f.owner === ME || visibleTo(s.id)));
   if (!here.length) return;
   const w = Math.max(13, Math.min(18, ps * 0.36));
   let ri = 0, li = 0;
   for (const f of here) {
-    const mine = f.owner === 0;
+    const mine = f.owner === ME;
     let dx, dy, dir = 1;
     if (f.sat) { dx = x - ps / 2 - w - 1; dy = y - ps / 2 + li * (w + 2); li++; dir = -1; }
     else { dx = x + ps / 2 + 1; dy = y - ps / 2 + ri * (w + 2); ri++; }
@@ -569,8 +571,8 @@ function onDbl(e) {
   if (!G) return;
   const s = starAt(e.offsetX, e.offsetY);
   if (s == null) return;
-  if (G.stars[s].owner === 0) openBuild(s);
-  else { const b = [...G.battles].reverse().find(b => b.star === s && b.sides.includes(0)); if (b) openBattle(b.id); }
+  if (G.stars[s].owner === ME) openBuild(s);
+  else { const b = [...G.battles].reverse().find(b => b.star === s && b.sides.includes(ME)); if (b) openBattle(b.id); }
 }
 
 // ---------- left panel ----------
@@ -618,7 +620,7 @@ function budgetEntries() {
     { key: 'tech', label: 'Tech', get: () => b.tech, set: (v) => b.tech = v },
     { key: 'savings', label: 'Savings', get: () => b.savings, set: (v) => b.savings = v },
   ];
-  for (const s of HO.colonies(G, 0)) list.push({ key: s.id, label: s.name, star: s.id, get: () => b.col[s.id] || 0, set: (v) => b.col[s.id] = v });
+  for (const s of HO.colonies(G, ME)) list.push({ key: s.id, label: s.name, star: s.id, get: () => b.col[s.id] || 0, set: (v) => b.col[s.id] = v });
   return list;
 }
 function renderPanel() {
@@ -678,13 +680,13 @@ function planetBox(sid) {
   const pic = el('div', { class: 'ppic' });
   pic.append(el('img', { src: look.pic ? look.pic.toDataURL() : A.img[look.base], alt: '' }));
   if (look.hat) pic.append(el('img', { src: A.img[look.hat], class: 'phat', alt: '' }));
-  const ownerName = s.owner === 0 ? 'You' : k.explored && k.owner > 0 ? G.players[k.owner].name : k.explored ? 'No one' : 'Unknown';
-  box.append(el('div', { class: 'phead' }, pic, el('div', null, el('h3', null, s.name), el('div', { class: 'sub' }, ownerName + (k.explored && s.owner !== 0 && k.seen >= 0 && k.seen < G.turn ? ` (seen ${2000 + k.seen * 10})` : '')))));
-  if (s.owner === 0 || k.explored) {
-    const src = s.owner === 0 ? s : k;
+  const ownerName = s.owner === ME ? 'You' : k.explored && k.owner >= 0 && k.owner !== ME ? G.players[k.owner].name : k.explored ? 'No one' : 'Unknown';
+  box.append(el('div', { class: 'phead' }, pic, el('div', null, el('h3', null, s.name), el('div', { class: 'sub' }, ownerName + (k.explored && s.owner !== ME && k.seen >= 0 && k.seen < G.turn ? ` (seen ${2000 + k.seen * 10})` : '')))));
+  if (s.owner === ME || k.explored) {
+    const src = s.owner === ME ? s : k;
     const gs = src.g / p.homeG, ts = 72 + (src.t - p.homeT);
     box.append(row('Gravity', gs.toFixed(2) + 'G' + classNote(gs)), row('Temp', degF(ts)), row('Metal', fmt(src.metal)));
-    if (s.owner === 0) {
+    if (s.owner === ME) {
       const inc = HO.planetIncome(G, p, s);
       box.append(row('Population', fmt(s.pop * 1e6)), row('Max population', fmt(HO.maxPop(G, p, s) * 1e6)), row('Income', money(inc), inc < 0 ? 'neg' : ''));
       const terraOK = Math.abs(HO.seenT(p, s) - 72) > 0.5, metalOK = s.metal > 0;
@@ -697,20 +699,20 @@ function planetBox(sid) {
       if (HO.feature(G, 'buildQueue')) box.append(yardBox(s));
       box.append(el('div', { class: 'btns' },
         el('button', { onclick: () => openBuild(sid) }, HO.feature(G, 'buildQueue') ? 'Queue ships…' : 'Build ships…'),
-        s.id !== p.homeStar || HO.colonies(G, 0).length > 1 ? el('button', { class: 'quiet', onclick: () => confirmBox(`Evacuate ${s.name}? Your colonists will leave; satellites stay.`, () => { HO.evacuate(G, 0, sid); Sound.play(7002); renderPanel(); draw(); save(); }) }, 'Evacuate') : null));
-    } else if (k.owner > 0) {
+        s.id !== p.homeStar || HO.colonies(G, ME).length > 1 ? el('button', { class: 'quiet', onclick: () => confirmBox(`Evacuate ${s.name}? Your colonists will leave; satellites stay.`, () => { HO.evacuate(G, ME, sid); Sound.play(7002); renderPanel(); draw(); save(); }) }, 'Evacuate') : null));
+    } else if (k.owner >= 0 && k.owner !== ME) {
       box.append(row('Population', k.pop ? '~' + fmt(k.pop * 1e6) : '?'));
     }
   } else box.append(el('p', { class: 'note' }, k.battleOnly ? 'Unexplored, but there has been a battle here.' : 'Unexplored. Send a ship to find out more.'));
   // fleets here
-  const here = G.fleets.filter(f => f.star === sid && f.to == null && (f.owner === 0 || visibleTo(sid)));
-  const inbound = G.fleets.filter(f => f.owner === 0 && f.to === sid);
+  const here = G.fleets.filter(f => f.star === sid && f.to == null && (f.owner === ME || visibleTo(sid)));
+  const inbound = G.fleets.filter(f => f.owner === ME && f.to === sid);
   if (here.length || inbound.length) {
     const fl = el('div', { class: 'fleets' }, el('h4', null, 'Ships here'));
     for (const f of here) fl.append(fleetRow(f));
     for (const f of inbound) fl.append(fleetRow(f, true));
     box.append(fl);
-    const mine = here.filter(f => f.owner === 0 && !f.sat);
+    const mine = here.filter(f => f.owner === ME && !f.sat);
     const mergeable = mine.some((a, i) => mine.some((b, j) => j > i && HO.canMerge(G, a, b)));
     if (mergeable) box.append(el('div', { class: 'btns' }, el('button', { class: 'quiet', onclick: () => {
       // merge each fleet into the first one it may join (one ship type per fleet under the DOS rules)
@@ -718,13 +720,13 @@ function planetBox(sid) {
         if (G.fleets.includes(mine[i]) && G.fleets.includes(mine[j]) && HO.canMerge(G, mine[i], mine[j])) HO.mergeFleets(G, mine[i], mine[j]);
       UI.selFleet = mine[0].id; renderPanel(); draw(); save(); } }, HO.feature(G, 'singleTypeFleets') ? 'Merge fleets of the same type' : 'Merge all fleets here')));
   }
-  const b = [...G.battles].reverse().find(b => b.star === sid && b.sides.includes(0));
+  const b = [...G.battles].reverse().find(b => b.star === sid && b.sides.includes(ME));
   if (b) box.append(el('div', { class: 'btns' }, el('button', { class: 'quiet', onclick: () => openBattle(b.id) }, `Review battle (${b.year})`)));
   return box;
 }
 function classNote(gs) { const c = HO.planetClass(G, gs); return c === 'inhospitable' ? ' · never profitable' : c === 'semi' ? ' · barely habitable' : ''; }
 function fleetRow(f, inbound) {
-  const mine = f.owner === 0;
+  const mine = f.owner === ME;
   const p = G.players[f.owner];
   const ds = HO.fleetDesigns(G, f);
   const sel = UI.selFleet === f.id;
@@ -794,7 +796,7 @@ function originalLook(m) {
   let [pic, snd] = hit.look;
   const id = 1000 + hit.i;
   if (snd === 'explore') snd = m.explore === 'good' ? 6000 : m.explore === 'mediocre' ? 6002 : 6001;
-  if (snd === 'elim') { const who = G.players.find(q => t.startsWith(q.name + ' ')); snd = who && HO.isBuddy(G, 0, who.id) ? 2001 : 7021; }
+  if (snd === 'elim') { const who = G.players.find(q => t.startsWith(q.name + ' ')); snd = who && HO.isBuddy(G, ME, who.id) ? 2001 : 7021; }
   let icon;
   if (pic === 'tech') { const k = ['Range', 'Speed', 'Weapons', 'Shield', 'Miniaturization'].findIndex(n => t.includes(' ' + n + ' ')); icon = k >= 0 ? 'm' + (9039 + k) : m.icon; }
   else if (pic === 'face') icon = m.icon;
@@ -802,15 +804,15 @@ function originalLook(m) {
   return { id, icon: icon && A.img[icon] ? icon : m.icon, sound: snd };
 }
 function showMessages() {
-  UI.inbox = G.inbox.slice(); UI.msgIdx = 0;
+  UI.inbox = me().inbox.slice(); UI.msgIdx = 0;
   renderMsg();
 }
 function renderMsg() {
   const box = $('#msg');
   box.innerHTML = '';
   if (G.over && UI.msgIdx >= UI.inbox.length) {
-    box.append(el('div', { class: 'card end' }, el('img', { src: A.img[G.winner === 0 ? 'p3030' : 'p3040'], alt: '' }),
-      el('div', null, el('p', null, G.winner === 0 ? 'You conquered the galaxy.' : 'The game is over.'), el('button', { onclick: newGameDialog }, 'New game'))));
+    box.append(el('div', { class: 'card end' }, el('img', { src: A.img[G.winner === ME ? 'p3030' : 'p3040'], alt: '' }),
+      el('div', null, el('p', null, G.winner === ME ? 'You conquered the galaxy.' : 'The game is over.'), el('button', { onclick: newGameDialog }, 'New game'))));
     return;
   }
   if (UI.msgIdx < UI.inbox.length) {
@@ -852,9 +854,9 @@ function profile() {
 }
 function rankOf(points) { const R = HO.DATA.ranks || []; let i = 0; while (i + 1 < R.length && points >= R[i + 1][1]) i++; return i; }
 function awardMasterPoints(byComputer) {
-  if (!G || !G.over || G.mpDone || G.rules !== 'original') return;
+  if (!G || !G.over || G.mpDone || G.rules !== 'original' || hotSeat()) return;
   G.mpDone = true;
-  const won = G.winner === 0 || (G.winners || []).includes(0);
+  const won = G.winner === ME || (G.winners || []).includes(ME);
   if (!won || byComputer) return; // INFERRED: no points when the computer played your last turn
   const RS = HO.RULESETS.original;
   const d = RS.difficulty(Object.assign({}, G.opts, { armageddons: G.armageddons || 0, won: true, year: G.year }));
@@ -863,7 +865,7 @@ function awardMasterPoints(byComputer) {
   pr.points += pts;
   pr.games.push({ date: new Date().toISOString().slice(0, 10), year: G.year, difficulty: d, points: pts });
   try { localStorage.setItem('ho5.profile', JSON.stringify(pr)); } catch (e) {}
-  G.inbox.push({ text: HO.report(79, d, fmt(pts)), icon: 'm9035' });
+  me().inbox.push({ text: HO.report(79, d, fmt(pts)), icon: 'm9035' });
   const after = rankOf(pr.points);
   if (after > before) setTimeout(() => showRank(after), 300);
 }
@@ -892,19 +894,65 @@ function openRanks() {
 function doEndTurn(confirmed) {
   if (!G || G.over) return;
   if (confirmed !== true && HO.feature(G, 'buildQueue')) {
-    const starved = HO.colonies(G, 0).filter(s => s.id !== me().homeStar && !(me().budget.col[s.id] > 0));
+    const starved = HO.colonies(G, ME).filter(s => s.id !== me().homeStar && !(me().budget.col[s.id] > 0));
     if (starved.length) { confirmBox(`You aren’t spending any money on ${starved.map(s => s.name).join(', ')}. Ending the turn will abandon ${starved.length === 1 ? 'it' : 'them'}. Go ahead?`, () => doEndTurn(true)); return; }
+  }
+  // hot seat: the turn goes to the next human; the year moves on after the last one
+  if (hotSeat()) {
+    G.done = G.done || [];
+    if (!G.done.includes(ME)) G.done.push(ME);
+    const next = seatOrder().find(p => !G.done.includes(p.id));
+    Sound.play(11111);
+    if (next) { G.cur = next.id; save(); handOver(next); return; }
+    G.done = [];
   }
   HO.endTurn(G);
   awardMasterPoints();
   Sound.play(11111);
+  for (const p of HO.humans(G)) addTurnNotes(p);
+  if (hotSeat()) { const first = seatOrder()[0] || me(); G.cur = first.id; save(); handOver(first); return; }
   save();
   // keep selection valid
   if (UI.selFleet != null && !G.fleets.some(f => f.id === UI.selFleet)) UI.selFleet = null;
   renderPanel(); draw();
-  if (Prefs.hints && G.turn % 7 === 3 && (HO.DATA.hints || []).length) { const h = HO.DATA.hints; G.inbox.push({ text: h[G.turn % Math.min(h.length, 40)], icon: 'm9024', quiet: true }); }
-  if (!G.inbox.length) G.inbox.push({ text: `Year ${G.year}. Nothing much happened.`, icon: 'm9024', quiet: true });
   showMessages();
+}
+function addTurnNotes(p) {
+  p.inbox = p.inbox || [];
+  if (Prefs.hints && G.turn % 7 === 3 && (HO.DATA.hints || []).length) { const h = HO.DATA.hints; p.inbox.push({ text: h[G.turn % Math.min(h.length, 40)], icon: 'm9024', quiet: true }); }
+  if (!p.inbox.length) p.inbox.push({ text: `Year ${G.year}. Nothing much happened.`, icon: 'm9024', quiet: true });
+}
+// ----- hot seat -----
+// Several people can play on one computer: each takes their turn in
+// order, and between turns a blank screen asks the next one to sit down,
+// so nobody sees anyone else's planets. Humans who are out of the game
+// get one last turn to read the news.
+function hotSeat() { return !!G && HO.humans(G).length > 1; }
+function seatOrder() {
+  return HO.humans(G).filter(p => (p.alive && !p.auto) || (!p.alive && !p.sawEnd && (p.inbox || []).length));
+}
+function handOver(p) {
+  closeModal(); clearInterval(UI.anim);
+  $('#msg').innerHTML = '';
+  let cover = $('#handover');
+  if (!cover) { cover = el('div', { id: 'handover', role: 'dialog', 'aria-modal': 'true' }); document.body.append(cover); }
+  cover.innerHTML = '';
+  cover.hidden = false;
+  const go = el('button', { onclick: () => takeSeat(p.id) }, `I’m ${p.name}: start my turn`);
+  cover.append(el('div', { class: 'card hand' },
+    el('h2', null, G.over ? 'Game over' : `${G.year}: ${p.name}’s turn`),
+    el('p', null, `Pass the computer to ${p.name}. Everyone else, no peeking!`), go));
+  go.focus();
+}
+function takeSeat(id) {
+  ME = id; G.cur = id;
+  const p = me();
+  if (!p.alive) p.sawEnd = true;
+  $('#handover').hidden = true;
+  UI.sel = G.stars[p.homeStar].owner === ME ? p.homeStar : (HO.colonies(G, ME)[0] || G.stars[p.homeStar]).id;
+  UI.selFleet = null; UI.route = null; UI.fitted = false; fit();
+  addTurnNotes(p);
+  save(); renderPanel(); draw(); showMessages();
 }
 
 // ---------- dialogs ----------
@@ -942,7 +990,7 @@ function yardBox(s) {
   const q = s.queue || [];
   if (q.length) {
     const pr = HO.rules(G).yardProgress(G, p, s);
-    box.append(el('p', { class: 'sub' }, 'Queued: ' + q.map(it => { const d = HO.getDesign(G, 0, it.did); return d ? `${it.n} ${d.name}` : ''; }).join(', ') + (pr ? ` · first one ${pr.pct}% paid for` : '')));
+    box.append(el('p', { class: 'sub' }, 'Queued: ' + q.map(it => { const d = HO.getDesign(G, ME, it.did); return d ? `${it.n} ${d.name}` : ''; }).join(', ') + (pr ? ` · first one ${pr.pct}% paid for` : '')));
   } else box.append(el('p', { class: 'sub' }, 'Nothing queued.'));
   return box;
 }
@@ -969,9 +1017,9 @@ function openBuild(sid) {
         el('div', { class: 'dtext' }, el('b', null, d.name), el('div', { class: 'sub' }, `${HO.TYPES[d.type].name} · R${d.type === 'satellite' ? 0 : d.R} Sp${d.V} W${d.W} Sh${d.S} M${d.M}`),
           el('div', { class: 'sub' }, `${money(c.money)} · ${fmt(c.metal)} metal${c.proto ? ' (incl. prototype)' : ''}`)),
         el('div', { class: 'pm' },
-          el('button', { class: 'quiet', disabled: !n, 'aria-label': 'Remove one', onclick: () => { if (queue) { const i = (s.queue || []).map(it => it.did).lastIndexOf(d.id); if (i >= 0) HO.unqueueShip(G, 0, sid, i); } else HO.unbuildShip(G, 0, sid, d.id); render(); renderPanel(); draw(); } }, '−'),
+          el('button', { class: 'quiet', disabled: !n, 'aria-label': 'Remove one', onclick: () => { if (queue) { const i = (s.queue || []).map(it => it.did).lastIndexOf(d.id); if (i >= 0) HO.unqueueShip(G, ME, sid, i); } else HO.unbuildShip(G, ME, sid, d.id); render(); renderPanel(); draw(); } }, '−'),
           el('span', { class: 'n' }, String(n)),
-          el('button', { disabled: !can, 'aria-label': queue ? 'Queue one' : 'Build one', onclick: () => { if (queue ? HO.queueShips(G, 0, sid, d.id, 1) : HO.buildShips(G, 0, sid, d.id, 1)) Sound.play(7006); render(); renderPanel(); draw(); } }, '+'))));
+          el('button', { disabled: !can, 'aria-label': queue ? 'Queue one' : 'Build one', onclick: () => { if (queue ? HO.queueShips(G, ME, sid, d.id, 1) : HO.buildShips(G, ME, sid, d.id, 1)) Sound.play(7006); render(); renderPanel(); draw(); } }, '+'))));
     }
     // designer
     const L = HO.designLimits(G, p, st.type);
@@ -1002,8 +1050,8 @@ function openBuild(sid) {
       const lim = HO.rules(G).maxDesigns;
       if (lim && !exists && HO.liveDesigns(p) >= lim) { toast(HO.DATA.alerts[15] || 'Your assembly lines are full.'); return; }
       const d = HO.findOrCreateDesign(G, p, spec);
-      if (queue) { HO.queueShips(G, 0, sid, d.id, 1); Sound.play(7006); }
-      else if (HO.buildShips(G, 0, sid, d.id, 1)) { Sound.play(7006); } else toast('Not enough money or metal.');
+      if (queue) { HO.queueShips(G, ME, sid, d.id, 1); Sound.play(7006); }
+      else if (HO.buildShips(G, ME, sid, d.id, 1)) { Sound.play(7006); } else toast('Not enough money or metal.');
       render(); renderPanel(); draw();
     } }, queue ? (exists ? `Queue another ${exists.name}` : 'Create this type and queue one') : exists && exists.built ? `Build another ${exists.name}` : 'Build the prototype')));
     body.append(left, right);
@@ -1063,8 +1111,8 @@ function openBattle(bid) {
     for (let i = 0; i < 70; i++) { x.fillStyle = 'rgba(200,210,255,.35)'; x.fillRect((i * 97) % 760, (i * 53) % 380, 1, 1); }
     sides.forEach((o, si) => {
       const pp = G.players[o];
-      x.fillStyle = o === 0 ? '#fff2c0' : '#ffb3d9'; x.font = '13px Geneva, Verdana, sans-serif'; x.textAlign = 'center';
-      x.fillText(o === 0 ? 'You' : pp.name, si * (760 / cols) + (760 / cols) / 2, 24);
+      x.fillStyle = o === ME ? '#fff2c0' : '#ffb3d9'; x.font = '13px Geneva, Verdana, sans-serif'; x.textAlign = 'center';
+      x.fillText(o === ME ? 'You' : pp.name, si * (760 / cols) + (760 / cols) / 2, 24);
     });
     if (pl.x >= 0) {
       const s = G.stars[b.star]; const p = me();
@@ -1093,7 +1141,7 @@ function openBattle(bid) {
     if (r >= b.rounds.length) {
       drawAll();
       const mine = (b.survivors[0] || 0);
-      status.textContent = `Battle over after ${b.rounds.length} round${b.rounds.length === 1 ? '' : 's'}. ` + sides.map(o => `${o === 0 ? 'You' : G.players[o].name} lost ${b.lost[o] || 0}`).join('; ') + '.' + (b.planetDied ? ' The colony was wiped out.' : '');
+      status.textContent = `Battle over after ${b.rounds.length} round${b.rounds.length === 1 ? '' : 's'}. ` + sides.map(o => `${o === ME ? 'You' : G.players[o].name} lost ${b.lost[o] || 0}`).join('; ') + '.' + (b.planetDied ? ' The colony was wiped out.' : '');
       return;
     }
     const ev = b.rounds[r][e];
@@ -1121,20 +1169,20 @@ function openPlayers() {
   const mine = me();
   for (const { p } of rows) {
     const face = p.human ? 'white0_' + (p.female ? 1 : 0) : 'bad' + p.face + '_' + (p.female ? 1 : 0);
-    const seen = p.human ? HO.colonies(G, 0).length : G.stars.filter(s => { const k = HO.know(G, me(), s.id); return k.explored && k.owner === p.id; }).length;
+    const seen = p.human ? HO.colonies(G, ME).length : G.stars.filter(s => { const k = HO.know(G, me(), s.id); return k.explored && k.owner === p.id; }).length;
     let status = p.surrendered ? 'Surrendered' : p.alive ? 'In the game' : 'Eliminated';
     if (pacts && p.id !== 0 && p.alive) {
       const they = (p.allies || []).includes(0), we = (mine.allies || []).includes(p.id);
-      if (HO.isBuddy(G, 0, p.id)) status = 'Your best buddy';
-      else if (HO.isAllied(G, 0, p.id)) status = 'Your ally' + ((p.buddies || []).includes(0) ? ' (offers best buddies)' : '');
+      if (HO.isBuddy(G, ME, p.id)) status = 'Your best buddy';
+      else if (HO.isAllied(G, ME, p.id)) status = 'Your ally' + ((p.buddies || []).includes(ME) ? ' (offers best buddies)' : '');
       else if (they) status = 'Offers to ally';
       else if (we) status = 'You offered to ally';
     }
     const chk = (kind, on) => el('input', { type: 'checkbox', checked: on ? 'checked' : false, 'aria-label': (kind === 'ally' ? 'Ally with ' : 'Best buddies with ') + p.name,
-      onchange: (e) => { HO.setPact(G, 0, p.id, kind, e.target.checked); save(); closeModal(); openPlayers(); } });
+      onchange: (e) => { HO.setPact(G, ME, p.id, kind, e.target.checked); save(); closeModal(); openPlayers(); } });
     tb.append(el('tr', { class: p.alive ? '' : 'dead' }, el('td', null, el('img', { src: A.img[face], alt: '', class: 'face' })), el('td', null, p.human ? p.name + ' (you)' : p.name), el('td', null, String(seen)), el('td', null, status),
-      pacts ? el('td', null, p.id === 0 || !p.alive ? '' : chk('ally', (mine.allies || []).includes(p.id))) : null,
-      pacts ? el('td', null, p.id === 0 || !p.alive ? '' : chk('buddy', (mine.buddies || []).includes(p.id))) : null));
+      pacts ? el('td', null, p.id === ME || !p.alive ? '' : chk('ally', (mine.allies || []).includes(p.id))) : null,
+      pacts ? el('td', null, p.id === ME || !p.alive ? '' : chk('buddy', (mine.buddies || []).includes(p.id))) : null));
   }
   t.append(tb);
   const h = me().hist;
@@ -1160,7 +1208,7 @@ function openGive() {
   const f = el('form', { class: 'newgame', onsubmit: (e) => {
     e.preventDefault();
     const d = Object.fromEntries(new FormData(f).entries());
-    const r = HO.give(G, 0, +d.to, +d.money || 0, +d.metal || 0);
+    const r = HO.give(G, ME, +d.to, +d.money || 0, +d.metal || 0);
     if (r === 'limit') toast(HO.DATA.alerts[5] || 'Sorry, but you may only give 3 gifts per turn.');
     else if (r === 'short') toast('You don’t have that much to give.');
     else if (r === 'ok') { Sound.play(5000); closeModal(); renderPanel(); save(); }
@@ -1179,7 +1227,7 @@ function openChat() {
     e.preventDefault();
     const d = Object.fromEntries(new FormData(f).entries());
     const text = (d.custom || '').trim() || d.line;
-    HO.sendChat(G, 0, +d.to, text); Sound.play(5000); closeModal(); save();
+    HO.sendChat(G, ME, +d.to, text); Sound.play(5000); closeModal(); save();
   } });
   f.append(el('label', null, el('span', null, 'Send to'), playerSelect('to')),
     el('label', null, el('span', null, 'Say'), el('select', { name: 'line' }, ...lines.map(l => el('option', { value: l }, l)))),
@@ -1198,9 +1246,9 @@ function openDip() {
 }
 function openSurrender() {
   const p = me();
-  if (p.surrenderTo != null) { confirmBox('You are surrendering at the end of this turn. Take it back?', () => { HO.surrender(G, 0, null); save(); }); return; }
+  if (p.surrenderTo != null) { confirmBox('You are surrendering at the end of this turn. Take it back?', () => { HO.surrender(G, ME, null); save(); }); return; }
   const sel = el('select', { name: 'to' }, ...others().map(q => el('option', { value: q.id }, q.name)), el('option', { value: -1 }, 'No one'));
-  const f = el('form', { class: 'newgame', onsubmit: (e) => { e.preventDefault(); HO.surrender(G, 0, +sel.value); closeModal(); save(); toast('You will surrender at the end of this turn.'); } });
+  const f = el('form', { class: 'newgame', onsubmit: (e) => { e.preventDefault(); HO.surrender(G, ME, +sel.value); closeModal(); save(); toast('You will surrender at the end of this turn.'); } });
   f.append(el('p', null, HO.DATA.alerts[1] || 'Do you really want to surrender?'),
     el('label', null, el('span', null, 'Surrender to'), sel),
     el('p', { class: 'sub' }, 'Your fleets are dismantled. Whoever you surrender to gets your savings, your metal, and your planets.'),
@@ -1209,15 +1257,15 @@ function openSurrender() {
 }
 function toggleArmageddon() {
   const p = me();
-  if (p.armageddon) { HO.setArmageddon(G, 0, false); toast(HO.DATA.alerts[4] || 'Whew!'); save(); return; }
-  confirmBox(HO.DATA.alerts[3] || 'Are you sure you want to destroy half the galaxy?', () => { HO.setArmageddon(G, 0, true); save(); toast('The armageddon device is on. It fires when every human player has turned theirs on.'); });
+  if (p.armageddon) { HO.setArmageddon(G, ME, false); toast(HO.DATA.alerts[4] || 'Whew!'); save(); return; }
+  confirmBox(HO.DATA.alerts[3] || 'Are you sure you want to destroy half the galaxy?', () => { HO.setArmageddon(G, ME, true); save(); toast('The armageddon device is on. It fires when every human player has turned theirs on.'); });
 }
 
 function table(head, rows) {
   return el('table', { class: 'ptable list' }, el('thead', null, el('tr', null, ...head.map(h => el('th', null, h)))), el('tbody', null, ...rows));
 }
 function openFleetList() {
-  const mine = G.fleets.filter(f => f.owner === 0);
+  const mine = G.fleets.filter(f => f.owner === ME);
   const rows = mine.map(f => {
     const where = f.star != null ? G.stars[f.star].name : `${G.stars[f.from].name} → ${G.stars[f.to].name}`;
     const go = f.dest != null ? G.stars[f.dest].name + (f.path && f.path.length ? ' → …' : '') : f.to != null ? `${Math.ceil((f.dist - f.prog) / HO.fleetSpeed(G, f))} turn(s)` : '';
@@ -1228,24 +1276,24 @@ function openFleetList() {
 }
 function openScrapTypes() {
   const p = me();
-  const count = {}; for (const f of G.fleets) if (f.owner === 0) for (const k in f.ships) count[k] = (count[k] || 0) + f.ships[k];
+  const count = {}; for (const f of G.fleets) if (f.owner === ME) for (const k in f.ships) count[k] = (count[k] || 0) + f.ships[k];
   const rows = p.designs.filter(d => !d.scrapped).map(d => el('tr', null, el('td', null, shipImgEl(d, 18), ' ', d.name), el('td', null, HO.TYPES[d.type].name), el('td', null, String(count[d.id] || 0)),
-    el('td', null, el('button', { class: 'quiet', onclick: () => confirmBox(HO.DATA.alerts[7] || 'Do you really want to scrap all existing ships of this type?', () => { const m = HO.scrapDesign(G, 0, d.id); toast(`Scrapped for ${fmt(m)} metal.`); renderPanel(); draw(); save(); }) }, 'Scrap'))));
+    el('td', null, el('button', { class: 'quiet', onclick: () => confirmBox(HO.DATA.alerts[7] || 'Do you really want to scrap all existing ships of this type?', () => { const m = HO.scrapDesign(G, ME, d.id); toast(`Scrapped for ${fmt(m)} metal.`); renderPanel(); draw(); save(); }) }, 'Scrap'))));
   modal('Scrap ship types', el('div', null, el('p', { class: 'sub' }, `Retiring a type frees an assembly line${HO.rules(G).maxDesigns ? ` (you can have ${HO.rules(G).maxDesigns})` : ''} and scraps every ship of that type.`), table(['Type', 'Class', 'Ships', ''], rows)), { cls: 'mid' });
 }
 function openBattleList() {
-  const bs = G.battles.filter(b => b.sides.includes(0)).reverse();
+  const bs = G.battles.filter(b => b.sides.includes(ME)).reverse();
   if (!bs.length) { toast('No battles yet.'); return; }
   const rows = bs.map(b => el('tr', { class: 'click', onclick: () => { closeModal(); openBattle(b.id); } }, el('td', null, G.stars[b.star].name), el('td', null, String(b.year)),
-    el('td', null, b.sides.filter(o => o !== 0).map(o => G.players[o].name).join(', ')), el('td', null, `${b.lost[0] || 0} / ${b.sides.filter(o => o !== 0).reduce((a, o) => a + (b.lost[o] || 0), 0)}`)));
+    el('td', null, b.sides.filter(o => o !== ME).map(o => G.players[o].name).join(', ')), el('td', null, `${b.lost[ME] || 0} / ${b.sides.filter(o => o !== ME).reduce((a, o) => a + (b.lost[o] || 0), 0)}`)));
   modal('Review battle', table(['Star', 'Year', 'Against', 'Lost (you / them)'], rows), { cls: 'mid' });
 }
 function openStarList() {
   const p = me();
   const ks = G.stars.map(s => ({ s, k: HO.know(G, p, s.id) })).filter(o => o.k.explored);
   const rows = ks.map(({ s, k }) => {
-    const src = s.owner === 0 ? s : k;
-    const owner = s.owner === 0 ? 'You' : k.owner >= 0 && G.players[k.owner] ? G.players[k.owner].name : '';
+    const src = s.owner === ME ? s : k;
+    const owner = s.owner === ME ? 'You' : k.owner >= 0 && G.players[k.owner] ? G.players[k.owner].name : '';
     return el('tr', { class: 'click', onclick: () => { UI.sel = s.id; closeModal(); renderPanel(); draw(); } }, el('td', null, s.name), el('td', null, (src.g / p.homeG).toFixed(2) + 'G'),
       el('td', null, degF(72 + (src.t - p.homeT))), el('td', null, fmt(src.metal)), el('td', null, owner), el('td', null, src.pop ? fmt(src.pop * 1e6) : ''));
   });
@@ -1273,7 +1321,7 @@ function runAutoPlay(o) {
     if (!G || G.over || n++ >= o.turns || UI.modal) { renderMsg(); return; }
     me().auto = o.computer; HO.endTurn(G); me().auto = false; awardMasterPoints(o.computer); save();
     renderPanel(); draw();
-    const stop = G.inbox.some(m => (o.won && m.battle && m.sound === 7027) || (o.lost && m.battle && m.sound !== 7027) || (o.news && !m.quiet && !m.battle && !m.chat));
+    const stop = me().inbox.some(m => (o.won && m.battle && m.sound === 7027) || (o.lost && m.battle && m.sound !== 7027) || (o.news && !m.quiet && !m.battle && !m.chat));
     $('#title').textContent = `${me().name} in ${G.opts.galaxy || 'Milky Way'} in ${G.year} (auto play)`;
     if (stop || G.over) { showMessages(); return; }
     setTimeout(step, 120);
@@ -1350,11 +1398,18 @@ function newGameDialog() {
     sel('d_density', 'Density', [['dense', 'Dense'], ['sparse', 'Sparse']], 'dense'),
     el('label', { class: 'chk' }, el('input', { type: 'checkbox', name: 'd_novas', checked: 'checked' }), el('span', null, 'Novas')));
   const startSel = sel('start', 'Your home system', STARTS, 'normal');
+  // hot seat: names and hats for players 2..6
+  const seats = el('div', { class: 'group seats' });
+  for (let i = 2; i <= 6; i++) seats.append(el('label', { 'data-seat': i }, el('span', null, `Player ${i}`),
+    el('span', { class: 'seat' }, el('input', { name: 'h' + i, value: localStorage.getItem('ho5.name' + i) || 'Player ' + i, maxlength: 20, 'aria-label': `Player ${i} name` }),
+      el('select', { name: 'hf' + i, 'aria-label': `Player ${i} hat` }, el('option', { value: '0' }, 'Cowboy'), el('option', { value: '1' }, 'Cowgirl')))));
   f.append(
     el('label', null, el('span', null, 'Your name'), el('input', { name: 'name', value: localStorage.getItem('ho5.name') || 'Jake', maxlength: 20 })),
     el('label', null, el('span', null, 'Galaxy name'), el('input', { name: 'galaxy', value: 'Milky Way', maxlength: 24 })),
     sel('female', 'Your hat', [['0', 'Cowboy'], ['1', 'Cowgirl']], '0'),
-    sel('computers', 'Computer players', [...[1, 2, 3, 4, 5, 6, 7, 8].map(n => [String(n), String(n)]), ['any', 'Any (1-8)']], '4'),
+    sel('humans', 'People playing on this computer', [1, 2, 3, 4, 5, 6].map(n => [String(n), n === 1 ? 'Just me' : `${n} (take turns)`]), '1'),
+    sel('computers', 'Computer players', [...[0, 1, 2, 3, 4, 5, 6, 7, 8].map(n => [String(n), String(n)]), ['any', 'Any (1-8)']], '4'),
+    seats,
     startSel,
     claudeBox, origBox, dosBox,
     // last line: the rules, with the game difficulty rating beside them
@@ -1372,6 +1427,10 @@ function newGameDialog() {
     const d = Object.fromEntries(new FormData(f).entries());
     const orig = d.rules === 'original', dos = d.rules === 'dos';
     claudeBox.hidden = orig || dos; origBox.hidden = !orig; dosBox.hidden = !dos; startSel.hidden = dos;
+    const nh = +d.humans || 1;
+    for (const l of seats.querySelectorAll('[data-seat]')) l.hidden = +l.dataset.seat > nh;
+    f.querySelector('select[name=computers] option[value="0"]').disabled = nh < 2;
+    if (nh < 2 && d.computers === '0') f.querySelector('select[name=computers]').value = '1';
     f.querySelector('fieldset.opts').hidden = !orig;
     for (const o of f.querySelectorAll('.slider output')) { const inp = o.previousElementSibling; if (!o.querySelector('small')) o.textContent = inp.value; }
     rating.textContent = orig ? String(HO.RULESETS.original.difficulty(origOpts(d))) : `Not rated with ${dos ? 'DOS 2.0' : 'Claude'} rules`;
@@ -1382,7 +1441,11 @@ function newGameDialog() {
     const d = Object.fromEntries(new FormData(f).entries());
     localStorage.setItem('ho5.name', d.name); localStorage.setItem('ho5.rules', d.rules);
     if (d.computers === 'any') d.computers = String(1 + Math.floor(Math.random() * 8));
-    const common = { seed: (Math.random() * 2 ** 31) | 0, name: d.name || 'You', galaxy: d.galaxy || 'Milky Way', female: d.female === '1', computers: +d.computers, start: d.start, rules: d.rules, alliances: !!d.alliances, luck: !!d.luck, novas: !!d.novas };
+    const nh = +d.humans || 1;
+    const humans = nh > 1 ? [{ name: d.name || 'Player 1', female: d.female === '1' }] : null;
+    for (let i = 2; i <= nh; i++) { humans.push({ name: d['h' + i] || 'Player ' + i, female: d['hf' + i] === '1' }); localStorage.setItem('ho5.name' + i, d['h' + i] || ''); }
+    if (nh < 2 && d.computers === '0') d.computers = '1';
+    const common = { humans, seed: (Math.random() * 2 ** 31) | 0, name: d.name || 'You', galaxy: d.galaxy || 'Milky Way', female: d.female === '1', computers: +d.computers, start: d.start, rules: d.rules, alliances: !!d.alliances, luck: !!d.luck, novas: !!d.novas };
     if (d.rules === 'original') {
       localStorage.setItem('ho5.iq', d.o_iq);
       const o = origOpts(d);
@@ -1391,9 +1454,10 @@ function newGameDialog() {
       G = HO.newGame(Object.assign(common, { start: d.d_skill, iq: d.d_iq, size: d.d_size, shape: d.d_shape, density: d.d_density, novas: !!d.d_novas, alliances: false, luck: false }));
     } else G = HO.newGame(Object.assign(common, { iq: d.iq, cstart: d.cstart, shape: d.shape, size: d.size, density: d.density }));
     if (d.skin && d.skin !== HOSKINS.current) { save(); HOSKINS.switchTo(d.skin); return; } // opens in the other skin
-    closeModal(); hideTitle();
-    UI.sel = G.players[0].homeStar; UI.selFleet = null; UI.fitted = false; fit();
+    closeModal(); hideTitle(); ME = 0;
+    UI.sel = G.players[ME].homeStar; UI.selFleet = null; UI.fitted = false; fit();
     Sound.play(128);
+    if (hotSeat()) { save(); draw(); handOver(me()); return; }
     save(); renderPanel(); draw(); showMessages();
   };
   modal('Create galaxy', f, { cls: 'mid' });
@@ -1402,8 +1466,10 @@ function newGameDialog() {
 // resumed: the game was just started (or saved) in another skin, so keep its messages
 function continueGame(resumed) {
   try { G = HO.load(localStorage.getItem('ho5.save')); } catch (e) { toast('That saved game could not be read.'); return; }
-  hideTitle(); UI.sel = G.players[0].homeStar; UI.fitted = false; fit(); renderPanel(); draw();
-  if (resumed !== true || !G.inbox.length) G.inbox = [{ text: `Welcome back. It’s the year ${G.year}.`, icon: 'm9024' }];
+  ME = G.cur || 0;
+  if (hotSeat()) { hideTitle(); fit(); draw(); handOver(me()); return; }
+  hideTitle(); UI.sel = G.players[ME].homeStar; UI.fitted = false; fit(); renderPanel(); draw();
+  if (resumed !== true || !me().inbox.length) me().inbox = [{ text: `Welcome back. It’s the year ${G.year}.`, icon: 'm9024' }];
   showMessages();
 }
 function save() { if (!G) return; try { localStorage.setItem('ho5.save', HO.save(G)); } catch (e) {} }
@@ -1411,8 +1477,8 @@ function save() { if (!G) return; try { localStorage.setItem('ho5.save', HO.save
 // ---------- menus ----------
 function setupMenus() {
   const menus = {
-    Game: [['New game…', newGameDialog], ['Players and history', () => G && openPlayers()], ['Auto-play this turn', () => { if (!G || G.over) return; me().auto = true; doEndTurn(); me().auto = false; }], ['Auto play…', () => G && !G.over && openAutoPlay()], ['Preferences…', openPrefs], ['Rank history…', openRanks], ['-'], ['Quit to title', () => { save(); Sound.play(7002); G = null; renderPanel(); draw(); $('#panel').innerHTML = ''; $('#msg').innerHTML = ''; titleScreen(); }]],
-    Ships: [['Build ships at selected colony…', () => { if (G && UI.sel != null && G.stars[UI.sel].owner === 0) openBuild(UI.sel); else toast('Select one of your colonies first.'); }], ['Review battle…', () => G && openBattleList()], ['List all fleets…', () => G && openFleetList()], ['Scrap ship types…', () => G && openScrapTypes()], ['Next fleet', nextFleet]],
+    Game: [['New game…', newGameDialog], ['Players and history', () => G && openPlayers()], ['Auto-play this turn', () => { if (!G || G.over) return; me().auto = true; doEndTurn(); me().auto = false; }], ['Auto play…', () => G && !G.over && (hotSeat() ? toast('Auto play is for one-player games.') : openAutoPlay())], ['Preferences…', openPrefs], ['Rank history…', openRanks], ['-'], ['Quit to title', () => { save(); Sound.play(7002); G = null; renderPanel(); draw(); $('#panel').innerHTML = ''; $('#msg').innerHTML = ''; titleScreen(); }]],
+    Ships: [['Build ships at selected colony…', () => { if (G && UI.sel != null && G.stars[UI.sel].owner === ME) openBuild(UI.sel); else toast('Select one of your colonies first.'); }], ['Review battle…', () => G && openBattleList()], ['List all fleets…', () => G && openFleetList()], ['Scrap ship types…', () => G && openScrapTypes()], ['Next fleet', nextFleet]],
     Galaxy: [['Players and alliances…', () => G && openPlayers()], ['List explored stars…', () => G && openStarList()],
       ['Give money or metal…', () => G && !G.over && openGive(), 'gifts'],
       ['Send a message…', () => G && !G.over && openChat(), 'chat'],
@@ -1446,7 +1512,7 @@ function setupMenus() {
 }
 function nextFleet() {
   if (!G) return;
-  const mine = G.fleets.filter(f => f.owner === 0 && f.star != null && !f.sat);
+  const mine = G.fleets.filter(f => f.owner === ME && f.star != null && !f.sat);
   if (!mine.length) return;
   const i = mine.findIndex(f => f.id === UI.selFleet);
   const f = mine[(i + 1) % mine.length];

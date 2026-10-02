@@ -183,3 +183,10 @@ button:focus-visible { outline: 2px solid var(--hi); outline-offset: 1px; }
 .newgame .lastrow > * { min-width: 0; }
 .newgame label:not(.chk) { grid-template-columns: minmax(0, 1fr); }
 .newgame [hidden] { display: none !important; }
+/* hot seat: the screen between two players' turns hides the map */
+#handover { position: fixed; inset: 0; z-index: 45; background: var(--space); display: grid; place-items: center; padding: 16px; }
+#handover[hidden] { display: none; }
+#handover .card.hand { cursor: default; flex-direction: column; align-items: center; text-align: center; max-width: 420px; }
+#handover h2 { margin: 0; font: 22px var(--west); color: var(--hat); }
+.newgame .seat { display: flex; gap: 6px; }
+.newgame .seat input { flex: 1; min-width: 0; }
