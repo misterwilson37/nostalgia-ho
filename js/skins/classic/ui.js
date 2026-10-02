@@ -810,7 +810,6 @@ function fleetRow(f, inbound) {
     if (HO.feature(G, 'stances')) acts.append(el('select', { 'aria-label': 'Battle stance', onclick: (e) => e.stopPropagation(), onchange: (e) => { f.stance = e.target.value; save(); } },
       ...[['normal', 'Normal'], ['offensive', 'Offensive'], ['defensive', 'Defensive']].map(([v, t]) => el('option', { value: v, selected: (f.stance || 'normal') === v ? 'selected' : false }, t))));
     if (HO.feature(G, 'lateArrival')) acts.append(el('label', { class: 'chk', onclick: (e) => e.stopPropagation() }, el('input', { type: 'checkbox', checked: f.delayed ? 'checked' : false, onchange: (e) => { f.delayed = e.target.checked; save(); } }), el('span', null, 'Arrive late')));
-    if (modern() && HO.fleetCount(f) > 1) acts.append(el('button', { class: 'quiet', onclick: (e) => { e.stopPropagation(); openScrapSome(f); } }, 'Scrap some…'));
     acts.append(el('button', { class: 'quiet', onclick: (e) => { e.stopPropagation(); confirmBox(`Scrap this fleet for ${Math.round(HO.TYPES ? 75 : 75)}% of its metal?`, () => { const m = HO.scrapFleet(G, f); Sound.play(7003); toast(`Scrapped for ${fmt(m)} metal.`); UI.selFleet = null; renderPanel(); draw(); save(); }); } }, 'Scrap'));
     r.append(acts);
   }
@@ -1039,7 +1038,7 @@ function modal(title, content, opts) {
 function closeModal() { if (UI.modal) { UI.modal.remove(); UI.modal = null; const c = UI.onClose; UI.onClose = null; if (c) c(); } }
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && UI.modal) closeModal(); });
 function confirmBox(text, yes) {
-  const w = modal('Are you sure?', el('div', null, el('p', null, text), el('div', { class: 'btns right' },
+  const w = modal('Are you sure?', el('div', null, text.nodeType ? text : el('p', null, text), el('div', { class: 'btns right' },
     el('button', { class: 'quiet', onclick: closeModal }, 'Cancel'), el('button', { onclick: () => { closeModal(); yes(); } }, 'OK'))), { cls: 'small' });
 }
 function toast(t) {
@@ -1127,31 +1126,6 @@ function openBuild(sid) {
   };
   render();
   modal(`${queue ? 'Queue' : 'Build'} ships at ${s.name}`, body, { cls: 'wide', onClose: () => save() });
-}
-// modern: scrap some of a fleet's ships (split them off, then scrap that)
-function openScrapSome(f) {
-  const take = {};
-  const body = el('div', null, el('p', { class: 'sub' }, 'Choose how many of each ship to scrap. You get back part of their metal.'));
-  for (const k in f.ships) {
-    const d = HO.getDesign(G, f.owner, +k); take[k] = 0;
-    const n = el('b', null, '0');
-    body.append(el('div', { class: 'drow' }, shipImgEl(d, 22, f.owner), el('div', { class: 'dtext' }, `${d.name} (${f.ships[k]})`),
-      el('div', { class: 'pm' }, el('button', { class: 'quiet', onclick: () => { take[k] = Math.max(0, take[k] - 1); n.textContent = take[k]; } }, '−'), n,
-        el('button', { class: 'quiet', onclick: () => { take[k] = Math.min(f.ships[k], take[k] + 1); n.textContent = take[k]; } }, '+'),
-        el('button', { class: 'quiet', onclick: () => { take[k] = f.ships[k]; n.textContent = take[k]; } }, 'All'))));
-  }
-  body.append(el('div', { class: 'btns right' }, el('button', { onclick: () => {
-    const total = Object.values(take).reduce((a, b) => a + b, 0);
-    if (!total) { closeModal(); return; }
-    const all = Object.keys(f.ships).every(k => take[k] >= f.ships[k]);
-    const nf = all ? f : HO.splitFleet(G, f, take);
-    if (!nf) { closeModal(); return; }
-    const m = HO.scrapFleet(G, nf); Sound.play(7003);
-    toast(`Scrapped ${total} ship${total === 1 ? '' : 's'} for ${fmt(m)} metal.`);
-    if (all) UI.selFleet = null;
-    closeModal(); renderPanel(); draw(); save();
-  } }, 'Scrap')));
-  modal('Scrap ships', body, { cls: 'small' });
 }
 function openSplit(f) {
   const take = {};
@@ -1409,9 +1383,27 @@ function openFleetList() {
 function openScrapTypes() {
   const p = me();
   const count = {}; for (const f of G.fleets) if (f.owner === ME) for (const k in f.ships) count[k] = (count[k] || 0) + f.ships[k];
-  const rows = p.designs.filter(d => !d.scrapped).map(d => el('tr', null, el('td', null, shipImgEl(d, 18), ' ', d.name), el('td', null, HO.TYPES[d.type].name), el('td', null, String(count[d.id] || 0)),
-    el('td', null, el('button', { class: 'quiet', onclick: () => confirmBox(HO.DATA.alerts[7] || 'Do you really want to scrap all existing ships of this type?', () => { const m = HO.scrapDesign(G, ME, d.id); toast(`Scrapped for ${fmt(m)} metal.`); renderPanel(); draw(); save(); }) }, 'Scrap'))));
-  modal('Scrap ship types', el('div', null, el('p', { class: 'sub' }, `Retiring a type frees an assembly line${HO.rules(G).maxDesigns ? ` (you can have ${HO.rules(G).maxDesigns})` : ''} and scraps every ship of that type.`), table(['Type', 'Class', 'Ships', ''], rows)), { cls: 'mid' });
+  const live = p.designs.filter(d => !d.scrapped);
+  const picked = new Set();
+  const go = el('button', { disabled: true }, 'Scrap checked types…');
+  const update = () => { go.disabled = !picked.size; go.textContent = picked.size > 1 ? `Scrap ${picked.size} types…` : 'Scrap checked types…'; };
+  const rows = live.map(d => el('tr', null,
+    el('td', null, el('input', { type: 'checkbox', 'aria-label': 'Scrap ' + d.name, onchange: (e) => { if (e.target.checked) picked.add(d.id); else picked.delete(d.id); update(); } })),
+    el('td', null, shipImgEl(d, 18), ' ', d.name), el('td', null, HO.TYPES[d.type].name), el('td', null, String(count[d.id] || 0))));
+  // one confirmation listing every type and how many ships go with it
+  go.addEventListener('click', () => {
+    const ds = live.filter(d => picked.has(d.id));
+    const list = el('ul', null, ...ds.map(d => el('li', null, `${d.name} (${HO.TYPES[d.type].name}): ${count[d.id] || 0} ship${count[d.id] === 1 ? '' : 's'}`)));
+    const ships = ds.reduce((a, d) => a + (count[d.id] || 0), 0);
+    confirmBox(el('div', null, el('p', null, `Scrap ${ds.length === 1 ? 'this ship type' : `these ${ds.length} ship types`} and all ${ships} existing ship${ships === 1 ? '' : 's'} of ${ds.length === 1 ? 'it' : 'them'}?`), list), () => {
+      let m = 0; for (const d of ds) m += HO.scrapDesign(G, ME, d.id);
+      Sound.play(7003); toast(`Scrapped ${ds.length} type${ds.length === 1 ? '' : 's'} for ${fmt(m)} metal.`);
+      if (UI.selFleet != null && !G.fleets.some(f => f.id === UI.selFleet)) UI.selFleet = null;
+      renderPanel(); draw(); save();
+    });
+  });
+  modal('Scrap ship types', el('div', null, el('p', { class: 'sub' }, `Retiring a type frees an assembly line${HO.rules(G).maxDesigns ? ` (you can have ${HO.rules(G).maxDesigns})` : ''} and scraps every ship of that type. Check the types to retire.`),
+    table(['', 'Type', 'Class', 'Ships'], rows), el('div', { class: 'btns right' }, go)), { cls: 'mid' });
 }
 function openBattleList() {
   const bs = G.battles.filter(b => b.sides.includes(ME)).reverse();
@@ -1511,7 +1503,7 @@ function openPrefs() {
   modal('Preferences', el('div', { class: 'prefs' }, box('important', 'Show only the most important messages'), box('review', 'Review battles as they happen'),
     box('hints', 'Give helpful game play hints'), box('celsius', 'Temperatures in Celsius (not °F)'),
     G ? el('label', { class: 'chk' }, el('input', { type: 'checkbox', checked: modern() ? 'checked' : false, onchange: (e) => { G.opts.modern = e.target.checked; save(); renderPanel(); } }),
-      el('span', null, 'Modern conveniences in this game (automatic routes, the map follows the news, partial scrapping, battle speed and written reports)')) : null,
+      el('span', null, 'Modern conveniences in this game (automatic routes, the map follows the news, battle speed and written reports)')) : null,
     box('tips', 'Explain things when the pointer rests on them (text from the original manual)')), { cls: 'small' });
 }
 
@@ -1615,7 +1607,7 @@ function newGameDialog() {
       el('label', { class: 'chk' }, el('input', { type: 'checkbox', name: 'luck' }), el('span', null, 'Luck in battles')),
       el('label', { class: 'chk' }, el('input', { type: 'checkbox', name: 'novas', checked: 'checked' }), el('span', null, 'Novas'))),
     el('label', { class: 'chk modern' }, el('input', { type: 'checkbox', name: 'modern', checked: localStorage.getItem('ho5.modern') === '1' ? 'checked' : false }),
-      el('span', null, 'Modern conveniences: automatic routes, the map follows the news, scrap some of a fleet, battle speed and written battle reports (not in the original games)')),
+      el('span', null, 'Modern conveniences: automatic routes, the map follows the news, battle speed and written battle reports (not in the original games)')),
     el('div', { class: 'btns right' }, el('button', { type: 'submit' }, 'Create galaxy')));
   const origOpts = (d) => ({ computers: d.computers === 'any' ? 4 : +d.computers, iqNum: +d.o_iq, start: d.start, cstart: d.o_cstart, shape: d.o_shape, size: +d.o_size, density: +d.o_density, buddies: !!d.buddies, yearsPerTurn: +d.o_years });
   const refresh = () => {
