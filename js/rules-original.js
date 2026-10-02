@@ -633,9 +633,13 @@ function projected(G, p) {
 // opt.shipyard(G, p, s, spend) lets another ruleset take part of a colony's
 // money for shipbuilding first (the DOS 2.0 rules); it returns what is left.
 // opt.research and opt.idleTech replace the research step and the "not
-// spending on research" reminder (the 4.0.5 rules).
+// spending on research" reminder (the 4.0.5 rules). opt.terraStep, terraCost,
+// mineMetal and mineMoney replace those formulas, and opt.terraWarnAlways
+// repeats the "never profitable" warning every turn (the Mac 3.0.1 rules).
 function economy(G, p, opt) {
   const cols = colonies(G, p.id);
+  const tStep = opt && opt.terraStep || terraStep, tCost = opt && opt.terraCost || terraCost;
+  const mMetal = opt && opt.mineMetal || mineMetal, mMoney = opt && opt.mineMoney || mineMoney;
   const limit = () => borrowLimit(G, p);
   const dip = dipAmount(p);
   p.savings -= dip;
@@ -694,20 +698,20 @@ function economy(G, p, opt) {
     let T = trunc(spend * tf);
     const M = spend - T;
     if (T > 0) {
-      if (T > 50 && h.gR > 256 && !s._warned) { s._warned = true; msg(G, p.id, `Warning: you are terraforming ${s.name}, a planet that will never become profitable.`, { icon: 'm9013', star: s.id }); }
+      if (T > 50 && h.gR > 256 && (!s._warned || opt && opt.terraWarnAlways)) { s._warned = true; msg(G, p.id, `Warning: you are terraforming ${s.name}, a planet that will never become profitable.`, { icon: 'm9013', star: s.id }); }
       s.oSink = s.oSink || 0;
       if (s.oSink < 5000) { const x = Math.min(5000 - s.oSink, T); T -= x; s.oSink += x; }
-      const step = terraStep(p, T);
+      const step = tStep(p, T);
       if (h.dT < step) {
-        p.oRefund += terraCost(p, step) - terraCost(p, h.dT);
+        p.oRefund += tCost(p, step) - tCost(p, h.dT);
         s.t = p.homeT;
         msg(G, p.id, `You have completely terraformed ${s.name}.`, { icon: 'm9017', star: s.id });
       } else s.t += (s.t < p.homeT ? 1 : -1) * step / 10;
     }
     if (M > 0) {
-      let got = mineMetal(p, M);
+      let got = mMetal(p, M);
       if (got >= s.metal) {
-        p.oRefund += Math.max(0, mineMoney(p, got) - mineMoney(p, s.metal));
+        p.oRefund += Math.max(0, mMoney(p, got) - mMoney(p, s.metal));
         got = s.metal;
         msg(G, p.id, h.gR > 256 ? `${s.name} has run out of metal. You should probably evacuate it.` : `${s.name} has run out of metal.`, { icon: 'm9001', star: s.id });
       }
@@ -720,8 +724,10 @@ function economy(G, p, opt) {
   else if (opt && opt.idleTech ? opt.idleTech(G, p, D) : p.human && D > 0 && G.turn % 5 === 0) msg(G, p.id, 'You are not spending any money on technology research.', { icon: 'm9011' });
 }
 // savings, interest, population and colony income (FUN_10077200)
-// opt.meteors and opt.interestOn replace those steps (the 4.0.5 rules).
+// opt.meteors and opt.interestOn replace those steps (the 4.0.5 rules);
+// opt.incomeU replaces the colony income formula (the Mac 3.0.1 rules).
 function afterMovement(G, p, opt) {
+  const incU = opt && opt.incomeU || incomeU;
   (opt && opt.meteors || meteors)(G, p);
   const cols = colonies(G, p.id);
   const share = shares(G, p, cols);
@@ -746,7 +752,7 @@ function afterMovement(G, p, opt) {
       u += add; setPopU(s, u);
     }
     s.oNew = false;
-    const inc = incomeU(u, hab(p, s).H);
+    const inc = incU(u, hab(p, s).H);
     s.oInc = inc;
     if (inc > 0) gross += inc;
     net += inc;

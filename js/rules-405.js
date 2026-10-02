@@ -507,7 +507,10 @@ function refuel(G) {
 // has no ships left; colony ships are shot first, then satellites, then a random
 // ship group, and the planet only when no ships are left; damage left over when a
 // ship dies is lost. No battle stances and no "arrive late" (GONE in 4.0.5).
+// The Mac 3.0.1 rules reuse this with their own hit table, ship costs and
+// shots (the active ruleset's hit, designCost, shotsPerShip and planetShots).
 function battle(G, sid) {
+  const RS = E.rules(G);
   const s = G.stars[sid];
   const present = G.fleets.filter(f => f.star === sid && f.to == null);
   const planetOwner = s.owner >= 0 && s.pop > 0 ? s.owner : -1;
@@ -522,9 +525,9 @@ function battle(G, sid) {
     const key = f.owner + ':' + d.id;
     let g = gmap[key];
     if (!g) {
-      const c = designCost(G, d), decoy = d.type === 'decoy';
+      const c = RS.designCost(G, d), decoy = d.type === 'decoy';
       // CONFIRMED: decoys fight with W 0, S 0 and 1 hp
-      g = gmap[key] = { owner: f.owner, d, type: d.type, n: 0, n0: 0, init: d.V, W0: decoy ? 0 : d.W, S: decoy ? 0 : d.S, hp: c.hp, shots: shotsPerShip(d), debris: trunc(c.metal / 5), dmg: 0, tgt: null, members: [], units: [], ui: 0 };
+      g = gmap[key] = { owner: f.owner, d, type: d.type, n: 0, n0: 0, init: d.V, W0: decoy ? 0 : d.W, S: decoy ? 0 : d.S, hp: c.hp, shots: RS.shotsPerShip(d), debris: trunc(c.metal / 5), dmg: 0, tgt: null, members: [], units: [], ui: 0 };
       groups.push(g);
     }
     g.members.push({ f, k, n }); g.n += n;
@@ -533,7 +536,7 @@ function battle(G, sid) {
   let planet = null;
   if (planetOwner >= 0) {
     const q = G.players[planetOwner], u = popU(s);
-    planet = { owner: planetOwner, planet: true, n: 1, n0: 1, init: 0, W0: q.tech.weapons, S: q.tech.shields, hp: u, shots: Math.ceil(u / 200000), dmg: 0, tgt: null, units: [] };
+    planet = { owner: planetOwner, planet: true, n: 1, n0: 1, init: 0, W0: q.tech.weapons, S: q.tech.shields, hp: u, shots: RS.planetShots ? RS.planetShots(u) : Math.ceil(u / 200000), dmg: 0, tgt: null, units: [] };
   }
   const rec = { id: G.nextId++, star: sid, year: G.year + 10, sides: ownerIds, rounds: [], start, planetOwner, pop0: s.pop, popR: [] };
   let debris = 0;
@@ -564,7 +567,7 @@ function battle(G, sid) {
       for (let i = 0; i < g.n0; i++) for (let j = 0; j < g.shots; j++) {
         if (!g.tgt || (g.tgt.planet ? g.tgt.hp <= 0 : g.tgt.n <= 0) || (g.tgt.planet && foes.some(h => !h.planet && h.n > 0))) g.tgt = pickTarget(foes);
         const t = g.tgt; if (!t) return;
-        const base = hit(g.W - t.S) * (RI(G, 0, 20) + g.W * 5 + 10);
+        const base = RS.hit(g.W - t.S) * (RI(G, 0, 20) + g.W * 5 + 10);
         const si = g.planet ? -1 : g.units[i % g.units.length];
         if (t.planet) {
           const dmg = Math.min(base * 4, t.hp); t.hp -= dmg;
