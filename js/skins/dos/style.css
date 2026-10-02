@@ -48,3 +48,7 @@ button:not(.mbtn):not(.close):not(.tbtn):not(.clock):not([role=menuitem]):active
 #tframe { width: min(383px, 86vw); background: #000; border: 0; image-rendering: pixelated; }
 .tbtns button { font: bold 14px var(--ui) !important; }
 .credit { color: #a0a0a0; }
+/* the DOS End Turn button is a picture (DIB 5000) */
+.clock.pic { padding: 0; background: none; border: 0; box-shadow: none; }
+.clock.pic img { display: block; width: 102px; height: auto; image-rendering: pixelated; }
+.clock.pic:active img { transform: translate(1px, 1px); }

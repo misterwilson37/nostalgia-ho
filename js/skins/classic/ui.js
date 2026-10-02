@@ -379,7 +379,8 @@ function draw() {
     const x = sx(s.x), y = sy(s.y);
     if (x < -60 || y < -60 || x > mapW + 60 || y > mapH + 60) continue;
     const look = starLook(s.id);
-    if (UI.sel === s.id && T.select && IMG[T.select]) { const r = ps * 0.85; cx.drawImage(IMG[T.select], x - r, y - r, r * 2, r * 2); }
+    const selPic = T.select && (ps < 24 && T.selectSmall ? IMG[T.selectSmall] : IMG[T.select]);
+    if (UI.sel === s.id && selPic) { const r = ps * 0.85; cx.drawImage(selPic, x - r, y - r, r * 2, r * 2); }
     else if (UI.sel === s.id) {
       const g = cx.createRadialGradient(x, y, ps * 0.3, x, y, ps * 0.95);
       g.addColorStop(0, 'rgba(255,240,170,0.75)'); g.addColorStop(1, 'rgba(255,200,80,0)');
@@ -390,7 +391,7 @@ function draw() {
     // satellites ring
     const sats = G.fleets.filter(f => f.star === s.id && f.sat && (f.owner === ME || visibleTo(s.id)));
     if (sats.length) {
-      cx.strokeStyle = sats.some(f => f.owner === ME) ? 'rgba(120,230,255,0.9)' : 'rgba(255,120,200,0.9)';
+      cx.strokeStyle = T.satRing || (sats.some(f => f.owner === ME) ? 'rgba(120,230,255,0.9)' : 'rgba(255,120,200,0.9)');
       cx.lineWidth = 1.5; cx.beginPath(); cx.ellipse(x, y, ps * 0.62, ps * 0.62, 0, 0, Math.PI * 2); cx.stroke();
     }
     if (s.owner >= 0 && s.owner !== ME && HO.feature(G, 'alliances') && HO.isAllied(G, ME, s.owner) && HO.know(G, me(), s.id).explored && IMG.haloAlly) cx.drawImage(IMG.haloAlly, x - ps * 0.6, y + ps * 0.28, ps * 1.2, ps * 0.4);
@@ -469,6 +470,12 @@ function fleetMarkers(f) {
   return out;
 }
 function drawMarkers(f, dx, dy, w, dir) {
+  if (T.marker) { // the theme draws one picture per fleet
+    const k = T.marker(f, f.owner === ME), im = k && IMG[k];
+    if (im) cx.drawImage(im, dx, dy, w, w);
+    if (im && UI.selFleet === f.id) { cx.strokeStyle = '#ffe066'; cx.lineWidth = 2; cx.strokeRect(dx - 1, dy - 1, w + 2, w + 2); }
+    return { x: dx, w: im ? w : 0 };
+  }
   const ims = fleetMarkers(f), n = Math.max(1, ims.length), span = n * w + (n - 1) * 2;
   const left = dir < 0 ? dx + w - span : dx;
   cx.fillStyle = UI.selFleet === f.id ? '#ffe066' : (f.owner === ME ? '#f4f7ff' : '#ffe3f1');
@@ -483,6 +490,7 @@ function drawDots(s, x, y, ps) {
   let ri = 0, li = 0;
   for (const f of here) {
     const mine = f.owner === ME;
+    if (T.marker && !T.marker(f, mine)) continue; // the theme doesn't show this fleet
     let dx, dy, dir = 1;
     if (f.sat) { dx = x - ps / 2 - w - 1; dy = y - ps / 2 + li * (w + 2); li++; dir = -1; }
     else { dx = x + ps / 2 + 1; dy = y - ps / 2 + ri * (w + 2); ri++; }
@@ -819,7 +827,8 @@ function renderMsg() {
     const m = UI.inbox[UI.msgIdx];
     if (Prefs.important && m.quiet && !m.battle && UI.msgIdx < UI.inbox.length - 1) { UI.msgIdx++; return renderMsg(); }
     const look = originalLook(m);
-    const sound = look ? look.sound : m.sound, icon = look ? look.icon : m.icon;
+    let sound = look ? look.sound : m.sound, icon = look ? look.icon : m.icon;
+    if (T.messageLook) { const t = T.messageLook(m, { icon, sound }, { G, ME, starLook }); if (t) ({ icon, sound } = t); }
     if (sound) Sound.play(sound);
     if (Prefs.review && m.battle && !m._reviewed) { m._reviewed = true; setTimeout(() => openBattle(m.battle), 50); }
     const card = el('div', { class: 'card', tabindex: 0, role: 'button', 'aria-label': 'Next message' });
@@ -837,6 +846,10 @@ function renderMsg() {
     if (m.star != null) { UI.sel = m.star; renderPanel(); draw(); }
     box.append(card);
     card.focus({ preventScroll: true });
+    return;
+  }
+  if (T.endTurnPic && A.img[T.endTurnPic]) { // the theme's own End Turn button picture
+    box.append(el('button', { class: 'clock pic', onclick: doEndTurn, 'aria-label': 'End turn' }, el('img', { src: A.img[T.endTurnPic], alt: '' })));
     return;
   }
   const clock = el('button', { class: 'clock', onclick: doEndTurn, 'aria-label': 'End turn' },
