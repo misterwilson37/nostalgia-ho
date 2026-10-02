@@ -574,7 +574,7 @@ function onUp(e) {
   if (tgt == null || tgt === f.star) { if (f.dest != null) { HO.cancelMove(G, f); Sound.play(4000); } }
   else if (HO.orderMove(G, f, tgt)) Sound.play(4001);
   else if (autoRoute(f, tgt)) Sound.play(4001);
-  else { Sound.play(7016); toast(`${G.stars[tgt].name} is out of range. This fleet has ${f.fuel.toFixed(1)} fuel; the trip is ${HO.starDist(G, f.star, tgt).toFixed(1)}.`); }
+  else { Sound.play(7016); toast(outOfRange(f, tgt)); }
   UI.hover = null; draw(); renderPanel(); save();
 }
 function onDbl(e) {
@@ -1376,6 +1376,17 @@ function findRoute(f, tgt) {
   const path = [];
   for (let v = tgt; v !== f.star; v = prev[v]) path.unshift(v);
   return path;
+}
+// why a fleet can't go, in plain words
+function outOfRange(f, tgt) {
+  const d = HO.starDist(G, f.star, tgt), max = HO.fleetMaxRange(G, f), name = G.stars[tgt].name;
+  const here = G.stars[f.star], fuelHere = here.owner === ME || (here.owner >= 0 && HO.isAllied(G, here.owner, ME));
+  let t = `${name} is ${d.toFixed(1)} away, but this fleet has only ${f.fuel.toFixed(1)} fuel.`;
+  if (d <= max && fuelHere) t += ' It will be refuelled here by next turn; try again then.';
+  else if (d <= max) t += ' Fleets refuel only at your own (or your allies’) colonies.';
+  else if (HO.feature(G, 'waypoints')) t += ` Its full range is ${max}, and fleets refuel only at your own (or your allies’) colonies, so it needs one of your colonies within reach on the way. Settle one, or research more Range.`;
+  else t += ` Its full range is ${max}; research more Range to go farther.`;
+  return t;
 }
 function autoRoute(f, tgt) {
   if (!Prefs.autoRoute || !HO.feature(G, 'waypoints') || f.sat) return false;
