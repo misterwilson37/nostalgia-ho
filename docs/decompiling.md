@@ -130,3 +130,10 @@ It takes about half a minute. The C uses the addresses of that layout (for examp
 `EndTurn @ 000a0004`); `docs/301-findings.md` cites functions by name and address.
 Routines that push arguments around Toolbox calls still read awkwardly; for the
 floating-point formulas, read the disassembly next to the C.
+
+The same two tools work on **Spaceward Ho! 1.2F** (the French Mac edition, 1992); run
+them on its resource fork the same way. Its MPW runtime is older, so `mac68k.py` doesn't
+recognise and name the long arithmetic helpers: in the 1.2 layout `LMUL` is at `104b4`
+(jump-table entry `$42`), `LDIV` at `104dc` (`$4a`) and the integer square root at `112c2`
+(`$202`); the C shows them as `thunk_FUN_…`, so read the disassembly next to it.
+`docs/12-findings.md` cites 1.2's functions by name and address.
