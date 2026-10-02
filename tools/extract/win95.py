@@ -113,6 +113,14 @@ def main(exe):
         key = 'b%d' % i
         im.save(os.path.join(OUT, 'sprites', key + '.png'), optimize=True)
         sprites.append(key)
+    # the selection ring: frame 0 of bitmap 175's animation (a 15-px white
+    # strip on the left; 56x51 cells at y 0 for big icons, 26x26 at y 156
+    # for small ones), its black made see-through
+    if 175 in bmps:
+        sheet = bmps[175].convert('RGBA')
+        for key, box in (('selbig', (15, 0, 15 + 56, 51)), ('selsmall', (15, 156, 15 + 26, 156 + 26))):
+            edges_clear(sheet.crop(box)).save(os.path.join(OUT, 'sprites', key + '.png'), optimize=True)
+            sprites.append(key)
     for name, raw in waves.items():
         open(os.path.join(OUT, 'sounds', name + '.wav'), 'wb').write(raw)
     json.dump(strings, open(os.path.join(OUT, 'strings.json'), 'w'), ensure_ascii=False, indent=0)

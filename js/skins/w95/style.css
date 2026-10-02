@@ -1,0 +1,47 @@
+/* Spaceward Ho! — 4.0.5 skin: the classic skin's layout, dressed like the
+   1996 Windows 95 version (silver 3-D controls, navy title bars, black map). */
+@import url("../classic/style.css");
+:root {
+  --plat: #c0c0c0; --plat2: #c0c0c0; --edge: #808080; --ink: #000; --sub: #333;
+  --hi: #000080; --hat: #000080; --gold: #ffff00; --space: #000; --neg: #a00000;
+  --ui: Tahoma, "MS Sans Serif", "Segoe UI", Arial, sans-serif; --west: Tahoma, "MS Sans Serif", Arial, sans-serif;
+}
+body { font-size: 12px; }
+.box, .designer { background: var(--plat); border: 2px solid; border-color: #fff #404040 #404040 #fff; box-shadow: inset -1px -1px 0 #808080, inset 1px 1px 0 #dfdfdf; }
+#panel { background: var(--plat); border-right: 2px solid #404040; }
+#menubar { background: #c0c0c0; border-bottom: 1px solid #808080; box-shadow: inset 0 -1px 0 #fff; }
+#menubar .logo { font: bold 13px var(--ui); color: #000080; }
+.mbtn:hover, .mbtn:focus-visible, .dropdown button:hover, .dropdown button:focus-visible { background: #000080; color: #fff; }
+.dropdown { background: #c0c0c0; border: 2px solid; border-color: #dfdfdf #000 #000 #dfdfdf; box-shadow: 1px 1px 0 #404040; }
+.box h3 { font: bold 12px var(--ui); color: #000080; }
+button:not(.mbtn):not(.close):not(.tbtn):not(.clock):not([role=menuitem]) {
+  background: #c0c0c0; border: 2px solid; border-color: #fff #000 #000 #fff; border-radius: 0; box-shadow: inset -1px -1px 0 #808080, inset 1px 1px 0 #dfdfdf; color: #000;
+}
+button:not(.mbtn):not(.close):not(.tbtn):not(.clock):not([role=menuitem]):not(.quiet) { font-weight: normal; border-radius: 0; }
+button:not(.mbtn):not(.close):not(.tbtn):not(.clock):not([role=menuitem]):active { border-color: #000 #fff #fff #000; box-shadow: inset 1px 1px 0 #808080; }
+.track { background: #fff; border: 2px solid; border-color: #808080 #fff #fff #808080; }
+.fill { background: #000080; }
+.fill.tech { background: #008080; }
+.fill.sav { background: #008000; }
+.fill.tbar { background: #800080; }
+.win { background: var(--plat); border: 2px solid; border-color: #dfdfdf #000 #000 #dfdfdf; box-shadow: inset -1px -1px 0 #808080, inset 1px 1px 0 #fff; }
+.wtitle { background: linear-gradient(90deg, #000080, #1084d0); border-bottom: 0; height: 20px; }
+.wtitle span { background: none; color: #fff; text-align: left; margin: 0; }
+.close { order: 2; margin-left: auto; width: 16px; height: 14px; background: #c0c0c0; border: 2px solid; border-color: #fff #000 #000 #fff; }
+.newgame input, .newgame select { border: 2px solid; border-color: #808080 #fff #fff #808080; }
+.tbtn { background: #c0c0c0; border: 2px solid; border-color: #fff #000 #000 #fff; border-radius: 0; }
+.tbtn.on { background: #000080; color: #fff; border-color: #000080; }
+.card { background: #c0c0c0; border: 2px solid; border-color: #fff #000 #000 #fff; box-shadow: 1px 1px 0 #404040; }
+.card .icon { width: 48px; image-rendering: pixelated; }
+.clock.pic { padding: 0; background: none; border: 0; box-shadow: none; }
+.clock.pic img { display: block; width: 64px; height: auto; image-rendering: pixelated; }
+.clock.pic:active img { transform: translate(1px, 1px); }
+.frow.sel { background: #fff; border-color: #000080; }
+.ppic img, .ppic .phat { image-rendering: pixelated; }
+/* title: the "Version 4" animation on white */
+#titlescreen { background: #008080; }
+.tcard h1 { font: bold clamp(30px, 6vw, 52px)/1 var(--ui); color: #fff; text-shadow: 2px 2px 0 #000; }
+.tcard .by { color: #e0e0e0; }
+#tframe { width: min(480px, 90vw); background: #fff; border: 2px solid; border-color: #808080 #fff #fff #808080; image-rendering: pixelated; }
+.tbtns button { font: 14px var(--ui) !important; }
+.credit { color: #e0e0e0; }

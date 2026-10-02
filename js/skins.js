@@ -24,6 +24,7 @@
 const SKINS = [
   { id: 'classic', name: 'Classic' },
   { id: 'dos', name: 'DOS 2.0' },
+  { id: 'w95', name: 'Windows 95 (4.0.5)' },
 ];
 const store = {
   get(k) { try { return root.localStorage.getItem(k); } catch (e) { return null; } },
