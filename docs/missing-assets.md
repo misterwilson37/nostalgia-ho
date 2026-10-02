@@ -168,6 +168,24 @@ same pictures: 256 colours for AGA Amigas (identical to the DOS pictures, so not
   The Amiga version also played by mail ("Briefspiel": each player's moves saved to a file
   and merged) and over a network; neither can be done here (see hot seat in the README).
 
+## mac12 (Mac 1.2, French, black and white)
+
+Spaceward Ho! 1.2F for the Macintosh (Delta Tao and Upgrade Editions, Paris, 1992). It keeps
+its pictures like 3.0.1 and with the same numbers, so this skin is the 3.0.1 skin pointed at
+[`assets/skins/mac12/`](../assets/skins/mac12/sprites/), with the DOS skin's planet and report
+icon choices (1.2 has the same set of icons as the DOS game).
+
+- **Its own:** the French title picture ([`p1001`](../assets/skins/mac12/sprites/p1001.png):
+  "Programme: Peter Commons, Graphismes: Howard Vives", "Version 1.2") and the big 81×76
+  ship parts `p2100`–`p2426` (white backgrounds; 3.0.1 has only the 40×40 ones).
+- **Translated:** its End Turn button says "Fin Tour"
+  ([`p5500`](../assets/skins/mac12/sprites/p5500.png)); the skin shows 3.0.1's English one,
+  which is the same picture in English ([`endturn`](../assets/skins/mac12/sprites/endturn.png)).
+  The title picture is still in French. A creative version could redraw its two French
+  lines in English.
+- **Missing:** colour. 1.2's colour pictures were in a separate file, "TheHo F CPicts", which
+  wasn't in the archive. 1.2 has 13 sounds (no "next message" click, no "Move 'em out!").
+
 ## mac3 (Mac 3.0.1, black and white)
 
 Spaceward Ho! 3.0.1 for the Macintosh (Delta Tao, 1993). The program's own pictures are

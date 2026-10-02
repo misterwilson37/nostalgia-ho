@@ -49,6 +49,8 @@ shared game file; this remake doesn't have a server, so it's one computer, takin
   pictures, sounds and title, and Workbench colours (art in `assets/skins/amiga/`). The
   Amiga game is the DOS game (same rules, same pictures in the same order), so play it with
   the DOS 2.0 rules
+- `js/skins/mac12/` and `js/skins/mac3c/`: the Mac 1.2 (French, 1992, black and white) and
+  Mac 3.0.1 colour skins, both the mac3 skin pointed at other pictures
 - `js/skins/mac3/`: the "Mac 3.0.1 (black and white)" skin: the DOS skin with the 1993 Mac
   game's 1-bit pictures and sounds and a Mac Plus look (art in `assets/skins/mac3/`). The DOS
   game's pictures were made from this one's, with the same numbers
@@ -71,4 +73,5 @@ shared game file; this remake doesn't have a server, so it's one computer, takin
   (`dos.py` does the same for the DOS 2.0 game's `HO.PRS` and `HOCOLOR.PRS`)
   (`win95.py` for 4.0.5's `SPACEHO.EXE`; `hlp.py` converts old WinHelp files to the HTML manuals in `assets/manuals/`)
   (`amiga.py` for the Amiga version's packed `.pff` files; how they are packed is at the top of it)
-  (`mac3.py` reads the Mac 3.0.1 floppy image directly)
+  (`mac3.py` reads the Mac 3.0.1 floppy images directly, and its colour pictures floppy;
+  `mac12.py` reads 1.2's resource fork as unar leaves it)
