@@ -27,6 +27,7 @@
 const SKINS = [
   { id: 'dos', version: '2.0', platform: 'DOS and Windows 3.1', year: 1993 },
   { id: 'amiga', version: '2.0', platform: 'Amiga, German', year: 1994 },
+  { id: 'mac12', version: '1.2', platform: 'Mac, French, black and white', year: 1992 },
   { id: 'mac3', version: '3.0.1', platform: 'Mac, black and white', year: 1993 },
   { id: 'mac3c', version: '3.0.1', platform: 'Mac, colour', year: 1993 },
   { id: 'w95', version: '4.0.5', platform: 'Windows 95', year: 1996 },

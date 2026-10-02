@@ -15,6 +15,9 @@
 'use strict';
 const P = 'dos:'; // the DOS skin's name for its pictures
 const colour = !!window.HOMAC3_COLOUR;
+// js/skins/mac12: 1.2 (1992), the same program two years earlier, with the
+// DOS game's set of icons and the big ship pictures as well
+const v12 = window.HOMAC_VERSION === '1.2';
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 const images = {
   p3030: 'p3530', p3040: 'p3540', // won, eliminated
@@ -22,9 +25,9 @@ const images = {
 };
 for (let n = 0; n < 16; n++) { images['bad' + n + '_0'] = 'i' + (2000 + n); images['bad' + n + '_1'] = 'i' + (2500 + n); }
 window.HOTHEME_OVER = {
-  dir: colour ? 'assets/skins/mac3c/' : 'assets/skins/mac3/',
+  dir: v12 ? 'assets/skins/mac12/' : colour ? 'assets/skins/mac3c/' : 'assets/skins/mac3/',
   // 3.0.1 has the Mac 5.0.5 sounds' numbers, 7001 (next message) included
-  sounds: { 11111: 7000, 7006: 7001 },
+  sounds: v12 ? { 11111: 7000 } : { 11111: 7000, 7006: 7001 },
   images,
   battlePlanet: P + 'i1004', // a plain planet
   // Planets on the map, as 3.0.1 picks them (SetPlanetTypesForStar @a4fbc
@@ -60,11 +63,12 @@ window.HOTHEME_OVER = {
     return L([1004, rich ? 1010 : 1011, rich ? 1005 : 1006][band]);
   },
   select: P + 'p502', selectSmall: P + 'p503',
-  endTurnPic: P + 'p5500', // "End Turn ⌘T"
+  endTurnPic: P + (v12 ? 'endturn' : 'p5500'), // "End Turn ⌘T" (1.2's own says "Fin Tour"; endturn is 3.0.1's)
   // Ship pictures: engine, hull and nose side by side, as in the DOS game,
   // but 40x40 parts (2600 + the DOS part number less 100), shown twice the size.
   shipPic(d, IMG) {
-    const part = (n) => IMG[P + 'p' + (2600 + n)];
+    const big = v12; // 1.2 has the 81x76 parts (2100 + n) too
+    const part = (n) => IMG[P + 'p' + ((big ? 2100 : 2600) + n)];
     let parts;
     if (d.type === 'satellite') parts = [part(301 + clamp(d.W - 1, 0, 25))];
     else if (d.type === 'scout' || d.type === 'fighter' || d.type === 'colony') {
@@ -73,10 +77,11 @@ window.HOTHEME_OVER = {
       else parts = [part(clamp(d.R + d.V - 8, 0, 23)), d.type === 'colony' ? part(150) : part(99 + clamp(d.S - 1, 0, 25)), part(250 + clamp(d.W - 1, 0, 29))];
     } else return null;
     if (parts.some(im => !im || !im.width)) return null;
-    const c = document.createElement('canvas'); c.width = parts.length * 80; c.height = 80;
+    const w = big ? 81 : 80, h = big ? 76 : 80;
+    const c = document.createElement('canvas'); c.width = parts.length * w; c.height = h;
     const x = c.getContext('2d');
     x.imageSmoothingEnabled = false;
-    parts.forEach((im, i) => x.drawImage(im, i * 80, 0, 80, 80));
+    parts.forEach((im, i) => x.drawImage(im, i * w, 0, w, h));
     return c;
   },
   // Report pictures, as 3.0.1 picks them (GetIconID @161216: by report
@@ -113,14 +118,21 @@ window.HOTHEME_OVER = {
     if (!t || !t.width) return false;
     frame.width = t.width; frame.height = t.height;
     frame.getContext('2d').drawImage(t, 0, 0);
-    Sound.play(10000); // "Move 'em out!"
+    Sound.play(v12 ? 2000 : 10000); // "Move 'em out!" (1.2 hasn't got it)
     return true;
   },
   page(doc) {
+    if (v12) {
+      const c = doc.querySelector('#titlescreen .credit');
+      if (c) c.textContent = 'A personal web remake with the art and sounds of Spaceward Ho! 1.2 for the Macintosh, French edition (Delta Tao Software and Upgrade Editions, Paris, 1992): programming by Peter Commons, pictures by Howard Vives. The title picture says so in French.';
+      const l = doc.querySelector('#menubar .logo'); if (l) l.textContent = 'Ho! 1.2';
+      return;
+    }
     const c = doc.querySelector('#titlescreen .credit');
     if (c) c.textContent = 'A personal web remake with the art and sounds of Spaceward Ho! 3.0.1 for the Macintosh (Delta Tao, 1993): written by Peter Commons, art by Howard Vives and Bob Van de walle, sounds by Mark Madeley.';
     const l = doc.querySelector('#menubar .logo'); if (l) l.textContent = 'Ho! 3.0.1';
   },
 };
+if (v12) { delete window.HOTHEME_OVER.starLook; delete window.HOTHEME_OVER.messageLook; } // 1.2 has only the DOS game's icons
 if (!window.HOSKINS_INLINE) document.write('<script src="js/skins/dos/ui.js"><\/script>');
 })();

@@ -1,0 +1,3 @@
+/* Spaceward Ho! — Mac 1.2 skin: the Mac 3.0.1 black-and-white look. */
+@import url("../mac3/style.css");
+#tframe { width: min(383px, 86vw); }
