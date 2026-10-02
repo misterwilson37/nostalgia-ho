@@ -37,8 +37,10 @@ root.HOHELP = {
 };
 // The same tips in the words of other versions' manuals, for games played
 // with those rules (keys as above; anything missing falls back to the
-// 5.0.5 text): dos = the DOS 2.0 manual, 405 = the 4.0.5 Windows help.
-root.HOHELP_RULES = root.HOHELP_RULES || { dos: {}, 405: {} };
+// 5.0.5 text): dos = the DOS 2.0 manual, 405 = the 4.0.5 Windows help,
+// 301 = the Mac 3.0.1 program's own Quick Help (DITL 3010; it has no manual).
+root.HOHELP_RULES = root.HOHELP_RULES || { dos: {}, 405: {}, 301: {} };
+root.HOHELP_RULES['301'] = root.HOHELP_RULES['301'] || {};
 // DOS 2.0 manual (assets/manuals/dos-2.0.pdf): no debt, no Radical tech,
 // ships are queued and paid for out of each planet's shipbuilding money.
 Object.assign(root.HOHELP_RULES.dos, {
@@ -95,11 +97,18 @@ Object.assign(root.HOHELP_RULES['405'], {
   route: ['If the fleet can’t reach the star you’ve dragged to, the path will be shown by a dotted gray line. If the fleet has enough fuel to go to the star you’ve selected and come back, the path will be a double-pointed arrow. A fleet refuels at planets you or your allies own, or from a tanker.', 'Moving Ships'],
   endTurn: ['You click on the turn clock to end your turn. If you are playing with a time limit, the moving hand shows how much time you have left for this turn; when you are out of time you go into “Bonus Time”.', 'The Star Map'],
 });
+// Spaceward Ho! 3.0.1 (Mac): the Quick Help box, DITL 3010 in the program.
+Object.assign(root.HOHELP_RULES['301'], {
+  route: ['To move a fleet, first click on the fleet you want to move in the list on the left. Then click and drag on the map from the star the fleet is at to where you want it to go.', 'Quick Help For Spaceward Ho! 3.0'],
+});
 // each ruleset's own manual, opened from the Help menu
 root.HOMANUALS = {
   original: ['assets/manuals/5.0.5/index.html', 'Spaceward Ho! 5 manual'],
   claude: ['assets/manuals/5.0.5/index.html', 'Spaceward Ho! 5 manual'],
   dos: ['assets/manuals/dos-2.0.pdf', 'Spaceward Ho! 2.0 manual (DOS)'],
   405: ['assets/manuals/4.0.5/index.html', 'Spaceward Ho! 4.0.5 help'],
+  // 3.0.1 shipped without an online manual; the 4.0.5 help is the closest
+  // (it has a page on what changed from 3.0 to 4.0)
+  301: ['assets/manuals/4.0.5/index.html', 'Spaceward Ho! 4.0.5 help (closest to 3.0.1)'],
 };
 })(this);

@@ -1576,6 +1576,14 @@ function newGameDialog() {
     sel('w_size', 'Galaxy size', [['small', 'Small'], ['medium', 'Medium'], ['large', 'Large'], ['xl', 'Extra Large'], ['huge', 'Humongous']], 'medium'),
     sel('w_density', 'Galaxy density', [['dense', 'Dense'], ['sparse', 'Sparse']], 'dense'),
     sel('w_years', 'Years per turn', [['10', '10'], ['20', '20'], ['30', '30'], ['50', '50']], '10'));
+  // Mac 3.0.1 rules: its Create New Galaxy window (DITL 6080) and Join skill (DITL 4010)
+  const mac3Box = el('div', { class: 'group' },
+    sel('m_skill', 'Your skill', [['novice', 'Novice'], ['beginner', 'Beginner'], ['normal', 'Normal'], ['advanced', 'Advanced'], ['expert', 'Expert']], 'normal'),
+    sel('m_iq', 'Computer intelligence', [['dumb', 'Dumb'], ['average', 'Average'], ['smart', 'Smart'], ['diabolical', 'Diabolical']], 'average'),
+    sel('m_shape', 'Galaxy style', [['circle', 'Circle'], ['random', 'Random'], ['ring', 'Ring'], ['spiral', 'Spiral'], ['grid', 'Grid'], ['cluster', 'Cluster']], 'cluster'),
+    sel('m_size', 'Galaxy size', [['small', 'Small'], ['medium', 'Medium'], ['large', 'Large'], ['xl', 'Extra Large'], ['huge', 'Humongous']], 'medium'),
+    sel('m_density', 'Galaxy density', [['dense', 'Dense'], ['sparse', 'Sparse']], 'dense'),
+    sel('m_years', 'Years per turn', [['10', '10'], ['20', '20'], ['30', '30'], ['50', '50'], ['100', '100']], '10'));
   const dosBox = el('div', { class: 'group' },
     sel('d_skill', 'Your skill', [['novice', 'Novice'], ['beginner', 'Beginner'], ['normal', 'Normal'], ['advanced', 'Advanced'], ['expert', 'Expert']], 'normal'),
     sel('d_iq', 'Computer skill', [['dumb', 'Dumb'], ['average', 'Average'], ['smart', 'Smart']], 'average'),
@@ -1596,7 +1604,7 @@ function newGameDialog() {
     sel('computers', 'Computer players', [...[...Array(20).keys()].map(n => [String(n), String(n)]), ['any', 'Any (1-8)']], '4'),
     seats,
     startSel,
-    claudeBox, origBox, dosBox, w95Box,
+    claudeBox, origBox, dosBox, w95Box, mac3Box,
     // last line: the rules, with the game difficulty rating beside them
     el('div', { class: 'lastrow' },
       sel('rules', 'Rules', HO.ruleOptions(), localStorage.getItem('ho5.rules') || 'claude'),
@@ -1612,23 +1620,25 @@ function newGameDialog() {
   const origOpts = (d) => ({ computers: d.computers === 'any' ? 4 : +d.computers, iqNum: +d.o_iq, start: d.start, cstart: d.o_cstart, shape: d.o_shape, size: +d.o_size, density: +d.o_density, buddies: !!d.buddies, yearsPerTurn: +d.o_years });
   const refresh = () => {
     const d = Object.fromEntries(new FormData(f).entries());
-    const orig = d.rules === 'original', dos = d.rules === 'dos', w95 = d.rules === '405';
-    claudeBox.hidden = orig || dos || w95; origBox.hidden = !orig; dosBox.hidden = !dos; w95Box.hidden = !w95; startSel.hidden = dos || w95;
-    // up to 19 computers with 4.0.5 rules, 8 otherwise
+    const orig = d.rules === 'original', dos = d.rules === 'dos', w95 = d.rules === '405', mac3 = d.rules === '301';
+    claudeBox.hidden = orig || dos || w95 || mac3; origBox.hidden = !orig; dosBox.hidden = !dos; w95Box.hidden = !w95; mac3Box.hidden = !mac3; startSel.hidden = dos || w95 || mac3;
+    // up to 19 computers with 4.0.5 and 3.0.1 rules, 8 otherwise
     const csel = f.querySelector('select[name=computers]');
-    for (const o of csel.options) if (/^\d+$/.test(o.value) && +o.value > 8) o.hidden = !w95;
-    if (!w95 && +csel.value > 8) csel.value = '8';
+    for (const o of csel.options) if (/^\d+$/.test(o.value) && +o.value > 8) o.hidden = !w95 && !mac3;
+    if (!w95 && !mac3 && +csel.value > 8) csel.value = '8';
     const nh = +d.humans || 1;
     for (const l of seats.querySelectorAll('[data-seat]')) l.hidden = +l.dataset.seat > nh;
     f.querySelector('select[name=computers] option[value="0"]').disabled = nh < 2;
     if (nh < 2 && d.computers === '0') f.querySelector('select[name=computers]').value = '1';
-    f.querySelector('fieldset.opts').hidden = !orig && !w95;
-    f.querySelector('input[name=novas]').closest('label').hidden = w95; // 4.0.5 always has novas
+    f.querySelector('fieldset.opts').hidden = !orig && !w95 && !mac3;
+    f.querySelector('input[name=novas]').closest('label').hidden = w95 || mac3; // 4.0.5 and 3.0.1 always have novas
+    f.querySelector('input[name=luck]').closest('label').hidden = mac3; // 3.0.1 always has battle luck
     for (const o of f.querySelectorAll('.slider output')) { const inp = o.previousElementSibling; if (!o.querySelector('small')) o.textContent = inp.value; }
     rating.textContent = orig ? String(HO.RULESETS.original.difficulty(origOpts(d)))
       : w95 ? String(HO.RULESETS['405'].difficulty({ computers: d.computers === 'any' ? 4 : +d.computers, iq: d.w_iq, start: d.w_skill, shape: d.w_shape, size: d.w_size, density: d.w_density }))
+      : mac3 ? String(HO.RULESETS['301'].difficulty({ computers: d.computers === 'any' ? 4 : +d.computers, iq: d.m_iq, start: d.m_skill, shape: d.m_shape, size: d.m_size, density: d.m_density }))
       : `Not rated with ${dos ? 'DOS 2.0' : 'Claude'} rules`;
-    rating.className = orig || w95 ? '' : 'none';
+    rating.className = orig || w95 || mac3 ? '' : 'none';
   };
   f.addEventListener('input', refresh); f.addEventListener('change', refresh);
   const start = () => {
@@ -1647,6 +1657,8 @@ function newGameDialog() {
       G = HO.newGame(Object.assign(common, o, { difficulty: HO.RULESETS.original.difficulty(o) }));
     } else if (d.rules === '405') {
       G = HO.newGame(Object.assign(common, { start: d.w_skill, iq: d.w_iq, shape: d.w_shape, size: d.w_size, density: d.w_density, yearsPerTurn: +d.w_years, novas: true }));
+    } else if (d.rules === '301') {
+      G = HO.newGame(Object.assign(common, { start: d.m_skill, iq: d.m_iq, shape: d.m_shape, size: d.m_size, density: d.m_density, yearsPerTurn: +d.m_years, novas: true, luck: true }));
     } else if (d.rules === 'dos') {
       G = HO.newGame(Object.assign(common, { start: d.d_skill, iq: d.d_iq, size: d.d_size, shape: d.d_shape, density: d.d_density, novas: false, alliances: false, luck: false }));
     } else G = HO.newGame(Object.assign(common, { iq: d.iq, cstart: d.cstart, shape: d.shape, size: d.size, density: d.density }));

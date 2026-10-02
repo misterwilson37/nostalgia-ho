@@ -814,5 +814,6 @@ if (typeof module !== 'undefined') {
   require('./rules-original.js'); require('./ai-original.js');
   require('./rules-dos.js');
   require('./rules-405.js');
+  require('./rules-301.js');
 } else root.HO = API;
 })(this);
