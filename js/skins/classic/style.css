@@ -130,7 +130,13 @@ button:focus-visible { outline: 2px solid var(--hi); outline-offset: 1px; }
 .tcard { text-align: center; color: #f1e6c8; }
 .tcard h1 { font: clamp(40px, 8vw, 84px)/1 var(--west); margin: 0 0 6px; color: #f3c64b; text-shadow: 3px 3px 0 #7a1d17, 6px 6px 0 rgba(0,0,0,.6); }
 .tcard .by { margin: 0 0 18px; color: #b9b0d6; }
-#tframe { width: min(300px, 70vw); height: auto; image-rendering: auto; background: #fff; border: 3px solid #f1e6c8; }
+#tframe { display: block; width: min(300px, 70vw); height: auto; image-rendering: auto; background: #fff; }
+/* the splash in a window of the skin's own style */
+.tsplash { width: auto; display: inline-flex; margin: 0 auto; text-align: left; color: var(--ink); }
+.tsplash .wbody { padding: 8px; display: grid; place-items: center; overflow: visible; }
+.tskin { display: inline-flex; gap: 6px; align-items: center; margin-top: 12px; color: inherit; font-size: 12px; }
+.tskin[hidden] { display: none; }
+.tskin select { font: inherit; color: #000; }
 .tbtns { display: flex; gap: 10px; justify-content: center; margin-top: 18px; flex-wrap: wrap; }
 .tbtns button { font: 18px var(--west) !important; padding: 6px 20px !important; }
 .credit { margin-top: 14px; font-size: 11px; color: #8d86ab; max-width: 52ch; margin-inline: auto; }

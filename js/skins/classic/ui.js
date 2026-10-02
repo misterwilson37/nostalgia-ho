@@ -14,8 +14,10 @@ const PAGE = `
   <div class="tcard">
     <h1>Spaceward Ho!</h1>
     <p class="by">by Peter Commons &amp; Joe Williams · Delta Tao Software</p>
-    <canvas id="tframe" width="304" height="200" role="img" aria-label="The Spaceward Ho! cowboy planet"></canvas>
+    <div class="win tsplash"><div class="wtitle"><span id="tname">Spaceward Ho!</span></div>
+      <div class="wbody"><canvas id="tframe" width="304" height="200" role="img" aria-label="The Spaceward Ho! title picture"></canvas></div></div>
     <div class="tbtns"><button id="tnew">New game</button><button id="tcont" hidden>Continue</button><button id="thelp" class="quiet">How to play</button></div>
+    <label class="tskin" hidden><span>Skin</span> <select id="tskin"></select></label>
     <p class="credit">A personal web remake built from Jake’s own copy of Spaceward Ho! 5.0.5. Art by Howard Vives and Bob Van de walle.</p>
   </div>
 </div>
@@ -1531,6 +1533,16 @@ function titleScreen() {
   t.hidden = false;
   const has = !!localStorage.getItem('ho5.save');
   const frame = $('#tframe'), fx = frame.getContext('2d');
+  // the splash sits in a window named for the release this skin is, and a
+  // list of the other skins reloads the page into one of them
+  const skins = (window.HOSKINS && HOSKINS.list) || [], here = skins.find(k => k.id === HOSKINS.current);
+  if (here) $('#tname').textContent = `Spaceward Ho! ${here.name}`;
+  const ts = $('#tskin');
+  if (skins.length > 1 && !ts.options.length) {
+    for (const k of skins) ts.append(el('option', { value: k.id, selected: k === here ? 'selected' : false }, k.name));
+    ts.addEventListener('change', () => HOSKINS.preview(ts.value));
+    ts.closest('label').hidden = false;
+  }
   let i = 0;
   clearInterval(UI.anim);
   if (T.title && T.title(frame, IMG, Sound)) { $('#tcont').hidden = !has; return; }
@@ -1607,7 +1619,7 @@ function newGameDialog() {
     claudeBox, origBox, dosBox, w95Box, mac3Box,
     // last line: the rules, with the game difficulty rating beside them
     el('div', { class: 'lastrow' },
-      sel('rules', 'Rules', HO.ruleOptions(), localStorage.getItem('ho5.rules') || 'claude'),
+      sel('rules', 'Rules', HO.ruleOptions(), [localStorage.getItem('ho5.rules')].find(r => r && HO.RULESETS[r]) || HO.newestRules()),
       skins.length > 1 ? sel('skin', 'Skin', skins.map(k => [k.id, k.name]), window.HOSKINS.current) : null,
       el('div', { class: 'rating' }, el('span', null, 'Game difficulty rating'), rating)),
     el('fieldset', { class: 'opts' }, el('legend', null, 'Options'),

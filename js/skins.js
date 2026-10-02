@@ -21,14 +21,18 @@
 //   game to move to the chosen one.
 (function (root) {
 'use strict';
+// Each skin is the look of one release of the game: its version, platform
+// and year name it in the lists, which run oldest to newest; the newest is
+// the default.
 const SKINS = [
-  { id: 'classic', name: 'Classic' },
-  { id: 'dos', name: 'DOS 2.0' },
-  { id: 'amiga', name: 'Amiga 2.0' },
-  { id: 'mac3', name: 'Mac 3.0.1 (black and white)' },
-  { id: 'mac3c', name: 'Mac 3.0.1 (colour)' },
-  { id: 'w95', name: 'Windows 95 (4.0.5)' },
-];
+  { id: 'dos', version: '2.0', platform: 'DOS and Windows 3.1', year: 1993 },
+  { id: 'amiga', version: '2.0', platform: 'Amiga, German', year: 1994 },
+  { id: 'mac3', version: '3.0.1', platform: 'Mac, black and white', year: 1993 },
+  { id: 'mac3c', version: '3.0.1', platform: 'Mac, colour', year: 1993 },
+  { id: 'w95', version: '4.0.5', platform: 'Windows 95', year: 1996 },
+  { id: 'classic', version: '5.0.5', platform: 'Mac OS 9 and X', year: 2003 },
+].map(k => Object.assign(k, { name: `${k.version} (${k.platform}, ${k.year})` }))
+  .sort((a, b) => a.year - b.year || a.version.localeCompare(b.version, 'en', { numeric: true }));
 const store = {
   get(k) { try { return root.localStorage.getItem(k); } catch (e) { return null; } },
   set(k, v) { try { root.localStorage.setItem(k, v); } catch (e) {} },
@@ -38,7 +42,8 @@ const list = root.HOSKINS_INLINE ? SKINS.filter(s => s.id === root.HOSKINS_INLIN
 const valid = (id) => list.some(s => s.id === id);
 let wanted = null;
 try { wanted = new URLSearchParams(root.location.search).get('skin'); } catch (e) {}
-const current = [wanted, store.get('ho5.skin')].find(valid) || list[0].id;
+const newest = list.reduce((a, b) => (b.year > a.year ? b : a)).id;
+const current = [wanted, store.get('ho5.skin')].find(valid) || newest;
 
 root.HOSKINS = {
   list,
@@ -48,6 +53,13 @@ root.HOSKINS = {
     let r = null;
     try { r = root.sessionStorage.getItem('ho5.resume'); root.sessionStorage.removeItem('ho5.resume'); } catch (e) {}
     return r === '1';
+  },
+  // remember the choice and reload in that skin at its title screen
+  preview(id) {
+    if (!valid(id) || id === current) return;
+    store.set('ho5.skin', id);
+    const u = new URL(root.location.href); u.searchParams.delete('skin');
+    root.location.href = u.toString();
   },
   // remember the choice and reload in that skin, continuing the saved game
   switchTo(id) {

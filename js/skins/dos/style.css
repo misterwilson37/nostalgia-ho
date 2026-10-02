@@ -44,7 +44,8 @@ button:not(.mbtn):not(.close):not(.tbtn):not(.clock):not([role=menuitem]):active
 .ppic img, .ppic .phat { image-rendering: pixelated; }
 /* title: the DOS credits picture on black */
 #titlescreen { background: #000; }
-.tcard h1, .tcard .by { display: none; }
+.tcard h1 { font: bold clamp(30px, 6vw, 52px)/1 var(--ui); color: #fff; text-shadow: none; }
+.tcard .by { color: #c0c0c0; }
 #tframe { width: min(383px, 86vw); background: #000; border: 0; image-rendering: pixelated; }
 .tbtns button { font: bold 14px var(--ui) !important; }
 .credit { color: #a0a0a0; }
