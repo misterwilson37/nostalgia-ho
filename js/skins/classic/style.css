@@ -190,3 +190,10 @@ button:focus-visible { outline: 2px solid var(--hi); outline-offset: 1px; }
 #handover h2 { margin: 0; font: 22px var(--west); color: var(--hat); }
 .newgame .seat { display: flex; gap: 6px; }
 .newgame .seat input { flex: 1; min-width: 0; }
+/* terraform / mine: one bar split between two colours */
+.tm input[type=range] { -webkit-appearance: none; appearance: none; height: 12px; border: 1px solid #555; border-radius: 6px; padding: 0;
+  background: linear-gradient(90deg, #4f9e4f 0 var(--split, 50%), #b0573a var(--split, 50%) 100%); }
+.tm input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 8px; height: 18px; border-radius: 3px; background: #fff; border: 1px solid #222; cursor: ew-resize; }
+.tm input[type=range]::-moz-range-thumb { width: 8px; height: 18px; border-radius: 3px; background: #fff; border: 1px solid #222; cursor: ew-resize; }
+.tm .tml { color: #2f6e2f; white-space: nowrap; } .tm .tmr { color: #8a3d22; white-space: nowrap; }
+.tm .tmv { font-variant-numeric: tabular-nums; font-size: 11px; }

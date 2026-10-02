@@ -113,7 +113,7 @@ const Sound = {
   stopTheme() { if (this.theme) this.theme.pause(); },
 };
 // preferences (the original's Preferences window: Celsius, only important messages, review battles, hints)
-const Prefs = { celsius: false, important: false, review: false, hints: true };
+const Prefs = { celsius: false, important: false, review: false, hints: true, autoRoute: true };
 try { const s = JSON.parse(localStorage.getItem('ho5.prefs') || '{}'); if (s.sound === false) Sound.on = false; if (s.music) Sound.music = true; for (const k in Prefs) if (s[k] != null) Prefs[k] = s[k]; } catch (e) {}
 function savePrefs() { try { localStorage.setItem('ho5.prefs', JSON.stringify(Object.assign({ sound: Sound.on, music: Sound.music }, Prefs))); } catch (e) {} }
 const degF = (f) => Prefs.celsius ? Math.round((f - 32) * 5 / 9) + '°C' : Math.round(f) + '°';
@@ -432,7 +432,8 @@ function draw() {
     if (tgt != null && tgt !== f.star) {
       const d = HO.starDist(G, f.star, tgt);
       const turns = Math.ceil(d / HO.fleetSpeed(G, f) - 1e-9);
-      const label = ok ? `${d.toFixed(1)} away · ${turns} turn${turns === 1 ? '' : 's'}` : `Too far: ${d.toFixed(1)} away, fuel ${f.fuel.toFixed(1)}`;
+      const via = !ok && Prefs.autoRoute && HO.feature(G, 'waypoints') && !f.sat ? findRoute(f, tgt) : null;
+      const label = ok ? `${d.toFixed(1)} away · ${turns} turn${turns === 1 ? '' : 's'}` : via ? `Too far to fly straight: will go via ${via.length - 1} stop${via.length === 2 ? '' : 's'}` : `Too far: ${d.toFixed(1)} away, fuel ${f.fuel.toFixed(1)}`;
       cx.font = '12px Geneva, Verdana, sans-serif'; cx.textAlign = 'left';
       const tw = cx.measureText(label).width;
       cx.fillStyle = 'rgba(0,0,0,0.7)'; cx.fillRect(x2 + 12, y2 - 24, tw + 10, 18);
@@ -572,6 +573,7 @@ function onUp(e) {
   }
   if (tgt == null || tgt === f.star) { if (f.dest != null) { HO.cancelMove(G, f); Sound.play(4000); } }
   else if (HO.orderMove(G, f, tgt)) Sound.play(4001);
+  else if (autoRoute(f, tgt)) Sound.play(4001);
   else { Sound.play(7016); toast(`${G.stars[tgt].name} is out of range. This fleet has ${f.fuel.toFixed(1)} fuel; the trip is ${HO.starDist(G, f.star, tgt).toFixed(1)}.`); }
   UI.hover = null; draw(); renderPanel(); save();
 }
@@ -699,10 +701,16 @@ function planetBox(sid) {
       box.append(row('Population', fmt(s.pop * 1e6)), row('Max population', fmt(HO.maxPop(G, p, s) * 1e6)), row('Income', money(inc), inc < 0 ? 'neg' : ''));
       const terraOK = Math.abs(HO.seenT(p, s) - 72) > 0.5, metalOK = s.metal > 0;
       if (terraOK && metalOK) {
-        const sl = el('div', { class: 'tm' }, el('span', null, 'Terraform'),
-          el('input', { type: 'range', min: 0, max: 100, value: Math.round(s.terra * 100), 'aria-label': 'Terraform versus mining', oninput: (ev) => { s.terra = ev.target.value / 100; }, onchange: save }),
-          el('span', null, 'Mine'));
-        box.append(sl);
+        // a balance, not an amount: the colony's money is split between
+        // terraforming (left, green) and mining (right, rust). The handle
+        // sits at the split; the more green, the more terraforming.
+        const pct = () => Math.round(s.terra * 100);
+        const lt = el('span', { class: 'tmv' }), rt = el('span', { class: 'tmv' });
+        const inp = el('input', { type: 'range', min: 0, max: 100, value: pct(), 'aria-label': 'Split between terraforming and mining',
+          oninput: (ev) => { s.terra = ev.target.value / 100; show(); }, onchange: save });
+        const show = () => { inp.style.setProperty('--split', pct() + '%'); lt.textContent = pct() + '%'; rt.textContent = (100 - pct()) + '%'; inp.setAttribute('aria-valuetext', `${pct()}% terraforming, ${100 - pct()}% mining`); };
+        show();
+        box.append(el('div', { class: 'tm' }, el('span', { class: 'tml' }, 'Terraform ', lt), inp, el('span', { class: 'tmr' }, rt, ' Mine')));
       } else box.append(el('p', { class: 'note' }, !terraOK && !metalOK ? 'Fully terraformed and mined out. Its budget goes to savings.' : !terraOK ? 'Fully terraformed; its budget goes to mining.' : 'No metal left; its budget goes to terraforming.'));
       if (HO.feature(G, 'buildQueue')) box.append(yardBox(s));
       box.append(el('div', { class: 'btns' },
@@ -1341,10 +1349,46 @@ function runAutoPlay(o) {
   };
   step();
 }
+// Too far to go straight there: hop through your (or your allies') colonies,
+// refuelling at each, the shortest way (a "Plan route…" made for you; the
+// DOS 2.0 game routed fleets like this by itself). Off in Preferences.
+function findRoute(f, tgt) {
+  const max = HO.fleetMaxRange(G, f);
+  if (!(max > 0)) return null;
+  const fuelAt = (sid) => { const o = G.stars[sid].owner; return o === ME || (o >= 0 && HO.isAllied(G, o, ME)); };
+  const nodes = G.stars.filter(st => fuelAt(st.id) || st.id === tgt).map(st => st.id);
+  const dist = { [f.star]: 0 }, prev = {}, done = new Set();
+  for (;;) {
+    let u = null;
+    for (const k in dist) if (!done.has(+k) && (u == null || dist[k] < dist[u])) u = +k;
+    if (u == null) return null;
+    if (u === tgt) break;
+    done.add(u);
+    if (u !== f.star && !fuelAt(u)) continue;
+    const reach = u === f.star ? f.fuel : max;
+    for (const v of nodes) {
+      if (done.has(v) || v === u) continue;
+      const d = HO.starDist(G, u, v);
+      if (d > reach + 1e-9) continue;
+      if (dist[v] == null || dist[u] + d < dist[v] - 1e-9) { dist[v] = dist[u] + d; prev[v] = u; }
+    }
+  }
+  const path = [];
+  for (let v = tgt; v !== f.star; v = prev[v]) path.unshift(v);
+  return path;
+}
+function autoRoute(f, tgt) {
+  if (!Prefs.autoRoute || !HO.feature(G, 'waypoints') || f.sat) return false;
+  const path = findRoute(f, tgt);
+  if (!path || !HO.orderPath(G, f, path)) return false;
+  toast(`${G.stars[tgt].name} is too far to fly straight there, so this fleet will go by way of ${path.slice(0, -1).map(i => G.stars[i].name).join(', ')}, refuelling on the way.`);
+  return true;
+}
 function openPrefs() {
   const box = (k, label) => el('label', { class: 'chk' }, el('input', { type: 'checkbox', checked: Prefs[k] ? 'checked' : false, onchange: (e) => { Prefs[k] = e.target.checked; savePrefs(); renderPanel(); } }), el('span', null, label));
   modal('Preferences', el('div', { class: 'prefs' }, box('important', 'Show only the most important messages'), box('review', 'Review battles as they happen'),
-    box('hints', 'Give helpful game play hints'), box('celsius', 'Temperatures in Celsius (not °F)')), { cls: 'small' });
+    box('hints', 'Give helpful game play hints'), box('celsius', 'Temperatures in Celsius (not °F)'),
+    box('autoRoute', 'Plan a route through my colonies when I send a fleet too far')), { cls: 'small' });
 }
 
 // ----- help -----
