@@ -988,7 +988,7 @@ function doEndTurn(confirmed) {
 }
 function addTurnNotes(p) {
   p.inbox = p.inbox || [];
-  if (Prefs.hints && G.turn % 7 === 3 && (HO.DATA.hints || []).length) { const h = HO.DATA.hints; p.inbox.push({ text: h[G.turn % Math.min(h.length, 40)], icon: 'm9024', quiet: true }); }
+  if (Prefs.hints && HO.rules(G).hints !== false && G.turn % 7 === 3 && (HO.DATA.hints || []).length) { const h = HO.DATA.hints; p.inbox.push({ text: h[G.turn % Math.min(h.length, 40)], icon: 'm9024', quiet: true }); }
   if (!p.inbox.length) p.inbox.push({ text: `Year ${G.year}. Nothing much happened.`, icon: 'm9024', quiet: true });
 }
 // ----- hot seat -----

@@ -809,6 +809,7 @@ function aiBudget(G, p, M, A) {
 
 E.registerRules('dos', Object.assign({}, O, {
   label: 'DOS 2.0 (1993)',
+  hints: false, // this game had no between-turn tips (4.0.5 and 5.0.5 do)
   // the New Game window lists rulesets by year, then version (engine.js ruleOptions)
   version: '2.0', platform: 'DOS and Windows 3.1', year: 1993,
   ai: 'original',

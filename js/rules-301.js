@@ -363,6 +363,7 @@ const STAR_NAMES = [
 
 E.registerRules('301', Object.assign({}, O, {
   label: 'Mac 3.0.1 (1993)',
+  hints: false, // this game had no between-turn tips (4.0.5 and 5.0.5 do)
   // the New Game window lists rulesets by year, then version (engine.js ruleOptions)
   version: '3.0.1', platform: 'Mac', year: 1993,
   ai: 'original',

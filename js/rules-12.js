@@ -282,6 +282,7 @@ function checkElimination(G) {
 
 E.registerRules('12', Object.assign({}, D, {
   label: 'Mac 1.2 (1992)',
+  hints: false, // this game had no between-turn tips (4.0.5 and 5.0.5 do)
   // the New Game window lists rulesets by year, then version (engine.js ruleOptions)
   version: '1.2', platform: 'Mac, French', year: 1992,
   maxPlayers: 20,          // CONFIRMED (CreateGalaxy): 20 player slots, one of them the computer
