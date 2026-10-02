@@ -54,7 +54,7 @@ computer players' design. The big differences are:
   - It has 684 pictures: the 2.0-style planets and ship parts, plus new "Version 4"
     title art and landscapes. It also has 37 new spoken sounds ("Whoa!", "Shucks",
     "Hyahh" …).
-  - It hasn't been turned into a ruleset or skin yet.
+  - Its rules are the "Windows 95 4.0.5" ruleset (`js/rules-405.js`, see `docs/405-findings.md`).
 
 ## How the program was read
 

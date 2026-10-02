@@ -632,6 +632,8 @@ function projected(G, p) {
 // mining (FUN_10073d70) and research (FUN_10074f90)
 // opt.shipyard(G, p, s, spend) lets another ruleset take part of a colony's
 // money for shipbuilding first (the DOS 2.0 rules); it returns what is left.
+// opt.research and opt.idleTech replace the research step and the "not
+// spending on research" reminder (the 4.0.5 rules).
 function economy(G, p, opt) {
   const cols = colonies(G, p.id);
   const limit = () => borrowLimit(G, p);
@@ -714,16 +716,17 @@ function economy(G, p, opt) {
   }
   // research
   const tech = trunc(D * share(p.budget.tech));
-  if (tech > 0) research(G, p, tech);
-  else if (p.human && D > 0 && G.turn % 5 === 0) msg(G, p.id, 'You are not spending any money on technology research.', { icon: 'm9011' });
+  if (tech > 0) (opt && opt.research || research)(G, p, tech);
+  else if (opt && opt.idleTech ? opt.idleTech(G, p, D) : p.human && D > 0 && G.turn % 5 === 0) msg(G, p.id, 'You are not spending any money on technology research.', { icon: 'm9011' });
 }
 // savings, interest, population and colony income (FUN_10077200)
-function afterMovement(G, p) {
-  meteors(G, p);
+// opt.meteors and opt.interestOn replace those steps (the 4.0.5 rules).
+function afterMovement(G, p, opt) {
+  (opt && opt.meteors || meteors)(G, p);
   const cols = colonies(G, p.id);
   const share = shares(G, p, cols);
   p.savings += trunc(p.oD * share(p.budget.savings));
-  p.oInterest = interestOn(p, p.savings);
+  p.oInterest = (opt && opt.interestOn || interestOn)(p, p.savings);
   p.savings += p.oRefund; p.oRefund = 0;
   let gross = 0, net = 0;
   for (const s of cols) {
@@ -1069,7 +1072,7 @@ E.registerRules('original', {
   maxDesigns: 24,
   features: { arrivalNotices: true, alliances: true, gifts: true, surrender: true, stances: true, lateArrival: true, waypoints: true, luck: true, supernova: true, armageddon: true, dip: true, chat: true, yearsPerTurn: true },
   HIT, hit, hab, popU, setPopU, maxPopU, incomeU, interestOn, mineMoney, mineMetal, terraCost, terraStep, aiSpec,
-  fleetStrength, planetStrength, techLevelCost, disposable, START, research,
+  fleetStrength, planetStrength, techLevelCost, disposable, START, research, techMsg, shotsPerShip,
   distance,
   newStar, setupPlayer, afterSetup, defaultDesigns, makeGalaxy, computerSetup, SHAPES, difficulty, masterPoints,
   maxPop: (G, p, s) => maxPopU(p, s) / 1000,

@@ -1,4 +1,4 @@
-// Headless AI-vs-AI test: node tools/test.js [claude|original|dos]
+// Headless AI-vs-AI test: node tools/test.js [claude|original|dos|405]
 const path = require('path'), root = path.join(__dirname, '..');
 const HO=require(path.join(root, 'js/engine.js'));
 Object.assign(HO.DATA,require(path.join(root, 'js/data.js')));

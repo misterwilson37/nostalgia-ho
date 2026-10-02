@@ -31,6 +31,10 @@ shared game file; this remake doesn't have a server, so it's one computer, takin
 - `js/rules-dos.js`: the "DOS 2.0" rules (Spaceward Ho! 2.0 for DOS, 1993: skill levels,
   four ship classes, ships queued and paid for at each colony; see `docs/dos-findings.md`).
   Its computer players are the Original ones
+- `js/rules-405.js`: the "Windows 95 4.0.5" rules (Spaceward Ho! 4.0.5 for Windows 95, 1996:
+  an earlier build of the 5.0.5 engine with skill levels, duels instead of free-for-all
+  battles, dearer high-tech ships and up to 19 computers; see `docs/405-findings.md`).
+  Built on the Original rules, with the Original computer players
 - `js/skins.js`: the list of skins and the loader. A skin is everything you see and
   hear; the game files above never touch the page, so any skin can play any ruleset
   and any saved game. The comment at the top of `js/skins.js` says what a skin must do.
@@ -46,9 +50,10 @@ shared game file; this remake doesn't have a server, so it's one computer, takin
 - `assets/`: sprites, sounds, the 25 rank pictures (`assets/explore/`) and theme music, listed in `assets/manifest.json`
 - `docs/original-findings.md`: what the original program actually does
 - `docs/dos-findings.md`: what the DOS 2.0 program does differently, and how its art was read
+- `docs/405-findings.md`: what the Windows 95 4.0.5 program does differently from 5.0.5
 - `docs/missing-assets.md`: what each skin still borrows or leaves silent (for future art)
 - `docs/decompiling.md`: how to decompile the Windows versions with Ghidra
-- `tools/test.js`: headless computer-vs-computer test (`node tools/test.js`, `node tools/test.js original` or `node tools/test.js dos`)
+- `tools/test.js`: headless computer-vs-computer test (`node tools/test.js`, `node tools/test.js original`, `dos` or `405`)
 - `tools/bundle.py`: builds `dist/spaceward-ho.html`, a single self-contained file with one
   skin built in (`python3 tools/bundle.py cozy` for another)
   (only needed for publishing somewhere that wants one file)

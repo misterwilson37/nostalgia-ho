@@ -323,7 +323,8 @@ function surrender(G, pid, to) {
 }
 function sendChat(G, from, to, text) {
   if (!feature(G, 'chat')) return;
-  const p = G.players[from];
+  const p = G.players[from], lim = rules(G).chatLimit; // 4.0.5: ten messages a turn
+  if (lim) { if ((p.chatThisTurn || 0) >= lim) return 'limit'; p.chatThisTurn = (p.chatThisTurn || 0) + 1; }
   if (G.players[to].human) msg(G, to, report(55, p.name, text), { icon: p.human ? 'm9024' : 'bad' + p.face + '_' + (p.female ? 1 : 0), chat: true });
   if (p.human) msg(G, from, report(71, G.players[to].name, text), { quiet: true });
   (G.players[to].news = G.players[to].news || []).push({ type: 'chat', from, text });
@@ -435,7 +436,7 @@ function newGame(opts) {
   // opts.humans: [{ name, female }] for a hot-seat game; else one human from opts.name / opts.female
   const H = Array.isArray(opts.humans) && opts.humans.length ? opts.humans.slice(0, 8) : [{ name: opts.name, female: opts.female }];
   const nHum = H.length;
-  const nComp = clamp(opts.computers | 0, nHum > 1 ? 0 : 1, 16 - nHum);
+  const nComp = clamp(opts.computers | 0, nHum > 1 ? 0 : 1, (rs.maxPlayers || 16) - nHum); // 4.0.5: up to 20 players
   const nPlayers = nComp + nHum;
   // a ruleset may lay out the galaxy itself (and pick the home stars)
   const gal = rs.makeGalaxy ? rs.makeGalaxy(G, opts, nPlayers) : null;
@@ -574,7 +575,7 @@ function turnStep(G, first, last) {
   if (feature(G, 'surrender')) processHandovers(G);
   if (feature(G, 'alliances')) { pactNews(G); shareMaps(G); }
   if (last) checkElimination(G);
-  for (const p of G.players) { p.spentThisTurn = []; recordHistory(G, p); }
+  for (const p of G.players) { p.spentThisTurn = []; if (p.chatThisTurn) p.chatThisTurn = 0; recordHistory(G, p); }
   for (const f of G.fleets) f.newThisTurn = false;
   G.turn++; G.year += rs.yearsPerTurn;
 }
@@ -714,7 +715,7 @@ function scrapFleet(G, f) {
   for (const k in f.ships) { const d = getDesign(G, f.owner, +k); metal += designCost(G, d).metal * f.ships[k] * rate; }
   if (f.star != null) {
     const s = G.stars[f.star];
-    if (s.owner === f.owner) p.metal += metal; else s.metal += metal;
+    if (s.owner === f.owner) p.metal += metal; else if (rules(G).scrapAt) rules(G).scrapAt(G, f.owner, s, metal); else s.metal += metal;
   } else if (rules(G).scrapInSpace) rules(G).scrapInSpace(G, f, metal);
   G.fleets.splice(G.fleets.indexOf(f), 1);
   return metal;
@@ -732,7 +733,7 @@ function scrapDesign(G, pid, did) {
     if (f.owner !== pid || !f.ships[did]) continue;
     const c = f.ships[did]; n += c;
     const m = Math.floor(unit * c * rate); metal += m;
-    if (f.star != null) { const s = G.stars[f.star]; if (s.owner === pid) p.metal += m; else s.metal += m; }
+    if (f.star != null) { const s = G.stars[f.star]; if (s.owner === pid) p.metal += m; else if (rules(G).scrapAt) rules(G).scrapAt(G, pid, s, m); else s.metal += m; }
     else if (rules(G).scrapInSpace) rules(G).scrapInSpace(G, { owner: pid, to: f.to, ships: { [did]: c } }, m);
     delete f.ships[did];
     if (!fleetCount(f)) G.fleets.splice(G.fleets.indexOf(f), 1);
@@ -812,5 +813,6 @@ if (typeof module !== 'undefined') {
   require('./rules-claude.js'); require('./ai-claude.js');
   require('./rules-original.js'); require('./ai-original.js');
   require('./rules-dos.js');
+  require('./rules-405.js');
 } else root.HO = API;
 })(this);

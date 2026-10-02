@@ -1358,7 +1358,8 @@ function openChat() {
     e.preventDefault();
     const d = Object.fromEntries(new FormData(f).entries());
     const text = (d.custom || '').trim() || d.line;
-    HO.sendChat(G, ME, +d.to, text); Sound.play(5000); closeModal(); save();
+    if (HO.sendChat(G, ME, +d.to, text) === 'limit') { toast('Sorry, you can only send ten messages per turn.'); return; }
+    Sound.play(5000); closeModal(); save();
   } });
   f.append(el('label', null, el('span', null, 'Send to'), playerSelect('to')),
     el('label', null, el('span', null, 'Say'), el('select', { name: 'line' }, ...lines.map(l => el('option', { value: l }, l)))),
@@ -1570,6 +1571,14 @@ function newGameDialog() {
     sel('o_years', 'Years per turn', [['10', '10'], ['20', '20'], ['30', '30'], ['50', '50']], '10'),
     el('label', { class: 'chk' }, el('input', { type: 'checkbox', name: 'buddies' }), el('span', null, 'Computers are best buddies')));
   // DOS 2.0 rules: the 2.0 Create Galaxy settings
+  // 4.0.5 rules (Windows 95): its New Game settings
+  const w95Box = el('div', { class: 'group' },
+    sel('w_skill', 'Your skill', [['novice', 'Novice'], ['beginner', 'Beginner'], ['normal', 'Normal'], ['advanced', 'Advanced'], ['expert', 'Expert']], 'normal'),
+    sel('w_iq', 'Computer intelligence', [['dumb', 'Dumb'], ['average', 'Average'], ['smart', 'Smart'], ['diabolical', 'Diabolical']], 'average'),
+    sel('w_shape', 'Galaxy style', [['circle', 'Circle'], ['random', 'Random'], ['ring', 'Ring'], ['spiral', 'Spiral'], ['grid', 'Grid'], ['cluster', 'Cluster']], 'circle'),
+    sel('w_size', 'Galaxy size', [['small', 'Small'], ['medium', 'Medium'], ['large', 'Large'], ['xl', 'Extra Large'], ['huge', 'Humongous']], 'medium'),
+    sel('w_density', 'Galaxy density', [['dense', 'Dense'], ['sparse', 'Sparse']], 'dense'),
+    sel('w_years', 'Years per turn', [['10', '10'], ['20', '20'], ['30', '30'], ['50', '50']], '10'));
   const dosBox = el('div', { class: 'group' },
     sel('d_skill', 'Your skill', [['novice', 'Novice'], ['beginner', 'Beginner'], ['normal', 'Normal'], ['advanced', 'Advanced'], ['expert', 'Expert']], 'normal'),
     sel('d_iq', 'Computer skill', [['dumb', 'Dumb'], ['average', 'Average'], ['smart', 'Smart']], 'average'),
@@ -1587,10 +1596,10 @@ function newGameDialog() {
     el('label', null, el('span', null, 'Galaxy name'), el('input', { name: 'galaxy', value: 'Milky Way', maxlength: 24 })),
     sel('female', 'Your hat', [['0', 'Cowboy'], ['1', 'Cowgirl']], '0'),
     sel('humans', 'People playing on this computer', [1, 2, 3, 4, 5, 6].map(n => [String(n), n === 1 ? 'Just me' : `${n} (take turns)`]), '1'),
-    sel('computers', 'Computer players', [...[0, 1, 2, 3, 4, 5, 6, 7, 8].map(n => [String(n), String(n)]), ['any', 'Any (1-8)']], '4'),
+    sel('computers', 'Computer players', [...[...Array(20).keys()].map(n => [String(n), String(n)]), ['any', 'Any (1-8)']], '4'),
     seats,
     startSel,
-    claudeBox, origBox, dosBox,
+    claudeBox, origBox, dosBox, w95Box,
     // last line: the rules, with the game difficulty rating beside them
     el('div', { class: 'lastrow' },
       sel('rules', 'Rules', HO.ruleOptions(), localStorage.getItem('ho5.rules') || 'claude'),
@@ -1606,16 +1615,23 @@ function newGameDialog() {
   const origOpts = (d) => ({ computers: d.computers === 'any' ? 4 : +d.computers, iqNum: +d.o_iq, start: d.start, cstart: d.o_cstart, shape: d.o_shape, size: +d.o_size, density: +d.o_density, buddies: !!d.buddies, yearsPerTurn: +d.o_years });
   const refresh = () => {
     const d = Object.fromEntries(new FormData(f).entries());
-    const orig = d.rules === 'original', dos = d.rules === 'dos';
-    claudeBox.hidden = orig || dos; origBox.hidden = !orig; dosBox.hidden = !dos; startSel.hidden = dos;
+    const orig = d.rules === 'original', dos = d.rules === 'dos', w95 = d.rules === '405';
+    claudeBox.hidden = orig || dos || w95; origBox.hidden = !orig; dosBox.hidden = !dos; w95Box.hidden = !w95; startSel.hidden = dos || w95;
+    // up to 19 computers with 4.0.5 rules, 8 otherwise
+    const csel = f.querySelector('select[name=computers]');
+    for (const o of csel.options) if (/^\d+$/.test(o.value) && +o.value > 8) o.hidden = !w95;
+    if (!w95 && +csel.value > 8) csel.value = '8';
     const nh = +d.humans || 1;
     for (const l of seats.querySelectorAll('[data-seat]')) l.hidden = +l.dataset.seat > nh;
     f.querySelector('select[name=computers] option[value="0"]').disabled = nh < 2;
     if (nh < 2 && d.computers === '0') f.querySelector('select[name=computers]').value = '1';
-    f.querySelector('fieldset.opts').hidden = !orig;
+    f.querySelector('fieldset.opts').hidden = !orig && !w95;
+    f.querySelector('input[name=novas]').closest('label').hidden = w95; // 4.0.5 always has novas
     for (const o of f.querySelectorAll('.slider output')) { const inp = o.previousElementSibling; if (!o.querySelector('small')) o.textContent = inp.value; }
-    rating.textContent = orig ? String(HO.RULESETS.original.difficulty(origOpts(d))) : `Not rated with ${dos ? 'DOS 2.0' : 'Claude'} rules`;
-    rating.className = orig ? '' : 'none';
+    rating.textContent = orig ? String(HO.RULESETS.original.difficulty(origOpts(d)))
+      : w95 ? String(HO.RULESETS['405'].difficulty({ computers: d.computers === 'any' ? 4 : +d.computers, iq: d.w_iq, start: d.w_skill, shape: d.w_shape, size: d.w_size, density: d.w_density }))
+      : `Not rated with ${dos ? 'DOS 2.0' : 'Claude'} rules`;
+    rating.className = orig || w95 ? '' : 'none';
   };
   f.addEventListener('input', refresh); f.addEventListener('change', refresh);
   const start = () => {
@@ -1632,6 +1648,8 @@ function newGameDialog() {
       localStorage.setItem('ho5.iq', d.o_iq);
       const o = origOpts(d);
       G = HO.newGame(Object.assign(common, o, { difficulty: HO.RULESETS.original.difficulty(o) }));
+    } else if (d.rules === '405') {
+      G = HO.newGame(Object.assign(common, { start: d.w_skill, iq: d.w_iq, shape: d.w_shape, size: d.w_size, density: d.w_density, yearsPerTurn: +d.w_years, novas: true }));
     } else if (d.rules === 'dos') {
       G = HO.newGame(Object.assign(common, { start: d.d_skill, iq: d.d_iq, size: d.d_size, shape: d.d_shape, density: d.d_density, novas: false, alliances: false, luck: false }));
     } else G = HO.newGame(Object.assign(common, { iq: d.iq, cstart: d.cstart, shape: d.shape, size: d.size, density: d.density }));
