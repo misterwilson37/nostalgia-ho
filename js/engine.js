@@ -67,7 +67,8 @@ function designMin(G, k, type) { const rs = rules(G); return rs.designMin ? rs.d
 function designCost(G, d) { return rules(G).designCost(G, d); }
 function canBuildType(G, p, type) { return rules(G).canBuild(G, p, type); }
 function designName(G, p, type) {
-  const names = DATA.shipNames[type] || ['Ship'];
+  // a ruleset may name ships from its own lists (rs.shipNames, by type)
+  const names = (rules(G).shipNames || DATA.shipNames)[type] || DATA.shipNames[type] || ['Ship'];
   const used = new Set(p.designs.map(d => d.name));
   for (let i = 0; i < 60; i++) {
     const base = names[(p.designs.length + i) % names.length];
@@ -433,6 +434,8 @@ function newGame(opts) {
     opts, stat: { battles: 0, captures: 0, colonized: 0 }, stars: [], players: [], fleets: [], battles: [], cur: 0, over: false, winner: -1, log: [],
   };
   const rs = rules(G);
+  // a ruleset whose original game had no New Game choices fixes them here
+  if (rs.fixOptions) rs.fixOptions(opts);
   // opts.humans: [{ name, female }] for a hot-seat game; else one human from opts.name / opts.female
   const H = Array.isArray(opts.humans) && opts.humans.length ? opts.humans.slice(0, 8) : [{ name: opts.name, female: opts.female }];
   const nHum = H.length;
@@ -463,10 +466,12 @@ function newGame(opts) {
   const AI = aiOf(G);
   for (let i = 0; i < nPlayers; i++) {
     const human = i < nHum;
-    const female = human ? !!H[i].female : R(G) < 0.45;
+    // a ruleset may give the computers its own names (rs.maleNames, rs.femaleNames)
+    // and say whether any computer is a woman (rs.femaleComputers: false = none)
+    const female = human ? !!H[i].female : rs.femaleComputers === false ? false : R(G) < 0.45;
     let name;
     if (human) name = H[i].name || (nHum > 1 ? 'Player ' + (i + 1) : 'You');
-    else { do { name = pick(G, female ? DATA.femaleNames : DATA.maleNames) || ('Computer ' + i); } while (usedNames.has(name) && usedNames.size < 40); }
+    else { do { name = pick(G, female ? (rs.femaleNames || DATA.femaleNames) : (rs.maleNames || DATA.maleNames)) || ('Computer ' + i); } while (usedNames.has(name) && usedNames.size < 40); }
     usedNames.add(name);
     const home = G.stars[homes[i]];
     // a ruleset may give each computer its own skill and home system
@@ -489,8 +494,10 @@ function newGame(opts) {
   rs.afterSetup(G);
   G.fleets.forEach(f => f.newThisTurn = false);
   for (const p of G.players) p.inbox = [];
-  msgAll(G, 'Spaceward Ho! by Peter Commons. Designed by Joe Williams.', { icon: 'm9004', sound: 11111 });
-  msgAll(G, 'Click here to make this message go away. Click on the clock to end your turn.', { icon: 'm9024' });
+  // the first messages: a ruleset may give its game's own (rs.welcome: [[text, opt], ...])
+  const welcome = rs.welcome || [['Spaceward Ho! by Peter Commons. Designed by Joe Williams.', { icon: 'm9004', sound: 11111 }],
+    ['Click here to make this message go away. Click on the clock to end your turn.', { icon: 'm9024' }]];
+  for (const [t, o] of welcome) msgAll(G, t, o);
   return G;
 }
 function placeStars(G, n, W, H, shape) {
@@ -822,5 +829,6 @@ if (typeof module !== 'undefined') {
   require('./rules-dos.js');
   require('./rules-405.js');
   require('./rules-301.js');
+  require('./rules-12.js');
 } else root.HO = API;
 })(this);
