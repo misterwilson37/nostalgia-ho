@@ -31,6 +31,7 @@ const SKINS = [
   { id: 'mac3', version: '3.0.1', platform: 'Mac, black and white', year: 1993 },
   { id: 'mac3c', version: '3.0.1', platform: 'Mac, colour', year: 1993 },
   { id: 'w95', version: '4.0.5', platform: 'Windows 95', year: 1996 },
+  { id: 'palm', version: '5', platform: 'Palm OS, version 1.0.4', year: 2003 },
   { id: 'classic', version: '5.0.5', platform: 'Mac OS 9 and X', year: 2003 },
 ].map(k => Object.assign(k, { name: `${k.version} (${k.platform}, ${k.year})` }))
   .sort((a, b) => a.year - b.year || a.version.localeCompare(b.version, 'en', { numeric: true }));
@@ -43,7 +44,7 @@ const list = root.HOSKINS_INLINE ? SKINS.filter(s => s.id === root.HOSKINS_INLIN
 const valid = (id) => list.some(s => s.id === id);
 let wanted = null;
 try { wanted = new URLSearchParams(root.location.search).get('skin'); } catch (e) {}
-const newest = list.reduce((a, b) => (b.year > a.year ? b : a)).id;
+const newest = list[list.length - 1].id; // the list runs oldest to newest
 const current = [wanted, store.get('ho5.skin')].find(valid) || newest;
 
 root.HOSKINS = {

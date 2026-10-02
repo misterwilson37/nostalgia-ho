@@ -813,7 +813,7 @@ const API = {
     .sort((a, b) => (a.year || 1e4) - (b.year || 1e4) || String(a.version || '').localeCompare(String(b.version || ''), 'en', { numeric: true }))
     .map(r => [r.id, r.year ? `${r.version} (${r.platform}, ${r.year})` : r.label]),
   // the newest original game's rules: the New Game window's default
-  newestRules: () => Object.values(RULESETS).filter(r => r.year).sort((a, b) => b.year - a.year)[0].id,
+  newestRules: () => Object.values(RULESETS).filter(r => r.year).sort((a, b) => b.year - a.year || String(b.version).localeCompare(String(a.version), 'en', { numeric: true }))[0].id,
   // randomness and helpers for rulesets and AIs
   R, RI, pick, shuffle, gauss, clamp,
   newGame, endTurn, buildShips, unbuildShip, designLimits, designMin, designCost, shipCostNow, canBuildType, findOrCreateDesign, getDesign,
