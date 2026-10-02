@@ -35,8 +35,16 @@ ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 OUT = os.path.join(ROOT, 'assets', 'skins', 'mac3')
 
 
-def resource_fork(path):
+def resource_fork(path, out=OUT):
     d = open(path, 'rb').read()
+    if d[:4] == b'\x00\x05\x16\x07':  # AppleDouble ("._name", as unar or a Mac zip leaves it)
+        for k in range(struct.unpack('>H', d[24:26])[0]):
+            eid, off, ln = struct.unpack('>III', d[26 + 12 * k:38 + 12 * k])
+            if eid == 2:  # the resource fork
+                tmp = os.path.join(out, '.app.rsrc')
+                os.makedirs(out, exist_ok=True)
+                open(tmp, 'wb').write(d[off:off + ln])
+                return tmp
     if d[1024:1026] != b'BD':  # not an HFS disk: take it as the fork itself
         return path
     import machfs
@@ -44,8 +52,8 @@ def resource_fork(path):
     v.read(d)
     for name, f in v.items():
         if getattr(f, 'type', None) == b'APPL':
-            tmp = os.path.join(OUT, '.app.rsrc')
-            os.makedirs(OUT, exist_ok=True)
+            tmp = os.path.join(out, '.app.rsrc')
+            os.makedirs(out, exist_ok=True)
             open(tmp, 'wb').write(f.rsrc)
             return tmp
     sys.exit('No program on that disk')
@@ -193,10 +201,10 @@ def save(out, images, sounds):
     print(len(images), 'sprites,', len(sounds), 'sounds ->', out)
 
 
-def main(src, colour=None):
-    os.makedirs(OUT, exist_ok=True)
-    res = parse(resource_fork(src))
-    tmp = os.path.join(OUT, '.app.rsrc')
+def main(src, colour=None, out=OUT):
+    os.makedirs(out, exist_ok=True)
+    res = parse(resource_fork(src, out))
+    tmp = os.path.join(out, '.app.rsrc')
     if os.path.exists(tmp):
         os.remove(tmp)
     images, sounds = {}, {}
@@ -214,7 +222,7 @@ def main(src, colour=None):
                 print('skipped sound', i, s.get('enc'))
                 continue
             sounds[i] = (round(s['rate']), s['data'])
-    save(OUT, images, sounds)
+    save(out, images, sounds)
     if not colour:
         return
     # the colour skin: every picture the colour file has, the rest black and white
@@ -233,7 +241,7 @@ def main(src, colour=None):
             if n in (502, 503):
                 im = edges_clear(im)
             images['p%d' % n] = im
-    save(OUT + 'c', images, sounds)
+    save(out + 'c', images, sounds)
 
 
 if __name__ == '__main__':
