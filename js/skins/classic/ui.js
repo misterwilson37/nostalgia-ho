@@ -121,6 +121,9 @@ const degText = (t) => Prefs.celsius ? t.replace(/(-?\d+)°(F)?/g, (m, n) => Mat
 
 // ---------- state ----------
 let G = null;            // game
+// "Modern conveniences" (a New Game option, also in Preferences): helpers the
+// original games didn't have. Off, the game plays as the originals did.
+const modern = () => !!(G && G.opts && G.opts.modern);
 // whose turn it is (several humans can share one computer: hot seat)
 let ME = 0;
 const me = () => G.players[ME];
@@ -305,6 +308,7 @@ function setupMap() {
   cv.addEventListener('pointerup', onUp);
   cv.addEventListener('pointercancel', () => { UI.drag = null; draw(); });
   cv.addEventListener('dblclick', onDbl);
+  cv.addEventListener('contextmenu', (e) => { if (!G) return; e.preventDefault(); const s = starAt(e.offsetX, e.offsetY); if (s != null) starMenu(s, e.clientX, e.clientY); });
   cv.addEventListener('wheel', (e) => { e.preventDefault(); zoomAt(e.offsetX, e.offsetY, e.deltaY < 0 ? 1.15 : 1 / 1.15); }, { passive: false });
   resize();
 }
@@ -323,6 +327,40 @@ function fit() {
   const s = Math.min((mapW - pad * 2) / G.W, (mapH - pad * 2 - 30) / G.H);
   UI.view = { s, ox: (mapW - G.W * s) / 2, oy: (mapH - 30 - G.H * s) / 2 + 4 };
   UI.fitted = true;
+}
+// right-click on a star: the commands that apply to it (5.0.5 had a
+// contextual menu in the map window; its items are the menu-bar commands)
+function starMenu(sid, px, py) {
+  closeStarMenu();
+  const s = G.stars[sid], mine = s.owner === ME;
+  UI.sel = sid; renderPanel(); draw();
+  const items = [];
+  if (mine && !G.over) items.push([HO.feature(G, 'buildQueue') ? 'Queue ships…' : 'Build ships…', () => openBuild(sid)]);
+  const fl = G.fleets.filter(f => f.owner === ME && f.star === sid && f.to == null && !f.sat);
+  if (fl.length) items.push(['Select a fleet here', () => { UI.selFleet = fl[0].id; renderPanel(); draw(); }]);
+  const bt = [...G.battles].reverse().find(b => b.star === sid && b.sides.includes(ME));
+  if (bt) items.push([`Review battle (${bt.year})`, () => openBattle(bt.id)]);
+  if (mine && !G.over && (s.id !== me().homeStar || HO.colonies(G, ME).length > 1))
+    items.push(['Evacuate planet…', () => confirmBox(`Evacuate ${s.name}? Your colonists will leave; satellites stay.`, () => { HO.evacuate(G, ME, sid); Sound.play(7002); renderPanel(); draw(); save(); })]);
+  items.push(['Centre the map here', () => { const x = sx(s.x), y = sy(s.y); UI.view.ox += mapW / 2 - x; UI.view.oy += mapH / 2 - y; draw(); }]);
+  const m = el('div', { class: 'dropdown open starmenu', role: 'menu', id: 'starmenu' },
+    el('div', { class: 'mhead' }, s.name), ...items.map(([t, fn]) => el('button', { role: 'menuitem', onclick: () => { closeStarMenu(); fn(); } }, t)));
+  document.body.append(m);
+  const r = m.getBoundingClientRect();
+  m.style.left = Math.min(px, window.innerWidth - r.width - 6) + 'px';
+  m.style.top = Math.min(py, window.innerHeight - r.height - 6) + 'px';
+  const first = m.querySelector('button'); if (first) first.focus();
+  setTimeout(() => document.addEventListener('pointerdown', closeStarMenuOutside), 0);
+}
+function closeStarMenuOutside(e) { if (!e.target.closest('#starmenu')) closeStarMenu(); }
+function closeStarMenu() { const m = $('#starmenu'); if (m) m.remove(); document.removeEventListener('pointerdown', closeStarMenuOutside); }
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeStarMenu(); });
+// bring a star to the middle of the map (zooming in a little if the map is far out)
+function centerOn(sid) {
+  const s = G.stars[sid]; if (!s || !UI.view) return;
+  const x = sx(s.x), y = sy(s.y);
+  if (x > mapW * 0.2 && x < mapW * 0.8 && y > mapH * 0.2 && y < mapH * 0.8) return; // already in view
+  UI.view.ox += mapW / 2 - x; UI.view.oy += mapH / 2 - y;
 }
 function zoomAt(px, py, f) {
   const v = UI.view;
@@ -424,15 +462,22 @@ function draw() {
       const d = HO.starDist(G, f.star, tgt); ok = d <= f.fuel + 1e-9; round = 2 * d <= f.fuel + 1e-9;
     }
     cx.save();
+    // too far, but a route through your colonies exists (modern): show it
+    const route = !ok && tgt != null && tgt !== f.star && modern() && HO.feature(G, 'waypoints') && !f.sat ? findRoute(f, tgt) : null;
+    if (route) {
+      let p0 = a;
+      for (const sid of route) { const b = G.stars[sid]; cx.strokeStyle = '#ffe066'; cx.lineWidth = 2; cx.beginPath(); cx.moveTo(sx(p0.x), sy(p0.y)); cx.lineTo(sx(b.x), sy(b.y)); cx.stroke(); arrowHead(sx(p0.x), sy(p0.y), sx(b.x), sy(b.y), '#ffe066'); p0 = b; }
+      for (const sid of route.slice(0, -1)) { const b = G.stars[sid]; cx.strokeStyle = '#ffe066'; cx.lineWidth = 1.5; cx.beginPath(); cx.arc(sx(b.x), sy(b.y), planetPx() * 0.6, 0, Math.PI * 2); cx.stroke(); }
+    }
     cx.strokeStyle = ok ? '#ffe066' : '#8a8a8a'; cx.lineWidth = 2;
     if (!ok) cx.setLineDash([4, 5]);
-    cx.beginPath(); cx.moveTo(sx(a.x), sy(a.y)); cx.lineTo(x2, y2); cx.stroke();
+    if (!route) { cx.beginPath(); cx.moveTo(sx(a.x), sy(a.y)); cx.lineTo(x2, y2); cx.stroke(); }
     cx.setLineDash([]);
     if (ok && tgt != null) { arrowHead(sx(a.x), sy(a.y), x2, y2, '#ffe066'); if (round) arrowHead(x2, y2, sx(a.x), sy(a.y), '#ffe066'); }
     if (tgt != null && tgt !== f.star) {
       const d = HO.starDist(G, f.star, tgt);
       const turns = Math.ceil(d / HO.fleetSpeed(G, f) - 1e-9);
-      const via = !ok && Prefs.autoRoute && HO.feature(G, 'waypoints') && !f.sat ? findRoute(f, tgt) : null;
+      const via = !ok && modern() && HO.feature(G, 'waypoints') && !f.sat ? findRoute(f, tgt) : null;
       const label = ok ? `${d.toFixed(1)} away · ${turns} turn${turns === 1 ? '' : 's'}` : via ? `Too far to fly straight: will go via ${via.length - 1} stop${via.length === 2 ? '' : 's'}` : `Too far: ${d.toFixed(1)} away, fuel ${f.fuel.toFixed(1)}`;
       cx.font = '12px Geneva, Verdana, sans-serif'; cx.textAlign = 'left';
       const tw = cx.measureText(label).width;
@@ -765,6 +810,7 @@ function fleetRow(f, inbound) {
     if (HO.feature(G, 'stances')) acts.append(el('select', { 'aria-label': 'Battle stance', onclick: (e) => e.stopPropagation(), onchange: (e) => { f.stance = e.target.value; save(); } },
       ...[['normal', 'Normal'], ['offensive', 'Offensive'], ['defensive', 'Defensive']].map(([v, t]) => el('option', { value: v, selected: (f.stance || 'normal') === v ? 'selected' : false }, t))));
     if (HO.feature(G, 'lateArrival')) acts.append(el('label', { class: 'chk', onclick: (e) => e.stopPropagation() }, el('input', { type: 'checkbox', checked: f.delayed ? 'checked' : false, onchange: (e) => { f.delayed = e.target.checked; save(); } }), el('span', null, 'Arrive late')));
+    if (modern() && HO.fleetCount(f) > 1) acts.append(el('button', { class: 'quiet', onclick: (e) => { e.stopPropagation(); openScrapSome(f); } }, 'Scrap some…'));
     acts.append(el('button', { class: 'quiet', onclick: (e) => { e.stopPropagation(); confirmBox(`Scrap this fleet for ${Math.round(HO.TYPES ? 75 : 75)}% of its metal?`, () => { const m = HO.scrapFleet(G, f); Sound.play(7003); toast(`Scrapped for ${fmt(m)} metal.`); UI.selFleet = null; renderPanel(); draw(); save(); }); } }, 'Scrap'));
     r.append(acts);
   }
@@ -851,7 +897,7 @@ function renderMsg() {
     const next = () => { if (m.star != null) { UI.sel = m.star; renderPanel(); } UI.msgIdx++; Sound.play(7001); renderMsg(); draw(); };
     card.addEventListener('click', next);
     card.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); next(); } });
-    if (m.star != null) { UI.sel = m.star; renderPanel(); draw(); }
+    if (m.star != null) { UI.sel = m.star; if (modern()) centerOn(m.star); renderPanel(); draw(); }
     box.append(card);
     card.focus({ preventScroll: true });
     return;
@@ -1082,6 +1128,31 @@ function openBuild(sid) {
   render();
   modal(`${queue ? 'Queue' : 'Build'} ships at ${s.name}`, body, { cls: 'wide', onClose: () => save() });
 }
+// modern: scrap some of a fleet's ships (split them off, then scrap that)
+function openScrapSome(f) {
+  const take = {};
+  const body = el('div', null, el('p', { class: 'sub' }, 'Choose how many of each ship to scrap. You get back part of their metal.'));
+  for (const k in f.ships) {
+    const d = HO.getDesign(G, f.owner, +k); take[k] = 0;
+    const n = el('b', null, '0');
+    body.append(el('div', { class: 'drow' }, shipImgEl(d, 22, f.owner), el('div', { class: 'dtext' }, `${d.name} (${f.ships[k]})`),
+      el('div', { class: 'pm' }, el('button', { class: 'quiet', onclick: () => { take[k] = Math.max(0, take[k] - 1); n.textContent = take[k]; } }, '−'), n,
+        el('button', { class: 'quiet', onclick: () => { take[k] = Math.min(f.ships[k], take[k] + 1); n.textContent = take[k]; } }, '+'),
+        el('button', { class: 'quiet', onclick: () => { take[k] = f.ships[k]; n.textContent = take[k]; } }, 'All'))));
+  }
+  body.append(el('div', { class: 'btns right' }, el('button', { onclick: () => {
+    const total = Object.values(take).reduce((a, b) => a + b, 0);
+    if (!total) { closeModal(); return; }
+    const all = Object.keys(f.ships).every(k => take[k] >= f.ships[k]);
+    const nf = all ? f : HO.splitFleet(G, f, take);
+    if (!nf) { closeModal(); return; }
+    const m = HO.scrapFleet(G, nf); Sound.play(7003);
+    toast(`Scrapped ${total} ship${total === 1 ? '' : 's'} for ${fmt(m)} metal.`);
+    if (all) UI.selFleet = null;
+    closeModal(); renderPanel(); draw(); save();
+  } }, 'Scrap')));
+  modal('Scrap ships', body, { cls: 'small' });
+}
 function openSplit(f) {
   const take = {};
   const body = el('div', null, el('p', { class: 'sub' }, 'Choose ships to move into a new fleet.'));
@@ -1097,12 +1168,41 @@ function openSplit(f) {
 }
 
 // ----- battle replay -----
+// modern: the battle as text, round by round
+function battleReport(b) {
+  const who = (o) => o === ME ? 'Your' : `${G.players[o].name}’s`;
+  const unit = (i) => { const u = b.start[i], d = HO.getDesign(G, u.o, u.did); return `${who(u.o)} ${d ? d.name + ' (' + HO.TYPES[d.type].name + ')' : 'ship'}`; };
+  const list = el('ol', { class: 'breport' });
+  b.rounds.forEach((evs, ri) => {
+    const shots = {}, kills = [];
+    let planetHits = 0;
+    for (const ev of evs) {
+      const o = ev.si >= 0 ? b.start[ev.si].o : b.planetOwner;
+      shots[o] = (shots[o] || 0) + 1;
+      if (ev.p) planetHits++;
+      else if (ev.k) kills.push(`${ev.si >= 0 ? unit(ev.si) : 'The planet'} destroyed ${unit(ev.ti).replace(/^Your/, 'your')}.`);
+    }
+    const sh = Object.keys(shots).map(o => `${+o === ME ? 'you' : G.players[o].name} fired ${shots[o]}`).join(', ');
+    const pop = b.popR && b.popR[ri] != null ? ` The colony is down to ${fmt(b.popR[ri] * 1e6)} people.` : '';
+    list.append(el('li', null, `${sh ? sh[0].toUpperCase() + sh.slice(1) : 'No shots'}.` + (planetHits ? ` ${planetHits} shot${planetHits === 1 ? '' : 's'} hit the planet.${pop}` : ''), ...kills.map(k => el('div', { class: 'kill' }, k))));
+  });
+  const sum = b.sides.map(o => `${o === ME ? 'You' : G.players[o].name} lost ${b.lost[o] || 0}`).join('; ') + '.';
+  return el('details', { class: 'breport-box' }, el('summary', null, `Written report (${b.rounds.length} round${b.rounds.length === 1 ? '' : 's'}): ${sum}`), list);
+}
 function openBattle(bid) {
   const b = G.battles.find(x => x.id === bid);
   if (!b) { toast('The record of that battle is no longer available.'); return; }
   const c = el('canvas', { class: 'bcv', width: 760, height: 380 });
   const status = el('p', { class: 'sub' }, '');
   const body = el('div', null, c, status);
+  // modern: a speed control and a written account of the battle
+  let speed = 1;
+  if (modern()) {
+    const sp = el('select', { 'aria-label': 'Battle speed', onchange: (e) => { speed = +e.target.value; if (speed === 0) finish(); } },
+      ...[['0.5', 'Slow'], ['1', 'Normal'], ['3', 'Fast'], ['0', 'Skip to the end']].map(([v, t]) => el('option', { value: v, selected: v === '1' ? 'selected' : false }, t)));
+    body.append(el('div', { class: 'bctl' }, el('label', null, 'Speed ', sp)), battleReport(b));
+  }
+  b._stop = false;
   modal(`Battle at ${G.stars[b.star].name}, ${b.year}`, body, { cls: 'wide', onClose: () => { b._stop = true; } });
   const x = c.getContext('2d');
   // layout: sides spread horizontally
@@ -1168,7 +1268,7 @@ function openBattle(bid) {
       return;
     }
     const ev = b.rounds[r][e];
-    if (!ev) { r++; e = 0; if (b.popR) pop = b.popR[r - 1]; status.textContent = `Round ${r + 1}`; setTimeout(step, 160); return; }
+    if (!ev) { r++; e = 0; if (b.popR) pop = b.popR[r - 1]; status.textContent = `Round ${r + 1}`; setTimeout(step, 160 / speed); return; }
     const a = center(ev.si);
     let t;
     if (ev.p) { t = { x: pl.x, y: pl.y }; Sound.play(3000); }
@@ -1176,7 +1276,15 @@ function openBattle(bid) {
     drawAll({ x1: a.x, y1: a.y, x2: t.x, y2: t.y, a: ev.a });
     if (ev.k && !ev.p) { const P = pos[ev.ti]; x.drawImage(IMG.debris, 0, 0, 288, 138, P.x - 6, P.y - 4, P.w + 12, P.h + 8); }
     e++;
-    setTimeout(step, Math.max(18, 110 - b.rounds[r].length * 2));
+    setTimeout(step, Math.max(18, 110 - b.rounds[r].length * 2) / speed);
+  };
+  // skip to the end: apply every remaining shot at once
+  const finish = () => {
+    for (; r < b.rounds.length; r++, e = 0) {
+      for (; e < b.rounds[r].length; e++) { const ev = b.rounds[r][e]; if (ev.k && !ev.p) alive[ev.ti] = false; }
+      if (b.popR) pop = b.popR[r];
+    }
+    step();
   };
   status.textContent = 'Round 1';
   drawAll(); setTimeout(step, 400);
@@ -1391,7 +1499,7 @@ function outOfRange(f, tgt) {
   return t;
 }
 function autoRoute(f, tgt) {
-  if (!Prefs.autoRoute || !HO.feature(G, 'waypoints') || f.sat) return false;
+  if (!modern() || !HO.feature(G, 'waypoints') || f.sat) return false;
   const path = findRoute(f, tgt);
   if (!path || !HO.orderPath(G, f, path)) return false;
   toast(`${G.stars[tgt].name} is too far to fly straight there, so this fleet will go by way of ${path.slice(0, -1).map(i => G.stars[i].name).join(', ')}, refuelling on the way.`);
@@ -1401,7 +1509,8 @@ function openPrefs() {
   const box = (k, label) => el('label', { class: 'chk' }, el('input', { type: 'checkbox', checked: Prefs[k] ? 'checked' : false, onchange: (e) => { Prefs[k] = e.target.checked; savePrefs(); renderPanel(); } }), el('span', null, label));
   modal('Preferences', el('div', { class: 'prefs' }, box('important', 'Show only the most important messages'), box('review', 'Review battles as they happen'),
     box('hints', 'Give helpful game play hints'), box('celsius', 'Temperatures in Celsius (not °F)'),
-    box('autoRoute', 'Plan a route through my colonies when I send a fleet too far'),
+    G ? el('label', { class: 'chk' }, el('input', { type: 'checkbox', checked: modern() ? 'checked' : false, onchange: (e) => { G.opts.modern = e.target.checked; save(); renderPanel(); } }),
+      el('span', null, 'Modern conveniences in this game (automatic routes, the map follows the news, partial scrapping, battle speed and written reports)')) : null,
     box('tips', 'Explain things when the pointer rests on them (text from the original manual)')), { cls: 'small' });
 }
 
@@ -1491,6 +1600,8 @@ function newGameDialog() {
       el('label', { class: 'chk' }, el('input', { type: 'checkbox', name: 'alliances', checked: 'checked' }), el('span', null, 'Alliances')),
       el('label', { class: 'chk' }, el('input', { type: 'checkbox', name: 'luck' }), el('span', null, 'Luck in battles')),
       el('label', { class: 'chk' }, el('input', { type: 'checkbox', name: 'novas', checked: 'checked' }), el('span', null, 'Novas'))),
+    el('label', { class: 'chk modern' }, el('input', { type: 'checkbox', name: 'modern', checked: localStorage.getItem('ho5.modern') === '1' ? 'checked' : false }),
+      el('span', null, 'Modern conveniences: automatic routes, the map follows the news, scrap some of a fleet, battle speed and written battle reports (not in the original games)')),
     el('div', { class: 'btns right' }, el('button', { type: 'submit' }, 'Create galaxy')));
   const origOpts = (d) => ({ computers: d.computers === 'any' ? 4 : +d.computers, iqNum: +d.o_iq, start: d.start, cstart: d.o_cstart, shape: d.o_shape, size: +d.o_size, density: +d.o_density, buddies: !!d.buddies, yearsPerTurn: +d.o_years });
   const refresh = () => {
@@ -1515,7 +1626,8 @@ function newGameDialog() {
     const humans = nh > 1 ? [{ name: d.name || 'Player 1', female: d.female === '1' }] : null;
     for (let i = 2; i <= nh; i++) { humans.push({ name: d['h' + i] || 'Player ' + i, female: d['hf' + i] === '1' }); localStorage.setItem('ho5.name' + i, d['h' + i] || ''); }
     if (nh < 2 && d.computers === '0') d.computers = '1';
-    const common = { humans, seed: (Math.random() * 2 ** 31) | 0, name: d.name || 'You', galaxy: d.galaxy || 'Milky Way', female: d.female === '1', computers: +d.computers, start: d.start, rules: d.rules, alliances: !!d.alliances, luck: !!d.luck, novas: !!d.novas };
+    localStorage.setItem('ho5.modern', d.modern ? '1' : '0');
+    const common = { modern: !!d.modern, humans, seed: (Math.random() * 2 ** 31) | 0, name: d.name || 'You', galaxy: d.galaxy || 'Milky Way', female: d.female === '1', computers: +d.computers, start: d.start, rules: d.rules, alliances: !!d.alliances, luck: !!d.luck, novas: !!d.novas };
     if (d.rules === 'original') {
       localStorage.setItem('ho5.iq', d.o_iq);
       const o = origOpts(d);
