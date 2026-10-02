@@ -60,3 +60,4 @@ shared game file; this remake doesn't have a server, so it's one computer, takin
 - `tools/decompile/DumpAll.java`: Ghidra script that writes a whole program's decompiled code to one file
 - `tools/extract/`: scripts that pulled the art and sound out of the original game
   (`dos.py` does the same for the DOS 2.0 game's `HO.PRS` and `HOCOLOR.PRS`)
+  (`win95.py` for 4.0.5's `SPACEHO.EXE`; `hlp.py` converts old WinHelp files to the HTML manuals in `assets/manuals/`)
