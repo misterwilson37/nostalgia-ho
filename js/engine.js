@@ -67,7 +67,8 @@ function designMin(G, k, type) { const rs = rules(G); return rs.designMin ? rs.d
 function designCost(G, d) { return rules(G).designCost(G, d); }
 function canBuildType(G, p, type) { return rules(G).canBuild(G, p, type); }
 function designName(G, p, type) {
-  // a ruleset may name ships from its own lists (rs.shipNames, by type)
+  // a ruleset may pick the name itself (rs.designName), or name ships from its own lists (rs.shipNames, by type)
+  if (rules(G).designName) return rules(G).designName(G, p, type);
   const names = (rules(G).shipNames || DATA.shipNames)[type] || DATA.shipNames[type] || ['Ship'];
   const used = new Set(p.designs.map(d => d.name));
   for (let i = 0; i < 60; i++) {
@@ -581,7 +582,8 @@ function turnStep(G, first, last) {
   if (feature(G, 'gifts')) deliverGifts(G);
   if (feature(G, 'surrender')) processHandovers(G);
   if (feature(G, 'alliances')) { pactNews(G); shareMaps(G); }
-  if (last) checkElimination(G);
+  // a ruleset may decide who is out and who has won itself (rs.checkElimination)
+  if (last) (rs.checkElimination || checkElimination)(G);
   for (const p of G.players) { p.spentThisTurn = []; if (p.chatThisTurn) p.chatThisTurn = 0; recordHistory(G, p); }
   for (const f of G.fleets) f.newThisTurn = false;
   G.turn++; G.year += rs.yearsPerTurn;
@@ -704,6 +706,9 @@ function battleNews(G, sid, b) {
       else { text = `${s.name} survived an attack from ${enemies}. You lost ${myLoss} of your ships; they lost ${theirLoss}. You lost ${fmt((startPop - s.pop) * 1e6)} people.`; sound = won ? 7027 : 2001; }
     } else if (won) { text = `You won a battle at ${s.name}. You lost ${myLoss} of your ships. ${enemies} lost ${theirLoss}.` + (planetDied ? ` The colony there was wiped out.` : ''); sound = 7027; icon = 'p3000'; }
     else { text = `You lost a battle at ${s.name}. You lost ${myLoss} of your ships. ${enemies} lost ${theirLoss}.`; sound = 2001; }
+    // a ruleset may word the report itself (rs.battleText: { text, sound, icon })
+    const rs = rules(G);
+    if (rs.battleText) { const t = rs.battleText(G, sid, b, o, { won, myLoss, theirLoss, enemies }); if (t) ({ text, sound, icon } = Object.assign({ text, sound, icon }, t)); }
     msg(G, o, text, { icon, sound, star: sid, battle: rec.id });
   }
 }
@@ -829,7 +834,7 @@ if (typeof module !== 'undefined') {
   require('./rules-dos.js');
   require('./rules-405.js');
   require('./rules-301.js');
-  require('./rules-12.js');
+  require('./rules-12.js'); require('./ai-12.js');
   require('./rules-palm.js');
 } else root.HO = API;
 })(this);
