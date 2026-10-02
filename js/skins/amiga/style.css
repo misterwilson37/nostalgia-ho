@@ -1,0 +1,24 @@
+/* Spaceward Ho! — Amiga 2.0 skin: the DOS skin's layout in Amiga
+   Workbench 2 colours (grey, black, white and blue, light top-left and
+   black bottom-right edges). */
+@import url("../dos/style.css");
+:root {
+  --plat: #aaaaaa; --plat2: #aaaaaa; --edge: #000; --sub: #222; --hi: #6688bb; --hat: #0055aa;
+  --ui: Verdana, "DejaVu Sans", Arial, sans-serif; --west: Verdana, Arial, sans-serif;
+}
+.box, .designer { border-color: #fff #000 #000 #fff; }
+#menubar { background: #fff; }
+#menubar .logo, .box h3 { color: #0055aa; }
+.mbtn:hover, .mbtn:focus-visible, .dropdown button:hover, .dropdown button:focus-visible { background: #6688bb; color: #fff; }
+button:not(.mbtn):not(.close):not(.tbtn):not(.clock):not([role=menuitem]) {
+  background: #aaaaaa; border-color: #fff #000 #000 #fff; box-shadow: none;
+}
+.fill { background: #0055aa; }
+.win { border-color: #fff #000 #000 #fff; }
+.wtitle, .tbtn.on { background: #6688bb; border-color: #6688bb; }
+.wtitle span { color: #000; }
+.close, .tbtn { background: #aaaaaa; border-color: #fff #000 #000 #fff; }
+.card { background: #aaaaaa; border-top-color: #6688bb; }
+.frow.sel { border-color: #0055aa; }
+/* the End Turn button is the Amiga's own 48x32 "Zug Ende" picture */
+.clock.pic img { width: 96px; }

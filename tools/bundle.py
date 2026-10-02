@@ -38,8 +38,14 @@ def skin_css(path):
 css = skin_css(P('js', 'skins', skin, 'style.css'))
 js = open(P('js', 'skins', skin, 'ui.js')).read()
 # a skin built on another one loads that one's ui.js after its own
-for src in re.findall(r"document\.write\('<script src=\"(js/skins/[^\"]+)\"><\\/script>'\)", js):
-    js += '\n' + open(P(src)).read()
+# (and so on, if that one is built on another)
+part = js
+while True:
+    srcs = re.findall(r"document\.write\('<script src=\"(js/skins/[^\"]+)\"><\\/script>'\)", part)
+    if not srcs:
+        break
+    part = ''.join('\n' + open(P(src)).read() for src in srcs)
+    js += part
 # a skin's own art and sounds (assets/skins/<skin>/, see js/skins/classic/ui.js loadTheme)
 sm = P('assets', 'skins', skin, 'manifest.json')
 if os.path.exists(sm):
