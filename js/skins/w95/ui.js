@@ -86,6 +86,11 @@ window.HOTHEME = {
     if (tech >= 0) return R('b' + (3100 + tech), 'burst');
     if (/radical|scientists|discover/i.test(t)) return R('b3105', 'burst');
     if (/^Year \d+|updated to the year/.test(t)) return R('b3111', 'click');
+    if (/population now exceeds/.test(t)) return R('b4024', 'verygood');
+    if (/suggests a big battle/.test(t)) return R('b3119', 'click');
+    if (/has eaten .* people/.test(t)) return R('b4011', 'biochomp');
+    if (/Valdez/.test(t)) return R('b3112', 'sonofa');
+    if (/armageddon device is on|activated the armageddon/i.test(t)) return R(own, 'scream');
     if (m.battle) {
       const b = G.battles.find(x => x.id === m.battle), o = b && b.sides.find(x => x !== ME && G.players[x]);
       return { icon: face(o != null && G.players[o]), sound: null };

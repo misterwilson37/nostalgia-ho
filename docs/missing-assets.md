@@ -146,10 +146,58 @@ The Windows 3.1 build adds one picture the DOS one lacks: its own title card (`d
 
 ## w95 (4.0.5, Windows 95)
 
-Not built yet: the art is extracted ([`assets/skins/w95/sprites/`](../assets/skins/w95/sprites/),
-480 pictures and 37 sounds) and the research into how 4.0.5 uses it is under way. This
-section will list what 4.0.5 lacks from 5.0.5, and the classic section above will gain
-entries for anything 4.0.5 had that 5.0.5 dropped.
+Where 4.0.5 uses each picture and sound was read from SPACEHO.EXE. 4.0.5 sits between 2.0
+and 5.0.5: it has most of 5.0.5's features, so less is borrowed than for DOS.
+
+### Pictures borrowed from classic
+
+- **A nova's wreck:** [`nova18`](../assets/sprites/nova18.png). 4.0.5 shows a swollen sun ([`b1403`](../assets/skins/w95/sprites/b1403.png)) while a star
+  is turning red or exploding, then nothing at all where the star was.
+- **The eye ship and other 5.0.5 special ships** ([`eyeship`](../assets/sprites/eyeship.png)): 4.0.5 has its own two hidden
+  specials ([`b2751`](../assets/skins/w95/sprites/b2751.png)–[`b2756`](../assets/skins/w95/sprites/b2756.png)) instead.
+- **Rank pictures**, [`assets/explore/`](../assets/explore/): 4.0.5's ten ranks have no
+  pictures (and ranks are off for the 4.0.5 rules for now).
+- **Message pictures** for reports 4.0.5 doesn't have: they get your own planet icon.
+- **Battle debris** [`debris`](../assets/sprites/debris.png): 4.0.5 draws shrinking and growing ellipses when a ship
+  dies, and sparks ([`b12000`](../assets/skins/w95/sprites/b12000.png)–[`b12002`](../assets/skins/w95/sprites/b12002.png)) on hits.
+
+### 4.0.5 art not used yet
+
+- the nova explosion animation [`b7728`](../assets/skins/w95/sprites/b7728.png)–[`b7741`](../assets/skins/w95/sprites/b7741.png) then [`b7750`](../assets/skins/w95/sprites/b7750.png)–[`b7758`](../assets/skins/w95/sprites/b7758.png);
+- the dreadnought's animation frames [`b7261`](../assets/skins/w95/sprites/b7261.png)–[`b7274`](../assets/skins/w95/sprites/b7274.png) (the skin shows frame
+  [`b7260`](../assets/skins/w95/sprites/b7260.png));
+- the planet window's rotating globe strips ([`b6100`](../assets/skins/w95/sprites/b6100.png)–[`b6130`](../assets/skins/w95/sprites/b6130.png), ice caps
+  [`b6150`](../assets/skins/w95/sprites/b6150.png)/[`b6151`](../assets/skins/w95/sprites/b6151.png)) and landscapes by temperature ([`b1300`](../assets/skins/w95/sprites/b1300.png)–[`b1305`](../assets/skins/w95/sprites/b1305.png));
+- the terraform/mine split slider [`b1410`](../assets/skins/w95/sprites/b1410.png) with its knob [`b1411`](../assets/skins/w95/sprites/b1411.png);
+- money and metal piles [`b311`](../assets/skins/w95/sprites/b311.png) (money), [`b312`](../assets/skins/w95/sprites/b312.png) (debt), [`b313`](../assets/skins/w95/sprites/b313.png) (metal);
+- the 16×16 planet and face icons ([`b8000`](../assets/skins/w95/sprites/b8000.png)–[`b9519`](../assets/skins/w95/sprites/b9519.png)) used when zoomed out;
+- the ally / best-buddy halos (rows of [`b175`](../assets/skins/w95/sprites/b175.png); [`b13000`](../assets/skins/w95/sprites/b13000.png)/[`b13001`](../assets/skins/w95/sprites/b13001.png) in the
+  player list), and the selection ring's 5-frame animation;
+- the New Game option icons [`b114`](../assets/skins/w95/sprites/b114.png)–[`b133`](../assets/skins/w95/sprites/b133.png) and the message-type icons
+  [`b10000`](../assets/skins/w95/sprites/b10000.png)–[`b10014`](../assets/skins/w95/sprites/b10014.png);
+- the pressed End Turn clock [`b367`](../assets/skins/w95/sprites/b367.png), the report window background [`b345`](../assets/skins/w95/sprites/b345.png), the
+  About/start-up pictures [`b316`](../assets/skins/w95/sprites/b316.png) and [`b383`](../assets/skins/w95/sprites/b383.png) (New World logo), and [`b3520`](../assets/skins/w95/sprites/b3520.png);
+- the Christmas planet [`b1404`](../assets/skins/w95/sprites/b1404.png) (25 December) and the "Peter"/"Howard" easter-egg planets
+  [`b3115`](../assets/skins/w95/sprites/b3115.png)/[`b3116`](../assets/skins/w95/sprites/b3116.png) ([`b3615`](../assets/skins/w95/sprites/b3615.png)/[`b3616`](../assets/skins/w95/sprites/b3616.png)).
+
+### Sounds
+
+All 37 sounds are wired to their 4.0.5 events except: `ahem` and `checkout` (what triggers
+them is unclear), `bonus`, `timeup` and `hurryup` (the turn timer and network play aren't
+in the remake), `nocheat` (4.0.5's cheat detector) and `shipbp` (the 4.0.5 game never plays
+it). There is no theme music.
+
+## 5.0.5 entries for things 4.0.5 had
+
+4.0.5 features that 5.0.5 dropped, so the classic skin has no art for them when you play
+with the 4.0.5 rules (they fall back to general pictures):
+
+- the "your population now exceeds …" milestones and the "a big battle just took place"
+  rumours (4.0.5: [`b4024`](../assets/skins/w95/sprites/b4024.png), [`b3119`](../assets/skins/w95/sprites/b3119.png));
+- the turn timer (the clock with time left, and its `bonus` / `timeup` sounds);
+- the ten 4.0.5 ranks (Red-Neck … Ho! Champion) and the Hall of Shame;
+- the money and metal piles and the planet window's globe and landscapes (5.0.5 shows
+  planet pictures and the explore pictures instead).
 
 ## cozy, scifi (planned)
 
