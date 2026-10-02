@@ -809,6 +809,8 @@ function aiBudget(G, p, M, A) {
 
 E.registerRules('dos', Object.assign({}, O, {
   label: 'DOS 2.0 (1993)',
+  // the New Game window lists rulesets by year, then version (engine.js ruleOptions)
+  version: '2.0', platform: 'DOS and Windows 3.1', year: 1993,
   ai: 'original',
   maxDesigns: 20,                         // CONFIRMED (10e8:1538, box3280; the computers too, FUN_1020_4019)
   queueSlots: QUEUE_SLOTS,                // CONFIRMED (FUN_1040_1479): three (design, count) slots per colony

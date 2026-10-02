@@ -1070,6 +1070,8 @@ function fleetArrives(G, f) {
 
 E.registerRules('original', {
   label: 'Original (decompiled from 5.0.5)',
+  // the New Game window lists rulesets by year, then version (engine.js ruleOptions)
+  version: '5.0.5', platform: 'Mac OS 9 and X', year: 2003,
   ai: 'original',
   yearsPerTurn: 10,
   galaxySizes: SIZES,

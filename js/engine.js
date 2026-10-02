@@ -799,7 +799,14 @@ function load(str) { const G = JSON.parse(str); if (!G.rules) G.rules = 'claude'
 const API = {
   DATA, SHIP_TYPES, TYPES: SHIP_TYPES, TECHS,
   registerRules, registerAI, rules, aiOf, feature, RULESETS,
-  ruleOptions: () => Object.values(RULESETS).map(r => [r.id, r.label]),
+  // [id, name] for the New Game window: the original games' rules by year of
+  // release, then version ("2.0 (DOS and Windows 3.1, 1993)"); rulesets that
+  // aren't an original game's (the remake's own) come last, by their label
+  ruleOptions: () => Object.values(RULESETS)
+    .sort((a, b) => (a.year || 1e4) - (b.year || 1e4) || String(a.version || '').localeCompare(String(b.version || ''), 'en', { numeric: true }))
+    .map(r => [r.id, r.year ? `${r.version} (${r.platform}, ${r.year})` : r.label]),
+  // the newest original game's rules: the New Game window's default
+  newestRules: () => Object.values(RULESETS).filter(r => r.year).sort((a, b) => b.year - a.year)[0].id,
   // randomness and helpers for rulesets and AIs
   R, RI, pick, shuffle, gauss, clamp,
   newGame, endTurn, buildShips, unbuildShip, designLimits, designMin, designCost, shipCostNow, canBuildType, findOrCreateDesign, getDesign,

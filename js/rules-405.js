@@ -799,6 +799,8 @@ const RANKS = [['Red-Neck', 0], ['Bow-legs', 1000], ['Cowpoke', 2500], ['Deputy 
 
 E.registerRules('405', Object.assign({}, O, {
   label: 'Windows 95 4.0.5 (1996)',
+  // the New Game window lists rulesets by year, then version (engine.js ruleOptions)
+  version: '4.0.5', platform: 'Windows 95', year: 1996,
   ai: 'original',
   maxPlayers: 20,          // CONFIRMED (FUN_00448856): 0-19 computers, 20 players
   maxDesigns: MAX_DESIGNS,

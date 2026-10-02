@@ -363,6 +363,8 @@ const STAR_NAMES = [
 
 E.registerRules('301', Object.assign({}, O, {
   label: 'Mac 3.0.1 (1993)',
+  // the New Game window lists rulesets by year, then version (engine.js ruleOptions)
+  version: '3.0.1', platform: 'Mac', year: 1993,
   ai: 'original',
   maxPlayers: 20,          // CONFIRMED (doCreateGalaxyDlg @f0550): 0-19 computers
   maxDesigns: MAX_DESIGNS,
