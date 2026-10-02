@@ -168,6 +168,30 @@ same pictures: 256 colours for AGA Amigas (identical to the DOS pictures, so not
   The Amiga version also played by mail ("Briefspiel": each player's moves saved to a file
   and merged) and over a network; neither can be done here (see hot seat in the README).
 
+## mac3 (Mac 3.0.1, black and white)
+
+Spaceward Ho! 3.0.1 for the Macintosh (Delta Tao, 1993) on one floppy. Its pictures are
+black and white; it read colour versions from a separate file, "Ho! 3.0 Color Picts", which
+isn't on the floppy. The DOS game's colour pictures have the same numbers, so they are very
+likely those colour pictures. The skin uses the DOS skin's code, so it is missing what the
+DOS skin is missing (above), with these differences:
+
+- **Its own:** the credits title picture ([`p1001`](../assets/skins/mac3/sprites/p1001.png)),
+  an English End Turn button "End Turn ⌘T" ([`p5500`](../assets/skins/mac3/sprites/p5500.png),
+  pressed: `p5501`), won and lost pictures (`p3530`, `p3540`) and the Mac sounds with their
+  5.0.5 numbers, including "Move 'em out!" (10000, played on the title screen).
+- **Smaller ship pictures:** the parts are 40×40 (`p2600`–`p2926`), shown at twice the size.
+  There are no 81×76 ones as in DOS.
+- **The battle planet** is the plain planet icon `i1004`: 3.0.1 has no battle planet picture
+  of its own that we've found.
+- **3.0.1 art not used yet** (for features the DOS 2.0 game lacks, e.g. alliances,
+  surrender, battle luck): icons [`i3140`](../assets/skins/mac3/sprites/i3140.png) (black
+  cat: bad luck), [`i3142`](../assets/skins/mac3/sprites/i3142.png) (horseshoe: good luck),
+  `i3150`–`i3164`, `i4011`–`i4017`, `i1010`–`i1013`, `i1512`, `i1513`, `i1600`, the
+  168×56 strips `p6100`–`p6140`, the "Version 3.0" picture `p1003`, and `p506`/`p507`/`p510`/`p511`
+  (rings with a halo).
+- **Not in 3.0.1:** `i128` and `i2499` (unused by the DOS skin too).
+
 ## w95 (4.0.5, Windows 95)
 
 Where 4.0.5 uses each picture and sound was read from SPACEHO.EXE. 4.0.5 sits between 2.0

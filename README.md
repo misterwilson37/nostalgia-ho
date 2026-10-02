@@ -2,7 +2,8 @@
 
 A personal remake of Delta Tao's *Spaceward Ho!* 5.0.5 that runs in a browser, with the
 1993 DOS version (2.0) and the 1996 Windows 95 version (4.0.5) as extra rulesets and skins,
-and an Amiga skin from the 1994 German Amiga version of 2.0.
+an Amiga skin from the 1994 German Amiga version of 2.0, and a black-and-white skin from the
+1993 Mac version (3.0.1).
 
 ## Playing / publishing
 
@@ -48,6 +49,9 @@ shared game file; this remake doesn't have a server, so it's one computer, takin
   pictures, sounds and title, and Workbench colours (art in `assets/skins/amiga/`). The
   Amiga game is the DOS game (same rules, same pictures in the same order), so play it with
   the DOS 2.0 rules
+- `js/skins/mac3/`: the "Mac 3.0.1 (black and white)" skin: the DOS skin with the 1993 Mac
+  game's 1-bit pictures and sounds and a Mac Plus look (art in `assets/skins/mac3/`). The DOS
+  game's pictures were made from this one's, with the same numbers
 - `js/skins/<name>/` and `assets/skins/<name>/`: where more skins and their own art go
   (planned: "cozy", then "scifi"). Add the skin to the list in `js/skins.js`; the New
   Game window then offers a Skin choice next to Rules. `?skin=<name>` in the address
@@ -67,3 +71,4 @@ shared game file; this remake doesn't have a server, so it's one computer, takin
   (`dos.py` does the same for the DOS 2.0 game's `HO.PRS` and `HOCOLOR.PRS`)
   (`win95.py` for 4.0.5's `SPACEHO.EXE`; `hlp.py` converts old WinHelp files to the HTML manuals in `assets/manuals/`)
   (`amiga.py` for the Amiga version's packed `.pff` files; how they are packed is at the top of it)
+  (`mac3.py` reads the Mac 3.0.1 floppy image directly)
