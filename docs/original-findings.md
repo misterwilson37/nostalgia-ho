@@ -278,7 +278,7 @@ drawn with these chances:
 | Extra metal from your planets | 7% | 9,000–11,000 metal |
 | Astronomers explore distant stars | 5% | 6–9 unexplored stars; only while more than 5 are unexplored |
 | Wealth of precious metals | 7% | 2 to 12 times your income added to savings |
-| Better mining (archaeologists) | 4% | once only, before the year 3000 |
+| Better mining (archaeologists) | 4% | once only, from the year 3000 on |
 | Higher maximum population | 4% | once only |
 | Better terraforming | 4% | once only |
 | Smarter generals | 4% | once only, only with Luck in Battles on |
@@ -410,7 +410,8 @@ CONFIRMED:
     miracle!"; others see "Wow, that's weird!").
 - **Supernova** (CONFIRMED):
   - The star and everything at it are destroyed.
-  - Stars within 10 ly are pelted with metal, more the closer they are.
+  - Stars within 10 ly are pelted with metal, more the closer they are: a star d ly
+    away gets a random amount from max(100, 10000/d − 1000) to 10000/d.
   - Colonies there lose people (40–60 units per unit of metal thrown) but keep
     the metal.
   - The wreck stays on the map. Fleets sent there are lost (section 8).

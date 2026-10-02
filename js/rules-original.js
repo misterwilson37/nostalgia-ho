@@ -164,7 +164,7 @@ const FLAG_OF = { mining: 'mining', pop: 'pop', terra: 'terra', generals: 'gener
 function radicalAllowed(G, p, i) {
   const k = RADICAL[i];
   if (k === 'explore') return G.stars.filter(s => !know(G, p, s.id).explored).length > 5;
-  if (k === 'mining') return !p.flags.mining && G.year < 3000;
+  if (k === 'mining') return !p.flags.mining && G.year >= 3000; // only from the year 3000 (FUN_1007a180 case 3: year >= 0xbb8)
   if (k === 'generals') return !p.flags.generals && !!G.opts.luck;
   if (FLAG_OF[k]) return !p.flags[FLAG_OF[k]];
   if (k === 'decoy') return p.human && !!G.opts.alliances;
@@ -1011,7 +1011,7 @@ function randomEvents(G) {
           for (const o of G.stars) {
             if (o === s) continue;
             const d = distance(G, s, o);
-            if (d < 11) { const m = RI(G, 0, Math.max(100, trunc(10000 / d) - 1000)); thrown[o.id] = (thrown[o.id] || 0) + m; o.metal += m; }
+            if (d > 0 && d < 11) { const m = RI(G, Math.max(100, trunc(10000 / d) - 1000), trunc(10000 / d)); // FUN_100769b0 @10076ae8 thrown[o.id] = (thrown[o.id] || 0) + m; o.metal += m; }
           }
           supernova(G, s);
         }
