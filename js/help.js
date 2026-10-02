@@ -38,9 +38,12 @@ root.HOHELP = {
 // The same tips in the words of other versions' manuals, for games played
 // with those rules (keys as above; anything missing falls back to the
 // 5.0.5 text): dos = the DOS 2.0 manual, 405 = the 4.0.5 Windows help,
-// 301 = the Mac 3.0.1 program's own Quick Help (DITL 3010; it has no manual).
-root.HOHELP_RULES = root.HOHELP_RULES || { dos: {}, 405: {}, 301: {} };
+// 301 = the Mac 3.0.1 program's own Quick Help (DITL 3010; it has no manual),
+// 12 = the Mac 1.2F program's dialog boxes, translated from the French (it has
+// no Quick Help and no manual).
+root.HOHELP_RULES = root.HOHELP_RULES || { dos: {}, 405: {}, 301: {}, 12: {} };
 root.HOHELP_RULES['301'] = root.HOHELP_RULES['301'] || {};
+root.HOHELP_RULES['12'] = root.HOHELP_RULES['12'] || {};
 // DOS 2.0 manual (assets/manuals/dos-2.0.pdf): no debt, no Radical tech,
 // ships are queued and paid for out of each planet's shipbuilding money.
 Object.assign(root.HOHELP_RULES.dos, {
@@ -101,6 +104,15 @@ Object.assign(root.HOHELP_RULES['405'], {
 Object.assign(root.HOHELP_RULES['301'], {
   route: ['To move a fleet, first click on the fleet you want to move in the list on the left. Then click and drag on the map from the star the fleet is at to where you want it to go.', 'Quick Help For Spaceward Ho! 3.0'],
 });
+// Spaceward Ho! 1.2F (Mac, French): the few dialog boxes that explain
+// something, in English (worded as DOS 2.0's boxes of the same number where
+// the French says the same thing).
+Object.assign(root.HOHELP_RULES['12'], {
+  route: ['If a fleet doesn’t have enough fuel to reach the star you dragged to, there are no arrows on either end of the dragged line. A fleet in hyperspace can’t be contacted until it arrives at its destination.', 'the “Fleet Can’t Reach” and “Fleet in Hyperspace” boxes (DITL 3330, 3290)'],
+  evacuate: ['A colony ship that has just landed its colonists has none aboard. If you send it off anyway, the colonists who landed are picked up and you abandon the planet. Or wait a turn and it will be refilled.', 'the “Colony Ship Warning” box (DITL 3300)'],
+  colonyBar: ['When you aren’t spending enough on your colonies to support them, the game asks before the turn ends: “Warning! You are not spending enough money to support your colonies. Do you really want to abandon them?” (“Let them die!” or Cancel).', 'the “Spending Warnings” box (DITL 5060)'],
+  build: ['Spaceward Ho! allows you only 20 ship types at one time. To create another, first scrap an old type by checking its “Scrap” box in the List Ship Types box. It is scrapped when the turn is updated, and you can create the new type next turn.', 'the “Too Many Ship Types” box (DITL 3280)'],
+});
 // each ruleset's own manual, opened from the Help menu
 root.HOMANUALS = {
   original: ['assets/manuals/5.0.5/index.html', 'Spaceward Ho! 5 manual'],
@@ -110,5 +122,8 @@ root.HOMANUALS = {
   // 3.0.1 shipped without an online manual; the 4.0.5 help is the closest
   // (it has a page on what changed from 3.0 to 4.0)
   301: ['assets/manuals/4.0.5/index.html', 'Spaceward Ho! 4.0.5 help (closest to 3.0.1)'],
+  // no 1.2F manual is in the archive; its rules are DOS 2.0's, so the DOS
+  // 2.0 manual is the closest
+  12: ['assets/manuals/dos-2.0.pdf', 'Spaceward Ho! 2.0 manual (DOS; closest to Mac 1.2)'],
 };
 })(this);

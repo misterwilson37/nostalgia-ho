@@ -167,6 +167,7 @@ button:focus-visible { outline: 2px solid var(--hi); outline-offset: 1px; }
 .prefs label.chk { display: flex; gap: 8px; align-items: center; }
 .newgame .group { display: contents; }
 .newgame .group[hidden], .newgame .opts[hidden] { display: none; }
+.newgame .note12 { grid-column: 1 / -1; margin: 0; }
 .newgame .rating { display: grid; gap: 2px; align-content: start; }
 .newgame .rating span { color: var(--sub); }
 .newgame .rating b { font-size: 1.35em; line-height: 1.2; }

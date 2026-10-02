@@ -79,7 +79,7 @@ window.HOTHEME = {
     const own = 'i' + (me.female ? 1500 : 1000);
     const tech = ['Range', 'Speed', 'Weapon', 'Shield', 'Miniaturization'].findIndex(n => new RegExp('Your ' + n + 's? Technology').test(t));
     const R = (icon, sound) => ({ icon: icon && (P + icon), sound });
-    if (/^Spaceward Ho! by/.test(t)) return R('i3115', null);
+    if (/^Spaceward Ho! (Version [\d.]+ )?by/.test(t)) return R('i3115', null); // 1.2 says "Version 1.2 by"
     if (/^Click here/.test(t)) return R('i3116', null);
     if (tech >= 0) return R('i' + (3100 + tech), 2000);
     if (/^Year \d+|updated to the year/.test(t)) return R('i3111', 2000);

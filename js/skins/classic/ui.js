@@ -1596,6 +1596,9 @@ function newGameDialog() {
     sel('m_size', 'Galaxy size', [['small', 'Small'], ['medium', 'Medium'], ['large', 'Large'], ['xl', 'Extra Large'], ['huge', 'Humongous']], 'medium'),
     sel('m_density', 'Galaxy density', [['dense', 'Dense'], ['sparse', 'Sparse']], 'dense'),
     sel('m_years', 'Years per turn', [['10', '10'], ['20', '20'], ['30', '30'], ['50', '50'], ['100', '100']], '10'));
+  // Mac 1.2 rules: 1.2 had no New Game window; every game was the same
+  const mac12Box = el('div', { class: 'group' }, el('p', { class: 'sub note12' },
+    '1.2 had no New Game choices: every game is a small, dense circle galaxy with one average computer player, and everyone starts at normal skill.'));
   const dosBox = el('div', { class: 'group' },
     sel('d_skill', 'Your skill', [['novice', 'Novice'], ['beginner', 'Beginner'], ['normal', 'Normal'], ['advanced', 'Advanced'], ['expert', 'Expert']], 'normal'),
     sel('d_iq', 'Computer skill', [['dumb', 'Dumb'], ['average', 'Average'], ['smart', 'Smart']], 'average'),
@@ -1616,7 +1619,7 @@ function newGameDialog() {
     sel('computers', 'Computer players', [...[...Array(20).keys()].map(n => [String(n), String(n)]), ['any', 'Any (1-8)']], '4'),
     seats,
     startSel,
-    claudeBox, origBox, dosBox, w95Box, mac3Box,
+    claudeBox, origBox, dosBox, w95Box, mac3Box, mac12Box,
     // last line: the rules, with the game difficulty rating beside them
     el('div', { class: 'lastrow' },
       sel('rules', 'Rules', HO.ruleOptions(), [localStorage.getItem('ho5.rules')].find(r => r && HO.RULESETS[r]) || HO.newestRules()),
@@ -1632,8 +1635,11 @@ function newGameDialog() {
   const origOpts = (d) => ({ computers: d.computers === 'any' ? 4 : +d.computers, iqNum: +d.o_iq, start: d.start, cstart: d.o_cstart, shape: d.o_shape, size: +d.o_size, density: +d.o_density, buddies: !!d.buddies, yearsPerTurn: +d.o_years });
   const refresh = () => {
     const d = Object.fromEntries(new FormData(f).entries());
-    const orig = d.rules === 'original', dos = d.rules === 'dos', w95 = d.rules === '405', mac3 = d.rules === '301';
-    claudeBox.hidden = orig || dos || w95 || mac3; origBox.hidden = !orig; dosBox.hidden = !dos; w95Box.hidden = !w95; mac3Box.hidden = !mac3; startSel.hidden = dos || w95 || mac3;
+    const orig = d.rules === 'original', dos = d.rules === 'dos', w95 = d.rules === '405', mac3 = d.rules === '301', mac12 = d.rules === '12';
+    claudeBox.hidden = orig || dos || w95 || mac3 || mac12; origBox.hidden = !orig; dosBox.hidden = !dos; w95Box.hidden = !w95; mac3Box.hidden = !mac3; mac12Box.hidden = !mac12; startSel.hidden = dos || w95 || mac3 || mac12;
+    // 1.2 fixes the computers (one) and has no women
+    f.querySelector('select[name=computers]').closest('label').hidden = mac12;
+    f.querySelector('select[name=female]').closest('label').hidden = mac12;
     // up to 19 computers with 4.0.5 and 3.0.1 rules, 8 otherwise
     const csel = f.querySelector('select[name=computers]');
     for (const o of csel.options) if (/^\d+$/.test(o.value) && +o.value > 8) o.hidden = !w95 && !mac3;
@@ -1649,7 +1655,7 @@ function newGameDialog() {
     rating.textContent = orig ? String(HO.RULESETS.original.difficulty(origOpts(d)))
       : w95 ? String(HO.RULESETS['405'].difficulty({ computers: d.computers === 'any' ? 4 : +d.computers, iq: d.w_iq, start: d.w_skill, shape: d.w_shape, size: d.w_size, density: d.w_density }))
       : mac3 ? String(HO.RULESETS['301'].difficulty({ computers: d.computers === 'any' ? 4 : +d.computers, iq: d.m_iq, start: d.m_skill, shape: d.m_shape, size: d.m_size, density: d.m_density }))
-      : `Not rated with ${dos ? 'DOS 2.0' : 'Claude'} rules`;
+      : `Not rated with ${dos ? 'DOS 2.0' : mac12 ? '1.2' : 'Claude'} rules`;
     rating.className = orig || w95 || mac3 ? '' : 'none';
   };
   f.addEventListener('input', refresh); f.addEventListener('change', refresh);
