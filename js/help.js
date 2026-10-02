@@ -35,4 +35,15 @@ root.HOHELP = {
   route: ['Specify your fleet’s path more exactly, star by star. Remember Range: how far a ship can reach without refueling, and fleets refuel at your own (and your allies’) colonies.', 'Hints, Glossary'],
   endTurn: ['When you’ve read all the messages, the End Turn clock appears. Click it when you’re done giving orders for this turn.', 'Starting a New Game'],
 };
+// The same tips in the words of other versions' manuals, for games played
+// with those rules (keys as above; anything missing falls back to the
+// 5.0.5 text): dos = the DOS 2.0 manual, 405 = the 4.0.5 Windows help.
+root.HOHELP_RULES = root.HOHELP_RULES || { dos: {}, 405: {} };
+// each ruleset's own manual, opened from the Help menu
+root.HOMANUALS = {
+  original: ['assets/manuals/5.0.5/index.html', 'Spaceward Ho! 5 manual'],
+  claude: ['assets/manuals/5.0.5/index.html', 'Spaceward Ho! 5 manual'],
+  dos: ['assets/manuals/dos-2.0.pdf', 'Spaceward Ho! 2.0 manual (DOS)'],
+  405: ['assets/manuals/5.0.5/index.html', 'Spaceward Ho! 5 manual (the 4.0.5 help is not converted yet)'],
+};
 })(this);

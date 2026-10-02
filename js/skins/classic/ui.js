@@ -1516,6 +1516,11 @@ function openPrefs() {
 }
 
 // ----- help -----
+// the manual for the rules being played (or last chosen on the New Game window)
+function manualFor() {
+  const M = window.HOMANUALS || {}, r = G ? G.rules : (localStorage.getItem('ho5.rules') || 'claude');
+  return M[r] || M.original || ['assets/manuals/5.0.5/index.html', 'Spaceward Ho! 5 manual'];
+}
 function openHelp() {
   const tips = HO.DATA.tips || [];
   const body = el('div', { class: 'help' },
@@ -1687,7 +1692,7 @@ function setupMenus() {
       [() => (G && me().surrenderTo != null ? 'Take back surrender' : 'Surrender…'), () => G && !G.over && openSurrender(), 'surrender'],
       [() => (G && me().armageddon ? 'Turn off the armageddon device' : 'Armageddon device…'), () => G && !G.over && toggleArmageddon(), 'armageddon']],
     View: [['Zoom in', () => zoomAt(mapW / 2, mapH / 2, 1.3)], ['Zoom out', () => zoomAt(mapW / 2, mapH / 2, 1 / 1.3)], ['Fit galaxy', () => { UI.fitted = false; fit(); draw(); }], ['-'], [() => (Sound.on ? 'Turn sound off' : 'Turn sound on'), () => { Sound.on = !Sound.on; savePrefs(); }], [() => (Sound.music ? 'Turn theme music off' : 'Turn theme music on'), () => { Sound.music = !Sound.music; savePrefs(); if (Sound.music && !$('#titlescreen').hidden) Sound.startTheme(); else Sound.stopTheme(); }]],
-    Help: [['How to play', openHelp]],
+    Help: [['How to play', openHelp], [() => 'Manual: ' + manualFor()[1], () => window.open(manualFor()[0], '_blank', 'noopener')]],
   };
   const bar = $('#menubar');
   for (const name in menus) {
@@ -1729,11 +1734,12 @@ document.addEventListener('keydown', (e) => {
 // keyboard focus, or on a long press on a touch screen.
 const Tip = { el: null, timer: 0, at: null };
 function tipShow(target) {
-  const H = window.HOHELP || {}, h = H[target.dataset.help];
+  const k = target.dataset.help, R = (window.HOHELP_RULES || {})[G && G.rules] || {};
+  const h = R[k] || (window.HOHELP || {})[k];
   if (!h || !Prefs.tips) return;
   if (!Tip.el) { Tip.el = el('div', { class: 'tip', role: 'tooltip', id: 'hotip' }); document.body.append(Tip.el); }
   Tip.el.innerHTML = '';
-  Tip.el.append(el('p', null, h[0]), el('small', null, 'Adapted from the Spaceward Ho! manual: ' + h[1]));
+  Tip.el.append(el('p', null, h[0]), el('small', null, `Adapted from the ${R[k] ? manualFor()[1] : 'Spaceward Ho! 5 manual'}: ${h[1]}`));
   Tip.el.hidden = false; Tip.at = target;
   target.setAttribute('aria-describedby', 'hotip');
   const r = target.getBoundingClientRect(), w = Math.min(320, window.innerWidth - 16);
