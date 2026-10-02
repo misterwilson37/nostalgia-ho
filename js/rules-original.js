@@ -1011,7 +1011,7 @@ function randomEvents(G) {
           for (const o of G.stars) {
             if (o === s) continue;
             const d = distance(G, s, o);
-            if (d > 0 && d < 11) { const m = RI(G, Math.max(100, trunc(10000 / d) - 1000), trunc(10000 / d)); // FUN_100769b0 @10076ae8 thrown[o.id] = (thrown[o.id] || 0) + m; o.metal += m; }
+            if (d > 0 && d < 11) { const m = RI(G, Math.max(100, trunc(10000 / d) - 1000), trunc(10000 / d)); thrown[o.id] = (thrown[o.id] || 0) + m; o.metal += m; } // metal: FUN_100769b0 @10076ae8
           }
           supernova(G, s);
         }
