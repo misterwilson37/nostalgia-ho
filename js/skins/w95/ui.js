@@ -145,13 +145,17 @@ window.HOTHEME = {
   // his foot, draws, twirls his six-gun and holsters it. Frames 200-220 are
   // 240x128, 221-223 (the foot) 96x73 at the bottom right. 1 tick = 1/60 s.
   title(frame, IMG, Sound) {
-    if (!IMG[B(200)]) return false;
-    frame.width = 240; frame.height = 128;
+    if (!IMG[B(200)] || !IMG[B(316)]) return false;
+    // The splash is bitmap 316 (304x200); the animation frames are its lower
+    // right part (the cowboy from the shoulders down), 240x128, drawn over it
+    // at (73, 72). Their last 12 columns are a border, left off here.
+    frame.width = 304; frame.height = 200;
     const x = frame.getContext('2d');
+    x.drawImage(IMG[B(316)], 0, 0);
     const show = (n) => {
       const im = IMG[B(n)]; if (!im) return;
-      if (n >= 221) { x.drawImage(im, 240 - im.width, 128 - im.height); return; }
-      x.fillStyle = '#fff'; x.fillRect(0, 0, 240, 128); x.drawImage(im, 0, 0);
+      if (n >= 221) { x.drawImage(im, 73 + 240 - im.width, 72 + 128 - im.height); return; }
+      x.drawImage(im, 0, 0, 228, 128, 73, 72, 228, 128);
     };
     const rnd = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
     const seq = []; // [frame, ticks, sound]
