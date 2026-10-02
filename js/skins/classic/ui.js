@@ -904,10 +904,10 @@ function renderMsg() {
     return;
   }
   if (T.endTurnPic && A.img[T.endTurnPic]) { // the theme's own End Turn button picture
-    box.append(el('button', { class: 'clock pic', onclick: doEndTurn, 'aria-label': 'End turn', 'data-help': 'endTurn' }, el('img', { src: A.img[T.endTurnPic], alt: '' })));
+    box.append(el('button', { class: 'clock pic', onclick: doEndTurn, 'aria-label': 'End turn', 'aria-keyshortcuts': 'T', 'data-help': 'endTurn', 'data-key': END_KEY() }, el('img', { src: A.img[T.endTurnPic], alt: '' })));
     return;
   }
-  const clock = el('button', { class: 'clock', onclick: doEndTurn, 'aria-label': 'End turn', 'data-help': 'endTurn' },
+  const clock = el('button', { class: 'clock', onclick: doEndTurn, 'aria-label': 'End turn', 'aria-keyshortcuts': 'T', 'data-help': 'endTurn', 'data-key': END_KEY() },
     el('span', { class: 'face', html: '<svg viewBox="0 0 40 40" width="34" height="34" aria-hidden="true"><circle cx="20" cy="20" r="17" fill="#fffef6" stroke="#222" stroke-width="2.5"/><path d="M20 20V8M20 20l8 5" stroke="#222" stroke-width="3" stroke-linecap="round"/></svg>' }),
     el('span', null, 'End turn'));
   box.append(clock);
@@ -1206,11 +1206,11 @@ function openBattle(bid) {
   const pl = { x: planetSide >= 0 ? planetSide * (760 / cols) + (760 / cols) / 2 : -1, y: 330 };
   let pop = b.pop0;
   const drawAll = (shot) => {
-    x.fillStyle = '#04030c'; x.fillRect(0, 0, 760, 380);
-    for (let i = 0; i < 70; i++) { x.fillStyle = 'rgba(200,210,255,.35)'; x.fillRect((i * 97) % 760, (i * 53) % 380, 1, 1); }
+    x.fillStyle = T.battleBg || '#04030c'; x.fillRect(0, 0, 760, 380); // a theme may draw battles on its own colour
+    for (let i = 0; i < 70; i++) { x.fillStyle = T.battleBg ? 'rgba(0,0,0,.25)' : 'rgba(200,210,255,.35)'; x.fillRect((i * 97) % 760, (i * 53) % 380, 1, 1); }
     sides.forEach((o, si) => {
       const pp = G.players[o];
-      x.fillStyle = o === ME ? '#fff2c0' : '#ffb3d9'; x.font = '13px Geneva, Verdana, sans-serif'; x.textAlign = 'center';
+      x.fillStyle = T.battleBg ? '#000' : o === ME ? '#fff2c0' : '#ffb3d9'; x.font = '13px Geneva, Verdana, sans-serif'; x.textAlign = 'center';
       x.fillText(o === ME ? 'You' : pp.name, si * (760 / cols) + (760 / cols) / 2, 24);
     });
     if (pl.x >= 0) {
@@ -1218,7 +1218,7 @@ function openBattle(bid) {
       x.globalAlpha = pop > 0.01 ? 1 : 0.3;
       x.drawImage(planetBattlePic(), pl.x - 24, pl.y - 24, 48, 48);
       x.globalAlpha = 1;
-      x.fillStyle = '#ccc'; x.font = '11px Geneva, Verdana, sans-serif'; x.fillText(`pop ${fmt(pop * 1e6)}`, pl.x, pl.y + 36);
+      x.fillStyle = T.battleBg ? '#000' : '#ccc'; x.font = '11px Geneva, Verdana, sans-serif'; x.fillText(`pop ${fmt(pop * 1e6)}`, pl.x, pl.y + 36);
     }
     b.start.forEach((u, i) => {
       if (!alive[i]) return;
@@ -1229,7 +1229,7 @@ function openBattle(bid) {
       x.drawImage(im, -im.width * sc / 2, -im.height * sc / 2, im.width * sc, im.height * sc); x.restore();
     });
     if (shot) {
-      x.strokeStyle = shot.a === 0 ? '#ffe066' : '#ff6fb5'; x.lineWidth = 2;
+      x.strokeStyle = T.battleBg ? '#000' : shot.a === 0 ? '#ffe066' : '#ff6fb5'; x.lineWidth = 2;
       x.beginPath(); x.moveTo(shot.x1, shot.y1); x.lineTo(shot.x2, shot.y2); x.stroke();
     }
   };
@@ -1732,6 +1732,9 @@ function setupMenus() {
         dd.append(el('button', { role: 'menuitem', onclick: () => { dd.classList.remove('open'); fn(); } }, typeof label === 'function' ? label() : label));
       }
       dd.classList.add('open');
+      // a menu near the right edge opens leftward so it stays on screen
+      dd.style.left = ''; dd.style.right = '';
+      if (dd.getBoundingClientRect().right > window.innerWidth - 4) { dd.style.left = 'auto'; dd.style.right = '0'; }
     });
     bar.append(el('div', { class: 'menu' }, btn, dd));
   }
@@ -1745,9 +1748,18 @@ function nextFleet() {
   const f = mine[(i + 1) % mine.length];
   UI.selFleet = f.id; UI.sel = f.star; renderPanel(); draw();
 }
+// End Turn from the keyboard: T. The originals used ⌘T (Mac), Ctrl+T (DOS,
+// Windows) or Amiga+Z; a browser keeps Ctrl+T and ⌘T for a new tab, so plain
+// T is the key here (Ctrl/⌘+T is tried too, where the browser lets it through).
+const END_KEY = () => `Keyboard: T${T.endTurnKey ? ` (in the original: ${T.endTurnKey}${/T$/.test(T.endTurnKey) ? ', which a browser keeps for opening a new tab' : ''})` : ''}`;
 document.addEventListener('keydown', (e) => {
   if (UI.modal || !G) return;
   if (e.key === 'Tab' && e.target === document.body) { e.preventDefault(); nextFleet(); }
+  const typing = /^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName);
+  if ((e.key === 't' || e.key === 'T') && !typing && !e.altKey && !e.shiftKey) {
+    const btn = document.querySelector('#msg .clock');
+    if (btn) { e.preventDefault(); btn.click(); }
+  }
 });
 
 // ---------- hover help ----------
@@ -1762,6 +1774,7 @@ function tipShow(target) {
   if (!Tip.el) { Tip.el = el('div', { class: 'tip', role: 'tooltip', id: 'hotip' }); document.body.append(Tip.el); }
   Tip.el.innerHTML = '';
   Tip.el.append(el('p', null, h[0]), el('small', null, `Adapted from the ${R[k] ? manualFor()[1] : 'Spaceward Ho! 5 manual'}: ${h[1]}`));
+  if (target.dataset.key) Tip.el.append(el('p', { class: 'key' }, target.dataset.key));
   Tip.el.hidden = false; Tip.at = target;
   target.setAttribute('aria-describedby', 'hotip');
   const r = target.getBoundingClientRect(), w = Math.min(320, window.innerWidth - 16);

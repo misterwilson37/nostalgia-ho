@@ -52,7 +52,10 @@ button { font: inherit; }
 .ppic img { width: 56px; height: 56px; image-rendering: pixelated; }
 .ppic .phat { position: absolute; left: -5px; top: -14px; width: 66px; height: auto; }
 .planet h3 { margin: 0; }
-.tm { display: grid; grid-template-columns: auto 1fr auto; gap: 6px; align-items: center; margin: 6px 0; }
+.tm { display: grid; grid-template-columns: auto minmax(40px, 1fr) auto; gap: 6px; align-items: center; margin: 6px 0; }
+.tm input[type=range] { width: 100%; min-width: 0; margin: 0; }
+.tm .tml, .tm .tmr { font-size: 11px; }
+.tip .key { margin: 6px 0 0; font-weight: bold; }
 .btns { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
 .btns.right { justify-content: flex-end; }
 button:not(.mbtn):not(.close):not(.tbtn):not(.clock):not([role=menuitem]) {

@@ -63,6 +63,9 @@ window.HOTHEME_OVER = {
     return L([1004, rich ? 1010 : 1011, rich ? 1005 : 1006][band]);
   },
   select: P + 'p502', selectSmall: P + 'p503',
+  endTurnKey: '⌘T',
+  // 1.2's black-on-white ship pictures are drawn on a white battle screen
+  battleBg: v12 ? '#fff' : undefined,
   endTurnPic: P + (v12 ? 'endturn' : 'p5500'), // "End Turn ⌘T" (1.2's own says "Fin Tour"; endturn is 3.0.1's)
   // Ship pictures: engine, hull and nose side by side, as in the DOS game,
   // but 40x40 parts (2600 + the DOS part number less 100), shown twice the size.

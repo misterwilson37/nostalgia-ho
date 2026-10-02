@@ -43,6 +43,7 @@ window.HOTHEME = {
   // the icon on them so they can still be picked out.)
   marker: (f, mine) => (mine && !f.sat ? P + 's3114' : null),
   endTurnPic: P + 'd5000',
+  endTurnKey: 'Ctrl+T', // as the button says
   // Planets (FUN_1040_31c3). "Gravity OK" = the planet's gravity is within
   // 2.56 times your home's either way. Temperature plays no part.
   //   yours: 1000 making money, 1001 losing money, 1002 bad gravity (a

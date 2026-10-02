@@ -16,6 +16,7 @@ window.HOTHEME_OVER = {
   dir: 'assets/skins/amiga/',
   // the End Turn button in English, redrawn from the German one
   endTurnPic: P + 'endturn',
+  endTurnKey: 'Amiga+Z',
   // the Amiga title picture is one piece
   title(frame, IMG, Sound) {
     const t = IMG[P + 'title'];
