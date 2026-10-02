@@ -915,7 +915,8 @@ function openRanks() {
 function doEndTurn(confirmed) {
   if (!G || G.over) return;
   if (confirmed !== true && HO.feature(G, 'buildQueue')) {
-    const starved = HO.colonies(G, ME).filter(s => s.id !== me().homeStar && !(me().budget.col[s.id] > 0));
+    const rs = HO.rules(G), starved = rs.underfunded ? rs.underfunded(G, me()) : HO.colonies(G, ME).filter(s => s.id !== me().homeStar && !(me().budget.col[s.id] > 0));
+    if (starved.length && rs.underfunded) { confirmBox(`${starved.map(s => s.name).join(', ')} ${starved.length === 1 ? 'isn’t' : 'aren’t'} getting enough money to cover ${starved.length === 1 ? 'its' : 'their'} losses. Ending the turn will cost colonists, and a colony left with none is abandoned. Go ahead?`, () => doEndTurn(true)); return; }
     if (starved.length) { confirmBox(`You aren’t spending any money on ${starved.map(s => s.name).join(', ')}. Ending the turn will abandon ${starved.length === 1 ? 'it' : 'them'}. Go ahead?`, () => doEndTurn(true)); return; }
   }
   // hot seat: the turn goes to the next human; the year moves on after the last one
@@ -1032,7 +1033,8 @@ function openBuild(sid) {
     for (const d of designs) {
       const c = HO.shipCostNow(G, p, d);
       const n = builtHere(d.id);
-      const can = queue || ((p.savings - c.money >= HO.borrowLimit(G, p)) && p.metal >= c.metal);
+      const slots = HO.rules(G).queueSlots, sq = s.queue || [];
+      const can = queue ? !(slots && sq.length >= slots && sq[sq.length - 1].did !== d.id) : ((p.savings - c.money >= HO.borrowLimit(G, p)) && p.metal >= c.metal);
       left.append(el('div', { class: 'drow' },
         shipImgEl(d, 26),
         el('div', { class: 'dtext' }, el('b', null, d.name), el('div', { class: 'sub' }, `${HO.TYPES[d.type].name} · R${d.type === 'satellite' ? 0 : d.R} Sp${d.V} W${d.W} Sh${d.S} M${d.M}`),
@@ -1044,7 +1046,7 @@ function openBuild(sid) {
     }
     // designer
     const L = HO.designLimits(G, p, st.type);
-    for (const k of ['R', 'V', 'W', 'S', 'M']) { const lo = HO.designMin(G, k); if (st[k] == null || st._t !== st.type) st[k] = L[k]; st[k] = Math.max(lo, Math.min(Math.max(lo, L[k] || lo), st[k])); }
+    for (const k of ['R', 'V', 'W', 'S', 'M']) { const lo = HO.designMin(G, k, st.type); if (st[k] == null || st._t !== st.type) st[k] = L[k]; st[k] = Math.max(lo, Math.min(Math.max(lo, L[k] || lo), st[k])); }
     st._t = st.type;
     const spec = { type: st.type, R: st.type === 'satellite' ? 0 : st.R, V: st.V, W: st.W, S: st.S, M: st.M };
     const c = HO.designCost(G, spec);
@@ -1057,21 +1059,21 @@ function openBuild(sid) {
     const lab = { R: 'Range', V: 'Speed', W: 'Weapons', S: 'Shields', M: 'Mini' };
     for (const k of ['R', 'V', 'W', 'S', 'M']) {
       if (k === 'R' && st.type === 'satellite') continue;
-      const min = HO.designMin(G, k), max = Math.max(min, L[k] || min);
+      const min = HO.designMin(G, k, st.type), max = Math.max(min, L[k] || min);
       right.append(el('label', { class: 'slide' }, el('span', null, lab[k]),
         el('input', { type: 'range', min, max, value: st[k], disabled: max <= min, oninput: (e) => { st[k] = +e.target.value; render(); } }),
         el('b', null, `${st[k]}/${max}`)));
     }
     right.append(el('p', { class: 'sub' }, `${money(c.money)} and ${fmt(c.metal)} metal each` + (exists && exists.built ? '' : `, plus ${money(c.proto)} to build the prototype`) + '.'));
     if (st.type === 'scout') right.append(el('p', { class: 'note' }, `Scouts get ${L.R - p.tech.range} extra range but weaker weapons and shields. Each scout flies alone.`));
-    if (st.type === 'satellite') right.append(el('p', { class: 'note' }, 'Satellites can’t move. They shoot twice per round.'));
+    if (st.type === 'satellite') right.append(el('p', { class: 'note' }, `Satellites can’t move. They shoot ${HO.feature(G, 'buildQueue') ? 'once' : 'twice'} per round.`));
     if (st.type === 'colony') right.append(el('p', { class: 'note' }, 'Colony ships settle the first unowned planet they’re sent to.'));
     if (st.type === 'mini') {}
     right.append(el('div', { class: 'btns' }, el('button', { onclick: () => {
       const lim = HO.rules(G).maxDesigns;
       if (lim && !exists && HO.liveDesigns(p) >= lim) { toast(HO.DATA.alerts[15] || 'Your assembly lines are full.'); return; }
       const d = HO.findOrCreateDesign(G, p, spec);
-      if (queue) { HO.queueShips(G, ME, sid, d.id, 1); Sound.play(7006); }
+      if (queue) { if (HO.queueShips(G, ME, sid, d.id, 1)) Sound.play(7006); else toast(`${s.name}’s queue is full: it holds ${HO.rules(G).queueSlots} kinds of ship.`); }
       else if (HO.buildShips(G, ME, sid, d.id, 1)) { Sound.play(7006); } else toast('Not enough money or metal.');
       render(); renderPanel(); draw();
     } }, queue ? (exists ? `Queue another ${exists.name}` : 'Create this type and queue one') : exists && exists.built ? `Build another ${exists.name}` : 'Build the prototype')));
@@ -1463,8 +1465,7 @@ function newGameDialog() {
     sel('d_iq', 'Computer skill', [['dumb', 'Dumb'], ['average', 'Average'], ['smart', 'Smart']], 'average'),
     sel('d_size', 'Galaxy size', [['small', 'Small'], ['medium', 'Medium'], ['large', 'Large'], ['xl', 'Extra Large'], ['huge', 'Humongous']], 'medium'),
     sel('d_shape', 'Map style', [['circle', 'Circle'], ['random', 'Random'], ['ring', 'Ring'], ['spiral', 'Spiral'], ['grid', 'Grid']], 'ring'),
-    sel('d_density', 'Density', [['dense', 'Dense'], ['sparse', 'Sparse']], 'dense'),
-    el('label', { class: 'chk' }, el('input', { type: 'checkbox', name: 'd_novas', checked: 'checked' }), el('span', null, 'Novas')));
+    sel('d_density', 'Density', [['dense', 'Dense'], ['sparse', 'Sparse']], 'dense')); // 2.0 has no novas
   const startSel = sel('start', 'Your home system', STARTS, 'normal');
   // hot seat: names and hats for players 2..6
   const seats = el('div', { class: 'group seats' });
@@ -1519,7 +1520,7 @@ function newGameDialog() {
       const o = origOpts(d);
       G = HO.newGame(Object.assign(common, o, { difficulty: HO.RULESETS.original.difficulty(o) }));
     } else if (d.rules === 'dos') {
-      G = HO.newGame(Object.assign(common, { start: d.d_skill, iq: d.d_iq, size: d.d_size, shape: d.d_shape, density: d.d_density, novas: !!d.d_novas, alliances: false, luck: false }));
+      G = HO.newGame(Object.assign(common, { start: d.d_skill, iq: d.d_iq, size: d.d_size, shape: d.d_shape, density: d.d_density, novas: false, alliances: false, luck: false }));
     } else G = HO.newGame(Object.assign(common, { iq: d.iq, cstart: d.cstart, shape: d.shape, size: d.size, density: d.density }));
     if (d.skin && d.skin !== HOSKINS.current) { save(); HOSKINS.switchTo(d.skin); return; } // opens in the other skin
     closeModal(); hideTitle(); ME = 0;

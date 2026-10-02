@@ -306,7 +306,7 @@ function aiSpec(p, type) {
 const shotsPerShip = (d) => d.type === 'satellite' ? 2 : d.type === 'dread' ? 25 : 1;
 function fleetStrength(G, f) {
   let st = 0;
-  for (const k in f.ships) { const d = getDesign(G, f.owner, +k); if (d) st += f.ships[k] * designCost(G, d).att; }
+  for (const k in f.ships) { const d = getDesign(G, f.owner, +k); if (d) st += f.ships[k] * E.rules(G).designCost(G, d).att; } // the active ruleset's costs (DOS 2.0 reuses this)
   return st;
 }
 // planet defence estimate the computers use (FUN_100839a0)

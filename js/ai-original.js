@@ -40,7 +40,10 @@ function makeAI(G, p, iqName, autoplay) {
   const tw = { range: RI(G, 160, 200), speed: RI(G, 160, 200), weapons: RI(G, 200, 260) };
   tw.shields = Math.min(RI(G, 200, 260), tw.weapons);
   tw.mini = 980 - tw.range - tw.speed - tw.weapons - tw.shields; tw.radical = 20;
-  if (autoplay) {
+  // a ruleset may set the personalities itself (DOS 2.0: FUN_1030_1b51)
+  const custom = E.rules(G).aiPersonality;
+  if (custom) custom(G, p, ai, tw, iq, autoplay);
+  else if (autoplay) {
     Object.assign(tw, { range: 200, speed: 200, weapons: 200, shields: 200, mini: 150, radical: 50 });
     Object.assign(ai, { colDef: 50, metalDef: 50 });
   } else if (iq === 1) {
@@ -54,7 +57,7 @@ function makeAI(G, p, iqName, autoplay) {
   }
   // two special personalities for smart computers
   const slot = p.id % 4;
-  if (!autoplay && iq > 2 && (slot === 3 || slot === 2)) {
+  if (!custom && !autoplay && iq > 2 && (slot === 3 || slot === 2)) {
     const big = G.players.length - 1 > 2;
     if (slot === 3) Object.assign(ai, { style: 3, upfront: iq === 4 ? 60 : 50, reqInc: 35000, colDef: 100, metalDef: 90, defDom: 300, attDom: 1000, aggr: 1, metalF: 75, saveGoal: RI(G, 4, 6) });
     else Object.assign(ai, { style: 2, upfront: 45, reqInc: 35000, colDef: 25, metalDef: 10, defDom: 150, attDom: 200, aggr: 10, metalF: 60, saveGoal: 3, minFleet: RI(G, 25, 30) });
@@ -86,6 +89,8 @@ function aiDesign(G, p, type) {
 }
 function aiTurn(G, p) {
   const ai = p.ai || (p.ai = makeAI(G, p, 'average', p.human));
+  const rs = E.rules(G);
+  if (rs.aiTurnStart) rs.aiTurnStart(G, p); // e.g. the DOS 2.0 Smart computers' free look around home
   const cols = colonies(G, p.id);
   if (!cols.length) { strandedColonyShips(G, p); return; }
   if (!p.human && G.opts.alliances) diplomacy(G, p);
@@ -95,7 +100,7 @@ function aiTurn(G, p) {
   // only the ship types this ruleset has (the DOS 2.0 rules have four)
   for (const t of ['scout', 'dread', 'fighter', 'tanker', 'colony', 'satellite']) D[t] = E.rules(G).canBuild(G, p, t) ? aiDesign(G, p, t) : null;
   if (p.hasBio) D.bio = p.designs.find(d => d.type === 'bio' && !d.scrapped) || null;
-  const C = {}; for (const t in D) if (D[t]) C[t] = RS.designCost(G, D[t]);
+  const C = {}; for (const t in D) if (D[t]) C[t] = rs.designCost(G, D[t]);
   // assembly lines are limited: scrap unused, superseded types (FUN_10086830)
   const live = p.designs.filter(d => !d.scrapped);
   if (live.length + 6 > 24) {
@@ -109,12 +114,12 @@ function aiTurn(G, p) {
   const cap = Math.max(0, trunc((I + ai.reqInc - 30000) / ai.reqInc));
   const cap2 = Math.max(cap, trunc((I + trunc(ai.reqInc / 4) + ai.reqInc - 30000) / ai.reqInc));
   const reserve = Math.max(0, Math.min(trunc(I * (G.year - 2000) / 100), I * ai.saveGoal));
-  const A = { D: RS.disposable(G, p).D, I, reserve };
+  const A = { D: (rs.disposable || RS.disposable)(G, p).D, I, reserve };
   let totalMetal = p.metal; for (const s of cols) totalMetal += s.metal;
   let homeFleet = 0, awayFleet = 0, satMetal = 0, warMetal = 0, colShips = 0;
   const myFleets = G.fleets.filter(f => f.owner === p.id);
   for (const f of myFleets) {
-    let m = 0; for (const k in f.ships) { const d = getDesign(G, p.id, +k); m += RS.designCost(G, d).metal * f.ships[k]; }
+    let m = 0; for (const k in f.ships) { const d = getDesign(G, p.id, +k); m += rs.designCost(G, d).metal * f.ships[k]; }
     const kind = fleetKind(G, f);
     if (kind === 'colony' || fleetHas(G, f, 'colony')) colShips += fleetCount(f) && 1;
     if (f.star != null && G.stars[f.star].owner === p.id) homeFleet += m; else if (kind !== 'scout') awayFleet += m;
@@ -188,7 +193,8 @@ function aiTurn(G, p) {
   for (const s of colonies(G, p.id)) {
     if (cls[s.id] === 8 && s.metal < 100 && s.id !== p.homeStar && colonies(G, p.id).length > 1) { evacuate(G, p.id, s.id); ai.noColonize[s.id] = true; continue; }
     if (s.metal <= 0) continue;
-    if (cls[s.id] === 8) req('mine', 75, s.id, RS.mineMoney(p, ai.iq === 1 ? s.metal + 25 : Math.min(s.metal + 25, 1000)));
+    if (rs.aiMineMoney) req('mine', cls[s.id] === 8 ? 75 : 30, s.id, rs.aiMineMoney(G, p, s, cls[s.id], ai.iq));
+    else if (cls[s.id] === 8) req('mine', 75, s.id, RS.mineMoney(p, ai.iq === 1 ? s.metal + 25 : Math.min(s.metal + 25, 1000)));
     else req('mine', 30, s.id, RS.mineMoney(p, Math.min(s.metal + 25, ai.iq <= 2 ? 5000 : 600)));
   }
   // step 12: scouting
@@ -228,7 +234,7 @@ function aiTurn(G, p) {
       if ((cls[s.id] === 9 || cls[s.id] === 10) && RS.popU(s) < 10000) want--;
       if (cls[s.id] === 8 && s.metal > 100) want--;
     }
-    want -= colShips;
+    want -= rs.aiColonyShipsBusy ? rs.aiColonyShipsBusy(G, p) : colShips; // DOS 2.0: ships come from a queue, so idle ones still need sending
     want = clamp(want, 0, 5);
     const cand = (needFleet, metalF) => {
       let best = -1, bv = 1, src = -1;
@@ -255,7 +261,7 @@ function aiTurn(G, p) {
   for (const s of colonies(G, p.id)) {
     const h = RS.hab(p, s);
     if (h.dT <= 0 || cls[s.id] <= 8) continue;
-    const amt = ai.iq === 1 ? RS.terraCost(p, h.dT) : h.dT < 1000 ? 3000 : (p.lastNet < 150000 ? 10000 : 15000);
+    const amt = rs.aiTerraMoney ? rs.aiTerraMoney(G, p, s, cls[s.id], ai.iq) : ai.iq === 1 ? RS.terraCost(p, h.dT) : h.dT < 1000 ? 3000 : (p.lastNet < 150000 ? 10000 : 15000);
     req('terra', cls[s.id] === 10 ? 70 : 80, s.id, amt);
   }
   // step 16: defense
@@ -295,17 +301,20 @@ function aiTurn(G, p) {
   // step 21: turn the decisions into budget bars like a human's
   const tot = A.D;
   const b = p.budget;
-  b.col = {};
-  if (tot <= 0) { b.tech = 0; b.savings = 1; }
+  if (rs.aiBudget) rs.aiBudget(G, p, M, A); // DOS 2.0: shares of the whole treasury, ships included
   else {
-    b.tech = M.tech / tot;
-    let used = M.tech;
-    for (const s of colonies(G, p.id)) {
-      const t = M.terra[s.id] || 0, m = M.mine[s.id] || 0;
-      b.col[s.id] = (t + m) / tot; used += t + m;
-      if (t + m > 0) s.terra = t / (t + m);
+    b.col = {};
+    if (tot <= 0) { b.tech = 0; b.savings = 1; }
+    else {
+      b.tech = M.tech / tot;
+      let used = M.tech;
+      for (const s of colonies(G, p.id)) {
+        const t = M.terra[s.id] || 0, m = M.mine[s.id] || 0;
+        b.col[s.id] = (t + m) / tot; used += t + m;
+        if (t + m > 0) s.terra = t / (t + m);
+      }
+      b.savings = Math.max(0, tot - used) / tot;
     }
-    b.savings = Math.max(0, tot - used) / tot;
   }
   p.talloc = Object.assign({}, ai.tw);
   // step 20: idle warships away from home fall back to the nearest colony
@@ -367,6 +376,7 @@ function satStrength(G, p, sid) {
 // FUN_100852d0: pay for ships out of savings above the reserve, never past the borrowing limit
 function aiBuild(ctx, d, sid, n) {
   const { G, p, A } = ctx;
+  if (E.rules(G).aiBuild) return E.rules(G).aiBuild(ctx, d, sid, n); // DOS 2.0: queue the ships at the colony
   if (!d || n < 1 || G.stars[sid].owner !== p.id) return 0;
   if (RS.popU(G.stars[sid]) < n) return 0;
   const c = shipCostNow(G, p, d), unit = RS.designCost(G, d).money;

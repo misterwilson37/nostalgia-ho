@@ -63,7 +63,7 @@ function planetIncome(G, p, s) { return rules(G).planetIncome(G, p, s); }
 
 // ---------- ship designs ----------
 function designLimits(G, p, type) { return rules(G).designLimits(G, p, type); }
-function designMin(G, k) { const rs = rules(G); return rs.designMin ? rs.designMin(G, k) : 1; }
+function designMin(G, k, type) { const rs = rules(G); return rs.designMin ? rs.designMin(G, k, type) : 1; }
 function designCost(G, d) { return rules(G).designCost(G, d); }
 function canBuildType(G, p, type) { return rules(G).canBuild(G, p, type); }
 function designName(G, p, type) {
@@ -153,9 +153,10 @@ function fleetKind(G, f) {
   return 'fighter';
 }
 function addShipsToStar(G, pid, sid, d, n) {
-  const sat = d.type === 'satellite';
+  const sat = d.type === 'satellite', rs = rules(G);
   let f;
-  if (sat) f = G.fleets.find(x => x.owner === pid && x.star === sid && x.sat);
+  if (rs.fleetFor) f = rs.fleetFor(G, pid, sid, d); // the ruleset picks the fleet new ships join (null: a new one)
+  else if (sat) f = G.fleets.find(x => x.owner === pid && x.star === sid && x.sat);
   else if (d.type === 'scout') f = null; // scouts get their own fleet
   else if (feature(G, 'singleTypeFleets')) // DOS 2.0: new ships join a fleet of the same type at the star
     f = G.fleets.find(x => x.owner === pid && x.star === sid && !x.sat && x.to == null && x.dest == null && fleetDesigns(G, x).every(e => e.type === d.type));
@@ -174,7 +175,12 @@ function canReach(G, f, sid) {
 function orderMove(G, f, sid) {
   if (f.sat || f.star == null) return false;
   if (sid === f.star) { f.dest = null; f.path = null; return true; }
-  if (!canReach(G, f, sid)) return false;
+  if (!canReach(G, f, sid)) {
+    // a ruleset may route the fleet through stars where it refuels (DOS 2.0)
+    const path = rules(G).route ? rules(G).route(G, f, sid) : null;
+    if (!path || !path.length) return false;
+    f.dest = path[0]; f.path = path.length > 1 ? path.slice(1) : null; return true;
+  }
   f.dest = sid; f.path = null; return true;
 }
 // multi-star path (waypoints): the fleet stops at each star, refuels, and goes on
@@ -198,14 +204,16 @@ function queueShips(G, pid, sid, did, n) {
   if (!d || s.owner !== pid || !canBuildType(G, G.players[pid], d.type) || n < 1) return 0;
   s.queue = s.queue || [];
   const last = s.queue[s.queue.length - 1];
-  if (last && last.did === did) last.n += n; else s.queue.push({ did, n });
+  if (last && last.did === did) last.n += n;
+  else if (rules(G).queueSlots && s.queue.length >= rules(G).queueSlots) return 0; // every slot is taken
+  else s.queue.push({ did, n });
   return n;
 }
 function unqueueShip(G, pid, sid, i) {
   const s = G.stars[sid];
   if (s.owner !== pid || !s.queue || !s.queue[i]) return;
   if (--s.queue[i].n <= 0) s.queue.splice(i, 1);
-  if (i === 0) s.yard = 0;
+  if (i === 0) { if (rules(G).yardRefund) rules(G).yardRefund(G, G.players[pid], s); else s.yard = 0; }
 }
 function mergeFleets(G, a, b) { // b into a
   for (const k in b.ships) a.ships[k] = (a.ships[k] || 0) + b.ships[k];
@@ -440,7 +448,7 @@ function newGame(opts) {
     G.W = W; G.H = H;
     pts = placeStars(G, n, W, H, opts.shape || 'random');
   }
-  const names = shuffle(G, DATA.starNames.slice());
+  const names = shuffle(G, (rs.starNames || DATA.starNames).slice());
   pts.forEach((pt, i) => {
     const st = rs.newStar(G);
     const s = { id: i, name: names[i % names.length] || ('Star ' + i), x: pt.x, y: pt.y, g: st.g, t: st.t, metal: st.metal, owner: -1, pop: 0, terra: 0.5, nova: 0, debris: 0, everProfit: false };
