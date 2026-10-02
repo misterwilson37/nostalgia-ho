@@ -170,11 +170,12 @@ same pictures: 256 colours for AGA Amigas (identical to the DOS pictures, so not
 
 ## mac3 (Mac 3.0.1, black and white)
 
-Spaceward Ho! 3.0.1 for the Macintosh (Delta Tao, 1993) on one floppy. Its pictures are
-black and white; it read colour versions from a separate file, "Ho! 3.0 Color Picts", which
-isn't on the floppy. The DOS game's colour pictures have the same numbers, so they are very
-likely those colour pictures. The skin uses the DOS skin's code, so it is missing what the
-DOS skin is missing (above), with these differences:
+Spaceward Ho! 3.0.1 for the Macintosh (Delta Tao, 1993). The program's own pictures are
+black and white; on a colour Mac it read colour versions from a second file, "Ho! 3.0 Color
+Picts". There are two skins: **mac3** (black and white) and **mac3c** (colour: every picture
+the colour file has, in [`assets/skins/mac3c/`](../assets/skins/mac3c/sprites/), under the
+same names). Both use the DOS skin's code, so they are missing what the DOS skin is missing
+(above), with these differences:
 
 - **Its own:** the credits title picture ([`p1001`](../assets/skins/mac3/sprites/p1001.png)),
   an English End Turn button "End Turn ⌘T" ([`p5500`](../assets/skins/mac3/sprites/p5500.png),
@@ -190,6 +191,11 @@ DOS skin is missing (above), with these differences:
   `i3150`–`i3164`, `i4011`–`i4017`, `i1010`–`i1013`, `i1512`, `i1513`, `i1600`, the
   168×56 strips `p6100`–`p6140`, the "Version 3.0" picture `p1003`, and `p506`/`p507`/`p510`/`p511`
   (rings with a halo).
+- **Colour art not used yet:** the purple space backdrop
+  ([`p6000`](../assets/skins/mac3c/sprites/p6000.png), 128×128, for tiling behind the map),
+  the planet surface strips `p6100`–`p6140` with the sphere shapes `p6150`/`p6151` (3.0 drew
+  rotating planets from these), red nova frames (32×32 icons `i700`–`i740`)
+  and twinkling-star frames `p750`–`p758`.
 - **Not in 3.0.1:** `i128` and `i2499` (unused by the DOS skin too).
 
 ## w95 (4.0.5, Windows 95)

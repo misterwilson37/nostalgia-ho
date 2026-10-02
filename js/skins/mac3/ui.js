@@ -8,9 +8,13 @@
 // (tools/extract/mac3.py), with a few changes: ship parts are 40x40
 // pictures p2600-p2926, and the title, End Turn button, selection rings
 // and won/lost pictures are 3.0.1's own.
+//
+// The colour skin (js/skins/mac3c) is this one with the pictures from
+// 3.0's "Ho! 3.0 Color Picts" file (assets/skins/mac3c, same names).
 (function () {
 'use strict';
 const P = 'dos:'; // the DOS skin's name for its pictures
+const colour = !!window.HOMAC3_COLOUR;
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 const images = {
   p3030: 'p3530', p3040: 'p3540', // won, eliminated
@@ -18,7 +22,7 @@ const images = {
 };
 for (let n = 0; n < 16; n++) { images['bad' + n + '_0'] = 'i' + (2000 + n); images['bad' + n + '_1'] = 'i' + (2500 + n); }
 window.HOTHEME_OVER = {
-  dir: 'assets/skins/mac3/',
+  dir: colour ? 'assets/skins/mac3c/' : 'assets/skins/mac3/',
   // 3.0.1 has the Mac 5.0.5 sounds' numbers, 7001 (next message) included
   sounds: { 11111: 7000, 7006: 7001 },
   images,

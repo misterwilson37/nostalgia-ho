@@ -26,6 +26,7 @@ const SKINS = [
   { id: 'dos', name: 'DOS 2.0' },
   { id: 'amiga', name: 'Amiga 2.0' },
   { id: 'mac3', name: 'Mac 3.0.1 (black and white)' },
+  { id: 'mac3c', name: 'Mac 3.0.1 (colour)' },
   { id: 'w95', name: 'Windows 95 (4.0.5)' },
 ];
 const store = {

@@ -1,0 +1,4 @@
+/* Spaceward Ho! — Mac 3.0.1 colour skin: the black-and-white skin's
+   Mac look (System 7 windows stayed black and white) with colour pictures. */
+@import url("../mac3/style.css");
+.clock.pic img { image-rendering: auto; }
