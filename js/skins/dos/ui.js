@@ -146,7 +146,8 @@ function faces() {
   for (let n = 0; n < 16; n++) { o['bad' + n + '_0'] = 'i' + (2000 + n); o['bad' + n + '_1'] = 'i' + (2500 + n); }
   return o;
 }
-// a skin built on this one (js/skins/amiga) changes what it needs
-Object.assign(window.HOTHEME, window.HOTHEME_OVER || {});
+// a skin built on this one (js/skins/amiga, mac3) changes what it needs; its
+// hooks can call this skin's own as HOTHEME.base
+window.HOTHEME = Object.assign({ base: window.HOTHEME }, window.HOTHEME, window.HOTHEME_OVER || {});
 if (!window.HOSKINS_INLINE) document.write('<script src="js/skins/classic/ui.js"><\/script>');
 })();

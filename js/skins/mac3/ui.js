@@ -27,6 +27,38 @@ window.HOTHEME_OVER = {
   sounds: { 11111: 7000, 7006: 7001 },
   images,
   battlePlanet: P + 'i1004', // a plain planet
+  // Planets on the map, as 3.0.1 picks them (SetPlanetTypesForStar @a4fbc
+  // in the decompile, docs/301-findings.md). r = the planet's gravity over
+  // your home's, either way round (at most 2.00 good, up to 2.56 poor).
+  //   yours (+500 if you're a woman): making money 1000 (1100, and 1600 for
+  //     a woman, on 25 December); losing money: r <= 2: 1001, r <= 2.56:
+  //     1012 (1013 under 100 metal), else 1002 (1003)
+  //   explored, nobody's: r <= 2: 1004, r <= 2.56: 1010 (1011), else 1005 (1006)
+  //   1007 unexplored, 1008 one of your fleets is on its way, 1009 a battle
+  //   was seen there; someone else's: 2000 + face (+500 a woman); a star
+  //   turning red or gone nova: 1020
+  starLook(look, { G, p, s, k }) {
+    const b = look.base;
+    const L = (n) => ({ base: P + 'i' + n, scale: 1.45 });
+    if (/^nova/.test(b)) return L(1020);
+    if (b === 'unknown') return L(1007);
+    if (b === 'soon') return L(1008);
+    if (b === 'battle') return L(1009);
+    if (look.hat && look.hat.startsWith('bad')) {
+      const [n, f] = look.hat.slice(3).split('_');
+      return L((f === '1' ? 2500 : 2000) + (+n % 20));
+    }
+    const src = look.hat ? s : k;
+    if (!src || (!look.hat && !k.explored)) return L(1007);
+    const r = Math.max(src.g, p.homeG) / Math.max(0.01, Math.min(src.g, p.homeG));
+    const band = r <= 2 ? 0 : r <= 2.56 ? 1 : 2, rich = src.metal >= 100;
+    if (look.hat) { // yours
+      const d = new Date(), xmas = d.getMonth() === 11 && d.getDate() === 25;
+      if (HO.planetIncome(G, p, s) >= 0) return L(xmas ? (p.female ? 1600 : 1100) : p.female ? 1500 : 1000);
+      return L((p.female ? 500 : 0) + [1001, rich ? 1012 : 1013, rich ? 1002 : 1003][band]);
+    }
+    return L([1004, rich ? 1010 : 1011, rich ? 1005 : 1006][band]);
+  },
   select: P + 'p502', selectSmall: P + 'p503',
   endTurnPic: P + 'p5500', // "End Turn ⌘T"
   // Ship pictures: engine, hull and nose side by side, as in the DOS game,
@@ -46,6 +78,34 @@ window.HOTHEME_OVER = {
     x.imageSmoothingEnabled = false;
     parts.forEach((im, i) => x.drawImage(im, i * 80, 0, 80, 80));
     return c;
+  },
+  // Report pictures, as 3.0.1 picks them (GetIconID @161216: by report
+  // template, STR# 1000), matched here by the text; the sound and anything
+  // not listed are the DOS skin's choice. 3161 (the scroll) is for chat.
+  messageLook(m, cur, ctx) {
+    const look = window.HOTHEME.base.messageLook(m, cur, ctx);
+    const t = String(m.text || ''), me = ctx.G.players[ctx.ME];
+    const ICONS = [
+      [/Radical researchers|mining consortium|weather patterns|ship technicians|black and white to colou?r|hardware problems|already are running in colou?r/, 3105],
+      [/not receiving sufficient funds|not spending any money on (technology|research)|Ship money is being used|no money to spend|borrow more ship money|enough money! You.re neglecting/, 4013],
+      [/never become profitable|computer bug/, 3112],
+      [/baby boom/i, 4017],
+      [/meteor shower|shock wave from the supernova/, 4015],
+      [/gone supernova|armageddon!|armageddon device was activated|half of the stars/i, 3118],
+      [/has offered to ally|You have offered to ally/, 3164],
+      [/no longer wants? to ally/, 3163],
+      [/formed an alliance|alliance with .* is gone/, 3160],
+      [/energy emanating/, 3119],
+      [/given you \$|You just gave .* \$/, 3110],
+      [/given you [\d,]+ metal|You just gave .* metal|archaeologists/, 3162],
+      [/has just surrendered/, 4016],
+      [/climatologists/, 1001],
+      [/generals are now smarter/, 3142],
+    ];
+    for (const [re, n] of ICONS) if (re.test(t)) return Object.assign({}, look, { icon: P + 'i' + n });
+    if (/^You have just surrendered|^You have abandoned|has revolted|people have revolted|sociologists|spies have stolen|alliance will win/.test(t)) return Object.assign({}, look, { icon: P + 'i' + (me.female ? 1500 : 1000) });
+    if (m.chat) return Object.assign({}, look, { icon: P + 'i3161' });
+    return look;
   },
   // the title screen: 3.0.1's credits picture
   title(frame, IMG, Sound) {
