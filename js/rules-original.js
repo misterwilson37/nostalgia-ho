@@ -341,10 +341,11 @@ function starCount(G, shape, size) {
   else { const w = trunc(size / 10) + 6; n = 2 * size + RI(G, -w, w) + 19; }
   return clamp(n, 19, 220);
 }
-function makeGalaxy(G, opts, nPlayers) {
+// maxStars: a lower cap on the star count for other rulesets (Palm OS: 90); 5.0.5 caps at 220
+function makeGalaxy(G, opts, nPlayers, maxStars) {
   const shape = SHAPES.includes(opts.shape) ? opts.shape : 'random';
   const size = sliderSize(opts.size), dens = sliderDensity(opts.density);
-  const n = starCount(G, shape, size);
+  const n = Math.min(starCount(G, shape, size), maxStars || 220);
   const P = [];
   for (let i = 0; i < n; i++) P.push({ x10: 0, y10: 0 });
   // a star must be at least 4 ly from every star placed before it

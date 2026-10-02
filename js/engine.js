@@ -830,5 +830,6 @@ if (typeof module !== 'undefined') {
   require('./rules-405.js');
   require('./rules-301.js');
   require('./rules-12.js');
+  require('./rules-palm.js');
 } else root.HO = API;
 })(this);
