@@ -41,6 +41,11 @@ differences:
 - **French computer and ship names**, and one more star name (Tiber).
 - The 1.2 credits as the first messages, and an "updated to the year" message every turn.
 - No notice when someone else's fleet arrives at your colony.
+- **Its own computer players** (`js/ai-12.js`, a port of `DoComputerTurn` and the routines
+  it calls), not the 5.0.5 ones the DOS 2.0 ruleset uses.
+- **Its own end of the game**: a player with no colonies is out after one turn, colony
+  ships or not, and the last player standing wins.
+- **Shorter battle reports**, 1.2's own.
 
 ## How it differs from 3.0.1
 
@@ -67,7 +72,7 @@ galaxy styles (no Cluster) and DOS 2.0's star placement and distance. See
 | Gender | `CreateNewPlayer` gives every player gender 0, so every planet icon and face is the man's and the computers are named only from the men's list | CONFIRMED (`CreateNewPlayer` @101aee; nothing else writes that field) |
 | Computer names | STR# 1999 (men), picked at random without repeats | CONFIRMED (`DoGameSolidificationStuff @a49d6`) |
 | Home world, technology, budget, designs, free ships | as DOS 2.0 | CONFIRMED (`CreatePlayer`) |
-| Computer personalities | as DOS 2.0 (`SetCompAttrs` sets the same fields to the same ranges; Average: attack margin 150–200) | CONFIRMED (`SetCompAttrs @e20f6`) |
+| Computer personalities | `SetCompAttrs` sets the fields the DOS 2.0 ruleset uses to the same ranges (Average: attack margin 150–200), and some more; see "Computer players" below | CONFIRMED (`SetCompAttrs @e20f6`) |
 | First messages | "Spaceward Ho! Version 1.2 by Peter Commons." and "Artwork by Howard Vives." (STR# 1000.1–2) | CONFIRMED (`CreatePlayer` seeds the message list with reports 1000 and 1001) |
 
 The remake fixes these settings in `fixOptions`, so whatever the New Game window sends, a
@@ -102,7 +107,6 @@ All as DOS 2.0:
 | Ship costs: B = (R+10)(V+15)(W+13)(S+13) ÷ 30.6, Satellite (W+13)(S+13) × 4.445; mm = (Mini+1)/2 + 0.5; Colony Ship + $45,000, + 3,000 metal, + 1,000 hit points; prototype 2 mm × price | CONFIRMED (`CalcShipCosts @114746`) |
 | Design sliders and the 20-type limit | CONFIRMED (`SetSBMinMax @111c3c`, DITL 3280) |
 | Battles: the colony's owner holds the star and the others fight it in random order; at most 5 groups; fastest first; one target a side (colony ship, satellite, a ship from a random start, the planet); (0–20 + 5W + 10) × WPNRAT (resource `MaTh 1002`, the DOS table), ÷ 6 against ships, × 4 against the planet; the planet fires last with its owner's Weapons; no luck | CONFIRMED (`DoBattleStage @d0004`, `CalculateGroups @d1194`, `HaveGroupShoot @d1746`, `PickTarget @d1f0e`) |
-| The computers' terraforming money: 5,000 for a profitable colony, else 1,800 (Dumb), 7,200 under $150,000 and 20,000 above | CONFIRMED (`AddTerraformingActions @90b7a`) |
 
 ### Events and messages
 
@@ -113,7 +117,140 @@ All as DOS 2.0:
 | A fleet arriving at your colony | no message to the colony's owner (DOS 2.0's ruleset turns the remake's `arrivalNotices` on; 1.2 has no text for it) | CONFIRMED (`MoveShips`, STR# 1000) |
 | A meteor shower wiping out a colony | 1.2 sends report 1059, which has no template in STR# 1000 (it has 59 lines), so the message would be blank; the remake keeps DOS 2.0's "A meteor shower destroyed your colony at …" | CONFIRMED (`ComputeIncomeAndPopulation`); the text GUESS |
 | Exploration | "You have explored …" shows gravity relative to home and the temperature in **°C** to a tenth: (T − home + 720 − 324) × 5/9 in tenths, so a planet at home's temperature shows 22.0 °C. The ruleset sets `celsius: true` so a skin can turn its Celsius preference on | CONFIRMED (`ExploreStar @a3b4c`) |
-| Ship names | a new design gets a random untaken name from STR# 2001 + class; the remake takes them in order | CONFIRMED (`GiveTypeCoolName @9457e`); the order GUESS |
+| Ship names | a new design gets a random name from STR# 2001 + class that no current design has (up to 100 tries; then the last one tried) | CONFIRMED (`GiveTypeCoolName @9457e`) |
+
+### Battle reports
+
+1.2 fights a star's battle as duels (the holder against each other player in turn) and
+writes two reports for each duel, one for the attacker and one for the defender
+(`MakeResultMessages @d2828`). The remake's battle covers the whole star at once, so each
+player gets one report, with the colony's owner as the defender. The texts are 1.2's,
+worded as DOS 2.0's lines 705–707 and 681:
+
+| Who | Report | Status |
+|---|---|---|
+| the winner | "You won a battle at S. You lost N of your ships. X lost M." (STR# 1000.34) | CONFIRMED |
+| a defending colony that won with no ships of its own left | "S successfully defended itself against an enemy attack from X." (1000.36) | CONFIRMED |
+| the loser | "You lost a battle at S. You lost N of your ships. X lost M." (1000.35) | CONFIRMED |
+| a defending colony that had no ships and lost | "X destroyed your colony at S." (1000.10) | CONFIRMED |
+| debris | "You have recovered N metal from the battle at S." to a winning colony owner, else "N metal has fallen onto S from your recent battle." to the winner (1000.52–53) | CONFIRMED (as DOS 2.0) |
+
+There is no "You lost N people" line, and nothing about the colony when a defender with
+ships loses. `PlayAnnounceSound @130f08` plays nothing for the battle reports and 2001 for
+a destroyed colony. The remake keeps sound 7027 on a won battle, because the skin's auto
+play stops on it (GUESS).
+
+Each battle also leaves every player who fought there an estimate of the enemy strength,
+which the computers use (see below). The loser learns the strength of the ships left and,
+at a colony, of the planet, ((population + 49) / 50) × (Weapons + 1)² / 125. Half the time
+it learns less. The winner's estimates are cleared. A colony's owner that was attacked
+puts more of its metal into defence: at least 70 % after a loss and at least 40 %, then
++10, but no more than its "% of colonies defended". All CONFIRMED (`MakeResultMessages`).
+
+### The end of the game
+
+| What | 1.2F | Status |
+|---|---|---|
+| Losing your last colony | at the end of each turn a player with no colonies is marked as dying, colony ships or not, and everyone is told "X has just been eliminated from the game." (STR# 1000.55–56) | CONFIRMED (`DoGameEndStuff @a4406`, `CheckEndGame @100702`) |
+| Out for good | still no colonies at the end of the next turn; a colony founded in between brings the player back | CONFIRMED (`DoGameEndStuff`) |
+| The winner | from 2010 on, with more than one player, the only player who is neither out nor dying: "Congratulations! You have just won the game." / "X has just won the game." (1000.57–58) | CONFIRMED (`CheckForWinner @a4948`, `CheckEndGame`) |
+| The fleets of a player out for good | 1.2 leaves them; the remake removes them | GUESS |
+
+## Computer players
+
+`js/ai-12.js` is a port of `DoComputerTurn @90004` and segment 9. It replaces the 5.0.5
+computer players (and their DOS 2.0 hooks). Everything in this section is CONFIRMED from
+the routine named.
+
+**Personality** (`SetCompAttrs @e20f6`; the fields of the hidden "Computer Params" window,
+DLOG 500):
+- rebuild difference 1;
+- up-front research 15–25 % and more research 15–25 % of income;
+- income per colony $33,000–37,000;
+- colonies defended 30–70 %;
+- metal for defence 30–70 %;
+- defending domination 150–250 %;
+- attacking domination 150–250 %;
+- aggressiveness 3–7;
+- desire for metal 25–75;
+- satellite shields cap 11–13;
+- research shares: Range and Speed 160–200, Weapons 200–260, Shields 200–260 but no more
+  than Weapons, Mini the rest of 1,000.
+
+The skill levels change some of these:
+- **Dumb**: up-front 4 %, more 1–6 %, colonies defended 10–20 %, both dominations 75–95 %,
+  aggressiveness 1, satellite cap 30.
+- **Average**: up-front 10–20 %, attacking domination 150–200 %.
+- **Smart**: up-front 10–20 %, aggressiveness 10.
+
+A human on auto play keeps the base values, with skill 0.
+
+**Each turn:**
+- **Designs** (`MaintainShipTypes @93cdc`).
+  - A design with no ships in service that is behind your tech in any stat is scrapped.
+  - Each class has one design to build: the one with the best Mini (colony ships: the
+    best Range).
+  - A new design (Scout Range +2 and Weapons and Shields −1; Satellite Range 0, Shields 1
+    above the cap; Colony Ship Mini ÷ 3) comes when Mini tech is 1 ahead of it. Colony
+    ships get a new design when Range is 2 ahead and none are in service.
+  - Past 15 designs, unused older ones are scrapped, then all older ones.
+- **Assessment** (`ComputeStatus @9388e`).
+  - Metal for defence drops by 1 a turn (0–80).
+  - Colonies the income supports: (income per colony + income − 30,000) ÷ income per
+    colony.
+  - Colonies to keep terraforming: (income per colony × 1.5 + income − 30,000) ÷ income
+    per colony.
+  - Spare metal: metal in hand and on your colonies, plus your fleets' metal, less 5,000,
+    or less a colony ship's metal for each colony ship.
+  - The spare metal is split between defence and offence by the smaller of metal for
+    defence and colonies defended, less the satellites and fighters you already have.
+- **The map** (`FillInStarStatus @94878`).
+  - Each star gets a class: unexplored, explored and free, someone else's, a battle seen,
+    a fleet of yours there or on its way, or your colony (paying, losing, or losing with
+    hostile gravity).
+  - It gets two threats from the battle estimates:
+    - at your colonies: what was seen there, or a fighter from every unknown star within
+      Range + 1;
+    - elsewhere: what was seen there, or within 10 ly of an unexplored star.
+  - Estimates fade:
+    - 60 years after a battle, half the time to 5;
+    - every 200 years, to 6 or 56 × (Weapons + 1)².
+  - Other players' stars with no battle seen are guessed at 40 × (Weapons + 1)².
+- **Old ships** (`ScrapOldSats @94220`, `ScrapOldFighters @9432e`). Satellites of an old
+  design at your colonies are scrapped. Fighters of an old design are scrapped at your
+  colonies; elsewhere they head for the nearest colony.
+- **Actions** (`AddActionToList @94662`): at most 50, by priority:
+
+| Action | Priority | Status |
+|---|---|---|
+| research: up-front % of income, then more % (only out of income not yet spent) | 90, 25 | CONFIRMED (`DoComputerTurn`, `SpendPercentOnTech @930c2`) |
+| support a losing colony (its loss) | 99, hostile gravity 98 | CONFIRMED (`AddColonySupportActions @90294`) |
+| colonies beyond what the income supports: the worst stop getting support, unless ships are refuelling there | — | CONFIRMED (same) |
+| mining: ⌈(metal + 25)² / 225⌉, at most 7,500 (hostile, not Dumb) or 2,500 | 75 hostile, 30 others | CONFIRMED (same) |
+| finish queued ships (their price, the full prototype price for a design never built) | 87 | CONFIRMED (`AddShipFinishingActions @90982`) |
+| explore unexplored and free stars with no enemy near, from the nearest colony within a colony ship's (55) or a scout's (54) Range | 55, 54 | CONFIRMED (`AddExploreActions @90d2e`) |
+| attack: stars scored by aggressiveness, their worth, metal and distance from the middle of your colonies, ± a quarter at random (Smart computers score other computers' stars a quarter) | aggressiveness × 5 + 35 | CONFIRMED (`AddAttackActions @9103e`, `PickAttackLoc @9118e`) |
+| colonize only stars where you have a fleet: a planet 10 better than your worst colony, then the best by worth and desire for metal | worth + 38 (+ 77 with no colony ship) | CONFIRMED (`AddColonizeAction @9139e`) |
+| terraform: 3/5 of your money shared by the colonies still being terraformed, at most 5,000 for a paying colony, 1,800 (Dumb), 7,200 under $150,000, 20,000 above | 70 paying, 80 losing | CONFIRMED (`AddTerraformingActions @90b7a`) |
+| satellites where the threat × defending domination % beats your satellites and the planet, at most colonies defended % of colonies; one at each hostile colony with none; scrap satellites where there is no threat | 60 (scrap 10) | CONFIRMED (`AddSatelliteActions @91d04`) |
+
+- **Carrying them out** (`PerformActions @92180` and the `Go…` routines).
+  - Each action takes what it needs from the money in hand.
+  - A scout, fighter fleet or colony ship that can make the trip goes. A fighter fleet
+    must be stronger than the threat × attacking domination %.
+  - Otherwise ships are queued at the colony and paid for out of its ship money
+    (`BuildAFleet @9297e`, `AddShipToQueue @92c66`). Only Dumb computers budget for the
+    prototype price.
+  - What can't be paid for is saved up, and missing metal is mined (`MineMetal @92dbc`).
+    For a colony ship, idle warships are scrapped for it.
+- **Idle fleets** (`SaveFleets @93148`). Fighters and colony ships idle at stars that
+  aren't yours, and scouts at your hostile colonies, go to the nearest colony. A colony
+  ship heading for a star someone has taken stops.
+- **The budget** (`ResolveSpending @93378`). What is left is saved. Every bar is its money
+  over the total, per mille rounded up, and each colony's own bars split its money
+  between terraforming, mining and ships.
+- **Research**. Research shifts from Range at level 10 and from Speed at level 5 to
+  Weapons and Shields.
 
 ## Pictures and sounds the skin needs
 
@@ -239,17 +376,18 @@ games are byte for byte the same):
   the computers' names.
 - `rs.shipNames` (by type): the names `designName` gives new designs.
 - `rs.welcome` (`[[text, opt], …]`): the first messages of a new game.
+- `rs.designName(G, p, type)`: the name of a new design (1.2's random pick).
+- `rs.battleText(G, sid, battle, playerId, info)`: the wording, sound and picture of a
+  player's battle report.
+- `rs.checkElimination(G)`: replaces the engine's check for who is out and who has won.
 
 ## Still unclear
 
-- The computer players (`DoComputerTurn @90004` and the rest of segment 9) were not
-  compared with DOS 2.0's step by step; the remake uses the DOS 2.0 hooks over the 5.0.5
-  computer players. The personalities and terraforming caps do match.
-- Elimination: 1.2 marks a player with no colonies as dying and drops them the next turn
-  if they still have none, colony ships or not (`DoGameEndStuff @a4406`), and declares a
-  winner only after 2010 (`CheckForWinner @a4948`). The remake keeps its own rule (a
-  colony ship keeps you in).
-- The battle result messages are the engine's ("… survived an attack from …", "… destroyed
-  your colony at …. You lost …"), which say a little more than 1.2's STR# 1000.10 and .36.
+- 1.2's battles are duels with two reports each; with more than two sides at a star the
+  remake sends one report for the whole battle (in 1.2F there is only one computer, so
+  this needs several humans).
+- The computers' moves use the remake's routes (the DOS 2.0 search, planned again at
+  every stop), as 1.2's `DeterminePath` does; `GoAttack` checks the route from the source
+  colony even for a fleet elsewhere, and the remake does the same check.
 - The Fix Spending command (STR# 1050), the Compare Players window (STR# 1008, 1020) and
   the battle-speed preference are interface, not rules, and aren't done for 1.2.
