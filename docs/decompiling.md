@@ -94,3 +94,39 @@ and notes from real play answer questions a decompile answers slowly or not at a
 - **Mixed fleets:** whether a fleet can hold more than one kind of ship.
 - **Saved games:** a few saved game files (`.HO` or similar). They show what the game
   stores.
+
+## The classic Mac version (3.0.1, 68k)
+
+Spaceward Ho! 3.0.1 for the Macintosh keeps its program in the resource fork: `CODE`
+resources 1–25 are the segments, and `CODE 0` is the A5 jump table that cross-segment
+calls go through (`JSR n(A5)`). Ghidra can't load that directly, so two small tools in
+`tools/decompile/` turn it into one plain 68000 binary and set it up:
+
+- **`mac68k.py`** (needs Python 3 and the `capstone` package) reads the resource fork
+  with `tools/extract/rsrc.py` and writes `out.bin` and `out.bin.syms`:
+  - segment *n* is placed at *n* × 0x10000;
+  - each jump-table entry becomes a `JMP` stub at low memory, and every
+    `JSR/JMP/PEA/LEA n(A5)` that points into the jump table is rewritten to the short
+    absolute form, so calls between segments resolve;
+  - Toolbox traps (A-line words, which Ghidra's 68000 can't decode) become `TRAP #0`,
+    and the `.syms` file says which trap each one was; SANE floating-point traps are
+    named by their operation (`FP_MUL_ext`, `FP_TTI_ext`, `EL_LN`, …);
+  - function names come from the MacsBug symbols MPW left after each routine
+    (`EndTurn`, `CalcShipCosts`, `DoOneBattle`, …), and MPW's long multiply/divide
+    helpers are found and named (`LMUL`, `LDIV`, `LMOD`, …).
+- **`Mac68k.java`** is the Ghidra script that reads the `.syms` file: it makes A5 a
+  constant (globals show up as `DAT_00efxxxx`, A5 = 0x00F00000), creates the functions
+  with their names, turns each trap into a call to a stub of that name (with stack
+  arguments for the SANE ones), runs the analysis and writes every function to one C file.
+
+```sh
+python3 tools/decompile/mac68k.py app.rsrc ho301.bin
+analyzeHeadless proj ho301 -import ho301.bin -loader BinaryLoader \
+  -processor 68000:BE:32:default -noanalysis -scriptPath tools/decompile \
+  -postScript Mac68k.java ho301.bin.syms ho301.c
+```
+
+It takes about half a minute. The C uses the addresses of that layout (for example
+`EndTurn @ 000a0004`); `docs/301-findings.md` cites functions by name and address.
+Routines that push arguments around Toolbox calls still read awkwardly; for the
+floating-point formulas, read the disassembly next to the C.
