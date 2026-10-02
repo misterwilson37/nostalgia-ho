@@ -137,3 +137,35 @@ recognise and name the long arithmetic helpers: in the 1.2 layout `LMUL` is at `
 (jump-table entry `$42`), `LDIV` at `104dc` (`$4a`) and the integer square root at `112c2`
 (`$202`); the C shows them as `thunk_FUN_…`, so read the disassembly next to it.
 `docs/12-findings.md` cites 1.2's functions by name and address.
+
+## The Palm OS version (5 for Palm OS, 68k)
+
+Spaceward Ho! 5 for Palm OS keeps its program in `code` resources of the `.prc` file,
+built with CodeWarrior: `code 1` is the main segment, `code 2`–`7` start with a 12-byte
+header that says which jump-table entries are theirs, the jump table itself sits in
+the A5 globals (`data 0`, packed), and most globals are A4-relative (`data 1`). System
+calls are `TRAP #15` followed by a selector word. **`palm68k.py`** (Python 3 and
+`capstone`) lays this out for the same Ghidra script:
+
+- segment *n* is placed at *n* × 0x10000, header included;
+- `data 0` is unpacked around A5 = 0x00F00000 and `data 1` around A4 = 0x00E80000, and
+  the jump-table entries (`JMP` to an offset in a segment) are pointed at their
+  segment, so `JSR d(A5)` calls resolve;
+- each trap becomes `JSR` to a named stub (`StrPrintF`, `DmGetResource`, …), with a
+  prototype for the common ones; soft-float calls (`FlpEmDispatch`, operation in D2)
+  get one stub per operation (`Flp_d_mul`, `Flp_d_dtoi`, …);
+- CodeWarrior's far calls (`PEA; PEA 4(PC); ADDI.L #d,(SP); RTS`) become plain `JSR`s,
+  and its multiply/divide helpers are named (`LMUL`, `LDIV`, …).
+
+```sh
+python3 tools/decompile/palm68k.py "Spaceward Ho.prc" palmho.bin
+analyzeHeadless proj palmho -import palmho.bin -loader BinaryLoader \
+  -processor 68000:BE:32:default -noanalysis -scriptPath tools/decompile \
+  -postScript Mac68k.java palmho.bin.syms palmho.c
+```
+
+It takes under a minute. Palm code has no routine names, so functions are called
+`FUN_<address>`; `docs/palm-findings.md` cites them that way. C++ virtual calls stay
+indirect (the vtables in `data 1` hold A5 offsets of jump-table entries), and a few
+dozen functions don't decompile ("Cannot properly adjust input varnodes"); read their
+disassembly instead.

@@ -4,6 +4,8 @@
 //   analyzeHeadless <projdir> <name> -import out.bin -loader BinaryLoader
 //     -processor 68000:BE:32:default -noanalysis -scriptPath tools/decompile
 //     -postScript Mac68k.java out.bin.syms out.c
+// Also used for Palm OS programs made by palm68k.py: their .syms has no "a5" line (the
+// globals are in the image) and "const <reg> <value>" lines for A5 and A4 instead.
 // See docs/decompiling.md.
 import ghidra.app.script.GhidraScript;
 import ghidra.app.decompiler.*;
@@ -29,14 +31,18 @@ public class Mac68k extends GhidraScript {
     List<Object[]> traps = new ArrayList<>();
     Map<String, Integer> trapArgs = new TreeMap<>();
     List<String[]> rts = new ArrayList<>();
+    List<String[]> sigs = new ArrayList<>();
     List<String[]> fns = new ArrayList<>();
     List<Long> stubs = new ArrayList<>();
+    Map<String, Long> consts = new LinkedHashMap<>();
     for (String l : lines) {
       String[] t = l.trim().split(" ");
       if (t[0].equals("a5")) { a5 = Long.parseLong(t[1], 16); below = Long.parseLong(t[2], 16); }
+      else if (t[0].equals("const")) consts.put(t[1], Long.parseLong(t[2], 16));
       else if (t[0].equals("jt")) stubs.add(Long.parseLong(t[1], 16));
       else if (t[0].equals("fn")) fns.add(t);
       else if (t[0].equals("rt")) rts.add(t);
+      else if (t[0].equals("sig")) sigs.add(t);
       else if (t[0].equals("trap")) {
         String nm = t[3];
         traps.add(new Object[] { Long.parseLong(t[1], 16), nm });
@@ -44,8 +50,8 @@ public class Mac68k extends GhidraScript {
       }
     }
     // A5 globals and trap stubs
-    mem.createUninitializedBlock("A5globals", a(a5 - below), below + 0x1000, false);
-    mem.createInitializedBlock("traps", a(0x00E00000L), 0x2000, (byte) 0, monitor, false);
+    if (a5 != 0) { mem.createUninitializedBlock("A5globals", a(a5 - below), below + 0x1000, false); consts.put("A5", a5); }
+    if (!trapArgs.isEmpty()) mem.createInitializedBlock("traps", a(0x00E00000L), 0x2000, (byte) 0, monitor, false);
     Map<String, Address> trapAddr = new HashMap<>();
     long next = 0x00E00000L;
     for (Map.Entry<String, Integer> e : trapArgs.entrySet()) {
@@ -64,9 +70,10 @@ public class Mac68k extends GhidraScript {
       f.updateFunction(null, null, (List) ps, Function.FunctionUpdateType.CUSTOM_STORAGE, true, SourceType.USER_DEFINED);
       f.setStackPurgeSize(2 + 4 * n);
     }
-    // A5 is constant in every segment
-    Register r = currentProgram.getRegister("A5");
-    currentProgram.getProgramContext().setValue(r, a(0), a(0x00DFFFFFL), BigInteger.valueOf(a5));
+    // A5 (and on Palm A4) is constant in every segment
+    for (Map.Entry<String, Long> e : consts.entrySet())
+      currentProgram.getProgramContext().setValue(currentProgram.getRegister(e.getKey()), a(0), a(0x00DFFFFFL),
+          BigInteger.valueOf(e.getValue()));
     for (Long s : stubs) { disassemble(a(s)); createFunction(a(s), null); }
     for (String[] t : fns) {
       Address s = a(Long.parseLong(t[1], 16));
@@ -74,6 +81,30 @@ public class Mac68k extends GhidraScript {
       Function f = getFunctionAt(s);
       if (f == null) f = createFunction(s, t[2]);
       else f.setName(t[2], SourceType.USER_DEFINED);
+    }
+    // "sig <addr> <ret> <args>": a stack-argument prototype (Palm OS traps). Letters: p pointer,
+    // l long, s short, b byte (in a 2-byte slot), d double, f float, v void; pointers return in A0
+    for (String[] t : sigs) {
+      Function f = getFunctionAt(a(Long.parseLong(t[1], 16)));
+      if (f == null) continue;
+      List<Variable> ps = new ArrayList<>();
+      int off = 4;
+      String sa = t.length > 3 ? t[3] : "";
+      for (int i = 0; i < sa.length(); i++) {
+        char c = sa.charAt(i);
+        DataType dt = c == 'p' ? PointerDataType.dataType : c == 's' ? ShortDataType.dataType
+            : c == 'b' ? ByteDataType.dataType : c == 'd' ? DoubleDataType.dataType
+            : c == 'f' ? FloatDataType.dataType : IntegerDataType.dataType;
+        ps.add(new ParameterImpl("a" + i, dt, off + (c == 'b' ? 1 : 0), currentProgram));
+        off += c == 'd' ? 8 : (c == 's' || c == 'b') ? 2 : 4;
+      }
+      char r0 = t[2].charAt(0);
+      ReturnParameterImpl ret = r0 == 'v' ? new ReturnParameterImpl(VoidDataType.dataType, currentProgram)
+          : r0 == 'p' ? new ReturnParameterImpl(PointerDataType.dataType, currentProgram.getRegister("A0"), currentProgram)
+          : new ReturnParameterImpl(r0 == 's' ? ShortDataType.dataType : r0 == 'b' ? ByteDataType.dataType
+              : r0 == 'f' ? FloatDataType.dataType : IntegerDataType.dataType,
+              currentProgram.getRegister(r0 == 's' ? "D0w" : r0 == 'b' ? "D0b" : "D0"), currentProgram);
+      f.updateFunction(null, ret, (List) ps, Function.FunctionUpdateType.CUSTOM_STORAGE, true, SourceType.USER_DEFINED);
     }
     // MPW runtime helpers: long multiply/divide with arguments in D0, D1
     for (String[] t : rts) {
@@ -109,7 +140,7 @@ public class Mac68k extends GhidraScript {
       DecompileResults res = d.decompileFunction(f, 120, monitor);
       pw.println("//==== " + f.getName() + " @ " + f.getEntryPoint());
       if (res != null && res.decompileCompleted()) pw.println(res.getDecompiledFunction().getC());
-      else pw.println("// FAILED");
+      else pw.println("// FAILED " + (res != null ? res.getErrorMessage().replace("\n", " ") : ""));
       n++;
     }
     pw.close();
