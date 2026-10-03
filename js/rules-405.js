@@ -555,10 +555,14 @@ function battle(G, sid) {
   const duel = (a, b) => {
     const luckOf = (o) => { let l = G.opts.luck ? RI(G, -1, 1) : 0; if (l < 0 && G.players[o].flags.generals) l = 0; return l; };
     const la = luckOf(a), lb = luckOf(b);
-    const A = groups.filter(g => g.owner === a && g.n > 0), B = groups.filter(g => g.owner === b && g.n > 0);
+    let A = groups.filter(g => g.owner === a && g.n > 0), B = groups.filter(g => g.owner === b && g.n > 0);
     if (planet && planet.owner === b && planet.hp > 0) B.push(planet);
     for (const g of A) { g.W = g.W0 + la; g.tgt = null; g.dmg = 0; }
     for (const g of B) { g.W = Math.max(g.planet ? 1 : 0, g.W0 + lb); g.tgt = null; g.dmg = 0; }
+    // a ruleset may cut each side into smaller groups for the duel (3.0.1:
+    // RS.splitGroups); a group's losses are its parent's
+    const split = !!RS.splitGroups;
+    if (split) [A, B] = RS.splitGroups(G, A, B);
     const alive = (side) => side.filter(g => g.planet ? g.hp > 0 : g.n > 0).length;
     const maxInit = Math.max(0, ...A.concat(B).map(g => g.init));
     for (const g of A.concat(B)) g.n0 = g.planet ? 1 : g.n;
@@ -576,7 +580,7 @@ function battle(G, sid) {
         } else {
           t.dmg += Math.max(1, trunc(base / 6));
           let killed = 0; const ti = t.units[t.ui] != null ? t.units[t.ui] : t.units[0];
-          if (t.dmg >= t.hp) { t.dmg = 0; t.n--; debris += t.debris; killed = 1; t.ui++; } // no carry-over
+          if (t.dmg >= t.hp) { t.dmg = 0; t.n--; if (t.parent) t.parent.n--; debris += t.debris; killed = 1; t.ui++; } // no carry-over
           if (ev.length < 80) ev.push({ a: g.owner, si, t: t.owner, k: killed, ti });
         }
       }
@@ -590,6 +594,11 @@ function battle(G, sid) {
         for (const g of A.concat(B)) g.n0 = g.planet ? (g.hp > 0 ? 1 : 0) : g.n;
       }
       if (rec.rounds.length < 60) { rec.rounds.push(ev); rec.popR.push(planet ? planet.hp / 1000 : s.pop); }
+    }
+    if (split) { // the parents' units: the dead first, as the remake's replays expect
+      const by = new Map();
+      for (const g of A.concat(B)) if (g.parent) { const e = by.get(g.parent) || by.set(g.parent, { dead: [], live: [] }).get(g.parent); e.dead.push(...g.units.slice(0, g.ui)); e.live.push(...g.units.slice(g.ui)); }
+      for (const [g, e] of by) { g.units = g.units.slice(0, g.ui).concat(e.dead, e.live); g.ui = g.units.length - e.live.length; }
     }
     return alive(A) > 0 ? a : alive(B) > 0 ? b : -1;
   };
