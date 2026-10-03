@@ -393,16 +393,14 @@ function economy(G, p) {
     if (M <= 0) continue;
     const h = hab(p, s), ship = clamp(s.ship || 0, 0, 1);
     const terraOK = h.dT > 0, metalOK = s.metal >= 1;
-    // CONFIRMED (FUN_1040_0aea): 2.0 marks a finished part -1 and spends
-    // only parts above 0, so a finished part's money is simply lost (nothing
-    // refunds it; the planet window, FUN_1088_1b3f -> FUN_1010_0077, draws
-    // the part as an empty bar). The remake differs on purpose: the shared
-    // planet panel hides a finished part and says its money goes to the
-    // other part (or, with both done, to savings), so that is what happens.
-    let tf = s.terra == null ? 0.5 : s.terra;
-    if (!terraOK) tf = 0; if (!metalOK) tf = terraOK ? 1 : 0;
-    let T = trunc(M * (1 - ship) * tf), X = trunc(M * (1 - ship) * (1 - tf));
-    if (!terraOK && !metalOK) { p.oRefund += T + X; continue; }
+    // CONFIRMED (FUN_1040_0aea; 1.2: TerraformMineStars @a0a9e): a finished
+    // part is marked -1 and only parts above 0 are spent, so a finished
+    // part's share of the colony's money is simply lost every turn (nothing
+    // refunds it) until the player moves the bar; the planet window
+    // (FUN_1088_1b3f -> FUN_1010_0077) draws the part as an empty bar.
+    const tf = s.terra == null ? 0.5 : s.terra;
+    let T = terraOK ? trunc(M * (1 - ship) * tf) : 0, X = metalOK ? trunc(M * (1 - ship) * (1 - tf)) : 0;
+    if (!terraOK && !metalOK) continue;
     if (T > 0) {
       if (T > 50 && h.gR > 256) msg(G, p.id, `Warning: you are terraforming ${s.name}, a planet that will never become profitable.`, { icon: 'm9013', star: s.id }); // every turn
       s.oSink = s.oSink || 0;
@@ -1020,6 +1018,7 @@ function economyYear(G, p) {
 E.registerRules('dos', Object.assign({}, O, {
   label: 'DOS 2.0 (1993)',
   hints: false, // this game had no between-turn tips (4.0.5 and 5.0.5 do)
+  finishedPartWasted: true, // a finished terraforming or mining part's money is lost (FUN_1040_0aea)
   // the New Game window lists rulesets by year, then version (engine.js ruleOptions)
   version: '2.0', platform: 'DOS and Windows 3.1', year: 1993,
   // 2.0's own computer players (js/ai-12.js: FUN_1020_0000 is the routine

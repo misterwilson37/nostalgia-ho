@@ -137,7 +137,7 @@ offline. The repository includes their output, not the DOS game itself.
 | Terraforming | the first $5,000 goes into the planet, as in 5.0.5. Then the money moves the temperature √(money/2) tenths of a degree, a third dearer than 5.0.5. Overshoot is refunded at 2 × (excess)². Warns every turn when the planet can never pay | CONFIRMED (`FUN_1040_0aea`) |
 | Mining | 15 × √money metal (5.0.5: 20 ×), so metal costs 1.78 times as much. When the planet runs out, the unneeded money (excess²/225) is refunded | CONFIRMED (`FUN_1040_0aea`) |
 | Growth and income | as in 5.0.5, except income takes the log of the *whole* square root of the population. A colony founded this turn starts growing next turn | CONFIRMED (`FUN_1040_27ee`) |
-| A part that is finished | 2.0 marks a fully terraformed or mined-out planet's part −1 and spends only parts above 0, so that part's share of the colony's money is lost every turn (nothing refunds it) until the player moves the bars; the planet window draws it as an empty bar, and with both parts done shows only the ship queue. The computers' bars leave it out. The remake's shared planet panel hides a finished part and says its money goes to the other part (or to savings), so the remake does that instead | CONFIRMED (`FUN_1040_0aea`, `FUN_1088_1b3f`, `FUN_1010_0077`, `FUN_1020_35f9`); the remake DIFFERS on purpose (interface) |
+| A part that is finished | 2.0 marks a fully terraformed or mined-out planet's part −1 and spends only parts above 0, so that part's share of the colony's money is lost every turn (nothing refunds it) until the player moves the bars; the planet window draws it as an empty bar, and with both parts done shows only the ship queue. The computers' bars leave it out. The remake does the same; its planet panel keeps the bar and says the money is wasted | CONFIRMED (`FUN_1040_0aea`, `FUN_1088_1b3f`, `FUN_1010_0077`, `FUN_1020_35f9`; 1.2 `TerraformMineStars @a0a9e`) |
 
 ### Research
 
@@ -209,8 +209,6 @@ offline. The repository includes their output, not the DOS game itself.
   and ships. The ruleset now uses 2.0's whole computer turn (below), not 5.0.5's.
 - **The personality fields** (`FUN_1030_1b51`): the same fields and ranges as 1.2's
   `SetCompAttrs` (see Setup).
-- **A finished terraforming or mining part**: its money is lost (see Money). The remake
-  keeps sending it to the other part, because its planet panel says so.
 - **Colonizing at the end of any turn**: CONFIRMED (`FUN_1040_2fa8`) and now done.
 - **The sine table**: 2.0's own (`COSINES`, `SINES`), now used.
 - **The computers' attack rating**: 2.0's own scale, 16-bit quirk and all; the 5.0.5
@@ -315,7 +313,7 @@ rules.
 | Messages a turn (engine: no limit) | ten | DIFFERED, now 2.0's (string 160, `FUN_1040_0038`) |
 | Sine table (computed) | 2.0's tables | DIFFERED, now 2.0's (`FUN_1118_0583`) |
 | Scrapped queued type (yard money passed on to the next ship) | lost | DIFFERED, now 2.0's (`FUN_1040_0fca`) |
-| A finished terraforming / mining part | its money is lost | DIFFERS on purpose (interface); see Money |
+| A finished terraforming / mining part | its money is lost | CONFIRMED; now 2.0's (see Money) |
 | Years per turn (10) | +10 a turn | matches (`FUN_1040_0038` @1040:01a8) |
 | Colony ships not used up (`colonyShipUsedUp: false`) | the fleet stays; colonists refilled at your colonies | matches (`FUN_1040_3645`, `2fa8`) |
 | Habitability (`hab`) | gravity ratio, temperature gap, H = ((ratio − 100) × 12,000 + gap²) ÷ 100 | matches (`FUN_1040_27ee` @1040:2ae1–2b91) |

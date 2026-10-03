@@ -747,7 +747,10 @@ function planetBox(sid) {
       const inc = HO.planetIncome(G, p, s);
       box.append(row('Population', fmt(s.pop * 1e6), '', 'population'), row('Max population', fmt(HO.maxPop(G, p, s) * 1e6), '', 'maxPop'), row('Income', money(inc), inc < 0 ? 'neg' : '', 'planetIncome'));
       const terraOK = Math.abs(HO.seenT(p, s) - 72) > 0.5, metalOK = s.metal > 0;
-      if (terraOK && metalOK) {
+      // in 2.0 and 1.2 a finished part's share is wasted, not passed on, so
+      // the bar stays (as in 2.0's planet window) and a note says so
+      const wasted = HO.rules(G).finishedPartWasted;
+      if ((terraOK && metalOK) || (wasted && (terraOK || metalOK))) {
         // a balance, not an amount: the colony's money is split between
         // terraforming (left, green) and mining (right, rust). The handle
         // sits at the split; the more green, the more terraforming.
@@ -755,10 +758,19 @@ function planetBox(sid) {
         const lt = el('span', { class: 'tmv' }), rt = el('span', { class: 'tmv' });
         const inp = el('input', { type: 'range', min: 0, max: 100, value: pct(), 'aria-label': 'Split between terraforming and mining',
           oninput: (ev) => { s.terra = ev.target.value / 100; show(); }, onchange: save });
-        const show = () => { inp.style.setProperty('--split', pct() + '%'); lt.textContent = pct() + '%'; rt.textContent = (100 - pct()) + '%'; inp.setAttribute('aria-valuetext', `${pct()}% terraforming, ${100 - pct()}% mining`); };
+        const waste = el('p', { class: 'note' });
+        const show = () => {
+          inp.style.setProperty('--split', pct() + '%'); lt.textContent = pct() + '%'; rt.textContent = (100 - pct()) + '%'; inp.setAttribute('aria-valuetext', `${pct()}% terraforming, ${100 - pct()}% mining`);
+          // only when money is actually going to the finished part
+          waste.textContent = !terraOK && pct() > 0 ? 'Fully terraformed: money on terraforming is wasted. Move the bar to Mine.'
+            : !metalOK && pct() < 100 ? 'No metal left: money on mining is wasted. Move the bar to Terraform.' : '';
+          waste.hidden = !waste.textContent;
+        };
         show();
         box.append(el('div', { class: 'tm', 'data-help': 'terraMine' }, el('span', { class: 'tml' }, 'Terraform ', lt), inp, el('span', { class: 'tmr' }, rt, ' Mine')));
-      } else box.append(el('p', { class: 'note' }, !terraOK && !metalOK ? 'Fully terraformed and mined out. Its budget goes to savings.' : !terraOK ? 'Fully terraformed; its budget goes to mining.' : 'No metal left; its budget goes to terraforming.'));
+        box.append(waste);
+      } else if (wasted) box.append(el('p', { class: 'note' }, 'Fully terraformed and mined out. Money spent here on terraforming or mining is wasted.'));
+      else box.append(el('p', { class: 'note' }, !terraOK && !metalOK ? 'Fully terraformed and mined out. Its budget goes to savings.' : !terraOK ? 'Fully terraformed; its budget goes to mining.' : 'No metal left; its budget goes to terraforming.'));
       if (HO.feature(G, 'buildQueue')) box.append(yardBox(s));
       box.append(el('div', { class: 'btns' },
         el('button', { onclick: () => openBuild(sid), 'data-help': 'build' }, HO.feature(G, 'buildQueue') ? 'Queue ships…' : 'Build ships…'),
