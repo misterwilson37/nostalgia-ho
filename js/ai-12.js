@@ -1,9 +1,24 @@
-// Spaceward Ho! web remake — the computer players of the "Mac 1.2" ruleset.
+// Spaceward Ho! web remake — the computer players of the "Mac 1.2" and
+// "DOS 2.0" rulesets.
 //
 // A port of Spaceward Ho! 1.2F's DoComputerTurn (segment 9 of the program,
 // @90004 in the layout of tools/decompile/mac68k.py) and the routines it
 // calls. docs/12-findings.md describes them in plain English. Every rule here
 // is CONFIRMED from the routine named beside it unless it says GUESS.
+//
+// 2.0 (DOS and Windows 3.1) has the same computer players: WINHO.EXE's
+// segment 1020 holds the same 36 routines, almost in the same order
+// (FUN_1020_0000 = DoComputerTurn, FUN_1020_03e7 = AddColonySupportActions,
+// ... FUN_1020_4a3d = FillInStarStatus, FUN_1020_54df = MarkUsedFleets; the
+// full list is in docs/dos-findings.md). Every constant in them is 1.2's, and the routines
+// read side by side with 1.2's (DoComputerTurn, SetCompAttrs = FUN_1030_1b51,
+// ComputeStatus, MaintainShipTypes, FillInStarStatus, GoColonize, BuildAFleet,
+// ResolveSpending, MakeResultMessages = FUN_1018_260b) do the same. The one
+// difference is the attack rating they compare (2.0 works part of it out in
+// 16 bits), which each ruleset supplies as rs.shipPower; the ruleset also
+// supplies the battle estimates (rs.x12), the planet's strength
+// (rs.planetPower) and the colony order (rs.colOrder). The 2.0 addresses
+// are listed in docs/dos-findings.md.
 //
 // How 1.2's computer thinks, in short: it sorts every star into a class (its
 // colonies by how they pay, stars it has fleets at or is sending fleets to,
@@ -17,7 +32,6 @@
 const E = typeof module !== 'undefined' ? require('./engine.js') : root.HO;
 const { RI, colonies, know, getDesign, findOrCreateDesign, orderMove, scrapFleet, scrapDesign, observe, starDist } = E;
 const trunc = Math.trunc;
-const RS = () => E.RULESETS['12'];
 const CLASSES = ['scout', 'fighter', 'colony', 'satellite']; // 1.2's class numbers 0-3
 const TECH5 = ['range', 'speed', 'weapons', 'shields', 'mini'];
 
@@ -93,8 +107,9 @@ function pathOK(G, p, from, to, fuel, R) {
 
 // ---------- the computer's turn (DoComputerTurn @90004) ----------
 function aiTurn(G, p) {
-  const ai = (p.ai && p.ai.v12) ? p.ai : (p.ai = makeAI(G, p, 'average', p.human));
-  const rs = RS(), att = (d) => rs.att12(G, d);
+  // (a game saved before these computer players were used gets them now, at its skill)
+  const ai = (p.ai && p.ai.v12) ? p.ai : (p.ai = makeAI(G, p, p.iq || 'average', p.human));
+  const rs = E.rules(G), att = (d) => rs.shipPower(G, d);
   const C = {
     G, p, ai, rs, att, iq: p.human ? 0 : ai.iq,
     M: Math.max(0, p.savings),                 // money still to hand out (d896)
@@ -754,10 +769,13 @@ function resolveSpending(C) {
   if (!p.human) p.talloc = Object.assign({}, tw);
 }
 
-E.registerAI('12', {
+const AI = {
   make: (G, p, iq) => makeAI(G, p, iq, false),
   turn: aiTurn,
   techEvent: () => {},
   noteBattle: () => {},
-});
+};
+E.registerAI('12', AI);
+// 2.0's computer turn (FUN_1020_0000) is this one; see the note at the top
+E.registerAI('dos', AI);
 })(this);

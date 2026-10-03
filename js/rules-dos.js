@@ -4,11 +4,13 @@
 // Computing) is the same game as Spaceward Ho! 2.0 for Windows 3.1
 // (WINHO.EXE, 1992), and the Windows program was decompiled to write these
 // rules. It is an earlier build of the engine behind the Mac 5.0.5 game, so
-// this ruleset borrows the "Original" (5.0.5) formulas where 2.0 does the
-// same thing, and replaces the rest.
+// this ruleset is built over the "Original" (5.0.5) one, but every rule it
+// still takes from there was checked against 2.0's code (docs/dos-findings.md,
+// "Inherited rules audit"); the rest are replaced here. Its computer players
+// are 2.0's own, the same as Mac 1.2's (js/ai-12.js).
 //
 // Labels: CONFIRMED (seg:off) = read from that WINHO.EXE function;
-// INFERRED = not settled by the decompile (kept from 5.0.5 or the remake).
+// GUESS = not settled by the decompile (the remake's choice).
 // docs/dos-findings.md explains each rule in plain English.
 //
 // The money model is 2.0's, not 5.0.5's: there is one pool of money (kept in
@@ -71,6 +73,7 @@ function setupPlayer(G, p, home, start) {
   p.budget = { tech: 0.15, savings: 0, col: { [home.id]: 0.85 } };
   p.flags = {}; p.bonus = {}; p.deck = [];
   p.skill = k; p.startRank = 0;
+  p.colOrder = [home.id]; // the colony budget slots, newest first (colOrder)
 }
 // starting designs (CONFIRMED, 1030:1299): Scout R8 V2 W1 S1; Satellite, Colony
 // Ship and Fighter R6 V2 W2 S2; Mini 0. Advanced and Expert players start with none.
@@ -109,8 +112,14 @@ function distance(G, a, b) {
   if (a.x10 == null || b.x10 == null) return O.distance(G, a, b); // a game started before these rules
   return wdist({ x: Math.round(a.x10 / 10), y: Math.round(a.y10 / 10) }, { x: Math.round(b.x10 / 10), y: Math.round(b.y10 / 10) });
 }
-const COS = [], SIN = []; // 100 x cos/sin of each degree (INFERRED: 2.0's own table wasn't compared)
+// 100 x cos/sin of each degree. CONFIRMED: WINHO.EXE's RCDATA "COSINES" and
+// "SINES" (loaded by FUN_1118_0583 into 0x5d54 / 0x5d58, read by the shape
+// routines) are 100 x cos / sin truncated, except for six entries, set below.
+// Mac 1.2 has the very same two tables in its resource fork.
+const COS = [], SIN = [];
 for (let a = 0; a < 360; a++) { COS.push(trunc(100 * Math.cos(a * Math.PI / 180))); SIN.push(trunc(100 * Math.sin(a * Math.PI / 180))); }
+COS[180] = -99; COS[300] = 49;
+SIN[90] = 99; SIN[150] = 50; SIN[210] = -49; SIN[270] = -99;
 const up3 = (s) => (trunc((s - 1) / 3) + 1) * 3;
 const SHAPES = ['circle', 'random', 'ring', 'spiral', 'grid'];
 const SIZES = ['small', 'medium', 'large', 'xl', 'huge'];
@@ -221,9 +230,8 @@ const STAR_NAMES = ['Sol', 'Sirius', 'Canopus', 'Vega', 'Rigel', 'Capella', 'Pro
 // ---------- ships ----------
 const TYPES4 = ['scout', 'fighter', 'colony', 'satellite']; // CONFIRMED: the four classes
 // CONFIRMED (FUN_10f0_05e9): costs. Price = mm*B (+45,000 for a colony ship),
-// prototype 2*mm*price-before-extra, metal B/(3 mm), hit points B/3.
-// The attack rating is only the computers' estimate; 2.0 doesn't divide it by
-// 50, but it is divided here so the 5.0.5 computer players keep their scale (INFERRED).
+// prototype 2*mm*price-before-extra, metal B/(3 mm), hit points B/3, and
+// the computers' attack rating (attack, below).
 const WPNRAT = [1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 5, 6, 8, 10, 15, 25, 50,
   74, 84, 89, 91, 93, 94, 95, 95, 96, 96, 96, 96, 97, 97, 97, 97, 97, 97, 97, 97, 97, 98, 98, 98, 98]; // CONFIRMED: RCDATA #3 "WPNRAT"
 const wpn = (x) => WPNRAT[clamp(x, 0, 50)];
@@ -239,10 +247,25 @@ function designCost(G, d) {
     money = trunc(mm * B); protoTotal = trunc(2 * mm * mm * B);
     metal = trunc(B / (3 * mm)); hp = trunc(B / 3);
   }
-  const a = trunc(hp / 50) * W * W, b = trunc(W * W * wpn(W + 25) * (5 * W + 20) / 300);
-  const att = Math.min(1000000, trunc(Math.max(a, b) / 50));
-  return { money, metal, proto: Math.max(0, protoTotal - money), protoTotal, hp: Math.max(1, hp), att };
+  return { money, metal, proto: Math.max(0, protoTotal - money), protoTotal, hp: Math.max(1, hp), att: attack(hp, W) };
 }
+// CONFIRMED (FUN_10f0_05e9 @10f0:079d-0851): the attack rating the computer
+// players use (design field +0x18) is the larger of (hp / 50) x W^2 and
+// W^2 x WPNRAT(W) x (5W + 20) / 300, not divided by 50. The second term is
+// worked out in 16-bit registers: W^2 x WPNRAT keeps its low 16 bits, the
+// product with (5W + 20) is cut back to a signed 16-bit number (CWD) before
+// the division, so from about Weapons 4 it wraps round and the first term
+// wins. (Mac 1.2 does it in 32 bits; js/rules-12.js keeps that.)
+const i16 = (x) => ((x & 0xffff) ^ 0x8000) - 0x8000;
+function attack(hp, W) {
+  const a = trunc(hp / 50) * W * W;
+  const b = trunc(i16(i16(i16(W * W) * wpn(W + 25)) * (5 * W + 20)) / 300);
+  return Math.max(a, b);
+}
+const shipPower = (G, d) => d ? designCost(G, d).att : 0;
+// a planet's strength as the computers reckon it, ((pop + 49) / 50) x
+// (W + 1)^2 / 125 (CONFIRMED: FUN_1018_260b, FUN_1020_1c73, FUN_1040_3a2b)
+const planetPower = (pop, W) => trunc(trunc((pop + 49) / 50) * (W + 1) * (W + 1) / 125);
 // CONFIRMED (CREATETYPEDLGPROC 10e8:0c79-0d72): Range 3..tech (+2 for a Scout,
 // 0 for a Satellite); Speed 1..tech, a Satellite's fixed at the tech;
 // Weapons and Shields 1..tech (-1 for a Scout); Mini 0..tech.
@@ -370,8 +393,12 @@ function economy(G, p) {
     if (M <= 0) continue;
     const h = hab(p, s), ship = clamp(s.ship || 0, 0, 1);
     const terraOK = h.dT > 0, metalOK = s.metal >= 1;
-    // INFERRED: 2.0 marks a finished part -1 and its money is lost; the
-    // remake's planet panel hides a finished part, so its money goes to the other
+    // CONFIRMED (FUN_1040_0aea): 2.0 marks a finished part -1 and spends
+    // only parts above 0, so a finished part's money is simply lost (nothing
+    // refunds it; the planet window, FUN_1088_1b3f -> FUN_1010_0077, draws
+    // the part as an empty bar). The remake differs on purpose: the shared
+    // planet panel hides a finished part and says its money goes to the
+    // other part (or, with both done, to savings), so that is what happens.
     let tf = s.terra == null ? 0.5 : s.terra;
     if (!terraOK) tf = 0; if (!metalOK) tf = terraOK ? 1 : 0;
     let T = trunc(M * (1 - ship) * tf), X = trunc(M * (1 - ship) * (1 - tf));
@@ -414,6 +441,15 @@ function economy(G, p) {
 const QUEUE_SLOTS = 3;
 function shipyard(G, p, s, M) {
   const q = s.queue || (s.queue = []);
+  // CONFIRMED (FUN_1040_0fca @1040:1225-1321; 1.2's ScrapFleetsAndTypes
+  // @a0e02): a scrapped ship type leaves every queue; if it was first in
+  // line, what was paid toward it (money and metal) is lost
+  for (let i = q.length - 1; i >= 0; i--) {
+    const d = getDesign(G, p.id, q[i].did);
+    if (d && !d.scrapped) continue;
+    if (i === 0) { s.yard = 0; s.yardMetal = 0; }
+    q.splice(i, 1);
+  }
   const ship = clamp(s.ship || 0, 0, 1);
   if ((M < 500 || ship <= 0) && q.length) msg(G, p.id, `You have ships queued at ${s.name} but have no money allocated for shipbuilding.`, { icon: 'm9020', star: s.id, quiet: true });
   if (M <= 0 || ship <= 0) return;
@@ -446,7 +482,10 @@ function shipyard(G, p, s, M) {
   }
   p.oRefund += Math.max(0, S);
 }
-// taking the first ship out of the queue gives back what was paid toward it (INFERRED)
+// taking the first ship out of the queue gives back what was paid toward it
+// (GUESS: the Build Ships window's own code for this sits behind a jump table
+// and wasn't found; when a queued ship *type* is scrapped, 2.0 does not give
+// the part-payment back, see shipyard)
 function yardRefund(G, p, s) {
   if (s.queue && s.queue.length && s.queue[0].did === s.yardDid) return;
   p.savings += s.yard || 0; p.metal += s.yardMetal || 0;
@@ -580,6 +619,7 @@ function settle(G, p, s, f) {
   s.terra = hab(p, s).gR > 256 ? 0 : 0.9; s.ship = 0;
   s.queue = []; s.yard = 0; s.yardMetal = 0;
   p.budget.col[s.id] = 0;
+  (p.colOrder || (p.colOrder = [])).unshift(s.id); // its slot goes in front (colOrder)
 }
 
 // ---------- battles (FUN_1018_0032, 1340, 14f7, 0976, 172a, 1e98, 260b) ----------
@@ -722,89 +762,259 @@ function battle(G, sid) {
   return { ownerIds, survivors, lost, planetOwner, planetDied, startPop, rec };
 }
 
-// ---------- computer players (ai-original.js with these hooks) ----------
-// personalities: CONFIRMED (FUN_1030_1b51) where the fields could be matched
-// to 5.0.5's; the rest keep the 5.0.5 ranges (INFERRED)
-function aiPersonality(G, p, ai, tw, iq, autoplay) {
-  tw.mini = 1000 - tw.range - tw.speed - tw.weapons - tw.shields; tw.radical = 0; // no Radical
-  if (autoplay) { Object.assign(tw, { range: 200, speed: 200, weapons: 200, shields: 200, mini: 200, radical: 0 }); Object.assign(ai, { colDef: 50, metalDef: 50 }); }
-  else if (iq === 1) Object.assign(ai, { upfront: 15, colDef: RI(G, 10, 20), attDom: RI(G, 75, 95), defDom: RI(G, 75, 95), aggr: 1, minFleet: 1 });
-  else if (iq === 2) ai.attDom = RI(G, 150, 200);
-  else Object.assign(ai, { aggr: 10, hatesHumans: true }); // Smart: targets owned by computers score a quarter (FUN_1020_10b5 @1020:1257)
+// ---------- what a player learns from a battle (FUN_1018_260b) ----------
+// CONFIRMED (FUN_1018_260b, Mac 1.2's MakeResultMessages @d2828, the same
+// routine): each player's knowledge of a star holds the year of the last
+// battle seen there and four strength estimates the computer players use
+// (knowledge record +0x16, +0x1a, +0x1e, +0x22, and +0x2a the planet's
+// population):
+//   e16: the enemy force to beat there; e1a: what it shows to stars within
+//   10 ly; e1e: the threat to your own colony; e22: what it shows to your
+//   colonies within reach; pop: the planet's population.
+// The strengths are the computers' attack ratings (rs.shipPower).
+function x12(G, p, sid) { const k = E.know(G, p, sid); return k.x12 || (k.x12 = { by: 0, e16: 0, e1a: 0, e1e: 0, e22: 0, pop: 0 }); }
+// 2.0 fights duels (the holder against each other player in turn) and writes
+// this for the attacker and the defender of each one; the remake's battle
+// reports the whole star at once, so every player is treated as in a duel
+// against all the others together, the colony's owner as the defender.
+function battleKnow(G, sid) {
+  const rs = E.rules(G), s = G.stars[sid], pop0 = s.owner >= 0 ? popU(s) : 0;
+  const res = battle(G, sid);
+  if (!res) return res;
+  const { ownerIds, survivors, planetOwner, planetDied, rec } = res;
+  const year = G.year + 10;
+  // the ships left after the battle, by owner and class, as attack ratings
+  const left = {};
+  rec.start.forEach((u, i) => {
+    if (!rec.end[i]) return;
+    const d = getDesign(G, u.o, u.did), L = left[u.o] || (left[u.o] = {});
+    L[u.t] = (L[u.t] || 0) + rs.shipPower(G, d);
+  });
+  const power = (owners, t) => owners.reduce((a, o) => a + Object.entries(left[o] || {}).reduce((b, [k, v]) => b + (t == null || k === t ? v : 0), 0), 0);
+  const W = planetOwner >= 0 ? G.players[planetOwner].tech.weapons : 0;
+  const pp = pop0 > 0 ? planetPower(pop0, W) : 0;
+  const rounds = rec.rounds.length;
+  const winnerOf = (o) => (survivors[o] || 0) > 0 || (o === planetOwner && !planetDied);
+  for (const o of ownerIds) {
+    const p = G.players[o], k = x12(G, p, sid), others = ownerIds.filter(x => x !== o);
+    k.by = year;
+    const won = winnerOf(o) && !others.some(x => winnerOf(x) && !isAllied(G, x, o));
+    if (o === planetOwner) {
+      // the defender: computers spend more of their metal on defence after an attack
+      if (p.ai && p.ai.v12 && pop0 > 0) {
+        if (!won && p.ai.metalDef < 70) p.ai.metalDef = 70;
+        if (p.ai.metalDef < 40) p.ai.metalDef = 40;
+        p.ai.metalDef = Math.min(p.ai.metalDef + 10, p.ai.colDef);
+      }
+      k.pop = 0;
+      if (won) {
+        k.e16 = 0; k.e1a = 0; k.e22 = 0;
+        if (pop0 < 1) k.e1e = 0;
+        else {
+          const all = power([o]), fighters = power([o], 'fighter'), r = RI(G, 1, 5);
+          if (r < 3 && rounds > 1) k.e1e = all - fighters;
+          else if (r < 5) k.e1e = trunc(all / 10);
+        }
+      } else {
+        const all = power(others);
+        k.e16 = all + 1;
+        if (pop0 < 1) {
+          k.e1a = RI(G, 1, 2) === 1 ? 0 : power(others, 'satellite');
+          k.e1e = 0; k.e22 = power(others, 'fighter') + power(others, 'scout');
+        } else {
+          k.e1a = RI(G, 1, 2) === 1 ? 0 : all;
+          k.e1e = 0; k.e22 = all;
+        }
+      }
+    } else if (won) {
+      k.e16 = 0; k.e1a = 0; k.e1e = 0; k.e22 = 0; k.pop = 0;
+    } else {
+      // an attacker that lost
+      k.pop = pop0;
+      k.e16 = power(others) + pp + 1;
+      if (RI(G, 1, 2) === 1 && pop0 > 0) k.e16 -= power(others, 'fighter') + power(others, 'scout') - 1;
+      k.e1a = RI(G, 1, 2) === 1 ? 0 : power(others, 'satellite') + pp;
+      k.e1e = 0;
+      k.e22 = power(others, 'fighter') + power(others, 'scout');
+    }
+  }
+  return res;
 }
-// CONFIRMED (FUN_1020_4a3d @1020:4a85): before 2020 a Smart computer knows
-// every star within 9 ly of its home
-function aiTurnStart(G, p) {
-  if (p.human || !p.ai || p.ai.iq !== 3 || G.year >= 2020) return;
-  for (const s of G.stars) if (starDist(G, s.id, p.homeStar) <= 9) observe(G, p, s.id);
+// CONFIRMED (FUN_1018_260b): the battle reports, report codes 1033 / 1034 /
+// 1035 / 1009 (string ids 705-707, 681). The winner: "You won a battle at %s.
+// You lost %d of your ships. %s lost %d.", or, for a colony left with no ships
+// of its own, "%s successfully defended itself against an enemy attack from
+// %s."; the loser: "You lost a battle at …", or, for a colony that had no
+// ships, "%s destroyed your colony at %s." Sounds (FUN_10c0_0c50): nothing for
+// the battle reports and 2001 for a destroyed colony; the remake keeps 7027 for
+// a won battle (the skin's auto play stops on it).
+function battleText(G, sid, b, o, x) {
+  const s = G.stars[sid], hadShips = b.rec.start.some(u => u.o === o);
+  if (o === b.planetOwner) {
+    if (x.won && !(b.survivors[o] > 0)) return { text: `${s.name} successfully defended itself against an enemy attack from ${x.enemies}.`, sound: 7027 };
+    if (!x.won && !hadShips) return { text: `${x.enemies} destroyed your colony at ${s.name}.`, sound: 2001, icon: 'm9036' };
+  }
+  if (x.won) return { text: `You won a battle at ${s.name}. You lost ${x.myLoss} of your ships. ${x.enemies} lost ${x.theirLoss}.`, sound: 7027, icon: 'p3000' };
+  return { text: `You lost a battle at ${s.name}. You lost ${x.myLoss} of your ships. ${x.enemies} lost ${x.theirLoss}.`, sound: 2001, icon: 'm9025' };
 }
-// CONFIRMED (FUN_1020_03e7 @1020:073e): mining money ceil((metal+25)^2/225);
-// a mining colony (state 8) up to 7,500 (Dumb: no cap), others up to 2,500
-function aiMineMoney(G, p, s, state, iq) {
-  const m = Math.floor(s.metal) + 25, need = Math.ceil(m * m / 225);
-  return state === 8 ? (iq === 1 ? need : Math.min(need, 7500)) : Math.min(need, 2500);
+
+// ---------- the end of the turn: refuelling, exploring, colonizing (FUN_1040_2fa8) ----------
+// CONFIRMED (FUN_1040_2fa8; Mac 1.2's ColonizeAndExplore @a3556 is the same):
+// at the end of every turn, for every player, each fleet at one of its
+// colonies is refuelled and its colony ships take on colonists; then every
+// fleet at a star looks at it again (FUN_1040_34e9) and, if the star isn't
+// the player's and the fleet carries colonists, founds a colony there
+// (FUN_1040_3645). So a colony ship founds a colony at the end of any turn it
+// sits at a free star with colonists aboard, not only when it arrives (the
+// engine's colonizing on arrival is turned off with canColonize). Battles are
+// fought to the end before this, so a star with your fleet left is never
+// someone else's colony.
+function refuel(G) {
+  const rs = E.rules(G);
+  for (const p of G.players) {
+    const mine = G.fleets.filter(f => f.owner === p.id && f.star != null && f.to == null && fleetCount(f) > 0);
+    for (const f of mine) {
+      if (G.stars[f.star].owner !== p.id) continue;
+      f.fuel = fleetMaxRange(G, f);
+      let c = 0; for (const d of fleetDesigns(G, f)) if (d.type === 'colony') c += f.ships[d.id];
+      f.colonists = c * 10;
+    }
+    for (const f of mine) {
+      if (!G.fleets.includes(f)) continue;
+      const s = G.stars[f.star];
+      observe(G, p, s.id);
+      if (s.owner < 0 && (f.colonists || 0) > 0 && fleetDesigns(G, f).some(d => d.type === 'colony')) {
+        G.stat.colonized++;
+        rs.settle(G, p, s, f);
+        observe(G, p, s.id);
+        msg(G, p.id, `You have colonized ${s.name}.`, { icon: 'm9031', sound: 7018, star: s.id });
+      }
+    }
+  }
 }
-// CONFIRMED (FUN_1020_0b51 @1020:0bf6): terraforming money: a profitable
-// colony up to 5,000; a losing one up to 1,800 (Dumb), else 7,200 while the
-// pool is under $150,000 and 20,000 above
-function aiTerraMoney(G, p, s, state, iq) {
-  const dT = hab(p, s).dT, need = 2 * dT * dT + Math.max(0, 5000 - (s.oSink || 0));
-  const cap = state === 10 ? 5000 : iq === 1 ? 1800 : p.savings < 150000 ? 7200 : 20000;
-  return Math.min(need, cap);
+// CONFIRMED (FUN_1040_23ed): a fleet's owner is told "Your fleet of %s has
+// arrived at %s." only at its last stop, when that star was already explored
+// and is either the player's own colony or nobody's (and the fleet isn't a
+// colony ship); at a stop on the way, "… has stopped at %s on the way to %s."
+// Nobody else is told (no text for it; features.arrivalNotices is off).
+function arrivalSays(G, p, f, s) {
+  if (f.path && f.path.length) return true;
+  return s.owner === p.id || (s.owner < 0 && !fleetDesigns(G, f).some(d => d.type === 'colony'));
 }
-// CONFIRMED (FUN_1020_2ec3): computers queue ships at a colony like humans.
-// How much they queue and when is the 5.0.5 logic (INFERRED).
-function aiBuild(ctx, d, sid, n) {
-  const { G, p, A } = ctx, s = G.stars[sid];
-  if (!d || n < 1 || s.owner !== p.id || popU(s) < n) return 0;
-  const c = shipCostNow(G, p, d);
-  if (p.metal < c.metal * n) return 0;
-  if (!(c.metal < 1 || A.colShips > 0 || d.type === 'colony' || A.metal >= 5000 || A.broke)) return 0;
-  if (A.shipLeft == null) A.shipLeft = A.D - A.reserve;
-  if (A.shipLeft < 1 && !(d.type === 'satellite' && n <= 5)) return 0;
-  // one colony ship on order at a time; otherwise top the order up to n
-  if (d.type === 'colony' && colonies(G, p.id).some(c2 => (c2.queue || []).some(it => { const x = getDesign(G, p.id, it.did); return x && x.type === 'colony'; }))) return 0;
-  const have = (s.queue || []).filter(it => it.did === d.id).reduce((a, it) => a + it.n, 0);
-  const add = n - have;
-  if (add <= 0 || !queueShips(G, p.id, sid, d.id, add)) return 0;
-  A.shipLeft -= c.money + (add - 1) * designCost(G, d).money;
-  return add;
+// CONFIRMED (FUN_10c0_0c50 -> FUN_1020_1a2d): the exploring sound goes by the
+// star's quality 0..20: 6000 at 15 or more, 6002 from 1 to 14, 6001 at 0. The
+// quality is 0 when the gravity ratio is over 2.56, else
+// (max(23, 100 - g(g+1)) x max(40, 100 - t(t+1))) / 527 + 2 with g = ratio/10 -
+// 10 and t = temperature gap / 33 °F, +1 (to 20 at most) for more than 10,000
+// metal. (5.0.5 also gives 0 when the ratio is over 2 and the gap over 50 °F.)
+function starQuality(p, s) {
+  const { gR, dT } = hab(p, s);
+  let q = 0;
+  if (gR <= 256) {
+    const gi = trunc(gR / 10) - 10, ti = trunc(dT / 330);
+    q = trunc(Math.max(23, 100 - gi * (gi + 1)) * Math.max(40, 100 - ti * (ti + 1)) / 527) + 2;
+  }
+  if (s.metal > 10000) q = Math.min(20, q + 1);
+  return q;
 }
-// colony ships already on their way, or on order (the 5.0.5 logic built and
-// sent a ship in the same turn; here an idle one at a colony still needs sending)
-function aiColonyShipsBusy(G, p) {
-  let n = 0;
-  for (const f of G.fleets) if (f.owner === p.id && fleetDesigns(G, f).some(d => d.type === 'colony') && (f.to != null || f.dest != null || (f.star != null && G.stars[f.star].owner !== p.id))) n++;
-  for (const s of colonies(G, p.id)) for (const it of s.queue || []) { const d = getDesign(G, p.id, it.did); if (d && d.type === 'colony') n += it.n; }
+function exploreQuality(G, p, s) { const q = starQuality(p, s); return q >= 15 ? 'good' : q > 0 ? 'mediocre' : 'bad'; }
+// CONFIRMED (FUN_1040_31c3): 2.0 sorts planets by one line only, gravity more
+// than 2.56 times home's (or under 1/2.56): such a planet never pays. There is
+// no "barely habitable" band as in 5.0.5.
+function planetClass(G, gs) { return gs > 2.56 || gs < 1 / 2.56 ? 'inhospitable' : 'good'; }
+
+// ---------- the end of the game (FUN_1040_3bd4, FUN_1040_3fa6, FUN_1050_09e3) ----------
+// CONFIRMED: at the end of each turn a player with no colonies (budget slots
+// only for Savings and Technology) is marked as dying (state 5), colony ships
+// or not, and every player is told "%s has just been eliminated from the
+// game." (strings 726-727, FUN_1050_09e3); if they still have none at the end
+// of the next turn they are out for good, and a colony founded in between
+// brings them back (state 1) (FUN_1040_3bd4). From 2010 on, with more than one
+// player, the only player who is neither out nor dying wins (FUN_1040_3fa6;
+// strings 728-729). Nothing removes an out player's fleets: they still fight,
+// and a computer's still move (FUN_1040_0038 runs the computer turn for every
+// computer slot, @1040:02bb).
+function checkElimination(G) {
+  const humans = E.humans(G);
+  for (const p of G.players) {
+    if (!p.alive) { if (!G.over && colonies(G, p.id).length) { p.alive = true; p.dying = false; } continue; }
+    if (colonies(G, p.id).length) { p.dying = false; continue; }
+    if (!p.dying) {
+      p.dying = true;
+      for (const q of humans) {
+        if (q === p) msg(G, q.id, 'You have just been eliminated from the game.', { icon: 'p3040', sound: 7020, big: 'p3040' });
+        else msg(G, q.id, `${p.name} has just been eliminated from the game.`, { icon: 'm9036', sound: 7020 });
+      }
+    } else { p.alive = false; p.dying = false; }
+  }
+  if (!G.over && G.year + 10 > 2009 && G.players.length > 1) {
+    const standing = G.players.filter(p => p.alive && !p.dying);
+    if (standing.length === 1) {
+      G.over = true; G.winner = standing[0].id;
+      for (const q of humans) {
+        if (q.id === G.winner) msg(G, q.id, 'Congratulations! You have just won the game.', { icon: 'p3030', sound: 7021, big: 'p3030' });
+        else msg(G, q.id, `${G.players[G.winner].name} has just won the game.`, { icon: 'p3040', sound: 7020, big: 'p3040' });
+      }
+    }
+  }
+  // GUESS (the remake's): every human is out, so the game ends for them
+  if (!G.over && !G.players.some(p => p.human && p.alive)) { G.over = true; G.winner = -2; }
+}
+
+// ---------- colony order (FUN_1040_3645) ----------
+// CONFIRMED (FUN_1040_3645 @1040:3705; Mac 1.2's ColonizeStar @a3d84, its
+// BlockMove @a3e3c): a new colony's budget slot is put in front of all the
+// others, which move up one. The computer players go through the slots in
+// that order, so the newest colony comes first and the home planet last.
+function colOrder(G, p) {
+  const own = (p.colOrder || []).filter((sid, i, a) => G.stars[sid].owner === p.id && a.indexOf(sid) === i);
+  for (const s of colonies(G, p.id)) if (!own.includes(s.id)) own.push(s.id);
+  return own;
+}
+
+// ---------- names (FUN_1040_4028, FUN_1020_4711, FUN_1050_1ec9) ----------
+// CONFIRMED (FUN_1040_4028): computers are named at random, without repeats
+// and never with a human's name, from string ids 112-131 (men) or 224-243
+// (women). (2.0 also adds the humans' names to a names file on disk and
+// draws from it; that file isn't kept.)
+const MALE_NAMES = ['Alex', 'Bert', 'Carl', 'John', 'Ed', 'Frank', 'Gary', 'Howard', 'Bob', 'Joe', 'Kirk', 'Larry', 'Paul', 'Nick', 'Dave', 'Peter', 'Ralph', 'Sam', 'Tim', 'Walter'];
+const FEMALE_NAMES = ['Andrea', 'Beth', 'Christie', 'Mary', 'Leslie', 'Laura', 'Natalie', 'Heather', 'Imelda', 'Jennifer', 'Kathy', 'Louise', 'Melissa', 'Nancy', 'Elizabeth', 'Patricia', 'Sue', 'Barbara', 'Wendy', 'Anne'];
+// CONFIRMED (FUN_1050_1ec9 @1050:1fd5): a computer is a woman half the time
+// (gender = random(0, 1) x 500)
+const FEMALE_COMPUTERS = 0.5;
+// CONFIRMED (FUN_1020_4711, with the tables at DS:0x242 = string ids 336,
+// 304, 288, 256 and DS:0x24a = 14, 23, 15, 18 names): a new design, the
+// computers' and the starting ones, is named from its class's list
+const SHIP_NAMES = {
+  scout: ['Needle', 'Explorer', 'Looker', 'Columbus', 'Magellan', 'Intrepid', 'Wanderer', 'Rudolph', 'Eagle', 'Sparrow', 'Ranger', 'Whisper', 'Weasel', 'Enterprise'],
+  fighter: ['Killer', 'Destroyer', 'Demon', 'Hurricane', 'Typhoon', 'Slasher', 'Patton', 'Stingray', 'Blaster', 'Conan', 'Serpent', 'Dragon', 'Tornado', 'Wraith', 'Storm', 'Dagger', 'Sword', 'Lance', 'Arrow', 'Constitution', 'Reliant', 'Panther', 'Nightmare'],
+  colony: ['Spreader', 'Mother', 'Expander', 'Nina', 'Pinta', 'Santa Maria', 'Stork', 'Freedom', 'Kon Tiki', 'Minnow', 'Taurus', 'Minerva', 'Egg', 'Peaceful', 'Hardy'],
+  satellite: ['Defender', 'Stopper', 'Protector', 'Eye', 'Armor', 'Shield', 'Peach', 'Caltrop', 'Washington', 'Gabriel', 'Sun Dog', 'Mercy', 'Vision', 'Apple', 'Pebble', 'Rock', 'Stone', 'Berry'],
+};
+// CONFIRMED (FUN_1020_4711; 1.2's GiveTypeCoolName @9457e): up to 100 tries
+// at a random name from the class's list that no design has; after 100 tries
+// the last one is kept. (Players can rename designs.)
+function designName(G, p, type) {
+  const names = (E.rules(G).shipNames || SHIP_NAMES)[type] || ['Ship'];
+  const used = new Set(p.designs.filter(d => !d.scrapped).map(d => d.name));
+  let n = names[0];
+  for (let i = 0; i < 100; i++) { n = names[RI(G, 1, names.length) - 1]; if (!used.has(n)) break; }
   return n;
 }
-// the computers' decisions as shares of the pool: each losing colony's loss
-// first, then research, terraforming and mining, then what the queues need
-// (above the computer's reserve); the rest is kept (INFERRED: 2.0's own split,
-// FUN_1020_35f9, wasn't decoded)
-function aiBudget(G, p, M, A) {
-  const b = p.budget, cols = colonies(G, p.id), M0 = Math.max(0, p.savings);
-  b.col = {};
-  if (M0 <= 0) { b.tech = 0; b.savings = 1; for (const s of cols) b.col[s.id] = 0; return; }
-  let used = M.tech, shipWant = 0;
-  const need = {};
-  for (const s of cols) {
-    const sup = Math.max(0, -(s.oInc || 0)), t = M.terra[s.id] || 0, m = M.mine[s.id] || 0;
-    let sh = 0;
-    for (const it of s.queue || []) { const d = getDesign(G, p.id, it.did); if (d && !d.scrapped) sh += shipCostNow(G, p, d).money + (it.n - 1) * designCost(G, d).money; }
-    sh = Math.max(0, sh - (s.yardDid != null ? s.yard || 0 : 0));
-    need[s.id] = { sup, t, m, sh }; used += sup + t + m; shipWant += sh;
-  }
-  const room = Math.max(0, M0 - used - A.reserve), k = shipWant > room ? room / Math.max(1, shipWant) : 1;
-  let tot = M.tech;
-  for (const s of cols) {
-    const x = need[s.id], sh = trunc(x.sh * k), spend = x.t + x.m + sh;
-    b.col[s.id] = (x.sup + spend + (x.sup ? 2 : 0)) / M0; tot += x.sup + spend;
-    if (spend > 0) { s.ship = sh / spend; if (x.t + x.m > 0) s.terra = x.t / (x.t + x.m); }
-    else s.ship = 0;
-  }
-  if (tot > M0) { const f = M0 / tot; for (const k2 in b.col) b.col[k2] *= f; b.tech = M.tech / M0 * f; b.savings = 0; }
-  else { b.tech = M.tech / M0; b.savings = Math.max(0, M0 - tot) / M0; }
+
+// ---------- messages ----------
+// CONFIRMED (FUN_1030_1299 @1030:14c9): every player's message list starts
+// with reports 1000 and 1001, strings 672-673 (FUN_10c0_0b3b gives them the
+// credit pictures 3115 and 3116)
+const WELCOME = [
+  ['Spaceward Ho! Version 2.0.1 by Peter Commons.', { icon: 'm9004', sound: 11111 }],
+  ['Artwork by Howard Vives.', { icon: 'm9024' }],
+];
+// CONFIRMED (FUN_1040_0038 @1040:02af): each player's turn opens with report
+// 1010, string 682 "The game has been updated to the year %d.", sound 2000
+function economyYear(G, p) {
+  if (p.human) msg(G, p.id, `The game has been updated to the year ${G.year + 10}.`, { icon: 'm9024', sound: 2000, quiet: true });
+  economy(G, p);
 }
 
 E.registerRules('dos', Object.assign({}, O, {
@@ -812,20 +1022,31 @@ E.registerRules('dos', Object.assign({}, O, {
   hints: false, // this game had no between-turn tips (4.0.5 and 5.0.5 do)
   // the New Game window lists rulesets by year, then version (engine.js ruleOptions)
   version: '2.0', platform: 'DOS and Windows 3.1', year: 1993,
-  ai: 'original',
+  // 2.0's own computer players (js/ai-12.js: FUN_1020_0000 is the routine
+  // Mac 1.2 calls DoComputerTurn, slightly evolved; see docs/dos-findings.md)
+  ai: 'dos',
   maxDesigns: 20,                         // CONFIRMED (10e8:1538, box3280; the computers too, FUN_1020_4019)
+  maxPlayers: 20,                         // CONFIRMED: 20 player slots (FUN_1030_0c97, FUN_1040_4028)
   queueSlots: QUEUE_SLOTS,                // CONFIRMED (FUN_1040_1479): three (design, count) slots per colony
+  // CONFIRMED: "Sorry, you can only send ten messages per turn." (string 160); each
+  // player's outgoing messages are kept in ten 8-byte entries (0x50 bytes, FUN_1040_0038 @1040:039d)
+  chatLimit: 10,
   plainTechMessages: true,                // "Your Range Technology has reached level N."
   battleEverywhere: true,                 // CONFIRMED (FUN_1040_23ed, 0aea): every fleet and colony marks its star
-  features: { arrivalNotices: true, waypoints: true, chat: true, buildQueue: true, singleTypeFleets: true, skills: true, noRadical: true },
+  // CONFIRMED (FUN_1040_23ed): no notice to a colony's owner when someone else's fleet arrives
+  features: { arrivalNotices: false, waypoints: true, chat: true, buildQueue: true, singleTypeFleets: true, skills: true, noRadical: true },
   canBuild: (G, p, type) => TYPES4.includes(type),
-  starNames: STAR_NAMES,
+  starNames: STAR_NAMES, maleNames: MALE_NAMES, femaleNames: FEMALE_NAMES, femaleComputers: FEMALE_COMPUTERS, shipNames: SHIP_NAMES,
+  welcome: WELCOME,
   SKILLS, WPNRAT, setupPlayer, defaultDesigns, afterSetup, computerSetup, makeGalaxy, distance, SHAPES,
   designCost, designLimits, designMin, aiSpec, paysPrototype, fleetFor, route,
   borrowLimit: () => 0,                   // CONFIRMED: no borrowing in 2.0 (money is clamped at 0)
-  disposable, projected, underfunded, economy, afterMovement, settle, battle, randomEvents, fleetArrives: null,
+  disposable, projected, underfunded, economy: economyYear, afterMovement, settle, battle: battleKnow, battleText, randomEvents, fleetArrives: null,
   planetIncome, incomeU, research, yardProgress, yardRefund,
-  aiPersonality, aiTurnStart, aiMineMoney, aiTerraMoney, aiBuild, aiBudget, aiColonyShipsBusy,
+  refuel, canColonize: () => false, arrivalSays, exploreQuality, planetClass, checkElimination,
+  observe: null,                          // 2.0 keeps no 5.0.5-style enemy strength (x12 instead)
+  outComputersPlay: true,                 // CONFIRMED (FUN_1040_0038 @1040:02bb): out computers still play
+  designName, colOrder, shipPower, planetPower, x12, popU,
   // not in 2.0 (CONFIRMED: no text or code for them)
   difficulty: undefined, masterPoints: undefined,
 }));
