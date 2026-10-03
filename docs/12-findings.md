@@ -158,9 +158,10 @@ puts more of its metal into defence: at least 70 % after a loss and at least 40 
 
 ## Computer players
 
-`js/ai-12.js` is a port of `DoComputerTurn @90004` and segment 9. It replaces the 5.0.5
-computer players (and their DOS 2.0 hooks). Everything in this section is CONFIRMED from
-the routine named.
+`js/ai-12.js` is a port of `DoComputerTurn @90004` and segment 9. DOS / Windows 2.0 turned
+out to have the same computer turn (`docs/dos-findings.md`, "Computer players"), so the DOS
+2.0 ruleset uses it too; the one difference, the attack rating's arithmetic, comes from each
+ruleset (`rs.shipPower`). Everything in this section is CONFIRMED from the routine named.
 
 **Personality** (`SetCompAttrs @e20f6`; the fields of the hidden "Computer Params" window,
 DLOG 500):
@@ -251,6 +252,22 @@ A human on auto play keeps the base values, with skill 0.
   between terraforming, mining and ships.
 - **Research**. Research shifts from Range at level 10 and from Speed at level 5 to
   Weapons and Shields.
+
+### Corrections made while checking DOS 2.0
+
+Four 1.2 rules were changed after comparing 1.2's code with 2.0's; each is 1.2's own:
+
+- **Colony order**: a new colony's budget slot goes in front of all the others
+  (`ColonizeStar @a3d84`, its `BlockMove` @a3e3c moves the slots up one), so the computers
+  go through their colonies newest first, home last. The remake had them oldest first.
+- **Colonizing**: at the end of every turn a fleet with colonists at a star that isn't yours
+  founds a colony, not only on arrival; fleets at your colonies are refuelled and refilled
+  first (`ColonizeAndExplore @a3556`).
+- **The sine table** of the Circle style: 1.2's resource fork holds the same two tables as
+  2.0's `COSINES` / `SINES` (six entries differ from a computed one), read by
+  `GiveGalaxyCircleCoords @e05a6` (A5 − 0x710, − 0x70c).
+- **A scrapped type in a ship queue** leaves the queue and, if it was first, what was paid
+  toward it is lost (`ScrapFleetsAndTypes @a0e02`).
 
 ## Pictures and sounds the skin needs
 
