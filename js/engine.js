@@ -468,8 +468,9 @@ function newGame(opts) {
   for (let i = 0; i < nPlayers; i++) {
     const human = i < nHum;
     // a ruleset may give the computers its own names (rs.maleNames, rs.femaleNames)
-    // and say whether any computer is a woman (rs.femaleComputers: false = none)
-    const female = human ? !!H[i].female : rs.femaleComputers === false ? false : R(G) < 0.45;
+    // and say whether any computer is a woman (rs.femaleComputers: false = none,
+    // or the chance that one is)
+    const female = human ? !!H[i].female : rs.femaleComputers === false ? false : R(G) < (typeof rs.femaleComputers === 'number' ? rs.femaleComputers : 0.45);
     let name;
     if (human) name = H[i].name || (nHum > 1 ? 'Player ' + (i + 1) : 'You');
     else { do { name = pick(G, female ? (rs.femaleNames || DATA.femaleNames) : (rs.maleNames || DATA.maleNames)) || ('Computer ' + i); } while (usedNames.has(name) && usedNames.size < 40); }
@@ -573,7 +574,8 @@ function turnStep(G, first, last) {
     for (const p of G.players) if ((p.alive || (rs.outComputersPlay && !G.over)) && !p.human) AI.turn(G, p);
     for (const p of G.players) if (p.human && p.auto && p.alive) AI.turn(G, p);
   }
-  if (feature(G, 'surrender')) processSurrenders(G);
+  // a ruleset may handle surrender, alliances news and who is out itself (rs.processSurrenders, ...)
+  if (feature(G, 'surrender')) (rs.processSurrenders || processSurrenders)(G);
   for (const p of G.players) if (p.alive && !p.surrendered) rs.economy(G, p);
   departures(G);
   movement(G);
@@ -582,10 +584,10 @@ function turnStep(G, first, last) {
   if (rs.afterMovement) for (const p of G.players) if (p.alive) rs.afterMovement(G, p);
   rs.randomEvents(G);
   if (feature(G, 'gifts')) deliverGifts(G);
-  if (feature(G, 'surrender')) processHandovers(G);
-  if (feature(G, 'alliances')) { pactNews(G); shareMaps(G); }
+  if (feature(G, 'surrender')) (rs.processHandovers || processHandovers)(G);
+  if (feature(G, 'alliances')) { (rs.pactNews || pactNews)(G); shareMaps(G); }
   // a ruleset may decide who is out and who has won itself (rs.checkElimination)
-  if (last) (rs.checkElimination || checkElimination)(G);
+  if (last || rs.checkEveryStep) (rs.checkElimination || checkElimination)(G);
   for (const p of G.players) { p.spentThisTurn = []; if (p.chatThisTurn) p.chatThisTurn = 0; recordHistory(G, p); }
   for (const f of G.fleets) f.newThisTurn = false;
   G.turn++; G.year += rs.yearsPerTurn;
@@ -641,7 +643,8 @@ function resolveStars(G) {
     const wasExplored = k.explored;
     observe(G, p, s.id);
     if (!wasExplored) exploreMsg(G, p, s);
-    else if (p.human && s.owner !== p.id && !fleetHas(G, f, 'colony')) {
+    // a ruleset may say when the owner hears of the arrival (rs.arrivalSays)
+    else if (p.human && (rules(G).arrivalSays ? rules(G).arrivalSays(G, p, f, s) : s.owner !== p.id && !fleetHas(G, f, 'colony'))) {
       if (f.path && f.path.length) msg(G, p.id, report(25, fleetLabel(G, f), s.name, G.stars[f.path[0]].name), { icon: 'm9038', star: s.id, quiet: true });
       else msg(G, p.id, `Your fleet of ${fleetLabel(G, f)} has arrived at ${s.name}.`, { icon: 'm9038', star: s.id, quiet: true });
     }
@@ -835,7 +838,7 @@ if (typeof module !== 'undefined') {
   require('./rules-original.js'); require('./ai-original.js');
   require('./rules-dos.js');
   require('./rules-405.js');
-  require('./rules-301.js');
+  require('./rules-301.js'); require('./ai-301.js');
   require('./rules-12.js'); require('./ai-12.js');
   require('./rules-palm.js');
 } else root.HO = API;
