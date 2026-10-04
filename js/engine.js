@@ -195,6 +195,7 @@ function cancelMove(G, f) { f.dest = null; f.path = null; }
 // can fleet b join fleet a? (DOS 2.0 rules: a fleet holds only one ship type)
 function canMerge(G, a, b) {
   if (a === b || a.owner !== b.owner || a.sat || b.sat) return false;
+  if (rules(G).canMerge) return rules(G).canMerge(G, a, b); // a ruleset's own rule (Mac 1.2: one design a fleet)
   if (!feature(G, 'singleTypeFleets')) return true;
   const t = fleetKind(G, a);
   return fleetDesigns(G, b).every(d => d.type === t) && fleetDesigns(G, a).every(d => d.type === t);
@@ -205,7 +206,8 @@ function queueShips(G, pid, sid, did, n) {
   const s = G.stars[sid], d = getDesign(G, pid, did);
   if (!d || s.owner !== pid || !canBuildType(G, G.players[pid], d.type) || n < 1) return 0;
   s.queue = s.queue || [];
-  const last = s.queue[s.queue.length - 1];
+  // rs.queueMergeAny: a design already in any slot gets the ships (1.2 / 2.0)
+  const last = rules(G).queueMergeAny ? s.queue.find(q => q.did === did) : s.queue[s.queue.length - 1];
   if (last && last.did === did) last.n += n;
   else if (rules(G).queueSlots && s.queue.length >= rules(G).queueSlots) return 0; // every slot is taken
   else s.queue.push({ did, n });
@@ -218,11 +220,13 @@ function unqueueShip(G, pid, sid, i) {
   if (i === 0) { if (rules(G).yardRefund) rules(G).yardRefund(G, G.players[pid], s); else s.yard = 0; }
 }
 function mergeFleets(G, a, b) { // b into a
+  const orders = { a: { dest: a.dest, path: a.path, routeTo: a.routeTo }, b: { dest: b.dest, path: b.path, routeTo: b.routeTo } };
   for (const k in b.ships) a.ships[k] = (a.ships[k] || 0) + b.ships[k];
   if (b.colonists) a.colonists = (a.colonists || 0) + b.colonists;
   a.fuel = Math.min(a.fuel, b.fuel);
   a.dest = null;
   G.fleets.splice(G.fleets.indexOf(b), 1);
+  if (rules(G).organized) rules(G).organized(G, a, b, null, orders); // a ruleset's own fuel, colonist and order rules
 }
 function splitFleet(G, f, take) { // take: {did:count}
   const nf = newFleet(G, f.owner, f.star, false); nf.newThisTurn = f.newThisTurn;
@@ -237,6 +241,7 @@ function splitFleet(G, f, take) { // take: {did:count}
   }
   if (fleetCount(nf) === 0) { G.fleets.splice(G.fleets.indexOf(nf), 1); return null; }
   if (fleetCount(f) === 0) G.fleets.splice(G.fleets.indexOf(f), 1);
+  if (rules(G).organized) rules(G).organized(G, f, null, nf);
   return nf;
 }
 // Alliances: each player lists who they want to ally with (p.allies) and be
@@ -702,6 +707,7 @@ function battleNews(G, sid, b) {
     if (mine > 0 || (o === s.owner)) observe(G, p, sid);
     else { k.battle = true; k.explored = k.explored; if (!k.explored) k.battleOnly = true; k.owner = Object.keys(survivors).map(Number).find(x => x !== o && survivors[x] > 0) ?? k.owner; k.seen = G.turn; k.enemyShips = Object.keys(survivors).filter(x => +x !== o).reduce((a, x) => a + survivors[x], 0); }
     if (!p.human) { if (p.ai && AI.noteBattle) AI.noteBattle(G, p, rec, won); continue; }
+    if (b.reported) continue; // the ruleset wrote its own reports (Mac 1.2: one pair a duel)
     const enemies = ownerIds.filter(x => x !== o).map(x => G.players[x].name).join(' and ');
     const theirLoss = ownerIds.filter(x => x !== o).reduce((a, x) => a + (lost[x] || 0), 0);
     const myLoss = lost[o] || 0;

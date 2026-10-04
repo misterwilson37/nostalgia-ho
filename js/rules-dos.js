@@ -623,7 +623,7 @@ function settle(G, p, s, f) {
 // ---------- battles (FUN_1018_0032, 1340, 14f7, 0976, 172a, 1e98, 260b) ----------
 // CONFIRMED: the colony's owner holds the star; the others, in random order,
 // fight the holder one at a time and the winner holds the star.
-function battle(G, sid) {
+function battle(G, sid, hooks) { // hooks.duel: called after each duel (Mac 1.2's reports and debris; 2.0 passes none)
   const s = G.stars[sid];
   const present = G.fleets.filter(f => f.star === sid && f.to == null && fleetCount(f) > 0);
   const planetOwner = s.owner >= 0 && s.pop > 0 ? s.owner : -1;
@@ -644,7 +644,7 @@ function battle(G, sid) {
   }
   for (const o of ownerIds) for (const e of army[o]) { e.n0 = e.n; for (let i = 0; i < e.n; i++) { e.alive.push(rec.start.length); rec.start.push({ o, t: e.d.type, did: e.d.id }); } }
   const planet = planetOwner >= 0 ? { planet: true, o: planetOwner, hp: popU(s), W: G.players[planetOwner].tech.weapons } : null;
-  let debris = 0;
+  let debris = 0, lastRounds = 0;
   const hasShips = (o) => army[o].some(e => e.n > 0);
   const standing = (o) => hasShips(o) || (planet && o === planetOwner && planet.hp > 0);
   // units (FUN_1018_1340 / 14f7): each design is cut into groups so a side
@@ -687,6 +687,7 @@ function battle(G, sid) {
       return U.find(u => u.planet && u.n > 0) || null;
     };
     let rounds = 0;
+    lastRounds = 0;
     while (up(side[0]) && up(side[1]) && rounds < 20000) {
       rounds++;
       const ev = [];
@@ -712,6 +713,7 @@ function battle(G, sid) {
           }
         }
       }
+      lastRounds = rounds;
       if (rec.rounds.length < 60) { rec.rounds.push(ev); rec.popR.push(planet ? planet.hp / 1000 : s.pop); }
       const pu = side[1].find(u => u.planet); if (pu) planet.hp = pu.hp;
     }
@@ -729,7 +731,10 @@ function battle(G, sid) {
   for (const a of order) {
     if (holder < 0 || !standing(holder)) { holder = a; continue; } // both sides died: the next one takes over
     if (isAllied(G, a, holder) || !hasShips(a)) continue;
+    const ships = (o) => army[o].reduce((x, e) => x + e.n, 0);
+    const pre = hooks && hooks.duel ? { A: a, D: holder, nA: ships(a), nD: ships(holder), pop0: planet && holder === planetOwner && planet.hp > 0 ? planet.hp : 0, d0: debris } : null;
     holder = fight(a, holder);
+    if (pre) hooks.duel(Object.assign(pre, { winner: holder, debris: debris - pre.d0, rounds: lastRounds, army, planetOwner }));
   }
   // losses
   const lost = {}, survivors = {};
@@ -750,7 +755,7 @@ function battle(G, sid) {
   }
   // FUN_1018_260b: the metal of every ship destroyed (a fifth each) goes to
   // a winning colony owner, or falls on the star (told to the winner only)
-  if (debris > 0) {
+  if (debris > 0 && !(hooks && hooks.duel)) {
     if (holder >= 0 && s.owner === holder) { G.players[holder].metal += debris; msg(G, holder, `You have recovered ${fmt(debris)} metal from the battle at ${s.name}.`, { icon: 'm9046', star: sid, quiet: true }); }
     else { s.metal += debris; if (holder >= 0) msg(G, holder, `${fmt(debris)} metal has fallen onto ${s.name} from your recent battle.`, { icon: 'm9046', star: sid, quiet: true }); }
   }
@@ -1046,6 +1051,8 @@ E.registerRules('dos', Object.assign({}, O, {
   observe: null,                          // 2.0 keeps no 5.0.5-style enemy strength (x12 instead)
   outComputersPlay: true,                 // CONFIRMED (FUN_1040_0038 @1040:02bb): out computers still play
   designName, colOrder, shipPower, planetPower, x12, popU,
+  // internals, for the Mac 1.2 ruleset built on this one (js/rules-12.js)
+  shareOf, colonyMoney, shipyard, removeColony, isqrt, wpn, battleOnly: battle,
   // not in 2.0 (CONFIRMED: no text or code for them)
   difficulty: undefined, masterPoints: undefined,
 }));
