@@ -89,11 +89,19 @@ function afterSetup(G) {
     for (let i = 0; i < st.scouts; i++) { addShipsToStar(G, p.id, home.id, by('scout'), 1); by('scout').built++; }
   }
 }
-// CONFIRMED (CreateNewPlayer @121fee): a computer's start comes from the
-// intelligence (Dumb = Expert, Average = Advanced, Smart = Normal, Diabolical =
-// Novice); with several humans each computer copies a human's skill
-// (DoGameSolidificationStuff @a741a). This is 4.0.5's computerSetup.
-const computerSetup = W.computerSetup;
+// CONFIRMED (CreateNewPlayer @121fee, the jump table at 122128): a computer's
+// skill comes from the intelligence, with no random step (4.0.5 has one):
+// Dumb = Expert, Average = Advanced, Smart = Normal, Diabolical = Novice.
+// CreatePlayer @f26a0 sets the money, metal, people and free ships from it
+// when the computer is created. With several humans DoGameSolidificationStuff
+// @a741a later copies a human's skill onto each computer (player +0x308), but
+// only the skill shown and the difficulty rating read it again, so the
+// computers keep the start their intelligence gave them.
+const COMPUTER_START = { dumb: 'expert', average: 'advanced', smart: 'normal', diabolical: 'novice' };
+function computerSetup(G, opts) {
+  const iq = IQS.includes(opts.iq) ? opts.iq : 'average';
+  return { start: COMPUTER_START[iq], iq };
+}
 
 // ---------- galaxy (CreateGalaxy @f0004 and the GiveGalaxy...Coords routines) ----------
 // CONFIRMED: the same generator as 4.0.5 (6 styles, 5 sizes, Dense/Sparse, whole
@@ -846,6 +854,12 @@ E.registerRules('301', Object.assign({}, O, {
   // the New Game window lists rulesets by year, then version (engine.js ruleOptions)
   version: '3.0.1', platform: 'Mac', year: 1993,
   ai: '301',               // its own computer players (js/ai-301.js)
+  // CONFIRMED (MakeResultMessages @e2ea2, DetectBigBattles @a4a20): a duel is
+  // a big battle when each side has more ships than RND(5, 10); at the end of
+  // each step every player whose news of the star (seen, and last battle
+  // news) is more than 10 years old hears the rumour (message 0x43b) and its
+  // record gets the year. The same as 4.0.5 (W.battle, W.randomEvents)
+  bigDuels: true,
   maxPlayers: 20,          // CONFIRMED (doCreateGalaxyDlg @f0550): 0-19 computers
   maxDesigns: MAX_DESIGNS,
   chatLimit: 10,           // CONFIRMED (STR# 1020.17): ten messages a turn

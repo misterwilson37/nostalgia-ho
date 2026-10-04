@@ -118,10 +118,6 @@ function afterSetup(G) {
 const COMPUTER_START = { dumb: 'expert', average: 'advanced', smart: 'normal', diabolical: 'novice' };
 function computerSetup(G, opts, k, nComp) {
   const iq = IQS.includes(opts.iq) ? opts.iq : 'average';
-  if (G.rules !== '405') { // the Mac 3.0.1 rules use this with its own citations (rules-301.js)
-    const nHum = G.players.filter(q => q.human).length;
-    return { start: nHum > 1 ? (SKILLS[opts.start] ? opts.start : 'normal') : COMPUTER_START[iq], iq };
-  }
   const c = IQS.indexOf(iq) + 1;
   if (k === 0) G._csUp = false;
   let L = c;
@@ -598,8 +594,9 @@ function battle(G, sid) {
     const la = luckOf(a), lb = luckOf(b);
     let A = groups.filter(g => g.owner === a && g.n > 0), B = groups.filter(g => g.owner === b && g.n > 0);
     // CONFIRMED (FUN_00425c9a): a duel is a "big battle" for the rumour when
-    // each side has more ships than rand(5, 10)
-    if (G.rules === '405') {
+    // each side has more ships than rand(5, 10) (a ruleset sets bigDuels:
+    // 4.0.5 and Mac 3.0.1)
+    if (RS.bigDuels) {
       const nA = A.reduce((t, g) => t + g.n, 0), nB = B.reduce((t, g) => t + g.n, 0);
       if (RI(G, 5, 10) < nB && RI(G, 5, 10) < nA && !(G.bigBattles = G.bigBattles || []).includes(sid)) G.bigBattles.push(sid);
     }
@@ -833,7 +830,7 @@ function randomEvents(G) {
   // CONFIRMED (FUN_00438a0f, msg 1028, called for every player): players whose
   // news of a star where a big battle took place (see battle) is more than 10
   // years old, explored or not, hear a rumour of it; a computer only notes it
-  const big = G.rules === '405';
+  const big = !!E.rules(G).bigDuels; // 4.0.5 and Mac 3.0.1
   for (const sid of (big ? G.bigBattles : G.battleStars) || []) {
     const s = G.stars[sid];
     for (const p of G.players) {
@@ -932,6 +929,7 @@ E.registerRules('405', Object.assign({}, O, {
   maxPlayers: 20,          // CONFIRMED (FUN_00448856): 0-19 computers, 20 players
   maxDesigns: MAX_DESIGNS,
   chatLimit: 10,           // CONFIRMED (string 755): ten messages a turn
+  bigDuels: true,          // CONFIRMED (FUN_00425c9a, FUN_00438a0f): the big-battle rumour after big duels only
   // CONFIRMED: no stances and no "arrive late" in 4.0.5; the rest as 5.0.5
   features: { arrivalNotices: true, alliances: true, gifts: true, surrender: true, waypoints: true, luck: true, supernova: true, armageddon: true, dip: true, chat: true, yearsPerTurn: true },
   SKILLS, HIT, hit, SHAPES, SIZES, RANKS, interestOn, techLevelCost, research, aiSpec,

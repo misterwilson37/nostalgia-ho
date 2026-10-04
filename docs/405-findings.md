@@ -189,14 +189,14 @@ steps, the source of `js/ai-original.js`). The scheme is the same; these are the
 | Steps | 18. No "split mixed fleets" step, and no computer biologicals (two 5.0.5 steps send them roaming) | 21 | `FUN_0045e8bb` |
 | Who plans | each computer with its own intelligence; a human on auto-play with intelligence 0 | — | `FUN_004320f8` |
 | Minimum attack fleet | 4–6 ships | 3–6 | `FUN_004438ba` |
-| Turtle and pouncer | among Smart and Diabolical computers, computer number 1, 6, 11, 16 (counting from 0) is a turtle (style 2) and number 3, 8, 13, 18 a pouncer (style 3). In a Sparse galaxy they research +80 Range, −40 Speed, −40 Weapons | by player number mod 4; the remake's 5.0.5 port gives the turtle style 3 and the pouncer style 2, the other way round from `FUN_100704d0` | `FUN_004438ba` (game +0x10 = density) |
+| Turtle and pouncer | among Smart and Diabolical computers, computer number 1, 6, 11, 16 (counting from 0) is a turtle (style 2) and number 3, 8, 13, 18 a pouncer (style 3). In a Sparse galaxy they research +80 Range, −40 Speed, −40 Weapons | by computer number mod 4 (3 the turtle, style 2; 2 the pouncer, style 3), density over 50 for the Range shift (`FUN_100704d0`); the remake's 5.0.5 port had them swapped, now fixed | `FUN_004438ba` (game +0x10 = density) |
 | Research shifts | Range 16, **Speed 5** and each Mini level move research into Weapons and Shields | no Speed rule | `FUN_004648d2` (cases 0x3eb, 0x3ec, 0x3ef) |
 | Design limit and lag score | 30 designs; Range counts ×10; Scout R+2, W−1, S−1; no Tanker −1 | 24; Range ×5; Scout R+3; Tanker R−1, V−1 | `FUN_004639ba`, `FUN_00463f2f` |
 | Designs nobody has built | dropped as soon as they lag today's tech in any stat they use | only when far behind | `FUN_004639ba` |
 | At the design limit | stops designing for the rest of the turn | keeps its old design | `FUN_004639ba` |
 | Pruning | past 30 − 6: designs that aren't current and have no ships, then the first six that aren't current, ships and all (`FUN_00434534` dismantles them) | the same at 24 | `FUN_004639ba` |
 | Development cost | Dumb and Average pay it for a design never built; above Dumb the computer's own designs have none (so Average pays only for its starting designs) | the remake's port: Dumb only | `FUN_00462105`, `FUN_004639ba` |
-| "I need metal." / "I need money." | after 2500 with under 10,000 metal; after 2400 when poorest by $2,000: to each ally, 1 in 20 | the same (the 5.0.5 port leaves it out) | `FUN_00463030` (codes 0x414/0x413 = strings 975/974) |
+| "I need metal." / "I need money." | after 2500 with under 10,000 metal; after 2400 when poorest by $2,000: to each ally, 1 in 20 | the same (`FUN_10085f60`; now in the 5.0.5 port) | `FUN_00463030` (codes 0x414/0x413 = strings 975/974) |
 | Surrender | no Alliances condition | the 5.0.5 port requires Alliances | `FUN_00463030`, `FUN_004656b4` |
 | Threat near a colony | unexplored, free or en-route stars count as one Fighter | the same; the port counted only unexplored ones | `FUN_00465a0d` |
 | Enemy defence it remembers | ships' attack + ceil(pop/50) × (W+2)² / 75 + 1; an enemy star never measured: the figure for 350,000 people at its own weapons | (S+1)(W+1)² ceil(pop/2500)/570, at least 1 | `FUN_00425c9a`, `FUN_00425c5d`, `FUN_00465a0d` |
@@ -271,10 +271,11 @@ interface-only hooks were not checked, and two are unused.
 
 ## What 3.0.1 shares
 
-The Mac 3.0.1 rules use 4.0.5's `computerSetup`, `makeGalaxy`, `distance`, `battle`,
-`randomEvents` and `scrapAt`. The 4.0.5 changes to the computers' start, the big-battle
-flag and the rumour apply only when the 4.0.5 rules are playing (`G.rules === '405'`), so
-3.0.1 is unchanged. 3.0.1 may well share them; it needs checking against its own code.
+The Mac 3.0.1 rules use 4.0.5's `makeGalaxy`, `distance`, `battle`, `randomEvents` and
+`scrapAt`. Checked against 3.0.1's own code (docs/301-findings.md): the big-battle flag and
+the rumour are the same (`MakeResultMessages @e2ea2`, `DetectBigBattles @a4a20`), so both
+rulesets set `bigDuels`; the computers' start is not (no random step in
+`CreateNewPlayer @121fee`), so 3.0.1 has its own `computerSetup`.
 
 ## Not implemented
 
