@@ -19,7 +19,9 @@ As in `original-findings.md`, every rule is labelled:
 DOS 2.0 is an **earlier build of the same game engine** as Mac 5.0.5, and the Windows 3.1
 build of 2.0 is the same game as the DOS one. The DOS program was only skimmed (see below),
 but the Windows program decompiles cleanly, so the "DOS 2.0" ruleset (`js/rules-dos.js`)
-follows what `WINHO.EXE` does.
+follows what `WINHO.EXE` does. Every routine of `WINHO.EXE` has been read
+(`docs/coverage-20.md`: 743 routines, none unread), and every rule the ruleset follows is
+cited below by its address.
 
 Some of it is still the 5.0.5 game: the home star, star stats, habitability, maximum
 population, growth, colony income and the colony-ship costs. Every rule the ruleset still
@@ -32,12 +34,16 @@ below). The big differences are:
 - **Colonies pay for themselves.** A colony that loses money is paid only from its own share;
   if that doesn't cover it, the colony loses people. Profitable colonies are never touched.
 - **Ships are queued** at each colony and paid from its Ship share, computers included.
+- **Each colony splits its money with three bars** (terraform, mine, ships); a finished
+  part's share passes to the other bars.
+- **Battles are duels**: the colony's owner holds the star and each other player fights
+  it in turn, with a pair of reports for each duel.
 - **No random events.**
 - Different research, mining, terraforming, ship-cost and battle numbers, and a
   different galaxy generator.
 - **Its own computer players**, the same as Mac 1.2's (`js/ai-12.js`): 1.2 turned out to be a
-  pre-release of 2.0, and 2.0 kept its computer turn almost unchanged (see "Computer
-  players" below).
+  pre-release of 2.0, and 2.0 kept its computer turn unchanged (see "Computer players"
+  below).
 - **A player with no colonies is out after one turn**, colony ships or not, and the last
   player standing wins.
 
@@ -103,8 +109,8 @@ offline. The repository includes their output, not the DOS game itself.
 | Free ships | Novice: a Colony Ship. Novice and Beginner: two Scouts, each in a fleet of its own. They count as built, so no prototype is paid for those designs | CONFIRMED (`FUN_1030_1299`, `FUN_1068_0000`) |
 | Computer players | one setting for all of them: Dumb, Average or Smart. Dumb starts like an Expert, Average like Normal, Smart like a Novice | CONFIRMED (`FUN_1050_1ec9`) |
 | Computer personalities | every field as Mac 1.2's `SetCompAttrs`: rebuild difference 1; up-front research 15–25 %, more research 15–25 %; income per colony $33,000–37,000; colonies defended and metal for defence 30–70 %; both dominations 150–250 %; aggressiveness 3–7; desire for metal 25–75; satellite shields cap 11–13; research Range and Speed 160–200, Weapons 200–260, Shields 200–260 but no more than Weapons, Mini the rest of 1,000. Dumb: up-front 4 %, more 1–6 %, colonies defended 10–20 %, dominations 75–95 %, aggressiveness 1, cap 30. Average: up-front 10–20 %, attacking domination 150–200 %. Smart: up-front 10–20 %, aggressiveness 10. A human on auto play keeps the base values and research 200 each | CONFIRMED (`FUN_1030_1b51`, every random range read in the asm) |
-| Smart computers | before 2020 they know every star less than 9 ly from home; when picking targets they score stars owned by other computers at a quarter, so they pick on humans | CONFIRMED (`FUN_1020_4a3d` @1020:4a85, `FUN_1020_10b5`) |
-| Players | 20 player slots | CONFIRMED (`FUN_1030_0c97`, `FUN_1040_4028`) |
+| Smart computers | while the year is before 2020 they know every star less than 9 ly from home; the year has already moved on to 2010 when they first plan, so that is their first turn only. When picking targets they score stars owned by other computers at a quarter, so they pick on humans | CONFIRMED (`FUN_1020_4a3d` @1020:4a85, `FUN_1040_0038` @1040:01a8, `FUN_1020_10b5`) |
+| Players | 20 player slots; the Create Galaxy window allows 0 to 19 computers | CONFIRMED (`FUN_1030_0c97`, `FUN_1040_4028`, CREATEGALAXYDLGPROC @1108:15f0-162c) |
 | Computer names | men from string ids 112–131 (Alex … Walter), women from 224–243 (Andrea … Anne), at random, no repeats and never a human's name. 2.0 also writes the humans' names to a names file and draws from it later; the remake keeps no such file | CONFIRMED (`FUN_1040_4028`); the file NOT IMPLEMENTED |
 | Women computers | each computer is a woman half the time (gender = random 0–1 × 500) | CONFIRMED (`FUN_1050_1ec9` @1050:1fd5) |
 | First messages | "Spaceward Ho! Version 2.0.1 by Peter Commons." and "Artwork by Howard Vives." (reports 1000 and 1001, strings 672–673) | CONFIRMED (`FUN_1030_1299` @1030:14c9) |
@@ -129,15 +135,19 @@ offline. The repository includes their output, not the DOS game itself.
 |---|---|---|
 | The money pool | all your money is divided every turn by per-mille shares: one per colony, Technology and Savings. At the end of the turn the pool is rebuilt from the kept share, any refunds, interest and the income of your profitable colonies. It never goes below $0: no borrowing, no interest owed, no "Dip into savings", no support from savings, no global warming, no fleets scrapped for lack of funds | CONFIRMED (`FUN_1040_27ee`, `FUN_1040_0038`) |
 | Interest | 10 × the whole square root of (kept money + refunds) | CONFIRMED (`FUN_1040_27ee` @1040:294c) |
-| A colony's money | its share, minus its loss if it loses money. It is split into terraforming, mining and ships | CONFIRMED (`FUN_1040_0925`, `0aea`, `1479`) |
+| Shares | per mille. A share of an amount M is trunc(M × share / 1,000) while M is under $2,000,000, and trunc(M / 1,000) × share above. The shares are used as they stand, not divided by their total: the computers' add up to a little over 1,000, because each is rounded up | CONFIRMED (`FUN_1040_0925` @1040:0960, `0aea` @0b4f and @0c3b, `1479` @15f5, `1b11` @1b9f, `27ee` @2869; `FUN_1020_35f9`) |
+| Budget slots | Savings, Technology and the home colony to begin with; each new colony's slot goes in front of the others. Every loop of the turn and the computers go through them in this order | CONFIRMED (`FUN_1030_1299` @1030:19b2, `FUN_1040_3645` @1040:3722) |
+| A colony's money | its share, minus its loss if it loses money. It is split by three bars, per mille: terraform, mine, ships | CONFIRMED (`FUN_1040_0925`, `0aea`, `1479`) |
 | Colonies that lose money | if the share doesn't cover the loss, the colony loses people in proportion (as in 5.0.5, minus 100); with no one left it is abandoned. This applies to every colony, the home planet and the computers' colonies too. A profitable colony is never abandoned, whatever its share. The game warns you before ending the turn | CONFIRMED (`FUN_1040_0925`) |
 | Underfunded colonies | still grow (the "no growth" flag is always cleared) | CONFIRMED, medium confidence (`FUN_1040_0925`) |
 | Revolts | none: no code makes a colony change hands | CONFIRMED (no caller of report 1012 or box 3090) |
-| New colonies | 10 colonists per colony ship in the fleet; bar chart terraform 900 / mine 100, or mine 1,000 when gravity is more than 2.56 times home's. If you have more than $20,000, the colony's share is worth $15,000, taken from the other shares but never below what a losing colony needs; otherwise it gets no share | CONFIRMED (`FUN_1040_3645`, `FUN_1010_16f2`, `FUN_1010_218e`) |
-| Terraforming | the first $5,000 goes into the planet, as in 5.0.5. Then the money moves the temperature √(money/2) tenths of a degree, a third dearer than 5.0.5. Overshoot is refunded at 2 × (excess)². Warns every turn when the planet can never pay | CONFIRMED (`FUN_1040_0aea`) |
-| Mining | 15 × √money metal (5.0.5: 20 ×), so metal costs 1.78 times as much. When the planet runs out, the unneeded money (excess²/225) is refunded | CONFIRMED (`FUN_1040_0aea`) |
+| New colonies | 10 colonists per colony ship in the fleet; income −7,501; bars terraform 900 / mine 100 (class 1), or mine 1,000 when gravity is more than 2.56 times home's (class 2); its slot goes first. If the pool is over $20,000, the slot is given 15,000,000 ÷ pool per mille: each other slot gives up ⌈left × its share ÷ their total⌉, round after round, none below its least share (a losing colony's ⌈loss × 1,000 ÷ pool⌉, when the pool is $1,000 or more and bigger than the loss); then, if the total is outside 990–1,010, the others are moved one at a time to make 1,000. Otherwise it gets no share | CONFIRMED (`FUN_1040_3645` @1040:3645-38bf, `FUN_1010_16f2`, `FUN_1010_179a` @1010:17de-1946 and 1aec-1c8b, `FUN_1010_218e`) |
+| Terraforming | a bar above 0 is spent whether the planet still needs it or not. The first $5,000 goes into the planet, as in 5.0.5. Then the money moves the temperature √(money/2) tenths of a degree, a third dearer than 5.0.5. A step bigger than the gap (even a gap of 0) sets the planet to your temperature, refunds 2 × (excess)² and sets the bar to −1. Warns every turn when more than $50 goes into a class-2 colony | CONFIRMED (`FUN_1040_0aea` @1040:0c8d-0df1) |
+| Mining | 15 × √money metal (5.0.5: 20 ×), so metal costs 1.78 times as much. Only when that is more than the planet has (not equal) does it take what is left, refund (excess² + 224) ÷ 225 and set the bar to −1 | CONFIRMED (`FUN_1040_0aea` @1040:0df4-0fb4) |
 | Growth and income | as in 5.0.5, except income takes the log of the *whole* square root of the population. A colony founded this turn starts growing next turn | CONFIRMED (`FUN_1040_27ee`) |
-| A part that is finished | 2.0 marks a fully terraformed or mined-out planet's part −1 and spends only parts above 0, so that part's share of the colony's money is lost every turn (nothing refunds it) until the player moves the bars; the planet window draws it as an empty bar, and with both parts done shows only the ship queue. The computers' bars leave it out. The remake does the same; its planet panel keeps the bar and says the money is wasted | CONFIRMED (`FUN_1040_0aea`, `FUN_1088_1b3f`, `FUN_1010_0077`, `FUN_1020_35f9`; 1.2 `TerraformMineStars @a0a9e`) |
+| A part that is finished | its bar is −1 for good: the planet window won't let it be dragged, the computers leave it alone, nothing sets it back. Every turn, after the fleets move, each colony's bars above 0 are scaled up to fill 1,000 (bar += bar × (1,000 − total) ÷ total), so a finished part's share goes to the others. With no bar above 0: both parts finished → ships 1,000; mining finished on a class-2 colony → ships 1,000, terraform 0; terraforming finished → mine 500, ships 500; otherwise terraform 500, ships 500. (The earlier version of this file said the share was wasted; it had missed this routine, `FUN_1040_269d`, which runs at the end of pass 1. The DOS program has it too, `FUN_a000_6c09`.) | CONFIRMED (`FUN_1040_269d` @1040:269d-27ed, `FUN_1010_04a7`, `FUN_1020_35f9` @1020:385b) |
+| Losing a colony | its share goes to the Savings slot, its slot is taken out, and your fleets of Colony Ships at the star are loaded with colonists. A colony lost in a battle goes in pass 2, after the kept money is worked out | CONFIRMED (`FUN_1040_38c0` @1040:38c0-3a2a, `FUN_1040_27ee` @1040:29e3) |
+| Out players | the turn runs for every player, out or not: an out player's money still earns interest and its research goes on | CONFIRMED (`FUN_1040_0038` @1040:02de-038b, 04c3-06d5) |
 
 ### Research
 
@@ -159,17 +169,19 @@ offline. The repository includes their output, not the DOS game itself.
 | Prototypes | humans pay 2 × mm × price for a design's first ship (5.0.5: 4 × mm²B). Computers never pay | CONFIRMED (`FUN_1040_1479`) |
 | Shipbuilding | each colony has a queue of three slots (a ship type and a count). Its Ship share pays for them in order. A ship is built when its price and metal are both there; otherwise the money left part-pays the first ship and a matching part of its metal is set aside. Any other money left goes back into the pool. Computer players use the same queues | CONFIRMED (`FUN_1040_1479`, `FUN_1020_2ec3`) |
 | A queued type that is scrapped | it leaves every queue; if it was first in line, what was paid toward it (money and metal) is lost | CONFIRMED (`FUN_1040_0fca` @1040:1225–1321) |
-| Taking a ship out of the queue | the remake gives the part-payment back; 2.0's Build Ships window code for this sits behind a jump table and wasn't found | GUESS |
+| Taking a ship out of the queue | one ship off a slot of several keeps what was paid; taking the first slot's last ship out empties the slot and zeroes what was paid toward it, money and metal, so it is lost (the window's OK writes its copy back) | CONFIRMED (Build Ships: `FUN_10e8_17af` @10e8:181a-182c, OK @10e8:21b7-21e8) |
+| Adding a ship to the queue | a design already in a slot gets the ship; a new one takes the first empty slot (taking the first slot zeroes the part-payment) | CONFIRMED (`FUN_10e8_16e4`) |
 | Ship names | a new design gets a random name from its class's list (Scouts: string ids 336–349, Fighters 304–326, Colony Ships 288–302, Satellites 256–273; tables at DS:0x242 and DS:0x24a) that no design has, up to 100 tries | CONFIRMED (`FUN_1020_4711`) |
 | The computers' attack rating | max(hp ÷ 50 × W², W² × WPNRAT(W) × (5W + 20) ÷ 300), not divided by 50. The second term is worked out in 16-bit registers (the product is cut to a signed 16-bit number before dividing), so from about Weapons 4 it wraps round and the first term wins. (Mac 1.2 does it in 32 bits.) | CONFIRMED (`FUN_10f0_05e9` @10f0:079d–0851) |
 | Shipbuilding messages | "ships queued … no money allocated" every turn the colony has under $500 or no Ship share; "spending money … no ships queued" and "… no metal available" only when more than $500 (or 1 % of your money) is left over | CONFIRMED (`FUN_1040_1479`) |
 | New ships | Fighters and Satellites join an idle fleet of the same type at the colony; Scouts and Colony Ships get a fleet of their own | CONFIRMED (`FUN_1040_1a2f`) |
-| Fleets | one ship type per fleet | CONFIRMED (`FUN_1068_0000`, ORGFLEETSDLGPROC) |
+| Fleets | one design per fleet (a "ship type" in 2.0's words); only fleets of the same design can be put together | CONFIRMED (`FUN_1068_0000`, ORGFLEETSDLGPROC) |
+| Organize Ships | one design's ships at a star are dealt into up to 12 piles. On OK every fleet of that design at the star, in list order (newest first), takes the next pile, has its orders cleared (next stop, destination, route) and its fuel used set to the average of what those fleets had used: their total over their number, counted up to 11. A fleet left without a pile is removed; each extra pile is a new fleet, which for Colony Ships is loaded with colonists | CONFIRMED (ORGFLEETSDLGPROC set-up @10e8:2a06-2ae6, OK @10e8:2dd5-2f12; the DOS program's `FUN_b000_d170` is the same) |
 | Orders | a fleet in hyperspace can't be given new orders until it stops | CONFIRMED (LISTFLEETSDLGPROC, box 3290) |
-| Routes | a fleet sent beyond its fuel is routed through your own colonies, refuelling at each: each hop within its Range, at most 42 ÷ Range hops, the shortest way under three times the direct distance. The remake plans the route once; 2.0 plans it again at every stop and says "can no longer reach" if the way is gone | CONFIRMED (`FUN_1040_25ce`, `FUN_1068_03a9`); replanning NOT IMPLEMENTED |
+| Routes | a fleet sent beyond its fuel is routed through your own colonies, refuelling at each: each hop within its Range, at most 42 ÷ Range hops, the shortest way under three times the direct distance. At every stop the route is planned again from where the fleet is, before it moves on and after the end-of-turn refuelling; with no way left it stops: "Your %s can no longer reach %s." | CONFIRMED (`FUN_1068_03a9`; `FUN_1040_25ce`, called by `FUN_1040_23ed` @1040:2454 and `FUN_1040_2fa8` @1040:310f) |
 | Scrapping | humans get 3/4 of the metal, computers all of it; ships scrapped in hyperspace fall on the star they were heading to next as a meteor shower | CONFIRMED (`FUN_1040_0fca`) |
-| Refuelling and colonizing | at the end of every turn each fleet at one of your colonies is refuelled and its colony ships take on 10 colonists each; then every fleet at a star looks at it again and, if the star isn't yours and the fleet has colonists, founds a colony. So a colony ship colonizes at the end of any turn it sits at a free star, not only when it arrives | CONFIRMED (`FUN_1040_2fa8`, `FUN_1040_34e9`, `FUN_1040_3645`) |
-| Arrival messages | only the owner is told. "Your fleet of … has arrived at …" only at the last stop, when that star was already explored and is your colony or nobody's (and the fleet isn't a colony ship); "… has stopped at … on the way to …" at each stop on a route. No notice to a colony's owner when someone else arrives | CONFIRMED (`FUN_1040_23ed`) |
+| Refuelling and colonizing | at the end of every turn, after the player's income, each fleet at one of your colonies is refuelled and its colony ships take on 10 colonists each; then every fleet at a star (newest first) looks at it again and, if the star isn't yours and the fleet has colonists, founds a colony. So a colony ship colonizes at the end of any turn it sits at a free star, not only when it arrives | CONFIRMED (`FUN_1040_2fa8`, `FUN_1040_34e9`, `FUN_1040_3645`) |
+| Arrival messages | only the owner is told, as the fleet moves (before any battle), from the player's own record of the star: "Your fleet of … has arrived at …" only at the last stop, when the record says the star is explored and is your colony or nobody's (and the fleet isn't a colony ship); "… has stopped at … on the way to …" at each stop on a route. No notice to a colony's owner when someone else arrives | CONFIRMED (`FUN_1040_23ed` @1040:24a5-25a2) |
 | Travel | each hop takes ⌈distance ÷ Speed⌉ turns, counted down one a turn | CONFIRMED (`FUN_1068_0a94`, `FUN_1040_23ed`) |
 | Exploring sound | by the star's quality 0–20 (`FUN_1020_1a2d`, the computers' own rating): 6000 at 15 or more, 6002 from 1 to 14, 6001 at 0. The quality is 0 only when gravity is over 2.56 times home's (5.0.5 also gives 0 when the gravity ratio is over 2 and the temperature 50 °F off) | CONFIRMED (`FUN_10c0_0c50` @10c0:0c98) |
 | Exploring message | "Gravity: 1.23G. Temp: 72.5°F" to a tenth of a degree; the remake rounds to whole degrees | CONFIRMED (string 703, `FUN_1040_34e9`); the remake DIFFERS (text only) |
@@ -179,14 +191,14 @@ offline. The repository includes their output, not the DOS game itself.
 
 | What | DOS 2.0 | Status |
 |---|---|---|
-| Who fights | the colony's owner holds the star; everyone else, in random order, fights the holder one at a time, and the winner holds the star | CONFIRMED (`FUN_1018_0032`) |
+| Who fights | the colony's owner holds the star; everyone else, in random order, fights the holder one at a time, and the winner holds the star; when both sides of a duel die, the next attacker holds it without a fight | CONFIRMED (`FUN_1018_0032` @1018:0032-0772) |
 | Units | each ship type is cut into groups, so a side has at most 5 (unless it has 5 or more types) | CONFIRMED (`FUN_1018_1340`, `14f7`) |
 | Order of fire | by Speed, fastest first, attacker before defender; ships hit during a speed level still fire in it. No round limit | CONFIRMED (`FUN_1018_0976`) |
 | Targets | each side shoots at one target until it dies: a colony ship first, then a satellite, then a ship picked from a random start, then the planet | CONFIRMED (`FUN_1018_1e98`) |
 | A shot | (0–20 + 5W + 10) × WPNRAT[W − S + 25] (the hit table is resource "WPNRAT" in the program), ÷ 6 against a ship (at least 1), × 4 against a planet. Damage left over when a ship dies is lost. Satellites shoot once | CONFIRMED (`FUN_1018_172a`) |
 | The planet | fights only for its owner when defending, with Weapons and Shields both equal to the owner's Weapons tech and hit points equal to its population; it shoots once a round, only when it is the defender's last unit | CONFIRMED (`FUN_1018_14f7`, `0976`) |
-| Debris | a fifth of the metal of every ship destroyed goes to a winning colony owner, or falls onto the star (only the winner is told) | CONFIRMED (`FUN_1018_260b`) |
-| Reports | the winner: "You won a battle at S. You lost N of your ships. X lost M." or, for a colony left with no ships of its own, "S successfully defended itself against an enemy attack from X."; the loser: "You lost a battle at …" or, for a colony that had no ships, "X destroyed your colony at S." (report codes 1033–1035 and 1009, strings 705–707 and 681) | CONFIRMED (`FUN_1018_260b`) |
+| Debris | after each duel, a fifth of the metal of every ship destroyed in it: a defender that wins at its own colony recovers it (1051); any other winner sees it fall onto the planet (1052); when both sides died it is lost | CONFIRMED (`FUN_1018_260b`) |
+| Reports | one pair a duel, the attacker's then the defender's, with that duel's counts. The winner: "You won a battle at S. You lost N of your ships. X lost M." or, for a defending colony left with no ships, "S successfully defended itself against an enemy attack from X."; the loser: "You lost a battle at …" or, for a defending colony that had no ships, "X destroyed your colony at S." (report codes 1033–1035 and 1009, strings 705–707 and 681) | CONFIRMED (`FUN_1018_0032` @1018:0732, `FUN_1018_260b`; 1.2's `MakeResultMessages` is the same routine) |
 | What each side learns | each battle leaves every player who fought there strength estimates the computers use: the loser learns the strength of the ships left and, at a colony, of the planet, ((population + 49) ÷ 50) × (Weapons + 1)² ÷ 125, half the time less; the winner's estimates are cleared. An attacked colony owner puts more metal into defence: at least 70 % after a loss, at least 40 %, then +10, at most its "colonies defended" | CONFIRMED (`FUN_1018_260b`, as Mac 1.2's `MakeResultMessages`) |
 | Luck and stances, arriving late | not in 2.0 | CONFIRMED |
 
@@ -195,37 +207,55 @@ offline. The repository includes their output, not the DOS game itself.
 | What | DOS 2.0 | Status |
 |---|---|---|
 | New year | each turn opens with "The game has been updated to the year N." (report 1010, string 682) | CONFIRMED (`FUN_1040_0038` @1040:02af) |
-| Messages to other players | at most ten a turn ("Sorry, you can only send ten messages per turn.", string 160; each player's outgoing list is ten 8-byte entries) | CONFIRMED (string 160, `FUN_1040_0038` @1040:039d) |
+| Messages to other players | at most ten a turn ("Sorry, you can only send ten messages per turn.", string 160; each player's outgoing list is ten 8-byte entries). Each is built from parts: to whom, "I like", "I don't like" or "I own", and a planet or a player (strings 176-210). They are reported at the end of the turn (reports 1036-1050); an "I own" message about a star the sender does own marks it as the sender's on the receiver's map. The remake's messages are free text with no effect (interface not done) | CONFIRMED (`SENDMESSAGEDLGPROC` @1070:1a46-1ad8, `FUN_1040_0038` @1040:05d4-0690, the "I own" check @1040:062f-0668) |
 | Losing your last colony | at the end of each turn a player with no colonies is marked as dying, colony ships or not, and everyone is told "X has just been eliminated from the game." (strings 726–727); still none at the end of the next turn and they are out for good; a colony founded in between brings them back | CONFIRMED (`FUN_1040_3bd4`, `FUN_1050_09e3`) |
 | The winner | from 2010 on, with more than one player, the only player who is neither out nor dying (strings 728–729). The remake also ends the game when every human is out (GUESS) | CONFIRMED (`FUN_1040_3fa6`) |
 | An out player's fleets | nothing removes them; they still fight, and an out computer still moves them (the computer turn runs for every computer slot) | CONFIRMED (`FUN_1040_0038` @1040:02bb) |
 | Random events | none. 2.0's files contain the text of a nova, a revolt, a volcanic eruption, metal found, a fleet lost in hyperspace and a wormhole, but its code never shows them (the features arrive in later versions) | CONFIRMED (every caller of the report and alert routines in `WINHO.EXE`) |
+| A colony wiped out by meteors | report 1009, "%s destroyed your colony at %s.", with nothing given for the first %s: the name shown is that of the player whose number happens to be in the report slot's spare bytes from an older report. The remake says "A meteor shower destroyed your colony at …" (see open questions) | CONFIRMED (`FUN_1040_27ee` @1040:2ab3-2acd, `FUN_10c0_0784` case 1009 @10c0:09b9, `FUN_10c0_0e20`) |
 
 ### Settled since the first version of this file
 
 - **How the computers split their money** (`FUN_1020_35f9`): it is Mac 1.2's
   `ResolveSpending`. What is left is saved; every budget bar is its money over the total,
   per mille rounded up; each colony's own bars split its money between terraforming, mining
-  and ships. The ruleset now uses 2.0's whole computer turn (below), not 5.0.5's.
+  and ships, a bar at −1 being left as it is.
 - **The personality fields** (`FUN_1030_1b51`): the same fields and ranges as 1.2's
   `SetCompAttrs` (see Setup).
-- **Colonizing at the end of any turn**: CONFIRMED (`FUN_1040_2fa8`) and now done.
-- **The sine table**: 2.0's own (`COSINES`, `SINES`), now used.
-- **The computers' attack rating**: 2.0's own scale, 16-bit quirk and all; the 5.0.5
-  computers that needed the ÷ 50 are gone, so the question is moot.
+- **Colonizing at the end of any turn**: CONFIRMED (`FUN_1040_2fa8`) and done.
+- **The sine table**: 2.0's own (`COSINES`, `SINES`), used.
+- **The computers' attack rating**: 2.0's own scale, 16-bit quirk and all.
+- **In the full pass** (`docs/coverage-20.md`), from 2.0's own code:
+  - a finished part's share passes on to the other bars (`FUN_1040_269d`), and the bars
+    are kept per mille with the −1 marks;
+  - shares are worked out without dividing by their total, with 2.0's $2,000,000 rule;
+  - a new colony's share is found by 2.0's own redistribution (`FUN_1010_16f2`, `179a`,
+    `218e`);
+  - a lost colony's share goes to Savings and the colony ships there are loaded
+    (`FUN_1040_38c0`);
+  - the turn runs for out players too (`FUN_1040_0038`);
+  - routes are planned again at every stop (`FUN_1040_25ce`);
+  - arrival messages are written as fleets move, from the player's record (`FUN_1040_23ed`);
+  - battles report each duel (`FUN_1018_0032`, `260b`);
+  - taking the first ship out of the queue loses what was paid (`FUN_10e8_17af`), and a
+    queued design gets new ships in its own slot (`FUN_10e8_16e4`);
+  - fleets hold one design; Organize Ships averages the fuel used and clears orders
+    (ORGFLEETSDLGPROC);
+  - the Create Galaxy window allows 0 to 19 computers (CREATEGALAXYDLGPROC @1108:15f0-162c,
+    scroll bar range 0-19).
 
 ### Still unclear
 
-- What happens to a ship's part-payment when you take it out of the queue by hand (the
-  remake gives it back; GUESS). Scrapping the type loses it (CONFIRMED).
-- The names winners and players add to the star and computer-name files on disk
-  (`FUN_1030_1049`, `FUN_1040_4028`): NOT IMPLEMENTED; the remake uses the built-in lists.
-- How many computers the Create Galaxy dialog allows (its handlers sit behind a jump
-  table); the remake allows up to the 20 player slots.
+See `docs/open-questions.md` (2.0 section). Not implemented, by choice or not yet:
+
+- The names winners add to the star list and the humans' names added to the computer
+  names file (`NAMESTARDLGPROC`, `FUN_1030_1049`, `FUN_1040_4028`): the remake uses the
+  built-in lists.
 - Several human players: 2.0 joins humans one at a time with passwords; the remake's hot
-  seat takes turns on one computer instead (NOT IMPLEMENTED as in 2.0).
-- 2.0 plans a fleet's route again at every stop and says "can no longer reach" if the way is
-  gone; the remake plans it once (NOT IMPLEMENTED, as before).
+  seat takes turns on one computer instead.
+- The Fix Spending command (`FUN_1010_1ce7`), the budget window's floors when you drag a
+  share (`FUN_1010_179a`), 2.0's Send Message window (`SENDMESSAGEDLGPROC`) and the
+  Explored Planets list.
 - Text only: the scrapping message ("Your fleet of … at … has been scrapped for … metal.",
   string 688, `FUN_1040_0fca`) and the explore message's tenths of a degree aren't
   reproduced; the remake's wording is used.
@@ -234,14 +264,29 @@ offline. The repository includes their output, not the DOS game itself.
 
 `js/ai-12.js` is a port of Mac 1.2's `DoComputerTurn` and its routines (see
 `docs/12-findings.md` for what they do). 2.0's computer turn is the same code: WINHO.EXE's
-segment 1020 holds the same routines, and every constant in them is 1.2's. These were read
-side by side with 1.2's and do the same, branch by branch: `FUN_1020_0000`,
-`FUN_1030_1b51`, `FUN_1020_3b45`, `FUN_1020_4019`, `FUN_1020_4a3d`, `FUN_1020_283d`,
-`FUN_1020_2a80`, `FUN_1020_35f9` and the battle estimates in `FUN_1018_260b`. The rest were
-compared by their constants (all the same, apart from structure sizes and debug strings).
-The only difference found is the attack rating's 16-bit arithmetic (`FUN_10f0_05e9`), which
-the ruleset supplies (`rs.shipPower`). So the DOS 2.0 ruleset registers `js/ai-12.js` as
-its AI (`ai: 'dos'`), and 1.2's behaviour is unchanged by the sharing.
+segment 1020 holds the same 36 routines in the same order, with 1.2's constants, so 2.0
+needs no computer-player file of its own. Every one of them has been read against
+`js/ai-12.js`: `FUN_1020_0000`, `FUN_1030_1b51`, `FUN_1020_3b45`, `FUN_1020_4019`,
+`FUN_1020_4a3d`, `FUN_1020_283d`, `FUN_1020_2a80`, `FUN_1020_35f9` and the battle
+estimates in `FUN_1018_260b` in the first pass, the rest (`03e7`, `0926`, `0974`, `09de`,
+`0b51`, `0ceb`, `0de5`, `0f82`, `10b5`, `12d1`, `2ec3`, `3322`, `3ac6`, `44d5`, `4582`,
+`54df` …) in the full pass.
+
+Where `js/ai-12.js` departs from the code, the ruleset now supplies 2.0's own data through
+hooks, so 1.2's games are left as they were (1.2 has the same code; see
+`docs/open-questions.md`):
+
+| What the code does | `js/ai-12.js` before | Hook (2.0) |
+|---|---|---|
+| The attack rating is worked out partly in 16 bits (`FUN_10f0_05e9` @10f0:079d-0851) | 32 bits | `rs.shipPower` (first pass) |
+| "Still being terraformed" is a Terraform bar that isn't −1 (`FUN_1020_03e7` @1020:0445, `0b51` @0b95 and @0c55, `12d1` @150d) | the temperature gap | `rs.terraLeft` |
+| ResolveSpending writes the bars per mille, leaving a bar at −1 alone (`FUN_1020_35f9` @1020:3829-3996) | fractions | `rs.setColonyBars` |
+| The computers plan in the new year: the year is moved on before `FUN_1020_0000` runs (`FUN_1040_0038` @1040:01a8, then @1040:02de), so a Smart computer's free look at the stars within 9 ly (`FUN_1020_4a3d` @1020:4a85, year < 2020) is for the first turn only, and the old-news checks (@1020:51a6-5262) count from the new year | the old year | `rs.aiYear` |
+
+One more slip in the code, with no effect on play: `FUN_1020_4582` (ScrapOldFighters)
+passes the fleet's number in the list as the Range to `FUN_1068_03a9` (@1020:468b); the
+colony it sends the fleet to is always within the fuel it has left, so the route is
+direct and the Range is never used (3.0.1 has the same slip).
 
 | 2.0 (`WINHO.EXE`) | Mac 1.2 |
 |---|---|
@@ -291,19 +336,19 @@ rules.
 | Computers' money split (`aiBudget` hook) | `ResolveSpending` | DIFFERED, now 2.0's (`FUN_1020_35f9`) |
 | Computers' personalities (`aiPersonality` hook, 5.0.5 ranges) | 1.2's fields and ranges | DIFFERED, now 2.0's (`FUN_1030_1b51`) |
 | Computers' building, mining, terraforming money (`aiBuild`, `aiMineMoney`, `aiTerraMoney`) | `BuildAFleet`, `AddColonySupportActions`, `AddTerraformingActions` | DIFFERED, now 2.0's (`FUN_1020_2a80`, `03e7`, `0b51`) |
-| Smart computers' map before 2020 (`aiTurnStart`, ≤ 9 ly) | stars less than 9 ly away | DIFFERED, now 2.0's (`FUN_1020_4a3d` @1020:4a85) |
+| Smart computers' map before 2020 (`aiTurnStart`, ≤ 9 ly) | stars less than 9 ly away, while the (already moved on) year is before 2020: the first turn only | DIFFERED, now 2.0's (`FUN_1020_4a3d` @1020:4a85, `rs.aiYear`) |
 | Attack rating (÷ 50 for the 5.0.5 computers) | not divided, 16-bit second term | DIFFERED, now 2.0's (`FUN_10f0_05e9`) |
 | What the computers remember of a star (`observe` hook, 5.0.5 enemy strength) | battle estimates only | DIFFERED, now 2.0's (`FUN_1018_260b`) |
-| Colony order the computers use (engine order) | newest colony's slot first | DIFFERED, now 2.0's (`FUN_1040_3645` @1040:3705) |
+| Colony order the computers use (engine order) | newest colony's slot first; the turn's own loops too | DIFFERED, now 2.0's (`FUN_1040_3645` @1040:3722) |
 | Refuelling (`refuel`, with tankers and biologicals) | at your colonies, colony ships refilled; nothing else | DIFFERED (same where it applies), now 2.0's (`FUN_1040_2fa8`) |
 | Colonizing (`canColonize`, engine: on arrival only) | at the end of any turn | DIFFERED, now 2.0's (`FUN_1040_2fa8`, `3645`) |
 | Exploring sound (`exploreQuality`) | quality from `FUN_1020_1a2d`, no "ratio over 2 and 50 °F off" rule | DIFFERED, now 2.0's (`FUN_10c0_0c50`) |
 | Planet classes (`planetClass`, with a "barely habitable" band) | only the 2.56 line | DIFFERED, now 2.0's (`FUN_1040_31c3`) |
 | Arrival notices (`features.arrivalNotices: true`) | none to other players | DIFFERED, now 2.0's (`FUN_1040_23ed`) |
-| Arrival message (engine: at any star not yours) | at your colony or a free explored star; at every stop on a route | DIFFERED, now 2.0's (`FUN_1040_23ed`) |
+| Arrival message (engine: at any star not yours) | written as the fleet moves, from the player's record: at your colony or a free explored star; at every stop on a route | DIFFERED, now 2.0's (`FUN_1040_23ed`) |
 | Elimination and winning (engine) | dying for a turn, colony ships don't count, last one standing from 2010 | DIFFERED, now 2.0's (`FUN_1040_3bd4`, `3fa6`, `FUN_1050_09e3`) |
 | Out players' fleets (engine removes them) | they stay; out computers keep moving them | DIFFERED, now 2.0's (`FUN_1040_0038`) |
-| Battle reports (engine) | 2.0's four reports | DIFFERED, now 2.0's (`FUN_1018_260b`) |
+| Battle reports (engine) | 2.0's four reports, a pair for each duel | DIFFERED, now 2.0's (`FUN_1018_0032`, `260b`) |
 | First messages (engine credits) | 2.0.1 credits | DIFFERED, now 2.0's (`FUN_1030_1299`) |
 | New-year message (none) | every turn | DIFFERED, now 2.0's (`FUN_1040_0038` @1040:02af) |
 | Computer names (engine list) | 2.0's 20 + 20 names | DIFFERED, now 2.0's (`FUN_1040_4028`) |
@@ -313,7 +358,12 @@ rules.
 | Messages a turn (engine: no limit) | ten | DIFFERED, now 2.0's (string 160, `FUN_1040_0038`) |
 | Sine table (computed) | 2.0's tables | DIFFERED, now 2.0's (`FUN_1118_0583`) |
 | Scrapped queued type (yard money passed on to the next ship) | lost | DIFFERED, now 2.0's (`FUN_1040_0fca`) |
-| A finished terraforming / mining part | its money is lost | CONFIRMED; now 2.0's (see Money) |
+| A finished terraforming / mining part | its share passes to the colony's other bars (the earlier version of this file had it lost) | now 2.0's (`FUN_1040_269d`, see Money) |
+| Shares and bars (fractions of the total) | per mille, used as they stand, with the $2,000,000 rule | DIFFERED, now 2.0's (see Money) |
+| A lost colony's share (spread over the others) | to Savings; colony ships there loaded | DIFFERED, now 2.0's (`FUN_1040_38c0`) |
+| The turn for out players (engine: only players still in) | every player | DIFFERED, now 2.0's (`FUN_1040_0038`) |
+| Taking a ship out of the queue (part-payment given back) | lost | DIFFERED, now 2.0's (`FUN_10e8_17af`) |
+| Putting fleets together (engine: same class) | same design; Organize Ships averages the fuel used and clears orders | DIFFERED, now 2.0's (`FUN_1068_0000`, ORGFLEETSDLGPROC) |
 | Years per turn (10) | +10 a turn | matches (`FUN_1040_0038` @1040:01a8) |
 | Colony ships not used up (`colonyShipUsedUp: false`) | the fleet stays; colonists refilled at your colonies | matches (`FUN_1040_3645`, `2fa8`) |
 | Habitability (`hab`) | gravity ratio, temperature gap, H = ((ratio − 100) × 12,000 + gap²) ÷ 100 | matches (`FUN_1040_27ee` @1040:2ae1–2b91) |
@@ -327,16 +377,28 @@ rules.
 
 ## Changes to the shared code
 
-`js/engine.js` got two optional hooks; the other rulesets' test games are byte for byte the
-same:
+`js/engine.js` has these optional hooks; the other rulesets' test games are byte for byte
+the same:
 
 - `rs.arrivalSays(G, p, fleet, star)`: when a fleet's owner is told it has arrived.
 - `rs.femaleComputers` may be a number: the chance that a computer is a woman.
+- `rs.economyForAll`: the turn's first pass runs for out players too (full pass).
+- `mergeFleets` passes both fleets' fuel to `rs.organized` (full pass).
 
-`js/ai-12.js` now takes the attack rating from the ruleset (`rs.shipPower`) and registers
-itself for the DOS 2.0 ruleset too. The 1.2 pieces that turned out to be 2.0's (battle
-estimates and reports, the end of the game, the new-year message, ship names, colony order)
-moved from `js/rules-12.js` into `js/rules-dos.js`, which 1.2 builds on.
+`js/ai-12.js` takes the attack rating from the ruleset (`rs.shipPower`) and registers
+itself for the DOS 2.0 ruleset too; in the full pass it also asks the ruleset whether a
+colony is still being terraformed (`rs.terraLeft`), lets it write the bars
+(`rs.setColonyBars`) and takes the planning year from it (`rs.aiYear`). The 1.2 pieces that
+turned out to be 2.0's (battle estimates and reports, the end of the game, the new-year
+message, ship names, colony order) moved from `js/rules-12.js` into `js/rules-dos.js`, which
+1.2 builds on.
+
+In the full pass the 2.0 turn got its own routines in `js/rules-dos.js` (`economy20`,
+`terraMine20`, `restoreBars20`, `research20`, `pass2_20`, `income20`, `colonize20`,
+`settle20`, `giveShare20`, `removeColony20`, `battle20`, `fleetArrives20`, `replan20`,
+`organized20` …). 1.2 has the same routines in its code, but its ruleset keeps the
+versions it had (`base12` in `js/rules-dos.js`, used by `js/rules-12.js`), so 1.2's games
+are unchanged; bringing 1.2 in line is listed in `docs/open-questions.md`.
 
 ## The DOS skin
 

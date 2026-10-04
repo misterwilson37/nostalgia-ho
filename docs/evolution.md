@@ -81,7 +81,72 @@ Black-and-white and colour icons (`ICN#`, `icl8`): planets by state, a face per 
 
 ## DOS / Windows 3.1 2.0 (1993)
 
-To be written in turn.
+### What it is
+
+2.0 is the game 1.2 was a pre-release of. The Windows 3.1 edition (`WINHO.EXE`, 1992,
+Windows programming by Steven Ohmert at Presage) came first; the DOS edition (1993, Ed
+Murphy at Presage, for New World Computing) is a port of it, with the same art, sounds,
+tables and turn code. Its credits read "Spaceward Ho! Version 2.0.1 by Peter Commons.
+Artwork by Howard Vives." Everything below is from the code of both programs
+(`docs/coverage-20.md`, `docs/dos-findings.md`; 1.2: `docs/coverage-12.md`,
+`docs/12-findings.md`).
+
+### Rules: what stayed
+
+The turn is 1.2's, routine by routine and constant by constant: one money pool divided
+by per-mille shares; colonies paying for themselves from their own share; the three bars
+per colony and `RestoreStarsBars` (`FUN_1040_269d` = `@a24e2`); terraforming (√(money/2)
+tenths of a degree), mining (15 × √money); research (√(money ÷ 120/150/150/150/200) ×
+60-140 %, Range costing L²); the three-slot ship queues; costs with 30.6 and 4.445;
+routes through your colonies planned again at every stop; colonizing at the end of any
+turn; battles as duels with the colony's owner, the WPNRAT hit table and a pair of
+reports a duel; the dying-then-out rule and the last player standing from 2010. The
+galaxy generator is 1.2's too, with the same sine tables.
+
+### Rules: what changed
+
+| Area | 1.2 | 2.0 |
+|---|---|---|
+| New game | no New Game window: every galaxy a Small, Dense Circle with one Average computer, every human at Normal skill (`CreateGalaxy @e0004`, `CreateNewPlayer @101972`) | the Create Galaxy window: five sizes, five shapes, Dense or Sparse, the computers' IQ (Dumb, Average, Smart) and 0 to 19 computers (CREATEGALAXYDLGPROC); each human picks a skill, Novice to Expert, and a gender (NEWPLAYERDLGPROC). The skill table and the computers' IQ branches were already in 1.2's code, unreachable |
+| Women | every player a man | women's faces and names; each computer a woman half the time (`FUN_1050_1ec9`) |
+| Novas | the code is there, gated by a style bit that is never set (`CheckForSupernova @a2640`) | gone: the turn has no nova step (`FUN_1040_0038`) |
+| Messages between players | French text but no command | the Send Message window: "I like", "I don't like" or "I own" a planet or a player, ten a turn; a true "I own" shows the star as the sender's on the receiver's map (SENDMESSAGEDLGPROC, `FUN_1040_0038` @1040:062f) |
+| Organize Fleets | every fleet of the design at the star gets the least fuel used; the older records keep their orders (`OrganizeFleets @113896`) | every such fleet gets the average fuel used (counted up to 11 fleets) and loses its orders (ORGFLEETSDLGPROC) |
+| The computers' attack rating | worked out in 32 bits (`CalcShipPower @114e10`) | the second term in 16 bits, so it wraps from about Weapons 4 (`FUN_10f0_05e9`) |
+| A colony wiped out by meteors | a blank report (1059, no text) | report 1009, "%s destroyed your colony at %s.", with a stray player's name |
+| Temperatures | °C | °F |
+| Names | French computer and ship names; the star list plus "Tiber" | English names (Alex … Walter, Andrea … Anne; Needle, Killer, Spreader, Defender …); 190 star names plus those winners add to a names file |
+
+### Computer players
+
+The same 36 routines as 1.2's `DoComputerTurn`, in the same order, with the same
+constants (segment 1020). What changed is around them: there can be up to 19 computers
+instead of one; their IQ can be Dumb, Average or Smart, so 1.2's unreachable Dumb and
+Smart branches now play (Smart: aggressiveness 10, a free look at the stars within 9 ly
+on the first turn, other computers' stars scored at a quarter); a computer is a woman half
+the time; and the attack rating they compare wraps in 16 bits. A human can hand their
+turn to the computer (Auto Play, AUTOPLAYDLGPROC).
+
+### Interface
+
+A Windows 3.1 program: a map window with floating windows for the budget, the
+technology, the reports and the selected planet (`Show/Hide Floating Windows`), the
+planet's three bars and the budget dragged with the mouse (`FUN_1010_04a7`,
+`FUN_1010_155c`), fleets dragged on the map with the route drawn as you go
+(`FUN_1080_09e5`). Windows: Ship Types (rename, mark for scrapping), New Type, Build Ships
+at a planet, Fleets (mark for scrapping), Organize Ships, Explored Planets, Review Battle,
+Compare Players (rankings from 2010, new in 2.0), Send Message (new), the players' skills,
+Name a Star for the winner, Game Info, Auto Play, poll speed and battle speed; Fix
+Spending in the budget window; printing the map (segment 10b0). Several humans join the game file
+in 2000 with passwords, as in 1.2, and can play from different machines: the game waits
+for everyone or lets a player force the turn (boxes 3070, 3210, 3230).
+
+### Art and sound
+
+The DOS and Windows editions share 392 of their 394 pictures (planets by state, faces,
+ship parts drawn by Range + Speed, Shields and Weapons, with hidden ships at 12/12 and
+15/15, report pictures) and the same 14 sounds; see `docs/dos-findings.md`, "The DOS
+skin".
 
 ## Mac 3.0.1 (1993)
 

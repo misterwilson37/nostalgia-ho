@@ -95,19 +95,90 @@ These are what 1.2's code does and what the remake now does; they look like slip
 
 ## DOS / Windows 3.1 2.0 (1993)
 
-To be done in turn (2.0's full pass comes next). Already noted from an earlier look at
-`WINHO.EXE`, to be settled in that pass:
+All 743 routines of the Windows 3.1 program `WINHO.EXE` have been read
+(`docs/coverage-20.md`; none unread), and every rule question that came up was answered
+from 2.0's own code, with its address in `docs/dos-findings.md`. No rule falls back on 1.2
+or a later version. The earlier notes here are settled: taking the first ship out of the
+queue loses what was paid (`FUN_10e8_17af`); routes are planned again at every stop
+(`FUN_1040_25ce`); a queued design gets new ships in its own slot (`FUN_10e8_16e4`); a
+finished part's share is passed on (`FUN_1040_269d`, 2.0 has 1.2's `RestoreStarsBars`); the
+Create Galaxy window allows 0 to 19 computers (CREATEGALAXYDLGPROC @1108:15f0-162c). What
+is left:
 
-- Taking the first slot's last ship out of a queue: the Build Ships window's remove
-  handler (10e8:17af, @10e8:181a) zeroes the part-payment, as 1.2's does, so it would be
-  lost; the ruleset still gives it back.
-- Routes are planned again at every stop (`FUN_1040_25ce`, called from `FUN_1040_23ed`
-  and `FUN_1040_2fa8`); the ruleset plans them once.
-- A design already queued gets new ships in its own slot (10e8:16e4).
-- Whether 2.0 has 1.2's `RestoreStarsBars` (a finished part's share passed on); the
-  ruleset currently wastes it.
-- How many computers the Create Galaxy window allows (its handlers sit behind a jump
-  table at 1108:1d57).
+### Settled, worth confirming
+
+These are what 2.0's code does and what the remake now does; they look like slips.
+
+1. **A colony wiped out by a meteor shower** gets report 1009, "%s destroyed your colony
+   at %s.", but nothing is given for the first %s (`FUN_1040_27ee` @1040:2ab3-2acd): the
+   report formatter reads a player number from the report record's spare bytes
+   (`FUN_10c0_0784` @10c0:09b9), which only hold whatever an older report left there
+   (`FUN_10c0_0e20` writes them only when it is given something). So 2.0 names a more or
+   less random player as the destroyer. The remake says "A meteor shower destroyed your
+   colony at …". (1.2 prints a blank line here.)
+2. **Organize Ships and fuel.** On OK every fleet of the design at the star gets the
+   average fuel used of those fleets, and the average is their total over their number
+   counted only up to 11, so with 12 or more fleets it comes out too high (ORGFLEETSDLGPROC
+   @10e8:2a7b-2ae6). The smallest fuel used is worked out alongside (@10e8:2a9b-2ab6) and
+   never used; 1.2 gives every fleet the least fuel used. Was the average meant?
+3. **Organize Ships clears orders**: every fleet of that design at the star loses its
+   destination and route, even one the window left alone (@10e8:2e2c-2e6f).
+4. **Organize Ships fills colony ships**: a new fleet made in the window is loaded with
+   colonists (`FUN_1068_0000` @1068:018c-0194), so splitting an empty colony fleet at a star that
+   isn't your colony refills part of it (as in 1.2).
+5. **A slip with no effect**: the computers' ScrapOldFighters passes a fleet's number in
+   the list as its Range to the route finder (`FUN_1020_4582` @1020:468b); the colony it
+   sends the fleet to is always within its fuel, so the Range is never used (3.0.1 has the
+   same slip).
+6. **Out players keep playing their turn**: the first and second passes run for every
+   player, out or not (`FUN_1040_0038` @1040:02de-038b, 04c3-06d5), so an out player's money
+   still earns interest and its research goes on (only out computers spend it).
+
+### Remake's choices
+
+1. **Random numbers.** 2.0 draws from Borland's `rand()` (`FUN_1000_13e9`, seeded by
+   `FUN_1000_13d6`) through `RND` (`FUN_1100_0000`); the remake has its own random numbers,
+   so a game can't be replayed move for move.
+2. **Every human out.** 2.0 goes on as long as the computers play (`FUN_1040_3fa6` needs
+   exactly one player standing); the remake ends the game when every human is out, and
+   with no winner if nobody is left standing.
+3. **Several humans.** 2.0 lets humans join the game file in the year 2000, each with a
+   name and password (`FUN_1050_1d08`, PLAYERENTRYDLGPROC), and plays each turn when
+   everyone has ended theirs, also across machines (`FUN_1050_0e65`, `FUN_1050_1216`). The
+   remake's hot seat passes one computer round instead.
+4. **The budget sliders.** 2.0's budget window keeps shares in whole per mille, and
+   dragging one moves the others in proportion but never below a losing colony's least
+   share (`FUN_1010_179a`, `FUN_1010_218e`). The remake's sliders move the others in
+   proportion with no floor; the turn reads each share to the nearest per mille.
+5. **Evacuate.** The remake's planet panel has an Evacuate button; 2.0 has no command to
+   give up a colony (only leaving it unfunded, with the "Let 'em die" warning, box 5060).
+6. **Sound of a won battle.** 2.0 plays nothing for the battle reports (`FUN_10c0_0c50`);
+   the remake plays 7027 because its auto play stops on that sound.
+7. **Battle replays.** 2.0 stores one replay per duel and deletes those over 500 years old
+   (`FUN_1050_2bf3`, `FUN_1040_486f`); the remake keeps one replay per star.
+
+### Interface not done
+
+- **Send Message** (SENDMESSAGEDLGPROC): 2.0's messages are built from "I like", "I don't
+  like" or "I own" and a planet or a player, ten a turn; an "I own" message about a star
+  the sender owns marks it as the sender's on the receiver's map (`FUN_1040_0038`
+  @1040:062f-0668). The remake's messages are free text with no effect.
+- **Fix Spending** (`FUN_1010_1ce7`, `1f55`, `1f6b`): cuts each colony's share to what it
+  can use, or raises a losing colony to its least share out of Savings.
+- **Naming a star after a win** (NAMESTARDLGPROC) and the humans' names added to the
+  computer names (`FUN_1040_4028`): 2.0 keeps them in a names file for later galaxies
+  (`FUN_1030_1049` draws star names from it too). The remake keeps no such file.
+- The Explored Planets list (LISTSTARSDLGPROC) and the poll and battle speed settings.
+
+### Found here, to look at in 1.2
+
+1.2 has the same routines (`docs/coverage-12.md`), but its ruleset keeps the versions it
+had (`base12` in `js/rules-dos.js`) so that its games stay as they were: the bars kept
+per mille with their −1 marks; shares used as they stand, with the $2,000,000 rule; a
+lost colony's share going to Savings and its colony ships loaded (`DecolonizeStar @a3fd4`
+does this too); a new colony's share by `FUN_1010_179a`'s redistribution; the turn run for
+out players; and the computers planning in the new year (1.2's `EndTurn` also adds 10 to
+the year before `DoComputerTurn`).
 
 ## Mac 3.0.1 (1993)
 
