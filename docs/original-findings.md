@@ -349,6 +349,11 @@ With weapons W, shields S, range R, speed V and mini M:
 - A planet can only build as many ships in a turn as it has population units.
   CONFIRMED. (It only matters for brand-new colonies.)
 - At most 24 ship designs at once ("assembly lines are full"). CONFIRMED.
+- **More than 17 types**: at the start of each turn's money step, a player
+  with more than 17 ship types loses the oldest ones that have no ships in
+  service and aren't the newest of their kind, until 17 are left. This is
+  for every player, humans too. CONFIRMED (`FUN_10074580`); it was missing
+  from the web app's 5.0.5 rules (it was thought to be the Palm game's own).
 
 ## 8. Movement and fuel
 
@@ -396,9 +401,29 @@ CONFIRMED:
   fights again.
 - **Luck in battles** (a game option): each side gets −1, 0 or +1 Weapons per
   battle. The "smarter generals" discovery removes the −1.
-- **Debris**: a fifth of the metal of every destroyed ship. It goes to the
-  planet's owner ("You recovered … metal") or falls onto the planet.
+- **Debris**: a fifth of the metal of every destroyed ship. After the
+  battle the sides are taken in player order, and the first side still
+  standing gets it all: onto its colony's stockpile if it owned the planet
+  ("You recovered … metal", ×5/4 with the recycling discovery), otherwise it
+  falls onto the planet ("… metal has fallen onto …"), told to that side
+  only. If every side was beaten, nobody gets it. CONFIRMED (`FUN_100803e0`).
+- **Who keeps the survivors**: when a side loses some ships of a type, the
+  ships left stay with its fleets listed first; the fleets listed last lose
+  theirs, and each Colony Ship lost takes its 10 colonists. CONFIRMED
+  (`FUN_10081810`). The web app used to take the losses from the first
+  fleets.
+- **What each side learns** (CONFIRMED, `FUN_100803e0`): every side's record
+  of the star gets the battle's year, the enemy colony's population, and
+  estimates of the strength there, which the computers plan with (see
+  "Computer players"). Each side likes each enemy less: 10–30 points for a
+  skirmish (one ship of its own, no Dreadnought present), 50–100 otherwise;
+  when its colony there was destroyed, 100–200, or all its liking if that was
+  over 500. An attacked computer colony (not the turtle's) puts more metal
+  into defence: +10 (kept between 60 and 99) when the colony was beaten with
+  over 20 people, then +5 (between 30 and 99) while under 70.
 - Allies at the same star fight side by side.
+- The sides of a battle are listed, and their luck drawn, in player order
+  (`FUN_1007e870`).
 
 ## 10. Novas, supernovas, Armageddon and other events
 
@@ -448,7 +473,7 @@ All of this needs the **Alliances** option, as in the original. CONFIRMED.
   at once.
 - **Gifts**: up to three a turn, of money or metal. They arrive at the end of
   the turn.
-- **Messages**: the original has canned phrases ("I like you", "Thank you!",
+- **Messages**: the original has canned phrases ("I like *name*.", "Thank You!",
   "Sorry!", "#!$@*$&@•™!" and so on). The computers react to some of them
   (section 12).
 - **Surrender** (CONFIRMED):
@@ -507,10 +532,11 @@ Every computer has a personality made of the same settings as a hidden
   toward players created before the computer, so later players started at 0;
   fixed.
 - **Diabolical computers cheat** (CONFIRMED):
-  - Before 2020 they know every star within 8 light-years of home: each turn
-    the star's record gets this year's planet and metal and "no owner"
-    (`FUN_10088460`). The remake leaves the computer's own colonies out (it
-    classes them from the truth). Added to `ai-original.js`; it was missing.
+  - Before 2020 they know every star within 8 light-years of home: the
+    star's record gets this year's gravity, temperature and metal and "no
+    owner" (`FUN_10088460`), its own colonies near home included. The year the
+    computers see is already the next one (below), so this happens on the
+    first turn only.
   - They treat other computers' planets as a quarter as attractive to attack
     as humans' (the score divided by 4, rounded toward zero, `FUN_10082ea0`;
     the remake rounded up, fixed).
@@ -546,13 +572,97 @@ Every computer has a personality made of the same settings as a hidden
 18–21. Send idle fleets home, reload empty colony ships, and set the same
    budget bars a human uses.
 
-Still looser than the code in `js/ai-original.js` (the Palm port,
-`js/ai-palm.js`, follows the same routines more closely; see
-docs/palm-findings.md): fleets go straight rather than by DeterminePath
-(`FUN_1007d260`) through your colonies; threats come from the ships seen, not
-the battle estimates kept in each star record; no step 1 split of mixed
-fleets; no tanker retirement or chained stops (steps 18–19); ships are bought
-through the human purchase path.
+`js/ai-original.js` follows these routines one by one (each is named in
+the code next to the rule it carries out). Points worth knowing:
+
+- **The year**: the turn routine (`FUN_10072a10`) moves the year on by 10
+  before the computers plan, so every year test in their plans ("after
+  2500", the savings reserve, how old a battle report is) uses the coming
+  year. A human's Auto button plans before the year moves on (`FUN_10066bb0`).
+- **Step 1** (`FUN_10088eb0`): a fleet of several designs at a star is split
+  into one fleet per design, the first design in the list first, except
+  satellite fleets and warships travelling with tankers. A split-off fleet
+  starts with a full tank (a Biological's starts empty) (`FUN_1007bcb0`).
+- **Star classes and threats** (`FUN_10088460`): each star is unexplored,
+  unexplored but a battle seen there, explored and free or friendly, an
+  enemy's, a best buddy's colony, with a fleet of yours there or on its way,
+  or one of your colonies (making money, losing money, or losing money on a
+  hostile planet). The threat to each colony is the largest of what the
+  battles there and nearby left in the computer's records (a Fighter from a
+  free or unknown star in reach). Other players' stars where it never saw a
+  battle get a guess from its own Weapons and Shields. Old news fades: 100
+  years after a battle the estimate there may drop to almost nothing, and
+  every 200 years it is guessed again.
+- **Routes** (DeterminePath, `FUN_1007d260`): a fleet goes straight when its
+  fuel allows; otherwise it hops through colonies of the computer's own and
+  its best buddies', at most 7 hops, never more than 3 times the straight
+  line, shortest first. A fleet whose next hop is beyond its fuel waits with
+  its orders (`FUN_10075f10`). A fleet with a Tanker uses a full tank and
+  routes only through stars whose record is of this year; since the year has
+  already moved on when the computers plan, that is in practice only the
+  Diabolical first-turn look.
+- **Tanker retirement** (`FUN_100870a0`): a computer's Tankers, like its
+  obsolete ships, go home to be scrapped, or are scrapped at once at a
+  colony. (The routine passes the fleet's number in the fleet list where the
+  route-finder expects the fleet's Range; that slip is kept.)
+- **Chained stops** (steps 18–19, `FUN_100843b0`, `FUN_100845f0`): a Smart or
+  Diabolical computer's idle warships with tankers pick a target in Range
+  that they beat by half again (the strongest such, each better one taken
+  two times in three); a Diabolical computer playing more than 10 years a
+  turn adds a second stop it can reach in the same turn.
+- **Buying ships** (`FUN_100852d0`): from Ship Savings above the reserve,
+  never reaching the borrowing limit, only where the colony has a thousand
+  people per ship bought there this turn, not at a star going nova. Dumb and
+  Average computers pay a type's first-ship price for their starting types;
+  Average and up design new types free of it (`FUN_10086830`). When a
+  purchase fails, no more ships are bought that turn, and if the metal was
+  short for a colony ship (with none in service), idle ships at its
+  colonies are scrapped for metal (`FUN_10085700`).
+- **Ship types** (`FUN_10086830`): a type with no ships in service, or ten
+  Weapons levels behind, is retired once any part of it is behind the
+  computer's technology; a new type is designed when the best of a kind is
+  obsolete enough; room is kept for six new types.
+- **Messages** go through an outbox of three a turn (`FUN_100880f0`), as the
+  canned lines "I like %s.", "I hate %s.", "You take %s.", "Thank You!",
+  "Sorry!", "#!$@*$&@•™!", "I need money.", "I need metal." and "I like
+  planets that are …".
+
+### Still unclear (5.0.5 computer players and battles)
+
+Each of these is a point 5.0.5's code doesn't settle, or a place the web app
+still differs; the answer used is given, and none is final:
+
+- **Colonies won in the same turn**: 5.0.5 keeps colonies in the order they
+  were won; for several in one turn the web app takes star order (as 4.0.5
+  does). It only breaks ties.
+- **"Can't terraform"** (colony record +2 = −1): `FUN_10082690` skips such
+  colonies; the web app reads it as "the temperature is already right", as
+  4.0.5 does (`FUN_0045f599`).
+- **Late arrivals**: 5.0.5 fights a battle without the late ships and then a
+  second, full battle, each with its own aftermath (`FUN_1007e870`, two
+  passes). The web app fights both exchanges as one battle with one
+  aftermath and one report.
+- **Per-design stances**: 5.0.5 keeps a stance byte for each design in a
+  fleet, and the computers buy the Tankers for their attack fleets with
+  value 3 in it. The web app keeps one stance per fleet and ignores that
+  value.
+- **The order of groups in a battle** (who shoots first within a Speed, ties
+  for targets) is still the web app's older reading, not checked against
+  `FUN_1007eed0`.
+- **Big battles**: `FUN_100803e0` marks a star where two or more sides
+  brought more than one ship (when a random 10–20 is under the ships
+  present, or more than 4 sides fought). What reads the mark wasn't found;
+  nothing is done with it.
+- **Whose star it is after a lost battle**: 5.0.5 records the side with the
+  colony, else the one with the most ships left (`FUN_10081230`); the web
+  app's shared battle report keeps its own choice.
+- **Auto play**: a human's Auto button sets the computer's aggressiveness and
+  share of colonies defended from the player's preferences
+  (`FUN_10066bb0`); the web app has no such preferences and uses the auto
+  play personality's fixed values.
+- **Nobody to surrender to**: when no other player is liked at all,
+  `FUN_10088160` answers with the player count; the web app surrenders to no
+  one.
 
 ### Where to attack (CONFIRMED)
 
@@ -594,7 +704,9 @@ This is faithful, not a bug in the web app.
 - After 2500 the richest player becomes less popular with everyone, and the
   poorest computer loses heart.
 - Computers dislike the allies of players they dislike.
-- When it changes its mind it may say "I like you." or "I hate you."
+- When it changes its mind it may say "I like *name*." or "I hate *name*."
+  (messages 1041/1042, with the other player's name; the web app used to
+  say "you").
 - **Requests** (`FUN_10085f60`, CONFIRMED; were missing): to each ally, one
   time in 20, "I need metal." (message 1045) after 2500 when its metal in all
   is under 10,000, and "I need money." (1044) after 2400 when its income is
@@ -611,13 +723,23 @@ This is faithful, not a bug in the web app.
   income), surrenders to the player it likes best. Turtles never surrender.
   `FUN_10085f60` doesn't look at the Alliances option (the remake used to
   require it; fixed).
-- Not in the remake (seen while checking the style field, not read in
-  full): after a battle `FUN_100803e0` lowers each side's feelings toward the
-  others (−30…−10, −100…−50 or −200…−100, or by the whole feeling when it is
-  over 500), and a computer that isn't a turtle raises its metal for defence
-  (+10 to between 60 and 99 in some cases, then +5 to at least 30 while under
-  70). The exact conditions are unread; they need battle details the 5.0.5
-  rules don't hand the computers.
+- **After a battle** (`FUN_100803e0`, now in the remake): each side likes
+  its enemies less, and an attacked computer puts more metal into defence;
+  the exact rules are in section 9.
+- **Best Buddies games**: when the game starts with the computers as best
+  buddies, a computer's feelings never change (`FUN_10087f80` checks game
+  option bit 0x20); the remake used to let them drift.
+- With only two players feelings don't change at all (`FUN_10087f80` counts
+  every player, out or not).
+- **Planet preferences**: "I like planets that are …" tells the receiver
+  your home's gravity and temperature (`FUN_10072a10`, at delivery), and new
+  best buddies learn each other's (`FUN_100761c0`). A computer that must
+  abandon a hostile colony offers it to an ally whose liking it suits ("You
+  take *star*.", `FUN_10081fe0`), and tells an ally its own preference once,
+  when asked.
+- A computer that won a battle where the other side lost nothing may say
+  "Sorry!"; when its colony is destroyed it may swear at the attacker and
+  tell everyone "I hate *name*." (`FUN_10087530`).
 
 ## 13. Years per turn, master points and ranks
 
@@ -892,6 +1014,13 @@ All addresses are for the PowerPC code of version 5.0.5, analysed with Ghidra
 | Computer player main / personality | FUN_10081cc0 / FUN_100704d0 |
 | Computer steps | FUN_10088eb0, 10086830, 10085f60, 10088460, 10088fd0, 10086f20, 100870a0, 100872a0, 10087530, 10081fa0, 10081fe0, 10082820, 10082bb0, 10083110, 10082690, 100839a0, 10083e30, 100843b0, 100845f0, 10085900, 10085bd0 |
 | Computer diplomacy | FUN_10087530, FUN_10087f80, FUN_10088160 |
+| Computer action list / jump table of actions | FUN_10088240, FUN_10088330 / FUN_10083e30 (cases 0x10083e78–0x10083fa4: FUN_10083fe0, FUN_10084860, FUN_10085880, FUN_10085070, FUN_100852d0, FUN_10085eb0, FUN_100858d0) |
+| Computer purchase / metal from scrapping / nearest colony | FUN_100852d0 / FUN_10085700 / FUN_100829e0 |
+| Computer obsolescence / colony rating / target score | FUN_10086d90 / FUN_10083810 / FUN_10082d40, FUN_10082ea0 |
+| Route finding (DeterminePath; every caller passes 7 as the 9th argument) | FUN_1007d260 |
+| New fleet / split a design off / fleet class / main design | FUN_1007bcb0 / FUN_1007bdc0 / FUN_1007cc70 / FUN_1007d160 |
+| After a battle: feelings, defence, star records, debris, survivors | FUN_100803e0 (FUN_10081570, FUN_10081160, FUN_10081380, FUN_10081440, FUN_10081230, FUN_10081810, FUN_100816e0) |
+| Auto button (a human's plan) | FUN_10066bb0 |
 | Ship picture builder / special pictures | FUN_100ad750 / FUN_100af8e0 (sheet PICT 11000, mask 11001) |
 | Planet picture | FUN_10090170 (sheet PICT 10000) |
 | Fleet markers | FUN_10091640 |

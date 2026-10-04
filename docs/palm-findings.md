@@ -160,16 +160,14 @@ fleets of 25–30), Smart and Diabolical only; with density over 50 their Range 
 is raised by 80. Diabolical computers start at −50–0 toward humans and 350–450 toward
 computers.
 
-**Where `js/ai-original.js` (5.0.5) differs from this code** (not changed; the 5.0.5
-ruleset is checked separately): it gives the turtle style 3 and the raider style 2 (so
-the metal-for-defence decay, the "turtles never surrender" rule and the "turtles only
-attack the weak" rule fall on the wrong one), picks the specials by player number
-rather than computer number, and raises Range on more than 3 players rather than
-density over 50; it has no Diabolical look within 8 ly, no "I need metal." / "I need
-money.", no routes, no star-record battle estimates (it estimates threats from the
-ships seen), no 3-message limit, no ship-type split or 17/24 type rules, no tanker
-retirement, no chained stops, and it buys ships through the human purchase path. The
-Palm code agrees with 5.0.5 on every one of these points.
+**`js/ai-original.js` (5.0.5)** used to be a looser reading of this code; it has since
+been ported again from the 5.0.5 decompile itself (routes, star-record estimates, the
+ship-type rules, tanker retirement, chained stops, 5.0.5's own buying; see
+docs/original-findings.md, "Computer players"). The two ports are separate code. Two
+places where the 5.0.5 code was read to differ from this port (not checked in the
+Palm code): a fleet split off in step 1 starts with a full tank (`FUN_1007bcb0`), and
+the satellites counted for a colony's defence leave out satellite fleets already given
+something to do (`FUN_1007e380`).
 
 ## Pictures (for a Palm skin)
 
@@ -270,7 +268,7 @@ were read in full for this audit.
 | Research (0.8 √(money ÷ 150), level costs) | 5.0.5 `research` | `FUN_00052832` | same |
 | Radical discoveries, the hand of four and its odds | 5.0.5 `radical` | `FUN_0005730c`, `FUN_00058016` | same (the free designs and monster need fewer than 24 types, `FUN_0005730c`) |
 | Dismantling: scrap returns 3/4 (7/8) to humans, all to computers | 5.0.5 `scrapReturn` | `FUN_00051dd0` | same |
-| Retiring unused types beyond 17 | not in the remake | `FUN_00051dd0` | Palm's own (`retireTypes`) |
+| Retiring unused types beyond 17 | 5.0.5 does it too (`FUN_10074580`), now in `rules-original.js` for the 5.0.5 ruleset | `FUN_00051dd0` | same (`rules-palm.js` keeps its own copy) |
 | Design limit | 5.0.5 `maxDesigns` 24 | `FUN_00043754`, `FUN_000654e6` | same: 24 |
 | Movement, fuel, waiting to refuel, wormholes | engine, 5.0.5 `fleetArrives` | `FUN_00053702` | same |
 | Routes for humans' fleets | engine (direct moves; waypoints by hand) | DeterminePath `FUN_0004c22c` | the computers use it (`ai-palm.js`); humans set stops by hand as for 5.0.5 (interface) |

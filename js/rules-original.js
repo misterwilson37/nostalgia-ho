@@ -638,6 +638,7 @@ function projected(G, p) {
 // mineMetal and mineMoney replace those formulas, and opt.terraWarnAlways
 // repeats the "never profitable" warning every turn (the Mac 3.0.1 rules).
 function economy(G, p, opt) {
+  if (is505(G)) retireTypes(G, p);
   const cols = colonies(G, p.id);
   const tStep = opt && opt.terraStep || terraStep, tCost = opt && opt.terraCost || terraCost;
   const mMetal = opt && opt.mineMetal || mineMetal, mMoney = opt && opt.mineMoney || mineMoney;
@@ -850,12 +851,22 @@ function refuel(G) {
 }
 
 // ---------- combat (FUN_1007e870, FUN_1007eed0, FUN_1007fe30, FUN_1007f430) ----------
+// The 5.0.5 ruleset itself (not the rulesets built on this file, which keep
+// the older reading) also does what FUN_1007e870 and FUN_100803e0 do around
+// the fight: the sides in player order, the survivors kept by the fleets
+// listed first, the debris to the first side left standing, and each side's
+// star record (the battle estimates its computers plan with) and feelings.
+const is505 = (G) => E.rules(G).id === 'original';
 function battle(G, sid) {
   const s = G.stars[sid];
   const present = G.fleets.filter(f => f.star === sid && f.to == null);
   const planetOwner = s.owner >= 0 && s.pop > 0 ? s.owner : -1;
   const owners = new Set(present.map(f => f.owner)); if (planetOwner >= 0) owners.add(planetOwner);
   const ownerIds = [...owners];
+  const r505 = is505(G);
+  // CONFIRMED (FUN_1007e870): the battle record lists the sides by player
+  // number, and each side's luck is drawn in that order
+  if (r505) ownerIds.sort((a, b) => a - b);
   if (!ownerIds.some(a => ownerIds.some(b => !isAllied(G, a, b)))) return null;
   const startPop = s.pop;
   // luck in battles (game option): each side -1, 0 or +1 weapons; smarter generals never get -1
@@ -886,7 +897,7 @@ function battle(G, sid) {
     planet = { owner: planetOwner, planet: true, n: 1, n0: 1, init: 0, W: Math.max(1, q.tech.weapons + luck[planetOwner]), S: q.tech.shields, hp: u, shots: Math.ceil(u / 200000), dmg: 0, tgt: null, units: [] };
   }
   const rec = { id: G.nextId++, star: sid, year: G.year + 10, sides: ownerIds, rounds: [], start, planetOwner, pop0: s.pop, popR: [] };
-  let debris = 0;
+  let debris = 0, lastRounds = 0;
   const all = () => planet ? groups.concat([planet]) : groups;
   const pickTarget = (g, pool) => {
     let best = null, bs = 0;
@@ -933,28 +944,51 @@ function battle(G, sid) {
       }
       if (rec.rounds.length < 60) { rec.rounds.push(ev); rec.popR.push(planet ? planet.hp / 1000 : s.pop); }
     }
+    lastRounds = rounds;
   };
   // ships told to arrive late sit out the opening exchange (two passes)
   if (groups.some(g => g.late)) fight(all().filter(g => !g.late));
   fight(all());
   const lost = {}, survivors = {};
+  // what each side brought and has left, for FUN_100803e0
+  const side = {};
+  for (const o of ownerIds) side[o] = { ships: 0, surv: {}, pop: o === planetOwner ? popU(s) : 0, W: o === planetOwner ? G.players[o].tech.weapons : 0, S: o === planetOwner ? G.players[o].tech.shields : 0 };
   for (const g of groups) {
     let gone = g.start - g.n;
     lost[g.owner] = (lost[g.owner] || 0) + gone;
     survivors[g.owner] = (survivors[g.owner] || 0) + g.n;
-    for (const m of g.members) { const x = Math.min(gone, m.n); m.f.ships[m.k] -= x; gone -= x; }
+    side[g.owner].ships += g.start;
+    side[g.owner].surv[g.d.id] = (side[g.owner].surv[g.d.id] || 0) + g.n;
+    if (!r505) for (const m of g.members) { const x = Math.min(gone, m.n); m.f.ships[m.k] -= x; gone -= x; }
+  }
+  if (r505) {
+    // CONFIRMED (FUN_10081810): each type's survivors stay with the side's
+    // fleets in fleet-list order; a colony ship lost takes its 10 colonists
+    const keep = {};
+    for (const o of ownerIds) for (const did in side[o].surv) keep[o + ':' + did] = side[o].surv[did];
+    for (const f of present) for (const k in f.ships) {
+      const key = f.owner + ':' + k, left = keep[key] || 0, x = Math.min(left, f.ships[k]);
+      keep[key] = left - x;
+      const d = getDesign(G, f.owner, +k);
+      if (d && d.type === 'colony' && f.colonists) f.colonists = Math.max(0, f.colonists - (f.ships[k] - x) * 10);
+      f.ships[k] = x;
+    }
   }
   for (const f of present) {
     for (const k in f.ships) if (f.ships[k] <= 0) delete f.ships[k];
     if (f.colonists) { let c = 0; for (const d of fleetDesigns(G, f)) if (d.type === 'colony') c += f.ships[d.id]; f.colonists = Math.min(f.colonists, c * 10); }
     if (fleetCount(f) === 0 && G.fleets.includes(f)) G.fleets.splice(G.fleets.indexOf(f), 1);
   }
-  let planetDied = false;
+  let planetDied = false, pop1 = 0;
   if (planet) {
+    pop1 = Math.max(0, planet.hp);
     setPopU(s, planet.hp);
     if (planet.hp <= 0) { s.pop = 0; s.owner = -1; planetDied = true; }
   }
-  if (debris > 0) {
+  if (r505) {
+    const standing = (o) => survivors[o] > 0 || (o === planetOwner && pop1 > 0); // the mask FUN_1007eed0 builds
+    aftermath505(G, sid, { ownerIds, side, planetOwner, pop1, rounds: lastRounds, dreadIn: groups.some(g => g.type === 'dread'), standing, debris });
+  } else if (debris > 0) {
     if (s.owner >= 0) { G.players[s.owner].metal += debris; msg(G, s.owner, `You recovered ${fmt(debris)} metal from the battle at ${s.name}.`, { icon: 'm9046', star: sid, quiet: true }); }
     else { s.metal += debris; for (const o of ownerIds) msg(G, o, `${fmt(debris)} metal has fallen onto ${s.name} from your recent battle.`, { icon: 'm9046', star: sid, quiet: true }); }
   }
@@ -964,7 +998,117 @@ function battle(G, sid) {
   return { ownerIds, survivors, lost, planetOwner, planetDied, startPop, rec };
 }
 
+// FUN_100803e0 (5.0.5 only): after the fight, for each side in player order.
+// Every point here is CONFIRMED in FUN_100803e0 and the routines it calls
+// (FUN_10081570 who the enemies are, FUN_10081160 the enemy colony,
+// FUN_10081380/FUN_10081440 the strength left, FUN_10087f80 feelings).
+// The star record's estimates (kept for js/ai-original.js, know().est):
+// by = the year a battle was last seen there, e16 = the force to beat there,
+// e1a = what it threatens near unexplored stars, e1e = the threat to your
+// colony there, e22 = what it threatens near your colonies.
+function aftermath505(G, sid, B) {
+  const s = G.stars[sid], AI = E.aiOf(G);
+  const { ownerIds, side, planetOwner, pop1, rounds, dreadIn, standing } = B;
+  let debris = B.debris;
+  // the strength left on the sides not allied with o (every side for -1), of one type (-1: all)
+  const str = (o, type) => {
+    let a = 0;
+    for (const x of ownerIds) {
+      if (o !== -1 && isAllied(G, o, x)) continue;
+      for (const did in side[x].surv) {
+        const d = getDesign(G, x, +did);
+        if (d && (type === -1 || d.type === type)) a += side[x].surv[did] * designCost(G, d).att;
+      }
+    }
+    return a;
+  };
+  const yr = G.year + 10; // the year the turn routine (FUN_10072a10) has already moved on to
+  for (const o of ownerIds) {
+    const p = G.players[o], k = know(G, p, sid), x = AI.est ? AI.est(G, p, sid) : (k.est || (k.est = {}));
+    const me = side[o], startPop = me.pop;
+    x.by = yr;
+    const enemies = ownerIds.filter(e => !isAllied(G, o, e));
+    let main = -1, mv = 0; // FUN_10081570: the enemy with the colony, else the one that came with the most ships
+    let enemyShips0 = 0, enemyLeft = 0;
+    for (const e of enemies) {
+      enemyShips0 += side[e].ships;
+      for (const did in side[e].surv) enemyLeft += side[e].surv[did];
+      if (side[e].pop > 0) { main = e; mv = 10000; } else if (mv < side[e].ships) { main = e; mv = side[e].ships; }
+    }
+    const one = enemies.length === 1 ? main : -1;
+    // feelings toward each enemy
+    for (const e of enemies) {
+      let dv;
+      if (!(startPop > 0) || pop1 !== 0) dv = me.ships === 1 && !dreadIn ? RI(G, -30, -10) : RI(G, -100, -50);
+      else { const a = p.ai && p.ai.att ? p.ai.att[e] || 0 : 0; dv = a > 500 ? -a : RI(G, -200, -100); }
+      if (AI.modify) AI.modify(G, p, e, dv);
+    }
+    // an attacked computer (not the turtle) puts more of its metal into defence
+    if (enemies.length && startPop > 0 && !p.human && p.ai && p.ai.style !== 2) {
+      if (!standing(o) && startPop > 20) p.ai.metalDef = clamp(p.ai.metalDef + 10, 60, 99);
+      if (p.ai.metalDef < 70) p.ai.metalDef = clamp(p.ai.metalDef + 5, 30, 99);
+    }
+    // the enemy colony's population and technology (FUN_10081160)
+    let ePop = 0, eW = 1, eS = 1;
+    for (const e of enemies) if (side[e].pop > 0) { ePop += side[e].pop; eW = side[e].W; eS = side[e].S; }
+    k.pop = ePop / 1000;
+    if (!standing(o)) {
+      if (startPop > 0) {
+        if (AI.note) AI.note(G, p, { code: 0x3f3, by: one });
+        x.e16 = str(o, -1) + 1;
+        x.e1a = RI(G, 1, 3) === 1 ? 0 : str(o, -1);
+        x.e1e = 0; x.e22 = str(o, -1);
+      } else {
+        const pp = trunc((eS + 2) * (eW + 2) * trunc((ePop + 2499) / 2500) * (eW + 2) / 570);
+        x.e16 = str(o, -1) + pp + 1;
+        const war = () => str(o, 'dread') + str(o, 'fighter') + str(o, 'scout');
+        if (ePop > 0 && RI(G, 1, 2) === 1) x.e16 = Math.max(0, x.e16 - war());
+        x.e1a = RI(G, 1, 3) === 1 && ePop < 100 ? 0 : war();
+        x.e1e = 0; x.e22 = war();
+      }
+    } else {
+      if (AI.note && enemies.length && startPop < 1) AI.note(G, p, { code: 0x40c, other: one, theirLoss: enemyShips0 - enemyLeft });
+      // the debris goes to the first side left standing
+      if (debris) {
+        if (o === planetOwner && startPop > 0) {
+          if (p.flags && p.flags.recycle) debris = trunc(debris * 5 / 4);
+          p.metal += debris;
+          msg(G, o, `You recovered ${fmt(debris)} metal from the battle at ${s.name}.`, { icon: 'm9046', star: sid, quiet: true });
+        } else {
+          s.metal += debris;
+          msg(G, o, `${fmt(debris)} metal has fallen onto ${s.name} from your recent battle.`, { icon: 'm9046', star: sid, quiet: true });
+        }
+        debris = 0;
+      }
+      x.e16 = 0; x.e1a = 0; x.e22 = 0;
+      if (!enemies.length || startPop < 1) x.e1e = 0;
+      else {
+        const v = str(-1, -1) - str(-1, 'fighter'), r = RI(G, 1, 5);
+        if (r < 3 && rounds > 1) x.e1e = trunc(v * 3 / 2);
+        else if (r < 5) x.e1e = trunc(v / 10);
+      }
+    }
+  }
+  // with every side beaten, nobody gets the debris (it stays in the battle record)
+}
+
 // ---------- scrapping (FUN_10074580) ----------
+// CONFIRMED (FUN_10074580, 5.0.5 only here): with more than 17 ship types,
+// the oldest types with no ships in service that aren't the newest of their
+// kind are retired until 17 are left, for every player, at the start of the
+// turn's money step.
+function retireTypes(G, p) {
+  const live = p.designs.filter(d => !d.scrapped);
+  let n = live.length - 17;
+  if (n <= 0) return;
+  const newest = {};
+  live.forEach((d, i) => { newest[d.type] = i; });
+  const inService = (d) => G.fleets.some(f => f.owner === p.id && f.ships[d.id] > 0);
+  for (let i = 0; i < live.length && n > 0; i++) {
+    const d = live[i];
+    if (i < newest[d.type] && !inService(d)) { d.scrapped = true; n--; }
+  }
+}
 // Humans get 3/4 of the metal back (7/8 after the recycling discovery);
 // computer players get all of it.
 const scrapReturn = (G, p) => p.human ? (p.flags.recycle ? 7 / 8 : 3 / 4) : 1;

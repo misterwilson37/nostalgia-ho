@@ -1,37 +1,30 @@
-// Spaceward Ho! web remake — computer players for the "Original" ruleset.
+// Spaceward Ho! web remake — computer players for the "Original" (5.0.5) ruleset.
 //
-// Recovered from the original's CComputerIntelligence (FUN_10081cc0 and the
-// 21 steps it calls); docs/original-findings.md describes them in plain
-// English. A computer's personality uses the same settings as the hidden
-// "Computer Attrs" debug window in the original.
+// A port of 5.0.5's CComputerIntelligence: the computer turn FUN_10081cc0 and
+// the 21 steps it calls, in order, with the routines they use (DeterminePath
+// FUN_1007d260, the action list FUN_10088240, the purchase FUN_100852d0, ...).
+// Every rule is CONFIRMED from the 5.0.5 PowerPC decompile at the address
+// given beside it, unless it says GUESS (then it says what it falls back on).
+// Arguments the decompiler dropped were read in the disassembly of the same
+// routine. docs/original-findings.md ("Computer players") describes the
+// computers in plain English and lists what is still unclear.
+//
+// The battles feed the computers' star records (the estimates `est` below):
+// js/rules-original.js aftermath505 (FUN_100803e0) writes them.
 (function (root) {
 'use strict';
 const E = typeof module !== 'undefined' ? require('./engine.js') : root.HO;
-const { R, RI, pick, clamp, msg, colonies, know, getDesign, findOrCreateDesign, shipCostNow, buildShips, evacuate, orderMove,
-  mergeFleets, scrapFleet, fleetCount, fleetHas, fleetKind, fleetDesigns, starDist, borrowLimit, isAllied } = E;
+const { RI, clamp, know, getDesign, isAllied, isBuddy } = E;
 const RS = E.RULESETS.original;
 const trunc = Math.trunc;
 
-function obsolete(p, d) {
-  if (d.type === 'bio') return 0;
-  const t = RS.aiSpec(p, d.type);
-  let sc = d.type === 'satellite' ? 0 : (t.R - d.R) * 5;
-  sc += (t.V - d.V) * 15;
-  if (d.type !== 'colony') sc += (t.W - d.W) * 15;
-  sc += (t.S - d.S) * 10;
-  if (d.type !== 'colony') sc += (t.M - d.M) * 10;
-  return sc;
-}
-
-// Original computer players (CComputerIntelligence, FUN_10081cc0)
-// =====================================================================
-// personality (FUN_100704d0) — the same fields as the hidden Debug >
-// Computer Attrs dialog in the original. Player record offsets in brackets;
-// the random draws are made in 5.0.5's order.
+// ---------- personality (FUN_100704d0) ----------
+// The same fields as the hidden Debug > Computer Attrs dialog. Player record
+// offsets in brackets; the random draws are made in 5.0.5's order.
 const sliderDensity = (v) => typeof v === 'number' ? v : ({ dense: 0, normal: 25, sparse: 60 }[v] ?? 25);
 function makeAI(G, p, iqName, autoplay) {
   const iq = { dumb: 1, average: 2, smart: 3, diabolical: 4 }[iqName] || 2;
-  const ai = { iq, noColonize: {}, lostAt: {}, sent: 0 };
+  const ai = { v505: true, iq, auto: !!autoplay, ev: [], att: {}, told: {}, prefG: {}, prefT: {}, colOrder: [], budPrev: [] };
   ai.upfront = RI(G, 35, 45);       // [+0xa4] % of income to research first
   ai.reqInc = RI(G, 33000, 37000);  // [+0xa8] income needed per extra colony
   ai.colDef = RI(G, 30, 70);        // [+0xac] % of colonies defended
@@ -46,19 +39,14 @@ function makeAI(G, p, iqName, autoplay) {
   ai.metalF = RI(G, 25, 75);        // [+0xc4] importance of metal when choosing colonies
   ai.saveGoal = RI(G, 2, 4);        // [+0xc6] savings goal (x income)
   ai.minFleet = RI(G, 3, 6);        // [+0xca] minimum attack fleet
-  // [+0xcc] starting attitude toward each of the 16 player slots (all 16 are
-  // drawn: players created after this one get theirs too)
-  ai.att = {};
+  // [+0xcc] starting attitude toward each of the 16 player slots
   for (let i = 0; i < 16; i++) ai.att[i] = RI(G, 250, 350);
-  // per-type "too obsolete" thresholds [+0xec] / [+0xf8]
-  ai.retire = { scout: 60, dread: 120, fighter: 60, tanker: 120, colony: 120, satellite: 100 };
-  ai.redesign = { scout: 30, dread: 60, fighter: 30, tanker: 60, colony: 60, satellite: 20 };
+  // [+0xec] retire a ship at this obsolescence; [+0xf8] design a new type at this one
+  ai.retire = { scout: 60, dread: 120, fighter: 60, tanker: 120, colony: 120, satellite: 100, bio: 0 };
+  ai.redesign = { scout: 30, dread: 60, fighter: 30, tanker: 60, colony: 60, satellite: 20, bio: 0 };
   // the humans come first (FUN_1006f640), so a computer's number among the computers is id − humans
   const nHum = G.players.filter(q => q.human).length;
-  // a ruleset may set the personalities itself (DOS 2.0: FUN_1030_1b51)
-  const custom = E.rules(G).aiPersonality;
-  if (custom) custom(G, p, ai, tw, iq, autoplay);
-  else if (autoplay) {
+  if (autoplay) {
     Object.assign(tw, { range: 200, speed: 200, weapons: 200, shields: 200, mini: 150, radical: 50 });
     Object.assign(ai, { colDef: 50, metalDef: 50 });
   } else if (iq === 1) {
@@ -68,7 +56,7 @@ function makeAI(G, p, iqName, autoplay) {
   } else if (iq === 3) {
     ai.upfront = RI(G, 45, 50); ai.attDom = RI(G, 150, 200);
   } else {
-    ai.upfront = RI(G, 40, 60); ai.aggr = 10; ai.minFleet = RI(G, 10, 15); ai.hatesHumans = true;
+    ai.upfront = RI(G, 40, 60); ai.aggr = 10; ai.minFleet = RI(G, 10, 15);
     // Diabolical computers dislike the humans and like the other computers
     for (let i = 0; i < 16; i++) ai.att[i] = i < nHum ? RI(G, -50, 0) : RI(G, 350, 450);
   }
@@ -81,11 +69,11 @@ function makeAI(G, p, iqName, autoplay) {
     Object.assign(tw, { range: 20, speed: 380, weapons: 380, shields: 20, mini: 180, radical: 20 });
     if (sliderDensity(G.opts.density) > 50) { tw.range += 80; tw.speed -= 40; tw.weapons -= 40; }
   };
-  if (!custom && !autoplay && iq > 2 && k === 3) {
+  if (!autoplay && iq > 2 && k === 3) {
     Object.assign(ai, { upfront: iq === 4 ? 60 : 50, reqInc: 35000, colDef: 100, metalDef: 90, defDom: 300, attDom: 1000, aggr: 1, style: 2, metalF: 75, saveGoal: RI(G, 4, 6) });
     special();
   }
-  if (!custom && !autoplay && iq > 2 && k === 2) {
+  if (!autoplay && iq > 2 && k === 2) {
     Object.assign(ai, { upfront: 45, reqInc: 35000, colDef: 25, metalDef: 10, defDom: 150, attDom: 200, aggr: 10, style: 3, metalF: 60, saveGoal: 3, minFleet: RI(G, 25, 30) });
     special();
   }
@@ -93,518 +81,1225 @@ function makeAI(G, p, iqName, autoplay) {
   p.talloc = Object.assign({}, tw);
   return ai;
 }
-// FUN_1008753x: tech milestones shift research toward weapons and shields
-function aiTechEvent(G, p, k) {
-  const tw = p.ai.tw;
-  if (k === 'range' && p.tech.range === 16) { tw.weapons += trunc(tw.range / 4); tw.shields += trunc(tw.range / 4); tw.range = trunc(tw.range / 2); }
-  if (k === 'mini' && p.tech.mini > 1) {
-    const L = p.tech.mini, x = trunc(tw.mini / ((L + 1) * 2));
-    tw.weapons += x; tw.shields += x; tw.mini = trunc(L * tw.mini / (L + 1));
-  }
+
+// ---------- the player's star records (0x2c bytes at player +0x1158) ----------
+// +0 the year of what is known (know().explored, seen); +0xc by: the year a
+// battle was last seen there; +0x14 pop; +0x18 e16 the force to beat there;
+// +0x1c e1a what it threatens near unexplored stars; +0x20 e1e the threat to
+// your colony there; +0x24 e22 what it threatens near your colonies.
+function est(G, p, sid) { const k = know(G, p, sid); return k.est || (k.est = { by: 0, e16: 0, e1a: 0, e1e: 0, e22: 0 }); }
+
+// ---------- fleets and designs as the original sees them ----------
+// ship types as the design record numbers them (+0)
+const TYPES = ['scout', 'dread', 'fighter', 'tanker', 'colony', 'satellite', 'bio'];
+const TNUM = { scout: 0, dread: 1, fighter: 2, tanker: 3, colony: 4, satellite: 5, bio: 6, decoy: 2 };
+const LIKE = 500; // player +0xc8: the feeling at which a computer wants an alliance
+const g100 = (g) => Math.max(1, Math.round(g * 100));
+const t10 = (t) => Math.round(t * 10);
+const popU = (s) => Math.round(s.pop * 1000);
+const kPop = (k) => Math.round((k.pop || 0) * 1000);
+const live = (p) => p.designs.filter(d => !d.scrapped);              // the design list (+0x1174)
+const dType = (d) => TNUM[d.type] ?? 2;
+const att = (G, d) => d ? E.designCost(G, d).att : 0;                 // design +0x1c
+const metalOf = (G, d) => d ? E.designCost(G, d).metal : 0;           // design +0x18
+const maxR = (G, f) => E.fleetMaxRange(G, f);                          // FUN_1007bfb0
+const speedOf = (G, f) => E.fleetSpeed(G, f);                          // FUN_1007bef0
+const usedFuel = (G, f) => Math.max(0, maxR(G, f) - (f.fuel || 0));    // fleet +0x7a (FUN_1007c060)
+const atStar = (f) => f.star != null && f.to == null;                  // fleet +0x76 != -1
+const hasPath = (f) => f.dest != null || !!(f.path && f.path.length) || f.to != null; // fleet +0x7c > 0
+const finalDest = (f) => f.path && f.path.length ? f.path[f.path.length - 1] : f.dest != null ? f.dest : f.to != null ? f.to : null;
+const myFleets = (G, p) => G.fleets.filter(f => f.owner === p.id);   // the fleet list (+0x1160)
+// FUN_1007ced0: ships of one type (-1: all)
+function countType(G, f, t) { let n = 0; for (const k in f.ships) { const d = getDesign(G, f.owner, +k); if (d && (t === -1 || dType(d) === t)) n += f.ships[k]; } return n; }
+function fleetAtt(G, f) { let a = 0; for (const k in f.ships) a += f.ships[k] * att(G, getDesign(G, f.owner, +k)); return a; }       // FUN_1007d000
+function fleetMetal(G, f) { let a = 0; for (const k in f.ships) a += f.ships[k] * metalOf(G, getDesign(G, f.owner, +k)); return a; } // FUN_1007cf70
+// FUN_1007cc70: one type, or 9 fighters and dreadnoughts, 7 with tankers, 8 with colony ships, 10 a mix, 11 empty
+function fleetClass(G, f) {
+  const n = [0, 0, 0, 0, 0, 0, 0];
+  let tot = 0;
+  for (const k in f.ships) { const d = getDesign(G, f.owner, +k); if (!d) continue; n[dType(d)] += f.ships[k]; tot += f.ships[k]; }
+  if (!tot) return 11;
+  for (let t = 0; t < 7; t++) if (n[t] === tot) return t;
+  const w = n[1] + n[2];
+  if (tot === w) return 9;
+  if (tot === n[3] + w) return 7;
+  return tot === n[4] + w ? 8 : 10;
 }
-function aiDesign(G, p, type) {
-  const ai = p.ai;
-  const ds = p.designs.filter(d => !d.scrapped && d.type === type);
-  let best = null, bs = 1e9;
-  for (const d of ds) { const sc = obsolete(p, d); if (sc < bs) { bs = sc; best = d; } }
-  if (!best || bs >= ai.redesign[type]) best = findOrCreateDesign(G, p, (E.rules(G).aiSpec || RS.aiSpec)(p, type));
+// FUN_1007d160: the design with the most ships (the first such in the design list)
+function mainDesign(G, p, f) {
+  let best = null, bn = 0;
+  for (const d of live(p)) { const n = f.ships[d.id] || 0; if (n && bn < n) { bn = n; best = d; } }
   return best;
 }
+const designCount = (f) => Object.keys(f.ships).filter(k => f.ships[k] > 0).length; // FUN_1007d090
+function inService(G, p, d) { let n = 0; for (const f of G.fleets) if (f.owner === p.id && f.ships[d.id]) n += f.ships[d.id]; return n; } // design +0x22
+// FUN_1007c3a0: give a fleet the route found; a fleet that can't yet make
+// its first jump waits with its orders (FUN_10075f10 keeps the path)
+function givePath(f, r) {
+  if (!r || !r.length) { f.dest = null; f.path = null; return; }
+  f.dest = r[0]; f.path = r.slice(1);
+}
+// FUN_1007bcb0: a new fleet at a star with full fuel (a Biological's tank
+// starts empty: fuel used = its Range), 10 colonists per colony ship
+function newFleet(G, p, sid, d, n) {
+  const f = E.newFleet(G, p.id, sid, d.type === 'satellite');
+  f.newThisTurn = false; f.name = d.name;
+  f.ships[d.id] = n;
+  if (d.type === 'colony') f.colonists = 10 * n;
+  f.fuel = d.type === 'satellite' || d.type === 'bio' ? 0 : maxR(G, f);
+  return f;
+}
+// FUN_1007bdc0: split the ships of one design off into a new fleet
+function splitOff(G, p, f, d) {
+  const n = f.ships[d.id] || 0;
+  if (!n || n >= countType(G, f, -1)) return null;
+  delete f.ships[d.id];
+  return newFleet(G, p, f.star, d, n);
+}
+
+// obsolescence (FUN_10086d90): Range x 5 (not Satellites; Scouts against
+// Range + 3, Tankers Range - 1), Speed x 15 (Tankers - 1), Weapons x 15 (not
+// Colony Ships; Scouts - 1), Shields x 10 (Scouts - 1), Mini x 10 (not Colony
+// Ships); Biologicals are never obsolete
+function obsolete(p, d) {
+  const t = p.tech, c = dType(d);
+  if (c === 6) return 0;
+  let o = 0;
+  if (c !== 5) o = ((c === 0 ? t.range + 3 : c === 3 ? t.range - 1 : t.range) - d.R) * 5;
+  o += ((c === 3 ? t.speed - 1 : t.speed) - d.V) * 15;
+  if (c !== 4) o += ((c === 0 ? t.weapons - 1 : t.weapons) - d.W) * 15;
+  o += ((c === 0 ? t.shields - 1 : t.shields) - d.S) * 10;
+  if (c !== 4) o += (t.mini - d.M) * 10;
+  return o;
+}
+
+// a star's rating from the star record, 0..20, -1 unknown (FUN_10072100)
+function quality(hg, ht, k) {
+  if (!k.explored) return -1;
+  const g = g100(k.g);
+  const gR = g < hg ? trunc(hg * 100 / g) : trunc(g * 100 / hg);
+  const dT = Math.abs(ht - t10(k.t));
+  let q = 0;
+  if (gR < 257 && (gR < 201 || dT < 501)) {
+    const a = trunc(gR / 10), b = trunc(dT / 330);
+    q = trunc(Math.max(23, 100 - (a - 10) * (a - 9)) * Math.max(40, 100 - b * (b + 1)) / 527) + 2;
+  }
+  if ((k.metal || 0) > 10000) q = Math.min(20, q + 1);
+  return q;
+}
+const starQuality = (C, sid) => quality(g100(C.p.homeG), t10(C.p.homeT), know(C.G, C.p, sid)); // FUN_100720d0
+
+// ---------- the colony list (player +0x1138) ----------
+// colonies in the order they were won (the home first, a new colony at the
+// end). GUESS: colonies won in the same turn are taken in star order.
+function colOrder(G, p) {
+  const ai = p.ai || {};
+  const own = (ai.colOrder || []).filter((sid, i, a) => G.stars[sid].owner === p.id && a.indexOf(sid) === i);
+  if (!own.length && G.stars[p.homeStar].owner === p.id) own.push(p.homeStar);
+  for (const s of G.stars) if (s.owner === p.id && !own.includes(s.id)) own.push(s.id);
+  if (p.ai) p.ai.colOrder = own;
+  return own;
+}
+
+// ---------- routes: DeterminePath (FUN_1007d260) ----------
+// Under 3 light-years: "found", with no orders. Within the fuel left: straight
+// there. Otherwise a route through the colonies of yours and your best
+// buddies' (FUN_10058830; with a Tanker in the fleet the fuel is a full tank
+// and the route goes instead through any star whose record is of this year),
+// using only stars with d(from) + d(to) < straight line + 6, each later hop
+// within the full Range, at most min(7, clamp(7R, 42, 120) / R) hops (every
+// caller passes 7 as the 9th argument), shorter than 3 times the straight
+// line; the shortest wins, then the one with fewer stops. Legs are measured
+// in a byte matrix. Returns the stops, or null.
+function determinePath(C, from, to, fuel, R, tanker) {
+  const { G, p } = C;
+  if (from == null || to == null || from < 0 || to < 0) return null;
+  if (tanker) fuel = R;
+  const d = (a, b) => E.starDist(G, a, b);
+  const direct = d(from, to);
+  if (direct < 3) return [];
+  if (direct <= fuel) return [to];
+  const hops = Math.min(7, R === 0 ? 1 : Math.min(7, trunc(clamp(R * 7, 42, 120) / R)));
+  const nodes = [from], last = [0];
+  const add = (v) => {
+    if (v === from || v === to || !(d(v, from) + d(v, to) < direct + 6)) return;
+    const l = d(v, to);
+    nodes.push(v); last.push(R < l ? 0 : l);
+  };
+  if (!tanker) {
+    for (const q of G.players) if (isBuddy(G, q.id, p.id)) for (const sid of colOrder(G, q)) add(sid);
+  } else {
+    // the star record's year is this year: the turn routine moves the year on
+    // before the computers plan, so only what was looked at during this
+    // computer turn (the Diabolical look of step 4) qualifies
+    for (const s of G.stars) if (know(G, p, s.id).dsight === G.turn) add(s.id);
+  }
+  const n = nodes.length, D = (a, b) => d(nodes[a], nodes[b]) & 255;
+  let best = direct * 3, bestCount = 0, bestPath = null;
+  const cand = [0, 1], cap = [0, fuel], legs = [], visited = new Array(n).fill(false);
+  visited[0] = true;
+  let depth = 1, cum = 0, guard = 0;
+  const advance = (lv) => { do { cand[lv]++; } while (cand[lv] < n && visited[cand[lv]]); };
+  while (cand[1] < n && guard++ < 2000000) {
+    if (cand[depth] >= n && depth > 1) {
+      depth--; cum -= legs[depth]; visited[cand[depth]] = false; advance(depth); continue;
+    }
+    const c = cand[depth], leg = D(cand[depth - 1], c);
+    legs[depth] = leg;
+    if (leg <= cap[depth] && cum + leg + 2 < best) {
+      if (last[c] === 0) {
+        if (depth < hops) { cap[depth + 1] = R; depth++; visited[c] = true; cum += leg; cand[depth] = 0; }
+      } else {
+        const tot = cum + leg + last[c];
+        if (tot < best || (depth < bestCount && tot === best)) {
+          best = tot; bestCount = depth + 1;
+          bestPath = cand.slice(1, depth + 1).map(i => nodes[i]).concat([to]);
+        }
+      }
+    }
+    advance(depth);
+  }
+  return bestPath;
+}
+
+// ---------- the computer's turn (FUN_10081cc0) ----------
+// FUN_10072a10 moves the year on by 10 before the computers plan, so the
+// year they see is the remake's G.year + 10. A human on auto play is planned
+// for from the Auto button (FUN_10066bb0) before the year moves on.
 function aiTurn(G, p) {
-  const ai = p.ai || (p.ai = makeAI(G, p, 'average', p.human));
-  const rs = E.rules(G);
-  if (rs.aiTurnStart) rs.aiTurnStart(G, p); // e.g. the DOS 2.0 Smart computers' free look around home
-  const cols = colonies(G, p.id);
-  if (!cols.length) { strandedColonyShips(G, p); return; }
-  ai.sent = 0; // the three-message outbox is emptied each turn (FUN_10072a10, player +0x1058)
-  reloadColonyShips(G, p);
-  // step 2: designs
-  const D = {};
-  // only the ship types this ruleset has (the DOS 2.0 rules have four)
-  for (const t of ['scout', 'dread', 'fighter', 'tanker', 'colony', 'satellite']) D[t] = E.rules(G).canBuild(G, p, t) ? aiDesign(G, p, t) : null;
-  if (p.hasBio) D.bio = p.designs.find(d => d.type === 'bio' && !d.scrapped) || null;
-  const C = {}; for (const t in D) if (D[t]) C[t] = rs.designCost(G, D[t]);
-  // assembly lines are limited: scrap unused, superseded types (FUN_10086830)
-  const live = p.designs.filter(d => !d.scrapped);
-  if (live.length + 6 > 24) {
-    const inUse = new Set();
-    for (const f of G.fleets) if (f.owner === p.id) for (const k in f.ships) inUse.add(+k);
-    for (const d of live) if (!inUse.has(d.id) && D[d.type] !== d) d.scrapped = true;
-  }
-  // step 3: assessment
-  if (!p.human && ai.style !== 2) ai.metalDef = clamp(ai.metalDef - 5, 1, ai.style === 3 ? 50 : 80);
-  const I = p.oInc + (p.oInterest || 0);
-  const cap = Math.max(0, trunc((I + ai.reqInc - 30000) / ai.reqInc));
-  const cap2 = Math.max(cap, trunc((I + trunc(ai.reqInc / 4) + ai.reqInc - 30000) / ai.reqInc));
-  const reserve = Math.max(0, Math.min(trunc(I * (G.year - 2000) / 100), I * ai.saveGoal));
-  const A = { D: (rs.disposable || RS.disposable)(G, p).D, I, reserve };
-  let totalMetal = p.metal; for (const s of cols) totalMetal += s.metal;
-  let homeFleet = 0, awayFleet = 0, satMetal = 0, warMetal = 0, colShips = 0;
-  const myFleets = G.fleets.filter(f => f.owner === p.id);
-  for (const f of myFleets) {
-    let m = 0; for (const k in f.ships) { const d = getDesign(G, p.id, +k); m += rs.designCost(G, d).metal * f.ships[k]; }
-    const kind = fleetKind(G, f);
-    if (kind === 'colony' || fleetHas(G, f, 'colony')) colShips += fleetCount(f) && 1;
-    if (f.star != null && G.stars[f.star].owner === p.id) homeFleet += m; else if (kind !== 'scout') awayFleet += m;
-    if (kind === 'satellite') satMetal += m;
-    if (kind === 'fighter' || kind === 'dread') warMetal += m;
-  }
-  const broke = colShips === 0 && C.colony.metal > totalMetal + homeFleet;
-  let spare = totalMetal + homeFleet + awayFleet - (colShips ? colShips * C.colony.metal : 5000);
-  spare = Math.max(0, spare);
-  A.defB = trunc(spare * ai.metalDef / 100) - satMetal;
-  A.offB = trunc(spare * (100 - ai.metalDef) / 100) - warMetal;
-  A.metal = totalMetal; A.colShips = colShips; A.broke = broke;
-  considerSurrender(G, p, A);
-  askAllies(G, p, totalMetal);
-  // step 4: what the computer believes about each star. Before 2020 a
-  // Diabolical computer looks at every star within 8 ly of home: its record
-  // gets this year's planet and metal, owner none (FUN_10088460). The remake
-  // leaves its own colonies' records alone (they are classed from the truth).
-  if (ai.iq === 4 && !p.human && G.year < 2020) {
-    for (const s of G.stars) {
-      if (s.id === p.homeStar || s.owner === p.id || starDist(G, s.id, p.homeStar) >= 9) continue;
-      const k = know(G, p, s.id);
-      Object.assign(k, { explored: true, owner: -1, metal: s.metal, g: s.g, t: s.t, seen: G.turn });
+  const ai = (p.ai && p.ai.v505) ? p.ai : (p.ai = makeAI(G, p, 'average', p.human));
+  if (!p.alive || p.surrendered) return; // player +0x34
+  const auto = !!p.human;
+  const Y = G.year + (auto ? 0 : 10);
+  const inc = p.oInc || 0;
+  const reserve = Math.max(0, Math.min(trunc(inc * (Y - 2000) / 100), inc * ai.saveGoal));
+  const C = {
+    G, p, ai, iq: ai.iq, auto, Y,
+    M: Math.max(0, RS.disposable(G, p).D), // +0x298: this turn's money
+    hand: p.metal,                         // +0x2a0: metal in hand
+    S: p.savings - reserve,                // +0x29c: Ship Savings above the reserve (+0x2a8)
+    I: inc + (p.oInterest || 0),           // +0x2a4
+    tech: 0, ships: 0, terra: {}, mine: {}, acts: [],
+    used: new Set(), scrapF: new Set(), scrapD: new Set(), built: {}, T: {}, sent: 0,
+  };
+  noteBuddies(C);
+  C.cols = colOrder(G, p);
+  splitFleets(C);                 // FUN_10088eb0
+  maintainShipTypes(C);           // FUN_10086830
+  computeStatus(C);               // FUN_10085f60
+  fillInStarStatus(C);            // FUN_10088460
+  markUsedFleets(C);              // FUN_10088fd0
+  scrapOldSats(C);                // FUN_10086f20
+  scrapOldShips(C);               // FUN_100870a0
+  strandedFleets(C);              // FUN_100872a0
+  reactAndAlly(C);                // FUN_10087530
+  addAction(C, 3, 90, -1, ai.upfront); // FUN_10081fa0
+  colonySupport(C);               // FUN_10081fe0
+  explore(C);                     // FUN_10082820
+  attack(C);                      // FUN_10082bb0
+  colonize(C);                    // FUN_10083110
+  terraform(C);                   // FUN_10082690
+  satellites(C);                  // FUN_100839a0
+  perform(C);                     // FUN_10083e30
+  if (C.iq > 2) chainAttacks(C);  // FUN_100843b0
+  if (C.iq > 3) chainFarther(C);  // FUN_100845f0
+  saveFleets(C);                  // FUN_10085900
+  resolveSpending(C);             // FUN_10085bd0
+  // the fleets (+0x72) and ship types (+0xc) marked for scrapping go in the
+  // turn's dismantling step (FUN_10074580), before anything moves
+  for (const f of C.scrapF) if (G.fleets.includes(f)) E.scrapFleet(G, f);
+  for (const d of C.scrapD) { if (inService(G, p, d)) E.scrapDesign(G, p.id, d.id); else d.scrapped = true; }
+}
+// FUN_100761c0: on becoming best buddies, each notes the other's planet
+// preference (their home's gravity and temperature)
+function noteBuddies(C) {
+  const { G, p, ai } = C;
+  const now = G.players.filter(q => q.id !== p.id && isBuddy(G, p.id, q.id)).map(q => q.id);
+  for (const id of now) if (!ai.budPrev.includes(id)) { const q = G.players[id]; ai.prefG[id] = g100(q.homeG); ai.prefT[id] = t10(q.homeT); }
+  ai.budPrev = now;
+}
+
+// ---------- step 1 (FUN_10088eb0): a fleet of several designs at a star is
+// split, one design at a time from the first in the design list, except
+// satellites and warships with tankers
+function splitFleets(C) {
+  const { G, p } = C;
+  for (let i = 0; i < G.fleets.length; i++) {
+    const f = G.fleets[i];
+    if (f.owner !== p.id || !atStar(f)) continue;
+    while (designCount(f) > 1 && fleetClass(G, f) !== 5 && fleetClass(G, f) !== 7) {
+      const d = live(p).find(x => f.ships[x.id] > 0);
+      if (!d || !splitOff(G, p, f, d)) break;
     }
   }
-  const cls = [], threat = [], tthreat = [];
-  const fAtt = Math.max(1, C.fighter.att);
+}
+
+// ---------- step 2 (FUN_10086830): ship types ----------
+function maintainShipTypes(C) {
+  const { G, p, ai } = C;
+  const t = p.tech, L = [t.range, t.speed, t.weapons, t.shields, t.mini], st = (d) => [d.R, d.V, d.W, d.S, d.M];
+  // a type with no ships in service (not Biologicals), or 10 Weapons levels
+  // behind (not Satellites or Biologicals), is retired if any part is behind
+  for (const d of live(p)) {
+    const c = dType(d);
+    if (!(inService(G, p, d) === 0 && c !== 6) && !(c !== 5 && c !== 6 && t.weapons - d.W > 10)) continue;
+    for (let k = 0; k < 5; k++) {
+      let l = L[k];
+      if (c === 0 && k === 0) l += 3;
+      if (c === 3 && (k === 0 || k === 1)) l -= 1;
+      if (c === 0 && (k === 2 || k === 3)) l -= 1;
+      if (c === 5 && (k < 2 || k === 3)) l = 0;
+      if (c === 4 && k === 4) l = 0;
+      if ((st(d)[k] | 0) < l) { C.scrapD.add(d); break; }
+    }
+  }
+  // the type to build of each kind (+0x10..): the least obsolete not retired;
+  // a new one when even that has reached the kind's redesign mark (if there
+  // are fewer than 24 types). Average and up give a type they design no
+  // development cost (its first-ship price is set to the ship price).
+  for (let c = 0; c < 7; c++) {
+    const type = TYPES[c];
+    let best = null, bo = 32000;
+    for (const d of live(p)) {
+      if (dType(d) !== c || d.type === 'decoy' || C.scrapD.has(d)) continue;
+      const o = obsolete(p, d);
+      if (o < bo) { bo = o; best = d; }
+    }
+    if (c < 6 && (!best || ai.redesign[type] <= bo)) {
+      if (live(p).length < 24) {
+        const d = E.findOrCreateDesign(G, p, RS.aiSpec(p, type));
+        C.scrapD.delete(d);
+        if (C.iq > 1 && !d.built) d.free = true;
+        C.T[type] = d;
+      } else C.T[type] = best || live(p)[0];
+    } else C.T[type] = best;
+  }
+  // room is kept for six new types
+  const n = live(p).length, cur = (d) => C.T[d.type] === d;
+  let gone = 0;
+  if (n + 6 > 24) for (const d of live(p)) if (!cur(d) && inService(G, p, d) < 1) { C.scrapD.add(d); gone++; }
+  if (n - gone + 6 > 24) { let k = 0; for (const d of live(p)) { if (k >= 6) break; if (!cur(d)) { C.scrapD.add(d); k++; } } }
+}
+
+// ---------- step 3 (FUN_10085f60): the computer's view of itself ----------
+function computeStatus(C) {
+  const { G, p, ai, T } = C;
+  // metal for defence drifts down 5 a turn (pouncer 1..50, others 1..80, the turtle never)
+  if (!p.human && !C.auto) {
+    if (ai.style === 3) ai.metalDef = clamp(ai.metalDef - 5, 1, 50);
+    else if (ai.style !== 2) ai.metalDef = clamp(ai.metalDef - 5, 1, 80);
+  }
+  C.cap = Math.max(0, trunc((C.I + ai.reqInc - 30000) / ai.reqInc));           // +0x2d6
+  C.cap2 = trunc((C.I + trunc(ai.reqInc / 4) + ai.reqInc - 30000) / ai.reqInc); // +0x2d8
+  // at least one while you have fewer than 2 colonies (the list's count < 4, counting its two budget entries)
+  const few = C.cols.length < 2 ? 1 : 0;
+  if (C.cap2 <= few) C.cap2 = few;
+  C.totalMetal = C.hand;                                                         // +0x2b8
+  for (const sid of C.cols) C.totalMetal += know(G, p, sid).metal || 0;
+  C.nAlive = G.players.filter(q => q.alive && !q.surrendered).length;            // +0x2de
+  C.broke = true; C.colShips = 0;                                                // +0x2d4, +0x2da
+  let home = 0, away = 0, sats = 0, war = 0;
+  for (const f of myFleets(G, p)) {
+    const d = mainDesign(G, p, f); if (!d) continue;
+    const c = dType(d), m = fleetMetal(G, f);
+    if (c === 4) { C.broke = false; C.colShips++; }
+    if (atStar(f) && know(G, p, f.star).owner === p.id) home += m;
+    else if (c !== 0) away += m;
+    if (c === 5) sats += m;
+    if (c === 2 || c === 1) war += m;
+  }
+  if (T.colony && metalOf(G, T.colony) <= home + C.totalMetal) C.broke = false;
+  C.homeFleet = home;
+  // the poorest, the second poorest, the richest and the richest other player by income
+  let low = -1, lowV = 9999999, low2 = 9999999, high = -1, highV = -100, second = -1, secondV = -100;
+  for (const q of G.players) {
+    if (!q.alive || q.surrendered) continue;
+    const v = q.oInc || 0;
+    if (v < lowV) { low2 = lowV; lowV = v; low = q.id; } else if (v < low2) low2 = v;
+    if (highV < v) { highV = v; high = q.id; }
+    if (q.id !== p.id && secondV < v) { secondV = v; second = q.id; }
+  }
+  C.low = low; C.high = high; C.second = second;
+  // after 2500 a computer that is broke, or by far the poorest, surrenders to
+  // the player it likes best, with 3 or more players left; turtles never do
+  // (the Alliances option is not asked)
+  if (C.Y > 2500 && !p.human && (C.broke || (low === p.id && lowV * 3 < low2)) && C.nAlive > 2 && ai.style !== 2)
+    p.surrenderTo = likeBest(C);
+  let spare = C.totalMetal + home + away;
+  if (C.colShips === 0) spare = Math.max(0, spare - 5000);
+  else spare -= C.colShips * (T.colony ? metalOf(G, T.colony) : 0);
+  C.defB = trunc(spare * ai.metalDef / 100) - sats;          // +0x2c4
+  C.offB = trunc(spare * (100 - ai.metalDef) / 100) - war;   // +0x2c8
+  // requests to each ally, one time in 20
+  if (C.Y > 2500 && C.totalMetal < 10000)
+    for (const q of G.players) if (q.id !== p.id && isAllied(G, p.id, q.id) && RI(G, 1, 20) === 1) say(C, q.id, 0x415);
+  if (C.Y > 2400 && low === p.id && lowV + 2000 < low2)
+    for (const q of G.players) if (q.id !== p.id && isAllied(G, p.id, q.id) && RI(G, 1, 20) === 1) say(C, q.id, 0x414);
+  // the middle of your colonies (+0x2fc; the sums are kept in 16 bits)
+  const s16 = (v) => (v << 16) >> 16;
+  let x = 0, y = 0;
+  for (const sid of C.cols) { const s = G.stars[sid]; x = s16(x + Math.round(s.x10 != null ? s.x10 : s.x * 20)); y = s16(y + Math.round(s.y10 != null ? s.y10 : s.y * 20)); }
+  const n = C.cols.length;
+  C.center = n ? { x10: trunc(x / n), y10: trunc(y / n) } : { x10: 0, y10: 0 };
+  C.center.x = C.center.x10 / 20; C.center.y = C.center.y10 / 20;
+}
+// FUN_10088160: the player it likes best, alive. (It also skips player
+// +0x31c, set by step 9 when someone surrendered to it; step 3 runs first and
+// the turn begins with it cleared, so it never matters.)
+function likeBest(C) {
+  const { G, p, ai } = C;
+  let to = -1, best = -30000;
+  for (const q of G.players) if (q.id !== p.id && best < (ai.att[q.id] || 0) && q.alive && !q.surrendered) { best = ai.att[q.id] || 0; to = q.id; }
+  return to;
+}
+
+// ---------- step 4 (FUN_10088460): the computer's view of the galaxy ----------
+// Classes (+0x27c): 0 unexplored, 1 a fleet on its way to an unexplored star,
+// 2 explored and nobody's or an ally's, 3 unexplored but a battle seen there,
+// 4 an enemy's, 5 a fleet on its way, 6 a fleet of yours there (or a best
+// buddy's colony), 7 a colony ship on its way, 8 your colony losing money on
+// a hostile planet, 9 your colony losing money, 10 making money.
+function fillInStarStatus(C) {
+  const { G, p, T } = C;
+  // a Diabolical computer, before 2020, writes into its record of every star
+  // within 8 ly of home (not home): this year, the gravity, temperature and
+  // metal, and no owner
+  if (C.iq === 4 && C.Y < 2020) for (const s of G.stars) {
+    if (s.id === p.homeStar || E.starDist(G, s.id, p.homeStar) >= 9) continue;
+    const k = know(G, p, s.id);
+    Object.assign(k, { explored: true, g: s.g, t: s.t, metal: s.metal, owner: -1, seen: G.turn, dsight: G.turn });
+  }
+  const hg = g100(p.homeG), ht = t10(p.homeT);
+  const cls = C.cls = [];
+  for (const s of G.stars) {
+    const k = know(G, p, s.id), x = est(G, p, s.id);
+    if (!k.explored) cls[s.id] = x.by >= 2000 ? 3 : 0;
+    else if (k.owner === p.id && s.owner === p.id) {
+      // losing money: 9 if the planet's gravity (as it is) and temperature (as recorded) are bearable, else 8
+      if ((s.oInc || 0) < 0) {
+        const g = g100(s.g), gR = g < hg ? trunc(hg * 100 / g) : trunc(g * 100 / hg);
+        cls[s.id] = gR < 257 && (gR < 201 || Math.abs(ht - t10(k.t)) < 501) ? 9 : 8;
+      } else cls[s.id] = 10;
+    } else if (k.owner == null || k.owner < 0 || k.owner === p.id || !isBuddy(G, p.id, k.owner))
+      cls[s.id] = k.owner == null || k.owner < 0 || k.owner === p.id || isAllied(G, p.id, k.owner) ? 2 : 4;
+    else cls[s.id] = 6;
+  }
+  C.goodFleetStar = -1; // +0x2dc: the best star (rated over 12) where a fleet of yours is
+  let bq = 12;
+  for (const f of myFleets(G, p)) {
+    if (atStar(f) && cls[f.star] < 6) {
+      cls[f.star] = 6;
+      const q = starQuality(C, f.star);
+      if (bq < q) { bq = q; C.goodFleetStar = f.star; }
+    }
+    if (!hasPath(f)) continue;
+    const t = finalDest(f);
+    if (cls[t] < 8 && cls[t] !== 4 && countType(G, f, 4) > 0) cls[t] = 7;
+    else if (cls[t] < 2) cls[t] = 1;
+    else if (cls[t] < 6) cls[t] = 5;
+  }
+  const threat = C.threat = [], tthreat = C.tthreat = [];   // +0x284, +0x280
+  for (const s of G.stars) { threat[s.id] = 0; tthreat[s.id] = 0; }
+  const fAtt = att(G, T.fighter), reach = Math.max(10, p.tech.range + 1), W = p.tech.weapons, Sh = p.tech.shields;
+  // the threat to each colony of yours: what was seen there, and what could
+  // come from the stars within reach (a fighter from a free or unknown one)
+  for (const s of G.stars) {
+    if (cls[s.id] <= 7) continue;
+    let t = est(G, p, s.id).e1e;
+    for (const o of G.stars) {
+      if (o.id === s.id || E.starDist(G, s.id, o.id) > reach) continue;
+      t = Math.max(t, cls[o.id] <= 2 ? fAtt : est(G, p, o.id).e22);
+    }
+    threat[s.id] = t;
+  }
+  for (const s of G.stars) if (cls[s.id] >= 3 && cls[s.id] <= 5) tthreat[s.id] = Math.max(1, est(G, p, s.id).e16);
   for (const s of G.stars) {
     const k = know(G, p, s.id);
-    let c;
-    if (s.owner === p.id) {
-      if ((s.oInc || 0) >= 0) c = 10;
-      else { const h = RS.hab(p, s); c = h.gR <= 256 && (h.gR < 201 || h.dT < 501) ? 9 : 8; }
-    } else if (!k.explored) c = 0;
-    else c = k.owner >= 0 && k.owner !== p.id && G.players[k.owner] && G.players[k.owner].alive ? 4 : 2;
-    cls[s.id] = c; threat[s.id] = 0; tthreat[s.id] = 0;
+    if (!(cls[s.id] === 0 || (cls[s.id] === 2 && est(G, p, s.id).by < 2000 && !(k.owner >= 0 && isAllied(G, p.id, k.owner))))) continue;
+    let t = tthreat[s.id];
+    for (const o of G.stars) if (o.id !== s.id && E.starDist(G, s.id, o.id) <= reach) t = Math.max(t, est(G, p, o.id).e1a);
+    tthreat[s.id] = t;
   }
-  for (const f of myFleets) if (f.star != null && cls[f.star] < 6) cls[f.star] = 6;
-  const reach = Math.max(10, p.tech.range + 1);
+  // old news fades
+  const guess = trunc((Sh + 1) * (W + 1) * (W + 1) * 140 / 570);
   for (const s of G.stars) {
-    if (cls[s.id] >= 8) {
-      let t = know(G, p, s.id).enemyStr || 0;
-      for (const o of G.stars) {
-        if (o.id === s.id || starDist(G, s.id, o.id) > reach) continue;
-        const c = cls[o.id];
-        t = Math.max(t, c <= 2 ? (c === 0 ? fAtt : 0) : (know(G, p, o.id).enemyStr || 0));
-      }
-      threat[s.id] = t;
-    } else if (cls[s.id] === 4 || cls[s.id] === 3) tthreat[s.id] = Math.max(1, know(G, p, s.id).enemyStr || 0);
-  }
-  // step 6: dismantle badly outdated fleets sitting at safe colonies;
-  // step 7: outdated fleets elsewhere head for the nearest colony
-  for (const f of myFleets.slice()) {
-    if (!G.fleets.includes(f) || f.star == null || f.to != null || f.dest != null || f.sat) continue;
-    const old = fleetDesigns(G, f).filter(d => d.type !== 'bio' && d.type !== 'colony');
-    if (cls[f.star] >= 8) {
-      if (threat[f.star] <= 0 && old.some(d => obsolete(p, d) >= 100)) scrapFleet(G, f);
-    } else if (old.some(d => obsolete(p, d) >= ai.retire[d.type])) {
-      const back = nearestOwn(G, p, f.star, f.fuel, cls);
-      if (back >= 0) orderMove(G, f, back);
+    const c = cls[s.id], x = est(G, p, s.id);
+    if (c !== 3 && c !== 4) continue;
+    if (x.by === C.Y - 100 && RI(G, 1, 2) === 1) { x.e16 = 5; x.e1a = 5; }
+    if (x.by >= 2000 && x.by < C.Y - 20 && (x.by - C.Y) % 200 === 0 && kPop(know(G, p, s.id)) === 0) {
+      if (RI(G, 1, 3) === 1) { x.e16 = 6; x.e1a = 6; }
+      else { x.e16 = guess; x.e1a = Math.max(1, x.e1a); }
     }
   }
-  for (const f of G.fleets) if (f.owner === p.id && f.sat && f.star != null && cls[f.star] >= 8 && threat[f.star] <= 0 &&
-    fleetDesigns(G, f).some(d => obsolete(p, d) >= 100)) { scrapFleet(G, f); break; }
-  // step 9: last turn's news and diplomacy (FUN_10087530), after the fleet steps as in FUN_10081cc0
-  if (!p.human && G.opts.alliances) diplomacy(G, p);
-  // queue of requests, highest priority first (FUN_10088240 / FUN_10083e30)
-  const Q = [];
-  const req = (type, prio, a, b) => Q.push({ type, prio, a, b, n: Q.length });
-  req('tech', 90, ai.upfront);
-  // step 11: shed colonies beyond what income supports; mining requests
-  const small = cols.filter(s => RS.popU(s) < 10000);
-  let excess = small.length - cap2;
-  while (excess > 0 && cols.length > 1) {
-    let worst = null, wv = 99;
-    for (const s of cols) {
-      if (s.id === p.homeStar || s.owner !== p.id) continue;
-      let v = aiHab(p, s); if (RS.popU(s) > 20 && v > 1) v += 10;
-      if (v < wv) { wv = v; worst = s; }
-    }
-    if (!worst || G.fleets.some(f => f.owner === p.id && f.star === worst.id && f.dest != null)) break;
-    evacuate(G, p.id, worst.id); ai.noColonize[worst.id] = true; cls[worst.id] = 6; excess--;
-  }
-  for (const s of colonies(G, p.id)) {
-    if (cls[s.id] === 8 && s.metal < 100 && s.id !== p.homeStar && colonies(G, p.id).length > 1) { evacuate(G, p.id, s.id); ai.noColonize[s.id] = true; continue; }
-    if (s.metal <= 0) continue;
-    if (rs.aiMineMoney) req('mine', cls[s.id] === 8 ? 75 : 30, s.id, rs.aiMineMoney(G, p, s, cls[s.id], ai.iq));
-    else if (cls[s.id] === 8) req('mine', 75, s.id, RS.mineMoney(p, ai.iq === 1 ? s.metal + 25 : Math.min(s.metal + 25, 1000)));
-    else req('mine', 30, s.id, RS.mineMoney(p, Math.min(s.metal + 25, ai.iq <= 2 ? 5000 : 600)));
-  }
-  // step 12: scouting
-  const sR = D.scout.R, fR = D.fighter.R;
-  if (!broke) {
-    let first = false;
-    for (const s of G.stars) {
-      if (!(cls[s.id] === 0 || cls[s.id] === 2) || tthreat[s.id] > 0) continue;
-      if (myFleets.some(f => f.dest === s.id || f.to === s.id)) continue;
-      let src = nearestOwn(G, p, s.id, sR, cls);
-      if (src >= 0) { if (cls[s.id] === 2 && !first) { first = true; req('scout', 86, s.id, src); } else req('scout', 55, s.id, src); }
-      else if ((src = nearestOwn(G, p, s.id, fR, cls)) >= 0) req('scout', 54, s.id, src);
-    }
-  }
-  // step 13: offense
-  if (!broke && A.offB > 0) {
-    const used = new Set(), staged = new Set();
-    let budget = A.offB, guard = 0;
-    while (budget > 0 && guard++ < G.stars.length) {
-      let best = -1, bv = 0;
-      for (const s of G.stars) {
-        if (cls[s.id] >= 5 || tthreat[s.id] <= 0 || used.has(s.id)) continue;
-        if (ai.style === 2 && tthreat[s.id] >= fAtt) continue;
-        const v = aiTargetScore(G, p, s, tthreat[s.id], fAtt);
-        if (v > bv) { bv = v; best = s.id; }
-      }
-      if (best < 0) break;
-      used.add(best);
-      const src = nearestOwn(G, p, best, fR, cls);
-      if (src >= 0 && !staged.has(src + ':' + best)) { staged.add(src + ':' + best); req('attack', ai.aggr * 5 + 35, best, src); budget -= C.fighter.metal * ai.minFleet; }
-    }
-  }
-  // step 14: colonization
-  if (!broke) {
-    let want = cap;
-    for (const s of colonies(G, p.id)) {
-      if ((cls[s.id] === 9 || cls[s.id] === 10) && RS.popU(s) < 10000) want--;
-      if (cls[s.id] === 8 && s.metal > 100) want--;
-    }
-    want -= rs.aiColonyShipsBusy ? rs.aiColonyShipsBusy(G, p) : colShips; // DOS 2.0: ships come from a queue, so idle ones still need sending
-    want = clamp(want, 0, 5);
-    const cand = (needFleet, metalF) => {
-      let best = -1, bv = 1, src = -1;
-      for (const s of G.stars) {
-        const k = know(G, p, s.id);
-        if (!k.explored || s.owner === p.id || k.owner >= 0 || ai.noColonize[s.id] || tthreat[s.id] > 0) continue;
-        if (needFleet && cls[s.id] !== 6) continue;
-        if (myFleets.some(f => fleetHas(G, f, 'colony') && (f.dest === s.id || f.to === s.id))) continue;
-        const from = nearestOwn(G, p, s.id, C.colony ? D.colony.R : fR, cls);
-        if (from < 0) continue;
-        const v = aiPlanetValue(p, s, k, metalF);
-        if (v > bv) { bv = v; best = s.id; src = from; }
-      }
-      return { best, bv, src };
-    };
-    if (want > 0) {
-      let r = cand(true, ai.metalF);
-      if (r.best < 0) r = cand(false, ai.metalF);
-      if (r.best < 0 && totalMetal < C.colony.metal) r = cand(false, 100);
-      if (r.best >= 0) req('colony', r.bv + (colShips < 1 ? 77 : 38), r.best, r.src);
-    }
-  }
-  // step 15: terraforming
-  for (const s of colonies(G, p.id)) {
-    const h = RS.hab(p, s);
-    if (h.dT <= 0 || cls[s.id] <= 8) continue;
-    const amt = rs.aiTerraMoney ? rs.aiTerraMoney(G, p, s, cls[s.id], ai.iq) : ai.iq === 1 ? RS.terraCost(p, h.dT) : h.dT < 1000 ? 3000 : (p.lastNet < 150000 ? 10000 : 15000);
-    req('terra', cls[s.id] === 10 ? 70 : 80, s.id, amt);
-  }
-  // step 16: defense
-  const satAtt = Math.max(1, C.satellite.att);
-  const defended = colonies(G, p.id).filter(s => cls[s.id] > 8).reverse();
-  const maxDef = Math.ceil(defended.length * ai.colDef / 100);
-  const base = trunc(fAtt * ai.defDom / 100);
-  let nDef = 0;
-  for (const s of defended) {
-    if (nDef >= maxDef) break;
-    const need = trunc(threat[s.id] / 100) * ai.defDom;
-    let have = satStrength(G, p, s.id) + RS.planetStrength(p, s);
-    if (have < base && need > 0) {
-      const n = trunc(base / satAtt) + 1;
-      if (n * C.satellite.metal < A.defB) { A.defB -= n * C.satellite.metal; have += base; req('defend', 60, s.id, n); }
-    }
-    if (base < need) nDef++;
-    if (have < need) {
-      const n = trunc((need - have) / satAtt) + 1;
-      if (n * C.satellite.metal < A.defB) { A.defB -= n * C.satellite.metal; req('defend', 60, s.id, n); }
-    }
-  }
-  for (const s of colonies(G, p.id)) if (cls[s.id] === 8 && satStrength(G, p, s.id) === 0) req('defend', 60, s.id, 1);
-  // step 17: carry out requests in priority order
-  Q.sort((x, y) => y.prio - x.prio || x.n - y.n);
-  let budget = A.D;
-  const M = { tech: 0, terra: {}, mine: {} };
-  const ctx = { G, p, ai, D, C, A, cls, tthreat, threat, myFleets };
-  for (const q of Q) {
-    if (q.type === 'tech') { const x = Math.min(budget, trunc(q.a * Math.max(0, I) / 100)); M.tech += x; budget -= x; }
-    else if (q.type === 'terra' || q.type === 'mine') { const x = Math.min(budget, q.b); const box = M[q.type]; box[q.a] = (box[q.a] || 0) + x; budget -= x; }
-    else if (q.type === 'scout') aiScout(ctx, q.a, q.b);
-    else if (q.type === 'colony') aiColony(ctx, q.a, q.b);
-    else if (q.type === 'attack') aiAttack(ctx, q.a, q.b);
-    else if (q.type === 'defend') aiBuild(ctx, D.satellite, q.a, q.b);
-  }
-  // step 21: turn the decisions into budget bars like a human's
-  const tot = A.D;
-  const b = p.budget;
-  if (rs.aiBudget) rs.aiBudget(G, p, M, A); // DOS 2.0: shares of the whole treasury, ships included
-  else {
-    b.col = {};
-    if (tot <= 0) { b.tech = 0; b.savings = 1; }
-    else {
-      b.tech = M.tech / tot;
-      let used = M.tech;
-      for (const s of colonies(G, p.id)) {
-        const t = M.terra[s.id] || 0, m = M.mine[s.id] || 0;
-        b.col[s.id] = (t + m) / tot; used += t + m;
-        if (t + m > 0) s.terra = t / (t + m);
-      }
-      b.savings = Math.max(0, tot - used) / tot;
-    }
-  }
-  p.talloc = Object.assign({}, ai.tw);
-  // step 20: idle warships away from home fall back to the nearest colony
-  for (const f of myFleets) {
-    if (!G.fleets.includes(f) || f.star == null || f.to != null || f.dest != null || f.sat) continue;
-    const kind = fleetKind(G, f);
-    if (kind === 'scout' || kind === 'colony' || G.stars[f.star].owner === p.id) continue;
-    const back = nearestOwn(G, p, f.star, f.fuel, cls);
-    if (back >= 0) orderMove(G, f, back);
-  }
-}
-// habitability score 2..21 (FUN_10072100)
-function aiHab(p, s) {
-  const h = RS.hab(p, s);
-  let v = 0;
-  if (h.gR < 257 && (h.gR < 201 || h.dT < 501)) {
-    const gi = trunc(h.gR / 10), ti = trunc(h.dT / 330);
-    v = trunc(Math.max(23, 100 - (gi - 10) * (gi - 9)) * Math.max(40, 100 - ti * (ti + 1)) / 527) + 2;
-  }
-  if (s.metal > 10000) v = Math.min(20, v + 1);
-  return v;
-}
-// colony target value (FUN_10083810)
-function aiPlanetValue(p, s, k, metalF) {
-  const hab = aiHab(p, s), metal = k.metal != null ? k.metal : s.metal;
-  if (hab < 2 && metal < 100) return -1;
-  const m = clamp(trunc(metal / 1250), 0, 20);
-  return trunc((metalF * m + hab * (100 - metalF) + 67) / 100);
-}
-// attack target score (FUN_10082ea0)
-function aiTargetScore(G, p, s, thr, fAtt) {
-  const ai = p.ai, k = know(G, p, s.id);
-  let v = clamp(ai.aggr * 2 - trunc(thr / fAtt), 0, 20);
-  if (k.pop > 0 && ai.iq !== 1) v += 20;
-  if (k.pop * 1000 > 400000 && ai.iq !== 1) v += 40;
-  let richest = -1, rv = -1;
-  for (const q of G.players) if (q.alive && q.id !== p.id && q.oInc > rv) { rv = q.oInc; richest = q.id; }
-  if (k.owner >= 0 && k.owner === richest) v += 25;
-  v += k.explored ? aiPlanetValue(p, s, k, ai.metalF) : 8;
-  v += clamp(20 - 5 * trunc(starDist(G, s.id, p.homeStar) / Math.max(1, p.tech.range)), 0, 20);
-  v += k.explored ? clamp(trunc((k.metal || 0) / 1000), 0, 20) : 8;
-  if (ai.hatesHumans && k.owner >= 0 && G.players[k.owner] && !G.players[k.owner].human) v = trunc(v / 4); // C division (FUN_10082ea0)
-  return v + RI(G, -trunc(v / 2), trunc(v / 2));
-}
-function nearestOwn(G, p, sid, fuel, cls) {
-  let best = -1, bd = 1e9;
+  // other players' stars where no battle was seen: a guess from your own technology
   for (const s of G.stars) {
-    if (s.owner !== p.id || s.id === sid || (cls && cls[s.id] < 8)) continue;
-    const d = starDist(G, sid, s.id);
-    if (d <= fuel && d < bd) { bd = d; best = s.id; }
+    const k = know(G, p, s.id), x = est(G, p, s.id);
+    if (k.owner >= 0 && k.owner !== p.id && x.by < 2000) { x.e16 = guess; x.e1a = 7; x.e1e = 0; x.e22 = fAtt; }
+  }
+}
+
+// ---------- step 5 (FUN_10088fd0): fleets already busy (+0x73) ----------
+// a colony ship at a star bound for a star now below class 6 stops
+function markUsedFleets(C) {
+  const { G, p, cls } = C;
+  for (const f of myFleets(G, p)) {
+    if (atStar(f) && fleetClass(G, f) === 4 && hasPath(f) && cls[finalDest(f)] < 6) E.cancelMove(G, f);
+    if (!atStar(f) || hasPath(f)) C.used.add(f);
+  }
+}
+
+// ---------- steps 6-8 ----------
+// FUN_10086f20: obsolete satellites at your colonies are scrapped
+function scrapOldSats(C) {
+  const { G, p, ai, cls } = C;
+  for (const f of myFleets(G, p)) {
+    if (fleetClass(G, f) !== 5 || !atStar(f) || C.scrapF.has(f) || !(cls[f.star] > 8)) continue;
+    for (const d of live(p)) {
+      if (!f.ships[d.id] || obsolete(p, d) < ai.retire.satellite) continue;
+      if (f.ships[d.id] === countType(G, f, -1)) { C.scrapF.add(f); C.used.add(f); }
+      else { const nf = splitOff(G, p, f, d); if (nf) { C.scrapF.add(nf); C.used.add(nf); } }
+    }
+  }
+}
+// FUN_100870a0: obsolete ships (and a computer's tankers) come home to be
+// scrapped; at a colony of yours they are scrapped there
+function scrapOldShips(C) {
+  const { G, p, ai, cls } = C;
+  myFleets(G, p).forEach((f, idx) => {
+    if (C.used.has(f) || !atStar(f) || fleetClass(G, f) === 5) return;
+    const d = mainDesign(G, p, f); if (!d) return;
+    const c = dType(d);
+    if (!(ai.retire[d.type] <= obsolete(p, d) || (!p.human && c === 3))) return;
+    if (cls[f.star] < 8) {
+      if (c === 0) return;
+      const left = maxR(G, f) - usedFuel(G, f);
+      const to = findClose(C, f.star, left, 2);
+      if (to === -1) return;
+      // the fleet's number in the fleet list is passed as the Range (r8 at 0x10087228)
+      const r = determinePath(C, f.star, to, left, idx, countType(G, f, 3) > 0);
+      if (r) { C.used.add(f); givePath(f, r); }
+    } else { C.scrapF.add(f); C.used.add(f); }
+  });
+}
+// FUN_100872a0: warships and biologicals that have used fuel and aren't
+// obsolete: biologicals go back to a colony; a stranded fleet of 5 or more
+// asks for a colony where it is (priority 58, 78 with 5 or more, +20 with 20 or more)
+function strandedFleets(C) {
+  const { G, p, ai, T } = C;
+  for (const f of myFleets(G, p)) {
+    if (fleetClass(G, f) === 5 || !atStar(f)) continue;
+    const d = mainDesign(G, p, f); if (!d) continue;
+    const c = dType(d);
+    if (!(c === 2 || c === 1 || c === 6) || !(usedFuel(G, f) > 0) || !(obsolete(p, d) < ai.retire[d.type])) continue;
+    const left = maxR(G, f) - usedFuel(G, f);
+    const src = findClose(C, f.star, left, c);
+    const n = countType(G, f, -1);
+    let prio = n > 4 ? 78 : 58;
+    if (n > 19) prio += 20;
+    let moved = false;
+    if (src !== -1 && c === 6) {
+      const r = determinePath(C, f.star, src, left, maxR(G, f), false);
+      if (r) { C.used.add(f); givePath(f, r); moved = true; }
+    }
+    if ((src === -1 || !moved) && n > 4 && c !== 6) {
+      const s2 = findClose(C, f.star, T.colony ? T.colony.R : 0, 4);
+      if (s2 !== -1) addAction(C, 4, prio, f.star, s2); // r7 = the colony found (0x100874d0)
+    }
+  }
+}
+
+// ---------- step 9 (FUN_10087530): last turn's news, feelings and alliances ----------
+// FUN_10087f80: with three or more players, raising the feeling for one lowers
+// it for everyone else (not yourself) by a sixth as much; a computer's
+// feelings don't change in a Best Buddies game (game option bit 0x20)
+function modify(G, p, to, delta) {
+  const ai = p.ai;
+  if (!ai || !ai.v505 || !delta || G.players.length <= 2 || (G.opts.buddies && !p.human)) return;
+  ai.att[to] = clamp((ai.att[to] || 0) + delta, -30000, 30000);
+  const x = trunc(delta / 6);
+  for (const q of G.players) if (q.id !== to && q.id !== p.id) ai.att[q.id] = clamp((ai.att[q.id] || 0) - x, -30000, 30000);
+}
+// FUN_100880f0: a canned message into the outbox, at most 3 a turn, none on
+// auto play; FUN_10072a10 hands them out (to = 'all': everyone else).
+// Report n of STR# 6020 is message 999 + n.
+function say(C, to, code, arg) {
+  const { G, p } = C;
+  if (C.auto || C.sent >= 3) return;
+  C.sent++;
+  const targets = to === 'all' ? G.players.filter(q => q.id !== p.id).map(q => q.id) : [to];
+  let text, extra = {};
+  if (code === 0x41a) {
+    const hg = g100(p.homeG), ht = t10(p.homeT);
+    text = E.report(code - 999, p.name, trunc(hg / 100), String(hg % 100).padStart(2, '0'), `${Math.round(ht / 10)}°`);
+    extra = { g: hg, t: ht };
+  } else text = E.report(code - 999, p.name, arg);
+  for (const t of targets) {
+    const q = G.players[t]; if (!q || t === p.id) continue;
+    if (q.human) E.msg(G, t, text, { icon: 'bad' + p.face + '_' + (p.female ? 1 : 0), quiet: true, chat: true });
+    (q.news = q.news || []).push(Object.assign({ type: 'chat', from: p.id, code, text }, extra));
+  }
+}
+function reactAndAlly(C) {
+  const { G, p, ai } = C;
+  const ev = ai.ev || [];
+  ai.ev = [];
+  for (const n of p.news || []) {
+    if (n.type === 'gift') {
+      if (n.money) ev.push({ code: 0x44c, from: n.from, amount: n.money });
+      if (n.metal) ev.push({ code: 0x44d, from: n.from, amount: n.metal });
+    } else if (n.type === 'allied') ev.push({ code: 0x443, with: n.with });
+    else if (n.type === 'broken') ev.push({ code: 0x444, with: n.with });
+    else if (n.type === 'chat') {
+      // "I like planets that are ..." (0x41a): delivering it sets the
+      // receiver's note of the sender's preference (FUN_10072a10, +0x114/+0x134)
+      let g = n.g, t = n.t;
+      if (n.code !== 0x41a) {
+        const m = /I like planets that are (\d+)\.(\d+)G and (-?[\d.]+)/i.exec(String(n.text || ''));
+        if (m) { g = +m[1] * 100 + +m[2]; t = Math.round(parseFloat(m[3]) * 10); }
+      }
+      if (g != null) { ai.prefG[n.from] = g; ai.prefT[n.from] = t; ev.push({ code: 0x41a, from: n.from }); }
+    }
+  }
+  p.news = [];
+  const tw = ai.tw;
+  for (const e of ev) {
+    switch (e.code) {
+      case 0x3eb: // Range reached 16: research moves to Weapons and Shields
+        if (e.level === 16) { tw.weapons += trunc(tw.range / 4); tw.shields += trunc(tw.range / 4); tw.range = trunc(tw.range / 2); }
+        break;
+      case 0x3ed: { // Weapons reached L: the planets' part of the estimates goes up
+        const P = (pop, L) => trunc(L * L * L * trunc((pop + 2499) / 2500) / 570);
+        for (const s of G.stars) {
+          const x = est(G, p, s.id), pop = kPop(know(G, p, s.id));
+          if (!(x.e16 > 0) || pop === 0) continue;
+          if (x.e16 > 20 && x.e1a > 20) x.e1a = x.e1a - P(pop, e.level) + P(pop, e.level + 1);
+          x.e16 = Math.max(0, x.e16);
+        }
+        break;
+      }
+      case 0x3ef: // Mini reached L: some of Mini's research goes to Weapons and Shields
+        if (e.level > 1) {
+          const x = trunc(tw.mini / ((e.level + 1) * 2));
+          tw.weapons += x; tw.shields += x; tw.mini = trunc(e.level * tw.mini / (e.level + 1));
+        }
+        break;
+      case 0x3f3: // a colony destroyed
+        if (!C.auto) {
+          if (RI(G, 1, 10) < 5) say(C, e.by, 0x419);
+          if (RI(G, 1, 15) < 3 && e.by >= 0) say(C, 'all', 0x412, G.players[e.by].name);
+        }
+        break;
+      case 0x40c: // won a battle: "Sorry!" when the other side lost nothing
+        if (!C.auto && e.theirLoss === 0 && RI(G, 1, 10) < 5 && e.other >= 0) say(C, e.other, 0x418);
+        break;
+      case 0x41a: // "I like planets that are ...": an ally is told yours, once
+        if (!C.auto && isAllied(G, p.id, e.from) && RI(G, 1, 10) < 7 && !((ai.told[e.from] || 0) & 1)) {
+          say(C, e.from, 0x41a);
+          ai.told[e.from] = (ai.told[e.from] || 0) + 1;
+        }
+        break;
+      case 0x443: // an alliance formed: like the new ally more, some others a little less
+        if (!C.auto) {
+          ai.att[e.with] = (ai.att[e.with] || 0) + RI(G, 50, 150);
+          for (const q of G.players) if (!isAllied(G, p.id, q.id) && RI(G, 1, 2) === 1) ai.att[q.id] = (ai.att[q.id] || 0) - RI(G, 15, 35);
+        }
+        break;
+      case 0x444: // an alliance gone
+        if (!C.auto) ai.att[e.with] = Math.min(ai.att[e.with] || 0, LIKE - 25);
+        break;
+      case 0x44c: case 0x44d: { // a gift of money (against gross income, +0x3c) or metal (against your metal)
+        if (C.auto) break;
+        const base = e.code === 0x44c ? (p.lastGross || 0) : C.totalMetal + C.homeFleet - e.amount;
+        const x = Math.min(50, base === 0 ? 50 : 5 * trunc(e.amount * 2 / base));
+        if (RI(G, 1, 60) < x) say(C, e.from, 0x417);
+        modify(G, p, e.from, x);
+        break;
+      }
+    }
+  }
+  // only with the Alliances option (game +0x5c bit 1), and not on auto play
+  if (!G.opts.alliances || C.auto) return;
+  if (C.Y > 2500) {
+    if (C.high === p.id) { modify(G, p, p.id, RI(G, 20, 40)); modify(G, p, C.second, RI(G, -25, -15)); }
+    else if (C.low === p.id) modify(G, p, p.id, RI(G, -40, -20));
+    else modify(G, p, C.high, RI(G, -10, -5));
+  }
+  // dislike the friends of those you dislike
+  for (const q of G.players) {
+    if (q.id === p.id || (ai.att[q.id] || 0) >= LIKE - 200) continue;
+    for (const r of G.players) if (r.id !== p.id && r.id !== q.id && isAllied(G, q.id, r.id)) modify(G, p, r.id, RI(G, -8, -4));
+  }
+  // want an alliance at 500 or more (player +0x110c)
+  p.allies = p.allies || [];
+  for (const q of G.players) {
+    if (!q.alive || q.surrendered) ai.att[q.id] = 0;
+    if (q.id === p.id) continue;
+    const want = p.allies.includes(q.id), a = ai.att[q.id] || 0;
+    if (a >= LIKE && !want) { E.setPact(G, p.id, q.id, 'ally', true); if (RI(G, 1, 10) > 5) say(C, q.id, 0x411, q.name); }
+    else if (a < LIKE && want) { E.setPact(G, p.id, q.id, 'ally', false); if (RI(G, 1, 10) > 5) say(C, q.id, 0x412, q.name); }
+  }
+}
+
+// ---------- the action list (FUN_10088240, FUN_10088330) ----------
+// At most 50, highest priority first (a new one after those of equal
+// priority). 1 explore, 2 attack, 3 research, 4 colonize, 5 terraform,
+// 6 mine, 7 satellites, 8 scrap satellites, 9 ship money.
+function addAction(C, type, prio, a, b) {
+  const L = C.acts;
+  if (L.length === 50) { if (prio <= L[49].prio) return; L.pop(); }
+  let i = 0; while (i < L.length && prio <= L[i].prio) i++;
+  L.splice(i, 0, { type, prio, a, b });
+}
+function countActions(C, type) {
+  const { G, p } = C;
+  let n = C.acts.filter(x => x.type === type).length;
+  if (type === 1) for (const f of myFleets(G, p)) if (countType(G, f, 0) > 0 && hasPath(f) && !know(G, p, finalDest(f)).explored) n++;
+  return n;
+}
+// FUN_100829e0: the nearest colony of yours (class 8 or more) within `range`
+// of a star; mode 4 also accepts an idle colony ship that could get there,
+// and then answers with the last colony in the list
+function findClose(C, sid, range, mode) {
+  const { G, p, cls } = C;
+  let best = -1, bd = 30000;
+  for (const c of C.cols) {
+    if (c === sid || cls[c] <= 7) continue;
+    const d = E.starDist(G, sid, c);
+    if (d <= range && d < bd) { bd = d; best = c; }
+  }
+  if (best === -1 && mode === 4) {
+    for (const f of myFleets(G, p)) {
+      if (!atStar(f) || fleetClass(G, f) !== 4) continue;
+      if (E.starDist(G, sid, f.star) <= maxR(G, f) - usedFuel(G, f)) return C.cols.length ? C.cols[C.cols.length - 1] : -1;
+    }
   }
   return best;
 }
-function satStrength(G, p, sid) {
-  let st = 0;
-  for (const f of G.fleets) if (f.owner === p.id && f.star === sid && f.sat) st += RS.fleetStrength(G, f);
-  return st;
-}
-// FUN_100852d0: pay for ships out of savings above the reserve, never past the borrowing limit
-function aiBuild(ctx, d, sid, n) {
-  const { G, p, A } = ctx;
-  if (E.rules(G).aiBuild) return E.rules(G).aiBuild(ctx, d, sid, n); // DOS 2.0: queue the ships at the colony
-  if (!d || n < 1 || G.stars[sid].owner !== p.id) return 0;
-  if (RS.popU(G.stars[sid]) < n) return 0;
-  const c = shipCostNow(G, p, d), unit = RS.designCost(G, d).money;
-  const total = c.money + (n - 1) * unit;
-  const spend = p.savings - A.reserve;
-  if ((spend < 1 && !(d.type === 'satellite' && n <= 5)) || spend - total <= borrowLimit(G, p) || p.metal < c.metal * n) return 0;
-  // keep 5,000 metal in hand for the next colony ship
-  if (!(c.metal < 1 || A.colShips > 0 || d.type === 'colony' || A.metal >= 5000 || A.broke)) return 0;
-  return buildShips(G, p.id, sid, d.id, n);
-}
-function freshFleet(G, p, sid, did) {
-  return G.fleets.find(f => f.owner === p.id && f.star === sid && f.newThisTurn && f.dest == null && f.ships[did]);
-}
-function aiScout(ctx, target, src) {
-  const { G, p, D } = ctx;
-  for (const f of G.fleets) {
-    if (f.owner !== p.id || f.star !== src || f.dest != null || f.to != null || fleetCount(f) !== 1) continue;
-    const kind = fleetKind(G, f);
-    if (kind !== 'scout' && kind !== 'bio') continue;
-    if (orderMove(G, f, target)) return;
-  }
-  if (aiBuild(ctx, D.scout, src, 1)) { const f = freshFleet(G, p, src, D.scout.id); if (f) orderMove(G, f, target); }
-}
-function aiColony(ctx, target, src) {
-  const { G, p, D } = ctx;
-  for (const f of G.fleets) {
-    if (f.owner !== p.id || f.star == null || f.to != null || f.dest != null || !fleetHas(G, f, 'colony')) continue;
-    if (orderMove(G, f, target)) return;
-  }
-  if (aiBuild(ctx, D.colony, src, 1)) { const f = freshFleet(G, p, src, D.colony.id); if (f) orderMove(G, f, target); }
-}
-// FUN_10084860
-function aiAttack(ctx, target, src) {
-  const { G, p, ai, D, C, A, tthreat } = ctx;
-  const need = trunc(tthreat[target] / 100) * ai.attDom + 1;
-  for (const f of G.fleets) {
-    if (f.owner !== p.id || f.star == null || f.to != null || f.dest != null || f.sat) continue;
-    const kind = fleetKind(G, f);
-    if (!(kind === 'fighter' || kind === 'dread' || kind === 'bio')) continue;
-    let st = RS.fleetStrength(G, f);
-    if (fleetDesigns(G, f).some(d => d.type !== 'bio' && obsolete(p, d) >= (ai.redesign[d.type] || 60))) st = trunc(st / 2);
-    if (st >= need && orderMove(G, f, target)) return;
-  }
-  const send = (did, n) => { const f = freshFleet(G, p, src, did); if (f) orderMove(G, f, target); return f; };
-  // a single dreadnought when one is about the right size
-  const dc = C.dread;
-  if (dc && 10 < ai.redesign.dread - obsolete(p, D.dread) && need < dc.att && trunc(dc.att * 3 / 4) < need && dc.metal <= A.offB && dc.metal <= A.metal) {
-    if (aiBuild(ctx, D.dread, src, 1)) {
-      A.offB -= dc.metal; A.metal -= dc.metal;
-      const f = send(D.dread.id, 1);
-      if (f && p.metal > 10000 && aiBuild(ctx, D.tanker, src, 1)) { const t = freshFleet(G, p, src, D.tanker.id); if (t && t !== f) mergeFleets(G, f, t); f.dest = target; }
-      return;
+
+// ---------- step 11 (FUN_10081fe0): colonies beyond the income, mining ----------
+const fuellingAt = (C, sid) => C.G.fleets.some(f => f.owner === C.p.id && atStar(f) && f.star === sid && usedFuel(C.G, f) > 0);   // FUN_10082520
+const stationedAt = (C, sid) => C.G.fleets.some(f => f.owner === C.p.id && atStar(f) && f.star === sid && !hasPath(f) && fleetClass(C.G, f) !== 5); // FUN_100825d0
+function colonySupport(C) {
+  const { G, p, cls } = C;
+  // small colonies (under 10 million) beyond what the income supports are
+  // evacuated, the worst first (rated, +10 with over 20,000 people), unless
+  // ships are refuelling there
+  let n = C.cols.filter(sid => popU(G.stars[sid]) < 10000).length;
+  while (C.cap2 < n && n > 0) {
+    let worst = -1, wq = 99;
+    for (const sid of C.cols) {
+      if (cls[sid] <= 7 || G.stars[sid].owner !== p.id) continue;
+      let q = starQuality(C, sid);
+      if (popU(G.stars[sid]) > 20 && q > 1) q += 10;
+      if (q < wq) { wq = q; worst = sid; }
     }
+    if (worst === -1) break;
+    n--;
+    if (!fuellingAt(C, worst)) { E.evacuate(G, p.id, worst); cls[worst] = 6; }
   }
-  // otherwise a wing of fighters
-  if (10 < ai.redesign.fighter * 2 - obsolete(p, D.fighter)) {
-    const fc = C.fighter;
-    let n = trunc(need / Math.max(1, fc.att)) + 1;
-    if (need > 20) n = Math.max(n, ai.minFleet);
-    const cost = n * fc.metal;
-    if (cost > A.offB || cost > A.metal) return;
-    const built = aiBuild(ctx, D.fighter, src, n);
-    if (!built) return;
-    A.offB -= built * fc.metal; A.metal -= built * fc.metal;
-    const f = send(D.fighter.id, built);
-    if (f && built > ai.minFleet * 2) {
-      const k = Math.max(1, trunc(built / 30));
-      if (p.metal > k * 7500 && aiBuild(ctx, D.tanker, src, k)) { const t = freshFleet(G, p, src, D.tanker.id); if (t && t !== f) mergeFleets(G, f, t); f.dest = target; }
+  for (const sid of C.cols) {
+    const s = G.stars[sid];
+    if (cls[sid] <= 7 || s.owner !== p.id) continue;
+    // a hostile colony with under 100 metal left is abandoned, unless ships
+    // refuel or wait there, and offered to an ally whose planets it suits
+    if (cls[sid] === 8 && s.metal < 100) {
+      cls[sid] = 6;
+      if (!fuellingAt(C, sid) && !stationedAt(C, sid)) {
+        E.evacuate(G, p.id, sid);
+        for (const q of G.players) {
+          if (q.id === p.id || !isAllied(G, p.id, q.id) || C.ai.prefG[q.id] == null) continue;
+          if (quality(C.ai.prefG[q.id], C.ai.prefT[q.id], know(G, p, sid)) > 5 && RI(G, 1, 10) < 9) { say(C, q.id, 0x410, s.name); break; }
+        }
+      } else cls[sid] = 8;
+    }
+    if (s.owner === p.id && s.metal > 0) {
+      const m = Math.floor(s.metal) + 25;
+      if (cls[sid] === 8) addAction(C, 6, 75, sid, RS.mineMoney(p, C.iq === 1 ? m : Math.min(m, 1000)));
+      else if (cls[sid] > 8) addAction(C, 6, 30, sid, RS.mineMoney(p, C.iq <= 2 ? Math.min(m, 5000) : Math.min(m, 600)));
     }
   }
 }
 
-
-// ---------- colony ships with nobody aboard go home to reload ----------
-function reloadColonyShips(G, p) {
-  for (const f of G.fleets) {
-    if (f.owner !== p.id || f.star == null || f.to != null || f.dest != null || !fleetHas(G, f, 'colony') || (f.colonists || 0) > 0) continue;
-    if (G.stars[f.star].owner === p.id) continue;
-    const back = nearestOwn(G, p, f.star, f.fuel);
-    if (back >= 0) orderMove(G, f, back);
+// ---------- step 15 (FUN_10082690): terraforming ----------
+// a Dumb computer asks for the whole job; the others $3,000 within 100
+// degrees, else $10,000 ($15,000 with $150,000 or more to spend); 70 at a
+// colony making money, 80 at one losing it. GUESS: colony +2 = -1 ("no
+// terraforming") is taken as the temperature already right.
+function terraform(C) {
+  const { G, p, cls } = C;
+  for (const sid of C.cols) {
+    const s = G.stars[sid];
+    if (s.owner !== p.id || cls[sid] <= 8) continue;
+    const dT = Math.abs(t10(s.t) - t10(p.homeT));
+    if (!(dT > 0)) continue;
+    const amt = C.iq === 1 ? RS.terraCost(p, dT) : dT < 1000 ? 3000 : C.M < 150000 ? 10000 : 15000;
+    addAction(C, 5, cls[sid] === 10 ? 70 : 80, sid, amt);
   }
 }
-// no colonies left: send any loaded colony ship to the best reachable free planet
-function strandedColonyShips(G, p) {
-  for (const f of G.fleets) {
-    if (f.owner !== p.id || f.star == null || f.to != null || f.dest != null || !fleetHas(G, f, 'colony') || !f.colonists) continue;
-    let best = -1, bv = -1e9;
+
+// ---------- step 12 (FUN_10082820): exploring ----------
+function explore(C) {
+  const { G, T, cls, tthreat } = C;
+  if (C.broke || !(C.colShips !== 0 || C.totalMetal > 4999)) return;
+  const sR = T.scout ? T.scout.R : 0, cR = T.colony ? T.colony.R : 0;
+  let top = false;
+  for (const s of G.stars) {
+    if (!((cls[s.id] === 0 && C.goodFleetStar === -1) || cls[s.id] === 2) || tthreat[s.id] !== 0 || s.nova) continue;
+    let src = findClose(C, s.id, cR, 0);
+    if (src < 0) { src = findClose(C, s.id, sR, 0); if (src >= 0) addAction(C, 1, 54, s.id, src); }
+    else if (top || cls[s.id] !== 2) addAction(C, 1, 55, s.id, src);
+    else { addAction(C, 1, 86, s.id, src); top = true; }
+  }
+}
+
+// ---------- step 13 (FUN_10082bb0, FUN_10082d40, FUN_10082ea0): attacking ----------
+// every target is picked in turn (the attack budget only has to be above
+// zero); each colony sends at most one attack
+function attack(C) {
+  const { ai, T } = C;
+  if (C.broke || !T.fighter) return;
+  const picked = new Set(), srcUsed = new Set();
+  while (C.offB > 0) {
+    const t = pickAttackLoc(C, picked);
+    if (t === -1) break;
+    picked.add(t);
+    const src = findClose(C, t, T.fighter.R, 2);
+    if (src !== -1 && !srcUsed.has(src)) { srcUsed.add(src); addAction(C, 2, ai.aggr * 5 + 35, t, src); } // r7 = src (0x10082cd8)
+  }
+}
+function pickAttackLoc(C, picked) {
+  const { G, p, ai, T, cls, tthreat } = C;
+  const fAtt = att(G, T.fighter), n = G.stars.length;
+  const start = RI(G, 0, n - 1);
+  let best = -1, bv = 0;
+  for (let i = (start + 1) % n; i !== start; i = (i + 1) % n) {
+    const s = G.stars[i], k = know(G, p, i);
+    if (cls[i] >= 5 || !(tthreat[i] > 0) || picked.has(i) || s.nova) continue;
+    if (ai.style === 2 && !(tthreat[i] < fAtt)) continue; // the turtle only picks on the weak
+    if (k.owner >= 0 && isAllied(G, k.owner, p.id)) continue;
+    const v = targetScore(C, i, fAtt);
+    if (bv < v) { bv = v; best = i; }
+  }
+  return best;
+}
+function targetScore(C, sid, fAtt) {
+  const { G, p, ai } = C, k = know(G, p, sid);
+  let v = clamp(ai.aggr * 2 - trunc(C.tthreat[sid] / Math.max(1, fAtt)), 0, 20);
+  const pop = kPop(k);
+  if (pop > 0 && C.iq !== 1) v += 20;
+  if (pop > 400000 && C.iq !== 1) v += 40;
+  if (k.owner >= 0 && k.owner === C.second) v += 25; // the richest other player
+  v += k.explored ? colQuality(C, sid, ai.metalF) : 8;
+  v += clamp(20 - 5 * trunc(RS.distance(G, G.stars[sid], C.center) / Math.max(1, p.tech.range)), 0, 20);
+  v += clamp(k.explored ? trunc((k.metal || 0) / 1000) : 8, 0, 20);
+  // a Diabolical computer cares a quarter as much about the other computers' stars
+  if (C.iq === 4 && k.owner >= 0 && G.players[k.owner] && !G.players[k.owner].human) v = trunc(v / 4);
+  return v + RI(G, trunc(-v / 2), trunc(v / 2));
+}
+// FUN_10083810: rating and metal (your fighters and dreadnoughts there count
+// as metal), weighed by the importance of metal
+function colQuality(C, sid, metalF) {
+  const { G, p } = C;
+  const q = starQuality(C, sid);
+  let a = know(G, p, sid).metal || 0;
+  for (const f of myFleets(G, p)) if (atStar(f) && f.star === sid && (fleetClass(G, f) === 2 || fleetClass(G, f) === 1)) a += fleetMetal(G, f);
+  const m = clamp(trunc(a / 1250), 0, 20);
+  if (q < 2 && a < 100) return -1;
+  return trunc((metalF * m + q * (100 - metalF) + 67) / 100);
+}
+
+// ---------- step 14 (FUN_10083110): colonizing ----------
+// only stars nobody owns where you have a fleet (class 6) are colonized
+function colonize(C) {
+  const { G, p, ai, T, cls } = C;
+  if (C.broke || !T.colony) return;
+  const cR = T.colony.R, free = (sid) => cls[sid] === 6 && !(know(G, p, sid).owner >= 0);
+  const out = myFleets(G, p).filter(f => fleetClass(G, f) === 4 && hasPath(f) && cls[finalDest(f)] < 8);
+  let want = C.cap;
+  // a planet rated 10 better than your worst colony is worth a colony ship anyway
+  let worst = -1, wq = 99;
+  for (const sid of C.cols) {
+    if (cls[sid] <= 7) continue;
+    let q = starQuality(C, sid);
+    if (popU(G.stars[sid]) > 20 && q > 1) q += 10;
+    if (q < wq) { wq = q; worst = sid; }
+  }
+  if (out.length) worst = -1;
+  if (worst !== -1) {
+    let bt = -1, bq = wq + 10, bs = -1;
     for (const s of G.stars) {
-      if (s.owner >= 0 || s.nova) continue;
-      const d = starDist(G, f.star, s.id);
-      if (d > f.fuel || d === 0) continue;
-      const v = aiHab(p, s) * 10 - d;
-      if (v > bv) { bv = v; best = s.id; }
+      if (!free(s.id)) continue;
+      const q = starQuality(C, s.id), src = findClose(C, s.id, cR, 4);
+      if (src !== -1 && bq < q) { bt = s.id; bq = q; bs = src; }
     }
-    if (best >= 0) orderMove(G, f, best);
+    if (bt !== -1) { addAction(C, 4, bq + 38, bt, bs); want--; }
+  }
+  for (const sid of C.cols) {
+    if ((cls[sid] === 9 || cls[sid] === 10) && popU(G.stars[sid]) < 10000) want--;
+    if (cls[sid] === 8 && (know(G, p, sid).metal || 0) > 100) want--;
+  }
+  want -= out.length;
+  want = clamp(want, 0, 5);
+  if (!want) return;
+  const look = (range, metalF, floor) => {
+    let bt = -1, bq = floor, bs = -1;
+    for (const s of G.stars) {
+      if (!free(s.id)) continue;
+      const q = colQuality(C, s.id, metalF), src = findClose(C, s.id, range, 4);
+      if (src !== -1 && bq < q) { bt = s.id; bq = q; bs = src; }
+    }
+    return { bt, bq, bs };
+  };
+  let r = look(cR, ai.metalF, 1);
+  if (r.bt === -1 && C.totalMetal > 4999) r = look(p.tech.range, ai.metalF, 1);
+  if (r.bt === -1 && (countActions(C, 1) === 0 || C.totalMetal < metalOf(G, T.colony))) r = look(cR, 100, -1);
+  if (r.bt !== -1) addAction(C, 4, r.bq + (C.colShips < 1 ? 77 : 38), r.bt, r.bs);
+}
+
+// ---------- step 16 (FUN_100839a0): satellites ----------
+function satellites(C) {
+  const { G, p, ai, T, cls, threat } = C;
+  if (!(C.colShips !== 0 || C.totalMetal > 4999 || C.broke) || !T.satellite) return;
+  const satAtt = Math.max(1, att(G, T.satellite)), satMetal = metalOf(G, T.satellite);
+  const minDef = trunc(att(G, T.fighter) * ai.defDom / 100);
+  const list = [];
+  for (let i = C.cols.length - 1; i >= 0; i--) { const sid = C.cols[i]; if (cls[sid] > 8) list.push({ sid, need: trunc(threat[sid] / 100) * ai.defDom }); }
+  const maxDef = trunc((list.length * ai.colDef + 99) / 100);
+  for (let i = 0, nDef = 0; i < list.length && nDef < maxDef; i++) {
+    const { sid, need } = list[i];
+    const sats = satPower(C, sid);
+    let have = sats + RS.planetStrength(p, G.stars[sid]);
+    if (have < minDef && need > 0) {
+      const n = trunc(minDef / satAtt) + 1;
+      if (n * satMetal < C.defB) { C.defB -= n * satMetal; have += minDef; addAction(C, 7, 60, sid, n); }
+    }
+    if (minDef < need) nDef++;
+    if (have < need) {
+      const n = trunc((need - have) / satAtt) + 1;
+      if (n * satMetal < C.defB) { C.defB -= n * satMetal; addAction(C, 7, 60, sid, n); }
+    } else if (sats > 0 && need === 0) addAction(C, 8, 10, sid, 0);
+  }
+  for (const sid of C.cols) if (cls[sid] === 8 && satPower(C, sid) === 0) addAction(C, 7, 60, sid, 1);
+}
+// FUN_1007e380(star, 5): your satellites' strength at a star, not counting
+// satellite fleets already given something to do (+0x73)
+function satPower(C, sid) {
+  let a = 0;
+  for (const f of myFleets(C.G, C.p)) {
+    if (!atStar(f) || f.star !== sid) continue;
+    for (const k in f.ships) { const d = getDesign(C.G, f.owner, +k); if (d && dType(d) === 5 && !C.used.has(f)) a += f.ships[k] * att(C.G, d); }
+  }
+  return a;
+}
+
+// ---------- step 17 (FUN_10083e30 and its jump table at 0x10083e78..0x10083fa4) ----------
+function perform(C) {
+  for (const x of C.acts) {
+    const take = (box, key, amt) => { const v = Math.min(amt, C.M); box[key] = (box[key] || 0) + v; C.M -= v; };
+    switch (x.type) {
+      case 1: goExplore(C, x.b, x.a); break;                                   // FUN_10083fe0
+      case 2: goAttack(C, x.b, x.a); break;                                    // FUN_10084860
+      case 3: { const v = Math.min(trunc(x.b * C.I / 100), C.M); C.tech += v; C.M -= v; break; } // FUN_10085880
+      case 4: goColonize(C, x.b, x.a); break;                                  // FUN_10085070
+      case 5: take(C.terra, x.a, x.b); break;                                  // +0x294
+      case 6: take(C.mine, x.a, x.b); break;                                   // +0x290
+      case 7: build(C, C.T.satellite, x.a, x.b, null); break;                  // FUN_100852d0
+      case 8: for (const f of myFleets(C.G, C.p)) if (atStar(f) && f.star === x.a && fleetClass(C.G, f) === 5) { C.scrapF.add(f); C.used.add(f); } break; // FUN_10085eb0
+      case 9: { const v = Math.min(x.b, C.M); C.ships += v; C.M -= v; break; }   // FUN_100858d0
+    }
+  }
+}
+const route = (C, f, to) => determinePath(C, f.star, to, maxR(C.G, f) - usedFuel(C.G, f), maxR(C.G, f), countType(C.G, f, 3) > 0);
+// FUN_10083fe0: a lone scout (or biological) at the colony goes; else a
+// biological is bought (from a colony of 10 to 700 million, when you have
+// the type), else a scout
+function goExplore(C, src, target) {
+  const { G, p, T, cls } = C;
+  for (const f of myFleets(G, p)) {
+    if (!atStar(f) || f.star !== src || C.used.has(f)) continue;
+    const c = fleetClass(G, f);
+    if (countType(G, f, -1) !== 1 || !(c === 0 || c === 6)) continue;
+    const r = route(C, f, target);
+    if (r) { C.used.add(f); cls[target] = 1; givePath(f, r); return; }
+    if (usedFuel(G, f) !== 0 && (c !== 6 || G.stars[src].owner === p.id)) { C.used.add(f); return; }
+    if (c !== 6 && !(T.scout && f.ships[T.scout.id]) && cls[f.star] > 7) { C.scrapF.add(f); C.used.add(f); }
+  }
+  let nf = null;
+  if (T.bio) {
+    const pop = G.stars[src].owner === p.id ? popU(G.stars[src]) : 0;
+    if (pop < 700000 && pop > 10000) {
+      const r = determinePath(C, src, target, T.bio.R, T.bio.R, false);
+      if (r) { nf = build(C, T.bio, src, 1, null); if (nf) { C.used.add(nf); cls[target] = 1; givePath(nf, r); return; } }
+    }
+  }
+  nf = build(C, T.scout, src, 1, null);
+  if (nf) {
+    const r = route(C, nf, target);
+    if (r) { C.used.add(nf); cls[target] = 1; givePath(nf, r); }
+  }
+}
+// FUN_10084860: a fleet strong enough (attacking domination % of the force
+// there; an obsolete one counts half) goes; else biologicals late in the
+// game, one dreadnought of about the right size (with a tanker over 10,000
+// metal), or a wing of fighters (tankers for big wings)
+function goAttack(C, src, target) {
+  const { G, p, ai, T, cls, tthreat } = C;
+  const need = trunc(tthreat[target] / 100) * ai.attDom + 1;
+  for (const f of myFleets(G, p)) {
+    if (C.used.has(f) || !atStar(f)) continue;
+    const c = fleetClass(G, f);
+    if (!(c === 1 || c === 2 || c === 6 || c === 7)) continue;
+    const d = mainDesign(G, p, f); if (!d) continue;
+    let pow = fleetAtt(G, f);
+    if (ai.redesign[d.type] <= obsolete(p, d)) pow = trunc(pow / 2);
+    if (need > pow) continue;
+    const r = route(C, f, target);
+    if (r && (c !== 6 || bioRouteOK(C, r))) { C.used.add(f); cls[target] = 5; givePath(f, r); return; }
+    if (usedFuel(G, f) !== 0 && cls[f.star] > 7) { C.used.add(f); return; }
+  }
+  const pop = G.stars[src].owner === p.id ? popU(G.stars[src]) : 0;
+  if ((C.Y > 5000 || (C.Y > 4000 && p.metal < 30000) || (C.Y > 3000 && p.metal < 10000)) && T.bio && pop < 700000 && pop > 50000) {
+    const R = T.bio.R - 1, r = determinePath(C, src, target, R, R, false);
+    if (r) {
+      const nf = build(C, T.bio, src, trunc(need / Math.max(1, att(G, T.bio))) + 1, null);
+      if (nf) { C.used.add(nf); cls[target] = 5; givePath(nf, r); return; }
+    }
+  }
+  const dd = T.dread;
+  if (dd && 10 < ai.redesign.dread - obsolete(p, dd)) {
+    const da = att(G, dd), dm = metalOf(G, dd);
+    if (need < da && trunc(da * 3 / 4) < need && dm <= C.offB && dm <= C.totalMetal) {
+      const R = dd.R - 1, r = determinePath(C, src, target, R, R, false);
+      if (r) {
+        C.offB -= dm;
+        const nf = build(C, dd, src, 1, null);
+        if (nf && p.metal > 10000) build(C, T.tanker, src, 1, nf);
+        if (nf) { C.used.add(nf); cls[target] = 5; givePath(nf, r); return; }
+      }
+    }
+  }
+  const fd = T.fighter;
+  if (fd && 10 < ai.redesign.fighter - obsolete(p, fd)) {
+    let n = trunc(need / Math.max(1, att(G, fd))) + 1;
+    if (need > 20) n = Math.max(ai.minFleet, n);
+    const cost = n * metalOf(G, fd);
+    if (cost <= C.offB && cost <= C.totalMetal) {
+      C.offB -= cost;
+      const nf = build(C, fd, src, n, null);
+      if (nf && n > ai.minFleet * 2) {
+        const k = Math.max(1, trunc(n / 30));
+        if (k * 7500 < p.metal) build(C, T.tanker, src, k, nf);
+      }
+      if (nf) {
+        const r = route(C, nf, target);
+        if (r) { C.used.add(nf); cls[target] = 5; givePath(nf, r); }
+      }
+    }
+  }
+}
+// FUN_10084f90: biologicals only stop where they can eat: colonies of 10
+// million or more, not your own of over 700 million
+function bioRouteOK(C, r) {
+  const { G, p } = C;
+  for (let i = 0; i < r.length - 1; i++) {
+    const s = G.stars[r[i]];
+    if (s.owner < 0 || popU(s) < 10000) return false;
+    if (s.owner === p.id && popU(s) > 700000) return false;
+  }
+  return true;
+}
+// FUN_10085070: the first idle colony ship goes, if it can; one with nobody
+// aboard at a colony waits for colonists; else one is bought
+function goColonize(C, src, target) {
+  const { G, p, T, cls } = C;
+  if (cls[target] === 7) return;
+  const f = myFleets(G, p).find(x => !C.used.has(x) && atStar(x) && fleetClass(G, x) === 4);
+  if (f) {
+    const r = determinePath(C, f.star, target, maxR(G, f) - usedFuel(G, f), maxR(G, f), false);
+    if (!(f.colonists > 0) && cls[f.star] > 7) { C.used.add(f); return; }
+    if (r) { C.used.add(f); cls[target] = 7; givePath(f, r); return; }
+    if (usedFuel(G, f) === 0 && cls[f.star] > 7) C.scrapF.add(f);
+    C.used.add(f);
+    return;
+  }
+  if (!T.colony) return;
+  const R = T.colony.R, r = determinePath(C, src, target, R, R, false);
+  if (!r) return;
+  const nf = build(C, T.colony, src, 1, null);
+  if (nf) { C.used.add(nf); cls[target] = 7; givePath(nf, r); }
+}
+// FUN_100852d0: buy n ships at a colony out of Ship Savings above the
+// reserve. Not at a star going nova; the colony needs a thousand people for
+// each ship bought there this turn. Dumb and Average computers pay a type's
+// first-ship price if none was ever built. If Ship Savings are gone (unless
+// up to 5 Satellites), or the purchase would reach the borrowing limit, or
+// the metal isn't there: no more ships this turn, and metal missing for a
+// colony ship is found by scrapping idle ships. With under 5,000 metal and no
+// colony ship only colony ships are bought (and ships that need no metal).
+// Scouts and colony ships each get a new fleet; other ships join a fleet of
+// that design at the star with no orders, else a new one; or the fleet given.
+function build(C, d, sid, n, into) {
+  const { G, p } = C;
+  if (!d || n < 1) return null;
+  const s = G.stars[sid];
+  if (s.nova || s.owner !== p.id) return null;
+  if (popU(s) < n + (C.built[sid] || 0)) return null;
+  const c = E.designCost(G, d), unit = c.money, metal = c.metal;
+  let price = C.iq < 3 && !d.built && !d.free ? c.protoTotal : unit;
+  if ((C.S < 1 && (d.type !== 'satellite' || n > 5)) || C.S - (price + (n - 1) * unit) <= E.borrowLimit(G, p) || C.hand < metal * n) {
+    if (C.S > 0) C.S = 0;
+    const needM = metal * n;
+    if (C.hand < needM) { mineMetal(C, needM - C.hand, d.type); C.totalMetal -= C.hand; C.hand = 0; }
+    else { C.hand -= needM; C.totalMetal -= needM; }
+    return null;
+  }
+  if (!(metal < 1 || C.colShips !== 0 || d.type === 'colony' || C.totalMetal > 4999 || C.broke)) return null;
+  let f = into;
+  for (; n > 0; n--) {
+    p.savings -= price; C.S -= price; p.metal -= metal; C.hand -= metal; C.totalMetal -= metal;
+    d.built++; C.built[sid] = (C.built[sid] || 0) + 1;
+    if (into) into.ships[d.id] = (into.ships[d.id] || 0) + 1;
+    else {
+      let j = null;
+      if (d.type !== 'scout' && d.type !== 'colony')
+        j = G.fleets.find(x => x.owner === p.id && atStar(x) && x.star === sid && x.ships[d.id] > 0 && !hasPath(x)) || null;
+      if (j) { j.ships[d.id]++; f = j; } else f = newFleet(G, p, sid, d, 1);
+    }
+    price = unit;
+  }
+  if (into && !into.sat) into.fuel = Math.min(into.fuel, maxR(G, into));
+  return f;
+}
+// FUN_10085700: for a colony ship short of metal, with none in service: idle
+// ships at your colonies (no colony ships among them) are scrapped, until
+// enough (a human's count at 3/4, 7/8 with recycling)
+function mineMetal(C, amount, type) {
+  const { G, p } = C;
+  if (!(amount > 0) || type !== 'colony' || C.colShips !== 0) return;
+  for (const f of myFleets(G, p)) {
+    if (!(amount > 0)) break;
+    if (C.used.has(f) || !atStar(f) || know(G, p, f.star).owner !== p.id || countType(G, f, 4) !== 0) continue;
+    let m = fleetMetal(G, f);
+    if (p.human) m = p.flags && p.flags.recycle ? trunc(m * 7 / 8) : trunc(m * 3 / 4);
+    amount -= m; C.scrapF.add(f); C.used.add(f);
   }
 }
 
-// ---------- diplomacy (FUN_10087530, FUN_10087f80, FUN_10088160) ----------
-// Each computer keeps an attitude toward every player. At 500 or more it
-// wants an alliance; below 500 it withdraws. Raising its attitude toward one
-// player lowers its attitude toward everyone else by a sixth as much.
-const LIKE = 500;
-function attitude(G, p, to, delta) {
-  if (!delta || G.players.filter(q => q.alive).length < 3) return;
-  const a = p.ai.att;
-  a[to] = clamp((a[to] || 0) + delta, -30000, 30000);
-  for (const q of G.players) if (q.id !== to && q.id !== p.id) a[q.id] = clamp((a[q.id] || 0) - trunc(delta / 6), -30000, 30000);
-}
-// A computer sends at most three messages a turn, to anyone (FUN_100880f0:
-// player +0x1058 counts them, emptied by FUN_10072a10); only humans see them.
-function say(G, p, to, text) {
-  if (p.ai && (p.ai.sent || 0) >= 3) return;
-  if (p.ai) p.ai.sent = (p.ai.sent || 0) + 1;
-  if (G.players[to] && G.players[to].human) msg(G, to, `${p.name} says, “${text}”`, { icon: 'bad' + p.face + '_' + (p.female ? 1 : 0), quiet: true, chat: true });
-}
-function diplomacy(G, p) {
-  const ai = p.ai;
-  p.allies = p.allies || [];
-  const alive = G.players.filter(q => q.alive && !q.surrendered);
-  // last turn's news: gifts received, alliances made and broken
-  for (const ev of p.news || []) {
-    if (ev.type === 'gift') {
-      const base = ev.money ? Math.max(1, p.oInc) : Math.max(1, p.metal - ev.metal);
-      const x = Math.min(50, 5 * trunc(2 * (ev.money || ev.metal) / base));
-      if (RI(G, 1, 60) < x) say(G, p, ev.from, 'Thank You!');
-      attitude(G, p, ev.from, x);
-    } else if (ev.type === 'allied') {
-      attitude(G, p, ev.with, RI(G, 50, 150));
-      for (const q of alive) if (q.id !== p.id && !isAllied(G, p.id, q.id) && RI(G, 1, 2) === 1) ai.att[q.id] = (ai.att[q.id] || 0) - RI(G, 15, 35);
-    } else if (ev.type === 'broken') ai.att[ev.with] = Math.min(ai.att[ev.with] || 0, LIKE - 25);
-    else if (ev.type === 'attacked' && RI(G, 1, 10) < 5) say(G, p, ev.by, '#!$@*$&@•™!');
-  }
-  p.news = [];
-  if (G.year > 2500) {
-    let rich = -1, rv = -1, poor = -1, pv = 1e18, second = -1, sv = -1;
-    for (const q of alive) {
-      if (q.oInc > rv) { rv = q.oInc; rich = q.id; }
-      if (q.oInc < pv) { pv = q.oInc; poor = q.id; }
-      if (q.id !== p.id && q.oInc > sv) { sv = q.oInc; second = q.id; }
+// ---------- steps 18-19 (FUN_100843b0, FUN_100845f0): warships with tankers ----------
+// Smart and up: an idle fleet of warships with tankers picks a target within
+// its Range (the strongest it beats by half again, but each better one is
+// taken only two times in three). Diabolical, with more than 10 years a
+// turn: a fleet with one stop adds a second it can reach in the same turn.
+function addStop(f, sid) { if (f.dest == null) { f.dest = sid; f.path = []; } else (f.path = f.path || []).push(sid); }
+function chainAttacks(C) {
+  const { G, p, cls, tthreat } = C;
+  for (const f of myFleets(G, p)) {
+    if (fleetClass(G, f) !== 7 || !atStar(f) || hasPath(f) || C.used.has(f)) continue;
+    const R = maxR(G, f), str = fleetAtt(G, f);
+    let best = -1, bv = 0;
+    for (const s of G.stars) {
+      const d = E.starDist(G, f.star, s.id), v = tthreat[s.id];
+      if (cls[s.id] < 5 && v > 0 && v < trunc(str * 2 / 3) && !s.nova && d <= R && (best === -1 || (bv < v && RI(G, 1, 3) !== 1))) { bv = v; best = s.id; }
     }
-    if (rich === p.id) { attitude(G, p, p.id, RI(G, 20, 40)); attitude(G, p, second, -RI(G, 15, 25)); }
-    else if (poor === p.id) attitude(G, p, p.id, -RI(G, 20, 40));
-    else attitude(G, p, rich, -RI(G, 5, 10));
-  }
-  // dislike the friends of enemies
-  for (const q of alive) {
-    if (q.id === p.id || (ai.att[q.id] || 0) >= LIKE - 200) continue;
-    for (const r of alive) if (r.id !== p.id && r.id !== q.id && isAllied(G, q.id, r.id)) ai.att[r.id] = (ai.att[r.id] || 0) - RI(G, 4, 8);
-  }
-  for (const q of G.players) {
-    if (q.id === p.id) continue;
-    if (!q.alive || q.surrendered) { ai.att[q.id] = 0; continue; }
-    const want = p.allies.includes(q.id);
-    if ((ai.att[q.id] || 0) >= LIKE && !want) { p.allies.push(q.id); if (RI(G, 1, 10) > 5) say(G, p, q.id, 'I like you.'); }
-    else if ((ai.att[q.id] || 0) < LIKE && want) { p.allies = p.allies.filter(x => x !== q.id); if (RI(G, 1, 10) > 5) say(G, p, q.id, 'I hate you.'); }
+    if (best !== -1) { cls[best] = 5; addStop(f, best); }
   }
 }
-// FUN_10085f60 / FUN_10088160: a computer that is hopelessly behind gives up
-// to the player it likes best. Turtles (style 2) never do. 5.0.5 doesn't ask
-// whether Alliances are on.
-function considerSurrender(G, p, A) {
-  const ai = p.ai;
-  if (p.human || G.year <= 2500 || ai.style === 2) return;
-  const alive = G.players.filter(q => q.alive && !q.surrendered);
-  if (alive.length <= 2) return;
-  const incs = alive.map(q => q.oInc).sort((a, b) => a - b);
-  const poorest = p.oInc === incs[0] && p.oInc * 3 < incs[1];
-  if (!(A.broke || poorest)) return;
-  let to = -1, best = -30000;
-  for (const q of alive) if (q.id !== p.id && (ai.att[q.id] || 0) > best) { best = ai.att[q.id] || 0; to = q.id; }
-  if (to >= 0) p.surrenderTo = to;
+function chainFarther(C) {
+  const { G, p, cls, tthreat } = C;
+  const ypt = Math.max(10, G.opts.yearsPerTurn || 10);
+  if (ypt === 10) return;
+  const k = trunc(ypt / 10);
+  for (const f of myFleets(G, p)) {
+    if (fleetClass(G, f) !== 7 || !atStar(f) || !(f.dest != null && !(f.path && f.path.length))) continue;
+    const v = speedOf(G, f), turns = Math.ceil(E.starDist(G, f.star, f.dest) / Math.max(1, v)); // +0x92
+    if (!(k - turns > 0)) continue;
+    const reach = Math.min(v * (k - turns), maxR(G, f) - usedFuel(G, f));
+    if (!(reach > 3)) continue;
+    const str = fleetAtt(G, f);
+    let best = -1, bv = 0;
+    for (const s of G.stars) {
+      const d = E.starDist(G, f.star, s.id), t = tthreat[s.id];
+      if (cls[s.id] < 5 && t > 0 && t < str && !s.nova && d <= reach && (best === -1 || bv < t)) { bv = t; best = s.id; }
+    }
+    if (best !== -1) { cls[best] = 5; addStop(f, best); }
+  }
 }
 
-// FUN_10085f60: requests to allies, each one time in 20 — "I need metal."
-// (string 1045, code 0x415) after 2500 with under 10,000 metal in all, and
-// "I need money." (1044, 0x414) after 2400 when it has the lowest income and
-// the next lowest is over $2,000 more. Nobody acts on them but a human.
-function askAllies(G, p, totalMetal) {
-  if (p.human) return;
-  const allies = G.players.filter(q => q.id !== p.id && isAllied(G, p.id, q.id));
-  if (G.year > 2500 && totalMetal < 10000)
-    for (const q of allies) if (RI(G, 1, 20) === 1) say(G, p, q.id, 'I need metal.');
-  const incs = G.players.filter(q => q.alive && !q.surrendered).map(q => q.oInc).sort((a, b) => a - b);
-  if (G.year > 2400 && p.oInc === incs[0] && incs.length > 1 && incs[0] + 2000 < incs[1])
-    for (const q of allies) if (RI(G, 1, 20) === 1) say(G, p, q.id, 'I need money.');
+// ---------- step 20 (FUN_10085900): idle fleets ----------
+// idle fleets go to the nearest colony (with what fuel is left) from: a star
+// going nova; a star where a fleet of yours is, if they have used fuel
+// (colony ships, fighters, dreadnoughts); your hostile colony, if they have
+// used fuel (scouts, and those three where the metal is gone). Colony ships
+// heading for an enemy's star stop.
+function saveFleets(C) {
+  const { G, p, cls } = C;
+  for (const f of myFleets(G, p)) {
+    if (fleetClass(G, f) === 5) continue;
+    const d = mainDesign(G, p, f); if (!d) continue;
+    const c = dType(d);
+    if (atStar(f) && !hasPath(f) && !C.used.has(f)) {
+      const s = G.stars[f.star], u = usedFuel(G, f);
+      const go = !!s.nova || (u > 0 && cls[f.star] === 6 && (c === 4 || c === 1 || c === 2)) ||
+        (u > 0 && cls[f.star] === 8 && (c === 0 || ((c === 4 || c === 2 || c === 1) && s.metal === 0)));
+      if (go) {
+        const left = maxR(G, f) - u;
+        const to = findClose(C, f.star, left, 2);
+        if (to !== -1) { const r = determinePath(C, f.star, to, left, left, countType(G, f, 3) > 0); if (r) { C.used.add(f); givePath(f, r); } }
+      }
+    }
+    if (atStar(f) && hasPath(f) && c === 4 && cls[finalDest(f)] === 4) { E.cancelMove(G, f); C.used.delete(f); }
+  }
 }
+
+// ---------- step 21 (FUN_10085bd0): the budget ----------
+// what is left goes to Ship Savings; every bar is its money over the total,
+// per mille rounded up; each colony's bar is split between terraforming and
+// mining the same way. A computer's research shares are its personality's.
+function resolveSpending(C) {
+  const { G, p, ai } = C;
+  C.ships += C.M; C.M = 0;
+  const cols = C.cols.filter(sid => G.stars[sid].owner === p.id);
+  let total = C.ships + C.tech;
+  for (const sid of cols) total += (C.terra[sid] || 0) + (C.mine[sid] || 0);
+  const k = trunc(total / 1000);
+  const pm = (b) => b < 2000001 ? trunc((total + b * 1000 - 1) / total) : trunc((b + k - 1) / k);
+  const b = p.budget;
+  b.col = {};
+  if (total === 0) { b.savings = 1; b.tech = 0; for (const sid of cols) b.col[sid] = 0; }
+  else {
+    b.savings = pm(C.ships) / 1000; b.tech = pm(C.tech) / 1000;
+    for (const sid of cols) b.col[sid] = pm((C.terra[sid] || 0) + (C.mine[sid] || 0)) / 1000;
+  }
+  for (const sid of cols) {
+    const s = G.stars[sid], t = C.terra[sid] || 0, m = C.mine[sid] || 0, sum = t + m;
+    if (!sum) continue;
+    const canT = RS.hab(p, s).dT > 0, canM = s.metal > 0;
+    if (!canT && !canM) continue;
+    if (!canT) s.terra = 0;
+    else if (!canM) s.terra = 1;
+    else {
+      const tp = trunc((sum + t * 1000 - 1) / sum), mp = trunc((sum + m * 1000 - 1) / sum);
+      s.terra = tp / (tp + mp);
+    }
+  }
+  if (!p.human && !C.auto) p.talloc = Object.assign({}, ai.tw);
+}
+
+// ---------- news for the computers ----------
+// the technology reports (1003 Range, 1005 Weapons, 1007 Mini), read next turn
+function techEvent(G, p, k) {
+  if (!p.ai || !p.ai.v505) return;
+  const code = { range: 0x3eb, speed: 0x3ec, weapons: 0x3ed, shields: 0x3ee, mini: 0x3ef }[k];
+  if (code) p.ai.ev.push({ code, level: p.tech[k] });
+}
+function note(G, p, e) { if (p.ai && p.ai.v505) (p.ai.ev = p.ai.ev || []).push(e); }
 
 E.registerAI('original', {
   make: (G, p, iq) => makeAI(G, p, iq, false),
   turn: aiTurn,
-  techEvent: aiTechEvent,
-  noteBattle: (G, p, rec, won) => { if (!won) p.ai.lostAt[rec.star] = G.turn; },
+  techEvent,
+  noteBattle: () => {},
+  // for js/rules-original.js aftermath505 (FUN_100803e0)
+  modify, note, est, LIKE,
 });
 })(this);
