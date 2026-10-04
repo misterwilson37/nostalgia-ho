@@ -483,12 +483,37 @@ Every computer has a personality made of the same settings as a hidden
   Range reaches 16, or Mini passes 1, they move budget into Weapons and
   Shields. CONFIRMED.
 - **Special personalities**: some Smart and Diabolical computers get one of
-  two. A **turtle** defends heavily and almost never attacks. A **pouncer**
-  defends little and attacks in big fleets. CONFIRMED.
+  two, by the computer's number among the computers (the humans come first),
+  counting from 0, mod 4 (`FUN_100704d0`, `FUN_10057de0`). CONFIRMED.
+  - Number 3, 7, 11, 15 is the **turtle** (style 2): 50% research first (60%
+    Diabolical), $35k per colony, every colony defended, 90% of metal for
+    defence, defence 300%, attack 1,000%, aggressiveness 1, metal 75%, savings
+    goal 4–6. Its defence share never drops, it never surrenders, and it only
+    attacks stars weaker than one Fighter (`FUN_10085f60`, `FUN_10082d40`).
+  - Number 2, 6, 10, 14 is the **pouncer** (style 3): 45% research first,
+    $35k per colony, 25% of colonies defended, 10% of metal for defence,
+    defence 150%, attack 200%, aggressiveness 10, metal 60%, savings goal 3,
+    fleets of 25–30. Its defence share drops toward at most 50%.
+  - Both research Range 20, Speed 380, Weapons 380, Shields 20, Mini 180,
+    Radical 20; in a galaxy of density over 50 (game +0x58, the number the
+    star layouts use) Range +80, Speed −40, Weapons −40.
+  - The remake had these the wrong way round (the turtle got style 3), picked
+    them by player number and gave the Range bonus for more than 3 players;
+    fixed.
+- **Random draws**: in 5.0.5's order (research share, income per colony,
+  colonies defended, metal for defence, defence %, the four research shares,
+  attack %, aggressiveness, metal %, savings goal, fleet size, then a starting
+  attitude for all 16 player slots). The remake used to draw attitudes only
+  toward players created before the computer, so later players started at 0;
+  fixed.
 - **Diabolical computers cheat** (CONFIRMED):
-  - Before 2020 they know every star within 8 light-years of home.
+  - Before 2020 they know every star within 8 light-years of home: each turn
+    the star's record gets this year's planet and metal and "no owner"
+    (`FUN_10088460`). The remake leaves the computer's own colonies out (it
+    classes them from the truth). Added to `ai-original.js`; it was missing.
   - They treat other computers' planets as a quarter as attractive to attack
-    as humans'.
+    as humans' (the score divided by 4, rounded toward zero, `FUN_10082ea0`;
+    the remake rounded up, fixed).
   - They start out disliking humans and liking other computers.
 
 ### Each turn (CONFIRMED, 21 steps)
@@ -520,6 +545,14 @@ Every computer has a personality made of the same settings as a hidden
     turn's budget; ships come out of savings.
 18–21. Send idle fleets home, reload empty colony ships, and set the same
    budget bars a human uses.
+
+Still looser than the code in `js/ai-original.js` (the Palm port,
+`js/ai-palm.js`, follows the same routines more closely; see
+docs/palm-findings.md): fleets go straight rather than by DeterminePath
+(`FUN_1007d260`) through your colonies; threats come from the ships seen, not
+the battle estimates kept in each star record; no step 1 split of mixed
+fleets; no tanker retirement or chained stops (steps 18–19); ships are bought
+through the human purchase path.
 
 ### Where to attack (CONFIRMED)
 
@@ -562,10 +595,29 @@ This is faithful, not a bug in the web app.
   poorest computer loses heart.
 - Computers dislike the allies of players they dislike.
 - When it changes its mind it may say "I like you." or "I hate you."
-- **Surrender**: after 2500, with Alliances on and at least three players
-  left, a computer that is broke, or the poorest by far (under a third of the
-  next poorest's income), surrenders to the player it likes best. Pouncers
-  never surrender.
+- **Requests** (`FUN_10085f60`, CONFIRMED; were missing): to each ally, one
+  time in 20, "I need metal." (message 1045) after 2500 when its metal in all
+  is under 10,000, and "I need money." (1044) after 2400 when its income is
+  the lowest and the next lowest is more than $2,000 higher. No computer acts
+  on them.
+- **Three messages a turn**: a computer's messages go through an outbox of
+  three (`FUN_100880f0`, player +0x1058, emptied each turn by `FUN_10072a10`);
+  the rest are dropped. Messages to other computers count too.
+- Diplomacy runs after the assessment, star classes and fleet steps
+  (`FUN_10081cc0` calls `FUN_10087530` ninth), so surrender and requests use
+  last turn's attitudes; the remake used to run it first, fixed.
+- **Surrender**: after 2500, with at least three players left, a computer
+  that is broke, or the poorest by far (under a third of the next poorest's
+  income), surrenders to the player it likes best. Turtles never surrender.
+  `FUN_10085f60` doesn't look at the Alliances option (the remake used to
+  require it; fixed).
+- Not in the remake (seen while checking the style field, not read in
+  full): after a battle `FUN_100803e0` lowers each side's feelings toward the
+  others (−30…−10, −100…−50 or −200…−100, or by the whole feeling when it is
+  over 500), and a computer that isn't a turtle raises its metal for defence
+  (+10 to between 60 and 99 in some cases, then +5 to at least 30 while under
+  70). The exact conditions are unread; they need battle details the 5.0.5
+  rules don't hand the computers.
 
 ## 13. Years per turn, master points and ranks
 

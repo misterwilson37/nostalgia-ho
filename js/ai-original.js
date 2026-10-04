@@ -26,20 +26,35 @@ function obsolete(p, d) {
 // Original computer players (CComputerIntelligence, FUN_10081cc0)
 // =====================================================================
 // personality (FUN_100704d0) — the same fields as the hidden Debug >
-// Computer Attrs dialog in the original
+// Computer Attrs dialog in the original. Player record offsets in brackets;
+// the random draws are made in 5.0.5's order.
+const sliderDensity = (v) => typeof v === 'number' ? v : ({ dense: 0, normal: 25, sparse: 60 }[v] ?? 25);
 function makeAI(G, p, iqName, autoplay) {
   const iq = { dumb: 1, average: 2, smart: 3, diabolical: 4 }[iqName] || 2;
-  const ai = {
-    iq, upfront: RI(G, 35, 45), reqInc: RI(G, 33000, 37000), colDef: RI(G, 30, 70), metalDef: RI(G, 60, 80),
-    attDom: RI(G, 150, 250), defDom: RI(G, 150, 250), aggr: RI(G, 3, 7), style: 1, metalF: RI(G, 25, 75),
-    saveGoal: RI(G, 2, 4), minFleet: RI(G, 3, 6), noColonize: {}, lostAt: {},
-    // per-type "too obsolete" thresholds (player record +0xec / +0xf8)
-    retire: { scout: 60, dread: 120, fighter: 60, tanker: 120, colony: 120, satellite: 100 },
-    redesign: { scout: 30, dread: 60, fighter: 30, tanker: 60, colony: 60, satellite: 20 },
-  };
-  const tw = { range: RI(G, 160, 200), speed: RI(G, 160, 200), weapons: RI(G, 200, 260) };
+  const ai = { iq, noColonize: {}, lostAt: {}, sent: 0 };
+  ai.upfront = RI(G, 35, 45);       // [+0xa4] % of income to research first
+  ai.reqInc = RI(G, 33000, 37000);  // [+0xa8] income needed per extra colony
+  ai.colDef = RI(G, 30, 70);        // [+0xac] % of colonies defended
+  ai.metalDef = RI(G, 60, 80);      // [+0xae] % of metal for defence
+  ai.defDom = RI(G, 150, 250);      // [+0xbe] defence strength wanted vs. threat
+  const tw = { range: RI(G, 160, 200), speed: RI(G, 160, 200), weapons: RI(G, 200, 260) }; // [+0xb0..]
   tw.shields = Math.min(RI(G, 200, 260), tw.weapons);
   tw.mini = 980 - tw.range - tw.speed - tw.weapons - tw.shields; tw.radical = 20;
+  ai.attDom = RI(G, 150, 250);      // [+0xbc] attack strength wanted vs. enemy
+  ai.aggr = RI(G, 3, 7);            // [+0xc0]
+  ai.style = 1;                     // [+0xc2] 2: the turtle, 3: the pouncer
+  ai.metalF = RI(G, 25, 75);        // [+0xc4] importance of metal when choosing colonies
+  ai.saveGoal = RI(G, 2, 4);        // [+0xc6] savings goal (x income)
+  ai.minFleet = RI(G, 3, 6);        // [+0xca] minimum attack fleet
+  // [+0xcc] starting attitude toward each of the 16 player slots (all 16 are
+  // drawn: players created after this one get theirs too)
+  ai.att = {};
+  for (let i = 0; i < 16; i++) ai.att[i] = RI(G, 250, 350);
+  // per-type "too obsolete" thresholds [+0xec] / [+0xf8]
+  ai.retire = { scout: 60, dread: 120, fighter: 60, tanker: 120, colony: 120, satellite: 100 };
+  ai.redesign = { scout: 30, dread: 60, fighter: 30, tanker: 60, colony: 60, satellite: 20 };
+  // the humans come first (FUN_1006f640), so a computer's number among the computers is id − humans
+  const nHum = G.players.filter(q => q.human).length;
   // a ruleset may set the personalities itself (DOS 2.0: FUN_1030_1b51)
   const custom = E.rules(G).aiPersonality;
   if (custom) custom(G, p, ai, tw, iq, autoplay);
@@ -47,26 +62,34 @@ function makeAI(G, p, iqName, autoplay) {
     Object.assign(tw, { range: 200, speed: 200, weapons: 200, shields: 200, mini: 150, radical: 50 });
     Object.assign(ai, { colDef: 50, metalDef: 50 });
   } else if (iq === 1) {
-    Object.assign(ai, { upfront: 15, colDef: RI(G, 10, 20), attDom: RI(G, 75, 95), defDom: RI(G, 75, 95), aggr: 1, minFleet: 1 });
+    ai.upfront = 15; ai.colDef = RI(G, 10, 20); ai.attDom = RI(G, 75, 95); ai.defDom = RI(G, 75, 95); ai.aggr = 1; ai.minFleet = 1;
   } else if (iq === 2) {
-    Object.assign(ai, { upfront: 30, colDef: RI(G, 30, 40), attDom: RI(G, 125, 175), defDom: RI(G, 125, 185), aggr: 4, minFleet: 1 });
+    ai.upfront = 30; ai.colDef = RI(G, 30, 40); ai.attDom = RI(G, 125, 175); ai.defDom = RI(G, 125, 185); ai.aggr = 4; ai.minFleet = 1;
   } else if (iq === 3) {
-    Object.assign(ai, { upfront: RI(G, 45, 50), attDom: RI(G, 150, 200) });
+    ai.upfront = RI(G, 45, 50); ai.attDom = RI(G, 150, 200);
   } else {
-    Object.assign(ai, { upfront: RI(G, 40, 60), aggr: 10, minFleet: RI(G, 10, 15), hatesHumans: true });
+    ai.upfront = RI(G, 40, 60); ai.aggr = 10; ai.minFleet = RI(G, 10, 15); ai.hatesHumans = true;
+    // Diabolical computers dislike the humans and like the other computers
+    for (let i = 0; i < 16; i++) ai.att[i] = i < nHum ? RI(G, -50, 0) : RI(G, 350, 450);
   }
-  // two special personalities for smart computers
-  const slot = p.id % 4;
-  if (!custom && !autoplay && iq > 2 && (slot === 3 || slot === 2)) {
-    const big = G.players.length - 1 > 2;
-    if (slot === 3) Object.assign(ai, { style: 3, upfront: iq === 4 ? 60 : 50, reqInc: 35000, colDef: 100, metalDef: 90, defDom: 300, attDom: 1000, aggr: 1, metalF: 75, saveGoal: RI(G, 4, 6) });
-    else Object.assign(ai, { style: 2, upfront: 45, reqInc: 35000, colDef: 25, metalDef: 10, defDom: 150, attDom: 200, aggr: 10, metalF: 60, saveGoal: 3, minFleet: RI(G, 25, 30) });
-    Object.assign(tw, { range: 20 + (big ? 80 : 0), speed: 380 - (big ? 40 : 0), weapons: 380 - (big ? 40 : 0), shields: 20, mini: 180, radical: 20 });
+  // two special personalities for Smart and Diabolical computers, by the
+  // computer's number among the computers (FUN_10057de0) mod 4: the 4th, 8th,
+  // ... is the turtle (style 2) and the 3rd, 7th, ... the pouncer (style 3).
+  // In a galaxy of density over 50 (game +0x58) they research more Range.
+  const k = (p.id - nHum) % 4;
+  const special = () => {
+    Object.assign(tw, { range: 20, speed: 380, weapons: 380, shields: 20, mini: 180, radical: 20 });
+    if (sliderDensity(G.opts.density) > 50) { tw.range += 80; tw.speed -= 40; tw.weapons -= 40; }
+  };
+  if (!custom && !autoplay && iq > 2 && k === 3) {
+    Object.assign(ai, { upfront: iq === 4 ? 60 : 50, reqInc: 35000, colDef: 100, metalDef: 90, defDom: 300, attDom: 1000, aggr: 1, style: 2, metalF: 75, saveGoal: RI(G, 4, 6) });
+    special();
+  }
+  if (!custom && !autoplay && iq > 2 && k === 2) {
+    Object.assign(ai, { upfront: 45, reqInc: 35000, colDef: 25, metalDef: 10, defDom: 150, attDom: 200, aggr: 10, style: 3, metalF: 60, saveGoal: 3, minFleet: RI(G, 25, 30) });
+    special();
   }
   ai.tw = tw;
-  // starting attitudes toward each player (Diabolical computers gang up on humans)
-  ai.att = {};
-  for (const q of G.players) if (q.id !== p.id) ai.att[q.id] = iq === 4 ? (q.human ? RI(G, -50, 0) : RI(G, 350, 450)) : RI(G, 250, 350);
   p.talloc = Object.assign({}, tw);
   return ai;
 }
@@ -93,7 +116,7 @@ function aiTurn(G, p) {
   if (rs.aiTurnStart) rs.aiTurnStart(G, p); // e.g. the DOS 2.0 Smart computers' free look around home
   const cols = colonies(G, p.id);
   if (!cols.length) { strandedColonyShips(G, p); return; }
-  if (!p.human && G.opts.alliances) diplomacy(G, p);
+  ai.sent = 0; // the three-message outbox is emptied each turn (FUN_10072a10, player +0x1058)
   reloadColonyShips(G, p);
   // step 2: designs
   const D = {};
@@ -133,7 +156,18 @@ function aiTurn(G, p) {
   A.offB = trunc(spare * (100 - ai.metalDef) / 100) - warMetal;
   A.metal = totalMetal; A.colShips = colShips; A.broke = broke;
   considerSurrender(G, p, A);
-  // step 4: what the computer believes about each star
+  askAllies(G, p, totalMetal);
+  // step 4: what the computer believes about each star. Before 2020 a
+  // Diabolical computer looks at every star within 8 ly of home: its record
+  // gets this year's planet and metal, owner none (FUN_10088460). The remake
+  // leaves its own colonies' records alone (they are classed from the truth).
+  if (ai.iq === 4 && !p.human && G.year < 2020) {
+    for (const s of G.stars) {
+      if (s.id === p.homeStar || s.owner === p.id || starDist(G, s.id, p.homeStar) >= 9) continue;
+      const k = know(G, p, s.id);
+      Object.assign(k, { explored: true, owner: -1, metal: s.metal, g: s.g, t: s.t, seen: G.turn });
+    }
+  }
   const cls = [], threat = [], tthreat = [];
   const fAtt = Math.max(1, C.fighter.att);
   for (const s of G.stars) {
@@ -173,6 +207,8 @@ function aiTurn(G, p) {
   }
   for (const f of G.fleets) if (f.owner === p.id && f.sat && f.star != null && cls[f.star] >= 8 && threat[f.star] <= 0 &&
     fleetDesigns(G, f).some(d => obsolete(p, d) >= 100)) { scrapFleet(G, f); break; }
+  // step 9: last turn's news and diplomacy (FUN_10087530), after the fleet steps as in FUN_10081cc0
+  if (!p.human && G.opts.alliances) diplomacy(G, p);
   // queue of requests, highest priority first (FUN_10088240 / FUN_10083e30)
   const Q = [];
   const req = (type, prio, a, b) => Q.push({ type, prio, a, b, n: Q.length });
@@ -356,7 +392,7 @@ function aiTargetScore(G, p, s, thr, fAtt) {
   v += k.explored ? aiPlanetValue(p, s, k, ai.metalF) : 8;
   v += clamp(20 - 5 * trunc(starDist(G, s.id, p.homeStar) / Math.max(1, p.tech.range)), 0, 20);
   v += k.explored ? clamp(trunc((k.metal || 0) / 1000), 0, 20) : 8;
-  if (ai.hatesHumans && k.owner >= 0 && G.players[k.owner] && !G.players[k.owner].human) v = Math.ceil(v / 4);
+  if (ai.hatesHumans && k.owner >= 0 && G.players[k.owner] && !G.players[k.owner].human) v = trunc(v / 4); // C division (FUN_10082ea0)
   return v + RI(G, -trunc(v / 2), trunc(v / 2));
 }
 function nearestOwn(G, p, sid, fuel, cls) {
@@ -486,7 +522,11 @@ function attitude(G, p, to, delta) {
   a[to] = clamp((a[to] || 0) + delta, -30000, 30000);
   for (const q of G.players) if (q.id !== to && q.id !== p.id) a[q.id] = clamp((a[q.id] || 0) - trunc(delta / 6), -30000, 30000);
 }
+// A computer sends at most three messages a turn, to anyone (FUN_100880f0:
+// player +0x1058 counts them, emptied by FUN_10072a10); only humans see them.
 function say(G, p, to, text) {
+  if (p.ai && (p.ai.sent || 0) >= 3) return;
+  if (p.ai) p.ai.sent = (p.ai.sent || 0) + 1;
   if (G.players[to] && G.players[to].human) msg(G, to, `${p.name} says, “${text}”`, { icon: 'bad' + p.face + '_' + (p.female ? 1 : 0), quiet: true, chat: true });
 }
 function diplomacy(G, p) {
@@ -532,10 +572,11 @@ function diplomacy(G, p) {
   }
 }
 // FUN_10085f60 / FUN_10088160: a computer that is hopelessly behind gives up
-// to the player it likes best.
+// to the player it likes best. Turtles (style 2) never do. 5.0.5 doesn't ask
+// whether Alliances are on.
 function considerSurrender(G, p, A) {
   const ai = p.ai;
-  if (p.human || G.year <= 2500 || ai.style === 2 || !G.opts.alliances) return;
+  if (p.human || G.year <= 2500 || ai.style === 2) return;
   const alive = G.players.filter(q => q.alive && !q.surrendered);
   if (alive.length <= 2) return;
   const incs = alive.map(q => q.oInc).sort((a, b) => a - b);
@@ -544,6 +585,20 @@ function considerSurrender(G, p, A) {
   let to = -1, best = -30000;
   for (const q of alive) if (q.id !== p.id && (ai.att[q.id] || 0) > best) { best = ai.att[q.id] || 0; to = q.id; }
   if (to >= 0) p.surrenderTo = to;
+}
+
+// FUN_10085f60: requests to allies, each one time in 20 — "I need metal."
+// (string 1045, code 0x415) after 2500 with under 10,000 metal in all, and
+// "I need money." (1044, 0x414) after 2400 when it has the lowest income and
+// the next lowest is over $2,000 more. Nobody acts on them but a human.
+function askAllies(G, p, totalMetal) {
+  if (p.human) return;
+  const allies = G.players.filter(q => q.id !== p.id && isAllied(G, p.id, q.id));
+  if (G.year > 2500 && totalMetal < 10000)
+    for (const q of allies) if (RI(G, 1, 20) === 1) say(G, p, q.id, 'I need metal.');
+  const incs = G.players.filter(q => q.alive && !q.surrendered).map(q => q.oInc).sort((a, b) => a - b);
+  if (G.year > 2400 && p.oInc === incs[0] && incs.length > 1 && incs[0] + 2000 < incs[1])
+    for (const q of allies) if (RI(G, 1, 20) === 1) say(G, p, q.id, 'I need money.');
 }
 
 E.registerAI('original', {
