@@ -20,6 +20,22 @@ const trunc = Math.trunc;
 const isqrt = (x) => x > 0 ? trunc(Math.sqrt(x)) : 0;
 const LY_PER_UNIT = 2; // map units, as in the Original ruleset
 const MAX_DESIGNS = 30; // CONFIRMED (string 540; FUN_0043a08c free designs need < 25)
+// 4.0.5's own text tables (SPACEHO.EXE strings). TECHNAMES[k][L - 1] is the
+// name shown for level L: string base + L (bases 841, 861, 881, 1892, 911 in
+// the table at 0x59d2ac, read by FUN_0046ec5a), which is the next level's
+// name in 5.0.5's list. STAR_NAMES: strings 108-298, cut to 7 letters
+// (FUN_00442374). Computer names: strings 595-614 and 615-634, cut to 11
+// letters (FUN_004768cc).
+const TECHNAMES = {
+  range: ["2", "3", "4", "5", "6", "Topping off the Tanks", "Fusion Pile", "Magneto-Hydrodynamic Power", "Allotropic Iron", "Gravitic Battery", "Quantum Energy Storage", "Singularity", "Plasma Siphon", "Muon Ladder", "There and Back", "Quark Grinder", "Pulsar Radiant", "Anti-Matter", "Star Harness", "1"],
+  speed: ["Solar Sail", "Ion Rocket", "Gravitic Slingshot", "Fusion Dump Drive", "Relativity Drive", "Trans-Light", "Hyperspace", "Rift Drive", "Hawking Propulsion System", "Hyper-Rift Drive", "PowerPC", "Trans-Rift Hyper Drive", "Hawking Trans-Hyper Drive", "Time Distortion", "Quantum Continuum", "Already There", "Speedy Gonzalez", "Teleportation", "Yesterday Drive", "1"],
+  weapons: ["2", "Mass Driver Cannon", "Laser 20", "Turbolaser", "Maser", "Gamma-Ray Laser", "Spectrum Cannon", "Energy Ball", "Nuclear Magnetic Resonance", "Phase Disruption", "Focused Quark Beam", "Hard Pixel", "Tachyon Cannon", "+5 Rustproof Vorpal", "Hyperspace Pulse", "Delta Particle Stream", "Neutron Compression", "Nova Cannon", "Galactic Disruption", "Advanced Space-Time Annihlation"],
+  shields: ["2", "Armored Hull", "Mass Repulsor", "Energy Dispersion", "Deflector", "Energy Bonded Armor", "Anti-Energy", "Quark Shell", "Delta  Wave", "Energy Injestor", "Refractor Field", "Holographic Decoy", "Stasis Flicker", "Conversion Field", "Tao Wave", "Gluon Armor", "Hide behind a big rock", "+5 Blessed Plate Mail", "Displacer Field", ""],
+  mini: ["Integrated Chip", "Large Scale Integration", "VLSI", "Wonkavision", "Ultra-microscopic", "Nanoscopic", "Advanced Nanoscopic", "Really Amazingly Small", "Yellow Polka Dot Bikini", "Sub-Atomic", "Partial Lepton", "Quark", "Sub-Quark", "Micro-Quark", "Nano-Quark", "Advanced Nano-Quark", "Bikini Again (Thought it was funny)", "Quantum Superstring", "Sub-Quantum Superstring", "Spaceward Ho! Version 4.0.5 by Peter Commons."],
+};
+const STAR_NAMES = ["Sol", "Sirius", "Canopus", "Vega", "Rigel", "Capella", "Procyon", "Mira", "Altair", "Antares", "Spica", "Pollux", "Castor", "Deneb", "Regulus", "Polaris", "Algol", "Proxima", "Alban", "Thuban", "Mizar", "Alcor", "Doobie", "Merak", "Phad", "Megrez", "Alioth", "Alkaid", "Mintaka", "Alnitak", "Atlas", "Remus", "Alcyon", "Electra", "Maia", "Merope", "Taygeta", "Sterope", "Hadar", "Quark", "Mimosa", "Adhara", "Shaula", "Nath", "Almak", "Alshain", "Tarazed", "Hamal", "Izar", "Shedir", "Menkar", "Diphda", "Etamin", "Acamar", "Alhena", "Alphard", "Arneb", "Nihal", "Saiph", "Markab", "Kansas", "Enif", "Nunki", "Kokab", "Ain", "Ancha", "Arkab", "Atik", "Atria", "Shadow", "Azha", "Baham", "Beid", "Botein", "Caph", "Coxa", "Cursa", "Dabih", "Furud", "Gedi", "Gienah", "Heka", "Keid", "Maaz", "Matar", "Mirfak", "Murzim", "Delta", "Ozworld", "Okda", "Phact", "Propus", "Rana", "Risha", "Sabik", "Petro", "Syrma", "Tarf", "Wasat", "Wazn", "Yed", "Yildun", "Zaniah", "Zaurac", "Zosma", "Ylum", "Arrakis", "Akworld", "Colma", "Henry", "Foundat", "Trantor", "Barsoom", "Rover", "Fluffy", "Lennon", "Gorby", "Atlanta", "Chicago", "Miami", "Home", "Binar", "Nemesis", "Harkon", "Talos", "Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", "Libra", "Scorpio", "Pisces", "Canis", "Ursa", "Beta", "Zeta", "Upsilon", "Rho", "Cepheus", "Calvin", "Hobbes", "Pooh", "Tigger", "Bambi", "Dumbo", "Tweety", "Bugs", "Torino", "Denali", "Woz", "Sauron", "Smaug", "Thune", "Thorin", "Gollum", "Fazaron", "Trellor", "Regor", "Basil", "Ursula", "Styx", "Lentor", "Sooltar", "Romula", "Vulcan", "Paradox", "Kessel", "Redox", "Sith", "Yavin", "Quatro", "Remulak", "Kathoon", "Thanos", "Krypton", "Darven", "Gotham", "Klah", "Zaphod", "Turin", "Vives", "Timmer", "Argot", "Willy", "Sirgil", "Ender", "Wobbler", "Quayle", "Hope"];
+const MALE_NAMES = ["Peter", "Joe", "Timmer", "Howard", "Bob", "Ed", "Mark", "Guy", "Ben", "Dan", "Kon", "Robert", "Clinton", "Mike", "Dave", "Steve", "Rosko", "Willy", "Jack", "Albert"];
+const FEMALE_NAMES = ["Christie", "Suzy", "Ann", "Julia", "Nancy", "Xena", "Athena", "Heather", "Caryl", "Jennifer", "Kathy", "Kate", "Jane", "Paula", "Michelle", "Iris", "Pam", "Liz", "Alexis", "Grace"];
 
 // ---------- player setup ----------
 // CONFIRMED (FUN_004427a4, dialog 318 "Join"): each human picks a Skill Level
@@ -87,17 +103,32 @@ function afterSetup(G) {
   }
 }
 // Computer Intelligence: one setting for every computer (CONFIRMED, FUN_00448856:
-// Dumb, Average, Smart, Diabolical; game +0x14 = 1..4). Personalities are 5.0.5's
-// (CONFIRMED, FUN_004438ba), so ai-original.js is used as it is.
-// Start wealth: with several humans each computer copies the skill of the human
-// it is assigned to (CONFIRMED, FUN_0043c9ea; here every human has the same skill).
-// With one human: INFERRED, the intelligence turned round (Diabolical = Novice
-// wealth ... Dumb = Expert), the inverse of FUN_00480eb5's skill-to-IQ table.
+// Dumb, Average, Smart, Diabolical; game +0x14 = 1..4). The computers are 4.0.5's
+// own (js/ai-405.js, FUN_0045e8bb).
+// Each computer's start (CONFIRMED, FUN_004768cc, when the game is created):
+// its skill comes from the intelligence turned round (Dumb = Expert, Average =
+// Advanced, Smart = Normal, Diabolical = Novice). For Average and Smart, each
+// computer but the last has a 39% chance (rand(1,100) < 40) to be set one
+// step lower, and then the next computer is set one step higher. The
+// computer then joins with that skill and its IQ is worked back from it
+// (FUN_00480eb5: Novice 4, Normal 3, Advanced 2, Expert 1), so the step also
+// changes its intelligence. Wealth is set as it joins (FUN_004427a4), before
+// FUN_0043c9ea copies a human's skill onto computers in a game with several
+// humans, so that copy changes only the skill shown, not the wealth.
 const COMPUTER_START = { dumb: 'expert', average: 'advanced', smart: 'normal', diabolical: 'novice' };
 function computerSetup(G, opts, k, nComp) {
   const iq = IQS.includes(opts.iq) ? opts.iq : 'average';
-  const nHum = G.players.filter(q => q.human).length;
-  return { start: nHum > 1 ? (SKILLS[opts.start] ? opts.start : 'normal') : COMPUTER_START[iq], iq };
+  if (G.rules !== '405') { // the Mac 3.0.1 rules use this with its own citations (rules-301.js)
+    const nHum = G.players.filter(q => q.human).length;
+    return { start: nHum > 1 ? (SKILLS[opts.start] ? opts.start : 'normal') : COMPUTER_START[iq], iq };
+  }
+  const c = IQS.indexOf(iq) + 1;
+  if (k === 0) G._csUp = false;
+  let L = c;
+  if (G._csUp) { L = c + 1; G._csUp = false; }
+  else if (k < nComp - 1 && c > 1 && c < 4 && RI(G, 1, 100) < 40) { L = c - 1; G._csUp = true; }
+  if (k === nComp - 1) delete G._csUp;
+  return { start: COMPUTER_START[IQS[L - 1]], iq: IQS[L - 1] };
 }
 
 // ---------- galaxy (FUN_0043ffe0 CREATE.CPP and one routine per shape) ----------
@@ -295,10 +326,20 @@ function research(G, p, spend) {
     if (lvl > p.tech[k] && p.tech[k] < 50) {
       p.tech[k] = Math.min(50, lvl);
       if (k === 'radical') { radical(G, p); continue; }
-      O.techMsg(G, p, k);
+      techMsg(G, p, k);
       const AI = E.aiOf(G); if (p.ai && AI.techEvent) AI.techEvent(G, p, k);
     }
   }
+}
+// CONFIRMED (FUN_00434dad, message 1003-1007; FUN_0046ec5a): up to level 20 a new
+// level is "You now have <name> <Tech> Technology (L)." with 4.0.5's name for it,
+// printed even when the name is a number; from level 21 "Your <Tech>
+// Technology has reached level L."
+const TLABEL = { range: 'Range', speed: 'Speed', weapons: 'Weapons', shields: 'Shield', mini: 'Miniaturization' };
+const TICON = { range: 'm9005', speed: 'm9006', weapons: 'm9007', shields: 'm9008', mini: 'm9003' };
+function techMsg(G, p, k) {
+  const L = p.tech[k];
+  msg(G, p.id, L < 21 ? `You now have ${TECHNAMES[k][L - 1]} ${TLABEL[k]} Technology (${L}).` : `Your ${TLABEL[k]} Technology has reached level ${L}.`, { icon: TICON[k], tech: k });
 }
 // CONFIRMED (FUN_00434dad): the reminder comes every turn the tech budget is 0
 // (5.0.5: every 5th turn)
@@ -390,7 +431,7 @@ function radical(G, p) {
       for (let j = 0; j < 5 && !got; j++) {
         const t = order[(s0 + j) % 5];
         let best = null; for (const q of G.players) if (q.alive && !q.surrendered && q.tech[t] > p.tech[t] && (!best || q.tech[t] > best.tech[t])) best = q;
-        if (best) { p.tech[t] = best.tech[t]; got = true; say(`Your spies have stolen some technological secrets from ${best.name}!`, 'm9040'); O.techMsg(G, p, t); }
+        if (best) { p.tech[t] = best.tech[t]; got = true; say(`Your spies have stolen some technological secrets from ${best.name}!`, 'm9040'); techMsg(G, p, t); }
       }
       if (!got) continue;
     } else if (k === 'protos') {
@@ -556,6 +597,12 @@ function battle(G, sid) {
     const luckOf = (o) => { let l = G.opts.luck ? RI(G, -1, 1) : 0; if (l < 0 && G.players[o].flags.generals) l = 0; return l; };
     const la = luckOf(a), lb = luckOf(b);
     let A = groups.filter(g => g.owner === a && g.n > 0), B = groups.filter(g => g.owner === b && g.n > 0);
+    // CONFIRMED (FUN_00425c9a): a duel is a "big battle" for the rumour when
+    // each side has more ships than rand(5, 10)
+    if (G.rules === '405') {
+      const nA = A.reduce((t, g) => t + g.n, 0), nB = B.reduce((t, g) => t + g.n, 0);
+      if (RI(G, 5, 10) < nB && RI(G, 5, 10) < nA && !(G.bigBattles = G.bigBattles || []).includes(sid)) G.bigBattles.push(sid);
+    }
     if (planet && planet.owner === b && planet.hp > 0) B.push(planet);
     for (const g of A) { g.W = g.W0 + la; g.tgt = null; g.dmg = 0; }
     for (const g of B) { g.W = Math.max(g.planet ? 1 : 0, g.W0 + lb); g.tgt = null; g.dmg = 0; }
@@ -672,8 +719,30 @@ function meteors(G, p) {
 
 // ---------- the turn ----------
 const OPT = { research, idleTech, meteors, interestOn };
-function economy(G, p) { O.economy(G, p, OPT); }
+// CONFIRMED (FUN_00469757, dialog 358): Dip into Savings takes an amount, up to
+// savings minus the borrowing limit, moves it at once into this turn's money,
+// and works the interest out again on what is left. It is a one-off: the next
+// turn starts with nothing dipped. The remake's Dip window gives a
+// percentage, so here it is that percentage of the most you may take.
+const dipMax = (G, p) => Math.max(0, p.savings - O.borrowLimit(G, p));
+const dipAmt = (G, p) => p.dip > 0 ? trunc(dipMax(G, p) * Math.min(100, p.dip) / 100) : 0;
+function projected(G, p) {
+  const dip = p.dip; p.dip = 0;
+  const r = O.projected(G, p);
+  p.dip = dip;
+  const a = dipAmt(G, p);
+  return Object.assign(r, { dip: a, net: r.net + a });
+}
+function economy(G, p) {
+  const amt = dipAmt(G, p);
+  p.dip = 0;
+  if (amt > 0) { p.savings -= amt; p.oInterest = interestOn(p, p.savings) + amt; }
+  O.economy(G, p, OPT);
+}
+// CONFIRMED (FUN_0043b243, msg 1065): the figure is the population in units,
+// printed as 4.0.5 prints numbers (FUN_0042e5c2): "1,000,000", or "10,000K" from ten million
 const MILESTONES = [1000000, 2500000, 5000000, 10000000, 20000000];
+const num405 = (n) => n >= 10000000 ? `${fmt(trunc(n / 1000000))},${String(trunc(n % 1000000 / 1000)).padStart(3, '0')}K` : fmt(n);
 function afterMovement(G, p) {
   // CONFIRMED (FUN_0043747e): metal received from ships scrapped at your colonies
   if (G.recv && G.recv.length) for (const r of G.recv.filter(x => x.to === p.id)) {
@@ -684,13 +753,21 @@ function afterMovement(G, p) {
   O.afterMovement(G, p, OPT);
   // CONFIRMED (dialog text 1052): the radical hand is first dealt in 2010
   if (!p.dealt && G.year >= 2010) dealHand(G, p);
-  // CONFIRMED (FUN_0043b243, msg 1065): population milestones, each once
-  // (INFERRED: shown in people, 1,000 to a unit, like the other messages)
-  let pop = 0; for (const s of colonies(G, p.id)) pop += popU(s);
+  // CONFIRMED (FUN_0043b243, msg 1065): population milestones, each once. The
+  // total leaves out a colony at the first star of the list (4.0.5 counts
+  // entries whose star number is > 0, so star 0 is missed). At most two a
+  // turn: the first of 1M / 2.5M not yet said, and the first of 5M / 10M / 20M.
+  // INFERRED: 4.0.5 lists computers first, so its star 0 is usually a
+  // computer's home; the remake lists humans first, so a human's own home at
+  // star 0 is still counted when there are computers.
+  const skip0 = !(p.homeStar === 0 && G.players.some(q => !q.human));
+  let pop = 0; for (const s of colonies(G, p.id)) if (s.id > 0 || !skip0) pop += popU(s);
   p.popMiles = p.popMiles || 0;
-  MILESTONES.forEach((m, i) => {
-    if (pop > m && !(p.popMiles & (1 << i))) { p.popMiles |= 1 << i; msg(G, p.id, `Congratulations, ${p.name}! Your population now exceeds ${fmt(m * 1000)}!`, { icon: 'm9035', sound: 7021 }); }
-  });
+  const say = (i) => { p.popMiles |= 1 << i; msg(G, p.id, `Congratulations, ${p.name}! Your population now exceeds ${num405(MILESTONES[i])}!`, { icon: 'm9035', sound: 7021 }); };
+  for (const chain of [[0, 1], [2, 3, 4]]) {
+    const i = chain.find(j => pop > MILESTONES[j] && !(p.popMiles & (1 << j)));
+    if (i != null) say(i);
+  }
 }
 
 // ---------- novas, supernovas and Armageddon (FUN_00436c26, FUN_00436ff8, FUN_00436988) ----------
@@ -753,19 +830,60 @@ function randomEvents(G) {
     if (popU(s) <= 0) { s.owner = -1; s.pop = 0; msg(G, p.id, `The meteor shower destroyed your colony at ${s.name}.`, { icon: 'm9036', star: s.id }); }
     else { p.metal += m; s.metal = Math.max(0, s.metal - m); }
   }
-  // CONFIRMED (FUN_00438a0f, msg 1028): players whose news of a star where a
-  // battle took place is more than 10 years old hear a rumour of it
-  for (const sid of G.battleStars || []) {
+  // CONFIRMED (FUN_00438a0f, msg 1028, called for every player): players whose
+  // news of a star where a big battle took place (see battle) is more than 10
+  // years old, explored or not, hear a rumour of it; a computer only notes it
+  const big = G.rules === '405';
+  for (const sid of (big ? G.bigBattles : G.battleStars) || []) {
     const s = G.stars[sid];
     for (const p of G.players) {
-      if (!p.alive || !p.human) continue;
+      if (!p.alive || (!big && !p.human)) continue;
       const k = know(G, p, sid);
       if (k.seen >= G.turn - 1 || (k.rumour != null && k.rumour >= G.turn - 1)) continue;
       k.rumour = G.turn; k.battle = true;
       msg(G, p.id, `The amount of energy emanating from ${s.name} suggests a big battle just took place.`, { icon: 'm9025', star: sid, quiet: true });
     }
   }
-  delete G.battleStars;
+  delete G.battleStars; delete G.bigBattles;
+}
+
+// ---------- what the computers remember about a star ----------
+// CONFIRMED (FUN_00425c9a, FUN_00425c5d): the defence a player notes at an
+// enemy star is the ships' attack plus the planet's, estimated as
+// ceil(pop / 50) x (weapons + 2)^2 / 75 (5.0.5: (S+1)(W+1)^2 ceil(pop/2500)/570)
+const planetEst = (u, w) => trunc(trunc((u + 49) / 50) * (w + 1) * (w + 1) / 75);
+function observe405(G, p, s, k) {
+  let str = 0;
+  for (const f of G.fleets) if (f.star === s.id && f.to == null && !isAllied(G, f.owner, p.id)) str += O.fleetStrength(G, f);
+  k.enemyStr = str;
+  if (s.owner >= 0 && !isAllied(G, s.owner, p.id)) k.enemyStr += planetEst(popU(s), G.players[s.owner].tech.weapons + 1);
+}
+// CONFIRMED (FUN_00462105): Dumb and Average computers pay development costs
+// for a design never built; computers above Dumb make their own designs with
+// none (js/ai-405.js), so Average pays only for its starting designs
+const paysPrototype = (G, p) => p.human || !p.ai || p.ai.iq < 3;
+
+// ---------- surrender ----------
+// CONFIRMED (FUN_00438718, FUN_004397ba): the winner gets the money and metal,
+// and each planet nobody else's fleets watch is founded again as a new colony
+// of 10 units (FUN_004397ba(player, star, 1): 10 per colony ship), so its
+// people are lost (the engine's default keeps 1 unit)
+function processHandovers(G) {
+  for (const h of G.handovers || []) {
+    const q = G.players[h.to]; if (!q || !q.alive) continue;
+    const from = G.players[h.from].name;
+    q.savings += h.money; q.metal += h.metal;
+    msg(G, q.id, E.report(148, from, fmt(h.money)), { icon: 'm9048' });
+    msg(G, q.id, E.report(149, from, fmt(h.metal)), { icon: 'm9046' });
+    for (const sid of h.stars) {
+      const s = G.stars[sid];
+      if (s.owner >= 0 || G.fleets.some(f => f.star === sid && f.to == null && !isAllied(G, f.owner, q.id))) continue;
+      msg(G, q.id, E.report(150, from, s.name), { icon: 'm9031', star: sid });
+      O.settle(G, q, s, { colonists: 10 });
+      observe(G, q, sid);
+    }
+  }
+  G.handovers = [];
 }
 
 // ---------- difficulty and master points (FUN_0043c351, FUN_0043c836, FUN_00497e58) ----------
@@ -810,7 +928,7 @@ E.registerRules('405', Object.assign({}, O, {
   label: 'Windows 95 4.0.5 (1996)',
   // the New Game window lists rulesets by year, then version (engine.js ruleOptions)
   version: '4.0.5', platform: 'Windows 95', year: 1996,
-  ai: 'original',
+  ai: '405',               // its own computer players (js/ai-405.js)
   maxPlayers: 20,          // CONFIRMED (FUN_00448856): 0-19 computers, 20 players
   maxDesigns: MAX_DESIGNS,
   chatLimit: 10,           // CONFIRMED (string 755): ten messages a turn
@@ -818,7 +936,10 @@ E.registerRules('405', Object.assign({}, O, {
   features: { arrivalNotices: true, alliances: true, gifts: true, surrender: true, waypoints: true, luck: true, supernova: true, armageddon: true, dip: true, chat: true, yearsPerTurn: true },
   SKILLS, HIT, hit, SHAPES, SIZES, RANKS, interestOn, techLevelCost, research, aiSpec,
   setupPlayer, defaultDesigns, afterSetup, computerSetup, makeGalaxy, distance,
-  designCost, designLimits, economy, afterMovement, refuel, battle, randomEvents, scrapAt,
+  designCost, designLimits, economy, projected, afterMovement, refuel, battle, randomEvents, scrapAt,
+  techMsg, processHandovers, starNames: STAR_NAMES, maleNames: MALE_NAMES, femaleNames: FEMALE_NAMES,
+  femaleComputers: 0.5,    // CONFIRMED (FUN_004768cc): each computer is a man or a woman at rand(0, 1)
+  observe: observe405, planetStrength: (q, s) => planetEst(popU(s), q.tech.weapons), paysPrototype,
   difficulty, winDifficulty, masterPoints, addMasterPoints,
 }));
 })(this);

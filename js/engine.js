@@ -837,7 +837,7 @@ if (typeof module !== 'undefined') {
   require('./rules-claude.js'); require('./ai-claude.js');
   require('./rules-original.js'); require('./ai-original.js');
   require('./rules-dos.js');
-  require('./rules-405.js');
+  require('./rules-405.js'); require('./ai-405.js');
   require('./rules-301.js'); require('./ai-301.js');
   require('./rules-12.js'); require('./ai-12.js');
   require('./rules-palm.js');
