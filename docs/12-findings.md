@@ -45,7 +45,9 @@ differences:
   it calls), not the 5.0.5 ones the DOS 2.0 ruleset uses.
 - **Its own end of the game**: a player with no colonies is out after one turn, colony
   ships or not, and the last player standing wins.
-- **Shorter battle reports**, 1.2's own.
+- **Shorter battle reports**, 1.2's own, one pair for each duel at a star.
+- No messages between players, routes planned again at every stop, fleets of one design,
+  and finished terraforming or mining bars handed on (see "Settled in the full pass").
 
 ## How it differs from 3.0.1
 
@@ -115,7 +117,7 @@ All as DOS 2.0:
 | Random events | none, as DOS 2.0. The text of a revolt (STR# 1000.13, DITL 3090), a volcano (1000.16), metal found (DITL 3110), a lost fleet (DITL 3120), a nova (1000.9, DITL 3130), stolen tech (DITL 3160) and a forfeit (DITL 3150) is there, but nothing shows it | CONFIRMED (every caller of `AddNewMessage`) |
 | "You have entered the year N." | every player's turn opens with it (STR# 1000.11, worded in English as DOS 2.0's line 682, "The game has been updated to the year N.") | CONFIRMED (`EndTurn` @a025e); added in `economy` |
 | A fleet arriving at your colony | no message to the colony's owner (DOS 2.0's ruleset turns the remake's `arrivalNotices` on; 1.2 has no text for it) | CONFIRMED (`MoveShips`, STR# 1000) |
-| A meteor shower wiping out a colony | 1.2 sends report 1059, which has no template in STR# 1000 (it has 59 lines), so the message would be blank; the remake keeps DOS 2.0's "A meteor shower destroyed your colony at …" | CONFIRMED (`ComputeIncomeAndPopulation`); the text GUESS |
+| A meteor shower wiping out a colony | 1.2 sends report 1059, which has no template in STR# 1000 (it has 59 lines), so the report is a blank line; the remake shows it blank | CONFIRMED (`ComputeIncomeAndPopulation`, `GetReportString @130746`) |
 | Exploration | "You have explored …" shows gravity relative to home and the temperature in **°C** to a tenth: (T − home + 720 − 324) × 5/9 in tenths, so a planet at home's temperature shows 22.0 °C. The ruleset sets `celsius: true` so a skin can turn its Celsius preference on | CONFIRMED (`ExploreStar @a3b4c`) |
 | Ship names | a new design gets a random name from STR# 2001 + class that no current design has (up to 100 tries; then the last one tried) | CONFIRMED (`GiveTypeCoolName @9457e`) |
 
@@ -123,9 +125,8 @@ All as DOS 2.0:
 
 1.2 fights a star's battle as duels (the holder against each other player in turn) and
 writes two reports for each duel, one for the attacker and one for the defender
-(`MakeResultMessages @d2828`). The remake's battle covers the whole star at once, so each
-player gets one report, with the colony's owner as the defender. The texts are 1.2's,
-worded as DOS 2.0's lines 705–707 and 681:
+(`MakeResultMessages @d2828`); the remake does the same (`battle12` in `js/rules-12.js`).
+The texts are 1.2's, worded as DOS 2.0's lines 705–707 and 681:
 
 | Who | Report | Status |
 |---|---|---|
@@ -138,7 +139,7 @@ worded as DOS 2.0's lines 705–707 and 681:
 There is no "You lost N people" line, and nothing about the colony when a defender with
 ships loses. `PlayAnnounceSound @130f08` plays nothing for the battle reports and 2001 for
 a destroyed colony. The remake keeps sound 7027 on a won battle, because the skin's auto
-play stops on it (GUESS).
+play stops on it (interface; listed in `docs/open-questions.md`).
 
 Each battle also leaves every player who fought there an estimate of the enemy strength,
 which the computers use (see below). The loser learns the strength of the ships left and,
@@ -397,14 +398,50 @@ games are byte for byte the same):
 - `rs.battleText(G, sid, battle, playerId, info)`: the wording, sound and picture of a
   player's battle report.
 - `rs.checkElimination(G)`: replaces the engine's check for who is out and who has won.
+- `rs.queueMergeAny`: a queued design gets new ships in whatever slot it is in.
+- `rs.canMerge(G, a, b)` and `rs.organized(G, fleet, merged, newFleet, orders)`: a
+  ruleset's own rule for which fleets may merge, and what merging or splitting does to
+  fuel, colonists and orders.
+- a battle result with `reported: true` gets no reports from the engine (the ruleset
+  wrote them).
 
-## Still unclear
+`js/rules-dos.js` got an optional third argument to `battle(G, sid, hooks)`:
+`hooks.duel(info)` is called after each duel, and the battle then leaves the debris to
+it. It also exports a few internals (`shareOf`, `colonyMoney`, `shipyard`,
+`removeColony`, `isqrt`, `wpn`, `battleOnly`) for `js/rules-12.js`. 2.0 passes no hooks,
+so its games are unchanged.
 
-- 1.2's battles are duels with two reports each; with more than two sides at a star the
-  remake sends one report for the whole battle (in 1.2F there is only one computer, so
-  this needs several humans).
-- The computers' moves use the remake's routes (the DOS 2.0 search, planned again at
-  every stop), as 1.2's `DeterminePath` does; `GoAttack` checks the route from the source
-  colony even for a fleet elsewhere, and the remake does the same check.
-- The Fix Spending command (STR# 1050), the Compare Players window (STR# 1008, 1020) and
-  the battle-speed preference are interface, not rules, and aren't done for 1.2.
+## Settled in the full pass
+
+`docs/coverage-12.md` lists all 548 routines of the program; none is left unread. Reading
+the rest of them changed these rules, each now 1.2's own in `js/rules-12.js` (2.0 keeps
+its own code until its own pass):
+
+| What | 1.2F | Status |
+|---|---|---|
+| A finished terraforming or mining part | the part is spent while its bar is above 0, with no check that the planet still needs it: a planet already at your temperature is "completely terraformed" again with 2 × (step − gap)² refunded, a planet with no metal "has run out of metal" with (excess² + 224) / 225 refunded; the bar is set to −1. Later in the same pass `RestoreStarsBars` spreads a −1 bar's share over the bars still above 0, in proportion (with none: both done → ships 1,000; mining done on a hostile-gravity planet → ships 1,000; terraforming done → mining 500, ships 500; else terraforming 500, ships 500). So the money is never wasted (2.0's ruleset wasted it) | CONFIRMED (`TerraformMineStars @a0a9e`, asm a0b70–a0dce; `RestoreStarsBars @a24e2`, asm a2564–a2604) |
+| Mining exactly what is left | 15 × √money equal to the metal left takes it all without the "run out" message (only more than what is left counts) | CONFIRMED (asm a0d0c `cmp.l`/`ble`) |
+| Order of colonies in a turn | support, terraforming and mining, and ship queues go through the colony slots in slot order, newest colony first | CONFIRMED (`KillUnsupportedStars @a0960`, `TerraformMineStars`, `BuildNewShips @a1406`) |
+| Battle reports | one pair a duel: each duel at a star is a battle of its own and `MakeResultMessages` writes the attacker's and the defender's report from that duel's counts. The defender's colony keeps its survivors; the debris of a duel goes to the colony's owner if it held ("You have recovered …"), else falls onto the planet with a note to the winner; when both sides die it is lost. A colony owner with no ships that loses gets "X destroyed your colony at S."; with ships, only "You lost a battle" | CONFIRMED (`DoBattleStage @d0004`, `MakeResultMessages @d2828`, `ResolveVictorFleetsAtStar @d3990`, `ZeroFleetsAtStar @d38ca`) |
+| What a battle teaches | the estimates (above) are written per duel, from that duel's survivors | CONFIRMED (`MakeResultMessages`) |
+| A meteor shower wiping out a colony | report 1059 has no template, so the report is a blank line (sound 2001) | CONFIRMED (`ComputeIncomeAndPopulation` asm a3034, `GetReportString @130746` default case @130d62) |
+| Messages between players | none: no command sends them and nothing fills the outgoing list | CONFIRMED (MENU 128–134; player +0xea0 written only by `CreatePlayer`, read by `EndTurn`) |
+| Routes | planned again at every stop: at the start of `MoveShips` and after `ColonizeAndExplore` a fleet whose next stop isn't its destination gets a new route from where it is, with the fuel it has left; with none it stops: "Your %s can no longer reach %s." | CONFIRMED (`CheckFleetDestination @a23d2`) |
+| The ship queue | a design already queued in any slot gets the new ships; taking one ship off a slot of several keeps what was paid; emptying the first slot loses what was paid toward it, money and metal | CONFIRMED (`AddTypeToQueue @11311a`, `RemoveTypeFromQueue @1131ec`, `BuildShips @112946`; part-payment at slot +0xf0a/+0xf0e) |
+| Fleets | a fleet is one design and a count. Organize Fleets deals one design's ships at a star into up to 12 fleets; on OK all of them get the least fuel used among them, the older records keep their orders, and a new Colony Ship fleet comes loaded with colonists | CONFIRMED (`NewFleet @110004`, `OrganizeFleets @113896`) |
+| Underfunded colonies | still grow: `KillUnsupportedStars` clears the slot's no-growth flag (+0x10) every turn and never sets it | CONFIRMED (`KillUnsupportedStars @a0960`) |
+| Novas | `CheckForSupernova` and `ReactToSupernova` both stop at style bit 0x10, never set | CONFIRMED (`ReactToSupernova @a2afc`) |
+| Ship and planet power noted at each star | computed by `NoteShipPowers` but never read (cleared each turn by `EndTurn`) | CONFIRMED (no reader of star +0x48–0x51) |
+
+Checked and the same as before: the per-player order of the turn (`EndTurn` runs one
+player's planning, money and moves before the next player's; nothing a computer reads
+is changed by another player's money or moves, so the remake's "everyone plans, then
+everyone pays, then everyone moves" gives the same game), losses falling on the oldest
+fleets (`ResolveVictorFleetsAtStar`), the design limit of 20 (`CreateShipType @111866`),
+scrapping a fleet (`ScrapCurrentFleet @1128ce` only marks it; `ScrapFleetsAndTypes`
+scraps it at the start of the next turn's pass, where it is, so the remake's immediate
+scrapping gives the same metal in the same place).
+
+## Still open
+
+See `docs/open-questions.md`, section "Mac 1.2".
