@@ -220,7 +220,7 @@ function unqueueShip(G, pid, sid, i) {
   if (i === 0) { if (rules(G).yardRefund) rules(G).yardRefund(G, G.players[pid], s); else s.yard = 0; }
 }
 function mergeFleets(G, a, b) { // b into a
-  const orders = { a: { dest: a.dest, path: a.path, routeTo: a.routeTo }, b: { dest: b.dest, path: b.path, routeTo: b.routeTo } };
+  const orders = { a: { dest: a.dest, path: a.path, routeTo: a.routeTo }, b: { dest: b.dest, path: b.path, routeTo: b.routeTo }, fuel: { a: a.fuel, b: b.fuel } };
   for (const k in b.ships) a.ships[k] = (a.ships[k] || 0) + b.ships[k];
   if (b.colonists) a.colonists = (a.colonists || 0) + b.colonists;
   a.fuel = Math.min(a.fuel, b.fuel);
@@ -581,7 +581,8 @@ function turnStep(G, first, last) {
   }
   // a ruleset may handle surrender, alliances news and who is out itself (rs.processSurrenders, ...)
   if (feature(G, 'surrender')) (rs.processSurrenders || processSurrenders)(G);
-  for (const p of G.players) if (p.alive && !p.surrendered) rs.economy(G, p);
+  // rs.economyForAll: the turn's first pass runs for out players too (DOS 2.0)
+  for (const p of G.players) if ((p.alive || rs.economyForAll) && !p.surrendered) rs.economy(G, p);
   departures(G);
   movement(G);
   resolveStars(G);

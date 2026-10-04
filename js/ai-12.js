@@ -244,7 +244,10 @@ function fillInStarStatus(C) {
   const { G, p, ai, T, rs } = C;
   const fAtt = T.fighter ? C.att(T.fighter) : 0;
   // a Smart computer knows the stars within 9 ly of home before 2020
-  if (C.iq === 3 && G.year < 2020) for (const s of G.stars) if (starDist(G, s.id, p.homeStar) < 9) observe(G, p, s.id);
+  // the year the computer plans in: 2.0 has already moved the year on
+  // (FUN_1040_0038 @1040:01a8, before FUN_1020_0000 runs; rs.aiYear)
+  const Y = rs.aiYear ? rs.aiYear(G) : G.year;
+  if (C.iq === 3 && Y < 2020) for (const s of G.stars) if (starDist(G, s.id, p.homeStar) < 9) observe(G, p, s.id);
   const cls = C.cls = [];
   for (const s of G.stars) {
     const k = know(G, p, s.id), x = rs.x12(G, p, s.id);
@@ -288,8 +291,8 @@ function fillInStarStatus(C) {
   const W = lvl(p, 'weapons');
   for (const s of G.stars) {
     const c = cls[s.id], x = rs.x12(G, p, s.id);
-    if ((c === 3 || c === 4) && x.by === G.year - 60 && RI(G, 1, 2) === 1) x.e16 = 5;
-    if ((c === 3 || c === 4) && x.by >= 2000 && x.by < G.year - 20 && (x.by - G.year) % 200 === 0 && x.pop === 0) {
+    if ((c === 3 || c === 4) && x.by === Y - 60 && RI(G, 1, 2) === 1) x.e16 = 5;
+    if ((c === 3 || c === 4) && x.by >= 2000 && x.by < Y - 20 && (x.by - Y) % 200 === 0 && x.pop === 0) {
       if (RI(G, 1, 2) === 1) x.e16 = 6;
       else x.e16 = trunc((W + 1) * 7000 * (W + 1) / 125);
     }
@@ -389,12 +392,19 @@ function colQuality(C, sid, metalF) {
   return trunc((metalF * m + q * (100 - metalF) + 67) / 100);
 }
 
+// a colony still being terraformed: its Terraform bar isn't -1 (finished).
+// 2.0's ruleset keeps the bars (rs.terraLeft, FUN_1020_03e7 @1020:0445);
+// 1.2's tells by the temperature gap
+function terraLeft(C, sid) {
+  const s = C.G.stars[sid];
+  return C.rs.terraLeft ? C.rs.terraLeft(C.G, C.p, s) : E.RULESETS.original.hab(C.p, s).dT > 0;
+}
+
 // ---------- supporting colonies and mining (AddColonySupportActions @90294) ----------
 function addColonySupportActions(C) {
   const { G, p, cls } = C;
-  const H = E.RULESETS.original.hab;
   // more colonies being terraformed than the income supports: let the worst go
-  let n = C.cols.filter(sid => H(p, G.stars[sid]).dT > 0).length;
+  let n = C.cols.filter(sid => terraLeft(C, sid)).length;
   while (C.cap2 < n && n > 0) {
     let worst = -1, wq = 99;
     for (const sid of C.cols) {
@@ -522,9 +532,8 @@ function addColonizeAction(C) {
     }
     if (bt !== -1) { addAction(C, 4, bq + 38, bt, bs); want--; }
   }
-  const H = E.RULESETS.original.hab;
   for (const sid of C.cols) {
-    if ((cls[sid] === 9 || cls[sid] === 10) && H(p, G.stars[sid]).dT > 0) want--;
+    if ((cls[sid] === 9 || cls[sid] === 10) && terraLeft(C, sid)) want--;
     if (cls[sid] === 8 && (know(G, p, sid).metal || 0) > 100) want--;
   }
   want -= colonyFleetsOut.length;
@@ -551,8 +560,7 @@ function addColonizeAction(C) {
 // 7,200 while you have less than $150,000, 20,000 above
 function addTerraformingActions(C) {
   const { G, p, cls } = C;
-  const H = E.RULESETS.original.hab;
-  const todo = C.cols.filter(sid => H(p, G.stars[sid]).dT > 0);
+  const todo = C.cols.filter(sid => terraLeft(C, sid));
   const n = todo.filter(sid => cls[sid] > 8).length;
   if (!n) return;
   const each = trunc(C.M * 3 / (n * 5));
@@ -755,6 +763,7 @@ function resolveSpending(C) {
     const s = G.stars[sid];
     b.col[sid] = pm(sid) / 1000;
     const t = C.terra[sid] || 0, m = C.mine[sid] || 0, f = C.finish[sid] || 0, rest = t + m + f;
+    if (C.rs.setColonyBars) { C.rs.setColonyBars(G, s, t, m, f); continue; } // 2.0: per mille, a finished bar left at -1
     if (t + m === 0) s.ship = 1;
     else {
       const tp = trunc((t * 1000 + rest - 1) / rest), mp = trunc((m * 1000 + rest - 1) / rest), sp = trunc((f * 1000 + rest - 1) / rest);

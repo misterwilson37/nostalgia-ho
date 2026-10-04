@@ -11,7 +11,9 @@
 //
 // Labels: CONFIRMED (seg:off) = read from that WINHO.EXE function;
 // GUESS = not settled by the decompile (the remake's choice).
-// docs/dos-findings.md explains each rule in plain English.
+// docs/dos-findings.md explains each rule in plain English, and
+// docs/coverage-20.md lists every routine of WINHO.EXE. The turn itself is
+// in the "2.0's turn, routine by routine" section near the end.
 //
 // The money model is 2.0's, not 5.0.5's: there is one pool of money (kept in
 // p.savings). Every turn all of it is divided by shares (per mille): one per
@@ -304,7 +306,7 @@ function fleetFor(G, pid, sid, d) {
 // CONFIRMED (FUN_1040_25ce -> FUN_1068_03a9): a fleet sent too far for its fuel
 // is routed through your own colonies, each hop within its Range, at most
 // 42/Range hops, the shortest such way if it is under three times the direct
-// distance. (2.0 plans the route again at every stop; here it is planned once.)
+// distance. (Planned again at every stop: replan20, for 2.0; 1.2 keeps its own.)
 function route(G, f, tgt) {
   const R = fleetMaxRange(G, f);
   if (!(R > 0) || f.star == null) return null;
@@ -371,73 +373,13 @@ function underfunded(G, p) {
   return colonies(G, p.id).filter(s => (s.oInc || 0) < 0 && colonyMoney(G, p, s, share) < 0);
 }
 
-// ---------- pass 1: funding, terraforming, mining, ships, research ----------
-function economy(G, p) {
-  const share = shareOf(G, p);
-  p.oKept = share(p.budget.savings); p.oRefund = 0;
-  // CONFIRMED (FUN_1040_0925): a colony losing more than its share loses
-  // people; with none left it is abandoned. Profitable colonies are never
-  // touched, whatever their share. Applies to every colony, home included.
-  for (const s of colonies(G, p.id)) {
-    s.oStarve = false;
-    const inc = s.oInc || 0, sh = share(p.budget.col[s.id]);
-    if (inc >= 0 || sh + inc >= 0) continue;
-    const u = Math.max(0, trunc(popU(s) * sh / -inc) - 100);
-    setPopU(s, u);
-    if (u === 0) { msg(G, p.id, `You have abandoned ${s.name}.`, { icon: 'm9036', star: s.id }); removeColony(G, p, s); }
-    else { s.oStarve = true; msg(G, p.id, `Your colony at ${s.name} is not receiving sufficient funds to support itself.`, { icon: 'm9020', sound: 3002, star: s.id }); }
-  }
-  // CONFIRMED (FUN_1040_0aea): terraforming and mining
-  for (const s of colonies(G, p.id)) {
-    const M = colonyMoney(G, p, s, share);
-    if (M <= 0) continue;
-    const h = hab(p, s), ship = clamp(s.ship || 0, 0, 1);
-    const terraOK = h.dT > 0, metalOK = s.metal >= 1;
-    // CONFIRMED (FUN_1040_0aea; 1.2: TerraformMineStars @a0a9e): a finished
-    // part is marked -1 and only parts above 0 are spent, so a finished
-    // part's share of the colony's money is simply lost every turn (nothing
-    // refunds it) until the player moves the bar; the planet window
-    // (FUN_1088_1b3f -> FUN_1010_0077) draws the part as an empty bar.
-    const tf = s.terra == null ? 0.5 : s.terra;
-    let T = terraOK ? trunc(M * (1 - ship) * tf) : 0, X = metalOK ? trunc(M * (1 - ship) * (1 - tf)) : 0;
-    if (!terraOK && !metalOK) continue;
-    if (T > 0) {
-      if (T > 50 && h.gR > 256) msg(G, p.id, `Warning: you are terraforming ${s.name}, a planet that will never become profitable.`, { icon: 'm9013', star: s.id }); // every turn
-      s.oSink = s.oSink || 0;
-      if (s.oSink < 5000) { const x = Math.min(5000 - s.oSink, T); s.oSink += x; T -= x; }
-      const step = isqrt(trunc(T / 2)); // tenths of a degree
-      if (step > h.dT) {
-        p.oRefund += 2 * (step - h.dT) * (step - h.dT);
-        s.t = p.homeT;
-        msg(G, p.id, `You have completely terraformed ${s.name}.`, { icon: 'm9017', star: s.id });
-      } else s.t += (s.t < p.homeT ? 1 : -1) * step / 10;
-    }
-    if (X > 0) {
-      let got = isqrt(X) * 15;
-      const have = Math.floor(s.metal);
-      if (got >= have) {
-        const ex = got - have;
-        p.oRefund += trunc((ex * ex + 224) / 225);
-        got = have;
-        msg(G, p.id, h.gR > 256 ? `${s.name} has run out of metal. You should probably abandon it.` : `${s.name} has run out of metal.`, { icon: 'm9001', star: s.id });
-      }
-      s.metal -= got; p.metal += got;
-    }
-  }
-  // CONFIRMED (FUN_1040_1479): shipbuilding
-  for (const s of colonies(G, p.id)) shipyard(G, p, s, colonyMoney(G, p, s, share));
-  // CONFIRMED (FUN_1040_1b11): research
-  const T = share(p.budget.tech);
-  if (T <= 0) msg(G, p.id, 'You are not spending any money on technology research.', { icon: 'm9011', quiet: true }); // every turn
-  research(G, p, T);
-}
 // CONFIRMED (FUN_1040_1479): each colony builds its queue (three slots of
 // design and count) from its Ship share. A ship is built when its price and
 // metal are both there; what can't finish part-pays the first ship (money and
 // a matching part of its metal, set aside), and any other money left goes
 // back into the pool. Computer players use the same queues.
 const QUEUE_SLOTS = 3;
-function shipyard(G, p, s, M) {
+function shipyard(G, p, s, M, shipMoney) { // shipMoney: 2.0's per-mille share of M (shipyard20); else M x the fraction
   const q = s.queue || (s.queue = []);
   // CONFIRMED (FUN_1040_0fca @1040:1225-1321; 1.2's ScrapFleetsAndTypes
   // @a0e02): a scrapped ship type leaves every queue; if it was first in
@@ -451,7 +393,7 @@ function shipyard(G, p, s, M) {
   const ship = clamp(s.ship || 0, 0, 1);
   if ((M < 500 || ship <= 0) && q.length) msg(G, p.id, `You have ships queued at ${s.name} but have no money allocated for shipbuilding.`, { icon: 'm9020', star: s.id, quiet: true });
   if (M <= 0 || ship <= 0) return;
-  let S = trunc(M * ship) + (s.yard || 0);
+  let S = (shipMoney != null ? shipMoney : trunc(M * ship)) + (s.yard || 0);
   p.metal += s.yardMetal || 0; s.yard = 0; s.yardMetal = 0;
   const built = {};
   let any = false;
@@ -479,15 +421,6 @@ function shipyard(G, p, s, M) {
     else if (!any && G.opts.overspendWarnings !== false) msg(G, p.id, `You are spending money on shipbuilding at ${s.name} but have no ships queued.`, { icon: 'm9020', star: s.id, quiet: true });
   }
   p.oRefund += Math.max(0, S);
-}
-// taking the first ship out of the queue gives back what was paid toward it
-// (GUESS: the Build Ships window's own code for this sits behind a jump table
-// and wasn't found; when a queued ship *type* is scrapped, 2.0 does not give
-// the part-payment back, see shipyard)
-function yardRefund(G, p, s) {
-  if (s.queue && s.queue.length && s.queue[0].did === s.yardDid) return;
-  p.savings += s.yard || 0; p.metal += s.yardMetal || 0;
-  s.yard = 0; s.yardMetal = 0;
 }
 // what the first ship in the queue still needs, for the interface
 function yardProgress(G, p, s) {
@@ -530,6 +463,7 @@ function incomeU(u, H) {
   return trunc(mult * u / 76) - trunc((H / 40 + 100) * u / 10000 + 7500);
 }
 function planetIncome(G, p, s) { return incomeU(popU(s), hab(p, s).H); }
+// (Kept for Mac 1.2, js/rules-12.js; 2.0 now uses pass2_20 below.)
 function afterMovement(G, p) {
   // CONFIRMED (1040:284f-2995): kept money plus refunds earns 10 x isqrt of itself; no borrowing
   const saved = (p.oKept || 0) + (p.oRefund || 0);
@@ -750,7 +684,7 @@ function battle(G, sid, hooks) { // hooks.duel: called after each duel (Mac 1.2'
   }
   let planetDied = false;
   if (planet) {
-    if (planet.hp <= 0) { const q = G.players[planetOwner]; removeColony(G, q, s); planetDied = true; }
+    if (planet.hp <= 0) { const q = G.players[planetOwner]; (hooks && hooks.lose ? hooks.lose : removeColony)(G, q, s); planetDied = true; }
     else setPopU(s, planet.hp);
   }
   // FUN_1018_260b: the metal of every ship destroyed (a fifth each) goes to
@@ -776,92 +710,9 @@ function battle(G, sid, hooks) { // hooks.duel: called after each duel (Mac 1.2'
 //   colonies within reach; pop: the planet's population.
 // The strengths are the computers' attack ratings (rs.shipPower).
 function x12(G, p, sid) { const k = E.know(G, p, sid); return k.x12 || (k.x12 = { by: 0, e16: 0, e1a: 0, e1e: 0, e22: 0, pop: 0 }); }
-// 2.0 fights duels (the holder against each other player in turn) and writes
-// this for the attacker and the defender of each one; the remake's battle
-// reports the whole star at once, so every player is treated as in a duel
-// against all the others together, the colony's owner as the defender.
-function battleKnow(G, sid) {
-  const rs = E.rules(G), s = G.stars[sid], pop0 = s.owner >= 0 ? popU(s) : 0;
-  const res = battle(G, sid);
-  if (!res) return res;
-  const { ownerIds, survivors, planetOwner, planetDied, rec } = res;
-  const year = G.year + 10;
-  // the ships left after the battle, by owner and class, as attack ratings
-  const left = {};
-  rec.start.forEach((u, i) => {
-    if (!rec.end[i]) return;
-    const d = getDesign(G, u.o, u.did), L = left[u.o] || (left[u.o] = {});
-    L[u.t] = (L[u.t] || 0) + rs.shipPower(G, d);
-  });
-  const power = (owners, t) => owners.reduce((a, o) => a + Object.entries(left[o] || {}).reduce((b, [k, v]) => b + (t == null || k === t ? v : 0), 0), 0);
-  const W = planetOwner >= 0 ? G.players[planetOwner].tech.weapons : 0;
-  const pp = pop0 > 0 ? planetPower(pop0, W) : 0;
-  const rounds = rec.rounds.length;
-  const winnerOf = (o) => (survivors[o] || 0) > 0 || (o === planetOwner && !planetDied);
-  for (const o of ownerIds) {
-    const p = G.players[o], k = x12(G, p, sid), others = ownerIds.filter(x => x !== o);
-    k.by = year;
-    const won = winnerOf(o) && !others.some(x => winnerOf(x) && !isAllied(G, x, o));
-    if (o === planetOwner) {
-      // the defender: computers spend more of their metal on defence after an attack
-      if (p.ai && p.ai.v12 && pop0 > 0) {
-        if (!won && p.ai.metalDef < 70) p.ai.metalDef = 70;
-        if (p.ai.metalDef < 40) p.ai.metalDef = 40;
-        p.ai.metalDef = Math.min(p.ai.metalDef + 10, p.ai.colDef);
-      }
-      k.pop = 0;
-      if (won) {
-        k.e16 = 0; k.e1a = 0; k.e22 = 0;
-        if (pop0 < 1) k.e1e = 0;
-        else {
-          const all = power([o]), fighters = power([o], 'fighter'), r = RI(G, 1, 5);
-          if (r < 3 && rounds > 1) k.e1e = all - fighters;
-          else if (r < 5) k.e1e = trunc(all / 10);
-        }
-      } else {
-        const all = power(others);
-        k.e16 = all + 1;
-        if (pop0 < 1) {
-          k.e1a = RI(G, 1, 2) === 1 ? 0 : power(others, 'satellite');
-          k.e1e = 0; k.e22 = power(others, 'fighter') + power(others, 'scout');
-        } else {
-          k.e1a = RI(G, 1, 2) === 1 ? 0 : all;
-          k.e1e = 0; k.e22 = all;
-        }
-      }
-    } else if (won) {
-      k.e16 = 0; k.e1a = 0; k.e1e = 0; k.e22 = 0; k.pop = 0;
-    } else {
-      // an attacker that lost
-      k.pop = pop0;
-      k.e16 = power(others) + pp + 1;
-      if (RI(G, 1, 2) === 1 && pop0 > 0) k.e16 -= power(others, 'fighter') + power(others, 'scout') - 1;
-      k.e1a = RI(G, 1, 2) === 1 ? 0 : power(others, 'satellite') + pp;
-      k.e1e = 0;
-      k.e22 = power(others, 'fighter') + power(others, 'scout');
-    }
-  }
-  return res;
-}
-// CONFIRMED (FUN_1018_260b): the battle reports, report codes 1033 / 1034 /
-// 1035 / 1009 (string ids 705-707, 681). The winner: "You won a battle at %s.
-// You lost %d of your ships. %s lost %d.", or, for a colony left with no ships
-// of its own, "%s successfully defended itself against an enemy attack from
-// %s."; the loser: "You lost a battle at …", or, for a colony that had no
-// ships, "%s destroyed your colony at %s." Sounds (FUN_10c0_0c50): nothing for
-// the battle reports and 2001 for a destroyed colony; the remake keeps 7027 for
-// a won battle (the skin's auto play stops on it).
-function battleText(G, sid, b, o, x) {
-  const s = G.stars[sid], hadShips = b.rec.start.some(u => u.o === o);
-  if (o === b.planetOwner) {
-    if (x.won && !(b.survivors[o] > 0)) return { text: `${s.name} successfully defended itself against an enemy attack from ${x.enemies}.`, sound: 7027 };
-    if (!x.won && !hadShips) return { text: `${x.enemies} destroyed your colony at ${s.name}.`, sound: 2001, icon: 'm9036' };
-  }
-  if (x.won) return { text: `You won a battle at ${s.name}. You lost ${x.myLoss} of your ships. ${x.enemies} lost ${x.theirLoss}.`, sound: 7027, icon: 'p3000' };
-  return { text: `You lost a battle at ${s.name}. You lost ${x.myLoss} of your ships. ${x.enemies} lost ${x.theirLoss}.`, sound: 2001, icon: 'm9025' };
-}
 
-// ---------- the end of the turn: refuelling, exploring, colonizing (FUN_1040_2fa8) ----------
+// ---------- the end of the turn: refuelling, exploring, colonizing ----------
+// (Kept for Mac 1.2, js/rules-12.js; 2.0 now uses pass2_20 below.)
 // CONFIRMED (FUN_1040_2fa8; Mac 1.2's ColonizeAndExplore @a3556 is the same):
 // at the end of every turn, for every player, each fleet at one of its
 // colonies is refuelled and its colony ships take on colonists; then every
@@ -894,15 +745,6 @@ function refuel(G) {
       }
     }
   }
-}
-// CONFIRMED (FUN_1040_23ed): a fleet's owner is told "Your fleet of %s has
-// arrived at %s." only at its last stop, when that star was already explored
-// and is either the player's own colony or nobody's (and the fleet isn't a
-// colony ship); at a stop on the way, "… has stopped at %s on the way to %s."
-// Nobody else is told (no text for it; features.arrivalNotices is off).
-function arrivalSays(G, p, f, s) {
-  if (f.path && f.path.length) return true;
-  return s.owner === p.id || (s.owner < 0 && !fleetDesigns(G, f).some(d => d.type === 'colony'));
 }
 // CONFIRMED (FUN_10c0_0c50 -> FUN_1020_1a2d): the exploring sound goes by the
 // star's quality 0..20: 6000 at 15 or more, 6002 from 1 to 14, 6001 at 0. The
@@ -1013,25 +855,636 @@ const WELCOME = [
   ['Spaceward Ho! Version 2.0.1 by Peter Commons.', { icon: 'm9004', sound: 11111 }],
   ['Artwork by Howard Vives.', { icon: 'm9024' }],
 ];
-// CONFIRMED (FUN_1040_0038 @1040:02af): each player's turn opens with report
-// 1010, string 682 "The game has been updated to the year %d.", sound 2000
-function economyYear(G, p) {
-  if (p.human) msg(G, p.id, `The game has been updated to the year ${G.year + 10}.`, { icon: 'm9024', sound: 2000, quiet: true });
-  economy(G, p);
+
+// =====================================================================
+// 2.0's turn, routine by routine (WINHO.EXE, read in docs/coverage-20.md).
+// 1.2 (js/rules-12.js) has the same routines; it keeps the versions above
+// (base12, at the end of this file) so its games stay as they were.
+// =====================================================================
+
+// ---------- shares, per mille (every pass-1 and pass-2 routine) ----------
+// CONFIRMED (FUN_1040_0925 @1040:0960-09fe, 0aea @0b4f-0b8e and @0c3b-0c87,
+// 1479 @15f5-164a, 1b11 @1b9f-1bdb, 27ee @2869-28d3): a share of an amount
+// is worked out as trunc(M x pm / 1000) while M is under $2,000,000, and
+// as trunc(M / 1000) x pm above. Nothing divides by the total of the bars:
+// the shares are used as they stand (the computers' add up to a little
+// more than 1,000, FUN_1020_35f9 rounds each one up).
+const share20 = (M, pm) => !(pm > 0) ? 0 : M < 2000000 ? trunc(M * pm / 1000) : trunc(M / 1000) * pm;
+const pmOf = (x) => Math.round((x || 0) * 1000);
+const keyPm = (p, k) => pmOf(k === 'sav' ? p.budget.savings : k === 'tech' ? p.budget.tech : p.budget.col[k]);
+const setKeyPm = (p, k, v) => { const f = v / 1000; if (k === 'sav') p.budget.savings = f; else if (k === 'tech') p.budget.tech = f; else p.budget.col[k] = f; };
+// the budget slots in 2.0's order (player +0xec0, 0x30 bytes each): set up
+// as Savings, Technology, home (FUN_1030_1299 @1030:19b2-1b32); a new colony's
+// slot goes in front (FUN_1040_3645 @1040:3722); a lost one is taken out
+// (FUN_1040_38c0). The computers, the budget window and every loop of the
+// turn go through them in this order.
+function slots20(G, p) {
+  if (!p.slots20) {
+    const cols = colOrder(G, p), home = cols.length ? cols[cols.length - 1] : null;
+    p.slots20 = cols.slice(0, -1).concat(['sav', 'tech']).concat(home != null ? [home] : []);
+  }
+  for (const s of colonies(G, p.id)) if (!p.slots20.includes(s.id)) p.slots20.unshift(s.id);
+  return p.slots20;
 }
+const colIds20 = (G, p) => slots20(G, p).filter(k => typeof k === 'number' && G.stars[k].owner === p.id);
+const colOrder20 = (G, p) => colIds20(G, p);
+function shareOf20(G, p) {
+  const M0 = Math.max(0, p.savings);
+  return (k) => share20(M0, keyPm(p, k));
+}
+// a colony's money: its share, less its loss if it loses money
+function colonyMoney20(G, p, s, share) {
+  const inc = s.oInc || 0;
+  return share(s.id) + (inc < 0 ? inc : 0);
+}
+
+// ---------- a colony's bars: terraform, mine, ships, per mille ----------
+// CONFIRMED (FUN_1040_0aea, FUN_1040_269d, FUN_1010_04a7): each colony has
+// three bars; a finished part is set to -1 and stays -1: no routine sets it
+// back, the planet window won't let it be dragged (FUN_1010_04a7 beeps on a
+// bar below 0) and the computers leave it alone (FUN_1020_35f9 @1020:385b).
+// The remake keeps them as s.bars = [T, X, S]; s.terra and s.ship (the
+// panel's sliders) are kept in step, and a change there is read back.
+function setBars20(s, T, X, S) {
+  s.bars = [T, X, S];
+  s.ship = clamp(S, 0, 1000) / 1000;
+  const t = Math.max(0, T), x = Math.max(0, X);
+  if (t + x > 0) s.terra = t / (t + x);
+  else if (T === -1 && X !== -1) s.terra = 0;
+  else if (X === -1 && T !== -1) s.terra = 1;
+  s._bsig = s.terra + '|' + s.ship;
+  return s.bars;
+}
+function bars20(s) {
+  if (s.bars && s._bsig === s.terra + '|' + s.ship) return s.bars;
+  // moved on the planet panel: the other bars share what the moved one
+  // leaves, as 2.0's drag does (FUN_1010_060a); a finished part stays -1
+  const td = !!s.bars && s.bars[0] === -1, xd = !!s.bars && s.bars[1] === -1;
+  let S = clamp(Math.round((s.ship || 0) * 1000), 0, 1000), T, X;
+  const rest = 1000 - S, tf = s.terra == null ? 0.5 : s.terra;
+  if (td && xd) { T = -1; X = -1; S = 1000; }
+  else if (td) { T = -1; X = rest; }
+  else if (xd) { X = -1; T = rest; }
+  else { T = Math.round(rest * tf); X = rest - T; }
+  return setBars20(s, T, X, S);
+}
+// the colony's class (slot +0x12): 0 paying, 1 losing, 2 losing with a
+// gravity ratio over 2.56 (FUN_1040_27ee @1040:2f55-2f96, FUN_1040_3645)
+const cls20 = (p, s) => s.cls20 != null ? s.cls20 : (s.oInc || 0) >= 0 ? 0 : hab(p, s).gR > 256 ? 2 : 1;
+
+// ---------- pass 1 (FUN_1040_0038 @1040:02de-038b) ----------
+// For each player in turn: the computer plans (FUN_1020_0000), then
+// scrapping (FUN_1040_0fca: the remake scraps when you give the order), the
+// losing colonies (0925), terraforming and mining (0aea), shipbuilding
+// (1479), research (1b11), the fleets move (23ed, with every route checked
+// first, 25ce) and the bars are restored (269d). Every loop goes through the
+// budget slots in order. 2.0 runs this for every player, out or not
+// (economyForAll).
+function economy20(G, p) {
+  // CONFIRMED (FUN_1040_0038 @1040:02af): report 1010 to every player
+  if (p.human) msg(G, p.id, `The game has been updated to the year ${G.year + 10}.`, { icon: 'm9024', sound: 2000, quiet: true });
+  const share = shareOf20(G, p);
+  p.oRefund = 0;
+  // CONFIRMED (FUN_1040_0925 @1040:0925-0ae9): a losing colony whose share
+  // won't cover its loss loses people, pop x share / loss - 100; with none
+  // left it is abandoned (FUN_1040_38c0). The "no growth" flag is cleared.
+  for (const sid of colIds20(G, p)) {
+    const s = G.stars[sid];
+    s.oStarve = false;
+    const inc = s.oInc || 0, sh = share(sid);
+    if (inc >= 0 || sh + inc >= 0) continue;
+    const u = Math.max(0, trunc(popU(s) * sh / -inc) - 100);
+    setPopU(s, u);
+    if (u === 0) { msg(G, p.id, `You have abandoned ${s.name}.`, { icon: 'm9036', star: s.id }); removeColony20(G, p, s); }
+    else { s.oStarve = true; msg(G, p.id, `Your colony at ${s.name} is not receiving sufficient funds to support itself.`, { icon: 'm9020', sound: 3002, star: s.id }); }
+  }
+  for (const sid of colIds20(G, p)) terraMine20(G, p, G.stars[sid], colonyMoney20(G, p, G.stars[sid], share));
+  // CONFIRMED (FUN_1040_1479 @1040:15db-164a): the Ship bar's share of the colony's money
+  for (const sid of colIds20(G, p)) {
+    const s = G.stars[sid], M = colonyMoney20(G, p, s, share), B = bars20(s);
+    shipyard(G, p, s, M, M > 0 && B[2] > 0 ? share20(M, B[2]) : 0);
+  }
+  // CONFIRMED (FUN_1040_1b11): research from the Technology slot's share
+  const T = share('tech');
+  if (T <= 0) msg(G, p.id, 'You are not spending any money on technology research.', { icon: 'm9011', quiet: true }); // every turn
+  research20(G, p, T);
+  replan20(G, p); // FUN_1040_23ed -> FUN_1040_25ce, before the fleets leave
+  for (const sid of colIds20(G, p)) restoreBars20(G, p, G.stars[sid]);
+}
+// CONFIRMED (FUN_1040_0aea @1040:0aea-0fc9; 1.2's TerraformMineStars @a0a9e
+// is the same): a bar above 0 is spent, whether the planet still needs it
+// or not (a planet already at your temperature is "completely terraformed"
+// again and its money refunded):
+// - terraforming: warns when more than $50 goes into a class-2 colony; the
+//   first $5,000 ever goes into the planet; then the temperature moves
+//   isqrt(money / 2) tenths of a degree toward yours; a step bigger than
+//   the gap sets it to yours, refunds 2 x (step - gap)^2 and sets the bar to -1;
+// - mining: 15 x isqrt(money) metal; more than the planet has (not equal)
+//   takes what is left, refunds ((excess^2 + 224) / 225) and sets the bar to -1;
+//   "You should probably abandon it" when the gravity ratio is over 2.56.
+function terraMine20(G, p, s, M) {
+  if (M <= 0) return;
+  let [T, X, S] = bars20(s);
+  const h = hab(p, s);
+  if (T > 0) {
+    let t = share20(M, T);
+    if (t > 50 && cls20(p, s) === 2) msg(G, p.id, `Warning: you are terraforming ${s.name}, a planet that will never become profitable.`, { icon: 'm9013', star: s.id });
+    s.oSink = s.oSink || 0;
+    if (s.oSink < 5000) { const x = Math.min(5000 - s.oSink, t); s.oSink += x; t -= x; }
+    const step = isqrt(trunc(t / 2)), gap = h.dT;
+    if (step > gap) {
+      p.oRefund += 2 * (step - gap) * (step - gap);
+      s.t = p.homeT; T = -1;
+      msg(G, p.id, `You have completely terraformed ${s.name}.`, { icon: 'm9017', star: s.id });
+    } else s.t += (s.t < p.homeT ? 1 : -1) * step / 10;
+  }
+  if (X > 0) {
+    let got = isqrt(share20(M, X)) * 15;
+    const have = Math.max(0, Math.floor(s.metal));
+    if (got > have) {
+      const ex = got - have;
+      p.oRefund += trunc((ex * ex + 224) / 225);
+      got = have; X = -1;
+      msg(G, p.id, h.gR > 256 ? `${s.name} has run out of metal. You should probably abandon it.` : `${s.name} has run out of metal.`, { icon: 'm9001', star: s.id });
+    }
+    s.metal -= got; p.metal += got;
+  }
+  setBars20(s, T, X, S);
+}
+// CONFIRMED (FUN_1040_269d @1040:269d-27ed; 1.2's RestoreStarsBars @a24e2):
+// every turn, for every colony, the bars above 0 are scaled up to fill
+// 1,000 (each += bar x (1000 - total) / total), so a finished part's share
+// goes to the others. With none above 0: both finished -> Ship 1,000;
+// mining finished on a class-2 colony -> Ship 1,000, Terraform 0;
+// terraforming finished -> Mine 500, Ship 500; otherwise Terraform 500,
+// Ship 500.
+function restoreBars20(G, p, s) {
+  let [T, X, S] = bars20(s);
+  const tot = Math.max(0, T) + Math.max(0, X) + Math.max(0, S);
+  if (tot === 0) {
+    if (T === -1 && X === -1) S = 1000;
+    else if (X === -1 && cls20(p, s) === 2) { S = 1000; T = 0; }
+    else { if (T === -1) X = 500; else T = 500; S = 500; }
+  } else {
+    if (T > 0) T += trunc(T * (1000 - tot) / tot);
+    if (X > 0) X += trunc(X * (1000 - tot) / tot);
+    if (S > 0) S += trunc(S * (1000 - tot) / tot);
+  }
+  setBars20(s, T, X, S);
+}
+// CONFIRMED (FUN_1040_1b11): as research() but each technology's money is
+// its per-mille share of the Technology money
+function research20(G, p, T) {
+  let tot = 0; for (const k of TECH5) tot += p.talloc[k] || 0;
+  for (const k of TECH5) {
+    const pm = tot === 1000 ? (p.talloc[k] || 0) : tot > 0 ? Math.round((p.talloc[k] || 0) * 1000 / tot) : 0;
+    const X = share20(T, pm);
+    let pts = trunc(isqrt(trunc(X / DIV[k])) * RI(G, 60, 140) / 100);
+    while (pts > 0) {
+      const L = trunc(p.tprog[k] / 100), frac = 100 - p.tprog[k] % 100, cost = levelCost(k, L);
+      if (cost <= 0) { p.tprog[k] += frac; continue; }
+      const need = trunc(frac * cost / 100);
+      if (pts > need) { p.tprog[k] += frac; pts -= need; }
+      else { p.tprog[k] += trunc(pts * 100 / cost); pts = 0; }
+    }
+    const lvl = trunc(p.tprog[k] / 100);
+    if (lvl > p.tech[k]) {
+      p.tech[k] = lvl;
+      msg(G, p.id, `Your ${TECHLABEL[k]} Technology has reached level ${lvl}.`, { icon: TECHICON[k], sound: 2000, tech: k });
+    }
+  }
+}
+
+// ---------- routes (FUN_1040_25ce, FUN_1068_03a9, FUN_1068_0a94) ----------
+// CONFIRMED (FUN_1040_25ce, called for every fleet before it moves by
+// FUN_1040_23ed @1040:2454 and after the end-of-turn refuelling by
+// FUN_1040_2fa8 @1040:310f; 1.2's CheckFleetDestination @a23d2): a fleet at a
+// star whose next stop isn't its destination has its route planned again
+// from where it is (FUN_1068_03a9 with the Range of its design); with no
+// route it stops there: "Your %s can no longer reach %s." (report 1023,
+// string 695).
+function route20(G, f, tgt) {
+  const r = route(G, f, tgt);
+  if (r && r.length) f.routeTo = tgt;
+  return r;
+}
+function replan20(G, p) {
+  for (const f of G.fleets) {
+    if (f.owner !== p.id || f.star == null || f.to != null || f.routeTo == null) continue;
+    const stops = (f.dest != null ? [f.dest] : []).concat(f.path || []);
+    const fin = stops[stops.length - 1];
+    if (stops.length < 2 || fin !== f.routeTo) continue;
+    const r = route(G, f, fin);
+    if (!r || !r.length) {
+      msg(G, p.id, `Your ${E.fleetLabel(G, f)} can no longer reach ${G.stars[fin].name}.`, { icon: 'm9038', star: f.star });
+      f.dest = null; f.path = null; f.routeTo = null;
+    } else { f.dest = null; f.path = r; }
+  }
+}
+// CONFIRMED (FUN_1040_23ed @1040:24a5-25a2): the messages are written as the
+// fleet moves (pass 1, before any battle), from the player's own record of
+// the star: at a stop on a route "… has stopped at %s on the way to %s."
+// (1025); at the destination "Your fleet of %s has arrived at %s." (1024)
+// only if the record says the star is explored and is the player's colony,
+// or nobody's and the fleet is not of Colony Ships.
+function fleetArrives20(G, f) {
+  const p = G.players[f.owner];
+  if (!p || !p.human || f.star == null) return true;
+  const s = G.stars[f.star], k = E.know(G, p, s.id), label = E.fleetLabel(G, f);
+  if (f.path && f.path.length) msg(G, p.id, E.report(25, label, s.name, G.stars[f.path[0]].name), { icon: 'm9038', star: s.id, quiet: true });
+  else if (k.explored) {
+    const owner = k.owner == null ? -1 : k.owner;
+    if (owner === p.id || (owner < 0 && !fleetDesigns(G, f).some(d => d.type === 'colony')))
+      msg(G, p.id, `Your fleet of ${label} has arrived at ${s.name}.`, { icon: 'm9038', star: s.id, quiet: true });
+  }
+  return true;
+}
+
+// ---------- battles: a pair of reports a duel (FUN_1018_0032, FUN_1018_260b) ----------
+// CONFIRMED (FUN_1018_0032 @1018:0032-0772): each duel at a star is a battle
+// of its own (its own replay record, FUN_1050_2bf3) and FUN_1018_260b (1.2's
+// MakeResultMessages @d2828, the same routine) runs after each one, for the
+// attacker (record +0) and then the defender (+2):
+// - the attacker: won -> 1033 and the debris falls onto the planet (1052);
+//   lost -> 1034;
+// - the defender: won -> at its own colony the debris goes to its metal
+//   (1051), elsewhere onto the planet (1052); the report is 1035 when it has
+//   no ships left there, else 1033; lost -> 1009 when it had no ships there,
+//   else 1034, and its colony is gone (star owner -1, @1018:309c);
+// - when both sides died the debris is lost;
+// - each side's battle estimates (x12) are written as below; a defender
+//   computer puts more of its metal into defence.
+// The lost colony's slot is taken out in pass 2 (FUN_1040_27ee @1040:29e3).
+function battle20(G, sid) {
+  const s = G.stars[sid], year = G.year + 10, rs = E.rules(G);
+  const name = (o) => G.players[o].name;
+  const power = (army, o, t) => (army[o] || []).reduce((a, e) => a + (t == null || e.d.type === t ? e.n * rs.shipPower(G, e.d) : 0), 0);
+  const duel = (x) => {
+    const { A, D: Df, winner: w, army, rounds, pop0 } = x;
+    const surv = (o) => (army[o] || []).reduce((a, e) => a + e.n, 0);
+    const W = pop0 > 0 ? G.players[Df].tech.weapons : 0, pp = pop0 > 0 ? planetPower(pop0, W) : 0;
+    let debris = x.debris;
+    { // the attacker
+      const k = x12(G, G.players[A], sid); k.by = year;
+      if (w === A) {
+        msg(G, A, `You won a battle at ${s.name}. You lost ${x.nA - surv(A)} of your ships. ${name(Df)} lost ${x.nD}.`, { icon: 'p3000', sound: 7027, star: sid });
+        if (debris) { msg(G, A, `${fmt(debris)} metal has fallen onto ${s.name} from your recent battle.`, { icon: 'm9046', star: sid, quiet: true }); s.metal += debris; debris = 0; }
+        k.e16 = 0; k.e1a = 0; k.e1e = 0; k.e22 = 0; k.pop = 0;
+      } else {
+        msg(G, A, `You lost a battle at ${s.name}. You lost ${x.nA} of your ships. ${name(Df)} lost ${x.nD - (w === Df ? surv(Df) : 0)}.`, { icon: 'm9025', sound: 2001, star: sid });
+        const ws = w === Df ? Df : -1, fs = ws < 0 ? 0 : power(army, ws, 'fighter') + power(army, ws, 'scout');
+        k.pop = pop0;
+        k.e16 = (ws < 0 ? 0 : power(army, ws)) + pp + 1;
+        if (RI(G, 1, 2) === 1 && pop0 > 0) k.e16 -= fs - 1;
+        k.e1a = RI(G, 1, 2) === 1 ? 0 : (ws < 0 ? 0 : power(army, ws, 'satellite')) + pp;
+        k.e1e = 0; k.e22 = fs;
+      }
+    }
+    { // the defender
+      const q = G.players[Df], k = x12(G, q, sid); k.by = year;
+      if (pop0 > 0 && q.ai && q.ai.v12) {
+        if (w !== Df && q.ai.metalDef < 70) q.ai.metalDef = 70;
+        if (q.ai.metalDef < 40) q.ai.metalDef = 40;
+        q.ai.metalDef = Math.min(q.ai.metalDef + 10, q.ai.colDef);
+      }
+      k.pop = 0;
+      const colony = s.owner === Df;
+      if (w === Df) {
+        if (surv(Df) < 1) msg(G, Df, `${s.name} successfully defended itself against an enemy attack from ${name(A)}.`, { sound: 7027, star: sid });
+        else msg(G, Df, `You won a battle at ${s.name}. You lost ${x.nD - surv(Df)} of your ships. ${name(A)} lost ${x.nA}.`, { icon: 'p3000', sound: 7027, star: sid });
+        if (colony) { q.metal += debris; msg(G, Df, `You have recovered ${fmt(debris)} metal from the battle at ${s.name}.`, { icon: 'm9046', star: sid, quiet: true }); debris = 0; }
+        else if (debris) { msg(G, Df, `${fmt(debris)} metal has fallen onto ${s.name} from your recent battle.`, { icon: 'm9046', star: sid, quiet: true }); s.metal += debris; debris = 0; }
+        k.e16 = 0; k.e1a = 0; k.e22 = 0;
+        if (pop0 < 1) k.e1e = 0;
+        else {
+          const all = power(army, Df), r = RI(G, 1, 5);
+          if (r < 3 && rounds > 1) k.e1e = all - power(army, Df, 'fighter');
+          else if (r < 5) k.e1e = trunc(all / 10);
+        }
+      } else {
+        if (x.nD === 0) msg(G, Df, `${name(A)} destroyed your colony at ${s.name}.`, { icon: 'm9036', sound: 2001, star: sid });
+        else msg(G, Df, `You lost a battle at ${s.name}. You lost ${x.nD} of your ships. ${name(A)} lost ${x.nA - (w === A ? surv(A) : 0)}.`, { icon: 'm9025', sound: 2001, star: sid });
+        const ws = w === A ? A : -1, all = ws < 0 ? 0 : power(army, ws);
+        k.e16 = all + 1;
+        if (pop0 < 1) {
+          k.e1a = RI(G, 1, 2) === 1 ? 0 : (ws < 0 ? 0 : power(army, ws, 'satellite'));
+          k.e1e = 0; k.e22 = ws < 0 ? 0 : power(army, ws, 'fighter') + power(army, ws, 'scout');
+        } else {
+          k.e1a = RI(G, 1, 2) === 1 ? 0 : all;
+          k.e1e = 0; k.e22 = all;
+        }
+      }
+    }
+  };
+  // a colony lost in a duel: the star is nobody's at once; its slot goes in pass 2
+  const lose = (G2, q, st) => { st.owner = -1; st.pop = 0; st.queue = []; st.yard = 0; st.yardMetal = 0; };
+  const res = battle(G, sid, { duel, lose });
+  if (res) res.reported = true;
+  return res;
+}
+
+// ---------- pass 2 (FUN_1040_0038 @1040:04c3-06d5) ----------
+// For each player in turn: savings, interest, lost colonies, meteors,
+// growth and income (FUN_1040_27ee), then refuelling, exploring, colonizing
+// and routes (FUN_1040_2fa8); the pool is then kept between $0 and
+// $999,999,999. 2.0 runs it for every player, out or not.
+function pass2_20(G) {
+  for (const p of G.players) {
+    income20(G, p);
+    colonize20(G, p);
+    p.savings = clamp(p.savings, 0, MONEY_MAX);
+  }
+}
+// CONFIRMED (FUN_1040_27ee): the kept money is the Savings slot's share;
+// with the refunds it earns 10 x isqrt of itself (@1040:2946-2995); then for
+// each colony slot in order: a colony lost in a battle (or left with no
+// people) is taken out (FUN_1040_38c0); ships scrapped in hyperspace fall
+// as a meteor shower, 50 people (units) a unit of metal, report 1053, and a
+// colony left with no one gets report 1009 and is taken out; growth as in
+// 5.0.5 (always, the "no growth" flag being cleared); income; profit and
+// baby-boom reports; the colony's class (0 paying, 1 losing, 2 losing with
+// a gravity ratio over 2.56).
+function income20(G, p) {
+  const share = shareOf20(G, p);
+  const saved = share('sav') + (p.oRefund || 0);
+  const interest = 10 * isqrt(saved);
+  let M = saved + interest, gross = 0, net = 0;
+  p.oRefund = 0; p.oKept = 0;
+  for (const sid of slots20(G, p).slice()) {
+    if (typeof sid !== 'number') continue;
+    const s = G.stars[sid];
+    if (s.owner !== p.id || !(s.pop > 0)) { removeColony20(G, p, s); continue; }
+    const m = G.meteors && G.meteors[sid];
+    if (m > 0) {
+      const kill = Math.min(popU(s), m * 50);
+      setPopU(s, popU(s) - kill);
+      msg(G, p.id, `Oh no! ${fmt(kill * 1000)} people were killed when a heavy meteor shower hit ${s.name}.`, { icon: 'm9021', star: s.id });
+      if (popU(s) <= 0) {
+        // report 1009, "%s destroyed your colony at %s.", with no attacker given (see docs/open-questions.md)
+        msg(G, p.id, `A meteor shower destroyed your colony at ${s.name}.`, { icon: 'm9036', sound: 2001, star: s.id });
+        removeColony20(G, p, s); continue;
+      }
+    }
+    const before = s.oInc == null ? -7501 : s.oInc;
+    const mx = O.maxPopU(p, s);
+    let u = popU(s), add;
+    if (u >= mx) add = trunc(mx / 1000) + RI(G, 0, trunc(mx / 10000));
+    else if (before <= -7500) add = Math.min(trunc(mx / 1000), 2 * u) + RI(G, 0, 5);
+    else {
+      const r1 = RI(G, 0, 5), r2 = RI(G, 0, trunc(mx / 100)), base = trunc(mx / 20);
+      add = base + r2 < 2 * u + r1 ? base + RI(G, 0, trunc(mx / 100)) : 2 * u + RI(G, 0, 5);
+      if (u + add >= mx) msg(G, p.id, `${s.name}’s population growth rate has slowed.`, { icon: 'm9030', star: s.id, quiet: true });
+    }
+    u += add; setPopU(s, u);
+    const h = hab(p, s), inc = incomeU(u, h.H);
+    s.oInc = inc;
+    if (inc > 0) { M += inc; gross += inc; }
+    net += inc;
+    if (before < 0 && inc >= 0) { s.everProfit = true; msg(G, p.id, `${s.name} has just become a profitable colony.`, { icon: 'm9000', sound: 2000, star: s.id }); }
+    if (before <= -7500 && inc > -7500) msg(G, p.id, `It’s a baby boom! The population at ${s.name} has started growing quickly.`, { icon: 'm9023', star: s.id });
+    s.cls20 = inc >= 0 ? 0 : h.gR > 256 ? 2 : 1;
+  }
+  p.savings = M;
+  p.oInterest = interest; p.oInc = gross;
+  p.lastGross = gross; p.lastIncome = net; p.lastInterest = interest; p.lastNet = net + interest;
+}
+// CONFIRMED (FUN_1040_2fa8 @1040:2fa8-3152): each of the player's fleets at
+// one of its colonies is refuelled, and a fleet of Colony Ships there takes
+// on colonists; then each fleet at a star (in the player's fleet list,
+// newest first) explores it (FUN_1040_34e9) and, if the star isn't the
+// player's and the fleet has colonists, founds a colony (FUN_1040_3645);
+// a fleet with a destination has its route checked (FUN_1040_25ce); then
+// every colony is explored again.
+function colonize20(G, p) {
+  const mine = () => G.fleets.filter(f => f.owner === p.id && f.star != null && f.to == null);
+  for (const f of mine()) {
+    if (G.stars[f.star].owner !== p.id) continue;
+    f.fuel = fleetMaxRange(G, f);
+    let c = 0; for (const d of fleetDesigns(G, f)) if (d.type === 'colony') c += f.ships[d.id];
+    if (c > 0) f.colonists = c * 10;
+  }
+  for (const f of mine().reverse()) {
+    if (!G.fleets.includes(f)) continue;
+    if (fleetCount(f) === 0) { G.fleets.splice(G.fleets.indexOf(f), 1); continue; }
+    const s = G.stars[f.star];
+    observe(G, p, s.id);
+    if (s.owner !== p.id && s.owner < 0 && (f.colonists || 0) > 0 && fleetDesigns(G, f).some(d => d.type === 'colony')) {
+      G.stat.colonized++;
+      settle20(G, p, s, f);
+      observe(G, p, s.id);
+    }
+  }
+  replan20(G, p);
+  for (const sid of colIds20(G, p)) observe(G, p, sid);
+}
+// CONFIRMED (FUN_1040_3645 @1040:3645-38bf): "You have colonized %s." (1032);
+// the new slot goes in front of the others; 10 colonists a ship of the
+// fleet; income -7501; bars Terraform 900 / Mine 100 (class 1), or
+// Mine 1,000 when the gravity ratio is over 2.56 (class 2); with more than
+// $20,000 in the pool the slot is given 15,000,000 / pool per mille
+// (FUN_1010_16f2), taken from the others (FUN_1010_179a).
+function settle20(G, p, s, f) {
+  msg(G, p.id, `You have colonized ${s.name}.`, { icon: 'm9031', sound: 7018, star: s.id });
+  const n = f.colonists || 10;
+  f.colonists = 0;
+  s.owner = p.id; setPopU(s, n); s.everProfit = false; s._warned = false;
+  s.oInc = -7501; s.oSink = 0; s.oStarve = false; s.oNew = false;
+  s.queue = []; s.yard = 0; s.yardMetal = 0;
+  const L = slots20(G, p), i = L.indexOf(s.id);
+  if (i >= 0) L.splice(i, 1);
+  L.unshift(s.id);
+  (p.colOrder || (p.colOrder = [])).unshift(s.id);
+  p.budget.col[s.id] = 0;
+  if (hab(p, s).gR > 256) { s.cls20 = 2; setBars20(s, 0, 1000, 0); } else { s.cls20 = 1; setBars20(s, 900, 100, 0); }
+  if (p.savings > 20000) giveShare20(G, p, s.id, trunc(15000000 / p.savings));
+}
+// CONFIRMED (FUN_1010_218e @1010:218e-2264): the least share a losing
+// colony needs, per mille: ceil(loss x 1000 / pool) when the pool is $1,000
+// or more and bigger than the loss; otherwise 0
+function minShare20(G, p, k) {
+  if (typeof k !== 'number') return 0;
+  const s = G.stars[k], inc = s.oInc || 0, M0 = p.savings;
+  if (inc >= 0 || M0 < 1000 || -inc >= M0) return 0;
+  return trunc((-inc * 1000 + M0 - 1) / M0);
+}
+// CONFIRMED (FUN_1010_16f2 and FUN_1010_179a @1010:17de-1946, 1aec-1c8b):
+// the slot's share is raised to pm; the others give it up in proportion
+// (each gives ceil(left x its share / their total)), none below its least
+// share, round after round; then, if the total is outside 990..1010, the
+// others are moved one at a time (from the first slot round) to make it
+// 1,000, first within their bounds, then without.
+function giveShare20(G, p, sid, pm) {
+  if (pm < 0 || pm > 1000) pm = 0;
+  const L = slots20(G, p).filter(k => typeof k !== 'number' || G.stars[k].owner === p.id);
+  const idx = L.indexOf(sid); if (idx < 0) return;
+  const v = L.map(k => keyPm(p, k)), mins = L.map(k => minShare20(G, p, k)), frozen = L.map(() => false);
+  const delta = pm - v[idx];
+  if (delta > 0) {
+    let rem = delta, free = L.length - 1;
+    while (rem > 0 && free > 0) {
+      let sum = 0; free = 0;
+      for (let i = 0; i < L.length; i++) if (i !== idx && !frozen[i]) { sum += v[i]; free++; }
+      if (sum === 0) break;
+      const r0 = rem;
+      for (let i = 0; i < L.length; i++) {
+        if (i === idx || frozen[i]) continue;
+        const nv = clamp(v[i] - trunc((r0 * v[i] + sum - 1) / sum), 0, 1000);
+        if (nv > mins[i]) { rem -= v[i] - nv; v[i] = nv; }
+        else { rem -= v[i] - mins[i]; v[i] = mins[i]; frozen[i] = true; }
+      }
+    }
+  }
+  v[idx] += delta;
+  let tot = v.reduce((a, x) => a + x, 0);
+  const allZero = !v.some((x, i) => i !== idx && x > 0);
+  const fix = (bounded) => {
+    for (let i = 0, it = 0; tot !== 1000 && it < 1000; it++) {
+      if (i !== idx) {
+        if (tot < 1000 && v[i] < 1000 && (!bounded || allZero || v[i] > 0)) { v[i]++; tot++; }
+        if (tot > 1000 && v[i] > (bounded ? mins[i] : 0)) { v[i]--; tot--; }
+      }
+      if (++i === L.length) i = 0;
+    }
+  };
+  if (tot < 990 || tot > 1010) fix(true);
+  if (tot < 990 || tot > 1010) fix(false);
+  L.forEach((k, i) => setKeyPm(p, k, v[i]));
+}
+// CONFIRMED (FUN_1040_38c0 @1040:38c0-3a2a; 1.2's DecolonizeStar @a3fd4):
+// a colony given up: the player's fleets of Colony Ships at the star are
+// loaded with colonists, the colony's share goes to the Savings slot, the
+// slot is taken out, and the star is nobody's.
+function removeColony20(G, p, s) {
+  for (const f of G.fleets) {
+    if (f.owner !== p.id || f.star !== s.id || f.to != null) continue;
+    let c = 0; for (const d of fleetDesigns(G, f)) if (d.type === 'colony') c += f.ships[d.id];
+    if (c > 0) f.colonists = c * 10;
+  }
+  const L = slots20(G, p), i = L.indexOf(s.id);
+  if (p.budget.col[s.id] != null) { p.budget.savings = (keyPm(p, 'sav') + keyPm(p, s.id)) / 1000; delete p.budget.col[s.id]; }
+  if (i >= 0) L.splice(i, 1);
+  if (s.owner === p.id) { s.owner = -1; s.pop = 0; }
+  if (s.owner < 0) { s.queue = []; s.yard = 0; s.yardMetal = 0; delete s.bars; delete s._bsig; delete s.cls20; }
+}
+
+// ---------- the ship queue and fleets ----------
+// CONFIRMED (BUILDSHIPSDLGPROC's remove handler FUN_10e8_17af @10e8:181a-182c,
+// add handler FUN_10e8_16e4, OK @10e8:21b7-21e8 writing the window's copy
+// back to the slot's part-payment +0x18/+0x1c): taking one ship off a slot
+// of several keeps what was paid; taking the first slot's last ship out
+// empties the slot and zeroes what was paid toward it, money and metal, so
+// it is lost. A design already in a slot gets the new ships; a new one takes
+// the first empty slot (queueMergeAny).
+function yardRefund20(G, p, s) {
+  if (s.queue && s.queue.length && s.queue[0].did === s.yardDid) return;
+  s.yard = 0; s.yardMetal = 0;
+}
+// CONFIRMED (FUN_1068_0000: a fleet record holds one design and a count):
+// fleets of the same design can be put together, nothing else
+function canMerge20(G, a, b) {
+  const da = Object.keys(a.ships), db = Object.keys(b.ships);
+  return da.length === 1 && db.length === 1 && da[0] === db[0];
+}
+// CONFIRMED (ORGFLEETSDLGPROC: its set-up @10e8:2a06-2ae6 and OK handler
+// @10e8:2dd5-2f12): Organize Ships deals the ships of one design at a star
+// into piles. On OK every fleet of that design at the star, in list order,
+// takes the next pile and has its orders cleared (next stop, destination,
+// route) and its fuel used set to the average of the fuel those fleets had
+// used: their total over their number, counted up to 11 (so from 12 fleets
+// on it is over 11); a fleet left without a pile is removed; each extra
+// pile is a new fleet (FUN_1068_0000), which for Colony Ships is loaded with
+// colonists. (The smallest fuel used is worked out too, @10e8:2a9b, and
+// never used.)
+function organized20(G, f, merged, nf, orders) {
+  const did = Object.keys(f.ships)[0]; if (did == null || f.star == null) return;
+  const R = fleetMaxRange(G, f);
+  const same = G.fleets.filter(x => x.owner === f.owner && x.star === f.star && x.to == null && Object.keys(x.ships).length === 1 && Object.keys(x.ships)[0] === did);
+  // the fleets as they were when the window opened
+  const usedOf = (fuel) => Math.max(0, R - fuel);
+  const before = [];
+  for (const x of same) {
+    if (x === nf) continue;
+    if (x === f && merged && orders && orders.fuel) { before.push(usedOf(orders.fuel.a)); before.push(usedOf(orders.fuel.b)); }
+    else before.push(usedOf(x.fuel));
+  }
+  if (merged && !(orders && orders.fuel)) before.push(usedOf(merged.fuel));
+  const avg = before.length ? trunc(before.reduce((a, x) => a + x, 0) / Math.min(before.length, 11)) : 0;
+  for (const x of same) { x.fuel = R - avg; x.dest = null; x.path = null; x.routeTo = null; }
+  const d = getDesign(G, f.owner, +did);
+  if (d && d.type === 'colony') {
+    if (nf) nf.colonists = 10 * fleetCount(nf);
+    if (merged) { // the record kept is the first in 2.0's list: the newer fleet
+      const fLoaded = (f.colonists || 0) - (merged.colonists || 0) > 0, mLoaded = (merged.colonists || 0) > 0;
+      f.colonists = (merged.id > f.id ? mLoaded : fLoaded) ? 10 * fleetCount(f) : 0;
+    } else if (nf) f.colonists = (f.colonists || 0) > 0 ? 10 * fleetCount(f) : 0;
+  }
+}
+
+// ---------- set-up (FUN_1030_1299 @1030:19ae-1b32) ----------
+// CONFIRMED: the budget slots are Savings (0), Technology (150) and the home
+// colony (850); the home colony's bars are Terraform -1 (finished), Mine
+// 200, Ship 800, and its class 0
+function afterSetup20(G) {
+  afterSetup(G);
+  for (const p of G.players) {
+    const home = G.stars[p.homeStar];
+    p.slots20 = ['sav', 'tech', home.id];
+    setBars20(home, -1, 200, 800); home.cls20 = 0;
+  }
+}
+
+// ---------- the budget panel ----------
+function projected20(G, p) {
+  let support = 0;
+  for (const s of colonies(G, p.id)) if ((s.oInc || 0) < 0) support += -s.oInc;
+  return { gross: p.oInc, income: (p.oInc || 0) - support, interest: p.oInterest || 0, net: Math.max(0, p.savings), dip: 0 };
+}
+function underfunded20(G, p) {
+  const share = shareOf20(G, p);
+  return colonies(G, p.id).filter(s => (s.oInc || 0) < 0 && colonyMoney20(G, p, s, share) < 0);
+}
+// the computers' hooks (js/ai-12.js): whether a colony is still being
+// terraformed is its Terraform bar not being -1 (FUN_1020_03e7 @1020:0445,
+// 0b51 @0b95 and @0c55, 12d1 @150d); and ResolveSpending's bars
+// (FUN_1020_35f9 @1020:3829-3996): with no terraforming or mining money,
+// Terraform and Mine 0 and Ship 1,000; else each is its money over the
+// colony's total, per mille rounded up; a bar at -1 is left as it is
+const terraLeft20 = (G, p, s) => bars20(s)[0] !== -1;
+function setColonyBars20(G, s, t, m, f) {
+  let [T, X] = bars20(s), S;
+  if (t + m === 0) { if (T >= 0) T = 0; if (X >= 0) X = 0; S = 1000; }
+  else {
+    const rest = t + m + f, pm = (v) => trunc((v * 1000 + rest - 1) / rest);
+    if (T >= 0) T = pm(t);
+    if (X >= 0) X = pm(m);
+    S = pm(f);
+  }
+  setBars20(s, T, X, S);
+}
+
+// The versions 1.2's ruleset keeps (js/rules-12.js): 1.2 has the same
+// routines as 2.0, but its games are kept as they were until 1.2's own
+// pass takes these up (docs/open-questions.md).
+const base12 = {
+  afterSetup, route, refuel, afterMovement, colOrder, disposable, projected, underfunded,
+  economyForAll: false, terraLeft: null, setColonyBars: null, aiYear: null,
+};
 
 E.registerRules('dos', Object.assign({}, O, {
   label: 'DOS 2.0 (1993)',
   hints: false, // this game had no between-turn tips (4.0.5 and 5.0.5 do)
-  finishedPartWasted: true, // a finished terraforming or mining part's money is lost (FUN_1040_0aea)
+  // CONFIRMED (FUN_1040_269d): a finished terraforming or mining part's share
+  // goes to the colony's other bars (the planet panel says so)
+  finishedPartWasted: false,
   // the New Game window lists rulesets by year, then version (engine.js ruleOptions)
   version: '2.0', platform: 'DOS and Windows 3.1', year: 1993,
   // 2.0's own computer players (js/ai-12.js: FUN_1020_0000 is the routine
-  // Mac 1.2 calls DoComputerTurn, slightly evolved; see docs/dos-findings.md)
+  // Mac 1.2 calls DoComputerTurn; see docs/dos-findings.md)
   ai: 'dos',
   maxDesigns: 20,                         // CONFIRMED (10e8:1538, box3280; the computers too, FUN_1020_4019)
   maxPlayers: 20,                         // CONFIRMED: 20 player slots (FUN_1030_0c97, FUN_1040_4028)
   queueSlots: QUEUE_SLOTS,                // CONFIRMED (FUN_1040_1479): three (design, count) slots per colony
+  queueMergeAny: true,                    // CONFIRMED (FUN_10e8_16e4): a design already queued gets the new ships
   // CONFIRMED: "Sorry, you can only send ten messages per turn." (string 160); each
   // player's outgoing messages are kept in ten 8-byte entries (0x50 bytes, FUN_1040_0038 @1040:039d)
   chatLimit: 10,
@@ -1042,17 +1495,25 @@ E.registerRules('dos', Object.assign({}, O, {
   canBuild: (G, p, type) => TYPES4.includes(type),
   starNames: STAR_NAMES, maleNames: MALE_NAMES, femaleNames: FEMALE_NAMES, femaleComputers: FEMALE_COMPUTERS, shipNames: SHIP_NAMES,
   welcome: WELCOME,
-  SKILLS, WPNRAT, setupPlayer, defaultDesigns, afterSetup, computerSetup, makeGalaxy, distance, SHAPES,
-  designCost, designLimits, designMin, aiSpec, paysPrototype, fleetFor, route,
+  SKILLS, WPNRAT, setupPlayer, defaultDesigns, afterSetup: afterSetup20, computerSetup, makeGalaxy, distance, SHAPES,
+  designCost, designLimits, designMin, aiSpec, paysPrototype, fleetFor, route: route20,
   borrowLimit: () => 0,                   // CONFIRMED: no borrowing in 2.0 (money is clamped at 0)
-  disposable, projected, underfunded, economy: economyYear, afterMovement, settle, battle: battleKnow, battleText, randomEvents, fleetArrives: null,
-  planetIncome, incomeU, research, yardProgress, yardRefund,
-  refuel, canColonize: () => false, arrivalSays, exploreQuality, planetClass, checkElimination,
+  // the turn: pass 1 for every player (economy20), the fleets move, the
+  // battles, then pass 2 for every player (pass2_20, run in the refuel slot)
+  economy: economy20, economyForAll: true, afterMovement: null, refuel: pass2_20,
+  disposable, projected: projected20, underfunded: underfunded20, settle, battle: battle20, randomEvents,
+  fleetArrives: fleetArrives20, arrivalSays: () => false, // the arrival messages are fleetArrives20's
+  planetIncome, incomeU, research, yardProgress, yardRefund: yardRefund20,
+  canMerge: canMerge20, organized: organized20,
+  canColonize: () => false, exploreQuality, planetClass, checkElimination,
   observe: null,                          // 2.0 keeps no 5.0.5-style enemy strength (x12 instead)
   outComputersPlay: true,                 // CONFIRMED (FUN_1040_0038 @1040:02bb): out computers still play
-  designName, colOrder, shipPower, planetPower, x12, popU,
+  designName, colOrder: colOrder20, shipPower, planetPower, x12, popU,
+  terraLeft: terraLeft20, setColonyBars: setColonyBars20,
+  // CONFIRMED (FUN_1040_0038 @1040:01a8): the year is moved on before the computers plan
+  aiYear: (G) => G.year + 10,
   // internals, for the Mac 1.2 ruleset built on this one (js/rules-12.js)
-  shareOf, colonyMoney, shipyard, removeColony, isqrt, wpn, battleOnly: battle,
+  shareOf, colonyMoney, shipyard, removeColony, isqrt, wpn, battleOnly: battle, base12,
   // not in 2.0 (CONFIRMED: no text or code for them)
   difficulty: undefined, masterPoints: undefined,
 }));

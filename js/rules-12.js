@@ -140,7 +140,7 @@ const trunc = Math.trunc;
 // player's colony slots in slot order (newest colony first: colOrder).
 function economy12(G, p) {
   if (p.human) msg(G, p.id, `The game has been updated to the year ${G.year + 10}.`, { icon: 'm9024', sound: 2000, quiet: true });
-  const share = D.shareOf(G, p), slots = D.colOrder(G, p).map(id => G.stars[id]);
+  const share = D.shareOf(G, p), slots = D.base12.colOrder(G, p).map(id => G.stars[id]);
   p.oKept = share(p.budget.savings); p.oRefund = 0;
   // KillUnsupportedStars @a0960: as 2.0 (rules-dos economy), slot by slot
   for (const s of slots) {
@@ -237,14 +237,14 @@ function terraMine12(G, p, s, M) {
 // bad-news sound (PlayAnnounceSound @130f08: 2001).
 function afterMovement12(G, p) {
   const before = (p.inbox || []).length;
-  D.afterMovement(G, p);
+  D.base12.afterMovement(G, p);
   for (const m of (p.inbox || []).slice(before)) if (/^A meteor shower destroyed your colony at /.test(m.text)) m.text = '';
 }
 // CONFIRMED (ColonizeAndExplore @a3556): after refuelling, exploring and
 // colonizing, each fleet with a destination is checked again
 // (CheckFleetDestination @a23d2)
 function refuel12(G) {
-  D.refuel(G);
+  D.base12.refuel(G);
   for (const p of G.players) replan(G, p);
 }
 
@@ -256,7 +256,7 @@ function refuel12(G) {
 // GiveFleetPath @110d56; with no route it stops there: "Your %s can no longer
 // reach %s." (report 1023, STR# 1000.24).
 function route12(G, f, tgt) {
-  const r = D.route(G, f, tgt);
+  const r = D.base12.route(G, f, tgt);
   if (r && r.length) f.routeTo = tgt;
   return r;
 }
@@ -266,7 +266,7 @@ function replan(G, p) {
     const stops = (f.dest != null ? [f.dest] : []).concat(f.path || []);
     const fin = stops[stops.length - 1];
     if (stops.length < 2 || fin !== f.routeTo) continue;
-    const r = D.route(G, f, fin);
+    const r = D.base12.route(G, f, fin);
     if (!r || !r.length) {
       msg(G, p.id, `Your ${E.fleetLabel(G, f)} can no longer reach ${G.stars[fin].name}.`, { icon: 'm9038', star: f.star });
       f.dest = null; f.path = null; f.routeTo = null;
@@ -433,7 +433,9 @@ function battle12(G, sid) {
   return res;
 }
 
-E.registerRules('12', Object.assign({}, D, {
+// 1.2 keeps the base versions of the routines 2.0 now does its own way
+// (js/rules-dos.js base12); see docs/open-questions.md
+E.registerRules('12', Object.assign({}, D, D.base12, {
   label: 'Mac 1.2 (1992)',
   hints: false, // this game had no between-turn tips (4.0.5 and 5.0.5 do)
   // the New Game window lists rulesets by year, then version (engine.js ruleOptions)
