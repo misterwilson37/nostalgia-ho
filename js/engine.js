@@ -840,6 +840,6 @@ if (typeof module !== 'undefined') {
   require('./rules-405.js'); require('./ai-405.js');
   require('./rules-301.js'); require('./ai-301.js');
   require('./rules-12.js'); require('./ai-12.js');
-  require('./rules-palm.js');
+  require('./rules-palm.js'); require('./ai-palm.js');
 } else root.HO = API;
 })(this);
