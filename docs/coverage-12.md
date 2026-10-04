@@ -12,8 +12,8 @@ stubs). Addresses are in that layout, as in `docs/12-findings.md`.
 | | Routines |
 |---|---:|
 | In the program | 548 |
-| Game rules | 111 (108 implemented, 3 not: Fix Spending ×2, naming a star) |
-| Not a rule (runtime, library, files, windows, drawing, menus, dialogs, sound) | 437 |
+| Game rules | 114 (111 implemented, 3 not: Fix Spending ×2, naming a star) |
+| Not a rule (runtime, library, files, windows, drawing, menus, dialogs, sound) | 434 |
 | Unread | 0 |
 
 ## How each routine was read
@@ -313,7 +313,7 @@ stubs). Addresses are in that layout, as in `docs/12-findings.md`.
 | `MineMetal` @92dbc | computer player step, ported | RULE, implemented | js/ai-12.js |
 | `SpendPercentOnTech` @930c2 | computer player step, ported | RULE, implemented | js/ai-12.js |
 | `SaveFleets` @93148 | computer player step, ported | RULE, implemented | js/ai-12.js |
-| `ResolveSpending` @93378 | computer player step, ported | RULE, implemented | js/ai-12.js |
+| `ResolveSpending` @93378 | computer player step, ported: shares rounded up (over $2,000,000 by money / (total / 1,000)), bars in 32 bits, a bar at -1 left | RULE, implemented | js/ai-12.js with rs.aiBigShares and js/rules-12.js setColonyBars12 |
 | `ScrapShips` @937f2 | computer player step, ported | RULE, implemented | js/ai-12.js |
 | `ComputeStatus` @9388e | computer player step, ported | RULE, implemented | js/ai-12.js |
 | `MaintainShipTypes` @93cdc | computer player step, ported | RULE, implemented | js/ai-12.js |
@@ -329,25 +329,25 @@ stubs). Addresses are in that layout, as in `docs/12-findings.md`.
 
 | Routine @ address | What it does | Status | Where / why |
 |---|---|---|---|
-| `EndTurn` @a0004 | the turn: per player plan, scrap, support, terraform/mine, build, research, move, restore bars; then battles; then per player income, colonize/explore, end of game | RULE, implemented | js/engine.js endTurn with js/rules-12.js economy12, afterMovement12, refuel12 (turn order: see open questions) |
-| `KillUnsupportedStars` @a0960 | losing colonies paid from their own share or lose people | RULE, implemented | js/rules-12.js economy12 |
-| `TerraformMineStars` @a0a9e | terraforming and mining by the colony bars, finished parts marked -1 | RULE, implemented | js/rules-12.js terraMine12 |
+| `EndTurn` @a0004 | the turn: per player plan, scrap, support, terraform/mine, build, research, move, restore bars; then battles; then per player income, colonize/explore, end of game | RULE, implemented | js/engine.js endTurn with js/rules-dos.js economy20 and pass2_20 (js/rules-12.js pass2_12); the year moved on first (rs.aiYear), both passes for every player (rs.economyForAll) |
+| `KillUnsupportedStars` @a0960 | losing colonies paid from their own share or lose people | RULE, implemented | js/rules-dos.js economy20 |
+| `TerraformMineStars` @a0a9e | terraforming and mining by the colony bars, finished parts marked -1 | RULE, implemented | js/rules-dos.js terraMine20 |
 | `ScrapFleetsAndTypes` @a0e02 | scrap marked fleets and designs; metal returned; queued scrapped type dropped | RULE, implemented | js/rules-dos.js (engine scrapFleet, shipyard) |
-| `BuildNewShips` @a1406 | the three-slot ship queues, part-payment | RULE, implemented | js/rules-dos.js shipyard (called from js/rules-12.js economy12) |
+| `BuildNewShips` @a1406 | the three-slot ship queues, part-payment | RULE, implemented | js/rules-dos.js shipyard (called from economy20) |
 | `PutNewShipAtStar` @a18b8 | a new ship joins an idle fleet of its design, else a new fleet | RULE, implemented | js/rules-dos.js fleetFor |
-| `SpendTechMoney` @a1a58 | research at 60-140 % | RULE, implemented | js/rules-dos.js research |
-| `MoveShips` @a20ee | fleet movement, arrival messages, routes checked | RULE, implemented | js/engine.js movement with js/rules-12.js replan |
-| `CheckFleetDestination` @a23d2 | plan a route again from where the fleet is | RULE, implemented | js/rules-12.js replan |
-| `RestoreStarsBars` @a24e2 | a finished part's share spread over the other bars | RULE, implemented | js/rules-12.js terraMine12 |
+| `SpendTechMoney` @a1a58 | research at 60-140 % | RULE, implemented | js/rules-dos.js research20 |
+| `MoveShips` @a20ee | fleet movement, arrival messages, routes checked | RULE, implemented | js/engine.js movement with js/rules-dos.js replan20, fleetArrives20 |
+| `CheckFleetDestination` @a23d2 | plan a route again from where the fleet is | RULE, implemented | js/rules-dos.js replan20 |
+| `RestoreStarsBars` @a24e2 | a finished part's share spread over the other bars | RULE, implemented | js/rules-dos.js restoreBars20 |
 | `CheckForSupernova` @a2640 | novas (only with style bit 0x10, never set in 1.2) | RULE, implemented | js/rules-12.js fixOptions (novas off) |
 | `ReactToSupernova` @a2afc | nova effects on colonies (gated by style bit 0x10: never runs in 1.2) | RULE, implemented | js/rules-12.js fixOptions (novas off) |
-| `ComputeIncomeAndPopulation` @a2de6 | interest, meteors, growth, income, pool clamp | RULE, implemented | js/rules-dos.js afterMovement (with js/rules-12.js afterMovement12) |
-| `ColonizeAndExplore` @a3556 | refuel at colonies, explore, colonize at the end of every turn, routes checked | RULE, implemented | js/rules-dos.js refuel with js/rules-12.js refuel12 |
+| `ComputeIncomeAndPopulation` @a2de6 | interest, meteors, growth, income, lost colonies taken out, the colony's class | RULE, implemented | js/rules-dos.js income20 (with js/rules-12.js pass2_12) |
+| `ColonizeAndExplore` @a3556 | refuel at colonies, explore, colonize at the end of every turn, routes checked | RULE, implemented | js/rules-dos.js colonize20 |
 | `SetPlanetTypesForMap` @a3782 | every star's map icon for a player | NOT A RULE | map icons (skin) |
 | `SetPlanetTypesForStar` @a3806 | a player's record of a star updated when seen (report 1060 there is dead code) | RULE, implemented | js/engine.js observe |
 | `ExploreStar` @a3b4c | exploring report (°C to a tenth) | RULE, implemented | js/engine.js exploreMsg, js/rules-12.js celsius |
-| `ColonizeStar` @a3d84 | found a colony: 10 colonists a ship, bars, share, slot first | RULE, implemented | js/rules-dos.js settle |
-| `DecolonizeStar` @a3fd4 | remove a colony; fleets there with colony ships marked loaded | RULE, implemented | js/rules-dos.js removeColony |
+| `ColonizeStar` @a3d84 | found a colony: 10 colonists a ship, bars, share, slot first | RULE, implemented | js/rules-dos.js settle20 |
+| `DecolonizeStar` @a3fd4 | remove a colony; fleets there with colony ships marked loaded; its share to Savings | RULE, implemented | js/rules-dos.js removeColony20 |
 | `NoteShipPowers` @a4254 | ship and planet power at each star, stored but never read | NOT A RULE | dead data (cleared each turn by EndTurn, no reader) |
 | `DoGameEndStuff` @a4406 | dying / out / back in | RULE, implemented | js/rules-dos.js checkElimination |
 | `OpenFileForEndTurn` @a44d4 | open the galaxy file for the turn | NOT A RULE | files |
@@ -387,20 +387,20 @@ stubs). Addresses are in that layout, as in `docs/12-findings.md`.
 
 | Routine @ address | What it does | Status | Where / why |
 |---|---|---|---|
-| `InitVLogBarAmts` @c0004 | budget bar scale | NOT A RULE | interface |
-| `GetVPercBarAmt` @c0118 | budget bar | NOT A RULE | interface |
-| `DrawVBarControl` @c0164 | budget bar | NOT A RULE | drawing |
-| `DoVBarClick` @c0446 | drag a budget bar (shares of the pool) | NOT A RULE | interface (the remake's budget panel) |
-| `InitHLogBarAmts` @c07be | colony bar scale | NOT A RULE | interface |
-| `GetHPercBarAmt` @c08d2 | colony bar | NOT A RULE | interface |
-| `DrawHBarControl` @c091e | colony bar | NOT A RULE | drawing |
-| `DoHBarClick` @c1002 | drag a colony bar (terraform/mine/ships) | NOT A RULE | interface (the remake's planet panel) |
-| `GiveBarPercent` @c139c | set a share and rebalance the others | NOT A RULE | interface |
-| `DetermineNewLevels` @c1470 | rebalance shares after a drag | NOT A RULE | interface |
+| `InitVLogBarAmts` @c0004 | colony bar scale | NOT A RULE | interface |
+| `GetVPercBarAmt` @c0118 | colony bar | NOT A RULE | interface |
+| `DrawVBarControl` @c0164 | colony bar | NOT A RULE | drawing |
+| `DoVBarClick` @c0446 | drag a colony bar (terraform/mine/ships); a bar below 0 (finished) can't be dragged | NOT A RULE | interface (the remake's planet panel) |
+| `InitHLogBarAmts` @c07be | budget bar scale | NOT A RULE | interface |
+| `GetHPercBarAmt` @c08d2 | budget bar | NOT A RULE | interface |
+| `DrawHBarControl` @c091e | budget bar | NOT A RULE | drawing |
+| `DoHBarClick` @c1002 | drag a budget bar (shares of the pool): every slot's floor 0 and ceiling 1,000, then `DetermineNewLevels` | NOT A RULE | interface (the remake's budget panel; see open questions, Remake's choices) |
+| `GiveBarPercent` @c139c | set a share and rebalance the others, none below its least share (a new colony's share, `ColonizeStar`) | RULE, implemented | js/rules-dos.js giveShare20 (2.0's FUN_1010_16f2, the same) |
+| `DetermineNewLevels` @c1470 | rebalance shares in proportion, within floors, then to a total of 1,000 | RULE, implemented | js/rules-dos.js giveShare20 (2.0's FUN_1010_179a, the same) |
 | `FixNextSpendingBar` @c1b48 | Fix Spending: give each underfunded colony at least its loss | RULE, not implemented | Fix Spending command not in the remake (interface) |
 | `FixSpendingBars` @c1fb0 | Fix Spending menu command | RULE, not implemented | Fix Spending command not in the remake (interface) |
 | `ComputeMaxPercent` @c1fde | the most a colony can use (terraform need, mining, queued ships less paid) | NOT A RULE | interface (bar limits) |
-| `ComputeMinPercent` @c224a | the least a losing colony needs (its loss) | NOT A RULE | interface (bar limits and the End Turn warning) |
+| `ComputeMinPercent` @c224a | the least a losing colony needs: ceil(loss x 1000 / pool) | RULE, implemented | js/rules-dos.js minShare20 (2.0's FUN_1010_218e; also the End Turn warning) |
 | `FollowStarNameClick` @c2388 | the galaxy map window, planet and fleet panels, budget bars | NOT A RULE | interface |
 | `MapWinProc` @c2652 | the galaxy map window, planet and fleet panels, budget bars | NOT A RULE | interface |
 | `CreateMapWin` @c2704 | the galaxy map window, planet and fleet panels, budget bars | NOT A RULE | interface |
@@ -435,7 +435,7 @@ stubs). Addresses are in that layout, as in `docs/12-findings.md`.
 | `GetFleetWinNum` @c6722 | the galaxy map window, planet and fleet panels, budget bars | NOT A RULE | interface |
 | `ClickInFleetRect` @c67d0 | the galaxy map window, planet and fleet panels, budget bars | NOT A RULE | interface |
 | `TabThroughFleets` @c68c2 | select next fleet | NOT A RULE | interface |
-| `FollowPathDrag` @c69d6 | drag a fleet to a star: route by DeterminePath, alert when out of reach | RULE, implemented | js/engine.js orderMove with js/rules-12.js route12 |
+| `FollowPathDrag` @c69d6 | drag a fleet to a star: route by DeterminePath, alert when out of reach | RULE, implemented | js/engine.js orderMove with js/rules-dos.js route20 |
 | `MapLine` @c6f9a | the galaxy map window, planet and fleet panels, budget bars | NOT A RULE | interface |
 | `StarLine` @c70c4 | the galaxy map window, planet and fleet panels, budget bars | NOT A RULE | interface |
 | `ClickInIconRect` @c745a | the galaxy map window, planet and fleet panels, budget bars | NOT A RULE | interface |
@@ -444,7 +444,7 @@ stubs). Addresses are in that layout, as in `docs/12-findings.md`.
 
 | Routine @ address | What it does | Status | Where / why |
 |---|---|---|---|
-| `DoBattleStage` @d0004 | who fights where: holder against each other player in turn, one duel each | RULE, implemented | js/rules-dos.js battle (duel hook) with js/rules-12.js battle12 |
+| `DoBattleStage` @d0004 | who fights where: holder against each other player in turn, one duel each | RULE, implemented | js/rules-dos.js battle20 |
 | `DoOneBattle` @d07d0 | one duel: rounds by speed, groups shoot, winner | RULE, implemented | js/rules-dos.js battle fight() |
 | `CalculateGroups` @d1194 | cut each side into at most 5 groups | RULE, implemented | js/rules-dos.js battle groupSize |
 | `CalcOneGroup` @d1324 | build one group | RULE, implemented | js/rules-dos.js battle units |
@@ -454,10 +454,10 @@ stubs). Addresses are in that layout, as in `docs/12-findings.md`.
 | `DrawOneGroup` @d214e | battle display | NOT A RULE | drawing |
 | `ReviewBattle` @d26e6 | replay a stored battle | NOT A RULE | interface |
 | `DrawX` @d27de | cross over a beaten side | NOT A RULE | drawing |
-| `MakeResultMessages` @d2828 | per duel: reports, debris, fleets resolved, estimates, defence metal | RULE, implemented | js/rules-12.js battle12 |
-| `TotalShipPower` @d367a | attack rating of ships by class | RULE, implemented | js/rules-12.js battle12 power() |
-| `CountNumShips` @d377c | count ships | RULE, implemented | js/rules-12.js battle12 |
-| `CalcBiggestAndNumTypes` @d37bc | largest design at a star (for the fleet description; 0 = no ships) | RULE, implemented | js/rules-12.js battle12 |
+| `MakeResultMessages` @d2828 | per duel: reports, debris, fleets resolved, estimates, defence metal | RULE, implemented | js/rules-dos.js battle20 |
+| `TotalShipPower` @d367a | attack rating of ships by class | RULE, implemented | js/rules-dos.js battle20 power() |
+| `CountNumShips` @d377c | count ships | RULE, implemented | js/rules-dos.js battle20 |
+| `CalcBiggestAndNumTypes` @d37bc | largest design at a star (for the fleet description; 0 = no ships) | RULE, implemented | js/rules-dos.js battle20 |
 | `ZeroFleetsAtStar` @d38ca | a beaten side's fleets there emptied | RULE, implemented | js/rules-dos.js battle losses |
 | `ResolveVictorFleetsAtStar` @d3990 | survivors given back to the first fleets in the list, losses on the last | RULE, implemented | js/rules-dos.js battle losses (oldest fleets lose first: the same) |
 | `DRAWINVERTEDBUTTONHILITE` @d3b78 | battle window button | NOT A RULE | drawing |
@@ -570,7 +570,7 @@ stubs). Addresses are in that layout, as in `docs/12-findings.md`.
 | `RemoveFleet` @110238 | remove a fleet record | RULE, implemented | js/engine.js |
 | `CalcFleetsAtAllStars` @11030a | count fleets at stars for the map | NOT A RULE | map display |
 | `DeterminePath` @1105ae | route through your colonies, at most 42/Range hops, under 3x direct | RULE, implemented | js/rules-dos.js route |
-| `GiveFleetPath` @110d56 | store a route in the fleet | RULE, implemented | js/rules-12.js route12/replan |
+| `GiveFleetPath` @110d56 | store a route in the fleet | RULE, implemented | js/rules-dos.js route20/replan20 |
 | `MakeFleetDescription` @110e28 | "N <design>" text | NOT A RULE | text |
 | `ListShipTypes` @110fc0 | Existing Designs window: rename, mark designs for scrapping | RULE, implemented | js/engine.js scrapDesign (scrapped at the end of the turn in 1.2; same effect) |
 | `InitShipTypesList` @1112c0 | designs list | NOT A RULE | interface |
@@ -629,7 +629,7 @@ stubs). Addresses are in that layout, as in `docs/12-findings.md`.
 | `UpdateReportWin` @130370 | the Reports window | NOT A RULE | interface |
 | `ClickInReportWindow` @1304f8 | the Reports window | NOT A RULE | interface |
 | `DrawMessage` @130652 | draw a report | NOT A RULE | interface |
-| `GetReportString` @130746 | report text from STR# 1000 by a jump table (1059-1063 have no template: blank) | RULE, implemented | js/rules-12.js afterMovement12 (blank meteor report) |
+| `GetReportString` @130746 | report text from STR# 1000 by a jump table (1059-1063 have no template: blank) | RULE, implemented | js/rules-12.js pass2_12 (blank meteor report) |
 | `GetIconID` @130db0 | report picture | NOT A RULE | skin |
 | `PlayAnnounceSound` @130f08 | report sound | NOT A RULE | skin |
 | `AddNewMessage` @131052 | add a report to a player | RULE, implemented | js/engine.js msg |

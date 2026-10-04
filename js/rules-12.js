@@ -12,10 +12,15 @@
 //   - no women: every player, computers too, is a man;
 //   - its own (French) computer and ship names, and one more star name;
 //   - its own credits ("Version 1.2"), and Celsius temperatures;
-//   - its computers' attack rating, worked out in 32 bits (2.0's wraps).
-// Its computer players (js/ai-12.js), battle reports, "updated to the year"
-// message and rule for who is out and who has won turned out to be 2.0's
-// too, so they now live in js/rules-dos.js.
+//   - its computers' attack rating, worked out in 32 bits (2.0's wraps);
+//   - its computers' shares over $2,000,000 by their own rule and their
+//     colony bars in 32 bits (ResolveSpending @93378);
+//   - a blank report for a colony wiped out by meteors;
+//   - its Organize Fleets (the ship queue is 2.0's, kept here with 1.2's addresses).
+// Its computer players (js/ai-12.js), its turn (EndTurn @a0004 and every
+// routine it calls), battle reports, "updated to the year" message and rule
+// for who is out and who has won turned out to be 2.0's too, so they now
+// live in js/rules-dos.js.
 // All game text is in English: 1.2's report templates (STR# 1000) are the
 // same list, line for line, as DOS 2.0's (string ids 672-730), so the DOS
 // English wording is used.
@@ -128,172 +133,111 @@ function att12(G, d) {
 // Each of these was read in 1.2's own code (docs/coverage-12.md lists every
 // routine); 2.0 is checked separately in its own turn.
 // =====================================================================
-const { RI, clamp, msg, fmt, colonies, getDesign, fleetCount, fleetDesigns, starDist } = E;
-const O = E.RULESETS.original;
+const { getDesign, fleetCount } = E;
 const trunc = Math.trunc;
 
-// ---------- pass 1 of the turn (EndTurn @a0004) ----------
-// CONFIRMED (EndTurn @a0004): for each player in turn, after its computer
-// plans: ScrapFleetsAndTypes, KillUnsupportedStars @a0960,
-// TerraformMineStars @a0a9e, BuildNewShips @a1406, SpendTechMoney @a1a58,
-// MoveShips @a20ee and RestoreStarsBars @a24e2. Each loop goes through the
-// player's colony slots in slot order (newest colony first: colOrder).
-function economy12(G, p) {
-  if (p.human) msg(G, p.id, `The game has been updated to the year ${G.year + 10}.`, { icon: 'm9024', sound: 2000, quiet: true });
-  const share = D.shareOf(G, p), slots = D.base12.colOrder(G, p).map(id => G.stars[id]);
-  p.oKept = share(p.budget.savings); p.oRefund = 0;
-  // KillUnsupportedStars @a0960: as 2.0 (rules-dos economy), slot by slot
-  for (const s of slots) {
-    if (s.owner !== p.id) continue;
-    s.oStarve = false;
-    const inc = s.oInc || 0, sh = share(p.budget.col[s.id]);
-    if (inc >= 0 || sh + inc >= 0) continue;
-    const u = Math.max(0, trunc(O.popU(s) * sh / -inc) - 100);
-    O.setPopU(s, u);
-    if (u === 0) { msg(G, p.id, `You have abandoned ${s.name}.`, { icon: 'm9036', star: s.id }); D.removeColony(G, p, s); }
-    else { s.oStarve = true; msg(G, p.id, `Your colony at ${s.name} is not receiving sufficient funds to support itself.`, { icon: 'm9020', sound: 3002, star: s.id }); }
-  }
-  for (const s of slots) if (s.owner === p.id) terraMine12(G, p, s, D.colonyMoney(G, p, s, share));
-  for (const s of slots) if (s.owner === p.id) D.shipyard(G, p, s, D.colonyMoney(G, p, s, share));
-  const T = share(p.budget.tech);
-  if (T <= 0) msg(G, p.id, 'You are not spending any money on technology research.', { icon: 'm9011', quiet: true });
-  D.research(G, p, T);
-  replan(G, p); // MoveShips @a20ee -> CheckFleetDestination @a23d2, before the fleets leave
-}
-// CONFIRMED (TerraformMineStars @a0a9e, asm a0b70-a0dce): a colony's money
-// (its share, less its loss) is split by its three bars (terraform, mine,
-// ships, per mille). A bar above 0 is spent; there is no check that the
-// planet still needs it:
-// - terraforming: the first $5,000 ever goes into the planet; then the
-//   temperature moves isqrt(money / 2) tenths of a degree toward yours; if
-//   that is more than the gap (even a gap of 0), the planet is set to your
-//   temperature, 2 x (step - gap)^2 is refunded, "You have completely
-//   terraformed %s." and the bar is set to -1 (done);
-// - mining: 15 x isqrt(money) metal; if that is more than the planet has, it
-//   takes what is there, refunds (excess^2 + 224) / 225, says the planet has
-//   run out (gravity ratio over 2.56: "You should probably abandon it.") and
-//   the bar is set to -1.
-// Then RestoreStarsBars @a24e2 (asm a2564-a2604), later in the same pass,
-// spreads a done bar's share over the bars still above 0, in proportion
-// (each += bar x (1000 - total) / total). With none above 0: both done ->
-// ships 1000; mining done on a planet of hostile gravity -> ships 1000,
-// terraforming 0; terraforming done -> mining 500, ships 500; otherwise
-// terraforming 500, ships 500. So a finished part's share is never wasted.
-// (2.0's rules-dos economy wastes it; that is 2.0's question, not this one.)
-function terraMine12(G, p, s, M) {
-  if (M <= 0) return;
-  const h = O.hab(p, s), ship = clamp(s.ship || 0, 0, 1), tf = s.terra == null ? 0.5 : s.terra;
-  const tBar = (1 - ship) * tf, xBar = (1 - ship) * (1 - tf);
-  let tDone = false, xDone = false;
-  if (tBar > 0) {
-    let T = trunc(M * tBar);
-    if (T > 50 && h.gR > 256) msg(G, p.id, `Warning: you are terraforming ${s.name}, a planet that will never become profitable.`, { icon: 'm9013', star: s.id });
-    s.oSink = s.oSink || 0;
-    if (s.oSink < 5000) { const x = Math.min(5000 - s.oSink, T); s.oSink += x; T -= x; }
-    const step = D.isqrt(trunc(T / 2)), gap = h.dT;
-    if (gap < step) {
-      p.oRefund += 2 * (step - gap) * (step - gap);
-      s.t = p.homeT; tDone = true;
-      msg(G, p.id, `You have completely terraformed ${s.name}.`, { icon: 'm9017', star: s.id });
-    } else s.t += (s.t < p.homeT ? 1 : -1) * step / 10;
-  }
-  if (xBar > 0) {
-    const X = trunc(M * xBar);
-    let got = D.isqrt(X) * 15;
-    const have = Math.max(0, Math.floor(s.metal));
-    if (got > have) {
-      const ex = got - have;
-      p.oRefund += trunc((ex * ex + 224) / 225);
-      got = have; xDone = true;
-      msg(G, p.id, h.gR > 256 ? `${s.name} has run out of metal. You should probably abandon it.` : `${s.name} has run out of metal.`, { icon: 'm9001', star: s.id });
-    }
-    s.metal -= got; p.metal += got;
-  }
-  if (!tDone && !xDone) return;
-  // RestoreStarsBars @a24e2, in per mille
-  let T = tDone ? -1 : Math.round(tBar * 1000), X = xDone ? -1 : Math.round(xBar * 1000), S = Math.round(ship * 1000);
-  const tot = Math.max(0, T) + Math.max(0, X) + Math.max(0, S);
-  if (tot === 0) {
-    if (T === -1 && X === -1) S = 1000;
-    else if (X === -1 && h.gR > 256) { S = 1000; T = 0; }
-    else if (T === -1) { X = 500; S = 500; }
-    else { T = 500; S = 500; }
-  } else {
-    if (T > 0) T += trunc(T * (1000 - tot) / tot);
-    if (X > 0) X += trunc(X * (1000 - tot) / tot);
-    if (S > 0) S += trunc(S * (1000 - tot) / tot);
-  }
-  T = Math.max(0, T); X = Math.max(0, X); S = Math.max(0, S);
-  s.ship = S / 1000;
-  if (T + X > 0) s.terra = T / (T + X);
-}
-
-// ---------- pass 2 and the end of the turn ----------
+// =====================================================================
+// The turn. 1.2's EndTurn @a0004 and every routine it calls are the ones
+// 2.0 has (FUN_1040_0038 and its routines), step for step and constant for
+// constant, so 1.2 plays the turn written in js/rules-dos.js ("2.0's turn,
+// routine by routine"). Each part below was read in 1.2's own code
+// (docs/12-findings.md, "The turn, read in 1.2's code"):
+// =====================================================================
+// - the year (EndTurn @a0004, asm a0126 `addi.l #10, 8(a0)`): moved on before
+//   the player loop, so the computers plan in the new year (DoComputerTurn,
+//   called @a027c and @a02b6) and report 1010 (@a025a) gives the new year
+//   (rs.aiYear);
+// - who plays: both player loops (pass 1 @a01d4-a037c, pass 2 @a049c-a0534)
+//   run for every player slot, out of the game or not; only DoComputerTurn
+//   asks who the player is (a computer slot, or a player in state 3,
+//   @a025e-a02ba). So an out player's money still earns interest, its
+//   research goes on and its fleets still refuel (rs.economyForAll; pass 2 is
+//   run for every player by rs.refuel);
+// - shares (KillUnsupportedStars @a09ba, TerraformMineStars @a0b28,
+//   BuildNewShips @a14ae, SpendTechMoney @a1af0, ComputeIncomeAndPopulation
+//   @a2e58): a slot's share of the pool is trunc(M x pm / 1000) while the pool
+//   is under $2,000,000 and trunc(M / 1000) x pm above, and the same for a
+//   colony's bars (@a0b80, @a0cb0, @a157c) and each technology (@a1b82...);
+//   nothing divides by the total of the shares, so the computers' shares,
+//   each rounded up, are used as they stand. The slots are 2.0's: Savings
+//   (star -2), Technology (star -1), then the home colony (CreatePlayer
+//   @e16a4: 0, 150 and 850 per mille, the home bars -1 / 200 / 800); a new
+//   colony's slot goes in front (ColonizeStar @a3d84); SpendTechMoney takes
+//   the first slot with star -1, ComputeIncomeAndPopulation the first with -2;
+// - the bars, per mille (TerraformMineStars @a0a9e): a finished part is set
+//   to -1 (@a0c5a terraforming, @a0d3e mining), and stays -1: nothing sets it
+//   back and the computers leave it (AddColonySupportActions @90294,
+//   AddTerraformingActions @90b7a, AddColonizeAction @9139e, ResolveSpending
+//   @93378 test it for -1: rs.terraLeft, rs.setColonyBars); RestoreStarsBars
+//   @a24e2 (asm a2564-a2604) scales every colony's bars above 0 to fill 1,000
+//   at the end of each player's pass 1, so a finished part's share goes to the
+//   others; the "never profitable" warning goes by the colony's class (slot
+//   +0x12 = 2, @a0bc2), which ComputeIncomeAndPopulation sets each turn;
+// - a colony given up (DecolonizeStar @a3fd4, called by KillUnsupportedStars
+//   @a0a46 and by ComputeIncomeAndPopulation @a2f90, @a2fac, @a3044): the
+//   player's fleets of Colony Ships at the star are loaded (fleet +6 = 1), the
+//   colony's share is added to the Savings slot, the slot is taken out and the
+//   star is nobody's;
+// - a colony lost in a battle: MakeResultMessages @d2828 makes the star
+//   nobody's at once; the slot stays until the owner's ComputeIncomeAndPopulation,
+//   which takes out a slot whose star had a battle won by someone else
+//   (DoBattleStage @d06ac notes each star's winner) or whose people are gone;
+// - pass 2 (ComputeIncomeAndPopulation @a2de6): the Savings slot's share plus
+//   the refunds, with 10 x isqrt of that as interest, is the new pool; then for
+//   each slot in order: lost colonies out, meteors (50 people a unit of metal),
+//   growth, income, the profit and baby-boom reports, the class; then
+//   ColonizeAndExplore @a3556 (refuel and load at your colonies, explore and
+//   colonize, newest fleet first, routes checked again, colonies explored); the
+//   pool is then kept within $0..$999,999,999 (EndTurn, after
+//   ColonizeAndExplore @a04e6, up to @a0534);
+// - a new colony (ColonizeStar @a3d84): "You have colonized %s." (1032), its
+//   slot in front, 10 colonists a ship, income -7501, bars 900 / 100 / 0 (or
+//   0 / 1,000 / 0 with gravity over 2.56 x home's), and with more than
+//   $20,000 in the pool (@a3f96) a share of 15,000,000 / pool per mille
+//   (@a3fa0-a3fb2) given by GiveBarPercent @c139c: DetermineNewLevels @c1470
+//   takes it from the other slots in proportion, each giving
+//   ceil(left x its share / their total) (@c155e-c1574) and none going below
+//   its least share (ComputeMinPercent @c224a: ceil(loss x 1000 / pool) for a
+//   losing colony when the pool is $1,000 or more and bigger than the loss),
+//   round after round; then a total outside 990..1010 is brought to 1,000 one
+//   per mille at a time, first within those bounds, then without. This is
+//   2.0's FUN_1010_16f2 / 179a / 218e, number for number;
+// - routes (CheckFleetDestination @a23d2): planned again at every stop, at the
+//   start of MoveShips @a20ee and after ColonizeAndExplore;
+// - arrival messages (MoveShips @a20ee): written as the fleet moves, from the
+//   player's own record of the star (as rules-dos fleetArrives20).
+//
+// What 1.2 does differently in the turn:
 // CONFIRMED (ComputeIncomeAndPopulation @a2de6, asm a3034): a colony wiped
 // out by a meteor shower gets report 1059 (0x423), but STR# 1000 has only 59
 // templates (1000-1058), so GetReportString @130746 finds no text
 // (GetIndString gives an empty string) and its jump table's default case
 // (@130d62) prints that empty template: the report is a blank line, with the
 // bad-news sound (PlayAnnounceSound @130f08: 2001).
-function afterMovement12(G, p) {
-  const before = (p.inbox || []).length;
-  D.base12.afterMovement(G, p);
-  for (const m of (p.inbox || []).slice(before)) if (/^A meteor shower destroyed your colony at /.test(m.text)) m.text = '';
+function pass2_12(G) {
+  const before = G.players.map(p => (p.inbox || []).length);
+  D.refuel(G); // 2.0's pass 2 (rules-dos pass2_20), for every player
+  G.players.forEach((p, i) => {
+    for (const m of (p.inbox || []).slice(before[i])) if (/^A meteor shower destroyed your colony at /.test(m.text)) m.text = '';
+  });
 }
-// CONFIRMED (ColonizeAndExplore @a3556): after refuelling, exploring and
-// colonizing, each fleet with a destination is checked again
-// (CheckFleetDestination @a23d2)
-function refuel12(G) {
-  D.base12.refuel(G);
-  for (const p of G.players) replan(G, p);
-}
-
-// ---------- routes (DeterminePath @1105ae, CheckFleetDestination @a23d2) ----------
-// CONFIRMED: CheckFleetDestination runs for every fleet at the start of
-// MoveShips @a20ee (asm a20ee-a2186) and after ColonizeAndExplore: a fleet at a
-// star whose next stop is not its destination gets its route planned again
-// (DeterminePath with the fuel it has left and its design's Range) and
-// GiveFleetPath @110d56; with no route it stops there: "Your %s can no longer
-// reach %s." (report 1023, STR# 1000.24).
-function route12(G, f, tgt) {
-  const r = D.base12.route(G, f, tgt);
-  if (r && r.length) f.routeTo = tgt;
-  return r;
-}
-function replan(G, p) {
-  for (const f of G.fleets) {
-    if (f.owner !== p.id || f.star == null || f.to != null || f.routeTo == null) continue;
-    const stops = (f.dest != null ? [f.dest] : []).concat(f.path || []);
-    const fin = stops[stops.length - 1];
-    if (stops.length < 2 || fin !== f.routeTo) continue;
-    const r = D.base12.route(G, f, fin);
-    if (!r || !r.length) {
-      msg(G, p.id, `Your ${E.fleetLabel(G, f)} can no longer reach ${G.stars[fin].name}.`, { icon: 'm9038', star: f.star });
-      f.dest = null; f.path = null; f.routeTo = null;
-    } else { f.dest = null; f.path = r; }
+// CONFIRMED (ResolveSpending @93378, asm 933ee-93724): the computers' bars
+// are each part's money x 1000 over the colony's total, rounded up, with the
+// product worked out in 32 bits (mulu.w pairs, @9363c, @936a4, @936ec) and
+// the result stored as a word: a part over $2,147,483 wraps. A bar at -1 is
+// left as it is; with no terraforming or mining money both go to 0 (unless
+// -1) and Ship to 1,000. (The shares of the slots, with their own rule over
+// $2,000,000, are in js/ai-12.js: rs.aiBigShares.)
+function setColonyBars12(G, s, t, m, f) {
+  let [T, X] = D.bars20(s), S;
+  if (t + m === 0) { if (T >= 0) T = 0; if (X >= 0) X = 0; S = 1000; }
+  else {
+    const rest = t + m + f, pm = (v) => (trunc(((Math.imul(v, 1000) + rest - 1) | 0) / rest) << 16) >> 16;
+    if (T >= 0) T = pm(t);
+    if (X >= 0) X = pm(m);
+    S = pm(f);
   }
-}
-
-// ---------- arrival messages (MoveShips @a20ee) ----------
-// CONFIRMED (MoveShips @a20ee): the messages are written as the fleet moves,
-// before any battle and before ColonizeAndExplore updates the player's record
-// of the star: at each stop on a route "… has stopped at %s on the way to %s."
-// (1025); at the destination "Your fleet of %s has arrived at %s." (1024) only
-// if the star was already explored and the player's record says it is its own
-// colony, or nobody's and the fleet is not of Colony Ships. So a fleet that is
-// then destroyed in a battle there was still announced. (2.0's rule, in
-// rules-dos, reads the star itself after the battles.)
-function fleetArrives12(G, f) {
-  const p = G.players[f.owner];
-  if (!p || !p.human || f.star == null) return true;
-  const s = G.stars[f.star], k = E.know(G, p, s.id), label = E.fleetLabel(G, f);
-  if (f.path && f.path.length) msg(G, p.id, E.report(25, label, s.name, G.stars[f.path[0]].name), { icon: 'm9038', star: s.id, quiet: true });
-  else if (k.explored) {
-    const owner = k.owner == null ? -1 : k.owner;
-    if (owner === p.id || (owner < 0 && !fleetDesigns(G, f).some(d => d.type === 'colony')))
-      msg(G, p.id, `Your fleet of ${label} has arrived at ${s.name}.`, { icon: 'm9038', star: s.id, quiet: true });
-  }
-  return true;
+  D.setBars20(s, T, X, S);
 }
 
 // ---------- the ship queue (BuildShips @112946) ----------
@@ -364,78 +308,14 @@ function organized12(G, f, merged, nf, orders) {
 // rules-dos battleKnow. Sounds: PlayAnnounceSound @130f08 plays nothing for
 // 1033-1035 and 2001 for 1009; the remake keeps 7027 on a won battle (the
 // skin's auto play stops on it; interface).
-function battle12(G, sid) {
-  const s = G.stars[sid], year = G.year + 10, rs = E.rules(G);
-  const name = (o) => G.players[o].name;
-  const power = (army, o, t) => (army[o] || []).reduce((a, e) => a + (t == null || e.d.type === t ? e.n * rs.shipPower(G, e.d) : 0), 0);
-  const duel = (x) => {
-    const { A, D: Df, winner: w, army, rounds, pop0 } = x;
-    const surv = (o) => (army[o] || []).reduce((a, e) => a + e.n, 0);
-    const W = pop0 > 0 ? G.players[Df].tech.weapons : 0, pp = pop0 > 0 ? D.planetPower(pop0, W) : 0;
-    let debris = x.debris;
-    // the attacker
-    {
-      const k = D.x12(G, G.players[A], sid); k.by = year;
-      if (w === A) {
-        msg(G, A, `You won a battle at ${s.name}. You lost ${x.nA - surv(A)} of your ships. ${name(Df)} lost ${x.nD}.`, { icon: 'p3000', sound: 7027, star: sid });
-        if (debris) { msg(G, A, `${fmt(debris)} metal has fallen onto ${s.name} from your recent battle.`, { icon: 'm9046', star: sid, quiet: true }); s.metal += debris; debris = 0; }
-        k.e16 = 0; k.e1a = 0; k.e1e = 0; k.e22 = 0; k.pop = 0;
-      } else {
-        msg(G, A, `You lost a battle at ${s.name}. You lost ${x.nA} of your ships. ${name(Df)} lost ${x.nD - (w === Df ? surv(Df) : 0)}.`, { icon: 'm9025', sound: 2001, star: sid });
-        const ws = w === Df ? Df : -1, fs = ws < 0 ? 0 : power(army, ws, 'fighter') + power(army, ws, 'scout');
-        k.pop = pop0;
-        k.e16 = (ws < 0 ? 0 : power(army, ws)) + pp + 1;
-        if (RI(G, 1, 2) === 1 && pop0 > 0) k.e16 -= fs - 1;
-        k.e1a = RI(G, 1, 2) === 1 ? 0 : (ws < 0 ? 0 : power(army, ws, 'satellite')) + pp;
-        k.e1e = 0; k.e22 = fs;
-      }
-    }
-    // the defender
-    {
-      const q = G.players[Df], k = D.x12(G, q, sid); k.by = year;
-      if (pop0 > 0 && q.ai && q.ai.v12) {
-        if (w !== Df && q.ai.metalDef < 70) q.ai.metalDef = 70;
-        if (q.ai.metalDef < 40) q.ai.metalDef = 40;
-        q.ai.metalDef = Math.min(q.ai.metalDef + 10, q.ai.colDef);
-      }
-      k.pop = 0;
-      const colony = s.owner === Df;
-      if (w === Df) {
-        if (surv(Df) < 1) msg(G, Df, `${s.name} successfully defended itself against an enemy attack from ${name(A)}.`, { sound: 7027, star: sid });
-        else msg(G, Df, `You won a battle at ${s.name}. You lost ${x.nD - surv(Df)} of your ships. ${name(A)} lost ${x.nA}.`, { icon: 'p3000', sound: 7027, star: sid });
-        if (colony) { q.metal += debris; msg(G, Df, `You have recovered ${fmt(debris)} metal from the battle at ${s.name}.`, { icon: 'm9046', star: sid, quiet: true }); debris = 0; }
-        else if (debris) { msg(G, Df, `${fmt(debris)} metal has fallen onto ${s.name} from your recent battle.`, { icon: 'm9046', star: sid, quiet: true }); s.metal += debris; debris = 0; }
-        k.e16 = 0; k.e1a = 0; k.e22 = 0;
-        if (pop0 < 1) k.e1e = 0;
-        else {
-          const all = power(army, Df), r = RI(G, 1, 5);
-          if (r < 3 && rounds > 1) k.e1e = all - power(army, Df, 'fighter');
-          else if (r < 5) k.e1e = trunc(all / 10);
-        }
-      } else {
-        if (x.nD === 0) msg(G, Df, `${name(A)} destroyed your colony at ${s.name}.`, { icon: 'm9036', sound: 2001, star: sid });
-        else msg(G, Df, `You lost a battle at ${s.name}. You lost ${x.nD} of your ships. ${name(A)} lost ${x.nA - (w === A ? surv(A) : 0)}.`, { icon: 'm9025', sound: 2001, star: sid });
-        const ws = w === A ? A : -1, all = ws < 0 ? 0 : power(army, ws);
-        k.e16 = all + 1;
-        if (pop0 < 1) {
-          k.e1a = RI(G, 1, 2) === 1 ? 0 : (ws < 0 ? 0 : power(army, ws, 'satellite'));
-          k.e1e = 0; k.e22 = ws < 0 ? 0 : power(army, ws, 'fighter') + power(army, ws, 'scout');
-        } else {
-          k.e1a = RI(G, 1, 2) === 1 ? 0 : all;
-          k.e1e = 0; k.e22 = all;
-        }
-      }
-    }
-    // both sides died: the debris is lost
-  };
-  const res = D.battleOnly(G, sid, { duel });
-  if (res) res.reported = true;
-  return res;
-}
+// The duels, their reports and the colony lost at once are 2.0's code to the
+// letter (rules-dos battle20, FUN_1018_0032 and FUN_1018_260b): the
+// defender's colony is nobody's as soon as it loses (MakeResultMessages
+// @d2828, the star's owner set to -1 at its end) and its slot is taken out in
+// the owner's pass 2 (ComputeIncomeAndPopulation, above).
 
-// 1.2 keeps the base versions of the routines 2.0 now does its own way
-// (js/rules-dos.js base12); see docs/open-questions.md
-E.registerRules('12', Object.assign({}, D, D.base12, {
+// 1.2 plays 2.0's turn (js/rules-dos.js), with the differences above
+E.registerRules('12', Object.assign({}, D, {
   label: 'Mac 1.2 (1992)',
   hints: false, // this game had no between-turn tips (4.0.5 and 5.0.5 do)
   // the New Game window lists rulesets by year, then version (engine.js ruleOptions)
@@ -454,11 +334,13 @@ E.registerRules('12', Object.assign({}, D, D.base12, {
   starNames: STAR_NAMES, maleNames: MALE_NAMES, femaleNames: FEMALE_NAMES, femaleComputers: false, shipNames: SHIP_NAMES,
   welcome: WELCOME,
   ai: '12',                // 1.2's own computer players (js/ai-12.js)
-  // CONFIRMED (above): the turn's money, terraforming and mining, battles,
-  // routes, the ship queue and fleets as 1.2 does them
-  economy: economy12, afterMovement: afterMovement12, refuel: refuel12, route: route12,
+  // CONFIRMED (above): the turn is 2.0's (rules-dos economy20, battle20,
+  // fleetArrives20, route20, pass2_20, rs.economyForAll, rs.aiYear,
+  // rs.terraLeft), with 1.2's blank meteor report, its computers' bars in 32
+  // bits and their shares over $2,000,000 (js/ai-12.js) and its Organize
+  // Fleets (the ship queue and merging are 2.0's rule, cited here in 1.2)
+  refuel: pass2_12, setColonyBars: setColonyBars12, aiBigShares: true,
   yardRefund: yardRefund12, queueMergeAny: true, canMerge: canMerge12, organized: organized12,
-  battle: battle12, fleetArrives: fleetArrives12, arrivalSays: () => false, // the messages are fleetArrives12's
   finishedPartWasted: false,
   att12, shipPower: att12,
 }));

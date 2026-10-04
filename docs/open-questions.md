@@ -39,7 +39,12 @@ a port of 5.0).
 
 All 548 routines of the program have been read (`docs/coverage-12.md`; none unread), and
 every rule question that came up was answered from 1.2's own code. No rule falls back on
-2.0. What is left:
+2.0. The six rules of the turn the 2.0 pass pointed to (the bars kept per mille with −1
+for a finished part, shares used as they stand with the $2,000,000 rule, a lost colony's
+share to Savings with its colony ships loaded, a new colony's share by redistribution,
+the turn run for out players, the computers planning in the new year) were read in 1.2's
+code and are all 1.2's; the ruleset now plays them (`docs/12-findings.md`, "The turn,
+read in 1.2's code"). What is left:
 
 ### Remake's choices
 
@@ -65,6 +70,12 @@ every rule question that came up was answered from 1.2's own code. No rule falls
 6. **The blank report's picture.** The blank report for a colony wiped out by meteors
    shows your own planet in 1.2 (`GetIconID @130db0`, default case); the remake shows
    its destroyed-colony picture.
+7. **The budget sliders.** 1.2's budget window keeps shares in whole per mille; dragging
+   one moves the others in proportion, with no floor (`DoHBarClick @c1002` gives every
+   slot a floor of 0 and a ceiling of 1,000 before `DetermineNewLevels @c1470`; only a new
+   colony's share, `GiveBarPercent @c139c`, keeps losing colonies at their least share).
+   The remake's sliders move the others in proportion too; the turn reads each share to
+   the nearest per mille.
 
 ### Interface not done
 
@@ -90,6 +101,14 @@ These are what 1.2's code does and what the remake now does; they look like slip
    players (STR# 1000.37–51, "ten messages per turn") but no way to send one.
 4. **Ship and planet power** is worked out at every star each turn (`NoteShipPowers
    @a4254`) and never used.
+5. **Out players keep playing their turn**: both passes of `EndTurn @a0004` run for every
+   player slot, out or not (pass 1 @a01d4-a037c, pass 2 @a049c-a0534), so an out
+   player's money still earns interest and its research goes on (only an out computer
+   spends it). 2.0 does the same.
+6. **The computers' colony bars in 32 bits**: `ResolveSpending @93378` works out each
+   part's money × 1,000 in 32 bits and keeps the result as a word (@9363c, @936a4,
+   @936ec), so a colony given more than $2,147,483 for one part gets a wrong bar. The
+   remake does the same; it takes a very rich computer to see it.
 
 ---
 
@@ -170,15 +189,14 @@ These are what 2.0's code does and what the remake now does; they look like slip
   (`FUN_1030_1049` draws star names from it too). The remake keeps no such file.
 - The Explored Planets list (LISTSTARSDLGPROC) and the poll and battle speed settings.
 
-### Found here, to look at in 1.2
+### Found in the 1.2 pass, for 2.0
 
-1.2 has the same routines (`docs/coverage-12.md`), but its ruleset keeps the versions it
-had (`base12` in `js/rules-dos.js`) so that its games stay as they were: the bars kept
-per mille with their −1 marks; shares used as they stand, with the $2,000,000 rule; a
-lost colony's share going to Savings and its colony ships loaded (`DecolonizeStar @a3fd4`
-does this too); a new colony's share by `FUN_1010_179a`'s redistribution; the turn run for
-out players; and the computers planning in the new year (1.2's `EndTurn` also adds 10 to
-the year before `DoComputerTurn`).
+- **The computers' shares over $2,000,000.** 2.0's `FUN_1020_35f9` gives a slot whose
+  money is over $2,000,000 ceil(money ÷ trunc(total ÷ 1,000)) per mille (@1020:3728), as
+  1.2's `ResolveSpending` does; the 2.0 ruleset doesn't set `rs.aiBigShares` yet, so its
+  computers still use ceil(money × 1,000 ÷ total) there. Left as it was so that 2.0's
+  test games stay the same; to be turned on with 2.0's next change. (The colony bars in
+  `FUN_1020_35f9` may wrap in 32 bits as 1.2's do; not checked.)
 
 ## Mac 3.0.1 (1993)
 

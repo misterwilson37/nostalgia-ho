@@ -756,7 +756,15 @@ function resolveSpending(C) {
   const keys = ['sav', 'tech'].concat(C.cols);
   const sum = (k) => (C.mine[k] || 0) + (C.terra[k] || 0) + (C.support[k] || 0) + (C.finish[k] || 0);
   let total = 0; for (const k of keys) total += sum(k);
-  const pm = (k) => total === 0 ? trunc(1000 / keys.length) : trunc((sum(k) * 1000 + total - 1) / total);
+  // rs.aiBigShares (Mac 1.2, ResolveSpending @93378 asm 93458-934c0): a slot
+  // given more than $2,000,000 gets ceil(money / trunc(total / 1000)) instead
+  const big = C.rs.aiBigShares;
+  const pm = (k) => {
+    const x = sum(k);
+    if (total === 0) return trunc(1000 / keys.length);
+    if (big && x > 2000000) { const t1 = trunc(total / 1000); return trunc((x + t1 - 1) / t1); }
+    return trunc((x * 1000 + total - 1) / total);
+  };
   const b = p.budget;
   b.savings = pm('sav') / 1000; b.tech = pm('tech') / 1000; b.col = {};
   for (const sid of C.cols) {

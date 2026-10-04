@@ -306,7 +306,7 @@ function fleetFor(G, pid, sid, d) {
 // CONFIRMED (FUN_1040_25ce -> FUN_1068_03a9): a fleet sent too far for its fuel
 // is routed through your own colonies, each hop within its Range, at most
 // 42/Range hops, the shortest such way if it is under three times the direct
-// distance. (Planned again at every stop: replan20, for 2.0; 1.2 keeps its own.)
+// distance. (Planned again at every stop: replan20, for 2.0 and 1.2.)
 function route(G, f, tgt) {
   const R = fleetMaxRange(G, f);
   if (!(R > 0) || f.star == null) return null;
@@ -463,7 +463,7 @@ function incomeU(u, H) {
   return trunc(mult * u / 76) - trunc((H / 40 + 100) * u / 10000 + 7500);
 }
 function planetIncome(G, p, s) { return incomeU(popU(s), hab(p, s).H); }
-// (Kept for Mac 1.2, js/rules-12.js; 2.0 now uses pass2_20 below.)
+// (No longer used: 2.0 and Mac 1.2 both use pass2_20 below.)
 function afterMovement(G, p) {
   // CONFIRMED (1040:284f-2995): kept money plus refunds earns 10 x isqrt of itself; no borrowing
   const saved = (p.oKept || 0) + (p.oRefund || 0);
@@ -712,7 +712,7 @@ function battle(G, sid, hooks) { // hooks.duel: called after each duel (Mac 1.2'
 function x12(G, p, sid) { const k = E.know(G, p, sid); return k.x12 || (k.x12 = { by: 0, e16: 0, e1a: 0, e1e: 0, e22: 0, pop: 0 }); }
 
 // ---------- the end of the turn: refuelling, exploring, colonizing ----------
-// (Kept for Mac 1.2, js/rules-12.js; 2.0 now uses pass2_20 below.)
+// (No longer used: 2.0 and Mac 1.2 both use pass2_20 below.)
 // CONFIRMED (FUN_1040_2fa8; Mac 1.2's ColonizeAndExplore @a3556 is the same):
 // at the end of every turn, for every player, each fleet at one of its
 // colonies is refuelled and its colony ships take on colonists; then every
@@ -858,8 +858,8 @@ const WELCOME = [
 
 // =====================================================================
 // 2.0's turn, routine by routine (WINHO.EXE, read in docs/coverage-20.md).
-// 1.2 (js/rules-12.js) has the same routines; it keeps the versions above
-// (base12, at the end of this file) so its games stay as they were.
+// 1.2 (js/rules-12.js) has the same routines, read in its own code, and
+// plays this turn too (docs/12-findings.md).
 // =====================================================================
 
 // ---------- shares, per mille (every pass-1 and pass-2 routine) ----------
@@ -1462,9 +1462,8 @@ function setColonyBars20(G, s, t, m, f) {
   setBars20(s, T, X, S);
 }
 
-// The versions 1.2's ruleset keeps (js/rules-12.js): 1.2 has the same
-// routines as 2.0, but its games are kept as they were until 1.2's own
-// pass takes these up (docs/open-questions.md).
+// The versions 1.2's ruleset used to keep. No longer used: 1.2 now plays
+// 2.0's turn above (js/rules-12.js, docs/12-findings.md).
 const base12 = {
   afterSetup, route, refuel, afterMovement, colOrder, disposable, projected, underfunded,
   economyForAll: false, terraLeft: null, setColonyBars: null, aiYear: null,
@@ -1513,7 +1512,7 @@ E.registerRules('dos', Object.assign({}, O, {
   // CONFIRMED (FUN_1040_0038 @1040:01a8): the year is moved on before the computers plan
   aiYear: (G) => G.year + 10,
   // internals, for the Mac 1.2 ruleset built on this one (js/rules-12.js)
-  shareOf, colonyMoney, shipyard, removeColony, isqrt, wpn, battleOnly: battle, base12,
+  shareOf, colonyMoney, shipyard, removeColony, isqrt, wpn, battleOnly: battle, base12, bars20, setBars20,
   // not in 2.0 (CONFIRMED: no text or code for them)
   difficulty: undefined, masterPoints: undefined,
 }));

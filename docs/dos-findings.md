@@ -396,9 +396,10 @@ message, ship names, colony order) moved from `js/rules-12.js` into `js/rules-do
 In the full pass the 2.0 turn got its own routines in `js/rules-dos.js` (`economy20`,
 `terraMine20`, `restoreBars20`, `research20`, `pass2_20`, `income20`, `colonize20`,
 `settle20`, `giveShare20`, `removeColony20`, `battle20`, `fleetArrives20`, `replan20`,
-`organized20` …). 1.2 has the same routines in its code, but its ruleset keeps the
-versions it had (`base12` in `js/rules-dos.js`, used by `js/rules-12.js`), so 1.2's games
-are unchanged; bringing 1.2 in line is listed in `docs/open-questions.md`.
+`organized20` …). 1.2 has the same routines in its code, read there afterwards, and its
+ruleset now plays this turn too (all but `organized20`, which 1.2 does its own way; see
+`docs/12-findings.md`, "The turn, read in 1.2's code"). The older versions kept for it
+(`base12`) are no longer used.
 
 ## The DOS skin
 

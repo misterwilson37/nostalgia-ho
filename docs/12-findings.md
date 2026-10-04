@@ -48,6 +48,10 @@ differences:
 - **Shorter battle reports**, 1.2's own, one pair for each duel at a star.
 - No messages between players, routes planned again at every stop, fleets of one design,
   and finished terraforming or mining bars handed on (see "Settled in the full pass").
+- **The turn is 2.0's**, step for step: shares used as they stand, with the $2,000,000
+  rule; bars per mille with −1 for a finished part; a lost colony's share to Savings; a
+  new colony's share taken from the others; the turn run for out players; the computers
+  planning in the new year (see "The turn, read in 1.2's code").
 
 ## How it differs from 3.0.1
 
@@ -103,7 +107,7 @@ All as DOS 2.0:
 | Ship queues: three slots a colony, part-payment of the first ship, humans pay the prototype, computers never do; the three shipbuilding warnings; Fighters and Satellites join an idle fleet of their type | CONFIRMED (`BuildNewShips @a1406`, `PutNewShipAtStar @a18b8`) |
 | Research: √(money ÷ 120/150/150/150/200) × 60–140 %; Range L², Speed (L+6)², Weapons and Shields (L+2)², Mini (L+7)²; "not spending any money on technology research" every turn | CONFIRMED (`SpendTechMoney @a1a58`) |
 | Interest 10 × √(kept + refunds); meteors 50 per unit of metal; growth; income with the log of the whole square root; pool clamped to 0..999,999,999 | CONFIRMED (`ComputeIncomeAndPopulation @a2de6`, `EndTurn @a0004`) |
-| New colonies: 10 colonists a colony ship, terraform 900 / mine 100 (or mine 1,000 when gravity is over 2.56 × home's), a $15,000 share when the pool is over $20,000. Colony ships at your colonies are refilled | CONFIRMED (`ColonizeStar @a3d84`, `ColonizeAndExplore @a3556`) |
+| New colonies: 10 colonists a colony ship, terraform 900 / mine 100 (or mine 1,000 when gravity is over 2.56 × home's), a share worth $15,000 (15,000,000 ÷ pool per mille, taken from the other slots) when the pool is over $20,000. Colony ships at your colonies are refilled; see "The turn, read in 1.2's code" | CONFIRMED (`ColonizeStar @a3d84`, `ColonizeAndExplore @a3556`) |
 | Scrapping: humans get 3/4 of the metal; in hyperspace it falls on the next star; over someone else's star it falls onto the planet | CONFIRMED (`ScrapFleetsAndTypes @a0e02`) |
 | Routes through your colonies, at most 42 ÷ Range hops, planned again at every stop | CONFIRMED (`CheckFleetDestination @a23d2`, `DeterminePath @1105ae`) |
 | Ship costs: B = (R+10)(V+15)(W+13)(S+13) ÷ 30.6, Satellite (W+13)(S+13) × 4.445; mm = (Mini+1)/2 + 0.5; Colony Ship + $45,000, + 3,000 metal, + 1,000 hit points; prototype 2 mm × price | CONFIRMED (`CalcShipCosts @114746`) |
@@ -125,7 +129,7 @@ All as DOS 2.0:
 
 1.2 fights a star's battle as duels (the holder against each other player in turn) and
 writes two reports for each duel, one for the attacker and one for the defender
-(`MakeResultMessages @d2828`); the remake does the same (`battle12` in `js/rules-12.js`).
+(`MakeResultMessages @d2828`); the remake does the same (`battle20` in `js/rules-dos.js`, 2.0's code being the same).
 The texts are 1.2's, worded as DOS 2.0's lines 705–707 and 681:
 
 | Who | Report | Status |
@@ -249,8 +253,9 @@ A human on auto play keeps the base values, with skill 0.
   aren't yours, and scouts at your hostile colonies, go to the nearest colony. A colony
   ship heading for a star someone has taken stops.
 - **The budget** (`ResolveSpending @93378`). What is left is saved. Every bar is its money
-  over the total, per mille rounded up, and each colony's own bars split its money
-  between terraforming, mining and ships.
+  over the total, per mille rounded up (for a slot given more than $2,000,000: its money
+  over a thousandth of the total, rounded up), and each colony's own bars split its money
+  between terraforming, mining and ships, a bar at −1 (finished) left as it is.
 - **Research**. Research shifts from Range at level 10 and from Speed at level 5 to
   Weapons and Shields.
 
@@ -407,9 +412,14 @@ games are byte for byte the same):
 
 `js/rules-dos.js` got an optional third argument to `battle(G, sid, hooks)`:
 `hooks.duel(info)` is called after each duel, and the battle then leaves the debris to
-it. It also exports a few internals (`shareOf`, `colonyMoney`, `shipyard`,
-`removeColony`, `isqrt`, `wpn`, `battleOnly`) for `js/rules-12.js`. 2.0 passes no hooks,
-so its games are unchanged.
+it. It also exports a few internals (`designCost`, `WPNRAT`, `bars20`, `setBars20`) for
+`js/rules-12.js`. 2.0 passes no hooks, so its games are unchanged. Since 1.2 plays 2.0's
+turn, the older versions `js/rules-dos.js` kept for it (`base12`, `afterMovement`,
+`refuel`, `giveShare`, `meteors`, `shareOf`, `colonyMoney`, the base `projected` and
+`underfunded`) are no longer used by any ruleset.
+
+`js/ai-12.js` got `rs.aiBigShares`: the computers' shares of a slot given more than
+$2,000,000 by `ResolveSpending`'s own rule (1.2 sets it).
 
 ## Settled in the full pass
 
@@ -419,7 +429,7 @@ its own code until its own pass):
 
 | What | 1.2F | Status |
 |---|---|---|
-| A finished terraforming or mining part | the part is spent while its bar is above 0, with no check that the planet still needs it: a planet already at your temperature is "completely terraformed" again with 2 × (step − gap)² refunded, a planet with no metal "has run out of metal" with (excess² + 224) / 225 refunded; the bar is set to −1. Later in the same pass `RestoreStarsBars` spreads a −1 bar's share over the bars still above 0, in proportion (with none: both done → ships 1,000; mining done on a hostile-gravity planet → ships 1,000; terraforming done → mining 500, ships 500; else terraforming 500, ships 500). So the money is never wasted (2.0's ruleset wasted it) | CONFIRMED (`TerraformMineStars @a0a9e`, asm a0b70–a0dce; `RestoreStarsBars @a24e2`, asm a2564–a2604) |
+| A finished terraforming or mining part | the part is spent while its bar is above 0, with no check that the planet still needs it: a planet already at your temperature is "completely terraformed" again with 2 × (step − gap)² refunded, a planet with no metal "has run out of metal" with (excess² + 224) / 225 refunded; the bar is set to −1. Later in the same pass `RestoreStarsBars` spreads a −1 bar's share over the bars still above 0, in proportion (with none: both done → ships 1,000; mining done on a hostile-gravity planet → ships 1,000; terraforming done → mining 500, ships 500; else terraforming 500, ships 500). So the money is never wasted (2.0 does the same, `FUN_1040_269d`) | CONFIRMED (`TerraformMineStars @a0a9e`, asm a0b70–a0dce; `RestoreStarsBars @a24e2`, asm a2564–a2604) |
 | Mining exactly what is left | 15 × √money equal to the metal left takes it all without the "run out" message (only more than what is left counts) | CONFIRMED (asm a0d0c `cmp.l`/`ble`) |
 | Order of colonies in a turn | support, terraforming and mining, and ship queues go through the colony slots in slot order, newest colony first | CONFIRMED (`KillUnsupportedStars @a0960`, `TerraformMineStars`, `BuildNewShips @a1406`) |
 | Battle reports | one pair a duel: each duel at a star is a battle of its own and `MakeResultMessages` writes the attacker's and the defender's report from that duel's counts. The defender's colony keeps its survivors; the debris of a duel goes to the colony's owner if it held ("You have recovered …"), else falls onto the planet with a note to the winner; when both sides die it is lost. A colony owner with no ships that loses gets "X destroyed your colony at S."; with ships, only "You lost a battle" | CONFIRMED (`DoBattleStage @d0004`, `MakeResultMessages @d2828`, `ResolveVictorFleetsAtStar @d3990`, `ZeroFleetsAtStar @d38ca`) |
@@ -441,6 +451,54 @@ fleets (`ResolveVictorFleetsAtStar`), the design limit of 20 (`CreateShipType @1
 scrapping a fleet (`ScrapCurrentFleet @1128ce` only marks it; `ScrapFleetsAndTypes`
 scraps it at the start of the next turn's pass, where it is, so the remake's immediate
 scrapping gives the same metal in the same place).
+
+## The turn, read in 1.2's code
+
+The 2.0 pass found six rules of the turn that 1.2 seemed to share, while the 1.2 ruleset
+still played older versions of them. Each was read again in 1.2's own code. All six are
+1.2's, so 1.2 now plays 2.0's turn from `js/rules-dos.js` (`economy20`, `pass2_20` and the
+routines they call), with only the differences listed after the table.
+
+| Rule | What 1.2's code does | Status |
+|---|---|---|
+| 1. The colony bars | Terraform, Mine and Ship bars are kept per mille in the colony slot (+2, +4, +6). A finished part is set to −1 (terraforming @a0c5a, mining @a0d3e) and stays −1: nothing sets it back, the planet window won't drag a bar below 0 (`DoVBarClick @c0446`), and the computers test for −1 and leave it (`AddColonySupportActions @90294`, `AddTerraformingActions @90b7a`, `AddColonizeAction @9139e`, `ResolveSpending @93378`). `RestoreStarsBars` scales every colony's bars above 0 to fill 1,000 at the end of each player's first pass. The "never profitable" warning goes by the colony's class (slot +0x12 = 2, @a0bc2), set each turn by `ComputeIncomeAndPopulation` | CONFIRMED (`TerraformMineStars @a0a9e`, `RestoreStarsBars @a24e2`) |
+| 2. Shares | A slot's share of the pool is trunc(M × share ÷ 1,000) while the pool is under $2,000,000 and trunc(M ÷ 1,000) × share above (@a09ba, @a0b28, @a14ae, @a1af0, @a2e58); a colony's bars and each technology's share of its money work the same way (@a0b80, @a0cb0, @a157c, @a1b82). Nothing divides by the total of the shares, so the computers' shares, each rounded up, are used as they stand. The slots are Savings (star −2), Technology (star −1) and the home colony, set up as 0, 150 and 850 per mille with the home bars −1 / 200 / 800 (`CreatePlayer @e16a4`); `SpendTechMoney` takes the first slot with star −1, `ComputeIncomeAndPopulation` the first with −2 | CONFIRMED (`KillUnsupportedStars @a0960`, `TerraformMineStars`, `BuildNewShips @a1406`, `SpendTechMoney @a1a58`, `ComputeIncomeAndPopulation @a2de6`) |
+| 3. A colony given up | `DecolonizeStar` loads the player's Colony Ship fleets at the star (fleet +6 = 1), adds the colony's share to the Savings slot, takes the slot out and makes the star nobody's. It is called for an abandoned colony (@a0a46) and, in the owner's second pass, for a colony lost in a battle or wiped out by meteors (@a2f90, @a2fac, @a3044). A lost battle makes the star nobody's at once (`MakeResultMessages @d2828`, at its end); the slot goes when `ComputeIncomeAndPopulation` sees that someone else won there (`DoBattleStage` notes each star's winner, @d06ac) | CONFIRMED (`DecolonizeStar @a3fd4`) |
+| 4. A new colony's share | With more than $20,000 in the pool (@a3f96), `ColonizeStar` gives the new slot (put first) 15,000,000 ÷ pool per mille (@a3fa0) through `GiveBarPercent @c139c`. `DetermineNewLevels @c1470` takes it from the other slots in proportion, each giving ceil(left × its share ÷ their total) (@c155e–c1574, `left` copied at the start of each round, @c1652), none below its least share (`ComputeMinPercent @c224a`: ceil(loss × 1,000 ÷ pool) for a losing colony when the pool is $1,000 or more and bigger than the loss), round after round; a total outside 990–1,010 is then brought to 1,000 one per mille at a time, first within the floors, then without. This is 2.0's `FUN_1010_16f2` / `179a` / `218e`, number for number | CONFIRMED (`ColonizeStar @a3d84`, `GiveBarPercent`, `DetermineNewLevels`, `ComputeMinPercent`) |
+| 5. Players who are out | Both player loops of `EndTurn` (pass 1 @a01d4–a037c, pass 2 @a049c–a0534) run for every player slot and check no state; only the call of `DoComputerTurn` asks who the player is (a computer slot, or a player in state 3, @a025e–a02ba). So an out player's money, interest, research and fleets keep going, and an out computer keeps giving its fleets orders | CONFIRMED (`EndTurn @a0004`) |
+| 6. The computers' year | `EndTurn` adds 10 to the year (@a0126) before the player loop, so `DoComputerTurn` (@a027c, @a02b6) plans in the new year, and report 1010 (@a025a) gives the new year | CONFIRMED (`EndTurn @a0004`) |
+
+Also read again, and the same as 2.0: the second pass for each player in turn
+(`ComputeIncomeAndPopulation`, then `ColonizeAndExplore @a3556`, then the pool kept
+within $0–$999,999,999, @a0522–a0534); a losing colony's people (`KillUnsupportedStars`);
+the refunds reset at the start of each player's first pass (@a02bc); the new colony's
+record (`ColonizeStar`: "You have colonized %s.", income −7,501, sink 0, bars 900 / 100 /
+0 or 0 / 1,000 / 0); `ColonizeAndExplore` refuelling and loading at your colonies, then
+exploring and colonizing in fleet-list order (newest first), with routes checked again.
+
+What 1.2 does differently from 2.0's turn (now in `js/rules-12.js`):
+
+| What | 1.2F | Status |
+|---|---|---|
+| A colony wiped out by meteors | report 1059, a blank line (as before) | CONFIRMED (`ComputeIncomeAndPopulation` asm a3034) |
+| The computers' shares over $2,000,000 | a slot given more than $2,000,000 gets ceil(money ÷ trunc(total ÷ 1,000)) per mille instead of ceil(money × 1,000 ÷ total) (the remake had only the second rule). 2.0's `FUN_1020_35f9` has the same branch; see `docs/open-questions.md` | CONFIRMED (`ResolveSpending @93378`, asm 93458–934c0); `rs.aiBigShares` in `js/ai-12.js` |
+| The computers' colony bars | each part's money × 1,000 ÷ the colony's total, rounded up, with the product in 32 bits and the result stored as a word, so a part over $2,147,483 wraps | CONFIRMED (`ResolveSpending`, @9363c, @936a4, @936ec); `setColonyBars12` |
+| Organize Fleets | every fleet of the design gets the least fuel used and the older records keep their orders (see "Settled in the full pass"); 2.0 gives the average and clears orders | CONFIRMED (`OrganizeFleets @113896`) |
+
+Two things that make no difference: `ColonizeAndExplore` does not check that the star is
+nobody's before founding a colony (only that it isn't the player's), but a star where
+your loaded fleet is still standing after the battles can't be someone else's colony;
+and `ComputeMinPercent` works in floating point where 2.0 uses integers, with the same
+results for any money the game reaches.
+
+How the game changed: the turn reads shares as they stand (the computers' add up to a
+little over 1,000, so they spend a little more than they have, as in 1.2) and above
+$2,000,000 by thousands; a new colony's share is taken from the others in whole per mille
+and never below a losing colony's need; a lost colony's share goes to Savings instead of
+being shared out by the next turn's sums, and colony ships waiting there are loaded; the
+bars keep their −1 marks, so the computers stop terraforming a planet only when its
+terraforming is finished, not when the temperature gap is 0; players who are out still
+earn interest and research; and the computers' first turn is planned as 2010, not 2000.
 
 ## Still open
 

@@ -31,7 +31,7 @@ Everything below is from its own code (`docs/12-findings.md`, `docs/coverage-12.
 
 | Area | 1.2 |
 |---|---|
-| Money | one pool, divided every turn by per-mille shares: one per colony, one for Technology, one kept as Savings. No borrowing, no debt, no "Dip into savings". Kept money earns 10 × √(kept + refunds) |
+| Money | one pool, divided every turn by per-mille shares: one per colony, one for Technology, one kept as Savings, used as they stand (and by thousands once the pool passes $2,000,000). No borrowing, no debt, no "Dip into savings". Kept money earns 10 × √(kept + refunds). A new colony's share is taken from the others; a lost colony's goes to Savings |
 | Colonies | each pays for itself from its own share; a losing colony whose share can't cover the loss loses people, and is abandoned at none. Each colony splits its money between terraforming, mining and ships; a finished part's share passes to the others |
 | Planets | growth and income as later versions (income uses the log of the whole square root of the population); maximum population 500,000 − 12 × hostility |
 | Terraforming | the first $5,000 goes into the planet, then √(money / 2) tenths of a degree a turn |
@@ -100,8 +100,14 @@ tenths of a degree), mining (15 × √money); research (√(money ÷ 120/150/150
 60-140 %, Range costing L²); the three-slot ship queues; costs with 30.6 and 4.445;
 routes through your colonies planned again at every stop; colonizing at the end of any
 turn; battles as duels with the colony's owner, the WPNRAT hit table and a pair of
-reports a duel; the dying-then-out rule and the last player standing from 2010. The
-galaxy generator is 1.2's too, with the same sine tables.
+reports a duel; the dying-then-out rule and the last player standing from 2010. So is the
+money arithmetic: shares used as they stand, not divided by their total, and worked out
+by thousands once the pool passes $2,000,000; a lost colony's share going to Savings,
+with its colony ships there loaded (`DecolonizeStar @a3fd4`); a new colony's share taken
+from the others in proportion, never below a losing colony's need (`GiveBarPercent
+@c139c` = `FUN_1010_16f2`); both passes of the turn run for players who are out; and the
+year moved on before the computers plan. The galaxy generator is 1.2's too, with the
+same sine tables.
 
 ### Rules: what changed
 
@@ -112,6 +118,7 @@ galaxy generator is 1.2's too, with the same sine tables.
 | Novas | the code is there, gated by a style bit that is never set (`CheckForSupernova @a2640`) | gone: the turn has no nova step (`FUN_1040_0038`) |
 | Messages between players | French text but no command | the Send Message window: "I like", "I don't like" or "I own" a planet or a player, ten a turn; a true "I own" shows the star as the sender's on the receiver's map (SENDMESSAGEDLGPROC, `FUN_1040_0038` @1040:062f) |
 | Organize Fleets | every fleet of the design at the star gets the least fuel used; the older records keep their orders (`OrganizeFleets @113896`) | every such fleet gets the average fuel used (counted up to 11 fleets) and loses its orders (ORGFLEETSDLGPROC) |
+| Dragging a budget bar | the others move in proportion with no floor (`DoHBarClick @c1002` sets every floor to 0) | a losing colony's share doesn't go below what it needs (`FUN_1010_0a7a` with `FUN_1010_218e`) |
 | The computers' attack rating | worked out in 32 bits (`CalcShipPower @114e10`) | the second term in 16 bits, so it wraps from about Weapons 4 (`FUN_10f0_05e9`) |
 | A colony wiped out by meteors | a blank report (1059, no text) | report 1009, "%s destroyed your colony at %s.", with a stray player's name |
 | Temperatures | °C | °F |
