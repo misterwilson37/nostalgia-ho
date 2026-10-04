@@ -1,0 +1,174 @@
+// Spaceward Ho! web remake — notes on each version, for players.
+//
+// The Ho menu's "About this version" window shows these for the rules being
+// played, keyed by ruleset id (the version's label, number, platform and year
+// come from the ruleset itself). Each version plays as it was released, bugs
+// and quirks included; these lists say what that means.
+//
+// - intro: a sentence or two on what the version is;
+// - quirks: its known bugs and quirks, which the remake plays as released
+//   (docs/open-questions.md, "Settled, worth confirming");
+// - differs: where the remake differs from it (docs/open-questions.md,
+//   "Remake's choices");
+// - missing: its windows and commands the remake hasn't got yet
+//   (docs/open-questions.md, "Interface not done");
+// - previous / changes: what changed from the version before it
+//   (docs/evolution.md);
+// - checking: the lists still being checked (the version's sections in the
+//   docs aren't written yet), e.g. { quirks: true, changes: true }.
+//
+// A line may be { text, show: (rs) => bool } to show only while a ruleset
+// flag says it applies (rs is the ruleset, HO.rules(G)).
+(function (root) {
+'use strict';
+const RANDOM = 'The random numbers are the remake’s own, so a game can’t be replayed move for move.';
+const HOTSEAT = 'Several people play on one computer and take turns. The original let each player join a shared game file, with a password.';
+root.HOVERSIONS = {
+  '12': {
+    intro: 'The French edition of the Mac game, a cut-down pre-release of 2.0. Every routine of its program has been read, and every rule comes from its own code.',
+    quirks: [
+      'A colony wiped out by a meteor shower gets a blank report.',
+      'Organize Fleets refuels and reloads: rearranging one design’s ships at a star gives every fleet of that design there the best fuel among them, and each new Colony Ship fleet it makes comes loaded with colonists.',
+      'The game has the text for messages between players, but no way to send one.',
+      'The power of the ships and planet at every star is worked out each turn and never used.',
+      'Players who are out still play their turn: their money still earns interest and their research goes on.',
+      'The computer’s colony bars go wrong when it gives a colony more than $2,147,483 for one part (the sum overflows). It takes a very rich computer to see it.',
+    ],
+    differs: [
+      RANDOM,
+      'If every player is out at once, the game ends with no winner. 1.2 just went on with no one able to win.',
+      HOTSEAT + ' (1.2 allowed up to 19 humans.)',
+      'A won battle plays a sound. 1.2 played nothing for battle reports.',
+      'The remake keeps one battle replay for each star a turn; 1.2 kept one for each duel. The reports are one pair a duel, as in 1.2.',
+      'The blank report for a colony lost to meteors shows a destroyed colony. 1.2 showed your own planet.',
+      { text: 'Dragging a budget bar moves the others in proportion, as in 1.2, but the shares aren’t kept in whole per mille; the turn rounds each to the nearest per mille.', show: (rs) => !rs.dragShare },
+      { text: 'The Evacuate button is the remake’s addition: 1.2 had no command to give up a colony.', show: (rs) => rs.evacuateCommand !== false },
+      { text: '1.2 had no command to give up a colony, so Evacuate shows only with modern conveniences on.', show: (rs) => rs.evacuateCommand === false },
+    ],
+    missing: [
+      'Fix Spending, which raises each colony that can’t pay its loss to its least share.',
+      'Naming a star after a win (1.2 kept the winners’ star names for later galaxies).',
+      'The preferences for battle speed, showing messages and watching battles, and the Explored Planets window.',
+    ],
+    previous: null,
+    changes: [],
+  },
+  dos: {
+    intro: 'The game 1.2 was a pre-release of: the Windows 3.1 edition came first, and the DOS edition is a port of it with the same art, sounds and rules. Every routine of the Windows program has been read.',
+    previous: '1.2',
+    quirks: [
+      'Organize Ships gives every fleet of the design at the star the average fuel used, but counts at most 11 fleets, so with 12 or more fleets the average comes out too high.',
+      'Organize Ships clears the orders of every fleet of that design at the star, even one you left alone.',
+      'A new fleet made in Organize Ships is loaded with colonists, so splitting an empty colony fleet away from your colonies refills part of it.',
+      'Players who are out still play their turn: their money still earns interest and their research goes on.',
+      'A slip in how the computers scrap old fighters has no effect on play.',
+    ],
+    differs: [
+      RANDOM,
+      'A colony wiped out by a meteor shower: 2.0’s report names a more or less random player as the destroyer; the remake says a meteor shower did it.',
+      'When every human is out, the game ends (with no winner if nobody is left). 2.0 went on as long as the computers played.',
+      HOTSEAT + ' (2.0 could also play across machines.)',
+      'A won battle plays a sound. 2.0 played nothing for battle reports.',
+      'The remake keeps one battle replay for each star a turn; 2.0 kept one for each duel.',
+      { text: 'Dragging a budget bar moves the others in proportion with no floor. 2.0 never took a losing colony below the share it needs.', show: (rs) => !rs.dragShare },
+      { text: 'The Evacuate button is the remake’s addition: 2.0 had no command to give up a colony (only leaving it unfunded).', show: (rs) => rs.evacuateCommand !== false },
+      { text: '2.0 had no command to give up a colony (only leaving it unfunded), so Evacuate shows only with modern conveniences on.', show: (rs) => rs.evacuateCommand === false },
+    ],
+    missing: [
+      'Send Message: 2.0’s messages are made of “I like”, “I don’t like” or “I own” and a planet or a player, and a true “I own” marks the star on the other player’s map. The remake’s messages are free text with no effect.',
+      'Fix Spending, in the budget window.',
+      'Naming a star after a win, and the names file kept for later galaxies.',
+      'The Explored Planets list and the poll and battle speed settings.',
+    ],
+    changes: [
+      'A Create Galaxy window: five sizes, five shapes, Dense or Sparse, 0 to 19 computers and their IQ (Dumb, Average or Smart). Each human picks a skill, Novice to Expert. (1.2 made every galaxy a small dense circle with one average computer.)',
+      'Women: women’s faces and names, and each computer is a woman half the time.',
+      'No novas (1.2 had the code, never switched on).',
+      'The Send Message window: ten messages a turn.',
+      'Organize Fleets gives the fleets the average fuel used instead of the least, and clears their orders.',
+      'Dragging a budget bar never takes a losing colony below the share it needs.',
+      'The computers’ attack rating wraps around from about Weapons 4 (a 16-bit sum).',
+      'A colony wiped out by meteors gets a report, naming a stray player.',
+      'Temperatures in °F instead of °C, and English names; 190 star names.',
+      'Auto Play, Compare Players (rankings from 2010) and Name a Star for the winner.',
+      'The turn itself is 1.2’s, routine by routine.',
+    ],
+  },
+  '301': {
+    intro: 'The first colour Mac version: an earlier build of the engine behind 4.0.5 and 5.0.5.',
+    previous: '2.0',
+    checking: { quirks: true, differs: true, changes: true },
+    quirks: [
+      'In 2010, on Spiral and Cluster maps, the computers skip their first turn.',
+      'A slip in how the computers scrap old ships has no effect on play.',
+    ],
+    differs: [RANDOM, HOTSEAT],
+    missing: [],
+    changes: [
+      'In colour.',
+      'The money model of the later versions: a share of each turn’s money goes to Ship Savings, which ships are bought from and which can go into debt. (2.0 had one pool and no borrowing.)',
+      'Novas are back, and battles have luck, always on.',
+      'Radical technology, with six outcomes.',
+      'Alliances; an alliance wins only if it holds for a turn.',
+    ],
+  },
+  '405': {
+    intro: 'The Windows 95 edition, which plays across platforms with the Mac 4.0.5: an earlier build of the 5.0.5 engine.',
+    previous: '3.0.1',
+    checking: { quirks: true, differs: true, changes: true },
+    quirks: [
+      'The New Game code never sets the novas option itself; the rest of that setting is whatever was left in memory.',
+      'The design window’s limits: Range from 4 up to your tech, Scouts up to tech + 2, with no exception for Biologicals.',
+      'Dreadnoughts are open to humans from the start.',
+    ],
+    differs: [RANDOM, HOTSEAT],
+    missing: [],
+    changes: [
+      'More ship classes than 3.0.1’s four, tankers and dreadnoughts among them; 30 designs instead of 20.',
+      'Radical technology has 17 discoveries, dealt from 2010.',
+      'Tankers refuel every fleet at their star completely.',
+    ],
+  },
+  original: {
+    intro: 'The last Mac version, for Mac OS 9 and X. The remake’s “Original” rules were recovered from its program.',
+    previous: '4.0.5',
+    checking: { quirks: true, differs: true, changes: true },
+    quirks: [
+      'A tanker’s route goes only through stars recorded this year.',
+      'Several rules are still open questions; the remake’s choice for each is listed in docs/open-questions.md.',
+    ],
+    differs: [RANDOM, HOTSEAT],
+    missing: [],
+    changes: [
+      'You pick a home system instead of a skill level, the computers’ IQ is a number from 50 to 200, and there are Hex galaxies.',
+      'Ships cost less at high tech (4.0.5’s cost is a product of all four stats).',
+      'Everyone at a star fights at once instead of in duels, with stances and “arrive late”.',
+      'The research facility, the prime rate and cheaper credit.',
+      'Novas give more warning, with a miracle rescue, and Armageddon shrinks distances.',
+    ],
+  },
+  palm: {
+    intro: 'A port of the Mac 5.0 to Palm handhelds: the 5.0 turn engine, recompiled, with the same constants.',
+    previous: '5.0.5 (Mac)',
+    checking: { quirks: true, differs: true, changes: true },
+    quirks: [],
+    differs: [
+      RANDOM.replace('own', 'own (the Palm game reads a fixed table of 5,000 numbers)'),
+      HOTSEAT,
+      'When every side in a battle is beaten, the Palm game loses the battle’s debris; the remake puts it on the planet.',
+    ],
+    missing: [],
+    changes: [
+      'At most 90 stars (5.0.5: 220), so big galaxies come out smaller.',
+      'No Alliances or Luck in Battles check boxes: both are always on.',
+      'No “Any (1-8)” choice for the number of computers.',
+      'No sounds.',
+    ],
+  },
+  claude: {
+    intro: 'The remake’s own rules, rebuilt from the 5.0.5 manual before the original program was read. Not an original version: its numbers are not the original formulas.',
+    previous: null,
+    quirks: [], differs: [], missing: [], changes: [],
+  },
+};
+})(this);

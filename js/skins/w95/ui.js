@@ -16,19 +16,7 @@ const B = (n) => P + 'b' + n;
 window.HOTHEME = {
   dir: 'assets/skins/w95/',
   prefix: P,
-  // 4.0.5 names its sounds (FUN_0046fe1b and the callers of FUN_0042f8bf);
-  // here they stand in for the classic skin's numbered ones
-  onlyOwnSounds: true,
-  sounds: {
-    2000: 'burst', 2001: 'shucks', // good / bad news
-    3000: 'softhit', 3001: 'medhit', 3002: 'hit', 3003: 'explode', // battle shots
-    4000: 'whoa', 4001: 'hyahh', // fleet stays / goes
-    5000: 'message', 5001: 'buddy', 5002: 'awww', 5003: 'shucks', // messages and pacts
-    6000: 'goodmmm', 6001: 'bad', 6002: 'medex', // exploring: good, worthless, so-so
-    7001: 'click', 7002: 'abandon', 7003: 'scrap', 7004: 'click', 7006: 'click', 7007: 'burst',
-    7013: 'click', 7014: 'click', 7015: 'click', 7016: 'whoa', 7017: 'click', 7018: 'click', 7019: 'burst',
-    7020: 'shucks', 7021: 'wow', 8000: 'explode', 128: 'hyahh', 11111: null, 7022: null, 7023: null,
-  },
+  // its sounds (named, not numbered): SOUNDS.w95 in js/skins.js
   images: Object.assign({
     p3030: 'b3000', p3040: 'b3010', // won / eliminated (FUN_00470dec)
     white0_0: 'b1405', white0_1: 'b1905', // you, in the Players window

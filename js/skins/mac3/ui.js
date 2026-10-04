@@ -26,8 +26,7 @@ const images = {
 for (let n = 0; n < 16; n++) { images['bad' + n + '_0'] = 'i' + (2000 + n); images['bad' + n + '_1'] = 'i' + (2500 + n); }
 window.HOTHEME_OVER = {
   dir: v12 ? 'assets/skins/mac12/' : colour ? 'assets/skins/mac3c/' : 'assets/skins/mac3/',
-  // 3.0.1 has the Mac 5.0.5 sounds' numbers, 7001 (next message) included
-  sounds: v12 ? { 11111: 7000 } : { 11111: 7000, 7006: 7001 },
+  // its sounds: SOUNDS.mac3 (SOUNDS.mac12, mac3c) in js/skins.js
   images,
   battlePlanet: P + 'i1004', // a plain planet
   // Planets on the map, as 3.0.1 picks them (SetPlanetTypesForStar @a4fbc

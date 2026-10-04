@@ -20,6 +20,44 @@ nobody sees anyone else's planets. The year moves on when the last person ends t
 It works with every ruleset and skin. (The original games did this over a network with a
 shared game file; this remake doesn't have a server, so it's one computer, taking turns.)
 
+## Each version as it was released
+
+Each ruleset plays one original version as it was released, bugs and quirks included.
+The conveniences a modern player may want are choices, and every one of them can be
+changed in the middle of a game from the **Ho menu** (the skin's "Ho!" at the top left):
+
+- **About this version**: the version's label, number, platform and year, its known bugs
+  and quirks (played as released), where the remake differs, and what changed from the
+  version before (`js/version-notes.js`).
+- **Skin**: reloads the page in another skin and carries on with the saved game.
+- **Sounds**: a game plays only the sounds of its skin's original (`SOUNDS` in
+  `js/skins.js`); an event that original had no sound for is silent. "Choose sounds"
+  (here or in New Game) plays another version's sounds, or none (`G.opts.sounds`, and
+  `localStorage` "ho5.sounds" for the next New Game).
+- **Modern conveniences** (`G.opts.modern`, also in New Game and Preferences): automatic
+  routes, the map following the news, battle speed and written battle reports, and the
+  commands the version didn't have.
+
+Optional ruleset flags the skin reads (each is documented where it is read):
+
+- `rs.evacuateCommand`: `false` when the version had no command to give up a colony (1.2
+  and 2.0); the Evacuate button and "Evacuate planet…" then show only with modern
+  conveniences on. Left out (or `true`): they always show. (`js/skins/classic/ui.js`,
+  `evacuateShown`)
+- `rs.dragShare(G, player, slot, newPerMille)`: the version's own way of dragging a budget
+  bar (2.0: the others move in proportion, never below a losing colony's least share;
+  1.2: the same with a floor of 0). `slot` is `'tech'`, `'savings'` or a colony's star id;
+  it returns the new shares in per mille (`{ tech, savings, col: { [starId]: pm } }`) or
+  sets `player.budget` itself. Left out: the others are scaled in proportion, as before.
+  (`js/skins/classic/ui.js`, `dragBudget`)
+- A battle report's `won: true` or `won: false` (an option of `msg()`): auto play stops on
+  battles won or lost by it. `engine.js` `battleNews` sets it; a ruleset that writes its
+  own reports should too. It is not saved with the game. A report with no `won` still
+  counts as won when its sound is 7027, for now. (`js/engine.js`, `msg`)
+- A battle record's `duel` (0, 1, …): a ruleset that keeps one replay per duel, as 1.2 and
+  2.0 did, pushes one record per duel to `G.battles`; the planet panel, the map menu and
+  Review Battle offer each. (`js/engine.js`, above `battle`)
+
 ## Layout
 
 - `index.html`: loads the game, then the skin (it has no page layout of its own)
@@ -37,7 +75,9 @@ shared game file; this remake doesn't have a server, so it's one computer, takin
   an earlier build of the 5.0.5 engine with skill levels, duels instead of free-for-all
   battles, dearer high-tech ships and up to 19 computers; see `docs/405-findings.md`).
   Built on the Original rules, with the Original computer players
-- `js/skins.js`: the list of skins and the loader. A skin is everything you see and
+- `js/version-notes.js`: for each ruleset, its known quirks, where the remake differs and
+  what changed from the version before (the Ho menu's "About this version")
+- `js/skins.js`: the list of skins and their sounds, and the loader. A skin is everything you see and
   hear; the game files above never touch the page, so any skin can play any ruleset
   and any saved game. The comment at the top of `js/skins.js` says what a skin must do.
 - `js/skins/classic/`: the "classic" skin, modelled on the original

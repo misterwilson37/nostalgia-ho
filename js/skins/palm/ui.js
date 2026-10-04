@@ -28,7 +28,7 @@ for (let n = 0; n < 16; n++) for (const f of [0, 1]) images['bad' + n + '_' + f]
 window.HOTHEME = {
   dir: 'assets/skins/palm/',
   prefix: P,
-  onlyOwnSounds: true, // no sounds at all
+  // no sounds at all (SOUNDS.palm in js/skins.js)
   images,
   select: B(3101), // the green ring, drawn under the selected star (FUN_000128e8)
   battlePlanet: B(6009),

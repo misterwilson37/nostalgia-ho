@@ -34,7 +34,7 @@ button { font: inherit; }
 .kv b { font-weight: bold; font-variant-numeric: tabular-nums; }
 .kv.neg b { color: var(--neg); }
 .info .kv:first-child b { font-size: 14px; }
-.barrow { display: grid; grid-template-columns: 82px 1fr 70px; align-items: center; gap: 6px; margin: 3px 0; }
+.barrow { display: grid; grid-template-columns: var(--blabel, 82px) minmax(40px, 1fr) var(--bval, 70px); align-items: center; gap: 6px; margin: 3px 0; }
 .barrow.hl .blabel { font-weight: bold; }
 .blabel { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .bval { text-align: right; font-variant-numeric: tabular-nums; color: var(--sub); font-size: 11px; }
@@ -227,3 +227,17 @@ button[data-help] { cursor: pointer; }
 .breport li { margin: 3px 0; }
 .breport .kill { color: var(--neg); }
 .newgame label.modern { grid-column: 1 / -1; }
+/* the Ho menu: the skin's "Ho!" at the top left opens it */
+#menubar .logo { cursor: pointer; }
+#menubar .logo:hover, #menubar .logo:focus-visible { color: #fff; }
+.dropdown button.check::before { content: '✓'; display: inline-block; width: 12px; margin-left: -12px; visibility: hidden; }
+.dropdown button.check.on::before { visibility: visible; }
+/* Choose sounds (New Game and the Ho menu's Sounds window) */
+.newgame .soundpick { grid-column: 1 / -1; display: grid; gap: 6px; }
+.newgame .soundpick label.soundset { grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 8px; }
+/* About this version */
+.about h3 { margin: 0 0 2px; }
+.about .vnotes h4 { margin: 12px 0 4px; }
+.about .vnotes ul { margin: 0; padding-left: 20px; }
+.about .vnotes li { margin: 3px 0; }
+.about .vnotes p { margin: 2px 0; }

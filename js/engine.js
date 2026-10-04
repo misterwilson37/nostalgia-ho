@@ -281,11 +281,17 @@ function report(n, ...args) {
   return ((DATA.reports || [])[n - 1] || '').replace(/%(\.\*)?[sd]|%%/g, (m) => m === '%%' ? '%' : String(args[i++] ?? ''));
 }
 // Every human player has their own messages (p.inbox); computers get none.
+// opt.won (a battle report: true when the player won, false when they
+// lost) is kept on the message for the skin (auto play stops on battles won
+// or lost) but not saved, so saved games stay as they were.
 function msg(G, pid, text, opt) {
   if (pid == null) return;
   const p = G.players[pid];
   if (!p || !p.human) return;
-  (p.inbox || (p.inbox = [])).push(Object.assign({ text }, opt || {}));
+  const { won, ...rest } = opt || {};
+  const m = Object.assign({ text }, rest);
+  if (won != null) Object.defineProperty(m, 'won', { value: !!won, enumerable: false, writable: true, configurable: true });
+  (p.inbox || (p.inbox = [])).push(m);
 }
 // news for every human player
 function msgAll(G, text, opt) { for (const p of G.players) msg(G, p.id, text, opt); }
@@ -691,6 +697,11 @@ function exploreMsg(G, p, s) {
 // ---------- battles ----------
 // The ruleset fights the battle and removes the losses; the engine then
 // updates everyone's knowledge and sends the reports.
+// Replays: each record in G.battles is one replay ({ id, star, year, sides,
+// start, rounds, ... }). The remake keeps one a star a turn (res.rec); a
+// ruleset that keeps one a duel, as 1.2 and 2.0 did, pushes a record for
+// each duel with rec.duel = 0, 1, … (the skin offers each of them) and
+// points each duel's reports at its own record (msg opt battle: rec.id).
 function battle(G, sid) {
   const res = rules(G).battle(G, sid);
   if (res) battleNews(G, sid, res);
@@ -721,7 +732,9 @@ function battleNews(G, sid, b) {
     // a ruleset may word the report itself (rs.battleText: { text, sound, icon })
     const rs = rules(G);
     if (rs.battleText) { const t = rs.battleText(G, sid, b, o, { won, myLoss, theirLoss, enemies }); if (t) ({ text, sound, icon } = Object.assign({ text, sound, icon }, t)); }
-    msg(G, o, text, { icon, sound, star: sid, battle: rec.id });
+    // won: the skin's auto play stops on battles won or lost by this flag,
+    // not by the sound (7027 is 5.0.5's; 1.2 and 2.0 played none)
+    msg(G, o, text, { icon, sound, star: sid, battle: rec.id, won });
   }
 }
 

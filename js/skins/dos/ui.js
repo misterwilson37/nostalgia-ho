@@ -20,14 +20,7 @@ const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 window.HOTHEME = {
   dir: 'assets/skins/dos/',
   prefix: P,
-  // The DOS game numbers its sounds like the Mac game (2000 good news,
-  // 2001 bad news, 3000-3003 battle shots, 4000/4001 fleet stays/goes,
-  // 5000 message sent, 6000-6002 exploring, 7000 end of turn, 1000 the
-  // click); those replace the Mac sounds by number. It has no others, so
-  // the rest are silent. (Sound uses: FUN_10c0_0c50 and the callers of
-  // FUN_1100_03c9 in the Windows build.)
-  onlyOwnSounds: true,
-  sounds: { 7001: 1000, 11111: 7000, 7006: 1000 },
+  // its sounds: SOUNDS.dos in js/skins.js
   // DOS pictures shown in place of the Mac ones
   images: Object.assign({
     p3030: 'd5040', p3040: 'd5050', // won, eliminated (alert pictures 5040/5050)

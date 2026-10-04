@@ -4,7 +4,7 @@
 // the classic skin's page
 const PAGE = `
 <div id="app">
-  <nav id="menubar" aria-label="Menus"><span class="logo">Ho!</span><span id="title"></span></nav>
+  <nav id="menubar" aria-label="Menus"><button class="mbtn logo" aria-haspopup="true" aria-label="Ho menu: this version, skin, sounds and modern conveniences">Ho!</button><span id="title"></span></nav>
   <div id="main">
     <aside id="panel" aria-label="Budget, technology and planet"></aside>
     <div id="mapwrap"><canvas id="map" aria-label="Star map"></canvas><div id="msg" aria-live="polite"></div></div>
@@ -31,7 +31,7 @@ const A = window.ASSETS || { img: {}, snd: {}, jpg: [], theme: 'assets/theme.mp3
 // own way. Anything it leaves out looks and sounds as here.
 const T = window.HOTHEME || {};
 function loadManifest(done) {
-  const fin = () => loadTheme(done);
+  const fin = () => { Object.assign(BASE_SND, A.snd); loadTheme(() => useSounds(soundsWanted(), done)); };
   if (window.ASSETS) return fin();
   fetch('assets/manifest.json').then(r => r.json()).then(m => {
     for (const k of m.sprites) A.img[k] = 'assets/sprites/' + k + '.png';
@@ -42,29 +42,63 @@ function loadManifest(done) {
     document.body.append(el('p', { class: 'warn' }, 'Could not load assets/manifest.json. Open this game from a web server (for example GitHub Pages), not straight from a file.'));
   });
 }
-// The theme's pictures are added as T.prefix + name; its sounds replace
-// ours with the same number, T.sounds maps our other sound numbers onto
-// its own (null = silent) and T.images shows one of its pictures in place
-// of one of ours.
+// The theme's pictures are added as T.prefix + name, and T.images shows
+// one of its pictures in place of one of ours. (Its sounds are a sound set:
+// see useSounds.)
 function loadTheme(done) {
   if (!T.dir) return done();
   const use = (sk) => {
     for (const k in sk.img) A.img[T.prefix + k] = sk.img[k];
-    const snd = T.onlyOwnSounds ? {} : A.snd;
-    for (const id in sk.snd) snd[id] = sk.snd[id];
-    for (const id in T.sounds || {}) { if (T.sounds[id] == null) delete snd[id]; else snd[id] = sk.snd[T.sounds[id]]; }
-    A.snd = snd;
     for (const k in T.images || {}) if (sk.img[T.images[k]]) A.img[k] = sk.img[T.images[k]];
     done();
   };
   if (A.skin) return use(A.skin); // single-file build
   fetch(T.dir + 'manifest.json').then(r => r.json()).then(m => {
-    const sk = { img: {}, snd: {} };
+    const sk = { img: {} };
     for (const k of m.sprites) sk.img[k] = T.dir + 'sprites/' + k + '.png';
-    for (const k of m.sounds) sk.snd[k] = T.dir + 'sounds/' + k + '.wav';
     use(sk);
   }).catch(() => done());
 }
+// ---------- sound sets ----------
+// Sounds belong to the skin (js/skins.js, SOUNDS): a game plays only the
+// sounds of its skin's original, and an event that original had no sound
+// for is silent. "Choose sounds" (New Game, or the Ho menu mid-game) puts
+// another original's set, or 'none', in G.opts.sounds (and remembers it in
+// localStorage "ho5.sounds" for the next New Game).
+const BASE_SND = {}; // the 5.0.5 sounds (assets/sounds), the "classic" set
+const skinSoundsId = () => {
+  if (!window.HOSKINS) return 'classic';
+  const k = HOSKINS.list.find(x => x.id === HOSKINS.current);
+  return (k ? k.sounds : 'classic') || 'none';
+};
+const soundsWanted = () => (G && G.opts && G.opts.sounds) || skinSoundsId();
+// true when the game plays its skin's own sounds (a skin's messageLook
+// names its own sounds; with another set the message's own sound is used)
+const ownSounds = () => { const w = soundsWanted(), o = skinSoundsId(), s = window.HOSKINS && HOSKINS.soundSet(o); return w === o || !!(s && s.same === w); };
+function useSounds(id, done) {
+  done = done || (() => {});
+  if (Sound.set === id) return done();
+  Sound.set = id; Sound.cache = {};
+  const set = !window.HOSKINS ? (id === 'none' ? null : { dir: null }) : HOSKINS.soundSet(id);
+  if (!set) { A.snd = {}; return done(); }
+  if (!set.dir) { A.snd = Object.assign({}, BASE_SND); return done(); }
+  // the set's own files, by their own numbers (or names), then its map
+  const use = (files) => {
+    const snd = Object.assign({}, files);
+    for (const n in set.map || {}) { const f = set.map[n]; if (f != null && files[f]) snd[n] = files[f]; else delete snd[n]; }
+    if (Sound.set === id) A.snd = snd;
+    done();
+  };
+  A.snd = {}; // silent while the set loads, never another set's sounds
+  const own = window.HOSKINS && HOSKINS.soundSet(skinSoundsId());
+  if (A.skin && own && (id === own.id || id === own.same)) return use(A.skin.snd || {}); // single-file build
+  fetch(set.dir + 'manifest.json').then(r => r.json()).then(m => {
+    const files = {};
+    for (const k of m.sounds || []) files[k] = set.dir + 'sounds/' + k + '.wav';
+    use(files);
+  }).catch(() => use({})); // never fall back on another set's sounds
+}
+const applySounds = () => useSounds(soundsWanted());
 const $ = (s, el) => (el || document).querySelector(s);
 const el = (tag, attrs, ...kids) => {
   const e = document.createElement(tag);
@@ -96,7 +130,7 @@ function loadImages(done) {
 
 // ---------- sound ----------
 const Sound = {
-  on: true, music: false, cache: {}, theme: null,
+  on: true, music: false, cache: {}, theme: null, set: undefined,
   play(id) {
     if (!this.on || id == null || !A.snd[id]) return;
     try {
@@ -126,6 +160,11 @@ let G = null;            // game
 // "Modern conveniences" (a New Game option, also in Preferences): helpers the
 // original games didn't have. Off, the game plays as the originals did.
 const modern = () => !!(G && G.opts && G.opts.modern);
+// Evacuate (give up a colony): rs.evacuateCommand says whether the version
+// had the command. true or left out: the planet panel's Evacuate button and
+// the map menu's "Evacuate planet…" always show; false (1.2 and 2.0 had no
+// such command): they show only with modern conveniences on.
+const evacuateShown = () => HO.rules(G).evacuateCommand !== false || modern();
 // whose turn it is (several humans can share one computer: hot seat)
 let ME = 0;
 const me = () => G.players[ME];
@@ -340,9 +379,8 @@ function starMenu(sid, px, py) {
   if (mine && !G.over) items.push([HO.feature(G, 'buildQueue') ? 'Queue ships…' : 'Build ships…', () => openBuild(sid)]);
   const fl = G.fleets.filter(f => f.owner === ME && f.star === sid && f.to == null && !f.sat);
   if (fl.length) items.push(['Select a fleet here', () => { UI.selFleet = fl[0].id; renderPanel(); draw(); }]);
-  const bt = [...G.battles].reverse().find(b => b.star === sid && b.sides.includes(ME));
-  if (bt) items.push([`Review battle (${bt.year})`, () => openBattle(bt.id)]);
-  if (mine && !G.over && (s.id !== me().homeStar || HO.colonies(G, ME).length > 1))
+  for (const bt of lastBattles(sid)) items.push([`Review ${battleName(bt)}`, () => openBattle(bt.id)]);
+  if (mine && !G.over && evacuateShown() && (s.id !== me().homeStar || HO.colonies(G, ME).length > 1))
     items.push(['Evacuate planet…', () => confirmBox(`Evacuate ${s.name}? Your colonists will leave; satellites stay.`, () => { HO.evacuate(G, ME, sid); Sound.play(7002); renderPanel(); draw(); save(); })]);
   items.push(['Centre the map here', () => { const x = sx(s.x), y = sy(s.y); UI.view.ox += mapW / 2 - x; UI.view.oy += mapH / 2 - y; draw(); }]);
   const m = el('div', { class: 'dropdown open starmenu', role: 'menu', id: 'starmenu' },
@@ -668,11 +706,32 @@ function setShare(entries, idx, f) {
   entries[idx].set(f);
   for (const e of others) e.set(otot > 0 ? e.get() / otot * (1 - f) : (1 - f) / others.length);
 }
+// A ruleset may drag the budget bars its own way: rs.dragShare(G, player,
+// slot, newPerMille), where slot is 'tech', 'savings' or a colony's star id
+// and newPerMille the dragged bar's new share (0-1000, whole). It is called
+// with the shares as they were when the drag began (so the result depends
+// only on where the bar is), and either returns the new shares in per mille,
+// { tech, savings, col: { [starId]: pm } } (any left out stay as they are),
+// or sets player.budget itself (shares as fractions of 1) and returns
+// nothing. With it, the bars are not scaled to add up to exactly 1 (the
+// rules keep whole per mille, and a total near 1,000 is left alone). 2.0:
+// the others move in proportion, none below a losing colony's least share
+// (FUN_1010_179a with FUN_1010_218e); 1.2: the same with a floor of 0
+// (DoHBarClick @c1002). Without it, the others are scaled in proportion.
+function dragBudget(p, key, f, start) {
+  const b = p.budget, o = JSON.parse(start);
+  b.tech = o.tech; b.savings = o.savings; b.col = o.col;
+  const r = HO.rules(G).dragShare(G, p, key, Math.max(0, Math.min(1000, Math.round(f * 1000))));
+  if (!r) return;
+  if (r.tech != null) b.tech = r.tech / 1000;
+  if (r.savings != null) b.savings = r.savings / 1000;
+  for (const k in r.col || {}) b.col[k] = r.col[k] / 1000;
+}
 function budgetEntries() {
   const p = me(), b = p.budget;
   const norm = () => { let t = b.tech + b.savings; for (const k in b.col) t += b.col[k]; return t || 1; };
-  const n = norm();
-  b.tech /= n; b.savings /= n; for (const k in b.col) b.col[k] /= n;
+  const n = HO.rules(G).dragShare ? 1 : norm();
+  if (n !== 1) { b.tech /= n; b.savings /= n; for (const k in b.col) b.col[k] /= n; }
   const list = [
     { key: 'tech', label: 'Tech', get: () => b.tech, set: (v) => b.tech = v },
     { key: 'savings', label: 'Savings', get: () => b.savings, set: (v) => b.savings = v },
@@ -700,12 +759,16 @@ function renderPanel() {
   const ents = budgetEntries();
   const spendable = Math.max(0, net);
   const bb = el('section', { class: 'box' }, el('h3', { 'data-help': 'budget' }, 'Budget'));
+  const own = HO.rules(G).dragShare;
+  let start = null; // the shares when the drag began (own drag rule)
   ents.forEach((e, i) => {
     const s = e.star != null ? G.stars[e.star] : null;
     const amt = e.get() * spendable;
     bb.append(bar(e.label, e.get(), 1, (f, end) => {
-      if (f != null) { setShare(ents, i, f); ents.forEach((x, j) => { const r = bb.querySelectorAll('.barrow')[j]; if (r) { r.querySelector('.fill').style.width = x.get() * 100 + '%'; r.querySelector('.bval').textContent = money(x.get() * spendable); } }); }
-      if (end) { renderPanel(); save(); }
+      if (f != null && own) { if (!start) start = JSON.stringify(p.budget); dragBudget(p, e.key, f, start); }
+      else if (f != null) setShare(ents, i, f);
+      if (f != null) { ents.forEach((x, j) => { const r = bb.querySelectorAll('.barrow')[j]; if (r) { r.querySelector('.fill').style.width = x.get() * 100 + '%'; r.querySelector('.bval').textContent = money(x.get() * spendable); } }); }
+      if (end) { start = null; renderPanel(); save(); }
     }, { right: money(amt), cls: e.key === 'tech' ? 'tech' : e.key === 'savings' ? 'sav' : 'col', rowCls: s && UI.sel === s.id ? 'hl' : '', help: e.key === 'tech' ? 'tech' : e.key === 'savings' ? 'savingsBar' : 'colonyBar' }));
   });
   if (net <= 0) bb.append(el('p', { class: 'warn' }, 'After supporting your colonies and paying interest, there is nothing left to spend.'));
@@ -727,7 +790,20 @@ function renderPanel() {
   panel.append(tb);
   // planet
   if (UI.sel != null) panel.append(planetBox(UI.sel));
+  fitBars(bb); fitBars(tb);
   panel.scrollTop = scroll;
+}
+// Widen a box's bar labels and amounts to fit their text (long colony
+// names, amounts in the hundreds of millions, a skin's wider type): the
+// label column grows to at most 42% of the box (beyond that it ends in "…",
+// with the whole name on hover), the amount column to the widest amount.
+function fitBars(box) {
+  const rows = box.querySelectorAll('.barrow');
+  let lw = 0, vw = 0;
+  rows.forEach(r => { lw = Math.max(lw, r.querySelector('.blabel').scrollWidth); vw = Math.max(vw, r.querySelector('.bval').scrollWidth); });
+  if (!rows.length || !box.clientWidth) return;
+  box.style.setProperty('--blabel', Math.min(Math.max(82, Math.ceil(lw) + 1), Math.floor(box.clientWidth * 0.42)) + 'px');
+  box.style.setProperty('--bval', Math.max(70, Math.ceil(vw) + 1) + 'px');
 }
 function row(k, v, cls, help) { return el('div', { class: 'kv ' + (cls || ''), 'data-help': help || null }, el('span', null, k), el('b', null, v)); }
 function planetBox(sid) {
@@ -774,7 +850,7 @@ function planetBox(sid) {
       if (HO.feature(G, 'buildQueue')) box.append(yardBox(s));
       box.append(el('div', { class: 'btns' },
         el('button', { onclick: () => openBuild(sid), 'data-help': 'build' }, HO.feature(G, 'buildQueue') ? 'Queue ships…' : 'Build ships…'),
-        s.id !== p.homeStar || HO.colonies(G, ME).length > 1 ? el('button', { class: 'quiet', 'data-help': 'evacuate', onclick: () => confirmBox(`Evacuate ${s.name}? Your colonists will leave; satellites stay.`, () => { HO.evacuate(G, ME, sid); Sound.play(7002); renderPanel(); draw(); save(); }) }, 'Evacuate') : null));
+        evacuateShown() && (s.id !== p.homeStar || HO.colonies(G, ME).length > 1) ? el('button', { class: 'quiet', 'data-help': 'evacuate', onclick: () => confirmBox(`Evacuate ${s.name}? Your colonists will leave; satellites stay.`, () => { HO.evacuate(G, ME, sid); Sound.play(7002); renderPanel(); draw(); save(); }) }, 'Evacuate') : null));
     } else if (k.owner >= 0 && k.owner !== ME) {
       box.append(row('Population', k.pop ? '~' + fmt(k.pop * 1e6) : '?'));
     }
@@ -795,8 +871,8 @@ function planetBox(sid) {
         if (G.fleets.includes(mine[i]) && G.fleets.includes(mine[j]) && HO.canMerge(G, mine[i], mine[j])) HO.mergeFleets(G, mine[i], mine[j]);
       UI.selFleet = mine[0].id; renderPanel(); draw(); save(); } }, HO.feature(G, 'singleTypeFleets') ? 'Merge fleets of the same type' : 'Merge all fleets here')));
   }
-  const b = [...G.battles].reverse().find(b => b.star === sid && b.sides.includes(ME));
-  if (b) box.append(el('div', { class: 'btns' }, el('button', { class: 'quiet', onclick: () => openBattle(b.id) }, `Review battle (${b.year})`)));
+  const bs = lastBattles(sid);
+  if (bs.length) box.append(el('div', { class: 'btns' }, ...bs.map(b => el('button', { class: 'quiet', onclick: () => openBattle(b.id) }, `Review ${battleName(b)}`))));
   return box;
 }
 function classNote(gs) { const c = HO.planetClass(G, gs); return c === 'inhospitable' ? ' · never profitable' : c === 'semi' ? ' · barely habitable' : ''; }
@@ -895,7 +971,7 @@ function renderMsg() {
     if (Prefs.important && m.quiet && !m.battle && UI.msgIdx < UI.inbox.length - 1) { UI.msgIdx++; return renderMsg(); }
     const look = originalLook(m);
     let sound = look ? look.sound : m.sound, icon = look ? look.icon : m.icon;
-    if (T.messageLook) { const t = T.messageLook(m, { icon, sound }, { G, ME, starLook }); if (t) ({ icon, sound } = t); }
+    if (T.messageLook) { const t = T.messageLook(m, { icon, sound }, { G, ME, starLook }); if (t) { icon = t.icon; if (ownSounds()) sound = t.sound; } }
     if (sound) Sound.play(sound);
     if (Prefs.review && m.battle && !m._reviewed) { m._reviewed = true; setTimeout(() => openBattle(m.battle), 50); }
     const card = el('div', { class: 'card', tabindex: 0, role: 'button', 'aria-label': 'Next message' });
@@ -1156,6 +1232,16 @@ function openSplit(f) {
 }
 
 // ----- battle replay -----
+// The replays of the latest battle you were in at a star. The remake keeps
+// one replay per star a turn; a ruleset may keep one per duel instead (1.2
+// and 2.0 did): several records for the star that year, each with a duel
+// index (rec.duel = 0, 1, …), and each is offered.
+function lastBattles(sid) {
+  const last = [...G.battles].reverse().find(b => b.star === sid && b.sides.includes(ME));
+  if (!last) return [];
+  return G.battles.filter(b => b === last || (last.duel != null && b.duel != null && b.star === sid && b.year === last.year && b.sides.includes(ME)));
+}
+const battleName = (b) => b.duel != null ? `duel ${b.duel + 1} (${b.year})` : `battle (${b.year})`;
 // modern: the battle as text, round by round
 function battleReport(b) {
   const who = (o) => o === ME ? 'Your' : `${G.players[o].name}’s`;
@@ -1191,7 +1277,7 @@ function openBattle(bid) {
     body.append(el('div', { class: 'bctl' }, el('label', null, 'Speed ', sp)), battleReport(b));
   }
   b._stop = false;
-  modal(`Battle at ${G.stars[b.star].name}, ${b.year}`, body, { cls: 'wide', onClose: () => { b._stop = true; } });
+  modal(`Battle at ${G.stars[b.star].name}, ${b.year}` + (b.duel != null ? `, duel ${b.duel + 1}` : ''), body, { cls: 'wide', onClose: () => { b._stop = true; } });
   const x = c.getContext('2d');
   // layout: sides spread horizontally
   const sides = b.sides;
@@ -1422,7 +1508,7 @@ function openScrapTypes() {
 function openBattleList() {
   const bs = G.battles.filter(b => b.sides.includes(ME)).reverse();
   if (!bs.length) { toast('No battles yet.'); return; }
-  const rows = bs.map(b => el('tr', { class: 'click', onclick: () => { closeModal(); openBattle(b.id); } }, el('td', null, G.stars[b.star].name), el('td', null, String(b.year)),
+  const rows = bs.map(b => el('tr', { class: 'click', onclick: () => { closeModal(); openBattle(b.id); } }, el('td', null, G.stars[b.star].name + (b.duel != null ? ` (duel ${b.duel + 1})` : '')), el('td', null, String(b.year)),
     el('td', null, b.sides.filter(o => o !== ME).map(o => G.players[o].name).join(', ')), el('td', null, `${b.lost[ME] || 0} / ${b.sides.filter(o => o !== ME).reduce((a, o) => a + (b.lost[o] || 0), 0)}`)));
   modal('Review battle', table(['Star', 'Year', 'Against', 'Lost (you / them)'], rows), { cls: 'mid' });
 }
@@ -1453,13 +1539,19 @@ function openAutoPlay() {
     el('div', { class: 'btns right' }, el('button', { type: 'submit' }, 'Start')));
   modal('Auto play', f, { cls: 'mid' });
 }
+// A battle report says whether you won in m.won (set by engine.js
+// battleNews, or by a ruleset that writes its own reports: won: true or
+// false). Older reports and rulesets marked a win only by its sound, 7027;
+// both are read for now.
+const isBattleNews = (m) => m.battle != null || m.won != null;
+const wonBattle = (m) => m.won === true || (m.won == null && m.sound === 7027);
 function runAutoPlay(o) {
   let n = 0;
   const step = () => {
     if (!G || G.over || n++ >= o.turns || UI.modal) { renderMsg(); return; }
     me().auto = o.computer; HO.endTurn(G); me().auto = false; awardMasterPoints(o.computer); save();
     renderPanel(); draw();
-    const stop = me().inbox.some(m => (o.won && m.battle && m.sound === 7027) || (o.lost && m.battle && m.sound !== 7027) || (o.news && !m.quiet && !m.battle && !m.chat));
+    const stop = me().inbox.some(m => (o.won && isBattleNews(m) && wonBattle(m)) || (o.lost && isBattleNews(m) && !wonBattle(m)) || (o.news && !m.quiet && !isBattleNews(m) && !m.chat));
     $('#title').textContent = `${me().name} in ${G.opts.galaxy || 'Milky Way'} in ${G.year} (auto play)`;
     if (stop || G.over) { showMessages(); return; }
     setTimeout(step, 120);
@@ -1516,9 +1608,89 @@ function openPrefs() {
   const box = (k, label) => el('label', { class: 'chk' }, el('input', { type: 'checkbox', checked: Prefs[k] ? 'checked' : false, onchange: (e) => { Prefs[k] = e.target.checked; savePrefs(); renderPanel(); } }), el('span', null, label));
   modal('Preferences', el('div', { class: 'prefs' }, box('important', 'Show only the most important messages'), box('review', 'Review battles as they happen'),
     box('hints', 'Give helpful game play hints'), box('celsius', 'Temperatures in Celsius (not °F)'),
-    G ? el('label', { class: 'chk' }, el('input', { type: 'checkbox', checked: modern() ? 'checked' : false, onchange: (e) => { G.opts.modern = e.target.checked; save(); renderPanel(); } }),
+    G ? el('label', { class: 'chk' }, el('input', { type: 'checkbox', checked: modern() ? 'checked' : false, onchange: (e) => setModern(e.target.checked) }),
       el('span', null, 'Modern conveniences in this game (automatic routes, the map follows the news, battle speed and written reports)')) : null,
     box('tips', 'Explain things when the pointer rests on them (text from the original manual)')), { cls: 'small' });
+}
+
+// ----- the Ho menu: this version, skin, sounds, modern conveniences -----
+// Each version plays as it was released; the conveniences a player may add
+// are choices here, and can be changed in the middle of a game.
+const MODERN_TEXT = 'Modern conveniences: automatic routes, the map follows the news, battle speed and written battle reports (not in the original games)';
+function setModern(on) { if (!G) return; G.opts.modern = !!on; save(); renderPanel(); draw(); }
+// the rules being played, or those chosen last in New Game
+const rulesId = () => G ? G.rules : ([localStorage.getItem('ho5.rules')].find(r => r && HO.RULESETS[r]) || HO.newestRules());
+function openAbout() {
+  const id = rulesId(), rs = HO.RULESETS[id] || HO.rules(null), N = (window.HOVERSIONS || {})[id] || {};
+  const chk = N.checking || {};
+  const lines = (list) => (list || []).filter(x => typeof x === 'string' || !x.show || x.show(rs)).map(x => typeof x === 'string' ? x : x.text);
+  const part = (title, list, key, none) => {
+    const L = lines(list);
+    if (!L.length && !chk[key] && !none) return null;
+    return el('section', { class: 'vnotes' }, el('h4', null, title),
+      chk[key] ? el('p', { class: 'note' }, 'Still being checked: this version’s notes aren’t finished yet.') : null,
+      L.length ? el('ul', null, ...L.map(t => el('li', null, t))) : none ? el('p', { class: 'sub' }, none) : null);
+  };
+  const body = el('div', { class: 'about' },
+    el('h3', null, rs.label || id),
+    rs.version ? el('p', { class: 'sub' }, `Version ${rs.version} · ${rs.platform} · ${rs.year}`) : null,
+    G ? null : el('p', { class: 'sub' }, 'The rules chosen for the next game.'),
+    N.intro ? el('p', null, N.intro) : null,
+    part('Known bugs and quirks, played as released', N.quirks, 'quirks', rs.version ? 'None known.' : null),
+    part('Where this remake differs', N.differs, 'differs'),
+    part('Not in this remake yet', N.missing, 'missing'),
+    N.previous !== undefined ? part(N.previous ? `What changed from ${N.previous}` : 'What changed', N.changes, 'changes', N.previous ? null : 'The earliest version in this remake: there is nothing earlier to compare it with.') : null,
+    el('div', { class: 'btns right' }, el('button', { onclick: closeModal }, 'OK')));
+  modal('About this version', body, { cls: 'mid' });
+}
+// the skin choice (title screen and Ho menu): every skin in HOSKINS.list
+function skinOptions(sel) {
+  const skins = (window.HOSKINS && HOSKINS.list) || [];
+  for (const k of skins) sel.append(el('option', { value: k.id, selected: k.id === HOSKINS.current ? 'selected' : false }, k.name));
+  return skins.length > 1;
+}
+function openSkin() {
+  const sel = el('select', { name: 'skin', 'aria-label': 'Skin' });
+  if (!skinOptions(sel)) { toast('This copy of the game has only one skin.'); return; }
+  const go = () => { const id = sel.value; if (id === HOSKINS.current) { closeModal(); return; } if (G) { save(); HOSKINS.switchTo(id); } else HOSKINS.preview(id); };
+  const f = el('form', { class: 'newgame', onsubmit: (e) => { e.preventDefault(); go(); } },
+    el('label', null, el('span', null, 'Skin'), sel),
+    el('p', { class: 'sub' }, G ? 'The game is saved and opens in the skin you pick. The skin is the look and the sounds of one release of the game; the rules stay as they are.' : 'The skin is the look and the sounds of one release of the game.'),
+    el('div', { class: 'btns right' }, el('button', { type: 'button', class: 'quiet', onclick: closeModal }, 'Cancel'), el('button', { type: 'submit' }, 'Switch')));
+  modal('Skin', f, { cls: 'small' });
+}
+// "Choose sounds": off, a game plays only its skin's original's sounds; on,
+// another version's sounds or none. value(): null (the skin's own), a sound
+// set's id, or 'none'.
+function soundPicker(value) {
+  const sets = (window.HOSKINS && HOSKINS.soundSets) || [];
+  const own = skinSoundsId(), ownSet = window.HOSKINS && HOSKINS.soundSet(own);
+  const shown = value || (ownSet && ownSet.same) || own;
+  const chk = el('input', { type: 'checkbox', name: 'choosesounds', checked: value ? 'checked' : false });
+  const sel = el('select', { name: 'soundset', 'aria-label': 'Sounds' },
+    ...sets.map(k => el('option', { value: k.id, selected: k.id === shown ? 'selected' : false }, k.name)),
+    el('option', { value: 'none', selected: shown === 'none' ? 'selected' : false }, 'None'));
+  const row = el('label', { class: 'soundset' }, el('span', null, 'Sounds'), sel);
+  row.hidden = !value;
+  chk.addEventListener('change', () => { row.hidden = !chk.checked; });
+  const box = el('div', { class: 'soundpick' },
+    el('label', { class: 'chk' }, chk, el('span', null, 'Choose sounds: another version’s sounds, or none (otherwise the game plays only the sounds of its skin’s original)')), row);
+  box.value = () => chk.checked ? sel.value : null;
+  return box;
+}
+function setSounds(v) {
+  try { localStorage.setItem('ho5.sounds', v || ''); } catch (e) {}
+  if (!G) return;
+  if (v) G.opts.sounds = v; else delete G.opts.sounds;
+  save(); applySounds();
+}
+function openSounds() {
+  if (!G) { toast('Sounds are chosen for each game: start or continue one first.'); return; }
+  const pick = soundPicker(G.opts.sounds || null);
+  const f = el('form', { class: 'newgame', onsubmit: (e) => { e.preventDefault(); setSounds(pick.value()); closeModal(); Sound.play(2000); } },
+    pick, el('p', { class: 'sub' }, 'For this game. Sound on or off for every game is in the View menu.'),
+    el('div', { class: 'btns right' }, el('button', { type: 'button', class: 'quiet', onclick: closeModal }, 'Cancel'), el('button', { type: 'submit' }, 'OK')));
+  modal('Sounds', f, { cls: 'small' });
 }
 
 // ----- help -----
@@ -1550,11 +1722,11 @@ function titleScreen() {
   const skins = (window.HOSKINS && HOSKINS.list) || [], here = skins.find(k => k.id === HOSKINS.current);
   if (here) $('#tname').textContent = `Spaceward Ho! ${here.name}`;
   const ts = $('#tskin');
-  if (skins.length > 1 && !ts.options.length) {
-    for (const k of skins) ts.append(el('option', { value: k.id, selected: k === here ? 'selected' : false }, k.name));
+  if (!ts.options.length && skinOptions(ts)) {
     ts.addEventListener('change', () => HOSKINS.preview(ts.value));
     ts.closest('label').hidden = false;
   }
+  applySounds(); // no game: the skin's own sounds
   let i = 0;
   clearInterval(UI.anim);
   if (T.title && T.title(frame, IMG, Sound)) { $('#tcont').hidden = !has; return; }
@@ -1618,6 +1790,7 @@ function newGameDialog() {
     sel('d_shape', 'Map style', [['circle', 'Circle'], ['random', 'Random'], ['ring', 'Ring'], ['spiral', 'Spiral'], ['grid', 'Grid']], 'ring'),
     sel('d_density', 'Density', [['dense', 'Dense'], ['sparse', 'Sparse']], 'dense')); // 2.0 has no novas
   const startSel = sel('start', 'Your home system', STARTS, 'normal');
+  const sounds = soundPicker(localStorage.getItem('ho5.sounds') || null);
   // hot seat: names and hats for players 2..6
   const seats = el('div', { class: 'group seats' });
   for (let i = 2; i <= 6; i++) seats.append(el('label', { 'data-seat': i }, el('span', null, `Player ${i}`),
@@ -1642,7 +1815,8 @@ function newGameDialog() {
       el('label', { class: 'chk' }, el('input', { type: 'checkbox', name: 'luck' }), el('span', null, 'Luck in battles')),
       el('label', { class: 'chk' }, el('input', { type: 'checkbox', name: 'novas', checked: 'checked' }), el('span', null, 'Novas'))),
     el('label', { class: 'chk modern' }, el('input', { type: 'checkbox', name: 'modern', checked: localStorage.getItem('ho5.modern') === '1' ? 'checked' : false }),
-      el('span', null, 'Modern conveniences: automatic routes, the map follows the news, battle speed and written battle reports (not in the original games)')),
+      el('span', null, MODERN_TEXT)),
+    sounds,
     el('div', { class: 'btns right' }, el('button', { type: 'submit' }, 'Create galaxy')));
   const origOpts = (d) => ({ computers: d.computers === 'any' ? 4 : +d.computers, iqNum: +d.o_iq, start: d.start, cstart: d.o_cstart, shape: d.o_shape, size: +d.o_size, density: +d.o_density, buddies: !!d.buddies, yearsPerTurn: +d.o_years });
   const refresh = () => {
@@ -1683,7 +1857,8 @@ function newGameDialog() {
     for (let i = 2; i <= nh; i++) { humans.push({ name: d['h' + i] || 'Player ' + i, female: d['hf' + i] === '1' }); localStorage.setItem('ho5.name' + i, d['h' + i] || ''); }
     if (nh < 2 && d.computers === '0') d.computers = '1';
     localStorage.setItem('ho5.modern', d.modern ? '1' : '0');
-    const common = { modern: !!d.modern, humans, seed: (Math.random() * 2 ** 31) | 0, name: d.name || 'You', galaxy: d.galaxy || 'Milky Way', female: d.female === '1', computers: +d.computers, start: d.start, rules: d.rules, alliances: !!d.alliances, luck: !!d.luck, novas: !!d.novas };
+    const snd = sounds.value(); localStorage.setItem('ho5.sounds', snd || '');
+    const common = { modern: !!d.modern, ...(snd ? { sounds: snd } : {}), humans, seed: (Math.random() * 2 ** 31) | 0, name: d.name || 'You', galaxy: d.galaxy || 'Milky Way', female: d.female === '1', computers: +d.computers, start: d.start, rules: d.rules, alliances: !!d.alliances, luck: !!d.luck, novas: !!d.novas };
     if (d.rules === 'original' || d.rules === 'palm') {
       localStorage.setItem('ho5.iq', d.o_iq);
       const o = origOpts(d);
@@ -1698,9 +1873,13 @@ function newGameDialog() {
     if (d.skin && d.skin !== HOSKINS.current) { save(); HOSKINS.switchTo(d.skin); return; } // opens in the other skin
     closeModal(); hideTitle(); ME = 0;
     UI.sel = G.players[ME].homeStar; UI.selFleet = null; UI.fitted = false; fit();
-    Sound.play(128);
-    if (hotSeat()) { save(); draw(); handOver(me()); return; }
-    save(); renderPanel(); draw(); showMessages();
+    save(); if (!hotSeat()) renderPanel(); draw();
+    // the game's sounds first, so its first message plays its own sound
+    useSounds(soundsWanted(), () => {
+      Sound.play(128);
+      if (hotSeat()) { draw(); handOver(me()); return; }
+      showMessages();
+    });
   };
   modal('Create galaxy', f, { cls: 'mid' });
   refresh();
@@ -1709,10 +1888,13 @@ function newGameDialog() {
 function continueGame(resumed) {
   try { G = HO.load(localStorage.getItem('ho5.save')); } catch (e) { toast('That saved game could not be read.'); return; }
   ME = G.cur || 0;
-  if (hotSeat()) { hideTitle(); fit(); draw(); handOver(me()); return; }
-  hideTitle(); UI.sel = G.players[ME].homeStar; UI.fitted = false; fit(); renderPanel(); draw();
-  if (resumed !== true || !me().inbox.length) me().inbox = [{ text: `Welcome back. It’s the year ${G.year}.`, icon: 'm9024' }];
-  showMessages();
+  // the game's sounds first, so its first message plays its own sound
+  useSounds(soundsWanted(), () => {
+    if (hotSeat()) { hideTitle(); fit(); draw(); handOver(me()); return; }
+    hideTitle(); UI.sel = G.players[ME].homeStar; UI.fitted = false; fit(); renderPanel(); draw();
+    if (resumed !== true || !me().inbox.length) me().inbox = [{ text: `Welcome back. It’s the year ${G.year}.`, icon: 'm9024' }];
+    showMessages();
+  });
 }
 function save() { if (!G) return; try { localStorage.setItem('ho5.save', HO.save(G)); } catch (e) {} }
 
@@ -1731,29 +1913,42 @@ function setupMenus() {
     View: [['Zoom in', () => zoomAt(mapW / 2, mapH / 2, 1.3)], ['Zoom out', () => zoomAt(mapW / 2, mapH / 2, 1 / 1.3)], ['Fit galaxy', () => { UI.fitted = false; fit(); draw(); }], ['-'], [() => (Sound.on ? 'Turn sound off' : 'Turn sound on'), () => { Sound.on = !Sound.on; savePrefs(); }], [() => (Sound.music ? 'Turn theme music off' : 'Turn theme music on'), () => { Sound.music = !Sound.music; savePrefs(); if (Sound.music && !$('#titlescreen').hidden) Sound.startTheme(); else Sound.stopTheme(); }]],
     Help: [['How to play', openHelp], [() => 'Manual: ' + manualFor()[1], () => window.open(manualFor()[0], '_blank', 'noopener')]],
   };
+  // The Ho menu, under the skin's "Ho!" at the top left: this version, and
+  // the modern conveniences a player may choose (all of them can change in
+  // the middle of a game). Items: [label, fn, feature or null, checked()].
+  const ho = [['About this version…', openAbout], ['-'],
+    ['Skin…', openSkin], ['Sounds…', () => openSounds()],
+    [MODERN_TEXT.replace(/:.*/, ''), () => { if (G) setModern(!modern()); else toast('Modern conveniences are chosen for each game: start or continue one first.'); }, null, () => modern()]];
   const bar = $('#menubar');
-  for (const name in menus) {
-    const btn = el('button', { class: 'mbtn', 'aria-haspopup': 'true' }, name);
+  const menu = (btn, items) => {
     const dd = el('div', { class: 'dropdown', role: 'menu' });
+    btn.setAttribute('aria-haspopup', 'true'); btn.setAttribute('aria-expanded', 'false');
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
       const open = dd.classList.contains('open');
-      document.querySelectorAll('.dropdown.open').forEach(d => d.classList.remove('open'));
+      document.querySelectorAll('.dropdown.open').forEach(d => { d.classList.remove('open'); d.previousElementSibling.setAttribute('aria-expanded', 'false'); });
       if (open) return;
       dd.innerHTML = '';
-      for (const [label, fn, feat] of menus[name]) {
+      for (const [label, fn, feat, checked] of items) {
         if (label === '-') { dd.append(el('hr')); continue; }
         if (feat && !(G && HO.feature(G, feat))) continue;
-        dd.append(el('button', { role: 'menuitem', onclick: () => { dd.classList.remove('open'); fn(); } }, typeof label === 'function' ? label() : label));
+        const on = checked ? !!checked() : null;
+        const text = typeof label === 'function' ? label() : label;
+        // (role menuitem: every skin styles its menus' items by that role)
+        dd.append(el('button', { role: 'menuitem', 'aria-label': checked ? `${text}: ${on ? 'on' : 'off'}` : null, class: checked ? 'check' + (on ? ' on' : '') : null,
+          onclick: () => { dd.classList.remove('open'); btn.setAttribute('aria-expanded', 'false'); fn(); } }, text));
       }
-      dd.classList.add('open');
+      dd.classList.add('open'); btn.setAttribute('aria-expanded', 'true');
       // a menu near the right edge opens leftward so it stays on screen
       dd.style.left = ''; dd.style.right = '';
       if (dd.getBoundingClientRect().right > window.innerWidth - 4) { dd.style.left = 'auto'; dd.style.right = '0'; }
     });
-    bar.append(el('div', { class: 'menu' }, btn, dd));
-  }
-  document.addEventListener('click', () => document.querySelectorAll('.dropdown.open').forEach(d => d.classList.remove('open')));
+    return el('div', { class: 'menu' }, btn, dd);
+  };
+  const logo = $('#menubar .logo');
+  if (logo) { const at = el('span'); logo.replaceWith(at); at.replaceWith(menu(logo, ho)); }
+  for (const name in menus) bar.append(menu(el('button', { class: 'mbtn' }, name), menus[name]));
+  document.addEventListener('click', () => document.querySelectorAll('.dropdown.open').forEach(d => { d.classList.remove('open'); d.previousElementSibling.setAttribute('aria-expanded', 'false'); }));
 }
 function nextFleet() {
   if (!G) return;
