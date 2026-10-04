@@ -66,6 +66,7 @@ shared game file; this remake doesn't have a server, so it's one computer, takin
 - `docs/405-findings.md`: what the Windows 95 4.0.5 program does differently from 5.0.5
 - `docs/missing-assets.md`: what each skin still borrows or leaves silent (for future art)
 - `docs/decompiling.md`: how to decompile the Windows versions with Ghidra
+- `docs/open-questions.md`, `docs/evolution.md`, `docs/coverage-12.md`: the questions still open for each version, how the game grew, and every routine of 1.2
 - `tools/test.js`: headless computer-vs-computer test (`node tools/test.js`, `node tools/test.js original`, `dos` or `405`)
 - `tools/bundle.py`: builds `dist/spaceward-ho.html`, a single self-contained file with one
   skin built in (`python3 tools/bundle.py cozy` for another)
