@@ -281,6 +281,8 @@ hooks, so 1.2's games are left as they were (1.2 has the same code; see
 | The attack rating is worked out partly in 16 bits (`FUN_10f0_05e9` @10f0:079d-0851) | 32 bits | `rs.shipPower` (first pass) |
 | "Still being terraformed" is a Terraform bar that isn't −1 (`FUN_1020_03e7` @1020:0445, `0b51` @0b95 and @0c55, `12d1` @150d) | the temperature gap | `rs.terraLeft` |
 | ResolveSpending writes the bars per mille, leaving a bar at −1 alone (`FUN_1020_35f9` @1020:3829-3996) | fractions | `rs.setColonyBars` |
+| A slot given more than $2,000,000 gets ⌈money ÷ trunc(total ÷ 1,000)⌉ per mille, the others ⌈money × 1,000 ÷ total⌉ (`FUN_1020_35f9` @1020:3709-3774, the compare at @1020:3721-372c), as Mac 1.2 | always money × 1,000 ÷ total | `rs.aiBigShares` (found in the 1.2 pass, set in the 3.0.1 pass) |
+| A colony's bars: the part's money × 1,000 is a 32-bit product (@1020:38da, 3930, 3974), divided as a signed long and kept as a word (@1020:38fc, 3952, 3996), so a part over $2,147,483 wraps, as in Mac 1.2 | exact | `setColonyBars20` (3.0.1 pass) |
 | The computers plan in the new year: the year is moved on before `FUN_1020_0000` runs (`FUN_1040_0038` @1040:01a8, then @1040:02de), so a Smart computer's free look at the stars within 9 ly (`FUN_1020_4a3d` @1020:4a85, year < 2020) is for the first turn only, and the old-news checks (@1020:51a6-5262) count from the new year | the old year | `rs.aiYear` |
 
 One more slip in the code, with no effect on play: `FUN_1020_4582` (ScrapOldFighters)

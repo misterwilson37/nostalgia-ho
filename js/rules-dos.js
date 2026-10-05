@@ -1448,13 +1448,18 @@ function underfunded20(G, p) {
 // 0b51 @0b95 and @0c55, 12d1 @150d); and ResolveSpending's bars
 // (FUN_1020_35f9 @1020:3829-3996): with no terraforming or mining money,
 // Terraform and Mine 0 and Ship 1,000; else each is its money over the
-// colony's total, per mille rounded up; a bar at -1 is left as it is
+// colony's total, per mille rounded up; a bar at -1 is left as it is.
+// The product is worked out in 32 bits (the long multiply FUN_1000_10f0 of
+// the part's money by 1,000, @1020:38da, 3930, 3974), the colony's total - 1
+// added and the signed long divide FUN_1000_11ac taken, and the result kept
+// as a word (@1020:38fc, 3952, 3996): a part over $2,147,483 wraps, as in
+// Mac 1.2 (ResolveSpending @93378).
 const terraLeft20 = (G, p, s) => bars20(s)[0] !== -1;
 function setColonyBars20(G, s, t, m, f) {
   let [T, X] = bars20(s), S;
   if (t + m === 0) { if (T >= 0) T = 0; if (X >= 0) X = 0; S = 1000; }
   else {
-    const rest = t + m + f, pm = (v) => trunc((v * 1000 + rest - 1) / rest);
+    const rest = t + m + f, pm = (v) => (trunc(((Math.imul(v, 1000) + rest - 1) | 0) / rest) << 16) >> 16;
     if (T >= 0) T = pm(t);
     if (X >= 0) X = pm(m);
     S = pm(f);
@@ -1509,6 +1514,11 @@ E.registerRules('dos', Object.assign({}, O, {
   outComputersPlay: true,                 // CONFIRMED (FUN_1040_0038 @1040:02bb): out computers still play
   designName, colOrder: colOrder20, shipPower, planetPower, x12, popU,
   terraLeft: terraLeft20, setColonyBars: setColonyBars20,
+  // CONFIRMED (FUN_1020_35f9 @1020:3709-3774, the compare at 1020:3721-372c):
+  // a slot given more than $2,000,000 gets ceil(money / trunc(total / 1000))
+  // per mille (two signed long divides, FUN_1000_11ac), the others
+  // ceil(money x 1000 / total), as Mac 1.2's ResolveSpending (js/ai-12.js)
+  aiBigShares: true,
   // CONFIRMED (FUN_1040_0038 @1040:01a8): the year is moved on before the computers plan
   aiYear: (G) => G.year + 10,
   // internals, for the Mac 1.2 ruleset built on this one (js/rules-12.js)
