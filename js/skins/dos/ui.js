@@ -77,6 +77,15 @@ window.HOTHEME = {
     if (/^Click here/.test(t)) return R('i3116', null);
     if (tech >= 0) return R('i' + (3100 + tech), 2000);
     if (/^Year \d+|updated to the year/.test(t)) return R('i3111', 2000);
+    // 1.2's blank meteor report (the 1009 report with no player's name):
+    // your own planet, with the report's own sound
+    if (!t.trim()) return { icon: P + own, sound: m.sound != null ? m.sound : null };
+    // a colony's own battle reports show your planet: 1009 "… destroyed your
+    // colony at …" (sound 2001) and 1035 "… successfully defended itself
+    // against an enemy attack from …" (no sound); only the fleets' reports,
+    // 1033 and 1034 (won, lost), show the other side's face
+    if (/ destroyed your colony at /.test(t)) return R(own, 2001);
+    if (/ successfully defended itself against an enemy attack from /.test(t)) return R(own, null);
     if (m.battle) { // the other side's face, no sound (the replay has its own)
       const b = G.battles.find(x => x.id === m.battle), o = b && b.sides.find(x => x !== ME && G.players[x]);
       const q = o != null && G.players[o];

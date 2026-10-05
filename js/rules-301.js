@@ -1836,6 +1836,7 @@ E.registerRules('301', Object.assign({}, D, {
   features: { arrivalNotices: false, alliances: true, gifts: true, surrender: true, waypoints: true, luck: true, supernova: true, armageddon: true, dip: true, chat: true, yearsPerTurn: true },
   // CONFIRMED (DoGalaxyMenu @f3ece): 3.0.1 has an Abandon command (evacuate301)
   evacuateCommand: true,
+  bestBuddies: false,      // no best buddies (see above)
   canBuild: (G, p, type) => TYPES4.includes(type),
   starNames: STAR_NAMES,
   SKILLS, HIT, hit, SHAPES: W.SHAPES, SIZES: W.SIZES, interestOn, techLevelCost, research, aiSpec,

@@ -35,21 +35,32 @@ changed in the middle of a game from the **Ho menu** (the skin's "Ho!" at the to
   (here or in New Game) plays another version's sounds, or none (`G.opts.sounds`, and
   `localStorage` "ho5.sounds" for the next New Game).
 - **Modern conveniences** (`G.opts.modern`, also in New Game and Preferences): automatic
-  routes, the map following the news, battle speed and written battle reports, and the
-  commands the version didn't have.
+  routes, the map following the news, battle speed and written battle reports. They never
+  add or remove a ruleset's commands: those (Evacuate, for one) follow the rules only.
 
 Optional ruleset flags the skin reads (each is documented where it is read):
 
 - `rs.evacuateCommand`: `false` when the version had no command to give up a colony (1.2
-  and 2.0); the Evacuate button and "Evacuate planet…" then show only with modern
-  conveniences on. Left out (or `true`): they always show. (`js/skins/classic/ui.js`,
-  `evacuateShown`)
+  and 2.0); the Evacuate button and "Evacuate planet…" then never show. Evacuate is a
+  rule, not a modern convenience. Left out (or `true`): they always show.
+  (`js/skins/classic/ui.js`, `evacuateShown`)
 - `rs.dragShare(G, player, slot, newPerMille)`: the version's own way of dragging a budget
-  bar (2.0: the others move in proportion, never below a losing colony's least share;
-  1.2: the same with a floor of 0). `slot` is `'tech'`, `'savings'` or a colony's star id;
+  bar (2.0 and 1.2: the others move in proportion, with a floor of 0; only a new
+  colony's first share uses the least-share floor). `slot` is `'tech'`, `'savings'` or a colony's star id;
   it returns the new shares in per mille (`{ tech, savings, col: { [starId]: pm } }`) or
   sets `player.budget` itself. Left out: the others are scaled in proportion, as before.
   (`js/skins/classic/ui.js`, `dragBudget`)
+- `rs.hints`: `false` when the version had no between-turn hints (1.2, 2.0, 3.0.1); the
+  hints choice in Preferences is then left out. (`js/skins/classic/ui.js`, `addTurnNotes`, `openPrefs`)
+- `rs.celsius`: `true` when the version showed temperatures only in °C, to a tenth (1.2,
+  the French edition); Preferences then shows °C as fixed. (`js/skins/classic/ui.js`, `degF`)
+- `rs.bestBuddies`: `false` when the version had alliances but no best-buddy pacts (3.0.1);
+  the Players window then offers only Ally. Left out: both, when `features.alliances` is on.
+  (`js/skins/classic/ui.js`, `openPlayers`)
+- Ranks: a ruleset with `rs.masterPoints` and `rs.difficulty` and no rank table of its own
+  (`rs.RANKS`) uses 5.0.5's 25 ranks: a win earns master points and the Game menu offers
+  "Rank history…" (the Original and Palm OS 5 rules). Other rulesets have no ranks there.
+  (`js/skins/classic/ui.js`, `hasRanks`)
 - A battle report's `won: true` or `won: false` (an option of `msg()`): auto play stops on
   battles won or lost by it. `engine.js` `battleNews` sets it; a ruleset that writes its
   own reports should too. It is not saved with the game. A report with no `won` still
@@ -80,6 +91,11 @@ Optional ruleset flags the skin reads (each is documented where it is read):
 - `js/skins.js`: the list of skins and their sounds, and the loader. A skin is everything you see and
   hear; the game files above never touch the page, so any skin can play any ruleset
   and any saved game. The comment at the top of `js/skins.js` says what a skin must do.
+  The controls that belong to a ruleset's game (Evacuate, the battle stance, Arrive late,
+  alliances, the New Game choices, the shipbuilding and terraform / mine bars, …) show
+  whenever that ruleset is played, in every skin, and only then: a skin changes how they
+  look, never whether they are there. Each skin's `style.css` draws the form controls
+  (check boxes, lists, sliders, fields) in its own look, under "Form controls".
 - `js/skins/classic/`: the "classic" skin, modelled on the original
   (`ui.js`: page, map, panels, dialogs, battle replay, sound, title screen; `style.css`)
 - `js/skins/dos/`: the "DOS 2.0" skin: the classic page with the DOS game's art,

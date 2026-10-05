@@ -18,7 +18,13 @@
 //   how a new game started in one skin opens in another;
 // - offer HOSKINS.list as a choice in its New Game window when there is
 //   more than one skin, and call HOSKINS.switchTo(id) after saving the new
-//   game to move to the chosen one.
+//   game to move to the chosen one;
+// - show every control that belongs to the ruleset being played (its
+//   HO.feature()s and rs flags: Evacuate, battle stances, alliances, the New
+//   Game choices, the shipbuilding bar, …) and none that it doesn't have,
+//   whatever the skin: a skin draws those controls in its own look (its
+//   buttons, check boxes, lists and sliders), never decides whether they are
+//   there. The skins built on js/skins/classic/ui.js get this from it.
 //
 // Sounds belong to the skin: a game plays only the sounds its skin's
 // original had (SOUNDS below), and an event the original had no sound for

@@ -152,19 +152,23 @@ const Sound = {
 const Prefs = { celsius: false, important: false, review: false, hints: true, autoRoute: true, tips: true };
 try { const s = JSON.parse(localStorage.getItem('ho5.prefs') || '{}'); if (s.sound === false) Sound.on = false; if (s.music) Sound.music = true; for (const k in Prefs) if (s[k] != null) Prefs[k] = s[k]; } catch (e) {}
 function savePrefs() { try { localStorage.setItem('ho5.prefs', JSON.stringify(Object.assign({ sound: Sound.on, music: Sound.music }, Prefs))); } catch (e) {} }
-const degF = (f) => Prefs.celsius ? Math.round((f - 32) * 5 / 9) + '°C' : Math.round(f) + '°';
-const degText = (t) => Prefs.celsius ? t.replace(/(-?\d+)°(F)?/g, (m, n) => Math.round((+n - 32) * 5 / 9) + '°C') : t;
+// rs.celsius: the version showed temperatures in °C, to a tenth (1.2, the
+// French edition); otherwise °C is the player's preference
+const rsCelsius = () => !!(G && HO.rules(G).celsius);
+const toC = (f) => rsCelsius() ? ((f - 32) * 5 / 9).toFixed(1) : Math.round((f - 32) * 5 / 9);
+const degF = (f) => Prefs.celsius || rsCelsius() ? toC(f) + '°C' : Math.round(f) + '°';
+const degText = (t) => Prefs.celsius || rsCelsius() ? t.replace(/(-?\d+)°(F)?/g, (m, n) => toC(+n) + '°C') : t;
 
 // ---------- state ----------
 let G = null;            // game
 // "Modern conveniences" (a New Game option, also in Preferences): helpers the
 // original games didn't have. Off, the game plays as the originals did.
 const modern = () => !!(G && G.opts && G.opts.modern);
-// Evacuate (give up a colony): rs.evacuateCommand says whether the version
-// had the command. true or left out: the planet panel's Evacuate button and
-// the map menu's "Evacuate planet…" always show; false (1.2 and 2.0 had no
-// such command): they show only with modern conveniences on.
-const evacuateShown = () => HO.rules(G).evacuateCommand !== false || modern();
+// Evacuate (give up a colony) is a rule: rs.evacuateCommand says whether the
+// version had the command. true or left out: the planet panel's Evacuate
+// button and the map menu's "Evacuate planet…" show; false (1.2 and 2.0 had
+// no such command): they never show, modern conveniences or not.
+const evacuateShown = () => HO.rules(G).evacuateCommand !== false;
 // whose turn it is (several humans can share one computer: hot seat)
 let ME = 0;
 const me = () => G.players[ME];
@@ -715,9 +719,10 @@ function setShare(entries, idx, f) {
 // or sets player.budget itself (shares as fractions of 1) and returns
 // nothing. With it, the bars are not scaled to add up to exactly 1 (the
 // rules keep whole per mille, and a total near 1,000 is left alone). 2.0:
-// the others move in proportion, none below a losing colony's least share
-// (FUN_1010_179a with FUN_1010_218e); 1.2: the same with a floor of 0
-// (DoHBarClick @c1002). Without it, the others are scaled in proportion.
+// the others move in proportion, with a floor of 0 (FUN_1010_1303 sets every
+// slot's least share to 0 for the drag; FUN_1010_179a); 1.2: the same
+// (DoHBarClick @c1002). Only a new colony's first share uses the least-share
+// floor, and not in a drag. Without it, the others are scaled in proportion.
 function dragBudget(p, key, f, start) {
   const b = p.budget, o = JSON.parse(start);
   b.tech = o.tech; b.savings = o.savings; b.col = o.col;
@@ -1009,12 +1014,17 @@ function profile() {
   try { return Object.assign({ points: 0, games: [] }, JSON.parse(localStorage.getItem('ho5.profile') || '{}')); } catch (e) { return { points: 0, games: [] }; }
 }
 function rankOf(points) { const R = HO.DATA.ranks || []; let i = 0; while (i + 1 < R.length && points >= R[i + 1][1]) i++; return i; }
+// The rulesets with 5.0.5's ranks: a difficulty rating and master points,
+// and no rank table of their own (rs.RANKS: 4.0.5's ten ranks, not shown
+// yet). Original (5.0.5) and Palm OS 5 (the same code); 1.2, 2.0, 3.0.1
+// and the Claude rules have no ranks.
+const hasRanks = (g) => { const rs = HO.rules(g); return !!(rs.masterPoints && rs.difficulty && !rs.RANKS); };
 function awardMasterPoints(byComputer) {
-  if (!G || !G.over || G.mpDone || G.rules !== 'original' || hotSeat()) return;
+  if (!G || !G.over || G.mpDone || !hasRanks(G) || hotSeat()) return;
   G.mpDone = true;
   const won = G.winner === ME || (G.winners || []).includes(ME);
   if (!won || byComputer) return; // INFERRED: no points when the computer played your last turn
-  const RS = HO.RULESETS.original;
+  const RS = HO.rules(G);
   const d = RS.difficulty(Object.assign({}, G.opts, { armageddons: G.armageddons || 0, won: true, year: G.year }));
   const pts = RS.masterPoints(d);
   const pr = profile(), before = rankOf(pr.points);
@@ -1040,7 +1050,7 @@ function openRanks() {
   const body = el('div', { class: 'rank' },
     el('img', { src: A.jpg[cur], alt: '' }),
     el('h3', null, R[cur][0]), el('p', null, `Total master points: ${fmt(pr.points)}`),
-    el('p', { class: 'sub' }, 'You earn master points by winning games with Original rules. The harder the game, the more points.'),
+    el('p', { class: 'sub' }, 'You earn master points by winning games with the 5.0.5 or Palm OS 5 rules. The harder the game, the more points.'),
     el('table', { class: 'ptable' }, el('tr', null, el('th', null, 'Rank'), el('th', null, 'Points'), el('th', null, 'Unlocks')),
       ...R.map((r, i) => el('tr', { class: i === cur ? 'me' : '' }, el('td', null, (i <= cur ? '★ ' : '') + r[0]), el('td', null, fmt(r[1])), el('td', null, r[2] || '')))));
   if (pr.games.length) body.append(el('h4', null, 'Wins'), el('table', { class: 'ptable' }, el('tr', null, el('th', null, 'Date'), el('th', null, 'Year'), el('th', null, 'Difficulty'), el('th', null, 'Points')),
@@ -1141,8 +1151,11 @@ function toast(t) {
 // the ships queued there, one at a time
 function yardBox(s) {
   const p = me(), box = el('div', { class: 'yard' });
-  box.append(el('div', { class: 'tm' }, el('span', null, 'Shipbuilding'),
-    el('input', { type: 'range', min: 0, max: 100, value: Math.round((s.ship || 0) * 100), 'aria-label': 'Share of this colony’s money for shipbuilding', oninput: (ev) => { s.ship = ev.target.value / 100; ev.target.nextSibling.textContent = ev.target.value + '%'; }, onchange: save }),
+  // the bar is filled up to the share (--split), in each skin's bar colours
+  const inp = el('input', { type: 'range', min: 0, max: 100, value: Math.round((s.ship || 0) * 100), 'aria-label': 'Share of this colony’s money for shipbuilding',
+    oninput: (ev) => { s.ship = ev.target.value / 100; ev.target.style.setProperty('--split', ev.target.value + '%'); ev.target.nextSibling.textContent = ev.target.value + '%'; }, onchange: save });
+  inp.style.setProperty('--split', Math.round((s.ship || 0) * 100) + '%');
+  box.append(el('div', { class: 'tm' }, el('span', null, 'Shipbuilding'), inp,
     el('span', null, Math.round((s.ship || 0) * 100) + '%')));
   const q = s.queue || [];
   if (q.length) {
@@ -1368,8 +1381,10 @@ function openBattle(bid) {
 function openPlayers() {
   const rows = G.players.map(p => ({ p, sc: HO.score(G, p) })).sort((a, b) => b.sc - a.sc);
   const pacts = HO.feature(G, 'alliances');
+  // rs.bestBuddies false: the version had alliances but no best buddies (3.0.1)
+  const buddies = pacts && HO.rules(G).bestBuddies !== false;
   const t = el('table', { class: 'ptable' }, el('thead', null, el('tr', null, el('th', null, ''), el('th', null, 'Player'), el('th', null, 'Colonies seen'), el('th', null, 'Status'),
-    pacts ? el('th', null, 'Ally') : null, pacts ? el('th', null, 'Best buddy') : null)));
+    pacts ? el('th', null, 'Ally') : null, buddies ? el('th', null, 'Best buddy') : null)));
   const tb = el('tbody');
   const mine = me();
   for (const { p } of rows) {
@@ -1379,7 +1394,7 @@ function openPlayers() {
     if (pacts && p.id !== 0 && p.alive) {
       const they = (p.allies || []).includes(0), we = (mine.allies || []).includes(p.id);
       if (HO.isBuddy(G, ME, p.id)) status = 'Your best buddy';
-      else if (HO.isAllied(G, ME, p.id)) status = 'Your ally' + ((p.buddies || []).includes(ME) ? ' (offers best buddies)' : '');
+      else if (HO.isAllied(G, ME, p.id)) status = 'Your ally' + (buddies && (p.buddies || []).includes(ME) ? ' (offers best buddies)' : '');
       else if (they) status = 'Offers to ally';
       else if (we) status = 'You offered to ally';
     }
@@ -1387,12 +1402,13 @@ function openPlayers() {
       onchange: (e) => { HO.setPact(G, ME, p.id, kind, e.target.checked); save(); closeModal(); openPlayers(); } });
     tb.append(el('tr', { class: p.alive ? '' : 'dead' }, el('td', null, el('img', { src: A.img[face], alt: '', class: 'face' })), el('td', null, p.human ? p.name + ' (you)' : p.name), el('td', null, String(seen)), el('td', null, status),
       pacts ? el('td', null, p.id === ME || !p.alive ? '' : chk('ally', (mine.allies || []).includes(p.id))) : null,
-      pacts ? el('td', null, p.id === ME || !p.alive ? '' : chk('buddy', (mine.buddies || []).includes(p.id))) : null));
+      buddies ? el('td', null, p.id === ME || !p.alive ? '' : chk('buddy', (mine.buddies || []).includes(p.id))) : null));
   }
   t.append(tb);
   const h = me().hist;
   const g = el('canvas', { width: 520, height: 160, class: 'graph' });
-  const note = pacts ? el('p', { class: 'sub' }, 'An alliance or best-buddy pact starts when both sides tick it. Allies don’t fight each other, refuel at each other’s colonies, and win together if every survivor is allied. Best buddies also share what they explore.') : null;
+  const note = pacts ? el('p', { class: 'sub' }, buddies ? 'An alliance or best-buddy pact starts when both sides tick it. Allies don’t fight each other, refuel at each other’s colonies, and win together if every survivor is allied. Best buddies also share what they explore.'
+    : 'An alliance starts when both sides tick it. Allies don’t fight each other, refuel at each other’s colonies, and win together if every survivor is allied.') : null;
   const body = el('div', null, t, note, el('h4', null, 'Your history'), g, el('p', { class: 'sub' }, 'Gold: total population. Blue: income. Green: tech.'));
   modal('Players', body, { cls: 'mid' });
   const x = g.getContext('2d');
@@ -1606,8 +1622,13 @@ function autoRoute(f, tgt) {
 }
 function openPrefs() {
   const box = (k, label) => el('label', { class: 'chk' }, el('input', { type: 'checkbox', checked: Prefs[k] ? 'checked' : false, onchange: (e) => { Prefs[k] = e.target.checked; savePrefs(); renderPanel(); } }), el('span', null, label));
+  // hints: only for a version that had them (rs.hints false: none between
+  // turns); °C: fixed on for a version that showed only °C (rs.celsius)
+  const hints = !G || HO.rules(G).hints !== false;
   modal('Preferences', el('div', { class: 'prefs' }, box('important', 'Show only the most important messages'), box('review', 'Review battles as they happen'),
-    box('hints', 'Give helpful game play hints'), box('celsius', 'Temperatures in Celsius (not °F)'),
+    hints ? box('hints', 'Give helpful game play hints') : null,
+    rsCelsius() ? el('label', { class: 'chk' }, el('input', { type: 'checkbox', checked: 'checked', disabled: true }), el('span', null, 'Temperatures in Celsius (this version showed only °C)'))
+      : box('celsius', 'Temperatures in Celsius (not °F)'),
     G ? el('label', { class: 'chk' }, el('input', { type: 'checkbox', checked: modern() ? 'checked' : false, onchange: (e) => setModern(e.target.checked) }),
       el('span', null, 'Modern conveniences in this game (automatic routes, the map follows the news, battle speed and written reports)')) : null,
     box('tips', 'Explain things when the pointer rests on them (text from the original manual)')), { cls: 'small' });
@@ -1901,7 +1922,7 @@ function save() { if (!G) return; try { localStorage.setItem('ho5.save', HO.save
 // ---------- menus ----------
 function setupMenus() {
   const menus = {
-    Game: [['New game…', newGameDialog], ['Players and history', () => G && openPlayers()], ['Auto-play this turn', () => { if (!G || G.over) return; me().auto = true; doEndTurn(); me().auto = false; }], ['Auto play…', () => G && !G.over && (hotSeat() ? toast('Auto play is for one-player games.') : openAutoPlay())], ['Preferences…', openPrefs], ['Rank history…', openRanks], ['-'], ['Quit to title', () => { save(); Sound.play(7002); G = null; renderPanel(); draw(); $('#panel').innerHTML = ''; $('#msg').innerHTML = ''; titleScreen(); }]],
+    Game: [['New game…', newGameDialog], ['Players and history', () => G && openPlayers()], ['Auto-play this turn', () => { if (!G || G.over) return; me().auto = true; doEndTurn(); me().auto = false; }], ['Auto play…', () => G && !G.over && (hotSeat() ? toast('Auto play is for one-player games.') : openAutoPlay())], ['Preferences…', openPrefs], ['Rank history…', openRanks, () => !G || hasRanks(G)], ['-'], ['Quit to title', () => { save(); Sound.play(7002); G = null; renderPanel(); draw(); $('#panel').innerHTML = ''; $('#msg').innerHTML = ''; titleScreen(); }]],
     Ships: [['Build ships at selected colony…', () => { if (G && UI.sel != null && G.stars[UI.sel].owner === ME) openBuild(UI.sel); else toast('Select one of your colonies first.'); }], ['Review battle…', () => G && openBattleList()], ['List all fleets…', () => G && openFleetList()], ['Scrap ship types…', () => G && openScrapTypes()], ['Next fleet', nextFleet]],
     Galaxy: [['Players and alliances…', () => G && openPlayers()], ['List explored stars…', () => G && openStarList()],
       ['Give money or metal…', () => G && !G.over && openGive(), 'gifts'],
@@ -1931,7 +1952,8 @@ function setupMenus() {
       dd.innerHTML = '';
       for (const [label, fn, feat, checked] of items) {
         if (label === '-') { dd.append(el('hr')); continue; }
-        if (feat && !(G && HO.feature(G, feat))) continue;
+        // feat: a feature the rules must have (HO.feature), or a function that says whether to show the item
+        if (feat && !(typeof feat === 'function' ? feat() : G && HO.feature(G, feat))) continue;
         const on = checked ? !!checked() : null;
         const text = typeof label === 'function' ? label() : label;
         // (role menuitem: every skin styles its menus' items by that role)

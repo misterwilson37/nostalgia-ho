@@ -38,3 +38,46 @@ button:not(.mbtn):not(.close):not(.tbtn):not(.clock):not([role=menuitem]):active
 .tcard h1 { font: bold clamp(28px, 6vw, 46px)/1 var(--ui); color: #000; text-shadow: none; }
 .tcard .by, .credit { color: #333; }
 #tframe { width: min(300px, 80vw); image-rendering: auto; }
+/* Form controls (Palm OS): the checkboxes, pop-up lists and sliders a
+   ruleset brings (battle stance, arrive late, alliances, the New Game
+   choices, the designer's sliders, terraform / mine and shipbuilding) are
+   drawn as Palm OS draws them whatever the rules: a pop-up trigger is its
+   black triangle and bold text, a field is underlined with dots, a check box
+   is a thin square with a tick, and a slider is this skin's budget bar
+   (.track) with a black thumb. ("html" outranks the classic skin's
+   ".newgame input".) */
+html input[type=text], html input[type=number], html input:not([type]) {
+  font: inherit; color: #000; border: 0; border-bottom: 1px dotted #000; border-radius: 0; background: transparent; padding: 2px 1px;
+}
+html input[type=number] { -moz-appearance: textfield; appearance: textfield; }
+html input[type=number]::-webkit-inner-spin-button, html input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+html select, html .newgame select {
+  -webkit-appearance: none; appearance: none; font: bold 11px var(--ui); color: #000; cursor: pointer;
+  border: 0; border-radius: 0; padding: 2px 4px 2px 14px;
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='7' height='4'><path d='M0 0h7L3.5 4z'/></svg>") no-repeat left 2px center / 7px 4px, transparent;
+}
+html input[type=checkbox] {
+  -webkit-appearance: none; appearance: none; width: 11px; height: 11px; margin: 0 3px 0 0; padding: 0; flex: none; cursor: pointer; vertical-align: middle;
+  border: 1px solid #000; border-radius: 2px; background: #fff;
+}
+html input[type=checkbox]:checked {
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='7' height='7'><path d='M0 2v3l2 2 5-5V0L2 5z'/></svg>") no-repeat center / 7px 7px, #fff;
+}
+html input[type=checkbox]:disabled, html input[type=range]:disabled, html select:disabled { opacity: .5; cursor: default; }
+html input[type=checkbox]:focus-visible, html select:focus-visible, html input[type=range]:focus-visible { outline: 1px dotted #000; outline-offset: 2px; }
+html input[type=range], html .tm input[type=range], html .newgame .slider input[type=range] {
+  -webkit-appearance: none; appearance: none; height: 10px; margin: 0; padding: 0; min-width: 0; cursor: ew-resize;
+  border: 1px solid #000; border-radius: 2px; background: #fff;
+}
+html input[type=range]::-webkit-slider-thumb, html .tm input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 7px; height: 14px; border: 0; border-radius: 2px; background: #000; cursor: ew-resize;
+}
+html input[type=range]::-moz-range-thumb, html .tm input[type=range]::-moz-range-thumb {
+  width: 7px; height: 14px; border: 0; border-radius: 2px; background: #000; cursor: ew-resize;
+}
+html input[type=range]::-moz-range-track { background: transparent; }
+/* terraform / mine keeps the bar colours this skin shares with the classic
+   one; shipbuilding: the colony bar's stripes up to the share */
+html .tm input[type=range] { background: linear-gradient(90deg, #4f9e4f 0 var(--split, 50%), #b0573a var(--split, 50%) 100%); }
+html .yard .tm input[type=range] { background: linear-gradient(90deg, transparent 0 var(--split, 0%), #fff var(--split, 0%) 100%), repeating-linear-gradient(90deg, #6c86d6 0 6px, #5873c8 6px 7px); }
+.newgame .opts { border: 1px solid #000; border-radius: 3px; }

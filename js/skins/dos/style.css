@@ -53,3 +53,53 @@ button:not(.mbtn):not(.close):not(.tbtn):not(.clock):not([role=menuitem]):active
 .clock.pic { padding: 0; background: none; border: 0; box-shadow: none; }
 .clock.pic img { display: block; width: 102px; height: auto; image-rendering: pixelated; }
 .clock.pic:active img { transform: translate(1px, 1px); }
+/* Form controls (Windows 3.1): the checkboxes, pop-up lists and sliders a
+   ruleset brings (battle stance, arrive late, alliances, the New Game
+   choices, the designer's sliders, terraform / mine and shipbuilding) are
+   drawn in this skin's look whatever the rules: a field is the sunken white
+   box, a list has the grey drop-down button, a checkbox is the square with
+   an X, and a slider is the budget bar (.track) with a grey button for its
+   thumb. ("html" outranks the classic skin's ".newgame input".) The Amiga
+   and Mac skins build on this and change what they need. */
+html select, html input[type=text], html input[type=number], html input:not([type]) {
+  font: inherit; color: #000; border: 2px solid; border-color: #808080 #fff #fff #808080; border-radius: 0; background-color: #fff;
+}
+html select, html .newgame select {
+  -webkit-appearance: none; appearance: none; padding: 2px 22px 2px 4px; cursor: pointer;
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='4'><path d='M0 0h8L4 4z'/></svg>") no-repeat right 4px center / 8px 4px,
+    linear-gradient(#fff, #fff) no-repeat right 15px top / 1px 100%,
+    linear-gradient(#404040, #404040) no-repeat right 16px top / 1px 100%,
+    linear-gradient(#c0c0c0, #c0c0c0) no-repeat right top / 16px 100%, #fff;
+}
+html input[type=number] { -moz-appearance: textfield; appearance: textfield; }
+html input[type=number]::-webkit-inner-spin-button, html input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+html input[type=checkbox] {
+  -webkit-appearance: none; appearance: none; width: 13px; height: 13px; margin: 0 3px 0 0; padding: 0; flex: none;
+  border: 1px solid #000; border-radius: 0; background: #fff; vertical-align: middle; cursor: pointer;
+}
+html input[type=checkbox]:checked {
+  background: linear-gradient(45deg, transparent calc(50% - .8px), #000 calc(50% - .8px) calc(50% + .8px), transparent calc(50% + .8px)),
+    linear-gradient(-45deg, transparent calc(50% - .8px), #000 calc(50% - .8px) calc(50% + .8px), transparent calc(50% + .8px)), #fff;
+}
+html input[type=checkbox]:disabled, html input[type=range]:disabled, html select:disabled { opacity: .55; cursor: default; }
+html input[type=checkbox]:focus-visible, html select:focus-visible, html input[type=range]:focus-visible { outline: 1px dotted #000; outline-offset: 2px; }
+html input[type=range], html .tm input[type=range], html .newgame .slider input[type=range] {
+  -webkit-appearance: none; appearance: none; height: 13px; margin: 0; padding: 0; min-width: 0;
+  border: 1px solid #000; border-radius: 0; background: #fff; cursor: ew-resize;
+}
+html input[type=range]::-webkit-slider-thumb, html .tm input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 10px; height: 17px; border-radius: 0; cursor: ew-resize;
+  background: #c0c0c0; border: 2px solid; border-color: #fff #404040 #404040 #fff; box-shadow: 1px 1px 0 #000;
+}
+html input[type=range]::-moz-range-thumb, html .tm input[type=range]::-moz-range-thumb {
+  width: 6px; height: 13px; border-radius: 0; cursor: ew-resize;
+  background: #c0c0c0; border: 2px solid; border-color: #fff #404040 #404040 #fff; box-shadow: 1px 1px 0 #000;
+}
+html input[type=range]::-moz-range-track { background: transparent; }
+/* terraform / mine: one budget bar in two of this skin's bar colours;
+   shipbuilding: the bar filled to the colony's share */
+html .tm input[type=range] { border-radius: 0; background: linear-gradient(90deg, #008000 0 var(--split, 50%), #800000 var(--split, 50%) 100%); }
+html .yard .tm input[type=range] { background: linear-gradient(90deg, #000080 0 var(--split, 0%), #fff var(--split, 0%) 100%); }
+.tm .tml, .tm .tmr { color: #000; }
+.newgame .opts { border: 2px groove #fff; }
+.facts label.chk, .prefs label.chk, .newgame label.chk { cursor: pointer; }

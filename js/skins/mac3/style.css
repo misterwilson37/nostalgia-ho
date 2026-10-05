@@ -33,10 +33,30 @@ button:not(.mbtn):not(.close):not(.tbtn):not(.clock):not([role=menuitem]):active
 #tframe { width: min(386px, 86vw); }
 .credit { color: #fff; }
 .clock.pic img { width: 104px; }
-input[type=range], input[type=checkbox], input[type=radio] { accent-color: #000; }
-/* the split bar (shipbuilding / savings, terraform / mine): solid and grey patterns */
-.tm input[type=range] { border-color: #000; border-radius: 0;
+/* Form controls (System 6 and 7): the DOS skin's (js/skins/dos/style.css)
+   in black and white: fields in a thin black box, a pop-up menu with its
+   drop shadow and triangle, square check boxes with an X, and sliders drawn
+   as this skin's budget bar with a white thumb. */
+html select, html input[type=text], html input[type=number], html input:not([type]) {
+  border: 1px solid #000; border-radius: 0; background-color: #fff; box-shadow: none;
+}
+html select, html .newgame select {
+  padding: 1px 20px 1px 5px; box-shadow: 1px 1px 0 #000;
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='9' height='5'><path d='M0 0h9L4.5 5z'/></svg>") no-repeat right 6px center / 9px 5px, #fff;
+}
+html input[type=checkbox] { width: 12px; height: 12px; border: 1px solid #000; }
+html input[type=range], html .tm input[type=range], html .newgame .slider input[type=range] { height: 12px; border: 1px solid #000; background: #fff; }
+html input[type=range]::-webkit-slider-thumb, html .tm input[type=range]::-webkit-slider-thumb {
+  width: 9px; height: 16px; background: #fff; border: 1px solid #000; box-shadow: 1px 1px 0 #000;
+}
+html input[type=range]::-moz-range-thumb, html .tm input[type=range]::-moz-range-thumb {
+  width: 7px; height: 14px; background: #fff; border: 1px solid #000; box-shadow: 1px 1px 0 #000;
+}
+/* the split bar (terraform / mine): solid and grey patterns; shipbuilding: solid to the share */
+html .tm input[type=range] {
   background: linear-gradient(90deg, #000 0 var(--split, 50%), transparent var(--split, 50%) 100%),
-              repeating-linear-gradient(45deg, #000 0 1px, #fff 1px 3px); }
-.tm input[type=range]::-webkit-slider-thumb { border-radius: 0; border-color: #000; }
+              repeating-linear-gradient(45deg, #000 0 1px, #fff 1px 3px);
+}
+html .yard .tm input[type=range] { background: linear-gradient(90deg, #000 0 var(--split, 0%), #fff var(--split, 0%) 100%); }
 .tm .tml, .tm .tmr { color: #000; }
+.newgame .opts { border: 1px solid #000; }

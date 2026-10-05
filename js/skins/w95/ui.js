@@ -69,6 +69,7 @@ window.HOTHEME = {
     const R = (icon, sound) => ({ icon: icon && P + icon, sound });
     const face = (q) => q && !q.human ? 'bad' + q.face + '_' + (q.female ? 1 : 0) : P + own;
     const tech = ['Range', 'Speed', 'Weapon', 'Shield', 'Mini'].findIndex(n => new RegExp('Your ' + n + '\\w* Tech').test(t));
+    if (!t.trim()) return R(own, 'shucks'); // 1.2's blank meteor report: your planet, bad news
     if (/^Spaceward Ho! by/.test(t)) return R('b3115', 'click');
     if (/^Click here/.test(t)) return R('b3116', 'click');
     if (tech >= 0) return R('b' + (3100 + tech), 'burst');

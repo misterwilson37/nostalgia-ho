@@ -241,3 +241,10 @@ button[data-help] { cursor: pointer; }
 .about .vnotes ul { margin: 0; padding-left: 20px; }
 .about .vnotes li { margin: 3px 0; }
 .about .vnotes p { margin: 2px 0; }
+/* shipbuilding (2.0 and 1.2 rules): the colony bar's stripes up to the colony's share */
+.yard .tm input[type=range] { background: linear-gradient(90deg, transparent 0 var(--split, 0%), #f8f8f8 var(--split, 0%) 100%), repeating-linear-gradient(90deg, #6c86d6 0 6px, #5873c8 6px 7px); }
+/* a window taller than the screen (New Game on a phone, with a ruleset's
+   options) scrolls inside, so its last controls and its OK button stay in
+   reach: the scrim's row has no height for "100%" to work from */
+.win { max-height: calc(100vh - 24px); max-height: calc(100dvh - 24px); }
+.wbody { min-height: 0; }
