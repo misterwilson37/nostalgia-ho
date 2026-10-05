@@ -238,7 +238,61 @@ play, several humans joining the game file with passwords, across a network.
 
 ## Windows 95 4.0.5 (1996)
 
-To be written in turn.
+### What it is
+
+4.0.5 (Delta Tao, 1996) is the Windows 95 program, an MFC application, which plays
+across platforms with the Mac 4.0.5. It is **3.0.1's game grown up**: its End Turn is
+3.0.1's routine for routine, its battles are 3.0.1's duels and its computer players are
+3.0.1's, with new ship classes, Radical tech as a hand of cards, best buddies and much of
+the arithmetic 5.0.5 keeps. Everything below is from the code (`docs/coverage-405.md`,
+`docs/405-findings.md`; 3.0.1: `docs/coverage-301.md`, `docs/301-findings.md`).
+
+### Rules: what stayed
+
+The turn's two passes and their routines (pass 2 now in two loops); Total Money and
+Ship Savings with the $2,000,000 rule, interest, debt at 15 %, the borrowing limit, Dip
+Into Savings, global warming; Savings, Technology and colonies newest first; two colony
+bars with −1 for done; MaintainKillStars, scrapping, meteors from hyperspace; duels with
+the colony's owner, luck, groups of one design, Colony Ships and Satellites targeted
+first, debris a fifth of the metal; novas and Armageddon; alliances, gifts (3 a turn),
+surrender, 10 canned messages a turn; out with no colonies and no Colony Ships; an
+alliance wins if it holds; Skill Levels with 3.0.1's people and income; Dumb to
+Diabolical computers; 3.0.1's galaxy generator; Organize Ships.
+
+### Rules: what changed
+
+| Area | 3.0.1 | 4.0.5 |
+|---|---|---|
+| Ship classes | Scout, Fighter, Colony Ship, Satellite; 20 designs | + Dreadnought (25 shots, × 25 hit points and metal, × 40 price) and Tanker (refuels every fleet at its star), Biologicals and decoys from Radical tech; 30 designs (`FUN_0041a9b4`) |
+| Building | as many ships as you can pay for | no more ships a turn at a colony than it has people (`FUN_0044eecd`, `FUN_00462105`) |
+| Starting money | income and metal by skill, no savings | Ship Savings by skill too ($100,000 Novice to $0 Expert) (`FUN_004427a4`) |
+| Interest | 10 × the whole root of savings | 10 × the exact root (`FUN_00437592`) |
+| Terraforming, mining, income | √(money/2) tenths; 15 × √money; the log of the whole root | √(⅔ money) tenths; 20 × √money; the log of the exact root (5.0.5's) (`FUN_00433c52`, `FUN_00437592`) |
+| Research | Range costs (L)², divisor 120 | Range costs L³/9, divisor 150 (`FUN_00434dad`) |
+| Radical tech | six outcomes at random | a hand of 4 of 17 discoveries from 2010: bonuses for mining, people, terraforming, generals and recycling, decoys and Biologicals, stealing tech, free designs (`FUN_0043a08c`, `FUN_0043adac`) |
+| A colony's share when lost | to Savings | to the other slots (`FUN_00439bf7`) |
+| Budget bars | each colony's most share the cost of finishing it | 0 to 1,000 for every slot (`FUN_0045c61e`) |
+| Battles | one shot a ship, the planet one shot; WPNRAT table | Satellites 2 shots, Dreadnoughts 25, the planet one per 200,000 people; an arctangent hit table; luck an option (`FUN_00421430`, `FUN_00423b52`, `FUN_0047b5dc`) |
+| Diplomacy | alliances | + best buddies (humans), who route through and see each other's exploring (`FUN_004221d7`, `FUN_0043853c`) |
+| Reports | — | biologicals eating, the Valdez, population milestones, "You just received … metal" (`FUN_00437ddd`, `FUN_0043b243`, `FUN_0043747e`) |
+| Novas | always possible | behind an option bit nothing sets (docs/open-questions.md) |
+| Every human out | the computers play on | the same, and the map is shown (`FUN_0047fb7b`) |
+| Winning | a difficulty rating in the Hall of Fame | master points by difficulty and ten ranks, Red-Neck to Ho! Champion (`FUN_00497e58`, `FUN_00482b89`) |
+| Spiral and Cluster | laid out in 2010 (the computers skip their first turn) | laid out at the start, no skip |
+
+### Computer players
+
+3.0.1's, step for step (`FUN_0045e8bb`): six classes of design, Dreadnoughts in attacks
+(one bought when one is enough), Tankers always retired, feelings read from their own
+reports, gifts weighed against the gross income or the metal; the poorest found among
+every player, out ones included (`docs/405-findings.md`).
+
+### Interface
+
+A Windows 95 MFC program with a map window, report list with a picture and sound for
+each report, budget bars, Ship Types, Organize Ships, Alliances, Give, Surrender, the
+canned Send Message, the radical hand window, the Hall of Fame with ranks, auto play
+settings, a turn time limit and network play.
 
 ## Mac 5.0.5 (2003)
 

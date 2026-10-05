@@ -81,6 +81,12 @@ window.HOTHEME = {
     if (/Valdez/.test(t)) return R('b3112', 'sonofa');
     if (/armageddon device is on|activated the armageddon/i.test(t)) return R(own, 'scream');
     if (m.battle) {
+      // 4.0.5 (FUN_0046f8cc): "You won/lost a battle" (0x40b, 0x40c) show
+      // the other side's face; "destroyed your colony" (0x3f3) and
+      // "survived an enemy attack" (0x40d) fall to the default, your own
+      // (FUN_0046fe1b: SHUCKS for 0x3f3, no sound for 0x40b-0x40d)
+      if (/destroyed your colony/.test(t)) return { icon: P + own, sound: 'shucks' };
+      if (/survived an enemy attack/.test(t)) return { icon: P + own, sound: null };
       const b = G.battles.find(x => x.id === m.battle), o = b && b.sides.find(x => x !== ME && G.players[x]);
       return { icon: face(o != null && G.players[o]), sound: null };
     }

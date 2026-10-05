@@ -314,13 +314,94 @@ These are what 3.0.1's code does and what the remake now does; they look like sl
 
 ## Windows 95 4.0.5 (1996)
 
-To be done in turn. Already noted: the novas option bit (galaxy +0x16 bit 2) is never
-set by the New Game code (`FUN_00409170` sets bit 1 from the Alliances box and bits 4
-and 8 from the preferences; the rest of the word is left from an uninitialised stack
-buffer in `FUN_00484788`); the design window's limits (`FUN_0044e51a`: Range 4 to
-tech, Scout tech + 2, no exception for Biologicals); scrapping idle fleets for a colony
-ship's metal (`FUN_00462600`); how gifts are weighed (`FUN_004648d2` cases 0x44a and
-0x44b); dreadnoughts open to humans from the start (`FUN_0044eb83`).
+All 8,703 routines of the program are accounted for (`docs/coverage-405.md`; none
+unread), and every rule question that came up was answered from 4.0.5's own code, with
+its address in `docs/405-findings.md`. The entries noted here before were re-checked:
+the design window's limits, scrapping idle fleets for a colony ship's metal, how gifts
+are weighed and Dreadnoughts open to humans are settled in the code and done (findings);
+the novas option is below. Where the ruleset uses 3.0.1's code (Organize Ships, the
+arrival messages), the 4.0.5 routine was read and does the same.
+
+### Open
+
+1. **Does a star ever turn red?** `FUN_00436c26` starts a red star only with option bit
+   2 (galaxy +0x16). `FUN_00409170` builds the option word from the Alliances box (bit
+   1) and the preferences (Luck bit 4, auto end bit 8); the rest of the word comes from a
+   stack buffer in `FUN_00484788` that is never cleared, so bit 2 is whatever was in
+   memory. Now: novas on (as 3.0.1, where the bit is always set). Armageddon doesn't
+   depend on it.
+2. **A Radical level with an empty hand.** Before the first deal (2010) a Radical level
+   draws rand(0, 16) but the switch then reads the loop counter, not the draw
+   (`FUN_0043a08c`). Now: the draw is used.
+3. **A hand that runs out on a design card.** When the decoy, biological or free-design
+   card can't be played (too many designs) and no card is left, `FUN_0043a08c` loops for
+   ever. Now: the discovery is lost.
+
+### Settled, worth confirming
+
+These are what 4.0.5's code does and what the remake now does; they look like slips.
+
+1. **The poorest player can be one who is out.** `FUN_00463030` takes the poorest and
+   richest by Total Money over every player, and an out player's is 0, so a computer is
+   seldom "far the poorest" and the richest's alliance penalty still works.
+2. **Surrendering to someone who surrendered to you** is ruled out only after the choice
+   is made (`FUN_004648d2` notes it after `FUN_00463030` has used it).
+3. **30 designs.** With 30 designs `FUN_004639ba` stops, and the classes not yet looked
+   at keep the design numbers chosen on an earlier turn (global `DAT_005b2dc0`), which
+   may now be other designs or none; a Biological design reads past that table.
+4. **ScrapOldShips** passes the fleet's number in the list as its Range (as 3.0.1; no
+   effect), and a Biological fleet is retired at the Scouts' redesign mark (it reads past
+   the retire table).
+5. **RefuelFighters** looks for a colony within the fuel left with the class as the
+   mode and ignores the answer (`FUN_004644c5`).
+6. **FindCloseEnoughColony's mode 4** answers your oldest colony when only a Colony Ship
+   could get there (`FUN_0045f92b`).
+7. **A colony at star 0** can always have its budget bar dragged (`FUN_0045c02c` tests
+   the star number, not the slot kind) and is left out of the population milestones
+   (`FUN_0043b243` counts star numbers above 0).
+8. **Best buddies' battle news is never shared**: the second branch of `FUN_0043853c`
+   asks for a battle this year that is also before this year.
+9. **The auto play settings** put the old colonies-defended value into metal for defence
+   (`FUN_00404c4e`).
+10. **After Armageddon fizzles** every player hears each device "was just turned off"
+    and next step "turned on" again (`FUN_00436988` clears the mask, the switches stay).
+11. **The Valdez** message says the citizens sue for twice your net worth; nothing is
+    taken (`FUN_00437ddd`).
+12. **A rank past 1,000,000 master points** shows "%s: %s" (string 334) instead of a rank
+    name (`FUN_00482b89`).
+13. **Buying at a colony** is allowed while its people (units) exceed the ships built
+    there this turn; for a human the count goes up before the money check
+    (`FUN_004691c4`), for a computer only when bought (`FUN_00462105`).
+14. **Ship power noted and never read** (`FUN_0043b08a`), as 3.0.1.
+
+### Remake's choices
+
+1. **Random numbers** are the remake's own (4.0.5: `FUN_0042a5c0`).
+2. **When the computers plan and fleets move.** 4.0.5 plans and moves for each player in
+   its own pass 1; the remake plans for every computer first and moves every fleet after
+   pass 1. Only what a computer sees of the players before it in the same step differs.
+3. **Scrapping** a human's fleet or design happens at once (4.0.5 marks it, `FUN_00419a52`,
+   and scraps at End Turn); the metal goes where 4.0.5 sends it.
+4. **Dragging a budget bar** redistributes once, from where the drag began.
+5. **Dip Into Savings** takes a percentage of the most (4.0.5: an amount).
+6. **Abandon** is the Evacuate button; its confirmation is the remake's own.
+7. **Several humans** play hot seat (4.0.5 also by network and by game file).
+8. **Alliances during a step** are read as they stand; 4.0.5 reads the copy made in
+   pass 1.
+
+### Interface not done
+
+- **The radical hand window** (`FUN_00471587`): shown with the 2010 report, it lists the
+  four projects (strings 821-837) with a timer and lets the player throw one out.
+- **The Hall of Fame, Hall of Shame and ranks** (`FUN_00497e58`, `FUN_00482b89`);
+  `masterPoints`, `addMasterPoints` and `RANKS` are in the ruleset.
+- **The auto play settings** (`FUN_00404c4e`).
+- **The canned-message window** (codes 0x40e-0x42b): "Look at %s" explores a star for the
+  receiver, "I own %s" marks it, "I like planets ..." gives your home; the remake's
+  messages are free text, of which the computers read "I like ..." and "I like planets
+  that are ...".
+- **The turn time limit** and the computer playing a human who runs out of time
+  (`FUN_0047f76e`); the date jokes (`FUN_00438f47`); network play.
 
 ## Mac 5.0.5 (2003)
 

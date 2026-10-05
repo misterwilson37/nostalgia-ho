@@ -1,42 +1,71 @@
 # Spaceward Ho! 4.0.5 for Windows 95: findings
 
 Spaceward Ho! 4.0.5 for Windows 95 (`SPACEHO.EXE`, 1996) plays across platforms with the
-Mac 4.0.5. This file explains how the "Windows 95 4.0.5" ruleset (`js/rules-405.js`) was
-made and how it differs from the Mac 5.0.5 rules in `js/rules-original.js`.
+Mac 4.0.5. This file says what the "Windows 95 4.0.5" ruleset (`js/rules-405.js`) and
+its computer players (`js/ai-405.js`) do, each rule with the routine it was read from.
+Every routine of the program is accounted for in `docs/coverage-405.md`.
 
-As in `original-findings.md` and `dos-findings.md`, every rule is labelled:
+Labels:
 
-- **CONFIRMED**: read from `SPACEHO.EXE`, cited by the Ghidra name of the function
-  (`FUN_address`). The float constants that the decompile drops were read from the
-  disassembly.
-- **INFERRED**: the decompile doesn't settle it, so the remake follows 5.0.5 or makes a
-  choice.
-- **NOT IMPLEMENTED**: in the 4.0.5 game but not in the remake.
+- **CONFIRMED**: read from `SPACEHO.EXE`, cited by the Ghidra name of the routine
+  (`FUN_address`), with `@address` for a place inside one. Float constants the decompile
+  drops were read from the disassembly; switch tables were decoded by hand.
+- **OPEN**: the code doesn't settle it; listed in `docs/open-questions.md` with what the
+  remake does.
+- **NOT IMPLEMENTED**: in 4.0.5 but not in the remake (interface).
 
 ## The short version
 
-4.0.5 is an **earlier build of the 5.0.5 engine**, so the ruleset is built on the
-"Original" rules (`Object.assign` over `rules-original.js`). Its computer players are
-4.0.5's own (`js/ai-405.js`, from `FUN_0045e8bb` and its 18 steps): the same scheme as
-5.0.5's at an earlier stage, with many small differences (see "Computer players" below).
-Every rule the ruleset still takes from 5.0.5 has been checked against 4.0.5's code (see
-"Inherited rules audit"). The main differences are:
+4.0.5 is **3.0.1's game grown up**, not an early 5.0.5: its End Turn (`FUN_004320f8`)
+is 3.0.1's `EndTurn`, routine for routine, with pass 2 split in two loops; its battles
+are 3.0.1's duels; its computer players are 3.0.1's `DoComputerTurn`, step for step. So
+the ruleset is now built on 3.0.1's (`js/rules-301.js` and `js/ai-301.js`, themselves on
+2.0's), using 3.0.1's pieces where 4.0.5's code does the same (Organize Ships, the
+arrival messages) and writing out what 4.0.5 changed:
 
-- **Setup**: you pick a Skill Level (Novice to Expert) instead of a Home System. One
-  Computer Intelligence setting covers every computer. You can have up to 19 computers.
-  There are 5 named sizes, Dense or Sparse, and 6 shapes (no Hex).
-- **Galaxy**: star positions are whole light-years, and Armageddon does not shrink
-  distances.
-- **Ships cost** a product of all four stats, so high-tech ships cost about twice as much.
-  You can have 30 designs.
-- **Battles** are duels between two players at a time, with a steeper hit table. Leftover
-  damage is lost, and there are no stances and no "arrive late".
-- **Tankers** refuel every fleet at their star completely.
-- **Radical tech** has 17 discoveries, dealt from 2010. The research facility, prime rate
-  and cheaper credit are gone, so interest is a flat 10 × √savings, and debt costs 15%.
-- Novas give less warning and have no miracle rescue.
+- six ship classes (Dreadnoughts and Tankers added) and the Biologicals and decoys of
+  Radical tech; 30 designs; a colony builds no more ships a turn than it has people;
+- Radical tech as a hand of four cards out of 17 discoveries, dealt from 2010;
+- best buddies (humans only), who route through each other's colonies and share maps;
+- 5.0.5's terraforming, mining and income formulas, interest on the exact root, its own
+  ship costs, hit table and research divisors; three new kinds of report;
+- its own galaxy generator (which Mac 3.0.1 shares).
 
-## Ruleset differences from 5.0.5
+The remake's earlier "4.0.5" ruleset was built on 5.0.5's rules; reading every routine
+showed the turn, the money, the battles and the computers are 3.0.1's, so the ruleset
+was rebuilt. What changed in play is listed under "What the rebuild changed".
+
+## The turn (FUN_004320f8, ENDTURN.CPP)
+
+CONFIRMED. One call per 10-year step (`FUN_00431bf0` loops over the years per turn).
+
+1. The year goes up 10. The step's tables are cleared: meteors, other players' scrap
+   over your colonies, the shock wave, battles at each star, big battles, arrivals.
+2. **Pass 1**, for each player in 4.0.5's order (the computers first, then the humans;
+   the remake's turn loops follow that order): "Year %d." (1012); a computer plans
+   (`FUN_0045e8bb`, also a human on auto play); the alliance and best-buddy offers are
+   copied for this step; a player who is out has its Armageddon switch turned on, and
+   every switch that is on goes into the mask; `SurrenderIfDesired` (`FUN_0043427a`),
+   `DeductInterest` (`FUN_0043361b`), `ScrapFleetsAndTypes` (`FUN_00434534`),
+   `MaintainKillStars` (`FUN_00433977`), `TerraformMineStars` (`FUN_00433c52`),
+   `SpendTechMoney` (`FUN_00434dad`), `MoveShips` (`FUN_004357fc`), `RestoreStarsBars`
+   (`FUN_004360af`).
+3. Every battle (`FUN_00421430`), Armageddon (`FUN_00436988`), the novas (`FUN_00436c26`).
+4. **Pass 2a**, for each player: the Armageddon reports, `ReactToSupernova`
+   (`FUN_00436ff8`), `GetOtherScrapMetal` (`FUN_0043747e`), income and growth
+   (`FUN_00437592`), colonizing and exploring (`FUN_00437ddd`).
+5. **Pass 2b**, for each player: allies' arrivals (`FUN_004383a8`), best buddies' maps
+   (`FUN_0043853c`), big battles (`FUN_00438a0f`), surrenders (`FUN_00438718`), the
+   canned messages and gifts of the turn, the net floor and clamps, the radical hand in
+   2010, milestones (`FUN_0043b243`), `DoGameEndStuff` (`FUN_0043bd5f`), the pact news
+   (`FUN_0043625c`, players still in), `RestoreStarsBars`, `SetPlanetDisplayValues`
+   (`FUN_00438b77`).
+6. `CheckForWinner` (`FUN_0043bf98`).
+
+The remake's engine asks every computer to plan before pass 1 and moves every fleet
+after it; 4.0.5 plans and moves for each player inside its own pass 1. As in 3.0.1, this
+changes only what a computer sees of the players before it in the same step (a remake
+choice, docs/open-questions.md).
 
 ### Setup
 
@@ -44,15 +73,18 @@ Every rule the ruleset still takes from 5.0.5 has been checked against 4.0.5's c
 |---|---|---|
 | Computers | 0–19 (20 players in all). The remake still needs at least one computer when one person plays | CONFIRMED (`FUN_00448856`, scroll range 0..0x13) |
 | Computer Intelligence | Dumb, Average, Smart or Diabolical, one setting for every computer. There is no IQ slider and no per-computer spread. "Super Genius" exists only as a string | CONFIRMED (`FUN_00448856`, game +0x14) |
-| Computer personalities | 5.0.5's table with small differences: see "Computer players" | CONFIRMED (`FUN_004438ba`) |
+| Computer personalities | 3.0.1's (`SetCompAttrs`) drawn in 4.0.5's order, with retire and redesign marks for six classes: see "Computer players" | CONFIRMED (`FUN_004438ba`) |
 | Skill Level | Novice $100,000 savings / $51,000 income / 20,000 metal / 750k people, plus a Colony Ship and 2 Scouts. Beginner $50,000 / 41,000 / 12,000 / 625k, plus 2 Scouts. Normal $25,000 / 30,000 / 5,000 / 500k. Advanced $10,000 / 20,000 / 2,500 / 350k. Expert $0 / 20,000 / 0 / 350k. Income gets + rand(1–100). There is no Outpost and no Abundant (and so no second colony) | CONFIRMED (`FUN_004427a4`, dialog 318) |
 | Computers' start | each computer's skill is the intelligence turned round: Dumb = Expert, Average = Advanced, Smart = Normal, Diabolical = Novice. For Average and Smart, each computer but the last has a 39% chance (rand(1–100) < 40) of being set one step lower, and then the next one is set one step higher. The computer joins with that skill, and its intelligence is worked back from it (Novice 4, Normal 3, Advanced 2, Expert 1), so the step changes its intelligence too | CONFIRMED (`FUN_004768cc`, `FUN_00484821` → `FUN_00480eb5`) |
 | Several humans | `FUN_0043c9ea` then copies a human's skill onto each computer, but wealth was already set when the computer joined (`FUN_004427a4`), so only the skill shown changes | CONFIRMED |
 | Computer names | 4.0.5's own: 20 men's names (strings 595–614) and 20 women's (615–634), cut to 11 letters; each computer is a man or a woman at even odds | CONFIRMED (`FUN_004768cc`) |
-| Starting designs | Scout **R8** V2 W1 S1; Tanker **R6 V2** W2 S2; Satellite (R0), Colony Ship and Fighter R6 V2 W2 S2; Mini 0 | CONFIRMED (`FUN_004427a4`) |
-| Technology, budget, home world | as 5.0.5 | CONFIRMED |
-| Gone | "Best Buddies" for the computers, Home System for the computers, "Based on IQ", Hex galaxies | CONFIRMED |
-| Options | Years per turn (10, 20, 30, 50) and three check boxes: Alliances, Luck in Battles, and "Automatically end turn for unconnected players" (option bit 8, `FUN_00473ced`). There is **no Novas check box**, so the remake always turns novas on | Options CONFIRMED (`FUN_00448856`, `FUN_004486bb`); novas always on INFERRED: `FUN_00436c26` tests option bit 2, but where the game sets it wasn't found |
+| Starting designs | in this order: Scout **R8** V2 W1 S1, Satellite (R0) V2 W2 S2, Colony Ship, Fighter and Tanker R6 V2 W2 S2; Mini 0; named as the computers' designs are (one of the first 15 names of the class) | CONFIRMED (`FUN_004427a4`, `FUN_0046472b`) |
+| Technology | 6/2/2/2/0/0 with a head start of rand(0, 40) into each level (Radical 0-80); research split 167 x 4, 166, 166 | CONFIRMED (`FUN_004427a4`) |
+| Budget | slots Savings 650, Technology 250, home 100 per mille; home bars Terraform done ($5,000 sunk), Mine 1,000; Ship Savings by skill; Total Money = income + rand(1, 100); borrowing limit trunc(gross / 2) x -10 | CONFIRMED (`FUN_004427a4` @0x18ee-0x1932) |
+| Home world | 0-200 F, 0.5-2.0 G, 10,000 metal | CONFIRMED (`FUN_004427a4`) |
+| Welcome | reports 1000 and 1002: "Spaceward Ho! Version 4.0.5 by Peter Commons.", "Artwork by Howard Vives and Bob Van de Walle." | CONFIRMED (`FUN_004427a4` @player +0x7cc) |
+| Not in 4.0.5 | Home Systems, "Based on IQ", Hex galaxies; the computers never offer best buddies (only humans do) | CONFIRMED |
+| Options | Years per turn (10, 20, 30, 50) and three check boxes: Alliances, Luck in Battles, and "Automatically end turn for unconnected players" (option bit 8, `FUN_00473ced`). There is **no Novas check box**: `FUN_00409170` builds the option word from the Alliances box (bit 1) and the preferences (Luck bit 4, auto end bit 8), the rest coming from a stack buffer `FUN_00484788` never clears, so bit 2, which `FUN_00436c26` tests before a star turns red, is whatever was there. The remake turns novas on (OPEN, docs/open-questions.md) | CONFIRMED (`FUN_00409170`, `FUN_00484788`, `FUN_00448856`) |
 
 ### Galaxy
 
@@ -76,224 +108,164 @@ Every rule the ruleset still takes from 5.0.5 has been checked against 4.0.5's c
 
 | What | 4.0.5 | Status |
 |---|---|---|
-| Savings interest | 10 × √savings, with no "half of savings" cap and no prime-rate bonus | CONFIRMED (`FUN_0043361b`, `FUN_00437592`) |
-| Debt interest | a flat 15% (no renegotiated credit) | CONFIRMED |
-| Budget, colony support, global warming, borrowing limit, income, growth, maximum population, terraforming, mining | as 5.0.5 | CONFIRMED |
-| Dip into savings | an amount, up to savings minus the borrowing limit, is moved at once into this turn's money, and the interest is worked out again on what is left. It happens once. The remake's Dip window gives a percentage, so the ruleset takes that percentage of the most you may take | CONFIRMED (`FUN_00469757`, dialog 358); the percentage is the remake's window |
-| Population milestones | "Congratulations, *name*! Your population now exceeds …" at 1, 2.5, 5, 10 and 20 million units, each once. At most two a turn: the first of 1M/2.5M not yet said, and the first of 5M/10M/20M. The total leaves out a colony at star number 0 (4.0.5 counts list entries whose star number is above 0); because 4.0.5 lists computers first and the remake humans, a human's own home at star 0 is still counted (INFERRED). The figure is the unit count as 4.0.5 prints numbers: "1,000,000", "2,500,000", "5,000,000", "10,000K", "20,000K" | CONFIRMED (`FUN_0043b243`, msg 1065, number format `FUN_0042e5c2`) |
+| Budget slots | Savings, Technology, then the colonies newest first, per mille, used as they stand; a share of an amount M is trunc(M x pm / 1000) under $2,000,000, trunc(M / 1000) x pm above (3.0.1's) | CONFIRMED (`FUN_00433c52`, `FUN_00434dad`, `FUN_00437592`) |
+| Interest | trunc(10 x sqrt(savings)) on the exact root (3.0.1: the whole root); a debt costs trunc(savings x 15 / 100) | CONFIRMED (`FUN_00437592` @004376a3) |
+| Borrowing limit | -5 x gross income, set in pass 2 (at the start, trunc(gross / 2) x -10) | CONFIRMED (`FUN_00437592`, `FUN_004427a4`) |
+| DeductInterest | 3.0.1's: interest paid from this turn's money, then Ship Savings ("Uh-oh!  Having to borrow more ship money to pay all your interest!"), then global warming on every colony and a random fleet scrapped (1056-1058) | CONFIRMED (`FUN_0043361b`) |
+| MaintainKillStars | 3.0.1's: colonies marked for abandoning given up, then losing colonies paid from this turn's money, Ship Savings (1053), then with people (starving, no growth) | CONFIRMED (`FUN_00433977`) |
+| Terraforming | trunc(sqrt(trunc(money / 3) x 2)) tenths of a degree (trunc(sqrt(trunc(money / 8) x 7)) with the discovery); the first $5,000 sunk; the overshoot refunded at trunc(3d^2/2) (trunc(8d^2/7)) | CONFIRMED (`FUN_00433c52` @00433f01) |
+| Mining | trunc(20 x sqrt(money)) metal (25 with the discovery); the overshoot refunded by MetalToMoney ceil(m^2/400) (625), above 30,000 metal ceil(m/400) x m | CONFIRMED (`FUN_00433c52` @004340d5, constants 0x57bf20/28; `FUN_0042f60c`) |
+| Income | 5.0.5's: the log of the exact root of the people | CONFIRMED (`FUN_00437592` @00437b7d) |
+| Growth | 3.0.1's rules, the random numbers drawn rand(0, 5) first | CONFIRMED (`FUN_00437592`) |
+| Colony lost | at a star where a battle took place, if the star isn't the player's any more or none of its people are left (3.0.1 looked at who won) | CONFIRMED (`FUN_00437592`) |
+| Net floor | "Warning!  After supporting your planets and paying your interest, you have no money to spend!" (1054) | CONFIRMED (`FUN_004320f8` @00433136) |
+| Dip Into Savings | an amount up to Ship Savings less the borrowing limit, at once; the interest worked out again. The remake's window takes a percentage | CONFIRMED (`FUN_00469757`) |
+| Buying | a human pays the prototype price while none of the design is built and the interest is worked out again (`FUN_004691c4`); computers below Smart pay it too (`FUN_00462105`); **a colony can build only while it has more people (units) than ships built there this turn** (slot +0xe; `FUN_0044eecd`, `FUN_00462105`); new ships but Scouts and Colony Ships join a fleet of the design at the star (a human's: one built this turn) | CONFIRMED |
+| Scrapping | a fleet or design marked (fleet +0xb, design +0x26), scrapped in pass 1: a human gets 3/4 of the metal (7/8 with the recycling discovery), at its own colony; over someone else's planet the metal falls for the owner (at most 32,767 a star); in hyperspace it rains on the next star. "Your fleet of %s at %s has been scrapped for %s metal." only at a star | CONFIRMED (`FUN_00434534`, `FUN_00419a52`) |
+
+### The colonies and the bars
+
+| What | 4.0.5 | Status |
+|---|---|---|
+| Colony bars | Terraform and Mine, -1 for done, scaled to 1,000 at the end of each pass; at your temperature Terraform done, out of metal Mine done, a colony with both done is finished and gives its share away (3.0.1's) | CONFIRMED (`FUN_004360af`, `FUN_00438b77`) |
+| GiveBarPercent | 3.0.1's redistribution, but every slot's bounds are 0..1,000 (0 for one being abandoned or finished); 3.0.1's ComputeMaxPercent is gone | CONFIRMED (`FUN_0045c61e`, `FUN_0045c6dc`, `FUN_0045ced4`, `FUN_0045cf57`) |
+| Dragging a bar | refused for a colony being abandoned and for a slot whose star number is 1 or more with both bars done (so a colony at star 0 can be dragged: a slip); every slot 0..1,000; redistributed at every step of the drag | CONFIRMED (`FUN_0045c02c`) |
+| Giving up a colony | its Colony Ships loaded; its share to 0, the others taking it (3.0.1 gave it to Savings); its owner's and best buddies' records cleared | CONFIRMED (`FUN_00439bf7`) |
+| Colonizing | 3.0.1's (income -7,501, bars 900/100 or Mine 1,000, its share 7,500,000 / money); "You have colonized %s." | CONFIRMED (`FUN_004397ba`) |
+| **Abandon (Evacuate)** | a human's toggle on a colony (slot +0x11), with confirmations for a profitable or nearly profitable colony and jokes for "Hope" and "Ship" (strings 661-671), ABANDON or WHOA; on, the colony's income comes off the net, off it goes back; either way its share goes to 0; the colony is given up at End Turn. The ruleset sets `evacuateCommand: true` | CONFIRMED (`FUN_00469b1d`) |
 
 ### Research
 
 | What | 4.0.5 | Status |
 |---|---|---|
-| Range level cost | **L³ / 9** (5.0.5: L^2.5 / 3): 24 vs 29 at level 6, 455 vs 341 at 16, 3,000 vs 1,643 at 30 | CONFIRMED (`FUN_00434dad`, `FUN_0042e559(L,3)/9`) |
-| Other costs, points, head starts, cap 50 | as 5.0.5 | CONFIRMED |
-| Gone | the +10% research facility, and the clamp of progress at 6,000 | CONFIRMED |
-| No research money | the reminder comes every turn the tech budget is 0 (5.0.5: every 5th turn) | CONFIRMED |
-| New level message | up to level 20: "You now have *name* Range Technology (L)." with 4.0.5's name list, which gives level L the name 5.0.5 gives level L+1 (string base + L; bases 841, 861, 881, 1892, 911). Numbers in the list are printed as names ("You now have 3 Range Technology (2).") and level 20 gets the next list's first entry. From level 21: "Your Range Technology has reached level L." | CONFIRMED (`FUN_00434dad`, `FUN_0046ec5a`, table at 0x59d2ac) |
+| Points | the Technology slot's share by each tech's research share; trunc(sqrt(trunc(money / D)) x 8 / 10), D 150 for Range, Speed, Weapons, Shields and 200 for Mini; Radical trunc(sqrt(trunc(money / 200)) / 2) | CONFIRMED (`FUN_00434dad`, constants 0x57bf30-40) |
+| Level costs | Range trunc(L^3 / 9); Speed (L+6)^2; Weapons and Shields (L+2)^2; Mini and Radical (L+7)^2; a head start of rand(0, 40) into each new level (Radical 0-80); at most 50 | CONFIRMED (`FUN_00434dad`) |
+| Reports | to level 20 "You now have <name> <Tech> Technology (L)." with 4.0.5's name for it, from 21 "Your <Tech> Technology has reached level L.", BURST; "You are not spending any money on technology research." every turn it gets nothing | CONFIRMED (`FUN_0046ec5a`, `FUN_00434dad`) |
 
 ### Radical discoveries
 
-| What | 4.0.5 | Status |
-|---|---|---|
-| The hand | up to 4 pending discoveries, first dealt in 2010 with "Your radical researchers are hard at work on another discovery!" | CONFIRMED (`FUN_0043adac`, msg 1052) |
-| A Radical level before 2010 | deals the hand first | INFERRED |
-| The 17 discoveries and their weights (%) | metal 7, astronomers 7, wealth 7, mining 4, max population 4, terraforming 4, smarter generals 4, recycling 4, decoy 6, biological 6, steal tech 6, six free designs 6, Range/Speed/Weapons/Shields/Mini +2: 7 each | CONFIRMED (`FUN_0043a08c`, weights at 0x59cf10) |
-| Gone | research facility, prime lending rate, cheaper credit | CONFIRMED |
-| Astronomers | needs 6 never-explored stars. It explores 6–9 stars that were never explored, or whose news is more than 100 years old | CONFIRMED |
-| Mining | only from the year 3000 on (see below) | CONFIRMED |
-| Decoy | humans only, needs Alliances. It looks like a Fighter: R+1, **V+1**, W+2, S+2, Mini −1 | CONFIRMED |
-| Biological | **humans only** (5.0.5: anyone) | CONFIRMED |
-| Steal tech | copies the highest level among the living players | CONFIRMED |
-| Free designs | needs fewer than 25 designs. Scout **R+2**, W−1, S−1. Fighter, Satellite (R0), Colony Ship, Tanker and Dreadnought at your current tech (no Tanker −1, no Colony Mini/3) | CONFIRMED |
-| Cancelling one pending program | a human can cancel one of the 4 (dialog 348) | NOT IMPLEMENTED |
+CONFIRMED (`FUN_0043a08c`, the hand `FUN_0043adac`, weights at 0x59cf10). A hand of up to
+four of 17 discoveries (player +0x18ce), first dealt in 2010 ("Your radical researchers
+are hard at work on another discovery!") and filled again after each: rand(0, 99) by
+weight 7 7 7 4 4 4 4 4 6 6 6 6 7 7 7 7 7; a card is dealt only if it isn't in the hand
+and: astronomers, 6 or more stars never explored; mining, not had and 3000 or later;
+population, terraforming, recycling, not had; generals, not had and Luck on; decoy, a
+human with Alliances on; biological, a human. A Radical level draws a card at random
+from the hand: metal rand(9,000-11,000) (the report divides it among your colonies);
+astronomers explore 6-9 stars not turning red whose news is older than 100 years; money
+rand(2-12) x this turn's money into Ship Savings; the five bonuses; a decoy (a Fighter
+with R+1 V+1 W+2 S+2 and Mini -1); a biological (R-2 V-1 W-1 S-1 Mini 0, no metal); the
+technology of the **last** player ahead of you (in 4.0.5's order); six free designs
+(fewer than 25); a tech +2. Slips: an empty hand acts on an uninitialised index; a hand
+that runs out while a design card can't be played loops for ever (both OPEN). The hand
+window (`FUN_00471587`, opened by the 2010 report) lets a human throw a card out of a
+full hand: NOT IMPLEMENTED.
 
 ### Ships and fleets
 
 | What | 4.0.5 | Status |
 |---|---|---|
-| Cost base | B = (V+15)(S+17)(W+13)(R+10) / 38.75 (5.0.5: (13+W)(S+R+V+38)/0.36). The starting Fighter is still $2,000 / 666 metal; R16 V8 W10 S10 is $9,583 against about $4,600 | CONFIRMED (`FUN_0041a9b4`) |
-| Mini factor, satellites, colony ships, tankers, dreadnoughts, biologicals, prototypes | as 5.0.5 | CONFIRMED |
-| Scouts | no extra metal divisor (5.0.5: mm + ½) | CONFIRMED |
-| Decoys | B from their own stats; money and prototype ÷ 20, metal ÷ 40 (no +10), 1 hp | CONFIRMED |
-| Attack rating | no Dreadnought +⅕ and no cap | CONFIRMED |
-| Design limit | 30 (5.0.5: 24) | CONFIRMED (string 540) |
-| Scout range limit in the design window | your Range + 2, like the starting and free Scouts (5.0.5: + 3) | INFERRED |
-| Computers' designs | the free-design rules above | INFERRED |
-| Prototypes for computers, dreadnoughts from the start | as 5.0.5 | INFERRED (not traced) |
-| Tankers | any of your tankers at a star refuels **every** one of your fleets there completely. There is no 200-unit pool and no "not enough tankers" | CONFIRMED (`FUN_00437ddd`) |
-| Valdez | a 1 in 100 chance, only for a Tanker design named "Valdez" that refuels another fleet (5.0.5: 1 in 250, any fleet named Valdez). Only a message | CONFIRMED (`FUN_00437ddd`) |
-| Scrapped at someone else's colony | the metal goes to that colony's owner later in the turn: "You just received … metal from someone scrapping a fleet or from a battle over …" | CONFIRMED (`FUN_00434534`, `FUN_0043747e`, msg 1064) |
-| Meteor showers | metal × 50 units killed; **no escape** onto orbiting colony ships | CONFIRMED (`FUN_00437592`) |
-| Fuel, biologicals, colony ships, routes, scrapping rates | as 5.0.5 | CONFIRMED |
-| Survival | you stay in the game while you hold a colony or a colony ship that isn't lost at an exploded star. The engine already works this way for every ruleset | CONFIRMED (`FUN_0043bd5f`) |
+| Classes | 0 Scout, 1 Dreadnought, 2 Fighter, 3 Tanker, 4 Colony Ship, 5 Satellite, 6 Biological; a decoy is a Fighter with Mini -1 | CONFIRMED (`FUN_004427a4`, `FUN_0041a9b4`) |
+| Costs | mm = (Mini + 1) / 2 + 0.5; B = (V+15)(S+17)(W+13)(R+10) / 38.75, a Satellite's (S+26)(W+13) x 2.381 x 2; price mm B, metal B / 3mm, hit points B / 3, prototype 4 mm^2 B; Colony Ship +$45,000 / +3,000 metal / +1,000 hp, Tanker +$22,500 / +1,500 / +500 (prototype 2 mm price); Biological 8 B, no metal, prototype 40 B; Dreadnought metal and hp x 25, price x 40, prototype 2 x price; a decoy / 20, metal / 40, 1 hp. Worked out in float32. The attack rating max(W^2 trunc(hp/50), trunc((5W+20) W^2 hit(W) / 300)), not divided by 50 (the old ruleset divided it) | CONFIRMED (`FUN_0041a9b4`, 0x57abe0-0x57ac40) |
+| Design window | Range 4 to your tech (Scout +2, Satellite 0), Speed 1 to yours (Satellite fixed), Weapons and Shields to yours (Scout -1), Mini 0 to yours; Dreadnoughts open from the start | CONFIRMED (`FUN_0044e51a`, `FUN_0044eb83`) |
+| Names | a new design's name from its class's list: the computers' (and the starting and discovered designs) from a random one of the first 15 places, a human's from the whole list, then the next name not in use | CONFIRMED (`FUN_0046472b`, tables 0x59e028/48) |
+| Fleets | one design each, kept by class (`FUN_00415db0`); a new Biological fleet starts with its fuel used up, a Colony Ship fleet loaded | CONFIRMED |
+| Routes | 3.0.1's search through your colonies **and your best buddies'**, on whole distances | CONFIRMED (`FUN_004164b0`, `FUN_004221d7`) |
+| Moves | satellites of a design at a star merged; every other fleet's route checked again ("Your %s can no longer reach %s."); arrivals as 3.0.1's (wormhole at a star that exploded) | CONFIRMED (`FUN_004357fc`, `FUN_00435dc3`) |
+| Organize Ships | 3.0.1's | CONFIRMED (`FUN_0042b278`) |
+| Refuelling | at your or an ally's colony; a Biological fleet doesn't refuel but **eats 200 people a ship** for each unit of fuel at your or an ally's colony while it has 200 x ships + 100 ("Your fleet of %s has eaten %s people while refueling at %s.", BIOCHOMP; the owner is told); a fleet short of fuel is refuelled by any Tanker fleet of yours at the star; "The Valdez has sprung a leak!" 1 time in 100 for a Tanker design named Valdez (nothing else happens) | CONFIRMED (`FUN_00437ddd`) |
 
 ### Battles
 
 | What | 4.0.5 | Status |
 |---|---|---|
-| Who fights | duels between two players. The colony's owner defends and the others are shuffled. Each in turn fights the current holder, and the winner holds the star. An ally of the holder goes to the back of the line; if everyone left is its ally, the holder changes places with the last in line. **Allies never fight side by side** (5.0.5: one battle with every side) | CONFIRMED (`FUN_00421430`, `FUN_0042227b`) |
-| Order of fire | no round limit. Fastest first; at each speed the attacker's groups fire, then the defender's. Ships hit at a speed still fire at it | CONFIRMED (`FUN_00422339`) |
-| Hit table | trunc(50 + 31.51 × atan(W − S)), clamped to ±25: 1% at −25, 5% at −6, 25% at −1, 50% at 0, 74% at +1, 89% at +3, 98% at +25 | CONFIRMED (`FUN_0047b5dc`) |
-| Damage | as 5.0.5, but leftover damage is lost when a ship dies | CONFIRMED (`FUN_00424088`) |
-| Targets | colony ships first, then satellites, then a random ship group; the planet only when no ships are left. No tanker preference | CONFIRMED (`FUN_00424b00`) |
-| The planet | fires only when it is its side's last group | CONFIRMED (`FUN_00422339`) |
-| Luck | rand(−1, 1) for each side in each duel; smarter generals remove the −1 | CONFIRMED |
-| Decoys | W 0, S 0, 1 hp | CONFIRMED |
-| Stances, "arrive late" | **gone**: no text and no code | CONFIRMED |
-| Debris | as 5.0.5 | CONFIRMED |
-| Battle replay | the remake shows all of a star's duels as one replay | INFERRED |
-| Big-battle rumour | only after a duel where each side had more ships than rand(5–10). Every player whose news of the star is more than 10 years old hears "The amount of energy emanating from … suggests a big battle just took place.", explored or not; a computer notes the battle | CONFIRMED (`FUN_00425c9a`, `FUN_00438a0f` called for every player by `FUN_004320f8`, msg 1028) |
+| Duels | 3.0.1's: the colony's owner holds the star and the others take it on one at a time; one replay record and pair of reports per duel (`duel` on the record) | CONFIRMED (`FUN_00421430`) |
+| Luck | with the Luck option, rand(-1, 1) Weapons a side, never -1 with smarter generals | CONFIRMED (@0042163c) |
+| Groups | at most 30 a side, sized as 3.0.1's (the defender: designs + 1); decoys have Speed, Weapons and Shields 0 | CONFIRMED (`FUN_00423878`, `FUN_00423b52`) |
+| Shots | Satellites 2 a round, Dreadnoughts 25, the planet ceil(pop / 200,000) | CONFIRMED (`FUN_00423b52`) |
+| Hit table | trunc(50 + 31.51 atan(W - S)) | CONFIRMED (`FUN_0047b5dc`) |
+| Targets | the first Colony Ship group, then Satellites, then from a random start | CONFIRMED (`FUN_00424b00`) |
+| Reports | "You won a battle ..." (1035) and "You lost a battle ..." (1036) with the other side's face; "... survived an enemy attack ..." (1037) and "... destroyed your colony ..." (942) with your own face; only the last has a sound (SHUCKS). `won` is set on each | CONFIRMED (`FUN_00425c9a`, `FUN_0046f8cc`, `FUN_0046fe1b`) |
+| Debris | a fifth of the metal of each ship lost; the winner's falls on the planet for its owner (or is recovered, x 5/4 with recycling) | CONFIRMED (`FUN_00425c9a`) |
 
-### Events
+### Novas and Armageddon
 
-| What | 4.0.5 | Status |
-|---|---|---|
-| New red star | after 2749, 1% a turn (5.0.5: about 1 in 99), one at a time | CONFIRMED (`FUN_00436c26`) |
-| Warning | starts at 10 + 10 × rand(0–7) and explodes at 110, so 3–10 turns (5.0.5: 10–20). The remake stores it on 5.0.5's scale (+100), so the map and the computers read it unchanged | CONFIRMED |
-| "It's a miracle" | **gone** (no string) | CONFIRMED |
-| Red-star warning | goes to every player every turn | CONFIRMED (msg 1011) |
-| Supernova | stars within 10 ly get rand(max(100, 10000/d − 1000), 10000/d) metal; colonies there lose rand(40–60) × metal units, and the owner gets the metal. Fleets arriving at an exploded star are lost | CONFIRMED (`FUN_00436ff8`, `FUN_004357fc`) |
-| Armageddon | as 5.0.5, without the shrink | CONFIRMED (`FUN_00436988`) |
+As 3.0.1's (CONFIRMED, `FUN_00436988`, `FUN_00436c26`, `FUN_00436ff8`): a red star
+(10..100, +10 a step) explodes at 110, throwing rand(max(100, 10000/d - 1000), 10000/d)
+metal at stars under 11 ly; a new one 1 time in 100 after 2749 (option bit 2, OPEN);
+Armageddon when every human's switch is on (an out player's counts as on), half the quiet
+stars at once. After a fizzle the mask is cleared but the switches stay on, so everyone
+hears each device "was just turned off", and next step "turned on".
 
 ### Diplomacy and the end of the game
 
 | What | 4.0.5 | Status |
 |---|---|---|
-| Alliances, best-buddy pacts, gifts (3 a turn), surrender, alliance victory | as 5.0.5 | CONFIRMED |
-| Messages | at most **10 a turn** ("Sorry, you can only send ten messages per turn.") | CONFIRMED (string 755) |
-| Handed-over planets | re-founded as new 10-unit colonies, so their people are lost | CONFIRMED (`FUN_00438718` → `FUN_004397ba(player, star, 1)`, 10 units per colony ship) |
-| Base difficulty rating | IQ and number of computers give 30–80; your skill adds (5 × skill − 10) × 2; −10 per ally; −5 for Medium–Extra Large and −10 for Humongous; −10 for Sparse; −10 for Spiral or Cluster; each Armageddon gives D = (2D − 38)/3 + 20. One human only. The ruleset's `difficulty()` gives the figure for the New Game window | CONFIRMED (`FUN_0043c351`) |
-| Rating of a win, master points, 10 ranks | in the ruleset as `winDifficulty`, `masterPoints`, `addMasterPoints` and `RANKS` (Red-Neck … Ho! Champion), but **not used**. The remake's rank window is built round 5.0.5's 25 ranks, their pictures and unlocks, and one points total. 4.0.5 games earn no points | CONFIRMED formulas (`FUN_0043c836`, `FUN_00497e58`, `FUN_00482b89`); ranks NOT IMPLEMENTED |
+| Alliances and best buddies | offers both ways; news of every change against the step before (1016-1027); best buddies learn each other's home and route through and see each other's exploring | CONFIRMED (`FUN_0043625c`, `FUN_0043853c`) |
+| Gifts | 3 a turn out of Ship Savings and metal; delivered in pass 2b with "%s has just given you ..." and "You just gave ..." | CONFIRMED (`FUN_00457c55`, `FUN_004320f8`) |
+| Surrender | 3.0.1's; money (Total Money + savings, not below 0) and metal reported to the winner (1073, 1074), and each planet nobody else watches given (1075) | CONFIRMED (`FUN_0043427a`, `FUN_00438718`) |
+| Out | no colonies and no Colony Ship fleet (but those flying to an exploded star); offers of alliance withdrawn (best buddy ones kept); money, savings, metal to 0; back in with a colony again | CONFIRMED (`FUN_0043bd5f`) |
+| Winning | from 2010, every player still in allied with every other: a lone player or computers alone at once, an alliance after a warning on an earlier step, and only on a step that ends a turn; "Congratulations!  You won the game.  Game difficulty rating was %d." | CONFIRMED (`FUN_0043bf98`, `FUN_0047fd97`, `FUN_0043c1ec`) |
+| Every human out | the whole map is shown to them and the computers play on | CONFIRMED (`FUN_0047fb7b`) |
+| Milestones | "Congratulations, %s!   Your population now exceeds %s!" at 1, 2.5, 5, 10, 20 million units, leaving out a colony at star 0 | CONFIRMED (`FUN_0043b243`) |
 
-## Two points checked against the Mac code
+## Computer players (js/ai-405.js)
 
-In two places, 4.0.5 disagreed with what the remake's 5.0.5 ruleset used to do. Both were
-checked against the Mac 5.0.5 program, and `rules-original.js` has been fixed to match.
-4.0.5 and 5.0.5 now agree:
+CONFIRMED: `FUN_0045e8bb` is 3.0.1's `DoComputerTurn` in the same order, and each step
+is 3.0.1's routine with these changes:
 
-- **The mining discovery** comes only **from** the year 3000 on (5.0.5 `FUN_1007a180`
-  case 3: year ≥ 0xbb8; the remake used to allow it only *before* 3000).
-- **Supernova metal**: a star at distance d (1–10) gets
-  rand(max(100, 10000/d − 1000), 10000/d) metal (5.0.5 `FUN_100769b0` @10076ae8; the
-  remake used to draw from 0).
+- **Personality** (`FUN_004438ba`): 3.0.1's numbers, without the "additional" draw;
+  feelings drawn for all 20 places; retire marks Scout 60, Dreadnought 120, Fighter 60,
+  Tanker 120, Colony Ship 120, Satellite 100 and redesign marks 30, 60, 30, 60, 60, 20.
+- **No Spiral/Cluster skip** in 2010; a computer that is out doesn't plan.
+- **Designs** (`FUN_004639ba`): six classes, 30 designs; at 30 the classes left keep
+  last turn's choices (a global never cleared).
+- **Status** (`FUN_00463030`): Dreadnoughts count with the Fighters; the poorest and
+  richest by Total Money over every player, one who is out (0) included.
+- **Old ships** (`FUN_004641ef`, `FUN_004644c5`): a computer's Tankers are always
+  retired; Dreadnoughts refuel like Fighters; the colony asked for uses
+  FindCloseEnoughColony's mode 4 (answering your oldest colony when only a Colony Ship
+  could get there).
+- **News** (`FUN_004648d2`): read from its own reports of the last turn, with 4.0.5's
+  codes; gifts weighed against the gross income or the metal, 50 when that is 0; a
+  player who surrendered to it is noted after the surrender choice was made.
+- **"You take %s"** offers use the ally's gravity and temperature (`FUN_0045eda0`).
+- **Attacks** (`FUN_004616ee`): Dreadnoughts go with the Fighters, and one Dreadnought is
+  bought when it is enough but not by more than a third.
+- **Buying** (`FUN_00462105`): not at a star going nova; not more ships than the colony
+  has people this turn.
+- **SaveFleets** (`FUN_00462878`): Dreadnoughts with the Fighters.
 
-## Computer players
+## What the rebuild changed in play
 
-4.0.5's computer turn is `FUN_0045e8bb` (COMPUTER.CPP). It runs 18 steps where 5.0.5 runs
-21, and `js/ai-405.js` follows it. Each step was compared with 5.0.5's (`FUN_10081cc0`'s
-steps, the source of `js/ai-original.js`). The scheme is the same; these are the differences.
+The old ruleset took 5.0.5's rules for what it hadn't read. Read in 4.0.5's code:
 
-| What | 4.0.5 | 5.0.5 | Where (4.0.5) |
-|---|---|---|---|
-| Steps | 18. No "split mixed fleets" step, and no computer biologicals (two 5.0.5 steps send them roaming) | 21 | `FUN_0045e8bb` |
-| Who plans | each computer with its own intelligence; a human on auto-play with intelligence 0 | — | `FUN_004320f8` |
-| Minimum attack fleet | 4–6 ships | 3–6 | `FUN_004438ba` |
-| Turtle and pouncer | among Smart and Diabolical computers, computer number 1, 6, 11, 16 (counting from 0) is a turtle (style 2) and number 3, 8, 13, 18 a pouncer (style 3). In a Sparse galaxy they research +80 Range, −40 Speed, −40 Weapons | by computer number mod 4 (3 the turtle, style 2; 2 the pouncer, style 3), density over 50 for the Range shift (`FUN_100704d0`); the remake's 5.0.5 port had them swapped, now fixed | `FUN_004438ba` (game +0x10 = density) |
-| Research shifts | Range 16, **Speed 5** and each Mini level move research into Weapons and Shields | no Speed rule | `FUN_004648d2` (cases 0x3eb, 0x3ec, 0x3ef) |
-| Design limit and lag score | 30 designs; Range counts ×10; Scout R+2, W−1, S−1; no Tanker −1 | 24; Range ×5; Scout R+3; Tanker R−1, V−1 | `FUN_004639ba`, `FUN_00463f2f` |
-| Designs nobody has built | dropped as soon as they lag today's tech in any stat they use | only when far behind | `FUN_004639ba` |
-| At the design limit | stops designing for the rest of the turn | keeps its old design | `FUN_004639ba` |
-| Pruning | past 30 − 6: designs that aren't current and have no ships, then the first six that aren't current, ships and all (`FUN_00434534` dismantles them) | the same at 24 | `FUN_004639ba` |
-| Development cost | Dumb and Average pay it for a design never built; above Dumb the computer's own designs have none (so Average pays only for its starting designs) | the remake's port: Dumb only | `FUN_00462105`, `FUN_004639ba` |
-| "I need metal." / "I need money." | after 2500 with under 10,000 metal; after 2400 when poorest by $2,000: to each ally, 1 in 20 | the same (`FUN_10085f60`; now in the 5.0.5 port) | `FUN_00463030` (codes 0x414/0x413 = strings 975/974) |
-| Surrender | no Alliances condition | the 5.0.5 port requires Alliances | `FUN_00463030`, `FUN_004656b4` |
-| Threat near a colony | unexplored, free or en-route stars count as one Fighter | the same; the port counted only unexplored ones | `FUN_00465a0d` |
-| Enemy defence it remembers | ships' attack + ceil(pop/50) × (W+2)² / 75 + 1; an enemy star never measured: the figure for 350,000 people at its own weapons | (S+1)(W+1)² ceil(pop/2500)/570, at least 1 | `FUN_00425c9a`, `FUN_00425c5d`, `FUN_00465a0d` |
-| Retiring fleets | a fleet past its type's limit, and **every tanker**, is scrapped at a safe colony or sent home; obsolete satellites at safe colonies are scrapped | the same | `FUN_004641ef`, `FUN_004640c4` |
-| Big war fleets | 5+ ships away from home ask for a colony ship, priority 58 | 58, 78 or 98 by size | `FUN_004644c5` |
-| Diplomacy | a broken alliance changes nothing; after 2500 the richest likes itself 30–60 more and the poorest 25–50 less; no dislike of the richest or of enemies' friends. It answers "I like *you*" messages and offers a hopeless planet it evacuates to an ally ("You take …") | broken alliance → under 500; ±20–40; dislikes the richest and enemies' friends | `FUN_004648d2`, `FUN_0045eda0` |
-| After a battle | it dislikes each enemy by 10–30 (one ship) or 100–200; a computer whose colony survived an attack it lost puts 10 more (at least 60) into defence, then 5 more (at least 30) while under 70 | — (not in the port) | `FUN_00425c9a` |
-| Scouting | only after a colony ship or 5,000 metal; unexplored stars only when no fleet of its own sits at a star rated over 12. Scouts that arrive stay where they are, marking a colony target | — | `FUN_0045f740`, `FUN_00462878` |
-| Attack score | aggressiveness − defence, +20 populated, planet value, closeness, metal, ±¼ at random; no +40 for big planets and no +25 for the richest rival; at most one attack from each colony | ±½, +40, +25 | `FUN_0045fb2f`, `FUN_0045fd65` |
-| Attacks | need = defence × attack ratio / 100 + 1; one Dreadnought or a Fighter wing; **no tanker escort**, no biologicals | tanker escorts; biologicals late in the game | `FUN_004616ee` |
-| Planet value | counts the metal in its own Fighters parked there | Fighters and Dreadnoughts | `FUN_0046097d` |
-| Colonizing | also sends a colony ship to a star rated 10 above its worst colony when none is out | the same | `FUN_00460125` |
-| Defence | need = threat × defence ratio / 100; planet: ceil(pop/50)(W+1)²/75; satellites where nothing threatens are scrapped | (threat/100) × ratio | `FUN_00460cbb`, `FUN_00462f76` |
-| Buying | a failed purchase stops all buying that turn except satellite orders of up to 5 | the same | `FUN_00462105` |
-| Idle fleets | Fighters, Dreadnoughts and colony ships idle at a star that isn't its own go home; at a hopeless colony, scouts go home, and the others too once its metal is gone | — | `FUN_00462878` |
-| Research split | set every turn for computers only; a human on auto-play keeps theirs | everyone | `FUN_00462be4` |
-| Assessment, star classes, mining, terraforming, colony-ship limits, request queue (50, by priority), Diabolical sight of stars within 8 ly before 2020 | as 5.0.5 | | `FUN_00463030`, `FUN_00465a0d`, `FUN_0045eda0`, `FUN_0045f599`, `FUN_00465796` |
+- The turn, money, bars, colonies, battles and computers are 3.0.1's (above), not 5.0.5's.
+- Ship attack ratings were divided by 50; they aren't (`FUN_0041a9b4`).
+- Radical: money is rand(2, 12) x this turn's money; stealing takes the last player
+  ahead; the metal report divides by your colonies; a decoy is a Fighter with Mini -1;
+  the astronomers' card is checked when dealt only; free designs need fewer than 25.
+- A computer's cap of colonies to keep counts slots (fewer than 4 slots).
+- Colonies build no more ships a turn than they have people (`yardRoom`, engine hook).
+- Abandon is 4.0.5's toggle (`evacuate`, `evacuateCommand: true`); dragging a bar is
+  4.0.5's (`dragShare`).
+- Battle reports carry `won`; each duel is its own replay (`duel`).
+- Engine hooks added: `rs.shipsAdded` (a new fleet adjusted: Biologicals unfuelled),
+  `rs.shareMaps` (4.0.5 shares maps in its own pass 2), `rs.yardRoom` (the colony's limit).
 
-Interpretation the remake had to make (INFERRED):
+## Ranks and the Hall of Fame (not built yet)
 
-- The remake keeps one "known defence" number per star, from the last time a player saw it,
-  instead of 4.0.5's four fields and their slow decay.
-- A gift is measured against income (money) or metal (metal), as in the 5.0.5 port.
-- "Sorry!" (4.0.5 case 0x40b) is said to a beaten side that had no ships in the battle.
-- With no colonies left, a loaded colony ship goes to the best free planet it can reach.
-- When short of metal for a colony ship, 4.0.5 also scraps idle fleets (`FUN_00462600`);
-  this is not done.
-
-## Inherited rules audit
-
-Every rule the 4.0.5 ruleset takes unchanged from `rules-original.js` or the engine, checked
-against SPACEHO.EXE: 33 rows, of which 11 differed and now use 4.0.5's rule and 22 match. Four
-interface-only hooks were not checked, and two are unused.
-
-| Rule (key) | Result | Where |
-|---|---|---|
-| Computer players (`ai`) | DIFFERED: now `js/ai-405.js` | `FUN_0045e8bb` (above) |
-| Computers' start (`computerSetup`) | DIFFERED: fixed (step up/down; no wealth copy) | `FUN_004768cc`, `FUN_00480eb5`, `FUN_004427a4` |
-| Development cost (`paysPrototype`) | DIFFERED: Dumb and Average pay | `FUN_00462105` |
-| Remembered enemy defence (`observe`, `planetStrength`) | DIFFERED: 4.0.5's estimate | `FUN_00425c9a`, `FUN_00425c5d` |
-| Dip into savings (`projected`, `economy`) | DIFFERED: a one-off amount | `FUN_00469757` |
-| Tech level message (`techMsg`) | DIFFERED: 4.0.5's names and wording | `FUN_0046ec5a` |
-| Handed-over planets (engine `processHandovers`) | DIFFERED: 10-unit colony | `FUN_00438718`, `FUN_004397ba` |
-| Star names (engine) | DIFFERED: 4.0.5's 191 | `FUN_00442374` |
-| Computer names and sex (engine) | DIFFERED: 4.0.5's 40 names, even odds | `FUN_004768cc` |
-| Population milestones | DIFFERED (two a turn, star 0 left out, figure): fixed | `FUN_0043b243` |
-| Big-battle rumour | DIFFERED (big duels only, every player): fixed | `FUN_00425c9a`, `FUN_00438a0f` |
-| Years per turn (`yearsPerTurn` 10, option) | MATCHES | `FUN_00448856`, `FUN_004320f8` |
-| Colony ships not used up; 10 colonists each (`colonyShipUsedUp`, `canColonize`) | MATCHES | `FUN_004397ba`, `FUN_00437ddd` |
-| New colony's values (`settle`) | MATCHES | `FUN_004397ba` |
-| Battles at every contested star (`battleEverywhere`) | MATCHES | `FUN_00421430` |
-| Hostility, maximum population, income (`hab`, `maxPopU`, `incomeU`, `planetIncome`) | MATCHES | `FUN_00437592` |
-| Population units (`popU`) | MATCHES | `FUN_004427a4` |
-| Mining and terraforming (`mineMetal`, `mineMoney`, `terraCost`, `terraStep`) | MATCHES | `FUN_00433c52` |
-| Money pool, colony support (`disposable`, economy) | MATCHES | `FUN_0043361b`, `FUN_00433977` |
-| Borrowing limit (`borrowLimit`) | MATCHES: −5 × income | `FUN_00437592`, `FUN_004427a4` |
-| Star stats (`newStar`) | MATCHES | `FUN_00442374` |
-| Shots per ship (`shotsPerShip`) | MATCHES: satellite 2, Dreadnought 25, others 1 | `FUN_00423b52` |
-| Fleet attack (`fleetStrength`) | MATCHES (sum of `FUN_0041a9b4`'s attack) | `FUN_0041a9b4` |
-| Building biologicals and decoys (`canBuild`) | MATCHES (after the discovery) | `FUN_0043a08c` |
-| Scrap return: humans ¾ (⅞ with recycling), computers all (`scrapReturn`) | MATCHES | `FUN_00434534` |
-| Scrapped in hyperspace: metal falls on the destination (`scrapInSpace`) | MATCHES | `FUN_00434534`, `FUN_00437592` |
-| Fleets reaching an exploded star are lost (`fleetArrives`) | MATCHES | `FUN_004357fc` |
-| Surrender (engine `processSurrenders`) | MATCHES | `FUN_0043427a` |
-| Alliances and best buddies (engine `pactNews`) | MATCHES | `FUN_0043625c` |
-| Buddies share what they explore (engine `shareMaps`) | MATCHES | `FUN_0043853c` |
-| Who is out (engine `checkElimination`) | MATCHES | `FUN_0043bd5f` |
-| Ten messages a turn (`chatLimit`) | MATCHES (computers too) | string 755, `FUN_00465607` |
-| Gifts (three a turn) | MATCHES according to the first 4.0.5 survey; not re-read for this audit | — |
-| Not used by this ruleset (`START`, `galaxySizes`) | — | |
-| Not checked (interface only): `planetClass` (planet list colours), `exploreQuality` (which sound plays), `designMin` (design window), the welcome messages | — | |
-
-## What 3.0.1 shares
-
-The Mac 3.0.1 rules use 4.0.5's `makeGalaxy`, `distance`, `battle`, `randomEvents` and
-`scrapAt`. Checked against 3.0.1's own code (docs/301-findings.md): the big-battle flag and
-the rumour are the same (`MakeResultMessages @e2ea2`, `DetectBigBattles @a4a20`), so both
-rulesets set `bigDuels`; the computers' start is not (no random step in
-`CreateNewPlayer @121fee`), so 3.0.1 has its own `computerSetup`.
-
-## Not implemented
-
-- Cancelling one of the four pending radical programs (dialog 348): a player's choice that
-  needs a window; the remake has none.
-- The Hall of Fame and Hall of Shame, the 10 cowboy ranks, and naming a star after a win.
-- The "is cheating" check (an anti-tamper checksum, not a rule).
-- Network play, turn time limits, "take over for a computer player", and automatically
-  ending turns for players who aren't connected.
-- Automatically scrapping unused old designs past 15 (a preference, not a rule).
-- Up to 20 players: the remake's rules allow it, but there are 16 computer faces, so
-  computers beyond 16 reuse faces.
-
-## Still unclear
-
-- Whether novas can be switched off. The three New Game check boxes are Alliances, Luck and
-  auto-end; `FUN_00436c26` tests option bit 2, but where it is set wasn't found, so novas are
-  always on.
-- Beginner's intelligence in `FUN_00480eb5` (code 1 is unhandled) doesn't matter: computers
-  never get the Beginner skill, and a human's intelligence is never used (auto-play runs
-  with 0).
+CONFIRMED. A win (`FUN_0047fd97` → `FUN_00497e58(1000)`) adds an entry to the Hall of
+Fame file `haloffam.ho` (the 25 last games: players, options, years, difficulty) and,
+unless the player was caught cheating (`FUN_004782ac`), master points to the player's
+name in a table of up to 25 names: 100 x trunc(10^((D - 25) / 25)) for the win's
+difficulty D (`FUN_0043c836` through `FUN_0043c1ec`), added in full up to 500 while the
+total is under 500, else at most a third of the total; the table is kept sorted and
+carries a checksum (a table whose sum doesn't match is wiped). Being eliminated
+(`FUN_00470dec`, report 0x432) adds a Hall of Shame entry (`FUN_00497e58(0x3e9)`), no
+points. The Hall of Fame window (`FUN_00482b89`) lists every name with its points and
+rank: under 1,000 Red-Neck, 2,500 Bow-legs, 5,000 Cowpoke, 10,000 Deputy Gunfighter,
+25,000 Town Sheriff, 50,000 Federal Marshall, 100,000 Lone Ranger, 250,000 Quickdraw
+McGraw, 500,000 Best in the West, 1,000,000 Ho! Champion (strings 324-333); at 1,000,000
+or more it reads string 334, "%s: %s" (a slip). The window's picture goes by the top
+player's points: under 5,000 bitmap 0x7a, 50,000 0x7b, 500,000 0x7c, else 0x7d.

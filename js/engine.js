@@ -106,6 +106,7 @@ function buildShips(G, pid, sid, did, n) {
   if (!canBuildType(G, p, d.type)) return 0;
   let built = 0;
   for (let i = 0; i < n; i++) {
+    if (rules(G).yardRoom && !rules(G).yardRoom(G, p, star, d)) break; // a ruleset's limit on ships built at a colony in a turn (4.0.5: its people)
     const c = shipCostNow(G, p, d);
     if (p.metal < c.metal) break;
     if (p.savings - c.money < borrowLimit(G, p)) break;
@@ -168,6 +169,7 @@ function addShipsToStar(G, pid, sid, d, n) {
   if (d.type === 'colony' && !rules(G).colonyShipUsedUp) f.colonists = (f.colonists || 0) + 10 * n;
   if (!sat) f.fuel = fleetMaxRange(G, f);
   if (!f.name) f.name = d.name;
+  if (rs.shipsAdded) rs.shipsAdded(G, f, d, n); // the ruleset adjusts the fleet (4.0.5: a new Biological fleet starts with no fuel)
   return f;
 }
 function canReach(G, f, sid) {
@@ -597,7 +599,7 @@ function turnStep(G, first, last) {
   rs.randomEvents(G);
   if (feature(G, 'gifts')) deliverGifts(G);
   if (feature(G, 'surrender')) (rs.processHandovers || processHandovers)(G);
-  if (feature(G, 'alliances')) { (rs.pactNews || pactNews)(G); shareMaps(G); }
+  if (feature(G, 'alliances')) { (rs.pactNews || pactNews)(G); (rs.shareMaps || shareMaps)(G); } // rs.shareMaps: a ruleset's own best-buddy map sharing (4.0.5: in its pass 2)
   // a ruleset may decide who is out and who has won itself (rs.checkElimination)
   if (last || rs.checkEveryStep) (rs.checkElimination || checkElimination)(G);
   for (const p of G.players) { p.spentThisTurn = []; if (p.chatThisTurn) p.chatThisTurn = 0; recordHistory(G, p); }
