@@ -61,21 +61,23 @@ read in 1.2's code"). What is left:
    and each plays their turn from the shared file; the turn runs when everyone has
    ended theirs (`EndTurnMenuCall @100b06`, `CheckTurnDone`). The remake's hot seat
    passes one computer round instead, with no passwords.
-4. **Sound of a won battle.** 1.2 plays nothing for battle reports
-   (`PlayAnnounceSound @130f08`); the remake plays 7027 because its auto play stops on
-   that sound.
-5. **Battle replays.** 1.2 stores one replay per duel (`DoBattleStage @d0004`, a 'bTTl'
-   resource each, deleted after 500 years by `ExpungeOldBattles`); the remake keeps one
-   replay per star. The reports are per duel, as in 1.2.
-6. **The blank report's picture.** The blank report for a colony wiped out by meteors
-   shows your own planet in 1.2 (`GetIconID @130db0`, default case); the remake shows
-   its destroyed-colony picture.
-7. **The budget sliders.** 1.2's budget window keeps shares in whole per mille; dragging
-   one moves the others in proportion, with no floor (`DoHBarClick @c1002` gives every
-   slot a floor of 0 and a ceiling of 1,000 before `DetermineNewLevels @c1470`; only a new
-   colony's share, `GiveBarPercent @c139c`, keeps losing colonies at their least share).
-   The remake's sliders move the others in proportion too; the turn reads each share to
-   the nearest per mille.
+4. **Dragging a budget bar.** 1.2 redistributes at every step of the drag, from where
+   the last step left the shares (`DoHBarClick @c1002` calls `DetermineNewLevels @c1470`
+   at @c1324 for each mouse move); the remake once, from the shares as the drag began
+   (`rs.dragShare`), so a long drag can end slightly differently. The rule itself (floor 0,
+   ceiling 1,000, @c1212-c121a) is 1.2's.
+5. **How long replays are kept.** 1.2 keeps each duel's replay ('bTTl') until
+   `ExpungeOldBattles` deletes it after 500 years; the remake keeps the last 60 replays
+   (`engine.js` `endTurn`, shared by every ruleset).
+
+Now done (were remake's choices): no sound for battle reports and `won` for auto play
+(`PlayAnnounceSound @130f08`); one replay per duel with each duel's reports pointing at it
+(`DoBattleStage @d0004`, AddResource @d0738, `MakeResultMessages` @d0768); the blank
+meteor report shows your own planet (`GetIconID @130db0`, default case); the budget bars
+drag by `DoHBarClick`'s rule (`rs.dragShare`); and there is no Evacuate button at all,
+even with modern conveniences (`DecolonizeStar @a3fd4` is called only by the turn).
+Item 2 stays because following it needs the skin to go on with no human in the game
+(the hot seat has no one to hand the turn to); items 1 and 3 stay at the user's request.
 
 ### Interface not done
 
@@ -99,6 +101,9 @@ These are what 1.2's code does and what the remake now does; they look like slip
    `NewFleet @110004`).
 3. **Message texts with no command.** 1.2 has the French text for messages between
    players (STR# 1000.37–51, "ten messages per turn") but no way to send one.
+   Nor is there a command to give up a colony: `DecolonizeStar @a3fd4` is called only by
+   `KillUnsupportedStars`, `ReactToSupernova` (never run) and `ComputeIncomeAndPopulation`,
+   so the remake shows no Evacuate button.
 4. **Ship and planet power** is worked out at every star each turn (`NoteShipPowers
    @a4254`) and never used.
 5. **Out players keep playing their turn**: both passes of `EndTurn @a0004` run for every
@@ -130,11 +135,22 @@ These are what 2.0's code does and what the remake now does; they look like slip
 
 1. **A colony wiped out by a meteor shower** gets report 1009, "%s destroyed your colony
    at %s.", but nothing is given for the first %s (`FUN_1040_27ee` @1040:2ab3-2acd): the
-   report formatter reads a player number from the report record's spare bytes
-   (`FUN_10c0_0784` @10c0:09b9), which only hold whatever an older report left there
-   (`FUN_10c0_0e20` writes them only when it is given something). So 2.0 names a more or
-   less random player as the destroyer. The remake says "A meteor shower destroyed your
-   colony at …". (1.2 prints a blank line here.)
+   report formatter reads a player number from the report record's first spare word
+   (`FUN_10c0_0784` @10c0:09b9) and prints the name at game header +0x16 + 16 × number.
+   A player's reports are kept in a list of at most 50 records that is never cleared;
+   when a report arrives with 50 there, records 10–49 move down to 0–39 and the new one
+   goes into record 40, whose bytes are left from before (`FUN_10c0_0e20` @10c0:0e31-0e5e;
+   the record is allocated zeroed, `FUN_10c8_04f9`, and starts with the two credits). So
+   the k-th report a player gets goes into a fresh record while k ≤ 48 (number 0: player
+   0's name), and after that into the record that report k − 10 used. The name is
+   therefore that of the first spare word of the player's report ten back, or twenty back
+   if that one wrote none, and so on: the attacker for 1009 and 1035, your ships lost for
+   1033 and 1034 (so a player number by accident), the gravity × 100 for 1031, and the
+   first two letters of a fleet's label or a design's name for 1016, 1017, 1019 and
+   1023-1025 ("one …" or "3 …"). Numbers 20 and up point at other header bytes, or past
+   the 1,562-byte header, where 2.0 itself would stop with a General Protection Fault.
+   The remake keeps the same list (`rules-dos.js` `log20`) and prints the same name, or
+   no name for numbers 20 and up. (1.2 prints a blank line here.)
 2. **Organize Ships and fuel.** On OK every fleet of the design at the star gets the
    average fuel used of those fleets, and the average is their total over their number
    counted only up to 11, so with 12 or more fleets it comes out too high (ORGFLEETSDLGPROC
@@ -152,6 +168,9 @@ These are what 2.0's code does and what the remake now does; they look like slip
 6. **Out players keep playing their turn**: the first and second passes run for every
    player, out or not (`FUN_1040_0038` @1040:02de-038b, 04c3-06d5), so an out player's money
    still earns interest and its research goes on (only out computers spend it).
+7. **No command to give up a colony**: `FUN_1040_38c0` is called only by `FUN_1040_0925`
+   (@1040:0ab5, a colony its share can't keep) and `FUN_1040_27ee` (@1040:29fa), so the
+   remake shows no Evacuate button.
 
 ### Remake's choices
 
@@ -165,16 +184,22 @@ These are what 2.0's code does and what the remake now does; they look like slip
    name and password (`FUN_1050_1d08`, PLAYERENTRYDLGPROC), and plays each turn when
    everyone has ended theirs, also across machines (`FUN_1050_0e65`, `FUN_1050_1216`). The
    remake's hot seat passes one computer round instead.
-4. **The budget sliders.** 2.0's budget window keeps shares in whole per mille, and
-   dragging one moves the others in proportion but never below a losing colony's least
-   share (`FUN_1010_179a`, `FUN_1010_218e`). The remake's sliders move the others in
-   proportion with no floor; the turn reads each share to the nearest per mille.
-5. **Evacuate.** The remake's planet panel has an Evacuate button; 2.0 has no command to
-   give up a colony (only leaving it unfunded, with the "Let 'em die" warning, box 5060).
-6. **Sound of a won battle.** 2.0 plays nothing for the battle reports (`FUN_10c0_0c50`);
-   the remake plays 7027 because its auto play stops on that sound.
-7. **Battle replays.** 2.0 stores one replay per duel and deletes those over 500 years old
-   (`FUN_1050_2bf3`, `FUN_1040_486f`); the remake keeps one replay per star.
+4. **Dragging a budget bar.** 2.0 redistributes at every step of the drag, from where
+   the last step left the shares (`FUN_1010_155c` calls `FUN_1010_179a` for each mouse
+   move); the remake once, from the shares as the drag began (`rs.dragShare`), so a long
+   drag can end slightly differently. The rule itself is 2.0's: the drag sets every slot's
+   least share to 0 and most to 1,000 (`FUN_1010_1303`), so unlike a new colony's share it
+   does not keep losing colonies at their least share.
+5. **How long replays are kept.** 2.0 deletes replays over 500 years old
+   (`FUN_1040_486f`); the remake keeps the last 60 (`engine.js` `endTurn`, shared by every
+   ruleset).
+
+Now done (were remake's choices): no sound for reports 1033-1035 and 2001 for 1009
+(`FUN_10c0_0c50`, jump table @10c0:0cc6), with `won` for auto play; one replay per duel
+(`FUN_1018_0032` @1018:0720, `FUN_1050_2bf3`) with each duel's reports pointing at it; the
+budget bars drag by 2.0's rule (`rs.dragShare`); no Evacuate button at all; and the meteor
+report's stale name ("Settled, worth confirming" 1). Item 2 stays because following it
+needs the skin to go on with no human in the game; items 1 and 3 stay at the user's request.
 
 ### Interface not done
 

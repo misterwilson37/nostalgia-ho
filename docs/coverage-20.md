@@ -213,7 +213,7 @@ calls (`GETDC`, `LOADSTRING` …); they are imports, not code of the program.
 | `FUN_1010_0a5b` @1010:0a5b | budget window helper | NOT A RULE | interface |
 | `FUN_1010_0a7a` @1010:0a7a | draw the budget window: each slot's share, a colony under its least share highlighted | NOT A RULE | drawing |
 | `FUN_1010_1303 †` @1010:1303 | click in the budget window: select a slot / start dragging a share | NOT A RULE | interface |
-| `FUN_1010_155c †` @1010:155c | drag a budget share: the others are moved by FUN_1010_179a | NOT A RULE | interface: the remake's budget sliders scale the others in proportion, without 2.0's floors (see open questions) |
+| `FUN_1010_155c †` @1010:155c | drag a budget share: the others are moved by FUN_1010_179a | NOT A RULE | interface: implemented as `dragShare20` in js/rules-dos.js (floor 0, ceiling 1,000, then FUN_1010_179a) |
 | `FUN_1010_16e6 †` @1010:16e6 | end of a budget drag | NOT A RULE | interface |
 | `FUN_1010_16f2` @1010:16f2 | give a slot a new share, the others giving it up (new colonies) | RULE, implemented | js/rules-dos.js giveShare20 |
 | `FUN_1010_179a` @1010:179a | move the other slots' shares to make room: in proportion, never below a losing colony's least share, then fix the total | RULE, implemented | js/rules-dos.js giveShare20 |

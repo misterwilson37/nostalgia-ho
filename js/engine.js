@@ -746,8 +746,11 @@ function evacuate(G, pid, sid) {
   delete G.players[pid].budget.col[sid];
   msg(G, pid, `You have evacuated ${s.name}.`, { icon: 'm9013', sound: 7002, star: sid, quiet: true });
 }
+// rs.scrapped(G, player, fleet, design): told of each fleet or design
+// scrapped (2.0 reports it at the start of the next turn)
 function scrapFleet(G, f) {
   const p = G.players[f.owner];
+  if (rules(G).scrapped) rules(G).scrapped(G, p, f, null);
   const rate = rules(G).scrapReturn(G, p);
   let metal = 0;
   for (const k in f.ships) { const d = getDesign(G, f.owner, +k); metal += designCost(G, d).metal * f.ships[k] * rate; }
@@ -764,6 +767,7 @@ function scrapFleet(G, f) {
 function scrapDesign(G, pid, did) {
   const p = G.players[pid], d = getDesign(G, pid, did);
   if (!d) return 0;
+  if (rules(G).scrapped) rules(G).scrapped(G, p, null, d);
   const rate = rules(G).scrapReturn(G, p);
   const unit = designCost(G, d).metal;
   let n = 0, metal = 0;

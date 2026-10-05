@@ -121,7 +121,7 @@ All as DOS 2.0:
 | Random events | none, as DOS 2.0. The text of a revolt (STR# 1000.13, DITL 3090), a volcano (1000.16), metal found (DITL 3110), a lost fleet (DITL 3120), a nova (1000.9, DITL 3130), stolen tech (DITL 3160) and a forfeit (DITL 3150) is there, but nothing shows it | CONFIRMED (every caller of `AddNewMessage`) |
 | "You have entered the year N." | every player's turn opens with it (STR# 1000.11, worded in English as DOS 2.0's line 682, "The game has been updated to the year N.") | CONFIRMED (`EndTurn` @a025e); added in `economy` |
 | A fleet arriving at your colony | no message to the colony's owner (DOS 2.0's ruleset turns the remake's `arrivalNotices` on; 1.2 has no text for it) | CONFIRMED (`MoveShips`, STR# 1000) |
-| A meteor shower wiping out a colony | 1.2 sends report 1059, which has no template in STR# 1000 (it has 59 lines), so the report is a blank line; the remake shows it blank | CONFIRMED (`ComputeIncomeAndPopulation`, `GetReportString @130746`) |
+| A meteor shower wiping out a colony | 1.2 sends report 1059, which has no template in STR# 1000 (it has 59 lines), so the report is a blank line; the remake shows it blank, with your own planet's picture | CONFIRMED (`ComputeIncomeAndPopulation`, `GetReportString @130746`) |
 | Exploration | "You have explored …" shows gravity relative to home and the temperature in **°C** to a tenth: (T − home + 720 − 324) × 5/9 in tenths, so a planet at home's temperature shows 22.0 °C. The ruleset sets `celsius: true` so a skin can turn its Celsius preference on | CONFIRMED (`ExploreStar @a3b4c`) |
 | Ship names | a new design gets a random name from STR# 2001 + class that no current design has (up to 100 tries; then the last one tried) | CONFIRMED (`GiveTypeCoolName @9457e`) |
 
@@ -324,8 +324,9 @@ colony, a new colony, another player eliminated and winning (.3–.7, .11, .29, 
 .58); 2001 for a colony destroyed, a black hole, being eliminated, someone else winning
 and a meteor wiping out a colony (.10, .21, .56, .57, report 1059); 3002 for a colony that
 isn't supported (.12); 6000 / 6002 / 6001 for exploring a good / middling / bad star
-(`DetermineStarQuality` ≥ 15, 1–14, 0); the credits and battle results are silent, and
-everything else plays the default sound. As DOS 2.0.
+(`DetermineStarQuality` ≥ 15, 1–14, 0); the credits and battle results (.34–.36) are silent, and
+everything else plays the default sound. As DOS 2.0. The remake now follows this: no
+sound on battle reports, which carry `won: true / false` for auto play instead.
 
 ## Names
 
@@ -434,7 +435,7 @@ its own code until its own pass):
 | Order of colonies in a turn | support, terraforming and mining, and ship queues go through the colony slots in slot order, newest colony first | CONFIRMED (`KillUnsupportedStars @a0960`, `TerraformMineStars`, `BuildNewShips @a1406`) |
 | Battle reports | one pair a duel: each duel at a star is a battle of its own and `MakeResultMessages` writes the attacker's and the defender's report from that duel's counts. The defender's colony keeps its survivors; the debris of a duel goes to the colony's owner if it held ("You have recovered …"), else falls onto the planet with a note to the winner; when both sides die it is lost. A colony owner with no ships that loses gets "X destroyed your colony at S."; with ships, only "You lost a battle" | CONFIRMED (`DoBattleStage @d0004`, `MakeResultMessages @d2828`, `ResolveVictorFleetsAtStar @d3990`, `ZeroFleetsAtStar @d38ca`) |
 | What a battle teaches | the estimates (above) are written per duel, from that duel's survivors | CONFIRMED (`MakeResultMessages`) |
-| A meteor shower wiping out a colony | report 1059 has no template, so the report is a blank line (sound 2001) | CONFIRMED (`ComputeIncomeAndPopulation` asm a3034, `GetReportString @130746` default case @130d62) |
+| A meteor shower wiping out a colony | report 1059 has no template, so the report is a blank line (sound 2001, the picture of your own planet) | CONFIRMED (`ComputeIncomeAndPopulation` asm a3034, `GetReportString @130746` default case @130d62) |
 | Messages between players | none: no command sends them and nothing fills the outgoing list | CONFIRMED (MENU 128–134; player +0xea0 written only by `CreatePlayer`, read by `EndTurn`) |
 | Routes | planned again at every stop: at the start of `MoveShips` and after `ColonizeAndExplore` a fleet whose next stop isn't its destination gets a new route from where it is, with the fuel it has left; with none it stops: "Your %s can no longer reach %s." | CONFIRMED (`CheckFleetDestination @a23d2`) |
 | The ship queue | a design already queued in any slot gets the new ships; taking one ship off a slot of several keeps what was paid; emptying the first slot loses what was paid toward it, money and metal | CONFIRMED (`AddTypeToQueue @11311a`, `RemoveTypeFromQueue @1131ec`, `BuildShips @112946`; part-payment at slot +0xf0a/+0xf0e) |
@@ -480,7 +481,10 @@ What 1.2 does differently from 2.0's turn (now in `js/rules-12.js`):
 
 | What | 1.2F | Status |
 |---|---|---|
-| A colony wiped out by meteors | report 1059, a blank line (as before) | CONFIRMED (`ComputeIncomeAndPopulation` asm a3034) |
+| A colony wiped out by meteors | report 1059, a blank line (as before), with the picture of your own planet (`GetIconID`'s default case) and sound 2001; 2.0 instead reports 1009 with a stale name | CONFIRMED (`ComputeIncomeAndPopulation` asm a3034, `GetIconID @130db0`, `PlayAnnounceSound @130f08`) |
+| Battle report sounds and replays | 1033–1035 play nothing, 1009 plays 2001; each duel is its own replay ('bTTl', AddResource @d0738) handed to `MakeResultMessages` (@d0768) | CONFIRMED (`PlayAnnounceSound @130f08`, `DoBattleStage @d0004`) |
+| Dragging a budget bar | every slot's least share 0 and most 1,000 (@c1212-c121a), then `DetermineNewLevels` at each step (@c1324): 2.0's rule, number for number (`rs.dragShare`) | CONFIRMED (`DoHBarClick @c1002`) |
+| Giving up a colony | no command: `DecolonizeStar` is called only by `KillUnsupportedStars`, `ReactToSupernova` (never run) and `ComputeIncomeAndPopulation`, so there is no Evacuate button | CONFIRMED |
 | The computers' shares over $2,000,000 | a slot given more than $2,000,000 gets ceil(money ÷ trunc(total ÷ 1,000)) per mille instead of ceil(money × 1,000 ÷ total) (the remake had only the second rule). 2.0's `FUN_1020_35f9` has the same branch; see `docs/open-questions.md` | CONFIRMED (`ResolveSpending @93378`, asm 93458–934c0); `rs.aiBigShares` in `js/ai-12.js` |
 | The computers' colony bars | each part's money × 1,000 ÷ the colony's total, rounded up, with the product in 32 bits and the result stored as a word, so a part over $2,147,483 wraps | CONFIRMED (`ResolveSpending`, @9363c, @936a4, @936ec); `setColonyBars12` |
 | Organize Fleets | every fleet of the design gets the least fuel used and the older records keep their orders (see "Settled in the full pass"); 2.0 gives the average and clears orders | CONFIRMED (`OrganizeFleets @113896`) |

@@ -212,7 +212,11 @@ offline. The repository includes their output, not the DOS game itself.
 | The winner | from 2010 on, with more than one player, the only player who is neither out nor dying (strings 728–729). The remake also ends the game when every human is out (GUESS) | CONFIRMED (`FUN_1040_3fa6`) |
 | An out player's fleets | nothing removes them; they still fight, and an out computer still moves them (the computer turn runs for every computer slot) | CONFIRMED (`FUN_1040_0038` @1040:02bb) |
 | Random events | none. 2.0's files contain the text of a nova, a revolt, a volcanic eruption, metal found, a fleet lost in hyperspace and a wormhole, but its code never shows them (the features arrive in later versions) | CONFIRMED (every caller of the report and alert routines in `WINHO.EXE`) |
-| A colony wiped out by meteors | report 1009, "%s destroyed your colony at %s.", with nothing given for the first %s: the name shown is that of the player whose number happens to be in the report slot's spare bytes from an older report. The remake says "A meteor shower destroyed your colony at …" (see open questions) | CONFIRMED (`FUN_1040_27ee` @1040:2ab3-2acd, `FUN_10c0_0784` case 1009 @10c0:09b9, `FUN_10c0_0e20`) |
+| A colony wiped out by meteors | report 1009, "%s destroyed your colony at %s.", with nothing given for the first %s. The formatter prints the name at game header +0x16 + 16 × the record's first spare word, and the meteor report writes none, so it names what was left there. A player's report list (at most 50, never cleared, starting with the two credits in a zeroed record) drops its oldest 10 when full and writes the new report into record 40, so report k goes into a fresh record while k ≤ 48 (player 0's name) and after that into the record report k − 10 used: the name comes from the first spare word of the report ten back (or twenty, …): the attacker (1009, 1035), your ships lost (1033, 1034), gravity × 100 (1031), or the first two letters of a fleet label or design name (1016, 1017, 1019, 1023–1025). From 20 up it is other header bytes or, past the 1,562-byte header, a General Protection Fault; the remake then prints no name. Sound 2001. The remake keeps the same list (`log20`) | CONFIRMED (`FUN_1040_27ee` @1040:2ab3-2acd, `FUN_10c0_0784` case 1009 @10c0:09b9-09d5, `FUN_10c0_0e20` @10c0:0e31-0ebe, `FUN_1030_1299` @1030:14c2-14d0, `FUN_10c8_04f9` GlobalAlloc 0x42, `FUN_10c0_14bd`, `FUN_1030_0000` @1030:000c) |
+| Battle report sounds | 1033, 1034 and 1035 play nothing; 1009 plays 2001 | CONFIRMED (`FUN_10c0_0c50`, jump table @10c0:0cc6, entries 0x21-0x23 and 9) |
+| Battle replays | one a duel, written right after the duel and before its reports | CONFIRMED (`FUN_1018_0032` @1018:06a9, 0720 `FUN_1050_2bf3`, 0732 `FUN_1018_260b`) |
+| Dragging a budget bar | the drag sets every slot's least share to 0 and its most to 1,000, then at each mouse move moves the slot to the new share (0–1,000) and the others make room in proportion (taking ⌈left × share ÷ total⌉ round after round when it shrinks, each getting 1 first if they are all 0), then a total outside 990–1,010 is fixed one per mille at a time. So, unlike a new colony's share, a drag does not keep losing colonies at their least share. The remake works it out once, from where the drag began | CONFIRMED (`FUN_1010_1303` @1010:1303-1557, `FUN_1010_155c`, `FUN_1010_179a` @1010:179a-1ce6); `rs.dragShare` |
+| Giving up a colony | no command: `FUN_1040_38c0` is called only by the turn (@1040:0ab5, 29fa), so there is no Evacuate button | CONFIRMED |
 
 ### Settled since the first version of this file
 
@@ -236,7 +240,10 @@ offline. The repository includes their output, not the DOS game itself.
   - the turn runs for out players too (`FUN_1040_0038`);
   - routes are planned again at every stop (`FUN_1040_25ce`);
   - arrival messages are written as fleets move, from the player's record (`FUN_1040_23ed`);
-  - battles report each duel (`FUN_1018_0032`, `260b`);
+  - battles report each duel (`FUN_1018_0032`, `260b`), each with its own replay, with
+    2.0's report sounds;
+  - dragging a budget bar follows the budget window (`FUN_1010_1303`, `155c`, `179a`);
+  - the meteor report names the stale player (`FUN_10c0_0e20`, `0784`);
   - taking the first ship out of the queue loses what was paid (`FUN_10e8_17af`), and a
     queued design gets new ships in its own slot (`FUN_10e8_16e4`);
   - fleets hold one design; Organize Ships averages the fuel used and clears orders
@@ -253,8 +260,7 @@ See `docs/open-questions.md` (2.0 section). Not implemented, by choice or not ye
   built-in lists.
 - Several human players: 2.0 joins humans one at a time with passwords; the remake's hot
   seat takes turns on one computer instead.
-- The Fix Spending command (`FUN_1010_1ce7`), the budget window's floors when you drag a
-  share (`FUN_1010_179a`), 2.0's Send Message window (`SENDMESSAGEDLGPROC`) and the
+- The Fix Spending command (`FUN_1010_1ce7`), 2.0's Send Message window (`SENDMESSAGEDLGPROC`) and the
   Explored Planets list.
 - Text only: the scrapping message ("Your fleet of … at … has been scrapped for … metal.",
   string 688, `FUN_1040_0fca`) and the explore message's tenths of a degree aren't
@@ -474,7 +480,7 @@ The DOS game numbers its sounds the same way as the Mac game:
 Those replace the Mac sounds with the same numbers. 1000 is a click and the default for
 messages, and 7000 plays at the end of a turn (**CONFIRMED**, `FUN_1100_03c9`,
 `FUN_1050_1216`). 2000 goes with tech levels, a new year, a profitable colony, a new
-colony and winning; 2001 with a destroyed colony and losing; 3002 also with a colony
+colony and winning; 2001 with a destroyed colony (report 1009) and losing the game; the battle results 1033–1035 play nothing; 3002 also with a colony
 that isn't getting enough money (`FUN_10c0_0c50`). The DOS game has no other sounds, so
 the skin is otherwise silent.
 

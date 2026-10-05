@@ -15,7 +15,7 @@
 //   - its computers' attack rating, worked out in 32 bits (2.0's wraps);
 //   - its computers' shares over $2,000,000 by their own rule and their
 //     colony bars in 32 bits (ResolveSpending @93378);
-//   - a blank report for a colony wiped out by meteors;
+//   - a blank report for a colony wiped out by meteors, with your own planet's picture;
 //   - its Organize Fleets (the ship queue is 2.0's, kept here with 1.2's addresses).
 // Its computer players (js/ai-12.js), its turn (EndTurn @a0004 and every
 // routine it calls), battle reports, "updated to the year" message and rule
@@ -213,12 +213,16 @@ const trunc = Math.trunc;
 // templates (1000-1058), so GetReportString @130746 finds no text
 // (GetIndString gives an empty string) and its jump table's default case
 // (@130d62) prints that empty template: the report is a blank line, with the
-// bad-news sound (PlayAnnounceSound @130f08: 2001).
+// bad-news sound (PlayAnnounceSound @130f08: 2001) and, as for any report
+// GetIconID @130db0 has no case for (0x423 falls to its default), the
+// picture of your own planet (1000 + your face; 'white0_0', your hat, in the
+// remake's own pictures).
 function pass2_12(G) {
   const before = G.players.map(p => (p.inbox || []).length);
   D.refuel(G); // 2.0's pass 2 (rules-dos pass2_20), for every player
   G.players.forEach((p, i) => {
-    for (const m of (p.inbox || []).slice(before[i])) if (/^A meteor shower destroyed your colony at /.test(m.text)) m.text = '';
+    // 2.0's meteor report (rules-dos income20) names no one in 1.2's ruleset
+    for (const m of (p.inbox || []).slice(before[i])) if (/^ destroyed your colony at /.test(m.text)) { m.text = ''; m.icon = 'white0_0'; }
   });
 }
 // CONFIRMED (ResolveSpending @93378, asm 933ee-93724): the computers' bars
@@ -306,13 +310,28 @@ function organized12(G, f, merged, nf, orders) {
 // - the counts are that duel's: my losses, and the other side's.
 // The estimates each side keeps (x12) are written per duel the same way as
 // rules-dos battleKnow. Sounds: PlayAnnounceSound @130f08 plays nothing for
-// 1033-1035 and 2001 for 1009; the remake keeps 7027 on a won battle (the
-// skin's auto play stops on it; interface).
+// 1033-1035 (0x409-0x40b) and 2001 for 1009 (0x3f1); each report says
+// whether you won (won: true / false) for the remake's auto play.
+// Replays: DoBattleStage makes one 'bTTl' resource for each duel (NewHandle
+// @d0116, the two sides' ships at the star, DoOneBattle @d06a4, AddResource
+// _A9AB @d0738) and hands its id to MakeResultMessages (@d0768), so each
+// duel's reports replay that duel (rules-dos battle, one record a duel).
 // The duels, their reports and the colony lost at once are 2.0's code to the
 // letter (rules-dos battle20, FUN_1018_0032 and FUN_1018_260b): the
 // defender's colony is nobody's as soon as it loses (MakeResultMessages
 // @d2828, the star's owner set to -1 at its end) and its slot is taken out in
 // the owner's pass 2 (ComputeIncomeAndPopulation, above).
+// CONFIRMED: no command gives up a colony. DecolonizeStar @a3fd4 is called
+// only by KillUnsupportedStars @a0960 (a colony its share can't keep),
+// ReactToSupernova @a2afc (never run: no novas) and ComputeIncomeAndPopulation
+// @a2de6 (a colony lost or emptied); the menus (MENU 128-134) have no such
+// item. So there is no Evacuate button, even with modern conveniences on.
+// CONFIRMED (DoHBarClick @c1002): dragging a budget bar sets every slot's
+// least share to 0 and its most to 1,000 (@c1212-c121a) and then, at each
+// step of the drag, moves the slot to the new share (0 to 1,000) with
+// DetermineNewLevels @c1470 (@c1324), the others making room in proportion:
+// 2.0's FUN_1010_1303 / 155c / 179a, number for number (rules-dos
+// dragShare20).
 
 // 1.2 plays 2.0's turn (js/rules-dos.js), with the differences above
 E.registerRules('12', Object.assign({}, D, {
@@ -340,6 +359,7 @@ E.registerRules('12', Object.assign({}, D, {
   // bits and their shares over $2,000,000 (js/ai-12.js) and its Organize
   // Fleets (the ship queue and merging are 2.0's rule, cited here in 1.2)
   refuel: pass2_12, setColonyBars: setColonyBars12, aiBigShares: true,
+  evacuateCommand: false, dragShare: D.dragShare, // (above) no Evacuate; 2.0's drag
   yardRefund: yardRefund12, queueMergeAny: true, canMerge: canMerge12, organized: organized12,
   finishedPartWasted: false,
   att12, shipPower: att12,
