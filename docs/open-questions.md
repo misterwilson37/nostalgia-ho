@@ -189,21 +189,103 @@ These are what 2.0's code does and what the remake now does; they look like slip
   (`FUN_1030_1049` draws star names from it too). The remake keeps no such file.
 - The Explored Planets list (LISTSTARSDLGPROC) and the poll and battle speed settings.
 
-### Found in the 1.2 pass, for 2.0
+### Found in the 1.2 pass, for 2.0 (now done)
 
 - **The computers' shares over $2,000,000.** 2.0's `FUN_1020_35f9` gives a slot whose
-  money is over $2,000,000 ceil(money ÷ trunc(total ÷ 1,000)) per mille (@1020:3728), as
-  1.2's `ResolveSpending` does; the 2.0 ruleset doesn't set `rs.aiBigShares` yet, so its
-  computers still use ceil(money × 1,000 ÷ total) there. Left as it was so that 2.0's
-  test games stay the same; to be turned on with 2.0's next change. (The colony bars in
-  `FUN_1020_35f9` may wrap in 32 bits as 1.2's do; not checked.)
+  money is over $2,000,000 ⌈money ÷ trunc(total ÷ 1,000)⌉ per mille (@1020:3709-3774, the
+  compare at @1020:3721-372c), as 1.2's `ResolveSpending` does. The 2.0 ruleset now sets
+  `rs.aiBigShares` (done at the start of the 3.0.1 pass; only the money of players over
+  $2,000,000 changes in 2.0's test games).
+- **The computers' colony bars in 32 bits.** `FUN_1020_35f9` multiplies the part's money
+  by 1,000 in 32 bits (@1020:38da, 3930, 3974) and keeps the quotient as a word
+  (@1020:38fc, 3952, 3996), so they wrap as 1.2's do; the 2.0 ruleset now does the same.
 
 ## Mac 3.0.1 (1993)
 
-To be done in turn. Already noted: in 2010, on Spiral and Cluster maps, the computers
-skip their first turn (`DoComputerTurn @90004` with galaxy +0x10); and `ScrapOldShips
-@94e3e` passes the fleet's list number as the Range (harmless: the colony it heads for
-is always within the fuel left, so the route is direct).
+All 648 routines of the program have been read (`docs/coverage-301.md`; none unread), and
+every rule question that came up was answered from 3.0.1's own code, with its address in
+`docs/301-findings.md`. No rule falls back on 2.0, 1.2 or a later version; where the
+ruleset uses 2.0's or 4.0.5's code, the 3.0.1 routine was read and does the same. The
+two entries noted here before were re-checked in the code and are below ("Settled, worth
+confirming" 1 and 2). There are no open questions; what is left:
+
+### Settled, worth confirming
+
+These are what 3.0.1's code does and what the remake now does; they look like slips.
+
+1. **The computers skip their first turn on Spiral and Cluster maps.** In 2010
+   `DoComputerTurn` does nothing while galaxy +0x10 is set (@9002a-9003a); `CreateGalaxy`
+   sets it for those two styles so the map is laid out in 2010, and nothing clears it
+   before the computers' turn.
+2. **A slip with no effect in ScrapOldShips**: it passes the fleet's number in the list
+   as its Range to the route finder (@94f70); the colony it sends the fleet to is always
+   within its fuel, so the Range is never used (2.0 has the same slip).
+3. **Stranded fighters always ask for a colony.** `RefuelFighters @9508a` looks for a
+   colony within a fighter fleet's fuel, but tests the answer through a flag cleared just
+   before (@951b4-951c6), so a colony in reach never stops the request.
+4. **Turning Abandon off doesn't give the share back.** Both ways, `DoGalaxyMenu`
+   calls `GiveBarPercent(slot, 0)` (@f40e6), so a colony un-marked keeps a share of 0
+   until the player raises it.
+5. **An abandoned colony with a colony ship there is colonized again at once.** Giving
+   the colony up loads the colony ships at the star (`DecolonizeStar @a5ac0`), and
+   `ColonizeAndExplore` then settles them there in the same turn ("You have abandoned
+   %s." followed by "You have colonized %s.").
+6. **Organize Ships gives every fleet the most fuel used** of the fleets of that design
+   at the star (`OrganizeFleets @133d14`); 1.2 gave the least, 2.0 the average. A fleet
+   whose count changed is unloaded unless every fleet there was loaded.
+7. **The computers' colony bars in 32 bits**: `ResolveSpending @93abc` works out each
+   part's money × 1,000 in 32 bits and keeps the result as a word, so a colony given more
+   than $2,147,483 for one part gets a wrong bar (as in 1.2 and 2.0).
+8. **Ship power noted and never read**: `NoteShipPowers @a6410` writes each star's ship
+   power into the galaxy record every turn; nothing reads it.
+9. **Report texts with no sender**: volcanoes, revolts, metal disappearing and the
+   "computer bug" (STR# 1000.14, .17, .72, .77) have text but no code sends them.
+
+### Remake's choices
+
+1. **Random numbers.** 3.0.1 draws from the C library's `rand()` through `RND @11ea2`;
+   the remake has its own random numbers, so a game can't be replayed move for move.
+2. **Every human out.** 3.0.1 goes on as long as the computers play (`CheckForWinner
+   @a731a`); the remake ends the game when every human is out.
+3. **Several humans.** 3.0.1 lets humans join the game file, each with a name and
+   password (`RegisterOrCreatePlayer @121c20`), and plays each turn when everyone has
+   ended theirs, also across a network (`PollNextTurn`, `CheckTurnDone`). The remake's
+   hot seat passes one computer round instead.
+4. **When the computers plan.** 3.0.1 plans for each computer at the start of its own
+   pass 1, after the players before it have paid, scrapped and moved (`EndTurn @a0004`);
+   the remake plans for every computer before anyone's money. A computer plans from its
+   own records of the stars, the battle estimates, last turn's reports and the Compare
+   Players money row (written in pass 2), which another player's pass 1 doesn't change,
+   so the plans come out the same but for rare cases (a colony another player gives up
+   in the same pass, a fleet that has just left).
+5. **Scrapping a fleet or a design.** 3.0.1 marks it and scraps it at the start of the
+   money at End Turn (marking a ship built this turn undoes its purchase:
+   `ScrapCurrentFleet`, `BuildDesignShips`); the remake scraps a human's fleet or design
+   at once (where the metal goes is 3.0.1's), and has its own Unbuild for this turn's
+   purchases. The computers' scrapping is 3.0.1's.
+6. **Dragging a budget bar.** 3.0.1 redistributes at every step of the drag, from where
+   the last step left the shares (`DoHBarClick @d18a0`); the remake once, from the shares
+   as the drag began, so a long drag can end slightly differently.
+7. **Spiral and Cluster maps** are laid out at the start (3.0.1: in 2010, once every
+   player has joined); the computers' 2010 skip is kept.
+8. **Dip Into Savings** takes an amount in 3.0.1 (`DipIntoSavings @f41cc`); the remake's
+   window gives a percentage of the most that may be dipped.
+9. **Abandon.** The remake's Evacuate button is 3.0.1's Abandon toggle; its
+   confirmation is the remake's own (3.0.1 asks only for a profitable or nearly
+   profitable colony, with two jokes for "Hope" and "Ship"), and the colony isn't
+   shown as marked.
+
+### Interface not done
+
+- **Fix Spending** (`FixSpendingBars @d28ca`, `FixNextSpendingBar @d2552`).
+- **The Hall of Fame and Hall of Shame** (`AddToHall @144796`, `doHallOfFameDlg`); the
+  difficulty rating it records is worked out.
+- **Naming a star after a win** (`NameAStar`).
+- **The auto play settings** (`DoConfigAutoPlayDialog @144226`).
+- **The canned-message window** (`SendMessage @140fa2`): the remake's messages are free
+  text, of which the computers read "I like …" and "I like planets that are …".
+- **The auto-scrap preference** (old designs past 15, `ScrapFleetsAndTypes`, prefs +0x74).
+- **The colour-monitor joke** (`AddEasterEggs @b0004`, STR# 1000.96).
 
 ## Windows 95 4.0.5 (1996)
 

@@ -1,55 +1,89 @@
 # Spaceward Ho! 3.0.1 for the Macintosh: findings
 
 Spaceward Ho! 3.0.1 (Delta Tao, 1993) is the first colour Mac version, a 68k program.
-This file explains how the "Mac 3.0.1" ruleset (`js/rules-301.js`) was made and how it
-differs from the Mac 5.0.5 rules in `js/rules-original.js`.
+This file explains how the "Mac 3.0.1" ruleset (`js/rules-301.js`, with its computer
+players in `js/ai-301.js`) was made, rule by rule, from 3.0.1's own code.
 
 The program was decompiled from its resource fork with `tools/decompile/mac68k.py` and
 `tools/decompile/Mac68k.java` (see `docs/decompiling.md`). MPW left a MacsBug name after
 every routine, so functions are cited by name and by address in that layout (segment
 *n* at *n* × 0x10000), for example `SpendTechMoney @a1ed2`. Text is cited by resource:
-`STR# 1000.n` is the n-th report template, `DITL n` a dialog.
+`STR# 1000.n` is the n-th report template (report code 0x3e8 + n − 1), `DITL n` a
+dialog. Every routine of the program is listed in `docs/coverage-301.md`; the questions
+the code leaves open are in `docs/open-questions.md`, and what changed from 2.0 in
+`docs/evolution.md`.
 
-As in `405-findings.md`, every rule is labelled:
+Every rule is labelled:
 
 - **CONFIRMED**: read in the decompiled 3.0.1 code (or its resources), cited by
   function and address.
-- **GUESS**: the decompile doesn't settle it, so the remake makes a choice (said
-  which).
 - **NOT IMPLEMENTED**: in 3.0.1 but not in the remake (all of these are interface:
   windows, menu commands, preferences).
 
-Nothing in this ruleset falls back on 5.0.5 or 4.0.5 without a 3.0.1 citation: where
-it uses their code, the 3.0.1 routine was read and does the same (see "Inherited
-rules audit" at the end).
+No rule of this ruleset falls back on another version: where it uses 2.0's code
+(`js/rules-dos.js`) or 4.0.5's (`js/rules-405.js`), the 3.0.1 routine was read and does
+the same (see "Inherited rules audit" at the end).
 
 ## The short version
 
-3.0.1 is an **earlier build of the engine behind 4.0.5 and 5.0.5**. Its money model is
-already 5.0.5's (a share of each turn's money goes to "Ship Savings", which ships are
-bought from and which can go into debt), and its galaxy, battles and novas are already
-4.0.5's. So the ruleset is built on the "Original" rules (`Object.assign` over
-`rules-original.js`), borrows the 4.0.5 galaxy, battle and nova code from
-`rules-405.js`, and has its own computer players (`js/ai-301.js`). The main
-differences from 5.0.5 are:
+3.0.1 is **2.0's game with a new money model and new events**. Its turn is 2.0's turn,
+routine for routine (`EndTurn @a0004`: for each player in turn the computer plans, then
+the money, terraforming and mining, research and moves; then every battle; then for each
+player income, colonizing and exploring), worked out with 2.0's arithmetic: budget
+shares per mille used as they stand (the $2,000,000 rule), colony bars per mille with −1
+for a finished part, a new colony's share found by redistribution, a lost colony's share
+going to Savings with its colony ships loaded, battles fought as duels, routes planned
+again at every stop. So the ruleset is built over the "DOS 2.0" rules
+(`Object.assign` over `rules-dos.js`). What 3.0.1 added on top:
 
-- **Setup**: a Skill Level (Novice to Expert) instead of a Home System; one Computer
-  Intelligence setting; up to 19 computers; no savings to start with.
-- **Only four ship classes**: Scout, Fighter, Colony Ship and Satellite; 20 designs.
-- **Cheaper research of Range but weaker research points**, dearer mining and
-  terraforming (as in DOS 2.0).
-- **Ships cost** a product of all four stats (as 4.0.5), prototypes cost half as much as
-  5.0.5's, and Satellites are half as strong and shoot once.
-- **Battles** are 4.0.5's duels with the DOS 2.0 hit table; luck is always on.
-- **Radical tech** has six outcomes, rolled fresh each time (no hand of four).
-- **Routes** through your colonies, planned again at every stop; **fleets of one
-  design**; **battle groups** of at most 5 a side.
-- **Its own computer players**: 1.2's scheme grown up (see "Computer players").
-- **Its own end of the game**: an alliance wins only if it holds for a turn.
+- **Ship Savings**: a share of each turn's money goes to Ship Savings, which earn
+  interest, pay for ships at once (no shipyard queues) and can go into debt down to a
+  borrowing limit; losing colonies are paid for out of this turn's money first.
+- **Setup**: a Skill Level (Novice to Expert), one Computer Intelligence setting, up to
+  19 computers, the 4.0.5 galaxy generator (six styles, five sizes).
+- **Only four ship classes**: Scout, Fighter, Colony Ship and Satellite; 20 designs,
+  4.0.5's cost formula with 2.0's hit table.
+- **Radical tech** with six outcomes; **alliances**, gifts, surrender and canned
+  messages; **novas** and **Armageddon**; **luck** in battle.
+- **Its own computer players**: 1.2's and 2.0's scheme grown up (see "Computer players").
+- **Its own end of the game**: an alliance wins only if it holds for a turn; a player
+  who is out has its fleets scrapped.
 - No stances, "arrive late", best buddies, tankers, dreadnoughts, biologicals, decoys,
-  ranks or master points.
+  ranks or master points (those are later).
 
-## Ruleset differences from 5.0.5
+## The turn
+
+CONFIRMED (`EndTurn @a0004`, read in the disassembly). Each End Turn runs this once per
+10 years of the turn (`PerformEndTurn @1216e8`). The players go in their slot order,
+computers first (`CreateNewPlayer @121fee` numbers the computers 0.. and the humans
+after them; the remake numbers humans first, so the ruleset's loops go computers first).
+
+**Pass 1, for each player** (@a02a0-a0596):
+1. "Year %d:" (report 1011, STR# 1000.12) opens its reports (@a033e).
+2. A computer, or a human on auto play, plans (`DoComputerTurn @90004`; only while
+   the player's state is below 4, so not once it is out).
+3. `SurrenderIfDesired @a1760`, `DeductInterest @a0e32`, `ScrapFleetsAndTypes @a194e`
+   (marked fleets and designs; every fleet of a player who is out, @a1ae8),
+   `MaintainKillStars @a10c8` (colonies marked to be abandoned, then losing colonies
+   paid or starved), `TerraformMineStars @a129a`, `SpendTechMoney @a1ed2`,
+   `SaveComparisonInfoOne @a65bc`, `MoveShips @a26ac`, `RestoreStarsBars @a2e4c`.
+
+**Between the passes** (@a0600-a0618): `DoBattleStage @e0004` (every battle),
+`CheckForArmageddon @a3268`, `CheckForSupernova @a33cc`.
+
+**Pass 2, for each player** (@a0628-a0d64): the Armageddon reports,
+`ReactToSupernova @a3702`, `GetOtherScrapMetal @a3abe`, `ComputeIncomeAndPopulation
+@a3bba`, `ColonizeAndExplore @a4414`, `DetectBigBattles @a4a20`, `DoSurrenders @a482a`,
+the reports and gifts between players, the net floored at 0 ("After supporting your
+planets and paying your interest, you have no money to spend!", 1000.105, @a0bdc) and
+the money clamped (@a0bdc-a0c9c), `NoteShipPowers` (never read), `DoGameEndStuff
+@a6d06`, `ConformPlayerAlliances @a2f76` (players still in), `RestoreStarsBars`,
+`SetPlanetDisplayValues @a4b60`, `SaveComparisonInfoTwo @a663c`.
+
+Then `CheckForWinner @a731a`. The remake runs every computer's plan before the money of
+pass 1 rather than in each player's turn (see `docs/open-questions.md`).
+
+## The rules
 
 ### Setup
 
@@ -81,24 +115,35 @@ differences from 5.0.5 are:
 
 ### Money
 
-3.0.1's budget is 5.0.5's: each turn's Total Money (last turn's income) pays interest and
-the support of losing colonies, then is shared out between Ship Savings, Technology and
-the colonies; ships are bought at once from Ship Savings, down to the borrowing limit.
+Each turn's Total Money (last turn's income, player +0) pays interest and the support
+of losing colonies, then is shared out between the budget slots: Ship Savings,
+Technology and the colonies; ships are bought at once from Ship Savings, down to the
+borrowing limit. The shares are 2.0's.
 
 | What | 3.0.1 | Status |
 |---|---|---|
+| Budget slots | Savings, Technology, then the colonies, the newest first (a new colony's slot goes in front of the other colonies). Each slot's share is a whole per mille, used as it stands (the shares need not add up to 1,000) | CONFIRMED (`CreatePlayer @f26a0`, `ColonizeStar @a566a`) |
+| A share of an amount M | trunc(M × pm ÷ 1,000) while M is under $2,000,000, trunc(M ÷ 1,000) × pm above (2.0's rule) | CONFIRMED (`TerraformMineStars @a1318-a1360`, `SpendTechMoney @a1f5a-a1fa2`, `ComputeIncomeAndPopulation @a3c1a-a3ca0`) |
+| Setting one share | the others (but colonies being abandoned or finished) give it up, or take it up, in proportion, ⌈left × share ÷ total⌉ each, round after round, none below 0 nor above the colony's most (⌈cost of finishing ÷ net × 1,001⌉; 1,000 for Savings and Technology; 0 for a colony being abandoned or finished); a total outside 990–1,010 is then brought to 1,000 one per mille at a time | CONFIRMED (`GiveBarPercent @d1d40`, `DetermineNewLevels @d1e1e`, `ComputeMaxPercent @d28f8`, `ComputeMinPercent @d2a94`) |
+| Dragging a budget bar | the same, with every other slot between 0 and 1,000; 3.0.1 does it at every step of the drag, the remake once, from where the drag began | CONFIRMED (`DoHBarClick @d18a0`; `rs.dragShare`) |
 | Interest | 10 × the whole square root of Ship Savings, with no "half of savings" cap and no prime-rate bonus; debt costs 15% | CONFIRMED (`ComputeIncomeAndPopulation @a3bba`, `DeductInterest @a0e32`) |
 | Paying interest, supporting colonies, global warming, a fleet scrapped for lack of funds | as 5.0.5 ("Warning! Ship money is being used to support …") | CONFIRMED (`DeductInterest`, `MaintainKillStars @a10c8`) |
 | Terraforming | the first $5,000 goes into the planet; then the money moves the temperature √(money / 2) tenths of a degree (5.0.5: √(2/3 money)), √(3/5 money) with the radical bonus. The overshoot is refunded at 2 × d² (5/3 × d²). The "never profitable" warning comes every turn | CONFIRMED (`TerraformMineStars @a129a`) |
 | Mining | 15 × the whole square root of the money (5.0.5: 20 × √), 18 × with the radical bonus. A mined-out planet refunds the unneeded money: ⌈m²/225⌉ (⌈m²/324⌉), above 30,000 metal ⌈m/225⌉ × m | CONFIRMED (`TerraformMineStars`, `MetalToMoney @13676`) |
 | Growth, maximum population, the +10% bonus | as 5.0.5 | CONFIRMED (`ComputeIncomeAndPopulation`) |
 | Income | as 5.0.5, except the log is of the *whole* square root of the population | CONFIRMED (`ComputeIncomeAndPopulation`, SANE calls) |
-| New colonies | as 5.0.5: 10 colonists per colony ship, terraform 900 / mine 100 (mine all when gravity is more than 2.56 times home's), a $7,500 share when Total Money is above $20,000 | CONFIRMED (`ColonizeStar @a566a`) |
+| New colonies | 10 colonists per colony ship; income −$7,501 until worked out (the net drops by as much); bars Terraform 900 / Mine 100 (Mine 1,000 when gravity is more than 2.56 times home's); at your own temperature Terraform is done and $5,000 counted as sunk, with no metal Mine is done; its share is set to 7,500,000 ÷ Total Money per mille when the money is over $20,000 (none if both parts are done) | CONFIRMED (`ColonizeStar @a566a`, `GiveBarPercent`) |
+| Giving up a colony | its colony ships at the star are loaded, its share goes to Savings, its slot is taken out, the star is nobody's | CONFIRMED (`DecolonizeStar @a5ac0`, 2.0's `FUN_1040_38c0`) |
+| Abandon | a toggle on the colony (Galaxy menu): on, its income comes off the net and its share goes to 0 (the others take it up); off, the income goes back; confirmations for a profitable or nearly profitable colony (DITL 3410, 3420) and two jokes for a star named "Hope" or "Ship" (DITL 3020, 3030). The colony is given up at the start of the money at End Turn ("You have abandoned %s.", 1000.9). The remake's Evacuate button is this command | CONFIRMED (`DoGalaxyMenu @f3ece-f4110`, `MaintainKillStars @a10c8`) |
 | Meteor showers | metal × 50 units killed; nobody escapes onto colony ships | CONFIRMED (`ComputeIncomeAndPopulation`) |
 | Dip into savings | an amount, up to Ship Savings minus the borrowing limit (so into debt), moves into this turn's money at once and the interest is worked out again on what is left; once (nothing is dipped next turn) | CONFIRMED (`DipIntoSavings @f41cc`). The remake's Dip window gives a percentage: here it is that percentage of the most you may dip (interface) |
 | Interest after buying | buying a ship works the interest out again on the Ship Savings left (a computer's buying doesn't) | CONFIRMED (`BuildAShip @132e04`, `BuildAFleet @92fc2`) |
 | Fix Spending | a menu command that rebalances overspent and underspent colonies | NOT IMPLEMENTED: interface (STR# 1050) |
-| A colony's money | split between terraforming and mining only, per mille (a side that can't be used is off); the "Ship" bar of STR# 1005 is unused | CONFIRMED (`RestoreStarsBars @a2e4c`, `TerraformMineStars @a129a`; the remake's one terraforming share is the same split) |
+| A colony's money | split by two bars, Terraform and Mine (slot +2, +4), per mille, −1 for a finished part; a bar above 0 is spent whether the planet still needs it or not. At the end of each pass the bars above 0 are scaled to 1,000, and with none above 0 the one not done gets 1,000. The home colony starts at Terraform −1, Mine 1,000. The "Ship" bar of STR# 1005 is unused | CONFIRMED (`RestoreStarsBars @a2e4c`, 2.0's `FUN_1040_269d` with two bars; `TerraformMineStars @a129a`; `CreatePlayer @f26a0`) |
+| Bars set right | at the end of pass 2, for each colony: at your own temperature Terraform is set done (and Mine, if not done, to 1,000); moved away from it (global warming) with Terraform done, Terraform gets 1,000 less Mine; out of metal, Mine is set done (and Terraform, if not done, to 1,000). A colony with both done is marked finished (slot +0x10) and its share is given to the others | CONFIRMED (`SetPlanetDisplayValues @a4b60`, called at `EndTurn @a0d0a`) |
+| Refunds | a terraforming step past your temperature refunds cost(step) − cost(gap); a mined-out planet refunds MetalToMoney(got) − MetalToMoney(left); refunds go into Ship Savings in pass 2 | CONFIRMED (`TerraformMineStars`, `ComputeIncomeAndPopulation`) |
+| No money to spend | a net below 0 is set to 0: "Warning! After supporting your planets and paying your interest, you have no money to spend!" (1000.105); money kept within $0–$1,000,000,000, Ship Savings within ±$1,000,000,000 | CONFIRMED (`EndTurn @a0bdc-a0c9c`) |
+| Losing a colony in battle | given up in pass 2 when the star's last duel was won by someone else (or none of its people are left) | CONFIRMED (`ComputeIncomeAndPopulation @a3df8`) |
 
 ### Research
 
@@ -138,18 +183,19 @@ the colonies; ships are bought at once from Ship Savings, down to the borrowing 
 | Design names | every new design, yours too, gets a name at random from STR# 2001–2004 by class (3.0.1's own lists) that no design of yours has; up to 100 tries | CONFIRMED (`GiveTypeCoolName @95296` and its callers `CreatePlayer`, `BuildDesignShips`, `DoSomethingRadical`, `MaintainShipTypes`) |
 | Design sliders | Range 3 to your Range (Scout +2, Satellite 0), Speed 1 to tech (a Satellite's fixed at your Speed), Weapons and Shields 1 to tech (Scout −1), Mini 0 to tech (5.0.5: Scout +3) | CONFIRMED (`SetSBMinMax @132792`) |
 | Fuel, colony ships, wormholes | as 5.0.5: fleets refuel at your own and your allies' colonies; colony ships reload colonists at your colonies; a fleet arriving at an exploded star is lost | CONFIRMED (`ColonizeAndExplore @a4414`, `MoveShips @a26ac`) |
-| Routes | a fleet sent farther than its fuel goes by way of your colonies (not ones being abandoned): the first hop within the fuel left, the others within its Range; a colony from which the destination is in Range ends the route; at most 42 ÷ Range stops; the shortest (fewest stops among equals), if under three times the direct distance. Planned again on arriving at each stop and before leaving it; with no route left the fleet stops: "Your … can no longer reach …" (STR# 1000.21) | CONFIRMED (`DeterminePath @130686`, `GiveFleetPath @130dc0`, `CheckFleetDestination @a2b8e`, called from `MoveShips @a26ac` and `ColonizeAndExplore @a4414`) |
+| Routes | a fleet sent farther than its fuel goes by way of your colonies (not ones being abandoned), looked at in slot order (the newest first), depth first: the first hop within the fuel left, the others within its Range; a colony from which the destination is in Range ends the route; at most 42 ÷ Range stops; a route is kept if it is under three times the direct distance and shorter than the best so far, or as long with no more stops (so of two routes as good, the later found wins). Distances are the low byte of the distance table. Planned again on arriving at each stop and before leaving it; with no route left the fleet stops: "Your … can no longer reach …" (STR# 1000.21) | CONFIRMED (`DeterminePath @130686`, `CreateDistArray @130e2`, `GiveFleetPath @130dc0`, `CheckFleetDestination @a2b8e`, called from `MoveShips @a26ac` and `ColonizeAndExplore @a4414`) |
 | Travel | a leg takes ⌈distance ÷ speed⌉ turns; the fuel is spent on arrival | CONFIRMED (`GiveFleetPath`, `MoveShips`) |
 | Manual waypoints | not in 3.0.1 (a fleet has only a next stop and a destination); the remake's "Plan route…" stays as an interface convenience | CONFIRMED (fleet record +0xe, +0x14) |
-| Fleets | a fleet holds one design. New Fighters and Satellites join a fleet of the same design at the star that has no orders (a human's only one built this turn); each Scout and Colony Ship is a fleet of its own. Fleets can be grouped to move together, at the slowest speed and shortest Range: the remake's fleets of several designs stand for such groups | CONFIRMED (`BuildAShip @132e04`, `BuildAFleet`, `NewFleet @130004`, `GiveFleetPath`) |
-| Scrapping | humans get 3/4 of the metal, computers all of it; in hyperspace it falls on the next star as a meteor shower; over someone else's colony it goes to that colony's owner later in the turn ("You just received … metal from someone scrapping a fleet over …") | CONFIRMED (`ScrapFleetsAndTypes @a194e`, `GetOtherScrapMetal @a3abe`) |
+| Fleets | a fleet holds one design. A player's fleet list is kept by class (Scouts, Fighters, Colony Ships, Satellites), a new fleet in front of the others of its class; the turn and the computers go through it in that order. New Fighters and Satellites join a fleet of the same design at the star that has no orders (a human's only one built this turn); each Scout and Colony Ship is a fleet of its own. Fleets can be grouped to move together, at the slowest speed and shortest Range: the remake's fleets of several designs stand for such groups | CONFIRMED (`BuildAShip @132e04`, `BuildAFleet`, `NewFleet @130004`, `GiveFleetPath`) |
+| Organize Ships | one design's ships at a star are dealt out again among up to 12 fleets; every fleet of that design there then has the most fuel used of any of them; a fleet whose count changed stops counting as built this turn unless all of them were, and its colony ships are unloaded unless all of them were loaded; the fleets kept keep their orders | CONFIRMED (`OrganizeFleets @133d14`) |
+| Scrapping | a fleet or design is marked (fleet +7, design +0x88; a toggle for a human, which undoes the purchase of a ship built this turn) and scrapped at the start of the money at End Turn. Humans get 3/4 of the metal, computers all of it; at your colony it goes to you; in hyperspace it falls on the next star as a meteor shower; elsewhere it falls onto the planet, and the planet's owner picks it up later in the turn ("You just received … metal from someone scrapping a fleet over …") | CONFIRMED (`ScrapCurrentFleet`, `BuildDesignShips`, `ScrapFleetsAndTypes @a194e`, `GetOtherScrapMetal @a3abe`). The remake scraps a human's fleet at once (see open questions) |
 | Automatically scrapping old designs past 15 | a preference of the program (not of the game): when on, at the end of each turn every player's unused designs older than the newest of their class are scrapped while there are more than 15 | NOT IMPLEMENTED: interface preference (`ScrapFleetsAndTypes @a194e`, prefs +0x74) |
 
 ### Battles
 
 | What | 3.0.1 | Status |
 |---|---|---|
-| Who fights | 4.0.5's duels: the colony's owner defends, the others are shuffled and each fights the current holder; allies take turns | CONFIRMED (`DoBattleStage @e0004`, `AreAllies @e09d2`, `EverybodyNotAllied @e0a56`) |
+| Who fights | 2.0's duels: at every star where two players are, the colony's owner holds the star and the others, shuffled, take it on one at a time from the end of the list; the winner holds it (both dead: the next in the list); an ally of the holder goes to the front, and once everyone left is the holder's ally the holder steps down. One replay is kept for each duel | CONFIRMED (`DoBattleStage @e0004`, `AreAllies @e09d2`, `EverybodyNotAllied @e0a56`, `ReviewBattle @e2d36`) |
 | Luck | −1, 0 or +1 Weapons for each side in each duel, **always on**; smarter generals never get −1 (the black cat and the horseshoe) | CONFIRMED (`DoBattleStage`) |
 | Order of fire | rounds until one side is gone; fastest first, the attacker's groups then the defender's at each speed; ships hit during a speed still fire in it; the planet fires only as its side's last group | CONFIRMED (`DoOneBattle @e0aee`) |
 | Hit table | resource `MaTh 1002` "Weapon Ratios": 1% at W−S ≤ −22, 25% at −1, 50% at 0, 74% at +1, 98% at +22 (the DOS 2.0 table) | CONFIRMED (`HaveGroupShoot @e1cc2`, `CalcShipCosts`) |
@@ -157,7 +203,7 @@ the colonies; ships are bought at once from Ship Savings, down to the borrowing 
 | Shots | every ship fires once a round, satellites too (5.0.5/4.0.5: twice); the planet once, with your Weapons (+ luck) and Shields tech and its population as hit points | CONFIRMED (`CalcOneGroup @e17e4`, `DoBattleStage`) |
 | Targets | colony ships first, then satellites, then a ship group from a random start, the planet last | CONFIRMED (`PickTarget @e250e`) |
 | Groups | in each duel a side's ships are cut into groups of at most N ships of one design, each a target of its own. N starts at a fifth of the side's ships (at least 1) and grows until the side has at most 5 groups (the planet counts) or one a design; with 5 or more designs N is the whole side; both sides use the larger N | CONFIRMED (`CalculateGroups @e1614`, `CalcOneGroup @e17e4`) |
-| Reports | the winner's and loser's as 5.0.5; the colony's owner: "%s survived an enemy attack from %s. You lost %d of your ships. %s lost %d. You lost %s people." / "%s destroyed your colony at %s. …" | CONFIRMED (`MakeResultMessages @e2ea2`, STR# 1000.11, .32–.34) |
+| Reports | one pair a duel: "You won a battle at %s. You lost %d of your ships. %s lost %d." / "You lost a battle …" (1000.32–.33), and for the colony's owner "%s survived an enemy attack from %s. … You lost %s people." (.34) / "%s destroyed your colony at %s. …" (.11). Only the last plays a sound (2001); the other three play none | CONFIRMED (`MakeResultMessages @e2ea2`, `PlayAnnounceSound @16156e`) |
 | What a battle teaches | the year, and strength estimates for the computers; see "Computer players" | CONFIRMED (`MakeResultMessages`) |
 | Debris, big-battle rumour | as 4.0.5: a duel is a big battle when each side has more ships than `RND(5, 10)` (`MakeResultMessages @e2ea2`; the star's flag is cleared each 10-year step); at the end of the step every player, computers too, whose record of the star was last seen and last heard of a battle more than 10 years ago gets "The amount of energy emanating from … suggests a big battle just took place." (0x43b) and the year in its record. The remake used to tell only humans, after every battle; fixed (`bigDuels`) | CONFIRMED (`DoOneBattle`, `MakeResultMessages @e2ea2`, `DetectBigBattles @a4a20`, called for every player in `EndTurn`) |
 | Stances, "arrive late" | not in 3.0.1 | CONFIRMED (no text or code) |
@@ -166,7 +212,7 @@ the colonies; ships are bought at once from Ship Savings, down to the borrowing 
 
 | What | 3.0.1 | Status |
 |---|---|---|
-| Red stars and supernovas | as 4.0.5: after 2749 a 1% chance a turn, one at a time, 3–10 turns of warning to every player, no miracle; metal and shock wave as 5.0.5 | CONFIRMED (`CheckForSupernova @a33cc`, `ReactToSupernova @a3702`) |
+| Red stars and supernovas | after 2749, 1 time in 100, if no star is red (or went this turn), a quiet star nobody owns starts turning red, 3–10 turns; every player hears "%s has started growing and is turning bright red in hue!" every turn it grows. Then each star within 11 ly gets RND(max(100, 10000 ÷ d − 1000), 10000 ÷ d) metal; a colony hit loses metal × RND(40, 60) people, its owner gets the metal; no miracle | CONFIRMED (`CheckForSupernova @a33cc`, `ReactToSupernova @a3702`) |
 | Armageddon | when every human has switched it on, half the quiet stars go supernova the next turn; no shrinking | CONFIRMED (`CheckForArmageddon @a3268`) |
 | Volcanoes, revolts, metal disappearing, the "computer bug" | their text is in the program (STR# 1000.14, .17, .72, .77) but nothing shows them | CONFIRMED (no caller) |
 
@@ -188,7 +234,7 @@ Step by step, as 3.0.1 does it:
 
 | What | 3.0.1 | Status |
 |---|---|---|
-| Out | every turn (each 10 years, also within one End Turn of several), a player with no colonies and no colony ships is out: its money and metal go to 0, its fleets stay where they are and still fight but nobody gives them orders. "%s has just been eliminated from the game." / "You have just been eliminated from the game." (1000.66–.67). A player who is out but has a colony again is back | CONFIRMED (`DoGameEndStuff @a6d06`, `CheckEndGame @12085a`, `EndTurn`: `DoComputerTurn` only for players still in). 5.0.5 removes the fleets |
+| Out | every turn (each 10 years, also within one End Turn of several), a player with no colonies and no colony ships is out: its money, Ship Savings and metal go to 0, and next turn's pass 1 scraps every fleet it has left. "%s has just been eliminated from the game." / "You have just been eliminated from the game." (1000.66–.67). A player who is out but has a colony again is back | CONFIRMED (`DoGameEndStuff @a6d06`, `ScrapFleetsAndTypes @a1ae8`, `CheckEndGame @12085a`; `DoComputerTurn` only for players still in) |
 | Winning | from 2010, when every player still in is allied with every other: a lone player wins at once; an alliance must hold for one more turn, "Your alliance will win the game next turn if it holds!" (1000.106). "Congratulations! You won the game." / "%s has just won the game." (1000.69, .68), for each winner | CONFIRMED (`CheckForWinner @a731a`, `CheckEndGame`) |
 | Hall of Fame and Hall of Shame, naming a star after a win | | NOT IMPLEMENTED: interface (`AddToHall @144796`, `NameAStar`) |
 
@@ -232,8 +278,13 @@ code as skill 0 (`EndTurn @a0004`).
 
 **Each turn:**
 - **Money.** Ship money is Ship Savings less a reserve: the smaller of reserve × income
-  and 1 % of income for each year since 2000. The money to share out is this turn's
-  (`DoComputerTurn`).
+  and 1 % of income for each year since 2000 (income here is Total Money). The money
+  to share out is the net (player +8: interest and every colony's income, never below
+  0). In 2010 on a Spiral or Cluster map the computers don't plan at all: galaxy +0x10,
+  set for those styles to lay the map out in 2010, is never cleared (`DoComputerTurn
+  @9002a-9003a`, `CreateGalaxy @f0004`); the remake keeps the skip.
+- **Scrapping** is by marks (fleet +7, design +0x88), carried out by
+  `ScrapFleetsAndTypes` at the start of the money.
 - **Designs** (`MaintainShipTypes @94794`, `CalcTypeObsolescence @94bcc`). Obsolescence:
   how far behind your tech, Range × 10 (not Satellites; Scouts +2), Speed × 15, Weapons ×
   15 (not Colony Ships; Scouts −1), Shields × 10 (Scouts −1), Mini × 10 (not Colony
@@ -263,15 +314,19 @@ code as skill 0 (`EndTurn @a0004`).
 - **Busy fleets** (`MarkUsedFleets @97112`): colony ships heading for an enemy's star stop.
 - **Old ships** (`ScrapOldSats @94d22`, `ScrapOldShips @94e3e`): ships at or past their
   class's retire mark are scrapped at your colonies and sent home from elsewhere (not
-  scouts). 3.0.1 passes the fleet's number as the Range when sending them home (a slip);
-  the remake uses the Range.
-- **Stranded fighters** (`RefuelFighters @9508a`): a fighter fleet of 5 or more, not yet
-  retired, with no colony in reach, asks for a colony where it is (priority 58).
+  scouts). 3.0.1 passes the fleet's number in its list as the Range when sending them
+  home (@94f70; a slip with no effect, since the colony is within the fuel left); the
+  remake does the same.
+- **Stranded fighters** (`RefuelFighters @9508a`): a fighter fleet of 5 or more that has
+  used fuel and is not yet retired asks for a colony where it is (priority 58). The
+  routine also looks for a colony within the fuel left, but its test of the answer
+  (@951b4-951c6) reads a flag cleared just before, so a colony in reach never stops the
+  request.
 - **Feelings** (`MsgReactDetermineAllies @9537e`, `ModifyAlliances @95dc8`), from last
   turn's reports: Range level 16 and Speed level 5 move research to Weapons and Shields;
   a Mini level moves some of it; a Weapons level raises the planets' part of its
   estimates; a colony destroyed: "#!$@*$&@•™!" to the attacker 4 times in 10, and "I hate
-  …" to everyone 2 in 15; a battle won where the other side lost no ships: "Sorry!" 4 in
+  …" to everyone (one message, @95f14) 2 in 15; a battle won where the other side lost no ships: "Sorry!" 4 in
   10; "I like you." from someone it nearly likes enough: sometimes up to 500; "I like X":
   likes X 25–50 more; an alliance formed: likes the ally 50–150 more and half the others
   15–35 less; a gift of money (against gross income) or metal: up to 50 more, and "Thank
@@ -312,16 +367,17 @@ code as skill 0 (`EndTurn @a0004`).
   going nova; fighters and colony ships from stars that aren't yours; scouts, and fighters
   and colony ships at a mined-out one, from hostile colonies. Colony ships heading for an
   enemy's star stop.
-- **The budget** (`ResolveSpending @93abc`): what is left goes to Ship Savings; each bar
-  is its money over the total, per mille rounded up; each colony's money is split
-  between terraforming and mining the same way; research shares are the personality's.
+- **The budget** (`ResolveSpending @93abc`): what is left goes to Ship Savings; each
+  slot's share is its money over the total, per mille rounded up (by thousands of the
+  total above $2,000,000), kept as a word; each colony's bars split its money the same
+  way (the part's money × 1,000 worked out in 32 bits), a done part left at −1 and the
+  other then 1,000; a finished colony (slot +0x10) is passed over; with no money at all
+  Savings gets 1,000; research shares are the personality's.
 
-**Strength estimates** (`MakeResultMessages`), per player and star: the year of the
-last battle seen and e16 (the force to beat there), e1a (what it shows to stars near
-it), e1e (the threat to your colony), e22 (what it shows to your colonies near it) and
-the population seen. The remake fights a star's battle as a whole, so each player is
-treated as in a duel with all its enemies there, the colony's owner as the defender
-(3.0.1 writes them per duel). A defender that held: e16, e1a, e22 0; e1e = its ships
+**Strength estimates** (`MakeResultMessages`), per player and star, after each duel:
+the year of the last battle seen and e16 (the force to beat there), e1a (what it shows
+to stars near it), e1e (the threat to your colony), e22 (what it shows to your colonies
+near it) and the population seen. A defender that held: e16, e1a, e22 0; e1e = its ships
 less fighters (2 in 5, after more than one round) or a tenth of that (2 in 5). A
 defender that lost: e16 = the winners' ships + 1, e1a 0 a third of the time else the
 same, e22 the same. A winner: all 0. A loser elsewhere: the population seen, e16 = the
@@ -329,91 +385,110 @@ winners' ships + the planet ((pop + 49) ÷ 50 × (Weapons + 2)² ÷ 75) + 1 (hal
 at a colony, less their fighters and scouts), e1a their satellites + planet (0 a third
 of the time if the population was under 100), e22 their fighters and scouts.
 
+## Play changes in this pass
+
+The ruleset was first built over the 5.0.5 rules. Reading 3.0.1's whole program showed
+that its turn is 2.0's, so it was rebuilt over `js/rules-dos.js`. Each change below is
+3.0.1's own code, cited:
+
+- **The turn**: 2.0's two passes for each player in turn, battles and events between
+  them, computers first (`EndTurn @a0004`); "Year %d:" opens each player's reports
+  (@a033e); a human on auto play is planned for like a computer (state 3, intelligence
+  0); a player who is out no longer plans (state below 4).
+- **Shares**: per mille slots, Savings, Technology, colonies newest first, used as they
+  stand with the $2,000,000 rule (`TerraformMineStars @a1318-a1360`, `SpendTechMoney
+  @a1f5a-a1fa2`, `ComputeIncomeAndPopulation @a3c1a-a3ca0`); a share is set with 2.0's
+  redistribution bounded by `ComputeMaxPercent @d28f8` (`GiveBarPercent @d1d40`,
+  `DetermineNewLevels @d1e1e`); a dragged bar keeps the others between 0 and 1,000
+  (`DoHBarClick @d18a0`, `rs.dragShare`).
+- **Colony bars**: Terraform and Mine per mille with −1 for done (`RestoreStarsBars
+  @a2e4c`); the home colony starts at −1 / 1,000 with $5,000 sunk (`CreatePlayer
+  @f26a0`); bars set right and finished colonies' shares given away at the end of pass
+  2 (`SetPlanetDisplayValues @a4b60`); the computers pass finished colonies over
+  (`ResolveSpending @93abc`).
+- **Terraforming and mining**: a bar above 0 is spent whether needed or not; the
+  refunds are cost(step) − cost(gap) and MetalToMoney(got) − MetalToMoney(left)
+  (`TerraformMineStars @a129a`).
+- **New and lost colonies**: the slot after Savings and Technology, income −$7,501, a
+  share of 7,500,000 ÷ Total Money per mille (`ColonizeStar @a566a`); a colony is lost
+  in pass 2 when its star's last duel was won by someone else (`ComputeIncomeAndPopulation
+  @a3df8`), its share going to Savings and its colony ships loaded (`DecolonizeStar
+  @a5ac0`).
+- **Money**: the net floored at 0 with report 1000.105 and the money clamped
+  (`EndTurn @a0bdc-a0c9c`); the computers share out the net (`DoComputerTurn @90004`).
+- **Abandon**: a toggle that takes the colony's income off the net and its share away at
+  once; the colony is given up at End Turn (`DoGalaxyMenu @f3ece-f4110`,
+  `MaintainKillStars @a10c8`). The Evacuate button now does this
+  (`rs.evacuate`, `rs.evacuateCommand: true`).
+- **Out players**: their fleets are scrapped in the next pass 1 (`ScrapFleetsAndTypes
+  @a1ae8`); before, they stayed and fought.
+- **Battles**: 2.0's duels taken from the end of the list; luck RND(−1, 1) on Weapons
+  (@e01f6-e0218); the planet with its owner's Weapons and Shields (@e0780-e07c6) counted
+  among the defender's groups and first (`CalculateGroups @e1614`); targets
+  (`PickTarget @e250e`); reports, estimates and feelings per duel (`MakeResultMessages
+  @e2ea2`); one replay per duel (`DoBattleStage`, `ReviewBattle @e2d36`); no sound for
+  "won", "lost" or "survived", 2001 for "destroyed your colony" (`PlayAnnounceSound
+  @16156e`).
+- **Novas**: a new red star only on a quiet star nobody owns; the warning every turn;
+  shock-wave metal to the colony's owner (`CheckForSupernova @a33cc`, `ReactToSupernova
+  @a3702`). Armageddon notices follow the switches as they stood (`EndTurn
+  @a03d0-a0450`).
+- **Fleets**: the list kept in class order (`NewFleet @130004`); routes by 3.0.1's
+  depth-first search, later ties winning (`DeterminePath @130686`); Organize Ships'
+  fuel, "built" and "loaded" rules (`OrganizeFleets @133d14`); satellites of one design
+  merged at each star (`MoveShips @a26ac`).
+- **Scrapping and surrender**: marks carried out at the start of the money; metal over
+  another's colony picked up by its owner (`ScrapFleetsAndTypes @a194e`,
+  `GetOtherScrapMetal @a3abe`); a surrendering player's fleets scrapped (`SurrenderIfDesired
+  @a1760`).
+- **Computers**: Total Money as income and the net as money to share
+  (`DoComputerTurn`); designs always new records, free from Average up
+  (`MaintainShipTypes @94794`); scrapping by marks; fleets in list order; the
+  `ScrapOldShips` slip (@94f70) and the `RefuelFighters` test (@951b4-951c6) as 3.0.1
+  has them; "I hate" as one message to everyone (`SendAMessage @95f14`); terraforming
+  by the bar (`AddTerraformingActions @90aac`); `ResolveSpending` in words and 32 bits;
+  the 2010 skip on Spiral and Cluster maps (@9002a).
+
 ## Changes to the shared code
 
-The ruleset needed a few hooks; none changes the other rulesets (their test games are
-the same, byte for byte):
-
-- `rules-original.js`: `economy()` takes `opt.terraStep`, `opt.terraCost`,
-  `opt.mineMetal`, `opt.mineMoney` and `opt.terraWarnAlways`, and `afterMovement()`
-  takes `opt.incomeU`.
-- `rules-405.js`: `battle()` asks the active ruleset for `hit`, `designCost`,
-  `shotsPerShip` and `planetShots` (4.0.5's own values are unchanged), and, if it has
-  one, `splitGroups(G, A, B)` to cut each side into smaller groups for a duel (a
-  group's losses are its parent's).
-- `engine.js`: `rs.processSurrenders`, `rs.processHandovers` and `rs.pactNews` replace
-  the engine's surrender and alliance-news steps; `rs.checkEveryStep` runs
-  `rs.checkElimination` on every 10-year step of an End Turn, not just the last; the
-  engine loads `js/ai-301.js` (and `index.html` lists it). The ruleset also uses the
-  hooks `rs.femaleComputers` (a chance), `rs.arrivalSays`, `rs.fleetFor`, `rs.route`,
-  `rs.designName`, `rs.battleText`, `rs.fleetArrives` and `rs.checkElimination`.
+- `js/rules-dos.js` (2.0, step 0 of this pass, see `docs/dos-findings.md`): the
+  computers' shares over $2,000,000 (`rs.aiBigShares`, `FUN_1020_35f9` @1020:3709-3774)
+  and the computers' colony bars worked out in 32 bits and kept as a word
+  (@1020:38da, 3930, 3974). Only 2.0's test games change (the money of the players over
+  $2,000,000 at turn 100).
+- `js/engine.js`: `evacuate()` hands over to `rs.evacuate` when a ruleset has one (only
+  3.0.1's does). Nothing else in the engine changed; the ruleset uses the hooks the
+  engine already had (`rs.processSurrenders`, `rs.pactNews`, `rs.checkElimination`,
+  `rs.fleetFor`, `rs.route`, `rs.fleetArrives`, `rs.organized`, `rs.dragShare`, `rs.scrapAt`,
+  `rs.designName`, the economy and refuel slots).
 
 ## Inherited rules audit
 
-Every rule the 3.0.1 ruleset takes from `rules-original.js` (5.0.5), `rules-405.js`
-(4.0.5) or the engine, checked against 3.0.1's code. "Same" means the 3.0.1 routine was
-read and does what the remake does; "3.0.1's own" means it differed and the ruleset now
-does 3.0.1's.
+Every rule the 3.0.1 ruleset takes from another ruleset, checked against 3.0.1's code.
 
 | Rule | From | 3.0.1 | Result |
 |---|---|---|---|
-| Computer players | `ai-original.js` | `DoComputerTurn @90004`, segment 9 | 3.0.1's own (`js/ai-301.js`) |
-| Personalities | `ai-original.js` | `SetCompAttrs @f32ec` | 3.0.1's own |
-| Attack rating ÷ 50 | 5.0.5 | `CalcShipCosts @134de6` | 3.0.1's own (no ÷ 50) |
-| Computers' mining and terraforming budgets | 5.0.5 AI hooks | `AddColonySupportActions`, `AddTerraformingActions` | 3.0.1's own (in `ai-301.js`) |
-| When computers plan (years per turn) | engine | `EndTurn`, `DoComputerTurn`: `(year − 2010) mod years-per-turn = 0` | same: the first step of each End Turn |
-| Years per turn | engine | `PerformEndTurn @1216e8`: EndTurn once per 10 years | same |
-| Turn order | engine | `EndTurn @a0004`: each player in turn plans (computers), pays interest, scraps, supports colonies, terraforms and mines, researches and moves; then all battles, novas; then each player's income, colonizing and exploring | the remake has every computer plan first, then the money, then the moves. Nothing a computer reads is changed by another player's money or moves in between except where other fleets stand, which 3.0.1's computers don't look at (they use battle estimates); accepted as the same |
-| Interest, debt, colony support, global warming, the scrapped fleet | 5.0.5 `economy` | `DeductInterest @a0e32`, `MaintainKillStars @a10c8` | same (CONFIRMED above) |
-| Borrowing limit | 5.0.5 | `ComputeIncomeAndPopulation @a3bba`: −5 × gross income | same |
-| Money left for the bars | 5.0.5 `disposable` | `ComputeIncomeAndPopulation`: Total Money + interest | same |
-| Share of a new colony; its first colonists and settings | 5.0.5 `settle` | `ColonizeStar @a566a` | same |
-| Colony ships not used up, reloaded at your colonies | 5.0.5 | `ColonizeAndExplore @a4414` (+6 flag) | same |
-| Refuelling at your and your allies' colonies | 5.0.5 `refuel` | `ColonizeAndExplore` | same (no tankers in 3.0.1) |
-| Colonizing | engine | `ColonizeAndExplore`: a loaded colony ship at a star that isn't yours or an ally's, after the battles | same |
-| Exploring, the star rating and its sound | 5.0.5 `exploreQuality` | `ExploreStar @a549e`, `PlayAnnounceSound @16156e`, `DetermineStarQuality @91c1c` (gravity ≤ 2.56 × and (≤ 2 × or ≤ 50 °F off); ≥ 15 good, 1–14 so-so, 0 bad) | same. The explored message shows the temperature to a tenth of a degree in 3.0.1 (interface) |
-| Battles everywhere hostile ships meet | 5.0.5 | `DoBattleStage @e0004` (stars with ships or colonies of two players) | same |
-| Battle duels, luck, targets, hit table | 4.0.5 `battle` | `DoBattleStage`, `DoOneBattle`, `HaveGroupShoot`, `PickTarget` | same (CONFIRMED above) |
-| Battle groups | 4.0.5 (one a design) | `CalculateGroups @e1614` | 3.0.1's own |
-| Battle reports | engine | `MakeResultMessages @e2ea2` | winner/loser same; the colony's owner's wording 3.0.1's own |
-| Debris | 4.0.5 | `DoOneBattle`, `MakeResultMessages` (to the holding owner, else onto the planet) | same |
-| Scrapping: 3/4 to humans, all to computers; in hyperspace a meteor shower at the next stop; over another's colony to its owner | 5.0.5 / 4.0.5 | `ScrapFleetsAndTypes @a194e`, `GetOtherScrapMetal @a3abe` | same |
-| Wormholes (arriving at a star that has gone) | 5.0.5 `fleetArrives` | `MoveShips @a26ac` | same |
-| Arrival messages | engine | `MoveShips`, `ColonizeAndExplore` | 3.0.1's own: you hear of your fleet stopping on the way and of reaching an explored star (even your own colony); others hear only of an ally's fleet, at their colony or where they have ships |
-| Travel time and fuel | engine | `GiveFleetPath @130dc0`, `MoveShips` | same |
-| Routes | engine (direct moves) and 5.0.5 waypoints | `DeterminePath`, `CheckFleetDestination` | 3.0.1's own |
-| New ships joining fleets | engine | `BuildAShip`, `BuildAFleet` | 3.0.1's own (`fleetFor`) |
-| Buying ships at once out of Ship Savings, to the borrowing limit, needing the metal | engine `buildShips` | `BuildAShip @132e04` | same; the interest recalculation is 3.0.1's own |
-| Undoing a purchase this turn | engine `unbuildShip` | no such command found | interface convenience of the remake |
-| Prototype costs | ruleset | `BuildAShip`, `BuildAFleet`, `MaintainShipTypes` | humans and Dumb pay; Average pays only for its starting designs (its own have none) |
-| Design names | engine (5.0.5 lists) | `GiveTypeCoolName @95296`, STR# 2001–2004 | 3.0.1's own |
-| Computer names and gender | engine (5.0.5 lists, 45 % women) | STR# 1999–2000, `CreateNewPlayer` | 3.0.1's own (50 %) |
-| Star stats, maximum population, growth, income, meteors | 5.0.5 | `GiveStarsValues`, `ComputeIncomeAndPopulation` | same (CONFIRMED above) |
-| "Never profitable" planets (gravity over 2.56 ×) | 5.0.5 `planetClass` | `TerraformMineStars`, `FillInStarStatus` | same |
-| Novas, supernovas, Armageddon | 4.0.5 `randomEvents` | `CheckForSupernova`, `ReactToSupernova`, `CheckForArmageddon` | same (CONFIRMED above). The armageddon on/off notices come at once in the remake, at the end of the turn in 3.0.1 (interface) |
-| Distance, galaxy shapes | 4.0.5 | `Distance`, `CreateGalaxy` and the `GiveGalaxy…Coords` routines | same, but the Circle's last ring is 3.0.1's own |
-| Computers' start and skill | 4.0.5 `computerSetup` | `CreateNewPlayer`, `DoGameSolidificationStuff` | 3.0.1's own: no random step, and the computers keep their own start with several humans |
-| Radical tech: stealing | ruleset | `DoSomethingRadical @a5d4e` (from the Compare Players table) | now only from players still in; the computers react to the stolen level |
+| Bars per mille, −1 for done; scaling to 1,000 | 2.0 `bars20`, `setBars20` (no Ship bar) | `RestoreStarsBars @a2e4c` | same (2.0's routine with two bars) |
+| Share of an amount | 2.0 `share20` | `TerraformMineStars`, `SpendTechMoney`, `ComputeIncomeAndPopulation` | same |
+| Redistribution of shares | 2.0 `giveShare20` | `GiveBarPercent`, `DetermineNewLevels` | same scheme; 3.0.1's bounds (`ComputeMaxPercent`, finished and abandoned colonies) are its own, in `giveBarPercent` |
+| Giving up a colony | 2.0 `removeColony20` | `DecolonizeStar @a5ac0` | same |
+| Distance | 2.0 / 4.0.5 | `Distance @11ef8` | same |
+| Galaxy shapes, star counts, home stars | 4.0.5 `makeGalaxy` | `CreateGalaxy` and the `GiveGalaxy…Coords` routines | same, but the Circle's last ring and the 2 ly margin are 3.0.1's own (`circleGalaxy`) |
+| Star stats | 5.0.5 / 4.0.5 `newStar` | `GiveStarsValues @f246c` | same |
+| Growth, maximum population, income, meteors | 5.0.5 `popU`, `hab` | `ComputeIncomeAndPopulation` | same, with the whole square root in the income's log (`incomeU`) |
+| Exploring, star rating | engine | `ExploreStar @a549e`, `DetermineStarQuality @91c1c` | same |
 | Alliances: both must want it | engine `isAllied` | `AreAllies @e09d2` | same |
-| Alliance news | engine `pactNews` | `ConformPlayerAlliances @a2f76` | 3.0.1's own (all notices) |
-| Gifts: at most 3 a turn, from what you have, delivered after the moves into Ship Savings | engine `give`, `deliverGifts` | `DoGiveThingsDlg @1437e0`, `EndTurn` | same; the giver's note comes at once (interface) |
-| Messages: at most 10 a turn | engine `sendChat` | `SendAMessage @95f14`, STR# 1020.17 | same |
-| Best buddies sharing maps | engine `shareMaps` | none in 3.0.1 | not used (no best buddies) |
-| Surrender | engine `processSurrenders`, `processHandovers` | `SurrenderIfDesired @a1760`, `DoSurrenders @a482a` | 3.0.1's own (fleets scrapped, 10 colonists, its notices) |
-| Who is out, who has won | engine `checkElimination` | `DoGameEndStuff @a6d06`, `CheckForWinner @a731a`, `CheckEndGame @12085a` | 3.0.1's own (fleets stay, alliance must hold a turn, every 10-year step) |
-| Every human out | engine | 3.0.1 goes on for the computers | the remake ends the game (interface) |
+| Gifts: at most 3 a turn, from what you have, delivered after the moves into Ship Savings | engine `give`, `deliverGifts` | `DoGiveThingsDlg @1437e0`, `EndTurn` | same |
+| Messages: at most 10 a turn | engine `sendChat` | `SendAMessage @95f14`, `SendMessage @140fa2` | same (the remake's messages are free text) |
+| Buying ships at once out of Ship Savings, needing the metal | engine `buildShips` | `BuildAShip @132e04` | same; the prototype and interest rules are the ruleset's |
+| Merging and splitting fleets | engine `mergeFleets`, `splitFleet` | `OrganizeFleets @133d14` | the engine's moves with 3.0.1's flags (`organized301`) |
+| Years per turn | engine | `PerformEndTurn @1216e8` | same |
 
-## Still unclear
+Everything else (the turn, money, research, radical tech, ships, battles, events,
+diplomacy, the end of the game, the computers) is the ruleset's own port of 3.0.1, as
+described above.
 
-- 3.0.1 fights and reports each duel at a star separately; the remake reports the whole
-  star at once, so with three or more sides the computers' estimates and feelings are
-  worked out as if each fought all its enemies there together (GUESS).
-- In its first year, if the map is laid out in 2010 (Spiral, Cluster), 3.0.1's
-  computers skip that turn (`DoComputerTurn` checks a galaxy flag); the remake lays the
-  map out at the start and they plan from the first turn.
-- 3.0.1's tie between equally short routes with as many stops goes to the first found
-  in its search order; the remake's search may pick another of them.
-- Interface not done: Fix Spending (STR# 1050), the Hall of Fame and Hall of Shame,
-  naming a star after a win, the colour-monitor joke (`AddEasterEggs @b0004`), the
-  auto-scrap preference, the auto play settings window (`DoConfigAutoPlayDialog`), and
-  the canned-message window (the remake's chat is free text).
+## Still open
+
+The questions 3.0.1's code doesn't settle, and the remake's own choices, are in
+`docs/open-questions.md` ("Mac 3.0.1").

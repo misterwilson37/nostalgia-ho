@@ -741,6 +741,7 @@ function battleNews(G, sid, b) {
 function evacuate(G, pid, sid) {
   const s = G.stars[sid];
   if (s.owner !== pid) return;
+  if (rules(G).evacuate) return rules(G).evacuate(G, G.players[pid], sid); // a ruleset's own command (Mac 3.0.1: marked, given up at End Turn)
   s.owner = -1; s.pop = 0;
   delete G.players[pid].budget.col[sid];
   msg(G, pid, `You have evacuated ${s.name}.`, { icon: 'm9013', sound: 7002, star: sid, quiet: true });

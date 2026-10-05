@@ -157,7 +157,84 @@ skin".
 
 ## Mac 3.0.1 (1993)
 
-To be written in turn.
+### What it is
+
+3.0.1 (Delta Tao, 1993) is the first colour Mac version, a 68k program with MPW's
+MacsBug names left in, so every routine is named. It is **2.0's game with a new money
+model and new events**: its turn is 2.0's two passes, routine for routine, worked out
+with 2.0's arithmetic, and the engine of 4.0.5 and 5.0.5 starts here (Ship Savings,
+alliances, Radical tech, novas, the 4.0.5 galaxy generator). Everything below is from
+the code of both programs (`docs/coverage-301.md`, `docs/301-findings.md`; 2.0:
+`docs/coverage-20.md`, `docs/dos-findings.md`).
+
+### Rules: what stayed
+
+The turn (`EndTurn @a0004` against `FUN_1040_0038`): for each player the computer plans,
+then the money, terraforming and mining, research and moves; then every battle; then
+for each player income, colonizing and exploring. Budget shares per mille, used as they
+stand, with the $2,000,000 rule; Savings, Technology and the colonies newest first; a
+new colony's share set by redistribution (7,500,000 ÷ the money, when over $20,000), a
+lost colony's share going to Savings with its colony ships loaded (`DecolonizeStar
+@a5ac0` = `FUN_1040_38c0`); colony bars with −1 for a finished part scaled to 1,000 at
+the end of each pass (`RestoreStarsBars @a2e4c` = `FUN_1040_269d`); terraforming
+(√(money/2) tenths, the first $5,000 sunk) and mining (15 × √money); income with the log
+of the whole square root; 10 colonists a colony ship; meteors from ships scrapped in
+hyperspace; routes through your colonies planned again at every stop; battles as duels
+with the colony's owner, the WPNRAT hit table (resource `MaTh 1002` "Weapon Ratios"),
+groups of one design, colony ships and satellites targeted first, a pair of reports and
+a replay per duel, debris a fifth of the metal; the four ship classes, 20 designs and
+2.0's design sliders; Skill Levels Novice to Expert with 2.0's starting money, metal
+and people; 0 to 19 computers; 1.2's and 2.0's computer players at the core (star
+classes, strength estimates, a list of at most 50 actions by priority).
+
+### Rules: what changed
+
+| Area | 2.0 | 3.0.1 |
+|---|---|---|
+| Money | one pool, never below $0; interest 10 × √(kept money + refunds); colonies paid from their own share (`FUN_1040_27ee`) | Total Money shared out each turn and **Ship Savings**: 10 × √savings interest, debt at 15 %, a borrowing limit of −5 × income; losing colonies paid from this turn's money, then Ship Savings; global warming and a fleet scrapped when even that fails; Dip Into Savings (`DeductInterest @a0e32`, `MaintainKillStars @a10c8`, `DipIntoSavings @f41cc`) |
+| A colony's bars | three: Terraform, Mine, Ships; a finished part −1 for good | two: Terraform and Mine; at the end of each turn a part is set done at your temperature or out of metal and set back after global warming, and a colony with both done gives its share away (`SetPlanetDisplayValues @a4b60`) |
+| Starting budget | Savings 0, Technology 150, home 850; home bars terraform done, mine 200, ships 800 | Savings 650, Technology 250, home 100; home bars Terraform done, Mine 1,000 (`CreatePlayer @f26a0`, `Stup 1000`) |
+| Ships | three-slot queues at each colony paid from its Ships bar; costs (R+10)(V+15)(W+13)(S+13) ÷ 30.6, satellites (W+13)(S+13) × 4.445 | bought at once out of Ship Savings, with a prototype price for a new design; (R+10)(V+15)(W+13)(S+17) ÷ 38.75, satellites 2.381 (W+13)(S+26) (`BuildAShip @132e04`, `CalcShipCosts @134de6`) |
+| Research | √(money ÷ divisor) × a random 60–140 % each turn; no Radical; no head start | × 8/10, fixed; Radical tech with six outcomes; a head start of 0–40 into each level (`SpendTechMoney @a1ed2`, `DoSomethingRadical @a5d4e`) |
+| Starting tech | exactly 6/2/2/2/0 | the same plus a head start, and a research split by tech (`CreatePlayer`) |
+| Battles | no luck; the planet uses its owner's Weapons tech for both Weapons and Shields | luck: −1, 0 or +1 Weapons a side each duel; the planet uses its owner's Weapons and Shields; allies don't fight (`DoBattleStage @e0004`) |
+| Novas | none | red stars after 2749 (1 in 100 a turn), supernovas hitting stars within 11 ly, and Armageddon when every human switches it on (`CheckForSupernova @a33cc`, `CheckForArmageddon @a3268`) |
+| Diplomacy | Send Message only ("I like", "I don't like", "I own") | alliances (both must want them), gifts of money and metal (3 a turn), surrender to another player, 14 canned messages (10 a turn) (`ConformPlayerAlliances @a2f76`, `DoGiveThingsDlg @1437e0`, `SurrenderIfDesired @a1760`, `DoSurrenders @a482a`) |
+| Giving up a colony | no command (only leaving it unfunded) | Abandon, a toggle carried out at End Turn (`DoGalaxyMenu @f3ece`) |
+| Underfunded colonies | still grow | don't grow that turn (`MaintainKillStars`) |
+| Out of the game | no colonies: dying for a turn, then out (colony ships don't count); out players still play their turn | no colonies and no colony ships: out at once, money, savings and metal to 0, fleets scrapped next turn, no more planning (`DoGameEndStuff @a6d06`, `ScrapFleetsAndTypes @a1ae8`) |
+| Winning | the last player standing, from 2010 | from 2010, every player left allied with every other: a lone player at once, an alliance if it holds a turn (`CheckForWinner @a731a`) |
+| Organize Ships | the average fuel used (counted up to 11 fleets); orders cleared; new fleets loaded | the most fuel used; orders kept; "built this turn" and "loaded" only if all were (`OrganizeFleets @133d14`) |
+| Dragging a budget bar | never below a losing colony's least share | between 0 and 1,000 (`DoHBarClick @d18a0`) |
+| Battle reports' sounds | none | none, but 2001 for "destroyed your colony" (`PlayAnnounceSound @16156e`) |
+| A colony wiped out by meteors | report 1009 with a stray player's name | "The meteor shower destroyed your colony at %s." (1000.71) |
+| Galaxy | five sizes; five shapes (Circle, Random, Ring, Spiral, Grid); Dense or Sparse | 4.0.5's: six styles (Circle, Random, Ring, Spiral, Grid, Cluster), five sizes, Dense or Sparse; Spiral and Cluster laid out in 2010; the map 2 ly from the left; a Circle's last ring evened out (`CreateGalaxy @f0004`) |
+| Star names | 190 | 191: 2.0's and "Hope" |
+| Ship names | 2.0's lists | 3.0.1's own (STR# 2001–2004), for humans' designs too (`GiveTypeCoolName @95296`) |
+| Options | computer IQ Dumb, Average, Smart; 10 years a turn | Dumb, Average, Smart, Diabolical; 10, 20, 30, 50 or 100 years a turn; an Alliances check box (DITL 6080) |
+
+### Computer players
+
+40 routines instead of 36 (segment 9), the old scheme grown up: ships bought at once out
+of Ship Savings, keeping a reserve of a few turns' income; designs dropped and drawn up
+by an "obsolescence" score (`MaintainShipTypes @94794`, `CalcTypeObsolescence @94bcc`),
+old ships scrapped or sent home, stranded fighter fleets asking for a colony; colonies
+the income can't support abandoned; a feeling for every player, moved by battles,
+messages, gifts and alliances, which decides alliances (with the option on) and whom a
+broke computer surrenders to (`MsgReactDetermineAllies @9537e`, `ModifyAlliances
+@95dc8`, `ComputeStatus @93fa8`). A fourth level, Diabolical, and among Smart and
+Diabolical computers "turtles" and "raiders" with their own personalities
+(`SetCompAttrs @f32ec`).
+
+### Interface
+
+A colour Mac program with floating tool windows (map, budget, technology, reports) and
+pie and bar controls for the colonies (`BarControl` segment). New windows: Alliances,
+Give, Surrender, the canned Send Message, Player Skills, History graph, the Hall of
+Fame and Hall of Shame with a difficulty rating, the auto play settings; Dip Into
+Savings and Abandon in the Galaxy menu. Kept from 2.0: Compare Players, Explored
+Planets, Organize Ships, Review Battle, Fix Spending, naming a star after a win, auto
+play, several humans joining the game file with passwords, across a network.
 
 ## Windows 95 4.0.5 (1996)
 
