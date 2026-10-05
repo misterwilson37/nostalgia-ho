@@ -1526,10 +1526,59 @@ function evacuate405(G, p, sid) {
   p.net301 = (p.net301 || 0) + (s.abandon301 ? -1 : 1) * (s.oInc || 0);
   giveBarPercent(G, p, sid, 0);
 }
-// a fleet or a design marked for scrapping (fleet +0xb, design +0x26),
-// scrapped by ScrapFleetsAndTypes in pass 1
-function flagScrap(G, f) { f.scrap301 = true; }
-function flagScrapDesign(G, p, d) { d.scrap301 = true; }
+// A fleet or a design marked for scrapping (fleet +0xb, design +0x26),
+// scrapped by ScrapFleetsAndTypes (FUN_00434534) in pass 1: a human's ships
+// for 3/4 of their metal (7/8 with the recycling discovery). The skin calls
+// these for a human's commands and shows f.scrap301 / d.scrap301 as the mark.
+// CONFIRMED (FUN_00419a52, the Ships menu's "Scrap Current Fleet", MAINFRM
+// FUN_00469698; refused while the turn is being worked out): the selected
+// fleet's mark is toggled (1 - itself), with SCRAP when it was off. A fleet
+// built this turn (fleet +0xd) isn't marked: its purchase is undone for every
+// ship in it: the design's built and existing counts and the colony's ships
+// built this turn go down, the money comes back (the price for each ship, and
+// for one of them the prototype price when none of the design is left built)
+// and the metal, the interest (and the net) is worked out again, and the
+// fleet is gone. The menu item's text doesn't change (menu resource 2; the
+// strings "Scrap current fleet" / "Don't Scrap Current Fleet", 318-319, are
+// never loaded). A marked fleet given orders on the map has them taken away
+// (FUN_00413ba3: an alert, WHOA); its information line reads "Fleet to be
+// scrapped for metal." (string 1338, FUN_0048fe0f). `how`: left out or true,
+// mark it (the computers' scrapping); false, unmark it; 'command', the human's
+// toggle. Returns 'unbuilt' when the purchase was undone, else whether the
+// fleet is now marked.
+function flagScrap(G, f, how) {
+  const p = G.players[f.owner], cmd = how === 'command';
+  const on = cmd ? !f.scrap301 : how !== false;
+  if (cmd && f.newThisTurn && f.star != null && f.to == null) {
+    const spent = p.spentThisTurn || [];
+    for (const k in f.ships) {
+      const d = getDesign(G, f.owner, +k), n = f.ships[k];
+      if (!d) continue;
+      const c = designCost(G, d);
+      d.built = Math.max(0, d.built - n);
+      p.savings += d.built < 1 ? c.money * (n - 1) + (d.free ? c.money : c.protoTotal) : c.money * n;
+      p.metal += c.metal * n;
+      for (let i = 0; i < n; i++) { const j = spent.map(e => e.did === +k && e.sid === f.star).lastIndexOf(true); if (j >= 0) spent.splice(j, 1); }
+    }
+    const I = interestOn(p, p.savings);
+    p.net301 = (p.net301 || 0) - (p.oInterest || 0) + I; p.oInterest = I;
+    G.fleets.splice(G.fleets.indexOf(f), 1);
+    return 'unbuilt';
+  }
+  f.scrap301 = !!on;
+  return f.scrap301;
+}
+// CONFIRMED (FUN_0044fd03, the Ship Types window's button, FUN_0044e9e4):
+// toggles design +0x26 (+0x92 in the player record); the button reads "Scrap
+// All" or "Don't Scrap" (strings 760-761); while a design is marked its Build
+// button is dimmed. Marking it gives back one ship of it ordered in the
+// window (the window's order count goes down by one; the ships are bought
+// when the window closes, FUN_00468f83). `how` as for flagScrap ('command'
+// toggles). Returns whether it is now marked.
+function flagScrapDesign(G, p, d, how) {
+  d.scrap301 = how === 'command' ? !d.scrap301 : how !== false;
+  return d.scrap301;
+}
 
 // =====================================================================
 // Novas and Armageddon (FUN_00436988, FUN_00436c26, FUN_00436ff8)

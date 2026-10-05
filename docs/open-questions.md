@@ -372,10 +372,12 @@ These are what 4.0.5's code does and what the remake now does; they look like sl
     taken (`FUN_00437ddd`).
 12. **A rank past 1,000,000 master points** shows "%s: %s" (string 334) instead of a rank
     name (`FUN_00482b89`).
-13. **Buying at a colony** is allowed while its people (units) exceed the ships built
+13. **Marking a ship type in the Ship Types window** gives back only one of the ships of
+    it ordered in the window (`FUN_0044fd03`); the remake's window gives back all of them.
+14. **Buying at a colony** is allowed while its people (units) exceed the ships built
     there this turn; for a human the count goes up before the money check
     (`FUN_004691c4`), for a computer only when bought (`FUN_00462105`).
-14. **Ship power noted and never read** (`FUN_0043b08a`), as 3.0.1.
+15. **Ship power noted and never read** (`FUN_0043b08a`), as 3.0.1.
 
 ### Remake's choices
 
@@ -383,8 +385,10 @@ These are what 4.0.5's code does and what the remake now does; they look like sl
 2. **When the computers plan and fleets move.** 4.0.5 plans and moves for each player in
    its own pass 1; the remake plans for every computer first and moves every fleet after
    pass 1. Only what a computer sees of the players before it in the same step differs.
-3. **Scrapping** a human's fleet or design happens at once (4.0.5 marks it, `FUN_00419a52`,
-   and scraps at End Turn); the metal goes where 4.0.5 sends it.
+3. **Scrapping** is 4.0.5's: Scrap Current Fleet and the Ship Types window's Scrap All
+   toggle a mark carried out at End Turn, and a fleet bought this turn is un-bought
+   (`FUN_00419a52`, `FUN_0044fd03`). The remake's menu item reads "Don't Scrap Current
+   Fleet" while the fleet is marked; 4.0.5's never changes.
 4. **Dragging a budget bar** redistributes once, from where the drag began.
 5. **Dip Into Savings** takes a percentage of the most (4.0.5: an amount).
 6. **Abandon** is the Evacuate button; its confirmation is the remake's own.
