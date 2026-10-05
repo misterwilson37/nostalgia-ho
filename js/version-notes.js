@@ -106,7 +106,7 @@ root.HOVERSIONS = {
       'When every human is out, the game ends. 3.0.1 went on as long as the computers played.',
       HOTSEAT + ' (3.0.1 could also play across a network.)',
       'The computers all plan before anyone’s money is worked out; 3.0.1 planned for each in its own turn. It comes out the same but for rare cases.',
-      'Scrapping a fleet or a design happens at once; 3.0.1 marked it and scrapped it at End Turn.',
+      'Scrapping marks a fleet or a ship type, and it is scrapped at End Turn, as in 3.0.1. The fleet’s row has the Scrap Current Fleet button as well as the Ships menu, and a marked type’s row is dimmed (3.0.1 changed only its button’s title).',
       'Dragging a budget bar works out the others once, from where the drag began; 3.0.1 did it at every step of the drag.',
       'Spiral and Cluster maps are laid out at the start; 3.0.1 laid them out in 2010.',
       'Dip Into Savings takes a percentage of the most you may dip; 3.0.1 took an amount.',

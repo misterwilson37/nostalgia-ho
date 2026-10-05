@@ -188,7 +188,7 @@ borrowing limit. The shares are 2.0's.
 | Manual waypoints | not in 3.0.1 (a fleet has only a next stop and a destination); the remake's "Plan route…" stays as an interface convenience | CONFIRMED (fleet record +0xe, +0x14) |
 | Fleets | a fleet holds one design. A player's fleet list is kept by class (Scouts, Fighters, Colony Ships, Satellites), a new fleet in front of the others of its class; the turn and the computers go through it in that order. New Fighters and Satellites join a fleet of the same design at the star that has no orders (a human's only one built this turn); each Scout and Colony Ship is a fleet of its own. Fleets can be grouped to move together, at the slowest speed and shortest Range: the remake's fleets of several designs stand for such groups | CONFIRMED (`BuildAShip @132e04`, `BuildAFleet`, `NewFleet @130004`, `GiveFleetPath`) |
 | Organize Ships | one design's ships at a star are dealt out again among up to 12 fleets; every fleet of that design there then has the most fuel used of any of them; a fleet whose count changed stops counting as built this turn unless all of them were, and its colony ships are unloaded unless all of them were loaded; the fleets kept keep their orders | CONFIRMED (`OrganizeFleets @133d14`) |
-| Scrapping | a fleet or design is marked (fleet +7, design +0x88; a toggle for a human, which undoes the purchase of a ship built this turn) and scrapped at the start of the money at End Turn. Humans get 3/4 of the metal, computers all of it; at your colony it goes to you; in hyperspace it falls on the next star as a meteor shower; elsewhere it falls onto the planet, and the planet's owner picks it up later in the turn ("You just received … metal from someone scrapping a fleet over …") | CONFIRMED (`ScrapCurrentFleet`, `BuildDesignShips`, `ScrapFleetsAndTypes @a194e`, `GetOtherScrapMetal @a3abe`). The remake scraps a human's fleet at once (see open questions) |
+| Scrapping | a fleet or design is marked (fleet +7, design +0x88; a toggle for a human, which undoes the purchase of a ship built this turn) and scrapped at the start of the money at End Turn. Humans get 3/4 of the metal, computers all of it; at your colony it goes to you; in hyperspace it falls on the next star as a meteor shower; elsewhere it falls onto the planet, and the planet's owner picks it up later in the turn ("You just received … metal from someone scrapping a fleet over …") | CONFIRMED (`ScrapCurrentFleet`, `BuildDesignShips`, `ScrapFleetsAndTypes @a194e`, `GetOtherScrapMetal @a3abe`). The remake marks as 3.0.1 does (see "Scrapping by marks" below) |
 | Automatically scrapping old designs past 15 | a preference of the program (not of the game): when on, at the end of each turn every player's unused designs older than the newest of their class are scrapped while there are more than 15 | NOT IMPLEMENTED: interface preference (`ScrapFleetsAndTypes @a194e`, prefs +0x74) |
 
 ### Battles
@@ -448,6 +448,54 @@ that its turn is 2.0's, so it was rebuilt over `js/rules-dos.js`. Each change be
   has them; "I hate" as one message to everyone (`SendAMessage @95f14`); terraforming
   by the bar (`AddTerraformingActions @90aac`); `ResolveSpending` in words and 32 bits;
   the 2010 skip on Spiral and Cluster maps (@9002a).
+
+## Scrapping by marks (the human's commands)
+
+The human's Scrap commands mark and unmark; `ScrapFleetsAndTypes @a194e` scraps what is
+marked at the start of the money at End Turn. The skin (`js/skins/classic/ui.js`, every
+skin) uses `rs.flagScrap` and `rs.flagScrapDesign` (`js/rules-301.js`) whenever a
+ruleset has them; the others still scrap at once.
+
+- **Scrap Current Fleet** (Ships menu item 5, `DoShipsMenu @f3e02`, `ScrapCurrentFleet
+  @133a24`): toggles fleet +7 (`1 - +7`), playing sound 7003 when it sets it. The menu
+  item reads "Scrap Current Fleet" or, for a marked fleet, "Don't Scrap Current Fleet"
+  (STR# 1010.9-10, `SetMenuItems @f4878` / `@f488a`); it is dimmed with no current
+  fleet. A fleet bought this turn (+9) is not marked: the purchase is undone (money, the
+  prototype's price when no ship of the design is left built, and metal back; the
+  interest worked out again on the Ship Savings; the fleet removed). The remake: the
+  same command in the Ships menu, and as the fleet row's button, worded the same; a
+  satellite fleet and a fleet in hyperspace can be marked too (`scrap301` drops the
+  metal on the next star).
+- **How a marked fleet shows**: its row in the fleet window is painted over with the grey
+  pattern in OR mode (`DrawOneFleet @155516`: PenPat, PenMode patOr, PaintRect), and the
+  fleet's information reads "Fleet to be scrapped for metal." (STR# 4000.12,
+  `DrawSelectedFleetInfo @155826`) in place of where it is stationed or going. The
+  remake: the row's status line says so, and the row is dimmed (the Mac 3.0.1 skins: a
+  grey of dots over it); the List all fleets window dims it too.
+- **A marked fleet can't be sent anywhere**: dragging it gives "Sorry, but you have that
+  fleet marked for the scrap heap. It's not going anywhere!" (STR# 4001.22), clears its
+  path and plays sound 4000 (`FollowPathDrag @1516d8-151702`). The remake: the same for
+  a drag on the map and for Plan route.
+- **A design** (the Ship Types window, `BuildDesignShips @13146a-1314b0`): button 7
+  toggles design +0x88 and reads "Scrap All" or "Don't Scrap" (`SetButtonStates
+  @132cca-132ce0`, Pascal strings @132d36 / @132d42); a marked design can't be bought
+  (button 4 dimmed, @132c44); marking it gives back the ships of it ordered in the window
+  (@1314d4-1315ac). The window's list shows no mark (only the button's title). The
+  remake: the button on each type's row of the Build window and in Scrap ship types,
+  with ships bought in that Build window given back; a marked type's row is dimmed and
+  can't be bought (also from the designer when its sliders match it, as
+  `FindMatchingType @132926` picks the existing type).
+- **At End Turn** (`ScrapFleetsAndTypes @a194e`): "Your fleet of %s at %s has been
+  scrapped for %s metal." (STR# 1000.18) and "Your "%s" ship type has been scrapped. %d
+  of this type scrapped for %s metal." (1000.19), as before.
+- **Order**: the fleets at a star are drawn in the player's fleet-list order
+  (`DrawFleetRect @1551a0`), and the current fleet is the first of them
+  (`CalcFleetsAtAllStars @1303e2`); the remake's fleet rows, star menu, List all fleets
+  and Next fleet follow `rs.fleetList` (class order, `NewFleet @130004`). A human's new
+  design is a new record unless the sliders match an existing one (`FindMatchingType`),
+  named at random (`GiveTypeCoolName`, `rs.designName`): the remake's
+  `findOrCreateDesign` does the same; `rs.newDesign` (always a new record) is the
+  computers' (`MaintainShipTypes @94794`).
 
 ## Changes to the shared code
 

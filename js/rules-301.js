@@ -1749,9 +1749,51 @@ function evacuate301(G, p, sid) {
   giveBarPercent(G, p, sid, 0);
 }
 // a fleet or a design marked for scrapping (fleet +7, design +0x88), scrapped
-// by ScrapFleetsAndTypes in pass 1
-function flagScrap(G, f) { f.scrap301 = true; }
-function flagScrapDesign(G, p, d) { d.scrap301 = true; }
+// by ScrapFleetsAndTypes in pass 1. The skin calls these for a human's
+// commands and shows f.scrap301 / d.scrap301 as the mark.
+// CONFIRMED (ScrapCurrentFleet @133a24, Ships menu item 5, DoShipsMenu
+// @f3e02): "Scrap Current Fleet" toggles the mark (fleet +7 = 1 - itself;
+// the menu item reads "Don't Scrap Current Fleet" while it is set, STR#
+// 1010.9-10, SetMenuItems @f4878/@f488a), with sound 7003 when it sets it. A
+// fleet built this turn (+9) is not marked: its purchase is undone, the
+// money (and the prototype's price when none of the design is left built)
+// and the metal go back, the interest is worked out again, and the fleet is
+// removed. `how`: left out or true, mark it (the computers' scrapping);
+// false, unmark it; 'command', a human's Scrap Current Fleet (toggles, or
+// undoes the purchase). Returns 'unbuilt' when the purchase was undone, else
+// whether the fleet is now marked.
+function flagScrap(G, f, how) {
+  const p = G.players[f.owner], cmd = how === 'command';
+  const on = cmd ? !f.scrap301 : how !== false;
+  if (cmd && on && f.newThisTurn && f.star != null && f.to == null) {
+    const spent = p.spentThisTurn || [];
+    for (const k in f.ships) {
+      const d = getDesign(G, f.owner, +k), n = f.ships[k];
+      for (let i = 0; i < n; i++) {
+        const j = spent.map(e => e.did === +k && e.sid === f.star).lastIndexOf(true);
+        if (j >= 0) { p.savings += spent[j].money; p.metal += spent[j].metal; spent.splice(j, 1); }
+        else if (d) { const c = designCost(G, d); p.savings += c.money; p.metal += c.metal; }
+        if (d) d.built = Math.max(0, d.built - 1);
+      }
+    }
+    if (p.human) p.oInterest = interestOn(p, p.savings);
+    G.fleets.splice(G.fleets.indexOf(f), 1);
+    return 'unbuilt';
+  }
+  f.scrap301 = !!on;
+  return f.scrap301;
+}
+// CONFIRMED (BuildDesignShips @13146a-1314b0, the Ship Types window's button
+// 7): toggles design +0x88; the button reads "Scrap All" or "Don't Scrap"
+// (SetButtonStates @132cca-132ce0, Pascal strings @132d36 / @132d42), and a
+// marked design can't be bought (button 4 dimmed, @132c44). Marking it gives
+// back the ships of it ordered in the window (@1314d4-1315ac; the skin does
+// that, as the remake buys at once). `how` as for flagScrap ('command'
+// toggles). Returns whether it is now marked.
+function flagScrapDesign(G, p, d, how) {
+  d.scrap301 = how === 'command' ? !d.scrap301 : how !== false;
+  return d.scrap301;
+}
 
 // ---------- the budget panel ----------
 function projected(G, p) {

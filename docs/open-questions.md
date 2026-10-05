@@ -283,11 +283,14 @@ These are what 3.0.1's code does and what the remake now does; they look like sl
    Players money row (written in pass 2), which another player's pass 1 doesn't change,
    so the plans come out the same but for rare cases (a colony another player gives up
    in the same pass, a fleet that has just left).
-5. **Scrapping a fleet or a design.** 3.0.1 marks it and scraps it at the start of the
-   money at End Turn (marking a ship built this turn undoes its purchase:
-   `ScrapCurrentFleet`, `BuildDesignShips`); the remake scraps a human's fleet or design
-   at once (where the metal goes is 3.0.1's), and has its own Unbuild for this turn's
-   purchases. The computers' scrapping is 3.0.1's.
+5. **Scrapping a fleet or a design** is by marks, as in 3.0.1 (`ScrapCurrentFleet
+   @133a24`, `BuildDesignShips @13146a`; see "Scrapping by marks" in
+   docs/301-findings.md). Left to the remake: the fleet row's button (3.0.1 has only the
+   menu item), the type's button also in the remake's Scrap ship types window, a
+   marked type's row dimmed (3.0.1 changes only the button's title), and the Build
+   window giving back the ships bought in it when a type is marked, as the remake buys
+   at once where 3.0.1 buys on OK. The remake also has its own Unbuild (−) for this
+   turn's purchases.
 6. **Dragging a budget bar.** 3.0.1 redistributes at every step of the drag, from where
    the last step left the shares (`DoHBarClick @d18a0`); the remake once, from the shares
    as the drag began, so a long drag can end slightly differently.

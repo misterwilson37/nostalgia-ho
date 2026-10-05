@@ -123,6 +123,10 @@ button:focus-visible { outline: 2px solid var(--hi); outline-offset: 1px; }
 .ptable td { padding: 3px 4px; border-bottom: 1px solid #c4c4c4; }
 .ptable .face { width: 34px; }
 .ptable tr.dead { opacity: .5; }
+/* a fleet or ship type marked for scrapping at End Turn (Mac 3.0.1's rules):
+   dimmed like a player who is out, its buttons left as they are */
+.frow.scrap .fpics, .frow.scrap .ftext, .drow.scrap > :first-child, .drow.scrap .dtext,
+.ptable tr.scrap td:not(:has(> button)) { opacity: .5; }
 .graph { width: 100%; height: auto; border: 1px solid #666; }
 .help p { margin: 0 0 8px; max-width: 70ch; }
 .help .tip { font-style: italic; }

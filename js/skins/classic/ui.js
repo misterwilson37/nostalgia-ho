@@ -381,7 +381,7 @@ function starMenu(sid, px, py) {
   UI.sel = sid; renderPanel(); draw();
   const items = [];
   if (mine && !G.over) items.push([HO.feature(G, 'buildQueue') ? 'Queue ships…' : 'Build ships…', () => openBuild(sid)]);
-  const fl = G.fleets.filter(f => f.owner === ME && f.star === sid && f.to == null && !f.sat);
+  const fl = fleetOrder(G.fleets.filter(f => f.owner === ME && f.star === sid && f.to == null && !f.sat));
   if (fl.length) items.push(['Select a fleet here', () => { UI.selFleet = fl[0].id; renderPanel(); draw(); }]);
   for (const bt of lastBattles(sid)) items.push([`Review ${battleName(bt)}`, () => openBattle(bt.id)]);
   if (mine && !G.over && evacuateShown() && (s.id !== me().homeStar || HO.colonies(G, ME).length > 1))
@@ -660,7 +660,8 @@ function onUp(e) {
     if (performance.now() - d.t > 700 && f.dest != null) { HO.cancelMove(G, f); Sound.play(4000); }
     draw(); renderPanel(); return;
   }
-  if (tgt == null || tgt === f.star) { if (f.dest != null) { HO.cancelMove(G, f); Sound.play(4000); } }
+  if (f.scrap301 && marksScrap() && tgt != null && tgt !== f.star) { toast(SCRAP_HEAP); HO.cancelMove(G, f); Sound.play(4000); } // (FollowPathDrag @1516d8-151702: the alert, no path, sound 4000)
+  else if (tgt == null || tgt === f.star) { if (f.dest != null) { HO.cancelMove(G, f); Sound.play(4000); } }
   else if (HO.orderMove(G, f, tgt)) Sound.play(4001);
   else if (autoRoute(f, tgt)) Sound.play(4001);
   else { Sound.play(7016); toast(outOfRange(f, tgt)); }
@@ -865,10 +866,10 @@ function planetBox(sid) {
   const inbound = G.fleets.filter(f => f.owner === ME && f.to === sid);
   if (here.length || inbound.length) {
     const fl = el('div', { class: 'fleets' }, el('h4', null, 'Ships here'));
-    for (const f of here) fl.append(fleetRow(f));
-    for (const f of inbound) fl.append(fleetRow(f, true));
+    for (const f of fleetOrder(here)) fl.append(fleetRow(f));
+    for (const f of fleetOrder(inbound)) fl.append(fleetRow(f, true));
     box.append(fl);
-    const mine = here.filter(f => f.owner === ME && !f.sat);
+    const mine = fleetOrder(here.filter(f => f.owner === ME && !f.sat));
     const mergeable = mine.some((a, i) => mine.some((b, j) => j > i && HO.canMerge(G, a, b)));
     if (mergeable) box.append(el('div', { class: 'btns' }, el('button', { class: 'quiet', onclick: () => {
       // merge each fleet into the first one it may join (one ship type per fleet under the DOS rules)
@@ -880,13 +881,52 @@ function planetBox(sid) {
   if (bs.length) box.append(el('div', { class: 'btns' }, ...bs.map(b => el('button', { class: 'quiet', onclick: () => openBattle(b.id) }, `Review ${battleName(b)}`))));
   return box;
 }
+// Scrapping by marks (rs.flagScrap(G, fleet, how), rs.flagScrapDesign(G,
+// player, design, how): Mac 3.0.1). The Scrap commands put a mark on a fleet
+// or a ship type, or take it off ('command'), and the ruleset scraps what is
+// marked at End Turn. f.scrap301 / d.scrap301 is the mark: the fleet's row,
+// the fleet list and the type lists show it (class "scrap", in each skin's
+// style). A ruleset without the hooks scraps at once (HO.scrapFleet,
+// HO.scrapDesign). The words are 3.0.1's: the Ships menu's "Scrap Current
+// Fleet" / "Don't Scrap Current Fleet" (STR# 1010.9-10, SetMenuItems
+// @f4878/@f488a) and the Ship Types window's "Scrap All" / "Don't Scrap"
+// (SetButtonStates @132cca-132ce0).
+const marksScrap = () => !!(G && HO.rules(G).flagScrap);
+const marksScrapDesign = () => !!(G && HO.rules(G).flagScrapDesign);
+const SCRAP_FLEET = ['Scrap Current Fleet', 'Don’t Scrap Current Fleet'];
+const SCRAP_TYPE = ['Scrap All', 'Don’t Scrap'];
+// (STR# 4001.22: FollowPathDrag @1516d8 gives a marked fleet no orders)
+const SCRAP_HEAP = 'Sorry, but you have that fleet marked for the scrap heap. It’s not going anywhere!';
+const MARKED_FLEET = 'Fleet to be scrapped for metal.'; // (STR# 4000.12, DrawSelectedFleetInfo @155826)
+// Scrap Current Fleet (ScrapCurrentFleet @133a24): sound 7003 when the mark
+// was off; a fleet bought this turn is given back instead (it is gone)
+function toggleScrapFleet(f) {
+  const was = !!f.scrap301;
+  HO.rules(G).flagScrap(G, f, 'command');
+  if (!was) Sound.play(7003);
+  if (!G.fleets.includes(f)) { UI.selFleet = null; toast('Purchase undone.'); }
+  renderPanel(); draw(); save();
+}
+function curFleet() { const f = UI.selFleet != null && G.fleets.find(x => x.id === UI.selFleet); return f && f.owner === ME ? f : null; }
+// rs.fleetList(G, player): the order a ruleset keeps a player's fleets in
+// (3.0.1: by class, NewFleet @130004). Your fleets at a star (DrawFleetRect
+// @1551a0), the fleet list and Next fleet follow it; others' come after, as
+// they were.
+function fleetOrder(list) {
+  const rs = G && HO.rules(G);
+  if (!rs || !rs.fleetList) return list;
+  const at = new Map(rs.fleetList(G, me()).map((f, i) => [f.id, i]));
+  const k = (f) => at.has(f.id) ? at.get(f.id) : Infinity;
+  return list.slice().sort((a, b) => k(a) - k(b) || 0);
+}
 function classNote(gs) { const c = HO.planetClass(G, gs); return c === 'inhospitable' ? ' · never profitable' : c === 'semi' ? ' · barely habitable' : ''; }
 function fleetRow(f, inbound) {
   const mine = f.owner === ME;
   const p = G.players[f.owner];
   const ds = HO.fleetDesigns(G, f);
   const sel = UI.selFleet === f.id;
-  const r = el('div', { class: 'frow' + (sel ? ' sel' : '') + (mine ? '' : ' enemy'), onclick: () => { UI.selFleet = f.id; renderPanel(); draw(); } });
+  const marked = mine && !!f.scrap301;
+  const r = el('div', { class: 'frow' + (sel ? ' sel' : '') + (mine ? '' : ' enemy') + (marked ? ' scrap' : ''), onclick: () => { UI.selFleet = f.id; renderPanel(); draw(); } });
   const pics = el('div', { class: 'fpics' });
   ds.slice(0, 3).forEach(d => pics.append(shipImgEl(d, 18)));
   r.append(pics);
@@ -896,7 +936,11 @@ function fleetRow(f, inbound) {
   else if (!mine) status = p.name;
   else if (f.sat) status = 'satellites';
   else status = (f.dest != null ? `→ ${G.stars[f.dest].name}` : 'holding') + ` · fuel ${f.fuel.toFixed(1)}/${HO.fleetMaxRange(G, f)} · speed ${HO.fleetSpeed(G, f)}`;
+  if (marked) status = MARKED_FLEET + (inbound ? ` · ${status}` : '');
   r.append(el('div', { class: 'ftext' }, el('div', null, parts.join(', ')), el('div', { class: 'sub' }, status)));
+  // (3.0.1 scraps satellites as any other fleet: Scrap Current Fleet)
+  if (sel && mine && !inbound && f.sat && marksScrap())
+    r.append(el('div', { class: 'facts' }, el('button', { class: 'quiet', onclick: (e) => { e.stopPropagation(); toggleScrapFleet(f); } }, SCRAP_FLEET[marked ? 1 : 0])));
   if (sel && mine && !inbound && !f.sat) {
     const acts = el('div', { class: 'facts' });
     if (f.dest != null) acts.append(el('button', { class: 'quiet', onclick: (e) => { e.stopPropagation(); HO.cancelMove(G, f); Sound.play(4000); renderPanel(); draw(); } }, 'Stay here'));
@@ -905,10 +949,13 @@ function fleetRow(f, inbound) {
     if (HO.feature(G, 'stances')) acts.append(el('select', { 'aria-label': 'Battle stance', onclick: (e) => e.stopPropagation(), onchange: (e) => { f.stance = e.target.value; save(); } },
       ...[['normal', 'Normal'], ['offensive', 'Offensive'], ['defensive', 'Defensive']].map(([v, t]) => el('option', { value: v, selected: (f.stance || 'normal') === v ? 'selected' : false }, t))));
     if (HO.feature(G, 'lateArrival')) acts.append(el('label', { class: 'chk', onclick: (e) => e.stopPropagation() }, el('input', { type: 'checkbox', checked: f.delayed ? 'checked' : false, onchange: (e) => { f.delayed = e.target.checked; save(); } }), el('span', null, 'Arrive late')));
-    acts.append(el('button', { class: 'quiet', onclick: (e) => { e.stopPropagation(); confirmBox(`Scrap this fleet for ${Math.round(HO.TYPES ? 75 : 75)}% of its metal?`, () => { const m = HO.scrapFleet(G, f); Sound.play(7003); toast(`Scrapped for ${fmt(m)} metal.`); UI.selFleet = null; renderPanel(); draw(); save(); }); } }, 'Scrap'));
+    if (marksScrap()) acts.append(el('button', { class: 'quiet', onclick: (e) => { e.stopPropagation(); toggleScrapFleet(f); } }, SCRAP_FLEET[marked ? 1 : 0]));
+    else acts.append(el('button', { class: 'quiet', onclick: (e) => { e.stopPropagation(); confirmBox(`Scrap this fleet for ${Math.round(HO.TYPES ? 75 : 75)}% of its metal?`, () => { const m = HO.scrapFleet(G, f); Sound.play(7003); toast(`Scrapped for ${fmt(m)} metal.`); UI.selFleet = null; renderPanel(); draw(); save(); }); } }, 'Scrap'));
     r.append(acts);
   }
-  if (sel && mine && inbound && HO.rules(G).scrapInSpace) {
+  if (sel && mine && inbound && marksScrap()) // marked in hyperspace: its metal falls on the next star at End Turn
+    r.append(el('div', { class: 'facts' }, el('button', { class: 'quiet', onclick: (e) => { e.stopPropagation(); toggleScrapFleet(f); } }, SCRAP_FLEET[marked ? 1 : 0])));
+  else if (sel && mine && inbound && HO.rules(G).scrapInSpace) {
     r.append(el('div', { class: 'facts' }, el('button', { class: 'quiet', onclick: (e) => { e.stopPropagation(); confirmBox('Dismantle this fleet in hyperspace? Its metal will rain down on its destination as a meteor shower.', () => { HO.scrapFleet(G, f); Sound.play(7003); UI.selFleet = null; renderPanel(); draw(); save(); }); } }, 'Dismantle in hyperspace')));
   }
   if (mine && f.path && f.path.length) r.querySelector('.sub').append(' · then ' + f.path.map(x => G.stars[x].name).join(' → '));
@@ -916,6 +963,7 @@ function fleetRow(f, inbound) {
 }
 // multi-star route: click stars in order, then Done
 function startRoute(f) {
+  if (f.scrap301 && marksScrap()) { Sound.play(4000); toast(SCRAP_HEAP); return; }
   UI.route = { fleet: f.id, stops: [] };
   toast('Click the stars to visit in order, then press Done.');
   renderRouteBar();
@@ -1171,6 +1219,10 @@ function openBuild(sid) {
   const st = UI.build = UI.build || { type: 'fighter' };
   if (!types.includes(st.type)) st.type = 'fighter';
   const body = el('div', { class: 'build' });
+  // ships bought in this window, by design: marking a type gives them back
+  // (BuildDesignShips @1314d4-1315ac)
+  const session = {};
+  const marking = marksScrapDesign() && !queue;
   const render = () => {
     body.innerHTML = '';
     const left = el('div', { class: 'blist' });
@@ -1182,15 +1234,20 @@ function openBuild(sid) {
       const c = HO.shipCostNow(G, p, d);
       const n = builtHere(d.id);
       const slots = HO.rules(G).queueSlots, sq = s.queue || [];
-      const can = queue ? !(slots && sq.length >= slots && sq[sq.length - 1].did !== d.id) : ((p.savings - c.money >= HO.borrowLimit(G, p)) && p.metal >= c.metal);
-      left.append(el('div', { class: 'drow' },
+      const can = !d.scrap301 && (queue ? !(slots && sq.length >= slots && sq[sq.length - 1].did !== d.id) : ((p.savings - c.money >= HO.borrowLimit(G, p)) && p.metal >= c.metal));
+      left.append(el('div', { class: 'drow' + (d.scrap301 ? ' scrap' : '') },
         shipImgEl(d, 26),
         el('div', { class: 'dtext' }, el('b', null, d.name), el('div', { class: 'sub' }, `${HO.TYPES[d.type].name} · R${d.type === 'satellite' ? 0 : d.R} Sp${d.V} W${d.W} Sh${d.S} M${d.M}`),
           el('div', { class: 'sub' }, `${money(c.money)} · ${fmt(c.metal)} metal${c.proto ? ' (incl. prototype)' : ''}`)),
         el('div', { class: 'pm' },
-          el('button', { class: 'quiet', disabled: !n, 'aria-label': 'Remove one', onclick: () => { if (queue) { const i = (s.queue || []).map(it => it.did).lastIndexOf(d.id); if (i >= 0) HO.unqueueShip(G, ME, sid, i); } else HO.unbuildShip(G, ME, sid, d.id); render(); renderPanel(); draw(); } }, '−'),
+          marking ? el('button', { class: 'quiet', onclick: () => {
+            // a type marked for scrapping: the ships of it bought in this window go back
+            if (HO.rules(G).flagScrapDesign(G, p, d, 'command')) for (; session[d.id] > 0; session[d.id]--) HO.unbuildShip(G, ME, sid, d.id);
+            render(); renderPanel(); draw(); save();
+          } }, SCRAP_TYPE[d.scrap301 ? 1 : 0]) : null,
+          el('button', { class: 'quiet', disabled: !n, 'aria-label': 'Remove one', onclick: () => { if (queue) { const i = (s.queue || []).map(it => it.did).lastIndexOf(d.id); if (i >= 0) HO.unqueueShip(G, ME, sid, i); } else if (HO.unbuildShip(G, ME, sid, d.id) && session[d.id] > 0) session[d.id]--; render(); renderPanel(); draw(); } }, '−'),
           el('span', { class: 'n' }, String(n)),
-          el('button', { disabled: !can, 'aria-label': queue ? 'Queue one' : 'Build one', onclick: () => { if (queue ? HO.queueShips(G, ME, sid, d.id, 1) : HO.buildShips(G, ME, sid, d.id, 1)) Sound.play(7006); render(); renderPanel(); draw(); } }, '+'))));
+          el('button', { disabled: !can, 'aria-label': queue ? 'Queue one' : 'Build one', onclick: () => { if (queue ? HO.queueShips(G, ME, sid, d.id, 1) : HO.buildShips(G, ME, sid, d.id, 1)) { Sound.play(7006); session[d.id] = (session[d.id] || 0) + 1; } render(); renderPanel(); draw(); } }, '+'))));
     }
     // designer
     const L = HO.designLimits(G, p, st.type);
@@ -1217,12 +1274,14 @@ function openBuild(sid) {
     if (st.type === 'satellite') right.append(el('p', { class: 'note' }, `Satellites can’t move. They shoot ${HO.feature(G, 'buildQueue') ? 'once' : 'twice'} per round.`));
     if (st.type === 'colony') right.append(el('p', { class: 'note' }, 'Colony ships settle the first unowned planet they’re sent to.'));
     if (st.type === 'mini') {}
-    right.append(el('div', { class: 'btns' }, el('button', { onclick: () => {
+    // a type marked for scrapping can't be bought (SetButtonStates @132c44)
+    const live = p.designs.find(d => !d.scrapped && d.type === spec.type && d.R === spec.R && d.V === spec.V && d.W === spec.W && d.S === spec.S && d.M === spec.M);
+    right.append(el('div', { class: 'btns' }, el('button', { disabled: !!(live && live.scrap301), title: live && live.scrap301 ? `${live.name} is marked for scrapping.` : null, onclick: () => {
       const lim = HO.rules(G).maxDesigns;
       if (lim && !exists && HO.liveDesigns(p) >= lim) { toast(HO.DATA.alerts[15] || 'Your assembly lines are full.'); return; }
       const d = HO.findOrCreateDesign(G, p, spec);
       if (queue) { if (HO.queueShips(G, ME, sid, d.id, 1)) Sound.play(7006); else toast(`${s.name}’s queue is full: it holds ${HO.rules(G).queueSlots} kinds of ship.`); }
-      else if (HO.buildShips(G, ME, sid, d.id, 1)) { Sound.play(7006); } else toast('Not enough money or metal.');
+      else if (HO.buildShips(G, ME, sid, d.id, 1)) { Sound.play(7006); session[d.id] = (session[d.id] || 0) + 1; } else toast('Not enough money or metal.');
       render(); renderPanel(); draw();
     } }, queue ? (exists ? `Queue another ${exists.name}` : 'Create this type and queue one') : exists && exists.built ? `Build another ${exists.name}` : 'Build the prototype')));
     body.append(left, right);
@@ -1487,12 +1546,12 @@ function table(head, rows) {
   return el('table', { class: 'ptable list' }, el('thead', null, el('tr', null, ...head.map(h => el('th', null, h)))), el('tbody', null, ...rows));
 }
 function openFleetList() {
-  const mine = G.fleets.filter(f => f.owner === ME);
+  const mine = fleetOrder(G.fleets.filter(f => f.owner === ME));
   const rows = mine.map(f => {
     const where = f.star != null ? G.stars[f.star].name : `${G.stars[f.from].name} → ${G.stars[f.to].name}`;
     const go = f.dest != null ? G.stars[f.dest].name + (f.path && f.path.length ? ' → …' : '') : f.to != null ? `${Math.ceil((f.dist - f.prog) / HO.fleetSpeed(G, f))} turn(s)` : '';
-    return el('tr', { class: 'click', onclick: () => { UI.selFleet = f.id; UI.sel = f.star != null ? f.star : f.to; closeModal(); renderPanel(); draw(); } },
-      el('td', null, HO.fleetLabel(G, f)), el('td', null, where), el('td', null, go), el('td', null, f.sat ? '' : `${Math.floor(f.fuel)}/${HO.fleetMaxRange(G, f)}`));
+    return el('tr', { class: 'click' + (f.scrap301 ? ' scrap' : ''), title: f.scrap301 ? MARKED_FLEET : null, onclick: () => { UI.selFleet = f.id; UI.sel = f.star != null ? f.star : f.to; closeModal(); renderPanel(); draw(); } },
+      el('td', null, HO.fleetLabel(G, f)), el('td', null, where), el('td', null, f.scrap301 ? 'to be scrapped' : go), el('td', null, f.sat ? '' : `${Math.floor(f.fuel)}/${HO.fleetMaxRange(G, f)}`));
   });
   modal('All your fleets', mine.length ? table(['Fleet', 'Where', 'Going to', 'Fuel'], rows) : el('p', null, 'You have no fleets.'), { cls: 'mid' });
 }
@@ -1500,6 +1559,16 @@ function openScrapTypes() {
   const p = me();
   const count = {}; for (const f of G.fleets) if (f.owner === ME) for (const k in f.ships) count[k] = (count[k] || 0) + f.ships[k];
   const live = p.designs.filter(d => !d.scrapped);
+  if (marksScrapDesign()) {
+    // marks, as the Ship Types window's "Scrap All" / "Don't Scrap": a
+    // marked type and every ship of it are scrapped at End Turn
+    const rows = live.map(d => el('tr', { class: d.scrap301 ? 'scrap' : null },
+      el('td', null, shipImgEl(d, 18), ' ', d.name), el('td', null, HO.TYPES[d.type].name), el('td', null, String(count[d.id] || 0)),
+      el('td', null, el('button', { class: 'quiet', onclick: () => { HO.rules(G).flagScrapDesign(G, p, d, 'command'); save(); closeModal(); openScrapTypes(); } }, SCRAP_TYPE[d.scrap301 ? 1 : 0]))));
+    modal('Scrap ship types', el('div', null, el('p', { class: 'sub' }, `A type marked here is scrapped at the end of the turn, with every ship of it, and frees an assembly line${HO.rules(G).maxDesigns ? ` (you can have ${HO.rules(G).maxDesigns})` : ''}. Until then you can take the mark off.`),
+      table(['Type', 'Class', 'Ships', ''], rows)), { cls: 'mid' });
+    return;
+  }
   const picked = new Set();
   const go = el('button', { disabled: true }, 'Scrap checked types…');
   const update = () => { go.disabled = !picked.size; go.textContent = picked.size > 1 ? `Scrap ${picked.size} types…` : 'Scrap checked types…'; };
@@ -1923,7 +1992,9 @@ function save() { if (!G) return; try { localStorage.setItem('ho5.save', HO.save
 function setupMenus() {
   const menus = {
     Game: [['New game…', newGameDialog], ['Players and history', () => G && openPlayers()], ['Auto-play this turn', () => { if (!G || G.over) return; me().auto = true; doEndTurn(); me().auto = false; }], ['Auto play…', () => G && !G.over && (hotSeat() ? toast('Auto play is for one-player games.') : openAutoPlay())], ['Preferences…', openPrefs], ['Rank history…', openRanks, () => !G || hasRanks(G)], ['-'], ['Quit to title', () => { save(); Sound.play(7002); G = null; renderPanel(); draw(); $('#panel').innerHTML = ''; $('#msg').innerHTML = ''; titleScreen(); }]],
-    Ships: [['Build ships at selected colony…', () => { if (G && UI.sel != null && G.stars[UI.sel].owner === ME) openBuild(UI.sel); else toast('Select one of your colonies first.'); }], ['Review battle…', () => G && openBattleList()], ['List all fleets…', () => G && openFleetList()], ['Scrap ship types…', () => G && openScrapTypes()], ['Next fleet', nextFleet]],
+    Ships: [['Build ships at selected colony…', () => { if (G && UI.sel != null && G.stars[UI.sel].owner === ME) openBuild(UI.sel); else toast('Select one of your colonies first.'); }], ['Review battle…', () => G && openBattleList()], ['List all fleets…', () => G && openFleetList()],
+      [() => SCRAP_FLEET[G && curFleet() && curFleet().scrap301 ? 1 : 0], () => { if (!G || G.over) return; const f = curFleet(); if (f) toggleScrapFleet(f); else toast('Select one of your fleets first.'); }, () => marksScrap()],
+      ['Scrap ship types…', () => G && openScrapTypes()], ['Next fleet', nextFleet]],
     Galaxy: [['Players and alliances…', () => G && openPlayers()], ['List explored stars…', () => G && openStarList()],
       ['Give money or metal…', () => G && !G.over && openGive(), 'gifts'],
       ['Send a message…', () => G && !G.over && openChat(), 'chat'],
@@ -1974,7 +2045,7 @@ function setupMenus() {
 }
 function nextFleet() {
   if (!G) return;
-  const mine = G.fleets.filter(f => f.owner === ME && f.star != null && !f.sat);
+  const mine = fleetOrder(G.fleets.filter(f => f.owner === ME && f.star != null && !f.sat));
   if (!mine.length) return;
   const i = mine.findIndex(f => f.id === UI.selFleet);
   const f = mine[(i + 1) % mine.length];

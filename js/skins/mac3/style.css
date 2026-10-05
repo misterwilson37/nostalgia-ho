@@ -29,6 +29,17 @@ button:not(.mbtn):not(.close):not(.tbtn):not(.clock):not([role=menuitem]):active
 .tbtn.on { background: #000; color: #fff; border-color: #000; }
 .card { background: #fff; border: 1px solid #000; box-shadow: 2px 2px 0 #000; border-top: 1px solid #000; outline: 2px solid #fff; }
 .frow.sel { background: #fff; border-color: #000; }
+/* a fleet marked for scrapping: 3.0.1 paints its row over with the grey
+   pattern in OR mode (DrawOneFleet @155516: PenPat, PenMode patOr,
+   PaintRect), here a light grey of dots so the words still read; the type
+   lists and the fleet list the same */
+.frow.scrap .fpics, .frow.scrap .ftext, .drow.scrap > :first-child, .drow.scrap .dtext,
+.ptable tr.scrap td:not(:has(> button)) { opacity: 1; position: relative; }
+.frow.scrap .fpics::after, .frow.scrap .ftext::after, .drow.scrap .dtext::after,
+.ptable tr.scrap td:not(:has(> button))::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='4' height='4'><path d='M0 0h1v1H0zM2 2h1v1H2z'/></svg>");
+}
 #titlescreen { background: #000; }
 #tframe { width: min(386px, 86vw); }
 .credit { color: #fff; }
