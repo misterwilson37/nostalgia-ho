@@ -1,27 +1,29 @@
 // Spaceward Ho! web remake — the "Palm OS" ruleset.
 //
 // Spaceward Ho! 5 for Palm OS (MobileFreon, 2003; version 1.0.4) is a port of
-// the Mac game 5.0. Its turn engine, economy, research, radical discoveries,
-// ship costs, battles, novas, ranks and computer players are the same code as
-// 5.0.5's (compared routine by routine; see docs/palm-findings.md), so this
-// ruleset is built over js/rules-original.js, but every rule it takes from
-// there was checked against the Palm code ("Inherited rules audit" in the
-// findings). Where the remake's 5.0.5 rules are a looser reading of that
-// code, this ruleset does what the Palm code does: its own computer players
-// (js/ai-palm.js), the battle's order and aftermath, and the retiring of
-// unused ship types.
+// the Mac game 5.0. Its End Turn (FUN_000500d4) is 5.0.5's (FUN_10072a10)
+// recompiled for the 68000: the same passes, the same routines in the same
+// order, the same constants, the same slips (docs/palm-findings.md pairs every
+// routine with its 5.0.5 twin; docs/coverage-palm.md accounts for all 1,041
+// routines of the program). So this ruleset is js/rules-original.js, the 5.0.5
+// rules, with all of their 5.0.5 hooks (the turn, per-mille money, marks for
+// dismantling and evacuating, the dip, dragging a bar, buying, late-arrival
+// battles, the colony list, movement, novas, milestones, the master-point
+// cap), and its computers are the 5.0.5 port (js/ai-palm.js). What the Palm
+// code does differently is below, each with its address.
 //
 // Labels: CONFIRMED (FUN_xxxxx) = read in the Palm decompile made by
-// tools/decompile/palm68k.py (addresses in that layout: 'code' n at n * 0x10000);
-// GUESS = not settled by the decompile.
+// tools/decompile/palm68k.py (addresses in that layout: 'code' n at n * 0x10000).
 (function (root) {
 'use strict';
 const E = typeof module !== 'undefined' ? require('./engine.js') : root.HO;
 const O = E.RULESETS.original;
-const { RI, msg, fmt, know, getDesign, fleetCount, fleetDesigns, isAllied, isBuddy } = E;
 const trunc = Math.trunc;
-const popU = (s) => Math.round(s.pop * 1000);
-const setPopU = (s, u) => { s.pop = Math.max(0, u) / 1000; };
+
+// Every own property of the 5.0.5 ruleset, the hooks that aren't enumerable
+// too (turn505, flagScrap, the bars, the dip, ...): the Palm code is the same.
+const base = {};
+for (const k of Object.getOwnPropertyNames(O)) if (k !== 'id') base[k] = O[k];
 
 // CONFIRMED (FUN_000232e6, the galaxy setup): the star count is worked out as
 // in 5.0.5 but kept between 19 and 90 stars (5.0.5: 19 to 220). The layouts are
@@ -29,323 +31,133 @@ const setPopU = (s, u) => { s.pop = Math.max(0, u) / 1000; };
 const MAX_STARS = 90;
 const makeGalaxy = (G, opts, nPlayers) => O.makeGalaxy(G, opts, nPlayers, MAX_STARS);
 
-// CONFIRMED (tFRM 1200, FUN_0003825a, FUN_0002b274): the Palm New Game window
-// has no Alliances or Luck in Battles check box (only Best Buddies), and the
-// game options keep the preference default 0x17 (alliances, novas and luck on).
-// So alliances and luck are always on.
+// CONFIRMED (FUN_000395a6, the New Game Wizard's Create; FUN_0002b274, the
+// preferences' defaults): the player creating the game gets the research and
+// budget shares kept in the preferences, and their defaults are Range, Speed,
+// Weapons, Shields and Mini 180 per mille each and Radical 100; Savings 650,
+// Technology 250, the home 100 (1,000 less the others); an Abundant player
+// (four slots) Savings 550, Technology 200, the third slot 150 and the fourth
+// 1,000 less those. (FUN_0002d91c keeps the first turn's shares as the next
+// game's defaults; the remake starts every game from the defaults.) 5.0.5 does
+// the same (FUN_1006579c, FUN_10072490).
+const PREF_TECH = { range: 180, speed: 180, weapons: 180, shields: 180, mini: 180, radical: 100 };
+// CONFIRMED (FUN_00026304 @00026710-000267b4; 5.0.5 FUN_1006f640 the same):
+// an Abundant player's second colony takes the third slot of the colony list
+// (the home's record is copied to the fourth with a share of 50 per mille, and
+// the third is then rewritten as the second colony, with 50 per mille, bars
+// 500 / 500, 10,000 people, income -7,500, $5,000 sunk), so the home is fourth
+// and both colonies have 50 per mille: 650 + 250 + 50 + 50 = 1,000.
 function afterSetup(G) {
+  // CONFIRMED (tFRM 1200, FUN_0003825a, FUN_0002b274): the Palm New Game window
+  // has no Alliances or Luck in Battles check box (only Best Buddies), and the
+  // game options keep the preference default 0x17 (alliances, novas and luck on).
   G.opts.alliances = true; G.opts.luck = true; G.opts.novas = true;
-  if (O.afterSetup) O.afterSetup(G);
-}
-
-// ---------- ship types (FUN_00051dd0, the dismantling step; 5.0.5 FUN_10074580) ----------
-// CONFIRMED: with more than 17 ship types, the oldest types with no ships in
-// service that aren't the newest of their kind are retired, until 17 are left
-// (for every player, before the turn's money is spent). At most 24 types
-// (FUN_00043754 for the Design window, FUN_000654e6 for the computers).
-function retireTypes(G, p) {
-  const live = p.designs.filter(d => !d.scrapped);
-  let n = live.length - 17;
-  if (n <= 0) return;
-  const newest = {};
-  live.forEach((d, i) => { newest[d.type] = i; });
-  const inService = (d) => G.fleets.some(f => f.owner === p.id && f.ships[d.id] > 0);
-  for (let i = 0; i < live.length && n > 0; i++) {
-    const d = live[i];
-    if (i < newest[d.type] && !inService(d)) { d.scrapped = true; n--; }
-  }
-}
-function economy(G, p) { retireTypes(G, p); return O.economy(G, p); }
-
-// ---------- battles (FUN_0002010e, FUN_00020736, FUN_00020cc8, FUN_0002144e,
-// FUN_00021960; 5.0.5 FUN_1007e870, FUN_1007eed0, FUN_1007f560, FUN_1007fe30,
-// FUN_100803e0) ----------
-// CONFIRMED the same as the remake's 5.0.5 battle: luck, stances, the hit
-// table, damage, targets, shots, debris, initiative by Speed, ships told to
-// arrive late sitting out the first exchange. What the Palm code does besides,
-// and this function adds:
-// - the groups' order (it decides ties for targets, and who shoots first
-//   within a Speed): your side first (else a side allied with you, else the
-//   first), then its allies, then the first side with a colony, then the rest;
-//   each side's planet, then its types from the newest, each type's offensive,
-//   defensive and normal ships (FUN_00020cc8, FUN_00020f0a);
-// - the losses of a type fall on the fleets listed last (FUN_00021370);
-// - the debris goes to the first side left standing: onto its colony if it has
-//   one there (5/4 with the recycling discovery), else onto the planet;
-// - what each side learns (the year, the population, and the strength
-//   estimates the computers use), and how the computers' feelings and their
-//   share of metal for defence change.
-function battle(G, sid) {
-  const s = G.stars[sid];
-  const present = G.fleets.filter(f => f.star === sid && f.to == null);
-  const planetOwner = s.owner >= 0 && s.pop > 0 ? s.owner : -1;
-  const owners = new Set(present.map(f => f.owner)); if (planetOwner >= 0) owners.add(planetOwner);
-  const ownerIds = [...owners].sort((a, b) => a - b); // the battle record lists the sides by player number
-  if (!ownerIds.some(a => ownerIds.some(b => !isAllied(G, a, b)))) return null;
-  const startPop = s.pop, pop0 = planetOwner >= 0 ? popU(s) : 0;
-  const luck = {};
-  for (const o of ownerIds) { let l = G.opts.luck ? RI(G, -1, 1) : 0; if (l < 0 && G.players[o].flags.generals) l = 0; luck[o] = l; }
-  const side = {};
-  for (const o of ownerIds) {
-    const q = G.players[o];
-    side[o] = { o, pop: o === planetOwner ? pop0 : 0, W: o === planetOwner ? q.tech.weapons : 0, S: o === planetOwner ? q.tech.shields : 0, ships: 0, surv: {} };
-  }
-  for (const f of present) side[f.owner].ships += fleetCount(f);
-  // the order of the sides
-  const me = G.players[G.cur || 0] && G.players[G.cur || 0].human ? (G.cur || 0) : 0;
-  let viewer = ownerIds.includes(me) ? me : ownerIds.find(o => isBuddy(G, me, o));
-  if (viewer == null) viewer = ownerIds[0];
-  const order = [viewer];
-  for (const o of ownerIds) if (!order.includes(o) && isAllied(G, o, viewer)) order.push(o);
-  const withPlanet = ownerIds.find(o => !order.includes(o) && side[o].pop > 0);
-  if (withPlanet != null) order.push(withPlanet);
-  for (const o of ownerIds) if (!order.includes(o)) order.push(o);
-  const groups = [], start = [];
-  let planet = null;
-  const STANCES = ['offensive', 'defensive', 'normal'];
-  for (const o of order) {
-    const q = G.players[o];
-    if (side[o].pop > 0) {
-      planet = { owner: o, planet: true, n: 1, n0: 1, init: 0, W: Math.max(1, q.tech.weapons + luck[o]), S: q.tech.shields, hp: side[o].pop, shots: Math.ceil(side[o].pop / 200000), dmg: 0, tgt: null, units: [] };
-      groups.push(planet);
-    }
-    const designs = q.designs.slice().reverse();
-    for (const d of designs) for (const stance of STANCES) for (const late of [false, true]) {
-      const members = [];
-      for (const f of present) if (f.owner === o && f.ships[d.id] > 0 && (f.stance || 'normal') === stance && (!!f.delayed && !!f.arrived) === late) members.push({ f, k: String(d.id), n: f.ships[d.id] });
-      if (!members.length) continue;
-      const c = O.designCost(G, d), decoy = d.type === 'decoy';
-      let W = d.W + luck[o], S = d.S;
-      if (stance === 'offensive') { W += 1; S -= 2; } else if (stance === 'defensive') { W -= 2; S += 1; }
-      const g = { owner: o, d, type: d.type, late, n: 0, n0: 0, init: decoy ? 0 : d.V, W: decoy ? -2 : Math.max(1, W), S: decoy ? 0 : Math.max(1, S), hp: c.hp, shots: O.shotsPerShip(d), debris: trunc(c.metal / 5), dmg: 0, tgt: null, members, units: [], ui: 0 };
-      for (const m of members) g.n += m.n;
-      groups.push(g);
-    }
-  }
-  for (const g of groups) { if (g.planet) continue; g.n0 = g.n; g.start = g.n; for (let i = 0; i < g.n; i++) { g.units.push(start.length); start.push({ o: g.owner, t: g.type, did: g.d.id }); } }
-  const dreadIn = groups.some(g => g.type === 'dread');
-  const rec = { id: G.nextId++, star: sid, year: G.year + 10, sides: ownerIds, rounds: [], start, planetOwner, pop0: s.pop, popR: [] };
-  let debris = 0, rounds = 0;
-  const pickTarget = (g, pool) => { // FUN_00020bb8 (1007f430)
-    let best = null, bs = 0;
-    for (const h of pool) {
-      if (h === g || h.n <= 0 || isAllied(G, h.owner, g.owner)) continue;
-      let sc = h.planet ? 0 : 100;
-      if (h.type === 'colony') sc += 10; else if (h.type === 'tanker') sc += 8; else if (h.type === 'satellite') sc += 6;
-      sc += RI(G, 1, 5);
-      if (sc > bs) { bs = sc; best = h; }
-    }
-    return best;
-  };
-  const fight = (pool) => { // FUN_00020736 (1007eed0), shooting FUN_0002144e (1007fe30)
-    const maxInit = Math.max(0, ...pool.map(g => g.init));
-    for (const g of pool) g.n0 = g.n;
-    let guard = 0;
-    while (guard++ < 2000 && pool.some(g => g.n > 0 && pool.some(h => h !== g && h.n > 0 && !isAllied(G, h.owner, g.owner)))) {
-      rounds++;
-      const ev = [];
-      for (let lvl = maxInit; lvl >= 0; lvl--) {
-        for (const g of pool) {
-          if (g.init !== lvl) continue;
-          let carry = 0;
-          for (let i = 0; i < g.n0; i++) for (let j = 0; j < g.shots; j++) {
-            if (!g.tgt || g.tgt.n <= 0) g.tgt = pickTarget(g, pool);
-            const t = g.tgt; if (!t) continue;
-            const r = RI(G, 0, 20);
-            const base = O.hit(g.W - t.S) * (r + g.W * 5 + 10);
-            const si = g.planet ? -1 : g.units[i % g.units.length];
-            if (t.planet) {
-              let dmg = base * 4 + carry; carry = 0;
-              dmg = Math.min(dmg, t.hp); t.hp -= dmg;
-              if (t.hp <= 0) { t.hp = 0; t.n = 0; }
-              if (ev.length < 80) ev.push({ a: g.owner, si, p: 1 });
-            } else {
-              const dmg = Math.max(1, trunc(base / 6)) + carry; carry = 0;
-              t.dmg += dmg;
-              let killed = 0; const ti = t.units[t.ui] != null ? t.units[t.ui] : t.units[0];
-              if (t.dmg >= t.hp) { carry = t.dmg - t.hp; t.dmg = 0; t.n--; debris += t.debris; killed = 1; t.ui++; }
-              if (ev.length < 80) ev.push({ a: g.owner, si, t: t.owner, k: killed, ti });
-            }
-          }
-        }
-        for (const g of pool) g.n0 = g.n;
-      }
-      if (rec.rounds.length < 60) { rec.rounds.push(ev); rec.popR.push(planet ? planet.hp / 1000 : s.pop); }
-    }
-  };
-  if (groups.some(g => g.late)) fight(groups.filter(g => !g.late));
-  fight(groups);
-  // the survivors of each type stay with the fleets listed first (FUN_00021370)
-  const lost = {}, survivors = {};
-  for (const o of ownerIds) { lost[o] = 0; survivors[o] = 0; }
-  const keep = {};
-  for (const g of groups) {
-    if (g.planet) continue;
-    lost[g.owner] += g.start - g.n; survivors[g.owner] += g.n;
-    const key = g.owner + ':' + g.d.id;
-    keep[key] = (keep[key] || 0) + g.n;
-    side[g.owner].surv[g.d.id] = (side[g.owner].surv[g.d.id] || 0) + g.n;
-  }
-  for (const f of present) for (const k in f.ships) {
-    const key = f.owner + ':' + k, left = keep[key] || 0, x = Math.min(left, f.ships[k]);
-    keep[key] = left - x; f.ships[k] = x;
-  }
-  for (const f of present) {
-    for (const k in f.ships) if (f.ships[k] <= 0) delete f.ships[k];
-    if (f.colonists) { let c = 0; for (const d of fleetDesigns(G, f)) if (d.type === 'colony') c += f.ships[d.id]; f.colonists = Math.min(f.colonists, c * 10); }
-    if (fleetCount(f) === 0 && G.fleets.includes(f)) G.fleets.splice(G.fleets.indexOf(f), 1);
-  }
-  let planetDied = false, pop1 = 0;
-  if (planet) {
-    pop1 = planet.hp;
-    setPopU(s, planet.hp);
-    if (planet.hp <= 0) { s.pop = 0; s.owner = -1; planetDied = true; }
-  }
-  // who is left standing (FUN_00020736's mask)
-  const standing = (o) => survivors[o] > 0 || (o === planetOwner && pop1 > 0);
-  aftermath(G, sid, { ownerIds, side, planetOwner, pop0, pop1, rounds, dreadIn, standing, debris });
-  const alive = new Set(); for (const g of groups) if (!g.planet) for (let i = 0; i < g.n; i++) alive.add(g.units[g.units.length - 1 - i]);
-  rec.survivors = survivors; rec.lost = lost; rec.pop1 = s.pop; rec.planetDied = planetDied; rec.end = start.map((_, i) => alive.has(i) ? 1 : 0);
-  G.battles.push(rec); G.stat.battles++; if (planetDied) G.stat.captures++;
-  return { ownerIds, survivors, lost, planetOwner, planetDied, startPop, rec };
-}
-// FUN_00021960 (100803e0): for each side, in player order
-function aftermath(G, sid, B) {
-  const s = G.stars[sid], AI = E.aiOf(G);
-  const { ownerIds, side, planetOwner, pop0, pop1, rounds, dreadIn, standing } = B;
-  let debris = B.debris;
-  // the strength left on the sides not allied with o (all sides for -1), of one type (-1: all) (FUN_10081380)
-  const str = (o, type) => {
-    let a = 0;
-    for (const x of ownerIds) {
-      if (o !== -1 && isAllied(G, o, x)) continue;
-      for (const did in side[x].surv) {
-        const d = getDesign(G, x, +did);
-        if (d && (type === -1 || d.type === type)) a += side[x].surv[did] * O.designCost(G, d).att;
-      }
-    }
-    return a;
-  };
-  const yr = G.year + 10;
-  for (const o of ownerIds) {
-    const p = G.players[o], k = know(G, p, sid), x = AI.px ? AI.px(G, p, sid) : (k.px || (k.px = {}));
-    const me = side[o], startPop = o === planetOwner ? pop0 : 0;
-    x.by = yr;
-    const enemies = ownerIds.filter(e => !isAllied(G, o, e));
-    const enemyShips0 = enemies.reduce((a, e) => a + side[e].ships, 0);
-    const enemyLeft = enemies.reduce((a, e) => a + Object.values(side[e].surv).reduce((b, n) => b + n, 0), 0);
-    let main = -1, mv = 0; // the enemy with the colony, else the one that came with most ships
-    for (const e of enemies) { if (side[e].pop > 0) { main = e; mv = 10000; } else if (mv < side[e].ships) { main = e; mv = side[e].ships; } }
-    // the computers' feelings toward their enemies
-    if (AI.modify) for (const e of enemies) {
-      if (!(startPop > 0) || pop1 !== 0) AI.modify(G, p, e, me.ships === 1 && !dreadIn ? RI(G, -30, -10) : RI(G, -100, -50));
-      else { const a = p.ai && p.ai.att ? p.ai.att[e] || 0 : 0; AI.modify(G, p, e, a > AI.LIKE ? -a : RI(G, -200, -100)); }
-    }
-    // an attacked computer puts more of its metal into defence
-    if (enemies.length && startPop > 0 && !p.human && p.ai && p.ai.palm && p.ai.style !== 2) {
-      if (!standing(o) && startPop > 20) p.ai.metalDef = Math.max(60, Math.min(99, p.ai.metalDef + 10));
-      if (p.ai.metalDef < 70) p.ai.metalDef = Math.max(30, Math.min(99, p.ai.metalDef + 5));
-    }
-    // the enemy colony's population and technology (FUN_10081160)
-    let ePop = 0, eW = 1, eS = 1;
-    for (const e of enemies) if (side[e].pop > 0) { ePop += side[e].pop; eW = side[e].W; eS = side[e].S; }
-    const lost = !standing(o);
-    if (lost) {
-      k.pop = ePop / 1000;
-      if (startPop > 0) {
-        if (AI.note) AI.note(G, p, { code: 0x3f3, by: enemies.length === 1 ? main : -1 });
-        x.e16 = str(o, -1) + 1;
-        x.e1a = RI(G, 1, 3) === 1 ? 0 : str(o, -1);
-        x.e1e = 0; x.e22 = str(o, -1);
-      } else {
-        const pp = trunc((eS + 2) * (eW + 2) * trunc((ePop + 2499) / 2500) * (eW + 2) / 570);
-        x.e16 = str(o, -1) + pp + 1;
-        const war = () => str(o, 'dread') + str(o, 'fighter') + str(o, 'scout');
-        if (ePop > 0 && RI(G, 1, 2) === 1) x.e16 = Math.max(0, x.e16 - war());
-        x.e1a = RI(G, 1, 3) === 1 && ePop < 100 ? 0 : war();
-        x.e1e = 0; x.e22 = war();
-      }
-    } else {
-      if (AI.note && startPop < 1 && enemies.length) AI.note(G, p, { code: 0x40c, other: enemies.length === 1 ? main : -1, theirLoss: enemyShips0 - enemyLeft });
-      if (debris) {
-        if (o === planetOwner && startPop > 0) {
-          if (p.flags && p.flags.recycle) debris = trunc(debris * 5 / 4);
-          p.metal += debris;
-          msg(G, o, `You recovered ${fmt(debris)} metal from the battle at ${s.name}.`, { icon: 'm9046', star: sid, quiet: true });
-        } else {
-          s.metal += debris;
-          msg(G, o, `${fmt(debris)} metal has fallen onto ${s.name} from your recent battle.`, { icon: 'm9046', star: sid, quiet: true });
-        }
-        debris = 0;
-      }
-      x.e16 = 0; x.e1a = 0; x.e22 = 0;
-      if (!enemies.length || startPop < 1) x.e1e = 0;
-      else {
-        const v = str(-1, -1) - str(-1, 'fighter'), r = RI(G, 1, 5);
-        if (r < 3 && rounds > 1) x.e1e = trunc(v * 3 / 2);
-        else if (r < 5) x.e1e = trunc(v / 10);
-      }
-    }
-  }
-  // nobody standing to take it (every side lost): GUESS the debris falls onto the planet
-  if (debris) s.metal += debris;
-}
-
-// ---------- the end of the game (FUN_000586fc; 5.0.5 FUN_1007acf0) ----------
-// CONFIRMED: as the engine (a player with no colony and no colony ship is
-// out; the game is won when one player is left, or every survivor is allied
-// with every other, or no human is left), except that when two or more humans
-// survive in that alliance it must hold for a turn: "Your alliance will win
-// the game next turn if it holds!" (6020.129), unless the game began with the
-// humans allied (options bit 0x10, not in the remake). The check starts after
-// the year 2000.
-function checkElimination(G) {
-  const { humans, report, fleetHas } = E;
+  O.afterSetup(G);
   for (const p of G.players) {
-    if (!p.alive) continue;
-    const hasCol = G.stars.some(s => s.owner === p.id);
-    const hasColShip = G.fleets.some(f => f.owner === p.id && fleetHas(G, f, 'colony'));
-    if (!hasCol && !hasColShip) {
-      p.alive = false;
-      G.fleets = G.fleets.filter(f => f.owner !== p.id);
-      for (const q of humans(G)) {
-        if (q === p) msg(G, q.id, 'You have just been eliminated from the game.', { icon: 'p3040', sound: 7020, big: 'p3040' });
-        else msg(G, q.id, `${p.name} has just been eliminated from the game.`, { icon: 'm9036', sound: 7020 });
-      }
+    if (p.startRank !== 7) continue;
+    const L = O.slots301(G, p), home = p.homeStar;
+    const second = L.find(k => typeof k === 'number' && k !== home);
+    if (second == null) continue;
+    p.slots301 = ['sav', 'tech', second, home].concat(L.filter(k => typeof k === 'number' && k !== home && k !== second));
+    O.setKeyPm(p, home, 50); O.setKeyPm(p, second, 50);
+  }
+  const h = G.players.find(q => q.human);
+  if (h) {
+    h.talloc = Object.assign({}, PREF_TECH);
+    const L = O.slots301(G, h), cols = L.filter(k => typeof k === 'number');
+    if (h.startRank === 7 && cols.length >= 2) {
+      O.setKeyPm(h, 'sav', 550); O.setKeyPm(h, 'tech', 200); O.setKeyPm(h, cols[0], 150); O.setKeyPm(h, cols[1], 100);
+    } else if (cols.length) {
+      O.setKeyPm(h, 'sav', 650); O.setKeyPm(h, 'tech', 250); O.setKeyPm(h, cols[0], 100);
     }
   }
-  if (G.over) return;
-  const alive = G.players.filter(p => p.alive && !p.surrendered);
-  const aliveHumans = alive.filter(p => p.human).length;
-  const allAllied = alive.every(a => alive.every(b => isAllied(G, a.id, b.id)));
-  if (!alive.length) { G.over = true; G.winner = -1; return; }
-  if (!(aliveHumans === 0 || allAllied)) { G.palmHold = false; return; }
-  if (aliveHumans >= 2 && alive.length >= 2 && !G.palmHold) {
-    G.palmHold = true;
-    for (const q of alive) msg(G, q.id, 'Your alliance will win the game next turn if it holds!', { icon: 'p3030' });
-    return;
-  }
-  G.palmHold = false;
-  G.over = true; G.winners = alive.map(p => p.id);
-  const hw = alive.find(p => p.human);
-  G.winner = hw ? hw.id : aliveHumans === 0 && !G.players.some(p => p.human && p.alive) ? -2 : alive[0].id;
-  for (const q of humans(G)) {
-    if (alive.includes(q)) {
-      for (const p of alive) if (p !== q) msg(G, q.id, report(78, p.name), { icon: 'p3030' });
-      msg(G, q.id, alive.length > 1 ? 'Wow! You won! You and your allies have conquered the galaxy. Congratulations!' : 'Wow! You won! You have conquered the galaxy. Congratulations!', { icon: 'p3030', sound: 7021, big: 'p3030' });
-    } else if (alive.length) msg(G, q.id, `${alive.map(p => p.name).join(' and ')} ${alive.length > 1 ? 'have' : 'has'} just won the game.`, { icon: 'p3040', sound: 7020, big: 'p3040' });
-  }
 }
+
+// CONFIRMED (FUN_0003734e, the Galaxy menu's "Evacuate Planet" / "Dont
+// Evacuate Planet", tSTL 6001.20-21): as 5.0.5's toggle (FUN_10060fac: the
+// mark, the income off the net, the share to 0 by FUN_00033180, sounds 7002 /
+// 4000), but the star's name is compared whole, letter case aside
+// (FUN_0002a466), and with no one-in-three draw: "Kansas" always gets
+// "Dorothy, I guess that means we're not in Kansas anymore" (tSTL 6004.38,
+// alert 2300) and is evacuated; "Hope" always asks "Dost thou truly wish to
+// abandon Hope? All is not yet lost..." (OK / Cancel); and a star named "Ship"
+// asks "Abandon Ship? Abandon Ship! All hands abandon ship! Women and children
+// first!", new in the Palm version (strings at 0x37674-0x37712). Any other
+// profitable colony asks "Do you really want to evacuate %s? It's a profitable
+// colony!" (tSTL 6003.18). (The Message History's Evacuate button,
+// FUN_00040232, keeps 5.0.5's one-in-three Kansas and Hope and has no Ship;
+// the remake has no such button.)
+const evacuateToggle = {
+  words: ['Evacuate Planet', 'Don’t Evacuate Planet'],
+  marked: (G, sid) => !!G.stars[sid].abandon301,
+  ask(G, p, sid) {
+    const s = G.stars[sid], nm = String(s.name).toLowerCase();
+    if (nm === 'kansas') return { text: 'Dorothy, I guess that means we’re not in Kansas anymore', notice: true };
+    if (nm === 'hope') return { text: 'Dost thou truly wish to abandon Hope? All is not yet lost...' };
+    if (nm === 'ship') return { text: 'Abandon Ship? Abandon Ship! All hands abandon ship! Women and children first!' };
+    if ((s.oInc || 0) > 0) return { text: `Do you really want to evacuate ${s.name}? It's a profitable colony!` };
+    return null;
+  },
+};
+
+// CONFIRMED (tSTL 6021, read by FUN_00027c4c for report 500; the End Turn,
+// FUN_000500d4, sends one each turn to a player whose hints preference is on,
+// picked by the system's random numbers from 4 to 43, FUN_00029b08): the Palm
+// version's own hints. (6021.1-3 are the welcome lines; 6021.44-51 are for
+// the demo, which draws from 4 to 52.)
+const HINTS = [
+  'Ships with higher Speed Tech shoot first.',
+  'Icons by your planet mean you have ships orbiting around it. Fleets are on the right; satellites are on the left.',
+  'Good planets look “prettier” than bad planets when you explore them.',
+  'Range is how far your ships can reach.',
+  'Satellites can’t move, but they shoot just as well as any other ship.',
+  'There’s a limited amount of metal in the game.',
+  'Miniaturization makes ships cost more money, but less metal.',
+  'Radical Tech can have a variety of effects.',
+  'Be careful with your metal--it can easily run out.',
+  'To cancel a fleet’s movement, make sure that fleet is selected in the Ship Info window and click the origin planet. You can also use the ‘Cancel Fleet Trip’ menu item in the ‘Ships’ menu.',
+  'Build Satellites to protect vulnerable planets.',
+  'Colonize good planets with Colony ships.',
+  'Scout ships have higher Range, but lower Weapons and Shields.',
+  'If your Weapons are higher than the opponent’s Shields, you’ll do lots of damage.',
+  'If your Shields are higher than the opponents Weapons, he’ll barely hurt you.',
+  'Lots of ships can make up for having low Technology.',
+  'You get money every turn.',
+  'Good planets are close to 1.0 G.',
+  'Good planets are close to 72°F (20°C).',
+  'Each player has a different idea of what a good planet is.',
+  'If a planet is over 2.5 G or below 0.4 G, it will never make a profit.',
+  'Abandon bad planets after you strip-mine them.',
+  'Terraforming improves a planet’s temperature.',
+  'Mining takes metal from a planet and puts it into your reserve.',
+  'Savings puts money away for shipbuilding.',
+  'Savings generates extra income.',
+  'If you go into debt, part of your income goes to pay interest.',
+  'If you have a fleet with fighters and a colony ship, mark the colony ship to arrive late. It’ll probably survive longer.',
+  'Ships in a fleet that arrive late may miss the worst initial battle.',
+  'Offensive ships attack better but defend worse.',
+  'Defensive ships defend better but attack worse.',
+  'There are menus and menu shortcuts in the Galaxy screen for your convenience.',
+  'The computer will help choose the best path possible for your fleets.',
+  'Put multiple ships in the same fleet with Organize Fleets.',
+  'Change the battle attitude of ships in your fleets in the Organize Fleets screen.',
+  'The Enemy and Allies screen can show who your friends and enemies are. It also so shows who is doing the best.',
+  'The first person in the Enemies and Allies list is winning.',
+  'If you’ve just started, you might want to try turning on auto-play and watching.',
+  'If you and your allies arrive at  a star in the same turn, they’ll fight side-by-side in battle.',
+  'Armageddons make the galaxy smaller.',
+];
 
 // ---------- the game's difficulty rating (FUN_0002a96c; 5.0.5 FUN_100560a0) ----------
 // CONFIRMED constant for constant the same as 5.0.5's, and the remake's
 // js/rules-original.js has the base and the Armageddon and year terms. At a
 // win (FUN_00058bee) the Palm game also multiplies by 0.97 for each human
-// after the first and 0.95 for each human who surrendered to another human,
-// adds one for each human winner after the first, takes one off for each
-// human who didn't win, and takes off a term for the turn time limit (none in
-// the remake). o.humans (the hot seat list), o.humanWinners and
-// o.humanSurrenders are used when given; otherwise one human, who won if o.won.
+// after the first and 0.95 for each human who surrendered to another human
+// (game +0x1a9, counted by FUN_00051b2c), adds one for each human winner after
+// the first, takes one off for each human who didn't win, and takes off a term
+// for the turn time limit (none in the remake). o.humans (the hot seat list),
+// o.humanWinners and o.humanSurrenders are used when given; otherwise one
+// human, who won if o.won.
 const START_ORDER = ['outpost', 'barren', 'backward', 'normal', 'advanced', 'thriving', 'abundant'];
 function difficulty(o) {
   const nComp = o.computers | 0;
@@ -382,18 +194,21 @@ function difficulty(o) {
   return trunc(Math.max(30, Math.min(140, sc)));
 }
 
-E.registerRules('palm', Object.assign({}, O, {
+const rs = Object.assign(base, {
   label: 'Palm OS 5 (2003)',
   // the New Game window lists rulesets by year, then version (engine.js ruleOptions)
   version: '5', platform: 'Palm OS, version 1.0.4', year: 2003,
-  ai: 'palm',               // its own computer players (js/ai-palm.js)
+  ai: 'palm',               // the computers: js/ai-palm.js (5.0.5's, the same code)
   maxStars: MAX_STARS,
-  maxDesigns: 24,           // CONFIRMED (FUN_00043754, FUN_000654e6, FUN_0005730c)
-  // the computers pay development costs as js/ai-palm.js works them out (FUN_00063e62)
-  paysPrototype: (G, p) => p.human || !p.ai || p.ai.iq < 2,
-  makeGalaxy, afterSetup, economy, battle, checkElimination, difficulty,
-  // pinned as it was inherited from the 5.0.5 rules before their full pass
-  // (5.0.5 tells only allies of arrivals); the Palm pass will settle it
-  features: { arrivalNotices: true, alliances: true, gifts: true, surrender: true, stances: true, lateArrival: true, waypoints: true, luck: true, supernova: true, armageddon: true, dip: true, chat: true, yearsPerTurn: true },
-}));
+  turn505: true,            // the 5.0.5 turn (js/rules-original.js is505)
+  makeGalaxy, afterSetup, difficulty, evacuateToggle,
+  // tSTL 6021.4-43, one a turn at random (FUN_000500d4); the skin shows hints
+  // from rs.hintTexts when it has them
+  hintTexts: HINTS,
+});
+// CONFIRMED (tSTL 6060, the star names): 5.0.5's 255, with "Courasant" in
+// place of "Antares" (the 196th)
+Object.defineProperty(rs, 'starNames', { enumerable: true, configurable: true,
+  get: () => (E.DATA.starNames || []).map(n => n === 'Antares' ? 'Courasant' : n) });
+E.registerRules('palm', rs);
 })(this);

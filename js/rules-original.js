@@ -862,7 +862,10 @@ function refuel(G) {
 
 // ---------- combat ----------
 // 5.0.5's battles are below (battle505, the 5.0.5 turn).
-const is505 = (G) => E.rules(G).id === 'original';
+// the 5.0.5 turn: 'original', and the Palm OS rules (the same code, recompiled:
+// docs/palm-findings.md) through the ruleset flag turn505 (not enumerable, so
+// the rulesets built on this one with Object.assign don't take it)
+const is505 = (G) => !!E.rules(G).turn505;
 
 // ---------- dismantling by marks (5.0.5 only here) ----------
 // CONFIRMED (FUN_10062c10, the Ships menu's "Dismantle Fleet"): the command
@@ -1334,8 +1337,13 @@ function research505(G, p) {
   if (T === 0 && p.alive) rep(G, p, 0x437, [], { icon: 'm9011', quiet: true });
   const old = {};
   for (const k of TECHS) old[k] = p.tech[k];
+  // the research shares are per mille as they stand (player +0x80..); the
+  // skin's Technology bars keep them as fractions of 1 once drawn, so those
+  // are read as per mille (a total of 2 or less can't be per mille)
+  let tsum = 0; for (const k of TECHS) tsum += p.talloc[k] || 0;
+  const tpm = (k) => tsum > 0 && tsum <= 2 ? Math.round((p.talloc[k] || 0) * 1000) : (p.talloc[k] || 0);
   for (const k of TECHS) {
-    const m = share505(T, p.talloc[k] || 0);
+    const m = share505(T, tpm(k));
     const div = k === 'mini' || k === 'radical' ? 200 : 150;
     let pts = trunc(Math.sqrt(trunc(m / div)) * (k === 'radical' ? 0.5 : 0.8));
     while (pts > 0) {
@@ -1591,7 +1599,9 @@ function income505(G, p) {
           add = base + r2 < 2 * u + r1 ? base + RI(G, 0, trunc(mx / 100)) : 2 * u + RI(G, 0, 5);
         }
         u += add;
-        if (mx <= u) rep(G, p, 0x408, [s.name], { icon: 'm9030', star: sid, quiet: true });
+        // only in the branch for a colony earning -7,499 or more (FUN_10077200;
+        // Palm FUN_00054d94 the same): a new colony doesn't report it
+        if (before >= -7499 && mx <= u) rep(G, p, 0x408, [s.name], { icon: 'm9030', star: sid, quiet: true });
       } else u += trunc(mx / 1000) + RI(G, 0, trunc(mx / 10000));
       setPopU(s, u);
     }
@@ -2497,9 +2507,12 @@ E.registerRules('original', {
   observe: observeHook, scrapReturn, scrapInSpace, randomEvents, fleetArrives,
 });
 // 5.0.5's own hooks. They are not enumerable, so the rulesets built on this
-// one with Object.assign (2.0, and through it 1.2, 3.0.1 and 4.0.5; Palm OS)
-// don't take them: each of those keeps its own rules until its own pass.
+// one with Object.assign (2.0, and through it 1.2, 3.0.1 and 4.0.5) don't
+// take them. The Palm OS rules (the same code, recompiled) take every one of
+// them on purpose (js/rules-palm.js copies the own properties).
 Object.defineProperties(E.RULESETS.original, Object.fromEntries(Object.entries({
+  // the 5.0.5 turn (is505 above); js/rules-palm.js sets it too
+  turn505: true,
   // 5.0.5 marks fleets and ship types and dismantles them at End Turn (FUN_10062c10, FUN_10074580)
   flagScrap, flagScrapDesign, scrapWords: { fleet: ['Dismantle Current Fleet', 'Don’t Dismantle Current Fleet'] },
   // the turn (above): pass 1 for everyone in `economy`, battles in `battle`,

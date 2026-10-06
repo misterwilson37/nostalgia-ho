@@ -2,172 +2,239 @@
 
 Spaceward Ho! 5 for Palm OS (MobileFreon, 2003, version 1.0.4) is a port of the Mac
 game 5.0 to Palm handhelds. This file explains how its rules compare with the Mac 5.0.5
-rules in `js/rules-original.js`, and how the "Palm OS" ruleset (`js/rules-palm.js`) was
-made.
+rules in `js/rules-original.js`, and how the "Palm OS" ruleset (`js/rules-palm.js`,
+`js/ai-palm.js`) is made. `docs/coverage-palm.md` accounts for every one of the program's
+1,041 routines.
 
 The program (`Spaceward Ho.prc`) was decompiled with `tools/decompile/palm68k.py` and
-`tools/decompile/Mac68k.java` (see `docs/decompiling.md`). Palm code has no routine
-names, so functions are cited by their address in that layout ('code' resource *n* at
-*n* × 0x10000), for example `FUN_000232e6`. The 5.0.5 routines they are compared with
-are the PowerPC ones named in `docs/original-findings.md` (for example
-`FUN_1006c4d0`). Text is cited by resource: `tSTL 6020.n` is the n-th report template
-(report number 1000 + n), `tFRM n` a form.
+Ghidra (see `docs/decompiling.md`); the 44 routines Ghidra could not decompile were read
+in a Capstone disassembly of the same layout. Palm code has no routine names, so
+functions are cited by their address in that layout ('code' resource *n* at *n* ×
+0x10000), for example `FUN_000232e6`. The 5.0.5 routines they are compared with are the
+PowerPC ones named in `docs/original-findings.md` (for example `FUN_1006c4d0`). Text is
+cited by resource: `tSTL 6020.n` is the n-th report template (report number 999 + n),
+`tFRM n` a form.
 
 Version 1.0.3 differs from 1.0.4 only in code and two string lists; the release notes
 list only interface fixes ("fixed temperature preference", list and selection bugs).
 
-As in `301-findings.md`, every rule is labelled:
+Every rule is labelled:
 
 - **CONFIRMED**: read in the decompiled Palm code (or its resources), cited by function.
-- **GUESS**: the decompile doesn't settle it, so the remake follows 5.0.5.
+- **OPEN**: the Palm code doesn't settle it; the remake falls back on 5.0.5 and the
+  question is in `docs/open-questions.md` (Palm).
 - **NOT IMPLEMENTED**: in the Palm version but not in the remake.
 
 ## The short version
 
-The Palm version is **the 5.0 turn engine, recompiled**. Routine by routine, the code
-does what 5.0.5 does, with the same constants and the same structure; even the player
-and game records have the same fields (shifted by a few bytes). The differences from
-5.0.5 are few:
+The Palm version is **the 5.0 turn engine, recompiled for the 68000**. Its End Turn
+(`FUN_000500d4`) calls the same routines in the same order as 5.0.5's (`FUN_10072a10`),
+the routines keep 5.0.5's order in the program, and each was read beside its 5.0.5
+twin: the same formulas, the same constants, the same slips (global warming that never
+happens, shares used as they stand, the dip raising the borrowing limit, the chained
+milestones, the Spiral look). Every random draw in 74 pairs of routines, the 26 of the
+computer turn among them, has the same range in the same place. The player, star,
+fleet and design records have the same fields, shifted by a few bytes.
 
-- **At most 90 stars** (5.0.5: 220). Galaxies above about size 36 (Grid from size 50,
-  Hex from size 45) come out smaller.
-- **No Alliances or Luck in Battles check boxes**: both are always on.
-- The random numbers come from a fixed table of 5,000 numbers stored in the program
-  (resource `RAND 1000`), not one made at the start of the game.
-- No "Any (1-8)" choice for the number of computers.
+So the Palm ruleset is now the 5.0.5 ruleset with **all** of its 5.0.5 hooks (the turn,
+per-mille money, the marks for dismantling and evacuating, the dip, dragging a bar,
+buying, late-arrival battles, the colony list, movement, novas, milestones, the
+master-point cap), and its computers are the 5.0.5 port (`js/ai-original.js`, through
+`js/ai-palm.js`). The Palm program differs from 5.0.5 in:
 
-The remake's 5.0.5 rules (`js/rules-original.js`, `js/ai-original.js`) are in places a
-looser reading of that same code. So the Palm ruleset is built over `rules-original.js`,
-but every rule it takes from there was checked against the Palm code (the "Inherited
-rules audit" below), and where the remake's 5.0.5 rules differ from the code, the Palm
-ruleset does what the Palm code does:
+- **at most 90 stars** (5.0.5: 220);
+- **no Alliances or Luck in Battles check boxes**: both always on (and novas);
+- **Evacuate Planet**: "Kansas" always gets the Dorothy line and "Hope" always asks
+  (5.0.5: one time in three each), the names are compared whole, and a star named
+  "Ship" asks "Abandon Ship? ..." (new);
+- **the star names**: "Courasant" in place of "Antares";
+- **its own hints** (tSTL 6021), one every turn;
+- **the difficulty rating** keeps the hot-seat factors (as before);
+- random numbers from a fixed table of 5,000 (resource `RAND 1000`), no "Any (1-8)"
+  computers, a demo mode, Palm system sounds, and the handheld's own windows.
 
-- its **own computer players** (`js/ai-palm.js`), a port of segment 6;
-- the **battle's** order of groups, the losses falling on the fleets listed last, the
-  debris going to the first side left standing, and what each side learns from it;
-- the **retiring of unused ship types** once a player has more than 17;
-- the **win check**: an alliance of two or more humans must hold for a turn;
-- the **difficulty rating** at a win (the hot-seat factors).
+Reading the Palm code also showed three things the remake's 5.0.5 rules do differently
+from both programs (below, "Found for 5.0.5").
 
-## How the comparison was done
+## The Palm pass (October 2026): every change to play, with addresses
 
-The turn routine (`FUN_000500d4`, 5.0.5 `FUN_10072a10`) calls the same steps in the
-same order, which pairs up the routines:
+"Before" is what the Palm ruleset did after the first Palm reading (5.0.5's pre-pass rules
+with its own battles and computers); "now" is what the Palm code does.
+
+| Area | Before | Now (the Palm code) | Where |
+|---|---|---|---|
+| The turn | the remake's generic order | 5.0.5's: pass 1 for each player (the computer plans first, then surrender, interest, dismantling, colony support, terraforming and mining, research, moves, RestoreStarsBars), the battles, Armageddon, the novas, pass 2a in a random order of players, pass 2b in order, the winner | `FUN_000500d4` (`FUN_00051b2c`, `FUN_00050ed4`, `FUN_00051dd0`, `FUN_00051184`, `FUN_00051446`, `FUN_00052832`, `FUN_00053702`, `FUN_00053c48`; `FUN_0002010e`, `FUN_00054296`, `FUN_00054498`; `FUN_00054832`, `FUN_00054ca4`, `FUN_00054d94`, `FUN_00055844`; `FUN_0005613e`, `FUN_00056244`, `FUN_000566e4`, `FUN_000563ec`, `FUN_00058206`, `FUN_000585fc`, `FUN_00053d74`, `FUN_00056828`, `FUN_0005253a`, `FUN_000583aa`; `FUN_000586fc`) |
+| Money | the incomes pooled, losses paid, the rest shared out | this turn's money (last turn's income + the dip), the interest, losing colonies paid in the colony list's order, each bar's per-mille share as it stands ($2,000,000 rule); Ship Savings get the Savings share, the interest and the refunds in pass 2 | `FUN_00050ed4`, `FUN_00051184`, `FUN_00051446`, `FUN_00054d94` |
+| Interest you can't pay | global warming and a fleet scrapped | never: the test compares the owed interest (below 0) with what may be lent, as 5.0.5's | `FUN_00050ed4` |
+| Terraforming, mining refunds | √(⅔ money); rounded refunds | trunc(√trunc(⅔ money)), the "never profitable" warning every turn; trunc(m²/400), from 25,001 trunc(m/400) × m | `FUN_00051446`, `FUN_0002a6bc` |
+| Research | shares of the tech budget | each tech's share as it stands, progress cut to 6,000, "not spending on research" every turn | `FUN_00052832` |
+| Scrapping | at once | marks ("Dismantle Current Fleet" / "Dont Dismantle Current Fleet", tSTL 6001.16-17; Scrap Ship Types toggles a type's mark with no question), carried out at End Turn; a fleet bought this turn is un-bought; 3/4 (7/8) of the metal for humans, all for computers; over another's star to its owner; in hyperspace a meteor shower | `FUN_00036928`, `FUN_00073e48`, `FUN_00051dd0`, `FUN_00054ca4` |
+| Evacuating | at once | a mark with Palm's jokes (above) and the profitable-colony question, the income off the net, the share to the others; carried out at End Turn | `FUN_0003734e`, `FUN_00051184` |
+| Dip Into Savings | an amount | 0-30 % (tFRM 2000's slider) of Ship Savings each turn as next turn's money; the Savings bar given away and locked | `FUN_000743f6`, `FUN_00054d94`, `FUN_00049f82` |
+| Dragging a bar | the remake's own | 5.0.5's redistribution, the same code; locked bars keep their shares | `FUN_00049496`, `FUN_00049f82` |
+| Buying | no limit by people; interest unchanged | no more ships a turn at a colony than its people (counted before the money check); the interest worked out again; new ships join a fleet of the design bought this turn | `FUN_0004435a`, `FUN_0004d9d6` |
+| Colony list | star order | a new colony in front; sorted by income each turn | `FUN_00056d34`, `FUN_000583aa` |
+| Battles | one battle at a star, Palm's own order | two when ships arrive late (each its own record, replay and reports; `duel` 0 and 1), sides in viewing order, designs last to first; reports with "and your allies", the enemy's face for one enemy, "You just watched some of your allies fight"; big battles; the loser's record of the owner | `FUN_0002010e`, `FUN_00020cc8`, `FUN_00021960`, `FUN_000566e4`, `FUN_00022a6e` |
+| Debris when every side is beaten | put on the planet | lost (no side standing takes it) | `FUN_00021960` |
+| Arrivals and movement | everyone told | "has arrived" by 5.0.5's rule, allies told of arrivals at stars not theirs, fleets wait when the next hop is too far or to load colonists | `FUN_00053702`, `FUN_00053ac0`, `FUN_0005613e` |
+| Novas and Armageddon | | the red-star warning every turn, the miracle reports, a fizzled device trying again every turn | `FUN_00054498`, `FUN_00054832`, `FUN_00054296` |
+| Milestones | | chained, as 5.0.5 | `FUN_00058206` |
+| Winning | Palm's own reading | 5.0.5's routine (warning 0x469, winners 0x436 with the master points capped, 0x434, 0x435) | `FUN_000586fc` |
+| Master points | the whole award | at most the cap noted at the new game (halfway past your next rank), once per game | `FUN_0002a906`, `FUN_000395a6`, `FUN_000414a6` |
+| Computers | a separate port | 5.0.5's port: they plan with the net and this turn's money in the coming year, ResolveSpending, evacuation by mark, terraform wishes where the bar isn't done, Tankers in attack fleets arriving late and defending, split fleets with a full tank, busy satellites left out of a colony's defence | segment 6 (table below) |
+| Starting shares | 167 per mille each; Abundant 650/250/100/50 | the creator's research 180 × 5 and Radical 100; budget 650/250/100, an Abundant player 550/200/150/100 with the second colony third and the home fourth (computers 650/250/50/50) | `FUN_000395a6`, `FUN_0002b274`, `FUN_00026304` |
+| Evacuate jokes | 5.0.5's | Palm's (above) | `FUN_0003734e` |
+| Star names | 5.0.5's | Courasant for Antares (tSTL 6060) | `FUN_00023cda` |
+| Hints | 5.0.5's, one every 7 turns | tSTL 6021.4-43, one every turn by the system's random numbers | `FUN_000500d4`, `FUN_00029b08`, `FUN_00027c4c` |
+
+## How the routines pair up
 
 | Step | Palm | 5.0.5 |
 |---|---|---|
-| Interest and debt | `FUN_00050ed4` | `FUN_100737b0` |
-| Dismantling | `FUN_00051dd0` | `FUN_10074580` |
-| Colony support | `FUN_00051184` | `FUN_10073a80` |
-| Terraforming and mining | `FUN_00051446` (+ `FUN_0002a5e2`, `FUN_0002a6bc`) | `FUN_10073d70` (+ `FUN_10055d90`, `FUN_10055e30`) |
-| Research | `FUN_00052832` | `FUN_10074f90` |
-| Movement | `FUN_00053702` | `FUN_10075b80` |
-| Battles | `FUN_0002010e`, `FUN_00021960` and the routines after them | `FUN_1007e870`, `FUN_1007eed0`, … |
-| Armageddon, novas | `FUN_00054296`, `FUN_00054498` | `FUN_10076680`, `FUN_100769b0` |
-| Supernova, population and income, tankers and biologicals | `FUN_00054832`, `FUN_00054d94`, `FUN_00055844` | `FUN_10076d20`, `FUN_10077200`, `FUN_10077aa0` |
-| Radical discoveries, hand of four | `FUN_0005730c`, `FUN_00058016` | `FUN_10079360`, `FUN_1007a180` |
-| Win check | `FUN_000586fc` | `FUN_1007acf0` |
-| Interest formula | `FUN_00029b40` | `FUN_10054de0` |
-| Master points | `FUN_0002a844` | `FUN_10055f60` |
-| Galaxy setup, star stats, player setup | `FUN_000232e6`, `FUN_00025f4a`, `FUN_00026304` | `FUN_1006c4d0`, `FUN_1006f280`, `FUN_1006f640` |
-| Computer personality | `FUN_0002746e` | `FUN_100704d0` |
+| End Turn, one 10-year step | `FUN_0005000c`, `FUN_000500d4` | `FUN_100728d0`, `FUN_10072a10` |
+| Surrender, interest, dismantling | `FUN_00051b2c`, `FUN_00050ed4`, `FUN_00051dd0` | `FUN_100742b0`, `FUN_100737b0`, `FUN_10074580` |
+| Colony support, terraforming and mining, research | `FUN_00051184`, `FUN_00051446`, `FUN_00052832` | `FUN_10073a80`, `FUN_10073d70`, `FUN_10074f90` |
+| Moving, departing, RestoreStarsBars | `FUN_00053702`, `FUN_00053ac0`, `FUN_00053c48` | `FUN_10075b80`, `FUN_10075f10`, `FUN_10076070` |
+| Battles | `FUN_0002010e` … `FUN_000230b2` | `FUN_1007e870` … `FUN_100819f0` |
+| Armageddon, novas, ReactToSupernova, scrap metal | `FUN_00054296`, `FUN_00054498`, `FUN_00054832`, `FUN_00054ca4` | `FUN_10076680`, `FUN_100769b0`, `FUN_10076d20`, `FUN_10077110` |
+| Income and growth, refuelling, colonizing and exploring | `FUN_00054d94`, `FUN_00055844` | `FUN_10077200`, `FUN_10077aa0` |
+| Pass 2b | `FUN_0005613e`, `FUN_00056244`, `FUN_000566e4`, `FUN_000563ec`, `FUN_00058206`, `FUN_000585fc`, `FUN_00053d74`, `FUN_00056828`, `FUN_00056a4c`, `FUN_0005249e`, `FUN_0005253a`, `FUN_000583aa` | `FUN_100782a0`, `FUN_10078390`, `FUN_10078840`, `FUN_10078560`, `FUN_1007a3f0`, `FUN_1007abb0`, `FUN_100761c0`, `FUN_10078990`, `FUN_10078bd0`, `FUN_10074c10`, `FUN_10074cd0`, `FUN_1007a5e0` |
+| Explore, colonize, give up a colony | `FUN_00056ac6`, `FUN_00056d34`, `FUN_00057076` | `FUN_10078c80`, `FUN_10078e80`, `FUN_10079190` |
+| Radical discovery and hand | `FUN_0005730c`, `FUN_00058016` | `FUN_10079360`, `FUN_1007a180` |
+| Winner, difficulty at the end | `FUN_000586fc`, `FUN_00058bee` | `FUN_1007acf0`, `FUN_1007b2c0` |
+| Interest, mining, MetalToMoney | `FUN_00029b40`, `FUN_0002a5e2`, `FUN_0002a6bc` | `FUN_10054de0`, `FUN_10055d90`, `FUN_10055e30` |
+| Ranks, master points, cap, difficulty | `FUN_0002a78a` … `FUN_0002a96c` | `FUN_10055ed0` … `FUN_100560a0` |
+| Galaxy, star, players, personality | `FUN_000232e6`, `FUN_00025f4a`, `FUN_00026304`, `FUN_0002746e` | `FUN_1006c4d0`, `FUN_1006f280`, `FUN_1006f640`, `FUN_100704d0` |
+| Bars | `FUN_00033180`, `FUN_000332d6`, `FUN_0003399c` | `FUN_100712b0`, `FUN_10071430`, `FUN_10071a50` |
+| Fleets, DeterminePath, ship costs, buying | `FUN_0004adc0` … `FUN_0004c22c`, `FUN_0004ce40`, `FUN_0004d9d6` | `FUN_1007bcb0` … `FUN_1007d260`, `FUN_1007de60`, `FUN_1007e4a0` |
+| Computers | `FUN_0006000c` … `FUN_00067fd6` (45 routines) | `FUN_10081af0` … `FUN_10088fd0` (45) |
 
-Each pair was read side by side. The Palm code does its floating point through the
-Palm OS soft-float traps (`Flp_d_mul` and so on, constants written out in full), so its
-formulas are easier to read than the PowerPC ones.
+## The 5.0.5 behaviours, checked one by one in the Palm code
 
-## Ruleset differences from 5.0.5
+Each CONFIRMED the same as `js/rules-original.js`, so the Palm ruleset uses it:
 
-### Setup and the New Game window
+- **The turn routine**: the same calls in the same order (above); the computers plan in
+  their own pass 1, after the year has moved on; the 2010 hand (0x466); the clamps;
+  the gifts and canned messages delivered in pass 2b (0x44c-0x44f).
+- **Per-mille money**: `FUN_00051446`, `FUN_00052832`, `FUN_00054d94` share each slot's
+  money as trunc(M × pm / 1000) under $2,000,000, trunc(M / 1000) × pm above.
+- **Marks for dismantling** (`FUN_00036928`: the mark at fleet +0x72, sound on setting
+  it, a fleet bought this turn un-bought with its first-ship price when none of the
+  design is left, the interest worked out again) and **evacuating** (`FUN_0003734e`:
+  colony +0x11, the net −+ the colony's income, GiveBarPercent to 0, sounds 7002 / 4000).
+- **Dip**: `FUN_0007437e` sets the slider 0 to 30; `FUN_000743f6` keeps the percentage
+  (player +0x56) and gives the Savings share away; `FUN_00054d94` takes it from Ship
+  Savings in pass 2 and counts it as income.
+- **Bar drag**: `FUN_00049496` is `FUN_1008a7a0` line for line (in proportion; all to 0
+  under a rise; the fall split when all are 0; the dragged bar 1,000 less the others or,
+  dragged to 0, the first bar taking the rest); `FUN_00049f82` locks a colony being
+  evacuated, a finished colony and Savings while dipping.
+- **Buying limits**: `FUN_0004435a` (the count at most the colony's people less the ships
+  built there this turn; a type marked for scrapping 0) and `FUN_0004d9d6`.
+- **Late-arrival battles**: `FUN_0002010e`, two passes, the second with the ships whose
+  stance byte has bit 1 and that arrived this turn.
+- **Colony order**: `FUN_00056d34`, `FUN_000583aa`.
+- **Movement**: `FUN_00053702`, `FUN_00053ac0`.
+- **Novas**: `FUN_00054498` (from 2750, 94 in 100 to go on, a new red star when
+  rand(1, 11) × rand(1, 9) < 2 and none is red). The Palm program draws the two in the
+  other order from 5.0.5; with the remake's own random numbers this changes nothing.
+- **Milestones**: `FUN_00058206`, chained.
+- **Master-point cap**: `FUN_0002a906` (halfway past your next rank, `FUN_0002a7e4`),
+  noted at the new game (`FUN_000395a6`, player +0x28), applied at the win
+  (`FUN_000586fc` for the report, `FUN_000414a6` for the points, once per game).
+- **The computers' spending**: `FUN_00064866` is ResolveSpending.
+
+## Battle reports, replays, scrap marks, ranks and hints
+
+- **Battle reports** (`FUN_00021960`): the codes and their arguments are 5.0.5's
+  (0x3f3, 0x40c, 0x40d, 0x40e, 0x47f, 0x42f, 0x430), so `aftermath505` writes them with
+  `won` set (0x40c, 0x40e and 0x47f won; 0x3f3 and 0x40d lost). The pictures come from
+  the same table as 5.0.5's (`FUN_000292f8`; 0x40d the enemy's hat when there is one
+  enemy, values 200-208), the sounds from the Palm system sounds (`FUN_0002c17e` turns a
+  5.0.5 sound number into one, when Sound is on).
+- **Replays**: each battle is its own record with its own seed (rand % 5000), and the
+  battle screen replays it (`FUN_00030306` calls `FUN_00020736`), so a star with late
+  arrivals has two (`duel` 0 and 1).
+- **Scrap marks**: the words are "Dismantle Current Fleet" / "Dont Dismantle Current
+  Fleet" (tSTL 6001.16-17), as 5.0.5's.
+- **Ranks**: resource `RANK 1000`, the same 25 ranks, points and unlocks; a new rank
+  shows tFRM 2900, where you may name a star for later games (NOT IMPLEMENTED).
+- **Hints**: one every turn while the preference is on (`FUN_000500d4`, report 500;
+  `FUN_00027c4c` reads tSTL 6021 at a SysRandom index from 4 to 43; the demo 4 to 52).
+  `rs.hintTexts` holds them.
+
+## Setup and the New Game window
 
 | What | Palm 1.0.4 | Status |
 |---|---|---|
-| Star count | worked out as in 5.0.5 (Grid (size ÷ 10 + 5)², Hex 3(k+2)(k+3)+1, others 2 × size + 19 ± (size ÷ 10 + 6)), then kept between **19 and 90** (5.0.5: 220) | CONFIRMED (`FUN_000232e6`) |
-| Layouts | 5.0.5's seven shapes, built from the capped count | CONFIRMED (the shape routines `FUN_000240aa`, `FUN_0002472c`, `FUN_00024f04`, `FUN_000243c2`, `FUN_00025360`, `FUN_00023e66`, `FUN_0002552e` use the same constants as 5.0.5's) |
-| Alliances, Luck in Battles | no check boxes (tFRM 1200 has only Best Buddies). The options word keeps the default 0x17: bit 1 alliances, bit 2 novas, bit 4 luck, bit 0x10 humans start allied; Best Buddies is bit 0x20 | CONFIRMED (tFRM 1200, `FUN_0003825a`, defaults in `FUN_0002b274`; bits read in `FUN_0002010e` (luck), `FUN_00054498` (novas), `FUN_000661fa` (alliances)) |
-| Number of computers | a list from 1 to the rank's limit (4 to 8); no "Any (1-8)" | CONFIRMED (`FUN_00038e72`) |
-| Other settings | IQ 50–200, Size, Density, Shape, your Home System, the computers' Home System (with "Based on IQ"), Years Per Turn 10/20/30/50, Best Buddies; the same defaults as 5.0.5 (4 computers, Circle, size 20, density 10, IQ 70, 10 years a turn) | CONFIRMED (`FUN_0002b274` matches 5.0.5's `FUN_10072490` field for field) |
-| Locking settings by rank | as 5.0.5: resource `RANK 1000` has the same 25 ranks, points and unlocks | CONFIRMED (`FUN_00038c6a` … `FUN_000392ee`); the remake doesn't lock settings (as for 5.0.5) |
-| Starting money, metal, population, technology, ships, designs | as 5.0.5 | CONFIRMED (`FUN_00026304`) |
-| Computer skill from IQ | as 5.0.5: (IQ − 50) × ⅔ − 12 plus 25 split across the computers | CONFIRMED (`FUN_00026304`) |
-| Computer personalities | the same ranges, value for value | CONFIRMED (`FUN_0002746e`) |
-| Difficulty rating | the same formula, constant by constant: the six scores (gap 4 → 15, 5 → 25, 6 → 40, else gap + 7; −4 / −2 for Abundant / Thriving players; 1 + (IQ − 50) ÷ 15; 2 × buddies × (n − 1) + n + 2; shape 4 / 7 / 10; 12 − (size − 1) ÷ 15, the same for density), (10 × lowest + sum with the first counted twice) ÷ 2 + 25; at a win (`FUN_00058bee`) × 0.9 per Armageddon, × 0.95 per human who surrendered to a human, × 0.97 per human after the first, + 1 per human winner after the first, − 1 per human who didn't win, + 1 for a win from 2000 to 3000, − year ÷ 5000 from 5000, − (turn time limit term), kept to 30–140 | CONFIRMED (`FUN_0002a96c`, disassembly; `FUN_00058bee` for the arguments). The remake's 5.0.5 rating lacks the hot-seat factors; `rules-palm.js` has them |
+| Star count | worked out as in 5.0.5, then kept between **19 and 90** (5.0.5: 220) | CONFIRMED (`FUN_000232e6`) |
+| Layouts | 5.0.5's seven shapes (`FUN_000240aa` Circle, `FUN_0002472c` Spiral, `FUN_00024f04` Cluster, `FUN_000243c2` Ring, `FUN_00025360` Grid, `FUN_00023e66` Random, `FUN_0002552e` Hex) | CONFIRMED |
+| Alliances, Luck in Battles | no check boxes (tFRM 1200 has only Best Buddies); the options keep the default 0x17 (bit 1 alliances, 2 novas, 4 luck, 0x10 humans start allied); Best Buddies is 0x20 | CONFIRMED (`FUN_0003825a`, `FUN_0002b274`) |
+| Number of computers | 1 to the rank's limit; no "Any (1-8)" | CONFIRMED (`FUN_00038e72`) |
+| Other settings and defaults | as 5.0.5 (4 computers, Circle, size 20, density 10, IQ 70, 10 years) | CONFIRMED (`FUN_0002b274`) |
+| Locking settings by rank | as 5.0.5 | CONFIRMED; not done (as for 5.0.5) |
+| Starting money, metal, population, technology, ships, designs, borrowing limit | as 5.0.5 | CONFIRMED (`FUN_00026304`) |
+| Starting shares | the creator's from the preferences (above) | CONFIRMED (`FUN_000395a6`) |
+| Computer skill and personalities | as 5.0.5 | CONFIRMED (`FUN_00026304`, `FUN_0002746e`) |
+| Computer names | each computer's sex drawn (rand(1, 2)), no two names the same; up to five star names you chose at a new rank put in the galaxy | CONFIRMED (`FUN_000692c4`); the chosen names not |
+| Difficulty rating | 5.0.5's formula; at a win × 0.97 per human after the first, × 0.95 per human who surrendered to a human (game +0x1a9, `FUN_00051b2c`), + 1 per human winner after the first, − 1 per human who didn't win; 0 when game +0x1d0 is set | CONFIRMED (`FUN_0002a96c`, `FUN_00058bee`) |
 
-### Randomness
-
-| What | Palm 1.0.4 | Status |
-|---|---|---|
-| Random numbers | `Random(lo, hi)` = lo + next() mod (hi − lo + 1), where next() reads the next of 5,000 long words from resource `RAND 1000`, wrapping from 4999 back to 1. A new game starts at (seed mod 5000); the position is saved with the game | CONFIRMED (`FUN_00029abc`, `FUN_0002c34a`, `FUN_000232e6`, the turn routine) |
-| The remake | keeps its own random numbers, as for 5.0.5 | (no change) |
-
-`SysRandom` is used once, for something cosmetic (`FUN_00029b08`).
-
-### Everything else
-
-Money, interest, colony support, global warming, terraforming (√(⅔ × money), refund
-3/2 d²), mining (20 × √money), population growth, income
-(pop × max(1, ln √pop) ÷ 76 − (7,500 + pop × (100 + H ÷ 40) ÷ 10,000)), research
-(0.8 × √(money ÷ 150), Range L^2.5 ÷ 3), the radical hand of four and its odds
-(7, 5, 7, 4 … 5, the same table), novas (from 2750, 1 in 99, 6% miracle), supernova
-shock waves, Armageddon, battles (the hit table, one planet shot per 200,000 people),
-debris, scrapping, tankers, biologicals, the win check and master points
-(3^((difficulty − 30) ÷ 10), at most 10,000,000): all CONFIRMED the same as 5.0.5 in the
-routines listed above.
-
-### Not rules, but different
+## Randomness
 
 | What | Palm 1.0.4 | Status |
 |---|---|---|
-| Report pictures | the same table as 5.0.5 (`FUN_000292f8`), except report 1159 (the "Palm OS version by…" credit) gets picture 9051. Player pictures are the player's hat | CONFIRMED |
-| Hot seat | a Players form (tFRM 1300) to add humans and pass the handheld | the remake's own hot seat |
-| Demo mode | an unregistered copy plays only a small galaxy against three computers (shape 2, IQ 70) and caps technology | NOT IMPLEMENTED (nothing to register) |
-| Ship pictures | no parts sheet: whole pictures and three parts per ship (below) | for the skin |
+| Random numbers | `Random(lo, hi)` = lo + next() mod (hi − lo + 1), next() the next of 5,000 long words of resource `RAND 1000`; a new game starts at (seed mod 5000); the position is saved with the game | CONFIRMED (`FUN_00029abc`); the remake keeps its own |
+| SysRandom | the hints and the Message History's Evacuate jokes | CONFIRMED (`FUN_00029b08`) |
 
 ## Computer players (`js/ai-palm.js`)
 
-The computer turn is `FUN_00060178` (5.0.5 `FUN_10081cc0`): the same 21 steps in the same
-order, each step's Palm routine read beside its 5.0.5 twin and found the same (the
-4-byte-shifted record offsets apart; the Palm decompile drops some call arguments, which
-were read in the disassembly). `js/ai-original.js`, the remake's 5.0.5 computers, is an
-earlier and looser reading of this code, so the Palm computers are a fresh port of the
-Palm routines, not built on it. Everything below is CONFIRMED in the routine named.
+The computer turn is `FUN_00060178` (5.0.5 `FUN_10081cc0`); its 45 routines are 5.0.5's
+45 in the same order (`docs/coverage-palm.md` pairs them). Every random draw in the 26
+routines of the turn has the same range in the same place. So `js/ai-palm.js` registers
+the 5.0.5 port of `js/ai-original.js` for the Palm ruleset. It replaces an earlier,
+separate port of the Palm routines, which differed from `js/ai-original.js` in a few
+places; in each, the Palm code sides with `js/ai-original.js`:
 
-| Step | Palm | 5.0.5 | What it does |
-|---|---|---|---|
-| 1 | `FUN_00067ebe` | `FUN_10088eb0` | fleets of several types at a star are split into one fleet per type (not satellites, or warships with tankers) |
-| 2 | `FUN_000654e6`, `FUN_00065a46` | `FUN_10086830`, `FUN_10086d90` | obsolescence (Range × 5, Speed × 15, Weapons × 15, Shields × 10, Mini × 10, with the Scout/Tanker/Colony/Satellite exceptions); types with no ships, or 10 Weapons levels behind, are retired if behind your tech; a new type when the best has reached its kind's redesign mark (30/60/30/60/60/20) and there are fewer than **24**; room is kept for 6 new types; Average and up pay no development cost for their own types |
-| 3 | `FUN_00064bd8` | `FUN_10085f60` | metal for defence −5 a turn (1–80; raiders 1–50; turtles never), colonies the income supports, the reserve, total metal, broke, defence and attack metal (spare metal less 5,000 with no colony ship, else less the colony ships' metal), surrender after 2500, **"I need metal."** (after 2500, under 10,000 metal) and **"I need money."** (after 2400, the poorest by over $2,000) to each ally one time in 20, the middle of your colonies (summed in 16 bits) |
-| 4 | `FUN_000672b8` | `FUN_10088460` | the star classes 0–10 (a best buddy's colony counts as class 6); **Diabolical computers see every star within 8 ly of home before 2020**; threats from the battle estimates in your star records; old news fades |
-| 5 | `FUN_00067fd6` | `FUN_10088fd0` | colony ships heading for a star now unsafe stop; moving fleets are busy |
-| 6–8 | `FUN_00065b5e`, `FUN_00065d16`, `FUN_00065f30` | `FUN_10086f20`, `FUN_100870a0`, `FUN_100872a0` | obsolete satellites scrapped; obsolete ships (and **every computer's tankers**) go home to be scrapped (passing the fleet's list number as its Range, a slip kept); stranded warships of 5 or more ask for a colony where they are (priority 58/78/98); biologicals go back to a colony |
-| 9 | `FUN_000661fa`, `FUN_00066eb0` | `FUN_10087530`, `FUN_10087f80` | last turn's reports: Range 16 and Mini levels move research to Weapons and Shields, Weapons levels raise the planet part of the estimates; curses and "I hate %s." when a colony is destroyed, "Sorry!" after an easy win, "Thank You!" for gifts, the planet-preference exchange, alliances made and broken; after 2500 the richest is liked less; dislike the friends of the disliked; ally at a feeling of 500. With three or more players, raising a feeling lowers it for the others by a sixth; **frozen in a Best Buddies game**. At most **3 messages a turn** (`FUN_00066fdc`) |
-| 10–16 | `FUN_00060506`, `FUN_0006053a`, `FUN_00060e76`, `FUN_000611f4`, `FUN_00061796`, `FUN_00060c9c`, `FUN_000620b6` | `FUN_10081fa0` … `FUN_100839a0` | the action list (at most 50, by priority): research 90; mining 75/30; abandoning colonies beyond the income (offered with "You take %s." to an ally who likes the planet); exploring 86/55/54; attacking 35 + 5 × aggressiveness, targets scored (a random start, ties to the first) with the richest *other* player +25; colonizing (+38 or +77); terraforming 70/80 ($3,000 / $10,000 / $15,000, Dumb the whole job); satellites 60 (the threat ÷ 100 × defence %), scrapping unthreatened ones 10 |
-| 17 | `FUN_000626d8` and the routines it calls | `FUN_10083e30` … | the actions in order; ships are bought from Ship Savings above the reserve, never past the borrowing limit, one thousand people a ship at the colony this turn, development costs for Dumb and Average (their starting types); a failed purchase stops ship buying for the turn and scraps idle ships for a colony ship's metal; with under 5,000 metal and no colony ship only colony ships are bought; attacks use a fleet strong enough, else biologicals late in the game, one dreadnought (with a tanker over 10,000 metal) or a wing of fighters (tankers for big wings) |
-| 18–19 | `FUN_00062cba`, `FUN_00062f2c` | `FUN_100843b0`, `FUN_100845f0` | Smart and up: idle warships with tankers add a target in Range as a stop; Diabolical with more than 10 years a turn: a second stop |
-| 20 | `FUN_0006455e` | `FUN_10085900` | idle fleets that have used fuel go home from danger; colony ships bound for an enemy star stop |
-| 21 | `FUN_00064866` | `FUN_10085bd0` | the budget bars, per mille rounded up |
+- a fleet split off at a star starts with a full tank, a Biological's empty
+  (`FUN_0004adc0`, 5.0.5 `FUN_1007bcb0`);
+- the satellites counted for a colony's defence leave out satellite fleets already
+  given something to do (fleet +0x73, `FUN_0004d89e`, 5.0.5 `FUN_1007e380`);
+- terraforming is wished for at each colony of class 9 or 10 whose Terraform bar isn't
+  done, with no other test (`FUN_00060c9c`, 5.0.5 `FUN_10082690`);
+- the year tests use the coming year (`FUN_000500d4` adds 10 before pass 1);
+- a Tanker's route goes through stars whose record is of this year (`FUN_0004c22c`).
 
-Routes: fleets are sent with DeterminePath (`FUN_0004c22c`, 5.0.5 `FUN_1007d260`), which
-goes straight within the fuel left, else through colonies of yours and your best
-buddies' (any star seen this turn for a fleet with a tanker), at most 7 hops, shorter
-than three times the straight line.
+The steps: 1 `FUN_00067ebe`; 2 `FUN_000654e6`, `FUN_00065a46`; 3 `FUN_00064bd8`; 4
+`FUN_000672b8`; 5 `FUN_00067fd6`; 6-8 `FUN_00065b5e`, `FUN_00065d16`, `FUN_00065f30`; 9
+`FUN_000661fa`, `FUN_00066eb0`; 10-16 `FUN_00060506` research, `FUN_0006053a` colony
+support, `FUN_00060c9c` terraforming, `FUN_00060e76` exploring, `FUN_000611f4` attacks,
+`FUN_00061796` colonizing, `FUN_000620b6` satellites; 17 `FUN_000626d8`; 18-19
+`FUN_00062cba`, `FUN_00062f2c`; 20 `FUN_0006455e`; 21 `FUN_00064866`.
 
-Personalities (`FUN_0002746e`, 5.0.5 `FUN_100704d0`): the 5.0.5 ranges, value for value.
-Of the computers (numbered after the humans), every 4th from the 4th is the **turtle
-(style 2**: defence 100 %, metal for defence 90 %, attack domination 1,000 %,
-aggressiveness 1) and every 4th from the 3rd the **raider (style 3**: aggressiveness 10,
-fleets of 25–30), Smart and Diabolical only; with density over 50 their Range research
-is raised by 80. Diabolical computers start at −50–0 toward humans and 350–450 toward
-computers.
+## Found for 5.0.5
 
-**`js/ai-original.js` (5.0.5)** used to be a looser reading of this code; it has since
-been ported again from the 5.0.5 decompile itself (routes, star-record estimates, the
-ship-type rules, tanker retirement, chained stops, 5.0.5's own buying; see
-docs/original-findings.md, "Computer players"). The two ports are separate code. Two
-places where the 5.0.5 code was read to differ from this port (not checked in the
-Palm code): a fleet split off in step 1 starts with a full tank (`FUN_1007bcb0`), and
-the satellites counted for a colony's defence leave out satellite fleets already given
-something to do (`FUN_1007e380`).
+Reading the Palm code beside 5.0.5's turned up three places where `js/rules-original.js`
+differs from both programs:
+
+1. **The growth-slowed report** ("%s's population growth rate has slowed.", 0x408) is
+   sent only in the branch for a colony earning −7,499 or more (`FUN_10077200`; Palm
+   `FUN_00054d94`); the remake sent it for new colonies too. Fixed in `income505` (both
+   rulesets; it doesn't change the games' course).
+2. **An Abundant start** (`FUN_1006f640` @slot 3; Palm `FUN_00026304`): the second
+   colony takes the third slot of the colony list and the home's record, copied to the
+   fourth, gets 50 per mille, so the shares are 650 + 250 + 50 + 50 = 1,000, not 1,050
+   with the home third. And the human creating a game gets the preferences' shares
+   (`FUN_1006579c`; defaults in `FUN_10072490`: research 180 × 5 and Radical 100, budget
+   650 / 250 / 100, Abundant 550 / 200 / 150 / 100). The Palm ruleset does both; the 5.0.5
+   ruleset is left as it was (for the 5.0.5 owner to decide).
+3. **The Radical Research window** (`FUN_1005f280`, dialog 0x99; Palm tFRM 3000): with
+   a full hand, the player may cancel one radical program. `docs/coverage-505.md` lists
+   the routine as a report list; it is a rule-touching window. Not in either ruleset.
+
+Also, the research shares (player +0x80) are per mille as they stand; the skin's
+Technology bars store them as fractions of 1 once drawn, which made `research505` give a
+human almost nothing. `research505` now reads fractions as per mille (a total of 2 or
+less); computer players' shares are per mille, so the test games don't change.
 
 ## Pictures (for a Palm skin)
 
@@ -236,67 +303,20 @@ Ring, Grid, Random, Hex; `FUN_00070938`, `FUN_00070a86`); 3300–3302 the list m
 won and lost pictures (`FUN_00071acc`…); 1170–1173 scroll arrows; 1007 the splash
 screen.
 
+
 ## Changes to the shared code
 
-- `rules-original.js`: `makeGalaxy()` takes an optional fourth argument, a lower cap on
-  the star count. 5.0.5 passes nothing and keeps its 220.
-- `engine.js` loads `js/ai-palm.js` under Node, and `index.html` lists it. No other
-  ruleset changes (their test games are the same, byte for byte).
+- `js/rules-original.js`: `is505(G)` is the ruleset flag `turn505` (not enumerable on the
+  5.0.5 ruleset, set by the Palm ruleset); `income505` sends 0x408 only for established
+  colonies; `research505` reads research shares kept as fractions. `makeGalaxy()` takes
+  an optional cap on the star count (from before).
+- `js/skins/classic/ui.js`: `rs.hintTexts`, a version's own hints, one every turn
+  (README hook list).
+- The 5.0.5, 1.2, 2.0, 3.0.1, 4.0.5 and Claude test games are the same, byte for byte.
 
-## Inherited rules audit
+## Still open
 
-Every rule the Palm ruleset takes from `rules-original.js` (5.0.5) or the engine, checked
-against the Palm code. "Same" means the Palm routine was read and does what the remake
-does; "Palm's own" means it differed and `rules-palm.js` / `ai-palm.js` now do the Palm
-thing. The economy, research, events and movement rows rest on the routine-by-routine
-comparison above (each Palm routine's formulas and constants against the remake's);
-the computers, the battles, the type limits, the win check and the difficulty rating
-were read in full for this audit.
-
-| Rule | From | Palm | Result |
-|---|---|---|---|
-| Computer players and personalities | `ai-original.js` | segment 6, `FUN_0002746e` | Palm's own (`js/ai-palm.js`, above) |
-| Computers' development costs | 5.0.5 `paysPrototype` | `FUN_00063e62`, `FUN_000654e6` | Palm's own: Dumb and Average pay for types never built, except Average's own new types |
-| Star count, layouts | 5.0.5 `makeGalaxy` | `FUN_000232e6` and the shape routines | Palm's own cap of 90 (above) |
-| Star stats, home systems, starting conditions, computer skill from IQ | 5.0.5 | `FUN_00025f4a`, `FUN_00026304` | same |
-| Alliances and luck options | engine | tFRM 1200, `FUN_0002b274` | Palm's own: always on |
-| Best Buddies start | 5.0.5 `afterSetup` | `FUN_000232e6` | same (and feelings then frozen, in `ai-palm.js`) |
-| Years per turn; computers plan on the first 10-year step | engine | `FUN_000500d4` | same |
-| Interest and debt, global warming, the fleet scrapped for lack of funds | 5.0.5 `economy` | `FUN_00050ed4`, `FUN_00029b40` | same |
-| Colony support | 5.0.5 `economy` | `FUN_00051184` | same |
-| Terraforming (√(⅔ money), refund 3/2 d²) and mining (20 √money) | 5.0.5 `economy` | `FUN_00051446`, `FUN_0002a5e2`, `FUN_0002a6bc` | same |
-| Research (0.8 √(money ÷ 150), level costs) | 5.0.5 `research` | `FUN_00052832` | same |
-| Radical discoveries, the hand of four and its odds | 5.0.5 `radical` | `FUN_0005730c`, `FUN_00058016` | same (the free designs and monster need fewer than 24 types, `FUN_0005730c`) |
-| Dismantling: scrap returns 3/4 (7/8) to humans, all to computers | 5.0.5 `scrapReturn` | `FUN_00051dd0` | same |
-| Retiring unused types beyond 17 | 5.0.5 does it too (`FUN_10074580`), now in `rules-original.js` for the 5.0.5 ruleset | `FUN_00051dd0` | same (`rules-palm.js` keeps its own copy) |
-| Design limit | 5.0.5 `maxDesigns` 24 | `FUN_00043754`, `FUN_000654e6` | same: 24 |
-| Movement, fuel, waiting to refuel, wormholes | engine, 5.0.5 `fleetArrives` | `FUN_00053702` | same |
-| Routes for humans' fleets | engine (direct moves; waypoints by hand) | DeterminePath `FUN_0004c22c` | the computers use it (`ai-palm.js`); humans set stops by hand as for 5.0.5 (interface) |
-| Battles: luck, stances, hit table, damage, targets, initiative, shots, debris, late arrivals | 5.0.5 `battle` | `FUN_0002010e`, `FUN_00020736`, `FUN_00020cc8`, `FUN_00020f0a`, `FUN_00020bb8`, `FUN_0002144e` (read in full) | same |
-| Battles: group order, which fleets keep the survivors, debris to the first side standing (5/4 with recycling) | 5.0.5 `battle` | `FUN_00020cc8`, `FUN_00021370`, `FUN_00021960` | Palm's own (`rules-palm.js`) |
-| What a battle teaches, the computers' feelings and defence after it | engine `battleNews`, `ai-original` `noteBattle` | `FUN_00021960`, `FUN_000212c6` … `FUN_00021370` | Palm's own (star-record estimates, feelings −30…−10 / −100…−50 / −200…−100, defence +10 / +5) |
-| Battles as one report per star (the Palm game reports the late arrivals' second exchange as a second battle) | engine | `FUN_0002010e` (two passes) | accepted (interface) |
-| Population growth, income, maximum population, meteors | 5.0.5 `afterMovement` | `FUN_00054d94` | same |
-| Tankers and biologicals refuelling | 5.0.5 `refuel` | `FUN_00055844` | same |
-| Novas, supernovas and their shock waves, Armageddon | 5.0.5 `randomEvents` | `FUN_00054296`, `FUN_00054498`, `FUN_00054832` | same |
-| Colonizing, exploring, star rating | engine, 5.0.5 `settle`, `exploreQuality` | `FUN_00055844`, `FUN_00033ece` | same |
-| Gifts, alliance news, best buddies sharing maps, surrender | engine | `FUN_00051b2c` and the turn routine | same |
-| Who is out | engine `checkElimination` | `FUN_000586fc` (the elimination notices; the out flag is set elsewhere) | same in outline: no colony and no colony ship |
-| Who has won | engine `checkElimination` | `FUN_000586fc` | Palm's own: two or more surviving humans must hold the alliance a turn (6020.129); checked after 2000 |
-| Difficulty rating, master points | 5.0.5 `difficulty`, `masterPoints` | `FUN_0002a96c`, `FUN_00058bee`, `FUN_0002a844` | rating Palm's own (hot-seat factors); master points same |
-
-## Still unclear
-
-- The 9th value DeterminePath reads beyond its 8 arguments (a cap on the hops) is
-  whatever lies on the caller's stack; the remake takes it as no cap.
-- A fleet with a tanker routes through "stars seen this year"; the remake takes stars
-  observed in the last turn (GUESS).
-- Where the computers note another player's planet preference ("I like planets that
-  are …"); the remake notes it when the message arrives (GUESS).
-- The order of colonies won in the same turn in the colony list (it only breaks ties);
-  the remake takes star order.
-- At a win, the number of human winners for the difficulty rating is not passed by the
-  remake's interface; one is assumed.
-- What the second date in a star record (+0xC) means is now settled: the year a battle
-  was last seen there. Unexplored stars with such a date are class 3 for the computers
-  (and show picture 2708 on the map).
+`docs/open-questions.md` (Palm) has the questions for the developers. In short: the
+debris lost when every side is beaten, the Message History's Evacuate keeping 5.0.5's
+one-in-three, the Abundant shares, and the unused report 0x475 ("%s has just taken over
+for the computer player %s.").

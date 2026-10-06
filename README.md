@@ -52,6 +52,9 @@ Optional ruleset flags the skin reads (each is documented where it is read):
   (`js/skins/classic/ui.js`, `dragBudget`)
 - `rs.hints`: `false` when the version had no between-turn hints (1.2, 2.0, 3.0.1); the
   hints choice in Preferences is then left out. (`js/skins/classic/ui.js`, `addTurnNotes`, `openPrefs`)
+- `rs.hintTexts`: a version's own between-turn hints, one shown every turn, picked by the
+  browser's random numbers (the Palm OS rules: tSTL 6021.4-43). Left out: 5.0.5's hints, one
+  every seven turns. (`js/skins/classic/ui.js`, `addTurnNotes`)
 - `rs.celsius`: `true` when the version showed temperatures only in °C, to a tenth (1.2,
   the French edition); Preferences then shows °C as fixed. (`js/skins/classic/ui.js`, `degF`)
 - `rs.bestBuddies`: `false` when the version had alliances but no best-buddy pacts (3.0.1);

@@ -547,6 +547,103 @@ These are what 5.0.5's code does and what the remake now does; they look like sl
 
 ## Palm 5 (2003)
 
-To be done in turn. Already noted: when every side at a star is beaten, the battle's
-debris is lost (`FUN_00021960` pays it only to a side left standing); the ruleset puts
-it on the planet.
+All 1,041 routines of the program are accounted for (`docs/coverage-palm.md`; none
+unread), and every rule question was answered from the Palm program's own code, with
+its address in `docs/palm-findings.md`. The Palm End Turn and computers are 5.0.5's,
+recompiled (each routine read beside its 5.0.5 twin; the same random draws in all 74
+pairs checked), so the ruleset uses the 5.0.5 rules and computers wherever the Palm code
+does the same, and its own code where it doesn't. No fallback to 5.0.5 was needed.
+
+The questions noted here or in `docs/palm-findings.md` before are settled in the code:
+
+1. When every side at a star is beaten, the battle's debris is lost (`FUN_00021960`
+   pays it only to a side left standing). Done (the ruleset used to put it on the
+   planet).
+2. DeterminePath's ninth argument, the cap on the hops, is 7 from every caller (for
+   example `PEA 7` at 0x6357e before the call). Done.
+3. A fleet with a Tanker routes through stars whose record is of this year
+   (`FUN_0004c22c`), as 5.0.5. Done.
+4. The computers note another player's planet preference when "I like planets that
+   are ..." is delivered (`FUN_000500d4`, pass 2b, code 0x41a) and when they become
+   best buddies (`FUN_00053d74`). Done.
+5. The order of colonies won in the same turn: a new colony goes in front, the list is
+   sorted by income each turn (`FUN_00056d34`, `FUN_000583aa`). Done.
+6. The number of human winners for the difficulty rating is counted by `FUN_000322da`
+   (game +0x1a6); the remake passes what its interface knows (one human unless told).
+
+### Open
+
+None: the code settles every rule question met.
+
+### Settled, worth confirming
+
+These are what the Palm code does and what the remake now does; they look like slips.
+
+1. **Two Evacuate commands, two sets of jokes.** The Galaxy menu's Evacuate Planet
+   (`FUN_0003734e`) always answers a star named Kansas with "Dorothy, I guess that means
+   we're not in Kansas anymore", always asks for Hope, and asks "Abandon Ship? ..." for a
+   star named Ship; the Message History's Evacuate button (`FUN_00040232`) keeps 5.0.5's
+   one time in three for Kansas and Hope and has no Ship. The remake has the menu's.
+2. **The debris of a battle nobody wins is lost** (item 1 above), as in 5.0.5.
+3. **An Abundant start**: the second colony takes the third slot of the colony list and
+   the home the fourth, both at 50 per mille (`FUN_00026304`; 5.0.5 `FUN_1006f640` the
+   same), so the colonies losing money are paid second colony first on the first turn.
+   The creator's own shares come from the preferences (`FUN_000395a6`): 550 / 200 / 150
+   / 100 by slot, so the second colony gets 150 and the home 100.
+4. **Report 0x475** ("%s has just taken over for the computer player %s.", tSTL
+   6020.142) is never sent.
+5. **The hints** are drawn by the handheld's SysRandom, not the game's table, from 4 to
+   43 (the demo from 4 to 52, past the 51 strings).
+6. **5.0.5's slips, kept**: global warming never happens (`FUN_00050ed4`), shares are
+   used as they stand, dipping raises the borrowing limit, a failed purchase uses up a
+   building place (`FUN_0004d9d6`), a fizzled Armageddon tries again every turn,
+   milestones are chained, the Spiral look before 2100 (`FUN_00055844`), the warnings
+   every turn, computers' evacuations by mark, buying lowers this turn's interest. The
+   same as `docs/open-questions.md` (Mac 5.0.5), at the Palm addresses in
+   `docs/coverage-palm.md`.
+7. **"%s is cheating"** (0x41d) from a checksum of the player record (`FUN_00058cf6`):
+   anti-cheat, not a rule, not in the remake.
+
+### Remake's choices
+
+1. **Random numbers** are the remake's own (Palm: resource `RAND 1000`, `FUN_00029abc`).
+   The Palm novas draw rand(1, 11) before rand(1, 9) (5.0.5 the other way); with the
+   remake's numbers this changes nothing.
+2. **When the computers plan and fleets move**: for every player at once, as for 5.0.5.
+3. **Dragging a budget bar** works it out once, from where the drag began
+   (`FUN_00049496` does it at every pen move).
+4. **A failed purchase** doesn't use up a building place.
+5. **Gifts**: the sender hears at once (Palm: in pass 2b, 0x44e/0x44f).
+6. **Master points**: the cap is worked out at the win (Palm notes it at the new game,
+   `FUN_000395a6`); the same with one human.
+7. **Several humans** play hot seat with the remake's own cover screen (Palm: the
+   Players window, tFRM 1300).
+8. **Every game starts from the default shares**: the Palm game keeps your first turn's
+   research and budget shares as the next game's (`FUN_0002d91c`).
+9. **Sounds**: the skin's own (Palm: a handful of system sounds, `FUN_0002c17e`).
+
+### Interface not done
+
+- **The Radical Research window** (tFRM 3000, `FUN_00041aa4`, `FUN_00075dba`-
+  `FUN_00075ff0`): with a full hand, tapping the "hard at work on another discovery"
+  report or the Radical bar lets you cancel one program. (5.0.5 has it too,
+  `FUN_1005f280`.)
+- **The auto play settings** (tFRM 1700, `FUN_000713be`): Friendly and Dig In sliders,
+  "Just End My Turns" or "Have Computer Play For Me", turn off when something interesting
+  happens.
+- **Build Ships' Allow Debt box** (`FUN_0004435a`) and the questions before building more
+  than 9 Scouts or Tankers (`FUN_00043754`, tSTL 6004.36-37).
+- **The research bars** dragged per mille like the budget bars (`FUN_00049496`), and
+  tapping the Savings bar while dipping to open Dip Into Savings.
+- **The Message History's Evacuate button** (`FUN_00040232`).
+- **Naming a star at a new rank** (tFRM 2900) for later galaxies (`FUN_000692c4` puts up to
+  five of them in).
+- **The canned-message window** (tFRM 2600: Thank You, Sorry, the curse); the remake's
+  messages are free text.
+- **Options locked by rank** (`FUN_0003825a`), left open on purpose.
+- **The Palm report texts** where they differ from 5.0.5's (the decoy discovery: "Your
+  ship technicians have designed a decoy ship. It's really weak, but it looks menacing
+  and can help keep your allies in line!"; the miracle: "Your scientist have figured out
+  how to prevent %s ..."; money without "$"); the remake shows 5.0.5's.
+- **The demo** (three computers, a small galaxy, capped technology, report 0x474) and
+  registration: nothing to register.

@@ -389,4 +389,55 @@ lobby with a turn time limit, and an e-mail bug reporter.
 
 ## Palm 5 (2003)
 
-To be written in turn.
+### What it is
+
+Spaceward Ho! 5 for Palm OS (MobileFreon, 2003; version 1.0.4) is a port of the Mac
+5.0 to Palm handhelds, written in C++ with Metrowerks CodeWarrior for the 68000 and
+Palm OS 3.5 or later. Its game is 5.0's, recompiled: the End Turn, the battles, the
+galaxy set-up and the computer players are 5.0.5's routines in the same order, with the
+same constants and the same slips. What is new is the handheld: its own windows, a
+smaller galaxy, a demo, hot-seat players on one handheld, and a few jokes. Everything
+below is from the code (`docs/coverage-palm.md`, `docs/palm-findings.md`; 5.0.5:
+`docs/coverage-505.md`, `docs/original-findings.md`).
+
+### Rules: what stayed
+
+Every 5.0.5 routine of the turn has its Palm twin doing the same: the turn's passes
+(`FUN_000500d4` as `FUN_10072a10`), interest and its slip (`FUN_00050ed4`), colony
+support, terraforming and mining, research, dismantling by marks and the retiring of
+types over 17, moving and waiting, RestoreStarsBars and the other bar routines,
+Armageddon, novas and supernovas, income and growth with the dip, refuelling,
+colonizing and exploring (the Valdez, the Spiral look), the allies' arrivals, best
+buddies' maps, surrenders, big battles, milestones, the end of a player, pact news, the
+design and colony lists, the radical hand, the winner and master points
+(`docs/palm-findings.md` pairs them). The battles (`FUN_0002010e` as `FUN_1007e870`:
+two passes for late arrivals, sides in viewing order, the reports, the debris), the
+galaxy shapes, the starting conditions, ship costs, buying, the commands (Dismantle,
+Scrap Ship Types, Dip, Give, Surrender, Armageddon) and the bar drag are 5.0.5's.
+
+### Rules: what changed
+
+| Area | 5.0.5 | Palm 1.0.4 |
+|---|---|---|
+| Galaxy | 19 to 220 stars | 19 to 90 (`FUN_000232e6`), so galaxies above about size 36 come out smaller |
+| New Game options | Alliances, Luck in Battles and Best Buddies check boxes, "Any (1-8)" computers | only Best Buddies; alliances, luck and novas always on (options 0x17); no "Any" (tFRM 1200, `FUN_00038e72`) |
+| Evacuate Planet | Kansas and Hope one time in three, names that begin so | Kansas always, Hope always asks, and "Abandon Ship? ..." for a star named Ship, whole names (`FUN_0003734e`); the Message History's button keeps 5.0.5's (`FUN_00040232`) |
+| Star names | 255, with Antares | Courasant instead of Antares (tSTL 6060); up to five names you chose at a new rank (`FUN_000692c4`) |
+| Hints | STR# 6021 | tSTL 6021, its own 40 (and the demo's), one every turn |
+| Difficulty rating | (as Palm) | the same formula; the hot-seat terms count humans on the handheld |
+| Report texts | | a few reworded (the decoy, the miracle), money without "$" |
+| Demo | a demo of 5.0.5 | three computers in a small galaxy, technology capped (report 0x474) |
+
+### Computer players
+
+The same: segment 6 is CComputerIntelligence, its 45 routines 5.0.5's 45 in order
+(`FUN_00060178` as `FUN_10081cc0`), with the same random draws.
+
+### Interface
+
+Palm OS forms instead of Mac windows: the Galaxy map with zoom levels and the hats of
+the colonies' owners, a Message History, Spending Levels (Tech and Planets pages of
+bars), Build Ships with an Allow Debt box, Organize Fleets, Enemies and Allies, Rank
+History, a Radical Research window, the Players window for hot seat, the New Game
+Wizard, Preferences (sound, Celsius, hints, best buddies' stars, auto-zoom), Auto Play,
+Find A Star, and system sounds instead of the Mac's. No network play.
