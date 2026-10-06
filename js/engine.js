@@ -46,8 +46,25 @@ const SHIP_TYPES = {
 const RULESETS = {}, AIS = {};
 function registerRules(name, rs) { RULESETS[name] = rs; rs.id = name; }
 function registerAI(name, ai) { AIS[name] = ai; }
-function rules(G) { return RULESETS[G && G.rules] || RULESETS.claude; }
-function aiOf(G) { const rs = rules(G); return AIS[rs.ai || rs.id] || AIS.claude; }
+// A game's ruleset and computer players. There is no fallback: a missing
+// game, an unknown ruleset id or a ruleset without its computer players is
+// an error (docs/fallbacks.md). With no game (the title screen, New Game) a
+// skin asks for a ruleset by id: rulesById(id), or HO.RULESETS[id].
+function rulesById(id) {
+  const rs = RULESETS[id];
+  if (!rs) throw new Error(`${id == null ? 'No ruleset was named' : `Unknown ruleset "${id}"`}. This remake has: ${Object.keys(RULESETS).join(', ')}.`);
+  return rs;
+}
+function rules(G) {
+  if (!G) throw new Error('rules(G) was asked for the ruleset with no game; with no game, name the ruleset (HO.rulesById)');
+  return RULESETS[G.rules] || rulesById(G.rules);
+}
+// every ruleset names its computer players (rs.ai)
+function aiOf(G) {
+  const rs = rules(G), ai = AIS[rs.ai];
+  if (!ai) throw new Error(`The "${rs.id}" ruleset's computer players ("${rs.ai}") aren't loaded`);
+  return ai;
+}
 function feature(G, name) { return !!(rules(G).features || {})[name]; }
 // The unofficial patch: fixes for a version's obvious bugs (docs/fixes.md).
 // A ruleset lists them as rs.fixes = [{ id, title, text }]; the player turns
@@ -311,8 +328,15 @@ function msgAll(G, text, opt) { for (const p of G.players) msg(G, p.id, text, op
 // 0..n-1 and computers come after them; G.cur is the human whose turn it is
 // (only the skin uses it, the game rules don't).
 const humans = (G) => G.players.filter(p => p.human);
-// a saved game from before hot seat kept one shared inbox
+// Save format history (upgradeSave):
+// - no G.rules: saves from before rulesets existed (before commit 0198d39,
+//   "Move the Claude rules and computer players out of the engine"), when
+//   the remake's own rules, now the 'claude' ruleset, were the only rules.
+//   Such a save is a Claude-rules game: a migration, not a fallback.
+// - G.inbox: one shared inbox, from before hot seat (each player's p.inbox).
+// A save naming a ruleset this remake doesn't have is an error (load throws).
 function upgradeSave(G) {
+  if (G.rules == null) G.rules = 'claude';
   if (G.inbox) { if (G.players[0] && !G.players[0].inbox) G.players[0].inbox = G.inbox; delete G.inbox; }
   if (G.cur == null) G.cur = 0;
   return G;
@@ -453,7 +477,7 @@ function shareMaps(G) {
 // ---------- galaxy creation ----------
 function newGame(opts) {
   const G = {
-    v: 1, rules: RULESETS[opts.rules] ? opts.rules : 'claude',
+    v: 1, rules: rulesById(opts.rules).id, // every new game names its rules
     rs: (opts.seed >>> 0) || ((Date.now() ^ 0x5eed) >>> 0), year: 2000, turn: 0, nextId: 1,
     opts, stat: { battles: 0, captures: 0, colonized: 0 }, stars: [], players: [], fleets: [], battles: [], cur: 0, over: false, winner: -1, log: [],
   };
@@ -578,6 +602,12 @@ function chooseHomes(G, k) {
 }
 
 // ---------- turn processing ----------
+// An exception is never caught here: it goes up to the caller (the skin
+// restores the game saved before End Turn and offers a bug report; the test
+// tools stop). during() only notes on it where it happened (e.hoWhere).
+function during(what, fn) {
+  try { return fn(); } catch (e) { if (e && typeof e === 'object' && !e.hoWhere) e.hoWhere = what; throw e; }
+}
 function endTurn(G) {
   if (G.over) return;
   for (const p of G.players) p.inbox = [];
@@ -594,8 +624,8 @@ function turnStep(G, first, last) {
   if (first) {
     // rs.outComputersPlay: a computer that is out of the game still gives its
     // leftover fleets orders (1.2)
-    for (const p of G.players) if ((p.alive || (rs.outComputersPlay && !G.over)) && !p.human) AI.turn(G, p);
-    for (const p of G.players) if (p.human && p.auto && p.alive) AI.turn(G, p);
+    for (const p of G.players) if ((p.alive || (rs.outComputersPlay && !G.over)) && !p.human) during(`the computer ${p.name}'s turn`, () => AI.turn(G, p));
+    for (const p of G.players) if (p.human && p.auto && p.alive) during(`${p.name}'s auto play`, () => AI.turn(G, p));
   }
   // a ruleset may handle surrender, alliances news and who is out itself (rs.processSurrenders, ...)
   if (feature(G, 'surrender')) (rs.processSurrenders || processSurrenders)(G);
@@ -852,11 +882,18 @@ function score(G, p) {
 
 // ---------- serialization ----------
 function save(G) { return JSON.stringify(G); }
-function load(str) { const G = JSON.parse(str); if (!G.rules) G.rules = 'claude'; return upgradeSave(G); }
+function load(str) {
+  const G = upgradeSave(JSON.parse(str));
+  if (!RULESETS[G.rules]) {
+    const e = new Error(`This saved game is played with the "${G.rules}" rules, which this version of the remake doesn't have.`);
+    e.hoSave = true; throw e;
+  }
+  return G;
+}
 
 const API = {
   DATA, SHIP_TYPES, TYPES: SHIP_TYPES, TECHS,
-  registerRules, registerAI, rules, aiOf, feature, RULESETS, fixes, fixed, patchVersion,
+  registerRules, registerAI, rules, rulesById, aiOf, feature, RULESETS, fixes, fixed, patchVersion,
   // [id, name] for the New Game window: the original games' rules by year of
   // release, then version ("2.0 (DOS and Windows 3.1, 1993)"); rulesets that
   // aren't an original game's (the remake's own) come last, by their label

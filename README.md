@@ -2,8 +2,8 @@
 
 A personal remake of Delta Tao's *Spaceward Ho!* 5.0.5 that runs in a browser, with the
 1993 DOS version (2.0) and the 1996 Windows 95 version (4.0.5) as extra rulesets and skins,
-an Amiga skin from the 1994 German Amiga version of 2.0, and a black-and-white skin from the
-1993 Mac version (3.0.1).
+an Amiga skin from the 1994 German Amiga version of 2.0, and skins from the Mac versions 1.2
+(1992, black and white), 3.0.1 (1993) and 4.0.5 (1996), both in black and white and in colour.
 
 ## Playing / publishing
 
@@ -161,6 +161,11 @@ Optional ruleset flags the skin reads (each is documented where it is read):
   and a Palm OS look (art in `assets/skins/palm/`, from `tools/extract/palm.py`)
 - `js/skins/mac12/` and `js/skins/mac3c/`: the Mac 1.2 (French, 1992, black and white) and
   Mac 3.0.1 colour skins, both the mac3 skin pointed at other pictures
+- `js/skins/mac4/` and `js/skins/mac4c/`: the Mac 4.0.5 skins (1996, black and white and
+  colour): the mac3 skin with 4.0's pictures and sounds (`assets/skins/mac4/`, `mac4c/`), its
+  title animation, its menus laid out as 4.0's MENU resources (the classic skin's
+  `T.menuLayout`, which moves and renames the remake's own menu items and never drops one) and
+  System 7 dialog frames, in their own section of `js/skins/mac4/style.css`
 - `js/skins/mac3/`: the "Mac 3.0.1 (black and white)" skin: the DOS skin with the 1993 Mac
   game's 1-bit pictures and sounds and a Mac Plus look (art in `assets/skins/mac3/`). The DOS
   game's pictures were made from this one's, with the same numbers
@@ -193,4 +198,5 @@ Optional ruleset flags the skin reads (each is documented where it is read):
   (`win95.py` for 4.0.5's `SPACEHO.EXE`; `hlp.py` converts old WinHelp files to the HTML manuals in `assets/manuals/`)
   (`amiga.py` for the Amiga version's packed `.pff` files; how they are packed is at the top of it)
   (`mac3.py` reads the Mac 3.0.1 floppy images directly, and its colour pictures floppy;
+  `mac4.py` reads 4.0.5's program and its "Ho! 4.0 Color Picts" file;
   `mac12.py` reads 1.2's resource fork as unar leaves it)

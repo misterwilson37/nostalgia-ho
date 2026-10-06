@@ -104,7 +104,7 @@ const el = (tag, attrs, ...kids) => {
   const e = document.createElement(tag);
   if (attrs) for (const k in attrs) {
     if (k === 'class') e.className = attrs[k];
-    else if (k.startsWith('on')) e.addEventListener(k.slice(2), attrs[k]);
+    else if (k.startsWith('on')) e.addEventListener(k.slice(2), guard(attrs[k])); // an exception: the bug report window
     else if (k === 'html') e.innerHTML = attrs[k];
     else if (attrs[k] !== false && attrs[k] != null) e.setAttribute(k, attrs[k]);
   }
@@ -195,6 +195,7 @@ const UI = {
   inbox: [], msgIdx: 0,
   drag: null, hover: null,
   dots: [],              // hit areas for fleet dots
+  bug: null, bugSeen: {}, // the bug report window (showBug), and how often each error came up
 };
 
 // ---------- ship pictures ----------
@@ -366,13 +367,13 @@ function setupMap() {
   cv = $('#map'); cx = cv.getContext('2d');
   for (let i = 0; i < 260; i++) bgStars.push({ x: Math.random(), y: Math.random(), b: Math.random() });
   new ResizeObserver(resize).observe(cv.parentElement);
-  cv.addEventListener('pointerdown', onDown);
-  cv.addEventListener('pointermove', onMove);
-  cv.addEventListener('pointerup', onUp);
-  cv.addEventListener('pointercancel', () => { UI.drag = null; draw(); });
-  cv.addEventListener('dblclick', onDbl);
-  cv.addEventListener('contextmenu', (e) => { if (!G) return; e.preventDefault(); const s = starAt(e.offsetX, e.offsetY); if (s != null) starMenu(s, e.clientX, e.clientY); });
-  cv.addEventListener('wheel', (e) => { e.preventDefault(); zoomAt(e.offsetX, e.offsetY, e.deltaY < 0 ? 1.15 : 1 / 1.15); }, { passive: false });
+  cv.addEventListener('pointerdown', guard(onDown)); // guard(): an exception shows the bug report window
+  cv.addEventListener('pointermove', guard(onMove));
+  cv.addEventListener('pointerup', guard(onUp));
+  cv.addEventListener('pointercancel', guard(() => { UI.drag = null; draw(); }));
+  cv.addEventListener('dblclick', guard(onDbl));
+  cv.addEventListener('contextmenu', guard((e) => { if (!G) return; e.preventDefault(); const s = starAt(e.offsetX, e.offsetY); if (s != null) starMenu(s, e.clientX, e.clientY); }));
+  cv.addEventListener('wheel', guard((e) => { e.preventDefault(); zoomAt(e.offsetX, e.offsetY, e.deltaY < 0 ? 1.15 : 1 / 1.15); }), { passive: false });
   resize();
 }
 function resize() {
@@ -706,9 +707,9 @@ function bar(label, val, max, onSet, opts) {
     fill.style.width = f * 100 + '%';
     onSet(f, false);
   };
-  track.addEventListener('pointerdown', (ev) => { track.setPointerCapture(ev.pointerId); set(ev); track._drag = true; });
-  track.addEventListener('pointermove', (ev) => { if (track._drag) set(ev); });
-  track.addEventListener('pointerup', (ev) => { track._drag = false; onSet(null, true); });
+  track.addEventListener('pointerdown', guard((ev) => { track.setPointerCapture(ev.pointerId); set(ev); track._drag = true; }));
+  track.addEventListener('pointermove', guard((ev) => { if (track._drag) set(ev); }));
+  track.addEventListener('pointerup', guard((ev) => { track._drag = false; onSet(null, true); }));
   track.addEventListener('keydown', (ev) => {
     if (ev.key !== 'ArrowLeft' && ev.key !== 'ArrowRight') return;
     ev.preventDefault();
@@ -1062,8 +1063,8 @@ function renderMsg() {
     body.append(extra, el('div', { class: 'count' }, `${UI.msgIdx + 1} of ${UI.inbox.length} · click to continue`));
     card.append(body);
     const next = () => { if (m.star != null) { UI.sel = m.star; renderPanel(); } UI.msgIdx++; Sound.play(7001); renderMsg(); draw(); };
-    card.addEventListener('click', next);
-    card.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); next(); } });
+    card.addEventListener('click', guard(next));
+    card.addEventListener('keydown', guard((e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); next(); } }));
     if (m.star != null) { UI.sel = m.star; if (modern()) centerOn(m.star); renderPanel(); draw(); }
     box.append(card);
     card.focus({ preventScroll: true });
@@ -1246,6 +1247,8 @@ function doEndTurn(confirmed) {
     if (starved.length && rs.underfunded) { confirmBox(`${starved.map(s => s.name).join(', ')} ${starved.length === 1 ? 'isn’t' : 'aren’t'} getting enough money to cover ${starved.length === 1 ? 'its' : 'their'} losses. Ending the turn will cost colonists, and a colony left with none is abandoned. Go ahead?`, () => doEndTurn(true)); return; }
     if (starved.length) { confirmBox(`You aren’t spending any money on ${starved.map(s => s.name).join(', ')}. Ending the turn will abandon ${starved.length === 1 ? 'it' : 'them'}. Go ahead?`, () => doEndTurn(true)); return; }
   }
+  // the game as it was: put back if the turn throws (playTurn)
+  const before = HO.save(G);
   // hot seat: the turn goes to the next human; the year moves on after the last one
   if (hotSeat()) {
     G.done = G.done || [];
@@ -1255,7 +1258,7 @@ function doEndTurn(confirmed) {
     if (next) { G.cur = next.id; save(); handOver(next); return; }
     G.done = [];
   }
-  HO.endTurn(G);
+  if (!playTurn('End Turn', before)) return;
   awardMasterPoints();
   recordHall();
   Sound.play(11111);
@@ -1331,6 +1334,103 @@ function confirmBox(text, yes) {
 function toast(t) {
   const d = el('div', { class: 'toast', role: 'status' }, t);
   document.body.append(d); setTimeout(() => d.remove(), 3600);
+}
+
+// ----- something went wrong: the bug report window -----
+// Every handler made with el() runs through guard(); End Turn and auto play
+// catch their own (playTurn); anything else that escapes reaches the window's
+// error event. Each shows this window in the skin's own look: an honest "this
+// version's code didn't plan for it, or the remake got it wrong", a
+// prefilled GitHub issue and the saved game to attach. window.HOBUGS keeps
+// what was shown (the test tools read it; it is also written to the console
+// as "[HO bug]").
+const BUG_REPO = 'https://github.com/misterwilson37/nostalgia-ho';
+window.HOBUGS = window.HOBUGS || [];
+function guard(fn, where) {
+  if (typeof fn !== 'function' || fn.hoGuarded) return fn;
+  const g = function (...a) { try { return fn.apply(this, a); } catch (e) { showBug(e, where); } };
+  g.hoGuarded = true;
+  return g;
+}
+function bugFacts() {
+  const id = rulesId(), rs = HO.RULESETS[id];
+  const ver = rs ? (rs.version ? `${rs.version} (${rs.platform}, ${rs.year})` : rs.label || id) : '(unknown)';
+  const patch = G ? (patchOn() ? `on (${HO.patchVersion(HO.rules(G))})` : 'off') : '(no game)';
+  return { id, ver, patch, skin: (window.HOSKINS && HOSKINS.current) || 'classic', year: G ? G.year : null, turn: G ? G.turn : null };
+}
+function bugReportUrl(e, where, f) {
+  const msg = String((e && e.message) || e);
+  const stack = String((e && e.stack) || '').split('\n').filter(l => l.trim() && !l.includes(msg)).slice(0, 8)
+    .map(l => l.replace(location.origin, '').trim()).join('\n');
+  const body = [
+    '**What happened**', '', '(What were you doing when it happened?)', '',
+    '**Error**', '', '```', `${where ? where + ': ' : ''}${msg}`, stack, '```', '',
+    '**Game**', '',
+    `- Rules: ${f.ver} — ruleset \`${f.id}\``,
+    `- Patch: ${f.patch}`,
+    `- Skin: ${f.skin}`,
+    f.year != null ? `- Year: ${f.year} (turn ${f.turn})` : '- No game in progress',
+    `- Browser: ${navigator.userAgent}`, '',
+    '**Saved game**', '', '(If you downloaded the saved game, drag the file in here.)',
+  ].join('\n');
+  const title = `[${f.id}] ${msg}`.slice(0, 120);
+  return `${BUG_REPO}/issues/new?title=${encodeURIComponent(title)}&body=${encodeURIComponent(body.slice(0, 6000))}`;
+}
+function downloadText(text, name) {
+  const url = URL.createObjectURL(new Blob([text], { type: 'application/json' }));
+  const a = el('a', { href: url, download: name });
+  document.body.append(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+}
+// o.save: the saved game to offer (default: the game as it is now);
+// o.restored: End Turn was undone; o.keep: the label of the closing button
+function showBug(e, where, o) {
+  o = o || {};
+  where = (e && e.hoWhere) || where || '';
+  const msg = String((e && e.message) || e);
+  console.error('[HO bug]', where ? where + ':' : '', e);
+  window.HOBUGS.push({ where, message: msg });
+  if (UI.bug) return; // one window at a time
+  // the same error over and over (drawn every frame, say): the window comes up three times at most
+  const n = UI.bugSeen[msg] = (UI.bugSeen[msg] || 0) + 1;
+  if (n > 3) { toast('The same thing went wrong again.'); return; }
+  if (!document.body) { window.addEventListener('DOMContentLoaded', () => showBug(e, where, o)); return; }
+  let f = null, saved = o.save;
+  try { f = bugFacts(); } catch (x) { f = { id: (G && G.rules) || '?', ver: '(unknown)', patch: '?', skin: '?', year: G ? G.year : null, turn: G ? G.turn : null }; }
+  if (saved == null && G) { try { saved = HO.save(G); } catch (x) {} }
+  const url = bugReportUrl(e, where, f);
+  const done = () => { UI.bug = null; closeModal(); };
+  const file = `spaceward-ho-${f.id}-${f.year != null ? f.year : 'save'}.json`;
+  const body = el('div', { class: 'about bugreport' },
+    el('p', null, 'Nice find! Something happened that this version’s code didn’t plan for, or that our remake got wrong. Want to send a bug report?'),
+    o.restored ? el('p', null, 'The turn didn’t go through: your game is just as it was before you ended the turn.') : null,
+    o.text ? el('p', null, o.text) : null,
+    el('p', { class: 'sub' }, saved ? 'The report opens a new issue on GitHub with the details filled in. The saved game helps us see it happen: download it, then drag the file into the report.' : 'The report opens a new issue on GitHub with the details filled in.'),
+    el('details', null, el('summary', null, 'What went wrong'),
+      el('pre', { style: 'white-space: pre-wrap; font-size: 11px; max-height: 9em; overflow: auto; margin: 4px 0' }, `${where ? where + ': ' : ''}${msg}\nRules: ${f.ver} · patch ${f.patch} · skin ${f.skin}${f.year != null ? ` · ${f.year}` : ''}`)),
+    el('div', { class: 'btns right' },
+      saved ? el('button', { type: 'button', class: 'quiet', onclick: () => downloadText(saved, file) }, 'Download the saved game') : null,
+      el('button', { type: 'button', class: 'quiet', onclick: done }, o.keep || 'Keep playing'),
+      el('button', { type: 'button', onclick: () => { window.open(url, '_blank', 'noopener'); done(); } }, 'Send bug report')));
+  modal('Something unexpected happened', body, { cls: 'mid', onClose: () => { UI.bug = null; } });
+  UI.bug = UI.modal;
+}
+// what escapes everything else (a timer, a listener not made with el())
+window.addEventListener('error', (ev) => {
+  if (!ev.error && /^Script error\.?$|ResizeObserver loop/.test(ev.message || '')) return;
+  showBug(ev.error || ev.message, '');
+});
+window.addEventListener('unhandledrejection', (ev) => showBug(ev.reason, ''));
+// End Turn (and auto play): the game saved just before is put back when the
+// turn throws, so a turn is never half played
+function playTurn(where, before) {
+  try { HO.endTurn(G); return true; } catch (e) {
+    G = HO.load(before); save();
+    if (UI.selFleet != null && !G.fleets.some(f => f.id === UI.selFleet)) UI.selFleet = null;
+    try { renderPanel(); draw(); renderMsg(); } catch (x) {}
+    showBug(e, where, { save: before, restored: true });
+    return false;
+  }
 }
 
 // ----- build ships -----
@@ -1777,7 +1877,10 @@ function runAutoPlay(o) {
   let n = 0;
   const step = () => {
     if (!G || G.over || n++ >= o.turns || UI.modal) { renderMsg(); return; }
-    me().auto = o.computer; HO.endTurn(G); me().auto = false; awardMasterPoints(o.computer); recordHall(); save();
+    const before = HO.save(G);
+    me().auto = o.computer;
+    if (!playTurn('Auto play', before)) return;
+    me().auto = false; awardMasterPoints(o.computer); recordHall(); save();
     renderPanel(); draw();
     const stop = me().inbox.some(m => (o.won && isBattleNews(m) && wonBattle(m)) || (o.lost && isBattleNews(m) && !wonBattle(m)) || (o.news && !m.quiet && !isBattleNews(m) && !m.chat));
     $('#title').textContent = `${me().name} in ${G.opts.galaxy || 'Milky Way'} in ${G.year}${titleTag()} (auto play)`;
@@ -1874,10 +1977,13 @@ function openPatchNotes() {
     el('div', { class: 'btns right' }, el('button', { onclick: closeModal }, 'OK')));
   modal(`${pv} patch notes (unofficial)`, body, { cls: 'mid' });
 }
-// the rules being played, or those chosen last in New Game
-const rulesId = () => G ? G.rules : ([localStorage.getItem('ho5.rules')].find(r => r && HO.RULESETS[r]) || HO.newestRules());
+// the rules being played, or with no game those chosen last in New Game
+// (the newest original's when none was, or the one chosen is gone): never a
+// silent fallback to another ruleset (docs/fallbacks.md)
+const chosenRules = () => { let r = null; try { r = localStorage.getItem('ho5.rules'); } catch (e) {} return r && HO.RULESETS[r] ? r : HO.newestRules(); };
+const rulesId = () => G ? G.rules : chosenRules();
 function openAbout() {
-  const id = rulesId(), rs = HO.RULESETS[id] || HO.rules(null), N = (window.HOVERSIONS || {})[id] || {};
+  const id = rulesId(), rs = HO.rulesById(id), N = (window.HOVERSIONS || {})[id] || {};
   const chk = N.checking || {};
   // a quirk the version's patch fixes says so: in a game with the patch on,
   // that this game has it fixed (the Patch notes say how); otherwise, which
@@ -1958,7 +2064,7 @@ function openSounds() {
 // ----- help -----
 // the manual for the rules being played (or last chosen on the New Game window)
 function manualFor() {
-  const M = window.HOMANUALS || {}, r = G ? G.rules : (localStorage.getItem('ho5.rules') || 'claude');
+  const M = window.HOMANUALS || {}, r = rulesId();
   return M[r] || M.original || ['assets/manuals/5.0.5/index.html', 'Spaceward Ho! 5 manual'];
 }
 function openHelp() {
@@ -2075,7 +2181,7 @@ function newGameDialog() {
     claudeBox, origBox, dosBox, w95Box, mac3Box, mac12Box,
     // last line: the rules, with the game difficulty rating beside them
     el('div', { class: 'lastrow' },
-      sel('rules', 'Rules', HO.ruleOptions(), [localStorage.getItem('ho5.rules')].find(r => r && HO.RULESETS[r]) || HO.newestRules()),
+      sel('rules', 'Rules', HO.ruleOptions(), chosenRules()),
       skins.length > 1 ? sel('skin', 'Skin', skins.map(k => [k.id, k.name]), window.HOSKINS.current) : null,
       el('div', { class: 'rating' }, el('span', null, 'Game difficulty rating'), rating)),
     el('fieldset', { class: 'opts' }, el('legend', null, 'Options'),
@@ -2091,7 +2197,8 @@ function newGameDialog() {
   const refresh = () => {
     const d = Object.fromEntries(new FormData(f).entries());
     const palm = d.rules === 'palm', orig = d.rules === 'original' || palm, dos = d.rules === 'dos', w95 = d.rules === '405', mac3 = d.rules === '301', mac12 = d.rules === '12';
-    claudeBox.hidden = orig || dos || w95 || mac3 || mac12; origBox.hidden = !orig; dosBox.hidden = !dos; w95Box.hidden = !w95; mac3Box.hidden = !mac3; mac12Box.hidden = !mac12; startSel.hidden = dos || w95 || mac3 || mac12;
+    // the Claude rules' own settings show only for them (not for any ruleset the window doesn't know)
+    claudeBox.hidden = d.rules !== 'claude'; origBox.hidden = !orig; dosBox.hidden = !dos; w95Box.hidden = !w95; mac3Box.hidden = !mac3; mac12Box.hidden = !mac12; startSel.hidden = dos || w95 || mac3 || mac12;
     // 1.2 fixes the computers (one) and has no women
     f.querySelector('select[name=computers]').closest('label').hidden = mac12;
     f.querySelector('select[name=female]').closest('label').hidden = mac12;
@@ -2149,7 +2256,10 @@ function newGameDialog() {
       G = HO.newGame(Object.assign(common, { start: d.m_skill, iq: d.m_iq, shape: d.m_shape, size: d.m_size, density: d.m_density, yearsPerTurn: +d.m_years, novas: true, luck: true }));
     } else if (d.rules === 'dos') {
       G = HO.newGame(Object.assign(common, { start: d.d_skill, iq: d.d_iq, size: d.d_size, shape: d.d_shape, density: d.d_density, novas: false, alliances: false, luck: false }));
-    } else G = HO.newGame(Object.assign(common, { iq: d.iq, cstart: d.cstart, shape: d.shape, size: d.size, density: d.density }));
+    } else if (d.rules === 'claude' || d.rules === '12') {
+      // (1.2 had no New Game window: its ruleset fixes every choice, rs.fixOptions)
+      G = HO.newGame(Object.assign(common, { iq: d.iq, cstart: d.cstart, shape: d.shape, size: d.size, density: d.density }));
+    } else throw new Error(`The New Game window has no settings for the "${d.rules}" rules`);
     if (d.skin && d.skin !== HOSKINS.current) { save(); HOSKINS.switchTo(d.skin); return; } // opens in the other skin
     closeModal(); hideTitle(); ME = 0;
     UI.sel = G.players[ME].homeStar; UI.selFleet = null; UI.fitted = false; fit();
@@ -2166,7 +2276,15 @@ function newGameDialog() {
 }
 // resumed: the game was just started (or saved) in another skin, so keep its messages
 function continueGame(resumed) {
-  try { G = HO.load(localStorage.getItem('ho5.save')); } catch (e) { toast('That saved game could not be read.'); return; }
+  // a save that can't be read (or names rules this remake doesn't have) is
+  // shown to the player, with the save to attach to a report
+  const raw = localStorage.getItem('ho5.save');
+  try { G = HO.load(raw); } catch (e) {
+    G = null;
+    showBug(e, 'Continue', { save: raw, keep: 'OK', text: e.hoSave ? e.message : 'The saved game could not be read.' });
+    if (resumed === true) titleScreen();
+    return;
+  }
   ME = G.cur || 0;
   // the game's sounds first, so its first message plays its own sound
   useSounds(soundsWanted(), () => {
@@ -2206,7 +2324,7 @@ function setupMenus() {
   const menu = (btn, items) => {
     const dd = el('div', { class: 'dropdown', role: 'menu' });
     btn.setAttribute('aria-haspopup', 'true'); btn.setAttribute('aria-expanded', 'false');
-    btn.addEventListener('click', (e) => {
+    btn.addEventListener('click', guard((e) => {
       e.stopPropagation();
       const open = dd.classList.contains('open');
       document.querySelectorAll('.dropdown.open').forEach(d => { d.classList.remove('open'); d.previousElementSibling.setAttribute('aria-expanded', 'false'); });
@@ -2226,13 +2344,44 @@ function setupMenus() {
       // a menu near the right edge opens leftward so it stays on screen
       dd.style.left = ''; dd.style.right = '';
       if (dd.getBoundingClientRect().right > window.innerWidth - 4) { dd.style.left = 'auto'; dd.style.right = '0'; }
-    });
+    }));
     return el('div', { class: 'menu' }, btn, dd);
   };
   const logo = $('#menubar .logo');
   if (logo) { const at = el('span'); logo.replaceWith(at); at.replaceWith(menu(logo, ho)); }
-  for (const name in menus) bar.append(menu(el('button', { class: 'mbtn' }, name), menus[name]));
+  const laid = T.menuLayout ? layoutMenus(menus, T.menuLayout) : menus;
+  for (const name in laid) bar.append(menu(el('button', { class: 'mbtn' }, name), laid[name]));
   document.addEventListener('click', () => document.querySelectorAll('.dropdown.open').forEach(d => { d.classList.remove('open'); d.previousElementSibling.setAttribute('aria-expanded', 'false'); }));
+}
+// A skin may lay these same items out as its original's menus did
+// (T.menuLayout, js/skins/mac4): { menu: [[label, 'Menu/label'], '-', …] },
+// where 'Menu/label' names an item above by its menu and label ('Menu/#n'
+// by its place, for items whose label changes), and label (null: keep it)
+// renames it; its rules (the feature that shows it, its check mark) stay.
+// [label, fn] is the skin's own item, for a control already on the page
+// (End Turn). Every item it leaves out goes at the end of its last menu, so
+// a skin can move and rename controls but never drop one.
+function layoutMenus(menus, layout) {
+  const out = {}, used = new Set();
+  const find = (ref) => {
+    const [m, k] = ref.split('/'), items = menus[m] || [];
+    const i = k[0] === '#' ? +k.slice(1) : items.findIndex(it => it[0] === k);
+    return items[i] ? [m + '#' + i, items[i]] : null;
+  };
+  for (const name in layout) {
+    out[name] = [];
+    for (const e of layout[name]) {
+      if (e === '-') { out[name].push(['-']); continue; }
+      if (typeof e[1] === 'function') { out[name].push(e); continue; }
+      const f = find(e[1]); if (!f) continue;
+      used.add(f[0]);
+      const it = f[1].slice(); if (e[0]) it[0] = e[0];
+      out[name].push(it);
+    }
+  }
+  const last = out[Object.keys(out).pop()];
+  for (const m in menus) menus[m].forEach((it, i) => { if (it[0] !== '-' && !used.has(m + '#' + i)) last.push(it); });
+  return out;
 }
 function nextFleet() {
   if (!G) return;
@@ -2246,7 +2395,7 @@ function nextFleet() {
 // Windows) or Amiga+Z; a browser keeps Ctrl+T and ⌘T for a new tab, so plain
 // T is the key here (Ctrl/⌘+T is tried too, where the browser lets it through).
 const END_KEY = () => `Keyboard: T${T.endTurnKey ? ` (in the original: ${T.endTurnKey}${/T$/.test(T.endTurnKey) ? ', which a browser keeps for opening a new tab' : ''})` : ''}`;
-document.addEventListener('keydown', (e) => {
+document.addEventListener('keydown', guard((e) => {
   if (UI.modal || !G) return;
   if (e.key === 'Tab' && e.target === document.body) { e.preventDefault(); nextFleet(); }
   const typing = /^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName);
@@ -2254,7 +2403,7 @@ document.addEventListener('keydown', (e) => {
     const btn = document.querySelector('#msg .clock');
     if (btn) { e.preventDefault(); btn.click(); }
   }
-});
+}));
 
 // ---------- hover help ----------
 // Anything with data-help="key" explains itself, in the words of the
@@ -2262,7 +2411,7 @@ document.addEventListener('keydown', (e) => {
 // keyboard focus, or on a long press on a touch screen.
 const Tip = { el: null, timer: 0, at: null };
 function tipShow(target) {
-  const k = target.dataset.help, R = (window.HOHELP_RULES || {})[G && G.rules] || {};
+  const k = target.dataset.help, R = (window.HOHELP_RULES || {})[rulesId()] || {};
   const h = R[k] || (window.HOHELP || {})[k];
   if (!h || !Prefs.tips) return;
   if (!Tip.el) { Tip.el = el('div', { class: 'tip', role: 'tooltip', id: 'hotip' }); document.body.append(Tip.el); }
@@ -2308,10 +2457,10 @@ window.addEventListener('DOMContentLoaded', () => {
   if (T.page) T.page(document);
   Object.assign(HO.DATA, window.HODATA);
   setupMenus();
-  $('#tnew').addEventListener('click', newGameDialog);
-  $('#tcont').addEventListener('click', () => continueGame());
-  $('#thelp').addEventListener('click', openHelp);
+  $('#tnew').addEventListener('click', guard(newGameDialog));
+  $('#tcont').addEventListener('click', guard(() => continueGame()));
+  $('#thelp').addEventListener('click', guard(openHelp));
   const resume = window.HOSKINS && HOSKINS.takeResume() && localStorage.getItem('ho5.save');
-  loadManifest(() => loadImages(() => { setupMap(); if (resume) continueGame(true); else titleScreen(); }));
+  loadManifest(() => loadImages(guard(() => { setupMap(); if (resume) continueGame(true); else titleScreen(); })));
 });
 })();

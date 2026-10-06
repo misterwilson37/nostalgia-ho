@@ -179,6 +179,9 @@ async function playOne(browser, rules, url) {
   const page = await browser.newPage({ viewport: { width: 1440, height: 940 } });
   const errors = [];
   page.on('pageerror', e => errors.push(e.message));
+  // the skin catches exceptions and shows its bug report window ([HO bug] in
+  // the console): each one fails the run, as an uncaught one would
+  page.on('console', m => { if (m.type() === 'error' && m.text().startsWith('[HO bug]')) errors.push(m.text()); });
   page.on('dialog', d => d.accept());
   await page.addInitScript((rules) => { try { if (!sessionStorage.getItem('hp')) { localStorage.clear(); localStorage.setItem('ho5.rules', rules); sessionStorage.setItem('hp', '1'); } } catch (e) {} }, rules);
   await page.addInitScript(pageHelpers);
