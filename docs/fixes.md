@@ -339,6 +339,9 @@ remake keeps no checksum).
 6. **On a Spiral map the computers explore the homes before 2100** (`FUN_10077aa0`
    @10077fc8; Palm `ho.c` the same test). Checked in phase 2 at the user's request; kept as
    unclear because the code looks written on purpose:
+   - **Decision (the user): kept as released.** The rule needed code written only for it
+     (computers only, before 2100, Spiral only, a bound that relies on Spiral home numbering),
+     so it reads as intentional and stays out of the patch.
    - *What it does:* at the end of ColonizeAndExplore, when the player is a computer (the
      slot test against the player count and galaxy +0x54), the style is 2 (Spiral) and
      the year is under 2100 (0x834), it explores stars 0 to (players − 1).
