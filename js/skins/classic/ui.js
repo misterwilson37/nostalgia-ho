@@ -169,6 +169,22 @@ const modern = () => !!(G && G.opts && G.opts.modern);
 // button and the map menu's "Evacuate planet…" show; false (1.2 and 2.0 had
 // no such command): they never show, modern conveniences or not.
 const evacuateShown = () => HO.rules(G).evacuateCommand !== false;
+// rs.evacuateToggle: the command marks the colony and the ruleset gives it up
+// at End Turn (5.0.5: "Evacuate Planet" / "Don't Evacuate Planet",
+// FUN_10060fac). { words: [mark, unmark], marked(G, sid), ask(G, player, sid) }:
+// ask gives null (no question), { text } (a yes/no question) or { text,
+// notice: true } (said, then done). Sounds 7002 on, 4000 off. Without it, the
+// remake's own confirmation and an immediate HO.evacuate.
+function evacuateClick(sid) {
+  const t = HO.rules(G).evacuateToggle, s = G.stars[sid];
+  if (!t) return confirmBox(`Evacuate ${s.name}? Your colonists will leave; satellites stay.`, () => { HO.evacuate(G, ME, sid); Sound.play(7002); renderPanel(); draw(); save(); });
+  const on = !t.marked(G, sid);
+  const go = () => { HO.evacuate(G, ME, sid); Sound.play(on ? 7002 : 4000); renderPanel(); draw(); save(); };
+  const a = on ? t.ask(G, me(), sid) : null;
+  if (!a) go(); else if (a.notice) { toast(a.text); go(); } else confirmBox(a.text, go);
+}
+const evacuateLabel = (sid, plain) => { const t = HO.rules(G).evacuateToggle; return t ? t.words[t.marked(G, sid) ? 1 : 0] : plain; };
+const evacuateHere = (s) => evacuateShown() && (HO.rules(G).evacuateToggle || s.id !== me().homeStar || HO.colonies(G, ME).length > 1);
 // whose turn it is (several humans can share one computer: hot seat)
 let ME = 0;
 const me = () => G.players[ME];
@@ -384,8 +400,8 @@ function starMenu(sid, px, py) {
   const fl = fleetOrder(G.fleets.filter(f => f.owner === ME && f.star === sid && f.to == null && !f.sat));
   if (fl.length) items.push(['Select a fleet here', () => { UI.selFleet = fl[0].id; renderPanel(); draw(); }]);
   for (const bt of lastBattles(sid)) items.push([`Review ${battleName(bt)}`, () => openBattle(bt.id)]);
-  if (mine && !G.over && evacuateShown() && (s.id !== me().homeStar || HO.colonies(G, ME).length > 1))
-    items.push(['Evacuate planet…', () => confirmBox(`Evacuate ${s.name}? Your colonists will leave; satellites stay.`, () => { HO.evacuate(G, ME, sid); Sound.play(7002); renderPanel(); draw(); save(); })]);
+  if (mine && !G.over && evacuateHere(s))
+    items.push([evacuateLabel(sid, 'Evacuate planet…'), () => evacuateClick(sid)]);
   items.push(['Centre the map here', () => { const x = sx(s.x), y = sy(s.y); UI.view.ox += mapW / 2 - x; UI.view.oy += mapH / 2 - y; draw(); }]);
   const m = el('div', { class: 'dropdown open starmenu', role: 'menu', id: 'starmenu' },
     el('div', { class: 'mhead' }, s.name), ...items.map(([t, fn]) => el('button', { role: 'menuitem', onclick: () => { closeStarMenu(); fn(); } }, t)));
@@ -856,7 +872,8 @@ function planetBox(sid) {
       if (HO.feature(G, 'buildQueue')) box.append(yardBox(s));
       box.append(el('div', { class: 'btns' },
         el('button', { onclick: () => openBuild(sid), 'data-help': 'build' }, HO.feature(G, 'buildQueue') ? 'Queue ships…' : 'Build ships…'),
-        evacuateShown() && (s.id !== p.homeStar || HO.colonies(G, ME).length > 1) ? el('button', { class: 'quiet', 'data-help': 'evacuate', onclick: () => confirmBox(`Evacuate ${s.name}? Your colonists will leave; satellites stay.`, () => { HO.evacuate(G, ME, sid); Sound.play(7002); renderPanel(); draw(); save(); }) }, 'Evacuate') : null));
+        evacuateHere(s) ? el('button', { class: 'quiet', 'data-help': 'evacuate', onclick: () => evacuateClick(sid) }, evacuateLabel(sid, 'Evacuate')) : null,
+        HO.rules(G).evacuateToggle && HO.rules(G).evacuateToggle.marked(G, sid) ? el('span', { class: 'note' }, 'Evacuating') : null));
     } else if (k.owner >= 0 && k.owner !== ME) {
       box.append(row('Population', k.pop ? '~' + fmt(k.pop * 1e6) : '?'));
     }
@@ -895,6 +912,10 @@ const marksScrap = () => !!(G && HO.rules(G).flagScrap);
 const marksScrapDesign = () => !!(G && HO.rules(G).flagScrapDesign);
 const SCRAP_FLEET = ['Scrap Current Fleet', 'Don’t Scrap Current Fleet'];
 const SCRAP_TYPE = ['Scrap All', 'Don’t Scrap'];
+// rs.scrapWords: a ruleset's own words for these ({ fleet: [mark, unmark],
+// type: [...] }; 5.0.5: "Dismantle Current Fleet" / "Don't Dismantle Current
+// Fleet", its Ships menu's string list)
+const scrapWords = (k) => (G && (HO.rules(G).scrapWords || {})[k]) || (k === 'type' ? SCRAP_TYPE : SCRAP_FLEET);
 // (STR# 4001.22: FollowPathDrag @1516d8 gives a marked fleet no orders)
 const SCRAP_HEAP = 'Sorry, but you have that fleet marked for the scrap heap. It’s not going anywhere!';
 const MARKED_FLEET = 'Fleet to be scrapped for metal.'; // (STR# 4000.12, DrawSelectedFleetInfo @155826)
@@ -940,7 +961,7 @@ function fleetRow(f, inbound) {
   r.append(el('div', { class: 'ftext' }, el('div', null, parts.join(', ')), el('div', { class: 'sub' }, status)));
   // (3.0.1 scraps satellites as any other fleet: Scrap Current Fleet)
   if (sel && mine && !inbound && f.sat && marksScrap())
-    r.append(el('div', { class: 'facts' }, el('button', { class: 'quiet', onclick: (e) => { e.stopPropagation(); toggleScrapFleet(f); } }, SCRAP_FLEET[marked ? 1 : 0])));
+    r.append(el('div', { class: 'facts' }, el('button', { class: 'quiet', onclick: (e) => { e.stopPropagation(); toggleScrapFleet(f); } }, scrapWords('fleet')[marked ? 1 : 0])));
   if (sel && mine && !inbound && !f.sat) {
     const acts = el('div', { class: 'facts' });
     if (f.dest != null) acts.append(el('button', { class: 'quiet', onclick: (e) => { e.stopPropagation(); HO.cancelMove(G, f); Sound.play(4000); renderPanel(); draw(); } }, 'Stay here'));
@@ -949,12 +970,12 @@ function fleetRow(f, inbound) {
     if (HO.feature(G, 'stances')) acts.append(el('select', { 'aria-label': 'Battle stance', onclick: (e) => e.stopPropagation(), onchange: (e) => { f.stance = e.target.value; save(); } },
       ...[['normal', 'Normal'], ['offensive', 'Offensive'], ['defensive', 'Defensive']].map(([v, t]) => el('option', { value: v, selected: (f.stance || 'normal') === v ? 'selected' : false }, t))));
     if (HO.feature(G, 'lateArrival')) acts.append(el('label', { class: 'chk', onclick: (e) => e.stopPropagation() }, el('input', { type: 'checkbox', checked: f.delayed ? 'checked' : false, onchange: (e) => { f.delayed = e.target.checked; save(); } }), el('span', null, 'Arrive late')));
-    if (marksScrap()) acts.append(el('button', { class: 'quiet', onclick: (e) => { e.stopPropagation(); toggleScrapFleet(f); } }, SCRAP_FLEET[marked ? 1 : 0]));
+    if (marksScrap()) acts.append(el('button', { class: 'quiet', onclick: (e) => { e.stopPropagation(); toggleScrapFleet(f); } }, scrapWords('fleet')[marked ? 1 : 0]));
     else acts.append(el('button', { class: 'quiet', onclick: (e) => { e.stopPropagation(); confirmBox(`Scrap this fleet for ${Math.round(HO.TYPES ? 75 : 75)}% of its metal?`, () => { const m = HO.scrapFleet(G, f); Sound.play(7003); toast(`Scrapped for ${fmt(m)} metal.`); UI.selFleet = null; renderPanel(); draw(); save(); }); } }, 'Scrap'));
     r.append(acts);
   }
   if (sel && mine && inbound && marksScrap()) // marked in hyperspace: its metal falls on the next star at End Turn
-    r.append(el('div', { class: 'facts' }, el('button', { class: 'quiet', onclick: (e) => { e.stopPropagation(); toggleScrapFleet(f); } }, SCRAP_FLEET[marked ? 1 : 0])));
+    r.append(el('div', { class: 'facts' }, el('button', { class: 'quiet', onclick: (e) => { e.stopPropagation(); toggleScrapFleet(f); } }, scrapWords('fleet')[marked ? 1 : 0])));
   else if (sel && mine && inbound && HO.rules(G).scrapInSpace) {
     r.append(el('div', { class: 'facts' }, el('button', { class: 'quiet', onclick: (e) => { e.stopPropagation(); confirmBox('Dismantle this fleet in hyperspace? Its metal will rain down on its destination as a meteor shower.', () => { HO.scrapFleet(G, f); Sound.play(7003); UI.selFleet = null; renderPanel(); draw(); save(); }); } }, 'Dismantle in hyperspace')));
   }
@@ -1074,9 +1095,11 @@ function awardMasterPoints(byComputer) {
   if (!won || byComputer) return; // INFERRED: no points when the computer played your last turn
   const RS = HO.rules(G);
   const d = RS.difficulty(Object.assign({}, G.opts, { armageddons: G.armageddons || 0, won: true, year: G.year }));
-  const pts = RS.masterPoints(d);
   const pr = profile(), before = rankOf(pr.points);
-  pr.points += pts;
+  // rs.addMasterPoints: a ruleset that caps what one win may add (5.0.5)
+  const was = pr.points;
+  pr.points = RS.addMasterPoints ? RS.addMasterPoints(was, RS.masterPoints(d)) : was + RS.masterPoints(d);
+  const pts = pr.points - was;
   pr.games.push({ date: new Date().toISOString().slice(0, 10), year: G.year, difficulty: d, points: pts });
   try { localStorage.setItem('ho5.profile', JSON.stringify(pr)); } catch (e) {}
   me().inbox.push({ text: HO.report(79, d, fmt(pts)), icon: 'm9035' });
@@ -1244,7 +1267,7 @@ function openBuild(sid) {
             // a type marked for scrapping: the ships of it bought in this window go back
             if (HO.rules(G).flagScrapDesign(G, p, d, 'command')) for (; session[d.id] > 0; session[d.id]--) HO.unbuildShip(G, ME, sid, d.id);
             render(); renderPanel(); draw(); save();
-          } }, SCRAP_TYPE[d.scrap301 ? 1 : 0]) : null,
+          } }, scrapWords('type')[d.scrap301 ? 1 : 0]) : null,
           el('button', { class: 'quiet', disabled: !n, 'aria-label': 'Remove one', onclick: () => { if (queue) { const i = (s.queue || []).map(it => it.did).lastIndexOf(d.id); if (i >= 0) HO.unqueueShip(G, ME, sid, i); } else if (HO.unbuildShip(G, ME, sid, d.id) && session[d.id] > 0) session[d.id]--; render(); renderPanel(); draw(); } }, '−'),
           el('span', { class: 'n' }, String(n)),
           el('button', { disabled: !can, 'aria-label': queue ? 'Queue one' : 'Build one', onclick: () => { if (queue ? HO.queueShips(G, ME, sid, d.id, 1) : HO.buildShips(G, ME, sid, d.id, 1)) { Sound.play(7006); session[d.id] = (session[d.id] || 0) + 1; } render(); renderPanel(); draw(); } }, '+'))));
@@ -1518,10 +1541,10 @@ function openChat() {
 }
 function openDip() {
   const p = me();
-  const f = el('form', { class: 'newgame', onsubmit: (e) => { e.preventDefault(); p.dip = +new FormData(f).get('dip'); closeModal(); renderPanel(); save(); } });
+  const f = el('form', { class: 'newgame', onsubmit: (e) => { e.preventDefault(); const v = +new FormData(f).get('dip'); const rs = HO.rules(G); if (rs.dipSet) rs.dipSet(G, p, v); else p.dip = v; closeModal(); renderPanel(); save(); } });
   const out = el('b', null, (p.dip || 0) + '%');
   f.append(el('label', null, el('span', null, 'Each turn, move this share of your savings into the budget'),
-    el('input', { name: 'dip', type: 'range', min: 0, max: 100, step: 5, value: p.dip || 0, oninput: (e) => { out.textContent = e.target.value + '%'; } }), out),
+    el('input', { name: 'dip', type: 'range', min: 0, max: HO.rules(G).dipMax || 100, step: HO.rules(G).dipMax ? 1 : 5, value: p.dip || 0, oninput: (e) => { out.textContent = e.target.value + '%'; } }), out),
     el('div', { class: 'btns right' }, el('button', { type: 'submit' }, 'OK')));
   modal('Dip into savings', f, { cls: 'small' });
 }
@@ -1564,7 +1587,7 @@ function openScrapTypes() {
     // marked type and every ship of it are scrapped at End Turn
     const rows = live.map(d => el('tr', { class: d.scrap301 ? 'scrap' : null },
       el('td', null, shipImgEl(d, 18), ' ', d.name), el('td', null, HO.TYPES[d.type].name), el('td', null, String(count[d.id] || 0)),
-      el('td', null, el('button', { class: 'quiet', onclick: () => { HO.rules(G).flagScrapDesign(G, p, d, 'command'); save(); closeModal(); openScrapTypes(); } }, SCRAP_TYPE[d.scrap301 ? 1 : 0]))));
+      el('td', null, el('button', { class: 'quiet', onclick: () => { HO.rules(G).flagScrapDesign(G, p, d, 'command'); save(); closeModal(); openScrapTypes(); } }, scrapWords('type')[d.scrap301 ? 1 : 0]))));
     modal('Scrap ship types', el('div', null, el('p', { class: 'sub' }, `A type marked here is scrapped at the end of the turn, with every ship of it, and frees an assembly line${HO.rules(G).maxDesigns ? ` (you can have ${HO.rules(G).maxDesigns})` : ''}. Until then you can take the mark off.`),
       table(['Type', 'Class', 'Ships', ''], rows)), { cls: 'mid' });
     return;
@@ -1993,7 +2016,7 @@ function setupMenus() {
   const menus = {
     Game: [['New game…', newGameDialog], ['Players and history', () => G && openPlayers()], ['Auto-play this turn', () => { if (!G || G.over) return; me().auto = true; doEndTurn(); me().auto = false; }], ['Auto play…', () => G && !G.over && (hotSeat() ? toast('Auto play is for one-player games.') : openAutoPlay())], ['Preferences…', openPrefs], ['Rank history…', openRanks, () => !G || hasRanks(G)], ['-'], ['Quit to title', () => { save(); Sound.play(7002); G = null; renderPanel(); draw(); $('#panel').innerHTML = ''; $('#msg').innerHTML = ''; titleScreen(); }]],
     Ships: [['Build ships at selected colony…', () => { if (G && UI.sel != null && G.stars[UI.sel].owner === ME) openBuild(UI.sel); else toast('Select one of your colonies first.'); }], ['Review battle…', () => G && openBattleList()], ['List all fleets…', () => G && openFleetList()],
-      [() => SCRAP_FLEET[G && curFleet() && curFleet().scrap301 ? 1 : 0], () => { if (!G || G.over) return; const f = curFleet(); if (f) toggleScrapFleet(f); else toast('Select one of your fleets first.'); }, () => marksScrap()],
+      [() => scrapWords('fleet')[G && curFleet() && curFleet().scrap301 ? 1 : 0], () => { if (!G || G.over) return; const f = curFleet(); if (f) toggleScrapFleet(f); else toast('Select one of your fleets first.'); }, () => marksScrap()],
       ['Scrap ship types…', () => G && openScrapTypes()], ['Next fleet', nextFleet]],
     Galaxy: [['Players and alliances…', () => G && openPlayers()], ['List explored stars…', () => G && openStarList()],
       ['Give money or metal…', () => G && !G.over && openGive(), 'gifts'],

@@ -611,9 +611,13 @@ function colonies(G, pid) { return G.stars.filter(s => s.owner === pid); }
 function projected(G, p) { return rules(G).projected(G, p); }
 
 function departures(G) {
+  const rs = rules(G);
   for (const f of G.fleets.slice()) {
     if (f.dest == null && f.path && f.path.length && f.star != null) f.dest = f.path.shift(); // next leg of a multi-star path
     if (f.dest == null || f.star == null || f.sat) continue;
+    // rs.departs(G, f): a ruleset's own test of whether a fleet with orders
+    // leaves now; false keeps it waiting with its orders, saying nothing (5.0.5)
+    if (rs.departs && !rs.departs(G, f)) continue;
     const d = starDist(G, f.star, f.dest);
     if (d > f.fuel + 1e-9) {
       if (f.path) { msg(G, f.owner, `Your fleet of ${fleetLabel(G, f)} is waiting to refuel before it can continue on to ${G.stars[f.dest].name}.`, { icon: 'm9038', star: f.star, quiet: true }); continue; }

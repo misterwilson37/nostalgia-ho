@@ -296,7 +296,87 @@ settings, a turn time limit and network play.
 
 ## Mac 5.0.5 (2003)
 
-To be written in turn.
+### What it is
+
+5.0.5 (Delta Tao, 2003) is the last Mac program, a PowerPC Carbon application for Mac
+OS 9 and X built with Metrowerks PowerPlant. Its End Turn keeps 4.0.5's shape (pass 1,
+the battles, Armageddon, the novas, pass 2 in two loops, the winner) and much of 4.0.5's
+arithmetic, but its battles, its computer players, its galaxy set-up and its ship costs
+are new, and it adds home systems, an IQ slider, master points with 25 ranks, and
+evacuating and dismantling by marks. Everything below is from the code
+(`docs/coverage-505.md`, `docs/original-findings.md`; 4.0.5: `docs/coverage-405.md`,
+`docs/405-findings.md`).
+
+### Rules: what stayed
+
+These 5.0.5 routines are 4.0.5's, line for line:
+
+| 5.0.5 | 4.0.5 | What |
+|---|---|---|
+| `FUN_100712b0` | `FUN_0045c61e` | GiveBarPercent: a slot to a share, the others (but those being evacuated or finished) making up the difference, 0 to 1,000 |
+| `FUN_10071430` | `FUN_0045c6dc` | DetermineNewLevels: the rounds of redistribution, the total brought into 990-1,010 |
+| `FUN_10071a50`, `FUN_10071ab0` | `FUN_0045ced4`, `FUN_0045cf57` | a slot's most and least share |
+| `FUN_10076070` | `FUN_004360af` | RestoreStarsBars |
+| `FUN_10078990` | `FUN_00438b77` | SetPlanetDisplayValues (a colony's bars done at your temperature or out of metal) |
+| `FUN_10085bd0` | `FUN_00462be4` | the computers' ResolveSpending |
+
+And these do what 4.0.5's did, step for step: the turn (`FUN_10072a10`, 4.0.5
+`FUN_004320f8`: "Year %d", the copied offers, an out player's Armageddon switch, surrender,
+interest, scrapping, colony support, terraforming and mining, research, moving, the bars;
+the battles, Armageddon, the novas; pass 2a and 2b; the winner on the last step); the
+budget per mille as the shares stand, with the $2,000,000 rule; interest on the exact
+root, debt at 15 %, the borrowing limit −5 times the gross; colony support
+(`FUN_10073a80` as `FUN_00433977`); research's points and the costs of Speed, Weapons,
+Shields, Mini and Radical; colonizing (an income of −7,501, bars 900/100 or Mine 1,000, a
+share of 7,500,000 / money); giving up a colony (`FUN_10079190` as `FUN_00439bf7`);
+buying (the interest worked out again, the prototype price, a colony's people as the
+limit, the count raised before the money check); un-buying a fleet bought this turn
+(`FUN_10062c10` as `FUN_00419a52`); the Evacuate toggle (`FUN_10060fac` as 4.0.5's
+Abandon `FUN_00469b1d`: the profitable-colony question, the net, the share to 0); gifts
+(three a turn, delivered in pass 2b), surrender, best buddies' maps, the allies' arrival
+list, big battles, milestones, the end of a player (no colonies and no colonists in
+flight); Biologicals eating 200 people a ship; the Radical hand of four.
+
+### Rules: what changed
+
+| Area | 4.0.5 | 5.0.5 |
+|---|---|---|
+| Starting wealth | Skill Level, Novice to Expert | Home System, Outpost to Abundant; an Outpost's home made hostile, an Abundant player's second colony (`FUN_1006f640`) |
+| Computers | four intelligence settings, every computer alike | an IQ slider (50-200), each computer a little sharper than the one before, "Based on IQ" home systems, personalities from it (`FUN_1006f640`, `FUN_100704d0`); computers may start as best buddies |
+| Galaxy | 4.0.5's generator in whole light-years, five sizes | a Size and a Density slider, positions in tenths of a light-year, Hex galaxies, a 6 ly margin (`FUN_1006c4d0`) |
+| Distances | built once | shrink to 3/4 (at least 3) after each Armageddon (`FUN_100589f0`) |
+| Interest shortfall | global warming and a fleet scrapped | never: a sign slip puts it all on Ship Savings (`FUN_100737b0` @10073870) |
+| Terraforming | trunc(sqrt(trunc(money / 3) × 2)) | trunc(sqrt(trunc(2 money / 3))) (`FUN_10073d70`) |
+| MetalToMoney | ceil(m²/400), from 30,000 ceil(m/400) × m | trunc(m²/400), from 25,001 trunc(m/400) × m (`FUN_10055e30`) |
+| Range research | L³/9 | trunc(L^2.5)/3 (`FUN_10074f90`) |
+| Radical tech | 17 discoveries | 20: + the research facility, the prime rate and cheaper credit (`FUN_10079360`) |
+| Dip Into Savings | an amount, at once | 0-30 % of Ship Savings each turn until cancelled, as next turn's money (`FUN_1005d380`, `FUN_10077200`) |
+| Colony list | newest first | a new colony in front, the list sorted by income each turn (`FUN_10078e80`, `FUN_1007a5e0`) |
+| Ship costs | (V+15)(S+17)(W+13)(R+10) / 38.75 | (13 + W)(S + R + V + 38) / 0.36, Mini as a factor (`FUN_1007de60`) |
+| Designs | 30 | 24, and more than 17 types retires the oldest unused ones (`FUN_10074580`) |
+| Scrapping | "Scrap" | "Dismantle": the same marks, words and messages of its own (`FUN_10062c10`, `FUN_10074580`) |
+| Battles | duels against the colony's owner, one at a time | everyone at a star at once, allies side by side, stances (offensive, defensive), arrive late as a second battle, groups in viewing order, a hit table and target scores of its own (`FUN_1007e870`, `FUN_1007eed0`) |
+| Battle reports | won, lost, survived, destroyed | + "You and your allies ...", "You just watched some of your allies fight a battle at %s." (`FUN_100803e0`) |
+| Novas | red 10-100, explodes at 110 | red 10-209, a star someone owns saved 7 times in 100 ("It's a miracle!"), the warning every turn (`FUN_100769b0`, `FUN_10076d20`) |
+| The Valdez | 1 in 100 | 1 in 250 (`FUN_10077aa0`) |
+| Winning | ten ranks, the Hall of Fame | master points capped at halfway past your next rank, 25 ranks with pictures (`FUN_10055f60`, `FUN_100b24c0`) |
+
+### Computer players
+
+New code (CComputerIntelligence, `FUN_10081cc0`): 21 steps, personalities set from the
+IQ, attacks scored by target, Dreadnoughts and Tankers in attack fleets (the Tankers
+arriving late and defensive), satellites, chained attacks for Smart and Diabolical,
+diplomacy with feelings, an outbox of canned lines. Only the last step, ResolveSpending,
+is 4.0.5's (`docs/original-findings.md`, section 12).
+
+### Interface
+
+A Carbon PowerPlant program with a map window, a report list with a picture and sound
+for each report, budget bars, Build Ships and Scrap Ship Types windows, Organize Fleets,
+Alliances, Give, Surrender, the canned Send Message, Dip Into Savings, Armageddon,
+Evacuate Planet and Dismantle Current Fleet as toggles, the Auto button with its
+preferences, master points and ranks, a graph of standings, network play through a
+lobby with a turn time limit, and an e-mail bug reporter.
 
 ## Palm 5 (2003)
 

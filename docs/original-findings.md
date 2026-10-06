@@ -38,6 +38,19 @@ The last big section lists every way the two rule sets differ.
 15. What can't be done in a browser, and what isn't done yet
 16. Claude rules versus Original rules
 17. Technical appendix
+18. The 5.0.5 pass: every change to play, with addresses
+
+---
+
+## The 5.0.5 pass (October 2026)
+
+Every one of the program's 5,388 routines is now accounted for
+(`docs/coverage-505.md`, none unread), and every rule was checked against the code. The
+web app's Original rules had been built from a first reading; this pass replaced what
+that reading had wrong. Each change below is now what the web app does (section 18 lists
+them all with their addresses); the sections that follow have been brought up to date.
+The questions the code leaves, and its apparent slips, are in `docs/open-questions.md`
+(Mac 5.0.5).
 
 ---
 
@@ -184,39 +197,46 @@ CONFIRMED, by home system:
 
 ## 4. Money
 
-- **Income from a colony** (CONFIRMED):
-  population × max(1, ln(√population)) ÷ 76, minus upkeep of
-  7,500 + population × (100 + H ÷ 40) ÷ 10,000. **H** is the planet's
-  "hostility", explained next. A Normal home world (500,000 people, H = 0)
-  earns about $30,700. That matches the hard-coded starting income of
-  $30,000, a good sign the formula is right.
-- **Hostility H** (CONFIRMED): take the gravity ratio as a percentage. It is
-  always 100 or more, so 1.5× either way is 150. Take the temperature gap in
-  tenths of a degree. Then H = ((ratio − 100) × 12,000 + gap²) ÷ 100.
-- **Disposable income** (CONFIRMED):
-  1. Each turn, the incomes of your profitable colonies are pooled.
-  2. Positive interest is added to the pool, not to savings.
-  3. Interest you owe is paid from the pool first.
-  4. Colonies running at a loss are paid for next.
-  5. Whatever is left is split by your budget bars.
-- **Savings interest** (CONFIRMED): 10 × √savings per turn, but never more than
-  half your savings. +50% after the "prime lending rate" discovery.
-- **Debt interest** (CONFIRMED): 15% of the debt per turn, 10% after the
-  "renegotiated credit" discovery.
-- **Borrowing limit**: 5 times your last turn's income. CONFIRMED.
-- **Dip into savings**: you can set a share of savings to be added to this
-  turn's spending. CONFIRMED.
-- **Can't pay** (CONFIRMED):
-  - If the pool can't cover interest, the rest comes out of savings, down to
-    the borrowing limit ("Having to borrow more…").
-  - If even that isn't enough, every colony's temperature drifts away from
-    ideal by an amount that grows with the shortfall ("Global warming is
-    taking place!"), and one random fleet is scrapped.
-  - If a losing colony can't be supported, savings pay for it ("Savings is
-    being used to support…").
-  - If that runs out, the colony loses population in proportion to the
-    shortfall and stops growing that turn ("not receiving sufficient funds").
-    It is lost if it reaches zero.
+CONFIRMED (the turn, `FUN_10072a10`; section 18 has the addresses):
+
+- **This turn's money** is last turn's colony income (the profitable colonies' income,
+  added up in pass 2) plus any dip. Interest is added to it (or taken from it), then the
+  colonies losing money are paid from it, and what is left is shared out by the budget
+  bars.
+- **The budget bars** are kept per mille (thousandths): Savings, Technology, then each
+  colony. Each slot gets its share **as it stands**, not scaled to the total: trunc(money
+  × share / 1000) under $2,000,000, trunc(money / 1000) × share above. The shares
+  usually add up to 1,000, but not always (an Abundant start is 1,050), and then more
+  than the money is spent.
+- **Ship Savings** get the Savings bar's share, the interest and the refunds (from
+  terraforming and mining overshoots) at the end of the turn. Ships are bought from Ship
+  Savings.
+- **Savings interest**: trunc(10 × √savings) a turn, but never more than half your
+  savings; +50% after the "prime lending rate" discovery.
+- **Debt interest**: 15% of the debt a turn, 10% after "renegotiated credit".
+- **Borrowing limit**: −5 times the gross income (the income of the profitable colonies
+  plus the dip). At the start, trunc(−income / 2) × 10.
+- **Buying a ship** works the interest out again on what is left in Ship Savings, so it
+  lowers this turn's interest; dismantling a fleet bought this turn gives everything back
+  and works the interest out again.
+- **Dip Into Savings**: a percentage, 0 to 30% (the window's slider), of Ship Savings
+  taken out every turn until it is set back to 0, and used as the next turn's money. It
+  counts as income for the borrowing limit. While it is on, the Savings bar is at 0 and
+  can't be dragged.
+- **Can't pay the interest**: this turn's money pays what it can ("Uh-oh! Having to
+  borrow more to pay all your interest!"), and Ship Savings the rest, past the borrowing
+  limit if need be. The code has a further step, global warming and a fleet scrapped,
+  but a sign slip means it never runs (`docs/open-questions.md`).
+- **Can't support a colony**: each colony losing money, in the colony list's order, is
+  paid from this turn's money, then from Ship Savings down to the borrowing limit
+  ("Warning! Savings is being used to support %s."), then with its people: it keeps
+  trunc(people × the part of the loss paid / the loss) − 100 and doesn't grow ("not
+  receiving sufficient funds"); with nobody left it is given up.
+- **The colony list** has a new colony in front, and is sorted by income, lowest first,
+  at the end of every turn; so the colonies losing most are paid first.
+- **No money to spend**: when the net is below 0 after all this, "Warning! After
+  supporting your planets and paying your interest, you have no money to spend!", and
+  the net is set to 0.
 
 ## 5. Planets
 
@@ -240,17 +260,29 @@ CONFIRMED, by home system:
   to 20 for you. Gravity and temperature closeness each give a score, and the
   two are combined. More than 10,000 metal adds 1. A rating of 0 means it can
   never pay. The rating only picks the exploration sound (section 14).
-- **Terraforming** (CONFIRMED):
+- **Terraforming** (CONFIRMED, `FUN_10073d70`):
   - The first $5,000 spent on a new colony's terraforming is absorbed as a
     one-off setup cost.
-  - After that, each turn moves the temperature by √(⅔ × money) tenths of a
-    degree, or √(⅞ × money) after the climatologist discovery.
-  - Any overshoot is refunded to savings.
-- **Mining** (CONFIRMED): 20 × √money metal per turn (25 × after the
-  archaeologist discovery). Money that would mine more than is left is
-  refunded.
-- **Evacuating** a planet removes its people and gives up the colony.
-  INFERRED from the menu item and the manual; the code wasn't read.
+  - After that, each turn moves the temperature by trunc(√trunc(⅔ × money)) tenths
+    of a degree, or trunc(√trunc(⅞ × money)) after the climatologist discovery.
+  - On reaching your temperature the Terraform bar is done (−1), the overshoot is
+    refunded to Ship Savings at trunc(3d²/2) (trunc(8d²/7)), and "You have
+    completely terraformed %s."
+  - Spending more than $50 a turn on a planet that can never pay gives the
+    "never become profitable" warning, every turn.
+- **Mining** (CONFIRMED, `FUN_10055d90`, `FUN_10055e30`): trunc(20 × √money) metal per
+  turn (25 × after the archaeologist discovery). Money that would mine more than is
+  left mines what is left, the Mine bar is done, and the overshoot is refunded:
+  trunc(m²/400) for m metal (625 with the discovery), trunc(m/400) × m from 25,001.
+- **Evacuating** (CONFIRMED, `FUN_10060fac`): Evacuate Planet marks a colony and
+  Don't Evacuate Planet takes the mark off. Marking a profitable colony asks first
+  ("Do you really want to evacuate %s? It's a profitable colony!"); a star named
+  Kansas, one time in three, gets "Dorothy, I guess that means we're not in Kansas
+  anymore", and one named Hope the "Dost thou truly wish to abandon Hope?" question.
+  The mark takes the colony's income off this turn's net (and puts it back when taken
+  off), and gives its budget share to the other slots. The colony shows "Evacuating"
+  and is given up at the start of the next End Turn ("You have evacuated %s."), its
+  colony ships loaded first.
 
 ## 6. Research and Radical discoveries
 
@@ -340,14 +372,26 @@ With weapons W, shields S, range R, speed V and mini M:
   light-year. Both owners are told.
 - **Decoys** (CONFIRMED): fake Fighters that show better numbers than you
   have. They cost very little and can't hurt anyone.
-- **Scrapping** (CONFIRMED): humans get back 75% of the metal (87.5% after the
-  recycling discovery); computer players get 100%.
+- **Dismantling** (CONFIRMED, `FUN_10062c10`, `FUN_100601e0`, `FUN_10099c84`,
+  `FUN_10074580`): Dismantle Current Fleet marks a fleet (Don't Dismantle Current
+  Fleet takes the mark off), and Scrap Ship Types or the Build Ships window marks a
+  ship type (asking first when it has ships). The marks are carried out at the start
+  of the next End Turn: every ship of a marked fleet or type is dismantled. Humans get
+  back 75% of the metal (87.5% after the recycling discovery); computer players get
+  100%. At your own colony it goes to your metal ("Your fleet of %s at %s has been
+  dismantled for %s metal."); over someone else's star it falls onto the planet and
+  its owner picks it up ("You just received %s metal from someone scrapping a
+  fleet..."). A marked type reports "Your “%s” ship type has been dismantled." when it
+  gave metal. Dismantling a fleet bought this turn instead cancels the purchase: the
+  money (with the first-ship price when none of the design is left), the metal and the
+  interest come back.
 - **Scrapping in hyperspace** (CONFIRMED): ships dismantled mid-trip rain
   their metal onto their destination the next turn as a **meteor shower**. It
   kills people there; anyone who fits aboard your colony ships in orbit
   escapes. This is the only cause of meteor showers.
 - A planet can only build as many ships in a turn as it has population units.
-  CONFIRMED. (It only matters for brand-new colonies.)
+  CONFIRMED (`FUN_1009ab50` for you, `FUN_100852d0` for the computers). (It only
+  matters for brand-new colonies.)
 - At most 24 ship designs at once ("assembly lines are full"). CONFIRMED.
 - **More than 17 types**: at the start of each turn's money step, a player
   with more than 17 ship types loses the oldest ones that have no ships in
@@ -363,8 +407,13 @@ With weapons W, shields S, range R, speed V and mini M:
 - Fleets refuel fully at your own and your allies' colonies. CONFIRMED.
 - **Multi-star paths** (CONFIRMED): a fleet can be given a route. It stops at
   each star to refuel and waits if it can't reach the next one yet.
-- **Arrival notices**: you are told when your fleets arrive, stop on the way,
-  or are fully refuelled and ready to go on. CONFIRMED.
+- **Arrival notices** (CONFIRMED, `FUN_10075b80`, `FUN_100782a0`): "Your fleet of %s
+  has arrived at %s." at the end of a trip, when you had explored the star and it has
+  an owner on your records, or the fleet isn't all Colony Ships. Your allies hear of
+  your fleets arriving at stars that aren't yours.
+- **Waiting** (CONFIRMED, `FUN_10075f10`): a fleet whose next hop is beyond its fuel
+  waits with its orders; an empty Colony Ship fleet at one of your colonies (not being
+  evacuated) waits there to reload.
 - **Wormholes** (CONFIRMED): a fleet arriving at a star that has gone
   supernova "disappeared through a wormhole in space and is lost".
 
@@ -397,8 +446,17 @@ CONFIRMED:
 - The planet uses its owner's Weapons and Shields tech.
 - **Battle stances**: a fleet can be **Offensive** (+1 Weapons, −2 Shields) or
   **Defensive** (−2 Weapons, +1 Shields).
-- **Arrive late**: ships marked late sit out a first exchange, then everyone
-  fights again.
+- **Arrive late** (`FUN_1007e870`): at a star, a first battle is fought without the
+  ships that arrived this turn marked to arrive late, then a second with everyone. Each
+  is a battle of its own, with its own replay, results and reports.
+- **Order** (`FUN_1007f560`): the sides are drawn up as you see them: your side, your
+  allies, the colony's owner, then the rest; each side's designs last to first.
+- **Reports** (`FUN_100803e0`, pictures `FUN_1009d670`): "... destroyed your colony
+  ..." and "You lost a battle ..." (with "and your allies" when they fought) show the
+  enemy's face when there was one enemy; "You won a battle ...", "%s survived an
+  attack from %s" and "You just watched some of your allies fight a battle at %s."
+  A star where two or more sides brought more than one ship is a "big battle", which
+  everyone not there hears of in pass 2 (`FUN_10078840`).
 - **Luck in battles** (a game option): each side gets −1, 0 or +1 Weapons per
   battle. The "smarter generals" discovery removes the −1.
 - **Debris**: a fifth of the metal of every destroyed ship. After the
@@ -431,8 +489,10 @@ CONFIRMED:
   - From the year 2750, about once in 99 turns, an unowned star starts to
     "grow and turn bright red". Only one star does this at a time.
   - A red star gets closer to exploding every turn.
-  - A star someone owns has a 6% chance each turn of being saved ("It's a
+  - A star someone owns has a 7% chance each turn (rand(1, 100) of 94 or more) of being saved ("It's a
     miracle!"; others see "Wow, that's weird!").
+  - Every player hears "Uh-oh! %s has started growing and is turning bright red
+    in hue!" every turn while a star is red. CONFIRMED (`FUN_10076d20`).
 - **Supernova** (CONFIRMED):
   - The star and everything at it are destroyed.
   - Stars within 10 ly are pelted with metal, more the closer they are: a star d ly
@@ -447,7 +507,8 @@ CONFIRMED:
     supernova ("Oh No! It's armageddon!").
   - Every distance shrinks to ¾, and the count of Armageddons lowers the game
     difficulty (section 13).
-  - With fewer than two quiet stars it fizzles ("not enough mass").
+  - With fewer than two quiet stars it fizzles ("not enough mass"). The devices
+    stay on, so it tries (and fizzles) again every turn. CONFIRMED (`FUN_10076680`).
 - **The Valdez** (CONFIRMED, an Easter egg): a fleet you name "Valdez" has a 1
   in 250 chance each turn of springing a leak. You get a message and nothing
   else happens.
@@ -471,8 +532,9 @@ All of this needs the **Alliances** option, as in the original. CONFIRMED.
   game warns first ("Your alliance will win the game next turn if it holds!")
   and checks again the next turn. With one human, as in the web app, it ends
   at once.
-- **Gifts**: up to three a turn, of money or metal. They arrive at the end of
-  the turn.
+- **Gifts** (CONFIRMED, `FUN_1005dcb0`): up to three a turn, of money (from Ship
+  Savings) or metal, to a player still in; taken at once, and they arrive at the end
+  of the turn.
 - **Messages**: the original has canned phrases ("I like *name*.", "Thank You!",
   "Sorry!", "#!$@*$&@•™!" and so on). The computers react to some of them
   (section 12).
@@ -482,6 +544,7 @@ All of this needs the **Alliances** option, as in the original. CONFIRMED.
   - The player you surrender to gets your savings plus a turn's income, your
     metal, and your planets.
   - A planet is handed over only if no enemy of theirs is sitting at it.
+  - A computer that likes nobody surrenders to no one (`FUN_10088160`).
 
 ## 12. Computer players
 
@@ -627,42 +690,35 @@ the code next to the rule it carries out). Points worth knowing:
   "Sorry!", "#!$@*$&@•™!", "I need money.", "I need metal." and "I like
   planets that are …".
 
-### Still unclear (5.0.5 computer players and battles)
+### Settled in the 5.0.5 pass
 
-Each of these is a point 5.0.5's code doesn't settle, or a place the web app
-still differs; the answer used is given, and none is final:
+The points this section used to list as unclear are all settled in the code, and the
+web app now follows it (`docs/open-questions.md`, Mac 5.0.5):
 
-- **Colonies won in the same turn**: 5.0.5 keeps colonies in the order they
-  were won; for several in one turn the web app takes star order (as 4.0.5
-  does). It only breaks ties.
-- **"Can't terraform"** (colony record +2 = −1): `FUN_10082690` skips such
-  colonies; the web app reads it as "the temperature is already right", as
-  4.0.5 does (`FUN_0045f599`).
-- **Late arrivals**: 5.0.5 fights a battle without the late ships and then a
-  second, full battle, each with its own aftermath (`FUN_1007e870`, two
-  passes). The web app fights both exchanges as one battle with one
-  aftermath and one report.
-- **Per-design stances**: 5.0.5 keeps a stance byte for each design in a
-  fleet, and the computers buy the Tankers for their attack fleets with
-  value 3 in it. The web app keeps one stance per fleet and ignores that
-  value.
-- **The order of groups in a battle** (who shoots first within a Speed, ties
-  for targets) is still the web app's older reading, not checked against
-  `FUN_1007eed0`.
-- **Big battles**: `FUN_100803e0` marks a star where two or more sides
-  brought more than one ship (when a random 10–20 is under the ships
-  present, or more than 4 sides fought). What reads the mark wasn't found;
-  nothing is done with it.
-- **Whose star it is after a lost battle**: 5.0.5 records the side with the
-  colony, else the one with the most ships left (`FUN_10081230`); the web
-  app's shared battle report keeps its own choice.
-- **Auto play**: a human's Auto button sets the computer's aggressiveness and
-  share of colonies defended from the player's preferences
-  (`FUN_10066bb0`); the web app has no such preferences and uses the auto
-  play personality's fixed values.
-- **Nobody to surrender to**: when no other player is liked at all,
-  `FUN_10088160` answers with the player count; the web app surrenders to no
-  one.
+- **The money a computer plans with** (`FUN_10081cc0`) is the net (player +0x40); the
+  reserve it won't touch is min(this turn's money × (year − 2000) / 100, that money ×
+  its savings goal); Total Money for the colony count is this turn's money plus the
+  interest.
+- **Its budget** (`FUN_10085bd0`) is 4.0.5's ResolveSpending, line for line: every slot
+  of the colony list but a finished colony gets its money over the total, per mille
+  rounded up, and each colony's bars split its money between terraforming and mining.
+- **Evacuating** (`FUN_10081fe0`): a computer sets a colony's evacuate mark directly,
+  with no question and no change to its net.
+- **Terraforming** (`FUN_10082690`): wished for at every colony whose Terraform bar
+  isn't done, with no other test.
+- **The colonies** are walked in the colony list's order (a new colony in front, the
+  list sorted by income each turn).
+- **Late arrivals** are a battle of their own (section 9), and the Tankers a computer
+  buys into an attack fleet are marked to arrive late and defend (stance byte 3,
+  `FUN_10084860`).
+- **Group order**, **big battles** and **the star's owner after a lost battle** follow
+  `FUN_1007f560`, `FUN_10078840` and `FUN_10081230` (section 9).
+- **Auto play**: a human's Auto button sets aggressiveness to a tenth of the
+  Preferences' Friendly-Aggressive slider and colonies defended to the Dig In-No
+  Defense slider (`FUN_10066bb0`, `FUN_1005ec40`); the web app has no such preferences
+  and keeps the auto play personality's values.
+- **Nobody to surrender to**: `FUN_10088160` answers the player count, which means "no
+  one".
 
 ### Where to attack (CONFIRMED)
 
@@ -772,7 +828,11 @@ At the end of a game it is adjusted:
 ### Master points and ranks (CONFIRMED)
 
 - A win earns 3 to the power of ((difficulty − 30) ÷ 10) master points, at
-  most 10,000,000. That is 1 point at difficulty 30, about 100 at 72 (the
+  most 10,000,000. But one win can't take you more than halfway past your
+  next rank: when you join a game, the game notes the points you may still win in it
+  (halfway between your next rank and the one after, less what you have; no limit from
+  65,535 up), and the win adds at most that. CONFIRMED (`FUN_10063a40`, `FUN_10056000`,
+  `FUN_10055f20`, `FUN_100b24c0`). The message says what was added. That is 1 point at difficulty 30, about 100 at 72 (the
   default settings), and 177,147 at 140.
 - Points add up across games. In the web app they are kept in your browser,
   and only Original-rules wins count.
@@ -924,6 +984,13 @@ keeps the name "explore" because that is what the project layout asked for.
   copied (section 1).
 - **Computers knowing all stars**: an option in some versions; no such switch
   was found in 5.0.5's New Game window, so it isn't offered.
+- **The auto play settings** (Preferences: the Friendly-Aggressive and Dig In-No
+  Defense sliders the Auto button uses): NOT IMPLEMENTED.
+- **The canned-message window** ("Look at %s" explores a star for the receiver, "I own
+  %s" marks it, "I like planets ..." tells your home): NOT IMPLEMENTED; the web app's
+  messages are free text.
+- **The questions before buying more than 9 Scouts or Tankers**, and **the first
+  turn's budget kept for the next game**: NOT IMPLEMENTED.
 
 ## 16. Claude rules versus Original rules
 
@@ -1027,6 +1094,50 @@ All addresses are for the PowerPC code of version 5.0.5, analysed with Ghidra
 | Message picture / message sound | FUN_1009d670 / FUN_1009cff0 (jump table at 0x10112ee8) |
 | Sound player | FUN_10095690 |
 | Sine and cosine tables | 0x100de4cc, 0x100dea6c |
+| Interest shortfall (the sign slip) | FUN_100737b0 @10073870 |
+| Colony support, evacuations carried out | FUN_10073a80 |
+| Colony list order / new colony in front | FUN_1007a5e0 / FUN_10078e80 |
+| Budget bars: GiveBarPercent, DetermineNewLevels, most and least | FUN_100712b0, FUN_10071430, FUN_10071a50, FUN_10071ab0 |
+| Dragging a bar / bars that can't be dragged | FUN_1008a7a0 / FUN_1008a030 |
+| Dip Into Savings window (slider 0-30, PPob 157) / the dip in pass 2 | FUN_1005d380 / FUN_10077200 |
+| Evacuate Planet / Dismantle Current Fleet / Scrap Ship Types / build window mark | FUN_10060fac / FUN_10062c10 / FUN_100601e0 / FUN_10099c84 |
+| Buying a ship (human) / Build Ships window's count | FUN_1007e4a0 / FUN_1009ab50 |
+| Give / Surrender / Armageddon / Send Message windows | FUN_1005dcb0 / FUN_1005d5a0 / FUN_1005e8e0 / FUN_1005d940 |
+| Moving, arrivals / departures / allies' arrival list | FUN_10075b80 / FUN_10075f10 / FUN_100782a0 |
+| Pass 2b: best buddies' maps, surrenders, big battles, milestones, end of a player | FUN_10078390, FUN_10078560, FUN_10078840, FUN_1007a3f0, FUN_1007abb0 |
+| Battle reports' wording and pictures | FUN_100803e0, FUN_1009c240, FUN_1009d670 |
+| Master points at a win, the cap | FUN_100b24c0, FUN_10063a40, FUN_10056000, FUN_10055f20 |
+| Preferences (auto play sliders) / Auto button | FUN_1005ec40 / FUN_10066bb0 |
 
 Tools used are in `tools/extract/`. The web app's `js/rules-original.js` and
 `js/ai-original.js` name the original routine next to each rule.
+
+## 18. The 5.0.5 pass: every change to play, with addresses
+
+What the web app's Original rules did before this pass, and what they do now, as 5.0.5's
+code does it. "Before" is the remake's earlier reading.
+
+| Area | Before | Now (5.0.5's code) | Where |
+|---|---|---|---|
+| The turn | the web app's own order | 5.0.5's: pass 1 for every player in order (interest, dismantling, colony support, terraforming and mining, research), the battles, Armageddon, the novas, pass 2a in a random order of players (supernova damage, scrap metal, income and growth, refuelling, colonizing, exploring), pass 2b in order (allies' arrivals, best buddies' maps, surrenders, big battles, clamps, the first radical hand, milestones, the end of a player, pact news, bars, the design and colony lists), the winner | `FUN_10072a10` |
+| Money | the incomes pooled with the interest, losses paid, the rest shared out | this turn's money (last turn's income), the interest, the losing colonies paid in the colony list's order, then each bar's per-mille share as it stands; Ship Savings get the Savings share, the interest and the refunds in pass 2 | `FUN_100737b0`, `FUN_10073a80`, `FUN_10077200` |
+| Interest you can't pay | global warming and a fleet scrapped | never: Ship Savings pay it all (a sign slip) | `FUN_100737b0` @10073870 |
+| Terraforming | √(⅔ money) | trunc(√trunc(⅔ money)); the "never profitable" warning every turn | `FUN_10073d70` |
+| Mining refunds | rounded up, from 30,000 | trunc(m²/400), from 25,001 trunc(m/400) × m | `FUN_10055e30` |
+| Research | shares of the tech budget | each tech's share as it stands; progress cut to 6,000; "not spending any money on technology research" every turn | `FUN_10074f90` |
+| Scrapping | at once | marks, carried out at the next End Turn ("Dismantle Current Fleet" / "Don't Dismantle Current Fleet"; Scrap Ship Types; the build window's mark); a fleet bought this turn is un-bought; 3/4 (7/8) of the metal for humans, all for computers; over another's star the metal falls to its owner; in hyperspace, a meteor shower | `FUN_10062c10`, `FUN_100601e0`, `FUN_10099c84`, `FUN_10074580`, `FUN_10077110` |
+| Evacuating | at once | a mark (Evacuate Planet / Don't Evacuate Planet) with the profitable-colony question and the Kansas and Hope jokes, the income off the net, the share to the others; carried out at the next End Turn ("You have evacuated %s.") | `FUN_10060fac`, `FUN_10073a80` |
+| Dip Into Savings | 0-100%, into this turn's budget | 0-30% of Ship Savings each turn as next turn's money, counted in the gross income; the Savings bar at 0 and locked | `FUN_1005d380`, `FUN_10077200`, `FUN_1008a030` |
+| Dragging a bar | the web app's own | 5.0.5's redistribution; locked bars (evacuating, finished, Savings while dipping) can't be dragged and keep their shares | `FUN_1008a7a0`, `FUN_1008a030` |
+| Colony list | star order | a new colony in front; sorted by income each turn | `FUN_10078e80`, `FUN_1007a5e0` |
+| Buying | no limit by people for you; interest unchanged | no more ships a turn at a colony than its people; the interest worked out again after each purchase | `FUN_1009ab50`, `FUN_1007e4a0` |
+| Start | | an Outpost's home made hostile; an Abundant player's second colony with 10,000 people, a 50 per-mille share and bars 500/500; the borrowing limit trunc(−income / 2) × 10 | `FUN_1006f640` |
+| Battles | one battle at a star | two when ships arrive late, each with its own replay and reports; sides drawn up in viewing order, designs last to first; reports with the enemy's face for one enemy, "and your allies", "You just watched some of your allies fight"; big battles reported to everyone else; the loser's record of the star's owner | `FUN_1007e870`, `FUN_1007f560`, `FUN_100803e0`, `FUN_10078840`, `FUN_10081230` |
+| Arrivals | everyone told | "has arrived" by 5.0.5's rule; allies told of arrivals at stars not yours; fleets wait when the next hop is too far | `FUN_10075b80`, `FUN_100782a0`, `FUN_10075f10` |
+| Novas and Armageddon | | the red-star warning every turn to everyone; the miracle reports; after a fizzle the devices stay on and it tries every turn | `FUN_100769b0`, `FUN_10076d20`, `FUN_10076680` |
+| Radical tech | | the hand as a set of cards (any card when empty); a new hand report after each discovery; the metal report divides by your colonies | `FUN_10079360`, `FUN_1007a180` |
+| Winning | | the winner check and its messages as 5.0.5's; a game won only by computers has no human winner | `FUN_1007acf0` |
+| Milestones | | chained: one of the first two marks and one of the last three a turn | `FUN_1007a3f0` |
+| Master points | the whole award | at most halfway past your next rank | `FUN_100b24c0`, `FUN_10055f20` |
+| Computer players | the remake's money figures | plan with the net (player +0x40), a reserve from this turn's money, 4.0.5's ResolveSpending; evacuation by mark; terraform wishes where the bar isn't done; Tankers in attack fleets arrive late and defend; the colony list's order | `FUN_10081cc0`, `FUN_10085bd0`, `FUN_10081fe0`, `FUN_10082690`, `FUN_10084860` |
+| Spiral maps | | before 2100 each computer explores the stars numbered 0 to players − 1, the homes | `FUN_10077aa0` @10077fc8 |

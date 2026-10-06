@@ -190,15 +190,11 @@ function quality(hg, ht, k) {
 const starQuality = (C, sid) => quality(g100(C.p.homeG), t10(C.p.homeT), know(C.G, C.p, sid)); // FUN_100720d0
 
 // ---------- the colony list (player +0x1138) ----------
-// colonies in the order they were won (the home first, a new colony at the
-// end). GUESS: colonies won in the same turn are taken in star order.
+// CONFIRMED: the computers walk the player's colony list as it stands (a new
+// colony in front of the others, FUN_10078e80; the list sorted by income at
+// the end of each turn, FUN_1007a5e0): js/rules-original.js colSlots
 function colOrder(G, p) {
-  const ai = p.ai || {};
-  const own = (ai.colOrder || []).filter((sid, i, a) => G.stars[sid].owner === p.id && a.indexOf(sid) === i);
-  if (!own.length && G.stars[p.homeStar].owner === p.id) own.push(p.homeStar);
-  for (const s of G.stars) if (s.owner === p.id && !own.includes(s.id)) own.push(s.id);
-  if (p.ai) p.ai.colOrder = own;
-  return own;
+  return RS.colSlots(G, p).filter(sid => G.stars[sid].owner === p.id);
 }
 
 // ---------- routes: DeterminePath (FUN_1007d260) ----------
@@ -271,11 +267,14 @@ function aiTurn(G, p) {
   if (!p.alive || p.surrendered) return; // player +0x34
   const auto = !!p.human;
   const Y = G.year + (auto ? 0 : 10);
-  const inc = p.oInc || 0;
+  // CONFIRMED (FUN_10081cc0): the money to share out is the net (player
+  // +0x40); the reserve is min(this turn's money (+0x38) x (year - 2000) /
+  // 100, that money x saveGoal), not below 0; Total Money is +0x38 + interest
+  const inc = p.tm || 0;
   const reserve = Math.max(0, Math.min(trunc(inc * (Y - 2000) / 100), inc * ai.saveGoal));
   const C = {
     G, p, ai, iq: ai.iq, auto, Y,
-    M: Math.max(0, RS.disposable(G, p).D), // +0x298: this turn's money
+    M: p.net505 || 0,                      // +0x298: this turn's money (player +0x40)
     hand: p.metal,                         // +0x2a0: metal in hand
     S: p.savings - reserve,                // +0x29c: Ship Savings above the reserve (+0x2a8)
     I: inc + (p.oInterest || 0),           // +0x2a4
@@ -306,9 +305,10 @@ function aiTurn(G, p) {
   saveFleets(C);                  // FUN_10085900
   resolveSpending(C);             // FUN_10085bd0
   // the fleets (+0x72) and ship types (+0xc) marked for scrapping go in the
-  // turn's dismantling step (FUN_10074580), before anything moves
-  for (const f of C.scrapF) if (G.fleets.includes(f)) E.scrapFleet(G, f);
-  for (const d of C.scrapD) { if (inService(G, p, d)) E.scrapDesign(G, p.id, d.id); else d.scrapped = true; }
+  // turn's dismantling step (FUN_10074580, js/rules-original.js dismantle505),
+  // before anything moves
+  for (const f of C.scrapF) if (G.fleets.includes(f)) RS.flagScrap(G, f, true);
+  for (const d of C.scrapD) RS.flagScrapDesign(G, p, d, true);
 }
 // FUN_100761c0: on becoming best buddies, each notes the other's planet
 // preference (their home's gravity and temperature)
@@ -795,7 +795,9 @@ function colonySupport(C) {
     }
     if (worst === -1) break;
     n--;
-    if (!fuellingAt(C, worst)) { E.evacuate(G, p.id, worst); cls[worst] = 6; }
+    // the colony's evacuate mark (+0x13) is set directly: no question, no
+    // change to the net (FUN_10081fe0 @100820f0)
+    if (!fuellingAt(C, worst)) { G.stars[worst].abandon301 = true; cls[worst] = 6; }
   }
   for (const sid of C.cols) {
     const s = G.stars[sid];
@@ -805,7 +807,7 @@ function colonySupport(C) {
     if (cls[sid] === 8 && s.metal < 100) {
       cls[sid] = 6;
       if (!fuellingAt(C, sid) && !stationedAt(C, sid)) {
-        E.evacuate(G, p.id, sid);
+        s.abandon301 = true; // +0x13 (FUN_10081fe0 @1008222c)
         for (const q of G.players) {
           if (q.id === p.id || !isAllied(G, p.id, q.id) || C.ai.prefG[q.id] == null) continue;
           if (quality(C.ai.prefG[q.id], C.ai.prefT[q.id], know(G, p, sid)) > 5 && RI(G, 1, 10) < 9) { say(C, q.id, 0x410, s.name); break; }
@@ -821,17 +823,18 @@ function colonySupport(C) {
 }
 
 // ---------- step 15 (FUN_10082690): terraforming ----------
-// a Dumb computer asks for the whole job; the others $3,000 within 100
-// degrees, else $10,000 ($15,000 with $150,000 or more to spend); 70 at a
-// colony making money, 80 at one losing it. GUESS: colony +2 = -1 ("no
-// terraforming") is taken as the temperature already right.
+// CONFIRMED: every colony whose Terraform bar (colony +2) is not -1 (done)
+// and which is rated above 8: a Dumb computer asks for the whole job (the
+// planet's temperature, star +0xc, against the home's, player +0x64), the
+// others $3,000 within 100 degrees, else $10,000 ($15,000 with $150,000 or
+// more to spend); 70 at a colony making money, 80 at one losing it. There is
+// no check that the temperature is off at all.
 function terraform(C) {
   const { G, p, cls } = C;
   for (const sid of C.cols) {
     const s = G.stars[sid];
-    if (s.owner !== p.id || cls[sid] <= 8) continue;
+    if (s.owner !== p.id || RS.bars(s)[0] === -1 || !(cls[sid] > 8)) continue;
     const dT = Math.abs(t10(s.t) - t10(p.homeT));
-    if (!(dT > 0)) continue;
     const amt = C.iq === 1 ? RS.terraCost(p, dT) : dT < 1000 ? 3000 : C.M < 150000 ? 10000 : 15000;
     addAction(C, 5, cls[sid] === 10 ? 70 : 80, sid, amt);
   }
@@ -1073,7 +1076,7 @@ function goAttack(C, src, target) {
       if (r) {
         C.offB -= dm;
         const nf = build(C, dd, src, 1, null);
-        if (nf && p.metal > 10000) build(C, T.tanker, src, 1, nf);
+        if (nf && p.metal > 10000 && build(C, T.tanker, src, 1, nf)) tankerStance(nf, T.tanker);
         if (nf) { C.used.add(nf); cls[target] = 5; givePath(nf, r); return; }
       }
     }
@@ -1088,7 +1091,7 @@ function goAttack(C, src, target) {
       const nf = build(C, fd, src, n, null);
       if (nf && n > ai.minFleet * 2) {
         const k = Math.max(1, trunc(n / 30));
-        if (k * 7500 < p.metal) build(C, T.tanker, src, k, nf);
+        if (k * 7500 < p.metal && build(C, T.tanker, src, k, nf)) tankerStance(nf, T.tanker);
       }
       if (nf) {
         const r = route(C, nf, target);
@@ -1138,6 +1141,10 @@ function goColonize(C, src, target) {
 // colony ship only colony ships are bought (and ships that need no metal).
 // Scouts and colony ships each get a new fleet; other ships join a fleet of
 // that design at the star with no orders, else a new one; or the fleet given.
+// the Tankers bought into an attack fleet get the stance byte 3 (fleet +0x58
+// + design: arrive late and defensive), FUN_10084860 @10084a1c and @10084b30
+// passing 3 to FUN_100852d0, which writes it as each ship joins
+function tankerStance(f, d) { f.dstance = Object.assign({}, f.dstance, { [d.id]: 3 }); }
 function build(C, d, sid, n, into) {
   const { G, p } = C;
   if (!d || n < 1) return null;
@@ -1252,36 +1259,42 @@ function saveFleets(C) {
 }
 
 // ---------- step 21 (FUN_10085bd0): the budget ----------
-// what is left goes to Ship Savings; every bar is its money over the total,
-// per mille rounded up; each colony's bar is split between terraforming and
-// mining the same way. A computer's research shares are its personality's.
+// CONFIRMED: 4.0.5's ResolveSpending (FUN_00462be4) line for line: what is
+// left goes to Ship Savings; every slot of the colony list but a finished
+// colony (+0x14) gets its money over the total, per mille rounded up (by
+// thousands of the total above $2,000,000), kept as a word; each colony's
+// bars split its money between terraforming (+2) and mining (+4) the same
+// way, a done part (-1) left as it is and the other then 1,000; with no money
+// at all the first slot (Savings) gets 1,000 and the others 0. A computer
+// not on auto play takes its personality's research shares.
 function resolveSpending(C) {
   const { G, p, ai } = C;
+  const i16 = (x) => ((x & 0xffff) ^ 0x8000) - 0x8000;
   C.ships += C.M; C.M = 0;
-  const cols = C.cols.filter(sid => G.stars[sid].owner === p.id);
+  const L = RS.slots301(G, p);
+  const money = (k) => k === 'sav' ? C.ships : k === 'tech' ? C.tech : (C.terra[k] || 0) + (C.mine[k] || 0);
   let total = C.ships + C.tech;
-  for (const sid of cols) total += (C.terra[sid] || 0) + (C.mine[sid] || 0);
-  const k = trunc(total / 1000);
-  const pm = (b) => b < 2000001 ? trunc((total + b * 1000 - 1) / total) : trunc((b + k - 1) / k);
-  const b = p.budget;
-  b.col = {};
-  if (total === 0) { b.savings = 1; b.tech = 0; for (const sid of cols) b.col[sid] = 0; }
-  else {
-    b.savings = pm(C.ships) / 1000; b.tech = pm(C.tech) / 1000;
-    for (const sid of cols) b.col[sid] = pm((C.terra[sid] || 0) + (C.mine[sid] || 0)) / 1000;
-  }
-  for (const sid of cols) {
-    const s = G.stars[sid], t = C.terra[sid] || 0, m = C.mine[sid] || 0, sum = t + m;
-    if (!sum) continue;
-    const canT = RS.hab(p, s).dT > 0, canM = s.metal > 0;
-    if (!canT && !canM) continue;
-    if (!canT) s.terra = 0;
-    else if (!canM) s.terra = 1;
+  for (const k of L) if (typeof k === 'number') total += money(k);
+  L.forEach((k, i) => {
+    if (typeof k === 'number' && G.stars[k].done301) return;
+    const b = money(k);
+    let v;
+    if (total === 0) v = i === 0 ? 1000 : 0;
+    else if (b < 2000001) v = i16(trunc(((total + b * 1000 - 1) | 0) / total));
+    else { const t1 = trunc(total / 1000); v = i16(trunc((b + t1 - 1) / t1)); }
+    RS.setKeyPm(p, k, v);
+    if (typeof k !== 'number') return;
+    const s = G.stars[k];
+    let [T, X] = RS.bars(s);
+    if (!((T >= 0 || X >= 0) && b !== 0)) return;
+    if (T < 0) X = 1000;
+    else if (X < 0) T = 1000;
     else {
-      const tp = trunc((sum + t * 1000 - 1) / sum), mp = trunc((sum + m * 1000 - 1) / sum);
-      s.terra = tp / (tp + mp);
+      T = i16(trunc(((b + Math.imul(C.terra[k] || 0, 1000) - 1) | 0) / b));
+      X = i16(trunc(((b + Math.imul(C.mine[k] || 0, 1000) - 1) | 0) / b));
     }
-  }
+    RS.setBars(s, T, X);
+  });
   if (!p.human && !C.auto) p.talloc = Object.assign({}, ai.tw);
 }
 

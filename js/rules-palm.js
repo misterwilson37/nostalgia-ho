@@ -392,5 +392,8 @@ E.registerRules('palm', Object.assign({}, O, {
   // the computers pay development costs as js/ai-palm.js works them out (FUN_00063e62)
   paysPrototype: (G, p) => p.human || !p.ai || p.ai.iq < 2,
   makeGalaxy, afterSetup, economy, battle, checkElimination, difficulty,
+  // pinned as it was inherited from the 5.0.5 rules before their full pass
+  // (5.0.5 tells only allies of arrivals); the Palm pass will settle it
+  features: { arrivalNotices: true, alliances: true, gifts: true, surrender: true, stances: true, lateArrival: true, waypoints: true, luck: true, supernova: true, armageddon: true, dip: true, chat: true, yearsPerTurn: true },
 }));
 })(this);

@@ -412,20 +412,117 @@ These are what 4.0.5's code does and what the remake now does; they look like sl
 
 ## Mac 5.0.5 (2003)
 
-A full pass comes later. Open from the work on the computer players (each says which
-way the game goes now):
+All 5,388 routines of the program are accounted for (`docs/coverage-505.md`; none
+unread), and every rule question that came up was answered from 5.0.5's own code, with
+its address in `docs/original-findings.md`. No fallback to 4.0.5 was needed: where the
+ruleset uses 4.0.5's code (the budget-bar routines GiveBarPercent, DetermineNewLevels,
+RestoreStarsBars and SetPlanetDisplayValues, and the computers' ResolveSpending), the
+5.0.5 routine was read and is the same line for line (`docs/evolution.md`).
 
-1. Open: the order of colonies won in the same turn. Now: 4.0.5's star order.
-2. Open: the reading of colony +2 = −1. Now: taken from 4.0.5.
-3. Open: late arrivals. Now: fought as two battles.
-4. Open: the per-design stance byte.
-5. Open: group order and targeting in `FUN_1007eed0`. Now: not ported.
-6. Open: who reads the big-battle flag.
-7. Open: the star's owner after a lost battle (`FUN_10081230`).
-8. Open: the Auto-button preferences.
-9. Open: surrender when there is nobody to surrender to.
-10. Open (read in the code, but surprising; please confirm): a tanker's route goes only
-    through stars recorded this year.
+The ten entries noted here before are settled in the code:
+
+1. The order of colonies won in the same turn: a new colony goes in front of the colony
+   list (`FUN_10078e80`), and the list is sorted by income, lowest first, at the end of
+   every turn (`FUN_1007a5e0`). Done.
+2. Colony +2 = −1 is "terraforming finished" (set by `FUN_10073d70` when the planet
+   reaches your temperature, and by `FUN_10078990`); the computers' terraforming wish
+   (`FUN_10082690`) skips such colonies and makes no other test. Done.
+3. Late arrivals: two battles at a star, the first without the ships that arrived late,
+   each with its own record, replay, aftermath and reports (`FUN_1007e870`). Done.
+4. The stance byte (fleet +0x58 + design): bit 1 arrive late, 2 defensive, 4
+   offensive; the computers' Tankers bought into an attack fleet get 3 (`FUN_10084860`
+   @10084a1c, @10084b30). Done.
+5. Group order and targeting (`FUN_1007eed0`, `FUN_1007f560`, `FUN_1007f430`): the
+   viewer's side, its allies, the colony's owner, the rest; designs in reverse order.
+   Done.
+6. The big-battle flag is read by `FUN_10078840` (pass 2b: "There was a big battle at
+   %s"). Done.
+7. The star's owner in the loser's record after a battle (`FUN_10081230`). Done.
+8. The Auto button (`FUN_10066bb0`) sets aggressiveness to a tenth of the Preferences'
+   Friendly-Aggressive slider and colonies defended to the Dig In-No Defense slider
+   (both 0-100, `FUN_1005ec40`), then plans with the computer's routine. The settings
+   are below under "Interface not done".
+9. Surrendering with nobody liked: `FUN_10088160` answers the player count, which
+   `FUN_100742b0` reads as "to no one". Done.
+10. A Tanker's route goes only through stars whose record is of this year: below.
+
+### Open
+
+None: the code settles every rule question met.
+
+### Settled, worth confirming
+
+These are what 5.0.5's code does and what the remake now does; they look like slips.
+
+1. **Global warming never happens.** `FUN_100737b0` @10073870 compares the interest
+   still owed (below 0) with what Ship Savings may still lend (0 or more), so the
+   shortfall always goes on Ship Savings, past the borrowing limit; "Global warming is
+   taking place!" and the fleet scrapped for a lack of funds (0x46b, 0x46c) are never
+   sent. 4.0.5 (`FUN_0043361b`) compared the owed amount the right way round.
+2. **Budget shares are used as they stand.** Each slot's money is its per-mille share of
+   this turn's money, not scaled to the shares' total (`FUN_10073d70`, `FUN_10074f90`,
+   `FUN_10077200`). The total can be over 1,000: Abundant starts at 1,050 (Savings 650,
+   Technology 250, home 100, second colony 50; `FUN_1006f640`), and dragging a bar with
+   others locked leaves the locked ones as they were (`FUN_1008a7a0`). The money is then
+   spent more than once.
+3. **Dipping raises the borrowing limit.** The dip counts in the gross income
+   (`FUN_10077200`), and the limit is −5 times the gross.
+4. **A Tanker's route** goes only through stars whose record is of this year
+   (`FUN_1007d260`); the computers plan after the year has moved on, so in practice only
+   the Diabolical first-turn look.
+5. **After Armageddon fizzles**, the devices stay on (they are turned off only after one
+   fired, `FUN_10076d20` @10076d4c), so it tries again, and fizzles again, every turn.
+6. **A failed purchase still uses up a building slot**: `FUN_1007e4a0` counts the ship
+   at the colony (+0x10) before it checks the money and metal (as 4.0.5's
+   `FUN_004691c4`).
+7. **Population milestones are chained** (`FUN_1007a3f0`): a player hears of one of the
+   first two marks and one of the last three a turn, so a jump past two marks reports
+   the higher one on a later turn.
+8. **On a Spiral map**, before 2100, each computer explores the stars numbered 0 to
+   (players − 1), which are the players' homes (`FUN_10077aa0` @10077fc8).
+9. **Warnings every turn**: "you are terraforming %s, a planet that will never become
+   profitable" (0x3f7), "You are not spending any money on technology research" (0x437)
+   and the red-star warning (0x43a, to every player) repeat every turn.
+10. **The computers' evacuations** set the colony's mark directly (`FUN_10081fe0`),
+    without the question or the change to the net that the Evacuate command makes.
+11. **Buying a ship lowers this turn's interest**: the interest is worked out again on
+    what is left in Ship Savings (`FUN_1007e4a0`, `FUN_10062c10`); the computers'
+    purchases leave it alone (`FUN_100852d0`).
+12. **"%s is cheating"** (0x41d) comes from a checksum of the player record
+    (`FUN_1007b410`) compared at the start of a turn: anti-cheat, not a rule, and not in
+    the remake.
+
+### Remake's choices
+
+1. **Random numbers** are the remake's own (5.0.5: a table of 5,000, `FUN_10054ce0`).
+2. **When the computers plan and fleets move.** 5.0.5 plans and moves for each player in
+   its own pass 1 (`FUN_10075b80`); the remake plans for every computer first and moves
+   every fleet after pass 1.
+3. **Dragging a budget bar** redistributes once, from where the drag began
+   (`FUN_1008a7a0` does it at every step of the drag).
+4. **A failed purchase** doesn't use up a building slot in the remake (item 6 above):
+   the remake stops at the first ship it can't pay for.
+5. **Gifts**: the sender's "You just gave ..." comes at once; 5.0.5 sends it at the end
+   of the turn with the receiver's (pass 2b, 0x44e/0x44f).
+6. **Master points**: the cap on what one win adds is worked out at the win from your
+   points then; 5.0.5 notes it when you join the game (`FUN_10063a40`). With one human
+   it is the same.
+7. **Several humans** play hot seat (5.0.5 also by network and by game file).
+
+### Interface not done
+
+- **The auto play settings** (Preferences, `FUN_1005ec40`; used by the Auto button,
+  `FUN_10066bb0`): a human on auto play keeps the auto play personality's own
+  aggressiveness and colonies defended.
+- **The canned-message window** (`FUN_1005d940`, codes 0x416-0x42c): "Look at %s"
+  explores a star for the receiver (`FUN_10078c80`), "I own %s" marks it in the
+  receiver's records, "I like planets ..." gives your home; messages to everyone, your
+  allies or your best buddies. The remake's messages are free text.
+- **Options locked by rank** ("Need more MPs", `FUN_10059570`); left open on purpose.
+- **The questions before buying more than 9 Scouts or Tankers** (alerts 0x24, 0x25,
+  `FUN_1005cf40`).
+- **The first turn's budget kept for the next game** (`FUN_10064600`, `FUN_1006579c`).
+- **The turn time limit** (`FUN_10058360`, `FUN_10066260`), network play and the lobby.
 
 ## Palm 5 (2003)
 
