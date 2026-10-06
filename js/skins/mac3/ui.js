@@ -10,7 +10,9 @@
 // and won/lost pictures are 3.0.1's own.
 //
 // The colour skin (js/skins/mac3c) is this one with the pictures from
-// 3.0's "Ho! 3.0 Color Picts" file (assets/skins/mac3c, same names).
+// 3.0's "Ho! 3.0 Color Picts" file (assets/skins/mac3c, same names). The
+// Mac 4.0.5 skins (js/skins/mac4, mac4c) are this one with window.HOMAC4,
+// which replaces whichever of these hooks it has.
 (function () {
 'use strict';
 const P = 'dos:'; // the DOS skin's name for its pictures
@@ -136,5 +138,7 @@ window.HOTHEME_OVER = {
   },
 };
 if (v12) { delete window.HOTHEME_OVER.starLook; delete window.HOTHEME_OVER.messageLook; } // 1.2 has only the DOS game's icons
+// js/skins/mac4 (4.0.5, 1996): this skin with 4.0's own pictures, sounds and hooks
+if (window.HOMAC4) Object.assign(window.HOTHEME_OVER, window.HOMAC4);
 if (!window.HOSKINS_INLINE) document.write('<script src="js/skins/dos/ui.js"><\/script>');
 })();

@@ -216,6 +216,64 @@ same names). Both use the DOS skin's code, so they are missing what the DOS skin
   and twinkling-star frames `p750`–`p758`.
 - **Not in 3.0.1:** `i128` and `i2499` (unused by the DOS skin too).
 
+## mac4, mac4c (Mac 4.0.5, black and white and colour)
+
+Spaceward Ho! 4.0.5 for the Macintosh (Delta Tao, 1996), the program the Windows 95 4.0.5 was
+ported from. Like 3.0.1 it has black-and-white pictures of its own and reads colour ones from a
+second file, "Ho! 4.0 Color Picts", so there are two skins: **mac4**
+([`assets/skins/mac4/`](../assets/skins/mac4/sprites/), 418 pictures) and **mac4c**
+([`assets/skins/mac4c/`](../assets/skins/mac4c/sprites/), 496: every picture the colour file has,
+under the black-and-white names, the rest black and white). Both have the same 42 sounds (37 from
+the program, 5 from the colour file). `tools/extract/mac4.py` writes them.
+
+The skins are the mac3 skin's code with 4.0's own hooks. 4.0 numbers its icons as the Windows
+4.0.5 numbers its bitmaps, so planets, report pictures and ship parts go where the w95 skin puts
+them (read from SPACEHO.EXE); the Mac program's own code hadn't been decompiled when the skins
+were made, so a Mac difference there would not show yet.
+
+- **Its own:** the splash ([`p1003`](../assets/skins/mac4c/sprites/p1003.png), "Spaceward Ho!
+  Version 4"), and in colour the cowboy planet's title animation (`p7000`–`p7023`), the planets
+  and faces (`i1000`–`i2519`), the 40×40 ship parts (`p2600`–`p2926`) and whole ships
+  (`p2260` the basic scout, `p2261` the biological, `p2263` the dreadnought), the round End
+  Turn button ([`p5500`](../assets/skins/mac4c/sprites/p5500.png)), the selection rings
+  (`p502`/`p503`; in colour cut from the sheet [`p500`](../assets/skins/mac4c/sprites/p500.png)),
+  the game won and lost pictures (`p3530`, `p3540`), its menus (MENU 129–134: File, Options,
+  Ships, Galaxy, Window) and the System 7 dialog frames of its DLOGs.
+- **The End Turn button's window** is empty: 4.0 writes the year (or the time left) in the
+  black window of `p5500`, as the Windows clock does; neither skin draws it yet.
+- **A nova's wreck** is the classic picture [`nova18`](../assets/sprites/nova18.png), as in the
+  w95 skin; the red frames 4.0 has for a star turning red and exploding (colour icons
+  `i728`–`i741`, [`p750`](../assets/skins/mac4c/sprites/p750.png)–`p758`) aren't shown, only `i1403`.
+- **Not in 4.0 at all:** the alliance underline, rank pictures (4.0.5's Master Point List shows
+  the w95 skin's cowboy planets in every skin), battle debris (classic), and for 5.0.5's special
+  ships the classic pictures.
+- **Not extracted:** PICT 4010, new in 4.0.5's program: no art but the registration plate under
+  the splash, with the licensee's name and serial number in text.
+- **Sounds:** 4.0's numbers mean other things than 5.0.5's, so the set maps the remake's events
+  to them as the w95 skin does by name (`MAC4_MAP` in `js/skins.js`); End Turn plays "New Turn"
+  (7000), as 3.0.1 does. Not used: `7004` bonus time, `7005` hurry up, `7012` time's almost up
+  (the turn timer), `7009` "Check this out!", `7016` "Don't cheat", `7008` ship building (too
+  short to hear), and the colour file's `7006` ("ROLF,LOL"), `7007` ("Smile"), `7010` ("ChkChk")
+  and `7011` ("Yeah-hoo! Engage Dreadnought"). "Move 'em out!" (10000) plays when the title
+  opens, as in the 3.0.1 skin.
+- **4.0 art not used yet:** the battle won / lost and neutral dudes (`p3500`, `p3510`, `p3020`);
+  the dreadnought's animation frames `p2264`–`p2277` and a second scout picture `p2262`; the
+  explosion frames `p7500`–`p7505`; the planet window's globe strips `p6100`–`p6140` with the
+  sphere masks `p6150`/`p6151`, and the landscapes `p6000`–`p6005` (colour) and `p6050` (black
+  and white); the money, debt and metal chips `p4051`, `p4053`, `p4061`; the message border
+  `p5530`; the halo rings (yellow and blue rows of `p500`, `p506`/`p507`, `p510`/`p511`); the
+  Send Message and New Game icons (`i3000`–`i3051`); the New World Computing logos `p7080`/`p7081`;
+  the credits text `p1001`; the Christmas planet `i1404` (Santa).
+
+**4.0.1 against 4.0.5.** The 4.0.1 program and colour file (1995) have the same art with these
+exceptions, all in the colour file: 4.0.5 adds the home planet strip
+[`p6109`](../assets/skins/mac4c/sprites/p6109.png) ("New Earth planet by Joe", the 4.0.3 notes'
+"new home planet picture"); seven globe strips (`p6106`, `p6107`, `p6114`, `p6125`, `p6131`–`p6133`)
+were cut again one pixel wider; two more (`p6108`, `p6113`) were packed again with the same pixels;
+and the ring sheet `p500` grew from 289×237 to 290×240 with the same first frames. The
+black-and-white pictures, icons, menus and all 42 sounds are the same. None of these is a picture
+the skins show, so there is no separate 4.0.1 skin.
+
 ## palm (Spaceward Ho! 5 for Palm OS, 1.0.4)
 
 The Palm game (MobileFreon, 2003) is 5.0 recompiled, and its pictures are 5.0.5's redrawn

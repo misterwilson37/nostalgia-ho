@@ -47,6 +47,19 @@
 // original's sound. A skin's messageLook may also ask for its own files by
 // their own numbers or names. null: the original had no sounds.
 const DOS_MAP = { 7001: 1000, 11111: 7000, 7006: 1000 };
+// the Mac 4.0.5's own numbers for the Windows 4.0.5's sounds (js/skins/w95
+// map below): click 7001, burst 2000, shucks 2001, whoa 4000, hyahh 4001,
+// buddy 7017, awww 7020, abandon 7002, scrap 7003, wow 7021, explode 3003
+const MAC4_MAP = {
+  5001: 7017, 5002: 7020, 5003: 2001, // pacts and chat
+  7004: 7001, 7006: 7001, 7007: 2000, 7013: 7001, 7014: 7001, 7015: 7001, 7016: 4000, 7017: 7001,
+  7018: 7001, 7019: 2000, 7020: 2001, 8000: 3003, 128: 4001, 7022: null, 7023: null,
+  11111: 7000, // "New Turn", which the Windows one hasn't got: played at End Turn, as 3.0.1's 7000
+  7005: null, 7008: null, 7009: null, 7010: null, 7011: null, 7012: null, 7024: null, 10000: null,
+};
+for (const n of [2000, 2001, 3000, 3001, 3002, 3003, 4000, 4001, 5000, 5001, 5002, 5003, 6000, 6001, 6002,
+  7000, 7001, 7002, 7003, 7004, 7005, 7006, 7007, 7008, 7009, 7010, 7011, 7012, 7013, 7014, 7015, 7016, 7017,
+  7018, 7019, 7020, 7021, 7022, 7023, 7024, 8000, 10000]) MAC4_MAP['m' + n] = n;
 const SOUNDS = {
   classic: { name: '5.0.5 (Mac OS 9 and X, 2003)', year: 2003, dir: null },
   // The DOS game numbers its sounds like the Mac game (2000 good news,
@@ -63,6 +76,14 @@ const SOUNDS = {
   mac3: { name: '3.0.1 (Mac, 1993)', year: 1993, dir: 'assets/skins/mac3/', map: { 11111: 7000, 7006: 7001 } },
   // the colour skin's sounds are the same files as the black and white one's
   mac3c: { name: '3.0.1 (Mac, 1993)', year: 1993, dir: 'assets/skins/mac3c/', map: { 11111: 7000, 7006: 7001 }, same: 'mac3' },
+  // the Mac 4.0.5 (37 sounds in the program, 5 in its Color Picts file) is
+  // the program the Windows 4.0.5 came from: the same sounds, numbered, and
+  // played for the same events as the Windows one's names (below); each of
+  // its files is also m<number> for the skin's own report sounds, since its
+  // numbers mean other things than 5.0.5's (its 7013 is the biological
+  // eating, its 7019 "Very good!")
+  mac4: { name: '4.0.5 (Mac, 1996)', year: 1996, dir: 'assets/skins/mac4/', map: MAC4_MAP },
+  mac4c: { name: '4.0.5 (Mac, 1996)', year: 1996, dir: 'assets/skins/mac4c/', map: MAC4_MAP, same: 'mac4' },
   // 4.0.5 names its sounds (FUN_0046fe1b and the callers of FUN_0042f8bf)
   w95: { name: '4.0.5 (Windows 95, 1996)', year: 1996, dir: 'assets/skins/w95/', map: {
     2000: 'burst', 2001: 'shucks', // good / bad news
@@ -82,6 +103,8 @@ const SKINS = [
   { id: 'mac12', version: '1.2', platform: 'Mac, French, black and white', year: 1992 },
   { id: 'mac3', version: '3.0.1', platform: 'Mac, black and white', year: 1993 },
   { id: 'mac3c', version: '3.0.1', platform: 'Mac, colour', year: 1993 },
+  { id: 'mac4', version: '4.0.5', platform: 'Mac, black and white', year: 1996 },
+  { id: 'mac4c', version: '4.0.5', platform: 'Mac, colour', year: 1996 },
   { id: 'w95', version: '4.0.5', platform: 'Windows 95', year: 1996 },
   { id: 'palm', version: '5', platform: 'Palm OS, version 1.0.4', year: 2003 },
   { id: 'classic', version: '5.0.5', platform: 'Mac OS 9 and X', year: 2003 },
