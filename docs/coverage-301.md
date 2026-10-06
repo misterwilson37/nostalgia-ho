@@ -1,7 +1,7 @@
 # Spaceward Ho! 3.0.1: coverage of the program
 
 Every routine in the 3.0.1 program, one row each, with what it does and whether it is a
-game rule. The program is the first colour Mac version (Delta Tao, 1993, 68k),
+game rule. The program is a 68k Mac version in black and white or colour (Delta Tao, 1993),
 decompiled from its resource fork as described in `docs/decompiling.md`: 25 CODE
 segments, laid out at *segment* × 0x10000, 648 routines. MPW left a MacsBug name after
 almost every routine; the `FUN_…` ones are MPW runtime glue (long multiply and divide,

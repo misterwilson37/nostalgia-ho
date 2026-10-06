@@ -162,7 +162,7 @@ root.HOVERSIONS = {
     ],
   },
   '301': {
-    intro: 'The first colour Mac version: 2.0’s game with the money model, alliances, Radical tech and novas of the later versions. Every routine of its program has been read, and every rule comes from its own code.',
+    intro: 'A colour and black-and-white Mac version (colour came with 2.0): 2.0’s game with the money model, alliances, Radical tech and novas of the later versions. Every routine of its program has been read, and every rule comes from its own code.',
     previous: '2.0',
     quirks: [
       { text: 'In 2010, on Spiral and Cluster maps, the computers skip their first turn.', fix: 'skip2010' },

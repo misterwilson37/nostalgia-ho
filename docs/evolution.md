@@ -183,7 +183,7 @@ How each of these claims compares with the code: "What Delta Tao said vs what th
 
 ### What it is
 
-3.0.1 (Delta Tao, 1993) is the first colour Mac version, a 68k program with MPW's
+3.0.1 (Delta Tao, 1993) is a 68k Mac program in black and white or colour (colour came with 2.0) with MPW's
 MacsBug names left in, so every routine is named. It is **2.0's game with a new money
 model and new events**: its turn is 2.0's two passes, routine for routine, worked out
 with 2.0's arithmetic, and the engine of 4.0.5 and 5.0.5 starts here (Ship Savings,
@@ -572,10 +572,9 @@ the Mac version of its number.
 
 Totals: **30 confirmed, 2 contradicted in part, 13 not checkable** (45 claims). Neither
 contradiction is about a rule: both are interface features that Delta Tao's 5.0 list calls
-new but that earlier versions already had in some form. The one finding that may mean the
-remake misread a version is about colour: Delta Tao and 1.2's code agree that colour came
-with 2.0, but this file and the 3.0.1 notes call 3.0.1 "the first colour Mac version" (see
-`docs/open-questions.md`, Mac 3.0.1).
+new but that earlier versions already had in some form. One finding corrected the remake's wording: Delta Tao and 1.2's code agree that colour came
+with 2.0, and Mac 2.0.1's own "TheHo Color Picts" (1992) confirms it; the remake had called
+3.0.1 "the first colour Mac version". Settled and reworded.
 
 ### Version 1 to 2
 

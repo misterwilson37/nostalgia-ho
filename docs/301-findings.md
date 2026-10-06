@@ -1,6 +1,6 @@
 # Spaceward Ho! 3.0.1 for the Macintosh: findings
 
-Spaceward Ho! 3.0.1 (Delta Tao, 1993) is the first colour Mac version, a 68k program.
+Spaceward Ho! 3.0.1 (Delta Tao, 1993) is a 68k Mac program in black and white or colour (colour came with 2.0; see `docs/evolution.md`).
 This file explains how the "Mac 3.0.1" ruleset (`js/rules-301.js`, with its computer
 players in `js/ai-301.js`) was made, rule by rule, from 3.0.1's own code.
 
