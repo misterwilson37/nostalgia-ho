@@ -37,7 +37,9 @@ Never a redesign. When in doubt, an entry is "unclear".
   fixes folded away below it; the last choice is kept in localStorage "ho5.patch".
 - `node tools/test.js <rules> --patch` plays the test games with the patch on.
 
-Phase 1 (done): the fixes for 1.2, 2.0 and 3.0.1. Phase 2 (to do): 4.0.5, 5.0.5 and Palm;
+Phase 1: the fixes for 1.2, 2.0 and 3.0.1. Phase 2: 4.0.5, 5.0.5 and Palm. Every version's
+obvious bugs are now fixed in its patch, except those the remake already plays fixed and
+those with nothing in the remake to fix (both noted below, with no fix entry);
 their entries are below so the list is complete, but their rulesets list no fixes yet.
 
 ## Counts
@@ -47,9 +49,9 @@ their entries are below so the list is complete, but their rulesets list no fixe
 | Mac 1.2 | 2 | 8 | 2 |
 | 2.0 | 5 | 5 | 3 |
 | Mac 3.0.1 | 4 | 5 | 3 |
-| 4.0.5 | 13 (+ 2 with nothing in the remake to fix) | 4 | 5 |
+| 4.0.5 | 9 fixed (+ 3 the remake already plays fixed, + 2 with nothing in the remake to fix) | 4 | 7 |
 | 5.0.5 | 2 | 6 | 6 |
-| Palm | 1 (+ 5.0.5's) | 5 (+ 5.0.5's) | 1 (+ 5.0.5's) |
+| Palm | 1 (+ 5.0.5's 2) | 5 (+ 5.0.5's) | 1 (+ 5.0.5's) |
 
 Palm's code is 5.0.5's recompiled, with the same slips; its own entries are counted, and
 5.0.5's apply to it as well.
@@ -205,43 +207,62 @@ The program's own credits read "Version 2.0.1" (string 672), so its patch is 2.0
 
 ---
 
-## Windows 95 4.0.5 (patch 4.0.5.1: phase 2)
+## Windows 95 4.0.5 (patch 4.0.5.1)
 
-### Obvious bug (to fix in phase 2)
+### Obvious bug (fixed in 4.0.5.1)
 
-1. **Red stars depend on uninitialised memory** (Open 1). `FUN_00436c26` starts a red
-   star only with option bit 2, which comes from a stack buffer in `FUN_00484788` never
-   cleared. *Fix:* the bit set, as in 3.0.1 (what the remake already plays).
-2. **A Radical level with an empty hand reads the loop counter** (Open 2,
-   `FUN_0043a08c`), not the draw. *Fix:* use the draw (what the remake already plays).
-3. **A hand that runs out on a design card loops for ever** (Open 3, `FUN_0043a08c`).
-   *Fix:* the discovery is lost (what the remake already plays).
-4. **The poorest player can be one who is out** (`FUN_00463030`): out players are skipped
-   by a Total Money of −1, but an out player's is 0. *Fix:* skip players who are out, as
-   3.0.1 (−1 in the Compare Players table) and 5.0.5 do.
-5. **30 designs: stale choices and a read past a table** (`FUN_004639ba`, global
-   `DAT_005b2dc0`). *Fix:* no stale design numbers (exactly how, to settle in phase 2).
-6. **ScrapOldShips**: the fleet's number as its Range (no effect), and a Biological fleet
-   retired at the Scouts' mark, read past the retire table (`FUN_004641ef`). *Fix:* the
-   Range; the Biological's own mark (from 5.0.5's retire rule).
-7. **RefuelFighters ignores its answer** (`FUN_004644c5`), as 3.0.1's. *Fix:* as 3.0.1.1.
-8. **A colony at star 0** (`FUN_0045c02c` tests the star number, not the slot kind;
-   `FUN_0043b243` counts star numbers above 0). *Fix:* test the slot kind; count every
-   colony.
-9. **Best buddies' battle news is never shared**: the second branch of `FUN_0043853c`
-   asks for a battle this year that is also before this year. *Fix:* this year's battles.
-10. **Marking a ship type gives back only one ship** ordered in the window
-    (`FUN_0044fd03`). *Fix:* all of them (`rs.scrapTypeRefundOne` off).
-11. **"%s: %s" as the rank past 1,000,000 points** (`FUN_00482b89`, string 334). *Fix:*
-    the top rank's name, "Ho! Champion".
-12. **The Hall of Fame's year** prints `tm_year` (1996 is 96, 2026 is 126;
-    `FUN_0049883d`, `FUN_00498b6a`). *Fix:* the year's last two digits, as in 1996.
-13. **The Hall of Shame's "Loser" without its colon** (`FUN_0046d1e8`). *Fix:* "Loser:".
+1. **`poorestOut`: the poorest player can be one who is out.** `FUN_00463030` skips a
+   player whose Total Money is −1 (3.0.1's mark for an out player, from its Compare
+   Players table), but in 4.0.5 an out player's is 0, so it usually counts as the poorest
+   and a computer is seldom "far the poorest". *Fix:* players who are out are left out, as
+   3.0.1 and 5.0.5 do (`js/ai-405.js` `computeStatus`).
+2. **`designs30`: stale design numbers with 30 designs.** With 30 designs `FUN_004639ba`
+   stops making new ones, and the classes not yet reached keep last turn's choices, held
+   as places in the design list (global `DAT_005b2dc0`, never cleared); a design scrapped
+   since moves the others, so the number may now be another design or none. Keeping last
+   turn's choice is the evident intent (the global is kept on purpose); the slip is that
+   it is a list place. *Fix:* the design itself is kept, none if it is gone
+   (`maintainShipTypes`).
+3. **`refuelCheck`: RefuelFighters ignores its answer** (`FUN_004644c5`): it looks for a
+   colony within the fuel left, passing the class as the mode, and drops the result.
+   *Fix:* as 3.0.1.1: a fleet with a colony within the fuel it has left (mode 1, as
+   3.0.1's routine calls it) asks for none (`refuelFighters`).
+4. **`scrapRange`: ScrapOldShips passes the fleet's number in the list as its Range**
+   (`FUN_004641ef`, as 3.0.1). *Fix:* the fleet's Range (`scrapOldShips`). Here the colony
+   is looked for in mode 2, which can answer a colony out of the fuel's reach, so the
+   Range can matter.
+5. **`star0`: a colony at star 0.** `FUN_0045c02c` refuses to drag a finished colony's bar
+   by testing the star number (≥ 1) instead of the slot kind, and `FUN_0043b243` counts
+   colony slots whose star number is above 0 for the population milestones. *Fix:* both
+   treat a colony at star 0 like any other (`dragShare`, `milestones` in
+   `js/rules-405.js`).
+6. **`scrapTypeRefund`: marking a ship type gives back only one ship** ordered in the
+   window (`FUN_0044fd03`). *Fix:* all of them (the skin's build window, which reads
+   `rs.scrapTypeRefundOne`, asks for the fix).
+7. **`rankName`: "%s: %s" as the rank past 1,000,000 points** (`FUN_00482b89`, string
+   334, a format string shown as it stands). *Fix:* the top rank's name, "Ho! Champion"
+   (`hall.rank(points, G)`).
+8. **`hallYear`: the Hall of Fame's year is `tm_year`** (`FUN_0049883d`, `FUN_00498b6a`):
+   two digits only until 1999, so 2026 reads 126. *Fix:* the year's last two digits, as
+   1996 showed (`hall.date(seconds, G)`).
+9. **`loserColon`: the Hall of Shame's "Loser" lacks its colon** (`FUN_0046d1e8`; every
+   other label has one). *Fix:* "Loser:" (`hall.loser(G)`).
 
-Also obvious, with nothing in the remake to fix: the auto play settings put the old
-"colonies defended" into metal for defence (`FUN_00404c4e`; the window isn't in the
-remake), and the cheating mark is set for the wrong player (`FUN_004320f8`; the remake
-keeps no checksum).
+The Hall of Fame, Hall of Shame and Master Point List are kept across games; the three
+hall fixes apply while the game being played has the patch on.
+
+**Already played fixed by the remake** (no fix entry: the patch changes nothing):
+- Red stars depend on uninitialised memory (Open 1; `FUN_00436c26`, `FUN_00484788`): the
+  remake sets the bit, as 3.0.1.
+- A Radical level with an empty hand reads the loop counter (Open 2, `FUN_0043a08c`): the
+  remake uses the draw.
+- A hand that runs out on a design card loops for ever (Open 3, `FUN_0043a08c`): the
+  remake loses the discovery.
+
+**Obvious, with nothing in the remake to fix** (no fix entry): the auto play settings
+put the old "colonies defended" into metal for defence (`FUN_00404c4e`; the window isn't
+in the remake), and the cheating mark is set for the wrong player (`FUN_004320f8`; the
+remake keeps no checksum).
 
 ### Quirk or design (left as released)
 
@@ -262,20 +283,40 @@ keeps no checksum).
    (`FUN_004691c4`); 5.0.5 does the same.
 5. The Master Point List's picture for 50,000-499,999 points is bitmap 0x7c, which the
    program hasn't got (`FUN_00482b89`): a missing picture, but which one was meant isn't known.
+6. **Best buddies' battle news is never shared** (moved here from "obvious" in phase 2).
+   The second branch of `FUN_0043853c` asks for a star whose battle year is this year,
+   whose record is older, and whose battle year is also before this year, which can't
+   happen. The test is plainly a slip, but what the branch then does is not settled by the
+   decompile: it copies a whole star record (both sides read through the same accessor,
+   so whose to whose isn't visible) and sets +0x2c to −11. A fix would have to guess.
+7. **A Biological fleet is retired at the Scouts' redesign mark** (moved here from
+   "obvious" in phase 2). `FUN_004641ef` reads the retire table at class 6, one past its
+   six entries, landing on the Scouts' redesign mark (30). Reading past the table is a
+   slip, but which mark was meant isn't known: 4.0.5 has no Biological retire mark, and
+   5.0.5's is 0 (retired as soon as it counts as obsolete at all), a different rule. (The
+   Range slip in the same routine is fixed: `scrapRange`.)
 
 ---
 
-## Mac 5.0.5 (patch 5.0.5.1: phase 2)
+## Mac 5.0.5 (patch 5.0.5.1)
 
-### Obvious bug (to fix in phase 2)
+### Obvious bug (fixed in 5.0.5.1)
 
-1. **Global warming never happens: a sign slip.** `FUN_100737b0` @10073870 compares the
-   interest still owed (below 0) with what Ship Savings may still lend (0 or more), so the
-   shortfall always goes on Ship Savings past the borrowing limit; "Global warming is
-   taking place!" and the fleet scrapped for lack of funds (0x46b, 0x46c) are never sent.
-   4.0.5 (`FUN_0043361b`) compares the right way round. *Fix:* 4.0.5's comparison.
-2. **Tanker retirement passes the fleet's number as its Range** (`FUN_100870a0`): no
-   effect. *Fix:* the Range.
+1. **`globalWarming`: global warming never happens (a sign slip).** `FUN_100737b0`
+   @10073870 compares the interest still owed (below 0) with what Ship Savings may still
+   lend (0 or more), so the shortfall always goes on Ship Savings past the borrowing
+   limit, and the branch with "Global warming is taking place!" (0x46b) and the fleet
+   scrapped for lack of funds (0x46c) never runs. 4.0.5 (`FUN_0043361b`) compares the
+   owed amount's negation. *Fix:* 4.0.5's comparison, then 5.0.5's own branch: what may be
+   lent pays part, the rest goes on Ship Savings, each colony's temperature moves away
+   from yours by rand(k, 2k) tenths, and a random fleet of the fleet list at a star is
+   marked to be scrapped (`js/rules-original.js` `interest505`). One reading: in the
+   decompile k is worked out from the (negative) owed amount ÷ 500, which would always
+   give the floor of 1; the patch takes k = the shortfall ÷ 500 (1 to 1,000), as 4.0.5,
+   since the branch was never run and its k is part of the same sign confusion.
+2. **`scrapRange`: Tanker and obsolete-ship retirement passes the fleet's number as its
+   Range** (`FUN_100870a0`, r8 at 0x10087228). *Fix:* the Range (`js/ai-original.js`
+   `scrapOldShips`).
 
 ### Quirk or design (left as released)
 
@@ -295,21 +336,49 @@ keeps no checksum).
 4. After Armageddon fizzles the devices stay on and it fizzles again every turn
    (`FUN_10076d20` @10076d4c).
 5. A failed purchase still uses up a building place (`FUN_1007e4a0`; 4.0.5 the same).
-6. On a Spiral map the computers explore stars 0 to players − 1, the homes, before 2100
-   (`FUN_10077aa0` @10077fc8): a deliberate head start or a slip.
+6. **On a Spiral map the computers explore the homes before 2100** (`FUN_10077aa0`
+   @10077fc8; Palm `ho.c` the same test). Checked in phase 2 at the user's request; kept as
+   unclear because the code looks written on purpose:
+   - *What it does:* at the end of ColonizeAndExplore, when the player is a computer (the
+     slot test against the player count and galaxy +0x54), the style is 2 (Spiral) and
+     the year is under 2100 (0x834), it explores stars 0 to (players − 1).
+   - *Stars 0 to players − 1 are always the homes on a Spiral:* the Spiral set-up
+     (`FUN_1006c8c0`) calls the layout (`FUN_1006d9e0`, which fills the stars from the end
+     so the arm tips come last, at the lowest numbers), then writes 0..players − 1 into
+     the home table (galaxy +0x218) and shuffles it. The Cluster set-up (`FUN_1006ca18`)
+     does exactly the same, so on Cluster maps too stars 0..players − 1 are the homes,
+     but the rule tests only Spiral.
+   - *No other version has it:* 1.2 and 2.0 give a Smart computer the stars within 9 ly of
+     home before 2020; 3.0.1 and 4.0.5 give a Diabolical one the stars within 9 ly in its
+     first turn (5.0.5 keeps that too). Those are by intelligence and on every map. 3.0.1
+     lays Spiral and Cluster maps out in 2010 (`GiveGalaxyTemporaryCoords @f0df2` puts
+     player i at star i until then) and its computers skip 2010 there; nothing in 3.0.1's
+     ColonizeAndExplore or 4.0.5's code tests the style or the year 2100 (no 0x834 in
+     either). So it isn't a leftover of the 2010 layout.
+   - *Why unclear, not obvious:* three deliberate conditions (computers only, before
+     2100, Spiral only), and a loop bound (the player count) that is only right because
+     the author knew Spiral homes are stars 0..players − 1. It reads as a head start for
+     the computers on the map where homes are farthest apart (arm tips), not as an
+     accident. That it leaves out Cluster, which has the same home numbering, is the one
+     sign of a slip, and it points the other way (to adding Cluster, not removing it).
 
 ---
 
 ## Palm 5 (patch 1.0.4.1)
 
-The Palm program's own version is 1.0.4, so its patch is 1.0.4.1 (`rs.patchVersion`). 5.0.5's entries above apply to it, at the Palm addresses in
-`docs/coverage-palm.md` (global warming: `FUN_00050ed4`).
+The Palm program's own version is 1.0.4, so its patch is 1.0.4.1 (`rs.patchVersion`).
+5.0.5's entries above apply to it, at the Palm addresses in `docs/coverage-palm.md`.
 
-### Obvious bug (to fix in phase 2)
+### Obvious bug (fixed in 1.0.4.1)
 
-1. **Missing ship pictures**: the engine and nose pictures 6205 and 6105 don't exist, so
-   the fastest engines and strongest noses aren't drawn (`FUN_000128e8`). *Fix:* the
-   highest picture there is (a skin matter).
+- **5.0.5's two, where the Palm code is the same:** `globalWarming` (DeductInterest
+  `FUN_00050ed4`, the same test) and `scrapRange` (the computers are 5.0.5's code,
+  `js/ai-original.js`).
+- **`palmPictures`: missing ship pictures.** A ship is drawn from an engine
+  (6200 + (R + V − 8) ÷ 5, up to 5), a hull and a nose (6100 + (W − 1) ÷ 5, up to 5), but
+  6205 and 6105 aren't in the program, so the fastest engines and strongest noses aren't
+  drawn (`FUN_000128e8`). *Fix:* the top pictures there are, 6204 and 6104 (the Palm skin,
+  `js/skins/palm/ui.js` `shipPic`).
 
 ### Quirk or design (left as released)
 
@@ -323,3 +392,4 @@ The Palm program's own version is 1.0.4, so its patch is 1.0.4.1 (`rs.patchVersi
 
 1. The hints are drawn from 4 to 43 (the demo from 4 to 52, past the 51 strings): the
    first three are never shown, and the demo reads past its list. The remake has no demo.
+2. The Spiral head start, as 5.0.5 (above).

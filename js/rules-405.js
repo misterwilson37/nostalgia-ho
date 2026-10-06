@@ -1457,7 +1457,8 @@ function dragShare(G, p, key, pm) {
     const sid = +k, s = G.stars[sid];
     if (!s || s.abandon301) return;
     const [T, X] = bars(s);
-    if (sid >= 1 && T === -1 && X === -1) return;
+    // the patch (fix 'star0'): the slot kind, so a finished colony at star 0 too
+    if ((sid >= 1 || E.fixed(G, 'star0')) && T === -1 && X === -1) return;
     giveBarPercent(G, p, sid, pm, true);
     return;
   }
@@ -2001,7 +2002,9 @@ function giftNews(G, p) {
 const MILESTONES = [1000000, 2500000, 5000000, 10000000, 20000000];
 const num405 = (n) => n >= 10000000 ? `${fmt(trunc(n / 1000000))},${String(trunc(n % 1000000 / 1000)).padStart(3, '0')}K` : fmt(n);
 function milestones(G, p) {
-  let pop = 0; for (const sid of colSlots(G, p)) if (sid > 0 && G.stars[sid].owner === p.id) pop += popU(G.stars[sid]);
+  // the patch (fix 'star0'): every colony counts
+  const all = E.fixed(G, 'star0');
+  let pop = 0; for (const sid of colSlots(G, p)) if ((sid > 0 || all) && G.stars[sid].owner === p.id) pop += popU(G.stars[sid]);
   p.popMiles = p.popMiles || 0;
   const say = (i) => { p.popMiles |= 1 << i; if (p.human) msg(G, p.id, `Congratulations, ${p.name}!   Your population now exceeds ${num405(MILESTONES[i])}!`, { icon: 'm9035', sound: 7021 }); };
   for (const chain of [[0, 1], [2, 3, 4]]) {
@@ -2179,7 +2182,9 @@ const addMasterPoints = (total, pts) => total + (total < 500 ? Math.min(pts, 500
 // "%s: %s", as the rank (rankName).
 const RANKS = [['Red-Neck', 0], ['Bow-legs', 1000], ['Cowpoke', 2500], ['Deputy Gunfighter', 5000], ['Town Sheriff', 10000],
   ['Federal Marshall', 25000], ['Lone Ranger', 50000], ['Quickdraw McGraw', 100000], ['Best in the West', 250000], ['Ho! Champion', 500000]];
-const rankName = (pts) => pts >= 1000000 ? '%s: %s' : RANKS[RANKS.length - 1 - RANKS.slice().reverse().findIndex(r => pts >= r[1])][0];
+// The patch (fix 'rankName'): the top rank's name. (G: the game being played,
+// for the patch; the window can open without one.)
+const rankName = (pts, G) => pts >= 1000000 ? (E.fixed(G, 'rankName') ? RANKS[RANKS.length - 1][0] : '%s: %s') : RANKS[RANKS.length - 1 - RANKS.slice().reverse().findIndex(r => pts >= r[1])][0];
 
 
 // ---------- the Hall of Fame, the Hall of Shame and the Master Point List ----------
@@ -2254,7 +2259,11 @@ const hallPicture = (pts) => pts < 5000 ? 122 : pts < 50000 ? 123 : pts < 500000
 // CONFIRMED (FUN_0049883d, FUN_00498b6a): the date as "%d/%d/%d" of
 // localtime's month + 1, day and tm_year, the years since 1900 (1996: 96,
 // 2026: 126)
-const hallDate = (t) => { const d = new Date(t * 1000); return `${d.getMonth() + 1}/${d.getDate()}/${d.getFullYear() - 1900}`; };
+// The patch (fix 'hallYear'): the year's last two digits, as 1996 showed.
+const hallDate = (t, G) => {
+  const d = new Date(t * 1000), y = d.getFullYear() - 1900;
+  return `${d.getMonth() + 1}/${d.getDate()}/${E.fixed(G, 'hallYear') ? String(y % 100).padStart(2, '0') : y}`;
+};
 // the names the Summary window shows (tables at 0x5a0584-0x5a05e0)
 const HALL_NAMES = {
   shape: [null, 'Circle', 'Random', 'Ring', 'Spiral', 'Grid', 'Cluster'], density: [null, 'Dense', 'Sparse'],
@@ -2263,6 +2272,9 @@ const HALL_NAMES = {
 };
 const hall = {
   entry: hallEntry, record: hallRecord, out: (G, p) => !!p.out405, rank: rankName, picture: hallPicture, date: hallDate, names: HALL_NAMES,
+  // the Hall of Shame summary's label (FUN_0046d1e8): "Loser", without the
+  // colon of "Winner:"; the patch (fix 'loserColon') adds it
+  loser: (G) => E.fixed(G, 'loserColon') ? 'Loser:' : 'Loser',
 };
 
 // ---------- the ruleset ----------
@@ -2270,9 +2282,28 @@ E.registerRules('405', Object.assign({}, D, {
   label: 'Windows 95 4.0.5 (1996)',
   // the New Game window lists rulesets by year, then version (engine.js ruleOptions)
   version: '4.0.5', platform: 'Windows 95', year: 1996,
-  // the unofficial 4.0.5.1 patch: none yet (docs/fixes.md lists 4.0.5's
-  // obvious bugs for phase 2); its own list, so 2.0's isn't inherited
-  fixes: [],
+  // the unofficial 4.0.5.1 patch (engine.js fixed; docs/fixes.md, "4.0.5");
+  // its own list, so 2.0's isn't inherited
+  fixes: [
+    { id: 'poorestOut', title: 'Players who are out don’t count as the poorest',
+      text: 'A computer looking for the poorest and richest players skipped players who were out by a mark they no longer had, so an out player (with no money) usually counted as the poorest, and a computer was seldom “far the poorest”. The patch leaves out players who are out, as 3.0.1 and 5.0.5 do.' },
+    { id: 'designs30', title: 'With 30 designs, the computers keep last turn’s designs',
+      text: 'With 30 designs a computer goes on building last turn’s choices for the classes it hadn’t reached, but it kept them as places in its list of designs, which may since have moved, so it could build some other design or none. The patch keeps the designs themselves.' },
+    { id: 'refuelCheck', title: 'Stranded fighters ask for a colony only when they are stranded',
+      text: 'A computer’s fighter or Dreadnought fleet low on fuel looked for a colony within reach and then ignored the answer, so it always asked for a new colony where it was. The patch asks only when no colony is within the fuel it has left, as the 3.0.1.1 patch does.' },
+    { id: 'scrapRange', title: 'Old ships sent home are routed with their own Range',
+      text: 'When the computers sent old ships home, the program passed the fleet’s place in a list where the route finder wants its Range. The patch passes the Range.' },
+    { id: 'star0', title: 'A colony at the first star is treated like any other',
+      text: 'Two tests looked at the star’s number instead of what the budget slot is, so a finished colony at the first star of the list could still have its budget bar dragged, and its people were left out of the population milestones. The patch treats it like any other colony.' },
+    { id: 'scrapTypeRefund', title: 'Marking a ship type gives back every ship of it you ordered',
+      text: 'Marking a ship type for scrapping in the build window gave back only one of the ships of it ordered there; the rest were built and then scrapped with the type. The patch gives them all back.' },
+    { id: 'rankName', title: 'The rank past 1,000,000 master points has a name',
+      text: 'From 1,000,000 master points the Master Point List showed “%s: %s” as the rank, a text meant to be filled in. The patch shows the top rank, Ho! Champion.' },
+    { id: 'hallYear', title: 'The Hall of Fame’s dates show the year’s last two digits',
+      text: 'The Hall of Fame and Hall of Shame printed the years since 1900, which read as two digits only until 1999: 2026 shows as 126. The patch shows the last two digits, so 2026 is 26.' },
+    { id: 'loserColon', title: 'The Hall of Shame says “Loser:”',
+      text: 'The Hall of Shame’s summary labelled you “Loser”, without the colon every other label has. The patch adds it.' },
+  ],
   patchVersion: null, // its own (4.0.5.1), not 2.0's
   ai: '405',               // its own computer players (js/ai-405.js)
   hints: true,             // CONFIRMED (strings 1700..): tips between turns

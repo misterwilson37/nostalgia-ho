@@ -1257,6 +1257,13 @@ function surrender505(G, p) {
 // still owed (below 0) with what Ship Savings may still lend (0 or more), so
 // the global warming and the fleet scrapped for a lack of funds (0x46b,
 // 0x46c) never happen. (4.0.5's DeductInterest, FUN_0043361b, compares -owed.)
+// The patch (fix 'globalWarming'): the owed amount compared the right way
+// round, as 4.0.5 does; the branch that then runs is 5.0.5's own: what Ship
+// Savings may lend pays part, "You don't have enough money! ... Global warming
+// is taking place!" (0x46b), the rest goes on Ship Savings, every colony's
+// temperature moves away from yours by rand(k, 2k) tenths (k the shortfall /
+// 500, 1 to 1,000, as 4.0.5; colonies within +-3,000 degrees), and a fleet at a
+// star picked at random from the fleet list is marked to be scrapped (0x46c).
 function interest505(G, p) {
   let M = p.tm || 0, I = p.oInterest || 0;
   if (I > 0 || -I <= M) M += I;
@@ -1264,7 +1271,22 @@ function interest505(G, p) {
     I += M; M = 0;
     const avail = Math.max(0, p.savings - limit505(G, p));
     if (avail > 0) rep(G, p, 0x46a, [], { icon: 'm9020', sound: 7020 });
-    p.savings += I;
+    if (E.fixed(G, 'globalWarming') && avail < -I) {
+      rep(G, p, 0x46b, [], { icon: 'm9020', sound: 2001 });
+      I += avail; p.savings -= avail; p.savings += I;
+      const k = clamp(trunc(-I / 500), 1, 1000);
+      for (const sid of colSlots505(G, p)) {
+        const s = G.stars[sid], t = t10(s.t);
+        if (!(t < 30000 && t > -30000)) continue;
+        const dt = RI(G, k, 2 * k);
+        s.t = (t < t10(p.homeT) ? t - dt : t + dt) / 10;
+      }
+      const fl = G.fleets.filter(f => f.owner === p.id);
+      if (fl.length) {
+        const f = fl[RI(G, 0, fl.length - 1)];
+        if (f.star != null && f.to == null) { f.scrap301 = true; rep(G, p, 0x46c, [], { icon: 'm9014' }); }
+      }
+    } else p.savings += I;
   }
   p.tm = M;
 }
@@ -2522,6 +2544,13 @@ E.registerRules('original', {
   label: 'Original (decompiled from 5.0.5)',
   // the New Game window lists rulesets by year, then version (engine.js ruleOptions)
   version: '5.0.5', platform: 'Mac OS 9 and X', year: 2003,
+  // the unofficial 5.0.5.1 patch (engine.js fixed; docs/fixes.md, "5.0.5")
+  fixes: [
+    { id: 'globalWarming', title: 'Interest you can’t pay brings global warming',
+      text: 'When your interest was more than this turn’s money and all you could still borrow, a test written the wrong way round (a sign slip) put it all on Ship Savings, however deep in debt, so the global warming the game has a message for never happened. The patch compares it the right way round, as 4.0.5 did: then your planets warm or cool away from your temperature and one of your fleets is scrapped for lack of funds.' },
+    { id: 'scrapRange', title: 'Ships sent home to be scrapped are routed with their own Range',
+      text: 'When the computers sent obsolete ships and Tankers home to be scrapped, the program passed the fleet’s place in a list where the route finder wants its Range, so the routes it found could be wrong. The patch passes the Range.' },
+  ],
   ai: 'original',
   yearsPerTurn: 10,
   galaxySizes: SIZES,

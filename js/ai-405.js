@@ -202,7 +202,9 @@ function obsolete(p, d) {
 // design is a Fighter, a Biological is of none), with room for 30 designs.
 // With 30 designs no new one is made and the classes not yet looked at keep
 // the design numbers chosen on an earlier turn (a global, DAT_005b2dc0, that
-// isn't cleared), which may by now be other designs or none.
+// isn't cleared), which may by now be other designs or none. The patch (fix
+// 'designs30') keeps last turn's design itself for those classes (none if it
+// is gone), not whatever design now has its number.
 function maintainShipTypes(C) {
   const { G, p, ai } = C;
   const live = () => p.designs.filter(d => !d.scrapped);
@@ -222,9 +224,13 @@ function maintainShipTypes(C) {
   // the design to build for each class: the least obsolete; a new one when
   // even that one has reached the class's redesign mark
   ai.lastT = ai.lastT || {};
+  const fix30 = E.fixed(G, 'designs30');
+  if (fix30) ai.lastId = ai.lastId || {};
+  const pickT = (type, d) => { C.T[type] = d; ai.lastT[type] = live().indexOf(d); if (fix30) ai.lastId[type] = d.id; };
   let full = false;
   for (let c = 0; c < 6; c++) {
     const type = CLASSES[c];
+    if (full && fix30) { const d = live().find(x => x.id === ai.lastId[type] && !C.scrapD.has(x)); if (d) C.T[type] = d; continue; }
     if (full) { const d = live()[ai.lastT[type]]; if (d) C.T[type] = d; continue; }
     let best = null, bo = 32000;
     for (const d of live()) {
@@ -232,14 +238,14 @@ function maintainShipTypes(C) {
       const o = obsolete(p, d);
       if (o < bo) { bo = o; best = d; }
     }
-    if (best && bo < ai.redesign[type]) { C.T[type] = best; ai.lastT[type] = live().indexOf(best); continue; }
+    if (best && bo < ai.redesign[type]) { pickT(type, best); continue; }
     if (live().length >= RS().maxDesigns) { full = true; c--; continue; }
     const sc = type === 'scout';
     const spec = { type, R: type === 'satellite' ? 0 : t.range + (sc ? 2 : 0), V: t.speed, W: t.weapons - (sc ? 1 : 0), S: t.shields - (sc ? 1 : 0), M: t.mini };
     if (type === 'colony' && spec.M > 1) spec.M = trunc(spec.M / 3);
     const d = RS().newDesign(G, p, spec); // always a new design record
     if (C.iq > 1) d.free = true; // Average and up: no development cost (the prototype price is the price)
-    C.T[type] = d; ai.lastT[type] = live().indexOf(d);
+    pickT(type, d);
   }
   // too many designs: drop the unused ones that aren't being built, then any
   const cur = new Set(Object.values(C.T)), max = RS().maxDesigns;
@@ -281,10 +287,13 @@ function computeStatus(C) {
   // (player +0), every player whose Total Money isn't -1, so a player who is
   // out (Total Money 0) counts, and is usually the poorest (3.0.1 read the
   // Compare Players table, -1 for one who was out)
+  // The patch (fix 'poorestOut'): players who are out are left out, as 3.0.1
+  // (-1 in its table) and 5.0.5 do
   let low = -1, lowV = 9999999, low2 = 9999999, high = -1, highV = -100;
+  const fixOut = E.fixed(G, 'poorestOut');
   for (const q of order405(G)) {
     const v = q.tm || 0;
-    if (v === -1) continue;
+    if (v === -1 || (fixOut && q.out405)) continue;
     if (v < lowV) { low2 = lowV; lowV = v; low = q.id; } else if (v < low2) low2 = v;
     if (highV < v) { highV = v; high = q.id; }
   }
@@ -437,7 +446,9 @@ function scrapOldShips(C) {
       if (t === 'scout') return;
       const left = maxR(G, f) - used(G, f);
       const back = findCloseEnoughColony(C, f.star, left, 2);
-      if (back !== -1 && go(C, f, f.star, back, left, idx)) C.used.add(f);
+      // (the fleet's number in the list as its Range, as 3.0.1; the patch,
+      // fix 'scrapRange', passes the Range)
+      if (back !== -1 && go(C, f, f.star, back, left, E.fixed(G, 'scrapRange') ? maxR(G, f) : idx)) C.used.add(f);
     } else { C.scrapF.add(f); C.used.add(f); }
   });
 }
@@ -454,7 +465,10 @@ function refuelFighters(C) {
     const t = classOf(G, f);
     if (f.star == null || !(t === 'fighter' || t === 'dread') || !(used(G, f) > 0)) continue;
     if (obsolete(p, designOf(G, f)) >= ai.retire[t]) continue;
-    findCloseEnoughColony(C, f.star, maxR(G, f) - used(G, f), CLASSES.indexOf(t));
+    // the patch (fix 'refuelCheck', as 3.0.1.1): a fleet with one of your
+    // colonies within the fuel it has left asks for none
+    if (E.fixed(G, 'refuelCheck')) { if (findCloseEnoughColony(C, f.star, maxR(G, f) - used(G, f), 1) !== -1) continue; }
+    else findCloseEnoughColony(C, f.star, maxR(G, f) - used(G, f), CLASSES.indexOf(t));
     if (fleetCount(f) <= 4) continue;
     const src = findCloseEnoughColony(C, f.star, T.colony ? T.colony.R : 0, 4);
     if (src !== -1) addAction(C, 4, 58, f.star, src);

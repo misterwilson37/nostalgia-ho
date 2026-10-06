@@ -55,8 +55,9 @@ window.HOTHEME = {
   // 40x40 parts 20 px apart: engine 6200+ (range and speed), hull 6300+
   // (shields; 6003 a colony ship, 6015 a tanker), nose 6100+ (weapons).
   // 6105 and 6205 don't exist, so at the top levels that part isn't drawn,
-  // as in the original.
-  shipPic(d, IMG) {
+  // as in the original. With the Palm patch (fix): the top engine and nose
+  // there are (6204, 6104) instead.
+  shipPic(d, IMG, rusty, fix) {
     const W = d.W || 0, S = d.S || 0, R = d.R || 0, V = d.V || 0, M = d.M || 0;
     let one = null;
     if (d.type === 'bio') one = W < 7 ? 6000 : W >= 13 && W <= 15 ? 6001 : 6002;
@@ -74,9 +75,10 @@ window.HOTHEME = {
       c.getContext('2d').drawImage(im, 0, 0);
       return c;
     }
-    const parts = [6200 + clamp(trunc((R + V - 8) / 5), 0, 5),
+    const top = fix ? 4 : 5;
+    const parts = [6200 + clamp(trunc((R + V - 8) / 5), 0, top),
       d.type === 'colony' ? 6003 : d.type === 'tanker' ? 6015 : 6300 + clamp(trunc((S - 1) / 6), 0, 4),
-      6100 + clamp(trunc((W - 1) / 5), 0, 5)];
+      6100 + clamp(trunc((W - 1) / 5), 0, top)];
     const c = document.createElement('canvas'); c.width = 80; c.height = 40;
     const x = c.getContext('2d');
     parts.forEach((n, i) => { const im = IMG[B(n)]; if (im && im.width) x.drawImage(im, i * 20, 0, 40, 40); });

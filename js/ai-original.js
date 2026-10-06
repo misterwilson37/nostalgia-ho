@@ -575,8 +575,9 @@ function scrapOldShips(C) {
       const left = maxR(G, f) - usedFuel(G, f);
       const to = findClose(C, f.star, left, 2);
       if (to === -1) return;
-      // the fleet's number in the fleet list is passed as the Range (r8 at 0x10087228)
-      const r = determinePath(C, f.star, to, left, idx, countType(G, f, 3) > 0);
+      // the fleet's number in the fleet list is passed as the Range (r8 at
+      // 0x10087228); the patch (fix 'scrapRange') passes the Range
+      const r = determinePath(C, f.star, to, left, E.fixed(G, 'scrapRange') ? maxR(G, f) : idx, countType(G, f, 3) > 0);
       if (r) { C.used.add(f); givePath(f, r); }
     } else { C.scrapF.add(f); C.used.add(f); }
   });

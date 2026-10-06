@@ -108,7 +108,7 @@ Optional ruleset flags the skin reads (each is documented where it is read):
   waiting with its orders, saying nothing (5.0.5). (`js/engine.js`, `departures`)
 - `rs.hall`: a version's Hall of Fame, Hall of Shame and Master Point List (4.0.5's
   `haloffam.ho`): `{ entry(G, player, won), record(tables, entry, won), out(G, player),
-  rank(points), picture(points), date(seconds), names }`. A human who wins or is
+  rank(points, G), picture(points), date(seconds, G), names, loser(G) }` (G, the game being played, only for its unofficial patch). A human who wins or is
   eliminated is put on record once a game (`G.hallDone`), in localStorage
   "ho5.hall.<rules>", apart from 5.0.5's rank history; the Game menu then offers
   "Master Point List…", "Hall of Fame…" and "Hall of Shame…", in every skin.

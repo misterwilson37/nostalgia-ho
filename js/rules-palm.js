@@ -193,5 +193,12 @@ const rs = Object.assign(base, {
 Object.defineProperty(rs, 'starNames', { enumerable: true, configurable: true,
   get: () => (E.DATA.starNames || []).map(n => n === 'Antares' ? 'Courasant' : n) });
 rs.patchVersion = '1.0.4.1'; // the Palm program's own version is 1.0.4
+// the unofficial 1.0.4.1 patch (docs/fixes.md, "Palm"): 5.0.5's fixes where the
+// Palm code is the same (interest FUN_00050ed4; the computers are 5.0.5's), and
+// its own: the missing ship pictures (the Palm skin draws them)
+rs.fixes = O.fixes.concat([
+  { id: 'palmPictures', title: 'The fastest engines and strongest noses are drawn',
+    text: 'A ship is drawn from an engine, a hull and a nose, but the Palm game has no picture for the top engine (6205) or the top nose (6105), so those ships were drawn with a part missing. The patch draws the highest engine and nose there are.' },
+]);
 E.registerRules('palm', rs);
 })(this);

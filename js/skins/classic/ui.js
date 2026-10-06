@@ -252,9 +252,11 @@ function shipPic(d, owner) {
   // a design whose weapons and shields are both more than 3 levels behind
   // its owner's research is drawn rusty (design flag +0xd, FUN_10074c10)
   const rusty = !!(p && p.tech && d.type !== 'bio' && p.tech.weapons - d.W > 3 && p.tech.shields - d.S > 3);
-  const key = [d.type, d.R, d.V, d.W, d.S, d.M, rusty].join(':');
+  // the Palm patch (fix 'palmPictures') draws the parts the Palm game lacked
+  const palmFix = !!(G && HO.fixed(G, 'palmPictures'));
+  const key = [d.type, d.R, d.V, d.W, d.S, d.M, rusty].join(':') + (palmFix ? ':fix' : '');
   if (shipCache[key]) return shipCache[key];
-  if (T.shipPic) { const t = T.shipPic(d, IMG, rusty); if (t) return (shipCache[key] = t); }
+  if (T.shipPic) { const t = T.shipPic(d, IMG, rusty, palmFix); if (t) return (shipCache[key] = t); }
   const { ops } = shipParts(d);
   let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
   for (const [, r] of ops) { x0 = Math.min(x0, r[0]); y0 = Math.min(y0, r[1]); x1 = Math.max(x1, r[2]); y1 = Math.max(y1, r[3]); }
@@ -1190,7 +1192,7 @@ function openHall(kind, at) {
   const body = el('div', { class: 'hall hall-list' },
     el('div', { class: 'htitle' }, title),
     hallHeads(['Name', 'When', 'Difficulty'], cols),
-    hallListBox(list.map(e => [e.name, H.date(e.time), String(e.difficulty)]), cols, sel, (i) => { sel = i; }, (i) => { sel = i; details(); }),
+    hallListBox(list.map(e => [e.name, H.date(e.time, G), String(e.difficulty)]), cols, sel, (i) => { sel = i; }, (i) => { sel = i; details(); }),
     el('div', { class: 'btns' }, el('button', { class: 'quiet', disabled: !list.length, onclick: details }, 'Details'), el('button', { onclick: closeModal }, 'OK')));
   modal(title, body, { cls: 'mid hallwin' });
 }
@@ -1205,7 +1207,7 @@ function openHallSummary(e, kind, back) {
     el('div', { class: 'htitle' }, shame ? 'Summary of Game Defeat' : 'Summary of Game Victory'),
     el('div', { class: 'hsum' },
       el('div', { class: 'hgrid' },
-        ...row(shame ? 'Loser' : 'Winner:', e.name), ...row('Date:', H.date(e.time)), ...row('Difficulty:', String(e.difficulty)),
+        ...row(shame ? (H.loser ? H.loser(G) : 'Loser') : 'Winner:', e.name), ...row('Date:', H.date(e.time, G)), ...row('Difficulty:', String(e.difficulty)),
         ...row('# Humans:', String(e.humans)), ...row('# of Computers:', String(e.computers)), ...row('# Allies:', String(e.allies)),
         ...row('Computer Intelligence:', N.iq[e.iq] || ''), ...row('Game Date:', String(e.year)),
         ...row('Galaxy Size:', N.size[e.size] || '', N.density[e.density] || '', N.shape[e.shape] || ''),
@@ -1233,7 +1235,7 @@ function openMasterList() {
   const body = el('div', { class: 'hall hall-master' },
     el('div', { class: 'htop' }, el('div', { class: 'htitle' }, 'Master Points:'), pic),
     hallHeads(['', 'Name', 'Points', 'Rank'], cols),
-    hallListBox(L.map(r => ['', r.name, String(r.points), H.rank(r.points)]), cols, 0, (i) => show(L[i].points)),
+    hallListBox(L.map(r => ['', r.name, String(r.points), H.rank(r.points, G)]), cols, 0, (i) => show(L[i].points)),
     el('div', { class: 'btns right' }, el('button', { onclick: closeModal }, 'OK')));
   modal('Master Point List', body, { cls: 'mid hallwin' });
 }
@@ -1381,7 +1383,7 @@ function openBuild(sid) {
           marking ? el('button', { class: 'quiet', onclick: () => {
             // a type marked for scrapping: the ships of it bought in this window go back
             if (HO.rules(G).flagScrapDesign(G, p, d, 'command')) {
-              if (HO.rules(G).scrapTypeRefundOne) { if (session[d.id] > 0 && HO.unbuildShip(G, ME, sid, d.id)) session[d.id]--; }
+              if (HO.rules(G).scrapTypeRefundOne && !HO.fixed(G, 'scrapTypeRefund')) { if (session[d.id] > 0 && HO.unbuildShip(G, ME, sid, d.id)) session[d.id]--; }
               else for (; session[d.id] > 0; session[d.id]--) HO.unbuildShip(G, ME, sid, d.id);
             }
             render(); renderPanel(); draw(); save();
