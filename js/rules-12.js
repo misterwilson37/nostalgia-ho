@@ -217,6 +217,8 @@ const trunc = Math.trunc;
 // GetIconID @130db0 has no case for (0x423 falls to its default), the
 // picture of your own planet (1000 + your face; 'white0_0', your hat, in the
 // remake's own pictures).
+// The patch (fix 'meteorReport'): 2.0's report 1009, naming the meteor
+// shower (rules-dos income20 writes it; it isn't blanked here).
 function pass2_12(G) {
   const before = G.players.map(p => (p.inbox || []).length);
   D.refuel(G); // 2.0's pass 2 (rules-dos pass2_20), for every player
@@ -236,7 +238,8 @@ function setColonyBars12(G, s, t, m, f) {
   let [T, X] = D.bars20(s), S;
   if (t + m === 0) { if (T >= 0) T = 0; if (X >= 0) X = 0; S = 1000; }
   else {
-    const rest = t + m + f, pm = (v) => (trunc(((Math.imul(v, 1000) + rest - 1) | 0) / rest) << 16) >> 16;
+    const rest = t + m + f, pm = E.fixed(G, 'colonyBars32') ? (v) => trunc((v * 1000 + rest - 1) / rest) // the patch: no overflow
+      : (v) => (trunc(((Math.imul(v, 1000) + rest - 1) | 0) / rest) << 16) >> 16;
     if (T >= 0) T = pm(t);
     if (X >= 0) X = pm(m);
     S = pm(f);
@@ -363,5 +366,14 @@ E.registerRules('12', Object.assign({}, D, {
   yardRefund: yardRefund12, queueMergeAny: true, canMerge: canMerge12, organized: organized12,
   finishedPartWasted: false,
   att12, shipPower: att12,
+  // the unofficial 1.2.1 patch (engine.js fixed; docs/fixes.md, "1.2"). 1.2
+  // has its own list: 2.0's (rules-dos FIXES20) isn't inherited.
+  patchVersion: null, // its own (1.2.1), not 2.0's
+  fixes: [
+    { id: 'meteorReport', title: 'The meteor report has a text',
+      text: 'A colony wiped out by a meteor shower got a blank report: its number is past the end of 1.2’s list of report texts. The patch gives it 2.0’s report, naming the meteor shower: “A meteor shower destroyed your colony at …”.' },
+    { id: 'colonyBars32', title: 'The computer’s colony bars no longer overflow',
+      text: 'When the computer gave a colony more than $2,147,483 for one part, the sum overflowed and the colony’s bars came out wrong. The patch works them out without overflowing.' },
+  ],
 }));
 })(this);

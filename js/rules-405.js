@@ -2270,6 +2270,10 @@ E.registerRules('405', Object.assign({}, D, {
   label: 'Windows 95 4.0.5 (1996)',
   // the New Game window lists rulesets by year, then version (engine.js ruleOptions)
   version: '4.0.5', platform: 'Windows 95', year: 1996,
+  // the unofficial 4.0.5.1 patch: none yet (docs/fixes.md lists 4.0.5's
+  // obvious bugs for phase 2); its own list, so 2.0's isn't inherited
+  fixes: [],
+  patchVersion: null, // its own (4.0.5.1), not 2.0's
   ai: '405',               // its own computer players (js/ai-405.js)
   hints: true,             // CONFIRMED (strings 1700..): tips between turns
   maxPlayers: 20,          // CONFIRMED (FUN_00448856): 0-19 computers, 20 players

@@ -19,6 +19,8 @@
 //
 // A line may be { text, show: (rs) => bool } to show only while a ruleset
 // flag says it applies (rs is the ruleset, HO.rules(G)).
+// A quirk may be { text, fix: id }: the version's unofficial patch fixes it
+// (rs.fixes, docs/fixes.md), and the window says so beside it.
 (function (root) {
 'use strict';
 const RANDOM = 'The random numbers are the remake’s own, so a game can’t be replayed move for move.';
@@ -27,13 +29,13 @@ root.HOVERSIONS = {
   '12': {
     intro: 'The French edition of the Mac game, a cut-down pre-release of 2.0. Every routine of its program has been read, and every rule comes from its own code.',
     quirks: [
-      'A colony wiped out by a meteor shower gets a blank report.',
+      { text: 'A colony wiped out by a meteor shower gets a blank report.', fix: 'meteorReport' },
       'Organize Fleets refuels and reloads: rearranging one design’s ships at a star gives every fleet of that design there the best fuel among them, and each new Colony Ship fleet it makes comes loaded with colonists.',
       'The game has the text for messages between players, but no way to send one.',
       'There is no command to give up a colony, so there is no Evacuate button: a colony goes only when it is left unfunded until its people are gone.',
       'The power of the ships and planet at every star is worked out each turn and never used.',
       'Players who are out still play their turn: their money still earns interest and their research goes on.',
-      'The computer’s colony bars go wrong when it gives a colony more than $2,147,483 for one part (the sum overflows). It takes a very rich computer to see it.',
+      { text: 'The computer’s colony bars go wrong when it gives a colony more than $2,147,483 for one part (the sum overflows). It takes a very rich computer to see it.', fix: 'colonyBars32' },
     ],
     differs: [
       RANDOM,
@@ -54,12 +56,14 @@ root.HOVERSIONS = {
     intro: 'The game 1.2 was a pre-release of: the Windows 3.1 edition came first, and the DOS edition is a port of it with the same art, sounds and rules. Every routine of the Windows program has been read.',
     previous: '1.2',
     quirks: [
-      'Organize Ships gives every fleet of the design at the star the average fuel used, but counts at most 11 fleets, so with 12 or more fleets the average comes out too high.',
+      { text: 'Organize Ships gives every fleet of the design at the star the average fuel used, but counts at most 11 fleets, so with 12 or more fleets the average comes out too high.', fix: 'orgFuelCount' },
       'Organize Ships clears the orders of every fleet of that design at the star, even one you left alone.',
       'A new fleet made in Organize Ships is loaded with colonists, so splitting an empty colony fleet away from your colonies refills part of it.',
       'Players who are out still play their turn: their money still earns interest and their research goes on.',
-      'A slip in how the computers scrap old fighters has no effect on play.',
-      'A colony wiped out by a meteor shower is reported as “… destroyed your colony”, naming whoever a report ten messages earlier happened to leave behind: often you or another player, sometimes no one. (Where 2.0 would have read past its own data and crashed, the remake names no one.)',
+      { text: 'A slip in how the computers scrap old fighters has no effect on play.', fix: 'scrapRange' },
+      { text: 'A colony wiped out by a meteor shower is reported as “… destroyed your colony”, naming whoever a report ten messages earlier happened to leave behind: often you or another player, sometimes no one. (Where 2.0 would have read past its own data and crashed, the remake names no one.)', fix: 'meteorReport' },
+      { text: 'The computers work out their designs’ attack rating in 16 bits, so from about Weapons 4 it wraps round and they misjudge their warships.', fix: 'attack16' },
+      { text: 'The computers’ colony bars go wrong when one gives a colony more than $2,147,483 for one part (the sum overflows).', fix: 'colonyBars32' },
       'There is no command to give up a colony, so there is no Evacuate button: a colony goes only when it is left unfunded until its people are gone (the “Let ’em die” warning).',
     ],
     differs: [
@@ -92,13 +96,13 @@ root.HOVERSIONS = {
     intro: 'The first colour Mac version: 2.0’s game with the money model, alliances, Radical tech and novas of the later versions. Every routine of its program has been read, and every rule comes from its own code.',
     previous: '2.0',
     quirks: [
-      'In 2010, on Spiral and Cluster maps, the computers skip their first turn.',
-      'A slip in how the computers scrap old ships has no effect on play.',
-      'Stranded fighter fleets always ask for a colony, even with one in reach.',
+      { text: 'In 2010, on Spiral and Cluster maps, the computers skip their first turn.', fix: 'skip2010' },
+      { text: 'A slip in how the computers scrap old ships has no effect on play.', fix: 'scrapRange' },
+      { text: 'Stranded fighter fleets always ask for a colony, even with one in reach.', fix: 'refuelCheck' },
       'Turning Abandon off doesn’t give the colony its share back.',
       'An abandoned colony with a colony ship there is colonized again in the same turn.',
       'Organize Ships gives every fleet of the design at the star the most fuel used among them.',
-      'The computer’s colony bars go wrong when it gives a colony more than $2,147,483 for one part.',
+      { text: 'The computer’s colony bars go wrong when it gives a colony more than $2,147,483 for one part.', fix: 'colonyBars32' },
       'The power of the ships at every star is worked out each turn and never used.',
     ],
     differs: [

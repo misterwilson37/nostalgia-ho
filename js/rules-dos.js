@@ -249,7 +249,7 @@ function designCost(G, d) {
     money = trunc(mm * B); protoTotal = trunc(2 * mm * mm * B);
     metal = trunc(B / (3 * mm)); hp = trunc(B / 3);
   }
-  return { money, metal, proto: Math.max(0, protoTotal - money), protoTotal, hp: Math.max(1, hp), att: attack(hp, W) };
+  return { money, metal, proto: Math.max(0, protoTotal - money), protoTotal, hp: Math.max(1, hp), att: attack(hp, W, E.fixed(G, 'attack16')) };
 }
 // CONFIRMED (FUN_10f0_05e9 @10f0:079d-0851): the attack rating the computer
 // players use (design field +0x18) is the larger of (hp / 50) x W^2 and
@@ -258,10 +258,12 @@ function designCost(G, d) {
 // product with (5W + 20) is cut back to a signed 16-bit number (CWD) before
 // the division, so from about Weapons 4 it wraps round and the first term
 // wins. (Mac 1.2 does it in 32 bits; js/rules-12.js keeps that.)
+// The patch (fix 'attack16'): the second term in 32 bits, as Mac 1.2 and
+// 3.0.1 work it out, so it no longer wraps.
 const i16 = (x) => ((x & 0xffff) ^ 0x8000) - 0x8000;
-function attack(hp, W) {
+function attack(hp, W, fix) {
   const a = trunc(hp / 50) * W * W;
-  const b = trunc(i16(i16(i16(W * W) * wpn(W + 25)) * (5 * W + 20)) / 300);
+  const b = fix ? trunc(W * W * wpn(W + 25) * (5 * W + 20) / 300) : trunc(i16(i16(i16(W * W) * wpn(W + 25)) * (5 * W + 20)) / 300);
   return Math.max(a, b);
 }
 const shipPower = (G, d) => d ? designCost(G, d).att : 0;
@@ -1382,6 +1384,8 @@ function income20(G, p) {
         // given: the name is the one left in the record (log20, above)
         let who = '';
         if (p.human && log20On(G)) { sync20(G, p, true); who = staleName20(G, addLog20(log20(p), null)); }
+        // the patch (fix 'meteorReport'): the report names the meteor shower
+        if (E.fixed(G, 'meteorReport')) who = 'A meteor shower';
         msg(G, p.id, `${who} destroyed your colony at ${s.name}.`, { icon: 'm9036', sound: 2001, star: s.id });
         if (p.human && log20On(G)) log20(p).i = p.inbox.length;
         removeColony20(G, p, s); continue;
@@ -1622,7 +1626,8 @@ function organized20(G, f, merged, nf, orders) {
     else before.push(usedOf(x.fuel));
   }
   if (merged && !(orders && orders.fuel)) before.push(usedOf(merged.fuel));
-  const avg = before.length ? trunc(before.reduce((a, x) => a + x, 0) / Math.min(before.length, 11)) : 0;
+  // the patch (fix 'orgFuelCount'): the average over every fleet, not at most 11
+  const avg = before.length ? trunc(before.reduce((a, x) => a + x, 0) / (E.fixed(G, 'orgFuelCount') ? before.length : Math.min(before.length, 11))) : 0;
   for (const x of same) { x.fuel = R - avg; x.dest = null; x.path = null; x.routeTo = null; }
   const d = getDesign(G, f.owner, +did);
   if (d && d.type === 'colony') {
@@ -1633,6 +1638,23 @@ function organized20(G, f, merged, nf, orders) {
     } else if (nf) f.colonists = (f.colonists || 0) > 0 ? 10 * fleetCount(f) : 0;
   }
 }
+
+// ---------- the unofficial patch (docs/fixes.md, "2.0") ----------
+// 2.0's obvious bugs, fixed only when the player turns the patch on at New
+// Game (G.opts.patch; engine.js fixed). Each is the smallest change that does
+// what the code evidently meant. The rules ask E.fixed(G, id) where they are.
+const FIXES20 = [
+  { id: 'meteorReport', title: 'The meteor report names the meteor shower',
+    text: 'A colony wiped out by a meteor shower was reported as “… destroyed your colony”, naming whoever a report ten messages earlier happened to leave behind (where 2.0 itself could crash). The patch reports “A meteor shower destroyed your colony at …”.' },
+  { id: 'orgFuelCount', title: 'Organize Ships averages the fuel over every fleet',
+    text: 'Organize Ships gives every fleet of the design the average fuel used, but counted at most 11 fleets, so with 12 the average came out too high. The patch divides by the real number of fleets.' },
+  { id: 'attack16', title: 'The computers’ attack rating no longer wraps round',
+    text: 'The computers worked out a design’s strength in 16 bits, so from about Weapons 4 the sum wrapped round and they misjudged their own warships. The patch works it out in 32 bits, as 1.2 and 3.0.1 do.' },
+  { id: 'colonyBars32', title: 'The computers’ colony bars no longer overflow',
+    text: 'When a computer gave a colony more than $2,147,483 for one part, the sum overflowed and the colony’s bars came out wrong. The patch works them out without overflowing.' },
+  { id: 'scrapRange', title: 'Old fighters sent home are routed with their own Range',
+    text: 'When the computers sent old fighters home, the program passed the fleet’s place in a list where the route finder wants its Range. It made no difference to play (the colony is always within reach), and the remake already routes these fleets by their own Range; it is listed so the patch covers every slip found.' },
+];
 
 // ---------- set-up (FUN_1030_1299 @1030:19ae-1b32) ----------
 // CONFIRMED: the budget slots are Savings (0), Technology (150) and the home
@@ -1673,7 +1695,8 @@ function setColonyBars20(G, s, t, m, f) {
   let [T, X] = bars20(s), S;
   if (t + m === 0) { if (T >= 0) T = 0; if (X >= 0) X = 0; S = 1000; }
   else {
-    const rest = t + m + f, pm = (v) => (trunc(((Math.imul(v, 1000) + rest - 1) | 0) / rest) << 16) >> 16;
+    const rest = t + m + f, pm = E.fixed(G, 'colonyBars32') ? (v) => trunc((v * 1000 + rest - 1) / rest) // the patch: no overflow
+      : (v) => (trunc(((Math.imul(v, 1000) + rest - 1) | 0) / rest) << 16) >> 16;
     if (T >= 0) T = pm(t);
     if (X >= 0) X = pm(m);
     S = pm(f);
@@ -1747,5 +1770,9 @@ E.registerRules('dos', Object.assign({}, O, {
   shareOf, colonyMoney, shipyard, removeColony, isqrt, wpn, battleOnly: battle, base12, bars20, setBars20,
   // not in 2.0 (CONFIRMED: no text or code for them)
   difficulty: undefined, masterPoints: undefined,
+  // the unofficial 2.0.1 patch (engine.js fixed; docs/fixes.md): each fix is
+  // asked for by its id where the rule is, and is off unless G.opts.patch
+  fixes: FIXES20,
+  patchVersion: '2.0.1.1', // the program calls itself 2.0.1 in its credits, so the patch is 2.0.1.1
 }));
 })(this);

@@ -767,7 +767,7 @@ function renderPanel() {
   const panel = $('#panel');
   const scroll = panel.scrollTop;
   panel.innerHTML = '';
-  $('#title').textContent = `${p.name} in ${G.opts.galaxy || 'Milky Way'} in ${G.year}`;
+  $('#title').textContent = `${p.name} in ${G.opts.galaxy || 'Milky Way'} in ${G.year}${titleTag()}`;
   // budget info
   const pr = HO.projected(G, p);
   const net = pr.net;
@@ -1778,7 +1778,7 @@ function runAutoPlay(o) {
     me().auto = o.computer; HO.endTurn(G); me().auto = false; awardMasterPoints(o.computer); recordHall(); save();
     renderPanel(); draw();
     const stop = me().inbox.some(m => (o.won && isBattleNews(m) && wonBattle(m)) || (o.lost && isBattleNews(m) && !wonBattle(m)) || (o.news && !m.quiet && !isBattleNews(m) && !m.chat));
-    $('#title').textContent = `${me().name} in ${G.opts.galaxy || 'Milky Way'} in ${G.year} (auto play)`;
+    $('#title').textContent = `${me().name} in ${G.opts.galaxy || 'Milky Way'} in ${G.year}${titleTag()} (auto play)`;
     if (stop || G.over) { showMessages(); return; }
     setTimeout(step, 120);
   };
@@ -1849,12 +1849,40 @@ function openPrefs() {
 // are choices here, and can be changed in the middle of a game.
 const MODERN_TEXT = 'Modern conveniences: automatic routes, the map follows the news, battle speed and written battle reports (not in the original games)';
 function setModern(on) { if (!G) return; G.opts.modern = !!on; save(); renderPanel(); draw(); }
+// The unofficial patch: fixes for a version's obvious bugs (rs.fixes,
+// docs/fixes.md), chosen at New Game only (G.opts.patch, a rule: it can't be
+// changed mid-game) and remembered for the next New Game ("ho5.patch"). Its
+// number is the version's + ".1" (HO.patchVersion). Hidden for a ruleset
+// with no fixes.
+const PATCH_TEXT = (rs) => `Apply the ${HO.patchVersion(rs)} patch: fixes for obvious bugs (not an official release)`;
+const patchName = (rs) => `${HO.patchVersion(rs)} (unofficial patch)`;
+const patchOn = () => !!(G && G.opts && G.opts.patch) && HO.fixes(HO.rules(G)).length > 0;
+const titleTag = () => patchOn() ? ` · ${patchName(HO.rules(G))}` : '';
+// the fixes as a list: each one's title and what it does
+const fixList = (rs) => el('ul', null, ...HO.fixes(rs).map(f => el('li', null, el('b', null, f.title), el('br'), f.text)));
+// Ho menu, "Patch notes…" (only while the game has the patch on)
+function openPatchNotes() {
+  if (!patchOn()) return;
+  const rs = HO.rules(G), pv = HO.patchVersion(rs);
+  const body = el('div', { class: 'about' },
+    el('h3', null, rs.label || rs.id),
+    el('p', { class: 'sub' }, `Version ${patchName(rs)} · ${rs.platform} · ${rs.year}`),
+    el('p', null, `This game plays ${rs.version} with the fixes below for its obvious bugs; everything else is as ${rs.version} was released. The patch is the remake’s own, not a release of the original game, and was chosen at New Game: it stays on for the whole game.`),
+    el('section', { class: 'vnotes' }, el('h4', null, 'Fixed'), fixList(rs)),
+    el('div', { class: 'btns right' }, el('button', { onclick: closeModal }, 'OK')));
+  modal(`${pv} patch notes (unofficial)`, body, { cls: 'mid' });
+}
 // the rules being played, or those chosen last in New Game
 const rulesId = () => G ? G.rules : ([localStorage.getItem('ho5.rules')].find(r => r && HO.RULESETS[r]) || HO.newestRules());
 function openAbout() {
   const id = rulesId(), rs = HO.RULESETS[id] || HO.rules(null), N = (window.HOVERSIONS || {})[id] || {};
   const chk = N.checking || {};
-  const lines = (list) => (list || []).filter(x => typeof x === 'string' || !x.show || x.show(rs)).map(x => typeof x === 'string' ? x : x.text);
+  // a quirk the version's patch fixes says so: in a game with the patch on,
+  // that this game has it fixed (the Patch notes say how); otherwise, which
+  // patch fixes it
+  const patched = !!G && patchOn(), pv = HO.patchVersion(rs), fixIds = HO.fixes(rs).map(f => f.id);
+  const fixNote = (x) => typeof x !== 'string' && x.fix && fixIds.includes(x.fix) ? (patched ? ` (fixed in this game by the ${pv} patch: see Patch notes)` : ` (fixed in the ${pv} patch)`) : '';
+  const lines = (list) => (list || []).filter(x => typeof x === 'string' || !x.show || x.show(rs)).map(x => typeof x === 'string' ? x : x.text + fixNote(x));
   const part = (title, list, key, none) => {
     const L = lines(list);
     if (!L.length && !chk[key] && !none) return null;
@@ -1864,8 +1892,9 @@ function openAbout() {
   };
   const body = el('div', { class: 'about' },
     el('h3', null, rs.label || id),
-    rs.version ? el('p', { class: 'sub' }, `Version ${rs.version} · ${rs.platform} · ${rs.year}`) : null,
+    rs.version ? el('p', { class: 'sub' }, `Version ${patched ? patchName(rs) : rs.version} · ${rs.platform} · ${rs.year}`) : null,
     G ? null : el('p', { class: 'sub' }, 'The rules chosen for the next game.'),
+    patched ? el('p', { class: 'note' }, `This game has the ${pv} patch on: the remake’s own fixes for ${rs.version}’s obvious bugs, not an official release. The Ho menu’s Patch notes say what each one fixes.`) : null,
     N.intro ? el('p', null, N.intro) : null,
     part('Known bugs and quirks, played as released', N.quirks, 'quirks', rs.version ? 'None known.' : null),
     part('Where this remake differs', N.differs, 'differs'),
@@ -2022,6 +2051,12 @@ function newGameDialog() {
     sel('d_density', 'Density', [['dense', 'Dense'], ['sparse', 'Sparse']], 'dense')); // 2.0 has no novas
   const startSel = sel('start', 'Your home system', STARTS, 'normal');
   const sounds = soundPicker(localStorage.getItem('ho5.sounds') || null);
+  // the unofficial patch: the check box names the chosen rules' patch, and
+  // its fixes are listed below it, folded away (refresh fills both)
+  const patchText = el('span'), patchSum = el('summary'), patchFixes = el('div');
+  const patchBox = el('div', { class: 'patch' },
+    el('label', { class: 'chk' }, el('input', { type: 'checkbox', name: 'patch', checked: localStorage.getItem('ho5.patch') === '1' ? 'checked' : false }), patchText),
+    el('details', null, patchSum, patchFixes));
   // hot seat: names and hats for players 2..6
   const seats = el('div', { class: 'group seats' });
   for (let i = 2; i <= 6; i++) seats.append(el('label', { 'data-seat': i }, el('span', null, `Player ${i}`),
@@ -2047,6 +2082,7 @@ function newGameDialog() {
       el('label', { class: 'chk' }, el('input', { type: 'checkbox', name: 'novas', checked: 'checked' }), el('span', null, 'Novas'))),
     el('label', { class: 'chk modern' }, el('input', { type: 'checkbox', name: 'modern', checked: localStorage.getItem('ho5.modern') === '1' ? 'checked' : false }),
       el('span', null, MODERN_TEXT)),
+    patchBox,
     sounds,
     el('div', { class: 'btns right' }, el('button', { type: 'submit' }, 'Create galaxy')));
   const origOpts = (d) => ({ computers: d.computers === 'any' ? 4 : +d.computers, iqNum: +d.o_iq, start: d.start, cstart: d.o_cstart, shape: d.o_shape, size: +d.o_size, density: +d.o_density, buddies: !!d.buddies, yearsPerTurn: +d.o_years });
@@ -2077,6 +2113,15 @@ function newGameDialog() {
       : mac3 ? String(HO.RULESETS['301'].difficulty({ computers: d.computers === 'any' ? 4 : +d.computers, iq: d.m_iq, start: d.m_skill, shape: d.m_shape, size: d.m_size, density: d.m_density }))
       : `Not rated with ${dos ? 'DOS 2.0' : mac12 ? '1.2' : 'Claude'} rules`;
     rating.className = orig || w95 || mac3 ? '' : 'none';
+    // the patch: only for rules that have fixes
+    const prs = HO.RULESETS[d.rules], nfx = HO.fixes(prs).length;
+    patchBox.hidden = !nfx;
+    if (nfx && patchBox.dataset.rules !== d.rules) {
+      patchBox.dataset.rules = d.rules;
+      patchText.textContent = PATCH_TEXT(prs);
+      patchSum.textContent = `What the ${HO.patchVersion(prs)} patch fixes (${nfx})`;
+      patchFixes.replaceChildren(fixList(prs));
+    }
   };
   f.addEventListener('input', refresh); f.addEventListener('change', refresh);
   const start = () => {
@@ -2088,8 +2133,10 @@ function newGameDialog() {
     for (let i = 2; i <= nh; i++) { humans.push({ name: d['h' + i] || 'Player ' + i, female: d['hf' + i] === '1' }); localStorage.setItem('ho5.name' + i, d['h' + i] || ''); }
     if (nh < 2 && d.computers === '0') d.computers = '1';
     localStorage.setItem('ho5.modern', d.modern ? '1' : '0');
+    const patch = !patchBox.hidden && !!d.patch;
+    if (!patchBox.hidden) localStorage.setItem('ho5.patch', patch ? '1' : '0');
     const snd = sounds.value(); localStorage.setItem('ho5.sounds', snd || '');
-    const common = { modern: !!d.modern, ...(snd ? { sounds: snd } : {}), humans, seed: (Math.random() * 2 ** 31) | 0, name: d.name || 'You', galaxy: d.galaxy || 'Milky Way', female: d.female === '1', computers: +d.computers, start: d.start, rules: d.rules, alliances: !!d.alliances, luck: !!d.luck, novas: !!d.novas };
+    const common = { modern: !!d.modern, ...(patch ? { patch: true } : {}), ...(snd ? { sounds: snd } : {}), humans, seed: (Math.random() * 2 ** 31) | 0, name: d.name || 'You', galaxy: d.galaxy || 'Milky Way', female: d.female === '1', computers: +d.computers, start: d.start, rules: d.rules, alliances: !!d.alliances, luck: !!d.luck, novas: !!d.novas };
     if (d.rules === 'original' || d.rules === 'palm') {
       localStorage.setItem('ho5.iq', d.o_iq);
       const o = origOpts(d);
@@ -2150,7 +2197,7 @@ function setupMenus() {
   // The Ho menu, under the skin's "Ho!" at the top left: this version, and
   // the modern conveniences a player may choose (all of them can change in
   // the middle of a game). Items: [label, fn, feature or null, checked()].
-  const ho = [['About this version…', openAbout], ['-'],
+  const ho = [['About this version…', openAbout], ['Patch notes…', openPatchNotes, () => patchOn()], ['-'],
     ['Skin…', openSkin], ['Sounds…', () => openSounds()],
     [MODERN_TEXT.replace(/:.*/, ''), () => { if (G) setModern(!modern()); else toast('Modern conveniences are chosen for each game: start or continue one first.'); }, null, () => modern()]];
   const bar = $('#menubar');

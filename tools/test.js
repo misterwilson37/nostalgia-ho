@@ -1,10 +1,12 @@
-// Headless AI-vs-AI test: node tools/test.js [claude|original|dos|405|301|12|palm]
+// Headless AI-vs-AI test: node tools/test.js [claude|original|dos|405|301|12|palm] [--patch]
+// --patch plays with the ruleset's unofficial patch on (G.opts.patch: its rs.fixes)
 const path = require('path'), root = path.join(__dirname, '..');
 const HO=require(path.join(root, 'js/engine.js'));
 Object.assign(HO.DATA,require(path.join(root, 'js/data.js')));
-const RULES=process.argv[2]||'claude';
+const ARGS=process.argv.slice(2), PATCH=ARGS.includes('--patch');
+const RULES=ARGS.filter(a=>!a.startsWith('--'))[0]||'claude';
 function run(seed,opts){
-  const G=HO.newGame(Object.assign({seed,size:'medium',computers:4,iq:'average',shape:'random',rules:RULES,alliances:true,novas:true},opts||{}));
+  const G=HO.newGame(Object.assign({seed,size:'medium',computers:4,iq:'average',shape:'random',rules:RULES,alliances:true,novas:true},PATCH?{patch:true}:{},opts||{}));
   for (const p of HO.humans(G)) { p.auto=true; if (RULES==='claude') p.ai=null; } // humans on autoplay
   let t0=Date.now();
   for(let i=0;i<400 && !G.over;i++){ HO.endTurn(G);

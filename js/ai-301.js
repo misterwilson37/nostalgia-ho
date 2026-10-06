@@ -135,8 +135,9 @@ function aiTurn(G, p) {
   // CONFIRMED (DoComputerTurn @9002a-9003a, CreateGalaxy @f0004): in 2010
   // the computers don't plan when the galaxy is a Spiral or a Cluster (galaxy
   // +0x10, set for those two styles to lay the map out in 2010, is never
-  // cleared); the remake lays those maps out at the start, but keeps the skip
-  if (Y === 2010 && (G.opts.shape === 'spiral' || G.opts.shape === 'cluster')) return;
+  // cleared); the remake lays those maps out at the start, but keeps the skip.
+  // The patch (fix 'skip2010'): they plan in 2010 too, as in 4.0.5.
+  if (Y === 2010 && (G.opts.shape === 'spiral' || G.opts.shape === 'cluster') && !E.fixed(G, 'skip2010')) return;
   // CONFIRMED (DoComputerTurn @90004): Ship Savings less a reserve of
   // saveGoal turns of income (no more than 1% of income a year since 2000) is
   // what ships may be bought with; the money to share out is the net (player
@@ -412,8 +413,9 @@ function scrapOldShips(C) {
       const back = findCloseEnoughColony(C, f.star, left, 1);
       // CONFIRMED (@94f70): 3.0.1 passes the fleet's number in its list as the
       // Range (a slip with no effect: the colony is within the fuel left, so
-      // the route is direct and the Range unused)
-      if (back !== -1 && go(C, f, f.star, back, left, idx)) C.used.add(f);
+      // the route is direct and the Range unused). The patch (fix
+      // 'scrapRange') passes the fleet's Range.
+      if (back !== -1 && go(C, f, f.star, back, left, E.fixed(G, 'scrapRange') ? maxR(G, f) : idx)) C.used.add(f);
     } else { C.scrapF.add(f); C.used.add(f); }
   });
 }
@@ -421,12 +423,16 @@ function scrapOldShips(C) {
 // has used fuel and isn't yet to be retired asks for a colony where it is.
 // The routine also looks for a colony within the fuel it has left, but the
 // test of that answer (@951b4-951c6) reads a flag cleared just before it, so
-// a colony in reach never stops the request.
+// a colony in reach never stops the request. The patch (fix 'refuelCheck'):
+// a fleet with one of your colonies within the fuel it has left isn't
+// stranded and asks for none.
 function refuelFighters(C) {
   const { G, p, ai, T } = C;
+  const fix = E.fixed(G, 'refuelCheck');
   for (const f of FL(C)) {
     if (f.star == null || classOf(G, f) !== 'fighter' || !(used(G, f) > 0)) continue;
     if (obsolete(p, designOf(G, f)) >= ai.retire.fighter || fleetCount(f) <= 4) continue;
+    if (fix && findCloseEnoughColony(C, f.star, maxR(G, f) - used(G, f), 1) !== -1) continue;
     const src = findCloseEnoughColony(C, f.star, T.colony ? T.colony.R : 0, 2);
     if (src !== -1) addAction(C, 4, 58, f.star, src);
   }
@@ -977,8 +983,13 @@ function resolveSpending(C) {
     if (T < 0) X = 1000;
     else if (X < 0) T = 1000;
     else {
-      T = i16(trunc(((b + Math.imul(C.terra[k] || 0, 1000) - 1) | 0) / b));
-      X = i16(trunc(((b + Math.imul(C.mine[k] || 0, 1000) - 1) | 0) / b));
+      if (E.fixed(G, 'colonyBars32')) { // the patch: no overflow
+        T = trunc((b + (C.terra[k] || 0) * 1000 - 1) / b);
+        X = trunc((b + (C.mine[k] || 0) * 1000 - 1) / b);
+      } else {
+        T = i16(trunc(((b + Math.imul(C.terra[k] || 0, 1000) - 1) | 0) / b));
+        X = i16(trunc(((b + Math.imul(C.mine[k] || 0, 1000) - 1) | 0) / b));
+      }
     }
     rs.setBars(s, T, X);
   });

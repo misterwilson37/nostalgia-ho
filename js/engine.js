@@ -49,6 +49,16 @@ function registerAI(name, ai) { AIS[name] = ai; }
 function rules(G) { return RULESETS[G && G.rules] || RULESETS.claude; }
 function aiOf(G) { const rs = rules(G); return AIS[rs.ai || rs.id] || AIS.claude; }
 function feature(G, name) { return !!(rules(G).features || {})[name]; }
+// The unofficial patch: fixes for a version's obvious bugs (docs/fixes.md).
+// A ruleset lists them as rs.fixes = [{ id, title, text }]; the player turns
+// the patch on at New Game (G.opts.patch), and the rules code asks
+// fixed(G, id), true only when the patch is on and this ruleset lists that
+// fix. A saved game without G.opts.patch plays the version as released.
+// (A ruleset built with Object.assign over another must set its own fixes.)
+function fixes(rs) { return (rs && rs.fixes) || []; }
+function fixed(G, id) { return !!(G && G.opts && G.opts.patch) && fixes(rules(G)).some(f => f.id === id); }
+// the patch's version number: the version's own + ".1" (rs.patchVersion overrides)
+function patchVersion(rs) { return rs ? rs.patchVersion || (rs.version ? rs.version + '.1' : null) : null; }
 
 // ---------- geometry ----------
 function dist(a, b) { return Math.hypot(a.x - b.x, a.y - b.y); }
@@ -846,7 +856,7 @@ function load(str) { const G = JSON.parse(str); if (!G.rules) G.rules = 'claude'
 
 const API = {
   DATA, SHIP_TYPES, TYPES: SHIP_TYPES, TECHS,
-  registerRules, registerAI, rules, aiOf, feature, RULESETS,
+  registerRules, registerAI, rules, aiOf, feature, RULESETS, fixes, fixed, patchVersion,
   // [id, name] for the New Game window: the original games' rules by year of
   // release, then version ("2.0 (DOS and Windows 3.1, 1993)"); rulesets that
   // aren't an original game's (the remake's own) come last, by their label

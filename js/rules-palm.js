@@ -192,5 +192,6 @@ const rs = Object.assign(base, {
 // place of "Antares" (the 196th)
 Object.defineProperty(rs, 'starNames', { enumerable: true, configurable: true,
   get: () => (E.DATA.starNames || []).map(n => n === 'Antares' ? 'Courasant' : n) });
+rs.patchVersion = '1.0.4.1'; // the Palm program's own version is 1.0.4
 E.registerRules('palm', rs);
 })(this);

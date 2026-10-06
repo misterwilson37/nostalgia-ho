@@ -1867,6 +1867,20 @@ E.registerRules('301', Object.assign({}, D, {
   hints: false, // this game had no between-turn tips (4.0.5 and 5.0.5 do)
   // the New Game window lists rulesets by year, then version (engine.js ruleOptions)
   version: '3.0.1', platform: 'Mac', year: 1993,
+  // the unofficial 3.0.1.1 patch (engine.js fixed; docs/fixes.md, "3.0.1"):
+  // 3.0.1's own list (2.0's, rules-dos FIXES20, isn't inherited); the
+  // computers ask for each in js/ai-301.js
+  patchVersion: null, // its own (3.0.1.1), not 2.0's
+  fixes: [
+    { id: 'skip2010', title: 'The computers play their first turn on Spiral and Cluster maps',
+      text: 'On Spiral and Cluster maps the computers did nothing in 2010: a mark set so the map would be laid out in 2010 was never cleared. The patch lets them plan from the first turn, as 4.0.5 does.' },
+    { id: 'refuelCheck', title: 'Stranded fighters ask for a colony only when they are stranded',
+      text: 'A computer’s fighter fleet low on fuel looked for a colony within reach, but the test of the answer read a flag cleared just before, so it always asked for a new colony where it was. The patch asks only when no colony is within the fuel it has left.' },
+    { id: 'colonyBars32', title: 'The computers’ colony bars no longer overflow',
+      text: 'When a computer gave a colony more than $2,147,483 for one part, the sum overflowed and the colony’s bars came out wrong. The patch works them out without overflowing.' },
+    { id: 'scrapRange', title: 'Old ships sent home are routed with their own Range',
+      text: 'When the computers sent old ships home, the program passed the fleet’s place in a list where the route finder wants its Range. It made no difference to play (the colony is always within reach); the patch passes the Range.' },
+  ],
   ai: '301',               // its own computer players (js/ai-301.js)
   maxPlayers: 20,          // CONFIRMED (doCreateGalaxyDlg @f0550): 0-19 computers
   maxDesigns: MAX_DESIGNS,

@@ -38,6 +38,16 @@ changed in the middle of a game from the **Ho menu** (the skin's "Ho!" at the to
   routes, the map following the news, battle speed and written battle reports. They never
   add or remove a ruleset's commands: those (Evacuate, for one) follow the rules only.
 
+The one exception is a choice made at New Game, and only then: **the unofficial patch**
+("Apply the 4.0.5.1 patch: fixes for obvious bugs (not an official release)",
+`G.opts.patch`, remembered in `localStorage` "ho5.patch"). It fixes a version's obvious
+bugs (`rs.fixes`, each asked for by the rules with `E.fixed(G, id)`) and nothing else; it
+is a rule, so it can't be changed mid-game, and a saved game without it plays the version
+as released. Its number is the version's with ".1" added; a game with it on says so in the
+title bar and About this version, and the Ho menu then has **Patch notes…**. Rulesets with
+no fixes don't offer it. `docs/fixes.md` lists every version's slips as obvious bugs,
+quirks and unclear cases; 1.2, 2.0 and 3.0.1 have their fixes so far.
+
 Optional ruleset flags the skin reads (each is documented where it is read):
 
 - `rs.evacuateCommand`: `false` when the version had no command to give up a colony (1.2
@@ -165,7 +175,8 @@ Optional ruleset flags the skin reads (each is documented where it is read):
 - `docs/missing-assets.md`: what each skin still borrows or leaves silent (for future art)
 - `docs/decompiling.md`: how to decompile the Windows versions with Ghidra
 - `docs/open-questions.md`, `docs/evolution.md`, `docs/coverage-12.md`: the questions still open for each version, how the game grew, and every routine of 1.2
-- `tools/test.js`: headless computer-vs-computer test (`node tools/test.js`, `node tools/test.js original`, `dos` or `405`)
+- `docs/fixes.md`: every version's slips sorted into obvious bugs (fixed by the unofficial patch), quirks and unclear cases
+- `tools/test.js`: headless computer-vs-computer test (`node tools/test.js`, `node tools/test.js original`, `dos` or `405`; add `--patch` to play with the unofficial patch on)
 - `tools/human-play.js`: a human played through the page in Chromium (Playwright), about 10
   turns in each ruleset: the Technology and Budget bars dragged, a Colony Ship bought (or
   queued) and sent out, the new colony terraformed. It checks that the values the skin
