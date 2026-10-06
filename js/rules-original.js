@@ -598,8 +598,19 @@ function afterSetup(G) {
         near.g = p.homeG * (1 + RI(G, 20, 50) / 100 * (RI(G, 1, 2) === 1 ? 1 : -1));
         near.oInc = -7500; near.oSink = 5000; near.terra = 0.5;
         p.budget.col[near.id] = 0.05;
-        // CONFIRMED (FUN_1006f870 @slot 3): 10,000 people, bars 500 / 500, 50 per mille
-        if (is505(G)) { setPopU(near, 10000); setBars505(near, 500, 500); p.slots301.push(near.id); }
+        // CONFIRMED (FUN_1006f640, the colony list at player
+        // +0x1138, records 0x1c bytes): Savings 650, Technology 250 and the
+        // home's record (100 per mille) are appended; for the second colony
+        // the home's record is appended again with 50 per mille (the fourth
+        // slot), and the third slot (+0x38..+0x50) is then rewritten as the
+        // second colony: 50 per mille, bars 500 / 500, 10,000 people, income
+        // -7,500, $5,000 sunk. So the second colony is third and the home
+        // fourth, 650 + 250 + 50 + 50 = 1,000. (Palm FUN_00026304 the same.)
+        if (is505(G)) {
+          setPopU(near, 10000); setBars505(near, 500, 500);
+          const L = p.slots301; L.splice(L.indexOf(home.id), 0, near.id);
+          p.budget.col[home.id] = 0.05;
+        }
         observe(G, p, near.id);
       }
     }
@@ -609,6 +620,32 @@ function afterSetup(G) {
       const d = byType('scout');
       addShipsToStar(G, p.id, home.id, d, 1); addShipsToStar(G, p.id, (second || home).id, d, 1); d.built += 2;
     }
+  }
+  if (is505(G)) creatorShares505(G);
+}
+// CONFIRMED (FUN_1006579c, the New Game window's OK, in the year 2000 (game
+// +0x18)): the player who creates the game gets the shares kept in the
+// preferences: research (player +0x80..+0x8a) from prefs +0x1b4..+0x1be;
+// the colony list's first slots from prefs +0x1c2, +0x1c4 and the third
+// 1,000 less those, or for an Abundant player (+0x29 = 7) from +0x1c8,
+// +0x1ca, +0x1cc and the fourth 1,000 less those. Their defaults (CPrefs,
+// FUN_10072490, prefs +0x1b4..+0x1ce): Range, Speed, Weapons, Shields and Mini
+// 180 (0xb4) each and Radical 100; Savings 650 (0x28a), Technology 250 (0xfa);
+// Abundant Savings 550 (0x226), Technology 200, the third slot (the second
+// colony, above) 150 (0x96) and the fourth (the home) 100. 5.0.5 keeps the
+// first turn's shares as the next game's (FUN_10064600); the remake starts
+// every game from the defaults. The other players keep 167 each and the
+// colony list as set up. (Palm FUN_000395a6, FUN_0002b274 the same.)
+const PREF_TECH505 = { range: 180, speed: 180, weapons: 180, shields: 180, mini: 180, radical: 100 };
+function creatorShares505(G) {
+  const h = G.players.find(q => q.human);
+  if (!h) return;
+  h.talloc = Object.assign({}, PREF_TECH505);
+  const cols = colSlots505(G, h);
+  if (h.startRank === 7 && cols.length >= 2) {
+    setKeyPm(h, 'sav', 550); setKeyPm(h, 'tech', 200); setKeyPm(h, cols[0], 150); setKeyPm(h, cols[1], 1000 - 550 - 200 - 150);
+  } else if (cols.length) {
+    setKeyPm(h, 'sav', 650); setKeyPm(h, 'tech', 250); setKeyPm(h, cols[0], 1000 - 650 - 250);
   }
 }
 
@@ -2460,7 +2497,8 @@ function projected505(G, p) {
   return { gross: M, income: M - support, interest: I, net: Math.max(0, M + I - support), dip: (p.dip > 0 && p.savings > 0) ? trunc(p.savings * p.dip / 100) : 0 };
 }
 // the start (FUN_1006f640): the colony list Savings 650, Technology 250, home
-// 100 per mille (+ a second colony's 50 for Abundant, so 1,050 as they stand);
+// 100 per mille (Abundant: the second colony third and the home fourth, 50
+// each, so 1,000; afterSetup);
 // the home's bars Terraform done and Mine 1,000 ($5,000 sunk), but an
 // Outpost's home, made hostile after your ideal was taken from it (its
 // gravity +-10..20%, its temperature +-35..50 degrees), Terraform 800 / Mine

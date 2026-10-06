@@ -182,14 +182,36 @@ CONFIRMED, by home system:
   game's resources agrees: Range names start at level 7, "Topping off the
   Tanks".
 - Starting budget: **65% savings, 25% technology, 10% home planet**, with
-  technology split evenly six ways. CONFIRMED.
+  technology split evenly six ways (167, 167, 167, 167, 166, 166 per mille).
+  CONFIRMED for every player but the one who creates the game (`FUN_1006f640`).
+- **The player who creates the game** gets the shares kept in the preferences when
+  the New Game window's OK is pressed in the year 2000 (`FUN_1006579c`): research
+  (player +0x80..+0x8a) from prefs +0x1b4..+0x1be, and the colony list's slots from
+  prefs +0x1c2, +0x1c4 with the third 1,000 less those, or, for an Abundant player
+  (player +0x29 = 7), from +0x1c8, +0x1ca, +0x1cc with the fourth 1,000 less those.
+  The preferences' defaults (CPrefs, `FUN_10072490`) are **Range, Speed, Weapons,
+  Shields and Mini 180 per mille each and Radical 100**; **Savings 650, Technology
+  250, home 100**; Abundant **Savings 550, Technology 200, the second colony 150, the
+  home 100**. 5.0.5 then keeps your first turn's shares as the next game's
+  (`FUN_10064600`); the remake starts every game from the defaults. CONFIRMED (the
+  Palm OS game does the same, `FUN_000395a6`, `FUN_0002b274`). Before this was found
+  the remake gave the creator 167 each.
 - Home planet: 0 to 200°F, 0.5 to 2.0 G, 10,000 metal, and already perfect for
   its owner. Your ideal temperature and gravity are defined as your home
   world's. CONFIRMED.
 - Advanced, Thriving and Abundant get two free Scouts. Thriving and Abundant
   get a free Colony Ship. Abundant also gets a second small colony next door
-  (5,000 population, 2,500 metal, 50–100°F off, 20–50% off in gravity).
+  (10,000 people in 5.0.5's code, 2,500 metal, 50–100°F off, 20–50% off in gravity).
   CONFIRMED.
+- **The Abundant start's colony list** (`FUN_1006f640`; the list at player +0x1138,
+  its records 0x1c bytes at +0x1144): Savings 650, Technology 250 and the home (100)
+  are appended; for the second colony the home's record is appended again with a share
+  of 50 (the fourth slot), and the third slot is then rewritten as the second colony
+  (share 50 at +0x38, bars 500 / 500 at +0x3a / +0x3c, income −7,500 at +0x40, 10,000
+  people at +0x44, $5,000 sunk at +0x4e, the star at +0x50). So the second colony is
+  third and the home fourth, and the shares add up to **650 + 250 + 50 + 50 = 1,000**.
+  CONFIRMED (Palm `FUN_00026304` the same). The remake had the home third with 100,
+  1,050 in all, until the Palm comparison showed it.
 - Starting ship designs: Scout (Range 9, Speed 2, Weapons 1, Shields 1),
   Tanker (Range 5, Speed 1, Weapons 2, Shields 2), and Satellite, Colony Ship
   and Fighter (Range 6, Speed 2, Weapons 2, Shields 2), all with Mini 0.
@@ -206,8 +228,8 @@ CONFIRMED (the turn, `FUN_10072a10`; section 18 has the addresses):
 - **The budget bars** are kept per mille (thousandths): Savings, Technology, then each
   colony. Each slot gets its share **as it stands**, not scaled to the total: trunc(money
   × share / 1000) under $2,000,000, trunc(money / 1000) × share above. The shares
-  usually add up to 1,000, but not always (an Abundant start is 1,050), and then more
-  than the money is spent.
+  usually add up to 1,000, but not always (a computer's shares are each rounded up,
+  `FUN_10085bd0`), and then more than the money is spent.
 - **Ship Savings** get the Savings bar's share, the interest and the refunds (from
   terraforming and mining overshoots) at the end of the turn. Ships are bought from Ship
   Savings.
@@ -1131,7 +1153,8 @@ code does it. "Before" is the remake's earlier reading.
 | Dragging a bar | the web app's own | 5.0.5's redistribution; locked bars (evacuating, finished, Savings while dipping) can't be dragged and keep their shares | `FUN_1008a7a0`, `FUN_1008a030` |
 | Colony list | star order | a new colony in front; sorted by income each turn | `FUN_10078e80`, `FUN_1007a5e0` |
 | Buying | no limit by people for you; interest unchanged | no more ships a turn at a colony than its people; the interest worked out again after each purchase | `FUN_1009ab50`, `FUN_1007e4a0` |
-| Start | | an Outpost's home made hostile; an Abundant player's second colony with 10,000 people, a 50 per-mille share and bars 500/500; the borrowing limit trunc(−income / 2) × 10 | `FUN_1006f640` |
+| Start | | an Outpost's home made hostile; an Abundant player's second colony with 10,000 people, a 50 per-mille share and bars 500/500, third in the colony list, the home fourth with 50; the borrowing limit trunc(−income / 2) × 10 | `FUN_1006f640` |
+| The creator's shares | | research 180 × 5 and Radical 100; Savings 650, Technology 250, home 100; Abundant 550 / 200 / 150 / 100 (the preferences' defaults) | `FUN_1006579c`, `FUN_10072490` |
 | Battles | one battle at a star | two when ships arrive late, each with its own replay and reports; sides drawn up in viewing order, designs last to first; reports with the enemy's face for one enemy, "and your allies", "You just watched some of your allies fight"; big battles reported to everyone else; the loser's record of the star's owner | `FUN_1007e870`, `FUN_1007f560`, `FUN_100803e0`, `FUN_10078840`, `FUN_10081230` |
 | Arrivals | everyone told | "has arrived" by 5.0.5's rule; allies told of arrivals at stars not yours; fleets wait when the next hop is too far | `FUN_10075b80`, `FUN_100782a0`, `FUN_10075f10` |
 | Novas and Armageddon | | the red-star warning every turn to everyone; the miracle reports; after a fizzle the devices stay on and it tries every turn | `FUN_100769b0`, `FUN_10076d20`, `FUN_10076680` |

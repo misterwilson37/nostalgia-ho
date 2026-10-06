@@ -56,13 +56,14 @@ Every routine in the PowerPC program of Spaceward Ho! 5.0.5 for Mac OS 9 and X (
 | `FUN_1005e2b0` | Rank dialog ("NN.jpg") | Interface | ui.js showRank |
 | `FUN_1005e8e0` | Armageddon window: turning it on asks (alert 4), off tells (alert 5); player +0x1110 | Rule, implemented | ui.js toggleArmageddon, engine setArmageddon |
 | `FUN_1005ec40` | Preferences: auto play aggressiveness and colonies defended (prefs +0x211, +0x212, 0-100), sounds | Rule, not implemented | no auto play settings (docs/open-questions.md) |
+| `FUN_1005f280` | Radical Research window (dialog 0x99, opened from the report list and the menu dispatch): with a full hand (four of the twenty programs in player +0x1118) the player may cancel one, which leaves the hand; with fewer than four it closes at once. (Listed before as a report-list display routine.) | Rule, not implemented | docs/open-questions.md (Palm's twin: `FUN_00041aa4`, docs/palm-findings.md) |
 | `FUN_100601e0` | Scrap Ship Types window: sets the design mark (+0xc) for the selection, clears it for the rest | Rule, implemented | js/rules-original.js flagScrapDesign |
 | `FUN_100609e0` | Menu command dispatch (Dismantle, Evacuate, Dip, Give, Surrender, Armageddon, Auto, windows) | Interface | ui.js menus |
 | `FUN_10060fac` | Evacuate Planet toggle (colony +0x13): Kansas and Hope jokes, the profitable-colony question, sounds 7002/4000, net +-income, share to 0 | Rule, implemented | js/rules-original.js evacuate505, evacuateToggle |
 | `FUN_10062c10` | Dismantle Current Fleet toggle (fleet +0x72), sound 7003; a fleet bought this turn is un-bought (price, prototype, metal, interest) | Rule, implemented | js/rules-original.js flagScrap |
 | `FUN_10063a40` | Joining a game: notes the master points still to be won | Rule, implemented | js/rules-original.js addMasterPoints505 |
 | `FUN_10064600` | First turn ended: the budget and research shares kept as next game's defaults (prefs +0x1b4..) | Interface, not done | docs/open-questions.md |
-| `FUN_1006579c` | New game: those defaults put in the player's research shares | Interface, not done | docs/open-questions.md |
+| `FUN_1006579c` | New game (in 2000): the preferences' shares put in the creating player's research shares (+0x80..+0x8a) and colony list (Savings, Technology, then 1,000 less those; Abundant four slots); defaults from `FUN_10072490` (180 × 5, Radical 100; 650 / 250 / 100; Abundant 550 / 200 / 150 / 100) | Rule, implemented | js/rules-original.js creatorShares505 (the defaults; keeping a game's shares for the next is `FUN_10064600`, not done) |
 | `FUN_10066260` | End Turn for a client: the turn time limit (player +0x94, +0x98), auto play | Interface, not done | no time limit (docs/open-questions.md) |
 | `FUN_10066bb0` | Auto button: aggressiveness = prefs/10, colonies defended = prefs, then the computer's plan (FUN_10081cc0, auto) once a turn | Rule, implemented (preferences not) | js/ai-original.js aiTurn (auto) |
 | `FUN_1006c4d0` | Galaxy creation: options, star count, shape switch (jump table 0x10110ac8), random-number table | Rule, implemented | js/rules-original.js makeGalaxy |
@@ -231,7 +232,7 @@ Every routine in the PowerPC program of Spaceward Ho! 5.0.5 for Mac OS 9 and X (
 - `FUN_10059570`: options locked by rank ("Need more MPs"); left open on purpose.
 - `FUN_1005cf40`: the questions before buying more than 9 Scouts or Tankers at once.
 
-The canned-message window (`FUN_1005d940`, with its effects in pass 2b: "Look at %s" explores a star for the receiver, "I own %s" marks it, "I like planets ..." gives your home), the turn time limit (`FUN_10058360`, `FUN_10066260`) and the first turn's budget kept for the next game (`FUN_10064600`, `FUN_1006579c`) are interface and are listed in docs/open-questions.md.
+The canned-message window (`FUN_1005d940`, with its effects in pass 2b: "Look at %s" explores a star for the receiver, "I own %s" marks it, "I like planets ..." gives your home), the turn time limit (`FUN_10058360`, `FUN_10066260`) and the first turn's budget kept for the next game (`FUN_10064600`; `FUN_1006579c` puts the preferences' shares in, and the remake does that with the defaults) are interface and are listed in docs/open-questions.md.
 
 ## The rest of the rule core, by band
 
@@ -262,7 +263,7 @@ Every routine of 0x10054c00-0x10089260 not in the table above, by band. "Small" 
 
 **0x1005cf00-0x10062b20: The document's command windows: Buy, Dip, Surrender, Send Message, Give, Armageddon, Preferences, Scrap Ship Types, Evacuate, Dismantle, the menu dispatch and its case blocks** (40 routines)
 
-- Described: `FUN_1005cf10` preferences field; `FUN_1005e820` QuickTime picture header copy; `FUN_1005f280` report list (display); `FUN_1005f7b0` window resize preference; `FUN_1005f830` window placement preferences; `FUN_1005fde0` Organize Fleets window open; `FUN_1005ffa0` fleet window open; `FUN_10060580` report click (opens the star or battle); `FUN_10060910` menu enabling; `FUN_10060e40` case block of the menu dispatch FUN_100609e0 (fleet window); `FUN_10060eb0` case block of FUN_100609e0; `FUN_10060f20` case block of FUN_100609e0; `FUN_10061800` case block of FUN_100609e0; `FUN_10061af0` map contextual menu text; `FUN_10062710` window close; `FUN_10062890` rank window from a report; `FUN_10062950` window activation.
+- Described: `FUN_1005cf10` preferences field; `FUN_1005e820` QuickTime picture header copy; `FUN_1005f7b0` window resize preference; `FUN_1005f830` window placement preferences; `FUN_1005fde0` Organize Fleets window open; `FUN_1005ffa0` fleet window open; `FUN_10060580` report click (opens the star or battle); `FUN_10060910` menu enabling; `FUN_10060e40` case block of the menu dispatch FUN_100609e0 (fleet window); `FUN_10060eb0` case block of FUN_100609e0; `FUN_10060f20` case block of FUN_100609e0; `FUN_10061800` case block of FUN_100609e0; `FUN_10061af0` map contextual menu text; `FUN_10062710` window close; `FUN_10062890` rank window from a report; `FUN_10062950` window activation.
 - Small: `1005cf00`, `10061ae0`, `10062700`, `10062830`.
 - Case blocks: `10060dec`, `10060e08`, `10060e24`, `10060e5c`, `10060e78`, `10060ee8`, `10060f04`, `10060f3c`, `10060f58`, `10060f74`, `100613c4`, `10061454`, `100615cc`, `10061828`, `1006186c`, `10061988`, `100619dc`, `10061a4c`, `10061ab4`.
 

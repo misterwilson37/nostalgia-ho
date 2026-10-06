@@ -225,16 +225,22 @@ differs from both programs:
    fourth, gets 50 per mille, so the shares are 650 + 250 + 50 + 50 = 1,000, not 1,050
    with the home third. And the human creating a game gets the preferences' shares
    (`FUN_1006579c`; defaults in `FUN_10072490`: research 180 × 5 and Radical 100, budget
-   650 / 250 / 100, Abundant 550 / 200 / 150 / 100). The Palm ruleset does both; the 5.0.5
-   ruleset is left as it was (for the 5.0.5 owner to decide).
+   650 / 250 / 100, Abundant 550 / 200 / 150 / 100). Checked in the 5.0.5 decompile and
+   now done in `js/rules-original.js` `afterSetup` and `creatorShares505`, for both
+   rulesets (`docs/original-findings.md`, section 3); the Palm ruleset's games are as
+   they were.
 3. **The Radical Research window** (`FUN_1005f280`, dialog 0x99; Palm tFRM 3000): with
    a full hand, the player may cancel one radical program. `docs/coverage-505.md` lists
-   the routine as a report list; it is a rule-touching window. Not in either ruleset.
+   the routine as a report list; it is a rule-touching window (corrected there). Not in
+   either ruleset.
 
 Also, the research shares (player +0x80) are per mille as they stand; the skin's
 Technology bars store them as fractions of 1 once drawn, which made `research505` give a
 human almost nothing. `research505` now reads fractions as per mille (a total of 2 or
-less); computer players' shares are per mille, so the test games don't change.
+less); computer players' shares are per mille, so the test games don't change. 4.0.5's
+research (`js/rules-405.js` `research`) had the same slip and reads them the same way
+now; `tools/human-play.js` plays a human through the page in every ruleset to catch
+any other.
 
 ## Pictures (for a Palm skin)
 

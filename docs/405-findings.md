@@ -144,6 +144,14 @@ choice, docs/open-questions.md).
 | Level costs | Range trunc(L^3 / 9); Speed (L+6)^2; Weapons and Shields (L+2)^2; Mini and Radical (L+7)^2; a head start of rand(0, 40) into each new level (Radical 0-80); at most 50 | CONFIRMED (`FUN_00434dad`) |
 | Reports | to level 20 "You now have <name> <Tech> Technology (L)." with 4.0.5's name for it, from 21 "Your <Tech> Technology has reached level L.", BURST; "You are not spending any money on technology research." every turn it gets nothing | CONFIRMED (`FUN_0046ec5a`, `FUN_00434dad`) |
 
+The research shares are per mille as they stand (a tech's money is trunc(T x share / 1000),
+as the budget slots). The skin's Technology bars keep a human's shares as fractions of 1
+once they are drawn, so `research` (`js/rules-405.js`) reads shares that add up to 2 or
+less as fractions and turns them to per mille (the nearest), as `research505` does for
+5.0.5. Until that was found (by `tools/human-play.js`, which plays a human through the
+page) a human playing 4.0.5 got almost nothing for research. The computers' shares are
+per mille, so their games are as they were.
+
 ### Radical discoveries
 
 CONFIRMED (`FUN_0043a08c`, the hand `FUN_0043adac`, weights at 0x59cf10). A hand of up to

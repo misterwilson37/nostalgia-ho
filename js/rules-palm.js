@@ -38,39 +38,21 @@ const makeGalaxy = (G, opts, nPlayers) => O.makeGalaxy(G, opts, nPlayers, MAX_ST
 // Technology 250, the home 100 (1,000 less the others); an Abundant player
 // (four slots) Savings 550, Technology 200, the third slot 150 and the fourth
 // 1,000 less those. (FUN_0002d91c keeps the first turn's shares as the next
-// game's defaults; the remake starts every game from the defaults.) 5.0.5 does
-// the same (FUN_1006579c, FUN_10072490).
-const PREF_TECH = { range: 180, speed: 180, weapons: 180, shields: 180, mini: 180, radical: 100 };
-// CONFIRMED (FUN_00026304 @00026710-000267b4; 5.0.5 FUN_1006f640 the same):
-// an Abundant player's second colony takes the third slot of the colony list
-// (the home's record is copied to the fourth with a share of 50 per mille, and
-// the third is then rewritten as the second colony, with 50 per mille, bars
-// 500 / 500, 10,000 people, income -7,500, $5,000 sunk), so the home is fourth
-// and both colonies have 50 per mille: 650 + 250 + 50 + 50 = 1,000.
+// game's defaults; the remake starts every game from the defaults.)
+// CONFIRMED (FUN_00026304 @00026710-000267b4): an Abundant player's second
+// colony takes the third slot of the colony list (the home's record is copied
+// to the fourth with a share of 50 per mille, and the third is then rewritten
+// as the second colony, with 50 per mille, bars 500 / 500, 10,000 people,
+// income -7,500, $5,000 sunk), so the home is fourth and both colonies have
+// 50 per mille: 650 + 250 + 50 + 50 = 1,000.
+// 5.0.5 does both the same (FUN_1006579c, FUN_10072490; FUN_1006f640), and
+// js/rules-original.js afterSetup (creatorShares505) does them for both rulesets.
 function afterSetup(G) {
   // CONFIRMED (tFRM 1200, FUN_0003825a, FUN_0002b274): the Palm New Game window
   // has no Alliances or Luck in Battles check box (only Best Buddies), and the
   // game options keep the preference default 0x17 (alliances, novas and luck on).
   G.opts.alliances = true; G.opts.luck = true; G.opts.novas = true;
   O.afterSetup(G);
-  for (const p of G.players) {
-    if (p.startRank !== 7) continue;
-    const L = O.slots301(G, p), home = p.homeStar;
-    const second = L.find(k => typeof k === 'number' && k !== home);
-    if (second == null) continue;
-    p.slots301 = ['sav', 'tech', second, home].concat(L.filter(k => typeof k === 'number' && k !== home && k !== second));
-    O.setKeyPm(p, home, 50); O.setKeyPm(p, second, 50);
-  }
-  const h = G.players.find(q => q.human);
-  if (h) {
-    h.talloc = Object.assign({}, PREF_TECH);
-    const L = O.slots301(G, h), cols = L.filter(k => typeof k === 'number');
-    if (h.startRank === 7 && cols.length >= 2) {
-      O.setKeyPm(h, 'sav', 550); O.setKeyPm(h, 'tech', 200); O.setKeyPm(h, cols[0], 150); O.setKeyPm(h, cols[1], 100);
-    } else if (cols.length) {
-      O.setKeyPm(h, 'sav', 650); O.setKeyPm(h, 'tech', 250); O.setKeyPm(h, cols[0], 100);
-    }
-  }
 }
 
 // CONFIRMED (FUN_0003734e, the Galaxy menu's "Evacuate Planet" / "Dont

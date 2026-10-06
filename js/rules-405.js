@@ -628,8 +628,15 @@ function spendTechMoney(G, p) {
 }
 function research(G, p, T) {
   const old = TECH_ORDER.map(k => p.tech[k]);
+  // the research shares are per mille as they stand (the computers' and the
+  // start's); the skin's Technology bars keep a human's as fractions of 1
+  // once drawn, so those are read as per mille (a total of 2 or less can't
+  // be per mille), as research505 does. Without this a human got almost
+  // nothing for research.
+  let tsum = 0; for (const k of TECH_ORDER) tsum += p.talloc[k] || 0;
+  const tpm = (k) => tsum > 0 && tsum <= 2 ? Math.round((p.talloc[k] || 0) * 1000) : (p.talloc[k] || 0);
   for (const k of TECH_ORDER) {
-    const q = trunc(share20(T, p.talloc[k] || 0) / DIV[k]);
+    const q = trunc(share20(T, tpm(k)) / DIV[k]);
     let pts = k === 'radical' ? trunc(Math.sqrt(q) / 2) : trunc(Math.sqrt(q) * 8 / 10);
     while (pts > 0) {
       const L = trunc(p.tprog[k] / 100), frac = 100 - p.tprog[k] % 100, cost = techLevelCost(k, L);

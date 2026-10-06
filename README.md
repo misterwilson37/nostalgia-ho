@@ -50,6 +50,16 @@ Optional ruleset flags the skin reads (each is documented where it is read):
   it returns the new shares in per mille (`{ tech, savings, col: { [starId]: pm } }`) or
   sets `player.budget` itself. Left out: the others are scaled in proportion, as before.
   (`js/skins/classic/ui.js`, `dragBudget`)
+- Units the skin writes, which a ruleset must read in these units (`tools/human-play.js`
+  checks every ruleset): `player.talloc` (the Technology bars) as fractions of 1 adding up
+  to 1 once drawn, though a ruleset starts them in its own units (per mille but the Claude
+  rules), so a per-mille ruleset reads a total of 2 or less as fractions (`research505`,
+  4.0.5's `research`) or scales by the total (2.0, 1.2, 3.0.1); `player.budget` as fractions
+  of 1 (rulesets with per-mille slots go through `keyPm` / `setKeyPm`); a colony's
+  `terra` (Terraform / Mine) and `ship` (Shipbuilding, 2.0 and 1.2) as fractions of 1,
+  read back by `bars20`; `player.dip` in percent (`rs.dipSet` when given); a fleet's
+  `stance` ('normal', 'offensive', 'defensive') and `delayed` (arrive late); designs in
+  tech levels. (`js/skins/classic/ui.js`, `renderPanel`, `planetBox`, `yardBox`)
 - `rs.hints`: `false` when the version had no between-turn hints (1.2, 2.0, 3.0.1); the
   hints choice in Preferences is then left out. (`js/skins/classic/ui.js`, `addTurnNotes`, `openPrefs`)
 - `rs.hintTexts`: a version's own between-turn hints, one shown every turn, picked by the
@@ -156,6 +166,13 @@ Optional ruleset flags the skin reads (each is documented where it is read):
 - `docs/decompiling.md`: how to decompile the Windows versions with Ghidra
 - `docs/open-questions.md`, `docs/evolution.md`, `docs/coverage-12.md`: the questions still open for each version, how the game grew, and every routine of 1.2
 - `tools/test.js`: headless computer-vs-computer test (`node tools/test.js`, `node tools/test.js original`, `dos` or `405`)
+- `tools/human-play.js`: a human played through the page in Chromium (Playwright), about 10
+  turns in each ruleset: the Technology and Budget bars dragged, a Colony Ship bought (or
+  queued) and sent out, the new colony terraformed. It checks that the values the skin
+  writes (research shares as fractions of 1, budget shares, the Terraform / Mine bar) come
+  out as the ruleset's own units would, and that the human's research and terraforming keep
+  up with the computers' (`node tools/human-play.js`, or `node tools/human-play.js 405
+  original`; it serves the folder with `python3 -m http.server 8000` when nothing answers)
 - `tools/bundle.py`: builds `dist/spaceward-ho.html`, a single self-contained file with one
   skin built in (`python3 tools/bundle.py cozy` for another)
   (only needed for publishing somewhere that wants one file)

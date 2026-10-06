@@ -185,7 +185,7 @@ root.HOVERSIONS = {
     previous: '4.0.5',
     quirks: [
       'Interest you can’t pay comes out of Ship Savings, however deep in debt: the global warming the game has a message for never happens.',
-      'Budget bars are used as they stand, even when they add up to more than 100% (an Abundant start does), so more than your money can be spent.',
+      'Budget bars are used as they stand, even when they add up to more than 100% (bars that can’t move keep their shares when you drag another), so more than your money can be spent.',
       'Dipping into savings counts as income, so it raises how far you may borrow.',
       'A ship you order but can’t pay for still uses up one of the colony’s building places for the turn.',
       'After an Armageddon device fizzles, the devices stay on and it tries again, and fizzles again, every turn.',
@@ -194,6 +194,7 @@ root.HOVERSIONS = {
       'The “never profitable” and “not spending on research” warnings, and the red-star warning, come every turn.',
       'A computer evacuating a colony doesn’t ask, and its budget doesn’t change until the turn is worked out.',
       'A tanker’s route goes only through stars recorded this year.',
+      'With an Abundant start your second colony comes before your home in the budget list.',
     ],
     differs: [
       RANDOM,
@@ -202,12 +203,14 @@ root.HOVERSIONS = {
       'Dragging a budget bar works out the others once, from where the drag began; 5.0.5 did it at every step of the drag.',
       'An order for ships stops at the first one you can’t pay for, so the ones after it don’t use up building places.',
       'When you give a gift, you are told at once; 5.0.5 told you at the end of the turn.',
+      'Every game starts from the default budget and research shares (research 18% each and Radical 10%); 5.0.5 started a new game with your first turn’s shares from the last one.',
     ],
     missing: [
+      'The Radical Research window, where a full hand of radical programs lets you cancel one.',
       'The auto play settings (how aggressive the computer is and how many colonies it defends when it plays for you).',
       'The canned-message window (“Look at …” and “I own …” also marked the map); the computers read “I like …” in free text.',
       'Options locked by rank (“Need more MPs”): every option is open.',
-      'The questions before buying more than 9 Scouts or Tankers, and the first turn’s budget kept for the next game.',
+      'The questions before buying more than 9 Scouts or Tankers.',
       'The turn time limit and network play.',
     ],
     changes: [

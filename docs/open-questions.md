@@ -542,7 +542,11 @@ These are what 5.0.5's code does and what the remake now does; they look like sl
 - **Options locked by rank** ("Need more MPs", `FUN_10059570`); left open on purpose.
 - **The questions before buying more than 9 Scouts or Tankers** (alerts 0x24, 0x25,
   `FUN_1005cf40`).
-- **The first turn's budget kept for the next game** (`FUN_10064600`, `FUN_1006579c`).
+- **The first turn's budget kept for the next game** (`FUN_10064600`). The new game's
+  shares from the preferences (`FUN_1006579c`) are done with the preferences' defaults
+  (`FUN_10072490`): every game starts from them.
+- **The Radical Research window** (`FUN_1005f280`, dialog 0x99): with a full hand of four
+  programs, cancel one (it leaves the hand). A rule, in a window; not in the remake.
 - **The turn time limit** (`FUN_10058360`, `FUN_10066260`), network play and the lobby.
 
 ## Palm 5 (2003)

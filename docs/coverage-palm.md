@@ -45,7 +45,7 @@ The 44 routines Ghidra could not decompile were read in the disassembly (a full 
 | `FUN_0002a844` | Master points for a win: 3^((max(30, d) - 30) / 10), at most 10,000,000; 0 below 10 | `FUN_10055f60` | Rule, implemented | js/rules-original.js masterPoints |
 | `FUN_0002a906` | The cap noted at a new game (player +0x28): 0xffff is no cap | `FUN_10056000` | Rule, implemented | js/rules-original.js addMasterPoints505 |
 | `FUN_0002a96c` | Game difficulty rating with the end-of-game terms (x0.97 per extra human, x0.95 per human surrender to a human, winners and losers, the year) | `FUN_100560a0` | Rule, implemented | js/rules-palm.js difficulty |
-| `FUN_0002b274` | Preferences' defaults: New Game settings (4 computers, Circle, 20, 10, IQ 70, 10 years, options 0x17), research shares 180 x 5 and 100, budget 650 / 250 / 100 (Abundant 550 / 200 / 150 / 100) | `FUN_10072490` | Rule, implemented | js/rules-palm.js afterSetup (the shares); engine newGame defaults |
+| `FUN_0002b274` | Preferences' defaults: New Game settings (4 computers, Circle, 20, 10, IQ 70, 10 years, options 0x17), research shares 180 x 5 and 100, budget 650 / 250 / 100 (Abundant 550 / 200 / 150 / 100) | `FUN_10072490` | Rule, implemented | js/rules-original.js creatorShares505 (the shares, both rulesets); engine newGame defaults |
 | `FUN_000297bc` | Each star's picture for a player's record | `FUN_10078bd0` | Interface | display |
 | `FUN_0003229c` | Number of players (humans only, for a game set to count them) | `FUN_10057de0` | Rule, implemented | engine |
 | `FUN_000322da` | Count of human winners (game +0x1a6) | `FUN_10057e50` | Rule, implemented | js/rules-original.js checkElimination505, js/rules-palm.js difficulty |
@@ -104,7 +104,7 @@ The 44 routines Ghidra could not decompile were read in the disassembly (a full 
 | `FUN_00025e38` | Nearest star helper | `FUN_1006f110` | Rule, implemented | js/rules-original.js |
 | `FUN_00025efa` | Free star test | `FUN_1006f1e0` | Rule, implemented | js/rules-original.js |
 | `FUN_00025f4a` | A star: temperature, gravity band, metal | `FUN_1006f280` | Rule, implemented | js/rules-original.js newStar |
-| `FUN_00026304` | Players created and set up: home system table, home star, Outpost made hostile, Abundant's second colony (third slot, home fourth, 50 per mille each), budget 650/250/100, designs, ships, borrowing limit, best-buddy computers | `FUN_1006c8c0`, `FUN_1006f640`, `FUN_1006f870` | Rule, implemented | js/rules-original.js setupPlayer, setup505, afterSetup; js/rules-palm.js afterSetup (the Abundant slots) |
+| `FUN_00026304` | Players created and set up: home system table, home star, Outpost made hostile, Abundant's second colony (third slot, home fourth, 50 per mille each), budget 650/250/100, designs, ships, borrowing limit, best-buddy computers | `FUN_1006c8c0`, `FUN_1006f640`, `FUN_1006f870` | Rule, implemented | js/rules-original.js setupPlayer, setup505, afterSetup (the Abundant slots, both rulesets) |
 | `FUN_0002746e` | Computer personality | `FUN_100704d0` | Rule, implemented | js/ai-original.js (via js/ai-palm.js) makeAI |
 | `FUN_0004adc0` | New fleet (Colony Ships loaded, a Biological fleet unfuelled, others full) | `FUN_1007bcb0` | Rule, implemented | engine newFleet, js/ai-original.js (via js/ai-palm.js) newFleet |
 | `FUN_0004aec4` | Split a design off a fleet | `FUN_1007bdc0` | Rule, implemented | js/ai-original.js (via js/ai-palm.js) splitOff |
@@ -220,7 +220,7 @@ The 44 routines Ghidra could not decompile were read in the disassembly (a full 
 | `FUN_00036928` | Dismantle toggle: the mark (fleet +0x72); a fleet bought this turn is un-bought (price, prototype, metal, interest) | `FUN_10062c10` | Rule, implemented | js/rules-original.js flagScrap |
 | `FUN_0003734e` | Evacuate Planet / Dont Evacuate Planet: Kansas always, Hope and Ship ask, profitable colonies ask; sounds 7002 / 4000; net -+ income; share to 0 | `FUN_10060fac` | Rule, implemented | js/rules-palm.js evacuateToggle |
 | `FUN_00036fb2` | Review Battle | `FUN_10062f20` | Interface | ui.js battle review |
-| `FUN_000395a6` | New game created: the creator's research and budget shares from the preferences, the master-point cap (player +0x28) | `FUN_1006579c`, `FUN_10063a40` | Rule, implemented | js/rules-palm.js afterSetup; js/rules-original.js addMasterPoints505 |
+| `FUN_000395a6` | New game created: the creator's research and budget shares from the preferences, the master-point cap (player +0x28) | `FUN_1006579c`, `FUN_10063a40` | Rule, implemented | js/rules-original.js creatorShares505, addMasterPoints505 |
 | `FUN_00040232` | Message History: Go See, and its Evacuate button (Kansas and Hope one time in three, no Ship) | `FUN_10060580`, `FUN_10060fac` | Rule, in part | the remake has no Evacuate in the message list |
 | `FUN_00041604` | A report tapped: the battle, the rank, the radical window (0x466), the win and loss screens | `FUN_10060580` | Interface | ui.js reports |
 | `FUN_000414a6` | Master points added at a win, up to the cap, once per game | `FUN_100b24c0` | Rule, implemented | ui.js awardMasterPoints, js/rules-original.js addMasterPoints505 |
