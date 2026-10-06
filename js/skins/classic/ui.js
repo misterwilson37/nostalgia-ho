@@ -676,7 +676,7 @@ function onUp(e) {
     if (performance.now() - d.t > 700 && f.dest != null) { HO.cancelMove(G, f); Sound.play(4000); }
     draw(); renderPanel(); return;
   }
-  if (f.scrap301 && marksScrap() && tgt != null && tgt !== f.star) { toast(SCRAP_HEAP); HO.cancelMove(G, f); Sound.play(4000); } // (FollowPathDrag @1516d8-151702: the alert, no path, sound 4000)
+  if (f.scrap301 && marksScrap() && tgt != null && tgt !== f.star) { toast(scrapWords('heap')); HO.cancelMove(G, f); Sound.play(4000); } // (FollowPathDrag @1516d8-151702: the alert, no path, sound 4000)
   else if (tgt == null || tgt === f.star) { if (f.dest != null) { HO.cancelMove(G, f); Sound.play(4000); } }
   else if (HO.orderMove(G, f, tgt)) Sound.play(4001);
   else if (autoRoute(f, tgt)) Sound.play(4001);
@@ -912,12 +912,14 @@ const marksScrap = () => !!(G && HO.rules(G).flagScrap);
 const marksScrapDesign = () => !!(G && HO.rules(G).flagScrapDesign);
 const SCRAP_FLEET = ['Scrap Current Fleet', 'Don’t Scrap Current Fleet'];
 const SCRAP_TYPE = ['Scrap All', 'Don’t Scrap'];
-// rs.scrapWords: a ruleset's own words for these ({ fleet: [mark, unmark],
-// type: [...] }; 5.0.5: "Dismantle Current Fleet" / "Don't Dismantle Current
-// Fleet", its Ships menu's string list)
-const scrapWords = (k) => (G && (HO.rules(G).scrapWords || {})[k]) || (k === 'type' ? SCRAP_TYPE : SCRAP_FLEET);
 // (STR# 4001.22: FollowPathDrag @1516d8 gives a marked fleet no orders)
 const SCRAP_HEAP = 'Sorry, but you have that fleet marked for the scrap heap. It’s not going anywhere!';
+// rs.scrapWords: a ruleset's own words for these ({ fleet: [mark, unmark],
+// type: [...], heap: the alert when a marked fleet is given orders }; 5.0.5:
+// "Dismantle Current Fleet" / "Don't Dismantle Current Fleet", its Ships
+// menu's string list; 4.0.5: "Scrap Current Fleet" both ways, and its own
+// alert, string 518)
+const scrapWords = (k) => (G && (HO.rules(G).scrapWords || {})[k]) || (k === 'type' ? SCRAP_TYPE : k === 'heap' ? SCRAP_HEAP : SCRAP_FLEET);
 const MARKED_FLEET = 'Fleet to be scrapped for metal.'; // (STR# 4000.12, DrawSelectedFleetInfo @155826)
 // Scrap Current Fleet (ScrapCurrentFleet @133a24): sound 7003 when the mark
 // was off; a fleet bought this turn is given back instead (it is gone)
@@ -984,7 +986,7 @@ function fleetRow(f, inbound) {
 }
 // multi-star route: click stars in order, then Done
 function startRoute(f) {
-  if (f.scrap301 && marksScrap()) { Sound.play(4000); toast(SCRAP_HEAP); return; }
+  if (f.scrap301 && marksScrap()) { Sound.play(4000); toast(scrapWords('heap')); return; }
   UI.route = { fleet: f.id, stops: [] };
   toast('Click the stars to visit in order, then press Done.');
   renderRouteBar();
@@ -1084,9 +1086,9 @@ function profile() {
 }
 function rankOf(points) { const R = HO.DATA.ranks || []; let i = 0; while (i + 1 < R.length && points >= R[i + 1][1]) i++; return i; }
 // The rulesets with 5.0.5's ranks: a difficulty rating and master points,
-// and no rank table of their own (rs.RANKS: 4.0.5's ten ranks, not shown
-// yet). Original (5.0.5) and Palm OS 5 (the same code); 1.2, 2.0, 3.0.1
-// and the Claude rules have no ranks.
+// and no rank table of their own (rs.RANKS: 4.0.5's ten ranks, shown by its
+// rs.hall below). Original (5.0.5) and Palm OS 5 (the same code); 1.2, 2.0,
+// 3.0.1 and the Claude rules have no ranks.
 const hasRanks = (g) => { const rs = HO.rules(g); return !!(rs.masterPoints && rs.difficulty && !rs.RANKS); };
 function awardMasterPoints(byComputer) {
   if (!G || !G.over || G.mpDone || !hasRanks(G) || hotSeat()) return;
@@ -1128,6 +1130,113 @@ function openRanks() {
     ...pr.games.slice(-30).reverse().map(g => el('tr', null, el('td', null, g.date), el('td', null, String(g.year)), el('td', null, String(g.difficulty)), el('td', null, fmt(g.points))))));
   modal('Rank history', body, { cls: 'mid' });
 }
+// ---------- the Hall of Fame, the Hall of Shame and the Master Point List ----------
+// rs.hall (4.0.5): a ruleset's own record of games, kept in localStorage per
+// ruleset ("ho5.hall.<rules>", the stand-in for 4.0.5's haloffam.ho; 5.0.5's
+// rank history is "ho5.profile"). The ruleset makes each entry and keeps the
+// tables (hall.entry(G, player, won), hall.record(tables, entry, won)), says
+// who is out (hall.out), and gives the rank names, pictures and dates; this
+// skin writes an entry once a game for each human who wins or is eliminated
+// (G.hallDone, as 4.0.5's bit at game +0x160) and draws the three windows
+// (the Game menu, in each skin's style; 4.0.5's Options menu).
+const hasHall = (g) => !!(g && HO.rules(g).hall);
+const hallKey = (g) => 'ho5.hall.' + g.rules;
+function hallTables(g) {
+  let T = {};
+  try { T = JSON.parse(localStorage.getItem(hallKey(g)) || '{}') || {}; } catch (e) { T = {}; }
+  return { fame: T.fame || [], shame: T.shame || [], master: T.master || { list: [], sum: 0 } };
+}
+function recordHall() {
+  if (!hasHall(G)) return;
+  const H = HO.rules(G).hall, done = G.hallDone = G.hallDone || {};
+  for (const p of HO.humans(G)) {
+    if (done[p.id]) continue;
+    const won = !!G.over && (G.winners || [G.winner]).includes(p.id);
+    if (!won && !H.out(G, p)) continue;
+    const e = H.entry(G, p, won);
+    e.time = Math.floor(Date.now() / 1000);
+    try { localStorage.setItem(hallKey(G), JSON.stringify(H.record(hallTables(G), e, won))); } catch (err) {}
+    done[p.id] = 1;
+  }
+}
+// a list box: rows of cells laid out on the window's tab stops (--cols),
+// one row selected; dbl: what a double click does
+function hallListBox(rows, cols, sel, onSel, dbl) {
+  const lb = el('div', { class: 'lb', role: 'listbox', tabindex: 0, style: `--cols: ${cols}` });
+  const mark = () => lb.querySelectorAll('.lbrow').forEach((r, i) => { r.classList.toggle('sel', i === sel); r.setAttribute('aria-selected', i === sel ? 'true' : 'false'); });
+  rows.forEach((cells, i) => {
+    const r = el('div', { class: 'lbrow', role: 'option', onclick: () => { sel = i; mark(); if (onSel) onSel(i); } }, ...cells.map(c => el('span', null, c)));
+    if (dbl) r.addEventListener('dblclick', () => dbl(i));
+    lb.append(r);
+  });
+  lb.addEventListener('keydown', (e) => {
+    if (!rows.length || (e.key !== 'ArrowDown' && e.key !== 'ArrowUp')) return;
+    e.preventDefault(); sel = Math.max(0, Math.min(rows.length - 1, sel + (e.key === 'ArrowDown' ? 1 : -1))); mark(); if (onSel) onSel(sel);
+  });
+  mark();
+  return lb;
+}
+const hallHeads = (names, cols) => el('div', { class: 'lbhead', style: `--cols: ${cols}` }, ...names.map(n => el('span', null, n)));
+// The Hall of Fame / Hall of Shame window (dialog 386, FUN_0046c8fe,
+// FUN_0049883d): "Hall of Fame" or "Hall of Shame"; Name, When, Difficulty
+// on the list's tab stops (92, 209); the first row selected; Details (dimmed
+// with no entries) opens the Summary of the selected game.
+function openHall(kind, at) {
+  if (!hasHall(G)) return;
+  const H = HO.rules(G).hall, list = hallTables(G)[kind === 'shame' ? 'shame' : 'fame'];
+  const title = kind === 'shame' ? 'Hall of Shame' : 'Hall of Fame', cols = '92fr 117fr 71fr';
+  let sel = Math.min(at | 0, Math.max(0, list.length - 1));
+  const details = () => { const i = sel; if (list[i]) openHallSummary(list[i], kind, () => openHall(kind, i)); };
+  const body = el('div', { class: 'hall hall-list' },
+    el('div', { class: 'htitle' }, title),
+    hallHeads(['Name', 'When', 'Difficulty'], cols),
+    hallListBox(list.map(e => [e.name, H.date(e.time), String(e.difficulty)]), cols, sel, (i) => { sel = i; }, (i) => { sel = i; details(); }),
+    el('div', { class: 'btns' }, el('button', { class: 'quiet', disabled: !list.length, onclick: details }, 'Details'), el('button', { onclick: closeModal }, 'OK')));
+  modal(title, body, { cls: 'mid hallwin' });
+}
+// The Summary window (dialog 387, FUN_0046d1e8, FUN_00498b6a): "Summary of
+// Game Victory" / "Summary of Game Defeat"; the Hall of Shame's "Winner:"
+// reads "Loser" (no colon, as 4.0.5). The picture box (static 1194) is left
+// empty: the summary never gives it a picture.
+function openHallSummary(e, kind, back) {
+  const H = HO.rules(G).hall, N = H.names, shame = kind === 'shame';
+  const row = (label, ...vals) => [el('span', { class: 'hl' }, label), el('span', { class: 'hv' }, ...vals.map(v => el('span', null, v)))];
+  const body = el('div', { class: 'hall hall-sum' },
+    el('div', { class: 'htitle' }, shame ? 'Summary of Game Defeat' : 'Summary of Game Victory'),
+    el('div', { class: 'hsum' },
+      el('div', { class: 'hgrid' },
+        ...row(shame ? 'Loser' : 'Winner:', e.name), ...row('Date:', H.date(e.time)), ...row('Difficulty:', String(e.difficulty)),
+        ...row('# Humans:', String(e.humans)), ...row('# of Computers:', String(e.computers)), ...row('# Allies:', String(e.allies)),
+        ...row('Computer Intelligence:', N.iq[e.iq] || ''), ...row('Game Date:', String(e.year)),
+        ...row('Galaxy Size:', N.size[e.size] || '', N.density[e.density] || '', N.shape[e.shape] || ''),
+        ...row('Player Skill:', N.skill[e.skill] || ''), ...row('Armageddons:', String(e.armageddons))),
+      el('div', { class: 'hpic', 'aria-hidden': 'true' })),
+    el('div', { class: 'btns right' }, el('button', { onclick: closeModal }, 'OK')));
+  // closing it goes back to the list it was opened from
+  modal(shame ? 'Summary of Game Defeat' : 'Summary of Game Victory', body, { cls: 'small hallwin', onClose: back });
+}
+// The Master Point List (dialog 388, FUN_00482b89, FUN_00482f45): "Master
+// Points:"; Name, Points, Rank on tab stops 6, 142, 278; points written
+// plainly ("%d"); the picture goes by the top player's points, then by the
+// selected player's (hall.picture: a bitmap number; 124 isn't in 4.0.5, so
+// nothing is drawn for it).
+function openMasterList() {
+  if (!hasHall(G)) return;
+  const H = HO.rules(G).hall, L = hallTables(G).master.list, cols = '6fr 136fr 136fr 101fr';
+  const pic = el('div', { class: 'hpic master' });
+  const show = (pts) => {
+    const n = H.picture(pts | 0), src = A.img[(T.prefix || '') + 'b' + n] || `assets/skins/w95/sprites/b${n}.png`;
+    pic.innerHTML = '';
+    const im = el('img', { src, alt: '' }); im.onerror = () => im.remove(); pic.append(im);
+  };
+  show(L.length ? L[0].points : 0);
+  const body = el('div', { class: 'hall hall-master' },
+    el('div', { class: 'htop' }, el('div', { class: 'htitle' }, 'Master Points:'), pic),
+    hallHeads(['', 'Name', 'Points', 'Rank'], cols),
+    hallListBox(L.map(r => ['', r.name, String(r.points), H.rank(r.points)]), cols, 0, (i) => show(L[i].points)),
+    el('div', { class: 'btns right' }, el('button', { onclick: closeModal }, 'OK')));
+  modal('Master Point List', body, { cls: 'mid hallwin' });
+}
 function doEndTurn(confirmed) {
   if (!G || G.over) return;
   if (confirmed !== true && HO.feature(G, 'buildQueue')) {
@@ -1146,6 +1255,7 @@ function doEndTurn(confirmed) {
   }
   HO.endTurn(G);
   awardMasterPoints();
+  recordHall();
   Sound.play(11111);
   for (const p of HO.humans(G)) addTurnNotes(p);
   if (hotSeat()) { const first = seatOrder()[0] || me(); G.cur = first.id; save(); handOver(first); return; }
@@ -1243,7 +1353,8 @@ function openBuild(sid) {
   if (!types.includes(st.type)) st.type = 'fighter';
   const body = el('div', { class: 'build' });
   // ships bought in this window, by design: marking a type gives them back
-  // (BuildDesignShips @1314d4-1315ac)
+  // (BuildDesignShips @1314d4-1315ac); rs.scrapTypeRefundOne: only one of
+  // them (4.0.5's slip, FUN_0044fd03)
   const session = {};
   const marking = marksScrapDesign() && !queue;
   const render = () => {
@@ -1265,7 +1376,10 @@ function openBuild(sid) {
         el('div', { class: 'pm' },
           marking ? el('button', { class: 'quiet', onclick: () => {
             // a type marked for scrapping: the ships of it bought in this window go back
-            if (HO.rules(G).flagScrapDesign(G, p, d, 'command')) for (; session[d.id] > 0; session[d.id]--) HO.unbuildShip(G, ME, sid, d.id);
+            if (HO.rules(G).flagScrapDesign(G, p, d, 'command')) {
+              if (HO.rules(G).scrapTypeRefundOne) { if (session[d.id] > 0 && HO.unbuildShip(G, ME, sid, d.id)) session[d.id]--; }
+              else for (; session[d.id] > 0; session[d.id]--) HO.unbuildShip(G, ME, sid, d.id);
+            }
             render(); renderPanel(); draw(); save();
           } }, scrapWords('type')[d.scrap301 ? 1 : 0]) : null,
           el('button', { class: 'quiet', disabled: !n, 'aria-label': 'Remove one', onclick: () => { if (queue) { const i = (s.queue || []).map(it => it.did).lastIndexOf(d.id); if (i >= 0) HO.unqueueShip(G, ME, sid, i); } else if (HO.unbuildShip(G, ME, sid, d.id) && session[d.id] > 0) session[d.id]--; render(); renderPanel(); draw(); } }, '−'),
@@ -1657,7 +1771,7 @@ function runAutoPlay(o) {
   let n = 0;
   const step = () => {
     if (!G || G.over || n++ >= o.turns || UI.modal) { renderMsg(); return; }
-    me().auto = o.computer; HO.endTurn(G); me().auto = false; awardMasterPoints(o.computer); save();
+    me().auto = o.computer; HO.endTurn(G); me().auto = false; awardMasterPoints(o.computer); recordHall(); save();
     renderPanel(); draw();
     const stop = me().inbox.some(m => (o.won && isBattleNews(m) && wonBattle(m)) || (o.lost && isBattleNews(m) && !wonBattle(m)) || (o.news && !m.quiet && !isBattleNews(m) && !m.chat));
     $('#title').textContent = `${me().name} in ${G.opts.galaxy || 'Milky Way'} in ${G.year} (auto play)`;
@@ -2014,7 +2128,8 @@ function save() { if (!G) return; try { localStorage.setItem('ho5.save', HO.save
 // ---------- menus ----------
 function setupMenus() {
   const menus = {
-    Game: [['New game…', newGameDialog], ['Players and history', () => G && openPlayers()], ['Auto-play this turn', () => { if (!G || G.over) return; me().auto = true; doEndTurn(); me().auto = false; }], ['Auto play…', () => G && !G.over && (hotSeat() ? toast('Auto play is for one-player games.') : openAutoPlay())], ['Preferences…', openPrefs], ['Rank history…', openRanks, () => !G || hasRanks(G)], ['-'], ['Quit to title', () => { save(); Sound.play(7002); G = null; renderPanel(); draw(); $('#panel').innerHTML = ''; $('#msg').innerHTML = ''; titleScreen(); }]],
+    Game: [['New game…', newGameDialog], ['Players and history', () => G && openPlayers()], ['Auto-play this turn', () => { if (!G || G.over) return; me().auto = true; doEndTurn(); me().auto = false; }], ['Auto play…', () => G && !G.over && (hotSeat() ? toast('Auto play is for one-player games.') : openAutoPlay())], ['Preferences…', openPrefs], ['Rank history…', openRanks, () => !G || hasRanks(G)],
+      ['Master Point List…', () => openMasterList(), () => hasHall(G)], ['Hall of Fame…', () => openHall('fame'), () => hasHall(G)], ['Hall of Shame…', () => openHall('shame'), () => hasHall(G)], ['-'], ['Quit to title', () => { save(); Sound.play(7002); G = null; renderPanel(); draw(); $('#panel').innerHTML = ''; $('#msg').innerHTML = ''; titleScreen(); }]],
     Ships: [['Build ships at selected colony…', () => { if (G && UI.sel != null && G.stars[UI.sel].owner === ME) openBuild(UI.sel); else toast('Select one of your colonies first.'); }], ['Review battle…', () => G && openBattleList()], ['List all fleets…', () => G && openFleetList()],
       [() => scrapWords('fleet')[G && curFleet() && curFleet().scrap301 ? 1 : 0], () => { if (!G || G.over) return; const f = curFleet(); if (f) toggleScrapFleet(f); else toast('Select one of your fleets first.'); }, () => marksScrap()],
       ['Scrap ship types…', () => G && openScrapTypes()], ['Next fleet', nextFleet]],

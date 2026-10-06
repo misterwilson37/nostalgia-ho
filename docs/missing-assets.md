@@ -246,8 +246,11 @@ and 5.0.5: it has most of 5.0.5's features, so less is borrowed than for DOS.
   is turning red or exploding, then nothing at all where the star was.
 - **The eye ship and other 5.0.5 special ships** ([`eyeship`](../assets/sprites/eyeship.png)): 4.0.5 has its own two hidden
   specials ([`b2751`](../assets/skins/w95/sprites/b2751.png)–[`b2756`](../assets/skins/w95/sprites/b2756.png)) instead.
-- **Rank pictures**, [`assets/explore/`](../assets/explore/): 4.0.5's ten ranks have no
-  pictures (and ranks are off for the 4.0.5 rules for now).
+- **Rank pictures**: 4.0.5's ten ranks have no pictures of their own; its Master Point
+  List shows a cowboy planet by points, [`b122`](../assets/skins/w95/sprites/b122.png) (under 5,000), [`b123`](../assets/skins/w95/sprites/b123.png) (under
+  50,000) and [`b125`](../assets/skins/w95/sprites/b125.png) (500,000 and more), in every skin. Its picture for 50,000 to 499,999,
+  bitmap 124 (0x7c), is not in SPACEHO.EXE (`FUN_00482b89` asks for it), so 4.0.5 and
+  the remake show none there.
 - **Message pictures** for reports 4.0.5 doesn't have: they get your own planet icon.
 - **Battle debris** [`debris`](../assets/sprites/debris.png): 4.0.5 draws shrinking and growing ellipses when a ship
   dies, and sparks ([`b12000`](../assets/skins/w95/sprites/b12000.png)–[`b12002`](../assets/skins/w95/sprites/b12002.png)) on hits.
@@ -286,7 +289,8 @@ with the 4.0.5 rules (they fall back to general pictures):
 - the "your population now exceeds …" milestones and the "a big battle just took place"
   rumours (4.0.5: [`b4024`](../assets/skins/w95/sprites/b4024.png), [`b3119`](../assets/skins/w95/sprites/b3119.png));
 - the turn timer (the clock with time left, and its `bonus` / `timeup` sounds);
-- the ten 4.0.5 ranks (Red-Neck … Ho! Champion) and the Hall of Shame;
+- the ten 4.0.5 ranks (Red-Neck … Ho! Champion) and the Hall of Shame (every skin shows
+  the 4.0.5 Master Point List's pictures);
 - the money and metal piles and the planet window's globe and landscapes (5.0.5 shows
   planet pictures and the explore pictures instead).
 

@@ -59,8 +59,37 @@ Optional ruleset flags the skin reads (each is documented where it is read):
   (`js/skins/classic/ui.js`, `openPlayers`)
 - Ranks: a ruleset with `rs.masterPoints` and `rs.difficulty` and no rank table of its own
   (`rs.RANKS`) uses 5.0.5's 25 ranks: a win earns master points and the Game menu offers
-  "Rank history…" (the Original and Palm OS 5 rules). Other rulesets have no ranks there.
+  "Rank history…" (the Original and Palm OS 5 rules). 4.0.5 has its own ten (`rs.RANKS`),
+  shown by its `rs.hall` (below). Other rulesets have no ranks.
   (`js/skins/classic/ui.js`, `hasRanks`)
+- `rs.evacuateToggle`: the Evacuate command marks the colony and the ruleset gives it up at
+  End Turn (5.0.5): `{ words: [mark, unmark], marked(G, starId), ask(G, player, starId) }`,
+  `ask` giving null, a yes/no question `{ text }` or a notice `{ text, notice: true }`.
+  Left out: the remake's own confirmation and an immediate `rs.evacuate`.
+  (`js/skins/classic/ui.js`, `evacuateClick`)
+- `rs.flagScrap(G, fleet, how)` and `rs.flagScrapDesign(G, player, design, how)`: Scrap
+  Current Fleet and the type's Scrap All put a mark on (or take it off, `'command'`
+  toggles), scrapped at End Turn (3.0.1, 4.0.5, 5.0.5). Left out: scrapped at once.
+  `rs.scrapWords`: the version's own words, `{ fleet: [mark, unmark], type: [mark,
+  unmark], heap: the alert when a marked fleet is given orders }` (5.0.5: "Dismantle
+  Current Fleet"; 4.0.5: "Scrap Current Fleet" both ways and its string 518); left out,
+  3.0.1's. `rs.scrapTypeRefundOne`: `true` when marking a type in the build window gives
+  back only one of the ships of it ordered there (4.0.5's slip); left out, all of them.
+  (`js/skins/classic/ui.js`, "Scrapping by marks", `openBuild`)
+- `rs.dipSet(G, player, percent)` and `rs.dipMax`: Dip Into Savings as the version kept
+  it (5.0.5: a percentage up to 30 that stays on); left out, `player.dip` is set and the
+  window's slider goes to 100. (`js/skins/classic/ui.js`, `openDip`)
+- `rs.addMasterPoints(total, points)`: what one win may add to a player's master points
+  (5.0.5: up to past the next rank). Left out: all of them. (`js/skins/classic/ui.js`, `awardMasterPoints`)
+- `rs.departs(G, fleet)`: whether a fleet with orders leaves this turn; `false` keeps it
+  waiting with its orders, saying nothing (5.0.5). (`js/engine.js`, `departures`)
+- `rs.hall`: a version's Hall of Fame, Hall of Shame and Master Point List (4.0.5's
+  `haloffam.ho`): `{ entry(G, player, won), record(tables, entry, won), out(G, player),
+  rank(points), picture(points), date(seconds), names }`. A human who wins or is
+  eliminated is put on record once a game (`G.hallDone`), in localStorage
+  "ho5.hall.<rules>", apart from 5.0.5's rank history; the Game menu then offers
+  "Master Point List…", "Hall of Fame…" and "Hall of Shame…", in every skin.
+  (`js/skins/classic/ui.js`, `recordHall`, `openHall`, `openMasterList`)
 - A battle report's `won: true` or `won: false` (an option of `msg()`): auto play stops on
   battles won or lost by it. `engine.js` `battleNews` sets it; a ruleset that writes its
   own reports should too. It is not saved with the game. A report with no `won` still

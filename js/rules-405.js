@@ -1573,8 +1573,9 @@ function flagScrap(G, f, how) {
 // All" or "Don't Scrap" (strings 760-761); while a design is marked its Build
 // button is dimmed. Marking it gives back one ship of it ordered in the
 // window (the window's order count goes down by one; the ships are bought
-// when the window closes, FUN_00468f83). `how` as for flagScrap ('command'
-// toggles). Returns whether it is now marked.
+// when the window closes, FUN_00468f83): only one, a slip the skin's build
+// window plays through `scrapTypeRefundOne`. `how` as for flagScrap
+// ('command' toggles). Returns whether it is now marked.
 function flagScrapDesign(G, p, d, how) {
   d.scrap301 = how === 'command' ? !d.scrap301 : how !== false;
   return d.scrap301;
@@ -2096,9 +2097,10 @@ function checkElimination(G) {
           G.allyWarn = false;
           const hw = live.find(p => p.human);
           G.over = true; G.winner = hw ? hw.id : live[0].id; G.winners = live.map(p => p.id);
-          const rating = winDifficulty(Object.assign({}, G.opts, { humans: E.humans(G).length, computers: G.players.filter(p => !p.human).length, armageddons: G.armageddons | 0 }));
+          // the rating is FUN_0043c1ec's for the winner reading it: its own
+          // allies and skill (hallEntry)
           for (const q of E.humans(G)) for (const w of live) {
-            if (w === q) msg(G, q.id, `Congratulations!  You won the game.  Game difficulty rating was ${rating}.`, { icon: 'p3030', sound: 7021, big: 'p3030' });
+            if (w === q) msg(G, q.id, `Congratulations!  You won the game.  Game difficulty rating was ${hallEntry(G, q, true).difficulty}.`, { icon: 'p3030', sound: 7021, big: 'p3030' });
             else msg(G, q.id, `${w.name} has just won the game.`, { icon: live.includes(q) ? 'p3030' : 'p3040', sound: live.includes(q) ? 7021 : 2001 });
           }
         }
@@ -2126,8 +2128,8 @@ const WELCOME = [
 ];
 
 // ---------- difficulty and master points (FUN_0043c351, FUN_0043c836, FUN_00497e58) ----------
-// Not tied to the rank window: the remake's ranks are 5.0.5's 25, with their
-// pictures and unlocks. These are here for the New Game rating and for later.
+// 4.0.5's own ranks, not 5.0.5's 25: a win writes the Hall of Fame and adds
+// master points, being eliminated writes the Hall of Shame (`hall` below).
 const sizeCode = (v) => SIZES.indexOf(sizeKey(v)) + 1;
 const iqCode = (v) => Math.max(1, IQS.indexOf(v) + 1);
 // "Base Difficulty Rating" in the New Game window (FUN_0043c351, CONFIRMED, one
@@ -2145,7 +2147,13 @@ function difficulty(o) {
   for (let i = 0; i < (o.armageddons | 0); i++) D = trunc((D * 2 - 38) / 3) + 20;
   return D;
 }
-// rating of a win (FUN_0043c836, CONFIRMED). o as above plus humans, timeLimit (seconds, 0 = none)
+// rating of a win (FUN_0043c836, CONFIRMED). o as above plus humans, timeLimit (seconds, 0 = none).
+// FUN_0043c1ec calls it for one player: o.allies is the number of other
+// players allied with that player both ways (FUN_0043c7c2, FUN_0042210e),
+// o.start that player's skill (player +0x26). A player marked as cheating
+// (galaxy +8: its record's checksum, FUN_0043c2a1, failed at End Turn,
+// "%s is cheating.", NOCHEAT) is rated -1 (FUN_0043c1ec); the remake keeps
+// no such checksum.
 function winDifficulty(o) {
   const nC = o.computers | 0, nH = Math.max(1, o.humans | 0), iq = iqCode(o.iq);
   const base = nC === 0 ? 40 : nC <= 1 ? (iq === 4 ? 70 : 40 + 6 * iq) : nC <= 3 ? (iq === 4 ? 80 : 40 + 8 * iq) : (iq === 4 ? 90 : 40 + 10 * iq);
@@ -2159,10 +2167,96 @@ function winDifficulty(o) {
 // added as min(points, 500) while the total is under 500, else min(points, total/3)
 const masterPoints = (d) => 100 * trunc(10 ** ((d - 25) / 25));
 const addMasterPoints = (total, pts) => total + (total < 500 ? Math.min(pts, 500) : Math.min(pts, trunc(total / 3)));
-// the ten ranks (strings 324-333, FUN_00482b89), CONFIRMED; no unlocks
+// the ten ranks (strings 324-333, FUN_00482b89), CONFIRMED; no unlocks.
+// [name, least points]. From 1,000,000 points the window loads string 334,
+// "%s: %s", as the rank (rankName).
 const RANKS = [['Red-Neck', 0], ['Bow-legs', 1000], ['Cowpoke', 2500], ['Deputy Gunfighter', 5000], ['Town Sheriff', 10000],
   ['Federal Marshall', 25000], ['Lone Ranger', 50000], ['Quickdraw McGraw', 100000], ['Best in the West', 250000], ['Ho! Champion', 500000]];
+const rankName = (pts) => pts >= 1000000 ? '%s: %s' : RANKS[RANKS.length - 1 - RANKS.slice().reverse().findIndex(r => pts >= r[1])][0];
 
+
+// ---------- the Hall of Fame, the Hall of Shame and the Master Point List ----------
+// CONFIRMED (FUN_00497e58, the file haloffam.ho, 0x1520 bytes): two lists
+// of the 25 last games, newest first (the Hall of Fame at 0, the Hall of
+// Shame at 0x9c6: a count, then 100-byte entries), and the master point
+// table at 0x138c (a count, a checksum, then 25 slots of a 12-byte name and
+// the points). The remake keeps the same tables in localStorage, one set
+// per ruleset (the skin's `hall` storage). An entry, by its short:
+//   0 humans (galaxy +1), 1 computers (+2), 2 style (+0xe: 1 Circle, 2 Random,
+//   3 Ring, 4 Spiral, 5 Grid, 6 Cluster), 3 density (+0x10: 1 Dense,
+//   2 Sparse), 4 size (+0x12: 1 Small .. 5 Humongous), 5 intelligence
+//   (+0x14: 1 Dumb .. 4 Diabolical), 6 (+0x16), 7 the game year (a win: the
+//   year it was won, galaxy +6; a loss: the year the player went out, +0x2dc,
+//   or this year while that reads 1), 8 allies (FUN_0043c7c2), 9 difficulty
+//   (FUN_0043c1ec), 10 (+0x20), 11-12 (+6), 13 years per turn (+0x18), 14-15
+//   the date (time()), 16 the player's skill (0 Novice .. 4 Expert), 17
+//   Armageddons (+0x22), 18.. the player's name.
+// A win (FUN_0047fd97, or report 0x434 FUN_00470dec) and being eliminated
+// (report 0x432 "Unfortunately, you have been eliminated ...",
+// FUN_00470dec) each call it once for the player at this computer:
+// FUN_004782ac skips it when this game was already put on record for that
+// player, and afterwards FUN_00478196 sets that player's bit (saved in the
+// game, +0x160). So a player who is out and comes back is never put in the
+// Hall of Fame for that game.
+function hallEntry(G, p, won) {
+  const o = G.opts || {};
+  const allies = G.players.filter(q => q !== p && isAllied(G, p.id, q.id)).length;
+  const skill = (SKILLS[p.skill] || SKILLS.normal).code;
+  return {
+    humans: E.humans(G).length, computers: G.players.filter(q => !q.human).length,
+    shape: Math.max(1, SHAPES.indexOf(o.shape) + 1), density: o.density === 'sparse' || (typeof o.density === 'number' && o.density >= 50) ? 2 : 1,
+    size: sizeCode(o.size), iq: iqCode(o.iq),
+    year: won || !(p.out405 > 1) ? G.year : p.out405,
+    allies, difficulty: winDifficulty(Object.assign({}, o, { humans: E.humans(G).length, computers: G.players.filter(q => !q.human).length, allies, armageddons: G.armageddons | 0, start: p.skill })),
+    yearsPerTurn: o.yearsPerTurn || 10, skill, armageddons: G.armageddons | 0, name: p.name,
+  };
+}
+// the master point table's checksum: the low 16 bits of every total, added
+// in a short (FUN_00497e58 @0049826a)
+const hallSum = (list) => list.reduce((a, r) => ((a + r.points) << 16) >> 16, 0);
+// CONFIRMED (FUN_00497e58): T = { fame: [], shame: [], master: { list, sum } }
+// (as loaded; missing parts are made). The entry goes first in its list,
+// which keeps 25. A win also adds master points: a table whose checksum
+// doesn't match is wiped; the player is found by name, else added (with 25
+// names the 25th, the lowest, is replaced); 100 x trunc(10^((D - 25) / 25))
+// points (addMasterPoints); the table is sorted, most points first, by the
+// code's exchange sort; the checksum is written again. Returns T.
+function hallRecord(T, e, won) {
+  T = T || {};
+  T.fame = T.fame || []; T.shame = T.shame || [];
+  T.master = T.master || { list: [], sum: 0 };
+  const list = won ? T.fame : T.shame;
+  list.unshift(e);
+  if (list.length > 25) list.length = 25;
+  if (!won) return T;
+  const M = T.master;
+  if (hallSum(M.list) !== (M.sum | 0)) M.list = [];
+  let i = M.list.findIndex(r => r.name === e.name);
+  if (i < 0) { i = Math.min(M.list.length, 24); M.list[i] = { name: e.name, points: 0 }; }
+  M.list[i].points = addMasterPoints(M.list[i].points, masterPoints(e.difficulty));
+  const L = M.list;
+  for (let a = 0; a < L.length - 1; a++) for (let b = a + 1; b < L.length; b++) if (L[a].points < L[b].points) [L[a], L[b]] = [L[b], L[a]];
+  M.sum = hallSum(L);
+  return T;
+}
+// CONFIRMED (FUN_00482b89, FUN_00482f45): the Master Point List's picture
+// by points: under 5,000 bitmap 0x7a, under 50,000 0x7b, under 500,000
+// 0x7c (not in SPACEHO.EXE: nothing is drawn), else 0x7d; the top player's
+// when the window opens, the selected player's after.
+const hallPicture = (pts) => pts < 5000 ? 122 : pts < 50000 ? 123 : pts < 500000 ? 124 : 125;
+// CONFIRMED (FUN_0049883d, FUN_00498b6a): the date as "%d/%d/%d" of
+// localtime's month + 1, day and tm_year, the years since 1900 (1996: 96,
+// 2026: 126)
+const hallDate = (t) => { const d = new Date(t * 1000); return `${d.getMonth() + 1}/${d.getDate()}/${d.getFullYear() - 1900}`; };
+// the names the Summary window shows (tables at 0x5a0584-0x5a05e0)
+const HALL_NAMES = {
+  shape: [null, 'Circle', 'Random', 'Ring', 'Spiral', 'Grid', 'Cluster'], density: [null, 'Dense', 'Sparse'],
+  size: [null, 'Small', 'Medium', 'Large', 'X-Large', 'Humongous'], iq: [null, 'Dumb', 'Average', 'Smart', 'Diabolical'],
+  skill: ['Novice', 'Beginner', 'Normal', 'Advanced', 'Expert'],
+};
+const hall = {
+  entry: hallEntry, record: hallRecord, out: (G, p) => !!p.out405, rank: rankName, picture: hallPicture, date: hallDate, names: HALL_NAMES,
+};
 
 // ---------- the ruleset ----------
 E.registerRules('405', Object.assign({}, D, {
@@ -2206,6 +2300,18 @@ E.registerRules('405', Object.assign({}, D, {
   scrapAt: (G, pid, s, metal) => { s.metal += metal; const so = G.scrapOver301 || (G.scrapOver301 = {}); so[s.id] = Math.min(32767, (so[s.id] || 0) + trunc(metal)); },
   finishedPartWasted: false,
   difficulty, winDifficulty, masterPoints, addMasterPoints,
+  // the Hall of Fame, Hall of Shame and Master Point List (FUN_00497e58,
+  // FUN_00482b89, FUN_0049883d, FUN_00498b6a): the skin's Game menu and
+  // windows read this
+  hall,
+  // CONFIRMED (menu resource 2, FUN_00413ba3, string 518): the Ships menu's
+  // "Scrap Current Fleet" never changes (strings 318-319 are never loaded);
+  // a marked fleet given orders on the map: string 518, then WHOA (4000)
+  scrapWords: { fleet: ['Scrap Current Fleet', 'Scrap Current Fleet'], heap: 'Sorry, but you have that fleet marked for the scrap heap.  it’s not going anywhere.' },
+  // CONFIRMED (FUN_0044fd03): marking a type in the Ship Types window gives
+  // back only one ship of it ordered there (the order count goes down by
+  // one); the skin's window reads this
+  scrapTypeRefundOne: true,
   // fleets, routes and colonies
   fleetFor, shipsAdded, builtAt, yardRoom, route, path301: path405, path405, givePath, settle, colOrder, abandon, evacuate: evacuate405, dragShare, flagScrap, flagScrapDesign, newDesign, fleetList,
   terraLeft: (G, p, s) => bars(s)[0] !== -1, bars, setBars, slots301: slots, colSlots, share20, keyPm, setKeyPm, giveBarPercent,

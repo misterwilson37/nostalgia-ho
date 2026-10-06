@@ -373,11 +373,25 @@ These are what 4.0.5's code does and what the remake now does; they look like sl
 12. **A rank past 1,000,000 master points** shows "%s: %s" (string 334) instead of a rank
     name (`FUN_00482b89`).
 13. **Marking a ship type in the Ship Types window** gives back only one of the ships of
-    it ordered in the window (`FUN_0044fd03`); the remake's window gives back all of them.
+    it ordered in the window (`FUN_0044fd03`; the remake's window too, through
+    `rs.scrapTypeRefundOne`); the others are bought and then scrapped with the type. The
+    window's running money and metal are credited as if all its orders came back, plus
+    the prototype price (twice when none is built); the remake buys at once and keeps no
+    running total, so that part has nothing to act on.
 14. **Buying at a colony** is allowed while its people (units) exceed the ships built
     there this turn; for a human the count goes up before the money check
     (`FUN_004691c4`), for a computer only when bought (`FUN_00462105`).
 15. **Ship power noted and never read** (`FUN_0043b08a`), as 3.0.1.
+16. **The Hall of Fame's dates** print `tm_year`, the years since 1900: a game won in
+    2026 reads "10/6/126" (`FUN_0049883d`, `FUN_00498b6a`).
+17. **The Hall of Shame's summary** labels the player "Loser", without the colon of
+    "Winner:" (`FUN_0046d1e8`).
+18. **The Master Point List's picture** for 50,000 to 499,999 points is bitmap 0x7c, which
+    SPACEHO.EXE doesn't have: nothing is drawn (`FUN_00482b89`).
+19. **The cheating mark** (a player record whose checksum fails at End Turn, "%s is
+    cheating.") is set for the player at this computer, not the one whose record failed
+    (`FUN_004320f8`); a marked player's win is rated -1 and earns no master points. The
+    remake has no such checksum, so nobody is marked.
 
 ### Remake's choices
 
@@ -387,21 +401,28 @@ These are what 4.0.5's code does and what the remake now does; they look like sl
    pass 1. Only what a computer sees of the players before it in the same step differs.
 3. **Scrapping** is 4.0.5's: Scrap Current Fleet and the Ship Types window's Scrap All
    toggle a mark carried out at End Turn, and a fleet bought this turn is un-bought
-   (`FUN_00419a52`, `FUN_0044fd03`). The remake's menu item reads "Don't Scrap Current
-   Fleet" while the fleet is marked; 4.0.5's never changes.
+   (`FUN_00419a52`, `FUN_0044fd03`); the menu item reads "Scrap Current Fleet" either
+   way, as 4.0.5's. Its alerts (string 518 for a marked fleet given orders) are the
+   remake's short notes, not boxes to click.
 4. **Dragging a budget bar** redistributes once, from where the drag began.
 5. **Dip Into Savings** takes a percentage of the most (4.0.5: an amount).
 6. **Abandon** is the Evacuate button; its confirmation is the remake's own.
 7. **Several humans** play hot seat (4.0.5 also by network and by game file).
 8. **Alliances during a step** are read as they stand; 4.0.5 reads the copy made in
    pass 1.
+9. **The Hall of Fame, Hall of Shame and Master Point List** are kept in the browser
+   (localStorage "ho5.hall.405") instead of `haloffam.ho`, and their menu items are in
+   the Game menu (4.0.5: Options, which also held Auto Play and Preferences). With
+   several humans on one computer each is recorded, as each would have been on their
+   own computer. The summary's picture box (static 1194) is left empty: the summary
+   never gives it a picture.
 
 ### Interface not done
 
 - **The radical hand window** (`FUN_00471587`): shown with the 2010 report, it lists the
   four projects (strings 821-837) with a timer and lets the player throw one out.
-- **The Hall of Fame, Hall of Shame and ranks** (`FUN_00497e58`, `FUN_00482b89`);
-  `masterPoints`, `addMasterPoints` and `RANKS` are in the ruleset.
+- **Naming a star after a win** (dialog 378, `FUN_00456047`) and the "You have conquered
+  the galaxy!" window with its picture (dialog 377, `FUN_0044bf5a`).
 - **The auto play settings** (`FUN_00404c4e`).
 - **The canned-message window** (codes 0x40e-0x42b): "Look at %s" explores a star for the
   receiver, "I own %s" marks it, "I like planets ..." gives your home; the remake's

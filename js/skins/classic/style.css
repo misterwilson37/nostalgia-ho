@@ -187,6 +187,26 @@ button:focus-visible { outline: 2px solid var(--hi); outline-offset: 1px; }
 .rank img { max-width: 100%; width: 360px; border: 1px solid #555; }
 .rank table { margin: 6px auto; text-align: left; }
 .rank tr.me td { font-weight: bold; }
+/* the Hall of Fame, Hall of Shame and Master Point List (a ruleset's
+   rs.hall, 4.0.5): a list box whose rows sit on the window's tab stops
+   (--cols), the column names above it, a Summary of one game */
+.hall .htitle { font-weight: bold; margin: 0 0 6px; }
+.hall .htop { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+.hall .lbhead, .hall .lbrow { display: grid; grid-template-columns: var(--cols); }
+.hall .lbhead { padding: 0 5px; color: var(--sub); }
+.hall .lb { background: #fff; color: #000; border: 1px solid var(--edge); height: 13.5em; overflow-y: auto; margin: 2px 0 6px; }
+.hall .lb:focus-visible { outline: 1px dotted var(--ink); outline-offset: 1px; }
+.hall .lbrow { padding: 1px 4px; cursor: default; white-space: nowrap; }
+.hall .lbrow span { overflow: hidden; text-overflow: ellipsis; padding-right: 4px; }
+.hall .lbrow.sel { background: var(--hi); color: #fff; }
+.hall-list .btns { justify-content: space-between; }
+.hall .hsum { display: flex; gap: 12px; align-items: flex-start; }
+.hall .hgrid { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 1px 8px; }
+.hall .hl { text-align: right; white-space: nowrap; }
+.hall .hv span + span { margin-left: 1.2em; }
+.hall .hpic { width: 87px; height: 86px; border: 1px solid var(--edge); flex: none; }
+.hall .hpic.master { width: 36px; height: 36px; background: #000; display: flex; align-items: center; justify-content: center; }
+.hall .hpic img { width: 32px; height: 32px; image-rendering: pixelated; }
 /* keep dialogs inside narrow screens */
 .scrim { grid-template-columns: minmax(0, auto); }
 .win { max-width: calc(100vw - 24px); }

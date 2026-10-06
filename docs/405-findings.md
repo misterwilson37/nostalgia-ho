@@ -122,8 +122,8 @@ choice, docs/open-questions.md).
 | Dip Into Savings | an amount up to Ship Savings less the borrowing limit, at once; the interest worked out again. The remake's window takes a percentage | CONFIRMED (`FUN_00469757`) |
 | Buying | a human pays the prototype price while none of the design is built and the interest is worked out again (`FUN_004691c4`); computers below Smart pay it too (`FUN_00462105`); **a colony can build only while it has more people (units) than ships built there this turn** (slot +0xe; `FUN_0044eecd`, `FUN_00462105`); new ships but Scouts and Colony Ships join a fleet of the design at the star (a human's: one built this turn) | CONFIRMED |
 | Scrapping | a fleet or design marked (fleet +0xb, design +0x26), scrapped in pass 1: a human gets 3/4 of the metal (7/8 with the recycling discovery), at its own colony; over someone else's planet the metal falls for the owner (at most 32,767 a star); in hyperspace it rains on the next star. "Your fleet of %s at %s has been scrapped for %s metal." only at a star | CONFIRMED (`FUN_00434534`) |
-| Scrap Current Fleet | the Ships menu item (menu resource 2; its text never changes: strings 318-319 "Scrap current fleet" / "Don't Scrap Current Fleet" are never loaded) toggles the selected fleet's mark, with SCRAP when it was off; refused while the turn is worked out. A fleet built this turn (+0xd) is not marked but un-bought: every ship's price comes back, the prototype price for one of them when none of the design is left built, and the metal; the design's built and existing counts and the colony's count of ships built this turn go down; the interest (and the net) is worked out again; the fleet is gone. A marked fleet given orders on the map loses them (an alert, WHOA); its information line reads "Fleet to be scrapped for metal." (1338) | CONFIRMED (`FUN_00419a52`, `FUN_00469698`, `FUN_00413ba3`, `FUN_0048fe0f`) |
-| Scrap a ship type | the Ship Types window's button, "Scrap All" / "Don't Scrap" (760-761), toggles the design's mark; a marked design can't be built (its Build button dimmed); marking gives back one ship of it ordered in the window (the window buys its orders when it closes) | CONFIRMED (`FUN_0044fd03`, `FUN_0044e9e4`, `FUN_00468f83`) |
+| Scrap Current Fleet | the Ships menu item (menu resource 2; its text never changes: strings 318-319 "Scrap current fleet" / "Don't Scrap Current Fleet" are never loaded) toggles the selected fleet's mark, with SCRAP when it was off (the remake's menu keeps its words: `scrapWords`); refused while the turn is worked out. A fleet built this turn (+0xd) is not marked but un-bought: every ship's price comes back, the prototype price for one of them when none of the design is left built, and the metal; the design's built and existing counts and the colony's count of ships built this turn go down; the interest (and the net) is worked out again; the fleet is gone. A marked fleet given orders on the map loses them (string 518, "Sorry, but you have that fleet marked for the scrap heap.  it's not going anywhere.", then WHOA); its information line reads "Fleet to be scrapped for metal." (1338) | CONFIRMED (`FUN_00419a52`, `FUN_00469698`, `FUN_00413ba3`, `FUN_0048fe0f`) |
+| Scrap a ship type | the Ship Types window's button, "Scrap All" / "Don't Scrap" (760-761), toggles the design's mark; a marked design can't be built (its Build button dimmed); marking gives back only one ship of it ordered in the window (a slip, reproduced: `scrapTypeRefundOne`); the others are bought when the window closes and scrapped with the type at End Turn. The window's running money and metal are credited as if every ship ordered in the window, of any design, came back (price and metal x the window's count), plus the prototype price, twice when none of the design is built; the purchase at the close is priced again, so only what the window lets you order is wrong (the remake buys at once and keeps no running total) | CONFIRMED (`FUN_0044fd03`, `FUN_0044f4f7`, `FUN_0044e9e4`, `FUN_00468f83`) |
 
 ### The colonies and the bars
 
@@ -252,22 +252,81 @@ The old ruleset took 5.0.5's rules for what it hadn't read. Read in 4.0.5's code
 - Abandon is 4.0.5's toggle (`evacuate`, `evacuateCommand: true`); dragging a bar is
   4.0.5's (`dragShare`).
 - Battle reports carry `won`; each duel is its own replay (`duel`).
+- A win's difficulty rating counts the winner's own allies and skill (`FUN_0043c1ec`); it
+  had counted no allies.
 - Engine hooks added: `rs.shipsAdded` (a new fleet adjusted: Biologicals unfuelled),
   `rs.shareMaps` (4.0.5 shares maps in its own pass 2), `rs.yardRoom` (the colony's limit).
 
-## Ranks and the Hall of Fame (not built yet)
+## The Hall of Fame, the Hall of Shame and master points
 
-CONFIRMED. A win (`FUN_0047fd97` → `FUN_00497e58(1000)`) adds an entry to the Hall of
-Fame file `haloffam.ho` (the 25 last games: players, options, years, difficulty) and,
-unless the player was caught cheating (`FUN_004782ac`), master points to the player's
-name in a table of up to 25 names: 100 x trunc(10^((D - 25) / 25)) for the win's
-difficulty D (`FUN_0043c836` through `FUN_0043c1ec`), added in full up to 500 while the
-total is under 500, else at most a third of the total; the table is kept sorted and
-carries a checksum (a table whose sum doesn't match is wiped). Being eliminated
-(`FUN_00470dec`, report 0x432) adds a Hall of Shame entry (`FUN_00497e58(0x3e9)`), no
-points. The Hall of Fame window (`FUN_00482b89`) lists every name with its points and
-rank: under 1,000 Red-Neck, 2,500 Bow-legs, 5,000 Cowpoke, 10,000 Deputy Gunfighter,
+CONFIRMED. Built: `hall` in `js/rules-405.js` (the entries and tables), the windows and
+the Game menu items in `js/skins/classic/ui.js` (every skin), 4.0.5's look in the w95 skin.
+
+**The file** (`FUN_00497e58`, `haloffam.ho`, 0x1520 bytes; the remake keeps the same
+tables in localStorage, "ho5.hall.405", apart from 5.0.5's "ho5.profile"):
+
+| Offset | What |
+|---|---|
+| 0 | the Hall of Fame: a count, then 25 entries of 100 bytes, newest first |
+| 0x9c6 | the Hall of Shame, the same |
+| 0x138c | the master point table: a count, a checksum (the low 16 bits of every total, added in a short), then 25 slots of a 12-byte name and the points (int) |
+
+An entry, by short: 0 humans (galaxy +1), 1 computers (+2), 2 style (+0xe: 1 Circle,
+2 Random, 3 Ring, 4 Spiral, 5 Grid, 6 Cluster), 3 density (+0x10: 1 Dense, 2 Sparse),
+4 size (+0x12: 1 Small .. 5 Humongous), 5 intelligence (+0x14: 1 Dumb .. 4 Diabolical),
+6 (+0x16), 7 the game year, 8 allies, 9 difficulty, 10 (+0x20), 11-12 (+6), 13 years per
+turn (+0x18), 14-15 the date (`time()`), 16 the player's skill (player +0x26: 0 Novice ..
+4 Expert), 17 Armageddons (+0x22), 18.. the player's name. The game year is the year of
+the win (galaxy +6), or for a loss the year the player went out (+0x2dc; this year while
+that still reads 1). Allies are the other players allied both ways (`FUN_0043c7c2`,
+`FUN_0042210e`); the difficulty is `FUN_0043c1ec`'s, below.
+
+**When.** A win (`FUN_0047fd97`, and report 0x434 in `FUN_00470dec`) calls
+`FUN_00497e58(1000)` for the player at this computer; being eliminated (report 0x432,
+"Unfortunately, you have been eliminated ...", `FUN_00470dec`) calls `FUN_00497e58(0x3e9)`.
+Each first asks `FUN_004782ac` whether this game is already on record for that player,
+and writes nothing if so; afterwards `FUN_00478196` sets that player's bit, saved in the
+game (+0x160). So each game is recorded once a player: a player who is out and comes back
+to win is never in the Hall of Fame for it. (The remake: `G.hallDone`, after each End
+Turn, for each human.)
+
+**Master points** (a win only). A table whose checksum doesn't match is wiped. The player
+is found by name, else added (with 25 names the 25th, the lowest, is replaced, at 0). The
+win adds 100 x trunc(10^((D - 25) / 25)) (`pow` and `__ftol`, 25.0 at 0x580670): in full,
+up to 500, while the total is under 500, else at most a third of the total. The table is
+sorted, most first, by an exchange sort, and the checksum written again.
+
+**The difficulty** (`FUN_0043c1ec` → `FUN_0043c836`, the remake's `winDifficulty`): for
+the player at this computer, with its own allies and skill (the remake's win report now
+uses them; it had read the Alliances option for the allies, always 0). A player marked
+as cheating (galaxy +8) is rated -1, which earns 0 points: the mark is set at End Turn
+when a player record's checksum (`FUN_0043c2a1` against +0x18d2) fails, with "%s is
+cheating." and NOCHEAT (report 0x41c, `FUN_004320f8` @004323d4-004327c4); it marks the player at
+this computer, not the one whose record failed. The remake keeps no such checksum.
+
+**The Master Point List** (Options menu, dialog 388, `FUN_00482b89`, `FUN_00482f45`):
+"Master Points:"; a list on tab stops 6, 142, 278 of "\t<name>\t%d\t<rank>"; the rank
+by points: under 1,000 Red-Neck, 2,500 Bow-legs, 5,000 Cowpoke, 10,000 Deputy Gunfighter,
 25,000 Town Sheriff, 50,000 Federal Marshall, 100,000 Lone Ranger, 250,000 Quickdraw
 McGraw, 500,000 Best in the West, 1,000,000 Ho! Champion (strings 324-333); at 1,000,000
-or more it reads string 334, "%s: %s" (a slip). The window's picture goes by the top
-player's points: under 5,000 bitmap 0x7a, 50,000 0x7b, 500,000 0x7c, else 0x7d.
+or more it loads string 334, "%s: %s", and shows that (a slip; the remake does too). The
+picture (36 x 39 at the top right) goes by the top player's points when the window
+opens and by the selected player's after: under 5,000 bitmap 0x7a, 50,000 0x7b, 500,000
+0x7c, else 0x7d. Bitmap 0x7c (124) is not in SPACEHO.EXE, so from 50,000 to 499,999
+points nothing is drawn (docs/missing-assets.md).
+
+**The Hall of Fame and Hall of Shame** (Options menu, dialog 386, `FUN_0046c8fe`,
+`FUN_0049883d`): "Hall of Fame" or "Hall of Shame" (0x59e118); Name, When, Difficulty on
+tab stops 92, 209; the date "%d/%d/%d" of the month + 1, the day and `tm_year`, the years
+since 1900 (1996 reads 96, 2026 reads 126: reproduced); the first row selected; Details,
+dimmed when the list is empty, opens the summary (dialog 387, `FUN_0046d1e8`,
+`FUN_00498b6a`): "Summary of Game Victory" or "... Defeat"; Winner: (for the Hall of
+Shame the label reads "Loser", without the colon: reproduced), Date, Difficulty, # Humans,
+# of Computers, # Allies, Computer Intelligence, Game Date, Galaxy Size with its density
+and style, Player Skill, Armageddons. Its picture box (static 1194, a `youwonga.cpp`
+picture control) is given no picture by the summary; the remake leaves it empty. The
+dialogs have no caption bar.
+
+**Not built:** naming a star after a win (dialog 378, `FUN_00456047`: "You won the game,
+so you get to name a star", kept in a list of four for later galaxies) and the "You have
+conquered the galaxy!" window with its picture (dialog 377, `FUN_0044bf5a`).

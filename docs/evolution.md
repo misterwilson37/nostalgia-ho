@@ -292,7 +292,16 @@ every player, out ones included (`docs/405-findings.md`).
 A Windows 95 MFC program with a map window, report list with a picture and sound for
 each report, budget bars, Ship Types, Organize Ships, Alliances, Give, Surrender, the
 canned Send Message, the radical hand window, the Hall of Fame with ranks, auto play
-settings, a turn time limit and network play.
+settings, a turn time limit and network play. The Ships menu's "Scrap Current Fleet"
+keeps its words whether or not the fleet is marked (3.0.1's became "Don't Scrap Current
+Fleet").
+
+The record of games (`haloffam.ho`, `FUN_00497e58`) is new: the last 25 games won (the
+Hall of Fame) and lost (the Hall of Shame), each with its players, galaxy, year and
+difficulty, and a Master Point List of up to 25 names with ten ranks, Red-Neck to Ho!
+Champion. A win earns 100 x trunc(10^((D - 25) / 25)) master points, at most 500 while
+the total is under 500 and then at most a third of it. 5.0.5 has 25 ranks instead,
+which unlock options.
 
 ## Mac 5.0.5 (2003)
 
