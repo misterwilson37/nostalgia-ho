@@ -222,7 +222,7 @@ root.HOVERSIONS = {
       { text: 'A slip in how the computers send old ships home to be scrapped (a list place passed as the Range).', fix: 'scrapRange' },
       'Computers never keep Tankers: they scrap them at home and send them home from elsewhere.',
       { text: 'A colony at the first star of the list can always have its budget bar dragged, and is left out of the population milestones.', fix: 'star0' },
-      'Best buddies share what they explored this year, but never their battle news.',
+      'Best buddies share battle news by handing over their whole record of the star; the one who didn’t fight can’t review the battle (on Windows, the buddy’s own record says so too until the game is saved).',
       'After an Armageddon device fizzles, everyone hears each device was turned off, and next turn on again.',
       'The Valdez leak threatens a lawsuit, but nothing is taken.',
       'The power of the ships at every star is worked out each turn and never used.',

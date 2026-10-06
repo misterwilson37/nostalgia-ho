@@ -346,13 +346,19 @@ arrival messages), the 4.0.5 routine was read and does the same.
    1) and the preferences (Luck bit 4, auto end bit 8); the rest of the word comes from a
    stack buffer in `FUN_00484788` that is never cleared, so bit 2 is whatever was in
    memory. Now: novas on (as 3.0.1, where the bit is always set). Armageddon doesn't
-   depend on it.
+   depend on it. The Mac 4.0.5 is no help: its New Game window (`GetDialogValues`
+   @10c8e) adds or takes away bits 1, 4 and 8 only, in the same uncleared 600-byte stack
+   buffer (`handleNewGameQueryEvent` @141316), which `HandleNewGameEvent` and
+   `CreateGalaxy` copy as they find it.
 2. **A Radical level with an empty hand.** Before the first deal (2010) a Radical level
    draws rand(0, 16) but the switch then reads the loop counter, not the draw
    (`FUN_0043a08c`). Now: the draw is used.
 3. **A hand that runs out on a design card.** When the decoy, biological or free-design
    card can't be played (too many designs) and no card is left, `FUN_0043a08c` loops for
    ever. Now: the discovery is lost.
+
+(2 and 3: the Mac 4.0.5's `DoSomethingRadical` @d0bba does the same; the names don't
+settle what was meant.)
 
 ### Settled, worth confirming
 
@@ -376,10 +382,15 @@ These are what 4.0.5's code does and what the remake now does; they look like sl
 7. **A colony at star 0** can always have its budget bar dragged (`FUN_0045c02c` tests
    the star number, not the slot kind) and is left out of the population milestones
    (`FUN_0043b243` counts star numbers above 0).
-8. **Best buddies' battle news is never shared**: the second branch of `FUN_0043853c`
-   asks for a battle this year that is also before this year.
+8. **Best buddies' battle news** is shared by handing over the buddy's whole record of
+   the star (`FUN_0043853c`'s second branch, the Mac's `BestBuddiesExplore`: the
+   buddy's record has a battle this year, the player's is older), marked so Review
+   Battle says the player didn't fight there. Windows copies the record's pointer, so the
+   two players share one record until the game is saved; the Mac and the remake copy
+   it. (This was listed as "never shared": the two tests read two different records,
+   which the Windows decompile shows through look-alike accessors.)
 9. **The auto play settings** put the old colonies-defended value into metal for defence
-   (`FUN_00404c4e`).
+   (`FUN_00404c4e`; the Mac 4.0.5's `DoConfigAutoPlayDialog` puts the new value).
 10. **After Armageddon fizzles** every player hears each device "was just turned off"
     and next step "turned on" again (`FUN_00436988` clears the mask, the switches stay).
 11. **The Valdez** message says the citizens sue for twice your net worth; nothing is
@@ -401,7 +412,8 @@ These are what 4.0.5's code does and what the remake now does; they look like sl
 17. **The Hall of Shame's summary** labels the player "Loser", without the colon of
     "Winner:" (`FUN_0046d1e8`).
 18. **The Master Point List's picture** for 50,000 to 499,999 points is bitmap 0x7c, which
-    SPACEHO.EXE doesn't have: nothing is drawn (`FUN_00482b89`).
+    SPACEHO.EXE doesn't have: nothing is drawn (`FUN_00482b89`). The Mac 4.0.5 draws the
+    computer-intelligence faces there (icons 3030-3033), all present.
 19. **The cheating mark** (a player record whose checksum fails at End Turn, "%s is
     cheating.") is set for the player at this computer, not the one whose record failed
     (`FUN_004320f8`); a marked player's win is rated -1 and earns no master points. The

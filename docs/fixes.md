@@ -49,7 +49,7 @@ their entries are below so the list is complete, but their rulesets list no fixe
 | Mac 1.2 | 2 | 8 | 2 |
 | 2.0 | 5 | 5 | 3 |
 | Mac 3.0.1 | 4 | 5 | 3 |
-| 4.0.5 | 9 fixed (+ 3 the remake already plays fixed, + 2 with nothing in the remake to fix) | 4 | 7 |
+| 4.0.5 | 9 fixed (+ 3 the remake already plays fixed, + 3 with nothing in the remake to fix) | 4 | 6 |
 | 5.0.5 | 2 | 6 | 6 |
 | Palm | 1 (+ 5.0.5's 2) | 5 (+ 5.0.5's) | 1 (+ 5.0.5's) |
 
@@ -261,8 +261,12 @@ hall fixes apply while the game being played has the patch on.
 
 **Obvious, with nothing in the remake to fix** (no fix entry): the auto play settings
 put the old "colonies defended" into metal for defence (`FUN_00404c4e`; the window isn't
-in the remake), and the cheating mark is set for the wrong player (`FUN_004320f8`; the
-remake keeps no checksum).
+in the remake; the Mac 4.0.5's `DoConfigAutoPlayDialog` puts the new value in both, which
+confirms the slip), the cheating mark is set for the wrong player (`FUN_004320f8`; the
+remake keeps no checksum), and a best buddy's star record is shared by pointer
+(`FUN_0043853c`'s second branch copies the record's pointer, so both players hold one
+record until the game is saved, the buddy's own marked "you did not fight in that
+battle" too; the Mac 4.0.5's `BestBuddiesExplore` copies the 46 bytes; the remake copies).
 
 ### Quirk or design (left as released)
 
@@ -283,18 +287,25 @@ remake keeps no checksum).
    (`FUN_004691c4`); 5.0.5 does the same.
 5. The Master Point List's picture for 50,000-499,999 points is bitmap 0x7c, which the
    program hasn't got (`FUN_00482b89`): a missing picture, but which one was meant isn't known.
-6. **Best buddies' battle news is never shared** (moved here from "obvious" in phase 2).
-   The second branch of `FUN_0043853c` asks for a star whose battle year is this year,
-   whose record is older, and whose battle year is also before this year, which can't
-   happen. The test is plainly a slip, but what the branch then does is not settled by the
-   decompile: it copies a whole star record (both sides read through the same accessor,
-   so whose to whose isn't visible) and sets +0x2c to −11. A fix would have to guess.
-7. **A Biological fleet is retired at the Scouts' redesign mark** (moved here from
+   The Mac 4.0.5 (`DRAWMASTERICON`) draws the computer-intelligence faces (icons 3030-3033,
+   Dumb, Average, Smart, Diabolical) at the same steps, all present; but Windows' 0x7a,
+   0x7b and 0x7d are not those four in order (0x7d, the top, is the Mac's Smart face), so
+   it still isn't known which picture 0x7c was to be.
+6. **A Biological fleet is retired at the Scouts' redesign mark** (moved here from
    "obvious" in phase 2). `FUN_004641ef` reads the retire table at class 6, one past its
    six entries, landing on the Scouts' redesign mark (30). Reading past the table is a
    slip, but which mark was meant isn't known: 4.0.5 has no Biological retire mark, and
    5.0.5's is 0 (retired as soon as it counts as obsolete at all), a different rule. (The
-   Range slip in the same routine is fixed: `scrapRange`.)
+   Range slip in the same routine is fixed: `scrapRange`.) The Mac 4.0.5 has the same
+   tables and reads them the same way (`ScrapOldShips`, `SetCompAttrs`).
+
+*Settled since:* "Best buddies' battle news is never shared" (unclear 6 until the Mac
+4.0.5 was read). The second branch of `FUN_0043853c` (the Mac's `BestBuddiesExplore`)
+tests the buddy's record (a battle this year) and then the player's own (explored and
+battle years older): two records, which the Windows decompile reads through accessors
+that look alike. It runs, and shares the buddy's battle news (the record, marked so that
+Review Battle says "Sorry, but since you did not fight in that battle, you have no
+information about it."). The remake now does it (`shareBuddyMaps`).
 
 ---
 

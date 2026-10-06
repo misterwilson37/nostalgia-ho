@@ -203,9 +203,16 @@ function distance(G, a, b) {
   return wdist({ x: Math.round(a.x10 / 10), y: Math.round(a.y10 / 10) }, { x: Math.round(b.x10 / 10), y: Math.round(b.y10 / 10) });
 }
 // 100 x cos / sin of a whole degree, truncated (CONFIRMED: the shapes call cos/sin
-// on deg*pi/180 and multiply by 100)
-const cos100 = (a) => trunc(100 * Math.cos(a * Math.PI / 180));
-const sin100 = (a) => trunc(100 * Math.sin(a * Math.PI / 180));
+// on deg x 3.14159 / 180 and multiply by 100: the constants 3.14159, 180.0 and
+// 100.0 at 0x57bfd0-0x57bfe0). Pi is 3.14159, not Math.PI: sin 90 and 270,
+// cos 180 come out 99 and -99, sin 150 50, sin 210 -49 and cos 300 49. The Mac
+// 4.0.5 reads the same values from its MaTh 1000 and 1001 tables (Sines,
+// Cosines), which are this formula. js/rules-301.js passes Math.PI (its galaxy
+// stays as it was).
+const PI405 = 3.14159;
+let gPi = PI405;
+const cos100 = (a) => trunc(100 * Math.cos(a * gPi / 180));
+const sin100 = (a) => trunc(100 * Math.sin(a * gPi / 180));
 const up3 = (s) => (trunc((s - 1) / 3) + 1) * 3;
 // CONFIRMED (FUN_00448856): six styles in this order (codes 1..6), no Hex
 const SHAPES = ['circle', 'random', 'ring', 'spiral', 'grid', 'cluster'];
@@ -218,7 +225,8 @@ function sizeKey(v) {
   if (typeof v === 'number') return v < 20 ? 'small' : v < 45 ? 'medium' : v < 65 ? 'large' : v < 90 ? 'xl' : 'huge';
   return 'medium';
 }
-function makeGalaxy(G, opts, nPlayers) {
+function makeGalaxy(G, opts, nPlayers, pi) {
+  gPi = pi || PI405;
   const shape = SHAPES.includes(opts.shape) ? opts.shape : 'random';
   const size = sizeKey(opts.size);
   const sparse = opts.density === 'sparse' || (typeof opts.density === 'number' && opts.density >= 50);
@@ -710,7 +718,8 @@ function dealHand(G, p) {
 // - astronomers: rand(6, 9) stars that aren't turning red and whose news is
 //   more than 100 years old are explored, walking on 1-3 stars at a time from
 //   a random one;
-// - money: rand(2, 12) x this turn's money into Ship Savings;
+// - money: rand(2 x, 12 x this turn's money) into Ship Savings (an amount
+//   between the two, not a multiple);
 // - mining, maximum population, terraforming, generals, recycling: the bonus;
 // - decoy (fewer than 30 designs): a Fighter design with R+1, V+1, W+2, S+2
 //   and Mini -1, which is what makes it a decoy;
@@ -1163,7 +1172,9 @@ function calculateGroups(SA, SD, planet, lA, lD, A, Dh) {
 }
 // CONFIRMED (FUN_00424b00): the first group of Colony Ships, else the first of
 // Satellites, else from a random start the first ship group (passing over
-// the planet, which is the target only if nothing else is left)
+// the planet, which is the target only if nothing else is left). (The Mac
+// 4.0.5's PickTarget @61f86 looks for the first Tanker group between the two:
+// docs/405-findings.md, "Mac 4.0.5 differs".)
 function pickTarget(G, T) {
   const c = T.findIndex(g => g.type === 'colony' && g.n > 0); if (c >= 0) return c;
   const s = T.findIndex(g => g.type === 'satellite' && g.n > 0); if (s >= 0) return s;
@@ -1896,17 +1907,30 @@ function allyArrivals(G, p) {
       if (p.human) msg(G, p.id, `${G.players[a.o].name}'s fleet of ${a.label} has arrived at ${G.stars[a.sid].name}.`, { icon: 'm9038', star: a.sid });
   }
 }
-// CONFIRMED (FUN_0043853c): each star a best buddy explored this year is
-// explored for the player from the buddy's map (FUN_00439558 with the buddy:
-// the record is brought up to date from the star itself). (A second branch,
-// for a star whose battle year is this year, can never run: it also asks
-// that year to be before this year.)
+// CONFIRMED (FUN_0043853c = Mac 4.0.5 BestBuddiesExplore @c4636): each star a
+// best buddy explored this year is explored for the player from the buddy's
+// map (FUN_00439558 with the buddy: the record is brought up to date from the
+// star itself). Else, when the buddy's record of the star has a battle this
+// year (+0x16) and the player's own record was last brought up to date, and
+// last heard of a battle, before this year (+8, +0x16), the player's record
+// becomes the buddy's, with its battle marked -11 (+0x2c): Review Battle then
+// says "Sorry, but since you did not fight in that battle, you have no
+// information about it." (The two tests read the buddy's record and the
+// player's, through two accessors the decompile shows alike; the Mac's names
+// and its plain copy make it clear. Windows copies the record's pointer, so
+// the two players share one record until the game is saved, the buddy's own
+// marked -11 too; the Mac copies the 46 bytes. The remake copies.)
 function shareBuddyMaps(G, p) {
+  const yr = G.year + 10;
   for (const q of order405(G)) {
     if (q.id === p.id || !E.isBuddy(G, p.id, q.id) || !isAllied(G, p.id, q.id)) continue;
     for (const s of G.stars) {
       const b = q.know && q.know[s.id];
-      if (b && b.explored && b.seen === G.turn) exploreStar(G, p, s.id, q.id);
+      if (!b) continue;
+      if (b.explored && b.seen === G.turn) { exploreStar(G, p, s.id, q.id); continue; }
+      if (!(b.x301 && b.x301.by === yr)) continue;
+      const k = know(G, p, s.id), seenYr = k.explored ? 2000 + 10 * (k.seen + 1) : 0;
+      if (seenYr < yr && x301(G, p, s.id).by < yr) p.know[s.id] = JSON.parse(JSON.stringify(b));
     }
   }
 }
@@ -2137,25 +2161,21 @@ const WELCOME = [
   ['Artwork by Howard Vives and Bob Van de Walle.', { icon: 'm9024' }],
 ];
 
-// ---------- difficulty and master points (FUN_0043c351, FUN_0043c836, FUN_00497e58) ----------
+// ---------- difficulty and master points (FUN_00447bdb, FUN_0043c836, FUN_00497e58) ----------
 // 4.0.5's own ranks, not 5.0.5's 25: a win writes the Hall of Fame and adds
 // master points, being eliminated writes the Hall of Shame (`hall` below).
 const sizeCode = (v) => SIZES.indexOf(sizeKey(v)) + 1;
 const iqCode = (v) => Math.max(1, IQS.indexOf(v) + 1);
-// "Base Difficulty Rating" in the New Game window (FUN_0043c351, CONFIRMED, one
-// human). o: computers, iq, start (skill), shape, size, density, allies, armageddons.
+// "Base Difficulty Rating" in the New Game window, CONFIRMED (FUN_00447bdb, the
+// New Game window; Mac 4.0.5 AdjustDifficulty @10c1e): the rating of a win
+// (FUN_0043c836 = Mac CalcGameRating) for the window's computers,
+// intelligence, galaxy and time limit, with 1 human of Normal skill, no allies
+// and no Armageddons. o: computers, iq, shape, size, density, timeLimit
+// (seconds; the remake has none, so the "no time limit" 5 comes off). (It
+// was read from FUN_0043c351, a rating with a float formula that nothing in
+// SPACEHO.EXE calls and the Mac program doesn't have.)
 function difficulty(o) {
-  const n = o.computers | 0;
-  if (!n) return 10;
-  const iq = iqCode(o.iq);
-  let D = iq === 1 ? (n < 9 ? 30 : 40) : iq === 2 ? (n < 9 ? 40 : 50) : iq === 3 ? (n < 4 ? 53 : n < 9 ? 60 : 65) : (n < 3 ? 65 : n < 6 ? 70 : n < 9 ? 75 : 80);
-  D += (5 * (SKILLS[o.start] || SKILLS.normal).code - 10) * 2 - 10 * (o.allies | 0);
-  const sz = sizeCode(o.size);
-  if (sz >= 5) D -= 10; else if (sz > 1) D -= 5;
-  if (o.density === 'sparse') D -= 10;
-  if (o.shape === 'spiral' || o.shape === 'cluster') D -= 10;
-  for (let i = 0; i < (o.armageddons | 0); i++) D = trunc((D * 2 - 38) / 3) + 20;
-  return D;
+  return winDifficulty(Object.assign({}, o, { humans: 1, start: 'normal', allies: 0, armageddons: 0 }));
 }
 // rating of a win (FUN_0043c836, CONFIRMED). o as above plus humans, timeLimit (seconds, 0 = none).
 // FUN_0043c1ec calls it for one player: o.allies is the number of other

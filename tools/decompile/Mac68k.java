@@ -51,7 +51,9 @@ public class Mac68k extends GhidraScript {
     }
     // A5 globals and trap stubs
     if (a5 != 0) { mem.createUninitializedBlock("A5globals", a(a5 - below), below + 0x1000, false); consts.put("A5", a5); }
-    if (!trapArgs.isEmpty()) mem.createInitializedBlock("traps", a(0x00E00000L), 0x2000, (byte) 0, monitor, false);
+    // (cw68k.py's image already reaches 0xE00000, zero-filled, on its way to its A5 world)
+    if (!trapArgs.isEmpty() && !mem.contains(a(0x00E00000L)))
+      mem.createInitializedBlock("traps", a(0x00E00000L), 0x2000, (byte) 0, monitor, false);
     Map<String, Address> trapAddr = new HashMap<>();
     long next = 0x00E00000L;
     for (Map.Entry<String, Integer> e : trapArgs.entrySet()) {

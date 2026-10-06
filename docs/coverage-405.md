@@ -10,8 +10,8 @@ Every routine in SPACEHO.EXE, the Windows 95 program of Spaceward Ho! 4.0.5 (Del
 | Jump stubs (the incremental-link table, 0x401000-0x403fff) | 707 |
 | Library (MFC 4 and the C runtime, from 0x49cc10) | 5155 |
 | The game's own code (0x404000-0x49cc10) | 2841 |
-| of which game rules | 136 (130 implemented, 6 not: listed below) |
-| of which interface, files, network, display, plumbing and inlined library code | 2705 |
+| of which game rules | 134 (130 implemented, 4 not, and the turn-time bank of FUN_0047f76e: listed below) |
+| of which interface, files, network, display, plumbing and inlined library code | 2707 |
 | Unread | 0 |
 
 ## How each routine was read
@@ -23,167 +23,168 @@ Every routine in SPACEHO.EXE, the Windows 95 program of Spaceward Ho! 4.0.5 (Del
 
 ## Rules and interface that change the game
 
-| Routine | What it does | Status | Where / why |
-|---|---|---|---|
-| `FUN_00404c4e` @404c4e | Auto play settings window: sets the human's aggressiveness (+0x718) and colonies defended (+0x704), and puts the OLD colonies-defended value into metal for defence (+0x706), a slip | Rule, not implemented | auto play settings window not built (docs/open-questions.md) |
-| `FUN_00409170` @409170 | Game options word: Alliances bit 1, Luck bit 4, auto end bit 8 (Novas bit 2 never set) | Rule, implemented | G.opts; docs/open-questions.md |
-| `FUN_0040bff1` @40bff1 | Armageddon command: two random confirmations (strings 299-309) to turn it on, toggles player +0x18ca | Rule, implemented | engine setArmageddon; the mask in pass 1 |
-| `FUN_00413ba3` @413ba3 | Map click and fleet dragging: picks a fleet, plans its route (FUN_004164b0) and gives it (FUN_0041726f), HYAHH | Interface | the remake's map drag; routes by rules route()/path405 |
-| `FUN_00415db0` @415db0 | NewFleet: a fleet record placed by class, new Biological fleets unfuelled, Colony Ships loaded | Rule, implemented | js/rules-405.js fleetList, shipsAdded |
-| `FUN_00416036` @416036 | DeleteFleet | Rule, implemented | engine |
-| `FUN_004160d6` @4160d6 | Clears the group number of fleets (fleet +0x1e) | Interface | fleet groups are not in the remake |
-| `FUN_00416187` @416187 | Fleet list housekeeping after buying (selection, counts) | Interface | display |
-| `FUN_004164b0` @4164b0 | DeterminePath: 3.0.1's route search through your and your best buddies' colonies, whole distances | Rule, implemented | js/rules-405.js path405 |
-| `FUN_0041726f` @41726f | GiveFleetPath | Rule, implemented | js/rules-405.js givePath |
-| `FUN_00419290` @419290 | Fleet window: removing a fleet from the list (window fields) | Interface | display |
-| `FUN_0041940e` @41940e | Fleet list box filling | Interface | display |
-| `FUN_00419722` @419722 | Fleet list line text | Interface | display |
-| `FUN_00419944` @419944 | Fleet list sort key | Interface | display |
-| `FUN_00419a52` @419a52 | Scrap / unbuild toggle on a fleet (fleet +0xb); a fleet built this turn is un-bought (savings, metal, built counts, slot +0xe) | Rule, implemented | engine scrapFleet / unbuildShip (scrapped at once: docs/open-questions.md) |
-| `FUN_0041a9b4` @41a9b4 | CalcShipCosts: price, metal, hit points, prototype, attack (float32) | Rule, implemented | js/rules-405.js designCost |
-| `FUN_0041adc6` @41adc6 | Ship power of a class at a star, not counting busy satellites | Rule, implemented | js/ai-405.js satPower |
-| `FUN_0041e140` @41e140 | Star information text ("Never Explored", "No battles") | Interface | display |
-| `FUN_0041e5b1` @41e5b1 | Terraform window drawing | Interface | display |
-| `FUN_0041f660` @41f660 | Menu items enabled by state (Abandon text 322/323, Armageddon) | Interface | display |
-| `FUN_00421430` @421430 | DoBattleStage: the duels at every star, luck, replay records | Rule, implemented | js/rules-405.js battle |
-| `FUN_0042210e` @42210e | AreAllies (galaxy +0x238 masks, both ways) | Rule, implemented | engine isAllied |
-| `FUN_004221d7` @4221d7 | AreBestBuddies (+0x288 masks) | Rule, implemented | engine isBuddy |
-| `FUN_00422339` @422339 | DoOneBattle: rounds by speed, HYAHH | Rule, implemented | js/rules-405.js duel |
-| `FUN_00423878` @423878 | Group size for a side | Rule, implemented | js/rules-405.js calculateGroups |
-| `FUN_00423b52` @423b52 | Groups of one design, shots, decoys | Rule, implemented | js/rules-405.js calculateGroups |
-| `FUN_00424088` @424088 | Shooting and damage | Rule, implemented | js/rules-405.js shoot |
-| `FUN_00424b00` @424b00 | Target choice | Rule, implemented | js/rules-405.js pickTarget |
-| `FUN_00425a2f` @425a2f | Review Battle: replays a battle record | Interface | the remake's replay |
-| `FUN_00425c5d` @425c5d | Planet power ceil(pop/50)(w+1)^2/75 | Rule, implemented | js/rules-405.js makeResultMessages, js/ai-405.js planetPower |
-| `FUN_00425c9a` @425c9a | Battle reports, estimates, debris, feelings (0x3f3, 0x40b-0x40d, 0x42e/0x42f) | Rule, implemented | js/rules-405.js makeResultMessages |
-| `FUN_00427584` @427584 | Finds the fleet a survivor goes back to | Rule, implemented | js/rules-405.js resolveVictor |
-| `FUN_004276e4` @4276e4 | Empties the loser's fleets | Rule, implemented | js/rules-405.js zeroFleets |
-| `FUN_0042780e` @42780e | Survivors back to the winner's fleets | Rule, implemented | js/rules-405.js resolveVictor |
-| `FUN_0042a5c0` @42a5c0 | RND(lo, hi) with a caller tag | Rule, implemented | engine RI (own random numbers) |
-| `FUN_0042b05d` @42b05d | Organize window line text | Interface | display |
-| `FUN_0042b278` @42b278 | OrganizeFleets: as 3.0.1 | Rule, implemented | js/rules-301.js organized301 (shared) |
-| `FUN_0042e480` @42e480 | Distance trunc((10 max + 3 min + 9) / 10) | Rule, implemented | js/rules-405.js distance |
-| `FUN_0042e806` @42e806 | Slot of a star in the player's list | Rule, implemented | js/rules-405.js slots |
-| `FUN_0042f4b3` @42f4b3 | Distance table built once | Rule, implemented | js/rules-405.js distance |
-| `FUN_0042f60c` @42f60c | MetalToMoney ceil(m^2/400) (625 with the bonus) | Rule, implemented | js/rules-405.js mineMoney |
-| `FUN_00431bf0` @431bf0 | End Turn driver: one FUN_004320f8 call per 10-year step | Rule, implemented | engine endTurn (yearsPerTurn) |
-| `FUN_004320f8` @4320f8 | EndTurn: pass 1, battles, Armageddon, novas, pass 2a and 2b, winner check | Rule, implemented | js/rules-405.js economy, pass2, checkElimination |
-| `FUN_0043361b` @43361b | DeductInterest | Rule, implemented | js/rules-405.js deductInterest |
-| `FUN_00433977` @433977 | MaintainKillStars | Rule, implemented | js/rules-405.js maintainKillStars |
-| `FUN_00433c52` @433c52 | TerraformMineStars | Rule, implemented | js/rules-405.js terraformMineStars |
-| `FUN_0043427a` @43427a | SurrenderIfDesired | Rule, implemented | js/rules-405.js processSurrenders |
-| `FUN_00434534` @434534 | ScrapFleetsAndTypes | Rule, implemented | js/rules-405.js scrapFleetsAndTypes |
-| `FUN_00434dad` @434dad | SpendTechMoney (research, tech reports) | Rule, implemented | js/rules-405.js spendTechMoney, research |
-| `FUN_004357fc` @4357fc | MoveShips | Rule, implemented | js/rules-405.js moveShips, engine movement, rules-301 fleetArrives |
-| `FUN_00435dc3` @435dc3 | CheckFleetDestination | Rule, implemented | js/rules-405.js replanFleet |
-| `FUN_004360af` @4360af | RestoreStarsBars | Rule, implemented | js/rules-405.js restoreStarsBars |
-| `FUN_0043625c` @43625c | ConformPlayerAlliances: pact and best-buddy news, Armageddon switch news | Rule, implemented | js/rules-405.js pactNews405 |
-| `FUN_00436988` @436988 | CheckForArmageddon | Rule, implemented | js/rules-405.js checkForArmageddon |
-| `FUN_00436c26` @436c26 | CheckForSupernova (Novas option bit 2) | Rule, implemented | js/rules-405.js checkForSupernova |
-| `FUN_00436ff8` @436ff8 | ReactToSupernova | Rule, implemented | js/rules-405.js reactToSupernova |
-| `FUN_0043747e` @43747e | GetOtherScrapMetal | Rule, implemented | js/rules-405.js getOtherScrapMetal |
-| `FUN_00437592` @437592 | ComputeIncomeAndPopulation | Rule, implemented | js/rules-405.js income |
-| `FUN_00437ddd` @437ddd | ColonizeAndExplore (biologicals eat, tankers, Valdez) | Rule, implemented | js/rules-405.js colonizeAndExplore |
-| `FUN_004383a8` @4383a8 | Allies' arrivals news | Rule, implemented | js/rules-405.js allyArrivals |
-| `FUN_0043853c` @43853c | Best buddies share this year's exploring (dead second branch) | Rule, implemented | js/rules-405.js shareBuddyMaps |
-| `FUN_00438718` @438718 | DoSurrenders | Rule, implemented | js/rules-405.js doSurrenders |
-| `FUN_00438a0f` @438a0f | DetectBigBattles | Rule, implemented | js/rules-405.js detectBigBattles |
-| `FUN_00438b77` @438b77 | SetPlanetDisplayValues | Rule, implemented | js/rules-405.js setPlanetDisplayValues |
-| `FUN_00438e90` @438e90 | Map refresh after the turn | Interface | display |
-| `FUN_00438f47` @438f47 | Date jokes on the map (birthdays of Howard and Peter, from the clock) | Rule, not implemented | easter egg not built |
-| `FUN_00439558` @439558 | ExploreStar (963/964) | Rule, implemented | js/rules-405.js exploreStar |
-| `FUN_004397ba` @4397ba | ColonizeStar | Rule, implemented | js/rules-405.js settle |
-| `FUN_00439bf7` @439bf7 | DecolonizeStar | Rule, implemented | js/rules-405.js decolonize |
-| `FUN_00439e5a` @439e5a | Debug: gives player 3 a Biological design (no caller) | Not a rule | dead code |
-| `FUN_00439f72` @439f72 | Debug: gives player 3 another design (no caller) | Not a rule | dead code |
-| `FUN_0043a08c` @43a08c | DoSomethingRadical: the 17 discoveries | Rule, implemented | js/rules-405.js radical |
-| `FUN_0043adac` @43adac | Deals the radical hand (weights 0x59cf10) | Rule, implemented | js/rules-405.js dealHand |
-| `FUN_0043b08a` @43b08a | NoteShipPowers (written, never read) | Not a rule | nothing reads it |
-| `FUN_0043b243` @43b243 | Population milestones | Rule, implemented | js/rules-405.js milestones |
-| `FUN_0043b47f` @43b47f | History graph data | Interface | the remake's history graph |
-| `FUN_0043bd5f` @43bd5f | DoGameEndStuff | Rule, implemented | js/rules-405.js doGameEndStuff |
-| `FUN_0043bf98` @43bf98 | CheckForWinner | Rule, implemented | js/rules-405.js checkElimination |
-| `FUN_0043c1ec` @43c1ec | Win difficulty rating (-1 after cheating) | Rule, implemented | js/rules-405.js winDifficulty |
-| `FUN_0043c351` @43c351 | Base difficulty rating in the New Game window | Rule, implemented | js/rules-405.js difficulty |
-| `FUN_0043c7c2` @43c7c2 | Allies count for the rating | Rule, implemented | js/rules-405.js winDifficulty |
-| `FUN_0043c836` @43c836 | Win difficulty rating formula | Rule, implemented | js/rules-405.js winDifficulty |
-| `FUN_0043c9ea` @43c9ea | Copies a human's skill onto computers in a game with several humans (shown skill only) | Rule, implemented | js/rules-405.js computerSetup |
-| `FUN_0043ffe0` @43ffe0 | CreateGalaxy | Rule, implemented | js/rules-405.js makeGalaxy |
-| `FUN_00442374` @442374 | Star names, cut to 7 letters | Rule, implemented | js/rules-405.js STAR_NAMES |
-| `FUN_004427a4` @4427a4 | CreatePlayer: skill, money, home world, designs, starting ships, welcome reports | Rule, implemented | js/rules-405.js setupPlayer, defaultDesigns, afterSetup, WELCOME |
-| `FUN_004438ba` @4438ba | SetCompAttrs: personalities | Rule, implemented | js/ai-405.js makeAI |
-| `FUN_00446312` @446312 | Registration code entry (GOODMMM / VERYGOOD sounds) | Not a rule | copy protection |
-| `FUN_00448856` @448856 | New Game options: IQ, players | Rule, implemented | engine new game, js/rules-405.js computerSetup |
-| `FUN_0044d00c` @44d00c | Ship Types window set-up (a copy of the designs; names by FUN_0046472b) | Interface | the remake's design window |
-| `FUN_0044e51a` @44e51a | Design window limits (Range 4..tech, Scout +2, Satellite R0) | Rule, implemented | js/rules-405.js designLimits, designMin |
-| `FUN_0044eb83` @44eb83 | Class list of the design window (Dreadnoughts open from the start) | Rule, implemented | js/rules-405.js canBuild |
-| `FUN_0044eecd` @44eecd | Buying in the design window: pop > ships built here this turn + ordered, metal, borrowing limit | Rule, implemented | js/rules-405.js yardRoom; engine buildShips |
-| `FUN_00457882` @457882 | Alliances window: alliance and best-buddy offers (+0x18c2, +0x18c6) | Rule, implemented | engine setPact |
-| `FUN_00457c55` @457c55 | Give window: 3 gifts a turn out of Ship Savings and metal | Rule, implemented | engine give; js/rules-405.js giftNews |
-| `FUN_00458060` @458060 | Surrender window (+0x5a) | Rule, implemented | engine surrender |
-| `FUN_0045c02c` @45c02c | Dragging a budget bar | Rule, implemented | js/rules-405.js dragShare |
-| `FUN_0045c61e` @45c61e | GiveBarPercent | Rule, implemented | js/rules-405.js giveBarPercent |
-| `FUN_0045c6dc` @45c6dc | DetermineNewLevels | Rule, implemented | js/rules-405.js giveBarPercent |
-| `FUN_0045ced4` @45ced4 | A slot's most share (0 abandoned or finished) | Rule, implemented | js/rules-405.js barMax |
-| `FUN_0045cf57` @45cf57 | A slot's least share (0) | Rule, implemented | js/rules-405.js giveBarPercent |
-| `FUN_0045e8bb` @45e8bb | DoComputerTurn | Rule, implemented | js/ai-405.js aiTurn |
-| `FUN_0045ed5a` @45ed5a | Research action | Rule, implemented | js/ai-405.js aiTurn |
-| `FUN_0045eda0` @45eda0 | AddColonySupportActions | Rule, implemented | js/ai-405.js addColonySupportActions |
-| `FUN_0045f45b` @45f45b | AnyUnfueledShips | Rule, implemented | js/ai-405.js anyUnfueledShips |
-| `FUN_0045f4e4` @45f4e4 | AnyStationedShips | Rule, implemented | js/ai-405.js anyStationedShips |
-| `FUN_0045f599` @45f599 | AddTerraformingActions | Rule, implemented | js/ai-405.js addTerraformingActions |
-| `FUN_0045f740` @45f740 | AddExploreActions | Rule, implemented | js/ai-405.js addExploreActions |
-| `FUN_0045f92b` @45f92b | FindCloseEnoughColony (mode 4 fallback) | Rule, implemented | js/ai-405.js findCloseEnoughColony |
-| `FUN_0045fb2f` @45fb2f | AddAttackActions | Rule, implemented | js/ai-405.js addAttackActions |
-| `FUN_0045fd65` @45fd65 | PickAttackLoc | Rule, implemented | js/ai-405.js pickAttackLoc |
-| `FUN_00460125` @460125 | AddColonizeAction | Rule, implemented | js/ai-405.js addColonizeAction |
-| `FUN_0046097d` @46097d | Colony quality | Rule, implemented | js/ai-405.js colQuality |
-| `FUN_00460b58` @460b58 | Star quality 0..20 | Rule, implemented | js/ai-405.js quality, O.exploreQuality |
-| `FUN_00460cbb` @460cbb | AddSatelliteActions | Rule, implemented | js/ai-405.js addSatelliteActions |
-| `FUN_004611c8` @4611c8 | PerformActions | Rule, implemented | js/ai-405.js performActions |
-| `FUN_004613a8` @4613a8 | GoExplore | Rule, implemented | js/ai-405.js goExplore |
-| `FUN_004616ee` @4616ee | GoAttack (with one Dreadnought) | Rule, implemented | js/ai-405.js goAttack |
-| `FUN_00461d80` @461d80 | GoColonize | Rule, implemented | js/ai-405.js goColonize |
-| `FUN_00462105` @462105 | BuildAFleet | Rule, implemented | js/ai-405.js buildAFleet |
-| `FUN_00462600` @462600 | MineMetal: idle ships scrapped for a colony ship | Rule, implemented | js/ai-405.js mineMetal |
-| `FUN_00462878` @462878 | SaveFleets | Rule, implemented | js/ai-405.js saveFleets |
-| `FUN_00462be4` @462be4 | ResolveSpending | Rule, implemented | js/ai-405.js resolveSpending |
-| `FUN_00462f76` @462f76 | ScrapShips (satellites at a star) | Rule, implemented | js/ai-405.js performActions |
-| `FUN_00463030` @463030 | ComputeStatus | Rule, implemented | js/ai-405.js computeStatus |
-| `FUN_004639ba` @4639ba | MaintainShipTypes | Rule, implemented | js/ai-405.js maintainShipTypes |
-| `FUN_00463f2f` @463f2f | CalcTypeObsolescence | Rule, implemented | js/ai-405.js obsolete |
-| `FUN_004640c4` @4640c4 | ScrapOldSats | Rule, implemented | js/ai-405.js scrapOldSats |
-| `FUN_004641ef` @4641ef | ScrapOldShips | Rule, implemented | js/ai-405.js scrapOldShips |
-| `FUN_004644c5` @4644c5 | RefuelFighters | Rule, implemented | js/ai-405.js refuelFighters |
-| `FUN_0046472b` @46472b | GiveTypeCoolName | Rule, implemented | js/rules-405.js nameFor |
-| `FUN_004648d2` @4648d2 | MsgReactDetermineAllies | Rule, implemented | js/ai-405.js msgReactDetermineAllies |
-| `FUN_004654a6` @4654a6 | ModifyAlliances | Rule, implemented | js/ai-405.js modifyAlliances |
-| `FUN_00465607` @465607 | SendAMessage (10 a turn) | Rule, implemented | js/ai-405.js say |
-| `FUN_004656b4` @4656b4 | PlayerILikeBest | Rule, implemented | js/ai-405.js computeStatus |
-| `FUN_00465796` @465796 | AddActionToList | Rule, implemented | js/ai-405.js addAction |
-| `FUN_004658b1` @4658b1 | CountActions | Rule, implemented | js/ai-405.js countActions |
-| `FUN_00465a0d` @465a0d | FillInStarStatus | Rule, implemented | js/ai-405.js fillInStarStatus |
-| `FUN_004668c8` @4668c8 | MarkUsedFleets (and ungroups) | Rule, implemented | js/ai-405.js markUsedFleets |
-| `FUN_00468f83` @468f83 | Ship Types window OK: buys the ships ordered in it (FUN_004691c4) or restores the designs | Interface | the remake's design window |
-| `FUN_004691c4` @4691c4 | Buying a ship (human): prototype price, slot +0xe, interest worked out again | Rule, implemented | engine buildShips; js/rules-405.js dipAndInterest |
-| `FUN_00469757` @469757 | Dip Into Savings | Rule, implemented | js/rules-405.js dipAndInterest |
-| `FUN_00469b1d` @469b1d | Abandon command (toggle, confirmations, ABANDON / WHOA) | Rule, implemented | js/rules-405.js evacuate405 (evacuateCommand: true) |
-| `FUN_0046ec5a` @46ec5a | Report texts (tech level names to 20) | Rule, implemented | js/rules-405.js techMsg and every message |
-| `FUN_0046f8cc` @46f8cc | Report pictures by code (battle: won/lost the other side, destroyed/survived your own) | Interface | js/skins/w95/ui.js messageLook |
-| `FUN_0046fe1b` @46fe1b | Report sounds by code | Interface | js/skins/w95/ui.js messageLook and message sounds |
-| `FUN_004702e1` @4702e1 | AddNewMessage (80 reports, oldest 10 dropped) | Rule, implemented | engine msg |
-| `FUN_00470dec` @470dec | Report click: replays, Hall of Shame on elimination, win window | Interface | the remake's reports; Hall not built |
-| `FUN_004714c7` @4714c7 | First report of a year | Rule, implemented | js/ai-405.js (ai.ev events) |
-| `FUN_00471587` @471587 | Radical card window: shows the hand of 4 and, on a pick, takes a card out of the hand (+0x18ce) | Rule, not implemented | the card window is not built; docs/open-questions.md |
-| `FUN_004768cc` @4768cc | Computers join: names, sexes, skill steps | Rule, implemented | js/rules-405.js computerSetup |
-| `FUN_0047b5dc` @47b5dc | Hit table 50 + 31.51 atan | Rule, implemented | js/rules-405.js HIT |
-| `FUN_0047f76e` @47f76e | Time limit: a human out of time has the computer play the turn (FUN_0045e8bb) | Rule, not implemented | no turn time limit in the remake |
-| `FUN_0047fb7b` @47fb7b | Reveals the map when every human is out | Rule, implemented | js/rules-405.js checkElimination |
-| `FUN_0047fd97` @47fd97 | CheckEndGame: elimination, warning and win reports | Rule, implemented | js/rules-405.js doGameEndStuff, checkElimination |
-| `FUN_00480eb5` @480eb5 | IQ worked back from the skill | Rule, implemented | js/rules-405.js computerSetup |
-| `FUN_00482b89` @482b89 | Hall of Fame window: names, master points, rank (strings 324-333) | Rule, not implemented | rank window not built |
-| `FUN_00484788` @484788 | New Game options record (stack buffer not cleared) | Rule, implemented | docs/open-questions.md |
-| `FUN_00497e58` @497e58 | Hall of Fame / Shame entry and master points | Rule, not implemented | not built; js/rules-405.js masterPoints, addMasterPoints |
+| Routine | Mac 4.0.5 (68k) | What it does | Status | Where / why |
+|---|---|---|---|---|
+| `FUN_00404c4e` @404c4e | `DoConfigAutoPlayDialog` @10440e | Auto play settings window: sets the human's aggressiveness (+0x718) and colonies defended (+0x704), and puts the OLD colonies-defended value into metal for defence (+0x706), a slip | Rule, not implemented | auto play settings window not built (docs/open-questions.md) |
+| `FUN_00409170` @409170 | `GetDialogValues` @10c8e | Game options word: Alliances bit 1, Luck bit 4, auto end bit 8 (Novas bit 2 never set) | Rule, implemented | G.opts; docs/open-questions.md |
+| `FUN_0040bff1` @40bff1 | `DoGalaxyMenu` @838c0 | Armageddon command: two random confirmations (strings 299-309) to turn it on, toggles player +0x18ca | Rule, implemented | engine setArmageddon; the mask in pass 1 |
+| `FUN_00413ba3` @413ba3 | `FollowPathDrag` @110dca | Map click and fleet dragging: picks a fleet, plans its route (FUN_004164b0) and gives it (FUN_0041726f), HYAHH | Interface | the remake's map drag; routes by rules route()/path405 |
+| `FUN_00415db0` @415db0 | `NewFleet` @f000c | NewFleet: a fleet record placed by class, new Biological fleets unfuelled, Colony Ships loaded | Rule, implemented | js/rules-405.js fleetList, shipsAdded |
+| `FUN_00416036` @416036 | `RemoveFleet` @f01e0 | DeleteFleet | Rule, implemented | engine |
+| `FUN_004160d6` @4160d6 | `ReassignGroupLeader` @f02bc | Clears the group number of fleets (fleet +0x1e) | Interface | fleet groups are not in the remake |
+| `FUN_00416187` @416187 | `CalcFleetsAtAllStars` @f031e | Fleet list housekeeping after buying (selection, counts) | Interface | display |
+| `FUN_004164b0` @4164b0 | `DeterminePath` @f044c | DeterminePath: 3.0.1's route search through your and your best buddies' colonies, whole distances | Rule, implemented | js/rules-405.js path405 |
+| `FUN_0041726f` @41726f | `GiveFleetPath` @f0aca | GiveFleetPath | Rule, implemented | js/rules-405.js givePath |
+| `FUN_00419290` @419290 | `ListAllFleets` @f2d80 | Fleet window: removing a fleet from the list (window fields) | Interface | display |
+| `FUN_0041940e` @41940e | `InitFleetsList` @f2f96 | Fleet list box filling | Interface | display |
+| `FUN_00419722` @419722 | `MakeListFleetsStr` @f31f8 | Fleet list line text | Interface | display |
+| `FUN_00419944` @419944 | — | Fleet list sort key | Interface | display |
+| `FUN_00419a52` @419a52 | `ScrapCurrentFleet` @f348a | Scrap / unbuild toggle on a fleet (fleet +0xb); a fleet built this turn is un-bought (savings, metal, built counts, slot +0xe) | Rule, implemented | engine scrapFleet / unbuildShip (scrapped at once: docs/open-questions.md) |
+| `FUN_0041a9b4` @41a9b4 | `CalcShipCosts` @f48a0 | CalcShipCosts: price, metal, hit points, prototype, attack (float32) | Rule, implemented | js/rules-405.js designCost |
+| `FUN_0041adc6` @41adc6 | `CalcShipPower` @f5294 | Ship power of a class at a star, not counting busy satellites | Rule, implemented | js/ai-405.js satPower |
+| `FUN_0041e140` @41e140 | — | Star information text ("Never Explored", "No battles") | Interface | display |
+| `FUN_0041e5b1` @41e5b1 | `DoTerraformDlg` @521ce | Terraform window drawing | Interface | display |
+| `FUN_0041f660` @41f660 | `SetMenuItems` @84028 | Menu items enabled by state (Abandon text 322/323, Armageddon) | Interface | display |
+| `FUN_00421430` @421430 | `DoBattleStage` @6000c | DoBattleStage: the duels at every star, luck, replay records | Rule, implemented | js/rules-405.js battle |
+| `FUN_0042210e` @42210e | `AreAllies` @607bc | AreAllies (galaxy +0x238 masks, both ways) | Rule, implemented | engine isAllied |
+| `FUN_004221d7` @4221d7 | `BestBuddies` @60852 | AreBestBuddies (+0x288 masks) | Rule, implemented | engine isBuddy |
+| `FUN_00422339` @422339 | `DoOneBattle` @6094e | DoOneBattle: rounds by speed, HYAHH | Rule, implemented | js/rules-405.js duel |
+| `FUN_00423878` @423878 | `CalculateGroups` @614b8 | Group size for a side | Rule, implemented | js/rules-405.js calculateGroups |
+| `FUN_00423b52` @423b52 | `CalcOneGroup` @61652 | Groups of one design, shots, decoys | Rule, implemented | js/rules-405.js calculateGroups |
+| `FUN_00424088` @424088 | `HaveGroupShoot` @618fa | Shooting and damage | Rule, implemented | js/rules-405.js shoot |
+| `FUN_00424b00` @424b00 | `PickTarget` @61f86 | Target choice: the first Colony Ship group, then Satellites, then from a random start (the Mac's PickTarget looks for Tankers between the two: Mac 4.0.5 differs, docs/405-findings.md) | Rule, implemented | js/rules-405.js pickTarget |
+| `FUN_00425a2f` @425a2f | `ReviewBattle` @6273e | Review Battle: replays a battle record | Interface | the remake's replay |
+| `FUN_00425c5d` @425c5d | — | Planet power ceil(pop/50)(w+1)^2/75 | Rule, implemented | js/rules-405.js makeResultMessages, js/ai-405.js planetPower |
+| `FUN_00425c9a` @425c9a | `MakeResultMessages` @6287e | Battle reports, estimates, debris, feelings (0x3f3, 0x40b-0x40d, 0x42e/0x42f) | Rule, implemented | js/rules-405.js makeResultMessages |
+| `FUN_00427584` @427584 | `CalcBiggestAndNumTypes` @63772 | CalcBiggestAndNumTypes (the Mac's name): the most numerous design among a player's fleets at the star, how many of it and how many others, for the fleet description kept with a battle report. (It had been read as finding the fleet a survivor goes back to: that is FUN_0042780e.) | Interface | report text only |
+| `FUN_004276e4` @4276e4 | `ZeroFleetsAtStar` @63838 | Empties the loser's fleets | Rule, implemented | js/rules-405.js zeroFleets |
+| `FUN_0042780e` @42780e | `ResolveVictorFleetsAtStar` @638be | Survivors back to the winner's fleets | Rule, implemented | js/rules-405.js resolveVictor |
+| `FUN_0042a5c0` @42a5c0 | `RND` @1710d0 | RND(lo, hi) with a caller tag | Rule, implemented | engine RI (own random numbers) |
+| `FUN_0042b05d` @42b05d | `DrawOneOrgFleet` @f3f6c | Organize window line text | Interface | display |
+| `FUN_0042b278` @42b278 | `OrganizeFleets` @f3804 | OrganizeFleets: as 3.0.1 | Rule, implemented | js/rules-301.js organized301 (shared) |
+| `FUN_0042e480` @42e480 | `Distance` @171164 | Distance trunc((10 max + 3 min + 9) / 10) | Rule, implemented | js/rules-405.js distance |
+| `FUN_0042e806` @42e806 | `GetPlayerStarNum` @1714e2 | Slot of a star in the player's list | Rule, implemented | js/rules-405.js slots |
+| `FUN_0042f4b3` @42f4b3 | `CreateDistArray` @17217a | Distance table built once | Rule, implemented | js/rules-405.js distance |
+| `FUN_0042f60c` @42f60c | `MetalToMoney` @17261a | MetalToMoney ceil(m^2/400) (625 with the bonus) | Rule, implemented | js/rules-405.js mineMoney |
+| `FUN_00431bf0` @431bf0 | `PerformEndTurn` @c000c | End Turn driver: one FUN_004320f8 call per 10-year step | Rule, implemented | engine endTurn (yearsPerTurn) |
+| `FUN_004320f8` @4320f8 | `DoOneTurn` @c0142 | EndTurn: pass 1, battles, Armageddon, novas, pass 2a and 2b, winner check | Rule, implemented | js/rules-405.js economy, pass2, checkElimination |
+| `FUN_0043361b` @43361b | `DeductInterest` @c0e62 | DeductInterest | Rule, implemented | js/rules-405.js deductInterest |
+| `FUN_00433977` @433977 | `MaintainKillStars` @c1040 | MaintainKillStars | Rule, implemented | js/rules-405.js maintainKillStars |
+| `FUN_00433c52` @433c52 | `TerraformMineStars` @c11fa | TerraformMineStars | Rule, implemented | js/rules-405.js terraformMineStars |
+| `FUN_0043427a` @43427a | `SurrenderIfDesired` @c177a | SurrenderIfDesired | Rule, implemented | js/rules-405.js processSurrenders |
+| `FUN_00434534` @434534 | `ScrapFleetsAndTypes` @c1920 | ScrapFleetsAndTypes | Rule, implemented | js/rules-405.js scrapFleetsAndTypes |
+| `FUN_00434dad` @434dad | `SpendTechMoney` @c1d74 | SpendTechMoney (research, tech reports) | Rule, implemented | js/rules-405.js spendTechMoney, research |
+| `FUN_004357fc` @4357fc | `MoveShips` @c272e | MoveShips | Rule, implemented | js/rules-405.js moveShips, engine movement, rules-301 fleetArrives |
+| `FUN_00435dc3` @435dc3 | `CheckFleetDestination` @c2a58 | CheckFleetDestination | Rule, implemented | js/rules-405.js replanFleet |
+| `FUN_004360af` @4360af | `RestoreStarsBars` @c2bec | RestoreStarsBars | Rule, implemented | js/rules-405.js restoreStarsBars |
+| `FUN_0043625c` @43625c | `ConformPlayerAlliances` @c2ce4 | ConformPlayerAlliances: pact and best-buddy news, Armageddon switch news | Rule, implemented | js/rules-405.js pactNews405 |
+| `FUN_00436988` @436988 | `CheckForArmageddon` @c3294 | CheckForArmageddon | Rule, implemented | js/rules-405.js checkForArmageddon |
+| `FUN_00436c26` @436c26 | `CheckForSupernova` @c33e4 | CheckForSupernova (Novas option bit 2) | Rule, implemented | js/rules-405.js checkForSupernova |
+| `FUN_00436ff8` @436ff8 | `ReactToSupernova` @c3604 | ReactToSupernova | Rule, implemented | js/rules-405.js reactToSupernova |
+| `FUN_0043747e` @43747e | `GetOtherScrapMetal` @c386a | GetOtherScrapMetal | Rule, implemented | js/rules-405.js getOtherScrapMetal |
+| `FUN_00437592` @437592 | `ComputeIncomeAndPopulation` @c3900 | ComputeIncomeAndPopulation | Rule, implemented | js/rules-405.js income |
+| `FUN_00437ddd` @437ddd | `ColonizeAndExplore` @c41f2 | ColonizeAndExplore (biologicals eat, tankers, Valdez) | Rule, implemented | js/rules-405.js colonizeAndExplore |
+| `FUN_004383a8` @4383a8 | `GiveAllyArrivedMessages` @c4564 | Allies' arrivals news | Rule, implemented | js/rules-405.js allyArrivals |
+| `FUN_0043853c` @43853c | `BestBuddiesExplore` @c4636 | Best buddies share this year's exploring, and their battle news: the second branch copies the buddy's record of a star where it saw a battle this year when the player's own news is older (marked -11: "since you did not fight in that battle, you have no information about it"; Windows copies the record's pointer). It had been read as dead | Rule, implemented | js/rules-405.js shareBuddyMaps |
+| `FUN_00438718` @438718 | `DoSurrenders` @c4734 | DoSurrenders | Rule, implemented | js/rules-405.js doSurrenders |
+| `FUN_00438a0f` @438a0f | `DetectBigBattles` @c4942 | DetectBigBattles | Rule, implemented | js/rules-405.js detectBigBattles |
+| `FUN_00438b77` @438b77 | `SetPlanetDisplayValues` @d000c | SetPlanetDisplayValues | Rule, implemented | js/rules-405.js setPlanetDisplayValues |
+| `FUN_00438e90` @438e90 | `SetPlanetTypesForMap` @d01a2 | Map refresh after the turn | Interface | display |
+| `FUN_00438f47` @438f47 | `SetPlanetTypesForStar` @d020a | SetPlanetTypesForStar (the Mac's name): the picture a star shows on the map, by owner, gravity, temperature, profit and nova; jokes: a Christmas picture on 25 December, and pictures 0xc2b / 0xc2c for a colony making $30,000 or more of a player named Peter or Howard. (It had been read as birthday jokes.) | Interface | map pictures; the jokes are not built |
+| `FUN_00439558` @439558 | `ExploreStar` @d05c6 | ExploreStar (963/964) | Rule, implemented | js/rules-405.js exploreStar |
+| `FUN_004397ba` @4397ba | `ColonizeStar` @d0720 | ColonizeStar | Rule, implemented | js/rules-405.js settle |
+| `FUN_00439bf7` @439bf7 | `DecolonizeStar` @d0a70 | DecolonizeStar | Rule, implemented | js/rules-405.js decolonize |
+| `FUN_00439e5a` @439e5a | — | Debug: gives player 3 a Biological design (no caller) | Not a rule | dead code |
+| `FUN_00439f72` @439f72 | — | Debug: gives player 3 another design (no caller) | Not a rule | dead code |
+| `FUN_0043a08c` @43a08c | `DoSomethingRadical` @d0bba | DoSomethingRadical: the 17 discoveries | Rule, implemented | js/rules-405.js radical |
+| `FUN_0043adac` @43adac | `DetermineNextFourRadChoices` @d13de | Deals the radical hand (weights 0x59cf10) | Rule, implemented | js/rules-405.js dealHand |
+| `FUN_0043b08a` @43b08a | `NoteShipPowers` @d15ac | NoteShipPowers (written, never read) | Not a rule | nothing reads it |
+| `FUN_0043b243` @43b243 | `CheckPlateaux` @d1706 | Population milestones | Rule, implemented | js/rules-405.js milestones |
+| `FUN_0043b47f` @43b47f | `SaveGraphInfo` @d1852 | History graph data | Interface | the remake's history graph |
+| `FUN_0043bd5f` @43bd5f | `DoGameEndStuff` @d1ef0 | DoGameEndStuff | Rule, implemented | js/rules-405.js doGameEndStuff |
+| `FUN_0043bf98` @43bf98 | `CheckForWinner` @d2022 | CheckForWinner | Rule, implemented | js/rules-405.js checkElimination |
+| `FUN_0043c1ec` @43c1ec | `CalcCurGameRating` @d21c2 | Win difficulty rating (-1 after cheating) | Rule, implemented | js/rules-405.js winDifficulty |
+| `FUN_0043c351` @43c351 | — | A difficulty rating with a float formula: nothing calls it (no call, pointer or table reaches it) and the Mac program has no such routine. It had been read as the New Game window's rating, which is FUN_00447bdb | Not a rule | dead code |
+| `FUN_00447bdb` @447bdb | `AdjustDifficulty` @10c1e | The New Game window's Base Difficulty Rating: FUN_0043c836 (CalcGameRating) for its computers, intelligence, galaxy and time limit, with 1 human of Normal skill, no allies and no Armageddons | Rule, implemented | js/rules-405.js difficulty |
+| `FUN_0043c7c2` @43c7c2 | `CalcNumAllies` @d22de | Allies count for the rating | Rule, implemented | js/rules-405.js winDifficulty |
+| `FUN_0043c836` @43c836 | `CalcGameRating` @d2334 | Win difficulty rating formula | Rule, implemented | js/rules-405.js winDifficulty |
+| `FUN_0043c9ea` @43c9ea | `DoGameSolidificationStuff` @d2432 | Copies a human's skill onto computers in a game with several humans (shown skill only) | Rule, implemented | js/rules-405.js computerSetup |
+| `FUN_0043ffe0` @43ffe0 | `CreateGalaxy` @8000c | CreateGalaxy | Rule, implemented | js/rules-405.js makeGalaxy |
+| `FUN_00442374` @442374 | `GiveStarsValues` @81a0a | Star names, cut to 7 letters | Rule, implemented | js/rules-405.js STAR_NAMES |
+| `FUN_004427a4` @4427a4 | `CreatePlayer` @81c9c | CreatePlayer: skill, money, home world, designs, starting ships, welcome reports | Rule, implemented | js/rules-405.js setupPlayer, defaultDesigns, afterSetup, WELCOME |
+| `FUN_004438ba` @4438ba | `SetCompAttrs` @827b6 | SetCompAttrs: personalities | Rule, implemented | js/ai-405.js makeAI |
+| `FUN_00446312` @446312 | `LicenseThisApp` @40030 | Registration code entry (GOODMMM / VERYGOOD sounds); the Mac's personalises the copy (name and company) | Not a rule | copy protection |
+| `FUN_00448856` @448856 | `doCreateGalaxyDlg` @10f5e | New Game options: IQ, players | Rule, implemented | engine new game, js/rules-405.js computerSetup |
+| `FUN_0044d00c` @44d00c | `BuildDesignShips` @f0d8e | Ship Types window set-up (a copy of the designs; names by FUN_0046472b) | Interface | the remake's design window |
+| `FUN_0044e51a` @44e51a | `SetSBMinMax` @f2538 | Design window limits (Range 4..tech, Scout +2, Satellite R0) | Rule, implemented | js/rules-405.js designLimits, designMin |
+| `FUN_0044eb83` @44eb83 | `InitShipTypesList` @f1bb6 | Class list of the design window (Dreadnoughts open from the start) | Rule, implemented | js/rules-405.js canBuild |
+| `FUN_0044eecd` @44eecd | `BuildSomeShips` @f1552 | Buying in the design window: pop > ships built here this turn + ordered, metal, borrowing limit | Rule, implemented | js/rules-405.js yardRoom; engine buildShips |
+| `FUN_00457882` @457882 | `DoAlliancesDlg` @10349a | Alliances window: alliance and best-buddy offers (+0x18c2, +0x18c6) | Rule, implemented | engine setPact |
+| `FUN_00457c55` @457c55 | `DoGiveThingsDlg` @103a70 | Give window: 3 gifts a turn out of Ship Savings and metal | Rule, implemented | engine give; js/rules-405.js giftNews |
+| `FUN_00458060` @458060 | `DoSurrenderToDlg` @103eb8 | Surrender window (+0x5a) | Rule, implemented | engine surrender |
+| `FUN_0045c02c` @45c02c | `DoHBarClick` @514e2 | Dragging a budget bar | Rule, implemented | js/rules-405.js dragShare |
+| `FUN_0045c61e` @45c61e | `GiveBarPercent` @518b6 | GiveBarPercent | Rule, implemented | js/rules-405.js giveBarPercent |
+| `FUN_0045c6dc` @45c6dc | `DetermineNewLevels` @5195e | DetermineNewLevels | Rule, implemented | js/rules-405.js giveBarPercent |
+| `FUN_0045ced4` @45ced4 | `ComputeMaxPercent` @51dca | A slot's most share (0 abandoned or finished) | Rule, implemented | js/rules-405.js barMax |
+| `FUN_0045cf57` @45cf57 | `ComputeMinPercent` @51e24 | A slot's least share (0) | Rule, implemented | js/rules-405.js giveBarPercent |
+| `FUN_0045e8bb` @45e8bb | `DoComputerTurn` @7000c | DoComputerTurn | Rule, implemented | js/ai-405.js aiTurn |
+| `FUN_0045ed5a` @45ed5a | `AddSavingsTechActions` @702c6 | Research action (despite the name, only research: type 3, priority 90, the +0x6fc percent) | Rule, implemented | js/ai-405.js aiTurn |
+| `FUN_0045eda0` @45eda0 | `AddColonySupportActions` @70310 | AddColonySupportActions | Rule, implemented | js/ai-405.js addColonySupportActions |
+| `FUN_0045f45b` @45f45b | `AnyUnfueledShips` @7074a | AnyUnfueledShips | Rule, implemented | js/ai-405.js anyUnfueledShips |
+| `FUN_0045f4e4` @45f4e4 | `AnyStationedShips` @707a2 | AnyStationedShips | Rule, implemented | js/ai-405.js anyStationedShips |
+| `FUN_0045f599` @45f599 | `AddTerraformingActions` @7080a | AddTerraformingActions | Rule, implemented | js/ai-405.js addTerraformingActions |
+| `FUN_0045f740` @45f740 | `AddExploreActions` @70954 | AddExploreActions | Rule, implemented | js/ai-405.js addExploreActions |
+| `FUN_0045f92b` @45f92b | `FindCloseEnoughColony` @70a94 | FindCloseEnoughColony (mode 4 fallback) | Rule, implemented | js/ai-405.js findCloseEnoughColony |
+| `FUN_0045fb2f` @45fb2f | `AddAttackActions` @70bc0 | AddAttackActions | Rule, implemented | js/ai-405.js addAttackActions |
+| `FUN_0045fd65` @45fd65 | `PickAttackLoc` @70cda | PickAttackLoc | Rule, implemented | js/ai-405.js pickAttackLoc |
+| `FUN_00460125` @460125 | `AddColonizeAction` @70f2e | AddColonizeAction | Rule, implemented | js/ai-405.js addColonizeAction |
+| `FUN_0046097d` @46097d | `DetermineColQuality` @713ce | Colony quality | Rule, implemented | js/ai-405.js colQuality |
+| `FUN_00460b58` @460b58 | `DetermineStarQuality` @71500 | Star quality 0..20 | Rule, implemented | js/ai-405.js quality, O.exploreQuality |
+| `FUN_00460cbb` @460cbb | `AddSatelliteActions` @71670 | AddSatelliteActions | Rule, implemented | js/ai-405.js addSatelliteActions |
+| `FUN_004611c8` @4611c8 | `PerformActions` @719d0 | PerformActions | Rule, implemented | js/ai-405.js performActions |
+| `FUN_004613a8` @4613a8 | `GoExplore` @71b18 | GoExplore | Rule, implemented | js/ai-405.js goExplore |
+| `FUN_004616ee` @4616ee | `GoAttack` @71ce8 | GoAttack (with one Dreadnought) | Rule, implemented | js/ai-405.js goAttack |
+| `FUN_00461d80` @461d80 | `GoColonize` @720da | GoColonize | Rule, implemented | js/ai-405.js goColonize |
+| `FUN_00462105` @462105 | `BuildAFleet` @722c8 | BuildAFleet | Rule, implemented | js/ai-405.js buildAFleet |
+| `FUN_00462600` @462600 | `MineMetal` @72584 | MineMetal: idle ships scrapped for a colony ship | Rule, implemented | js/ai-405.js mineMetal |
+| `FUN_00462878` @462878 | `SaveFleets` @72720 | SaveFleets | Rule, implemented | js/ai-405.js saveFleets |
+| `FUN_00462be4` @462be4 | `ResolveSpending` @72904 | ResolveSpending | Rule, implemented | js/ai-405.js resolveSpending |
+| `FUN_00462f76` @462f76 | `ScrapShips` @72b5e | ScrapShips (satellites at a star) | Rule, implemented | js/ai-405.js performActions |
+| `FUN_00463030` @463030 | `ComputeStatus` @72bce | ComputeStatus | Rule, implemented | js/ai-405.js computeStatus |
+| `FUN_004639ba` @4639ba | `MaintainShipTypes` @73140 | MaintainShipTypes | Rule, implemented | js/ai-405.js maintainShipTypes |
+| `FUN_00463f2f` @463f2f | `CalcTypeObsolescence` @73428 | CalcTypeObsolescence | Rule, implemented | js/ai-405.js obsolete |
+| `FUN_004640c4` @4640c4 | `ScrapOldSats` @73550 | ScrapOldSats | Rule, implemented | js/ai-405.js scrapOldSats |
+| `FUN_004641ef` @4641ef | `ScrapOldShips` @735e0 | ScrapOldShips | Rule, implemented | js/ai-405.js scrapOldShips |
+| `FUN_004644c5` @4644c5 | `RefuelFighters` @73750 | RefuelFighters | Rule, implemented | js/ai-405.js refuelFighters |
+| `FUN_0046472b` @46472b | `GiveTypeCoolName` @73886 | GiveTypeCoolName | Rule, implemented | js/rules-405.js nameFor |
+| `FUN_004648d2` @4648d2 | `MsgReactDetermineAllies` @7398a | MsgReactDetermineAllies | Rule, implemented | js/ai-405.js msgReactDetermineAllies |
+| `FUN_004654a6` @4654a6 | `ModifyAlliances` @741b4 | ModifyAlliances | Rule, implemented | js/ai-405.js modifyAlliances |
+| `FUN_00465607` @465607 | `SendAMessage` @7430c | SendAMessage (10 a turn) | Rule, implemented | js/ai-405.js say |
+| `FUN_004656b4` @4656b4 | `PlayerILikeBest` @74372 | PlayerILikeBest | Rule, implemented | js/ai-405.js computeStatus |
+| `FUN_00465796` @465796 | `AddActionToList` @743fc | AddActionToList | Rule, implemented | js/ai-405.js addAction |
+| `FUN_004658b1` @4658b1 | `CountActions` @744b4 | CountActions | Rule, implemented | js/ai-405.js countActions |
+| `FUN_00465a0d` @465a0d | `FillInStarStatus` @74550 | FillInStarStatus | Rule, implemented | js/ai-405.js fillInStarStatus |
+| `FUN_004668c8` @4668c8 | `MarkUsedFleets` @74dfe | MarkUsedFleets (and ungroups) | Rule, implemented | js/ai-405.js markUsedFleets |
+| `FUN_00468f83` @468f83 | `BuildDesignShips` @f0d8e | Ship Types window OK: buys the ships ordered in it (FUN_004691c4) or restores the designs | Interface | the remake's design window |
+| `FUN_004691c4` @4691c4 | `BuildAShip` @f2ac6 | Buying a ship (human): prototype price, slot +0xe, interest worked out again | Rule, implemented | engine buildShips; js/rules-405.js dipAndInterest |
+| `FUN_00469757` @469757 | `DipIntoSavings` @83c66 | Dip Into Savings | Rule, implemented | js/rules-405.js dipAndInterest |
+| `FUN_00469b1d` @469b1d | `DoGalaxyMenu` @838c0 | Abandon command (toggle, confirmations, ABANDON / WHOA) | Rule, implemented | js/rules-405.js evacuate405 (evacuateCommand: true) |
+| `FUN_0046ec5a` @46ec5a | `GetReportString` @1507d4 | Report texts (tech level names to 20) | Rule, implemented | js/rules-405.js techMsg and every message |
+| `FUN_0046f8cc` @46f8cc | `GetIconID` @151682 | Report pictures by code (battle: won/lost the other side, destroyed/survived your own) | Interface | js/skins/w95/ui.js messageLook |
+| `FUN_0046fe1b` @46fe1b | `PlayAnnounceSound` @151b6c | Report sounds by code | Interface | js/skins/w95/ui.js messageLook and message sounds |
+| `FUN_004702e1` @4702e1 | `AddNewMessage` @151e56 | AddNewMessage (80 reports, oldest 10 dropped) | Rule, implemented | engine msg |
+| `FUN_00470dec` @470dec | `DoMessageAction` @1523c2 | Report click: replays, Hall of Shame on elimination, win window | Interface | the remake's reports; Hall not built |
+| `FUN_004714c7` @4714c7 | `FindDateMessageNumber` @152974 | First report of a year | Rule, implemented | js/ai-405.js (ai.ev events) |
+| `FUN_00471587` @471587 | `DoRadicalChoiceDlg` @1529e2 | Radical card window: shows the hand of 4 and, on a pick, takes a card out of the hand (+0x18ce) | Rule, not implemented | the card window is not built; docs/open-questions.md |
+| `FUN_004768cc` @4768cc | `SetUpComputerPlayers` @1424c6 | Computers join: names, sexes, skill steps | Rule, implemented | js/rules-405.js computerSetup |
+| `FUN_0047b5dc` @47b5dc | — (MaTh 1002 "Weapon Ratios", the same 51 values) | Hit table 50 + 31.51 atan | Rule, implemented | js/rules-405.js HIT |
+| `FUN_0047f76e` @47f76e | `EndTurnMenuCall` @e0920 | The End Turn command (the Mac's name): with Auto Play set to "Have computer play for me" (mode 2) the computer plays the human's turn (FUN_0045e8bb); then the turn-time bank (player +0x60: seconds left under the limit are kept, up to 900 a turn and twice the limit). It had been read as the time limit's routine | Rule, implemented (auto play) / not implemented (time bank) | engine p.auto; no turn time limit in the remake |
+| `FUN_0047fb7b` @47fb7b | `ExploreEverything` @8464a | Reveals the map when every human is out | Rule, implemented | js/rules-405.js checkElimination |
+| `FUN_0047fd97` @47fd97 | `CheckEndGame` @e0280 | CheckEndGame: elimination, warning and win reports | Rule, implemented | js/rules-405.js doGameEndStuff, checkElimination |
+| `FUN_00480eb5` @480eb5 | `CreateNewPlayer` @e0dba | IQ worked back from the skill | Rule, implemented | js/rules-405.js computerSetup |
+| `FUN_00482b89` @482b89 | `doMasterListDlg` @10538e | Hall of Fame window: names, master points, rank (strings 324-333) | Rule, not implemented | rank window not built |
+| `FUN_00484788` @484788 | `handleNewGameQueryEvent` @141316 | New Game options record (stack buffer not cleared) | Rule, implemented | docs/open-questions.md |
+| `FUN_00497e58` @497e58 | `AddToHall` @104ade | Hall of Fame / Shame entry and master points | Rule, not implemented | not built; js/rules-405.js masterPoints, addMasterPoints |
 
 ## The rest of the game code, by source file
 
@@ -299,7 +300,7 @@ Every routine in SPACEHO.EXE, the Windows 95 program of Spaceward Ho! 4.0.5 (Del
 
 ### NEWGLXYD.CPP: the New Game window (81 routines)
 
-- **Window, dialog and drawing code; touches no game record** (36): 447375, 4473f0, 447479, 4474b5, 4476a2, 4476e1, 44789e, 447a0c, 447bba, 447bdb, 447d0f, 449e8a, 449f14, 44a04c, 44a06d, 44a16a, 44a188, 44a283, 44a2fe, 44a340, 44a372, 44b4d0, 44b520, 44b600, 44b651, 44b72b, 44b7cd, 44b7ee, 44b995, 44b9ea, 44bad0, 44bb20, 44bc95, 44bca4, 44bcb3, 44bcbf
+- **Window, dialog and drawing code; touches no game record** (35): 447375, 4473f0, 447479, 4474b5, 4476a2, 4476e1, 44789e, 447a0c, 447bba, 447d0f, 449e8a, 449f14, 44a04c, 44a06d, 44a16a, 44a188, 44a283, 44a2fe, 44a340, 44a372, 44b4d0, 44b520, 44b600, 44b651, 44b72b, 44b7cd, 44b7ee, 44b995, 44b9ea, 44bad0, 44bb20, 44bc95, 44bca4, 44bcb3, 44bcbf
 - **Plumbing (small helpers, message maps, string and list handling); touches no game record** (34): 44748c, 44749a, 44768a, 447696, 4476b8, 4476c6, 4477d8, 4477e1, 4477ea, 4477fd, 44780d, 447bae, 447bcd, 4486bb, 4487da, 4487f5, 448832, 44a05f, 44a2e0, 44a3a4, 44b3e0, 44b664, 44b6a0, 44b6d0, 44b710, 44b7e0, 44b8eb, 44b97a, 44b9fd, 44bbee, 44bc01, 44bc30, 44bcd2, 44bd60
 - **Library code compiled into the module (MFC and C runtime templates, constructors, destructors)** (10): 44b0e0, 44b190, 44b1e0, 44b280, 44b2d0, 44b390, 44b480, 44b5b0, 44bbb0, 44bd10
 
@@ -412,3 +413,20 @@ Every routine in SPACEHO.EXE, the Windows 95 program of Spaceward Ho! 4.0.5 (Del
 ## Jump stubs
 
 707 routines from 0x401005 to 0x402c89, 1,009 `JMP` entries of the incremental-link table; each jumps to the routine of the same name without `thunk_`.
+
+## The Mac 4.0.5
+
+The Mac 4.0.5's 68k code (`tools/decompile/cw68k.py`, `Mac68k.java`; docs/decompiling.md)
+has 27 `CODE` resources: CODE 0 (one jump-table entry), CODE 1 (CodeWarrior's start-up,
+segment loader and arithmetic, 13 unnamed routines, and 15 named ones), CODE 2-3 (132
+unnamed library routines: strings, `sqrt`, `abs`, `sprintf`, resource strings) and CODE
+4-26, 24 segments of named routines. The A5 world (308 jump-table entries and the
+globals with their starting values) is unpacked from DATA 0. Ghidra finds 756 routines:
+606 carry MacsBug names (600 different; a few small static ones, such as
+`PlayAsyncSound` and `DRAWLISTBORDER`, are in several segments), 721 decompile and 35
+don't ("Cannot properly adjust input varnodes"), which were read in the disassembly when
+they mattered. The column "Mac 4.0.5" above gives each rule routine's Mac name and
+address (— where the Mac has none: Windows-only windows, the planet power inlined in its
+callers, the hit table kept as a resource, debug and dead code). The PowerPC code in the
+data fork is the same program (spot-checked). `docs/405-findings.md` ("Read against the
+Mac 4.0.5") lists what the names corrected and where the Mac differs.

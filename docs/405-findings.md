@@ -95,6 +95,7 @@ choice, docs/open-questions.md).
 | Armageddon | does not shrink distances: the table is built once | CONFIRMED (`FUN_0042f4b3`) |
 | Star count | Grid 25 / 36 / 64 / 100 / 169. Other shapes 20 + rand(1–12), 32 + rand(1–16), 48 + rand(1–20), 68 + rand(1–32), rand(101–190) | CONFIRMED (`FUN_0043ffe0`) |
 | Circle and Ring | rings 4 ly apart (cap 35) when Dense, 6 ly apart (cap 49) when Sparse | CONFIRMED (`FUN_00440958`, `FUN_00440c31`) |
+| Angles | Circle, Ring, Spiral and Cluster place stars at trunc(100 cos) and trunc(100 sin) of a whole degree, worked out with pi = 3.14159 (constants 0x57bfd0-0x57bfe0): sin 90 and 270 and cos 180 come out 99 and -99, sin 150 50, sin 210 -49, cos 300 49. The Mac 4.0.5 reads the same values from its MaTh 1000 / 1001 tables (Sines, Cosines). The remake had used the exact pi (corrected) | CONFIRMED (`FUN_00440f8a` and the other shapes) |
 | Random | a square of side √(25 × stars), doubled when Sparse. The first stars are the homes | CONFIRMED (`FUN_00440796`) |
 | Grid | spacing 4 or 6 ly | CONFIRMED (`FUN_00441988`) |
 | Spiral | 5.0.5's spiral in whole light-years: the core is max(8, √stars × step / 2), one arm per player, 6° twist, and the arm tips get a wider search. Homes are shuffled | CONFIRMED (`FUN_00440f8a`) |
@@ -163,7 +164,7 @@ population, terraforming, recycling, not had; generals, not had and Luck on; dec
 human with Alliances on; biological, a human. A Radical level draws a card at random
 from the hand: metal rand(9,000-11,000) (the report divides it among your colonies);
 astronomers explore 6-9 stars not turning red whose news is older than 100 years; money
-rand(2-12) x this turn's money into Ship Savings; the five bonuses; a decoy (a Fighter
+rand(2 x, 12 x this turn's money) into Ship Savings (an amount between the two); the five bonuses; a decoy (a Fighter
 with R+1 V+1 W+2 S+2 and Mini -1); a biological (R-2 V-1 W-1 S-1 Mini 0, no metal); the
 technology of the **last** player ahead of you (in 4.0.5's order); six free designs
 (fewer than 25); a tech +2. Slips: an empty hand acts on an uninitialised index; a hand
@@ -194,7 +195,7 @@ full hand: NOT IMPLEMENTED.
 | Groups | at most 30 a side, sized as 3.0.1's (the defender: designs + 1); decoys have Speed, Weapons and Shields 0 | CONFIRMED (`FUN_00423878`, `FUN_00423b52`) |
 | Shots | Satellites 2 a round, Dreadnoughts 25, the planet ceil(pop / 200,000) | CONFIRMED (`FUN_00423b52`) |
 | Hit table | trunc(50 + 31.51 atan(W - S)) | CONFIRMED (`FUN_0047b5dc`) |
-| Targets | the first Colony Ship group, then Satellites, then from a random start | CONFIRMED (`FUN_00424b00`) |
+| Targets | the first Colony Ship group, then Satellites, then from a random start (the Mac 4.0.5 looks for Tankers between Colony Ships and Satellites: see "Mac 4.0.5 differs") | CONFIRMED (`FUN_00424b00`) |
 | Reports | "You won a battle ..." (1035) and "You lost a battle ..." (1036) with the other side's face; "... survived an enemy attack ..." (1037) and "... destroyed your colony ..." (942) with your own face; only the last has a sound (SHUCKS). `won` is set on each | CONFIRMED (`FUN_00425c9a`, `FUN_0046f8cc`, `FUN_0046fe1b`) |
 | Debris | a fifth of the metal of each ship lost; the winner's falls on the planet for its owner (or is recovered, x 5/4 with recycling) | CONFIRMED (`FUN_00425c9a`) |
 
@@ -211,7 +212,7 @@ hears each device "was just turned off", and next step "turned on".
 
 | What | 4.0.5 | Status |
 |---|---|---|
-| Alliances and best buddies | offers both ways; news of every change against the step before (1016-1027); best buddies learn each other's home and route through and see each other's exploring | CONFIRMED (`FUN_0043625c`, `FUN_0043853c`) |
+| Alliances and best buddies | offers both ways; news of every change against the step before (1016-1027); best buddies learn each other's home and route through and see each other's exploring; a buddy's record of a star where it saw a battle this year replaces the player's when the player's news is older (Review Battle then says "since you did not fight in that battle, you have no information about it"; Windows copies the record's pointer, the Mac and the remake copy the record) | CONFIRMED (`FUN_0043625c`, `FUN_0043853c`) |
 | Gifts | 3 a turn out of Ship Savings and metal; delivered in pass 2b with "%s has just given you ..." and "You just gave ..." | CONFIRMED (`FUN_00457c55`, `FUN_004320f8`) |
 | Surrender | 3.0.1's; money (Total Money + savings, not below 0) and metal reported to the winner (1073, 1074), and each planet nobody else watches given (1075) | CONFIRMED (`FUN_0043427a`, `FUN_00438718`) |
 | Out | no colonies and no Colony Ship fleet (but those flying to an exploded star); offers of alliance withdrawn (best buddy ones kept); money, savings, metal to 0; back in with a colony again | CONFIRMED (`FUN_0043bd5f`) |
@@ -252,7 +253,7 @@ The old ruleset took 5.0.5's rules for what it hadn't read. Read in 4.0.5's code
 
 - The turn, money, bars, colonies, battles and computers are 3.0.1's (above), not 5.0.5's.
 - Ship attack ratings were divided by 50; they aren't (`FUN_0041a9b4`).
-- Radical: money is rand(2, 12) x this turn's money; stealing takes the last player
+- Radical: money is rand(2 x, 12 x this turn's money); stealing takes the last player
   ahead; the metal report divides by your colonies; a decoy is a Fighter with Mini -1;
   the astronomers' card is checked when dealt only; free designs need fewer than 25.
 - A computer's cap of colonies to keep counts slots (fewer than 4 slots).
@@ -338,3 +339,116 @@ dialogs have no caption bar.
 **Not built:** naming a star after a win (dialog 378, `FUN_00456047`: "You won the game,
 so you get to name a star", kept in a list of four for later galaxies) and the "You have
 conquered the galaxy!" window with its picture (dialog 377, `FUN_0044bf5a`).
+
+## Read against the Mac 4.0.5
+
+The Mac 4.0.5 (`Spaceward Ho! 4.0.5`, a fat application: 68k `CODE` resources built
+with Metrowerks CodeWarrior, and a PowerPC PEF in the data fork) was decompiled with its
+MacsBug routine names (`tools/decompile/cw68k.py` and `Mac68k.java`, `docs/decompiling.md`):
+600 names in 24 named segments (`EndTurn`, `EndTurn2`, `Battles`, `Computer`, `Fleets`,
+`Rare`, …). Addresses below are in that layout (CODE n at n × 0x10000). Every game-rule
+routine of `docs/coverage-405.md` now has its Mac name beside it, matched by what it
+calls, its constants and its strings. The PowerPC code is the same program: spot checks
+of `PickTarget` and `CheckForSupernova` find the same code, Tankers included.
+
+The Mac code is Windows' code compiled for the Mac, routine for routine: the same
+records (Windows' star and player records carry an 8-byte header more), the same
+constants, the same slips (the uncleared New Game buffer, the empty radical hand, the
+Biological retire mark, the colony at star 0, 30 designs, `refuelCheck`, `scrapRange`,
+`poorestOut`). Each routine of the remake was read against it; the routines whose Mac
+decompile failed ("Cannot properly adjust input varnodes": `GiveBarPercent`,
+`CalcOneGroup`, `HaveGroupShoot`, `PickTarget`, `CheckFleetDestination`, `DeterminePath`,
+`NewFleet` and 28 more) were read in the disassembly. The Mac stores what Windows
+computes: the hit table is resource MaTh 1002 ("Weapon Ratios", the same 51 values as
+50 + 31.51 atan), the angles MaTh 1000 / 1001.
+
+### What the names corrected (Windows read again)
+
+- **The galaxy's angles** use pi = 3.14159 (`FUN_00440f8a` and the other shapes; the Mac's
+  MaTh tables are this formula). The remake used the exact pi, which moves the stars at
+  90°, 150°, 180°, 210°, 270° and 300° by up to a light-year in Circle, Ring, Spiral and
+  Cluster galaxies. Fixed (`cos100`, `sin100` in `js/rules-405.js`; 3.0.1, which uses
+  this generator, keeps the exact pi: see below).
+- **The New Game window's Base Difficulty Rating** is the rating of a win
+  (`FUN_0043c836` = `CalcGameRating`) for the window's settings, with 1 human of Normal
+  skill, no allies and no Armageddons (`FUN_00447bdb`; Mac `AdjustDifficulty` @10c1e).
+  It had been read from `FUN_0043c351`, a rating with a float formula that nothing calls
+  and the Mac doesn't have. Fixed (`difficulty`).
+- **Best buddies' battle news** (`FUN_0043853c` = `BestBuddiesExplore` @c4636): the second
+  branch was thought unreachable; it tests the buddy's record and then the player's, and
+  runs (above, Diplomacy). Built (`shareBuddyMaps`).
+- **`FUN_00427584`** is `CalcBiggestAndNumTypes` (the most numerous design at a star, for
+  a report's fleet description), not the survivors' fleet (that is `FUN_0042780e`,
+  `ResolveVictorFleetsAtStar`); **`FUN_00438f47`** is `SetPlanetTypesForStar` (each
+  star's map picture, with a Christmas picture and pictures for rich colonies of players
+  named Peter or Howard), not birthday jokes; **`FUN_0047f76e`** is `EndTurnMenuCall`
+  (End Turn: the computer plays a human set to "Have computer play for me", then the
+  turn-time bank), not the time limit's routine; **`FUN_0045ed5a`**,
+  `AddSavingsTechActions`, adds the research action only. No rule changed.
+- Wording: the Radical money is rand(2 × this turn's money, 12 ×), not a multiple.
+
+### Mac 4.0.5 differs
+
+The '405' ruleset stays Windows'. Where the Mac does otherwise:
+
+1. **Targets in battle** (`PickTarget` @61f86, and the PowerPC code): the first Colony
+   Ship group, then the first **Tanker** group, then Satellites, then from a random
+   start. Windows (`FUN_00424b00`) has no Tanker step.
+2. **The technology names in the reports** ("You now have %s Range Technology (%d).",
+   `GetReportString` @1507d4): the Mac takes the level's own name (STR# 6270-6274, index
+   = level). Windows reads one past (string table base + level, with the lists starting
+   at level 1): Range 7 is "Fusion Pile" instead of "Topping off the Tanks", and Mini 20
+   is "Spaceward Ho! Version 4.0.5 by Peter Commons."
+3. **Ship design names** come from STR# 6210-6216, 15 a class (Dreadnoughts "Big
+   Surprise" … "Annihilator", Biologicals "Medusa" … "Trash Compactor", Scouts with "De
+   Gama"), copied to the Preferences, where a name a human types is added to its class's
+   list (`AddNewTypeNameToPrefs`). A computer draws from places 1-15 (`RND`), a human from
+   the whole list (`aSynchRand`, the Mac's other random generator). Windows' lists are
+   its own (14 Scouts, 3 Dreadnoughts, 23 Fighters, 7 Tankers, 18 Satellites, 2
+   Biologicals).
+4. **The auto play settings** (`DoConfigAutoPlayDialog` @10440e) set metal for defence to
+   the new colonies-defended value; Windows to the old one (a Windows slip).
+5. **Best buddies' battle news**: the Mac copies the buddy's record; Windows copies its
+   pointer, so the two players share one record until the game is saved.
+6. **The welcome report** reads "Spaceward Ho! Version 4.0.3 by Peter Commons." (STR#
+   6040, not updated; the program's `vers` is 4.0.5). Computer and star names match
+   Windows'.
+7. **Computers' sexes, and the names of the computers**, are drawn with `aSynchRand`, not
+   the game's random numbers, from the Preferences' name lists, to which every human's
+   name is added when a game starts (`DoGameSolidificationStuff` @d2432, which also
+   shuffles the players' colours and copies a human's skill to the computers, as
+   `FUN_0043c9ea`).
+8. **The New Game window** has the Luck in Battles and "Automatically end turn for
+   unconnected players" boxes (Windows: the Preferences), a time limit menu (No Time
+   Limit, Fast 30/120, Medium 60/180, Slow 90/180) and the four winners' star names.
+
+### Mac-only interface
+
+- **The colour-monitor joke** (`AddEasterEggs` @b000c, segment "TopSecret"): in a random
+  year from 2000 to 5000 (player +0x5e, `CreatePlayer`), if the screen shows fewer than 16
+  colours and could show 256, the report "Your scientists have discovered how to turn
+  your monitor from black and white to color!" (1111; 1112 and 1113 are its follow-ups).
+- **Menus** (MBAR 128): File has Begin Game, End Turn and Switch Players (hot seat on one
+  Mac), Page Setup and Print; Options has Auto Play, Sound, Master Point List, Hall of
+  Fame, Hall of Shame, Preferences; Ships' "Scrap Current Fleet" reads "Don't Scrap
+  Current Fleet" for a marked fleet (`SetMenuItems`; Windows' text never changes); a
+  Window menu shows the
+  floating Tech Spending, Report and Chat windows, Zoom In / Out, Hide Information and
+  Clean Up Windows (`WinMgr`).
+- **Auto Play** (`doAutoPlayDialog`, DITL 4020): "Have computer play for me", "Just mark
+  me done every turn", "I'll play my own turns", "Mark me done until something
+  interesting happens", with a Config window (Friendly, Aggressive, Dig In, No Defense).
+- **The Hall of Fame, Hall of Shame and Master Point List** (`AddToHall` @104ade,
+  `doHallOfFameDlg`, `doDetailsDlg`, `doMasterListDlg`): the Master Point List's picture
+  is the computer-intelligence face for the points (icons 3030-3033: Dumb under 5,000,
+  Average under 50,000, Smart under 500,000, else Diabolical), all four present; a
+  winner names a star (`NameAStar`, STR# 2000 in the Preferences, four used a galaxy).
+- **Network play** through a "mailbox" game file on a shared volume, with semaphores and
+  a server window (segments Network, ServerWinProc), Apple events, printing, the
+  supernova and Armageddon graphics with gamma fades (`DoGratuitousGraphics`,
+  `DoFadeAndBack`), black-and-white and colour drawing throughout.
+
+### 3.0.1
+
+Mac 3.0.1 reads the same MaTh tables, so its galaxy (`js/rules-301.js`, which uses this
+generator) has the same pi; it keeps the exact pi for now (its output is unchanged).

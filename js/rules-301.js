@@ -138,7 +138,7 @@ function computerSetup(G, opts) {
 // light-years, the same star counts and distance), except that the map is shifted
 // to start 2 ly from the left and 4 ly from the top (ConformCoordinates @f1fb6).
 function makeGalaxy(G, opts, nPlayers) {
-  const gal = W.SHAPES.includes(opts.shape) && opts.shape === 'circle' ? circleGalaxy(G, opts, nPlayers) : W.makeGalaxy(G, opts, nPlayers);
+  const gal = W.SHAPES.includes(opts.shape) && opts.shape === 'circle' ? circleGalaxy(G, opts, nPlayers) : W.makeGalaxy(G, opts, nPlayers, Math.PI);
   for (const q of gal.pts) { q.x -= 1; q.x10 -= 20; } // 4.0.5 leaves 4 ly; 2 ly = 1 map unit
   return gal;
 }

@@ -169,3 +169,33 @@ It takes under a minute. Palm code has no routine names, so functions are called
 indirect (the vtables in `data 1` hold A5 offsets of jump-table entries), and a few
 dozen functions don't decompile ("Cannot properly adjust input varnodes"); read their
 disassembly instead.
+
+## Spaceward Ho! 4.0.5 for the Macintosh (68k, CodeWarrior)
+
+The Mac 4.0.5 is a fat application: PowerPC code in the data fork (a PEF, with no routine
+names) and 68k `CODE` resources in the resource fork, built with Metrowerks CodeWarrior,
+whose MacsBug names survive. CodeWarrior's 68k runtime loads segments itself, so
+`mac68k.py` doesn't fit: CODE 0 has one jump-table entry, the real jump table is part of
+the A5 world packed in `DATA 0`, segments have a 12-byte header, and cross-segment calls
+are `JSR abs.l` fixed up from packed relocation lists. **`cw68k.py`** (Python 3 and
+`capstone`) does what CODE 1 does at launch for a fixed layout and writes the same kind of
+`.bin` and `.syms` for `Mac68k.java`:
+
+- CODE n (header included) at n × 0x10000;
+- the A5 world unpacked around A5 = 0x00F00000, with the globals' starting values, and
+  each jump-table entry as `JMP target.l` in it; every relocation applied;
+- traps, MacsBug names and CodeWarrior's long multiply/divide helpers (`__lmul`, `__ldiv`,
+  …) as `mac68k.py` does.
+
+```sh
+python3 tools/decompile/cw68k.py "Spaceward Ho! 4.0.5.rsrc" ho405.bin
+analyzeHeadless proj ho405 -import ho405.bin -loader BinaryLoader \
+  -processor 68000:BE:32:default -noanalysis -scriptPath tools/decompile \
+  -postScript Mac68k.java ho405.bin.syms ho405.c
+```
+
+It takes about two minutes: 756 routines, 606 of them named, 35 that don't decompile
+("Cannot properly adjust input varnodes"; read their disassembly). The SANE float code
+decompiles badly: read the disassembly, where extended constants are loaded as three
+moves (`move.l #$4002a000` … is 10.0). `docs/405-findings.md` and `docs/coverage-405.md`
+cite the Mac routines by name and address in this layout.
