@@ -1,0 +1,11 @@
+/* Spaceward Ho! — Mac 2.0.1 colour skin: the black-and-white skin's look
+   (the system's windows stayed black and white on a colour Mac) with
+   2.0.1's colour pictures. */
+@import url("../mac2/style.css");
+.clock.pic img { image-rendering: auto; }
+/* the colour message border (PICT 5030): white in a teal frame */
+.card { border-width: 3px; border-image: url("../../../assets/skins/mac2c/sprites/p5530.png") 3 fill / 3px stretch; }
+/* the budget bars stay black and white, but for a colony losing money:
+   2.0.1 made those 50% grey in black and white only; in colour 2.0 calls
+   such planets "red" (2.0 Release Notes), so red here (unconfirmed) */
+.barrow.loss .fill { background: #c00000; }

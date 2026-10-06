@@ -786,6 +786,7 @@ function renderPanel() {
   const bb = el('section', { class: 'box' }, el('h3', { 'data-help': 'budget' }, 'Budget'));
   const own = HO.rules(G).dragShare;
   let start = null; // the shares when the drag began (own drag rule)
+  // a colony losing money has the row class "loss" (2.0.1 drew its bar 50% grey: js/skins/mac2)
   ents.forEach((e, i) => {
     const s = e.star != null ? G.stars[e.star] : null;
     const amt = e.get() * spendable;
@@ -794,7 +795,7 @@ function renderPanel() {
       else if (f != null) setShare(ents, i, f);
       if (f != null) { ents.forEach((x, j) => { const r = bb.querySelectorAll('.barrow')[j]; if (r) { r.querySelector('.fill').style.width = x.get() * 100 + '%'; r.querySelector('.bval').textContent = money(x.get() * spendable); } }); }
       if (end) { start = null; renderPanel(); save(); }
-    }, { right: money(amt), cls: e.key === 'tech' ? 'tech' : e.key === 'savings' ? 'sav' : 'col', rowCls: s && UI.sel === s.id ? 'hl' : '', help: e.key === 'tech' ? 'tech' : e.key === 'savings' ? 'savingsBar' : 'colonyBar' }));
+    }, { right: money(amt), cls: e.key === 'tech' ? 'tech' : e.key === 'savings' ? 'sav' : 'col', rowCls: (s && UI.sel === s.id ? 'hl' : '') + (s && HO.planetIncome(G, p, s) < 0 ? ' loss' : ''), help: e.key === 'tech' ? 'tech' : e.key === 'savings' ? 'savingsBar' : 'colonyBar' }));
   });
   if (net <= 0) bb.append(el('p', { class: 'warn' }, 'After supporting your colonies and paying interest, there is nothing left to spend.'));
   panel.append(bb);

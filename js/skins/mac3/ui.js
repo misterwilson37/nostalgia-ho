@@ -12,7 +12,8 @@
 // The colour skin (js/skins/mac3c) is this one with the pictures from
 // 3.0's "Ho! 3.0 Color Picts" file (assets/skins/mac3c, same names). The
 // Mac 4.0.5 skins (js/skins/mac4, mac4c) are this one with window.HOMAC4,
-// which replaces whichever of these hooks it has.
+// which replaces whichever of these hooks it has; the Mac 2.0.1 skins
+// (js/skins/mac2, mac2c) the same with window.HOMAC2.
 (function () {
 'use strict';
 const P = 'dos:'; // the DOS skin's name for its pictures
@@ -20,6 +21,8 @@ const colour = !!window.HOMAC3_COLOUR;
 // js/skins/mac12: 1.2 (1992), the same program two years earlier, with the
 // DOS game's set of icons and the big ship pictures as well
 const v12 = window.HOMAC_VERSION === '1.2';
+// js/skins/mac2: 2.0.1 (1992), between the two, with 1.2's icons and big ship pictures
+const v2 = !!window.HOMAC2;
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 const images = {
   p3030: 'p3530', p3040: 'p3540', // won, eliminated
@@ -71,7 +74,7 @@ window.HOTHEME_OVER = {
   // Ship pictures: engine, hull and nose side by side, as in the DOS game,
   // but 40x40 parts (2600 + the DOS part number less 100), shown twice the size.
   shipPic(d, IMG) {
-    const big = v12; // 1.2 has the 81x76 parts (2100 + n) too
+    const big = v12 || v2; // 1.2 and 2.0.1 have the 81x76 parts (2100 + n) too
     const part = (n) => IMG[P + 'p' + ((big ? 2100 : 2600) + n)];
     let parts;
     if (d.type === 'satellite') parts = [part(301 + clamp(d.W - 1, 0, 25))];
@@ -138,6 +141,9 @@ window.HOTHEME_OVER = {
   },
 };
 if (v12) { delete window.HOTHEME_OVER.starLook; delete window.HOTHEME_OVER.messageLook; } // 1.2 has only the DOS game's icons
+// js/skins/mac2 (2.0.1, 1992): 1.2's icons, which are the DOS game's, so the DOS
+// skin's planets and report pictures, and 2.0's own pictures, sounds and hooks
+if (v2) { delete window.HOTHEME_OVER.starLook; delete window.HOTHEME_OVER.messageLook; Object.assign(window.HOTHEME_OVER, window.HOMAC2); }
 // js/skins/mac4 (4.0.5, 1996): this skin with 4.0's own pictures, sounds and hooks
 if (window.HOMAC4) Object.assign(window.HOTHEME_OVER, window.HOMAC4);
 if (!window.HOSKINS_INLINE) document.write('<script src="js/skins/dos/ui.js"><\/script>');

@@ -186,6 +186,66 @@ icon choices (1.2 has the same set of icons as the DOS game).
 - **Missing:** colour. 1.2's colour pictures were in a separate file, "TheHo F CPicts", which
   wasn't in the archive. 1.2 has 13 sounds (no "next message" click, no "Move 'em out!").
 
+## mac2, mac2c (Mac 2.0.1, black and white and colour)
+
+Spaceward Ho! 2.0.1 for the Macintosh (Delta Tao, 21 January 1992: the program's date on its
+disk; its `vers` says "Copyright Delta Tao Software, 1990-2"). 2.0 runs in colour when "TheHo
+Color Picts" is beside it and in black and white otherwise, so there are two skins: **mac2**
+([`assets/skins/mac2/`](../assets/skins/mac2/sprites/), 393 pictures: 90 ICN#, 62 ics#, 241
+PICT) and **mac2c** ([`assets/skins/mac2c/`](../assets/skins/mac2c/sprites/), 397: the
+program's own colour icons, icl8 and ics8, and the colour file's 231 PPMp and 13 PICTs under the
+black-and-white names). Both have the program's 13 sounds; the colour file has none.
+`tools/extract/mac2.py` writes them (from the .rsrc forks or the two .dc42 floppies).
+
+The skins are the mac3 skin's code with 2.0's own hooks (`window.HOMAC2`). 2.0.1's icons are
+1.2's, the DOS game's set, so planets and report pictures are the DOS skin's choices, as in the
+mac12 skin; the ship pictures are the big 81×76 parts on a white battle screen, as 1.2's.
+
+- **Against 1.2 (mac12):** 389 of the 393 black-and-white pictures and all 13 sounds are the
+  same files. 2.0.1's own are the splash [`p1003`](../assets/skins/mac2/sprites/p1003.png)
+  ("2.0", the cowboy planet riding a space shark), the About box
+  [`p1001`](../assets/skins/mac2/sprites/p1001.png) ("Version 2.0", in English) and the
+  cleaned-up End Turn button [`p5500`](../assets/skins/mac2/sprites/p5500.png)/`p5501` ("End
+  Turn ⌘T"; 1.2's says "Fin Tour", and 3.0.1's English one is the same picture as 2.0.1's).
+- **Against 3.0.1 (mac3, mac3c):** 3.0.1 has more icons (its planets 1010–1020, the report
+  pictures 3105–3164, 4011–4017) and no big ship parts; of the pictures both have, 2.0.1 differs
+  in the application icons (`i200`–`i203`), the New Game icons `i3000`–`i3032`, `i3110`, `i3111`,
+  the title pictures and, in colour, the selection rings and five report icons. 2.0.1 has 13 of
+  3.0.1's 21 sounds (no click, no "Move 'em out!", no pact sounds); `2001`, `4001`, `6001` and
+  `6002` were re-recorded for 3.0.1.
+- **Against the DOS 2.0 (dos):** the DOS game's colour ship parts (`d12100`–`d12926`) are 2.0.1's
+  colour PPMp 12100–12926 pixel for pixel (the DOS ones with their white made see-through), and
+  130 of its 153 icons are 2.0.1's colour icons; the rest differ by the DOS palette (the faces
+  `i2001`–`i2010`, the hands `i3001`/`i3002`) or were redrawn (`i3051`, `i3115`, `i3116`). The
+  DOS sounds are 2.0.1's thirteen at PC rates (22050 / 11025 Hz instead of the Mac's 22254 /
+  11127, the same number of samples), plus a click (`1000`) the Mac game hasn't got. The DOS
+  title, End Turn button, rings and won/lost pictures are its own.
+- **Its own in the skins:** the start-up window (DLOG 1201, colour 1200: the splash over Open
+  Game, New Game), the End Turn button, the message border (`p5530`, the colour one teal) round
+  the event messages at the bottom left of the map, the menus (MENU 129, 131–133: File, Options,
+  Ships, Galaxy), the dialog frames of its DLOGs (dBoxProc and altDBoxProc), the 2.0.1 Changes'
+  50% grey budget bars for colonies losing money (black and white) and the black line on the map
+  window's left edge.
+- **Guessed:** the colour skin's bar for a colony losing money is red (the release notes call
+  such planets "red"; the colour bars' colours aren't in the resources, they're drawn by the
+  code). The title plays the good-news sound (2000), as the 1.2 and DOS skins do; 2.0 has no
+  "Move 'em out!".
+- **Not in the remake, so not in the menus:** Open, Save, Revert, Close, End Turn & Switch
+  Players, Page Setup, Print Map (File); the Edit menu; Force Turn Update, I'll Update Turns, Set
+  Polling Time (network play), Set Battle Speed (the replay has its own speed), Show Event
+  Messages, Give Overspending Warnings (Options; Review Announced Battles is the remake's
+  Preferences, which the skin puts in Options); Create New Ship Type
+  and Organize Fleets (Ships; the remake designs in the build window); Fix Spending, with its black
+  break-even line on each bar (Galaxy); the Window menu (Tech Spending Window, Report Window).
+- **Not extracted:** PICT 4010, the licensee's plate under the splash and the About box, is in
+  neither file (the program draws it). The cursors (CURS 128–135) and the WDEF/CDEF window and
+  control code are not art.
+- **2.0.1 art not used yet:** the 40×40 ship parts `p2600`–`p2926` (the skins show the big ones);
+  the About box `p1001`; the battle won / lost, neutral and eliminated dudes (`p3500`, `p3510`,
+  `p3020`, `p3550`); the pressed End Turn `p5501`; the New Game icons (`i3000`–`i3051`); three
+  colour globes `p2758`–`p2760`; the empty face frame `i2499`; the small fleet icons
+  `s12000`–`s12003`.
+
 ## mac3 (Mac 3.0.1, black and white)
 
 Spaceward Ho! 3.0.1 for the Macintosh (Delta Tao, 1993). The program's own pictures are

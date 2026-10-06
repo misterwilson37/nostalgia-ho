@@ -72,6 +72,9 @@ const SOUNDS = {
   amiga: { name: '2.0 (Amiga, German, 1994)', year: 1994, dir: 'assets/skins/amiga/', map: DOS_MAP },
   // 1.2 has thirteen sounds: good and bad news, battle, exploring, end of turn
   mac12: { name: '1.2 (Mac, French, 1992)', year: 1992, dir: 'assets/skins/mac12/', map: { 11111: 7000 } },
+  // 2.0.1 has the same thirteen sounds as 1.2 (the same files); no click
+  mac2: { name: '2.0.1 (Mac, 1992)', year: 1992, dir: 'assets/skins/mac2/', map: { 11111: 7000 } },
+  mac2c: { name: '2.0.1 (Mac, 1992)', year: 1992, dir: 'assets/skins/mac2c/', map: { 11111: 7000 }, same: 'mac2' },
   // 3.0.1 has the Mac 5.0.5 sounds' numbers, 7001 (next message) included
   mac3: { name: '3.0.1 (Mac, 1993)', year: 1993, dir: 'assets/skins/mac3/', map: { 11111: 7000, 7006: 7001 } },
   // the colour skin's sounds are the same files as the black and white one's
@@ -101,6 +104,8 @@ const SKINS = [
   { id: 'dos', version: '2.0', platform: 'DOS and Windows 3.1', year: 1993 },
   { id: 'amiga', version: '2.0', platform: 'Amiga, German', year: 1994 },
   { id: 'mac12', version: '1.2', platform: 'Mac, French, black and white', year: 1992 },
+  { id: 'mac2', version: '2.0.1', platform: 'Mac, black and white', year: 1992 },
+  { id: 'mac2c', version: '2.0.1', platform: 'Mac, colour', year: 1992 },
   { id: 'mac3', version: '3.0.1', platform: 'Mac, black and white', year: 1993 },
   { id: 'mac3c', version: '3.0.1', platform: 'Mac, colour', year: 1993 },
   { id: 'mac4', version: '4.0.5', platform: 'Mac, black and white', year: 1996 },
