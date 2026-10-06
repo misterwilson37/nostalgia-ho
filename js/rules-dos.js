@@ -257,7 +257,9 @@ function designCost(G, d) {
 // worked out in 16-bit registers: W^2 x WPNRAT keeps its low 16 bits, the
 // product with (5W + 20) is cut back to a signed 16-bit number (CWD) before
 // the division, so from about Weapons 4 it wraps round and the first term
-// wins. (Mac 1.2 does it in 32 bits; js/rules-12.js keeps that.)
+// wins. (Mac 1.2 does it in 32 bits; js/rules-12.js keeps that. So does
+// Mac 2.0.1, CalcShipCosts @114c9a-114d1a: a difference of the Windows
+// build, whose ints are 16 bits.)
 // The patch (fix 'attack16'): the second term in 32 bits, as Mac 1.2 and
 // 3.0.1 work it out, so it no longer wraps.
 const i16 = (x) => ((x & 0xffff) ^ 0x8000) - 0x8000;
@@ -876,9 +878,12 @@ const SHIP_NAMES = {
   colony: ['Spreader', 'Mother', 'Expander', 'Nina', 'Pinta', 'Santa Maria', 'Stork', 'Freedom', 'Kon Tiki', 'Minnow', 'Taurus', 'Minerva', 'Egg', 'Peaceful', 'Hardy'],
   satellite: ['Defender', 'Stopper', 'Protector', 'Eye', 'Armor', 'Shield', 'Peach', 'Caltrop', 'Washington', 'Gabriel', 'Sun Dog', 'Mercy', 'Vision', 'Apple', 'Pebble', 'Rock', 'Stone', 'Berry'],
 };
-// CONFIRMED (FUN_1020_4711; 1.2's GiveTypeCoolName @9457e): up to 100 tries
-// at a random name from the class's list that no design has; after 100 tries
-// the last one is kept. (Players can rename designs.)
+// CONFIRMED (FUN_1020_4711; 1.2's and Mac 2.0.1's GiveTypeCoolName @9457e):
+// up to 100 tries at a random name from the class's list that no design has;
+// after 100 tries the last one is kept. (Players can rename designs.) 2.0's
+// list also holds the names humans gave their own designs, kept in the names
+// file by FUN_10e8_0f64 (Mac AddNewTypeNameToPrefs); the remake keeps no
+// names file, so it is the built-in list.
 function designName(G, p, type) {
   const names = (E.rules(G).shipNames || SHIP_NAMES)[type] || ['Ship'];
   const used = new Set(p.designs.filter(d => !d.scrapped).map(d => d.name));
@@ -1612,7 +1617,9 @@ function canMerge20(G, a, b) {
 // on it is over 11); a fleet left without a pile is removed; each extra
 // pile is a new fleet (FUN_1068_0000), which for Colony Ships is loaded with
 // colonists. (The smallest fuel used is worked out too, @10e8:2a9b, and
-// never used.)
+// never used.) This is the Windows port's own dialog: Mac 2.0.1's
+// OrganizeFleets @1137e6 gives every fleet the least fuel used and leaves
+// the orders alone, as 1.2 does (docs/dos-findings.md, "Mac 2.0.1 differs").
 function organized20(G, f, merged, nf, orders) {
   const did = Object.keys(f.ships)[0]; if (did == null || f.star == null) return;
   const R = fleetMaxRange(G, f);

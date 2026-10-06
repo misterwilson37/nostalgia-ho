@@ -104,8 +104,8 @@ Palm's code is 5.0.5's recompiled, with the same slips; its own entries are coun
 2. **Underfunded colonies still grow.** `KillUnsupportedStars @a0960` clears the colony
    slot's "no growth" flag (+0x10) every turn and nothing ever sets it, so the growth
    check that reads it never stops a starving colony; 3.0.1 does stop one (+0xe). A dead
-   branch, but the 2.0 reading of the same code is only medium confidence, and turning it
-   on would change the economy a good deal.
+   branch, and Mac 2.0.1's named code now confirms the 2.0 reading, but turning it on
+   would change the economy a good deal.
 
 ---
 
@@ -130,7 +130,9 @@ The program's own credits read "Version 2.0.1" (string 672), so its patch is 2.0
 3. **`attack16`: the computers' attack rating wraps.** `FUN_10f0_05e9`
    (@10f0:079d-0851) works out W² × WPNRAT × (5W + 20) in 16-bit registers, so from about
    Weapons 4 it wraps round and the computers misjudge their warships. Mac 1.2 and 3.0.1
-   work it out in 32 bits. *Fix:* 32 bits (`attack`, through `designCost`).
+   work it out in 32 bits, and so does Mac 2.0.1, the same version (`CalcShipCosts`
+   @114c9a-114d1a): the wrap is the Windows build's 16-bit ints. *Fix:* 32 bits
+   (`attack`, through `designCost`).
 4. **`colonyBars32`: the computers' colony bars overflow.** `FUN_1020_35f9` (@1020:38da,
    3930, 3974; kept as a word @38fc, 3952, 3996), as 1.2's. *Fix:* no overflow
    (`setColonyBars20`).
@@ -143,7 +145,8 @@ The program's own credits read "Version 2.0.1" (string 672), so its patch is 2.0
 
 ### Quirk or design (left as released)
 
-- Organize Ships averages the fuel used (1.2: the least, 3.0.1: the most): a rule.
+- Organize Ships averages the fuel used (1.2 and Mac 2.0.1: the least, 3.0.1: the most): a rule
+  of the Windows build.
 - Players who are out still play their turn (`FUN_1040_0038` @1040:02de-038b, 04c3-06d5).
 - No command to give up a colony (`FUN_1040_38c0`): a colony goes only when left unfunded.
 - Report texts with no sender (a nova, a revolt, a volcano, metal found, a lost fleet, a
@@ -154,9 +157,17 @@ The program's own credits read "Version 2.0.1" (string 672), so its patch is 2.0
 
 1. **Organize Ships clears every fleet's orders** (@10e8:2e2c-2e6f), even one the window
    left alone. Deliberate code (it clears the next stop, the destination and the route),
-   but 1.2 and 3.0.1 keep the orders.
-2. **Organize Ships reloads colony ships** (`FUN_1068_0000` @1068:018c-0194), as 1.2.
-3. **Underfunded colonies still grow** (`FUN_1040_0925`, medium confidence), as 1.2.
+   but 1.2 and 3.0.1 keep the orders, and so does Mac 2.0.1, the same version
+   (`OrganizeFleets` @1137e6 writes only the count and the fuel): the clearing, and the
+   average fuel, are the Windows port's own dialog. Still left as released, since the
+   ruleset plays the Windows program.
+2. **Organize Ships reloads colony ships** (`FUN_1068_0000` @1068:018c-0194), as 1.2 and
+   Mac 2.0.1 (`NewFleet` @110004).
+3. **Underfunded colonies still grow** (`FUN_1040_0925`), as 1.2. The reading is no longer
+   in doubt: Mac 2.0.1's named code (`KillUnsupportedStars` @a0954 clears the slot's word
+   +0x10 every turn, `ComputeIncomeAndPopulation` @a28bc grows a colony only when it is 0,
+   and only `ColonizeStar` writes it otherwise, with 0) does the same. Whether it was
+   meant is still the developers' question.
 
 ---
 

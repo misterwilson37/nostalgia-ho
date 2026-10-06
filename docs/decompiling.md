@@ -138,6 +138,13 @@ recognise and name the long arithmetic helpers: in the 1.2 layout `LMUL` is at `
 (`$202`); the C shows them as `thunk_FUN_…`, so read the disassembly next to it.
 `docs/12-findings.md` cites 1.2's functions by name and address.
 
+They also work on **Spaceward Ho! 2.0.1 for the Macintosh** (1992), the Mac build of the
+version the "DOS 2.0" ruleset plays: 22 segments and 498 named routines. Its MPW runtime
+is 1.2's, so the long arithmetic is unnamed there too: `LMUL` at `104b4` (`$42`), `LDIV` at
+`104dc` (`$4a`), `LMOD` at `104fc` (`$5a`) and the integer square root at `111da` (`$1ca`).
+`docs/coverage-20.md` gives each Windows routine its Mac 2.0.1 name, and
+`docs/dos-findings.md` ("Mac 2.0.1") cites the Mac code by name and address.
+
 ## The Palm OS version (5 for Palm OS, 68k)
 
 Spaceward Ho! 5 for Palm OS keeps its program in `code` resources of the `.prc` file,

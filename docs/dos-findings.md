@@ -68,6 +68,96 @@ below). The big differences are:
     "Hyahh" …).
   - Its rules are the "Windows 95 4.0.5" ruleset (`js/rules-405.js`, see `docs/405-findings.md`).
 
+## Mac 2.0.1: the same version, with routine names
+
+Spaceward Ho! 2.0.1 for the Macintosh (Delta Tao, 1992; `vers` "2.0.1") is Delta Tao's own
+build of this version. Its resource fork keeps the MacsBug name MPW left after every
+routine, so it was decompiled with `tools/decompile/mac68k.py` and `Mac68k.java` as 1.2
+and 3.0.1 were (`docs/decompiling.md`): 22 code segments, 498 named routines, every one
+decompiled (ten only as far as Ghidra could; their disassembly was read), plus 66
+unnamed MPW glue routines. It is cited here as `Name @address` in that layout (segment
+*n* at *n* × 0x10000). Its long arithmetic is unnamed in the decompile: `LMUL` @104b4,
+`LDIV` @104dc, `LMOD` @104fc, the integer square root @111da (jump-table entries $42,
+$4a, $5a, $1ca). `docs/coverage-20.md` gives every Windows routine its Mac name.
+
+### Which 2.0 the Windows build is
+
+`WINHO.EXE` is a **2.0.1** build, though its title says "Version 2.0 for Windows":
+
+- its credits are 2.0.1's (string 672, "Spaceward Ho! Version 2.0.1 by Peter Commons.";
+  the Mac's STR# 1000.1 is the same line);
+- it has the 2.0.1 change that shows in code: Compare Players draws no chart in 2000, or
+  when you have won or lost (`COMPAREPLAYERSDLGPROC` @1070:07ef, 0881; Mac
+  `ComparePlayers` @1208d4, the year 2000 and player states 4 and 5);
+- its computer players are Mac 2.0.1's: `FUN_1020_0000` … `54df` are the Mac `Computer`
+  segment's 36 routines in the same order with the same constants (`AddSatelliteActions`
+  @91d04 and `FUN_1020_1c73` were compared again line by line for this). So the 2.0.1
+  notes' "improved satellite building strategy" and "estimates of enemy satellite
+  strength" are in the Windows program, and in the remake's computers.
+
+The Mac `Computer` segment is also, instruction for instruction, the one in **1.2F**
+(only the A5 offsets of the globals differ), and so are `MakeResultMessages` (the battle
+estimates) and `CalcShipPower`. 1.2F's other rule segments are 2.0.1's less the New Game,
+Send Message, Compare Players and Auto Play windows, plus nova code that never runs, with
+its texts loaded from French STR# resources. So 1.2F's computer players are 2.0.1's too,
+and with no 2.0.0 program to compare, what the 2.0.1 computer changes were can't be seen:
+all three programs have the improved code.
+
+### Read again with the names, and the same as Windows
+
+Every rule routine of `docs/coverage-20.md` has its Mac namesake, and the Mac code does
+what this file says the Windows code does, except for the table below. Checked in
+particular, by name:
+
+- the turn (`EndTurn` @a0004 and the 27 routines after it: segment 1040 routine for
+  routine; 2.0.1's `EndTurn` segment is 1.2F's without the novas, with 2.0's report 1009
+  for a colony wiped out by meteors and the exploring report in °F);
+- battles (`DoBattleStage` @d0004 … `ResolveVictorFleetsAtStar` @d39c6: 1.2F's code);
+- set-up (`CreatePlayer` @e1bba: $51,000 / 20,000 … $20,000 / 0; `CreateNewPlayer`
+  @101c62: a computer's skill 4 − 2 × (IQ − 1) and a woman half the time, humans may join
+  only in 2000; `SetCompAttrs` @e260c), the galaxy (`CreateGalaxy` @e0004 and the
+  `GiveGalaxy…Coords` routines; the Create Galaxy window allows 0 to 19 computers,
+  `CreateGalaxyDlg` @e03dc), and the `MaTh` tables (sines, cosines, `WPNRAT`: the same
+  numbers as the Windows RCDATA, read by `SetupMiscStructures` @150812);
+- the report sounds (`PlayAnnounceSound` @130e74) and pictures (`GetIconID` @130d1c):
+  the same tables, entry for entry, as `FUN_10c0_0c50` and `FUN_10c0_0b3b`;
+- the meteor report's stale name: `AddNewMessage` @130fba writes a record's extra bytes
+  only when given, and `GetReportString`'s case 1009 (@130adc) prints the name of the
+  player number in the record's first extra word, as Windows does;
+- an "I own" message (`EndTurn` @a05fe-a068c): a true one sets the star's owner on the
+  receiver's map, as `FUN_1040_0038` @1040:062f-0668;
+- underfunded colonies still grow: `KillUnsupportedStars` @a0954 clears the slot's
+  no-growth word (+0x10) every turn, `ComputeIncomeAndPopulation` grows a colony only when
+  it is 0 (@a28bc), and nothing else writes it but `ColonizeStar` (with 0). This settles
+  the medium-confidence reading of `FUN_1040_0925`;
+- Fix Spending (`FixSpendingBars` @c2018, `FixNextSpendingBar` @c1b48,
+  `ComputeMaxPercent` @c2046): each use fixes the next colony with a problem, as
+  `FUN_1010_1ce7` (not done in the remake; see below);
+- the spending warning at End Turn (`GiveSpendingWarning` @10299c = `FUN_1050_2b31`).
+
+### Mac 2.0.1 differs
+
+What the Mac program does differently from the Windows one. The "DOS 2.0" ruleset plays
+the Windows program, so it keeps the Windows column; none of these is a misreading.
+
+| What | Windows / DOS 2.0 (the ruleset) | Mac 2.0.1 |
+|---|---|---|
+| Organize Fleets: fuel | every fleet of the design at the star gets the **average** fuel used, the total over the number of fleets counted up to 11 (ORGFLEETSDLGPROC @10e8:2a7b-2ae6, 2e32, 2edd); the smallest is worked out and unused | every fleet gets the **least** fuel used of them (`OrganizeFleets` @1137e6, its set-up loop; the value written on OK), as 1.2F |
+| Organize Fleets: orders | every such fleet's next stop, destination and route are cleared (@10e8:2e3f-2e6f) | the orders are left alone; only the count and the fuel are written |
+| The computers' attack rating | W² × WPNRAT × (5W + 20) ÷ 300 in 16-bit registers, so from about Weapons 4 it wraps and hp ÷ 50 × W² wins (`FUN_10f0_05e9` @10f0:0800-0827) | 32 bits (`CalcShipCosts` @114c9a-114d1a, `LMUL` / `LDIV`), so it never wraps; the computers rate their warships, and decide on attacks and satellites, by the larger true value |
+| A losing colony's least share | integer arithmetic (`FUN_1010_218e`) | SANE floating point (`ComputeMinPercent` @c22b2); the same results for any money the game reaches |
+| The meteor report's stale name, player number 20 and up | reads past the 1,562-byte header: a General Protection Fault | reads past the header too (no fault on a 68k Mac), so a garbage name |
+| Report records | 0x31 bytes | 0x32 bytes (same fields, same 50-record list) |
+| The default sound | sound 1000, a click (`FUN_1100_03c9`) | the system beep (`PlaySound` @12636, `SysBeep`); the Mac program has 13 sounds, 2000-7000, and no 1000 |
+| Forcing the turn on | from the End Turn box (`FUN_1050_0e65`, boxes 3210 and 3230); `FUN_1050_1b19` is never called | a Force End Turn command (`ForceEndTurn` @122382, box 3210) calls `MarkAllPlayersDone` @101616 |
+
+Sounds otherwise: the same numbers for the same events (the report table above; battle,
+fleet and exploring sounds 3000-3003, 4000/4001, 6000-6002; 5000 message sent; 7000 new
+turn). The Mac sounds are named in the resource fork: 2000 "Good Announcement - Burst",
+2001 "shucks!", 3000-3003 "Soft Hit", "Med Hit", "Hard Hit (boom minus oooh)", "Ship
+Dead - expl2", 4000 "woah2", 4001 "hyahh2", 5000 "Message Has Been Sent", 6000-6002 "Good
+Explored", "Bad explored", "Mediocre", 7000 "New Turn".
+
 ## How the program was read
 
 - `DOSHO.EXE` was built with Borland C++ 3.x and compressed with PKLITE.
@@ -139,7 +229,7 @@ offline. The repository includes their output, not the DOS game itself.
 | Budget slots | Savings, Technology and the home colony to begin with; each new colony's slot goes in front of the others. Every loop of the turn and the computers go through them in this order | CONFIRMED (`FUN_1030_1299` @1030:19b2, `FUN_1040_3645` @1040:3722) |
 | A colony's money | its share, minus its loss if it loses money. It is split by three bars, per mille: terraform, mine, ships | CONFIRMED (`FUN_1040_0925`, `0aea`, `1479`) |
 | Colonies that lose money | if the share doesn't cover the loss, the colony loses people in proportion (as in 5.0.5, minus 100); with no one left it is abandoned. This applies to every colony, the home planet and the computers' colonies too. A profitable colony is never abandoned, whatever its share. The game warns you before ending the turn | CONFIRMED (`FUN_1040_0925`) |
-| Underfunded colonies | still grow (the "no growth" flag is always cleared) | CONFIRMED, medium confidence (`FUN_1040_0925`) |
+| Underfunded colonies | still grow (the "no growth" flag is always cleared) | CONFIRMED (`FUN_1040_0925`; read again in Mac 2.0.1's named code, `KillUnsupportedStars` @a0954 and `ComputeIncomeAndPopulation` @a28bc: see "Mac 2.0.1") |
 | Revolts | none: no code makes a colony change hands | CONFIRMED (no caller of report 1012 or box 3090) |
 | New colonies | 10 colonists per colony ship in the fleet; income −7,501; bars terraform 900 / mine 100 (class 1), or mine 1,000 when gravity is more than 2.56 times home's (class 2); its slot goes first. If the pool is over $20,000, the slot is given 15,000,000 ÷ pool per mille: each other slot gives up ⌈left × its share ÷ their total⌉, round after round, none below its least share (a losing colony's ⌈loss × 1,000 ÷ pool⌉, when the pool is $1,000 or more and bigger than the loss); then, if the total is outside 990–1,010, the others are moved one at a time to make 1,000. Otherwise it gets no share | CONFIRMED (`FUN_1040_3645` @1040:3645-38bf, `FUN_1010_16f2`, `FUN_1010_179a` @1010:17de-1946 and 1aec-1c8b, `FUN_1010_218e`) |
 | Terraforming | a bar above 0 is spent whether the planet still needs it or not. The first $5,000 goes into the planet, as in 5.0.5. Then the money moves the temperature √(money/2) tenths of a degree, a third dearer than 5.0.5. A step bigger than the gap (even a gap of 0) sets the planet to your temperature, refunds 2 × (excess)² and sets the bar to −1. Warns every turn when more than $50 goes into a class-2 colony | CONFIRMED (`FUN_1040_0aea` @1040:0c8d-0df1) |
@@ -260,8 +350,11 @@ See `docs/open-questions.md` (2.0 section). Not implemented, by choice or not ye
   built-in lists.
 - Several human players: 2.0 joins humans one at a time with passwords; the remake's hot
   seat takes turns on one computer instead.
-- The Fix Spending command (`FUN_1010_1ce7`), 2.0's Send Message window (`SENDMESSAGEDLGPROC`) and the
-  Explored Planets list.
+- The Fix Spending command (`FUN_1010_1ce7`, Mac `FixNextSpendingBar`: each use fixes the next
+  colony whose share is over what it can use or under its least share, with one line of
+  text), 2.0's Send Message window (`SENDMESSAGEDLGPROC`) and the Explored Planets list.
+- The names humans give their designs, which 2.0 adds to the names file for the
+  computers' later designs (`FUN_10e8_0f64`, Mac `AddNewTypeNameToPrefs`).
 - Text only: the scrapping message ("Your fleet of … at … has been scrapped for … metal.",
   string 688, `FUN_1040_0fca`) and the explore message's tenths of a degree aren't
   reproduced; the remake's wording is used.
@@ -271,7 +364,9 @@ See `docs/open-questions.md` (2.0 section). Not implemented, by choice or not ye
 `js/ai-12.js` is a port of Mac 1.2's `DoComputerTurn` and its routines (see
 `docs/12-findings.md` for what they do). 2.0's computer turn is the same code: WINHO.EXE's
 segment 1020 holds the same 36 routines in the same order, with 1.2's constants, so 2.0
-needs no computer-player file of its own. Every one of them has been read against
+needs no computer-player file of its own. Mac 2.0.1's `Computer` segment is the same code
+again, with the same names (see "Mac 2.0.1"); the one difference the computers see is
+the attack rating's arithmetic. Every one of them has been read against
 `js/ai-12.js`: `FUN_1020_0000`, `FUN_1030_1b51`, `FUN_1020_3b45`, `FUN_1020_4019`,
 `FUN_1020_4a3d`, `FUN_1020_283d`, `FUN_1020_2a80`, `FUN_1020_35f9` and the battle
 estimates in `FUN_1018_260b` in the first pass, the rest (`03e7`, `0926`, `0974`, `09de`,
@@ -295,6 +390,9 @@ One more slip in the code, with no effect on play: `FUN_1020_4582` (ScrapOldFigh
 passes the fleet's number in the list as the Range to `FUN_1068_03a9` (@1020:468b); the
 colony it sends the fleet to is always within the fuel it has left, so the route is
 direct and the Range is never used (3.0.1 has the same slip).
+
+(Mac 2.0.1 has the `Computer` routines at the same addresses as 1.2; its `SetCompAttrs` is
+@e260c and `MakeResultMessages` @d285e.)
 
 | 2.0 (`WINHO.EXE`) | Mac 1.2 |
 |---|---|

@@ -155,9 +155,11 @@ These are what 2.0's code does and what the remake now does; they look like slip
    average fuel used of those fleets, and the average is their total over their number
    counted only up to 11, so with 12 or more fleets it comes out too high (ORGFLEETSDLGPROC
    @10e8:2a7b-2ae6). The smallest fuel used is worked out alongside (@10e8:2a9b-2ab6) and
-   never used; 1.2 gives every fleet the least fuel used. Was the average meant?
+   never used; 1.2 and Mac 2.0.1 (`OrganizeFleets` @1137e6) give every fleet the least
+   fuel used, so the average is the Windows port's own. Was it meant?
 3. **Organize Ships clears orders**: every fleet of that design at the star loses its
-   destination and route, even one the window left alone (@10e8:2e2c-2e6f).
+   destination and route, even one the window left alone (@10e8:2e2c-2e6f). Mac 2.0.1
+   keeps them (`OrganizeFleets` @1137e6).
 4. **Organize Ships fills colony ships**: a new fleet made in the window is loaded with
    colonists (`FUN_1068_0000` @1068:018c-0194), so splitting an empty colony fleet at a star that
    isn't your colony refills part of it (as in 1.2).
@@ -207,8 +209,13 @@ needs the skin to go on with no human in the game; items 1 and 3 stay at the use
   like" or "I own" and a planet or a player, ten a turn; an "I own" message about a star
   the sender owns marks it as the sender's on the receiver's map (`FUN_1040_0038`
   @1040:062f-0668). The remake's messages are free text with no effect.
-- **Fix Spending** (`FUN_1010_1ce7`, `1f55`, `1f6b`): cuts each colony's share to what it
-  can use, or raises a losing colony to its least share out of Savings.
+- **Fix Spending** (`FUN_1010_1ce7`, `1f55`, `1f6b`; Mac `FixNextSpendingBar`,
+  `FixSpendingBars`, `ComputeMaxPercent`): each use fixes the next colony with a problem,
+  cutting its share to what it can use (+1 per mille, the rest to Savings) or raising a
+  losing colony to its least share out of Savings, with one line of text.
+- **Design names for the computers** (`FUN_10e8_0f64`, Mac `AddNewTypeNameToPrefs`): the
+  names humans give their designs go into the names file, and the computers' later
+  designs draw from it. The remake keeps no names file.
 - **Naming a star after a win** (NAMESTARDLGPROC) and the humans' names added to the
   computer names (`FUN_1040_4028`): 2.0 keeps them in a names file for later galaxies
   (`FUN_1030_1049` draws star names from it too). The remake keeps no such file.
