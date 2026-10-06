@@ -15,7 +15,14 @@
 // - previous / changes: what changed from the version before it
 //   (docs/evolution.md);
 // - checking: the lists still being checked (the version's sections in the
-//   docs aren't written yet), e.g. { quirks: true, changes: true }.
+//   docs aren't written yet), e.g. { quirks: true, changes: true };
+// - deltaTao: what Delta Tao themselves said changed in this version, quoted
+//   word for word from the Spaceward Ho! 5 manual's "Changes From Previous
+//   Versions" ({ from, source, url, text: [paragraphs] }; a short line in
+//   text is one of the manual's headings). Checked claim by claim against the
+//   code in docs/evolution.md, "What Delta Tao said vs what the code shows";
+// - requirements: what Delta Tao gave as the version's system requirements
+//   (5.0 only), for the OS-look list.
 //
 // A line may be { text, show: (rs) => bool } to show only while a ruleset
 // flag says it applies (rs is the ruleset, HO.rules(G)).
@@ -24,6 +31,67 @@
 (function (root) {
 'use strict';
 const RANDOM = 'The random numbers are the remake’s own, so a game can’t be replayed move for move.';
+// Delta Tao's own account of each version's changes, from the Spaceward Ho!
+// 5 manual (quoted verbatim; their spelling and punctuation are kept).
+const DT_SOURCE = "From Delta Tao's Spaceward Ho! 5 manual, 'Changes From Previous Versions'";
+const DT_URL = 'https://www.deltatao.com/ho/ho/changes.html';
+const DT = (from, text) => ({ from, source: DT_SOURCE, url: DT_URL, text });
+const DT_2 = DT('Version 1 to 2', [
+  'We incorporated the planet, budget, and fleet windows into the map window and moved them to the left to save screen space. We added message passing and communication. We went to full color for the ships and planets. The computer strategies were rewritten from the ground up. The "slow game" option was removed; games are now between the old slow and fast speeds. We went to a log scale spending window to allow for better resolution at the lower spending levels.',
+  'We made the computer players name their ships and fleets (and themselves) the same way people do. We added a "master player" (Game Administrator) who can force an update to the next turn in a multi-player game. We got rid of the timed turn features, since we couldn\'t adjust for people with different clock settings. We changed the cost of the Technologies to balance out the game, and we made Speed affect combat. We made printing work.',
+]);
+const DT_3 = DT('Version 2 to 3', [
+  'We made spending based on income, rather than total money supply. We made ships get built the turn you ask for them, instead of the old shipbuilding queue. We allocate money to your planets automatically, so you can\'t accidentally underspend on them. We added the Graph History chart, so you can see your long-term trends. We added several gratuitous graphics and sounds. We added some new galaxy types.',
+  'We also added a bunch of new messages, made the computer players deal with friends and enemies, and made the computers send semi-intelligent messages to everyone. You can now give money and metal to your friends (or enemies), or surrender to them.',
+]);
+const DT_4 = DT('Version 3 to 4', [
+  'We added many new ship types, including Tankers, Dreadnoughts, Biologicals, and Decoys. We made Satellites twice as strong (and expensive).',
+  'We made the game PowerPC native, and added speed improving features such as "only show important messages" and automatic spending fixing.',
+  'We made the multi-player game much better. The turn clock made games progress at the right rate, Best-buddies alliances were added, battle luck was made optional, we added a Chat Window and Text Messages. Turns are updated locally now, instead of on the master machine, so network updates are much faster. We allowed players to join games after they\'ve begun.',
+  'We improved usability: Several dialogs (especially Build ships) were fixed, help messages were added, and we made the terraforming a slider instead of the old pie chart. And, of course, the graphics and sounds were greatly improved.',
+  'We changed the difficulty ratings, and added Master Points and many more statistics.',
+]);
+const DT_5 = DT('Version 4 to 5', [
+  'Seven years is a long time to go between revisions, so you might say that under the hood, Spaceward Ho! was getting a bit long in the tooth. Not for general use, as you can still play version 1.0 in the latest version of MacOS X (what other apps can do that?), but when we decided we wanted to add a bunch more features, it, well, needed a rewrite.',
+  'So for those of you who like acronym-compliant applications, version 5.0 is now PowerPC, Carbon, multi-threaded, TCP/IP, and OS X-friendly.',
+  'Feature-wise (on top of the hood), there\'s an awful lot of new stuff in version 5.0 of the Ho! Even so, if you\'re familiar with 4.0, you\'ll be able to play with the new one and figure everything out. However, we\'re providing this handy list of new features so you\'ll know what you\'re getting.',
+  'Requirements',
+  'Spaceward Ho! 5.0 is bigger than ever, and requires some 20 megabytes of hard disk space, 10 megabytes of RAM, and OS 8.6 or later.',
+  'Internet Play',
+  'Join spacewardho.net to play games with people from around the world.',
+  'Smarter Computers',
+  'The computers can now use biological and tanker ships, can make multi-planet attacks, and are better at preserving their metal in the endgame.',
+  'Multiway Battles',
+  'If several players arrive at a star at the same time, there\'s now a single large battle, with allies joining each other in combat. (Sometimes two people allied with you will shoot at each other, too.)',
+  'Grouped Fleets',
+  'You can group several ship types into a single fleet, for ease of movement and so that fleets of different speeds will stay together.',
+  'Battle Options',
+  'You can give different battle options to each ship type in a fleet, so that some go all-out offensive (giving a weapons bonus and shields penalty) or defensive. And you can have some ships - usually your colony ship - follow behind the main fleet, not coming in until the main battle is over.',
+  'Fleet Paths',
+  'You can now option-click a long route for a fleet, so it will visit a sequence of stars as fuel allows.',
+  'New Radical Techs',
+  'These include improving research, improving savings interest, decreasing the borrowing interest, and lots more.',
+  'Faster and Easier',
+  'We\'re proud that, contrary to the universal tendency for software to bloat, Spaceward Ho! has gotten easier to play and faster with each version. Version 5 is the fastest yet.',
+  'New User Interface',
+  'Each fleet has its own dot on the star map, and you can just drag a fleet to its destination to move it. Contextual menus are also available.',
+  'OS X Native',
+  'Spaceward Ho! 5 is Carbonized for optimal use on OS X or OS 8 or 9.',
+  'Cooperative Play',
+  'Multiplayer games can automatically pit all humans against the computers, for fun and friendly games.',
+  'New Easter Eggs',
+  'But we can\'t tell you about them here. You\'ll find them, or hear about them on the net.',
+  'Updates',
+  'You\'ll be able to find software updates to Spaceward Ho! (as we release them) at our web site at http://www.deltatao.com',
+  'Thanks to everyone who sent in suggestions, whether in person, on their warranty registration, on comp.sys.mac.games, or on the phone. We considered everything everyone suggested, and, although we couldn\'t incorporate every new idea, we think you\'ll find a lot we did.',
+]);
+// 5.0's stated requirements (the Requirements paragraph of DT_5), for the
+// OS-look list
+const REQ_5 = {
+  os: 'OS 8.6 or later', disk: '20 MB', ram: '10 MB',
+  quote: 'Spaceward Ho! 5.0 is bigger than ever, and requires some 20 megabytes of hard disk space, 10 megabytes of RAM, and OS 8.6 or later.',
+  source: DT_SOURCE, url: DT_URL,
+};
 const HOTSEAT = 'Several people play on one computer and take turns. The original let each player join a shared game file, with a password.';
 root.HOVERSIONS = {
   '12': {
@@ -79,6 +147,7 @@ root.HOVERSIONS = {
       'Naming a star after a win, and the names file kept for later galaxies.',
       'The Explored Planets list and the poll and battle speed settings.',
     ],
+    deltaTao: DT_2,
     changes: [
       'A Create Galaxy window: five sizes, five shapes, Dense or Sparse, 0 to 19 computers and their IQ (Dumb, Average or Smart). Each human picks a skill, Novice to Expert. (1.2 made every galaxy a small dense circle with one average computer.)',
       'Women: women’s faces and names, and each computer is a woman half the time.',
@@ -125,6 +194,7 @@ root.HOVERSIONS = {
       'The preference to scrap old designs automatically past 15.',
       'The colour-monitor joke.',
     ],
+    deltaTao: DT_3,
     changes: [
       'In colour.',
       'Ship Savings: a share of each turn’s money is saved, earns interest, buys ships at once (no queues) and can go into debt down to a borrowing limit. (2.0 had one pool and no borrowing.)',
@@ -177,6 +247,7 @@ root.HOVERSIONS = {
       'The canned-message window (“Look at …” and “I own …” also marked the map); the computers read “I like …” in free text.',
       'The auto play settings, the turn time limit and network play.',
     ],
+    deltaTao: DT_4,
     changes: [
       'Dreadnoughts (25 shots a round) and Tankers (refuel every fleet at their star); 30 designs instead of 20.',
       'Radical tech is a hand of four out of 17 discoveries, dealt from 2010: bonuses, decoys, Biologicals that eat people to refuel, stolen tech, free designs.',
@@ -221,6 +292,8 @@ root.HOVERSIONS = {
       'The questions before buying more than 9 Scouts or Tankers.',
       'The turn time limit and network play.',
     ],
+    deltaTao: DT_5,
+    requirements: REQ_5,
     changes: [
       'You pick a home system instead of a skill level, the computers’ IQ is a number from 50 to 200, and there are Hex galaxies.',
       'Ships cost less at high tech (4.0.5’s cost is a product of all four stats); at most 24 designs.',
@@ -269,6 +342,7 @@ root.HOVERSIONS = {
       'The canned-message window, the Evacuate button in the message list, and options locked by rank.',
       'A few reports reworded in the Palm version (the decoy ship, the miracle).',
     ],
+    deltaTao: DT_5, // the Palm game is a port of 5.0: Delta Tao's 4-to-5 list
     changes: [
       'At most 90 stars (5.0.5: 220), so big galaxies come out smaller.',
       'No Alliances or Luck in Battles check boxes: both are always on, and so are novas.',

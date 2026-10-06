@@ -2008,6 +2008,10 @@ function openAbout() {
     part('Where this remake differs', N.differs, 'differs'),
     part('Not in this remake yet', N.missing, 'missing'),
     N.previous !== undefined ? part(N.previous ? `What changed from ${N.previous}` : 'What changed', N.changes, 'changes', N.previous ? null : 'The earliest version in this remake: there is nothing earlier to compare it with.') : null,
+    // Delta Tao's own words on what changed, quoted from the 5.0 manual
+    N.deltaTao ? el('section', { class: 'vnotes' }, el('h4', null, `What Delta Tao said (${N.deltaTao.from})`),
+      ...N.deltaTao.text.map(t => el('p', null, t)),
+      el('p', { class: 'sub' }, N.deltaTao.source, ' ', el('a', { href: N.deltaTao.url, target: '_blank', rel: 'noopener' }, N.deltaTao.url))) : null,
     el('div', { class: 'btns right' }, el('button', { onclick: closeModal }, 'OK')));
   modal('About this version', body, { cls: 'mid' });
 }

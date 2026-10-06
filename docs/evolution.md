@@ -18,6 +18,8 @@ files and coverage files cited); anything not read in the code is marked INFERRE
 
 ## Mac 1.2 (1992)
 
+Delta Tao's own account of the versions (the Spaceward Ho! 5 manual, 'Changes From Previous Versions', <https://www.deltatao.com/ho/ho/changes.html>) starts at "Version 1 to 2", quoted at the top of the 2.0 section. 1.2 has no entry of its own; what that list says about 1.2 is in "What Delta Tao said vs what the code shows" at the end of this file.
+
 ### What it is
 
 1.2F is the French edition of the Mac game (Delta Tao, published by Upgrade Editions,
@@ -80,6 +82,18 @@ Black-and-white and colour icons (`ICN#`, `icl8`): planets by state, a face per 
 ---
 
 ## DOS / Windows 3.1 2.0 (1993)
+
+> **Delta Tao: "Version 1 to 2"**
+>
+> We incorporated the planet, budget, and fleet windows into the map window and moved them to the left to save screen space. We added message passing and communication. We went to full color for the ships and planets. The computer strategies were rewritten from the ground up. The "slow game" option was removed; games are now between the old slow and fast speeds. We went to a log scale spending window to allow for better resolution at the lower spending levels.
+>
+> We made the computer players name their ships and fleets (and themselves) the same way people do. We added a "master player" (Game Administrator) who can force an update to the next turn in a multi-player game. We got rid of the timed turn features, since we couldn't adjust for people with different clock settings. We changed the cost of the Technologies to balance out the game, and we made Speed affect combat. We made printing work.
+>
+> — From Delta Tao's Spaceward Ho! 5 manual, 'Changes From Previous Versions' (<https://www.deltatao.com/ho/ho/changes.html>).
+
+Delta Tao's "1" is the Mac 1.0-1.1.2 line, which the remake hasn't got. 1.2 is numbered after it but built as a 2.0 pre-release, and already has most of this list (see the table at the end).
+
+How each of these claims compares with the code: "What Delta Tao said vs what the code shows", at the end of this file.
 
 ### What it is
 
@@ -156,6 +170,16 @@ ship parts drawn by Range + Speed, Shields and Weapons, with hidden ships at 12/
 skin".
 
 ## Mac 3.0.1 (1993)
+
+> **Delta Tao: "Version 2 to 3"**
+>
+> We made spending based on income, rather than total money supply. We made ships get built the turn you ask for them, instead of the old shipbuilding queue. We allocate money to your planets automatically, so you can't accidentally underspend on them. We added the Graph History chart, so you can see your long-term trends. We added several gratuitous graphics and sounds. We added some new galaxy types.
+>
+> We also added a bunch of new messages, made the computer players deal with friends and enemies, and made the computers send semi-intelligent messages to everyone. You can now give money and metal to your friends (or enemies), or surrender to them.
+>
+> — From Delta Tao's Spaceward Ho! 5 manual, 'Changes From Previous Versions' (<https://www.deltatao.com/ho/ho/changes.html>).
+
+How each of these claims compares with the code: "What Delta Tao said vs what the code shows", at the end of this file.
 
 ### What it is
 
@@ -238,6 +262,24 @@ play, several humans joining the game file with passwords, across a network.
 
 ## Windows 95 4.0.5 (1996)
 
+> **Delta Tao: "Version 3 to 4"**
+>
+> We added many new ship types, including Tankers, Dreadnoughts, Biologicals, and Decoys. We made Satellites twice as strong (and expensive).
+>
+> We made the game PowerPC native, and added speed improving features such as "only show important messages" and automatic spending fixing.
+>
+> We made the multi-player game much better. The turn clock made games progress at the right rate, Best-buddies alliances were added, battle luck was made optional, we added a Chat Window and Text Messages. Turns are updated locally now, instead of on the master machine, so network updates are much faster. We allowed players to join games after they've begun.
+>
+> We improved usability: Several dialogs (especially Build ships) were fixed, help messages were added, and we made the terraforming a slider instead of the old pie chart. And, of course, the graphics and sounds were greatly improved.
+>
+> We changed the difficulty ratings, and added Master Points and many more statistics.
+>
+> — From Delta Tao's Spaceward Ho! 5 manual, 'Changes From Previous Versions' (<https://www.deltatao.com/ho/ho/changes.html>).
+
+Delta Tao wrote of the Mac 4.0; the remake's 4.0.5 is the Windows 95 program, which plays across platforms with the Mac 4.0.5 and has the same game.
+
+How each of these claims compares with the code: "What Delta Tao said vs what the code shows", at the end of this file.
+
 ### What it is
 
 4.0.5 (Delta Tao, 1996) is the Windows 95 program, an MFC application, which plays
@@ -304,6 +346,76 @@ the total is under 500 and then at most a third of it. 5.0.5 has 25 ranks instea
 which unlock options.
 
 ## Mac 5.0.5 (2003)
+
+> **Delta Tao: "Version 4 to 5"**
+>
+> Seven years is a long time to go between revisions, so you might say that under the hood, Spaceward Ho! was getting a bit long in the tooth. Not for general use, as you can still play version 1.0 in the latest version of MacOS X (what other apps can do that?), but when we decided we wanted to add a bunch more features, it, well, needed a rewrite.
+>
+> So for those of you who like acronym-compliant applications, version 5.0 is now PowerPC, Carbon, multi-threaded, TCP/IP, and OS X-friendly.
+>
+> Feature-wise (on top of the hood), there's an awful lot of new stuff in version 5.0 of the Ho! Even so, if you're familiar with 4.0, you'll be able to play with the new one and figure everything out. However, we're providing this handy list of new features so you'll know what you're getting.
+>
+> **Requirements**
+>
+> Spaceward Ho! 5.0 is bigger than ever, and requires some 20 megabytes of hard disk space, 10 megabytes of RAM, and OS 8.6 or later.
+>
+> **Internet Play**
+>
+> Join spacewardho.net to play games with people from around the world.
+>
+> **Smarter Computers**
+>
+> The computers can now use biological and tanker ships, can make multi-planet attacks, and are better at preserving their metal in the endgame.
+>
+> **Multiway Battles**
+>
+> If several players arrive at a star at the same time, there's now a single large battle, with allies joining each other in combat. (Sometimes two people allied with you will shoot at each other, too.)
+>
+> **Grouped Fleets**
+>
+> You can group several ship types into a single fleet, for ease of movement and so that fleets of different speeds will stay together.
+>
+> **Battle Options**
+>
+> You can give different battle options to each ship type in a fleet, so that some go all-out offensive (giving a weapons bonus and shields penalty) or defensive. And you can have some ships - usually your colony ship - follow behind the main fleet, not coming in until the main battle is over.
+>
+> **Fleet Paths**
+>
+> You can now option-click a long route for a fleet, so it will visit a sequence of stars as fuel allows.
+>
+> **New Radical Techs**
+>
+> These include improving research, improving savings interest, decreasing the borrowing interest, and lots more.
+>
+> **Faster and Easier**
+>
+> We're proud that, contrary to the universal tendency for software to bloat, Spaceward Ho! has gotten easier to play and faster with each version. Version 5 is the fastest yet.
+>
+> **New User Interface**
+>
+> Each fleet has its own dot on the star map, and you can just drag a fleet to its destination to move it. Contextual menus are also available.
+>
+> **OS X Native**
+>
+> Spaceward Ho! 5 is Carbonized for optimal use on OS X or OS 8 or 9.
+>
+> **Cooperative Play**
+>
+> Multiplayer games can automatically pit all humans against the computers, for fun and friendly games.
+>
+> **New Easter Eggs**
+>
+> But we can't tell you about them here. You'll find them, or hear about them on the net.
+>
+> **Updates**
+>
+> You'll be able to find software updates to Spaceward Ho! (as we release them) at our web site at http://www.deltatao.com
+>
+> Thanks to everyone who sent in suggestions, whether in person, on their warranty registration, on comp.sys.mac.games, or on the phone. We considered everything everyone suggested, and, although we couldn't incorporate every new idea, we think you'll find a lot we did.
+>
+> — From Delta Tao's Spaceward Ho! 5 manual, 'Changes From Previous Versions' (<https://www.deltatao.com/ho/ho/changes.html>).
+
+How each of these claims compares with the code: "What Delta Tao said vs what the code shows", at the end of this file.
 
 ### What it is
 
@@ -389,6 +501,8 @@ lobby with a turn time limit, and an e-mail bug reporter.
 
 ## Palm 5 (2003)
 
+Delta Tao's own list of what changed in 5 (quoted at the top of "Mac 5.0.5" above, from Delta Tao's Spaceward Ho! 5 manual, 'Changes From Previous Versions', <https://www.deltatao.com/ho/ho/changes.html>) covers this port too; the Palm game has no list of its own from Delta Tao.
+
 ### What it is
 
 Spaceward Ho! 5 for Palm OS (MobileFreon, 2003; version 1.0.4) is a port of the Mac
@@ -441,3 +555,104 @@ bars), Build Ships with an Allow Debt box, Organize Fleets, Enemies and Allies, 
 History, a Radical Research window, the Players window for hot seat, the New Game
 Wizard, Preferences (sound, Celsius, hints, best buddies' stars, auto-zoom), Auto Play,
 Find A Star, and system sounds instead of the Mac's. No network play.
+
+---
+
+## What Delta Tao said vs what the code shows
+
+Delta Tao's Spaceward Ho! 5 manual has a section, "Changes From Previous Versions"
+(<https://www.deltatao.com/ho/ho/changes.html>), quoted at the top of each version's section
+above. Each claim in it is checked here against what the remake read in each version's code
+(the findings and coverage files cited). A claim is **Confirmed** when the code shows it,
+**Contradicted** when the code shows otherwise, and **Not checkable** when it is about the
+interface, the network, speed or art that the decompile can't settle, or about a version the
+remake hasn't got (Mac 1.0-1.1.2, the Mac 4.0). Delta Tao wrote of the Mac line; the remake's
+2.0 is the Windows 3.1 / DOS program and its 4.0.5 the Windows 95 one, each the same game as
+the Mac version of its number.
+
+Totals: **30 confirmed, 2 contradicted in part, 13 not checkable** (45 claims). Neither
+contradiction is about a rule: both are interface features that Delta Tao's 5.0 list calls
+new but that earlier versions already had in some form. The one finding that may mean the
+remake misread a version is about colour: Delta Tao and 1.2's code agree that colour came
+with 2.0, but this file and the 3.0.1 notes call 3.0.1 "the first colour Mac version" (see
+`docs/open-questions.md`, Mac 3.0.1).
+
+### Version 1 to 2
+
+The "1.2" column says whether the claim is already true of 1.2 (checked in 1.2's own code,
+`docs/12-findings.md`, `docs/coverage-12.md`, and its resources).
+
+| Claim | Verdict (2.0) | What the code shows | 1.2 |
+|---|---|---|---|
+| Planet, budget and fleet windows put into the map window, on the left | Confirmed (the Mac line) | 1.2's map window draws the planet, fleet, budget and income panels itself (`DrawPlanetRect @c4334`, `DrawFleetRect @c4c6c`, `DrawBudgetRect @c53bc`, `DrawIncomeRect @c3f70`, segment MapWinProc); its Windows menu has only the Technology and Reports windows (MENU 134). The Windows 2.0 port keeps them as floating windows instead (`Show/Hide Floating Windows`, "Interface" above). Which side they are on wasn't checked | yes |
+| Message passing and communication | Confirmed | the Send Message window, ten a turn; "I own" marks the star on the receiver's map (SENDMESSAGEDLGPROC, `FUN_1040_0038` @1040:062f) | **no**: the French texts are there (STR# 1000.37-51, STR# 1020 "ten messages per turn") but no menu command sends one and nothing writes the outgoing list (player +0xea0) |
+| Full colour for ships and planets | Confirmed | 2.0's art is in `HO.PRS` and `HOCOLOR.PRS` (`docs/dos-findings.md`) | yes: 92 colour icons (`icl8`), colour star drawing (`DrawOneColorStarSubProc @c33a6`, `LoadDrawColorIcon @12a7c`), a colour battle dialog (DLOG 7011), the "No Color QD" alert (ALRT 2010) and colour pictures read from a separate file, "TheHo F CPicts" (STR# 1002.2), which wasn't in the archive (`docs/missing-assets.md`) |
+| Computer strategies rewritten from the ground up | Not checkable | no 1.0-1.1 code to compare. 2.0's computer turn is 1.2's, the same 36 routines in the same order (`DoComputerTurn @90004`; "Computer players" above) | yes (the 2.0 computer) |
+| The "slow game" option removed; games between the old slow and fast speeds | Not checkable | what the old speeds were can't be seen. Neither 1.2 nor 2.0 has a game-speed option: both play 10 years a turn (`CreateGalaxy @e0004`; 2.0's Create Galaxy window). 1.2's "Lente / Rapide" (DITL 4040) is the battle animation's speed | yes (no such option) |
+| A log-scale spending window | Confirmed | 2.0's budget and planet bars are drawn on tables of exp() (`FUN_1010_0a03`, `FUN_1010_0000`, both calling the C library's exp, `FUN_1000_0e7a`) | yes: `InitHLogBarAmts @c07be` (budget bars) and `InitVLogBarAmts @c0004` (colony bars) build their scales with SANE's exp (`@80030`, Elems selector 8) |
+| Computers name their ships and fleets (and themselves) as people do | Confirmed | computers are named from a names list (1.2 STR# 1999, `DoGameSolidificationStuff @a49d6`; 2.0's English list, `FUN_1050_1ec9`); a computer's new design gets a name from the class's list (`GiveTypeCoolName @9457e`); a fleet is shown by its design's name ("N <design>", `MakeFleetDescription @110e28`) | yes |
+| A master player (Game Administrator) can force the next turn | Confirmed | 2.0: boxes 3070, 3210, 3230 (`FUN_1050_0e65`) | yes: ALRT 3070 "Admin: Update to 2010?", 3210 "Admin: Force Update?", 3230 (`EndTurnMenuCall @100b06`, `PollNextTurn @100ea0`) |
+| Timed turns removed | Confirmed | 2.0 has no turn time limit, only how often to look for the other players (the poll speed); a time limit comes back in 4.0.5 (`FUN_0047f76e`) | yes: no time limit (`TIMEDOKMODALFILTER @f03ce` only closes a dialog by itself) |
+| Technology costs changed | Not checkable | no 1.x code to compare. 2.0: Range L², Speed (L+6)², Weapons and Shields (L+2)², Mini (L+7)² (`FUN_1040_1b11`) | yes: the same costs (`SpendTechMoney @a1a58`) |
+| Speed affects combat | Confirmed | groups fire by Speed, fastest first (`FUN_1018_0976`) | yes (`DoOneBattle @d07d0`) |
+| Printing works | Confirmed | 2.0 prints the map (segment 10b0) | **no**: the File menu (MENU 129) has no Page Setup or Print |
+
+**What this says about 1.2.** 1.2 has ten of the twelve "Version 1 to 2" changes: the
+panels in the map window, colour, the rewritten computers, no slow game, log-scale bars,
+named computers and designs, the Game Administrator, no timed turns, 2.0's technology
+costs and Speed in combat. It lacks only the two that need new windows or commands:
+sending messages (the texts are there, the command isn't) and printing. With its own
+words ("a development version of Spaceward Ho! 2.0", DITL 2000; "Pre-Release Version
+2.0b1", STR# 1002.9; "Spaceward Ho! 2.0 can't read files made with versions 1.0-1.1.2",
+DITL 3030), this makes 1.2 **early 2.0 work, not a late 1.x**: a 2.0 beta shipped in
+France under the number 1.2, cut down where 2.0 was unfinished (no New Game window, no
+women, no messages, no printing). Nothing in Delta Tao's list contradicts the remake's
+reading of 1.2.
+
+### Version 2 to 3
+
+| Claim | Verdict | What the code shows |
+|---|---|---|
+| Spending based on income, not the total money supply | Confirmed | 3.0.1 shares out each turn's Total Money, last turn's income (player +0), after interest and colony support; savings are kept apart in Ship Savings (`docs/301-findings.md`, Money; `DeductInterest @a0e32`, `MaintainKillStars @a10c8`). 2.0 divides one pool holding all its money, Savings included (`FUN_1040_27ee`) |
+| Ships built the turn you ask, not a shipbuilding queue | Confirmed | bought at once out of Ship Savings (`BuildAShip @132e04`); 2.0's three-slot queues are gone |
+| Money allocated to your planets automatically, so they can't be underspent | Confirmed | losing colonies are paid first from this turn's money, then from Ship Savings (`MaintainKillStars @a10c8`); in 2.0 a colony lives on its own share and loses people when it is too small (`FUN_1040_0925`) |
+| The Graph History chart | Confirmed | `GraphHistory @14293c`, `SaveGraphInfo @a6732`; 2.0 has no such window |
+| Gratuitous graphics and sounds | Not checkable | art, not rules; 3.0.1 does add nova and Armageddon pictures (`DoSupernovaGraphic @1569ba`, `DoArmageddonGraphic @157076`) |
+| Some new galaxy types | Confirmed | one new style, Cluster (`CreateGalaxy @f0004`: Circle, Random, Ring, Spiral, Grid, Cluster; 2.0 had the first five) |
+| New messages; computers deal with friends and enemies and send semi-intelligent messages to everyone | Confirmed | 14 canned messages (STR# 3000, `SendMessage @140fa2`); feelings and alliances (`MsgReactDetermineAllies @9537e`, `ModifyAlliances @95dc8`); computers' messages, one to everyone (`SendAMessage @95f14`) |
+| Give money and metal, or surrender | Confirmed | `DoGiveThingsDlg @1437e0`, `SurrenderIfDesired @a1760`, `DoSurrenders @a482a` |
+
+### Version 3 to 4
+
+| Claim | Verdict | What the code shows |
+|---|---|---|
+| New ship types: Tankers, Dreadnoughts, Biologicals, Decoys | Confirmed | 4.0.5's classes and costs (`FUN_0041a9b4`); Biologicals and decoys from the Radical hand (`FUN_0043a08c`) |
+| Satellites twice as strong (and expensive) | Confirmed | 2 shots a round instead of 1 (`FUN_00423b52`); price 2.381 (W+13)(S+26) × 2 against 3.0.1's 2.381 (W+13)(S+26) (`FUN_0041a9b4`; 3.0.1 `CalcShipCosts @134de6`) |
+| PowerPC native | Not checkable | the remake's 4.0.5 is the Windows 95 program; the Mac 4.0.5 program wasn't decompiled |
+| "Only show important messages" and automatic spending fixing | Not checkable | interface; the findings record neither. (3.0.1 had a Fix Spending command, `FixSpendingBars @d28ca`; none is recorded for 4.0.5) |
+| The turn clock | Confirmed | a turn time limit; a human out of time has the computer play the turn (`FUN_0047f76e`) |
+| Best-buddies alliances | Confirmed | `FUN_004221d7`, `FUN_0043853c` |
+| Battle luck made optional | Confirmed | Luck is bit 4 of the option word (`FUN_00409170`); 3.0.1 has no Luck box and always uses it (DITL 6080, `DoBattleStage @e0004`) |
+| A Chat Window and Text Messages | Not checkable | the findings record only the canned Send Message window (`FUN_00465607`) |
+| Turns updated locally | Not checkable | network |
+| Players may join a game after it has begun | Confirmed (by its text) | 4.0.5 turns a late joiner away only when "there aren't any computers to take over for" (string 529); 1.2 and 2.0 let humans join only in 2000 (1.2 ALRT 3060) |
+| Dialogs fixed, help messages, a terraforming slider instead of the pie chart | Not checkable | interface. 3.0.1 does have the pie controls (segment BarControl) |
+| Difficulty ratings changed; Master Points and more statistics | Confirmed | master points by difficulty and ten ranks (`FUN_00497e58`, `FUN_00482b89`), against 3.0.1's small difficulty number (`AddToHall @144796`) |
+
+### Version 4 to 5
+
+| Claim | Verdict | What the code shows |
+|---|---|---|
+| PowerPC, Carbon, multi-threaded, TCP/IP, OS X-friendly | Confirmed (PowerPC and Carbon) | 5.0.5 is a PowerPC Carbon PowerPlant program ("Mac 5.0.5" above); threads and TCP/IP weren't checked |
+| Requirements: 20 MB of disk, 10 MB of RAM, OS 8.6 or later | Not checkable | not in the code read; a Carbon program on OS 8.6 needs CarbonLib, which fits |
+| Internet play (spacewardho.net) | Not checkable | network; the lobby is there but its server is gone (`docs/original-findings.md`, section 15) |
+| Smarter computers: Biologicals and Tankers, multi-planet attacks, metal kept for the endgame | Confirmed (the first two) | computers buy Biologicals to explore and, late in the game, to attack (`FUN_10083fe0`, `FUN_10084860`, `FUN_10084f90`), and Tankers into attack fleets (`FUN_10084860`); 4.0.5's computers buy neither and scrap Tankers. Smart and Diabolical computers chain stops (`FUN_100843b0`, `FUN_100845f0`). Keeping metal for the endgame isn't found: only the rule that a computer under 5,000 metal builds nothing but colony ships (original-findings, "Where to colonize") |
+| Multiway battles, allies fighting side by side | Confirmed | everyone at a star fights one battle, sides drawn up by alliance (`FUN_1007e870`, `FUN_1007eed0`, `FUN_1007f560`); 4.0.5 fought duels with the colony's owner. Two of your allies shooting each other isn't recorded on its own |
+| Grouped fleets: several ship types in one fleet, so fleets of different speeds stay together | **Contradicted in part** | a 5.0.5 fleet does hold several designs (a byte per design at fleet +0x58; the computers split them, `FUN_10088eb0`; the Group Fleets window). But keeping fleets of different speeds together is older: 3.0.1 groups one-design fleets to move together at the slowest speed and shortest Range (`ReassignGroupLeader @130342`, `GiveFleetPath @130dc0`), and 4.0.5 keeps a group number (fleet +0x1e, `FUN_004160d6`) |
+| Battle options for each ship type: offensive, defensive, following behind | Confirmed | a stance byte per design in the fleet (fleet +0x58 + design: 1 arrive late, 2 defensive, 4 offensive; `FUN_1007bcb0`); Offensive +1 Weapons −2 Shields, Defensive −2 Weapons +1 Shields; late arrivals fight a second battle (`FUN_1007e870`) |
+| Fleet paths through a sequence of stars | Confirmed | multi-star paths, waiting for fuel (original-findings, section 8; `FUN_10075f10`). Earlier versions only route through your own colonies by themselves |
+| New Radical techs: research, savings interest, borrowing interest | Confirmed | the research facility, the prime rate and cheaper credit (`FUN_10079360`) |
+| Faster and easier | Not checkable | speed of the program |
+| Each fleet its own dot; drag a fleet to its destination; contextual menus | **Contradicted in part** | the dots and menus weren't checked, but dragging a fleet to a star is old: 1.2 `FollowPathDrag @c69d6`, 2.0 `FUN_1080_09e5`, 3.0.1 `FollowPathDrag @1516d8` |
+| Cooperative play: all humans against the computers | Confirmed | the network option "All Humans Are Best Buddies" (original-findings, sections 2 and 15) |
+| New Easter eggs | Not checkable | not listed by Delta Tao |

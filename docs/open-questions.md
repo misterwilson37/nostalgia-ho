@@ -315,6 +315,20 @@ These are what 3.0.1's code does and what the remake now does; they look like sl
 - **The auto-scrap preference** (old designs past 15, `ScrapFleetsAndTypes`, prefs +0x74).
 - **The colour-monitor joke** (`AddEasterEggs @b0004`, STR# 1000.96).
 
+### To re-check (from Delta Tao's changelog)
+
+1. **Is 3.0.1 really "the first colour Mac version"?** The remake says so
+   (`docs/evolution.md`'s version table and "What it is", `docs/301-findings.md`,
+   `docs/coverage-301.md`, the About notes in `js/version-notes.js`). Delta Tao's manual
+   says the change to "full color for the ships and planets" came with version 2
+   ("Version 1 to 2"), and 1.2, a 2.0 pre-release, is already a colour program: 92 `icl8`
+   icons, `DrawOneColorStarSubProc @c33a6`, `LoadDrawColorIcon @12a7c`, a colour battle
+   dialog (DLOG 7011), the "No Color QD" alert (ALRT 2010) and colour pictures read from
+   "TheHo F CPicts" (STR# 1002.2), a file missing from the archive. So 3.0.1 is at most the
+   first colour Mac version the remake has the colour art of. Re-check the wording (no
+   rule depends on it); see `docs/evolution.md`, "What Delta Tao said vs what the code
+   shows".
+
 ## Windows 95 4.0.5 (1996)
 
 All 8,703 routines of the program are accounted for (`docs/coverage-405.md`; none
