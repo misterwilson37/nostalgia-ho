@@ -61,6 +61,47 @@ Two helpers in `js/engine.js` read them for the New Game window:
 
 `HO.ruleOptions()` (every ruleset, by year) and `HO.newestRules()` are as before.
 
+The New Game window (`js/skins/classic/ui.js`, `newGameDialog`) has the original game's
+own window above a line: name, galaxy, hat, players, computers, IQ, home systems, shape,
+size, density, years per turn, best buddies with the game difficulty rating beside it, and
+the game options (each shown only for the rulesets that had it). Below the line are the
+remake's own choices: **Version**, **Edition**, **Skin** and **OS look** in a row, then the
+unofficial patch, the modern conveniences and Choose sounds. The Skin menu lists the
+edition's own skins first (`rs.skins`), then a line, then the others; choosing an edition
+picks its first skin unless a skin was picked by hand this session. A ruleset without the
+fields above yet is placed by its `rs.version` (and a small table in `ui.js`).
+
+## OS looks
+
+The operating system's part of the look is a choice of its own: window frames and title
+bars, the menu bar and menus, buttons, check boxes, radio buttons, pop-up menus, sliders,
+scroll bars, fields, dialog frames and the system fonts. A skin keeps the game's own art and
+layout (planets, ships, faces, pictures, messages, the End Turn button, the title screen) and
+its sounds. Each look is `js/os/<id>.css`, loaded before the skin's `style.css`, and named on
+the document root as class `os-<id>`; they all start from `js/os/base.css` (the classic
+skin's own chrome) and draw everything in CSS and inline SVG.
+
+| Look | id | What it has | Default for |
+|---|---|---|---|
+| System 6 | `system6` | System 7's, with Chicago (bold) menus, titles and buttons and pop-ups with no arrow | mac2, mac2c |
+| System 7 | `system7` | black and white: 4.0's double-framed dialogs, round buttons with the default ring, Chicago menus, 50% grey scroll bars | mac12, mac3, mac3c, mac4, mac4c |
+| Mac OS 8 and 8.6 | `macos8` | Platinum: the classic skin's grey windows and ridged title bars, bevelled controls, pointed slider thumb | classic |
+| Mac OS 9 | `macos9` | Platinum with zoom and collapse boxes, a flatter menu bar, rounder buttons, lavender highlight | |
+| Mac OS X (Aqua) | `macosx` | 10.0 to 10.2: pinstripes, traffic lights, gel buttons (the default blue), blue gel controls | |
+| DOS | `dos` | the DOS 2.0 game's own Windows 3.1 style windows | dos |
+| Windows 3.1 | `win31` | the DOS look with a sizing frame, control-menu box, minimize and maximize, bold System font | |
+| Windows 95 | `win95` | silver 3-D controls, gradient navy title bars, close box at the right | w95 |
+| Workbench | `workbench` | Amiga Workbench 2 colours and bevels | amiga |
+| Palm OS | `palmos` | Palm OS forms: a black title tab, thin round buttons, small bold type | palm |
+
+Each skin lists its own looks in `js/skins.js` (`SKINS`' `os`, the default first: mac2 System
+6 and 7, mac4 System 7 and Mac OS 8, dos DOS and Windows 3.1, classic Mac OS 8.6, 9 and X);
+the OS look menu offers those first, then a line, then every other look, so anything can be
+mixed. The list follows the skin, not the version. The look is chosen in New Game, on the
+title screen, and mid-game from the Ho menu's **Skin and OS look…**, where it changes at once
+(`HOSKINS.setOS`); it is kept with the game (`G.opts.os`) and for the next one
+(`localStorage` "ho5.os"). `?os=<id>` in the address also picks one.
+
 ## Each version as it was released
 
 Each ruleset plays one original version as it was released, bugs and quirks included.
@@ -70,7 +111,8 @@ changed in the middle of a game from the **Ho menu** (the skin's "Ho!" at the to
 - **About this version**: the version's label, number, platform and year, its known bugs
   and quirks (played as released), where the remake differs, and what changed from the
   version before (`js/version-notes.js`).
-- **Skin**: reloads the page in another skin and carries on with the saved game.
+- **Skin and OS look**: another skin reloads the page in it and carries on with the saved
+  game; another OS look goes on at once.
 - **Sounds**: a game plays only the sounds of its skin's original (`SOUNDS` in
   `js/skins.js`); an event that original had no sound for is silent. "Choose sounds"
   (here or in New Game) plays another version's sounds, or none (`G.opts.sounds`, and
@@ -197,8 +239,8 @@ Optional ruleset flags the skin reads (each is documented where it is read):
   The controls that belong to a ruleset's game (Evacuate, the battle stance, Arrive late,
   alliances, the New Game choices, the shipbuilding and terraform / mine bars, …) show
   whenever that ruleset is played, in every skin, and only then: a skin changes how they
-  look, never whether they are there. Each skin's `style.css` draws the form controls
-  (check boxes, lists, sliders, fields) in its own look, under "Form controls".
+  look, never whether they are there. The OS look (`js/os/<id>.css`, above) draws the form
+  controls (check boxes, lists, sliders, fields), under "Form controls".
 - `js/skins/classic/`: the "classic" skin, modelled on the original
   (`ui.js`: page, map, panels, dialogs, battle replay, sound, title screen; `style.css`)
 - `js/skins/dos/`: the "DOS 2.0" skin: the classic page with the DOS game's art,
@@ -215,18 +257,18 @@ Optional ruleset flags the skin reads (each is documented where it is read):
 - `js/skins/mac4/` and `js/skins/mac4c/`: the Mac 4.0.5 skins (1996, black and white and
   colour): the mac3 skin with 4.0's pictures and sounds (`assets/skins/mac4/`, `mac4c/`), its
   title animation, its menus laid out as 4.0's MENU resources (the classic skin's
-  `T.menuLayout`, which moves and renames the remake's own menu items and never drops one) and
-  System 7 dialog frames, in their own section of `js/skins/mac4/style.css`
+  `T.menuLayout`, which moves and renames the remake's own menu items and never drops one); its
+  System 7 dialog frames are the System 7 look
 - `js/skins/mac2/` and `js/skins/mac2c/`: the Mac 2.0.1 skins (1992, black and white and
   colour): the mac3 skin with 2.0's pictures and sounds (`assets/skins/mac2/`, `mac2c/`; its
   icons are 1.2's and the DOS game's), its start-up window, End Turn button, message border,
-  menus (`T.menuLayout`) and dialog frames, in their own section of `js/skins/mac2/style.css`
+  menus (`T.menuLayout`); its dialog frames are the System 6 look
 - `js/skins/mac3/`: the "Mac 3.0.1 (black and white)" skin: the DOS skin with the 1993 Mac
-  game's 1-bit pictures and sounds and a Mac Plus look (art in `assets/skins/mac3/`). The DOS
+  game's 1-bit pictures and sounds, in the System 7 look (art in `assets/skins/mac3/`). The DOS
   game's pictures were made from this one's, with the same numbers
 - `js/skins/<name>/` and `assets/skins/<name>/`: where more skins and their own art go
   (planned: "cozy", then "scifi"). Add the skin to the list in `js/skins.js`; the New
-  Game window then offers a Skin choice next to Rules. `?skin=<name>` in the address
+  Game window then offers it in the Skin menu; give it its own OS looks (`os`). `?skin=<name>` in the address
   also picks one.
 - `assets/`: sprites, sounds, the 25 rank pictures (`assets/explore/`) and theme music, listed in `assets/manifest.json`
 - `docs/original-findings.md`: what the original program actually does

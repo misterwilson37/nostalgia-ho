@@ -1,0 +1,62 @@
+/* Spaceward Ho! — OS look "Mac OS 8 and 8.6" (Platinum): the classic
+   skin's own chrome (js/os/base.css: grey windows with ridged title bars,
+   a grey menu bar, round-cornered buttons with a heavy default ring), and
+   Platinum's controls drawn in CSS: bevelled check boxes with a tick,
+   radio buttons, pop-up buttons with their arrow, sunken fields, a grooved
+   slider with a pointed thumb and grey scroll bars. The classic (5.0.5)
+   skin's default look; the Mac 4.0.5 skins' second. */
+@import url("base.css");
+html select, html input[type=text], html input[type=number], html input:not([type]) {
+  font: inherit; color: #000; border: 1px solid; border-color: #777 #fff #fff #777; border-radius: 0; background-color: #fff;
+  box-shadow: inset 1px 1px 0 #333;
+}
+html input[type=text], html input[type=number], html input:not([type]) { padding: 3px 4px; }
+html input[type=number] { -moz-appearance: textfield; appearance: textfield; }
+html input[type=number]::-webkit-inner-spin-button, html input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+/* a pop-up button: a bevelled grey box with its arrow in a part of its own */
+html select, html .newgame select {
+  -webkit-appearance: none; appearance: none; padding: 2px 24px 2px 6px; cursor: pointer; color: #000;
+  border: 1px solid #333; border-radius: 3px; box-shadow: inset 1px 1px 0 #fff, inset -1px -1px 0 #999;
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='7' height='4'><path d='M0 0h7L3.5 4z'/></svg>") no-repeat right 6px center / 7px 4px,
+    linear-gradient(#888, #888) no-repeat right 18px top 3px / 1px calc(100% - 6px),
+    linear-gradient(#fff, #fff) no-repeat right 19px top 3px / 1px calc(100% - 6px),
+    linear-gradient(#f3f3f3, #d4d4d4);
+}
+html input[type=checkbox], html input[type=radio] {
+  -webkit-appearance: none; appearance: none; width: 12px; height: 12px; margin: 0 4px 0 0; padding: 0; flex: none; vertical-align: middle; cursor: pointer;
+  border: 1px solid #222; border-radius: 0; background: linear-gradient(135deg, #c8c8c8, #f4f4f4);
+  box-shadow: inset 1px 1px 0 #fff, inset -1px -1px 0 #9a9a9a;
+}
+html input[type=checkbox]:checked {
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12'><path d='M2.5 6l2.5 3L10 1.5' fill='none' stroke='black' stroke-width='2'/></svg>") center / 12px 12px no-repeat,
+    linear-gradient(135deg, #c8c8c8, #f4f4f4);
+}
+html input[type=radio] { border-radius: 50%; }
+html input[type=radio]:checked { background: radial-gradient(circle at 45% 45%, #888 0 1px, #000 1.5px 3px, transparent 3.5px), linear-gradient(135deg, #c8c8c8, #f4f4f4); }
+html input[type=checkbox]:disabled, html input[type=radio]:disabled, html input[type=range]:disabled, html select:disabled { opacity: .5; cursor: default; }
+html input[type=checkbox]:focus-visible, html input[type=radio]:focus-visible, html select:focus-visible, html input[type=range]:focus-visible { outline: 2px solid var(--hi); outline-offset: 1px; }
+/* a slider: a grooved track and Platinum's pointed grey thumb */
+html input[type=range], html .newgame .slider input[type=range] {
+  -webkit-appearance: none; appearance: none; height: 6px; margin: 5px 0; padding: 0; min-width: 0; cursor: ew-resize;
+  border: 1px solid; border-color: #666 #fff #fff #666; border-radius: 2px; background: #b4b4b4;
+}
+html input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 11px; height: 16px; border: 0; cursor: ew-resize; background: none;
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='11' height='16'><path d='M.5 .5h10v10l-5 5-5-5z' fill='%23dcdcdc' stroke='black'/><path d='M1.5 9.8V1.5h8' fill='none' stroke='white'/><path d='M9.5 1.5v8.6l-4 4' fill='none' stroke='%23888'/></svg>") center / 11px 16px no-repeat;
+}
+html input[type=range]::-moz-range-thumb { width: 11px; height: 16px; border: 0; border-radius: 0; background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='11' height='16'><path d='M.5 .5h10v10l-5 5-5-5z' fill='%23dcdcdc' stroke='black'/></svg>") center / 11px 16px no-repeat; }
+html input[type=range]::-moz-range-track { background: transparent; }
+.newgame .slider output { min-width: 2.5em; }
+/* Scroll bars (Platinum): a grey groove, a ridged grey thumb and bevelled
+   arrow boxes */
+::-webkit-scrollbar { width: 15px; height: 15px; }
+::-webkit-scrollbar-track { background: #c4c4c4; box-shadow: inset 1px 1px 0 #8a8a8a, inset -1px -1px 0 #e6e6e6; }
+::-webkit-scrollbar-thumb { border: 1px solid #222; box-shadow: inset 1px 1px 0 #fff, inset -1px -1px 0 #8f8f8f;
+  background: repeating-linear-gradient(#fff 0 1px, #7c7c7c 1px 2px, transparent 2px 3px) center / 7px 8px no-repeat, linear-gradient(135deg, #e8e8f2, #b8b8c8); }
+::-webkit-scrollbar-thumb:horizontal { background: repeating-linear-gradient(90deg, #fff 0 1px, #7c7c7c 1px 2px, transparent 2px 3px) center / 8px 7px no-repeat, linear-gradient(135deg, #e8e8f2, #b8b8c8); }
+::-webkit-scrollbar-corner { background: #dcdcdc; }
+::-webkit-scrollbar-button:single-button { display: block; width: 15px; height: 15px; border: 1px solid #222; background-color: #dedede; box-shadow: inset 1px 1px 0 #fff, inset -1px -1px 0 #999; }
+::-webkit-scrollbar-button:single-button:vertical:decrement { background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='7' height='4'><path fill='%23000' d='M0 4h7L3.5 0z'/></svg>"); background-repeat: no-repeat; background-position: center; }
+::-webkit-scrollbar-button:single-button:vertical:increment { background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='7' height='4'><path fill='%23000' d='M0 0h7L3.5 4z'/></svg>"); background-repeat: no-repeat; background-position: center; }
+::-webkit-scrollbar-button:single-button:horizontal:decrement { background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='4' height='7'><path fill='%23000' d='M4 0v7L0 3.5z'/></svg>"); background-repeat: no-repeat; background-position: center; }
+::-webkit-scrollbar-button:single-button:horizontal:increment { background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='4' height='7'><path fill='%23000' d='M0 0v7L4 3.5z'/></svg>"); background-repeat: no-repeat; background-position: center; }

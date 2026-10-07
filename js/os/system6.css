@@ -1,0 +1,12 @@
+/* Spaceward Ho! — OS look "System 6": the black-and-white Macintosh before
+   System 7 (js/os/system7.css), which it is close to: Chicago for the menus,
+   window titles and buttons (Chicago's heavy strokes drawn bold where the
+   browser hasn't the font), and pop-up menus as System 6 programs drew
+   them, a shadowed box with no arrow (the standard pop-up with its
+   triangle came with System 7). The Mac 2.0.1 skins' default look. */
+@import url("system7.css");
+:root { --ui: Chicago, Geneva, Verdana, sans-serif; }
+#menubar, .mbtn, .dropdown button, #menubar .logo, .wtitle span { font-weight: bold; }
+button:not(.mbtn):not(.close):not(.tbtn):not(.clock):not([role=menuitem]) { font-weight: bold; }
+html select, html .newgame select { padding: 1px 6px 1px 5px; background: #fff; box-shadow: 1px 1px 0 #000; }
+.dropdown { box-shadow: 1px 1px 0 #000; }

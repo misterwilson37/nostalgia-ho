@@ -1,33 +1,28 @@
-/* Spaceward Ho! — classic skin */
+/* Spaceward Ho! — classic skin: the page's layout and the game's own art.
+   The window chrome (frames, menus, buttons, form controls, system fonts)
+   is the OS look's, js/os/<id>.css, loaded before this file (js/skins.js);
+   the classic skin's own is js/os/base.css, its default look Mac OS 8.6. */
 @import url("https://fonts.googleapis.com/css2?family=Rye&display=swap");
 :root {
-  --plat: #dedede; --plat2: #cfcfcf; --edge: #8e8e8e; --ink: #1d1b22; --sub: #5d5a66;
-  --hi: #2f4fb8; --hat: #a8322b; --gold: #e2b33c; --space: #04030c; --neg: #a8322b;
-  --ui: Geneva, "Lucida Grande", Verdana, sans-serif; --west: "Rye", Georgia, serif;
+  /* the chrome's colours and font (--plat, --plat2, --edge, --ink, --sub,
+     --hi, --ui) come from the OS look, js/os/<id>.css, loaded before this */
+  --hat: #a8322b; --gold: #e2b33c; --space: #04030c; --neg: #a8322b;
+  --west: "Rye", Georgia, serif;
   box-sizing: border-box; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px);
   color-scheme: light;
 }
 *, *::before, *::after { box-sizing: inherit; }
 html { height: 100%; scroll-padding-top: env(safe-area-inset-top, 0px); }
-body { height: 100%; margin: 0; background: var(--space); color: var(--ink); font: 12px/1.4 var(--ui); overflow: hidden; }
+body { height: 100%; margin: 0; background: var(--space); color: var(--ink); overflow: hidden; }
 button { font: inherit; }
 #app { display: grid; grid-template-rows: auto 1fr; height: 100%; }
-#menubar { display: flex; align-items: center; gap: 2px; background: linear-gradient(#f4f4f4, #d6d6d6); border-bottom: 1px solid #777; padding: 0 8px; height: 26px; position: relative; z-index: 20; }
-#menubar .logo { font: 15px var(--west); color: var(--hat); margin-right: 10px; letter-spacing: .02em; white-space: nowrap; }
-.menu { position: relative; }
-.mbtn { background: none; border: 0; padding: 3px 9px; border-radius: 2px; cursor: pointer; color: var(--ink); }
-.mbtn:hover, .mbtn:focus-visible { background: var(--hi); color: #fff; outline: none; }
-.dropdown { display: none; position: absolute; top: 24px; left: 0; min-width: 230px; background: #f4f4f4; border: 1px solid #555; box-shadow: 2px 3px 0 rgba(0,0,0,.35); padding: 3px 0; }
-.dropdown.open { display: block; }
-.dropdown button { display: block; width: 100%; text-align: left; background: none; border: 0; padding: 4px 16px; cursor: pointer; color: var(--ink); }
-.dropdown button:hover, .dropdown button:focus-visible { background: var(--hi); color: #fff; outline: none; }
-.dropdown hr { border: 0; border-top: 1px solid #bbb; margin: 3px 0; }
+/* the menu bar's and menus' look: the OS look (js/os) */
+#menubar { display: flex; align-items: center; gap: 2px; position: relative; z-index: 20; }
 #title { margin-left: auto; color: var(--sub); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 #main { display: grid; grid-template-columns: 300px 1fr; min-height: 0; }
-#panel { background: var(--plat); border-right: 1px solid #444; overflow-y: auto; padding: 8px; min-height: 0; }
+#panel { overflow-y: auto; padding: 8px; min-height: 0; }
 #mapwrap { position: relative; min-width: 0; min-height: 0; overflow: hidden; }
 #map { display: block; touch-action: none; }
-.box { background: var(--plat2); border: 1px solid var(--edge); border-top-color: #fff; border-left-color: #fff; padding: 7px 8px; margin-bottom: 8px; }
 .box h3 { margin: 0 0 5px; font: 14px var(--west); color: var(--hat); font-weight: normal; }
 .box h4 { margin: 8px 0 4px; font-size: 12px; }
 .kv { display: flex; justify-content: space-between; gap: 8px; padding: 1px 0; }
@@ -38,8 +33,6 @@ button { font: inherit; }
 .barrow.hl .blabel { font-weight: bold; }
 .blabel { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .bval { text-align: right; font-variant-numeric: tabular-nums; color: var(--sub); font-size: 11px; }
-.track { height: 13px; background: #f8f8f8; border: 1px solid #666; position: relative; cursor: ew-resize; touch-action: none; }
-.track:focus-visible { outline: 2px solid var(--hi); outline-offset: 1px; }
 .fill { position: absolute; inset: 0 auto 0 0; background: repeating-linear-gradient(90deg, #6c86d6 0 6px, #5873c8 6px 7px); }
 .fill.tech { background: repeating-linear-gradient(90deg, #e2b33c 0 6px, #c99a28 6px 7px); }
 .fill.sav { background: repeating-linear-gradient(90deg, #6fb46f 0 6px, #579a57 6px 7px); }
@@ -58,13 +51,6 @@ button { font: inherit; }
 .tip .key { margin: 6px 0 0; font-weight: bold; }
 .btns { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
 .btns.right { justify-content: flex-end; }
-button:not(.mbtn):not(.close):not(.tbtn):not(.clock):not([role=menuitem]) {
-  background: linear-gradient(#fdfdfd, #d3d3d3); border: 1px solid #555; border-radius: 4px; padding: 3px 12px; cursor: pointer; color: var(--ink);
-  box-shadow: inset 0 0 0 1px #fff;
-}
-button:not(.mbtn):not(.close):not(.tbtn):not(.clock):not([role=menuitem]):not(.quiet) { border: 2px solid #222; border-radius: 6px; font-weight: bold; }
-button:disabled { opacity: .45; cursor: default; }
-button:focus-visible { outline: 2px solid var(--hi); outline-offset: 1px; }
 .fleets { border-top: 1px solid #aaa; margin-top: 8px; }
 .frow { display: grid; grid-template-columns: auto 1fr; gap: 6px; padding: 4px; border: 1px solid transparent; cursor: pointer; align-items: center; }
 .frow.sel { background: #fff7d6; border-color: #b59a3b; }
@@ -89,16 +75,13 @@ button:focus-visible { outline: 2px solid var(--hi); outline-offset: 1px; }
 .clock:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
 /* windows */
 .scrim { position: fixed; inset: 0; background: rgba(4,3,12,.55); display: grid; place-items: center; z-index: 50; padding: 12px; }
-.win { background: var(--plat); border: 1px solid #222; box-shadow: 3px 4px 0 rgba(0,0,0,.6); max-width: 100%; max-height: calc(100% - 10px); display: flex; flex-direction: column; width: 420px; }
+.win { max-width: 100%; max-height: calc(100% - 10px); display: flex; flex-direction: column; width: 420px; }
 .win.small { width: 360px; } .win.mid { width: 560px; } .win.wide { width: 820px; }
-.wtitle { display: flex; align-items: center; gap: 8px; height: 22px; padding: 0 6px; background: repeating-linear-gradient(#ececec 0 1px, #c4c4c4 1px 2px); border-bottom: 1px solid #555; }
-.wtitle span { background: var(--plat); padding: 0 8px; margin: 0 auto; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.close { width: 13px; height: 13px; border: 1px solid #333; background: linear-gradient(#fff, #bbb); padding: 0; cursor: pointer; flex: none; }
-.wbody { padding: 12px; overflow: auto; }
+.wtitle { display: flex; align-items: center; gap: 8px; }
+.wbody { overflow: auto; }
 .newgame { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 14px; }
 .newgame label { display: grid; gap: 2px; }
 .newgame label span { color: var(--sub); }
-.newgame input, .newgame select { font: inherit; padding: 3px 4px; border: 1px solid #777; background: #fff; }
 .newgame .btns { grid-column: 1 / -1; }
 .build { display: grid; grid-template-columns: 1.1fr 1fr; gap: 14px; }
 .blist { min-width: 0; }
@@ -108,11 +91,8 @@ button:focus-visible { outline: 2px solid var(--hi); outline-offset: 1px; }
 .dtext b { display: block; }
 .pm { display: flex; align-items: center; gap: 6px; }
 .pm .n { min-width: 20px; text-align: center; font-weight: bold; }
-.designer { background: var(--plat2); border: 1px solid var(--edge); padding: 8px; min-width: 0; }
 .designer h4 { margin: 0 0 6px; }
 .types { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px; }
-.tbtn { background: #f2f2f2; border: 1px solid #777; border-radius: 10px; padding: 2px 9px; cursor: pointer; color: var(--ink); }
-.tbtn.on { background: var(--hi); color: #fff; border-color: var(--hi); }
 .preview { display: grid; place-items: center; height: 64px; background: var(--space); margin-bottom: 8px; }
 .preview .shippic { height: 48px !important; max-width: 95%; object-fit: contain; }
 .slide { display: grid; grid-template-columns: 62px 1fr 42px; align-items: center; gap: 6px; margin: 4px 0; }
@@ -162,7 +142,7 @@ button:focus-visible { outline: 2px solid var(--hi); outline-offset: 1px; }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 
-.newgame .opts { grid-column: 1 / -1; display: flex; gap: 14px; flex-wrap: wrap; border: 1px solid #999; padding: 4px 8px; }
+.newgame .opts { grid-column: 1 / -1; display: flex; gap: 14px; flex-wrap: wrap; padding: 4px 8px; }
 .newgame .opts legend { color: var(--sub); }
 .newgame label.chk { display: flex; gap: 6px; align-items: center; }
 
@@ -215,9 +195,20 @@ button:focus-visible { outline: 2px solid var(--hi); outline-offset: 1px; }
 .win { max-width: calc(100vw - 24px); }
 .newgame > *, .newgame .group > * { min-width: 0; }
 .newgame input, .newgame select { max-width: 100%; box-sizing: border-box; }
-.newgame .lastrow { grid-column: 1 / -1; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 8px 14px; }
-@media (max-width: 640px) { .newgame .lastrow { grid-auto-flow: row; } }
-.newgame .lastrow > * { min-width: 0; }
+/* New Game: above the line the original game's window (best buddies with
+   the difficulty rating beside it), below it the remake's own choices:
+   Version, Edition, Skin and OS look in a row, then the patch, the modern
+   conveniences and the sounds */
+.newgame .buddyrow { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px 14px; align-items: start; }
+.newgame .buddies { display: grid; gap: 4px; align-content: start; }
+.newgame .ngline { grid-column: 1 / -1; width: 100%; height: 0; margin: 4px 0 0; border: 0; border-top: 1px solid var(--edge); }
+.newgame .picks { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px 10px; }
+.newgame .picks > * { min-width: 0; }
+@media (max-width: 640px) { .newgame .picks { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.newgame option.sep { color: var(--sub); }
+.win.ngwin { width: 680px; }
+/* the Ho menu's Skin and OS look window: one column */
+.newgame.skinos { grid-template-columns: minmax(0, 1fr); }
 .newgame label:not(.chk) { grid-template-columns: minmax(0, 1fr); }
 .newgame [hidden] { display: none !important; }
 /* hot seat: the screen between two players' turns hides the map */
@@ -227,12 +218,7 @@ button:focus-visible { outline: 2px solid var(--hi); outline-offset: 1px; }
 #handover h2 { margin: 0; font: 22px var(--west); color: var(--hat); }
 .newgame .seat { display: flex; gap: 6px; }
 .newgame .seat input { flex: 1; min-width: 0; }
-/* terraform / mine: one bar split between two colours */
-.tm input[type=range] { -webkit-appearance: none; appearance: none; height: 12px; border: 1px solid #555; border-radius: 6px; padding: 0;
-  background: linear-gradient(90deg, #4f9e4f 0 var(--split, 50%), #b0573a var(--split, 50%) 100%); }
-.tm input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 8px; height: 18px; border-radius: 3px; background: #fff; border: 1px solid #222; cursor: ew-resize; }
-.tm input[type=range]::-moz-range-thumb { width: 8px; height: 18px; border-radius: 3px; background: #fff; border: 1px solid #222; cursor: ew-resize; }
-.tm .tml { color: #2f6e2f; white-space: nowrap; } .tm .tmr { color: #8a3d22; white-space: nowrap; }
+/* terraform / mine: the split bar is drawn by the OS look (js/os) */
 .tm .tmv { font-variant-numeric: tabular-nums; font-size: 11px; }
 /* hover help (text from the original manual, js/help.js) */
 .tip { position: fixed; z-index: 90; background: #fffbe6; color: var(--ink); border: 1px solid #222; box-shadow: 3px 3px 0 rgba(0,0,0,.45); padding: 7px 9px; font-size: 12px; line-height: 1.35; pointer-events: none; }
@@ -261,8 +247,6 @@ button[data-help] { cursor: pointer; }
 .newgame .patch ul { margin: 4px 0 0; padding-left: 20px; }
 .newgame .patch li { margin: 4px 0; }
 /* the Ho menu: the skin's "Ho!" at the top left opens it */
-#menubar .logo { cursor: pointer; }
-#menubar .logo:hover, #menubar .logo:focus-visible { color: #fff; }
 .dropdown button.check::before { content: '✓'; display: inline-block; width: 12px; margin-left: -12px; visibility: hidden; }
 .dropdown button.check.on::before { visibility: visible; }
 /* Choose sounds (New Game and the Ho menu's Sounds window) */
@@ -274,8 +258,6 @@ button[data-help] { cursor: pointer; }
 .about .vnotes ul { margin: 0; padding-left: 20px; }
 .about .vnotes li { margin: 3px 0; }
 .about .vnotes p { margin: 2px 0; }
-/* shipbuilding (2.0 and 1.2 rules): the colony bar's stripes up to the colony's share */
-.yard .tm input[type=range] { background: linear-gradient(90deg, transparent 0 var(--split, 0%), #f8f8f8 var(--split, 0%) 100%), repeating-linear-gradient(90deg, #6c86d6 0 6px, #5873c8 6px 7px); }
 /* a window taller than the screen (New Game on a phone, with a ruleset's
    options) scrolls inside, so its last controls and its OK button stay in
    reach: the scrim's row has no height for "100%" to work from */
