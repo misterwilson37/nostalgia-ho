@@ -178,6 +178,8 @@ function difficulty(o) {
 
 const rs = Object.assign(base, {
   label: 'Palm OS 5 (2003)',
+  // the New Game window's Version and Edition menus (engine.js editions)
+  family: '5', edition: { version: '5', name: 'Palm OS', platform: 'Palm OS, version 1.0.4', year: 2003 }, skins: ['palm'],
   // the New Game window lists rulesets by year, then version (engine.js ruleOptions)
   version: '5', platform: 'Palm OS, version 1.0.4', year: 2003,
   ai: 'palm',               // the computers: js/ai-palm.js (5.0.5's, the same code)

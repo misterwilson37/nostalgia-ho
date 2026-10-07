@@ -389,7 +389,9 @@ computes: the hit table is resource MaTh 1002 ("Weapon Ratios", the same 51 valu
 
 ### Mac 4.0.5 differs
 
-The '405' ruleset stays Windows'. Where the Mac does otherwise:
+The '405' ruleset stays Windows'; the 'mac405' ruleset (`js/rules-mac405.js`) plays the
+Mac, items 1-7 and 9-11 below (5 changes nothing: the remake already copied). Where the
+Mac does otherwise:
 
 1. **Targets in battle** (`PickTarget` @61f86, and the PowerPC code): the first Colony
    Ship group, then the first **Tanker** group, then Satellites, then from a random
@@ -421,6 +423,18 @@ The '405' ruleset stays Windows'. Where the Mac does otherwise:
 8. **The New Game window** has the Luck in Battles and "Automatically end turn for
    unconnected players" boxes (Windows: the Preferences), a time limit menu (No Time
    Limit, Fast 30/120, Medium 60/180, Slow 90/180) and the four winners' star names.
+9. **`CreatePlayer`** @81c9c draws one more of the game's random numbers, RND(20, 50) x
+   100, the colour-monitor joke's year (player +0x5e, below).
+10. **The Ship Types window's Scrap box** (`BuildDesignShips` @f0d8e, case 8) gives back
+   every ship of the design ordered in the window and zeroes its count; Windows
+   (`FUN_0044fd03`) gives back one (`scrapTypeRefundOne`).
+11. **The Hall of Fame** (`doMasterListDlg` @10538e, `doHallOfFameDlg` @105020,
+   `doDetailsDlg` @1057e4): eleven ranks from STR# 6280 (Red-neck, Bow-legs, Cowpoke,
+   Deputy, Gunfighter, Town Sheriff, Federal Marshall, Lone Ranger, QuickDraw™ McGraw,
+   Best in the West, Ho! Champion; from 0, 1,000, 2,500, 5,000, 10,000, 25,000, 50,000,
+   100,000, 250,000, 500,000 and 1,000,000 points), where Windows has ten with "Deputy
+   Gunfighter" as one and "%s: %s" past 1,000,000; dates as month/day/whole year
+   (`Secs2Date`, "%d/%d/%d"); "Loser:" with its colon (DITL 4110).
 
 ### Mac-only interface
 

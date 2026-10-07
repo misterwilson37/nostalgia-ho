@@ -1272,7 +1272,8 @@ function battle20(G, sid) {
 // A number of 20 or more (letters make big numbers) points past the names
 // into the rest of the header, or past its end, where 2.0 itself would stop
 // with a General Protection Fault; the remake then prints no name.
-const log20On = (G) => E.rules(G).id === 'dos'; // 1.2 prints a blank report instead (rules-12.js)
+// (Mac 2.0.1, js/rules-mac20.js, keeps the same list: AddNewMessage @130fba)
+const log20On = (G) => E.rules(G).id === 'dos' || E.rules(G).id === 'mac20'; // 1.2 prints a blank report instead (rules-12.js)
 function log20(p) { return p.log20 || (p.log20 = { n: 0, w: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], t: null, i: 0, defer: [], pend: [] }); }
 // a report goes into the list; spare: its first spare word, or null for none.
 // Returns the word the record held before (what a report with none shows).
@@ -1388,7 +1389,7 @@ function income20(G, p) {
         // report 1009, "%s destroyed your colony at %s.", with no player
         // given: the name is the one left in the record (log20, above)
         let who = '';
-        if (p.human && log20On(G)) { sync20(G, p, true); who = staleName20(G, addLog20(log20(p), null)); }
+        if (p.human && log20On(G)) { sync20(G, p, true); who = (E.rules(G).staleName || staleName20)(G, addLog20(log20(p), null)); }
         // the patch (fix 'meteorReport'): the report names the meteor shower
         if (E.fixed(G, 'meteorReport')) who = 'A meteor shower';
         msg(G, p.id, `${who} destroyed your colony at ${s.name}.`, { icon: 'm9036', sound: 2001, star: s.id });
@@ -1720,6 +1721,10 @@ const base12 = {
 
 E.registerRules('dos', Object.assign({}, O, {
   label: 'DOS 2.0 (1993)',
+  // the New Game window's Version and Edition menus (engine.js editions):
+  // the Windows 3.1 program, WINHO.EXE, is a 2.0.1 build (its credits,
+  // string 672), and the DOS game a port of it
+  family: '2.0', edition: { version: '2.0.1', name: 'DOS and Windows 3.1', platform: 'DOS and Windows 3.1', year: 1993 }, skins: ['dos', 'amiga'],
   // CONFIRMED: 2.0 has no command to give up a colony. FUN_1040_38c0, which
   // gives one up, is called only by the turn: a colony its share can't keep
   // (FUN_1040_0925 @1040:0ab5) and one lost or emptied (FUN_1040_27ee

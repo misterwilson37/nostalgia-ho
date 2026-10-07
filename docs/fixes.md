@@ -4,7 +4,7 @@ Every ruleset plays its version exactly as released, bugs and quirks included. T
 unofficial patch is a choice at New Game ("Apply the x.y.z.1 patch: fixes for obvious bugs
 (not an official release)", `G.opts.patch`) that fixes a version's *obvious* bugs and
 nothing else. Its number is the version's own with ".1" added (`HO.patchVersion`), so
-"1.2.1", "2.0.1.1", "3.0.1.1", "4.0.5.1", "5.0.5.1" and Palm "1.0.4.1". It is not a release of the original
+"1.2.1", "2.0.1.1" (DOS and Windows, and Mac), "3.0.1.1", "4.0.5.1" (Windows 95, and Mac), "5.0.5.1" and Palm "1.0.4.1". It is not a release of the original
 game; it is the remake's own.
 
 This file goes through every slip and quirk listed for each version in
@@ -48,13 +48,17 @@ their entries are below so the list is complete, but their rulesets list no fixe
 |---|---|---|---|
 | Mac 1.2 | 2 | 8 | 2 |
 | 2.0 | 5 | 5 | 3 |
+| Mac 2.0.1 | 3 | 5 | 2 |
 | Mac 3.0.1 | 4 | 5 | 3 |
-| 4.0.5 | 9 fixed (+ 3 the remake already plays fixed, + 3 with nothing in the remake to fix) | 4 | 6 |
+| 4.0.5 | 10 fixed (+ 3 the remake already plays fixed, + 3 with nothing in the remake to fix) | 4 | 6 |
+| Mac 4.0.5 | 5 fixed (+ 3 the remake already plays fixed, + 1 with nothing in the remake to fix) | 5 | 6 |
 | 5.0.5 | 2 | 6 | 6 |
 | Palm | 1 (+ 5.0.5's 2) | 5 (+ 5.0.5's) | 1 (+ 5.0.5's) |
 
 Palm's code is 5.0.5's recompiled, with the same slips; its own entries are counted, and
-5.0.5's apply to it as well.
+5.0.5's apply to it as well. The Mac 2.0.1 and Mac 4.0.5 are other editions of 2.0 and
+4.0.5 (their own rulesets, `mac20` and `mac405`): each has its own patch list, the
+version's slips that are in its own code, without the other edition's.
 
 ---
 
@@ -171,6 +175,39 @@ The program's own credits read "Version 2.0.1" (string 672), so its patch is 2.0
 
 ---
 
+## Mac 2.0.1 (patch 2.0.1.1)
+
+The Mac edition of 2.0.1 (`mac20`, `js/rules-mac20.js`): 2.0's code, routine for routine,
+with its own names. Its list is 2.0's without the Windows build's own slips.
+
+### Obvious bug (fixed in 2.0.1.1)
+
+1. **`meteorReport`** (`GetReportString` @130adc, `AddNewMessage` @130fba): as 2.0's 1;
+   for a number outside 0-19 the Mac prints whatever lies outside the game's header
+   instead of faulting. *Fix:* "A meteor shower destroyed your colony at S."
+2. **`colonyBars32`**: the computers' colony bars overflow (`ResolveSpending`, the
+   `Computer` segment being 1.2F's instruction for instruction). *Fix:* as 2.0.
+3. **`scrapRange`**: `ScrapOldFighters` passes the fleet's place in the list where
+   `DeterminePath` wants its Range (its fourth argument, the Range elsewhere). *Fix:* as
+   2.0 (no effect on play).
+
+**Not in its list** (Windows slips; the Mac code is right): `orgFuelCount` (the Mac's
+Organize Fleets takes the least fuel used, `OrganizeFleets` @1137e6) and `attack16`
+(`CalcShipCosts` @114c9a-114d1a, 32 bits).
+
+### Quirk or design (left as released)
+
+- Organize Ships gives the least fuel used and keeps the orders (as 1.2).
+- Players who are out still play their turn; no command to give up a colony; report
+  texts with no sender; the warnings every turn: as 2.0.
+
+### Unclear (left; for the developers)
+
+1. Organize Ships reloads colony ships (`NewFleet` @110004), as 2.0's 2.
+2. Underfunded colonies still grow (`KillUnsupportedStars` @a0954), as 2.0's 3.
+
+---
+
 ## Mac 3.0.1 (patch 3.0.1.1)
 
 ### Obvious bug (fixed in 3.0.1.1)
@@ -258,6 +295,12 @@ The program's own credits read "Version 2.0.1" (string 672), so its patch is 2.0
    1996 showed (`hall.date(seconds, G)`).
 9. **`loserColon`: the Hall of Shame's "Loser" lacks its colon** (`FUN_0046d1e8`; every
    other label has one). *Fix:* "Loser:" (`hall.loser(G)`).
+10. **`techNames`: a new technology level is reported by the next level's name**
+   (`FUN_0046ec5a`: string base + level, the lists starting at level 1): Range 7 is
+   "Fusion Pile" instead of "Topping off the Tanks", Mini 20 the credits line. The Mac
+   4.0.5 takes the level's own name (`GetReportString` @1507d4, STR# 6270-6274). *Fix:*
+   string base + level − 1 (`techName` in `js/rules-405.js`; level 1 is strings 841,
+   861, 881, 1892 and 911).
 
 The Hall of Fame, Hall of Shame and Master Point List are kept across games; the three
 hall fixes apply while the game being played has the patch on.
@@ -272,7 +315,7 @@ hall fixes apply while the game being played has the patch on.
 
 **Obvious, with nothing in the remake to fix** (no fix entry): the auto play settings
 put the old "colonies defended" into metal for defence (`FUN_00404c4e`; the window isn't
-in the remake; the Mac 4.0.5's `DoConfigAutoPlayDialog` puts the new value in both, which
+in the remake, though its rule is, `rs.autoPlaySettings`; the Mac 4.0.5's `DoConfigAutoPlayDialog` puts the new value in both, which
 confirms the slip), the cheating mark is set for the wrong player (`FUN_004320f8`; the
 remake keeps no checksum), and a best buddy's star record is shared by pointer
 (`FUN_0043853c`'s second branch copies the record's pointer, so both players hold one
@@ -317,6 +360,46 @@ battle years older): two records, which the Windows decompile reads through acce
 that look alike. It runs, and shares the buddy's battle news (the record, marked so that
 Review Battle says "Sorry, but since you did not fight in that battle, you have no
 information about it."). The remake now does it (`shareBuddyMaps`).
+
+---
+
+## Mac 4.0.5 (patch 4.0.5.1)
+
+The Mac edition of 4.0.5 (`mac405`, `js/rules-mac405.js`): the Windows program's code
+compiled for the Mac, with most of its slips (`docs/405-findings.md`, "Read against the
+Mac 4.0.5"). Its list is 4.0.5's without the Windows build's own slips.
+
+### Obvious bug (fixed in 4.0.5.1)
+
+1. **`poorestOut`**, 2. **`designs30`**, 3. **`refuelCheck`**, 4. **`scrapRange`**
+   (`ScrapOldShips`), 5. **`star0`**: as 4.0.5's 1-5, the Mac code doing the same
+   (405-findings: "the same slips (… the colony at star 0, 30 designs, `refuelCheck`,
+   `scrapRange`, `poorestOut`)").
+
+**Not in its list** (Windows slips; the Mac code is right):
+- `scrapTypeRefund`: the Mac's Ship Types window gives back every ship of the type
+  ordered there (`BuildDesignShips` @f0d8e, case 8, zeroes the window's count);
+- `rankName`: the Mac has an eleventh rank, "Ho! Champion" from 1,000,000 points
+  (`doMasterListDlg` @10538e, STR# 6280), and no format string;
+- `hallYear`: the Mac prints the whole year (`Secs2Date`, "%d/%d/%d");
+- `loserColon`: the Mac's Hall of Shame says "Loser:" (DITL 4110);
+- `techNames`: the Mac takes the level's own name (`GetReportString` @1507d4).
+
+**Already played fixed by the remake**: as 4.0.5 (red stars, the empty hand, a hand
+running out). **Obvious, with nothing in the remake to fix**: the cheating mark
+(as 4.0.5). The auto play settings and the best buddy's record are right on the Mac
+(`DoConfigAutoPlayDialog` @10440e, `BestBuddiesExplore` @c4636).
+
+### Quirk or design (left as released)
+
+- As 4.0.5's four; and the welcome report's "Version 4.0.3" (STR# 6040, never updated):
+  a forgotten string, but not a bug in play.
+
+### Unclear (left; for the developers)
+
+- As 4.0.5's six (the Mac has the same code for each, and draws the computer-intelligence
+  faces where Windows has no picture, 5). See also `docs/open-questions.md`, "The Mac 4.0.5
+  edition": Windows' ten ranks look like two strings joined.
 
 ---
 

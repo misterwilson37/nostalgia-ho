@@ -18,6 +18,7 @@ const PAGE = `
       <div class="wbody"><canvas id="tframe" width="304" height="200" role="img" aria-label="The Spaceward Ho! title picture"></canvas></div></div>
     <div class="tbtns"><button id="tnew">New game</button><button id="tcont" hidden>Continue</button><button id="thelp" class="quiet">How to play</button></div>
     <label class="tskin" hidden><span>Skin</span> <select id="tskin"></select></label>
+    <label class="tskin tos" hidden><span>OS look</span> <select id="tos"></select></label>
     <p class="credit">A personal web remake built from Jake’s own copy of Spaceward Ho! 5.0.5. Art by Howard Vives and Bob Van de walle.</p>
   </div>
 </div>
@@ -2017,21 +2018,169 @@ function openAbout() {
     el('div', { class: 'btns right' }, el('button', { onclick: closeModal }, 'OK')));
   modal('About this version', body, { cls: 'mid' });
 }
-// the skin choice (title screen and Ho menu): every skin in HOSKINS.list
-function skinOptions(sel) {
-  const skins = (window.HOSKINS && HOSKINS.list) || [];
-  for (const k of skins) sel.append(el('option', { value: k.id, selected: k.id === HOSKINS.current ? 'selected' : false }, k.name));
-  return skins.length > 1;
+// ----- versions, editions, skins and OS looks -----
+// Version and Edition pick the ruleset: each ruleset says which version
+// (rs.family) and edition (rs.edition = { version, name, platform, year })
+// it is, and its own skins (rs.skins), and engine.js lists them
+// (HO.families(), HO.editions(family)). A ruleset that doesn't say yet is
+// placed by its version number (and by the table here), so the menus never
+// lose one.
+const ED_FALLBACK = {
+  '12': { family: '1.2', name: 'Mac (French)', skins: ['mac12'] },
+  mac20: { family: '2.0', name: 'Mac', skins: ['mac2c', 'mac2'] },
+  dos: { family: '2.0', name: 'DOS and Windows 3.1', skins: ['dos', 'amiga'] },
+  '301': { family: '3.0', name: 'Mac', skins: ['mac3c', 'mac3'] },
+  mac405: { family: '4.0', name: 'Mac', skins: ['mac4c', 'mac4'] },
+  '405': { family: '4.0', name: 'Windows 95', skins: ['w95'] },
+  original: { family: '5', name: 'Mac', platform: 'Mac OS 8.6, 9 and X', skins: ['classic'] },
+  palm: { family: '5', name: 'Palm OS', skins: ['palm'] },
+  claude: { family: 'remake', name: 'The remake’s own rules', skins: ['classic'] },
+};
+// the New Game window starts every edition with its own rules (tools/human-play.js asks)
+window.HONEWGAME_EDITIONS = true;
+const FAMILY_NAMES = { '1.2': '1.2', '2.0': '2.0', '3.0': '3.0', '4.0': '4.0', '5': '5', remake: 'Claude (the remake’s)', claude: 'Claude (the remake’s)' };
+// a ruleset's version: its own, else from its version number ('2.0.1' is 2.0, '5.0.5' is 5)
+function familyOf(id) {
+  const rs = HO.RULESETS[id] || {};
+  if (rs.family) return rs.family;
+  if (ED_FALLBACK[id]) return ED_FALLBACK[id].family;
+  const m = /^(\d+)(?:\.(\d+))?/.exec(String(rs.version || ''));
+  if (!m) return 'remake';
+  return +m[1] >= 5 ? '5' : `${m[1]}.${m[2] || 0}`;
 }
+const famKey = (f) => f === 'claude' ? 'remake' : f;
+// the versions, oldest first, the remake's own last: [family id]
+function familyList() {
+  const ids = Object.keys(HO.RULESETS);
+  let fams = [];
+  if (typeof HO.families === 'function') { try { fams = HO.families().map(f => famKey(typeof f === 'string' ? f : f.id)); } catch (e) { fams = []; } }
+  for (const id of ids) { const f = famKey(familyOf(id)); if (!fams.includes(f)) fams.push(f); }
+  const order = ['1.2', '2.0', '3.0', '4.0', '5'];
+  const rank = (f) => f === 'remake' ? 1e3 : order.includes(f) ? order.indexOf(f) : 500 + parseFloat(f);
+  return fams.filter(f => editionList(f).length).sort((a, b) => rank(a) - rank(b));
+}
+// one version's editions, as the Edition menu lists them: [ruleset id]
+function editionList(fam) {
+  let ids = null;
+  if (typeof HO.editions === 'function') { try { ids = HO.editions(fam).map(e => typeof e === 'string' ? e : e.id).filter(id => HO.RULESETS[id]); } catch (e) { ids = null; } }
+  if (!ids || !ids.length) {
+    const yr = (id) => (HO.RULESETS[id].edition || {}).year || HO.RULESETS[id].year || 1e4;
+    ids = Object.keys(HO.RULESETS).filter(id => famKey(familyOf(id)) === fam).sort((a, b) => yr(a) - yr(b) || editionName(a).localeCompare(editionName(b)));
+  }
+  // the ones engine.js doesn't list yet, placed by their version
+  for (const id of Object.keys(HO.RULESETS)) if (famKey(familyOf(id)) === fam && !ids.includes(id)) ids.push(id);
+  return ids;
+}
+// an edition's name in the menu: "Mac", "DOS and Windows 3.1", … (5.0.5's
+// Mac edition by its systems, "Mac OS 8.6, 9 and X")
+function editionName(id) {
+  const rs = HO.RULESETS[id] || {}, e = rs.edition || {}, fb = ED_FALLBACK[id] || {};
+  const name = e.name || fb.name || rs.platform || rs.label || id;
+  const plat = e.platform || fb.platform || '';
+  return name === 'Mac' && /^Mac OS/.test(plat) ? plat : name;
+}
+function editionLabel(id) {
+  const rs = HO.RULESETS[id] || {}, e = rs.edition || {};
+  const ver = e.version || rs.version, year = e.year || rs.year;
+  if (famKey(familyOf(id)) === 'remake') return editionName(id);
+  return `${editionName(id)} — ${[ver, year].filter(Boolean).join(', ')}`;
+}
+// an edition's own skins, the first to offer first (only the ones this copy has)
+function editionSkins(id) {
+  const rs = HO.RULESETS[id] || {}, have = ((window.HOSKINS && HOSKINS.list) || []).map(k => k.id);
+  return (rs.skins || (ED_FALLBACK[id] || {}).skins || []).filter(k => have.includes(k));
+}
+const SEP = '──────────';
+const sepOption = () => el('option', { disabled: 'disabled', value: '', class: 'sep' }, SEP);
+// a select's options: the own ones, a line, then all the others
+function fillOwnFirst(sel, own, all, value, name) {
+  sel.replaceChildren(...own.map(id => el('option', { value: id }, name(id))),
+    ...(own.length && all.some(id => !own.includes(id)) ? [sepOption()] : []),
+    ...all.filter(id => !own.includes(id)).map(id => el('option', { value: id }, name(id))));
+  sel.value = value;
+  if (sel.value !== value) sel.value = own[0] || all[0];
+}
+const skinName = (id) => { const k = ((window.HOSKINS && HOSKINS.list) || []).find(x => x.id === id); return k ? k.name : id; };
+// the skins, an edition's own first
+function fillSkins(sel, rulesId, value) {
+  const all = ((window.HOSKINS && HOSKINS.list) || []).map(k => k.id);
+  fillOwnFirst(sel, rulesId ? editionSkins(rulesId) : [], all, value, skinName);
+}
+// the OS looks, the skin's own first (the look follows the skin, not the version)
+function fillOS(sel, skin, value) {
+  if (!window.HOSKINS || !HOSKINS.osChoices) return;
+  const ch = HOSKINS.osChoices(skin);
+  fillOwnFirst(sel, ch.filter(o => o.own).map(o => o.id), ch.map(o => o.id), value, (id) => HOSKINS.osName(id));
+}
+// a skin or a look picked by hand this session (sessionStorage): changing
+// the edition (or the skin) then leaves it as it is
+const picked = {
+  get(k) { try { return sessionStorage.getItem('ho5.picked.' + k) === '1'; } catch (e) { return false; } },
+  set(k) { try { sessionStorage.setItem('ho5.picked.' + k, '1'); } catch (e) {} },
+};
+// the look showing; a game's own look (G.opts.os) is put on when it opens
+const osNow = () => (window.HOSKINS && HOSKINS.os) || null;
+function useOS(id) {
+  if (!id || !window.HOSKINS || !HOSKINS.setOS || HOSKINS.os === id) return;
+  HOSKINS.setOS(id); // (the map follows its new size: setupMap's ResizeObserver)
+}
+// a Skin and an OS look pop-up that work together: picking a skin offers
+// its own looks first, and puts on its first unless a look was picked by hand
+function skinOSPickers(rulesId) {
+  const skinSel = el('select', { name: 'skin', 'aria-label': 'Skin' });
+  const osSel = el('select', { name: 'os', 'aria-label': 'OS look' });
+  fillSkins(skinSel, rulesId, window.HOSKINS ? HOSKINS.current : 'classic');
+  fillOS(osSel, skinSel.value, osNow());
+  skinSel.addEventListener('change', () => {
+    picked.set('skin');
+    fillOS(osSel, skinSel.value, picked.get('os') ? osSel.value : HOSKINS.osDefault(skinSel.value));
+  });
+  osSel.addEventListener('change', () => picked.set('os'));
+  // the edition changed: its own skins first, its first one chosen unless one was picked by hand
+  const forEdition = (id) => {
+    const own = editionSkins(id);
+    fillSkins(skinSel, id, !picked.get('skin') && own.length ? own[0] : skinSel.value);
+    fillOS(osSel, skinSel.value, picked.get('os') ? osSel.value : HOSKINS.osDefault(skinSel.value));
+  };
+  return { skinSel, osSel, forEdition };
+}
+// the title screen's Skin and OS look pop-ups: a skin reloads the page in it,
+// a look goes on at once
+function titlePickers() {
+  if (!window.HOSKINS) return;
+  const ts = $('#tskin'), to = $('#tos');
+  if (ts.options.length) { fillOS(to, HOSKINS.current, osNow()); return; }
+  if (HOSKINS.list.length > 1) {
+    fillSkins(ts, chosenRules(), HOSKINS.current);
+    ts.addEventListener('change', () => { picked.set('skin'); HOSKINS.preview(ts.value, picked.get('os') ? HOSKINS.os : null); });
+    ts.closest('label').hidden = false;
+  }
+  if (HOSKINS.osChoices) {
+    fillOS(to, HOSKINS.current, osNow());
+    to.addEventListener('change', () => { picked.set('os'); useOS(to.value); });
+    to.closest('label').hidden = false;
+  }
+}
+// Ho menu, "Skin and OS look…": the skin reloads the page and carries on with
+// the saved game; the look goes on at once. Both are kept with the game
+// (G.opts.os) and for the next one (localStorage).
 function openSkin() {
-  const sel = el('select', { name: 'skin', 'aria-label': 'Skin' });
-  if (!skinOptions(sel)) { toast('This copy of the game has only one skin.'); return; }
-  const go = () => { const id = sel.value; if (id === HOSKINS.current) { closeModal(); return; } if (G) { save(); HOSKINS.switchTo(id); } else HOSKINS.preview(id); };
-  const f = el('form', { class: 'newgame', onsubmit: (e) => { e.preventDefault(); go(); } },
-    el('label', null, el('span', null, 'Skin'), sel),
-    el('p', { class: 'sub' }, G ? 'The game is saved and opens in the skin you pick. The skin is the look and the sounds of one release of the game; the rules stay as they are.' : 'The skin is the look and the sounds of one release of the game.'),
-    el('div', { class: 'btns right' }, el('button', { type: 'button', class: 'quiet', onclick: closeModal }, 'Cancel'), el('button', { type: 'submit' }, 'Switch')));
-  modal('Skin', f, { cls: 'small' });
+  if (!window.HOSKINS) { toast('This copy of the game has only one skin.'); return; }
+  const { skinSel, osSel } = skinOSPickers(G ? G.rules : chosenRules());
+  if (HOSKINS.list.length < 2) skinSel.disabled = true;
+  const go = () => {
+    const id = skinSel.value, os = osSel.value || HOSKINS.os;
+    if (G) { G.opts.os = os; save(); }
+    if (id === HOSKINS.current) { closeModal(); useOS(os); return; }
+    if (G) HOSKINS.switchTo(id, os); else HOSKINS.preview(id, os);
+  };
+  const f = el('form', { class: 'newgame skinos', onsubmit: (e) => { e.preventDefault(); go(); } },
+    el('label', null, el('span', null, 'Skin'), skinSel),
+    el('label', null, el('span', null, 'OS look'), osSel),
+    el('p', { class: 'sub' }, 'The skin is the game’s pictures and sounds from one release, the OS look the windows, menus and buttons around them; any skin can wear any look. ' +
+      (G ? 'A new skin opens the saved game in it; a new look goes on at once. The rules stay as they are.' : 'A new look goes on at once.')),
+    el('div', { class: 'btns right' }, el('button', { type: 'button', class: 'quiet', onclick: closeModal }, 'Cancel'), el('button', { type: 'submit' }, 'OK')));
+  modal('Skin and OS look', f, { cls: 'small' });
 }
 // "Choose sounds": off, a game plays only its skin's original's sounds; on,
 // another version's sounds or none. value(): null (the skin's own), a sound
@@ -2095,11 +2244,7 @@ function titleScreen() {
   // list of the other skins reloads the page into one of them
   const skins = (window.HOSKINS && HOSKINS.list) || [], here = skins.find(k => k.id === HOSKINS.current);
   if (here) $('#tname').textContent = `Spaceward Ho! ${here.name}`;
-  const ts = $('#tskin');
-  if (!ts.options.length && skinOptions(ts)) {
-    ts.addEventListener('change', () => HOSKINS.preview(ts.value));
-    ts.closest('label').hidden = false;
-  }
+  titlePickers();
   applySounds(); // no game: the skin's own sounds
   let i = 0;
   clearInterval(UI.anim);
@@ -2126,19 +2271,21 @@ function newGameDialog() {
     sel('shape', 'Galaxy shape', [['random', 'Random'], ['ring', 'Ring'], ['cluster', 'Cluster'], ['spiral', 'Spiral'], ['grid', 'Grid'], ['hex', 'Hex']], 'random'),
     sel('size', 'Galaxy size', [['small', 'Small'], ['medium', 'Medium'], ['large', 'Large'], ['huge', 'Humongous']], 'medium'),
     sel('density', 'Galaxy density', [['dense', 'Dense'], ['normal', 'Normal'], ['sparse', 'Sparse']], 'normal'),
-    sel('c_years', 'Years per turn', [['10', '10'], ['20', '20'], ['30', '30'], ['50', '50']], '10'),
-    el('label', { class: 'chk' }, el('input', { type: 'checkbox', name: 'c_buddies' }), el('span', null, 'Computers are best buddies')));
+    sel('c_years', 'Years per turn', [['10', '10'], ['20', '20'], ['30', '30'], ['50', '50']], '10'));
   // Original rules: the original New Game window's controls
   const rating = el('b', null, '');
-  const skins = (window.HOSKINS && HOSKINS.list) || [];
   const origBox = el('div', { class: 'group' },
     slider('o_iq', 'Computer IQ', 50, 200, localStorage.getItem('ho5.iq') || 100),
     sel('o_cstart', 'Computer home systems', [...STARTS, ['iq', 'Based on IQ']], 'iq'),
     sel('o_shape', 'Galaxy shape', [['circle', 'Circle'], ['spiral', 'Spiral'], ['cluster', 'Cluster'], ['ring', 'Ring'], ['grid', 'Grid'], ['random', 'Random'], ['hex', 'Hex']], 'circle'),
     slider('o_size', 'Galaxy size', 0, 100, 50, 'Small', 'Large'),
     slider('o_density', 'Galaxy density', 0, 100, 25, 'Dense', 'Sparse'),
-    sel('o_years', 'Years per turn', [['10', '10'], ['20', '20'], ['30', '30'], ['50', '50']], '10'),
-    el('label', { class: 'chk' }, el('input', { type: 'checkbox', name: 'buddies' }), el('span', null, 'Computers are best buddies')));
+    sel('o_years', 'Years per turn', [['10', '10'], ['20', '20'], ['30', '30'], ['50', '50']], '10'));
+  // best buddies (the Claude and Original rules), with the game difficulty rating beside it
+  const buddyO = el('label', { class: 'chk' }, el('input', { type: 'checkbox', name: 'buddies' }), el('span', null, 'Computers are best buddies'));
+  const buddyC = el('label', { class: 'chk' }, el('input', { type: 'checkbox', name: 'c_buddies' }), el('span', null, 'Computers are best buddies'));
+  const buddyRow = el('div', { class: 'buddyrow' }, el('div', { class: 'buddies' }, buddyO, buddyC),
+    el('div', { class: 'rating' }, el('span', null, 'Game difficulty rating'), rating));
   // DOS 2.0 rules: the 2.0 Create Galaxy settings
   // 4.0.5 rules (Windows 95): its New Game settings
   const w95Box = el('div', { class: 'group' },
@@ -2178,7 +2325,36 @@ function newGameDialog() {
   for (let i = 2; i <= 6; i++) seats.append(el('label', { 'data-seat': i }, el('span', null, `Player ${i}`),
     el('span', { class: 'seat' }, el('input', { name: 'h' + i, value: localStorage.getItem('ho5.name' + i) || 'Player ' + i, maxlength: 20, 'aria-label': `Player ${i} name` }),
       el('select', { name: 'hf' + i, 'aria-label': `Player ${i} hat` }, el('option', { value: '0' }, 'Cowboy'), el('option', { value: '1' }, 'Cowgirl')))));
+  // Version and Edition pick the rules; Skin and OS look how they show
+  const famSel = el('select', { name: 'version', 'aria-label': 'Version' });
+  const edSel = el('select', { name: 'rules', 'aria-label': 'Edition' });
+  const famNow = famKey(familyOf(chosenRules()));
+  famSel.append(...familyList().map(fm => el('option', { value: fm, selected: fm === famNow ? 'selected' : false }, FAMILY_NAMES[fm] || fm)));
+  // every edition is in the Edition menu, only the version's showing (so
+  // that picking one by its id also picks its version)
+  const fillEditions = (fam, value) => {
+    const fams = familyList();
+    edSel.replaceChildren(...fams.flatMap(fm => editionList(fm).map(id => el('option', { value: id, 'data-family': fm, hidden: fm === fam ? false : 'hidden' }, editionLabel(id)))));
+    const mine = editionList(fam);
+    edSel.value = mine.includes(value) ? value : mine[0];
+  };
+  fillEditions(famNow, chosenRules());
+  const pick = skinOSPickers(edSel.value);
+  famSel.addEventListener('change', () => { fillEditions(famSel.value, null); pick.forEdition(edSel.value); });
+  edSel.addEventListener('change', () => {
+    const fm = edSel.selectedOptions[0] && edSel.selectedOptions[0].dataset.family;
+    if (fm && fm !== famSel.value) { famSel.value = fm; fillEditions(fm, edSel.value); }
+    pick.forEdition(edSel.value);
+  });
+  const pickRow = el('div', { class: 'picks' },
+    el('label', null, el('span', null, 'Version'), famSel),
+    el('label', null, el('span', null, 'Edition'), edSel),
+    el('label', null, el('span', null, 'Skin'), pick.skinSel),
+    el('label', null, el('span', null, 'OS look'), pick.osSel));
+  if (!window.HOSKINS || HOSKINS.list.length < 2) pick.skinSel.closest('label').hidden = true;
+  if (!window.HOSKINS || !HOSKINS.osChoices) pick.osSel.closest('label').hidden = true;
   f.append(
+    // above the line: the original game's own New Game window
     el('label', null, el('span', null, 'Your name'), el('input', { name: 'name', value: localStorage.getItem('ho5.name') || 'Jake', maxlength: 20 })),
     el('label', null, el('span', null, 'Galaxy name'), el('input', { name: 'galaxy', value: 'Milky Way', maxlength: 24 })),
     sel('female', 'Your hat', [['0', 'Cowboy'], ['1', 'Cowgirl']], '0'),
@@ -2187,26 +2363,37 @@ function newGameDialog() {
     seats,
     startSel,
     claudeBox, origBox, dosBox, w95Box, mac3Box, mac12Box,
-    // last line: the rules, with the game difficulty rating beside them
-    el('div', { class: 'lastrow' },
-      sel('rules', 'Rules', HO.ruleOptions(), chosenRules()),
-      skins.length > 1 ? sel('skin', 'Skin', skins.map(k => [k.id, k.name]), window.HOSKINS.current) : null,
-      el('div', { class: 'rating' }, el('span', null, 'Game difficulty rating'), rating)),
+    buddyRow,
     el('fieldset', { class: 'opts' }, el('legend', null, 'Options'),
       el('label', { class: 'chk' }, el('input', { type: 'checkbox', name: 'alliances', checked: 'checked' }), el('span', null, 'Alliances')),
       el('label', { class: 'chk' }, el('input', { type: 'checkbox', name: 'luck' }), el('span', null, 'Luck in battles')),
       el('label', { class: 'chk' }, el('input', { type: 'checkbox', name: 'novas', checked: 'checked' }), el('span', null, 'Novas'))),
+    // the line: below it, the remake's own choices
+    el('hr', { class: 'ngline' }),
+    pickRow,
+    patchBox,
     el('label', { class: 'chk modern' }, el('input', { type: 'checkbox', name: 'modern', checked: localStorage.getItem('ho5.modern') === '1' ? 'checked' : false }),
       el('span', null, MODERN_TEXT)),
-    patchBox,
     sounds,
     el('div', { class: 'btns right' }, el('button', { type: 'submit' }, 'Create galaxy')));
+  // which of the window's settings an edition has: its own, or (an edition
+  // the window doesn't know by name) its version's other edition's
+  const KIND = { claude: 'claude', original: 'original', palm: 'original', dos: 'dos', '405': '405', '301': '301', '12': '12' };
+  const FAM_KIND = { '1.2': '12', '2.0': 'dos', '3.0': '301', '4.0': '405', '5': 'original', remake: 'claude' };
+  const kindOf = (id) => KIND[id] || FAM_KIND[famKey(familyOf(id))] || null;
+  // the rating: the edition's own difficulty, else its version's
+  const rater = (id, k) => (HO.RULESETS[id] && HO.RULESETS[id].difficulty) ? HO.RULESETS[id] : HO.RULESETS[k];
   const origOpts = (d) => ({ computers: d.computers === 'any' ? 4 : +d.computers, iqNum: +d.o_iq, start: d.start, cstart: d.o_cstart, shape: d.o_shape, size: +d.o_size, density: +d.o_density, buddies: !!d.buddies, yearsPerTurn: +d.o_years });
   const refresh = () => {
     const d = Object.fromEntries(new FormData(f).entries());
-    const palm = d.rules === 'palm', orig = d.rules === 'original' || palm, dos = d.rules === 'dos', w95 = d.rules === '405', mac3 = d.rules === '301', mac12 = d.rules === '12';
+    const k = kindOf(d.rules);
+    const palm = d.rules === 'palm', orig = k === 'original', dos = k === 'dos', w95 = k === '405', mac3 = k === '301', mac12 = k === '12';
     // the Claude rules' own settings show only for them (not for any ruleset the window doesn't know)
-    claudeBox.hidden = d.rules !== 'claude'; origBox.hidden = !orig; dosBox.hidden = !dos; w95Box.hidden = !w95; mac3Box.hidden = !mac3; mac12Box.hidden = !mac12; startSel.hidden = dos || w95 || mac3 || mac12;
+    claudeBox.hidden = k !== 'claude'; origBox.hidden = !orig; dosBox.hidden = !dos; w95Box.hidden = !w95; mac3Box.hidden = !mac3; mac12Box.hidden = !mac12; startSel.hidden = dos || w95 || mac3 || mac12;
+    // your home system just after the computers' IQ, as the original window has it
+    const box = k === 'claude' ? claudeBox : orig ? origBox : null;
+    if (box && startSel.parentNode !== box) box.insertBefore(startSel, box.children[1]);
+    buddyO.hidden = !orig; buddyC.hidden = k !== 'claude';
     // 1.2 fixes the computers (one) and has no women
     f.querySelector('select[name=computers]').closest('label').hidden = mac12;
     f.querySelector('select[name=female]').closest('label').hidden = mac12;
@@ -2221,15 +2408,15 @@ function newGameDialog() {
     for (const l of seats.querySelectorAll('[data-seat]')) l.hidden = +l.dataset.seat > nh;
     f.querySelector('select[name=computers] option[value="0"]').disabled = nh < 2;
     if (nh < 2 && d.computers === '0') f.querySelector('select[name=computers]').value = '1';
-    const claudeR = d.rules === 'claude';
+    const claudeR = k === 'claude';
     f.querySelector('fieldset.opts').hidden = (!orig && !w95 && !mac3 && !claudeR) || palm;
     f.querySelector('input[name=novas]').closest('label').hidden = w95 || mac3; // 4.0.5 and 3.0.1 always have novas
     f.querySelector('input[name=luck]').closest('label').hidden = mac3; // 3.0.1 always has battle luck
     for (const o of f.querySelectorAll('.slider output')) { const inp = o.previousElementSibling; if (!o.querySelector('small')) o.textContent = inp.value; }
-    rating.textContent = orig ? String(HO.RULESETS.original.difficulty(origOpts(d)))
-      : w95 ? String(HO.RULESETS['405'].difficulty({ computers: d.computers === 'any' ? 4 : +d.computers, iq: d.w_iq, start: d.w_skill, shape: d.w_shape, size: d.w_size, density: d.w_density }))
-      : mac3 ? String(HO.RULESETS['301'].difficulty({ computers: d.computers === 'any' ? 4 : +d.computers, iq: d.m_iq, start: d.m_skill, shape: d.m_shape, size: d.m_size, density: d.m_density }))
-      : `Not rated with ${dos ? 'DOS 2.0' : mac12 ? '1.2' : 'Claude'} rules`;
+    rating.textContent = orig ? String(rater(d.rules, 'original').difficulty(origOpts(d)))
+      : w95 ? String(rater(d.rules, '405').difficulty({ computers: d.computers === 'any' ? 4 : +d.computers, iq: d.w_iq, start: d.w_skill, shape: d.w_shape, size: d.w_size, density: d.w_density }))
+      : mac3 ? String(rater(d.rules, '301').difficulty({ computers: d.computers === 'any' ? 4 : +d.computers, iq: d.m_iq, start: d.m_skill, shape: d.m_shape, size: d.m_size, density: d.m_density }))
+      : `Not rated with ${dos ? '2.0' : mac12 ? '1.2' : 'Claude'} rules`;
     rating.className = orig || w95 || mac3 ? '' : 'none';
     // the patch: only for rules that have fixes
     const prs = HO.RULESETS[d.rules], nfx = HO.fixes(prs).length;
@@ -2255,22 +2442,26 @@ function newGameDialog() {
     if (!patchBox.hidden) localStorage.setItem('ho5.patch', patch ? '1' : '0');
     const snd = sounds.value(); localStorage.setItem('ho5.sounds', snd || '');
     const common = { modern: !!d.modern, ...(patch ? { patch: true } : {}), ...(snd ? { sounds: snd } : {}), humans, seed: (Math.random() * 2 ** 31) | 0, name: d.name || 'You', galaxy: d.galaxy || 'Milky Way', female: d.female === '1', computers: +d.computers, start: d.start, rules: d.rules, alliances: !!d.alliances, luck: !!d.luck, novas: !!d.novas };
-    if (d.rules === 'original' || d.rules === 'palm') {
+    const k = kindOf(d.rules);
+    if (k === 'original') {
       localStorage.setItem('ho5.iq', d.o_iq);
       const o = origOpts(d);
-      G = HO.newGame(Object.assign(common, o, { difficulty: HO.RULESETS.original.difficulty(o) }));
-    } else if (d.rules === '405') {
+      G = HO.newGame(Object.assign(common, o, { difficulty: rater(d.rules, 'original').difficulty(o) }));
+    } else if (k === '405') {
       G = HO.newGame(Object.assign(common, { start: d.w_skill, iq: d.w_iq, shape: d.w_shape, size: d.w_size, density: d.w_density, yearsPerTurn: +d.w_years, novas: true }));
-    } else if (d.rules === '301') {
+    } else if (k === '301') {
       G = HO.newGame(Object.assign(common, { start: d.m_skill, iq: d.m_iq, shape: d.m_shape, size: d.m_size, density: d.m_density, yearsPerTurn: +d.m_years, novas: true, luck: true }));
-    } else if (d.rules === 'dos') {
+    } else if (k === 'dos') {
       G = HO.newGame(Object.assign(common, { start: d.d_skill, iq: d.d_iq, size: d.d_size, shape: d.d_shape, density: d.d_density, novas: false, alliances: false, luck: false }));
-    } else if (d.rules === 'claude' || d.rules === '12') {
+    } else if (k === 'claude' || k === '12') {
       // (1.2 had no New Game window: its ruleset fixes every choice, rs.fixOptions)
       G = HO.newGame(Object.assign(common, { iq: d.iq, cstart: d.cstart, shape: d.shape, size: d.size, density: d.density,
-        ...(d.rules === 'claude' ? { yearsPerTurn: +d.c_years || 10, buddies: !!d.c_buddies } : {}) }));
+        ...(k === 'claude' ? { yearsPerTurn: +d.c_years || 10, buddies: !!d.c_buddies } : {}) }));
     } else throw new Error(`The New Game window has no settings for the "${d.rules}" rules`);
-    if (d.skin && d.skin !== HOSKINS.current) { save(); HOSKINS.switchTo(d.skin); return; } // opens in the other skin
+    // the OS look is kept with the game (G.opts.os) and for the next one
+    if (d.os) G.opts.os = d.os;
+    if (d.skin && window.HOSKINS && d.skin !== HOSKINS.current) { save(); HOSKINS.switchTo(d.skin, d.os); return; } // opens in the other skin
+    useOS(d.os);
     closeModal(); hideTitle(); ME = 0;
     UI.sel = G.players[ME].homeStar; UI.selFleet = null; UI.fitted = false; fit();
     save(); if (!hotSeat()) renderPanel(); draw();
@@ -2281,7 +2472,7 @@ function newGameDialog() {
       showMessages();
     });
   };
-  modal('Create galaxy', f, { cls: 'mid' });
+  modal('Create galaxy', f, { cls: 'mid ngwin' });
   refresh();
 }
 // resumed: the game was just started (or saved) in another skin, so keep its messages
@@ -2296,6 +2487,7 @@ function continueGame(resumed) {
     return;
   }
   ME = G.cur || 0;
+  useOS(G.opts && G.opts.os); // the game's own OS look
   // the game's sounds first, so its first message plays its own sound
   useSounds(soundsWanted(), () => {
     if (hotSeat()) { hideTitle(); fit(); draw(); handOver(me()); return; }
@@ -2328,7 +2520,7 @@ function setupMenus() {
   // the modern conveniences a player may choose (all of them can change in
   // the middle of a game). Items: [label, fn, feature or null, checked()].
   const ho = [['About this version…', openAbout], ['Patch notes…', openPatchNotes, () => patchOn()], ['-'],
-    ['Skin…', openSkin], ['Sounds…', () => openSounds()],
+    ['Skin and OS look…', openSkin], ['Sounds…', () => openSounds()],
     [MODERN_TEXT.replace(/:.*/, ''), () => { if (G) setModern(!modern()); else toast('Modern conveniences are chosen for each game: start or continue one first.'); }, null, () => modern()]];
   const bar = $('#menubar');
   const menu = (btn, items) => {

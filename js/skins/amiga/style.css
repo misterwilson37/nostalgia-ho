@@ -1,45 +1,11 @@
-/* Spaceward Ho! — Amiga 2.0 skin: the DOS skin's layout in Amiga
-   Workbench 2 colours (grey, black, white and blue, light top-left and
-   black bottom-right edges). */
+/* Spaceward Ho! — Amiga 2.0 skin: the DOS skin's layout with the Amiga
+   version's pictures, in Workbench 2 colours. Its windows, menus and
+   controls are the "Workbench" OS look (js/os/workbench.css). */
 @import url("../dos/style.css");
-:root {
-  --plat: #aaaaaa; --plat2: #aaaaaa; --edge: #000; --sub: #222; --hi: #6688bb; --hat: #0055aa;
-  --ui: Verdana, "DejaVu Sans", Arial, sans-serif; --west: Verdana, Arial, sans-serif;
-}
-.box, .designer { border-color: #fff #000 #000 #fff; }
-#menubar { background: #fff; }
-#menubar .logo, .box h3 { color: #0055aa; }
-.mbtn:hover, .mbtn:focus-visible, .dropdown button:hover, .dropdown button:focus-visible { background: #6688bb; color: #fff; }
-button:not(.mbtn):not(.close):not(.tbtn):not(.clock):not([role=menuitem]) {
-  background: #aaaaaa; border-color: #fff #000 #000 #fff; box-shadow: none;
-}
+:root { --hat: #0055aa; --west: Verdana, Arial, sans-serif; }
+.box h3 { color: #0055aa; }
 .fill { background: #0055aa; }
-.win { border-color: #fff #000 #000 #fff; }
-.wtitle, .tbtn.on { background: #6688bb; border-color: #6688bb; }
-.wtitle span { color: #000; }
-.close, .tbtn { background: #aaaaaa; border-color: #fff #000 #000 #fff; }
 .card { background: #aaaaaa; border-top-color: #6688bb; }
 .frow.sel { border-color: #0055aa; }
 /* the End Turn button is a 48x32 picture: the Amiga's own "Zug Ende" one, redrawn in English */
 .clock.pic img { width: 96px; }
-/* Form controls (Workbench 2): the DOS skin's (js/skins/dos/style.css) in
-   Workbench colours: recessed white fields, a list is a raised grey cycle
-   gadget (the cycle mark on its left), a check box is a raised grey box
-   with a tick, and a slider is the budget bar with a raised grey knob. */
-html select, html input[type=text], html input[type=number], html input:not([type]) {
-  border: 2px solid; border-color: #000 #fff #fff #000; background-color: #fff;
-}
-html select, html .newgame select {
-  padding: 2px 6px 2px 24px; border-color: #fff #000 #000 #fff;
-  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='11' height='10'><path d='M8.5 3.2A4 3.6 0 1 0 9 6.5' fill='none' stroke='black' stroke-width='1.6'/><path d='M6 0.5L10.5 3.6L6 4.6z'/></svg>") no-repeat left 5px center / 11px 10px,
-    linear-gradient(#000, #000) no-repeat left 19px top / 1px 100%,
-    linear-gradient(#fff, #fff) no-repeat left 20px top / 1px 100%, #aaaaaa;
-}
-html input[type=checkbox] { width: 16px; height: 13px; border: 2px solid; border-color: #fff #000 #000 #fff; background: #aaaaaa; }
-html input[type=checkbox]:checked {
-  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='7' height='7'><path d='M0 2v3l2 2 5-5V0L2 5z'/></svg>") no-repeat center / 7px 7px, #aaaaaa;
-}
-html input[type=range]::-webkit-slider-thumb, html .tm input[type=range]::-webkit-slider-thumb { background: #aaaaaa; border-color: #fff #000 #000 #fff; box-shadow: none; }
-html input[type=range]::-moz-range-thumb, html .tm input[type=range]::-moz-range-thumb { background: #aaaaaa; border-color: #fff #000 #000 #fff; box-shadow: none; }
-html .yard .tm input[type=range] { background: linear-gradient(90deg, #0055aa 0 var(--split, 0%), #fff var(--split, 0%) 100%); }
-.newgame .opts { border: 2px solid; border-color: #000 #fff #fff #000; }

@@ -339,6 +339,8 @@ function organized12(G, f, merged, nf, orders) {
 // 1.2 plays 2.0's turn (js/rules-dos.js), with the differences above
 E.registerRules('12', Object.assign({}, D, {
   label: 'Mac 1.2 (1992)',
+  // the New Game window's Version and Edition menus (engine.js editions)
+  family: '1.2', edition: { version: '1.2', name: 'Mac (French)', platform: 'Mac, French edition by Upgrade Editions', year: 1992 }, skins: ['mac12'],
   hints: false, // this game had no between-turn tips (4.0.5 and 5.0.5 do)
   // the New Game window lists rulesets by year, then version (engine.js ruleOptions)
   version: '1.2', platform: 'Mac, French', year: 1992,

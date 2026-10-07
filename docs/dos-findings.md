@@ -138,7 +138,11 @@ particular, by name:
 ### Mac 2.0.1 differs
 
 What the Mac program does differently from the Windows one. The "DOS 2.0" ruleset plays
-the Windows program, so it keeps the Windows column; none of these is a misreading.
+the Windows program, so it keeps the Windows column; none of these is a misreading. The
+"Mac 2.0.1" ruleset (`mac20`, `js/rules-mac20.js`) plays the Mac column: Organize Fleets,
+the attack rating and the stale name (a player number outside 0-19: no name, the bytes
+the Mac would print being unknown); the report records, the least share and the two
+interface rows change nothing in play.
 
 | What | Windows / DOS 2.0 (the ruleset) | Mac 2.0.1 |
 |---|---|---|

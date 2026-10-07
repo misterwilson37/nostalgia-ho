@@ -35,7 +35,15 @@ try { ({ chromium } = require('playwright')); } catch (e) { console.error('Playw
 
 const args = process.argv.slice(2);
 const opt = (k, d) => { const a = args.find(x => x.startsWith('--' + k + '=')); return a ? a.slice(k.length + 3) : d; };
-const ALL = ['12', 'dos', '301', '405', 'original', 'palm', 'claude'];
+const ALL = ['12', 'dos', '301', '405', 'original', 'palm', 'claude', 'mac20', 'mac405'];
+// The Mac editions (js/rules-mac20.js, js/rules-mac405.js) have the same
+// New Game settings as the same version's other edition. While the New Game
+// window has no settings of their own (it starts only the rulesets it knows),
+// the form is filled in for that edition and the game is made with the Mac
+// edition's rules (HO.newGame's opts.rules swapped in the page). A window
+// that starts them itself says so (window.HONEWGAME_EDITIONS = true) and is
+// used as it is.
+const FORM_AS = { mac20: 'dos', mac405: '405' };
 const RULES = args.filter(a => !a.startsWith('--')).length ? args.filter(a => !a.startsWith('--')) : ALL;
 const TURNS = +opt('turns', 10);
 const URL0 = opt('url', 'http://localhost:8000/');
@@ -189,12 +197,23 @@ async function playOne(browser, rules, url) {
     let a = seed >>> 0;
     Math.random = () => { a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
   }, +SEED + ALL.indexOf(rules) * 1000);
+  if (FORM_AS[rules]) await page.addInitScript(([as, rules]) => {
+    let ho;
+    Object.defineProperty(window, 'HO', { configurable: true, get: () => ho, set: (v) => {
+      ho = v;
+      const ng = v.newGame;
+      v.newGame = (opts) => ng(opts && opts.rules === as && window.__hpEdition ? Object.assign(opts, { rules }) : opts);
+    } });
+  }, [FORM_AS[rules], rules]);
   await page.goto(url + (url.includes('?') ? '&' : '?') + 'skin=classic');
   await page.waitForSelector('#tnew', { state: 'visible' });
   await page.click('#tnew');
   const form = page.locator('form.newgame');
   await form.waitFor();
-  await form.locator('select[name=rules]').selectOption(rules);
+  // (an edition the window can't start yet is made through its version's other edition: FORM_AS)
+  const knows = !FORM_AS[rules] || await page.evaluate(() => !!window.HONEWGAME_EDITIONS);
+  if (!knows) await page.evaluate(() => { window.__hpEdition = true; });
+  await form.locator('select[name=rules]').selectOption(knows ? rules : FORM_AS[rules]);
   if (rules !== '12') await form.locator('select[name=computers]').selectOption('3');
   if (rules === 'original' || rules === 'palm') {
     // Abundant for both: the second colony from the start (and its shares)
@@ -206,6 +225,7 @@ async function playOne(browser, rules, url) {
   const fails = [], notes = [];
   const fail = (t) => fails.push(t);
   const st0 = await page.evaluate(() => window.__hp.state());
+  if (st0.rules !== rules) fail(`the game was made with the "${st0.rules}" rules, not "${rules}"`);
   const me0 = st0.players.find(p => p.human);
   // 5.0.5 and Palm OS: the creator's starting shares (FUN_1006579c)
   if (rules === 'original' || rules === 'palm') {
@@ -242,7 +262,7 @@ async function playOne(browser, rules, url) {
     if (!shipOrdered && home) {
       await clickStar(page, home.id);
       const r = await buildColonyShip(page);
-      if (r === 'ok') { shipOrdered = true; notes.push(`turn ${turn}: Colony Ship ${rules === 'dos' || rules === '12' ? 'queued' : 'bought'} at ${home.name}`); }
+      if (r === 'ok') { shipOrdered = true; notes.push(`turn ${turn}: Colony Ship ${rules === 'dos' || rules === '12' || rules === 'mac20' ? 'queued' : 'bought'} at ${home.name}`); }
       else if (turn === 1) notes.push(`turn ${turn}: build: ${r}`);
       // 2.0 and 1.2 pay for ships from the colony's Shipbuilding share
       const yard = page.locator('#panel input[aria-label^="Share of this colony"]');

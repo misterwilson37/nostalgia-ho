@@ -2542,6 +2542,8 @@ function setup505(G, p, home, st) {
 
 E.registerRules('original', {
   label: 'Original (decompiled from 5.0.5)',
+  // the New Game window's Version and Edition menus (engine.js editions)
+  family: '5', edition: { version: '5.0.5', name: 'Mac', platform: 'Mac OS 8.6, 9 and X', year: 2003 }, skins: ['classic'],
   // the New Game window lists rulesets by year, then version (engine.js ruleOptions)
   version: '5.0.5', platform: 'Mac OS 9 and X', year: 2003,
   // the unofficial 5.0.5.1 patch (engine.js fixed; docs/fixes.md, "5.0.5")

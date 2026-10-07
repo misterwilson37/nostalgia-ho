@@ -1,4 +1,4 @@
-// Headless AI-vs-AI test: node tools/test.js <claude|original|dos|405|301|12|palm> [--patch]
+// Headless AI-vs-AI test: node tools/test.js <claude|original|dos|405|301|12|palm|mac20|mac405> [--patch]
 // --patch plays with the ruleset's unofficial patch on (G.opts.patch: its rs.fixes)
 const path = require('path'), root = path.join(__dirname, '..');
 const HO=require(path.join(root, 'js/engine.js'));

@@ -82,6 +82,15 @@ business; the DOS 2.0 "Inherited rules audit" covers them for 2.0.
 | 405 | `battleText` | the engine's battle report wording | unused: 4.0.5's `battle` writes its own (`reported: true`) |
 | original | `battleText` | the engine's battle report wording | unused: `battle505` fights and reports every battle itself and returns nothing |
 | palm | `battleText` | the engine's battle report wording | unused: 5.0.5's `battle505` (same code) |
+| mac20 | `battleText` | the engine's battle report wording | unused: 2.0's `battle20` (rules-dos), which the Mac code is (`DoBattleStage` @d0004 … `ResolveVictorFleetsAtStar` @d39c6, dos-findings) |
+| mac405 | `battleText` | the engine's battle report wording | unused: 4.0.5's `battle` (rules-405) |
+| 12 | `computerIdentity` | the engine draws each computer's sex (`femaleComputers`) and name (`maleNames`, `femaleNames`) with the game's random numbers | gap: 12-findings names the computers in `DoGameSolidificationStuff` @a49d6 but doesn't say with which random numbers; Mac 2.0.1, the same code, uses the game's (below) |
+| dos | `computerIdentity` | as above | gap: the Windows program isn't cited for it; Mac 2.0.1, the same version, uses the game's (below) |
+| mac20 | `computerIdentity` | as above | verified: Mac 2.0.1 has one generator, `RND` @121a6 (no `aSynchRand`), and `DoGameSolidificationStuff` @a40d8 draws the names with it |
+| 301 | `computerIdentity` | as above | gap: not stated for 3.0.1 |
+| 405 | `computerIdentity` | as above | verified: 405-findings, "Computers' sexes, and the names of the computers, are drawn with `aSynchRand`, not the game's random numbers" on the Mac (Mac 4.0.5 differs, 7), so the game's on Windows (`FUN_004768cc`, coverage-405) |
+| original | `computerIdentity` | as above | gap: not stated for 5.0.5 |
+| palm | `computerIdentity` | as above | gap: as 5.0.5 |
 
 ### Mac 1.2 (`12`)
 
@@ -193,6 +202,41 @@ the Palm program is checked on its own:
 | palm | `queueSlots` | (ship queues) | unused: no ship queues |
 | palm | `yardRefund` | (ship queues) | unused: no ship queues |
 
+### Mac 2.0.1 (`mac20`)
+
+The DOS 2.0 ruleset with Mac 2.0.1's differences (`js/rules-mac20.js`): its
+defaults are 2.0's, with the same status, the Mac code being 2.0's routine for
+routine (dos-findings, "Read again with the names, and the same as Windows"):
+
+| Ruleset | Hook | Engine default | Status |
+|---|---|---|---|
+| mac20 | `departs` | as for 1.2 above | gap: as 2.0 (`MoveShips`, `CheckFleetDestination` @a23d2 are 1.2's and 2.0's) |
+| mac20 | `scrapAt` | the metal falls onto the planet | verified: as 2.0 (`ScrapFleetsAndTypes`, the turn being 1.2F's: dos-findings) |
+| mac20 | `shipsAdded` | nothing more (a full tank) | gap: as 2.0 |
+| mac20 | `fixOptions` | no New Game choice is fixed | unused in effect: the Create Galaxy window (`CreateGalaxyDlg` @e03dc, 0 to 19 computers) |
+| mac20 | `checkEveryStep` | the winner on the last step | unused: one step a turn |
+| mac20 | `evacuate` | the engine's Evacuate | unused: no Evacuate (`evacuateCommand: false`, as 2.0) |
+| mac20 | `pactNews` | the engine's alliance news | unused: no alliances |
+| mac20 | `processSurrenders` | the engine's surrender | unused: no surrender |
+| mac20 | `processHandovers` | the engine's handover | unused: no surrender |
+| mac20 | `shareMaps` | best buddies share maps | unused: no alliances |
+| mac20 | `yardRoom` | no per-colony limit | unused: ships are queued |
+
+### Mac 4.0.5 (`mac405`)
+
+The Windows 95 4.0.5 ruleset with the Mac 4.0.5's differences
+(`js/rules-mac405.js`); the Mac code is Windows' compiled for the Mac, so its
+defaults are 4.0.5's, with the same status:
+
+| Ruleset | Hook | Engine default | Status |
+|---|---|---|---|
+| mac405 | `departs` | as for 1.2 above (the fuel taken on leaving) | gap: as 4.0.5 |
+| mac405 | `canMerge` | any two fleets may be put together | gap: as 4.0.5 |
+| mac405 | `fixOptions` | no New Game choice is fixed | unused in effect: the Mac's own New Game window |
+| mac405 | `queueMergeAny` | (ship queues) | unused: no ship queues |
+| mac405 | `queueSlots` | (ship queues) | unused: no ship queues |
+| mac405 | `yardRefund` | (ship queues) | unused: no ship queues |
+
 ## Gaps to check, by version
 
 - **1.2**: when a fleet leaves and spends its fuel (`departs`); a new fleet's fuel (`shipsAdded`).
@@ -201,3 +245,5 @@ the Palm program is checked on its own:
 - **4.0.5**: when a fleet spends its fuel (`departs`); fleets of several designs (`canMerge`).
 - **5.0.5**: women computers' chance; design names; the first message; messages a turn for humans; grouping fleets and its fuel; routes planned on the map; out computers' orders; and, for the patch only, scrapping over another's star and its report.
 - **Palm OS 5**: 5.0.5's list, and whether the Palm program has 16 player slots and 5.0.5's computer names.
+- **Mac 2.0.1** and **Mac 4.0.5**: their versions' other editions' lists (2.0, 4.0.5).
+- **Every version but 2.0.1 and 4.0.5**: which random numbers name the computers (`computerIdentity`).

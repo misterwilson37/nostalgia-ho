@@ -1,6 +1,7 @@
 /* Spaceward Ho! — Mac 2.0.1 skin (black and white): the Mac 3.0.1 skin's
-   page and form controls, with 2.0.1's art and, in its own section below,
-   the system's window chrome as 2.0.1's resources draw it. */
+   page and form controls, with 2.0.1's art. Its windows, menus and
+   controls are the "System 6" OS look (js/os/system6.css), drawn as 2.0.1's
+   resources draw them; the start-up window is 2.0.1's own. */
 @import url("../mac3/style.css");
 
 /* ---------- 2.0.1's art ---------- */
@@ -23,45 +24,6 @@
 /* "Added black line on left edge of map window" (2.0.1 Changes) */
 #mapwrap::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 1px; background: #000; z-index: 4; pointer-events: none; }
 
-/* ---------- Look: System 6 and 7, as 2.0.1's resources draw it ----------
-   Everything about windows and menus that comes from the system rather
-   than the game art, kept together so it can become its own "look" choice.
-   2.0.1 (January 1992, System 6.0.5 or later) draws them as 4.0 does
-   (js/skins/mac4/style.css), from the same kinds of resources:
-   - Dialogs (DLOG procID 1, dBoxProc: Create New Galaxy 6080, Build Ships
-     6020, List Fleets 6030, …): no title bar, a black line, a white line and
-     a 2-pixel black frame. 2.0 writes a dialog's name as plain text centred
-     at its top (DITL 6080 "Create New Galaxy"); the remake's close box
-     stays, at the left.
-   - Buttons are 58x20 with round ends; the default one (the last in a row:
-     OK, Create) gets the 3-pixel rounded ring (the 66x28 user item round
-     each default button in 2.0's DITLs, 6080 and 4040 among them).
-   - The start-up window (DLOG 1201, procID 3, altDBoxProc): a black line
-     and a 2-pixel drop shadow round the splash, the buttons underneath
-     (DITL 1201: Open Game, New Game, Quit, 75x20, New Game's ring).
-   - The menu bar and menus: black on white, Chicago, the chosen one
-     inverted, and a 1-pixel shadow under each menu. */
-.win { border: 2px solid #000; outline: 0; box-shadow: 0 0 0 1px #fff, 0 0 0 2px #000, 2px 2px 0 2px #000; }
-.wtitle { background: #fff; border-bottom: 0; height: 22px; }
-.wtitle span { background: none; font: bold 12px Chicago, Charcoal, Geneva, var(--ui); }
-.wbody { padding-left: 10px; padding-right: 10px; }
-.close { width: 11px; height: 11px; border: 1px solid #000; background: #fff; }
-.close:active { background: #000; }
-button:not(.mbtn):not(.close):not(.tbtn):not(.clock):not([role=menuitem]) {
-  min-width: 58px; min-height: 20px; border-radius: 10px; font: 12px Chicago, Charcoal, Geneva, var(--ui);
-}
-.win .btns > button:not(.quiet):last-child, .newgame .btns > button:last-child {
-  outline: 3px solid #000; outline-offset: 1px; border-radius: 10px;
-}
-#menubar { height: 20px; font: 12px Chicago, Charcoal, Geneva, var(--ui); }
-#menubar .menu { order: 1; } /* the menus at the left, the game's name at the right */
-#menubar #title { order: 2; }
-#menubar .logo { font: bold 12px Chicago, Charcoal, Geneva, var(--ui); }
-.mbtn, .dropdown button { font: 12px Chicago, Charcoal, Geneva, var(--ui); }
-.mbtn { border-radius: 0; padding: 2px 8px; }
-.dropdown { top: 19px; border: 1px solid #000; box-shadow: 1px 1px 0 #000; padding: 0; background: #fff; }
-.dropdown button { padding: 2px 16px 2px 18px; }
-.dropdown hr { border-top: 1px dotted #000; margin: 4px 0; }
 /* the start-up window: no title, the splash, then Open Game, New Game */
 .tcard .tskin:not([hidden]) { display: block; margin-top: 12px; }
 .tcard h1, .tcard .by { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }

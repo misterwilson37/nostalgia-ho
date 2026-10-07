@@ -128,12 +128,15 @@ const SHIP_NAMES = {
   bio: ['Medusa', 'Slither'],
 };
 SHIP_NAMES.decoy = SHIP_NAMES.fighter;
-function nameFor(G, p, type, fifteen) {
-  const L = SHIP_NAMES[type] || SHIP_NAMES.fighter;
+// (A ruleset built on this one may name ships from its own lists, rs.shipNames,
+// and draw a human's name with other random numbers: rnd(a, b), Mac 4.0.5.)
+function nameFor(G, p, type, fifteen, rnd) {
+  const names = E.rules(G).shipNames || SHIP_NAMES;
+  const L = names[type] || names.fighter;
   const n = fifteen ? 15 : L.length;
   const at = (i) => L[i < L.length ? i : 0];
   const used = new Set(p.designs.map(d => d.name));
-  const i0 = RI(G, 0, n - 1);
+  const i0 = rnd ? rnd(0, n - 1) : RI(G, 0, n - 1);
   let i = i0;
   do { if (!used.has(at(i))) return at(i); i = (i + 1) % n; } while (i !== i0);
   return at(i0);
@@ -675,9 +678,17 @@ const idleTech = (G, p) => p.human && !(p.budget.tech > 0);
 // Technology has reached level L." Both play BURST (FUN_0046fe1b).
 const TLABEL = { range: 'Range', speed: 'Speed', weapons: 'Weapons', shields: 'Shield', mini: 'Miniaturization' };
 const TICON = { range: 'm9005', speed: 'm9006', weapons: 'm9007', shields: 'm9008', mini: 'm9003' };
+// The name is string base + L, one past the level's own (TECHNAMES above), a
+// Windows slip: the Mac 4.0.5 (GetReportString @1507d4) takes the level's own
+// name from STR# 6270-6274 (js/rules-mac405.js, rs.techName). The patch (fix
+// 'techNames') takes the level's own, string base + L - 1 (TECH_FIRST for
+// level 1: strings 841, 861, 881, 1892, 911).
+const TECH_FIRST = { range: '1', speed: '1', weapons: '1', shields: '1', mini: 'Integrated Circuit' };
+const techName = (G, k, L) => E.rules(G).techName ? E.rules(G).techName(k, L)
+  : E.fixed(G, 'techNames') ? (L === 1 ? TECH_FIRST[k] : TECHNAMES[k][L - 2]) : TECHNAMES[k][L - 1];
 function techMsg(G, p, k) {
   const L = p.tech[k];
-  msg(G, p.id, L < 21 ? `You now have ${TECHNAMES[k][L - 1]} ${TLABEL[k]} Technology (${L}).` : `Your ${TLABEL[k]} Technology has reached level ${L}.`, { icon: TICON[k], sound: 2000, tech: k });
+  msg(G, p.id, L < 21 ? `You now have ${techName(G, k, L)} ${TLABEL[k]} Technology (${L}).` : `Your ${TLABEL[k]} Technology has reached level ${L}.`, { icon: TICON[k], sound: 2000, tech: k });
 }
 
 // ---------- radical discoveries (FUN_0043a08c; the hand FUN_0043adac, weights at 0x59cf10) ----------
@@ -1177,6 +1188,8 @@ function calculateGroups(SA, SD, planet, lA, lD, A, Dh) {
 // docs/405-findings.md, "Mac 4.0.5 differs".)
 function pickTarget(G, T) {
   const c = T.findIndex(g => g.type === 'colony' && g.n > 0); if (c >= 0) return c;
+  // (Mac 4.0.5, rs.tankerTarget: PickTarget @61f86-61fee, class 3, then Satellites)
+  if (E.rules(G).tankerTarget) { const t = T.findIndex(g => g.type === 'tanker' && g.n > 0); if (t >= 0) return t; }
   const s = T.findIndex(g => g.type === 'satellite' && g.n > 0); if (s >= 0) return s;
   if (!T.length) return -1;
   const i0 = RI(G, 0, T.length - 1);
@@ -2300,6 +2313,8 @@ const hall = {
 // ---------- the ruleset ----------
 E.registerRules('405', Object.assign({}, D, {
   label: 'Windows 95 4.0.5 (1996)',
+  // the New Game window's Version and Edition menus (engine.js editions)
+  family: '4.0', edition: { version: '4.0.5', name: 'Windows 95', platform: 'Windows 95', year: 1996 }, skins: ['w95'],
   // the New Game window lists rulesets by year, then version (engine.js ruleOptions)
   version: '4.0.5', platform: 'Windows 95', year: 1996,
   // the unofficial 4.0.5.1 patch (engine.js fixed; docs/fixes.md, "4.0.5");
@@ -2323,6 +2338,8 @@ E.registerRules('405', Object.assign({}, D, {
       text: 'The Hall of Fame and Hall of Shame printed the years since 1900, which read as two digits only until 1999: 2026 shows as 126. The patch shows the last two digits, so 2026 is 26.' },
     { id: 'loserColon', title: 'The Hall of Shame says “Loser:”',
       text: 'The Hall of Shame’s summary labelled you “Loser”, without the colon every other label has. The patch adds it.' },
+    { id: 'techNames', title: 'A new technology level is reported by its own name',
+      text: 'The report of a new technology level printed the next level’s name: Range 7 was “Fusion Pile” instead of “Topping off the Tanks”, and Miniaturization 20 was the program’s credits line. The patch prints the level’s own name, as the Mac 4.0.5 does.' },
   ],
   patchVersion: null, // its own (4.0.5.1), not 2.0's
   ai: '405',               // its own computer players (js/ai-405.js)
@@ -2374,6 +2391,15 @@ E.registerRules('405', Object.assign({}, D, {
   // back only one ship of it ordered there (the order count goes down by
   // one); the skin's window reads this
   scrapTypeRefundOne: true,
+  // the auto play settings window (FUN_00404c4e = Mac DoConfigAutoPlayDialog
+  // @10440e), for a skin that builds it: aggressiveness (+0x718) and colonies
+  // defended (+0x704) as set, and metal for defence (+0x706) the OLD colonies
+  // defended, a Windows slip (the Mac puts the new value in both, so does
+  // js/rules-mac405.js); the window isn't in the remake yet
+  autoPlaySettings(G, p, set) {
+    const ai = p.ai || {}, old = ai.colDef;
+    ai.aggr = set.aggr; ai.colDef = set.colDef; ai.metalDef = old;
+  },
   // fleets, routes and colonies
   fleetFor, shipsAdded, builtAt, yardRoom, route, path301: path405, path405, givePath, settle, colOrder, abandon, evacuate: evacuate405, dragShare, flagScrap, flagScrapDesign, newDesign, fleetList,
   terraLeft: (G, p, s) => bars(s)[0] !== -1, bars, setBars, slots301: slots, colSlots, share20, keyPm, setKeyPm, giveBarPercent,
@@ -2381,5 +2407,7 @@ E.registerRules('405', Object.assign({}, D, {
   // the rest in pass 2
   processSurrenders, processHandovers: () => {}, pactNews: () => {}, shareMaps: () => {}, checkElimination, checkEveryStep: true,
   x301, att301: att405, shipPower: att405, aiYear: null, aiBigShares: undefined, setColonyBars: undefined,
+  // internals, for the Mac 4.0.5 ruleset built on this one (js/rules-mac405.js)
+  nameFor405: nameFor, TECHNAMES,
 }));
 })(this);

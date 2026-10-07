@@ -25,7 +25,7 @@ Every routine in SPACEHO.EXE, the Windows 95 program of Spaceward Ho! 4.0.5 (Del
 
 | Routine | Mac 4.0.5 (68k) | What it does | Status | Where / why |
 |---|---|---|---|---|
-| `FUN_00404c4e` @404c4e | `DoConfigAutoPlayDialog` @10440e | Auto play settings window: sets the human's aggressiveness (+0x718) and colonies defended (+0x704), and puts the OLD colonies-defended value into metal for defence (+0x706), a slip | Rule, not implemented | auto play settings window not built (docs/open-questions.md) |
+| `FUN_00404c4e` @404c4e | `DoConfigAutoPlayDialog` @10440e | Auto play settings window: sets the human's aggressiveness (+0x718) and colonies defended (+0x704), and puts the OLD colonies-defended value into metal for defence (+0x706), a slip | Rule, implemented | js/rules-405.js autoPlaySettings (the window isn't built: docs/open-questions.md) |
 | `FUN_00409170` @409170 | `GetDialogValues` @10c8e | Game options word: Alliances bit 1, Luck bit 4, auto end bit 8 (Novas bit 2 never set) | Rule, implemented | G.opts; docs/open-questions.md |
 | `FUN_0040bff1` @40bff1 | `DoGalaxyMenu` @838c0 | Armageddon command: two random confirmations (strings 299-309) to turn it on, toggles player +0x18ca | Rule, implemented | engine setArmageddon; the mask in pass 1 |
 | `FUN_00413ba3` @413ba3 | `FollowPathDrag` @110dca | Map click and fleet dragging: picks a fleet, plans its route (FUN_004164b0) and gives it (FUN_0041726f), HYAHH | Interface | the remake's map drag; routes by rules route()/path405 |

@@ -8,11 +8,38 @@ files and coverage files cited); anything not read in the code is marked INFERRE
 | Version | Year | Platform | Remake ruleset |
 |---|---|---|---|
 | 1.2F | 1992 | Mac (68k), French edition | `js/rules-12.js` |
+| 2.0.1 | 1992 | Mac (68k), black and white and colour | `js/rules-mac20.js` |
 | 2.0 | 1993 | DOS and Windows 3.1 | `js/rules-dos.js` |
-| 3.0.1 | 1993 | Mac (68k), first in colour | `js/rules-301.js` |
-| 4.0.5 | 1996 | Windows 95 (and Mac 4.0.5) | `js/rules-405.js` |
+| 3.0.1 | 1993 | Mac (68k), in colour and black and white | `js/rules-301.js` |
+| 4.0.5 | 1996 | Windows 95 | `js/rules-405.js` |
+| 4.0.5 | 1996 | Mac (68k and PowerPC) | `js/rules-mac405.js` |
 | 5.0.5 | 2003 | Mac OS 9 / X (PowerPC) | `js/rules-original.js` |
 | 5 for Palm OS | 2003 | Palm (68k), a port of 5.0 | `js/rules-palm.js` |
+
+### Versions and editions
+
+A version could come out for several computers at once, each an *edition*: a build of
+the same game by its own programmers, whose code can differ in a few places. The remake
+plays each edition it has read as its own ruleset, grouped by version (`rs.family`,
+`rs.edition`; the New Game window's Version and Edition menus, `HO.families()` and
+`HO.editions(family)` in `js/engine.js`):
+
+| Version (`family`) | Edition | Build | Year | Ruleset |
+|---|---|---|---|---|
+| 1.2 | Mac (French) | 1.2F | 1992 | `12` |
+| 2.0 | Mac | 2.0.1 | 1992 | `mac20` |
+| 2.0 | DOS and Windows 3.1 | 2.0.1 (Windows), its DOS port | 1993 | `dos` |
+| 3.0 | Mac | 3.0.1 | 1993 | `301` |
+| 4.0 | Mac | 4.0.5 | 1996 | `mac405` |
+| 4.0 | Windows 95 | 4.0.5 | 1996 | `405` |
+| 5 | Mac | 5.0.5 | 2003 | `original` |
+| 5 | Palm OS | 5 (1.0.4) | 2003 | `palm` |
+
+The Amiga 2.0 (German, 1994) is the DOS game's rules with its own art, so it is a skin of
+the `dos` ruleset, not an edition of its own. Where two editions of a version differ,
+each version's section below says how ("The Mac 2.0.1 edition", "The Mac 4.0.5
+edition"); the version's own sections describe the edition read first (DOS and
+Windows 2.0, Windows 95 4.0.5).
 
 ---
 
@@ -168,6 +195,34 @@ The DOS and Windows editions share 392 of their 394 pictures (planets by state, 
 ship parts drawn by Range + Speed, Shields and Weapons, with hidden ships at 12/12 and
 15/15, report pictures) and the same 14 sounds; see `docs/dos-findings.md`, "The DOS
 skin".
+
+### The Mac 2.0.1 edition
+
+Delta Tao's own Mac build of 2.0.1 (1992; `js/rules-mac20.js`) is the same game, routine
+for routine, read with its MacsBug names (`docs/dos-findings.md`, "Mac 2.0.1: the same
+version, with routine names"; `docs/coverage-20.md`). Its turn, battles, set-up, galaxy,
+computers, report texts, name lists, sounds and pictures by report are the Windows
+program's. Where its code differs (dos-findings, "Mac 2.0.1 differs"):
+
+- **Organize Fleets** keeps 1.2's rule: every fleet of the design at the star gets the
+  least fuel used among them, and their orders are left alone (`OrganizeFleets`
+  @1137e6). The Windows port's dialog gives the average (counted over at most 11
+  fleets) and clears the orders. So the change listed under "Rules: what changed" is
+  the Windows port's, not 2.0's.
+- **The computers' attack rating** is worked out in 32 bits (`CalcShipCosts`
+  @114c9a-114d1a), as 1.2's, so it never wraps; the 16-bit wrap is the Windows build's.
+- **The meteor report's stale name**: the same reused record, but for a player number
+  outside 0-19 the Mac reads past the game's header without a fault and prints whatever
+  is there (the remake names no one, as for Windows).
+- The report records are 0x32 bytes (Windows 0x31), the losing colony's least share is
+  in floating point (`ComputeMinPercent` @c22b2): neither changes play.
+- Interface: a **Force End Turn** command (`ForceEndTurn` @122382, Windows forces the
+  turn from the End Turn box), the system beep as the default sound (Windows: a click),
+  13 sounds 2000-7000 named in the resource fork, black-and-white and colour pictures.
+
+Its unofficial patch, 2.0.1.1, fixes the meteor report, the computers' colony bars and
+the old fighters' Range; Organize Ships' 11 and the 16-bit attack rating are Windows
+slips and not in its list (`docs/fixes.md`, "Mac 2.0.1").
 
 ## Mac 3.0.1 (1993)
 
@@ -344,6 +399,44 @@ difficulty, and a Master Point List of up to 25 names with ten ranks, Red-Neck t
 Champion. A win earns 100 x trunc(10^((D - 25) / 25)) master points, at most 500 while
 the total is under 500 and then at most a third of it. 5.0.5 has 25 ranks instead,
 which unlock options.
+
+### The Mac 4.0.5 edition
+
+The Mac 4.0.5 (1996, a fat application for 68k and PowerPC Macs; `js/rules-mac405.js`) is
+the Windows program's code compiled for the Mac, routine for routine, with the same
+records, constants and most of the same slips (`docs/405-findings.md`, "Read against the
+Mac 4.0.5"). Where its code differs ("Mac 4.0.5 differs"):
+
+- **Battles**: after Colony Ships, the first Tanker group is the target, then
+  Satellites (`PickTarget` @61f86). Windows has no Tanker step.
+- **Reports**: a new technology level is reported by its own name (`GetReportString`
+  @1507d4, STR# 6270-6274); Windows prints the next level's. The welcome report still
+  reads "Version 4.0.3" (STR# 6040).
+- **Names**: 15 ship names a class (STR# 6210-6216, with Dreadnoughts "Big Surprise" …
+  "Annihilator" and Biologicals "Medusa" … "Trash Compactor"), a human's drawn with the
+  Mac's second random generator (`aSynchRand`); the computers' sexes and names are drawn
+  with it too (`SetUpComputerPlayers` @1424c6), so they don't move the game's random
+  numbers. The Preferences keep these lists and add to them the names humans type and
+  play under.
+- **The auto play settings** put the new "colonies defended" into metal for defence
+  (`DoConfigAutoPlayDialog` @10440e); Windows the old one.
+- **A best buddy's star record** is copied (`BestBuddiesExplore` @c4636); Windows shares
+  it by pointer until the game is saved.
+- Read for the ruleset: `CreatePlayer` @81c9c draws one more of the game's random
+  numbers (the colour-monitor joke's year); the Ship Types window's Scrap box gives back
+  every ship of the design ordered in the window (`BuildDesignShips` @f0d8e), Windows only
+  one; the Master Point List has **eleven ranks**, "Deputy" and "Gunfighter" apart and
+  "Ho! Champion" from 1,000,000 points (`doMasterListDlg` @10538e, STR# 6280), where
+  Windows has ten ("Deputy Gunfighter" as one) and shows its format string "%s: %s" past
+  1,000,000; the Hall of Fame shows the whole year; the Hall of Shame says "Loser:".
+- Interface: the New Game window has Luck in Battles, "Automatically end turn for
+  unconnected players" and a time limit; the menus, floating windows, Switch Players,
+  the colour-monitor joke and network play through a shared game file are the Mac’s (405-findings, "Mac-only
+  interface").
+
+So most of the Windows edition's slips found so far are the Windows build's own. Its
+unofficial patch, 4.0.5.1, keeps the five slips the Mac code shares (`docs/fixes.md`,
+"Mac 4.0.5").
 
 ## Mac 5.0.5 (2003)
 

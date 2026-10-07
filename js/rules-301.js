@@ -1864,6 +1864,8 @@ const STAR_NAMES = D.starNames.concat(['Hope']);
 
 E.registerRules('301', Object.assign({}, D, {
   label: 'Mac 3.0.1 (1993)',
+  // the New Game window's Version and Edition menus (engine.js editions)
+  family: '3.0', edition: { version: '3.0.1', name: 'Mac', platform: 'Mac', year: 1993 }, skins: ['mac3c', 'mac3'],
   hints: false, // this game had no between-turn tips (4.0.5 and 5.0.5 do)
   // the New Game window lists rulesets by year, then version (engine.js ruleOptions)
   version: '3.0.1', platform: 'Mac', year: 1993,

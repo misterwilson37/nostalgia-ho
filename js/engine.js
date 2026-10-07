@@ -46,6 +46,42 @@ const SHIP_TYPES = {
 const RULESETS = {}, AIS = {};
 function registerRules(name, rs) { RULESETS[name] = rs; rs.id = name; }
 function registerAI(name, ai) { AIS[name] = ai; }
+
+// ---------- versions and editions (the New Game window's menus) ----------
+// Each ruleset plays one edition of one version: a build of the game for one
+// platform. It says which with three fields:
+//   family:  the version it belongs to, '1.2', '2.0', '3.0', '4.0', '5' (the
+//            Version menu), or 'remake' for the remake's own rules;
+//   edition: { version, name, platform, year }: the build's own number
+//            ('2.0.1'), its name in the Edition menu ('Mac', 'DOS and Windows
+//            3.1', 'Windows 95', 'Palm OS', 'Mac (French)'), the computers it
+//            ran on, and the year it came out;
+//   skins:   its own skins (js/skins.js ids), the one to offer first first.
+// The Claude rules (js/rules-claude.js) are the remake's own and set none of
+// these, so they are given here.
+const OWN_EDITIONS = {
+  claude: { family: 'remake', edition: { version: 'Claude', name: 'The remake’s own rules', platform: 'a web browser', year: 2026 }, skins: ['classic'] },
+};
+const famOf = (r) => r.family || (OWN_EDITIONS[r.id] || {}).family;
+const edOf = (r) => r.edition || (OWN_EDITIONS[r.id] || {}).edition || {};
+const skinsOf = (r) => r.skins || (OWN_EDITIONS[r.id] || {}).skins || [];
+const famYear = (ids) => Math.min(...ids.map(id => edOf(RULESETS[id]).year || 1e4));
+// editions(family): the rulesets of one version, oldest first (then by
+// name), as { id, family, version, name, platform, year, skins, label, patch }
+// (label: the ruleset's own; patch: its unofficial patch's number, or null
+// when it has no fixes). An unknown family gives [].
+function editions(family) {
+  return Object.values(RULESETS).filter(r => famOf(r) === family)
+    .map(r => { const e = edOf(r); return { id: r.id, family, version: e.version, name: e.name, platform: e.platform, year: e.year, skins: skinsOf(r).slice(), label: r.label, patch: fixes(r).length ? patchVersion(r) : null }; })
+    .sort((a, b) => (a.year || 1e4) - (b.year || 1e4) || String(a.name).localeCompare(String(b.name)));
+}
+// families(): the versions, oldest first, the remake's own last, as
+// { id, year, editions: [ruleset ids, as editions(id) orders them] }
+function families() {
+  const ids = [...new Set(Object.values(RULESETS).map(famOf).filter(Boolean))];
+  return ids.map(id => ({ id, year: famYear(editions(id).map(e => e.id)), editions: editions(id).map(e => e.id) }))
+    .sort((a, b) => (a.id === 'remake') - (b.id === 'remake') || a.year - b.year || a.id.localeCompare(b.id, 'en', { numeric: true }));
+}
 // A game's ruleset and computer players. There is no fallback: a missing
 // game, an unknown ruleset id or a ruleset without its computer players is
 // an error (docs/fallbacks.md). With no game (the title screen, New Game) a
@@ -517,9 +553,15 @@ function newGame(opts) {
     // a ruleset may give the computers its own names (rs.maleNames, rs.femaleNames)
     // and say whether any computer is a woman (rs.femaleComputers: false = none,
     // or the chance that one is)
-    const female = human ? !!H[i].female : rs.femaleComputers === false ? false : R(G) < (typeof rs.femaleComputers === 'number' ? rs.femaleComputers : 0.45);
+    // A ruleset may instead pick each computer's sex and name itself
+    // (rs.computerIdentity(G, k, nComp, humans) -> { female, name }, k the
+    // computer's number from 0), for one that draws them with other random
+    // numbers than the game's (Mac 4.0.5)
+    const own = !human && rs.computerIdentity ? rs.computerIdentity(G, i - nHum, nComp, H) : null;
+    const female = own ? !!own.female : human ? !!H[i].female : rs.femaleComputers === false ? false : R(G) < (typeof rs.femaleComputers === 'number' ? rs.femaleComputers : 0.45);
     let name;
     if (human) name = H[i].name || (nHum > 1 ? 'Player ' + (i + 1) : 'You');
+    else if (own) name = own.name;
     else { do { name = pick(G, female ? (rs.femaleNames || DATA.femaleNames) : (rs.maleNames || DATA.maleNames)) || ('Computer ' + i); } while (usedNames.has(name) && usedNames.size < 40); }
     usedNames.add(name);
     const home = G.stars[homes[i]];
@@ -900,6 +942,8 @@ const API = {
   ruleOptions: () => Object.values(RULESETS)
     .sort((a, b) => (a.year || 1e4) - (b.year || 1e4) || String(a.version || '').localeCompare(String(b.version || ''), 'en', { numeric: true }))
     .map(r => [r.id, r.year ? `${r.version} (${r.platform}, ${r.year})` : r.label]),
+  // the Version and Edition menus (above registerRules)
+  families, editions,
   // the newest original game's rules: the New Game window's default
   newestRules: () => Object.values(RULESETS).filter(r => r.year).sort((a, b) => b.year - a.year || String(b.version).localeCompare(String(a.version), 'en', { numeric: true }))[0].id,
   // randomness and helpers for rulesets and AIs
@@ -919,5 +963,6 @@ if (typeof module !== 'undefined') {
   require('./rules-301.js'); require('./ai-301.js');
   require('./rules-12.js'); require('./ai-12.js');
   require('./rules-palm.js'); require('./ai-palm.js');
+  require('./rules-mac20.js'); require('./rules-mac405.js');
 } else root.HO = API;
 })(this);

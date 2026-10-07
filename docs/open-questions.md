@@ -20,8 +20,9 @@ developers. It is filled in one version at a time, earliest first.
 A fallback only keeps the game playable: the question stays open and stays on this list.
 
 The versions, in order: Mac 1.2 (1992; a pre-release of 2.0), DOS / Windows 3.1 2.0
-(1993), Mac 3.0.1 (1993), Windows 95 4.0.5 (1996), Mac 5.0.5 (2003), and Palm 5 (2003,
-a port of 5.0).
+(1993, with its Mac 2.0.1 edition of 1992), Mac 3.0.1 (1993), Windows 95 4.0.5 (1996,
+with its Mac 4.0.5 edition), Mac 5.0.5 (2003), and Palm 5 (2003, a port of 5.0). An
+edition's questions are in its version's section.
 
 ## Legend
 
@@ -231,6 +232,29 @@ needs the skin to go on with no human in the game; items 1 and 3 stay at the use
 - **The computers' colony bars in 32 bits.** `FUN_1020_35f9` multiplies the part's money
   by 1,000 in 32 bits (@1020:38da, 3930, 3974) and keeps the quotient as a word
   (@1020:38fc, 3952, 3996), so they wrap as 1.2's do; the 2.0 ruleset now does the same.
+
+### The Mac 2.0.1 edition (`mac20`)
+
+Every rule routine of the Mac 2.0.1 program has its Windows namesake and does the same,
+but for the rows of `docs/dos-findings.md`, "Mac 2.0.1 differs", which the `mac20` ruleset
+(`js/rules-mac20.js`) plays. Nothing in it is open. The entries above apply to it, except
+Organize Ships' average and cleared orders (the Mac gives the least fuel used and keeps
+the orders, `OrganizeFleets` @1137e6) and the computers' 16-bit attack rating (32 bits on
+the Mac, `CalcShipCosts` @114c9a).
+
+**Settled, worth confirming:**
+
+- **The meteor report's stale name** (`GetReportString` @130adc): as on Windows it names
+  whoever the reused report record left behind; for a number outside 0-19 the Mac reads
+  outside the game's header (no fault on a 68k Mac) and prints whatever bytes are there.
+  The remake names no one then, since those bytes aren't known; the 2.0.1.1 patch names
+  the meteor shower.
+
+**Remake's choices:** the default sound is the skin's, where the Mac beeped (`PlaySound`
+@12636, `SysBeep`).
+
+**Interface not done:** **Force End Turn** (`ForceEndTurn` @122382, box 3210, calling
+`MarkAllPlayersDone` @101616); the rest is the Windows list above.
 
 ## Mac 3.0.1 (1993)
 
@@ -455,6 +479,50 @@ These are what 4.0.5's code does and what the remake now does; they look like sl
   that are ...".
 - **The turn time limit** and the computer playing a human who runs out of time
   (`FUN_0047f76e`); the date jokes (`FUN_00438f47`); network play.
+
+### The Mac 4.0.5 edition (`mac405`)
+
+The Mac 4.0.5 is the Windows program compiled for the Mac; the `mac405` ruleset
+(`js/rules-mac405.js`) plays it with the rows of `docs/405-findings.md`, "Mac 4.0.5
+differs", and three read for it (`CreatePlayer`'s extra draw, the Ship Types window's
+refund, the ranks and dates of the Hall of Fame). The open questions above are the Mac's
+too (its code reads the same option word and the same hand), and so are the settled
+slips it shares: `poorestOut`, `designs30`, `refuelCheck`, `scrapRange`, `star0`, the
+Biological retire mark.
+
+**Open:**
+
+1. **Where did Windows' ranks go wrong?** The Mac's Master Point List has eleven ranks
+   (STR# 6280: Red-neck, Bow-legs, Cowpoke, Deputy, Gunfighter, Town Sheriff, Federal
+   Marshall, Lone Ranger, QuickDraw™ McGraw, Best in the West, Ho! Champion) at 0, 1,000,
+   2,500, 5,000, 10,000, 25,000, 50,000, 100,000, 250,000, 500,000 and 1,000,000 points
+   (`doMasterListDlg` @10538e). Windows' strings 324-333 are ten, with "Deputy
+   Gunfighter" as one, and string 334 is "%s: %s"; its thresholds are the Mac's first
+   ten. So at 5,000 Windows says "Deputy Gunfighter" where the Mac says "Deputy", from
+   10,000 every Windows rank is the name the Mac gives the next rank up (Town Sheriff
+   for the Mac's Gunfighter … Ho! Champion from 500,000), and past 1,000,000 Windows
+   shows the format string. It looks like two strings joined in the
+   Windows string table (a missing separator), which would make the `rankName` fix
+   ("Ho! Champion" past 1,000,000) only half the story; the `405` ruleset keeps
+   Windows' table as read, and `mac405` the Mac's.
+
+**Remake's choices:**
+
+- **aSynchRand**: the Mac's second generator is kept in the game (`G.rsA`), seeded once
+  from the game's state without drawing from it, so a game plays again from its seed; the
+  Mac's ran apart from the game file.
+- **The Preferences' name lists**: the Mac adds every human's name to the computers'
+  names (`DoGameSolidificationStuff` @d2432) and each name typed in the design window to
+  its class's ship names (`AddNewTypeNameToPrefs`); the remake uses the program's own
+  lists only.
+- **The colour-monitor joke's year** is drawn (`CreatePlayer` @81c9c, the game's random
+  numbers) and kept (`p.colorJoke`), but no report is made: a browser always shows
+  colour.
+
+**Interface not done:** the New Game window's Luck in Battles, "Automatically end turn
+for unconnected players" and time limit menu; the auto play settings window (the rule is
+`rs.autoPlaySettings`); the floating windows and Switch Players; the colour-monitor
+joke; network play.
 
 ## Mac 5.0.5 (2003)
 

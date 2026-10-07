@@ -125,5 +125,12 @@ root.HOMANUALS = {
   // no 1.2F manual is in the archive; its rules are DOS 2.0's, so the DOS
   // 2.0 manual is the closest
   12: ['assets/manuals/dos-2.0.pdf', 'Spaceward Ho! 2.0 manual (DOS; closest to Mac 1.2)'],
+  // the Mac editions (js/rules-mac20.js, js/rules-mac405.js): their manuals
+  // aren't in the archive; the same version's other edition's is the closest
+  mac20: ['assets/manuals/dos-2.0.pdf', 'Spaceward Ho! 2.0 manual (DOS; the same version as Mac 2.0.1)'],
+  mac405: ['assets/manuals/4.0.5/index.html', 'Spaceward Ho! 4.0.5 help (Windows; the same version as Mac 4.0.5)'],
 };
+// the Mac editions' hover help: the same version's other edition's texts
+root.HOHELP_RULES.mac20 = root.HOHELP_RULES.mac20 || root.HOHELP_RULES.dos;
+root.HOHELP_RULES.mac405 = root.HOHELP_RULES.mac405 || root.HOHELP_RULES['405'];
 })(this);

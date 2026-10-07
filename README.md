@@ -2,6 +2,7 @@
 
 A personal remake of Delta Tao's *Spaceward Ho!* 5.0.5 that runs in a browser, with the
 1993 DOS version (2.0) and the 1996 Windows 95 version (4.0.5) as extra rulesets and skins,
+the Mac editions of 2.0.1 (1992) and 4.0.5 (1996) as rulesets of their own,
 an Amiga skin from the 1994 German Amiga version of 2.0, and skins from the Mac versions 1.2
 (1992, black and white), 2.0.1 (1992), 3.0.1 (1993) and 4.0.5 (1996), the last three both in
 black and white and in colour.
@@ -20,6 +21,45 @@ their turn in order, and a cover screen between turns asks the next person to si
 nobody sees anyone else's planets. The year moves on when the last person ends their turn.
 It works with every ruleset and skin. (The original games did this over a network with a
 shared game file; this remake doesn't have a server, so it's one computer, taking turns.)
+
+## Versions and editions
+
+New Game offers a **Version**, then an **Edition** of it (the build for one platform),
+then a **Skin**, then an OS look. Each edition the remake has read is a ruleset of its
+own, built on another edition of its version where the code is the same, changing only
+what differs (the Mac 2.0.1 on the DOS and Windows 2.0, the Mac 4.0.5 on the Windows 95
+4.0.5). A ruleset says which it is:
+
+- `rs.family`: its version, the Version menu's entry: `'1.2'`, `'2.0'`, `'3.0'`, `'4.0'`,
+  `'5'`, or `'remake'` for the remake's own rules;
+- `rs.edition`: `{ version, name, platform, year }`, e.g. `{ version: '2.0.1', name:
+  'Mac', platform: 'Mac, System 6 and 7', year: 1992 }`: the build's number, its name in
+  the Edition menu, the computers it ran on and its year;
+- `rs.skins`: its own skins (ids from `js/skins.js`), the one to offer first first.
+
+| Family | Edition (`edition.name`) | Build | Year | Ruleset | Skins |
+|---|---|---|---|---|---|
+| 1.2 | Mac (French) | 1.2 | 1992 | `12` | mac12 |
+| 2.0 | Mac | 2.0.1 | 1992 | `mac20` | mac2c, mac2 |
+| 2.0 | DOS and Windows 3.1 | 2.0.1 | 1993 | `dos` | dos, amiga |
+| 3.0 | Mac | 3.0.1 | 1993 | `301` | mac3c, mac3 |
+| 4.0 | Mac | 4.0.5 | 1996 | `mac405` | mac4c, mac4 |
+| 4.0 | Windows 95 | 4.0.5 | 1996 | `405` | w95 |
+| 5 | Mac | 5.0.5 | 2003 | `original` | classic |
+| 5 | Palm OS | 5 | 2003 | `palm` | palm |
+| remake | The remake's own rules | Claude | 2026 | `claude` | classic |
+
+(The Claude rules set none of these fields; `js/engine.js` gives them, `OWN_EDITIONS`.)
+Two helpers in `js/engine.js` read them for the New Game window:
+
+- `HO.families()`: the versions, oldest first and the remake's own last, as
+  `[{ id, year, editions: [ruleset ids] }]` (`year`: its first edition's);
+- `HO.editions(family)`: one version's rulesets, oldest first (then by name), as
+  `[{ id, family, version, name, platform, year, skins, label, patch }]` (`label`: the
+  ruleset's own; `patch`: its unofficial patch's number, or null when it has no fixes).
+  An unknown family gives `[]`.
+
+`HO.ruleOptions()` (every ruleset, by year) and `HO.newestRules()` are as before.
 
 ## Each version as it was released
 
@@ -118,6 +158,9 @@ Optional ruleset flags the skin reads (each is documented where it is read):
   battles won or lost by it. `engine.js` `battleNews` sets it; a ruleset that writes its
   own reports should too. It is not saved with the game. A report with no `won` still
   counts as won when its sound is 7027, for now. (`js/engine.js`, `msg`)
+- `rs.autoPlaySettings(G, player, { aggr, colDef })`: the auto play settings window's
+  OK (4.0.5: aggressiveness and colonies defended as set, and metal for defence the old
+  colonies defended on Windows, the new one on the Mac). No skin has the window yet.
 - A battle record's `duel` (0, 1, …): a ruleset that keeps one replay per duel, as 1.2 and
   2.0 did, pushes one record per duel to `G.battles`; the planet panel, the map menu and
   Review Battle offer each. (`js/engine.js`, above `battle`)
@@ -138,6 +181,14 @@ Optional ruleset flags the skin reads (each is documented where it is read):
   an earlier build of the 5.0.5 engine with skill levels, duels instead of free-for-all
   battles, dearer high-tech ships and up to 19 computers; see `docs/405-findings.md`).
   Built on the Original rules, with the Original computer players
+- `js/rules-mac20.js`: the "Mac 2.0.1" rules (Spaceward Ho! 2.0.1 for the Mac, 1992): the
+  DOS 2.0 rules with what the Mac program does differently (Organize Fleets, the
+  computers' attack rating, the meteor report's stale name; `docs/dos-findings.md`, "Mac
+  2.0.1 differs")
+- `js/rules-mac405.js`: the "Mac 4.0.5" rules (Spaceward Ho! 4.0.5 for the Mac, 1996): the
+  Windows 95 4.0.5 rules with what the Mac program does differently (Tankers as targets,
+  tech level and ship names, the computers' names, the Hall of Fame's ranks;
+  `docs/405-findings.md`, "Mac 4.0.5 differs")
 - `js/version-notes.js`: for each ruleset, its known quirks, where the remake differs and
   what changed from the version before (the Ho menu's "About this version")
 - `js/skins.js`: the list of skins and their sounds, and the loader. A skin is everything you see and
@@ -185,7 +236,7 @@ Optional ruleset flags the skin reads (each is documented where it is read):
 - `docs/decompiling.md`: how to decompile the Windows versions with Ghidra
 - `docs/open-questions.md`, `docs/evolution.md`, `docs/coverage-12.md`: the questions still open for each version, how the game grew, and every routine of 1.2
 - `docs/fixes.md`: every version's slips sorted into obvious bugs (fixed by the unofficial patch), quirks and unclear cases
-- `tools/test.js`: headless computer-vs-computer test (`node tools/test.js`, `node tools/test.js original`, `dos` or `405`; add `--patch` to play with the unofficial patch on)
+- `tools/test.js`: headless computer-vs-computer test (`node tools/test.js`, `node tools/test.js original`, `dos`, `405`, `mac20`, `mac405` …; add `--patch` to play with the unofficial patch on)
 - `tools/human-play.js`: a human played through the page in Chromium (Playwright), about 10
   turns in each ruleset: the Technology and Budget bars dragged, a Colony Ship bought (or
   queued) and sent out, the new colony terraformed. It checks that the values the skin
