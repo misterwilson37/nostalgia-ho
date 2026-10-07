@@ -9,8 +9,8 @@ Every routine in the PowerPC program of Spaceward Ho! 5.0.5 for Mac OS 9 and X (
 | In the program | 5388 |
 | PowerPlant (Metrowerks' application framework, 0x10000000-0x100504ff) | 2471 |
 | The game's own code (0x10050500-0x100d2dff) | 2007 |
-| of which game rules | 180 (176 implemented, 4 not or in part: listed below) |
-| of which interface, files, network, display, plumbing and templates | 1827 |
+| of which game rules | 190 (185 implemented, 5 not or in part: listed below) |
+| of which interface, files, network, display, plumbing and templates | 1817 |
 | MSL (Metrowerks' C and C++ library, from 0x100d2e00) | 179 |
 | Imported system calls and their glue (named by the loader) | 731 |
 | Unread | 0 |
@@ -27,7 +27,7 @@ Every routine in the PowerPC program of Spaceward Ho! 5.0.5 for Mac OS 9 and X (
 | Routine | What it does | Status | Where / why |
 |---|---|---|---|
 | `FUN_10054ce0` | RND(lo, hi) from the game's table of 5,000 random numbers (game +0x208 index) | Rule, implemented | engine RI (the remake's own numbers) |
-| `FUN_10054d40` | Random number from the system clock (interface draws) | Interface | display |
+| `FUN_10054d40` | Random number from the system clock, rand() >> 4 (CPrefs' virtual +0x18, virtual table 0x10111f00): the computers' sexes and names at New Game, a design window's type name | Rule, implemented | js/rules-original.js clockRI (a stream of the remake's own) |
 | `FUN_10054de0` | Interest: trunc(10 sqrt(savings)), at most half; debts 15 % (10 % with cheaper credit), +50 % with the prime rate | Rule, implemented | js/rules-original.js interestOn |
 | `FUN_10054f40` | Integer power | Rule, implemented | helper of FUN_10055f60 |
 | `FUN_10055d90` | Mining: trunc(20 sqrt(money)), 25 with the archaeologists | Rule, implemented | js/rules-original.js mineMetal |
@@ -47,7 +47,7 @@ Every routine in the PowerPC program of Spaceward Ho! 5.0.5 for Mac OS 9 and X (
 | `FUN_100588e0` | Distance lookup | Rule, implemented | js/rules-original.js distance |
 | `FUN_10058900` | Distance table built again (after an Armageddon) | Rule, implemented | js/rules-original.js distance |
 | `FUN_100589f0` | Distance: larger gap + a third of the smaller, rounded up; x3/4 per Armageddon, at least 3 | Rule, implemented | js/rules-original.js dist10 |
-| `FUN_10059570` | New Game window: shape, size, density, IQ, home systems, years a turn, Alliances, Luck, Best Buddies; options locked by rank ("Need more MPs") | Rule, implemented (rank locks not, on purpose) | engine newGame, js/rules-original.js; docs/open-questions.md |
+| `FUN_10059570` | New Game window: shape, size, density, IQ, home systems, years a turn, Alliances, Luck, Best Buddies; options locked by rank ("Need more MPs"); at OK (@1005a2a4-1005a404) the 8 computer slots' sexes (the clock's rand(1, 2) == 1 a man) and names (the clock's rand over the sex's list, `FUN_10095ea0`, `FUN_10095d50`: the Preferences' past players, then STR# 6280 / 6281), drawn again while an earlier slot of the same sex has the name; the hints preference (+0x41) | Rule, implemented (rank locks not, on purpose) | engine newGame, js/rules-original.js computerIdentity505, welcome505; docs/open-questions.md |
 | `FUN_1005cf40` | Build ships window, Buy: at most 24 designs (alert 0x10); more than 9 Scouts or Tankers asks first (alerts 0x24, 0x25) | Rule, implemented (the two questions not) | engine buildShips; docs/open-questions.md |
 | `FUN_1005d380` | Dip Into Savings window: 0-100 %, the Savings bar gives its share away | Rule, implemented | js/rules-original.js dipSet505, ui.js openDip |
 | `FUN_1005d5a0` | Surrender window (player +0x8c; the player count is "no one") | Rule, implemented | engine surrender; js/rules-original.js surrender505 |
@@ -68,7 +68,7 @@ Every routine in the PowerPC program of Spaceward Ho! 5.0.5 for Mac OS 9 and X (
 | `FUN_10066bb0` | Auto button: aggressiveness = prefs/10, colonies defended = prefs, then the computer's plan (FUN_10081cc0, auto) once a turn | Rule, implemented (preferences not) | js/ai-original.js aiTurn (auto) |
 | `FUN_1006c4d0` | Galaxy creation: options, star count, shape switch (jump table 0x10110ac8), random-number table | Rule, implemented | js/rules-original.js makeGalaxy |
 | `FUN_1006c8c0` | Players created; best-buddy computers' masks (+0x110c, +0x110e); then FUN_1006f640 | Rule, implemented | js/rules-original.js afterSetup |
-| `FUN_1006d0c0` | Computer names from the lists, none the same | Interface | engine names |
+| `FUN_1006d0c0` | A computer whose name begins another player's, or is the start of it (`FUN_10055640` over the shorter length), renamed with the next of the designers' names for its sex (men 0x10110948 from Peter, player +0x28 = 1; women 0x10110a08 from Christie) | Rule, implemented | js/rules-original.js computerIdentity505 |
 | `FUN_1006d280` | Random shape | Rule, implemented | js/rules-original.js |
 | `FUN_1006d460` | Circle | Rule, implemented | js/rules-original.js |
 | `FUN_1006d700` | Ring | Rule, implemented | js/rules-original.js |
@@ -86,7 +86,8 @@ Every routine in the PowerPC program of Spaceward Ho! 5.0.5 for Mac OS 9 and X (
 | `FUN_1006f1e0` | Free star test | Rule, implemented | js/rules-original.js |
 | `FUN_1006f280` | A star: temperature, gravity band, metal | Rule, implemented | js/rules-original.js newStar |
 | `FUN_1006f640` | Player setup: home system table (jump table 0x10110ae8), home star, Outpost made hostile, Abundant's second colony, budget 650/250/100, bars, designs, starting ships, borrowing limit | Rule, implemented | js/rules-original.js START, setup505, afterSetup |
-| `FUN_1006f870` | Starting designs (Scout, Tanker, Satellite, Colony Ship, Fighter) | Rule, implemented | js/rules-original.js byType |
+| `FUN_1006f870` | Starting designs (Scout, Tanker, Satellite, Colony Ship, Fighter), named by `FUN_1007dcf0` with the game's numbers after the personality (`FUN_100704d0` @1006fd24); the first reports (@1006fa2c: hint 1, 1000, 1002, hints 2 and 3 with the hints preference or the demo; else 1000, 1002) | Rule, implemented | js/rules-original.js defaultDesigns, newDesign505, welcome505 |
+| `FUN_1007dcf0` | A new ship type's name: the start the game's rand(0, 14) and a round of 15 (flag set: set-up, Radical, computers) or the clock's over the list (the design window); the first name no type of the player's has, else the last tried | Rule, implemented | js/rules-original.js shipName505 |
 | `FUN_100704d0` | Computer personality | Rule, implemented | js/ai-original.js makeAI |
 | `FUN_10071060` | Slot of a star in the colony list | Rule, implemented | js/rules-original.js slots505 |
 | `FUN_10071100` | Report with a text argument | Rule, implemented | js/rules-original.js rep |
@@ -216,7 +217,13 @@ Every routine in the PowerPC program of Spaceward Ho! 5.0.5 for Mac OS 9 and X (
 | `FUN_10088fd0` | Busy fleets | Rule, implemented | js/ai-original.js markUsedFleets |
 | `FUN_1008a030` | Bars that can't be dragged (evacuating, finished, Savings while dipping) | Rule, implemented | js/rules-original.js dragShare505 |
 | `FUN_1008a7a0` | Dragging a budget bar | Rule, implemented | js/rules-original.js dragShare505 |
-| `FUN_1008c5f0` | Map clicks and fleet dragging: plans and gives routes | Interface | ui.js map; engine orderMove |
+| `FUN_1008c5f0` | Map clicks and fleet dragging: a dragged fleet gets DeterminePath's route (`FUN_1008d140` @1008ce2c; command-drag @1008cdac; option-click stops by hand, `FUN_1008d680`); no route, no orders (alert 6004.30 once) | Rule, implemented | ui.js map; engine orderMove; js/rules-original.js route, js/ai-original.js mapRoute |
+| `FUN_10061af0` | Command status: Send Message (0x13ab) on only while the outbox (player +0x1058) holds fewer than 3, and the other commands' states | Rule, implemented | js/rules-original.js chatLimit |
+| `FUN_100aa240` | Group Fleets: Group All (0x387): every fleet at the star but all-Satellite ones into the selected or first, all-Biological ones among themselves; the larger fuel used, "bought this turn" (+0x74) only if both, a new design's stance, the colonists | Rule, implemented | js/rules-original.js canMerge505, organized505 |
+| `FUN_100aa730` | Group Fleets: Split (0x388): half a pile, or each design but the first, to a new fleet with the old one's fuel used, +0x74 and stances | Rule, implemented | engine splitFleet, js/rules-original.js organized505 |
+| `FUN_100a8780` | Group Fleets (LFleetsDataBrowser): a pile dropped on another fleet (all, a count asked, or one): the larger fuel used, +0x74 only if both, the colonists, the stance when the design is new to it (`FUN_100a9820` the same) | Rule, implemented in part | the remake's merge (organized505); no pile drag (docs/open-questions.md) |
+| `FUN_100a85b0` | Group Fleets: a drop accepted unless onto the same fleet or an all-Satellite fleet, and all-Biological fleets only with each other (`FUN_100a8400`: a Satellite pile can't be dragged) | Rule, implemented | js/rules-original.js canMerge505 |
+| `FUN_100b8770` | The game header for the players: the humans' records, then up to 8 computers (fewer than 16 in all) with slot k's name and sex | Rule, implemented | js/rules-original.js computerIdentity505 |
 | `FUN_10090170` | Planet picture | Interface | ui.js |
 | `FUN_10091640` | Fleet markers | Interface | ui.js |
 | `FUN_10099c84` | Build window: a type's scrap mark, asking first when it has ships (alert 8) | Rule, implemented | js/rules-original.js flagScrapDesign |
@@ -231,6 +238,7 @@ Every routine in the PowerPC program of Spaceward Ho! 5.0.5 for Mac OS 9 and X (
 - `FUN_1005ec40` / `FUN_10066bb0`: the auto play settings (Preferences: Friendly-Aggressive and Dig In-No Defense sliders, 0-100; the Auto button sets aggressiveness to a tenth of the first and colonies defended to the second). Now in the skin's Preferences (`rs.autoPlaySettings`); until they are set, a human on auto play keeps the auto play personality (the defaults weren't read: docs/open-questions.md).
 - `FUN_10059570`: options locked by rank ("Need more MPs"); left open on purpose.
 - `FUN_1005cf40`: the questions before buying more than 9 Scouts or Tankers at once.
+- `FUN_100a8780` / `FUN_100a9820`: dragging part of a pile from one fleet to another in the Group Fleets window (the remake merges whole fleets and splits; their rules are the same).
 
 The canned-message window (`FUN_1005d940`, with its effects in pass 2b: "Look at %s" explores a star for the receiver, "I own %s" marks it, "I like planets ..." gives your home), the turn time limit (`FUN_10058360`, `FUN_10066260`) and the first turn's budget kept for the next game (`FUN_10064600`; `FUN_1006579c` puts the preferences' shares in, and the remake does that with the defaults) are interface and are listed in docs/open-questions.md.
 
@@ -261,9 +269,9 @@ Every routine of 0x10054c00-0x10089260 not in the table above, by band. "Small" 
 - Small: `10058d40`, `100590d0`, `100591d0`, `1005a6b0`, `1005ac60`, `1005ae90`, `1005aec0`, `1005aef0`, `1005af10`, `1005af20`, `1005af30`, `1005af40`, `1005af50`, `1005af60`, `1005af70`, `1005af80`, `1005af90`, `1005afa0`, `1005ba30`, `1005ba80`, `1005bad0`, `1005baf0`, `1005bb00`, `1005bb10`, `1005bb20`, `1005bb30`, `1005bb40`, `1005bb50`, `1005bb60`, `1005bb70`, `1005bb80`, `1005be90`.
 - Case blocks: `10058f54`, `10058f7c`, `10058fa4`, `10058fcc`, `10058ff4`, `1005914c`, `100591dc`, `100592e4`, `10059538`, `1005ad7c`, `1005ae14`, `1005ae54`.
 
-**0x1005cf00-0x10062b20: The document's command windows: Buy, Dip, Surrender, Send Message, Give, Armageddon, Preferences, Scrap Ship Types, Evacuate, Dismantle, the menu dispatch and its case blocks** (40 routines)
+**0x1005cf00-0x10062b20: The document's command windows: Buy, Dip, Surrender, Send Message, Give, Armageddon, Preferences, Scrap Ship Types, Evacuate, Dismantle, the menu dispatch and its case blocks** (38 routines)
 
-- Described: `FUN_1005cf10` preferences field; `FUN_1005e820` QuickTime picture header copy; `FUN_1005f7b0` window resize preference; `FUN_1005f830` window placement preferences; `FUN_1005fde0` Organize Fleets window open; `FUN_1005ffa0` fleet window open; `FUN_10060580` report click (opens the star or battle); `FUN_10060910` menu enabling; `FUN_10060e40` case block of the menu dispatch FUN_100609e0 (fleet window); `FUN_10060eb0` case block of FUN_100609e0; `FUN_10060f20` case block of FUN_100609e0; `FUN_10061800` case block of FUN_100609e0; `FUN_10061af0` map contextual menu text; `FUN_10062710` window close; `FUN_10062890` rank window from a report; `FUN_10062950` window activation.
+- Described: `FUN_1005cf10` preferences field; `FUN_1005e820` QuickTime picture header copy; `FUN_1005f7b0` window resize preference; `FUN_1005f830` window placement preferences; `FUN_1005fde0` Organize Fleets window open; `FUN_1005ffa0` fleet window open; `FUN_10060580` report click (opens the star or battle); `FUN_10060910` menu enabling; `FUN_10060e40` case block of the menu dispatch FUN_100609e0 (fleet window); `FUN_10060eb0` case block of FUN_100609e0; `FUN_10060f20` case block of FUN_100609e0; `FUN_10061800` case block of FUN_100609e0; `FUN_10062710` window close; `FUN_10062890` rank window from a report; `FUN_10062950` window activation.
 - Small: `1005cf00`, `10061ae0`, `10062700`, `10062830`.
 - Case blocks: `10060dec`, `10060e08`, `10060e24`, `10060e5c`, `10060e78`, `10060ee8`, `10060f04`, `10060f3c`, `10060f58`, `10060f74`, `100613c4`, `10061454`, `100615cc`, `10061828`, `1006186c`, `10061988`, `100619dc`, `10061a4c`, `10061ab4`.
 
@@ -274,7 +282,7 @@ Every routine of 0x10054c00-0x10089260 not in the table above, by band. "Small" 
 
 **0x10063700-0x10067a10: CHoDocumentLocal and CHoDocumentClient: open, save, join, End Turn, the time limit, the Auto button, master points** (51 routines)
 
-- Described: `FUN_10063700` document; `FUN_100637b0` document constructor; `FUN_100639a0` document windows built; `FUN_10063f10` window placement; `FUN_100640b0` window placement; `FUN_10064220` window placement; `FUN_100642d0` End Turn for a local game (plays the turn, the time limit); `FUN_100647b0` document file; `FUN_10064960` save; `FUN_10064b70` file name; `FUN_10064c90` document glue; `FUN_10064cf0` document error alerts; `FUN_10065680` case block of FUN_10064e38 (document menu); `FUN_10065ec0` battle review; `FUN_10066000` chat; `FUN_10066b60` destructor; `FUN_10066d20` document; `FUN_10066df0` document file; `FUN_100670e0` document state; `FUN_100673a0` document window title; `FUN_10067470` application start-up; `FUN_10067620` CHoClientApp constructor; `FUN_100678a0` CHoClientApp destructor.
+- Described: `FUN_10063700` document; `FUN_100637b0` document constructor; `FUN_100639a0` document windows built; `FUN_10063f10` window placement; `FUN_100640b0` window placement; `FUN_10064220` window placement; `FUN_100642d0` End Turn for a local game (plays the turn, the time limit); `FUN_100647b0` document file; `FUN_10064960` save; `FUN_10064b70` file name; `FUN_10064c90` document glue; `FUN_10064cf0` document error alerts; `FUN_10065680` case block of FUN_10064e38 (document menu); `FUN_10065ec0` battle review; `FUN_10066000` the players' names added to the Preferences' lists of names (for later games' computers); `FUN_10066b60` destructor; `FUN_10066d20` document; `FUN_10066df0` document file; `FUN_100670e0` document state; `FUN_100673a0` document window title; `FUN_10067470` application start-up; `FUN_10067620` CHoClientApp constructor; `FUN_100678a0` CHoClientApp destructor.
 - Small: `10063950`, `10063a30`, `10063ee0`, `100641e0`, `10064930`, `10064c80`, `10065fe0`, `10065ff0`, `10066250`, `10066b40`, `10066b50`, `100670c0`, `100670d0`, `10067400`, `10067420`, `10067430`, `10067440`, `10067450`, `10067460`.
 - Case blocks: `10064d64`, `10064dac`, `10064e38`, `10065598`, `10065718`, `100659ec`, `10065c18`, `10065d78`, `10065f98`.
 
@@ -300,9 +308,9 @@ Every routine of 0x10054c00-0x10089260 not in the table above, by band. "Small" 
 - Described: `FUN_10079690` case block of the radical discovery FUN_10079360; `FUN_10079860` case block of FUN_10079360; `FUN_1007a2b0` case block of the hand refill FUN_1007a180; `FUN_1007a2d0` case block of FUN_1007a180; `FUN_1007a340` case block of FUN_1007a180.
 - Case blocks: `100795f4`, `100797c4`, `10079824`, `1007997c`, `10079a7c`, `10079c18`, `1007a0a8`, `1007a24c`, `1007a2e4`, `1007a2f8`, `1007a318`, `1007a32c`, `1007a354`, `1007a368`.
 
-**0x1007b4f0-0x1007e870: LHoArray templates; fleet routines (new fleet, split, labels, counts, map selection cycling, routes); ship costs and names; buying** (33 routines)
+**0x1007b4f0-0x1007e870: LHoArray templates; fleet routines (new fleet, split, labels, counts, map selection cycling, routes); ship costs and names; buying** (32 routines)
 
-- Described: `FUN_1007b4f0` array constructor; `FUN_1007b680` array copy; `FUN_1007ba90` a star's picture for a record; `FUN_1007c080` fleet name; `FUN_1007c250` fleet label; `FUN_1007c530` fleets at a star (map); `FUN_1007c6f0` map selection; `FUN_1007c920` fleet index; `FUN_1007c9d0` fleet index; `FUN_1007ca80` fleet index (moving or not); `FUN_1007cb00` map selection cycling; `FUN_1007ce20` fleet has only one kind; `FUN_1007dcf0` default ship-type name; `FUN_1007e700` battle info constructor; `FUN_1007e780` array destructor; `FUN_1007e7f0` battle info destructor.
+- Described: `FUN_1007b4f0` array constructor; `FUN_1007b680` array copy; `FUN_1007ba90` a star's picture for a record; `FUN_1007c080` fleet name; `FUN_1007c250` fleet label; `FUN_1007c530` fleets at a star (map); `FUN_1007c6f0` map selection; `FUN_1007c920` fleet index; `FUN_1007c9d0` fleet index; `FUN_1007ca80` fleet index (moving or not); `FUN_1007cb00` map selection cycling; `FUN_1007ce20` fleet has only one kind; `FUN_1007e700` battle info constructor; `FUN_1007e780` array destructor; `FUN_1007e7f0` battle info destructor.
 - Small: `1007c4d0`, `1007c500`, `1007c690`, `1007c6c0`, `1007cdc0`, `1007cdf0`, `1007ce90`.
 - Array templates: `1007b570`, `1007b5e0`, `1007b5f0`, `1007b700`, `1007b7c0`, `1007b820`, `1007b890`, `1007b910`, `1007b9a0`, `1007b9d0`.
 

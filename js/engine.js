@@ -408,7 +408,8 @@ function surrender(G, pid, to) {
 }
 function sendChat(G, from, to, text) {
   if (!feature(G, 'chat')) return;
-  const p = G.players[from], lim = rules(G).chatLimit; // 4.0.5: ten messages a turn
+  // rs.chatLimit: messages a player may send a turn (4.0.5: ten), or (G) => that
+  const p = G.players[from], lim = typeof rules(G).chatLimit === 'function' ? rules(G).chatLimit(G) : rules(G).chatLimit;
   if (lim) { if ((p.chatThisTurn || 0) >= lim) return 'limit'; p.chatThisTurn = (p.chatThisTurn || 0) + 1; }
   if (G.players[to].human) msg(G, to, report(55, p.name, text), { icon: p.human ? 'm9024' : 'bad' + p.face + '_' + (p.female ? 1 : 0), chat: true });
   if (p.human) msg(G, from, report(71, G.players[to].name, text), { quiet: true });

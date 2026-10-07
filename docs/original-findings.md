@@ -415,6 +415,13 @@ With weapons W, shields S, range R, speed V and mini M:
   CONFIRMED (`FUN_1009ab50` for you, `FUN_100852d0` for the computers). (It only
   matters for brand-new colonies.)
 - At most 24 ship designs at once ("assembly lines are full"). CONFIRMED.
+- **Ship type names** (CONFIRMED, `FUN_1007dcf0`): a new type takes a name from its
+  class's list (STR# 6010-6016, 15 names each). For the five set-up types, the Radical
+  discoveries' types and the computers' (and auto play's) the start is the game's
+  rand(0, 14); for the design window it is the clock's random number over the whole list
+  (`FUN_1009a810`). From the start it takes the first name round the list that none of
+  the player's types has (letter case aside), or, with all taken, the last one tried. A
+  decoy is a Fighter record and takes a Fighter's name.
 - **More than 17 types**: at the start of each turn's money step, a player
   with more than 17 ship types loses the oldest ones that have no ships in
   service and aren't the newest of their kind, until 17 are left. This is
@@ -429,6 +436,13 @@ With weapons W, shields S, range R, speed V and mini M:
 - Fleets refuel fully at your own and your allies' colonies. CONFIRMED.
 - **Multi-star paths** (CONFIRMED): a fleet can be given a route. It stops at
   each star to refuel and waits if it can't reach the next one yet.
+- **Routes on the map** (CONFIRMED, `FUN_1008c5f0`, `FUN_1008d140`): dragging a fleet
+  to a star gives it the route the computers' route finder (DeterminePath,
+  `FUN_1007d260`) finds from its star with its fuel left and its Range, so a star
+  beyond the fuel is reached through your and your best buddies' colonies (with a Tanker
+  in the fleet, through stars you have a record of from this year). No route: no orders,
+  and the first time "Sorry, but that fleet doesn't have enough fuel ..." (STR# 6004.30).
+  Option-click lays the stops out by hand (the web app's "Plan route").
 - **Arrival notices** (CONFIRMED, `FUN_10075b80`, `FUN_100782a0`): "Your fleet of %s
   has arrived at %s." at the end of a trip, when you had explored the star and it has
   an owner on your records, or the fleet isn't all Colony Ships. Your allies hear of
@@ -559,7 +573,9 @@ All of this needs the **Alliances** option, as in the original. CONFIRMED.
   of the turn.
 - **Messages**: the original has canned phrases ("I like *name*.", "Thank You!",
   "Sorry!", "#!$@*$&@•™!" and so on). The computers react to some of them
-  (section 12).
+  (section 12). Three a turn (CONFIRMED, `FUN_10061af0` @10061d88: Send Message is
+  greyed out once the outbox, player +0x1058, holds 3; the computers' outbox,
+  `FUN_100880f0`, is the same 3). The web app's free-text messages keep to three.
 - **Surrender** (CONFIRMED):
   - You can surrender to a player or to no one.
   - Your fleets are dismantled.
@@ -569,6 +585,19 @@ All of this needs the **Alliances** option, as in the original. CONFIRMED.
   - A computer that likes nobody surrenders to no one (`FUN_10088160`).
 
 ## 12. Computer players
+
+### Names and sexes (CONFIRMED)
+
+The New Game window's OK (`FUN_10059570` @1005a2a4-1005a404) draws, for each of 8
+computer slots, the sex, rand(1, 2) = 1 a man and 2 a woman (so a woman one time in
+two), and a name of that sex from the Preferences' list (the names of past players of
+that sex, added by `FUN_10066000`, then STR# 6280: 20 men's names, or 6281: 22 women's);
+both are drawn again while an earlier slot of the same sex has that name. These draws
+use the clock's random numbers (`FUN_10054d40`), not the game's. The server gives the
+k-th computer the k-th slot (`FUN_100b8770`), and when the galaxy is made
+(`FUN_1006d0c0`) a computer whose name begins another player's, or is the start of it,
+is renamed with the next of the designers' names for its sex (Peter, Joe, Timmer, ...;
+Christie, Suzy, Ann, ...). The web app does all of this but the past players' names.
 
 ### Personality (CONFIRMED)
 
@@ -900,6 +929,16 @@ At the end of a game it is adjusted:
 
 ## 14. What you see and hear
 
+### The first messages (CONFIRMED)
+
+A new player's report list (`FUN_1006f870` @1006fa2c-1006fab0) starts with "Spaceward
+Ho! by Peter Commons." and "Artwork by Howard Vives and Bob Van de walle."; with the
+"Give helpful game play hints" preference on (the default) it is hint 1 ("Click here to
+make this message go away. Click on the clock to end your turn."), the two credits,
+hint 2 ("Fleets appear as dots next to your planets. ...") and hint 3 ("Play with the
+spending bars. ..."). The demo says "Spaceward Ho! DEMO by Peter Commons." and always
+has the hints. Pictures 9031, 9032 and 9049; the plain message sound.
+
 ### Ship pictures (CONFIRMED)
 
 Ships are built from a sheet of parts (picture 11000), with four rows of 30
@@ -998,8 +1037,13 @@ keeps the name "explore" because that is what the project layout asked for.
 - **Hidden debug menu** (God View, "Computer Do Turn", the Computer Attrs and
   Terraform test windows): NOT IMPLEMENTED. These are developer tools.
 - **Group Fleets…** (the original's window for rearranging ships between
-  fleets): NOT IMPLEMENTED as a window. The web app has "Merge all fleets
-  here" and fleet splitting instead.
+  fleets, `LOrganizeFleetsDialog`): NOT IMPLEMENTED as a window. The web app has
+  "Merge all fleets here" (the window's Group All) and fleet splitting, with its rules
+  (CONFIRMED, `FUN_100aa240`, `FUN_100aa730`, `FUN_100a8780`, `FUN_100a85b0`):
+  Satellites stay apart, a fleet of only Biologicals goes only with another; the fleet
+  that takes ships keeps its orders and gets the lower fuel, is "bought this turn"
+  only if both were, and a design new to it keeps its stance; Split gives the new fleet
+  the old one's fuel, mark and stances.
 - **Saving where you like**: the web app saves one game in the browser rather
   than to a file.
 - **Exact replays**: the original's own list of 5,000 random numbers is not
@@ -1164,3 +1208,9 @@ code does it. "Before" is the remake's earlier reading.
 | Master points | the whole award | at most halfway past your next rank | `FUN_100b24c0`, `FUN_10055f20` |
 | Computer players | the remake's money figures | plan with the net (player +0x40), a reserve from this turn's money, 4.0.5's ResolveSpending; evacuation by mark; terraform wishes where the bar isn't done; Tankers in attack fleets arrive late and defend; the colony list's order | `FUN_10081cc0`, `FUN_10085bd0`, `FUN_10081fe0`, `FUN_10082690`, `FUN_10084860` |
 | Spiral maps | | before 2100 each computer explores the stars numbered 0 to players − 1, the homes | `FUN_10077aa0` @10077fc8 |
+| Computers' names (October 2026, second pass) | a woman 45 % of the time, names from the lists with the game's numbers | a woman one time in two, then a name of that sex, drawn again while an earlier computer of that sex has it, with the clock's numbers; a computer whose name begins another player's, or is the start of it, renamed from the designers' names | `FUN_10059570`, `FUN_100b8770`, `FUN_1006d0c0` |
+| Ship type names | in order round the list | from the game's rand(0, 14) (set-up, Radical, computers) or the clock's (the design window), the first name round the 15 no type of yours has; a decoy a Fighter's name | `FUN_1007dcf0` |
+| First messages | "Spaceward Ho! by Peter Commons. Designed by Joe Williams.", "Click here ..." | hint 1, the two credits, hints 2 and 3 (the credits alone with hints off) | `FUN_1006f870` @1006fa2c |
+| Messages a turn | no limit | three | `FUN_10061af0` @10061d88 |
+| Merging and splitting fleets | any fleets; the orders cleared | Biologicals only with Biologicals; the fleet keeps its orders, the lower fuel, the "bought this turn" mark only if both had it, a new design's stance | `FUN_100aa240`, `FUN_100a8780`, `FUN_100a85b0`, `FUN_100aa730` |
+| Routes on the map | only with modern conveniences | DeterminePath's route for any dragged fleet | `FUN_1008c5f0`, `FUN_1008d140`, `FUN_1007d260` |

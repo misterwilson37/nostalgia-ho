@@ -627,21 +627,45 @@ The ten entries noted here before are settled in the code:
 
 ### Open
 
-The rule questions met in the ruleset's own code are settled. The engine defaults the
-ruleset still relies on are listed in `docs/fallbacks.md`; those not settled yet:
+None of the rules. The engine defaults the ruleset relied on are settled from 5.0.5's
+code (`docs/fallbacks.md`); the last of them, in October 2026:
 
-1. **Women computers' chance** (the engine: 45 %) and **where a computer's name is first
-   given**: `FUN_1006d0c0` only renames a computer whose name another player already
-   has, with the next unused name of a fixed list in order (men from "Peter", women from
-   "Christie"). Neither the sex nor the first name was found being drawn.
-2. **Design names**, read but not yet applied: `FUN_1007dcf0` starts at a random name
-   among the first 15 of the class's list (set-up, the computers, Radical designs) or all
-   of it (the design window, `FUN_1009a810`), and takes the next name round the list no
-   design of the player's has (else the first one drawn), as 4.0.5's. The remake names
-   them in order. Applying it changes the random numbers drawn, and the Palm (which takes
-   5.0.5's hooks) hasn't been checked.
-3. The first message, a limit on humans' messages a turn, the Group Fleets window and its
-   fuel, routes planned on the map, and (patch only) scrapping over someone else's star.
+1. **The computers' sexes and names.** The New Game window's OK draws them, for 8
+   computer slots: the sex is the clock's rand(1, 2) == 1 (a man; so a woman one time in
+   two, not the engine's 45 %), then a name of that sex, both drawn again while an
+   earlier slot of the same sex has the name (`FUN_10059570` @1005a2a4-1005a404, and its
+   twin `FUN_100b0bc0`). The names are the Preferences' list of past players of that sex
+   (`FUN_10066000` adds every player's name when a game is played) and then STR# 6280
+   (men) / 6281 (women) (`FUN_10095d50`, `FUN_10095ea0`). The server gives computer k the
+   k-th (`FUN_100b8770`), and the galaxy set-up's `FUN_1006d0c0` renames a computer whose
+   name begins another player's, or is the start of it, with the next of the designers'
+   names for its sex (men from "Peter", player +0x28 = 1; women from "Christie"; the
+   earlier note had the sexes the other way round). The draws are the clock's
+   (`FUN_10054d40`, CPrefs' virtual +0x18), not the game's table. Done
+   (`computerIdentity505`); the past players' names aren't kept (below).
+2. **Design names.** `FUN_1007dcf0` as read, now applied (`shipName505`): the game's
+   rand(0, 14) and 15 names for the set-up types, the Radical discoveries' types, the
+   computers' and auto play's; the clock's over the whole list for the design window;
+   then the first name round the list no live type of the player's has, and when all are
+   taken the last one tried (not the first drawn, as noted before); a decoy is a Fighter
+   record and takes a Fighter's name. The Palm program's `FUN_0004cd18` is the same, so
+   the Palm ruleset keeps 5.0.5's.
+3. **The first messages** (`FUN_1006f870` @1006fa2c-1006fab0): with the "Give helpful
+   game play hints" preference on (its default), hint 1 ("Click here to make this
+   message go away. ..."), "Spaceward Ho! by Peter Commons.", "Artwork by Howard Vives
+   and Bob Van de walle.", hints 2 and 3; with it off, the two credits. Done
+   (`welcome505`; the New Game passes the preference as `hints`).
+   **Humans' messages a turn**: three (Send Message is greyed out at 3, `FUN_10061af0`
+   @10061d88). Done (`chatLimit`).
+   **The Group Fleets window** (`LOrganizeFleetsDialog`): its rules for "Merge all
+   fleets here" and splitting are done (`canMerge505`, `organized505`): all-Biological
+   fleets mix only with each other; the fleet that takes ships keeps its orders and the
+   lower fuel. The window itself is under "Interface not done".
+   **Routes planned on the map**: a dragged fleet gets DeterminePath's route
+   (`FUN_1008c5f0` @1008ce2c, `FUN_1008d140`). Done (`rs.route`).
+   **Scrapping over someone else's star, patch only**: nothing reaches the engine's
+   scrapping; the patch's global warming marks its fleet, and 5.0.5's own dismantling
+   gives the metal to the star's owner. Nothing to do.
 
 Settled in October 2026: an out computer plays no turn (`FUN_10081cc0` runs its steps
 only while the player's out flag, +0x34, is 0; Palm `FUN_00060178`, +0x36).
@@ -687,6 +711,10 @@ These are what 5.0.5's code does and what the remake now does; they look like sl
 12. **"%s is cheating"** (0x41d) comes from a checksum of the player record
     (`FUN_1007b410`) compared at the start of a turn: anti-cheat, not a rule, and not in
     the remake.
+13. **A computer is renamed by a prefix.** `FUN_1006d0c0` compares names over the
+    shorter one's length, letter case aside, so a human called Edward has a computer
+    called Ed renamed Peter, and one called P has Pam renamed. The designers' lists it
+    renames from hold 16 names each; the men's runs on into the women's.
 
 ### Remake's choices
 
@@ -704,9 +732,22 @@ These are what 5.0.5's code does and what the remake now does; they look like sl
    points then; 5.0.5 notes it when you join the game (`FUN_10063a40`). With one human
    it is the same.
 7. **Several humans** play hot seat (5.0.5 also by network and by game file).
+8. **The clock's random numbers** (`FUN_10054d40`: the computers' sexes and names, the
+   design window's names) are a stream of the remake's own, apart from the game's
+   (`G.rsClock`).
+9. **The past players' names**: 5.0.5 adds every player's name to the Preferences'
+   lists of names (`FUN_10066000`), which later games draw computers' names from; the
+   remake keeps no such list and draws from the game's 20 and 22.
 
 ### Interface not done
 
+- **The Group Fleets window** (`LOrganizeFleetsDialog`, WIND 140: drag piles between
+  fleets, Group All, Split, the stance and late-arrival controls). Its rules are done
+  through "Merge all fleets here", Split and the fleet's stance controls; dragging part
+  of a pile from one fleet to another isn't. A Satellite pile can't be dragged in it.
+- **The one-time alert** when a dragged fleet can't reach the star ("Sorry, but that
+  fleet doesn't have enough fuel ...", STR# 6004.30, shown once, prefs +0x290 bit 1):
+  the remake shows its own note each time.
 - Now done: **the auto play settings** (Preferences, `FUN_1005ec40`; used by the Auto
   button, `FUN_10066bb0`; `rs.autoPlaySettings`): Preferences has the Friendly-Aggressive
   and Dig In-No Defense sliders (0-100), and each turn the computer plays for you it sets
@@ -762,7 +803,29 @@ The questions noted here or in `docs/palm-findings.md` before are settled in the
 
 ### Open
 
-None: the code settles every rule question met.
+None: the code settles every rule question met. Settled in October 2026 (they had been
+5.0.5's engine defaults):
+
+1. **Player slots**: 9, not 16. `FUN_000232e6` sets the alliance and best-buddy masks
+   (game +0x1aa, +0x1bc) for 9 players (5.0.5's `FUN_1006c4d0` for 16); a human joins
+   only while there are no players (`FUN_0003412a`, the New Game window's Create and the
+   Players window's Add, else 0x13a2), and 8 computers' names are drawn
+   (`FUN_000692c4`). Done (`maxPlayers: 9`; the remake's hot seat shares the 9).
+2. **The computers' names**: 5.0.5's. tSTL 6280 / 6281 are STR# 6280 / 6281 name for
+   name, read the same way (`FUN_0002bf90`, `FUN_0002c0b8`: the Preferences' past
+   players first); the sex is SysRandom(1, 2) == 1, a man (`FUN_000692c4`); the rename
+   (`FUN_00023cda`, listed before as the star names) has 5.0.5's two lists of 16.
+3. **Design names**: 5.0.5's routine (`FUN_0004cd18`; tSTL 6010-6016 the same lists).
+4. **The first messages** are the Palm's own (`FUN_00026304` @000266fc-000268cc):
+   tSTL 6021.0-2 for the hints (`FUN_0002be5c` reads report 500's number less one), the
+   two credits, and "Palm OS version by Christopher Cotton and Steve Orens of Mobilefreon
+   (tm)" (1159) last. Done (`welcome` in `js/rules-palm.js`).
+5. **Messages a turn**: below (item 8 of "Settled, worth confirming"). **Organize
+   Fleets** (tFRM 2300): Group All (`FUN_00079a18`) and Split (`FUN_00079ea8`) are
+   5.0.5's (the lower fuel, the "bought this turn" mark, a new design's stance, the
+   colonists, Biologicals grouped apart; Split copies the fuel), so the remake's "Merge
+   all fleets here" and Split keep 5.0.5's rules. Moving a pile is the Palm's own (item
+   10 below). **The map's routes**: 5.0.5's DeterminePath (`FUN_0004c22c`).
 
 ### Settled, worth confirming
 
@@ -792,6 +855,21 @@ These are what the Palm code does and what the remake now does; they look like s
    `docs/coverage-palm.md`.
 7. **"%s is cheating"** (0x41d) from a checksum of the player record (`FUN_00058cf6`):
    anti-cheat, not a rule, not in the remake.
+8. **A human's messages aren't counted.** The player record has room for 3 messages a
+   turn (+0x124, +0x126; the gift count follows at +0x1b0), the computers stop at 3
+   (`FUN_00066fdc`) and 5.0.5 greys out Send Message at 3, but the Palm's Send Message
+   and Send (`FUN_000371d6`, `FUN_000754b6`) never check: a 4th is written over the
+   gifts, and the End Turn copies past each player's 0xb8 bytes. The remake can't play
+   the overwrite and allows any number; the 1.0.4.1 patch keeps to 3 (`palmMessages`).
+9. **One human a game** (item 1 above): the Players window's Add refuses once the game
+   exists (0x1390) or anyone is in (0x13a2), and its End and Take buttons do nothing.
+10. **Moving a pile in Organize Fleets** (`FUN_000790ea`, `FUN_0004af48`; 5.0.5 drags
+    piles with `FUN_100a8780`): to "Empty Fleet" the new fleet (`FUN_0004adc0`) has a
+    full tank (a Biological's empty) and isn't "bought this turn"; into another fleet,
+    that fleet keeps its own fuel, takes the moved design's stance, and its colonists
+    are replaced by the moved ones (5.0.5: the lower fuel, the stance only for a design
+    new to it, the colonists added). The remake has no pile move (Interface not done),
+    so neither is played.
 
 ### Remake's choices
 
@@ -805,8 +883,10 @@ These are what the Palm code does and what the remake now does; they look like s
 5. **Gifts**: the sender hears at once (Palm: in pass 2b, 0x44e/0x44f).
 6. **Master points**: the cap is worked out at the win (Palm notes it at the new game,
    `FUN_000395a6`); the same with one human.
-7. **Several humans** play hot seat with the remake's own cover screen (Palm: the
-   Players window, tFRM 1300).
+7. **Several humans** play hot seat with the remake's own cover screen. The Palm game
+   has room for one: its Players window (tFRM 1300, `FUN_00039c2c`) adds a person through
+   `FUN_0003412a`, which refuses once the game exists (0x1390) or has a player (0x13a2),
+   and its End and Take buttons do nothing.
 8. **Every game starts from the default shares**: the Palm game keeps your first turn's
    research and budget shares as the next game's (`FUN_0002d91c`).
 9. **Sounds**: the skin's own (Palm: a handful of system sounds, `FUN_0002c17e`).
@@ -818,6 +898,8 @@ These are what the Palm code does and what the remake now does; they look like s
   bar). Its program names are open as 5.0.5's.
 - Now done: **the auto play settings** (tFRM 1700, `FUN_000713be`): the Friendly and Dig
   In sliders on the Auto play window, used as 5.0.5's (above), with the same open points.
+- **Organize Fleets' pile moves** (`FUN_000790ea`, `FUN_0004af48`; item 10 above): the
+  remake has Group All ("Merge all fleets here") and Split.
 - **Build Ships' Allow Debt box** (`FUN_0004435a`) and the questions before building more
   than 9 Scouts or Tankers (`FUN_00043754`, tSTL 6004.36-37).
 - **The research bars** dragged per mille like the budget bars (`FUN_00049496`), and

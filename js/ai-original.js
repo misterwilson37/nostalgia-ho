@@ -228,7 +228,9 @@ function determinePath(C, from, to, fuel, R, tanker) {
     // the star record's year is this year: the turn routine moves the year on
     // before the computers plan, so only what was looked at during this
     // computer turn (the Diabolical look of step 4) qualifies
-    for (const s of G.stars) if (know(G, p, s.id).dsight === G.turn) add(s.id);
+    // (the map's route for a human, mapRoute below: C.thisYear, the records
+    // of the year being played)
+    for (const s of G.stars) if (C.thisYear ? C.thisYear(know(G, p, s.id)) : know(G, p, s.id).dsight === G.turn) add(s.id);
   }
   const n = nodes.length, D = (a, b) => d(nodes[a], nodes[b]) & 255;
   let best = direct * 3, bestCount = 0, bestPath = null;
@@ -372,7 +374,7 @@ function maintainShipTypes(C) {
     }
     if (c < 6 && (!best || ai.redesign[type] <= bo)) {
       if (live(p).length < 24) {
-        const d = E.findOrCreateDesign(G, p, RS.aiSpec(p, type));
+        const d = RS.newDesign505(G, p, RS.aiSpec(p, type)); // named with the game's numbers (FUN_10086830 @10086bd0)
         C.scrapD.delete(d);
         if (C.iq > 1 && !d.built) d.free = true;
         C.T[type] = d;
@@ -1019,6 +1021,21 @@ function perform(C) {
   }
 }
 const route = (C, f, to) => determinePath(C, f.star, to, maxR(C.G, f) - usedFuel(C.G, f), maxR(C.G, f), countType(C.G, f, 3) > 0);
+// CONFIRMED (FUN_1008c5f0 @1008ce2c, FUN_1008d140 @1008d538): a fleet dragged on the map
+// (no key held) is given DeterminePath's route from its star with its fuel
+// left (Range - fuel used, FUN_1007bfb0 / FUN_1007c060) and its Range, with
+// a Tanker (FUN_1007ce90) through the stars whose record is of the year
+// being played (the turn routine wrote them after moving the year on:
+// js/rules-original.js recYear505). No route: no orders. (Command-drag is
+// the same call; Option-click lays out the stops by hand, the remake's
+// "Plan route"; FUN_1008c5f0 @1008cdac, @1008cdec.) rs.route (js/rules-original.js) asks here when the star is
+// beyond the fuel left; a star within it is DeterminePath's straight hop.
+function mapRoute(G, f, to) {
+  if (f.star == null || f.sat) return null;
+  const C = { G, p: G.players[f.owner], thisYear: (k) => !!(k && k.explored && k.seen >= 0 && 2010 + 10 * k.seen === G.year) };
+  const r = route(C, f, to);
+  return r && r.length ? r : null;
+}
 // FUN_10083fe0: a lone scout (or biological) at the colony goes; else a
 // biological is bought (from a colony of 10 to 700 million, when you have
 // the type), else a scout
@@ -1320,5 +1337,7 @@ E.registerAI('original', {
   noteBattle: () => {},
   // for js/rules-original.js aftermath505 (FUN_100803e0)
   modify, note, est, LIKE,
+  // the map's routes (js/rules-original.js route)
+  mapRoute,
 });
 })(this);

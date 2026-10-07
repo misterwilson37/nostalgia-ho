@@ -176,6 +176,25 @@ function difficulty(o) {
   return trunc(Math.max(30, Math.min(140, sc)));
 }
 
+// CONFIRMED (FUN_00026304 @000266fc-000268cc): a player's first messages are
+// 5.0.5's (js/rules-original.js welcome505) with the Palm's own hints and a
+// last one: with the hints preference on (prefs +0x209, default on,
+// FUN_0002b274; the New Game record +0x41, FUN_000696ba) or in the demo
+// (game +0x4a), report 500 with 1 (tSTL 6021.0: FUN_0002be5c reads index - 1),
+// the credit (1000; 1001 in the demo), the artwork (1002), 500 with 2 and 3
+// (6021.1-2), and "Palm OS version by ..." (1159, tSTL 6020.159); otherwise
+// 1000, 1002 and 1159. Pictures from the 5.0.5 table, 1159 9051
+// (FUN_000292f8).
+function welcome(G) {
+  const m = (t, pic) => [t, { icon: pic, sound: 7001 }];
+  const credit = [m('Spaceward Ho! by Peter Commons.', 'm9031'), m('Artwork by Howard Vives and Bob Van de walle.', 'm9032')];
+  const palm = m('Palm OS version by Christopher Cotton and Steve Orens of Mobilefreon (tm)', 'm9051');
+  if (G.opts.hints === false) return [...credit, palm];
+  return [m('Click the G button to see the Galaxy, click the $ button to see the Spendingscreen and click the H button to see these messages.', 'm9049'), ...credit,
+    m('Fleets appear as icons next to your planets. To send a fleet to another planet, select it and then drag it to the new planet.', 'm9049'),
+    m('Play with the spending bars. Conquer the galaxy. Gain ranks to unlock more game options. Enjoy.', 'm9049'), palm];
+}
+
 const rs = Object.assign(base, {
   label: 'Palm OS 5 (2003)',
   // the New Game window's Version and Edition menus (engine.js editions)
@@ -185,7 +204,23 @@ const rs = Object.assign(base, {
   ai: 'palm',               // the computers: js/ai-palm.js (5.0.5's, the same code)
   maxStars: MAX_STARS,
   turn505: true,            // the 5.0.5 turn (js/rules-original.js is505)
-  makeGalaxy, afterSetup, difficulty, evacuateToggle,
+  makeGalaxy, afterSetup, difficulty, evacuateToggle, welcome,
+  // CONFIRMED (FUN_000232e6: the alliance and best-buddy masks, game +0x1aa
+  // and +0x1bc, are set for 9 players; 5.0.5's FUN_1006c4d0 for 16): 9 player
+  // slots, one human (FUN_0003412a, the Players window's Add and the New Game
+  // window's Create: only before the game exists, else 0x1390, and while there
+  // are no players yet, else "too many", 0x13a2; 5.0.5's FUN_100b7f90 takes 8) and at most 8 computers (the 8 names
+  // drawn, FUN_000692c4; the rank's limit, FUN_00038e72). The remake's hot
+  // seat (its own) shares the 9.
+  maxPlayers: 9,
+  // CONFIRMED (FUN_000371d6, Send Message; FUN_000754b6, its Send): unlike
+  // 5.0.5 (js/rules-original.js chatLimit) the Palm game doesn't count a
+  // human's messages: each Send adds one to the outbox (player +0x124, room
+  // for 3 at +0x126, 0x2e bytes each), so a 4th is written over the gift
+  // count and gifts (+0x1b0) and the End Turn copies more than its 0xb8
+  // bytes a player (FUN_000500d4, 4 x 0x2e). The remake, which can't do that, lets you
+  // send as many as you like; the 1.0.4.1 patch keeps to 3 (fix 'palmMessages').
+  chatLimit: (G) => E.fixed(G, 'palmMessages') ? 3 : 0,
   // tSTL 6021.4-43, one a turn at random (FUN_000500d4); the skin shows hints
   // from rs.hintTexts when it has them
   hintTexts: HINTS,
@@ -208,6 +243,8 @@ rs.patchVersion = '1.0.4.1'; // the Palm program's own version is 1.0.4
 // Palm code is the same (interest FUN_00050ed4; the computers are 5.0.5's), and
 // its own: the missing ship pictures (the Palm skin draws them)
 rs.fixes = O.fixes.concat([
+  { id: 'palmMessages', title: 'No more than three messages a turn',
+    text: 'The game keeps room for three messages a turn, and the computers never send more, but nothing stopped you sending a fourth: it was written over your gifts for the turn and past the space the End Turn keeps for each player. The patch stops at three, as the Mac game did.' },
   { id: 'palmPictures', title: 'The fastest engines and strongest noses are drawn',
     text: 'A ship is drawn from an engine, a hull and a nose, but the Palm game has no picture for the top engine (6205) or the top nose (6105), so those ships were drawn with a part missing. The patch draws the highest engine and nose there are.' },
 ]);

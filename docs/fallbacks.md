@@ -89,8 +89,6 @@ business; the DOS 2.0 "Inherited rules audit" covers them for 2.0.
 | mac20 | `computerIdentity` | as above | verified: Mac 2.0.1 has one generator, `RND` @121a6 (no `aSynchRand`), and `DoGameSolidificationStuff` @a40d8 draws the names with it |
 | 301 | `computerIdentity` | as above | verified: `DoGameSolidificationStuff` @a741a seeds the game's generator with the galaxy's seed (`srand`, header +6) and draws the names with `RND` @11ea2, as 1.2 does; 3.0.1 has no other generator |
 | 405 | `computerIdentity` | as above | verified: 405-findings, "Computers' sexes, and the names of the computers, are drawn with `aSynchRand`, not the game's random numbers" on the Mac (Mac 4.0.5 differs, 7), so the game's on Windows (`FUN_004768cc`, coverage-405) |
-| original | `computerIdentity` | as above | gap: `FUN_1006d0c0` only renames a computer whose name another player already has, with the next unused name of a fixed list in order (men from "Peter", women, player +0x28 = 1, from "Christie"), no random numbers; where a computer's name is first given wasn't found |
-| palm | `computerIdentity` | as above | gap: as 5.0.5 |
 
 ### Mac 1.2 (`12`)
 
@@ -147,21 +145,16 @@ business; the DOS 2.0 "Inherited rules audit" covers them for 2.0.
 | Ruleset | Hook | Engine default | Status |
 |---|---|---|---|
 | original | `checkEveryStep` | the winner is checked on an End Turn's last step only | verified: rules-original `checkElimination505`, CONFIRMED (`FUN_1007acf0`, "on the last step of an End Turn"); the engine's own note cites `FUN_100728d0` |
-| original | `maxPlayers` | 16 players | verified: original-findings, "attitude for all 16 player slots" |
-| original | `maleNames` | the computers' names from `js/data.js` (5.0.5's lists), none the same | verified: coverage-505, `FUN_1006d0c0` "Computer names from the lists, none the same: engine names" |
-| original | `femaleNames` | as `maleNames` | verified: as above |
+| original | `maxPlayers` | 16 players | verified: 16 player slots (the masks for 16 in `FUN_1006c4d0`): up to 8 humans (`FUN_100b7f90`: a human joins while fewer than 8 are in) and 8 computers (`FUN_100b8770` @100b89a0: the computers' records after the humans', fewer than 16 in all and at most 8; 8 names are drawn, `FUN_10059570`) |
+| original | `maleNames` | the computers' names from `js/data.js` | unused: `rs.computerIdentity` (`computerIdentity505`) names the computers itself, from the same lists (STR# 6280, `FUN_10095d50`) |
+| original | `femaleNames` | as `maleNames` | unused: as `maleNames` (STR# 6281) |
 | original | `starNames` | `js/data.js`'s 255 star names (5.0.5's) | verified: palm-findings, "Star names: 5.0.5's" 255 (tSTL 6060 against 5.0.5) |
-| original | `femaleComputers` | a computer is a woman 45 % of the time | gap: no finding gives 5.0.5's chance (2.0 and 4.0.5: a half, CONFIRMED there) |
-| original | `designName` | a new design is named from `js/data.js`'s ship names by type, in order, skipping names in use | gap: 5.0.5's "default ship-type name" (`FUN_1007dcf0`) is listed in coverage-505, not described |
-| original | `shipNames` | the ship names `designName` uses | gap: with `designName` |
-| original | `welcome` | "Spaceward Ho! by Peter Commons. Designed by Joe Williams." (sound 11111), then "Click here to make this message go away. Click on the clock to end your turn." | gap: the second is 5.0.5's text (`js/data.js`); the first message's text and sound aren't cited |
-| original | `chatLimit` | no limit on messages a turn | gap: 5.0.5's Send Message window sends canned lines (coverage-505, `FUN_1005d940`, "Interface, not done"); its computers send three a turn (original-findings). A limit for humans isn't stated |
-| original | `canMerge` | any two fleets may be put together | gap: 5.0.5's Group Fleets window is not implemented; "Merge all fleets here" and splitting stand in for it (original-findings, "Group Fleets…"). Its rules (who may group, the fuel) aren't confirmed |
-| original | `organized` | merging: the fuel is the lower of the two, the orders are cleared; splitting: both keep the fuel | gap: with `canMerge` |
-| original | `route` | no route: a fleet sent beyond its fuel isn't given orders (the classic skin plans a route itself only with modern conveniences) | gap: 5.0.5's map plans and gives routes when a fleet is dragged (coverage-505, `FUN_1008c5f0`) |
+| original | `femaleComputers` | a computer is a woman 45 % of the time | unused: `computerIdentity505` draws each sex, a woman one time in two (`FUN_10059570` @1005a318: the clock's rand(1, 2), 1 a man) |
+| original | `shipNames` | the ship names the engine's `designName` uses | unused: `designName505` and `newDesign505` name every type themselves, from `js/data.js`'s lists (STR# 6010-6016, `FUN_10095b80`) |
+| original | `nameAStar` | no Name a Star | gap (found in the October 2026 check, not built): 5.0.5's rank window (`FUN_1005e2b0`) has a star-naming field and the alert "Sorry, but there is already a star with that name" (STR# 6004.10, `FUN_100966c0(10)` @1005e73c); how the name is used in later games wasn't read |
 | original | `outComputersPlay` | a computer out of the game gives no orders | verified: the computer turn (`FUN_10081cc0`, called for each computer by `FUN_10072a10`) runs its steps only while the player's out flag (+0x34, set by `FUN_1007abb0`) is 0; an out player's fleets are dismantled in its next pass 1 anyway |
-| original | `scrapAt` | a fleet scrapped over someone else's star: the metal falls onto the planet | gap, patch only: the engine's `scrapFleet` is reached only by the 5.0.5.1 patch's global warming (`globalWarming`, a fleet scrapped for lack of funds). 5.0.5's own dismantling (`FUN_10074580`) gives such metal to the star's owner |
-| original | `scrapped` | no report when a fleet is scrapped | gap, patch only: as `scrapAt` (the patch's message is its own) |
+| original | `scrapAt` | a fleet scrapped over someone else's star: the metal falls onto the planet | unused: nothing in the 5.0.5 rules reaches the engine's `scrapFleet` or `scrapDesign`. Fleets and types are marked (`rs.flagScrap`, `rs.flagScrapDesign`) and dismantled by 5.0.5's own routine at End Turn (`FUN_10074580`: over someone else's star the metal goes to that star's owner, `otherScrapMetal505`); the 5.0.5.1 patch's global warming marks its fleet the same way (`interest505`, 0x46c); the computers' scrapping is marks too |
+| original | `scrapped` | no report when a fleet is scrapped | unused: as `scrapAt` (5.0.5's dismantling writes its own reports) |
 | original | `patchVersion` | the version's number + ".1": 5.0.5.1 | verified: docs/fixes.md ("5.0.5"); not play |
 | original | `fixOptions` | no New Game choice is fixed | unused in effect: 5.0.5's New Game window |
 | original | `queueMergeAny` | (ship queues) | unused: no ship queues |
@@ -177,20 +170,13 @@ the Palm program is checked on its own:
 | Ruleset | Hook | Engine default | Status |
 |---|---|---|---|
 | palm | `checkEveryStep` | the winner on the last step only | verified: palm-findings, "Winning: 5.0.5's routine" (`FUN_000586fc`) |
-| palm | `maxPlayers` | 16 players | gap: as 5.0.5, not stated for the Palm program |
-| palm | `maleNames` | 5.0.5's names | gap: palm-findings checks the star names (Courasant for Antares) but not the computers' names |
-| palm | `femaleNames` | 5.0.5's names | gap: as `maleNames` |
-| palm | `femaleComputers` | 45 % | gap: as 5.0.5 |
-| palm | `designName` | as 5.0.5 | gap: as 5.0.5 |
-| palm | `shipNames` | as 5.0.5 | gap: as 5.0.5 |
-| palm | `welcome` | as 5.0.5 | gap: as 5.0.5 |
-| palm | `chatLimit` | no limit | gap: as 5.0.5 |
-| palm | `canMerge` | any two fleets | gap: as 5.0.5 |
-| palm | `organized` | as 5.0.5 | gap: as 5.0.5 |
-| palm | `route` | no route | gap: as 5.0.5 |
+| palm | `maleNames` | the engine's names | unused: 5.0.5's `computerIdentity505`, the same code (`FUN_000692c4`: SysRandom(1, 2), 1 a man; tSTL 6280 / 6281, the same 20 and 22 names as 5.0.5's STR#, `FUN_0002bf90`; the rename `FUN_00023cda` with the same two lists of 16) |
+| palm | `femaleNames` | the engine's names | unused: as `maleNames` |
+| palm | `femaleComputers` | 45 % | unused: as `maleNames` (a woman one time in two) |
+| palm | `shipNames` | the engine's ship names | unused: 5.0.5's `designName505` / `newDesign505`, the same code (`FUN_0004cd18`; tSTL 6010-6016 the same as 5.0.5's) |
 | palm | `outComputersPlay` | out computers give no orders | verified: the Palm's computer turn `FUN_00060178` runs only while the player's out flag (+0x36, set by `FUN_000585fc`) is 0, as 5.0.5's |
-| palm | `scrapAt` | onto the planet | gap, patch only: as 5.0.5 (the 1.0.4.1 patch takes 5.0.5's `globalWarming`) |
-| palm | `scrapped` | no report | gap, patch only: as 5.0.5 |
+| palm | `scrapAt` | onto the planet | unused: as 5.0.5 (marks, dismantled by `FUN_00051dd0`; the 1.0.4.1 patch takes 5.0.5's `globalWarming`, which marks) |
+| palm | `scrapped` | no report | unused: as 5.0.5 |
 | palm | `fixOptions` | no fixed choice | unused in effect: the Palm game's New Game window |
 | palm | `queueMergeAny` | (ship queues) | unused: no ship queues |
 | palm | `queueSlots` | (ship queues) | unused: no ship queues |
@@ -254,8 +240,46 @@ These hooks were engine defaults and are now each ruleset's own, from its versio
   piles). This changes play for a human: "Merge all fleets here" now puts together only
   fleets of one design.
 
+### 5.0.5 and the Palm game (October 2026, second pass)
+
+These were engine defaults for 5.0.5 (and the Palm game, which takes 5.0.5's hooks) and
+are now the ruleset's own, from the code (`docs/original-findings.md`, section 18;
+`docs/palm-findings.md`):
+
+- **`computerIdentity`** (5.0.5, Palm): the New Game window's OK draws, for each of 8
+  computer slots, the sex (the clock's rand(1, 2) == 1: a man; a woman one time in two)
+  and a name of that sex, drawn again while an earlier slot of the same sex has it
+  (`FUN_10059570` @1005a2a4-1005a404, `FUN_100b0bc0` @100b1940; Palm `FUN_000692c4`, by
+  SysRandom); the server gives computer k slot k's (`FUN_100b8770`), and the galaxy
+  set-up renames a computer whose name begins another player's or is the start of it
+  (`FUN_1006d0c0`; Palm `FUN_00023cda`). The draws are the clock's (CPrefs' virtual
+  +0x18, `FUN_10054d40`), so the remake makes them with a stream of its own
+  (`G.rsClock`), not the game's numbers.
+- **`designName`** and the types the game makes (5.0.5, Palm): `FUN_1007dcf0` (Palm
+  `FUN_0004cd18`): from a start the game's rand(0, 14) (set-up, Radical discoveries,
+  the computers and auto play) or the clock's (the design window), the first name round
+  the class's 15 that no live type of the player's has; a decoy takes a Fighter's name.
+  The remake had named them in order.
+- **`welcome`**: 5.0.5's first messages (`FUN_1006f870` @1006fa2c): with the hints
+  preference on, hint 1, "Spaceward Ho! by Peter Commons.", "Artwork by Howard Vives and
+  Bob Van de walle.", hints 2 and 3; with it off the two credits. The Palm game's own
+  hints and a last "Palm OS version by ..." (`FUN_00026304` @000266fc). The engine's
+  "Designed by Joe Williams" line was nobody's.
+- **`chatLimit`**: 5.0.5, three a turn (Send Message is greyed out at 3, `FUN_10061af0`
+  @10061d88); the Palm game counts nothing (`FUN_000371d6`, `FUN_000754b6`): no limit,
+  three with its 1.0.4.1 patch (`palmMessages`).
+- **`canMerge`**, **`organized`**: the Group Fleets window (`LOrganizeFleetsDialog`,
+  `FUN_100a8400`, `FUN_100a85b0`, `FUN_100a8780`, `FUN_100aa240`, `FUN_100aa730`): all
+  Biological fleets mix only with each other; the fleet that takes ships keeps its
+  orders, gets the lower fuel, stays "bought this turn" only if both were, and keeps a
+  new design's stance; a fleet split off takes the fuel, the mark and the stances.
+- **`route`**: a fleet dragged on the map gets DeterminePath's route
+  (`FUN_1008c5f0` @1008ce2c, `FUN_1008d140`), with or without modern conveniences.
+- **`maxPlayers`** (Palm): 9 (`FUN_000232e6`'s masks; one human, `FUN_0003412a`).
+
 ## Gaps to check, by version
 
-- **5.0.5**: women computers' chance; the first naming of the computers (`computerIdentity`: `FUN_1006d0c0` only renames clashes); design names (read but not applied: `FUN_1007dcf0` starts at a random name, among the first 15 for set-up, computers and Radical designs and among all of them for the design window, and takes the next name round the list no design of yours has, as 4.0.5's `nameFor`; applying it would also change the Palm's, not checked); the first message; messages a turn for humans; grouping fleets and its fuel; routes planned on the map; and, for the patch only, scrapping over another's star and its report.
-- **Palm OS 5**: 5.0.5's list (but out computers, checked), and whether the Palm program has 16 player slots and 5.0.5's computer names.
+- **5.0.5**: Name a Star at a new rank (`nameAStar`, above: found, not built).
+- **Palm OS 5**: none of 5.0.5's left but its own Name a Star words (the hook is the
+  Palm's own).
 - **Mac 4.0.5**: none of its own left (4.0.5's `computerIdentity` is the Mac's own hook).

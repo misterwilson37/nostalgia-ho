@@ -1806,7 +1806,11 @@ function openChat() {
     e.preventDefault();
     const d = Object.fromEntries(new FormData(f).entries());
     const text = (d.custom || '').trim() || d.line;
-    if (HO.sendChat(G, ME, +d.to, text) === 'limit') { toast('Sorry, you can only send ten messages per turn.'); return; }
+    if (HO.sendChat(G, ME, +d.to, text) === 'limit') {
+      // rs.chatLimit, a number or (G) => one (5.0.5: 3, its Send Message greyed out once three are sent)
+      const L = HO.rules(G).chatLimit, n = typeof L === 'function' ? L(G) : L;
+      toast(n === 10 ? 'Sorry, you can only send ten messages per turn.' : `You have sent the ${n} messages you may send this turn.`); return;
+    }
     Sound.play(5000); closeModal(); save();
   } });
   f.append(el('label', null, el('span', null, 'Send to'), playerSelect('to')),
@@ -2617,7 +2621,8 @@ function newGameDialog() {
     const patch = !patchBox.hidden && !!d.patch;
     if (!patchBox.hidden) localStorage.setItem('ho5.patch', patch ? '1' : '0');
     const snd = sounds.value(); localStorage.setItem('ho5.sounds', snd || '');
-    const common = { modern: !!d.modern, ...(patch ? { patch: true } : {}), ...(snd ? { sounds: snd } : {}), humans, seed: (Math.random() * 2 ** 31) | 0, name: d.name || 'You', galaxy: d.galaxy || 'Milky Way', female: d.female === '1', computers: +d.computers, start: d.start, rules: d.rules, alliances: !!d.alliances, luck: !!d.luck, novas: !!d.novas, ...keptStarsOpt(d.rules) };
+    // hints: the creator's "Give helpful game play hints" preference, which 5.0.5 and the Palm game read for the first messages (rs.welcome)
+    const common = { modern: !!d.modern, ...(patch ? { patch: true } : {}), ...(snd ? { sounds: snd } : {}), hints: !!Prefs.hints, humans, seed: (Math.random() * 2 ** 31) | 0, name: d.name || 'You', galaxy: d.galaxy || 'Milky Way', female: d.female === '1', computers: +d.computers, start: d.start, rules: d.rules, alliances: !!d.alliances, luck: !!d.luck, novas: !!d.novas, ...keptStarsOpt(d.rules) };
     const k = kindOf(d.rules);
     if (k === 'original') {
       localStorage.setItem('ho5.iq', d.o_iq);

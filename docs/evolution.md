@@ -651,7 +651,8 @@ Spaceward Ho! 5 for Palm OS (MobileFreon, 2003; version 1.0.4) is a port of the 
 Palm OS 3.5 or later. Its game is 5.0's, recompiled: the End Turn, the battles, the
 galaxy set-up and the computer players are 5.0.5's routines in the same order, with the
 same constants and the same slips. What is new is the handheld: its own windows, a
-smaller galaxy, a demo, hot-seat players on one handheld, and a few jokes. Everything
+smaller galaxy, a demo, room for one person (a Players window whose Add refuses anyone
+else), and a few jokes. Everything
 below is from the code (`docs/coverage-palm.md`, `docs/palm-findings.md`; 5.0.5:
 `docs/coverage-505.md`, `docs/original-findings.md`).
 
@@ -677,6 +678,10 @@ Scrap Ship Types, Dip, Give, Surrender, Armageddon) and the bar drag are 5.0.5's
 | Galaxy | 19 to 220 stars | 19 to 90 (`FUN_000232e6`), so galaxies above about size 36 come out smaller |
 | New Game options | Alliances, Luck in Battles and Best Buddies check boxes, "Any (1-8)" computers | only Best Buddies; alliances, luck and novas always on (options 0x17); no "Any" (tFRM 1200, `FUN_00038e72`) |
 | Evacuate Planet | Kansas and Hope one time in three, names that begin so | Kansas always, Hope always asks, and "Abandon Ship? ..." for a star named Ship, whole names (`FUN_0003734e`); the Message History's button keeps 5.0.5's (`FUN_00040232`) |
+| Players | 16 slots: up to 8 people (`FUN_100b7f90`) and 8 computers | 9 slots (the masks in `FUN_000232e6`): one person (the Players window's Add, `FUN_00039c2c` → `FUN_0003412a`, refuses once the game exists or has a player; its End and Take buttons do nothing) and up to 8 computers |
+| Messages a turn | three (Send Message greyed out, `FUN_10061af0`) | not counted (`FUN_000371d6`, `FUN_000754b6`): a fourth is written over the turn's gifts |
+| First messages | the credits, with hints 1-3 around them when hints are on (`FUN_1006f870`) | the same with the Palm's own hints, and "Palm OS version by Christopher Cotton and Steve Orens of Mobilefreon (tm)" last (`FUN_00026304`) |
+| Organize Fleets | Group Fleets: drag piles, Group All, Split | Group All and Split the same (`FUN_00079a18`, `FUN_00079ea8`); a pile is moved between two lists instead, and to "Empty Fleet" gets a full tank (`FUN_0004af48`) |
 | Star names | 255, with Antares | Courasant instead of Antares (tSTL 6060); up to five names you chose at a new rank (`FUN_000692c4`) |
 | Hints | STR# 6021 | tSTL 6021, its own 40 (and the demo's), one every turn |
 | Difficulty rating | (as Palm) | the same formula; the hot-seat terms count humans on the handheld |
@@ -693,7 +698,8 @@ The same: segment 6 is CComputerIntelligence, its 45 routines 5.0.5's 45 in orde
 Palm OS forms instead of Mac windows: the Galaxy map with zoom levels and the hats of
 the colonies' owners, a Message History, Spending Levels (Tech and Planets pages of
 bars), Build Ships with an Allow Debt box, Organize Fleets, Enemies and Allies, Rank
-History, a Radical Research window, the Players window for hot seat, the New Game
+History, a Radical Research window, a Players window (Add, Start; nobody can be added
+once the game exists), the New Game
 Wizard, Preferences (sound, Celsius, hints, best buddies' stars, auto-zoom), Auto Play,
 Find A Star, and system sounds instead of the Mac's. No network play.
 

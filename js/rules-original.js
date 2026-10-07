@@ -253,11 +253,11 @@ function radical(G, p) {
       const t = p.tech;
       if (k === 'decoy') { // a fake Fighter that shows off better numbers than you have
         p.hasDecoy = true;
-        findOrCreateDesign(G, p, { type: 'decoy', R: t.range + 1, V: Math.max(2, trunc(t.speed / 3)), W: t.weapons + 2, S: t.shields + 2, M: -1 });
+        (is505(G) ? newDesign505 : findOrCreateDesign)(G, p, { type: 'decoy', R: t.range + 1, V: Math.max(2, trunc(t.speed / 3)), W: t.weapons + 2, S: t.shields + 2, M: -1 });
         say('Your scientists have invented a decoy ship. It can\'t fight, but it\'s cheap. Amaze your friends and confuse your enemies.', 'm9049');
       } else {
         p.hasBio = true;
-        findOrCreateDesign(G, p, { type: 'bio', R: Math.max(1, t.range - 2), V: Math.max(1, t.speed - 1), W: Math.max(1, t.weapons - 1), S: Math.max(1, t.shields - 1), M: 0 });
+        (is505(G) ? newDesign505 : findOrCreateDesign)(G, p, { type: 'bio', R: Math.max(1, t.range - 2), V: Math.max(1, t.speed - 1), W: Math.max(1, t.weapons - 1), S: Math.max(1, t.shields - 1), M: 0 });
         say('Your mad scientists have created a space monster ship! It\'s not too powerful, but it doesn\'t cost any metal!', 'm9026');
       }
     } else if (k === 'steal') {
@@ -272,7 +272,7 @@ function radical(G, p) {
     } else if (k === 'protos') {
       if (live + 6 > 24) continue;
       for (const type of ['scout', 'fighter', 'satellite', 'colony', 'tanker', 'dread']) {
-        const d = findOrCreateDesign(G, p, aiSpec(p, type)); if (d.built === 0) d.free = true;
+        const d = (is505(G) ? newDesign505 : findOrCreateDesign)(G, p, aiSpec(p, type)); if (d.built === 0) d.free = true;
       }
       say('Your ship technicians have designed a set of new ships with no development cost.', 'm9047');
     } else { // a tech jumps two levels (research has to catch up before it rises again)
@@ -285,6 +285,161 @@ function radical(G, p) {
   // CONFIRMED (FUN_10079360 @1007a128-1007a15c): the hand is dealt again and
   // "Your Radical researchers are hard at work on another discovery!" (0x466)
   if (is505(G)) msg(G, p.id, 'Your Radical researchers are hard at work on another discovery!', { icon: 'm9010', quiet: true });
+}
+
+// ---------- the clock's random numbers (FUN_10054d40) ----------
+// CONFIRMED (CPrefs' virtual table at 0x10111f00: slot +0x18 is the transition
+// vector 0x100f4270, FUN_10054d40): the draws the interface makes (each
+// computer's sex and name in the New Game window, a design's name in the
+// design window) take the C library's rand() >> 4 (FUN_100d9640, seeded from
+// the clock), not the game's table of 5,000 (FUN_10054ce0). The remake gives
+// them a stream of their own (G.rsClock), so they don't use up the game's
+// numbers. (The Palm game: SysRandom, FUN_00029b08, its virtual +0x1c.)
+function clockRI(G, a, b) {
+  if (G.rsClock == null) G.rsClock = (((G.opts && G.opts.seed != null ? G.opts.seed : G.rs) ^ 0x436c6f63) >>> 0) || 1;
+  let t = (G.rsClock = (G.rsClock + 0x6D2B79F5) | 0);
+  t = Math.imul(t ^ (t >>> 15), t | 1);
+  t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+  return a + Math.floor(((t ^ (t >>> 14)) >>> 0) / 4294967296 * (b - a + 1));
+}
+
+// ---------- ship type names (FUN_1007dcf0) ----------
+// CONFIRMED (FUN_1007dcf0; Palm FUN_0004cd18 the same): a new type is named
+// from its class's list, STR# 6010 + class (FUN_10095b80 / FUN_10095bf0;
+// Scout, Dreadnought, Fighter, Tanker, Colony Ship, Satellite, Biological;
+// 15 names each, js/data.js; the Palm's tSTL 6010-6016 are the same). With
+// the flag set (the five set-up types, FUN_1006f870 @1006feb4-10070070; the
+// Radical discoveries' types, FUN_10079860-FUN_1007a07c; the computers' and
+// auto play's, FUN_10086830 @10086bd0) the start is the game's rand(0, 14)
+// and the round 15 names; without it (the design window, FUN_1009a810
+// @1009a848) the start is the clock's rand(0, count - 1) and the round the
+// list's count. From the start, the first name no type of the player's has
+// (FUN_10055760: letter case aside) is taken, going round; when every name is
+// taken, the last one tried (the one before the start). A decoy is a Fighter
+// record (class 2, Mini -1: FUN_10079860), so it takes a Fighter's name.
+function shipName505(G, p, type, set) {
+  const L = DATA.shipNames[type === 'decoy' ? 'fighter' : type] || [];
+  const n = set ? 15 : L.length;
+  if (n < 1) return '';
+  const i0 = set ? RI(G, 0, 14) : clockRI(G, 0, n - 1);
+  const used = new Set(p.designs.filter(d => !d.scrapped).map(d => String(d.name).toLowerCase()));
+  let i = i0;
+  for (;;) {
+    const name = L[i] || ''; // past the list's end GetIndString gives an empty name
+    const free = !used.has(name.toLowerCase());
+    i = (i + 1) % n;
+    if (free || i === i0) return name;
+  }
+}
+// A type made by the game (set-up, a Radical discovery, a computer or auto
+// play): named with the game's numbers when it is new. The design window
+// (engine findOrCreateDesign) names it with designName505 below.
+function newDesign505(G, p, spec) {
+  const d = p.designs.find(x => !x.scrapped && x.type === spec.type && x.R === spec.R && x.V === spec.V && x.W === spec.W && x.S === spec.S && x.M === spec.M);
+  if (d) return d;
+  return findOrCreateDesign(G, p, Object.assign({}, spec, { name: shipName505(G, p, spec.type, true) }));
+}
+const designName505 = (G, p, type) => shipName505(G, p, type, false);
+
+// ---------- the computers' sexes and names (FUN_10059570, FUN_1006d0c0) ----------
+// CONFIRMED (the New Game window's OK, FUN_10059570 @1005a2a4-1005a404, and
+// its twin FUN_100b0bc0 @100b1940-100b1a9c; Palm FUN_000692c4): for each of
+// the 8 computer slots, the sex is the clock's rand(1, 2) == 1 (1 a man, 0 a
+// woman: a woman one time in two), then a place the clock's rand(0, count
+// - 1) in the list for that sex (FUN_10095ea0, FUN_10095d50: the
+// Preferences' names of past players of that sex first, then STR# 6280 men /
+// 6281 women, js/data.js; the remake keeps no past players and uses the
+// lists); both are drawn again while an earlier slot of the same sex has the
+// same name (FUN_10055760). The record goes to the server (0x190 bytes, the
+// names at +0x48, the sexes at +0x148), which puts computer k's name and sex
+// in the player records after the humans' (FUN_100b8770 @100b8948-100b89ac;
+// FUN_10057f70 makes the players, FUN_10070bb0: name +8, sex +0x28). Then the
+// galaxy set-up (FUN_1006c4d0 @1006c7d8) renames a computer whose name
+// another player's begins with, or begins another player's (FUN_10055640 over
+// the shorter length, letter case aside), with the next of a fixed list for
+// its sex (men from 0x10110948, women from 0x10110a08; 12 letters a name; the
+// men's list runs on into the women's), checking again each time.
+const RENAME_MEN = ['Peter', 'Joe', 'Timmer', 'Howard', 'Bob', 'Ed', 'Mark', 'Guy', 'Ben', 'Dan', 'Kon', 'Brennan', 'John', 'Mike', 'Dave', 'Steve'];
+const RENAME_WOMEN = ['Christie', 'Suzy', 'Ann', 'Julia', 'Nancy', 'Xena', 'Athena', 'Heather', 'Caryl', 'Jennifer', 'Sabrina', 'Kathy', 'Claire', 'Kate', 'Jane', 'Alexis'];
+function computerIdentity505(G, k, nComp, humans) {
+  if (k === 0) {
+    const men = DATA.maleNames, women = DATA.femaleNames, slots = [];
+    for (let i = 0; i < Math.max(8, nComp); i++) {
+      let male, name;
+      do {
+        male = clockRI(G, 1, 2) === 1;
+        const L = male ? men : women;
+        name = L[clockRI(G, 0, L.length - 1)];
+      } while (slots.some(s => s.male === male && s.name.toLowerCase() === name.toLowerCase()));
+      slots.push({ male, name });
+    }
+    // FUN_1006d0c0: the humans first, then the computers
+    const H = humans || [], all = H.map((h, i) => String(h.name || (H.length > 1 ? 'Player ' + (i + 1) : 'You'))).concat(slots.slice(0, nComp).map(s => s.name));
+    const nHum = all.length - nComp, next = { men: 0, women: 0 };
+    const clash = (a, b) => { const n = Math.min(a.length, b.length); return a.slice(0, n).toLowerCase() === b.slice(0, n).toLowerCase(); };
+    for (let i = nHum; i < all.length; i++) {
+      if (!all[i]) continue;
+      const male = slots[i - nHum].male;
+      while (all.some((o, j) => j !== i && clash(all[i], o))) {
+        all[i] = male ? RENAME_MEN.concat(RENAME_WOMEN)[next.men++] || '' : RENAME_WOMEN[next.women++] || '';
+        if (!all[i]) break;
+      }
+    }
+    G._ids505 = slots.slice(0, nComp).map((s, i) => ({ female: !s.male, name: all[nHum + i] || s.name }));
+  }
+  const r = G._ids505[k];
+  if (k === nComp - 1) delete G._ids505;
+  return r;
+}
+
+// ---------- the first messages (FUN_1006f870 @1006fa2c-1006fab0) ----------
+// CONFIRMED: a player's report list starts with "Spaceward Ho! by Peter
+// Commons." (1000) and "Artwork by Howard Vives and Bob Van de walle." (1002);
+// when the creator's "Give helpful game play hints" preference is on (prefs
+// +0x20b, default on, FUN_10072490 @10072774; New Game record +0x41,
+// FUN_10059570 @1005a2b0) or the copy is the demo (game +0x60), it is hint 1,
+// the credit (1001 in the demo), the artwork, hint 2 and hint 3 (report 500
+// with 1-3: STR# 6021.1-3). Pictures 9031, 9032, 9049 (FUN_1009d670); the
+// sound the message sound 7001 (FUN_1009cff0 below 0x3eb). The remake has
+// nothing to register, so never the demo.
+function welcome505(G) {
+  const credit = [['Spaceward Ho! by Peter Commons.', { icon: 'm9031', sound: 7001 }],
+    ['Artwork by Howard Vives and Bob Van de walle.', { icon: 'm9032', sound: 7001 }]];
+  if (G.opts.hints === false) return credit;
+  const hint = (t) => [t, { icon: 'm9049', sound: 7001 }];
+  return [hint('Click here to make this message go away. Click on the clock to end your turn.'), ...credit,
+    hint('Fleets appear as dots next to your planets. Click one and drag it to send it to another star.'),
+    hint('Play with the spending bars. Conquer the galaxy. Gain ranks to unlock more game options. Enjoy.')];
+}
+
+// ---------- the Group Fleets window (LOrganizeFleetsDialog, WIND 140) ----------
+// CONFIRMED (FUN_100a8400, FUN_100a85b0: what may be dragged and dropped; the
+// drop FUN_100a8780 / FUN_100a9820; Group All FUN_100aa240 @command 0x387;
+// Split FUN_100aa730): a Satellite pile can't be dragged and an all-Satellite
+// fleet takes nothing (the remake's Satellites are fleets of their own);
+// an all-Biological fleet (FUN_1007cc70 class 6) mixes only with another;
+// any other piles go together, whatever their designs. The fleet that takes
+// ships keeps its own orders (fleet +0x7c) and gets the larger fuel used of
+// the two (+0x7a), so the lower fuel; it is "bought this turn" (+0x74) only
+// when both were; the colonists go with the Colony Ships (10 a ship, no more
+// than there were); a design new to it keeps the stance it had (+0x58 +
+// design). A fleet split off gets the fuel used, the "bought this turn" mark
+// and the stances of the one it came from, and no orders.
+const allBio505 = (G, f) => { const ds = fleetDesigns(G, f); return ds.length > 0 && ds.every(d => d.type === 'bio'); };
+const canMerge505 = (G, a, b) => allBio505(G, a) === allBio505(G, b);
+function organized505(G, f, merged, nf, orders) {
+  if (merged) {
+    if (orders) { f.dest = orders.a.dest; f.path = orders.a.path; f.routeTo = orders.a.routeTo; }
+    f.newThisTurn = !!f.newThisTurn && !!merged.newThisTurn;
+    for (const k in merged.ships) {
+      if ((f.ships[k] || 0) !== merged.ships[k]) continue; // f had some already: its own stance stays
+      const st = stanceBits(merged, +k), own = stanceBits(f, +k);
+      if (st !== own) (f.dstance = f.dstance || {})[k] = st;
+    }
+  } else if (nf) {
+    nf.newThisTurn = !!f.newThisTurn; nf.stance = f.stance; nf.delayed = f.delayed;
+    if (f.dstance) { nf.dstance = {}; for (const k in nf.ships) if (f.dstance[k] != null) nf.dstance[k] = f.dstance[k]; }
+  }
 }
 
 // ---------- ships (FUN_1007de60) ----------
@@ -602,10 +757,13 @@ function setupPlayer(G, p, home, start) {
   p.startRank = st.rank;
   if (is505(G)) setup505(G, p, home, st);
 }
+// (5.0.5 names the five with the game's numbers in this order, after the
+// player's other set-up draws and its personality: FUN_1006f870
+// @1006feb4-10070070, FUN_100704d0 @1006fd24)
 function defaultDesigns(G, p) {
   for (const type of ['scout', 'tanker', 'satellite', 'colony', 'fighter']) {
     const spec = aiSpec(p, type); spec.M = 0;
-    findOrCreateDesign(G, p, spec);
+    (is505(G) ? newDesign505 : findOrCreateDesign)(G, p, spec);
   }
 }
 function afterSetup(G) {
@@ -2632,5 +2790,20 @@ Object.defineProperties(E.RULESETS.original, Object.fromEntries(Object.entries({
   // the windows (the skin builds them; docs/coverage-505.md)
   autoPlaySettings: autoPlaySettings505, autoPlayRange: { aggr: [0, 100], where: 'prefs' },
   radicalHand: radicalHand505,
+  // the computers' sexes and names, the ship type names, the first messages
+  // (FUN_10059570, FUN_1006d0c0, FUN_1007dcf0, FUN_1006f870; above)
+  computerIdentity: computerIdentity505, designName: designName505, newDesign505, shipName505, welcome: welcome505,
+  // CONFIRMED (FUN_10061af0 @10061d88, the status of Send Message, command
+  // 0x13ab): the command is on only while the player's outbox (player
+  // +0x1058, emptied by the End Turn @10072de8) holds fewer than 3 messages;
+  // the canned-message window (FUN_1005d940) adds one. The computers' outbox
+  // (FUN_100880f0) is the same 3 (js/ai-original.js say).
+  chatLimit: 3,
+  // the Group Fleets window (above)
+  canMerge: canMerge505, organized: organized505,
+  // CONFIRMED (FUN_1008c5f0, FUN_1008d140): a fleet dragged on the map is
+  // given the route DeterminePath (FUN_1007d260) finds from its star with the
+  // fuel left and its Range, as the computers' are (js/ai-original.js mapRoute)
+  route: (G, f, sid) => { const A = E.aiOf(G); return A && A.mapRoute ? A.mapRoute(G, f, sid) : null; },
 }).map(([k, value]) => [k, { value, enumerable: false, writable: true, configurable: true }])));
 })(this);

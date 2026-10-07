@@ -52,8 +52,8 @@ their entries are below so the list is complete, but their rulesets list no fixe
 | Mac 3.0.1 | 4 | 5 | 3 |
 | 4.0.5 | 10 fixed (+ 3 the remake already plays fixed, + 3 with nothing in the remake to fix) | 4 | 6 |
 | Mac 4.0.5 | 6 fixed (+ 3 the remake already plays fixed, + 1 with nothing in the remake to fix) | 4 | 6 |
-| 5.0.5 | 2 | 6 | 6 |
-| Palm | 1 (+ 5.0.5's 2) | 5 (+ 5.0.5's) | 1 (+ 5.0.5's) |
+| 5.0.5 | 2 | 7 | 6 |
+| Palm | 2 (+ 5.0.5's 2) | 5 (+ 5.0.5's) | 2 (+ 5.0.5's) |
 
 Palm's code is 5.0.5's recompiled, with the same slips; its own entries are counted, and
 5.0.5's apply to it as well. The Mac 2.0.1 and Mac 4.0.5 are other editions of 2.0 and
@@ -433,6 +433,10 @@ running out). **Obvious, with nothing in the remake to fix**: the cheating mark
 - Buying a ship lowers this turn's interest (`FUN_1007e4a0`).
 - An Abundant start puts the second colony before the home in the budget list.
 - "%s is cheating" from a checksum: anti-cheat, not in the remake.
+- A computer whose name begins another player's, or is the start of it, is renamed from
+  the designers' names (`FUN_1006d0c0` compares over the shorter name's length): a
+  human called Edward gets a computer called Ed renamed Peter. It reads as meant (no two
+  players alike), done with a prefix compare.
 
 ### Unclear (left; for the developers)
 
@@ -489,6 +493,16 @@ The Palm program's own version is 1.0.4, so its patch is 1.0.4.1 (`rs.patchVersi
   6205 and 6105 aren't in the program, so the fastest engines and strongest noses aren't
   drawn (`FUN_000128e8`). *Fix:* the top pictures there are, 6204 and 6104 (the Palm skin,
   `js/skins/palm/ui.js` `shipPic`).
+- **`palmMessages`: a human's messages aren't counted.** The player record has room for
+  3 outgoing messages (player +0x124 the count, +0x126 three records of 0x2e bytes, the
+  gift count right after at +0x1b0), the computers stop at 3 (`FUN_00066fdc`) and 5.0.5
+  greys out Send Message at 3 (`FUN_10061af0` @10061d88), but the Palm's Send Message
+  (`FUN_000371d6`) and its Send (`FUN_000754b6`) never look at the count: a 4th message
+  is written over the gift count and gifts, and the End Turn (`FUN_000500d4`) copies the
+  outbox into a buffer of 0xb8 bytes a player (3 messages and the cheat notice), so more
+  spill into the next player's. The remake can't play the overwrite and lets you send as
+  many as you like (`rs.chatLimit` 0). *Fix:* three a turn, as 5.0.5
+  (`js/rules-palm.js` `chatLimit`).
 
 ### Quirk or design (left as released)
 
@@ -500,6 +514,12 @@ The Palm program's own version is 1.0.4, so its patch is 1.0.4.1 (`rs.patchVersi
 
 ### Unclear (left; for the developers)
 
-1. The hints are drawn from 4 to 43 (the demo from 4 to 52, past the 51 strings): the
-   first three are never shown, and the demo reads past its list. The remake has no demo.
+1. The hints are drawn from 4 to 43 (the demo from 4 to 52, past the 51 strings). The
+   first three are the first turn's messages (`FUN_00026304` @000266fc, report 500 with
+   1-3), so starting at 4 is meant; the demo reads past its list. The remake has no demo.
 2. The Spiral head start, as 5.0.5 (above).
+3. Moving a pile to "Empty Fleet" in Organize Fleets (`FUN_0004af48`, `FUN_0004adc0`)
+   gives the new fleet a full tank (a Biological's empty), where Split
+   (`FUN_00079ea8`) and 5.0.5 keep the fuel used; moving one into another fleet keeps
+   that fleet's fuel and replaces its colonists. A slip or a convenience; the remake has
+   no pile move, so nothing to fix.

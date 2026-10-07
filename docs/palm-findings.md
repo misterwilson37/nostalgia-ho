@@ -84,7 +84,7 @@ with its own battles and computers); "now" is what the Palm code does.
 | Computers | a separate port | 5.0.5's port: they plan with the net and this turn's money in the coming year, ResolveSpending, evacuation by mark, terraform wishes where the bar isn't done, Tankers in attack fleets arriving late and defending, split fleets with a full tank, busy satellites left out of a colony's defence | segment 6 (table below) |
 | Starting shares | 167 per mille each; Abundant 650/250/100/50 | the creator's research 180 × 5 and Radical 100; budget 650/250/100, an Abundant player 550/200/150/100 with the second colony third and the home fourth (computers 650/250/50/50) | `FUN_000395a6`, `FUN_0002b274`, `FUN_00026304` |
 | Evacuate jokes | 5.0.5's | Palm's (above) | `FUN_0003734e` |
-| Star names | 5.0.5's | Courasant for Antares (tSTL 6060) | `FUN_00023cda` |
+| Star names | 5.0.5's | Courasant for Antares (tSTL 6060) | tSTL 6060 |
 | Hints | 5.0.5's, one every 7 turns | tSTL 6021.4-43, one every turn by the system's random numbers | `FUN_000500d4`, `FUN_00029b08`, `FUN_00027c4c` |
 
 ## How the routines pair up
@@ -177,7 +177,10 @@ Each CONFIRMED the same as `js/rules-original.js`, so the Palm ruleset uses it:
 | Starting money, metal, population, technology, ships, designs, borrowing limit | as 5.0.5 | CONFIRMED (`FUN_00026304`) |
 | Starting shares | the creator's from the preferences (above) | CONFIRMED (`FUN_000395a6`) |
 | Computer skill and personalities | as 5.0.5 | CONFIRMED (`FUN_00026304`, `FUN_0002746e`) |
-| Computer names | each computer's sex drawn (rand(1, 2)), no two names the same; up to five star names you chose at a new rank put in the galaxy | CONFIRMED (`FUN_000692c4`); the chosen names not |
+| Computer names | 5.0.5's: for 8 slots the sex SysRandom(1, 2) == 1 a man (a woman one time in two), a name of that sex (`FUN_0002bf90`: the Preferences' past players, then tSTL 6280 / 6281, the same 20 and 22 names as 5.0.5's STR#), drawn again while an earlier slot of the same sex has it; a computer whose name begins another player's, or is the start of it, renamed from the designers' names (`FUN_00023cda`, 5.0.5's two lists of 16); up to five star names you chose at a new rank put in the galaxy | CONFIRMED (`FUN_000692c4`, `FUN_00023cda`); the chosen names not |
+| Player slots | 9 (5.0.5: 16): the alliance masks for 9; one human (the Players window's Add, `FUN_0003412a`, only while there are no players); up to 8 computers | CONFIRMED (`FUN_000232e6`, `FUN_0003412a`) |
+| Ship type names | 5.0.5's routine (`FUN_0004cd18`), tSTL 6010-6016 the same lists | CONFIRMED |
+| First messages | with the hints preference on (prefs +0x209), tSTL 6021.0, the credit (1000), the artwork (1002), 6021.1-2, then "Palm OS version by Christopher Cotton and Steve Orens of Mobilefreon (tm)" (1159); with it off 1000, 1002, 1159 | CONFIRMED (`FUN_00026304` @000266fc-000268cc, `FUN_0002be5c`) |
 | Difficulty rating | 5.0.5's formula; at a win × 0.97 per human after the first, × 0.95 per human who surrendered to a human (game +0x1a9, `FUN_00051b2c`), + 1 per human winner after the first, − 1 per human who didn't win; 0 when game +0x1d0 is set | CONFIRMED (`FUN_0002a96c`, `FUN_00058bee`) |
 
 ## Randomness
@@ -320,6 +323,27 @@ screen.
 - `js/skins/classic/ui.js`: `rs.hintTexts`, a version's own hints, one every turn
   (README hook list).
 - The 5.0.5, 1.2, 2.0, 3.0.1, 4.0.5 and Claude test games are the same, byte for byte.
+
+## Second pass (October 2026): 5.0.5's last engine defaults, checked in the Palm code
+
+- **Player slots**: 9, one human and up to 8 computers (above); `maxPlayers: 9`.
+- **The computers' names and sexes**: 5.0.5's routine (`FUN_000692c4` beside
+  `FUN_10059570`; the rename `FUN_00023cda` beside `FUN_1006d0c0`, which this file
+  listed before as the star names). The draws are SysRandom's, as 5.0.5's are the
+  clock's; the Palm ruleset takes 5.0.5's `computerIdentity`.
+- **Ship type names**: `FUN_0004cd18` is `FUN_1007dcf0` (the game's numbers for set-up,
+  Radical and the computers, SysRandom for the design window, `FUN_000436f8`); the
+  decoy is a Fighter record (class 2) as in 5.0.5.
+- **The first messages**: the Palm's own (above), `welcome` in `js/rules-palm.js`.
+- **Messages a turn**: the Palm game doesn't count a human's (`FUN_000371d6`,
+  `FUN_000754b6`); a fourth is written over the gifts (player +0x1b0). Played as no
+  limit; the 1.0.4.1 patch keeps to three (`palmMessages`).
+- **Organize Fleets** (tFRM 2300): Group All (`FUN_00079a18`) and Split
+  (`FUN_00079ea8`) are 5.0.5's, so the 5.0.5 merge and split rules apply; moving a pile
+  (`FUN_000790ea`, `FUN_0004af48`) is the Palm's own (a new fleet with a full tank;
+  into another fleet, its own fuel kept and its colonists replaced) and isn't in the
+  remake.
+- **Routes on the map**: 5.0.5's DeterminePath (`FUN_0004c22c`).
 
 ## Still open
 
