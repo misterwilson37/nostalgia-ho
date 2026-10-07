@@ -1045,7 +1045,9 @@ function renderMsg() {
   box.innerHTML = '';
   if (G.over && UI.msgIdx >= UI.inbox.length) {
     box.append(el('div', { class: 'card end' }, el('img', { src: A.img[G.winner === ME ? 'p3030' : 'p3040'], alt: '' }),
-      el('div', null, el('p', null, G.winner === ME ? 'You conquered the galaxy.' : 'The game is over.'), el('button', { onclick: newGameDialog }, 'New game'), ' ',
+      el('div', null, el('p', null, G.winner === ME ? 'You conquered the galaxy.' : 'The game is over.'),
+        winPending() ? el('button', { onclick: () => openWinWindows(renderMsg) }, HO.rules(G).conquered && !G.conqueredSeen ? 'You won…' : 'Name a star…') : null, ' ',
+        el('button', { onclick: newGameDialog }, 'New game'), ' ',
         el('button', { class: 'quiet', onclick: () => openFeedback('game') }, 'Tell us how it went'))));
     return;
   }
@@ -1064,9 +1066,13 @@ function renderMsg() {
     const body = el('div', { class: 'mtext' }, el('p', null, degText(m.text)));
     const extra = el('div', { class: 'mbtns' });
     if (m.battle) extra.append(el('button', { class: 'quiet', onclick: (e) => { e.stopPropagation(); openBattle(m.battle); } }, 'Review battle'));
+    // the radical hand opens from its report (rs.radicalHand)
+    if (radicalReport(m) && HO.rules(G).radicalHand && !G.over) extra.append(el('button', { class: 'quiet', onclick: (e) => { e.stopPropagation(); openRadicalHand(); } }, 'Radical projects…'));
     body.append(extra, el('div', { class: 'count' }, `${UI.msgIdx + 1} of ${UI.inbox.length} · click to continue`));
     card.append(body);
-    const next = () => { if (m.star != null) { UI.sel = m.star; renderPanel(); } UI.msgIdx++; Sound.play(7001); renderMsg(); draw(); };
+    const next0 = () => { if (m.star != null) { UI.sel = m.star; renderPanel(); } UI.msgIdx++; Sound.play(7001); renderMsg(); draw(); };
+    // clicking the winner's report opens the version's win windows first (rs.conquered, rs.nameAStar)
+    const next = () => winReport(m) && winPending() ? openWinWindows(next0) : next0();
     card.addEventListener('click', guard(next));
     card.addEventListener('keydown', guard((e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); next(); } }));
     if (m.star != null) { UI.sel = m.star; if (modern()) centerOn(m.star); renderPanel(); draw(); }
@@ -1075,7 +1081,16 @@ function renderMsg() {
     return;
   }
   if (T.endTurnPic && A.img[T.endTurnPic]) { // the theme's own End Turn button picture
-    box.append(el('button', { class: 'clock pic', onclick: doEndTurn, 'aria-label': 'End turn', 'aria-keyshortcuts': 'T', 'data-help': 'endTurn', 'data-key': END_KEY() }, el('img', { src: A.img[T.endTurnPic], alt: '' })));
+    const btn = el('button', { class: 'clock pic', onclick: doEndTurn, 'aria-label': 'End turn', 'aria-keyshortcuts': 'T', 'data-help': 'endTurn', 'data-key': END_KEY() }, el('img', { src: A.img[T.endTurnPic], alt: '' }));
+    // T.endTurnYear [x, y, w, h, picture width]: the picture's window where
+    // the original writes the year (4.0: p5500's black window, the Windows
+    // 4.0.5's clock); placed in percent, so it follows the picture's size
+    const Y = T.endTurnYear;
+    if (Y) {
+      const im = IMG[T.endTurnPic], H = (im && im.height) || Y[4];
+      btn.append(el('span', { class: 'clockyear', 'aria-hidden': 'true', style: `left:${Y[0] / Y[4] * 100}%;top:${Y[1] / H * 100}%;width:${Y[2] / Y[4] * 100}%;height:${Y[3] / H * 100}%` }, String(G.year)));
+    }
+    box.append(btn);
     return;
   }
   const clock = el('button', { class: 'clock', onclick: doEndTurn, 'aria-label': 'End turn', 'aria-keyshortcuts': 'T', 'data-help': 'endTurn', 'data-key': END_KEY() },
@@ -1113,15 +1128,17 @@ function awardMasterPoints(byComputer) {
   try { localStorage.setItem('ho5.profile', JSON.stringify(pr)); } catch (e) {}
   me().inbox.push({ text: HO.report(79, d, fmt(pts)), icon: 'm9035' });
   const after = rankOf(pr.points);
-  if (after > before) setTimeout(() => showRank(after), 300);
+  // the Palm OS names a star at a new rank (rs.nameAStar.when 'rank', tFRM 2900)
+  const NS = RS.nameAStar, named = NS && NS.when === 'rank' ? () => openNameStar() : null;
+  if (after > before) setTimeout(() => showRank(after, named), 300);
 }
-function showRank(i) {
+function showRank(i, then) {
   const R = HO.DATA.ranks[i];
   const body = el('div', { class: 'rank' },
     el('img', { src: A.jpg[i], alt: '' }),
     el('p', null, 'Congratulations! You have achieved the rank of:'), el('h3', null, R[0]));
   if (R[2]) body.append(el('p', null, `You have earned the ability to ${R[2]}.`));
-  body.append(el('div', { class: 'btns right' }, el('button', { onclick: closeModal }, 'OK')));
+  body.append(el('div', { class: 'btns right' }, el('button', { onclick: () => { closeModal(); if (then) then(); } }, 'OK')));
   Sound.play(7021);
   modal('New rank', body, { cls: 'mid' });
 }
@@ -1895,15 +1912,19 @@ function openAutoPlay() {
   const f = el('form', { class: 'newgame', onsubmit: (e) => {
     e.preventDefault();
     const d = Object.fromEntries(new FormData(f).entries());
+    if (sl) sl.apply();
     closeModal(); runAutoPlay({ turns: +d.turns || 10, computer: d.mode === 'computer', won: !!d.won, lost: !!d.lost, news: !!d.news });
   } });
+  let sl = null; // the Palm OS: the auto play settings on this form (autoPlayWhere)
   f.append(el('label', null, el('span', null, 'Play'), el('select', { name: 'mode' }, el('option', { value: 'computer' }, 'Have the computer play for me'), el('option', { value: 'end' }, 'Just end my turns'))),
     el('label', null, el('span', null, 'For up to this many turns'), el('input', { name: 'turns', type: 'number', min: 1, max: 500, value: 20 })),
     el('fieldset', { class: 'opts' }, el('legend', null, 'Stop when something interesting happens'),
       el('label', { class: 'chk' }, el('input', { type: 'checkbox', name: 'won', checked: 'checked' }), el('span', null, 'Battles I win')),
       el('label', { class: 'chk' }, el('input', { type: 'checkbox', name: 'lost', checked: 'checked' }), el('span', null, 'Battles I lose')),
       el('label', { class: 'chk' }, el('input', { type: 'checkbox', name: 'news', checked: 'checked' }), el('span', null, 'Colonies, tech levels and other news'))),
-    el('div', { class: 'btns right' }, el('button', { type: 'submit' }, 'Start')));
+    ...(autoPlayWhere() === 'autoplay' ? [(sl = autoPlaySliders()).box] : []),
+    el('div', { class: 'btns right' }, ...(autoPlayWhere() === 'config' ? [el('button', { type: 'button', class: 'quiet', onclick: () => { closeModal(); openAutoPlaySettings(openAutoPlay); } }, 'Config…')] : []),
+      el('button', { type: 'submit' }, 'Start')));
   modal('Auto play', f, { cls: 'mid' });
 }
 // A battle report says whether you won in m.won (set by engine.js
@@ -1927,6 +1948,117 @@ function runAutoPlay(o) {
     setTimeout(step, 120);
   };
   step();
+}
+// ---------- the originals' own windows (each where its ruleset says so) ----------
+// The auto play settings (rs.autoPlaySettings, rs.autoPlayRange): two
+// sliders, Friendly to Aggressive (aggressiveness, in the version's units:
+// rs.autoPlayRange.aggr) and Dig In to No Defense (the share of colonies
+// defended, 100 to 0). 4.0.5: the Auto Play window's Config… (DITL 4020,
+// DoConfigAutoPlayDialog, FUN_00404c4e); 5.0.5: Preferences (FUN_1005ec40);
+// Palm OS: on the Auto Play form itself (tFRM 1700, FUN_000713be).
+const autoPlayWhere = () => { const rs = G && HO.rules(G); return rs && rs.autoPlaySettings ? ((rs.autoPlayRange || {}).where || 'config') : null; };
+function autoPlaySliders() {
+  const rs = HO.rules(G), cur = rs.autoPlaySettings(G, me()) || { aggr: 0, colDef: 50 };
+  const [lo, hi] = (rs.autoPlayRange || {}).aggr || [0, 10];
+  const row = (name, label, left, right, min, max, val, show) => {
+    const out = el('b', { class: 'apval' }, show(val));
+    const inp = el('input', { type: 'range', name, min, max, value: val, 'aria-label': label, oninput: (e) => { out.textContent = show(+e.target.value); } });
+    return el('div', { class: 'aprow' }, el('span', { class: 'aplabel' }, label, ' ', out),
+      el('div', { class: 'apslider' }, el('span', null, left), inp, el('span', null, right)));
+  };
+  // Dig In at the left: the slider runs from 100% of colonies defended to none
+  const box = el('div', { class: 'apsettings' },
+    row('aggr', 'Aggressiveness', 'Friendly', 'Aggressive', lo, hi, cur.aggr, (v) => String(v)),
+    row('dig', 'Colonies defended', 'Dig In', 'No Defense', 0, 100, 100 - cur.colDef, (v) => (100 - v) + '%'));
+  const apply = () => {
+    const a = +box.querySelector('input[name=aggr]').value, d = +box.querySelector('input[name=dig]').value;
+    rs.autoPlaySettings(G, me(), { aggr: a, colDef: 100 - d }); save();
+  };
+  return { box, apply };
+}
+function openAutoPlaySettings(back) {
+  if (!G || autoPlayWhere() == null) return;
+  const s = autoPlaySliders();
+  const f = el('form', { class: 'newgame', onsubmit: (e) => { e.preventDefault(); s.apply(); closeModal(); if (back) back(); } },
+    el('p', { class: 'sub' }, 'How the computer plays your turns for you.'), s.box,
+    el('div', { class: 'btns right' }, el('button', { type: 'button', class: 'quiet', onclick: () => { closeModal(); if (back) back(); } }, 'Cancel'), el('button', { type: 'submit' }, 'OK')));
+  modal('Auto Play Settings', f, { cls: 'small' });
+}
+// The radical hand (rs.radicalHand): 4.0.5's radical card window
+// (FUN_00471587) and 5.0.5's Radical Research window (FUN_1005f280; Palm
+// tFRM 3000). It lists the hand; picking one throws it out of the hand, and
+// the next discovery deals the hand full again. rs.radicalHand.full: the
+// window opens only with that many (5.0.5: four; with fewer it closes at once).
+const radicalReport = (m) => /hard at work on another discovery/.test(String(m.text || ''));
+function openRadicalHand() {
+  const RH = G && HO.rules(G).radicalHand; if (!RH || G.over) return;
+  const cards = RH.cards(G, me());
+  if (!cards.length || (RH.full && cards.length < RH.full)) { toast(cards.length ? 'Your radical researchers have fewer than four projects: none can be cancelled.' : 'Your radical researchers have no projects yet.'); return; }
+  let sel = -1;
+  const go = el('button', { disabled: true, onclick: () => { if (sel < 0) return; RH.discard(G, me(), cards[sel].id); save(); closeModal(); Sound.play(7002); toast('That project has been cancelled.'); } }, 'Cancel Project');
+  const body = el('div', { class: 'hall radhand' },
+    el('p', { class: 'htitle' }, 'Your radical researchers are working on these projects. You may cancel one; another takes its place after the next discovery.'),
+    hallListBox(cards.map(c => [c.text]), '1fr', sel, (i) => { sel = i; go.disabled = false; }),
+    el('div', { class: 'btns right' }, go, el('button', { onclick: closeModal }, 'OK')));
+  modal('Radical Research', body, { cls: 'mid' });
+}
+// Winning (rs.conquered, rs.nameAStar): clicking the winner's report opens
+// 4.0.5's "You have conquered the galaxy!" window with the won picture
+// (dialog 377), then Name a Star (dialog 378; 2.0's NAMESTARDLGPROC, 1.2's
+// and 3.0.1's NameAStar). The Palm OS names a star at a new rank (tFRM 2900).
+// The names are kept in this browser for the version (localStorage
+// "ho5.stars.<rules>", the original's names file or preferences) and passed
+// to later games (opts.starNamesKept), where the ruleset uses them.
+const starsKey = (id) => 'ho5.stars.' + id;
+function keptStars(id) { try { const v = JSON.parse(localStorage.getItem(starsKey(id)) || '[]'); return Array.isArray(v) ? v.filter(n => typeof n === 'string') : []; } catch (e) { return []; } }
+const keptStarsOpt = (id) => { const NS = (HO.RULESETS[id] || {}).nameAStar, k = NS ? keptStars(id) : []; return k.length ? { starNamesKept: k } : {}; };
+const iWon = () => !!G && G.over && (G.winners || [G.winner]).includes(ME);
+const winReport = (m) => m && m.big === 'p3030' && iWon();
+const winPending = () => { const rs = HO.rules(G); return iWon() && ((rs.conquered && !G.conqueredSeen) || (rs.nameAStar && rs.nameAStar.when === 'win' && !G.starNamed)); };
+function openWinWindows(done) {
+  const rs = HO.rules(G);
+  if (rs.conquered && !G.conqueredSeen) {
+    G.conqueredSeen = true; save();
+    const body = el('div', { class: 'conquered' }, A.img.p3030 ? el('img', { src: A.img.p3030, alt: '' }) : null, el('p', null, rs.conquered),
+      el('div', { class: 'btns right' }, el('button', { onclick: () => { closeModal(); openWinWindows(done); } }, 'OK')));
+    Sound.play(7021);
+    modal('You won', body, { cls: 'small', sticky: true });
+    return;
+  }
+  if (rs.nameAStar && rs.nameAStar.when === 'win' && !G.starNamed) { openNameStar(() => { G.starNamed = true; save(); if (done) done(); }); return; }
+  if (done) done();
+}
+function openNameStar(done) {
+  const NS = HO.rules(G).nameAStar, id = G.rules; if (!NS) return;
+  const inp = el('input', { name: 'star', maxlength: NS.max || 7, autocomplete: 'off', 'aria-label': 'Star name' });
+  const err = el('p', { class: 'note', role: 'alert' });
+  const finish = () => { closeModal(); if (done) done(); };
+  const f = el('form', { class: 'newgame namestar', onsubmit: (e) => {
+    e.preventDefault();
+    const n = inp.value.trim().slice(0, NS.max || 7);
+    if (!n) { inp.focus(); return; }
+    const all = (HO.rules(G).starNames || HO.DATA.starNames || []).concat(keptStars(id), G.stars.map(s => s.name));
+    if (all.some(x => String(x).toLowerCase() === n.toLowerCase())) { err.textContent = NS.taken.replace('%s', n); Sound.play(4000); inp.select(); return; }
+    let k = keptStars(id).concat([n]); if (NS.keep) k = k.slice(-NS.keep);
+    try { localStorage.setItem(starsKey(id), JSON.stringify(k)); } catch (x) {}
+    toast(NS.use ? `“${n}” will be among the stars of your next galaxies.` : `“${n}” has been kept.`);
+    finish();
+  } }, el('p', null, NS.text), el('label', null, el('span', null, 'Star name'), inp), err,
+    el('div', { class: 'btns right' }, el('button', { type: 'button', class: 'quiet', onclick: finish }, 'Cancel'), el('button', { type: 'submit' }, 'OK')));
+  modal('Name a Star', f, { cls: 'small', sticky: true });
+}
+// Force End Turn (rs.forceEndTurn, Mac 2.0.1): with several players, marks
+// every player done after asking (box 3210), and the turn is played
+function forceEndTurn() {
+  if (!G || G.over || !hotSeat()) return;
+  const FE = HO.rules(G).forceEndTurn; if (!FE) return;
+  const all = seatOrder(), left = all.filter(p => p.id !== ME && !(G.done || []).includes(p.id));
+  if (!left.length) { doEndTurn(); return; }
+  const t = FE.ask.replace('%s', me().name).replace('%s', String(left.length)).replace('%s', String(all.length));
+  const w = modal('Force End Turn', el('div', null, ...t.split('\n\n').map(x => el('p', null, x)), el('div', { class: 'btns right' },
+    el('button', { class: 'quiet', onclick: closeModal }, 'Wait'),
+    el('button', { onclick: () => { closeModal(); G.done = all.map(p => p.id).filter(i => i !== ME); doEndTurn(); } }, 'Force End Turn'))), { cls: 'small' });
+  return w;
 }
 // Too far to go straight there: hop through your (or your allies') colonies,
 // refuelling at each, the shortest way (a "Plan route…" made for you; the
@@ -1985,7 +2117,14 @@ function openPrefs() {
       : box('celsius', 'Temperatures in Celsius (not °F)'),
     G ? el('label', { class: 'chk' }, el('input', { type: 'checkbox', checked: modern() ? 'checked' : false, onchange: (e) => setModern(e.target.checked) }),
       el('span', null, 'Modern conveniences in this game (automatic routes, the map follows the news, battle speed and written reports)')) : null,
-    box('tips', 'Explain things when the pointer rests on them (text from the original manual)')), { cls: 'small' });
+    box('tips', 'Explain things when the pointer rests on them (text from the original manual)'),
+    autoPlayWhere() === 'prefs' ? prefsAutoPlay() : null), { cls: 'small' });
+}
+// 5.0.5's Preferences hold the auto play settings (FUN_1005ec40)
+function prefsAutoPlay() {
+  const s = autoPlaySliders();
+  s.box.addEventListener('change', () => s.apply());
+  return el('fieldset', { class: 'opts' }, el('legend', null, 'Auto play'), s.box);
 }
 
 // ----- the Ho menu: this version, skin, sounds, modern conveniences -----
@@ -2477,7 +2616,7 @@ function newGameDialog() {
     const patch = !patchBox.hidden && !!d.patch;
     if (!patchBox.hidden) localStorage.setItem('ho5.patch', patch ? '1' : '0');
     const snd = sounds.value(); localStorage.setItem('ho5.sounds', snd || '');
-    const common = { modern: !!d.modern, ...(patch ? { patch: true } : {}), ...(snd ? { sounds: snd } : {}), humans, seed: (Math.random() * 2 ** 31) | 0, name: d.name || 'You', galaxy: d.galaxy || 'Milky Way', female: d.female === '1', computers: +d.computers, start: d.start, rules: d.rules, alliances: !!d.alliances, luck: !!d.luck, novas: !!d.novas };
+    const common = { modern: !!d.modern, ...(patch ? { patch: true } : {}), ...(snd ? { sounds: snd } : {}), humans, seed: (Math.random() * 2 ** 31) | 0, name: d.name || 'You', galaxy: d.galaxy || 'Milky Way', female: d.female === '1', computers: +d.computers, start: d.start, rules: d.rules, alliances: !!d.alliances, luck: !!d.luck, novas: !!d.novas, ...keptStarsOpt(d.rules) };
     const k = kindOf(d.rules);
     if (k === 'original') {
       localStorage.setItem('ho5.iq', d.o_iq);
@@ -2548,7 +2687,9 @@ function setupMenus() {
       ['Dip into savings…', () => G && !G.over && openDip(), 'dip'],
       ['-'],
       [() => (G && me().surrenderTo != null ? 'Take back surrender' : 'Surrender…'), () => G && !G.over && openSurrender(), 'surrender'],
-      [() => (G && me().armageddon ? 'Turn off the armageddon device' : 'Armageddon device…'), () => G && !G.over && toggleArmageddon(), 'armageddon']],
+      [() => (G && me().armageddon ? 'Turn off the armageddon device' : 'Armageddon device…'), () => G && !G.over && toggleArmageddon(), 'armageddon'],
+      ['Radical research…', () => openRadicalHand(), () => !!(G && (HO.rules(G).radicalHand || {}).menu)],
+      ['Force end turn…', () => forceEndTurn(), () => !!(G && HO.rules(G).forceEndTurn && hotSeat())]],
     View: [['Zoom in', () => zoomAt(mapW / 2, mapH / 2, 1.3)], ['Zoom out', () => zoomAt(mapW / 2, mapH / 2, 1 / 1.3)], ['Fit galaxy', () => { UI.fitted = false; fit(); draw(); }], ['-'], [() => (Sound.on ? 'Turn sound off' : 'Turn sound on'), () => { Sound.on = !Sound.on; savePrefs(); }], [() => (Sound.music ? 'Turn theme music off' : 'Turn theme music on'), () => { Sound.music = !Sound.music; savePrefs(); if (Sound.music && !$('#titlescreen').hidden) Sound.startTheme(); else Sound.stopTheme(); }]],
     Help: [['How to play', openHelp], [() => 'Manual: ' + manualFor()[1], () => window.open(manualFor()[0], '_blank', 'noopener')]],
   };

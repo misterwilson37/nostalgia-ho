@@ -36,6 +36,7 @@ window.HOMAC4 = {
   select: PIC(502), selectSmall: PIC(503),
   battlePlanet: I(1003), // "Explored Perfect"
   endTurnPic: PIC(5500), // the round End Turn button (pressed: 5501)
+  endTurnYear: [17, 32, 27, 15, 60], // its black window, where 4.0 writes the year
   endTurnKey: '⌘T', // File menu: End Turn ⌘T
   // Planets, numbered as the Windows 4.0.5 picks them (js/skins/w95):
   // size by gravity against your home's, 1000-1006 explored (+100 mined

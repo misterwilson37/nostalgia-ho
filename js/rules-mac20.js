@@ -97,6 +97,10 @@ E.registerRules('mac20', Object.assign({}, D, {
   canMerge: R12.canMerge, organized: R12.organized,
   shipPower: R12.att12,
   staleName,
+  // CONFIRMED (ForceEndTurn @122382, box 3210, MarkAllPlayersDone @101616):
+  // the File menu's Force End Turn marks every player done, after asking;
+  // the skin offers it in a hot-seat game (the remake's several players)
+  forceEndTurn: { ask: '%s, %s of the %s players haven’t finished their turn yet.\n\nDo you really want to force an end of turn, or do you want to wait for them to finish?' },
   fixes: FIXES,
   patchVersion: '2.0.1.1',
 }));

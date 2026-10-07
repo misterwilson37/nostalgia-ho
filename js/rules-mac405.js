@@ -157,8 +157,11 @@ function setupPlayer(G, p, home, start) {
 // ---------- 4. the auto play settings (DoConfigAutoPlayDialog @10440e) ----------
 // CONFIRMED (@10440e on OK): aggressiveness (+0x718) and colonies defended
 // (+0x704) as set, and metal for defence (+0x706) the NEW colonies defended.
+// (With no set it only gives the values the window opens with; the human's
+// auto play record is made if need be, as in js/rules-405.js.)
 function autoPlaySettings(G, p, set) {
-  const ai = p.ai || {};
+  const ai = E.aiOf(G).autoplayAI(G, p);
+  if (!set) return { aggr: ai.aggr, colDef: ai.colDef };
   ai.aggr = set.aggr; ai.colDef = set.colDef; ai.metalDef = set.colDef;
 }
 

@@ -50,7 +50,7 @@ window.HOMAC2 = {
   // they are left out; its Zoom In and Zoom Out are in the Galaxy menu.
   menuLayout: {
     File: [['New…', 'Game/New game…'], '-',
-      ['End Turn', endTurn], '-',
+      ['End Turn', endTurn], ['Force End Turn…', 'Galaxy/Force end turn…'], '-',
       ['Quit', 'Game/Quit to title']],
     Options: [['Auto Play…', 'Game/Auto play…'], ['Auto-Play This Turn', 'Game/Auto-play this turn'], '-',
       ['Preferences…', 'Game/Preferences…'], [null, 'View/#4'], [null, 'View/#5'], '-', // Sound

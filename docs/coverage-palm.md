@@ -210,12 +210,12 @@ The 44 routines Ghidra could not decompile were read in the disassembly (a full 
 | `FUN_000672b8` | Star status and threats | `FUN_10088460` | Rule, implemented | js/ai-original.js (via js/ai-palm.js) fillInStarStatus |
 | `FUN_00067ebe` | Split fleets | `FUN_10088eb0` | Rule, implemented | js/ai-original.js (via js/ai-palm.js) splitFleets |
 | `FUN_00067fd6` | Busy fleets | `FUN_10088fd0` | Rule, implemented | js/ai-original.js (via js/ai-palm.js) markUsedFleets |
-| `FUN_0002d14a` | Play One Turn For Me / auto play: aggressiveness = Friendly slider / 10, colonies defended = Dig In slider, then the computer's plan | `FUN_10066bb0` | Rule, in part | js/ai-original.js (via js/ai-palm.js) aiTurn (auto); the sliders not |
+| `FUN_0002d14a` | Play One Turn For Me / auto play: aggressiveness = Friendly slider / 10, colonies defended = Dig In slider, then the computer's plan | `FUN_10066bb0` | Rule, implemented | js/ai-original.js (via js/ai-palm.js) aiTurn, p.autoPrefs505 once set |
 | `FUN_0002d286` | End Turn from the handheld: the turn, the first turn's player names, auto play stopped when something interesting happened | `FUN_100642d0` | Interface | engine endTurn; auto play stops on battles |
 | `FUN_0002d91c` | First End Turn: the research and budget shares kept as the next game's defaults; the hints flags copied | `FUN_10064600` | Interface | not done (every game starts from the defaults) |
 | `FUN_00034d08` | Map pen: tapping stars and fleets, dragging a fleet plans its route with DeterminePath | `FUN_1008c5f0` | Interface | ui.js map; engine orderMove (automatic routes a modern convenience) |
 | `FUN_0002cca8` | New game with the same settings (Game menu) | `FUN_1006579c` | Interface | ui.js New Game |
-| `FUN_000692c4` | Computer names and sexes (rand(1, 2) each), none the same; up to five of the star names you chose at a new rank put in the galaxy | `FUN_1006d0c0` | Interface | engine names (the chosen star names not) |
+| `FUN_000692c4` | Computer names and sexes (rand(1, 2) each), none the same; up to five of the star names you chose at a new rank put in the galaxy | `FUN_1006d0c0` | Interface | engine names; the chosen star names: js/engine.js newGame (opts.starNamesKept, rs.nameAStar) |
 | `FUN_00036810` | Dismantle Current Fleet (menu 0x519) | `FUN_10062c10` | Rule, implemented | js/rules-original.js flagScrap |
 | `FUN_00036928` | Dismantle toggle: the mark (fleet +0x72); a fleet bought this turn is un-bought (price, prototype, metal, interest) | `FUN_10062c10` | Rule, implemented | js/rules-original.js flagScrap |
 | `FUN_0003734e` | Evacuate Planet / Dont Evacuate Planet: Kansas always, Hope and Ship ask, profitable colonies ask; sounds 7002 / 4000; net -+ income; share to 0 | `FUN_10060fac` | Rule, implemented | js/rules-palm.js evacuateToggle |
@@ -224,8 +224,8 @@ The 44 routines Ghidra could not decompile were read in the disassembly (a full 
 | `FUN_00040232` | Message History: Go See, and its Evacuate button (Kansas and Hope one time in three, no Ship) | `FUN_10060580`, `FUN_10060fac` | Rule, in part | the remake has no Evacuate in the message list |
 | `FUN_00041604` | A report tapped: the battle, the rank, the radical window (0x466), the win and loss screens | `FUN_10060580` | Interface | ui.js reports |
 | `FUN_000414a6` | Master points added at a win, up to the cap, once per game | `FUN_100b24c0` | Rule, implemented | ui.js awardMasterPoints, js/rules-original.js addMasterPoints505 |
-| `FUN_00041aa4` | Radical Research window (a full hand: cancel one program) | `FUN_1005f280` | Rule, not implemented | docs/open-questions.md |
-| `FUN_00075ff0` | Radical Research window: the program chosen leaves the hand (player +0x1e0) | `FUN_1005f280` | Rule, not implemented | docs/open-questions.md |
+| `FUN_00041aa4` | Radical Research window (a full hand: cancel one program) | `FUN_1005f280` | Rule, implemented | js/rules-original.js radicalHand505 (the Palm takes 5.0.5's hooks); js/skins/classic/ui.js openRadicalHand |
+| `FUN_00075ff0` | Radical Research window: the program chosen leaves the hand (player +0x1e0) | `FUN_1005f280` | Rule, implemented | js/rules-original.js radicalHand505 discard |
 | `FUN_00043754` | Build Ships: Build (at most 24 designs, "Are you sure you want to build that many scout ships / tankers?" past 9) | `FUN_1005cf40` | Rule, in part | engine buildShips (the two questions not) |
 | `FUN_0004435a` | Build Ships: the count, at most the colony's people less ships built there, Allow Debt (Ship Savings above the borrowing limit, else above 0) | `FUN_1009ab50` | Rule, in part | engine buildShips, yardRoom505 (Allow Debt off not) |
 | `FUN_00049496` | Spending Levels: dragging a budget or research bar (locked: evacuating, finished, Savings while dipping, research below 0); the Savings bar while dipping opens Dip; Radical opens the Radical Research window | `FUN_1008a7a0` | Rule, in part | js/rules-original.js dragShare505 (budget); the research bars not (ui.js) |
@@ -235,7 +235,7 @@ The 44 routines Ghidra could not decompile were read in the disassembly (a full 
 | `FUN_00074bfe` | Give: three gifts a turn, money from Ship Savings and metal taken at once (sliders in thousandths of what you have) | `FUN_1005dcb0` | Rule, implemented | engine give |
 | `FUN_000750be` | Surrender To...: "Do you really want to surrender?", the player or no one; cancel | `FUN_1005d5a0` | Rule, implemented | engine surrender; js/rules-original.js surrender505 |
 | `FUN_00071cd6` | Armageddon: turning it on asks, off tells (player +0x1da) | `FUN_1005e8e0` | Rule, implemented | ui.js toggleArmageddon, engine setArmageddon |
-| `FUN_000713be` | AutoPlay window: on / off, just end turns or play for me, stop when something interesting happens, Friendly and Dig In sliders (0-100) | `FUN_1005ec40` | Rule, in part | ui.js auto play (the sliders not) |
+| `FUN_000713be` | AutoPlay window: on / off, just end turns or play for me, stop when something interesting happens, Friendly and Dig In sliders (0-100) | `FUN_1005ec40` | Rule, implemented | ui.js openAutoPlay with the sliders (rs.autoPlayRange.where 'autoplay') |
 | `FUN_00073e48` | Scrap Ship Types: tapping a type toggles its mark (design +0xc), no question | `FUN_100601e0` | Rule, implemented | js/rules-original.js flagScrapDesign |
 | `FUN_00079a18` | Organize Fleets: ships moved between fleets, stances, a fleet's Scrap mark | 100aa000.. | Interface | ui.js fleet panel; engine splitFleet |
 | `FUN_00079ea8` | Organize Fleets: a new fleet | 100aa000.. | Interface | engine splitFleet |

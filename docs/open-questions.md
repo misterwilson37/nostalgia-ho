@@ -84,9 +84,14 @@ Item 2 stays because following it needs the skin to go on with no human in the g
 
 - **Fix Spending** (Galaxy menu, "Correction dépenses": `FixSpendingBars @c1fb0`,
   `FixNextSpendingBar @c1b48`): raises each colony that can't pay its loss to its
-  minimum share.
-- **Naming a star after a win** (`NameAStar @120a04`): the winner's star name is saved
-  in the program's STR# 2005 for later galaxies. The remake keeps no such list.
+  minimum share. Not built: its lines of text and `ComputeMaxPercent @c1fde`'s formula
+  weren't recorded, so a window would have to guess its rule.
+- Now done: **naming a star after a win** (`NameAStar @120a04`, `rs.nameAStar`): clicking
+  the winner's report opens Name a Star; the name is kept in this browser (localStorage
+  "ho5.stars.12", the program's STR# 2005) and later 1.2 galaxies draw their star names
+  from the list and those names, as `GiveStarsValues` does. Not read: the window's own
+  words and its alert for a name already taken (French in 1.2); the remake shows 4.0.5's
+  words ("You won the game, so you get to name a star.") and 2.0's alert (string 3340).
 - The preferences for battle speed, showing messages and watching battles, and the
   Explored Planets window.
 
@@ -227,13 +232,19 @@ needs the skin to go on with no human in the game; items 1 and 3 stay at the use
 - **Fix Spending** (`FUN_1010_1ce7`, `1f55`, `1f6b`; Mac `FixNextSpendingBar`,
   `FixSpendingBars`, `ComputeMaxPercent`): each use fixes the next colony with a problem,
   cutting its share to what it can use (+1 per mille, the rest to Savings) or raising a
-  losing colony to its least share out of Savings, with one line of text.
+  losing colony to its least share out of Savings, with one line of text. Not built: the
+  lines of text (but "You have no spending problems.") and `FUN_1010_1f6b`'s formula
+  weren't recorded, and the strings files hold neither.
 - **Design names for the computers** (`FUN_10e8_0f64`, Mac `AddNewTypeNameToPrefs`): the
   names humans give their designs go into the names file, and the computers' later
   designs draw from it. The remake keeps no names file.
-- **Naming a star after a win** (NAMESTARDLGPROC) and the humans' names added to the
-  computer names (`FUN_1040_4028`): 2.0 keeps them in a names file for later galaxies
-  (`FUN_1030_1049` draws star names from it too). The remake keeps no such file.
+- **The humans' names added to the computer names** (`FUN_1040_4028`): 2.0 keeps them in
+  its names file for later galaxies. The remake keeps no such list.
+- Now done: **naming a star after a win** (NAMESTARDLGPROC, opened by clicking the
+  winner's report, `FUN_10c0_12de`; `rs.nameAStar`): the name is kept in this browser
+  (localStorage "ho5.stars.dos", "ho5.stars.mac20"), at most 7 letters, never one there is
+  already (string 3340), and later galaxies draw their star names from the 190 and those
+  names (`FUN_1030_1049`). Not read: the window's own words (the remake shows 4.0.5's).
 - The Explored Planets list (LISTSTARSDLGPROC) and the poll and battle speed settings.
 
 ### Found in the 1.2 pass, for 2.0 (now done)
@@ -267,8 +278,11 @@ the Mac, `CalcShipCosts` @114c9a).
 **Remake's choices:** the default sound is the skin's, where the Mac beeped (`PlaySound`
 @12636, `SysBeep`).
 
-**Interface not done:** **Force End Turn** (`ForceEndTurn` @122382, box 3210, calling
-`MarkAllPlayersDone` @101616); the rest is the Windows list above.
+**Interface not done:** the Windows list above. Now done: **Force End Turn**
+(`ForceEndTurn` @122382, box 3210, calling `MarkAllPlayersDone` @101616;
+`rs.forceEndTurn`), in the File menu of a game with several players: it asks with box
+3210's text (the Windows build's string 3210, the same words; the buttons' words weren't
+read: "Wait" and "Force End Turn") and then plays the turn with everyone marked done.
 
 ## Mac 3.0.1 (1993)
 
@@ -364,11 +378,19 @@ These are what 3.0.1's code does and what the remake now does; they look like sl
 
 ### Interface not done
 
-- **Fix Spending** (`FixSpendingBars @d28ca`, `FixNextSpendingBar @d2552`).
+- **Fix Spending** (`FixSpendingBars @d28ca`, `FixNextSpendingBar @d2552`). Not built:
+  the lines of text it writes (STR# 1050) weren't recorded, only 2.0's "You have no
+  spending problems." (also 1.2 and 2.0: their `ComputeMaxPercent` formula and lines).
 - **The Hall of Fame and Hall of Shame** (`AddToHall @144796`, `doHallOfFameDlg`); the
   difficulty rating it records is worked out.
-- **Naming a star after a win** (`NameAStar`).
-- **The auto play settings** (`DoConfigAutoPlayDialog @144226`).
+- **The auto play settings** (`DoConfigAutoPlayDialog @144226`): which of the player's
+  fields it sets and its scroll bars' ranges weren't recorded in the 3.0.1 pass, so the
+  window isn't built for 3.0.1 (4.0.5's would be a later version's guess).
+- Now done, in part: **naming a star after a win** (`NameAStar @1424b2`, `rs.nameAStar`):
+  the window opens from the winner's report and keeps the name (localStorage
+  "ho5.stars.301"). Open: where 3.0.1 keeps the name and whether later galaxies use it
+  (`GiveStarsValues` reads STR# 1003 only); the remake doesn't use it. The words are
+  4.0.5's and the alert 2.0's.
 - **The canned-message window** (`SendMessage @140fa2`): the remake's messages are free
   text, of which the computers read "I like …" and "I like planets that are …".
 - **The auto-scrap preference** (old designs past 15, `ScrapFleetsAndTypes`, prefs +0x74).
@@ -502,11 +524,25 @@ These are what 4.0.5's code does and what the remake now does; they look like sl
 
 ### Interface not done
 
-- **The radical hand window** (`FUN_00471587`): shown with the 2010 report, it lists the
-  four projects (strings 821-837) with a timer and lets the player throw one out.
-- **Naming a star after a win** (dialog 378, `FUN_00456047`) and the "You have conquered
-  the galaxy!" window with its picture (dialog 377, `FUN_0044bf5a`).
-- **The auto play settings** (`FUN_00404c4e`).
+- Now done: **the radical hand window** (`FUN_00471587`, Mac `DoRadicalChoiceDlg`;
+  `rs.radicalHand`): the "hard at work on another discovery" report has a Radical
+  projects… button (the original opened it by clicking the report); it lists the hand in
+  strings 821-837, and the one picked leaves the hand. Open: the timer the window was
+  noted with, its title and its buttons' words (the remake: "Radical Research", "Cancel
+  Project", "OK"), and whether it also lets a hand of fewer than four be thinned.
+- Now done: **the "You have conquered the galaxy!" window** (dialog 377, `FUN_0044bf5a`,
+  `rs.conquered`) with the won picture, then **Name a Star** (dialog 378, `FUN_00456047`,
+  `rs.nameAStar`), opened by clicking the winner's report (and from the end of the
+  messages). The name (at most 7 letters, not one there is already: string 513) is kept
+  with the last four (localStorage "ho5.stars.405", "ho5.stars.mac405"), and all four are
+  put in each later galaxy. Open: which name goes when a fifth is named, which stars get
+  the names, and dialog 377's title.
+- Now done: **the auto play settings** (`FUN_00404c4e`, Mac `DoConfigAutoPlayDialog`;
+  `rs.autoPlaySettings`): the Auto play window's Config… opens Friendly-Aggressive and Dig
+  In-No Defense sliders. Open: the scroll bars' ranges (the remake: aggressiveness 0-10,
+  colonies defended 100 % at Dig In to 0 at No Defense) and the human's values before the
+  first auto play turn (the remake makes the auto play record when the window opens, as
+  the first auto play turn would).
 - **The canned-message window** (codes 0x40e-0x42b): "Look at %s" explores a star for the
   receiver, "I own %s" marks it, "I like planets ..." gives your home; the remake's
   messages are free text, of which the computers read "I like ..." and "I like planets
@@ -546,9 +582,12 @@ rank past 1,000,000, which showed the unfilled "%s: %s".
   colour.
 
 **Interface not done:** the New Game window's Luck in Battles, "Automatically end turn
-for unconnected players" and time limit menu; the auto play settings window (the rule is
-`rs.autoPlaySettings`); the floating windows and Switch Players; the colour-monitor
-joke; network play.
+for unconnected players", time limit menu and the four winners' star names (the names
+are kept and used: above); the floating windows and Switch Players; the colour-monitor
+joke; network play. Now done: the auto play settings window (`rs.autoPlaySettings`, the
+new value in metal for defence), the radical hand window, the conquered window and Name
+a Star, as 4.0.5's above. The End Turn button's black window shows the year (PICT 5500;
+4.0 also showed the time left there, and the remake has no time limit).
 
 ## Mac 5.0.5 (2003)
 
@@ -668,9 +707,19 @@ These are what 5.0.5's code does and what the remake now does; they look like sl
 
 ### Interface not done
 
-- **The auto play settings** (Preferences, `FUN_1005ec40`; used by the Auto button,
-  `FUN_10066bb0`): a human on auto play keeps the auto play personality's own
-  aggressiveness and colonies defended.
+- Now done: **the auto play settings** (Preferences, `FUN_1005ec40`; used by the Auto
+  button, `FUN_10066bb0`; `rs.autoPlaySettings`): Preferences has the Friendly-Aggressive
+  and Dig In-No Defense sliders (0-100), and each turn the computer plays for you it sets
+  aggressiveness to a tenth of the first and colonies defended to the second. Open: the
+  Preferences' defaults, so until the sliders are set the auto play personality keeps its
+  own values; and the sliders' direction (5.0.5 reads Dig In-No Defense straight into
+  colonies defended; the remake puts 100 % at Dig In).
+- Now done: **the Radical Research window** (`FUN_1005f280`, dialog 0x99;
+  `rs.radicalHand`): from the "hard at work" report's button or the Galaxy menu, with a
+  full hand of four you may cancel one program. Open: its program names; the remake lists
+  4.0.5's strings 821-837 for the 17 both versions have (the fallback to 4.0.5), and for
+  the three 5.0.5 added words from their own reports ("Build a new research facility.",
+  "Raise the prime lending rate.", "Renegotiate your line of credit.").
 - **The canned-message window** (`FUN_1005d940`, codes 0x416-0x42c): "Look at %s"
   explores a star for the receiver (`FUN_10078c80`), "I own %s" marks it in the
   receiver's records, "I like planets ..." gives your home; messages to everyone, your
@@ -764,20 +813,20 @@ These are what the Palm code does and what the remake now does; they look like s
 
 ### Interface not done
 
-- **The Radical Research window** (tFRM 3000, `FUN_00041aa4`, `FUN_00075dba`-
-  `FUN_00075ff0`): with a full hand, tapping the "hard at work on another discovery"
-  report or the Radical bar lets you cancel one program. (5.0.5 has it too,
-  `FUN_1005f280`.)
-- **The auto play settings** (tFRM 1700, `FUN_000713be`): Friendly and Dig In sliders,
-  "Just End My Turns" or "Have Computer Play For Me", turn off when something interesting
-  happens.
+- Now done: **the Radical Research window** (tFRM 3000, `FUN_00041aa4`, `FUN_00075dba`-
+  `FUN_00075ff0`), as 5.0.5's (above), from the report or the Galaxy menu (not the Radical
+  bar). Its program names are open as 5.0.5's.
+- Now done: **the auto play settings** (tFRM 1700, `FUN_000713be`): the Friendly and Dig
+  In sliders on the Auto play window, used as 5.0.5's (above), with the same open points.
 - **Build Ships' Allow Debt box** (`FUN_0004435a`) and the questions before building more
   than 9 Scouts or Tankers (`FUN_00043754`, tSTL 6004.36-37).
 - **The research bars** dragged per mille like the budget bars (`FUN_00049496`), and
   tapping the Savings bar while dipping to open Dip Into Savings.
 - **The Message History's Evacuate button** (`FUN_00040232`).
-- **Naming a star at a new rank** (tFRM 2900) for later galaxies (`FUN_000692c4` puts up to
-  five of them in).
+- Now done: **naming a star at a new rank** (tFRM 2900, `rs.nameAStar`): after the new
+  rank's window; the names are kept (localStorage "ho5.stars.palm") and the last five are
+  put in each new galaxy (`FUN_000692c4` puts up to five in). Open: the form's words
+  (the remake's own), how many names are kept and which five go in.
 - **The canned-message window** (tFRM 2600: Thank You, Sorry, the curse); the remake's
   messages are free text.
 - **Options locked by rank** (`FUN_0003825a`), left open on purpose.

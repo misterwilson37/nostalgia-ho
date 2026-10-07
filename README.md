@@ -202,7 +202,30 @@ Optional ruleset flags the skin reads (each is documented where it is read):
   counts as won when its sound is 7027, for now. (`js/engine.js`, `msg`)
 - `rs.autoPlaySettings(G, player, { aggr, colDef })`: the auto play settings window's
   OK (4.0.5: aggressiveness and colonies defended as set, and metal for defence the old
-  colonies defended on Windows, the new one on the Mac). No skin has the window yet.
+  colonies defended on Windows, the new one on the Mac; 5.0.5 and Palm OS: the sliders
+  kept, used at each auto play turn); with no set it gives the values the window opens
+  with. `rs.autoPlayRange`: `{ aggr: [min, max], where }`, the aggressiveness slider's
+  range and where the sliders are: `'config'` (the Auto play window's Config…, 4.0.5),
+  `'prefs'` (Preferences, 5.0.5) or `'autoplay'` (on the Auto play window, Palm OS).
+  (`js/skins/classic/ui.js`, `openAutoPlaySettings`)
+- `rs.radicalHand`: the radical hand window (4.0.5, 5.0.5, Palm OS): `{ cards(G, player)
+  → [{ id, text }], discard(G, player, id), full, menu }`; it opens from the "hard at work
+  on another discovery" report (and the Galaxy menu with `menu`), only with `full` cards
+  when that is given. (`js/skins/classic/ui.js`, `openRadicalHand`)
+- `rs.conquered`: the text of 4.0.5's "You have conquered the galaxy!" window, opened with
+  the won picture by clicking the winner's report. (`js/skins/classic/ui.js`, `openWinWindows`)
+- `rs.nameAStar`: Name a Star, `{ when: 'win' | 'rank', text, taken, max, keep, use, put }`:
+  after a win (clicking the winner's report) or a new rank (Palm OS), a star name of at
+  most `max` letters, not one there is already (`taken`, with %s); kept in localStorage
+  "ho5.stars.<rules>" (the last `keep`, or all) and passed to `HO.newGame` as
+  `opts.starNamesKept`, where `use` `'pool'` adds them to the version's star names (1.2,
+  2.0) and `'put'` puts the last `put` of them in the galaxy (4.0.5, Palm OS); `null`
+  keeps them unused (3.0.1). (`js/skins/classic/ui.js`, `openNameStar`; `js/engine.js`, `newGame`)
+- `rs.forceEndTurn`: `{ ask }`, Mac 2.0.1's Force End Turn, offered with several players:
+  asks (box 3210, %s the player, those not done, all) and plays the turn with everyone
+  marked done. (`js/skins/classic/ui.js`, `forceEndTurn`)
+- A skin's `T.endTurnYear` (`[x, y, w, h, picture width]`): the window in its End Turn
+  picture where the year is written (mac4, mac4c, w95).
 - A battle record's `duel` (0, 1, …): a ruleset that keeps one replay per duel, as 1.2 and
   2.0 did, pushes one record per duel to `G.battles`; the planet panel, the map menu and
   Review Battle offer each. (`js/engine.js`, above `battle`)

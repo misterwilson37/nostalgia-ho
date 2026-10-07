@@ -25,7 +25,7 @@ Every routine in SPACEHO.EXE, the Windows 95 program of Spaceward Ho! 4.0.5 (Del
 
 | Routine | Mac 4.0.5 (68k) | What it does | Status | Where / why |
 |---|---|---|---|---|
-| `FUN_00404c4e` @404c4e | `DoConfigAutoPlayDialog` @10440e | Auto play settings window: sets the human's aggressiveness (+0x718) and colonies defended (+0x704), and puts the OLD colonies-defended value into metal for defence (+0x706), a slip | Rule, implemented | js/rules-405.js autoPlaySettings (the window isn't built: docs/open-questions.md) |
+| `FUN_00404c4e` @404c4e | `DoConfigAutoPlayDialog` @10440e | Auto play settings window: sets the human's aggressiveness (+0x718) and colonies defended (+0x704), and puts the OLD colonies-defended value into metal for defence (+0x706), a slip | Rule, implemented | js/rules-405.js autoPlaySettings; the window: js/skins/classic/ui.js openAutoPlaySettings (the Auto play window's Config…) |
 | `FUN_00409170` @409170 | `GetDialogValues` @10c8e | Game options word: Alliances bit 1, Luck bit 4, auto end bit 8 (Novas bit 2 never set) | Rule, implemented | G.opts; docs/open-questions.md |
 | `FUN_0040bff1` @40bff1 | `DoGalaxyMenu` @838c0 | Armageddon command: two random confirmations (strings 299-309) to turn it on, toggles player +0x18ca | Rule, implemented | engine setArmageddon; the mask in pass 1 |
 | `FUN_00413ba3` @413ba3 | `FollowPathDrag` @110dca | Map click and fleet dragging: picks a fleet, plans its route (FUN_004164b0) and gives it (FUN_0041726f), HYAHH | Interface | the remake's map drag; routes by rules route()/path405 |
@@ -173,9 +173,9 @@ Every routine in SPACEHO.EXE, the Windows 95 program of Spaceward Ho! 4.0.5 (Del
 | `FUN_0046f8cc` @46f8cc | `GetIconID` @151682 | Report pictures by code (battle: won/lost the other side, destroyed/survived your own) | Interface | js/skins/w95/ui.js messageLook |
 | `FUN_0046fe1b` @46fe1b | `PlayAnnounceSound` @151b6c | Report sounds by code | Interface | js/skins/w95/ui.js messageLook and message sounds |
 | `FUN_004702e1` @4702e1 | `AddNewMessage` @151e56 | AddNewMessage (80 reports, oldest 10 dropped) | Rule, implemented | engine msg |
-| `FUN_00470dec` @470dec | `DoMessageAction` @1523c2 | Report click: replays, Hall of Shame on elimination, win window | Interface | the remake's reports; Hall not built |
+| `FUN_00470dec` @470dec | `DoMessageAction` @1523c2 | Report click: replays, Hall of Shame on elimination, win window | Interface | the remake's reports; the win windows (js/skins/classic/ui.js openWinWindows: rs.conquered, rs.nameAStar) |
 | `FUN_004714c7` @4714c7 | `FindDateMessageNumber` @152974 | First report of a year | Rule, implemented | js/ai-405.js (ai.ev events) |
-| `FUN_00471587` @471587 | `DoRadicalChoiceDlg` @1529e2 | Radical card window: shows the hand of 4 and, on a pick, takes a card out of the hand (+0x18ce) | Rule, not implemented | the card window is not built; docs/open-questions.md |
+| `FUN_00471587` @471587 | `DoRadicalChoiceDlg` @1529e2 | Radical card window: shows the hand of 4 and, on a pick, takes a card out of the hand (+0x18ce) | Rule, implemented | js/rules-405.js radicalHand (strings 821-837); js/skins/classic/ui.js openRadicalHand, from the report |
 | `FUN_004768cc` @4768cc | `SetUpComputerPlayers` @1424c6 | Computers join: names, sexes, skill steps | Rule, implemented | js/rules-405.js computerSetup |
 | `FUN_0047b5dc` @47b5dc | — (MaTh 1002 "Weapon Ratios", the same 51 values) | Hit table 50 + 31.51 atan | Rule, implemented | js/rules-405.js HIT |
 | `FUN_0047f76e` @47f76e | `EndTurnMenuCall` @e0920 | The End Turn command (the Mac's name): with Auto Play set to "Have computer play for me" (mode 2) the computer plays the human's turn (FUN_0045e8bb); then the turn-time bank (player +0x60: seconds left under the limit are kept, up to 900 a turn and twice the limit). It had been read as the time limit's routine | Rule, implemented (auto play) / not implemented (time bank) | engine p.auto; no turn time limit in the remake |

@@ -16,7 +16,7 @@ The DOS program was checked against it where the two could be matched: its
 | | Routines |
 |---|---:|
 | In the program | 743 |
-| Game rules | 119 (112 implemented, 7 not: Fix Spending ×3, Send Message, naming a star ×2, design names kept for the computers) |
+| Game rules | 119 (114 implemented, 5 not: Fix Spending ×3, Send Message, design names kept for the computers) |
 | Not a rule (runtime, files, windows, drawing, menus, dialogs, sound, dead code) | 624 |
 | Unread | 0 |
 
@@ -506,8 +506,8 @@ calls (`GETDC`, `LOADSTRING` …); they are imports, not code of the program.
 | `FUN_1070_1b5b †` @1070:1b5b | — | open Send Message | NOT A RULE | interface |
 | `FUN_1070_1b85 †` @1070:1b85 | `ZoomIn` @121e1c | map zoom in | NOT A RULE | interface |
 | `FUN_1070_1be9 †` @1070:1be9 | `ZoomOut` @121e9c | map zoom out | NOT A RULE | interface |
-| `NAMESTARDLGPROC` @1070:1c4f | `NameAStar` @121f20 (the name stored by `MarkStarNamed`) | NAMESTARDLGPROC: the winner names a star; the name goes to the names file for later galaxies | RULE, not implemented | not implemented (no names file) |
-| `FUN_1070_2050 †` @1070:2050 | `NameAStar` @121f20 (opened by `DoMessageAction`) | open Name a Star (from FUN_10c0_12de: clicking the winner's report) | RULE, not implemented | not implemented |
+| `NAMESTARDLGPROC` @1070:1c4f | `NameAStar` @121f20 (the name stored by `MarkStarNamed`) | NAMESTARDLGPROC: the winner names a star; the name goes to the names file for later galaxies | RULE, implemented | js/rules-dos.js nameAStar; js/skins/classic/ui.js openNameStar (the names file: localStorage); js/engine.js newGame |
+| `FUN_1070_2050 †` @1070:2050 | `NameAStar` @121f20 (opened by `DoMessageAction`) | open Name a Star (from FUN_10c0_12de: clicking the winner's report) | RULE, implemented | js/skins/classic/ui.js renderMsg (the winner's report), openWinWindows |
 | `FUN_1070_2073` @1070:2073 | `InitSkillsList` @122240 | skill list | NOT A RULE | interface |
 | `LISTSKILLSDLGPROC` @1070:214f | `ListPlayerSkills` @122164 | LISTSKILLSDLGPROC: the players' skills | NOT A RULE | interface |
 | `FUN_1070_21e7 †` @1070:21e7 | — | open the skills list | NOT A RULE | interface |

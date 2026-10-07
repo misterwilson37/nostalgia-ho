@@ -1773,6 +1773,16 @@ E.registerRules('dos', Object.assign({}, O, {
   features: { arrivalNotices: false, waypoints: true, chat: true, buildQueue: true, singleTypeFleets: true, skills: true, noRadical: true },
   canBuild: (G, p, type) => TYPES4.includes(type),
   starNames: STAR_NAMES, maleNames: MALE_NAMES, femaleNames: FEMALE_NAMES, femaleComputers: FEMALE_COMPUTERS, shipNames: SHIP_NAMES,
+  // CONFIRMED (NAMESTARDLGPROC @1070:1c4f, opened by clicking the winner's
+  // report, FUN_10c0_12de; Mac NameAStar @121f20, MarkStarNamed; string
+  // 3340): the winner names a star, at most 7 letters, not one there is
+  // already; the name goes into the names file, and every later galaxy draws
+  // its star names from the 190 and the names file, no repeats (FUN_1030_1049).
+  // The window's own words weren't read: the remake uses 4.0.5's
+  // (docs/open-questions.md). The remake's names file: the skin's
+  // localStorage, passed to HO.newGame as opts.starNamesKept.
+  nameAStar: { when: 'win', text: 'You won the game, so you get to name a star.', keep: 0, use: 'pool', max: 7,
+    taken: 'Sorry, there’s already a star named ‘%s’.  Please pick another name.' },
   welcome: WELCOME,
   SKILLS, WPNRAT, setupPlayer, defaultDesigns, afterSetup: afterSetup20, computerSetup, makeGalaxy, distance, SHAPES,
   designCost, designLimits, designMin, aiSpec, paysPrototype, fleetFor, route: route20,

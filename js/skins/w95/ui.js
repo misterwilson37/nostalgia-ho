@@ -27,6 +27,7 @@ window.HOTHEME = {
   // fleets sitting at a star: icon 10114 (FUN_0048e55e); nothing for satellites
   marker: (f) => (f.sat ? null : B(10114)),
   endTurnPic: B(368), // the End Turn clock (FUN_004903ea)
+  endTurnYear: [21, 33, 27, 15, 64], // the clock's black window, where it writes the year
   battlePlanet: B(1003),
   // Planets (FUN_00438f47). Size by gravity against your home's; yours with
   // a hat when losing money (icy or hot versions), the rich ones when paying

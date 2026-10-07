@@ -55,8 +55,8 @@ Every routine in the PowerPC program of Spaceward Ho! 5.0.5 for Mac OS 9 and X (
 | `FUN_1005dcb0` | Give window: three gifts a turn (alert 6), to a player still in (alert 7), money from Ship Savings and metal taken at once | Rule, implemented | engine give |
 | `FUN_1005e2b0` | Rank dialog ("NN.jpg") | Interface | ui.js showRank |
 | `FUN_1005e8e0` | Armageddon window: turning it on asks (alert 4), off tells (alert 5); player +0x1110 | Rule, implemented | ui.js toggleArmageddon, engine setArmageddon |
-| `FUN_1005ec40` | Preferences: auto play aggressiveness and colonies defended (prefs +0x211, +0x212, 0-100), sounds | Rule, not implemented | no auto play settings (docs/open-questions.md) |
-| `FUN_1005f280` | Radical Research window (dialog 0x99, opened from the report list and the menu dispatch): with a full hand (four of the twenty programs in player +0x1118) the player may cancel one, which leaves the hand; with fewer than four it closes at once. (Listed before as a report-list display routine.) | Rule, not implemented | docs/open-questions.md (Palm's twin: `FUN_00041aa4`, docs/palm-findings.md) |
+| `FUN_1005ec40` | Preferences: auto play aggressiveness and colonies defended (prefs +0x211, +0x212, 0-100), sounds | Rule, implemented | js/rules-original.js autoPlaySettings505 (applied in js/ai-original.js aiTurn); the sliders in the skin's Preferences |
+| `FUN_1005f280` | Radical Research window (dialog 0x99, opened from the report list and the menu dispatch): with a full hand (four of the twenty programs in player +0x1118) the player may cancel one, which leaves the hand; with fewer than four it closes at once. (Listed before as a report-list display routine.) | Rule, implemented | js/rules-original.js radicalHand505; js/skins/classic/ui.js openRadicalHand (program names: docs/open-questions.md) |
 | `FUN_100601e0` | Scrap Ship Types window: sets the design mark (+0xc) for the selection, clears it for the rest | Rule, implemented | js/rules-original.js flagScrapDesign |
 | `FUN_100609e0` | Menu command dispatch (Dismantle, Evacuate, Dip, Give, Surrender, Armageddon, Auto, windows) | Interface | ui.js menus |
 | `FUN_10060fac` | Evacuate Planet toggle (colony +0x13): Kansas and Hope jokes, the profitable-colony question, sounds 7002/4000, net +-income, share to 0 | Rule, implemented | js/rules-original.js evacuate505, evacuateToggle |
@@ -228,7 +228,7 @@ Every routine in the PowerPC program of Spaceward Ho! 5.0.5 for Mac OS 9 and X (
 
 ### Rules not implemented
 
-- `FUN_1005ec40` / `FUN_10066bb0`: the auto play settings (Preferences: Friendly-Aggressive and Dig In-No Defense sliders, 0-100; the Auto button sets aggressiveness to a tenth of the first and colonies defended to the second). The remake has no such preferences; a human on auto play keeps the auto play personality (docs/open-questions.md, "Interface not done").
+- `FUN_1005ec40` / `FUN_10066bb0`: the auto play settings (Preferences: Friendly-Aggressive and Dig In-No Defense sliders, 0-100; the Auto button sets aggressiveness to a tenth of the first and colonies defended to the second). Now in the skin's Preferences (`rs.autoPlaySettings`); until they are set, a human on auto play keeps the auto play personality (the defaults weren't read: docs/open-questions.md).
 - `FUN_10059570`: options locked by rank ("Need more MPs"); left open on purpose.
 - `FUN_1005cf40`: the questions before buying more than 9 Scouts or Tankers at once.
 

@@ -158,7 +158,8 @@ Each CONFIRMED the same as `js/rules-original.js`, so the Palm ruleset uses it:
 - **Scrap marks**: the words are "Dismantle Current Fleet" / "Dont Dismantle Current
   Fleet" (tSTL 6001.16-17), as 5.0.5's.
 - **Ranks**: resource `RANK 1000`, the same 25 ranks, points and unlocks; a new rank
-  shows tFRM 2900, where you may name a star for later games (NOT IMPLEMENTED).
+  shows tFRM 2900, where you may name a star for later games (built: `rs.nameAStar`; the
+  form's words are the remake's).
 - **Hints**: one every turn while the preference is on (`FUN_000500d4`, report 500;
   `FUN_00027c4c` reads tSTL 6021 at a SysRandom index from 4 to 43; the demo 4 to 52).
   `rs.hintTexts` holds them.
@@ -231,8 +232,8 @@ differs from both programs:
    they were.
 3. **The Radical Research window** (`FUN_1005f280`, dialog 0x99; Palm tFRM 3000): with
    a full hand, the player may cancel one radical program. `docs/coverage-505.md` lists
-   the routine as a report list; it is a rule-touching window (corrected there). Not in
-   either ruleset.
+   the routine as a report list; it is a rule-touching window (corrected there). Built
+   for both rulesets since (`rs.radicalHand`).
 
 Also, the research shares (player +0x80) are per mille as they stand; the skin's
 Technology bars store them as fractions of 1 once drawn, which made `research505` give a

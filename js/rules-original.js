@@ -178,6 +178,41 @@ function refillDeck(G, p) {
     if (!p.deck.includes(i) && radicalAllowed(G, p, i)) p.deck.push(i);
   }
 }
+// CONFIRMED (FUN_1005f280, dialog 0x99; Palm FUN_00041aa4, FUN_00075ff0):
+// the Radical Research window, opened from the report "Your Radical
+// researchers are hard at work on another discovery!" (0x466) or the menu
+// (Palm: also the Radical bar). With a full hand (four programs, player
+// +0x1118) the player may cancel one, which leaves the hand until the next
+// discovery deals it full again; with fewer than four it closes at once.
+// Its program names weren't read: the window lists 4.0.5's (strings
+// 821-837, the 17 discoveries both have) and, for the three 5.0.5 added,
+// words from their own reports (docs/open-questions.md).
+const RADICAL_TEXT = { metal: 'Search for more metal on your planets.', explore: 'Explore distant stars.', money: 'Get lots of money immediately.',
+  mining: 'Improve mining efficiency.', pop: 'Improve population maximums.', terra: 'Improve terraforming efficiency.', generals: 'Educate battle generals better.',
+  recycle: 'Improve recycling program.', research: 'Build a new research facility.', save: 'Raise the prime lending rate.', borrow: 'Renegotiate your line of credit.',
+  decoy: 'Build a decoy ship.', bio: 'Build a biological space monster.', steal: 'Steal technology from another player.', protos: 'Build a set of ships with no development cost.',
+  range: 'Improve range tech dramatically.', speed: 'Improve speed tech dramatically.', weapons: 'Improve weapons tech dramatically.', shields: 'Improve shields tech dramatically.',
+  mini: 'Improve mini tech dramatically.' };
+const radicalHand505 = {
+  full: 4, menu: true, // (the menu dispatch opens it too; the remake's Galaxy menu)
+  cards: (G, p) => (p.deck || []).map(i => ({ id: i, text: RADICAL_TEXT[RADICAL[i]] })),
+  discard(G, p, id) { const at = (p.deck || []).indexOf(id); if (at >= 0) p.deck.splice(at, 1); },
+};
+// CONFIRMED (FUN_1005ec40, FUN_10066bb0; Palm FUN_000713be, FUN_0002d14a):
+// the auto play settings, the Friendly-Aggressive and Dig In-No Defense
+// sliders (0-100; 5.0.5's Preferences, prefs +0x211, +0x212; the Palm's Auto
+// Play window). Each turn the computer plays for a human it sets
+// aggressiveness to a tenth of the first and colonies defended to the
+// second, then plans (js/ai-original.js aiTurn). The remake keeps them with
+// the player (p.autoPrefs505) once set; until then the auto play record
+// keeps its own values (the Preferences' defaults weren't read). With no
+// set it gives the values the window opens with.
+function autoPlaySettings505(G, p, set) {
+  if (set) { p.autoPrefs505 = { aggr: clamp(set.aggr | 0, 0, 100), colDef: clamp(set.colDef | 0, 0, 100) }; return; }
+  if (p.autoPrefs505) return Object.assign({}, p.autoPrefs505);
+  const ai = p.ai && p.ai.v505 ? p.ai : null;
+  return ai ? { aggr: clamp(ai.aggr * 10, 0, 100), colDef: ai.colDef } : { aggr: 50, colDef: 50 };
+}
 function radical(G, p) {
   msg(G, p.id, 'Your Radical researchers have just made another wild discovery!', { icon: 'm9010' });
   const say = (t, icon) => msg(G, p.id, t, { icon: icon || 'm9010', sound: 7007 });
@@ -2594,5 +2629,8 @@ Object.defineProperties(E.RULESETS.original, Object.fromEntries(Object.entries({
   fleetFor: fleetFor505, shipsAdded: shipsAdded505, yardRoom: yardRoom505, addMasterPoints: addMasterPoints505,
   bars: bars505, setBars: setBars505, slots301: slots505, colSlots: colSlots505, keyPm, setKeyPm, giveBarPercent: giveBar505, share505,
   terraLeft: (G, p, s) => bars505(s)[0] !== -1,
+  // the windows (the skin builds them; docs/coverage-505.md)
+  autoPlaySettings: autoPlaySettings505, autoPlayRange: { aggr: [0, 100], where: 'prefs' },
+  radicalHand: radicalHand505,
 }).map(([k, value]) => [k, { value, enumerable: false, writable: true, configurable: true }])));
 })(this);

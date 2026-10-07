@@ -1092,6 +1092,9 @@ function note(G, p, e) { if (p.ai && p.ai.v405) (p.ai.ev = p.ai.ev || []).push(e
 
 E.registerAI('405', {
   make: (G, p, iq) => makeAI(G, p, iq, false),
+  // a human's auto play record, made as the first auto play turn makes it
+  // (aiTurn), for the auto play settings window (js/rules-405.js autoPlaySettings)
+  autoplayAI: (G, p) => (p.ai && p.ai.v405) ? p.ai : (p.ai = makeAI(G, p, 'average', true)),
   turn: aiTurn,
   techEvent,
   noteBattle: () => {},

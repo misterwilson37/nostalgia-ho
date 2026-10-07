@@ -1911,6 +1911,12 @@ E.registerRules('301', Object.assign({}, D, {
   bestBuddies: false,      // no best buddies (see above)
   canBuild: (G, p, type) => TYPES4.includes(type),
   starNames: STAR_NAMES,
+  // CONFIRMED (NameAStar @1424b2): the winner names a star. Where 3.0.1 keeps
+  // the name, and whether later galaxies use it, weren't read (GiveStarsValues
+  // reads STR# 1003 only): the remake keeps it and doesn't use it, and uses
+  // 2.0's alert and 4.0.5's words (docs/open-questions.md).
+  nameAStar: { when: 'win', text: 'You won the game, so you get to name a star.', keep: 0, use: null, max: 7,
+    taken: 'Sorry, there’s already a star named ‘%s’.  Please pick another name.' },
   SKILLS, HIT, hit, SHAPES: W.SHAPES, SIZES: W.SIZES, interestOn, techLevelCost, research, aiSpec,
   setupPlayer, defaultDesigns, afterSetup, computerSetup, makeGalaxy, distance: W.distance, galaxySizes: O.galaxySizes,
   designCost, designLimits, designMin, paysPrototype, shotsPerShip, planetShots, borrowLimit,

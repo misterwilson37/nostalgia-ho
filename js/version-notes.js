@@ -120,7 +120,6 @@ root.HOVERSIONS = {
     ],
     missing: [
       'Fix Spending, which raises each colony that can’t pay its loss to its least share.',
-      'Naming a star after a win (1.2 kept the winners’ star names for later galaxies).',
       'The preferences for battle speed, showing messages and watching battles, and the Explored Planets window.',
     ],
     previous: null,
@@ -150,7 +149,6 @@ root.HOVERSIONS = {
     missing: [
       'Send Message: 2.0’s messages are made of “I like”, “I don’t like” or “I own” and a planet or a player, and a true “I own” marks the star on the other player’s map. The remake’s messages are free text with no effect.',
       'Fix Spending, in the budget window.',
-      'Naming a star after a win, and the names file kept for later galaxies.',
       'The Explored Planets list and the poll and battle speed settings.',
     ],
     deltaTao: DT_2,
@@ -194,8 +192,8 @@ root.HOVERSIONS = {
     missing: [
       'Fix Spending.',
       'The Hall of Fame and Hall of Shame (the difficulty rating is worked out).',
-      'Naming a star after a win.',
       'The auto play settings window.',
+      'Where the star a winner names is kept, and whether later galaxies use it: the remake keeps the name and doesn’t use it.',
       'The canned-message window: the remake’s messages are free text, and the computers read “I like …” in them.',
       'The preference to scrap old designs automatically past 15.',
       'The colour-monitor joke.',
@@ -249,10 +247,8 @@ root.HOVERSIONS = {
       'Evacuate is 4.0.5’s Abandon: the colony is given up at End Turn, and pressing it again takes it back.',
     ],
     missing: [
-      'The radical projects window, where you could throw out one of your four projects.',
-      'Naming a star after a win, and the “You have conquered the galaxy!” window.',
       'The canned-message window (“Look at …” and “I own …” also marked the map); the computers read “I like …” in free text.',
-      'The auto play settings, the turn time limit and network play.',
+      'The turn time limit and network play.',
     ],
     deltaTao: DT_4,
     changes: [
@@ -288,8 +284,6 @@ root.HOVERSIONS = {
     missing: [
       'Send Message: 2.0.1’s messages are made of “I like”, “I don’t like” or “I own” and a planet or a player, and a true “I own” marks the star on the other player’s map. The remake’s messages are free text with no effect.',
       'Fix Spending, in the budget window.',
-      'Force End Turn, which marks every player done.',
-      'Naming a star after a win, and the names file kept for later galaxies.',
     ],
     deltaTao: DT_2,
     requirements: REQ_201,
@@ -335,10 +329,8 @@ root.HOVERSIONS = {
       'Evacuate is 4.0.5’s Abandon: the colony is given up at End Turn, and pressing it again takes it back.',
     ],
     missing: [
-      'The radical projects window, where you could throw out one of your four projects.',
-      'Naming a star after a win, and the “You have conquered the galaxy!” window.',
       'The canned-message window (“Look at …” and “I own …” also marked the map); the computers read “I like …” in free text.',
-      'The auto play settings, the turn time limit, “Automatically end turn for unconnected players” and network play.',
+      'The turn time limit, “Automatically end turn for unconnected players” and network play.',
       'The colour-monitor joke.',
     ],
     deltaTao: DT_4,
@@ -380,8 +372,6 @@ root.HOVERSIONS = {
       'Every game starts from the default budget and research shares (research 18% each and Radical 10%); 5.0.5 started a new game with your first turn’s shares from the last one.',
     ],
     missing: [
-      'The Radical Research window, where a full hand of radical programs lets you cancel one.',
-      'The auto play settings (how aggressive the computer is and how many colonies it defends when it plays for you).',
       'The canned-message window (“Look at …” and “I own …” also marked the map); the computers read “I like …” in free text.',
       'Options locked by rank (“Need more MPs”): every option is open.',
       'The questions before buying more than 9 Scouts or Tankers.',
@@ -429,11 +419,8 @@ root.HOVERSIONS = {
       'Sounds are the skin’s, not the handheld’s few beeps.',
     ],
     missing: [
-      'The Radical Research window, where a full hand of radical programs lets you cancel one.',
-      'The auto play settings (Friendly and Dig In sliders; only end my turns; stop when something interesting happens).',
       'Build Ships’ Allow Debt box, and the questions before building more than 9 Scouts or Tankers.',
       'Dragging the research bars the way the budget bars are dragged.',
-      'Naming a star when you reach a new rank, for later games.',
       'The canned-message window, the Evacuate button in the message list, and options locked by rank.',
       'A few reports reworded in the Palm version (the decoy ship, the miracle).',
     ],

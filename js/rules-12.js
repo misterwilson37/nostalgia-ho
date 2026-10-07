@@ -356,6 +356,13 @@ E.registerRules('12', Object.assign({}, D, {
   // (the skin's Celsius preference does this)
   celsius: true,
   starNames: STAR_NAMES, maleNames: MALE_NAMES, femaleNames: FEMALE_NAMES, femaleComputers: false, shipNames: SHIP_NAMES,
+  // CONFIRMED (NameAStar @120a04, GiveStarsValues): the winner names a star,
+  // kept in the program's STR# 2005 "More Star Names" (it ships with
+  // "Tiber"), which every later galaxy draws from with STR# 1003. The
+  // window's words and its alert for a name taken weren't read (French in
+  // 1.2): the remake uses 2.0's alert and 4.0.5's words (docs/open-questions.md).
+  nameAStar: { when: 'win', text: 'You won the game, so you get to name a star.', keep: 0, use: 'pool', max: 7,
+    taken: 'Sorry, there’s already a star named ‘%s’.  Please pick another name.' },
   welcome: WELCOME,
   ai: '12',                // 1.2's own computer players (js/ai-12.js)
   // CONFIRMED (above): the turn is 2.0's (rules-dos economy20, battle20,

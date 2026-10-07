@@ -703,6 +703,11 @@ function techMsg(G, p, k) {
 const RADICAL = ['metal', 'explore', 'money', 'mining', 'pop', 'terra', 'generals', 'recycle', 'decoy', 'bio', 'steal', 'protos',
   'range', 'speed', 'weapons', 'shields', 'mini'];
 const RADICAL_WEIGHT = [7, 7, 7, 4, 4, 4, 4, 4, 6, 6, 6, 6, 7, 7, 7, 7, 7];
+// strings 821-837: each card as the radical card window lists it
+const RADICAL_TEXT = ['Search for more metal on your planets.', 'Explore distant stars.', 'Get lots of money immediately.', 'Improve mining efficiency.',
+  'Improve population maximums.', 'Improve terraforming efficiency.', 'Educate battle generals better.', 'Improve recycling program.', 'Build a decoy ship.',
+  'Build a biological space monster.', 'Steal technology from another player.', 'Build a set of ships with no development cost.', 'Improve range tech dramatically.',
+  'Improve speed tech dramatically.', 'Improve weapons tech dramatically.', 'Improve shields tech dramatically.', 'Improve mini tech dramatically.'];
 const FLAG_OF = { mining: 'mining', pop: 'pop', terra: 'terra', generals: 'generals', recycle: 'recycle' };
 const neverExplored = (G, p) => G.stars.filter(s => !know(G, p, s.id).explored).length;
 function dealable(G, p, i) {
@@ -2402,14 +2407,38 @@ E.registerRules('405', Object.assign({}, D, {
   // one); the skin's window reads this
   scrapTypeRefundOne: true,
   // the auto play settings window (FUN_00404c4e = Mac DoConfigAutoPlayDialog
-  // @10440e), for a skin that builds it: aggressiveness (+0x718) and colonies
-  // defended (+0x704) as set, and metal for defence (+0x706) the OLD colonies
-  // defended, a Windows slip (the Mac puts the new value in both, so does
-  // js/rules-mac405.js); the window isn't in the remake yet
+  // @10440e; the skin's Auto Play window, Config…): aggressiveness (+0x718)
+  // and colonies defended (+0x704) as set, and metal for defence (+0x706) the
+  // OLD colonies defended, a Windows slip (the Mac puts the new value in
+  // both, so does js/rules-mac405.js). With no set it only gives the values
+  // the window opens with. The remake makes a human's auto play record at the
+  // first auto play turn (js/ai-405.js), so the window makes it if need be.
   autoPlaySettings(G, p, set) {
-    const ai = p.ai || {}, old = ai.colDef;
+    const ai = E.aiOf(G).autoplayAI(G, p), old = ai.colDef;
+    if (!set) return { aggr: ai.aggr, colDef: ai.colDef };
     ai.aggr = set.aggr; ai.colDef = set.colDef; ai.metalDef = old;
   },
+  autoPlayRange: { aggr: [0, 10] }, // the window's scroll bars (their ranges weren't read: docs/open-questions.md)
+  // CONFIRMED (FUN_00471587 = Mac DoRadicalChoiceDlg @1529e2): the radical
+  // card window, opened by clicking the report "Your radical researchers are
+  // hard at work on another discovery!", shows the hand of four (strings
+  // 821-837, one a discovery) and, on a pick, takes that card out of the hand
+  // (+0x18ce); the next discovery deals the hand full again (dealHand)
+  radicalHand: {
+    cards: (G, p) => RADICAL.map((k, i) => i).filter(i => p.hand405 & (1 << i)).map(i => ({ id: i, text: RADICAL_TEXT[i] })),
+    discard(G, p, id) { p.hand405 &= ~(1 << id); },
+  },
+  // CONFIRMED (FUN_00470dec, FUN_0044bf5a, dialog 377): clicking the winner's
+  // report opens "You have conquered the galaxy!" with its picture (the skin's
+  // won picture, p3030), then Name a Star (FUN_00456047, dialog 378)
+  conquered: 'You have conquered the galaxy!',
+  // CONFIRMED (FUN_00456047, dialog 378; string 513): the winner names a star,
+  // at most 7 letters, not one there is already; the last four names are
+  // kept and all four are put in each later galaxy (the Mac's New Game
+  // window shows them: docs/405-findings.md). Which four go when a fifth is
+  // named, and which stars get them, weren't read (docs/open-questions.md).
+  nameAStar: { when: 'win', text: 'You won the game, so you get to name a star.', keep: 4, use: 'put', put: 4, max: 7,
+    taken: 'Sorry, there’s already a star named “%s.”  Please pick another name.' },
   // fleets, routes and colonies
   fleetFor, shipsAdded, builtAt, yardRoom, route, path301: path405, path405, givePath, settle, colOrder, abandon, evacuate: evacuate405, dragShare, flagScrap, flagScrapDesign, newDesign, fleetList,
   terraLeft: (G, p, s) => bars(s)[0] !== -1, bars, setBars, slots301: slots, colSlots, share20, keyPm, setKeyPm, giveBarPercent,

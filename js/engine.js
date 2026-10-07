@@ -536,7 +536,14 @@ function newGame(opts) {
     G.W = W; G.H = H;
     pts = placeStars(G, n, W, H, opts.shape || 'random');
   }
-  const names = shuffle(G, (rs.starNames || DATA.starNames).slice());
+  // Name a Star (rs.nameAStar): the names players gave stars in earlier games,
+  // which the skin keeps (opts.starNamesKept), join the version's own list
+  // ('pool') or are put in the galaxy, at most rs.nameAStar.put of them
+  // ('put'); none kept, the list is the version's own as before
+  const NS = rs.nameAStar, kept = NS && Array.isArray(opts.starNamesKept) ? opts.starNamesKept.filter(n => typeof n === 'string' && n) : [];
+  const base = rs.starNames || DATA.starNames;
+  let names = shuffle(G, base.slice().concat(NS && NS.use === 'pool' ? kept.filter(n => !base.includes(n)) : []));
+  if (NS && NS.use === 'put' && kept.length) { const put = kept.slice(-(NS.put || kept.length)); names = put.concat(names.filter(n => !put.includes(n))); }
   pts.forEach((pt, i) => {
     const st = rs.newStar(G);
     const s = { id: i, name: names[i % names.length] || ('Star ' + i), x: pt.x, y: pt.y, g: st.g, t: st.t, metal: st.metal, owner: -1, pop: 0, terra: 0.5, nova: 0, debris: 0, everProfit: false };

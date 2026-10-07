@@ -299,8 +299,9 @@ were made, so a Mac difference there would not show yet.
   (`p502`/`p503`; in colour cut from the sheet [`p500`](../assets/skins/mac4c/sprites/p500.png)),
   the game won and lost pictures (`p3530`, `p3540`), its menus (MENU 129–134: File, Options,
   Ships, Galaxy, Window) and the System 7 dialog frames of its DLOGs.
-- **The End Turn button's window** is empty: 4.0 writes the year (or the time left) in the
-  black window of `p5500`, as the Windows clock does; neither skin draws it yet.
+- **The End Turn button's window** shows the year (`T.endTurnYear`), as 4.0 and the Windows
+  clock do (4.0 also showed the time left there; the remake has no time limit). The
+  digits are the remake's own (white, bold Geneva): 4.0's font for them wasn't read.
 - **A nova's wreck** is the classic picture [`nova18`](../assets/sprites/nova18.png), as in the
   w95 skin; the red frames 4.0 has for a star turning red and exploding (colour icons
   `i728`–`i741`, [`p750`](../assets/skins/mac4c/sprites/p750.png)–`p758`) aren't shown, only `i1403`.

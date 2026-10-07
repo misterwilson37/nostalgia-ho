@@ -263,3 +263,24 @@ button[data-help] { cursor: pointer; }
    reach: the scrim's row has no height for "100%" to work from */
 .win { max-height: calc(100vh - 24px); max-height: calc(100dvh - 24px); }
 .wbody { min-height: 0; }
+
+/* ---------- the originals' own windows (ui.js, "the originals' own windows") ---------- */
+/* the year in an End Turn picture's window (T.endTurnYear: mac4, w95) */
+.clock.pic { position: relative; }
+.clock.pic .clockyear { position: absolute; display: flex; align-items: center; justify-content: center; color: #fff; font: bold 10px/1 Geneva, Verdana, sans-serif; letter-spacing: 0; pointer-events: none; }
+.clock.pic:active .clockyear { transform: translate(1px, 1px); }
+/* the auto play settings: Friendly–Aggressive, Dig In–No Defense */
+.apsettings { display: grid; gap: 8px; margin: 6px 0; grid-column: 1 / -1; }
+.newgame > .sub, .namestar > p, .namestar > label { grid-column: 1 / -1; }
+.apsettings .aplabel { display: block; }
+.apsettings .apslider { display: grid; grid-template-columns: 5.5em minmax(0, 1fr) 5.5em; align-items: center; gap: 6px; }
+.apsettings .apslider span:last-child { text-align: right; }
+.apsettings .apslider input { width: 100%; min-width: 0; }
+/* the radical hand */
+.hall.radhand .lb { height: auto; min-height: 4.5em; }
+.hall.radhand .htitle { font-weight: normal; }
+/* "You have conquered the galaxy!" */
+.conquered { text-align: center; }
+.conquered img { max-width: 100%; image-rendering: pixelated; }
+.conquered p { font-weight: bold; }
+.namestar input[name=star] { width: 9em; }

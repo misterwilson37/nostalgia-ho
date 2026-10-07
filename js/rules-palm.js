@@ -189,6 +189,15 @@ const rs = Object.assign(base, {
   // tSTL 6021.4-43, one a turn at random (FUN_000500d4); the skin shows hints
   // from rs.hintTexts when it has them
   hintTexts: HINTS,
+  // CONFIRMED (tFRM 2900, FUN_000692c4): at a new rank you may name a star
+  // for later games, and up to five of the names are put in each new galaxy.
+  // The form's words weren't read (docs/open-questions.md); nor how many
+  // names are kept, nor which five go in: the remake keeps every name and
+  // puts in the last five.
+  // the auto play settings are on the Auto Play form (tFRM 1700, FUN_000713be)
+  autoPlayRange: { aggr: [0, 100], where: 'autoplay' },
+  nameAStar: { when: 'rank', text: 'You have reached a new rank, so you get to name a star.', keep: 0, use: 'put', put: 5, max: 7,
+    taken: 'Sorry, there’s already a star named “%s.”  Please pick another name.' },
 });
 // CONFIRMED (tSTL 6060, the star names): 5.0.5's 255, with "Courasant" in
 // place of "Antares" (the 196th)

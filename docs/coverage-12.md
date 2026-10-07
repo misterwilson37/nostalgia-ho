@@ -12,7 +12,7 @@ stubs). Addresses are in that layout, as in `docs/12-findings.md`.
 | | Routines |
 |---|---:|
 | In the program | 548 |
-| Game rules | 114 (111 implemented, 3 not: Fix Spending ×2, naming a star) |
+| Game rules | 114 (112 implemented, 2 not: Fix Spending ×2) |
 | Not a rule (runtime, library, files, windows, drawing, menus, dialogs, sound) | 434 |
 | Unread | 0 |
 
@@ -616,7 +616,7 @@ stubs). Addresses are in that layout, as in `docs/12-findings.md`.
 | `DRAWLISTBORDER` @1208b0 | list border | NOT A RULE | drawing |
 | `ZoomIn` @120900 | map zoom | NOT A RULE | interface |
 | `ZoomOut` @120980 | map zoom | NOT A RULE | interface |
-| `NameAStar` @120a04 | the winner names a star; saved to STR# 2005 for later games | RULE, not implemented | interface/persistence: winners' names are not kept |
+| `NameAStar` @120a04 | the winner names a star; saved to STR# 2005 for later games | RULE, implemented | js/rules-12.js nameAStar; the window in js/skins/classic/ui.js openNameStar; js/engine.js newGame (opts.starNamesKept) |
 | `doBattleSpeedDialog` @120c48 | battle speed preference | NOT A RULE | interface |
 
 ### Segment ReportWinProc (21 functions)

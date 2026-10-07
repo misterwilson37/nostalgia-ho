@@ -265,6 +265,11 @@ function determinePath(C, from, to, fuel, R, tanker) {
 function aiTurn(G, p) {
   const ai = (p.ai && p.ai.v505) ? p.ai : (p.ai = makeAI(G, p, 'average', p.human));
   if (!p.alive || p.surrendered) return; // player +0x34
+  // CONFIRMED (FUN_10066bb0; Palm FUN_0002d14a): for a human the auto play
+  // settings come first: aggressiveness a tenth of the Friendly-Aggressive
+  // slider, colonies defended the Dig In-No Defense slider (js/rules-original.js
+  // autoPlaySettings505; only once the player has set them in the remake)
+  if (p.human && p.autoPrefs505) { ai.aggr = trunc(p.autoPrefs505.aggr / 10); ai.colDef = p.autoPrefs505.colDef; }
   const auto = !!p.human;
   const Y = G.year + (auto ? 0 : 10);
   // CONFIRMED (FUN_10081cc0): the money to share out is the net (player

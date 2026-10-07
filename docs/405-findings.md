@@ -170,7 +170,7 @@ technology of the **last** player ahead of you (in 4.0.5's order); six free desi
 (fewer than 25); a tech +2. Slips: an empty hand acts on an uninitialised index; a hand
 that runs out while a design card can't be played loops for ever (both OPEN). The hand
 window (`FUN_00471587`, opened by the 2010 report) lets a human throw a card out of a
-full hand: NOT IMPLEMENTED.
+full hand: built (`rs.radicalHand`; the skin's Radical projects… button on that report).
 
 ### Ships and fleets
 
@@ -336,9 +336,12 @@ and style, Player Skill, Armageddons. Its picture box (static 1194, a `youwonga.
 picture control) is given no picture by the summary; the remake leaves it empty. The
 dialogs have no caption bar.
 
-**Not built:** naming a star after a win (dialog 378, `FUN_00456047`: "You won the game,
-so you get to name a star", kept in a list of four for later galaxies) and the "You have
-conquered the galaxy!" window with its picture (dialog 377, `FUN_0044bf5a`).
+**Built since:** naming a star after a win (dialog 378, `FUN_00456047`: "You won the game,
+so you get to name a star", kept in a list of four for later galaxies; `rs.nameAStar`) and
+the "You have conquered the galaxy!" window with its picture (dialog 377, `FUN_0044bf5a`;
+`rs.conquered`), opened by clicking the winner's report; the radical card window
+(`rs.radicalHand`, strings 821-837) and the auto play settings (`rs.autoPlaySettings`).
+What of them is open is in `docs/open-questions.md`.
 
 ## Read against the Mac 4.0.5
 
