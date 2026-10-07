@@ -60,7 +60,7 @@ function registerAI(name, ai) { AIS[name] = ai; }
 // The Claude rules (js/rules-claude.js) are the remake's own and set none of
 // these, so they are given here.
 const OWN_EDITIONS = {
-  claude: { family: 'remake', edition: { version: 'Claude', name: 'The remake’s own rules', platform: 'a web browser', year: 2026 }, skins: ['classic'] },
+  claude: { family: 'remake', edition: { version: 'Claude', name: 'The remake’s own rules', platform: 'a web browser', year: 2026 }, skins: ['cozy', 'classic'] },
 };
 const famOf = (r) => r.family || (OWN_EDITIONS[r.id] || {}).family;
 const edOf = (r) => r.edition || (OWN_EDITIONS[r.id] || {}).edition || {};

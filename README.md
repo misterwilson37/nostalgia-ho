@@ -273,6 +273,9 @@ Optional ruleset flags the skin reads (each is documented where it is read):
   pictures, sounds and title, and Workbench colours (art in `assets/skins/amiga/`). The
   Amiga game is the DOS game (same rules, same pictures in the same order), so play it with
   the DOS 2.0 rules
+- `js/skins/cozy/`: the Cozy skin, Claude-made and not a historical release: the 5.0.5 art
+  upscaled with xBRZ (`tools/skins/cozy_art.py`, art in `assets/skins/cozy/`) in a western
+  dress over the classic page; the Claude rules' own skin (`docs/cozy-skin/`)
 - `js/skins/palm/`: the "5 (Palm OS)" skin: the classic page with the Palm OS game's art
   and a Palm OS look (art in `assets/skins/palm/`, from `tools/extract/palm.py`)
 - `js/skins/mac12/` and `js/skins/mac3c/`: the Mac 1.2 (French, 1992, black and white) and

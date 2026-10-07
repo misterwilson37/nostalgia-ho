@@ -2209,7 +2209,7 @@ const ED_FALLBACK = {
   '405': { family: '4.0', name: 'Windows 95', skins: ['w95'] },
   original: { family: '5', name: 'Mac', platform: 'Mac OS 8.6, 9 and X', skins: ['classic'] },
   palm: { family: '5', name: 'Palm OS', skins: ['palm'] },
-  claude: { family: 'remake', name: 'The remake’s own rules', skins: ['classic'] },
+  claude: { family: 'remake', name: 'The remake’s own rules', skins: ['cozy', 'classic'] },
 };
 // the New Game window starts every edition with its own rules (tools/human-play.js asks)
 window.HONEWGAME_EDITIONS = true;
@@ -2263,7 +2263,8 @@ function editionLabel(id) {
 // an edition's own skins, the first to offer first (only the ones this copy has)
 function editionSkins(id) {
   const rs = HO.RULESETS[id] || {}, have = ((window.HOSKINS && HOSKINS.list) || []).map(k => k.id);
-  return (rs.skins || (ED_FALLBACK[id] || {}).skins || []).filter(k => have.includes(k));
+  const ed = HO.editions ? (HO.editions(familyOf(id)) || []).find(e => e.id === id) : null; // engine.js also knows the rulesets it can't edit (the Claude rules)
+  return ((ed && ed.skins && ed.skins.length ? ed.skins : null) || rs.skins || (ED_FALLBACK[id] || {}).skins || []).filter(k => have.includes(k));
 }
 const SEP = '──────────';
 const sepOption = () => el('option', { disabled: 'disabled', value: '', class: 'sep' }, SEP);

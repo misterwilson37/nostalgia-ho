@@ -1,0 +1,111 @@
+/* Spaceward Ho! — cozy skin: the classic skin's layout in a western dress
+   (leather, parchment and brass, under a dusk sky). Fonts: Rye for signs
+   (loaded by the classic stylesheet) and Bitter for reading. */
+@import url("https://fonts.googleapis.com/css2?family=Bitter:wght@400;600;700&display=swap");
+@import url("../classic/style.css");
+:root {
+  --night: #120d2b; --dusk: #2a1d4e; --sunset: #f2a65a; --parchment: #f4e4c1; --parch-dark: #ead6ac;
+  --leather: #7b4a2b; --leather-dk: #4f2e19; --brass: #c99a45; --trim: #b48a52; --red: #b5402f;
+  --plat: var(--parchment); --plat2: var(--parch-dark); --edge: var(--trim); --ink: #3a2616; --sub: #7a5a3c;
+  --hi: #9a3524; --hat: var(--leather-dk); --gold: var(--sunset); --space: var(--night); --neg: var(--red);
+  --ui: "Bitter", Georgia, serif; --west: "Rye", Georgia, serif;
+}
+body { background: var(--night); font: 13px/1.45 var(--ui); }
+:focus-visible { outline-color: var(--sunset) !important; }
+
+/* the menu bar: a strip of tooled leather */
+#menubar { background: linear-gradient(#8a5634, #6a3e22); border-bottom: 2px solid #2a170c; box-shadow: inset 0 -1px 0 rgba(255, 220, 170, .15); height: 30px; }
+#menubar .logo { color: var(--sunset); text-shadow: 1px 1px 0 #2a170c; }
+.mbtn { color: var(--parchment); }
+.mbtn:hover, .mbtn:focus-visible { background: var(--sunset); color: #2a170c; }
+#title { color: #f0d9b0; }
+.dropdown { background: var(--parchment); border: 2px solid #3a2112; border-radius: 0 0 8px 8px; box-shadow: 0 6px 16px rgba(0, 0, 0, .45); }
+.dropdown button { color: var(--ink); }
+.dropdown button:hover, .dropdown button:focus-visible { background: var(--leather); color: var(--parchment); }
+.dropdown hr { border-top-color: var(--trim); }
+
+/* the side panel: a saddlebag, with parchment cards tucked in it */
+#panel { background: linear-gradient(90deg, #4f2e19, #5c361e 60%, #4a2b17); border-right: 3px solid #2a170c; padding: 10px; }
+.box { background: var(--parchment); border: 2px solid #3a2112; border-radius: 10px; padding: 9px 11px;
+  box-shadow: inset 0 0 0 3px var(--parchment), inset 0 0 0 4px var(--trim), 0 3px 0 #2a170c, 0 6px 12px rgba(0, 0, 0, .3); }
+.box h3 { font: 15px var(--west); color: var(--leather-dk); }
+/* the treasury, first in the panel: a brass plaque */
+#panel > .box:first-child { background: linear-gradient(#f3d58f, #c99a45 60%, #a87a30); border-color: #5c3d14;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .6), 0 3px 0 #3d2810, 0 6px 14px rgba(0, 0, 0, .35); }
+#panel > .box:first-child .kv b { color: #2b1a08; }
+#panel > .box:first-child .kv { color: #4a300c; }
+.kv.neg b { color: var(--red); }
+.bval { color: var(--sub); }
+.track { background: #fff6df; border: 1.5px solid #6b4a2a; border-radius: 6px; overflow: hidden; height: 14px; }
+.fill { background: repeating-linear-gradient(90deg, #8b5a3c 0 6px, #74472d 6px 7px); }
+.fill.tech { background: repeating-linear-gradient(90deg, #e3b55a 0 6px, #c99a45 6px 7px); }
+.fill.sav { background: repeating-linear-gradient(90deg, #8fae6a 0 6px, #76945a 6px 7px); }
+.fill.tbar { background: repeating-linear-gradient(90deg, #c4553f 0 6px, #a3402e 6px 7px); }
+.frow.sel { background: #fff3d8; border-color: var(--brass); border-radius: 6px; }
+.fleets { border-top: 1.5px dashed var(--trim); }
+
+/* buttons: red leather, and parchment chips for the quiet ones */
+button:not(.mbtn):not(.close):not(.tbtn):not(.clock):not([role=menuitem]) {
+  background: linear-gradient(#c4553f, #9a3524); color: #fff4dc; border: 2px solid #4a1a0d !important; border-radius: 8px !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .25), 0 3px 0 #3a1408; text-shadow: 0 1px 0 #4a1a0d;
+}
+button:not(.mbtn):not(.close):not(.tbtn):not(.clock):not([role=menuitem]):active { transform: translateY(2px); box-shadow: 0 1px 0 #3a1408; }
+button.quiet:not(.mbtn):not(.close):not(.tbtn):not(.clock):not([role=menuitem]) {
+  background: #f7ebcf; color: var(--ink); border: 1.5px solid #6b4a2a !important; border-radius: 16px !important; box-shadow: none; text-shadow: none;
+}
+.tbtn { background: #f7ebcf; border: 1.5px solid #6b4a2a; color: var(--ink); }
+.tbtn.on { background: var(--leather); color: var(--parchment); border-color: #3a2112; }
+
+/* the map: a dusk sky behind the stars, and mesas on the horizon */
+#mapwrap { background: linear-gradient(#120d2b 0%, #1d1440 45%, #2a1d4e 68%, #4a2a55 86%, #7a3f4c 100%); }
+#map { mix-blend-mode: lighten; } /* the sky shows wherever the map is darker than it */
+.mesas { position: absolute; left: 0; right: 0; bottom: 0; height: 84px; pointer-events: none; z-index: 2; opacity: .92; }
+.mesas svg { width: 100%; height: 100%; display: block; }
+#routebar { z-index: 6; }
+
+/* messages: notes pinned to the board */
+#msg { z-index: 5; }
+.card { background: var(--parchment); border: 1.5px solid #6b4a2a; border-radius: 4px; transform: rotate(-.6deg); position: relative;
+  box-shadow: 0 2px 0 #c9b087, 0 10px 22px rgba(0, 0, 0, .45); padding: 14px 14px 10px; }
+.card::before { content: ""; position: absolute; top: 5px; left: 50%; width: 10px; height: 10px; margin-left: -5px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #fff2c4, #c99a45 55%, #6b4a1c); box-shadow: 0 1px 1px rgba(0, 0, 0, .5); }
+.card:focus-visible { outline: 3px solid var(--sunset); }
+.mtext p { font-size: 14px; }
+.count { color: var(--sub); }
+/* the upscaled pictures are smooth art, not pixels */
+.card .icon, .ppic img, .ppic .phat, .ptable .face, .hall .hpic img, .rank img { image-rendering: auto; }
+.card .icon { width: 56px; }
+
+/* End Turn: a sheriff's badge */
+.clock { width: 112px; height: 112px; padding: 0; border: 0; background: transparent no-repeat center / contain; box-shadow: none; position: relative;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Cdefs%3E%3CradialGradient id='g' cx='40%25' cy='35%25'%3E%3Cstop offset='0' stop-color='%23fff2c4'/%3E%3Cstop offset='.55' stop-color='%23e3b55a'/%3E%3Cstop offset='1' stop-color='%239c6d22'/%3E%3C/radialGradient%3E%3C/defs%3E%3Cg transform='translate(60 60)'%3E%3Cpath d='M0-54 13-22 47-30 25-4 47 24 13 18 0 52-13 18-47 24-25-4-47-30-13-22Z' fill='url(%23g)' stroke='%234a300c' stroke-width='3' stroke-linejoin='round'/%3E%3Cg fill='url(%23g)' stroke='%234a300c' stroke-width='2.5'%3E%3Ccircle cx='0' cy='-54' r='6'/%3E%3Ccircle cx='47' cy='-30' r='6'/%3E%3Ccircle cx='47' cy='24' r='6'/%3E%3Ccircle cx='0' cy='52' r='6'/%3E%3Ccircle cx='-47' cy='24' r='6'/%3E%3Ccircle cx='-47' cy='-30' r='6'/%3E%3C/g%3E%3Ccircle r='24' fill='%23f4e4c1' stroke='%234a300c' stroke-width='2.5'/%3E%3C/g%3E%3C/svg%3E");
+  display: grid; place-items: center; font: 11px/1.05 var(--west); color: #3a2616; text-align: center; filter: drop-shadow(0 5px 6px rgba(0, 0, 0, .45)); }
+.clock .face { display: none; }
+.clock > span:last-child { width: 40px; }
+.clock:hover { background-color: transparent; transform: rotate(-4deg); }
+.clock:active { transform: rotate(-4deg) translateY(2px); }
+
+/* windows: parchment with a leather title bar */
+.scrim { background: rgba(18, 13, 43, .62); }
+.win { background: var(--parchment); border: 2px solid #3a2112; border-radius: 12px; overflow: hidden; box-shadow: 0 6px 0 #2a170c, 0 16px 36px rgba(0, 0, 0, .55); }
+.wtitle { height: 30px; background: linear-gradient(#8a5634, #6a3e22); border-bottom: 2px solid #3a2112; }
+.wtitle span { background: none; color: var(--parchment); font: 15px var(--west); font-weight: normal; letter-spacing: .02em; }
+.close { width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid #3a2112; background: radial-gradient(circle at 35% 35%, #fff2c4, #c99a45 60%, #8a6220); }
+.designer { background: var(--parch-dark); border: 1.5px solid var(--trim); border-radius: 8px; }
+.preview, .bcv { background: var(--night); border-radius: 6px; }
+.newgame input, .newgame select { border: 1.5px solid #6b4a2a; border-radius: 6px; background: #fffaf0; }
+.ptable th { color: var(--sub); border-bottom-color: var(--trim); }
+.ptable td { border-bottom-color: #e2cfa4; }
+.drow { border-bottom-color: #e2cfa4; }
+.toast { background: var(--leather-dk); color: var(--parchment); border: 1.5px solid var(--brass); border-radius: 8px; }
+
+/* the title screen: dusk over the mesas */
+#titlescreen { background: linear-gradient(#120d2b 0%, #2a1d4e 55%, #6b3a5c 82%, #c5684a 100%); }
+#titlescreen::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 110px; pointer-events: none;
+  background: no-repeat bottom / 100% 100% url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120' preserveAspectRatio='none'%3E%3Cpath d='M0 120V92l60-4 20-26h70l14 22 90 6 30-38h96l18 30 120 10 40-20 60 2 22-34h110l16 28 90 10 34-18 80 4 26-40h88l14 34 82 14H1200V120z' fill='%231c1029'/%3E%3C/svg%3E"); }
+.tcard { position: relative; z-index: 1; }
+.tcard h1 { color: var(--sunset); text-shadow: 3px 3px 0 #5c2a1c, 6px 6px 0 rgba(0, 0, 0, .5); }
+.tcard .by { color: #e8d6f4; }
+.tsplash { border-radius: 12px; }
+#tframe { width: min(420px, 78vw); border-radius: 6px; }
+.credit { color: #d6c6ea; }

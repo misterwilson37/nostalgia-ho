@@ -139,6 +139,7 @@ const SKINS = [
   { id: 'mac4c', version: '4.0.5', platform: 'Mac, colour', year: 1996, os: ['system7', 'macos8'] },
   { id: 'w95', version: '4.0.5', platform: 'Windows 95', year: 1996, os: ['win95'] },
   { id: 'palm', version: '5', platform: 'Palm OS, version 1.0.4', year: 2003, os: ['palmos'] },
+  { id: 'cozy', version: '5.0.5', platform: 'cozy western, upscaled art', year: 2003, os: ['macos8', 'macos9', 'macosx'] },
   { id: 'classic', version: '5.0.5', platform: 'Mac OS 9 and X', year: 2003, os: ['macos8', 'macos9', 'macosx'] },
 ].map(k => Object.assign(k, { name: `${k.version} (${k.platform}, ${k.year})`, sounds: k.id in SOUNDS ? SOUNDS[k.id] && k.id : 'classic' }))
   .sort((a, b) => a.year - b.year || a.version.localeCompare(b.version, 'en', { numeric: true }));
