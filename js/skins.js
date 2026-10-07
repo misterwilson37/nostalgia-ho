@@ -130,7 +130,7 @@ const OSES = [
 const SKINS = [
   { id: 'dos', version: '2.0', platform: 'DOS and Windows 3.1', year: 1993, os: ['dos', 'win31'] },
   { id: 'amiga', version: '2.0', platform: 'Amiga, German', year: 1994, os: ['workbench'] },
-  { id: 'mac12', version: '1.2', platform: 'Mac, French, black and white', year: 1992, os: ['system7'] },
+  { id: 'mac12', version: '1.2', platform: 'Mac, French, black and white', year: 1992, os: ['system6', 'system7'] },
   { id: 'mac2', version: '2.0.1', platform: 'Mac, black and white', year: 1992, os: ['system7', 'system6'] },
   { id: 'mac2c', version: '2.0.1', platform: 'Mac, colour', year: 1992, os: ['system7', 'system6'] },
   { id: 'mac3', version: '3.0.1', platform: 'Mac, black and white', year: 1993, os: ['system7'] },
