@@ -26,17 +26,6 @@
 //   buttons, check boxes, lists and sliders), never decides whether they are
 //   there. The skins built on js/skins/classic/ui.js get this from it.
 //
-// The operating system's part of the look (window frames and title bars,
-// menus, buttons, check boxes, radio buttons, pop-up menus, sliders, scroll
-// bars, fields and the system fonts) is a separate choice, the "OS look":
-// js/os/<id>.css, loaded before the skin's style.css (so a skin's own rules
-// can still dress one of its windows), and named on the document root as
-// class "os-<id>". A skin keeps the game's own art and layout. OSES below
-// lists the looks; each skin lists its own (SKINS' os), the first its
-// default, and any skin can be played in any look. Which look loads:
-// ?os=<id>, else the last one picked (localStorage "ho5.os"), else the
-// skin's first. HOSKINS.setOS(id) changes it at once, without a reload.
-//
 // Sounds belong to the skin: a game plays only the sounds its skin's
 // original had (SOUNDS below), and an event the original had no sound for
 // is silent. A player can choose another original's sounds, or none, for a
@@ -111,35 +100,19 @@ const SOUNDS = {
   } },
   palm: null, // the Palm game had no sampled sounds
 };
-// The OS looks (js/os/<id>.css), oldest first: each is the window chrome
-// of one system, drawn in CSS (no system bitmaps).
-const OSES = [
-  { id: 'workbench', name: 'Workbench (Amiga)', year: 1990 },
-  { id: 'system6', name: 'System 6', year: 1988 },
-  { id: 'system7', name: 'System 7', year: 1991 },
-  { id: 'win31', name: 'Windows 3.1', year: 1992 },
-  { id: 'dos', name: 'DOS (2.0\u2019s own windows)', year: 1993 },
-  { id: 'win95', name: 'Windows 95', year: 1995 },
-  { id: 'palmos', name: 'Palm OS', year: 1996 },
-  { id: 'macos8', name: 'Mac OS 8 and 8.6 (Platinum)', year: 1997 },
-  { id: 'macos9', name: 'Mac OS 9', year: 1999 },
-  { id: 'macosx', name: 'Mac OS X (Aqua)', year: 2001 },
-].sort((a, b) => a.year - b.year);
-// os: the skin's own OS looks, its default first (the systems its original
-// ran on); any other look can be chosen too
 const SKINS = [
-  { id: 'dos', version: '2.0', platform: 'DOS and Windows 3.1', year: 1993, os: ['dos', 'win31'] },
-  { id: 'amiga', version: '2.0', platform: 'Amiga, German', year: 1994, os: ['workbench'] },
-  { id: 'mac12', version: '1.2', platform: 'Mac, French, black and white', year: 1992, os: ['system7'] },
-  { id: 'mac2', version: '2.0.1', platform: 'Mac, black and white', year: 1992, os: ['system6', 'system7'] },
-  { id: 'mac2c', version: '2.0.1', platform: 'Mac, colour', year: 1992, os: ['system6', 'system7'] },
-  { id: 'mac3', version: '3.0.1', platform: 'Mac, black and white', year: 1993, os: ['system7'] },
-  { id: 'mac3c', version: '3.0.1', platform: 'Mac, colour', year: 1993, os: ['system7'] },
-  { id: 'mac4', version: '4.0.5', platform: 'Mac, black and white', year: 1996, os: ['system7', 'macos8'] },
-  { id: 'mac4c', version: '4.0.5', platform: 'Mac, colour', year: 1996, os: ['system7', 'macos8'] },
-  { id: 'w95', version: '4.0.5', platform: 'Windows 95', year: 1996, os: ['win95'] },
-  { id: 'palm', version: '5', platform: 'Palm OS, version 1.0.4', year: 2003, os: ['palmos'] },
-  { id: 'classic', version: '5.0.5', platform: 'Mac OS 9 and X', year: 2003, os: ['macos8', 'macos9', 'macosx'] },
+  { id: 'dos', version: '2.0', platform: 'DOS and Windows 3.1', year: 1993 },
+  { id: 'amiga', version: '2.0', platform: 'Amiga, German', year: 1994 },
+  { id: 'mac12', version: '1.2', platform: 'Mac, French, black and white', year: 1992 },
+  { id: 'mac2', version: '2.0.1', platform: 'Mac, black and white', year: 1992 },
+  { id: 'mac2c', version: '2.0.1', platform: 'Mac, colour', year: 1992 },
+  { id: 'mac3', version: '3.0.1', platform: 'Mac, black and white', year: 1993 },
+  { id: 'mac3c', version: '3.0.1', platform: 'Mac, colour', year: 1993 },
+  { id: 'mac4', version: '4.0.5', platform: 'Mac, black and white', year: 1996 },
+  { id: 'mac4c', version: '4.0.5', platform: 'Mac, colour', year: 1996 },
+  { id: 'w95', version: '4.0.5', platform: 'Windows 95', year: 1996 },
+  { id: 'palm', version: '5', platform: 'Palm OS, version 1.0.4', year: 2003 },
+  { id: 'classic', version: '5.0.5', platform: 'Mac OS 9 and X', year: 2003 },
 ].map(k => Object.assign(k, { name: `${k.version} (${k.platform}, ${k.year})`, sounds: k.id in SOUNDS ? SOUNDS[k.id] && k.id : 'classic' }))
   .sort((a, b) => a.year - b.year || a.version.localeCompare(b.version, 'en', { numeric: true }));
 const store = {
@@ -153,32 +126,6 @@ let wanted = null;
 try { wanted = new URLSearchParams(root.location.search).get('skin'); } catch (e) {}
 const newest = list[list.length - 1].id; // the list runs oldest to newest
 const current = [wanted, store.get('ho5.skin')].find(valid) || newest;
-const skinOf = (id) => list.find(s => s.id === id) || list[0];
-const validOS = (id) => OSES.some(o => o.id === id);
-const osDefault = (skin) => skinOf(skin).os[0];
-let wantedOS = null;
-try { wantedOS = new URLSearchParams(root.location.search).get('os'); } catch (e) {}
-let currentOS = [wantedOS, store.get('ho5.os')].find(validOS) || osDefault(current);
-// show a look: the single-file build has every look inlined as <style
-// data-os> (tools/bundle.py) and turns one on; otherwise the one <link>
-// (#ho-os) is pointed at js/os/<id>.css, the old one kept until the new one
-// has loaded so nothing flashes unstyled
-function applyOS(id) {
-  const doc = root.document, de = doc.documentElement;
-  for (const c of [...de.classList]) if (c.startsWith('os-')) de.classList.remove(c);
-  de.classList.add('os-' + id); de.dataset.os = id;
-  const inl = doc.querySelectorAll('style[data-os]');
-  if (inl.length) { for (const st of inl) st.media = st.dataset.os === id ? 'all' : 'not all'; return; }
-  const old = doc.getElementById('ho-os');
-  if (!old) return;
-  const href = `js/os/${id}.css`;
-  if (old.getAttribute('href') === href) return;
-  const ln = doc.createElement('link');
-  ln.rel = 'stylesheet'; ln.href = href;
-  const done = () => { if (old.parentNode) old.remove(); ln.id = 'ho-os'; };
-  ln.onload = done; ln.onerror = done;
-  old.after(ln);
-}
 
 // the sound sets a player may choose: each original's own (one entry for
 // sets that are the same files), oldest first; the single-file build has
@@ -189,25 +136,6 @@ const soundSets = Object.keys(SOUNDS).filter(id => SOUNDS[id] && !SOUNDS[id].sam
 root.HOSKINS = {
   list,
   current,
-  // the OS looks ([{ id, name, year }]), the one showing, and a skin's own
-  oses: OSES,
-  get os() { return currentOS; },
-  osName(id) { const o = OSES.find(x => x.id === id); return o ? o.name : id; },
-  skinOS(skin) { return skinOf(skin).os.slice(); },
-  osDefault,
-  // the looks in the order a menu lists them for a skin: its own first,
-  // then (own: false) every other one
-  osChoices(skin) {
-    const own = skinOf(skin).os;
-    return [...own.map(id => Object.assign({ own: true }, OSES.find(o => o.id === id))),
-      ...OSES.filter(o => !own.includes(o.id)).map(o => Object.assign({ own: false }, o))];
-  },
-  // show another look at once and remember it ("ho5.os")
-  setOS(id) {
-    if (!validOS(id)) return;
-    currentOS = id; store.set('ho5.os', id);
-    applyOS(id);
-  },
   // true once, right after switchTo(): continue the saved game
   takeResume() {
     let r = null;
@@ -218,34 +146,25 @@ root.HOSKINS = {
   // (null for 'none' or an unknown id); a skin's own set is its "sounds"
   soundSets,
   soundSet(id) { return id && SOUNDS[id] ? Object.assign({ id }, SOUNDS[id]) : null; },
-  // remember the choice and reload in that skin at its title screen, in
-  // the look given (else that skin's own first look)
-  preview(id, os) {
+  // remember the choice and reload in that skin at its title screen
+  preview(id) {
     if (!valid(id) || id === current) return;
     store.set('ho5.skin', id);
-    store.set('ho5.os', validOS(os) ? os : osDefault(id));
     const u = new URL(root.location.href); u.searchParams.delete('skin');
     root.location.href = u.toString();
   },
-  // remember the choice and reload in that skin, continuing the saved game,
-  // in the look given (else the one showing)
-  switchTo(id, os) {
+  // remember the choice and reload in that skin, continuing the saved game
+  switchTo(id) {
     if (!valid(id)) return;
     store.set('ho5.skin', id);
-    if (validOS(os)) store.set('ho5.os', os);
     try { root.sessionStorage.setItem('ho5.resume', '1'); } catch (e) {}
     const u = new URL(root.location.href); u.searchParams.delete('skin');
     root.location.href = u.toString();
   },
 };
 store.set('ho5.skin', current);
-store.set('ho5.os', currentOS);
-root.document.documentElement.classList.add('os-' + currentOS);
-root.document.documentElement.dataset.os = currentOS;
-if (root.HOSKINS_INLINE) applyOS(currentOS);
-else {
-  root.document.write(`<link rel="stylesheet" id="ho-os" href="js/os/${currentOS}.css">` +
-    `<link rel="stylesheet" href="js/skins/${current}/style.css">` +
+if (!root.HOSKINS_INLINE) {
+  root.document.write(`<link rel="stylesheet" href="js/skins/${current}/style.css">` +
     `<script src="js/skins/${current}/ui.js"><\/script>`);
 }
 })(this);
