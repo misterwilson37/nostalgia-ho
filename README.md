@@ -128,8 +128,7 @@ Optional ruleset flags the skin reads (each is documented where it is read):
 - `js/data.js`: names, tech-level names and tips from the original resources
 - `js/engine.js`: game mechanics shared by every ruleset (turns, fleets, movement,
   exploring, colonizing, battle bookkeeping, saving)
-- `js/rules-claude.js`, `js/ai-claude.js`: the "Claude" rules and computer players
-  (reconstructed from the manual)
+- `js/rules-claude.js`, `js/ai-claude.js`: the "Claude" rules and computer players (rebuilt from the 5.0.5 manual alone; see `docs/claude-rules/`)
 - `js/rules-original.js`, `js/ai-original.js`: the "Original" rules and computer players
   (recovered from the original 5.0.5 program; see `docs/original-findings.md`)
 - `js/rules-dos.js`: the "DOS 2.0" rules (Spaceward Ho! 2.0 for DOS, 1993: skill levels,

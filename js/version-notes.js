@@ -354,9 +354,22 @@ root.HOVERSIONS = {
     ],
   },
   claude: {
-    intro: 'The remake’s own rules, rebuilt from the 5.0.5 manual before the original program was read. Not an original version: its numbers are not the original formulas.',
+    intro: 'Not an original version: the remake’s own Spaceward Ho!, rebuilt from the Spaceward Ho! 5 manual alone, without reading the original program or the other rulesets. Where the manual gives a number it is used; everything else (and the computer players, and the jokes) is a guess, tuned by self-play.',
     previous: null,
-    quirks: [], differs: [], missing: [], changes: [],
+    quirks: [],
+    differs: [
+      'Every number the manual doesn’t give is invented: growth, research costs, ship prices, battle damage, Radical odds.',
+      'Biologicals graze on starlight anywhere (a third of their range a turn) instead of refueling at colonies.',
+      'Battle stances apply to a whole fleet, not to each ship type in it.',
+      'Computer players only know what they’ve seen: planets as they were when last visited, enemy tech from ships they’ve fought.',
+      RANDOM, HOTSEAT,
+    ],
+    missing: [
+      'Master points and skill levels (the ranks profile is shared with the Original rules, so the Claude rules leave it alone).',
+      'The Graph History’s ten items (the skin’s history graph shows population, income and tech).',
+      'The Auto Play attack and defend sliders.',
+    ],
+    changes: [],
   },
 };
 })(this);

@@ -39,6 +39,7 @@ function loadManifest(done) {
     for (let i = 1; i <= m.explore; i++) A.jpg.push('assets/explore/' + String(i).padStart(2, '0') + '.jpg');
     fin();
   }).catch(() => {
+    $('#titlescreen').hidden = true;
     document.body.append(el('p', { class: 'warn' }, 'Could not load assets/manifest.json. Open this game from a web server (for example GitHub Pages), not straight from a file.'));
   });
 }
@@ -2124,7 +2125,9 @@ function newGameDialog() {
     sel('cstart', 'Computer home systems', STARTS, 'normal'),
     sel('shape', 'Galaxy shape', [['random', 'Random'], ['ring', 'Ring'], ['cluster', 'Cluster'], ['spiral', 'Spiral'], ['grid', 'Grid'], ['hex', 'Hex']], 'random'),
     sel('size', 'Galaxy size', [['small', 'Small'], ['medium', 'Medium'], ['large', 'Large'], ['huge', 'Humongous']], 'medium'),
-    sel('density', 'Galaxy density', [['dense', 'Dense'], ['normal', 'Normal'], ['sparse', 'Sparse']], 'normal'));
+    sel('density', 'Galaxy density', [['dense', 'Dense'], ['normal', 'Normal'], ['sparse', 'Sparse']], 'normal'),
+    sel('c_years', 'Years per turn', [['10', '10'], ['20', '20'], ['30', '30'], ['50', '50']], '10'),
+    el('label', { class: 'chk' }, el('input', { type: 'checkbox', name: 'c_buddies' }), el('span', null, 'Computers are best buddies')));
   // Original rules: the original New Game window's controls
   const rating = el('b', null, '');
   const skins = (window.HOSKINS && HOSKINS.list) || [];
@@ -2218,7 +2221,8 @@ function newGameDialog() {
     for (const l of seats.querySelectorAll('[data-seat]')) l.hidden = +l.dataset.seat > nh;
     f.querySelector('select[name=computers] option[value="0"]').disabled = nh < 2;
     if (nh < 2 && d.computers === '0') f.querySelector('select[name=computers]').value = '1';
-    f.querySelector('fieldset.opts').hidden = (!orig && !w95 && !mac3) || palm;
+    const claudeR = d.rules === 'claude';
+    f.querySelector('fieldset.opts').hidden = (!orig && !w95 && !mac3 && !claudeR) || palm;
     f.querySelector('input[name=novas]').closest('label').hidden = w95 || mac3; // 4.0.5 and 3.0.1 always have novas
     f.querySelector('input[name=luck]').closest('label').hidden = mac3; // 3.0.1 always has battle luck
     for (const o of f.querySelectorAll('.slider output')) { const inp = o.previousElementSibling; if (!o.querySelector('small')) o.textContent = inp.value; }
@@ -2263,7 +2267,8 @@ function newGameDialog() {
       G = HO.newGame(Object.assign(common, { start: d.d_skill, iq: d.d_iq, size: d.d_size, shape: d.d_shape, density: d.d_density, novas: false, alliances: false, luck: false }));
     } else if (d.rules === 'claude' || d.rules === '12') {
       // (1.2 had no New Game window: its ruleset fixes every choice, rs.fixOptions)
-      G = HO.newGame(Object.assign(common, { iq: d.iq, cstart: d.cstart, shape: d.shape, size: d.size, density: d.density }));
+      G = HO.newGame(Object.assign(common, { iq: d.iq, cstart: d.cstart, shape: d.shape, size: d.size, density: d.density,
+        ...(d.rules === 'claude' ? { yearsPerTurn: +d.c_years || 10, buddies: !!d.c_buddies } : {}) }));
     } else throw new Error(`The New Game window has no settings for the "${d.rules}" rules`);
     if (d.skin && d.skin !== HOSKINS.current) { save(); HOSKINS.switchTo(d.skin); return; } // opens in the other skin
     closeModal(); hideTitle(); ME = 0;
@@ -2466,6 +2471,11 @@ window.addEventListener('DOMContentLoaded', () => {
   $('#tcont').addEventListener('click', guard(() => continueGame()));
   $('#thelp').addEventListener('click', guard(openHelp));
   const resume = window.HOSKINS && HOSKINS.takeResume() && localStorage.getItem('ho5.save');
-  loadManifest(() => loadImages(guard(() => { setupMap(); if (resume) continueGame(true); else titleScreen(); })));
+  // the title screen's backdrop covers the empty game while the pictures load
+  const ts = $('#titlescreen'); ts.hidden = false; ts.classList.add('loading');
+  loadManifest(() => loadImages(guard(() => {
+    ts.classList.remove('loading'); setupMap();
+    if (resume) { ts.hidden = true; continueGame(true); } else titleScreen();
+  })));
 });
 })();

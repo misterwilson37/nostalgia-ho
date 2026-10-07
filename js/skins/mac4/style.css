@@ -46,7 +46,8 @@ button:not(.mbtn):not(.close):not(.tbtn):not(.clock):not([role=menuitem]) {
 /* the start-up window: no title, the splash, then Open Game, New Game */
 .tcard .tskin:not([hidden]) { display: block; margin-top: 12px; }
 .tcard h1, .tcard .by { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
-.tsplash { box-shadow: 2px 2px 0 #000; border: 1px solid #000; }
+/* the start-up window keeps its white edge on the black backdrop, like every other window here */
+.tsplash { border: 2px solid #000; box-shadow: 0 0 0 1px #fff, 0 0 0 2px #000, 2px 2px 0 2px #000; }
 .tsplash .wtitle { display: none; }
 .tsplash .wbody { padding: 0 0 10px; gap: 10px; }
 .tsplash #tframe { background: #fff; }
