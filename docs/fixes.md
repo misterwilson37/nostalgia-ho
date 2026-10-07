@@ -51,7 +51,7 @@ their entries are below so the list is complete, but their rulesets list no fixe
 | Mac 2.0.1 | 3 | 5 | 2 |
 | Mac 3.0.1 | 4 | 5 | 3 |
 | 4.0.5 | 10 fixed (+ 3 the remake already plays fixed, + 3 with nothing in the remake to fix) | 4 | 6 |
-| Mac 4.0.5 | 5 fixed (+ 3 the remake already plays fixed, + 1 with nothing in the remake to fix) | 5 | 6 |
+| Mac 4.0.5 | 6 fixed (+ 3 the remake already plays fixed, + 1 with nothing in the remake to fix) | 4 | 6 |
 | 5.0.5 | 2 | 6 | 6 |
 | Palm | 1 (+ 5.0.5's 2) | 5 (+ 5.0.5's) | 1 (+ 5.0.5's) |
 
@@ -375,6 +375,9 @@ Mac 4.0.5"). Its list is 4.0.5's without the Windows build's own slips.
    (`ScrapOldShips`), 5. **`star0`**: as 4.0.5's 1-5, the Mac code doing the same
    (405-findings: "the same slips (… the colony at star 0, 30 designs, `refuelCheck`,
    `scrapRange`, `poorestOut`)").
+6. **`welcomeVersion`**: the welcome report says "Version 4.0.3" (STR# 6040, never
+   updated for 4.0.5); the patch says 4.0.5. (Jake's call: a forgotten string is fixed
+   like a bug, though it changes nothing in play.)
 
 **Not in its list** (Windows slips; the Mac code is right):
 - `scrapTypeRefund`: the Mac's Ship Types window gives back every ship of the type
@@ -392,8 +395,7 @@ running out). **Obvious, with nothing in the remake to fix**: the cheating mark
 
 ### Quirk or design (left as released)
 
-- As 4.0.5's four; and the welcome report's "Version 4.0.3" (STR# 6040, never updated):
-  a forgotten string, but not a bug in play.
+- As 4.0.5's four.
 
 ### Unclear (left; for the developers)
 

@@ -314,7 +314,7 @@ root.HOVERSIONS = {
       'After an Armageddon device fizzles, everyone hears each device was turned off, and next turn on again.',
       'The Valdez leak threatens a lawsuit, but nothing is taken.',
       'The power of the ships at every star is worked out each turn and never used.',
-      'The first message still says “Version 4.0.3”.',
+      { text: 'The first message still says “Version 4.0.3”.', fix: 'welcomeVersion' },
     ],
     differs: [
       RANDOM,

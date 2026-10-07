@@ -585,8 +585,8 @@ function newGame(opts) {
   rs.afterSetup(G);
   G.fleets.forEach(f => f.newThisTurn = false);
   for (const p of G.players) p.inbox = [];
-  // the first messages: a ruleset may give its game's own (rs.welcome: [[text, opt], ...])
-  const welcome = rs.welcome || [['Spaceward Ho! by Peter Commons. Designed by Joe Williams.', { icon: 'm9004', sound: 11111 }],
+  // the first messages: a ruleset may give its game's own (rs.welcome: [[text, opt], ...], or (G) => that)
+  const welcome = (typeof rs.welcome === 'function' ? rs.welcome(G) : rs.welcome) || [['Spaceward Ho! by Peter Commons. Designed by Joe Williams.', { icon: 'm9004', sound: 11111 }],
     ['Click here to make this message go away. Click on the clock to end your turn.', { icon: 'm9024' }]];
   for (const [t, o] of welcome) msgAll(G, t, o);
   return G;

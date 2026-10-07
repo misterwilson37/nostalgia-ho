@@ -92,3 +92,8 @@ Don't touch other rulesets' files. Write a HANDOFF and a README.
   its `claude` fallback: `rules()` throws on an unknown ruleset, and only an
   old save with no `rules` field is migrated to `claude`. So a bug in these
   files breaks only the Claude rules, not every ruleset.
+- **Jake's rule: Claude-rules games stay apart.** Their wins and losses must
+  never count toward anything outside the Claude rules (master points, ranks,
+  any Hall of Fame). Today they write nothing: the rules have no
+  `masterPoints`, `difficulty` or `hall`. If records are ever added, they get
+  their own key (as `hall` does, "ho5.hall.<rules>"), never "ho5.profile".

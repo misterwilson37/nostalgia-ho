@@ -138,8 +138,9 @@ const designName = (G, p, type) => W.nameFor405(G, p, type, false, (a, b) => aRI
 // CONFIRMED: reports 1000 and 1002 are STR# 6040.1 and 6040.3, "Spaceward
 // Ho! Version 4.0.3 by Peter Commons." (never updated: the program's `vers`
 // is 4.0.5) and "Artwork by Howard Vives and Bob Van de walle."
-const WELCOME = [
-  ['Spaceward Ho! Version 4.0.3 by Peter Commons.', { icon: 'm9004', sound: 11111 }],
+// The patch (fix 'welcomeVersion') says 4.0.5.
+const WELCOME = (G) => [
+  [`Spaceward Ho! Version ${E.fixed(G, 'welcomeVersion') ? '4.0.5' : '4.0.3'} by Peter Commons.`, { icon: 'm9004', sound: 11111 }],
   ['Artwork by Howard Vives and Bob Van de walle.', { icon: 'm9024' }],
 ];
 
@@ -178,7 +179,10 @@ const hall = Object.assign({}, W.hall, { rank, date, loser: () => 'Loser:' });
 // window's refund, the rank past 1,000,000 points, the Hall of Fame's year,
 // the missing colon and the technology names are right on the Mac (above).
 const MAC_SLIPS = ['poorestOut', 'designs30', 'refuelCheck', 'scrapRange', 'star0'];
-const FIXES = W.fixes.filter(f => MAC_SLIPS.includes(f.id));
+const FIXES = W.fixes.filter(f => MAC_SLIPS.includes(f.id)).concat([
+  { id: 'welcomeVersion', title: 'The welcome report gives the right version',
+    text: 'The first report of a game said “Spaceward Ho! Version 4.0.3”: the string was never updated for 4.0.5. The patch says 4.0.5.' },
+]);
 
 // Mac 4.0.5 plays 4.0.5's game (js/rules-405.js), with the differences above
 E.registerRules('mac405', Object.assign({}, W, {

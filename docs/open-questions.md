@@ -492,19 +492,11 @@ Biological retire mark.
 
 **Open:**
 
-1. **Where did Windows' ranks go wrong?** The Mac's Master Point List has eleven ranks
-   (STR# 6280: Red-neck, Bow-legs, Cowpoke, Deputy, Gunfighter, Town Sheriff, Federal
-   Marshall, Lone Ranger, QuickDraw™ McGraw, Best in the West, Ho! Champion) at 0, 1,000,
-   2,500, 5,000, 10,000, 25,000, 50,000, 100,000, 250,000, 500,000 and 1,000,000 points
-   (`doMasterListDlg` @10538e). Windows' strings 324-333 are ten, with "Deputy
-   Gunfighter" as one, and string 334 is "%s: %s"; its thresholds are the Mac's first
-   ten. So at 5,000 Windows says "Deputy Gunfighter" where the Mac says "Deputy", from
-   10,000 every Windows rank is the name the Mac gives the next rank up (Town Sheriff
-   for the Mac's Gunfighter … Ho! Champion from 500,000), and past 1,000,000 Windows
-   shows the format string. It looks like two strings joined in the
-   Windows string table (a missing separator), which would make the `rankName` fix
-   ("Ho! Champion" past 1,000,000) only half the story; the `405` ruleset keeps
-   Windows' table as read, and `mac405` the Mac's.
+Settled by Jake: **Windows' ten ranks stay.** The Mac has eleven (Deputy and Gunfighter
+apart, Ho! Champion from 1,000,000); Windows has ten, "Deputy Gunfighter" as one, so from
+10,000 points each Windows rank is the Mac's next one up. It reads as a choice made for
+the Windows build, so `405` keeps it, patch or not; the `rankName` fix still names the
+rank past 1,000,000, which showed the unfilled "%s: %s".
 
 **Remake's choices:**
 

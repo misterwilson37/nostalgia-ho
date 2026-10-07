@@ -1045,7 +1045,8 @@ function renderMsg() {
   box.innerHTML = '';
   if (G.over && UI.msgIdx >= UI.inbox.length) {
     box.append(el('div', { class: 'card end' }, el('img', { src: A.img[G.winner === ME ? 'p3030' : 'p3040'], alt: '' }),
-      el('div', null, el('p', null, G.winner === ME ? 'You conquered the galaxy.' : 'The game is over.'), el('button', { onclick: newGameDialog }, 'New game'))));
+      el('div', null, el('p', null, G.winner === ME ? 'You conquered the galaxy.' : 'The game is over.'), el('button', { onclick: newGameDialog }, 'New game'), ' ',
+        el('button', { class: 'quiet', onclick: () => openFeedback('game') }, 'Tell us how it went'))));
     return;
   }
   if (UI.msgIdx < UI.inbox.length) {
@@ -1359,7 +1360,7 @@ function bugFacts() {
   const id = rulesId(), rs = HO.RULESETS[id];
   const ver = rs ? (rs.version ? `${rs.version} (${rs.platform}, ${rs.year})` : rs.label || id) : '(unknown)';
   const patch = G ? (patchOn() ? `on (${HO.patchVersion(HO.rules(G))})` : 'off') : '(no game)';
-  return { id, ver, patch, skin: (window.HOSKINS && HOSKINS.current) || 'classic', year: G ? G.year : null, turn: G ? G.turn : null };
+  return { id, ver, patch, skin: (window.HOSKINS && HOSKINS.current) || 'classic', os: osNow() || '(default)', year: G ? G.year : null, turn: G ? G.turn : null };
 }
 function bugReportUrl(e, where, f) {
   const msg = String((e && e.message) || e);
@@ -1378,6 +1379,41 @@ function bugReportUrl(e, where, f) {
   ].join('\n');
   const title = `[${f.id}] ${msg}`.slice(0, 120);
   return `${BUG_REPO}/issues/new?title=${encodeURIComponent(title)}&body=${encodeURIComponent(body.slice(0, 6000))}`;
+}
+// Feedback and suggestions: like a bug report, a new GitHub issue with the
+// facts filled in, which the player finishes and sends (nothing is sent
+// from here). kind: 'game' (offered when a game ends, won or lost) or 'idea'
+// (the Ho menu's Suggestion box, any time).
+function feedbackUrl(kind) {
+  const f = bugFacts(), game = kind === 'game' && G && G.over;
+  const won = game && (G.winners || [G.winner]).includes(ME);
+  const facts = [
+    `- Rules: ${f.ver} — ruleset \`${f.id}\``,
+    `- Patch: ${f.patch}`,
+    `- Modern conveniences: ${G ? (modern() ? 'on' : 'off') : '(no game)'}`,
+    `- Skin: ${f.skin} · OS look: ${f.os}`,
+    G ? `- Galaxy: ${G.stars.length} stars, ${G.players.length} players; ${game ? (won ? 'won' : 'lost') : 'in'} ${G.year} (turn ${G.turn})` : '- No game in progress',
+  ];
+  const body = (game ? [
+    '**How did the game go?**', '', '(Fun? Too easy, too hard? Anything that surprised you?)', '',
+    '**Did anything play differently from how you remember it?**', '', '(Which version, and what did it do?)', '',
+    '**Anything else?**', '', '',
+  ] : [
+    '**Your suggestion**', '', '(An idea, a wish, something you missed, something that felt off.)', '',
+  ]).concat(['**Game**', '', ...facts, `- Browser: ${navigator.userAgent}`]).join('\n');
+  const title = game ? `[feedback][${f.id}] ${won ? 'Won' : 'Lost'} in ${G.year}` : `[suggestion] `;
+  return `${BUG_REPO}/issues/new?title=${encodeURIComponent(title)}&labels=${game ? 'feedback' : 'suggestion'}&body=${encodeURIComponent(body.slice(0, 6000))}`;
+}
+function openFeedback(kind) {
+  const game = kind === 'game';
+  const body = el('div', { class: 'about' },
+    el('p', null, game ? 'Win or lose, we’d love to hear how the game went: what was fun, what wasn’t, and anything that didn’t play like the version you remember.'
+      : 'Got an idea, a wish, or something that felt off? Drop it in the suggestion box.'),
+    el('p', { class: 'sub' }, 'This opens a new issue on GitHub with the game’s details filled in; you write the rest and send it. A GitHub account is needed.'),
+    el('div', { class: 'btns right' },
+      el('button', { type: 'button', class: 'quiet', onclick: closeModal }, 'Not now'),
+      el('button', { type: 'button', onclick: () => { window.open(feedbackUrl(kind), '_blank', 'noopener'); closeModal(); } }, game ? 'Send feedback' : 'Open the suggestion box')));
+  modal(game ? 'How did it go?' : 'Suggestion box', body, { cls: 'small' });
 }
 function downloadText(text, name) {
   const url = URL.createObjectURL(new Blob([text], { type: 'application/json' }));
@@ -2521,7 +2557,8 @@ function setupMenus() {
   // the middle of a game). Items: [label, fn, feature or null, checked()].
   const ho = [['About this version…', openAbout], ['Patch notes…', openPatchNotes, () => patchOn()], ['-'],
     ['Skin and OS look…', openSkin], ['Sounds…', () => openSounds()],
-    [MODERN_TEXT.replace(/:.*/, ''), () => { if (G) setModern(!modern()); else toast('Modern conveniences are chosen for each game: start or continue one first.'); }, null, () => modern()]];
+    [MODERN_TEXT.replace(/:.*/, ''), () => { if (G) setModern(!modern()); else toast('Modern conveniences are chosen for each game: start or continue one first.'); }, null, () => modern()],
+    ['-'], ['Suggestion box…', () => openFeedback('idea')]];
   const bar = $('#menubar');
   const menu = (btn, items) => {
     const dd = el('div', { class: 'dropdown', role: 'menu' });
