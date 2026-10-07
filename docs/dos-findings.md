@@ -276,7 +276,7 @@ offline. The repository includes their output, not the DOS game itself.
 | Scrapping | humans get 3/4 of the metal, computers all of it; ships scrapped in hyperspace fall on the star they were heading to next as a meteor shower | CONFIRMED (`FUN_1040_0fca`) |
 | Refuelling and colonizing | at the end of every turn, after the player's income, each fleet at one of your colonies is refuelled and its colony ships take on 10 colonists each; then every fleet at a star (newest first) looks at it again and, if the star isn't yours and the fleet has colonists, founds a colony. So a colony ship colonizes at the end of any turn it sits at a free star, not only when it arrives | CONFIRMED (`FUN_1040_2fa8`, `FUN_1040_34e9`, `FUN_1040_3645`) |
 | Arrival messages | only the owner is told, as the fleet moves (before any battle), from the player's own record of the star: "Your fleet of … has arrived at …" only at the last stop, when the record says the star is explored and is your colony or nobody's (and the fleet isn't a colony ship); "… has stopped at … on the way to …" at each stop on a route. No notice to a colony's owner when someone else arrives | CONFIRMED (`FUN_1040_23ed` @1040:24a5-25a2) |
-| Travel | each hop takes ⌈distance ÷ Speed⌉ turns, counted down one a turn | CONFIRMED (`FUN_1068_0a94`, `FUN_1040_23ed`) |
+| Travel | each hop takes ⌈distance ÷ Speed⌉ turns, counted down one a turn; the hop's fuel is spent when the fleet arrives (its length, fleet +0xe, added to the fuel used, +4; Mac 2.0.1 `MoveShips` @a20e2 the same). A new ship joins an idle fleet of its design at the star by its count only, else gets a new fleet with no fuel used | CONFIRMED (`FUN_1068_0a94`, `FUN_1040_23ed`, `FUN_1040_1a2f`, `FUN_1068_0000`; js/rules-dos.js departs20, legFuelArrives) |
 | Exploring sound | by the star's quality 0–20 (`FUN_1020_1a2d`, the computers' own rating): 6000 at 15 or more, 6002 from 1 to 14, 6001 at 0. The quality is 0 only when gravity is over 2.56 times home's (5.0.5 also gives 0 when the gravity ratio is over 2 and the temperature 50 °F off) | CONFIRMED (`FUN_10c0_0c50` @10c0:0c98) |
 | Exploring message | "Gravity: 1.23G. Temp: 72.5°F" to a tenth of a degree; the remake rounds to whole degrees | CONFIRMED (string 703, `FUN_1040_34e9`); the remake DIFFERS (text only) |
 | Meteor showers | only from ships scrapped in hyperspace: 50 people (units) killed per unit of metal, no escape into colony ships | CONFIRMED (`FUN_1040_27ee`) |
@@ -483,6 +483,7 @@ rules.
 | Scrapping in hyperspace (`scrapInSpace`) | metal falls on the next star as a meteor shower | matches (`FUN_1040_0fca` @1040:10bc–10db); the message is the remake's (text only) |
 | Scrapping over someone else's star (engine) | metal falls onto the planet | matches (`FUN_1040_0fca` @1040:1134–1145) |
 | Fleet travel (engine) | ⌈hop ÷ Speed⌉ turns a hop | matches (`FUN_1068_0a94`) |
+| Fuel of a leg (engine: taken on leaving) | taken on arrival | DIFFERED (only what a fleet in flight shows), now 2.0's (`FUN_1040_23ed`; `departs20`) |
 | `HIT`, `hit`, `shotsPerShip`, `interestOn`, `mineMoney`, `mineMetal`, `terraCost`, `terraStep`, `techLevelCost`, `techMsg`, `START`, `fleetStrength`, `planetStrength`, `galaxySizes` | — | not used by these rules (2.0's own battle, money, research, setup and galaxy routines replace them) |
 
 ## Changes to the shared code

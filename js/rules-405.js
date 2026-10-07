@@ -2349,7 +2349,17 @@ E.registerRules('405', Object.assign({}, D, {
   chatLimit: 10,           // CONFIRMED (string 755): ten messages a turn
   bigDuels: true,          // CONFIRMED (FUN_00425c9a, FUN_00438a0f): the big-battle rumour after big duels only
   plainTechMessages: false, // CONFIRMED (FUN_0046ec5a): "You now have <name> ... Technology (L)." to level 20
-  queueSlots: undefined, queueMergeAny: undefined, yardProgress: undefined, yardRefund: undefined, canMerge: undefined,
+  queueSlots: undefined, queueMergeAny: undefined, yardProgress: undefined, yardRefund: undefined,
+  // CONFIRMED: a fleet holds one design (FUN_00415db0), and only fleets of the
+  // same design can be put together, by Organize ("Group All" and "Divide All"
+  // deal one design's ships into piles). As in 3.0.1 (rules-301 canMerge) the
+  // routes keep a group leader (fleet +0x1e, FUN_00435dc3, FUN_004160d6) that
+  // nothing sets but to -1 (FUN_00415db0, the new fleet) and FUN_004160d6 itself;
+  // the Ships menu (Build/Design, List All Fleets, Organize, Scrap Current
+  // Fleet, Review Battle) has no group command, nor has the Mac's (DoShipsMenu
+  // @83802)
+  canMerge: D.canMerge,
+  departs: D.departs, // a leg's fuel spent on arrival (FUN_004357fc, as 3.0.1's: rules-301 fleetArrives)
   // CONFIRMED (FUN_0042b278): fleets are organized as 3.0.1's (js/rules-301.js)
   organized: (...a) => R301().organized(...a),
   // CONFIRMED: no stances and no "arrive late" (no text or code); best buddies

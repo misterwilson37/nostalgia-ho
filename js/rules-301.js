@@ -646,7 +646,12 @@ function moveShips(G, p) {
 // supernova is lost: "Your fleet of %s disappeared through a wormhole in space
 // and is lost." (1000.20). A fleet that reaches a star someone else owns is
 // noted for the owner's allies (ColonizeAndExplore tells them).
+// CONFIRMED (MoveShips @a26ac, GiveFleetPath @130dc0): the leg's fuel is spent
+// on arrival: GiveFleetPath keeps the leg's length in the fleet (+0x10), and the
+// turn the fleet reaches the star MoveShips adds it to the fuel used (+2) and
+// clears it, as 1.2 and 2.0 do (rules-dos departs20, legFuelArrives).
 function fleetArrives(G, f) {
+  D.legFuelArrives(f);
   const p = G.players[f.owner], s = G.stars[f.star], label = E.fleetLabel(G, f);
   if (s.nova >= 210) { if (p.human) msg(G, p.id, `Your fleet of ${label} disappeared through a wormhole in space and is lost.`, { icon: 'm9036', star: s.id }); return false; }
   if (f.path && f.path.length) { if (p.human) msg(G, p.id, E.report(25, label, s.name, G.stars[f.path[f.path.length - 1]].name), { icon: 'm9038', star: s.id, quiet: true }); return true; }
@@ -740,10 +745,9 @@ function replan(G, p) {
 // CONFIRMED (BuildAShip @132e04, BuildAFleet @92fc2): a fleet holds one design.
 // New Fighters and Satellites join a fleet of the same design at the star that
 // isn't on its way anywhere (a human's only one built this turn, fleet +9);
-// each Scout and Colony Ship is a fleet of its own. 3.0.1 lets fleets be
-// grouped to move together; the remake's fleets of several designs are such
-// groups (the group moves at the slowest one's speed and the shortest Range,
-// GiveFleetPath).
+// each Scout and Colony Ship is a fleet of its own. (The route code can move
+// a group of fleets at the slowest one's speed and the shortest Range,
+// GiveFleetPath, but 3.0.1 has no way to make a group: see canMerge below.)
 function fleetFor(G, pid, sid, d) {
   if (d.type !== 'fighter' && d.type !== 'satellite') return null;
   const human = G.players[pid].human && !G.players[pid].auto;
@@ -1888,7 +1892,17 @@ E.registerRules('301', Object.assign({}, D, {
   maxDesigns: MAX_DESIGNS,
   chatLimit: 10,           // CONFIRMED (SendAMessage @95f14, STR# 1020.17): ten messages a turn
   plainTechMessages: true, // CONFIRMED (STR# 1000.3-7): "Your Range Technology has reached level N."
-  queueSlots: undefined, queueMergeAny: undefined, yardProgress: undefined, yardRefund: undefined, canMerge: undefined, organized: organized301,
+  queueSlots: undefined, queueMergeAny: undefined, yardProgress: undefined, yardRefund: undefined, organized: organized301,
+  // CONFIRMED: a fleet holds one design, and only fleets of the same design can
+  // be put together (Organize Ships, OrganizeFleets @133d14). The route and
+  // move code keeps a group leader (fleet +0x1a, ReassignGroupLeader @130342,
+  // CheckFleetDestination, GiveFleetPath), but nothing makes a group: the only
+  // writes to it are NewFleet's, MarkUsedFleets' and ReassignGroupLeader's;
+  // the Ships menu (MENU 132) has no group command, and "Group Current Fleet",
+  // "Ungroup Current Fleet" (STR# 1010.13-14) and the "Which fleet would you
+  // like to group with your ^0?" box (DITL 4060) are never loaded
+  canMerge: D.canMerge,
+  departs: D.departs, // a leg's fuel spent on arrival (fleetArrives)
   // CONFIRMED: no stances, no "arrive late", no best buddies (no text or code);
   // the arrival messages are fleetArrives' and colonizeAndExplore's
   features: { arrivalNotices: false, alliances: true, gifts: true, surrender: true, waypoints: true, luck: true, supernova: true, armageddon: true, dip: true, chat: true, yearsPerTurn: true },

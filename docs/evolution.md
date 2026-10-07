@@ -224,6 +224,54 @@ Its unofficial patch, 2.0.1.1, fixes the meteor report, the computers' colony ba
 the old fighters' Range; Organize Ships' 11 and the 16-bit attack rating are Windows
 slips and not in its list (`docs/fixes.md`, "Mac 2.0.1").
 
+### The release notes (Mac 2.0 and 2.0.1)
+
+Two texts came with the Mac 2.0.1 disks besides Delta Tao's later list above: the **2.0
+Release Notes** ("The comments are mostly directed at people who owned version 1 to
+describe what's new, but they also include some things not yet mentioned in the
+manual") and **Changes for version 2.0.1** ("--Joe and Peter"), with a note for PowerBook
+owners. What they say, against the code:
+
+| The release notes say | What the code shows |
+|---|---|
+| Full colour, read from a second file, "TheHo Color Picts", which must sit beside the program under that name | Confirmed: the Mac 2.0.1 program reads its colour pictures from that file (it is on the disks); 1.2 already had colour, from "TheHo F CPicts" (1.2 above) |
+| The alerts at each new turn became "Event Messages" in the map's bottom left corner; the Report Window keeps the last 50 or so; clicking a message goes to its star and does its action (such as reviewing the battle); when all are clicked, an End Turn button appears | Interface; the remake's message cards follow this |
+| An "overspending warnings" option in the Options menu; overspending goes into savings, "which even gets interest" | Confirmed: money not spent stays in the pool and earns 10 × √(kept + refunds) (2.0 rules, above); 1.2's Options menu already has the spending alert |
+| "Fix Spending" (command-F, Galaxy menu) caps spending to just pay for everything, including the ships queued | The routine is there (Mac `FixSpendingBars` @c2018); the remake hasn't got the command |
+| One fleet holds one ship type; Organize Fleets organizes the ships of the selected fleet's type at the selected star; the Build Ships dialog is new | Confirmed: a fleet record holds one design (`FUN_1068_0000`, Mac `NewFleet` @110004); Organize Fleets (`OrganizeFleets` @1137e6, ORGFLEETSDLGPROC); the three-slot ship queues. 1.2 has all three |
+| Tab selects the next fleet; double-clicking your star opens Build Ships, someone else's Review Battle | Interface (Mac `TabThroughFleets` @c68a6) |
+| Auto Play in the Options menu, "Don't count on it to be real smart" | Confirmed: a human's turn played by the computers' own routine (AUTOPLAYDLGPROC; Mac `ChangeAutoPlay` @1014f2, `doAutoPlayDialog` @12243c) |
+| Battle speed, and animation that can be turned off | Interface |
+| Send Message (Galaxy menu); the computers ignore messages, but "when you send them an 'I own' message, though, they WILL know you are there" | Confirmed: a true "I own" marks the star as the sender's on the receiver's map, a computer's too (`FUN_1040_0038` @1040:062f); the computers' turn reads no messages |
+| The computers learn your name and how you name your ships; throw away "Spaceward Ho! prefs" to make them forget | Confirmed: the humans' names are added to the computers' name list (STR# 1999 in the preferences, `DoGameSolidificationStuff`; Windows `FUN_1040_4028`), and new design names to the ship names (`AddNewTypeNameToPrefs`; Windows `FUN_10e8_0f64`). The remake keeps no such file |
+| Dumb computers start as an Expert human, Average as Normal, Smart as a Novice, with a Colony Ship and two Scouts; Dumb explore and terraform slowly, mine fast and research too little | Confirmed for the starts (`FUN_1050_1ec9`; the Novice start has a Colony Ship and two Scouts). How each level plays is in their personalities (the IQ branches, above) |
+| "None of the computer players cheat. That is, they aren't privy to any information you don't have" | **Not quite**: a Smart computer knows every star less than 9 ly from home on its first turn, without exploring (`FUN_1020_4a3d` @1020:4a85, dos-findings) |
+| The human's skill sets the home planet's metal, money and people, "plus novices and beginners get to start with a couple of ships" | Confirmed: Novice and Beginner start with two Scouts, the Novice also with a Colony Ship (2.0's skill table) |
+
+Changes for version 2.0.1 (a list of 22, each ticked). Most are the interface: the line
+drawn when a fleet is dragged beyond its reach in 50 % grey, unprofitable planets'
+spending bars grey in black and white, the zoom box, the report window's scrolling,
+"locked disk" and "save game failed" messages, the "Compare Players" chart not shown in
+2000 or once you have won or lost, typing a star's name to select it, the black-and-white
+End Turn button and application icon, a black line on the map window's left edge, the
+population shown after a battle whose planet was hit at all, and the spelling in the "Go
+to second turn now?" alert. Crashes fixed: the "Pass 2 for player N" freeze, desk
+accessories under System 6 without MultiFinder, "unexpectedly quit" on bare-bones
+systems. "Half built ships in 'Build Ships' dialog now built from left to right", the
+order the queue's slots are paid in (the first slot first, `FUN_1040_1479`). Two are the
+computers': "Improved artificial intelligence satellite building strategy" and "Improved
+artificial intelligence estimates of enemy satellite strength"; the remake has no 2.0.0
+program to compare (not checkable). "Removed a 'secret,' added a different one": an
+Easter egg, not found. And:
+
+> TheHo now requires 6.0.5 (to avoid 6.0.2 color qd problem).
+
+So **Mac 2.0.1 needs System 6.0.5 or later** (2.0 itself allowed earlier System 6 releases: INFERRED from the wording). The
+added "note to read me on using the Powerbooks as game servers" says a PowerBook keeping
+a network game's file must not spin its disk down (set it to 15 minutes in the Portable
+control panel), or both machines may crash.
+
+
 ## Mac 3.0.1 (1993)
 
 > **Delta Tao: "Version 2 to 3"**
@@ -663,8 +711,8 @@ remake hasn't got (Mac 1.0-1.1.2, the Mac 4.0). Delta Tao wrote of the Mac line;
 2.0 is the Windows 3.1 / DOS program and its 4.0.5 the Windows 95 one, each the same game as
 the Mac version of its number.
 
-Totals: **30 confirmed, 2 contradicted in part, 13 not checkable** (45 claims). Neither
-contradiction is about a rule: both are interface features that Delta Tao's 5.0 list calls
+Totals: **31 confirmed, 1 contradicted in part, 13 not checkable** (45 claims). The
+contradiction isn't about a rule: it is an interface feature that Delta Tao's 5.0 list calls
 new but that earlier versions already had in some form. One finding corrected the remake's wording: Delta Tao and 1.2's code agree that colour came
 with 2.0, and Mac 2.0.1's own "TheHo Color Picts" (1992) confirms it; the remake had called
 3.0.1 "the first colour Mac version". Settled and reworded.
@@ -740,7 +788,7 @@ reading of 1.2.
 | Internet play (spacewardho.net) | Not checkable | network; the lobby is there but its server is gone (`docs/original-findings.md`, section 15) |
 | Smarter computers: Biologicals and Tankers, multi-planet attacks, metal kept for the endgame | Confirmed (the first two) | computers buy Biologicals to explore and, late in the game, to attack (`FUN_10083fe0`, `FUN_10084860`, `FUN_10084f90`), and Tankers into attack fleets (`FUN_10084860`); 4.0.5's computers buy neither and scrap Tankers. Smart and Diabolical computers chain stops (`FUN_100843b0`, `FUN_100845f0`). Keeping metal for the endgame isn't found: only the rule that a computer under 5,000 metal builds nothing but colony ships (original-findings, "Where to colonize") |
 | Multiway battles, allies fighting side by side | Confirmed | everyone at a star fights one battle, sides drawn up by alliance (`FUN_1007e870`, `FUN_1007eed0`, `FUN_1007f560`); 4.0.5 fought duels with the colony's owner. Two of your allies shooting each other isn't recorded on its own |
-| Grouped fleets: several ship types in one fleet, so fleets of different speeds stay together | **Contradicted in part** | a 5.0.5 fleet does hold several designs (a byte per design at fleet +0x58; the computers split them, `FUN_10088eb0`; the Group Fleets window). But keeping fleets of different speeds together is older: 3.0.1 groups one-design fleets to move together at the slowest speed and shortest Range (`ReassignGroupLeader @130342`, `GiveFleetPath @130dc0`), and 4.0.5 keeps a group number (fleet +0x1e, `FUN_004160d6`) |
+| Grouped fleets: several ship types in one fleet, so fleets of different speeds stay together | Confirmed | a 5.0.5 fleet holds several designs (a byte per design at fleet +0x58; the computers split them, `FUN_10088eb0`; the Group Fleets window). Before 5.0 a fleet holds one design and only fleets of one design can be put together. 3.0.1 and 4.0.5 have route code for a group of fleets moving at the slowest speed and shortest Range (`ReassignGroupLeader @130342`, `GiveFleetPath @130dc0`; 4.0.5's group number, fleet +0x1e, `FUN_004160d6`), but nothing makes a group: neither has a group command, and 3.0.1's "Group Current Fleet" strings (STR# 1010.13-14) and dialog (DITL 4060) are never loaded. (Until October 2026 this was "Contradicted in part", reading that code as 3.0.1's groups) |
 | Battle options for each ship type: offensive, defensive, following behind | Confirmed | a stance byte per design in the fleet (fleet +0x58 + design: 1 arrive late, 2 defensive, 4 offensive; `FUN_1007bcb0`); Offensive +1 Weapons −2 Shields, Defensive −2 Weapons +1 Shields; late arrivals fight a second battle (`FUN_1007e870`) |
 | Fleet paths through a sequence of stars | Confirmed | multi-star paths, waiting for fuel (original-findings, section 8; `FUN_10075f10`). Earlier versions only route through your own colonies by themselves |
 | New Radical techs: research, savings interest, borrowing interest | Confirmed | the research facility, the prime rate and cheaper credit (`FUN_10079360`) |

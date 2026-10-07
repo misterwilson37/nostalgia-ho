@@ -22,7 +22,7 @@
 //   text is one of the manual's headings). Checked claim by claim against the
 //   code in docs/evolution.md, "What Delta Tao said vs what the code shows";
 // - requirements: what Delta Tao gave as the version's system requirements
-//   (5.0 only), for the OS-look list.
+//   (5.0, and Mac 2.0.1 from its change list), for the OS-look list.
 //
 // A line may be { text, show: (rs) => bool } to show only while a ruleset
 // flag says it applies (rs is the ruleset, HO.rules(G)).
@@ -91,6 +91,12 @@ const REQ_5 = {
   os: 'OS 8.6 or later', disk: '20 MB', ram: '10 MB',
   quote: 'Spaceward Ho! 5.0 is bigger than ever, and requires some 20 megabytes of hard disk space, 10 megabytes of RAM, and OS 8.6 or later.',
   source: DT_SOURCE, url: DT_URL,
+};
+// Mac 2.0.1's, from "Changes for version 2.0.1" on its disks
+const REQ_201 = {
+  os: 'System 6.0.5 or later',
+  quote: 'TheHo now requires 6.0.5 (to avoid 6.0.2 color qd problem).',
+  source: 'Changes for version 2.0.1 (Joe and Peter), on the Mac 2.0.1 disks',
 };
 const HOTSEAT = 'Several people play on one computer and take turns. The original let each player join a shared game file, with a password.';
 root.HOVERSIONS = {
@@ -286,6 +292,7 @@ root.HOVERSIONS = {
       'Naming a star after a win, and the names file kept for later galaxies.',
     ],
     deltaTao: DT_2,
+    requirements: REQ_201,
     changes: [
       'The same game as the DOS and Windows 3.1 edition, except: Organize Fleets keeps 1.2’s least fuel used and leaves the orders alone (Windows: the average, and the orders cleared), and the computers’ attack rating is worked out in 32 bits, as 1.2’s, so it never wraps round (Windows: 16 bits).',
       'A Create Galaxy window: five sizes, five shapes, Dense or Sparse, 0 to 19 computers and their IQ (Dumb, Average or Smart). Each human picks a skill, Novice to Expert. (1.2 made every galaxy a small dense circle with one average computer.)',

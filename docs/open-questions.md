@@ -115,6 +115,13 @@ These are what 1.2's code does and what the remake now does; they look like slip
    part's money × 1,000 in 32 bits and keeps the result as a word (@9363c, @936a4,
    @936ec), so a colony given more than $2,147,483 for one part gets a wrong bar. The
    remake does the same; it takes a very rich computer to see it.
+7. **A leg's fuel is spent on arrival** (`MoveShips @a20ee`: the leg's length, fleet
+   +0xe, is added to the fuel used, +4, the turn the fleet reaches the star), so a fleet
+   in flight shows the fuel it had at the last star. Nothing reads it in flight, so play
+   is the same either way; the remake now does it so (`departs`, `docs/fallbacks.md`).
+   Settled in October 2026 with the other engine defaults: a new fleet's full tank
+   (`NewFleet @110004`) and the computers' names drawn with the game's `RND` @12290
+   (`DoGameSolidificationStuff @a49d6`).
 
 ---
 
@@ -174,6 +181,13 @@ These are what 2.0's code does and what the remake now does; they look like slip
 7. **No command to give up a colony**: `FUN_1040_38c0` is called only by `FUN_1040_0925`
    (@1040:0ab5, a colony its share can't keep) and `FUN_1040_27ee` (@1040:29fa), so the
    remake shows no Evacuate button.
+8. **A leg's fuel is spent on arrival** (`FUN_1040_23ed`: the leg's length kept by
+   `FUN_1068_0a94`, fleet +0xe, is added to the fuel used the turn the fleet arrives; Mac
+   2.0.1 `MoveShips` @a20e2 the same). No play changes; the remake now does it so.
+   Settled with it in October 2026: a new ship joins an idle fleet of its design by its
+   count only, else gets a new fleet with a full tank (`FUN_1040_1a2f`, `FUN_1068_0000`;
+   Mac `NewFleet` @110004), and the computers' names and sexes are drawn with the game's
+   `RND` (`FUN_1100_0000`).
 
 ### Remake's choices
 
@@ -296,6 +310,20 @@ These are what 3.0.1's code does and what the remake now does; they look like sl
    power into the galaxy record every turn; nothing reads it.
 9. **Report texts with no sender**: volcanoes, revolts, metal disappearing and the
    "computer bug" (STR# 1000.14, .17, .72, .77) have text but no code sends them.
+10. **Fleet groups that can't be made.** The route and move code can move a group of
+    fleets at the slowest speed and shortest Range (group leader fleet +0x1a,
+    `ReassignGroupLeader @130342`, `CheckFleetDestination`, `GiveFleetPath @130dc0`), but
+    nothing makes a group: the Ships menu (MENU 132) has no group command, and "Group
+    Current Fleet" / "Ungroup Current Fleet" (STR# 1010.13-14) and DITL 4060 ("Which
+    fleet would you like to group with your ^0?") are never loaded. Unfinished, it seems
+    (Delta Tao lists grouped fleets as new in 5.0). The remake had let any fleets be put
+    together as such groups; it now lets only fleets of one design be (October 2026).
+11. **A leg's fuel is spent on arrival** (`MoveShips @a26ac`, the leg's length kept at
+    fleet +0x10 by `GiveFleetPath`), as 1.2 and 2.0. No play changes; the remake now does
+    it so. Settled with it: no limit on ships bought at a colony in a turn (`BuildAShip
+    @132e04`, `BuildAFleet @92fc2`), a new fleet's full tank (`NewFleet @130004`), and
+    the computers' names drawn with the game's `RND` after `srand` with the galaxy's seed
+    (`DoGameSolidificationStuff @a741a`).
 
 ### Remake's choices
 
@@ -441,6 +469,12 @@ These are what 4.0.5's code does and what the remake now does; they look like sl
     cheating.") is set for the player at this computer, not the one whose record failed
     (`FUN_004320f8`); a marked player's win is rated -1 and earns no master points. The
     remake has no such checksum, so nobody is marked.
+20. **Fleet groups that can't be made**, as in 3.0.1: the group number (fleet +0x1e) is
+    read by the routes (`FUN_00435dc3`) but set only to -1 (`FUN_00415db0`) and by
+    `FUN_004160d6`; neither edition's Ships menu has a group command ("Group All" is the
+    Organize window's button for one design's piles). The remake now lets only fleets of
+    one design be put together (October 2026). A leg's fuel is spent on arrival
+    (`FUN_004357fc`, the Mac's `MoveShips` @c272e), as 3.0.1; no play changes.
 
 ### Remake's choices
 
@@ -554,7 +588,24 @@ The ten entries noted here before are settled in the code:
 
 ### Open
 
-None: the code settles every rule question met.
+The rule questions met in the ruleset's own code are settled. The engine defaults the
+ruleset still relies on are listed in `docs/fallbacks.md`; those not settled yet:
+
+1. **Women computers' chance** (the engine: 45 %) and **where a computer's name is first
+   given**: `FUN_1006d0c0` only renames a computer whose name another player already
+   has, with the next unused name of a fixed list in order (men from "Peter", women from
+   "Christie"). Neither the sex nor the first name was found being drawn.
+2. **Design names**, read but not yet applied: `FUN_1007dcf0` starts at a random name
+   among the first 15 of the class's list (set-up, the computers, Radical designs) or all
+   of it (the design window, `FUN_1009a810`), and takes the next name round the list no
+   design of the player's has (else the first one drawn), as 4.0.5's. The remake names
+   them in order. Applying it changes the random numbers drawn, and the Palm (which takes
+   5.0.5's hooks) hasn't been checked.
+3. The first message, a limit on humans' messages a turn, the Group Fleets window and its
+   fuel, routes planned on the map, and (patch only) scrapping over someone else's star.
+
+Settled in October 2026: an out computer plays no turn (`FUN_10081cc0` runs its steps
+only while the player's out flag, +0x34, is 0; Palm `FUN_00060178`, +0x36).
 
 ### Settled, worth confirming
 

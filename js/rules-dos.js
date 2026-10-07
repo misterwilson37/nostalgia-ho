@@ -1127,6 +1127,23 @@ function replan20(G, p) {
     } else { f.dest = null; f.path = r; }
   }
 }
+// CONFIRMED (FUN_1040_23ed @1040:23ed-24a5; Mac 2.0.1 MoveShips @a20e2, 1.2
+// MoveShips @a20ee): a leg's fuel is spent when the fleet arrives, not when it
+// leaves. The route routine (FUN_1068_0a94, GiveFleetPath @110d56) keeps the
+// leg's length in the fleet (+0xe), and the turn the fleet reaches the star
+// adds it to the fuel used (+4) and clears it; in flight the fleet's fuel used
+// is still what it was at the last star. (3.0.1, MoveShips @a26ac, and 4.0.5,
+// FUN_004357fc and the Mac's MoveShips @c272e, do the same: rules-301, -405.)
+// The engine takes the fuel as a fleet leaves (departures), so departs20 gives
+// it back and keeps it in f.legFuel, and legFuelArrives takes it on arrival.
+// Nothing in the turn or the computers reads the fuel of a fleet in flight, so
+// only what a fleet in flight shows as its fuel changes.
+function departs20(G, f) {
+  const d = starDist(G, f.star, f.dest);
+  if (d <= f.fuel + 1e-9) { f.fuel += d; f.legFuel = d; } // within its fuel: it leaves (the engine takes d back)
+  return true;
+}
+function legFuelArrives(f) { if (f.legFuel != null) { f.fuel -= f.legFuel; delete f.legFuel; } }
 // CONFIRMED (FUN_1040_23ed @1040:24a5-25a2): the messages are written as the
 // fleet moves (pass 1, before any battle), from the player's own record of
 // the star: at a stop on a route "… has stopped at %s on the way to %s."
@@ -1134,6 +1151,7 @@ function replan20(G, p) {
 // only if the record says the star is explored and is the player's colony,
 // or nobody's and the fleet is not of Colony Ships.
 function fleetArrives20(G, f) {
+  legFuelArrives(f);
   const p = G.players[f.owner];
   if (!p || !p.human || f.star == null) return true;
   const s = G.stars[f.star], k = E.know(G, p, s.id), label = E.fleetLabel(G, f);
@@ -1764,6 +1782,7 @@ E.registerRules('dos', Object.assign({}, O, {
   economy: economy20, economyForAll: true, afterMovement: null, refuel: pass2_20,
   disposable, projected: projected20, underfunded: underfunded20, settle, battle: battle20, randomEvents,
   fleetArrives: fleetArrives20, arrivalSays: () => false, // the arrival messages are fleetArrives20's
+  departs: departs20, legFuelArrives,     // a leg's fuel spent on arrival (above)
   planetIncome, incomeU, research, yardProgress, yardRefund: yardRefund20,
   canMerge: canMerge20, organized: organized20,
   canColonize: () => false, exploreQuality, planetClass, checkElimination,

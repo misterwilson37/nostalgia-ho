@@ -84,21 +84,20 @@ business; the DOS 2.0 "Inherited rules audit" covers them for 2.0.
 | palm | `battleText` | the engine's battle report wording | unused: 5.0.5's `battle505` (same code) |
 | mac20 | `battleText` | the engine's battle report wording | unused: 2.0's `battle20` (rules-dos), which the Mac code is (`DoBattleStage` @d0004 … `ResolveVictorFleetsAtStar` @d39c6, dos-findings) |
 | mac405 | `battleText` | the engine's battle report wording | unused: 4.0.5's `battle` (rules-405) |
-| 12 | `computerIdentity` | the engine draws each computer's sex (`femaleComputers`) and name (`maleNames`, `femaleNames`) with the game's random numbers | gap: 12-findings names the computers in `DoGameSolidificationStuff` @a49d6 but doesn't say with which random numbers; Mac 2.0.1, the same code, uses the game's (below) |
-| dos | `computerIdentity` | as above | gap: the Windows program isn't cited for it; Mac 2.0.1, the same version, uses the game's (below) |
+| 12 | `computerIdentity` | the engine draws each computer's sex (`femaleComputers`) and name (`maleNames`, `femaleNames`) with the game's random numbers | verified: `DoGameSolidificationStuff` @a49d6 draws each computer's name with `RND` @12290 (a name from STR# 1999 at random, none the same and never a human's), and `RND` (the C library's `rand`) is 1.2's only generator |
+| dos | `computerIdentity` | as above | verified: the names (`FUN_1040_4028`) and the sexes (`FUN_1050_1ec9` @1050:1fd5) are drawn with `FUN_1100_0000`, the game's `RND` (its error text "RND low > high") |
 | mac20 | `computerIdentity` | as above | verified: Mac 2.0.1 has one generator, `RND` @121a6 (no `aSynchRand`), and `DoGameSolidificationStuff` @a40d8 draws the names with it |
-| 301 | `computerIdentity` | as above | gap: not stated for 3.0.1 |
+| 301 | `computerIdentity` | as above | verified: `DoGameSolidificationStuff` @a741a seeds the game's generator with the galaxy's seed (`srand`, header +6) and draws the names with `RND` @11ea2, as 1.2 does; 3.0.1 has no other generator |
 | 405 | `computerIdentity` | as above | verified: 405-findings, "Computers' sexes, and the names of the computers, are drawn with `aSynchRand`, not the game's random numbers" on the Mac (Mac 4.0.5 differs, 7), so the game's on Windows (`FUN_004768cc`, coverage-405) |
-| original | `computerIdentity` | as above | gap: not stated for 5.0.5 |
+| original | `computerIdentity` | as above | gap: `FUN_1006d0c0` only renames a computer whose name another player already has, with the next unused name of a fixed list in order (men from "Peter", women, player +0x28 = 1, from "Christie"), no random numbers; where a computer's name is first given wasn't found |
 | palm | `computerIdentity` | as above | gap: as 5.0.5 |
 
 ### Mac 1.2 (`12`)
 
 | Ruleset | Hook | Engine default | Status |
 |---|---|---|---|
-| 12 | `departs` | a fleet with orders leaves at once if the leg is within its fuel, and the fuel is taken as it leaves; beyond its fuel it waits on a path, else its orders are dropped | gap: 1.2's routes are confirmed (`CheckFleetDestination @a23d2`) but not when a fleet leaves or when its fuel is spent; 2.0's audit has the travel time only |
 | 12 | `scrapAt` | a fleet scrapped over someone else's star: the metal falls onto the planet | verified: 12-findings, "Scrapping … over someone else's star it falls onto the planet" (`ScrapFleetsAndTypes @a0e02`) |
-| 12 | `shipsAdded` | ships joining or making a fleet change nothing more (a new fleet has a full tank) | gap: `NewFleet @110004` is cited for Organize Fleets, not for a new fleet's fuel |
+| 12 | `shipsAdded` | ships joining or making a fleet change nothing more (a new fleet has a full tank) | verified: `NewFleet` @110004 sets a new fleet's fuel used (+4) to 0; ships joining a fleet only add to its count (2.0's `FUN_1040_1a2f`, below) |
 | 12 | `checkEveryStep` | the winner is checked on an End Turn's last step | unused: no "Years per turn" (one step a turn) |
 | 12 | `evacuate` | the engine's Evacuate | unused: no Evacuate command (`evacuateCommand: false`, 12-findings) |
 | 12 | `pactNews` | the engine's alliance news | unused: no alliances |
@@ -111,9 +110,8 @@ business; the DOS 2.0 "Inherited rules audit" covers them for 2.0.
 
 | Ruleset | Hook | Engine default | Status |
 |---|---|---|---|
-| dos | `departs` | as for 1.2 above | gap, in part: dos-findings' audit, "Fleet travel (engine): ⌈hop ÷ Speed⌉ turns a hop, matches (`FUN_1068_0a94`)", covers the travel time; when the fuel is spent (the engine: on leaving) is not stated |
 | dos | `scrapAt` | the metal falls onto the planet | verified: dos-findings' audit, "Scrapping over someone else's star (engine) … matches (`FUN_1040_0fca` @1040:1134–1145)" |
-| dos | `shipsAdded` | nothing more (a full tank) | gap: not stated |
+| dos | `shipsAdded` | nothing more (a full tank) | verified: a new ship joins a fleet of its design at the star with no orders by adding one to its count, fuel untouched, else gets a new fleet (`FUN_1040_1a2f`), whose fuel used (+4) is 0 (`FUN_1068_0000`) |
 | dos | `fixOptions` | no New Game choice is fixed | unused in effect: 2.0 has its own Create Galaxy window (coverage-20, `CREATEGALAXYDLGPROC`) |
 | dos | `checkEveryStep` | the winner on the last step | unused: one step a turn |
 | dos | `evacuate` | the engine's Evacuate | unused: no Evacuate (`evacuateCommand: false`, CONFIRMED in rules-dos) |
@@ -127,10 +125,8 @@ business; the DOS 2.0 "Inherited rules audit" covers them for 2.0.
 
 | Ruleset | Hook | Engine default | Status |
 |---|---|---|---|
-| 301 | `departs` | as for 1.2 above (the fuel taken on leaving) | gap: 301-findings, "Travel: a leg takes ⌈distance ÷ speed⌉ turns; **the fuel is spent on arrival**" (`GiveFleetPath`, `MoveShips`): the travel time matches, the moment the fuel is spent differs from the engine's. Check whether it changes play (a fleet's fuel is read in flight by scrapping, routes and the computers) |
-| 301 | `canMerge` | any two fleets of a player at a star may be put together | verified: 301-findings, "Fleets can be grouped to move together, at the slowest speed and shortest Range: the remake's fleets of several designs stand for such groups" |
-| 301 | `shipsAdded` | nothing more (a full tank) | gap: 301-findings has which fleet new ships join (`BuildAShip @132e04`), not their fuel |
-| 301 | `yardRoom` | no limit on ships bought at a colony in a turn | gap: 5.0.5 (`FUN_1009ab50`) and 4.0.5 limit them by the colony's people; 301-findings doesn't say whether 3.0.1 does |
+| 301 | `shipsAdded` | nothing more (a full tank) | verified: `NewFleet` @130004 sets a new fleet's fuel used (+2) to 0; a ship joining a fleet (`BuildAShip` @132e04, `BuildAFleet` @92fc2) only adds to its count |
+| 301 | `yardRoom` | no limit on ships bought at a colony in a turn | verified: `BuildAShip` @132e04 (a human's) checks only the metal and the borrowing limit, `BuildAFleet` @92fc2 (a computer's) only the money and metal; neither reads the colony's people (the limit is 4.0.5's) |
 | 301 | `shareMaps` | best buddies share maps | unused: no best buddies (301-findings, CONFIRMED: no text or code), so no pair ever shares |
 | 301 | `fixOptions` | no New Game choice is fixed | unused in effect: 3.0.1 has its own Create New Galaxy window |
 | 301 | `queueMergeAny` | (ship queues) | unused: no ship queues (set `undefined` on purpose) |
@@ -141,8 +137,6 @@ business; the DOS 2.0 "Inherited rules audit" covers them for 2.0.
 
 | Ruleset | Hook | Engine default | Status |
 |---|---|---|---|
-| 405 | `departs` | as for 1.2 above (the fuel taken on leaving) | gap: 405-findings doesn't say when a fleet leaves or spends its fuel; its arrivals are 3.0.1's (`FUN_004357fc`), and 3.0.1 spends the fuel on arrival (above) |
-| 405 | `canMerge` | any two fleets may be put together | gap: 405-findings, "Fleets: one design each, kept by class (`FUN_00415db0`)"; grouping fleets of several designs (3.0.1's groups) isn't stated for 4.0.5 |
 | 405 | `fixOptions` | no New Game choice is fixed | unused in effect: 4.0.5 has its own New Game window |
 | 405 | `queueMergeAny` | (ship queues) | unused: no ship queues |
 | 405 | `queueSlots` | (ship queues) | unused: no ship queues |
@@ -165,7 +159,7 @@ business; the DOS 2.0 "Inherited rules audit" covers them for 2.0.
 | original | `canMerge` | any two fleets may be put together | gap: 5.0.5's Group Fleets window is not implemented; "Merge all fleets here" and splitting stand in for it (original-findings, "Group Fleets…"). Its rules (who may group, the fuel) aren't confirmed |
 | original | `organized` | merging: the fuel is the lower of the two, the orders are cleared; splitting: both keep the fuel | gap: with `canMerge` |
 | original | `route` | no route: a fleet sent beyond its fuel isn't given orders (the classic skin plans a route itself only with modern conveniences) | gap: 5.0.5's map plans and gives routes when a fleet is dragged (coverage-505, `FUN_1008c5f0`) |
-| original | `outComputersPlay` | a computer out of the game gives no orders | gap: not stated for 5.0.5 (2.0 and 1.2: out computers keep playing, CONFIRMED there) |
+| original | `outComputersPlay` | a computer out of the game gives no orders | verified: the computer turn (`FUN_10081cc0`, called for each computer by `FUN_10072a10`) runs its steps only while the player's out flag (+0x34, set by `FUN_1007abb0`) is 0; an out player's fleets are dismantled in its next pass 1 anyway |
 | original | `scrapAt` | a fleet scrapped over someone else's star: the metal falls onto the planet | gap, patch only: the engine's `scrapFleet` is reached only by the 5.0.5.1 patch's global warming (`globalWarming`, a fleet scrapped for lack of funds). 5.0.5's own dismantling (`FUN_10074580`) gives such metal to the star's owner |
 | original | `scrapped` | no report when a fleet is scrapped | gap, patch only: as `scrapAt` (the patch's message is its own) |
 | original | `patchVersion` | the version's number + ".1": 5.0.5.1 | verified: docs/fixes.md ("5.0.5"); not play |
@@ -194,7 +188,7 @@ the Palm program is checked on its own:
 | palm | `canMerge` | any two fleets | gap: as 5.0.5 |
 | palm | `organized` | as 5.0.5 | gap: as 5.0.5 |
 | palm | `route` | no route | gap: as 5.0.5 |
-| palm | `outComputersPlay` | out computers give no orders | gap: as 5.0.5 |
+| palm | `outComputersPlay` | out computers give no orders | verified: the Palm's computer turn `FUN_00060178` runs only while the player's out flag (+0x36, set by `FUN_000585fc`) is 0, as 5.0.5's |
 | palm | `scrapAt` | onto the planet | gap, patch only: as 5.0.5 (the 1.0.4.1 patch takes 5.0.5's `globalWarming`) |
 | palm | `scrapped` | no report | gap, patch only: as 5.0.5 |
 | palm | `fixOptions` | no fixed choice | unused in effect: the Palm game's New Game window |
@@ -210,9 +204,8 @@ routine (dos-findings, "Read again with the names, and the same as Windows"):
 
 | Ruleset | Hook | Engine default | Status |
 |---|---|---|---|
-| mac20 | `departs` | as for 1.2 above | gap: as 2.0 (`MoveShips`, `CheckFleetDestination` @a23d2 are 1.2's and 2.0's) |
 | mac20 | `scrapAt` | the metal falls onto the planet | verified: as 2.0 (`ScrapFleetsAndTypes`, the turn being 1.2F's: dos-findings) |
-| mac20 | `shipsAdded` | nothing more (a full tank) | gap: as 2.0 |
+| mac20 | `shipsAdded` | nothing more (a full tank) | verified: Mac 2.0.1's `NewFleet` @110004 sets a new fleet's fuel used (+4) to 0, as 1.2's |
 | mac20 | `fixOptions` | no New Game choice is fixed | unused in effect: the Create Galaxy window (`CreateGalaxyDlg` @e03dc, 0 to 19 computers) |
 | mac20 | `checkEveryStep` | the winner on the last step | unused: one step a turn |
 | mac20 | `evacuate` | the engine's Evacuate | unused: no Evacuate (`evacuateCommand: false`, as 2.0) |
@@ -230,20 +223,39 @@ defaults are 4.0.5's, with the same status:
 
 | Ruleset | Hook | Engine default | Status |
 |---|---|---|---|
-| mac405 | `departs` | as for 1.2 above (the fuel taken on leaving) | gap: as 4.0.5 |
-| mac405 | `canMerge` | any two fleets may be put together | gap: as 4.0.5 |
 | mac405 | `fixOptions` | no New Game choice is fixed | unused in effect: the Mac's own New Game window |
 | mac405 | `queueMergeAny` | (ship queues) | unused: no ship queues |
 | mac405 | `queueSlots` | (ship queues) | unused: no ship queues |
 | mac405 | `yardRefund` | (ship queues) | unused: no ship queues |
 
+## Settled from the versions' code (October 2026)
+
+These hooks were engine defaults and are now each ruleset's own, from its version's code:
+
+- **`departs`** (1.2, 2.0, Mac 2.0.1, 3.0.1, 4.0.5, Mac 4.0.5): every one of these versions
+  spends a leg's fuel when the fleet **arrives**, not when it leaves. The route routine
+  keeps the leg's length in the fleet, and the turn the fleet reaches the star adds it to
+  the fuel used: 1.2 `MoveShips` @a20ee, Mac 2.0.1 `MoveShips` @a20e2, Windows 2.0
+  `FUN_1040_23ed` (with `FUN_1068_0a94`), 3.0.1 `MoveShips` @a26ac (with `GiveFleetPath`
+  @130dc0), Windows 4.0.5 `FUN_004357fc`, Mac 4.0.5 `MoveShips` @c272e. `rules-dos`
+  `departs20` gives back the fuel the engine takes on leaving and `legFuelArrives` takes
+  it on arrival (`f.legFuel`). Play doesn't change: nothing in these turns or computers
+  reads the fuel of a fleet in flight (they all look at fleets at a star), and a fleet
+  that arrives is refuelled after it; only the fuel a fleet in flight shows changes.
+- **`canMerge`** (3.0.1, 4.0.5, Mac 4.0.5): only fleets of the same design can be put
+  together. The fallback (any two fleets) had been marked verified for 3.0.1 from
+  301-findings' "Fleets can be grouped to move together", but nothing in 3.0.1 makes a
+  group: the group leader (fleet +0x1a) is written only by `NewFleet`, `MarkUsedFleets`
+  and `ReassignGroupLeader`; the Ships menu (MENU 132) has no group command; "Group
+  Current Fleet" / "Ungroup Current Fleet" (STR# 1010.13-14) and DITL 4060 ("Which fleet
+  would you like to group with your ^0?") are never loaded. 4.0.5 is the same (fleet
+  +0x1e written only by `FUN_00415db0` and `FUN_004160d6`; no group command in either
+  edition's Ships menu; "Group All" is the Organize window's button for one design's
+  piles). This changes play for a human: "Merge all fleets here" now puts together only
+  fleets of one design.
+
 ## Gaps to check, by version
 
-- **1.2**: when a fleet leaves and spends its fuel (`departs`); a new fleet's fuel (`shipsAdded`).
-- **2.0**: when a fleet spends its fuel (`departs`); a new fleet's fuel (`shipsAdded`).
-- **3.0.1**: the fuel is spent on arrival in 3.0.1, on leaving in the engine (`departs`); a new fleet's fuel (`shipsAdded`); a limit on ships bought at a colony in a turn (`yardRoom`).
-- **4.0.5**: when a fleet spends its fuel (`departs`); fleets of several designs (`canMerge`).
-- **5.0.5**: women computers' chance; design names; the first message; messages a turn for humans; grouping fleets and its fuel; routes planned on the map; out computers' orders; and, for the patch only, scrapping over another's star and its report.
-- **Palm OS 5**: 5.0.5's list, and whether the Palm program has 16 player slots and 5.0.5's computer names.
-- **Mac 2.0.1** and **Mac 4.0.5**: their versions' other editions' lists (2.0, 4.0.5).
-- **Every version but 2.0.1 and 4.0.5**: which random numbers name the computers (`computerIdentity`).
+- **5.0.5**: women computers' chance; the first naming of the computers (`computerIdentity`: `FUN_1006d0c0` only renames clashes); design names (read but not applied: `FUN_1007dcf0` starts at a random name, among the first 15 for set-up, computers and Radical designs and among all of them for the design window, and takes the next name round the list no design of yours has, as 4.0.5's `nameFor`; applying it would also change the Palm's, not checked); the first message; messages a turn for humans; grouping fleets and its fuel; routes planned on the map; and, for the patch only, scrapping over another's star and its report.
+- **Palm OS 5**: 5.0.5's list (but out computers, checked), and whether the Palm program has 16 player slots and 5.0.5's computer names.
+- **Mac 4.0.5**: none of its own left (4.0.5's `computerIdentity` is the Mac's own hook).

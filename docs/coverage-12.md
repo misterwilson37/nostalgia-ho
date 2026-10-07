@@ -336,7 +336,7 @@ stubs). Addresses are in that layout, as in `docs/12-findings.md`.
 | `BuildNewShips` @a1406 | the three-slot ship queues, part-payment | RULE, implemented | js/rules-dos.js shipyard (called from economy20) |
 | `PutNewShipAtStar` @a18b8 | a new ship joins an idle fleet of its design, else a new fleet | RULE, implemented | js/rules-dos.js fleetFor |
 | `SpendTechMoney` @a1a58 | research at 60-140 % | RULE, implemented | js/rules-dos.js research20 |
-| `MoveShips` @a20ee | fleet movement, arrival messages, routes checked | RULE, implemented | js/engine.js movement with js/rules-dos.js replan20, fleetArrives20 |
+| `MoveShips` @a20ee | fleet movement, arrival messages, routes checked; a leg's fuel (+0xe) added to the fuel used (+4) on arrival | RULE, implemented | js/engine.js movement with js/rules-dos.js replan20, fleetArrives20, departs20, legFuelArrives |
 | `CheckFleetDestination` @a23d2 | plan a route again from where the fleet is | RULE, implemented | js/rules-dos.js replan20 |
 | `RestoreStarsBars` @a24e2 | a finished part's share spread over the other bars | RULE, implemented | js/rules-dos.js restoreBars20 |
 | `CheckForSupernova` @a2640 | novas (only with style bit 0x10, never set in 1.2) | RULE, implemented | js/rules-12.js fixOptions (novas off) |

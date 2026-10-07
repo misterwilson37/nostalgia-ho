@@ -31,7 +31,7 @@ Every routine in SPACEHO.EXE, the Windows 95 program of Spaceward Ho! 4.0.5 (Del
 | `FUN_00413ba3` @413ba3 | `FollowPathDrag` @110dca | Map click and fleet dragging: picks a fleet, plans its route (FUN_004164b0) and gives it (FUN_0041726f), HYAHH | Interface | the remake's map drag; routes by rules route()/path405 |
 | `FUN_00415db0` @415db0 | `NewFleet` @f000c | NewFleet: a fleet record placed by class, new Biological fleets unfuelled, Colony Ships loaded | Rule, implemented | js/rules-405.js fleetList, shipsAdded |
 | `FUN_00416036` @416036 | `RemoveFleet` @f01e0 | DeleteFleet | Rule, implemented | engine |
-| `FUN_004160d6` @4160d6 | `ReassignGroupLeader` @f02bc | Clears the group number of fleets (fleet +0x1e) | Interface | fleet groups are not in the remake |
+| `FUN_004160d6` @4160d6 | `ReassignGroupLeader` @f02bc | Clears the group number of fleets (fleet +0x1e) | Rule, unreachable | nothing in 4.0.5 makes a group: fleet +0x1e is written only here and by `FUN_00415db0` (-1); js/rules-405.js canMerge: one design |
 | `FUN_00416187` @416187 | `CalcFleetsAtAllStars` @f031e | Fleet list housekeeping after buying (selection, counts) | Interface | display |
 | `FUN_004164b0` @4164b0 | `DeterminePath` @f044c | DeterminePath: 3.0.1's route search through your and your best buddies' colonies, whole distances | Rule, implemented | js/rules-405.js path405 |
 | `FUN_0041726f` @41726f | `GiveFleetPath` @f0aca | GiveFleetPath | Rule, implemented | js/rules-405.js givePath |
@@ -74,7 +74,7 @@ Every routine in SPACEHO.EXE, the Windows 95 program of Spaceward Ho! 4.0.5 (Del
 | `FUN_0043427a` @43427a | `SurrenderIfDesired` @c177a | SurrenderIfDesired | Rule, implemented | js/rules-405.js processSurrenders |
 | `FUN_00434534` @434534 | `ScrapFleetsAndTypes` @c1920 | ScrapFleetsAndTypes | Rule, implemented | js/rules-405.js scrapFleetsAndTypes |
 | `FUN_00434dad` @434dad | `SpendTechMoney` @c1d74 | SpendTechMoney (research, tech reports) | Rule, implemented | js/rules-405.js spendTechMoney, research |
-| `FUN_004357fc` @4357fc | `MoveShips` @c272e | MoveShips | Rule, implemented | js/rules-405.js moveShips, engine movement, rules-301 fleetArrives |
+| `FUN_004357fc` @4357fc | `MoveShips` @c272e | MoveShips; a leg's fuel (+0x14) added to the fuel used (+6) on arrival | Rule, implemented | js/rules-405.js moveShips, departs, engine movement, rules-301 fleetArrives |
 | `FUN_00435dc3` @435dc3 | `CheckFleetDestination` @c2a58 | CheckFleetDestination | Rule, implemented | js/rules-405.js replanFleet |
 | `FUN_004360af` @4360af | `RestoreStarsBars` @c2bec | RestoreStarsBars | Rule, implemented | js/rules-405.js restoreStarsBars |
 | `FUN_0043625c` @43625c | `ConformPlayerAlliances` @c2ce4 | ConformPlayerAlliances: pact and best-buddy news, Armageddon switch news | Rule, implemented | js/rules-405.js pactNews405 |

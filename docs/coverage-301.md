@@ -352,7 +352,7 @@ dragging a fleet): the remake has its own windows for them, and the rule behind 
 | `SurrenderIfDesired` @a1760 | a surrendering player gives up its colonies and marks its fleets for scrapping | RULE, implemented | js/rules-301.js processSurrenders |
 | `ScrapFleetsAndTypes` @a194e | marked fleets and designs scrapped (and every fleet of a player who is out); metal 3/4 to humans; the auto-scrap preference | RULE, implemented | js/rules-301.js scrapFleetsAndTypes (the preference is not done: interface) |
 | `SpendTechMoney` @a1ed2 | research: share20 of the Technology slot by research share, levels, head start, reports | RULE, implemented | js/rules-301.js spendTechMoney, research |
-| `MoveShips` @a26ac | satellites merged, routes checked, fleets moved, arrival and wormhole reports | RULE, implemented | js/rules-301.js moveShips, fleetArrives |
+| `MoveShips` @a26ac | satellites merged, routes checked, fleets moved, arrival and wormhole reports; a leg's fuel (+0x10) added to the fuel used (+2) on arrival | RULE, implemented | js/rules-301.js moveShips, fleetArrives, departs (rules-dos departs20) |
 | `CheckFleetDestination` @a2b8e | plan a route again from where the fleet is; stop it if none | RULE, implemented | js/rules-301.js replan |
 | `RestoreStarsBars` @a2e4c | a colony's bars scaled to 1,000; a finished part's share given to the other | RULE, implemented | js/rules-301.js restoreStarsBars |
 | `ConformPlayerAlliances` @a2f76 | alliance and Armageddon-switch news for each player | RULE, implemented | js/rules-301.js pactNews |
@@ -604,7 +604,7 @@ dragging a fleet): the remake has its own windows for them, and the rule behind 
 |---|---|---|---|
 | `NewFleet` @130004 | a fleet record, kept in class order; colony ships loaded | RULE, implemented | js/rules-301.js fleetList, fleetFor |
 | `RemoveFleet` @130230 | remove a fleet record | RULE, implemented | js/engine.js |
-| `ReassignGroupLeader` @130342 | a group's leader when its leader goes | RULE, implemented | js/engine.js (the remake's fleets stand for groups) |
+| `ReassignGroupLeader` @130342 | a group's leader when its leader goes | RULE, unreachable | nothing in 3.0.1 makes a group (js/rules-301.js canMerge: one design) |
 | `CalcFleetsAtAllStars` @1303e2 | the map's satellite counts and first fleet at each star | NOT A RULE | display |
 | `DeterminePath` @130686 | route through your colonies: depth first, at most 42/Range hops, under 3x direct, later ties win | RULE, implemented | js/rules-301.js path301 |
 | `GiveFleetPath` @130dc0 | store a route in a fleet (and its group): legs, turns | RULE, implemented | js/rules-301.js givePath, route |
