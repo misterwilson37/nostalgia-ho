@@ -693,7 +693,8 @@ code (`docs/fallbacks.md`); the last of them, in October 2026:
    **The Group Fleets window** (`LOrganizeFleetsDialog`): its rules for "Merge all
    fleets here" and splitting are done (`canMerge505`, `organized505`): all-Biological
    fleets mix only with each other; the fleet that takes ships keeps its orders and the
-   lower fuel. The window itself is under "Interface not done".
+   lower fuel. The window itself is now built too (`rs.organizeFleets: '505'`, js/skins/classic/ui.js
+   `openOrganize`), with a count field for part of a pile (5.0.5's Option-drag).
    **Routes planned on the map**: a dragged fleet gets DeterminePath's route
    (`FUN_1008c5f0` @1008ce2c, `FUN_1008d140`). Done (`rs.route`).
    **Scrapping over someone else's star, patch only**: nothing reaches the engine's
@@ -781,10 +782,9 @@ These are what 5.0.5's code does and what the remake now does; they look like sl
 
 ### Interface not done
 
-- **The Group Fleets window** (`LOrganizeFleetsDialog`, WIND 140: drag piles between
-  fleets, Group All, Split, the stance and late-arrival controls). Its rules are done
-  through "Merge all fleets here", Split and the fleet's stance controls; dragging part
-  of a pile from one fleet to another isn't. A Satellite pile can't be dragged in it.
+- ~~The Group Fleets window~~: built (October 2026), as 5.0.5's: drag (or tap) piles between
+  fleets with a count for part of a pile, Group All, Split, the stance and late-arrival
+  controls (`openOrganize`, `rs.organizeFleets: '505'`).
 - **The one-time alert** when a dragged fleet can't reach the star ("Sorry, but that
   fleet doesn't have enough fuel ...", STR# 6004.30, shown once, prefs +0x290 bit 1):
   the remake shows its own note each time.
