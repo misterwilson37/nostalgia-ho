@@ -264,6 +264,16 @@ const rs = Object.assign(base, {
   // at "No" each time the window opens (LIKELY: nothing sets its value). The
   // purchase itself is 5.0.5's (0x1000375b0 = FUN_1007e4a0).
   allowDebt: { label: 'Allow Debt', words: ['No', 'Yes'], on: false },
+  // CONFIRMED (OrganizeFleetsLayer, 0x1000bfe20-0x1000c2f14;
+  // OrganizerFleetFleetsContainer, 0x1000a5328-0x1000a6018): the Organize
+  // Fleets window, opened by a double tap on the fleet list: tap a pile, then
+  // the fleet to take it (the whole pile, move:from:to: with count -1);
+  // Scrap, Group, Split (half the pile), New Fleet; the arrows page the
+  // fleets four at a time (moveContainer:). Its rules are 5.0.5's Group
+  // Fleets' (canMerge505, organized505; the move leaves a design new to the
+  // fleet with whatever stance byte it had, 5.0.5 copies it: the remake
+  // copies it). js/skins/classic/ui.js openOrganize.
+  organizeFleets: 'ios',
   // the auto play window (above)
   autoPlayWindow: 'ios', autoPlayRange: { aggr: [0, 100], where: 'autoplay' }, autoPlayDefaults: AUTO_DEFAULTS,
   // CONFIRMED (the calls of the report routine, 0x10003b028 and 0x10003af9c:

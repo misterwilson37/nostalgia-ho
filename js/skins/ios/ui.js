@@ -36,17 +36,18 @@ for (let n = 0; n < 16; n++) for (const f of [0, 1]) images['bad' + n + '_' + f]
 const DOT_SET = ['self', 'self_unfueld', 'self_old', 'self_old', 'others'];
 for (let set = 0; set < 5; set++) for (let t = 0; t < 7; t++) for (let b = 0; b < 4; b++) images[`dot${set}_${t}_${b}`] = `fleet_dots_${DOT_SET[set]}_${t}_${b}`;
 
-// The planet (-[PlanetNode update:temp:metal:] 0x100090e58): one of seven
+// The planet (-[PlanetNode update:temp:metal:] 0x100090e58, read in the
+// disassembly for the format strings' arguments): "planet_%d%@", one of seven
 // planets by its gravity against your home's (the 5.0.5 sizes: 252, 201,
-// 126, 76, 51, 39 per cent), "_mined" below 100 metal; over a hot one
-// (720 + its temperature less your home's, in tenths, over 770) the hot cover
-// at min(100, (T - 770) / 30) x 1.5 / 255 opacity; over a cold one (under
-// 650) an ice cover; with 100 metal or more, boulders. Which ice cover and
-// which boulders the app picks wasn't read (the format strings' arguments):
-// here the colder, the bigger the caps (ice_cover0-4 by (650 - T) / 150),
-// and boulder_01-05 by 5.0.5's metal steps (1,000, 2,500, 5,000, 10,000).
-// Each cover is cut to the planet's shape. Drawn at 120 pixels (the 240
-// pixel Retina art at half size).
+// 126, 76, 51, 39 per cent), with "_mined" below 100 metal. T is 720 + its
+// temperature less your home's, in tenths (StarNode updateFor:withStar:
+// withGame: 0x10001af5c). Over 770 the hot cover at min(100, (T - 770) / 30)
+// x 1.5 / 255 opacity; under 650 "ice_cover%d" with T / 130, held to 0-4
+// (so the coldest planets have ice_cover0); with 100 metal or more
+// "boulder_0%d", 5 less one for each of 1,000, 2,500, 5,000 and 10,000
+// reached (100-999 boulder_05, 10,000 or more boulder_01). Each cover is cut
+// to the planet's shape (the app scales them to the planet's size). Drawn at
+// 120 pixels (the 240 pixel Retina art at half size).
 const SIZE = 120;
 const cache = {};
 function row(p, g) {
@@ -57,8 +58,8 @@ function planetPic(IMG, p, src) {
   const r = row(p, src.g), mined = src.metal < 100;
   const T = Math.round(src.t * 10) - Math.round(p.homeT * 10) + 720;
   const hot = T > 770 ? Math.min(100, trunc((T - 770) / 30)) * 1.5 / 255 : 0;
-  const ice = T < 650 ? Math.min(4, trunc((650 - T) / 150)) : -1;
-  const rock = mined ? 0 : 1 + [1000, 2500, 5000, 10000].filter(v => src.metal >= v).length;
+  const ice = T < 650 ? clamp(trunc(T / 130), 0, 4) : -1;
+  const rock = mined ? 0 : 5 - [1000, 2500, 5000, 10000].filter(v => src.metal >= v).length;
   const key = [r, mined, Math.round(hot * 100), ice, rock].join(':');
   if (cache[key]) return cache[key];
   const base = IMG[P + `planet_${r}${mined ? '_mined' : ''}`];
@@ -142,21 +143,27 @@ window.HOTHEME = {
   // its sounds are 5.0.5's recordings as MP3s: SOUNDS.ios in js/skins.js
   images,
   select: P + 'ring', // the green ring round the selected star
+  fleetPath: 'ios', // a dragged fleet's route line (js/skins/classic/ui.js iosFleetPath)
   satRing: 'rgba(200,215,235,0.85)', // the satellites' grey oval (fleet_sat_oval), as a ring
   battlePlanet: P + 'ship-planet',
   battleBg: null,
   endTurnKey: null,
-  // Stars (StarNode): an unexplored star is the white ball with a question
-  // mark, one your fleet is on its way to has the exclamation mark (the help's
-  // "sending scouts" picture), one where only a battle was seen the X (a
-  // guess); a star turning red is supernova_going1-3, the explosion a frame
-  // of the supernova, the wreck supernovaed. Planets: planetPic above.
-  starLook(look, { p, s, k, IMG }) {
+  // Stars (-[StarNode updateFor:withStar:withGame:] 0x10001af5c): an
+  // unexplored star is planet-question, or planet-x when no owner is known
+  // and a battle was seen there, or planet-exclamation when it is the end of
+  // one of your fleets' routes (the last star of its path); a star turning
+  // red (its nova count, star +0x14, not 0) is supernova_going1 under 71,
+  // going2 under 91, else going3; a star gone supernova shows supernovaed
+  // (-[StarNode supernova:] 0x10001ac78, after the explosion's frames, which
+  // the remake shows as one frame the turn it happens). Planets: planetPic.
+  starLook(look, { G, p, s, k, IMG }) {
     const b = look.base, B = (n) => ({ base: P + n, hat: look.hat });
-    if (b === 'unknown') return B('planet-question');
-    if (b === 'soon') return B('planet-exclamation');
+    if (b === 'unknown' || b === 'soon') {
+      const end = (f) => f.path && f.path.length ? f.path[f.path.length - 1] : f.dest != null ? f.dest : f.to;
+      return B(G.fleets.some(f => f.owner === p.id && end(f) === s.id) ? 'planet-exclamation' : 'planet-question');
+    }
     if (b === 'battle') return B('planet-x');
-    if (/^nova\d$/.test(b)) return B('supernova_going' + Math.min(3, 1 + trunc(+b.slice(4) / 2)));
+    if (/^nova\d$/.test(b)) { const n = ((s.owner === p.id ? s : k) || {}).nova || 0; return B(n < 71 ? 'supernova_going1' : n < 91 ? 'supernova_going2' : 'supernova_going3'); }
     if (b === 'nova12') return B('supernova10');
     if (b === 'nova18') return B('supernovaed');
     const src = look.hat && s.owner === p.id ? s : k;

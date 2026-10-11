@@ -530,8 +530,11 @@ function draw() {
     const w = 14, box = drawMarkers(f, x - w / 2, y - w / 2, w, 1);
     UI.dots.push({ x: box.x, y: y - w / 2, w: box.w, h: w, f: f.id, transit: true });
   }
-  // dragging
-  if (UI.drag && UI.drag.fleet != null && UI.drag.moved) {
+  // dragging (a skin with T.fleetPath 'ios' draws iOS's route line instead,
+  // over a star, and for a finger over empty space nothing: iosFleetPath)
+  const iosPath = T.fleetPath === 'ios' && UI.drag && UI.drag.fleet != null && UI.drag.moved && (UI.hover != null || UI.drag.touch);
+  if (iosPath) iosFleetPath(G.fleets.find(f => f.id === UI.drag.fleet), UI.hover);
+  else if (UI.drag && UI.drag.fleet != null && UI.drag.moved) {
     const f = G.fleets.find(f => f.id === UI.drag.fleet);
     const a = G.stars[f.star];
     const tgt = UI.hover;
@@ -567,6 +570,52 @@ function draw() {
     }
     cx.restore();
   }
+}
+// iOS's line while a fleet is dragged (-[FleetMovementMenu updateFleetPath:]
+// 0x1000c90d0, -[MapLayer updateFleetPath:fleet:] 0x10000f190, drawFleetPaths
+// 0x10000e93c): the route finder's route (0x100036674, DeterminePath, flag 7:
+// the ruleset's rs.route, else straight there within the fuel, else the
+// remake's own route with modern conveniences) to the star under the finger,
+// leg by leg, 2 points wide, white when the route can be flown, else one red
+// leg straight there (0xff0000ff: "the red fleet line"); each leg labelled
+// with its length in light years (addDistanceLabelWithFrom:withTo:
+// withDistance: 0x10000f538: "%d" in white on the dark "supernovaed" disc at
+// 220/255, to the side of the leg's middle). Over the fleet's own star or
+// empty space there is none (the fleet's orders are drawn). Two remake
+// choices: the route finder's "under 3 light years" (no line on iOS) is
+// drawn as one white leg, and the labels keep one size whatever the zoom.
+function iosFleetPath(f, tgt) {
+  UI.lastPath = null;
+  if (!f || tgt == null || tgt === f.star || f.star == null) return;
+  const rs = HO.rules(G);
+  let path = null, ok = true;
+  if (HO.starDist(G, f.star, tgt) <= f.fuel + 1e-9) path = [tgt];
+  else {
+    path = rs.route ? rs.route(G, f, tgt) : modern() && HO.feature(G, 'waypoints') && !f.sat ? findRoute(f, tgt) : null;
+    if (!path || !path.length) { path = [tgt]; ok = false; }
+  }
+  cx.save();
+  cx.lineWidth = 2; cx.strokeStyle = ok ? '#ffffff' : '#ff0000';
+  const legs = [];
+  let a = G.stars[f.star];
+  for (const sid of path) {
+    const b = G.stars[sid];
+    cx.beginPath(); cx.moveTo(sx(a.x), sy(a.y)); cx.lineTo(sx(b.x), sy(b.y)); cx.stroke();
+    legs.push([a, b]); a = b;
+  }
+  const disc = IMG[(T.prefix || '') + 'supernovaed'];
+  cx.font = '14px Arial, Helvetica, sans-serif'; cx.textAlign = 'center'; cx.textBaseline = 'middle';
+  for (const [p, q] of legs) {
+    const x1 = sx(p.x), y1 = sy(p.y), x2 = sx(q.x), y2 = sy(q.y);
+    const lx = (x1 + x2) / 2 + ((x2 - x1) * (y2 - y1) <= 0 ? 10 : -22), ly = (y1 + y2) / 2 + 10;
+    cx.globalAlpha = 220 / 255;
+    if (disc && disc.width) cx.drawImage(disc, lx + 2 - 13, ly + 2 - 13, 26, 26);
+    else { cx.fillStyle = '#000'; cx.beginPath(); cx.arc(lx + 2, ly + 2, 12, 0, Math.PI * 2); cx.fill(); }
+    cx.globalAlpha = 1; cx.fillStyle = '#fff';
+    cx.fillText(String(Math.round(HO.starDist(G, p.id, q.id))), lx, ly);
+  }
+  cx.restore();
+  UI.lastPath = { fleet: f.id, to: tgt, stops: path.slice(), ok }; // for the test tools (HOVIEW)
 }
 function visibleTo(sid) {
   if (G.stars[sid].owner === ME) return true;
@@ -730,16 +779,33 @@ const TOUCH = {
   FAR: 5,           // a step from the selected star longer than this is a drag ("moved far", StarNode); here also the whole way
   SLIDE: 30,        // a list follows the finger once it has moved this far (CCMenuAdvanced minimumTouchLengthToSlide)
   HOLD: 500,        // the satellite's long hold, and the selected star's single tap waits this long to deselect (ms)
-  DOUBLE: 400, DOUBLE_AT: 30, // two taps this quick and this close are a double tap (iOS's tapCount: the remake's guess)
+  DOUBLE: 400, DOUBLE_AT: 30, // two taps this quick and this close are a double tap (iOS's tapCount is UIKit's own, not the game's: the remake's choice)
   KEEP: 6, RECENT: 200, THROW: 0.5, THROW_MS: 3000, // the throw (InertialScroller): last 6 touches, those of the last 0.2 s, speed x 0.5, over 3 s
-  PICK: Math.sqrt(2200), // a tap picks the nearest star within this (pickStar: squared distance <= scale x 2,200)
+  PICK: 2200, PICK_MAX: 32768, // a tap picks the nearest star with squared distance <= planetScale x 2,200 and < 32,768 (pickStar:, map units)
 };
 // the iOS fuel alert (Alert String 30), once (the app state's bit at +0x298)
 const FUEL_ALERT = 'Sorry, but that fleet doesn’t have enough fuel to reach the selected destination. You can tell this because of the red fleet line.';
 // map scale 1.0 is 40 points to a galaxy unit (the map's content is the
 // galaxy's extent x 40 points); a phone zooms to 1.5, a tablet to 2.0 (the
 // iPad flag), and out only to the scale that shows the whole galaxy
+// iOS's iPad flag is the device's idiom (+[GraphicDefines setup]:
+// userInterfaceIdiom == pad); a browser can't ask, so a screen whose short
+// side is 600 points or more counts as a tablet (every iPad has 768 or more,
+// every iPhone 430 or less: the remake's choice of line between them)
 const isTablet = () => Math.min(window.innerWidth, window.innerHeight) >= 600;
+// The planets' scale (-[MapLayer setScale:]): zoomed in past 1.0 (iPhone) or
+// 1.7 (iPad), or 0.1 past the smallest scale if that is larger, a planet is
+// drawn 2.0 (iPhone) or 3.0 (iPad) times its map size whatever the zoom;
+// below that, from 0.2 (0.6) at the smallest scale up to it, in a line. The
+// map's scale 1.0 is 40 points to a galaxy unit (UI.view.s / 40); a
+// planet's scale is this over the map's. What a tap picks and the selected
+// star's square grow and shrink with it.
+function planetTarget() {
+  const pad = isTablet(), s = UI.view.s / 40, lo = Math.min(fitScale(), UI.view.s) / 40;
+  let thr = pad ? 1.7 : 1.0;
+  if (lo >= thr) thr = lo + 0.1;
+  return s >= thr ? (pad ? 3 : 2) : (pad ? 0.6 : 0.2) + (pad ? 2.4 : 1.8) / (thr - lo) * (s - lo);
+}
 const fitScale = () => G && mapW ? Math.min((mapW - 60) / G.W, (mapH - 90) / G.H) : UI.view.s;
 const zoomRange = () => { const lo = Math.min(fitScale(), UI.view.s), hi = Math.max(40 * (isTablet() ? 2 : 1.5), lo); return [lo, hi]; };
 // no rubber band: the galaxy (with the fit's margin) never leaves the map:
@@ -750,10 +816,13 @@ function clampView() {
   v.ox = ax(v.ox - 30, G.W * v.s + 60, mapW) + 30;
   v.oy = ax(v.oy - 30, G.H * v.s + 60, mapH) + 30;
 }
-// the star a tap picks: the nearest within TOUCH.PICK at map scale 1.0 (never
-// under 20 points), not one in its supernova
+// the star a tap picks (-[MapLayer pickStar:]): the nearest whose squared
+// distance in map units (40 to a galaxy unit at scale 1.0) is at most the
+// planets' scale x 2,200 and under 32,768, not one gone supernova; on the
+// screen that is sqrt(2,200 x planetTarget() x map scale) points
 function pickStar(px, py) {
-  const r = Math.max(20, TOUCH.PICK * UI.view.s / 40);
+  const k = UI.view.s / 40, t = planetTarget();
+  const r = Math.min(Math.sqrt(TOUCH.PICK * t / k), Math.sqrt(TOUCH.PICK_MAX)) * k;
   let best = null, bd = r * r;
   for (const s of G.stars) {
     const b = ourStarLook(s.id).base; if (b === 'nova12' || b === 'nova18') continue;
@@ -762,14 +831,15 @@ function pickStar(px, py) {
   }
   return best;
 }
-// only the selected star takes touches of its own: an 80 x 80 point square
-// about it (StarNode ourTouch:, -40 to +40) at map scale 1.0, scaled with the
-// map (at least 24 points across); where the galaxy is crowded, a touch
-// nearer another star is the map's (the remake's choice: a far-out map
-// would otherwise hide the selected star's neighbours under its square)
+// only the selected star takes touches of its own: an 80 x 80 square about
+// it (StarNode ourTouch:, -40 to +40 in the star's own units, which the
+// planets' scale sizes), so 40 x planetTarget() points each way; where the
+// galaxy is crowded, a touch nearer another star is the map's (the remake's
+// choice: a far-out map would otherwise hide the selected star's
+// neighbours under its square)
 function onSelected(px, py) {
   if (!G || UI.sel == null || !G.stars[UI.sel]) return false;
-  const s = G.stars[UI.sel], h = Math.max(12, 40 * Math.min(2, UI.view.s / 40));
+  const s = G.stars[UI.sel], h = 40 * planetTarget();
   if (Math.abs(sx(s.x) - px) > h || Math.abs(sy(s.y) - py) > h) return false;
   const n = pickStar(px, py);
   return n == null || n === UI.sel;
@@ -842,6 +912,7 @@ const Touch = {
     const x = e.offsetX, y = e.offsetY, mode = this.mode;
     this.pts.delete(e.pointerId);
     if (mode === 'pinch') { // the finger left goes on panning, never a tap
+      this.lastTap = null;
       if (this.pts.size === 1) { const r = [...this.pts.values()][0]; this.mode = 'pan'; this.dist = Infinity; this.last = { x: r.x, y: r.y }; this.hist = [{ x: r.x, y: r.y, t: performance.now() }]; }
       else if (!this.pts.size) this.mode = null;
       return;
@@ -850,10 +921,10 @@ const Touch = {
     this.mode = null;
     if (mode === 'pan') {
       if (this.dist < TOUCH.TAP) this.mapTap(x, y, tapCount(x, y, 'map'));
-      else this.throw();
+      else { this.lastTap = null; this.throw(); } // a touch that moved breaks a run of taps (UIKit's tapCount)
     } else if (mode === 'star') {
       if (UI.ruler) { UI.ruler = null; draw(); }
-      if (this.far) return;
+      if (this.far) { this.lastTap = null; return; }
       if (tapCount(x, y, 'map') === 2) { clearTimeout(this.deselect); starDoubleTap(UI.sel); return; }
       const sid = UI.sel; // a single tap deselects the star after 0.5 s, unless a second tap comes first
       this.deselect = setTimeout(guard(() => { if (G && UI.sel === sid) { UI.sel = null; UI.selFleet = null; renderPanel(); draw(); } }), TOUCH.HOLD);
@@ -929,7 +1000,7 @@ document.addEventListener('pointermove', guard((e) => {
   if (t.mode === 'slide') {
     t.scroller.scrollTop = t.st - (e.clientY - t.y0);
     if (t.scroller.scrollWidth > t.scroller.clientWidth) t.scroller.scrollLeft = t.sl - (e.clientX - t.x0);
-    t.hist.push({ y: e.clientY, t: performance.now() }); if (t.hist.length > TOUCH.KEEP) t.hist.shift();
+    t.hist.push({ x: e.clientX, y: e.clientY, t: performance.now() }); if (t.hist.length > TOUCH.KEEP) t.hist.shift();
   }
 }));
 const listEnd = guard((e) => {
@@ -938,12 +1009,16 @@ const listEnd = guard((e) => {
   List.t = null; clearTimeout(t.hold);
   if (t.mode === 'drag') { List.drop(e.type === 'pointerup' ? e : null); List.noClick(); return; }
   if (t.mode === 'held') { List.noClick(); return; }
-  if (t.mode === 'slide') { List.noClick(); if (e.type === 'pointerup') List.spin(t); return; }
-  // a double tap on the fleets at a star: that fleet's Split (Organize Fleets)
+  if (t.mode === 'slide') { List.noClick(); if (e.type === 'pointerup') { if (t.fleets) List.fling(t); else List.spin(t); } return; }
+  // a double tap on the fleets at a star (tapCount 2 in FleetMovementMenu):
+  // Organize Fleets (+[OrganizeFleetsLayer dialog]) with a ruleset that has
+  // it, else that fleet's Split
   if (e.type === 'pointerup' && t.fleets && tapCount(e.clientX, e.clientY, 'fleets') === 2) {
     const at = document.elementFromPoint(e.clientX, e.clientY), row = at && at.closest('.frow');
     const f = row && G && G.fleets.find(x => x.id === +row.dataset.fleet);
-    if (f && f.owner === ME && !f.sat && !G.over && !row.dataset.inbound && HO.fleetCount(f) > 1) { List.noClick(); openSplit(f); }
+    const sid = f ? f.star : UI.sel;
+    if (organizeStyle() && sid != null && !(row && row.dataset.inbound)) { List.noClick(); openOrganize(sid); }
+    else if (f && f.owner === ME && !f.sat && !G.over && !row.dataset.inbound && HO.fleetCount(f) > 1) { List.noClick(); openSplit(f); }
   }
 });
 document.addEventListener('pointerup', listEnd);
@@ -960,7 +1035,26 @@ Object.assign(List, {
     const sc = t.scroller, tick = () => { sc.scrollTop -= v; v *= 0.95; if (Math.abs(v) > 0.3) this.spinT = setTimeout(tick, 20); };
     this.spinT = setTimeout(tick, 20);
   },
-  stopSpin() { clearTimeout(this.spinT); },
+  // the fleet list's own throw (FleetMovementMenu is a CCInertialMenu, whose
+  // InertialScroller is the map's: the touches of the last 0.2 s, if they
+  // cover more than 5 points, carry the list on by half their speed, at most
+  // half its length, easing out over 3 s; a new touch stops it)
+  fling(t) {
+    const now = performance.now(), h = t.hist.filter(p => now - p.t <= TOUCH.RECENT);
+    if (h.length < 2) return;
+    let path = 0; for (let i = 1; i < h.length; i++) path += Math.hypot(h[i].x - h[i - 1].x, h[i].y - h[i - 1].y);
+    if (path <= 5) return;
+    const a = h[0], b = h[h.length - 1], dt = (b.t - a.t) / 1000, k = dt > 0 ? TOUCH.THROW / dt : 5;
+    const sc = t.scroller, half = sc.scrollHeight / 2, my = Math.max(-half, Math.min(half, -(b.y - a.y) * k));
+    const y0 = sc.scrollTop, t0 = performance.now();
+    const step = () => {
+      const u = Math.min(1, (performance.now() - t0) / TOUCH.THROW_MS), f = u >= 1 ? 1 : 1 - Math.pow(2, -10 * u); // CCEaseExponentialOut
+      sc.scrollTop = y0 + my * f;
+      this.flingT = u < 1 ? requestAnimationFrame(step) : 0;
+    };
+    this.flingT = requestAnimationFrame(step);
+  },
+  stopSpin() { clearTimeout(this.spinT); if (this.flingT) cancelAnimationFrame(this.flingT); this.flingT = 0; },
   // picked up (-[FleetMovementMenu ccTouchMoved:withEvent:]): the ship
   // follows the finger, drawn above it so the finger doesn't hide it
   pickUp(t, x, y) {
@@ -971,6 +1065,11 @@ Object.assign(List, {
     document.body.append(t.sprite);
     UI.selFleet = t.f.id; UI.sel = t.f.star;
     UI.drag = { fleet: t.f.id, x: 0, y: 0, moved: true, touch: true };
+    // fleetDraggingChanged: 1: the planet's buttons hide (PlanetButtons
+    // fleetDragging: 0x1000c3e10), and on an iPad the star's information
+    // (StarInfoLayer fleetDragging: 0x10001a000, only with the iPad flag)
+    document.documentElement.classList.add('fleetdrag');
+    document.documentElement.classList.toggle('fleetdrag-pad', isTablet());
     this.dragTo(x, y);
   },
   // the route to the star under the finger, with the "Next Message" sound for
@@ -991,6 +1090,7 @@ Object.assign(List, {
   drop(e) {
     const t = this.t || {}, f = UI.drag && G && G.fleets.find(x => x.id === UI.drag.fleet), tgt = e ? UI.hover : null;
     document.querySelectorAll('.touchdrag').forEach(n => n.remove());
+    document.documentElement.classList.remove('fleetdrag', 'fleetdrag-pad'); // fleetDraggingChanged: 0
     UI.drag = null; UI.hover = null;
     if (f && tgt != null) {
       if (f.scrap301 && marksScrap() && tgt !== f.star) { toast(scrapWords('heap')); HO.cancelMove(G, f); Sound.play(4000); }
@@ -1241,7 +1341,9 @@ function planetBox(sid) {
       // merge each fleet into the first one it may join (one ship type per fleet under the DOS rules)
       for (let i = 0; i < mine.length; i++) for (let j = i + 1; j < mine.length; j++)
         if (G.fleets.includes(mine[i]) && G.fleets.includes(mine[j]) && HO.canMerge(G, mine[i], mine[j])) HO.mergeFleets(G, mine[i], mine[j]);
-      UI.selFleet = mine[0].id; renderPanel(); draw(); save(); } }, HO.feature(G, 'singleTypeFleets') ? 'Merge fleets of the same type' : 'Merge all fleets here')));
+      UI.selFleet = mine[0].id; renderPanel(); draw(); save(); } }, HO.feature(G, 'singleTypeFleets') ? 'Merge fleets of the same type' : 'Merge all fleets here'),
+      organizeStyle() ? el('button', { class: 'quiet', onclick: () => openOrganize(sid) }, organizeStyle() === 'ios' ? 'Organize fleets…' : 'Group fleets…') : null));
+    else if (mine.length && organizeStyle()) box.append(el('div', { class: 'btns' }, el('button', { class: 'quiet', onclick: () => openOrganize(sid) }, organizeStyle() === 'ios' ? 'Organize fleets…' : 'Group fleets…')));
   }
   const bs = lastBattles(sid);
   if (bs.length) box.append(el('div', { class: 'btns' }, ...bs.map(b => el('button', { class: 'quiet', onclick: () => openBattle(b.id) }, `Review ${battleName(b)}`))));
@@ -1747,7 +1849,7 @@ const BUG_REPO = 'https://github.com/misterwilson37/nostalgia-ho';
 window.HOBUGS = window.HOBUGS || [];
 // what the map shows, for the test tools (read only): its scale and offset,
 // the selected star and fleet, a finger's ruler and drag
-window.HOVIEW = () => ({ view: Object.assign({}, UI.view), sel: UI.sel, selFleet: UI.selFleet, ruler: UI.ruler && Object.assign({}, UI.ruler), drag: !!UI.drag, logBars: UI.logBars, mapW, mapH, fit: fitScale(), zoom: zoomRange(), modal: !!UI.modal });
+window.HOVIEW = () => ({ view: Object.assign({}, UI.view), sel: UI.sel, selFleet: UI.selFleet, ruler: UI.ruler && Object.assign({}, UI.ruler), drag: !!UI.drag, path: UI.drag && UI.lastPath ? Object.assign({}, UI.lastPath) : null, logBars: UI.logBars, mapW, mapH, fit: fitScale(), zoom: zoomRange(), modal: !!UI.modal });
 function guard(fn, where) {
   if (typeof fn !== 'function' || fn.hoGuarded) return fn;
   const g = function (...a) { try { return fn.apply(this, a); } catch (e) { showBug(e, where); } };
@@ -1993,6 +2095,193 @@ function openSplit(f) {
   }
   body.append(el('div', { class: 'btns right' }, el('button', { onclick: () => { const nf = HO.splitFleet(G, f, take); if (nf) UI.selFleet = nf.id; closeModal(); renderPanel(); draw(); save(); } }, 'Split fleet')));
   modal('Split fleet', body, { cls: 'small' });
+}
+
+// ----- Organize Fleets (iOS OrganizeFleetsLayer; 5.0.5's Group Fleets) -----
+// A ruleset with rs.organizeFleets has the window ('ios': iOS 1.2.9's
+// Organize Fleets; '505': 5.0.5's Group Fleets, LOrganizeFleetsDialog); the
+// others keep Split… and "Merge all fleets here". What it does is the
+// ruleset's (the engine's splitFleet and mergeFleets with rs.organized and
+// rs.canMerge); only the controls differ. iOS (docs/ios-findings.md,
+// "Organize Fleets"): your fleets at the star that hold ships, Satellites
+// apart (updateData: 0x1000c0f38), side by side in columns, four showing,
+// the arrows paging one column (moveContainer: 0x1000c0e00); in each the
+// fleet's name ("Scrapped" when marked) and fuel, then a picture and count
+// for each pile (one design's ships). Tap a pile (shipSelected:
+// 0x1000c2714), then a fleet outlined as able to take it
+// (OrganizerFleetFleetsContainer startWith:ship:block: 0x1000a5478: not an
+// all-Biological fleet, unless the pile is Biological; an empty one takes
+// anything): the whole pile goes there (move:from:to: 0x1000c27e0, count -1).
+// The selected pile's Delayed Arrival and Attitude (0x1000c0a98,
+// 0x1000c0b5c: Normal, Aggressive, Defensive in turn); Scrap (0x1000c2144:
+// then tap a fleet to mark it, scrapFleet: 0x1000c17e0), Group (0x1000c1a84:
+// every fleet into the selected pile's or the first, Biologicals apart),
+// Split (0x1000c1e4c: half the selected pile, rounded down, to a new fleet;
+// a pile of one: each other pile to a fleet of its own), New Fleet
+// (0x1000c232c: the selected pile to a new fleet, else an empty column);
+// pinching the window out splits, in groups (pinching: 0x1000c2ae0). 5.0.5's
+// window (FUN_100a8400, FUN_100a8780, FUN_100aa240, FUN_100aa730) moves
+// piles the same way with Group All and Split, and lets you move part of a
+// pile (Option-drag asks how many, Option-Shift moves one: here a count).
+function organizeStyle() { return !!G && !G.over && HO.rules(G).organizeFleets; }
+const pileStance = (f, did) => f.dstance && f.dstance[did] != null ? f.dstance[did] : (f.delayed ? 1 : 0) | (f.stance === 'defensive' ? 2 : f.stance === 'offensive' ? 4 : 0);
+function openOrganize(sid) {
+  const style = organizeStyle();
+  if (!style || sid == null) return;
+  const ios = style === 'ios';
+  const W = { sel: null, first: 0, empties: [], scrapping: false, n: 0, pressed: null };
+  let nextEmpty = 1;
+  const allBio = (f) => { const ds = HO.fleetDesigns(G, f); return ds.length > 0 && ds.every(d => d.type === 'bio'); };
+  const fleets = () => fleetOrder(G.fleets.filter(f => f.owner === ME && f.star === sid && f.to == null && !f.sat && HO.fleetCount(f) > 0));
+  const cols = () => [...fleets().map(f => ({ key: 'f' + f.id, f })), ...W.empties.map(e => ({ key: 'e' + e, empty: e }))];
+  const selFleet = () => W.sel && G.fleets.find(f => f.id === W.sel.fid && f.ships[W.sel.did] > 0);
+  const canTake = (c) => {
+    const f = selFleet(); if (!f) return false;
+    if (c.empty) return true;
+    if (c.f === f) return false;
+    return (HO.getDesign(G, f.owner, W.sel.did).type === 'bio') === allBio(c.f);
+  };
+  const done = (keyToShow) => {
+    W.sel = null; W.scrapping = false;
+    if (keyToShow) { const i = cols().findIndex(c => c.key === keyToShow); if (i >= 0 && (i < W.first || i >= W.first + 4)) W.first = Math.max(0, i - 3); }
+    save(); renderPanel(); draw(); render();
+  };
+  // a pile into a fleet (or an empty column): the engine's split and merge,
+  // so the ruleset's rules apply (5.0.5: the fleet that takes it keeps its
+  // orders, the larger fuel used, "bought this turn" only if both, the
+  // colonists with the Colony Ships)
+  const move = (c, n) => {
+    const f = selFleet(); if (!f || !canTake(c)) return;
+    n = Math.max(1, Math.min(f.ships[W.sel.did], n || f.ships[W.sel.did]));
+    const nf = HO.splitFleet(G, f, { [W.sel.did]: n });
+    if (!nf) return;
+    if (c.f) HO.mergeFleets(G, c.f, nf);
+    else W.empties = W.empties.filter(e => e !== c.empty);
+    done(c.f ? 'f' + c.f.id : 'f' + nf.id);
+  };
+  const group = () => {
+    const fl = fleets(), pick = selFleet();
+    for (const bio of [false, true]) {
+      const same = fl.filter(f => allBio(f) === bio);
+      const tgt = pick && allBio(pick) === bio ? pick : same[0];
+      for (const f of same) if (f !== tgt && G.fleets.includes(f) && G.fleets.includes(tgt) && HO.canMerge(G, tgt, f)) HO.mergeFleets(G, tgt, f);
+    }
+    W.empties = [];
+    done();
+  };
+  const split = () => {
+    const f = selFleet(); if (!f) return;
+    const n = f.ships[W.sel.did];
+    let nf = null;
+    if (n > 1) nf = HO.splitFleet(G, f, { [W.sel.did]: n >> 1 });
+    else for (const k of Object.keys(f.ships).filter(k => f.ships[k] > 0).slice(1)) nf = HO.splitFleet(G, f, { [k]: f.ships[k] }) || nf;
+    done(nf && 'f' + nf.id);
+  };
+  const newFleet = () => {
+    const f = selFleet();
+    if (f) { const nf = HO.splitFleet(G, f, { [W.sel.did]: f.ships[W.sel.did] }); done(nf && 'f' + nf.id); return; }
+    const e = nextEmpty++; W.empties.push(e); done('e' + e);
+  };
+  const scrapAt = (c) => {
+    if (!c.f) return;
+    const was = !!c.f.scrap301;
+    HO.rules(G).flagScrap(G, c.f, 'command');
+    if (!was) Sound.play(7003);
+    if (!G.fleets.includes(c.f)) toast('Purchase undone.');
+    done();
+  };
+  const setStance = (bits) => {
+    const f = selFleet(); if (!f) return;
+    f.dstance = Object.assign({}, f.dstance, { [W.sel.did]: bits });
+    save(); render();
+  };
+  const colW = () => isTablet() ? 160 : 84;
+  const body = el('div', { class: 'organize' + (ios ? ' ios' : ' m505') });
+  const tapCol = (c) => {
+    if (W.scrapping) { scrapAt(c); return; }
+    if (W.sel && canTake(c)) move(c, ios ? 0 : W.n);
+  };
+  const render = () => {
+    if (!G) return;
+    const all = cols();
+    if (W.sel && !selFleet()) W.sel = null;
+    W.first = Math.max(0, Math.min(W.first, all.length - 4));
+    body.innerHTML = '';
+    const msg = W.scrapping ? 'Fleets will be scrapped at turn end' : ios ? 'Tap the ship you wish to move' : 'Choose a pile of ships, then the fleet to move it to.';
+    const left = el('button', { class: 'quiet orgarrow', 'aria-label': 'Earlier fleets', disabled: W.first > 0 ? false : 'disabled', onclick: () => { if (W.first > 0) { W.first--; render(); } } }, '◀');
+    const right = el('button', { class: 'quiet orgarrow', 'aria-label': 'Later fleets', disabled: W.first < all.length - 4 ? false : 'disabled', onclick: () => { if (W.first < all.length - 4) { W.first++; render(); } } }, '▶');
+    body.append(el('div', { class: 'orghead' }, el('p', { class: 'sub orgmsg' }, msg), all.length > 4 ? el('span', { class: 'orgarrows' }, left, right) : null));
+    const strip = el('div', { class: 'orgstrip' });
+    strip.style.setProperty('--colw', colW() + 'px');
+    strip.style.transform = `translateX(${-W.first * (colW() + 8)}px)`;
+    if (!all.length) body.append(el('p', { class: 'note' }, 'No fleets of yours here.'));
+    for (const c of all) {
+      const target = W.scrapping ? !!c.f : W.sel ? canTake(c) : false;
+      const col = el('div', { class: 'orgcol' + (target ? ' target' : '') + (c.f && W.sel && W.sel.fid === c.f.id ? ' from' : ''), 'data-col': c.key });
+      if (c.f) {
+        col.append(el('div', { class: 'orgname' }, c.f.scrap301 && marksScrap() ? 'Scrapped' : c.f.name || 'Fleet'),
+          el('div', { class: 'sub orgfuel' }, `Fuel: ${Math.floor(c.f.fuel)}`));
+        for (const k of Object.keys(c.f.ships)) {
+          const n = c.f.ships[k]; if (!(n > 0)) continue;
+          const d = HO.getDesign(G, c.f.owner, +k), on = W.sel && W.sel.fid === c.f.id && W.sel.did === +k;
+          col.append(el('button', { class: 'orgpile' + (on ? ' on' : ''), 'data-did': k, 'aria-pressed': on ? 'true' : 'false', title: d.name,
+            onclick: (e) => {
+              e.stopPropagation();
+              if (W.scrapping) { scrapAt(c); return; }
+              if (W.sel && W.sel.fid !== c.f.id) { tapCol(c); return; } // another fleet's pile: that fleet is the target
+              W.sel = on ? null : { fid: c.f.id, did: +k }; W.n = n; render();
+            } }, shipImgEl(d, isTablet() ? 26 : 18, c.f.owner), el('b', null, String(n))));
+        }
+      } else col.append(el('div', { class: 'orgname' }, 'New fleet'), el('div', { class: 'sub orgfuel' }, 'empty'));
+      col.addEventListener('click', guard(() => tapCol(c)));
+      // a finger or button held on a target is drawn red (the container's
+      // selected fleet); lifted off it, nothing happens
+      col.addEventListener('pointerdown', () => { if (target) col.classList.add('press'); });
+      col.addEventListener('pointerleave', () => col.classList.remove('press'));
+      col.addEventListener('pointerup', () => col.classList.remove('press'));
+      strip.append(col);
+    }
+    body.append(el('div', { class: 'orgview' }, strip));
+    // the selected pile's Delayed Arrival and Attitude (5.0.5's window has
+    // the same, per pile: fleet +0x58 + design)
+    const f = selFleet();
+    if (f) {
+      const bits = pileStance(f, W.sel.did), att = bits & 4 ? 'Aggressive' : bits & 2 ? 'Defensive' : 'Normal';
+      const info = el('div', { class: 'orginfo' },
+        el('span', null, 'Selected Ship:  Delayed Arrival'),
+        el('button', { class: 'quiet', onclick: () => setStance(bits ^ 1) }, bits & 1 ? 'Yes' : 'No'),
+        el('span', null, 'Attitude'),
+        el('button', { class: 'quiet', onclick: () => setStance(bits & 4 ? (bits & ~4) | 2 : bits & 2 ? bits & ~2 : bits | 4) }, att));
+      if (!ios && f.ships[W.sel.did] > 1) {
+        const max = f.ships[W.sel.did];
+        info.append(el('label', { class: 'orgcount' }, 'Move ', el('input', { type: 'number', min: 1, max, value: W.n || max, 'aria-label': 'Ships to move',
+          onchange: (e) => { W.n = Math.max(1, Math.min(max, Math.trunc(+e.target.value) || max)); } }), ` of ${max}`));
+      }
+      body.append(info);
+    }
+    const btns = el('div', { class: 'btns orgbtns' });
+    if (ios && marksScrap()) btns.append(el('button', { class: W.scrapping ? 'on' : null, onclick: () => { W.scrapping = !W.scrapping; W.sel = null; render(); } }, 'Scrap'));
+    btns.append(el('button', { onclick: group }, ios ? 'Group' : 'Group All'),
+      el('button', { onclick: split, disabled: f ? false : 'disabled' }, 'Split'));
+    if (ios) btns.append(el('button', { onclick: newFleet }, 'New Fleet'));
+    body.append(btns);
+  };
+  // two fingers on the window: spread them to split, pinch them to group
+  // (UIPinchGestureRecognizer: scale over 1 splits; here only past 10% either way)
+  const pins = new Map(); let d0 = 0, d1 = 0;
+  body.addEventListener('pointerdown', (e) => { if (e.pointerType !== 'touch') return; pins.set(e.pointerId, [e.clientX, e.clientY]); if (pins.size === 2) { const [a, b] = [...pins.values()]; d0 = d1 = Math.hypot(a[0] - b[0], a[1] - b[1]); } });
+  body.addEventListener('pointermove', (e) => { if (!pins.has(e.pointerId)) return; pins.set(e.pointerId, [e.clientX, e.clientY]); if (pins.size === 2) { const [a, b] = [...pins.values()]; d1 = Math.hypot(a[0] - b[0], a[1] - b[1]); } });
+  const pinEnd = guard((e) => {
+    if (!pins.has(e.pointerId)) return;
+    const two = pins.size === 2; pins.delete(e.pointerId);
+    if (!two || !d0) return;
+    const r = d1 / d0; d0 = 0;
+    List.noClick();
+    if (r > 1.1) split(); else if (r < 0.9) group();
+  });
+  body.addEventListener('pointerup', pinEnd); body.addEventListener('pointercancel', pinEnd);
+  render();
+  modal(ios ? 'Organize Fleets' : 'Group Fleets', body, { cls: 'wide orgwin', onClose: () => { W.empties = []; renderPanel(); draw(); save(); } });
 }
 
 // ----- battle replay -----
@@ -3149,6 +3438,7 @@ function setupMenus() {
       ['Master Point List…', () => openMasterList(), () => hasHall(G)], ['Hall of Fame…', () => openHall('fame'), () => hasHall(G)], ['Hall of Shame…', () => openHall('shame'), () => hasHall(G)], ['-'], ['Quit to title', () => { save(); Sound.play(7002); G = null; renderPanel(); draw(); $('#panel').innerHTML = ''; $('#msg').innerHTML = ''; titleScreen(); }]],
     Ships: [['Build ships at selected colony…', () => { if (G && UI.sel != null && G.stars[UI.sel].owner === ME) openBuild(UI.sel); else toast('Select one of your colonies first.'); }], ['Review battle…', () => G && openBattleList()], ['List all fleets…', () => G && openFleetList()],
       [() => scrapWords('fleet')[G && curFleet() && curFleet().scrap301 ? 1 : 0], () => { if (!G || G.over) return; const f = curFleet(); if (f) toggleScrapFleet(f); else toast('Select one of your fleets first.'); }, () => marksScrap()],
+      [() => (G && organizeStyle() === 'ios' ? 'Organize fleets…' : 'Group fleets…'), () => { if (G && UI.sel != null) openOrganize(UI.sel); }, () => !!organizeStyle()],
       ['Scrap ship types…', () => G && openScrapTypes()], ['Next fleet', nextFleet]],
     Galaxy: [['Players and alliances…', () => G && openPlayers()], ['List explored stars…', () => G && openStarList()],
       ['Give money or metal…', () => G && !G.over && openGive(), 'gifts'],

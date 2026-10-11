@@ -1002,17 +1002,42 @@ None of the rules.
    zoom from the whole galaxy to 1.5 (phone) or 2.0 (tablet) with no rubber band, a pan
    thrown on release, a tap selecting the nearest star, the selected star's ruler, single
    tap (deselect) and double tap (Build Ships or the battle), fleets dragged out of the
-   planet panel's list and dropped on a star, the satellite's long hold (with a ruleset
-   that marks for scrapping), lists sliding after 30 points and the budget bars on the
-   log scale; a gesture whose command the ruleset hasn't got is skipped. A mouse and a
-   pen keep the remake's own behaviour. No other version had a touch screen; if an
-   Android version turns up and handles touch differently, it becomes a choice like the
-   OS look. The remake's own choices in it: a double tap is two taps within 0.4 s and 30
-   points (iOS's tapCount); the selected star's square shrinks with the map (at least 24
-   points) and gives way to a nearer star; a slow drag from it counts as a drag; the
-   double tap on the fleet list opens Split… (the remake has no Organize Fleets window);
-   the fuel alert is shown once per browser; after a finger sets a bar, the bars are
-   drawn on the log scale until a mouse sets one.
+   planet panel's list and dropped on a star (the planet's buttons, and on a tablet the
+   star's information, hidden meanwhile), the double tap on the fleet list (Organize
+   Fleets, or Split… without it), the satellite's long hold (with a ruleset that marks
+   for scrapping), lists sliding after 30 points (the fleet list thrown on as iOS's
+   inertial menu) and the budget bars on the log scale; a gesture whose command the
+   ruleset hasn't got is skipped. A mouse and a pen keep the remake's own behaviour. No
+   other version had a touch screen; if an Android version turns up and handles touch
+   differently, it becomes a choice like the OS look. The remake's own choices in it:
+   - a double tap is two taps within 0.4 s and 30 points: iOS counts taps with UIKit's
+     own tapCount (`-[CCMenu tapCount]` asks the touch), so the game sets no window;
+   - a screen whose short side is 600 points or more is a tablet: iOS asks the device
+     (`+[GraphicDefines setup]`: the iPad idiom), which a browser can't;
+   - the tap's reach and the selected star's square follow iOS's planet scale
+     (`-[MapLayer setScale:]`, now read), with the remake's own smallest scale (the
+     whole galaxy showing; iOS's covers the screen); where stars crowd, the square gives
+     way to a nearer star, and a slow drag from it counts as a drag;
+   - the fuel alert is shown once per browser; after a finger sets a bar, the bars are
+     drawn on the log scale until a mouse sets one;
+   - Organize Fleets: a pinch counts past 10% either way (iOS: any scale over 1 splits,
+     any other groups); a pile moved to a fleet that hasn't its design takes its stance
+     with it, as 5.0.5's drop does (iOS's `move:from:to:` leaves the fleet's stance byte
+     for that design as it was, LIKELY whatever an earlier pile left there); the fleet a
+     pile leaves is gone at once when empty (iOS: when the window closes);
+   - the iOS skin's route line: a route under 3 light years (none on iOS) is drawn as
+     one white leg, and the legs' labels keep one size (iOS scales them with the
+     planets).
+9. **Settled from the code in this pass** (were the earlier build's guesses):
+   Organize Fleets' arrows page the fleets, four showing (`moveContainer:`, not a ship
+   move); the whole pile moves, part of one only by Split; the route line is the route
+   finder's, white leg by leg or red straight; the iPad hides the star's information
+   while a fleet is dragged; the fleet list is inertial; the planets' ice cover is
+   `T / 130` (coldest `ice_cover0`) and the boulders `5 −` the metal steps (most metal
+   `boulder_01`); the star markers (`planet-x` for a battle seen at a star of no known
+   owner, `planet-exclamation` for the end of one of your fleets' routes, the supernova
+   pictures at 71 and 91); the tap's reach (√(2,200 × planet scale), under √32,768 map
+   units) and the selected star's square (40 × the planet scale's target).
 
 ### Interface not done
 
@@ -1021,7 +1046,14 @@ None of the rules.
   shown as Game Center shows them.
 - **The questions before building many Scouts or Tankers** (Alert Strings 36-37, shown
   in the Build Ships window).
-- **Organize Fleets' arrows** (`moveContainer:`; what they move wasn't read).
+- Now done: **Organize Fleets** (`rs.organizeFleets: 'ios'`, `openOrganize`): the
+  columns and arrows, moving a pile, Delayed Arrival and Attitude, Scrap, Group, Split,
+  New Fleet, the pinch. 5.0.5 has its Group Fleets window the same way
+  (`organizeFleets: '505'`, with a count for part of a pile); the Palm keeps Split…
+  (its pile moves differ, item 10 of the Palm's "Settled, worth confirming").
+- **The supernova's explosion** (`-[StarNode supernova:]` plays frames handed to it;
+  their timing wasn't read): the remake shows one frame the turn it happens. The star
+  dust after it (`starDust`, opacity from star +0x12) isn't drawn.
 - **Options locked by rank**: none on iOS, so nothing to do.
 - **The Kansas and Hope words** in other languages (`fr.lproj`, `tr.lproj`).
 

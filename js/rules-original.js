@@ -2801,6 +2801,10 @@ Object.defineProperties(E.RULESETS.original, Object.fromEntries(Object.entries({
   chatLimit: 3,
   // the Group Fleets window (above)
   canMerge: canMerge505, organized: organized505,
+  // and the window itself (js/skins/classic/ui.js openOrganize): a pile, or
+  // part of one (Option-drag asks how many, FUN_100a8400 / FUN_100a8780),
+  // moved to another fleet; Group All; Split
+  organizeFleets: '505',
   // CONFIRMED (FUN_1008c5f0, FUN_1008d140): a fleet dragged on the map is
   // given the route DeterminePath (FUN_1007d260) finds from its star with the
   // fuel left and its Range, as the computers' are (js/ai-original.js mapRoute)

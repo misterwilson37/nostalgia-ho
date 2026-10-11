@@ -292,5 +292,28 @@ button[data-help] { cursor: pointer; }
 #panel, .dropdown, .starmenu { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
 #panel img { -webkit-user-drag: none; user-drag: none; }
 .touchdrag { position: fixed; z-index: 95; pointer-events: none; transform: translateX(-50%); filter: drop-shadow(0 3px 4px rgba(0,0,0,.6)); height: 30px; width: auto; }
+/* while a finger drags a fleet (iOS fleetDraggingChanged:): the planet's
+   buttons hide (PlanetButtons), and on a tablet the star's information too
+   (StarInfoLayer, iPad only); the fleets stay where they are */
+html.fleetdrag #panel .planet > .btns, html.fleetdrag.fleetdrag-pad #panel .planet > :not(.fleets) { visibility: hidden; }
+/* Organize Fleets (ui.js openOrganize): the fleets in columns, four showing,
+   paged by the arrows; the fleets that can take the chosen pile outlined in
+   blue, the one under a finger in red (OrganizerFleetFleetsContainer draw) */
+.organize .orghead { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.organize .orgarrows { display: flex; gap: 4px; flex: none; }
+.organize .orgview { overflow: hidden; width: calc(4 * (var(--colw, 160px) + 8px)); max-width: 100%; margin: 6px auto; }
+.organize .orgstrip { display: flex; gap: 8px; transition: transform .2s; }
+.organize .orgcol { flex: none; width: var(--colw, 160px); min-height: 90px; padding: 4px; border: 1px solid transparent; border-radius: 4px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.organize .orgcol.target { border-color: #393cd6; cursor: pointer; }
+.organize .orgcol.target.press { border-color: #f00; }
+.organize .orgcol.from { background: rgba(127,127,127,.12); }
+.organize .orgname { font-weight: bold; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
+.organize .orgpile { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 2px 4px; padding: 2px 4px; min-width: 0; max-width: 100%; box-sizing: border-box; }
+.organize .orgpile img { max-width: 100%; object-fit: contain; }
+.organize .orgpile.on { outline: 2px solid #393cd6; }
+.organize .orginfo { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; justify-content: center; }
+.organize .orgcount input { width: 4em; }
+.organize .orgbtns { justify-content: center; flex-wrap: wrap; }
+.organize .orgbtns button.on { outline: 2px solid #393cd6; }
 #autostop { position: absolute; right: 12px; bottom: 12px; z-index: 6; font-weight: bold; }
 .switchrow { display: flex; gap: 8px; align-items: center; justify-content: space-between; }

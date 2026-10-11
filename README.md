@@ -32,24 +32,46 @@ drags, so a laptop with a touch screen has both:
 - the map: pinch to zoom, from the whole galaxy to 1.5x (phones) or 2.0x (tablets), never
   past the galaxy's edges (no rubber band); one finger pans, and a throw carries on (the
   last 6 touches of the last 0.2 s, half the speed, easing out over 3 s); a lift after less
-  than 15 points of movement is a tap, which selects the nearest star; a double tap on the
-  map does nothing;
+  than 15 points of movement is a tap, which selects the nearest star within iOS's reach
+  (√(2,200 × the planets' scale) map units: about 66 points zoomed in on a phone, 81 on a
+  tablet, 10 to 25 zoomed out); a double tap on the map does nothing;
 - the selected star: dragging from it draws a distance ruler; a single tap deselects it
-  after 0.5 s; a double tap opens Build Ships (or replays the battle there);
+  after 0.5 s; a double tap opens Build Ships (or replays the battle there); its square
+  grows and shrinks with the planets' scale, as on iOS;
 - fleets: drag one of yours out of the planet panel's list and drop it on a star to send it
   (back on its own star, it stays; the line is red without the fuel, and the fuel alert
-  comes once); a double tap on the list opens Split… (the remake's Organize Fleets);
-  holding a satellite of yours for 0.5 s marks it for scrapping or unmarks it, with a
-  ruleset that marks (`rs.flagScrap`);
+  comes once); while it is dragged the planet's buttons hide, and on a tablet the star's
+  information too; a double tap on the list opens **Organize Fleets** with a ruleset that
+  has it (`rs.organizeFleets`: iOS and 5.0.5, below), else Split…; holding a satellite of
+  yours for 0.5 s marks it for scrapping or unmarks it, with a ruleset that marks
+  (`rs.flagScrap`);
 - lists, the panel and windows slide after 30 points of movement (an item touched isn't
-  chosen once its list has moved);
+  chosen once its list has moved); a slide on the fleet list is thrown on as the map is
+  (iOS's fleet list is an inertial menu), the others slow down as iOS's scroll layers;
 - the budget and technology bars jump to the finger on iOS's log scale (value =
   (exp(x * 77 / w / 32.11 + 2.302) - 10) * 10 per mille, up to 1,000), and are drawn on it
   until a mouse sets one; the terraform / mine slider stays linear;
 - a long press on anything with hover help still explains it, unless the finger moves.
 
 A gesture whose command the ruleset hasn't got is skipped. `window.HOVIEW()` gives the
-map's scale and offset and the selection, for the test tools.
+map's scale and offset, the selection and the route line being drawn, for the test tools.
+A phone and a tablet are told apart by the screen's short side (600 points or more is a
+tablet; iOS asks the device).
+
+**Organize Fleets** (Ships menu, the "Organize fleets…" / "Group fleets…" button under the
+ships at a star, or a double tap on the fleet list), for a ruleset with
+`rs.organizeFleets`: `'ios'` (iOS 1.2.9's window) or `'505'` (5.0.5's Group Fleets). Your
+fleets at the star (not satellites) stand in columns, four at a time, the arrows paging
+them; tap or click a pile (one design's ships), then a fleet outlined in blue to move it
+there (an all-Biological fleet takes only Biologicals). The chosen pile's Delayed Arrival
+and Attitude can be changed. Group puts every fleet into the chosen pile's (or the first;
+Biologicals apart), Split moves half the chosen pile (rounded down) to a new fleet, or
+with one ship every other pile to fleets of their own. iOS adds Scrap (then tap a fleet to
+mark it) and New Fleet (the chosen pile to a new fleet, or an empty column), and a pinch
+on the window: spread to split, pinch to group. 5.0.5 moves part of a pile too (a count;
+5.0.5 asked with Option-drag). The rules are the ruleset's own (`rs.canMerge`,
+`rs.organized`). The Palm moves piles by its own rules, so it keeps Split… and "Merge all
+fleets here".
 
 ## Versions and editions
 
@@ -270,6 +292,11 @@ Optional ruleset flags the skin reads (each is documented where it is read):
 - `rs.allowDebt` (`{ label, words, on }`): Build Ships' "Allow Debt" switch (iOS): off,
   ships are bought only while Ship Savings stay at 0 or more; on, down to the borrowing
   limit. Left out: always down to the borrowing limit. (`js/skins/classic/ui.js`, `openBuild`)
+- `rs.organizeFleets` (`'ios'` or `'505'`): the Organize Fleets window (iOS 1.2.9's, or
+  5.0.5's Group Fleets with a count for part of a pile), worked through the engine's
+  `splitFleet` and `mergeFleets`, so `rs.canMerge` and `rs.organized` decide what may join
+  and what the fleets keep. Left out (or `null`, the Palm): Split… and "Merge all fleets
+  here" only. (`js/skins/classic/ui.js`, `openOrganize`)
 - `rs.autoPlayWindow` `'ios'` and `rs.autoPlayDefaults` (`{ aggr, colDef, stop, every }`):
   iOS's Auto Play window (Computer Play For Me, Just End My Turns Only, stop when
   something interesting happens, click through the messages every n seconds) and its
@@ -344,7 +371,9 @@ Optional ruleset flags the skin reads (each is documented where it is read):
   app's landscape screen (the map filling it, the panel as the sidebar at the right, the
   HUD bar at the top) with the app's own art, its Retina pictures drawn at half size
   (planets with their hot, ice and boulder covers, ships from their parts, hats, fleet
-  dots, the ring, the report pictures, the cowboy on the title) and its sounds as MP3s
+  dots, the ring, the report pictures, the star markers, the cowboy on the title) and
+  iOS's route line for a dragged fleet (`T.fleetPath: 'ios'`: the route finder's route,
+  white leg by leg with each leg's length, or red straight to a star it can't reach), and its sounds as MP3s
   (art in `assets/skins/ios/`, from `tools/extract/ios.py`); its looks are iOS 10 (the
   default) and iOS 6. A sound set's manifest may say `"soundFormat": "mp3"` (its files
   are then `.mp3`, not `.wav`; `useSounds`, `tools/bundle.py`). With the iOS rules the

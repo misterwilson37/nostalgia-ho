@@ -237,6 +237,21 @@ and fighters, alliances, battles, the history and the win.
   `hoguy_0-19` (the title's cowboy frames); `report_icon-0`-`50`; the buttons, sliders,
   panels, `Game_You_Won`, `Game_You_Lost`, `HoExplosions`, `digits_atlas`, `icon0-9`
   (galaxy shapes and options), `09900`-`09909`.
+- **Where the planet and star pictures go** (CONFIRMED, read in the disassembly for the
+  format strings' arguments): `-[PlanetNode update:temp:metal:]` `0x100090e58` takes
+  the gravity as a percentage of your home's (`planet_%d%@`: 0 from 252 %, then 201,
+  126, 76, 51, 39 down to 6; "_mined" under 100 metal) and T = 720 + the temperature
+  less your home's in tenths: from 771 the `hot_cover` at opacity min(100, (T − 770) /
+  30) × 1.5; under 650 `ice_cover%d` with T / 130 held to 0-4 (the coldest
+  `ice_cover0`); with 100 metal or more `boulder_0%d` with 5 less one for each of
+  1,000, 2,500, 5,000 and 10,000 reached (the most metal `boulder_01`); each cover is
+  scaled to the planet's size. `-[StarNode updateFor:withStar:withGame:]` `0x10001af5c`:
+  an unexplored star is `planet-question`, or `planet-x` when no owner is known and a
+  battle was seen there (record +0xc ≥ 2000), or `planet-exclamation` when one of your
+  fleets' routes ends there (its path's last star); a star whose nova count (+0x14) isn't
+  0 is `supernova_going1` under 71, `going2` under 91, else `going3`; one gone supernova
+  `supernovaed` (`-[StarNode supernova:]` `0x10001ac78`, after the explosion's frames),
+  with its star dust (`stardust`, opacity min(255, dust × 255 / 20)).
 - **Message pictures**: `report_icon-n` is 5.0.5's message picture 9000 + n redrawn at
   80 × 80 (`+[MessageNode reportIcon:]` builds `report_icon-%ld.png`; compared side by
   side, 0-50 all match; 5.0.5's 9051 has none). `manifest.json` "images" maps the remake's
@@ -271,7 +286,7 @@ The map is a CCLayerPanZoom (`-[CCLayerPanZoom init]` `0x10009e85c`) set up by
 | Setting | Value | Source |
 |---|---|---|
 | mode | 0 ("sheet": a single finger pans) | CONFIRMED, MapLayer init |
-| maxScale | 1.5 on iPhone, 2.0 on iPad (the iPad flag `DAT_100148a78`, set by `+[GraphicDefines setup]` `0x100008548`) | CONFIRMED, MapLayer init (extension default 3.0) |
+| maxScale | 1.5 on iPhone, 2.0 on iPad (the iPad flag `DAT_100148a78`, set by `+[GraphicDefines setup]` `0x100008548` when `-[UIDevice userInterfaceIdiom]` is 1, the iPad idiom; not from the screen's size) | CONFIRMED, MapLayer init (extension default 3.0) |
 | minScale | the scale that fits the whole galaxy into the pan bounds: max(bounds width / content width, bounds height / content height) | CONFIRMED, MapLayer init (extension default 0.5) |
 | content size | the galaxy's extent (game +0x222) × 40 points | CONFIRMED, MapLayer init |
 | pan bounds | the screen without the sidebar, or the whole screen when the sidebar is hidden (`setBoundsForSidebar`, `setBoundsWithoutSidebar`; a margin unit of 4 points on iPhone, 8 on iPad, `DAT_100148a80`) | CONFIRMED |
@@ -289,12 +304,22 @@ The map is a CCLayerPanZoom (`-[CCLayerPanZoom init]` `0x10009e85c`) set up by
   throws the map. CONFIRMED.
 - **A tap on the map** (`-[MapLayer layerPanZoom:clickedAtPoint:tapCount:]`
   `0x10000feb0`): if tapCount isn't 2 and a star is near (`-[MapLayer pickStar:]`
-  `0x10000f93c`: the nearest star with squared distance ≤ the planet scale × 2,200, in
-  map coordinates where a star sits at its galaxy position × 4, offset (+5, −10); a
-  star in its supernova is skipped), that star becomes the selected star
+  `0x10000f93c`: the nearest star with squared distance ≤ the planet scale × 2,200
+  (`DAT_1000cef88`) and under 32,768, in map coordinates where a star sits at its
+  galaxy position × 4, offset (+5, −10); a star gone supernova is skipped), that star
+  becomes the selected star
   (`selectPlanet:zoom:` with zoom 0, so the map doesn't move) and its planet bar is
   shown (`selectPlanetBar:`). A tap away from every star does nothing; a double tap on
   the map (tapCount 2) does nothing and doesn't zoom. CONFIRMED.
+- **The planet scale** (`-[MapLayer setScale:]` `0x10000e590`), which sizes the stars'
+  pictures, the tap's reach and the selected star's square: zoomed in to 1.0 or more
+  on an iPhone (1.7 on an iPad; or 0.1 past the smallest scale when that is larger),
+  every planet is drawn 2.0 (iPad 3.0) times its size whatever the zoom (planet scale
+  = 2.0 ÷ map scale); below that the 2.0 falls in a line to 0.2 (iPad 0.6, from 3.0) at
+  the smallest scale (`DAT_1000cef98` 1.7, `DAT_1000cefa0` 0.1, `DAT_1000cefc0` 2.4 and
+  1.8, `DAT_1000cefd0` 0.6 and 0.2). So a tap picks a star within √(2,200 × that
+  number × the map scale) points: about 66 points zoomed in on an iPhone, 81 on an
+  iPad, and 10 to 25 at the smallest scale. CONFIRMED.
 - **Two fingers (pinch)** (`0x10009f064`, the two-touch branch): the scale is multiplied
   by the change in the fingers' distance, held between minScale and maxScale (no rubber
   band, since the ratio is 0), zooming about the fingers' midpoint, and the map also
@@ -316,8 +341,10 @@ The map is a CCLayerPanZoom (`-[CCLayerPanZoom init]` `0x10009e85c`) set up by
 Only the selected star takes touches of its own: `-[StarNode selectedStar:num:]`
 `0x10001ae04` adds it to the touch dispatcher (priority 0, swallowing) when it is
 selected and removes it when it is not. Its touch area is an 80 × 80 square about the
-star (`ourTouch:`, −40 to +40). Every other star is just part of the map (a tap selects
-it, a drag pans).
+star (`ourTouch:` `0x10001bc50`, −40 to +40 in the star node's own units, which the
+planet scale sizes: 40 × 2.0 = 80 points each way zoomed in on an iPhone, 8 at the
+smallest scale). Every other star is just part of the map (a tap selects it, a drag
+pans).
 
 - **Touch down** (`0x10001bc8c`): cancels a pending single tap and clears "moved far".
   CONFIRMED.
@@ -342,22 +369,42 @@ The fleets at the selected star are a scrolling list of ship pictures in the sta
 panel (FleetMovementMenu, a CCInertialMenu built on CCMenuAdvanced).
 
 - **Touch down on a fleet** (`-[FleetMovementMenu ccTouchBegan:withEvent:]`
-  `0x1000c9808`): stops auto play if it is on (the flag at app state +8), picks the
+  `0x1000c9808`; the list is a CCInertialMenu, `-[FleetMovementMenu
+  initWithItems:vaList:]` `0x1000c8e28`): stops auto play if it is on (the flag at app state +8), picks the
   fleet under the finger (the item's tag is the fleet number; −1 if none), loads its
   ship picture into the drag sprite and clears the route. CONFIRMED.
 - **Moving while still inside the list** (`0x1000c995c`): the list scrolls
   (CCMenuAdvanced, below). **Moving out of the list** picks the fleet up: from then on
   the ship picture follows the finger, drawn above it (offset by its own height × scale,
-  so the finger doesn't hide it), `fleetDraggingChanged: 1` is posted once (on iPad the
-  star info panel hides while dragging, `-[StarInfoLayer fleetDragging:]` `0x10001a000`; on both, the planet buttons hide, `-[PlanetButtons fleetDragging:]` `0x1000c3e10`), and the
+  so the finger doesn't hide it), `fleetDraggingChanged: 1` is posted once
+  (`+[HoAppNotify fleetDraggingChanged:]` `0x100008a44`, the notification
+  "HoFleetDraggingChanged"): on an iPad the star info panel hides while dragging
+  (`-[StarInfoLayer fleetDragging:]` `0x10001a000` sets it visible to !dragging only
+  when the iPad flag is set; on an iPhone it stays), and on both the planet buttons
+  hide (`-[PlanetButtons fleetDragging:]` `0x1000c3e10`), and the
   route is updated (`-[FleetMovementMenu updateFleetPath:]` `0x1000c90d0`). CONFIRMED.
 - **The route while dragging** (`0x1000c90d0`): whenever the star under the finger
   (`pickStarTouch:`) changes, the fleet's route to it is worked out by the 5.0.5 route
-  finder (`0x100036674`, for you, from the fleet's star, with its speed and range,
-  flag 7) and drawn on the map (red when the fleet hasn't the fuel), with the "Next
-  Message" sound (index 16) for every new star other than the selected one. Over empty
-  space the fleet's current orders are shown again (`updateFleetPathFromRec:fleet:`).
-  CONFIRMED.
+  finder (`0x100036674`, for you, from the fleet's star, with its fuel left and range,
+  flag 7) and drawn on the map, with the "Next Message" sound (index 16) for every new
+  star other than the selected one. Over empty space the fleet's current orders are
+  shown again (`updateFleetPathFromRec:fleet:` `0x10000f0f8`). CONFIRMED.
+- **The line** (`-[MapLayer updateFleetPath:fleet:]` `0x10000f190`, `drawFleetPaths`
+  `0x10000e93c`): the route finder's record holds up to eight stars (+4), each leg's
+  length (+0x16), the number of legs (+0x34), the whole length (+0x36) and whether it
+  can be flown (+0x3a). Each leg is a line 2 points wide (`glLineWidth(2)`, GL_LINES),
+  white (0xffffffff) when the route can be flown and red (0xff0000ff) when it can't;
+  the route finder gives a route it can't fly as one straight leg (its "nothing
+  shorter than 3 × the straight line" end, +0x3a left 0), so the red line runs straight
+  to the star, while a route through your colonies is drawn leg by leg in white. A
+  route under 3 light years (+0x36 = 0) draws nothing. Each leg gets a label
+  (`addDistanceLabelWithFrom:withTo:withDistance:` `0x10000f538`): its length, "%d",
+  white Arial 16, on the dark `supernovaed` disc at opacity 220, beside the leg's middle
+  (10 points right of it, or 22 left, by the slope; 10 points below), both scaled by
+  the planet scale. The first leg starts at the fleet's place beside its star
+  (`calcFleetInitialStarOffset:fleet:current:player:`). LinesNode (`0x1000aca08`-
+  `0x1000acf08`) is the same kind of line node (width 1, a colour and an opacity) used
+  elsewhere. CONFIRMED.
 - **Dropping** (`-[FleetMovementMenu ccTouchEnded:withEvent:]` `0x1000c9a44`, then
   `moveFleet` `0x1000c94cc`): only if the fleet was picked up and the finger is over a
   star. If the route can't be flown (no fuel) and the star isn't the fleet's own, the
@@ -370,14 +417,77 @@ panel (FleetMovementMenu, a CCInertialMenu built on CCMenuAdvanced).
   the drag sprite is hidden and `fleetDraggingChanged: 0` is posted. Dropping over
   empty space does nothing. CONFIRMED.
 - **Double tap on the fleet list** (tapCount 2 inside it): opens Organize Fleets
-  (`+[OrganizeFleetsLayer dialog]`). CONFIRMED.
-- In Organize Fleets, a drag in the fleets column moves the highlight with the finger
-  and lifting it chooses that fleet (`OrganizerFleetFleetsContainer`, `0x1000a5e08`,
-  `0x1000a5eec`, `0x1000a5f04`); the left and right arrows (MenuAdjusters,
-  `+[MenuAdjusters menu:delegate:]` `0x100011868`, `adjustLeft:` / `adjustRight:`
-  `0x1000c0ee4` / `0x1000c0f00`) call `moveContainer:` with 1 or 0
-  (what that moves wasn't read: LIKELY the ships between the two sides). The drag is
-  CONFIRMED.
+  (`+[OrganizeFleetsLayer dialog]`, below). CONFIRMED. tapCount is UIKit's own count
+  (`-[CCMenu tapCount]` `0x100056364` asks the touch); how quick and how close two taps
+  must be is the system's, not in the game.
+
+### Organize Fleets (OrganizeFleetsLayer)
+
+The window for one star's fleets (`-[OrganizeFleetsLayer initDialog]` `0x1000bfe20`:
+the selected star, `myPlayerState`; on an iPad 0.8 × 0.7 of the screen). CONFIRMED
+throughout:
+
+- **The columns** (`updateData:` `0x1000c0f38`): one for each of your fleets at the
+  star, in the fleet list's order, except all-Satellite fleets (fleet class 5,
+  `0x1000362fc`/`0x100035f78`); a column is 84 points wide on an iPhone, 160 on an
+  iPad (`mFleetNodeWidth`). At its top the fleet's name line (sprintf template 37) or
+  "Scrapped" (Misc Strings 201) when marked, then "Fuel: %d" (range less fuel used,
+  `0x100035580` − `0x100035634`) when it holds ships, then one ShipMenuItem for each of
+  its piles (one design's ships: its picture and count; tag = the design). Four columns
+  show (`firstFleetShowing` to +4); **the arrows** (MenuAdjusters at the top right,
+  shown only with more than four columns, `addLeftRight` `0x1000c0440`) call
+  `moveContainer:` (`0x1000c0e00`): left (1) shows one column earlier, right (0) one
+  later, never past the ends; the row slides there in 0.2 s (`CCMoveTo`,
+  `updateFleetContainerPosition` `0x1000c0d0c`). They move no ships.
+- **Moving a pile**: the message reads "Tap the ship you wish to move" (Misc Strings
+  162). Tap a pile (`shipSelected:` `0x1000c2714`, `activateShip:` `0x1000c23e8`): it is
+  highlighted, and every other column that can take it is outlined in blue (0x393cd6,
+  `OrganizerFleetFleetsContainer startWith:ship:block:` `0x1000a5478`): not an
+  all-Satellite fleet, not an all-Biological fleet (class 6) unless the pile is
+  Biological, and a Biological pile only into an all-Biological or an empty fleet.
+  Tapping the pile again drops the selection; another pile of the same fleet takes it
+  over; a pile of another fleet does nothing itself. Touch an outlined column: it is
+  outlined in red while the finger stays on it (`touchHitFleet:`, `updateSelectedFleet:`
+  `0x1000a5e80`), and lifting there moves **the whole pile** into that fleet (the
+  block `0x1000c2564` calls `move:from:to:` `0x1000c27e0` with count −1, which takes
+  them all; no call passes a smaller count): the fleet that takes it gets the larger
+  fuel used (+0x7a), "bought this turn" (+0x74) only if both were, and 10 colonists a
+  Colony Ship (+0x70, no more than there were); its orders stay; the pile's stance byte
+  (+0x58 + design) is not copied (5.0.5's drop copies it for a design new to the
+  fleet). Lifting elsewhere does nothing. **Part of a pile** moves only by Split.
+- **The selected pile's settings** (`addCurrentShipInfo` `0x1000bffd0`,
+  `updateCurrentShipInfo` `0x1000c090c`): "Selected Ship:  Delayed Arrival" (Misc
+  Strings 163) with a No / Yes button (bit 1 of the pile's stance byte,
+  `delayedArrivalClick` `0x1000c0a98`), "Attitude" (164) with a button that goes
+  Normal → Aggressive → Defensive → Normal (bits 4 and 2, `attitudeClick`
+  `0x1000c0b5c`; Misc Strings 170, 125, 169).
+- **The buttons** (`addExtraButtons` `0x1000c0520`, Misc Strings 165-168): **Scrap**
+  (`scrapClick` `0x1000c2144`): "Fleets will be scrapped at turn end", every column
+  outlined; the next column tapped is marked or unmarked (`scrapFleet:` `0x1000c17e0`:
+  the mark toggled with "Scrap Fleet Sound", a fleet bought this turn un-bought); tap
+  Scrap again to give up. **Group** (`groupClick` `0x1000c1a84`): every fleet at the
+  star into the selected pile's fleet, or the first, all-Biological fleets into the
+  first all-Biological one apart (the same fuel, mark, stance and colonist rules), then
+  the empty ones removed. **Split** (`splitClick` `0x1000c1e4c`): the selected pile, if
+  it has more than one ship, loses half of them (rounded down) to a new fleet; a pile of
+  one sends every other pile of its fleet to a fleet of its own; the new fleets get the
+  fuel used, the mark and the stances. **New Fleet** (`newFleetClick` `0x1000c232c`):
+  with a pile selected, a new fleet takes the whole pile; without, an empty column
+  appears, which takes any pile. Nothing selected: Split does nothing.
+- **A pinch** on the window (`watchForPinch:` `0x1000c2a0c`, a UIPinchGestureRecognizer,
+  the game's only one; `pinching:` `0x1000c2ae0`): the columns scale with the fingers,
+  and on letting go a spread (scale over 1) is Split, a pinch Group.
+- **Closing** (`doClose:` `0x1000c2d68`): the empty fleets are removed and the map
+  redrawn.
+
+5.0.5's Group Fleets window (`LOrganizeFleetsDialog`, WIND 140, a data browser) does
+the same things with a mouse: a pile is dragged (`FUN_100a8400`: not a Satellite pile;
+the whole pile, Option asks how many, Option-Shift one) onto another fleet
+(`FUN_100a85b0`: not the same or an all-Satellite fleet, all-Biological fleets only with
+each other) and moved with the same arithmetic as `move:from:to:` (`FUN_100a8780`, plus
+the stance for a new design); Group All (`FUN_100aa240`) and Split (`FUN_100aa730`) are
+iOS's Group and Split. The Palm's Organize Fleets (tFRM 2300) has the same Group All and
+Split but its own pile move (`docs/open-questions.md`, Palm, item 10).
 - **Satellites** (SatelliteMenu): holding a satellite for 0.5 s marks it for scrapping
   (or unmarks it): `-[SatelliteMenu ccTouchBegan:withEvent:]` `0x1000a3288` notes the
   time, `-[SatelliteMenuItem selected]` `0x100016c00` runs a 0.5 s delay that flips the
@@ -396,8 +506,11 @@ panel (FleetMovementMenu, a CCInertialMenu built on CCMenuAdvanced).
   (`ccTouchMoved:withEvent:` `0x10001f7cc`) the highlight is dropped and the list
   follows the finger instead; lifting the finger activates the highlighted item, if any
   (`0x10001f72c`). Extension code.
-- **CCInertialMenu** (`0x1000aa180`, `0x1000aa1ec`, `0x1000aa254`) adds the same
-  InertialScroller throw as the map. Extension code. `MenuDisabledDuringAutoplay` and
+- **CCInertialMenu** (`0x1000aa10c`, `0x1000aa180`, `0x1000aa1ec`, `0x1000aa254`) adds
+  the same InertialScroller throw as the map: on lifting, the touches of the last 0.2 s,
+  if they cover more than 5 points, carry the list on by half their speed (at most half
+  its size) over 3 s, easing out. The fleet list at a star (FleetMovementMenu) is one.
+  Extension code. `MenuDisabledDuringAutoplay` and
   `InertialMenuDisabledDuringAutoplay` (`0x1000aa33c`, `0x1000aa38c`) ignore touches
   while auto play runs. CONFIRMED.
 - **CCScrollLayer** (`0x100007fd4` ...): moves with the finger,

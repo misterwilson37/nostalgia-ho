@@ -231,6 +231,12 @@ const rs = Object.assign(base, {
   // puts in the last five.
   // the auto play settings are on the Auto Play form (tFRM 1700, FUN_000713be)
   autoPlayRange: { aggr: [0, 100], where: 'autoplay' },
+  // Organize Fleets (tFRM 2300): Group All and Split are 5.0.5's, but moving
+  // a pile isn't (FUN_000790ea, FUN_0004af48: the fleet that takes it keeps
+  // its own fuel and its colonists are replaced; to "Empty Fleet" a full
+  // tank): 5.0.5's window (organizeFleets '505') would play 5.0.5's rules, so
+  // the Palm keeps Split… and "Merge all fleets here" (docs/open-questions.md)
+  organizeFleets: null,
   nameAStar: { when: 'rank', text: 'You have reached a new rank, so you get to name a star.', keep: 0, use: 'put', put: 5, max: 7,
     taken: 'Sorry, there’s already a star named “%s.”  Please pick another name.' },
 });
