@@ -782,7 +782,7 @@ These are what 5.0.5's code does and what the remake now does; they look like sl
 
 ### Interface not done
 
-- ~~The Group Fleets window~~: built (October 2026), as 5.0.5's: drag (or tap) piles between
+- Now done: **the Group Fleets window** (October 2026), as 5.0.5's: drag (or tap) piles between
   fleets with a count for part of a pile, Group All, Split, the stance and late-arrival
   controls (`openOrganize`, `rs.organizeFleets: '505'`).
 - **The one-time alert** when a dragged fleet can't reach the star ("Sorry, but that
