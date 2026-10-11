@@ -60,7 +60,8 @@ function registerAI(name, ai) { AIS[name] = ai; }
 // The Claude rules (js/rules-claude.js) are the remake's own and set none of
 // these, so they are given here.
 const OWN_EDITIONS = {
-  claude: { family: 'remake', edition: { version: 'Claude', name: 'The remake’s own rules', platform: 'a web browser', year: 2026 }, skins: ['cozy', 'classic'] },
+  claude: { family: 'remake', edition: { version: 'Claude', name: 'Claude’s rules (inspired by the 5.0.5 manual, 2026)', platform: 'a web browser', year: 2026 }, skins: ['cozy', 'classic'] },
+  gemini: { family: 'remake', edition: { version: 'Gemini', name: 'Gemini’s rules (inspired by the 5.0.5 manual, 2026)', platform: 'a web browser', year: 2026 }, skins: ['gemini', 'classic'] },
 };
 const famOf = (r) => r.family || (OWN_EDITIONS[r.id] || {}).family;
 const edOf = (r) => r.edition || (OWN_EDITIONS[r.id] || {}).edition || {};
@@ -1024,5 +1025,6 @@ if (typeof module !== 'undefined') {
   require('./rules-palm.js'); require('./ai-palm.js');
   require('./rules-ios.js');
   require('./rules-mac20.js'); require('./rules-mac405.js');
+  require('./rules-gemini.js'); require('./ai-gemini.js');
 } else root.HO = API;
 })(this);

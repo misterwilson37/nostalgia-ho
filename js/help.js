@@ -117,6 +117,7 @@ Object.assign(root.HOHELP_RULES['12'], {
 root.HOMANUALS = {
   original: ['assets/manuals/5.0.5/index.html', 'Spaceward Ho! 5 manual'],
   claude: ['assets/manuals/5.0.5/index.html', 'Spaceward Ho! 5 manual'],
+  gemini: ['assets/manuals/5.0.5/index.html', 'Spaceward Ho! 5 manual'],
   dos: ['assets/manuals/dos-2.0.pdf', 'Spaceward Ho! 2.0 manual (DOS)'],
   405: ['assets/manuals/4.0.5/index.html', 'Spaceward Ho! 4.0.5 help'],
   // 3.0.1 shipped without an online manual; the 4.0.5 help is the closest

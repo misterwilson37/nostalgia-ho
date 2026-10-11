@@ -148,7 +148,8 @@ const SKINS = [
   { id: 'palm', version: '5', platform: 'Palm OS, version 1.0.4', year: 2003, os: ['palmos'] },
   // 1.2.9 was built with the iOS 10.3 SDK (2017); iOS 6 is the 2012 launch's system
   { id: 'ios', version: '1.2.9', platform: 'iPhone and iPad', year: 2012, os: ['ios10', 'ios6'] },
-  { id: 'cozy', version: '5.0.5', platform: 'cozy western, upscaled art', year: 2003, os: ['macos8', 'macos9', 'macosx'] },
+  { id: 'cozy', version: 'Cozy western', platform: 'by Claude', year: 2026, homage: true, os: ['macos8', 'macos9', 'macosx'] },
+  { id: 'gemini', version: 'Tactical console', platform: 'by Gemini', year: 2026, homage: true, os: ['macosx', 'macos9', 'win95', 'macos8', 'system7', 'win31'] },
   { id: 'classic', version: '5.0.5', platform: 'Mac OS 9 and X', year: 2003, os: ['macos8', 'macos9', 'macosx'] },
 ].map(k => Object.assign(k, { name: `${k.version} (${k.platform}, ${k.year})`, sounds: k.id in SOUNDS ? SOUNDS[k.id] && k.id : 'classic' }))
   .sort((a, b) => a.year - b.year || a.version.localeCompare(b.version, 'en', { numeric: true }));
@@ -163,7 +164,7 @@ let wanted = null;
 try { wanted = new URLSearchParams(root.location.search).get('skin'); } catch (e) {}
 // the default: the classic (Mac 5.0.5) skin, Jake's choice; the newest
 // one only if this copy has no classic (the single-file build of another skin)
-const fallback = valid('classic') ? 'classic' : list[list.length - 1].id; // the list runs oldest to newest
+const fallback = valid('classic') ? 'classic' : (list.filter(s => !s.homage).pop() || list[list.length - 1]).id; // the list runs oldest to newest
 const current = [wanted, store.get('ho5.skin')].find(valid) || fallback;
 const skinOf = (id) => list.find(s => s.id === id) || list[0];
 const validOS = (id) => OSES.some(o => o.id === id);

@@ -3002,11 +3002,12 @@ const ED_FALLBACK = {
   '405': { family: '4.0', name: 'Windows 95', skins: ['w95'] },
   original: { family: '5', name: 'Mac', platform: 'Mac OS 8.6, 9 and X', skins: ['classic'] },
   palm: { family: '5', name: 'Palm OS', skins: ['palm'] },
-  claude: { family: 'remake', name: 'The remake’s own rules', skins: ['cozy', 'classic'] },
+  claude: { family: 'remake', name: 'Claude’s rules (inspired by the 5.0.5 manual, 2026)', skins: ['cozy', 'classic'] },
+  gemini: { family: 'remake', name: 'Gemini’s rules (inspired by the 5.0.5 manual, 2026)', skins: ['gemini', 'classic'] },
 };
 // the New Game window starts every edition with its own rules (tools/human-play.js asks)
 window.HONEWGAME_EDITIONS = true;
-const FAMILY_NAMES = { '1.2': '1.2', '2.0': '2.0', '3.0': '3.0', '4.0': '4.0', '5': '5', remake: 'Claude (the remake’s)', claude: 'Claude (the remake’s)' };
+const FAMILY_NAMES = { '1.2': '1.2', '2.0': '2.0', '3.0': '3.0', '4.0': '4.0', '5': '5', remake: 'AI homages', claude: 'AI homages' };
 // a ruleset's version: its own, else from its version number ('2.0.1' is 2.0, '5.0.5' is 5)
 function familyOf(id) {
   const rs = HO.RULESETS[id] || {};
@@ -3061,11 +3062,17 @@ function editionSkins(id) {
 }
 const SEP = '──────────';
 const sepOption = () => el('option', { disabled: 'disabled', value: '', class: 'sep' }, SEP);
-// a select's options: the own ones, a line, then all the others
+// a select's options: the own ones, a line, then all the others, with the AI
+// homages (skins marked homage: true in js/skins.js) last, after a second line
+const isHomage = (id) => ((window.HOSKINS && HOSKINS.list) || []).some(k => k.id === id && k.homage);
 function fillOwnFirst(sel, own, all, value, name) {
-  sel.replaceChildren(...own.map(id => el('option', { value: id }, name(id))),
-    ...(own.length && all.some(id => !own.includes(id)) ? [sepOption()] : []),
-    ...all.filter(id => !own.includes(id)).map(id => el('option', { value: id }, name(id))));
+  const rest = all.filter(id => !own.includes(id)), orig = rest.filter(id => !isHomage(id)), hom = rest.filter(isHomage);
+  const opt = (id) => el('option', { value: id }, name(id));
+  sel.replaceChildren(...own.map(opt),
+    ...(own.length && rest.length ? [sepOption()] : []),
+    ...orig.map(opt),
+    ...(orig.length && hom.length ? [sepOption()] : []),
+    ...hom.map(opt));
   sel.value = value;
   if (sel.value !== value) sel.value = own[0] || all[0];
 }
@@ -3295,10 +3302,10 @@ function newGameDialog() {
     el('span', { class: 'seat' }, el('input', { name: 'h' + i, value: localStorage.getItem('ho5.name' + i) || 'Player ' + i, maxlength: 20, 'aria-label': `Player ${i} name` }),
       el('select', { name: 'hf' + i, 'aria-label': `Player ${i} hat` }, el('option', { value: '0' }, 'Cowboy'), el('option', { value: '1' }, 'Cowgirl')))));
   // Version and Edition pick the rules; Skin and OS look how they show
-  const famSel = el('select', { name: 'version', 'aria-label': 'Version' });
+  const famSel = el('select', { name: 'version', 'aria-label': 'Ruleset version' });
   const edSel = el('select', { name: 'rules', 'aria-label': 'Edition' });
   const famNow = famKey(familyOf(chosenRules()));
-  famSel.append(...familyList().map(fm => el('option', { value: fm, selected: fm === famNow ? 'selected' : false }, FAMILY_NAMES[fm] || fm)));
+  famSel.append(...familyList().flatMap(fm => [...(fm === 'remake' ? [sepOption()] : []), el('option', { value: fm, selected: fm === famNow ? 'selected' : false }, FAMILY_NAMES[fm] || fm)]));
   // every edition is in the Edition menu, only the version's showing (so
   // that picking one by its id also picks its version)
   const fillEditions = (fam, value) => {
@@ -3316,7 +3323,7 @@ function newGameDialog() {
     pick.forEdition(edSel.value);
   });
   const pickRow = el('div', { class: 'picks' },
-    el('label', null, el('span', null, 'Version'), famSel),
+    el('label', null, el('span', null, 'Ruleset version'), famSel),
     el('label', null, el('span', null, 'Edition'), edSel),
     el('label', null, el('span', null, 'Skin'), pick.skinSel),
     el('label', null, el('span', null, 'OS look'), pick.osSel));

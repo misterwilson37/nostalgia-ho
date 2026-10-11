@@ -380,6 +380,13 @@ Optional ruleset flags the skin reads (each is documented where it is read):
   pictures, sounds and title, and Workbench colours (art in `assets/skins/amiga/`). The
   Amiga game is the DOS game (same rules, same pictures in the same order), so play it with
   the DOS 2.0 rules
+- `js/rules-gemini.js`, `js/ai-gemini.js`, `js/skins/gemini/`: the AI homage by Google's Gemini:
+  its own rules and computer players, written from the 5.0.5 manual alone, and its
+  "Tactical console" skin (`docs/gemini-rules/`, `docs/gemini-skin/`)
+- `js/homage.js`: the "AI homage, play at your own risk" note shown when a player picks
+  an homage's rules or skin (`docs/ai-homages/`). Homage skins are `homage: true` in
+  `js/skins.js` and come last in the menus, after a line; their rules are the "AI homages"
+  ruleset version
 - `js/skins/cozy/`: the Cozy skin, Claude-made and not a historical release: the 5.0.5 art
   upscaled with xBRZ (`tools/skins/cozy_art.py`, art in `assets/skins/cozy/`) in a western
   dress over the classic page; the Claude rules' own skin (`docs/cozy-skin/`)

@@ -35,7 +35,7 @@ try { ({ chromium } = require('playwright')); } catch (e) { console.error('Playw
 
 const args = process.argv.slice(2);
 const opt = (k, d) => { const a = args.find(x => x.startsWith('--' + k + '=')); return a ? a.slice(k.length + 3) : d; };
-const ALL = ['12', 'dos', '301', '405', 'original', 'palm', 'claude', 'mac20', 'mac405', 'ios']; // new rulesets go last: each one's seed is its place in this list
+const ALL = ['12', 'dos', '301', '405', 'original', 'palm', 'claude', 'mac20', 'mac405', 'ios', 'gemini']; // new rulesets go last: each one's seed is its place in this list
 // The Mac editions (js/rules-mac20.js, js/rules-mac405.js) have the same
 // New Game settings as the same version's other edition. While the New Game
 // window has no settings of their own (it starts only the rulesets it knows),
@@ -192,6 +192,8 @@ async function playOne(browser, rules, url) {
   page.on('console', m => { if (m.type() === 'error' && m.text().startsWith('[HO bug]')) errors.push(m.text()); });
   page.on('dialog', d => d.accept());
   await page.addInitScript((rules) => { try { if (!sessionStorage.getItem('hp')) { localStorage.clear(); localStorage.setItem('ho5.rules', rules); sessionStorage.setItem('hp', '1'); } } catch (e) {} }, rules);
+  // the homage notes (js/homage.js) would cover the New Game window: hide them for the test
+  await page.addInitScript(() => { try { for (const k of ['rules.claude', 'rules.gemini', 'skins.cozy', 'skins.gemini']) localStorage.setItem('ho5.homage.hide.' + k, '1'); } catch (e) {} });
   await page.addInitScript(pageHelpers);
   if (SEED !== 'random') await page.addInitScript((seed) => {
     let a = seed >>> 0;

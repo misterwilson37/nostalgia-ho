@@ -497,6 +497,19 @@ root.HOVERSIONS = {
       'Straight quotes in the reports.',
     ],
   },
+  gemini: {
+    intro: 'Not an original version: an AI homage. Google’s Gemini wrote it from the Spaceward Ho! 5 manual alone, so the game could be played while the originals weren’t available, as an experiment alongside Claude’s rules. Gemini never saw the original program or the other rulesets; it worked from the manual, the engine, and test results relayed round by round.',
+    previous: null,
+    quirks: [],
+    differs: [
+      'Every number the manual doesn’t give is Gemini’s invention, and so are its jokes.',
+      'Biologicals (“Space Monsters”) refuel by eating colonists, wherever they are.',
+      'Bankruptcy has consequences: colonists riot, research in progress is lost, most stored metal is seized, and half of every fleet is repossessed and sold toward the debt.',
+      RANDOM, HOTSEAT,
+    ],
+    missing: [],
+    changes: [],
+  },
   claude: {
     intro: 'Not an original version: the remake’s own Spaceward Ho!, rebuilt from the Spaceward Ho! 5 manual alone, without reading the original program or the other rulesets. Where the manual gives a number it is used; everything else (and the computer players, and the jokes) is a guess, tuned by self-play.',
     previous: null,
