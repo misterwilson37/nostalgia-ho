@@ -354,7 +354,10 @@ function msg(G, pid, text, opt) {
   const p = G.players[pid];
   if (!p || !p.human) return;
   const { won, ...rest } = opt || {};
-  const m = Object.assign({ text }, rest);
+  // rs.msgText(G, text): a version's own wording of every message (iOS 1.2.9:
+  // straight quotes, its character slips); left out, the text as given
+  const tx = rules(G).msgText;
+  const m = Object.assign({ text: tx ? tx(G, text) : text }, rest);
   if (won != null) Object.defineProperty(m, 'won', { value: !!won, enumerable: false, writable: true, configurable: true });
   (p.inbox || (p.inbox = [])).push(m);
 }
@@ -971,6 +974,7 @@ if (typeof module !== 'undefined') {
   require('./rules-301.js'); require('./ai-301.js');
   require('./rules-12.js'); require('./ai-12.js');
   require('./rules-palm.js'); require('./ai-palm.js');
+  require('./rules-ios.js');
   require('./rules-mac20.js'); require('./rules-mac405.js');
 } else root.HO = API;
 })(this);

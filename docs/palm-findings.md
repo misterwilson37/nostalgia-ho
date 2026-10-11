@@ -85,7 +85,7 @@ with its own battles and computers); "now" is what the Palm code does.
 | Starting shares | 167 per mille each; Abundant 650/250/100/50 | the creator's research 180 × 5 and Radical 100; budget 650/250/100, an Abundant player 550/200/150/100 with the second colony third and the home fourth (computers 650/250/50/50) | `FUN_000395a6`, `FUN_0002b274`, `FUN_00026304` |
 | Evacuate jokes | 5.0.5's | Palm's (above) | `FUN_0003734e` |
 | Star names | 5.0.5's | Courasant for Antares (tSTL 6060) | tSTL 6060 |
-| Hints | 5.0.5's, one every 7 turns | tSTL 6021.4-43, one every turn by the system's random numbers | `FUN_000500d4`, `FUN_00029b08`, `FUN_00027c4c` |
+| Hints | 5.0.5's STR# 6021.4-43, one every 10-year step (`FUN_10072a10`) | tSTL 6021.4-43, one every turn by the system's random numbers | `FUN_000500d4`, `FUN_00029b08`, `FUN_00027c4c` |
 
 ## How the routines pair up
 

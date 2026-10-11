@@ -89,14 +89,15 @@ alliance, luck and nova rules. What iOS changes is the interface and what comes 
 | Locking settings by rank | greyed out until the rank ("(Need more MPs)") | nothing locked: the rank records' unlock fields are never read, and "(Need more MPs)" (Misc Strings 59) is never used | CONFIRMED | the rank table `0x1000cf1f4` is read only by `0x10003d584`, `0x10003d5c0`, `0x10003d5e4` |
 | Players | up to 16, network play | one human (`-[SimpleServer isSinglePlayer]`), the server class kept (`0x10003c5b0` still takes up to 8 humans) | CONFIRMED | `SimpleServer`, `CServerGame` |
 | Surrender, Send Message | menu commands | no command; the strings remain (Alert Strings 2-3, the canned report lines) | CONFIRMED (no selector or menu item reaches them) | `-[AdditionalMenu init]` 0x100093824: Dip Into Savings, Auto Play, Armageddon, Give Money/Metal, Scrap Ship Types, Main Menu, Preferences |
-| Evacuate Planet | asks only for a profitable colony | asks for every colony: sprintf template 36 "Do you really want to evacuate %s?" (new) or 18, 5.0.5's profitable-colony question | CONFIRMED | `tryEvacuatePlanet:` 0x1000941e0 |
-| Kansas, Hope | one time in three each | the same, by the clock's random numbers; the star's name compared whole, ignoring case (`0x10003d3a8`: equal length and `toupper` equal) | CONFIRMED | 0x1000941e0 |
+| Evacuate Planet | asks only for a profitable colony | asks for every colony when marking (not when unmarking): sprintf template 36 "Do you really want to evacuate %s?" (new) for a colony making no profit (colony +8 < 1), 18, 5.0.5's profitable-colony question, otherwise | CONFIRMED | `tryEvacuatePlanet:` 0x1000941e0 |
+| Kansas, Hope | one time in three each | the same, by the interface's random numbers; the star's name compared whole, ignoring case (`0x10003d3a8`: equal length and `toupper` equal); Kansas's line (Alert Strings 38) now has OK and Cancel, so Cancel keeps the colony; Hope's is Misc Strings 123 | CONFIRMED | 0x1000941e0 |
 | Master points | kept in the preferences | a Game Center leaderboard "master_points" (`0x10008f8a0` reads, `0x10008f904` writes); the award and the cap as 5.0.5's; the game's creation time kept in a list of the last 10 games won, so a game pays once | CONFIRMED | `-[EndGameLayer updateMasterPoints]` 0x10009d2cc, `-[EndGameLayer doUpdateMPs]` 0x10009ce54 |
 | Leaderboards, achievements | | leaderboards "master_points", "games_won" (+1 a win); achievements "win_first_game", "win_10", "win_100", "win_500", "win_1000" (counted), "lost_a_game", "played_10000" (+1 a game ended, of 10,000) | CONFIRMED | 0x10009ce54, 0x10009d2cc, `DDGameKitHelper`, `GameCenterUtils` |
 | Hints | STR# 6021, 52 lines | "Help Messages", 42: lines 1-3 rewritten for touch ("Tap here to make this message go away. Tap on the End Turn button ..."), the option-key, contextual-menu and demo lines gone, "Touch outside of a dialog ..." and "Technology bars can be adjusted with a touch of your finger." new | CONFIRMED | `en.lproj/objectdictionary.plist`; the turn `0x10002dca8` @0x10002df1c |
-| A hint a turn | (see "Found for 5.0.5") | hint 500 every 10-year step while the preference is on, line rand(4, count − 1) of the 42 by the clock's numbers | CONFIRMED | `0x10002dca8` (5.0.5 `FUN_10072a10`: rand(4, 43), the demo rand(4, 52)) |
-| First messages | the credits and hints 1-3 (`FUN_1006f870`) | no report posts them: no call to the report routine (`0x10003b028`, `0x10003af9c`) passes 1000-1002; the welcome screen and the help page take their place | LIKELY | the call sites of `0x10003b028` |
-| Star names | 255 | 257: "Hope" inserted after "Quayle" (index 191) and "SparksMcGee" last | CONFIRMED | Star Names; where the galaxy draws its names wasn't traced: UNKNOWN whether "SparksMcGee" can be dealt |
+| A hint a turn | (see "Found for 5.0.5") | hint 500 every 10-year step while the preference is on (player +0x1119), rand(4, count) by the interface's numbers (`0x10003cb08`), and report 500 reads line n − 1 (`0x10008e508`): lines 4-42 of the 42 | CONFIRMED | `0x10002dca8` (5.0.5 `FUN_10072a10`: rand(4, 43), the demo rand(4, 52)) |
+| First messages | the credits and hints 1-3 (`FUN_1006f870`) | none: the report routines (`0x10003b028`, `0x10003af9c`) are called only from the battles, the turn, exploring (`0x10003405c`) and the new colony (`0x100034238`), never with 1000-1002, and report 500 only by the turn's hint; no pointer to either is stored. The welcome screen and the help page take their place | CONFIRMED (outside the encrypted page) | every call site of `0x10003b028` and `0x10003af9c` |
+| Star names | 255 | 257: "Hope" inserted after "Naboo" (index 191) and "SparksMcGee" last; "Seti Alpha" without 5.0.5's stray carriage return. Both new names are dealt like any other: the set-up draws each star's name over the whole list, rand(0, count − 1), again while an earlier star has it, then shuffles; the names kept at new ranks come first. A saved game's "Sparks McGee" is renamed "SparksMcGee" on loading | CONFIRMED | `0x10002a38c` @0x10002b9d8-0x10002bcac; `0x10003c2c8` |
+| Name a Star | (5.0.5: a field in the rank window) | at a new rank, `RankLevelDialogLayer` ("Congratulations!", "You may name a star for use in future games: ", Misc Strings 73-74): up to 11 letters, refused when already kept (Alert Strings 10), added to the preferences' list (+0x310); asked again after a win while you have named fewer stars than your rank, unless you once cancelled (+0x373). At New Game up to five kept names, in a row from rand(0, kept − 5), go into the galaxy | CONFIRMED | `-[RankLevelDialogLayer initDialog]` 0x1000b8b78, `doClose:` 0x1000b90ec, `-[EndGameLayer doUpdateMPs]` 0x10009ce54, `-[NewGameScene SetupExtraGameInfo:]` 0x1000162d8 |
 | Report wording | curly quotes; "$%s" | straight quotes; the "$" moved into the number formatter (reports 101, 103, 126, 148 lose it in the template); "™" decoded as "ª" ("PowerPCª", "#!$@*$&@¥ª!") | CONFIRMED | Report Window Templates, Speed Tech Strings |
 | Alerts | | 4 ("... lives will be lost!!"), 30 ("... because of the red fleet line."), 38 ("... anymore!!") reworded | CONFIRMED | Alert Strings |
 | Build Ships | the count limited by money to the borrowing limit | an "Allow Debt" switch: off, the count stops at Ship Savings ≥ 0; on, at the borrowing limit; the warnings for many Scouts or Tankers shown in the window | CONFIRMED (interface; the purchase itself, `0x1000375b0`, is `FUN_1007e4a0`) | `-[BuildSingleShipDialog determineCapacity]` 0x1000b6a08 |
@@ -177,11 +178,16 @@ Nothing else that changes play was found. In particular these were checked and a
 ## Found for 5.0.5
 
 - **A hint every turn.** 5.0.5's `FUN_10072a10` posts hint 500 for every player with the
-  hints preference on, every 10-year step (rand(4, 43); the demo always, rand(4, 52)),
-  and so do the Palm (`FUN_000500d4`) and iOS (`0x10002dca8`). The remake's 5.0.5 rules
-  give one every seven turns (`js/skins/classic/ui.js` `addTurnNotes`, `G.turn % 7 ===
-  3`). Worth checking against the 5.0.5 decompile before changing (the 5.0.5 report list
-  may hold hints back elsewhere; nothing in `FUN_10071180` does).
+  hints preference on (player +0x1111), every 10-year step (the clock's rand(4, 43); the
+  demo always, rand(4, 52)), and so do the Palm (`FUN_000500d4`) and iOS (`0x10002dca8`).
+  The remake's 5.0.5 rules had given one every seven turns (`js/skins/classic/ui.js`
+  `addTurnNotes`, `G.turn % 7 === 3`). Checked in the 5.0.5 decompile (nothing in
+  `FUN_10071180` holds hints back) and fixed: `js/rules-original.js` `hintTexts` (STR#
+  6021 lines 4-43), one a turn (`docs/open-questions.md`, 5.0.5's "Remake's choices").
+- **Naming a star at a new rank.** iOS's New Game record has 5.0's `specialStarNames`
+  (5 x 12 bytes) and `numSpecialStarNames`, filled from the names kept at new ranks
+  (below); 5.0.5's rank window has the same field (`docs/fallbacks.md`), so 5.0.5
+  likely used them the same way (not read in 5.0.5).
 
 ## The string lists
 
@@ -511,11 +517,10 @@ the `ship-*` parts, hats from `player_<k>_<sex>` / `enemy_<k>_<sex>`, the title 
 
 ## Still open
 
-- Whether "SparksMcGee" and "Hope" can be dealt as star names (the routine that deals
-  them wasn't traced to the end).
-- Whether a new game posts any first messages (no report call with the credits' codes was
-  found; the help page and the welcome screen may be all there is).
 - The battle routines' inner loops were compared by structure, constants and the hit
   table, not line by line.
 - Premultiplied alpha in the sheets: the PVR frames were taken as stored (straight
   alpha, which they look like); the CgBI PNGs were un-premultiplied.
+- Settled since (`docs/open-questions.md`, iOS): "Hope" and "SparksMcGee" are dealt like
+  any name; a new game posts no first messages; the hints are lines 4-42; the stars
+  named at a new rank go into later galaxies. The ruleset is `js/rules-ios.js`.

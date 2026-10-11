@@ -13,15 +13,16 @@ developers. It is filled in one version at a time, earliest first.
    is reproduced as the program did it.
 2. **Only if that code truly doesn't settle it**, the next lower version's code: 3.0.1
    falls back on 2.0, then 1.2; 2.0 on 1.2; 1.2 on 2.0 (nothing is earlier); 4.0.5 on
-   3.0.1; 5.0.5 on 4.0.5; Palm (a port of 5.0) on 5.0.5. A later version is the last
-   resort.
+   3.0.1; 5.0.5 on 4.0.5; Palm and iOS (ports of 5.0) on 5.0.5. A later version is the
+   last resort.
 3. **Then the user**, who is in contact with the original developers.
 
 A fallback only keeps the game playable: the question stays open and stays on this list.
 
 The versions, in order: Mac 1.2 (1992; a pre-release of 2.0), DOS / Windows 3.1 2.0
 (1993, with its Mac 2.0.1 edition of 1992), Mac 3.0.1 (1993), Windows 95 4.0.5 (1996,
-with its Mac 4.0.5 edition), Mac 5.0.5 (2003), and Palm 5 (2003, a port of 5.0). An
+with its Mac 4.0.5 edition), Mac 5.0.5 (2003), Palm 5 (2003, a port of 5.0) and iOS
+1.2.9 (2012, a port of 5.0). An
 edition's questions are in its version's section.
 
 ## Legend
@@ -738,6 +739,13 @@ These are what 5.0.5's code does and what the remake now does; they look like sl
 9. **The past players' names**: 5.0.5 adds every player's name to the Preferences'
    lists of names (`FUN_10066000`), which later games draw computers' names from; the
    remake keeps no such list and draws from the game's 20 and 22.
+10. **The hints** (settled October 2026): 5.0.5's turn sends a hint every 10-year step
+    to each player with the hints preference on (`FUN_10072a10`: report 500 with the
+    clock's rand(4, 43), STR# 6021 lines 4-43); the remake had shown one every seven
+    turns. Now one every turn (`rs.hintTexts`), but the skin shows it, so: once an End
+    Turn even with 20, 30 or 50 years a turn (5.0.5: one a step), drawn by the browser,
+    from the viewer's hints preference, after the turn's other messages and with the
+    skin's picture (5.0.5: report 500's, 9049, first in the list).
 
 ### Interface not done
 
@@ -774,6 +782,12 @@ These are what 5.0.5's code does and what the remake now does; they look like sl
 - **The Radical Research window** (`FUN_1005f280`, dialog 0x99): with a full hand of four
   programs, cancel one (it leaves the hand). A rule, in a window; not in the remake.
 - **The turn time limit** (`FUN_10058360`, `FUN_10066260`), network play and the lobby.
+- **Naming a star at a new rank** (the rank window `FUN_1005e2b0`, its field and STR#
+  6004.10; `docs/fallbacks.md`, a gap). The iOS port, the same 5.0 source, keeps the
+  names in the preferences and puts up to five of them, in a row from a random start,
+  into each new galaxy through the New Game record's `specialStarNames` (5 x 12 bytes,
+  `numSpecialStarNames`), whose layout comes from 5.0's own (iOS section below); 5.0.5's
+  own use of them wasn't read, so it isn't built for 5.0.5.
 
 ## Palm 5 (2003)
 
@@ -918,3 +932,79 @@ These are what the Palm code does and what the remake now does; they look like s
   how to prevent %s ..."; money without "$"); the remake shows 5.0.5's.
 - **The demo** (three computers, a small galaxy, capped technology, report 0x474) and
   registration: nothing to register.
+
+---
+
+## iOS 1.2.9 (2012)
+
+The C++ rule core of the iOS program (0x100020614-0x10003e7b4, 291 routines) was read
+beside its 5.0.5 twins (`docs/coverage-ios.md`), and the interface routines that change
+the game one by one (`docs/ios-findings.md`). The ruleset (`js/rules-ios.js`) takes the
+5.0.5 rules and computers wherever the iOS code does the same, and its own code where
+it doesn't. One page of the program (0x10008d000-0x10008dfff) is encrypted by the App
+Store and was never decrypted or read; no rule routine lies there.
+
+Settled from the code in October 2026 (they were open in `docs/ios-findings.md`):
+
+1. **"Hope" and "SparksMcGee" are dealt like any other name.** The galaxy set-up
+   (`0x10002a38c` @0x10002b9d8-0x10002bcac) draws each star's name over the whole list
+   of 257 (rand(0, count − 1), again while an earlier star has it), then shuffles; the
+   names named at a new rank come first. A saved game's "Sparks McGee" (12 letters, too
+   long for a star) is renamed "SparksMcGee" when loaded (`0x10003c2c8`). "Hope" comes
+   after "Naboo" (the 192nd). Done (`rs.starNames`).
+2. **No first messages.** Messages enter the report list only through `0x10003b028` and
+   `0x10003af9c`, called from the battles (`0x100021108`), the turn (`0x10002dca8`),
+   exploring (`0x10003405c`) and the new colony (`0x100034238`); no pointer to either is
+   stored anywhere. No call passes the credits (1000-1002), and report 500 is sent only
+   by the turn's hint. Done (`welcome: []`). (Nothing in the encrypted page can be
+   ruled out, but it holds `RootViewController` and drawing code.)
+3. **The hints are lines 4-42 of the 42.** The turn sends report 500 with rand(4, 42)
+   (the interface's numbers, `0x10003cb08`; the count from `0x10008e5c4`) and report 500
+   reads line n − 1 (`0x10008e508`). Done (`rs.hintTexts`, 39 lines).
+4. **Name a Star at a new rank** (`-[RankLevelDialogLayer initDialog]` 0x1000b8b78,
+   `doClose:` 0x1000b90ec; `-[EndGameLayer doUpdateMPs]` 0x10009ce54;
+   `-[NewGameScene SetupExtraGameInfo:]` 0x1000162d8): new in this pass. Done
+   (`rs.nameAStar`, five names a galaxy, from a start the remake draws from the seed).
+
+### Open
+
+None of the rules.
+
+### Settled, worth confirming
+
+1. **Kansas has a Cancel button.** 5.0.5 tells you "Dorothy, ..." and evacuates; iOS
+   shows the line with OK and Cancel (`tryEvacuatePlanet:` 0x1000941e0), so it is a
+   question. Done as a question.
+2. **Evacuate asks for every colony**, including one losing money ("Do you really want
+   to evacuate %s?", sprintf Templates 36).
+3. **The Allow Debt switch starts at "No"** each time Build Ships opens (LIKELY: no
+   code sets its value), so by default you can't buy past your Ship Savings.
+
+### Remake's choices
+
+1. **Random numbers** are the remake's own (iOS: 5.0.5's table of 5,000 for the game,
+   `0x1000d0fbc`; the C library's `rand()` for the interface).
+2. **When the computers plan and fleets move**, **dragging a budget bar**, **a failed
+   purchase**, **gifts** and **master points' cap**: as 5.0.5's choices above.
+3. **Game Center** (the "master_points" and "games_won" leaderboards and seven
+   achievements): kept in the browser (`rs.gameCenter`, its own key
+   "ho5.gamecenter.ios"), never with another ruleset's records. A game counts once by
+   its seed (iOS: its creation time, among the last 10 won).
+4. **Which five named stars go in** is drawn from the game's seed (iOS: `rand()`).
+5. **The hints** are shown by the skin, as 5.0.5's (above).
+6. **Every game starts from the default shares** (iOS keeps the first turn's for the
+   next game, `-[SimpleServer copyPrefsToPlayerRec]` 0x10009030c).
+7. **Money over ten million** is written in full; iOS's formatter (`0x10003cd4c`)
+   writes "$12.345M" (and "12,345K" for other numbers).
+
+### Interface not done
+
+- **Several saved games**, e-mailing a game, the welcome screen and the help page.
+- **Game Center's own windows**: the leaderboards and achievements are listed, not
+  shown as Game Center shows them.
+- **The questions before building many Scouts or Tankers** (Alert Strings 36-37, shown
+  in the Build Ships window).
+- **Organize Fleets' arrows** (`moveContainer:`; what they move wasn't read).
+- **Options locked by rank**: none on iOS, so nothing to do.
+- **The Kansas and Hope words** in other languages (`fr.lproj`, `tr.lproj`).
+

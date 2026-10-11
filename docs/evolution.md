@@ -1,6 +1,7 @@
 # How Spaceward Ho! grew
 
-Spaceward Ho! changed a great deal between 1992 and 2003. This file goes through the
+Spaceward Ho! changed a great deal between 1992 and 2003 (and was ported to the iPhone in
+2012). This file goes through the
 versions the remake has, in order, and says what each one is and what it added, removed
 or changed. It is written one version at a time, from the code of each (the findings
 files and coverage files cited); anything not read in the code is marked INFERRED.
@@ -15,6 +16,7 @@ files and coverage files cited); anything not read in the code is marked INFERRE
 | 4.0.5 | 1996 | Mac (68k and PowerPC) | `js/rules-mac405.js` |
 | 5.0.5 | 2003 | Mac OS 9 / X (PowerPC) | `js/rules-original.js` |
 | 5 for Palm OS | 2003 | Palm (68k), a port of 5.0 | `js/rules-palm.js` |
+| 1.2.9 for iOS | 2012 (1.2.9: 2017 or later) | iPhone and iPad (arm64), a port of 5.0 | `js/rules-ios.js` |
 
 ### Versions and editions
 
@@ -34,6 +36,7 @@ plays each edition it has read as its own ruleset, grouped by version (`rs.famil
 | 4.0 | Windows 95 | 4.0.5 | 1996 | `405` |
 | 5 | Mac | 5.0.5 | 2003 | `original` |
 | 5 | Palm OS | 5 (1.0.4) | 2003 | `palm` |
+| 5 | iOS | 1.2.9 | 2012 | `ios` |
 
 The Amiga 2.0 (German, 1994) is the DOS game's rules with its own art, so it is a skin of
 the `dos` ruleset, not an edition of its own. Where two editions of a version differ,
@@ -702,6 +705,64 @@ History, a Radical Research window, a Players window (Add, Start; nobody can be 
 once the game exists), the New Game
 Wizard, Preferences (sound, Celsius, hints, best buddies' stars, auto-zoom), Auto Play,
 Find A Star, and system sounds instead of the Mac's. No network play.
+
+## iOS 1.2.9 (2012)
+
+Delta Tao's own list of what changed in 5 (quoted at the top of "Mac 5.0.5" above) covers
+this port too; Ariton's port has no list of its own.
+
+### What it is
+
+Spaceward Ho! for iPhone and iPad (Ariton Technologies, `com.ariton.spacewardho`) was
+first released on 29 March 2012. The version read is 1.2.9, built with Xcode 8.3.3
+against the iOS 10.3 SDK on macOS 10.12.6, so in mid-2017 or later: one arm64 program
+drawn with cocos2d, landscape only, for the iPhone (and iPod touch) and the iPad. Its
+C++ rule core is Delta Tao's 5.0 source recompiled: the same classes, records and
+routines in the same order as 5.0.5's PowerPC build, and it calls no Objective-C. What
+Ariton wrote is the touch interface around it. Everything below is from the code
+(`docs/coverage-ios.md` and `docs/ios-findings.md`; 5.0.5: `docs/coverage-505.md`,
+`docs/original-findings.md`).
+
+### Rules: what stayed
+
+All of 5.0.5's: the turn (`0x10002dca8` as `FUN_10072a10`, its subroutines inlined,
+the interest's sign slip included), the battles, Armageddon, novas, the set-up (the
+star count kept in 19-220, the seven shapes, the starting table), ship costs and
+buying, the Radical discoveries, the difficulty rating, master points and their cap,
+the 25 ranks, the random table of 5,000 numbers, and the computer players (all 21 steps
+and their helpers paired with no difference). Unlike the Palm port it keeps 5.0.5's 220
+stars and 16 player slots, and its alliance, luck and nova rules.
+
+### Rules: what changed
+
+| Area | 5.0.5 | iOS 1.2.9 |
+|---|---|---|
+| New Game options | Alliances, Luck in Battles and Best Buddies, "Any (1-8)" computers, IQ 50-200, options locked by rank | only Best Buddies; options always 7 (+0x20 with Best Buddies); computers 1-8; the IQ in tens; nothing locked (`-[NewGameScene updateCreationInfo]`, `newGameOptions`) |
+| Players | up to 8 people and 8 computers, network play | one person (`-[SimpleServer isSinglePlayer]`), no network |
+| Commands | Surrender, Send Message | neither (`-[AdditionalMenu init]`); the computers still surrender and send messages |
+| Evacuate Planet | asks only for a profitable colony | asks for every colony ("Do you really want to evacuate %s?"); Kansas, one time in three, now with Cancel; the names compared whole (`tryEvacuatePlanet:`) |
+| First messages | the credits, with hints 1-3 around them | none (the welcome screen and a help web page) |
+| Hints | STR# 6021, lines 4-43, one a step | its own 42 "Help Messages", rewritten for touch; lines 4-42, one a step |
+| Star names | 255 | 257: "Hope" and "SparksMcGee" added, dealt like any other; up to five of the names you chose at new ranks go in (`SetupExtraGameInfo:`) |
+| Build Ships | buys down to the borrowing limit | an "Allow Debt" switch, off: down to Ship Savings of 0 (`determineCapacity`) |
+| Auto play | the Auto button, settings in Preferences | a window: Computer Play For Me, Just End My Turns Only, Play One Turn, its sliders, stop when something interesting happens, a message every 0-10 seconds (`AutoPlayLayer`) |
+| Master points | in the preferences | a Game Center leaderboard ("master_points"), with "games_won" and seven achievements; the award and the cap 5.0.5's (`EndGameLayer`) |
+| Report texts | curly quotes | straight quotes; "™" read as "ª" |
+
+### Computer players
+
+The same: `0x1000239e0` calls 5.0.5's 21 steps in the same order (`FUN_10081cc0`), every
+step and helper read beside its twin. The computers' auto play for a human sets
+aggressiveness and colonies defended from the Auto Play window's sliders, as 5.0.5's
+Preferences did.
+
+### Interface
+
+Touch throughout (`docs/ios-findings.md`, "Touch controls"): the map pans with a finger
+and zooms with two, a tap selects a star, a fleet is dragged from the star's list to
+another star, a double tap on a star opens Build Ships, the budget bars are touched on a
+log scale. Several saved games, sent by e-mail; Game Center; a help web page; the
+artwork redrawn for Retina screens, the sounds 5.0.5's.
 
 ---
 

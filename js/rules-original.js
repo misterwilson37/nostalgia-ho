@@ -2806,4 +2806,16 @@ Object.defineProperties(E.RULESETS.original, Object.fromEntries(Object.entries({
   // fuel left and its Range, as the computers' are (js/ai-original.js mapRoute)
   route: (G, f, sid) => { const A = E.aiOf(G); return A && A.mapRoute ? A.mapRoute(G, f, sid) : null; },
 }).map(([k, value]) => [k, { value, enumerable: false, writable: true, configurable: true }])));
+// CONFIRMED (FUN_10072a10, pass 1 for each player, after report 0x3f4): a
+// hint every 10-year step to each player whose hints preference is on
+// (player +0x1111) or in the demo (game +0x60): report 500 with the clock's
+// rand(4, 0x2b) (the demo's rand(4, 0x34)), and report 500 reads STR# 6021
+// line n (hint 1-3 are the first messages, welcome505), so lines 4-43 (the
+// demo's 44-52 are never drawn outside it). The Palm (FUN_000500d4) and iOS
+// (0x10002dca8) turns do the same. The skin shows one of rs.hintTexts every
+// turn (the remake had shown one every seven). Not enumerable, so 4.0.5 and
+// the versions before don't take it; js/rules-palm.js and js/rules-ios.js
+// give their own.
+Object.defineProperty(E.RULESETS.original, 'hintTexts', { enumerable: false, configurable: true,
+  get: () => (DATA.hints || []).slice(3, 43) });
 })(this);

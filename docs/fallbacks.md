@@ -89,6 +89,14 @@ business; the DOS 2.0 "Inherited rules audit" covers them for 2.0.
 | mac20 | `computerIdentity` | as above | verified: Mac 2.0.1 has one generator, `RND` @121a6 (no `aSynchRand`), and `DoGameSolidificationStuff` @a40d8 draws the names with it |
 | 301 | `computerIdentity` | as above | verified: `DoGameSolidificationStuff` @a741a seeds the game's generator with the galaxy's seed (`srand`, header +6) and draws the names with `RND` @11ea2, as 1.2 does; 3.0.1 has no other generator |
 | 405 | `computerIdentity` | as above | verified: 405-findings, "Computers' sexes, and the names of the computers, are drawn with `aSynchRand`, not the game's random numbers" on the Mac (Mac 4.0.5 differs, 7), so the game's on Windows (`FUN_004768cc`, coverage-405) |
+| 12 | `msgText` | every message as the rules wrote it | verified: each ruleset writes its version's own wording (1.2's own report texts, rules-12); only the iOS game reworded the same texts (`rs.msgText`, iOS below) |
+| dos | `msgText` | every message as the rules wrote it | verified: each ruleset writes its version's own wording (2.0's, rules-dos); only the iOS game reworded the same texts (`rs.msgText`, iOS below) |
+| mac20 | `msgText` | every message as the rules wrote it | verified: each ruleset writes its version's own wording (2.0's (the Mac's strings, rules-mac20)); only the iOS game reworded the same texts (`rs.msgText`, iOS below) |
+| 301 | `msgText` | every message as the rules wrote it | verified: each ruleset writes its version's own wording (3.0.1's, rules-301); only the iOS game reworded the same texts (`rs.msgText`, iOS below) |
+| 405 | `msgText` | every message as the rules wrote it | verified: each ruleset writes its version's own wording (4.0.5's, rules-405); only the iOS game reworded the same texts (`rs.msgText`, iOS below) |
+| mac405 | `msgText` | every message as the rules wrote it | verified: each ruleset writes its version's own wording (4.0.5's, rules-405); only the iOS game reworded the same texts (`rs.msgText`, iOS below) |
+| original | `msgText` | every message as the rules wrote it | verified: each ruleset writes its version's own wording (STR# 6020 through `js/data.js`); only the iOS game reworded the same texts (`rs.msgText`, iOS below) |
+| palm | `msgText` | every message as the rules wrote it | verified: each ruleset writes its version's own wording (5.0.5's STR# 6020; the Palm's few rewordings are under "Interface not done" in docs/open-questions.md); only the iOS game reworded the same texts (`rs.msgText`, iOS below) |
 
 ### Mac 1.2 (`12`)
 
@@ -181,6 +189,28 @@ the Palm program is checked on its own:
 | palm | `queueMergeAny` | (ship queues) | unused: no ship queues |
 | palm | `queueSlots` | (ship queues) | unused: no ship queues |
 | palm | `yardRefund` | (ship queues) | unused: no ship queues |
+
+### iOS 1.2.9 (`ios`)
+
+The iOS game is 5.0.5's rule core recompiled for arm64 (ios-findings), and its ruleset
+takes every 5.0.5 hook, as the Palm's does. Its defaults are 5.0.5's, checked in the
+iOS program:
+
+| Ruleset | Hook | Engine default | Status |
+|---|---|---|---|
+| ios | `battleText` | the engine's battle report wording | unused: 5.0.5's `battle505` (the iOS battles `0x100020734` = `FUN_1007e870`) |
+| ios | `checkEveryStep` | the winner on the last step only | verified: the iOS turn `0x10002dca8` = `FUN_10072a10`, the winner on the last step (ios-findings, "The turn") |
+| ios | `maxPlayers` | 16 players | verified: 16 slots kept (ios-findings: "keeps 5.0.5's 220-star cap, its 16 player slots"); one of them human (`rs.maxHumans`, `fixOptions`) |
+| ios | `maleNames` | the engine's names | unused: 5.0.5's `computerIdentity505`; iOS draws the same way (`-[NewGameScene SetupExtraGameInfo:]` 0x1000162d8: 8 slots, the interface's rand(1, 2) == 1 a man, a name of that sex drawn again while an earlier slot has it), from the same 20 and 22 names ("Male / Female Computer Names") |
+| ios | `femaleNames` | the engine's names | unused: as `maleNames` |
+| ios | `femaleComputers` | 45 % | unused: as `maleNames` (a woman one time in two) |
+| ios | `shipNames` | the engine's ship names | unused: 5.0.5's `designName505` / `newDesign505` (the 15 names a class are 5.0.5's, ios-findings "The string lists") |
+| ios | `outComputersPlay` | out computers give no orders | verified: the computer turn `0x1000239e0` = `FUN_10081cc0`, every step paired (coverage-ios), so it runs only while the out flag is 0 |
+| ios | `scrapAt` | onto the planet | unused: as 5.0.5 (marks, dismantled in the turn; Dismantle is `-[OrganizeFleetsLayer scrapFleet:]`, a mark) |
+| ios | `scrapped` | no report | unused: as 5.0.5 |
+| ios | `queueMergeAny` | (ship queues) | unused: no ship queues |
+| ios | `queueSlots` | (ship queues) | unused: no ship queues |
+| ios | `yardRefund` | (ship queues) | unused: no ship queues |
 
 ### Mac 2.0.1 (`mac20`)
 
@@ -280,6 +310,9 @@ are now the ruleset's own, from the code (`docs/original-findings.md`, section 1
 ## Gaps to check, by version
 
 - **5.0.5**: Name a Star at a new rank (`nameAStar`, above: found, not built).
+- **iOS 1.2.9**: none (its `nameAStar` is its own, from `RankLevelDialogLayer` and
+  `-[NewGameScene SetupExtraGameInfo:]`; the same record in 5.0.5 suggests how 5.0.5's
+  names were used, docs/open-questions.md).
 - **Palm OS 5**: none of 5.0.5's left but its own Name a Star words (the hook is the
   Palm's own).
 - **Mac 4.0.5**: none of its own left (4.0.5's `computerIdentity` is the Mac's own hook).

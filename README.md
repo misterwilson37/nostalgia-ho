@@ -47,6 +47,7 @@ what differs (the Mac 2.0.1 on the DOS and Windows 2.0, the Mac 4.0.5 on the Win
 | 4.0 | Windows 95 | 4.0.5 | 1996 | `405` | w95 |
 | 5 | Mac | 5.0.5 | 2003 | `original` | classic |
 | 5 | Palm OS | 5 | 2003 | `palm` | palm |
+| 5 | iOS | 1.2.9 | 2012 | `ios` | ios |
 | remake | The remake's own rules | Claude | 2026 | `claude` | classic |
 
 (The Claude rules set none of these fields; `js/engine.js` gives them, `OWN_EDITIONS`.)
@@ -156,8 +157,9 @@ Optional ruleset flags the skin reads (each is documented where it is read):
 - `rs.hints`: `false` when the version had no between-turn hints (1.2, 2.0, 3.0.1); the
   hints choice in Preferences is then left out. (`js/skins/classic/ui.js`, `addTurnNotes`, `openPrefs`)
 - `rs.hintTexts`: a version's own between-turn hints, one shown every turn, picked by the
-  browser's random numbers (the Palm OS rules: tSTL 6021.4-43). Left out: 5.0.5's hints, one
-  every seven turns. (`js/skins/classic/ui.js`, `addTurnNotes`)
+  browser's random numbers (5.0.5: STR# 6021 lines 4-43, `FUN_10072a10`; the Palm OS rules:
+  tSTL 6021.4-43; iOS: its "Help Messages" 4-42). Left out (4.0.5 and before, the Claude
+  rules): one of `js/data.js`'s hints every seven turns. (`js/skins/classic/ui.js`, `addTurnNotes`)
 - `rs.celsius`: `true` when the version showed temperatures only in °C, to a tenth (1.2,
   the French edition); Preferences then shows °C as fixed. (`js/skins/classic/ui.js`, `degF`)
 - `rs.bestBuddies`: `false` when the version had alliances but no best-buddy pacts (3.0.1);
@@ -224,6 +226,30 @@ Optional ruleset flags the skin reads (each is documented where it is read):
 - `rs.forceEndTurn`: `{ ask }`, Mac 2.0.1's Force End Turn, offered with several players:
   asks (box 3210, %s the player, those not done, all) and plays the turn with everyone
   marked done. (`js/skins/classic/ui.js`, `forceEndTurn`)
+- `rs.msgText(G, text)`: a version's own wording of every message the rules send (iOS
+  1.2.9: straight quotes, "ª" for "™"); left out, the text as given. (`js/engine.js`, `msg`)
+- The New Game window of a version that had fewer choices (iOS 1.2.9): `rs.optionBoxes`
+  `false` (no Alliances, Luck or Novas boxes; the rules turn all three on),
+  `rs.anyComputers` `false` (no "Any (1-8)"; also the Palm OS), `rs.iqStep` (the IQ
+  slider's step: 10), `rs.maxHumans` (how many people may play: 1; the ruleset's
+  `fixOptions` keeps to it). (`js/skins/classic/ui.js`, `newGameDialog`)
+- `rs.surrenderCommand` and `rs.chatCommand` `false`: the version had the rule but no
+  command for the player (iOS: no Surrender, no Send Message; the computers still
+  surrender and send messages). Left out: the command shows with its feature.
+- `rs.allowDebt` (`{ label, words, on }`): Build Ships' "Allow Debt" switch (iOS): off,
+  ships are bought only while Ship Savings stay at 0 or more; on, down to the borrowing
+  limit. Left out: always down to the borrowing limit. (`js/skins/classic/ui.js`, `openBuild`)
+- `rs.autoPlayWindow` `'ios'` and `rs.autoPlayDefaults` (`{ aggr, colDef, stop, every }`):
+  iOS's Auto Play window (Computer Play For Me, Just End My Turns Only, stop when
+  something interesting happens, click through the messages every n seconds) and its
+  preferences' defaults. (`js/skins/classic/ui.js`, `openAutoPlay`)
+- `rs.gameCenter`: the iOS game's Game Center records, kept in the browser under their own
+  key (`gameCenter.key`, "ho5.gamecenter.ios"), never with another ruleset's: master points,
+  games won and seven achievements. `gameCenter.gameOver(record, { gameId, won,
+  difficulty }, namedStars)` gives `{ rec, points, rank, newRank, askName }` (the award is
+  5.0.5's; a game counts once among the last 10 won); `blank()`, `leaderboards`,
+  `achievements` (listed, `{ id, title, goal }`). Such a ruleset has no `rs.masterPoints`,
+  so the 5.0.5 rank history ("ho5.profile") isn't written for it.
 - A skin's `T.endTurnYear` (`[x, y, w, h, picture width]`): the window in its End Turn
   picture where the year is written (mac4, mac4c, w95).
 - A battle record's `duel` (0, 1, …): a ruleset that keeps one replay per duel, as 1.2 and
@@ -250,6 +276,11 @@ Optional ruleset flags the skin reads (each is documented where it is read):
   DOS 2.0 rules with what the Mac program does differently (Organize Fleets, the
   computers' attack rating, the meteor report's stale name; `docs/dos-findings.md`, "Mac
   2.0.1 differs")
+- `js/rules-ios.js`: the "iOS 1.2.9" rules (Spaceward Ho! for iPhone and iPad, Ariton,
+  2012; 1.2.9 from 2017 or later): the 5.0.5 rules recompiled, with the port's own New
+  Game choices, one person, no Surrender or Send Message, Evacuate's questions, its
+  hints, star names, Allow Debt, Auto Play window, report wording and Game Center
+  records (`docs/ios-findings.md`)
 - `js/rules-mac405.js`: the "Mac 4.0.5" rules (Spaceward Ho! 4.0.5 for the Mac, 1996): the
   Windows 95 4.0.5 rules with what the Mac program does differently (Tankers as targets,
   tech level and ship names, the computers' names, the Hall of Fame's ranks;

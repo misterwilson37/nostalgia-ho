@@ -4,7 +4,7 @@ Every ruleset plays its version exactly as released, bugs and quirks included. T
 unofficial patch is a choice at New Game ("Apply the x.y.z.1 patch: fixes for obvious bugs
 (not an official release)", `G.opts.patch`) that fixes a version's *obvious* bugs and
 nothing else. Its number is the version's own with ".1" added (`HO.patchVersion`), so
-"1.2.1", "2.0.1.1" (DOS and Windows, and Mac), "3.0.1.1", "4.0.5.1" (Windows 95, and Mac), "5.0.5.1" and Palm "1.0.4.1". It is not a release of the original
+"1.2.1", "2.0.1.1" (DOS and Windows, and Mac), "3.0.1.1", "4.0.5.1" (Windows 95, and Mac), "5.0.5.1", Palm "1.0.4.1" and iOS "1.2.9.1". It is not a release of the original
 game; it is the remake's own.
 
 This file goes through every slip and quirk listed for each version in
@@ -523,3 +523,46 @@ The Palm program's own version is 1.0.4, so its patch is 1.0.4.1 (`rs.patchVersi
    (`FUN_00079ea8`) and 5.0.5 keep the fuel used; moving one into another fleet keeps
    that fleet's fuel and replaces its colonists. A slip or a convenience; the remake has
    no pile move, so nothing to fix.
+
+---
+
+## iOS 1.2.9 (patch 1.2.9.1)
+
+The iOS program's own version is 1.2.9, so its patch is 1.2.9.1 (`rs.patchVersion`).
+Its rule core is 5.0.5's recompiled (`docs/ios-findings.md`), so 5.0.5's entries above
+apply to it, at the iOS addresses in `docs/coverage-ios.md`.
+
+### Obvious bug (fixed in 1.2.9.1)
+
+- **5.0.5's two, where the iOS code is the same:** `globalWarming` (the interest,
+  `0x10003cb84`, inlined in the turn `0x10002dca8` with the same test) and `scrapRange`
+  (the computers' step 7, `0x10002557c` = `FUN_100870a0`, paired with no difference).
+- **`iosCharacters`: the Mac's characters read as Latin-1.** The string lists were
+  carried over from the Mac resources byte for byte and read on the iPhone as another
+  encoding, so MacRoman "™" (0xAA) shows as "ª" and "•" (0xA5) as "¥": the Speed tech
+  names "PowerPCª" and "Speedy Gonzalezª" (Speed Tech Strings) and the curse
+  "#!$@*$&@¥ª!" (Report Window Templates 50 and 66). A garbled message. *Fix:* "™" and
+  "•", as 5.0.5 shows them (`js/rules-ios.js` `msgText`; the skin's own tech-name
+  labels are the skin's).
+
+### Quirk or design (left as released)
+
+- 5.0.5's, as above.
+- Evacuate asks for every colony, and Kansas's line now has a Cancel button
+  (`tryEvacuatePlanet:` 0x1000941e0): a new design.
+- The straight quotes and apostrophes of the reports, and report 135's "." for "…":
+  the port's own wording.
+- The Allow Debt switch starts at "No" each time Build Ships opens (LIKELY: nothing sets
+  it).
+- "Hope" and "SparksMcGee" among the star names; a saved game's "Sparks McGee" is
+  renamed on loading (`0x10003c2c8`): the name was once too long for a star's 11
+  letters.
+
+### Unclear (left; for the developers)
+
+1. 5.0.5's first two above: shares used as they stand, and dipping raising the
+   borrowing limit.
+2. Money over ten million: the number formatter (`0x10003cd4c`) writes "$12.345M",
+   and other numbers that size "12,345K"; whether 5.0.5 did the same wasn't compared.
+   The remake writes the number in full in every ruleset.
+
