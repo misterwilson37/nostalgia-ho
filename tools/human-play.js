@@ -35,7 +35,7 @@ try { ({ chromium } = require('playwright')); } catch (e) { console.error('Playw
 
 const args = process.argv.slice(2);
 const opt = (k, d) => { const a = args.find(x => x.startsWith('--' + k + '=')); return a ? a.slice(k.length + 3) : d; };
-const ALL = ['12', 'dos', '301', '405', 'original', 'palm', 'ios', 'claude', 'mac20', 'mac405'];
+const ALL = ['12', 'dos', '301', '405', 'original', 'palm', 'claude', 'mac20', 'mac405', 'ios']; // new rulesets go last: each one's seed is its place in this list
 // The Mac editions (js/rules-mac20.js, js/rules-mac405.js) have the same
 // New Game settings as the same version's other edition. While the New Game
 // window has no settings of their own (it starts only the rulesets it knows),
