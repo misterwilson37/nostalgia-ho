@@ -103,7 +103,7 @@ The 44 routines Ghidra could not decompile were read in the disassembly (a full 
 | `FUN_00025d9e` | Star spacing check, other direction | `FUN_1006f050` | Rule, implemented | js/rules-original.js okFwd |
 | `FUN_00025e38` | Nearest star helper | `FUN_1006f110` | Rule, implemented | js/rules-original.js |
 | `FUN_00025efa` | Free star test | `FUN_1006f1e0` | Rule, implemented | js/rules-original.js |
-| `FUN_00025f4a` | A star: temperature, gravity band, metal | `FUN_1006f280` | Rule, implemented | js/rules-original.js newStar |
+| `FUN_00025f4a` | A star: temperature, gravity band, metal; the names: the kept ones (game +0x15a, +0x15e) first, the others distinct, the list shuffled | `FUN_1006f280` | Rule, implemented | js/rules-original.js newStar |
 | `FUN_00026304` | Players created and set up: home system table, home star, Outpost made hostile, Abundant's second colony (third slot, home fourth, 50 per mille each), budget 650/250/100, designs (named by `FUN_0004cd18`), ships, borrowing limit, best-buddy computers; the first messages (@000266fc-000268cc: with the hints preference, 500 with 1, 1000, 1002, 500 with 2 and 3, 1159; else 1000, 1002, 1159) | `FUN_1006c8c0`, `FUN_1006f640`, `FUN_1006f870` | Rule, implemented | js/rules-original.js setupPlayer, setup505, afterSetup (the Abundant slots, both rulesets); js/rules-palm.js welcome |
 | `FUN_0002746e` | Computer personality | `FUN_100704d0` | Rule, implemented | js/ai-original.js (via js/ai-palm.js) makeAI |
 | `FUN_0004adc0` | New fleet (Colony Ships loaded, a Biological fleet unfuelled, others full) | `FUN_1007bcb0` | Rule, implemented | engine newFleet, js/ai-original.js (via js/ai-palm.js) newFleet |
@@ -215,7 +215,7 @@ The 44 routines Ghidra could not decompile were read in the disassembly (a full 
 | `FUN_0002d91c` | First End Turn: the research and budget shares kept as the next game's defaults; the hints flags copied | `FUN_10064600` | Interface | not done (every game starts from the defaults) |
 | `FUN_00034d08` | Map pen: tapping stars and fleets, dragging a fleet plans its route with DeterminePath (`FUN_0004c22c`, cap 7) | `FUN_1008c5f0` | Rule, implemented | ui.js map; engine orderMove; js/rules-original.js route |
 | `FUN_0002cca8` | New game with the same settings (Game menu) | `FUN_1006579c` | Interface | ui.js New Game |
-| `FUN_000692c4` | The New Game window's OK: 8 computer slots' sexes (SysRandom(1, 2) == 1 a man) and names (SysRandom over the sex's list, `FUN_0002bf90`, `FUN_0002c0b8`: tSTL 6280 / 6281), drawn again while an earlier slot of the same sex has the name; up to five of the star names you chose at a new rank put in the galaxy | `FUN_10059570` | Rule, implemented | js/rules-original.js computerIdentity505; the chosen star names: js/engine.js newGame (opts.starNamesKept, rs.nameAStar) |
+| `FUN_000692c4` | The New Game window's OK: 8 computer slots' sexes (SysRandom(1, 2) == 1 a man) and names (SysRandom over the sex's list, `FUN_0002bf90`, `FUN_0002c0b8`: tSTL 6280 / 6281), drawn again while an earlier slot of the same sex has the name; up to five of the star names you chose at a new rank, in a row from SysRandom(0, kept − 5), put in the galaxy | `FUN_10059570` | Rule, implemented | js/rules-original.js computerIdentity505; the chosen star names: js/engine.js newGame (opts.starNamesKept, rs.nameAStar) |
 | `FUN_00036810` | Dismantle Current Fleet (menu 0x519) | `FUN_10062c10` | Rule, implemented | js/rules-original.js flagScrap |
 | `FUN_00036928` | Dismantle toggle: the mark (fleet +0x72); a fleet bought this turn is un-bought (price, prototype, metal, interest) | `FUN_10062c10` | Rule, implemented | js/rules-original.js flagScrap |
 | `FUN_0003734e` | Evacuate Planet / Dont Evacuate Planet: Kansas always, Hope and Ship ask, profitable colonies ask; sounds 7002 / 4000; net -+ income; share to 0 | `FUN_10060fac` | Rule, implemented | js/rules-palm.js evacuateToggle |
@@ -261,7 +261,7 @@ The 44 routines Ghidra could not decompile were read in the disassembly (a full 
 - `FUN_0003825a`, `FUN_0003871c`: options locked by rank, left open on purpose (as for 5.0.5).
 - `FUN_00052832`, `FUN_0005730c`: the demo's technology cap (report 0x474, the table at 0xEFF00A); nothing to register in the remake.
 
-Organize Fleets' pile moves (`FUN_000790ea`, `FUN_0004af48`), the first turn's shares kept as the next game's defaults (`FUN_0002d91c`), the star names chosen at a new rank (`FUN_000692c4`), the hints' every-turn timing and the Palm report texts are interface; they are in `docs/open-questions.md` (Palm).
+Organize Fleets' pile moves (`FUN_000790ea`, `FUN_0004af48`), the first turn's shares kept as the next game's defaults (`FUN_0002d91c`), the hints' every-turn timing and the Palm report texts are interface; they are in `docs/open-questions.md` (Palm).
 
 ## The rest of the program, by band
 

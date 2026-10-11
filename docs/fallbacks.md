@@ -159,7 +159,6 @@ business; the DOS 2.0 "Inherited rules audit" covers them for 2.0.
 | original | `starNames` | `js/data.js`'s 255 star names (5.0.5's) | verified: palm-findings, "Star names: 5.0.5's" 255 (tSTL 6060 against 5.0.5) |
 | original | `femaleComputers` | a computer is a woman 45 % of the time | unused: `computerIdentity505` draws each sex, a woman one time in two (`FUN_10059570` @1005a318: the clock's rand(1, 2), 1 a man) |
 | original | `shipNames` | the ship names the engine's `designName` uses | unused: `designName505` and `newDesign505` name every type themselves, from `js/data.js`'s lists (STR# 6010-6016, `FUN_10095b80`) |
-| original | `nameAStar` | no Name a Star | gap (found in the October 2026 check, not built): 5.0.5's rank window (`FUN_1005e2b0`) has a star-naming field and the alert "Sorry, but there is already a star with that name" (STR# 6004.10, `FUN_100966c0(10)` @1005e73c); how the name is used in later games wasn't read |
 | original | `outComputersPlay` | a computer out of the game gives no orders | verified: the computer turn (`FUN_10081cc0`, called for each computer by `FUN_10072a10`) runs its steps only while the player's out flag (+0x34, set by `FUN_1007abb0`) is 0; an out player's fleets are dismantled in its next pass 1 anyway |
 | original | `scrapAt` | a fleet scrapped over someone else's star: the metal falls onto the planet | unused: nothing in the 5.0.5 rules reaches the engine's `scrapFleet` or `scrapDesign`. Fleets and types are marked (`rs.flagScrap`, `rs.flagScrapDesign`) and dismantled by 5.0.5's own routine at End Turn (`FUN_10074580`: over someone else's star the metal goes to that star's owner, `otherScrapMetal505`); the 5.0.5.1 patch's global warming marks its fleet the same way (`interest505`, 0x46c); the computers' scrapping is marks too |
 | original | `scrapped` | no report when a fleet is scrapped | unused: as `scrapAt` (5.0.5's dismantling writes its own reports) |
@@ -309,10 +308,10 @@ are now the ruleset's own, from the code (`docs/original-findings.md`, section 1
 
 ## Gaps to check, by version
 
-- **5.0.5**: Name a Star at a new rank (`nameAStar`, above: found, not built).
+- **5.0.5**: none of the rules (Name a Star at a new rank is now its own, `FUN_1005e2b0`;
+  only the rank window's words are borrowed from the iOS port, docs/open-questions.md).
 - **iOS 1.2.9**: none (its `nameAStar` is its own, from `RankLevelDialogLayer` and
-  `-[NewGameScene SetupExtraGameInfo:]`; the same record in 5.0.5 suggests how 5.0.5's
-  names were used, docs/open-questions.md).
+  `-[NewGameScene SetupExtraGameInfo:]`; 5.0.5's own, read since, uses the same record).
 - **Palm OS 5**: none of 5.0.5's left but its own Name a Star words (the hook is the
   Palm's own).
 - **Mac 4.0.5**: none of its own left (4.0.5's `computerIdentity` is the Mac's own hook).

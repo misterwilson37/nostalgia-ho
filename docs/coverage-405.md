@@ -67,7 +67,7 @@ Every routine in SPACEHO.EXE, the Windows 95 program of Spaceward Ho! 4.0.5 (Del
 | `FUN_0042f4b3` @42f4b3 | `CreateDistArray` @17217a | Distance table built once | Rule, implemented | js/rules-405.js distance |
 | `FUN_0042f60c` @42f60c | `MetalToMoney` @17261a | MetalToMoney ceil(m^2/400) (625 with the bonus) | Rule, implemented | js/rules-405.js mineMoney |
 | `FUN_00431bf0` @431bf0 | `PerformEndTurn` @c000c | End Turn driver: one FUN_004320f8 call per 10-year step | Rule, implemented | engine endTurn (yearsPerTurn) |
-| `FUN_004320f8` @4320f8 | `DoOneTurn` @c0142 | EndTurn: pass 1, battles, Armageddon, novas, pass 2a and 2b, winner check | Rule, implemented | js/rules-405.js economy, pass2, checkElimination |
+| `FUN_004320f8` @4320f8 | `DoOneTurn` @c0142 | EndTurn: pass 1, battles, Armageddon, novas, pass 2a and 2b, winner check; a help message (report 24, rand(4, 29): strings 781-806; Mac aSynchRand(4, 30), STR# 6250.4-30) to each player every step with the preference on | Rule, implemented | js/rules-405.js economy, pass2, checkElimination; HINTS405 / rules-mac405 HINTS_MAC (rs.hintTexts, shown by ui.js addTurnNotes) |
 | `FUN_0043361b` @43361b | `DeductInterest` @c0e62 | DeductInterest | Rule, implemented | js/rules-405.js deductInterest |
 | `FUN_00433977` @433977 | `MaintainKillStars` @c1040 | MaintainKillStars | Rule, implemented | js/rules-405.js maintainKillStars |
 | `FUN_00433c52` @433c52 | `TerraformMineStars` @c11fa | TerraformMineStars | Rule, implemented | js/rules-405.js terraformMineStars |
@@ -110,8 +110,8 @@ Every routine in SPACEHO.EXE, the Windows 95 program of Spaceward Ho! 4.0.5 (Del
 | `FUN_0043c836` @43c836 | `CalcGameRating` @d2334 | Win difficulty rating formula | Rule, implemented | js/rules-405.js winDifficulty |
 | `FUN_0043c9ea` @43c9ea | `DoGameSolidificationStuff` @d2432 | Copies a human's skill onto computers in a game with several humans (shown skill only) | Rule, implemented | js/rules-405.js computerSetup |
 | `FUN_0043ffe0` @43ffe0 | `CreateGalaxy` @8000c | CreateGalaxy | Rule, implemented | js/rules-405.js makeGalaxy |
-| `FUN_00442374` @442374 | `GiveStarsValues` @81a0a | Star names, cut to 7 letters | Rule, implemented | js/rules-405.js STAR_NAMES |
-| `FUN_004427a4` @4427a4 | `CreatePlayer` @81c9c | CreatePlayer: skill, money, home world, designs, starting ships, welcome reports | Rule, implemented | js/rules-405.js setupPlayer, defaultDesigns, afterSetup, WELCOME |
+| `FUN_00442374` @442374 | `GiveStarsValues` @81a0a | Star names, cut to 7 letters; the kept winners' names take the first places (entries 0xbf + i, one place late: the first is the own 191st, "Hope", the last kept name lost) and the list is shuffled | Rule, implemented | js/rules-405.js STAR_NAMES, nameAStar.slots (keptNames405; fix keptStarNames); engine newGame |
+| `FUN_004427a4` @4427a4 | `CreatePlayer` @81c9c | CreatePlayer: skill, money, home world, designs, starting ships, welcome reports (hints 0, 1, 2 around the credits with the help messages preference) | Rule, implemented | js/rules-405.js setupPlayer, defaultDesigns, afterSetup, WELCOME |
 | `FUN_004438ba` @4438ba | `SetCompAttrs` @827b6 | SetCompAttrs: personalities | Rule, implemented | js/ai-405.js makeAI |
 | `FUN_00446312` @446312 | `LicenseThisApp` @40030 | Registration code entry (GOODMMM / VERYGOOD sounds); the Mac's personalises the copy (name and company) | Not a rule | copy protection |
 | `FUN_00448856` @448856 | `doCreateGalaxyDlg` @10f5e | New Game options: IQ, players | Rule, implemented | engine new game, js/rules-405.js computerSetup |
@@ -328,6 +328,7 @@ Every routine in SPACEHO.EXE, the Windows 95 program of Spaceward Ho! 4.0.5 (Del
 - **Window code that reads the game records to draw them or fills the window's own fields; no rule** (18): 4540a8, 45470f, 45490f, 454afc, 455366, 4554b1, 45575a, 455b6a, 456163, 456202, 45778c, 45797d, 457f78, 4583ff, 459c21, 45a5d6, 45aae1, 45df17
 - **Plumbing (small helpers, message maps, string and list handling); touches no game record** (79): 454ad8, 454aee, 455334, 455340, 455356, 455436, 45548d, 4554a3, 455f49, 455fc8, 456155, 4561f4, 45630d, 45646f, 456485, 456493, 456533, 457727, 45775a, 457766, 45777c, 457f54, 457f6a, 4583c3, 4583cf, 4583db, 4583f1, 45853e, 4596b0, 459772, 459781, 459790, 45979f, 4597ae, 4597bd, 4597cc, 4597db, 4597fa, 4598c7, 4598e6, 45996b, 45998a, 459a2a, 459b47, 459ba0, 45a3fa, 45a403, 45a40c, 45a418, 45a42b, 45a439, 45a5a2, 45a5bc, 45aa60, 45bf5d, 45bf69, 45bf75, 45bf81, 45bf8d, 45bf99, 45bfa5, 45bfb1, 45bfc4, 45bfd2, 45dd0f, 45dd33, 45de8d, 45de99, 45deb5, 45e26a, 45e328, 45e5ab, 45e5ca, 45e600, 45e6c5, 45e785, 45e86a, 45e884, 45e8a1
 - **Window, dialog and drawing code; touches no game record** (33): 456047, 45613f, 4561de, 4567c8, 45771b, 4583b7, 458528, 459763, 4597e7, 4598b8, 4598d3, 459977, 459a0b, 459a17, 459aec, 459af8, 459b04, 459b10, 459b1c, 459b28, 459b34, 45a493, 45dc60, 45dd4e, 45dea2, 45dec3, 45e01e, 45e1a9, 45e1f0, 45e20e, 45e296, 45e2f8, 45e5b7
+  Of these, `FUN_00456047` (Name a Star, dialog 378) keeps the winners' star names: four at most, a fifth replacing the fourth and going first (RemoveAt(3), InsertAt(0)); the remake's `rs.nameAStar.add` (js/rules-405.js).
 - **Library code compiled into the module (MFC and C runtime templates, constructors, destructors)** (7): 459860, 459920, 4599c0, 459a60, 45e510, 45e560, 45e850
 
 ### COMPUTER.CPP: the computer players (71 routines)

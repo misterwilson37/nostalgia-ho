@@ -157,6 +157,10 @@ const HINTS = [
 function msgText(G, text) {
   let t = String(text).replace(/[‘’]/g, "'").replace(/[“”]/g, '"').replace('to get it to work…', 'to get it to work.');
   if (!E.fixed(G, 'iosCharacters')) t = t.replace(/•/g, '¥').replace(/™/g, 'ª');
+  // the sums of reports 101, 103, 126 and 148, written by the money formatter
+  // (0x10003cd4c, 5.0.5's FUN_10055050 with the currency): from ten million
+  // "$12.345M" where 5.0.5's plain number gives "$12,345K"
+  t = t.replace(/\$(\d+),(\d{3})K/g, '$$$1.$2M');
   return t;
 }
 

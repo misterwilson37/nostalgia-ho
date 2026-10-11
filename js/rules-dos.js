@@ -24,7 +24,7 @@
 (function (root) {
 'use strict';
 const E = typeof module !== 'undefined' ? require('./engine.js') : root.HO;
-const { RI, clamp, msg, fmt, colonies, getDesign, shipCostNow, addShipsToStar, findOrCreateDesign, observe, starDist,
+const { RI, clamp, msg, fmt, num, colonies, getDesign, shipCostNow, addShipsToStar, findOrCreateDesign, observe, starDist,
   fleetCount, fleetDesigns, fleetMaxRange, queueShips, isAllied, TECHS } = E;
 const O = E.RULESETS.original;
 const { popU, setPopU, hab } = O;
@@ -532,7 +532,7 @@ function meteors(G, p) {
     const m = G.meteors[s.id]; if (!m) continue;
     const kill = Math.min(popU(s), m * 50);
     setPopU(s, popU(s) - kill);
-    msg(G, p.id, `Oh no! ${fmt(kill * 1000)} people were killed when a heavy meteor shower hit ${s.name}.`, { icon: 'm9021', star: s.id });
+    msg(G, p.id, `Oh no! ${num(G, kill * 1000)} people were killed when a heavy meteor shower hit ${s.name}.`, { icon: 'm9021', star: s.id });
     if (popU(s) <= 0) { msg(G, p.id, `A meteor shower destroyed your colony at ${s.name}.`, { icon: 'm9036', sound: 2001, star: s.id }); removeColony(G, p, s); }
   }
 }
@@ -727,8 +727,8 @@ function battle(G, sid, hooks) {
   // FUN_1018_260b: the metal of every ship destroyed (a fifth each) goes to
   // a winning colony owner, or falls on the star (told to the winner only)
   if (debris > 0 && !(hooks && hooks.duel)) {
-    if (holder >= 0 && s.owner === holder) { G.players[holder].metal += debris; msg(G, holder, `You have recovered ${fmt(debris)} metal from the battle at ${s.name}.`, { icon: 'm9046', star: sid, quiet: true }); }
-    else { s.metal += debris; if (holder >= 0) msg(G, holder, `${fmt(debris)} metal has fallen onto ${s.name} from your recent battle.`, { icon: 'm9046', star: sid, quiet: true }); }
+    if (holder >= 0 && s.owner === holder) { G.players[holder].metal += debris; msg(G, holder, `You have recovered ${num(G, debris)} metal from the battle at ${s.name}.`, { icon: 'm9046', star: sid, quiet: true }); }
+    else { s.metal += debris; if (holder >= 0) msg(G, holder, `${num(G, debris)} metal has fallen onto ${s.name} from your recent battle.`, { icon: 'm9046', star: sid, quiet: true }); }
   }
   if (!perDuel) {
     const alive = new Set(); for (const o of ownerIds) for (const e of army[o]) for (const i of e.alive.slice(0, e.n)) alive.add(i);
@@ -1201,7 +1201,7 @@ function battle20(G, sid) {
       const k = x12(G, G.players[A], sid); k.by = year;
       if (w === A) {
         msg(G, A, `You won a battle at ${s.name}. You lost ${x.nA - surv(A)} of your ships. ${name(Df)} lost ${x.nD}.`, { icon: 'p3000', star: sid, battle: x.bid, won: true });
-        if (debris) { msg(G, A, `${fmt(debris)} metal has fallen onto ${s.name} from your recent battle.`, { icon: 'm9046', star: sid, quiet: true }); s.metal += debris; debris = 0; }
+        if (debris) { msg(G, A, `${num(G, debris)} metal has fallen onto ${s.name} from your recent battle.`, { icon: 'm9046', star: sid, quiet: true }); s.metal += debris; debris = 0; }
         k.e16 = 0; k.e1a = 0; k.e1e = 0; k.e22 = 0; k.pop = 0;
       } else {
         msg(G, A, `You lost a battle at ${s.name}. You lost ${x.nA} of your ships. ${name(Df)} lost ${x.nD - (w === Df ? surv(Df) : 0)}.`, { icon: 'm9025', star: sid, battle: x.bid, won: false });
@@ -1225,8 +1225,8 @@ function battle20(G, sid) {
       if (w === Df) {
         if (surv(Df) < 1) msg(G, Df, `${s.name} successfully defended itself against an enemy attack from ${name(A)}.`, { star: sid, battle: x.bid, won: true });
         else msg(G, Df, `You won a battle at ${s.name}. You lost ${x.nD - surv(Df)} of your ships. ${name(A)} lost ${x.nA}.`, { icon: 'p3000', star: sid, battle: x.bid, won: true });
-        if (colony) { q.metal += debris; msg(G, Df, `You have recovered ${fmt(debris)} metal from the battle at ${s.name}.`, { icon: 'm9046', star: sid, quiet: true }); debris = 0; }
-        else if (debris) { msg(G, Df, `${fmt(debris)} metal has fallen onto ${s.name} from your recent battle.`, { icon: 'm9046', star: sid, quiet: true }); s.metal += debris; debris = 0; }
+        if (colony) { q.metal += debris; msg(G, Df, `You have recovered ${num(G, debris)} metal from the battle at ${s.name}.`, { icon: 'm9046', star: sid, quiet: true }); debris = 0; }
+        else if (debris) { msg(G, Df, `${num(G, debris)} metal has fallen onto ${s.name} from your recent battle.`, { icon: 'm9046', star: sid, quiet: true }); s.metal += debris; debris = 0; }
         k.e16 = 0; k.e1a = 0; k.e22 = 0;
         if (pop0 < 1) k.e1e = 0;
         else {
@@ -1402,7 +1402,7 @@ function income20(G, p) {
     if (m > 0) {
       const kill = Math.min(popU(s), m * 50);
       setPopU(s, popU(s) - kill);
-      msg(G, p.id, `Oh no! ${fmt(kill * 1000)} people were killed when a heavy meteor shower hit ${s.name}.`, { icon: 'm9021', star: s.id });
+      msg(G, p.id, `Oh no! ${num(G, kill * 1000)} people were killed when a heavy meteor shower hit ${s.name}.`, { icon: 'm9021', star: s.id });
       if (popU(s) <= 0) {
         // report 1009, "%s destroyed your colony at %s.", with no player
         // given: the name is the one left in the record (log20, above)
@@ -1705,6 +1705,84 @@ function underfunded20(G, p) {
   const share = shareOf20(G, p);
   return colonies(G, p.id).filter(s => (s.oInc || 0) < 0 && colonyMoney20(G, p, s, share) < 0);
 }
+// ---------- Fix Spending (the Galaxy menu's command) ----------
+// CONFIRMED (FUN_1010_1f55 starts it, FUN_1010_1ce7 is each step, FUN_1010_1f6b
+// a slot's most share, FUN_1010_218e its least; Mac 2.0.1 FixSpendingBars
+// @c2018, FixNextSpendingBar @c1b48, ComputeMaxPercent @c2046, ComputeMinPercent
+// @c22b2; 1.2 the same routines at @c1fb0, @c1b48, @c1fde, @c224a, instruction
+// for instruction): the command sets the step to -1 and takes one step; each
+// step goes on from the slot after the last one it looked at (the budget
+// slots in order, Savings and Technology too), stops at the first colony with
+// a problem, fixes it and puts one line in the message bubble:
+// - a share above its most + 1 per mille (the most: ComputeMaxPercent) is cut
+//   to the most + 1, the rest going to Savings: "You were overspending at %s.
+//   The problem has been fixed.";
+// - a share under its least (ComputeMinPercent: a losing colony's loss over the
+//   pool, rounded up, minshare20) is raised to it from Savings: "You were
+//   underspending at %s. The problem has been fixed."; when the share is 0, or
+//   Savings has less than the difference, nothing moves: "You are abandoning
+//   %s." (Mac: "You’re abandoning %s.");
+// - with no problem in any slot on the first step: "You have no spending
+//   problems.".
+// Clicking the bubble takes the next step (the map window's click handler,
+// Mac @c60bc); after the last slot the bubble goes back to the reports
+// (InvalRgn) and the step is 0x7fff, so clicking does nothing more.
+// A slot's most (ComputeMaxPercent): Savings and Technology 1,000; a colony
+// needs its loss, plus, with Terraform above 0, 2 x the temperature gap
+// (tenths of a degree, the player's +0x28 less the star's +0x3a) squared,
+// plus, with Mine above 0, (metal left^2 + 224) / 225 (the money mining
+// would take to empty the planet), plus, with Ship above 0 and the first
+// queue slot holding ships, each queue slot's count x its design's price (the
+// prototype's while none of it has been built, design +0x60) less what was
+// paid toward the first ship (slot +0x18), all in 32 bits; when that is less
+// than the pool (compared unsigned, so a negative need counts as huge) and
+// the pool isn't 0, the most is ceil(need x 1000 / pool) (in floating point:
+// the Mac rounds the need to single precision first), else 1,000.
+const FIX_LINES20 = ['You have no spending problems.', 'You were overspending at %s. The problem has been fixed.',
+  'You were underspending at %s. The problem has been fixed.', 'You are abandoning %s.']; // WINHO.EXE's own lines
+function maxShare20(G, p, k, single) {
+  if (typeof k !== 'number') return 1000;
+  const s = G.stars[k], [T, X, S] = bars20(s);
+  let need = (s.oInc || 0) < 0 ? -s.oInc : 0;
+  if (T > 0) { const d = hab(p, s).dT; need = (need + Math.imul(d, d) * 2) | 0; }
+  if (X > 0) { const m = Math.max(0, Math.floor(s.metal)); need = (need + trunc(((Math.imul(m, m) + 224) | 0) / 225)) | 0; }
+  const q = s.queue || [];
+  if (S > 0 && q.length && q[0].n > 0) {
+    for (const it of q.slice(0, QUEUE_SLOTS)) {
+      if (!(it.n > 0)) continue;
+      const d = getDesign(G, p.id, it.did); if (!d) continue;
+      const c = designCost(G, d);
+      need = (need + Math.imul(it.n, d.built > 0 ? c.money : c.protoTotal)) | 0;
+    }
+    need = (need - (s.yard || 0)) | 0;
+  }
+  const pool = Math.max(0, p.savings);
+  if (!((need >>> 0) < pool && pool !== 0)) return 1000;
+  const x = single ? Math.fround(need) : need;
+  return trunc((x * 1000 + pool - 1) / pool);
+}
+// one step (FUN_1010_1ce7): { text: the bubble's line, or null when the
+// bubble goes back to the reports; cur: where the next step goes on from }
+function fixSpending20(G, p, cur) {
+  const F = E.rules(G).fixSpending, lines = F.lines;
+  const L = slots20(G, p).filter(k => typeof k !== 'number' || G.stars[k].owner === p.id), n = L.length;
+  const from = cur;
+  const say = (i, k) => lines[i].replace('%s', typeof k === 'number' ? G.stars[k].name : '');
+  while (cur >= -1 && cur < n) {
+    cur++;
+    if (from === -1 && cur === n) return { text: lines[0], cur: n - 1 };
+    if (cur < 0 || cur >= n) return { text: null, cur: 0x7fff };
+    const k = L[cur], v = keyPm(p, k), lo = minShare20(G, p, k), hi = maxShare20(G, p, k, !!F.single) + 1;
+    if (hi < v) { setKeyPm(p, k, hi); setKeyPm(p, 'sav', keyPm(p, 'sav') + v - hi); return { text: say(1, k), cur }; }
+    if (lo > v) {
+      if (v <= 0 || keyPm(p, 'sav') < lo - v) return { text: say(3, k), cur };
+      setKeyPm(p, 'sav', keyPm(p, 'sav') - (lo - v)); setKeyPm(p, k, lo);
+      return { text: say(2, k), cur };
+    }
+  }
+  return { text: null, cur };
+}
+
 // the computers' hooks (js/ai-12.js): whether a colony is still being
 // terraformed is its Terraform bar not being -1 (FUN_1020_03e7 @1020:0445,
 // 0b51 @0b95 and @0c55, 12d1 @150d); and ResolveSpending's bars
@@ -1738,6 +1816,11 @@ const base12 = {
 };
 
 E.registerRules('dos', Object.assign({}, O, {
+  // CONFIRMED (WINHO.EXE's number formats "%ld,%.3ld", "%ld,%.3ld,%.3d",
+  // "%ld,%.3ldK"; Mac 2.0.1 and 1.2 LongToNiceString @1244a): every number in
+  // a report or window is "1,234", "1,234,567", and from ten million "12,345K"
+  // (engine niceNum); a sum is "$" and that. Not 5.0.5's (rules-original).
+  fmtNum: E.niceNum, fmtMoney: null,
   label: 'DOS 2.0 (1993)',
   // the New Game window's Version and Edition menus (engine.js editions):
   // the Windows 3.1 program, WINHO.EXE, is a 2.0.1 build (its credits,
@@ -1750,6 +1833,8 @@ E.registerRules('dos', Object.assign({}, O, {
   // So there is no Evacuate button, even with modern conveniences on (a rule).
   evacuateCommand: false,
   dragShare: dragShare20,                 // the budget window's drag (FUN_1010_1303, 155c, 179a)
+  // the Galaxy menu's Fix Spending (above): its lines, and whether the need is rounded to single precision (the Mac's SANE)
+  fixSpending: { lines: FIX_LINES20, single: false, next: fixSpending20 },
   scrapped: scrapped20,                   // the report list (log20): 2.0 reports scrapping next turn
   hints: false, // this game had no between-turn tips (4.0.5 and 5.0.5 do)
   // CONFIRMED (FUN_1040_269d): a finished terraforming or mining part's share

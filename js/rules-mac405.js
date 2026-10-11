@@ -139,10 +139,22 @@ const designName = (G, p, type) => W.nameFor405(G, p, type, false, (a, b) => aRI
 // Ho! Version 4.0.3 by Peter Commons." (never updated: the program's `vers`
 // is 4.0.5) and "Artwork by Howard Vives and Bob Van de walle."
 // The patch (fix 'welcomeVersion') says 4.0.5.
-const WELCOME = (G) => [
-  [`Spaceward Ho! Version ${E.fixed(G, 'welcomeVersion') ? '4.0.5' : '4.0.3'} by Peter Commons.`, { icon: 'm9004', sound: 11111 }],
-  ['Artwork by Howard Vives and Bob Van de walle.', { icon: 'm9024' }],
-];
+// With the help messages preference on (prefs +0x86; CreatePlayer @81c9c),
+// as on Windows: hint 1, the two credits, hints 2 and 3 (report 24 with 1, 2,
+// 3: STR# 6250 "Help Messages" lines 1-3, read by GetIndString, so from 1).
+const hintM = (t) => [t, { icon: 'm9049', hint: true }];
+const WELCOME = (G) => {
+  const credit = [[`Spaceward Ho! Version ${E.fixed(G, 'welcomeVersion') ? '4.0.5' : '4.0.3'} by Peter Commons.`, { icon: 'm9004', sound: 11111 }],
+    ['Artwork by Howard Vives and Bob Van de walle.', { icon: 'm9024' }]];
+  if (G.opts.hints === false) return credit;
+  return [hintM('Click here to make this message go away. Click on the clock to end your turn.'), ...credit,
+    hintM('Click and Drag from one star to another to move fleets.'), hintM('Play with the spending bars. Conquer the galaxy. Enjoy.')];
+};
+// CONFIRMED (DoOneTurn @c0350-c0382, every step): with the preference on,
+// report 24 with aSynchRand(4, 30), the interface's numbers, inclusive: STR#
+// 6250 lines 4-30, 27 hints (one more than Windows: "Ships with higher Speed
+// Tech shoot first."; 31-40 are the demo's).
+const HINTS_MAC = ["Ships with higher Speed Tech shoot first.", "A dot by a planet means you have ships in orbit there.", "Good planets look “prettier” than bad planets when you explore them.", "Range is how far your ships can reach.", "Satellites can't move, but they shoot just as well as any other ship.", "There's a limited amount of metal in the game.", "Miniaturization makes ships cost more money, but less metal.", "Radical Tech can have a variety of effects.", "Be careful with your metal--it can easily run out.", "Click and hold for a second to cancel a fleet's movement.", "Build Satellites to protect vulnerable planets.", "Colonize good planets with Colony ships.", "Scout ships have higher Range, but lower Weapons and Shields.", "If your Weapons are higher than the opponent's Shields, you'll do lots of damage.", "If your Shields are higher than the opponents Weapons, he'll barely hurt you.", "Lots of ships can make up for having low Technology.", "You get money every turn.", "Good planets are close to 1.0 G.", "Good planets are close to 72 degrees.", "Each player has a different idea of what a good planet is.", "If a planet is over 2.5 G or below 0.4 G, it will never make a profit.", "Abandon bad planets after you strip-mine them.", "Terraforming improves a planet's temperature.", "Mining takes metal from a planet and puts it into your reserve.", "Ship savings puts money away for shipbuilding.", "Savings generates extra income.", "If you go into debt, part of your income goes to pay interest."];
 
 // ---------- 8. CreatePlayer's extra draw ----------
 // CONFIRMED (CreatePlayer @81c9c, after the head start into each technology): the
@@ -181,7 +193,7 @@ const hall = Object.assign({}, W.hall, { rank, date, loser: () => 'Loser:' });
 // 4.0.5's list without the Windows build's own slips: the Ship Types
 // window's refund, the rank past 1,000,000 points, the Hall of Fame's year,
 // the missing colon and the technology names are right on the Mac (above).
-const MAC_SLIPS = ['poorestOut', 'designs30', 'refuelCheck', 'scrapRange', 'star0'];
+const MAC_SLIPS = ['poorestOut', 'designs30', 'refuelCheck', 'scrapRange', 'star0', 'keptStarNames'];
 const FIXES = W.fixes.filter(f => MAC_SLIPS.includes(f.id)).concat([
   { id: 'welcomeVersion', title: 'The welcome report gives the right version',
     text: 'The first report of a game said “Spaceward Ho! Version 4.0.3”: the string was never updated for 4.0.5. The patch says 4.0.5.' },
@@ -199,7 +211,16 @@ E.registerRules('mac405', Object.assign({}, W, {
   tankerTarget: true,
   techName,
   shipNames: SHIP_NAMES, designName,
-  welcome: WELCOME,
+  welcome: WELCOME, hintTexts: HINTS_MAC,
+  // CONFIRMED (NameAStar @10244c): 2 to 7 letters (a shorter name is not
+  // kept), taken when it is found anywhere in the kept names (the
+  // Preferences' STR# 2000) or the star names (STR# 6060), by Munger: a name
+  // inside another counts, letter case too; kept at the end of STR# 2000,
+  // all of them. The New Game window (doCreateGalaxyDlg @10f5e) takes four in
+  // a row from aSynchRand(0, kept - 4) (all when there are four or fewer) and
+  // GiveStarsValues @81a0a numbers them one place late as Windows does
+  // ("Hope", STR# 6060.191; the patch's 'keptStarNames').
+  nameAStar: Object.assign({}, W.nameAStar, { keep: 0, add: null, pick: 'run', match: 'munger' }),
   computerIdentity,
   setupPlayer,
   autoPlaySettings,

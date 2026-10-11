@@ -14,7 +14,7 @@
 (function (root) {
 'use strict';
 const E = typeof module !== 'undefined' ? require('./engine.js') : root.HO;
-const { R, RI, pick, clamp, msg, fmt, colonies, know, observe, getDesign, findOrCreateDesign, designName,
+const { R, RI, pick, clamp, msg, fmt, num, colonies, know, observe, getDesign, findOrCreateDesign, designName,
   fleetCount, fleetHas, fleetDesigns, fleetMaxRange, fleetLabel, addShipsToStar, techSum, seenG, seenT,
   DATA, TECHS, isAllied, scrapFleet, evacuate } = E;
 const trunc = Math.trunc;
@@ -223,7 +223,7 @@ function radical(G, p) {
     if (k === 'metal') {
       const m = RI(G, 9000, 11000); p.metal += m;
       const n = colonies(G, p.id).length;
-      say(`Your mining consortium has just been able to extract an additional ${fmt(is505(G) ? trunc(m / Math.max(1, n)) : n < 3 ? m : m / Math.max(1, n))} metal from every planet you have.`, 'm9046'); // 5.0.5 (case 0 @100795f4): metal / colonies
+      say(`Your mining consortium has just been able to extract an additional ${num(G, is505(G) ? trunc(m / Math.max(1, n)) : n < 3 ? m : m / Math.max(1, n))} metal from every planet you have.`, 'm9046'); // 5.0.5 (case 0 @100795f4): metal / colonies
     } else if (k === 'explore') {
       let n = RI(G, 6, 9), i2 = RI(G, 0, G.stars.length - 1);
       for (let c = 0; n > 0 && c < G.stars.length; c++) {
@@ -234,7 +234,7 @@ function radical(G, p) {
       say('Weird weather patterns have allowed astronomers to explore certain far away stars.', 'm9018');
     } else if (k === 'money') {
       const m = trunc((p.oInc || 0) * RI(G, 20, 120) / 10); p.savings += m;
-      say(`You have found a wealth of precious metals and have increased your savings by $${fmt(m)}`, 'm9048');
+      say(`You have found a wealth of precious metals and have increased your savings by $${num(G, m)}`, 'm9048');
     } else if (FLAG_OF[k]) {
       p.flags[FLAG_OF[k]] = true;
       const text = {
@@ -1082,8 +1082,8 @@ function refuel(G) {
         let eaten = 0;
         while (f.fuel < max && popU(s) >= n * 200 + 100) { f.fuel++; setPopU(s, popU(s) - n * 200); eaten += n * 200; }
         if (eaten) {
-          msg(G, p.id, `Your fleet of ${fleetLabel(G, f)} has eaten ${fmt(eaten * 1000)} people while refueling at ${s.name}.`, { icon: 'm9026', sound: 7013, star: s.id });
-          if (s.owner !== p.id) msg(G, s.owner, `${p.name}’s fleet of biologicals has eaten ${fmt(eaten * 1000)} people while refueling at ${s.name}.`, { icon: 'm9026', sound: 7013, star: s.id });
+          msg(G, p.id, `Your fleet of ${fleetLabel(G, f)} has eaten ${num(G, eaten * 1000)} people while refueling at ${s.name}.`, { icon: 'm9026', sound: 7013, star: s.id });
+          if (s.owner !== p.id) msg(G, s.owner, `${p.name}’s fleet of biologicals has eaten ${num(G, eaten * 1000)} people while refueling at ${s.name}.`, { icon: 'm9026', sound: 7013, star: s.id });
         }
       }
     }
@@ -1180,7 +1180,7 @@ function dismantle505(G, p) {
       const label = fleetLabel(G, { owner: p.id, ships: { [k]: n } });
       if (f.scrap301) {
         if (f.star == null || f.to != null) msg(G, p.id, `Your fleet of ${label} was dismantled while in hyperspace.`, { icon: 'm9014', quiet: true });
-        else msg(G, p.id, `Your fleet of ${label} at ${G.stars[f.star].name} has been dismantled for ${fmt(own ? m : 0)} metal.`, { icon: 'm9014', star: f.star, quiet: true });
+        else msg(G, p.id, `Your fleet of ${label} at ${G.stars[f.star].name} has been dismantled for ${num(G, own ? m : 0)} metal.`, { icon: 'm9014', star: f.star, quiet: true });
       } else { const t = tally.get(d) || { n: 0, m: 0 }; t.n += n; if (own) t.m += m; tally.set(d, t); }
       delete f.ships[k];
     }
@@ -1191,7 +1191,7 @@ function dismantle505(G, p) {
     if (!d.scrap301 || d.scrapped) continue;
     d.scrapped = true; d.scrap301 = false;
     const t = tally.get(d);
-    if (t && t.m > 0) msg(G, p.id, `Your “${d.name}” ship type has been dismantled. ${t.n} of this type scrapped for ${fmt(t.m)} metal.`, { icon: 'm9014', quiet: true });
+    if (t && t.m > 0) msg(G, p.id, `Your “${d.name}” ship type has been dismantled. ${t.n} of this type scrapped for ${num(G, t.m)} metal.`, { icon: 'm9014', quiet: true });
   }
 }
 // CONFIRMED (FUN_10077110, pass 2a): metal dismantled over a colony of yours
@@ -1203,7 +1203,7 @@ function otherScrapMetal505(G, p) {
   for (const s of colonies(G, p.id)) {
     const m = so[s.id]; if (!m || !(popU(s) > 0)) continue;
     p.metal += m; s.metal -= m; delete so[s.id];
-    msg(G, p.id, `You just received ${fmt(m)} metal from someone scrapping a fleet or from a battle over ${s.name}.`, { icon: 'm9014', star: s.id });
+    msg(G, p.id, `You just received ${num(G, m)} metal from someone scrapping a fleet or from a battle over ${s.name}.`, { icon: 'm9014', star: s.id });
   }
 }
 
@@ -1245,8 +1245,8 @@ function meteors(G, p) {
       f.colonists = (f.colonists || 0) + x; kill -= x; saved += x;
     }
     setPopU(s, popU(s) - kill);
-    msg(G, p.id, `Oh no! ${fmt(kill * 1000)} people were killed when a heavy meteor shower hit ${s.name}.`, { icon: 'm9021', sound: 8000, star: s.id });
-    if (saved) msg(G, p.id, `${fmt(saved * 1000)} people managed to escape the meteor shower at ${s.name} by fleeing to the orbiting colony ship(s).`, { icon: 'm9021', star: s.id });
+    msg(G, p.id, `Oh no! ${num(G, kill * 1000)} people were killed when a heavy meteor shower hit ${s.name}.`, { icon: 'm9021', sound: 8000, star: s.id });
+    if (saved) msg(G, p.id, `${num(G, saved * 1000)} people managed to escape the meteor shower at ${s.name} by fleeing to the orbiting colony ship(s).`, { icon: 'm9021', star: s.id });
     if (popU(s) <= 0) { msg(G, p.id, `The meteor shower destroyed your colony at ${s.name}.`, { icon: 'm9036', star: s.id }); s.owner = -1; s.pop = 0; }
   }
 }
@@ -1311,7 +1311,7 @@ function randomEvents(G) {
     const p = G.players[s.owner], m = thrown[sid];
     const kill = Math.min(popU(s), m * RI(G, 40, 60));
     setPopU(s, popU(s) - kill);
-    msg(G, p.id, `The shock wave from the supernova threw ${fmt(m)} metal at ${s.name}, killing ${fmt(kill * 1000)} people.`, { icon: 'm9036', star: s.id });
+    msg(G, p.id, `The shock wave from the supernova threw ${num(G, m)} metal at ${s.name}, killing ${num(G, kill * 1000)} people.`, { icon: 'm9036', star: s.id });
     if (popU(s) <= 0) { s.owner = -1; s.pop = 0; msg(G, p.id, `The meteor shower destroyed your colony at ${s.name}.`, { icon: 'm9036', star: s.id }); }
     else { p.metal += m; s.metal = Math.max(0, s.metal - m); }
   }
@@ -1793,7 +1793,7 @@ function react505(G, p) {
     const m = G.thrown505[sid]; if (!m) continue;
     const s = G.stars[sid], kill = Math.min(popU(s), m * RI(G, 40, 60));
     setPopU(s, popU(s) - kill);
-    rep(G, p, 0x43c, [fmt(m), s.name, fmt(kill * 1000)], { icon: 'm9036', star: sid });
+    rep(G, p, 0x43c, [num(G, m), s.name, num(G, kill * 1000)], { icon: 'm9036', star: sid });
     if (popU(s) === 0) { rep(G, p, 0x438, [s.name], { icon: 'm9036', star: sid }); decolonize505(G, p, sid); }
     else { p.metal += m; s.metal -= m; }
   }
@@ -1834,8 +1834,8 @@ function income505(G, p) {
         const x = Math.min(c * 10 - (f.colonists || 0), kill);
         if (x > 0) { kill -= x; saved += x; f.colonists = (f.colonists || 0) + x; }
       }
-      rep(G, p, 0x431, [fmt(kill * 1000), s.name], { icon: 'm9021', sound: 3003, star: sid });
-      if (saved > 0) rep(G, p, 0x482, [fmt(saved * 1000), s.name], { icon: 'm9021', star: sid });
+      rep(G, p, 0x431, [num(G, kill * 1000), s.name], { icon: 'm9021', sound: 3003, star: sid });
+      if (saved > 0) rep(G, p, 0x482, [num(G, saved * 1000), s.name], { icon: 'm9021', star: sid });
       if (popU(s) < 1) { rep(G, p, 0x438, [s.name], { icon: 'm9036', star: sid }); decolonize505(G, p, sid); continue; }
     }
     const before = s.oInc == null ? -7501 : s.oInc, h = hab(p, s);
@@ -1925,8 +1925,8 @@ function colonizeExplore505(G, p) {
       let eaten = 0;
       while (f.fuel < max && popU(s) >= n * 200 + 100) { f.fuel++; setPopU(s, popU(s) - n * 200); eaten += n * 200; }
       if (eaten) {
-        rep(G, p, 0x402, [fleetLabel(G, f), fmt(eaten * 1000), s.name], { icon: 'm9026', sound: 7013, star: s.id });
-        if (owner !== p.id) rep(G, G.players[owner], 0x403, [p.name, fmt(eaten * 1000), s.name], { icon: 'm9026', sound: 7013, star: s.id });
+        rep(G, p, 0x402, [fleetLabel(G, f), num(G, eaten * 1000), s.name], { icon: 'm9026', sound: 7013, star: s.id });
+        if (owner !== p.id) rep(G, G.players[owner], 0x403, [p.name, num(G, eaten * 1000), s.name], { icon: 'm9026', sound: 7013, star: s.id });
       }
     }
   }
@@ -2031,7 +2031,7 @@ function buddyMaps505(G, p) {
       if (explored && recYear505(kq) < Y) {
         const was = kq.explored;
         observe(G, q, s.id);
-        if (!was) msg(G, q.id, `${p.name} has explored ${s.name}. Gravity: ${(s.g / q.homeG).toFixed(2)}G. Temp: ${Math.round(72 + s.t - q.homeT)}°. Metal: ${fmt(s.metal)}.`, { icon: 'm9028', star: s.id, explore: exploreQuality(G, q, s), quiet: true });
+        if (!was) msg(G, q.id, `${p.name} has explored ${s.name}. Gravity: ${(s.g / q.homeG).toFixed(2)}G. Temp: ${Math.round(72 + s.t - q.homeT)}°. Metal: ${num(G, s.metal)}.`, { icon: 'm9028', star: s.id, explore: exploreQuality(G, q, s), quiet: true });
       } else if (fought && !explored && recYear505(kq) < Y && !(kq.by505 >= Y)) {
         Object.assign(kq, JSON.parse(JSON.stringify(k)));
       }
@@ -2052,8 +2052,8 @@ function surrenders505(G, p) {
     if (h.to >= 0 && G.players[h.to]) rep(G, p, 0x451, [q.name, G.players[h.to].name], { icon: 'm9036' });
     else rep(G, p, 0x450, [q.name], { icon: 'm9036' });
     if (h.to !== p.id) continue;
-    rep(G, p, 0x47b, [q.name, fmt(h.money)], { icon: 'm9048', sound: 7015 });
-    rep(G, p, 0x47c, [q.name, fmt(h.metal)], { icon: 'm9046', sound: 7015 });
+    rep(G, p, 0x47b, [q.name, num(G, h.money)], { icon: 'm9048', sound: 7015 });
+    rep(G, p, 0x47c, [q.name, num(G, h.metal)], { icon: 'm9046', sound: 7015 });
     p.savings += h.money; p.metal += h.metal;
     for (const sid of h.stars) {
       const s = G.stars[sid], v = G.visit505[sid];
@@ -2086,7 +2086,7 @@ function bigBattles505(G, p) {
 function milestones505(G, p) {
   let tot = 0; for (const sid of colSlots505(G, p)) tot += popU(G.stars[sid]);
   const f = p.mile505 || (p.mile505 = {});
-  const say = (n, b) => { rep(G, p, 0x473, [p.name, fmt(n * 1000)], { icon: 'm9030', sound: 7019 }); f[b] = true; };
+  const say = (n, b) => { rep(G, p, 0x473, [p.name, num(G, n * 1000)], { icon: 'm9030', sound: 7019 }); f[b] = true; };
   if (tot > 1000000 && !f[1]) say(1000000, 1);
   else if (tot > 2500000 && !f[2]) say(2500000, 2);
   if (tot > 5000000 && !f[4]) say(5000000, 4);
@@ -2525,7 +2525,7 @@ function aftermath505(G, sid, B) {
       k.owner = owner;
       if (x.pop > 0) {
         if (AI.note) AI.note(G, p, { code: 0x3f3, by: one });
-        msg(G, p.id, `${eName} destroyed your colony at ${s.name}. You ${myAllies}lost ${lost} of your ships. ${eName} lost ${theirs}. You lost ${fmt(x.pop * 1000)} people.`, { icon: 'm9036', sound: 2001, star: sid, battle: rec.id, won: false });
+        msg(G, p.id, `${eName} destroyed your colony at ${s.name}. You ${myAllies}lost ${lost} of your ships. ${eName} lost ${theirs}. You lost ${num(G, x.pop * 1000)} people.`, { icon: 'm9036', sound: 2001, star: sid, battle: rec.id, won: false });
         est.e16 = strOf(x.o, -1) + 1;
         est.e1a = RI(G, 1, 3) === 1 ? 0 : strOf(x.o, -1);
         est.e1e = 0; est.e22 = strOf(x.o, -1);
@@ -2544,16 +2544,16 @@ function aftermath505(G, sid, B) {
       else {
         if (AI.note && !(x.pop > 0)) AI.note(G, p, { code: 0x40c, other: one, theirLoss: theirs });
         if (!(x.pop > 0)) msg(G, p.id, `You ${myAllies}won a battle at ${s.name}. You ${myAllies}lost ${lost} of your ships. ${eName} lost ${theirs}.`, { icon: 'm9036', star: sid, battle: rec.id, won: true });
-        else msg(G, p.id, `${s.name} survived an attack from ${eName}. You ${myAllies}lost ${lost} of your ships; ${eName} lost ${theirs}. You lost ${fmt((x.pop - popLeft) * 1000)} people.`, { icon: 'm9036', star: sid, battle: rec.id, won: true });
+        else msg(G, p.id, `${s.name} survived an attack from ${eName}. You ${myAllies}lost ${lost} of your ships; ${eName} lost ${theirs}. You lost ${num(G, (x.pop - popLeft) * 1000)} people.`, { icon: 'm9036', star: sid, battle: rec.id, won: true });
       }
       if (debris) {
         if (x.pop > 0 && popLeft > 0) {
           if (p.flags && p.flags.recycle) debris = trunc(debris * 5 / 4);
           p.metal += debris;
-          msg(G, p.id, `You recovered ${fmt(debris)} metal from the battle at ${s.name}.`, { icon: 'm9046', star: sid, quiet: true });
+          msg(G, p.id, `You recovered ${num(G, debris)} metal from the battle at ${s.name}.`, { icon: 'm9046', star: sid, quiet: true });
         } else {
           s.metal += debris; G.scrapOver505[sid] = (G.scrapOver505[sid] || 0) + debris;
-          msg(G, p.id, `${fmt(debris)} metal has fallen onto ${s.name} from your recent battle.`, { icon: 'm9046', star: sid, quiet: true });
+          msg(G, p.id, `${num(G, debris)} metal has fallen onto ${s.name} from your recent battle.`, { icon: 'm9046', star: sid, quiet: true });
         }
         debris = 0;
       }
@@ -2793,6 +2793,29 @@ Object.defineProperties(E.RULESETS.original, Object.fromEntries(Object.entries({
   // the computers' sexes and names, the ship type names, the first messages
   // (FUN_10059570, FUN_1006d0c0, FUN_1007dcf0, FUN_1006f870; above)
   computerIdentity: computerIdentity505, designName: designName505, newDesign505, shipName505, welcome: welcome505,
+  // CONFIRMED (FUN_10055050, called by the report formatter FUN_1009c240 with
+  // no currency and by the income view FUN_10098650, the budget bars
+  // FUN_1008a120 and the planet panel FUN_10092300 with it; formats read in
+  // the data section, 0x100efcf0-0x100efd18): numbers from ten million are
+  // "12,345K" ("$12,345K" in a report, whose template has the "$"), sums in
+  // the panels from ten million "$12.345M", a negative sum "($1,234)" (engine
+  // num505, money505)
+  fmtNum: E.num505, fmtMoney: E.money505,
+  // CONFIRMED (the rank window FUN_1005e2b0, dialog 0x9c, shown once a game
+  // when a win brings a new rank): its field 'NAME' takes a star name of up
+  // to 11 letters (FUN_100549f0, 0xb); OK with a name refuses one equal to a
+  // kept name (FUN_10055760, letter case aside) or found by Munger in the star
+  // names (STR# 6060: a name inside another counts) with alert 10 ("Sorry,
+  // but there is already a star with that name. ..."), else adds it at the
+  // end of the Preferences' list (+0x2e8, FUN_1007b5f0); OK blank or Cancel
+  // names none. New Game (FUN_10059570 @1005a2f0) takes up to five, in a row
+  // from the clock's rand(0, kept - 5), into the game (+0x170), and
+  // FUN_1006f280 gives them the first places of the star list before it is
+  // shuffled (engine newGame). The window's own words weren't read (its PPob
+  // isn't in the remake's copy): the iOS port's, the same 5.0 source
+  // (docs/open-questions.md).
+  nameAStar: { when: 'rank', inRank: true, text: 'You may name a star for use in future games:', keep: 0, use: 'put', put: 5, pick: 'run', max: 11, match: '505',
+    taken: 'Sorry, but there is already a star with that name. How about a different name?' },
   // CONFIRMED (FUN_10061af0 @10061d88, the status of Send Message, command
   // 0x13ab): the command is on only while the player's outbox (player
   // +0x1058, emptied by the End Turn @10072de8) holds fewer than 3 messages;

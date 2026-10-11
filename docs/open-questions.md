@@ -83,10 +83,18 @@ Item 2 stays because following it needs the skin to go on with no human in the g
 
 ### Interface not done
 
-- **Fix Spending** (Galaxy menu, "Correction dépenses": `FixSpendingBars @c1fb0`,
-  `FixNextSpendingBar @c1b48`): raises each colony that can't pay its loss to its
-  minimum share. Not built: its lines of text and `ComputeMaxPercent @c1fde`'s formula
-  weren't recorded, so a window would have to guess its rule.
+- Now done (October 2026): **Fix Spending** (Galaxy menu, "Correction dépenses", ⌘F:
+  `FixSpendingBars @c1fb0`, `FixNextSpendingBar @c1b48`, `ComputeMaxPercent @c1fde`,
+  `ComputeMinPercent @c224a`; `rs.fixSpending`, the Galaxy menu's "Fix spending"): Mac
+  2.0.1's routines instruction for instruction (2.0 below). Its four lines are STR# 1050
+  in French; the remake shows Mac 2.0.1's English ones, the same lines in the same order
+  ("Vous n'avez pas de problème." is "You have no spending problems."). The original
+  put each line in the message bubble and a click on the bubble took the next step; the
+  remake shows it in a small window whose Next is that click.
+- **A name shorter than 4 letters names no star**, and a name found inside another by
+  `Munger` (STR# 2005 and 1003, letter case counting) is taken (`NameAStar @120a04`).
+  Done (`rs.nameAStar.min`, `match: 'munger'`). The name never goes on a star of the game
+  just won: `MarkStarNamed @1014e8` only marks the game file.
 - Now done: **naming a star after a win** (`NameAStar @120a04`, `rs.nameAStar`): clicking
   the winner's report opens Name a Star; the name is kept in this browser (localStorage
   "ho5.stars.12", the program's STR# 2005) and later 1.2 galaxies draw their star names
@@ -230,12 +238,20 @@ needs the skin to go on with no human in the game; items 1 and 3 stay at the use
   like" or "I own" and a planet or a player, ten a turn; an "I own" message about a star
   the sender owns marks it as the sender's on the receiver's map (`FUN_1040_0038`
   @1040:062f-0668). The remake's messages are free text with no effect.
-- **Fix Spending** (`FUN_1010_1ce7`, `1f55`, `1f6b`; Mac `FixNextSpendingBar`,
-  `FixSpendingBars`, `ComputeMaxPercent`): each use fixes the next colony with a problem,
-  cutting its share to what it can use (+1 per mille, the rest to Savings) or raising a
-  losing colony to its least share out of Savings, with one line of text. Not built: the
-  lines of text (but "You have no spending problems.") and `FUN_1010_1f6b`'s formula
-  weren't recorded, and the strings files hold neither.
+- Now done (October 2026): **Fix Spending** (`FUN_1010_1f55`, `1ce7`, `1f6b`, `218e`;
+  Mac `FixSpendingBars @c2018`, `FixNextSpendingBar @c1b48`, `ComputeMaxPercent @c2046`,
+  `ComputeMinPercent @c22b2`; `rs.fixSpending`, js/rules-dos.js `fixSpending20`): each
+  step goes on from the slot after the last one and stops at the first colony whose
+  share is above its most + 1 per mille (cut to that, the rest to Savings: "You were
+  overspending at %s. The problem has been fixed.") or under its least (raised from
+  Savings: "You were underspending at %s. ..."; with a share of 0 or too little in
+  Savings, "You are abandoning %s.", the Mac "You’re abandoning %s."); with none on the
+  first step "You have no spending problems.". The most is the colony's loss, plus 2 ×
+  the temperature gap² with Terraform on, plus (metal left² + 224) / 225 with Mine on,
+  plus each queue slot's count × its price (the prototype's while none was built) less
+  what was paid, with Ship on, over the pool, rounded up (1,000 when the need isn't under
+  the pool). The lines are in WINHO.EXE's data (0x3f6e4-0x3f776) and Mac 2.0.1's code
+  (@c1f6e-c1ff8). The original's message bubble is the remake's small window (Next).
 - **Design names for the computers** (`FUN_10e8_0f64`, Mac `AddNewTypeNameToPrefs`): the
   names humans give their designs go into the names file, and the computers' later
   designs draw from it. The remake keeps no names file.
@@ -379,19 +395,23 @@ These are what 3.0.1's code does and what the remake now does; they look like sl
 
 ### Interface not done
 
-- **Fix Spending** (`FixSpendingBars @d28ca`, `FixNextSpendingBar @d2552`). Not built:
-  the lines of text it writes (STR# 1050) weren't recorded, only 2.0's "You have no
-  spending problems." (also 1.2 and 2.0: their `ComputeMaxPercent` formula and lines).
+- Now done (October 2026): **Fix Spending** (`FixSpendingBars @d28ca`,
+  `FixNextSpendingBar @d2552`, STR# 1050; js/rules-301.js `fixSpending301`): 2.0's steps
+  with 3.0.1's most (`ComputeMaxPercent @d28f8`) and only overspending fixed: the
+  difference goes to Savings and Technology in proportion to their shares (truncated, so
+  a per mille or two can be lost); `ComputeMinPercent` is 0, so lines 3 and 4 never show.
+  A colony being abandoned or finished (most 0) is cut to 1 per mille.
 - **The Hall of Fame and Hall of Shame** (`AddToHall @144796`, `doHallOfFameDlg`); the
   difficulty rating it records is worked out.
 - **The auto play settings** (`DoConfigAutoPlayDialog @144226`): which of the player's
   fields it sets and its scroll bars' ranges weren't recorded in the 3.0.1 pass, so the
   window isn't built for 3.0.1 (4.0.5's would be a later version's guess).
-- Now done, in part: **naming a star after a win** (`NameAStar @1424b2`, `rs.nameAStar`):
-  the window opens from the winner's report and keeps the name (localStorage
-  "ho5.stars.301"). Open: where 3.0.1 keeps the name and whether later galaxies use it
-  (`GiveStarsValues` reads STR# 1003 only); the remake doesn't use it. The words are
-  4.0.5's and the alert 2.0's.
+- Now done: **naming a star after a win** (`NameAStar @1424b2`, `rs.nameAStar`): the
+  window opens from the winner's report; a name of 2 to 7 letters not found by Munger in
+  STR# 2005 or 1003 is added to the Preferences' STR# 2005 ("ho5.stars.301"), and
+  `GiveStarsValues @f246c` draws every star's name from the 191 and those names (settled
+  October 2026: it reads STR# 2005 too, `use: 'pool'`). Still not read: the window's words
+  (4.0.5's) and its alert (2.0's).
 - **The canned-message window** (`SendMessage @140fa2`): the remake's messages are free
   text, of which the computers read "I like …" and "I like planets that are …".
 - **The auto-scrap preference** (old designs past 15, `ScrapFleetsAndTypes`, prefs +0x74).
@@ -534,10 +554,22 @@ These are what 4.0.5's code does and what the remake now does; they look like sl
 - Now done: **the "You have conquered the galaxy!" window** (dialog 377, `FUN_0044bf5a`,
   `rs.conquered`) with the won picture, then **Name a Star** (dialog 378, `FUN_00456047`,
   `rs.nameAStar`), opened by clicking the winner's report (and from the end of the
-  messages). The name (at most 7 letters, not one there is already: string 513) is kept
-  with the last four (localStorage "ho5.stars.405", "ho5.stars.mac405"), and all four are
-  put in each later galaxy. Open: which name goes when a fifth is named, which stars get
-  the names, and dialog 377's title.
+  messages). The name (2 to 7 letters, not one there is already: string 513) is kept
+  (localStorage "ho5.stars.405", "ho5.stars.mac405"). Settled October 2026: Windows keeps
+  four, a fifth replacing the fourth and going first (`FUN_00456047`: RemoveAt(3),
+  InsertAt(0)); the Mac keeps every name (STR# 2000) and its New Game window takes four in
+  a row from `aSynchRand(0, kept − 4)` (`doCreateGalaxyDlg @10f5e`); both set-ups give the
+  names the first places of the star list and shuffle it, so they land on stars at
+  random, and both number them one place late: the first place reads the 191st own name,
+  "Hope", and the last kept name is lost (`FUN_00442374`, `GiveStarsValues @81a0a`; the
+  patch's `keptStarNames`). Open: dialog 377's title.
+- Now done (October 2026): **the hints.** Both 4.0.5s send one every 10-year step with
+  the help messages preference on (Windows `FUN_004320f8` @4321f6: report 24 with
+  rand(4, 29), strings 781-806; Mac `DoOneTurn` @c0350: aSynchRand(4, 30), STR# 6250
+  lines 4-30), and start the reports with hint 0 (1 on the Mac), the credits and hints 1
+  and 2 (2 and 3) (`FUN_004427a4`, `CreatePlayer`). The remake had one of 5.0.5's every
+  seven turns; now `rs.hintTexts` and `welcome`, with picture 3170 in the w95 and mac4
+  skins. As 5.0.5's, the skin draws them with the browser's random numbers.
 - Now done: **the auto play settings** (`FUN_00404c4e`, Mac `DoConfigAutoPlayDialog`;
   `rs.autoPlaySettings`): the Auto play window's Config… opens Friendly-Aggressive and Dig
   In-No Defense sliders. Open: the scroll bars' ranges (the remake: aggressiveness 0-10,
@@ -782,12 +814,22 @@ These are what 5.0.5's code does and what the remake now does; they look like sl
 - **The Radical Research window** (`FUN_1005f280`, dialog 0x99): with a full hand of four
   programs, cancel one (it leaves the hand). A rule, in a window; not in the remake.
 - **The turn time limit** (`FUN_10058360`, `FUN_10066260`), network play and the lobby.
-- **Naming a star at a new rank** (the rank window `FUN_1005e2b0`, its field and STR#
-  6004.10; `docs/fallbacks.md`, a gap). The iOS port, the same 5.0 source, keeps the
-  names in the preferences and puts up to five of them, in a row from a random start,
-  into each new galaxy through the New Game record's `specialStarNames` (5 x 12 bytes,
-  `numSpecialStarNames`), whose layout comes from 5.0's own (iOS section below); 5.0.5's
-  own use of them wasn't read, so it isn't built for 5.0.5.
+- Now done (October 2026): **naming a star at a new rank** (the rank window
+  `FUN_1005e2b0`, `rs.nameAStar.inRank`): its field takes up to 11 letters; OK refuses a
+  kept name (letter case aside) or one Munger finds in STR# 6060 with alert 10 ("Sorry,
+  but there is already a star with that name. How about a different name?"), else adds
+  it to the Preferences' list (+0x2e8); New Game (`FUN_10059570` @1005a2f0) takes up to
+  five in a row from the clock's rand(0, kept − 5), and `FUN_1006f280` gives them the
+  first places of the star list and shuffles it. Open: the window's own words (its PPob
+  isn't in the remake's copy of the program): the remake shows the iOS port's, "You may
+  name a star for use in future games:" (a later version's, the last resort).
+- Now done (October 2026): **numbers from ten million**: 5.0.5's `FUN_10055050` writes
+  them "12,345K" in reports and windows ("$12,345K" in a report, whose template has the
+  "$"), and the panels' sums "$12.345M", a negative sum "($1,234)" (`rs.fmtNum`,
+  `rs.fmtMoney`). 1.2 to 4.0.5 write "12,345K" (`LongToNiceString`, `FUN_0042e5c2`); the
+  Palm writes every number in full (`FUN_0002c510`). Open: the income view writes the
+  interest shorter ("12K", "1.23M", `FUN_100552e0`) inside a template whose words weren't
+  read; the remake's Interest row is written as the other sums.
 
 ## Palm 5 (2003)
 
@@ -920,9 +962,11 @@ These are what the Palm code does and what the remake now does; they look like s
   tapping the Savings bar while dipping to open Dip Into Savings.
 - **The Message History's Evacuate button** (`FUN_00040232`).
 - Now done: **naming a star at a new rank** (tFRM 2900, `rs.nameAStar`): after the new
-  rank's window; the names are kept (localStorage "ho5.stars.palm") and the last five are
-  put in each new galaxy (`FUN_000692c4` puts up to five in). Open: the form's words
-  (the remake's own), how many names are kept and which five go in.
+  rank's window; the names are kept (localStorage "ho5.stars.palm"). Settled October
+  2026: `FUN_000692c4` puts up to five in a row from SysRandom(0, kept − 5) into the game,
+  and `FUN_00025f4a` gives them the first places of the star list and shuffles it, so
+  they land on stars at random. Open: the form's words (the remake's own) and how the
+  list grows (the remake keeps every name).
 - **The canned-message window** (tFRM 2600: Thank You, Sorry, the curse); the remake's
   messages are free text.
 - **Options locked by rank** (`FUN_0003825a`), left open on purpose.
@@ -994,8 +1038,10 @@ None of the rules.
 5. **The hints** are shown by the skin, as 5.0.5's (above).
 6. **Every game starts from the default shares** (iOS keeps the first turn's for the
    next game, `-[SimpleServer copyPrefsToPlayerRec]` 0x10009030c).
-7. **Money over ten million** is written in full; iOS's formatter (`0x10003cd4c`)
-   writes "$12.345M" (and "12,345K" for other numbers).
+7. **Money over ten million**: settled October 2026. 5.0.5's own formatter
+   (`FUN_10055050`) writes "$12.345M" and "12,345K" as iOS's (`0x10003cd4c`) does, so the
+   remake now writes them so too (`rs.fmtNum`, `rs.fmtMoney`; the four reports whose "$"
+   moved into the formatter, `msgText`).
 8. **Touch follows iOS 1.2.9 in every skin.** Whenever a finger is used (a pointer
    event of type "touch"), every skin and every ruleset get the iOS game's gestures
    (`docs/ios-findings.md`, "Touch controls"; `js/skins/classic/ui.js`, "touch"): pinch

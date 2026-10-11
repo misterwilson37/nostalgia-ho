@@ -25,7 +25,7 @@
 (function (root) {
 'use strict';
 const E = typeof module !== 'undefined' ? require('./engine.js') : root.HO;
-const { RI, clamp, msg, fmt, colonies, know, observe, getDesign, addShipsToStar, fleetCount, fleetDesigns, fleetMaxRange, isAllied, TECHS } = E;
+const { RI, clamp, msg, fmt, num, colonies, know, observe, getDesign, addShipsToStar, fleetCount, fleetDesigns, fleetMaxRange, isAllied, TECHS } = E;
 const O = E.RULESETS.original, D = E.RULESETS.dos;
 const R301 = () => E.RULESETS['301'];
 const { popU, setPopU, hab } = O;
@@ -543,13 +543,13 @@ function scrapFleetsAndTypes(G, p) {
     if (!f.scrap301 && !ofDead && !out) continue;
     const at = f.star != null && f.to == null ? f.star : null, label = E.fleetLabel(G, f), n = fleetCount(f), dids = Object.keys(f.ships);
     const r = scrap405(G, f);
-    if (f.scrap301) { if (p.human && at != null) msg(G, p.id, `Your fleet of ${label} at ${G.stars[at].name} has been scrapped for ${fmt(r.own ? r.metal : 0)} metal.`, { icon: 'm9014', quiet: true }); }
+    if (f.scrap301) { if (p.human && at != null) msg(G, p.id, `Your fleet of ${label} at ${G.stars[at].name} has been scrapped for ${num(G, r.own ? r.metal : 0)} metal.`, { icon: 'm9014', quiet: true }); }
     else for (const k of dids) { const d = getDesign(G, p.id, +k); const t = tally.get(d) || { n: 0, m: 0 }; t.n += n; if (r.own) t.m += r.metal; tally.set(d, t); }
   }
   for (const d of dead) {
     const t = tally.get(d) || { n: 0, m: 0 };
     d.scrapped = true; d.scrap301 = false;
-    if (p.human) msg(G, p.id, `Your "${d.name}" ship type has been scrapped. ${t.n} of this type scrapped for ${fmt(t.m)} metal.`, { icon: 'm9014', quiet: true });
+    if (p.human) msg(G, p.id, `Your "${d.name}" ship type has been scrapped. ${t.n} of this type scrapped for ${num(G, t.m)} metal.`, { icon: 'm9014', quiet: true });
   }
 }
 // CONFIRMED (FUN_00433977): as 3.0.1's MaintainKillStars: colonies marked to
@@ -767,7 +767,7 @@ function radical(G, p) {
     const k = RADICAL[idx], t = p.tech;
     if (k === 'metal') {
       const m = RI(G, 9000, 11000), n = colSlots(G, p).length;
-      say(`Your mining consortium has just been able to extract an additional ${fmt(n < 1 ? m : trunc(m / n))} metal from every planet you have.`, 'm9046', 2000);
+      say(`Your mining consortium has just been able to extract an additional ${num(G, n < 1 ? m : trunc(m / n))} metal from every planet you have.`, 'm9046', 2000);
       p.metal += m;
     } else if (k === 'explore') {
       let n = RI(G, 6, 9);
@@ -780,7 +780,7 @@ function radical(G, p) {
       }
     } else if (k === 'money') {
       const m = RI(G, (p.tm || 0) * 2, (p.tm || 0) * 12);
-      say(`You have found a wealth of precious metals and have increased your savings by ${fmt(m)}.`, 'm9048', 2000);
+      say(`You have found a wealth of precious metals and have increased your savings by ${num(G, m)}.`, 'm9048', 2000);
       p.savings += m;
     } else if (FLAG_OF[k]) {
       p.flags[FLAG_OF[k]] = true;
@@ -1273,7 +1273,7 @@ function makeResultMessages(G, sid, x) {
   const mark = (o) => { const k = x301(G, G.players[o], sid); k.by = yr; return k; };
   const fallOnto = (P, o) => {
     if (debris === 0) return;
-    if (P.human) msg(G, o, `${fmt(debris)} metal has fallen onto ${s.name} from your recent battle.`, { icon: 'm9046', star: sid, quiet: true });
+    if (P.human) msg(G, o, `${num(G, debris)} metal has fallen onto ${s.name} from your recent battle.`, { icon: 'm9046', star: sid, quiet: true });
     s.metal += debris;
     const so = G.scrapOver301 || (G.scrapOver301 = {});
     so[sid] = Math.min(32767, (so[sid] || 0) + debris);
@@ -1316,12 +1316,12 @@ function makeResultMessages(G, sid, x) {
     if (winner === Dh) {
       resolveVictor(G, sid, Dh, x.survId);
       if (pop === 0) { if (P.human) msg(G, Dh, `You won a battle at ${s.name}.  You lost ${nD - survN} of your ships.  ${name(A)} lost ${nA}.`, { icon: 'p3000', star: sid, battle: x.bid, won: true }); }
-      else if (P.human) msg(G, Dh, `${s.name} survived an enemy attack from ${name(A)}.  You lost ${nD - survN} of your ships.  ${name(A)} lost ${nA}.  You lost ${fmt((pop - planetLeft) * 1000)} people.`, { icon: 'p3000', star: sid, battle: x.bid, won: true });
+      else if (P.human) msg(G, Dh, `${s.name} survived an enemy attack from ${name(A)}.  You lost ${nD - survN} of your ships.  ${name(A)} lost ${nA}.  You lost ${num(G, (pop - planetLeft) * 1000)} people.`, { icon: 'p3000', star: sid, battle: x.bid, won: true });
       if (!own) fallOnto(P, Dh);
       else {
         setPopU(s, planetLeft);
         if (P.flags.recycle) debris = trunc(debris * 5 / 4);
-        if (P.human) msg(G, Dh, `You recovered ${fmt(debris)} metal from the battle at ${s.name}.`, { icon: 'm9046', star: sid, quiet: true });
+        if (P.human) msg(G, Dh, `You recovered ${num(G, debris)} metal from the battle at ${s.name}.`, { icon: 'm9046', star: sid, quiet: true });
         P.metal += debris; debris = 0;
       }
       k.e16 = 0; k.e1a = 0; k.e22 = 0;
@@ -1337,7 +1337,7 @@ function makeResultMessages(G, sid, x) {
       if (own) setPopU(s, 0);
       if (pop === 0) { if (P.human) msg(G, Dh, `You lost a battle at ${s.name}.  You lost ${nD} of your ships.  ${name(A)} lost ${nA - (winner === A ? survN : 0)}.`, { icon: 'm9025', star: sid, battle: x.bid, won: false }); }
       else {
-        if (P.human) msg(G, Dh, `${name(A)} destroyed your colony at ${s.name}.  You lost ${nD} of your ships. ${name(A)} lost ${nA - (winner === A ? survN : 0)}.  You lost ${fmt(pop * 1000)} people.`, { icon: 'm9036', sound: 2001, star: sid, battle: x.bid, won: false });
+        if (P.human) msg(G, Dh, `${name(A)} destroyed your colony at ${s.name}.  You lost ${nD} of your ships. ${name(A)} lost ${nA - (winner === A ? survN : 0)}.  You lost ${num(G, pop * 1000)} people.`, { icon: 'm9036', sound: 2001, star: sid, battle: x.bid, won: false });
         if (AI.note) AI.note(G, P, { code: 0x3f3, by: A });
       }
       if (pop < 1) {
@@ -1701,7 +1701,7 @@ function reactToSupernova(G, p, armFired, thrown) {
     if (!m) continue;
     const kill = Math.min(popU(s), Math.imul(m, RI(G, 40, 60)));
     setPopU(s, popU(s) - kill);
-    if (p.human) msg(G, p.id, `The shock wave from the supernova threw ${fmt(m)} metal at ${s.name}, killing ${fmt(kill * 1000)} people.`, { icon: 'm9036', sound: 8000, star: sid });
+    if (p.human) msg(G, p.id, `The shock wave from the supernova threw ${num(G, m)} metal at ${s.name}, killing ${num(G, kill * 1000)} people.`, { icon: 'm9036', sound: 8000, star: sid });
     if (popU(s) === 0) { if (p.human) msg(G, p.id, `The meteor shower destroyed your colony at ${s.name}.`, { icon: 'm9036', sound: 8000, star: sid }); decolonize(G, p, sid); }
     else { p.metal += m; s.metal -= m; }
   }
@@ -1764,7 +1764,7 @@ function getOtherScrapMetal(G, p) {
     const s = G.stars[sid], m = so[sid];
     if (!m || !(popU(s) > 0)) continue;
     p.metal += m; s.metal -= m; so[sid] = 0;
-    if (p.human) msg(G, p.id, `You just received ${fmt(m)} metal from someone scrapping a fleet or from a battle over ${s.name}.`, { icon: 'm9046', sound: 2000, star: sid });
+    if (p.human) msg(G, p.id, `You just received ${num(G, m)} metal from someone scrapping a fleet or from a battle over ${s.name}.`, { icon: 'm9046', sound: 2000, star: sid });
   }
 }
 // CONFIRMED (FUN_00437592 ComputeIncomeAndPopulation): the Savings slot's
@@ -1801,7 +1801,7 @@ function income(G, p) {
     if (m > 0) {
       const kill = Math.min(popU(s), m * 50);
       setPopU(s, popU(s) - kill);
-      if (p.human) msg(G, p.id, `Oh no!  ${fmt(kill * 1000)} people were killed when a heavy meteor shower hit ${s.name}.`, { icon: 'm9021', sound: 8000, star: sid });
+      if (p.human) msg(G, p.id, `Oh no!  ${num(G, kill * 1000)} people were killed when a heavy meteor shower hit ${s.name}.`, { icon: 'm9021', sound: 8000, star: sid });
       if (popU(s) === 0) { if (p.human) msg(G, p.id, `The meteor shower destroyed your colony at ${s.name}.`, { icon: 'm9036', sound: 8000, star: sid }); decolonize(G, p, sid); continue; }
     }
     const before = s.oInc == null ? -7501 : s.oInc;
@@ -1859,8 +1859,8 @@ function colonizeAndExplore(G, p) {
       let eaten = 0;
       while (f.fuel < R && popU(s) >= n * 200 + 100) { f.fuel = Math.min(R, f.fuel + 1); setPopU(s, popU(s) - n * 200); eaten += n * 200; }
       if (eaten) {
-        if (p.human) msg(G, p.id, `Your fleet of ${E.fleetLabel(G, f)} has eaten ${fmt(eaten * 1000)} people while refueling at ${s.name}.`, { icon: 'm9021', star: s.id });
-        if (o !== p.id && G.players[o].human) msg(G, o, `${p.name}'s fleet of biologicals has eaten ${fmt(eaten * 1000)} people while refueling at ${s.name}.`, { icon: 'm9021', star: s.id });
+        if (p.human) msg(G, p.id, `Your fleet of ${E.fleetLabel(G, f)} has eaten ${num(G, eaten * 1000)} people while refueling at ${s.name}.`, { icon: 'm9021', star: s.id });
+        if (o !== p.id && G.players[o].human) msg(G, o, `${p.name}'s fleet of biologicals has eaten ${num(G, eaten * 1000)} people while refueling at ${s.name}.`, { icon: 'm9021', star: s.id });
       }
       continue;
     }
@@ -1908,8 +1908,8 @@ function exploreStar(G, p, sid, from) {
   observe(G, p, sid);
   if (first && p.human) {
     const s = G.stars[sid], q = O.exploreQuality(G, p, s), g = E.seenG(p, s).toFixed(2), t = Math.round(E.seenT(p, s));
-    const text = from == null ? `You have explored ${s.name}. Gravity: ${g}G. Temp: ${t}°. Metal: ${fmt(s.metal)}.`
-      : `${G.players[from].name} has explored ${s.name}. Gravity: ${g}G.  Temp: ${t}°.  Metal: ${fmt(s.metal)}.`;
+    const text = from == null ? `You have explored ${s.name}. Gravity: ${g}G. Temp: ${t}°. Metal: ${num(G, s.metal)}.`
+      : `${G.players[from].name} has explored ${s.name}. Gravity: ${g}G.  Temp: ${t}°.  Metal: ${num(G, s.metal)}.`;
     msg(G, p.id, text, { icon: q === 'good' ? 'm9027' : q === 'mediocre' ? 'm9028' : 'm9029', sound: q === 'good' ? 6000 : q === 'mediocre' ? 6002 : 6001, star: sid, explore: q });
   }
 }
@@ -2003,7 +2003,7 @@ function doSurrenders(G, p) {
     if (p.human) msg(G, p.id, h.to >= 0 ? `${from} has just surrendered to ${G.players[h.to].name}.` : `${from} has just surrendered`, { icon: 'm9036', sound: 2000 });
     if (h.to !== p.id) continue;
     const AI = E.aiOf(G); if (AI.note) AI.note(G, p, { code: 0x44f, to: p.id, from: h.from });
-    if (p.human) { msg(G, p.id, `${from} surrenders to you, giving you $${fmt(h.money)}.`, { icon: 'm9048' }); msg(G, p.id, `${from} surrenders to you, giving you ${fmt(h.metal)} metal.`, { icon: 'm9046' }); }
+    if (p.human) { msg(G, p.id, `${from} surrenders to you, giving you $${num(G, h.money)}.`, { icon: 'm9048' }); msg(G, p.id, `${from} surrenders to you, giving you ${num(G, h.metal)} metal.`, { icon: 'm9046' }); }
     p.savings += h.money; p.metal += h.metal;
     for (const sid of h.stars) {
       const s = G.stars[sid], pres = (G.present301 || {})[sid];
@@ -2024,13 +2024,13 @@ function doSurrenders(G, p) {
 function giftNews(G, p) {
   for (const g of G.gifts || []) {
     if (g.to === p.id) {
-      if (g.money > 0) { if (p.human) msg(G, p.id, `${G.players[g.from].name} has just given you $${fmt(g.money)}.`, { icon: 'm9048' }); p.savings += g.money; }
-      if (g.metal > 0) { if (p.human) msg(G, p.id, `${G.players[g.from].name} has just given you ${fmt(g.metal)} metal.`, { icon: 'm9046' }); p.metal += g.metal; }
+      if (g.money > 0) { if (p.human) msg(G, p.id, `${G.players[g.from].name} has just given you $${num(G, g.money)}.`, { icon: 'm9048' }); p.savings += g.money; }
+      if (g.metal > 0) { if (p.human) msg(G, p.id, `${G.players[g.from].name} has just given you ${num(G, g.metal)} metal.`, { icon: 'm9046' }); p.metal += g.metal; }
       (p.news = p.news || []).push({ type: 'gift', from: g.from, money: g.money, metal: g.metal });
     }
     if (g.from === p.id && p.human) {
-      if (g.money > 0) msg(G, p.id, `You just gave ${G.players[g.to].name} $${fmt(g.money)}.`, { icon: 'm9048', quiet: true });
-      if (g.metal > 0) msg(G, p.id, `You just gave ${G.players[g.to].name} ${fmt(g.metal)} metal.`, { icon: 'm9046', quiet: true });
+      if (g.money > 0) msg(G, p.id, `You just gave ${G.players[g.to].name} $${num(G, g.money)}.`, { icon: 'm9048', quiet: true });
+      if (g.metal > 0) msg(G, p.id, `You just gave ${G.players[g.to].name} ${num(G, g.metal)} metal.`, { icon: 'm9046', quiet: true });
     }
   }
 }
@@ -2042,7 +2042,8 @@ function giftNews(G, p) {
 // docs/open-questions.md). The number as 4.0.5 prints it (FUN_0042e5c2):
 // "1,000,000", from ten million "10,000K".
 const MILESTONES = [1000000, 2500000, 5000000, 10000000, 20000000];
-const num405 = (n) => n >= 10000000 ? `${fmt(trunc(n / 1000000))},${String(trunc(n % 1000000 / 1000)).padStart(3, '0')}K` : fmt(n);
+function keptNames405(G, put) { return E.fixed(G, 'keptStarNames') ? put : ['Hope'].concat(put.slice(0, -1)); }
+const num405 = E.niceNum; // FUN_0042e5c2 (engine niceNum): "1,000,000", from ten million "10,000K"
 function milestones(G, p) {
   // the patch (fix 'star0'): every colony counts
   const all = E.fixed(G, 'star0');
@@ -2174,10 +2175,26 @@ function projected(G, p) {
 }
 // CONFIRMED (FUN_004427a4 @player +0x7cc): every player's message list starts
 // with reports 1000 and 1002 (strings 931 and 933; the demo has 932 and more)
-const WELCOME = [
-  ['Spaceward Ho! Version 4.0.5 by Peter Commons.', { icon: 'm9004', sound: 11111 }],
-  ['Artwork by Howard Vives and Bob Van de Walle.', { icon: 'm9024' }],
-];
+// When the creator's "Give help messages" preference is on (prefs
+// "giveHelpMsgs", +0xb6; FUN_004427a4 @4428c6-44293c) it is hint 0, the two
+// credits, hints 1 and 2: report 24 (0x18) with 0, 1, 2, strings 777-779,
+// picture 3170 (FUN_0046f8cc). The New Game window passes the preference as
+// G.opts.hints.
+const hint405 = (t) => [t, { icon: 'm9049', hint: true }];
+const WELCOME = (G) => {
+  const credit = [['Spaceward Ho! Version 4.0.5 by Peter Commons.', { icon: 'm9004', sound: 11111 }],
+    ['Artwork by Howard Vives and Bob Van de Walle.', { icon: 'm9024' }]];
+  if (G.opts.hints === false) return credit;
+  return [hint405('Click here to make this message go away.'), ...credit,
+    hint405('Click and Drag from one star to another to move fleets.'), hint405('Play with the spending bars. Conquer the galaxy. Enjoy.')];
+};
+// CONFIRMED (FUN_004320f8 @4321f6-432232, pass 1 of every 10-year step, after
+// the "Year %d" report): with the help messages preference on, every player
+// gets report 24 with rand(4, 29) (FUN_0042e43c, the C library's rand()):
+// string 777 + n, so strings 781-806, 26 hints (777-780 are never drawn;
+// 807-811, the demo's, neither). Kept as the program has them, slips and all.
+// The skin shows one of rs.hintTexts each step (js/skins/classic/ui.js addTurnNotes).
+const HINTS405 = ["A dot by a planet means you have ships in orbit there.", "Good planets look \"prettier\" than bad planets when you explore them.", "Range is how far your ships can reach.", "Satellites can't move,, but they shoot just as well as any other ship.", "There's a limited amount of metal in the game.", "Miniaturization makes ships cost more money, but less metal.", "Radical Tech can have a variety of effects.", "Be careful with your metal--it can easily run out.", "Click and hold for a second to cancel a fleet's movement.", "Build Satellites to protect vulnerable planets.", "Colonize good planets with Colony ships.", "Scout ships have higher Range, but lower Weapons and Shields.", "If your Weapons are higher than the opponent's Shields, you'll do lots of damage", "If your Shields are higher than the opponent's Weapons, he'll barely hurt you.", "Lots of ships can make up for having low Technology", "You get money every turn.", "Good planets are close to 1.0 G.", "Good planets are close to 72 degrees.", "Each player has a different idea of what a good planet is.", "If a planet is over 2.5 G or below 0.4 G, it will never make a profit.", "Abandon bad planets after you strip-mine them.", "Terraforming improves a planet's temperature.", "Mining takes metal from a planet and puts it in your reserve.", "Ship savings puts money away for shipbuilding.", "Savings generates extra income.", "If you go into debt, part of your income goes to pay interest ."];
 
 // ---------- difficulty and master points (FUN_00447bdb, FUN_0043c836, FUN_00497e58) ----------
 // 4.0.5's own ranks, not 5.0.5's 25: a win writes the Hall of Fame and adds
@@ -2318,6 +2335,11 @@ const hall = {
 // ---------- the ruleset ----------
 E.registerRules('405', Object.assign({}, D, {
   label: 'Windows 95 4.0.5 (1996)',
+  // CONFIRMED (FUN_0042e5c2, used by the report texts FUN_0046ec5a and the
+  // windows' text; Mac 4.0.5's "%d,%.3dK" too): "12,345K" from ten million
+  fmtNum: E.niceNum,
+  // no Fix Spending: neither 4.0.5 has the command (no such menu item or string)
+  fixSpending: null,
   // the New Game window's Version and Edition menus (engine.js editions)
   family: '4.0', edition: { version: '4.0.5', name: 'Windows 95', platform: 'Windows 95', year: 1996 }, skins: ['w95'],
   // the New Game window lists rulesets by year, then version (engine.js ruleOptions)
@@ -2325,6 +2347,8 @@ E.registerRules('405', Object.assign({}, D, {
   // the unofficial 4.0.5.1 patch (engine.js fixed; docs/fixes.md, "4.0.5");
   // its own list, so 2.0's isn't inherited
   fixes: [
+    { id: 'keptStarNames', title: 'Every star a winner named is in the next galaxies',
+      text: 'The names winners gave stars were numbered one place late when a new galaxy was made: the first became “Hope”, the program’s own 191st name, and the last one named was never used. The patch puts every kept name in.' },
     { id: 'poorestOut', title: 'Players who are out don’t count as the poorest',
       text: 'A computer looking for the poorest and richest players skipped players who were out by a mark they no longer had, so an out player (with no money) usually counted as the poorest, and a computer was seldom “far the poorest”. The patch leaves out players who are out, as 3.0.1 and 5.0.5 do.' },
     { id: 'designs30', title: 'With 30 designs, the computers keep last turn’s designs',
@@ -2348,7 +2372,8 @@ E.registerRules('405', Object.assign({}, D, {
   ],
   patchVersion: null, // its own (4.0.5.1), not 2.0's
   ai: '405',               // its own computer players (js/ai-405.js)
-  hints: true,             // CONFIRMED (strings 1700..): tips between turns
+  hints: true,             // CONFIRMED (FUN_004320f8): a hint every step (above)
+  hintTexts: HINTS405,
   maxPlayers: 20,          // CONFIRMED (FUN_00448856): 0-19 computers, 20 players
   maxDesigns: MAX_DESIGNS,
   chatLimit: 10,           // CONFIRMED (string 755): ten messages a turn
@@ -2433,11 +2458,20 @@ E.registerRules('405', Object.assign({}, D, {
   // won picture, p3030), then Name a Star (FUN_00456047, dialog 378)
   conquered: 'You have conquered the galaxy!',
   // CONFIRMED (FUN_00456047, dialog 378; string 513): the winner names a star,
-  // at most 7 letters, not one there is already; the last four names are
-  // kept and all four are put in each later galaxy (the Mac's New Game
-  // window shows them: docs/405-findings.md). Which four go when a fifth is
-  // named, and which stars get them, weren't read (docs/open-questions.md).
-  nameAStar: { when: 'win', text: 'You won the game, so you get to name a star.', keep: 4, use: 'put', put: 4, max: 7,
+  // 2 to 7 letters (the dialog says so; blank names none), not one there is
+  // already. The program keeps four (the application's CStringArray +0xcc):
+  // a name is added at the end while there are fewer, else the fourth is
+  // removed and the new one put first (RemoveAt(3), InsertAt(0)). The New
+  // Game record takes all of them (FUN_00409170: count +0x14, names +0x16),
+  // and GiveStarsValues (FUN_00442374) puts them in with the others and
+  // shuffles the list (engine newGame), but numbers them from 0xbf where its
+  // own names run 1..0xbf: the first place reads its own 191st name, "Hope"
+  // (string 298), the others the kept names one place late, and the last
+  // kept name is never used (keptNames405). The patch (fix 'keptStarNames')
+  // puts every kept name in.
+  nameAStar: { when: 'win', text: 'You won the game, so you get to name a star.', keep: 4, use: 'put', put: 4, max: 7, min: 2,
+    add: (list, name) => list.length < 4 ? list.concat([name]) : [name].concat(list.slice(0, 3)),
+    slots: (G, put) => keptNames405(G, put),
     taken: 'Sorry, there’s already a star named “%s.”  Please pick another name.' },
   // fleets, routes and colonies
   fleetFor, shipsAdded, builtAt, yardRoom, route, path301: path405, path405, givePath, settle, colOrder, abandon, evacuate: evacuate405, dragShare, flagScrap, flagScrapDesign, newDesign, fleetList,

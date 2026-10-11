@@ -13,7 +13,7 @@ in `docs/301-findings.md`, which describes the rules in plain English.
 | | Routines |
 |---|---:|
 | In the program | 648 |
-| Game rules | 154 (149 implemented, 5 not: Fix Spending ×2, the Hall of Fame window, the auto play settings window, the colour-monitor joke) |
+| Game rules | 154 (151 implemented, 3 not: the Hall of Fame window, the auto play settings window, the colour-monitor joke) |
 | Not a rule (runtime, library, files, windows, drawing, menus, dialogs, printing, sound) | 494 |
 | Unread | 0 |
 
@@ -422,8 +422,8 @@ dragging a fleet): the remake has its own windows for them, and the rule behind 
 | `DoHBarClick` @d18a0 | drag a budget bar: DetermineNewLevels with every other slot between 0 and 1,000 | RULE, implemented | js/rules-301.js dragShare |
 | `GiveBarPercent` @d1d40 | set one slot's share and rebalance the others | RULE, implemented | js/rules-301.js giveBarPercent |
 | `DetermineNewLevels` @d1e1e | rebalance shares in proportion within 0..most; finished and abandoned colonies left alone | RULE, implemented | js/rules-301.js giveBarPercent |
-| `FixNextSpendingBar` @d2552 | Fix Spending: give each colony what it needs | RULE, not implemented | the Fix Spending command is not in the remake (interface) |
-| `FixSpendingBars` @d28ca | the Fix Spending command | RULE, not implemented | interface |
+| `FixNextSpendingBar` @d2552 | Fix Spending, one step: the next slot above its most + 1 is cut to that, the difference shared by Savings and Technology by their per cents (50/50 when both are 0); STR# 1050.1-2 | RULE, implemented | js/rules-301.js fixSpending301 (rs.fixSpending); ui.js openFixSpending |
+| `FixSpendingBars` @d28ca | the Fix Spending command: the step from -1 | RULE, implemented | ui.js openFixSpending |
 | `ComputeMaxPercent` @d28f8 | the most a colony needs: ceil(cost x 1001 / net); 0 when abandoned or finished | RULE, implemented | js/rules-301.js computeMax |
 | `ComputeMinPercent` @d2a94 | the least a slot may have (0 in 3.0.1's use) | RULE, implemented | js/rules-301.js giveBarPercent |
 | `FollowStarNameClick` @d2ab2 | click a star's name in the Budget window | NOT A RULE | interface |

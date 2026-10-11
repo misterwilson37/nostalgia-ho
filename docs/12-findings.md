@@ -93,7 +93,8 @@ novas, no alliances, no luck and 10 years a turn.
 | Circle | rings 4 ly apart (Dense), r × 44 / 35 + 1 stars a ring, up to 20 tries at ± 1 ly | CONFIRMED (`GiveGalaxyCircleCoords @e05a6`) |
 | Spacing, home stars, margin, distance | as DOS 2.0: at least 4 ly between stars; homes 20 ly apart, relaxing by 4; shifted to a 2 ly margin; distance (10 × longer + 3 × shorter + 9) ÷ 10 | CONFIRMED (`StarSafe @e1432`, `AllocateHomeStars @e1024`, `ConformCoordinates @e125c`, `Distance @122e6`) |
 | Star stats | as DOS 2.0 | CONFIRMED (`GiveStarsValues @e14ae`) |
-| Star names | STR# 1003 (the DOS 2.0 list of 190) plus STR# 2005 "More Star Names", where winners' names go; the program ships with one, "Tiber". At most 7 letters | CONFIRMED (`GiveStarsValues`) |
+| Star names | STR# 1003 (the DOS 2.0 list of 190) plus STR# 2005 "More Star Names", where winners' names go; the program ships with one, "Tiber". At most 7 letters. A winner's name must have 4 to 7 letters (shorter: not kept) and is taken when `Munger` finds it inside any name of STR# 2005 or 1003; it goes on no star of the game just won (`MarkStarNamed` only marks the file) | CONFIRMED (`GiveStarsValues`, `NameAStar @120a04`, `MarkStarNamed @1014e8`) |
+| Fix Spending | the Galaxy menu's "Correction dépenses" (⌘F): Mac 2.0.1's command, instruction for instruction (`docs/dos-findings.md`), its lines STR# 1050 in French; numbers "12,345K" from ten million (`LongToNiceString @1244a`) | CONFIRMED (`FixSpendingBars @c1fb0`, `FixNextSpendingBar @c1b48`, `ComputeMaxPercent @c1fde`, `ComputeMinPercent @c224a`); js/rules-dos.js fixSpending20 |
 | Novas | `CheckForSupernova` only runs when style bit 0x10 is set, and 1.2F always sets style 1. So there are no novas, and no black holes (a fleet is lost only at a star that has exploded) | CONFIRMED (`CheckForSupernova @a2640`, `MoveShips @a20ee`) |
 
 ### Money, research, ships, battles

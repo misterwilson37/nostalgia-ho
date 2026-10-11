@@ -361,7 +361,12 @@ E.registerRules('12', Object.assign({}, D, {
   // "Tiber"), which every later galaxy draws from with STR# 1003. The
   // window's words and its alert for a name taken weren't read (French in
   // 1.2): the remake uses 2.0's alert and 4.0.5's words (docs/open-questions.md).
-  nameAStar: { when: 'win', text: 'You won the game, so you get to name a star.', keep: 0, use: 'pool', max: 7,
+  // A name of 4 to 7 letters is kept (a shorter one isn't, @120ae2), and it is
+  // taken when Munger finds it in STR# 2005 or STR# 1003: a name inside
+  // another counts, letter case too (match 'munger'). The name doesn't go on
+  // a star of the game just won: MarkStarNamed @1014e8 only marks the game
+  // file (+0x14), so it isn't asked again.
+  nameAStar: { when: 'win', text: 'You won the game, so you get to name a star.', keep: 0, use: 'pool', max: 7, min: 4, match: 'munger',
     taken: 'Sorry, there’s already a star named ‘%s’.  Please pick another name.' },
   welcome: WELCOME,
   ai: '12',                // 1.2's own computer players (js/ai-12.js)
@@ -372,6 +377,15 @@ E.registerRules('12', Object.assign({}, D, {
   // Fleets (the ship queue and merging are 2.0's rule, cited here in 1.2)
   refuel: pass2_12, setColonyBars: setColonyBars12, aiBigShares: true,
   evacuateCommand: false, dragShare: D.dragShare, // (above) no Evacuate; 2.0's drag
+  // CONFIRMED (FixSpendingBars @c1fb0, FixNextSpendingBar @c1b48,
+  // ComputeMaxPercent @c1fde, ComputeMinPercent @c224a; "Correction
+  // dépenses", ⌘F, the Galaxy menu): Mac 2.0.1's routines instruction for
+  // instruction (rules-dos fixSpending20, the need in single precision). Its
+  // lines are STR# 1050 in French ("Vous n'avez pas de problème.", "Vous
+  // dépensiez trop à %s. Le problème a été résolu.", ...), given in English
+  // as Mac 2.0.1's, the same four lines in the same order
+  fixSpending: Object.assign({}, D.fixSpending, { single: true, lines: ['You have no spending problems.',
+    'You were overspending at %s. The problem has been fixed.', 'You were underspending at %s. The problem has been fixed.', 'You’re abandoning %s.'] }),
   yardRefund: yardRefund12, queueMergeAny: true, canMerge: canMerge12, organized: organized12,
   finishedPartWasted: false,
   att12, shipPower: att12,

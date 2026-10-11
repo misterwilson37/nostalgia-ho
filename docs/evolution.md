@@ -240,7 +240,7 @@ owners. What they say, against the code:
 | Full colour, read from a second file, "TheHo Color Picts", which must sit beside the program under that name | Confirmed: the Mac 2.0.1 program reads its colour pictures from that file (it is on the disks); 1.2 already had colour, from "TheHo F CPicts" (1.2 above) |
 | The alerts at each new turn became "Event Messages" in the map's bottom left corner; the Report Window keeps the last 50 or so; clicking a message goes to its star and does its action (such as reviewing the battle); when all are clicked, an End Turn button appears | Interface; the remake's message cards follow this |
 | An "overspending warnings" option in the Options menu; overspending goes into savings, "which even gets interest" | Confirmed: money not spent stays in the pool and earns 10 × √(kept + refunds) (2.0 rules, above); 1.2's Options menu already has the spending alert |
-| "Fix Spending" (command-F, Galaxy menu) caps spending to just pay for everything, including the ships queued | The routine is there (Mac `FixSpendingBars` @c2018); the remake hasn't got the command |
+| "Fix Spending" (command-F, Galaxy menu) caps spending to just pay for everything, including the ships queued | Confirmed: `ComputeMaxPercent` @c2046 counts the loss, terraforming to the end, all the metal mined and the queue; each use fixes one colony (`FixNextSpendingBar` @c1b48); played (`rs.fixSpending`) |
 | One fleet holds one ship type; Organize Fleets organizes the ships of the selected fleet's type at the selected star; the Build Ships dialog is new | Confirmed: a fleet record holds one design (`FUN_1068_0000`, Mac `NewFleet` @110004); Organize Fleets (`OrganizeFleets` @1137e6, ORGFLEETSDLGPROC); the three-slot ship queues. 1.2 has all three |
 | Tab selects the next fleet; double-clicking your star opens Build Ships, someone else's Review Battle | Interface (Mac `TabThroughFleets` @c68a6) |
 | Auto Play in the Options menu, "Don't count on it to be real smart" | Confirmed: a human's turn played by the computers' own routine (AUTOPLAYDLGPROC; Mac `ChangeAutoPlay` @1014f2, `doAutoPlayDialog` @12243c) |
@@ -836,7 +836,7 @@ reading of 1.2.
 | New ship types: Tankers, Dreadnoughts, Biologicals, Decoys | Confirmed | 4.0.5's classes and costs (`FUN_0041a9b4`); Biologicals and decoys from the Radical hand (`FUN_0043a08c`) |
 | Satellites twice as strong (and expensive) | Confirmed | 2 shots a round instead of 1 (`FUN_00423b52`); price 2.381 (W+13)(S+26) × 2 against 3.0.1's 2.381 (W+13)(S+26) (`FUN_0041a9b4`; 3.0.1 `CalcShipCosts @134de6`) |
 | PowerPC native | Not checkable | the remake's 4.0.5 is the Windows 95 program; the Mac 4.0.5 program wasn't decompiled |
-| "Only show important messages" and automatic spending fixing | Not checkable | interface; the findings record neither. (3.0.1 had a Fix Spending command, `FixSpendingBars @d28ca`; none is recorded for 4.0.5) |
+| "Only show important messages" and automatic spending fixing | Not checkable | interface; the findings record neither. (3.0.1 had a Fix Spending command, `FixSpendingBars @d28ca`; 4.0.5 has none: no menu item or string for it) |
 | The turn clock | Confirmed | a turn time limit; a human out of time has the computer play the turn (`FUN_0047f76e`) |
 | Best-buddies alliances | Confirmed | `FUN_004221d7`, `FUN_0043853c` |
 | Battle luck made optional | Confirmed | Luck is bit 4 of the option word (`FUN_00409170`); 3.0.1 has no Luck box and always uses it (DITL 6080, `DoBattleStage @e0004`) |

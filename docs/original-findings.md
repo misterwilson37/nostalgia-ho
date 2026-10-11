@@ -939,6 +939,34 @@ hint 2 ("Fleets appear as dots next to your planets. ...") and hint 3 ("Play wit
 spending bars. ..."). The demo says "Spaceward Ho! DEMO by Peter Commons." and always
 has the hints. Pictures 9031, 9032 and 9049; the plain message sound.
 
+### Naming a star at a new rank (CONFIRMED, October 2026)
+
+The rank window (`FUN_1005e2b0`, dialog 0x9c), shown when a win brings a new rank, has a
+field for a star name of up to 11 letters. OK with a name refuses one equal to a kept
+name (`FUN_10055760`, letter case aside) or found anywhere in the star names (`Munger`
+on STR# 6060, so a name inside another counts) with alert 10 ("Sorry, but there is
+already a star with that name. How about a different name?"), and keeps the window;
+otherwise the name goes at the end of the Preferences' list (+0x2e8, `FUN_1007b5f0`). OK
+blank or Cancel names none. New Game (`FUN_10059570` @1005a2f0) takes up to five of the
+kept names, in a row from the clock's rand(0, kept − 5), into the game (+0x170), and the
+galaxy set-up (`FUN_1006f280`) gives them the first places of the star list, draws the
+other stars' names, distinct, from its own, and shuffles the list: the names land on
+stars at random. The window's own words weren't read (its PPob isn't in the remake's
+copy): the remake shows the iOS port's. (`rs.nameAStar.inRank`, ui.js `showRank`.)
+
+### Numbers (CONFIRMED, October 2026)
+
+`FUN_10055050` writes a number with commas, the sign first, and from ten million
+"12,345K" (formats "%s%d", "%s%d,%.3d", "%s%d,%.3d,%.3d", "%s%d,%.3dK" at
+0x100efcf0-0x100efd08); every report goes through it so (`FUN_1009c240`), so a sum over
+ten million reads "$12,345K" in a report. With the currency (the income view
+`FUN_10098650`, the budget bars `FUN_1008a120`, the planet panel `FUN_10092300`) it
+writes "$1,234", and from ten million "$12.345M", a negative sum "($1,234)"
+("%s%s%d%s" ... "%s%s%d.%.3dM%s"). `FUN_100552e0`'s shorter "1.23M" / "12K" (no
+currency) is used only by the income view's interest, inside a template (its string 8)
+whose words weren't read, and by the network lobby; the remake's Interest row writes
+the sum with the currency, as the other rows. (`rs.fmtNum`, `rs.fmtMoney`.)
+
 ### Ship pictures (CONFIRMED)
 
 Ships are built from a sheet of parts (picture 11000), with four rows of 30

@@ -49,9 +49,9 @@ their entries are below so the list is complete, but their rulesets list no fixe
 | Mac 1.2 | 2 | 8 | 2 |
 | 2.0 | 5 | 5 | 3 |
 | Mac 2.0.1 | 3 | 5 | 2 |
-| Mac 3.0.1 | 4 | 5 | 3 |
-| 4.0.5 | 10 fixed (+ 3 the remake already plays fixed, + 3 with nothing in the remake to fix) | 4 | 6 |
-| Mac 4.0.5 | 6 fixed (+ 3 the remake already plays fixed, + 1 with nothing in the remake to fix) | 4 | 6 |
+| Mac 3.0.1 | 4 | 6 | 3 |
+| 4.0.5 | 11 fixed (+ 3 the remake already plays fixed, + 3 with nothing in the remake to fix) | 4 | 6 |
+| Mac 4.0.5 | 7 fixed (+ 3 the remake already plays fixed, + 1 with nothing in the remake to fix) | 4 | 6 |
 | 5.0.5 | 2 | 7 | 6 |
 | Palm | 2 (+ 5.0.5's 2) | 5 (+ 5.0.5's) | 2 (+ 5.0.5's) |
 
@@ -237,6 +237,10 @@ Organize Fleets takes the least fuel used, `OrganizeFleets` @1137e6) and `attack
 - A computer's skill copied from a human's after its start is set
   (`DoGameSolidificationStuff @a741a`): only the skill shown changes.
 - Dip Into Savings works once; buying a ship works the interest out again: rules.
+- Fix Spending's overspending is shared between Savings and Technology by whole per
+  cents, truncated, so a per mille or two can vanish from the budget; a colony being
+  abandoned or finished is cut to 1 per mille (its most, 0, + 1) (`FixNextSpendingBar
+  @d2552`): the routine's own arithmetic.
 
 ### Unclear (left; for the developers)
 
@@ -301,6 +305,12 @@ Organize Fleets takes the least fuel used, `OrganizeFleets` @1137e6) and `attack
    4.0.5 takes the level's own name (`GetReportString` @1507d4, STR# 6270-6274). *Fix:*
    string base + level − 1 (`techName` in `js/rules-405.js`; level 1 is strings 841,
    861, 881, 1892 and 911).
+11. **`keptStarNames`: the stars winners named are numbered one place late**
+   (`FUN_00442374`: the kept names are entries 0xbf + i, but entries up to 0xbf are the
+   program's own names 1-191): the first place reads the 191st own name, "Hope" (string
+   298), each kept name moves one place on, and the last one named is never used (with
+   one kept name, none is). *Fix:* every kept name in (`keptNames405` in
+   `js/rules-405.js`).
 
 The Hall of Fame, Hall of Shame and Master Point List are kept across games; the three
 hall fixes apply while the game being played has the patch on.
@@ -378,6 +388,8 @@ Mac 4.0.5"). Its list is 4.0.5's without the Windows build's own slips.
 6. **`welcomeVersion`**: the welcome report says "Version 4.0.3" (STR# 6040, never
    updated for 4.0.5); the patch says 4.0.5. (Jake's call: a forgotten string is fixed
    like a bug, though it changes nothing in play.)
+7. **`keptStarNames`**: as 4.0.5's 11 (`GiveStarsValues @81a0a`: entries 0xbf + i,
+   GetIndString(STR# 6060, 191) "Hope" for the first).
 
 **Not in its list** (Windows slips; the Mac code is right):
 - `scrapTypeRefund`: the Mac's Ship Types window gives back every ship of the type
@@ -563,6 +575,7 @@ apply to it, at the iOS addresses in `docs/coverage-ios.md`.
 1. 5.0.5's first two above: shares used as they stand, and dipping raising the
    borrowing limit.
 2. Money over ten million: the number formatter (`0x10003cd4c`) writes "$12.345M",
-   and other numbers that size "12,345K"; whether 5.0.5 did the same wasn't compared.
-   The remake writes the number in full in every ruleset.
+   and other numbers that size "12,345K". Settled (October 2026): 5.0.5's `FUN_10055050`
+   does the same, so it is 5.0.5's design, played as such in both rulesets (`rs.fmtNum`,
+   `rs.fmtMoney`); 1.2 to 4.0.5 write "12,345K" too, the Palm every number in full.
 

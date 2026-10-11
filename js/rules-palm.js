@@ -197,6 +197,11 @@ function welcome(G) {
 
 const rs = Object.assign(base, {
   label: 'Palm OS 5 (2003)',
+  // CONFIRMED (FUN_0002c510, the CMiscUtilsPalm method +0x68 the report
+  // formatter FUN_00027c4c calls): numbers in full with commas, however big,
+  // not 5.0.5's "12,345K". (Its compact "$1.23 M" / "$12 K" money, FUN_0002c664
+  // with tSTL 1001.47-62, is for screens the remake doesn't have.)
+  fmtNum: null, fmtMoney: null,
   // the New Game window's Version and Edition menus (engine.js editions)
   family: '5', edition: { version: '5', name: 'Palm OS', platform: 'Palm OS, version 1.0.4', year: 2003 }, skins: ['palm'],
   // the New Game window lists rulesets by year, then version (engine.js ruleOptions)
@@ -226,9 +231,13 @@ const rs = Object.assign(base, {
   hintTexts: HINTS,
   // CONFIRMED (tFRM 2900, FUN_000692c4): at a new rank you may name a star
   // for later games, and up to five of the names are put in each new galaxy.
-  // The form's words weren't read (docs/open-questions.md); nor how many
-  // names are kept, nor which five go in: the remake keeps every name and
-  // puts in the last five.
+  // CONFIRMED (FUN_000692c4): the New Game window takes up to five of the kept
+  // names, in a row from a start drawn over the list, SysRandom(0, kept - 5)
+  // (pick 'run'); FUN_00025f4a gives them the first places of the star list,
+  // the other stars distinct names of its own, and shuffles the list with
+  // the game's numbers, so they land on stars at random (engine newGame). The
+  // form's words weren't read (docs/open-questions.md), nor how the list
+  // grows: the remake keeps every name.
   // the auto play settings are on the Auto Play form (tFRM 1700, FUN_000713be)
   autoPlayRange: { aggr: [0, 100], where: 'autoplay' },
   // Organize Fleets (tFRM 2300): Group All and Split are 5.0.5's, but moving
@@ -237,7 +246,7 @@ const rs = Object.assign(base, {
   // tank): 5.0.5's window (organizeFleets '505') would play 5.0.5's rules, so
   // the Palm keeps Split… and "Merge all fleets here" (docs/open-questions.md)
   organizeFleets: null,
-  nameAStar: { when: 'rank', text: 'You have reached a new rank, so you get to name a star.', keep: 0, use: 'put', put: 5, max: 7,
+  nameAStar: { when: 'rank', text: 'You have reached a new rank, so you get to name a star.', keep: 0, use: 'put', put: 5, pick: 'run', max: 7,
     taken: 'Sorry, there’s already a star named “%s.”  Please pick another name.' },
 });
 // CONFIRMED (tSTL 6060, the star names): 5.0.5's 255, with "Courasant" in

@@ -59,7 +59,7 @@ window.HOMAC2 = {
       ['List All Fleets…', 'Ships/List all fleets…'], ['Next Fleet', 'Ships/Next fleet'], ['Build Ships…', 'Ships/Build ships at selected colony…'], [null, 'Ships/#3'], '-',
       ['Review Battle…', 'Ships/Review battle…']],
     Galaxy: [['Compare Players…', 'Game/Players and history'], ['List All Explored Stars…', 'Galaxy/List explored stars…'], ['Send Message…', 'Galaxy/Send a message…'], '-',
-      ['Zoom In', 'View/Zoom in'], ['Zoom Out', 'View/Zoom out'], ['Fit Galaxy', 'View/Fit galaxy'], '-',
+      ['Zoom In', 'View/Zoom in'], ['Zoom Out', 'View/Zoom out'], ['Fit Galaxy', 'View/Fit galaxy'], ['Fix Spending', 'Galaxy/Fix spending'], '-',
       ['Alliances…', 'Galaxy/Players and alliances…'], ['Give Money/Metal…', 'Galaxy/Give money or metal…'], ['Dip Into Savings…', 'Galaxy/Dip into savings…'], [null, 'Galaxy/#6'], [null, 'Galaxy/#7']],
     Help: [['How to Play', 'Help/How to play'], [null, 'Help/#1']],
   },

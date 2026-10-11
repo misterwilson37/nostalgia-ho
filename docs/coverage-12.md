@@ -12,7 +12,7 @@ stubs). Addresses are in that layout, as in `docs/12-findings.md`.
 | | Routines |
 |---|---:|
 | In the program | 548 |
-| Game rules | 114 (112 implemented, 2 not: Fix Spending ×2) |
+| Game rules | 114 (all implemented) |
 | Not a rule (runtime, library, files, windows, drawing, menus, dialogs, sound) | 434 |
 | Unread | 0 |
 
@@ -397,9 +397,9 @@ stubs). Addresses are in that layout, as in `docs/12-findings.md`.
 | `DoHBarClick` @c1002 | drag a budget bar (shares of the pool): every slot's floor 0 and ceiling 1,000, then `DetermineNewLevels` | NOT A RULE | interface (the remake's budget panel; see open questions, Remake's choices) |
 | `GiveBarPercent` @c139c | set a share and rebalance the others, none below its least share (a new colony's share, `ColonizeStar`) | RULE, implemented | js/rules-dos.js giveShare20 (2.0's FUN_1010_16f2, the same) |
 | `DetermineNewLevels` @c1470 | rebalance shares in proportion, within floors, then to a total of 1,000 | RULE, implemented | js/rules-dos.js giveShare20 (2.0's FUN_1010_179a, the same) |
-| `FixNextSpendingBar` @c1b48 | Fix Spending: give each underfunded colony at least its loss | RULE, not implemented | Fix Spending command not in the remake (interface) |
-| `FixSpendingBars` @c1fb0 | Fix Spending menu command | RULE, not implemented | Fix Spending command not in the remake (interface) |
-| `ComputeMaxPercent` @c1fde | the most a colony can use (terraform need, mining, queued ships less paid) | NOT A RULE | interface (bar limits) |
+| `FixNextSpendingBar` @c1b48 | Fix Spending, one step: the next slot over its most + 1 (cut, the rest to Savings) or under its least (raised from Savings, or "abandoning"); STR# 1050 | RULE, implemented | js/rules-dos.js fixSpending20 (rs.fixSpending, Mac lines and single precision in js/rules-12.js); ui.js openFixSpending |
+| `FixSpendingBars` @c1fb0 | Fix Spending menu command: the step from -1 | RULE, implemented | ui.js openFixSpending (the Galaxy menu's Fix spending) |
+| `ComputeMaxPercent` @c1fde | the most a colony can use: loss + 2 x gap² (Terraform on) + (metal² + 224) / 225 (Mine on) + queue x price less paid (Ship on), over the pool rounded up, in single precision; 1,000 for Savings, Technology or a need not under the pool | RULE, implemented | js/rules-dos.js maxShare20 (Fix Spending) |
 | `ComputeMinPercent` @c224a | the least a losing colony needs: ceil(loss x 1000 / pool) | RULE, implemented | js/rules-dos.js minShare20 (2.0's FUN_1010_218e; also the End Turn warning) |
 | `FollowStarNameClick` @c2388 | the galaxy map window, planet and fleet panels, budget bars | NOT A RULE | interface |
 | `MapWinProc` @c2652 | the galaxy map window, planet and fleet panels, budget bars | NOT A RULE | interface |

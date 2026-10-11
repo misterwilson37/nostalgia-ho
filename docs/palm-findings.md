@@ -159,7 +159,13 @@ Each CONFIRMED the same as `js/rules-original.js`, so the Palm ruleset uses it:
   Fleet" (tSTL 6001.16-17), as 5.0.5's.
 - **Ranks**: resource `RANK 1000`, the same 25 ranks, points and unlocks; a new rank
   shows tFRM 2900, where you may name a star for later games (built: `rs.nameAStar`; the
-  form's words are the remake's).
+  form's words are the remake's). New Game takes up to five kept names in a row from
+  SysRandom(0, kept − 5) (`FUN_000692c4`), and the galaxy set-up gives them the first
+  places of the star list and shuffles it (`FUN_00025f4a`), as 5.0.5 does.
+- **Numbers**: reports write every number in full with commas (`FUN_0002c510`, the
+  CMiscUtilsPalm method +0x68 that the report formatter `FUN_00027c4c` calls), not
+  5.0.5's "12,345K"; the compact money of tSTL 1001.47-62 ("$1.23 M", "$12 K",
+  `FUN_0002c664`) belongs to screens the remake doesn't have.
 - **Hints**: one every turn while the preference is on (`FUN_000500d4`, report 500;
   `FUN_00027c4c` reads tSTL 6021 at a SysRandom index from 4 to 43; the demo 4 to 52).
   `rs.hintTexts` holds them.

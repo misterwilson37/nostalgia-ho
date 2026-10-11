@@ -211,8 +211,21 @@ Optional ruleset flags the skin reads (each is documented where it is read):
   hints choice in Preferences is then left out. (`js/skins/classic/ui.js`, `addTurnNotes`, `openPrefs`)
 - `rs.hintTexts`: a version's own between-turn hints, one shown every turn, picked by the
   browser's random numbers (5.0.5: STR# 6021 lines 4-43, `FUN_10072a10`; the Palm OS rules:
-  tSTL 6021.4-43; iOS: its "Help Messages" 4-42). Left out (4.0.5 and before, the Claude
-  rules): one of `js/data.js`'s hints every seven turns. (`js/skins/classic/ui.js`, `addTurnNotes`)
+  tSTL 6021.4-43; iOS: its "Help Messages" 4-42; Windows 4.0.5: strings 781-806,
+  `FUN_004320f8`; Mac 4.0.5: STR# 6250 lines 4-30, `DoOneTurn`), marked `hint: true` (the
+  w95 and mac4 skins give them picture 3170). Left out (the Claude rules): one of
+  `js/data.js`'s hints every seven turns. (`js/skins/classic/ui.js`, `addTurnNotes`)
+- `rs.fmtNum(n)` and `rs.fmtMoney(n)`: how the version writes a number in reports and
+  windows, and a sum in the panels (1.2 to 4.0.5: "12,345K" from ten million, engine
+  `niceNum`; 5.0.5 and iOS: the same with the sign first, `num505`, and sums "$12.345M",
+  "($1,234)", `money505`). Left out or null: the number in full with commas (the Palm OS,
+  the Claude rules). The rules write their reports' numbers with `HO.num(G, n)`.
+  (`js/engine.js`; `js/skins/classic/ui.js`, `fmt`, `money`)
+- `rs.fixSpending`: `{ lines, single, next(G, player, cur) → { text, cur } }`, the Galaxy
+  menu's Fix Spending (1.2, 2.0, Mac 2.0.1, 3.0.1): each step goes on from `cur` (-1 to
+  start), fixes the next colony with a problem in the budget and gives the line to show,
+  or null when there is nothing more. (`js/rules-dos.js` `fixSpending20`, `js/rules-301.js`
+  `fixSpending301`; `js/skins/classic/ui.js`, `openFixSpending`)
 - `rs.celsius`: `true` when the version showed temperatures only in °C, to a tenth (1.2,
   the French edition); Preferences then shows °C as fixed. (`js/skins/classic/ui.js`, `degF`)
 - `rs.bestBuddies`: `false` when the version had alliances but no best-buddy pacts (3.0.1);
@@ -269,13 +282,18 @@ Optional ruleset flags the skin reads (each is documented where it is read):
   when that is given. (`js/skins/classic/ui.js`, `openRadicalHand`)
 - `rs.conquered`: the text of 4.0.5's "You have conquered the galaxy!" window, opened with
   the won picture by clicking the winner's report. (`js/skins/classic/ui.js`, `openWinWindows`)
-- `rs.nameAStar`: Name a Star, `{ when: 'win' | 'rank', text, taken, max, keep, use, put }`:
-  after a win (clicking the winner's report) or a new rank (Palm OS), a star name of at
-  most `max` letters, not one there is already (`taken`, with %s); kept in localStorage
-  "ho5.stars.<rules>" (the last `keep`, or all) and passed to `HO.newGame` as
-  `opts.starNamesKept`, where `use` `'pool'` adds them to the version's star names (1.2,
-  2.0) and `'put'` puts the last `put` of them in the galaxy (4.0.5, Palm OS); `null`
-  keeps them unused (3.0.1). (`js/skins/classic/ui.js`, `openNameStar`; `js/engine.js`, `newGame`)
+- `rs.nameAStar`: Name a Star, `{ when: 'win' | 'rank', text, taken, max, min, match, keep,
+  add, use, put, pick, slots, inRank }`: after a win (clicking the winner's report) or a
+  new rank (Palm OS, 5.0.5 in the rank window itself with `inRank`), a star name of `min`
+  to `max` letters (shorter names none), not one there is already (`taken`, with %s;
+  `match` `'munger'`: found inside any kept or star name, the Mac versions; `'505'`); kept
+  in localStorage "ho5.stars.<rules>" (`add(list, name)`, else at the end; the last
+  `keep`, or all) and passed to `HO.newGame` as `opts.starNamesKept`, where `use` `'pool'`
+  adds them to the version's star names (1.2, 2.0, 3.0.1) and `'put'` puts `put` of them
+  in the galaxy (the last ones, or with `pick: 'run'` a run from a start drawn from the
+  seed; `slots(G, names)` what the set-up makes of them), first in the star list, which
+  is then shuffled (4.0.5, Palm OS, 5.0.5, iOS). (`js/skins/classic/ui.js`,
+  `openNameStar`, `showRank`; `js/engine.js`, `newGame`)
 - `rs.forceEndTurn`: `{ ask }`, Mac 2.0.1's Force End Turn, offered with several players:
   asks (box 3210, %s the player, those not done, all) and plays the turn with everyone
   marked done. (`js/skins/classic/ui.js`, `forceEndTurn`)

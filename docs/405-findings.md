@@ -103,7 +103,7 @@ choice, docs/open-questions.md).
 | Home stars | other shapes: random stars for all 20 slots, at least 20 ly apart, relaxing by 4 ly, 25 tries each | CONFIRMED (`FUN_00441af4`) |
 | Margin | the map is shifted so it starts 4 ly from the edge (5.0.5: 6) | CONFIRMED (`FUN_00441ddc`) |
 | Star stats | as 5.0.5 | CONFIRMED (`FUN_00442374`) |
-| Star names | 4.0.5's own 191 names (strings 108–298), cut to 7 letters, each used once | CONFIRMED (`FUN_00442374`) |
+| Star names | 4.0.5's own 191 names (strings 108–298), cut to 7 letters, each used once; the kept winners' names first, one place late (the first place is "Hope", the last kept name lost: a slip, the patch's `keptStarNames`), the list then shuffled. Hints: report 24 every step with the help messages preference (strings 781-806; Mac STR# 6250.4-30), and hints around the credits in the first reports. Numbers "12,345K" from ten million (`FUN_0042e5c2`) | CONFIRMED (`FUN_00442374`) |
 
 ### Money
 

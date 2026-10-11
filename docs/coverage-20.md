@@ -16,7 +16,7 @@ The DOS program was checked against it where the two could be matched: its
 | | Routines |
 |---|---:|
 | In the program | 743 |
-| Game rules | 119 (114 implemented, 5 not: Fix Spending ×3, Send Message, design names kept for the computers) |
+| Game rules | 119 (117 implemented, 2 not: Send Message, design names kept for the computers) |
 | Not a rule (runtime, files, windows, drawing, menus, dialogs, sound, dead code) | 624 |
 | Unread | 0 |
 
@@ -232,9 +232,9 @@ calls (`GETDC`, `LOADSTRING` …); they are imports, not code of the program.
 | `FUN_1010_16e6 †` @1010:16e6 | — | end of a budget drag | NOT A RULE | interface |
 | `FUN_1010_16f2` @1010:16f2 | `GiveBarPercent` @c139c | give a slot a new share, the others giving it up (new colonies) | RULE, implemented | js/rules-dos.js giveShare20 |
 | `FUN_1010_179a` @1010:179a | `DetermineNewLevels` @c1470 | move the other slots' shares to make room: in proportion, never below a losing colony's least share, then fix the total | RULE, implemented | js/rules-dos.js giveShare20 |
-| `FUN_1010_1ce7` @1010:1ce7 | `FixNextSpendingBar` @c1b48 | Fix Spending, one problem per use: from the slot after the last one it fixed, the first colony whose share is more than it can use + 1 per mille (cut to that, the rest to Savings) or less than its least share (raised from Savings if Savings has enough; otherwise only a line saying so); one line of text in the message bubble; "You have no spending problems." when none. (Corrected with the Mac names: it fixes one colony a use, not every colony at once) | RULE, not implemented | interface not done (as 1.2's) |
-| `FUN_1010_1f55 †` @1010:1f55 | `FixSpendingBars` @c2018 | Fix Spending command: starts FUN_1010_1ce7 from the first slot | RULE, not implemented | interface not done |
-| `FUN_1010_1f6b` @1010:1f6b | `ComputeMaxPercent` @c2046 | Fix Spending: the share a colony can use (loss, terraforming to the end, all its metal mined, its queue) | RULE, not implemented | interface not done |
+| `FUN_1010_1ce7` @1010:1ce7 | `FixNextSpendingBar` @c1b48 | Fix Spending, one problem per use: from the slot after the last one it fixed, the first colony whose share is more than it can use + 1 per mille (cut to that, the rest to Savings) or less than its least share (raised from Savings if Savings has enough; otherwise only a line saying so); one line of text in the message bubble; "You have no spending problems." when none, "You are abandoning %s." when a losing colony can't be raised (its share is 0 or Savings is short). (Corrected with the Mac names: it fixes one colony a use, not every colony at once) | RULE, implemented | js/rules-dos.js fixSpending20 (rs.fixSpending); ui.js openFixSpending |
+| `FUN_1010_1f55 †` @1010:1f55 | `FixSpendingBars` @c2018 | Fix Spending command: starts FUN_1010_1ce7 from the first slot | RULE, implemented | ui.js openFixSpending (the Galaxy menu's Fix spending) |
+| `FUN_1010_1f6b` @1010:1f6b | `ComputeMaxPercent` @c2046 | Fix Spending: the share a colony can use: loss + 2 x gap² (Terraform on) + (metal² + 224) / 225 (Mine on) + count x price of each queue slot (the prototype's while none built) less what was paid (Ship on), ceil(need x 1000 / pool) on the FPU when the need is under the pool (unsigned), else 1,000 | RULE, implemented | js/rules-dos.js maxShare20 |
 | `FUN_1010_218e` @1010:218e | `ComputeMinPercent` @c22b2 | a losing colony's least share: ceil(loss x 1000 / pool) | RULE, implemented | js/rules-dos.js minShare20 |
 | `FUN_1010_2267 †` @1010:2267 | — | budget window drag feedback (focus rectangle) | NOT A RULE | interface |
 | `FUN_1010_22e0 †` @1010:22e0 | — | budget window drag feedback (focus rectangle) | NOT A RULE | interface |

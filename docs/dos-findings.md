@@ -131,8 +131,10 @@ particular, by name:
   it is 0 (@a28bc), and nothing else writes it but `ColonizeStar` (with 0). This settles
   the medium-confidence reading of `FUN_1040_0925`;
 - Fix Spending (`FixSpendingBars` @c2018, `FixNextSpendingBar` @c1b48,
-  `ComputeMaxPercent` @c2046): each use fixes the next colony with a problem, as
-  `FUN_1010_1ce7` (not done in the remake; see below);
+  `ComputeMaxPercent` @c2046, `ComputeMinPercent` @c22b2): each use fixes the next
+  colony with a problem, as `FUN_1010_1ce7`, its lines kept in the code (@c1f6e-c1ff8:
+  "You’re abandoning %s." where Windows has "You are abandoning %s.") and the need
+  rounded to single precision by SANE (done: `rs.fixSpending`, the Galaxy menu);
 - the spending warning at End Turn (`GiveSpendingWarning` @10299c = `FUN_1050_2b31`).
 
 ### Mac 2.0.1 differs
@@ -354,9 +356,12 @@ See `docs/open-questions.md` (2.0 section). Not implemented, by choice or not ye
   built-in lists.
 - Several human players: 2.0 joins humans one at a time with passwords; the remake's hot
   seat takes turns on one computer instead.
-- The Fix Spending command (`FUN_1010_1ce7`, Mac `FixNextSpendingBar`: each use fixes the next
-  colony whose share is over what it can use or under its least share, with one line of
-  text), 2.0's Send Message window (`SENDMESSAGEDLGPROC`) and the Explored Planets list.
+- 2.0's Send Message window (`SENDMESSAGEDLGPROC`) and the Explored Planets list. (The
+  Fix Spending command is done: js/rules-dos.js `fixSpending20`, `maxShare20`; each step
+  in a small window, Next being the original's click on the message bubble.)
+- Numbers: every number in a report or window is written "1,234", "1,234,567" and from
+  ten million "12,345K" (WINHO.EXE's formats; Mac `LongToNiceString`), so "$12,345K" in
+  a report with a "$" (`rs.fmtNum`, engine `niceNum`).
 - The names humans give their designs, which 2.0 adds to the names file for the
   computers' later designs (`FUN_10e8_0f64`, Mac `AddNewTypeNameToPrefs`).
 - Text only: the scrapping message ("Your fleet of … at … has been scrapped for … metal.",

@@ -113,8 +113,10 @@ const el = (tag, attrs, ...kids) => {
   for (const c of kids.flat()) if (c != null && c !== false) e.append(c.nodeType ? c : document.createTextNode(c));
   return e;
 };
-const fmt = (n) => Math.round(n).toLocaleString('en-US');
-const money = (n) => (n < 0 ? '-$' : '$') + fmt(Math.abs(n));
+// numbers and sums as the game's version writes them (rs.fmtNum, rs.fmtMoney:
+// 5.0.5's "12,345K" and "$12.345M", 1.2 to 4.0.5's "12,345K"); left out, in full
+const fmt = (n) => { const f = G && HO.rules(G).fmtNum; return f ? f(n) : Math.round(n).toLocaleString('en-US'); };
+const money = (n) => { const f = G && HO.rules(G).fmtMoney; return f ? f(n) : (n < 0 ? '-$' : '$') + fmt(Math.abs(n)); };
 
 // ---------- images ----------
 const IMG = {};
@@ -1574,7 +1576,7 @@ function awardMasterPoints(byComputer) {
   me().inbox.push({ text: HO.report(79, d, fmt(pts)), icon: 'm9035' });
   const after = rankOf(pr.points);
   // the Palm OS names a star at a new rank (rs.nameAStar.when 'rank', tFRM 2900)
-  const NS = RS.nameAStar, named = NS && NS.when === 'rank' ? () => openNameStar() : null;
+  const NS = RS.nameAStar, named = NS && NS.when === 'rank' && !NS.inRank ? () => openNameStar() : null;
   if (after > before) setTimeout(() => showRank(after, named), 300);
 }
 // Game Center (rs.gameCenter, iOS 1.2.9): the app keeps master points and
@@ -1616,7 +1618,21 @@ function showRank(i, then) {
     el('img', { src: A.jpg[i], alt: '' }),
     el('p', null, 'Congratulations! You have achieved the rank of:'), el('h3', null, R[0]));
   if (R[2]) body.append(el('p', null, `You have earned the ability to ${R[2]}.`));
-  body.append(el('div', { class: 'btns right' }, el('button', { onclick: () => { closeModal(); if (then) then(); } }, 'OK')));
+  // 5.0.5's rank window has the star-name field itself (rs.nameAStar.inRank,
+  // FUN_1005e2b0): OK with a name keeps it, unless it is taken (the alert,
+  // and the window stays); OK blank or Cancel names none
+  const NS = G && HO.rules(G).nameAStar, inRank = NS && NS.when === 'rank' && NS.inRank;
+  if (inRank) {
+    const inp = el('input', { name: 'star', maxlength: NS.max || 11, autocomplete: 'off', 'aria-label': 'Star name' }), err = el('p', { class: 'note', role: 'alert' });
+    const ok = () => {
+      const n = inp.value.trim().slice(0, NS.max || 11);
+      if (n && starTaken(NS, G.rules, n)) { err.textContent = NS.taken.replace('%s', n); Sound.play(4000); inp.select(); return; }
+      if (n) { keepStar(NS, G.rules, n); toast(`“${n}” will be among the stars of your next galaxies.`); }
+      closeModal(); if (then) then();
+    };
+    body.append(el('form', { class: 'newgame namestar', onsubmit: (e) => { e.preventDefault(); ok(); } }, el('p', null, NS.text), el('label', null, el('span', null, 'Star name'), inp), err,
+      el('div', { class: 'btns right' }, el('button', { type: 'button', class: 'quiet', onclick: () => { closeModal(); if (then) then(); } }, 'Cancel'), el('button', { type: 'submit' }, 'OK'))));
+  } else body.append(el('div', { class: 'btns right' }, el('button', { onclick: () => { closeModal(); if (then) then(); } }, 'OK')));
   Sound.play(7021);
   modal('New rank', body, { cls: 'mid' });
 }
@@ -1776,7 +1792,7 @@ function addTurnNotes(p) {
   const ownHints = HO.rules(G).hintTexts;
   // one a 10-year step (report 500, sent on every step of the turn: 20, 30 or 50 years a turn give 2, 3 or 5)
   const steps = HO.feature(G, 'yearsPerTurn') ? Math.max(1, Math.round((G.opts.yearsPerTurn || 10) / 10)) : 1;
-  if (Prefs.hints && ownHints && ownHints.length) for (let i = 0; i < steps; i++) p.inbox.push({ text: ownHints[Math.floor(Math.random() * ownHints.length)], icon: 'm9024', quiet: true });
+  if (Prefs.hints && ownHints && ownHints.length) for (let i = 0; i < steps; i++) p.inbox.push({ text: ownHints[Math.floor(Math.random() * ownHints.length)], icon: 'm9024', quiet: true, hint: true });
   else if (Prefs.hints && HO.rules(G).hints !== false && G.turn % 7 === 3 && (HO.DATA.hints || []).length) { const h = HO.DATA.hints; p.inbox.push({ text: h[G.turn % Math.min(h.length, 40)], icon: 'm9024', quiet: true }); }
   if (!p.inbox.length) p.inbox.push({ text: `Year ${G.year}. Nothing much happened.`, icon: 'm9024', quiet: true });
 }
@@ -2501,6 +2517,27 @@ function openChat() {
     el('div', { class: 'btns right' }, el('button', { type: 'submit' }, 'Send')));
   modal('Send a message', f, { cls: 'mid' });
 }
+// Fix Spending (rs.fixSpending: 1.2, 2.0, 3.0.1; the Galaxy menu): the
+// original put each step's line in the map window's message bubble, and a
+// click on the bubble took the next step, until the last slot, when the
+// bubble went back to the reports. Here the line is a small window's: Next
+// is the click on the bubble, Done leaves the bubble. The budget bars move
+// with each step (rules-dos fixSpending20, rules-301 fixSpending301).
+function openFixSpending() {
+  const FS = HO.rules(G).fixSpending; if (!FS) return;
+  let cur = -1;
+  const line = el('p', { class: 'fixline', role: 'status' });
+  const next = el('button', { onclick: () => step() }, 'Next');
+  const step = () => {
+    const r = FS.next(G, me(), cur); cur = r.cur;
+    renderPanel(); save();
+    if (r.text == null) { closeModal(); return; }
+    line.textContent = r.text;
+  };
+  modal('Fix Spending', el('div', null, line, el('div', { class: 'btns right' }, el('button', { class: 'quiet', onclick: closeModal }, 'Done'), next)), { cls: 'small' });
+  step();
+  if (UI.modal) next.focus();
+}
 function openDip() {
   const p = me();
   const f = el('form', { class: 'newgame', onsubmit: (e) => { e.preventDefault(); const v = +new FormData(f).get('dip'); const rs = HO.rules(G); if (rs.dipSet) rs.dipSet(G, p, v); else p.dip = v; closeModal(); renderPanel(); save(); } });
@@ -2762,6 +2799,22 @@ function openWinWindows(done) {
   if (rs.nameAStar && rs.nameAStar.when === 'win' && !G.starNamed) { openNameStar(() => { G.starNamed = true; save(); if (done) done(); }); return; }
   if (done) done();
 }
+// Is the name taken? NS.match 'munger': found anywhere in the kept names or
+// the version's star names, a name inside another too, letter case counting
+// (the Mac versions' Munger); '505': equal to a kept name, letter case aside,
+// or found by Munger in the star names (5.0.5); left out: equal to a star
+// name, a kept one or one of this galaxy, letter case aside
+function starTaken(NS, id, n) {
+  const base = HO.rules(G).starNames || HO.DATA.starNames || [], kept = keptStars(id), lc = (x) => String(x).toLowerCase();
+  if (NS.match === 'munger') return base.concat(kept).some(x => String(x).includes(n));
+  if (NS.match === '505') return kept.some(x => lc(x) === lc(n)) || base.some(x => String(x).includes(n));
+  return base.concat(kept, G.stars.map(s => s.name)).some(x => lc(x) === lc(n));
+}
+// keep it: NS.add(list, name) (4.0.5's list of four), else at the end, the last NS.keep
+function keepStar(NS, id, n) {
+  let k = NS.add ? NS.add(keptStars(id), n) : keptStars(id).concat([n]); if (NS.keep) k = k.slice(-NS.keep);
+  try { localStorage.setItem(starsKey(id), JSON.stringify(k)); } catch (x) {}
+}
 function openNameStar(done, cancelled) {
   const NS = HO.rules(G).nameAStar, id = G.rules; if (!NS) return;
   const inp = el('input', { name: 'star', maxlength: NS.max || 7, autocomplete: 'off', 'aria-label': 'Star name' });
@@ -2771,10 +2824,10 @@ function openNameStar(done, cancelled) {
     e.preventDefault();
     const n = inp.value.trim().slice(0, NS.max || 7);
     if (!n) { inp.focus(); return; }
-    const all = (HO.rules(G).starNames || HO.DATA.starNames || []).concat(keptStars(id), G.stars.map(s => s.name));
-    if (all.some(x => String(x).toLowerCase() === n.toLowerCase())) { err.textContent = NS.taken.replace('%s', n); Sound.play(4000); inp.select(); return; }
-    let k = keptStars(id).concat([n]); if (NS.keep) k = k.slice(-NS.keep);
-    try { localStorage.setItem(starsKey(id), JSON.stringify(k)); } catch (x) {}
+    // NS.min: a shorter name names no star (the Mac versions)
+    if (NS.min && n.length < NS.min) { finish(); return; }
+    if (starTaken(NS, id, n)) { err.textContent = NS.taken.replace('%s', n); Sound.play(4000); inp.select(); return; }
+    keepStar(NS, id, n);
     toast(NS.use ? `“${n}” will be among the stars of your next galaxies.` : `“${n}” has been kept.`);
     finish();
   } }, el('p', null, NS.text), el('label', null, el('span', null, 'Star name'), inp), err,
@@ -3444,6 +3497,7 @@ function setupMenus() {
       ['Give money or metal…', () => G && !G.over && openGive(), 'gifts'],
       ['Send a message…', () => G && !G.over && openChat(), () => commandShown('chat')],
       ['Dip into savings…', () => G && !G.over && openDip(), 'dip'],
+      ['Fix spending', () => G && !G.over && openFixSpending(), () => !!(G && HO.rules(G).fixSpending)],
       ['-'],
       [() => (G && me().surrenderTo != null ? 'Take back surrender' : 'Surrender…'), () => G && !G.over && openSurrender(), () => commandShown('surrender')],
       [() => (G && me().armageddon ? 'Turn off the armageddon device' : 'Armageddon device…'), () => G && !G.over && toggleArmageddon(), 'armageddon'],

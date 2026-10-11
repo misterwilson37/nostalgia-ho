@@ -381,6 +381,37 @@ function upgradeSave(G) {
   return G;
 }
 function fmt(n) { return Math.round(n).toLocaleString('en-US'); }
+// How each version writes a number (rs.fmtNum, reports and windows; rs.fmtMoney,
+// the panels' sums with their "$"). Left out: fmt, the number in full.
+// - niceNum: 1.2 to 4.0.5 (LongToNiceString @1244a in 1.2, @1206c in 3.0.1, the
+//   same "%d,%.3d" formats in 2.0's WINHO.EXE and Mac 2.0.1; 4.0.5 FUN_0042e5c2):
+//   "1,234", "1,234,567", and from ten million "12,345K"; a negative number is
+//   written with one sign ("-1,234"), and from minus ten million in full, as
+//   only a positive count of millions reaches the "K" format;
+// - num505: 5.0.5's FUN_10055050 with no currency (the reports, FUN_1009c240,
+//   and every window number): the sign first, then the same as niceNum, so
+//   "-12,345K" too;
+// - money505: FUN_10055050 with the currency (the income view FUN_10098650,
+//   the budget bars FUN_1008a120, the planet panel FUN_10092300): "$1,234",
+//   "$1,234,567", from ten million "$12.345M", and a negative sum in
+//   parentheses, "($1,234)" (formats "%s%s%d%s" ... "%s%s%d.%.3dM%s").
+const p3 = (v) => String(v).padStart(3, '0');
+function niceNum(n) {
+  n = Math.round(n);
+  const s = n < 0 ? -1 : 1, m = Math.trunc(n / 1e6), t = Math.trunc((n - m * 1e6) / 1000), r = n - m * 1e6 - t * 1000;
+  if (m >= 10) return `${m},${p3(s * t)}K`;
+  if (m === 0) return t === 0 ? String(r) : `${t},${p3(s * r)}`;
+  return `${m},${p3(s * t)},${p3(s * r)}`;
+}
+const num505 = (n) => { n = Math.round(n); return (n < 0 ? '-' : '') + niceNum(Math.abs(n)); };
+function money505(n) {
+  n = Math.round(n);
+  const a = Math.abs(n), m = Math.trunc(a / 1e6), t = Math.trunc((a - m * 1e6) / 1000);
+  const body = m >= 10 ? `${m}.${p3(t)}M` : niceNum(a);
+  return n < 0 ? `($${body})` : `$${body}`;
+}
+// a number as the game's version writes it in its reports (rs.fmtNum)
+const num = (G, n) => { const f = G && rules(G).fmtNum; return f ? f(n) : fmt(n); };
 
 // ---------- diplomacy: alliances, best buddies, gifts, surrender, chat ----------
 function setPact(G, pid, other, kind, on) {
@@ -400,7 +431,7 @@ function give(G, from, to, money, metal) {
   if (money > Math.max(0, p.savings) || metal > p.metal || (!money && !metal)) return 'short';
   p.savings -= money; p.metal -= metal; p.giftsThisTurn = (p.giftsThisTurn || 0) + 1;
   (G.gifts = G.gifts || []).push({ from, to, money, metal });
-  msg(G, from, money ? report(103, G.players[to].name, fmt(money)) : report(104, G.players[to].name, fmt(metal)), { icon: 'm9048', quiet: true });
+  msg(G, from, money ? report(103, G.players[to].name, num(G, money)) : report(104, G.players[to].name, num(G, metal)), { icon: 'm9048', quiet: true });
   return 'ok';
 }
 // surrender to a player, or to no one (to = -1); null cancels
@@ -447,8 +478,8 @@ function processHandovers(G) {
     const q = G.players[h.to]; if (!q || !q.alive) continue;
     const from = G.players[h.from].name;
     q.savings += h.money; q.metal += h.metal;
-    msg(G, q.id, report(148, from, fmt(h.money)), { icon: 'm9048' });
-    msg(G, q.id, report(149, from, fmt(h.metal)), { icon: 'm9046' });
+    msg(G, q.id, report(148, from, num(G, h.money)), { icon: 'm9048' });
+    msg(G, q.id, report(149, from, num(G, h.metal)), { icon: 'm9046' });
     for (const sid of h.stars) {
       const s = G.stars[sid];
       if (s.owner >= 0 || G.fleets.some(f => f.star === sid && f.to == null && !isAllied(G, f.owner, q.id))) continue;
@@ -463,8 +494,8 @@ function deliverGifts(G) {
   for (const g of G.gifts || []) {
     const q = G.players[g.to]; if (!q.alive) continue;
     q.savings += g.money; q.metal += g.metal;
-    if (g.money) msg(G, q.id, report(101, G.players[g.from].name, fmt(g.money)), { icon: 'm9048' });
-    if (g.metal) msg(G, q.id, report(102, G.players[g.from].name, fmt(g.metal)), { icon: 'm9046' });
+    if (g.money) msg(G, q.id, report(101, G.players[g.from].name, num(G, g.money)), { icon: 'm9048' });
+    if (g.metal) msg(G, q.id, report(102, G.players[g.from].name, num(G, g.metal)), { icon: 'm9046' });
     (q.news = q.news || []).push({ type: 'gift', from: g.from, money: g.money, metal: g.metal });
   }
   G.gifts = [];
@@ -547,7 +578,22 @@ function newGame(opts) {
   const NS = rs.nameAStar, kept = NS && Array.isArray(opts.starNamesKept) ? opts.starNamesKept.filter(n => typeof n === 'string' && n) : [];
   const base = rs.starNames || DATA.starNames;
   let names = shuffle(G, base.slice().concat(NS && NS.use === 'pool' ? kept.filter(n => !base.includes(n)) : []));
-  if (NS && NS.use === 'put' && kept.length) { const put = kept.slice(-(NS.put || kept.length)); names = put.concat(names.filter(n => !put.includes(n))); }
+  // 'put' as the versions' own galaxy set-ups do (4.0.5 FUN_00442374 and Mac
+  // GiveStarsValues @81a0a, Palm FUN_00025f4a, 5.0.5 FUN_1006f280, iOS
+  // 0x10002a38c): the names put in take the first places of the list, the
+  // other stars draw distinct names from the version's own, and the whole
+  // list is shuffled, so they land on stars at random (a home star among
+  // them). Which names go in: NS.pick 'run' (5.0.5, Palm, Mac 4.0.5) is
+  // NS.put of them in a row from a start drawn over the list (the program's
+  // other random numbers: here from the game's seed, not drawn from the
+  // game's); else the last NS.put. NS.slots(G, names) gives what the set-up
+  // makes of them (4.0.5's slip). (Without kept names nothing here changes.)
+  if (NS && NS.use === 'put' && kept.length) {
+    const n = NS.put || kept.length, at = NS.pick === 'run' && kept.length > n ? ((opts.seed >>> 0) || 0) % (kept.length - n + 1) : Math.max(0, kept.length - n);
+    let put = kept.slice(at, at + n);
+    if (NS.slots) put = NS.slots(G, put);
+    names = shuffle(G, put.concat(names.slice(0, Math.max(0, pts.length - put.length))));
+  }
   pts.forEach((pt, i) => {
     const st = rs.newStar(G);
     const s = { id: i, name: names[i % names.length] || ('Star ' + i), x: pt.x, y: pt.y, g: st.g, t: st.t, metal: st.metal, owner: -1, pop: 0, terra: 0.5, nova: 0, debris: 0, everProfit: false };
@@ -790,7 +836,7 @@ function exploreMsg(G, p, s) {
   const snd = quality === 'good' ? 6000 : quality === 'mediocre' ? 6002 : 6001;
   const icon = quality === 'good' ? 'm9027' : quality === 'mediocre' ? 'm9028' : 'm9029';
   const gStr = gs.toFixed(2) + 'G';
-  msg(G, p.id, `You have explored ${s.name}. Gravity: ${gStr}. Temp: ${Math.round(ts)}°. Metal: ${fmt(s.metal)}.`, { icon, sound: snd, star: s.id, explore: quality });
+  msg(G, p.id, `You have explored ${s.name}. Gravity: ${gStr}. Temp: ${Math.round(ts)}°. Metal: ${num(G, s.metal)}.`, { icon, sound: snd, star: s.id, explore: quality });
 }
 
 // ---------- battles ----------
@@ -824,8 +870,8 @@ function battleNews(G, sid, b) {
     const myLoss = lost[o] || 0;
     let text, sound, icon = 'm9025';
     if (o === planetOwner) {
-      if (planetDied) { text = `${enemies} destroyed your colony at ${s.name}. You lost ${myLoss} of your ships. They lost ${theirLoss}. You lost ${fmt((startPop) * 1e6)} people.`; sound = 7020; icon = 'm9036'; }
-      else { text = `${s.name} survived an attack from ${enemies}. You lost ${myLoss} of your ships; they lost ${theirLoss}. You lost ${fmt((startPop - s.pop) * 1e6)} people.`; sound = won ? 7027 : 2001; }
+      if (planetDied) { text = `${enemies} destroyed your colony at ${s.name}. You lost ${myLoss} of your ships. They lost ${theirLoss}. You lost ${num(G, (startPop) * 1e6)} people.`; sound = 7020; icon = 'm9036'; }
+      else { text = `${s.name} survived an attack from ${enemies}. You lost ${myLoss} of your ships; they lost ${theirLoss}. You lost ${num(G, (startPop - s.pop) * 1e6)} people.`; sound = won ? 7027 : 2001; }
     } else if (won) { text = `You won a battle at ${s.name}. You lost ${myLoss} of your ships. ${enemies} lost ${theirLoss}.` + (planetDied ? ` The colony there was wiped out.` : ''); sound = 7027; icon = 'p3000'; }
     else { text = `You lost a battle at ${s.name}. You lost ${myLoss} of your ships. ${enemies} lost ${theirLoss}.`; sound = 2001; }
     // a ruleset may word the report itself (rs.battleText: { text, sound, icon })
@@ -880,7 +926,7 @@ function scrapDesign(G, pid, did) {
     if (!fleetCount(f)) G.fleets.splice(G.fleets.indexOf(f), 1);
   }
   d.scrapped = true;
-  msg(G, pid, report(21, d.name, n, fmt(metal)), { icon: 'm9014', quiet: true });
+  msg(G, pid, report(21, d.name, n, num(G, metal)), { icon: 'm9014', quiet: true });
   return metal;
 }
 function liveDesigns(p) { return p.designs.filter(d => !d.scrapped).length; }
@@ -964,7 +1010,7 @@ const API = {
   newGame, endTurn, buildShips, unbuildShip, designLimits, designMin, designCost, shipCostNow, canBuildType, findOrCreateDesign, getDesign,
   fleetCount, fleetDesigns, fleetSpeed, fleetMaxRange, fleetHas, fleetKind, fleetLabel, orderMove, orderPath, cancelMove, canReach, canMerge, queueShips, unqueueShip,
   newFleet, addShipsToStar, mergeFleets, splitFleet, scrapFleet, evacuate, colonies, seenG, seenT, maxPop, planetClass, planetIncome,
-  scrapDesign, liveDesigns, isFriend, isAllied, isBuddy, hasColonyAt, designName, report, setPact, give, surrender, sendChat, setArmageddon, hostileAt, know, observe, msg, msgAll, humans, starDist, dist, projected, techSum, score, save, load, borrowLimit, fmt,
+  scrapDesign, liveDesigns, isFriend, isAllied, isBuddy, hasColonyAt, designName, report, setPact, give, surrender, sendChat, setArmageddon, hostileAt, know, observe, msg, msgAll, humans, starDist, dist, projected, techSum, score, save, load, borrowLimit, fmt, num, niceNum, num505, money505,
 };
 if (typeof module !== 'undefined') {
   module.exports = API;

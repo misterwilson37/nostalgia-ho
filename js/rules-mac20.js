@@ -97,6 +97,16 @@ E.registerRules('mac20', Object.assign({}, D, {
   canMerge: R12.canMerge, organized: R12.organized,
   shipPower: R12.att12,
   staleName,
+  // CONFIRMED (NameAStar @121f20, MarkStarNamed @10173c): 1.2's window: 4 to 7
+  // letters, Munger in STR# 2005 and 1003 (rules-12 nameAStar), the name
+  // added to STR# 2005 for later galaxies and the game marked named
+  nameAStar: Object.assign({}, D.nameAStar, { min: 4, match: 'munger', taken: 'Sorry, there’s already a star named  “%s.” Please pick another name.' }), // DITL 3340
+  // CONFIRMED (FixNextSpendingBar @c1b48, ComputeMaxPercent @c2046,
+  // ComputeMinPercent @c22b2: 2.0's Fix Spending, rules-dos fixSpending20,
+  // with its lines kept in the code, @c1f6e-c1ff8) and the need rounded to
+  // single precision by SANE (FP_X2Z_sgl before the multiply)
+  fixSpending: Object.assign({}, D.fixSpending, { single: true, lines: ['You have no spending problems.',
+    'You were overspending at %s. The problem has been fixed.', 'You were underspending at %s. The problem has been fixed.', 'You’re abandoning %s.'] }),
   // CONFIRMED (ForceEndTurn @122382, box 3210, MarkAllPlayersDone @101616):
   // the File menu's Force End Turn marks every player done, after asking;
   // the skin offers it in a hot-seat game (the remake's several players)

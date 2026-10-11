@@ -24,7 +24,7 @@
 (function (root) {
 'use strict';
 const E = typeof module !== 'undefined' ? require('./engine.js') : root.HO;
-const { RI, clamp, msg, fmt, colonies, know, observe, addShipsToStar, TECHS, getDesign, fleetCount, fleetDesigns, fleetMaxRange, isAllied } = E;
+const { RI, clamp, msg, fmt, num, colonies, know, observe, addShipsToStar, TECHS, getDesign, fleetCount, fleetDesigns, fleetMaxRange, isAllied } = E;
 const D = E.RULESETS.dos, O = E.RULESETS.original, W = E.RULESETS['405'];
 const { popU, setPopU, hab } = O;
 const trunc = Math.trunc;
@@ -410,13 +410,13 @@ function scrapFleetsAndTypes(G, p) {
     if (!f.scrap301 && !ofDead && !out) continue;
     const at = f.star != null && f.to == null ? f.star : null, label = E.fleetLabel(G, f), n = fleetCount(f), dids = Object.keys(f.ships);
     const r = scrap301(G, f);
-    if (f.scrap301) { if (p.human) msg(G, p.id, `Your fleet of ${label} at ${at != null ? G.stars[at].name : 'hyperspace'} has been scrapped for ${fmt(r.own ? r.metal : 0)} metal.`, { icon: 'm9014', quiet: true }); }
+    if (f.scrap301) { if (p.human) msg(G, p.id, `Your fleet of ${label} at ${at != null ? G.stars[at].name : 'hyperspace'} has been scrapped for ${num(G, r.own ? r.metal : 0)} metal.`, { icon: 'm9014', quiet: true }); }
     else for (const k of dids) { const d = getDesign(G, p.id, +k); const t = tally.get(d) || { n: 0, m: 0 }; t.n += n; if (r.own) t.m += r.metal; tally.set(d, t); }
   }
   for (const d of dead) {
     const t = tally.get(d) || { n: 0, m: 0 };
     d.scrapped = true; d.scrap301 = false;
-    if (p.human) msg(G, p.id, `Your “${d.name}” ship type has been scrapped. ${t.n} of this type scrapped for ${fmt(t.m)} metal.`, { icon: 'm9014', quiet: true });
+    if (p.human) msg(G, p.id, `Your “${d.name}” ship type has been scrapped. ${t.n} of this type scrapped for ${num(G, t.m)} metal.`, { icon: 'm9014', quiet: true });
   }
 }
 // CONFIRMED (MaintainKillStars @a10c8): first every colony marked to be
@@ -564,7 +564,7 @@ function radical(G, p) {
     if (r < 10) { // 1,000-3,000 metal; the message divides it among your colonies
       const m = RI(G, 1000, 3000), n = colSlots(G, p).length;
       p.metal += m;
-      say(`Your mining consortium has just been able to extract an additional ${fmt(n < 1 ? m : trunc(m / n))} metal from every planet you have.`, 'm9046');
+      say(`Your mining consortium has just been able to extract an additional ${num(G, n < 1 ? m : trunc(m / n))} metal from every planet you have.`, 'm9046');
       return;
     }
     if (r < 20) { // 6-9 stars whose news is more than 100 years old, walking on from a random star (ExploreStar)
@@ -1093,7 +1093,7 @@ function makeResultMessages(G, sid, x) {
     if (winner === A) {
       resolveVictor(G, sid, A, x.survId);
       if (P.human) msg(G, A, `You won a battle at ${s.name}. You lost ${nA - survN} of your ships. ${name(Dh)} lost ${nD}.`, { icon: 'p3000', star: sid, battle: x.bid, won: true });
-      if (debris !== 0) { if (P.human) msg(G, A, `${fmt(debris)} metal has fallen onto ${s.name} from your recent battle.`, { icon: 'm9046', star: sid, quiet: true }); s.metal += debris; debris = 0; }
+      if (debris !== 0) { if (P.human) msg(G, A, `${num(G, debris)} metal has fallen onto ${s.name} from your recent battle.`, { icon: 'm9046', star: sid, quiet: true }); s.metal += debris; debris = 0; }
       k.e16 = 0; k.e1a = 0; k.e1e = 0; k.e22 = 0; k.pop = 0;
       if (nD === 0 && AI.note) AI.note(G, P, { code: 0x407, other: Dh });
     } else {
@@ -1122,11 +1122,11 @@ function makeResultMessages(G, sid, x) {
     if (winner === Dh) {
       resolveVictor(G, sid, Dh, x.survId);
       if (pop === 0) { if (P.human) msg(G, Dh, `You won a battle at ${s.name}. You lost ${nD - survN} of your ships. ${name(A)} lost ${nA}.`, { icon: 'p3000', star: sid, battle: x.bid, won: true }); }
-      else if (P.human) msg(G, Dh, `${s.name} survived an enemy attack from ${name(A)}. You lost ${nD - survN} of your ships. ${name(A)} lost ${nA}. You lost ${fmt((pop - planetLeft) * 1000)} people.`, { icon: 'p3000', star: sid, battle: x.bid, won: true });
-      if (!own) { if (debris !== 0) { if (P.human) msg(G, Dh, `${fmt(debris)} metal has fallen onto ${s.name} from your recent battle.`, { icon: 'm9046', star: sid, quiet: true }); s.metal += debris; debris = 0; } }
+      else if (P.human) msg(G, Dh, `${s.name} survived an enemy attack from ${name(A)}. You lost ${nD - survN} of your ships. ${name(A)} lost ${nA}. You lost ${num(G, (pop - planetLeft) * 1000)} people.`, { icon: 'p3000', star: sid, battle: x.bid, won: true });
+      if (!own) { if (debris !== 0) { if (P.human) msg(G, Dh, `${num(G, debris)} metal has fallen onto ${s.name} from your recent battle.`, { icon: 'm9046', star: sid, quiet: true }); s.metal += debris; debris = 0; } }
       else {
         setPopU(s, planetLeft);
-        if (P.human) msg(G, Dh, `You recovered ${fmt(debris)} metal from the battle at ${s.name}.`, { icon: 'm9046', star: sid, quiet: true });
+        if (P.human) msg(G, Dh, `You recovered ${num(G, debris)} metal from the battle at ${s.name}.`, { icon: 'm9046', star: sid, quiet: true });
         P.metal += debris; debris = 0;
       }
       k.e16 = 0; k.e1a = 0; k.e22 = 0;
@@ -1142,7 +1142,7 @@ function makeResultMessages(G, sid, x) {
       if (own) setPopU(s, 0);
       if (pop === 0) { if (P.human) msg(G, Dh, `You lost a battle at ${s.name}. You lost ${nD} of your ships. ${name(A)} lost ${nA - (winner === A ? survN : 0)}.`, { icon: 'm9025', star: sid, battle: x.bid, won: false }); }
       else {
-        if (P.human) msg(G, Dh, `${name(A)} destroyed your colony at ${s.name}. You lost ${nD} of your ships. ${name(A)} lost ${nA - (winner === A ? survN : 0)}. You lost ${fmt(pop * 1000)} people.`, { icon: 'm9036', sound: 2001, star: sid, battle: x.bid, won: false });
+        if (P.human) msg(G, Dh, `${name(A)} destroyed your colony at ${s.name}. You lost ${nD} of your ships. ${name(A)} lost ${nA - (winner === A ? survN : 0)}. You lost ${num(G, pop * 1000)} people.`, { icon: 'm9036', sound: 2001, star: sid, battle: x.bid, won: false });
         if (AI.note) AI.note(G, P, { code: 0x3f2, by: A });
       }
       if (pop < 1) {
@@ -1286,7 +1286,7 @@ function reactToSupernova(G, p, armFired, thrown) {
     if (!m) continue;
     const kill = Math.min(popU(s), Math.imul(m, RI(G, 40, 60)));
     setPopU(s, popU(s) - kill);
-    if (p.human) msg(G, p.id, `The shock wave from the supernova threw ${m} metal at ${s.name}, killing ${fmt(kill * 1000)} people.`, { icon: 'm9036', star: sid });
+    if (p.human) msg(G, p.id, `The shock wave from the supernova threw ${m} metal at ${s.name}, killing ${num(G, kill * 1000)} people.`, { icon: 'm9036', star: sid });
     if (popU(s) === 0) { if (p.human) msg(G, p.id, `The meteor shower destroyed your colony at ${s.name}.`, { icon: 'm9036', star: sid }); decolonize(G, p, sid); }
     else { p.metal += m; s.metal -= m; }
   }
@@ -1300,7 +1300,7 @@ function getOtherScrapMetal(G, p) {
     const s = G.stars[sid], m = so[sid];
     if (!m || !(popU(s) > 0)) continue;
     p.metal += m; s.metal -= m; so[sid] = 0;
-    if (p.human) msg(G, p.id, `You just received ${fmt(m)} metal from someone scrapping a fleet over ${s.name}.`, { icon: 'm9046', star: sid });
+    if (p.human) msg(G, p.id, `You just received ${num(G, m)} metal from someone scrapping a fleet over ${s.name}.`, { icon: 'm9046', star: sid });
   }
 }
 // CONFIRMED (ComputeIncomeAndPopulation @a3bba): the Savings slot's share20 of
@@ -1332,7 +1332,7 @@ function income(G, p) {
     if (m > 0) {
       const kill = Math.min(popU(s), m * 50);
       setPopU(s, popU(s) - kill);
-      if (p.human) msg(G, p.id, `Oh no! ${fmt(kill * 1000)} people were killed when a heavy meteor shower hit ${s.name}.`, { icon: 'm9021', star: sid });
+      if (p.human) msg(G, p.id, `Oh no! ${num(G, kill * 1000)} people were killed when a heavy meteor shower hit ${s.name}.`, { icon: 'm9021', star: sid });
       if (popU(s) === 0) { if (p.human) msg(G, p.id, `The meteor shower destroyed your colony at ${s.name}.`, { icon: 'm9036', sound: 2001, star: sid }); decolonize(G, p, sid); continue; }
     }
     const before = s.oInc == null ? -7501 : s.oInc;
@@ -1410,7 +1410,7 @@ function exploreStar(G, p, sid) {
   observe(G, p, sid);
   if (first && p.human) {
     const s = G.stars[sid], q = O.exploreQuality(G, p, s);
-    msg(G, p.id, `You have explored ${s.name}. Gravity: ${(E.seenG(p, s)).toFixed(2)}G. Temp: ${Math.round(E.seenT(p, s))}°. Metal: ${fmt(s.metal)}.`, { icon: q === 'good' ? 'm9027' : q === 'mediocre' ? 'm9028' : 'm9029', sound: q === 'good' ? 6000 : q === 'mediocre' ? 6002 : 6001, star: sid, explore: q });
+    msg(G, p.id, `You have explored ${s.name}. Gravity: ${(E.seenG(p, s)).toFixed(2)}G. Temp: ${Math.round(E.seenT(p, s))}°. Metal: ${num(G, s.metal)}.`, { icon: q === 'good' ? 'm9027' : q === 'mediocre' ? 'm9028' : 'm9029', sound: q === 'good' ? 6000 : q === 'mediocre' ? 6002 : 6001, star: sid, explore: q });
   }
 }
 // CONFIRMED (ColonizeStar @a566a): "You have colonized %s." (1000.31); the new
@@ -1515,6 +1515,41 @@ function giveBarPercent(G, p, sid, pm, noMax) {
   if (tot < 990 || tot > 1010) fix(true);
   if (tot < 990 || tot > 1010) fix(false);
   L.forEach((k, i) => setKeyPm(p, k, v[i]));
+}
+// CONFIRMED (FixSpendingBars @d28ca, FixNextSpendingBar @d2552, the Galaxy
+// menu's Fix Spending, ⌘F): 2.0's command (rules-dos fixSpending20) with 3.0.1's
+// bounds and only one kind of problem: each step goes on from the slot after
+// the last one, and the first slot whose share is above its most + 1 per mille
+// (ComputeMaxPercent @d28f8, computeMax above: 0 for a colony being abandoned
+// or finished, so it is cut to 1) is cut to that, the difference shared by
+// Savings and Technology in proportion to their shares when the step began
+// (Savings ⌊100 x Savings / (Savings + Technology)⌋ per cent, Technology the
+// rest, 50 / 50 when both are 0; each part ⌊pct x difference / 100⌋, so a per
+// mille or two can be lost): "You were overspending at %s. The problem has
+// been fixed." (STR# 1050.2). With none on the first step: "You have no
+// spending problems." (1050.1). An underspending colony is never raised
+// (ComputeMinPercent @d2a94 is 0), so 1050.3 and 1050.4 are never shown.
+const FIX_LINES301 = ['You have no spending problems.', 'You were overspending at %s. The problem has been fixed.',
+  'You were underspending at %s. The problem has been fixed.', 'You’re abandoning %s.'];
+function fixSpending301(G, p, cur) {
+  const lines = E.rules(G).fixSpending.lines;
+  const L = slots301(G, p).filter(k => typeof k !== 'number' || G.stars[k].owner === p.id), n = L.length;
+  const sv = keyPm(p, 'sav'), tc = keyPm(p, 'tech');
+  const sp = sv + tc === 0 ? 50 : trunc(sv * 100 / (sv + tc)), tp = 100 - sp;
+  const from = cur;
+  while (cur >= -1 && cur < n) {
+    cur++;
+    if (from === -1 && cur === n) return { text: lines[0], cur: n - 1 };
+    if (cur < 0 || cur >= n) return { text: null, cur: 0x7fff };
+    const k = L[cur], v = keyPm(p, k), hi = computeMax(G, p, k) + 1;
+    if (hi < v) {
+      setKeyPm(p, k, hi);
+      setKeyPm(p, 'sav', keyPm(p, 'sav') + trunc(sp * (v - hi) / 100));
+      setKeyPm(p, 'tech', keyPm(p, 'tech') + trunc(tp * (v - hi) / 100));
+      return { text: lines[1].replace('%s', G.stars[k].name), cur };
+    }
+  }
+  return { text: null, cur };
 }
 // CONFIRMED (DoHBarClick @d18a0): dragging a budget bar (not of a colony
 // being abandoned or finished) sets its share and calls DetermineNewLevels
@@ -1868,6 +1903,8 @@ const STAR_NAMES = D.starNames.concat(['Hope']);
 
 E.registerRules('301', Object.assign({}, D, {
   label: 'Mac 3.0.1 (1993)',
+  // CONFIRMED (LongToNiceString @1206c): 2.0's numbers, "12,345K" from ten million (engine niceNum)
+  fmtNum: E.niceNum,
   // the New Game window's Version and Edition menus (engine.js editions)
   family: '3.0', edition: { version: '3.0.1', name: 'Mac', platform: 'Mac', year: 1993 }, skins: ['mac3c', 'mac3'],
   hints: false, // this game had no between-turn tips (4.0.5 and 5.0.5 do)
@@ -1911,11 +1948,15 @@ E.registerRules('301', Object.assign({}, D, {
   bestBuddies: false,      // no best buddies (see above)
   canBuild: (G, p, type) => TYPES4.includes(type),
   starNames: STAR_NAMES,
-  // CONFIRMED (NameAStar @1424b2): the winner names a star. Where 3.0.1 keeps
-  // the name, and whether later galaxies use it, weren't read (GiveStarsValues
-  // reads STR# 1003 only): the remake keeps it and doesn't use it, and uses
-  // 2.0's alert and 4.0.5's words (docs/open-questions.md).
-  nameAStar: { when: 'win', text: 'You won the game, so you get to name a star.', keep: 0, use: null, max: 7,
+  // CONFIRMED (NameAStar @1424b2): the winner names a star, 2 to 7 letters (a
+  // shorter one isn't kept), taken when Munger finds it in the Preferences'
+  // STR# 2005 or in STR# 1003 (a name inside another counts); kept at the end
+  // of STR# 2005. GiveStarsValues @f246c draws every star's name from the 191
+  // and those names (1..191 + kept, each once; the galaxy is cut to that many
+  // stars), so later galaxies use them as 1.2's and 2.0's do ('pool'). The
+  // window's words and the alert weren't read: 4.0.5's and 2.0's
+  // (docs/open-questions.md).
+  nameAStar: { when: 'win', text: 'You won the game, so you get to name a star.', keep: 0, use: 'pool', max: 7, min: 2, match: 'munger',
     taken: 'Sorry, there’s already a star named ‘%s’.  Please pick another name.' },
   SKILLS, HIT, hit, SHAPES: W.SHAPES, SIZES: W.SIZES, interestOn, techLevelCost, research, aiSpec,
   setupPlayer, defaultDesigns, afterSetup, computerSetup, makeGalaxy, distance: W.distance, galaxySizes: O.galaxySizes,
@@ -1933,7 +1974,7 @@ E.registerRules('301', Object.assign({}, D, {
   finishedPartWasted: false,
   difficulty, masterPoints: undefined,
   // fleets, routes and colonies
-  fleetFor, route, path301, givePath, settle, colOrder, abandon, evacuate: evacuate301, dragShare, flagScrap, flagScrapDesign, newDesign, fleetList,
+  fleetFor, route, path301, givePath, settle, colOrder, abandon, evacuate: evacuate301, dragShare, fixSpending: { lines: FIX_LINES301, next: fixSpending301 }, flagScrap, flagScrapDesign, newDesign, fleetList,
   terraLeft: (G, p, s) => bars(s)[0] !== -1, bars, setBars, slots301, share20, keyPm, setKeyPm,
   // diplomacy and the end of the game (engine hooks)
   processSurrenders, processHandovers: () => {}, pactNews, checkElimination, checkEveryStep: true,

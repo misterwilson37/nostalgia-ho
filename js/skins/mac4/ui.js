@@ -84,6 +84,7 @@ window.HOMAC4 = {
     const tech = ['Range', 'Speed', 'Weapon', 'Shield', 'Mini'].findIndex(n => new RegExp('Your ' + n + '\\w* Tech').test(t));
     if (!t.trim()) return R(own, 2001);
     if (/^Spaceward Ho! by/.test(t)) return R('i3115', 7001);
+    if (m.hint) return R('i3170', 7001); // a help message, report 24 (GetIconID @151682: 3170)
     if (/^Click here/.test(t)) return R('i3116', 7001);
     if (tech >= 0) return R('i' + (3100 + tech), 2000);
     if (/radical|scientists|discover/i.test(t)) return R('i3105', 2000);
