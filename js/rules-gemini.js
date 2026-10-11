@@ -551,5 +551,12 @@
         }
     };
 
+    // The game's first messages. Added on integration by Claude (not Gemini's
+    // words), modelled on the Claude rules' welcome, so a game no longer opens
+    // with the engine's generic credit line. See docs/gemini-rules/HANDOFF.md.
+    Rules.welcome = [
+        ['Spaceward Ho! \u2014 Gemini\u2019s rules, written by Google\u2019s Gemini from the manual and nothing else. Click a message to make it go away.', { icon: 'm9004', sound: 11111 }],
+        ['When the messages are gone, click the clock to end your turn. Good luck out there.', { icon: 'm9024' }],
+    ];
     E.registerRules('gemini', Rules);
 })(this);
