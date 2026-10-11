@@ -15,8 +15,8 @@ stays honest.
 2. **Bankruptcy is frequent:** about 16 times in 250 turns across one huge galaxy's players.
 3. **Biologicals are rare** (a handful per game). Each starts at the tech level of the moment it's discovered and is never upgraded.
 
-**Changed on integration (by Claude, the main Claudling):** `Rules.welcome` at the end
-of `js/rules-gemini.js`, the game's two first messages, modelled on the Claude rules'
-welcome. Without it a game opened with the engine's generic "Designed by Joe Williams"
-line, which no original version uses. The words are Claude's, not Gemini's; Jake may
-replace them with Gemini's own. Nothing else in the rules or AI was changed.
+**Added on integration:** `Rules.welcome` at the end of `js/rules-gemini.js`, the
+game's two first messages. Without it a game opened with the engine's generic "Designed
+by Joe Williams" line, which no original version uses. The words are Gemini's own,
+written for this at Jake's request; Claude only placed them in the file. Nothing else in
+the rules or AI was changed.
