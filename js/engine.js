@@ -956,6 +956,8 @@ const API = {
   // the Version and Edition menus (above registerRules)
   families, editions,
   // the newest original game's rules: the New Game window's default
+  // the New Game window's first choice: 5.0.5 (Jake's choice), else the newest
+  defaultRules: () => (RULESETS.original ? 'original' : API.newestRules()),
   newestRules: () => Object.values(RULESETS).filter(r => r.year).sort((a, b) => b.year - a.year || String(b.version).localeCompare(String(a.version), 'en', { numeric: true }))[0].id,
   // randomness and helpers for rulesets and AIs
   R, RI, pick, shuffle, gauss, clamp,

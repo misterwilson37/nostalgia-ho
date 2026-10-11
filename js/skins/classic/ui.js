@@ -2609,7 +2609,7 @@ function openPatchNotes() {
 // the rules being played, or with no game those chosen last in New Game
 // (the newest original's when none was, or the one chosen is gone): never a
 // silent fallback to another ruleset (docs/fallbacks.md)
-const chosenRules = () => { let r = null; try { r = localStorage.getItem('ho5.rules'); } catch (e) {} return r && HO.RULESETS[r] ? r : HO.newestRules(); };
+const chosenRules = () => { let r = null; try { r = localStorage.getItem('ho5.rules'); } catch (e) {} return r && HO.RULESETS[r] ? r : (HO.defaultRules ? HO.defaultRules() : HO.newestRules()); };
 const rulesId = () => G ? G.rules : chosenRules();
 function openAbout() {
   const id = rulesId(), rs = HO.rulesById(id), N = (window.HOVERSIONS || {})[id] || {};

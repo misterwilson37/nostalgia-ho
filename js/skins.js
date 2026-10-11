@@ -9,7 +9,7 @@
 // To add a skin: make the folder and add a line to SKINS below.
 //
 // Which skin loads: ?skin=<id> in the address, else the last one picked
-// (localStorage "ho5.skin"), else the first in the list.
+// (localStorage "ho5.skin"), else the classic skin.
 //
 // What a skin's ui.js must do:
 // - build its own page inside <body> (index.html leaves the body empty);
@@ -45,8 +45,8 @@
 (function (root) {
 'use strict';
 // Each skin is the look of one release of the game: its version, platform
-// and year name it in the lists, which run oldest to newest; the newest is
-// the default.
+// and year name it in the lists, which run oldest to newest; the classic
+// skin is the default.
 // Each original's sounds, by the skin whose art comes from it. The remake
 // plays its sounds by the 5.0.5 game's numbers (assets/sounds, the
 // "classic" set: 2000 good news, 2001 bad news, 3000-3003 battle shots,
@@ -161,8 +161,10 @@ const list = root.HOSKINS_INLINE ? SKINS.filter(s => s.id === root.HOSKINS_INLIN
 const valid = (id) => list.some(s => s.id === id);
 let wanted = null;
 try { wanted = new URLSearchParams(root.location.search).get('skin'); } catch (e) {}
-const newest = list[list.length - 1].id; // the list runs oldest to newest
-const current = [wanted, store.get('ho5.skin')].find(valid) || newest;
+// the default: the classic (Mac 5.0.5) skin, Jake's choice; the newest
+// one only if this copy has no classic (the single-file build of another skin)
+const fallback = valid('classic') ? 'classic' : list[list.length - 1].id; // the list runs oldest to newest
+const current = [wanted, store.get('ho5.skin')].find(valid) || fallback;
 const skinOf = (id) => list.find(s => s.id === id) || list[0];
 const validOS = (id) => OSES.some(o => o.id === id);
 const osDefault = (skin) => skinOf(skin).os[0];

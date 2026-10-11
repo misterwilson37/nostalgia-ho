@@ -89,7 +89,7 @@ Two helpers in `js/engine.js` read them for the New Game window:
   ruleset's own; `patch`: its unofficial patch's number, or null when it has no fixes).
   An unknown family gives `[]`.
 
-`HO.ruleOptions()` (every ruleset, by year) and `HO.newestRules()` are as before.
+`HO.ruleOptions()` (every ruleset, by year) and `HO.newestRules()` are as before; `HO.defaultRules()` is the New Game window's first choice (5.0.5), as the classic skin is the default skin.
 
 The New Game window (`js/skins/classic/ui.js`, `newGameDialog`) has the original game's
 own window above a line: name, galaxy, hat, players, computers, IQ, home systems, shape,
