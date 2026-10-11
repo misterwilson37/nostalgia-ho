@@ -56,7 +56,7 @@ if os.path.exists(sm):
     m = json.load(open(sm))
     assets['skin'] = {
         'img': {k: uri(P('assets', 'skins', skin, 'sprites', k + '.png'), 'image/png') for k in m['sprites']},
-        'snd': {str(k): uri(P('assets', 'skins', skin, 'sounds', f'{k}.wav'), 'audio/wav') for k in m['sounds']},
+        'snd': {str(k): uri(P('assets', 'skins', skin, 'sounds', f"{k}.{m.get('soundFormat', 'wav')}"), 'audio/mpeg' if m.get('soundFormat') == 'mp3' else 'audio/wav') for k in m['sounds']},
     }
 page = page.replace('</head>', os_css + '</head>', 1)
 page = page.replace('</body>', '<style>\n' + css + '</style>\n<script>\n' + js + '\n</script>\n</body>')

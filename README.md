@@ -5,7 +5,7 @@ A personal remake of Delta Tao's *Spaceward Ho!* 5.0.5 that runs in a browser, w
 the Mac editions of 2.0.1 (1992) and 4.0.5 (1996) as rulesets of their own,
 an Amiga skin from the 1994 German Amiga version of 2.0, and skins from the Mac versions 1.2
 (1992, black and white), 2.0.1 (1992), 3.0.1 (1993) and 4.0.5 (1996), the last three both in
-black and white and in colour.
+black and white and in colour, and an iOS skin from the 2012 iPhone and iPad version (1.2.9).
 
 ## Playing / publishing
 
@@ -21,6 +21,35 @@ their turn in order, and a cover screen between turns asks the next person to si
 nobody sees anyone else's planets. The year moves on when the last person ends their turn.
 It works with every ruleset and skin. (The original games did this over a network with a
 shared game file; this remake doesn't have a server, so it's one computer, taking turns.)
+
+## Touch
+
+Whenever a finger is used, every skin gets the iOS game's gestures (`docs/ios-findings.md`,
+"Touch controls"; `js/skins/classic/ui.js`, "touch"), told apart per event by
+`PointerEvent.pointerType === 'touch'`; a mouse and a pen keep the remake's own clicks and
+drags, so a laptop with a touch screen has both:
+
+- the map: pinch to zoom, from the whole galaxy to 1.5x (phones) or 2.0x (tablets), never
+  past the galaxy's edges (no rubber band); one finger pans, and a throw carries on (the
+  last 6 touches of the last 0.2 s, half the speed, easing out over 3 s); a lift after less
+  than 15 points of movement is a tap, which selects the nearest star; a double tap on the
+  map does nothing;
+- the selected star: dragging from it draws a distance ruler; a single tap deselects it
+  after 0.5 s; a double tap opens Build Ships (or replays the battle there);
+- fleets: drag one of yours out of the planet panel's list and drop it on a star to send it
+  (back on its own star, it stays; the line is red without the fuel, and the fuel alert
+  comes once); a double tap on the list opens Split… (the remake's Organize Fleets);
+  holding a satellite of yours for 0.5 s marks it for scrapping or unmarks it, with a
+  ruleset that marks (`rs.flagScrap`);
+- lists, the panel and windows slide after 30 points of movement (an item touched isn't
+  chosen once its list has moved);
+- the budget and technology bars jump to the finger on iOS's log scale (value =
+  (exp(x * 77 / w / 32.11 + 2.302) - 10) * 10 per mille, up to 1,000), and are drawn on it
+  until a mouse sets one; the terraform / mine slider stays linear;
+- a long press on anything with hover help still explains it, unless the finger moves.
+
+A gesture whose command the ruleset hasn't got is skipped. `window.HOVIEW()` gives the
+map's scale and offset and the selection, for the test tools.
 
 ## Versions and editions
 
@@ -94,9 +123,11 @@ skin's own chrome) and draw everything in CSS and inline SVG.
 | Windows 95 | `win95` | silver 3-D controls, gradient navy title bars, close box at the right | w95 |
 | Workbench | `workbench` | Amiga Workbench 2 colours and bevels | amiga |
 | Palm OS | `palmos` | Palm OS forms: a black title tab, thin round buttons, small bold type | palm |
+| iOS 6 | `ios6` | the 2012 launch's system: Helvetica Neue, the blue-grey navigation bar, the dark blue glassy alert, a black action sheet of glossy buttons for the menus, the blue ON / grey OFF switch for every check box, the blue-filled slider | |
+| iOS 10 | `ios10` | the system 1.2.9 was built for (iOS 10.3 SDK, 2017): San Francisco (Helvetica Neue where it's missing), a translucent bar, 270-point alerts with their buttons along the bottom, action sheets for the menus, green switches for every check box, the thin slider with its white knob, rounded text fields; no status bar (the app hid it) | ios |
 
 Each skin lists its own looks in `js/skins.js` (`SKINS`' `os`, the default first: mac2 System
-6 and 7, mac4 System 7 and Mac OS 8, dos DOS and Windows 3.1, classic Mac OS 8.6, 9 and X);
+6 and 7, mac4 System 7 and Mac OS 8, dos DOS and Windows 3.1, classic Mac OS 8.6, 9 and X, ios iOS 10 and 6);
 the OS look menu offers those first, then a line, then every other look, so anything can be
 mixed. The list follows the skin, not the version. The look is chosen in New Game, on the
 title screen, and mid-game from the Ho menu's **Skin and OS look…**, where it changes at once
@@ -309,6 +340,17 @@ Optional ruleset flags the skin reads (each is documented where it is read):
   dress over the classic page; the Claude rules' own skin (`docs/cozy-skin/`)
 - `js/skins/palm/`: the "5 (Palm OS)" skin: the classic page with the Palm OS game's art
   and a Palm OS look (art in `assets/skins/palm/`, from `tools/extract/palm.py`)
+- `js/skins/ios/`: the "1.2.9 (iPhone and iPad)" skin: the classic page laid out as the
+  app's landscape screen (the map filling it, the panel as the sidebar at the right, the
+  HUD bar at the top) with the app's own art, its Retina pictures drawn at half size
+  (planets with their hot, ice and boulder covers, ships from their parts, hats, fleet
+  dots, the ring, the report pictures, the cowboy on the title) and its sounds as MP3s
+  (art in `assets/skins/ios/`, from `tools/extract/ios.py`); its looks are iOS 10 (the
+  default) and iOS 6. A sound set's manifest may say `"soundFormat": "mp3"` (its files
+  are then `.mp3`, not `.wav`; `useSounds`, `tools/bundle.py`). With the iOS rules the
+  Game menu's **Rank and Game Center…** shows the record `rs.gameCenter` keeps
+  (`awardGameCenter`: once a game, won or lost, the points report, a new rank's window
+  and Name a Star when asked).
 - `js/skins/mac12/` and `js/skins/mac3c/`: the Mac 1.2 (French, 1992, black and white) and
   Mac 3.0.1 colour skins, both the mac3 skin pointed at other pictures
 - `js/skins/mac4/` and `js/skins/mac4c/`: the Mac 4.0.5 skins (1996, black and white and

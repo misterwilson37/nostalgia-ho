@@ -996,6 +996,23 @@ None of the rules.
    next game, `-[SimpleServer copyPrefsToPlayerRec]` 0x10009030c).
 7. **Money over ten million** is written in full; iOS's formatter (`0x10003cd4c`)
    writes "$12.345M" (and "12,345K" for other numbers).
+8. **Touch follows iOS 1.2.9 in every skin.** Whenever a finger is used (a pointer
+   event of type "touch"), every skin and every ruleset get the iOS game's gestures
+   (`docs/ios-findings.md`, "Touch controls"; `js/skins/classic/ui.js`, "touch"): pinch
+   zoom from the whole galaxy to 1.5 (phone) or 2.0 (tablet) with no rubber band, a pan
+   thrown on release, a tap selecting the nearest star, the selected star's ruler, single
+   tap (deselect) and double tap (Build Ships or the battle), fleets dragged out of the
+   planet panel's list and dropped on a star, the satellite's long hold (with a ruleset
+   that marks for scrapping), lists sliding after 30 points and the budget bars on the
+   log scale; a gesture whose command the ruleset hasn't got is skipped. A mouse and a
+   pen keep the remake's own behaviour. No other version had a touch screen; if an
+   Android version turns up and handles touch differently, it becomes a choice like the
+   OS look. The remake's own choices in it: a double tap is two taps within 0.4 s and 30
+   points (iOS's tapCount); the selected star's square shrinks with the map (at least 24
+   points) and gives way to a nearer star; a slow drag from it counts as a drag; the
+   double tap on the fleet list opens Split… (the remake has no Organize Fleets window);
+   the fuel alert is shown once per browser; after a finger sets a bar, the bars are
+   drawn on the log scale until a mouse sets one.
 
 ### Interface not done
 

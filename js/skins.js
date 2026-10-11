@@ -52,7 +52,8 @@
 // "classic" set: 2000 good news, 2001 bad news, 3000-3003 battle shots,
 // 4000/4001 fleet stays/goes, 5000 message sent, 6000-6002 exploring, 7001
 // next message, 7006 ship built, 11111 end of turn, ...). A set's own files
-// (dir + 'sounds/<n>.wav', listed in dir + 'manifest.json') replace those
+// (dir + 'sounds/<n>.wav', or .mp3 when the manifest's "soundFormat" says
+// so, listed in dir + 'manifest.json') replace those
 // with the same number; map gives one of its files for another number (null:
 // silent); every other number is silent, so a set never borrows another
 // original's sound. A skin's messageLook may also ask for its own files by
@@ -110,6 +111,10 @@ const SOUNDS = {
     7020: 'shucks', 7021: 'wow', 8000: 'explode', 128: 'hyahh', 11111: null, 7022: null, 7023: null,
   } },
   palm: null, // the Palm game had no sampled sounds
+  // iOS 1.2.9 (2012): 5.0.5's recordings as MP3s (assets/skins/ios/manifest.json
+  // "soundFormat"), named by 5.0.5's numbers; 7006 (ship built) is near silent,
+  // as in the app; 7008-7011 aren't in its "Sounds" list
+  ios: { name: '1.2.9 (iPhone and iPad, 2012)', year: 2012, dir: 'assets/skins/ios/' },
 };
 // The OS looks (js/os/<id>.css), oldest first: each is the window chrome
 // of one system, drawn in CSS (no system bitmaps).
@@ -124,6 +129,8 @@ const OSES = [
   { id: 'macos8', name: 'Mac OS 8 and 8.6 (Platinum)', year: 1997 },
   { id: 'macos9', name: 'Mac OS 9', year: 1999 },
   { id: 'macosx', name: 'Mac OS X (Aqua)', year: 2001 },
+  { id: 'ios6', name: 'iOS 6', year: 2012 },
+  { id: 'ios10', name: 'iOS 10', year: 2017 },
 ].sort((a, b) => a.year - b.year);
 // os: the skin's own OS looks, its default first (the systems its original
 // ran on); any other look can be chosen too
@@ -139,6 +146,8 @@ const SKINS = [
   { id: 'mac4c', version: '4.0.5', platform: 'Mac, colour', year: 1996, os: ['system7', 'macos8'] },
   { id: 'w95', version: '4.0.5', platform: 'Windows 95', year: 1996, os: ['win95'] },
   { id: 'palm', version: '5', platform: 'Palm OS, version 1.0.4', year: 2003, os: ['palmos'] },
+  // 1.2.9 was built with the iOS 10.3 SDK (2017); iOS 6 is the 2012 launch's system
+  { id: 'ios', version: '1.2.9', platform: 'iPhone and iPad', year: 2012, os: ['ios10', 'ios6'] },
   { id: 'cozy', version: '5.0.5', platform: 'cozy western, upscaled art', year: 2003, os: ['macos8', 'macos9', 'macosx'] },
   { id: 'classic', version: '5.0.5', platform: 'Mac OS 9 and X', year: 2003, os: ['macos8', 'macos9', 'macosx'] },
 ].map(k => Object.assign(k, { name: `${k.version} (${k.platform}, ${k.year})`, sounds: k.id in SOUNDS ? SOUNDS[k.id] && k.id : 'classic' }))

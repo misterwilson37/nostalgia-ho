@@ -1,0 +1,120 @@
+/* Spaceward Ho! — OS look "iOS 10": the system the 1.2.9 build was made
+   for (the iOS 10.3 SDK, 2017). The game draws most of its screens with its
+   own art, so this is the system's own part: San Francisco type (iOS 9 and
+   later; Helvetica Neue where the browser has no San Francisco), a
+   translucent bar at the top (the app hides the status bar, so there is none),
+   alerts (270 points, rounded 13, the buttons along the bottom in the tint
+   blue, the preferred one bold), action sheets for the menus (rounded groups,
+   centred blue items), the green switches (UISwitch: the Allow Debt switch,
+   and every check box), the thin slider with its white knob, rounded text
+   fields, segmented controls and the thin scroll indicators. All drawn in
+   CSS. The iOS skin's default look. */
+@import url("base.css");
+:root {
+  --plat: #efeff4; --plat2: #ffffff; --edge: #c8c7cc; --ink: #000; --sub: #8e8e93; --hi: #007aff;
+  --ui: -apple-system, "SF Pro Text", "SF UI Text", system-ui, "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --tint: #007aff; --green: #4cd964; --hair: rgba(0,0,0,.2);
+}
+body { font-size: 13px; -webkit-font-smoothing: antialiased; }
+/* the bar at the top: a translucent navigation bar with its hairline */
+#menubar { background: rgba(247,247,247,.96); border-bottom: .5px solid #b2b2b2; height: 32px; padding: 0 8px; -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); }
+#menubar .logo { font: 600 16px var(--ui); color: #000; letter-spacing: 0; }
+#menubar .logo:hover, #menubar .logo:focus-visible { color: var(--tint); background: none; }
+.mbtn { font: 15px var(--ui); color: var(--tint); border-radius: 6px; padding: 3px 8px; }
+.mbtn:hover, .mbtn:focus-visible, .mbtn[aria-expanded=true] { background: none; color: #66aaff; }
+#title { color: #000; font: 600 13px var(--ui); }
+/* the menus: action sheets, a rounded group of centred blue items */
+.dropdown { top: 32px; min-width: 260px; background: rgba(248,248,248,.97); border: 0; border-radius: 13px; padding: 0; overflow: hidden;
+  box-shadow: 0 8px 30px rgba(0,0,0,.3); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); }
+.dropdown button { font: 17px var(--ui); color: var(--tint); text-align: center; padding: 11px 16px; border-top: .5px solid var(--hair); }
+.dropdown button:first-child, .dropdown .mhead + button, .dropdown hr + button { border-top: 0; }
+.dropdown button:hover, .dropdown button:focus-visible { background: rgba(0,0,0,.06); color: var(--tint); }
+.dropdown hr { border: 0; height: 8px; margin: 0; background: rgba(0,0,0,.18); }
+.dropdown button.check::before { color: var(--tint); }
+.starmenu .mhead { text-align: center; font: 13px var(--ui); color: var(--sub); padding: 12px 16px; border-bottom: .5px solid var(--hair); margin: 0; }
+/* the panel and boxes: grouped table sections */
+#panel { background: var(--plat); border-right: .5px solid #b2b2b2; }
+.box, .designer { background: #fff; border: 0; border-radius: 10px; box-shadow: none; }
+/* windows: a sheet with its title in the middle and a round close button */
+.win { background: #fff; border: 0; border-radius: 13px; box-shadow: 0 10px 40px rgba(0,0,0,.35); overflow: hidden; }
+.wtitle { height: 44px; padding: 0 10px; background: rgba(247,247,247,.96); border-bottom: .5px solid #b2b2b2; }
+.wtitle span { background: none; font: 600 17px var(--ui); color: #000; }
+.close { width: 22px; height: 22px; border: 0; border-radius: 50%; padding: 0; flex: none;
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='22' height='22'><circle cx='11' cy='11' r='11' fill='%23e3e3e8'/><path d='M7.5 7.5l7 7M14.5 7.5l-7 7' stroke='%238e8e93' stroke-width='2' stroke-linecap='round'/></svg>") center / 22px no-repeat; }
+.wbody { padding: 14px; }
+/* alerts (UIAlertController): 270 points, centred words, the buttons along the bottom */
+.win.alert { width: 270px; background: rgba(248,248,248,.97); border-radius: 13px; text-align: center; -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); }
+.win.alert .wtitle { height: auto; padding: 18px 16px 0; background: none; border: 0; justify-content: center; }
+.win.alert .wtitle span { font: 600 17px var(--ui); white-space: normal; }
+.win.alert .close { display: none; }
+.win.alert .wbody { padding: 4px 16px 0; font-size: 13px; }
+.win.alert .btns { margin: 18px -16px 0; gap: 0; flex-wrap: nowrap; border-top: .5px solid var(--hair); }
+html .win.alert .btns > button { flex: 1; min-height: 44px; margin: 0; border: 0 !important; border-left: .5px solid var(--hair) !important; border-radius: 0 !important;
+  background: none !important; box-shadow: none !important; color: var(--tint) !important; font: 600 17px var(--ui) !important; padding: 0 !important; }
+html .win.alert .btns > button:first-child { border-left: 0 !important; }
+html .win.alert .btns > button.quiet { font-weight: 400 !important; }
+html .win.alert .btns > button:active { background: rgba(0,0,0,.08) !important; }
+/* buttons: the tint colour, in a thin rounded frame (system buttons have no
+   bezel; the frame keeps them visible on the game's panels) */
+button:not(.mbtn):not(.close):not(.tbtn):not(.clock):not([role=menuitem]) {
+  background: #fff; color: var(--tint); border: 1px solid var(--tint); border-radius: 7px; padding: 4px 12px; font: 15px var(--ui); box-shadow: none;
+}
+button:not(.mbtn):not(.close):not(.tbtn):not(.clock):not([role=menuitem]):not(.quiet) { border: 1px solid var(--tint); border-radius: 7px; font-weight: 600; }
+button:not(.mbtn):not(.close):not(.tbtn):not(.clock):not([role=menuitem]):active { background: var(--tint); color: #fff; }
+button:disabled { opacity: .35; }
+button:focus-visible { outline: 2px solid rgba(0,122,255,.5); outline-offset: 1px; }
+/* segmented control */
+.tbtn { background: #fff; color: var(--tint); border: 1px solid var(--tint); border-radius: 5px; font: 13px var(--ui); padding: 3px 10px; }
+.tbtn.on { background: var(--tint); color: #fff; }
+/* the budget bars' troughs: a thin rounded track */
+.track { height: 12px; background: #e5e5ea; border: 0; border-radius: 6px; overflow: hidden; }
+/* text fields: the rounded-rect border style, for the keyboard */
+html input[type=text], html input[type=number], html input:not([type]) {
+  font: 15px var(--ui); color: #000; padding: 5px 7px; border: .5px solid #c7c7cc; border-radius: 5px; background: #fff; box-shadow: none;
+}
+html input[type=text]:focus, html input:not([type]):focus, html input[type=number]:focus { outline: 0; border-color: var(--tint); box-shadow: 0 0 0 1px var(--tint); }
+html input[type=number] { -moz-appearance: textfield; appearance: textfield; }
+html input[type=number]::-webkit-inner-spin-button, html input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+/* a choice: the value in the tint, a chevron after it (a table row's detail) */
+html select, html .newgame select {
+  -webkit-appearance: none; appearance: none; font: 15px var(--ui); color: var(--tint); cursor: pointer; padding: 4px 24px 4px 8px; min-height: 30px;
+  border: .5px solid #c7c7cc; border-radius: 5px; box-shadow: none;
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='13'><path d='M1 1l6 5.5L1 12' fill='none' stroke='%23c7c7cc' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>") no-repeat right 8px center / 8px 13px, #fff;
+}
+/* the switch (UISwitch, 51 x 31 points): green when on, the white knob sliding over */
+html input[type=checkbox] {
+  -webkit-appearance: none; appearance: none; width: 51px; height: 31px; margin: 0 6px 0 0; padding: 0; flex: none; vertical-align: middle; cursor: pointer;
+  border: 0; border-radius: 16px; transition: background .2s;
+  background: radial-gradient(circle at 15.5px 15.5px, #fff 0 13.5px, rgba(0,0,0,.12) 14px, transparent 15px), #e5e5ea;
+  box-shadow: inset 0 0 0 1.5px #e5e5ea;
+}
+html input[type=checkbox]:checked { background: radial-gradient(circle at 35.5px 15.5px, #fff 0 13.5px, rgba(0,0,0,.12) 14px, transparent 15px), var(--green); box-shadow: inset 0 0 0 1.5px var(--green); }
+/* a radio button: the table's check mark */
+html input[type=radio] {
+  -webkit-appearance: none; appearance: none; width: 18px; height: 18px; margin: 0 6px 0 0; padding: 0; flex: none; vertical-align: middle; cursor: pointer;
+  border: 0; border-radius: 50%; background: transparent; box-shadow: inset 0 0 0 1px #c7c7cc;
+}
+html input[type=radio]:checked { box-shadow: none; background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='18' height='18'><path d='M3 9.5l4 4L15 4' fill='none' stroke='%23007aff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/></svg>") center / 18px no-repeat; }
+html input[type=checkbox]:disabled, html input[type=radio]:disabled, html input[type=range]:disabled, html select:disabled { opacity: .4; cursor: default; }
+html input[type=checkbox]:focus-visible, html input[type=radio]:focus-visible, html select:focus-visible, html input[type=range]:focus-visible { outline: 2px solid rgba(0,122,255,.5); outline-offset: 2px; }
+/* the slider (UISlider): a 2-point track and a 28-point white knob */
+html input[type=range], html .newgame .slider input[type=range] {
+  -webkit-appearance: none; appearance: none; height: 2px; margin: 13px 0; padding: 0; min-width: 0; cursor: pointer; border: 0; border-radius: 1px; background: #b7b7b7;
+}
+html input[type=range]::-webkit-slider-thumb, html .tm input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; border: 0; background: #fff;
+  box-shadow: 0 3px 8px rgba(0,0,0,.15), 0 1px 1px rgba(0,0,0,.16), 0 0 0 .5px rgba(0,0,0,.08);
+}
+html input[type=range]::-moz-range-thumb, html .tm input[type=range]::-moz-range-thumb { width: 28px; height: 28px; border-radius: 50%; border: 0; background: #fff; box-shadow: 0 3px 8px rgba(0,0,0,.15), 0 0 0 .5px rgba(0,0,0,.1); }
+html input[type=range]::-moz-range-track { background: transparent; }
+/* terraform / mine and shipbuilding: the track in two colours */
+html .tm input[type=range] { height: 4px; border-radius: 2px; border: 0; background: linear-gradient(90deg, #4cd964 0 var(--split, 50%), #ff9500 var(--split, 50%) 100%); box-shadow: none; }
+html .yard .tm input[type=range] { background: linear-gradient(90deg, var(--tint) 0 var(--split, 0%), #b7b7b7 var(--split, 0%) 100%); }
+.tm .tml { color: #1f9e3a; } .tm .tmr { color: #c96a00; }
+.newgame .opts { border: 0; border-radius: 10px; background: #fff; }
+/* scroll indicators: thin, dark and rounded */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(0,0,0,.35); border-radius: 3px; }
+::-webkit-scrollbar-corner { background: transparent; }
+::-webkit-scrollbar-button { display: none; }

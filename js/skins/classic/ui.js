@@ -95,8 +95,8 @@ function useSounds(id, done) {
   const own = window.HOSKINS && HOSKINS.soundSet(skinSoundsId());
   if (A.skin && own && (id === own.id || id === own.same)) return use(A.skin.snd || {}); // single-file build
   fetch(set.dir + 'manifest.json').then(r => r.json()).then(m => {
-    const files = {};
-    for (const k of m.sounds || []) files[k] = set.dir + 'sounds/' + k + '.wav';
+    const files = {}, ext = m.soundFormat || 'wav'; // a set's files are .wav unless its manifest says (iOS: "mp3")
+    for (const k of m.sounds || []) files[k] = set.dir + 'sounds/' + k + '.' + ext;
     use(files);
   }).catch(() => use({})); // never fall back on another set's sounds
 }
@@ -196,6 +196,8 @@ const UI = {
   view: { s: 40, ox: 0, oy: 0 },
   inbox: [], msgIdx: 0,
   drag: null, hover: null,
+  ruler: null,           // a finger's distance ruler from the selected star (touch)
+  logBars: false,        // the bars drawn on iOS's log scale (a finger set one last)
   dots: [],              // hit areas for fleet dots
   bug: null, bugSeen: {}, // the bug report window (showBug), and how often each error came up
 };
@@ -304,7 +306,7 @@ function novaLook(k) {
 }
 function starLook(sid) {
   const look = ourStarLook(sid);
-  return (T.starLook && T.starLook(look, { G, p: me(), s: G.stars[sid], k: HO.know(G, me(), sid) })) || look;
+  return (T.starLook && T.starLook(look, { G, p: me(), s: G.stars[sid], k: HO.know(G, me(), sid), IMG })) || look;
 }
 function ourStarLook(sid) {
   const p = me(), s = G.stars[sid], k = HO.know(G, p, sid);
@@ -369,12 +371,14 @@ function setupMap() {
   cv = $('#map'); cx = cv.getContext('2d');
   for (let i = 0; i < 260; i++) bgStars.push({ x: Math.random(), y: Math.random(), b: Math.random() });
   new ResizeObserver(resize).observe(cv.parentElement);
-  cv.addEventListener('pointerdown', guard(onDown)); // guard(): an exception shows the bug report window
-  cv.addEventListener('pointermove', guard(onMove));
-  cv.addEventListener('pointerup', guard(onUp));
-  cv.addEventListener('pointercancel', guard(() => { UI.drag = null; draw(); }));
-  cv.addEventListener('dblclick', guard(onDbl));
-  cv.addEventListener('contextmenu', guard((e) => { if (!G) return; e.preventDefault(); const s = starAt(e.offsetX, e.offsetY); if (s != null) starMenu(s, e.clientX, e.clientY); }));
+  // a finger (pointerType 'touch') gets iOS 1.2.9's gestures (Touch.map*,
+  // below); a mouse and a pen keep these, so a hybrid laptop has both
+  cv.addEventListener('pointerdown', guard((e) => isTouch(e) ? Touch.mapDown(e) : onDown(e))); // guard(): an exception shows the bug report window
+  cv.addEventListener('pointermove', guard((e) => isTouch(e) ? Touch.mapMove(e) : onMove(e)));
+  cv.addEventListener('pointerup', guard((e) => isTouch(e) ? Touch.mapUp(e) : onUp(e)));
+  cv.addEventListener('pointercancel', guard((e) => { if (isTouch(e)) Touch.mapCancel(e); else { UI.drag = null; draw(); } }));
+  cv.addEventListener('dblclick', guard((e) => { if (lastPointer !== 'touch') onDbl(e); })); // iOS: a double tap on the map does nothing
+  cv.addEventListener('contextmenu', guard((e) => { if (!G) return; e.preventDefault(); if (lastPointer === 'touch') return; const s = starAt(e.offsetX, e.offsetY); if (s != null) starMenu(s, e.clientX, e.clientY); }));
   cv.addEventListener('wheel', guard((e) => { e.preventDefault(); zoomAt(e.offsetX, e.offsetY, e.deltaY < 0 ? 1.15 : 1 / 1.15); }), { passive: false });
   resize();
 }
@@ -477,6 +481,17 @@ function draw() {
     const f = G.fleets.find(x => x.id === UI.route.fleet);
     if (f) { let a = G.stars[f.star]; for (const sid of UI.route.stops) { const b = G.stars[sid]; drawRoute(a, b, HO.fleetSpeed(G, f), '#ffffff', 0); a = b; } }
   }
+  // a finger dragged from the selected star: a distance ruler (iOS StarNode)
+  if (UI.ruler && G.stars[UI.ruler.from] && G.stars[UI.ruler.to]) {
+    const a = G.stars[UI.ruler.from], b = G.stars[UI.ruler.to], x2 = sx(b.x), y2 = sy(b.y);
+    cx.save(); cx.strokeStyle = '#bfe8ff'; cx.lineWidth = 2; cx.setLineDash([6, 5]);
+    cx.beginPath(); cx.moveTo(sx(a.x), sy(a.y)); cx.lineTo(x2, y2); cx.stroke(); cx.setLineDash([]);
+    const label = `${b.name}: ${HO.starDist(G, a.id, b.id).toFixed(1)} away`;
+    cx.font = '12px Geneva, Verdana, sans-serif'; cx.textAlign = 'left';
+    const tw = cx.measureText(label).width;
+    cx.fillStyle = 'rgba(0,0,0,0.7)'; cx.fillRect(x2 + 12, y2 - 24, tw + 10, 18);
+    cx.fillStyle = '#bfe8ff'; cx.fillText(label, x2 + 17, y2 - 11); cx.restore();
+  }
   // stars
   for (const s of G.stars) {
     const x = sx(s.x), y = sy(s.y);
@@ -534,8 +549,9 @@ function draw() {
       for (const sid of route) { const b = G.stars[sid]; cx.strokeStyle = '#ffe066'; cx.lineWidth = 2; cx.beginPath(); cx.moveTo(sx(p0.x), sy(p0.y)); cx.lineTo(sx(b.x), sy(b.y)); cx.stroke(); arrowHead(sx(p0.x), sy(p0.y), sx(b.x), sy(b.y), '#ffe066'); p0 = b; }
       for (const sid of route.slice(0, -1)) { const b = G.stars[sid]; cx.strokeStyle = '#ffe066'; cx.lineWidth = 1.5; cx.beginPath(); cx.arc(sx(b.x), sy(b.y), planetPx() * 0.6, 0, Math.PI * 2); cx.stroke(); }
     }
-    cx.strokeStyle = ok ? '#ffe066' : '#8a8a8a'; cx.lineWidth = 2;
-    if (!ok) cx.setLineDash([4, 5]);
+    // a finger's drag: red when the fleet hasn't the fuel (iOS, FleetMovementMenu updateFleetPath:)
+    cx.strokeStyle = ok ? '#ffe066' : UI.drag.touch ? '#e8402a' : '#8a8a8a'; cx.lineWidth = 2;
+    if (!ok && !UI.drag.touch) cx.setLineDash([4, 5]);
     if (!route) { cx.beginPath(); cx.moveTo(sx(a.x), sy(a.y)); cx.lineTo(x2, y2); cx.stroke(); }
     cx.setLineDash([]);
     if (ok && tgt != null) { arrowHead(sx(a.x), sy(a.y), x2, y2, '#ffe066'); if (round) arrowHead(x2, y2, sx(a.x), sy(a.y), '#ffe066'); }
@@ -662,15 +678,7 @@ function onUp(e) {
   if (!G || !d) return;
   const px = e.offsetX, py = e.offsetY;
   if (d.pan) {
-    if (!d.moved && UI.route) {
-      const s = starAt(px, py), f = G.fleets.find(x => x.id === UI.route.fleet);
-      if (s != null && f) {
-        const prev = UI.route.stops.length ? UI.route.stops[UI.route.stops.length - 1] : f.star;
-        if (s !== prev) { if (HO.starDist(G, prev, s) <= HO.fleetMaxRange(G, f)) UI.route.stops.push(s); else toast(`${G.stars[s].name} is too far for one hop.`); }
-        renderRouteBar(); draw();
-      }
-      return;
-    }
+    if (!d.moved && UI.route) { routeStop(starAt(px, py)); return; }
     if (!d.moved) { const s = starAt(px, py); UI.sel = s; UI.selFleet = null; renderPanel(); draw(); }
     return;
   }
@@ -688,6 +696,14 @@ function onUp(e) {
   else { Sound.play(7016); toast(outOfRange(f, tgt)); }
   UI.hover = null; draw(); renderPanel(); save();
 }
+// Plan route…: a clicked (or tapped) star is the next stop
+function routeStop(s) {
+  const f = G.fleets.find(x => x.id === UI.route.fleet);
+  if (s == null || !f) return;
+  const prev = UI.route.stops.length ? UI.route.stops[UI.route.stops.length - 1] : f.star;
+  if (s !== prev) { if (HO.starDist(G, prev, s) <= HO.fleetMaxRange(G, f)) UI.route.stops.push(s); else toast(`${G.stars[s].name} is too far for one hop.`); }
+  renderRouteBar(); draw();
+}
 function onDbl(e) {
   if (!G) return;
   const s = starAt(e.offsetX, e.offsetY);
@@ -696,34 +712,360 @@ function onDbl(e) {
   else { const b = [...G.battles].reverse().find(b => b.star === s && b.sides.includes(ME)); if (b) openBattle(b.id); }
 }
 
+// ---------- touch: iOS 1.2.9's gestures, in every skin ----------
+// Whenever a finger is used (a pointer event's pointerType 'touch'), the map,
+// the fleet lists, the budget bars and the scrolling lists do what the iOS
+// game (Spaceward Ho! 1.2.9 for iPhone and iPad, 2012) does with a finger,
+// whatever the skin; a mouse and a pen keep the remake's own behaviour, so a
+// hybrid laptop has both. Every number is the iOS game's (docs/ios-findings.md,
+// "Touch controls"); distances are in points, a CSS pixel here. A gesture
+// whose command the ruleset hasn't got is skipped (the satellite's long hold
+// needs rs.flagScrap). The long press that explains a control (hover help,
+// below) is kept, and given up when the finger moves.
+const isTouch = (e) => !!e && e.pointerType === 'touch';
+let lastPointer = 'mouse'; // the last pointer pressed anywhere: a double click or a context menu made by a finger is ignored
+document.addEventListener('pointerdown', (e) => { lastPointer = e.pointerType || 'mouse'; }, true);
+const TOUCH = {
+  TAP: 15,          // a lift after less than this much movement is a tap (CCLayerPanZoom maxTouchDistanceToClick)
+  FAR: 5,           // a step from the selected star longer than this is a drag ("moved far", StarNode); here also the whole way
+  SLIDE: 30,        // a list follows the finger once it has moved this far (CCMenuAdvanced minimumTouchLengthToSlide)
+  HOLD: 500,        // the satellite's long hold, and the selected star's single tap waits this long to deselect (ms)
+  DOUBLE: 400, DOUBLE_AT: 30, // two taps this quick and this close are a double tap (iOS's tapCount: the remake's guess)
+  KEEP: 6, RECENT: 200, THROW: 0.5, THROW_MS: 3000, // the throw (InertialScroller): last 6 touches, those of the last 0.2 s, speed x 0.5, over 3 s
+  PICK: Math.sqrt(2200), // a tap picks the nearest star within this (pickStar: squared distance <= scale x 2,200)
+};
+// the iOS fuel alert (Alert String 30), once (the app state's bit at +0x298)
+const FUEL_ALERT = 'Sorry, but that fleet doesn’t have enough fuel to reach the selected destination. You can tell this because of the red fleet line.';
+// map scale 1.0 is 40 points to a galaxy unit (the map's content is the
+// galaxy's extent x 40 points); a phone zooms to 1.5, a tablet to 2.0 (the
+// iPad flag), and out only to the scale that shows the whole galaxy
+const isTablet = () => Math.min(window.innerWidth, window.innerHeight) >= 600;
+const fitScale = () => G && mapW ? Math.min((mapW - 60) / G.W, (mapH - 90) / G.H) : UI.view.s;
+const zoomRange = () => { const lo = Math.min(fitScale(), UI.view.s), hi = Math.max(40 * (isTablet() ? 2 : 1.5), lo); return [lo, hi]; };
+// no rubber band: the galaxy (with the fit's margin) never leaves the map:
+// when it is wider than the map it covers it, else it stays inside it
+function clampView() {
+  if (!G) return;
+  const v = UI.view, ax = (o, len, view) => len <= view ? Math.min(Math.max(o, 0), view - len) : Math.min(0, Math.max(o, view - len));
+  v.ox = ax(v.ox - 30, G.W * v.s + 60, mapW) + 30;
+  v.oy = ax(v.oy - 30, G.H * v.s + 60, mapH) + 30;
+}
+// the star a tap picks: the nearest within TOUCH.PICK at map scale 1.0 (never
+// under 20 points), not one in its supernova
+function pickStar(px, py) {
+  const r = Math.max(20, TOUCH.PICK * UI.view.s / 40);
+  let best = null, bd = r * r;
+  for (const s of G.stars) {
+    const b = ourStarLook(s.id).base; if (b === 'nova12' || b === 'nova18') continue;
+    const d = (sx(s.x) - px) ** 2 + (sy(s.y) - py) ** 2;
+    if (d <= bd) { bd = d; best = s.id; }
+  }
+  return best;
+}
+// only the selected star takes touches of its own: an 80 x 80 point square
+// about it (StarNode ourTouch:, -40 to +40) at map scale 1.0, scaled with the
+// map (at least 24 points across); where the galaxy is crowded, a touch
+// nearer another star is the map's (the remake's choice: a far-out map
+// would otherwise hide the selected star's neighbours under its square)
+function onSelected(px, py) {
+  if (!G || UI.sel == null || !G.stars[UI.sel]) return false;
+  const s = G.stars[UI.sel], h = Math.max(12, 40 * Math.min(2, UI.view.s / 40));
+  if (Math.abs(sx(s.x) - px) > h || Math.abs(sy(s.y) - py) > h) return false;
+  const n = pickStar(px, py);
+  return n == null || n === UI.sel;
+}
+// the double-tap count, as iOS's tapCount: a tap soon after another, near it
+function tapCount(x, y, where) {
+  const now = performance.now(), l = Touch.lastTap;
+  const n = l && l.where === where && now - l.t < TOUCH.DOUBLE && Math.hypot(x - l.x, y - l.y) < TOUCH.DOUBLE_AT ? l.n + 1 : 1;
+  Touch.lastTap = { x, y, t: now, n, where };
+  return n;
+}
+// Double tap on the selected star (-[MapLayer showBuildShips]): Build Ships
+// at your colony; elsewhere, the replay of a battle you were in there
+function starDoubleTap(sid) {
+  if (sid == null) return;
+  if (G.stars[sid].owner === ME && !G.over) { openBuild(sid); return; }
+  const b = [...G.battles].reverse().find(b => b.star === sid && b.sides.includes(ME));
+  if (b) openBattle(b.id);
+}
+const Touch = {
+  pts: new Map(), mode: null, lastTap: null, fling: 0, deselect: 0,
+  stopFling() { if (this.fling) cancelAnimationFrame(this.fling); this.fling = 0; },
+  // the map (CCLayerPanZoom in "sheet" mode: one finger pans, two pinch)
+  mapDown(e) {
+    if (!G) return;
+    this.stopFling(); tipHide();
+    try { cv.setPointerCapture(e.pointerId); } catch (x) {}
+    const x = e.offsetX, y = e.offsetY;
+    this.pts.set(e.pointerId, { x, y });
+    if (this.pts.size === 2) { // a pinch is never a tap
+      const [a, b] = [...this.pts.values()], v = UI.view, mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+      this.mode = 'pinch'; this.d0 = Math.max(1, Math.hypot(a.x - b.x, a.y - b.y)); this.s0 = v.s;
+      this.wx = (mx - v.ox) / v.s; this.wy = (my - v.oy) / v.s;
+      if (UI.ruler) { UI.ruler = null; draw(); }
+      return;
+    }
+    if (this.pts.size > 2) return;
+    this.dist = 0; this.last = { x, y }; this.hist = [{ x, y, t: performance.now() }];
+    if (!UI.route && onSelected(x, y)) { // StarNode ccTouchBegan: cancels a pending single tap
+      clearTimeout(this.deselect); this.mode = 'star'; this.far = false; this.rulerTo = null;
+    } else this.mode = 'pan';
+  },
+  mapMove(e) {
+    if (!G || !this.pts.has(e.pointerId)) return;
+    const x = e.offsetX, y = e.offsetY, p = this.pts.get(e.pointerId);
+    p.x = x; p.y = y;
+    if (this.mode === 'pinch') {
+      if (this.pts.size < 2) return;
+      const [a, b] = [...this.pts.values()], v = UI.view, [lo, hi] = zoomRange();
+      const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+      v.s = Math.max(lo, Math.min(hi, this.s0 * Math.hypot(a.x - b.x, a.y - b.y) / this.d0));
+      v.ox = mx - this.wx * v.s; v.oy = my - this.wy * v.s; // about the fingers' midpoint, panning with it
+      clampView(); draw(); return;
+    }
+    const dx = x - this.last.x, dy = y - this.last.y, step = Math.hypot(dx, dy);
+    this.last = { x, y }; this.dist += step;
+    if (this.mode === 'pan') {
+      UI.view.ox += dx; UI.view.oy += dy; clampView();
+      this.hist.push({ x, y, t: performance.now() }); if (this.hist.length > TOUCH.KEEP) this.hist.shift();
+      draw();
+    } else if (this.mode === 'star') { // the map stays; a ruler to the star under the finger
+      if (step > TOUCH.FAR || Math.hypot(x - this.hist[0].x, y - this.hist[0].y) > TOUCH.FAR) this.far = true; // (a slow drag too: the remake's)
+      if (!this.far) return;
+      const s = pickStar(x, y);
+      if (s !== this.rulerTo) { this.rulerTo = s; UI.ruler = s != null && s !== UI.sel ? { from: UI.sel, to: s } : null; draw(); }
+    }
+  },
+  mapUp(e) {
+    if (!G || !this.pts.has(e.pointerId)) return;
+    const x = e.offsetX, y = e.offsetY, mode = this.mode;
+    this.pts.delete(e.pointerId);
+    if (mode === 'pinch') { // the finger left goes on panning, never a tap
+      if (this.pts.size === 1) { const r = [...this.pts.values()][0]; this.mode = 'pan'; this.dist = Infinity; this.last = { x: r.x, y: r.y }; this.hist = [{ x: r.x, y: r.y, t: performance.now() }]; }
+      else if (!this.pts.size) this.mode = null;
+      return;
+    }
+    if (this.pts.size) return;
+    this.mode = null;
+    if (mode === 'pan') {
+      if (this.dist < TOUCH.TAP) this.mapTap(x, y, tapCount(x, y, 'map'));
+      else this.throw();
+    } else if (mode === 'star') {
+      if (UI.ruler) { UI.ruler = null; draw(); }
+      if (this.far) return;
+      if (tapCount(x, y, 'map') === 2) { clearTimeout(this.deselect); starDoubleTap(UI.sel); return; }
+      const sid = UI.sel; // a single tap deselects the star after 0.5 s, unless a second tap comes first
+      this.deselect = setTimeout(guard(() => { if (G && UI.sel === sid) { UI.sel = null; UI.selFleet = null; renderPanel(); draw(); } }), TOUCH.HOLD);
+    }
+  },
+  mapCancel(e) { this.pts.delete(e.pointerId); if (!this.pts.size) this.mode = null; if (UI.ruler) { UI.ruler = null; draw(); } },
+  // a tap (-[MapLayer layerPanZoom:clickedAtPoint:tapCount:]): a star near it
+  // becomes the selected one and the map doesn't move; a tap away from the
+  // stars, or a double tap, does nothing
+  mapTap(x, y, n) {
+    if (UI.route) { routeStop(pickStar(x, y)); return; } // Plan route…: the remake's own, by tap as by click
+    if (n === 2) return;
+    const s = pickStar(x, y);
+    if (s == null) return;
+    clearTimeout(this.deselect);
+    UI.sel = s; UI.selFleet = null; renderPanel(); draw();
+  },
+  // the throw (InertialScroller touchEnded:node:)
+  throw() {
+    const now = performance.now(), h = this.hist.filter(p => now - p.t <= TOUCH.RECENT);
+    if (h.length < 2) return;
+    const a = h[0], b = h[h.length - 1], d = Math.hypot(b.x - a.x, b.y - a.y);
+    if (d <= 5) return;
+    const dt = (b.t - a.t) / 1000, k = dt > 0 ? TOUCH.THROW / dt : 5;
+    const cw = G.W * UI.view.s / 2, ch = G.H * UI.view.s / 2;
+    const mx = Math.max(-cw, Math.min(cw, (b.x - a.x) * k)), my = Math.max(-ch, Math.min(ch, (b.y - a.y) * k));
+    const t0 = performance.now();
+    let done = 0;
+    const step = () => {
+      if (!G) { this.fling = 0; return; }
+      const t = Math.min(1, (performance.now() - t0) / TOUCH.THROW_MS), f = t >= 1 ? 1 : 1 - Math.pow(2, -10 * t); // CCEaseExponentialOut
+      UI.view.ox += mx * (f - done); UI.view.oy += my * (f - done); done = f;
+      clampView(); draw();
+      this.fling = t < 1 ? requestAnimationFrame(step) : 0;
+    };
+    this.fling = requestAnimationFrame(step);
+  },
+};
+// The planet panel's lists, the windows' lists and the menus (CCMenuAdvanced,
+// CCScrollLayer): a finger on an item doesn't scroll at once; once it has
+// moved 30 points the list follows it (and the item isn't chosen), and keeps
+// going a little when let go. In the fleets at a star, a fleet of yours dragged
+// out of the list is picked up and dropped on a star to send it
+// (FleetMovementMenu); a double tap on the list opens the fleet's Split (the
+// remake's Organize Fleets); holding one of your satellites for 0.5 s marks it
+// for scrapping or unmarks it (SatelliteMenu), with a ruleset that marks.
+const SLIDERS = '#panel, .wbody, .dropdown, .lb, .starmenu';
+const List = { t: null };
+document.addEventListener('pointerdown', guard((e) => {
+  if (!isTouch(e) || !e.isPrimary) return;
+  List.stopSpin();
+  const box = e.target.closest && e.target.closest(SLIDERS);
+  if (!box || e.target.closest('.track, input[type=range], input[type=text], input[type=number], input:not([type]), textarea, select')) { List.t = null; return; }
+  const row = e.target.closest('.frow'), f = row && G && G.fleets.find(x => x.id === +row.dataset.fleet);
+  const t = List.t = { x: e.clientX, y: e.clientY, box, scroller: scrollerOf(e.target), mode: null, hist: [], row, f: null, sat: null, fleets: row && row.closest('.fleets') };
+  if (f && f.owner === ME && !G.over && !row.dataset.inbound) {
+    if (!f.sat) t.f = f;
+    else if (marksScrap()) t.hold = setTimeout(guard(() => { if (List.t === t && !t.mode) { t.mode = 'held'; toggleScrapFleet(f); } }), TOUCH.HOLD);
+  }
+}));
+document.addEventListener('pointermove', guard((e) => {
+  const t = List.t;
+  if (!isTouch(e) || !t || !e.isPrimary) return;
+  const dx = e.clientX - t.x, dy = e.clientY - t.y;
+  if (Math.hypot(dx, dy) > 10) { clearTimeout(Tip.timer); clearTimeout(t.hold); }
+  if (t.mode === 'drag') { List.dragTo(e.clientX, e.clientY); return; }
+  if (t.mode === 'held') return;
+  if ((!t.mode || t.mode === 'slide') && t.f && t.fleets) { // out of the fleet list (sliding it or not): picked up
+    const r = t.fleets.getBoundingClientRect();
+    if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) { List.pickUp(t, e.clientX, e.clientY); return; }
+  }
+  if (!t.mode && Math.hypot(dx, dy) >= TOUCH.SLIDE && t.scroller) { t.mode = 'slide'; t.y0 = e.clientY; t.x0 = e.clientX; t.st = t.scroller.scrollTop; t.sl = t.scroller.scrollLeft; tipHide(); }
+  if (t.mode === 'slide') {
+    t.scroller.scrollTop = t.st - (e.clientY - t.y0);
+    if (t.scroller.scrollWidth > t.scroller.clientWidth) t.scroller.scrollLeft = t.sl - (e.clientX - t.x0);
+    t.hist.push({ y: e.clientY, t: performance.now() }); if (t.hist.length > TOUCH.KEEP) t.hist.shift();
+  }
+}));
+const listEnd = guard((e) => {
+  const t = List.t;
+  if (!isTouch(e) || !t || !e.isPrimary) return;
+  List.t = null; clearTimeout(t.hold);
+  if (t.mode === 'drag') { List.drop(e.type === 'pointerup' ? e : null); List.noClick(); return; }
+  if (t.mode === 'held') { List.noClick(); return; }
+  if (t.mode === 'slide') { List.noClick(); if (e.type === 'pointerup') List.spin(t); return; }
+  // a double tap on the fleets at a star: that fleet's Split (Organize Fleets)
+  if (e.type === 'pointerup' && t.fleets && tapCount(e.clientX, e.clientY, 'fleets') === 2) {
+    const at = document.elementFromPoint(e.clientX, e.clientY), row = at && at.closest('.frow');
+    const f = row && G && G.fleets.find(x => x.id === +row.dataset.fleet);
+    if (f && f.owner === ME && !f.sat && !G.over && !row.dataset.inbound && HO.fleetCount(f) > 1) { List.noClick(); openSplit(f); }
+  }
+});
+document.addEventListener('pointerup', listEnd);
+document.addEventListener('pointercancel', listEnd);
+// after a slide, a drag or a hold, the lift chooses nothing
+document.addEventListener('click', (e) => { if (List.quiet && performance.now() - List.quiet < 400) { e.stopPropagation(); e.preventDefault(); List.quiet = 0; } }, true);
+Object.assign(List, {
+  noClick() { this.quiet = performance.now(); },
+  // the throw after a slide (CCScrollLayer: half the last step's speed, x 0.95 every 0.02 s)
+  spin(t) {
+    const now = performance.now(), h = t.hist.filter(p => now - p.t <= TOUCH.RECENT);
+    if (h.length < 2) return;
+    let v = (h[h.length - 1].y - h[0].y) / Math.max(1, h[h.length - 1].t - h[0].t) * 20 / 2; // points per 0.02 s tick
+    const sc = t.scroller, tick = () => { sc.scrollTop -= v; v *= 0.95; if (Math.abs(v) > 0.3) this.spinT = setTimeout(tick, 20); };
+    this.spinT = setTimeout(tick, 20);
+  },
+  stopSpin() { clearTimeout(this.spinT); },
+  // picked up (-[FleetMovementMenu ccTouchMoved:withEvent:]): the ship
+  // follows the finger, drawn above it so the finger doesn't hide it
+  pickUp(t, x, y) {
+    t.mode = 'drag'; tipHide();
+    const d = HO.fleetDesigns(G, t.f)[0];
+    t.sprite = d ? shipImgEl(d, 30, t.f.owner) : el('span');
+    t.sprite.classList.add('touchdrag');
+    document.body.append(t.sprite);
+    UI.selFleet = t.f.id; UI.sel = t.f.star;
+    UI.drag = { fleet: t.f.id, x: 0, y: 0, moved: true, touch: true };
+    this.dragTo(x, y);
+  },
+  // the route to the star under the finger, with the "Next Message" sound for
+  // every new star other than the fleet's own (updateFleetPath:)
+  dragTo(x, y) {
+    const t = this.t; if (!t || !UI.drag) return;
+    t.sprite.style.left = x + 'px'; t.sprite.style.top = (y - (t.sprite.offsetHeight || 30) - 8) + 'px';
+    const r = cv.getBoundingClientRect(), px = x - r.left, py = y - r.top;
+    const inMap = px >= 0 && py >= 0 && px <= r.width && py <= r.height;
+    const s = inMap ? pickStar(px, py) : null;
+    UI.drag.x = px; UI.drag.y = py;
+    if (s !== UI.hover) { UI.hover = s; if (s != null && s !== t.f.star) Sound.play(7001); }
+    draw();
+  },
+  // dropped (-[FleetMovementMenu ccTouchEnded:withEvent:], moveFleet): on a
+  // star, the fleet is sent there; back on its own star, it stays; over empty
+  // space, nothing
+  drop(e) {
+    const t = this.t || {}, f = UI.drag && G && G.fleets.find(x => x.id === UI.drag.fleet), tgt = e ? UI.hover : null;
+    document.querySelectorAll('.touchdrag').forEach(n => n.remove());
+    UI.drag = null; UI.hover = null;
+    if (f && tgt != null) {
+      if (f.scrap301 && marksScrap() && tgt !== f.star) { toast(scrapWords('heap')); HO.cancelMove(G, f); Sound.play(4000); }
+      else if (tgt === f.star) { if (f.dest != null) { HO.cancelMove(G, f); Sound.play(4000); } }
+      else if (HO.orderMove(G, f, tgt)) Sound.play(4001);
+      else if (autoRoute(f, tgt)) Sound.play(4001);
+      else { Sound.play(7016); fuelAlert(); }
+      save();
+    }
+    renderPanel(); draw();
+  },
+});
+List.t = null;
+function fuelAlert() {
+  let seen = false; try { seen = localStorage.getItem('ho5.fuelAlert') === '1'; localStorage.setItem('ho5.fuelAlert', '1'); } catch (e) {}
+  if (!seen) modal('Not enough fuel', el('div', null, el('p', null, FUEL_ALERT), el('div', { class: 'btns right' }, el('button', { onclick: closeModal }, 'OK'))), { cls: 'small alert' });
+}
+// the nearest box that scrolls (else the page)
+function scrollerOf(n) {
+  for (let e = n; e && e !== document.body; e = e.parentElement) {
+    const st = getComputedStyle(e);
+    if (/(auto|scroll)/.test(st.overflowY + st.overflowX) && (e.scrollHeight > e.clientHeight + 1 || e.scrollWidth > e.clientWidth + 1)) return e;
+  }
+  return document.scrollingElement;
+}
+
 // ---------- left panel ----------
 function bar(label, val, max, onSet, opts) {
   opts = opts || {};
   const track = el('div', { class: 'track', role: 'slider', tabindex: 0, 'aria-label': label, 'aria-valuenow': Math.round(val / max * 100) });
   const fill = el('div', { class: 'fill' + (opts.cls ? ' ' + opts.cls : '') });
-  fill.style.width = (max > 0 ? Math.min(100, val / max * 100) : 0) + '%';
+  track._v = max > 0 ? Math.min(1, val / max) : 0;
+  fill.style.width = barWidth(track._v);
   track.append(fill);
+  // a mouse or pen: the share is where the pointer is along the bar; a
+  // finger: iOS's log scale (logBarValue), and only while it stays on the
+  // bar's row (HoBarLayer ccTouchMoved:)
   const set = (ev) => {
     const r = track.getBoundingClientRect();
-    const f = Math.max(0, Math.min(1, (ev.clientX - r.left) / r.width));
-    fill.style.width = f * 100 + '%';
+    const x = Math.max(0, Math.min(1, (ev.clientX - r.left) / r.width));
+    const f = isTouch(ev) ? logBarValue(x) / 1000 : x;
+    track._v = f; fill.style.width = barWidth(f);
     onSet(f, false);
   };
-  track.addEventListener('pointerdown', guard((ev) => { track.setPointerCapture(ev.pointerId); set(ev); track._drag = true; }));
-  track.addEventListener('pointermove', guard((ev) => { if (track._drag) set(ev); }));
+  track.addEventListener('pointerdown', guard((ev) => {
+    UI.logBars = isTouch(ev); // the bars are drawn on the scale of the last pointer that set one
+    track.setPointerCapture(ev.pointerId); set(ev); track._drag = true;
+  }));
+  track.addEventListener('pointermove', guard((ev) => {
+    if (!track._drag) return;
+    if (isTouch(ev)) { const r = track.parentElement.getBoundingClientRect(); if (ev.clientY < r.top || ev.clientY > r.bottom) return; }
+    set(ev);
+  }));
   track.addEventListener('pointerup', guard((ev) => { track._drag = false; onSet(null, true); }));
+  track.addEventListener('pointercancel', guard((ev) => { if (track._drag) { track._drag = false; onSet(null, true); } }));
   track.addEventListener('keydown', (ev) => {
     if (ev.key !== 'ArrowLeft' && ev.key !== 'ArrowRight') return;
     ev.preventDefault();
-    const cur = parseFloat(fill.style.width) / 100 || 0;
+    const cur = track._v || 0;
     const f = Math.max(0, Math.min(1, cur + (ev.key === 'ArrowRight' ? 0.05 : -0.05)));
-    fill.style.width = f * 100 + '%'; onSet(f, false); onSet(null, true);
+    track._v = f; fill.style.width = barWidth(f); onSet(f, false); onSet(null, true);
   });
   return el('div', { class: 'barrow' + (opts.rowCls ? ' ' + opts.rowCls : ''), 'data-help': opts.help || null },
     el('span', { class: 'blabel', title: opts.title || label }, label),
     track,
     el('span', { class: 'bval' }, opts.right || ''));
 }
+// iOS's budget bars (-[HoBarLayer handleTouch], initHLogBarAmts): pixel x of
+// a bar w wide is worth trunc((exp(x * 77 / w / 32.11 + 2.302) - 10) * 10)
+// per mille, the last pixel 1,000, so the left of the bar sets small shares
+// finely (as the Mac's bars since 2.0). x here is the fraction x / w. The
+// bars are drawn on the same scale (getHPercBarAmt:) after a finger set one.
+const logBarValue = (x) => x >= 1 ? 1000 : Math.max(0, Math.min(1000, Math.trunc((Math.exp(x * 77 / 32.11 + 2.302) - 10) * 10)));
+const logBarPos = (pm) => Math.max(0, Math.min(1, (Math.log(Math.max(0, pm) / 10 + 10) - 2.302) * 32.11 / 77));
+const barWidth = (f) => (UI.logBars ? logBarPos(f * 1000) : Math.min(1, f)) * 100 + '%';
 // proportional budget setter: entries [{key, get, set}]
 function setShare(entries, idx, f) {
   // f is the new fraction (0..1) for entries[idx]; others scale to fill 1-f
@@ -795,7 +1137,7 @@ function renderPanel() {
     bb.append(bar(e.label, e.get(), 1, (f, end) => {
       if (f != null && own) { if (!start) start = JSON.stringify(p.budget); dragBudget(p, e.key, f, start); }
       else if (f != null) setShare(ents, i, f);
-      if (f != null) { ents.forEach((x, j) => { const r = bb.querySelectorAll('.barrow')[j]; if (r) { r.querySelector('.fill').style.width = x.get() * 100 + '%'; r.querySelector('.bval').textContent = money(x.get() * spendable); } }); }
+      if (f != null) { ents.forEach((x, j) => { const r = bb.querySelectorAll('.barrow')[j]; if (r) { r.querySelector('.track')._v = x.get(); r.querySelector('.fill').style.width = barWidth(x.get()); r.querySelector('.bval').textContent = money(x.get() * spendable); } }); }
       if (end) { start = null; renderPanel(); save(); }
     }, { right: money(amt), cls: e.key === 'tech' ? 'tech' : e.key === 'savings' ? 'sav' : 'col', rowCls: (s && UI.sel === s.id ? 'hl' : '') + (s && HO.planetIncome(G, p, s) < 0 ? ' loss' : ''), help: e.key === 'tech' ? 'tech' : e.key === 'savings' ? 'savingsBar' : 'colonyBar' }));
   });
@@ -809,9 +1151,10 @@ function renderPanel() {
   const tnames = { range: 'Range', speed: 'Speed', weapons: 'Weapons', shields: 'Shields', mini: 'Mini', radical: 'Radical' };
   tents.forEach((e, i) => {
     const lvl = e.key === 'radical' ? '' : p.tech[e.key];
-    const nm = e.key !== 'radical' ? (HO.DATA.techNames[e.key] || [])[p.tech[e.key] - 1] : null;
+    // the level's name in the version's own characters (rs.msgText: iOS shows "ª" for "™", patch-aware)
+    const nm0 = e.key !== 'radical' ? (HO.DATA.techNames[e.key] || [])[p.tech[e.key] - 1] : null, nm = nm0 && HO.rules(G).msgText ? HO.rules(G).msgText(G, nm0) : nm0;
     tb.append(bar(`${tnames[e.key]}${lvl !== '' ? ' ' + lvl : ''}`, e.get(), 1, (f, end) => {
-      if (f != null) { setShare(tents, i, f); tents.forEach((x, j) => { const r = tb.querySelectorAll('.barrow')[j]; if (r) r.querySelector('.fill').style.width = x.get() * 100 + '%'; }); }
+      if (f != null) { setShare(tents, i, f); tents.forEach((x, j) => { const r = tb.querySelectorAll('.barrow')[j]; if (r) { r.querySelector('.track')._v = x.get(); r.querySelector('.fill').style.width = barWidth(x.get()); } }); }
       if (end) { renderPanel(); save(); }
     }, { right: money(e.get() * techSpend), cls: 'tbar', title: nm && !/^\d+$/.test(nm) ? nm : tnames[e.key], help: e.key }));
   });
@@ -955,7 +1298,7 @@ function fleetRow(f, inbound) {
   const ds = HO.fleetDesigns(G, f);
   const sel = UI.selFleet === f.id;
   const marked = mine && !!f.scrap301;
-  const r = el('div', { class: 'frow' + (sel ? ' sel' : '') + (mine ? '' : ' enemy') + (marked ? ' scrap' : ''), onclick: () => { UI.selFleet = f.id; renderPanel(); draw(); } });
+  const r = el('div', { class: 'frow' + (sel ? ' sel' : '') + (mine ? '' : ' enemy') + (marked ? ' scrap' : ''), 'data-fleet': f.id, 'data-inbound': inbound ? '1' : null, onclick: () => { UI.selFleet = f.id; renderPanel(); draw(); } });
   const pics = el('div', { class: 'fpics' });
   ds.slice(0, 3).forEach(d => pics.append(shipImgEl(d, 18)));
   r.append(pics);
@@ -1132,6 +1475,39 @@ function awardMasterPoints(byComputer) {
   const NS = RS.nameAStar, named = NS && NS.when === 'rank' ? () => openNameStar() : null;
   if (after > before) setTimeout(() => showRank(after, named), 300);
 }
+// Game Center (rs.gameCenter, iOS 1.2.9): the app keeps master points and
+// games won on Game Center leaderboards, with seven achievements. The remake
+// keeps that record in the browser (localStorage, the ruleset's own key), and
+// the ruleset says what a finished game earns (gameCenter.gameOver): once a
+// game, when it ends for you (won, lost, or you were eliminated), the points
+// report (79), a new rank's window, then the Name a Star window
+// (rs.nameAStar) when the record asks for one; Cancel there stops the asking.
+// The Game menu's "Game Center…" shows the record.
+function gameCenterRec(GC) { try { return JSON.parse(localStorage.getItem(GC.key) || 'null'); } catch (e) { return null; } }
+function awardGameCenter() {
+  const rs = G && HO.rules(G), GC = rs && rs.gameCenter;
+  if (!GC || G.gcDone || hotSeat() || !(G.over || !me().alive)) return;
+  G.gcDone = true;
+  const won = !!G.over && (G.winners || [G.winner]).includes(ME);
+  const d = won && rs.difficulty ? rs.difficulty(Object.assign({}, G.opts, { armageddons: G.armageddons || 0, won: true, year: G.year })) : 0;
+  const r = GC.gameOver(gameCenterRec(GC), { gameId: String(G.opts.seed), won, difficulty: d }, keptStars(G.rules).length);
+  try { localStorage.setItem(GC.key, JSON.stringify(r.rec)); } catch (e) {}
+  if (r.points) me().inbox.push({ text: HO.report(79, d, fmt(r.points)), icon: 'm9035' });
+  const decline = () => { const rec = gameCenterRec(GC) || GC.blank(); rec.starsDeclined = true; try { localStorage.setItem(GC.key, JSON.stringify(rec)); } catch (e) {} };
+  const name = r.askName && rs.nameAStar ? () => openNameStar(null, decline) : null;
+  if (r.newRank) setTimeout(() => showRank(r.rank, name), 300);
+  else if (name) setTimeout(name, 300);
+}
+function openGameCenter() {
+  const GC = HO.RULESETS[rulesId()] && HO.RULESETS[rulesId()].gameCenter; if (!GC) return;
+  const rec = Object.assign(GC.blank(), gameCenterRec(GC) || {}), R = HO.DATA.ranks || [], cur = rankOf(rec.master_points);
+  const body = el('div', { class: 'rank gamecenter' },
+    A.jpg[cur] ? el('img', { src: A.jpg[cur], alt: '' }) : null, R[cur] ? el('h3', null, R[cur][0]) : null,
+    el('h4', null, 'Leaderboards'), el('table', { class: 'ptable' }, ...GC.leaderboards.map(b => el('tr', null, el('td', null, b.title), el('td', null, fmt(rec[b.id] || 0))))),
+    el('h4', null, 'Achievements'), el('table', { class: 'ptable' }, ...GC.achievements.map(a => { const n = (rec.achievements || {})[a.id] || 0; return el('tr', { class: n >= a.goal ? 'me' : '' }, el('td', null, (n >= a.goal ? '★ ' : '') + a.title), el('td', null, a.goal > 1 ? `${fmt(n)} of ${fmt(a.goal)}` : n ? 'Done' : '')); })),
+    el('p', { class: 'sub' }, 'The app kept these on Game Center; here they stay in this browser.'));
+  modal('Game Center', body, { cls: 'mid' });
+}
 function showRank(i, then) {
   const R = HO.DATA.ranks[i];
   const body = el('div', { class: 'rank' },
@@ -1280,7 +1656,7 @@ function doEndTurn(confirmed) {
     G.done = [];
   }
   if (!playTurn('End Turn', before)) return;
-  awardMasterPoints();
+  awardMasterPoints(); awardGameCenter();
   recordHall();
   Sound.play(11111);
   for (const p of HO.humans(G)) addTurnNotes(p);
@@ -1296,7 +1672,9 @@ function addTurnNotes(p) {
   // rs.hintTexts: a version's own hints, one every turn picked by the system's
   // random numbers, not the game's (Palm OS: tSTL 6021.4-43, FUN_000500d4)
   const ownHints = HO.rules(G).hintTexts;
-  if (Prefs.hints && ownHints && ownHints.length) p.inbox.push({ text: ownHints[Math.floor(Math.random() * ownHints.length)], icon: 'm9024', quiet: true });
+  // one a 10-year step (report 500, sent on every step of the turn: 20, 30 or 50 years a turn give 2, 3 or 5)
+  const steps = HO.feature(G, 'yearsPerTurn') ? Math.max(1, Math.round((G.opts.yearsPerTurn || 10) / 10)) : 1;
+  if (Prefs.hints && ownHints && ownHints.length) for (let i = 0; i < steps; i++) p.inbox.push({ text: ownHints[Math.floor(Math.random() * ownHints.length)], icon: 'm9024', quiet: true });
   else if (Prefs.hints && HO.rules(G).hints !== false && G.turn % 7 === 3 && (HO.DATA.hints || []).length) { const h = HO.DATA.hints; p.inbox.push({ text: h[G.turn % Math.min(h.length, 40)], icon: 'm9024', quiet: true }); }
   if (!p.inbox.length) p.inbox.push({ text: `Year ${G.year}. Nothing much happened.`, icon: 'm9024', quiet: true });
 }
@@ -1350,7 +1728,7 @@ function closeModal() { if (UI.modal) { UI.modal.remove(); UI.modal = null; cons
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && UI.modal) closeModal(); });
 function confirmBox(text, yes) {
   const w = modal('Are you sure?', el('div', null, text.nodeType ? text : el('p', null, text), el('div', { class: 'btns right' },
-    el('button', { class: 'quiet', onclick: closeModal }, 'Cancel'), el('button', { onclick: () => { closeModal(); yes(); } }, 'OK'))), { cls: 'small' });
+    el('button', { class: 'quiet', onclick: closeModal }, 'Cancel'), el('button', { onclick: () => { closeModal(); yes(); } }, 'OK'))), { cls: 'small alert' });
 }
 function toast(t) {
   const d = el('div', { class: 'toast', role: 'status' }, t);
@@ -1367,6 +1745,9 @@ function toast(t) {
 // as "[HO bug]").
 const BUG_REPO = 'https://github.com/misterwilson37/nostalgia-ho';
 window.HOBUGS = window.HOBUGS || [];
+// what the map shows, for the test tools (read only): its scale and offset,
+// the selected star and fleet, a finger's ruler and drag
+window.HOVIEW = () => ({ view: Object.assign({}, UI.view), sel: UI.sel, selFleet: UI.selFleet, ruler: UI.ruler && Object.assign({}, UI.ruler), drag: !!UI.drag, logBars: UI.logBars, mapW, mapH, fit: fitScale(), zoom: zoomRange(), modal: !!UI.modal });
 function guard(fn, where) {
   if (typeof fn !== 'function' || fn.hoGuarded) return fn;
   const g = function (...a) { try { return fn.apply(this, a); } catch (e) { showBug(e, where); } };
@@ -1519,10 +1900,21 @@ function openBuild(sid) {
   // them (4.0.5's slip, FUN_0044fd03)
   const session = {};
   const marking = marksScrapDesign() && !queue;
+  // rs.allowDebt (iOS 1.2.9, -[BuildSingleShipDialog determineCapacity]): an
+  // "Allow Debt" switch, { label, words: [off, on], on: its setting when the
+  // window opens }; off, buying stops while savings stay at $0 or more; on,
+  // at the borrowing limit (the other versions always allow debt)
+  const AD = !queue && HO.rules(G).allowDebt, debtSwitch = !!AD;
+  if (debtSwitch) st.debt = !!AD.on;
+  const floor = () => debtSwitch && !st.debt ? 0 : HO.borrowLimit(G, p);
+  const affordable = (c) => p.savings - c.money >= floor() && p.metal >= c.metal;
   const render = () => {
     body.innerHTML = '';
     const left = el('div', { class: 'blist' });
     left.append(el('div', { class: 'money' }, `Savings ${money(p.savings)} · Metal ${fmt(p.metal)}`));
+    if (debtSwitch) left.append(el('label', { class: 'chk switchrow' }, el('span', null, AD.label || 'Allow Debt'),
+      el('input', { type: 'checkbox', class: 'switch', role: 'switch', 'aria-label': AD.label || 'Allow Debt', checked: st.debt ? 'checked' : false, onchange: (e) => { st.debt = e.target.checked; render(); } }),
+      el('small', { class: 'switchword' }, (AD.words || ['No', 'Yes'])[st.debt ? 1 : 0])));
     const designs = p.designs.filter(d => !d.scrapped && types.includes(d.type));
     const builtHere = (did) => queue ? (s.queue || []).filter(it => it.did === did).reduce((a, it) => a + it.n, 0) : p.spentThisTurn.filter(e => e.sid === sid && e.did === did).length;
     if (queue) left.append(el('p', { class: 'note' }, 'Ships you add here are queued. They are built as this colony’s shipbuilding money pays for them' + ((s.ship || 0) > 0 ? '.' : ' — give it a Shipbuilding share in the planet panel.')));
@@ -1530,7 +1922,7 @@ function openBuild(sid) {
       const c = HO.shipCostNow(G, p, d);
       const n = builtHere(d.id);
       const slots = HO.rules(G).queueSlots, sq = s.queue || [];
-      const can = !d.scrap301 && (queue ? !(slots && sq.length >= slots && sq[sq.length - 1].did !== d.id) : ((p.savings - c.money >= HO.borrowLimit(G, p)) && p.metal >= c.metal));
+      const can = !d.scrap301 && (queue ? !(slots && sq.length >= slots && sq[sq.length - 1].did !== d.id) : affordable(c));
       left.append(el('div', { class: 'drow' + (d.scrap301 ? ' scrap' : '') },
         shipImgEl(d, 26),
         el('div', { class: 'dtext' }, el('b', null, d.name), el('div', { class: 'sub' }, `${HO.TYPES[d.type].name} · R${d.type === 'satellite' ? 0 : d.R} Sp${d.V} W${d.W} Sh${d.S} M${d.M}`),
@@ -1580,6 +1972,7 @@ function openBuild(sid) {
       if (lim && !exists && HO.liveDesigns(p) >= lim) { toast(HO.DATA.alerts[15] || 'Your assembly lines are full.'); return; }
       const d = HO.findOrCreateDesign(G, p, spec);
       if (queue) { if (HO.queueShips(G, ME, sid, d.id, 1)) Sound.play(7006); else toast(`${s.name}’s queue is full: it holds ${HO.rules(G).queueSlots} kinds of ship.`); }
+      else if (debtSwitch && !affordable(HO.shipCostNow(G, p, d))) toast(`Not enough money or metal. Turn on ${AD.label || 'Allow Debt'} to borrow.`);
       else if (HO.buildShips(G, ME, sid, d.id, 1)) { Sound.play(7006); session[d.id] = (session[d.id] || 0) + 1; } else toast('Not enough money or metal.');
       render(); renderPanel(); draw();
     } }, queue ? (exists ? `Queue another ${exists.name}` : 'Create this type and queue one') : exists && exists.built ? `Build another ${exists.name}` : 'Build the prototype')));
@@ -1911,8 +2304,12 @@ function openStarList() {
   });
   modal('Explored stars', table(['Star', 'Gravity', 'Temp', 'Metal', 'Owner', 'Population'], rows), { cls: 'mid' });
 }
+// the computer plays this one turn for you (the Game menu's "Auto-play this
+// turn"; iOS's Play One Turn)
+function playOneTurn() { if (!G || G.over) return; me().auto = true; doEndTurn(); me().auto = false; }
 // Auto Play: keep ending turns until something interesting happens
 function openAutoPlay() {
+  if (HO.rules(G).autoPlayWindow === 'ios') return openAutoPlayIOS();
   const f = el('form', { class: 'newgame', onsubmit: (e) => {
     e.preventDefault();
     const d = Object.fromEntries(new FormData(f).entries());
@@ -1937,18 +2334,62 @@ function openAutoPlay() {
 // both are read for now.
 const isBattleNews = (m) => m.battle != null || m.won != null;
 const wonBattle = (m) => m.won === true || (m.won == null && m.sound === 7027);
+// iOS 1.2.9's Auto Play window (rs.autoPlayWindow 'ios', AutoPlayLayer;
+// Misc Strings 130-136): Computer Play For Me or Just End My Turns Only, Do or
+// Do NOT Turn Off When Something Interesting Happens, and Click through the
+// messages every 0-10 seconds; it plays until its STOP button (138). "Play
+// One Turn" is the Game menu's own item. (The window's defaults are the
+// remake's guess.)
+function openAutoPlayIOS() {
+  const D = HO.rules(G).autoPlayDefaults || { stop: true, every: 4 };
+  const secs = el('b', null, String(D.every || 0));
+  let sl = null; // the auto play settings, when the ruleset keeps them on this window
+  const f = el('form', { class: 'newgame autoplay-ios', onsubmit: (e) => {
+    e.preventDefault();
+    const d = Object.fromEntries(new FormData(f).entries()), stop = !!d.stop;
+    if (sl) sl.apply();
+    closeModal(); runAutoPlay({ turns: Infinity, computer: d.mode === 'computer', won: stop, lost: stop, news: stop, every: +d.every || 0, stopButton: true });
+  } });
+  f.append(el('label', null, el('span', null, 'Play'), el('select', { name: 'mode' }, el('option', { value: 'computer' }, 'Computer Play For Me'), el('option', { value: 'end' }, 'Just End My Turns Only'))),
+    el('label', { class: 'chk switchrow' }, el('span', null, 'Turn Off When Something Interesting Happens'), el('input', { type: 'checkbox', class: 'switch', role: 'switch', name: 'stop', checked: D.stop !== false ? 'checked' : false })),
+    el('label', null, el('span', null, 'Click through the messages every'),
+      el('span', { class: 'slider' }, el('input', { type: 'range', name: 'every', min: 0, max: 10, value: D.every || 0, oninput: (e) => { secs.textContent = e.target.value; } }), el('output', null, secs, ' seconds'))),
+    ...(autoPlayWhere() === 'autoplay' ? [(sl = autoPlaySliders()).box] : []),
+    el('div', { class: 'btns right' }, ...(autoPlayWhere() === 'config' ? [el('button', { type: 'button', class: 'quiet', onclick: () => { closeModal(); openAutoPlaySettings(openAutoPlay); } }, 'Config…')] : []),
+      // Play One Turn: the computer plays this one turn for you
+      el('button', { type: 'button', class: 'quiet', onclick: () => { if (sl) sl.apply(); closeModal(); playOneTurn(); } }, 'Play One Turn'),
+      el('button', { type: 'submit' }, 'Start')));
+  modal('Auto Play', f, { cls: 'mid' });
+}
 function runAutoPlay(o) {
   let n = 0;
+  // the STOP button (iOS), over the map while auto play runs
+  const stopBtn = o.stopButton ? el('button', { id: 'autostop', class: 'clock', onclick: () => { o.stopped = true; stopBtn.remove(); } }, 'STOP') : null;
+  if (stopBtn) $('#mapwrap').append(stopBtn);
+  const finish = () => { if (stopBtn) stopBtn.remove(); };
+  // click through this turn's messages, one every o.every seconds, then go on
+  const clickThrough = (next) => {
+    showMessages();
+    const tick = () => {
+      if (o.stopped || !G || UI.modal) { finish(); return; }
+      if (UI.msgIdx >= UI.inbox.length) { next(); return; }
+      UI.msgIdx++; renderMsg(); draw();
+      setTimeout(tick, o.every * 1000);
+    };
+    setTimeout(tick, o.every * 1000);
+  };
   const step = () => {
-    if (!G || G.over || n++ >= o.turns || UI.modal) { renderMsg(); return; }
+    if (o.stopped) { finish(); renderMsg(); return; }
+    if (!G || G.over || n++ >= o.turns || UI.modal) { finish(); renderMsg(); return; }
     const before = HO.save(G);
     me().auto = o.computer;
-    if (!playTurn('Auto play', before)) return;
-    me().auto = false; awardMasterPoints(o.computer); recordHall(); save();
+    if (!playTurn('Auto play', before)) { finish(); return; }
+    me().auto = false; awardMasterPoints(o.computer); awardGameCenter(); recordHall(); save();
     renderPanel(); draw();
     const stop = me().inbox.some(m => (o.won && isBattleNews(m) && wonBattle(m)) || (o.lost && isBattleNews(m) && !wonBattle(m)) || (o.news && !m.quiet && !isBattleNews(m) && !m.chat));
     $('#title').textContent = `${me().name} in ${G.opts.galaxy || 'Milky Way'} in ${G.year}${titleTag()} (auto play)`;
-    if (stop || G.over) { showMessages(); return; }
+    if (stop || G.over) { finish(); showMessages(); return; }
+    if (o.every > 0) { clickThrough(step); return; }
     setTimeout(step, 120);
   };
   step();
@@ -2032,7 +2473,7 @@ function openWinWindows(done) {
   if (rs.nameAStar && rs.nameAStar.when === 'win' && !G.starNamed) { openNameStar(() => { G.starNamed = true; save(); if (done) done(); }); return; }
   if (done) done();
 }
-function openNameStar(done) {
+function openNameStar(done, cancelled) {
   const NS = HO.rules(G).nameAStar, id = G.rules; if (!NS) return;
   const inp = el('input', { name: 'star', maxlength: NS.max || 7, autocomplete: 'off', 'aria-label': 'Star name' });
   const err = el('p', { class: 'note', role: 'alert' });
@@ -2048,7 +2489,7 @@ function openNameStar(done) {
     toast(NS.use ? `“${n}” will be among the stars of your next galaxies.` : `“${n}” has been kept.`);
     finish();
   } }, el('p', null, NS.text), el('label', null, el('span', null, 'Star name'), inp), err,
-    el('div', { class: 'btns right' }, el('button', { type: 'button', class: 'quiet', onclick: finish }, 'Cancel'), el('button', { type: 'submit' }, 'OK')));
+    el('div', { class: 'btns right' }, el('button', { type: 'button', class: 'quiet', onclick: () => { if (cancelled) cancelled(); finish(); } }, 'Cancel'), el('button', { type: 'submit' }, 'OK')));
   modal('Name a Star', f, { cls: 'small', sticky: true });
 }
 // Force End Turn (rs.forceEndTurn, Mac 2.0.1): with several players, marks
@@ -2131,6 +2572,12 @@ function prefsAutoPlay() {
   return el('fieldset', { class: 'opts' }, el('legend', null, 'Auto play'), s.box);
 }
 
+// A version whose rules have a thing but whose players had no command for it:
+// rs.surrenderCommand and rs.chatCommand false (iOS 1.2.9: no Surrender and no
+// Send Message, though the computers still send messages): the Galaxy menu
+// leaves the command out. Left out: the command shows with its feature.
+const COMMAND_FLAGS = { surrender: 'surrenderCommand', chat: 'chatCommand' };
+const commandShown = (feat) => !!G && HO.feature(G, feat) && HO.rules(G)[COMMAND_FLAGS[feat]] !== false;
 // ----- the Ho menu: this version, skin, sounds, modern conveniences -----
 // Each version plays as it was released; the conveniences a player may add
 // are choices here, and can be changed in the middle of a game.
@@ -2567,6 +3014,11 @@ function newGameDialog() {
   const refresh = () => {
     const d = Object.fromEntries(new FormData(f).entries());
     const k = kindOf(d.rules);
+    // a ruleset's own New Game window (each read where it is used):
+    // rs.optionBoxes false: no Alliances, Luck or Novas boxes, all on (iOS);
+    // rs.anyComputers false: no "Any (1-8)" (Palm OS, iOS); rs.iqStep: the IQ
+    // slider's step (iOS: 10); rs.maxHumans: how many people may play (iOS: 1)
+    const ngr = HO.RULESETS[d.rules] || {};
     const palm = d.rules === 'palm', orig = k === 'original', dos = k === 'dos', w95 = k === '405', mac3 = k === '301', mac12 = k === '12';
     // the Claude rules' own settings show only for them (not for any ruleset the window doesn't know)
     claudeBox.hidden = k !== 'claude'; origBox.hidden = !orig; dosBox.hidden = !dos; w95Box.hidden = !w95; mac3Box.hidden = !mac3; mac12Box.hidden = !mac12; startSel.hidden = dos || w95 || mac3 || mac12;
@@ -2582,14 +3034,23 @@ function newGameDialog() {
     for (const o of csel.options) if (/^\d+$/.test(o.value) && +o.value > 8) o.hidden = !w95 && !mac3;
     if (!w95 && !mac3 && +csel.value > 8) csel.value = '8';
     // Palm OS 5 has no "Any" choice for the computers, and alliances, luck and novas are always on
-    csel.querySelector('option[value=any]').hidden = palm;
-    if (palm && csel.value === 'any') csel.value = '4';
-    const nh = +d.humans || 1;
+    const noAny = palm || ngr.anyComputers === false, noBoxes = palm || ngr.optionBoxes === false;
+    csel.querySelector('option[value=any]').hidden = noAny;
+    if (noAny && csel.value === 'any') csel.value = '4';
+    // the IQ in steps (iOS: 50, 60, … 200)
+    const iq = f.querySelector('input[name=o_iq]'), step = String(ngr.iqStep || 1);
+    if (iq.step !== step) { iq.step = step; iq.value = String(Math.round(+iq.value / +step) * +step); iq.nextElementSibling.textContent = iq.value; }
+    // how many people may play on this computer (iOS: one)
+    const hsel = f.querySelector('select[name=humans]'), maxH = ngr.maxHumans || 6;
+    for (const o of hsel.options) o.hidden = +o.value > maxH;
+    if (+hsel.value > maxH) hsel.value = String(maxH);
+    hsel.closest('label').hidden = maxH < 2;
+    const nh = Math.min(+d.humans || 1, maxH);
     for (const l of seats.querySelectorAll('[data-seat]')) l.hidden = +l.dataset.seat > nh;
     f.querySelector('select[name=computers] option[value="0"]').disabled = nh < 2;
     if (nh < 2 && d.computers === '0') f.querySelector('select[name=computers]').value = '1';
     const claudeR = k === 'claude';
-    f.querySelector('fieldset.opts').hidden = (!orig && !w95 && !mac3 && !claudeR) || palm;
+    f.querySelector('fieldset.opts').hidden = (!orig && !w95 && !mac3 && !claudeR) || noBoxes;
     f.querySelector('input[name=novas]').closest('label').hidden = w95 || mac3; // 4.0.5 and 3.0.1 always have novas
     f.querySelector('input[name=luck]').closest('label').hidden = mac3; // 3.0.1 always has battle luck
     for (const o of f.querySelectorAll('.slider output')) { const inp = o.previousElementSibling; if (!o.querySelector('small')) o.textContent = inp.value; }
@@ -2613,7 +3074,9 @@ function newGameDialog() {
     const d = Object.fromEntries(new FormData(f).entries());
     localStorage.setItem('ho5.name', d.name); localStorage.setItem('ho5.rules', d.rules);
     if (d.computers === 'any') d.computers = String(1 + Math.floor(Math.random() * 8));
-    const nh = +d.humans || 1;
+    const ngr = HO.RULESETS[d.rules] || {};
+    const nh = Math.min(+d.humans || 1, ngr.maxHumans || 6);
+    if (ngr.optionBoxes === false) { d.alliances = d.luck = d.novas = 'on'; } // no boxes: all on
     const humans = nh > 1 ? [{ name: d.name || 'Player 1', female: d.female === '1' }] : null;
     for (let i = 2; i <= nh; i++) { humans.push({ name: d['h' + i] || 'Player ' + i, female: d['hf' + i] === '1' }); localStorage.setItem('ho5.name' + i, d['h' + i] || ''); }
     if (nh < 2 && d.computers === '0') d.computers = '1';
@@ -2682,17 +3145,17 @@ function save() { if (!G) return; try { localStorage.setItem('ho5.save', HO.save
 // ---------- menus ----------
 function setupMenus() {
   const menus = {
-    Game: [['New game…', newGameDialog], ['Players and history', () => G && openPlayers()], ['Auto-play this turn', () => { if (!G || G.over) return; me().auto = true; doEndTurn(); me().auto = false; }], ['Auto play…', () => G && !G.over && (hotSeat() ? toast('Auto play is for one-player games.') : openAutoPlay())], ['Preferences…', openPrefs], ['Rank history…', openRanks, () => !G || hasRanks(G)],
+    Game: [['New game…', newGameDialog], ['Players and history', () => G && openPlayers()], ['Auto-play this turn', () => playOneTurn()], ['Auto play…', () => G && !G.over && (hotSeat() ? toast('Auto play is for one-player games.') : openAutoPlay())], ['Preferences…', openPrefs], ['Rank history…', openRanks, () => !G || hasRanks(G)], ['Rank and Game Center…', openGameCenter, () => !!(HO.RULESETS[rulesId()] || {}).gameCenter],
       ['Master Point List…', () => openMasterList(), () => hasHall(G)], ['Hall of Fame…', () => openHall('fame'), () => hasHall(G)], ['Hall of Shame…', () => openHall('shame'), () => hasHall(G)], ['-'], ['Quit to title', () => { save(); Sound.play(7002); G = null; renderPanel(); draw(); $('#panel').innerHTML = ''; $('#msg').innerHTML = ''; titleScreen(); }]],
     Ships: [['Build ships at selected colony…', () => { if (G && UI.sel != null && G.stars[UI.sel].owner === ME) openBuild(UI.sel); else toast('Select one of your colonies first.'); }], ['Review battle…', () => G && openBattleList()], ['List all fleets…', () => G && openFleetList()],
       [() => scrapWords('fleet')[G && curFleet() && curFleet().scrap301 ? 1 : 0], () => { if (!G || G.over) return; const f = curFleet(); if (f) toggleScrapFleet(f); else toast('Select one of your fleets first.'); }, () => marksScrap()],
       ['Scrap ship types…', () => G && openScrapTypes()], ['Next fleet', nextFleet]],
     Galaxy: [['Players and alliances…', () => G && openPlayers()], ['List explored stars…', () => G && openStarList()],
       ['Give money or metal…', () => G && !G.over && openGive(), 'gifts'],
-      ['Send a message…', () => G && !G.over && openChat(), 'chat'],
+      ['Send a message…', () => G && !G.over && openChat(), () => commandShown('chat')],
       ['Dip into savings…', () => G && !G.over && openDip(), 'dip'],
       ['-'],
-      [() => (G && me().surrenderTo != null ? 'Take back surrender' : 'Surrender…'), () => G && !G.over && openSurrender(), 'surrender'],
+      [() => (G && me().surrenderTo != null ? 'Take back surrender' : 'Surrender…'), () => G && !G.over && openSurrender(), () => commandShown('surrender')],
       [() => (G && me().armageddon ? 'Turn off the armageddon device' : 'Armageddon device…'), () => G && !G.over && toggleArmageddon(), 'armageddon'],
       ['Radical research…', () => openRadicalHand(), () => !!(G && (HO.rules(G).radicalHand || {}).menu)],
       ['Force end turn…', () => forceEndTurn(), () => !!(G && HO.rules(G).forceEndTurn && hotSeat())]],

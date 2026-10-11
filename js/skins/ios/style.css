@@ -1,0 +1,78 @@
+/* Spaceward Ho! — iOS 1.2.9 skin: the classic page laid out as the app's
+   landscape screen (the map filling it, the sidebar at the right, the
+   planet's HUD bar at the top) in the app's own art: navy panels with light
+   blue edges (fleet-background, dialog-background, message_bar,
+   button-empty), the green selection ring and green names. The Retina art
+   is drawn at half size. The system's pieces (alerts, action sheets,
+   switches, fields, sliders, the fonts) are the OS look's (js/os/ios10.css,
+   the default, or ios6.css). */
+@import url("../classic/style.css");
+:root {
+  --hat: #3fe03f; --gold: #f6d23a; --space: #000; --neg: #ff5a4a;
+  --west: var(--ui);
+  --navy: #07083d; --navy2: #10137a; --rim: #4fb8f2;
+}
+body { background: #000; }
+/* the HUD at the top: the menus and, at the right, the bar the app shows a
+   planet's money, population, temperature, gravity and metal in (HUD-left,
+   HUD-right): green on navy with a light blue edge */
+html.skin-ios #menubar { background: #000; border-bottom: 0; box-shadow: none; height: 32px; padding: 0 6px; gap: 4px; }
+html.skin-ios #menubar .logo { color: var(--hat); font: bold 15px var(--ui); }
+html.skin-ios .mbtn { color: #dfe9ff; border-radius: 6px; }
+html.skin-ios .mbtn:hover, html.skin-ios .mbtn:focus-visible { background: var(--navy2); color: #fff; }
+html.skin-ios #title { color: #4cf04c; background: linear-gradient(#1b2a9a, #0a0f5e); border: 1px solid var(--rim); border-radius: 10px; padding: 1px 12px; font: 12px var(--ui); margin-right: 2px; max-width: 60%; }
+/* the sidebar at the right (the app's buttons and planet list) */
+html.skin-ios #main { grid-template-columns: minmax(0, 1fr) 300px; }
+html.skin-ios #panel { order: 2; background: #000; border-right: 0; border-left: 1px solid #1b2a9a; color: #e8ecff; padding: 6px; }
+html.skin-ios #mapwrap { order: 1; }
+html.skin-ios .box { background: linear-gradient(#0a0c55, #05062e); border: 2px solid var(--rim); border-radius: 12px; box-shadow: inset 0 0 6px rgba(79,184,242,.35); color: #e8ecff; padding: 7px 9px; }
+html.skin-ios .box h3 { color: #fff; font: 600 14px var(--ui); }
+html.skin-ios .box h4 { color: #bcd2ff; }
+html.skin-ios .planet h3 { color: var(--hat); font-size: 16px; }
+html.skin-ios .note, html.skin-ios .sub, html.skin-ios .bval { color: #9fb2e0; }
+html.skin-ios .kv.neg b, html.skin-ios .warn { color: var(--neg); }
+html.skin-ios .ppic img { image-rendering: auto; }
+html.skin-ios .ppic .phat { left: -4px; top: -16px; width: 64px; }
+/* the budget bars: the app's colours (Savings orange, Tech magenta, the
+   colonies blue, the technologies cyan) on a dark track with white rules */
+html.skin-ios .track { background: #02031e; border: 1px solid #3a4cb0; border-radius: 2px; height: 14px; }
+html.skin-ios .fill { background: #1638ff; }
+html.skin-ios .fill.tech { background: #ff22ff; }
+html.skin-ios .fill.sav { background: #ff6a10; }
+html.skin-ios .fill.tbar { background: #18c8e8; }
+html.skin-ios .barrow.loss .fill { background: #8a1a1a; }
+html.skin-ios .fleets { border-top-color: #2a3a9a; }
+html.skin-ios .frow.sel { background: rgba(79,184,242,.18); border-color: var(--rim); border-radius: 8px; }
+html.skin-ios .frow.enemy .ftext div:first-child { color: #ff7a7a; }
+html.skin-ios .shippic { image-rendering: auto; }
+/* messages: the message bar's navy square with its light blue rim */
+html.skin-ios .card { background: linear-gradient(#11147a, #070940); color: #fff; border: 2px solid var(--rim); border-radius: 14px; box-shadow: 0 0 10px rgba(79,184,242,.45); }
+html.skin-ios .card .icon { width: 40px; image-rendering: auto; }
+html.skin-ios .count { color: #9fb2e0; }
+/* End Turn: the app's square navy button (button-empty) with its words */
+html.skin-ios .clock { background: linear-gradient(160deg, #2b2f9a 0%, #0b0c4a 55%, #03041c 100%); color: #fff; border: 2px solid var(--rim); border-radius: 12px; box-shadow: 0 0 6px rgba(79,184,242,.5); font: 600 20px/1.05 var(--ui); padding: 8px 14px; }
+html.skin-ios .clock .face { display: none; }
+html.skin-ios .clock:hover { background: linear-gradient(160deg, #3a3fc0 0%, #12146a 55%, #05062a 100%); }
+/* the game's own windows on dialog-background (alerts are the OS look's) */
+html.skin-ios .win:not(.alert) { background: linear-gradient(#05072b, #0b1270); border: 3px solid var(--rim); border-radius: 22px; box-shadow: 0 0 18px rgba(79,184,242,.5); color: #eef2ff; }
+html.skin-ios .win:not(.alert) .wtitle { background: none; border: 0; color: #fff; }
+html.skin-ios .win:not(.alert) .wtitle span { background: none; color: #fff; }
+html.skin-ios .win:not(.alert) .sub, html.skin-ios .win:not(.alert) .note, html.skin-ios .newgame label span { color: #a9bce8; }
+html.skin-ios .win:not(.alert) .ptable td { border-bottom-color: #26357e; }
+html.skin-ios .win:not(.alert) .drow { border-bottom-color: #26357e; }
+html.skin-ios .designer { background: rgba(0,0,0,.25); border: 1px solid #2a3a9a; border-radius: 10px; color: #eef2ff; }
+html.skin-ios .preview { background: #000; border-radius: 8px; }
+html.skin-ios .ptable tr.click:hover { background: rgba(79,184,242,.15); }
+/* the title: the welcome screen, black */
+html.skin-ios #titlescreen { background: #000; }
+html.skin-ios .tcard h1 { display: none; } /* the name is in the picture */
+html.skin-ios .tcard .by { color: #9fb2e0; margin-bottom: 10px; }
+html.skin-ios #tframe { width: min(400px, 80vw, calc((100vh - 150px) * 4 / 3)); min-width: 200px; background: #000; }
+html.skin-ios .tbtns { margin-top: 10px; }
+html.skin-ios .tsplash .wtitle { display: none; }
+html.skin-ios .tsplash { background: #000; border: 2px solid var(--rim); border-radius: 14px; overflow: hidden; }
+html.skin-ios .credit { color: #8090c0; }
+@media (max-width: 760px) {
+  html.skin-ios #main { grid-template-columns: 1fr; }
+  html.skin-ios #panel { border-left: 0; border-top: 1px solid #1b2a9a; }
+}

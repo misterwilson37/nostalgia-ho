@@ -1,0 +1,202 @@
+// Spaceward Ho! web remake — the iOS skin (see js/skins.js)
+//
+// The art, sounds and look of Spaceward Ho! 1.2.9 for iPhone and iPad (Ariton
+// Technologies, 2012; this build 2017) on top of the classic skin's page: this
+// file says which of the app's pictures go where (window.HOTHEME, read by
+// js/skins/classic/ui.js), then loads the classic skin. The pictures and
+// sounds come from the app bundle (tools/extract/ios.py, assets/skins/ios/);
+// almost all of them are Retina (@2x, -hd) pictures, drawn here at half their
+// size. Where each is used was read from the app's code (docs/ios-findings.md,
+// "Art and sound"); what wasn't read is marked as a guess. The app is
+// landscape only, the map filling the screen with a sidebar of buttons at the
+// right; the page keeps the classic layout with the panel moved to the right
+// (style.css). A finger gets the app's gestures in every skin (ui.js, "touch").
+(function () {
+'use strict';
+const P = 'ios:';
+const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+const trunc = Math.trunc;
+
+const images = {
+  p3030: 'Game_You_Won', p3040: 'Game_You_Lost', // the end of the game
+  haloAlly: 'halo1', // an ally's colony (StarNode's halo)
+};
+// the report pictures: 5.0.5's message pictures 9000-9050 redrawn at 80 x 80
+// (+[MessageNode reportIcon:] builds "report_icon-%ld")
+for (let n = 0; n <= 50; n++) images['m' + (9000 + n)] = 'report_icon-' + n;
+// hats: your colonies by how they pay (the classic skin's rows: paying, then
+// losing money on a good, a semi-habitable and a hostile planet) are
+// player_<row>_<m|f>; another player's, enemy_<hat>_<m|f> (16 hats)
+for (let row = 0; row < 4; row++) for (const f of [0, 1]) images['white' + row + '_' + f] = `player_${row}_${f ? 'f' : 'm'}`;
+for (let n = 0; n < 16; n++) for (const f of [0, 1]) images['bad' + n + '_' + f] = `enemy_${n}_${f ? 'f' : 'm'}`;
+// fleet markers: fleet_dots_<self|self_unfueld|self_old|others>_<class>_<count>,
+// the classic skin's four sets of your own (plain, not fully fuelled, old,
+// both) and everyone else's; the app has no "old and unfuelled" set, so that
+// one is the old set (a guess)
+const DOT_SET = ['self', 'self_unfueld', 'self_old', 'self_old', 'others'];
+for (let set = 0; set < 5; set++) for (let t = 0; t < 7; t++) for (let b = 0; b < 4; b++) images[`dot${set}_${t}_${b}`] = `fleet_dots_${DOT_SET[set]}_${t}_${b}`;
+
+// The planet (-[PlanetNode update:temp:metal:] 0x100090e58): one of seven
+// planets by its gravity against your home's (the 5.0.5 sizes: 252, 201,
+// 126, 76, 51, 39 per cent), "_mined" below 100 metal; over a hot one
+// (720 + its temperature less your home's, in tenths, over 770) the hot cover
+// at min(100, (T - 770) / 30) x 1.5 / 255 opacity; over a cold one (under
+// 650) an ice cover; with 100 metal or more, boulders. Which ice cover and
+// which boulders the app picks wasn't read (the format strings' arguments):
+// here the colder, the bigger the caps (ice_cover0-4 by (650 - T) / 150),
+// and boulder_01-05 by 5.0.5's metal steps (1,000, 2,500, 5,000, 10,000).
+// Each cover is cut to the planet's shape. Drawn at 120 pixels (the 240
+// pixel Retina art at half size).
+const SIZE = 120;
+const cache = {};
+function row(p, g) {
+  const pct = trunc(Math.round(g * 100) * 100 / Math.max(1, Math.round(p.homeG * 100)));
+  return [252, 201, 126, 76, 51, 39].filter(v => pct < v).length;
+}
+function planetPic(IMG, p, src) {
+  const r = row(p, src.g), mined = src.metal < 100;
+  const T = Math.round(src.t * 10) - Math.round(p.homeT * 10) + 720;
+  const hot = T > 770 ? Math.min(100, trunc((T - 770) / 30)) * 1.5 / 255 : 0;
+  const ice = T < 650 ? Math.min(4, trunc((650 - T) / 150)) : -1;
+  const rock = mined ? 0 : 1 + [1000, 2500, 5000, 10000].filter(v => src.metal >= v).length;
+  const key = [r, mined, Math.round(hot * 100), ice, rock].join(':');
+  if (cache[key]) return cache[key];
+  const base = IMG[P + `planet_${r}${mined ? '_mined' : ''}`];
+  if (!base || !base.width) return null;
+  const c = document.createElement('canvas'); c.width = c.height = SIZE;
+  const x = c.getContext('2d');
+  x.drawImage(base, 0, 0, SIZE, SIZE);
+  const over = (im, alpha) => {
+    if (!im || !im.width) return;
+    const t = document.createElement('canvas'); t.width = t.height = SIZE;
+    const tx = t.getContext('2d');
+    tx.globalAlpha = alpha; tx.drawImage(im, 0, 0, SIZE, SIZE); tx.globalAlpha = 1;
+    tx.globalCompositeOperation = 'destination-in'; tx.drawImage(base, 0, 0, SIZE, SIZE);
+    x.drawImage(t, 0, 0);
+  };
+  if (rock) over(IMG[P + 'boulder_0' + rock], 1);
+  if (hot) over(IMG[P + 'hot_cover'], hot);
+  if (ice >= 0) over(IMG[P + 'ice_cover' + ice], 1);
+  return (cache[key] = c);
+}
+
+// Ships: the app's ship sheet is 5.0.5's ship sheet (PICT 11000) redrawn at
+// twice the size and cut into parts (ship-engine-n, ship-middle-n,
+// ship-weapon-n, ship-satellite-n, the colony, tanker and dreadnought bodies
+// and the special designs), so a ship is put together as the classic skin
+// builds it (FUN_100ad750), every distance doubled.
+const SPECIAL = { bio: ['bio-1', 'bio-2', 'bio-3'], dread: ['dreadnought-1', 'dreadnought-2'], fighter: ['fighter-1', 'fighter-2'], satellite: ['satellite-1', 'satellite-2', 'satellite-3', 'satellite-4'] };
+function special(d) {
+  const { R, V, W, S, M } = d, t = d.type;
+  if (t === 'bio') return SPECIAL.bio[W < 7 ? 0 : (W > 12 && W < 16) ? 1 : 2];
+  if (t === 'scout' && W === 1) return 'scout-1';
+  if (t === 'dread' && W > 30) return SPECIAL.dread[0];
+  if (t === 'dread' && W === 8 && R > 10 && R < 14 && M > 1) return SPECIAL.dread[1];
+  if ((t === 'fighter' || t === 'decoy') && W < 9 && V > 5) return SPECIAL.fighter[0];
+  if ((t === 'fighter' || t === 'decoy') && W === 12 && S < 11) return SPECIAL.fighter[1];
+  if (t === 'satellite' && W === 5 && S > 3 && S < 7) return SPECIAL.satellite[0];
+  if (t === 'satellite' && W === 15 && S > 13 && S < 17) return SPECIAL.satellite[1];
+  if (t === 'satellite' && W < 9 && S > 9 && S < 15) return SPECIAL.satellite[2];
+  if (t === 'satellite' && S < 5 && W > 15 && W < 21) return SPECIAL.satellite[3];
+  return null;
+}
+function shipPic(d, IMG, rusty) {
+  const im = (n) => IMG[P + n];
+  const part = (k, v) => im(`ship-${k}-${clamp(v, 0, 29)}`);
+  const ops = []; // [picture, x, y] around the ship's centre, in Retina pixels
+  const sp = special(d);
+  if (sp) { const p = im('ship-special-' + sp); if (!p || !p.width) return null; ops.push([p, -trunc(p.width / 2), -trunc(p.height / 2)]); }
+  else if (d.type === 'satellite') ops.push([part('satellite', d.W - 1), -40, -40]);
+  else {
+    const eng = part('engine', (d.R || 0) + (d.V || 0) - 8), nose = part('weapon', d.W - 1);
+    if (d.type === 'dread') {
+      ops.push([im('ship-dreadnaught-middle'), -130, -88]);
+      for (const [x, y] of [[104, -84], [104, 22], [130, -34]]) ops.push([nose, x, y]);
+      for (const [x, y] of [[-182, -90], [-182, 16], [-208, -40]]) ops.push([eng, x, y]);
+    } else {
+      const body = d.type === 'colony' ? [im('ship-colony-middle'), -70, -56] : d.type === 'tanker' ? [im('ship-tanker-middle'), -64, -44] : [part('middle', d.S - 1), -40, -40];
+      const l = body[1], r = body[1] + (body[0] ? body[0].width : 80);
+      ops.push(body, [nose, r, -40], [eng, l - 80, -40]);
+    }
+  }
+  if (ops.some(o => !o[0] || !o[0].width)) return null;
+  let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+  for (const [p, x, y] of ops) { x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x + p.width); y1 = Math.max(y1, y + p.height); }
+  // half size: the Retina parts on a canvas half as big
+  const c = document.createElement('canvas'); c.width = Math.ceil((x1 - x0) / 2); c.height = Math.ceil((y1 - y0) / 2);
+  const cx = c.getContext('2d');
+  for (const [p, x, y] of ops) {
+    if (!rusty || !im('ship-rust')) { cx.drawImage(p, (x - x0) / 2, (y - y0) / 2, p.width / 2, p.height / 2); continue; }
+    // a design far behind its owner's research: the rust laid over each part (as 5.0.5's sheet)
+    const t = document.createElement('canvas'); t.width = p.width; t.height = p.height;
+    const tx = t.getContext('2d'); tx.drawImage(p, 0, 0);
+    tx.globalCompositeOperation = 'source-atop'; tx.drawImage(im('ship-rust'), 0, 0);
+    cx.drawImage(t, (x - x0) / 2, (y - y0) / 2, p.width / 2, p.height / 2);
+  }
+  return c;
+}
+
+window.HOTHEME = {
+  dir: 'assets/skins/ios/',
+  prefix: P,
+  // its sounds are 5.0.5's recordings as MP3s: SOUNDS.ios in js/skins.js
+  images,
+  select: P + 'ring', // the green ring round the selected star
+  satRing: 'rgba(200,215,235,0.85)', // the satellites' grey oval (fleet_sat_oval), as a ring
+  battlePlanet: P + 'ship-planet',
+  battleBg: null,
+  endTurnKey: null,
+  // Stars (StarNode): an unexplored star is the white ball with a question
+  // mark, one your fleet is on its way to has the exclamation mark (the help's
+  // "sending scouts" picture), one where only a battle was seen the X (a
+  // guess); a star turning red is supernova_going1-3, the explosion a frame
+  // of the supernova, the wreck supernovaed. Planets: planetPic above.
+  starLook(look, { p, s, k, IMG }) {
+    const b = look.base, B = (n) => ({ base: P + n, hat: look.hat });
+    if (b === 'unknown') return B('planet-question');
+    if (b === 'soon') return B('planet-exclamation');
+    if (b === 'battle') return B('planet-x');
+    if (/^nova\d$/.test(b)) return B('supernova_going' + Math.min(3, 1 + trunc(+b.slice(4) / 2)));
+    if (b === 'nova12') return B('supernova10');
+    if (b === 'nova18') return B('supernovaed');
+    const src = look.hat && s.owner === p.id ? s : k;
+    if (!src || src.g == null) return look;
+    const pic = planetPic(IMG, p, src);
+    return pic ? { base: look.base, pic, hat: look.hat } : look;
+  },
+  shipPic(d, IMG, rusty) { return shipPic(d, IMG, rusty); },
+  // the title: the app's welcome screen, its name down the side and the
+  // cowboy planet (hoguy_0-19) twirling his six-gun
+  title(frame, IMG, Sound) {
+    const name = IMG[P + 'spacewardho_name'], guy = (n) => IMG[P + 'hoguy_' + n];
+    if (!name || !name.width || !guy(0) || !guy(0).width) return false;
+    frame.width = 400; frame.height = 300;
+    const x = frame.getContext('2d');
+    const paint = (n) => {
+      x.fillStyle = '#000'; x.fillRect(0, 0, 400, 300);
+      x.drawImage(name, 8, 4, name.width * 292 / name.height, 292);
+      x.fillStyle = '#fff'; x.fillRect(84, 20, 300, 260);
+      const g = guy(n); if (g) x.drawImage(g, 84 + (300 - g.width * 1.25) / 2, 20 + (260 - g.height * 1.25) / 2, g.width * 1.25, g.height * 1.25);
+    };
+    paint(0);
+    const ts = document.getElementById('titlescreen'), gen = frame._gen = (frame._gen || 0) + 1;
+    let i = 0;
+    const tick = () => {
+      if (!ts || ts.hidden || frame._gen !== gen) return;
+      paint(i % 20); if (i % 20 === 10) Sound.play(7023);
+      i++;
+      if (i > 60) { paint(0); Sound.play(7022); i = 0; setTimeout(tick, 4000); return; }
+      setTimeout(tick, 110);
+    };
+    setTimeout(tick, 900);
+    return true;
+  },
+  page(doc) {
+    const c = doc.querySelector('#titlescreen .credit');
+    if (c) c.textContent = 'A personal web remake with the art and sounds of Spaceward Ho! 1.2.9 for iPhone and iPad (Ariton Technologies, 2012). Art by Howard Vives and Bob Van de walle.';
+    const l = doc.querySelector('#menubar .logo'); if (l) l.textContent = 'Ho!';
+    doc.documentElement.classList.add('skin-ios');
+  },
+};
+if (!window.HOSKINS_INLINE) document.write('<script src="js/skins/classic/ui.js"><\/script>');
+})();

@@ -1,0 +1,134 @@
+/* Spaceward Ho! — OS look "iOS 6": the system the app was launched on
+   (March 2012, iOS 5; iOS 6 that autumn), before iOS 7's flat look: Helvetica
+   Neue, the blue-grey navigation bar with its bordered bar buttons (the app
+   hides the status bar, so there is none), the pinstriped grouped background,
+   the dark blue glassy alert (UIAlertView) with its white rim and glossy
+   buttons, the black action sheet of white glossy buttons for the menus, the
+   blue ON / grey OFF switch (UISwitch: the Allow Debt switch, and every
+   check box), the blue-filled slider with its glossy knob, the bezelled text
+   field and the segmented control. All drawn in CSS and inline SVG. The iOS
+   skin's second look. */
+@import url("base.css");
+:root {
+  --plat: #c5ccd4; --plat2: #fff; --edge: #acb3bb; --ink: #000; --sub: #4c566c; --hi: #2a68c8;
+  --ui: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --pin: repeating-linear-gradient(90deg, #c5ccd4 0 5px, #cbd2d8 5px 7px);
+  --navbar: linear-gradient(#b0bccd 0%, #889bb3 50%, #8195af 51%, #6d84a2 100%);
+  --barbtn: linear-gradient(#8fa3bf 0%, #6b84a6 50%, #5e7a9f 51%, #4a6c9b 100%);
+  --gloss: linear-gradient(#fff 0%, #f3f3f3 50%, #e8e8e8 51%, #e0e0e0 100%);
+  --blue: linear-gradient(#5aa2f8 0%, #2b7de1 50%, #1a6bd4 51%, #1e72dc 100%);
+}
+body { font-size: 13px; }
+/* the navigation bar: blue-grey, the words white with a shadow above them */
+#menubar { background: var(--navbar); border-top: 1px solid #cdd5df; border-bottom: 1px solid #2d3642; height: 34px; padding: 0 6px; gap: 5px; }
+#menubar .logo { font: bold 17px var(--ui); color: #fff; text-shadow: 0 -1px 0 rgba(0,0,0,.5); letter-spacing: 0; padding: 0 6px; }
+#menubar .logo:hover, #menubar .logo:focus-visible { color: #fff; background: none; }
+.mbtn { font: bold 12px var(--ui); color: #fff; text-shadow: 0 -1px 0 rgba(0,0,0,.5); padding: 4px 9px; border-radius: 5px;
+  background: var(--barbtn); border: 1px solid #375073; box-shadow: inset 0 1px 0 rgba(255,255,255,.3), 0 1px 0 rgba(255,255,255,.25); }
+.mbtn:hover, .mbtn:focus-visible, .mbtn[aria-expanded=true] { background: linear-gradient(#5c7396, #3d5a85); color: #fff; }
+#title { color: #fff; font: bold 13px var(--ui); text-shadow: 0 -1px 0 rgba(0,0,0,.5); }
+/* the menus: an action sheet, white glossy buttons on smoky black */
+.dropdown { top: 32px; min-width: 260px; background: linear-gradient(rgba(40,48,62,.94), rgba(10,14,22,.96)); border: 1px solid #000; border-radius: 8px; padding: 8px 10px;
+  box-shadow: 0 6px 22px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.25); }
+.dropdown button { font: bold 16px var(--ui); color: #000; text-align: center; padding: 8px 12px; margin: 5px 0; border-radius: 8px;
+  background: var(--gloss); border: 1px solid #000; box-shadow: inset 0 1px 0 #fff; text-shadow: 0 1px 0 #fff; }
+.dropdown button:hover, .dropdown button:focus-visible { background: var(--blue); color: #fff; text-shadow: 0 -1px 0 rgba(0,0,0,.4); }
+.dropdown hr { border: 0; border-top: 1px solid rgba(255,255,255,.12); margin: 6px 0; }
+.starmenu .mhead { color: #fff; text-align: center; font: 14px var(--ui); text-shadow: 0 -1px 0 #000; border: 0; padding: 4px 8px 6px; }
+/* the panel and boxes: grouped table sections on pinstripes */
+#panel { background: var(--pin); border-right: 1px solid #8c939b; }
+.box, .designer { background: #fff; border: 1px solid #a6abb2; border-radius: 10px; box-shadow: 0 1px 0 rgba(255,255,255,.75); }
+/* windows: a pinstriped view under a navigation bar */
+.win { background: var(--pin); border: 1px solid #2d3642; border-radius: 6px; box-shadow: 0 8px 30px rgba(0,0,0,.55); overflow: hidden; }
+.wtitle { height: 44px; padding: 0 8px; background: var(--navbar); border-bottom: 1px solid #2d3642; box-shadow: inset 0 1px 0 #cdd5df; }
+.wtitle span { background: none; font: bold 18px var(--ui); color: #fff; text-shadow: 0 -1px 0 rgba(0,0,0,.5); }
+.close { order: 2; width: 26px; height: 26px; border: 1px solid #375073; border-radius: 5px; padding: 0; flex: none;
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='26' height='26'><path d='M9 9l8 8M17 9l-8 8' stroke='white' stroke-width='2.4' stroke-linecap='round'/></svg>") center / 26px no-repeat, var(--barbtn);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.3); }
+.wbody { padding: 14px; }
+/* the alert (UIAlertView): dark blue glass in a white rim, white words, glossy buttons */
+.win.alert { width: 284px; text-align: center; border: 2px solid rgba(255,255,255,.85); border-radius: 10px; color: #fff;
+  background: linear-gradient(rgba(255,255,255,.28) 0, rgba(255,255,255,.06) 48px, transparent 49px), rgba(4,17,57,.88);
+  box-shadow: 0 4px 16px rgba(0,0,0,.65), inset 0 0 6px rgba(160,180,255,.45); }
+.win.alert .wtitle { height: auto; padding: 14px 12px 0; background: none; border: 0; box-shadow: none; justify-content: center; }
+.win.alert .wtitle span { font: bold 17px var(--ui); white-space: normal; }
+.win.alert .close { display: none; }
+.win.alert .wbody { padding: 6px 14px 14px; color: #fff; text-shadow: 0 -1px 0 rgba(0,0,0,.6); font-size: 15px; }
+.win.alert .sub { color: #dfe6ff; }
+.win.alert .btns { justify-content: center; flex-wrap: nowrap; gap: 8px; margin-top: 14px; }
+html .win.alert .btns > button { flex: 1; min-height: 42px; border: 1px solid rgba(0,0,0,.65) !important; border-radius: 6px !important; color: #fff !important; font: bold 17px var(--ui) !important;
+  text-shadow: 0 -1px 0 rgba(0,0,0,.6); background: linear-gradient(rgba(255,255,255,.38), rgba(255,255,255,.14) 50%, rgba(255,255,255,.06) 51%, rgba(255,255,255,.12)) !important;
+  box-shadow: 0 1px 0 rgba(255,255,255,.25), inset 0 1px 0 rgba(255,255,255,.45) !important; padding: 0 8px !important; }
+html .win.alert .btns > button:not(.quiet) { background: linear-gradient(rgba(255,255,255,.55), rgba(255,255,255,.28) 50%, rgba(255,255,255,.18) 51%, rgba(255,255,255,.28)) !important; }
+html .win.alert .btns > button:active { background: rgba(140,170,255,.5) !important; }
+/* buttons: the rounded-rect button, white with blue-grey bold words */
+button:not(.mbtn):not(.close):not(.tbtn):not(.clock):not([role=menuitem]) {
+  background: var(--gloss); color: #385487; border: 1px solid #a5a5a5; border-radius: 9px; padding: 4px 13px; font: bold 14px var(--ui);
+  box-shadow: 0 1px 1px rgba(0,0,0,.12), inset 0 1px 0 #fff; text-shadow: 0 1px 0 #fff;
+}
+button:not(.mbtn):not(.close):not(.tbtn):not(.clock):not([role=menuitem]):not(.quiet) { border: 1px solid #a5a5a5; border-radius: 9px; font-weight: bold; }
+button:not(.mbtn):not(.close):not(.tbtn):not(.clock):not([role=menuitem]):active { background: var(--blue); color: #fff; text-shadow: 0 -1px 0 rgba(0,0,0,.4); }
+button:disabled { opacity: .45; }
+button:focus-visible { outline: 2px solid rgba(42,104,200,.6); outline-offset: 1px; }
+/* the segmented control: grey bezels, the chosen one blue */
+.tbtn { background: linear-gradient(#fdfdfd, #dcdcdc); color: #4c566c; border: 1px solid #8e8e8e; border-radius: 6px; font: bold 12px var(--ui); padding: 3px 10px; text-shadow: 0 1px 0 #fff; }
+.tbtn.on { background: var(--blue); color: #fff; border-color: #1b4f99; text-shadow: 0 -1px 0 rgba(0,0,0,.4); }
+/* the budget bars' troughs */
+.track { height: 12px; background: linear-gradient(#d9d9d9, #f7f7f7); border: 1px solid #8e8e8e; border-radius: 6px; overflow: hidden; box-shadow: inset 0 1px 2px rgba(0,0,0,.3); }
+/* text fields: the bezel, a white field in a rounded inset */
+html input[type=text], html input[type=number], html input:not([type]) {
+  font: 15px var(--ui); color: #000; padding: 5px 8px; border: 1px solid #8e8e8e; border-radius: 6px; background: #fff; box-shadow: inset 0 1px 3px rgba(0,0,0,.4);
+}
+html input[type=text]:focus, html input:not([type]):focus, html input[type=number]:focus { outline: 0; border-color: #2a68c8; }
+html input[type=number] { -moz-appearance: textfield; appearance: textfield; }
+html input[type=number]::-webkit-inner-spin-button, html input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+html select, html .newgame select {
+  -webkit-appearance: none; appearance: none; font: bold 14px var(--ui); color: #385487; cursor: pointer; padding: 4px 26px 4px 9px; min-height: 30px;
+  border: 1px solid #a5a5a5; border-radius: 8px; box-shadow: 0 1px 1px rgba(0,0,0,.12);
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='9' height='13'><path d='M1.5 1.5l6 5-6 5' fill='none' stroke='%23385487' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/></svg>") no-repeat right 9px center / 9px 13px, var(--gloss);
+}
+/* the switch (UISwitch, 77 x 27 points): blue with ON, grey with OFF, a glossy round knob */
+html input[type=checkbox] {
+  -webkit-appearance: none; appearance: none; width: 77px; height: 27px; margin: 0 6px 0 0; padding: 0; flex: none; vertical-align: middle; cursor: pointer;
+  border: 1px solid #9a9a9a; border-radius: 14px; box-shadow: inset 0 2px 3px rgba(0,0,0,.35);
+  background:
+    radial-gradient(circle at 13px 12.5px, #fff 0 8px, #d6d6d6 11px, #a0a0a0 12.5px, transparent 13.5px),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='77' height='27'><text x='49' y='18.5' text-anchor='middle' font-family='Helvetica Neue, Helvetica, Arial' font-weight='bold' font-size='15' fill='%237f7f7f'>OFF</text></svg>") no-repeat center / 77px 27px,
+    linear-gradient(#e2e2e2, #fdfdfd);
+}
+html input[type=checkbox]:checked {
+  border-color: #1b4f99;
+  background:
+    radial-gradient(circle at 63px 12.5px, #fff 0 8px, #d6d6d6 11px, #a0a0a0 12.5px, transparent 13.5px),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='77' height='27'><text x='26' y='18.5' text-anchor='middle' font-family='Helvetica Neue, Helvetica, Arial' font-weight='bold' font-size='15' fill='white'>ON</text></svg>") no-repeat center / 77px 27px,
+    linear-gradient(#0a5ab4, #3c8ff0);
+}
+html input[type=radio] {
+  -webkit-appearance: none; appearance: none; width: 18px; height: 18px; margin: 0 6px 0 0; padding: 0; flex: none; vertical-align: middle; cursor: pointer;
+  border: 1px solid #8e8e8e; border-radius: 50%; background: var(--gloss);
+}
+html input[type=radio]:checked { background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='18' height='18'><path d='M4 9.5l3.5 3.5L14 5' fill='none' stroke='%23385487' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/></svg>") center / 16px no-repeat, var(--gloss); }
+html input[type=checkbox]:disabled, html input[type=radio]:disabled, html input[type=range]:disabled, html select:disabled { opacity: .45; cursor: default; }
+html input[type=checkbox]:focus-visible, html input[type=radio]:focus-visible, html select:focus-visible, html input[type=range]:focus-visible { outline: 2px solid rgba(42,104,200,.6); outline-offset: 2px; }
+/* the slider: a blue-filled groove and a glossy white knob */
+html input[type=range], html .newgame .slider input[type=range] {
+  -webkit-appearance: none; appearance: none; height: 9px; margin: 10px 0; padding: 0; min-width: 0; cursor: pointer;
+  border: 1px solid #5b6f8f; border-radius: 5px; background: linear-gradient(#2a68c8, #6aa6f0); box-shadow: inset 0 1px 2px rgba(0,0,0,.4);
+}
+html input[type=range]::-webkit-slider-thumb, html .tm input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 23px; height: 23px; border-radius: 50%; cursor: pointer; border: 1px solid #8e8e8e;
+  background: radial-gradient(circle at 50% 30%, #fff 0 4px, #f0f0f0 7px, #c8c8c8 11px); box-shadow: 0 1px 3px rgba(0,0,0,.5);
+}
+html input[type=range]::-moz-range-thumb, html .tm input[type=range]::-moz-range-thumb { width: 21px; height: 21px; border-radius: 50%; border: 1px solid #8e8e8e; background: radial-gradient(circle at 50% 30%, #fff, #c8c8c8); }
+html input[type=range]::-moz-range-track { background: transparent; }
+/* terraform / mine and shipbuilding: the groove in two colours */
+html .tm input[type=range] { background: linear-gradient(90deg, #4fa64f 0 var(--split, 50%), #c4683e var(--split, 50%) 100%); }
+html .yard .tm input[type=range] { background: linear-gradient(90deg, #2a68c8 0 var(--split, 0%), #f2f2f2 var(--split, 0%) 100%); }
+.tm .tml { color: #2f6e2f; } .tm .tmr { color: #8a3d22; }
+.newgame .opts { border: 1px solid #a6abb2; border-radius: 10px; background: #fff; }
+/* scroll indicators */
+::-webkit-scrollbar { width: 7px; height: 7px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(0,0,0,.45); border-radius: 4px; border: 1px solid rgba(255,255,255,.35); }
+::-webkit-scrollbar-corner { background: transparent; }
+::-webkit-scrollbar-button { display: none; }
