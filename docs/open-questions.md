@@ -954,8 +954,10 @@ These are what the Palm code does and what the remake now does; they look like s
   bar). Its program names are open as 5.0.5's.
 - Now done: **the auto play settings** (tFRM 1700, `FUN_000713be`): the Friendly and Dig
   In sliders on the Auto play window, used as 5.0.5's (above), with the same open points.
-- **Organize Fleets' pile moves** (`FUN_000790ea`, `FUN_0004af48`; item 10 above): the
-  remake has Group All ("Merge all fleets here") and Split.
+- **Organize Fleets' pile moves** (`FUN_000790ea`, `FUN_0004af48`; item 10 above): not
+  built (`rs.organizeFleets: null`): the Palm's pile move keeps the taking fleet's own fuel
+  and replaces its colonists, so 5.0.5's Group Fleets window would play 5.0.5's rules. The
+  Palm keeps Split… and "Merge all fleets here".
 - **Build Ships' Allow Debt box** (`FUN_0004435a`) and the questions before building more
   than 9 Scouts or Tankers (`FUN_00043754`, tSTL 6004.36-37).
 - **The research bars** dragged per mille like the budget bars (`FUN_00049496`), and
