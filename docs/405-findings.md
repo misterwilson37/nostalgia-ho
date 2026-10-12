@@ -220,6 +220,52 @@ hears each device "was just turned off", and next step "turned on".
 | Every human out | the whole map is shown to them and the computers play on | CONFIRMED (`FUN_0047fb7b`) |
 | Milestones | "Congratulations, %s!   Your population now exceeds %s!" at 1, 2.5, 5, 10, 20 million units, leaving out a colony at star 0 | CONFIRMED (`FUN_0043b243`) |
 
+## Bars and battles (October 2026)
+
+Peter Commons' three notes (the bars' scale, the bars that lock at zero, the ships in
+battles), read in both programs (Windows `SPACEHO.EXE`, Mac 4.0.5 with its routine names):
+
+- **The scale.** Both build the log table: the 77-pixel budget bars (Windows
+  `FUN_0045aa60`, Mac `InitHLogBarAmts` @50924: trunc(10 × (e^(i / 32.11 + 2.302) − 10)),
+  the 78th entry 1,000) and the 50-pixel technology bars (`FUN_00459ba0`,
+  `InitVLogBarAmts` @5000c: i / 20.85, the same curve). The budget bars use it for the
+  mouse and the drawing when a setting says so (Windows `FUN_0045c02c` and `FUN_0045aae1`
+  read SPACEHO.INI's `[prefs] useLogScale`, written back on quitting and read with 1 by
+  default, `FUN_0047d8e8`; Mac `DoHBarClick` @514e2 and `DrawHBarControl` @50a80 read the
+  setup's +0x3c, 1 in 'Stup' 1000 "Default Setup", which nothing in the program writes),
+  otherwise 1,000 × x / 77 with a linear grid. So both draw and drag them on the log scale
+  unless the setting is edited by hand; neither has 3.0.1's click to switch. The
+  technology bars are always on the log scale (`FUN_0045a5d6` called with 2 by the
+  research window; `DoVBarClick` @5060c with 2 from `ClickInTechWin` @18025a). The
+  remake: `rs.barScale` `{ budget: 'log', tech: 'log' }`. CONFIRMED.
+- **The lock** (above, "Dragging a bar"): a colony being abandoned, or a finished one at
+  star 1 or more (the star-0 slip, fixed by the 4.0.5.1 patch); a click on it beeps
+  (Windows `MessageBeep`, Mac `PlaySound`). Savings and Technology are never locked (no
+  Dip Into Savings in 4.0.5). The drawing (`FUN_0045aae1`, `DrawHBarControl`) writes "$"
+  and the income of a finished colony 4 pixels into its empty bar, at any star number,
+  so a finished colony at star 0 says so and can still be dragged. The remake already
+  refused the drag in its rules (`dragShare`); now the bar says so and refuses it too
+  (`rs.barLocked`, `barLocked405`). CONFIRMED.
+- **The battle window** (Mac `ReviewBattle` @6273e, `DrawAllGroups` @6208a,
+  `DrawOneGroup` @6226c, `MakeFleetDescription` @f0c26, disassembled: its decompile
+  fails; STR# 1030; Windows strings 1081-1091 and the formats "%s (%d/%d) %s", "%s %s
+  (%d/%d) %s", "%d %s (%d/%d) %ss" @0x59c48c): headed "Summary of battle", "at %s in %d:",
+  "Round %d" while it runs, and closed with "Congratulations!" "You won the battle!" or
+  "Unfortunately," "you lost the battle…" ("..." on Windows). The duel's two sides are two
+  lists, a group a row 53 pixels high: one ship picture, a bar of the damage done to its
+  next ship (up to 120 pixels), and its words under it, cut to 120 pixels with "…": "N
+  Name (W/S) Classs", "one Name (W/S) Class" (the design's own Weapons and Shields; a decoy
+  "Decoy" to its owner; cut to 39 letters), "1 dead Name (W/S) Class" / "N dead Name (W/S)
+  Classs" (STR# 1030.1-2, by the starting count) once the group is gone; a colony its
+  people, or "%s dead" with the people it had. No owner's name or luck. The remake:
+  `rs.battlePanel` (rules-dos `battlePanel20`, Windows `battlePanelWin`, Mac
+  `battlePanelMac`), the columns headed with the sides' names (the remake's).
+
+What changed in play: nothing in the rules. The bars are on the log scale for the mouse
+and the finger, and a locked bar refuses the drag and says why. Not read: which list is
+drawn on the left (the remake puts the record's first side there) and the Windows
+battle window's own drawing routine (its strings and formats are the Mac's).
+
 ## Computer players (js/ai-405.js)
 
 CONFIRMED: `FUN_0045e8bb` is 3.0.1's `DoComputerTurn` in the same order, and each step

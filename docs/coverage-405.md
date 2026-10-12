@@ -431,3 +431,16 @@ address (— where the Mac has none: Windows-only windows, the planet power inli
 callers, the hit table kept as a resource, debug and dead code). The PowerPC code in the
 data fork is the same program (spot-checked). `docs/405-findings.md` ("Read against the
 Mac 4.0.5") lists what the names corrected and where the Mac differs.
+
+## The bars and the battle window (October 2026)
+
+Read for Peter Commons' notes (`docs/405-findings.md`, "Bars and battles"). Windows:
+`FUN_0045aa60` and `FUN_00459ba0` (the log tables), `FUN_0045c02c` (the budget drag, read
+before for the lock), `FUN_0045a5d6` (the research drag), `FUN_0045aae1` (the drawing),
+`FUN_0047d8e8` / `FUN_0047d859` with "useLogScale" (the setting), the battle strings
+1081-1091. Mac: `InitHLogBarAmts` @50924, `GetHPercBarAmt` @50a40, `DrawHBarControl`
+@50a80, `DoHBarClick` @514e2, `InitVLogBarAmts` @5000c, `DoVBarClick` @5060c,
+`ClickInTechWin` @18025a, `UpdateTechWin` @1800f0, `InitPrefs` @1a0b36 ('Stup' 1000),
+`DrawAllGroups` @6208a, `DrawOneGroup` @6226c, `MakeFleetDescription` @f0c26
+(disassembly). Rules: none changed.
+
