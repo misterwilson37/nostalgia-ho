@@ -2991,7 +2991,7 @@ function openNameStar(done, cancelled) {
     keepStar(NS, id, n);
     toast(NS.use ? `“${n}” will be among the stars of your next galaxies.` : `“${n}” has been kept.`);
     finish();
-  } }, el('p', null, NS.text), el('label', null, el('span', null, 'Star name'), inp), err,
+  } }, el('p', null, NS.text), NS.rule ? el('p', null, NS.rule) : null, el('label', null, el('span', null, NS.label || 'Star name'), inp), NS.hint ? el('p', { class: 'note' }, NS.hint) : null, err,
     el('div', { class: 'btns right' }, el('button', { type: 'button', class: 'quiet', onclick: () => { if (cancelled) cancelled(); finish(); } }, 'Cancel'), el('button', { type: 'submit' }, 'OK')));
   modal('Name a Star', f, { cls: 'small', sticky: true });
 }

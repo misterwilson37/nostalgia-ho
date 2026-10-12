@@ -159,9 +159,13 @@ Item 2 stays because following it needs the skin to go on with no human in the g
 - Now done: **naming a star after a win** (`NameAStar @120a04`, `rs.nameAStar`): clicking
   the winner's report opens Name a Star; the name is kept in this browser (localStorage
   "ho5.stars.12", the program's STR# 2005) and later 1.2 galaxies draw their star names
-  from the list and those names, as `GiveStarsValues` does. Not read: the window's own
-  words and its alert for a name already taken (French in 1.2); the remake shows 4.0.5's
-  words ("You won the game, so you get to name a star.") and 2.0's alert (string 3340).
+  from the list and those names, as `GiveStarsValues` does. The window's own
+  words are read (DLOG/DITL 4050 and DITL 3340 of the French 1.2F: "Vous venez de gagner,
+  alors vous devez donner un nom à une étoile." / "Le nom doit comprendre entre 4 et 7
+  lettres." / "Nouveau nom d'étoile:" / "(Si vous ne voulez pas donner un nom à une étoile,
+  cliquez juste sur OK)." and the alert "Désolé, il y a déjà une Etoile nommée “^0.”
+  Soyons créatifs!") and given in French as they are (`rs.nameAStar` text, rule, label,
+  hint, taken).
 - The preferences for battle speed, showing messages and watching battles, and the
   Explored Planets window.
 
@@ -471,8 +475,11 @@ These are what 3.0.1's code does and what the remake now does; they look like sl
   window opens from the winner's report; a name of 2 to 7 letters not found by Munger in
   STR# 2005 or 1003 is added to the Preferences' STR# 2005 ("ho5.stars.301"), and
   `GiveStarsValues @f246c` draws every star's name from the 191 and those names (settled
-  October 2026: it reads STR# 2005 too, `use: 'pool'`). Still not read: the window's words
-  (4.0.5's) and its alert (2.0's).
+  October 2026: it reads STR# 2005 too, `use: 'pool'`). The window's words are read
+  (DLOG/DITL 4050; the alert is in STR# 4001): "You won the game, so you get to name a
+  star." / "Star names must be 2 to 7 characters long." / "New Star Name:" / "(If you’d rather
+  not name a star, click “OK” with the name blank.)", and the alert "Sorry, there’s already a
+  star named  “^0.” Please pick another name." (`rs.nameAStar` text, rule, label, hint, taken).
 - **The canned-message window** (`SendMessage @140fa2`): the remake's messages are free
   text, of which the computers read "I like …" and "I like planets that are …".
 - **The auto-scrap preference** (old designs past 15, `ScrapFleetsAndTypes`, prefs +0x74).

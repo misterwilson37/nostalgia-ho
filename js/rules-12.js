@@ -370,8 +370,11 @@ E.registerRules('12', Object.assign({}, D, {
   // another counts, letter case too (match 'munger'). The name doesn't go on
   // a star of the game just won: MarkStarNamed @1014e8 only marks the game
   // file (+0x14), so it isn't asked again.
-  nameAStar: { when: 'win', text: 'You won the game, so you get to name a star.', keep: 0, use: 'pool', max: 7, min: 4, match: 'munger',
-    taken: 'Sorry, there’s already a star named ‘%s’.  Please pick another name.' },
+  // CONFIRMED (DLOG/DITL 4050 and DITL 3340 of the French 1.2F, its own words)
+  nameAStar: { when: 'win', keep: 0, use: 'pool', max: 7, min: 4, match: 'munger',
+    text: 'Vous venez de gagner, alors vous devez donner un nom à une étoile.', rule: 'Le nom doit comprendre entre 4 et 7 lettres.',
+    label: 'Nouveau nom d\'étoile:', hint: '(Si vous ne voulez pas donner un nom à une étoile, cliquez juste sur OK).',
+    taken: 'Désolé, il y a déjà une Etoile nommée “%s.” Soyons créatifs!' },
   welcome: WELCOME,
   ai: '12',                // 1.2's own computer players (js/ai-12.js)
   // CONFIRMED (above): the turn is 2.0's (rules-dos economy20, battle20,
