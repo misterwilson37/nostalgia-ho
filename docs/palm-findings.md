@@ -351,6 +351,45 @@ screen.
   remake.
 - **Routes on the map**: 5.0.5's DeterminePath (`FUN_0004c22c`).
 
+## Bars and battles (October 2026)
+
+Peter Commons' three notes (the bars' scale, the bars that lock at zero, the ships in
+battles), read in the Palm code:
+
+- **The scale.** `FUN_00049e32` builds 5.0.5's table in the soft float: for each of the
+  bar's w pixels (control +0x10), trunc(10 × (e^(77 i / w / 32.11 + 2.302) − 10))
+  (`FUN_00044f6a` is e^x; 32.11 is the double 0x40400e147ae147ae), the last 1,000.
+  `FUN_00049db4` gives a share's pixel, `FUN_00049496` puts the pen's pixel through the
+  table (control +0x20), and `FUN_00048e7a` draws the bars and the grid at 100 ... 1,000
+  per mille on it. Budget and technology bars alike (the control's kind, +0x28, 2 or 1).
+  The remake: 5.0.5's `rs.barScale`, for every pointer. CONFIRMED.
+- **The lock.** `FUN_00049f82` is `FUN_1008a030`: a colony being evacuated (colony +0x11),
+  a finished colony (+2 and +4 both −1), Savings while dipping (player +0x20 above 0); a
+  technology bar below 0. A tap on Savings while dipping opens Dip Into Savings
+  (`FUN_00049496` → `thunk_FUN_000741a6`); on another locked bar nothing happens, no
+  sound. `FUN_00048e7a` draws a locked bar without its bar and its words 11 pixels in
+  (`FUN_0004a016`): "Evacuating" (tSTL 6001.31; drawing it also sets the evacuating
+  colony's share to 0, `FUN_00049d66`), the finished colony's income, "-N% " and N % of
+  Ship Savings as a negative number ("-%ld%% ", @0x4a1a0). The remake: `barLockedPalm`.
+  CONFIRMED.
+- **The battle window** (`FUN_00030a80` and its caller @0x30960; the words
+  `FUN_0004b864`, whose decompile fails, from its disassembly): "Review Battle at %s in
+  %ld" (6003.12). Two columns, x 1 and 90, by the group's side byte (5.0.5's: the
+  viewer's side on the left), 140 pixels of rows showing at a time, scrolled. Each group
+  is one ship picture (`FUN_000310a6`, no pile), shaded by its damage (`FUN_0001445c`
+  clipped to the damage), its owner's hat, over it the owner's name, "+name" when the
+  side's luck is good and "-name" when bad ("+%s", "-%s" @0x30a78), and under it the
+  words: "%ld %s (%ld/%ld)", "1 %s (%ld/%ld)", "%s (%ld/%ld)" (@0x4b920) with the class's
+  name (the list read with 0, the singular, LIKELY: "3 Fighter (5/4)") and the design's
+  own Weapons and Shields, no design name; "%ld/%ld %ss" (6003.14) with losses; "one
+  dead %s" / "%ld dead %s" (6003.10-11; which of the two the call passes was lost in the
+  decompile, LIKELY as 5.0.5's); a colony "%s People" (`@0x30df2`), "%s of %s People
+  survived" (6003.15) or "%s People killed" (6003.9). The remake: `battlePanelPalm`.
+
+What changed in play: nothing in the rules. The bars are on the log scale for the mouse
+too, and a locked bar refuses the drag and says why. Not read: which string the
+all-dead group's call passes (above), the damage shading's look.
+
 ## Still open
 
 `docs/open-questions.md` (Palm) has the questions for the developers. In short: the
