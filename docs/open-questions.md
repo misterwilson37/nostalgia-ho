@@ -114,8 +114,9 @@ planned order:
 5. The names files (2.0) and the rest of the Palm's own touches.
 6. iOS's extra screens.
 7. Turn time limits.
-8. Last: the translations, each version in the languages it shipped in (French, German,
-   Turkish), chosen in New Game.
+
+(The remake's own work, such as English for 1.2 and the translations, is in
+`docs/roadmap.md`.)
 
 ### Android
 
