@@ -1851,7 +1851,7 @@ function battlePanel20(opt) {
     planet: (G, x, x0) => x <= 0.0005 ? `${pop(G, x0)} dead` : pop(G, x),
   });
 }
-const BATTLE_PANEL_DOS = battlePanel20({ name: 15, cls: 11, dots: '...' }), BATTLE_PANEL_MAC = battlePanel20({ dots: '…', cols: 'mac', shade: true }), BATTLE_PANEL_WIN = battlePanel20({ dots: '...', cols: 'mac', shade: true });
+const BATTLE_PANEL_DOS = battlePanel20({ name: 15, cls: 11, dots: '...', cols: 'mac', shade: true }), BATTLE_PANEL_MAC = battlePanel20({ dots: '…', cols: 'mac', shade: true }), BATTLE_PANEL_WIN = battlePanel20({ dots: '...', cols: 'mac', shade: true });
 
 E.registerRules('dos', Object.assign({}, O, {
   // CONFIRMED (DOS: the budget window's drawing FUN_9000_0cd5 and click

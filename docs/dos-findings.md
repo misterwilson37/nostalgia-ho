@@ -392,8 +392,7 @@ What changed in play: nothing. The finger now uses 2.0's linear bars instead of 
 log scale. Which list is on the left: Mac 2.0.1 (`DoOneBattle @d07d0`, `DrawOneGroup
 @d214e`) draws the viewing player's side on the left (the left column's x is 25 when
 `param_1[0]` is the viewer, else 300; a watcher in neither sees the second side there),
-`BATTLE_PANEL_MAC` `cols: 'mac'`. CONFIRMED. Mac 2.0.1's `DrawOneGroup` also shades a group's picture cell (gray, patOr: all of it when the group is gone, else 120 x the next ship's damage / hit points pixels from the left; `shade`). DOS and Windows 3.1 not read. DOS and Windows 3.1 not read (the remake puts
-the record's first side there).
+`BATTLE_PANEL_MAC` `cols: 'mac'`. CONFIRMED. Mac 2.0.1's `DrawOneGroup` also shades a group's picture cell (gray, patOr: all of it when the group is gone, else 120 x the next ship's damage / hit points pixels from the left; `shade`). DOS 2.0 (read October 2026): `FUN_9000_366d` sets the column x's by `*param_1 == DAT_5000_1f24` (the viewer) exactly so (the first list, at 0x5442, gets 25), and `FUN_9000_4f72` (its `DrawOneGroup`) draws the group at y = 53 row + 45, the words in a box under it, and the same 120 x 40 shading (the fill from a pattern resource not identified; a satellite, type 3, a third of it starting 40 in); `BATTLE_PANEL_DOS` has `cols: 'mac'` and `shade`. Each column is headed by a 32 x 32 owner icon and the owner's name (`FUN_1000_1ea1` at x + 35), which the remake's column heading stands for. Windows 3.1 is the same code, not separately read.
 
 ### Still unclear
 

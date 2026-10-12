@@ -92,11 +92,11 @@ Remake's choices in it:
    2026, `docs/original-findings.md`, "The piles, laid out"), the
    pictures the skin's; where the version wrote no owner's name on a group (1.2 to 4.0.5;
    iOS, which draws the owner's hat) the remake heads each column with its side's name; the good-luck and bad-luck pictures are 5.0.5's PICT 9017 (a rainbow) and 9018 (a storm), drawn in the classic skin (extracted as `m9017`/`m9018`, 40 x 40, 20 pixels right of the group's picture); iOS draws `report_icon-17`/`-18` (`-[BattleShipNode init]` 0x10009c18c, `reportIcon:17`/`18`; settled October 2026), the Palm has no picture ("+name"/"-name");
-   the Mac 1.2 to 4.0.5's damage shading (`DrawOneGroup`: a gray patOr rectangle over the group's cell, whole when the group is gone, else 120 x the next ship's damage / hit points from the left; satellites a third of it, in the middle) is drawn (`shade`), in Windows 4.0.5 too (`FUN_004251cd`, read October 2026: the same rectangle, 120 x damage / hit points, a third and 40 in for a satellite); DOS and Windows 3.1 not read, so unshaded; the population is the remake's
+   the Mac 1.2 to 4.0.5's damage shading (`DrawOneGroup`: a gray patOr rectangle over the group's cell, whole when the group is gone, else 120 x the next ship's damage / hit points from the left; satellites a third of it, in the middle) is drawn (`shade`), in Windows 4.0.5 too (`FUN_004251cd`, read October 2026: the same rectangle, 120 x damage / hit points, a third and 40 in for a satellite); DOS 2.0 too (`FUN_9000_4f72`: the same rectangle, its fill from a pattern resource, not identified, taken as the Mac's gray); Windows 3.1 is the DOS code, not separately read; the population is the remake's
    people count (the planet panel's). The side drawn on the left in the Mac 1.2 to 4.0.5 is
    the viewing player's (`DoOneBattle` sets the columns' x by `param_1[0] == viewer`;
    a watcher in neither side sees the second side on the left): done (`cols: 'mac'`);
-   Windows 4.0.5 is the same (`FUN_00422339`: the first player is the viewer, the first list's x is 25 and the second's 300, else the other way about; `cols: 'mac'`); DOS keeps the record's first side, not read.
+   Windows 4.0.5 is the same (`FUN_00422339`: the first player is the viewer, the first list's x is 25 and the second's 300, else the other way about; `cols: 'mac'`) and DOS 2.0 (`FUN_9000_366d`: `*param_1 == viewer` sets `DAT_5000_3c8e` (the first list at 0x5442) to 25 and `DAT_5000_3c8c` to 300, else the reverse; DOS draws a 32 x 32 owner icon and the owner's name at the head of each column, which the remake's column heading stands for).
 5. **The beep** of a locked bar is a short tone the page makes (the originals' system
    beep).
 
