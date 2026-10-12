@@ -15,7 +15,8 @@ developers. It is filled in one version at a time, earliest first.
    falls back on 2.0, then 1.2; 2.0 on 1.2; 1.2 on 2.0 (nothing is earlier); 4.0.5 on
    3.0.1; 5.0.5 on 4.0.5; Palm and iOS (ports of 5.0) on 5.0.5. A later version is the
    last resort.
-3. **Then the user**, who is in contact with the original developers.
+3. **Then the developers.** Jake's contact is Joe Williams ("Delta Joe"), the game's
+   co-designer at Delta Tao; Peter Commons, who programmed it, may chime in too.
 
 A fallback only keeps the game playable: the question stays open and stays on this list.
 
@@ -39,7 +40,7 @@ edition's questions are in its version's section.
 
 ## The bars and the battle window, every version (October 2026)
 
-Peter Commons, trying the remake, noted three things: "the bar charts aren't log scale",
+Joe Williams ("Delta Joe", Spaceward Ho!'s co-designer), trying the remake, noted three things: "the bar charts aren't log scale",
 "[the bars] don't lock at zero when mined and terraformed", and "battles don't show ship
 info". Each was settled from each version's code, newest first (each version's findings
 file, "Bars and battles"), and built as a rule of the ruleset, drawn by every skin:

@@ -509,7 +509,7 @@ earn interest and research; and the computers' first turn is planned as 2010, no
 
 ## Bars and battles (October 2026)
 
-Peter Commons' three notes (the bars' scale, the bars that lock at zero, the ships in
+Joe Williams' three notes (the bars' scale, the bars that lock at zero, the ships in
 battles), read in 1.2F's code. 1.2 is 2.0 here too (`docs/dos-findings.md`, "Bars and
 battles"):
 

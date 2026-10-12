@@ -648,7 +648,7 @@ the `ship-*` parts, hats from `player_<k>_<sex>` / `enemy_<k>_<sex>`, the title 
 
 ## Bars and battles (October 2026)
 
-Peter Commons, trying the remake, noted that the bar charts weren't on a log scale,
+Joe Williams ("Delta Joe", Spaceward Ho!'s co-designer), trying the remake, noted that the bar charts weren't on a log scale,
 that they didn't lock at zero once a colony was mined and terraformed, and that battles
 didn't show the ships. In iOS 1.2.9:
 

@@ -1007,7 +1007,7 @@ calls (`GETDC`, `LOADSTRING` …); they are imports, not code of the program.
 
 ## The bars and the battle window (October 2026)
 
-Read for Peter Commons' notes (`docs/dos-findings.md`, "Bars and battles"), in the DOS
+Read for Joe Williams' notes (`docs/dos-findings.md`, "Bars and battles"), in the DOS
 decompile and Mac 2.0.1: DOS `FUN_9000_0cd5` (the budget window's drawing), `FUN_9000_1554`
 (its click: the scale switch), `FUN_9000_0cae` (a share's pixel), `FUN_9000_0604` (the
 vertical bars' click), `FUN_3000_b405` (the setup's defaults); Mac 2.0.1 `InitHLogBarAmts`

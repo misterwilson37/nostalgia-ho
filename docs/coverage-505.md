@@ -457,7 +457,7 @@ Total outside the rule core: 1381.
 
 ## The bars and the battle window (October 2026)
 
-Read for Peter Commons' notes (the bars' scale, the locked bars, the ships in battles;
+Read for Joe Williams' notes (the bars' scale, the locked bars, the ships in battles;
 `docs/original-findings.md` section 14):
 
 | Routine | What | Remake |

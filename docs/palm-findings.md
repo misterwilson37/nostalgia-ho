@@ -377,7 +377,7 @@ screen.
 
 ## Bars and battles (October 2026)
 
-Peter Commons' three notes (the bars' scale, the bars that lock at zero, the ships in
+Joe Williams' three notes (the bars' scale, the bars that lock at zero, the ships in
 battles), read in the Palm code:
 
 - **The scale.** `FUN_00049e32` builds 5.0.5's table in the soft float: for each of the

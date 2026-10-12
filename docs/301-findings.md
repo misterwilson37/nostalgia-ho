@@ -539,7 +539,7 @@ described above.
 
 ## Bars and battles (October 2026)
 
-Peter Commons' three notes (the bars' scale, the bars that lock at zero, the ships in
+Joe Williams' three notes (the bars' scale, the bars that lock at zero, the ships in
 battles), read in 3.0.1's code:
 
 - **The scale.** `InitHLogBarAmts @d091c` and `InitVLogBarAmts @d0004` build the log

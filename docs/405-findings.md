@@ -222,7 +222,7 @@ hears each device "was just turned off", and next step "turned on".
 
 ## Bars and battles (October 2026)
 
-Peter Commons' three notes (the bars' scale, the bars that lock at zero, the ships in
+Joe Williams' three notes (the bars' scale, the bars that lock at zero, the ships in
 battles), read in both programs (Windows `SPACEHO.EXE`, Mac 4.0.5 with its routine names):
 
 - **The scale.** Both build the log table: the 77-pixel budget bars (Windows

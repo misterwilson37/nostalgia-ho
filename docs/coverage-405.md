@@ -434,7 +434,7 @@ Mac 4.0.5") lists what the names corrected and where the Mac differs.
 
 ## The bars and the battle window (October 2026)
 
-Read for Peter Commons' notes (`docs/405-findings.md`, "Bars and battles"). Windows:
+Read for Joe Williams' notes (`docs/405-findings.md`, "Bars and battles"). Windows:
 `FUN_0045aa60` and `FUN_00459ba0` (the log tables), `FUN_0045c02c` (the budget drag, read
 before for the lock), `FUN_0045a5d6` (the research drag), `FUN_0045aae1` (the drawing),
 `FUN_0047d8e8` / `FUN_0047d859` with "useLogScale" (the setting), the battle strings

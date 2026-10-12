@@ -1055,7 +1055,7 @@ keeps the name "explore" because that is what the project layout asked for.
 
 ### The bars and the battle window (CONFIRMED, October 2026)
 
-Peter Commons' three notes on the remake (the bars aren't on a log scale; they don't lock
+Joe Williams' three notes on the remake (the bars aren't on a log scale; they don't lock
 at zero when a colony is mined and terraformed; battles don't show the ships), read in
 LHoBarControl (0x10089260-0x1008ba00) and CBattleStageMac (0x100ac840-0x100afcb0):
 

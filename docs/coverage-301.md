@@ -829,7 +829,7 @@ dragging a fleet): the remake has its own windows for them, and the rule behind 
 
 ## The bars and the battle window (October 2026)
 
-Read for Peter Commons' notes (`docs/301-findings.md`, "Bars and battles"):
+Read for Joe Williams' notes (`docs/301-findings.md`, "Bars and battles"):
 `InitVLogBarAmts @d0004`, `GetVPercBarAmt @d0118`, `DrawVBarControl @d0164`, `DoVBarClick
 @d0582`, `InitHLogBarAmts @d091c`, `GetHPercBarAmt @d0a30`, `DrawHBarControl @d0a7c`,
 `DoHBarClick @d18a0` (read before for the drag; now for the scale switch and the lock),
