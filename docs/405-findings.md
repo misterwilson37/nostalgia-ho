@@ -264,8 +264,8 @@ battles), read in both programs (Windows `SPACEHO.EXE`, Mac 4.0.5 with its routi
   (`param_1[0]`) is the viewing player the left column's x is set to 25 (4.0.5: 5) and the right's to 300,
   else the other way about; `DrawOneGroup` takes its x from the list it draws (the first side's list gets
   the first side's x). So the **viewer's side is on the left**, and a viewer in neither side (a hot-seat
-  watcher) sees the record's *second* side there. The remake: `makeBattlePanel` `cols: 'mac'`. CONFIRMED for the Mac (Windows 4.0.5 not read: it keeps the record's first side on the left).
-- **The damage shading** (`DrawOneGroup @6226c`; the same code in 1.2, 2.0.1, 3.0.1 and 4.0.5): after the picture and the words,
+  watcher) sees the record's *second* side there. The remake: `makeBattlePanel` `cols: 'mac'`. CONFIRMED for the Mac. Windows 4.0.5's battle routine is `FUN_00422339` (strings 1081-1089 as `FUN_0042e172(buf, 0x439, k)`; k 0-1 the "dead" formats, 2 and 3 the heading, 4 the round, 5-8 the ending, 10-11 "no information"); it has the same rule: `*param_1 == viewer` sets the first list's x (`DAT_005abda4`) to 25 and the second's to 300, else the reverse. The remake's `battlePanelWin` has `cols: 'mac'` (read October 2026).
+- **The damage shading** (Windows `FUN_004251cd`, the same: rows 53 pixels from y 35, the 120 x 40 picture cell, the bar 120 x damage / hit points from the left, a satellite a third of it starting 40 in; the words in a white box under it, centred, the font one size smaller when wider than 140 pixels instead of the Mac's cut; `DrawOneGroup @6226c`; the same code in 1.2, 2.0.1, 3.0.1 and 4.0.5): after the picture and the words,
   a group that is not a colony's has its 120 x 40 picture cell painted with the pen set to the gray pattern (the
   QuickDraw global qd.gray; the pen is put back to qd.black after) in patOr mode: a gone group (count 0) the whole
   cell, else the damage done to its next ship, 120 x damage / hit points pixels from the left (a satellite: a third
@@ -273,9 +273,7 @@ battles), read in both programs (Windows `SPACEHO.EXE`, Mac 4.0.5 with its routi
   (the battle events' `f`), drawn as a translucent gray rectangle. CONFIRMED.
 
 What changed in play: nothing in the rules. The bars are on the log scale for the mouse
-and the finger, and a locked bar refuses the drag and says why. Not read: which list is
-drawn on the left (the remake puts the record's first side there) and the Windows
-battle window's own drawing routine (its strings and formats are the Mac's).
+and the finger, and a locked bar refuses the drag and says why. Windows 4.0.5's battle drawing is read (above): the viewer's side on the left and the shading are the Mac's.
 
 ## Computer players (js/ai-405.js)
 
