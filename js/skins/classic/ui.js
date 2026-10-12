@@ -1135,6 +1135,9 @@ function bar(label, val, max, onSet, opts) {
   track._v = max > 0 ? Math.min(1, val / max) : 0;
   fill.style.width = barWidth(track._v, sc);
   track.append(fill);
+  // 5.0.5's grid (FUN_1008aff0): ten lines at 100 ... 1,000 per mille on the bar's scale,
+  // each a black tick 3 pixels long at the top, the rest of the line a faint blend
+  if (opts.grid) for (let k = 1; k <= 10; k++) track.append(el('i', { class: 'grid', style: `left:${barWidth(k / 10, sc)}` }));
   if (lk && lk.text) track.append(el('span', { class: 'locktext' }, lk.text));
   const set = (ev) => {
     const r = track.getBoundingClientRect();
@@ -1274,7 +1277,7 @@ function renderPanel() {
       else if (f != null) setShare(ents, i, f);
       if (f != null) { ents.forEach((x, j) => { const r = bb.querySelectorAll('.barrow')[j]; if (r) { r.querySelector('.track')._v = x.get(); r.querySelector('.fill').style.width = barWidth(x.get(), bsc); r.querySelector('.bval').textContent = money(x.get() * spendable); } }); }
       if (end) { start = null; renderPanel(); save(); }
-    }, { scale: bsc, locked: rsB.barLocked ? rsB.barLocked(G, p, e.key) : null, right: money(amt), cls: e.key === 'tech' ? 'tech' : e.key === 'savings' ? 'sav' : 'col', rowCls: (s && UI.sel === s.id ? 'hl' : '') + (s && HO.planetIncome(G, p, s) < 0 ? ' loss' : ''), help: e.key === 'tech' ? 'tech' : e.key === 'savings' ? 'savingsBar' : 'colonyBar' }));
+    }, { scale: bsc, grid: !!(rsB.barGrid && T.barGrid !== false), locked: rsB.barLocked ? rsB.barLocked(G, p, e.key) : null, right: money(amt), cls: e.key === 'tech' ? 'tech' : e.key === 'savings' ? 'sav' : 'col', rowCls: (s && UI.sel === s.id ? 'hl' : '') + (s && HO.planetIncome(G, p, s) < 0 ? ' loss' : ''), help: e.key === 'tech' ? 'tech' : e.key === 'savings' ? 'savingsBar' : 'colonyBar' }));
   });
   if (net <= 0) bb.append(el('p', { class: 'warn' }, 'After supporting your colonies and paying interest, there is nothing left to spend.'));
   panel.append(bb);

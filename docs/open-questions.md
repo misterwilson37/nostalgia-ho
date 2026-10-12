@@ -68,8 +68,13 @@ Remake's choices in it:
 1. **The scale switch** (1.2 to 3.0.1) is a click on the Budget heading, the strip above
    the bars; the original kept the setting in its setup file, the remake in the browser,
    one for each ruleset ("ho5.barScale.<ruleset>").
-2. **The bars' grid** (ten lines at 100 ... 1,000 per mille on the log scale, tenths on the
-   linear one) isn't drawn; the bars are the skin's own width, not 77 pixels, so the
+2. **The bars' grid**: 5.0.5 and the Palm (`rs.barGrid`) draw it on the budget bars in the
+   classic skin (`FUN_1008aff0`: ten lines at 100 ... 1,000 per mille through the bar's
+   scale, so log spacing; each a black tick 3 pixels long at the top, the rest of the line
+   drawn in the "transparent" pen mode, a colour and weight from a data table not read, so
+   the remake blends black at 28 %, LIKELY; the bars' frame lines are black too). The older
+   versions have a grid as well (log at 100 ... 1,000, tenths when linear) but their drawing
+   wasn't read, so they have none. The bars are the skin's own width, not 77 pixels, so the
    table is worked out for the bar's fraction (engine `BAR_SCALES.log`), not in 78 steps.
 3. **A finger uses the version's own scale** (it used iOS's log scale in every skin):
    linear in 2.0 and 1.2 unless switched, log elsewhere. Rulesets that aren't an original

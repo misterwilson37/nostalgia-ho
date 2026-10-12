@@ -39,6 +39,8 @@ button { font: inherit; }
 .fill.tbar { background: repeating-linear-gradient(90deg, #c96c63 0 6px, #ad5149 6px 7px); }
 /* a locked bar (rs.barLocked): no dragging; its words where the bar would be,
    a little past its start, as the originals drew them */
+.track .grid { position: absolute; top: 0; bottom: 0; width: 1px; margin-left: -1px; background: rgba(0,0,0,.28); pointer-events: none; }
+.track .grid::before { content: ''; position: absolute; left: 0; top: 0; width: 1px; height: 3px; background: #000; }
 .track.locked { cursor: not-allowed; }
 .barrow[data-help] .track.locked { cursor: not-allowed; }
 .locktext { position: absolute; left: 3px; top: 50%; transform: translateY(-50%); font-size: 10px; line-height: 1; white-space: nowrap; overflow: hidden; max-width: calc(100% - 6px); text-overflow: ellipsis; color: var(--sub); pointer-events: none; }

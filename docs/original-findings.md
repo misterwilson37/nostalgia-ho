@@ -1292,3 +1292,11 @@ code does it. "Before" is the remake's earlier reading.
 | Messages a turn | no limit | three | `FUN_10061af0` @10061d88 |
 | Merging and splitting fleets | any fleets; the orders cleared | Biologicals only with Biologicals; the fleet keeps its orders, the lower fuel, the "bought this turn" mark only if both had it, a new design's stance | `FUN_100aa240`, `FUN_100a8780`, `FUN_100a85b0`, `FUN_100aa730` |
 | Routes on the map | only with modern conveniences | DeterminePath's route for any dragged fleet | `FUN_1008c5f0`, `FUN_1008d140`, `FUN_1007d260` |
+
+### The budget bars' grid (FUN_1008aff0)
+
+After the bars (each painted in its HSV colour with 3D edges), 10 lines at 100, 200 ... 1,000
+per mille, each at the bar's left + `FUN_100896a0(value)` (the log table's pixel): a black
+(`ForeColor 0x21`) tick 3 pixels long at the top, then a line to the bottom of the bars in pen
+mode 0x24 (transparent) with a colour and blend weight from the program's data (not read).
+CONFIRMED for the geometry; the remake blends black at 28 % (LIKELY). Palm: `FUN_00048e7a`.
