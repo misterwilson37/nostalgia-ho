@@ -313,7 +313,7 @@ const rs = Object.assign(base, {
   // (pick 'run'); FUN_00025f4a gives them the first places of the star list,
   // the other stars distinct names of its own, and shuffles the list with
   // the game's numbers, so they land on stars at random (engine newGame). The
-  // form's words weren't read (docs/open-questions.md), nor how the list
+  // form's words weren't read (docs/research-log.md), nor how the list
   // grows: the remake keeps every name.
   // the auto play settings are on the Auto Play form (tFRM 1700, FUN_000713be)
   autoPlayRange: { aggr: [0, 100], where: 'autoplay' },

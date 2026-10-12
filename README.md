@@ -451,7 +451,8 @@ Optional ruleset flags the skin reads (each is documented where it is read):
 - `docs/405-findings.md`: what the Windows 95 4.0.5 program does differently from 5.0.5
 - `docs/missing-assets.md`: what each skin still borrows or leaves silent (for future art)
 - `docs/decompiling.md`: how to decompile the Windows versions with Ghidra
-- `docs/open-questions.md`, `docs/evolution.md`, `docs/coverage-12.md`: the questions still open for each version, how the game grew, and every routine of 1.2
+- `docs/open-questions.md`, `docs/evolution.md`, `docs/coverage-12.md`: what is left to ask Delta Tao, how the game grew, and every routine of 1.2
+- `docs/research-log.md`: the full research history, every question met in each version and how it was settled
 - `docs/fixes.md`: every version's slips sorted into obvious bugs (fixed by the unofficial patch), quirks and unclear cases
 - `tools/test.js`: headless computer-vs-computer test (`node tools/test.js`, `node tools/test.js original`, `dos`, `405`, `mac20`, `mac405` …; add `--patch` to play with the unofficial patch on)
 - `tools/human-play.js`: a human played through the page in Chromium (Playwright), about 10

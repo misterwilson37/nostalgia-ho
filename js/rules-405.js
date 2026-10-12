@@ -2055,7 +2055,7 @@ function giftNews(G, p) {
 // +0x18cc), at most two a step: the first of 1M / 2.5M not yet said and the
 // first of 5M / 10M / 20M. The total counts the colony slots whose star
 // number is above 0, so a colony at star 0 is left out (a slip; see
-// docs/open-questions.md). The number as 4.0.5 prints it (FUN_0042e5c2):
+// docs/research-log.md). The number as 4.0.5 prints it (FUN_0042e5c2):
 // "1,000,000", from ten million "10,000K".
 const MILESTONES = [1000000, 2500000, 5000000, 10000000, 20000000];
 function keptNames405(G, put) { return E.fixed(G, 'keptStarNames') ? put : ['Hope'].concat(put.slice(0, -1)); }

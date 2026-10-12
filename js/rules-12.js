@@ -366,7 +366,7 @@ E.registerRules('12', Object.assign({}, D, {
   // kept in the program's STR# 2005 "More Star Names" (it ships with
   // "Tiber"), which every later galaxy draws from with STR# 1003. The
   // window's words and its alert for a name taken weren't read (French in
-  // 1.2): the remake uses 2.0's alert and 4.0.5's words (docs/open-questions.md).
+  // 1.2): the remake uses 2.0's alert and 4.0.5's words (docs/research-log.md).
   // A name of 4 to 7 letters is kept (a shorter one isn't, @120ae2), and it is
   // taken when Munger finds it in STR# 2005 or STR# 1003: a name inside
   // another counts, letter case too (match 'munger'). The name doesn't go on

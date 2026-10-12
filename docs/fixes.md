@@ -8,7 +8,7 @@ nothing else. Its number is the version's own with ".1" added (`HO.patchVersion`
 game; it is the remake's own.
 
 This file goes through every slip and quirk listed for each version in
-`docs/open-questions.md` ("Settled, worth confirming", and the Open entries that are slips)
+`docs/research-log.md` ("Settled, worth confirming", and the Open entries that are slips)
 and in the findings files, and puts each into one of three groups:
 
 - **Obvious bug (fix it)**: the code plainly doesn't do what it meant: a sign error, an
@@ -418,7 +418,7 @@ running out). **Obvious, with nothing in the remake to fix**: the cheating mark
 ### Unclear (left; for the developers)
 
 - As 4.0.5's six (the Mac has the same code for each, and draws the computer-intelligence
-  faces where Windows has no picture, 5). See also `docs/open-questions.md`, "The Mac 4.0.5
+  faces where Windows has no picture, 5). See also `docs/research-log.md`, "The Mac 4.0.5
   edition": Windows' ten ranks look like two strings joined.
 
 ---

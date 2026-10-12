@@ -145,7 +145,7 @@ The texts are 1.2's, worded as DOS 2.0's lines 705–707 and 681:
 There is no "You lost N people" line, and nothing about the colony when a defender with
 ships loses. `PlayAnnounceSound @130f08` plays nothing for the battle reports and 2001 for
 a destroyed colony. The remake keeps sound 7027 on a won battle, because the skin's auto
-play stops on it (interface; listed in `docs/open-questions.md`).
+play stops on it (interface; listed in `docs/research-log.md`).
 
 Each battle also leaves every player who fought there an estimate of the enemy strength,
 which the computers use (see below). The loser learns the strength of the ships left and,
@@ -551,4 +551,5 @@ scale.
 
 ## Still open
 
-See `docs/open-questions.md`, section "Mac 1.2".
+See `docs/open-questions.md` (the 1.2 entries), and `docs/research-log.md`, section
+"Mac 1.2", for how each question was settled.

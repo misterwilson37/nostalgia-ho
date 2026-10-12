@@ -425,7 +425,7 @@ too, and a locked bar refuses the drag and says why. Not read: the damage shadin
 
 ## Still open
 
-`docs/open-questions.md` (Palm) has the questions for the developers. In short: the
+`docs/research-log.md` (Palm) has the questions met and how they were settled. In short: the
 debris lost when every side is beaten, the Message History's Evacuate keeping 5.0.5's
 one-in-three, the Abundant shares, and the unused report 0x475 ("%s has just taken over
 for the computer player %s.").

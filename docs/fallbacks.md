@@ -96,7 +96,7 @@ business; the DOS 2.0 "Inherited rules audit" covers them for 2.0.
 | 405 | `msgText` | every message as the rules wrote it | verified: each ruleset writes its version's own wording (4.0.5's, rules-405); only the iOS game reworded the same texts (`rs.msgText`, iOS below) |
 | mac405 | `msgText` | every message as the rules wrote it | verified: each ruleset writes its version's own wording (4.0.5's, rules-405); only the iOS game reworded the same texts (`rs.msgText`, iOS below) |
 | original | `msgText` | every message as the rules wrote it | verified: each ruleset writes its version's own wording (STR# 6020 through `js/data.js`); only the iOS game reworded the same texts (`rs.msgText`, iOS below) |
-| palm | `msgText` | every message as the rules wrote it | verified: each ruleset writes its version's own wording (5.0.5's STR# 6020; the Palm's few rewordings are under "Interface not done" in docs/open-questions.md); only the iOS game reworded the same texts (`rs.msgText`, iOS below) |
+| palm | `msgText` | every message as the rules wrote it | verified: each ruleset writes its version's own wording (5.0.5's STR# 6020; the Palm's few rewordings are under "Unfinished" in docs/open-questions.md); only the iOS game reworded the same texts (`rs.msgText`, iOS below) |
 
 ### Mac 1.2 (`12`)
 

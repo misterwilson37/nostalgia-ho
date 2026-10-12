@@ -1983,7 +1983,7 @@ E.registerRules('301', Object.assign({}, D, {
   // and those names (1..191 + kept, each once; the galaxy is cut to that many
   // stars), so later galaxies use them as 1.2's and 2.0's do ('pool'). The
   // window's words and the alert weren't read: 4.0.5's and 2.0's
-  // (docs/open-questions.md).
+  // (docs/research-log.md).
   // CONFIRMED (DLOG/DITL 4050 and STR# 4001 of 3.0.1, its own words)
   nameAStar: { when: 'win', text: 'You won the game, so you get to name a star.', keep: 0, use: 'pool', max: 7, min: 2, match: 'munger',
     rule: 'Star names must be 2 to 7 characters long.', label: 'New Star Name:', hint: '(If you’d rather not name a star, click “OK” with the name blank.)',

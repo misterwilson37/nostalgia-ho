@@ -744,7 +744,7 @@ the code next to the rule it carries out). Points worth knowing:
 ### Settled in the 5.0.5 pass
 
 The points this section used to list as unclear are all settled in the code, and the
-web app now follows it (`docs/open-questions.md`, Mac 5.0.5):
+web app now follows it (`docs/research-log.md`, Mac 5.0.5):
 
 - **The money a computer plans with** (`FUN_10081cc0`) is the net (player +0x40); the
   reserve it won't touch is min(this turn's money × (year − 2000) / 100, that money ×

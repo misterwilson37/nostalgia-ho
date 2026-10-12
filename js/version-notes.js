@@ -7,11 +7,11 @@
 //
 // - intro: a sentence or two on what the version is;
 // - quirks: its known bugs and quirks, which the remake plays as released
-//   (docs/open-questions.md, "Settled, worth confirming");
+//   (docs/research-log.md, "Settled, worth confirming");
 // - differs: where the remake differs from it (docs/open-questions.md,
-//   "Remake's choices");
+//   "Remake's choices"; the full list in docs/research-log.md);
 // - missing: its windows and commands the remake hasn't got yet
-//   (docs/open-questions.md, "Interface not done");
+//   (docs/open-questions.md, "Unfinished");
 // - previous / changes: what changed from the version before it
 //   (docs/evolution.md);
 // - checking: the lists still being checked (the version's sections in the

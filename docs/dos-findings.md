@@ -431,7 +431,7 @@ estimates in `FUN_1018_260b` in the first pass, the rest (`03e7`, `0926`, `0974`
 
 Where `js/ai-12.js` departs from the code, the ruleset now supplies 2.0's own data through
 hooks, so 1.2's games are left as they were (1.2 has the same code; see
-`docs/open-questions.md`):
+`docs/research-log.md`):
 
 | What the code does | `js/ai-12.js` before | Hook (2.0) |
 |---|---|---|

@@ -661,7 +661,7 @@ dragging a fleet): the remake has its own windows for them, and the rule behind 
 | `DRAWMSGLISTBORDER` @14233c | drawing | NOT A RULE | display |
 | `ZoomIn` @1423ae | map zoom | NOT A RULE | interface |
 | `ZoomOut` @14242e | map zoom | NOT A RULE | interface |
-| `NameAStar` @1424b2 | the winner names a star | RULE, implemented (in part) | js/rules-301.js nameAStar, js/skins/classic/ui.js openNameStar; the name is kept but not used (where 3.0.1 uses it is open: docs/open-questions.md) |
+| `NameAStar` @1424b2 | the winner names a star | RULE, implemented (in part) | js/rules-301.js nameAStar, js/skins/classic/ui.js openNameStar; the name is kept but not used (where 3.0.1 uses it: docs/research-log.md) |
 | `ListPlayerSkills` @14270a | Player Skills window | NOT A RULE | interface |
 | `InitSkillsList` @1427e6 | set up a window's list | NOT A RULE | interface |
 | `GraphHistory` @14293c | History graph window | NOT A RULE | interface |
