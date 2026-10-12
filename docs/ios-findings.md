@@ -25,7 +25,9 @@ decrypted and its bytes were treated as unreadable (Ghidra was given a copy with
 page zeroed). It holds the end of the TouchJSON code, `-[RootViewController ...]` and the
 first drawing methods of CBattleStagePhone's table (0x10008dbd8-0x10008dfff); no game
 rule lives there: every routine of the rule core (below) lies in 0x100020614-0x10003e7b4,
-and the string-list readers start at 0x10008e11c.
+and the string-list readers start at 0x10008e11c. CBattleStagePhone's methods were since
+read from the Android 1.2.8 build, which has the same code unencrypted and named
+("CBattleStagePhone, read from the Android 1.2.8 build", below).
 
 Every rule is labelled:
 
@@ -703,9 +705,60 @@ didn't show the ships. In iOS 1.2.9:
 
 What changed in play: nothing in the rules. The mouse now drags the bars on the log
 scale (before: linear), the bars are always drawn on it, and locked bars refuse the
-drag in the interface as well as in the rules. Not read: the first drawing methods of
-CBattleStagePhone (in the encrypted page; the BattleStageLayer above is what draws the
-window), and the damage shading's exact look (not drawn).
+drag in the interface as well as in the rules. Not read: the damage shading's exact look
+(not drawn). The first drawing methods of CBattleStagePhone, in the encrypted page, are
+read below from the Android build.
+
+### CBattleStagePhone, read from the Android 1.2.8 build
+
+The methods in the encrypted page (0x10008dbd8-0x10008df20, CBattleStagePhone's virtual
+table at 0x1000fdd10) were read from the Android 1.2.8 build (`docs/android-findings.md`),
+whose library is unencrypted and exports them by name. Android 1.2.8 and iOS 1.2.9 are
+the same code everywhere they were compared, and the pairing holds here: the table's
+slots are in the same order, the sizes in the 32-bit build's ratio, and `DrawExplosion`
+(iOS 0x10008e01c, outside the page) reads the same on both (the record's flag, the
+group's +0x28, `explosion:`, the same sleep). LIKELY for iOS as a whole, CONFIRMED for
+Android.
+
+CBattleStagePhone is the CBattleStage that replays a battle record into the battle
+window. `-[BattleStageLayer setup:]` (0x100095004) starts `-[BattleStageLayer review]`
+(0x1000953a4) on its own thread (`detachNewThreadSelector:`), which makes a
+CBattleStagePhone for the game, calls `ReviewPhoneBattle` with the window's battle record
+and the window, has the main thread run `drawAllGroups` and `doneReview`, and deletes it.
+Each drawing method below posts a message to the window on the main thread and waits for
+it (`performSelectorOnMainThread:withObject:waitUntilDone:` YES), so the replay is paced
+by the window and by the sleeps:
+
+| Method | iOS (Android) | What |
+|---|---|---|
+| `ReviewPhoneBattle(info, layer)` | 0x10008dbd8 (`0x251978`) | keeps the window, sets the stage's round count to 0 and runs `CBattleStage::DoOneBattle(info, review = 1)` (0x100020ce0): the battle fought again from the record's seed, round by round, calling the methods below; then posts `afterReview:` with the viewer's player number (not waiting) |
+| `DrawAllGroups(info)` | 0x10008dc48 (`0x251a00`) | posts `drawAllGroups` |
+| `DrawGroup(info, g)` | 0x10008dc74 (`0x251a4c`) | posts `drawGroup:` g, unless the battle lasted one round, nothing of the viewer's survived it (the record's mask of players with ships or a colony left at the end, +0x18) and g's owner isn't the viewer's ally in this battle (`CBattleStage::AreBattleAllies`): such a group isn't drawn. A debug line ("Group: %d  side: %d yOffset %ld", "... Don't Draw") is logged |
+| `FinishDrawing(info)` | 0x10008dd80 (`0x251b8c`) | called once before the first round, despite its name: keeps the number of rounds the record says the battle took (+0x16) and posts `finishDrawing`, which lays the window out (`addBattleDescription`, `addShipGroups`) |
+| `IsSpecialShip(design, rect)` | 0x10008ddb4 (`0x251be0`) | true for a design whose ShipNode `isSpecial` (`+[ShipNode ship:]`): the rect is 0, 0 and the picture's height and width (an empty rect when there is no picture) |
+| `DrawRound(n)` | 0x10008de40 (`0x251cd4`) | posts `updateRound:` n (the round label) |
+| `BattleWait(t)` | 0x10008de94 (`0x251d4c`) | if the clock (ticks of 1/60 s) hasn't reached t, sleeps (t − now) / 60 seconds |
+| `SkipToEnd()` | 0x10008df04 (`0x251dd8`) | the window's `shouldSkip` (its skip button) |
+| `DrawShot(info, shooter, target)` | 0x10008df20 (`0x251e0c`) | unless the stage's don't-animate flag is set: posts `fireShot:` [shooter group, target group], then sleeps the Preferences' ship-shoot delay × 12 / 300 seconds (`shipShootDelay`, preferences +0x220; Android +0x218) |
+| `DrawExplosion(g)` | 0x10008e01c (`0x251f38`) | unless the flag is set and g's +0x28 isn't 0: posts `explosion:` g, then the same sleep |
+
+`DoOneBattle` sets the don't-animate flag (stage +0x3a, Android +0x22) when it replays a
+battle that took one round in which nothing of the viewer's survived: such a battle is
+shown without shots or explosions. On the window's side (outside the page, read on iOS):
+`fireShot:` (0x100095aec) draws a laser, a `CCMotionStreak` of `laser.png`, moved with a
+`CCMoveTo` from the shooter's ship to the target's; `explosion:` (0x100095e80) plays the
+`HoExplosions.png` frames over the group's ship and hides them; `updateRound:`
+(0x100095a10) writes the round number; `afterReview:` (0x100095770) adds the closing
+line and the report icons. CONFIRMED (Android), LIKELY (iOS).
+
+**What it changes in the 'ios' skin's battle panel** (`rs.battlePanel`,
+`openBattlePanel`; not built): the window is a replay, not a summary. It is laid out
+first (`finishDrawing`), then each round's number is shown, each shot is a laser from
+the shooting group's ship to the target's followed by a pause of the ship-shoot delay
+(× 0.04 s), each ship lost an explosion over its group with the same pause, and a skip
+button ends it. Two cases differ from what the remake draws: a battle that ended in its
+first round with nothing of the viewer's left shows no shots or explosions, and in it
+the groups of players who aren't the viewer's allies aren't drawn at all.
 
 ## Still open
 

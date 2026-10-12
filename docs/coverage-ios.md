@@ -18,7 +18,8 @@ zeroed and the disassembly leaves it out. What lies there (by the surrounding co
 metadata and the virtual tables): the end of TouchJSON's `CJSONSerializer`,
 `RootViewController`'s methods and CBattleStagePhone's first drawing methods
 (0x10008dbd8-0x10008dfff). No rule routine does: the rule core is 0x100020614-0x10003e7b4,
-and every routine it calls is outside the page.
+and every routine it calls is outside the page. CBattleStagePhone's methods there were read
+from the Android 1.2.8 build instead (`docs/coverage-android.md`).
 
 ## Counts
 
