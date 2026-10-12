@@ -49,7 +49,7 @@ their entries are below so the list is complete, but their rulesets list no fixe
 | Mac 1.2 | 2 | 8 | 2 |
 | 2.0 | 5 | 5 | 3 |
 | Mac 2.0.1 | 3 | 5 | 2 |
-| Mac 3.0.1 | 4 | 6 | 3 |
+| Mac 3.0.1 | 5 | 6 | 3 |
 | 4.0.5 | 11 fixed (+ 3 the remake already plays fixed, + 3 with nothing in the remake to fix) | 4 | 6 |
 | Mac 4.0.5 | 7 fixed (+ 3 the remake already plays fixed, + 1 with nothing in the remake to fix) | 4 | 6 |
 | 5.0.5 | 2 | 7 | 6 |
@@ -227,6 +227,12 @@ Organize Fleets takes the least fuel used, `OrganizeFleets` @1137e6) and `attack
 4. **`scrapRange`: the wrong number passed as a Range.** `ScrapOldShips @94e3e` passes the
    fleet's number in the list as its Range (@94f70); no effect on play. *Fix:* the fleet's
    Range (`scrapOldShips`).
+5. **`star0`: a finished colony at star 0 can be dragged** (found October 2026).
+   `DoHBarClick @d18a0` refuses the drag of a finished colony's bar by testing the star
+   number (≥ 1) instead of the slot kind, as 4.0.5 does (its `star0`); the drawing
+   (`DrawHBarControl @d0a7c`) tests ≥ 0, so the colony shows its income but can still be
+   dragged. The remake had refused it at every star; it now plays the slip as released.
+   *Fix:* locked like any other (`dragShare`, `locked301` in `js/rules-301.js`).
 
 ### Quirk or design (left as released)
 

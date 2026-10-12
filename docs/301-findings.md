@@ -536,6 +536,41 @@ Everything else (the turn, money, research, radical tech, ships, battles, events
 diplomacy, the end of the game, the computers) is the ruleset's own port of 3.0.1, as
 described above.
 
+## Bars and battles (October 2026)
+
+Peter Commons' three notes (the bars' scale, the bars that lock at zero, the ships in
+battles), read in 3.0.1's code:
+
+- **The scale.** `InitHLogBarAmts @d091c` and `InitVLogBarAmts @d0004` build the log
+  tables (77 and 50 pixels; 32.11 and 20.85, 2.302, 10), `GetHPercBarAmt @d0a30` a
+  share's pixel. The budget bars (`DrawHBarControl @d0a7c`, `DoHBarClick @d18a0`) are on
+  the log scale when the setup's +0x2a is set, which it is by default ('Stup' 1000
+  "Default Setup" +0x2a = 1); a click on the strip above the bars flips it (`DoHBarClick`:
+  1 − the value, and the bars redrawn), so they go linear (1,000 × x / 77, the grid in
+  tenths) and back. The technology bars are always on the log scale (`DoVBarClick
+  @d0582` with 2). The remake: `rs.barScale` `{ budget: 'log', tech: 'log', toggle:
+  true }`, the switch a click on the Budget heading, kept per ruleset in the browser.
+  CONFIRMED.
+- **The lock.** `DoHBarClick` refuses the drag (`PlaySound(-1)`, a beep) for a colony
+  being abandoned (slot +7) and for a finished one (both bars −1) whose star number is 1
+  or more; Savings and Technology never (3.0.1 has no Dip Into Savings). A finished
+  colony at star 0 can still be dragged: the same slip as 4.0.5's (`docs/fixes.md`,
+  3.0.1 `star0`). `DrawHBarControl` writes "$" and the income of a finished colony
+  (star 0 or more, not being abandoned) 3 pixels into its empty bar. **A change to
+  vanilla play:** the remake had refused the drag at every star; now a finished colony
+  at star 0 can be dragged, as in 3.0.1, and the 3.0.1.1 patch locks it. The remake:
+  `rs.barLocked` (`barLocked301`), `dragShare`. CONFIRMED.
+- **The battle window** (`ReviewBattle @e2d36`, `DrawAllGroups @e267c`, `DrawOneGroup
+  @e274e`, `MakeFleetDescription @130fb6`; STR# 1030, STR# 4000.32): Mac 2.0.1's and 4.0.5's
+  (`docs/405-findings.md`, "Bars and battles"): "Summary of battle", "at %s in %d:",
+  "Round %d"; the duel's two sides in two columns of groups, each one ship picture with a
+  damage bar and its words under it ("N Name (W/S) Classs", "one Name (W/S) Class", "N dead
+  Name (W/S) Class(s)"; a colony its people or "%s dead"); "Congratulations!" "You won the
+  battle!" or "Unfortunately," "you lost the battle…". The remake: `rs.battlePanel`
+  (`battlePanelMac`).
+
+Not read: which list is on the left (the remake puts the record's first side there).
+
 ## Still open
 
 The questions 3.0.1's code doesn't settle, and the remake's own choices, are in
