@@ -1053,6 +1053,54 @@ pictures**, shown when you reach a new rank. They are never shown for
 exploring. The original builds the file name from the rank number. The folder
 keeps the name "explore" because that is what the project layout asked for.
 
+### The bars and the battle window (CONFIRMED, October 2026)
+
+Peter Commons' three notes on the remake (the bars aren't on a log scale; they don't lock
+at zero when a colony is mined and terraformed; battles don't show the ships), read in
+LHoBarControl (0x10089260-0x1008ba00) and CBattleStageMac (0x100ac840-0x100afcb0):
+
+- **The scale.** `FUN_100895a0` builds the bar's table, one entry a pixel of its width w
+  (control +0xe6): trunc(10 × (e^(2.302 + 77 i / w / 32.11) − 10)), the last entry 1,000
+  (the constants 32.11, 77.0, 2.302, 10.0 at 0x100f0688-0x100f06a0, read in the data
+  section; `FUN_100c4f80` is e^x). The mouse's pixel goes through the table
+  (`FUN_1008a7a0`), a share is drawn to the first pixel whose entry passes it, less one
+  (`FUN_100896a0`), and the grid is drawn at 100, 200 ... 1,000 per mille on it
+  (`FUN_1008aff0`). Both kinds of bar, budget (control +0xe4 = 2) and technology (1).
+  The remake: `rs.barScale` `{ budget: 'log', tech: 'log' }`, engine `BAR_SCALES.log`, for
+  the mouse, a pen and a finger.
+- **The lock.** `FUN_1008a030`: a colony being evacuated (colony slot +0x13), a finished
+  colony (+2 and +4 both −1), Savings while dipping (slot −2, player +0x54 above 0); a
+  technology bar only below 0. A click on a locked bar beeps (`SysBeep`), but on Savings
+  while dipping it opens Dip Into Savings (command 0x139c). The words drawn in the bar's
+  place, 3 pixels in (`FUN_1008a120`): "Evacuating" (Misc Strings 32), the finished
+  colony's income (slot +8, `FUN_10055050` with "$"), "-N% (amount)" with N % of Ship
+  Savings. The bar itself is drawn flat (no edges) at its share, which the rules keep at
+  0 (`GiveBarPercent` when the colony is marked or finishes). The remake already refused
+  the drag in its rules (`dragShare505`); now the bar says so and refuses it too
+  (`rs.barLocked`, `barLocked505`).
+- **The battle window.** "Review Battle at %s in %d" (STR# 6020's templates), "Round %d".
+  The groups (`FUN_1007f560`, `FUN_1007f7f0`, `FUN_1007f9f0`): the viewer's side and its
+  allies, then the first other side with a colony, then the rest; each side's colony
+  first, then its designs last to first, each split by stance; group +0x26 says the
+  column: 0 for the viewer's side and its allies (x 145), 1 for the others (x 465,
+  mirrored). Each group (`FUN_100ac8c0`, `FUN_100aceb0`): a pile of its ships' pictures in
+  a V, trunc(0.5 + n^0.68) of them, 1 to 30 (`FUN_1007fc20`, constants 0.68 and 0.5 at
+  0x100f0660), the last shaded by its damage; the owner's face on it with the owner's
+  name on a black pill; PICT 9017 or 9018 beside it when the side's luck (player record
+  +2) is above or below 0; its words on a white pill under it (`FUN_1007c250`): "%d %s
+  (%d/%d) %ss", "%s %s (%d/%d) %s" with "one", the design's name, its own Weapons and
+  Shields (design +6, +8: not the stance's or the luck's), its class ("Decoy" for its
+  owner's decoys), cut to 39 letters; "%d/%d %ss" with losses, "one dead %s" / "%d dead
+  %ss" when gone; a colony its people, "%s/%s", or "%s killed". The remake keeps the
+  sides' luck and the groups' stances in the battle record for it (`rec.luck`,
+  `start[i].st`) and draws it (`rs.battlePanel`, `battlePanel505`): the pile, the names,
+  the luck as a + or − mark, the words; not the damage shading.
+
+What changed in play: nothing in the rules (the battle records are larger by the luck
+and the stances). In the interface the bars are now on the log scale for the mouse too,
+and a locked bar refuses the drag and says why. Not read: the exact pixels of the pile's
+pictures and the damage shading.
+
 ## 15. What can't be done in a browser, and what isn't done yet
 
 - **Network play** (hosting, joining, the lobby, the spacewardho.net server,
@@ -1193,6 +1241,8 @@ All addresses are for the PowerPC code of version 5.0.5, analysed with Ghidra
 | Colony list order / new colony in front | FUN_1007a5e0 / FUN_10078e80 |
 | Budget bars: GiveBarPercent, DetermineNewLevels, most and least | FUN_100712b0, FUN_10071430, FUN_10071a50, FUN_10071ab0 |
 | Dragging a bar / bars that can't be dragged | FUN_1008a7a0 / FUN_1008a030 |
+| The bars' log table, a share's pixel, the drawing, a locked bar's words | FUN_100895a0, FUN_100896a0, FUN_1008aff0, FUN_1008a120 |
+| The battle window's groups and words | FUN_1007f560, FUN_1007f7f0, FUN_1007f9f0, FUN_1007fc20, FUN_100ac8c0, FUN_100aceb0, FUN_1007c250 |
 | Dip Into Savings window (slider 0-30, PPob 157) / the dip in pass 2 | FUN_1005d380 / FUN_10077200 |
 | Evacuate Planet / Dismantle Current Fleet / Scrap Ship Types / build window mark | FUN_10060fac / FUN_10062c10 / FUN_100601e0 / FUN_10099c84 |
 | Buying a ship (human) / Build Ships window's count | FUN_1007e4a0 / FUN_1009ab50 |

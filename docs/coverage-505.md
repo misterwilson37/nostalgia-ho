@@ -454,3 +454,20 @@ Total outside the rule core: 1381.
 - **PowerPlant** (0x10000000-0x100504ff, 2471 routines): LAction and the text-editing actions, LUndoer, LPane, LView, LWindow, LDialogBox, LControl and the Appearance controls, LTable classes, LStream and LFileStream, LArray and LVariableArray, LAttachment, LPeriodical, LCommander, LApplication, LDocument, LModelObject (Apple events), LGWorld, LString and the rest of Metrowerks' framework, each named by its own type information. They hold no game rule: the game reaches them only through its own classes above.
 - **MSL** (from 0x100d2e00, 179 routines): the C and C++ run-time (memory, strings, printf, math, exceptions, static initialisation).
 - **Imported calls** (731): the Carbon, QuickTime and Open Transport calls, named by the loader, and the glue routines (`.glue::...`) that call them.
+
+## The bars and the battle window (October 2026)
+
+Read for Peter Commons' notes (the bars' scale, the locked bars, the ships in battles;
+`docs/original-findings.md` section 14):
+
+| Routine | What | Remake |
+|---|---|---|
+| `FUN_100895a0` | the bar's log table (77.0, 32.11, 2.302, 10.0 at 0x100f0688-0x100f06a0) | engine `BAR_SCALES.log`, `rs.barScale` |
+| `FUN_100896a0` | a share's pixel on the table | `BAR_SCALES.log.toX` |
+| `FUN_1008a7a0` | the click: the mouse's pixel through the table; a locked bar beeps, Savings while dipping opens Dip Into Savings | ui.js `bar`, `rs.barLocked` |
+| `FUN_1008a030`, `FUN_1008a120`, `FUN_1008a370`, `FUN_10089750` | which bars are locked, their words, their colours | `barLocked505` |
+| `FUN_1008aff0` | the drawing: the bars on the table, the grid at 100 ... 1,000, a locked bar flat with its words | ui.js `bar` (no grid) |
+| `FUN_1007f560`, `FUN_1007f7f0`, `FUN_1007f9f0` | the battle's groups: order, stance, column | engine `battleGroups`, `makeBattlePanel` |
+| `FUN_1007fc20` | a group's pile: trunc(0.5 + n^0.68), 1 to 30 | `battlePanel505` |
+| `FUN_100ac8c0`, `FUN_100aceb0`, `FUN_1007c250` | a group drawn: the pile, the face and name, the luck, the words | `battlePanel505`, ui.js `openBattlePanel` |
+
