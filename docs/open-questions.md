@@ -1194,9 +1194,13 @@ None of the rules.
   New Fleet, the pinch. 5.0.5 has its Group Fleets window the same way
   (`organizeFleets: '505'`, with a count for part of a pile); the Palm keeps Split…
   (its pile moves differ, item 10 of the Palm's "Settled, worth confirming").
-- **The supernova's explosion** (`-[StarNode supernova:]` plays frames handed to it;
-  their timing wasn't read): the remake shows one frame the turn it happens. The star
-  dust after it (`starDust`, opacity from star +0x12) isn't drawn.
+- Now done: **the supernova's explosion** (settled October 2026, `docs/ios-findings.md`):
+  `SupernovaAnimate` runs 20 frames (`supernova0`-`19`) at 0.15 s, 3 seconds, the turn
+  the star blows, then `supernovaed` with the star dust at full; after that the dust
+  (+0x12, 20 at the nova, one less a turn) fades at 255 x dust / 20 and the wreck and dust
+  go at 0. `supernova_going1-3` aren't timed: they are the turns before, by the nova
+  count. Built in the iOS skin (`novaLook`); the dust that big battles leave (+0x12 set to
+  20 by `sub_100021108`) isn't, the remake keeping no dust for battles.
 - **Options locked by rank**: none on iOS, so nothing to do.
 - **The Kansas and Hope words** in other languages (`fr.lproj`, `tr.lproj`).
 

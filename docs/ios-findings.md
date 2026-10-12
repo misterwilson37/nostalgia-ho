@@ -252,6 +252,24 @@ and fighters, alliances, battles, the history and the win.
   0 is `supernova_going1` under 71, `going2` under 91, else `going3`; one gone supernova
   `supernovaed` (`-[StarNode supernova:]` `0x10001ac78`, after the explosion's frames),
   with its star dust (`stardust`, opacity min(255, dust × 255 / 20)).
+- **The supernova's timing** (CONFIRMED, October 2026). The map runs `SupernovaAnimate`
+  (0x10000e4ec) on the stars whose nova year (+0x14) is this year. Its duration is
+  frames × delay of `+[SupernovaAnimate animation]` (0x1000a6664, cached as
+  "supernova" in CCAnimationCache): "supernova0.png" to "supernova19.png", 20 frames,
+  delay 0.15 (the float at 0x1000d64b8), so 3 seconds; `update:` (0x1000a64e0) shows
+  frame min(trunc(20 t), 19); `stop` (0x1000a6354) marks the star blown
+  (`superNovaState:withState:` 1) and calls `supernova:` nil, which shows `supernovaed`
+  (the literal at 0x1000fceb0; going1-3 follow it) and the dust at opacity 255, the name
+  hidden. No CCDelayTime is used. Until the animation the star shows `supernova_going3`
+  (its +0x14 is then the year, over 90); the going frames aren't timed, they follow the
+  nova count turn by turn. Afterwards `updateFor:` draws, while the dust (+0x12, a signed
+  byte) is 1 or more, `supernovaed` and the dust at min(255, trunc(255 × dust / 20)),
+  and at 0 neither (an empty place; the name stays hidden, `starWentSupernova:`). The
+  nova sets the dust to 20 (0x100030c30) and the turn takes 1 off each star's
+  (0x1000323c0, later in the same routine, so 19 the nova's turn, LIKELY), and a battle
+  flagged at the star (`sub_100021108`, 0x1000211f4) puts it back up to 20. Built in the
+  iOS skin (`novaLook`; the dust drawn under the special, their order not read); the
+  battles' dust isn't (the remake keeps none).
 - **Message pictures**: `report_icon-n` is 5.0.5's message picture 9000 + n redrawn at
   80 × 80 (`+[MessageNode reportIcon:]` builds `report_icon-%ld.png`; compared side by
   side, 0-50 all match; 5.0.5's 9051 has none). `manifest.json` "images" maps the remake's

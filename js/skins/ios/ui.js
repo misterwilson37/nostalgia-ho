@@ -54,6 +54,52 @@ function row(p, g) {
   const pct = trunc(Math.round(g * 100) * 100 / Math.max(1, Math.round(p.homeG * 100)));
   return [252, 201, 126, 76, 51, 39].filter(v => pct < v).length;
 }
+// The supernova, as the app times it. The turn a star blows, the map runs
+// SupernovaAnimate on it (-[MapLayer ...] 0x10000e4ec, the stars whose nova
+// year, +0x14, is this year): a CCActionInterval of frames x delay of
+// +[SupernovaAnimate animation] (0x1000a6664: "supernova0.png" to
+// "supernova19.png", 20 frames, setDelay: 0.15, the float at 0x1000d64b8),
+// so 3 seconds; update: shows frame min(trunc(20 t), 19) (0x1000a64e0) by
+// -[StarNode supernova:]; stop (0x1000a6354) marks the star blown
+// (superNovaState:withState:) and calls supernova: nil, which shows
+// supernovaed and the star dust at opacity 255 and hides the name. Before it
+// the star still shows supernova_going3 (its +0x14 is the year, over 90).
+// After that, each turn (-[StarNode updateFor:withStar:withGame:]
+// 0x10001af5c): while the star's dust (+0x12) is 1 or more, supernovaed and
+// stardust at opacity min(255, trunc(255 x dust / 20)); at 0 neither, an
+// empty place. The nova sets dust to 20 (0x100030c30) and every turn takes 1
+// off (0x1000323c0, LIKELY after it, so 19 the nova's turn); a big battle
+// sets it back to 20 (0x1000211f4, not built: the remake keeps no dust for
+// battles). Drawn: stardust under the special.
+const novaStart = {}, novaPics = {};
+let novaTimer = 0;
+function novaLook(G, p, s, k, IMG, redraw) {
+  const n = ((s.owner === p.id ? s : k) || {}).nova || 0;
+  if (n < 210) return null;
+  const age = Math.max(0, G.year - n), dust = 19 - age;
+  const im = (x) => IMG[P + x], ok = (x) => x && x.complete !== false && x.width;
+  if (age === 0) {
+    const key = (G.opts && G.opts.seed) + ':' + s.id + ':' + n;
+    const now = (typeof performance !== 'undefined' ? performance : Date).now();
+    if (novaStart[key] == null) novaStart[key] = now;
+    const t = (now - novaStart[key]) / 1000;
+    if (t < 3) {
+      if (redraw && !novaTimer) novaTimer = setTimeout(() => { novaTimer = 0; redraw(); }, 150 - ((t * 1000) % 150) + 1);
+      const f = 'supernova' + Math.min(19, Math.trunc(t / 0.15));
+      return ok(im(f)) ? { base: P + f } : null;
+    }
+  }
+  const ck = 'nova:' + Math.max(0, dust) + ':' + (age === 0);
+  if (novaPics[ck]) return { base: P + 'supernovaed', pic: novaPics[ck] };
+  const sp = im('supernovaed'), du = im('stardust');
+  if (!ok(sp)) return null;
+  const c = document.createElement('canvas'); c.width = sp.width; c.height = sp.height;
+  if (dust < 1) return { base: P + 'supernovaed', pic: (novaPics[ck] = c) }; // nothing left
+  const x = c.getContext('2d');
+  if (ok(du)) { x.globalAlpha = age === 0 ? 1 : Math.min(255, Math.trunc(255 * dust / 20)) / 255; x.drawImage(du, 0, 0, c.width, c.height); x.globalAlpha = 1; }
+  x.drawImage(sp, 0, 0, c.width, c.height);
+  return { base: P + 'supernovaed', pic: (novaPics[ck] = c) };
+}
 function planetPic(IMG, p, src) {
   const r = row(p, src.g), mined = src.metal < 100;
   const T = Math.round(src.t * 10) - Math.round(p.homeT * 10) + 720;
@@ -154,9 +200,9 @@ window.HOTHEME = {
   // one of your fleets' routes (the last star of its path); a star turning
   // red (its nova count, star +0x14, not 0) is supernova_going1 under 71,
   // going2 under 91, else going3; a star gone supernova shows supernovaed
-  // (-[StarNode supernova:] 0x10001ac78, after the explosion's frames, which
-  // the remake shows as one frame the turn it happens). Planets: planetPic.
-  starLook(look, { G, p, s, k, IMG }) {
+  // (-[StarNode supernova:] 0x10001ac78) after the explosion (novaLook
+  // below). Planets: planetPic.
+  starLook(look, { G, p, s, k, IMG, redraw }) {
     const b = look.base, B = (n) => ({ base: P + n, hat: look.hat });
     if (b === 'unknown' || b === 'soon') {
       const end = (f) => f.path && f.path.length ? f.path[f.path.length - 1] : f.dest != null ? f.dest : f.to;
@@ -164,8 +210,7 @@ window.HOTHEME = {
     }
     if (b === 'battle') return B('planet-x');
     if (/^nova\d$/.test(b)) { const n = ((s.owner === p.id ? s : k) || {}).nova || 0; return B(n < 71 ? 'supernova_going1' : n < 91 ? 'supernova_going2' : 'supernova_going3'); }
-    if (b === 'nova12') return B('supernova10');
-    if (b === 'nova18') return B('supernovaed');
+    if (b === 'nova12' || b === 'nova18') return novaLook(G, p, s, k, IMG, redraw) || B(b === 'nova12' ? 'supernova10' : 'supernovaed');
     const src = look.hat && s.owner === p.id ? s : k;
     if (!src || src.g == null) return look;
     const pic = planetPic(IMG, p, src);

@@ -310,7 +310,7 @@ function novaLook(k) {
 }
 function starLook(sid) {
   const look = ourStarLook(sid);
-  return (T.starLook && T.starLook(look, { G, p: me(), s: G.stars[sid], k: HO.know(G, me(), sid), IMG })) || look;
+  return (T.starLook && T.starLook(look, { G, p: me(), s: G.stars[sid], k: HO.know(G, me(), sid), IMG, redraw: draw })) || look;
 }
 function ourStarLook(sid) {
   const p = me(), s = G.stars[sid], k = HO.know(G, p, sid);
