@@ -372,7 +372,7 @@ battles), read in the Palm code:
   colony's share to 0, `FUN_00049d66`), the finished colony's income, "-N% " and N % of
   Ship Savings as a negative number ("-%ld%% ", @0x4a1a0). The remake: `barLockedPalm`.
   CONFIRMED.
-- **The battle window** (`FUN_00030a80` and its caller @0x30960; the words
+- **The battle window** (`FUN_00030a80` and its caller `FUN_00030768`, a group; the words
   `FUN_0004b864`, whose decompile fails, from its disassembly): "Review Battle at %s in
   %ld" (6003.12). Two columns, x 1 and 90, by the group's side byte (5.0.5's: the
   viewer's side on the left), 140 pixels of rows showing at a time, scrolled. Each group

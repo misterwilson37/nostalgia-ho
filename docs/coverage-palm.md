@@ -429,7 +429,7 @@ Every routine not in the table above, by band. "Small" routines are accessors, c
 Read for Peter Commons' notes (`docs/palm-findings.md`, "Bars and battles"):
 `FUN_00049e32` (the log table), `FUN_00049db4` (a share's pixel), `FUN_00049496` (the pen;
 read before for the drag), `FUN_00048e7a` (the drawing and grid), `FUN_00049f82` (the lock),
-`FUN_0004a016` (a locked bar's words), `FUN_00030a80` and its caller (the battle window's
+`FUN_0004a016` (a locked bar's words), `FUN_00030a80` and its caller `FUN_00030768` (the battle window’s
 groups), `FUN_0004b864` (a design's words, from the disassembly: the decompile fails).
 Rules: none changed; the remake's `barLockedPalm` and `battlePanelPalm` (js/rules-palm.js).
 
