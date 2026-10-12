@@ -1086,7 +1086,7 @@ LHoBarControl (0x10089260-0x1008ba00) and CBattleStageMac (0x100ac840-0x100afcb0
   mirrored). Each group (`FUN_100ac8c0`, `FUN_100aceb0`): a pile of its ships' pictures in
   a V, trunc(0.5 + n^0.68) of them, 1 to 30 (`FUN_1007fc20`, constants 0.68 and 0.5 at
   0x100f0660), the last shaded by its damage; the owner's face on it with the owner's
-  name on a black pill; PICT 9017 or 9018 beside it when the side's luck (player record
+  name on a black pill; PICT 9017 (rainbow) or 9018 (storm; both extracted, assets/sprites/m9017.png, m9018.png) beside it when the side's luck (player record
   +2) is above or below 0; its words on a white pill under it (`FUN_1007c250`): "%d %s
   (%d/%d) %ss", "%s %s (%d/%d) %s" with "one", the design's name, its own Weapons and
   Shields (design +6, +8: not the stance's or the luck's), its class ("Decoy" for its

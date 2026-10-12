@@ -532,6 +532,11 @@ battles"):
   whole description with "%.*s détruit(s)" (STR# 1030.1, whatever the count); a colony
   its people or "%s morts" (STR# 4000.32). The remake gives them in English as Mac
   2.0.1's (`battlePanelMac`), as it gives 1.2's other French lines.
+- **Which side is on the left** (`DoOneBattle @d07d0`, `DrawOneGroup @d214e`): when the record's first player
+  (`param_1[0]`) is the viewing player the left column's x is set to 25 (4.0.5: 5) and the right's to 300,
+  else the other way about; `DrawOneGroup` takes its x from the list it draws (the first side's list gets
+  the first side's x). So the **viewer's side is on the left**, and a viewer in neither side (a hot-seat
+  watcher) sees the record's *second* side there. The remake: `makeBattlePanel` `cols: 'mac'`. CONFIRMED.
 
 What changed in play: nothing. The finger uses 2.0's linear bars instead of iOS's log
 scale.

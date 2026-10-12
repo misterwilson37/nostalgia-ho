@@ -1040,8 +1040,11 @@ function battleGroups(G, b, byStance) {
   }
   return out;
 }
-// cfg: cols 'sides' (the record's first side left, the rest right: 1.2 to
-// 4.0.5, DOS) or 'viewer' (the viewer's side and its allies left: 5.0.5,
+// cfg: cols 'sides' (the record's first side left, the rest right: DOS and
+// Windows 2.0 to 4.0.5), 'mac' (the Mac 1.2 to 4.0.5: the viewing player's side
+// left, else, a viewer in neither, the second side; DoOneBattle sets the left
+// column's x to 25, 5 in 4.0.5, when the first side's player is the viewer and
+// to 300 otherwise, each side's groups drawn at its own x) or 'viewer' (the viewer's side and its allies left: 5.0.5,
 // iOS, the Palm); byStance; head(G, b) and end(G, b, won) the window's own
 // lines; ship(G, d, n, n0, mine) and planet(G, pop, pop0) a group's words;
 // owner ('pill': the owner's name on the group, 'luck': and the side's luck
@@ -1050,7 +1053,9 @@ function battleGroups(G, b, byStance) {
 function makeBattlePanel(cfg) {
   return function panel(G, b, state, viewer) {
     const alive = state.alive || [], groups = battleGroups(G, b, cfg.byStance);
+    const sides = b.sides, v0 = cfg.cols === 'mac' ? (sides.includes(viewer) ? viewer : sides.length > 1 ? sides[1] : sides[0]) : sides[0];
     const left = (o) => {
+      if (cfg.cols === 'mac') return o === v0 || isAllied(G, o, v0);
       if (cfg.cols === 'viewer') {
         const v = b.sides.includes(viewer) ? viewer : b.sides[0];
         return o === v || isAllied(G, o, v);
@@ -1073,7 +1078,7 @@ function makeBattlePanel(cfg) {
       if (cfg.owner === 'luck' && b.luck) { const l = b.luck[g.o] | 0; r.owner = (l > 0 ? '+' : l < 0 ? '-' : '') + r.owner; }
       cols[left(g.o) ? 0 : 1].push(r);
     }
-    return { cols, head: cfg.head ? cfg.head(G, b) : [], end: cfg.end && state.over ? cfg.end(G, b, state.won) : null, owner: cfg.owner || null };
+    return { cols, leftSide: v0, head: cfg.head ? cfg.head(G, b) : [], end: cfg.end && state.over ? cfg.end(G, b, state.won) : null, owner: cfg.owner || null, luck: cfg.luck === true };
   };
 }
 

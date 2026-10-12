@@ -2485,7 +2485,7 @@ function openBattlePanel(b) {
     const won = (live(o => !foe(o)) || (b.planetOwner >= 0 && !foe(b.planetOwner) && pop > 0.0005)) && !live(foe) && !(b.planetOwner >= 0 && foe(b.planetOwner) && pop > 0.0005);
     return { alive, pop, over, won };
   };
-  let P = rs.battlePanel(G, b, state(), viewer);
+  let P = rs.battlePanel(G, b, state(), ME);
   // layout: two columns, two groups a row in each; a cell is 180 wide
   const W = 760, CW = 180, RH = 70, dark = !!T.battleBg;
   const headH = 12 + P.head.length * 18 + (P.owner ? 0 : 18);
@@ -2510,14 +2510,14 @@ function openBattlePanel(b) {
   P.cols.forEach((col, ci) => col.forEach((g, k) => { const at = cellOf(ci, k); g.units.forEach(i => where.set(i, at)); if (g.planet) planetAt = at; }));
   const cut = (t, w) => { if (x.measureText(t).width <= w) return t; while (t.length > 1 && x.measureText(t + '…').width > w) t = t.slice(0, -1); return t + '…'; };
   const drawAll = (shot) => {
-    P = rs.battlePanel(G, b, state(), viewer);
+    P = rs.battlePanel(G, b, state(), ME);
     x.fillStyle = T.battleBg || '#04030c'; x.fillRect(0, 0, W, H);
     if (!dark) for (let i = 0; i < 70; i++) { x.fillStyle = 'rgba(200,210,255,.35)'; x.fillRect((i * 97) % W, (i * 53) % H, 1, 1); }
     x.textAlign = 'center'; x.fillStyle = ink;
     P.head.forEach((t, i) => { x.font = (i ? '' : 'bold ') + '13px ' + font; x.fillText(t, W / 2, 20 + i * 18); });
     if (!P.owner) { // the remake's own: each column headed with its side's name (the version drew none)
       x.font = '12px ' + font; x.fillStyle = sub;
-      [b.sides[0], b.sides.find(o => o !== b.sides[0])].forEach((o, ci) => { if (o == null) return; x.fillText(o === ME ? 'You' : (G.players[o] || {}).name || '', ci * (W / 2) + W / 4 + (ci ? 20 : 0), headH - 6); });
+      [P.leftSide ?? b.sides[0], b.sides.find(o => o !== (P.leftSide ?? b.sides[0]))].forEach((o, ci) => { if (o == null) return; x.fillText(o === ME ? 'You' : (G.players[o] || {}).name || '', ci * (W / 2) + W / 4 + (ci ? 20 : 0), headH - 6); });
     }
     x.strokeStyle = dark ? '#000' : 'rgba(200,210,255,.25)'; x.beginPath(); x.moveTo(W / 2 + 10, headH - 2); x.lineTo(W / 2 + 10, H - 40); x.stroke();
     P.cols.forEach((col, ci) => col.forEach((g, k) => {
@@ -2539,7 +2539,10 @@ function openBattlePanel(b) {
         if (P.owner === 'pill') { x.fillStyle = '#000'; roundRect(x, at.x - w / 2, at.y + 10, w, 12, 6); x.fill(); x.fillStyle = '#fff'; x.fillText(t, at.x, at.y + 19); }
         else { x.fillStyle = ink; x.fillText(t, at.x, at.y - 22); }
       }
-      if (g.luck) { // the good-luck / bad-luck picture (5.0.5 PICT 9017/9018, iOS icons 17/18): a mark here
+      const lim = g.luck && P.owner === 'pill' && IMG[g.luck > 0 ? 'm9017' : 'm9018']; // 'pill': 5.0.5's panel (iOS keeps the marks)
+      if (lim && lim.complete && lim.naturalWidth) { // 5.0.5's PICT 9017 (a rainbow) or 9018 (a storm), 40 x 40, beside the group
+        x.drawImage(lim, at.x + 22, at.y - 20, 40, 40);
+      } else if (g.luck) { // the good-luck / bad-luck picture (iOS icons 17/18; where the skin has no picture): a mark
         x.fillStyle = g.luck > 0 ? '#3c9a3c' : '#c03a3a'; x.beginPath(); x.arc(at.x + 40, at.y - 8, 7, 0, Math.PI * 2); x.fill();
         x.fillStyle = '#fff'; x.font = 'bold 11px ' + font; x.fillText(g.luck > 0 ? '+' : '−', at.x + 40, at.y - 4);
       }

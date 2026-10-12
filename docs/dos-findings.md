@@ -385,8 +385,11 @@ drawing (`FUN_1010_0a7a`):
   `BATTLE_PANEL_DOS`, Mac 2.0.1 `BATTLE_PANEL_MAC`).
 
 What changed in play: nothing. The finger now uses 2.0's linear bars instead of iOS's
-log scale. Not read: which list is on the left (the remake puts the record's first side
-there).
+log scale. Which list is on the left: Mac 2.0.1 (`DoOneBattle @d07d0`, `DrawOneGroup
+@d214e`) draws the viewing player's side on the left (the left column's x is 25 when
+`param_1[0]` is the viewer, else 300; a watcher in neither sees the second side there),
+`BATTLE_PANEL_MAC` `cols: 'mac'`. CONFIRMED. DOS and Windows 3.1 not read (the remake puts
+the record's first side there).
 
 ### Still unclear
 

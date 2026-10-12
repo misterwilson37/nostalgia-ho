@@ -260,6 +260,11 @@ battles), read in both programs (Windows `SPACEHO.EXE`, Mac 4.0.5 with its routi
   people, or "%s dead" with the people it had. No owner's name or luck. The remake:
   `rs.battlePanel` (rules-dos `battlePanel20`, Windows `battlePanelWin`, Mac
   `battlePanelMac`), the columns headed with the sides' names (the remake's).
+- **Which side is on the left** (`DoOneBattle @6094e`, `DrawOneGroup @6226c`): when the record's first player
+  (`param_1[0]`) is the viewing player the left column's x is set to 25 (4.0.5: 5) and the right's to 300,
+  else the other way about; `DrawOneGroup` takes its x from the list it draws (the first side's list gets
+  the first side's x). So the **viewer's side is on the left**, and a viewer in neither side (a hot-seat
+  watcher) sees the record's *second* side there. The remake: `makeBattlePanel` `cols: 'mac'`. CONFIRMED for the Mac (Windows 4.0.5 not read: it keeps the record's first side on the left).
 
 What changed in play: nothing in the rules. The bars are on the log scale for the mouse
 and the finger, and a locked bar refuses the drag and says why. Not read: which list is

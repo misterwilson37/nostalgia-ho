@@ -76,11 +76,12 @@ Remake's choices in it:
    version's (Claude, Gemini) have no `rs.barScale` and stay linear.
 4. **The battle window**: the groups are laid out two to a row in each column, the
    pictures the skin's; where the version wrote no owner's name on a group (1.2 to 4.0.5;
-   iOS, which draws the owner's hat) the remake heads each column with its side's name; the good-luck and bad-luck pictures (5.0.5, iOS) are a + or − mark;
+   iOS, which draws the owner's hat) the remake heads each column with its side's name; the good-luck and bad-luck pictures are 5.0.5's PICT 9017 (a rainbow) and 9018 (a storm), drawn in the classic skin (extracted as `m9017`/`m9018`, 40 x 40, 20 pixels right of the group's picture); iOS, which draws icons 17/18, keeps a + or − mark, the Palm has no picture ("+name"/"-name");
    the damage shading and damage bars aren't drawn; the population is the remake's
-   people count (the planet panel's). The side drawn on the left in 1.2 to 4.0.5 (the
-   duel's first or second list) wasn't settled: the remake puts the record's first side
-   there.
+   people count (the planet panel's). The side drawn on the left in the Mac 1.2 to 4.0.5 is
+   the viewing player's (`DoOneBattle` sets the columns' x by `param_1[0] == viewer`;
+   a watcher in neither side sees the second side on the left): done (`cols: 'mac'`);
+   Windows and DOS keep the record's first side, not read.
 5. **The beep** of a locked bar is a short tone the page makes (the originals' system
    beep).
 

@@ -569,7 +569,11 @@ battles), read in 3.0.1's code:
   battle!" or "Unfortunately," "you lost the battle…". The remake: `rs.battlePanel`
   (`battlePanelMac`).
 
-Not read: which list is on the left (the remake puts the record's first side there).
+- **Which side is on the left** (`DoOneBattle @e0aee`, `DrawOneGroup @e274e`): when the record's first player
+  (`param_1[0]`) is the viewing player the left column's x is set to 25 (4.0.5: 5) and the right's to 300,
+  else the other way about; `DrawOneGroup` takes its x from the list it draws (the first side's list gets
+  the first side's x). So the **viewer's side is on the left**, and a viewer in neither side (a hot-seat
+  watcher) sees the record's *second* side there. The remake: `makeBattlePanel` `cols: 'mac'`. CONFIRMED (2.0.1 @d07d0/@d214e and 1.2 are the same).
 
 ## Still open
 
