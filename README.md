@@ -99,6 +99,7 @@ what differs (the Mac 2.0.1 on the DOS and Windows 2.0, the Mac 4.0.5 on the Win
 | 5 | Mac | 5.0.5 | 2003 | `original` | classic |
 | 5 | Palm OS | 5 | 2003 | `palm` | palm |
 | 5 | iOS | 1.2.9 | 2012 | `ios` | ios |
+| 5 | Android | 1.2.8 | 2015 | `android` | android |
 | remake | The remake's own rules | Claude | 2026 | `claude` | classic |
 
 (The Claude rules set none of these fields; `js/engine.js` gives them, `OWN_EDITIONS`.)
@@ -122,6 +123,12 @@ unofficial patch, the modern conveniences and Choose sounds. The Skin menu lists
 edition's own skins first (`rs.skins`), then a line, then the others; choosing an edition
 picks its first skin unless a skin was picked by hand this session. A ruleset without the
 fields above yet is placed by its `rs.version` (and a small table in `ui.js`).
+
+## Fonts
+
+Every font is hosted in `assets/fonts/` (woff2, SIL Open Font License; see `assets/fonts/README.txt` and the
+`OFL-*.txt` files): Rye (classic), Bitter (cozy), Roboto (the android skin and its looks). The page loads nothing
+from Google Fonts or any other third party for them; `tools/bundle.py` embeds them as data: URIs.
 
 ## OS looks
 
@@ -147,9 +154,11 @@ skin's own chrome) and draw everything in CSS and inline SVG.
 | Palm OS | `palmos` | Palm OS forms: a black title tab, thin round buttons, small bold type | palm |
 | iOS 6 | `ios6` | the 2012 launch's system: Helvetica Neue, the blue-grey navigation bar, the dark blue glassy alert, a black action sheet of glossy buttons for the menus, the blue ON / grey OFF switch for every check box, the blue-filled slider | |
 | iOS 10 | `ios10` | the system 1.2.9 was built for (iOS 10.3 SDK, 2017): San Francisco (Helvetica Neue where it's missing), a translucent bar, 270-point alerts with their buttons along the bottom, action sheets for the menus, green switches for every check box, the thin slider with its white knob, rounded text fields; no status bar (the app hid it) | ios |
+| Android 4 | `android4` | Holo dark (a best guess, no screenshots of the game): dark grey dialogs with a cyan (#33b5e5) title rule and focus, flat buttons, Holo switches, square check boxes, thin sliders, underlined fields, Roboto | android |
+| Fire OS 3 and 4 | `fireos` | the Android 4 look in Amazon's orange (#f90, #e47911), a best guess | android |
 
 Each skin lists its own looks in `js/skins.js` (`SKINS`' `os`, the default first: mac2 System
-6 and 7, mac4 System 7 and Mac OS 8, dos DOS and Windows 3.1, classic Mac OS 8.6, 9 and X, ios iOS 10 and 6);
+6 and 7, mac4 System 7 and Mac OS 8, dos DOS and Windows 3.1, classic Mac OS 8.6, 9 and X, ios iOS 10 and 6, android Fire OS and Android 4);
 the OS look menu offers those first, then a line, then every other look, so anything can be
 mixed. The list follows the skin, not the version. The look is chosen in New Game, on the
 title screen, and mid-game from the Ho menu's **Skin and OS look…**, where it changes at once

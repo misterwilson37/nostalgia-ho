@@ -110,13 +110,14 @@ planned order:
 
 ### Android
 
-- The same as iOS, and e-mailing one saved game (we don't know if it worked on Android).
+- The same as iOS (including the Scouts and Tankers warning and the drag "tick"), and e-mailing one saved game (we don't know if it worked on Android).
 
 ### iOS
 
 - Several saved games, e-mailing a game, the welcome screen and the help page.
 - Game Center's own windows (the leaderboards and achievements are shown as a plain list).
-- The questions before building many Scouts or Tankers.
+- The questions before building many Scouts or Tankers (iOS 1.2.5: a warning above 10).
+- The "tick" sound when a fleet is dragged to a planet (iOS 1.2.5).
 - The star dust that big battles leave (a supernova's dust is drawn).
 - The Kansas and Hope lines in French and Turkish.
 

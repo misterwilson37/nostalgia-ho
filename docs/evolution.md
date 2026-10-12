@@ -794,6 +794,24 @@ of 5.9 inches or more is a tablet, a smaller one a phone; the text is the system
 (the game asks for Arial, which Android lacks; Roboto on Android 4). The pictures and
 sounds are iOS's (two sounds stored as Ogg Vorbis).
 
+### iOS and Android releases
+
+From the App Store's version history (sent by Jake):
+
+| Version | Date | What it says |
+|---|---|---|
+| 1.2.9 | 31 Aug 2017 | "64 bit compatible! Rejoice! Plus, some other bug fixes. And fixing the accidental deletion of games after Aug 8th." |
+| 1.2.8 | 30 Aug 2017 | "64 bit compatible! Rejoice! Plus, some other bug fixes." |
+| 1.2.5 | 5 Dec 2013 | fixed crashes with large galaxies and with multitouch after the first transition; a new style for the message window; no toggle text on the players sidebar for eliminated players; a warning when building more than 10 scouts or tankers; a "tick" sound when you drag to a planet; the sidebar scrolls when you select a planet; auto play is off while a battle is shown; a menu that couldn't be selected fixed |
+| 1.2.4 | 30 Oct 2013 | tap and hold to scrap a satellite; fuel status for the fleets; a pathing bug fixed (a ship couldn't be sent to a planet it could reach by refuelling at a colony); works on iOS 4.3.x again; better message wrapping; a double tap on a fleet opens Organize; Facebook and Twitter; iOS 7 fixes |
+| 1.2.3 | 11 Sep 2013 | finally shows the damage to ships in battles; planet and name spacing adjusted on the iPad; a crash when scrapping a fleet fixed |
+
+The Android build labelled 1.2.8 was built in February 2015 (versionCode 1424117070), two
+and a half years before iOS 1.2.8, so its label does not match the iOS releases. Its code
+lies between iOS 1.2.5 (December 2013) and the 2017 64-bit releases: it is 32-bit ARM. The
+2017 iOS entries ("64 bit", the games deleted after 8 August) are platform and save-file
+fixes, which fits the finding that the rules are identical.
+
 ---
 
 ## What Delta Tao said vs what the code shows
