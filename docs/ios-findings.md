@@ -670,13 +670,24 @@ didn't show the ships. In iOS 1.2.9:
   losses is "%d/%d %ss", one wholly lost "one dead %s" or "%d dead %ss"; the colony its
   people, "%s/%s", or "%s killed" (sprintf Templates 9-15). No owner's name is written.
   The remake: `rs.battlePanel` (`battlePanelIOS`). CONFIRMED.
+  **The luck icons** (`-[BattleShipNode init]` 0x10009c18c): `goodluck` is
+  `+[MessageNode reportIcon:17]` and `badluck` `reportIcon:18`, i.e. `report_icon-17.png`
+  and `report_icon-18.png` (`assets/skins/ios/sprites/`; the remake's `m9017`, `m9018`);
+  the skin draws them in place of the + and − marks (`makeBattlePanel` now returns
+  `luck`, which the window's picture test needed).
+- **Build Ships' Allow Debt** starts at "No" (CONFIRMED): `BuildSingleShipDialog
+  initDialog` 0xb4d60 builds the switch as a SliderArray of "No", "Yes" (Misc Strings
+  159, 160), nothing sets it, and `determineCapacity` 0xb6a08 reads 0 as "stop at Ship
+  Savings".
+- **Organize Fleets' pile move** (`move:from:to:` 0xc27e0, CONFIRMED): writes only the
+  counts, the larger fuel used, "bought" and the colonists; the receiving fleet's stance
+  byte (+0x58 + design) is never touched.
 
 What changed in play: nothing in the rules. The mouse now drags the bars on the log
 scale (before: linear), the bars are always drawn on it, and locked bars refuse the
 drag in the interface as well as in the rules. Not read: the first drawing methods of
 CBattleStagePhone (in the encrypted page; the BattleStageLayer above is what draws the
-window), which picture the good-luck and bad-luck icons are (the remake draws a + or −
-mark), and the damage shading's exact look (not drawn).
+window), and the damage shading's exact look (not drawn).
 
 ## Still open
 

@@ -1078,8 +1078,11 @@ None of the rules.
    question. Done as a question.
 2. **Evacuate asks for every colony**, including one losing money ("Do you really want
    to evacuate %s?", sprintf Templates 36).
-3. **The Allow Debt switch starts at "No"** each time Build Ships opens (LIKELY: no
-   code sets its value), so by default you can't buy past your Ship Savings.
+3. **The Allow Debt switch starts at "No"** each time Build Ships opens (CONFIRMED
+   October 2026: `initDialog` 0xb4d60 makes `debtSlider` a SliderArray of Misc Strings
+   159 "No" and 160 "Yes" and never calls `setValue:` on it, and nothing else writes
+   it; `determineCapacity` 0xb6a08 reads 0 as "stop at Ship Savings", as the remake's
+   `allowDebt` `on: false`), so by default you can't buy past your Ship Savings.
 
 ### Remake's choices
 
@@ -1128,7 +1131,9 @@ None of the rules.
    - Organize Fleets: a pinch counts past 10% either way (iOS: any scale over 1 splits,
      any other groups); a pile moved to a fleet that hasn't its design takes its stance
      with it, as 5.0.5's drop does (iOS's `move:from:to:` leaves the fleet's stance byte
-     for that design as it was, LIKELY whatever an earlier pile left there); the fleet a
+     for that design as it was; CONFIRMED October 2026, 0xc27e0 writes only the counts
+     (+0x28), the larger fuel used, "bought" and the Colony Ships' colonists, so it keeps
+     whatever the byte held); the fleet a
      pile leaves is gone at once when empty (iOS: when the window closes);
    - the iOS skin's route line: a route under 3 light years (none on iOS) is drawn as
      one white leg, and the legs' labels keep one size (iOS scales them with the
