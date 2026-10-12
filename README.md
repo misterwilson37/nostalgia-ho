@@ -48,9 +48,9 @@ drags, so a laptop with a touch screen has both:
 - lists, the panel and windows slide after 30 points of movement (an item touched isn't
   chosen once its list has moved); a slide on the fleet list is thrown on as the map is
   (iOS's fleet list is an inertial menu), the others slow down as iOS's scroll layers;
-- the budget and technology bars jump to the finger on iOS's log scale (value =
-  (exp(x * 77 / w / 32.11 + 2.302) - 10) * 10 per mille, up to 1,000), and are drawn on it
-  until a mouse sets one; the terraform / mine slider stays linear;
+- the budget and technology bars jump to the finger, on the ruleset's own scale, as a
+  mouse's click does (`rs.barScale`, below); a finger stays on the bar's row as it drags;
+  the terraform / mine slider stays linear;
 - a long press on anything with hover help still explains it, unless the finger moves.
 
 A gesture whose command the ruleset hasn't got is skipped. `window.HOVIEW()` gives the
@@ -191,6 +191,28 @@ Optional ruleset flags the skin reads (each is documented where it is read):
   and 2.0); the Evacuate button and "Evacuate planet…" then never show. Evacuate is a
   rule, not a modern convenience. Left out (or `true`): they always show.
   (`js/skins/classic/ui.js`, `evacuateShown`)
+- `rs.barScale`: `{ budget, tech, toggle }`, each `'log'` or `'linear'` (left out:
+  linear). The budget and technology bars are drawn, and set by a mouse, a pen or a
+  finger, on that scale: the log scale every version has (engine `BAR_SCALES.log`: a
+  bar's fraction x is worth trunc((e^(77x / 32.11 + 2.302) − 10) × 10) per mille, the
+  end 1,000; Mac `InitHLogBarAmts`, 5.0.5 `FUN_100895a0`, iOS `initHLogBarAmts`). iOS,
+  5.0.5, the Palm, 4.0.5 and 3.0.1 use it for both; 2.0 and 1.2 for the technology bars
+  only, the budget bars being linear. `toggle` (1.2 to 3.0.1): a click on the Budget
+  heading switches the budget bars between the two, kept per ruleset in the browser.
+  `HO.barScale(G, kind, pick)` gives the scale. (`js/skins/classic/ui.js`, `bar`)
+- `rs.barLocked(G, player, slot)`: a budget bar the version locks, or null: `{ text,
+  free, dip, silent }`, its words drawn in the bar's place (5.0.5, iOS, Palm:
+  "Evacuating", a finished colony's income, Savings while dipping "-N% (…)"; 3.0.1 and
+  4.0.5: a finished colony's "$" income), `free` when it can still be dragged (3.0.1's and
+  4.0.5's finished colony at star 0), `dip` when a click opens Dip Into Savings (5.0.5,
+  the Palm), `silent` when a refused click makes no beep (iOS, the Palm). Left out:
+  nothing is locked (2.0, 1.2). (`js/skins/classic/ui.js`, `bar`, `renderPanel`)
+- `rs.battlePanel(G, battle, state, viewer)`: the battle window's ship panel as the
+  version showed it, made with `HO.makeBattlePanel(cfg)`: the heading and closing lines
+  and two columns of groups, each with its words ("3 Lancelot (5/4) Fighters", "one dead
+  …", the colony's people), the owner's name and the side's luck where the version drew
+  them. The skin draws it (`openBattlePanel`; `T.battleBg`, `T.battleFont`). Left out
+  (Claude, Gemini): the remake's own battle window.
 - `rs.dragShare(G, player, slot, newPerMille)`: the version's own way of dragging a budget
   bar (2.0 and 1.2: the others move in proportion, with a floor of 0; only a new
   colony's first share uses the least-share floor). `slot` is `'tech'`, `'savings'` or a colony's star id;

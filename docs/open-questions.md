@@ -37,6 +37,61 @@ edition's questions are in its version's section.
 
 ---
 
+## The bars and the battle window, every version (October 2026)
+
+Peter Commons, trying the remake, noted three things: "the bar charts aren't log scale",
+"[the bars] don't lock at zero when mined and terraformed", and "battles don't show ship
+info". Each was settled from each version's code, newest first (each version's findings
+file, "Bars and battles"), and built as a rule of the ruleset, drawn by every skin:
+`rs.barScale` (engine `BAR_SCALES`, `barScale`), `rs.barLocked` and `rs.battlePanel`
+(engine `makeBattlePanel`).
+
+| Version | The bars' scale | Locked at zero | Ships in the battle window |
+|---|---|---|---|
+| iOS 1.2.9 | log, budget and technology (the only scale) | evacuating, finished, Savings while dipping | yes: groups, (W/S), luck |
+| Mac 5.0.5 | log, budget and technology (the only scale) | the same; a beep, or Dip Into Savings | yes: piles, names, luck |
+| Palm 5 | log (the only scale) | the same | yes: one picture, "+name" for luck |
+| Windows / Mac 4.0.5 | log by default (INI `useLogScale`, setup +0x3c: no switch in the game); technology always log | abandoning, finished at star ≥ 1 (the `star0` slip) | yes: "Summary of battle", (W/S), "N dead" |
+| Mac 3.0.1 | log by default; a click above the bars switches; technology always log | the same as 4.0.5 (the same slip) | yes, as 4.0.5 |
+| DOS / Mac 2.0.1 | **linear by default**; a click above the bars switches to log; technology always log | none | yes, as 4.0.5 |
+| Mac 1.2F | as 2.0 | none | yes, in French |
+
+So the **log scale** goes back to the oldest version read (1.2F), as a switch for the
+budget bars and always for the technology bars; it became the budget bars' default in
+3.0.1 and their only scale in 5.0. The **lock at zero** first appears in **Mac 3.0.1**;
+the two versions before it, **2.0** (DOS and Mac 2.0.1, one step) and **1.2**, have none,
+so the search stopped there (it is probably new in 3.0, for the developer to confirm).
+The **ships in the battle window** go back to 1.2F as well.
+
+Remake's choices in it:
+
+1. **The scale switch** (1.2 to 3.0.1) is a click on the Budget heading, the strip above
+   the bars; the original kept the setting in its setup file, the remake in the browser,
+   one for each ruleset ("ho5.barScale.<ruleset>").
+2. **The bars' grid** (ten lines at 100 ... 1,000 per mille on the log scale, tenths on the
+   linear one) isn't drawn; the bars are the skin's own width, not 77 pixels, so the
+   table is worked out for the bar's fraction (engine `BAR_SCALES.log`), not in 78 steps.
+3. **A finger uses the version's own scale** (it used iOS's log scale in every skin):
+   linear in 2.0 and 1.2 unless switched, log elsewhere. Rulesets that aren't an original
+   version's (Claude, Gemini) have no `rs.barScale` and stay linear.
+4. **The battle window**: the groups are laid out two to a row in each column, the
+   pictures the skin's; the remake heads each column of 1.2 to 4.0.5 with its side's name
+   (they drew none); the good-luck and bad-luck pictures (5.0.5, iOS) are a + or − mark;
+   the damage shading and damage bars aren't drawn; the population is the remake's
+   people count (the planet panel's). The side drawn on the left in 1.2 to 4.0.5 (the
+   duel's first or second list) wasn't settled: the remake puts the record's first side
+   there.
+5. **The beep** of a locked bar is a short tone the page makes (the originals' system
+   beep).
+
+A change to vanilla play: **Mac 3.0.1** now lets a finished colony at star 0 have its
+bar dragged, as 3.0.1 does (`DoHBarClick @d18a0` tests the star number); the remake had
+locked it. The 3.0.1.1 patch locks it (`star0`, `docs/fixes.md`). No version's lock was
+missing from the remake's rules: 5.0.5's, iOS's, the Palm's and 4.0.5's were already
+refused there; the bars now show it.
+
+---
+
 ## Mac 1.2 (1992)
 
 All 548 routines of the program have been read (`docs/coverage-12.md`; none unread), and
@@ -1054,7 +1109,7 @@ None of the rules.
    star's information, hidden meanwhile), the double tap on the fleet list (Organize
    Fleets, or Split… without it), the satellite's long hold (with a ruleset that marks
    for scrapping), lists sliding after 30 points (the fleet list thrown on as iOS's
-   inertial menu) and the budget bars on the log scale; a gesture whose command the
+   inertial menu); a gesture whose command the
    ruleset hasn't got is skipped. A mouse and a pen keep the remake's own behaviour. No
    other version had a touch screen; if an Android version turns up and handles touch
    differently, it becomes a choice like the OS look. The remake's own choices in it:
@@ -1066,8 +1121,10 @@ None of the rules.
      (`-[MapLayer setScale:]`, now read), with the remake's own smallest scale (the
      whole galaxy showing; iOS's covers the screen); where stars crowd, the square gives
      way to a nearer star, and a slow drag from it counts as a drag;
-   - the fuel alert is shown once per browser; after a finger sets a bar, the bars are
-     drawn on the log scale until a mouse sets one;
+   - the fuel alert is shown once per browser;
+   - (October 2026) the budget and technology bars are no longer on iOS's log scale for
+     every finger: each ruleset's own scale is used by the finger, the mouse and the pen
+     alike, and for drawing them (`rs.barScale`, above, "The bars and the battle window");
    - Organize Fleets: a pinch counts past 10% either way (iOS: any scale over 1 splits,
      any other groups); a pile moved to a fleet that hasn't its design takes its stance
      with it, as 5.0.5's drop does (iOS's `move:from:to:` leaves the fleet's stance byte
