@@ -2480,13 +2480,14 @@ function openBattle(bid) {
 // conveniences' speed control and account are kept.
 function openBattlePanel(b) {
   const rs = HO.rules(G), viewer = b.sides.includes(ME) ? ME : b.sides[0];
-  const alive = b.start.map(() => true);
+  const alive = b.start.map(() => true), hurt = [];
+  let seq = 0;
   let pop = b.pop0, over = false;
   const state = () => {
     const foe = (o) => o !== viewer && !HO.isAllied(G, o, viewer);
     const live = (pred) => b.start.some((u, i) => alive[i] && pred(u.o));
     const won = (live(o => !foe(o)) || (b.planetOwner >= 0 && !foe(b.planetOwner) && pop > 0.0005)) && !live(foe) && !(b.planetOwner >= 0 && foe(b.planetOwner) && pop > 0.0005);
-    return { alive, pop, over, won };
+    return { alive, hurt, pop, over, won };
   };
   let P = rs.battlePanel(G, b, state(), ME);
   // layout: two columns, two groups a row in each; a cell is 180 wide
@@ -2536,6 +2537,9 @@ function openBattlePanel(b) {
           x.save(); x.translate(px, py); if (ci) x.scale(-1, 1); x.drawImage(im, -im.width * sc / 2, -im.height * sc / 2, im.width * sc, im.height * sc); x.restore();
         }
         x.globalAlpha = 1;
+        if (g.shade && g.shade[1] > g.shade[0]) { // 1.2 to 4.0.5: the cell's damage shading (a gray PaintRect in patOr)
+          x.fillStyle = 'rgba(128,128,128,.55)'; x.fillRect(at.x - 30 + 60 * g.shade[0], at.y - 20, 60 * (g.shade[1] - g.shade[0]), 40);
+        }
       }
       if (P.owner && g.owner) { // the owner's name over the group (5.0.5: a black pill; the Palm: "+name" for good luck)
         x.font = '10px ' + font; const t = cut(g.owner, CW - 20), w = x.measureText(t).width + 8;
@@ -2572,7 +2576,7 @@ function openBattlePanel(b) {
     const a = center(ev.si);
     let t;
     if (ev.p) { t = center(-1); Sound.play(3000); }
-    else { t = center(ev.ti); if (ev.k) { alive[ev.ti] = false; Sound.play(e % 3 === 0 ? 3003 : 3002); } else if (e % 4 === 0) Sound.play(3000 + (e % 2)); }
+    else { t = center(ev.ti); if (ev.f != null) hurt[ev.ti] = { n: ++seq, f: ev.f }; if (ev.k) { alive[ev.ti] = false; Sound.play(e % 3 === 0 ? 3003 : 3002); } else if (e % 4 === 0) Sound.play(3000 + (e % 2)); }
     drawAll({ x1: a.x, y1: a.y, x2: t.x, y2: t.y, a: ev.a });
     if (ev.k && !ev.p) x.drawImage(IMG.debris, 0, 0, 288, 138, t.x - 30, t.y - 18, 60, 36);
     e++;
@@ -2580,7 +2584,7 @@ function openBattlePanel(b) {
   };
   const finish = () => {
     for (; r < b.rounds.length; r++, e = 0) {
-      for (; e < b.rounds[r].length; e++) { const ev = b.rounds[r][e]; if (ev.k && !ev.p) alive[ev.ti] = false; }
+      for (; e < b.rounds[r].length; e++) { const ev = b.rounds[r][e]; if (ev.f != null && !ev.p) hurt[ev.ti] = { n: ++seq, f: ev.f }; if (ev.k && !ev.p) alive[ev.ti] = false; }
       if (b.popR) pop = b.popR[r];
     }
     step();

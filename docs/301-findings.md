@@ -574,6 +574,12 @@ battles), read in 3.0.1's code:
   else the other way about; `DrawOneGroup` takes its x from the list it draws (the first side's list gets
   the first side's x). So the **viewer's side is on the left**, and a viewer in neither side (a hot-seat
   watcher) sees the record's *second* side there. The remake: `makeBattlePanel` `cols: 'mac'`. CONFIRMED (2.0.1 @d07d0/@d214e and 1.2 are the same).
+- **The damage shading** (`DrawOneGroup @e274e`; the same code in 1.2, 2.0.1, 3.0.1 and 4.0.5): after the picture and the words,
+  a group that is not a colony's has its 120 x 40 picture cell painted with the pen set to the gray pattern (the
+  QuickDraw global qd.gray; the pen is put back to qd.black after) in patOr mode: a gone group (count 0) the whole
+  cell, else the damage done to its next ship, 120 x damage / hit points pixels from the left (a satellite: a third
+  of that, starting 40 pixels in, so at most 40 wide). No frame, no other bars. The remake: `rs.battlePanel` `shade`
+  (the battle events' `f`), drawn as a translucent gray rectangle. CONFIRMED.
 
 ## Still open
 

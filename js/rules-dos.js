@@ -669,7 +669,7 @@ function battle(G, sid, hooks) {
               t.dmg += Math.max(1, trunc(base / 6));
               let k2 = 0, ti = t.idx[Math.max(0, t.n - 1)];
               if (t.dmg >= t.hp) { t.dmg = 0; t.n--; debris += t.debris; k2 = 1; } // no carry-over
-              if (ev.length < 80) ev.push({ a: u.o, si: id(si), t: t.o, k: k2, ti: id(ti) });
+              if (ev.length < 80) ev.push({ a: u.o, si: id(si), t: t.o, k: k2, ti: id(ti), f: k2 ? 0 : t.dmg / t.hp });
             }
           }
         }
@@ -1844,14 +1844,14 @@ function battlePanel20(opt) {
   };
   const pop = (G, x) => (E.rules(G).fmtNum || fmt)(Math.round(x * 1e6));
   return E.makeBattlePanel({
-    cols: opt.cols || 'sides', pics: (n) => Math.min(n, 1),
+    cols: opt.cols || 'sides', shade: !!opt.shade, pics: (n) => Math.min(n, 1),
     head: (G, b) => ['Summary of battle', `at ${G.stars[b.star].name} in ${b.year}:`],
     end: (G, b, won) => won ? ['Congratulations!', 'You won the battle!'] : ['Unfortunately,', 'you lost the battle' + opt.dots],
     ship: (G, d, n, n0, mine) => n < 1 ? `${n0} dead ${desc(d, 0, mine)}${n0 === 1 ? '' : 's'}` : desc(d, n, mine),
     planet: (G, x, x0) => x <= 0.0005 ? `${pop(G, x0)} dead` : pop(G, x),
   });
 }
-const BATTLE_PANEL_DOS = battlePanel20({ name: 15, cls: 11, dots: '...' }), BATTLE_PANEL_MAC = battlePanel20({ dots: '…', cols: 'mac' }), BATTLE_PANEL_WIN = battlePanel20({ dots: '...' });
+const BATTLE_PANEL_DOS = battlePanel20({ name: 15, cls: 11, dots: '...' }), BATTLE_PANEL_MAC = battlePanel20({ dots: '…', cols: 'mac', shade: true }), BATTLE_PANEL_WIN = battlePanel20({ dots: '...' });
 
 E.registerRules('dos', Object.assign({}, O, {
   // CONFIRMED (DOS: the budget window's drawing FUN_9000_0cd5 and click

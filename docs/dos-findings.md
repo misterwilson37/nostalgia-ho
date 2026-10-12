@@ -388,7 +388,7 @@ What changed in play: nothing. The finger now uses 2.0's linear bars instead of 
 log scale. Which list is on the left: Mac 2.0.1 (`DoOneBattle @d07d0`, `DrawOneGroup
 @d214e`) draws the viewing player's side on the left (the left column's x is 25 when
 `param_1[0]` is the viewer, else 300; a watcher in neither sees the second side there),
-`BATTLE_PANEL_MAC` `cols: 'mac'`. CONFIRMED. DOS and Windows 3.1 not read (the remake puts
+`BATTLE_PANEL_MAC` `cols: 'mac'`. CONFIRMED. Mac 2.0.1's `DrawOneGroup` also shades a group's picture cell (gray, patOr: all of it when the group is gone, else 120 x the next ship's damage / hit points pixels from the left; `shade`). DOS and Windows 3.1 not read. DOS and Windows 3.1 not read (the remake puts
 the record's first side there).
 
 ### Still unclear

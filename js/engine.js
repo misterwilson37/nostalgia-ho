@@ -1049,7 +1049,14 @@ function battleGroups(G, b, byStance) {
 // lines; ship(G, d, n, n0, mine) and planet(G, pop, pop0) a group's words;
 // owner ('pill': the owner's name on the group, 'luck': and the side's luck
 // as + or −, the Palm's "+%s"); luck (a mark for the side's luck, 5.0.5 and
-// iOS); pics(n) how many pictures a group of n ships shows.
+// iOS); pics(n) how many pictures a group of n ships shows; shade (the Mac
+// 1.2 to 4.0.5): each group's damage shading, r.shade = [from, to] as
+// fractions of the group's cell, drawn by DrawOneGroup as a gray (qd.gray)
+// PaintRect in patOr over the cell: a gone group fills the whole cell, else
+// the damage done to the group's front ship (state.hurt[unit] = the fraction
+// of its hit points, from the battle events' f), 120 x damage / hit points
+// pixels of the 120 from the left (a satellite: a third of that, in the
+// middle third); a colony's group has none.
 function makeBattlePanel(cfg) {
   return function panel(G, b, state, viewer) {
     const alive = state.alive || [], groups = battleGroups(G, b, cfg.byStance);
@@ -1073,6 +1080,13 @@ function makeBattlePanel(cfg) {
         const n0 = g.units.length, n = g.units.filter(i => alive[i] !== false).length;
         r.did = g.did; r.n = n; r.n0 = n0; r.text = cfg.ship(G, d, n, n0, mine, g.st);
         r.pics = cfg.pics ? cfg.pics(n || n0) : 1;
+        if (cfg.shade) {
+          const sat = d.type === 'satellite';
+          let f = 0, q = -1;
+          for (const i of g.units) { const h = state.hurt && state.hurt[i]; if (h && h.n > q) { q = h.n; f = h.f; } }
+          f = Math.max(0, Math.min(1, f));
+          r.shade = n === 0 ? [0, 1] : sat ? [1 / 3, 1 / 3 + f / 3] : [0, f];
+        }
       }
       if (cfg.owner) r.owner = (mine ? 'You' : P ? P.name : '?');
       if (cfg.owner === 'luck' && b.luck) { const l = b.luck[g.o] | 0; r.owner = (l > 0 ? '+' : l < 0 ? '-' : '') + r.owner; }

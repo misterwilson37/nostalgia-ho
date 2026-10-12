@@ -1229,7 +1229,7 @@ function shoot(G, g, T, k, tgt, ev, addDebris) {
       let killed = 0;
       const ti = t.ids[Math.max(0, t.n - 1)];
       if (t.hp <= t.dmg) { t.dmg = 0; t.n--; addDebris(t.debris); killed = 1; }
-      if (ev.length < 80) ev.push({ a: g.o, si, t: t.o, k: killed, ti });
+      if (ev.length < 80) ev.push({ a: g.o, si, t: t.o, k: killed, ti, f: killed ? 0 : t.dmg / t.hp });
     }
     if (t.n === 0) tgt[k] = -1;
   }
