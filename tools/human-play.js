@@ -223,6 +223,10 @@ async function playOne(browser, rules, url) {
   const knows = !FORM_AS[rules] || await page.evaluate(() => !!window.HONEWGAME_EDITIONS);
   if (!knows) await page.evaluate(() => { window.__hpEdition = true; });
   await form.locator('select[name=rules]').selectOption(knows ? rules : FORM_AS[rules]);
+  // stay in the classic skin: picking a ruleset offers its own skin first (Cozy for the
+  // Claude rules, Gemini's for Gemini's), which would reload the page into it; this test
+  // is about the rules, and runs through the classic page
+  { const sk = form.locator('select[name=skin]'); if (await sk.count() && await sk.locator('option[value=classic]').count()) await sk.selectOption('classic'); }
   if (rules !== '12') await form.locator('select[name=computers]').selectOption('3');
   if (rules === 'original' || rules === 'palm' || rules === 'ios' || rules === 'android') {
     // Abundant for both: the second colony from the start (and its shares)
