@@ -362,6 +362,14 @@ battles), read in the Palm code:
   `FUN_00049db4` gives a share's pixel, `FUN_00049496` puts the pen's pixel through the
   table (control +0x20), and `FUN_00048e7a` draws the bars and the grid at 100 ... 1,000
   per mille on it. Budget and technology bars alike (the control's kind, +0x28, 2 or 1).
+  The grid is not 5.0.5's (CONFIRMED, October 2026): after the bars and before the
+  names, ten solid 1-pixel lines (`WinPaintLine`) at x = left + `FUN_00049db4`(100k),
+  from the list's top (0) to its last row's bottom, so through the bars and the gaps,
+  in colour-table entry 3 (`FUN_00014418`: the app's table at A5-0x16b6, 24 palette
+  indices, e7 00 00 a5 7d ...; entry 3 index 0xa5, #666666; on a grayscale screen the
+  table at A5-0x169e, gray 5 of 15); no black tick at the top; a black line 1 left of
+  the bars' left edge from the top. The remake: `rs.barGrid` `{ n: 10, tick: 0, line:
+  true, color: '#666666', tech: true }`, drawn through each bar (not the gaps).
   The remake: 5.0.5's `rs.barScale`, for every pointer. CONFIRMED.
 - **The lock.** `FUN_00049f82` is `FUN_1008a030`: a colony being evacuated (colony +0x11),
   a finished colony (+2 and +4 both −1), Savings while dipping (player +0x20 above 0); a

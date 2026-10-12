@@ -240,6 +240,15 @@ const rs = Object.assign(base, {
   // 77.0, 32.11, 2.302 and 10.0 in the Palm's soft float; FUN_00049db4 a
   // share's pixel; FUN_00049496 the pen's pixel through it; FUN_00048e7a the
   // grid at 100 ... 1,000 per mille), inherited from 5.0.5
+  // CONFIRMED (FUN_00048e7a, the bar list's drawing): after the bars, ten
+  // lines at 100 ... 1,000 per mille through the bar's scale (FUN_00049db4),
+  // each a solid 1-pixel line from the list's top to its last row's bottom,
+  // over the bars, in the app's colour-table entry 3 (FUN_00014418: the
+  // colour table at A5-0x16b6 gives palette index 0xa5, #666666; the
+  // grayscale one at A5-0x169e gray 5 of 15); no tick (5.0.5 draws a black
+  // 3-pixel tick and a faint line); the budget and technology bars alike
+  // (the same control, kind +0x28 2 or 1).
+  barGrid: { n: 10, tick: 0, line: true, color: '#666666', tech: true },
   barLocked: barLockedPalm, battlePanel: battlePanelPalm,
   // CONFIRMED (FUN_0002c510, the CMiscUtilsPalm method +0x68 the report
   // formatter FUN_00027c4c calls): numbers in full with commas, however big,

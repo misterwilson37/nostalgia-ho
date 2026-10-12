@@ -1138,8 +1138,9 @@ function bar(label, val, max, onSet, opts) {
   // 5.0.5's grid (FUN_1008aff0): ten lines at 100 ... 1,000 per mille on the bar's scale,
   // each a black tick 3 pixels long at the top, the rest of the line a faint blend
   // opts.grid is the ruleset's rs.barGrid: n lines, tick pixels long; line: faint through the bar;
-  // above: the older versions' ticks sit on the heading strip's rule (2 pixels above the first bar), none through the bars
-  if (opts.grid) { const g = opts.grid; for (let k = 1; k <= g.n; k++) track.append(el('i', { class: 'grid' + (g.line ? '' : ' tickonly') + (g.above ? ' above' : ''), style: `left:${barWidth(k / g.n, sc)};--tick:${g.tick}px` })); }
+  // above: the older versions' ticks sit on the heading strip's rule (2 pixels above the first bar), none through the bars;
+  // color: the line drawn solid in that colour, tech: the technology bars too (the Palm's)
+  if (opts.grid) { const g = opts.grid; for (let k = 1; k <= g.n; k++) track.append(el('i', { class: 'grid' + (g.line ? '' : ' tickonly') + (g.above ? ' above' : ''), style: `left:${barWidth(k / g.n, sc)};--tick:${g.tick}px` + (g.color ? `;background:${g.color}` : '') })); }
   if (lk && lk.text) track.append(el('span', { class: 'locktext' }, lk.text));
   const set = (ev) => {
     const r = track.getBoundingClientRect();
@@ -1296,7 +1297,7 @@ function renderPanel() {
     tb.append(bar(`${tnames[e.key]}${lvl !== '' ? ' ' + lvl : ''}`, e.get(), 1, (f, end) => {
       if (f != null) { setShare(tents, i, f); tents.forEach((x, j) => { const r = tb.querySelectorAll('.barrow')[j]; if (r) { r.querySelector('.track')._v = x.get(); r.querySelector('.fill').style.width = barWidth(x.get(), tsc); } }); }
       if (end) { renderPanel(); save(); }
-    }, { scale: tsc, right: money(e.get() * techSpend), cls: 'tbar', title: nm && !/^\d+$/.test(nm) ? nm : tnames[e.key], help: e.key }));
+    }, { scale: tsc, grid: rsB.barGrid && rsB.barGrid.tech && T.barGrid !== false ? rsB.barGrid : null, right: money(e.get() * techSpend), cls: 'tbar', title: nm && !/^\d+$/.test(nm) ? nm : tnames[e.key], help: e.key }));
   });
   panel.append(tb);
   // planet

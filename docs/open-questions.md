@@ -68,7 +68,7 @@ Remake's choices in it:
 1. **The scale switch** (1.2 to 3.0.1) is a click on the Budget heading, the strip above
    the bars; the original kept the setting in its setup file, the remake in the browser,
    one for each ruleset ("ho5.barScale.<ruleset>").
-2. **The bars' grid**: 5.0.5 and the Palm (`rs.barGrid`) draw it on the budget bars in the
+2. **The bars' grid**: 5.0.5 and the Palm (`rs.barGrid`) draw it on the budget bars (the Palm: and the technology bars) in the
    classic skin (`FUN_1008aff0`: ten lines at 100 ... 1,000 per mille through the bar's
    scale, so log spacing; each a black tick 3 pixels long at the top, the rest of the line
    drawn in the "transparent" pen mode, a colour and weight from a data table not read, so
@@ -79,7 +79,10 @@ Remake's choices in it:
    MoveTo y+15, LineTo y+13) on the rule under the heading strip, black, at 77k/10 pixels when
    linear or on the log table at 100 ... 1,000 per mille, following the scale switch where
    there is one (1.2, 2.0, 3.0.1: the setup's +0x2a). `rs.barGrid` is `{ n, tick, line, above }`:
-   5.0.5 `{ 10, 3, line: true }`, the older ones `{ 10, 2, line: false, above: true }`, drawn on
+   5.0.5 `{ 10, 3, line: true }`; the Palm its own (`FUN_00048e7a`, settled October 2026:
+   solid 1-pixel lines from the list's top to its bottom, over the bars, no tick, in the
+   app's colour-table entry 3, #666666, on the technology bars too:
+   `{ 10, 0, line: true, color: '#666666', tech: true }`); the older ones `{ 10, 2, line: false, above: true }`, drawn on
    the first bar only (the classic skin; the cozy skin clips them). The Mac draws its rule in
    ten LineTo strokes, so each tick's top joins the next tick's foot by a slant; the remake
    draws the ticks alone. The bars are the skin's own width, not 77 pixels, so the
