@@ -21,9 +21,10 @@
 // routine it calls), battle reports, "updated to the year" message and rule
 // for who is out and who has won turned out to be 2.0's too, so they now
 // live in js/rules-dos.js.
-// All game text is in English: 1.2's report templates (STR# 1000) are the
+// Its reports are in English: 1.2's report templates (STR# 1000) are the
 // same list, line for line, as DOS 2.0's (string ids 672-730), so the DOS
-// English wording is used.
+// English wording is used. Its names and Name a Star window are French, or
+// English with the Language choice (lang, below).
 //
 // Labels: CONFIRMED (Name @address) = read from that 1.2 routine (its MacsBug
 // name and address in the layout made by tools/decompile/mac68k.py);
@@ -378,6 +379,23 @@ E.registerRules('12', Object.assign({}, D, {
     label: 'Nouveau nom d\'étoile:', hint: '(Si vous ne voulez pas donner un nom à une étoile, cliquez juste sur OK).',
     taken: 'Désolé, il y a déjà une Etoile nommée “%s.” Soyons créatifs!' },
   welcome: WELCOME,
+  // Languages (engine.js rs.languages; G.opts.lang, New Game's Language):
+  // 1.2F's own French names and words, or English. The English is the
+  // nearest official English, Mac 2.0.1's (1.2 is a pre-release of 2.0):
+  // CONFIRMED (2.0.1's STR# 1999-2004) its computer and ship name lists are
+  // 1.2F's entry for entry (Joe, Sam, Magellan, Rudolph, Conan, Serpent,
+  // Dragon, Santa Maria, Gabriel, Sun Dog, Vision and Apple in the same
+  // places), and the same as DOS 2.0's; its star names (STR# 1003, 2005) are
+  // 1.2F's, so they don't change; Name a Star's words are its DITL 4050 and
+  // DITL 3340. docs/12-findings.md, "English".
+  languages: ['fr', 'en'],
+  lang: {
+    en: { maleNames: D.maleNames, femaleNames: D.femaleNames, shipNames: D.shipNames,
+      nameAStar: { when: 'win', keep: 0, use: 'pool', max: 7, min: 4, match: 'munger',
+        text: 'You won the game, so you get to name a star.', rule: 'Star names must be 4 to 7 characters long.',
+        label: 'New Star Name:', hint: '(If you’d rather not name a star, click “OK” with the name blank.)',
+        taken: 'Sorry, there’s already a star named  “%s.” Please pick another name.' } },
+  },
   ai: '12',                // 1.2's own computer players (js/ai-12.js)
   // CONFIRMED (above): the turn is 2.0's (rules-dos economy20, battle20,
   // fleetArrives20, route20, pass2_20, rs.economyForAll, rs.aiYear,

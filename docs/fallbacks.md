@@ -126,6 +126,8 @@ business; the DOS 2.0 "Inherited rules audit" covers them for 2.0.
 | dos | `processHandovers` | the engine's handover | unused: no surrender |
 | dos | `shareMaps` | best buddies share maps | unused: no alliances |
 | dos | `yardRoom` | no per-colony limit | unused: ships are queued |
+| dos | `languages` | the version's own language only (no Language choice) | not yet: the German DOS 2.0 (docs/roadmap.md, item 4) |
+| dos | `lang` | no other language's names or words | not yet: the German DOS 2.0 (docs/roadmap.md, item 4) |
 
 ### Mac 3.0.1 (`301`)
 
@@ -138,6 +140,8 @@ business; the DOS 2.0 "Inherited rules audit" covers them for 2.0.
 | 301 | `queueMergeAny` | (ship queues) | unused: no ship queues (set `undefined` on purpose) |
 | 301 | `queueSlots` | (ship queues) | unused: no ship queues |
 | 301 | `yardRefund` | (ship queues) | unused: no ship queues |
+| 301 | `languages` | the version's own language only (no Language choice) | verified for now: English only in the remake; any official translation waits for docs/roadmap.md, item 4 |
+| 301 | `lang` | no other language's names or words | verified for now: English only in the remake; any official translation waits for docs/roadmap.md, item 4 |
 
 ### Windows 95 4.0.5 (`405`)
 
@@ -147,6 +151,8 @@ business; the DOS 2.0 "Inherited rules audit" covers them for 2.0.
 | 405 | `queueMergeAny` | (ship queues) | unused: no ship queues |
 | 405 | `queueSlots` | (ship queues) | unused: no ship queues |
 | 405 | `yardRefund` | (ship queues) | unused: no ship queues |
+| 405 | `languages` | the version's own language only (no Language choice) | verified for now: English only in the remake; any official translation waits for docs/roadmap.md, item 4 |
+| 405 | `lang` | no other language's names or words | verified for now: English only in the remake; any official translation waits for docs/roadmap.md, item 4 |
 
 ### Mac 5.0.5 (`original`)
 
@@ -167,6 +173,8 @@ business; the DOS 2.0 "Inherited rules audit" covers them for 2.0.
 | original | `queueMergeAny` | (ship queues) | unused: no ship queues |
 | original | `queueSlots` | (ship queues) | unused: no ship queues |
 | original | `yardRefund` | (ship queues) | unused: no ship queues |
+| original | `languages` | the version's own language only (no Language choice) | verified for now: English only in the remake; any official translation waits for docs/roadmap.md, item 4 |
+| original | `lang` | no other language's names or words | verified for now: English only in the remake; any official translation waits for docs/roadmap.md, item 4 |
 
 ### Palm OS 5 (`palm`)
 
@@ -188,6 +196,8 @@ the Palm program is checked on its own:
 | palm | `queueMergeAny` | (ship queues) | unused: no ship queues |
 | palm | `queueSlots` | (ship queues) | unused: no ship queues |
 | palm | `yardRefund` | (ship queues) | unused: no ship queues |
+| palm | `languages` | the version's own language only (no Language choice) | verified for now: English only in the remake; any official translation waits for docs/roadmap.md, item 4 |
+| palm | `lang` | no other language's names or words | verified for now: English only in the remake; any official translation waits for docs/roadmap.md, item 4 |
 
 ### iOS 1.2.9 (`ios`)
 
@@ -210,6 +220,8 @@ iOS program:
 | ios | `queueMergeAny` | (ship queues) | unused: no ship queues |
 | ios | `queueSlots` | (ship queues) | unused: no ship queues |
 | ios | `yardRefund` | (ship queues) | unused: no ship queues |
+| ios | `languages` | the version's own language only (no Language choice) | not yet: its French and Turkish (docs/roadmap.md, item 4) |
+| ios | `lang` | no other language's names or words | not yet: its French and Turkish (docs/roadmap.md, item 4) |
 
 ### Android 1.2.8 (`android`)
 
@@ -231,6 +243,8 @@ same source (android-findings, "The same as iOS 1.2.9"), so each default is iOS'
 | android | `queueMergeAny` | (ship queues) | same as iOS (the rule core is the same source) |
 | android | `queueSlots` | (ship queues) | same as iOS (the rule core is the same source) |
 | android | `yardRefund` | (ship queues) | same as iOS (the rule core is the same source) |
+| android | `languages` | the version's own language only (no Language choice) | not yet: its French and Turkish (docs/roadmap.md, item 4) |
+| android | `lang` | no other language's names or words | not yet: its French and Turkish (docs/roadmap.md, item 4) |
 
 ### Mac 2.0.1 (`mac20`)
 
@@ -250,6 +264,8 @@ routine (dos-findings, "Read again with the names, and the same as Windows"):
 | mac20 | `processHandovers` | the engine's handover | unused: no surrender |
 | mac20 | `shareMaps` | best buddies share maps | unused: no alliances |
 | mac20 | `yardRoom` | no per-colony limit | unused: ships are queued |
+| mac20 | `languages` | the version's own language only (no Language choice) | verified for now: English only in the remake; any official translation waits for docs/roadmap.md, item 4 |
+| mac20 | `lang` | no other language's names or words | verified for now: English only in the remake; any official translation waits for docs/roadmap.md, item 4 |
 
 ### Mac 4.0.5 (`mac405`)
 
@@ -263,6 +279,8 @@ defaults are 4.0.5's, with the same status:
 | mac405 | `queueMergeAny` | (ship queues) | unused: no ship queues |
 | mac405 | `queueSlots` | (ship queues) | unused: no ship queues |
 | mac405 | `yardRefund` | (ship queues) | unused: no ship queues |
+| mac405 | `languages` | the version's own language only (no Language choice) | verified for now: English only in the remake; any official translation waits for docs/roadmap.md, item 4 |
+| mac405 | `lang` | no other language's names or words | verified for now: English only in the remake; any official translation waits for docs/roadmap.md, item 4 |
 
 ## Settled from the versions' code (October 2026)
 

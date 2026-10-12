@@ -94,7 +94,60 @@ function rulesById(id) {
 }
 function rules(G) {
   if (!G) throw new Error('rules(G) was asked for the ruleset with no game; with no game, name the ruleset (HO.rulesById)');
-  return RULESETS[G.rules] || rulesById(G.rules);
+  const rs = RULESETS[G.rules] || rulesById(G.rules);
+  return G.opts && G.opts.lang ? inLanguage(rs, G.opts.lang) : rs;
+}
+// ---------- languages (rs.languages, rs.lang, G.opts.lang) ----------
+// A version that shipped in more than one language lists them, its own
+// first (rs.languages, e.g. 1.2F's ['fr', 'en']); rs.lang[code] holds what
+// another language changes, and only text and names: the name lists
+// (starNames, maleNames, femaleNames, shipNames by class), each entry for
+// entry with the version's own, and words (nameAStar, welcome, ...). The
+// rules never change, so a seed plays the same game in every language: names
+// are drawn from the version's own lists and then put in the game's language
+// (ownRules, gameName, ownName). A game's language is G.opts.lang (none: the
+// version's own). LANGUAGES names each code in its own language.
+const LANGUAGES = { en: 'English', fr: 'Français', de: 'Deutsch', tr: 'Türkçe' };
+const langCache = new WeakMap();
+function languages(rs) { return rs && Array.isArray(rs.languages) && rs.languages.length > 1 ? rs.languages : []; }
+function inLanguage(rs, lang) {
+  const over = lang && rs.lang && rs.lang[lang];
+  if (!over) return rs;
+  let m = langCache.get(rs);
+  if (!m) langCache.set(rs, m = {});
+  return m[lang] || (m[lang] = Object.assign({}, rs, over));
+}
+// the game's ruleset in the version's own language
+function ownRules(G) { return RULESETS[G.rules] || rulesById(G.rules); }
+// name lists by kind: stars, men, women, ships (every class's)
+const NAME_KINDS = { stars: (r) => [r.starNames], men: (r) => [r.maleNames], women: (r) => [r.femaleNames],
+  ships: (r) => Object.keys(r.shipNames || {}).sort().map(k => r.shipNames[k]) };
+// a map of one language's names of a kind to another's, entry for entry
+function langMap(rs, from, to, kind) {
+  const key = `${from || ''}>${to || ''}>${kind}`;
+  let m = langCache.get(rs);
+  if (!m) langCache.set(rs, m = {});
+  if (m[key]) return m[key];
+  const A = NAME_KINDS[kind](inLanguage(rs, from)), B = NAME_KINDS[kind](inLanguage(rs, to)), map = new Map();
+  A.forEach((a, i) => (a || []).forEach((n, j) => { const b = B[i] && B[i][j]; if (b != null && b !== n && !map.has(n)) map.set(n, b); }));
+  return (m[key] = map);
+}
+// a name of the version's own lists in the game's language, and back
+function gameName(G, n, kind) { return G.opts && G.opts.lang ? langMap(ownRules(G), null, G.opts.lang, kind).get(n) || n : n; }
+function ownName(G, n, kind) { return G.opts && G.opts.lang ? langMap(ownRules(G), G.opts.lang, null, kind).get(n) || n : n; }
+// a game changes language (the Ho menu): its stars', computers' and ship
+// designs' names from the lists are put in the new language; reports already
+// received keep theirs
+function setLanguage(G, lang) {
+  const rs = ownRules(G), from = G.opts.lang || null, to = lang && lang !== languages(rs)[0] ? lang : null;
+  if (from === to) return;
+  const tr = (n, kind) => langMap(rs, from, to, kind).get(n) || n;
+  for (const s of G.stars) s.name = tr(s.name, 'stars');
+  for (const p of G.players) {
+    if (!p.human) p.name = tr(p.name, p.female ? 'women' : 'men');
+    for (const d of p.designs || []) d.name = tr(d.name, 'ships');
+  }
+  if (to) G.opts.lang = to; else delete G.opts.lang;
 }
 // every ruleset names its computer players (rs.ai)
 function aiOf(G) {
@@ -133,10 +186,11 @@ function canBuildType(G, p, type) { return rules(G).canBuild(G, p, type); }
 function designName(G, p, type) {
   // a ruleset may pick the name itself (rs.designName), or name ships from its own lists (rs.shipNames, by type)
   if (rules(G).designName) return rules(G).designName(G, p, type);
-  const names = (rules(G).shipNames || DATA.shipNames)[type] || DATA.shipNames[type] || ['Ship'];
+  // (drawn in the version's own language, then put in the game's: rs.languages)
+  const names = (ownRules(G).shipNames || DATA.shipNames)[type] || DATA.shipNames[type] || ['Ship'];
   const used = new Set(p.designs.map(d => d.name));
   for (let i = 0; i < 60; i++) {
-    const base = names[(p.designs.length + i) % names.length];
+    const base = gameName(G, names[(p.designs.length + i) % names.length], 'ships');
     const n = i < names.length ? base : base + ' ' + (Math.floor(i / names.length) + 1);
     if (!used.has(n)) return n;
   }
@@ -553,6 +607,8 @@ function newGame(opts) {
     rs: (opts.seed >>> 0) || ((Date.now() ^ 0x5eed) >>> 0), year: 2000, turn: 0, nextId: 1,
     opts, stat: { battles: 0, captures: 0, colonized: 0 }, stars: [], players: [], fleets: [], battles: [], cur: 0, over: false, winner: -1, log: [],
   };
+  // the game's language (rs.languages): none for the version's own, or one it doesn't have
+  if (opts.lang != null && (!languages(RULESETS[G.rules]).includes(opts.lang) || opts.lang === languages(RULESETS[G.rules])[0])) delete opts.lang;
   const rs = rules(G);
   // a ruleset whose original game had no New Game choices fixes them here
   if (rs.fixOptions) rs.fixOptions(opts);
@@ -577,7 +633,7 @@ function newGame(opts) {
   // ('pool') or are put in the galaxy, at most rs.nameAStar.put of them
   // ('put'); none kept, the list is the version's own as before
   const NS = rs.nameAStar, kept = NS && Array.isArray(opts.starNamesKept) ? opts.starNamesKept.filter(n => typeof n === 'string' && n) : [];
-  const base = rs.starNames || DATA.starNames;
+  const base = ownRules(G).starNames || DATA.starNames; // the version's own list (in the game's language below)
   let names = shuffle(G, base.slice().concat(NS && NS.use === 'pool' ? kept.filter(n => !base.includes(n)) : []));
   // 'put' as the versions' own galaxy set-ups do (4.0.5 FUN_00442374 and Mac
   // GiveStarsValues @81a0a, Palm FUN_00025f4a, 5.0.5 FUN_1006f280, iOS
@@ -597,7 +653,7 @@ function newGame(opts) {
   }
   pts.forEach((pt, i) => {
     const st = rs.newStar(G);
-    const s = { id: i, name: names[i % names.length] || ('Star ' + i), x: pt.x, y: pt.y, g: st.g, t: st.t, metal: st.metal, owner: -1, pop: 0, terra: 0.5, nova: 0, debris: 0, everProfit: false };
+    const s = { id: i, name: gameName(G, names[i % names.length], 'stars') || ('Star ' + i), x: pt.x, y: pt.y, g: st.g, t: st.t, metal: st.metal, owner: -1, pop: 0, terra: 0.5, nova: 0, debris: 0, everProfit: false };
     if (pt.x10 != null) { s.x10 = pt.x10; s.y10 = pt.y10; }
     G.stars.push(s);
   });
@@ -620,7 +676,11 @@ function newGame(opts) {
     let name;
     if (human) name = H[i].name || (nHum > 1 ? 'Player ' + (i + 1) : 'You');
     else if (own) name = own.name;
-    else { do { name = pick(G, female ? (rs.femaleNames || DATA.femaleNames) : (rs.maleNames || DATA.maleNames)) || ('Computer ' + i); } while (usedNames.has(name) && usedNames.size < 40); }
+    else { // drawn from the version's own list, then in the game's language (rs.languages)
+      const mine = ownRules(G);
+      do { name = pick(G, female ? (mine.femaleNames || DATA.femaleNames) : (mine.maleNames || DATA.maleNames)) || ('Computer ' + i); } while (usedNames.has(name) && usedNames.size < 40);
+      usedNames.add(name); name = gameName(G, name, female ? 'women' : 'men');
+    }
     usedNames.add(name);
     const home = G.stars[homes[i]];
     // a ruleset may give each computer its own skill and home system
@@ -1107,7 +1167,7 @@ function makeBattlePanel(cfg) {
 const API = {
   DATA, SHIP_TYPES, TYPES: SHIP_TYPES, TECHS,
   BAR_SCALES, barScale, battleGroups, makeBattlePanel,
-  registerRules, registerAI, rules, rulesById, aiOf, feature, RULESETS, fixes, fixed, patchVersion,
+  registerRules, registerAI, rules, rulesById, aiOf, LANGUAGES, languages, ownRules, gameName, ownName, setLanguage, feature, RULESETS, fixes, fixed, patchVersion,
   // [id, name] for the New Game window: the original games' rules by year of
   // release, then version ("2.0 (DOS and Windows 3.1, 1993)"); rulesets that
   // aren't an original game's (the remake's own) come last, by their label

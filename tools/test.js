@@ -1,18 +1,19 @@
 // Headless AI-vs-AI test: node tools/test.js <claude|original|dos|405|301|12|palm|ios|android|mac20|mac405|gemini> [--patch]
 // --patch plays with the ruleset's unofficial patch on (G.opts.patch: its rs.fixes)
+// --lang=<code> plays in another of the version's languages (G.opts.lang: rs.languages), e.g. 12 --lang=en
 const path = require('path'), root = path.join(__dirname, '..');
 const HO=require(path.join(root, 'js/engine.js'));
 Object.assign(HO.DATA,require(path.join(root, 'js/data.js')));
-const ARGS=process.argv.slice(2), PATCH=ARGS.includes('--patch');
+const ARGS=process.argv.slice(2), PATCH=ARGS.includes('--patch'), LANG=(ARGS.find(a=>a.startsWith('--lang='))||'').slice(7);
 // the ruleset is named, never assumed: an unknown one stops the test
 const RULES=ARGS.filter(a=>!a.startsWith('--'))[0];
-if (!RULES || !HO.RULESETS[RULES]) { console.error(`Usage: node tools/test.js <ruleset> [--patch]; rulesets: ${Object.keys(HO.RULESETS).join(', ')}${RULES ? ` (no "${RULES}")` : ''}`); process.exit(2); }
+if (!RULES || !HO.RULESETS[RULES]) { console.error(`Usage: node tools/test.js <ruleset> [--patch] [--lang=<code>]; rulesets: ${Object.keys(HO.RULESETS).join(', ')}${RULES ? ` (no "${RULES}")` : ''}`); process.exit(2); }
 // an exception anywhere in a turn stops the test with where it happened (the
 // engine's e.hoWhere: a computer's turn, ...), the game and the turn
 function fail(e,seed,G){ console.error(`FAILED: ${RULES}${PATCH?' --patch':''}, seed ${seed}${G?`, year ${G.year} (turn ${G.turn})`:', New Game'}${e&&e.hoWhere?`, in ${e.hoWhere}`:''}`); console.error(e&&e.stack||e); process.exit(1); }
 function run(seed,opts){
   let G=null;
-  try { G=HO.newGame(Object.assign({seed,size:'medium',computers:4,iq:'average',shape:'random',rules:RULES,alliances:true,novas:true},PATCH?{patch:true}:{},opts||{})); } catch(e){ fail(e,seed,null); }
+  try { G=HO.newGame(Object.assign({seed,size:'medium',computers:4,iq:'average',shape:'random',rules:RULES,alliances:true,novas:true},PATCH?{patch:true}:{},LANG?{lang:LANG}:{},opts||{})); } catch(e){ fail(e,seed,null); }
   for (const p of HO.humans(G)) { p.auto=true; if (RULES==='claude') p.ai=null; } // humans on autoplay
   let t0=Date.now();
   for(let i=0;i<400 && !G.over;i++){ try { HO.endTurn(G); } catch(e){ fail(e,seed,G); }

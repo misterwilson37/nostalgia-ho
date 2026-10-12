@@ -884,12 +884,15 @@ const SHIP_NAMES = {
 // list also holds the names humans gave their own designs, kept in the names
 // file by FUN_10e8_0f64 (Mac AddNewTypeNameToPrefs); the remake keeps no
 // names file, so it is the built-in list.
+// (In a game in another language, rs.languages, the draw is from the
+// version's own list and its names, E.ownName; the name is then put in the
+// game's language, so the game plays the same.)
 function designName(G, p, type) {
-  const names = (E.rules(G).shipNames || SHIP_NAMES)[type] || ['Ship'];
-  const used = new Set(p.designs.filter(d => !d.scrapped).map(d => d.name));
+  const names = (E.ownRules(G).shipNames || SHIP_NAMES)[type] || ['Ship'];
+  const used = new Set(p.designs.filter(d => !d.scrapped).map(d => E.ownName(G, d.name, 'ships')));
   let n = names[0];
   for (let i = 0; i < 100; i++) { n = names[RI(G, 1, names.length) - 1]; if (!used.has(n)) break; }
-  return n;
+  return E.gameName(G, n, 'ships');
 }
 
 // ---------- messages ----------
