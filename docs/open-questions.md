@@ -1145,8 +1145,8 @@ None of the rules.
      every finger: each ruleset's own scale is used by the finger, the mouse and the pen
      alike, and for drawing them (`rs.barScale`, above, "The bars and the battle window");
    - Organize Fleets: a pinch counts past 10% either way (iOS: any scale over 1 splits,
-     any other groups); a pile moved to a fleet that hasn't its design takes its stance
-     with it, as 5.0.5's drop does (iOS's `move:from:to:` leaves the fleet's stance byte
+     any other groups); a pile moved to a fleet that hasn't its design keeps that fleet's
+     own stance for it, not the pile's (built October 2026; iOS's `move:from:to:` leaves the fleet's stance byte
      for that design as it was; CONFIRMED October 2026, 0xc27e0 writes only the counts
      (+0x28), the larger fuel used, "bought" and the Colony Ships' colonists, so it keeps
      whatever the byte held); the fleet a

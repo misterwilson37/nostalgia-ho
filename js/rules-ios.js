@@ -305,10 +305,22 @@ const rs = Object.assign(base, {
   // the fleet to take it (the whole pile, move:from:to: with count -1);
   // Scrap, Group, Split (half the pile), New Fleet; the arrows page the
   // fleets four at a time (moveContainer:). Its rules are 5.0.5's Group
-  // Fleets' (canMerge505, organized505; the move leaves a design new to the
-  // fleet with whatever stance byte it had, 5.0.5 copies it: the remake
-  // copies it). js/skins/classic/ui.js openOrganize.
+  // Fleets' (canMerge505, organized505), but the move leaves a design new to
+  // the fleet with whatever stance it had (CONFIRMED: move:from:to: 0xc27e0
+  // writes the counts, the larger fuel used, "bought" and the colonists, never
+  // the stance byte +0x58 + design), where 5.0.5 copies it. The remake's
+  // nearest: the fleet's own stance for that design, i.e. no copy.
+  // js/skins/classic/ui.js openOrganize.
   organizeFleets: 'ios',
+  organized(G, f, merged, nf, orders) {
+    const before = f.dstance ? Object.assign({}, f.dstance) : null;
+    E.RULESETS.original.organized(G, f, merged, nf, orders);
+    if (!merged) return;
+    for (const k in merged.ships) {
+      if ((f.ships[k] || 0) !== merged.ships[k]) continue; // f had some already: unchanged anyway
+      if (before && before[k] != null) f.dstance[k] = before[k]; else if (f.dstance) delete f.dstance[k];
+    }
+  },
   // the auto play window (above)
   autoPlayWindow: 'ios', autoPlayRange: { aggr: [0, 100], where: 'autoplay' }, autoPlayDefaults: AUTO_DEFAULTS,
   // CONFIRMED (the calls of the report routine, 0x10003b028 and 0x10003af9c:
