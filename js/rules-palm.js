@@ -230,7 +230,7 @@ const popPalm = (pop) => E.fmt(Math.round(pop * 1e6));
 const battlePanelPalm = E.makeBattlePanel({
   cols: 'viewer', byStance: true, owner: 'luck', pics: (n) => Math.min(n, 1),
   head: (G, b) => [`Review Battle at ${G.stars[b.star].name} in ${b.year}`],
-  ship: (G, d, n, n0, mine) => n === 0 ? (n0 === 1 ? `one dead ${shipDescPalm(d, 0, mine)}` : `${n0} dead ${shipDescPalm(d, 0, mine)}`)
+  ship: (G, d, n, n0, mine) => n === 0 ? `${n0} dead ${shipDescPalm(d, 0, mine)}` // FUN_00030a80, an all-dead group: always 6003.11 "%ld dead %s" ("1 dead Fighter (5/4)"; 6003.10 "one dead %s" is never loaded there)
     : n !== n0 ? `${n}/${n0} ${shipDescPalm(d, 0, mine)}s` : shipDescPalm(d, n, mine),
   planet: (G, pop, pop0) => pop <= 0.0005 ? `${popPalm(pop0)} People killed` : Math.abs(pop - pop0) < 0.0005 ? `${popPalm(pop)} People` : `${popPalm(pop)} of ${popPalm(pop0)} People survived`,
 });

@@ -382,13 +382,14 @@ battles), read in the Palm code:
   words: "%ld %s (%ld/%ld)", "1 %s (%ld/%ld)", "%s (%ld/%ld)" (@0x4b920) with the class's
   name (the list read with 0, the singular, LIKELY: "3 Fighter (5/4)") and the design's
   own Weapons and Shields, no design name; "%ld/%ld %ss" (6003.14) with losses; "one
-  dead %s" / "%ld dead %s" (6003.10-11; which of the two the call passes was lost in the
-  decompile, LIKELY as 5.0.5's); a colony "%s People" (`@0x30df2`), "%s of %s People
+  dead %s" / "%ld dead %s" (6003.10-11): an all-dead group is always "%ld dead %s" with
+  the group's first count, even for one ("1 dead Fighter (5/4)"; read from the disassembly of
+  `FUN_00030a80` at 0x30ace: string id 0xc, count, then `FUN_0004b864` with count 0 giving
+  "%s (%ld/%ld)"; 6003.10 isn't loaded there) CONFIRMED; a colony "%s People" (`@0x30df2`), "%s of %s People
   survived" (6003.15) or "%s People killed" (6003.9). The remake: `battlePanelPalm`.
 
 What changed in play: nothing in the rules. The bars are on the log scale for the mouse
-too, and a locked bar refuses the drag and says why. Not read: which string the
-all-dead group's call passes (above), the damage shading's look.
+too, and a locked bar refuses the drag and says why. Not read: the damage shading's look.
 
 ## Still open
 
