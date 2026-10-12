@@ -194,6 +194,12 @@ title bar and About this version, and the Ho menu then has **Patch notes…**. R
 no fixes don't offer it. `docs/fixes.md` lists every version's slips as obvious bugs,
 quirks and unclear cases; 1.2, 2.0 and 3.0.1 have their fixes so far.
 
+**Language**: a version that shipped in more than one language offers them below the line
+in New Game and in the Ho menu's **Language…** (`G.opts.lang`, remembered per ruleset in
+`localStorage` "ho5.lang.<id>"). So far that is 1.2: French, as released, or English from
+Mac 2.0.1's names and words (`docs/12-findings.md`, "English"). Only names and words
+change: a seed plays the same game in every language, so it can change mid-game.
+
 Optional ruleset flags the skin reads (each is documented where it is read):
 
 - `rs.evacuateCommand`: `false` when the version had no command to give up a colony (1.2
@@ -259,6 +265,12 @@ Optional ruleset flags the skin reads (each is documented where it is read):
   `fixSpending301`; `js/skins/classic/ui.js`, `openFixSpending`)
 - `rs.celsius`: `true` when the version showed temperatures only in °C, to a tenth (1.2,
   the French edition); Preferences then shows °C as fixed. (`js/skins/classic/ui.js`, `degF`)
+- `rs.languages`: the languages the version shipped in, its own first (1.2: `['fr',
+  'en']`); `rs.lang[code]`: what another language changes, only names and words (the
+  name lists entry for entry with the version's own, `nameAStar`, ...). Names are drawn
+  from the version's own lists and then put in the game's language (`HO.gameName`), so the
+  game plays the same; `HO.setLanguage(G, code)` changes a game's. (`js/engine.js`,
+  `inLanguage`; `js/skins/classic/ui.js`, New Game and `openLanguage`)
 - `rs.bestBuddies`: `false` when the version had alliances but no best-buddy pacts (3.0.1);
   the Players window then offers only Ally. Left out: both, when `features.alliances` is on.
   (`js/skins/classic/ui.js`, `openPlayers`)
@@ -463,7 +475,7 @@ Optional ruleset flags the skin reads (each is documented where it is read):
 - `docs/open-questions.md`, `docs/evolution.md`, `docs/coverage-12.md`: what is left to ask Delta Tao, how the game grew, and every routine of 1.2
 - `docs/research-log.md`: the full research history, every question met in each version and how it was settled
 - `docs/fixes.md`: every version's slips sorted into obvious bugs (fixed by the unofficial patch), quirks and unclear cases
-- `tools/test.js`: headless computer-vs-computer test (`node tools/test.js`, `node tools/test.js original`, `dos`, `405`, `mac20`, `mac405` …; add `--patch` to play with the unofficial patch on)
+- `tools/test.js`: headless computer-vs-computer test (`node tools/test.js`, `node tools/test.js original`, `dos`, `405`, `mac20`, `mac405` …; add `--patch` to play with the unofficial patch on, `--lang=en` to play 1.2 in English)
 - `tools/human-play.js`: a human played through the page in Chromium (Playwright), about 10
   turns in each ruleset: the Technology and Budget bars dragged, a Colony Ship bought (or
   queued) and sent out, the new colony terraformed. It checks that the values the skin

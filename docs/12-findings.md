@@ -38,7 +38,8 @@ differences:
 - **No New Game choices.** Every galaxy is a small, dense Circle with one Average computer;
   every human starts at Normal skill.
 - **No women.** Every player, computers too, is a man.
-- **French computer and ship names**, and one more star name (Tiber).
+- **French computer and ship names**, and one more star name (Tiber). A Language choice
+  plays it in English instead (see "English").
 - The 1.2 credits as the first messages, and an "updated to the year" message every turn.
 - No notice when someone else's fleet arrives at your colony.
 - **Its own computer players** (`js/ai-12.js`, a port of `DoComputerTurn` and the routines
@@ -332,6 +333,8 @@ sound on battle reports, which carry `won: true / false` for auto play instead.
 
 ## Names
 
+(These are the French game's names; for its English ones see "English", below.)
+
 Star names are kept as they are; 1.2's list is DOS 2.0's plus "Tiber" (the river; French
 would say "Tibre"), so it has no French-only star names. The default galaxy name is
 "Voie Lactée", the Milky Way (STR# 1002.7). Computer and ship names are kept in French;
@@ -390,6 +393,65 @@ Stupide (Dumb), Moyen (Average), Brillant (Smart) (STR# 1009); "Joueurs de Silic
 Armes (Weapons), Boucliers (Shields), Mini; Epargne (Savings), Fortune totale (Total
 Money), Revenu (Income), Réserve métal (Metal reserve), Terra / Mine / Prod (terraforming,
 mining, shipbuilding) (STR# 1001, 1005).
+
+## English
+
+The remake plays 1.2 in French, as released, or in English: New Game's **Language**
+(below the line, only for a version that shipped in more than one language) or the Ho
+menu's **Language…** in the middle of a game (`G.opts.lang`; `rs.languages` and `rs.lang`
+in `js/rules-12.js`, `inLanguage`, `gameName` and `setLanguage` in `js/engine.js`). Only
+names and words change. The names are always drawn from 1.2F's own lists and then put in
+the game's language, so a seed plays the same game in either: `node tools/test.js 12
+--lang=en` prints what `node tools/test.js 12` does, with the English names (and a save a
+few bytes longer).
+
+What is French in 1.2 is its names and its Name a Star window; its reports, battle
+reports and Fix Spending lines were already given in English (DOS 2.0's report strings,
+which are 1.2's STR# 1000 line for line, and Mac 2.0.1's STR# 1050). The English is the
+nearest official English, **Mac 2.0.1**'s (1.2 is a pre-release of 2.0), read from its
+resources (`STR#`, `DITL`):
+
+- **Star names**: none change. 1.2F's STR# 1003 is 2.0.1's (and DOS 2.0's) list of 190,
+  entry for entry, all in English, and STR# 2005 is "Tiber" in both.
+- **Computer and ship names**: 2.0.1's STR# 1999–2004 have the same number of entries as
+  1.2F's, and the names that weren't translated stand in the same places in both (Joe,
+  Sam; Laura, Imelda, Louise, Barbara; Magellan, Rudolph; Conan, Serpent, Dragon; Santa
+  Maria; Gabriel, Sun Dog, Vision, Apple), so each French entry is matched with the English
+  one in its place. 2.0.1's lists are DOS 2.0's. All 110 are matched (16 spelt the same);
+  the translator rendered some (Mère → Mother, Murmure → Whisper, Bouclier → Shield,
+  Bonaparte for Patton) and replaced many with names of his own (Lui for Paul, Dupont for
+  Nick, Ravage for Killer, Fleur noire for Defender), so by meaning only about a quarter
+  match, but each is the English name of its place:
+
+| List | French → English (Mac 2.0.1) |
+|---|---|
+| Computers, men (STR# 1999) | François → Alex, Valery → Bert, Jacques → Carl, Georges → John, Bernard → Ed, Laurent → Frank, Michel → Gary, Adolf → Howard, Edouard → Bob, Joe, Mikhaïl → Kirk, Boris → Larry, Lui → Paul, Dupont → Nick, Muhamar → Dave, Saddam → Peter, Claude → Ralph, Sam, Arès → Tim, Averell → Walter |
+| Computers, women (unused) (STR# 2000) | Agathe → Andrea, Aglaé → Beth, Ginette → Christie, 3615 → Mary, Flore → Leslie, Laura, Salômé → Natalie, Thècle → Heather, Imelda, Claude → Jennifer, Carmen → Kathy, Louise, Phèdre → Melissa, Lucrèce → Nancy, Zazie → Elizabeth, Thelma → Patricia, Sue LN → Sue, Barbara, Athêna → Wendy, Jackie → Anne |
+| Scouts (STR# 2001) | Sonde → Needle, Echo → Explorer, Regard → Looker, Colomb → Columbus, Magellan, Esprit → Intrepid, Errance → Wanderer, Rudolph, Lueur → Eagle, Surprise → Sparrow, Fantôme → Ranger, Murmure → Whisper, Silence → Weasel, Ténèbres → Enterprise |
+| Fighters (STR# 2002) | Ravage → Killer, Enfer → Destroyer, Démon → Demon, Ouragan → Hurricane, Gorgone → Typhoon, Tempête → Slasher, Bonaparte → Patton, Brasier → Stingray, Furie → Blaster, Conan, Serpent, Dragon, Scalpel → Tornado, Hadès → Wraith, Hydre → Storm, Maléfice → Dagger, Sabre → Sword, Foudre → Lance, Laser → Arrow, Cauchemar → Constitution, Carnage → Reliant, Styx → Panther, Terminator → Nightmare |
+| Colony Ships (STR# 2003) | Océan → Spreader, Mère → Mother, Essor → Expander, Ninon → Nina, Croissance → Pinta, Santa Maria, Idéal → Stork, Liberté → Freedom, Sérénité → Kon Tiki, Union → Minnow, Espace → Taurus, Citadelle → Minerva, Moisson → Egg, Paix → Peaceful, Titan → Hardy |
+| Satellites (STR# 2004) | Fleur noire → Defender, Ippon → Stopper, Patience → Protector, Eveil → Eye, Armure → Armor, Bouclier → Shield, Bienvenue → Peach, Eclat → Caltrop, Gardien → Washington, Gabriel, Sun Dog, Pitié → Mercy, Vision, Apple, Sourire → Pebble, Muraille → Rock, Désolation → Stone, Framboise → Berry |
+
+- **Name a Star** (DITL 4050, the alert DITL 3340): 2.0.1's own words, the same window:
+  "You won the game, so you get to name a star." / "Star names must be 4 to 7 characters
+  long." / "New Star Name:" / "(If you’d rather not name a star, click “OK” with the name
+  blank.)" / "Sorry, there’s already a star named  “%s.” Please pick another name."
+
+**The remake's English**: none was needed. Every French name and line the remake shows
+has an official English counterpart in Mac 2.0.1.
+
+| French | The remake's English | Where |
+|---|---|---|
+| (none) | | |
+
+Not changed by the language: the pictures (the title picture's French words, and 1.2's
+"Fin Tour" End Turn button, which the skin already shows as 3.0.1's English one), and the
+default galaxy name ("Voie Lactée", STR# 1002.7, which the remake never showed: New Game
+offers "Milky Way"). Reports already received keep their words when the language changes
+in the middle of a game. The names are compared in 1.2F's French: a human called Alex
+in an English game may meet a computer called Alex, and a design a player renames with a
+name from one language's list counts as taken in that language only (so, with that one
+rename, a later design's name is drawn as it would be in that language).
 
 ## Changes to the shared code
 

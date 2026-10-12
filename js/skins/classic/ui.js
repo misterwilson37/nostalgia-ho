@@ -3188,6 +3188,24 @@ const titleTag = () => patchOn() ? ` · ${patchName(HO.rules(G))}` : '';
 // the fixes as a list: each one's title and what it does
 const fixList = (rs) => el('ul', null, ...HO.fixes(rs).map(f => el('li', null, el('b', null, f.title), el('br'), f.text)));
 // Ho menu, "Patch notes…" (only while the game has the patch on)
+// Ho menu, "Language…" (a version that shipped in more than one, rs.languages):
+// the game's names and words in another; the game plays on the same
+function openLanguage() {
+  if (!G) return;
+  const langs = HO.languages(HO.ownRules(G)), now = (G.opts && G.opts.lang) || langs[0];
+  const s = el('select', { 'aria-label': 'Language' }, ...langs.map((c, i) => el('option', { value: c, selected: c === now ? 'selected' : false }, (HO.LANGUAGES[c] || c) + (i ? '' : ' (original)'))));
+  const ok = () => {
+    closeModal();
+    if (s.value === now) return;
+    HO.setLanguage(G, s.value);
+    try { localStorage.setItem('ho5.lang.' + G.rules, s.value); } catch (e) { /* not kept */ }
+    save(); renderPanel(); draw();
+  };
+  modal('Language', el('div', { class: 'about' },
+    el('p', null, 'The names of the stars, computer players and ship designs, and the game’s words, in another of this version’s languages. The game plays on the same; reports already received keep their words.'),
+    el('label', null, el('span', null, 'Language '), s),
+    el('div', { class: 'btns right' }, el('button', { onclick: closeModal }, 'Cancel'), el('button', { onclick: ok }, 'OK'))), { cls: 'mid' });
+}
 function openPatchNotes() {
   if (!patchOn()) return;
   const rs = HO.rules(G), pv = HO.patchVersion(rs);
@@ -3579,6 +3597,10 @@ function newGameDialog() {
     el('label', null, el('span', null, 'Skin'), pick.skinSel),
     el('label', null, el('span', null, 'OS look'), pick.osSel));
   if (!window.HOSKINS || HOSKINS.list.length < 2) pick.skinSel.closest('label').hidden = true;
+  // the game's language, for a version that shipped in more than one
+  // (rs.languages, its own first; G.opts.lang): only names and words change
+  const langSel = el('select', { name: 'lang', 'aria-label': 'Language' });
+  const langRow = el('div', { class: 'picks langpick' }, el('label', null, el('span', null, 'Language'), langSel));
   if (!window.HOSKINS || !HOSKINS.osChoices) pick.osSel.closest('label').hidden = true;
   f.append(
     // above the line: the original game's own New Game window
@@ -3598,6 +3620,7 @@ function newGameDialog() {
     // the line: below it, the remake's own choices
     el('hr', { class: 'ngline' }),
     pickRow,
+    langRow,
     patchBox,
     el('label', { class: 'chk modern' }, el('input', { type: 'checkbox', name: 'modern', checked: localStorage.getItem('ho5.modern') === '1' ? 'checked' : false }),
       el('span', null, MODERN_TEXT)),
@@ -3659,6 +3682,15 @@ function newGameDialog() {
       : mac3 ? String(rater(d.rules, '301').difficulty({ computers: d.computers === 'any' ? 4 : +d.computers, iq: d.m_iq, start: d.m_skill, shape: d.m_shape, size: d.m_size, density: d.m_density }))
       : `Not rated with ${dos ? '2.0' : mac12 ? '1.2' : 'Claude'} rules`;
     rating.className = orig || w95 || mac3 ? '' : 'none';
+    // the language: only for rules with more than one (rs.languages)
+    const langs = HO.languages(ngr);
+    langRow.hidden = !langs.length;
+    if (langs.length && langSel.dataset.rules !== d.rules) {
+      langSel.dataset.rules = d.rules;
+      let last = null; try { last = localStorage.getItem('ho5.lang.' + d.rules); } catch (e) { /* none kept */ }
+      langSel.replaceChildren(...langs.map((c, i) => el('option', { value: c }, (HO.LANGUAGES[c] || c) + (i ? '' : ' (original)'))));
+      langSel.value = langs.includes(last) ? last : langs[0];
+    }
     // the patch: only for rules that have fixes
     const prs = HO.RULESETS[d.rules], nfx = HO.fixes(prs).length;
     patchBox.hidden = !nfx;
@@ -3684,8 +3716,10 @@ function newGameDialog() {
     const patch = !patchBox.hidden && !!d.patch;
     if (!patchBox.hidden) localStorage.setItem('ho5.patch', patch ? '1' : '0');
     const snd = sounds.value(); localStorage.setItem('ho5.sounds', snd || '');
+    const lang = !langRow.hidden && d.lang ? d.lang : null;
+    if (lang) localStorage.setItem('ho5.lang.' + d.rules, lang);
     // hints: the creator's "Give helpful game play hints" preference, which 5.0.5 and the Palm game read for the first messages (rs.welcome)
-    const common = { modern: !!d.modern, ...(patch ? { patch: true } : {}), ...(snd ? { sounds: snd } : {}), hints: !!Prefs.hints, humans, seed: (Math.random() * 2 ** 31) | 0, name: d.name || 'You', galaxy: d.galaxy || 'Milky Way', female: d.female === '1', computers: +d.computers, start: d.start, rules: d.rules, alliances: !!d.alliances, luck: !!d.luck, novas: !!d.novas, ...keptStarsOpt(d.rules) };
+    const common = { modern: !!d.modern, ...(patch ? { patch: true } : {}), ...(snd ? { sounds: snd } : {}), ...(lang ? { lang } : {}), hints: !!Prefs.hints, humans, seed: (Math.random() * 2 ** 31) | 0, name: d.name || 'You', galaxy: d.galaxy || 'Milky Way', female: d.female === '1', computers: +d.computers, start: d.start, rules: d.rules, alliances: !!d.alliances, luck: !!d.luck, novas: !!d.novas, ...keptStarsOpt(d.rules) };
     const k = kindOf(d.rules);
     if (k === 'original') {
       localStorage.setItem('ho5.iq', d.o_iq);
@@ -3768,7 +3802,7 @@ function setupMenus() {
   // the modern conveniences a player may choose (all of them can change in
   // the middle of a game). Items: [label, fn, feature or null, checked()].
   const ho = [['About this version…', openAbout], ['Patch notes…', openPatchNotes, () => patchOn()], ['-'],
-    ['Skin and OS look…', openSkin], ['Sounds…', () => openSounds()],
+    ['Skin and OS look…', openSkin], ['Sounds…', () => openSounds()], ['Language…', openLanguage, () => !!(G && HO.languages(HO.ownRules(G)).length)],
     [MODERN_TEXT.replace(/:.*/, ''), () => { if (G) setModern(!modern()); else toast('Modern conveniences are chosen for each game: start or continue one first.'); }, null, () => modern()],
     ['-'], ['Suggestion box…', () => openFeedback('idea')]];
   const bar = $('#menubar');
