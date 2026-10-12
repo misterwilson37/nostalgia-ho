@@ -73,8 +73,16 @@ Remake's choices in it:
    scale, so log spacing; each a black tick 3 pixels long at the top, the rest of the line
    drawn in the "transparent" pen mode, a colour and weight from a data table not read, so
    the remake blends black at 28 %, LIKELY; the bars' frame lines are black too). The older
-   versions have a grid as well (log at 100 ... 1,000, tenths when linear) but their drawing
-   wasn't read, so they have none. The bars are the skin's own width, not 77 pixels, so the
+   versions (read October 2026: Mac 1.2 `DrawHBarControl @c091e`, 2.0.1 @c091e, 3.0.1 @d0a7c,
+   4.0.5 @50a80; DOS 2.0 `FUN_9000_0cd5`; Windows 3.1 `FUN_1010_0a7a`; Windows 4.0.5
+   `FUN_0045aae1`) have no grid through the bars: only ten ticks, 2 pixels high (`Line(0, -2)` /
+   MoveTo y+15, LineTo y+13) on the rule under the heading strip, black, at 77k/10 pixels when
+   linear or on the log table at 100 ... 1,000 per mille, following the scale switch where
+   there is one (1.2, 2.0, 3.0.1: the setup's +0x2a). `rs.barGrid` is `{ n, tick, line, above }`:
+   5.0.5 `{ 10, 3, line: true }`, the older ones `{ 10, 2, line: false, above: true }`, drawn on
+   the first bar only (the classic skin; the cozy skin clips them). The Mac draws its rule in
+   ten LineTo strokes, so each tick's top joins the next tick's foot by a slant; the remake
+   draws the ticks alone. The bars are the skin's own width, not 77 pixels, so the
    table is worked out for the bar's fraction (engine `BAR_SCALES.log`), not in 78 steps.
 3. **A finger uses the version's own scale** (it used iOS's log scale in every skin):
    linear in 2.0 and 1.2 unless switched, log elsewhere. Rulesets that aren't an original

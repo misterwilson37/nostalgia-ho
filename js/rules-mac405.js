@@ -201,6 +201,8 @@ const FIXES = W.fixes.filter(f => MAC_SLIPS.includes(f.id)).concat([
 
 // Mac 4.0.5 plays 4.0.5's game (js/rules-405.js), with the differences above
 E.registerRules('mac405', Object.assign({}, W, {
+  // the bars' ticks (DrawHBarControl @50a80): ten, 2 pixels high, on the heading strip's rule, following the scale; nothing through the bars
+  barGrid: { n: 10, tick: 2, line: false, above: true },
   // CONFIRMED (InitHLogBarAmts @50924, GetHPercBarAmt @50a40, DrawHBarControl
   // @50a80, DoHBarClick @514e2; 'Stup' 1000 "Default Setup" +0x3c = 1, which
   // nothing in the program writes, so no click switches it as in 3.0.1): the

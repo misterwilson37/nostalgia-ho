@@ -1868,6 +1868,9 @@ E.registerRules('dos', Object.assign({}, O, {
   // with 1) are linear. No budget bar is ever locked: 2.0 has no finished or
   // evacuating colony to lock (its finished parts pass their share on).
   barScale: { budget: 'linear', tech: 'log', toggle: true },
+  // no grid through the bars: ten ticks 2 pixels high on the rule of the heading strip, at 77k/10 pixels (linear) or on the log table
+  // (the switch moves them); DOS FUN_9000_0cd5, Windows 3.1 FUN_1010_0a7a, Mac 2.0.1 DrawHBarControl @c091e
+  barGrid: { n: 10, tick: 2, line: false, above: true },
   battlePanel: BATTLE_PANEL_DOS, battlePanelMac: BATTLE_PANEL_MAC, battlePanelWin: BATTLE_PANEL_WIN,
   // CONFIRMED (WINHO.EXE's number formats "%ld,%.3ld", "%ld,%.3ld,%.3d",
   // "%ld,%.3ldK"; Mac 2.0.1 and 1.2 LongToNiceString @1244a): every number in

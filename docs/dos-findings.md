@@ -362,7 +362,7 @@ drawing (`FUN_1010_0a7a`):
   default (DOS `FUN_3000_b405`; Mac 'Stup' 1000 "Default Setup" +0x2a = 0). A click on
   the strip above the bars flips it (DOS `FUN_9000_1554`, Mac `DoHBarClick`: 1 − the
   value, the bars redrawn), so the player could switch them to the log scale and back;
-  linear, a share is 1,000 × x / 77 and the grid is in tenths. Windows 3.1 draws by the
+  linear, a share is 1,000 × x / 77 and the ticks are in tenths (`FUN_9000_0cd5`, Windows `FUN_1010_0a7a`, Mac 2.0.1 `DrawHBarControl`: ten black ticks 2 pixels high on the rule under the heading strip, none through the bars, following the switch; `rs.barGrid`). Windows 3.1 draws by the
   same setting (`FUN_1010_0a7a` @0c25, 0d6f, 0fa0; its click, `FUN_1010_1303`, has the
   switch, read October 2026: a click at or above the top of the bars (the heading strip,
   y ≤ the window's top) does `*(DAT_1130_6219 + 0x2a) = 1 − *(DAT_1130_6219 + 0x2a)`, then

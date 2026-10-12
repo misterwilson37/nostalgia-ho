@@ -1950,6 +1950,8 @@ E.registerRules('301', Object.assign({}, D, {
   // +0x2a), as in 2.0; the Technology bars always on the log scale
   // (InitVLogBarAmts @d0004, DoVBarClick @d0582 with 2)
   barScale: { budget: 'log', tech: 'log', toggle: true },
+  // DrawHBarControl @d0a7c: ten ticks 2 pixels high on the heading strip's rule (linear or log by the switch), nothing through the bars
+  barGrid: { n: 10, tick: 2, line: false, above: true },
   barLocked: barLocked301, battlePanel: D.battlePanelMac,
   maxPlayers: 20,          // CONFIRMED (doCreateGalaxyDlg @f0550): 0-19 computers
   maxDesigns: MAX_DESIGNS,

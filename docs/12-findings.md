@@ -515,8 +515,9 @@ battles"):
 
 - **The scale.** `InitHLogBarAmts @c07be` and `InitVLogBarAmts @c0004` build the log
   tables (77 and 50 pixels), `GetHPercBarAmt @c08d2` a share's pixel. The budget bars
-  (`DrawHBarControl @c091e`, `DoHBarClick @c1002`) are linear (1,000 × x / 77, the grid in
-  tenths) unless the setup's +0x2a is set, 0 by default ('Stup' 1000 "Default Setup"); a
+  (`DrawHBarControl @c091e`, `DoHBarClick @c1002`) are linear (1,000 × x / 77, the ticks in
+  tenths: ten black ticks 2 pixels high on the heading strip's rule, no grid through the bars, read in
+  `DrawHBarControl`; `rs.barGrid`) unless the setup's +0x2a is set, 0 by default ('Stup' 1000 "Default Setup"); a
   click above the bars flips it (`DoHBarClick`'s last branch: 1 − the value, then
   `DrawBudgetRect`), and they are drawn and dragged on the log scale (the grid at 100 ...
   1,000 per mille) until clicked again. The technology bars are always on the log scale

@@ -233,7 +233,7 @@ battles), read in both programs (Windows `SPACEHO.EXE`, Mac 4.0.5 with its routi
   read SPACEHO.INI's `[prefs] useLogScale`, written back on quitting and read with 1 by
   default, `FUN_0047d8e8`; Mac `DoHBarClick` @514e2 and `DrawHBarControl` @50a80 read the
   setup's +0x3c, 1 in 'Stup' 1000 "Default Setup", which nothing in the program writes),
-  otherwise 1,000 × x / 77 with a linear grid. So both draw and drag them on the log scale
+  otherwise 1,000 × x / 77 with a linear grid (Windows `FUN_0045aae1` and Mac `DrawHBarControl` @50a80 draw it as ten 2-pixel ticks on the heading strip's rule, 77k/10 pixels linear or the log table, none through the bars: `rs.barGrid`). So both draw and drag them on the log scale
   unless the setting is edited by hand; neither has 3.0.1's click to switch. The
   technology bars are always on the log scale (`FUN_0045a5d6` called with 2 by the
   research window; `DoVBarClick` @5060c with 2 from `ClickInTechWin` @18025a). The

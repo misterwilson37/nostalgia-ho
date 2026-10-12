@@ -547,7 +547,7 @@ battles), read in 3.0.1's code:
   share's pixel. The budget bars (`DrawHBarControl @d0a7c`, `DoHBarClick @d18a0`) are on
   the log scale when the setup's +0x2a is set, which it is by default ('Stup' 1000
   "Default Setup" +0x2a = 1); a click on the strip above the bars flips it (`DoHBarClick`:
-  1 − the value, and the bars redrawn), so they go linear (1,000 × x / 77, the grid in
+  1 − the value, and the bars redrawn; `DrawHBarControl` draws ten 2-pixel ticks on the heading strip's rule, none through the bars, moving with the switch; `rs.barGrid`), so they go linear (1,000 × x / 77, the grid in
   tenths) and back. The technology bars are always on the log scale (`DoVBarClick
   @d0582` with 2). The remake: `rs.barScale` `{ budget: 'log', tech: 'log', toggle:
   true }`, the switch a click on the Budget heading, kept per ruleset in the browser.

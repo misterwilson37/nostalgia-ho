@@ -2848,7 +2848,7 @@ Object.defineProperties(E.RULESETS.original, Object.fromEntries(Object.entries({
   // a share's pixel; FUN_1008a7a0, the mouse's pixel through the table; the
   // grid at 100, 200 ... 1,000 per mille on it, FUN_1008aff0); the locked
   // bars (barLocked505) and the battle window's ship panel (battlePanel505)
-  barScale: { budget: 'log', tech: 'log' }, barGrid: true /* FUN_1008aff0; Palm FUN_00048e7a */, barLocked: barLocked505, battlePanel: battlePanel505, battlePanelWords: words505,
+  barScale: { budget: 'log', tech: 'log' }, barGrid: { n: 10, tick: 3, line: true } /* FUN_1008aff0; Palm FUN_00048e7a: ten lines through the bars, a black tick 3 pixels long at the top */, barLocked: barLocked505, battlePanel: battlePanel505, battlePanelWords: words505,
   fleetFor: fleetFor505, shipsAdded: shipsAdded505, yardRoom: yardRoom505, addMasterPoints: addMasterPoints505,
   bars: bars505, setBars: setBars505, slots301: slots505, colSlots: colSlots505, keyPm, setKeyPm, giveBarPercent: giveBar505, share505,
   terraLeft: (G, p, s) => bars505(s)[0] !== -1,

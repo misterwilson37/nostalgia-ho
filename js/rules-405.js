@@ -2395,6 +2395,8 @@ E.registerRules('405', Object.assign({}, D, {
   // the research window's drag FUN_0045a5d6 is called with 2, the log scale):
   // both kinds of bar on the log scale (Mac 4.0.5 alike: below)
   barScale: { budget: 'log', tech: 'log' },
+  // Windows FUN_0045aae1 (Mac DrawHBarControl @50a80): ten ticks 2 pixels high on the heading strip's rule, nothing through the bars
+  barGrid: { n: 10, tick: 2, line: false, above: true },
   barLocked: barLocked405, battlePanel: D.battlePanelWin,
   hints: true,             // CONFIRMED (FUN_004320f8): a hint every step (above)
   hintTexts: HINTS405,
