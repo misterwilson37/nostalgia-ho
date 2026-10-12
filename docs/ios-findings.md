@@ -533,7 +533,7 @@ The budget and colony bars are touched directly; there is no thumb.
   (0 to the bar width) is looked up in a log scale built by `initHLogBarAmts`
   (`0x10000ad78`): for pixel x of width w, value = trunc((exp(x × 77 / w / 32.11 +
   2.302) − 10) × 10), the last pixel 1,000 (per mille); so the left of the bar gives
-  fine control of small amounts, as on the Mac since 2.0 (`InitHLogBarAmts`). The bar
+  fine control of small amounts, as on the Mac (`InitHLogBarAmts`, since 1.2). The bar
   is drawn from the same table (`getHPercBarAmt:` `0x10000aeb8`). The constants are
   `DAT_1000cef68` = 77.0, `DAT_1000cef70` = 32.11, `DAT_1000cef78` = 2.302. CONFIRMED.
 - **The other bars** make room as on the Mac (5.0.5's drag rule): the change is shared
@@ -627,6 +627,56 @@ the `ship-*` parts, hats from `player_<k>_<sex>` / `enemy_<k>_<sex>`, the title 
 `ios` (`dir: 'assets/skins/ios/'`, mp3 support in `useSounds`); an OS look of its own
 (dark panels, `dialog-background`, the `slider-*` and `button-*` art); `skins.js` entry
 `{ id: 'ios', version: '1.2.9', platform: 'iPhone and iPad', year: 2012 }`.
+
+## Bars and battles (October 2026)
+
+Peter Commons, trying the remake, noted that the bar charts weren't on a log scale,
+that they didn't lock at zero once a colony was mined and terraformed, and that battles
+didn't show the ships. In iOS 1.2.9:
+
+- **The scale.** The budget bars (`-[HoBarLayer initHLogBarAmts]` 0x10000ad78, `handleTouch`
+  0x10000a734, `getHPercBarAmt:` 0x10000aeb8, above) and the technology bars (TechLayer is
+  a HoBarLayer too) are on the log scale for touching and for drawing: value =
+  trunc((e^(x × 77 / w / 32.11 + 2.302) − 10) × 10) per mille, the last pixel 1,000. A
+  finger is the only input, so the remake's mouse uses it too (`rs.barScale` `{ budget:
+  'log', tech: 'log' }`, inherited from 5.0.5, engine `BAR_SCALES.log`). The
+  terraform/mine slider stays linear. CONFIRMED.
+- **The lock.** `-[PlayerPlanetsLayer isBarLocked:]` 0x10000b2b8 is 5.0.5's `FUN_1008a030`
+  (the colony slot is 0x1c bytes at player +0x1150): a colony being evacuated (+0x13), a
+  finished colony (Terraform +2 and Mine +4 both −1), Savings while dipping (slot −2 with
+  player +0x5c above 0); Technology (−1) never. `-[TechLayer isBarLocked:]` 0x10001c418
+  locks a technology bar whose share is below 0 (the remake's never are). A touch on a
+  locked bar isn't taken (`ccTouchBegan:` 0x10000a558): no sound and, unlike 5.0.5, no Dip
+  Into Savings window. `barString:` 0x10000b3d8 writes "Evacuating" (Misc Strings 31), the
+  finished colony's income (slot +8, as money), or "-%d%% (%s)" with dip × Ship Savings /
+  100 (player +0x50); `getBarStringColor:` 0x10000b560 and `getBarColor:withVal:`
+  0x10000b644 colour them. The shares are the rules' (0 for an evacuating or finished
+  colony). The remake: `rs.barLocked` (`barLockedIOS`, js/rules-ios.js). CONFIRMED.
+- **The battle window.** BattleStageLayer (outside the encrypted page): `setup:`
+  0x100095004, `addBattleDescription` 0x1000949f4 ("Review Battle at %s in %d", sprintf
+  Templates 12, centred at the top), `addShipGroups` 0x100094b64 (a list taller than the
+  screen in a CCLayerPanZoom that scrolls), `drawGroup:` 0x1000954c8 and
+  `-[BattleShipNode update:player:myPlayer:]` 0x10009c3f0 with `init` 0x10009c18c. Each
+  group (0x34-byte record: owner, player, design, ship counts now (+0x1c) and at the
+  start (+0x1e), damage) is one ShipNode (the design's picture, `setDamage:` the damage
+  done to its next ship), the owner's hat on it (the player's halo, or the computer's
+  face), the good-luck or bad-luck report icon (17, 18) when the side's luck (player
+  record +2) is above or below 0, a dead-ship sprite when the group is gone, and its words
+  under it. Groups of side 0 (the viewer's, as in 5.0.5) are on the left, the rest on the
+  right, mirrored. The words (FUN_1000358c8, disassembled for its arguments; = 5.0.5's
+  FUN_1007c250): "%d %s (%d/%d) %ss" (count, design name, the design's Weapons +8 and
+  Shields +0xa, class), "%s %s (%d/%d) %s" with "one", "%s (%d/%d) %s"; cut to 39
+  letters; a decoy is "Decoy" to its owner and its class to everyone else. A group with
+  losses is "%d/%d %ss", one wholly lost "one dead %s" or "%d dead %ss"; the colony its
+  people, "%s/%s", or "%s killed" (sprintf Templates 9-15). No owner's name is written.
+  The remake: `rs.battlePanel` (`battlePanelIOS`). CONFIRMED.
+
+What changed in play: nothing in the rules. The mouse now drags the bars on the log
+scale (before: linear), the bars are always drawn on it, and locked bars refuse the
+drag in the interface as well as in the rules. Not read: the first drawing methods of
+CBattleStagePhone (in the encrypted page; the BattleStageLayer above is what draws the
+window), which picture the good-luck and bad-luck icons are (the remake draws a + or −
+mark), and the damage shading's exact look (not drawn).
 
 ## Still open
 
