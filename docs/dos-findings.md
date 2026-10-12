@@ -363,8 +363,12 @@ drawing (`FUN_1010_0a7a`):
   the strip above the bars flips it (DOS `FUN_9000_1554`, Mac `DoHBarClick`: 1 − the
   value, the bars redrawn), so the player could switch them to the log scale and back;
   linear, a share is 1,000 × x / 77 and the grid is in tenths. Windows 3.1 draws by the
-  same setting (`FUN_1010_0a7a` @0c25, 0d6f, 0fa0; its click, `FUN_1010_1303`, wasn't
-  re-read for the switch). The technology bars are always on the log scale (DOS
+  same setting (`FUN_1010_0a7a` @0c25, 0d6f, 0fa0; its click, `FUN_1010_1303`, has the
+  switch, read October 2026: a click at or above the top of the bars (the heading strip,
+  y ≤ the window's top) does `*(DAT_1130_6219 + 0x2a) = 1 − *(DAT_1130_6219 + 0x2a)`, then
+  redraws with GETDC / `FUN_1088_29c7` / RELEASEDC; a click lower down picks the slot (the
+  row is (y − top − 2) / 14) and starts the drag; the same word the draw tests, so the `dos`
+  ruleset's `barScale.toggle` stands for the Windows build too). The technology bars are always on the log scale (DOS
   `FUN_9000_0604` and the Mac's `DoVBarClick` with 2, from the research window); a
   colony's own bars (with 1) are linear. The remake: `rs.barScale` `{ budget: 'linear',
   tech: 'log', toggle: true }` (the switch: a click on the Budget heading). CONFIRMED.
