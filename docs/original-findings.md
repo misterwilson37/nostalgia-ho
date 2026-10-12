@@ -1078,8 +1078,8 @@ LHoBarControl (0x10089260-0x1008ba00) and CBattleStageMac (0x100ac840-0x100afcb0
   0 (`GiveBarPercent` when the colony is marked or finishes). The remake already refused
   the drag in its rules (`dragShare505`); now the bar says so and refuses it too
   (`rs.barLocked`, `barLocked505`).
-- **The battle window.** "Review Battle at %s in %d" (STR# 6020's templates), "Round %d".
-  The groups (`FUN_1007f560`, `FUN_1007f7f0`, `FUN_1007f9f0`): the viewer's side and its
+- **The battle window.** "Review Battle at %s in %d" and "Round %d" (the resource
+  fork's sprintf templates, as iOS's). The groups (`FUN_1007f560`, `FUN_1007f7f0`, `FUN_1007f9f0`): the viewer's side and its
   allies, then the first other side with a colony, then the rest; each side's colony
   first, then its designs last to first, each split by stance; group +0x26 says the
   column: 0 for the viewer's side and its allies (x 145), 1 for the others (x 465,
