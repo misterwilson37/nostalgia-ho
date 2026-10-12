@@ -1051,8 +1051,12 @@ These are what the Palm code does and what the remake now does; they look like s
   rank's window; the names are kept (localStorage "ho5.stars.palm"). Settled October
   2026: `FUN_000692c4` puts up to five in a row from SysRandom(0, kept − 5) into the game,
   and `FUN_00025f4a` gives them the first places of the star list and shuffles it, so
-  they land on stars at random. Open: the form's words (the remake's own) and how the
-  list grows (the remake keeps every name).
+  they land on stars at random. Settled October 2026 (`FUN_00075c40`, the Cool!
+  button): the list grows without limit, each name added at the end, none replaced;
+  the name (11 letters, the field's maxChars) is refused only when it equals a kept name,
+  letter case aside (not the star list), with tSTL 6004 item 10; the form's words are
+  tFRM 2900's ("Congratulation!", "You may name a star for use in future games:", Cool!,
+  Nevermind). Built (`rs.nameAStar` `match: 'kept'`, `max: 11`).
 - **The canned-message window** (tFRM 2600: Thank You, Sorry, the curse); the remake's
   messages are free text.
 - **Options locked by rank** (`FUN_0003825a`), left open on purpose.

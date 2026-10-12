@@ -162,6 +162,30 @@ Each CONFIRMED the same as `js/rules-original.js`, so the Palm ruleset uses it:
   form's words are the remake's). New Game takes up to five kept names in a row from
   SysRandom(0, kept − 5) (`FUN_000692c4`), and the galaxy set-up gives them the first
   places of the star list and shuffles it (`FUN_00025f4a`), as 5.0.5 does.
+  The save (`FUN_00075c40`, button 0xb56 Cool!; CONFIRMED October 2026): the field
+  (0xb55, maxChars 11) cut to 11 letters (StrNCopy 0xb); a blank name, or one whose
+  first byte is above 127, saves nothing; a name equal to a kept one, letter case
+  aside (`FUN_0002a4b4`), is refused with tSTL 6004 item 10, "Sorry, but there is
+  already a star with that name. How about a different name?" (`FUN_0002c438`); one
+  longer than 11 with "That star's name is too long!" (never, the field stops at 11);
+  else it is added at the end of the kept list (prefs +0x2e8, 12-byte records;
+  `FUN_0002b636` grows the array by one, `FUN_0002b9ee` only trims spare room: no limit,
+  no replacing) and the preferences saved. The star list itself isn't looked at. The
+  form's words: title "Congratulation!", "Congratulations!", "You have achieved  the
+  rank of:", "You may name a star for use / in future games:", Cool! and Nevermind.
+  Built (`rs.nameAStar`).
+- **The compact figures** (`FUN_0002c664`, CMiscUtilsPalm +0x6c, tSTL 1001 items
+  46-64; CONFIRMED October 2026): each screen tests the figure and calls it instead
+  of the full form (+0x68) past a size: the money panel (`FUN_00047f54`, labels tSTL
+  6001 "Metal:", "Savings:", "Income:"): Metal from 1,000,000 or below 0, Savings from
+  $10,000,000 or below 0, Income from $100,000,000, the bracketed changes from 10,000
+  either way; the planet panel (`FUN_0003b4e0`): Metal from 1,000,000, Income from
+  $10,000,000; Build Ships' cost and metal (`FUN_00044722`, "no cost" at 0) from
+  1,000,000; the dip's amount on the Savings bar (`FUN_0004a016`) from $1,000,000; one
+  figure of `FUN_00079676`. The forms: "$M,KKK K" for 1 to 9 million, "$M.xx M" from 10
+  million, "$K.0u K" under 100,000 (u / 100 printed %02ld: 12,345 is "$12.03 K"),
+  "$K K" else; negative in brackets with "$", with "-" without. Built for the money and
+  planet panels (`rs.shortMoney`, `moneyPalm`); Build Ships and the dip keep full figures.
 - **Numbers**: reports write every number in full with commas (`FUN_0002c510`, the
   CMiscUtilsPalm method +0x68 that the report formatter `FUN_00027c4c` calls), not
   5.0.5's "12,345K"; the compact money of tSTL 1001.47-62 ("$1.23 M", "$12 K",

@@ -18,6 +18,19 @@
 'use strict';
 const E = typeof module !== 'undefined' ? require('./engine.js') : root.HO;
 const O = E.RULESETS.original;
+// FUN_0002c664 (CMiscUtilsPalm +0x6c), the compact figure, from tSTL 1001
+// items 46-64: M millions, K thousands, u units of |n|: 0 "$0"; M 1-9
+// "$M,KKK K"; M 10 up "$M.xx M" (xx = K / 10); M 0 and K under 100 "$K.0u K"
+// (u / 100 printed %02ld, so 12,345 is "$12.03 K"); else "$K K". Negative:
+// in brackets with the currency, "-" without. The currency is tSTL 1001
+// item 46 "$" (the euro option, prefs +0x2e6, makes it 0x80).
+function moneyPalm(n, cur = true) {
+  n = Math.trunc(n); const neg = n < 0, a = Math.abs(n), M = Math.trunc(a / 1e6), K = Math.trunc((a % 1e6) / 1000), u = a % 1000;
+  const c = cur ? '$' : '', p2 = (x) => String(x).padStart(2, '0'), p3 = (x) => String(x).padStart(3, '0');
+  if (a === 0) return cur ? '$0' : '0';
+  const t = M >= 1 && M <= 9 ? `${M},${p3(K)} K` : M >= 10 ? `${M}.${p2(Math.trunc(K / 10))} M` : K < 100 ? `${K}.${p2(Math.trunc(u / 100))} K` : `${K} K`;
+  return neg ? (cur ? `(${c}${t})` : '-' + t) : c + t;
+}
 const trunc = Math.trunc;
 
 // Every own property of the 5.0.5 ruleset, the hooks that aren't enumerable
@@ -252,9 +265,20 @@ const rs = Object.assign(base, {
   barLocked: barLockedPalm, battlePanel: battlePanelPalm,
   // CONFIRMED (FUN_0002c510, the CMiscUtilsPalm method +0x68 the report
   // formatter FUN_00027c4c calls): numbers in full with commas, however big,
-  // not 5.0.5's "12,345K". (Its compact "$1.23 M" / "$12 K" money, FUN_0002c664
-  // with tSTL 1001.47-62, is for screens the remake doesn't have.)
+  // not 5.0.5's "12,345K" (the compact money, FUN_0002c664: shortMoney below).
   fmtNum: null, fmtMoney: null,
+  // CONFIRMED (October 2026): the compact form is used on screens by size
+  // (each caller tests the figure, then calls the method +0x6c, FUN_0002c664,
+  // instead of +0x68): the money panel (FUN_00047f54: Metal from 1,000,000
+  // or below 0, Savings from $10,000,000 or below 0, Income from
+  // $100,000,000; the changes in brackets from 10,000 either way), the planet
+  // panel (FUN_0003b4e0: Metal from 1,000,000, Income from $10,000,000), the
+  // Build Ships window's cost and metal (FUN_00044722, from 1,000,000), the
+  // dip's amount on the Savings bar (FUN_0004a016, from $1,000,000) and one
+  // figure of FUN_00079676; everything else (reports, the bars' amounts) in
+  // full. The skin uses it where it has the screen (rs.shortMoney: the
+  // money and planet panels).
+  shortMoney: { fn: moneyPalm, full: { savings: [0, 1e7], income: [-Infinity, 1e8], metal: [0, 1e6], planetMetal: [-Infinity, 1e6], planetIncome: [-Infinity, 1e7] } },
   // the New Game window's Version and Edition menus (engine.js editions)
   family: '5', edition: { version: '5', name: 'Palm OS', platform: 'Palm OS, version 1.0.4', year: 2003 }, skins: ['palm'],
   // the New Game window lists rulesets by year, then version (engine.js ruleOptions)
@@ -299,8 +323,21 @@ const rs = Object.assign(base, {
   // tank): 5.0.5's window (organizeFleets '505') would play 5.0.5's rules, so
   // the Palm keeps Split… and "Merge all fleets here" (docs/open-questions.md)
   organizeFleets: null,
-  nameAStar: { when: 'rank', text: 'You have reached a new rank, so you get to name a star.', keep: 0, use: 'put', put: 5, pick: 'run', max: 7,
-    taken: 'Sorry, there’s already a star named “%s.”  Please pick another name.' },
+  // CONFIRMED (FUN_00075c40, tFRM 2900's Cool! button 0xb56): the name, cut
+  // to 11 letters (StrNCopy 0xb; the field 0xb55 takes 11, maxChars), is
+  // refused when it equals a kept name, letter case aside (FUN_0002a4b4;
+  // the star list and this galaxy's stars aren't looked at; alert 2300),
+  // else added at the end of the kept list (FUN_0002b636: grown by one,
+  // no limit, nothing replaced) and the preferences saved. A blank name
+  // (or one whose first byte is above 127) is let go unsaved.
+  // The form's words (tFRM 2900): the title "Congratulation!", "You may name
+  // a star for use / in future games:", the buttons Cool! and Nevermind; the
+  // refusal is tSTL 6004 item 10 (FUN_0002c438), the too-long one "That
+  // star's name is too long!" (0x75d9c), which the 11-letter field never lets
+  // happen.
+  nameAStar: { when: 'rank', title: 'Congratulation!', text: 'You may name a star for use in future games:', ok: 'Cool!', cancel: 'Nevermind',
+    keep: 0, use: 'put', put: 5, pick: 'run', max: 11, match: 'kept',
+    taken: 'Sorry, but there is already a star with that name. How about a different name?' },
 });
 // CONFIRMED (tSTL 6060, the star names): 5.0.5's 255, with "Courasant" in
 // place of "Antares" (the 196th)

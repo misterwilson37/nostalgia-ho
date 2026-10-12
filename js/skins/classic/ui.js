@@ -117,6 +117,9 @@ const el = (tag, attrs, ...kids) => {
 // 5.0.5's "12,345K" and "$12.345M", 1.2 to 4.0.5's "12,345K"); left out, in full
 const fmt = (n) => { const f = G && HO.rules(G).fmtNum; return f ? f(n) : Math.round(n).toLocaleString('en-US'); };
 const money = (n) => { const f = G && HO.rules(G).fmtMoney; return f ? f(n) : (n < 0 ? '-$' : '$') + fmt(Math.abs(n)); };
+// a panel's figure (rs.shortMoney, the Palm): in full inside the screen's
+// range ([lo, hi)), else the version's compact form
+const panelFig = (key, n, cur) => { const S = G && HO.rules(G).shortMoney, r = S && S.full[key]; return r && !(n >= r[0] && n < r[1]) ? S.fn(n, cur) : cur ? money(n) : fmt(n); };
 
 // ---------- images ----------
 const IMG = {};
@@ -1255,10 +1258,10 @@ function renderPanel() {
   const pr = HO.projected(G, p);
   const net = pr.net;
   panel.append(el('section', { class: 'box info' },
-    row('Savings', money(p.savings), p.savings < 0 ? 'neg' : '', 'savings'),
-    row('Income', money(pr.income), pr.income < 0 ? 'neg' : '', 'income'),
+    row('Savings', panelFig('savings', p.savings, true), p.savings < 0 ? 'neg' : '', 'savings'),
+    row('Income', panelFig('income', pr.income, true), pr.income < 0 ? 'neg' : '', 'income'),
     pr.interest ? row(pr.interest > 0 ? 'Interest' : 'Interest owed', money(pr.interest), pr.interest < 0 ? 'neg' : '', 'interest') : null,
-    row('Metal', fmt(p.metal), '', 'metal'),
+    row('Metal', panelFig('metal', p.metal, false), '', 'metal'),
   ));
   // budget bars
   const ents = budgetEntries();
@@ -1330,10 +1333,10 @@ function planetBox(sid) {
   if (s.owner === ME || k.explored) {
     const src = s.owner === ME ? s : k;
     const gs = src.g / p.homeG, ts = 72 + (src.t - p.homeT);
-    box.append(row('Gravity', gs.toFixed(2) + 'G' + classNote(gs), '', 'gravity'), row('Temp', degF(ts), '', 'temp'), row('Metal', fmt(src.metal), '', 'planetMetal'));
+    box.append(row('Gravity', gs.toFixed(2) + 'G' + classNote(gs), '', 'gravity'), row('Temp', degF(ts), '', 'temp'), row('Metal', panelFig('planetMetal', src.metal, false), '', 'planetMetal'));
     if (s.owner === ME) {
       const inc = HO.planetIncome(G, p, s);
-      box.append(row('Population', fmt(s.pop * 1e6), '', 'population'), row('Max population', fmt(HO.maxPop(G, p, s) * 1e6), '', 'maxPop'), row('Income', money(inc), inc < 0 ? 'neg' : '', 'planetIncome'));
+      box.append(row('Population', fmt(s.pop * 1e6), '', 'population'), row('Max population', fmt(HO.maxPop(G, p, s) * 1e6), '', 'maxPop'), row('Income', panelFig('planetIncome', inc, true), inc < 0 ? 'neg' : '', 'planetIncome'));
       const terraOK = Math.abs(HO.seenT(p, s) - 72) > 0.5, metalOK = s.metal > 0;
       // in 2.0 and 1.2 a finished part's share is wasted, not passed on, so
       // the bar stays (as in 2.0's planet window) and a note says so
@@ -3046,12 +3049,14 @@ function openWinWindows(done) {
 // Is the name taken? NS.match 'munger': found anywhere in the kept names or
 // the version's star names, a name inside another too, letter case counting
 // (the Mac versions' Munger); '505': equal to a kept name, letter case aside,
-// or found by Munger in the star names (5.0.5); left out: equal to a star
+// or found by Munger in the star names (5.0.5); 'kept': equal to a kept
+// name, letter case aside (the Palm); left out: equal to a star
 // name, a kept one or one of this galaxy, letter case aside
 function starTaken(NS, id, n) {
   const base = HO.rules(G).starNames || HO.DATA.starNames || [], kept = keptStars(id), lc = (x) => String(x).toLowerCase();
   if (NS.match === 'munger') return base.concat(kept).some(x => String(x).includes(n));
   if (NS.match === '505') return kept.some(x => lc(x) === lc(n)) || base.some(x => String(x).includes(n));
+  if (NS.match === 'kept') return kept.some(x => lc(x) === lc(n)); // the Palm (FUN_00075c40): the kept names only
   return base.concat(kept, G.stars.map(s => s.name)).some(x => lc(x) === lc(n));
 }
 // keep it: NS.add(list, name) (4.0.5's list of four), else at the end, the last NS.keep
@@ -3075,8 +3080,8 @@ function openNameStar(done, cancelled) {
     toast(NS.use ? `“${n}” will be among the stars of your next galaxies.` : `“${n}” has been kept.`);
     finish();
   } }, el('p', null, NS.text), NS.rule ? el('p', null, NS.rule) : null, el('label', null, el('span', null, NS.label || 'Star name'), inp), NS.hint ? el('p', { class: 'note' }, NS.hint) : null, err,
-    el('div', { class: 'btns right' }, el('button', { type: 'button', class: 'quiet', onclick: () => { if (cancelled) cancelled(); finish(); } }, 'Cancel'), el('button', { type: 'submit' }, 'OK')));
-  modal('Name a Star', f, { cls: 'small', sticky: true });
+    el('div', { class: 'btns right' }, el('button', { type: 'button', class: 'quiet', onclick: () => { if (cancelled) cancelled(); finish(); } }, NS.cancel || 'Cancel'), el('button', { type: 'submit' }, NS.ok || 'OK')));
+  modal(NS.title || 'Name a Star', f, { cls: 'small', sticky: true });
 }
 // Force End Turn (rs.forceEndTurn, Mac 2.0.1): with several players, marks
 // every player done after asking (box 3210), and the turn is played
