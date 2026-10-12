@@ -250,5 +250,7 @@ window.HOTHEME = {
     doc.documentElement.classList.add('skin-ios');
   },
 };
+// a skin built on this one (js/skins/android/ui.js) adjusts the theme here
+if (window.HOTHEME_VARIANT) window.HOTHEME_VARIANT(window.HOTHEME);
 if (!window.HOSKINS_INLINE) document.write('<script src="js/skins/classic/ui.js"><\/script>');
 })();

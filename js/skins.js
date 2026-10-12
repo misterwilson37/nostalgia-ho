@@ -115,6 +115,8 @@ const SOUNDS = {
   // "soundFormat"), named by 5.0.5's numbers; 7006 (ship built) is near silent,
   // as in the app; 7008-7011 aren't in its "Sounds" list
   ios: { name: '1.2.9 (iPhone and iPad, 2012)', year: 2012, dir: 'assets/skins/ios/' },
+  // Android 1.2.8 (2015): the iOS game's pictures and sounds, unchanged
+  android: { name: '1.2.8 (Android, 2015)', year: 2015, dir: 'assets/skins/ios/', same: 'ios' },
 };
 // The OS looks (js/os/<id>.css), oldest first: each is the window chrome
 // of one system, drawn in CSS (no system bitmaps).
@@ -130,6 +132,8 @@ const OSES = [
   { id: 'macos9', name: 'Mac OS 9', year: 1999 },
   { id: 'macosx', name: 'Mac OS X (Aqua)', year: 2001 },
   { id: 'ios6', name: 'iOS 6', year: 2012 },
+  { id: 'android4', name: 'Android 4 (Holo dark)', year: 2012 },
+  { id: 'fireos', name: 'Fire OS 3 and 4 (Amazon)', year: 2013 },
   { id: 'ios10', name: 'iOS 10', year: 2017 },
 ].sort((a, b) => a.year - b.year);
 // os: the skin's own OS looks, its default first (the systems its original
@@ -148,6 +152,7 @@ const SKINS = [
   { id: 'palm', version: '5', platform: 'Palm OS, version 1.0.4', year: 2003, os: ['palmos'] },
   // 1.2.9 was built with the iOS 10.3 SDK (2017); iOS 6 is the 2012 launch's system
   { id: 'ios', version: '1.2.9', platform: 'iPhone and iPad', year: 2012, os: ['ios10', 'ios6'] },
+  { id: 'android', version: '1.2.8', platform: 'Android', year: 2015, os: ['fireos', 'android4'] },
   { id: 'cozy', version: 'Cozy western', platform: 'by Claude', year: 2026, homage: true, os: ['macos8', 'macos9', 'macosx'] },
   { id: 'gemini', version: 'Tactical console', platform: 'by Gemini', year: 2026, homage: true, os: ['macosx', 'macos9', 'win95', 'macos8', 'system7', 'win31'] },
   { id: 'classic', version: '5.0.5', platform: 'Mac OS 9 and X', year: 2003, os: ['macos8', 'macos9', 'macosx'] },

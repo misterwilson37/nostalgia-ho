@@ -1,0 +1,136 @@
+/* Spaceward Ho! — OS look "Android 4": Holo dark, the system of the 1.2.8
+   Android build (minSdk 14, Android 4.0; target 4.2, Jelly Bean; the activity's
+   theme is Holo.Transparent.NoActionBar.Fullscreen). BEST GUESS: no screenshot
+   of the game on an Android was available, and the game draws its own windows
+   in cocos2d. Apportable most likely mapped the few native pieces (the alerts,
+   e.g. "Exit Spaceward Ho?") to Android's AlertDialog, so this is Holo as every
+   Android 4 app drew it: dark grey dialogs with a cyan title rule (#33b5e5),
+   flat buttons divided by thin lines, the Holo switch (ON / OFF text), the
+   square check box with its cyan tick, the thin slider with a cyan progress
+   and thumb, underlined text fields that turn cyan on focus, Roboto. All drawn
+   in CSS. The Android skin's default look; js/os/fireos.css reuses it with
+   Amazon's orange. The accent is --tint. */
+@import url("base.css");
+@import url("roboto.css");
+:root {
+  --plat: #1b1b1b; --plat2: #282828; --edge: #404040; --ink: #fff; --sub: #a8a8a8; --hi: #33b5e5;
+  --ui: Roboto, "Droid Sans", "Helvetica Neue", Arial, sans-serif;
+  --tint: #33b5e5; --tint2: #0099cc; --tint-dim: rgba(51,181,229,.35); --btn: #3c3c3c; --btn-hi: #4e4e4e; --hair: #4a4a4a; --on: #fff;
+  color-scheme: dark;
+}
+body { font-size: 13px; background: #000; color: var(--ink); -webkit-font-smoothing: antialiased; }
+/* the bar at the top: the dark action bar with its coloured rule */
+#menubar { background: #111; border-bottom: 2px solid var(--tint); height: 34px; padding: 0 8px; box-shadow: none; }
+#menubar .logo { font: 500 16px var(--ui); color: var(--tint); }
+#menubar .logo:hover, #menubar .logo:focus-visible { color: #fff; background: none; }
+.mbtn { font: 14px var(--ui); color: #fff; border-radius: 0; padding: 6px 10px; }
+.mbtn:hover, .mbtn:focus-visible, .mbtn[aria-expanded=true] { background: var(--tint-dim); color: #fff; }
+#title { color: #fff; font: 500 13px var(--ui); }
+/* the menus: a dark pop-up list, items separated by hairlines */
+.dropdown { top: 34px; min-width: 220px; background: #2b2b2b; border: 1px solid #000; border-radius: 2px; padding: 0; overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,.7); }
+.dropdown button { font: 16px var(--ui); color: #fff; text-align: left; padding: 10px 16px; border-top: 1px solid var(--hair); border-radius: 0; background: none; }
+.dropdown button:first-child, .dropdown .mhead + button, .dropdown hr + button { border-top: 0; }
+.dropdown button:hover, .dropdown button:focus-visible { background: var(--tint-dim); color: #fff; }
+.dropdown button:disabled { color: #777; }
+.dropdown hr { border: 0; height: 2px; margin: 0; background: var(--tint); }
+.dropdown button.check::before { color: var(--tint); }
+.starmenu .mhead { font: 500 14px var(--ui); color: var(--tint); padding: 10px 16px 6px; border-bottom: 2px solid var(--tint); margin: 0; }
+/* the panel and its boxes */
+#panel { background: #101010; border-right: 1px solid #333; }
+.box, .designer { background: #1f1f1f; border: 1px solid #333; border-radius: 2px; box-shadow: none; }
+/* windows: a Holo dialog, dark grey, the title in cyan over a cyan rule */
+.win { background: #282828; color: #fff; border: 1px solid #000; border-radius: 2px; box-shadow: 0 6px 24px rgba(0,0,0,.75); overflow: hidden; }
+.wtitle { height: 48px; padding: 0 12px 0 16px; background: none; border: 0; border-bottom: 2px solid var(--tint); }
+.wtitle span { background: none; font: 400 20px var(--ui); color: var(--tint); }
+.close { width: 28px; height: 28px; border: 0; border-radius: 0; padding: 0; flex: none; background: transparent url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='28' height='28'><path d='M8 8l12 12M20 8L8 20' stroke='%23a8a8a8' stroke-width='2'/></svg>") center no-repeat; }
+.close:hover, .close:focus-visible { background-color: var(--tint-dim); }
+.wbody { padding: 14px 16px; color: #fff; }
+.win .sub, .win .note, .newgame label span { color: var(--sub); }
+.ptable td { border-bottom-color: #3a3a3a; }
+/* alerts (AlertDialog): the title and its rule, the message, the buttons side by side along the bottom */
+.win.alert { width: 300px; max-width: calc(100vw - 32px); }
+.win.alert .wtitle { height: 48px; }
+.win.alert .wtitle span { white-space: normal; }
+.win.alert .close { display: none; }
+.win.alert .wbody { padding: 12px 16px 0; font: 16px var(--ui); }
+.win.alert .btns { margin: 14px 0 0; gap: 0; flex-wrap: nowrap; border-top: 1px solid var(--hair); }
+html .win.alert .btns > button { flex: 1; min-height: 48px !important; margin: 0; border: 0 !important; border-left: 1px solid var(--hair) !important; border-radius: 0 !important;
+  background: none !important; box-shadow: none !important; color: #fff !important; font: 14px var(--ui) !important; text-transform: none; padding: 0 8px !important; }
+html .win.alert .btns > button:first-child { border-left: 0 !important; }
+html .win.alert .btns > button:hover, html .win.alert .btns > button:focus-visible { background: var(--tint-dim) !important; }
+html .win.alert .btns > button:active { background: var(--tint) !important; }
+/* buttons: flat dark grey, the Holo borderless look, cyan while pressed */
+button:not(.mbtn):not(.close):not(.tbtn):not(.clock):not([role=menuitem]) {
+  background: var(--btn); color: #fff; border: 1px solid #1a1a1a; border-radius: 2px; padding: 6px 14px; font: 14px var(--ui); box-shadow: none; min-height: 32px;
+}
+button:not(.mbtn):not(.close):not(.tbtn):not(.clock):not([role=menuitem]):not(.quiet) { border-bottom: 2px solid #1a1a1a; }
+button:not(.mbtn):not(.close):not(.tbtn):not(.clock):not([role=menuitem]):hover { background: var(--btn-hi); }
+button:not(.mbtn):not(.close):not(.tbtn):not(.clock):not([role=menuitem]):active { background: var(--tint); color: #000; }
+button:disabled { opacity: .4; }
+button:focus-visible { outline: 2px solid var(--tint); outline-offset: 1px; }
+/* tabs: Holo tab strip, the selected one underlined */
+.tbtn { background: transparent; color: var(--sub); border: 0; border-bottom: 2px solid transparent; border-radius: 0; font: 500 13px var(--ui); padding: 5px 10px; }
+.tbtn.on { color: var(--tint); border-bottom-color: var(--tint); }
+/* the budget bars' troughs */
+.track { height: 10px; background: #0d0d0d; border: 1px solid #3a3a3a; border-radius: 0; overflow: hidden; }
+/* text fields: the underline only, cyan on focus */
+html input[type=text], html input[type=number], html input:not([type]) {
+  font: 15px var(--ui); color: #fff; padding: 5px 4px; border: 0; border-bottom: 2px solid #6a6a6a; border-radius: 0; background: transparent; box-shadow: none;
+}
+html input[type=text]:focus, html input:not([type]):focus, html input[type=number]:focus { outline: 0; border-bottom-color: var(--tint); background: rgba(51,181,229,.08); box-shadow: none; }
+html input[type=number] { -moz-appearance: textfield; appearance: textfield; }
+html input[type=number]::-webkit-inner-spin-button, html input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+/* a choice (Spinner): the value with its triangle at the lower right, an underline */
+html select, html .newgame select {
+  -webkit-appearance: none; appearance: none; font: 15px var(--ui); color: #fff; cursor: pointer; padding: 5px 26px 5px 4px; min-height: 32px;
+  border: 0; border-bottom: 2px solid var(--tint); border-radius: 0; box-shadow: none; background-color: transparent;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10'><path d='M10 0v10H0z' fill='%2333b5e5'/></svg>");
+  background-repeat: no-repeat; background-position: right 2px bottom 3px;
+}
+html .tskin select { color: #fff; } /* (the title's pickers: classic/style.css makes them black) */
+html select option { background: #282828; color: #fff; }
+/* the Holo switch: a dark track with ON / OFF in it and a grey (cyan when on) thumb */
+html input[type=checkbox].switch, html .switchrow input[type=checkbox] {
+  -webkit-appearance: none; appearance: none; width: 64px; height: 28px; margin: 0 6px 0 0; padding: 0; flex: none; vertical-align: middle; cursor: pointer;
+  border: 1px solid #5a5a5a; border-radius: 0; background: #151515; position: relative;
+}
+html input[type=checkbox].switch::before, html .switchrow input[type=checkbox]::before { content: "OFF"; position: absolute; right: 6px; top: 5px; font: 500 11px var(--ui); color: #8a8a8a; }
+html input[type=checkbox].switch::after, html .switchrow input[type=checkbox]::after { content: ""; position: absolute; left: 0; top: 0; width: 30px; height: 26px; background: #6e6e6e; }
+html input[type=checkbox].switch:checked, html .switchrow input[type=checkbox]:checked { border-color: var(--tint); }
+html input[type=checkbox].switch:checked::before, html .switchrow input[type=checkbox]:checked::before { content: "ON"; left: 8px; right: auto; color: var(--tint); }
+html input[type=checkbox].switch:checked::after, html .switchrow input[type=checkbox]:checked::after { left: 31px; background: var(--tint); }
+/* the check box: a dark square with a cyan tick */
+html input[type=checkbox]:not(.switch):not(.switchrow input) {
+  -webkit-appearance: none; appearance: none; width: 22px; height: 22px; margin: 0 6px 0 0; padding: 0; flex: none; vertical-align: middle; cursor: pointer;
+  border: 2px solid #8a8a8a; border-radius: 2px; background: #151515;
+}
+html input[type=checkbox]:not(.switch):checked { border-color: var(--tint); background: #151515 url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='18' height='18'><path d='M3 9.5l4 4L15 4' fill='none' stroke='%2333b5e5' stroke-width='3'/></svg>") center no-repeat; }
+/* the radio button: a ring with a cyan dot */
+html input[type=radio] {
+  -webkit-appearance: none; appearance: none; width: 22px; height: 22px; margin: 0 6px 0 0; padding: 0; flex: none; vertical-align: middle; cursor: pointer;
+  border: 2px solid #8a8a8a; border-radius: 50%; background: #151515;
+}
+html input[type=radio]:checked { border-color: var(--tint); background: radial-gradient(circle, var(--tint) 0 4px, #151515 5px); }
+html input[type=checkbox]:disabled, html input[type=radio]:disabled, html input[type=range]:disabled, html select:disabled { opacity: .4; cursor: default; }
+html input[type=checkbox]:focus-visible, html input[type=radio]:focus-visible, html select:focus-visible, html input[type=range]:focus-visible { outline: 2px solid var(--tint); outline-offset: 2px; }
+/* the slider (SeekBar): a thin track, the cyan progress, a round cyan thumb with its halo */
+html input[type=range], html .newgame .slider input[type=range] {
+  -webkit-appearance: none; appearance: none; height: 4px; margin: 14px 0; padding: 0; min-width: 0; cursor: pointer; border: 0; border-radius: 0; background: #5a5a5a;
+}
+html input[type=range]::-webkit-slider-thumb, html .tm input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 22px; height: 22px; border-radius: 50%; cursor: pointer; border: 0; background: var(--tint);
+  box-shadow: 0 0 0 6px var(--tint-dim);
+}
+html input[type=range]::-moz-range-thumb, html .tm input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border-radius: 50%; border: 0; background: var(--tint); box-shadow: 0 0 0 6px var(--tint-dim); }
+html input[type=range]::-moz-range-track { background: transparent; }
+/* terraform / mine and shipbuilding: the track in two colours */
+html .tm input[type=range] { height: 4px; border-radius: 0; border: 0; background: linear-gradient(90deg, #99cc00 0 var(--split, 50%), #ffbb33 var(--split, 50%) 100%); box-shadow: none; }
+html .yard .tm input[type=range] { background: linear-gradient(90deg, var(--tint) 0 var(--split, 0%), #5a5a5a var(--split, 0%) 100%); }
+.tm .tml { color: #99cc00; } .tm .tmr { color: #ffbb33; }
+.newgame .opts { border: 1px solid #3a3a3a; border-radius: 2px; background: #1f1f1f; }
+/* scroll bars: the thin Holo fast-scroll bar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(160,160,160,.6); border-radius: 0; }
+::-webkit-scrollbar-corner { background: transparent; }
+::-webkit-scrollbar-button { display: none; }
