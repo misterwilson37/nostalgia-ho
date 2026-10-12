@@ -1815,7 +1815,60 @@ const base12 = {
   economyForAll: false, terraLeft: null, setColonyBars: null, aiYear: null,
 };
 
+// CONFIRMED (Mac 2.0.1 DrawAllGroups @d207c, DrawOneGroup @d214e,
+// MakeFleetDescription @110e28, ReviewBattle @d271c, STR# 1030; the DOS
+// program's strings 64-75 and formats "%0.15Fs (%d/%d) %0.11Fs"; 1.2 @d214e,
+// 3.0.1 @e274e, Mac 4.0.5 @6226c, Windows 4.0.5 strings 1081-1089 and
+// "%s (%d/%d) %s" @0x59c48c): the battle window is headed "Summary of
+// battle" and "at %s in %d:", with "Round %d" while it runs, and ends with
+// "Congratulations!" "You won the battle!" or "Unfortunately," "you lost the
+// battle…" ("..." on DOS and Windows). The two sides' groups are two columns,
+// the record's first side and the second (the attacker and the defender of
+// the duel), a group a row 53 pixels high: one ship picture, a bar of the
+// damage done to its next ship beside it (120 pixels at most), and its words
+// under it, cut with "…" to 120 pixels (the Mac):
+//   "N Name (W/S) Classs", "one Name (W/S) Class" (MakeFleetDescription; the
+//   design's own Weapons and Shields; DOS cuts the name to 15 letters and the
+//   class to 11), "N dead Name (W/S) Class" for one ship lost and "N dead Name
+//   (W/S) Classs" for more (STR# 1030.1-2) when the group is gone;
+//   a colony its people, or "N dead" when it is wiped out (people killed).
+// No owner's name or luck is drawn (the remake heads each column with its
+// side's name). 1.2F's words are French ("%d %.*ss %.*s (%d/%d)", "%.*s
+// détruit(s)", "%s morts"): given in English as 2.0.1's, as the remake
+// gives 1.2's other French lines.
+function battlePanel20(opt) {
+  const cut = (s, n) => n ? String(s).slice(0, n) : String(s);
+  const desc = (d, n, mine) => {
+    const cls = cut(d.type === 'decoy' && !mine ? 'Fighter' : (E.TYPES[d.type] || { name: '' }).name, opt.cls), nm = cut(d.name, opt.name), ws = `(${d.W}/${d.S})`;
+    return (n < 1 ? `${nm} ${ws} ${cls}` : n === 1 ? `one ${nm} ${ws} ${cls}` : `${n} ${nm} ${ws} ${cls}s`).slice(0, 39);
+  };
+  const pop = (G, x) => (E.rules(G).fmtNum || fmt)(Math.round(x * 1e6));
+  return E.makeBattlePanel({
+    cols: 'sides', pics: (n) => Math.min(n, 1),
+    head: (G, b) => ['Summary of battle', `at ${G.stars[b.star].name} in ${b.year}:`],
+    end: (G, b, won) => won ? ['Congratulations!', 'You won the battle!'] : ['Unfortunately,', 'you lost the battle' + opt.dots],
+    ship: (G, d, n, n0, mine) => n < 1 ? `${n0} dead ${desc(d, 0, mine)}${n0 === 1 ? '' : 's'}` : desc(d, n, mine),
+    planet: (G, x, x0) => x <= 0.0005 ? `${pop(G, x0)} dead` : pop(G, x),
+  });
+}
+const BATTLE_PANEL_DOS = battlePanel20({ name: 15, cls: 11, dots: '...' }), BATTLE_PANEL_MAC = battlePanel20({ dots: '…' }), BATTLE_PANEL_WIN = battlePanel20({ dots: '...' });
+
 E.registerRules('dos', Object.assign({}, O, {
+  // CONFIRMED (DOS: the budget window's drawing FUN_9000_0cd5 and click
+  // FUN_9000_1554, which switches the scale, the setup's +0x2a 0 by default
+  // FUN_3000_b405; Mac 2.0.1 InitHLogBarAmts
+  // @c07be, DrawHBarControl @c091e, DoHBarClick @c1002, 'Stup' 1000 "Default
+  // Setup" +0x2a = 0): the budget bars are linear, 1,000 × x / 77 per mille,
+  // unless the setup's +0x2a is set, which a click on the strip above the bars
+  // switches (DoHBarClick, a click above the bars: 1 − the value, and the bars redrawn):
+  // then they are drawn and dragged on the log scale (engine BAR_SCALES.log),
+  // the grid at 100 ... 1,000 per mille on it. The Technology bars are always
+  // on the log scale (DoVBarClick @c0446 and DrawVBarControl with 2, from the
+  // research window; DOS FUN_9000_0604 with 2); a colony's own bars (DoVBarClick
+  // with 1) are linear. No budget bar is ever locked: 2.0 has no finished or
+  // evacuating colony to lock (its finished parts pass their share on).
+  barScale: { budget: 'linear', tech: 'log', toggle: true },
+  battlePanel: BATTLE_PANEL_DOS, battlePanelMac: BATTLE_PANEL_MAC, battlePanelWin: BATTLE_PANEL_WIN,
   // CONFIRMED (WINHO.EXE's number formats "%ld,%.3ld", "%ld,%.3ld,%.3d",
   // "%ld,%.3ldK"; Mac 2.0.1 and 1.2 LongToNiceString @1244a): every number in
   // a report or window is "1,234", "1,234,567", and from ten million "12,345K"

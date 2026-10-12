@@ -201,6 +201,14 @@ const FIXES = W.fixes.filter(f => MAC_SLIPS.includes(f.id)).concat([
 
 // Mac 4.0.5 plays 4.0.5's game (js/rules-405.js), with the differences above
 E.registerRules('mac405', Object.assign({}, W, {
+  // CONFIRMED (InitHLogBarAmts @50924, GetHPercBarAmt @50a40, DrawHBarControl
+  // @50a80, DoHBarClick @514e2; 'Stup' 1000 "Default Setup" +0x3c = 1, which
+  // nothing in the program writes, so no click switches it as in 3.0.1): the
+  // budget bars on the log scale; the Technology bars always on it
+  // (InitVLogBarAmts @5000c, DoVBarClick @5060c and DrawVBarControl called
+  // with 2 by ClickInTechWin @18025a and UpdateTechWin @1800f0). The battle
+  // window's words are the Mac's ("…"), DrawOneGroup @6226c
+  battlePanel: W.battlePanelMac,
   label: 'Mac 4.0.5 (1996)',
   // the New Game window's Version and Edition menus (engine.js editions)
   family: '4.0', edition: { version: '4.0.5', name: 'Mac', platform: 'Mac, System 7 (68k and PowerPC)', year: 1996 }, skins: ['mac4c', 'mac4'],

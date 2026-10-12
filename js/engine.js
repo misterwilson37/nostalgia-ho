@@ -991,8 +991,95 @@ function load(str) {
   return G;
 }
 
+// ---------- the bar charts' scales (rs.barScale) ----------
+// Every version's budget and technology bars that aren't linear build one
+// table (Mac 1.2 to 4.0.5 InitHLogBarAmts / InitVLogBarAmts, Windows 4.0.5
+// FUN_0045aa60 / FUN_00459ba0, 5.0.5 FUN_100895a0, the Palm FUN_00049e32,
+// iOS -[HoBarLayer initHLogBarAmts]): pixel x of a bar w pixels long is worth
+// trunc(10 × (e^(2.302 + 77x / w / 32.11) − 10)) per mille, the last pixel
+// 1,000 (on the 77-pixel Mac and Windows budget bars x / 32.11, on their
+// 50-pixel technology bars x / 20.85: the same curve). A share is drawn to the
+// first pixel whose entry passes it, less one (GetHPercBarAmt). Here the
+// position is the fraction f = x / w. A linear bar is worth what it shows
+// (1,000 x / 77 on the Macs); its fraction is passed on as it is, so a linear
+// ruleset's mouse drags give what they always gave.
+const BAR_SCALES = {
+  linear: { id: 'linear', toValue: (f) => clamp(f, 0, 1) * 1000, toX: (pm) => clamp(pm / 1000, 0, 1) },
+  log: {
+    id: 'log',
+    toValue: (f) => f >= 1 ? 1000 : clamp(Math.trunc((Math.exp(Math.max(0, f) * 77 / 32.11 + 2.302) - 10) * 10), 0, 1000),
+    toX: (pm) => clamp((Math.log(Math.max(0, pm) / 10 + 10) - 2.302) * 32.11 / 77, 0, 1),
+  },
+};
+// rs.barScale: { budget, tech } ('log' or 'linear'; left out: linear) and
+// toggle (the budget bars switch scale when the strip above them is clicked:
+// Mac 1.2 to 3.0.1, DOS 2.0). `pick` is the player's switch, when there is one.
+function barScale(G, kind, pick) {
+  const bs = rules(G).barScale || {};
+  const id = kind === 'budget' && bs.toggle && pick ? pick : bs[kind];
+  return BAR_SCALES[id] || BAR_SCALES.linear;
+}
+
+// ---------- the battle window's ship panel (rs.battlePanel) ----------
+// A battle record's groups as the version drew them: one group a side's
+// ships of one design (5.0.5, iOS, the Palm: and of one stance, start[i].st),
+// each side's colony a group of its own, first in its side. The rulesets
+// describe the panel with makeBattlePanel(cfg) (rules-original, rules-dos,
+// rules-301, rules-405, rules-palm, rules-ios); the skin draws it.
+function battleGroups(G, b, byStance) {
+  const out = [], at = {};
+  (b.start || []).forEach((u, i) => {
+    const k = u.o + ':' + u.did + (byStance ? ':' + (u.st || 'n') : '');
+    let g = at[k];
+    if (!g) { g = at[k] = { o: u.o, did: u.did, t: u.t, st: u.st || 'n', units: [] }; out.push(g); }
+    g.units.push(i);
+  });
+  if (b.planetOwner >= 0 && b.pop0 > 0) {
+    const pg = { o: b.planetOwner, planet: true, units: [] }, i = out.findIndex(g => g.o === b.planetOwner);
+    if (i < 0) out.push(pg); else out.splice(i, 0, pg);
+  }
+  return out;
+}
+// cfg: cols 'sides' (the record's first side left, the rest right: 1.2 to
+// 4.0.5, DOS) or 'viewer' (the viewer's side and its allies left: 5.0.5,
+// iOS, the Palm); byStance; head(G, b) and end(G, b, won) the window's own
+// lines; ship(G, d, n, n0, mine) and planet(G, pop, pop0) a group's words;
+// owner ('pill': the owner's name on the group, 'luck': and the side's luck
+// as + or −, the Palm's "+%s"); luck (a mark for the side's luck, 5.0.5 and
+// iOS); pics(n) how many pictures a group of n ships shows.
+function makeBattlePanel(cfg) {
+  return function panel(G, b, state, viewer) {
+    const alive = state.alive || [], groups = battleGroups(G, b, cfg.byStance);
+    const left = (o) => {
+      if (cfg.cols === 'viewer') {
+        const v = b.sides.includes(viewer) ? viewer : b.sides[0];
+        return o === v || isAllied(G, o, v);
+      }
+      return o === b.sides[0];
+    };
+    const cols = [[], []];
+    for (const g of groups) {
+      const P = G.players[g.o], mine = g.o === viewer;
+      const r = { o: g.o, units: g.units, planet: !!g.planet, luck: cfg.luck && b.luck ? (b.luck[g.o] | 0) : 0 };
+      if (g.planet) {
+        r.n = state.pop > 0.0005 ? 1 : 0; r.text = cfg.planet(G, state.pop, b.pop0);
+      } else {
+        const d = getDesign(G, g.o, g.did) || { type: g.t, name: SHIP_TYPES[g.t] ? SHIP_TYPES[g.t].name : '', W: 1, S: 1 };
+        const n0 = g.units.length, n = g.units.filter(i => alive[i] !== false).length;
+        r.did = g.did; r.n = n; r.n0 = n0; r.text = cfg.ship(G, d, n, n0, mine, g.st);
+        r.pics = cfg.pics ? cfg.pics(n || n0) : 1;
+      }
+      if (cfg.owner) r.owner = (mine ? 'You' : P ? P.name : '?');
+      if (cfg.owner === 'luck' && b.luck) { const l = b.luck[g.o] | 0; r.owner = (l > 0 ? '+' : l < 0 ? '-' : '') + r.owner; }
+      cols[left(g.o) ? 0 : 1].push(r);
+    }
+    return { cols, head: cfg.head ? cfg.head(G, b) : [], end: cfg.end && state.over ? cfg.end(G, b, state.won) : null, owner: cfg.owner || null };
+  };
+}
+
 const API = {
   DATA, SHIP_TYPES, TYPES: SHIP_TYPES, TECHS,
+  BAR_SCALES, barScale, battleGroups, makeBattlePanel,
   registerRules, registerAI, rules, rulesById, aiOf, feature, RULESETS, fixes, fixed, patchVersion,
   // [id, name] for the New Game window: the original games' rules by year of
   // release, then version ("2.0 (DOS and Windows 3.1, 1993)"); rulesets that

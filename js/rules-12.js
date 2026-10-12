@@ -338,6 +338,10 @@ function organized12(G, f, merged, nf, orders) {
 
 // 1.2 plays 2.0's turn (js/rules-dos.js), with the differences above
 E.registerRules('12', Object.assign({}, D, {
+  // the battle window's words are the Mac's (rules-dos battlePanel20: no
+  // cut names, "…"); the bars are 2.0's (linear budget bars a click above
+  // them switches to the log scale, 'Stup' 1000 +0x2a = 0; log Technology bars)
+  battlePanel: D.battlePanelMac,
   label: 'Mac 1.2 (1992)',
   // the New Game window's Version and Edition menus (engine.js editions)
   family: '1.2', edition: { version: '1.2', name: 'Mac (French)', platform: 'Mac, French edition by Upgrade Editions', year: 1992 }, skins: ['mac12'],

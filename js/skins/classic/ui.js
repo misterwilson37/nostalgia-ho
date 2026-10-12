@@ -199,7 +199,6 @@ const UI = {
   inbox: [], msgIdx: 0,
   drag: null, hover: null,
   ruler: null,           // a finger's distance ruler from the selected star (touch)
-  logBars: false,        // the bars drawn on iOS's log scale (a finger set one last)
   dots: [],              // hit areas for fleet dots
   bug: null, bugSeen: {}, // the bug report window (showBug), and how often each error came up
 };
@@ -1120,25 +1119,35 @@ function scrollerOf(n) {
 }
 
 // ---------- left panel ----------
+// A bar chart (budget, technology). Rule controls follow the ruleset, never
+// the skin: opts.scale is the ruleset's scale for this kind of bar
+// (HO.barScale: rs.barScale, engine BAR_SCALES), used for drawing it and for
+// where a mouse, a pen or a finger puts it; opts.locked is the ruleset's
+// rs.barLocked answer for it: its words, drawn in the bar's place, and
+// whether it can be dragged (`free`), a click opening Dip Into Savings
+// (`dip`) or doing nothing (`silent`) instead of the beep. A finger stays on
+// the bar's row while it drags (HoBarLayer ccTouchMoved:, iOS).
 function bar(label, val, max, onSet, opts) {
   opts = opts || {};
-  const track = el('div', { class: 'track', role: 'slider', tabindex: 0, 'aria-label': label, 'aria-valuenow': Math.round(val / max * 100) });
+  const sc = opts.scale || HO.BAR_SCALES.linear, lk = opts.locked || null, refuse = !!lk && !lk.free;
+  const track = el('div', { class: 'track' + (lk ? ' locked' : ''), role: 'slider', tabindex: 0, 'aria-label': label, 'aria-valuenow': Math.round(val / max * 100), 'aria-disabled': refuse ? 'true' : null, title: lk && lk.text ? lk.text : null });
   const fill = el('div', { class: 'fill' + (opts.cls ? ' ' + opts.cls : '') });
   track._v = max > 0 ? Math.min(1, val / max) : 0;
-  fill.style.width = barWidth(track._v);
+  fill.style.width = barWidth(track._v, sc);
   track.append(fill);
-  // a mouse or pen: the share is where the pointer is along the bar; a
-  // finger: iOS's log scale (logBarValue), and only while it stays on the
-  // bar's row (HoBarLayer ccTouchMoved:)
+  if (lk && lk.text) track.append(el('span', { class: 'locktext' }, lk.text));
   const set = (ev) => {
     const r = track.getBoundingClientRect();
     const x = Math.max(0, Math.min(1, (ev.clientX - r.left) / r.width));
-    const f = isTouch(ev) ? logBarValue(x) / 1000 : x;
-    track._v = f; fill.style.width = barWidth(f);
+    const f = sc.toValue(x) / 1000;
+    track._v = f; fill.style.width = barWidth(f, sc);
     onSet(f, false);
   };
+  // a locked bar refuses the drag: the version's beep (5.0.5 SysBeep, 3.0.1
+  // and 4.0.5 PlaySound / MessageBeep), or Dip Into Savings, or nothing
+  const refused = () => { if (lk.dip) openDip(); else if (!lk.silent) beep(); };
   track.addEventListener('pointerdown', guard((ev) => {
-    UI.logBars = isTouch(ev); // the bars are drawn on the scale of the last pointer that set one
+    if (refuse) { refused(); return; }
     track.setPointerCapture(ev.pointerId); set(ev); track._drag = true;
   }));
   track.addEventListener('pointermove', guard((ev) => {
@@ -1146,28 +1155,47 @@ function bar(label, val, max, onSet, opts) {
     if (isTouch(ev)) { const r = track.parentElement.getBoundingClientRect(); if (ev.clientY < r.top || ev.clientY > r.bottom) return; }
     set(ev);
   }));
-  track.addEventListener('pointerup', guard((ev) => { track._drag = false; onSet(null, true); }));
+  track.addEventListener('pointerup', guard((ev) => { if (!track._drag) return; track._drag = false; onSet(null, true); }));
   track.addEventListener('pointercancel', guard((ev) => { if (track._drag) { track._drag = false; onSet(null, true); } }));
   track.addEventListener('keydown', (ev) => {
     if (ev.key !== 'ArrowLeft' && ev.key !== 'ArrowRight') return;
     ev.preventDefault();
-    const cur = track._v || 0;
-    const f = Math.max(0, Math.min(1, cur + (ev.key === 'ArrowRight' ? 0.05 : -0.05)));
-    track._v = f; fill.style.width = barWidth(f); onSet(f, false); onSet(null, true);
+    if (refuse) { refused(); return; }
+    // a step of 5% of the bar's length, on its own scale
+    const x = Math.max(0, Math.min(1, sc.toX((track._v || 0) * 1000) + (ev.key === 'ArrowRight' ? 0.05 : -0.05)));
+    const f = sc.toValue(x) / 1000;
+    track._v = f; fill.style.width = barWidth(f, sc); onSet(f, false); onSet(null, true);
   });
   return el('div', { class: 'barrow' + (opts.rowCls ? ' ' + opts.rowCls : ''), 'data-help': opts.help || null },
     el('span', { class: 'blabel', title: opts.title || label }, label),
     track,
     el('span', { class: 'bval' }, opts.right || ''));
 }
-// iOS's budget bars (-[HoBarLayer handleTouch], initHLogBarAmts): pixel x of
-// a bar w wide is worth trunc((exp(x * 77 / w / 32.11 + 2.302) - 10) * 10)
-// per mille, the last pixel 1,000, so the left of the bar sets small shares
-// finely (as the Mac's bars since 2.0). x here is the fraction x / w. The
-// bars are drawn on the same scale (getHPercBarAmt:) after a finger set one.
-const logBarValue = (x) => x >= 1 ? 1000 : Math.max(0, Math.min(1000, Math.trunc((Math.exp(x * 77 / 32.11 + 2.302) - 10) * 10)));
-const logBarPos = (pm) => Math.max(0, Math.min(1, (Math.log(Math.max(0, pm) / 10 + 10) - 2.302) * 32.11 / 77));
-const barWidth = (f) => (UI.logBars ? logBarPos(f * 1000) : Math.min(1, f)) * 100 + '%';
+// a share's length on the bar's scale (engine BAR_SCALES: the log scale's
+// GetHPercBarAmt, or the share itself)
+const barWidth = (f, sc) => (sc || HO.BAR_SCALES.linear).toX(f * 1000) * 100 + '%';
+// The budget bars' scale switch (rs.barScale.toggle: Mac 1.2 to 3.0.1, DOS
+// 2.0): a click on the strip above the bars flips the setup's scale, kept
+// with the player's other settings (the original kept it in its setup file),
+// one for each ruleset.
+const barPickKey = () => 'ho5.barScale.' + G.rules;
+function barPick() { try { return localStorage.getItem(barPickKey()); } catch (e) { return null; } }
+function flipBarScale() {
+  const now = HO.barScale(G, 'budget', barPick()).id;
+  try { localStorage.setItem(barPickKey(), now === 'log' ? 'linear' : 'log'); } catch (e) {}
+  renderPanel();
+}
+// the system beep a locked bar gives (no sound file: a short square wave)
+let beepCtx = null;
+function beep() {
+  if (!Sound.on) return;
+  try {
+    beepCtx = beepCtx || new (window.AudioContext || window.webkitAudioContext)();
+    const o = beepCtx.createOscillator(), g = beepCtx.createGain();
+    o.type = 'square'; o.frequency.value = 880; g.gain.value = 0.06;
+    o.connect(g); g.connect(beepCtx.destination); o.start(); o.stop(beepCtx.currentTime + 0.12);
+  } catch (e) {}
+}
 // proportional budget setter: entries [{key, get, set}]
 function setShare(entries, idx, f) {
   // f is the new fraction (0..1) for entries[idx]; others scale to fill 1-f
@@ -1229,7 +1257,12 @@ function renderPanel() {
   // budget bars
   const ents = budgetEntries();
   const spendable = Math.max(0, net);
-  const bb = el('section', { class: 'box' }, el('h3', { 'data-help': 'budget' }, 'Budget'));
+  // the scales are the ruleset's (rs.barScale); where it has the switch, a
+  // click on the heading (the strip above the bars) flips the budget bars'
+  const rsB = HO.rules(G), bsc = HO.barScale(G, 'budget', barPick()), tsc = HO.barScale(G, 'tech');
+  const flip = rsB.barScale && rsB.barScale.toggle;
+  const bb = el('section', { class: 'box' }, el('h3', flip ? { 'data-help': 'budget', class: 'scaleflip', role: 'button', tabindex: 0, title: bsc.id === 'log' ? 'Click to show the bars on a linear scale' : 'Click to show the bars on a logarithmic scale',
+    onclick: flipBarScale, onkeydown: (ev) => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); flipBarScale(); } } } : { 'data-help': 'budget' }, 'Budget'));
   const own = HO.rules(G).dragShare;
   let start = null; // the shares when the drag began (own drag rule)
   // a colony losing money has the row class "loss" (2.0.1 drew its bar 50% grey: js/skins/mac2)
@@ -1239,9 +1272,9 @@ function renderPanel() {
     bb.append(bar(e.label, e.get(), 1, (f, end) => {
       if (f != null && own) { if (!start) start = JSON.stringify(p.budget); dragBudget(p, e.key, f, start); }
       else if (f != null) setShare(ents, i, f);
-      if (f != null) { ents.forEach((x, j) => { const r = bb.querySelectorAll('.barrow')[j]; if (r) { r.querySelector('.track')._v = x.get(); r.querySelector('.fill').style.width = barWidth(x.get()); r.querySelector('.bval').textContent = money(x.get() * spendable); } }); }
+      if (f != null) { ents.forEach((x, j) => { const r = bb.querySelectorAll('.barrow')[j]; if (r) { r.querySelector('.track')._v = x.get(); r.querySelector('.fill').style.width = barWidth(x.get(), bsc); r.querySelector('.bval').textContent = money(x.get() * spendable); } }); }
       if (end) { start = null; renderPanel(); save(); }
-    }, { right: money(amt), cls: e.key === 'tech' ? 'tech' : e.key === 'savings' ? 'sav' : 'col', rowCls: (s && UI.sel === s.id ? 'hl' : '') + (s && HO.planetIncome(G, p, s) < 0 ? ' loss' : ''), help: e.key === 'tech' ? 'tech' : e.key === 'savings' ? 'savingsBar' : 'colonyBar' }));
+    }, { scale: bsc, locked: rsB.barLocked ? rsB.barLocked(G, p, e.key) : null, right: money(amt), cls: e.key === 'tech' ? 'tech' : e.key === 'savings' ? 'sav' : 'col', rowCls: (s && UI.sel === s.id ? 'hl' : '') + (s && HO.planetIncome(G, p, s) < 0 ? ' loss' : ''), help: e.key === 'tech' ? 'tech' : e.key === 'savings' ? 'savingsBar' : 'colonyBar' }));
   });
   if (net <= 0) bb.append(el('p', { class: 'warn' }, 'After supporting your colonies and paying interest, there is nothing left to spend.'));
   panel.append(bb);
@@ -1256,9 +1289,9 @@ function renderPanel() {
     // the level's name in the version's own characters (rs.msgText: iOS shows "ª" for "™", patch-aware)
     const nm0 = e.key !== 'radical' ? (HO.DATA.techNames[e.key] || [])[p.tech[e.key] - 1] : null, nm = nm0 && HO.rules(G).msgText ? HO.rules(G).msgText(G, nm0) : nm0;
     tb.append(bar(`${tnames[e.key]}${lvl !== '' ? ' ' + lvl : ''}`, e.get(), 1, (f, end) => {
-      if (f != null) { setShare(tents, i, f); tents.forEach((x, j) => { const r = tb.querySelectorAll('.barrow')[j]; if (r) { r.querySelector('.track')._v = x.get(); r.querySelector('.fill').style.width = barWidth(x.get()); } }); }
+      if (f != null) { setShare(tents, i, f); tents.forEach((x, j) => { const r = tb.querySelectorAll('.barrow')[j]; if (r) { r.querySelector('.track')._v = x.get(); r.querySelector('.fill').style.width = barWidth(x.get(), tsc); } }); }
       if (end) { renderPanel(); save(); }
-    }, { right: money(e.get() * techSpend), cls: 'tbar', title: nm && !/^\d+$/.test(nm) ? nm : tnames[e.key], help: e.key }));
+    }, { scale: tsc, right: money(e.get() * techSpend), cls: 'tbar', title: nm && !/^\d+$/.test(nm) ? nm : tnames[e.key], help: e.key }));
   });
   panel.append(tb);
   // planet
@@ -1863,9 +1896,11 @@ function toast(t) {
 // as "[HO bug]").
 const BUG_REPO = 'https://github.com/misterwilson37/nostalgia-ho';
 window.HOBUGS = window.HOBUGS || [];
+// the test tools open a battle's window by its record (tools/, scratch scripts)
+window.HOBATTLE = (bid) => { if (G) openBattle(bid); };
 // what the map shows, for the test tools (read only): its scale and offset,
 // the selected star and fleet, a finger's ruler and drag
-window.HOVIEW = () => ({ view: Object.assign({}, UI.view), sel: UI.sel, selFleet: UI.selFleet, ruler: UI.ruler && Object.assign({}, UI.ruler), drag: !!UI.drag, path: UI.drag && UI.lastPath ? Object.assign({}, UI.lastPath) : null, logBars: UI.logBars, mapW, mapH, fit: fitScale(), zoom: zoomRange(), modal: !!UI.modal });
+window.HOVIEW = () => ({ view: Object.assign({}, UI.view), sel: UI.sel, selFleet: UI.selFleet, ruler: UI.ruler && Object.assign({}, UI.ruler), drag: !!UI.drag, path: UI.drag && UI.lastPath ? Object.assign({}, UI.lastPath) : null, barScale: G ? { budget: HO.barScale(G, 'budget', barPick()).id, tech: HO.barScale(G, 'tech').id } : null, mapW, mapH, fit: fitScale(), zoom: zoomRange(), modal: !!UI.modal });
 function guard(fn, where) {
   if (typeof fn !== 'function' || fn.hoGuarded) return fn;
   const g = function (...a) { try { return fn.apply(this, a); } catch (e) { showBug(e, where); } };
@@ -2335,6 +2370,7 @@ function battleReport(b) {
 function openBattle(bid) {
   const b = G.battles.find(x => x.id === bid);
   if (!b) { toast('The record of that battle is no longer available.'); return; }
+  if (HO.rules(G).battlePanel) { openBattlePanel(b); return; }
   const c = el('canvas', { class: 'bcv', width: 760, height: 380 });
   const status = el('p', { class: 'sub' }, '');
   const body = el('div', null, c, status);
@@ -2432,6 +2468,121 @@ function openBattle(bid) {
   status.textContent = 'Round 1';
   drawAll(); setTimeout(step, 400);
 }
+
+// The battle window of a ruleset that describes its panel (rs.battlePanel,
+// engine makeBattlePanel): each side's groups of ships as the version showed
+// them, a picture (5.0.5: a pile) with the group's words under it, updated as
+// ships die; the version's own heading and closing lines. The skin styles it
+// (T.battleBg: its own background, black words; T.battleFont). The modern
+// conveniences' speed control and account are kept.
+function openBattlePanel(b) {
+  const rs = HO.rules(G), viewer = b.sides.includes(ME) ? ME : b.sides[0];
+  const alive = b.start.map(() => true);
+  let pop = b.pop0, over = false;
+  const state = () => {
+    const foe = (o) => o !== viewer && !HO.isAllied(G, o, viewer);
+    const live = (pred) => b.start.some((u, i) => alive[i] && pred(u.o));
+    const won = (live(o => !foe(o)) || (b.planetOwner >= 0 && !foe(b.planetOwner) && pop > 0.0005)) && !live(foe) && !(b.planetOwner >= 0 && foe(b.planetOwner) && pop > 0.0005);
+    return { alive, pop, over, won };
+  };
+  let P = rs.battlePanel(G, b, state(), viewer);
+  // layout: two columns, two groups a row in each; a cell is 180 wide
+  const W = 760, CW = 180, RH = 70, dark = !!T.battleBg;
+  const headH = 12 + P.head.length * 18 + (P.owner ? 0 : 18);
+  const rows = Math.max(1, ...P.cols.map(c => Math.ceil(c.length / 2)));
+  const H = headH + rows * RH + 44;
+  const c = el('canvas', { class: 'bcv', width: W, height: H });
+  const status = el('p', { class: 'sub' }, '');
+  const body = el('div', null, c, status);
+  let speed = 1;
+  if (modern()) {
+    const sp = el('select', { 'aria-label': 'Battle speed', onchange: (e) => { speed = +e.target.value; if (speed === 0) finish(); } },
+      ...[['0.5', 'Slow'], ['1', 'Normal'], ['3', 'Fast'], ['0', 'Skip to the end']].map(([v, t]) => el('option', { value: v, selected: v === '1' ? 'selected' : false }, t)));
+    body.append(el('div', { class: 'bctl' }, el('label', null, 'Speed ', sp)), battleReport(b));
+  }
+  b._stop = false;
+  modal(`Battle at ${G.stars[b.star].name}, ${b.year}` + (b.duel != null ? `, duel ${b.duel + 1}` : ''), body, { cls: 'wide', onClose: () => { b._stop = true; } });
+  const x = c.getContext('2d');
+  const font = T.battleFont || 'Geneva, Verdana, sans-serif', ink = dark ? '#000' : '#e8e8f0', sub = dark ? '#000' : '#b9bdd6';
+  // each group's cell; each ship's place is its group's
+  const cellOf = (ci, k) => ({ x: ci * (W / 2) + (k % 2) * CW + CW / 2 + (ci ? 20 : 0), y: headH + Math.floor(k / 2) * RH + 24 });
+  const where = new Map(); let planetAt = null;
+  P.cols.forEach((col, ci) => col.forEach((g, k) => { const at = cellOf(ci, k); g.units.forEach(i => where.set(i, at)); if (g.planet) planetAt = at; }));
+  const cut = (t, w) => { if (x.measureText(t).width <= w) return t; while (t.length > 1 && x.measureText(t + '…').width > w) t = t.slice(0, -1); return t + '…'; };
+  const drawAll = (shot) => {
+    P = rs.battlePanel(G, b, state(), viewer);
+    x.fillStyle = T.battleBg || '#04030c'; x.fillRect(0, 0, W, H);
+    if (!dark) for (let i = 0; i < 70; i++) { x.fillStyle = 'rgba(200,210,255,.35)'; x.fillRect((i * 97) % W, (i * 53) % H, 1, 1); }
+    x.textAlign = 'center'; x.fillStyle = ink;
+    P.head.forEach((t, i) => { x.font = (i ? '' : 'bold ') + '13px ' + font; x.fillText(t, W / 2, 20 + i * 18); });
+    if (!P.owner) { // the remake's own: each column headed with its side's name (the version drew none)
+      x.font = '12px ' + font; x.fillStyle = sub;
+      [b.sides[0], b.sides.find(o => o !== b.sides[0])].forEach((o, ci) => { if (o == null) return; x.fillText(o === ME ? 'You' : (G.players[o] || {}).name || '', ci * (W / 2) + W / 4 + (ci ? 20 : 0), headH - 6); });
+    }
+    x.strokeStyle = dark ? '#000' : 'rgba(200,210,255,.25)'; x.beginPath(); x.moveTo(W / 2 + 10, headH - 2); x.lineTo(W / 2 + 10, H - 40); x.stroke();
+    P.cols.forEach((col, ci) => col.forEach((g, k) => {
+      const at = cellOf(ci, k);
+      if (g.planet) {
+        x.globalAlpha = g.n ? 1 : 0.3; x.drawImage(planetBattlePic(), at.x - 20, at.y - 20, 40, 40); x.globalAlpha = 1;
+      } else {
+        const d = HO.getDesign(G, g.o, g.did) || { type: 'fighter', R: 1, V: 1, W: 1, S: 1 }, im = shipPic(d, g.o);
+        const n = g.n ? Math.max(1, g.pics || 1) : 1, sc = Math.min(56 / im.width, 36 / im.height);
+        x.globalAlpha = g.n ? 1 : 0.3;
+        for (let j = 0; j < n; j++) { // 5.0.5's pile: a V, each ship 2 points from the last
+          const o = j - Math.floor(n / 2), px = at.x - 2 * Math.abs(o), py = at.y + 2 * o;
+          x.save(); x.translate(px, py); if (ci) x.scale(-1, 1); x.drawImage(im, -im.width * sc / 2, -im.height * sc / 2, im.width * sc, im.height * sc); x.restore();
+        }
+        x.globalAlpha = 1;
+      }
+      if (P.owner && g.owner) { // the owner's name over the group (5.0.5: a black pill; the Palm: "+name" for good luck)
+        x.font = '10px ' + font; const t = cut(g.owner, CW - 20), w = x.measureText(t).width + 8;
+        if (P.owner === 'pill') { x.fillStyle = '#000'; roundRect(x, at.x - w / 2, at.y + 10, w, 12, 6); x.fill(); x.fillStyle = '#fff'; x.fillText(t, at.x, at.y + 19); }
+        else { x.fillStyle = ink; x.fillText(t, at.x, at.y - 22); }
+      }
+      if (g.luck) { // the good-luck / bad-luck picture (5.0.5 PICT 9017/9018, iOS icons 17/18): a mark here
+        x.fillStyle = g.luck > 0 ? '#3c9a3c' : '#c03a3a'; x.beginPath(); x.arc(at.x + 40, at.y - 8, 7, 0, Math.PI * 2); x.fill();
+        x.fillStyle = '#fff'; x.font = 'bold 11px ' + font; x.fillText(g.luck > 0 ? '+' : '−', at.x + 40, at.y - 4);
+      }
+      x.font = '11px ' + font; x.fillStyle = ink;
+      x.fillText(cut(g.text, CW - 6), at.x, at.y + (P.owner === 'pill' ? 36 : 32));
+    }));
+    if (P.end) { x.font = 'bold 13px ' + font; x.fillStyle = ink; x.fillText(P.end.join(' '), W / 2, H - 14); }
+    if (shot) {
+      x.strokeStyle = dark ? '#000' : shot.a === viewer ? '#ffe066' : '#ff6fb5'; x.lineWidth = 2;
+      x.beginPath(); x.moveTo(shot.x1, shot.y1); x.lineTo(shot.x2, shot.y2); x.stroke();
+    }
+  };
+  const center = (i) => i < 0 ? (planetAt || { x: W / 2, y: H / 2 }) : (where.get(i) || { x: W / 2, y: H / 2 });
+  let r = 0, e = 0;
+  const step = () => {
+    if (b._stop) return;
+    if (r >= b.rounds.length) {
+      over = true; drawAll();
+      status.textContent = `Battle over after ${b.rounds.length} round${b.rounds.length === 1 ? '' : 's'}. ` + b.sides.map(o => `${o === ME ? 'You' : G.players[o].name} lost ${b.lost[o] || 0}`).join('; ') + '.' + (b.planetDied ? ' The colony was wiped out.' : '');
+      return;
+    }
+    const ev = b.rounds[r][e];
+    if (!ev) { r++; e = 0; if (b.popR) pop = b.popR[r - 1]; status.textContent = `Round ${r + 1}`; setTimeout(step, 160 / speed); return; }
+    const a = center(ev.si);
+    let t;
+    if (ev.p) { t = center(-1); Sound.play(3000); }
+    else { t = center(ev.ti); if (ev.k) { alive[ev.ti] = false; Sound.play(e % 3 === 0 ? 3003 : 3002); } else if (e % 4 === 0) Sound.play(3000 + (e % 2)); }
+    drawAll({ x1: a.x, y1: a.y, x2: t.x, y2: t.y, a: ev.a });
+    if (ev.k && !ev.p) x.drawImage(IMG.debris, 0, 0, 288, 138, t.x - 30, t.y - 18, 60, 36);
+    e++;
+    setTimeout(step, Math.max(18, 110 - b.rounds[r].length * 2) / speed);
+  };
+  const finish = () => {
+    for (; r < b.rounds.length; r++, e = 0) {
+      for (; e < b.rounds[r].length; e++) { const ev = b.rounds[r][e]; if (ev.k && !ev.p) alive[ev.ti] = false; }
+      if (b.popR) pop = b.popR[r];
+    }
+    step();
+  };
+  status.textContent = 'Round 1';
+  drawAll(); setTimeout(step, 400);
+}
+function roundRect(x, l, t, w, h, r) { x.beginPath(); x.moveTo(l + r, t); x.arcTo(l + w, t, l + w, t + h, r); x.arcTo(l + w, t + h, l, t + h, r); x.arcTo(l, t + h, l, t, r); x.arcTo(l, t, l + w, t, r); x.closePath(); }
 
 // ----- players -----
 function openPlayers() {

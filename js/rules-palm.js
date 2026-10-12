@@ -195,8 +195,52 @@ function welcome(G) {
     m('Play with the spending bars. Conquer the galaxy. Gain ranks to unlock more game options. Enjoy.', 'm9049'), palm];
 }
 
+// CONFIRMED (FUN_00049f82, which bars can't be dragged; FUN_0004a016, what a
+// locked bar says; FUN_00048e7a, the drawing; FUN_00049496, the pen): 5.0.5's
+// locked bars, drawn without their bar and with the words 11 pixels past the
+// bar's start: "Evacuating" (tSTL 6001.31; drawing it also sets the evacuating
+// colony's share to 0), a finished colony's income, Savings while dipping
+// "-N% " and N % of Ship Savings as a negative number (StrPrintF "-%ld%% ",
+// @0x4a1a0). A tap on the Savings bar while dipping opens Dip Into Savings
+// (thunk_FUN_000741a6); on the others nothing happens (no sound).
+function barLockedPalm(G, p, slot) {
+  const r = O.barLocked(G, p, slot);
+  if (!r) return null;
+  if (r.dip) return { text: `-${p.dip}% ${E.fmt(-trunc((p.savings || 0) * p.dip / 100))}`, dip: true };
+  return Object.assign({}, r, { silent: true });
+}
+// CONFIRMED (the battle screen FUN_00030a80, its group FUN_00030a80's caller
+// @0x30960, the words FUN_0004b864 (disassembled: the decompile fails) with
+// "%ld %s (%ld/%ld)", "1 %s (%ld/%ld)", "%s (%ld/%ld)" @0x4b920; tSTL 6003):
+// two columns 89 pixels apart (the group's side byte, as 5.0.5's: the
+// viewer's side on the left), scrolled; each group one ship picture (no
+// pile), shaded by its damage, its owner's hat, and over it the owner's name,
+// "+name" when the side has good luck and "-name" bad luck; under it the
+// words, with the class's name (tSTL 6002, the singular: the call passes 0)
+// and no design name: "N Class (W/S)", "1 Class (W/S)", "n/N Class (W/S)s"
+// (6003.14 "%ld/%ld %ss"), "one dead Class (W/S)" / "N dead Class (W/S)"
+// (6003.10-11, LIKELY: the call's string number is lost in the decompile);
+// a colony "N People", "n of N People survived" (6003.15), "N People killed"
+// (6003.9). The window's title is "Review Battle at %s in %ld" (6003.12).
+function shipDescPalm(d, n, mine) {
+  const cls = d.type === 'decoy' && !mine ? 'Fighter' : (E.TYPES[d.type] || { name: '' }).name, ws = `(${d.W}/${d.S})`;
+  return n < 1 ? `${cls} ${ws}` : n === 1 ? `1 ${cls} ${ws}` : `${n} ${cls} ${ws}`;
+}
+const popPalm = (pop) => E.fmt(Math.round(pop * 1e6));
+const battlePanelPalm = E.makeBattlePanel({
+  cols: 'viewer', byStance: true, owner: 'luck', pics: (n) => Math.min(n, 1),
+  head: (G, b) => [`Review Battle at ${G.stars[b.star].name} in ${b.year}`],
+  ship: (G, d, n, n0, mine) => n === 0 ? (n0 === 1 ? `one dead ${shipDescPalm(d, 0, mine)}` : `${n0} dead ${shipDescPalm(d, 0, mine)}`)
+    : n !== n0 ? `${n}/${n0} ${shipDescPalm(d, 0, mine)}s` : shipDescPalm(d, n, mine),
+  planet: (G, pop, pop0) => pop <= 0.0005 ? `${popPalm(pop0)} People killed` : Math.abs(pop - pop0) < 0.0005 ? `${popPalm(pop)} People` : `${popPalm(pop)} of ${popPalm(pop0)} People survived`,
+});
 const rs = Object.assign(base, {
   label: 'Palm OS 5 (2003)',
+  // the bar charts: 5.0.5's log scale (FUN_00049e32 builds the table with
+  // 77.0, 32.11, 2.302 and 10.0 in the Palm's soft float; FUN_00049db4 a
+  // share's pixel; FUN_00049496 the pen's pixel through it; FUN_00048e7a the
+  // grid at 100 ... 1,000 per mille), inherited from 5.0.5
+  barLocked: barLockedPalm, battlePanel: battlePanelPalm,
   // CONFIRMED (FUN_0002c510, the CMiscUtilsPalm method +0x68 the report
   // formatter FUN_00027c4c calls): numbers in full with commas, however big,
   // not 5.0.5's "12,345K". (Its compact "$1.23 M" / "$12 K" money, FUN_0002c664

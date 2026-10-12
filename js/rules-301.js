@@ -1551,16 +1551,32 @@ function fixSpending301(G, p, cur) {
   }
   return { text: null, cur };
 }
-// CONFIRMED (DoHBarClick @d18a0): dragging a budget bar (not of a colony
-// being abandoned or finished) sets its share and calls DetermineNewLevels
-// with every other slot between 0 and 1,000 (not ComputeMaxPercent's most).
-// 3.0.1 does this at every step of the drag, from where the last step left
-// the shares; the remake's bars give only where the drag ends (from the
-// shares as the drag began).
+// CONFIRMED (DoHBarClick @d18a0): dragging a budget bar sets its share and
+// calls DetermineNewLevels with every other slot between 0 and 1,000 (not
+// ComputeMaxPercent's most). 3.0.1 does this at every step of the drag, from
+// where the last step left the shares; the remake's bars give only where the
+// drag ends (from the shares as the drag began). The drag is refused (a beep,
+// PlaySound(-1)) for a colony being abandoned (slot +7) and for a slot whose
+// star number is 1 or more with both its bars done (+2, +4 at -1): the test
+// reads the star number, so a finished colony at star 0 can still be dragged,
+// as in 4.0.5 (the patch's 'star0' locks it too). Savings and Technology are
+// never locked (barLocked301).
+const locked301 = (G, sid) => { const s = G.stars[sid]; return !!s && (s.abandon301 || (s.done301 && (sid >= 1 || E.fixed(G, 'star0')))); };
 function dragShare(G, p, key, pm) {
   const k = key === 'savings' ? 'sav' : key;
-  if (typeof k === 'number' || /^\d+$/.test(k)) { const s = G.stars[+k]; if (!s || s.abandon301 || s.done301) return; giveBarPercent(G, p, +k, pm, true); return; }
+  if (typeof k === 'number' || /^\d+$/.test(k)) { if (!G.stars[+k] || locked301(G, +k)) return; giveBarPercent(G, p, +k, pm, true); return; }
   giveBarPercent(G, p, k, pm, true);
+}
+// CONFIRMED (DrawHBarControl @d0a7c, DoHBarClick @d18a0): a finished colony
+// (not being abandoned, star number 0 or more, both bars done) has "$" and
+// its income (the slot’s, LongToNiceString) written 3 pixels into its bar,
+// which is empty (its share is 0); a colony being abandoned is drawn as the
+// others. Clicked, a locked bar beeps.
+function barLocked301(G, p, slot) {
+  if (typeof slot !== 'number' && !/^\d+$/.test(slot)) return null;
+  const sid = +slot, s = G.stars[sid]; if (!s) return null;
+  const text = s.done301 && !s.abandon301 ? '$' + E.niceNum(s.oInc || 0) : null, refuse = locked301(G, sid);
+  return refuse || text ? { text, free: !refuse } : null;
 }
 // CONFIRMED (DecolonizeStar @a5ac0; 2.0's FUN_1040_38c0): a colony given up:
 // the player's fleets of colony ships at the star are loaded, the colony's
@@ -1923,8 +1939,18 @@ E.registerRules('301', Object.assign({}, D, {
       text: 'When a computer gave a colony more than $2,147,483 for one part, the sum overflowed and the colony’s bars came out wrong. The patch works them out without overflowing.' },
     { id: 'scrapRange', title: 'Old ships sent home are routed with their own Range',
       text: 'When the computers sent old ships home, the program passed the fleet’s place in a list where the route finder wants its Range. It made no difference to play (the colony is always within reach); the patch passes the Range.' },
+    { id: 'star0', title: 'A finished colony at the first star is locked like any other',
+      text: 'The test that stops you dragging the budget bar of a finished colony looked at the star’s number instead of what the budget slot is, so a finished colony at the first star of the list could still have its bar dragged. The patch locks it like any other.' },
   ],
   ai: '301',               // its own computer players (js/ai-301.js)
+  // CONFIRMED (InitHLogBarAmts @d091c, GetHPercBarAmt @d0a30, DrawHBarControl
+  // @d0a7c, DoHBarClick @d18a0; 'Stup' 1000 "Default Setup" +0x2a = 1): the
+  // budget bars are on the log scale by default, and a click on the strip
+  // above them switches them to linear and back (DoHBarClick: 1 − the setup's
+  // +0x2a), as in 2.0; the Technology bars always on the log scale
+  // (InitVLogBarAmts @d0004, DoVBarClick @d0582 with 2)
+  barScale: { budget: 'log', tech: 'log', toggle: true },
+  barLocked: barLocked301, battlePanel: D.battlePanelMac,
   maxPlayers: 20,          // CONFIRMED (doCreateGalaxyDlg @f0550): 0-19 computers
   maxDesigns: MAX_DESIGNS,
   chatLimit: 10,           // CONFIRMED (SendAMessage @95f14, STR# 1020.17): ten messages a turn

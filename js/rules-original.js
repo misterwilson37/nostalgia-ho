@@ -2318,7 +2318,9 @@ function battleAt505(G, sid, pass) {
   const col = sides.find(x => !ordered.includes(x) && x.pop > 0);
   if (col) ordered.push(col);
   for (const x of sides) if (!ordered.includes(x)) ordered.push(x);
-  const rec = { id: G.nextId++, star: sid, year: Y, sides: sides.map(x => x.o), rounds: [], start: [], planetOwner: -1, pop0: s.pop, popR: [] };
+  // the battle window's panel (battlePanel505) shows each side's luck and the
+  // groups' stances: kept in the record (luck, start[i].st)
+  const rec = { id: G.nextId++, star: sid, year: Y, sides: sides.map(x => x.o), rounds: [], start: [], planetOwner: -1, pop0: s.pop, popR: [], luck: Object.fromEntries(sides.map(x => [x.o, x.luck])) };
   const groups = [];
   let planet = null, debris = 0, dreadIn = false;
   for (const x of ordered) {
@@ -2330,11 +2332,11 @@ function battleAt505(G, sid, pass) {
     for (let i = ds.length - 1; i >= 0; i--) {
       const d = ds[i], c = x.cnt[d.id], cost = designCost(G, d), decoy = d.type === 'decoy';
       if (d.type === 'dread') dreadIn = true;
-      for (const [n, dw, dsh] of [[c.off, 1, -2], [c.def, -2, 1], [c.nor, 0, 0]]) {
+      for (const [n, dw, dsh, st] of [[c.off, 1, -2, 'o'], [c.def, -2, 1, 'd'], [c.nor, 0, 0, 'n']]) {
         if (!(n > 0)) continue;
         const g = { owner: x.o, side: x, d, type: d.type, n, n0: n, start: n, init: decoy ? 0 : d.V, W: decoy ? -2 : Math.max(1, d.W + x.luck + dw), S: decoy ? 0 : Math.max(1, d.S + dsh),
           hp: cost.hp, shots: shotsPerShip(d), debris: trunc(cost.metal / 5), dmg: 0, tgt: null, units: [] };
-        for (let u = 0; u < n; u++) { g.units.push(rec.start.length); rec.start.push({ o: x.o, t: d.type, did: d.id }); }
+        for (let u = 0; u < n; u++) { g.units.push(rec.start.length); rec.start.push({ o: x.o, t: d.type, did: d.id, st }); }
         groups.push(g);
       }
     }
@@ -2630,6 +2632,63 @@ function dragShare505(G, p, key, pm) {
   else v[idx] = Math.max(0, 1000 - T);
   L.forEach((x, i) => setKeyPm(p, x, v[i]));
 }
+// CONFIRMED (FUN_1008a030, which bars can't be dragged; FUN_1008a120, what a
+// locked bar says; FUN_1008aff0, the drawing; FUN_1008a7a0, the click): a
+// colony being evacuated (colony slot +0x13) says "Evacuating" (Misc Strings
+// 32); a finished colony (both its Terraform and Mine bars done, -1) its
+// income ("$" and the number, FUN_10055050 with the currency); the Savings
+// bar while dipping into Ship Savings "-N% (amount)", the amount N % of Ship
+// Savings (player +0x48 × +0x54 / 100). The text is drawn in the bar's place
+// (FUN_1008aff0 draws a locked bar flat, without its two-pixel edges, and the
+// text 3 pixels past the bar's start). Clicked, a locked bar beeps
+// (SysBeep), but the Savings bar while dipping opens Dip Into Savings
+// (command 0x139c). Their shares stay where the rules put them: 0 for an
+// evacuating or finished colony (GiveBarPercent), and Savings while dipping.
+// A technology bar locks only below 0, which the remake's never are.
+function barLocked505(G, p, slot) {
+  const R = E.rules(G), num = R.fmtNum || E.fmt, cash = R.fmtMoney || ((n) => '$' + E.fmt(n));
+  if (slot === 'savings') return (p.dip || 0) > 0 ? { text: `-${p.dip}% (${num(trunc((p.savings || 0) * p.dip / 100))})`, dip: true } : null;
+  if (typeof slot !== 'number' && !/^\d+$/.test(slot)) return null;
+  const s = G.stars[+slot]; if (!s) return null;
+  if (s.abandon301) return { text: 'Evacuating' };
+  if (s.done301) return { text: cash(s.oInc || 0) };
+  return null;
+}
+// CONFIRMED (CBattleStageMac FUN_100ac8c0 draws a group, FUN_100aceb0 its
+// ships and words, FUN_1007c250 a design's words; the groups FUN_1007f560,
+// FUN_1007f7f0, FUN_1007f9f0; strings STR# 6002 / sprintf Templates): the
+// window is "Review Battle at %s in %d" with "Round %d" under the ships. The
+// viewer's side and its allies are drawn on the left (x 145), the rest on
+// the right (x 465, the pictures mirrored), each a column of groups in the
+// battle's order: a side's colony first, then its designs, last to first,
+// each split by stance. A group is a pile of its ships' pictures in a V,
+// trunc(0.5 + n^0.68) of them (1 to 30, FUN_1007fc20; constants 0.68 and 0.5
+// at 0x100f0660), its owner's face with the owner's name on a black pill,
+// the good-luck or bad-luck picture (PICT 9017 / 9018) when the side's luck
+// is +1 or -1, and its words on a white pill under it:
+//   "N Name (W/S) Classs", "one Name (W/S) Class" (a Decoy shows its owner
+//   "Decoy", everyone else "Fighter"; cut to 39 letters), "n/N Name (W/S)
+//   Classs" once some are lost, "one dead Name (W/S) Class" / "N dead Name
+//   (W/S) Classs" when all are; a colony its people, "now/before", or
+//   "N killed". W and S are the design's own (not the stance's or luck's).
+// The remake draws the pile, the names and the luck as marks; the damage
+// shading of a pile's last ship isn't drawn.
+function shipDesc505(d, n, mine) {
+  const cls = d.type === 'decoy' && !mine ? 'Fighter' : (E.TYPES[d.type] || { name: '' }).name;
+  const ws = `(${d.W}/${d.S})`;
+  return (n < 1 ? `${d.name} ${ws} ${cls}` : n === 1 ? `one ${d.name} ${ws} ${cls}` : `${n} ${d.name} ${ws} ${cls}s`).slice(0, 39);
+}
+const pop505 = (G, pop) => (E.rules(G).fmtNum || E.fmt)(Math.round(pop * 1e6));
+const words505 = {
+  ship: (G, d, n, n0, mine) => n === 0 ? (n0 === 1 ? `one dead ${shipDesc505(d, 0, mine)}` : `${n0} dead ${shipDesc505(d, 0, mine)}s`)
+    : n !== n0 ? `${n}/${n0} ${shipDesc505(d, 0, mine)}s` : shipDesc505(d, n, mine),
+  planet: (G, pop, pop0) => pop <= 0.0005 ? `${pop505(G, pop0)} killed` : Math.abs(pop - pop0) < 0.0005 ? pop505(G, pop) : `${pop505(G, pop)}/${pop505(G, pop0)}`,
+};
+const battlePanel505 = E.makeBattlePanel(Object.assign({
+  cols: 'viewer', byStance: true, owner: 'pill', luck: true,
+  pics: (n) => n <= 1 ? n : clamp(trunc(0.5 + Math.pow(n, 0.68)), 1, 30),
+  head: (G, b) => [`Review Battle at ${G.stars[b.star].name} in ${b.year}`],
+}, words505));
 // CONFIRMED (FUN_1005d380, "Dip Into Savings…", dialog 0x9d): a percentage
 // kept (player +0x54), from the window's slider, 0 to 30 % (PPob 157: the
 // slider's minimum 0, maximum 30, marked 0%, 15% and 30%; the code would take
@@ -2784,6 +2843,12 @@ Object.defineProperties(E.RULESETS.original, Object.fromEntries(Object.entries({
   checkElimination: checkElimination505, arrivalSays: () => false, departs: departs505,
   // the commands and the budget bars
   evacuateCommand: true, evacuate: evacuate505, evacuateToggle, dragShare: dragShare505, dipSet: dipSet505, dipMax: 30,
+  // the bar charts (LHoBarControl): the budget and technology bars on the
+  // log scale, for drawing and dragging (FUN_100895a0, the table; FUN_100896a0,
+  // a share's pixel; FUN_1008a7a0, the mouse's pixel through the table; the
+  // grid at 100, 200 ... 1,000 per mille on it, FUN_1008aff0); the locked
+  // bars (barLocked505) and the battle window's ship panel (battlePanel505)
+  barScale: { budget: 'log', tech: 'log' }, barLocked: barLocked505, battlePanel: battlePanel505, battlePanelWords: words505,
   fleetFor: fleetFor505, shipsAdded: shipsAdded505, yardRoom: yardRoom505, addMasterPoints: addMasterPoints505,
   bars: bars505, setBars: setBars505, slots301: slots505, colSlots: colSlots505, keyPm, setKeyPm, giveBarPercent: giveBar505, share505,
   terraLeft: (G, p, s) => bars505(s)[0] !== -1,

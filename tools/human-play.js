@@ -15,7 +15,8 @@
 //     research, money, metal and colonies' temperatures must come out the
 //     same. (This is what failed for 4.0.5 and 5.0.5: a share of 0.18 read
 //     as 0.18 per mille.)
-//   - the Budget bars as drawn equal the per mille the ruleset reads (rs.keyPm);
+//   - the Budget bars as drawn (read through the ruleset's scale, rs.barScale)
+//     equal the per mille the ruleset reads (rs.keyPm);
 // and at the end:
 //   - the human's research progress over the game is comparable to the
 //     computers' (at least 0.3 of their mean, at most 5 times);
@@ -151,18 +152,24 @@ async function dismiss(page) {
 function section(page, title) {
   return page.locator('#panel section.box').filter({ has: page.locator('h3', { hasText: new RegExp('^' + title + '$') }) });
 }
-// a bar dragged to fraction f of its track (pointer down, a small move, up)
+// a bar dragged to the place that gives share f (pointer down, a small move,
+// up): the place is on the ruleset's own scale (rs.barScale, engine
+// BAR_SCALES: linear or the log scale), as the page reports it (HOVIEW)
 async function dragBar(page, title, label, f) {
   const row = section(page, title).locator('.barrow').filter({ has: page.locator('.blabel', { hasText: label }) }).first();
   if (!(await row.count())) return false;
   const b = await row.locator('.track').boundingBox();
-  const x = b.x + b.width * f, y = b.y + b.height / 2;
+  const at = await page.evaluate(([kind, f]) => HO.BAR_SCALES[window.HOVIEW().barScale[kind]].toX(f * 1000), [title === 'Budget' ? 'budget' : 'tech', f]);
+  const x = b.x + b.width * at, y = b.y + b.height / 2;
   await page.mouse.move(x - 2, y); await page.mouse.down(); await page.mouse.move(x, y, { steps: 2 }); await page.mouse.up();
   await sleep(30);
   return true;
 }
+// the bars as drawn, each its share per mille read back through the
+// ruleset's scale (w: per mille)
 async function readBars(page, title) {
-  return section(page, title).locator('.barrow').evaluateAll(rows => rows.map(r => ({ label: r.querySelector('.blabel').textContent, w: parseFloat(r.querySelector('.fill').style.width) || 0 })));
+  const kind = title === 'Budget' ? 'budget' : 'tech';
+  return section(page, title).locator('.barrow').evaluateAll((rows, kind) => { const sc = HO.BAR_SCALES[window.HOVIEW().barScale[kind]]; return rows.map(r => ({ label: r.querySelector('.blabel').textContent, w: sc.toValue((parseFloat(r.querySelector('.fill').style.width) || 0) / 100) })); }, kind);
 }
 async function clickStar(page, sid) {
   const p = await page.evaluate((sid) => window.__hp.mapPos(sid), sid);
@@ -311,7 +318,7 @@ async function playOne(browser, rules, url) {
     const bars = await readBars(page, 'Budget');
     for (const b of bars) {
       const want = b.label === 'Tech' ? meB.pm.tech : b.label === 'Savings' ? meB.pm.sav : meB.pm.col[(meB.cols.find(c => c.name === b.label) || {}).id];
-      if (want == null || Math.abs(b.w * 10 - want) > 2) fail(`turn ${turn}: Budget bar ${b.label} drawn ${Math.round(b.w * 10)} per mille, the rules read ${want}`);
+      if (want == null || Math.abs(b.w - want) > 2) fail(`turn ${turn}: Budget bar ${b.label} drawn ${Math.round(b.w)} per mille, the rules read ${want}`);
     }
     // shadow: as left by the skin vs in the computers' units
     const sh = await page.evaluate(() => window.__hp.shadow());

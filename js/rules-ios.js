@@ -242,8 +242,39 @@ const gameCenter = {
   },
 };
 
+// CONFIRMED (-[PlayerPlanetsLayer isBarLocked:] 0x10000b2b8, barString:
+// 0x10000b3d8): 5.0.5's locked bars (a colony being evacuated, a finished
+// colony, Savings while dipping), saying "Evacuating" (Misc Strings 31), the
+// colony's income, or "-%d%% (%s)" with N % of Ship Savings (player +0x50 ×
+// +0x5c / 100) as money. A touch on a locked bar isn't taken
+// (-[HoBarLayer ccTouchBegan:withEvent:] 0x10000a558): no beep, and no Dip
+// Into Savings window (5.0.5 opened it).
+function barLockedIOS(G, p, slot) {
+  const r = O.barLocked(G, p, slot);
+  if (!r) return null;
+  if (r.dip) return { text: `-${p.dip}% (${E.money505(trunc((p.savings || 0) * p.dip / 100))})`, silent: true };
+  return Object.assign({}, r, { silent: true });
+}
+// CONFIRMED (-[BattleStageLayer setup:] 0x100095004, addBattleDescription
+// 0x1000949f4: "Review Battle at %s in %d", sprintf Templates 12; drawGroup:
+// 0x1000954c8; -[BattleShipNode update:player:myPlayer:] 0x10009c3f0, its
+// words FUN_1000358c8 = 5.0.5's FUN_1007c250): 5.0.5's panel, but each group
+// is one ship picture (ShipNode, shaded by its damage), the owner's hat on
+// it (the player's halo or face), the good-luck or bad-luck report icon
+// (17, 18) beside it, and its words under it (sprintf Templates 9-15: "%s
+// killed", "one dead %s", "%d dead %ss", "%d/%d %ss", "%s/%s"); groups whose
+// side is 0 (the viewer's) on the left, the rest on the right, mirrored; a
+// list taller than the screen scrolls (CCLayerPanZoom, addShipGroups).
+// No owner's name is written on a group.
+const battlePanelIOS = E.makeBattlePanel({
+  cols: 'viewer', byStance: true, luck: true, pics: (n) => Math.min(n, 1),
+  head: (G, b) => [`Review Battle at ${G.stars[b.star].name} in ${b.year}`],
+  ship: (G, d, n, n0, mine) => O.battlePanelWords.ship(G, d, n, n0, mine),
+  planet: (G, pop, pop0) => O.battlePanelWords.planet(G, pop, pop0),
+});
 const rs = Object.assign(base, {
   label: 'iOS 1.2.9 (2012)',
+  barLocked: barLockedIOS, battlePanel: battlePanelIOS,
   // the New Game window's Version and Edition menus (engine.js editions)
   family: '5', edition: { version: '1.2.9', name: 'iOS', platform: 'iPhone and iPad', year: 2012 }, skins: ['ios'],
   // the New Game window lists rulesets by year, then version (engine.js ruleOptions)

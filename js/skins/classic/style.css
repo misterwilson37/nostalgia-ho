@@ -37,6 +37,13 @@ button { font: inherit; }
 .fill.tech { background: repeating-linear-gradient(90deg, #e2b33c 0 6px, #c99a28 6px 7px); }
 .fill.sav { background: repeating-linear-gradient(90deg, #6fb46f 0 6px, #579a57 6px 7px); }
 .fill.tbar { background: repeating-linear-gradient(90deg, #c96c63 0 6px, #ad5149 6px 7px); }
+/* a locked bar (rs.barLocked): no dragging; its words where the bar would be,
+   a little past its start, as the originals drew them */
+.track.locked { cursor: not-allowed; }
+.barrow[data-help] .track.locked { cursor: not-allowed; }
+.locktext { position: absolute; left: 3px; top: 50%; transform: translateY(-50%); font-size: 10px; line-height: 1; white-space: nowrap; overflow: hidden; max-width: calc(100% - 6px); text-overflow: ellipsis; color: var(--sub); pointer-events: none; }
+/* the switch between the budget bars' scales (rs.barScale.toggle) */
+h3.scaleflip { cursor: pointer; }
 .warn { color: var(--neg); margin: 6px 0 0; }
 .note, .sub { color: var(--sub); }
 .note { margin: 6px 0; }

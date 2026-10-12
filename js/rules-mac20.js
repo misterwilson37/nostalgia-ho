@@ -89,6 +89,10 @@ const FIXES = D.fixes.filter(f => f.id !== 'orgFuelCount' && f.id !== 'attack16'
 
 // Mac 2.0.1 plays 2.0's turn (js/rules-dos.js), with the differences above
 E.registerRules('mac20', Object.assign({}, D, {
+  // the battle window's words are the Mac's (rules-dos battlePanel20: no
+  // cut names, "…"); the bars are 2.0's (linear budget bars a click above
+  // them switches to the log scale, 'Stup' 1000 +0x2a = 0; log Technology bars)
+  battlePanel: D.battlePanelMac,
   label: 'Mac 2.0.1 (1992)',
   // the New Game window's Version and Edition menus (engine.js editions)
   family: '2.0', edition: { version: '2.0.1', name: 'Mac', platform: 'Mac, System 6 and 7', year: 1992 }, skins: ['mac2c', 'mac2'],

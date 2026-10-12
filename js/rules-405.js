@@ -1493,6 +1493,22 @@ function dragShare(G, p, key, pm) {
   }
   giveBarPercent(G, p, k, pm, true);
 }
+// CONFIRMED (the budget window's drawing FUN_0045aae1, Mac DrawHBarControl
+// @50a80; the click FUN_0045c02c, Mac DoHBarClick @514e2): a finished colony
+// (not being abandoned, star number 0 or more, both bars done) has "$" and
+// its income written 4 pixels into its empty bar (its share is 0); clicked,
+// a locked bar beeps (Windows MessageBeep, the Mac PlaySound). The lock is
+// dragShare's above: a colony being abandoned, or a finished one at star 1
+// or more (the 'star0' slip: one at star 0 shows its income and can still
+// be dragged). Savings and Technology are never locked.
+function barLocked405(G, p, slot) {
+  if (typeof slot !== 'number' && !/^\d+$/.test(slot)) return null;
+  const sid = +slot, s = G.stars[sid]; if (!s) return null;
+  const [T, X] = bars(s), done = T === -1 && X === -1;
+  const refuse = !!s.abandon301 || (done && (sid >= 1 || E.fixed(G, 'star0')));
+  const text = done && !s.abandon301 ? '$' + E.niceNum(s.oInc || 0) : null;
+  return refuse || text ? { text, free: !refuse } : null;
+}
 // CONFIRMED (FUN_00439bf7 DecolonizeStar): a colony given up: the player's
 // fleets of Colony Ships at the star are loaded; the colony's share goes to
 // 0 and the other slots take it up (GiveBarPercent(slot, 0); 3.0.1 gave it to
@@ -2372,6 +2388,14 @@ E.registerRules('405', Object.assign({}, D, {
   ],
   patchVersion: null, // its own (4.0.5.1), not 2.0's
   ai: '405',               // its own computer players (js/ai-405.js)
+  // CONFIRMED (FUN_0045aa60 and FUN_00459ba0 build the 77- and 50-pixel log
+  // tables; FUN_0045c02c, the budget drag, and FUN_0045aae1, the drawing,
+  // read the table when SPACEHO.INI's [prefs] useLogScale is not 0, which it
+  // is by default (FUN_0047d8e8 "useLogScale" with 1) and no window sets;
+  // the research window's drag FUN_0045a5d6 is called with 2, the log scale):
+  // both kinds of bar on the log scale (Mac 4.0.5 alike: below)
+  barScale: { budget: 'log', tech: 'log' },
+  barLocked: barLocked405, battlePanel: D.battlePanelWin,
   hints: true,             // CONFIRMED (FUN_004320f8): a hint every step (above)
   hintTexts: HINTS405,
   maxPlayers: 20,          // CONFIRMED (FUN_00448856): 0-19 computers, 20 players
