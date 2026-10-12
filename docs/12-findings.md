@@ -506,6 +506,36 @@ bars keep their −1 marks, so the computers stop terraforming a planet only whe
 terraforming is finished, not when the temperature gap is 0; players who are out still
 earn interest and research; and the computers' first turn is planned as 2010, not 2000.
 
+## Bars and battles (October 2026)
+
+Peter Commons' three notes (the bars' scale, the bars that lock at zero, the ships in
+battles), read in 1.2F's code. 1.2 is 2.0 here too (`docs/dos-findings.md`, "Bars and
+battles"):
+
+- **The scale.** `InitHLogBarAmts @c07be` and `InitVLogBarAmts @c0004` build the log
+  tables (77 and 50 pixels), `GetHPercBarAmt @c08d2` a share's pixel. The budget bars
+  (`DrawHBarControl @c091e`, `DoHBarClick @c1002`) are linear (1,000 × x / 77, the grid in
+  tenths) unless the setup's +0x2a is set, 0 by default ('Stup' 1000 "Default Setup"); a
+  click above the bars flips it (`DoHBarClick`'s last branch: 1 − the value, then
+  `DrawBudgetRect`), and they are drawn and dragged on the log scale (the grid at 100 ...
+  1,000 per mille) until clicked again. The technology bars are always on the log scale
+  (`DoVBarClick @c0446` with 2, from the research window; with 1, a colony's bars, they are
+  linear). So the log scale is in the oldest version read, as a choice for the budget
+  bars. The remake: 2.0's `rs.barScale` (inherited). CONFIRMED.
+- **The lock.** None in the budget bars: `DoHBarClick` checks no slot. A colony's own bar
+  below 0 (a finished part) beeps when clicked (`DoVBarClick`). CONFIRMED.
+- **The battle window.** 2.0's (`DrawAllGroups @d207c`, `DrawOneGroup @d214e`,
+  `ReviewBattle @d26e6`, `MakeFleetDescription @110e28`), in French: STR# 1030 "Résumé de
+  la bataille", "à %s en %d:", "Round %d", "Félicitations!" "Bataille gagnée!" or "Hélas,"
+  "vous avez perdu…"; a group's words "%d %.*ss %.*s (%d/%d)" ("3 Chasseurs Lancelot
+  (5/4)": the class first, French order), "1 %.*s %.*s (%d/%d)", and when it is gone the
+  whole description with "%.*s détruit(s)" (STR# 1030.1, whatever the count); a colony
+  its people or "%s morts" (STR# 4000.32). The remake gives them in English as Mac
+  2.0.1's (`battlePanelMac`), as it gives 1.2's other French lines.
+
+What changed in play: nothing. The finger uses 2.0's linear bars instead of iOS's log
+scale.
+
 ## Still open
 
 See `docs/open-questions.md`, section "Mac 1.2".

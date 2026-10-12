@@ -391,8 +391,8 @@ stubs). Addresses are in that layout, as in `docs/12-findings.md`.
 | `GetVPercBarAmt` @c0118 | colony bar | NOT A RULE | interface |
 | `DrawVBarControl` @c0164 | colony bar | NOT A RULE | drawing |
 | `DoVBarClick` @c0446 | drag a colony bar (terraform/mine/ships); a bar below 0 (finished) can't be dragged | NOT A RULE | interface (the remake's planet panel) |
-| `InitHLogBarAmts` @c07be | budget bar scale | NOT A RULE | interface |
-| `GetHPercBarAmt` @c08d2 | budget bar | NOT A RULE | interface |
+| `InitHLogBarAmts` @c07be | budget bar scale: the log table, used while the setup's +0x2a is set (0 by default; a click above the bars flips it, `DoHBarClick`) (October 2026) | NOT A RULE | interface (`rs.barScale`) |
+| `GetHPercBarAmt` @c08d2 | budget bar: a share's pixel on the log table (October 2026) | NOT A RULE | interface (engine `BAR_SCALES.log`) |
 | `DrawHBarControl` @c091e | budget bar | NOT A RULE | drawing |
 | `DoHBarClick` @c1002 | drag a budget bar (shares of the pool): every slot's floor 0 and ceiling 1,000, then `DetermineNewLevels` | NOT A RULE | interface (the remake's budget panel; see open questions, Remake's choices) |
 | `GiveBarPercent` @c139c | set a share and rebalance the others, none below its least share (a new colony's share, `ColonizeStar`) | RULE, implemented | js/rules-dos.js giveShare20 (2.0's FUN_1010_16f2, the same) |
@@ -450,8 +450,8 @@ stubs). Addresses are in that layout, as in `docs/12-findings.md`.
 | `CalcOneGroup` @d1324 | build one group | RULE, implemented | js/rules-dos.js battle units |
 | `HaveGroupShoot` @d1746 | a group's shots, damage, debris | RULE, implemented | js/rules-dos.js battle fight() |
 | `PickTarget` @d1f0e | colony ship, satellite, random ship, planet | RULE, implemented | js/rules-dos.js battle pickTarget |
-| `DrawAllGroups` @d207c | battle display | NOT A RULE | drawing |
-| `DrawOneGroup` @d214e | battle display | NOT A RULE | drawing |
+| `DrawAllGroups` @d207c | battle display: both sides' groups, or "no information" (October 2026) | NOT A RULE | drawing (`rs.battlePanel`) |
+| `DrawOneGroup` @d214e | battle display: a group's picture, damage bar and words (October 2026) | NOT A RULE | drawing (`rs.battlePanel`) |
 | `ReviewBattle` @d26e6 | replay a stored battle | NOT A RULE | interface |
 | `DrawX` @d27de | cross over a beaten side | NOT A RULE | drawing |
 | `MakeResultMessages` @d2828 | per duel: reports, debris, fleets resolved, estimates, defence metal | RULE, implemented | js/rules-dos.js battle20 |
@@ -571,7 +571,7 @@ stubs). Addresses are in that layout, as in `docs/12-findings.md`.
 | `CalcFleetsAtAllStars` @11030a | count fleets at stars for the map | NOT A RULE | map display |
 | `DeterminePath` @1105ae | route through your colonies, at most 42/Range hops, under 3x direct | RULE, implemented | js/rules-dos.js route |
 | `GiveFleetPath` @110d56 | store a route in the fleet | RULE, implemented | js/rules-dos.js route20/replan20 |
-| `MakeFleetDescription` @110e28 | "N <design>" text | NOT A RULE | text |
+| `MakeFleetDescription` @110e28 | "N Classes Name (W/S)" text (French order; October 2026) | NOT A RULE | text (`battlePanelMac`) |
 | `ListShipTypes` @110fc0 | Existing Designs window: rename, mark designs for scrapping | RULE, implemented | js/engine.js scrapDesign (scrapped at the end of the turn in 1.2; same effect) |
 | `InitShipTypesList` @1112c0 | designs list | NOT A RULE | interface |
 | `DRAWLISTBORDER` @11145e | list border | NOT A RULE | drawing |
