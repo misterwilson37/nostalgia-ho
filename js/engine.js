@@ -1056,7 +1056,10 @@ function battleGroups(G, b, byStance) {
 // the damage done to the group's front ship (state.hurt[unit] = the fraction
 // of its hit points, from the battle events' f), 120 x damage / hit points
 // pixels of the 120 from the left (a satellite: a third of that, in the
-// middle third); a colony's group has none.
+// middle third); a colony's group has none. layout 'pile505' (5.0.5,
+// FUN_1007f560 to FUN_100aceb0): each column one stack of groups, a group's
+// r.dmg (its front ship's damage, 1 when gone), r.st (its stance, for its
+// x), r.type and r.pics0 (the pictures it started with, for its place).
 function makeBattlePanel(cfg) {
   return function panel(G, b, state, viewer) {
     const alive = state.alive || [], groups = battleGroups(G, b, cfg.byStance);
@@ -1080,6 +1083,11 @@ function makeBattlePanel(cfg) {
         const n0 = g.units.length, n = g.units.filter(i => alive[i] !== false).length;
         r.did = g.did; r.n = n; r.n0 = n0; r.text = cfg.ship(G, d, n, n0, mine, g.st);
         r.pics = cfg.pics ? cfg.pics(n || n0) : 1;
+        if (cfg.layout === 'pile505') { // FUN_100aceb0: the pile's last picture shaded by its front ship's damage, all of it when the group is gone
+          let f = 0, q = -1;
+          for (const i of g.units) { const h = state.hurt && state.hurt[i]; if (h && h.n > q && alive[i] !== false) { q = h.n; f = h.f; } }
+          r.dmg = n === 0 ? 1 : Math.max(0, Math.min(1, f)); r.st = g.st; r.type = d.type; r.pics0 = cfg.pics(n0);
+        }
         if (cfg.shade) {
           const sat = d.type === 'satellite';
           let f = 0, q = -1;
@@ -1092,7 +1100,7 @@ function makeBattlePanel(cfg) {
       if (cfg.owner === 'luck' && b.luck) { const l = b.luck[g.o] | 0; r.owner = (l > 0 ? '+' : l < 0 ? '-' : '') + r.owner; }
       cols[left(g.o) ? 0 : 1].push(r);
     }
-    return { cols, leftSide: v0, head: cfg.head ? cfg.head(G, b) : [], end: cfg.end && state.over ? cfg.end(G, b, state.won) : null, owner: cfg.owner || null, luck: cfg.luck === true };
+    return { cols, layout: cfg.layout || null, leftSide: v0, head: cfg.head ? cfg.head(G, b) : [], end: cfg.end && state.over ? cfg.end(G, b, state.won) : null, owner: cfg.owner || null, luck: cfg.luck === true };
   };
 }
 

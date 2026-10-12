@@ -1094,7 +1094,32 @@ LHoBarControl (0x10089260-0x1008ba00) and CBattleStageMac (0x100ac840-0x100afcb0
   %ss" when gone; a colony its people, "%s/%s", or "%s killed". The remake keeps the
   sides' luck and the groups' stances in the battle record for it (`rec.luck`,
   `start[i].st`) and draws it (`rs.battlePanel`, `battlePanel505`): the pile, the names,
-  the luck as a + or − mark, the words; not the damage shading.
+  the luck, the words, the damage shading.
+- **The piles, laid out** (CONFIRMED, October 2026; `FUN_1007f560`, `FUN_1007f7f0`,
+  `FUN_1007f9f0`, `FUN_1007fcb0`, `FUN_100aceb0`, `FUN_100ac8c0`; the panel object's
+  vtable at 0x101156c0: +8 `FUN_1007fcb0`, +0x8c `FUN_100aceb0`, +0x94 `FUN_100ad750`
+  draws one picture). A pile of k = trunc(0.5 + n^0.68) pictures (1 to 30; one ship
+  one picture; a gone group its starting count's pile): picture i (0 first) is drawn at
+  (−2|i − k/2|, 2(i − k/2)) from the first's place, each over the last, so a V pointing
+  left, its point the middle picture, the last picture lowest and on top. The pile is
+  the picture's size plus 2 x (k/2) wide and 2 x (k − 1) high (the PICT's own size, or a
+  dreadnought 211 x 100, a tanker 145 x 44, a colony ship 150 x 56, a satellite 40 x 40,
+  else 120 x 40; a colony 62 x 62), its box centred on the group's place, the whole box
+  mirrored in the right column (CopyBits a column at a time). The last picture is
+  shaded, qd.gray in patOr, over its right (damage x 100 / hit points) per cent (all of
+  it when the group is gone; before the mirror). Each column is one stack: x 145 or 465,
+  9 right for an offensive group, 9 left for a defensive one; y from 0, 5 more before
+  each further side, a colony 84 + 12, a ship group its starting pile's height + 24, the
+  group's centre 75 below (95 for a dreadnought); a design's groups offensive,
+  defensive, then normal. On the centre the owner's face (50 x 50, transparent; a gone
+  group's crossed over) and the owner's name on a black round rectangle (11 to 23 below
+  the centre, the name ± 3), white Geneva 9; the luck picture 132 left (right column: 82
+  right), 20 up; the words, white on black, 51 wider each side than the words, 2 to 16
+  below the pile, the pile's height there worked out from the picture count put
+  through the n^0.68 rule a second time (`FUN_1007fcb0` is handed k, not n), so a large
+  pile's words sit over its lowest pictures (a slip of the original, kept). Built in the
+  classic skin (`layout: 'pile505'`, `pile505Layout`, `drawGroup505`; the faces are the
+  skin's, the PICTs' sizes the remake's pictures' capped at the sizes above).
 
 What changed in play: nothing in the rules (the battle records are larger by the luck
 and the stances). In the interface the bars are now on the log scale for the mouse too,

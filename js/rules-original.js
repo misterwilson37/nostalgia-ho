@@ -2685,7 +2685,7 @@ const words505 = {
   planet: (G, pop, pop0) => pop <= 0.0005 ? `${pop505(G, pop0)} killed` : Math.abs(pop - pop0) < 0.0005 ? pop505(G, pop) : `${pop505(G, pop)}/${pop505(G, pop0)}`,
 };
 const battlePanel505 = E.makeBattlePanel(Object.assign({
-  cols: 'viewer', byStance: true, owner: 'pill', luck: true,
+  cols: 'viewer', byStance: true, owner: 'pill', luck: true, layout: 'pile505',
   pics: (n) => n <= 1 ? n : clamp(trunc(0.5 + Math.pow(n, 0.68)), 1, 30),
   head: (G, b) => [`Review Battle at ${G.stars[b.star].name} in ${b.year}`],
 }, words505));

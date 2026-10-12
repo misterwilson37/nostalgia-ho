@@ -87,7 +87,9 @@ Remake's choices in it:
 3. **A finger uses the version's own scale** (it used iOS's log scale in every skin):
    linear in 2.0 and 1.2 unless switched, log elsewhere. Rulesets that aren't an original
    version's (Claude, Gemini) have no `rs.barScale` and stay linear.
-4. **The battle window**: the groups are laid out two to a row in each column, the
+4. **The battle window**: the groups are laid out two to a row in each column (5.0.5:
+   its own, one stack a column, the piles as `FUN_100aceb0` lays them, settled October
+   2026, `docs/original-findings.md`, "The piles, laid out"), the
    pictures the skin's; where the version wrote no owner's name on a group (1.2 to 4.0.5;
    iOS, which draws the owner's hat) the remake heads each column with its side's name; the good-luck and bad-luck pictures are 5.0.5's PICT 9017 (a rainbow) and 9018 (a storm), drawn in the classic skin (extracted as `m9017`/`m9018`, 40 x 40, 20 pixels right of the group's picture); iOS draws `report_icon-17`/`-18` (`-[BattleShipNode init]` 0x10009c18c, `reportIcon:17`/`18`; settled October 2026), the Palm has no picture ("+name"/"-name");
    the Mac 1.2 to 4.0.5's damage shading (`DrawOneGroup`: a gray patOr rectangle over the group's cell, whole when the group is gone, else 120 x the next ship's damage / hit points from the left; satellites a third of it, in the middle) is drawn (`shade`), DOS, Windows 3.1 and 4.0.5 not read, so unshaded; the population is the remake's

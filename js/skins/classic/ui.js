@@ -2493,10 +2493,13 @@ function openBattlePanel(b) {
   };
   let P = rs.battlePanel(G, b, state(), ME);
   // layout: two columns, two groups a row in each; a cell is 180 wide
-  const W = 760, CW = 180, RH = 70, dark = !!T.battleBg;
+  // (5.0.5, P.layout 'pile505': each column one stack, pile505Layout)
+  const dark = !!T.battleBg;
   const headH = 12 + P.head.length * 18 + (P.owner ? 0 : 18);
+  const L = P.layout === 'pile505' ? pile505Layout(P) : null;
+  const W = L ? L.W : 760, CW = 180, RH = 70;
   const rows = Math.max(1, ...P.cols.map(c => Math.ceil(c.length / 2)));
-  const H = headH + rows * RH + 44;
+  const H = L ? L.H + 24 : headH + rows * RH + 44;
   const c = el('canvas', { class: 'bcv', width: W, height: H });
   const status = el('p', { class: 'sub' }, '');
   const body = el('div', null, c, status);
@@ -2511,7 +2514,7 @@ function openBattlePanel(b) {
   const x = c.getContext('2d');
   const font = T.battleFont || 'Geneva, Verdana, sans-serif', ink = dark ? '#000' : '#e8e8f0', sub = dark ? '#000' : '#b9bdd6';
   // each group's cell; each ship's place is its group's
-  const cellOf = (ci, k) => ({ x: ci * (W / 2) + (k % 2) * CW + CW / 2 + (ci ? 20 : 0), y: headH + Math.floor(k / 2) * RH + 24 });
+  const cellOf = (ci, k) => L ? L.at[ci][k] : ({ x: ci * (W / 2) + (k % 2) * CW + CW / 2 + (ci ? 20 : 0), y: headH + Math.floor(k / 2) * RH + 24 });
   const where = new Map(); let planetAt = null;
   P.cols.forEach((col, ci) => col.forEach((g, k) => { const at = cellOf(ci, k); g.units.forEach(i => where.set(i, at)); if (g.planet) planetAt = at; }));
   const cut = (t, w) => { if (x.measureText(t).width <= w) return t; while (t.length > 1 && x.measureText(t + '…').width > w) t = t.slice(0, -1); return t + '…'; };
@@ -2525,9 +2528,10 @@ function openBattlePanel(b) {
       x.font = '12px ' + font; x.fillStyle = sub;
       [P.leftSide ?? b.sides[0], b.sides.find(o => o !== (P.leftSide ?? b.sides[0]))].forEach((o, ci) => { if (o == null) return; x.fillText(o === ME ? 'You' : (G.players[o] || {}).name || '', ci * (W / 2) + W / 4 + (ci ? 20 : 0), headH - 6); });
     }
-    x.strokeStyle = dark ? '#000' : 'rgba(200,210,255,.25)'; x.beginPath(); x.moveTo(W / 2 + 10, headH - 2); x.lineTo(W / 2 + 10, H - 40); x.stroke();
+    if (!L) { x.strokeStyle = dark ? '#000' : 'rgba(200,210,255,.25)'; x.beginPath(); x.moveTo(W / 2 + 10, headH - 2); x.lineTo(W / 2 + 10, H - 40); x.stroke(); }
     P.cols.forEach((col, ci) => col.forEach((g, k) => {
       const at = cellOf(ci, k);
+      if (L) { drawGroup505(x, g, at, ci, font); return; }
       if (g.planet) {
         x.globalAlpha = g.n ? 1 : 0.3; x.drawImage(planetBattlePic(), at.x - 20, at.y - 20, 40, 40); x.globalAlpha = 1;
       } else {
@@ -2593,6 +2597,82 @@ function openBattlePanel(b) {
   };
   status.textContent = 'Round 1';
   drawAll(); setTimeout(step, 400);
+}
+// 5.0.5's battle window (FUN_1007f560, FUN_1007f7f0, FUN_1007f9f0 lay the
+// groups out; FUN_100ac8c0 and FUN_100aceb0 draw one). Each column is one
+// stack from the top, its x 145 (the viewer's side) or 465 (the others,
+// mirrored), each group's x moved 9 right when offensive and 9 left when
+// defensive; a side's groups follow 5 below the last side's, a colony takes
+// 84 + 12, a pile its height (as it started) + 24, its centre 75 below its
+// top (95 for a dreadnought). A pile (pile505Size, FUN_1007fcb0): the
+// picture's size (a dreadnought 211 x 100, a tanker 145 x 44, a colony ship
+// 150 x 56, a satellite 40 x 40, else 120 x 40, where the PICT has none) and
+// 2 more each way for each picture after the first.
+const PILE505_BOX = { dread: [211, 100], tanker: [145, 44], colony: [150, 56], satellite: [40, 40] };
+function pile505Pic(g) {
+  if (g.planet) return { im: planetBattlePic(), w: 62, h: 62 };
+  const d = HO.getDesign(G, g.o, g.did) || { type: g.type || 'fighter', R: 1, V: 1, W: 1, S: 1 }, im = shipPic(d, g.o);
+  const [bw, bh] = PILE505_BOX[d.type] || [120, 40], sc = Math.min(1, bw / im.width, bh / im.height);
+  return { im, w: Math.round(im.width * sc), h: Math.round(im.height * sc) };
+}
+const pile505Size = (w, h, k) => ({ w: w + Math.floor(k / 2) * 2, h: h + (k - 1) * 2 });
+function pile505Layout(P) { // the window's own coordinates: a column's first group at 0, its centre at 75
+  const at = [[], []]; let H = 140;
+  P.cols.forEach((col, ci) => {
+    let y = 0, last = null;
+    col.forEach((g, k) => {
+      if (g.o !== last && y > 0) y += 5;
+      last = g.o;
+      const x0 = ci ? 465 : 145, dx = g.st === 'o' ? 9 : g.st === 'd' ? -9 : 0;
+      at[ci][k] = { x: x0 + dx, y: y + (g.type === 'dread' ? 95 : 75) };
+      if (g.planet) y += 84 + 12;
+      else { const p = pile505Pic(g); y += pile505Size(p.w, p.h, g.pics0 || 1).h + 24; }
+    });
+    H = Math.max(H, y + 75);
+  });
+  return { W: 610, H, at };
+}
+// one group (FUN_100ac8c0, FUN_100aceb0): the pile, n pictures, the i-th
+// 2(n/2 - |i - n/2|) right and 2(i - n/2) down of the first's place, each
+// drawn over the last; the last shaded (qd.gray, patOr) over its right
+// damage-fraction (all of it when the group is gone); the whole mirrored in
+// the right column and centred on the group's place. Over it the owner's
+// face (50 x 50) and name (a black pill, white Geneva 9, 11 to 23 below the
+// centre); the side's luck, PICT 9017/9018, 132 left of the centre (right
+// column: 82 right), 20 above; the words in a black pill 51 wider each side
+// than the words, from 2 to 16 below the pile, whose height the window works
+// out from the picture count put through the n^0.68 rule twice (FUN_1007fcb0
+// called with the count FUN_1007fc20 already made), so a big pile's pill
+// sits on its last pictures.
+function drawGroup505(x, g, at, ci, font) {
+  const p = pile505Pic(g), n = g.planet ? 1 : Math.max(1, g.pics || 1), k2 = Math.floor(n / 2), sz = pile505Size(p.w, p.h, n);
+  const c = document.createElement('canvas'); c.width = sz.w; c.height = sz.h;
+  const cx = c.getContext('2d');
+  for (let j = 0; j < n; j++) {
+    const d = j - k2, px = 2 * k2 - 2 * Math.abs(d), py = 2 * (d + k2);
+    cx.drawImage(p.im, px, py, p.w, p.h);
+    if (j === n - 1 && g.dmg > 0) {
+      const sw = Math.trunc(p.w * Math.min(1, g.dmg)), t = document.createElement('canvas'); t.width = t.height = 2;
+      const tx = t.getContext('2d'); tx.fillStyle = '#000'; tx.fillRect(0, 0, 1, 1); tx.fillRect(1, 1, 1, 1);
+      cx.fillStyle = cx.createPattern(t, 'repeat'); cx.fillRect(px + p.w - sw, py, sw, p.h);
+    }
+  }
+  const l = at.x - Math.trunc(sz.w / 2), tp = at.y - Math.trunc(sz.h / 2);
+  x.save(); if (ci) { x.translate(l * 2 + sz.w, 0); x.scale(-1, 1); } x.drawImage(c, l, tp); x.restore();
+  const P = G.players[g.o], fk = P && (P.human ? 'white0_' : 'bad' + P.face + '_') + (P && P.female ? 1 : 0), fim = fk && IMG[fk];
+  if (fim && fim.complete && fim.naturalWidth) { x.globalAlpha = g.n ? 1 : 0.4; x.drawImage(fim, at.x - 25, at.y - 25, 50, 50); x.globalAlpha = 1; }
+  x.font = '9px ' + font; x.textAlign = 'left';
+  if (g.owner) {
+    const t = g.owner, w = x.measureText(t).width, pl = at.x - w / 2 - 3;
+    x.fillStyle = '#000'; roundRect(x, pl, at.y + 11, w + 6, 12, 4); x.fill(); x.fillStyle = '#fff'; x.fillText(t, pl + 3, at.y + 20);
+  }
+  const lim = g.luck && IMG[g.luck > 0 ? 'm9017' : 'm9018'];
+  if (lim && lim.complete && lim.naturalWidth) x.drawImage(lim, ci ? at.x + 82 : at.x - 132, at.y - 20, 40, 40);
+  const lh = g.planet ? sz.h : pile505Size(p.w, p.h, g.pics ? Math.max(1, Math.min(30, Math.trunc(0.5 + Math.pow(n, 0.68)))) : 1).h;
+  const t = g.text, w = x.measureText(t).width, y0 = at.y + Math.trunc(lh / 2);
+  x.fillStyle = '#000'; roundRect(x, at.x - w / 2 - 51, y0 + 2, w + 102, 14, 2.5); x.fill();
+  x.fillStyle = '#fff'; x.fillText(t, at.x - w / 2, y0 + 11);
+  x.textAlign = 'center';
 }
 function roundRect(x, l, t, w, h, r) { x.beginPath(); x.moveTo(l + r, t); x.arcTo(l + w, t, l + w, t + h, r); x.arcTo(l + w, t + h, l, t + h, r); x.arcTo(l, t + h, l, t, r); x.arcTo(l, t, l + w, t, r); x.closePath(); }
 
