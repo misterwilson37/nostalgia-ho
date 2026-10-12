@@ -75,8 +75,8 @@ Remake's choices in it:
    linear in 2.0 and 1.2 unless switched, log elsewhere. Rulesets that aren't an original
    version's (Claude, Gemini) have no `rs.barScale` and stay linear.
 4. **The battle window**: the groups are laid out two to a row in each column, the
-   pictures the skin's; the remake heads each column of 1.2 to 4.0.5 with its side's name
-   (they drew none); the good-luck and bad-luck pictures (5.0.5, iOS) are a + or − mark;
+   pictures the skin's; where the version wrote no owner's name on a group (1.2 to 4.0.5;
+   iOS, which draws the owner's hat) the remake heads each column with its side's name; the good-luck and bad-luck pictures (5.0.5, iOS) are a + or − mark;
    the damage shading and damage bars aren't drawn; the population is the remake's
    people count (the planet panel's). The side drawn on the left in 1.2 to 4.0.5 (the
    duel's first or second list) wasn't settled: the remake puts the record's first side
