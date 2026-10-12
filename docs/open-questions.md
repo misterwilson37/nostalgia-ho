@@ -895,9 +895,12 @@ These are what 5.0.5's code does and what the remake now does; they look like sl
   them "12,345K" in reports and windows ("$12,345K" in a report, whose template has the
   "$"), and the panels' sums "$12.345M", a negative sum "($1,234)" (`rs.fmtNum`,
   `rs.fmtMoney`). 1.2 to 4.0.5 write "12,345K" (`LongToNiceString`, `FUN_0042e5c2`); the
-  Palm writes every number in full (`FUN_0002c510`). Open: the income view writes the
-  interest shorter ("12K", "1.23M", `FUN_100552e0`) inside a template whose words weren't
-  read; the remake's Interest row is written as the other sums.
+  Palm writes every number in full (`FUN_0002c510`). The income view
+  (`FUN_10098650`) writes the interest shorter ("12K", "1.23M", `FUN_100552e0`) inside STR#
+  6003 item 8, "(Int: $%s)" (found in the resource fork; the same list holds 4 "(+ $%s)",
+  5 "(- $%s)", 6 "(+ %s)", 7 "(- %s)"; the view loads item 8 and then calls `FUN_100552e0`
+  on the player record's +0x4c, drawn right-aligned 0x17 pixels down). Not built: the
+  remake's Interest row is a row of its own, written as the other sums.
 
 ## Palm 5 (2003)
 

@@ -1300,3 +1300,7 @@ per mille, each at the bar's left + `FUN_100896a0(value)` (the log table's pixel
 (`ForeColor 0x21`) tick 3 pixels long at the top, then a line to the bottom of the bars in pen
 mode 0x24 (transparent) with a colour and blend weight from the program's data (not read).
 CONFIRMED for the geometry; the remake blends black at 28 % (LIKELY). Palm: `FUN_00048e7a`.
+
+The income view's interest figure (`FUN_10098650`, player +0x4c through `FUN_100552e0`, which
+writes it as "$12K" / "$1.23M" style short numbers) sits in STR# 6003 item 8: "(Int: $%s)".
+CONFIRMED (resource fork). Neighbours: 4 "(+ $%s)", 5 "(- $%s)", 6 "(+ %s)", 7 "(- %s)".
