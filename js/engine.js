@@ -1138,6 +1138,7 @@ if (typeof module !== 'undefined') {
   require('./rules-12.js'); require('./ai-12.js');
   require('./rules-palm.js'); require('./ai-palm.js');
   require('./rules-ios.js');
+  require('./rules-android.js');
   require('./rules-mac20.js'); require('./rules-mac405.js');
   require('./rules-gemini.js'); require('./ai-gemini.js');
 } else root.HO = API;

@@ -17,6 +17,7 @@ files and coverage files cited); anything not read in the code is marked INFERRE
 | 5.0.5 | 2003 | Mac OS 9 / X (PowerPC) | `js/rules-original.js` |
 | 5 for Palm OS | 2003 | Palm (68k), a port of 5.0 | `js/rules-palm.js` |
 | 1.2.9 for iOS | 2012 (1.2.9: 2017 or later) | iPhone and iPad (arm64), a port of 5.0 | `js/rules-ios.js` |
+| 1.2.8 for Android | 2015 (build of 16 February) | Android 4.0 and later (ARM), the iOS game built with Apportable | `js/rules-android.js` |
 
 ### Versions and editions
 
@@ -37,6 +38,7 @@ plays each edition it has read as its own ruleset, grouped by version (`rs.famil
 | 5 | Mac | 5.0.5 | 2003 | `original` |
 | 5 | Palm OS | 5 (1.0.4) | 2003 | `palm` |
 | 5 | iOS | 1.2.9 | 2012 | `ios` |
+| 5 | Android | 1.2.8 | 2015 | `android` |
 
 The Amiga 2.0 (German, 1994) is the DOS game's rules with its own art, so it is a skin of
 the `dos` ruleset, not an edition of its own. Where two editions of a version differ,
@@ -763,6 +765,34 @@ and zooms with two, a tap selects a star, a fleet is dragged from the star's lis
 another star, a double tap on a star opens Build Ships, the budget bars are touched on a
 log scale. Several saved games, sent by e-mail; Game Center; a help web page; the
 artwork redrawn for Retina screens, the sounds 5.0.5's.
+
+## Android 1.2.8 (2015)
+
+The same game as iOS 1.2.9, so everything above holds; `docs/android-findings.md` lists
+the differences and `docs/coverage-android.md` what was read.
+
+### What it is
+
+Spaceward Ho! for Android (Ariton Technologies, `com.ariton.spacewardho`, version 1.2.8,
+built 16 February 2015; read from the Amazon Appstore build) is the iOS game recompiled
+with Apportable: one 32-bit ARM library with symbols, for Android 4.0 and later (target
+4.2), landscape only. Its C++ rule core is the iOS source: 209 routines paired by name,
+order and size, the same tables byte for byte, the same random ranges and report codes.
+
+### Rules: what stayed and what changed
+
+All of iOS 1.2.9's rules. What the platform changed is not a rule: there is no Game
+Center (master points are a number in the preferences file, with the iOS award and cap;
+no achievements or leaderboards, no buttons for them on the title), no hidden "e-mail
+every saved game" tap, and the interface's random numbers come from `lrand48()` instead
+of `rand()`.
+
+### Interface
+
+The Back key closes the open window (or asks "Exit Spaceward Ho?" on the title); a screen
+of 5.9 inches or more is a tablet, a smaller one a phone; the text is the system sans
+(the game asks for Arial, which Android lacks; Roboto on Android 4). The pictures and
+sounds are iOS's (two sounds stored as Ogg Vorbis).
 
 ---
 

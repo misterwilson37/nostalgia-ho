@@ -36,7 +36,7 @@ try { ({ chromium } = require('playwright')); } catch (e) { console.error('Playw
 
 const args = process.argv.slice(2);
 const opt = (k, d) => { const a = args.find(x => x.startsWith('--' + k + '=')); return a ? a.slice(k.length + 3) : d; };
-const ALL = ['12', 'dos', '301', '405', 'original', 'palm', 'claude', 'mac20', 'mac405', 'ios', 'gemini']; // new rulesets go last: each one's seed is its place in this list
+const ALL = ['12', 'dos', '301', '405', 'original', 'palm', 'claude', 'mac20', 'mac405', 'ios', 'gemini', 'android']; // new rulesets go last: each one's seed is its place in this list
 // The Mac editions (js/rules-mac20.js, js/rules-mac405.js) have the same
 // New Game settings as the same version's other edition. While the New Game
 // window has no settings of their own (it starts only the rulesets it knows),
@@ -224,7 +224,7 @@ async function playOne(browser, rules, url) {
   if (!knows) await page.evaluate(() => { window.__hpEdition = true; });
   await form.locator('select[name=rules]').selectOption(knows ? rules : FORM_AS[rules]);
   if (rules !== '12') await form.locator('select[name=computers]').selectOption('3');
-  if (rules === 'original' || rules === 'palm' || rules === 'ios') {
+  if (rules === 'original' || rules === 'palm' || rules === 'ios' || rules === 'android') {
     // Abundant for both: the second colony from the start (and its shares)
     await form.locator('select[name=start]').selectOption('abundant');
     await form.locator('select[name=o_cstart]').selectOption('abundant');
@@ -237,7 +237,7 @@ async function playOne(browser, rules, url) {
   if (st0.rules !== rules) fail(`the game was made with the "${st0.rules}" rules, not "${rules}"`);
   const me0 = st0.players.find(p => p.human);
   // 5.0.5 and Palm OS: the creator's starting shares (FUN_1006579c)
-  if (rules === 'original' || rules === 'palm' || rules === 'ios') {
+  if (rules === 'original' || rules === 'palm' || rules === 'ios' || rules === 'android') {
     const t = me0.talloc;
     if (!(t.range === 180 && t.speed === 180 && t.weapons === 180 && t.shields === 180 && t.mini === 180 && t.radical === 100)) fail(`starting research shares ${JSON.stringify(t)}, not 180 x 5 and 100`);
     const L = me0.slots.map(k => k === 'sav' ? me0.pm.sav : k === 'tech' ? me0.pm.tech : me0.pm.col[k]);

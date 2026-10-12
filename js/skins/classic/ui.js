@@ -1649,10 +1649,12 @@ function openGameCenter() {
   const rec = Object.assign(GC.blank(), gameCenterRec(GC) || {}), R = HO.DATA.ranks || [], cur = rankOf(rec.master_points);
   const body = el('div', { class: 'rank gamecenter' },
     A.jpg[cur] ? el('img', { src: A.jpg[cur], alt: '' }) : null, R[cur] ? el('h3', null, R[cur][0]) : null,
-    el('h4', null, 'Leaderboards'), el('table', { class: 'ptable' }, ...GC.leaderboards.map(b => el('tr', null, el('td', null, b.title), el('td', null, fmt(rec[b.id] || 0))))),
-    el('h4', null, 'Achievements'), el('table', { class: 'ptable' }, ...GC.achievements.map(a => { const n = (rec.achievements || {})[a.id] || 0; return el('tr', { class: n >= a.goal ? 'me' : '' }, el('td', null, (n >= a.goal ? '★ ' : '') + a.title), el('td', null, a.goal > 1 ? `${fmt(n)} of ${fmt(a.goal)}` : n ? 'Done' : '')); })),
-    el('p', { class: 'sub' }, 'The app kept these on Game Center; here they stay in this browser.'));
-  modal('Game Center', body, { cls: 'mid' });
+    GC.leaderboards.length ? el('h4', null, 'Leaderboards') : null, GC.leaderboards.length ? el('table', { class: 'ptable' }, ...GC.leaderboards.map(b => el('tr', null, el('td', null, b.title), el('td', null, fmt(rec[b.id] || 0))))) : null,
+    GC.achievements.length ? el('h4', null, 'Achievements') : null, GC.achievements.length ? el('table', { class: 'ptable' }, ...GC.achievements.map(a => { const n = (rec.achievements || {})[a.id] || 0; return el('tr', { class: n >= a.goal ? 'me' : '' }, el('td', null, (n >= a.goal ? '★ ' : '') + a.title), el('td', null, a.goal > 1 ? `${fmt(n)} of ${fmt(a.goal)}` : n ? 'Done' : '')); })) : null,
+    // no leaderboards (Android): just the points the app kept in its preferences file
+    GC.leaderboards.length ? null : el('p', null, `Master points: ${fmt(rec.master_points)}`),
+    el('p', { class: 'sub' }, GC.note || 'The app kept these on Game Center; here they stay in this browser.'));
+  modal(GC.title || 'Game Center', body, { cls: 'mid' });
 }
 function showRank(i, then) {
   const R = HO.DATA.ranks[i];
@@ -3743,7 +3745,7 @@ function save() { if (!G) return; try { localStorage.setItem('ho5.save', HO.save
 // ---------- menus ----------
 function setupMenus() {
   const menus = {
-    Game: [['New game…', newGameDialog], ['Players and history', () => G && openPlayers()], ['Auto-play this turn', () => playOneTurn()], ['Auto play…', () => G && !G.over && (hotSeat() ? toast('Auto play is for one-player games.') : openAutoPlay())], ['Preferences…', openPrefs], ['Rank history…', openRanks, () => !G || hasRanks(G)], ['Rank and Game Center…', openGameCenter, () => !!(HO.RULESETS[rulesId()] || {}).gameCenter],
+    Game: [['New game…', newGameDialog], ['Players and history', () => G && openPlayers()], ['Auto-play this turn', () => playOneTurn()], ['Auto play…', () => G && !G.over && (hotSeat() ? toast('Auto play is for one-player games.') : openAutoPlay())], ['Preferences…', openPrefs], ['Rank history…', openRanks, () => !G || hasRanks(G)], [() => ((HO.RULESETS[rulesId()] || {}).gameCenter || {}).menu || 'Rank and Game Center…', openGameCenter, () => !!(HO.RULESETS[rulesId()] || {}).gameCenter],
       ['Master Point List…', () => openMasterList(), () => hasHall(G)], ['Hall of Fame…', () => openHall('fame'), () => hasHall(G)], ['Hall of Shame…', () => openHall('shame'), () => hasHall(G)], ['-'], ['Quit to title', () => { save(); Sound.play(7002); G = null; renderPanel(); draw(); $('#panel').innerHTML = ''; $('#msg').innerHTML = ''; titleScreen(); }]],
     Ships: [['Build ships at selected colony…', () => { if (G && UI.sel != null && G.stars[UI.sel].owner === ME) openBuild(UI.sel); else toast('Select one of your colonies first.'); }], ['Review battle…', () => G && openBattleList()], ['List all fleets…', () => G && openFleetList()],
       [() => scrapWords('fleet')[G && curFleet() && curFleet().scrap301 ? 1 : 0], () => { if (!G || G.over) return; const f = curFleet(); if (f) toggleScrapFleet(f); else toast('Select one of your fleets first.'); }, () => marksScrap()],

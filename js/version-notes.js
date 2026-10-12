@@ -497,6 +497,24 @@ root.HOVERSIONS = {
       'Straight quotes in the reports.',
     ],
   },
+  android: {
+    intro: 'The iPhone and iPad game recompiled for Android by Ariton (version 1.2.8, built in February 2015, from the Amazon Appstore): the same source as iOS 1.2.9, so it plays exactly like it. Only the platform differs.',
+    previous: 'iOS 1.2.9',
+    quirks: [],
+    differs: [
+      RANDOM,
+      'Master points are one number kept in this browser; the game kept it in its preferences file.',
+      'The Back key is Escape.',
+    ],
+    missing: [
+      'Several saved games, sending a game by e-mail, and the help web page.',
+    ],
+    changes: [
+      'No Game Center: no achievements, no leaderboards, no games-won count, and no buttons for them on the title.',
+      'No hidden “e-mail every saved game” tap on the title.',
+      'The Back key closes the open window, or asks “Exit Spaceward Ho?” on the title.',
+    ],
+  },
   gemini: {
     intro: 'Not an original version: an AI homage. Google’s Gemini wrote it from the Spaceward Ho! 5 manual alone, so the game could be played while the originals weren’t available, as an experiment alongside Claude’s rules. Gemini never saw the original program or the other rulesets; it worked from the manual, the engine, and test results relayed round by round.',
     previous: null,

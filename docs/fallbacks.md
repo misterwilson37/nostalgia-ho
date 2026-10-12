@@ -211,6 +211,27 @@ iOS program:
 | ios | `queueSlots` | (ship queues) | unused: no ship queues |
 | ios | `yardRefund` | (ship queues) | unused: no ship queues |
 
+### Android 1.2.8 (`android`)
+
+The iOS ruleset with Android's differences (`js/rules-android.js`): the rule core is the
+same source (android-findings, "The same as iOS 1.2.9"), so each default is iOS's:
+
+| Ruleset | Hook | Engine default | Status |
+|---|---|---|---|
+| android | `battleText` | the engine's battle report wording | same as iOS (the rule core is the same source) |
+| android | `checkEveryStep` | the winner on the last step only | same as iOS (the rule core is the same source) |
+| android | `maxPlayers` | 16 players | same as iOS (the rule core is the same source) |
+| android | `maleNames` | the engine's names | same as iOS (the rule core is the same source) |
+| android | `femaleNames` | the engine's names | same as iOS (the rule core is the same source) |
+| android | `femaleComputers` | 45 % | same as iOS (the rule core is the same source) |
+| android | `shipNames` | the engine's ship names | same as iOS (the rule core is the same source) |
+| android | `outComputersPlay` | out computers give no orders | same as iOS (the rule core is the same source) |
+| android | `scrapAt` | onto the planet | same as iOS (the rule core is the same source) |
+| android | `scrapped` | no report | same as iOS (the rule core is the same source) |
+| android | `queueMergeAny` | (ship queues) | same as iOS (the rule core is the same source) |
+| android | `queueSlots` | (ship queues) | same as iOS (the rule core is the same source) |
+| android | `yardRefund` | (ship queues) | same as iOS (the rule core is the same source) |
+
 ### Mac 2.0.1 (`mac20`)
 
 The DOS 2.0 ruleset with Mac 2.0.1's differences (`js/rules-mac20.js`): its

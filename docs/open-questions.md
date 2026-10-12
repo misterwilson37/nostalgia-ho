@@ -8,6 +8,7 @@ fix. Any answer helps, even "I don't remember". Thank you!
 
 ## The versions
 
+- **Android**: Spaceward Ho! 1.2.8 for Android (2015), the iOS game built for Android.
 - **iOS**: Spaceward Ho! 1.2.9 for iPhone and iPad (2012), a port of 5.0.
 - **Palm**: Spaceward Ho! 5 for Palm OS, version 1.0.4 (2003, by MobileFreon), a port of 5.0.
 - **5.0.5**: the Mac version 5.0.5 (2003).
@@ -35,6 +36,10 @@ Things the code can't decide for us. Each says what the remake does for now.
   Defense sliders start at, and which end of Dig In–No Defense meant "defend every
   colony"? For now: the auto play player's own values until the sliders are moved, and
   100 % defended at Dig In.
+
+### Android
+
+- **When the first Android release came out**, and which face the game's "Arial" was drawn in on a device (Droid Sans or Roboto). For now: 2015, the build's date, and Roboto.
 
 ### Palm
 
@@ -102,6 +107,10 @@ planned order:
 5. The names files (2.0) and the rest of the Palm's own touches.
 6. iOS's extra screens.
 7. Last: turn time limits.
+
+### Android
+
+- The same as iOS, and e-mailing one saved game (we don't know if it worked on Android).
 
 ### iOS
 
@@ -202,6 +211,12 @@ Where a browser can't do what the original did, or the remake had to pick.
 - **Sounds** are the skin's; the Mac's system beep is a short tone.
 - **No anti-cheat checksum**, so "%s is cheating" never appears.
 
+### Android
+
+- Master points are one number in the browser, with no games-won count, achievements or leaderboards, and no e-mail of saved games.
+- The Back key is Escape. A tablet is a window 600 pixels or more on its short side (the app asked for a screen of 5.9 inches or more).
+- The Android 4 (Holo) and Fire OS looks are guesses: we had no screenshots of the game on either.
+
 ### iOS
 
 - Which five named stars go into a galaxy is drawn from the game's seed.
@@ -265,6 +280,10 @@ Where a browser can't do what the original did, or the remake had to pick.
 
 The remake offers an optional fix for these small slips, which were still in each line's
 last release. Please tell us if any of them was intended!
+
+### Android
+
+- The same as iOS: the Mac's characters show as Latin-1.
 
 ### iOS
 
