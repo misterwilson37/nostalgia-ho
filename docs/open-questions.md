@@ -23,6 +23,13 @@ fix. Any answer helps, even "I don't remember". Thank you!
 
 Things the code can't decide for us. Each says what the remake does for now.
 
+### Every version
+
+- **Were there other translations?** We know of French (Mac 1.2F, and the iOS and Android
+  ports), German (the Amiga 2.0, and a German DOS 2.0) and Turkish (iOS and Android). Were
+  there others, such as Japanese or Spanish, for any version? For now: the remake will
+  offer only the translations we have, each with the version it came with.
+
 ### 5.0.5
 
 - **The rank window's words.** At a new rank you may name a star, but that window's
@@ -106,7 +113,9 @@ planned order:
 4. The Explored Planets windows and the older preferences (1.2, 2.0).
 5. The names files (2.0) and the rest of the Palm's own touches.
 6. iOS's extra screens.
-7. Last: turn time limits.
+7. Turn time limits.
+8. Last: the translations, each version in the languages it shipped in (French, German,
+   Turkish), chosen in New Game.
 
 ### Android
 
