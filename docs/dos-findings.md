@@ -347,6 +347,47 @@ offline. The repository includes their output, not the DOS game itself.
   - the Create Galaxy window allows 0 to 19 computers (CREATEGALAXYDLGPROC @1108:15f0-162c,
     scroll bar range 0-19).
 
+### Bars and battles (October 2026)
+
+Peter Commons' three notes (the bars' scale, the bars that lock at zero, the ships in
+battles), read in the DOS program (the decompile of `DOSHO.EXE`'s overlays), Mac 2.0.1
+(`InitHLogBarAmts @c07be`, `DrawHBarControl @c091e`, `DoHBarClick @c1002`,
+`InitVLogBarAmts @c0004`, `DoVBarClick @c0446`, `DrawAllGroups @d207c`, `DrawOneGroup
+@d214e`, `ReviewBattle @d271c`, `MakeFleetDescription @110e28`) and the Windows 3.1
+drawing (`FUN_1010_0a7a`):
+
+- **The scale.** 2.0 has the log table (the Mac's `InitHLogBarAmts`, the DOS program's
+  `FUN_9000_0cae` for a share's pixel), but the budget bars are **linear by default**:
+  they are drawn and dragged on it only while the setup's +0x2a is set, and it is 0 by
+  default (DOS `FUN_3000_b405`; Mac 'Stup' 1000 "Default Setup" +0x2a = 0). A click on
+  the strip above the bars flips it (DOS `FUN_9000_1554`, Mac `DoHBarClick`: 1 − the
+  value, the bars redrawn), so the player could switch them to the log scale and back;
+  linear, a share is 1,000 × x / 77 and the grid is in tenths. Windows 3.1 draws by the
+  same setting (`FUN_1010_0a7a` @0c25, 0d6f, 0fa0; its click, `FUN_1010_1303`, wasn't
+  re-read for the switch). The technology bars are always on the log scale (DOS
+  `FUN_9000_0604` and the Mac's `DoVBarClick` with 2, from the research window); a
+  colony's own bars (with 1) are linear. The remake: `rs.barScale` `{ budget: 'linear',
+  tech: 'log', toggle: true }` (the switch: a click on the Budget heading). CONFIRMED.
+- **The lock.** None: `DoHBarClick` checks no slot (2.0 has no Evacuate command and no
+  finished colony slot to lock: a finished part's share goes to the colony's other bars,
+  `FUN_1040_269d`). A colony's own bars (`DoVBarClick` with 1) refuse a bar whose value is
+  below 0 (a finished part, −1) with a beep; the remake's Terraform / Mine slider has no
+  finished part to drag. CONFIRMED.
+- **The battle window.** "Summary of battle", "at %s in %d:" (DOS strings 66-67, STR#
+  1030.3-4), "Round %d" while it runs, then "Congratulations!" "You won the battle!" or
+  "Unfortunately," "you lost the battle..." ("…" on the Mac). The duel's two sides in two
+  columns of groups, a row 53 pixels high: one ship picture, a damage bar, its words under
+  it: "%d %s (%d/%d) %ss", "one %s (%d/%d) %s", "%s (%d/%d) %s" (`MakeFleetDescription`;
+  DOS "%0.15Fs (%d/%d) %0.11Fs": the name cut to 15 letters, the class to 11), the
+  design's own Weapons and Shields; "%d dead %s" / "%d dead %ss" (strings 64-65, STR#
+  1030.1-2, by the starting count) once the group is gone; a colony its people, or "%s
+  dead" with the people it had. The remake: `rs.battlePanel` (`battlePanel20`: DOS
+  `BATTLE_PANEL_DOS`, Mac 2.0.1 `BATTLE_PANEL_MAC`).
+
+What changed in play: nothing. The finger now uses 2.0's linear bars instead of iOS's
+log scale. Not read: which list is on the left (the remake puts the record's first side
+there).
+
 ### Still unclear
 
 See `docs/open-questions.md` (2.0 section). Not implemented, by choice or not yet:

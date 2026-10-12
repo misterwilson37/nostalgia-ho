@@ -1004,3 +1004,16 @@ calls (`GETDC`, `LOADSTRING` …); they are imports, not code of the program.
 | `FUN_1128_0000` @1128:0000 | — | floating-point helper | NOT A RULE | program |
 | `FUN_1128_000c` @1128:000c | — | floating-point helper | NOT A RULE | program |
 | `FUN_1128_00bf` @1128:00bf | — | floating-point helper | NOT A RULE | program |
+
+## The bars and the battle window (October 2026)
+
+Read for Peter Commons' notes (`docs/dos-findings.md`, "Bars and battles"), in the DOS
+decompile and Mac 2.0.1: DOS `FUN_9000_0cd5` (the budget window's drawing), `FUN_9000_1554`
+(its click: the scale switch), `FUN_9000_0cae` (a share's pixel), `FUN_9000_0604` (the
+vertical bars' click), `FUN_3000_b405` (the setup's defaults); Mac 2.0.1 `InitHLogBarAmts`
+@c07be, `DrawHBarControl` @c091e, `DoHBarClick` @c1002, `InitVLogBarAmts` @c0004,
+`DoVBarClick` @c0446, `DrawAllGroups` @d207c, `DrawOneGroup` @d214e, `ReviewBattle`
+@d271c, `MakeFleetDescription` @110e28; Windows 3.1 `FUN_1010_0a7a` (the setting read in
+the drawing). Above, `FUN_1010_0000` and `FUN_1010_0a03` are the log tables
+(`InitVLogBarAmts`, `InitHLogBarAmts`, now read: no longer "likely"). Rules: none changed.
+
