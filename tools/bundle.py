@@ -33,12 +33,15 @@ def skin_css(path):
     # a skin's (or an OS look's) CSS may @import another's by relative url
     css = open(path).read()
     imp = lambda m: skin_css(os.path.normpath(os.path.join(os.path.dirname(path), m.group(1))))
-    return re.sub(r'@import url\("((?!https?:)[^"]+\.css)"\);', imp, css)
+    css = re.sub(r'@import url\("((?!https?:)[^"]+\.css)"\);', imp, css)
+    # the local fonts (assets/fonts) go in as data: URIs, relative to the file they are named in
+    font = lambda m: 'url("' + uri(os.path.normpath(os.path.join(os.path.dirname(path), m.group(1))), 'font/woff2') + '")'
+    return re.sub(r'url\("((?!https?:|data:)[^"]*assets/fonts/[^"]+\.woff2)"\)', font, css)
 
 css = skin_css(P('js', 'skins', skin, 'style.css'))
 # every OS look (js/os), each in a <style data-os> that js/skins.js turns on
 # or off (media), ahead of the skin's CSS as the separate files load
-looks = sorted(f[:-4] for f in os.listdir(P('js', 'os')) if f.endswith('.css') and f != 'base.css')
+looks = sorted(f[:-4] for f in os.listdir(P('js', 'os')) if f.endswith('.css') and f not in ('base.css', 'roboto.css'))
 os_css = ''.join(f'<style data-os="{k}" media="not all">\n' + skin_css(P('js', 'os', k + '.css')) + '</style>\n' for k in looks)
 js = open(P('js', 'skins', skin, 'ui.js')).read()
 # a skin built on another one loads that one's ui.js after its own
@@ -51,12 +54,13 @@ while True:
     part = ''.join('\n' + open(P(src)).read() for src in srcs)
     js += part
 # a skin's own art and sounds (assets/skins/<skin>/, see js/skins/classic/ui.js loadTheme)
-sm = P('assets', 'skins', skin, 'manifest.json')
+art = {'android': 'ios'}.get(skin, skin)  # the Android skin has the iOS skin's art
+sm = P('assets', 'skins', art, 'manifest.json')
 if os.path.exists(sm):
     m = json.load(open(sm))
     assets['skin'] = {
-        'img': {k: uri(P('assets', 'skins', skin, 'sprites', k + '.png'), 'image/png') for k in m['sprites']},
-        'snd': {str(k): uri(P('assets', 'skins', skin, 'sounds', f"{k}.{m.get('soundFormat', 'wav')}"), 'audio/mpeg' if m.get('soundFormat') == 'mp3' else 'audio/wav') for k in m['sounds']},
+        'img': {k: uri(P('assets', 'skins', art, 'sprites', k + '.png'), 'image/png') for k in m['sprites']},
+        'snd': {str(k): uri(P('assets', 'skins', art, 'sounds', f"{k}.{m.get('soundFormat', 'wav')}"), 'audio/mpeg' if m.get('soundFormat') == 'mp3' else 'audio/wav') for k in m['sounds']},
     }
 page = page.replace('</head>', os_css + '</head>', 1)
 page = page.replace('</body>', '<style>\n' + css + '</style>\n<script>\n' + js + '\n</script>\n</body>')

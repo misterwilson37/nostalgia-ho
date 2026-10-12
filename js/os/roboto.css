@@ -1,0 +1,4 @@
+/* Roboto, hosted here (assets/fonts, SIL OFL): the Android skin and the Android 4 and
+   Fire OS looks. Android has no Arial, so the system sans-serif of Android 4.x is Roboto. */
+@font-face { font-family: "Roboto"; font-style: normal; font-weight: 400; font-display: swap; src: url("../../assets/fonts/Roboto-Regular.woff2") format("woff2"); }
+@font-face { font-family: "Roboto"; font-style: normal; font-weight: 700; font-display: swap; src: url("../../assets/fonts/Roboto-Bold.woff2") format("woff2"); }

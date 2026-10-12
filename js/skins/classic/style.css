@@ -2,7 +2,8 @@
    The window chrome (frames, menus, buttons, form controls, system fonts)
    is the OS look's, js/os/<id>.css, loaded before this file (js/skins.js);
    the classic skin's own is js/os/base.css, its default look Mac OS 8.6. */
-@import url("https://fonts.googleapis.com/css2?family=Rye&display=swap");
+/* Rye, hosted here (assets/fonts, SIL OFL) */
+@font-face { font-family: "Rye"; font-style: normal; font-weight: 400; font-display: swap; src: url("../../../assets/fonts/Rye-Regular.woff2") format("woff2"); }
 :root {
   /* the chrome's colours and font (--plat, --plat2, --edge, --ink, --sub,
      --hi, --ui) come from the OS look, js/os/<id>.css, loaded before this */

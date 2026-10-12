@@ -1,7 +1,8 @@
 /* Spaceward Ho! — cozy skin: the classic skin's layout in a western dress
    (leather, parchment and brass, under a dusk sky). Fonts: Rye for signs
    (loaded by the classic stylesheet) and Bitter for reading. */
-@import url("https://fonts.googleapis.com/css2?family=Bitter:wght@400;600;700&display=swap");
+/* Bitter, hosted here (assets/fonts, SIL OFL; a variable font, so 400, 600 and 700 are one file) */
+@font-face { font-family: "Bitter"; font-style: normal; font-weight: 100 900; font-display: swap; src: url("../../../assets/fonts/Bitter-Variable.woff2") format("woff2"); }
 @import url("../classic/style.css");
 :root {
   --night: #120d2b; --dusk: #2a1d4e; --sunset: #f2a65a; --parchment: #f4e4c1; --parch-dark: #ead6ac;
