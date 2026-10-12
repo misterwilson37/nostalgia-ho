@@ -677,9 +677,12 @@ function newGame(opts) {
     if (human) name = H[i].name || (nHum > 1 ? 'Player ' + (i + 1) : 'You');
     else if (own) name = own.name;
     else { // drawn from the version's own list, then in the game's language (rs.languages)
-      const mine = ownRules(G);
-      do { name = pick(G, female ? (mine.femaleNames || DATA.femaleNames) : (mine.maleNames || DATA.maleNames)) || ('Computer ' + i); } while (usedNames.has(name) && usedNames.size < 40);
-      usedNames.add(name); name = gameName(G, name, female ? 'women' : 'men');
+      // a name is taken if a player has it in the version's own language or in
+      // the game's (an English 1.2 draws again on an English match, as 2.0.1
+      // does with its own names; in the version's own language both are one)
+      const mine = ownRules(G), kind = female ? 'women' : 'men';
+      do { name = pick(G, female ? (mine.femaleNames || DATA.femaleNames) : (mine.maleNames || DATA.maleNames)) || ('Computer ' + i); } while ((usedNames.has(name) || usedNames.has(gameName(G, name, kind))) && usedNames.size < 40);
+      usedNames.add(name); name = gameName(G, name, kind);
     }
     usedNames.add(name);
     const home = G.stars[homes[i]];

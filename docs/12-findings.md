@@ -448,8 +448,10 @@ Not changed by the language: the pictures (the title picture's French words, and
 "Fin Tour" End Turn button, which the skin already shows as 3.0.1's English one), and the
 default galaxy name ("Voie Lactée", STR# 1002.7, which the remake never showed: New Game
 offers "Milky Way"). Reports already received keep their words when the language changes
-in the middle of a game. The names are compared in 1.2F's French: a human called Alex
-in an English game may meet a computer called Alex, and a design a player renames with a
+in the middle of a game. A computer's name is drawn again when a player already has it in
+either language (as 2.0.1 does with its English names), so a human called Alex never meets
+a computer called Alex; in that case an English game can play differently from the French
+one with the same seed. A design a player renames with a
 name from one language's list counts as taken in that language only (so, with that one
 rename, a later design's name is drawn as it would be in that language).
 
