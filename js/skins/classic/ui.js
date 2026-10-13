@@ -2822,15 +2822,85 @@ function openGive() {
 function openChat() {
   if (!others().length) { toast(HO.DATA.alerts[6] || 'There is no one else to send something to.'); return; }
   const lines = ['Thank You!', 'Sorry!', '#!$@*$&@•™!', 'I need money.', 'I need metal.', 'I like you.', 'I hate you.', 'Let’s be allies.'];
+// the version's own Send Message window (rs.cannedChat, js/engine.js
+// sendCanned): 'popup' (5.0.5, the Palm) two menus, To Whom and Say What;
+// 'steps' (2.0, 3.0.1, 4.0.5) the columns filled one after another, here a
+// menu each: to whom, saying what, then what the message needs (a star, a
+// player, a line of text, or 2.0's "About What?" and "Which One?")
+function chatLimitToast() {
+  // rs.chatLimit, a number or (G) => one (5.0.5: 3, its Send Message greyed out once three are sent)
+  const L = HO.rules(G).chatLimit, n = typeof L === 'function' ? L(G) : L;
+  toast(n === 10 ? 'Sorry, you can only send ten messages per turn.' : `You have sent the ${n} messages you may send this turn.`);
+}
+function openCanned(C) {
+  const send = (m) => {
+    const r = HO.sendCanned(G, ME, m);
+    if (r === 'limit') { chatLimitToast(); return; }
+    if (r !== 'ok') return;
+    Sound.play(5000); closeModal(); save();
+  };
+  const sel = (name, opts, cur) => el('select', { name, 'aria-label': name }, ...opts.map(o => el('option', { value: String(o[0]), disabled: o[2] ? 'disabled' : false, selected: String(o[0]) === String(cur) ? 'selected' : false }, o[1])));
+  const val = (v) => /^\d+$/.test(v) ? +v : v;
+  const tos = C.to(G, ME), ok = tos.filter(o => !o[2]);
+  if (!ok.length) { toast(HO.DATA.alerts[6] || 'There is no one else to send something to.'); return; }
+  const f = el('form', { class: 'newgame' });
+  if (C.style === 'popup') {
+    const cur = C.remember && ok.some(o => o[0] === me().chatTo) ? me().chatTo : ok[0][0];
+    const to = sel('to', tos, cur), say = sel('say', C.lines.map((l, i) => [i, l]), 0);
+    f.addEventListener('submit', guard((e) => {
+      e.preventDefault();
+      const t = val(to.value);
+      if (C.remember) me().chatTo = t;
+      send(C.make(G, ME, t, +say.value));
+    }));
+    f.append(el('label', null, el('span', null, C.prompts[0]), to), el('label', null, el('span', null, C.prompts[1]), say),
+      el('div', { class: 'btns right' }, el('button', { type: 'button', class: 'quiet', onclick: closeModal }, C.buttons[0]), el('button', { type: 'submit' }, C.buttons[1])));
+    modal(C.title, f, { cls: 'mid' });
+    return;
+  }
+  const to = sel('to', tos, ok[0][0]), say = sel('say', C.actions.map((a, i) => [i, a.label]), 0), more = el('div');
+  let parts = [];
+  const build = () => {
+    more.textContent = ''; parts = [];
+    let kind = null;
+    for (const [prompt, k, opts] of C.actions[+say.value].parts) {
+      let c;
+      if (k === 'text') c = el('input', { name: prompt, maxlength: opts || 24, 'aria-label': prompt });
+      else if (k === 'about') { c = sel(prompt, opts.map((o, i) => [i, o[0]]), 0); c.addEventListener('change', guard(() => build2())); kind = opts; }
+      else c = sel(prompt, C.list(G, ME, k === 'which' ? kind[0][1] : k, UI.sel), null);
+      c.dataset.kind = k;
+      parts.push(c);
+      more.append(el('label', null, el('span', null, prompt.replace('\n', ' ')), c));
+    }
+  };
+  // 2.0's "Which One?" follows its "About What?"
+  const build2 = () => {
+    const a = parts.find(x => x.dataset.kind === 'about'), w = parts.find(x => x.dataset.kind === 'which');
+    if (!a || !w) return;
+    const opts = C.actions[+say.value].parts.find(x => x[1] === 'about')[2];
+    const n = sel(w.name, C.list(G, ME, opts[+a.value][1], UI.sel), null); n.dataset.kind = 'which';
+    w.replaceWith(n); parts[parts.indexOf(w)] = n;
+  };
+  say.addEventListener('change', guard(() => { build(); build2(); }));
+  build(); build2();
+  f.addEventListener('submit', guard((e) => {
+    e.preventDefault();
+    const v = parts.map(x => x.dataset.kind === 'text' ? null : val(x.value));
+    if (parts.some(x => x.dataset.kind !== 'text' && x.value === '')) return;
+    const t = parts.find(x => x.dataset.kind === 'text');
+    if (t) v.text = t.value;
+    send(C.make(G, ME, val(to.value), +say.value, v));
+  }));
+  f.append(el('label', null, el('span', null, C.prompts[0].replace('\n', ' ')), to), el('label', null, el('span', null, C.prompts[1]), say), more,
+    el('div', { class: 'btns right' }, el('button', { type: 'button', class: 'quiet', onclick: closeModal }, 'Cancel'), el('button', { type: 'submit' }, 'Send')));
+  modal(C.title, f, { cls: 'mid' });
+}
   const f = el('form', { class: 'newgame', onsubmit: (e) => {
+  if (HO.rules(G).cannedChat) { openCanned(HO.rules(G).cannedChat); return; }
     e.preventDefault();
     const d = Object.fromEntries(new FormData(f).entries());
     const text = (d.custom || '').trim() || d.line;
-    if (HO.sendChat(G, ME, +d.to, text) === 'limit') {
-      // rs.chatLimit, a number or (G) => one (5.0.5: 3, its Send Message greyed out once three are sent)
-      const L = HO.rules(G).chatLimit, n = typeof L === 'function' ? L(G) : L;
-      toast(n === 10 ? 'Sorry, you can only send ten messages per turn.' : `You have sent the ${n} messages you may send this turn.`); return;
-    }
+    if (HO.sendChat(G, ME, +d.to, text) === 'limit') { chatLimitToast(); return; }
     Sound.play(5000); closeModal(); save();
   } });
   f.append(el('label', null, el('span', null, 'Send to'), playerSelect('to')),

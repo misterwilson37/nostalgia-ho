@@ -1768,6 +1768,7 @@ function pass2(G) {
     shareBuddyMaps(G, p);
     detectBigBattles(G, p);
     doSurrenders(G, p);
+    E.deliverCanned(G, p.id, order); // the messages (above)
     giftNews(G, p);
     // CONFIRMED (@00433136-004331d0): "Warning!  After supporting your planets
     // and paying your interest, you have no money to spend!" (1054) when the
@@ -1787,6 +1788,7 @@ function pass2(G) {
     setPlanetDisplayValues(G, p);
   }
   G.scrapOver301 = {}; G.gifts = []; G.handovers = [];
+  E.clearCanned(G);
 }
 // CONFIRMED (FUN_0043747e): metal that fell onto one of your colonies with
 // people (someone else's scrapping or a battle's debris, at most 32,767) is
@@ -2022,6 +2024,42 @@ function processSurrenders(G) {
     G.handovers.push(h);
   }
 }
+// ---------- Send Message (FUN_0049a8e1, FUN_0049b2d0, FUN_004320f8) ----------
+// CONFIRMED: 3.0.1's window (js/engine.js cannedSteps) in Windows' words
+// (strings 674-688, 771-776): four columns of 20 cells; "To Whom?" the
+// others still in, then "Everyone" (1361) and, in a game with alliances
+// (game options bit 0), "Your Allies" and "Your Buddies" (1367-1368; the
+// number of players + 1 and + 2); "Saying What?" fifteen, the last "Text
+// Msg.", a line of up to 24 letters typed under "Which Star?" (0x41d). The
+// codes are 0x40e + the place; My Stats carries your home's gravity and
+// temperature. In pass 2, after the surrenders, each player is told the
+// messages for them (969-984, Windows' own slips) and the ones they sent
+// (985-1000, code + 0x10), sender by sender: to Your Allies goes to each
+// ally (FUN_0042210e), to Your Buddies to each best buddy (FUN_004221d7);
+// an "I own" (0x412) about a star the sender owns marks it as the sender's
+// on the receiver's map, Star Stats (0x41b) explores it for the receiver
+// (FUN_00439558) and My Stats (0x419) tells the receiver's computer your
+// home (js/ai-405.js). At most ten a turn (string 755).
+function canned405(words) {
+  const w = words || {};
+  const S = (label, parts) => ({ label, parts: parts || [] });
+  const L = w.actions || ['I Want', 'You Take', 'I Like', 'Don\'t Like', 'I Own', 'Need $', 'Metal', 'Attack', 'Thanks', 'Sorry', '#&@$&*!', 'My Stats', 'I saw', 'Star Stats', 'Text Msg.'];
+  const P = w.prompts || ['Send Message\nTo Whom?', 'Saying What?', 'Which Star?', 'When?', 'Who?', 'Where?'];
+  const star = [[P[2], 'nearby']], who = [[P[4], 'players']];
+  return E.cannedSteps({
+    base: 0x40e, order: order405, explore: (G, q, sid) => exploreStar(G, q, sid),
+    prompts: [P[0], P[1]],
+    actions: [S(L[0], star), S(L[1], star), S(L[2], who), S(L[3], who), S(L[4], [[P[2], 'owned']]), S(L[5]), S(L[6]), S(L[7], star), S(L[8]), S(L[9]), S(L[10]), S(L[11]),
+      S(L[12], [[P[4], 'players'], [P[5], 'nearby']]), S(L[13], [[P[2], 'known']]), Object.assign(S(L[14], [[P[2], 'text', 24]]), { at: 15 })],
+    groups: w.groups || [['all', 'Everyone'], ['allies', 'Your Allies', (G) => !!G.opts.alliances], ['buddies', 'Your Buddies', (G) => !!G.opts.alliances]],
+    said: w.said || ['%n says, "I want %s"', '%n says, "You take %s"', '%n says, "I like %p."', '%n says "I hate %p."', '%n says, "I own %s."', '%n says, "I need money."', '%n says, "I need metal."',
+      '%n says, "Let\'s attack %s."', '%n says, "Thank you!"', '%n says, "Sorry!"', '%n says , "#!$*@%$&!"', '%n says, "I like planets that are %g."', '%n says, "I saw %p at %s!"', '%n says, "Look at %s."', '', '%n says: %x.'],
+    told: w.told || ['You told %t that you want %s.', 'You told %t that you don\'t want %s.', 'You told %t that you like %p.', 'You told %t that you hate %p.', 'You told %t that you own %s.', 'You told %t that you need money.',
+      'You told %t that you need metal.', 'You told %t, "Let\'s attack %s."', 'You told %t, "Thank You!"', 'You told %t "Sorry!"', 'You said "!$@*$&@!" to %t.', 'You told %t what gravity and temperature you prefer.',
+      'You told %t you saw %p at %s.', 'You told %t all about %s.', '', 'Your message to %t: %x.'],
+  });
+}
+Object.defineProperty(E, 'canned405', { value: canned405, configurable: true });
 // CONFIRMED (FUN_00438718 DoSurrenders, pass 2): every other player hears "%s
 // has just surrendered" (1033, no full stop) or "%s has just surrendered to
 // %s." (1034); the winner hears "%s surrenders to you, giving you $%s." and
@@ -2421,6 +2459,8 @@ E.registerRules('405', Object.assign({}, D, {
   maxPlayers: 20,          // CONFIRMED (FUN_00448856): 0-19 computers, 20 players
   maxDesigns: MAX_DESIGNS,
   chatLimit: 10,           // CONFIRMED (string 755): ten messages a turn
+  // the Send Message window (FUN_0049a8e1, FUN_0049b2d0), below
+  cannedChat: canned405(),
   bigDuels: true,          // CONFIRMED (FUN_00425c9a, FUN_00438a0f): the big-battle rumour after big duels only
   plainTechMessages: false, // CONFIRMED (FUN_0046ec5a): "You now have <name> ... Technology (L)." to level 20
   queueSlots: undefined, queueMergeAny: undefined, yardProgress: undefined, yardRefund: undefined,

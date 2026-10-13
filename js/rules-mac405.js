@@ -211,6 +211,18 @@ E.registerRules('mac405', Object.assign({}, W, {
   // with 2 by ClickInTechWin @18025a and UpdateTechWin @1800f0). The battle
   // window's words are the Mac's ("…"), DrawOneGroup @6226c
   battlePanel: W.battlePanelMac,
+  // CONFIRMED (STR# 6220, 6240, 6170.31/.37/.38, 6040.39-70): the Send
+  // Message window (js/rules-405.js canned405) in the Mac's words
+  cannedChat: E.canned405({
+    actions: ['I Want', 'You Take', 'I Like', 'I Don’t Like', 'I Own', 'I Need Money', 'I Need Metal', 'Let’s Attack', 'Thank You', 'Sorry', '#!$@*$&@•™!', 'My Stats', 'I Saw', 'Star Stats', 'Text Msg.'],
+    prompts: ['Send Message To Who?', 'Saying What?', 'Which Star?', 'When?', 'Who?', 'Where?'],
+    groups: [['all', 'Everyone'], ['allies', 'Your Allies', (G) => !!G.opts.alliances], ['buddies', 'Your Buddies', (G) => !!G.opts.alliances]],
+    said: ['I want %s.', 'You take %s.', 'I like %p.', 'I hate %p.', 'I own %s.', 'I need money.', 'I need metal.', 'Let’s attack %s.', 'Thank You!', 'Sorry!', '#!$@*$&@•™!', 'I like planets that are %g.', 'I saw %p at %s!', 'Look at %s.']
+      .map(t => `%n says, “${t}”`).concat(['', '%n says: %x']),
+    told: ['You told %t that you want %s.', 'You told %t that you don’t want %s.', 'You told %t that you like %p.', 'You told %t that you hate %p.', 'You told %t that you own %s.', 'You told %t that you need money.',
+      'You told %t that you need metal.', 'You told %t, “Let’s attack %s.”', 'You told %t, “Thank You!”', 'You told %t, “Sorry!”', 'You said “#!$@*$&@•™!” to %t.', 'You told %t what gravity and temperature you prefer.',
+      'You told %t you saw %p at %s.', 'You told %t all about %s.', '', 'Your message to %t: %x'],
+  }),
   label: 'Mac 4.0.5 (1996)',
   // the New Game window's Version and Edition menus (engine.js editions)
   family: '4.0', edition: { version: '4.0.5', name: 'Mac', platform: 'Mac, System 7 (68k and PowerPC)', year: 1996 }, skins: ['mac4c', 'mac4'],

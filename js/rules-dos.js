@@ -1370,6 +1370,39 @@ function staleName20(G, w) {
   return '';
 }
 
+// ---------- Send Message (SENDMESSAGEDLGPROC @1070:1396; Mac 2.0.1 SendMessage @120f42) ----------
+// CONFIRMED (strings 176-210; Mac STR# 3000-3002 and SendMessage, the same
+// window): "Send Message To Who?" the other players; "Saying What?" I Like,
+// I Don't Like, I Own; "About What?" Planet or Player (I Own: Planet only,
+// SetCellsToObjTypes); "Which One?" your colonies for I Own
+// (SetCellsToOwnedStars), the nearby stars for a planet (the selected one
+// first, SetCellsToNearbyStars), the other players for a player. The codes:
+// 0x40c / 0x40d a planet liked / not, 0x40e / 0x40f a player, 0x410 owned.
+// At most ten a turn (string 160). Reported in pass 2 (FUN_1040_0038
+// @1040:05d4-0690), after each player's income and colonizing: to the
+// receiver "%s sends a message saying he likes %s." (reports 1036-1040, she:
+// 1041-1045), to the sender "You sent a message to %s saying you like %s."
+// (1046-1050); an "I own" about a star the sender does own marks it as the
+// sender's on the receiver's map (@1040:062f-0668).
+function canned20() {
+  const name = (G, m) => m.code === 0x40e || m.code === 0x40f ? (G.players[m.a] || {}).name || '' : (G.stars[m.a] || {}).name || '';
+  const verb = ['likes', 'doesn’t like', 'likes', 'doesn’t like', 'owns'], you = ['like', 'don’t like', 'like', 'don’t like', 'own'];
+  const planet = [['Planet', 'nearby'], ['Player', 'players']];
+  return {
+    style: 'steps', title: 'Send Message', prompts: ['Send Message To Who?', 'Saying What?'],
+    actions: [{ label: 'I Like', parts: [['About What?', 'about', planet], ['Which One?', 'which']] },
+      { label: 'I Don’t Like', parts: [['About What?', 'about', planet], ['Which One?', 'which']] },
+      { label: 'I Own', parts: [['About What?', 'about', [['Planet', 'owned']]], ['Which One?', 'which']] }],
+    to: (G, pid) => E.cannedList(G, pid, 'players'),
+    list: (G, pid, kind, sel) => E.cannedList(G, pid, kind, sel),
+    make: (G, from, to, i, v) => ({ to, a: v[1], code: i === 2 ? 0x410 : 0x40c + i + (v[0] === 1 ? 2 : 0) }),
+    said: (G, m) => { const p = G.players[m.from]; return `${p.name} sends a message saying ${p.female ? 'she' : 'he'} ${verb[m.code - 0x40c]} ${name(G, m)}.`; },
+    told: (G, m) => `You sent a message to ${G.players[m.to].name} saying you ${you[m.code - 0x40c]} ${name(G, m)}.`,
+    news: (G, m) => ({ code: m.code, subject: m.a }),
+    effect: (G, m, q) => { if (m.code === 0x410 && G.stars[m.a] && G.stars[m.a].owner === m.from) E.know(G, q, m.a).owner = m.from; },
+  };
+}
+
 // ---------- pass 2 (FUN_1040_0038 @1040:04c3-06d5) ----------
 // For each player in turn: savings, interest, lost colonies, meteors,
 // growth and income (FUN_1040_27ee), then refuelling, exploring, colonizing
@@ -1380,7 +1413,9 @@ function pass2_20(G) {
     income20(G, p);
     colonize20(G, p);
     p.savings = clamp(p.savings, 0, MONEY_MAX);
+    E.deliverCanned(G, p.id); // the messages (Send Message, above)
   }
+  E.clearCanned(G);
 }
 // CONFIRMED (FUN_1040_27ee): the kept money is the Savings slot's share;
 // with the refunds it earns 10 x isqrt of itself (@1040:2946-2995); then for
@@ -1924,6 +1959,7 @@ E.registerRules('dos', Object.assign({}, O, {
   // CONFIRMED: "Sorry, you can only send ten messages per turn." (string 160); each
   // player's outgoing messages are kept in ten 8-byte entries (0x50 bytes, FUN_1040_0038 @1040:039d)
   chatLimit: 10,
+  cannedChat: canned20(),                 // the Send Message window (below)
   plainTechMessages: true,                // "Your Range Technology has reached level N."
   battleEverywhere: true,                 // CONFIRMED (FUN_1040_23ed, 0aea): every fleet and colony marks its star
   // CONFIRMED (FUN_1040_23ed): no notice to a colony's owner when someone else's fleet arrives

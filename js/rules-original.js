@@ -1741,6 +1741,7 @@ function pass2_505(G) {
     buddyMaps505(G, p);
     surrenders505(G, p);
     bigBattles505(G, p);
+    E.deliverCanned(G, p.id); // the messages (Send Message, above)
     // CONFIRMED (@10073190-10073220): "Warning! After supporting your
     // planets and paying your interest, you have no money to spend!" (0x468)
     // when the net is below 0 (it is then 0); the net at most $1,000,000,000,
@@ -1762,7 +1763,39 @@ function pass2_505(G) {
     sortColonies505(G, p);
   }
   G.surr505 = {};
+  E.clearCanned(G);
 }
+// ---------- Send Message (FUN_1005d940; FUN_10072a10 pass 2b) ----------
+// CONFIRMED: two popups. "To Whom:" every player, yourself and those out
+// (player +0x34) greyed, then MENU 201's Everyone, Allies and Best Buddies
+// (the number of players, + 1, + 2); it starts on the player you last sent
+// to (player +0xa0) when that one can be chosen, else on the first who can;
+// with no one, alert 7. "Say What:" MENU 218: Thank You, Sorry, %$*^&%! (the
+// code 0x416 + the item: 0x417-0x419). The message goes into the outbox
+// (player +0x1058, three a turn: chatLimit) with sound 5000. In pass 2b,
+// after the big battles, each player in turn hears the messages for them,
+// sender by sender (STR# 6020: "%s says, “Thank You!”", 0x417 - 999), Allies
+// reaching each ally (FUN_100587a0) and Best Buddies each best buddy
+// (FUN_10058830), and is told the ones they sent (code + 0x10: "You told %s,
+// “Thank You!”"). The window offers none of the messages that do something
+// when they arrive ("I own", "Look at", "I like planets ..."): only the
+// computers send those (js/ai-original.js say).
+function canned505(o) {
+  o = o || {};
+  const groups = o.groups || [['all', 'Everyone'], ['allies', 'Allies'], ['buddies', 'Best Buddies']];
+  const out = (q) => !q.alive || q.surrendered;
+  return {
+    style: 'popup', title: 'Send Message', prompts: ['To Whom:', 'Say What:'], buttons: o.buttons || ['Cancel', 'OK'],
+    lines: o.lines || ['Thank You', 'Sorry', '%$*^&%!'], remember: o.remember !== false,
+    to: (G, pid) => o.to ? o.to(G, pid) : G.players.map(q => [q.id, q.name, q.id === pid || out(q)]).concat(groups.map(g => [g[0], g[1], false])),
+    make: (G, from, to, i) => ({ to, code: 0x417 + i }),
+    said: (G, m) => E.report(m.code - 999, G.players[m.from].name),
+    // the remake's: a message to Everyone, Allies or Best Buddies names them
+    told: (G, m) => E.report(m.code + 0x10 - 999, typeof m.to === 'number' ? G.players[m.to].name : (groups.find(g => g[0] === m.to) || [0, ''])[1]),
+    news: (G, m) => ({ code: m.code }),
+  };
+}
+Object.defineProperty(E, 'canned505', { value: canned505, configurable: true });
 // CONFIRMED (FUN_10076d20, in pass 2a): after an Armageddon fired, the
 // player's switch is off. For each star: a red one (10..209) gives "Uh-oh! %s
 // has started growing and is turning bright red in hue!" (0x43a) every turn,
@@ -2896,6 +2929,8 @@ Object.defineProperties(E.RULESETS.original, Object.fromEntries(Object.entries({
   // the canned-message window (FUN_1005d940) adds one. The computers' outbox
   // (FUN_100880f0) is the same 3 (js/ai-original.js say).
   chatLimit: 3,
+  // the Send Message window (below)
+  cannedChat: canned505(),
   // the Group Fleets window (above)
   canMerge: canMerge505, organized: organized505,
   // and the window itself (js/skins/classic/ui.js openOrganize): a pile, or
@@ -2906,6 +2941,10 @@ Object.defineProperties(E.RULESETS.original, Object.fromEntries(Object.entries({
   // ask first, Alert Strings 36 / 37; any answer but OK buys nothing. The Palm does the same
   // (FUN_00043754).
   manyShips: { at: 10, how: 'ask' },
+  // CONFIRMED (FUN_1008c5f0): a dragged fleet that can't reach the star (no route either) gets
+  // no orders and, the first time ever, Alert String 30 ("Sorry, but that fleet doesn't have enough
+  // fuel ..."; preference bit 1 at +0x290); after that, nothing.
+  fuelAlert: '505',
   // CONFIRMED (FUN_1008c5f0, FUN_1008d140): a fleet dragged on the map is
   // given the route DeterminePath (FUN_1007d260) finds from its star with the
   // fuel left and its Range, as the computers' are (js/ai-original.js mapRoute)
@@ -2924,7 +2963,3 @@ Object.defineProperties(E.RULESETS.original, Object.fromEntries(Object.entries({
 Object.defineProperty(E.RULESETS.original, 'hintTexts', { enumerable: false, configurable: true,
   get: () => (DATA.hints || []).slice(3, 43) });
 })(this);
-  // CONFIRMED (FUN_1008c5f0): a dragged fleet that can't reach the star (no route either) gets
-  // no orders and, the first time ever, Alert String 30 ("Sorry, but that fleet doesn't have enough
-  // fuel ..."; preference bit 1 at +0x290); after that, nothing.
-  fuelAlert: '505',

@@ -643,6 +643,97 @@ function sendChat(G, from, to, text) {
   if (p.human) msg(G, from, report(71, G.players[to].name, text), { quiet: true });
   (G.players[to].news = G.players[to].news || []).push({ type: 'chat', from, text });
 }
+// ---------- the canned-message windows (rs.cannedChat) ----------
+// A version's Send Message window builds a message from its own parts and
+// puts it in the sender's outbox (counted against rs.chatLimit as sendChat
+// counts); the ruleset's pass 2 hands each player the messages for them
+// (deliverCanned, in the version's place) and empties the outboxes
+// (clearCanned). m.to: a player's number, or 'all', 'allies' or 'buddies'.
+function sendCanned(G, from, m) {
+  if (!feature(G, 'chat') || !rules(G).cannedChat) return 'no';
+  const p = G.players[from], lim = typeof rules(G).chatLimit === 'function' ? rules(G).chatLimit(G) : rules(G).chatLimit;
+  if (lim) { if ((p.chatThisTurn || 0) >= lim) return 'limit'; p.chatThisTurn = (p.chatThisTurn || 0) + 1; }
+  (p.outbox = p.outbox || []).push(Object.assign({ from }, m));
+  return 'ok';
+}
+function cannedFor(G, m, r) {
+  if (m.from === r) return false;
+  if (m.to === 'all') return true;
+  if (m.to === 'allies') return isAllied(G, m.from, r);
+  if (m.to === 'buddies') return isBuddy(G, m.from, r);
+  return m.to === r;
+}
+// every outbox, in player order (order: the version's, else G.players), for player r: a message for r is reported
+// to r (C.said), goes into r's news for the computers (C.news: its code and
+// parts) and does what it does (C.effect); one from r is reported to r (C.told)
+function deliverCanned(G, r, order) {
+  const C = rules(G).cannedChat, q = G.players[r];
+  if (!C || !q) return;
+  for (const p of order || G.players) for (const m of p.outbox || []) {
+    if (cannedFor(G, m, r)) {
+      msg(G, r, C.said(G, m), { icon: p.human ? 'm9024' : 'bad' + p.face + '_' + (p.female ? 1 : 0), chat: true });
+      (q.news = q.news || []).push(Object.assign({ type: 'chat', from: m.from, text: m.text || '' }, C.news ? C.news(G, m) : {}));
+      if (C.effect) C.effect(G, m, q);
+    }
+    if (m.from === r) msg(G, r, C.told(G, m), { quiet: true });
+  }
+}
+function clearCanned(G) { for (const p of G.players) delete p.outbox; }
+// 3.0.1's and 4.0.5's window (js/rules-301.js, js/rules-405.js): o.order the
+// version's player order, o.explore its ExploreStar; o.said, o.told,
+// o.actions, o.prompts, o.groups ([to, label, shown(G)]) and o.base its own
+function cannedSteps(o) {
+  o = o || {};
+  const star = (G, i) => (G.stars[i] || {}).name || '', who = (G, i) => (G.players[i] || {}).name || '';
+  const said = o.said || ['I want %s.', 'You take %s.', 'I like %p.', 'I hate %p.', 'I own %s.', 'I need money.', 'I need metal.', 'Let’s attack %s.', 'Thank You!', 'Sorry!', '#!$@*$&@•™!', 'I like planets that are %g.', 'I saw %p at %s!', 'Look at %s.'].map(t => `%n says, “${t}”`);
+  const told = o.told || ['You told %t that you want %s.', 'You told %t that you don’t want %s.', 'You told %t that you like %p.', 'You told %t that you hate %p.', 'You told %t that you own %s.', 'You told %t that you need money.', 'You told %t that you need metal.', 'You told %t, “Let’s attack %s.”', 'You told %t, “Thank You!”', 'You told %t, “Sorry!”', 'You said “#!$@*$&@•™!” to %t.', 'You told %t what gravity and temperature you prefer.', 'You told %t you saw %p at %s.', 'You told %t all about %s.'];
+  const base = o.base || 0x40a, groups = o.groups || [['all', 'Everyone']];
+  const fill = (G, t, m) => t.replace(/%[sptgnx]/g, (k) => k === '%n' ? who(G, m.from) : k === '%x' ? m.text : k === '%s' ? star(G, m.code - base === 12 ? m.b : m.a)
+    : k === '%p' ? who(G, m.a) : k === '%t' ? (groups.find(g => g[0] === m.to) || [0, who(G, m.to)])[1]
+    : `${Math.trunc(m.g / 100)}.${String(m.g % 100).padStart(2, '0')}G and ${Math.trunc(m.t / 10)}.${Math.abs(m.t % 10)}°F`);
+  const S = (label, parts) => ({ label, parts: parts || [] });
+  const actions = o.actions || [S('I Want', [['Which Star?', 'nearby']]), S('You Take', [['Which Star?', 'nearby']]), S('I Like', [['Who?', 'players']]), S('I Don’t Like', [['Who?', 'players']]),
+    S('I Own', [['Which Star?', 'owned']]), S('I Need Money'), S('I Need Metal'), S('Let’s Attack', [['Which Star?', 'nearby']]), S('Thank You'), S('Sorry'), S('#!$@*$&@•™!'), S('My Stats'),
+    S('I Saw', [['Who?', 'players'], ['Where?', 'nearby']]), S('Star Stats', [['Which Star?', 'known']])];
+  return {
+    style: 'steps', title: 'Send Message', prompts: o.prompts || ['Send Message To Who?', 'Saying What?'], actions,
+    // the window's lists
+    to: (G, pid) => cannedList(G, pid, 'players', null, { inOnly: true, order: (o.order ? o.order(G) : G.players) }).concat(groups.filter(g => !g[2] || g[2](G)).map(g => [g[0], g[1]])),
+    list: (G, pid, kind, sel) => cannedList(G, pid, kind, sel, { inOnly: true, order: (o.order ? o.order(G) : G.players) }),
+    make: (G, from, to, i, v) => {
+      const m = { to, code: base + (actions[i].at != null ? actions[i].at : i), a: v[0], b: v[1] };
+      if (v.text != null) m.text = v.text;
+      if (i === 11) { const p = G.players[from]; m.g = Math.max(1, Math.round(p.homeG * 100)); m.t = Math.round(p.homeT * 10); }
+      return m;
+    },
+    said: (G, m) => fill(G, said[m.code - base], m),
+    told: (G, m) => fill(G, told[m.code - base], m),
+    // the computers read the code and its parts (js/ai-301.js chatCode)
+    news: (G, m) => ({ code: m.code, subject: m.a, star: m.a, g: m.g, t: m.t }),
+    effect: (G, m, q) => {
+      const i = m.code - base;
+      if (i === 4 && G.stars[m.a] && G.stars[m.a].owner === m.from) know(G, q, m.a).owner = m.from;
+      if (i === 13 && G.stars[m.a]) o.explore(G, q, m.a);
+    },
+  };
+}
+// the lists of the 2.0, 3.0.1 and 4.0.5 windows (cells, 20 in 3.0.1 and
+// 4.0.5), as [value, label]: 'players' the others (out: those still in only;
+// SetCellsToPlayers), 'nearby' the selected star then the nearest others,
+// ties by name (SetCellsToNearbyStars), 'owned' your colonies
+// (SetCellsToOwnedStars), 'known' the stars you have explored or own nearest
+// the selected star (SetCellsToKnownStars)
+function cannedList(G, pid, kind, sel, o) {
+  o = o || {};
+  const n = o.cells || 20, p = G.players[pid];
+  if (kind === 'players') return (o.order || G.players).filter(q => q.id !== pid && (!o.inOnly || (q.alive && !q.surrendered))).slice(0, n).map(q => [q.id, q.name]);
+  if (kind === 'owned') return colonies(G, pid).slice(0, n).map(s => [s.id, s.name]);
+  const c = sel != null ? sel : p.homeStar;
+  const near = (a, b) => starDist(G, c, a.id) - starDist(G, c, b.id) || (a.name < b.name ? -1 : a.name > b.name ? 1 : 0);
+  if (kind === 'nearby') return [G.stars[c]].concat(G.stars.filter(s => s.id !== c).sort(near).slice(0, n - 1)).map(s => [s.id, s.name]);
+  if (kind === 'known') return G.stars.filter(s => know(G, p, s.id).explored || s.owner === pid).sort(near).slice(0, n).map(s => [s.id, s.name]);
+  return [];
+}
 function setArmageddon(G, pid, on) {
   if (!feature(G, 'armageddon')) return;
   const p = G.players[pid];
@@ -1357,7 +1448,7 @@ const API = {
   newGame, endTurn, buildShips, unbuildShip, designLimits, designMin, designCost, shipCostNow, canBuildType, findOrCreateDesign, getDesign,
   fleetCount, fleetDesigns, fleetSpeed, fleetMaxRange, fleetHas, fleetKind, fleetLabel, orderMove, orderPath, cancelMove, canReach, canMerge, queueShips, unqueueShip,
   newFleet, addShipsToStar, mergeFleets, splitFleet, scrapFleet, evacuate, colonies, seenG, seenT, maxPop, planetClass, planetIncome,
-  scrapDesign, liveDesigns, isFriend, isAllied, isBuddy, hasColonyAt, designName, namesFile, namesFileAdd, report, setPact, give, surrender, sendChat, setArmageddon, hostileAt, know, observe, msg, msgAll, humans, starDist, dist, projected, techSum, score, save, load, borrowLimit, fmt, num, niceNum, num505, money505,
+  scrapDesign, liveDesigns, isFriend, isAllied, isBuddy, hasColonyAt, designName, namesFile, namesFileAdd, report, setPact, give, surrender, sendChat, sendCanned, deliverCanned, clearCanned, cannedList, cannedSteps, setArmageddon, hostileAt, know, observe, msg, msgAll, humans, starDist, dist, projected, techSum, score, save, load, borrowLimit, fmt, num, niceNum, num505, money505,
 };
 if (typeof module !== 'undefined') {
   module.exports = API;

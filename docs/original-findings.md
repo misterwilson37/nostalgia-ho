@@ -1155,9 +1155,11 @@ pictures and the damage shading.
   was found in 5.0.5's New Game window, so it isn't offered.
 - **The auto play settings** (Preferences: the Friendly-Aggressive and Dig In-No
   Defense sliders the Auto button uses): NOT IMPLEMENTED.
-- **The canned-message window** ("Look at %s" explores a star for the receiver, "I own
-  %s" marks it, "I like planets ..." tells your home): NOT IMPLEMENTED; the web app's
-  messages are free text.
+- **The canned-message window** (`FUN_1005d940`): built (`js/rules-original.js`
+  canned505). Its menus offer only Thank You, Sorry and %$*^&%! (MENU 218, codes
+  0x417-0x419), to a player, Everyone, Allies or Best Buddies (MENU 201); "Look at %s",
+  "I own %s" and "I like planets ..." (which do something when pass 2b delivers them)
+  are the computers' only.
 - **The questions before buying more than 9 Scouts or Tankers** (`FUN_1005cf40`): done
   (`rs.manyShips`: the Scout / Tanker count of 10 or more asks Alert 36 / 37, OK buys, any
   other answer buys nothing; the remake's window buys one a click, so it asks at the click

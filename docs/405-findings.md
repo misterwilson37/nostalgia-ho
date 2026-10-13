@@ -524,3 +524,11 @@ Mac does otherwise:
 
 Mac 3.0.1 reads the same MaTh tables, so its galaxy (`js/rules-301.js`, which uses this
 generator) has the same pi; it keeps the exact pi for now (its output is unchanged).
+
+## Built later (October 2026)
+
+- **Send Message** (built, October 2026; `FUN_0049a8e1`, `FUN_0049b2d0`, delivery in
+  `FUN_004320f8`): 3.0.1's four columns in Windows' words (strings 674-688, 771-776), with
+  "Text Msg." (0x41d, 24 letters) and, in a game with alliances, "Your Allies" and "Your
+  Buddies"; "I own" (0x412) marks the star, Star Stats (0x41b) explores it, My Stats
+  (0x419) gives your home. The Mac's words are STR# 6220/6240/6040 (`js/rules-mac405.js`).

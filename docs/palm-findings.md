@@ -434,3 +434,9 @@ for the computer player %s.").
   asks tSTL 6004.36 / .37 ("Are you sure you want to build that many scout ships / tankers?")
   for a Scout (class 0) or Tanker (class 3) count above 9, as `FUN_1005cf40` does; any
   answer but OK sets the count to 0.
+
+## Built later (October 2026)
+
+- **Send Message** (built, October 2026; tFRM 2600, `FUN_00075266`, `FUN_000754b6`):
+  "To Whom:" the others still in, "Say What:" Thank You, Sorry, %$*^&%!! (0x417 + item),
+  OK and Cancel; delivered as 5.0.5's (`rs.cannedChat`).

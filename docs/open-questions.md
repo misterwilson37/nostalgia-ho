@@ -137,7 +137,6 @@ planned order:
 - Dragging the research bars like the budget bars, and tapping the Savings bar while
   dipping to open Dip Into Savings.
 - The Message History's Evacuate button.
-- The canned-message window (Thank You, Sorry, the curse).
 - The Palm's own report wording where it differs from 5.0.5's (the decoy, the miracle,
   money without "$").
 
@@ -148,7 +147,6 @@ planned order:
 
 ### 4.0.5
 
-- The canned-message window ("Look at", "I own", "I like planets ...").
 - The turn time limit, and the computer taking over for a human who runs out of time.
 - The date jokes.
 - Mac: the New Game window's Luck in Battles, "Automatically end turn for unconnected
@@ -159,14 +157,8 @@ planned order:
 
 - The Hall of Fame and Hall of Shame.
 - The auto play settings window.
-- The canned-message window.
 - The auto-scrap preference (old designs past 15).
 - The colour-monitor joke.
-
-### 2.0
-
-- Send Message's built messages ("I like", "I don't like", "I own"); "I own" marks the
-  star on the receiver's map.
 
 ---
 

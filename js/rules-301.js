@@ -1197,6 +1197,7 @@ function pass2(G) {
     colonizeAndExplore(G, p);
     detectBigBattles(G, p);
     doSurrenders(G, p);
+    E.deliverCanned(G, p.id, order301(G)); // the messages (above)
     // CONFIRMED (EndTurn @a0bdc-a0c9c): "After supporting your planets and
     // paying your interest, you have no money to spend!" (1000.105) when the
     // net is below 0, which is then 0; the money kept within $0..$1,000,000,000,
@@ -1212,7 +1213,26 @@ function pass2(G) {
     cmp(G)[p.id] = Object.assign({}, cmp(G)[p.id] || {}, { out: !p.alive, money: p.alive ? p.tm : -1 });
   }
   G.scrapOver301 = {}; // (EndTurn @a03b0: cleared before each 10-year step)
+  E.clearCanned(G);
 }
+// ---------- Send Message (SendMessage @140fa2, EndTurn @a07a0-a09fc) ----------
+// CONFIRMED: four columns of 20 cells, filled in turn (STR# 3002 heads them):
+// "Send Message To Who?" the others still in (SetCellsToPlayers: state 3 or
+// less), then "Everyone" (STR# 4000.39, the number of players); "Saying
+// What?" STR# 3000's fourteen; then for I Want, You Take and Let's Attack
+// "Which Star?" the nearby stars (the selected one first,
+// SetCellsToNearbyStars), for I Like and I Don't Like "Who?" the others, for
+// I Own your colonies (SetCellsToOwnedStars), for Star Stats the stars you
+// know (SetCellsToKnownStars), for I Saw "Who?" then "Where?" (nearby); the
+// rest need no more. The message's code is 0x40a + its place; My Stats
+// carries your home's gravity and temperature. At most ten a turn ("Sorry,
+// you can only send ten messages per turn.", STR# 1020.17).
+// In pass 2, after the surrenders, each player is told the messages for
+// them ("%s says, ..." STR# 1000.35-48) and the ones they sent ("You told
+// ...", 1000.49-62, code + 0xe), sender by sender; an "I own" about a star
+// the sender does own marks it as the sender's on the receiver's map, and
+// Star Stats explores the star for the receiver (ExploreStar).
+const canned301 = () => E.cannedSteps({ order: order301, explore: (...a) => exploreStar(...a) });
 // CONFIRMED (CheckForArmageddon @a3268): when every human has the device on
 // (a human who is out counts as on, EndTurn @a0450) and at least one still in
 // does, half the stars that aren't turning red (shuffled) start a supernova at
@@ -1958,6 +1978,8 @@ E.registerRules('301', Object.assign({}, D, {
   maxPlayers: 20,          // CONFIRMED (doCreateGalaxyDlg @f0550): 0-19 computers
   maxDesigns: MAX_DESIGNS,
   chatLimit: 10,           // CONFIRMED (SendAMessage @95f14, STR# 1020.17): ten messages a turn
+  // the Send Message window (SendMessage @140fa2), below
+  cannedChat: canned301(),
   plainTechMessages: true, // CONFIRMED (STR# 1000.3-7): "Your Range Technology has reached level N."
   queueSlots: undefined, queueMergeAny: undefined, yardProgress: undefined, yardRefund: undefined, organized: organized301,
   // CONFIRMED: a fleet holds one design, and only fleets of the same design can

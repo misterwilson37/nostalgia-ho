@@ -303,6 +303,12 @@ const rs = Object.assign(base, {
   // bytes a player (FUN_000500d4, 4 x 0x2e). The remake, which can't do that, lets you
   // send as many as you like; the 1.0.4.1 patch keeps to 3 (fix 'palmMessages').
   chatLimit: (G) => E.fixed(G, 'palmMessages') ? 3 : 0,
+  // CONFIRMED (tFRM 2600 "Send Message", FUN_00075266, FUN_000754b6): "To
+  // Whom:" lists only the others still in (player +0x36), from the first;
+  // "Say What:" Thank You, Sorry, %$*^&%!! (0x417 + the item); OK and
+  // Cancel. Delivered as 5.0.5's (js/rules-original.js canned505).
+  cannedChat: E.canned505({ lines: ['Thank You', 'Sorry', '%$*^&%!!'], remember: false, buttons: ['Cancel', 'OK'],
+    to: (G, pid) => G.players.filter(q => q.id !== pid && q.alive && !q.surrendered).map(q => [q.id, q.name, false]) }),
   // tSTL 6021.4-43, one a turn at random (FUN_000500d4); the skin shows hints
   // from rs.hintTexts when it has them
   hintTexts: HINTS,

@@ -149,7 +149,6 @@ root.HOVERSIONS = {
       'Fix Spending shows each step’s line in a small window, whose Next is the original’s click on the message bubble.',
     ],
     missing: [
-      'Send Message: 2.0’s messages are made of “I like”, “I don’t like” or “I own” and a planet or a player, and a true “I own” marks the star on the other player’s map. The remake’s messages are free text with no effect.',
       'The Explored Planets list and the poll and battle speed settings.',
     ],
     deltaTao: DT_2,
@@ -196,7 +195,6 @@ root.HOVERSIONS = {
     missing: [
       'The Hall of Fame and Hall of Shame (the difficulty rating is worked out).',
       'The auto play settings window.',
-      'The canned-message window: the remake’s messages are free text, and the computers read “I like …” in them.',
       'The preference to scrap old designs automatically past 15.',
       'The colour-monitor joke.',
     ],
@@ -253,7 +251,6 @@ root.HOVERSIONS = {
       'Hints are drawn by the browser’s random numbers; 4.0.5 used its own.',
     ],
     missing: [
-      'The canned-message window (“Look at …” and “I own …” also marked the map); the computers read “I like …” in free text.',
       'The turn time limit and network play.',
     ],
     deltaTao: DT_4,
@@ -289,7 +286,6 @@ root.HOVERSIONS = {
       'Fix Spending shows each step’s line in a small window, whose Next is the original’s click on the message bubble.',
     ],
     missing: [
-      'Send Message: 2.0.1’s messages are made of “I like”, “I don’t like” or “I own” and a planet or a player, and a true “I own” marks the star on the other player’s map. The remake’s messages are free text with no effect.',
     ],
     deltaTao: DT_2,
     requirements: REQ_201,
@@ -339,7 +335,6 @@ root.HOVERSIONS = {
       'Hints are drawn by the browser’s random numbers, and the four named stars a new galaxy takes are picked from the game’s seed; the Mac used its own random numbers.',
     ],
     missing: [
-      'The canned-message window (“Look at …” and “I own …” also marked the map); the computers read “I like …” in free text.',
       'The turn time limit, “Automatically end turn for unconnected players” and network play.',
       'The colour-monitor joke.',
     ],
@@ -384,7 +379,6 @@ root.HOVERSIONS = {
       'Every game starts from the default budget and research shares (research 18% each and Radical 10%); 5.0.5 started a new game with your first turn’s shares from the last one.',
     ],
     missing: [
-      'The canned-message window (“Look at …” and “I own …” also marked the map); the remake’s messages are free text, three a turn as in 5.0.5, and the computers read “I like …” in them.',
       'The Group Fleets window: “Merge all fleets here” and splitting follow its rules (Biologicals keep to themselves; the fleet that takes ships keeps its orders and the lower fuel).',
       'Options locked by rank (“Need more MPs”): every option is open.',
       'The turn time limit and network play.',
@@ -437,7 +431,7 @@ root.HOVERSIONS = {
     missing: [
       'Build Ships’ Allow Debt box.',
       'Dragging the research bars the way the budget bars are dragged.',
-      'The canned-message window, the Evacuate button in the message list, and options locked by rank.',
+      'The Evacuate button in the message list, and options locked by rank.',
       'A few reports reworded in the Palm version (the decoy ship, the miracle).',
     ],
     deltaTao: DT_5, // the Palm game is a port of 5.0: Delta Tao's 4-to-5 list

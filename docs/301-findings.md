@@ -225,7 +225,7 @@ Step by step, as 3.0.1 does it:
 | Alliances | each player says whom it wants to ally with; an alliance is two players who both want it. Allies don't fight, refuel at each other's colonies and share the end of the game | CONFIRMED (`AreAllies @e09d2`, `ColonizeAndExplore @a4414`) |
 | Alliance news | at the end of the turn each player still in hears of every change since the last one: "%s has offered to ally with you." / "%s no longer wants to ally with you." (1000.78–.79), "You have offered to ally with %s." / "You no longer want to ally with %s." (.80–.81), and "You have formed an alliance with %s." / "Your alliance with %s is gone." (.82–.83). All that apply are sent (5.0.5 sends only the alliance when one forms) | CONFIRMED (`ConformPlayerAlliances @a2f76`) |
 | Gifts | money (no more than your Ship Savings, if positive) and metal (no more than you have), at most 3 a turn; taken from you at once and given after the moves: the money into Ship Savings, "%s has just given you $%s." / "… %s metal." (1000.85–.86) | CONFIRMED (`DoGiveThingsDlg @1437e0`, `EndTurn @a0004`, STR# 1020.21). The giver's own note (1000.87–.88) comes at once in the remake, at the end of the turn in 3.0.1 (interface) |
-| Messages | canned ones (STR# 3000: I Want, You Take, I Like, I Don't Like, I Own, I Need Money, I Need Metal, Let's Attack, Thank You, Sorry, #!$@*$&@•™!, My Stats, I Saw, Star Stats), at most 10 a turn. The computers read "I like …" and "I like planets that are …"; see "Computer players" | CONFIRMED (STR# 3000, STR# 1020.17, `SendAMessage @95f14`, `MsgReactDetermineAllies @9537e`). The remake's chat is free text; the computers read those two lines from it |
+| Messages | canned ones (STR# 3000: I Want, You Take, I Like, I Don't Like, I Own, I Need Money, I Need Metal, Let's Attack, Thank You, Sorry, #!$@*$&@•™!, My Stats, I Saw, Star Stats), at most 10 a turn. The computers read "I like …" and "I like planets that are …"; see "Computer players" | CONFIRMED (STR# 3000, STR# 1020.17, `SendAMessage @95f14`, `MsgReactDetermineAllies @9537e`). The Send Message window is built (`js/engine.js` cannedSteps, `js/rules-301.js` canned301); the computers read its codes |
 | Surrender, 1 | at the start of the turn a surrendering player's colonies are given up, every fleet is scrapped where it is (metal falls on the star, or rains on the next stop from hyperspace; over another player's colony it goes to its owner), and its Total Money plus Ship Savings (not below 0) and its metal are kept for the winner. "You have just surrendered." / "… to %s." (1000.91–.92); everyone else: "%s has just surrendered." / "… to %s." (.89–.90) | CONFIRMED (`SurrenderIfDesired @a1760`, `ScrapFleetsAndTypes @a194e`, `DoSurrenders @a482a`). 5.0.5 removes the fleets without scrapping |
 | Surrender, 2 | after the moves the winner gets the money into Ship Savings and the metal, and colonizes each of the stars nobody has taken or has ships at (other than its allies'), as with a colony ship: 10 colonists, "You have colonized %s." | CONFIRMED (`DoSurrenders`, `ColonizeStar @a566a`). 5.0.5 gives 1 colonist and three notices of its own |
 | Who may surrender | anyone, to anyone or to no one; the computers: see "Computer players" | CONFIRMED (`DoSurrenderToDlg`, `ComputeStatus @93fa8`) |
@@ -586,3 +586,11 @@ battles), read in 3.0.1's code:
 
 The questions 3.0.1's code doesn't settle, and the remake's own choices, are in
 `docs/open-questions.md` ("Mac 3.0.1").
+
+## Built later (October 2026)
+
+- **Send Message** (built, October 2026; `SendMessage` @140fa2, `SetCellsTo*` @141776-142200,
+  `EndTurn` @a07a0-a09fc): the four columns (to whom: the others still in and Everyone;
+  STR# 3000's fourteen messages; a star, player or both), ten a turn, delivered in pass 2
+  after the surrenders; a true "I own" marks the star on the receiver's map and Star Stats
+  explores it for the receiver (`rs.cannedChat`).

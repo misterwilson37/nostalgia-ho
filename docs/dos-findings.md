@@ -303,7 +303,7 @@ offline. The repository includes their output, not the DOS game itself.
 | What | DOS 2.0 | Status |
 |---|---|---|
 | New year | each turn opens with "The game has been updated to the year N." (report 1010, string 682) | CONFIRMED (`FUN_1040_0038` @1040:02af) |
-| Messages to other players | at most ten a turn ("Sorry, you can only send ten messages per turn.", string 160; each player's outgoing list is ten 8-byte entries). Each is built from parts: to whom, "I like", "I don't like" or "I own", and a planet or a player (strings 176-210). They are reported at the end of the turn (reports 1036-1050); an "I own" message about a star the sender does own marks it as the sender's on the receiver's map. The remake's messages are free text with no effect (interface not done) | CONFIRMED (`SENDMESSAGEDLGPROC` @1070:1a46-1ad8, `FUN_1040_0038` @1040:05d4-0690, the "I own" check @1040:062f-0668) |
+| Messages to other players | at most ten a turn ("Sorry, you can only send ten messages per turn.", string 160; each player's outgoing list is ten 8-byte entries). Each is built from parts: to whom, "I like", "I don't like" or "I own", and a planet or a player (strings 176-210). They are reported at the end of the turn (reports 1036-1050); an "I own" message about a star the sender does own marks it as the sender's on the receiver's map. Built: the version's Send Message window (`rs.cannedChat`, `js/rules-dos.js` canned20), delivered in pass 2 | CONFIRMED (`SENDMESSAGEDLGPROC` @1070:1a46-1ad8, `FUN_1040_0038` @1040:05d4-0690, the "I own" check @1040:062f-0668) |
 | Losing your last colony | at the end of each turn a player with no colonies is marked as dying, colony ships or not, and everyone is told "X has just been eliminated from the game." (strings 726–727); still none at the end of the next turn and they are out for good; a colony founded in between brings them back | CONFIRMED (`FUN_1040_3bd4`, `FUN_1050_09e3`) |
 | The winner | from 2010 on, with more than one player, the only player who is neither out nor dying (strings 728–729). The remake also ends the game when every human is out (GUESS) | CONFIRMED (`FUN_1040_3fa6`) |
 | An out player's fleets | nothing removes them; they still fight, and an out computer still moves them (the computer turn runs for every computer slot) | CONFIRMED (`FUN_1040_0038` @1040:02bb) |
@@ -739,3 +739,10 @@ the skin is otherwise silent.
 
 The skin is styled like Windows 3.1: grey bevelled panels and buttons, navy title bars and
 a teal End Turn button, after the DOS game's `d5000` button picture.
+
+## Built later (October 2026)
+
+- **Send Message** (built, October 2026; Mac 2.0.1 `SendMessage` @120f42 and
+  `SetCellsTo*`, the same window as `SENDMESSAGEDLGPROC`): to whom, I Like / I Don't Like /
+  I Own, Planet or Player, which one; codes 0x40c-0x410, ten a turn, reported in pass 2
+  (reports 1036-1050, she 1041-1045) with a true "I own" marking the star (`rs.cannedChat`).
