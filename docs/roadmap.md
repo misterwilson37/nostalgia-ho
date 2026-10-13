@@ -20,7 +20,14 @@ Delta Tao, in `docs/open-questions.md`, "Unfinished").
    iOS/Android). Where a version had no official translation, the remake's own, built
    from the nearest official one (French from 1.2F onward; German from 2.0; Turkish
    backwards from iOS) and matched to its tone, and marked as the remake's wherever used.
+   **The official half done (October 2026):** DOS 2.0 and Mac 2.0.1 in German (the German
+   DOS 2.0, `docs/dos-findings.md`, "Languages"; the Amiga skin starts in German), iOS and
+   Android in French and Turkish (their `fr.lproj` and `tr.lproj`, help pages included,
+   `docs/ios-findings.md`, "Languages"), 1.2 in English (item 1). Left: the remake's own
+   text for the versions with no translation (5.0.5, 4.0.5, 3.0.1, Palm OS; French and
+   Turkish for 5.0.5 backwards from iOS, German for 3.0.1 onward from 2.0), and a German
+   1.2 or a French 2.0 the same way.
 
-Sources: the German DOS 2.0 (first disk: `DOSHO.EXE` with its German text; the colour
+Sources: the German DOS 2.0 (first disk: `DOSHO.EXE` and `HO.PRS` with its German text; the colour
 pictures and sounds are on a later disk not yet in hand); the Spaceward Ho! 4 FAQ,
 https://www.deltatao.com/ho/ho4faq/.

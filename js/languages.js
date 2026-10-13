@@ -230,7 +230,9 @@ function iosLang(lang, rs) {
   // report 36's "gemi")
   args.push(['%d ships', '%d ' + (lang === 'fr' ? 'vaisseaux' : 'gemi')]);
   const names = (k) => tr(k).map(s => String(s).replace(/\r/g, ''));
-  const shipNames = { decoy: (rs.shipNames || E.DATA.shipNames || {}).decoy }; // the decoys' names aren't in the lists: English in every language
+  // (the same lists as the version's own: the decoys' 5.0.5 list isn't in the
+  // app, whose decoys take a Fighter's name, so it stays as it is)
+  const shipNames = { decoy: (rs.shipNames || E.DATA.shipNames || {}).decoy };
   for (const k in SHIP_LISTS) shipNames[k] = names(SHIP_LISTS[k]);
   // the battle window (rules-ios battlePanelIn): sprintf Templates 9-12, 14
   const SP = en('sprintf Templates'), SPT = tr('sprintf Templates');

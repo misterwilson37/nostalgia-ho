@@ -211,13 +211,66 @@ game's string lists by name; 5.0.5's STR# resources, as the C++ code numbers the
 | sprintf Templates | 37 | 0-25 5.0.5's; 26-36 new (ObjC formats; 35 "Do you really want to evacuate %s?") |
 | System Names, Galaxy Shapes, Ship Class Names, Sounds, Message-Communication Error Strings, Game Internal Errors | | 5.0.5's (the network errors unused) |
 
-French (`fr.lproj`) and Turkish (`tr.lproj`) lists are in the bundle too. The binary's own
+French (`fr.lproj`) and Turkish (`tr.lproj`) lists are in the bundle too (below,
+"Languages"). The binary's own
 strings add "Valdez" (the leaking-fleet joke is kept), "Sparks McGee" / "SparksMcGee",
 "*SERVER*", the Game Center category names and the help page names. The help
 (`en.lproj/help_index.html`, iPad, and `help_index_iphone.html`, with screenshots) is a
 tutorial: the goal, the defaults ("a Thriving home system"), tapping and dragging
 fleets, End Turn, gravity near 1.00 G and 72 °F, the terraform/mine slider, satellites
 and fighters, alliances, battles, the history and the win.
+
+## Languages
+
+iOS and Android are offered in English, their own language, and in **French** and
+**Turkish** (New Game's Language and the Ho menu's Language…; `js/languages.js`,
+`rs.languages = ['en', 'fr', 'tr']`). The in-game text is translated, not only the help:
+`fr.lproj` and `tr.lproj` each hold the whole `objectdictionary.plist`, the same 27 lists
+with the same counts as `en.lproj` (the Turkish sprintf Templates lack the last, "Fleet
+%d"), which the program reads in the device's language; the Android build's
+`assets/fr.lproj` and `tr.lproj` have the same lists, line for line, and the same help
+pages. `tools/extract/languages.py` copies the lists the remake reads into
+`js/lang-data.js` and the help pages to `assets/skins/ios/help-fr/` and `help-tr/`
+(pictures decoded from the iPhone's PNGs, as `tools/extract/ios.py` does the English ones).
+
+**What is mapped**, entry for entry with `en.lproj` (which the rules' own lists already
+are: `data.js`, rules-ios `starNames`, `msgText`), about 780 lines a language:
+
+| List | Where in the remake |
+|---|---|
+| Star Names (257), Male / Female Computer Names (20 / 22), Scout … Biological Names (7 × 15) | `starNames`, `maleNames`, `femaleNames`, `shipNames` |
+| Report Window Templates (159), Alert Strings (39) | `say`: the reports, put in the game's language when shown |
+| Range … Mini Tech Strings, Radical Tech Strings (121) | `say.words`: the tech names in a report |
+| Ship Class Names (14), Misc Strings 0, 29, 38, 39 ("one", "You", "Your enemies", "and your allies ") | `say.args`, `say.words`: a fleet or a side in a report |
+| Help Messages 4-42 | `hintTexts` |
+| Misc Strings 73-74, Alert Strings 9 | `nameAStar` (the new rank's star) |
+| sprintf Templates 9-12, 14 | the battle window (rules-ios `battlePanelIn`) |
+| the help page (`help_index.html`) | the Help menu's manual, in the game's language (`js/help.js`) |
+
+`node tools/test.js ios --lang=fr` (and `tr`, and `android`) plays what the English game
+does, with the French or Turkish names: the names are drawn from the English lists (5.0.5's
+computer and ship names too, rules-original `computerIdentity505` and `shipName505`) and
+then put in the game's language; a computer's name is drawn again when a human has it in
+either language.
+
+**Where a translation takes other fillings than the English**, the app filled it in the
+English order, so a word went where a number goes; the remake gives each filling its
+meaning (`js/languages.js`, `BY_PLACE`, `CELSIUS`):
+
+| Report | Translation | The remake |
+|---|---|---|
+| 36, French | "Vous avez gagné la bataille de %s. Vous avez perdu %d …": no "(and your allies)" fillings | the star, the counts and the enemy in their places |
+| 85, French | "Votre niveau en %P vient de grimper …" ("%P" is no format) | the tech's name |
+| 17, 50, French | the temperature as "%d,%1.1d°C", where the English fills in "95°" | in degrees Celsius, to the degree |
+| 11, 38, Turkish | the enemy and its losses left out ("… %slost%d miktarını kaybettin.", "lost" untranslated) | the star, the counts and the people lost in their places, "lost" kept |
+| 84, Turkish | the star left out | the metal and the people in their places |
+
+Kept as the lists have them: the Turkish 124 is a second copy of 123 (the spies' report
+reads as the credit one's), the Turkish hints write "72iF (20iC)", the French money is
+"€" in the windows' formats (the reports keep the "$" the remake writes), and a few
+untranslated words ("Tanker", "Round"). The remake's own: a fleet of several classes, "N
+ships", has no line in the lists; it is "N vaisseaux" / "N gemi", the reports' own words.
+The remake's interface (windows, buttons) stays English, as it is for every version.
 
 ## Art and sound (for an 'ios' skin)
 

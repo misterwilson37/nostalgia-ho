@@ -538,6 +538,93 @@ rules.
 | Fuel of a leg (engine: taken on leaving) | taken on arrival | DIFFERED (only what a fleet in flight shows), now 2.0's (`FUN_1040_23ed`; `departs20`) |
 | `HIT`, `hit`, `shotsPerShip`, `interestOn`, `mineMoney`, `mineMetal`, `terraCost`, `terraStep`, `techLevelCost`, `techMsg`, `START`, `fleetStrength`, `planetStrength`, `galaxySizes` | — | not used by these rules (2.0's own battle, money, research, setup and galaxy routines replace them) |
 
+## Languages
+
+DOS 2.0 and Mac 2.0.1 are offered in English, their own language, and in **German**, from
+the German DOS 2.0 (New Game's Language, below the line, and the Ho menu's Language…;
+`js/languages.js`, `rs.languages = ['en', 'de']`). The Amiga skin starts New Game in German
+(the skin's `lang: 'de'`); English can still be picked there.
+
+**Source.** Jake's floppy image of the German DOS 2.0 ("Version D2.0 für DOS", February
+1993), read only as data (`tools/extract/languages.py`; nothing in it was run):
+
+- `HO.PRS`, string table 0 (`tools/extract/dos.py`'s format): the English table's ids, so
+  each German string is the English one with the same id. 588 strings against the
+  English 585: the German adds 372-375, the class names' plurals ("Späher",
+  "Kampfschiffe", "Kolonieschiffe", "Satelliten"; the English adds an "s"), and its 5040
+  ("…Galaxis erobert!") swallowed 5050 (a missing NUL: "║\x13" is 5050's id).
+- `DOSHO.EXE`, not packed (the English one is PKLITE'd): the lines the program keeps in
+  its own data, each found by the line before it, which both languages share: Fix
+  Spending's four ("Ihre Ausgaben sind in Ordnung." …), the Name a Star window
+  `NameStarBox` ("Sie haben gewonnen, deshalb dürfen Sie einen Stern benennen. (4 - 7
+  Buchstaben)." and "Neuer Name:"), the battle window's "Ein %s (%d/%d) %s" (the name and
+  the class cut to 15 letters) and "%s Tote", the numbers "1.234" / "12.345K", and the
+  planet window's temperature in °C. The menus, windows and copy protection are German
+  too, but the remake's interface is its own.
+
+**What is mapped** (entry for entry, by id), 368 strings:
+
+| What | German | Where in the remake |
+|---|---|---|
+| Star names | 432-621 (190) | `starNames` |
+| Computers, men and women | 112-131, 224-243 | `maleNames`, `femaleNames` |
+| Ship names | 336-349, 304-326, 288-302, 256-273 | `shipNames` |
+| Reports | 672-686, 688-707, 723-730 (43) | `say` (below) |
+| Battle window | 64, 66-72, 83, 368-375, `DOSHO.EXE`'s two | `battlePanel` (rules-dos `battlePanel20` with German words) |
+| Name a Star | `NameStarBox`, 3340 | `nameAStar` |
+| Fix Spending | `DOSHO.EXE`'s four | `fixSpending.lines` |
+| Force End Turn (Mac 2.0.1) | 3210 | `forceEndTurn.ask` |
+
+All 300 names are distinct in German, and none is another entry's English name. The
+reports stay in English in the game (the rules read them: `log20`, the skins' pictures)
+and are put in German when shown (`HO.say`): `node tools/test.js dos --lang=de` plays
+what `node tools/test.js dos` does, with the German names. Numbers in a report are
+written "1.234". "one Scout" in a report is "ein Späher" (the battle window's "Ein"; how
+the German program wrote a one-ship fleet in a report wasn't read: LIKELY).
+
+The exploring report (703) is the German program's: the gravity with a decimal comma,
+the temperature in **degrees Celsius**. The program's two temperature lines (`DOSHO.EXE`
+file offsets 0x6ad8d and 0x2105e, both "%d,%1.1d%cC") work it out from whole degrees
+Fahrenheit, trunc((F − 32) × 5 ÷ 9) (÷ 10, − 32, × 5, ÷ 9), and print the whole
+degrees' last digit again as the "tenths" (a slip: 22 °C shows as "22,2°C"); the
+exploring report's own arguments weren't read (LIKELY the same). The remake writes the
+whole degrees, as it does in English.
+
+Slips kept as the German has them: "%Fss Bevölkerungswachstum" ("Menkars …"), 686's
+trailing blanks (dropped), and 74 and 75 swapped ("Sie wurden sofort besiegt." where the
+English says "You have no information.", a line the remake doesn't show).
+
+**The remake's German** (no 2.0 text; marked in `js/languages.js`), in the German
+program's own words:
+
+| English (the remake's) | German | From |
+|---|---|---|
+| A meteor shower destroyed your colony at %s. (the 2.0.1.1 patch) | Ein Meteoritenschauer besiegt Ihre Kolonie auf %s. | 681, 725 |
+| Your fleet of %s is waiting to refuel before it can continue on to %s. | Die Flotte von %s wartet auf Treibstoff, bevor sie nach %s weiterfliegt. | 697, 3330 |
+| %s says: %s (the remake's free-text messages) | %s sendet einen Funkspruch: %s | 708 |
+| Your message to %s: %s | Sie senden einen Funkspruch an %s: %s | 718 |
+
+Not changed by the language: the remake's interface (windows, buttons, its own lines such
+as "Nothing much happened"), the pictures (the Amiga skin's End Turn button stays the
+English copy), and the numbers in the windows.
+
+**The Amiga 2.0's German** (`assets/skins/amiga/strings.json`, `tools/extract/amiga.py`,
+Stefan Franke's own translation, 1994) differs; the DOS one is used for both rulesets:
+
+- Names: the Amiga puts ten names of its own before each computer list (Anton … Jupp,
+  Anne … Josefine), six before each ship list (Ausguck …, Attacker …, Aussaat …, and
+  five before the satellites) and 25 before the stars (Homo, Eimer, Mitropa …); its men
+  have Alex and Björn where the DOS has Grischa and Nils, its colony ships Wurzel where
+  the DOS has Freiheit. The DOS lists are the English ones' length, entry for entry; the
+  Amiga's longer lists are for the "every easter egg" option (`docs/roadmap.md`, item 2).
+- Reports: 8 of the 57 differ: 684 (an extra "%s"), 685 ("einen Planeten"), 687 ("Ein
+  Vulkanausbruch auf %s hat …"), 695 ("Ihr %s kann …" for "Ihre Flotte von %s kann …"),
+  697 ("wurde bei %s auf dem Weg nach %s aufgehalten" for "macht halt auf"), 703 (a
+  decimal point), 727 ("Sie werden …"), and 686's blanks.
+- Windows: Fix Spending "Sie gaben auf %s zu viel aus. Dieses Problem ist nun behoben!",
+  Name a Star "Sterntaufe" / "Taufen Sie einen Stern:", the skills "Neuling" for
+  "Novize". The battle window's two no-information lines are swapped in both.
+
 ## Changes to the shared code
 
 `js/engine.js` has these optional hooks; the other rulesets' test games are byte for byte

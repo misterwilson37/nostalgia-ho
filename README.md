@@ -196,9 +196,21 @@ quirks and unclear cases; 1.2, 2.0 and 3.0.1 have their fixes so far.
 
 **Language**: a version that shipped in more than one language offers them below the line
 in New Game and in the Ho menu's **Language…** (`G.opts.lang`, remembered per ruleset in
-`localStorage` "ho5.lang.<id>"). So far that is 1.2: French, as released, or English from
-Mac 2.0.1's names and words (`docs/12-findings.md`, "English"). Only names and words
-change: a seed plays the same game in every language, so it can change mid-game.
+`localStorage` "ho5.lang.<id>"). Each version offers the languages there is official text
+for, English always among them:
+
+| Version | Languages | From |
+|---|---|---|
+| 1.2 | French (its own), English | Mac 2.0.1's names and words (`docs/12-findings.md`, "English") |
+| DOS 2.0, Mac 2.0.1 | English (their own), German | the German DOS 2.0 (`docs/dos-findings.md`, "Languages") |
+| iOS, Android | English (their own), French, Turkish | the app's `fr.lproj` and `tr.lproj`, with its help pages (`docs/ios-findings.md`, "Languages") |
+
+Only names and words change: a seed plays the same game in every language, so it can
+change mid-game. The reports are kept in the version's own words and put in the game's
+language when shown (`HO.say`); the remake's own interface (its windows and buttons) stays
+English. The Amiga skin starts New Game in German (its `lang: 'de'`). 5.0.5, 4.0.5, 3.0.1
+and Palm OS are English only: they had no translation, and their languages wait for the
+remake's own text (`docs/roadmap.md`, item 4).
 
 Optional ruleset flags the skin reads (each is documented where it is read):
 
@@ -265,9 +277,14 @@ Optional ruleset flags the skin reads (each is documented where it is read):
   `fixSpending301`; `js/skins/classic/ui.js`, `openFixSpending`)
 - `rs.celsius`: `true` when the version showed temperatures only in °C, to a tenth (1.2,
   the French edition); Preferences then shows °C as fixed. (`js/skins/classic/ui.js`, `degF`)
-- `rs.languages`: the languages the version shipped in, its own first (1.2: `['fr',
-  'en']`); `rs.lang[code]`: what another language changes, only names and words (the
-  name lists entry for entry with the version's own, `nameAStar`, ...). Names are drawn
+- `rs.languages`: the languages the version is offered in, its own first (1.2: `['fr',
+  'en']`, DOS 2.0 `['en', 'de']`, iOS `['en', 'fr', 'tr']`); `rs.lang[code]`: what another
+  language changes, only names and words (the name lists entry for entry with the
+  version's own, `nameAStar`, `fixSpending`, `battlePanel`, `hintTexts`, ...), and `say`:
+  the reports, each the version's template and the language's, put in the game's language
+  when the skin shows them (`HO.say(G, text)`; `js/languages.js` for DOS 2.0, Mac 2.0.1,
+  iOS and Android, from `js/lang-data.js`, which `tools/extract/languages.py` writes). The
+  skin's `lang` (the Amiga skin's `'de'`) is New Game's first choice. Names are drawn
   from the version's own lists and then put in the game's language (`HO.gameName`), so the
   game plays the same; `HO.setLanguage(G, code)` changes a game's. (`js/engine.js`,
   `inLanguage`; `js/skins/classic/ui.js`, New Game and `openLanguage`)
@@ -404,6 +421,10 @@ Optional ruleset flags the skin reads (each is documented where it is read):
   Windows 95 4.0.5 rules with what the Mac program does differently (Tankers as targets,
   tech level and ship names, the computers' names, the Hall of Fame's ranks;
   `docs/405-findings.md`, "Mac 4.0.5 differs")
+- `js/languages.js`: the versions' official translations (DOS 2.0 and Mac 2.0.1 in German,
+  iOS and Android in French and Turkish), matched entry for entry to each ruleset's names,
+  words and reports; `js/lang-data.js` holds the text, written by
+  `tools/extract/languages.py` from the German DOS 2.0 and the iOS app
 - `js/version-notes.js`: for each ruleset, its known quirks, where the remake differs and
   what changed from the version before (the Ho menu's "About this version")
 - `js/skins.js`: the list of skins and their sounds, and the loader. A skin is everything you see and
