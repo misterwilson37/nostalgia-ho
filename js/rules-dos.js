@@ -1934,11 +1934,37 @@ E.registerRules('dos', Object.assign({}, O, {
   // 3340): the winner names a star, at most 7 letters, not one there is
   // already; the name goes into the names file, and every later galaxy draws
   // its star names from the 190 and the names file, no repeats (FUN_1030_1049).
-  // The window's own words weren't read: the remake uses 4.0.5's
-  // (docs/open-questions.md). The remake's names file: the skin's
-  // localStorage, passed to HO.newGame as opts.starNamesKept.
+  // CONFIRMED (WINHO.EXE dialog 19): the window's own words. The remake's
+  // names file: the skin's localStorage, passed to HO.newGame as
+  // opts.starNamesKept.
   nameAStar: { when: 'win', text: 'You won the game, so you get to name a star.', keep: 0, use: 'pool', max: 7,
+    rule: 'Star names must be 4 to 7 characters long.', label: 'New Star Name:', hint: '(If you\'d rather not name a star, click "OK" with the name blank.)',
     taken: 'Sorry, there’s already a star named ‘%s’.  Please pick another name.' },
+  // CONFIRMED (WINHO.EXE's Options menu, items 304-307; dialogs 8 BATTLESPEED
+  // and 26 POLLSPEED; Mac 2.0.1's DITL 4040 and 4060, CNTL 4040 (10 to 60
+  // ticks a shot) and 4060 (1 to 15 seconds), Stup 1000's defaults: 30
+  // ticks, fully animated, 8 seconds, event messages and battles shown):
+  // the preferences. Not fully animated, each pile shoots as a group with
+  // no explosions (the manual); Review Announced Battles plays a battle as
+  // its report is shown, and only matters with Show Event Messages, which
+  // steps through the reports at the start of a turn (unchecked, they are
+  // only in the Report Window). The polling time is for players on other
+  // machines: kept, but nothing in the remake polls.
+  options: {
+    battleSpeed: { min: 10, max: 60, def: 30, menu: 'Set Battle Speed…', title: 'Battle Speed:', fast: 'Fast', slow: 'Slow', full: 'Fully Animated Battles' },
+    poll: { min: 1, max: 15, def: 8, menu: 'Set Polling Time…', title: 'Polling Time:', fast: 'Fast', slow: 'Slow', unit: 'Seconds',
+      note: 'A fast polling time will let you know about turn updates more quickly but may slow down the computer.' },
+    showMessages: 'Show Event Messages', reviewBattles: 'Review Announced Battles', reports: 'Report Window',
+  },
+  // CONFIRMED (LISTSTARSDLGPROC @1070:05fa, FUN_1070_0033; dialog 17; strings
+  // 144-147; Mac ListExploredStars @120004, InitStarsList @120136): the
+  // stars the player's record has explored or seen owned, nobody's first by
+  // quality (FUN_1020_1a2d, best first), then other players' by name and
+  // then by quality, then your own by name, each sort a swap sort; a row is
+  // the name, the climate ("No Climate Info." when not explored), the metal
+  // and Own, Explored or Enemy. Go To Star selects and centres the star.
+  exploredList: { title: 'List of All Explored Stars:', go: 'Go To Star', noClimate: 'No Climate Info.', own: 'Own', free: 'Explored', enemy: 'Enemy',
+    quality: (p, k) => starQuality(p, k) },
   welcome: WELCOME,
   SKILLS, WPNRAT, setupPlayer, defaultDesigns, afterSetup: afterSetup20, computerSetup, makeGalaxy, distance, SHAPES,
   designCost, designLimits, designMin, aiSpec, paysPrototype, fleetFor, route: route20,

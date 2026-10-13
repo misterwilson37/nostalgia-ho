@@ -613,6 +613,12 @@ battles"):
 What changed in play: nothing. The finger uses 2.0's linear bars instead of iOS's log
 scale.
 
+## Interface built later
+
+- The Options menu's preferences (`DoOptionsMenu @e2784`, `doBattleSpeedDialog @120c48`, DITL/CNTL 4040, Stup 1000's
+  defaults) and the Explored Planets window (`ListExploredStars @120004`, `InitStarsList @120136`, DITL 6040,
+  STR# 1020): `rs.options`, `rs.exploredList`; js/skins/classic/ui.js `verPrefs`, `openExploredList`, `openReports`.
+
 ## Still open
 
 See `docs/open-questions.md` (the 1.2 entries), and `docs/research-log.md`, section

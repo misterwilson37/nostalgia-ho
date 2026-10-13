@@ -379,6 +379,18 @@ E.registerRules('12', Object.assign({}, D, {
     label: 'Nouveau nom d\'étoile:', hint: '(Si vous ne voulez pas donner un nom à une étoile, cliquez juste sur OK).',
     taken: 'Désolé, il y a déjà une Etoile nommée “%s.” Soyons créatifs!' },
   welcome: WELCOME,
+  // CONFIRMED (DoOptionsMenu @e2784, doBattleSpeedDialog @120c48, BattleWait
+  // @d4414; MENU 131, DITL 4040, CNTL 4040: 10 to 60 ticks a shot; Stup
+  // 1000's defaults: 30 ticks, fully animated, messages and battles shown;
+  // ReportWinProc's battle reports, ListExploredStars @120004): 2.0's
+  // preferences in French, without the polling time (1.2 polls every 8
+  // seconds, Stup +0x40, with no window for it), and 2.0's Explored Planets
+  // list (rules-dos exploredList) with its French words (DITL 6040, STR# 1020)
+  options: {
+    battleSpeed: { min: 10, max: 60, def: 30, menu: 'Vitesse des batailles…', title: 'Vitesse des batailles:', fast: 'Rapide', slow: 'Lente', full: 'Animation complète' },
+    showMessages: 'Montrer messages', reviewBattles: 'Voir batailles', reports: 'Fenêtre Rapports',
+  },
+  exploredList: Object.assign({}, D.exploredList, { title: 'Répertoire des planètes explorées:', go: 'Rejoindre planète', noClimate: 'Climat inconnu', own: 'Contrôlée', free: 'Explorée', enemy: 'Ennemie' }),
   // Languages (engine.js rs.languages; G.opts.lang, New Game's Language):
   // 1.2F's own French names and words, or English. The English is the
   // nearest official English, Mac 2.0.1's (1.2 is a pre-release of 2.0):
@@ -394,7 +406,11 @@ E.registerRules('12', Object.assign({}, D, {
       nameAStar: { when: 'win', keep: 0, use: 'pool', max: 7, min: 4, match: 'munger',
         text: 'You won the game, so you get to name a star.', rule: 'Star names must be 4 to 7 characters long.',
         label: 'New Star Name:', hint: '(If you’d rather not name a star, click “OK” with the name blank.)',
-        taken: 'Sorry, there’s already a star named  “%s.” Please pick another name.' } },
+        taken: 'Sorry, there’s already a star named  “%s.” Please pick another name.' },
+      // Mac 2.0.1's English for the same windows (MENU 131, DITL 4040, 6040, STR# 1020)
+      options: { battleSpeed: { min: 10, max: 60, def: 30, menu: 'Set Battle Speed…', title: 'Battle Speed:', fast: 'Fast', slow: 'Slow', full: 'Fully Animated Battles' },
+        showMessages: 'Show Event Messages', reviewBattles: 'Review Announced Battles', reports: 'Report Window' },
+      exploredList: Object.assign({}, D.exploredList) },
   },
   ai: '12',                // 1.2's own computer players (js/ai-12.js)
   // CONFIRMED (above): the turn is 2.0's (rules-dos economy20, battle20,

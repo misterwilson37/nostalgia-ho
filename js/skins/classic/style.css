@@ -169,6 +169,11 @@ h3.scaleflip { cursor: pointer; }
 .ptable tr.click:hover { background: #fff7d6; }
 .prefs { display: grid; gap: 8px; }
 .prefs label.chk { display: flex; gap: 8px; align-items: center; }
+.prefs .slider { display: flex; gap: 8px; align-items: center; }
+.prefs .slider input { flex: 1; min-width: 0; }
+.ptable.list tr.sel td { background: Highlight; color: HighlightText; }
+ul.reports { list-style: none; margin: 0; padding: 0; max-height: 60vh; overflow: auto; }
+ul.reports li { padding: 4px 6px; border-bottom: 1px solid rgba(128,128,128,.3); cursor: pointer; }
 .newgame .group { display: contents; }
 .newgame .group[hidden], .newgame .opts[hidden], .newgame .picks[hidden] { display: none; }
 .newgame .note12 { grid-column: 1 / -1; margin: 0; }

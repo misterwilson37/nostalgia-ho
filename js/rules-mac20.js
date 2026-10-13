@@ -106,7 +106,9 @@ E.registerRules('mac20', Object.assign({}, D, {
   // CONFIRMED (NameAStar @121f20, MarkStarNamed @10173c): 1.2's window: 4 to 7
   // letters, Munger in STR# 2005 and 1003 (rules-12 nameAStar), the name
   // added to STR# 2005 for later galaxies and the game marked named
-  nameAStar: Object.assign({}, D.nameAStar, { min: 4, match: 'munger', taken: 'Sorry, there’s already a star named  “%s.” Please pick another name.' }), // DITL 3340
+  // and its own words (DITL 4050)
+  nameAStar: Object.assign({}, D.nameAStar, { min: 4, match: 'munger', taken: 'Sorry, there’s already a star named  “%s.” Please pick another name.', // DITL 3340
+    hint: '(If you’d rather not name a star, click “OK” with the name blank.)' }),
   // CONFIRMED (FixNextSpendingBar @c1b48, ComputeMaxPercent @c2046,
   // ComputeMinPercent @c22b2: 2.0's Fix Spending, rules-dos fixSpending20,
   // with its lines kept in the code, @c1f6e-c1ff8) and the need rounded to

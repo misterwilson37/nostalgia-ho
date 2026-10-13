@@ -156,7 +156,11 @@ const Sound = {
   stopTheme() { if (this.theme) this.theme.pause(); },
 };
 // preferences (the original's Preferences window: Celsius, only important messages, review battles, hints)
-const Prefs = { celsius: false, important: false, review: false, hints: true, autoRoute: true, tips: true };
+const Prefs = { celsius: false, important: false, review: false, hints: true, autoRoute: true, tips: true,
+  // the version's own preferences (rs.options, 1.2 and 2.0): battle speed in
+  // ticks a shot (null: the version's default), fully animated battles,
+  // event messages shown, the polling time in seconds (null: the default)
+  battleSpeed: null, fullAnim: true, showMsgs: true, poll: null };
 try { const s = JSON.parse(localStorage.getItem('ho5.prefs') || '{}'); if (s.sound === false) Sound.on = false; if (s.music) Sound.music = true; for (const k in Prefs) if (s[k] != null) Prefs[k] = s[k]; } catch (e) {}
 function savePrefs() { try { localStorage.setItem('ho5.prefs', JSON.stringify(Object.assign({ sound: Sound.on, music: Sound.music }, Prefs))); } catch (e) {} }
 // rs.celsius: the version showed temperatures in °C, to a tenth (1.2, the
@@ -165,6 +169,16 @@ const rsCelsius = () => !!(G && HO.rules(G).celsius);
 const toC = (f) => rsCelsius() ? ((f - 32) * 5 / 9).toFixed(1) : Math.round((f - 32) * 5 / 9);
 const degF = (f) => Prefs.celsius || rsCelsius() ? toC(f) + '°C' : Math.round(f) + '°';
 const degText = (t) => Prefs.celsius || rsCelsius() ? t.replace(/(-?\d+)°(F)?/g, (m, n) => toC(+n) + '°C') : t;
+// rs.options: the version's own Options menu preferences (1.2, 2.0)
+const verOpts = () => (G && HO.rules(G).options) || null;
+const optVal = (O, k) => { const v = Prefs[k]; return v != null && v >= O.min && v <= O.max ? v : O.def; };
+// the battle's pace from the version's battle speed (rs.options.battleSpeed:
+// ticks a shot, the remake's pace at the default) and fully animated
+// battles (off: each pile shoots as a group, no explosions)
+function verBattle() {
+  const BS = (verOpts() || {}).battleSpeed;
+  return BS ? { f: optVal(BS, 'battleSpeed') / BS.def, full: Prefs.fullAnim !== false } : { f: 1, full: true };
+}
 
 // ---------- state ----------
 let G = null;            // game
@@ -1529,6 +1543,8 @@ function originalLook(m) {
 }
 function showMessages() {
   UI.inbox = me().inbox.slice(); UI.msgIdx = 0;
+  // Show Event Messages off (rs.options): the reports are only in the Report Window
+  const O = verOpts(); if (O && O.showMessages && Prefs.showMsgs === false) UI.msgIdx = UI.inbox.length;
   renderMsg();
 }
 function renderMsg() {
@@ -2399,6 +2415,13 @@ function battleReport(b) {
   const sum = b.sides.map(o => `${o === ME ? 'You' : G.players[o].name} lost ${b.lost[o] || 0}`).join('; ') + '.';
   return el('details', { class: 'breport-box' }, el('summary', null, `Written report (${b.rounds.length} round${b.rounds.length === 1 ? '' : 's'}): ${sum}`), list);
 }
+// the shots shown at once: one, or (not fully animated, verBattle) the
+// shooting pile's run of shots
+function pileShots(round, e, VB) {
+  const evs = [round[e]];
+  if (!VB.full) while (round[e + evs.length] && round[e + evs.length].si === round[e].si) evs.push(round[e + evs.length]);
+  return evs;
+}
 function openBattle(bid) {
   const b = G.battles.find(x => x.id === bid);
   if (!b) { toast('The record of that battle is no longer available.'); return; }
@@ -2408,6 +2431,7 @@ function openBattle(bid) {
   const body = el('div', null, c, status);
   // modern: a speed control and a written account of the battle
   let speed = 1;
+  const VB = verBattle();
   if (modern()) {
     const sp = el('select', { 'aria-label': 'Battle speed', onchange: (e) => { speed = +e.target.value; if (speed === 0) finish(); } },
       ...[['0.5', 'Slow'], ['1', 'Normal'], ['3', 'Fast'], ['0', 'Skip to the end']].map(([v, t]) => el('option', { value: v, selected: v === '1' ? 'selected' : false }, t)));
@@ -2463,9 +2487,9 @@ function openBattle(bid) {
       x.save(); x.translate(P.x + P.w / 2, P.y + P.h / 2); if (P.mirror) x.scale(-1, 1);
       x.drawImage(im, -im.width * sc / 2, -im.height * sc / 2, im.width * sc, im.height * sc); x.restore();
     });
-    if (shot) {
-      x.strokeStyle = T.battleBg ? '#000' : shot.a === 0 ? '#ffe066' : '#ff6fb5'; x.lineWidth = 2;
-      x.beginPath(); x.moveTo(shot.x1, shot.y1); x.lineTo(shot.x2, shot.y2); x.stroke();
+    for (const sh of [].concat(shot || [])) {
+      x.strokeStyle = T.battleBg ? '#000' : sh.a === 0 ? '#ffe066' : '#ff6fb5'; x.lineWidth = 2;
+      x.beginPath(); x.moveTo(sh.x1, sh.y1); x.lineTo(sh.x2, sh.y2); x.stroke();
     }
   };
   const center = (i) => i < 0 ? { x: pl.x, y: pl.y } : { x: pos[i].x + pos[i].w / 2, y: pos[i].y + pos[i].h / 2 };
@@ -2479,15 +2503,19 @@ function openBattle(bid) {
       return;
     }
     const ev = b.rounds[r][e];
-    if (!ev) { r++; e = 0; if (b.popR) pop = b.popR[r - 1]; status.textContent = `Round ${r + 1}`; setTimeout(step, 160 / speed); return; }
-    const a = center(ev.si);
-    let t;
-    if (ev.p) { t = { x: pl.x, y: pl.y }; Sound.play(3000); }
-    else { t = center(ev.ti); if (ev.k) { alive[ev.ti] = false; Sound.play(e % 3 === 0 ? 3003 : 3002); } else if (e % 4 === 0) Sound.play(3000 + (e % 2)); }
-    drawAll({ x1: a.x, y1: a.y, x2: t.x, y2: t.y, a: ev.a });
-    if (ev.k && !ev.p) { const P = pos[ev.ti]; x.drawImage(IMG.debris, 0, 0, 288, 138, P.x - 6, P.y - 4, P.w + 12, P.h + 8); }
-    e++;
-    setTimeout(step, Math.max(18, 110 - b.rounds[r].length * 2) / speed);
+    if (!ev) { r++; e = 0; if (b.popR) pop = b.popR[r - 1]; status.textContent = `Round ${r + 1}`; setTimeout(step, 160 / speed * VB.f); return; }
+    const evs = pileShots(b.rounds[r], e, VB);
+    const shots = evs.map((ev, j) => {
+      const a = center(ev.si), q = e + j;
+      let t;
+      if (ev.p) { t = { x: pl.x, y: pl.y }; if (!j) Sound.play(3000); }
+      else { t = center(ev.ti); if (ev.k) { alive[ev.ti] = false; if (!j) Sound.play(q % 3 === 0 ? 3003 : 3002); } else if (!j && q % 4 === 0) Sound.play(3000 + (q % 2)); }
+      return { x1: a.x, y1: a.y, x2: t.x, y2: t.y, a: ev.a };
+    });
+    drawAll(shots);
+    if (VB.full && ev.k && !ev.p) { const P = pos[ev.ti]; x.drawImage(IMG.debris, 0, 0, 288, 138, P.x - 6, P.y - 4, P.w + 12, P.h + 8); }
+    e += evs.length;
+    setTimeout(step, Math.max(18, 110 - b.rounds[r].length * 2) / speed * VB.f);
   };
   // skip to the end: apply every remaining shot at once
   const finish = () => {
@@ -2531,6 +2559,7 @@ function openBattlePanel(b) {
   const status = el('p', { class: 'sub' }, '');
   const body = el('div', null, c, status);
   let speed = 1;
+  const VB = verBattle();
   if (modern()) {
     const sp = el('select', { 'aria-label': 'Battle speed', onchange: (e) => { speed = +e.target.value; if (speed === 0) finish(); } },
       ...[['0.5', 'Slow'], ['1', 'Normal'], ['3', 'Fast'], ['0', 'Skip to the end']].map(([v, t]) => el('option', { value: v, selected: v === '1' ? 'selected' : false }, t)));
@@ -2590,9 +2619,9 @@ function openBattlePanel(b) {
       x.fillText(cut(g.text, CW - 6), at.x, at.y + (P.owner === 'pill' ? 36 : 32));
     }));
     if (P.end) { x.font = 'bold 13px ' + font; x.fillStyle = ink; x.fillText(P.end.join(' '), W / 2, H - 14); }
-    if (shot) {
-      x.strokeStyle = dark ? '#000' : shot.a === viewer ? '#ffe066' : '#ff6fb5'; x.lineWidth = 2;
-      x.beginPath(); x.moveTo(shot.x1, shot.y1); x.lineTo(shot.x2, shot.y2); x.stroke();
+    for (const sh of [].concat(shot || [])) {
+      x.strokeStyle = dark ? '#000' : sh.a === viewer ? '#ffe066' : '#ff6fb5'; x.lineWidth = 2;
+      x.beginPath(); x.moveTo(sh.x1, sh.y1); x.lineTo(sh.x2, sh.y2); x.stroke();
     }
   };
   const center = (i) => i < 0 ? (planetAt || { x: W / 2, y: H / 2 }) : (where.get(i) || { x: W / 2, y: H / 2 });
@@ -2605,15 +2634,19 @@ function openBattlePanel(b) {
       return;
     }
     const ev = b.rounds[r][e];
-    if (!ev) { r++; e = 0; if (b.popR) pop = b.popR[r - 1]; status.textContent = `Round ${r + 1}`; setTimeout(step, 160 / speed); return; }
-    const a = center(ev.si);
+    if (!ev) { r++; e = 0; if (b.popR) pop = b.popR[r - 1]; status.textContent = `Round ${r + 1}`; setTimeout(step, 160 / speed * VB.f); return; }
+    const evs = pileShots(b.rounds[r], e, VB);
     let t;
-    if (ev.p) { t = center(-1); Sound.play(3000); }
-    else { t = center(ev.ti); if (ev.f != null) hurt[ev.ti] = { n: ++seq, f: ev.f }; if (ev.k) { alive[ev.ti] = false; Sound.play(e % 3 === 0 ? 3003 : 3002); } else if (e % 4 === 0) Sound.play(3000 + (e % 2)); }
-    drawAll({ x1: a.x, y1: a.y, x2: t.x, y2: t.y, a: ev.a });
-    if (ev.k && !ev.p) x.drawImage(IMG.debris, 0, 0, 288, 138, t.x - 30, t.y - 18, 60, 36);
-    e++;
-    setTimeout(step, Math.max(18, 110 - b.rounds[r].length * 2) / speed);
+    const shots = evs.map((ev, j) => {
+      const a = center(ev.si), q = e + j;
+      if (ev.p) { t = center(-1); if (!j) Sound.play(3000); }
+      else { t = center(ev.ti); if (ev.f != null) hurt[ev.ti] = { n: ++seq, f: ev.f }; if (ev.k) { alive[ev.ti] = false; if (!j) Sound.play(q % 3 === 0 ? 3003 : 3002); } else if (!j && q % 4 === 0) Sound.play(3000 + (q % 2)); }
+      return { x1: a.x, y1: a.y, x2: t.x, y2: t.y, a: ev.a };
+    });
+    drawAll(shots);
+    if (VB.full && ev.k && !ev.p) x.drawImage(IMG.debris, 0, 0, 288, 138, t.x - 30, t.y - 18, 60, 36);
+    e += evs.length;
+    setTimeout(step, Math.max(18, 110 - b.rounds[r].length * 2) / speed * VB.f);
   };
   const finish = () => {
     for (; r < b.rounds.length; r++, e = 0) {
@@ -2895,6 +2928,7 @@ function openBattleList() {
   modal('Review battle', table(['Star', 'Year', 'Against', 'Lost (you / them)'], rows), { cls: 'mid' });
 }
 function openStarList() {
+  if (HO.rules(G).exploredList) return openExploredList();
   const p = me();
   const ks = G.stars.map(s => ({ s, k: HO.know(G, p, s.id) })).filter(o => o.k.explored);
   const rows = ks.map(({ s, k }) => {
@@ -2904,6 +2938,35 @@ function openStarList() {
       el('td', null, degF(72 + (src.t - p.homeT))), el('td', null, fmt(src.metal)), el('td', null, owner), el('td', null, src.pop ? fmt(src.pop * 1e6) : ''));
   });
   modal('Explored stars', table(['Star', 'Gravity', 'Temp', 'Metal', 'Owner', 'Population'], rows), { cls: 'mid' });
+}
+// The version's own Explored Planets window (rs.exploredList, 1.2 and 2.0:
+// ListExploredStars, LISTSTARSDLGPROC): the stars your record has explored
+// or seen owned, nobody's by quality, then other players' by name and then
+// by quality, then yours by name (the original's swap sorts); each row the
+// name, the climate, the metal and Own, Explored or Enemy; Go To Star
+function openExploredList() {
+  const L = HO.rules(G).exploredList, p = me();
+  const rec = (s) => s.owner === ME ? { explored: true, owner: ME, g: s.g, t: s.t, metal: s.metal } : HO.know(G, p, s.id);
+  const seen = G.stars.filter(s => { const k = rec(s); return k.explored || k.owner >= 0; });
+  const ownerOf = (s) => rec(s).owner;
+  const free = seen.filter(s => ownerOf(s) < 0), other = seen.filter(s => ownerOf(s) >= 0 && ownerOf(s) !== ME), mine = seen.filter(s => ownerOf(s) === ME);
+  const q = (s) => { const k = rec(s); return k.explored ? L.quality(p, k) : 0; };
+  // the original's sort: for each place, swap in any later one that should go first
+  const swapSort = (a, before) => { for (let i = 0; i < a.length - 1; i++) for (let j = i + 1; j < a.length; j++) if (before(a[j], a[i])) { const t = a[i]; a[i] = a[j]; a[j] = t; } return a; };
+  const byQ = (x, y) => q(x) > q(y), byName = (x, y) => x.name < y.name;
+  const list = swapSort(free, byQ).concat(swapSort(swapSort(other, byName), byQ), swapSort(mine, byName));
+  let pick = null;
+  const go = el('button', { disabled: true, onclick: () => { if (pick == null) return; closeModal(); UI.sel = pick; centerOn(pick); renderPanel(); draw(); } }, L.go);
+  const rows = list.map(s => {
+    const k = rec(s), o = ownerOf(s);
+    const climate = k.explored ? `${degF(72 + (k.t - p.homeT))}  ${(k.g / p.homeG).toFixed(2)}G` : L.noClimate;
+    const tr = el('tr', { class: 'click', tabindex: 0, onclick: () => { pick = s.id; go.disabled = false; for (const r of tr.parentNode.children) r.classList.toggle('sel', r === tr); },
+      ondblclick: () => { pick = s.id; go.click(); } },
+      el('td', null, s.name), el('td', null, climate), el('td', null, k.explored ? fmt(Math.max(0, k.metal || 0)) : ''), el('td', null, o === ME ? L.own : o < 0 ? L.free : L.enemy));
+    return tr;
+  });
+  modal(L.title.replace(/:$/, ''), el('div', null, el('p', { class: 'sub' }, L.title), el('table', { class: 'ptable list' }, el('tbody', null, ...rows)),
+    el('div', { class: 'btns right' }, go, el('button', { onclick: closeModal }, 'OK'))), { cls: 'mid' });
 }
 // the computer plays this one turn for you (the Game menu's "Auto-play this
 // turn"; iOS's Play One Turn)
@@ -3175,7 +3238,8 @@ function openPrefs() {
   // hints: only for a version that had them (rs.hints false: none between
   // turns); °C: fixed on for a version that showed only °C (rs.celsius)
   const hints = !G || HO.rules(G).hints !== false;
-  modal('Preferences', el('div', { class: 'prefs' }, box('important', 'Show only the most important messages'), box('review', 'Review battles as they happen'),
+  const O = verOpts();
+  modal('Preferences', el('div', { class: 'prefs' }, O ? verPrefs(O, box) : null, O ? null : box('important', 'Show only the most important messages'), O ? null : box('review', 'Review battles as they happen'),
     hints ? box('hints', 'Give helpful game play hints') : null,
     rsCelsius() ? el('label', { class: 'chk' }, el('input', { type: 'checkbox', checked: 'checked', disabled: true }), el('span', null, 'Temperatures in Celsius (this version showed only °C)'))
       : box('celsius', 'Temperatures in Celsius (not °F)'),
@@ -3183,6 +3247,40 @@ function openPrefs() {
       el('span', null, 'Modern conveniences in this game (automatic routes, the map follows the news, battle speed and written reports)')) : null,
     box('tips', 'Explain things when the pointer rests on them (text from the original manual)'),
     autoPlayWhere() === 'prefs' ? prefsAutoPlay() : null), { cls: 'small' });
+}
+// The version's own Options menu items (rs.options, 1.2 and 2.0), in its
+// words: Show Event Messages, Review Announced Battles, the battle speed
+// (Fast to Slow, fully animated battles) and 2.0's polling time
+function verPrefs(O, box) {
+  const slider = (C, k, extra) => {
+    const out = el('span', { class: 'note' });
+    const show = (v) => { out.textContent = C.unit ? `${v} ${C.unit}` : ''; };
+    const inp = el('input', { type: 'range', min: C.min, max: C.max, step: 1, value: optVal(C, k), 'aria-label': C.title.replace(/:$/, ''),
+      oninput: (e) => show(+e.target.value), onchange: (e) => { Prefs[k] = +e.target.value; savePrefs(); } });
+    show(optVal(C, k));
+    return el('fieldset', { class: 'opts', title: extra || null }, el('legend', null, C.title),
+      el('div', { class: 'slider' }, el('span', null, C.fast), inp, el('span', null, C.slow)), out, C.note ? el('p', { class: 'note' }, C.note) : null,
+      C.full ? el('label', { class: 'chk' }, el('input', { type: 'checkbox', checked: Prefs.fullAnim !== false ? 'checked' : false, onchange: (e) => { Prefs.fullAnim = e.target.checked; savePrefs(); } }), el('span', null, C.full)) : null);
+  };
+  return el('div', null,
+    O.showMessages ? box('showMsgs', O.showMessages) : null,
+    O.reviewBattles ? box('review', O.reviewBattles) : null,
+    O.battleSpeed ? slider(O.battleSpeed, 'battleSpeed') : null,
+    O.poll ? slider(O.poll, 'poll', 'Kept as the original had it; the remake has no players on other machines, so nothing polls.') : null);
+}
+// The Report Window (rs.options.reports, 1.2 and 2.0): this turn's reports,
+// where they are when Show Event Messages is off; clicking one goes to its
+// star, or reviews its battle
+function openReports() {
+  if (!G) return;
+  const O = verOpts() || {}, ms = me().inbox || [];
+  const rows = ms.map(m => el('li', { class: 'click', tabindex: 0, onclick: () => {
+    closeModal();
+    if (winReport(m) && winPending()) { openWinWindows(() => renderMsg()); return; }
+    if (m.battle) { openBattle(m.battle); return; }
+    if (m.star != null) { UI.sel = m.star; centerOn(m.star); renderPanel(); draw(); }
+  } }, degText(HO.say(G, m.text))));
+  modal(O.reports || 'Reports', ms.length ? el('ul', { class: 'reports' }, ...rows) : el('p', null, 'No reports this turn.'), { cls: 'mid' });
 }
 // 5.0.5's Preferences hold the auto play settings (FUN_1005ec40)
 function prefsAutoPlay() {
@@ -3846,6 +3944,7 @@ function setupMenus() {
       ['Send a message…', () => G && !G.over && openChat(), () => commandShown('chat')],
       ['Dip into savings…', () => G && !G.over && openDip(), 'dip'],
       ['Fix spending', () => G && !G.over && openFixSpending(), () => !!(G && HO.rules(G).fixSpending)],
+      ['Report window…', () => openReports(), () => !!(verOpts() || {}).reports],
       ['-'],
       [() => (G && me().surrenderTo != null ? 'Take back surrender' : 'Surrender…'), () => G && !G.over && openSurrender(), () => commandShown('surrender')],
       [() => (G && me().armageddon ? 'Turn off the armageddon device' : 'Armageddon device…'), () => G && !G.over && toggleArmageddon(), 'armageddon'],

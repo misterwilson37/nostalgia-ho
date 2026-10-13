@@ -175,13 +175,6 @@ planned order:
   star on the receiver's map.
 - The names file: humans' design names reused by the computers, and humans' names added
   to the computers' names.
-- Name a Star's own words (for now 4.0.5's).
-- The Explored Planets list, and the poll and battle speed settings.
-
-### 1.2
-
-- The preferences for battle speed, showing messages and watching battles.
-- The Explored Planets window.
 
 ---
 
@@ -197,6 +190,12 @@ Where a browser can't do what the original did, or the remake had to pick.
 - **Its own random numbers**, so a game can't be replayed move for move against an original.
 - **Browser storage** for the Halls of Fame, master points, ranks, Game Center records
   and the star names winners keep, one set per version.
+- **The 1.2 and 2.0 Options menu** (battle speed, fully animated battles, Show Event
+  Messages, Review Announced Battles, 2.0's polling time) is in Preferences, in the
+  version's words. The battle speed's 10 to 60 ticks a shot scale the remake's own pace
+  (30, the default, is the remake's pace); the polling time is kept but nothing polls,
+  as there are no players on other machines; with event messages off the reports are in
+  a Report Window list (Galaxy menu).
 - **Modern conveniences** (automatic routes, the map following the news, battle speed,
   written battle reports) can be switched on or off; they never add or remove commands.
 - **An optional patch** for the slips in section 4, chosen at New Game; it is not an

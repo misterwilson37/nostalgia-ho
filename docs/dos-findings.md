@@ -403,7 +403,10 @@ See `docs/open-questions.md` (2.0 section). Not implemented, by choice or not ye
   built-in lists.
 - Several human players: 2.0 joins humans one at a time with passwords; the remake's hot
   seat takes turns on one computer instead.
-- 2.0's Send Message window (`SENDMESSAGEDLGPROC`) and the Explored Planets list. (The
+- 2.0's Send Message window (`SENDMESSAGEDLGPROC`). (Built since: the Explored Planets list,
+  `LISTSTARSDLGPROC`/`FUN_1070_0033`, dialog 17, as `rs.exploredList`, and the Options
+  menu's polling time, battle speed, Show Event Messages and Review Announced Battles,
+  `POLLSPEEDDLGPROC`, `BATTLESPEEDDLGPROC`, dialogs 26 and 8, as `rs.options`.) (The
   Fix Spending command is done: js/rules-dos.js `fixSpending20`, `maxShare20`; each step
   in a small window, Next being the original's click on the message bubble.)
 - Numbers: every number in a report or window is written "1,234", "1,234,567" and from
@@ -624,6 +627,11 @@ Stefan Franke's own translation, 1994) differs; the DOS one is used for both rul
 - Windows: Fix Spending "Sie gaben auf %s zu viel aus. Dieses Problem ist nun behoben!",
   Name a Star "Sterntaufe" / "Taufen Sie einen Stern:", the skills "Neuling" for
   "Novize". The battle window's two no-information lines are swapped in both.
+
+- Name a Star's own words: WINHO.EXE's dialog 19 ("You won the game, so you get to name a
+  star." … "New Star Name:") and Mac 2.0.1's DITL 4050 (`rs.nameAStar` rule, label, hint), as
+  1.2's and 3.0.1's; the length rule stays as it was (the Windows check, behind a jump table,
+  wasn't read).
 
 ## Changes to the shared code
 
