@@ -106,27 +106,25 @@ Things the code can't decide for us. Each says what the remake does for now.
 Windows, commands and pictures of the originals that the remake hasn't built yet. The
 planned order:
 
-1. The small questions and alerts (the one-time fuel alert, the Palm's Allow Debt box
-   and Message History Evacuate).
-2. The canned-message windows (2.0, 3.0.1, 4.0.5, 5.0.5, Palm).
-3. 3.0.1's Hall of Fame and auto play settings.
-4. The Explored Planets windows and the older preferences (1.2, 2.0).
-5. The names files (2.0) and the rest of the Palm's own touches.
-6. iOS's extra screens.
-7. Turn time limits.
+1. The small questions and alerts (the Palm's Allow Debt box and Message History
+   Evacuate).
+2. 3.0.1's Hall of Fame and auto play settings.
+3. The Explored Planets windows and the older preferences (1.2, 2.0).
+4. The names files (2.0) and the rest of the Palm's own touches.
+5. iOS's extra screens.
+6. Turn time limits.
 
 (The remake's own work, such as English for 1.2 and the translations, is in
 `docs/roadmap.md`.)
 
 ### Android
 
-- The same as iOS (including the drag "tick"), and e-mailing one saved game (we don't know if it worked on Android).
+- The same as iOS, and e-mailing one saved game (we don't know if it worked on Android).
 
 ### iOS
 
 - Several saved games, e-mailing a game, the welcome screen and the help page.
 - Game Center's own windows (the leaderboards and achievements are shown as a plain list).
-- The "tick" sound when a fleet is dragged to a planet (iOS 1.2.5).
 - The star dust that big battles leave (a supernova's dust is drawn).
 - The Kansas and Hope lines in French and Turkish.
 
@@ -145,10 +143,6 @@ planned order:
 
 ### 5.0.5
 
-- The one-time "not enough fuel" alert when a fleet is dragged with the mouse (the remake
-  shows its own note each time).
-- The canned-message window ("Look at", "I own", "I like planets ...", to everyone,
-  allies or best buddies).
 - The income view's short interest figure ("(Int: $12K)").
 - The turn time limit.
 

@@ -739,8 +739,15 @@ function onMove(e) {
   if (Math.hypot(px - d.sx, py - d.sy) > 4) d.moved = true;
   d.x = px; d.y = py;
   if (d.pan) { if (d.moved) { UI.view.ox = d.ox + (px - d.sx); UI.view.oy = d.oy + (py - d.sy); draw(); } return; }
-  UI.hover = starAt(px, py);
+  const h = starAt(px, py);
+  if (h !== UI.hover) { UI.hover = h; dragTick(d.fleet, h); }
   draw();
+}
+// rs.dragTick (iOS 1.2.5 and later, Android; -[FleetMovementMenu updateFleetPath:] 0x1000c90d0): each
+// new star the dragged fleet is over, other than its own, plays Sounds item 16, "Next Message" (7001)
+function dragTick(fid, s) {
+  const k = HO.rules(G).dragTick, f = G.fleets.find(x => x.id === fid);
+  if (k && s != null && f && s !== f.star) Sound.play(k);
 }
 function onUp(e) {
   const d = UI.drag; UI.drag = null;
@@ -762,7 +769,7 @@ function onUp(e) {
   else if (tgt == null || tgt === f.star) { if (f.dest != null) { HO.cancelMove(G, f); Sound.play(4000); } }
   else if (HO.orderMove(G, f, tgt)) Sound.play(4001);
   else if (autoRoute(f, tgt)) Sound.play(4001);
-  else { Sound.play(7016); toast(outOfRange(f, tgt)); }
+  else { Sound.play(7016); if (HO.rules(G).fuelAlert === '505') fuelAlert(HO.DATA.alerts[29], 'ho5.fuelAlert505'); else toast(outOfRange(f, tgt)); }
   UI.hover = null; draw(); renderPanel(); save();
 }
 // Plan route…: a clicked (or tapped) star is the next stop
@@ -1101,7 +1108,7 @@ Object.assign(List, {
     const inMap = px >= 0 && py >= 0 && px <= r.width && py <= r.height;
     const s = inMap ? pickStar(px, py) : null;
     UI.drag.x = px; UI.drag.y = py;
-    if (s !== UI.hover) { UI.hover = s; if (s != null && s !== t.f.star) Sound.play(7001); }
+    if (s !== UI.hover) { UI.hover = s; dragTick(t.f.id, s); }
     draw();
   },
   // dropped (-[FleetMovementMenu ccTouchEnded:withEvent:], moveFleet): on a
@@ -1124,9 +1131,12 @@ Object.assign(List, {
   },
 });
 List.t = null;
-function fuelAlert() {
-  let seen = false; try { seen = localStorage.getItem('ho5.fuelAlert') === '1'; localStorage.setItem('ho5.fuelAlert', '1'); } catch (e) {}
-  if (!seen) modal('Not enough fuel', el('div', null, el('p', null, FUEL_ALERT), el('div', { class: 'btns right' }, el('button', { onclick: closeModal }, 'OK'))), { cls: 'small alert' });
+// rs.fuelAlert '505' (FUN_1008c5f0: Alert String 30, shown once, then the drag just gives no orders;
+// the preference bit 1 at +0x290): the mouse drag shows it the first time and says nothing after
+function fuelAlert(text, key) {
+  key = key || 'ho5.fuelAlert';
+  let seen = false; try { seen = localStorage.getItem(key) === '1'; localStorage.setItem(key, '1'); } catch (e) {}
+  if (!seen) modal('Not enough fuel', el('div', null, el('p', null, text || FUEL_ALERT), el('div', { class: 'btns right' }, el('button', { onclick: closeModal }, 'OK'))), { cls: 'small alert' });
 }
 // the nearest box that scrolls (else the page)
 function scrollerOf(n) {

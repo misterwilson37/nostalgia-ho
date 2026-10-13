@@ -329,6 +329,8 @@ const rs = Object.assign(base, {
   // the star list and this galaxy's stars aren't looked at; alert 2300),
   // else added at the end of the kept list (FUN_0002b636: grown by one,
   // no limit, nothing replaced) and the preferences saved. A blank name
+  // 5.0.5's one-time fuel alert is a mouse drag's (FUN_1008c5f0); the Palm's stylus drag wasn't traced
+  fuelAlert: null,
   // (or one whose first byte is above 127) is let go unsaved.
   // The form's words (tFRM 2900): the title "Congratulation!", "You may name
   // a star for use / in future games:", the buttons Cool! and Nevermind; the

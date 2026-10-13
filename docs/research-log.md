@@ -877,7 +877,7 @@ These are what 5.0.5's code does and what the remake now does; they look like sl
   controls (`openOrganize`, `rs.organizeFleets: '505'`).
 - **The one-time alert** when a dragged fleet can't reach the star ("Sorry, but that
   fleet doesn't have enough fuel ...", STR# 6004.30, shown once, prefs +0x290 bit 1):
-  the remake shows its own note each time.
+  `rs.fuelAlert: '505'`.
 - Now done: **the auto play settings** (Preferences, `FUN_1005ec40`; used by the Auto
   button, `FUN_10066bb0`; `rs.autoPlaySettings`): Preferences has the Friendly-Aggressive
   and Dig In-No Defense sliders (0-100), and each turn the computer plays for you it sets

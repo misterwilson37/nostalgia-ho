@@ -441,7 +441,9 @@ With weapons W, shields S, range R, speed V and mini M:
   `FUN_1007d260`) finds from its star with its fuel left and its Range, so a star
   beyond the fuel is reached through your and your best buddies' colonies (with a Tanker
   in the fleet, through stars you have a record of from this year). No route: no orders,
-  and the first time "Sorry, but that fleet doesn't have enough fuel ..." (STR# 6004.30).
+  and the first time "Sorry, but that fleet doesn't have enough fuel ..." (STR# 6004.30;
+  done, `rs.fuelAlert: '505'`: a mouse drag shows it once, kept in this browser, and then
+  says nothing; the sound 7016 still plays).
   Option-click lays the stops out by hand (the web app's "Plan route").
 - **Arrival notices** (CONFIRMED, `FUN_10075b80`, `FUN_100782a0`): "Your fleet of %s
   has arrived at %s." at the end of a trip, when you had explored the star and it has

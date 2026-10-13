@@ -310,6 +310,11 @@ const rs = Object.assign(base, {
   // Scouts (class 0) or Tankers (class 3) chosen, the count turns red and Alert String 36 / 37
   // shows in the window (showScoutWarning, showTankerWarning); nothing is asked.
   manyShips: { at: 10, how: 'warn' },
+  // CONFIRMED (-[FleetMovementMenu updateFleetPath:] 0x1000c90d0, Android 1.2.8 the same; release note
+  // 1.2.5 "a tick sound when you drag to a planet"): every new star under the dragged fleet, its own
+  // star apart, plays Sounds item 16, "Next Message.wav" (sound 7001). No other tick file is named
+  // in the code (ping2, pong1, doink1 and drum72 in the bundle are never loaded).
+  dragTick: 7001,
   // CONFIRMED (OrganizeFleetsLayer, 0x1000bfe20-0x1000c2f14;
   // OrganizerFleetFleetsContainer, 0x1000a5328-0x1000a6018): the Organize
   // Fleets window, opened by a double tap on the fleet list: tap a pile, then

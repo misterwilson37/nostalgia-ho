@@ -2924,3 +2924,7 @@ Object.defineProperties(E.RULESETS.original, Object.fromEntries(Object.entries({
 Object.defineProperty(E.RULESETS.original, 'hintTexts', { enumerable: false, configurable: true,
   get: () => (DATA.hints || []).slice(3, 43) });
 })(this);
+  // CONFIRMED (FUN_1008c5f0): a dragged fleet that can't reach the star (no route either) gets
+  // no orders and, the first time ever, Alert String 30 ("Sorry, but that fleet doesn't have enough
+  // fuel ..."; preference bit 1 at +0x290); after that, nothing.
+  fuelAlert: '505',

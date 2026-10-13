@@ -831,3 +831,11 @@ the groups of players who aren't the viewer's allies aren't drawn at all.
   sure you want to build that many tankers / scout ships?"); nothing is asked, and the
   count turns red. Release note 1.2.5 said "above 10"; the code says 10 or more. The
   remake shows the line in red under a design once 10 of it are bought in the window.
+
+- **The drag "tick"** (release note 1.2.5; done, `rs.dragTick: 7001`): `-[FleetMovementMenu
+  updateFleetPath:]` `0x1000c90d0` calls `PlaySoundByID` for Sounds item 16 on every new
+  star under the dragged fleet other than its own; Android's `PlaySoundByID` (`0x26f8cc`)
+  is the same (it reads the "Sounds" list and plays "%@.wav"). So the file is
+  "Next Message.wav" (the skin's 7001); the code names no other: `ping2`, `pong1`, `doink1`
+  and `drum72` are in the bundle but no string of them is in the program. The touch drag
+  already did this; the mouse drag now does too, and only for iOS and Android.

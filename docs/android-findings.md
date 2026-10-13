@@ -212,3 +212,6 @@ system's Back/Home/Recents bar on devices without keys.
 - **Many Scouts or Tankers**: the same as iOS (`updateCosts` `0x2b2bb8`, `showScoutWarning`
   `0x2b1328`, `showTankerWarning` `0x2b1390`; Alert Strings 36 and 37 shown in red at a
   count of 10 or more). Done.
+
+- **The drag "tick"**: the same as iOS ("Next Message.wav", `PlaySoundByID` `0x26f8cc`
+  with Sounds item 16). Done.
