@@ -135,7 +135,7 @@ choice, docs/open-questions.md).
 | Dragging a bar | refused for a colony being abandoned and for a slot whose star number is 1 or more with both bars done (so a colony at star 0 can be dragged: a slip); every slot 0..1,000; redistributed at every step of the drag | CONFIRMED (`FUN_0045c02c`) |
 | Giving up a colony | its Colony Ships loaded; its share to 0, the others taking it (3.0.1 gave it to Savings); its owner's and best buddies' records cleared | CONFIRMED (`FUN_00439bf7`) |
 | Colonizing | 3.0.1's (income -7,501, bars 900/100 or Mine 1,000, its share 7,500,000 / money); "You have colonized %s." | CONFIRMED (`FUN_004397ba`) |
-| **Abandon (Evacuate)** | a human's toggle on a colony (slot +0x11), with confirmations for a profitable or nearly profitable colony and jokes for "Hope" and "Ship" (strings 661-671), ABANDON or WHOA; on, the colony's income comes off the net, off it goes back; either way its share goes to 0; the colony is given up at End Turn. The ruleset sets `evacuateCommand: true` | CONFIRMED (`FUN_00469b1d`) |
+| **Abandon (Evacuate)** | a human's toggle on a colony (slot +0x11), with confirmations for a profitable or nearly profitable colony and jokes for "Hope" and "Ship" (strings 661-671; the jokes are in the remake, `rs.evacuateJoke`: always, `strcmp`, no draw), ABANDON or WHOA; on, the colony's income comes off the net, off it goes back; either way its share goes to 0; the colony is given up at End Turn. The ruleset sets `evacuateCommand: true` | CONFIRMED (`FUN_00469b1d`) |
 
 ### Research
 
@@ -439,7 +439,7 @@ computes: the hit table is resource MaTh 1002 ("Weapon Ratios", the same 51 valu
   a report's fleet description), not the survivors' fleet (that is `FUN_0042780e`,
   `ResolveVictorFleetsAtStar`); **`FUN_00438f47`** is `SetPlanetTypesForStar` (each
   star's map picture, with a Christmas picture and pictures for rich colonies of players
-  named Peter or Howard), not birthday jokes; **`FUN_0047f76e`** is `EndTurnMenuCall`
+  named Peter or Howard), not birthday jokes (built: the Christmas picture and Windows' Peter and Howard pictures in the skins, the Mac's Peter and Howard only in Full Hoedown; Abandon's Hope and Ship jokes and Armageddon's two questions, strings 299-309 and 661-662, are the rules'); **`FUN_0047f76e`** is `EndTurnMenuCall`
   (End Turn: the computer plays a human set to "Have computer play for me", then the
   turn-time bank), not the time limit's routine; **`FUN_0045ed5a`**,
   `AddSavingsTechActions`, adds the research action only. No rule changed.

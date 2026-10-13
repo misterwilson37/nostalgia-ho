@@ -24,6 +24,8 @@
 (function (root) {
 'use strict';
 const E = typeof module !== 'undefined' ? require('./engine.js') : root.HO;
+const JOKE_HOPE = 'Dost thou truly wish to abandon Hope? All is not yet lost!';
+const JOKE_SHIP = 'Abandon Ship? Abandon Ship! All hands abandon ship! Women and children first!';
 const { RI, clamp, msg, fmt, num, colonies, know, observe, addShipsToStar, TECHS, getDesign, fleetCount, fleetDesigns, fleetMaxRange, isAllied } = E;
 const D = E.RULESETS.dos, O = E.RULESETS.original, W = E.RULESETS['405'];
 const { popU, setPopU, hab } = O;
@@ -1973,6 +1975,11 @@ E.registerRules('301', Object.assign({}, D, {
   features: { arrivalNotices: false, alliances: true, gifts: true, surrender: true, waypoints: true, luck: true, supernova: true, armageddon: true, dip: true, chat: true, yearsPerTurn: true },
   // CONFIRMED (DoGalaxyMenu @f3ece): 3.0.1 has an Abandon command (evacuate301)
   evacuateCommand: true,
+  // CONFIRMED (DITL 3020 and 3030, read from the resource fork): the Abandon
+  // command asks a joke for a star named Hope or Ship, always, in 4.0.5's
+  // words (Ship's has line breaks and the buttons "Jump Ship" / "Don't Jump";
+  // Hope's OK and Cancel); the name compare wasn't re-read
+  evacuateJoke: (G, s) => { const nm = E.ownName(G, s.name, 'stars'); return nm === 'Hope' ? JOKE_HOPE : nm === 'Ship' ? JOKE_SHIP : null; },
   bestBuddies: false,      // no best buddies (see above)
   canBuild: (G, p, type) => TYPES4.includes(type),
   starNames: STAR_NAMES,

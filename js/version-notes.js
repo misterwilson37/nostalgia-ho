@@ -191,6 +191,7 @@ root.HOVERSIONS = {
       'Spiral and Cluster maps are laid out at the start; 3.0.1 laid them out in 2010.',
       'Dip Into Savings takes a percentage of the most you may dip; 3.0.1 took an amount.',
       'Evacuate is 3.0.1’s Abandon: the colony is given up at End Turn, and pressing it again takes it back. The planet doesn’t show it as marked.',
+      'Evacuating a star named Hope or Ship asks 3.0.1’s jokes (“Dost thou truly wish to abandon Hope? All is not yet lost!”, “Abandon Ship? …”), every time.',
     ],
     missing: [
       'The Hall of Fame and Hall of Shame (the difficulty rating is worked out).',
@@ -248,6 +249,7 @@ root.HOVERSIONS = {
       'Dragging a budget bar works out the others once, from where the drag began; 4.0.5 did it at every step of the drag.',
       'Dip Into Savings takes a percentage of the most you may dip; 4.0.5 took an amount.',
       'Evacuate is 4.0.5’s Abandon: the colony is given up at End Turn, and pressing it again takes it back.',
+      'Evacuating a star named Hope or Ship asks 4.0.5’s jokes, every time; turning Armageddon on asks two questions, one of five and one of six.',
       'Hints are drawn by the browser’s random numbers; 4.0.5 used its own.',
     ],
     missing: [
@@ -333,6 +335,7 @@ root.HOVERSIONS = {
       'Dragging a budget bar works out the others once, from where the drag began; 4.0.5 did it at every step of the drag.',
       'Dip Into Savings takes a percentage of the most you may dip; 4.0.5 took an amount.',
       'Evacuate is 4.0.5’s Abandon: the colony is given up at End Turn, and pressing it again takes it back.',
+      'Evacuating a star named Hope or Ship asks 4.0.5’s jokes, every time; turning Armageddon on asks two questions, one of five and one of six.',
       'Hints are drawn by the browser’s random numbers, and the four named stars a new galaxy takes are picked from the game’s seed; the Mac used its own random numbers.',
     ],
     missing: [

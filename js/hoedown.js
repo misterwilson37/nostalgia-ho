@@ -19,12 +19,13 @@
 //   items: [text], the list the About window shows ("Full Hoedown");
 //   colorMonitor: { text, icon }, the colour-monitor joke, to each human at
 //     the first End Turn with Hoedown on (engine.js endTurn);
-//   evacuate(G, star): 3.0.1's and 4.0.5's Evacuate jokes, where the remake
-//     asks its own question (js/skins/classic/ui.js evacuateClick);
 //   armageddon: [[first questions], [second questions]], 4.0.5's;
 //   extraNames: { lang: { stars, men, women, ships: { by class } } }, names
 //     a release in that language added (engine.js hoName);
-//   pictures: true, the skins' planet jokes (js/skins/w95, js/skins/mac4).
+//   pictures: true, the Mac skins' Peter and Howard planets (js/skins/mac4).
+// 3.0.1's and 4.0.5's Hope and Ship jokes on Evacuate, 4.0.5's two Armageddon
+// questions and the w95 skin's Christmas and Peter and Howard planets are not
+// here: the originals always had them, so they are in the rules and the skins.
 // }
 (function (root) {
 'use strict';
@@ -41,22 +42,11 @@ const R = E.RULESETS;
 const COLOR = { text: 'Your scientists have discovered how to turn your monitor from black and white to color!', icon: 'm9039' };
 const COLOR_ITEM = (where) => `The colour-monitor joke, “Your scientists have discovered how to turn your monitor from black and white to color!”, at your first End Turn (${where}).`;
 
-// 4.0.5's Evacuate (Abandon) jokes (Windows FUN_00469b1d, strings 661-662;
-// 3.0.1 DITL 3020 and 3030), for a star named Hope or Ship, whole names. The
-// remake's Evacuate asks its own question for these versions; with Hoedown a
-// star so named gets the joke instead. (3.0.1's DITL text wasn't read: its
-// words here are 4.0.5's.)
-const HOPE_405 = 'Dost thou truly wish to abandon Hope? All is not yet lost!';
-const SHIP = 'Abandon Ship? Abandon Ship! All hands abandon ship! Women and children first!';
-function evacuate405(G, s) {
-  const nm = String(E.ownName(G, s.name, 'stars')).toLowerCase();
-  return nm === 'hope' ? HOPE_405 : nm === 'ship' ? SHIP : null;
-}
-
 // 4.0.5's Armageddon command (Windows FUN_0040bff1, Mac DoGalaxyMenu @838c0)
 // asks twice before it turns the device on: one of strings 299-303, then one
-// of 304-309, each drawn by the interface's rand(). 5.0.5 cut them to one
-// question (alert 4); with Hoedown every later version asks 4.0.5's two.
+// of 304-309, each drawn by the interface's rand() (4.0.5 and the Mac 4.0.5 ask
+// them as they are: rules-405.js armageddonAsk). 5.0.5 cut them to one
+// question (alert 4); with Hoedown the later versions ask 4.0.5's two.
 const ARMAGEDDON = [[
   'Do you really want to launch the armageddon device?  It\'ll blow up half of the galaxy!',
   'Do you really want to launch the armageddon device?  Isn\'t life too short as it is?',
@@ -98,9 +88,8 @@ const AMIGA_ITEM = 'In German, the Amiga 2.0’s own names join the lists: 25 st
 
 const KANSAS_ITEM = (src) => `Evacuating a star named Kansas always gets “Dorothy, I guess that means we’re not in Kansas anymore”, and Hope always asks “Dost thou truly wish to abandon Hope?” (one time in three each in ${src}; the draw is still made).`;
 const SHIP_ITEM = 'Evacuating a star named Ship asks “Abandon Ship? Abandon Ship! All hands abandon ship! Women and children first!”, 4.0.5’s joke, which 5.0.5 cut and the Palm version put back.';
-const HOPE_SHIP_ITEM = (src) => `Evacuating a star named Hope asks “Dost thou truly wish to abandon Hope? All is not yet lost!”, and one named Ship “Abandon Ship? … Women and children first!” (${src}), in place of the remake’s own question.`;
 const VALDEZ_ITEM = (odds, src) => `A fleet named Valdez springs a leak every time it refuels at a star (“Oh no! The Valdez has sprung a leak! …”; one time in ${odds} in ${src}; the draw is still made, and the leak still costs nothing).`;
-const PICTURES_ITEM = (skin, cut) => `In the ${skin} skin, your colonies on the map show the Christmas planet on 25 December, and a rich colony (making $30,000 or more) of a player named Peter or Howard shows Peter’s or Howard’s picture${cut}.`;
+const PICTURES_ITEM = 'In the Mac 4.0.5 skins, a rich colony (making $30,000 or more) of a player named Peter or Howard shows Peter’s or Howard’s picture (SetPlanetTypesForStar @d020a: the Mac still compares the names, and then shows the plain rich planet; Hoedown puts Windows 4.0.5’s pictures back, the Mac’s own 3115 and 3116).';
 
 const set = (id, h) => { if (R[id]) R[id].hoedown = h; };
 set('original', {
@@ -118,23 +107,19 @@ for (const id of ['ios', 'android']) set(id, {
   colorMonitor: COLOR, armageddon: ARMAGEDDON,
 });
 set('405', {
-  items: [HOPE_SHIP_ITEM('4.0.5, FUN_00469b1d, strings 661-662'), VALDEZ_ITEM(100, '4.0.5, FUN_00437ddd'),
-    COLOR_ITEM('Windows 4.0.5 has the line, string 1042, and never loads it; the Mac 4.0.5 sent it only on a black-and-white screen'),
-    ARMAGEDDON_ITEM.replace(', which 5.0.5 cut to one', ', which the remake had left out'),
-    PICTURES_ITEM('4.0.5 (Windows 95)', ' (SetPlanetTypesForStar, FUN_00438f47: pictures 1404, 3115 and 3116, which the remake had left out)')],
-  colorMonitor: COLOR, evacuate: evacuate405, armageddon: ARMAGEDDON, pictures: true,
+  items: [VALDEZ_ITEM(100, '4.0.5, FUN_00437ddd'),
+    COLOR_ITEM('Windows 4.0.5 has the line, string 1042, and never loads it; the Mac 4.0.5 sent it only on a black-and-white screen')],
+  colorMonitor: COLOR,
 });
 set('mac405', {
-  items: [HOPE_SHIP_ITEM('4.0.5, strings 661-662'), VALDEZ_ITEM(100, '4.0.5'),
+  items: [VALDEZ_ITEM(100, '4.0.5'),
     COLOR_ITEM('Mac 4.0.5, AddEasterEggs @b000c, string 1111: in a random year from 2000 to 5000, on a black-and-white screen; the year is still drawn'),
-    ARMAGEDDON_ITEM.replace(', which 5.0.5 cut to one', ', which the remake had left out'),
-    PICTURES_ITEM('Mac 4.0.5', ' (SetPlanetTypesForStar @d020a: the Mac still compares the names, and then shows the plain rich planet; Hoedown puts Windows 4.0.5’s pictures back, the Mac’s own 3115 and 3116)')],
-  colorMonitor: COLOR, evacuate: evacuate405, armageddon: ARMAGEDDON, pictures: true,
+    PICTURES_ITEM],
+  colorMonitor: COLOR, pictures: true,
 });
 set('301', {
-  items: [HOPE_SHIP_ITEM('3.0.1, DITL 3020 and 3030, in 4.0.5’s words'),
-    COLOR_ITEM('Mac 3.0.1, AddEasterEggs @b0004, STR# 1000.96: in a random year from 2000 to 5000, on a black-and-white screen')],
-  colorMonitor: COLOR, evacuate: evacuate405,
+  items: [COLOR_ITEM('Mac 3.0.1, AddEasterEggs @b0004, STR# 1000.96: in a random year from 2000 to 5000, on a black-and-white screen')],
+  colorMonitor: COLOR,
 });
 for (const id of ['dos', 'mac20']) set(id, {
   items: [AMIGA_ITEM],

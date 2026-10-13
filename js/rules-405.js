@@ -25,6 +25,24 @@
 (function (root) {
 'use strict';
 const E = typeof module !== 'undefined' ? require('./engine.js') : root.HO;
+// Abandon's jokes (strings 661-662) and Armageddon's two questions (299-303,
+// 304-309): the original always had them (Full Hoedown no longer holds them)
+const JOKE_HOPE = 'Dost thou truly wish to abandon Hope? All is not yet lost!';
+const JOKE_SHIP = 'Abandon Ship? Abandon Ship! All hands abandon ship! Women and children first!';
+const ARMAGEDDON_ASK = [[
+  'Do you really want to launch the armageddon device?  It\'ll blow up half of the galaxy!',
+  'Do you really want to launch the armageddon device?  Isn\'t life too short as it is?',
+  'Do you really want to launch the armageddon device?  I mean, you\'d probably win anyway; why take the chance?',
+  'Do you really want to launch the armageddon device?  Doing so decreases the difficulty score by half!',
+  'Do you really want to launch the armageddon device?  Odds are you\'ll blow yourself up!',
+], [
+  'Are you just doing this because you think you\'ll win but it\'s really late and so you want to go to bed?',
+  'Aren\'t you sure you really don\'t want to have nothing to do with not launching the armageddon device?',
+  'You\'re just doing this \'cause you enjoy the ultimate feeling of power, aren\'t you???',
+  'If you do this, everyone will hate you!  It\'s such a sissy way to try to win, anyway.',
+  'Now look, this is NO laughing matter.  You just might get yourself killed!',
+  'I get it.  You\'re losing big time and this is the only way you could possibly win!  That\'s it isn\'t it?',
+]];
 const { RI, clamp, msg, fmt, num, colonies, know, observe, getDesign, addShipsToStar, fleetCount, fleetDesigns, fleetMaxRange, isAllied, TECHS } = E;
 const O = E.RULESETS.original, D = E.RULESETS.dos;
 const R301 = () => E.RULESETS['301'];
@@ -2424,6 +2442,14 @@ E.registerRules('405', Object.assign({}, D, {
   bestBuddies: true,
   // CONFIRMED (FUN_00469b1d): a human has an Abandon command (evacuate405)
   evacuateCommand: true,
+  // CONFIRMED (FUN_00469b1d): Abandon asks a joke for a star named exactly
+  // "Hope" (string 661) or "Ship" (662), always (no draw), in place of the
+  // confirmations; the remake's own question asks otherwise (evacuateClick)
+  evacuateJoke: (G, s) => { const nm = E.ownName(G, s.name, 'stars'); return nm === 'Hope' ? JOKE_HOPE : nm === 'Ship' ? JOKE_SHIP : null; },
+  // CONFIRMED (FUN_0040bff1; Mac DoGalaxyMenu @838c0): turning Armageddon on
+  // asks one of strings 299-303 and then one of 304-309, each drawn by the
+  // interface's rand() (not the game's numbers), both answered OK
+  armageddonAsk: ARMAGEDDON_ASK,
   canBuild: (G, p, type) => type === 'bio' ? !!p.hasBio : type === 'decoy' ? !!p.hasDecoy : CLASS[type] != null,
   starNames: STAR_NAMES, maleNames: MALE_NAMES, femaleNames: FEMALE_NAMES,
   femaleComputers: 0.5,    // CONFIRMED (FUN_004768cc): each computer is a man or a woman at rand(0, 1)

@@ -90,7 +90,7 @@ Every routine in SPACEHO.EXE, the Windows 95 program of Spaceward Ho! 4.0.5 (Del
 | `FUN_00438a0f` @438a0f | `DetectBigBattles` @c4942 | DetectBigBattles | Rule, implemented | js/rules-405.js detectBigBattles |
 | `FUN_00438b77` @438b77 | `SetPlanetDisplayValues` @d000c | SetPlanetDisplayValues | Rule, implemented | js/rules-405.js setPlanetDisplayValues |
 | `FUN_00438e90` @438e90 | `SetPlanetTypesForMap` @d01a2 | Map refresh after the turn | Interface | display |
-| `FUN_00438f47` @438f47 | `SetPlanetTypesForStar` @d020a | SetPlanetTypesForStar (the Mac's name): the picture a star shows on the map, by owner, gravity, temperature, profit and nova; jokes: a Christmas picture on 25 December, and pictures 0xc2b / 0xc2c for a colony making $30,000 or more of a player named Peter or Howard. (It had been read as birthday jokes.) | Interface | map pictures; the jokes are not built |
+| `FUN_00438f47` @438f47 | `SetPlanetTypesForStar` @d020a | SetPlanetTypesForStar (the Mac's name): the picture a star shows on the map, by owner, gravity, temperature, profit and nova; jokes: a Christmas picture on 25 December, and pictures 0xc2b / 0xc2c for a colony making $30,000 or more of a player named Peter or Howard. (It had been read as birthday jokes.) | Interface | map pictures; the Christmas picture (w95, mac4) and Windows' Peter and Howard pictures (w95) are built; the Mac's are Hoedown's |
 | `FUN_00439558` @439558 | `ExploreStar` @d05c6 | ExploreStar (963/964) | Rule, implemented | js/rules-405.js exploreStar |
 | `FUN_004397ba` @4397ba | `ColonizeStar` @d0720 | ColonizeStar | Rule, implemented | js/rules-405.js settle |
 | `FUN_00439bf7` @439bf7 | `DecolonizeStar` @d0a70 | DecolonizeStar | Rule, implemented | js/rules-405.js decolonize |

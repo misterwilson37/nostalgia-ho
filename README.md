@@ -435,7 +435,7 @@ Optional ruleset flags the skin reads (each is documented where it is read):
   iOS and Android in French and Turkish), matched entry for entry to each ruleset's names,
   words and reports; `js/lang-data.js` holds the text, written by
   `tools/extract/languages.py` from the German DOS 2.0 and the iOS app
-- `js/hoedown.js`: Full Hoedown, each official release's jokes at their most (`rs.hoedown`: the items About this version lists, the colour-monitor joke, 4.0.5's Evacuate and Armageddon jokes, the Amiga's German names)
+- `js/hoedown.js`: Full Hoedown, each official release's jokes at their most (`rs.hoedown`: the items About this version lists, the colour-monitor joke, the Armageddon questions put back in the 5.0.5 family, the Amiga's German names; 4.0.5's Evacuate and Armageddon jokes are the rules' own now)
 - `js/version-notes.js`: for each ruleset, its known quirks, where the remake differs and
   what changed from the version before (the Ho menu's "About this version")
 - `js/skins.js`: the list of skins and their sounds, and the loader. A skin is everything you see and

@@ -184,8 +184,8 @@ const evacuateShown = () => HO.rules(G).evacuateCommand !== false;
 // remake's own confirmation and an immediate HO.evacuate.
 function evacuateClick(sid) {
   const t = HO.rules(G).evacuateToggle, s = G.stars[sid];
-  // Full Hoedown: 3.0.1's and 4.0.5's "Hope" and "Ship" in place of the remake's question
-  const hj = !t && HO.hoedown(G) && HO.ownRules(G).hoedown.evacuate && HO.ownRules(G).hoedown.evacuate(G, s);
+  // 3.0.1's and 4.0.5's "Hope" and "Ship" jokes (rs.evacuateJoke) in place of the remake's question
+  const hj = !t && HO.rules(G).evacuateJoke && HO.rules(G).evacuateJoke(G, s);
   if (!t) return confirmBox(hj ? HO.say(G, hj) : `Evacuate ${s.name}? Your colonists will leave; satellites stay.`, () => { HO.evacuate(G, ME, sid); Sound.play(7002); renderPanel(); draw(); save(); });
   const on = !t.marked(G, sid);
   const go = () => { HO.evacuate(G, ME, sid); Sound.play(on ? 7002 : 4000); renderPanel(); draw(); save(); };
@@ -2813,8 +2813,9 @@ function openSurrender() {
 function toggleArmageddon() {
   const p = me();
   if (p.armageddon) { HO.setArmageddon(G, ME, false); toast(HO.DATA.alerts[4] || 'Whew!'); save(); return; }
-  // Full Hoedown: 4.0.5's two questions, each drawn from its list (rs.hoedown.armageddon)
-  const hq = HO.hoedown(G) && HO.ownRules(G).hoedown.armageddon;
+  // 4.0.5's two questions, each drawn from its list (rs.armageddonAsk); with
+  // Full Hoedown, the later versions ask them too (rs.hoedown.armageddon)
+  const hq = HO.rules(G).armageddonAsk || (HO.hoedown(G) && HO.ownRules(G).hoedown.armageddon);
   const any = (L) => L[Math.floor(Math.random() * L.length)];
   if (hq) return confirmBox(any(hq[0]), () => confirmBox(any(hq[1]), () => { HO.setArmageddon(G, ME, true); save(); toast('The armageddon device is on. It fires when every human player has turned theirs on.'); }));
   confirmBox(HO.DATA.alerts[3] || 'Are you sure you want to destroy half the galaxy?', () => { HO.setArmageddon(G, ME, true); save(); toast('The armageddon device is on. It fires when every human player has turned theirs on.'); });
