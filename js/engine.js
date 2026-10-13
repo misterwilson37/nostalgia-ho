@@ -120,8 +120,9 @@ function inLanguage(rs, lang) {
 // the game's ruleset in the version's own language
 function ownRules(G) { return RULESETS[G.rules] || rulesById(G.rules); }
 // name lists by kind: stars, men, women, ships (every class's)
-const NAME_KINDS = { stars: (r) => [r.starNames], men: (r) => [r.maleNames], women: (r) => [r.femaleNames],
-  ships: (r) => Object.keys(r.shipNames || {}).sort().map(k => r.shipNames[k]) };
+// (a ruleset without its own lists draws from DATA's, 5.0.5's)
+const NAME_KINDS = { stars: (r) => [r.starNames || DATA.starNames], men: (r) => [r.maleNames || DATA.maleNames], women: (r) => [r.femaleNames || DATA.femaleNames],
+  ships: (r) => { const n = r.shipNames || DATA.shipNames || {}; return Object.keys(n).sort().map(k => n[k]); } };
 // a map of one language's names of a kind to another's, entry for entry
 function langMap(rs, from, to, kind) {
   const key = `${from || ''}>${to || ''}>${kind}`;
@@ -148,6 +149,55 @@ function setLanguage(G, lang) {
     for (const d of p.designs || []) d.name = tr(d.name, 'ships');
   }
   if (to) G.opts.lang = to; else delete G.opts.lang;
+}
+// A message in the game's language. Messages are kept in the version's own
+// words (the rules and the skins read them: rules-dos log20, the skins'
+// report pictures and sounds), and put in the game's language when shown:
+// say(G, text). rs.lang[code].say holds the language's reports, each
+// [own, translated]: the version's template ("%s", "%d" for what is filled
+// in, "%%" a "%") and the language's (filled in the same order, or "%2$s" by
+// place), or a function (args, G) => text; args, the same for what is
+// filled in (a fleet's "one Scout"); words, whole fillings
+// (a tech's name); num(t), a number's form. A text no report matches stays
+// as it is.
+const SAY_ARG = /(%(?:\d+\$)?(?:\.\*)?[-0-9.]*l?[sdu]|%%)/;
+const sayCache = new WeakMap();
+function sayList(list) {
+  const esc = (t) => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return (list || []).map(([from, to]) => ({ to, len: from.length,
+    re: new RegExp('^' + String(from).split(SAY_ARG).map((x, j) => j % 2 ? (x === '%%' ? '%' : /[du]$/.test(x) ? '(-?[\\d,.]+)' : '([\\s\\S]*?)') : esc(x)).join('') + '$') }))
+    .sort((a, b) => b.len - a.len);
+}
+function sayFill(to, args) {
+  let i = 0;
+  return String(to).replace(/%(?:(\d+)\$)?(?:\.\*)?[-0-9.]*l?[sdu]|%%/g, (m, k) => m === '%%' ? '%' : String((k ? args[k - 1] : args[i++]) ?? ''));
+}
+function sayOf(L) {
+  let c = sayCache.get(L);
+  if (!c) sayCache.set(L, c = { reports: sayList(L.reports), args: sayList(L.args) });
+  return c;
+}
+function sayMatch(list, t) { for (const c of list) { const m = c.re.exec(t); if (m) return [c, m.slice(1)]; } return null; }
+function sayArgIn(L, C, a) {
+  if (L.words && Object.prototype.hasOwnProperty.call(L.words, a)) return L.words[a];
+  const hit = sayMatch(C.args, a);
+  if (hit) return typeof hit[0].to === 'function' ? hit[0].to(hit[1]) : sayFill(hit[0].to, hit[1].map(x => sayArgIn(L, C, x)));
+  return L.num && /^-?\$?[\d,]+(\.\d+)?K?$/.test(a) ? L.num(a) : a;
+}
+function say(G, text) {
+  const t = String(text == null ? '' : text), lang = G && G.opts && G.opts.lang;
+  const own = lang && ownRules(G).lang, L = own && own[lang] && own[lang].say;
+  if (!L) return t;
+  const C = sayOf(L), hit = sayMatch(C.reports, t);
+  if (!hit) return t;
+  const args = hit[1].map(a => sayArgIn(L, C, a));
+  const out = typeof hit[0].to === 'function' ? hit[0].to(args, G, hit[1]) : sayFill(hit[0].to, args);
+  return L.cap ? out.charAt(0).toUpperCase() + out.slice(1) : out;
+}
+// whether a text is one of the language's reports (tools: what isn't translated)
+function saysIn(G, text) {
+  const lang = G && G.opts && G.opts.lang, own = lang && ownRules(G).lang, L = own && own[lang] && own[lang].say;
+  return !!(L && sayMatch(sayOf(L).reports, String(text)));
 }
 // every ruleset names its computer players (rs.ai)
 function aiOf(G) {
@@ -675,7 +725,7 @@ function newGame(opts) {
     const female = own ? !!own.female : human ? !!H[i].female : rs.femaleComputers === false ? false : R(G) < (typeof rs.femaleComputers === 'number' ? rs.femaleComputers : 0.45);
     let name;
     if (human) name = H[i].name || (nHum > 1 ? 'Player ' + (i + 1) : 'You');
-    else if (own) name = own.name;
+    else if (own) name = gameName(G, own.name, female ? 'women' : 'men'); // (rs.languages: the game's language)
     else { // drawn from the version's own list, then in the game's language (rs.languages)
       // a name is taken if a player has it in the version's own language or in
       // the game's (an English 1.2 draws again on an English match, as 2.0.1
@@ -1170,7 +1220,7 @@ function makeBattlePanel(cfg) {
 const API = {
   DATA, SHIP_TYPES, TYPES: SHIP_TYPES, TECHS,
   BAR_SCALES, barScale, battleGroups, makeBattlePanel,
-  registerRules, registerAI, rules, rulesById, aiOf, LANGUAGES, languages, ownRules, gameName, ownName, setLanguage, feature, RULESETS, fixes, fixed, patchVersion,
+  registerRules, registerAI, rules, rulesById, aiOf, LANGUAGES, languages, ownRules, gameName, ownName, setLanguage, say, saysIn, feature, RULESETS, fixes, fixed, patchVersion,
   // [id, name] for the New Game window: the original games' rules by year of
   // release, then version ("2.0 (DOS and Windows 3.1, 1993)"); rulesets that
   // aren't an original game's (the remake's own) come last, by their label
@@ -1204,5 +1254,6 @@ if (typeof module !== 'undefined') {
   require('./rules-android.js');
   require('./rules-mac20.js'); require('./rules-mac405.js');
   require('./rules-gemini.js'); require('./ai-gemini.js');
+  require('./languages.js'); // the versions' other languages (rs.languages)
 } else root.HO = API;
 })(this);

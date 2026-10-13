@@ -1552,7 +1552,8 @@ function renderMsg() {
     const big = m.big || (m.jpg != null ? 'jpg' : null);
     if (m.jpg != null) card.append(el('img', { class: 'jpg', src: A.jpg[m.jpg], alt: '' }));
     else if (icon && A.img[icon]) card.append(el('img', { class: m.big ? 'bigicon' : 'icon', src: A.img[icon], alt: '' }));
-    const body = el('div', { class: 'mtext' }, el('p', null, degText(m.text)));
+    // in the game's language (engine.js say; the report is kept in the version's own words)
+    const body = el('div', { class: 'mtext' }, el('p', null, degText(HO.say(G, m.text))));
     const extra = el('div', { class: 'mbtns' });
     if (m.battle) extra.append(el('button', { class: 'quiet', onclick: (e) => { e.stopPropagation(); openBattle(m.battle); } }, 'Review battle'));
     // the radical hand opens from its report (rs.radicalHand)
@@ -3188,6 +3189,9 @@ const titleTag = () => patchOn() ? ` · ${patchName(HO.rules(G))}` : '';
 // the fixes as a list: each one's title and what it does
 const fixList = (rs) => el('ul', null, ...HO.fixes(rs).map(f => el('li', null, el('b', null, f.title), el('br'), f.text)));
 // Ho menu, "Patch notes…" (only while the game has the patch on)
+// the language last chosen for a ruleset (a skin with a language of its
+// own, T.lang, keeps its own choice)
+const langKey = (id) => 'ho5.lang.' + id + (T.lang ? '.' + ((window.HOSKINS && HOSKINS.current) || '') : '');
 // Ho menu, "Language…" (a version that shipped in more than one, rs.languages):
 // the game's names and words in another; the game plays on the same
 function openLanguage() {
@@ -3198,7 +3202,7 @@ function openLanguage() {
     closeModal();
     if (s.value === now) return;
     HO.setLanguage(G, s.value);
-    try { localStorage.setItem('ho5.lang.' + G.rules, s.value); } catch (e) { /* not kept */ }
+    try { localStorage.setItem(langKey(G.rules), s.value); } catch (e) { /* not kept */ }
     save(); renderPanel(); draw();
   };
   modal('Language', el('div', { class: 'about' },
@@ -3465,6 +3469,9 @@ function openSounds() {
 // the manual for the rules being played (or last chosen on the New Game window)
 function manualFor() {
   const M = window.HOMANUALS || {}, r = rulesId();
+  // a version's help in the game's language (HOMANUALS[id][lang])
+  const own = M[r] && !Array.isArray(M[r]) ? M[r] : null, lang = (G && G.rules === r && G.opts && G.opts.lang) || 'en';
+  if (own) return own[lang] || own.en;
   return M[r] || M.original || ['assets/manuals/5.0.5/index.html', 'Spaceward Ho! 5 manual'];
 }
 function openHelp() {
@@ -3687,9 +3694,11 @@ function newGameDialog() {
     langRow.hidden = !langs.length;
     if (langs.length && langSel.dataset.rules !== d.rules) {
       langSel.dataset.rules = d.rules;
-      let last = null; try { last = localStorage.getItem('ho5.lang.' + d.rules); } catch (e) { /* none kept */ }
+      let last = null; try { last = localStorage.getItem(langKey(d.rules)); } catch (e) { /* none kept */ }
       langSel.replaceChildren(...langs.map((c, i) => el('option', { value: c }, (HO.LANGUAGES[c] || c) + (i ? '' : ' (original)'))));
-      langSel.value = langs.includes(last) ? last : langs[0];
+      // a skin of a release in another language starts in it (T.lang: the
+      // Amiga skin's German), else the version's own
+      langSel.value = langs.includes(last) ? last : T.lang && langs.includes(T.lang) ? T.lang : langs[0];
     }
     // the patch: only for rules that have fixes
     const prs = HO.RULESETS[d.rules], nfx = HO.fixes(prs).length;
@@ -3717,7 +3726,7 @@ function newGameDialog() {
     if (!patchBox.hidden) localStorage.setItem('ho5.patch', patch ? '1' : '0');
     const snd = sounds.value(); localStorage.setItem('ho5.sounds', snd || '');
     const lang = !langRow.hidden && d.lang ? d.lang : null;
-    if (lang) localStorage.setItem('ho5.lang.' + d.rules, lang);
+    if (lang) localStorage.setItem(langKey(d.rules), lang);
     // hints: the creator's "Give helpful game play hints" preference, which 5.0.5 and the Palm game read for the first messages (rs.welcome)
     const common = { modern: !!d.modern, ...(patch ? { patch: true } : {}), ...(snd ? { sounds: snd } : {}), ...(lang ? { lang } : {}), hints: !!Prefs.hints, humans, seed: (Math.random() * 2 ** 31) | 0, name: d.name || 'You', galaxy: d.galaxy || 'Milky Way', female: d.female === '1', computers: +d.computers, start: d.start, rules: d.rules, alliances: !!d.alliances, luck: !!d.luck, novas: !!d.novas, ...keptStarsOpt(d.rules) };
     const k = kindOf(d.rules);

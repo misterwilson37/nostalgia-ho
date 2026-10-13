@@ -266,15 +266,18 @@ function barLockedIOS(G, p, slot) {
 // side is 0 (the viewer's) on the left, the rest on the right, mirrored; a
 // list taller than the screen scrolls (CCLayerPanZoom, addShipGroups).
 // No owner's name is written on a group.
-const battlePanelIOS = E.makeBattlePanel({
+// (tr: the window's words in another language, js/languages.js: the head
+// and a text's own translation)
+const battlePanelIn = (tr) => E.makeBattlePanel({
   cols: 'viewer', byStance: true, luck: true, pics: (n) => Math.min(n, 1),
-  head: (G, b) => [`Review Battle at ${G.stars[b.star].name} in ${b.year}`],
-  ship: (G, d, n, n0, mine) => O.battlePanelWords.ship(G, d, n, n0, mine),
-  planet: (G, pop, pop0) => O.battlePanelWords.planet(G, pop, pop0),
+  head: (G, b) => [tr ? tr.head(G.stars[b.star].name, b.year) : `Review Battle at ${G.stars[b.star].name} in ${b.year}`],
+  ship: (G, d, n, n0, mine) => tr ? tr.text(O.battlePanelWords.ship(G, d, n, n0, mine)) : O.battlePanelWords.ship(G, d, n, n0, mine),
+  planet: (G, pop, pop0) => tr ? tr.text(O.battlePanelWords.planet(G, pop, pop0)) : O.battlePanelWords.planet(G, pop, pop0),
 });
+const battlePanelIOS = battlePanelIn(null);
 const rs = Object.assign(base, {
   label: 'iOS 1.2.9 (2012)',
-  barLocked: barLockedIOS, battlePanel: battlePanelIOS,
+  barLocked: barLockedIOS, battlePanel: battlePanelIOS, battlePanelIn,
   // the New Game window's Version and Edition menus (engine.js editions)
   family: '5', edition: { version: '1.2.9', name: 'iOS', platform: 'iPhone and iPad', year: 2012 }, skins: ['ios'],
   // the New Game window lists rulesets by year, then version (engine.js ruleOptions)

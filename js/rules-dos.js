@@ -1839,19 +1839,29 @@ const base12 = {
 // side's name). 1.2F's words are French ("%d %.*ss %.*s (%d/%d)", "%.*s
 // détruit(s)", "%s morts"): given in English as 2.0.1's, as the remake
 // gives 1.2's other French lines.
+// opt.words: the window's words in another language (js/languages.js, the
+// German DOS 2.0's); left out, the English ones
+const WORDS20 = {
+  head: (star, year) => ['Summary of battle', `at ${star} in ${year}:`],
+  won: ['Congratulations!', 'You won the battle!'], lost: ['Unfortunately,', 'you lost the battle'],
+  cls: (type, n) => (E.TYPES[type] || { name: '' }).name + (n > 1 ? 's' : ''),
+  one: 'one ', dead: (n0, desc) => `${n0} dead ${desc}${n0 === 1 ? '' : 's'}`, deadPeople: (x) => `${x} dead`,
+};
 function battlePanel20(opt) {
+  const W = opt.words || WORDS20;
   const cut = (s, n) => n ? String(s).slice(0, n) : String(s);
   const desc = (d, n, mine) => {
-    const cls = cut(d.type === 'decoy' && !mine ? 'Fighter' : (E.TYPES[d.type] || { name: '' }).name, opt.cls), nm = cut(d.name, opt.name), ws = `(${d.W}/${d.S})`;
-    return (n < 1 ? `${nm} ${ws} ${cls}` : n === 1 ? `one ${nm} ${ws} ${cls}` : `${n} ${nm} ${ws} ${cls}s`).slice(0, 39);
+    const t = d.type === 'decoy' && !mine ? 'fighter' : d.type;
+    const cls = W === WORDS20 ? cut((E.TYPES[t] || { name: '' }).name, opt.cls) + (n > 1 ? 's' : '') : cut(W.cls(t, n), opt.cls), nm = cut(d.name, opt.name), ws = `(${d.W}/${d.S})`;
+    return (n < 1 ? `${nm} ${ws} ${cls}` : n === 1 ? `${W.one}${nm} ${ws} ${cls}` : `${n} ${nm} ${ws} ${cls}`).slice(0, 39);
   };
   const pop = (G, x) => (E.rules(G).fmtNum || fmt)(Math.round(x * 1e6));
   return E.makeBattlePanel({
     cols: opt.cols || 'sides', shade: !!opt.shade, pics: (n) => Math.min(n, 1),
-    head: (G, b) => ['Summary of battle', `at ${G.stars[b.star].name} in ${b.year}:`],
-    end: (G, b, won) => won ? ['Congratulations!', 'You won the battle!'] : ['Unfortunately,', 'you lost the battle' + opt.dots],
-    ship: (G, d, n, n0, mine) => n < 1 ? `${n0} dead ${desc(d, 0, mine)}${n0 === 1 ? '' : 's'}` : desc(d, n, mine),
-    planet: (G, x, x0) => x <= 0.0005 ? `${pop(G, x0)} dead` : pop(G, x),
+    head: (G, b) => W.head(G.stars[b.star].name, b.year),
+    end: (G, b, won) => won ? W.won.slice() : [W.lost[0], W.lost[1] + opt.dots],
+    ship: (G, d, n, n0, mine) => n < 1 ? W.dead(n0, desc(d, 0, mine)) : desc(d, n, mine),
+    planet: (G, x, x0) => x <= 0.0005 ? W.deadPeople(pop(G, x0)) : pop(G, x),
   });
 }
 const BATTLE_PANEL_DOS = battlePanel20({ name: 15, cls: 11, dots: '...', cols: 'mac', shade: true }), BATTLE_PANEL_MAC = battlePanel20({ dots: '…', cols: 'mac', shade: true }), BATTLE_PANEL_WIN = battlePanel20({ dots: '...', cols: 'mac', shade: true });
@@ -1953,6 +1963,8 @@ E.registerRules('dos', Object.assign({}, O, {
   aiYear: (G) => G.year + 10,
   // internals, for the Mac 1.2 ruleset built on this one (js/rules-12.js)
   shareOf, colonyMoney, shipyard, removeColony, isqrt, wpn, battleOnly: battle, base12, bars20, setBars20,
+  // the battle window in another language (js/languages.js)
+  battlePanel20,
   // not in 2.0 (CONFIRMED: no text or code for them)
   difficulty: undefined, masterPoints: undefined,
   // the unofficial 2.0.1 patch (engine.js fixed; docs/fixes.md): each fix is

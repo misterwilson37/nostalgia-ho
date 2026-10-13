@@ -14,6 +14,10 @@
 const P = 'dos:'; // the DOS skin's name for its pictures
 window.HOTHEME_OVER = {
   dir: 'assets/skins/amiga/',
+  // the Amiga game is German: New Game starts in German for the rulesets
+  // that have it (DOS 2.0 and Mac 2.0.1, js/languages.js); English can be
+  // chosen there, and is kept for this skin
+  lang: 'de',
   // the End Turn button in English, redrawn from the German one
   endTurnPic: P + 'endturn',
   endTurnKey: 'Amiga+Z',

@@ -118,7 +118,12 @@ root.HOMANUALS = {
   original: ['assets/manuals/5.0.5/index.html', 'Spaceward Ho! 5 manual'],
   claude: ['assets/manuals/5.0.5/index.html', 'Spaceward Ho! 5 manual'],
   gemini: ['assets/manuals/5.0.5/index.html', 'Spaceward Ho! 5 manual'],
-  android: ['assets/manuals/5.0.5/index.html', 'Spaceward Ho! 5 manual'],
+  // the iOS and Android games' own help page (en.lproj, fr.lproj, tr.lproj
+  // help_index.html: the same pages in both), in the game's language
+  // (rs.languages; tools/extract/ios.py, tools/extract/languages.py)
+  ios: { en: ['assets/skins/ios/help/help_index.html', 'Spaceward Ho! for iPhone and iPad help'],
+    fr: ['assets/skins/ios/help-fr/help_index.html', 'Aide de Spaceward Ho! (iPhone et iPad)'],
+    tr: ['assets/skins/ios/help-tr/help_index.html', 'Spaceward Ho! yardım (iPhone ve iPad)'] },
   dos: ['assets/manuals/dos-2.0.pdf', 'Spaceward Ho! 2.0 manual (DOS)'],
   405: ['assets/manuals/4.0.5/index.html', 'Spaceward Ho! 4.0.5 help'],
   // 3.0.1 shipped without an online manual; the 4.0.5 help is the closest
@@ -132,6 +137,7 @@ root.HOMANUALS = {
   mac20: ['assets/manuals/dos-2.0.pdf', 'Spaceward Ho! 2.0 manual (DOS; the same version as Mac 2.0.1)'],
   mac405: ['assets/manuals/4.0.5/index.html', 'Spaceward Ho! 4.0.5 help (Windows; the same version as Mac 4.0.5)'],
 };
+root.HOMANUALS.android = root.HOMANUALS.ios;
 // the Mac editions' hover help: the same version's other edition's texts
 root.HOHELP_RULES.mac20 = root.HOHELP_RULES.mac20 || root.HOHELP_RULES.dos;
 root.HOHELP_RULES.mac405 = root.HOHELP_RULES.mac405 || root.HOHELP_RULES['405'];

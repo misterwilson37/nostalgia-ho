@@ -322,13 +322,15 @@ function shipName505(G, p, type, set) {
   const n = set ? 15 : L.length;
   if (n < 1) return '';
   const i0 = set ? RI(G, 0, 14) : clockRI(G, 0, n - 1);
-  const used = new Set(p.designs.filter(d => !d.scrapped).map(d => String(d.name).toLowerCase()));
+  // (in a game in another language, rs.languages: the version's own names
+  // are compared and drawn, then the name is put in the game's language)
+  const used = new Set(p.designs.filter(d => !d.scrapped).map(d => String(E.ownName(G, d.name, 'ships')).toLowerCase()));
   let i = i0;
   for (;;) {
     const name = L[i] || ''; // past the list's end GetIndString gives an empty name
     const free = !used.has(name.toLowerCase());
     i = (i + 1) % n;
-    if (free || i === i0) return name;
+    if (free || i === i0) return E.gameName(G, name, 'ships');
   }
 }
 // A type made by the game (set-up, a Radical discovery, a computer or auto
@@ -380,7 +382,10 @@ function computerIdentity505(G, k, nComp, humans) {
     for (let i = nHum; i < all.length; i++) {
       if (!all[i]) continue;
       const male = slots[i - nHum].male;
-      while (all.some((o, j) => j !== i && clash(all[i], o))) {
+      // (in a game in another language, rs.languages, a computer's name is
+      // drawn again when a human has it in either language)
+      const either = (o, j) => clash(all[i], o) || (j < nHum && G.opts && G.opts.lang && clash(String(E.gameName(G, all[i], male ? 'men' : 'women')), o));
+      while (all.some((o, j) => j !== i && either(o, j))) {
         all[i] = male ? RENAME_MEN.concat(RENAME_WOMEN)[next.men++] || '' : RENAME_WOMEN[next.women++] || '';
         if (!all[i]) break;
       }
