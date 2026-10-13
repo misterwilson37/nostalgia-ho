@@ -2963,3 +2963,16 @@ Object.defineProperties(E.RULESETS.original, Object.fromEntries(Object.entries({
 Object.defineProperty(E.RULESETS.original, 'hintTexts', { enumerable: false, configurable: true,
   get: () => (DATA.hints || []).slice(3, 43) });
 })(this);
+  // CONFIRMED (FUN_10098650, the income view; FUN_100552e0, the short number; STR# 6003 item 8
+  // "(Int: $%s)"): the interest (player +0x4c) is written beside the income as a short number: under
+  // 1,000 as it is, 1,000 to 9,999 "1,234", 10,000 to 999,999 "12K" (thousands, cut), 1 to 9.99
+  // million "1.23M", from 10 million "12M"; a negative one with a "-" in front. There is no row of
+  // its own for it.
+  interestShort(n) {
+    const neg = n < 0, a = Math.abs(Math.trunc(n)), m = Math.trunc(a / 1e6), k = Math.trunc((a % 1e6) / 1000), pre = neg ? '-' : '';
+    if (m >= 1 && m <= 9) return `${pre}${m}.${String(Math.trunc(k / 10)).padStart(2, '0')}M`;
+    if (m >= 10) return `${pre}${m}M`;
+    if (k >= 10) return `${pre}${k}K`;
+    if (k >= 1) return `${pre}${k},${String(a % 1000).padStart(3, '0')}`;
+    return `${pre}${a % 1000}`;
+  },

@@ -382,7 +382,7 @@ root.HOVERSIONS = {
       'The Group Fleets window: “Merge all fleets here” and splitting follow its rules (Biologicals keep to themselves; the fleet that takes ships keeps its orders and the lower fuel).',
       'Options locked by rank (“Need more MPs”): every option is open.',
       'The turn time limit and network play.',
-      'The rank window’s own words for naming a star (the iOS version’s are shown), and the shorter way the income panel wrote the interest.',
+      'The rank window’s own words for naming a star (the iOS version’s are shown).',
     ],
     deltaTao: DT_5,
     requirements: REQ_5,

@@ -1285,8 +1285,8 @@ function renderPanel() {
   const net = pr.net;
   panel.append(el('section', { class: 'box info' },
     row('Savings', panelFig('savings', p.savings, true), p.savings < 0 ? 'neg' : '', 'savings'),
-    row('Income', panelFig('income', pr.income, true), pr.income < 0 ? 'neg' : '', 'income'),
-    pr.interest ? row(pr.interest > 0 ? 'Interest' : 'Interest owed', money(pr.interest), pr.interest < 0 ? 'neg' : '', 'interest') : null,
+    row('Income', panelFig('income', pr.income, true) + (HO.rules(G).interestShort ? ` (Int: $${HO.rules(G).interestShort(pr.interest)})` : ''), pr.income < 0 ? 'neg' : '', 'income'),
+    pr.interest && !HO.rules(G).interestShort ? row(pr.interest > 0 ? 'Interest' : 'Interest owed', money(pr.interest), pr.interest < 0 ? 'neg' : '', 'interest') : null,
     row('Metal', panelFig('metal', p.metal, false), '', 'metal'),
   ));
   // budget bars

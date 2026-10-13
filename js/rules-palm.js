@@ -380,7 +380,7 @@ const rs = Object.assign(base, {
   // the Palm keeps Split… and "Merge all fleets here" (docs/open-questions.md)
   organizeFleets: null,
   // 5.0.5's one-time fuel alert is a mouse drag's (FUN_1008c5f0); the Palm's stylus drag wasn't traced
-  fuelAlert: null,
+  fuelAlert: null, interestShort: null, // 5.0.5's income view (the Palm's wasn't traced)
   dragTech: dragTechPalm, msgText: msgTextPalm, messageEvacuate,
   // CONFIRMED (FUN_0004435a, the Build Ships form's capacity; FUN_0004248a, the check box 0x709 sets
   // the dialog's byte +0x1aa, left 0 when the form opens): "Allow Debt" off, the most you can order is

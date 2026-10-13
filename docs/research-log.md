@@ -921,8 +921,8 @@ These are what 5.0.5's code does and what the remake now does; they look like sl
   (`FUN_10098650`) writes the interest shorter ("12K", "1.23M", `FUN_100552e0`) inside STR#
   6003 item 8, "(Int: $%s)" (found in the resource fork; the same list holds 4 "(+ $%s)",
   5 "(- $%s)", 6 "(+ %s)", 7 "(- %s)"; the view loads item 8 and then calls `FUN_100552e0`
-  on the player record's +0x4c, drawn right-aligned 0x17 pixels down). Not built: the
-  remake's Interest row is a row of its own, written as the other sums.
+  on the player record's +0x4c, drawn right-aligned 0x17 pixels down). Now built
+  (`rs.interestShort`).
 
 ## Palm 5 (2003)
 

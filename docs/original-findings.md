@@ -1335,4 +1335,4 @@ CONFIRMED for the geometry; the remake blends black at 28 % (LIKELY). Palm: `FUN
 
 The income view's interest figure (`FUN_10098650`, player +0x4c through `FUN_100552e0`, which
 writes it as "$12K" / "$1.23M" style short numbers) sits in STR# 6003 item 8: "(Int: $%s)".
-CONFIRMED (resource fork). Neighbours: 4 "(+ $%s)", 5 "(- $%s)", 6 "(+ %s)", 7 "(- %s)".
+CONFIRMED (resource fork). Done: `rs.interestShort` (the income row reads "$30,066 (Int: $12K)"; short numbers: `FUN_100552e0` gives "1,234", "12K", "1.23M", "12M", a "-" for a negative one). Neighbours: 4 "(+ $%s)", 5 "(- $%s)", 6 "(+ %s)", 7 "(- %s)".

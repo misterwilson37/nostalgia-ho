@@ -134,7 +134,6 @@ planned order:
 
 ### 5.0.5
 
-- The income view's short interest figure ("(Int: $12K)").
 - The turn time limit.
 
 ### 4.0.5
