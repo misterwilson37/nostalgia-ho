@@ -2834,8 +2834,29 @@ function setup505(G, p, home, st) {
   p.tm = p.oInc; p.net505 = p.oInc; p.lim505 = trunc(-p.oInc / 2) * 10;
 }
 
+// ---------- the turn time limit (FUN_10054c60, FUN_10066260, FUN_10058360) ----------
+// CONFIRMED (the network New Game window's "Turn Time Limit:" popup TTLT,
+// FUN_10054c60): 30 Seconds, 45 Seconds, 1 Minute, 1 Min. 30 Secs., 2
+// Minutes, 4 Minutes: 1800 to 14400 ticks (game +100). Each second of the
+// player's turn adds its ticks (player +0x98); past the limit the excess
+// comes out of the bank (+0x94) at once, with sound 7004 when the bank first
+// pays; at 600 ticks or less left, 7012; the bank spent, End Turn (command
+// 0x138e). At End Turn (FUN_10058360) ticks left under the limit are
+// banked, at most half the limit a turn and twice the limit in all. A
+// network game's setting: the remake offers it for several people taking
+// turns, the hot seat standing in for network play; no limit is the
+// remake's own first choice.
+const TIME_LIMIT_505 = {
+  ids: ['original'], unit: 1 / 60, label: 'Turn Time Limit', hotSeat: true,
+  choices: [[0, 'None'], [1800, '30 Seconds'], [2700, '45 Seconds'], [3600, '1 Minute'], [5400, '1 Min. 30 Secs.'], [7200, '2 Minutes'], [14400, '4 Minutes']],
+  step: 60, sounds: { bonus: 7004, timeUp: 7012 }, warn: 600, drain: true,
+  left: (T, used, bank) => T.limit - used + Math.max(0, bank),
+  timeUp: (T, used, bank) => used >= T.limit && bank <= 0,
+  bankAtEnd: (T, used, bank) => T.limit - used > 0 ? Math.min(bank + Math.min(T.limit - used, Math.trunc(T.limit / 2)), 2 * T.limit) : bank,
+};
 E.registerRules('original', {
   label: 'Original (decompiled from 5.0.5)',
+  timeLimit: TIME_LIMIT_505,
   // the New Game window's Version and Edition menus (engine.js editions)
   family: '5', edition: { version: '5.0.5', name: 'Mac', platform: 'Mac OS 8.6, 9 and X', year: 2003 }, skins: ['classic'],
   // the New Game window lists rulesets by year, then version (engine.js ruleOptions)
@@ -2945,6 +2966,19 @@ Object.defineProperties(E.RULESETS.original, Object.fromEntries(Object.entries({
   // no orders and, the first time ever, Alert String 30 ("Sorry, but that fleet doesn't have enough
   // fuel ..."; preference bit 1 at +0x290); after that, nothing.
   fuelAlert: '505',
+  // CONFIRMED (FUN_10098650, the income view; FUN_100552e0, the short number; STR# 6003 item 8
+  // "(Int: $%s)"): the interest (player +0x4c) is written beside the income as a short number: under
+  // 1,000 as it is, 1,000 to 9,999 "1,234", 10,000 to 999,999 "12K" (thousands, cut), 1 to 9.99
+  // million "1.23M", from 10 million "12M"; a negative one with a "-" in front. There is no row of
+  // its own for it.
+  interestShort(n) {
+    const neg = n < 0, a = Math.abs(Math.trunc(n)), m = Math.trunc(a / 1e6), k = Math.trunc((a % 1e6) / 1000), pre = neg ? '-' : '';
+    if (m >= 1 && m <= 9) return `${pre}${m}.${String(Math.trunc(k / 10)).padStart(2, '0')}M`;
+    if (m >= 10) return `${pre}${m}M`;
+    if (k >= 10) return `${pre}${k}K`;
+    if (k >= 1) return `${pre}${k},${String(a % 1000).padStart(3, '0')}`;
+    return `${pre}${a % 1000}`;
+  },
   // CONFIRMED (FUN_1008c5f0, FUN_1008d140): a fleet dragged on the map is
   // given the route DeterminePath (FUN_1007d260) finds from its star with the
   // fuel left and its Range, as the computers' are (js/ai-original.js mapRoute)
@@ -2963,16 +2997,3 @@ Object.defineProperties(E.RULESETS.original, Object.fromEntries(Object.entries({
 Object.defineProperty(E.RULESETS.original, 'hintTexts', { enumerable: false, configurable: true,
   get: () => (DATA.hints || []).slice(3, 43) });
 })(this);
-  // CONFIRMED (FUN_10098650, the income view; FUN_100552e0, the short number; STR# 6003 item 8
-  // "(Int: $%s)"): the interest (player +0x4c) is written beside the income as a short number: under
-  // 1,000 as it is, 1,000 to 9,999 "1,234", 10,000 to 999,999 "12K" (thousands, cut), 1 to 9.99
-  // million "1.23M", from 10 million "12M"; a negative one with a "-" in front. There is no row of
-  // its own for it.
-  interestShort(n) {
-    const neg = n < 0, a = Math.abs(Math.trunc(n)), m = Math.trunc(a / 1e6), k = Math.trunc((a % 1e6) / 1000), pre = neg ? '-' : '';
-    if (m >= 1 && m <= 9) return `${pre}${m}.${String(Math.trunc(k / 10)).padStart(2, '0')}M`;
-    if (m >= 10) return `${pre}${m}M`;
-    if (k >= 10) return `${pre}${k}K`;
-    if (k >= 1) return `${pre}${k},${String(a % 1000).padStart(3, '0')}`;
-    return `${pre}${a % 1000}`;
-  },

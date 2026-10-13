@@ -2405,8 +2405,39 @@ const hall = {
 };
 
 // ---------- the ruleset ----------
+// ---------- the turn time limit (New Game window; FUN_0047f76e, FUN_004152f6) ----------
+// CONFIRMED (Windows' New Game window @00401810-1816 and the galaxy set-up
+// @00407220-0040723c; Mac GetDialogValues @10c8e, MENU 6050; EndTurnMenuCall
+// @e0920, TimeIsUp @1119ca, DrawTimeClock @115af2, CheckOnAutoplay @14114a):
+// No Time Limit, Fast (30/120), Medium (60/180), Slow (90/180): 1800, 3600
+// or 5400 seconds a turn (galaxy +0x1a), with 3600, 5400 or 7200 (+0x1c) of
+// which twice is the most a player may bank (so Slow banks up to 240
+// minutes, though its name says 180). The seconds count only while the
+// player's map is up, at most 60 at a time. At End Turn, seconds left are
+// banked (at most 900 a turn, up to twice +0x1c), seconds over are taken
+// from the bank (player +0x60). When this turn's time is gone the clock
+// plays sound 7004 (bonus time, once a turn, if anything is banked) and
+// shows the bank counting down; at 600 seconds or less left in all, 7012;
+// past the turn's time and the bank, open windows are closed and the turn
+// is ended as it stands (EndTurnMenuCall, which lets the computer play it
+// for a player whose Auto Play is "Have computer play for me"). The limit
+// counts in the rating of a win (winDifficulty).
+const TIME_LIMIT_405 = {
+  ids: ['405', 'mac405'], unit: 1, label: 'Turn Time Limit',
+  choices: [[0, 'No Time Limit'], [1800, 'Fast (30/120)'], [3600, 'Medium (60/180)'], [5400, 'Slow (90/180)']],
+  caps: { 1800: 3600, 3600: 5400, 5400: 7200 }, step: 60, sounds: { bonus: 7004, timeUp: 7012 }, warn: 600,
+  // seconds left in all: this turn's, then the bank
+  left: (T, used, bank) => T.limit - used + Math.max(0, bank),
+  timeUp: (T, used, bank) => used > T.limit + Math.max(0, bank),
+  bankAtEnd: (T, used, bank) => {
+    const c = used - T.limit;
+    if (c < 0) return Math.min(bank + Math.min(-c, 900), 2 * T.cap);
+    return bank - Math.min(c, bank);
+  },
+};
 E.registerRules('405', Object.assign({}, D, {
   label: 'Windows 95 4.0.5 (1996)',
+  timeLimit: TIME_LIMIT_405,
   // CONFIRMED (FUN_0042e5c2, used by the report texts FUN_0046ec5a and the
   // windows' text; Mac 4.0.5's "%d,%.3dK" too): "12,345K" from ten million
   fmtNum: E.niceNum,

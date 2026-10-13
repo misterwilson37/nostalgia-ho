@@ -97,8 +97,10 @@ All of these are in the web app's New Game window for Original rules. The web
 app also keeps its own **Novas** check box (the original has no switch for
 this; leave it ticked to match).
 
-Network-only settings (turn time limit, password, "Fair Start", "All Humans
-Are Best Buddies") are left out; see section 15.
+Network-only settings (password, "Fair Start", "All Humans Are Best Buddies") are left
+out; see section 15. The turn time limit (popup TTLT: 30 seconds to 4 minutes, in ticks;
+`FUN_10054c60`, the bank `FUN_10058360`, the countdown and End Turn `FUN_10066260`) is
+offered when several people take turns (`rs.timeLimit`).
 
 ### How many stars (CONFIRMED)
 

@@ -206,7 +206,7 @@ window.HOMAC4 = {
   // the remake does, so it is left out.
   menuLayout: {
     File: [['New Game…', 'Game/New game…'], '-',
-      ['End Turn', () => { const b = document.querySelector('#msg .clock'); if (b) b.click(); }], '-',
+      ['End Turn', () => { const b = document.querySelector('#msg .clock'); if (b) b.click(); }], ['End Turn and Switch Players', 'Game/#1'], '-',
       ['Quit', 'Game/Quit to title']],
     Options: [['Auto Play…', 'Game/Auto play…'], ['Auto-Play This Turn', 'Game/Auto-play this turn'], '-',
       [null, 'View/#4'], [null, 'View/#5'], '-', // Sound

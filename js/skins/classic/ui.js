@@ -1616,13 +1616,13 @@ function renderMsg() {
       const im = IMG[T.endTurnPic], H = (im && im.height) || Y[4];
       btn.append(el('span', { class: 'clockyear', 'aria-hidden': 'true', style: `left:${Y[0] / Y[4] * 100}%;top:${Y[1] / H * 100}%;width:${Y[2] / Y[4] * 100}%;height:${Y[3] / H * 100}%` }, String(G.year)));
     }
-    box.append(btn);
+    box.append(btn); clockTime();
     return;
   }
   const clock = el('button', { class: 'clock', onclick: doEndTurn, 'aria-label': 'End turn', 'aria-keyshortcuts': 'T', 'data-help': 'endTurn', 'data-key': END_KEY() },
     el('span', { class: 'face', html: '<svg viewBox="0 0 40 40" width="34" height="34" aria-hidden="true"><circle cx="20" cy="20" r="17" fill="#fffef6" stroke="#222" stroke-width="2.5"/><path d="M20 20V8M20 20l8 5" stroke="#222" stroke-width="3" stroke-linecap="round"/></svg>' }),
     el('span', null, 'End turn'));
-  box.append(clock);
+  box.append(clock); clockTime();
 }
 // ---------- ranks and master points ----------
 // The original keeps a record of your wins. Each win in an Original-rules
@@ -1843,6 +1843,8 @@ function doEndTurn(confirmed) {
     if (starved.length && rs.underfunded) { confirmBox(`${starved.map(s => s.name).join(', ')} ${starved.length === 1 ? 'isn’t' : 'aren’t'} getting enough money to cover ${starved.length === 1 ? 'its' : 'their'} losses. Ending the turn will cost colonists, and a colony left with none is abandoned. Go ahead?`, () => doEndTurn(true)); return; }
     if (starved.length) { confirmBox(`You aren’t spending any money on ${starved.map(s => s.name).join(', ')}. Ending the turn will abandon ${starved.length === 1 ? 'it' : 'them'}. Go ahead?`, () => doEndTurn(true)); return; }
   }
+  // the turn time limit: this turn's time banked or taken from the bank
+  timeAtEnd(me());
   // the game as it was: put back if the turn throws (playTurn)
   const before = HO.save(G);
   // hot seat: the turn goes to the next human; the year moves on after the last one
@@ -1885,6 +1887,64 @@ function addTurnNotes(p) {
 function hotSeat() { return !!G && HO.humans(G).length > 1; }
 function seatOrder() {
   return HO.humans(G).filter(p => (p.alive && !p.auto) || (!p.alive && !p.sawEnd && (p.inbox || []).length));
+}
+// ---------- the turn time limit (rs.timeLimit, G.opts.timeLimit) ----------
+// 4.0.5's and 5.0.5's: the player's time this turn (p.timeUsed) and bank
+// (p.timeBank), in the version's units (4.0.5 seconds, 5.0.5 ticks), count
+// while the player's map is up, at most a minute at a time; the version
+// says what is banked at End Turn and when time is up, and then the open
+// windows close and the turn ends as it stands. Off unless chosen.
+function timeLimit() {
+  if (!G || !G.opts || !(G.opts.timeLimit > 0)) return null;
+  const T = HO.rules(G).timeLimit;
+  return T && T.ids.includes(G.rules) ? Object.assign({}, T, { limit: G.opts.timeLimit, cap: (T.caps || {})[G.opts.timeLimit] || G.opts.timeLimit }) : null;
+}
+const pad2 = (n) => String(n).padStart(2, '0');
+// the time left in all (this turn's, then the bank), as h:mm:ss or m:ss
+function timeLeftText(T, p) {
+  const s = Math.max(0, Math.ceil(T.left(T, p.timeUsed || 0, p.timeBank || 0) * T.unit)), h = Math.floor(s / 3600), m = Math.floor(s / 60) % 60;
+  return h ? `${h}:${pad2(m)}:${pad2(s % 60)}` : `${m}:${pad2(s % 60)}`;
+}
+const timeCounting = () => !!G && !G.over && me() && me().human && me().alive && !(G.done || []).includes(ME) && !($('#handover') && !$('#handover').hidden) && !$('#titlescreen:not([hidden])');
+let timeLast = 0, timeSaved = 0;
+function timeTick() {
+  const now = Date.now(), dt = Math.min(60, Math.max(0, (now - (timeLast || now)) / 1000)); timeLast = now;
+  const T = timeLimit(); if (!T || !timeCounting()) return;
+  const p = me(), prev = p.timeUsed || 0, bank0 = p.timeBank || 0, left0 = T.left(T, prev, bank0);
+  let used = prev + dt / T.unit, up = false;
+  p.timeFlags = p.timeFlags || {};
+  if (used > T.limit && prev <= T.limit && bank0 > 0 && !p.timeFlags.bonus) { p.timeFlags.bonus = true; Sound.play(T.sounds.bonus); }
+  if (T.drain && used > T.limit) { p.timeBank = bank0 - (used - T.limit); used = T.limit; if (p.timeBank < 0) { p.timeBank = 0; up = true; } }
+  p.timeUsed = used;
+  if (left0 > T.warn && T.left(T, used, p.timeBank || 0) <= T.warn && !p.timeFlags.warn) { p.timeFlags.warn = true; Sound.play(T.sounds.timeUp); }
+  clockTime();
+  if (up || T.timeUp(T, used, p.timeBank || 0)) { closeModal(); toast(`${p.name}’s time is up.`); doEndTurn(true); return; }
+  if (now - timeSaved > 10000) { timeSaved = now; save(); }
+}
+setInterval(timeTick, 1000);
+// at End Turn: this turn's time goes to the bank (or comes out of it)
+function timeAtEnd(p) {
+  const T = timeLimit(); if (!T || !p) return;
+  p.timeBank = T.bankAtEnd(T, p.timeUsed || 0, p.timeBank || 0);
+  p.timeUsed = 0; p.timeFlags = {};
+}
+// the countdown on the End Turn button (4.0.5: its black window, T.endTurnYear)
+function clockTime() {
+  const T = timeLimit(), b = $('#msg .clock'); if (!T || !b) return;
+  let t = b.querySelector('.timeleft');
+  if (!t) { t = el('span', { class: 'timeleft' + (b.querySelector('.clockyear') ? ' inyear' : '') }); b.append(t); const y = b.querySelector('.clockyear'); if (y) y.style.visibility = 'hidden'; }
+  const p = me(), over = (p.timeUsed || 0) >= T.limit;
+  t.textContent = timeLeftText(T, p); t.classList.toggle('bonus', over);
+  b.title = `${T.label}: ${t.textContent} left${over ? ' (bonus time)' : ''}`;
+  const y = b.querySelector('.clockyear'); if (y) { t.style.cssText = y.style.cssText.replace(/visibility:[^;]*;?/, ''); }
+}
+// End Turn and Switch Players (rs.switchPlayers, Mac 4.0.5): ends this
+// player's turn if it isn't ended, and passes the computer to the next
+function switchPlayers() {
+  if (!G || G.over || !hotSeat()) return;
+  if (!(G.done || []).includes(ME)) { doEndTurn(); return; }
+  const next = seatOrder().find(p => !(G.done || []).includes(p.id));
+  if (next) { G.cur = next.id; save(); handOver(next); }
 }
 function handOver(p) {
   closeModal(); clearInterval(UI.anim);
@@ -3797,6 +3857,13 @@ function newGameDialog() {
     sel('w_size', 'Galaxy size', [['small', 'Small'], ['medium', 'Medium'], ['large', 'Large'], ['xl', 'Extra Large'], ['huge', 'Humongous']], 'medium'),
     sel('w_density', 'Galaxy density', [['dense', 'Dense'], ['sparse', 'Sparse']], 'dense'),
     sel('w_years', 'Years per turn', [['10', '10'], ['20', '20'], ['30', '30'], ['50', '50']], '10'));
+  // the turn time limit (rs.timeLimit: 4.0.5's menu, 5.0.5's network popup,
+  // offered for several people taking turns) and Mac 4.0.5's "Automatically
+  // end turn for unconnected players" (rs.autoEndBox), which no game here needs
+  const tlSel = el('select', { name: 'timelimit', 'aria-label': 'Turn time limit' });
+  const tlRow = el('label', { class: 'tlrow', hidden: true }, el('span', null, 'Turn Time Limit'), tlSel);
+  const autoEndBox = el('label', { class: 'chk', hidden: true, title: 'Shown as the Mac had it. It ends the turn of a player whose computer isn’t connected to the game; with no network play here, nobody is ever unconnected, so it changes nothing.' },
+    el('input', { type: 'checkbox', name: 'autoend' }), el('span', null, ''));
   // Mac 3.0.1 rules: its Create New Galaxy window (DITL 6080) and Join skill (DITL 4010)
   const mac3Box = el('div', { class: 'group' },
     sel('m_skill', 'Your skill', [['novice', 'Novice'], ['beginner', 'Beginner'], ['normal', 'Normal'], ['advanced', 'Advanced'], ['expert', 'Expert']], 'normal'),
@@ -3876,11 +3943,13 @@ function newGameDialog() {
     seats,
     startSel,
     claudeBox, origBox, dosBox, w95Box, mac3Box, mac12Box,
+    tlRow,
     buddyRow,
     el('fieldset', { class: 'opts' }, el('legend', null, 'Options'),
       el('label', { class: 'chk' }, el('input', { type: 'checkbox', name: 'alliances', checked: 'checked' }), el('span', null, 'Alliances')),
       el('label', { class: 'chk' }, el('input', { type: 'checkbox', name: 'luck' }), el('span', null, 'Luck in battles')),
-      el('label', { class: 'chk' }, el('input', { type: 'checkbox', name: 'novas', checked: 'checked' }), el('span', null, 'Novas'))),
+      el('label', { class: 'chk' }, el('input', { type: 'checkbox', name: 'novas', checked: 'checked' }), el('span', null, 'Novas')),
+      autoEndBox),
     // the line: below it, the remake's own choices
     el('hr', { class: 'ngline' }),
     pickRow,
@@ -3938,12 +4007,18 @@ function newGameDialog() {
     f.querySelector('select[name=computers] option[value="0"]').disabled = nh < 2;
     if (nh < 2 && d.computers === '0') f.querySelector('select[name=computers]').value = '1';
     const claudeR = k === 'claude';
+    // the version's time limit menu (its own choices, kept while it stays the same)
+    const TLr = ngr.timeLimit && ngr.timeLimit.ids.includes(d.rules) && (!ngr.timeLimit.hotSeat || nh > 1) ? ngr.timeLimit : null;
+    tlRow.hidden = !TLr;
+    if (TLr && tlSel.dataset.rules !== d.rules) { tlSel.dataset.rules = d.rules; tlSel.replaceChildren(...TLr.choices.map(([v, t]) => el('option', { value: String(v) }, t))); }
+    if (!TLr) tlSel.value = '0';
+    autoEndBox.hidden = !ngr.autoEndBox; if (ngr.autoEndBox) autoEndBox.lastChild.textContent = ngr.autoEndBox;
     f.querySelector('fieldset.opts').hidden = (!orig && !w95 && !mac3 && !claudeR) || noBoxes;
     f.querySelector('input[name=novas]').closest('label').hidden = w95 || mac3; // 4.0.5 and 3.0.1 always have novas
     f.querySelector('input[name=luck]').closest('label').hidden = mac3; // 3.0.1 always has battle luck
     for (const o of f.querySelectorAll('.slider output')) { const inp = o.previousElementSibling; if (!o.querySelector('small')) o.textContent = inp.value; }
     rating.textContent = orig ? String(rater(d.rules, 'original').difficulty(origOpts(d)))
-      : w95 ? String(rater(d.rules, '405').difficulty({ computers: d.computers === 'any' ? 4 : +d.computers, iq: d.w_iq, start: d.w_skill, shape: d.w_shape, size: d.w_size, density: d.w_density }))
+      : w95 ? String(rater(d.rules, '405').difficulty({ computers: d.computers === 'any' ? 4 : +d.computers, iq: d.w_iq, start: d.w_skill, shape: d.w_shape, size: d.w_size, density: d.w_density, timeLimit: +d.timelimit || 0 }))
       : mac3 ? String(rater(d.rules, '301').difficulty({ computers: d.computers === 'any' ? 4 : +d.computers, iq: d.m_iq, start: d.m_skill, shape: d.m_shape, size: d.m_size, density: d.m_density }))
       : `Not rated with ${dos ? '2.0' : mac12 ? '1.2' : 'Claude'} rules`;
     rating.className = orig || w95 || mac3 ? '' : 'none';
@@ -3989,7 +4064,8 @@ function newGameDialog() {
     const lang = !langRow.hidden && d.lang ? d.lang : null;
     if (lang) localStorage.setItem(langKey(d.rules), lang);
     // hints: the creator's "Give helpful game play hints" preference, which 5.0.5 and the Palm game read for the first messages (rs.welcome)
-    const common = { modern: !!d.modern, ...(patch ? { patch: true } : {}), ...(hoedown ? { hoedown: true } : {}), ...(snd ? { sounds: snd } : {}), ...(lang ? { lang } : {}), hints: !!Prefs.hints, humans, seed: (Math.random() * 2 ** 31) | 0, name: d.name || 'You', galaxy: d.galaxy || 'Milky Way', female: d.female === '1', computers: +d.computers, start: d.start, rules: d.rules, alliances: !!d.alliances, luck: !!d.luck, novas: !!d.novas, ...keptStarsOpt(d.rules), ...keptNamesOpt(d.rules) };
+    const common = { modern: !!d.modern, ...(patch ? { patch: true } : {}), ...(hoedown ? { hoedown: true } : {}), ...(snd ? { sounds: snd } : {}), ...(lang ? { lang } : {}), hints: !!Prefs.hints, humans, seed: (Math.random() * 2 ** 31) | 0, name: d.name || 'You', galaxy: d.galaxy || 'Milky Way', female: d.female === '1', computers: +d.computers, start: d.start, rules: d.rules, alliances: !!d.alliances, luck: !!d.luck, novas: !!d.novas, ...keptStarsOpt(d.rules), ...keptNamesOpt(d.rules),
+      ...(+d.timelimit > 0 && !tlRow.hidden ? { timeLimit: +d.timelimit } : {}), ...(d.autoend && !autoEndBox.hidden ? { autoEnd: true } : {}) };
     const k = kindOf(d.rules);
     if (k === 'original') {
       localStorage.setItem('ho5.iq', d.o_iq);
@@ -4051,7 +4127,7 @@ function save() { if (!G) return; try { localStorage.setItem('ho5.save', HO.save
 // ---------- menus ----------
 function setupMenus() {
   const menus = {
-    Game: [['New game…', newGameDialog], ['Players and history', () => G && openPlayers()], ['Auto-play this turn', () => playOneTurn()], ['Auto play…', () => G && !G.over && (hotSeat() ? toast('Auto play is for one-player games.') : openAutoPlay())], ['Preferences…', openPrefs], ['Rank history…', openRanks, () => !G || hasRanks(G)], [() => ((HO.RULESETS[rulesId()] || {}).gameCenter || {}).menu || 'Rank and Game Center…', openGameCenter, () => !!(HO.RULESETS[rulesId()] || {}).gameCenter],
+    Game: [['New game…', newGameDialog], [() => (G && HO.rules(G).switchPlayers) || 'End turn and switch players', () => switchPlayers(), () => !!(G && HO.rules(G).switchPlayers && hotSeat())], ['Players and history', () => G && openPlayers()], ['Auto-play this turn', () => playOneTurn()], ['Auto play…', () => G && !G.over && (hotSeat() ? toast('Auto play is for one-player games.') : openAutoPlay())], ['Preferences…', openPrefs], ['Rank history…', openRanks, () => !G || hasRanks(G)], [() => ((HO.RULESETS[rulesId()] || {}).gameCenter || {}).menu || 'Rank and Game Center…', openGameCenter, () => !!(HO.RULESETS[rulesId()] || {}).gameCenter],
       ['Master Point List…', () => openMasterList(), () => hasHall(G)], ['Hall of Fame…', () => openHall('fame'), () => hasHall(G)], ['Hall of Shame…', () => openHall('shame'), () => hasHall(G)], ['-'], ['Quit to title', () => { save(); Sound.play(7002); G = null; renderPanel(); draw(); $('#panel').innerHTML = ''; $('#msg').innerHTML = ''; titleScreen(); }]],
     Ships: [['Build ships at selected colony…', () => { if (G && UI.sel != null && G.stars[UI.sel].owner === ME) openBuild(UI.sel); else toast('Select one of your colonies first.'); }], ['Review battle…', () => G && openBattleList()], ['List all fleets…', () => G && openFleetList()],
       [() => scrapWords('fleet')[G && curFleet() && curFleet().scrap301 ? 1 : 0], () => { if (!G || G.over) return; const f = curFleet(); if (f) toggleScrapFleet(f); else toast('Select one of your fleets first.'); }, () => marksScrap()],

@@ -494,6 +494,14 @@ Mac does otherwise:
    Gunfighter" as one and "%s: %s" past 1,000,000; dates as month/day/whole year
    (`Secs2Date`, "%d/%d/%d"); "Loser:" with its colon (DITL 4110).
 
+Built since: the turn time limit (both: `rs.timeLimit`, the New Game menu, the countdown
+and the bank, `EndTurnMenuCall`, `TimeIsUp`, `DrawTimeClock`, `FUN_0047f76e`,
+`FUN_004152f6`), and for the Mac the New Game window's "Automatically end turn for
+unconnected players" (`rs.autoEndBox`, no effect) and End Turn and Switch Players
+(`rs.switchPlayers`, `ServerEndAroundSwitch`). Luck in Battles was already in the window,
+and the four winners' star names are drawn as the window opens (`rs.nameAStar.pick`
+'run'), with nothing of them shown.
+
 ### Mac-only interface
 
 - **The colour-monitor joke** (`AddEasterEggs` @b000c, segment "TopSecret"): in a random

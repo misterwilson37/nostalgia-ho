@@ -134,15 +134,11 @@ planned order:
 
 ### 5.0.5
 
-- The turn time limit.
 
 ### 4.0.5
 
-- The turn time limit, and the computer taking over for a human who runs out of time.
 - The date jokes.
-- Mac: the New Game window's Luck in Battles, "Automatically end turn for unconnected
-  players", the time limit menu and the winners' star names.
-- Mac: the floating windows, Switch Players and the colour-monitor joke.
+- Mac: the floating windows and the colour-monitor joke.
 
 ### 3.0.1
 
@@ -219,6 +215,9 @@ Where a browser can't do what the original did, or the remake had to pick.
 - Options locked by rank are all open.
 - A between-turn hint comes once per End Turn (5.0.5: one per 10-year step).
 - Past players' names aren't kept for later games' computers.
+- The turn time limit (a network game's setting in 5.0.5) is offered when several people
+  take turns, with "None" as the remake's own first choice; its countdown is written on
+  the End Turn button.
 - Gifts: the sender hears at once, not at the end of the turn.
 - The master points one win may add are worked out at the win (5.0.5: when you joined).
 - A purchase that fails for money still uses a building place in 5.0.5; the remake stops
@@ -241,6 +240,14 @@ Where a browser can't do what the original did, or the remake had to pick.
 - Windows keeps its ten ranks (the Mac has eleven): it looks like a choice for that build.
 - Mac: the second random generator lives in the saved game, and the Preferences' name
   lists aren't kept.
+- The turn time limit's countdown shows the time left in all (this turn's, then the bank)
+  in the End Turn button's black window; the original showed the bank there and this
+  turn's time with the clock's hand. When time runs out the turn ends as it stands, as
+  the original's own machine did; the computer plays it only for a player whose Auto Play
+  is "Have computer play for me". The server's IQ 10 turn for a human who hasn't ended a
+  turn in ten years (`DoOneTurn`) needs network play, so it never comes up.
+- Mac: "Automatically end turn for unconnected players" is in the New Game window but
+  changes nothing (no network play; its tooltip says so).
 
 ### 3.0.1
 

@@ -201,6 +201,16 @@ const FIXES = W.fixes.filter(f => MAC_SLIPS.includes(f.id)).concat([
 
 // Mac 4.0.5 plays 4.0.5's game (js/rules-405.js), with the differences above
 E.registerRules('mac405', Object.assign({}, W, {
+  // CONFIRMED (DITL 6080 item 15, the option word's bit 8; DrawIconRect
+  // @11537c, CheckOnAutoplay @14114a): "Automatically end turn for
+  // unconnected players" counts a player whose machine isn't connected as
+  // done. Shown in the New Game window as the Mac had it; with no network
+  // play nobody is ever unconnected, so it changes nothing (G.opts.autoEnd).
+  autoEndBox: 'Automatically end turn for unconnected players',
+  // CONFIRMED (MENU 129 "End Turn and Switch Players", DoFileMenu @83602 case
+  // 9, ServerEndAroundSwitch @14360a): ends this player's turn if it isn't
+  // ended, saves, and opens the game again for the next player on this Mac
+  switchPlayers: 'End Turn and Switch Players',
   // the bars' ticks (DrawHBarControl @50a80): ten, 2 pixels high, on the heading strip's rule, following the scale; nothing through the bars
   barGrid: { n: 10, tick: 2, line: false, above: true },
   // CONFIRMED (InitHLogBarAmts @50924, GetHPercBarAmt @50a40, DrawHBarControl
