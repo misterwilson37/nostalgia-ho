@@ -3619,16 +3619,20 @@ function newGameDialog() {
     if (fm && fm !== famSel.value) { famSel.value = fm; fillEditions(fm, edSel.value); }
     pick.forEdition(edSel.value);
   });
-  const pickRow = el('div', { class: 'picks' },
-    el('label', null, el('span', null, 'Ruleset version'), famSel),
-    el('label', null, el('span', null, 'Edition'), edSel),
-    el('label', null, el('span', null, 'Skin'), pick.skinSel),
-    el('label', null, el('span', null, 'OS look'), pick.osSel));
-  if (!window.HOSKINS || HOSKINS.list.length < 2) pick.skinSel.closest('label').hidden = true;
   // the game's language, for a version that shipped in more than one
   // (rs.languages, its own first; G.opts.lang): only names and words change
   const langSel = el('select', { name: 'lang', 'aria-label': 'Language' });
-  const langRow = el('div', { class: 'picks langpick' }, el('label', null, el('span', null, 'Language'), langSel));
+  const langRow = el('label', { class: 'langpick' }, el('span', null, 'Language'), langSel);
+  // two rows: what the game is (version, edition, language), then how it
+  // looks (skin, OS look)
+  const pickRow = el('div', { class: 'picks' },
+    el('label', null, el('span', null, 'Ruleset version'), famSel),
+    el('label', null, el('span', null, 'Edition'), edSel),
+    langRow);
+  const lookRow = el('div', { class: 'picks' },
+    el('label', null, el('span', null, 'Skin'), pick.skinSel),
+    el('label', null, el('span', null, 'OS look'), pick.osSel));
+  if (!window.HOSKINS || HOSKINS.list.length < 2) pick.skinSel.closest('label').hidden = true;
   if (!window.HOSKINS || !HOSKINS.osChoices) pick.osSel.closest('label').hidden = true;
   f.append(
     // above the line: the original game's own New Game window
@@ -3648,7 +3652,7 @@ function newGameDialog() {
     // the line: below it, the remake's own choices
     el('hr', { class: 'ngline' }),
     pickRow,
-    langRow,
+    lookRow,
     patchBox,
     el('label', { class: 'chk modern' }, el('input', { type: 'checkbox', name: 'modern', checked: localStorage.getItem('ho5.modern') === '1' ? 'checked' : false }),
       el('span', null, MODERN_TEXT)),

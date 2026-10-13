@@ -216,7 +216,8 @@ h3.scaleflip { cursor: pointer; }
 .newgame .buddyrow { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px 14px; align-items: start; }
 .newgame .buddies { display: grid; gap: 4px; align-content: start; }
 .newgame .ngline { grid-column: 1 / -1; width: 100%; height: 0; margin: 4px 0 0; border: 0; border-top: 1px solid var(--edge); }
-.newgame .picks { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px 10px; }
+.newgame .picks { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px 10px; }
+.newgame .picks > [hidden] { display: none; }
 .newgame .picks > * { min-width: 0; }
 @media (max-width: 640px) { .newgame .picks { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .newgame option.sep { color: var(--sub); }
