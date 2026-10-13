@@ -47,8 +47,8 @@ their entries are below so the list is complete, but their rulesets list no fixe
 | Version | Obvious bug | Quirk or design | Unclear |
 |---|---|---|---|
 | Mac 1.2 | 2 | 8 | 2 |
-| 2.0 | 5 | 5 | 3 |
-| Mac 2.0.1 | 3 | 5 | 2 |
+| 2.0 | 6 | 5 | 3 |
+| Mac 2.0.1 | 4 | 5 | 2 |
 | Mac 3.0.1 | 5 | 6 | 3 |
 | 4.0.5 | 11 fixed (+ 3 the remake already plays fixed, + 3 with nothing in the remake to fix) | 4 | 6 |
 | Mac 4.0.5 | 7 fixed (+ 3 the remake already plays fixed, + 1 with nothing in the remake to fix) | 4 | 6 |
@@ -146,6 +146,13 @@ The program's own credits read "Version 2.0.1" (string 672), so its patch is 2.0
    fuel left. The remake's port (`js/ai-12.js` `scrapOldFighters`) already routes by the
    fleet's own Range, so the fix changes nothing in play; it is listed so the patch covers
    every slip found.
+6. **`deBattleLines`: two German battle-window lines swapped.** In the German DOS 2.0's
+   string table (`HO.PRS`, table 0) 74 reads "Sie wurden sofort besiegt." and 75 "Keine
+   Information erlangt.", where the English 74 is "You have no information." and 75 "You
+   were destroyed immediately." A translators' slip, kept as shipped in vanilla play. Only
+   in a German game (`rs.lang.de.battleLines`, `js/languages.js`); the remake's battle
+   window shows neither line today, so the fix is in the data. *Fix:* each line under
+   its own id.
 
 ### Quirk or design (left as released)
 
@@ -190,6 +197,7 @@ with its own names. Its list is 2.0's without the Windows build's own slips.
 3. **`scrapRange`**: `ScrapOldFighters` passes the fleet's place in the list where
    `DeterminePath` wants its Range (its fourth argument, the Range elsewhere). *Fix:* as
    2.0 (no effect on play).
+4. **`deBattleLines`**: as 2.0's 6, in a German game (the same German table).
 
 **Not in its list** (Windows slips; the Mac code is right): `orgFuelCount` (the Mac's
 Organize Fleets takes the least fuel used, `OrganizeFleets` @1137e6) and `attack16`
@@ -562,6 +570,18 @@ apply to it, at the iOS addresses in `docs/coverage-ios.md`.
   "#!$@*$&@¥ª!" (Report Window Templates 50 and 66). A garbled message. *Fix:* "™" and
   "•", as 5.0.5 shows them (`js/rules-ios.js` `msgText`; the skin's own tech-name
   labels are the skin's).
+- **`trSpiesReport`: the Turkish spies' report is the credit report.** In `tr.lproj`
+  Report Window Templates 124 ("Your spies have stolen some technological secrets from
+  %s!") is a second copy of 123, the line-of-credit report. A translators' slip, kept as
+  shipped in vanilla play. Only in a Turkish game (iOS and Android). *Fix:* the report in
+  Turkish, **the remake's own wording (not in the app)**, in the style of the other
+  Turkish reports: "Senin casusların %s den bazı teknolojik sırlar çaldı!"
+- **`trLostWord`: "lost" left in English in the Turkish colony-destroyed report.**
+  Report Window Templates 11 reads "Sen gemilerinin  %slost%d miktarını kaybettin": the
+  English "lost" is glued to the number (the remake's other listed Turkish report that
+  took the English template's fillings, 38, has no stray word). Only in a Turkish game.
+  *Fix:* **the remake's own wording**: 38's phrase for the same clause, "Sen
+  %sgemilerinin %d tanesini kaybettin" (the word is the translation's own "kaybettin").
 
 ### Quirk or design (left as released)
 

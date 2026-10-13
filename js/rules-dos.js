@@ -1683,6 +1683,8 @@ const FIXES20 = [
     text: 'When a computer gave a colony more than $2,147,483 for one part, the sum overflowed and the colony’s bars came out wrong. The patch works them out without overflowing.' },
   { id: 'scrapRange', title: 'Old fighters sent home are routed with their own Range',
     text: 'When the computers sent old fighters home, the program passed the fleet’s place in a list where the route finder wants its Range. It made no difference to play (the colony is always within reach), and the remake already routes these fleets by their own Range; it is listed so the patch covers every slip found.' },
+  { id: 'deBattleLines', title: 'The German battle window’s two no-information lines are the right way round',
+    text: 'In the German version the battle window’s lines “You have no information.” and “You were destroyed immediately.” (strings 74 and 75) are swapped. The patch puts each in its place; it matters only when the game is played in German.' },
 ];
 
 // ---------- set-up (FUN_1030_1299 @1030:19ae-1b32) ----------

@@ -154,6 +154,12 @@ function german(rs, own) {
     battlePanel: own.battlePanel20(Object.assign({ name: 15, cls: 15, dots: '...', cols: 'mac', shade: true }, { words: BATTLE_DE })),
     ...(rs.forceEndTurn ? { forceEndTurn: Object.assign({}, rs.forceEndTurn, { ask: S(3210) }) } : {}),
     say: SAY_DE,
+    // the battle window's two lines for a fleet seen to nothing (strings 74, 75).
+    // The German table has them swapped (74 says "destroyed at once" where the
+    // English says "You have no information."); the remake shows neither, and
+    // keeps them as shipped; the patch (fix 'deBattleLines') puts them right
+    battleLines: { noInfo: S(74), destroyed: S(75) },
+    fix: { deBattleLines: { battleLines: { noInfo: S(75), destroyed: S(74) } } },
   };
 }
 const DOS = E.RULESETS.dos, MAC20 = E.RULESETS.mac20;
@@ -186,6 +192,9 @@ const BY_PLACE = {
   },
   tr: {
     11: (t) => t.replace(/%s/, '%1$s').replace(/(%1\$s[^%]*)%s/, '$1%2$s').replace(/%slost%d/, '%3$slost%4$d').replace(/%s insan/, '%7$s insan'),
+    // the patch's (fix 'trLostWord'): 38's own wording for the same clause, the
+    // untranslated "lost" gone (kaybettin, as 36-38 and 11's last sentence say it)
+    '11p': (t) => BY_PLACE.tr[11](t).replace(/Sen gemilerinin\s+%3\$slost%4\$d miktarını/, 'Sen %3$sgemilerinin %4$d tanesini'),
     38: (t) => t.replace('%s%sden', '%1$s%2$sden').replace('%sgemilerinin %d', '%3$sgemilerinin %4$d').replace('%s tane insan', '%7$s tane insan'),
     84: (t) => t.replace('%s kadar metal', '%1$s kadar metal').replace('%s kadar insan', '%3$s kadar insan'),
   },
@@ -202,13 +211,17 @@ const CELSIUS = {
 };
 function iosLang(lang, rs) {
   const en = (k) => L('en', k), tr = (k) => L(lang, k);
-  const reports = [];
+  const reports = [], fixReports = [], fixSpies = [];
   const R = en('Report Window Templates'), RT = tr('Report Window Templates');
   R.forEach((t, i) => {
     let to = RT[i];
     if (CELSIUS[lang] && CELSIUS[lang][i]) to = CELSIUS[lang][i](to);
     else if (BY_PLACE[lang] && BY_PLACE[lang][i]) to = BY_PLACE[lang][i](to);
     reports.push([t, to]);
+    if (lang === 'tr' && i === 11) fixReports.push([t, BY_PLACE.tr['11p'](RT[i])]);
+    // the Turkish spies' report is a second copy of 123 (the credit report); the
+    // patch (fix 'trSpiesReport') writes it out, in the style of the others
+    if (lang === 'tr' && i === 124) fixSpies.push([t, 'Senin casusların %s den bazı teknolojik sırlar çaldı!']);
     // the patch (fix 'iosCharacters') shows the Mac's characters
     if (/[ª¥]/.test(t)) reports.push([t.replace(/¥/g, '•').replace(/ª/g, '™'), to]);
   });
@@ -261,6 +274,7 @@ function iosLang(lang, rs) {
     hintTexts: tr('Help Messages').slice(3),
     battlePanel: rs.battlePanelIn ? rs.battlePanelIn({ head: (star, year) => SPT[12].replace('%s', star).replace('%d', year).trim(), text: panelText }) : undefined,
     say: { reports, args, words },
+    fix: lang === 'tr' ? { trLostWord: { say: { reports: fixReports } }, trSpiesReport: { say: { reports: fixSpies } } } : undefined,
   };
 }
 for (const rs of [E.RULESETS.ios, E.RULESETS.android]) {

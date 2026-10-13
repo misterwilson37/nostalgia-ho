@@ -375,6 +375,10 @@ rs.patchVersion = '1.2.9.1';
 rs.fixes = O.fixes.concat([
   { id: 'iosCharacters', title: 'The trademark sign and the bullet are shown',
     text: 'The game’s texts came from the Mac, where “™” and “•” are other bytes than on the iPhone, so the tech names showed “PowerPCª” and “Speedy Gonzalezª” and the curse read “#!$@*$&@¥ª!”. The patch shows “™” and “•”.' },
+  { id: 'trSpiesReport', title: 'The Turkish spies’ report is its own report',
+    text: 'In the Turkish version the report of stolen technological secrets is a copy of the line-of-credit report. The patch writes it out in Turkish (the remake’s wording); it matters only when the game is played in Turkish.' },
+  { id: 'trLostWord', title: 'The Turkish colony-destroyed report translates “lost”',
+    text: 'In the Turkish version the report of a colony destroyed in battle left the word “lost” in English, glued to the number of ships. The patch words that sentence as the Turkish battle report does (the remake’s wording); it matters only when the game is played in Turkish.' },
 ]);
 E.registerRules('ios', rs);
 })(this);

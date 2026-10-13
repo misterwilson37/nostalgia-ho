@@ -95,7 +95,7 @@ function rulesById(id) {
 function rules(G) {
   if (!G) throw new Error('rules(G) was asked for the ruleset with no game; with no game, name the ruleset (HO.rulesById)');
   const rs = RULESETS[G.rules] || rulesById(G.rules);
-  return G.opts && G.opts.lang ? inLanguage(rs, G.opts.lang) : rs;
+  return G.opts && G.opts.lang ? inLanguage(rs, G.opts.lang, !!G.opts.patch) : rs;
 }
 // ---------- languages (rs.languages, rs.lang, G.opts.lang) ----------
 // A version that shipped in more than one language lists them, its own
@@ -110,14 +110,26 @@ function rules(G) {
 const LANGUAGES = { en: 'English', fr: 'Français', de: 'Deutsch', tr: 'Türkçe' };
 const langCache = new WeakMap();
 function languages(rs) { return rs && Array.isArray(rs.languages) && rs.languages.length > 1 ? rs.languages : []; }
-function inLanguage(rs, lang) {
+// over.fix = { fixId: partial } holds the unofficial patch's corrections to a
+// translation's own slips (docs/fixes.md): with the patch on and the fix listed,
+// the partial is laid over the language (a say's reports go in front of its own)
+function inLanguage(rs, lang, patch) {
   const over = lang && rs.lang && rs.lang[lang];
   if (!over) return rs;
   let m = langCache.get(rs);
   if (!m) langCache.set(rs, m = {});
-  return m[lang] || (m[lang] = Object.assign({}, rs, over));
+  const key = patch && over.fix ? lang + '+patch' : lang;
+  if (m[key]) return m[key];
+  let o = over;
+  if (key !== lang) for (const id of Object.keys(over.fix)) {
+    if (!fixes(rs).some(f => f.id === id)) continue;
+    const p = over.fix[id];
+    o = Object.assign({}, o, p, p.say ? { say: Object.assign({}, o.say, p.say, { reports: (p.say.reports || []).concat(o.say.reports || []) }) } : {});
+  }
+  return m[key] = Object.assign({}, rs, o);
 }
 // the game's ruleset in the version's own language
+const langRules = (G) => rules(G);
 function ownRules(G) { return RULESETS[G.rules] || rulesById(G.rules); }
 // name lists by kind: stars, men, women, ships (every class's)
 // (a ruleset without its own lists draws from DATA's, 5.0.5's)
@@ -186,7 +198,7 @@ function sayArgIn(L, C, a) {
 }
 function say(G, text) {
   const t = String(text == null ? '' : text), lang = G && G.opts && G.opts.lang;
-  const own = lang && ownRules(G).lang, L = own && own[lang] && own[lang].say;
+  const own = lang && ownRules(G).lang, L = own && own[lang] && own[lang].say && langRules(G).say;
   if (!L) return t;
   const C = sayOf(L), hit = sayMatch(C.reports, t);
   if (!hit) return t;
@@ -196,7 +208,7 @@ function say(G, text) {
 }
 // whether a text is one of the language's reports (tools: what isn't translated)
 function saysIn(G, text) {
-  const lang = G && G.opts && G.opts.lang, own = lang && ownRules(G).lang, L = own && own[lang] && own[lang].say;
+  const lang = G && G.opts && G.opts.lang, own = lang && ownRules(G).lang, L = own && own[lang] && own[lang].say && langRules(G).say;
   return !!(L && sayMatch(sayOf(L).reports, String(text)));
 }
 // every ruleset names its computer players (rs.ai)
