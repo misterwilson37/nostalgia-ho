@@ -9,10 +9,13 @@ Delta Tao, in `docs/open-questions.md`, "Unfinished").
    ship, star and computer names matched to their official English counterparts (the
    same names appear in later versions). Anything with no official counterpart is the
    remake's own English, marked as such.
-2. **The "every easter egg" option** (name to be chosen). Delta Tao's own jokes and
-   extras at their most: one-in-three jokes every time, references a later version cut
-   put back, the French and German name lists' extra names added. Official releases'
-   material only: the AI homages' jokes stay with the homages.
+2. **Full Hoedown** (Jake's name for the "every easter egg" option). Done (October 2026):
+   `G.opts.hoedown`, in New Game below the line and the Ho menu; `js/hoedown.js`,
+   `docs/hoedown.md`. Delta Tao's own jokes and extras at their most: one-in-three jokes
+   every time, references a later version cut put back, the jokes a version's resources
+   hold and never show, the Amiga's extra German names. Official releases' material only:
+   the AI homages' jokes stay with the homages. It never changes the play (the random
+   draws are still made); what would have is listed in `docs/hoedown.md` for Jake.
 3. **Everything already queued:** the originals' unbuilt windows (`docs/open-questions.md`,
    "Unfinished", in its order).
 4. **Other languages.** Each version in the languages it shipped in, from the official

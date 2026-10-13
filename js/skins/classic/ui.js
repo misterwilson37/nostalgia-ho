@@ -3263,7 +3263,7 @@ function openAbout() {
     patched ? el('p', { class: 'note' }, `This game has the ${pv} patch on: the remake’s own fixes for ${rs.version}’s obvious bugs, not an official release. The Ho menu’s Patch notes say what each one fixes.`) : null,
     N.intro ? el('p', null, N.intro) : null,
     rs.hoedown ? el('section', { class: 'vnotes' }, el('h4', null, 'Full Hoedown'),
-      el('p', { class: 'sub' }, `${G && HO.hoedown(G) ? 'On in this game' : 'Off'} (New Game, or the Ho menu): ${rs.version || rs.id}’s own jokes at their most. The game plays the same.`),
+      el('p', { class: 'sub' }, `${G && HO.hoedown(G) ? 'On in this game' : 'Off in this game'} (New Game and the Ho menu turn it on and off): ${rs.version || rs.id}’s own jokes at their most, and only Delta Tao’s. The game plays the same.`),
       hoedownList(rs)) : null,
     part('Known bugs and quirks, played as released', N.quirks, 'quirks', rs.version ? 'None known.' : null),
     part('Where this remake differs', N.differs, 'differs'),

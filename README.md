@@ -183,6 +183,16 @@ changed in the middle of a game from the **Ho menu** (the skin's "Ho!" at the to
 - **Modern conveniences** (`G.opts.modern`, also in New Game and Preferences): automatic
   routes, the map following the news, battle speed and written battle reports. They never
   add or remove a ruleset's commands: those (Evacuate, for one) follow the rules only.
+- **Full Hoedown** (`G.opts.hoedown`, also in New Game below the line, remembered in
+  `localStorage` "ho5.hoedown"; Jake's name for it): Delta Tao's own humour at its most.
+  A joke that came one time in three comes every time (its random draw is still made and
+  only its result ignored), a joke a later version cut is put back, a joke a version's
+  resources hold but its program never shows is shown, and a German game takes the Amiga
+  2.0's extra names. Official releases' material only: the AI homages (Claude, Gemini)
+  don't offer it, and 1.2 has nothing to turn up. It never changes the play: a seed plays
+  the same game with it on or off, apart from text and pictures (`node tools/test.js <id>
+  --hoedown --digest`). Each version's items are in About this version (`rs.hoedown`,
+  `js/hoedown.js`); `docs/hoedown.md` lists them with their sources.
 
 The one exception is a choice made at New Game, and only then: **the unofficial patch**
 ("Apply the 4.0.5.1 patch: fixes for obvious bugs (not an official release)",
@@ -425,6 +435,7 @@ Optional ruleset flags the skin reads (each is documented where it is read):
   iOS and Android in French and Turkish), matched entry for entry to each ruleset's names,
   words and reports; `js/lang-data.js` holds the text, written by
   `tools/extract/languages.py` from the German DOS 2.0 and the iOS app
+- `js/hoedown.js`: Full Hoedown, each official release's jokes at their most (`rs.hoedown`: the items About this version lists, the colour-monitor joke, 4.0.5's Evacuate and Armageddon jokes, the Amiga's German names)
 - `js/version-notes.js`: for each ruleset, its known quirks, where the remake differs and
   what changed from the version before (the Ho menu's "About this version")
 - `js/skins.js`: the list of skins and their sounds, and the loader. A skin is everything you see and
@@ -496,7 +507,8 @@ Optional ruleset flags the skin reads (each is documented where it is read):
 - `docs/open-questions.md`, `docs/evolution.md`, `docs/coverage-12.md`: what is left to ask Delta Tao, how the game grew, and every routine of 1.2
 - `docs/research-log.md`: the full research history, every question met in each version and how it was settled
 - `docs/fixes.md`: every version's slips sorted into obvious bugs (fixed by the unofficial patch), quirks and unclear cases
-- `tools/test.js`: headless computer-vs-computer test (`node tools/test.js`, `node tools/test.js original`, `dos`, `405`, `mac20`, `mac405` …; add `--patch` to play with the unofficial patch on, `--lang=en` to play 1.2 in English)
+- `docs/hoedown.md`: every Full Hoedown item with its source, and what was left out because it would change the play
+- `tools/test.js`: headless computer-vs-computer test (`node tools/test.js`, `node tools/test.js original`, `dos`, `405`, `mac20`, `mac405` …; add `--patch` to play with the unofficial patch on, `--lang=en` to play 1.2 in English, `--hoedown` to play with Full Hoedown on and `--digest` to print each game's state without its messages and names, which `--hoedown` must leave the same)
 - `tools/human-play.js`: a human played through the page in Chromium (Playwright), about 10
   turns in each ruleset: the Technology and Budget bars dragged, a Colony Ship bought (or
   queued) and sent out, the new colony terraformed. It checks that the values the skin
