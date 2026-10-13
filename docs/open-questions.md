@@ -173,8 +173,6 @@ planned order:
 
 - Send Message's built messages ("I like", "I don't like", "I own"); "I own" marks the
   star on the receiver's map.
-- The names file: humans' design names reused by the computers, and humans' names added
-  to the computers' names.
 
 ---
 
@@ -189,7 +187,8 @@ Where a browser can't do what the original did, or the remake had to pick.
   a cover screen between turns and no passwords.
 - **Its own random numbers**, so a game can't be replayed move for move against an original.
 - **Browser storage** for the Halls of Fame, master points, ranks, Game Center records
-  and the star names winners keep, one set per version.
+  and the star names winners keep, one set per version; 1.2's and 2.0's names file too
+  (the humans' names and design names the computers draw from).
 - **The 1.2 and 2.0 Options menu** (battle speed, fully animated battles, Show Event
   Messages, Review Announced Battles, 2.0's polling time) is in Preferences, in the
   version's words. The battle speed's 10 to 60 ticks a shot scale the remake's own pace

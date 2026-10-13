@@ -888,7 +888,8 @@ const SHIP_NAMES = {
 // version's own list and its names, E.ownName; the name is then put in the
 // game's language, so the game plays the same.)
 function designName(G, p, type) {
-  const names = (E.ownRules(G).shipNames || SHIP_NAMES)[type] || ['Ship'];
+  // (with the names humans gave this class in earlier games: the names file, rs.namesFile)
+  const names = E.namesFile(G, (E.ownRules(G).shipNames || SHIP_NAMES)[type] || ['Ship'], 'ships', type);
   const used = new Set(p.designs.filter(d => !d.scrapped).map(d => E.ownName(G, d.name, 'ships')));
   let n = names[0];
   for (let i = 0; i < 100; i++) { n = names[RI(G, 1, names.length) - 1]; if (!used.has(n)) break; }
@@ -1940,6 +1941,18 @@ E.registerRules('dos', Object.assign({}, O, {
   nameAStar: { when: 'win', text: 'You won the game, so you get to name a star.', keep: 0, use: 'pool', max: 7,
     rule: 'Star names must be 4 to 7 characters long.', label: 'New Star Name:', hint: '(If you\'d rather not name a star, click "OK" with the name blank.)',
     taken: 'Sorry, there’s already a star named ‘%s’.  Please pick another name.' },
+  // CONFIRMED (FUN_1040_4028, FUN_10e8_0f64, FUN_1020_4711; Mac 2.0.1
+  // GetPrefNamesResource @12c2a, DoGameSolidificationStuff @a40d8,
+  // AddNewTypeNameToPrefs @11202a, GiveTypeCoolName @9457e; 1.2 the same,
+  // @12c5a, @a49d6, @112028): the names file. Its lists (STR# 1999 men, 2000
+  // women, 2001+ each class's design names) start as the program's own; in
+  // 2000, after the computers are named, each human's name is added to the
+  // men's or women's list, and the name of each type a human creates to its
+  // class's list, unless Munger finds it there or the list holds 255; the
+  // computers draw their names and design names from these lists. The
+  // remake's names file: the skin's localStorage, opts.namesKept
+  // (engine namesFile, namesFileAdd).
+  namesFile: { max: 255 },
   // CONFIRMED (WINHO.EXE's Options menu, items 304-307; dialogs 8 BATTLESPEED
   // and 26 POLLSPEED; Mac 2.0.1's DITL 4040 and 4060, CNTL 4040 (10 to 60
   // ticks a shot) and 4060 (1 to 15 seconds), Stup 1000's defaults: 30

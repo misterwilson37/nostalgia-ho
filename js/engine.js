@@ -739,6 +739,30 @@ function shareMaps(G) {
   }
 }
 
+// The names file (rs.namesFile, 1.2 and 2.0: GetPrefNamesResource,
+// DoGameSolidificationStuff, AddNewTypeNameToPrefs): the version's own list
+// of computer names (kind 'men', 'women') or of a class's design names
+// (kind 'ships', type) with the names humans added in earlier games, which
+// the skin keeps (opts.namesKept); none kept, the version's own list
+function namesFile(G, list, kind, type) {
+  const K = rules(G).namesFile && G.opts && G.opts.namesKept;
+  const add = K ? (kind === 'ships' ? (K.ships || {})[type] : K[kind]) : null;
+  return Array.isArray(add) && add.length ? list.concat(add.filter(n => typeof n === 'string' && n && !list.includes(n))) : list;
+}
+// a name added to the names file (kept: { men, women, ships: { type } }):
+// not when Munger finds it in the list (a name inside another counts,
+// letter case too), nor once the list holds rs.namesFile.max names
+function namesFileAdd(rs, kept, kind, name, type) {
+  const NF = rs.namesFile; name = String(name || '').trim();
+  if (!NF || !name) return false;
+  const own = kind === 'ships' ? ((rs.shipNames || DATA.shipNames)[type] || []) : kind === 'women' ? (rs.femaleNames || DATA.femaleNames) : (rs.maleNames || DATA.maleNames);
+  if (kind === 'ships') { kept.ships = kept.ships || {}; kept.ships[type] = kept.ships[type] || []; } else kept[kind] = kept[kind] || [];
+  const add = kind === 'ships' ? kept.ships[type] : kept[kind], all = own.concat(add);
+  if (all.length >= NF.max || all.some(n => String(n).includes(name))) return false;
+  add.push(name);
+  return true;
+}
+
 // ---------- galaxy creation ----------
 function newGame(opts) {
   const G = {
@@ -820,7 +844,8 @@ function newGame(opts) {
       // the game's (an English 1.2 draws again on an English match, as 2.0.1
       // does with its own names; in the version's own language both are one)
       const mine = ownRules(G), kind = female ? 'women' : 'men';
-      do { name = pick(G, female ? (mine.femaleNames || DATA.femaleNames) : (mine.maleNames || DATA.maleNames)) || ('Computer ' + i); } while ((usedNames.has(name) || usedNames.has(gameName(G, name, kind))) && usedNames.size < 40);
+      const list = namesFile(G, female ? (mine.femaleNames || DATA.femaleNames) : (mine.maleNames || DATA.maleNames), kind);
+      do { name = pick(G, list) || ('Computer ' + i); } while ((usedNames.has(name) || usedNames.has(gameName(G, name, kind))) && usedNames.size < 40);
       usedNames.add(name); name = gameName(G, name, kind);
     }
     usedNames.add(name);
@@ -1332,7 +1357,7 @@ const API = {
   newGame, endTurn, buildShips, unbuildShip, designLimits, designMin, designCost, shipCostNow, canBuildType, findOrCreateDesign, getDesign,
   fleetCount, fleetDesigns, fleetSpeed, fleetMaxRange, fleetHas, fleetKind, fleetLabel, orderMove, orderPath, cancelMove, canReach, canMerge, queueShips, unqueueShip,
   newFleet, addShipsToStar, mergeFleets, splitFleet, scrapFleet, evacuate, colonies, seenG, seenT, maxPop, planetClass, planetIncome,
-  scrapDesign, liveDesigns, isFriend, isAllied, isBuddy, hasColonyAt, designName, report, setPact, give, surrender, sendChat, setArmageddon, hostileAt, know, observe, msg, msgAll, humans, starDist, dist, projected, techSum, score, save, load, borrowLimit, fmt, num, niceNum, num505, money505,
+  scrapDesign, liveDesigns, isFriend, isAllied, isBuddy, hasColonyAt, designName, namesFile, namesFileAdd, report, setPact, give, surrender, sendChat, setArmageddon, hostileAt, know, observe, msg, msgAll, humans, starDist, dist, projected, techSum, score, save, load, borrowLimit, fmt, num, niceNum, num505, money505,
 };
 if (typeof module !== 'undefined') {
   module.exports = API;

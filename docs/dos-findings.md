@@ -207,7 +207,7 @@ offline. The repository includes their output, not the DOS game itself.
 | Computer personalities | every field as Mac 1.2's `SetCompAttrs`: rebuild difference 1; up-front research 15–25 %, more research 15–25 %; income per colony $33,000–37,000; colonies defended and metal for defence 30–70 %; both dominations 150–250 %; aggressiveness 3–7; desire for metal 25–75; satellite shields cap 11–13; research Range and Speed 160–200, Weapons 200–260, Shields 200–260 but no more than Weapons, Mini the rest of 1,000. Dumb: up-front 4 %, more 1–6 %, colonies defended 10–20 %, dominations 75–95 %, aggressiveness 1, cap 30. Average: up-front 10–20 %, attacking domination 150–200 %. Smart: up-front 10–20 %, aggressiveness 10. A human on auto play keeps the base values and research 200 each | CONFIRMED (`FUN_1030_1b51`, every random range read in the asm) |
 | Smart computers | while the year is before 2020 they know every star less than 9 ly from home; the year has already moved on to 2010 when they first plan, so that is their first turn only. When picking targets they score stars owned by other computers at a quarter, so they pick on humans | CONFIRMED (`FUN_1020_4a3d` @1020:4a85, `FUN_1040_0038` @1040:01a8, `FUN_1020_10b5`) |
 | Players | 20 player slots; the Create Galaxy window allows 0 to 19 computers | CONFIRMED (`FUN_1030_0c97`, `FUN_1040_4028`, CREATEGALAXYDLGPROC @1108:15f0-162c) |
-| Computer names | men from string ids 112–131 (Alex … Walter), women from 224–243 (Andrea … Anne), at random, no repeats and never a human's name. 2.0 also writes the humans' names to a names file and draws from it later; the remake keeps no such file | CONFIRMED (`FUN_1040_4028`); the file NOT IMPLEMENTED |
+| Computer names | men from string ids 112–131 (Alex … Walter), women from 224–243 (Andrea … Anne), at random, no repeats and never a human's name. 2.0 also writes the humans' names to a names file and draws from it later (the remake: `rs.namesFile`, engine `namesFile`, kept in browser storage) | CONFIRMED (`FUN_1040_4028`) |
 | Women computers | each computer is a woman half the time (gender = random 0–1 × 500) | CONFIRMED (`FUN_1050_1ec9` @1050:1fd5) |
 | First messages | "Spaceward Ho! Version 2.0.1 by Peter Commons." and "Artwork by Howard Vives." (reports 1000 and 1001, strings 672–673) | CONFIRMED (`FUN_1030_1299` @1030:14c9) |
 | Ranks and master points, alliances and best buddies, Armageddon, novas option | not in 2.0: no text or code for them | CONFIRMED |
@@ -398,9 +398,6 @@ log scale. Which list is on the left: Mac 2.0.1 (`DoOneBattle @d07d0`, `DrawOneG
 
 See `docs/open-questions.md` (2.0 section). Not implemented, by choice or not yet:
 
-- The names winners add to the star list and the humans' names added to the computer
-  names file (`NAMESTARDLGPROC`, `FUN_1030_1049`, `FUN_1040_4028`): the remake uses the
-  built-in lists.
 - Several human players: 2.0 joins humans one at a time with passwords; the remake's hot
   seat takes turns on one computer instead.
 - 2.0's Send Message window (`SENDMESSAGEDLGPROC`). (Built since: the Explored Planets list,
@@ -412,8 +409,12 @@ See `docs/open-questions.md` (2.0 section). Not implemented, by choice or not ye
 - Numbers: every number in a report or window is written "1,234", "1,234,567" and from
   ten million "12,345K" (WINHO.EXE's formats; Mac `LongToNiceString`), so "$12,345K" in
   a report with a "$" (`rs.fmtNum`, engine `niceNum`).
-- The names humans give their designs, which 2.0 adds to the names file for the
-  computers' later designs (`FUN_10e8_0f64`, Mac `AddNewTypeNameToPrefs`).
+- Built since: the names file (`FUN_1040_4028`, `FUN_10e8_0f64`, `FUN_1020_4711`; Mac
+  `GetPrefNamesResource`, `DoGameSolidificationStuff`, `AddNewTypeNameToPrefs`): the humans'
+  names and the names they give new types join the version's lists (unless Munger finds
+  them there, at most 255), and the computers draw from them in later games;
+  `rs.namesFile`, kept per ruleset in browser storage ("ho5.names.dos"), with a Name field
+  and Name It For Me in the designer.
 - Text only: the scrapping message ("Your fleet of … at … has been scrapped for … metal.",
   string 688, `FUN_1040_0fca`) and the explore message's tenths of a degree aren't
   reproduced; the remake's wording is used.

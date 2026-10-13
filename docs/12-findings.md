@@ -618,6 +618,8 @@ scale.
 - The Options menu's preferences (`DoOptionsMenu @e2784`, `doBattleSpeedDialog @120c48`, DITL/CNTL 4040, Stup 1000's
   defaults) and the Explored Planets window (`ListExploredStars @120004`, `InitStarsList @120136`, DITL 6040,
   STR# 1020): `rs.options`, `rs.exploredList`; js/skins/classic/ui.js `verPrefs`, `openExploredList`, `openReports`.
+- The names file, as 2.0's (`GetPrefNamesResource @12c5a`, `DoGameSolidificationStuff @a49d6`,
+  `AddNewTypeNameToPrefs @112028`): `rs.namesFile` (inherited from rules-dos), kept as "ho5.names.12".
 
 ## Still open
 

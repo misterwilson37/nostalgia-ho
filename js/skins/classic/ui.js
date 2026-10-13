@@ -2146,6 +2146,8 @@ function openBuild(sid) {
     for (const k of ['R', 'V', 'W', 'S', 'M']) { const lo = HO.designMin(G, k, st.type); if (st[k] == null || st._t !== st.type) st[k] = L[k]; st[k] = Math.max(lo, Math.min(Math.max(lo, L[k] || lo), st[k])); }
     st._t = st.type;
     const spec = { type: st.type, R: st.type === 'satellite' ? 0 : st.R, V: st.V, W: st.W, S: st.S, M: st.M };
+    // the names file (rs.namesFile): a human names a new type, or takes a suggestion
+    const NF = HO.rules(G).namesFile;
     const c = HO.designCost(G, spec);
     const exists = p.designs.find(d => d.type === spec.type && d.R === spec.R && d.V === spec.V && d.W === spec.W && d.S === spec.S && d.M === spec.M);
     const right = el('div', { class: 'designer' }, el('h4', null, 'Design a new type'));
@@ -2161,6 +2163,11 @@ function openBuild(sid) {
         el('input', { type: 'range', min, max, value: st[k], disabled: max <= min, oninput: (e) => { st[k] = +e.target.value; render(); } }),
         el('b', null, `${st[k]}/${max}`)));
     }
+    if (NF && !exists) {
+      const inp = el('input', { maxlength: 15, value: st.name || '', 'aria-label': 'Ship type name', placeholder: 'a name of your own', oninput: (e) => { st.name = e.target.value.trim(); } });
+      right.append(el('label', { class: 'dname' }, el('span', null, 'Name: '), inp, ' ',
+        el('button', { type: 'button', class: 'quiet', onclick: () => { st.name = HO.designName(G, p, st.type); inp.value = st.name; } }, 'Name It For Me')));
+    }
     right.append(el('p', { class: 'sub' }, `${money(c.money)} and ${fmt(c.metal)} metal each` + (exists && exists.built ? '' : `, plus ${money(c.proto)} to build the prototype`) + '.'));
     if (st.type === 'scout') right.append(el('p', { class: 'note' }, `Scouts get ${L.R - p.tech.range} extra range but weaker weapons and shields. Each scout flies alone.`));
     if (st.type === 'satellite') right.append(el('p', { class: 'note' }, `Satellites can’t move. They shoot ${HO.feature(G, 'buildQueue') ? 'once' : 'twice'} per round.`));
@@ -2171,7 +2178,9 @@ function openBuild(sid) {
     right.append(el('div', { class: 'btns' }, el('button', { disabled: !!(live && live.scrap301), title: live && live.scrap301 ? `${live.name} is marked for scrapping.` : null, onclick: () => {
       const lim = HO.rules(G).maxDesigns;
       if (lim && !exists && HO.liveDesigns(p) >= lim) { toast(HO.DATA.alerts[15] || 'Your assembly lines are full.'); return; }
+      if (NF && st.name) spec.name = st.name;
       const d = HO.findOrCreateDesign(G, p, spec);
+      if (NF && !exists && spec.name) { keepName('ships', d.name, d.type); st.name = ''; }
       if (queue) { if (HO.queueShips(G, ME, sid, d.id, 1)) Sound.play(7006); else toast(`${s.name}’s queue is full: it holds ${HO.rules(G).queueSlots} kinds of ship.`); }
       else if (debtSwitch && !affordable(HO.shipCostNow(G, p, d))) toast(`Not enough money or metal. Turn on ${AD.label || 'Allow Debt'} to borrow.`);
       else manyAsk(d, () => { if (HO.buildShips(G, ME, sid, d.id, 1)) { Sound.play(7006); session[d.id] = (session[d.id] || 0) + 1; } else toast('Not enough money or metal.'); render(); renderPanel(); draw(); });
@@ -3121,6 +3130,22 @@ function openRadicalHand() {
 const starsKey = (id) => 'ho5.stars.' + id;
 function keptStars(id) { try { const v = JSON.parse(localStorage.getItem(starsKey(id)) || '[]'); return Array.isArray(v) ? v.filter(n => typeof n === 'string') : []; } catch (e) { return []; } }
 const keptStarsOpt = (id) => { const NS = (HO.RULESETS[id] || {}).nameAStar, k = NS ? keptStars(id) : []; return k.length ? { starNamesKept: k } : {}; };
+// The names file (rs.namesFile, 1.2 and 2.0): the names humans gave
+// themselves and their ship types, kept in this browser for the version
+// (localStorage "ho5.names.<rules>", the original's preferences file) and
+// passed to later games (opts.namesKept), where the computers draw from them
+const namesKey = (id) => 'ho5.names.' + id;
+function keptNames(id) { try { const v = JSON.parse(localStorage.getItem(namesKey(id)) || '{}'); return v && typeof v === 'object' && !Array.isArray(v) ? v : {}; } catch (e) { return {}; } }
+const keptNamesOpt = (id) => { if (!(HO.RULESETS[id] || {}).namesFile) return {}; const k = keptNames(id); return Object.keys(k).length ? { namesKept: k } : {}; };
+// add a name to the file (engine namesFileAdd); in a game, its own copy too,
+// as the original's computers read the file as it changes
+function keepName(kind, name, type) {
+  if (!G || !HO.rules(G).namesFile) return;
+  const id = G.rules, rs = HO.ownRules(G), k = keptNames(id);
+  if (HO.namesFileAdd(rs, k, kind, name, type)) try { localStorage.setItem(namesKey(id), JSON.stringify(k)); } catch (e) {}
+  G.opts.namesKept = G.opts.namesKept || {};
+  HO.namesFileAdd(rs, G.opts.namesKept, kind, name, type);
+}
 const iWon = () => !!G && G.over && (G.winners || [G.winner]).includes(ME);
 const winReport = (m) => m && m.big === 'p3030' && iWon();
 const winPending = () => { const rs = HO.rules(G); return iWon() && ((rs.conquered && !G.conqueredSeen) || (rs.nameAStar && rs.nameAStar.when === 'win' && !G.starNamed)); };
@@ -3873,7 +3898,7 @@ function newGameDialog() {
     const lang = !langRow.hidden && d.lang ? d.lang : null;
     if (lang) localStorage.setItem(langKey(d.rules), lang);
     // hints: the creator's "Give helpful game play hints" preference, which 5.0.5 and the Palm game read for the first messages (rs.welcome)
-    const common = { modern: !!d.modern, ...(patch ? { patch: true } : {}), ...(hoedown ? { hoedown: true } : {}), ...(snd ? { sounds: snd } : {}), ...(lang ? { lang } : {}), hints: !!Prefs.hints, humans, seed: (Math.random() * 2 ** 31) | 0, name: d.name || 'You', galaxy: d.galaxy || 'Milky Way', female: d.female === '1', computers: +d.computers, start: d.start, rules: d.rules, alliances: !!d.alliances, luck: !!d.luck, novas: !!d.novas, ...keptStarsOpt(d.rules) };
+    const common = { modern: !!d.modern, ...(patch ? { patch: true } : {}), ...(hoedown ? { hoedown: true } : {}), ...(snd ? { sounds: snd } : {}), ...(lang ? { lang } : {}), hints: !!Prefs.hints, humans, seed: (Math.random() * 2 ** 31) | 0, name: d.name || 'You', galaxy: d.galaxy || 'Milky Way', female: d.female === '1', computers: +d.computers, start: d.start, rules: d.rules, alliances: !!d.alliances, luck: !!d.luck, novas: !!d.novas, ...keptStarsOpt(d.rules), ...keptNamesOpt(d.rules) };
     const k = kindOf(d.rules);
     if (k === 'original') {
       localStorage.setItem('ho5.iq', d.o_iq);
@@ -3890,6 +3915,8 @@ function newGameDialog() {
       G = HO.newGame(Object.assign(common, { iq: d.iq, cstart: d.cstart, shape: d.shape, size: d.size, density: d.density,
         ...(k === 'claude' ? { yearsPerTurn: +d.c_years || 10, buddies: !!d.c_buddies } : {}) }));
     } else throw new Error(`The New Game window has no settings for the "${d.rules}" rules`);
+    // the names file: in 2000, after the computers are named, the humans' names join it
+    if (HO.rules(G).namesFile) for (const p of HO.humans(G)) keepName(p.female ? 'women' : 'men', p.name);
     // the OS look is kept with the game (G.opts.os) and for the next one
     if (d.os) G.opts.os = d.os;
     if (d.skin && window.HOSKINS && d.skin !== HOSKINS.current) { save(); HOSKINS.switchTo(d.skin, d.os); return; } // opens in the other skin
