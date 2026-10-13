@@ -3400,14 +3400,14 @@ function skinOSPickers(rulesId) {
   fillOS(osSel, skinSel.value, osNow());
   skinSel.addEventListener('change', () => {
     picked.set('skin');
-    fillOS(osSel, skinSel.value, picked.get('os') ? osSel.value : HOSKINS.osDefault(skinSel.value));
+    fillOS(osSel, skinSel.value, HOSKINS.osDefault(skinSel.value)); // a new skin starts in its own look
   });
   osSel.addEventListener('change', () => picked.set('os'));
   // the edition changed: its own skins first, its first one chosen unless one was picked by hand
   const forEdition = (id) => {
     const own = editionSkins(id);
     fillSkins(skinSel, id, !picked.get('skin') && own.length ? own[0] : skinSel.value);
-    fillOS(osSel, skinSel.value, picked.get('os') ? osSel.value : HOSKINS.osDefault(skinSel.value));
+    fillOS(osSel, skinSel.value, HOSKINS.osDefault(skinSel.value)); // a new skin starts in its own look
   };
   return { skinSel, osSel, forEdition };
 }
@@ -3419,7 +3419,7 @@ function titlePickers() {
   if (ts.options.length) { fillOS(to, HOSKINS.current, osNow()); return; }
   if (HOSKINS.list.length > 1) {
     fillSkins(ts, chosenRules(), HOSKINS.current);
-    ts.addEventListener('change', () => { picked.set('skin'); HOSKINS.preview(ts.value, picked.get('os') ? HOSKINS.os : null); });
+    ts.addEventListener('change', () => { picked.set('skin'); HOSKINS.preview(ts.value, null); }); // the new skin opens in its own look (or the one last picked for it)
     ts.closest('label').hidden = false;
   }
   if (HOSKINS.osChoices) {

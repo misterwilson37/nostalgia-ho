@@ -34,7 +34,7 @@
 // class "os-<id>". A skin keeps the game's own art and layout. OSES below
 // lists the looks; each skin lists its own (SKINS' os), the first its
 // default, and any skin can be played in any look. Which look loads:
-// ?os=<id>, else the last one picked (localStorage "ho5.os"), else the
+// ?os=<id>, else the last one picked for this skin (localStorage "ho5.os.<skin>"), else the
 // skin's first. HOSKINS.setOS(id) changes it at once, without a reload.
 //
 // Sounds belong to the skin: a game plays only the sounds its skin's
@@ -176,7 +176,9 @@ const validOS = (id) => OSES.some(o => o.id === id);
 const osDefault = (skin) => skinOf(skin).os[0];
 let wantedOS = null;
 try { wantedOS = new URLSearchParams(root.location.search).get('os'); } catch (e) {}
-let currentOS = [wantedOS, store.get('ho5.os')].find(validOS) || osDefault(current);
+// remembered per skin ("ho5.os.<skin>"), so a look picked for one skin never
+// follows the player into another
+let currentOS = [wantedOS, store.get('ho5.os.' + current)].find(validOS) || osDefault(current);
 // show a look: the single-file build has every look inlined as <style
 // data-os> (tools/bundle.py) and turns one on; otherwise the one <link>
 // (#ho-os) is pointed at js/os/<id>.css, the old one kept until the new one
@@ -223,7 +225,7 @@ root.HOSKINS = {
   // show another look at once and remember it ("ho5.os")
   setOS(id) {
     if (!validOS(id)) return;
-    currentOS = id; store.set('ho5.os', id);
+    currentOS = id; store.set('ho5.os.' + current, id);
     applyOS(id);
   },
   // true once, right after switchTo(): continue the saved game
@@ -241,7 +243,7 @@ root.HOSKINS = {
   preview(id, os) {
     if (!valid(id) || id === current) return;
     store.set('ho5.skin', id);
-    store.set('ho5.os', validOS(os) ? os : osDefault(id));
+    if (validOS(os)) store.set('ho5.os.' + id, os);
     const u = new URL(root.location.href); u.searchParams.delete('skin');
     root.location.href = u.toString();
   },
@@ -250,14 +252,14 @@ root.HOSKINS = {
   switchTo(id, os) {
     if (!valid(id)) return;
     store.set('ho5.skin', id);
-    if (validOS(os)) store.set('ho5.os', os);
+    if (validOS(os)) store.set('ho5.os.' + id, os);
     try { root.sessionStorage.setItem('ho5.resume', '1'); } catch (e) {}
     const u = new URL(root.location.href); u.searchParams.delete('skin');
     root.location.href = u.toString();
   },
 };
 store.set('ho5.skin', current);
-store.set('ho5.os', currentOS);
+store.set('ho5.os.' + current, currentOS);
 root.document.documentElement.classList.add('os-' + currentOS);
 root.document.documentElement.dataset.os = currentOS;
 if (root.HOSKINS_INLINE) applyOS(currentOS);

@@ -17,7 +17,7 @@ body { background: #000; }
 html select option { background: #26231f; }
 button:not(.mbtn):not(.close):not(.tbtn):not(.clock):not([role=menuitem]):active { background: var(--tint2); }
 /* the SVG tick, the select triangle and the radio dot are drawn in the accent: redone in orange */
-html input[type=checkbox]:not(.switch):checked { background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='18' height='18'><path d='M3 9.5l4 4L15 4' fill='none' stroke='%23ff9900' stroke-width='3'/></svg>"); }
+html input[type=checkbox]:not(.switch):not(.switchrow input):checked { background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='18' height='18'><path d='M3 9.5l4 4L15 4' fill='none' stroke='%23ff9900' stroke-width='3'/></svg>"); }
 html select, html .newgame select { background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10'><path d='M10 0v10H0z' fill='%23ff9900'/></svg>"); }
 html .tm input[type=range] { background: linear-gradient(90deg, #99cc00 0 var(--split, 50%), #ff9900 var(--split, 50%) 100%); }
 .tm .tmr { color: #ff9900; }
