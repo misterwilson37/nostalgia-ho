@@ -48,7 +48,7 @@ Every routine in the PowerPC program of Spaceward Ho! 5.0.5 for Mac OS 9 and X (
 | `FUN_10058900` | Distance table built again (after an Armageddon) | Rule, implemented | js/rules-original.js distance |
 | `FUN_100589f0` | Distance: larger gap + a third of the smaller, rounded up; x3/4 per Armageddon, at least 3 | Rule, implemented | js/rules-original.js dist10 |
 | `FUN_10059570` | New Game window: shape, size, density, IQ, home systems, years a turn, Alliances, Luck, Best Buddies; options locked by rank ("Need more MPs"); at OK (@1005a2a4-1005a404) the 8 computer slots' sexes (the clock's rand(1, 2) == 1 a man) and names (the clock's rand over the sex's list, `FUN_10095ea0`, `FUN_10095d50`: the Preferences' past players, then STR# 6280 / 6281), drawn again while an earlier slot of the same sex has the name; the hints preference (+0x41) | Rule, implemented (rank locks not, on purpose) | engine newGame, js/rules-original.js computerIdentity505, welcome505; docs/open-questions.md |
-| `FUN_1005cf40` | Build ships window, Buy: at most 24 designs (alert 0x10); more than 9 Scouts or Tankers asks first (alerts 0x24, 0x25) | Rule, implemented (the two questions not) | engine buildShips; docs/open-questions.md |
+| `FUN_1005cf40` | Build ships window, Buy: at most 24 designs (alert 0x10); more than 9 Scouts or Tankers asks first (alerts 0x24, 0x25) | Rule, implemented (the questions: `rs.manyShips`) | engine buildShips; docs/open-questions.md |
 | `FUN_1005d380` | Dip Into Savings window: 0-100 %, the Savings bar gives its share away | Rule, implemented | js/rules-original.js dipSet505, ui.js openDip |
 | `FUN_1005d5a0` | Surrender window (player +0x8c; the player count is "no one") | Rule, implemented | engine surrender; js/rules-original.js surrender505 |
 | `FUN_1005d940` | Send Message window: the canned lines into the outbox (player +0x1058) | Interface, not done | the remake's messages are free text (docs/open-questions.md) |
@@ -237,7 +237,6 @@ Every routine in the PowerPC program of Spaceward Ho! 5.0.5 for Mac OS 9 and X (
 
 - `FUN_1005ec40` / `FUN_10066bb0`: the auto play settings (Preferences: Friendly-Aggressive and Dig In-No Defense sliders, 0-100; the Auto button sets aggressiveness to a tenth of the first and colonies defended to the second). Now in the skin's Preferences (`rs.autoPlaySettings`); until they are set, a human on auto play keeps the auto play personality (the defaults weren't read: docs/open-questions.md).
 - `FUN_10059570`: options locked by rank ("Need more MPs"); left open on purpose.
-- `FUN_1005cf40`: the questions before buying more than 9 Scouts or Tankers at once.
 - `FUN_100a8780` / `FUN_100a9820`: dragging part of a pile from one fleet to another in the Group Fleets window (the remake merges whole fleets and splits; their rules are the same).
 
 The canned-message window (`FUN_1005d940`, with its effects in pass 2b: "Look at %s" explores a star for the receiver, "I own %s" marks it, "I like planets ..." gives your home), the turn time limit (`FUN_10058360`, `FUN_10066260`) and the first turn's budget kept for the next game (`FUN_10064600`; `FUN_1006579c` puts the preferences' shares in, and the remake does that with the defaults) are interface and are listed in docs/open-questions.md.

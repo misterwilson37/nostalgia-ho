@@ -429,3 +429,8 @@ too, and a locked bar refuses the drag and says why. Not read: the damage shadin
 debris lost when every side is beaten, the Message History's Evacuate keeping 5.0.5's
 one-in-three, the Abundant shares, and the unused report 0x475 ("%s has just taken over
 for the computer player %s.").
+
+- **Many Scouts or Tankers** (done, `rs.manyShips`, inherited from 5.0.5): `FUN_00043754`
+  asks tSTL 6004.36 / .37 ("Are you sure you want to build that many scout ships / tankers?")
+  for a Scout (class 0) or Tanker (class 3) count above 9, as `FUN_1005cf40` does; any
+  answer but OK sets the count to 0.

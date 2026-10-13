@@ -2902,6 +2902,10 @@ Object.defineProperties(E.RULESETS.original, Object.fromEntries(Object.entries({
   // part of one (Option-drag asks how many, FUN_100a8400 / FUN_100a8780),
   // moved to another fleet; Group All; Split
   organizeFleets: '505',
+  // CONFIRMED (FUN_1005cf40): 10 or more Scouts (class 0) or Tankers (class 3) in one purchase
+  // ask first, Alert Strings 36 / 37; any answer but OK buys nothing. The Palm does the same
+  // (FUN_00043754).
+  manyShips: { at: 10, how: 'ask' },
   // CONFIRMED (FUN_1008c5f0, FUN_1008d140): a fleet dragged on the map is
   // given the route DeterminePath (FUN_1007d260) finds from its star with the
   // fuel left and its Range, as the computers' are (js/ai-original.js mapRoute)

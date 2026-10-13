@@ -306,6 +306,10 @@ const rs = Object.assign(base, {
   // at "No" each time the window opens (LIKELY: nothing sets its value). The
   // purchase itself is 5.0.5's (0x1000375b0 = FUN_1007e4a0).
   allowDebt: { label: 'Allow Debt', words: ['No', 'Yes'], on: false },
+  // CONFIRMED (-[BuildSingleShipDialog updateCosts] 0x1000b2bb8 / Android 0x2b2bb8): with 10 or more
+  // Scouts (class 0) or Tankers (class 3) chosen, the count turns red and Alert String 36 / 37
+  // shows in the window (showScoutWarning, showTankerWarning); nothing is asked.
+  manyShips: { at: 10, how: 'warn' },
   // CONFIRMED (OrganizeFleetsLayer, 0x1000bfe20-0x1000c2f14;
   // OrganizerFleetFleetsContainer, 0x1000a5328-0x1000a6018): the Organize
   // Fleets window, opened by a double tap on the fleet list: tap a pile, then

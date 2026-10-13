@@ -822,3 +822,12 @@ the groups of players who aren't the viewer's allies aren't drawn at all.
 - Settled since (`docs/open-questions.md`, iOS): "Hope" and "SparksMcGee" are dealt like
   any name; a new game posts no first messages; the hints are lines 4-42; the stars
   named at a new rank go into later galaxies. The ruleset is `js/rules-ios.js`.
+
+- **Many Scouts or Tankers** (done, `rs.manyShips: { at: 10, how: 'warn' }`):
+  `-[BuildSingleShipDialog updateCosts]` (iOS `0x1000b2bb8`, Android `0x2b2bb8`) compares the
+  chosen count with 10 (`cmp r0, #10`, `blt`): from 10 on, a Tanker (class 3) or Scout
+  (class 0) shows `showTankerWarning` / `showScoutWarning`, the red labels `mTooManyTankers`
+  and `mTooManyScouts` made in `initDialog` from `GetAlertString(37)` / `(36)` ("Are you
+  sure you want to build that many tankers / scout ships?"); nothing is asked, and the
+  count turns red. Release note 1.2.5 said "above 10"; the code says 10 or more. The
+  remake shows the line in red under a design once 10 of it are bought in the window.

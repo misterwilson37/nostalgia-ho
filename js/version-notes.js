@@ -387,7 +387,6 @@ root.HOVERSIONS = {
       'The canned-message window (“Look at …” and “I own …” also marked the map); the remake’s messages are free text, three a turn as in 5.0.5, and the computers read “I like …” in them.',
       'The Group Fleets window: “Merge all fleets here” and splitting follow its rules (Biologicals keep to themselves; the fleet that takes ships keeps its orders and the lower fuel).',
       'Options locked by rank (“Need more MPs”): every option is open.',
-      'The questions before buying more than 9 Scouts or Tankers.',
       'The turn time limit and network play.',
       'The rank window’s own words for naming a star (the iOS version’s are shown), and the shorter way the income panel wrote the interest.',
     ],
@@ -436,7 +435,7 @@ root.HOVERSIONS = {
       'Sounds are the skin’s, not the handheld’s few beeps.',
     ],
     missing: [
-      'Build Ships’ Allow Debt box, and the questions before building more than 9 Scouts or Tankers.',
+      'Build Ships’ Allow Debt box.',
       'Dragging the research bars the way the budget bars are dragged.',
       'The canned-message window, the Evacuate button in the message list, and options locked by rank.',
       'A few reports reworded in the Palm version (the decoy ship, the miracle).',
@@ -482,7 +481,6 @@ root.HOVERSIONS = {
     missing: [
       'Game Center itself: the leaderboards and achievements are kept here, not shared.',
       'Several saved games, sending a game by e-mail, and the help web page.',
-      'The questions before building more than 9 Scouts or Tankers.',
       'Organize Fleets’ way of moving ships between fleets.',
     ],
     deltaTao: DT_5, // the iOS game is a port of 5.0: Delta Tao's 4-to-5 list

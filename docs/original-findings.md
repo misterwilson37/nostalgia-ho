@@ -1156,7 +1156,10 @@ pictures and the damage shading.
 - **The canned-message window** ("Look at %s" explores a star for the receiver, "I own
   %s" marks it, "I like planets ..." tells your home): NOT IMPLEMENTED; the web app's
   messages are free text.
-- **The questions before buying more than 9 Scouts or Tankers**, and **the first
+- **The questions before buying more than 9 Scouts or Tankers** (`FUN_1005cf40`): done
+  (`rs.manyShips`: the Scout / Tanker count of 10 or more asks Alert 36 / 37, OK buys, any
+  other answer buys nothing; the remake's window buys one a click, so it asks at the click
+  that takes one design's ships bought in the window to 10, once). **The first
   turn's budget kept for the next game**: NOT IMPLEMENTED.
 
 ## 16. Claude rules versus Original rules

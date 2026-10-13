@@ -2065,7 +2065,24 @@ function openBuild(sid) {
   // ships bought in this window, by design: marking a type gives them back
   // (BuildDesignShips @1314d4-1315ac); rs.scrapTypeRefundOne: only one of
   // them (4.0.5's slip, FUN_0044fd03)
-  const session = {};
+  // rs.manyShips (5.0.5 and the Palm: FUN_1005cf40, FUN_00043754): a purchase of
+  // 10 or more Scouts or Tankers asks first (Alert Strings 36 and 37, any answer but
+  // OK buys nothing); { at: 10, how: 'ask' }. iOS and Android
+  // (-[BuildSingleShipDialog updateCosts] 0x2b2bb8, count >= 10): the same texts shown
+  // in red in the window, { at: 10, how: 'warn' }. This window buys one ship a click,
+  // so it asks at the click that takes a design's ships bought here to 10, once.
+  const carry = UI.buildCarry && UI.buildCarry.sid === sid ? UI.buildCarry : null; UI.buildCarry = null;
+  const session = carry ? carry.session : {}, asked = carry ? carry.asked : {};
+  const MS = !queue && HO.rules(G).manyShips;
+  const manyText = (d) => d.type === 'scout' ? HO.DATA.alerts[35] : d.type === 'tanker' ? HO.DATA.alerts[36] : null;
+  const manyAsk = (d, go) => {
+    if (MS && MS.how === 'ask' && manyText(d) && (session[d.id] || 0) + 1 >= MS.at && !asked[d.id]) {
+      UI.buildCarry = { sid, session, asked };
+      modal('Are you sure?', el('div', null, el('p', null, manyText(d)), el('div', { class: 'btns right' },
+        el('button', { class: 'quiet', onclick: () => { closeModal(); openBuild(sid); } }, 'Cancel'),
+        el('button', { onclick: () => { asked[d.id] = true; closeModal(); UI.buildCarry = { sid, session, asked }; go(); openBuild(sid); } }, 'OK'))), { cls: 'small alert' });
+    } else go();
+  };
   const marking = marksScrapDesign() && !queue;
   // rs.allowDebt (iOS 1.2.9, -[BuildSingleShipDialog determineCapacity]): an
   // "Allow Debt" switch, { label, words: [off, on], on: its setting when the
@@ -2093,7 +2110,8 @@ function openBuild(sid) {
       left.append(el('div', { class: 'drow' + (d.scrap301 ? ' scrap' : '') },
         shipImgEl(d, 26),
         el('div', { class: 'dtext' }, el('b', null, d.name), el('div', { class: 'sub' }, `${HO.TYPES[d.type].name} · R${d.type === 'satellite' ? 0 : d.R} Sp${d.V} W${d.W} Sh${d.S} M${d.M}`),
-          el('div', { class: 'sub' }, `${money(c.money)} · ${fmt(c.metal)} metal${c.proto ? ' (incl. prototype)' : ''}`)),
+          el('div', { class: 'sub' }, `${money(c.money)} · ${fmt(c.metal)} metal${c.proto ? ' (incl. prototype)' : ''}`),
+          MS && MS.how === 'warn' && manyText(d) && (session[d.id] || 0) >= MS.at ? el('div', { class: 'sub manywarn', style: 'color:#d00' }, manyText(d)) : null),
         el('div', { class: 'pm' },
           marking ? el('button', { class: 'quiet', onclick: () => {
             // a type marked for scrapping: the ships of it bought in this window go back
@@ -2105,7 +2123,7 @@ function openBuild(sid) {
           } }, scrapWords('type')[d.scrap301 ? 1 : 0]) : null,
           el('button', { class: 'quiet', disabled: !n, 'aria-label': 'Remove one', onclick: () => { if (queue) { const i = (s.queue || []).map(it => it.did).lastIndexOf(d.id); if (i >= 0) HO.unqueueShip(G, ME, sid, i); } else if (HO.unbuildShip(G, ME, sid, d.id) && session[d.id] > 0) session[d.id]--; render(); renderPanel(); draw(); } }, '−'),
           el('span', { class: 'n' }, String(n)),
-          el('button', { disabled: !can, 'aria-label': queue ? 'Queue one' : 'Build one', onclick: () => { if (queue ? HO.queueShips(G, ME, sid, d.id, 1) : HO.buildShips(G, ME, sid, d.id, 1)) { Sound.play(7006); session[d.id] = (session[d.id] || 0) + 1; } render(); renderPanel(); draw(); } }, '+'))));
+          el('button', { disabled: !can, 'aria-label': queue ? 'Queue one' : 'Build one', onclick: () => { manyAsk(d, () => { if (queue ? HO.queueShips(G, ME, sid, d.id, 1) : HO.buildShips(G, ME, sid, d.id, 1)) { Sound.play(7006); session[d.id] = (session[d.id] || 0) + 1; } render(); renderPanel(); draw(); }); } }, '+'))));
     }
     // designer
     const L = HO.designLimits(G, p, st.type);
@@ -2140,7 +2158,7 @@ function openBuild(sid) {
       const d = HO.findOrCreateDesign(G, p, spec);
       if (queue) { if (HO.queueShips(G, ME, sid, d.id, 1)) Sound.play(7006); else toast(`${s.name}’s queue is full: it holds ${HO.rules(G).queueSlots} kinds of ship.`); }
       else if (debtSwitch && !affordable(HO.shipCostNow(G, p, d))) toast(`Not enough money or metal. Turn on ${AD.label || 'Allow Debt'} to borrow.`);
-      else if (HO.buildShips(G, ME, sid, d.id, 1)) { Sound.play(7006); session[d.id] = (session[d.id] || 0) + 1; } else toast('Not enough money or metal.');
+      else manyAsk(d, () => { if (HO.buildShips(G, ME, sid, d.id, 1)) { Sound.play(7006); session[d.id] = (session[d.id] || 0) + 1; } else toast('Not enough money or metal.'); render(); renderPanel(); draw(); });
       render(); renderPanel(); draw();
     } }, queue ? (exists ? `Queue another ${exists.name}` : 'Create this type and queue one') : exists && exists.built ? `Build another ${exists.name}` : 'Build the prototype')));
     body.append(left, right);

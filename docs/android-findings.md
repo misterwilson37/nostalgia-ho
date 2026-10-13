@@ -208,3 +208,7 @@ system's Back/Home/Recents bar on devices without keys.
   (this manifest still names Google as the target store).
 - As for iOS: the battle routines' inner loops were compared by structure and
   constants, not line by line.
+
+- **Many Scouts or Tankers**: the same as iOS (`updateCosts` `0x2b2bb8`, `showScoutWarning`
+  `0x2b1328`, `showTankerWarning` `0x2b1390`; Alert Strings 36 and 37 shown in red at a
+  count of 10 or more). Done.
