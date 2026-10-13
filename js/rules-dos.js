@@ -1855,7 +1855,7 @@ function battlePanel20(opt) {
     const cls = W === WORDS20 ? cut((E.TYPES[t] || { name: '' }).name, opt.cls) + (n > 1 ? 's' : '') : cut(W.cls(t, n), opt.cls), nm = cut(d.name, opt.name), ws = `(${d.W}/${d.S})`;
     return (n < 1 ? `${nm} ${ws} ${cls}` : n === 1 ? `${W.one}${nm} ${ws} ${cls}` : `${n} ${nm} ${ws} ${cls}`).slice(0, 39);
   };
-  const pop = (G, x) => (E.rules(G).fmtNum || fmt)(Math.round(x * 1e6));
+  const pop = (G, x) => { const t = (E.rules(G).fmtNum || fmt)(Math.round(x * 1e6)); return W.num ? W.num(t) : t; };
   return E.makeBattlePanel({
     cols: opt.cols || 'sides', shade: !!opt.shade, pics: (n) => Math.min(n, 1),
     head: (G, b) => W.head(G.stars[b.star].name, b.year),

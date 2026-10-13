@@ -136,6 +136,7 @@ const BATTLE_DE = {
   one: X(DE.exe.fleetOne).split('%s')[0], // "Ein "
   dead: (n0, desc) => S(64).replace('%d', n0).replace('%s', desc),
   deadPeople: (x) => X(DE.exe.deadPeople).replace('%s', x),
+  num: numDE,
 };
 // Name a Star (DOSHO.EXE's NameStarBox: the text, the field's label; string
 // 3340 when the name is taken)
@@ -235,9 +236,20 @@ function iosLang(lang, rs) {
   const SP = en('sprintf Templates'), SPT = tr('sprintf Templates');
   const esc = (t) => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const panel = [9, 10, 11, 14].map(i => [new RegExp('^' + esc(SP[i]).replace(/%d/g, '(\\d+)').replace(/%s/g, '(.*?)') + '$'), SPT[i]]);
+  // a group: "one Needle (1/1) Scout", "3 Needle (1/1) Scouts" (rules-original
+  // shipDesc505): Misc Strings 0 ("one") and the class names, singular and plural
+  const desc = (t) => {
+    const m = /^(?:(one) |(\d+) )?(.*) \((\d+)\/(\d+)\) (.+)$/.exec(t);
+    if (!m) return t;
+    let cls = m[6], plural = false;
+    if (m[2] && /s$/.test(cls)) { cls = cls.slice(0, -1); plural = true; }
+    const i = SC.indexOf(cls);
+    if (i < 0 || i > 6) return t;
+    return (m[1] ? one + ' ' : m[2] ? m[2] + ' ' : '') + `${m[3]} (${m[4]}/${m[5]}) ` + SCT[plural ? i + 7 : i];
+  };
   const panelText = (t) => {
-    for (const [re, to] of panel) { const m = re.exec(t); if (m) { let i = 1; return to.replace(/%[sd]/g, () => m[i++] ?? ''); } }
-    return t;
+    for (const [re, to] of panel) { const m = re.exec(t); if (m) { let i = 1; return to.replace(/%[sd]/g, () => { const a = m[i++] ?? ''; return /\(\d+\/\d+\)/.test(a) ? desc(a) : a; }); } }
+    return desc(t);
   };
   return {
     starNames: names('Star Names'), maleNames: names('Male Computer Names'), femaleNames: names('Female Computer Names'), shipNames,
