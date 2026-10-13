@@ -1888,7 +1888,7 @@ function colonizeAndExplore(G, p) {
       const t = fl.find(x => x.star === f.star && E.fleetHas(G, x, 'tanker'));
       if (t) {
         const d = fleetDesigns(G, t).find(x => x.type === 'tanker');
-        if (RI(G, 1, 100) === 1 && d && d.name === 'Valdez' && p.human) msg(G, p.id, `Oh no!  The Valdez has sprung a leak!  The ecology on ${s.name} is in shambles!  The citizens are suing you for negligence for twice your net worth!`, { icon: 'm9036', star: s.id });
+        if ((RI(G, 1, 100) === 1 || E.hoedown(G)) && d && d.name === 'Valdez' && p.human) msg(G, p.id, `Oh no!  The Valdez has sprung a leak!  The ecology on ${s.name} is in shambles!  The citizens are suing you for negligence for twice your net worth!`, { icon: 'm9036', star: s.id });
         f.fuel = R;
       }
     }

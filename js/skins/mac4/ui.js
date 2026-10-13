@@ -68,6 +68,16 @@ window.HOMAC4 = {
         if (!goodG) { if (minedOut) pic += 100; } else if (cold) pic += 50; else if (hot) pic += 100;
         return L(pic);
       }
+      // Full Hoedown (HO.hoedown): SetPlanetTypesForStar's jokes (@d020a):
+      // on 25 December the Christmas planet (1404); and Windows 4.0.5's
+      // pictures for a rich colony of a player named Peter or Howard, which
+      // the Mac cut (it compares the names and shows the plain planet), from
+      // the Mac's own 3115 and 3116 (it has no woman's)
+      if (HO.hoedown(G)) {
+        const d = new Date();
+        if (d.getMonth() === 11 && d.getDate() === 25) return L(1404);
+        if (HO.planetIncome(G, p, s) >= 30000 && (p.name === 'Peter' || p.name === 'Howard')) return L(p.name === 'Peter' ? 3115 : 3116);
+      }
       return L((HO.planetIncome(G, p, s) < 30000 ? 1406 : 1405) + (p.female ? 500 : 0));
     }
     let pic = 1000 + size; // explored, nobody's

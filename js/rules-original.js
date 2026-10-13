@@ -1072,7 +1072,7 @@ function refuel(G) {
           f.fuel = max;
           if (s.owner === p.id) { let c = 0; for (const d of ds) if (d.type === 'colony') c += f.ships[d.id]; f.colonists = c * 10; }
         }
-        if (f.name === 'Valdez' && RI(G, 1, 250) === 1)
+        if (f.name === 'Valdez' && (RI(G, 1, 250) === 1 || E.hoedown(G))) // Full Hoedown: the draw made, the leak every time
           msg(G, p.id, `Oh no! The Valdez has sprung a leak! The ecology on ${s.name} is in shambles! The citizens are suing you for twice your net worth!`, { icon: 'm9038', star: s.id });
         if (f.fuel < max) {
           let dreads = 0; for (const d of ds) if (d.type === 'dread') dreads += f.ships[d.id];
@@ -1919,7 +1919,7 @@ function colonizeExplore505(G, p) {
     const ds = fleetDesigns(G, f), bio = ds.length > 0 && ds.every(d => d.type === 'bio');
     if (!bio) {
       if (owner >= 0 && isAllied(G, p.id, owner)) { f.fuel = max; if (owner === p.id) f.colonists = count(f, 'colony') * 10; }
-      if (RI(G, 1, 250) === 1 && f.name === 'Valdez') rep(G, p, 0x47e, [s.name], { icon: 'm9038', star: s.id });
+      if ((RI(G, 1, 250) === 1 || E.hoedown(G)) && f.name === 'Valdez') rep(G, p, 0x47e, [s.name], { icon: 'm9038', star: s.id });
       if (!f.sat && f.fuel < max) {
         const cost = count(f) + 24 * count(f, 'dread'), had = pool[f.star] || 0;
         while (f.fuel < max && cost <= (pool[f.star] || 0)) { f.fuel = Math.min(max, f.fuel + 1); pool[f.star] -= cost; }
@@ -2600,8 +2600,12 @@ const evacuateToggle = {
   marked: (G, sid) => !!G.stars[sid].abandon301,
   ask(G, p, sid) {
     const s = G.stars[sid], nm = String(s.name).toLowerCase();
-    if (nm === 'kansas' && RI(G, 1, 3) === 1) return { text: 'Dorothy, I guess that means we’re not in Kansas anymore', notice: true };
-    if (nm === 'hope' && RI(G, 1, 3) === 1) return { text: 'Dost thou truly wish to abandon Hope? All is not yet lost...' };
+    // Full Hoedown (E.hoedown): the one-in-three draws are still made, and
+    // their result ignored; and the Palm's "Ship" (4.0.5's, cut by 5.0.5)
+    const H = E.hoedown(G);
+    if (nm === 'kansas' && (RI(G, 1, 3) === 1 || H)) return { text: 'Dorothy, I guess that means we’re not in Kansas anymore', notice: true };
+    if (nm === 'hope' && (RI(G, 1, 3) === 1 || H)) return { text: 'Dost thou truly wish to abandon Hope? All is not yet lost...' };
+    if (nm === 'ship' && H) return { text: 'Abandon Ship? Abandon Ship! All hands abandon ship! Women and children first!' };
     if ((s.oInc || 0) > 0) return { text: `Do you really want to evacuate ${s.name}? It's a profitable colony!` };
     return null;
   },

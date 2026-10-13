@@ -147,13 +147,19 @@ function langMap(rs, from, to, kind) {
 }
 // a name of the version's own lists in the game's language, and back
 function gameName(G, n, kind) { return G.opts && G.opts.lang ? langMap(ownRules(G), null, G.opts.lang, kind).get(n) || n : n; }
-function ownName(G, n, kind) { return G.opts && G.opts.lang ? langMap(ownRules(G), G.opts.lang, null, kind).get(n) || n : n; }
+function ownName(G, n, kind) {
+  const h = G.hoNames && G.hoNames[kind]; // Full Hoedown's extra names stand for the names they replaced
+  if (h && Object.prototype.hasOwnProperty.call(h, n)) n = h[n];
+  return ownName0(G, n, kind);
+}
+function ownName0(G, n, kind) { return G.opts && G.opts.lang ? langMap(ownRules(G), G.opts.lang, null, kind).get(n) || n : n; }
 // a game changes language (the Ho menu): its stars', computers' and ship
 // designs' names from the lists are put in the new language; reports already
 // received keep theirs
 function setLanguage(G, lang) {
   const rs = ownRules(G), from = G.opts.lang || null, to = lang && lang !== languages(rs)[0] ? lang : null;
   if (from === to) return;
+  hoNamesOff(G);
   const tr = (n, kind) => langMap(rs, from, to, kind).get(n) || n;
   for (const s of G.stars) s.name = tr(s.name, 'stars');
   for (const p of G.players) {
@@ -161,6 +167,66 @@ function setLanguage(G, lang) {
     for (const d of p.designs || []) d.name = tr(d.name, 'ships');
   }
   if (to) G.opts.lang = to; else delete G.opts.lang;
+  hoNamesOn(G);
+}
+// ---------- Full Hoedown's extra names ----------
+// rs.hoedown.extraNames[lang]: { stars, men, women, ships: { by class } },
+// the names a release in that language added to its lists (the Amiga 2.0's
+// German). With Hoedown on and the game in that language they join the
+// pools, and never change the game: every name is drawn as without them, and
+// then, by a draw of its own (hoRand: from the seed, never the game's
+// numbers), swapped for an unused extra name as often as the extra names'
+// share of the longer list. G.hoNames[kind] keeps what each extra name
+// replaced, which the rules see instead (ownName).
+function hoRand(G, key) {
+  let h = 2166136261 ^ ((G.opts && G.opts.seed) >>> 0);
+  for (let i = 0; i < key.length; i++) h = Math.imul(h ^ key.charCodeAt(i), 16777619);
+  h ^= h >>> 13; h = Math.imul(h, 0x5bd1e995); h ^= h >>> 15;
+  return (h >>> 0) / 4294967296;
+}
+function hoExtras(G) {
+  const x = hoedown(G) && ownRules(G).hoedown.extraNames;
+  return (x && x[G.opts.lang || languages(ownRules(G))[0] || 'en']) || null;
+}
+// n, a name drawn from the game's list of its kind (ships: of class cls), or
+// an extra name in its place; key names the draw
+function hoName(G, kind, n, key, cls) {
+  const X = hoExtras(G), rs = rules(G);
+  const extra = X && (kind === 'ships' ? X.ships && X.ships[cls] : X[kind]);
+  const base = kind === 'ships' ? ((rs.shipNames || DATA.shipNames || {})[cls] || []) : NAME_KINDS[kind](rs)[0] || [];
+  if (!extra || !extra.length || !base.includes(n)) return n;
+  const used = (G.hoNames = G.hoNames || {})[kind] = G.hoNames[kind] || {};
+  const taken = new Set([...G.players.map(p => p.name), ...G.stars.map(s => s.name), ...G.players.flatMap(p => (p.designs || []).map(d => d.name))]);
+  const free = extra.filter(x => !Object.prototype.hasOwnProperty.call(used, x) && !taken.has(x));
+  if (!free.length || hoRand(G, kind + key) >= extra.length / (extra.length + base.length)) return n;
+  const x = free[Math.floor(hoRand(G, kind + key + '#') * free.length)];
+  used[x] = n;
+  return x;
+}
+// put the extra names in (Hoedown on, or the game's language changed) and take them out
+function hoNamesOn(G) {
+  if (!hoExtras(G)) return;
+  for (const s of G.stars) s.name = hoName(G, 'stars', s.name, 's' + s.id);
+  for (const p of G.players) {
+    if (!p.human) p.name = hoName(G, p.female ? 'women' : 'men', p.name, 'p' + p.id);
+    (p.designs || []).forEach((d, i) => { d.name = hoName(G, 'ships', d.name, `d${p.id}.${i}`, d.type); });
+  }
+}
+function hoNamesOff(G) {
+  const H = G.hoNames;
+  if (!H) return;
+  const back = (kind, n) => (H[kind] && Object.prototype.hasOwnProperty.call(H[kind], n) ? H[kind][n] : n);
+  for (const s of G.stars) s.name = back('stars', s.name);
+  for (const p of G.players) {
+    if (!p.human) p.name = back(p.female ? 'women' : 'men', p.name);
+    for (const d of p.designs || []) d.name = back('ships', d.name);
+  }
+  delete G.hoNames;
+}
+// Hoedown on or off in the middle of a game (the Ho menu)
+function setHoedown(G, on) {
+  if (!G || !ownRules(G).hoedown) return;
+  if (on) { G.opts.hoedown = true; hoNamesOn(G); } else { hoNamesOff(G); delete G.opts.hoedown; }
 }
 // A message in the game's language. Messages are kept in the version's own
 // words (the rules and the skins read them: rules-dos log20, the skins'
@@ -226,6 +292,13 @@ function feature(G, name) { return !!(rules(G).features || {})[name]; }
 // (A ruleset built with Object.assign over another must set its own fixes.)
 function fixes(rs) { return (rs && rs.fixes) || []; }
 function fixed(G, id) { return !!(G && G.opts && G.opts.patch) && fixes(rules(G)).some(f => f.id === id); }
+// Full Hoedown (G.opts.hoedown, off unless chosen at New Game or in the Ho
+// menu): Delta Tao's own jokes at their most (js/hoedown.js, docs/hoedown.md).
+// Only for the rulesets with Hoedown items (rs.hoedown: the official
+// releases', never the AI homages'). The rules ask hoedown(G) where a joke
+// is; a joke's random draw is still made and only its result ignored, so a
+// seed plays the same game with Hoedown on or off.
+function hoedown(G) { return !!(G && G.opts && G.opts.hoedown) && !!ownRules(G).hoedown; }
 // the patch's version number: the version's own + ".1" (rs.patchVersion overrides)
 function patchVersion(rs) { return rs ? rs.patchVersion || (rs.version ? rs.version + '.1' : null) : null; }
 
@@ -246,6 +319,10 @@ function designMin(G, k, type) { const rs = rules(G); return rs.designMin ? rs.d
 function designCost(G, d) { return rules(G).designCost(G, d); }
 function canBuildType(G, p, type) { return rules(G).canBuild(G, p, type); }
 function designName(G, p, type) {
+  const n = designName0(G, p, type);
+  return hoExtras(G) ? hoName(G, 'ships', n, `d${p.id}.${p.designs.length}.${G.turn}`, type) : n;
+}
+function designName0(G, p, type) {
   // a ruleset may pick the name itself (rs.designName), or name ships from its own lists (rs.shipNames, by type)
   if (rules(G).designName) return rules(G).designName(G, p, type);
   // (drawn in the version's own language, then put in the game's: rs.languages)
@@ -766,6 +843,7 @@ function newGame(opts) {
     rs.defaultDesigns(G, p);
   }
   rs.afterSetup(G);
+  hoNamesOn(G); // Full Hoedown's extra names (after every draw of the game's)
   G.fleets.forEach(f => f.newThisTurn = false);
   for (const p of G.players) p.inbox = [];
   // the first messages: a ruleset may give its game's own (rs.welcome: [[text, opt], ...], or (G) => that)
@@ -841,6 +919,10 @@ function endTurn(G) {
   // checked on the last (FUN_100728d0)
   const steps = feature(G, 'yearsPerTurn') ? Math.max(1, Math.round((G.opts.yearsPerTurn || 10) / 10)) : 1;
   for (let i = 0; i < steps && !G.over; i++) turnStep(G, i === 0, i === steps - 1);
+  // Full Hoedown: the version's colour-monitor joke (rs.hoedown.colorMonitor,
+  // js/hoedown.js) to each human once, at the first End Turn it is on for
+  const cm = hoedown(G) && ownRules(G).hoedown.colorMonitor;
+  if (cm) for (const p of G.players) if (p.human && !p.hoColor) { p.hoColor = true; msg(G, p.id, cm.text, { icon: cm.icon || 'm9039' }); }
   // keep battle records bounded
   if (G.battles.length > 60) G.battles.splice(0, G.battles.length - 60);
 }
@@ -1232,7 +1314,7 @@ function makeBattlePanel(cfg) {
 const API = {
   DATA, SHIP_TYPES, TYPES: SHIP_TYPES, TECHS,
   BAR_SCALES, barScale, battleGroups, makeBattlePanel,
-  registerRules, registerAI, rules, rulesById, aiOf, LANGUAGES, languages, ownRules, gameName, ownName, setLanguage, say, saysIn, feature, RULESETS, fixes, fixed, patchVersion,
+  registerRules, registerAI, rules, rulesById, aiOf, LANGUAGES, languages, ownRules, gameName, ownName, setLanguage, say, saysIn, feature, RULESETS, fixes, fixed, hoedown, setHoedown, patchVersion,
   // [id, name] for the New Game window: the original games' rules by year of
   // release, then version ("2.0 (DOS and Windows 3.1, 1993)"); rulesets that
   // aren't an original game's (the remake's own) come last, by their label
@@ -1267,5 +1349,6 @@ if (typeof module !== 'undefined') {
   require('./rules-mac20.js'); require('./rules-mac405.js');
   require('./rules-gemini.js'); require('./ai-gemini.js');
   require('./languages.js'); // the versions' other languages (rs.languages)
+  require('./hoedown.js'); // Full Hoedown (rs.hoedown)
 } else root.HO = API;
 })(this);

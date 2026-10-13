@@ -111,6 +111,7 @@ business; the DOS 2.0 "Inherited rules audit" covers them for 2.0.
 | 12 | `processHandovers` | the engine's surrender handover | unused: no surrender |
 | 12 | `shareMaps` | best buddies share maps | unused: no alliances |
 | 12 | `yardRoom` | no limit on ships built at a colony in a turn | unused: ships are queued (`buildQueue`); `buildShips` isn't called |
+| 12 | `hoedown` | no Full Hoedown (the New Game box and the Ho menu item hidden) | verified: 1.2 has no Delta Tao joke to turn up (docs/hoedown.md, "1.2") |
 
 ### DOS 2.0 (`dos`)
 

@@ -56,6 +56,15 @@ window.HOTHEME = {
         if (!goodG) { if (minedOut) pic += 100; } else if (cold) pic += 50; else if (hot) pic += 100;
         return L(pic);
       }
+      // Full Hoedown (HO.hoedown): SetPlanetTypesForStar's jokes (FUN_00438f47),
+      // which the remake had left out: on 25 December the Christmas planet
+      // (1404), and a rich colony of a player named Peter or Howard (as
+      // typed) shows 3115 or 3116 (+500 a woman)
+      if (HO.hoedown(G)) {
+        const d = new Date();
+        if (d.getMonth() === 11 && d.getDate() === 25) return L(1404);
+        if (HO.planetIncome(G, p, s) >= 30000 && (p.name === 'Peter' || p.name === 'Howard')) return L((p.name === 'Peter' ? 3115 : 3116) + (p.female ? 500 : 0));
+      }
       return L((HO.planetIncome(G, p, s) < 30000 ? 1406 : 1405) + (p.female ? 500 : 0));
     }
     let pic = 1000 + size; // explored, nobody's

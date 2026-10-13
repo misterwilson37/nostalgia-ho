@@ -85,8 +85,12 @@ const evacuateToggle = {
   marked: (G, sid) => !!G.stars[sid].abandon301,
   ask(G, p, sid) {
     const s = G.stars[sid], nm = String(s.name).toLowerCase(), third = () => 1 + Math.floor(Math.random() * 3) === 1;
-    if (nm === 'kansas' && third()) return { text: "Dorothy, I guess that means we're not in Kansas anymore!!" };
-    if (nm === 'hope' && third()) return { text: 'Dost thou truly wish to abandon Hope? All is not yet lost...' };
+    // Full Hoedown (E.hoedown): the one-in-three draws are still made, and
+    // their result ignored; and the Palm's "Ship" (4.0.5's, cut by 5.0.5)
+    const H = E.hoedown(G);
+    if (nm === 'kansas' && (third() || H)) return { text: "Dorothy, I guess that means we're not in Kansas anymore!!" };
+    if (nm === 'hope' && (third() || H)) return { text: 'Dost thou truly wish to abandon Hope? All is not yet lost...' };
+    if (nm === 'ship' && H) return { text: 'Abandon Ship? Abandon Ship! All hands abandon ship! Women and children first!' };
     if ((s.oInc || 0) < 1) return { text: `Do you really want to evacuate ${s.name}?` };
     return { text: `Do you really want to evacuate ${s.name}? It's a profitable colony!` };
   },

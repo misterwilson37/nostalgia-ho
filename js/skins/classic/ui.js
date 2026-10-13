@@ -184,7 +184,9 @@ const evacuateShown = () => HO.rules(G).evacuateCommand !== false;
 // remake's own confirmation and an immediate HO.evacuate.
 function evacuateClick(sid) {
   const t = HO.rules(G).evacuateToggle, s = G.stars[sid];
-  if (!t) return confirmBox(`Evacuate ${s.name}? Your colonists will leave; satellites stay.`, () => { HO.evacuate(G, ME, sid); Sound.play(7002); renderPanel(); draw(); save(); });
+  // Full Hoedown: 3.0.1's and 4.0.5's "Hope" and "Ship" in place of the remake's question
+  const hj = !t && HO.hoedown(G) && HO.ownRules(G).hoedown.evacuate && HO.ownRules(G).hoedown.evacuate(G, s);
+  if (!t) return confirmBox(hj ? HO.say(G, hj) : `Evacuate ${s.name}? Your colonists will leave; satellites stay.`, () => { HO.evacuate(G, ME, sid); Sound.play(7002); renderPanel(); draw(); save(); });
   const on = !t.marked(G, sid);
   const go = () => { HO.evacuate(G, ME, sid); Sound.play(on ? 7002 : 4000); renderPanel(); draw(); save(); };
   const a = on ? t.ask(G, me(), sid) : null;
@@ -2811,6 +2813,10 @@ function openSurrender() {
 function toggleArmageddon() {
   const p = me();
   if (p.armageddon) { HO.setArmageddon(G, ME, false); toast(HO.DATA.alerts[4] || 'Whew!'); save(); return; }
+  // Full Hoedown: 4.0.5's two questions, each drawn from its list (rs.hoedown.armageddon)
+  const hq = HO.hoedown(G) && HO.ownRules(G).hoedown.armageddon;
+  const any = (L) => L[Math.floor(Math.random() * L.length)];
+  if (hq) return confirmBox(any(hq[0]), () => confirmBox(any(hq[1]), () => { HO.setArmageddon(G, ME, true); save(); toast('The armageddon device is on. It fires when every human player has turned theirs on.'); }));
   confirmBox(HO.DATA.alerts[3] || 'Are you sure you want to destroy half the galaxy?', () => { HO.setArmageddon(G, ME, true); save(); toast('The armageddon device is on. It fires when every human player has turned theirs on.'); });
 }
 
@@ -3177,6 +3183,14 @@ const commandShown = (feat) => !!G && HO.feature(G, feat) && HO.rules(G)[COMMAND
 // are choices here, and can be changed in the middle of a game.
 const MODERN_TEXT = 'Modern conveniences: automatic routes, the map follows the news, battle speed and written battle reports (not in the original games)';
 function setModern(on) { if (!G) return; G.opts.modern = !!on; save(); renderPanel(); draw(); }
+// Full Hoedown (G.opts.hoedown, js/hoedown.js): Delta Tao's own jokes at
+// their most, never the play; chosen at New Game ("ho5.hoedown") and in the
+// Ho menu, for rules with Hoedown items (rs.hoedown: not the AI homages)
+const HOEDOWN_TEXT = 'Full Hoedown: Delta Tao’s own jokes at their most, every time (the game plays the same)';
+const hoedownOn = () => !!(G && HO.hoedown(G));
+function setHoedown(on) { if (!G) return; HO.setHoedown(G, !!on); save(); renderPanel(); draw(); toast(on ? 'Full Hoedown is on.' : 'Full Hoedown is off.'); }
+// the Hoedown items of a ruleset, as a list
+const hoedownList = (rs) => el('ul', null, ...((rs.hoedown || {}).items || []).map(t => el('li', null, t)));
 // The unofficial patch: fixes for a version's obvious bugs (rs.fixes,
 // docs/fixes.md), chosen at New Game only (G.opts.patch, a rule: it can't be
 // changed mid-game) and remembered for the next New Game ("ho5.patch"). Its
@@ -3248,6 +3262,9 @@ function openAbout() {
     G ? null : el('p', { class: 'sub' }, 'The rules chosen for the next game.'),
     patched ? el('p', { class: 'note' }, `This game has the ${pv} patch on: the remake’s own fixes for ${rs.version}’s obvious bugs, not an official release. The Ho menu’s Patch notes say what each one fixes.`) : null,
     N.intro ? el('p', null, N.intro) : null,
+    rs.hoedown ? el('section', { class: 'vnotes' }, el('h4', null, 'Full Hoedown'),
+      el('p', { class: 'sub' }, `${G && HO.hoedown(G) ? 'On in this game' : 'Off'} (New Game, or the Ho menu): ${rs.version || rs.id}’s own jokes at their most. The game plays the same.`),
+      hoedownList(rs)) : null,
     part('Known bugs and quirks, played as released', N.quirks, 'quirks', rs.version ? 'None known.' : null),
     part('Where this remake differs', N.differs, 'differs'),
     part('Not in this remake yet', N.missing, 'missing'),
@@ -3572,6 +3589,9 @@ function newGameDialog() {
   const patchBox = el('div', { class: 'patch' },
     el('label', { class: 'chk' }, el('input', { type: 'checkbox', name: 'patch', checked: localStorage.getItem('ho5.patch') === '1' ? 'checked' : false }), patchText),
     el('details', null, patchSum, patchFixes));
+  // Full Hoedown: only for rules with Hoedown items (never the AI homages')
+  const hoBox = el('label', { class: 'chk modern hoedown' }, el('input', { type: 'checkbox', name: 'hoedown', checked: localStorage.getItem('ho5.hoedown') === '1' ? 'checked' : false }),
+    el('span', null, HOEDOWN_TEXT));
   // hot seat: names and hats for players 2..6
   const seats = el('div', { class: 'group seats' });
   for (let i = 2; i <= 6; i++) seats.append(el('label', { 'data-seat': i }, el('span', null, `Player ${i}`),
@@ -3631,6 +3651,7 @@ function newGameDialog() {
     patchBox,
     el('label', { class: 'chk modern' }, el('input', { type: 'checkbox', name: 'modern', checked: localStorage.getItem('ho5.modern') === '1' ? 'checked' : false }),
       el('span', null, MODERN_TEXT)),
+    hoBox,
     sounds,
     el('div', { class: 'btns right' }, el('button', { type: 'submit' }, 'Create galaxy')));
   // which of the window's settings an edition has: its own, or (an edition
@@ -3700,6 +3721,7 @@ function newGameDialog() {
       // Amiga skin's German), else the version's own
       langSel.value = langs.includes(last) ? last : T.lang && langs.includes(T.lang) ? T.lang : langs[0];
     }
+    hoBox.hidden = !(HO.RULESETS[d.rules] || {}).hoedown;
     // the patch: only for rules that have fixes
     const prs = HO.RULESETS[d.rules], nfx = HO.fixes(prs).length;
     patchBox.hidden = !nfx;
@@ -3723,12 +3745,14 @@ function newGameDialog() {
     if (nh < 2 && d.computers === '0') d.computers = '1';
     localStorage.setItem('ho5.modern', d.modern ? '1' : '0');
     const patch = !patchBox.hidden && !!d.patch;
+    const hoedown = !hoBox.hidden && !!d.hoedown;
+    if (!hoBox.hidden) localStorage.setItem('ho5.hoedown', hoedown ? '1' : '0');
     if (!patchBox.hidden) localStorage.setItem('ho5.patch', patch ? '1' : '0');
     const snd = sounds.value(); localStorage.setItem('ho5.sounds', snd || '');
     const lang = !langRow.hidden && d.lang ? d.lang : null;
     if (lang) localStorage.setItem(langKey(d.rules), lang);
     // hints: the creator's "Give helpful game play hints" preference, which 5.0.5 and the Palm game read for the first messages (rs.welcome)
-    const common = { modern: !!d.modern, ...(patch ? { patch: true } : {}), ...(snd ? { sounds: snd } : {}), ...(lang ? { lang } : {}), hints: !!Prefs.hints, humans, seed: (Math.random() * 2 ** 31) | 0, name: d.name || 'You', galaxy: d.galaxy || 'Milky Way', female: d.female === '1', computers: +d.computers, start: d.start, rules: d.rules, alliances: !!d.alliances, luck: !!d.luck, novas: !!d.novas, ...keptStarsOpt(d.rules) };
+    const common = { modern: !!d.modern, ...(patch ? { patch: true } : {}), ...(hoedown ? { hoedown: true } : {}), ...(snd ? { sounds: snd } : {}), ...(lang ? { lang } : {}), hints: !!Prefs.hints, humans, seed: (Math.random() * 2 ** 31) | 0, name: d.name || 'You', galaxy: d.galaxy || 'Milky Way', female: d.female === '1', computers: +d.computers, start: d.start, rules: d.rules, alliances: !!d.alliances, luck: !!d.luck, novas: !!d.novas, ...keptStarsOpt(d.rules) };
     const k = kindOf(d.rules);
     if (k === 'original') {
       localStorage.setItem('ho5.iq', d.o_iq);
@@ -3813,6 +3837,7 @@ function setupMenus() {
   const ho = [['About this version…', openAbout], ['Patch notes…', openPatchNotes, () => patchOn()], ['-'],
     ['Skin and OS look…', openSkin], ['Sounds…', () => openSounds()], ['Language…', openLanguage, () => !!(G && HO.languages(HO.ownRules(G)).length)],
     [MODERN_TEXT.replace(/:.*/, ''), () => { if (G) setModern(!modern()); else toast('Modern conveniences are chosen for each game: start or continue one first.'); }, null, () => modern()],
+    ['Full Hoedown', () => setHoedown(!hoedownOn()), () => !!(G && HO.ownRules(G).hoedown), () => hoedownOn()],
     ['-'], ['Suggestion box…', () => openFeedback('idea')]];
   const bar = $('#menubar');
   const menu = (btn, items) => {
