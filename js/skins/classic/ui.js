@@ -196,8 +196,8 @@ const evacuateShown = () => HO.rules(G).evacuateCommand !== false;
 // ask gives null (no question), { text } (a yes/no question) or { text,
 // notice: true } (said, then done). Sounds 7002 on, 4000 off. Without it, the
 // remake's own confirmation and an immediate HO.evacuate.
-function evacuateClick(sid) {
-  const t = HO.rules(G).evacuateToggle, s = G.stars[sid];
+function evacuateClick(sid, tog) {
+  const t = tog || HO.rules(G).evacuateToggle, s = G.stars[sid];
   // 3.0.1's and 4.0.5's "Hope" and "Ship" jokes (rs.evacuateJoke) in place of the remake's question
   const hj = !t && HO.rules(G).evacuateJoke && HO.rules(G).evacuateJoke(G, s);
   if (!t) return confirmBox(hj ? HO.say(G, hj) : `Evacuate ${s.name}? Your colonists will leave; satellites stay.`, () => { HO.evacuate(G, ME, sid); Sound.play(7002); renderPanel(); draw(); save(); });
@@ -1317,15 +1317,20 @@ function renderPanel() {
   const tb = el('section', { class: 'box' }, el('h3', { 'data-help': 'tech' }, 'Technology'));
   const techSpend = spendable * p.budget.tech;
   const tents = HO.TECHS.filter(k => !(k === 'radical' && HO.feature(G, 'noRadical'))).map(k => ({ key: k, get: () => p.talloc[k], set: (v) => p.talloc[k] = v }));
-  let tt = tents.reduce((a, e) => a + e.get(), 0) || 1; tents.forEach(e => e.set(e.get() / tt));
+  // rs.dragTech (the Palm: per mille like the budget bars): the shares are kept as they stand
+  // (a total of 1,000 per mille is 1), not scaled to add up to 1 whatever happens
+  const tdrag = HO.rules(G).dragTech; let tstart = null;
+  let tt = tents.reduce((a, e) => a + e.get(), 0) || 1; if (tdrag) tt = tt > 2 ? 1000 : 1; tents.forEach(e => e.set(e.get() / tt));
   const tnames = { range: 'Range', speed: 'Speed', weapons: 'Weapons', shields: 'Shields', mini: 'Mini', radical: 'Radical' };
   tents.forEach((e, i) => {
     const lvl = e.key === 'radical' ? '' : p.tech[e.key];
     // the level's name in the version's own characters (rs.msgText: iOS shows "ª" for "™", patch-aware)
     const nm0 = e.key !== 'radical' ? (HO.DATA.techNames[e.key] || [])[p.tech[e.key] - 1] : null, nm = nm0 && HO.rules(G).msgText ? HO.rules(G).msgText(G, nm0) : nm0;
     tb.append(bar(`${tnames[e.key]}${lvl !== '' ? ' ' + lvl : ''}`, e.get(), 1, (f, end) => {
-      if (f != null) { setShare(tents, i, f); tents.forEach((x, j) => { const r = tb.querySelectorAll('.barrow')[j]; if (r) { r.querySelector('.track')._v = x.get(); r.querySelector('.fill').style.width = barWidth(x.get(), tsc); } }); }
-      if (end) { renderPanel(); save(); }
+      if (f != null && tdrag) { if (!tstart) tstart = JSON.stringify(p.talloc); Object.assign(p.talloc, JSON.parse(tstart)); tdrag(G, p, e.key, Math.max(0, Math.min(1000, Math.round(f * 1000)))); }
+      else if (f != null) setShare(tents, i, f);
+      if (f != null) { tents.forEach((x, j) => { const r = tb.querySelectorAll('.barrow')[j]; if (r) { r.querySelector('.track')._v = x.get(); r.querySelector('.fill').style.width = barWidth(x.get(), tsc); } }); }
+      if (end) { tstart = null; renderPanel(); save(); }
     }, { scale: tsc, grid: rsB.barGrid && rsB.barGrid.tech && T.barGrid !== false ? rsB.barGrid : null, right: money(e.get() * techSpend), cls: 'tbar', title: nm && !/^\d+$/.test(nm) ? nm : tnames[e.key], help: e.key }));
   });
   panel.append(tb);
@@ -1586,6 +1591,9 @@ function renderMsg() {
     if (m.battle) extra.append(el('button', { class: 'quiet', onclick: (e) => { e.stopPropagation(); openBattle(m.battle); } }, 'Review battle'));
     // the radical hand opens from its report (rs.radicalHand)
     if (radicalReport(m) && HO.rules(G).radicalHand && !G.over) extra.append(el('button', { class: 'quiet', onclick: (e) => { e.stopPropagation(); openRadicalHand(); } }, 'Radical projects…'));
+    // rs.messageEvacuate (the Palm's Message History): a message about one of your colonies has an Evacuate button
+    const ME2 = HO.rules(G).messageEvacuate;
+    if (ME2 && m.star != null && !G.over && G.stars[m.star].owner === ME) extra.append(el('button', { class: 'quiet', onclick: (e) => { e.stopPropagation(); evacuateClick(m.star, ME2); renderMsg(); } }, ME2.words[ME2.marked(G, m.star) ? 1 : 0]));
     body.append(extra, el('div', { class: 'count' }, `${UI.msgIdx + 1} of ${UI.inbox.length} · click to continue`));
     card.append(body);
     const next0 = () => { if (m.star != null) { UI.sel = m.star; renderPanel(); } UI.msgIdx++; Sound.play(7001); renderMsg(); draw(); };
@@ -2122,7 +2130,10 @@ function openBuild(sid) {
     body.innerHTML = '';
     const left = el('div', { class: 'blist' });
     left.append(el('div', { class: 'money' }, `Savings ${money(p.savings)} · Metal ${fmt(p.metal)}`));
-    if (debtSwitch) left.append(el('label', { class: 'chk switchrow' }, el('span', null, AD.label || 'Allow Debt'),
+    // (the Palm's is a plain check box, rs.allowDebt.box: tFRM 2100's control 0x709, FUN_0004248a)
+    if (debtSwitch && AD.box) left.append(el('label', { class: 'chk' },
+      el('input', { type: 'checkbox', checked: st.debt ? 'checked' : false, onchange: (e) => { st.debt = e.target.checked; render(); } }), el('span', null, AD.label || 'Allow Debt')));
+    else if (debtSwitch) left.append(el('label', { class: 'chk switchrow' }, el('span', null, AD.label || 'Allow Debt'),
       el('input', { type: 'checkbox', class: 'switch', role: 'switch', 'aria-label': AD.label || 'Allow Debt', checked: st.debt ? 'checked' : false, onchange: (e) => { st.debt = e.target.checked; render(); } }),
       el('small', { class: 'switchword' }, (AD.words || ['No', 'Yes'])[st.debt ? 1 : 0])));
     const designs = p.designs.filter(d => !d.scrapped && types.includes(d.type));

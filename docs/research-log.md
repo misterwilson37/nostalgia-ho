@@ -875,7 +875,7 @@ These are what 5.0.5's code does and what the remake now does; they look like sl
 - Now done: **the Group Fleets window** (October 2026), as 5.0.5's: drag (or tap) piles between
   fleets with a count for part of a pile, Group All, Split, the stance and late-arrival
   controls (`openOrganize`, `rs.organizeFleets: '505'`).
-- **The one-time alert** when a dragged fleet can't reach the star ("Sorry, but that
+- Now done: **the one-time alert** when a dragged fleet can't reach the star ("Sorry, but that
   fleet doesn't have enough fuel ...", STR# 6004.30, shown once, prefs +0x290 bit 1):
   `rs.fuelAlert: '505'`.
 - Now done: **the auto play settings** (Preferences, `FUN_1005ec40`; used by the Auto
@@ -1051,11 +1051,8 @@ These are what the Palm code does and what the remake now does; they look like s
   built (`rs.organizeFleets: null`): the Palm's pile move keeps the taking fleet's own fuel
   and replaces its colonists, so 5.0.5's Group Fleets window would play 5.0.5's rules. The
   Palm keeps Split… and "Merge all fleets here".
-- **Build Ships' Allow Debt box** (`FUN_0004435a`) and the questions before building more
-  than 9 Scouts or Tankers (`FUN_00043754`, tSTL 6004.36-37).
-- **The research bars** dragged per mille like the budget bars (`FUN_00049496`), and
-  tapping the Savings bar while dipping to open Dip Into Savings.
-- **The Message History's Evacuate button** (`FUN_00040232`).
+- Now done: Build Ships' Allow Debt box, the research bars dragged per mille, the Message
+  History's Evacuate button, the Palm's own report texts (`docs/palm-findings.md`).
 - Now done: **naming a star at a new rank** (tFRM 2900, `rs.nameAStar`): after the new
   rank's window; the names are kept (localStorage "ho5.stars.palm"). Settled October
   2026: `FUN_000692c4` puts up to five in a row from SysRandom(0, kept − 5) into the game,
@@ -1069,10 +1066,6 @@ These are what the Palm code does and what the remake now does; they look like s
 - **The canned-message window** (tFRM 2600: Thank You, Sorry, the curse); the remake's
   messages are free text.
 - **Options locked by rank** (`FUN_0003825a`), left open on purpose.
-- **The Palm report texts** where they differ from 5.0.5's (the decoy discovery: "Your
-  ship technicians have designed a decoy ship. It's really weak, but it looks menacing
-  and can help keep your allies in line!"; the miracle: "Your scientist have figured out
-  how to prevent %s ..."; money without "$"); the remake shows 5.0.5's.
 - **The demo** (three computers, a small galaxy, capped technology, report 0x474) and
   registration: nothing to register.
 

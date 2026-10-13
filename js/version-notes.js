@@ -429,10 +429,7 @@ root.HOVERSIONS = {
       'Sounds are the skin’s, not the handheld’s few beeps.',
     ],
     missing: [
-      'Build Ships’ Allow Debt box.',
-      'Dragging the research bars the way the budget bars are dragged.',
-      'The Evacuate button in the message list, and options locked by rank.',
-      'A few reports reworded in the Palm version (the decoy ship, the miracle).',
+      'Options locked by rank.',
     ],
     deltaTao: DT_5, // the Palm game is a port of 5.0: Delta Tao's 4-to-5 list
     changes: [

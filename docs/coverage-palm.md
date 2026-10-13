@@ -221,7 +221,7 @@ The 44 routines Ghidra could not decompile were read in the disassembly (a full 
 | `FUN_0003734e` | Evacuate Planet / Dont Evacuate Planet: Kansas always, Hope and Ship ask, profitable colonies ask; sounds 7002 / 4000; net -+ income; share to 0 | `FUN_10060fac` | Rule, implemented | js/rules-palm.js evacuateToggle |
 | `FUN_00036fb2` | Review Battle | `FUN_10062f20` | Interface | ui.js battle review |
 | `FUN_000395a6` | New game created: the creator's research and budget shares from the preferences, the master-point cap (player +0x28) | `FUN_1006579c`, `FUN_10063a40` | Rule, implemented | js/rules-original.js creatorShares505, addMasterPoints505 |
-| `FUN_00040232` | Message History: Go See, and its Evacuate button (Kansas and Hope one time in three, no Ship) | `FUN_10060580`, `FUN_10060fac` | Rule, in part | the remake has no Evacuate in the message list |
+| `FUN_00040232` | Message History: Go See, and its Evacuate button (Kansas and Hope one time in three, no Ship) | `FUN_10060580`, `FUN_10060fac` | Rule, implemented | `rs.messageEvacuate` |
 | `FUN_00041604` | A report tapped: the battle, the rank, the radical window (0x466), the win and loss screens | `FUN_10060580` | Interface | ui.js reports |
 | `FUN_000414a6` | Master points added at a win, up to the cap, once per game | `FUN_100b24c0` | Rule, implemented | ui.js awardMasterPoints, js/rules-original.js addMasterPoints505 |
 | `FUN_00041aa4` | Radical Research window (a full hand: cancel one program) | `FUN_1005f280` | Rule, implemented | js/rules-original.js radicalHand505 (the Palm takes 5.0.5's hooks); js/skins/classic/ui.js openRadicalHand |
@@ -254,9 +254,6 @@ The 44 routines Ghidra could not decompile were read in the disassembly (a full 
 
 - `FUN_00041aa4`, `FUN_00075dba`-`FUN_00075ff0` (and the Spending Levels' Radical bar, `FUN_00049496`): the **Radical Research window**. When the hand of four radical programs is full, tapping the report "Your Radical researchers are hard at work on another discovery!" (0x466) or the Radical bar opens it, and the player may cancel one program (it leaves the hand, player +0x1e0; the next draw refills it). 5.0.5 has the same window (`FUN_1005f280`, dialog 0x99, which `docs/coverage-505.md` lists as display). Not in the remake.
 - `FUN_000713be`, `FUN_0002d14a`: the auto play settings (Friendly and Dig In sliders, 0-100; "Just end my turns" or "Have computer play for me"; turn auto play off when something interesting happens). The remake's auto play keeps the auto play personality and stops on battles.
-- `FUN_0004435a`: Build Ships' Allow Debt check box (off, the count is limited by Ship Savings above 0; on, by the borrowing limit); the remake always allows the borrowing limit.
-- `FUN_00049496`: the research bars are dragged with the same code as the budget bars (per mille as they stand, locked below 0); the remake's skin scales them in proportion.
-- `FUN_00040232`: the Message History's Evacuate button (Kansas and Hope one time in three, no Ship); the remake has no such button (the Galaxy menu's command, `FUN_0003734e`, is in `js/rules-palm.js`).
 - `FUN_0003825a`, `FUN_0003871c`: options locked by rank, left open on purpose (as for 5.0.5).
 - `FUN_00052832`, `FUN_0005730c`: the demo's technology cap (report 0x474, the table at 0xEFF00A); nothing to register in the remake.
 

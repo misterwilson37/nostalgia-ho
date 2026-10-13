@@ -440,3 +440,16 @@ for the computer player %s.").
 - **Send Message** (built, October 2026; tFRM 2600, `FUN_00075266`, `FUN_000754b6`):
   "To Whom:" the others still in, "Say What:" Thank You, Sorry, %$*^&%!! (0x417 + item),
   OK and Cancel; delivered as 5.0.5's (`rs.cannedChat`).
+
+- **Allow Debt box** (done, `rs.allowDebt: { box: true }`): `FUN_0004248a` reads check box 0x709 into the
+  dialog's byte +0x1aa (0 when the form opens) and `FUN_0004435a` limits the count by Ship Savings with
+  it off and by Ship Savings less the borrowing limit with it on. A plain check box in the window.
+- **Research bars** (done, `rs.dragTech`): `FUN_00049496` drags them with the budget bars' code, per mille
+  (`dragTechPalm`).
+- **Tap on the Savings bar while dipping** opens Dip Into Savings: already done (`barLockedPalm`, `dip`).
+- **Message History's Evacuate** (done, `rs.messageEvacuate`): `FUN_00040232`'s button, on a message about
+  your own colony; 5.0.5's one-in-three jokes; an evacuating colony is let off without a question.
+- **Report wording** (done, `rs.msgText`): tSTL 6020 against 5.0.5's STR# 6020: the decoy discovery (111),
+  the miracle (157: "Your scientist have figured out how to prevent"), "wierd" (158), and no "$" in
+  reports 101, 103, 126 and 148 (6020.100, .102, .125, .147). The rest differ only in the Palm's own quote
+  bytes (and 6020.121's "10%%", which StrPrintF prints as "10%").

@@ -95,6 +95,56 @@ const evacuateToggle = {
   },
 };
 
+// CONFIRMED (FUN_00049496, the pen on a bar of the Spending Levels form, the same code for the
+// budget bars (kind 2) and the research bars (kind 1): FUN_1008a7a0's drag, line for line): a
+// research bar is dragged like a budget bar, per mille as the shares stand, the others in
+// proportion to their shares (each loses trunc(change x its share / their total)), all to 0
+// under a rise bigger than they hold, the fall split between them when they are all 0, and the
+// dragged bar 1,000 less the others (dragged to 0, the first bar takes what is left). No
+// research bar is locked (only below 0, which doesn't happen). The skin gives it the shares
+// as they were when the drag began (rs.dragTech, like rs.dragShare).
+function dragTechPalm(G, p, key, pm) {
+  const L = E.TECHS.filter(k => !(k === 'radical' && E.feature(G, 'noRadical')));
+  const idx = L.indexOf(key); if (idx < 0) return;
+  const v = L.map(k => Math.round((p.talloc[k] || 0) * 1000)), to = Math.max(0, Math.min(1000, pm)), delta = to - v[idx];
+  if (!delta) return;
+  const n = L.length - 1;
+  let sum = 0; v.forEach((x, i) => { if (i !== idx) sum += x; });
+  if (sum === 0 && delta < 0) { const q = trunc(-delta / Math.max(1, n)); v.forEach((x, i) => { if (i !== idx) v[i] = q < 2 ? 1 : q; }); }
+  else if (sum < delta && delta > 0) v.forEach((x, i) => { if (i !== idx) v[i] = 0; });
+  else if (sum !== 0) v.forEach((x, i) => { if (i !== idx) v[i] = x - trunc(delta * x / sum); });
+  let T = 0; v.forEach((x, i) => { if (i !== idx) T += x; });
+  if (to === 0) { v[idx] = 0; if (1000 - T > 0) { const j = idx === 0 ? 1 : 0; v[j] += 1000 - T; } }
+  else v[idx] = Math.max(0, 1000 - T);
+  L.forEach((k, i) => { p.talloc[k] = v[i] / 1000; });
+}
+
+// CONFIRMED (the report strings tSTL 6020 against 5.0.5's STR# 6020, compared one by one; the
+// curly quotes of 5.0.5 are the Palm's own 0x92 / 0x93 / 0x94, which the string dump drops): where
+// the wording differs, the Palm's is shown: the decoy ("Your ship technicians have designed a
+// decoy ship. It's really weak, but it looks menacing and can help keep your allies in line!",
+// 6020.111), the miracle ("... Your scientist have figured out how to prevent %s from going
+// supernova.", 157) and "wierd" (158), and the four sums with no "$" (100 "has just given you",
+// 102 "You just gave", 125 "increased your savings by", 147 "surrenders to you, giving you").
+function msgTextPalm(G, text) {
+  return String(text)
+    .replace("Your scientists have invented a decoy ship. It can't fight, but it's cheap. Amaze your friends and confuse your enemies.", "Your ship technicians have designed a decoy ship. It's really weak, but it looks menacing and can help keep your allies in line!")
+    .replace('Your scientists have figured out to prevent', 'Your scientist have figured out how to prevent')
+    .replace("Wow, that's weird!", "Wow, that's wierd!")
+    .replace(/^(.* has just given you )\$(?=\d)/, '$1')
+    .replace(/^(You just gave .* )\$(?=\d)/, '$1')
+    .replace(/^(You have found a wealth of precious metals and have increased your savings by )\$(?=\d)/, '$1')
+    .replace(/^(.* surrenders to you, giving you )\$(?=\d)/, '$1');
+}
+
+// CONFIRMED (FUN_00040232, the Message History form: its Evacuate button 0x8a5): for the star of the
+// selected message, when it is one of your colonies: an evacuating colony is let off at once (the
+// income back on the net); otherwise 5.0.5's questions (FUN_0002a466 compares the name: Kansas, one
+// time in three, the Dorothy line; Hope, one time in three, asks; a profitable colony asks; no
+// "Ship" joke), then it is marked (GiveBarPercent to 0, the income off the net), as the menu's.
+// rs.messageEvacuate is that toggle; the skin puts the button on a message about your colony.
+const messageEvacuate = Object.assign({}, O.evacuateToggle, { words: ['Evacuate', 'Don’t Evacuate'] });
+
 // CONFIRMED (tSTL 6021, read by FUN_00027c4c for report 500; the End Turn,
 // FUN_000500d4, sends one each turn to a player whose hints preference is on,
 // picked by the system's random numbers from 4 to 43, FUN_00029b08): the Palm
@@ -329,14 +379,20 @@ const rs = Object.assign(base, {
   // tank): 5.0.5's window (organizeFleets '505') would play 5.0.5's rules, so
   // the Palm keeps Split… and "Merge all fleets here" (docs/open-questions.md)
   organizeFleets: null,
+  // 5.0.5's one-time fuel alert is a mouse drag's (FUN_1008c5f0); the Palm's stylus drag wasn't traced
+  fuelAlert: null,
+  dragTech: dragTechPalm, msgText: msgTextPalm, messageEvacuate,
+  // CONFIRMED (FUN_0004435a, the Build Ships form's capacity; FUN_0004248a, the check box 0x709 sets
+  // the dialog's byte +0x1aa, left 0 when the form opens): "Allow Debt" off, the most you can order is
+  // worked out from Ship Savings (+0x4a); on, from Ship Savings less the borrowing limit (+0x52); then
+  // metal and building places, as 5.0.5. (iOS's switch is this box redrawn.)
+  allowDebt: { label: 'Allow Debt', box: true, on: false },
   // CONFIRMED (FUN_00075c40, tFRM 2900's Cool! button 0xb56): the name, cut
   // to 11 letters (StrNCopy 0xb; the field 0xb55 takes 11, maxChars), is
   // refused when it equals a kept name, letter case aside (FUN_0002a4b4;
   // the star list and this galaxy's stars aren't looked at; alert 2300),
   // else added at the end of the kept list (FUN_0002b636: grown by one,
   // no limit, nothing replaced) and the preferences saved. A blank name
-  // 5.0.5's one-time fuel alert is a mouse drag's (FUN_1008c5f0); the Palm's stylus drag wasn't traced
-  fuelAlert: null,
   // (or one whose first byte is above 127) is let go unsaved.
   // The form's words (tFRM 2900): the title "Congratulation!", "You may name
   // a star for use / in future games:", the buttons Cool! and Nevermind; the

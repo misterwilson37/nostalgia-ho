@@ -106,13 +106,11 @@ Things the code can't decide for us. Each says what the remake does for now.
 Windows, commands and pictures of the originals that the remake hasn't built yet. The
 planned order:
 
-1. The small questions and alerts (the Palm's Allow Debt box and Message History
-   Evacuate).
-2. 3.0.1's Hall of Fame and auto play settings.
-3. The Explored Planets windows and the older preferences (1.2, 2.0).
-4. The names files (2.0) and the rest of the Palm's own touches.
-5. iOS's extra screens.
-6. Turn time limits.
+1. 3.0.1's Hall of Fame and auto play settings.
+2. The Explored Planets windows and the older preferences (1.2, 2.0).
+3. The names files (2.0) and the rest of the Palm's own touches.
+4. iOS's extra screens.
+5. Turn time limits.
 
 (The remake's own work, such as English for 1.2 and the translations, is in
 `docs/roadmap.md`.)
@@ -133,12 +131,6 @@ planned order:
 - Moving a pile in Organize Fleets (the Palm's own move: the receiving fleet keeps its
   fuel and its colonists are replaced). For now there are Split… and "Merge all fleets
   here".
-- Build Ships' Allow Debt box.
-- Dragging the research bars like the budget bars, and tapping the Savings bar while
-  dipping to open Dip Into Savings.
-- The Message History's Evacuate button.
-- The Palm's own report wording where it differs from 5.0.5's (the decoy, the miracle,
-  money without "$").
 
 ### 5.0.5
 
