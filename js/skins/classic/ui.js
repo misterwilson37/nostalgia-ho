@@ -3206,7 +3206,7 @@ function openLanguage() {
     save(); renderPanel(); draw();
   };
   modal('Language', el('div', { class: 'about' },
-    el('p', null, 'The names of the stars, computer players and ship designs, and the game’s words, in another of this version’s languages. The game plays on the same; reports already received keep their words.'),
+    el('p', null, 'The names of the stars, computer players and ship designs, and the game’s words, in another of this version’s languages. The game plays on the same; reports already received may keep some names in the old language.'),
     el('label', null, el('span', null, 'Language '), s),
     el('div', { class: 'btns right' }, el('button', { onclick: closeModal }, 'Cancel'), el('button', { onclick: ok }, 'OK'))), { cls: 'mid' });
 }
