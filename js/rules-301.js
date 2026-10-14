@@ -403,7 +403,27 @@ function scrap301(G, f) {
   G.fleets.splice(G.fleets.indexOf(f), 1);
   return { metal, own };
 }
+// CONFIRMED (ScrapFleetsAndTypes @a194e-a1a4a, the setup's +0x74): first,
+// with more than 15 ship types, each type no ship is left of (+0x80) and
+// that is older than the newest of its class is marked for scrapping, oldest
+// first, until 15 would be left. 3.0.1 calls this "Automatically scrapping
+// old designs", a preference, but 'Stup' 1000 sets it on and nothing in the
+// program (the Preferences window, DITL 6150, has no box for it) turns it
+// off, so every player's old types always go.
+function autoScrapTypes(G, p) {
+  const live = p.designs.filter(d => !d.scrapped);
+  let over = live.length - 15;
+  if (over <= 0) return;
+  const newest = {};
+  live.forEach((d, i) => { newest[d.type] = i; });
+  const inUse = (d) => G.fleets.some(f => f.owner === p.id && f.ships[d.id] > 0);
+  for (let i = 0; i < live.length && over > 0; i++) {
+    const d = live[i];
+    if (!inUse(d) && i < newest[d.type]) { d.scrap301 = true; over--; }
+  }
+}
 function scrapFleetsAndTypes(G, p) {
+  autoScrapTypes(G, p);
   const dead = new Set(p.designs.filter(d => d.scrap301 && !d.scrapped));
   const out = !p.alive && !p.surrendered;
   const tally = new Map();
@@ -1935,6 +1955,62 @@ function difficulty(o) {
   return d;
 }
 
+// ---------- the Hall of Fame and the Hall of Shame (AddToHall @144796, doHallOfFameDlg @144af4) ----------
+// CONFIRMED: two lists in the preferences file, 'HaLL' 1000 (Fame) and 1001
+// (Shame), each a count and the 25 last games, newest first (58-byte
+// entries). An entry is written once a game for the player at this computer
+// (the galaxy's +0xe bit, MarkEndGameDone): the Hall of Fame when the "you
+// won" report is shown (0x42c, CheckEndGame after the win year), the Hall of
+// Shame when "You have just been eliminated" is (0x42a: out, or state 5).
+// It keeps the humans and computers, the galaxy's style, density, size and
+// intelligence, the year (won, or gone out), the allies (AreAllies), the
+// difficulty rating (difficulty above, for this player's skill, allies and
+// Armageddons), the times this galaxy was replayed (+0x1a), its seed (+6),
+// the years a turn (+0x1e), the time (the Mac's clock), the skill, the
+// Armageddons and the name. No master points (4.0.5's).
+// The window (DLOG 4080 "Hall Of Fame", 4090 "Hall of Shame"; DITL: "Hall Of
+// Fame" / "Hall Of Shame", Name, When, Difficulty, Details, Play Again, OK):
+// a row is the name, the date ("%d/%d/%d": month, day, year in full) and the
+// rating; Details (or a double click) opens DLOG 4100 / 4110 "Summary of Game
+// Victory" / "Summary of Game Loss" (the style, intelligence, size and
+// density by the names of ICN# 3020-3051, the skill by STR# 1007); Play
+// Again (NewGame @12000c, CreateGalaxy) starts the same galaxy again: one
+// human, the same computers, style, density, size, intelligence, seed and
+// years a turn, replayed once more.
+const NAMES301 = { shape: { circle: 'Circle', random: 'Random', ring: 'Ring', spiral: 'Spiral', grid: 'Grid', cluster: 'Cluster' },
+  size: { small: 'Small', medium: 'Medium', large: 'Large', xl: 'Extra Large', huge: 'Humongous' }, density: { dense: 'Dense', sparse: 'Sparse' },
+  iq: { dumb: 'Dumb', average: 'Average', smart: 'Smart', diabolical: 'Diabolical' }, skill: ['Novice', 'Beginner', 'Normal', 'Advanced', 'Expert', 'Master'] };
+function hallEntry301(G, p, won) {
+  const o = G.opts || {}, computers = G.players.filter(q => !q.human).length;
+  const allies = G.players.filter(q => q !== p && isAllied(G, p.id, q.id)).length;
+  const skill = SKILLS[p.skill] ? p.skill : 'normal', size = sizeKey(o.size), density = o.density === 'sparse' || (typeof o.density === 'number' && o.density >= 50) ? 'sparse' : 'dense';
+  return {
+    humans: E.humans(G).length, computers, shape: o.shape, density, size, iq: IQS.includes(o.iq) ? o.iq : 'average', year: G.year, allies,
+    difficulty: difficulty({ computers, iq: o.iq, start: skill, allies, size, density, shape: o.shape, armageddons: G.armageddons | 0 }),
+    replays: o.replays | 0, skill: SKILLS[skill].code, armageddons: G.armageddons | 0, name: p.name,
+    opts: { computers, iq: o.iq, shape: o.shape, size: o.size, density: o.density, yearsPerTurn: o.yearsPerTurn, seed: o.seed, start: skill, alliances: o.alliances, novas: o.novas, luck: o.luck },
+  };
+}
+const hall301 = {
+  entry: hallEntry301, out: (G, p) => !p.alive || !!p.surrendered, master: false,
+  record: (T, e, won) => {
+    T = T || {}; T.fame = T.fame || []; T.shame = T.shame || [];
+    const list = won ? T.fame : T.shame;
+    list.unshift(e); if (list.length > 25) list.length = 25;
+    return T;
+  },
+  date: (t) => { const d = new Date(t * 1000); return `${d.getMonth() + 1}/${d.getDate()}/${d.getFullYear()}`; },
+  words: { fame: 'Hall Of Fame', shame: 'Hall Of Shame', fameTitle: 'Hall Of Fame', shameTitle: 'Hall of Shame', heads: ['Name', 'When', 'Difficulty'],
+    win: 'Summary of Game Victory', loss: 'Summary of Game Loss', playAgain: 'Play Again' },
+  summary: (G, e, shame) => [[shame ? 'Loser:' : 'Winner:', e.name], ['Date:', hall301.date(e.time)], ['Difficulty:', String(e.difficulty)],
+    ['# Humans:', String(e.humans)], ['# Computers:', String(e.computers)], ['# Allies:', String(e.allies)],
+    ['Computer Intelligence:', NAMES301.iq[e.iq] || ''], ['Game Date:', String(e.year)],
+    ['Galaxy Style:', NAMES301.size[e.size] || '', NAMES301.density[e.density] || '', NAMES301.shape[e.shape] || ''],
+    ['Player Skill:', NAMES301.skill[e.skill] || ''], ['Times Replayed:', String(e.replays)], ['Armageddons:', String(e.armageddons)]],
+  // Play Again: the New Game options for the same galaxy
+  again: (e) => e.opts && e.opts.seed != null ? Object.assign({}, e.opts, { rules: '301', replays: (e.replays | 0) + 1 }) : null,
+};
+
 // CONFIRMED: STR# 1003 "Star Names", 191 names (7 letters at most): 2.0's 190
 // and "Hope"
 const STAR_NAMES = D.starNames.concat(['Hope']);
@@ -2032,6 +2108,24 @@ E.registerRules('301', Object.assign({}, D, {
   scrapAt: (G, pid, s, metal) => { s.metal += metal; const so = G.scrapOver301 || (G.scrapOver301 = {}); so[s.id] = Math.min(32767, (so[s.id] || 0) + trunc(metal)); },
   finishedPartWasted: false,
   difficulty, masterPoints: undefined,
+  hall: hall301,                 // the Hall of Fame and the Hall of Shame (above)
+  // CONFIRMED (DoConfigAutoPlayDialog @144226, DLOG/DITL 4021 "Configure
+  // Computer’s Auto Play Style:", ConfigAutoplaySBResponse @14436e): the Auto
+  // Play window's Config… shows two scroll bars, Friendly to Aggressive
+  // (CNTL 4021, 0-10: player +0x4de, aggressiveness) and No Defense to Dig In
+  // (CNTL 4022, 0-100: +0x4ca, the share of colonies defended); OK writes
+  // both, and the new defence into the metal for defence too (+0x4cc), where
+  // 4.0.5 Windows keeps the old one. Cancel changes nothing. The remake makes
+  // the auto play record at the first auto play turn (js/ai-301.js), so
+  // settings chosen before then wait on the player (p.autoSet301), and the
+  // window starts at 5 and 50 % until then (the remake's).
+  autoPlaySettings(G, p, set) {
+    const ai = p.ai && p.ai.v301 ? p.ai : null, cur = Object.assign({ aggr: 5, colDef: 50 }, ai ? { aggr: ai.aggr, colDef: ai.colDef } : {}, p.autoSet301 || {});
+    if (!set) return { aggr: cur.aggr, colDef: cur.colDef };
+    const v = { aggr: set.aggr, colDef: set.colDef, metalDef: set.colDef };
+    if (ai) Object.assign(ai, v); else p.autoSet301 = v;
+  },
+  autoPlayRange: { aggr: [0, 10], digRight: true, title: 'Configure Computer’s Auto Play Style:' },
   // fleets, routes and colonies
   fleetFor, route, path301, givePath, settle, colOrder, abandon, evacuate: evacuate301, dragShare, fixSpending: { lines: FIX_LINES301, next: fixSpending301 }, flagScrap, flagScrapDesign, newDesign, fleetList,
   terraLeft: (G, p, s) => bars(s)[0] !== -1, bars, setBars, slots301, share20, keyPm, setKeyPm,

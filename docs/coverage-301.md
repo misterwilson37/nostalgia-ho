@@ -13,7 +13,7 @@ in `docs/301-findings.md`, which describes the rules in plain English.
 | | Routines |
 |---|---:|
 | In the program | 648 |
-| Game rules | 154 (151 implemented, 3 not: the Hall of Fame window, the auto play settings window, the colour-monitor joke) |
+| Game rules | 154 (153 implemented, 1 not: the colour-monitor joke) |
 | Not a rule (runtime, library, files, windows, drawing, menus, dialogs, printing, sound) | 494 |
 | Unread | 0 |
 
@@ -350,7 +350,7 @@ dragging a fleet): the remake has its own windows for them, and the rule behind 
 | `MaintainKillStars` @a10c8 | colonies marked to be abandoned given up; losing colonies paid for or starved | RULE, implemented | js/rules-301.js maintainKillStars |
 | `TerraformMineStars` @a129a | terraforming and mining by the colony bars, share20 of this turn's money, refunds | RULE, implemented | js/rules-301.js terraformMineStars |
 | `SurrenderIfDesired` @a1760 | a surrendering player gives up its colonies and marks its fleets for scrapping | RULE, implemented | js/rules-301.js processSurrenders |
-| `ScrapFleetsAndTypes` @a194e | marked fleets and designs scrapped (and every fleet of a player who is out); metal 3/4 to humans; the auto-scrap preference | RULE, implemented | js/rules-301.js scrapFleetsAndTypes (the preference is not done: interface) |
+| `ScrapFleetsAndTypes` @a194e | marked fleets and designs scrapped (and every fleet of a player who is out); metal 3/4 to humans; the auto-scrap preference | RULE, implemented | js/rules-301.js scrapFleetsAndTypes, autoScrapTypes (always on: the setup sets it and no window turns it off) |
 | `SpendTechMoney` @a1ed2 | research: share20 of the Technology slot by research share, levels, head start, reports | RULE, implemented | js/rules-301.js spendTechMoney, research |
 | `MoveShips` @a26ac | satellites merged, routes checked, fleets moved, arrival and wormhole reports; a leg's fuel (+0x10) added to the fuel used (+2) on arrival | RULE, implemented | js/rules-301.js moveShips, fleetArrives, departs (rules-dos departs20) |
 | `CheckFleetDestination` @a2b8e | plan a route again from where the fleet is; stop it if none | RULE, implemented | js/rules-301.js replan |
@@ -682,12 +682,12 @@ dragging a fleet): the remake has its own windows for them, and the rule behind 
 | `ForceEndTurn` @143eb4 | Force End Turn command | NOT A RULE | network play |
 | `doAutoPlayDialog` @143f70 | switch auto play on or off | RULE, implemented | js/engine.js auto play |
 | `AutoplaySBResponse` @14419a | scroll bar response in a window | NOT A RULE | interface |
-| `DoConfigAutoPlayDialog` @144226 | auto play settings | RULE, not implemented | interface |
+| `DoConfigAutoPlayDialog` @144226 | auto play settings | RULE, implemented | js/rules-301.js autoPlaySettings |
 | `ConfigAutoplaySBResponse` @14436e | scroll bar response in a window | NOT A RULE | interface |
 | `doPreferencesDialog` @1443f6 | Preferences window (sound, speed, auto-scrap of old designs) | NOT A RULE | interface |
 | `PreferencesSBResponse` @144720 | scroll bar response in a window | NOT A RULE | interface |
 | `AddToHall` @144796 | the Hall of Fame entry and the difficulty rating | RULE, implemented | js/rules-301.js difficulty (the Hall itself is not done: interface) |
-| `doHallOfFameDlg` @144af4 | Hall of Fame and Hall of Shame window | RULE, not implemented | interface |
+| `doHallOfFameDlg` @144af4 | Hall of Fame and Hall of Shame window | RULE, implemented | js/rules-301.js hall301 |
 | `InitHOFList` @144c8e | set up a window's list | NOT A RULE | interface |
 | `DRAWLISTBORDER` @144efe | list border | NOT A RULE | display |
 | `doDetailsDlg` @144f4e | Hall of Fame: one entry's details | NOT A RULE | interface |

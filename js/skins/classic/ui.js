@@ -1784,28 +1784,42 @@ const hallHeads = (names, cols) => el('div', { class: 'lbhead', style: `--cols: 
 // with no entries) opens the Summary of the selected game.
 function openHall(kind, at) {
   if (!hasHall(G)) return;
-  const H = HO.rules(G).hall, list = hallTables(G)[kind === 'shame' ? 'shame' : 'fame'];
-  const title = kind === 'shame' ? 'Hall of Shame' : 'Hall of Fame', cols = '92fr 117fr 71fr';
+  const H = HO.rules(G).hall, list = hallTables(G)[kind === 'shame' ? 'shame' : 'fame'], W = H.words || {};
+  // hall.words (3.0.1): the version's own titles and heads; hall.again: Play Again's New Game options
+  const title = (kind === 'shame' ? W.shame : W.fame) || (kind === 'shame' ? 'Hall of Shame' : 'Hall of Fame'), cols = '92fr 117fr 71fr';
   let sel = Math.min(at | 0, Math.max(0, list.length - 1));
   const details = () => { const i = sel; if (list[i]) openHallSummary(list[i], kind, () => openHall(kind, i)); };
+  const again = H.again && el('button', { class: 'quiet', disabled: !list.length, onclick: () => { const o = list[sel] && H.again(list[sel]); if (o) closeModal(), playAgain(o); } }, W.playAgain || 'Play Again');
   const body = el('div', { class: 'hall hall-list' },
     el('div', { class: 'htitle' }, title),
-    hallHeads(['Name', 'When', 'Difficulty'], cols),
+    hallHeads(W.heads || ['Name', 'When', 'Difficulty'], cols),
     hallListBox(list.map(e => [e.name, H.date(e.time, G), String(e.difficulty)]), cols, sel, (i) => { sel = i; }, (i) => { sel = i; details(); }),
-    el('div', { class: 'btns' }, el('button', { class: 'quiet', disabled: !list.length, onclick: details }, 'Details'), el('button', { onclick: closeModal }, 'OK')));
-  modal(title, body, { cls: 'mid hallwin' });
+    el('div', { class: 'btns' }, el('button', { class: 'quiet', disabled: !list.length, onclick: details }, 'Details'), again, el('button', { onclick: closeModal }, 'OK')));
+  modal((kind === 'shame' ? W.shameTitle : W.fameTitle) || title, body, { cls: 'mid hallwin' });
+}
+// Play Again (3.0.1, hall.again): the same galaxy, from its seed, with you as
+// its one human; the rest as a new game from the New Game window
+function playAgain(o) {
+  save();
+  G = HO.newGame(Object.assign({ name: me().name, female: me().female, hints: !!Prefs.hints }, o));
+  closeModal(); hideTitle(); ME = 0;
+  UI.sel = G.players[ME].homeStar; UI.selFleet = null; UI.fitted = false; fit();
+  save(); renderPanel(); draw();
+  useSounds(soundsWanted(), () => { Sound.play(128); showMessages(); });
 }
 // The Summary window (dialog 387, FUN_0046d1e8, FUN_00498b6a): "Summary of
 // Game Victory" / "Summary of Game Defeat"; the Hall of Shame's "Winner:"
 // reads "Loser" (no colon, as 4.0.5). The picture box (static 1194) is left
 // empty: the summary never gives it a picture.
 function openHallSummary(e, kind, back) {
-  const H = HO.rules(G).hall, N = H.names, shame = kind === 'shame';
+  const H = HO.rules(G).hall, N = H.names, shame = kind === 'shame', W = H.words || {};
   const row = (label, ...vals) => [el('span', { class: 'hl' }, label), el('span', { class: 'hv' }, ...vals.map(v => el('span', null, v)))];
+  const heading = (shame ? W.loss : W.win) || (shame ? 'Summary of Game Defeat' : 'Summary of Game Victory');
   const body = el('div', { class: 'hall hall-sum' },
-    el('div', { class: 'htitle' }, shame ? 'Summary of Game Defeat' : 'Summary of Game Victory'),
+    el('div', { class: 'htitle' }, heading),
     el('div', { class: 'hsum' },
-      el('div', { class: 'hgrid' },
+      // hall.summary (3.0.1): the version's own rows, [label, ...values]
+      H.summary ? el('div', { class: 'hgrid' }, ...H.summary(G, e, shame).flatMap(r => row(...r))) : el('div', { class: 'hgrid' },
         ...row(shame ? (H.loser ? H.loser(G) : 'Loser') : 'Winner:', e.name), ...row('Date:', H.date(e.time, G)), ...row('Difficulty:', String(e.difficulty)),
         ...row('# Humans:', String(e.humans)), ...row('# of Computers:', String(e.computers)), ...row('# Allies:', String(e.allies)),
         ...row('Computer Intelligence:', N.iq[e.iq] || ''), ...row('Game Date:', String(e.year)),
@@ -1814,7 +1828,7 @@ function openHallSummary(e, kind, back) {
       el('div', { class: 'hpic', 'aria-hidden': 'true' })),
     el('div', { class: 'btns right' }, el('button', { onclick: closeModal }, 'OK')));
   // closing it goes back to the list it was opened from
-  modal(shame ? 'Summary of Game Defeat' : 'Summary of Game Victory', body, { cls: 'small hallwin', onClose: back });
+  modal(heading, body, { cls: 'small hallwin', onClose: back });
 }
 // The Master Point List (dialog 388, FUN_00482b89, FUN_00482f45): "Master
 // Points:"; Name, Points, Rank on tab stops 6, 142, 278; points written
@@ -2892,9 +2906,6 @@ function openGive() {
     el('div', { class: 'btns right' }, el('button', { type: 'submit' }, 'Give')));
   modal('Give money or metal', f, { cls: 'mid' });
 }
-function openChat() {
-  if (!others().length) { toast(HO.DATA.alerts[6] || 'There is no one else to send something to.'); return; }
-  const lines = ['Thank You!', 'Sorry!', '#!$@*$&@•™!', 'I need money.', 'I need metal.', 'I like you.', 'I hate you.', 'Let’s be allies.'];
 // the version's own Send Message window (rs.cannedChat, js/engine.js
 // sendCanned): 'popup' (5.0.5, the Palm) two menus, To Whom and Say What;
 // 'steps' (2.0, 3.0.1, 4.0.5) the columns filled one after another, here a
@@ -2968,8 +2979,11 @@ function openCanned(C) {
     el('div', { class: 'btns right' }, el('button', { type: 'button', class: 'quiet', onclick: closeModal }, 'Cancel'), el('button', { type: 'submit' }, 'Send')));
   modal(C.title, f, { cls: 'mid' });
 }
-  const f = el('form', { class: 'newgame', onsubmit: (e) => {
+function openChat() {
   if (HO.rules(G).cannedChat) { openCanned(HO.rules(G).cannedChat); return; }
+  if (!others().length) { toast(HO.DATA.alerts[6] || 'There is no one else to send something to.'); return; }
+  const lines = ['Thank You!', 'Sorry!', '#!$@*$&@•™!', 'I need money.', 'I need metal.', 'I like you.', 'I hate you.', 'Let’s be allies.'];
+  const f = el('form', { class: 'newgame', onsubmit: (e) => {
     e.preventDefault();
     const d = Object.fromEntries(new FormData(f).entries());
     const text = (d.custom || '').trim() || d.line;
@@ -3237,13 +3251,16 @@ function autoPlaySliders() {
     return el('div', { class: 'aprow' }, el('span', { class: 'aplabel' }, label, ' ', out),
       el('div', { class: 'apslider' }, el('span', null, left), inp, el('span', null, right)));
   };
-  // Dig In at the left: the slider runs from 100% of colonies defended to none
+  // Dig In at the left: the slider runs from 100% of colonies defended to
+  // none (3.0.1, rs.autoPlayRange.digRight: No Defense at the left)
+  const R = !!(rs.autoPlayRange || {}).digRight;
   const box = el('div', { class: 'apsettings' },
     row('aggr', 'Aggressiveness', 'Friendly', 'Aggressive', lo, hi, cur.aggr, (v) => String(v)),
-    row('dig', 'Colonies defended', 'Dig In', 'No Defense', 0, 100, 100 - cur.colDef, (v) => (100 - v) + '%'));
+    R ? row('dig', 'Colonies defended', 'No Defense', 'Dig In', 0, 100, cur.colDef, (v) => v + '%')
+      : row('dig', 'Colonies defended', 'Dig In', 'No Defense', 0, 100, 100 - cur.colDef, (v) => (100 - v) + '%'));
   const apply = () => {
     const a = +box.querySelector('input[name=aggr]').value, d = +box.querySelector('input[name=dig]').value;
-    rs.autoPlaySettings(G, me(), { aggr: a, colDef: 100 - d }); save();
+    rs.autoPlaySettings(G, me(), { aggr: a, colDef: R ? d : 100 - d }); save();
   };
   return { box, apply };
 }
@@ -3251,7 +3268,7 @@ function openAutoPlaySettings(back) {
   if (!G || autoPlayWhere() == null) return;
   const s = autoPlaySliders();
   const f = el('form', { class: 'newgame', onsubmit: (e) => { e.preventDefault(); s.apply(); closeModal(); if (back) back(); } },
-    el('p', { class: 'sub' }, 'How the computer plays your turns for you.'), s.box,
+    el('p', { class: 'sub' }, (HO.rules(G).autoPlayRange || {}).title || 'How the computer plays your turns for you.'), s.box,
     el('div', { class: 'btns right' }, el('button', { type: 'button', class: 'quiet', onclick: () => { closeModal(); if (back) back(); } }, 'Cancel'), el('button', { type: 'submit' }, 'OK')));
   modal('Auto Play Settings', f, { cls: 'small' });
 }
@@ -4130,7 +4147,7 @@ function save() { if (!G) return; try { localStorage.setItem('ho5.save', HO.save
 function setupMenus() {
   const menus = {
     Game: [['New game…', newGameDialog], [() => (G && HO.rules(G).switchPlayers) || 'End turn and switch players', () => switchPlayers(), () => !!(G && HO.rules(G).switchPlayers && hotSeat())], ['Players and history', () => G && openPlayers()], ['Auto-play this turn', () => playOneTurn()], ['Auto play…', () => G && !G.over && (hotSeat() ? toast('Auto play is for one-player games.') : openAutoPlay())], ['Preferences…', openPrefs], ['Rank history…', openRanks, () => !G || hasRanks(G)], [() => ((HO.RULESETS[rulesId()] || {}).gameCenter || {}).menu || 'Rank and Game Center…', openGameCenter, () => !!(HO.RULESETS[rulesId()] || {}).gameCenter],
-      ['Master Point List…', () => openMasterList(), () => hasHall(G)], ['Hall of Fame…', () => openHall('fame'), () => hasHall(G)], ['Hall of Shame…', () => openHall('shame'), () => hasHall(G)], ['-'], ['Quit to title', () => { save(); Sound.play(7002); G = null; renderPanel(); draw(); $('#panel').innerHTML = ''; $('#msg').innerHTML = ''; titleScreen(); }]],
+      ['Master Point List…', () => openMasterList(), () => hasHall(G) && HO.rules(G).hall.master !== false], ['Hall of Fame…', () => openHall('fame'), () => hasHall(G)], ['Hall of Shame…', () => openHall('shame'), () => hasHall(G)], ['-'], ['Quit to title', () => { save(); Sound.play(7002); G = null; renderPanel(); draw(); $('#panel').innerHTML = ''; $('#msg').innerHTML = ''; titleScreen(); }]],
     Ships: [['Build ships at selected colony…', () => { if (G && UI.sel != null && G.stars[UI.sel].owner === ME) openBuild(UI.sel); else toast('Select one of your colonies first.'); }], ['Review battle…', () => G && openBattleList()], ['List all fleets…', () => G && openFleetList()],
       [() => scrapWords('fleet')[G && curFleet() && curFleet().scrap301 ? 1 : 0], () => { if (!G || G.over) return; const f = curFleet(); if (f) toggleScrapFleet(f); else toast('Select one of your fleets first.'); }, () => marksScrap()],
       [() => (G && organizeStyle() === 'ios' ? 'Organize fleets…' : 'Group fleets…'), () => { if (G && UI.sel != null) openOrganize(UI.sel); }, () => !!organizeStyle()],

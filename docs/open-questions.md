@@ -106,11 +106,10 @@ Things the code can't decide for us. Each says what the remake does for now.
 Windows, commands and pictures of the originals that the remake hasn't built yet. The
 planned order:
 
-1. 3.0.1's Hall of Fame and auto play settings.
-2. The Explored Planets windows and the older preferences (1.2, 2.0).
-3. The names files (2.0) and the rest of the Palm's own touches.
-4. iOS's extra screens.
-5. Turn time limits.
+1. The Explored Planets windows and the older preferences (1.2, 2.0).
+2. The names files (2.0) and the rest of the Palm's own touches.
+3. iOS's extra screens.
+4. Turn time limits.
 
 (The remake's own work, such as English for 1.2 and the translations, is in
 `docs/roadmap.md`.)
@@ -142,9 +141,6 @@ planned order:
 
 ### 3.0.1
 
-- The Hall of Fame and Hall of Shame.
-- The auto play settings window.
-- The auto-scrap preference (old designs past 15).
 - The colour-monitor joke.
 
 ---

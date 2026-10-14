@@ -193,9 +193,6 @@ root.HOVERSIONS = {
       'Evacuating a star named Hope or Ship asks 3.0.1’s jokes (“Dost thou truly wish to abandon Hope? All is not yet lost!”, “Abandon Ship? …”), every time.',
     ],
     missing: [
-      'The Hall of Fame and Hall of Shame (the difficulty rating is worked out).',
-      'The auto play settings window.',
-      'The preference to scrap old designs automatically past 15.',
       'The colour-monitor joke.',
     ],
     deltaTao: DT_3,

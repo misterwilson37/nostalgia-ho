@@ -129,6 +129,8 @@ function colQuality(C, sid, metalF) {
 // ---------- the computer's turn (DoComputerTurn @90004) ----------
 function aiTurn(G, p) {
   const ai = (p.ai && p.ai.v301) ? p.ai : (p.ai = makeAI(G, p, 'average', p.human));
+  // the auto play settings chosen before the first auto play turn (js/rules-301.js autoPlaySettings)
+  if (p.autoSet301) { Object.assign(ai, p.autoSet301); delete p.autoSet301; }
   const rs = RS();
   const Y = G.year + 10; // 3.0.1 has already moved the year on when the computers plan
   const iq = p.human ? 0 : ai.iq;

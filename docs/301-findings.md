@@ -189,7 +189,7 @@ borrowing limit. The shares are 2.0's.
 | Fleets | a fleet holds one design. A player's fleet list is kept by class (Scouts, Fighters, Colony Ships, Satellites), a new fleet in front of the others of its class; the turn and the computers go through it in that order. New Fighters and Satellites join a fleet of the same design at the star that has no orders (a human's only one built this turn); each Scout and Colony Ship is a fleet of its own. Only fleets of the same design can be put together (Organize Ships). The route code can move a group of fleets at the slowest speed and shortest Range, but nothing makes a group: the group leader (fleet +0x1a) is written only by `NewFleet`, `MarkUsedFleets` and `ReassignGroupLeader`, the Ships menu (MENU 132) has no group command, and "Group Current Fleet" / "Ungroup Current Fleet" (STR# 1010.13-14) and DITL 4060 ("Which fleet would you like to group with your ^0?") are never loaded. (Read so in October 2026; before, the remake let any fleets be put together as such groups.) A new fleet's fuel used is 0 (`NewFleet`); a ship joining a fleet only adds to its count | CONFIRMED (`BuildAShip @132e04`, `BuildAFleet`, `NewFleet @130004`, `GiveFleetPath`; js/rules-301.js canMerge) |
 | Organize Ships | one design's ships at a star are dealt out again among up to 12 fleets; every fleet of that design there then has the most fuel used of any of them; a fleet whose count changed stops counting as built this turn unless all of them were, and its colony ships are unloaded unless all of them were loaded; the fleets kept keep their orders | CONFIRMED (`OrganizeFleets @133d14`) |
 | Scrapping | a fleet or design is marked (fleet +7, design +0x88; a toggle for a human, which undoes the purchase of a ship built this turn) and scrapped at the start of the money at End Turn. Humans get 3/4 of the metal, computers all of it; at your colony it goes to you; in hyperspace it falls on the next star as a meteor shower; elsewhere it falls onto the planet, and the planet's owner picks it up later in the turn ("You just received … metal from someone scrapping a fleet over …") | CONFIRMED (`ScrapCurrentFleet`, `BuildDesignShips`, `ScrapFleetsAndTypes @a194e`, `GetOtherScrapMetal @a3abe`). The remake marks as 3.0.1 does (see "Scrapping by marks" below) |
-| Automatically scrapping old designs past 15 | a preference of the program (not of the game): when on, at the end of each turn every player's unused designs older than the newest of their class are scrapped while there are more than 15 | NOT IMPLEMENTED: interface preference (`ScrapFleetsAndTypes @a194e`, prefs +0x74) |
+| Automatically scrapping old designs past 15 | a preference of the program (not of the game): when on, at the end of each turn every player's unused designs older than the newest of their class are scrapped while there are more than 15 | Built: always on ('Stup' 1000 sets +0x74 to 1 and no window turns it off), `js/rules-301.js` autoScrapTypes (`ScrapFleetsAndTypes @a194e`) |
 
 ### Battles
 
@@ -236,7 +236,7 @@ Step by step, as 3.0.1 does it:
 |---|---|---|
 | Out | every turn (each 10 years, also within one End Turn of several), a player with no colonies and no colony ships is out: its money, Ship Savings and metal go to 0, and next turn's pass 1 scraps every fleet it has left. "%s has just been eliminated from the game." / "You have just been eliminated from the game." (1000.66–.67). A player who is out but has a colony again is back | CONFIRMED (`DoGameEndStuff @a6d06`, `ScrapFleetsAndTypes @a1ae8`, `CheckEndGame @12085a`; `DoComputerTurn` only for players still in) |
 | Winning | from 2010, when every player still in is allied with every other: a lone player wins at once; an alliance must hold for one more turn, "Your alliance will win the game next turn if it holds!" (1000.106). "Congratulations! You won the game." / "%s has just won the game." (1000.69, .68), for each winner | CONFIRMED (`CheckForWinner @a731a`, `CheckEndGame`) |
-| Hall of Fame and Hall of Shame, naming a star after a win | | NOT IMPLEMENTED: interface (`AddToHall @144796`, `NameAStar`) |
+| Hall of Fame and Hall of Shame, naming a star after a win | | Built: `js/rules-301.js` hall301 (`AddToHall @144796`, `doHallOfFameDlg @144af4`, `doDetailsDlg`) |
 | Name a Star window's words | DLOG/DITL 4050: "You won the game, so you get to name a star." "Star names must be 2 to 7 characters long." "New Star Name:" "(If you’d rather not name a star, click “OK” with the name blank.)"; name taken, STR# 4001: "Sorry, there’s already a star named  “^0.” Please pick another name." (`rs.nameAStar` text, rule, label, hint, taken) | CONFIRMED |
 
 ## Computer players
@@ -594,3 +594,16 @@ The questions 3.0.1's code doesn't settle, and the remake's own choices, are in
   STR# 3000's fourteen messages; a star, player or both), ten a turn, delivered in pass 2
   after the surrenders; a true "I own" marks the star on the receiver's map and Star Stats
   explores it for the receiver (`rs.cannedChat`).
+- **Hall of Fame and Hall of Shame** (built, October 2026; `AddToHall @144796`,
+  `doHallOfFameDlg @144af4`, `InitHOFList`, `doDetailsDlg`, DLOG/DITL 4080-4110): 'HaLL'
+  1000/1001, 25 games each, newest first, written once a game when the win or "eliminated"
+  report is shown; Name, When ("%d/%d/%d"), Difficulty; Details (the Summary of Game
+  Victory / Loss) and Play Again (the same galaxy from its seed, one human, replayed + 1).
+  No master points. `rs.hall`.
+- **Auto play settings** (built; `DoConfigAutoPlayDialog @144226`, DITL 4021): Friendly to
+  Aggressive 0-10 (+0x4de) and No Defense to Dig In 0-100 (+0x4ca, also written to the
+  metal for defence +0x4cc). `rs.autoPlaySettings`.
+- **Auto-scrap of old designs past 15** (built; `ScrapFleetsAndTypes @a194e`): the
+  "preference" is on in 'Stup' 1000 (+0x74 = 1) and the Preferences window (DITL 6150) has
+  no box for it, so it is a rule: with more than 15 types, unused types older than the
+  newest of their class are scrapped, oldest first (`autoScrapTypes`).
