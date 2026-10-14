@@ -132,12 +132,7 @@ planned order:
 
 ### 4.0.5
 
-- The date jokes.
-- Mac: the floating windows and the colour-monitor joke.
-
-### 3.0.1
-
-- The colour-monitor joke.
+- Mac: the floating windows.
 
 ---
 
