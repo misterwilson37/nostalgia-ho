@@ -234,6 +234,8 @@ function iosLang(lang, rs) {
   const SC = en('Ship Class Names'), SCT = tr('Ship Class Names');
   CLASS_KEYS.forEach((k, i) => { words[SC[i]] = SCT[i]; });
   const M = en('Misc Strings'), MT = tr('Misc Strings');
+  // the Evacuate question for a star named Hope (Misc Strings 123; Kansas's is Alert Strings 37, above)
+  reports.push([M[123], MT[123]]);
   for (const i of [29, 38, 39]) words[M[i]] = MT[i];
   const one = MT[0]; // "un", "bir"
   const args = [['one %s', one + ' %s']];

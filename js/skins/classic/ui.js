@@ -206,7 +206,7 @@ function evacuateClick(sid, tog) {
   const on = !t.marked(G, sid);
   const go = () => { HO.evacuate(G, ME, sid); Sound.play(on ? 7002 : 4000); renderPanel(); draw(); save(); };
   const a = on ? t.ask(G, me(), sid) : null;
-  if (!a) go(); else if (a.notice) { toast(a.text); go(); } else confirmBox(a.text, go);
+  if (!a) go(); else if (a.notice) { toast(HO.say(G, a.text)); go(); } else confirmBox(HO.say(G, a.text), go);
 }
 const evacuateLabel = (sid, plain) => { const t = HO.rules(G).evacuateToggle; return t ? t.words[t.marked(G, sid) ? 1 : 0] : plain; };
 const evacuateHere = (s) => evacuateShown() && (HO.rules(G).evacuateToggle || s.id !== me().homeStar || HO.colonies(G, ME).length > 1);

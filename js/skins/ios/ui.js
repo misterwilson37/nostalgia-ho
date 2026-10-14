@@ -100,6 +100,28 @@ function novaLook(G, p, s, k, IMG, redraw) {
   x.drawImage(sp, 0, 0, c.width, c.height);
   return { base: P + 'supernovaed', pic: (novaPics[ck] = c) };
 }
+// The star dust a big battle leaves (CONFIRMED, the turn's star loop 0x1000323a4-0x1000323e0 and
+// -[StarNode updateFor:withStar:withGame:] 0x10001b078): each step the star's dust (+0x12) loses 1,
+// and a star with the big-battle flag (sub_100021108, 0x1000211f4) is set to 20; while it is 1 or
+// more (and the star isn't in its explosion) the stardust picture is drawn at opacity
+// min(255, 255 x dust / 20), on any star. rs.starDust: the rules note the step (G.dust505[star]).
+// Drawn over the planet (the order wasn't read); shown where the player has explored (the remake's choice).
+const dustPics = {};
+function dusted(r, look, { G, p, s, k, IMG }) {
+  const by = G.dust505 && G.dust505[s.id];
+  if (by == null || !r || /^nova/.test(look.base) || !(s.owner === p.id || (k && k.explored))) return r;
+  const dust = 20 - Math.max(0, Math.round((G.year - by) / 10));
+  const du = IMG[P + 'stardust'], bi = r.pic || IMG[r.base];
+  if (dust < 1 || !du || !du.width || !bi || !bi.width) return r;
+  const a = Math.min(255, Math.trunc(255 * dust / 20)), ck = r.base + ':' + a + ':' + (r.pic ? 'p' + (r.pic.__id || (r.pic.__id = ++dustId)) : '');
+  if (!dustPics[ck]) {
+    const c = document.createElement('canvas'); c.width = bi.width; c.height = bi.height; const x = c.getContext('2d');
+    x.drawImage(bi, 0, 0); x.globalAlpha = a / 255; x.drawImage(du, 0, 0, c.width, c.height); x.globalAlpha = 1;
+    dustPics[ck] = c;
+  }
+  return Object.assign({}, r, { pic: dustPics[ck] });
+}
+let dustId = 0;
 function planetPic(IMG, p, src) {
   const r = row(p, src.g), mined = src.metal < 100;
   const T = Math.round(src.t * 10) - Math.round(p.homeT * 10) + 720;
@@ -202,7 +224,8 @@ window.HOTHEME = {
   // going2 under 91, else going3; a star gone supernova shows supernovaed
   // (-[StarNode supernova:] 0x10001ac78) after the explosion (novaLook
   // below). Planets: planetPic.
-  starLook(look, { G, p, s, k, IMG, redraw }) {
+  starLook(look, c) { return dusted(HOTHEME.starLook0(look, c), look, c); },
+  starLook0(look, { G, p, s, k, IMG, redraw }) {
     const b = look.base, B = (n) => ({ base: P + n, hat: look.hat });
     if (b === 'unknown' || b === 'soon') {
       const end = (f) => f.path && f.path.length ? f.path[f.path.length - 1] : f.dest != null ? f.dest : f.to;

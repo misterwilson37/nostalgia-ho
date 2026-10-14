@@ -122,8 +122,6 @@ planned order:
 
 - Several saved games, e-mailing a game, the welcome screen and the help page.
 - Game Center's own windows (the leaderboards and achievements are shown as a plain list).
-- The star dust that big battles leave (a supernova's dust is drawn).
-- The Kansas and Hope lines in French and Turkish.
 
 ### Palm
 

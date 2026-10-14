@@ -324,6 +324,11 @@ const rs = Object.assign(base, {
   // Fleets' (canMerge505, organized505), but the move leaves a design new to
   // the fleet with whatever stance it had (CONFIRMED: move:from:to: 0xc27e0
   // writes the counts, the larger fuel used, "bought" and the colonists, never
+  // CONFIRMED (0x1000323a4-0x1000323e0, sub_100021108 0x1000211f4): a big battle sets the star's dust to 20
+  // (the skin draws it, js/skins/ios/ui.js dusted); the rules keep the step of the last one (G.dust505).
+  starDust: true,
+  // 5.0.5's own: its mouse-drag fuel alert and its short interest figure (iOS has its alert's own words, touch)
+  fuelAlert: null, interestShort: null,
   // the stance byte +0x58 + design), where 5.0.5 copies it. The remake's
   // nearest: the fleet's own stance for that design, i.e. no copy.
   // js/skins/classic/ui.js openOrganize.

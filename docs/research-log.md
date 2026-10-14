@@ -1201,8 +1201,8 @@ None of the rules.
   the star blows, then `supernovaed` with the star dust at full; after that the dust
   (+0x12, 20 at the nova, one less a turn) fades at 255 x dust / 20 and the wreck and dust
   go at 0. `supernova_going1-3` aren't timed: they are the turns before, by the nova
-  count. Built in the iOS skin (`novaLook`); the dust that big battles leave (+0x12 set to
-  20 by `sub_100021108`) isn't, the remake keeping no dust for battles.
+  count. Built in the iOS skin (`novaLook`); the dust that big battles leave is built too
+  (`rs.starDust`, `docs/ios-findings.md`).
 - **Options locked by rank**: none on iOS, so nothing to do.
-- **The Kansas and Hope words** in other languages (`fr.lproj`, `tr.lproj`).
+- Now done: **the Kansas and Hope words** in French and Turkish (`js/languages.js`: Alert Strings 37, Misc Strings 123).
 

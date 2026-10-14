@@ -2511,7 +2511,7 @@ function aftermath505(G, sid, B) {
   let debris = B.debris;
   let crowd = 0, tot = 0;
   for (const x of sides) { tot += x.ships; if (x.ships > 1) crowd++; }
-  if (crowd > 1 && (RI(G, 10, 20) < tot || sides.length > 4)) G.big505[sid] = true;
+  if (crowd > 1 && (RI(G, 10, 20) < tot || sides.length > 4)) { G.big505[sid] = true; if (E.rules(G).starDust) (G.dust505 || (G.dust505 = {}))[sid] = Y; }
   const strOf = (o, type) => {
     let a = 0;
     for (const x of sides) {

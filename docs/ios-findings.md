@@ -324,7 +324,17 @@ The remake's interface (windows, buttons) stays English, as it is for every vers
   (0x1000323c0, later in the same routine, so 19 the nova's turn, LIKELY), and a battle
   flagged at the star (`sub_100021108`, 0x1000211f4) puts it back up to 20. Built in the
   iOS skin (`novaLook`; the dust drawn under the special, their order not read); the
-  battles' dust isn't (the remake keeps none).
+  battles' dust is built too (below).
+
+- **The star dust of big battles** (done, `rs.starDust`; the skin's `dusted`): the turn's star loop
+  (`0x1000323a4`-`0x1000323e0`) takes 1 off each star's dust (+0x12) and, for a star with the
+  big-battle flag (`sub_100021108` `0x1000211f4` sets the same byte array 5.0.5's `FUN_100803e0`
+  does), sets it to 20; `updateFor:` (`0x10001b078`) shows the stardust at opacity
+  min(255, 255 × dust / 20) on any star with dust of 1 or more that isn't exploding. So it is not
+  only the wreck's: any star a big battle was fought at. The rules keep the step of the last one
+  (`G.dust505`, iOS and Android only); the skin draws it over the planet (the order wasn't read)
+  on stars the player has explored. Slip noticed: `novaLook`'s age counts years, not 10-year
+  steps; the battle dust counts steps (20 less a step).
 - **Message pictures**: `report_icon-n` is 5.0.5's message picture 9000 + n redrawn at
   80 × 80 (`+[MessageNode reportIcon:]` builds `report_icon-%ld.png`; compared side by
   side, 0-50 all match; 5.0.5's 9051 has none). `manifest.json` "images" maps the remake's
@@ -839,3 +849,9 @@ the groups of players who aren't the viewer's allies aren't drawn at all.
   "Next Message.wav" (the skin's 7001); the code names no other: `ping2`, `pong1`, `doink1`
   and `drum72` are in the bundle but no string of them is in the program. The touch drag
   already did this; the mouse drag now does too, and only for iOS and Android.
+
+- **Kansas and Hope in French and Turkish** (done): the questions go through the game's language
+  (`HO.say`): Alert Strings 37 ("Dorothée, je suppose que nous ne sommes plus en Normandie ?" / "Dorothy,
+  galiba biz artık Kansas'da değiliz") and Misc Strings 123 ("Voulez vous vraiment laisser tomber ? Tout
+  n'est pas encore perdu ..." / "Yani, sen şimdi tüm ümidini terketmek mi istiyorsun? Henüz her şey
+  kaybolmadı ki..."), from `fr.lproj` and `tr.lproj`. The other Evacuate questions stay English.
