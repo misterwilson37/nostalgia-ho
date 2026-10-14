@@ -1595,7 +1595,7 @@ function renderMsg() {
     if (radicalReport(m) && HO.rules(G).radicalHand && !G.over) extra.append(el('button', { class: 'quiet', onclick: (e) => { e.stopPropagation(); openRadicalHand(); } }, 'Radical projects…'));
     // rs.messageEvacuate (the Palm's Message History): a message about one of your colonies has an Evacuate button
     const ME2 = HO.rules(G).messageEvacuate;
-    if (ME2 && m.star != null && !G.over && G.stars[m.star].owner === ME) extra.append(el('button', { class: 'quiet', onclick: (e) => { e.stopPropagation(); evacuateClick(m.star, ME2); renderMsg(); } }, ME2.words[ME2.marked(G, m.star) ? 1 : 0]));
+    if (ME2 && m.star != null && !G.over && G.stars[m.star].owner === ME) extra.append(el('button', { class: 'quiet', style: 'float:right', onclick: (e) => { e.stopPropagation(); evacuateClick(m.star, ME2); renderMsg(); } }, ME2.words[ME2.marked(G, m.star) ? 1 : 0]));
     body.append(extra, el('div', { class: 'count' }, `${UI.msgIdx + 1} of ${UI.inbox.length} · click to continue`));
     card.append(body);
     const next0 = () => { if (m.star != null) { UI.sel = m.star; renderPanel(); } UI.msgIdx++; Sound.play(7001); renderMsg(); draw(); };
