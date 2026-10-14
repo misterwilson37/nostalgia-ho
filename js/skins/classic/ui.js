@@ -1419,8 +1419,8 @@ function planetBox(sid) {
       for (let i = 0; i < mine.length; i++) for (let j = i + 1; j < mine.length; j++)
         if (G.fleets.includes(mine[i]) && G.fleets.includes(mine[j]) && HO.canMerge(G, mine[i], mine[j])) HO.mergeFleets(G, mine[i], mine[j]);
       UI.selFleet = mine[0].id; renderPanel(); draw(); save(); } }, HO.feature(G, 'singleTypeFleets') ? 'Merge fleets of the same type' : 'Merge all fleets here'),
-      organizeStyle() ? el('button', { class: 'quiet', onclick: () => openOrganize(sid) }, organizeStyle() === 'ios' ? 'Organize fleets…' : 'Group fleets…') : null));
-    else if (mine.length && organizeStyle()) box.append(el('div', { class: 'btns' }, el('button', { class: 'quiet', onclick: () => openOrganize(sid) }, organizeStyle() === 'ios' ? 'Organize fleets…' : 'Group fleets…')));
+      organizeStyle() ? el('button', { class: 'quiet', onclick: () => openOrganize(sid) }, organizeName()) : null));
+    else if (mine.length && organizeStyle()) box.append(el('div', { class: 'btns' }, el('button', { class: 'quiet', onclick: () => openOrganize(sid) }, organizeName())));
   }
   const bs = lastBattles(sid);
   if (bs.length) box.append(el('div', { class: 'btns' }, ...bs.map(b => el('button', { class: 'quiet', onclick: () => openBattle(b.id) }, `Review ${battleName(b)}`))));
@@ -2330,12 +2330,17 @@ function openSplit(f) {
 // piles the same way with Group All and Split, and lets you move part of a
 // pile (Option-drag asks how many, Option-Shift moves one: here a count).
 function organizeStyle() { return !!G && !G.over && HO.rules(G).organizeFleets; }
+// the window's name: iOS and the Palm's "Organize Fleets", 5.0.5's "Group Fleets"
+const organizeName = () => organizeStyle() === 'ios' || organizeStyle() === 'palm' ? 'Organize fleets…' : 'Group fleets…';
 const pileStance = (f, did) => f.dstance && f.dstance[did] != null ? f.dstance[did] : (f.delayed ? 1 : 0) | (f.stance === 'defensive' ? 2 : f.stance === 'offensive' ? 4 : 0);
 function openOrganize(sid) {
   const style = organizeStyle();
   if (!style || sid == null) return;
   const ios = style === 'ios';
-  const W = { sel: null, first: 0, empties: [], scrapping: false, n: 0, pressed: null };
+  // the Palm (rs.pileMove): a whole pile at a time, to any other fleet or to
+  // "Empty Fleet", always there at the end of the list
+  const palm = style === 'palm';
+  const W = { sel: null, first: 0, empties: palm ? [0] : [], scrapping: false, n: 0, pressed: null };
   let nextEmpty = 1;
   const allBio = (f) => { const ds = HO.fleetDesigns(G, f); return ds.length > 0 && ds.every(d => d.type === 'bio'); };
   const fleets = () => fleetOrder(G.fleets.filter(f => f.owner === ME && f.star === sid && f.to == null && !f.sat && HO.fleetCount(f) > 0));
@@ -2345,6 +2350,7 @@ function openOrganize(sid) {
     const f = selFleet(); if (!f) return false;
     if (c.empty) return true;
     if (c.f === f) return false;
+    if (palm) return true;
     return (HO.getDesign(G, f.owner, W.sel.did).type === 'bio') === allBio(c.f);
   };
   const done = (keyToShow) => {
@@ -2358,6 +2364,7 @@ function openOrganize(sid) {
   // colonists with the Colony Ships)
   const move = (c, n) => {
     const f = selFleet(); if (!f || !canTake(c)) return;
+    if (palm) { const to = HO.rules(G).pileMove(G, f, W.sel.did, c.f || null); done(to && 'f' + to.id); return; }
     n = Math.max(1, Math.min(f.ships[W.sel.did], n || f.ships[W.sel.did]));
     const nf = HO.splitFleet(G, f, { [W.sel.did]: n });
     if (!nf) return;
@@ -2372,7 +2379,7 @@ function openOrganize(sid) {
       const tgt = pick && allBio(pick) === bio ? pick : same[0];
       for (const f of same) if (f !== tgt && G.fleets.includes(f) && G.fleets.includes(tgt) && HO.canMerge(G, tgt, f)) HO.mergeFleets(G, tgt, f);
     }
-    W.empties = [];
+    W.empties = palm ? [0] : [];
     done();
   };
   const split = () => {
@@ -2438,7 +2445,7 @@ function openOrganize(sid) {
               W.sel = on ? null : { fid: c.f.id, did: +k }; W.n = n; render();
             } }, shipImgEl(d, isTablet() ? 26 : 18, c.f.owner), el('b', null, String(n))));
         }
-      } else col.append(el('div', { class: 'orgname' }, 'New fleet'), el('div', { class: 'sub orgfuel' }, 'empty'));
+      } else col.append(el('div', { class: 'orgname' }, palm ? 'Empty Fleet' : 'New fleet'), el('div', { class: 'sub orgfuel' }, 'empty'));
       col.addEventListener('click', guard(() => tapCol(c)));
       // a finger or button held on a target is drawn red (the container's
       // selected fleet); lifted off it, nothing happens
@@ -2458,7 +2465,7 @@ function openOrganize(sid) {
         el('button', { class: 'quiet', onclick: () => setStance(bits ^ 1) }, bits & 1 ? 'Yes' : 'No'),
         el('span', null, 'Attitude'),
         el('button', { class: 'quiet', onclick: () => setStance(bits & 4 ? (bits & ~4) | 2 : bits & 2 ? bits & ~2 : bits | 4) }, att));
-      if (!ios && f.ships[W.sel.did] > 1) {
+      if (!ios && !palm && f.ships[W.sel.did] > 1) {
         const max = f.ships[W.sel.did];
         info.append(el('label', { class: 'orgcount' }, 'Move ', el('input', { type: 'number', min: 1, max, value: W.n || max, 'aria-label': 'Ships to move',
           onchange: (e) => { W.n = Math.max(1, Math.min(max, Math.trunc(+e.target.value) || max)); } }), ` of ${max}`));
@@ -2487,7 +2494,7 @@ function openOrganize(sid) {
   });
   body.addEventListener('pointerup', pinEnd); body.addEventListener('pointercancel', pinEnd);
   render();
-  modal(ios ? 'Organize Fleets' : 'Group Fleets', body, { cls: 'wide orgwin', onClose: () => { W.empties = []; renderPanel(); draw(); save(); } });
+  modal(ios || palm ? 'Organize Fleets' : 'Group Fleets', body, { cls: 'wide orgwin', onClose: () => { W.empties = []; renderPanel(); draw(); save(); } });
 }
 
 // ----- battle replay -----
@@ -4243,7 +4250,7 @@ function setupMenus() {
       ['Master Point List…', () => openMasterList(), () => hasHall(G) && HO.rules(G).hall.master !== false], ['Hall of Fame…', () => openHall('fame'), () => hasHall(G)], ['Hall of Shame…', () => openHall('shame'), () => hasHall(G)], ['-'], ['Quit to title', () => { save(); Sound.play(7002); G = null; renderPanel(); draw(); $('#panel').innerHTML = ''; $('#msg').innerHTML = ''; titleScreen(); }]],
     Ships: [['Build ships at selected colony…', () => { if (G && UI.sel != null && G.stars[UI.sel].owner === ME) openBuild(UI.sel); else toast('Select one of your colonies first.'); }], ['Review battle…', () => G && openBattleList()], ['List all fleets…', () => G && openFleetList()],
       [() => scrapWords('fleet')[G && curFleet() && curFleet().scrap301 ? 1 : 0], () => { if (!G || G.over) return; const f = curFleet(); if (f) toggleScrapFleet(f); else toast('Select one of your fleets first.'); }, () => marksScrap()],
-      [() => (G && organizeStyle() === 'ios' ? 'Organize fleets…' : 'Group fleets…'), () => { if (G && UI.sel != null) openOrganize(UI.sel); }, () => !!organizeStyle()],
+      [() => (G && organizeName()), () => { if (G && UI.sel != null) openOrganize(UI.sel); }, () => !!organizeStyle()],
       ['Scrap ship types…', () => G && openScrapTypes()], ['Next fleet', nextFleet]],
     Galaxy: [['Players and alliances…', () => G && openPlayers()], ['List explored stars…', () => G && openStarList()],
       ['Give money or metal…', () => G && !G.over && openGive(), 'gifts'],

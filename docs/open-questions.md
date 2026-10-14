@@ -123,9 +123,6 @@ planned order:
 
 ### Palm
 
-- Moving a pile in Organize Fleets (the Palm's own move: the receiving fleet keeps its
-  fuel and its colonists are replaced). For now there are Split… and "Merge all fleets
-  here".
 
 ### 5.0.5
 

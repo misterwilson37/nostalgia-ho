@@ -371,8 +371,7 @@ screen.
 - **Organize Fleets** (tFRM 2300): Group All (`FUN_00079a18`) and Split
   (`FUN_00079ea8`) are 5.0.5's, so the 5.0.5 merge and split rules apply; moving a pile
   (`FUN_000790ea`, `FUN_0004af48`) is the Palm's own (a new fleet with a full tank;
-  into another fleet, its own fuel kept and its colonists replaced) and isn't in the
-  remake.
+  into another fleet, its own fuel kept and its colonists replaced): built, `rs.pileMove`.
 - **Routes on the map**: 5.0.5's DeterminePath (`FUN_0004c22c`).
 
 ## Bars and battles (October 2026)
@@ -453,3 +452,10 @@ for the computer player %s.").
   the miracle (157: "Your scientist have figured out how to prevent"), "wierd" (158), and no "$" in
   reports 101, 103, 126 and 148 (6020.100, .102, .125, .147). The rest differ only in the Palm's own quote
   bytes (and 6020.121's "10%%", which StrPrintF prints as "10%").
+- **Organize Fleets** (built, October 2026; tFRM 2300, `FUN_000790ea`, `FUN_0004af48`,
+  `FUN_0004adc0`): an arrow moves the whole selected pile to the other list's fleet or to
+  "Empty Fleet" (a new fleet: no orders, not bought this turn, a full tank, a Biological's
+  empty); the receiver keeps its fuel and orders, takes the pile's stance, and with Colony
+  Ships its colonists are replaced by the ones that come (10 a ship, no more than there
+  were). No Biological check. Group All and Split stay 5.0.5's (`rs.pileMove`,
+  `organizeFleets: 'palm'`).

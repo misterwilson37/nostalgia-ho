@@ -297,6 +297,33 @@ const battlePanelPalm = E.makeBattlePanel({
     : n !== n0 ? `${n}/${n0} ${shipDescPalm(d, 0, mine)}s` : shipDescPalm(d, n, mine),
   planet: (G, pop, pop0) => pop <= 0.0005 ? `${popPalm(pop0)} People killed` : Math.abs(pop - pop0) < 0.0005 ? `${popPalm(pop)} People` : `${popPalm(pop)} of ${popPalm(pop0)} People survived`,
 });
+// CONFIRMED (FUN_0004af48, from FUN_000790ea): a pile (one design's ships,
+// all of them) moved to another fleet at the star is added to its count; to
+// "Empty Fleet" it makes a new fleet (FUN_0004adc0: a fresh record, no
+// orders, not bought this turn, fuel used 0, so a full tank, but a
+// Biological's used fuel is its Range, so empty). Either way the fleet that
+// takes it keeps its own fuel and orders, the pile's stance goes with it
+// (+0x58 + design), and with Colony Ships (class 4) the colonists that go,
+// 10 a ship and no more than there were, take the place of the receiver's
+// own (+0x70 is set, not added to). A fleet left empty is taken out
+// (FUN_0004b134). Nothing stops a pile going into a Biological fleet or a
+// Biological pile into another (5.0.5's window keeps them apart).
+function pileMove(G, f, did, to) {
+  const n = f.ships[did] || 0, d = E.getDesign(G, f.owner, did);
+  if (!n || !d || to === f) return null;
+  const bits = f.dstance && f.dstance[did] != null ? f.dstance[did] : (f.delayed ? 1 : 0) | (f.stance === 'defensive' ? 2 : f.stance === 'offensive' ? 4 : 0);
+  if (!to) {
+    to = E.newFleet(G, f.owner, f.star, false);
+    to.newThisTurn = false; to.name = d.name;
+    to.ships[did] = n;
+    to.fuel = d.type === 'bio' ? 0 : E.fleetMaxRange(G, to);
+  } else to.ships[did] = (to.ships[did] || 0) + n;
+  (to.dstance = to.dstance || {})[did] = bits;
+  delete f.ships[did];
+  if (d.type === 'colony') { const moved = Math.min(f.colonists || 0, n * 10); f.colonists = (f.colonists || 0) - moved; to.colonists = moved; }
+  if (E.fleetCount(f) === 0) G.fleets.splice(G.fleets.indexOf(f), 1);
+  return to;
+}
 const rs = Object.assign(base, {
   label: 'Palm OS 5 (2003)',
   // the bar charts: 5.0.5's log scale (FUN_00049e32 builds the table with
@@ -373,12 +400,13 @@ const rs = Object.assign(base, {
   // grows: the remake keeps every name.
   // the auto play settings are on the Auto Play form (tFRM 1700, FUN_000713be)
   autoPlayRange: { aggr: [0, 100], where: 'autoplay' },
-  // Organize Fleets (tFRM 2300): Group All and Split are 5.0.5's, but moving
-  // a pile isn't (FUN_000790ea, FUN_0004af48: the fleet that takes it keeps
-  // its own fuel and its colonists are replaced; to "Empty Fleet" a full
-  // tank): 5.0.5's window (organizeFleets '505') would play 5.0.5's rules, so
-  // the Palm keeps Split… and "Merge all fleets here" (docs/open-questions.md)
-  organizeFleets: null,
+  // Organize Fleets (tFRM 2300 "Organize Fleets": two fleet lists, each
+  // ending in "Empty Fleet", their piles, the arrows between them, Split,
+  // Group All, Done). Group All (FUN_00079a18) and Split (FUN_00079ea8) are
+  // 5.0.5's (canMerge, organized); an arrow (0x902, 0x903; FUN_000790ea) moves
+  // the selected pile, all of it, with the Palm's own FUN_0004af48 (pileMove)
+  organizeFleets: 'palm',
+  pileMove,
   // 5.0.5's one-time fuel alert is a mouse drag's (FUN_1008c5f0); the Palm's stylus drag wasn't traced
   fuelAlert: null, interestShort: null, // 5.0.5's income view (the Palm's wasn't traced)
   dragTech: dragTechPalm, msgText: msgTextPalm, messageEvacuate,
