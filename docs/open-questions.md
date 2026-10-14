@@ -116,12 +116,10 @@ planned order:
 
 ### Android
 
-- The same as iOS, and e-mailing one saved game (we don't know if it worked on Android).
+- The same as iOS.
 
 ### iOS
 
-- Several saved games, e-mailing a game, the welcome screen and the help page.
-- Game Center's own windows (the leaderboards and achievements are shown as a plain list).
 
 ### Palm
 
@@ -134,7 +132,12 @@ planned order:
 
 ### 4.0.5
 
-- Mac: the floating windows.
+- The date jokes.
+- Mac: the floating windows and the colour-monitor joke.
+
+### 3.0.1
+
+- The colour-monitor joke.
 
 ---
 
@@ -181,13 +184,19 @@ Where a browser can't do what the original did, or the remake had to pick.
 
 ### Android
 
-- Master points are one number in the browser, with no games-won count, achievements or leaderboards, and no e-mail of saved games.
+- Master points are one number in the browser, with no games-won count, achievements or leaderboards.
+- Saved Games offers Download where the app e-mailed one game, as iOS (below).
 - The Back key is Escape. A tablet is a window 600 pixels or more on its short side (the app asked for a screen of 5.9 inches or more).
 - The Android 4 (Holo) and Fire OS looks are guesses: we had no screenshots of the game on either.
 
 ### iOS
 
 - Which five named stars go into a galaxy is drawn from the game's seed.
+- **Saved games** are slots in the browser, one per game (its creation time), and
+  **Download** takes the place of e-mailing a game: the file opens again from Saved
+  Games' "Open a downloaded game…". The help page and Game Center's windows are screens
+  over the page, in the system's look of the time; Game Center's boards list only this
+  browser's player, and Today and This Week show the same as All Time.
 - A double tap is two taps within 0.4 s and 30 points (iOS asked the system).
 - Organize Fleets: a pinch counts past 10 %, and an emptied fleet goes at once (iOS: when
   the window closes).

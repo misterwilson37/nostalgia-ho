@@ -540,7 +540,3 @@ generator) has the same pi; it keeps the exact pi for now (its output is unchang
   "Text Msg." (0x41d, 24 letters) and, in a game with alliances, "Your Allies" and "Your
   Buddies"; "I own" (0x412) marks the star, Star Stats (0x41b) explores it, My Stats
   (0x419) gives your home. The Mac's words are STR# 6220/6240/6040 (`js/rules-mac405.js`).
-- **The date jokes** (checked, October 2026): the only date the program reads in play is
-  in `FUN_00438f47` (SetPlanetTypesForStar; Mac @d020a): on 25 December your colonies show
-  the Christmas planet, already in the w95 and mac4 skins. The other clock reads are the
-  Hall of Fame's dates (`FUN_0049883d`, `FUN_00498b6a`) and the Mac's licence strings.

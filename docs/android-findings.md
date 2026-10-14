@@ -103,6 +103,8 @@ Android 1.2.8 build").
 | Fonts | "Arial" (iOS's) | the game asks for the same "Arial" (the name `+[GraphicDefines fontName]` hands out); Android has no Arial, so Apportable's UIFont substitutes a system font (Droid Sans or Roboto by the strings in the library). The four bundled fonts (`com.apportable.system/fonts`: Droid Naskh, Droid Sans Hebrew ×2, Droid Sans Thai) are Apportable's fallbacks for scripts the game doesn't use | CONFIRMED (the name asked for); LIKELY (the face drawn) | `.data` `0x2e8ba4` |
 | Analytics | none | Apportable's runtime carries Mixpanel and an advertiser-ID manager, but no game class calls them | CONFIRMED (no caller in the game's classes); LIKELY (Apportable's own telemetry) | `+[Mixpanel initialize]` |
 
+Built since: Saved Games (slots in the browser, Download for the one-game e-mail) and the help page as a screen, without the Game Center buttons (`rs.screens`).
+
 ## The same as iOS 1.2.9
 
 Checked and the same (CONFIRMED unless marked). The method is in

@@ -1685,6 +1685,7 @@ function awardGameCenter() {
 }
 function openGameCenter() {
   const GC = HO.RULESETS[rulesId()] && HO.RULESETS[rulesId()].gameCenter; if (!GC) return;
+  if (GC.leaderboards.length && (screensOf(rulesId()) || {}).gameCenterButtons) return openGameCenterScreen('leaderboards');
   const rec = Object.assign(GC.blank(), gameCenterRec(GC) || {}), R = HO.DATA.ranks || [], cur = rankOf(rec.master_points);
   const body = el('div', { class: 'rank gamecenter' },
     A.jpg[cur] ? el('img', { src: A.jpg[cur], alt: '' }) : null, R[cur] ? el('h3', null, R[cur][0]) : null,
@@ -3804,6 +3805,7 @@ function manualFor() {
   return M[r] || M.original || ['assets/manuals/5.0.5/index.html', 'Spaceward Ho! 5 manual'];
 }
 function openHelp() {
+  if ((screensOf(rulesId()) || {}).help) return openHelpScreen();
   const tips = HO.DATA.tips || [];
   const body = el('div', { class: 'help' },
     el('p', null, 'Play with the bar charts to divide your money. Click a message to see the next one; when they’re all read, click the clock to end your turn. Double-click your colony to build ships. Drag a fleet’s dot to another star to send it there; drag it back onto its own star to cancel.'),
@@ -3813,6 +3815,96 @@ function openHelp() {
     el('h4', null, 'Tip'), el('p', { class: 'tip' }, tips.length ? tips[Math.floor(Math.random() * tips.length)] : ''),
     el('p', { class: 'sub' }, 'This remake uses the original art, sounds, and text. Its rules are reconstructed from the manual (the “Claude” ruleset); numbers are not the original formulas.'));
   modal('How to play', body, { cls: 'mid' });
+}
+
+// ----- the iOS and Android apps' own screens (rs.screens) -----
+// Saved Games: every game kept by its creation time (the app's folders; the
+// remake's slots in the browser, "ho5.games.<rules>"), opened, deleted or
+// downloaded (the app e-mailed one), and a downloaded game opened again;
+// the help page as a screen; Game Center's leaderboards and achievements.
+const screensOf = (id) => (HO.RULESETS[id] || {}).screens || null;
+const gamesKey = (id) => 'ho5.games.' + id;
+function savedGames(id) { try { const v = JSON.parse(localStorage.getItem(gamesKey(id)) || '[]'); return Array.isArray(v) ? v : []; } catch (e) { return []; } }
+// the game in its slot (from save(): the slot is the game's creation time)
+function saveSlot() {
+  if (!G || !screensOf(G.rules) || !screensOf(G.rules).savedGames) return;
+  if (!G.gameId) G.gameId = Date.now();
+  const L = savedGames(G.rules).filter(x => x && x.id !== G.gameId), p = G.players[ME] || G.players[0];
+  L.unshift({ id: G.gameId, galaxy: (G.opts && G.opts.galaxy) || 'Milky Way', player: p ? p.name : '', year: G.year, over: !!G.over, when: Date.now(), data: HO.save(G) });
+  try { localStorage.setItem(gamesKey(G.rules), JSON.stringify(L)); } catch (e) { toast('There’s no room left in this browser for another saved game. Delete one in Saved Games.'); }
+}
+function screen(title, body, opts) {
+  opts = opts || {};
+  closeScreen();
+  const back = el('button', { class: 'sback', onclick: () => { closeScreen(); if (opts.onBack) opts.onBack(); } }, opts.back || 'Back');
+  const sc = el('div', { class: 'hoscreen ' + (opts.cls || ''), role: 'dialog', 'aria-modal': 'true', 'aria-label': title },
+    el('div', { class: 'sbar' }, back, el('h2', null, title), opts.right || el('span')), el('div', { class: 'sbody' }, body));
+  document.body.append(sc); UI.screen = sc; back.focus();
+  return sc;
+}
+function closeScreen() { if (UI.screen) { UI.screen.remove(); UI.screen = null; } }
+// Escape (Android's Back) leaves a screen, before anything else hears it
+window.addEventListener('keydown', (e) => { if (e.key === 'Escape' && UI.screen && !document.querySelector('.scrim')) { e.preventDefault(); e.stopImmediatePropagation(); const b = UI.screen.querySelector('.sback'); if (b) b.click(); } }, true);
+function openSavedGames(id) {
+  id = id || rulesId();
+  const S = screensOf(id) || {}, L = savedGames(id);
+  const fileIn = el('input', { type: 'file', accept: '.hogame,.json,application/json', hidden: true, onchange: (e) => {
+    const f = e.target.files[0]; if (!f) return;
+    f.text().then((t) => { try { HO.load(t); } catch (x) { toast('That file isn’t a saved game this remake can read.'); return; } localStorage.setItem('ho5.save', t); closeScreen(); continueGame(); });
+  } });
+  const open = (g) => { if (G) save(); localStorage.setItem('ho5.save', g.data); closeScreen(); continueGame(); };
+  const download = (g) => {
+    const a = el('a', { href: URL.createObjectURL(new Blob([g.data], { type: 'application/json' })), download: `${g.galaxy} ${g.year}.hogame`.replace(/[\\/:*?"<>|]+/g, '-') });
+    document.body.append(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  };
+  const del = (g) => confirmBox(`Delete the game in ${g.galaxy} (${g.year})?`, () => {
+    try { localStorage.setItem(gamesKey(id), JSON.stringify(savedGames(id).filter(x => x.id !== g.id))); } catch (e) {}
+    openSavedGames(id);
+  });
+  const rows = L.map(g => el('li', { class: 'sgame' },
+    el('button', { class: 'sopen', onclick: () => open(g) }, el('b', null, g.galaxy), el('span', null, `${g.player} · ${g.over ? 'over in' : 'year'} ${g.year}`), el('small', null, new Date(g.when).toLocaleString())),
+    el('button', { class: 'quiet', onclick: () => download(g), title: 'The app e-mailed a game; here it is saved as a file you can open again.' }, 'Download'),
+    el('button', { class: 'quiet', onclick: () => del(g) }, 'Delete')));
+  screen(S.savedGames || 'Saved Games', el('div', null,
+    L.length ? el('ul', { class: 'slist' }, ...rows) : el('p', { class: 'sub' }, 'No saved games yet.'),
+    el('div', { class: 'btns' }, el('button', { class: 'quiet', onclick: () => fileIn.click() }, 'Open a downloaded game…'), fileIn)), { cls: 'saved' });
+}
+function openHelpScreen() {
+  const [url, name] = manualFor();
+  screen((screensOf(rulesId()) || {}).help || 'Help', el('iframe', { class: 'shelp', src: url, title: name }), { cls: 'helpscreen', back: 'Done' });
+}
+// Game Center's own windows (iOS: GKLeaderboardViewController,
+// GKAchievementViewController), from the record the remake keeps
+function openGameCenterScreen(tab) {
+  const GC = HO.RULESETS[rulesId()] && HO.RULESETS[rulesId()].gameCenter; if (!GC) return;
+  const rec = Object.assign(GC.blank(), gameCenterRec(GC) || {}), me0 = localStorage.getItem('ho5.name') || 'You';
+  const seg = (items, cur, go) => el('div', { class: 'segmented', role: 'tablist' }, ...items.map(([k, t]) => el('button', { role: 'tab', 'aria-selected': k === cur ? 'true' : 'false', class: k === cur ? 'on' : '', onclick: () => go(k) }, t)));
+  const boards = () => el('ul', { class: 'slist gc' }, ...GC.leaderboards.map(b => el('li', null, el('button', { class: 'sopen', onclick: () => board(b, 'all') }, el('b', null, b.title), el('span', null, `${fmt(rec[b.id] || 0)} · #1 of 1`)))));
+  const board = (b, scope) => show('leaderboards', el('div', null,
+    seg([['today', 'Today'], ['week', 'This Week'], ['all', 'All Time']], scope, (k) => board(b, k)),
+    el('h3', { class: 'gch' }, b.title),
+    el('ul', { class: 'slist gc' }, el('li', { class: 'gcrow' }, el('span', { class: 'gcrank' }, '1'), el('b', null, me0), el('span', { class: 'gcscore' }, fmt(rec[b.id] || 0)))),
+    el('p', { class: 'sub' }, scope === 'all' ? 'Only this browser’s player is on the board.' : 'The remake keeps no dates for scores, so every period shows the same.'),
+    el('button', { class: 'quiet', onclick: () => show('leaderboards') }, 'All leaderboards')));
+  const ach = () => { const done = GC.achievements.filter(a => ((rec.achievements || {})[a.id] || 0) >= a.goal).length;
+    return el('div', null, el('p', { class: 'sub' }, `${done} of ${GC.achievements.length} achievements completed`),
+      el('ul', { class: 'slist gc' }, ...GC.achievements.map(a => { const n = (rec.achievements || {})[a.id] || 0, pc = Math.floor(100 * Math.min(n, a.goal) / a.goal);
+        return el('li', { class: 'gcach' + (n >= a.goal ? ' done' : '') }, el('span', { class: 'gcicon', 'aria-hidden': 'true' }, n >= a.goal ? '★' : '☆'),
+          el('span', null, el('b', null, a.title), el('small', null, n >= a.goal ? 'Completed' : a.goal > 1 ? `${fmt(n)} of ${fmt(a.goal)}` : 'Not yet')),
+          el('span', { class: 'gcpct' }, pc + '%')); }))); };
+  const show = (t, body) => screen('Game Center', el('div', null, seg([['leaderboards', 'Leaderboards'], ['achievements', 'Achievements']], t, (k) => show(k)),
+    body || (t === 'achievements' ? ach() : boards()), el('p', { class: 'sub' }, GC.note || 'The app kept these on Game Center; here they stay in this browser.')), { cls: 'gamecenter', back: 'Done' });
+  show(tab === 'achievements' ? 'achievements' : 'leaderboards');
+}
+// the title's buttons for these screens (the app's welcome screen)
+function titleScreens() {
+  const b = $('#titlescreen .tbtns'); if (!b) return;
+  b.querySelectorAll('.tscreen').forEach(x => x.remove());
+  const S = screensOf(chosenRules()); if (!S) return;
+  const mk = (t, f) => el('button', { class: 'tscreen quiet', onclick: guard(f) }, t);
+  if (S.savedGames) b.append(mk(S.savedGames, () => openSavedGames(chosenRules())));
+  const GC = (HO.RULESETS[chosenRules()] || {}).gameCenter;
+  if (S.gameCenterButtons && GC && GC.leaderboards.length) b.append(mk('Achievements', () => openGameCenterScreen('achievements')), mk('Leaderboards', () => openGameCenterScreen('leaderboards')));
 }
 
 // ----- new game / title -----
@@ -3826,6 +3918,7 @@ function titleScreen() {
   const skins = (window.HOSKINS && HOSKINS.list) || [], here = skins.find(k => k.id === HOSKINS.current);
   if (here) $('#tname').textContent = `Spaceward Ho! ${here.name}`;
   titlePickers();
+  titleScreens();
   applySounds(); // no game: the skin's own sounds
   let i = 0;
   clearInterval(UI.anim);
@@ -4141,12 +4234,12 @@ function continueGame(resumed) {
     showMessages();
   });
 }
-function save() { if (!G) return; try { localStorage.setItem('ho5.save', HO.save(G)); } catch (e) {} }
+function save() { if (!G) return; try { localStorage.setItem('ho5.save', HO.save(G)); } catch (e) {} saveSlot(); }
 
 // ---------- menus ----------
 function setupMenus() {
   const menus = {
-    Game: [['New game…', newGameDialog], [() => (G && HO.rules(G).switchPlayers) || 'End turn and switch players', () => switchPlayers(), () => !!(G && HO.rules(G).switchPlayers && hotSeat())], ['Players and history', () => G && openPlayers()], ['Auto-play this turn', () => playOneTurn()], ['Auto play…', () => G && !G.over && (hotSeat() ? toast('Auto play is for one-player games.') : openAutoPlay())], ['Preferences…', openPrefs], ['Rank history…', openRanks, () => !G || hasRanks(G)], [() => ((HO.RULESETS[rulesId()] || {}).gameCenter || {}).menu || 'Rank and Game Center…', openGameCenter, () => !!(HO.RULESETS[rulesId()] || {}).gameCenter],
+    Game: [['New game…', newGameDialog], [() => (G && HO.rules(G).switchPlayers) || 'End turn and switch players', () => switchPlayers(), () => !!(G && HO.rules(G).switchPlayers && hotSeat())], ['Players and history', () => G && openPlayers()], ['Auto-play this turn', () => playOneTurn()], ['Auto play…', () => G && !G.over && (hotSeat() ? toast('Auto play is for one-player games.') : openAutoPlay())], ['Preferences…', openPrefs], ['Saved games…', () => openSavedGames(), () => !!(screensOf(rulesId()) || {}).savedGames], ['Rank history…', openRanks, () => !G || hasRanks(G)], [() => ((HO.RULESETS[rulesId()] || {}).gameCenter || {}).menu || 'Rank and Game Center…', openGameCenter, () => !!(HO.RULESETS[rulesId()] || {}).gameCenter],
       ['Master Point List…', () => openMasterList(), () => hasHall(G) && HO.rules(G).hall.master !== false], ['Hall of Fame…', () => openHall('fame'), () => hasHall(G)], ['Hall of Shame…', () => openHall('shame'), () => hasHall(G)], ['-'], ['Quit to title', () => { save(); Sound.play(7002); G = null; renderPanel(); draw(); $('#panel').innerHTML = ''; $('#msg').innerHTML = ''; titleScreen(); }]],
     Ships: [['Build ships at selected colony…', () => { if (G && UI.sel != null && G.stars[UI.sel].owner === ME) openBuild(UI.sel); else toast('Select one of your colonies first.'); }], ['Review battle…', () => G && openBattleList()], ['List all fleets…', () => G && openFleetList()],
       [() => scrapWords('fleet')[G && curFleet() && curFleet().scrap301 ? 1 : 0], () => { if (!G || G.over) return; const f = curFleet(); if (f) toggleScrapFleet(f); else toast('Select one of your fleets first.'); }, () => marksScrap()],

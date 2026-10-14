@@ -39,13 +39,6 @@ const R = E.RULESETS;
 // (string 1042), 5.0.5 (STR# 6020.114) and iOS and Android (Report Window
 // Templates 113) keep the line and never send it. With Hoedown it comes at
 // the first End Turn (Mac 4.0.5's year, p.colorJoke, is still drawn).
-// Checked again for 3.0.1 (AddEasterEggs @b0004): the year is CreatePlayer's
-// RND(20, 50) x 100 (player +0x5e); in it, RND(1, 100) is drawn and thrown
-// away, and the report goes out only when the main screen shows fewer than
-// 16 colours and could show 256 (the GDevice's pixel depth, HasDepth 8). So
-// the joke was the screen's, not the draw's: never in a browser, and it
-// stays here, not in the rules (the remake doesn't draw 3.0.1's CreatePlayer
-// numbers, so there is no year to keep).
 const COLOR = { text: 'Your scientists have discovered how to turn your monitor from black and white to color!', icon: 'm9039' };
 const COLOR_ITEM = (where) => `The colour-monitor joke, “Your scientists have discovered how to turn your monitor from black and white to color!”, at your first End Turn (${where}).`;
 

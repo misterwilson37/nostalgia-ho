@@ -289,6 +289,15 @@ const rs = Object.assign(base, {
   ai: 'original',           // the computers: 5.0.5's (0x1000239e0 = FUN_10081cc0, every step paired)
   turn505: true,            // the 5.0.5 turn (0x10002dca8 = FUN_10072a10)
   fixOptions, evacuateToggle, msgText, autoPlaySettings, gameCenter,
+  // CONFIRMED (SavedGameData, sub_100098b1c: a folder per game, named by its
+  // creation time; the Saved Games screen, 0x10009ba08; -[WelcomeScene ...]:
+  // the title's buttons; help_index.html; DDGameKitHelper showLeaderboard,
+  // showAchievements): the app's own screens. Several saved games, each
+  // kept by its creation time (the remake: slots in the browser), which the
+  // app e-mailed as attachments (the remake: Download, and opening a
+  // downloaded file); the help page as a screen of its own; the title's
+  // Achievements and Leaderboards buttons opening Game Center's windows
+  screens: { savedGames: 'Saved Games', help: 'Help', gameCenterButtons: true },
   // the New Game window (above), for the skin: no option boxes, no "Any",
   // the IQ in tens, one person
   optionBoxes: false, anyComputers: false, iqStep: 10, maxHumans: 1,
@@ -315,6 +324,11 @@ const rs = Object.assign(base, {
   // star apart, plays Sounds item 16, "Next Message.wav" (sound 7001). No other tick file is named
   // in the code (ping2, pong1, doink1 and drum72 in the bundle are never loaded).
   dragTick: 7001,
+  // CONFIRMED (0x1000323a4-0x1000323e0, sub_100021108 0x1000211f4): a big battle sets the star's dust to 20
+  // (the skin draws it, js/skins/ios/ui.js dusted); the rules keep the step of the last one (G.dust505).
+  starDust: true,
+  // 5.0.5's own: its mouse-drag fuel alert and its short interest figure (iOS has its alert's own words, touch)
+  fuelAlert: null, interestShort: null,
   // CONFIRMED (OrganizeFleetsLayer, 0x1000bfe20-0x1000c2f14;
   // OrganizerFleetFleetsContainer, 0x1000a5328-0x1000a6018): the Organize
   // Fleets window, opened by a double tap on the fleet list: tap a pile, then
@@ -324,11 +338,6 @@ const rs = Object.assign(base, {
   // Fleets' (canMerge505, organized505), but the move leaves a design new to
   // the fleet with whatever stance it had (CONFIRMED: move:from:to: 0xc27e0
   // writes the counts, the larger fuel used, "bought" and the colonists, never
-  // CONFIRMED (0x1000323a4-0x1000323e0, sub_100021108 0x1000211f4): a big battle sets the star's dust to 20
-  // (the skin draws it, js/skins/ios/ui.js dusted); the rules keep the step of the last one (G.dust505).
-  starDust: true,
-  // 5.0.5's own: its mouse-drag fuel alert and its short interest figure (iOS has its alert's own words, touch)
-  fuelAlert: null, interestShort: null,
   // the stance byte +0x58 + design), where 5.0.5 copies it. The remake's
   // nearest: the fleet's own stance for that design, i.e. no copy.
   // js/skins/classic/ui.js openOrganize.

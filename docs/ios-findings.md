@@ -648,6 +648,8 @@ The budget and colony bars are touched directly; there is no thumb.
 - **The Dip into Savings slider** (`-[DipIntoSavingsDialogLayer valueChanged:tag:]`
   `0x1000a8438`): 0-30 %. CONFIRMED (see "Every difference").
 
+Built since: the saved games (several, by creation time; Download for the e-mail), the help page as a screen, the title's Achievements and Leaderboards buttons and Game Center's windows (`rs.screens`; js/skins/classic/ui.js `openSavedGames`, `openHelpScreen`, `openGameCenterScreen`).
+
 ### Dialogs, buttons and hidden touches
 
 - **Dialogs** (`-[DialogLayerSprite ccTouchBegan:withEvent:]` `0x1000bce5c`,

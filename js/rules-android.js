@@ -57,6 +57,8 @@ Object.assign(rs, {
   version: '1.2.8', platform: 'Android (Amazon Appstore)', year: 2015,
   gameCenter,
   hiddenEmail: false,
+  // the same screens without Game Center's buttons on the title (docs/android-findings.md)
+  screens: Object.assign({}, I.screens, { gameCenterButtons: false }),
   // the program's own version is 1.2.8, so its patch is 1.2.8.1
   patchVersion: '1.2.8.1',
 });

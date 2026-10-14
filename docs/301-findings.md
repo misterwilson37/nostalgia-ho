@@ -607,7 +607,3 @@ The questions 3.0.1's code doesn't settle, and the remake's own choices, are in
   "preference" is on in 'Stup' 1000 (+0x74 = 1) and the Preferences window (DITL 6150) has
   no box for it, so it is a rule: with more than 15 types, unused types older than the
   newest of their class are scrapped, oldest first (`autoScrapTypes`).
-- **The colour-monitor joke** (checked, October 2026; `AddEasterEggs @b0004`, `CreatePlayer
-  @f26a0`): in the year RND(20, 50) × 100 (player +0x5e) RND(1, 100) is drawn and unused, and
-  the report (0x447, STR# 1000.96) goes out only when the main screen is set below 16 colours
-  and can show 256. Not random, the screen's: it stays in Full Hoedown (`js/hoedown.js`).
