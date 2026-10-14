@@ -103,33 +103,14 @@ Things the code can't decide for us. Each says what the remake does for now.
 
 ## 2. Unfinished
 
-Windows, commands and pictures of the originals that the remake hasn't built yet. The
-planned order:
-
-1. The Explored Planets windows and the older preferences (1.2, 2.0).
-2. The names files (2.0) and the rest of the Palm's own touches.
-3. iOS's extra screens.
-4. Turn time limits.
-
-(The remake's own work, such as English for 1.2 and the translations, is in
-`docs/roadmap.md`.)
-
-### Android
-
-- The same as iOS.
-
-### iOS
-
-
-### Palm
-
-
-### 5.0.5
-
+Windows, commands and pictures of the originals that the remake hasn't built yet. Everything
+once queued here is built; one optional piece is left:
 
 ### 4.0.5
 
 - Mac: the floating windows.
+
+(The remake's own work, such as the translations, is in `docs/roadmap.md`.)
 
 ---
 
