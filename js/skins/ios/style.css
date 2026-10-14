@@ -65,7 +65,7 @@ html.skin-ios .preview { background: #000; border-radius: 8px; }
 html.skin-ios .ptable tr.click:hover { background: rgba(79,184,242,.15); }
 /* the title: the welcome screen, black */
 html.skin-ios #titlescreen { background: #000; }
-html.skin-ios .tcard h1 { display: none; } /* the name is in the picture */
+html.skin-ios .tcard h1 { font: 600 clamp(34px, 6vw, 56px)/1.1 "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif; color: #fff; text-shadow: 0 0 18px rgba(79,184,242,.55); letter-spacing: -.01em; }
 html.skin-ios .tcard .by { color: #9fb2e0; margin-bottom: 10px; }
 html.skin-ios #tframe { width: min(400px, 80vw, calc((100vh - 150px) * 4 / 3)); min-width: 200px; background: #000; }
 html.skin-ios .tbtns { margin-top: 10px; }
