@@ -224,7 +224,7 @@ window.HOMAC4 = {
   },
   page(doc) {
     const c = doc.querySelector('#titlescreen .credit');
-    if (c) c.textContent = 'A personal web remake with the art and sounds of Spaceward Ho! 4.0.5 for the Macintosh (Delta Tao, 1996): written by Peter Commons, art by Howard Vives and Bob Van de walle, sounds by Mark Madeley and Guy Vardaman.';
+    if (c) c.textContent = 'With the art and sounds of Spaceward Ho! 4.0.5 for the Macintosh (Delta Tao, 1996): written by Peter Commons, art by Howard Vives and Bob Van de walle, sounds by Mark Madeley and Guy Vardaman.';
     const l = doc.querySelector('#menubar .logo'); if (l) l.textContent = 'Ho! 4.0.5';
     // the start-up window's buttons (DITL 1200): Open Game, New Game
     const n = doc.querySelector('#tnew'), o = doc.querySelector('#tcont');

@@ -94,7 +94,7 @@ window.HOTHEME = {
   },
   page(doc) {
     const c = doc.querySelector('#titlescreen .credit');
-    if (c) c.textContent = 'A personal web remake with the art of Spaceward Ho! 5 for Palm OS (MobileFreon, 2003). The Palm game had no sounds.';
+    if (c) c.textContent = 'With the art of Spaceward Ho! 5 for Palm OS (MobileFreon, 2003). The Palm game had no sounds.';
     const l = doc.querySelector('#menubar .logo'); if (l) l.textContent = 'Ho! 5 Palm';
   },
 };

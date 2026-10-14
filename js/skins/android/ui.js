@@ -28,7 +28,7 @@ window.HOTHEME_VARIANT = function (T) {
   T.page = function (doc) {
     page(doc);
     const c = doc.querySelector('#titlescreen .credit');
-    if (c) c.textContent = 'A personal web remake with the art and sounds of Spaceward Ho! 1.2.8 for Android (Ariton Technologies, 2015). Art by Howard Vives and Bob Van de walle.';
+    if (c) c.textContent = 'With the art and sounds of Spaceward Ho! 1.2.8 for Android (Ariton Technologies, 2015). Art by Howard Vives and Bob Van de walle.';
     doc.documentElement.classList.add('skin-android');
     backKey(doc);
   };

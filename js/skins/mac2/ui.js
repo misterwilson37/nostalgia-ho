@@ -65,7 +65,7 @@ window.HOMAC2 = {
   },
   page(doc) {
     const c = doc.querySelector('#titlescreen .credit');
-    if (c) c.textContent = 'A personal web remake with the art and sounds of Spaceward Ho! 2.0.1 for the Macintosh (Delta Tao Software, 1992): written by Peter Commons, art by Howard Vives.';
+    if (c) c.textContent = 'With the art and sounds of Spaceward Ho! 2.0.1 for the Macintosh (Delta Tao Software, 1992): written by Peter Commons, art by Howard Vives.';
     const l = doc.querySelector('#menubar .logo'); if (l) l.textContent = 'Ho! 2.0.1';
     // the start-up window's buttons (DITL 1201): Open Game, New Game
     const n = doc.querySelector('#tnew'), o = doc.querySelector('#tcont');

@@ -32,7 +32,7 @@ window.HOTHEME_OVER = {
   },
   page(doc) {
     const c = doc.querySelector('#titlescreen .credit');
-    if (c) c.textContent = 'A personal web remake with the art and sounds of Spaceward Ho! 2.0 for the Amiga (New World Computing, 1994). Amiga version by Stefan "Bebbo" Franke; pictures by Howard Vives.';
+    if (c) c.textContent = 'With the art and sounds of Spaceward Ho! 2.0 for the Amiga (New World Computing, 1994). Amiga version by Stefan "Bebbo" Franke; pictures by Howard Vives.';
     const l = doc.querySelector('#menubar .logo'); if (l) l.textContent = 'Ho! 2.0';
   },
 };

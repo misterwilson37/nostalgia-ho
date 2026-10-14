@@ -245,7 +245,7 @@ window.HOTHEME = {
   },
   page(doc) {
     const c = doc.querySelector('#titlescreen .credit');
-    if (c) c.textContent = 'A personal web remake with the art and sounds of Spaceward Ho! 1.2.9 for iPhone and iPad (Ariton Technologies, 2012). Art by Howard Vives and Bob Van de walle.';
+    if (c) c.textContent = 'With the art and sounds of Spaceward Ho! 1.2.9 for iPhone and iPad (Ariton Technologies, 2012). Art by Howard Vives and Bob Van de walle.';
     const l = doc.querySelector('#menubar .logo'); if (l) l.textContent = 'Ho!';
     doc.documentElement.classList.add('skin-ios');
   },

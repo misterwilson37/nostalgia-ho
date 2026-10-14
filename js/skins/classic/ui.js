@@ -13,13 +13,15 @@ const PAGE = `
 <div id="titlescreen" hidden>
   <div class="tcard">
     <h1>Spaceward Ho!</h1>
+    <p class="ver">Version 5.1 (Alpha)</p>
     <p class="by">by Peter Commons &amp; Joe Williams · Delta Tao Software</p>
     <div class="win tsplash"><div class="wtitle"><span id="tname">Spaceward Ho!</span></div>
       <div class="wbody"><canvas id="tframe" width="304" height="200" role="img" aria-label="The Spaceward Ho! title picture"></canvas></div></div>
     <div class="tbtns"><button id="tnew">New game</button><button id="tcont" hidden>Continue</button><button id="thelp" class="quiet">How to play</button></div>
     <label class="tskin" hidden><span>Skin</span> <select id="tskin"></select></label>
     <label class="tskin tos" hidden><span>OS look</span> <select id="tos"></select></label>
-    <p class="credit">A personal web remake built from Jake’s own copy of Spaceward Ho! 5.0.5. Art by Howard Vives and Bob Van de walle.</p>
+    <p class="madeby">Updated and adapted for the web by Jake Wilson, with an abundance of help from Claude (Anthropic).</p>
+    <p class="credit">Art by Howard Vives and Bob Van de walle.</p>
   </div>
 </div>
 `;

@@ -111,7 +111,7 @@ window.HOTHEME = {
       cx.imageSmoothingQuality = 'high';
     }
     const c = doc.querySelector('#titlescreen .credit');
-    if (c) c.textContent = 'A personal web remake of Spaceward Ho! 5.0.5, in a cozy western dress: the original art by Howard Vives and Bob Van de walle, upscaled.';
+    if (c) c.textContent = 'Spaceward Ho! 5.0.5 in a cozy western dress: the original art by Howard Vives and Bob Van de walle, upscaled.';
     const by = doc.querySelector('#titlescreen .by');
     if (by) by.textContent = 'by Peter Commons and Joe Williams, Delta Tao Software';
   },

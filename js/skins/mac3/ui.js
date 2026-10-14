@@ -131,12 +131,12 @@ window.HOTHEME_OVER = {
   page(doc) {
     if (v12) {
       const c = doc.querySelector('#titlescreen .credit');
-      if (c) c.textContent = 'A personal web remake with the art and sounds of Spaceward Ho! 1.2 for the Macintosh, French edition (Delta Tao Software and Upgrade Editions, Paris, 1992): programming by Peter Commons, pictures by Howard Vives. The title picture says so in French.';
+      if (c) c.textContent = 'With the art and sounds of Spaceward Ho! 1.2 for the Macintosh, French edition (Delta Tao Software and Upgrade Editions, Paris, 1992): programming by Peter Commons, pictures by Howard Vives. The title picture says so in French.';
       const l = doc.querySelector('#menubar .logo'); if (l) l.textContent = 'Ho! 1.2';
       return;
     }
     const c = doc.querySelector('#titlescreen .credit');
-    if (c) c.textContent = 'A personal web remake with the art and sounds of Spaceward Ho! 3.0.1 for the Macintosh (Delta Tao, 1993): written by Peter Commons, art by Howard Vives and Bob Van de walle, sounds by Mark Madeley.';
+    if (c) c.textContent = 'With the art and sounds of Spaceward Ho! 3.0.1 for the Macintosh (Delta Tao, 1993): written by Peter Commons, art by Howard Vives and Bob Van de walle, sounds by Mark Madeley.';
     const l = doc.querySelector('#menubar .logo'); if (l) l.textContent = 'Ho! 3.0.1';
   },
 };

@@ -187,7 +187,7 @@ window.HOTHEME = {
   },
   page(doc) {
     const c = doc.querySelector('#titlescreen .credit');
-    if (c) c.textContent = 'A personal web remake with the art and sounds of Spaceward Ho! 4.0.5 for Windows 95 (New World Computing, 1996).';
+    if (c) c.textContent = 'With the art and sounds of Spaceward Ho! 4.0.5 for Windows 95 (New World Computing, 1996).';
     const l = doc.querySelector('#menubar .logo'); if (l) l.textContent = 'Ho! 4';
   },
 };
