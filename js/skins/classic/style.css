@@ -144,9 +144,10 @@ h3.scaleflip { cursor: pointer; }
 .tskin select { font: inherit; color: #000; }
 .tbtns { display: flex; gap: 10px; justify-content: center; margin-top: 18px; flex-wrap: wrap; }
 .tbtns button { font: 18px var(--west) !important; padding: 6px 20px !important; }
-.madeby { margin: 20px auto 0; font-size: 13px; line-height: 1.4; max-width: 46ch; }
-.madeby + .credit { margin-top: 6px; }
 .credit { margin-top: 14px; font-size: 11px; color: #8d86ab; max-width: 52ch; margin-inline: auto; }
+/* the art and sounds first and larger; the remake's own credit small, after them */
+.tcard .credit { margin-top: 20px; font-size: 13px; line-height: 1.4; color: inherit; }
+.madeby { margin: 8px auto 0; font-size: 11px; max-width: 52ch; opacity: .65; }
 @media (max-width: 760px) {
   #main { grid-template-columns: 1fr; grid-template-rows: 58vh auto; overflow-y: auto; }
   #panel { order: 2; border-right: 0; border-top: 1px solid #444; overflow: visible; }

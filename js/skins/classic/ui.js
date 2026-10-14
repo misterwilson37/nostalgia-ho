@@ -20,8 +20,8 @@ const PAGE = `
     <div class="tbtns"><button id="tnew">New game</button><button id="tcont" hidden>Continue</button><button id="thelp" class="quiet">How to play</button></div>
     <label class="tskin" hidden><span>Skin</span> <select id="tskin"></select></label>
     <label class="tskin tos" hidden><span>OS look</span> <select id="tos"></select></label>
-    <p class="madeby">Updated and adapted for the web by Jake Wilson, with an abundance of help from Claude (Anthropic).</p>
     <p class="credit">Art by Howard Vives and Bob Van de walle.</p>
+    <p class="madeby">Updated and adapted for the web by Jake Wilson, with an abundance of help from Claude (Anthropic).</p>
   </div>
 </div>
 `;
