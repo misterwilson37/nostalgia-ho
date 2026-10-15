@@ -75,6 +75,9 @@ const skinSoundsId = () => {
   const k = HOSKINS.list.find(x => x.id === HOSKINS.current);
   return (k ? k.sounds : 'classic') || 'none';
 };
+// the Macs' colour-monitor joke looks for a black-and-white screen: a
+// black-and-white skin is one (engine.js endTurn, rs.colorMonitorBW)
+HO.screenBW = () => !!(window.HOSKINS && HOSKINS.bw);
 const soundsWanted = () => (G && G.opts && G.opts.sounds) || skinSoundsId();
 // true when the game plays its skin's own sounds (a skin's messageLook
 // names its own sounds; with another set the message's own sound is used)

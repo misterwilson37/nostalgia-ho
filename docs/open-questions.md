@@ -135,6 +135,10 @@ Where a browser can't do what the original did, or the remake had to pick.
   a Report Window list (Galaxy menu).
 - **Modern conveniences** (automatic routes, the map following the news, battle speed,
   written battle reports) can be switched on or off; they never add or remove commands.
+- **A black-and-white skin is a black-and-white screen**: Mac 3.0.1 and 4.0.5 told a player
+  whose colour-capable Mac was set to black and white, in a random year, that their
+  scientists had found how to turn the monitor to colour. The remake sends it on the
+  black-and-white skins (3.0.1's year comes from the game's seed).
 - **An optional patch** for the slips in section 4, chosen at New Game; it is not an
   official release.
 - **Touch follows iOS 1.2.9** in every version and skin: pinch, pan, tap, double tap,

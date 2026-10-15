@@ -44,8 +44,10 @@ const R = E.RULESETS;
 // away, and the report goes out only when the main screen shows fewer than
 // 16 colours and could show 256 (the GDevice's pixel depth, HasDepth 8). So
 // the joke was the screen's, not the draw's: never in a browser, and it
-// stays here, not in the rules (the remake doesn't draw 3.0.1's CreatePlayer
-// numbers, so there is no year to keep).
+// numbers, so there is no year to keep). Since October 2026 the rules send it
+// too, as the Macs did, when the skin is a black-and-white one (a browser can
+// always show colour): rs.colorMonitorBW, engine.js endTurn; 3.0.1's year
+// from the seed (hoRand).
 const COLOR = { text: 'Your scientists have discovered how to turn your monitor from black and white to color!', icon: 'm9039' };
 const COLOR_ITEM = (where) => `The colour-monitor joke, “Your scientists have discovered how to turn your monitor from black and white to color!”, at your first End Turn (${where}).`;
 

@@ -13,7 +13,7 @@ in `docs/301-findings.md`, which describes the rules in plain English.
 | | Routines |
 |---|---:|
 | In the program | 648 |
-| Game rules | 154 (153 implemented; the colour-monitor joke is the screen's, so Full Hoedown's: js/hoedown.js) |
+| Game rules | 154 (all implemented; the colour-monitor joke goes to black-and-white skins) |
 | Not a rule (runtime, library, files, windows, drawing, menus, dialogs, printing, sound) | 494 |
 | Unread | 0 |
 
@@ -389,7 +389,7 @@ dragging a fleet): the remake has its own windows for them, and the rule behind 
 
 | Routine @ address | What it does | Status | Where / why |
 |---|---|---|---|
-| `AddEasterEggs` @b0004 | the colour-monitor joke on a black-and-white screen, in a random year | NOT A RULE: the screen's depth decides | js/hoedown.js (Full Hoedown) |
+| `AddEasterEggs` @b0004 | the colour-monitor joke on a black-and-white screen, in a random year | IMPLEMENTED: a black-and-white skin is that screen; the year from the seed | engine.js `endTurn` (`rs.colorMonitorBW`); js/hoedown.js (Full Hoedown) |
 
 ### Segment Initialize: start-up (12 routines)
 

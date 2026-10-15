@@ -141,12 +141,12 @@ const OSES = [
 const SKINS = [
   { id: 'dos', version: '2.0', platform: 'DOS and Windows 3.1', year: 1993, os: ['dos', 'win31'] },
   { id: 'amiga', version: '2.0', platform: 'Amiga, German', year: 1994, os: ['workbench'] },
-  { id: 'mac12', version: '1.2', platform: 'Mac, French, black and white', year: 1992, os: ['system6', 'system7'] },
-  { id: 'mac2', version: '2.0.1', platform: 'Mac, black and white', year: 1992, os: ['system7', 'system6'] },
+  { id: 'mac12', bw: true, version: '1.2', platform: 'Mac, French, black and white', year: 1992, os: ['system6', 'system7'] },
+  { id: 'mac2', bw: true, version: '2.0.1', platform: 'Mac, black and white', year: 1992, os: ['system7', 'system6'] },
   { id: 'mac2c', version: '2.0.1', platform: 'Mac, colour', year: 1992, os: ['system7', 'system6'] },
-  { id: 'mac3', version: '3.0.1', platform: 'Mac, black and white', year: 1993, os: ['system7'] },
+  { id: 'mac3', bw: true, version: '3.0.1', platform: 'Mac, black and white', year: 1993, os: ['system7'] },
   { id: 'mac3c', version: '3.0.1', platform: 'Mac, colour', year: 1993, os: ['system7'] },
-  { id: 'mac4', version: '4.0.5', platform: 'Mac, black and white', year: 1996, os: ['system7', 'macos8'] },
+  { id: 'mac4', bw: true, version: '4.0.5', platform: 'Mac, black and white', year: 1996, os: ['system7', 'macos8'] },
   { id: 'mac4c', version: '4.0.5', platform: 'Mac, colour', year: 1996, os: ['system7', 'macos8'] },
   { id: 'w95', version: '4.0.5', platform: 'Windows 95', year: 1996, os: ['win95'] },
   { id: 'palm', version: '5', platform: 'Palm OS, version 1.0.4', year: 2003, os: ['palmos'] },
@@ -209,6 +209,8 @@ const soundSets = Object.keys(SOUNDS).filter(id => SOUNDS[id] && !SOUNDS[id].sam
 root.HOSKINS = {
   list,
   current,
+  // a black-and-white skin: the screen the Macs' colour-monitor joke looked for
+  get bw() { return !!skinOf(current).bw; },
   // the OS looks ([{ id, name, year }]), the one showing, and a skin's own
   oses: OSES,
   get os() { return currentOS; },

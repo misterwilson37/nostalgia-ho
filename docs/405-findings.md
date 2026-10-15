@@ -508,6 +508,8 @@ and the four winners' star names are drawn as the window opens (`rs.nameAStar.pi
   year from 2000 to 5000 (player +0x5e, `CreatePlayer`), if the screen shows fewer than 16
   colours and could show 256, the report "Your scientists have discovered how to turn
   your monitor from black and white to color!" (1111; 1112 and 1113 are its follow-ups).
+  Built (October 2026): a black-and-white skin is that screen, so the joke comes in
+  `p.colorJoke`'s year, once (`rs.colorMonitorBW`, engine.js `endTurn`).
 - **Menus** (MBAR 128): File has Begin Game, End Turn and Switch Players (hot seat on one
   Mac), Page Setup and Print; Options has Auto Play, Sound, Master Point List, Hall of
   Fame, Hall of Shame, Preferences; Ships' "Scrap Current Fleet" reads "Don't Scrap

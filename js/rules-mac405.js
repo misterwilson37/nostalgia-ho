@@ -201,6 +201,7 @@ const FIXES = W.fixes.filter(f => MAC_SLIPS.includes(f.id)).concat([
 
 // Mac 4.0.5 plays 4.0.5's game (js/rules-405.js), with the differences above
 E.registerRules('mac405', Object.assign({}, W, {
+  colorMonitorBW: true, // the colour-monitor joke on a black-and-white skin, in p.colorJoke's year (AddEasterEggs @b000c; engine.js endTurn)
   // CONFIRMED (DITL 6080 item 15, the option word's bit 8; DrawIconRect
   // @11537c, CheckOnAutoplay @14114a): "Automatically end turn for
   // unconnected players" counts a player whose machine isn't connected as

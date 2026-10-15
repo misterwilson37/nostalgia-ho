@@ -1030,6 +1030,7 @@ function during(what, fn) {
 function endTurn(G) {
   if (G.over) return;
   for (const p of G.players) p.inbox = [];
+  const yearBefore = G.year;
   // "Years per turn" (Original rules): one End Turn runs several 10-year
   // turns; the computers only plan on the first and the winner is only
   // checked on the last (FUN_100728d0)
@@ -1039,6 +1040,18 @@ function endTurn(G) {
   // js/hoedown.js) to each human once, at the first End Turn it is on for
   const cm = hoedown(G) && ownRules(G).hoedown.colorMonitor;
   if (cm) for (const p of G.players) if (p.human && !p.hoColor) { p.hoColor = true; msg(G, p.id, cm.text, { icon: cm.icon || 'm9039' }); }
+  // The colour-monitor joke as Mac 3.0.1 and 4.0.5 sent it (rs.colorMonitorBW,
+  // AddEasterEggs): in the player's joke year, when the screen is set to black
+  // and white and could show colour. The page says whether its skin is a
+  // black-and-white one (API.screenBW); a browser can always show colour. The
+  // Mac 4.0.5 drew the year (p.colorJoke); 3.0.1's comes from the seed
+  // (hoRand), so the game's numbers are untouched.
+  const bw = ownRules(G).colorMonitorBW && API.screenBW && API.screenBW();
+  const jokeText = ownRules(G).hoedown && ownRules(G).hoedown.colorMonitor;
+  if (bw && jokeText && !G.over) for (const p of G.players) {
+    const y = p.colorJoke || (20 + Math.floor(hoRand(G, 'colorJoke' + p.id) * 31)) * 100;
+    if (p.human && !p.hoColor && y > yearBefore && y <= G.year) { p.hoColor = true; msg(G, p.id, jokeText.text, { icon: jokeText.icon || 'm9039' }); }
+  }
   // keep battle records bounded
   if (G.battles.length > 60) G.battles.splice(0, G.battles.length - 60);
 }

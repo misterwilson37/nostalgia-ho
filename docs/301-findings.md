@@ -167,7 +167,7 @@ borrowing limit. The shares are 2.0's.
 | 50–59: free designs | Scout, Fighter, Satellite and Colony Ship at your tech, with no development cost, while you have fewer than 17 designs; otherwise a tech jump | CONFIRMED |
 | 60–99: a tech jumps two levels | a random one of the five | CONFIRMED |
 | Gone | money, recycling, research facility, prime rate, cheaper credit, decoys, biologicals | CONFIRMED |
-| The colour-monitor joke | in a random year from 2000 to 5000, on a black-and-white screen | NOT IMPLEMENTED (`AddEasterEggs @b0004`, STR# 1000.96) |
+| The colour-monitor joke | in a random year from 2000 to 5000, on a black-and-white screen | BUILT: a black-and-white skin is that screen (`AddEasterEggs @b0004`, STR# 1000.96; engine.js `endTurn`, `rs.colorMonitorBW`) |
 
 ### Ships and fleets
 
@@ -610,4 +610,9 @@ The questions 3.0.1's code doesn't settle, and the remake's own choices, are in
 - **The colour-monitor joke** (checked, October 2026; `AddEasterEggs @b0004`, `CreatePlayer
   @f26a0`): in the year RND(20, 50) × 100 (player +0x5e) RND(1, 100) is drawn and unused, and
   the report (0x447, STR# 1000.96) goes out only when the main screen is set below 16 colours
-  and can show 256. Not random, the screen's: it stays in Full Hoedown (`js/hoedown.js`).
+  and can show 256. Not random, the screen's. Built (October 2026): a black-and-white skin
+  (mac12, mac2, mac3, mac4) is a screen set to black and white that could show colour, so
+  the joke comes in the player's year, once (`rs.colorMonitorBW`, engine.js `endTurn`). The
+  remake doesn't draw 3.0.1's CreatePlayer numbers, so the year comes from the seed
+  (`hoRand`), and the game's numbers are untouched. Full Hoedown still sends it at the
+  first End Turn on any skin.

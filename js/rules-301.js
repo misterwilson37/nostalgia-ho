@@ -2108,6 +2108,7 @@ E.registerRules('301', Object.assign({}, D, {
   scrapAt: (G, pid, s, metal) => { s.metal += metal; const so = G.scrapOver301 || (G.scrapOver301 = {}); so[s.id] = Math.min(32767, (so[s.id] || 0) + trunc(metal)); },
   finishedPartWasted: false,
   difficulty, masterPoints: undefined,
+  colorMonitorBW: true,          // the colour-monitor joke on a black-and-white skin (AddEasterEggs @b0004; engine.js endTurn)
   hall: hall301,                 // the Hall of Fame and the Hall of Shame (above)
   // CONFIRMED (DoConfigAutoPlayDialog @144226, DLOG/DITL 4021 "Configure
   // Computer’s Auto Play Style:", ConfigAutoplaySBResponse @14436e): the Auto
