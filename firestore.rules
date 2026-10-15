@@ -1,0 +1,93 @@
+rules_version = '2';
+// Spaceward Ho! (spacewardho.com): the Firestore security rules.
+// Paste this whole file into the Firebase console (Firestore Database, Rules)
+// and Publish. docs/online.md says what is stored and why; js/cloud.js writes it.
+//
+// - users/{uid}/saves/{id}: a player's saved games, read and written only by
+//   that player, each field's type and size checked.
+// - halls/{rules}/entries/{id}: the shared Hall of Fame and Hall of Shame,
+//   one per ruleset. Anyone may read; a signed-in player (a guest too) may
+//   add an entry as themselves, checked field by field; nobody may change
+//   one, and only an admin may delete one.
+// - admins/{uid}: who the admins are. No client may read or write it (it is
+//   made by hand in the console); the rules only ask whether a document
+//   exists, which needs no read permission.
+// - Everything else: denied.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function isAdmin() { return signedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid)); }
+    function str(v, lo, hi) { return v is string && v.size() >= lo && v.size() <= hi; }
+    function whole(v, lo, hi) { return v is int && v >= lo && v <= hi; }
+    function num(v, lo, hi) { return (v is int || v is float) && v >= lo && v <= hi; }
+    // a Hall field that is a whole number or a short word (the versions differ)
+    function code(v) { return (v is int && v >= -1000 && v <= 1000) || (v is string && v.size() <= 16); }
+    function optCode(d, k) { return !(k in d) || code(d[k]); }
+    function optWhole(d, k, lo, hi) { return !(k in d) || whole(d[k], lo, hi); }
+
+    match /admins/{uid} {
+      allow read, write: if false;
+    }
+
+    match /users/{uid}/saves/{id} {
+      function owner() { return signedIn() && request.auth.uid == uid; }
+      function validSave() {
+        let d = request.resource.data;
+        return d.keys().hasOnly(['rules', 'edition', 'year', 'player', 'galaxy', 'over', 'updated', 'saved', 'size', 'raw', 'enc', 'hash', 'data', 'client'])
+          && d.keys().hasAll(['rules', 'year', 'updated', 'saved', 'size', 'enc', 'hash', 'data'])
+          && str(d.rules, 1, 16) && id.size() <= 64
+          && (!('edition' in d) || str(d.edition, 0, 100))
+          && whole(d.year, -100000, 1000000)
+          && (!('player' in d) || str(d.player, 0, 60))
+          && (!('galaxy' in d) || str(d.galaxy, 0, 60))
+          && (!('over' in d) || d.over is bool)
+          && d.updated == request.time
+          && whole(d.saved, 0, 100000000000000)
+          && d.data is bytes && d.data.size() <= 1000000
+          && whole(d.size, 0, 1000000) && d.size == d.data.size()
+          && (!('raw' in d) || whole(d.raw, 0, 100000000))
+          && d.enc in ['gzip', 'json']
+          && str(d.hash, 1, 40)
+          && (!('client' in d) || str(d.client, 0, 40));
+      }
+      allow read, delete: if owner();
+      allow create, update: if owner() && validSave();
+    }
+
+    match /halls/{rules}/entries/{id} {
+      function validEntry() {
+        let d = request.resource.data;
+        let kind = d.kind;
+        return d.keys().hasOnly(['uid', 'name', 'kind', 'rules', 'edition', 'client', 'createdAt',
+            'fameAt', 'fameDifficulty', 'shameAt', 'shameDifficulty',
+            'humans', 'computers', 'shape', 'density', 'size', 'iq', 'year', 'allies', 'difficulty',
+            'yearsPerTurn', 'skill', 'armageddons', 'replays', 'time'])
+          && d.keys().hasAll(['uid', 'name', 'kind', 'rules', 'createdAt', 'difficulty', 'time'])
+          && d.uid == request.auth.uid
+          && str(d.name, 1, 40)
+          && d.rules == rules && str(rules, 1, 16)
+          && (!('edition' in d) || str(d.edition, 0, 100))
+          && (!('client' in d) || str(d.client, 0, 40))
+          && d.createdAt == request.time
+          // the list it is in: fameAt / fameDifficulty or shameAt / shameDifficulty, not both
+          && ((kind == 'fame' && d.fameAt == request.time && d.fameDifficulty == d.difficulty && !('shameAt' in d) && !('shameDifficulty' in d))
+            || (kind == 'shame' && d.shameAt == request.time && d.shameDifficulty == d.difficulty && !('fameAt' in d) && !('fameDifficulty' in d)))
+          && num(d.difficulty, -10000, 10000)
+          // the game's own time (seconds) within a day of the server's
+          && whole(d.time, request.time.toMillis() / 1000 - 86400, request.time.toMillis() / 1000 + 86400)
+          && optWhole(d, 'humans', 0, 64) && optWhole(d, 'computers', 0, 64) && optWhole(d, 'allies', 0, 64)
+          && optWhole(d, 'year', -100000, 1000000) && optWhole(d, 'yearsPerTurn', 0, 1000)
+          && optWhole(d, 'skill', 0, 20) && optWhole(d, 'armageddons', 0, 100000) && optWhole(d, 'replays', 0, 1000000)
+          && optCode(d, 'shape') && optCode(d, 'density') && optCode(d, 'size') && optCode(d, 'iq');
+      }
+      allow read: if true;
+      allow create: if signedIn() && validEntry();
+      allow update: if false;
+      allow delete: if isAdmin();
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
