@@ -30,6 +30,12 @@ Delta Tao, in `docs/open-questions.md`, "Unfinished").
    text for the versions with no translation (5.0.5, 4.0.5, 3.0.1, Palm OS; French and
    Turkish for 5.0.5 backwards from iOS, German for 3.0.1 onward from 2.0), and a German
    1.2 or a French 2.0 the same way.
+5. **Online.** Jake's order: (1) cloud saves, the browser's saves kept as the offline
+   option; (2) a shared Hall of Fame; later (3) shared names, (4) online play. **1 and 2
+   done (October 2026)**, with the decency filter shared names need: `docs/online.md`
+   (accounts, Account saves, the Hall's Everyone list, `firestore.rules`). Left: shared
+   star and ship names (through `js/decency.js`) and online play (full Firestore is in
+   the SDK bundle for its realtime listeners).
 
 Sources: the German DOS 2.0 (first disk: `DOSHO.EXE` and `HO.PRS` with its German text; the colour
 pictures and sounds are on a later disk not yet in hand); the Spaceward Ho! 4 FAQ,

@@ -14,6 +14,20 @@ The repository *is* the website: no build step. On GitHub, turn on
 Opening `index.html` straight from disk won't load the pictures and sounds;
 it needs to be served from a web address.
 
+## Online (optional)
+
+Signing in is never needed: a player who doesn't plays exactly as before, offline, with
+the browser's saves. **Sign in** on the title screen (or the Ho menu's **Account…**:
+Google, an email and password, or a guest account) keeps saved games in the account too,
+so they follow the player to another computer (**Account saves…** in the Game menu, for
+every ruleset; Continue asks when the account's copy is newer), and adds a **This
+computer / Everyone** switch to the Hall of Fame and Hall of Shame (4.0.5 and 3.0.1): one
+shared Hall per ruleset, its names through a decency filter (`js/decency.js`). The
+Firebase SDK (`js/vendor/firebase.js`) loads only when a player asks for any of this, and
+everything fails soft without a network. The single-file build has none of it. What is
+stored, the security rules (`firestore.rules`), the console steps, admins and the tests:
+`docs/online.md`.
+
 ## Several players on one computer
 
 New Game asks how many people are playing (up to 6). With more than one, everyone takes
@@ -436,6 +450,10 @@ Optional ruleset flags the skin reads (each is documented where it is read):
   words and reports; `js/lang-data.js` holds the text, written by
   `tools/extract/languages.py` from the German DOS 2.0 and the iOS app
 - `js/hoedown.js`: Full Hoedown, each official release's jokes at their most (`rs.hoedown`: the items About this version lists, the colour-monitor joke, the Armageddon questions put back in the 5.0.5 family, the Amiga's German names; 4.0.5's Evacuate and Armageddon jokes are the rules' own now)
+- `js/cloud.js`: the online parts (`window.HOCLOUD`: accounts, saves in the account, the
+  shared Hall), with no UI; the windows are in `js/skins/classic/ui.js` ("online").
+  `js/vendor/firebase.js` is the Firebase SDK, built by `tools/firebase/build-firebase.mjs`;
+  `js/decency.js` the filter for shared names (`tools/decency-test.js`); `docs/online.md`
 - `js/version-notes.js`: for each ruleset, its known quirks, where the remake differs and
   what changed from the version before (the Ho menu's "About this version")
 - `js/skins.js`: the list of skins and their sounds, and the loader. A skin is everything you see and
