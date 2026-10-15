@@ -370,3 +370,28 @@ html.fleetdrag #panel .planet > .btns, html.fleetdrag.fleetdrag-pad #panel .plan
 .hoscreen.helpscreen .sbody { max-width: none; padding: 0; display: flex; }
 .hoscreen .shelp { flex: 1; border: 0; width: 100%; min-height: 100%; background: #fff; }
 @media (max-width: 480px) { .hoscreen .sbody { padding: 16px; } .hoscreen.helpscreen .sbody { padding: 0; } }
+/* a window opened over an iOS / Android screen (Saved Games' Delete, the
+   Account windows) sits above it */
+.hoscreen ~ .scrim { z-index: 70; }
+/* online (js/cloud.js; ui.js "online"): the title's account button, quiet
+   and in the title's own colours, the sign-in form, Account saves, the
+   Hall's This computer / Everyone switch */
+.tacctp { margin: 12px 0 0; }
+.tcard .tacct { font-size: 12px !important; padding: 2px 10px !important; color: inherit; background: none; border: 1px solid currentColor; border-radius: 3px; opacity: .8; cursor: pointer; box-shadow: none; }
+.tcard .tacct:hover, .tcard .tacct:focus-visible { opacity: 1; }
+.cloudform .cfield { display: grid; grid-template-columns: 6em minmax(0, 1fr); align-items: center; gap: 6px; margin: 4px 0; }
+.cloudform .cfield input { min-width: 0; }
+.cloudmsg:empty { display: none; }
+.account label.chk, .offer label.chk { display: flex; gap: 8px; align-items: center; margin: 8px 0; }
+.aclist { list-style: none; margin: 0 0 8px; padding: 0; max-height: 50vh; overflow-y: auto; border: 1px solid var(--edge); }
+.aclist li { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; justify-content: space-between; padding: 6px 8px; border-top: 1px solid var(--edge); }
+.aclist li:first-child { border-top: 0; }
+.aclist li.cur { font-weight: bold; }
+.aclist .acinfo { min-width: 0; flex: 1 1 14em; }
+.aclist .btns { margin: 0; }
+.aclist small { color: var(--sub); font-weight: normal; }
+.hall .hwhere { display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: center; margin: 0 0 6px; }
+.hall .hwhere label.chk { display: inline-flex; gap: 4px; align-items: center; }
+.hall .hbox > .sub { margin: 4px 0; }
+/* a skin that draws the Hall at its original's fixed size (w95) grows it by the switch's row */
+.hall-list:has(> .hwhere) { height: auto; padding-bottom: 10px; }

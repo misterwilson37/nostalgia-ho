@@ -1,0 +1,385 @@
+// Spaceward Ho! web remake — the online parts: accounts, saved games kept in
+// an account, and the shared Hall of Fame (window.HOCLOUD).
+//
+// The game is a static page that plays offline, and it must go on doing so
+// exactly as before for anyone who never signs in. So this file is small and
+// does nothing at load: the Firebase SDK (js/vendor/firebase.js, built by
+// tools/firebase/build-firebase.mjs) is fetched only
+// - when the player opens Account (or one of the two offers in the skin: a
+//   finished game for the shared Hall, a deliberate save), or
+// - at start-up, after the page has loaded, when this browser was signed in
+//   before (localStorage "ho5.cloud.was"), so the account comes back by itself.
+// No anonymous account is ever made behind the player's back: "Play as a
+// guest" is a button. Every call fails soft: if the SDK can't load or the
+// network is down, the promise resolves to false / null / [] (or rejects
+// with a plain-English message for the window that asked), and the game
+// carries on with its browser saves.
+//
+// The single-file offline build (tools/bundle.py) and a page opened from disk
+// have no server to talk to: there HOCLOUD.supported is false and the skin
+// shows none of this.
+//
+// What is stored, where, and the rules that guard it: docs/online.md and
+// firestore.rules. The skin (js/skins/classic/ui.js, "online") draws the
+// windows; this file has no UI.
+(function (root) {
+'use strict';
+// The project's web config. It is public by design (every visitor's browser
+// gets it); what protects the data is firestore.rules and the API key's
+// referrer restriction. No measurementId: no Analytics, by Jake's choice.
+const CONFIG = {
+  apiKey: 'AIzaSyBOLeRA8ez6PT8FgjTe1rk4XgbtmOzsj8s',
+  authDomain: 'nostalgia-ho.firebaseapp.com',
+  projectId: 'nostalgia-ho',
+  storageBucket: 'nostalgia-ho.firebasestorage.app',
+  messagingSenderId: '725464059135',
+  appId: '1:725464059135:web:7f7c0bd548d8fcc68010ca',
+};
+// the client written with each save and Hall entry (firestore.rules: 40 characters)
+const CLIENT = 'web 5.1 Alpha';
+// Firestore's document limit is 1 MiB (1,048,576 bytes, field names and
+// all); a game's compressed data may be up to 1,000,000 bytes of it
+// (firestore.rules checks the same number)
+const MAX_DATA = 1000000;
+// uploads while playing: at most one a minute (End Turn and leaving the page
+// don't wait). The free tier allows 20,000 writes a day.
+const MIN_GAP = 60000;
+
+const doc = root.document;
+const store = {
+  get(k) { try { return root.localStorage.getItem(k); } catch (e) { return null; } },
+  set(k, v) { try { if (v == null) root.localStorage.removeItem(k); else root.localStorage.setItem(k, v); } catch (e) {} },
+  sget(k) { try { return root.sessionStorage.getItem(k); } catch (e) { return null; } },
+  sset(k, v) { try { if (v == null) root.sessionStorage.removeItem(k); else root.sessionStorage.setItem(k, v); } catch (e) {} },
+};
+let params = null;
+try { params = new URLSearchParams(root.location.search); } catch (e) {}
+const local = /^(localhost|127\.0\.0\.1|\[::1\])$/.test((root.location && root.location.hostname) || '');
+// ?emulator=1 on localhost: the Auth and Firestore emulators on their usual
+// ports (9099, 8080); ?emulator=<auth port>,<firestore port> for others
+const emulator = local && params && params.get('emulator') ? params.get('emulator') : null;
+const supported = !root.HOSKINS_INLINE && !!root.location && /^https?:$/.test(root.location.protocol) && typeof Promise !== 'undefined';
+
+// ---------- loading ----------
+function loadScript(src, timeout) {
+  return new Promise((resolve, reject) => {
+    const s = doc.createElement('script');
+    const t = setTimeout(() => { s.onload = s.onerror = null; reject(new Error('timeout')); }, timeout || 20000);
+    s.src = src; s.async = true;
+    s.onload = () => { clearTimeout(t); resolve(); };
+    s.onerror = () => { clearTimeout(t); s.remove(); reject(new Error('load')); };
+    doc.head.append(s);
+  });
+}
+let sdkP = null, readyP = null, decencyP = null;
+// the SDK file only (no network beyond this site); resolves false on failure
+function loadSdk() {
+  if (!supported) return Promise.resolve(false);
+  if (root.HOFB) return Promise.resolve(true);
+  if (!sdkP) sdkP = loadScript('js/vendor/firebase.js').then(() => !!root.HOFB, () => { sdkP = null; return false; });
+  return sdkP;
+}
+const S = { app: null, auth: null, db: null, user: null, known: false, listeners: [] };
+// the SDK loaded and started, and the account (if any) restored: resolves
+// true, or false when it can't be
+function ready() {
+  if (!supported) return Promise.resolve(false);
+  if (!readyP) {
+    readyP = loadSdk().then((ok) => {
+      if (!ok) return false;
+      const F = root.HOFB;
+      S.app = F.initializeApp(CONFIG);
+      S.auth = F.initializeAuth(S.app, { persistence: [F.indexedDBLocalPersistence, F.browserLocalPersistence], popupRedirectResolver: F.browserPopupRedirectResolver });
+      S.db = F.initializeFirestore(S.app, {});
+      if (emulator) {
+        const [ap, fp] = emulator === '1' ? [9099, 8080] : emulator.split(',').map(Number);
+        F.connectAuthEmulator(S.auth, `http://127.0.0.1:${ap}`, { disableWarnings: true });
+        F.connectFirestoreEmulator(S.db, '127.0.0.1', fp);
+      }
+      return new Promise((resolve) => {
+        let first = true;
+        F.onAuthStateChanged(S.auth, (u) => {
+          S.user = u ? describe(u) : null; S.known = true;
+          // remembered so the next visit restores the account at start-up
+          store.set('ho5.cloud.was', u ? '1' : null);
+          store.set('ho5.cloud.name', u ? S.user.name : null);
+          if (first) { first = false; resolve(true); }
+          for (const f of S.listeners.slice()) { try { f(S.user); } catch (e) {} }
+        }, () => { if (first) { first = false; resolve(true); } });
+        // back from a Google sign-in done by redirect (popups blocked)
+        if (store.sget('ho5.cloud.redirect')) {
+          store.sset('ho5.cloud.redirect', null);
+          F.getRedirectResult(S.auth).catch((e) => { S.redirectError = errorText(e); });
+        }
+      });
+    }).catch(() => { readyP = null; return false; });
+  }
+  return readyP;
+}
+// a promise that gives up after ms (resolving to dflt)
+const within = (p, ms, dflt) => Promise.race([p, new Promise(r => setTimeout(() => r(dflt), ms))]);
+
+function describe(u) {
+  const google = (u.providerData || []).some(p => p.providerId === 'google.com');
+  const email = u.email || ((u.providerData || []).find(p => p.email) || {}).email || null;
+  return { uid: u.uid, anonymous: !!u.isAnonymous, email, google, password: (u.providerData || []).some(p => p.providerId === 'password'),
+    name: u.isAnonymous ? 'Guest' : (u.displayName || email || 'Signed in') };
+}
+
+// ---------- plain-English errors ----------
+const ERRORS = {
+  'auth/invalid-email': 'That doesn’t look like an email address.',
+  'auth/missing-email': 'Type your email address first.',
+  'auth/missing-password': 'Type your password.',
+  'auth/weak-password': 'Choose a password of at least 6 characters.',
+  'auth/invalid-credential': 'That email and password don’t match an account. Check them, or create an account.',
+  'auth/invalid-login-credentials': 'That email and password don’t match an account. Check them, or create an account.',
+  'auth/wrong-password': 'That password isn’t right.',
+  'auth/user-not-found': 'There’s no account with that email. Create one?',
+  'auth/user-disabled': 'That account has been turned off.',
+  'auth/email-already-in-use': 'There’s already an account with that email. Sign in to it instead (or use Forgot password).',
+  'auth/credential-already-in-use': 'That account already exists, so this guest can’t become it. Sign out of the guest and sign in to that account instead; the guest’s games stay with the guest.',
+  'auth/provider-already-linked': 'This account already has that way of signing in.',
+  'auth/popup-closed-by-user': 'The sign-in window was closed before you finished.',
+  'auth/cancelled-popup-request': 'The sign-in window was closed before you finished.',
+  'auth/user-cancelled': 'Sign-in was cancelled.',
+  'auth/network-request-failed': 'Couldn’t reach the sign-in service. Check your connection and try again.',
+  'auth/too-many-requests': 'Too many tries. Wait a few minutes and try again.',
+  'auth/unauthorized-domain': 'This web address isn’t allowed to sign in (Firebase: Authentication, Settings, Authorized domains).',
+  'auth/operation-not-allowed': 'That way of signing in is turned off for this site.',
+  'auth/admin-restricted-operation': 'That way of signing in is turned off for this site.',
+  'auth/internal-error': 'The sign-in service couldn’t start. Check your connection, or try again in a moment.',
+  'auth/requires-recent-login': 'Please sign in again first.',
+  'permission-denied': 'The account service refused that.',
+  'unavailable': 'Couldn’t reach the account service. Check your connection and try again.',
+  'deadline-exceeded': 'The account service took too long to answer. Try again.',
+  'resource-exhausted': 'The account service is over its limit for today. Your games are still saved in this browser.',
+};
+function errorText(e) {
+  if (!e) return 'Something went wrong.';
+  if (e.hoText) return e.hoText;
+  if (e.code && ERRORS[e.code]) return ERRORS[e.code];
+  return 'Something went wrong' + (e.code ? ` (${e.code})` : e.message ? ` (${e.message})` : '') + '.';
+}
+const fail = (text) => { const e = new Error(text); e.hoText = text; return e; };
+// run fn once the SDK is up (rejecting in plain English when it can't be)
+function withSdk(fn) {
+  return ready().then((ok) => {
+    if (!ok) throw fail('Couldn’t load the account service. Check your connection and try again; your games are still saved in this browser.');
+    return fn(root.HOFB);
+  });
+}
+const needUser = () => { if (!S.auth || !S.auth.currentUser) throw fail('Sign in first.'); return S.auth.currentUser; };
+
+// ---------- signing in ----------
+function google(link) {
+  return withSdk((F) => {
+    const p = new F.GoogleAuthProvider();
+    p.setCustomParameters({ prompt: 'select_account' });
+    const cur = S.auth.currentUser;
+    const go = link && cur ? F.linkWithPopup(cur, p) : F.signInWithPopup(S.auth, p);
+    return go.then(r => { refresh(); return r; }, (e) => {
+      // popups blocked (or not possible, as in some in-app browsers): the
+      // same sign-in by leaving the page and coming back
+      if (e && (e.code === 'auth/popup-blocked' || e.code === 'auth/operation-not-supported-in-environment')) {
+        store.sset('ho5.cloud.redirect', '1');
+        return (link && cur ? F.linkWithRedirect(cur, p) : F.signInWithRedirect(S.auth, p)).then(() => new Promise(() => {}));
+      }
+      throw e;
+    });
+  });
+}
+// the user's details after a link (the auth state doesn't change on a link)
+function refresh() { const u = S.auth && S.auth.currentUser; S.user = u ? describe(u) : null; if (u) store.set('ho5.cloud.name', S.user.name); for (const f of S.listeners.slice()) { try { f(S.user); } catch (e) {} } }
+
+const API = {
+  supported,
+  client: CLIENT,
+  MAX_DATA,
+  // the SDK started and the account known (see ready above)
+  ready,
+  loadSdk,
+  within,
+  errorText,
+  // the signed-in player, or null: { uid, anonymous, email, google, password, name }
+  get user() { return S.user; },
+  // true once the account state is known this visit
+  get known() { return S.known; },
+  // this browser was signed in last time (the name shown before the SDK is back)
+  get wasSignedIn() { return store.get('ho5.cloud.was') === '1'; },
+  get lastName() { return store.get('ho5.cloud.name'); },
+  // a sign-in by redirect that failed (shown once by the Account window)
+  takeRedirectError() { const e = S.redirectError; S.redirectError = null; return e || null; },
+  // fn(user) on every change of account (null: signed out)
+  onChange(fn) { S.listeners.push(fn); return () => { S.listeners = S.listeners.filter(f => f !== fn); }; },
+  signInGoogle: () => google(false),
+  // a guest keeps its uid, and so its saves and Hall entries, when it links
+  linkGoogle: () => google(true),
+  signInEmail: (email, pw) => withSdk(F => F.signInWithEmailAndPassword(S.auth, String(email).trim(), pw)),
+  createAccount: (email, pw) => withSdk(F => F.createUserWithEmailAndPassword(S.auth, String(email).trim(), pw)),
+  linkEmail: (email, pw) => withSdk(F => F.linkWithCredential(needUser(), F.EmailAuthProvider.credential(String(email).trim(), pw)).then(r => { refresh(); return r; })),
+  resetPassword: (email) => withSdk(F => F.sendPasswordResetEmail(S.auth, String(email).trim())),
+  signInGuest: () => withSdk(F => F.signInAnonymously(S.auth)),
+  signOut: () => withSdk(F => F.signOut(S.auth)).then(() => { store.set('ho5.cloud.was', null); store.set('ho5.cloud.name', null); }),
+};
+
+// ---------- saved games in the account (users/{uid}/saves/{id}) ----------
+// "Keep my saved games in my account too": on unless turned off (browser
+// only); the browser saves are kept either way
+API.keepSaves = () => store.get('ho5.cloud.saves') !== '0';
+API.setKeepSaves = (on) => store.set('ho5.cloud.saves', on ? '1' : '0');
+
+// a short fingerprint of a save, to skip uploading what is already there
+function hash(s) {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 0x01000193); }
+  return (h >>> 0).toString(16).padStart(8, '0') + '.' + s.length.toString(36);
+}
+API.hash = hash;
+const canGzip = () => typeof root.CompressionStream === 'function' && typeof root.DecompressionStream === 'function';
+function gzip(text) {
+  if (!canGzip()) return Promise.resolve({ enc: 'json', bytes: new TextEncoder().encode(text) });
+  return new Response(new Blob([text]).stream().pipeThrough(new root.CompressionStream('gzip'))).arrayBuffer().then(b => ({ enc: 'gzip', bytes: new Uint8Array(b) }));
+}
+function gunzip(bytes, enc) {
+  if (enc !== 'gzip') return Promise.resolve(new TextDecoder().decode(bytes));
+  return new Response(new Blob([bytes]).stream().pipeThrough(new root.DecompressionStream('gzip'))).text();
+}
+// a document id for a game: its ruleset and its id (G.gameId, set by the skin)
+API.saveId = (rules, gameId) => `${String(rules).replace(/[^A-Za-z0-9_-]/g, '')}-${String(gameId).replace(/[^A-Za-z0-9_-]/g, '')}`.slice(0, 64);
+
+const U = { fn: null, timer: 0, last: 0, busy: null, warned: {} };
+const sentKey = (uid) => 'ho5.cloud.sent.' + uid;
+function sentMap(uid) { try { return JSON.parse(store.get(sentKey(uid)) || '{}') || {}; } catch (e) { return {}; } }
+// upload one game: s = { id, rules, edition, year, player, galaxy, over, json, saved }
+// resolves 'sent', 'same' (nothing changed), 'big' (over the limit) or 'off'
+function upload(s, force) {
+  const u = S.auth && S.auth.currentUser;
+  if (!u || !API.keepSaves() || !s || !s.json) return Promise.resolve('off');
+  const F = root.HOFB, h = hash(s.json), sent = sentMap(u.uid);
+  if (!force && sent[s.id] === h) return Promise.resolve('same');
+  return gzip(s.json).then(({ enc, bytes }) => {
+    if (bytes.length > MAX_DATA) {
+      if (!U.warned[s.id]) { U.warned[s.id] = 1; if (API.onSaveProblem) API.onSaveProblem(`This game is too big to keep in your account (${Math.round(bytes.length / 1024)} KB compressed; the limit is ${Math.round(MAX_DATA / 1024)} KB). It is still saved in this browser.`); }
+      return 'big';
+    }
+    const data = { rules: String(s.rules).slice(0, 16), edition: String(s.edition || '').slice(0, 100), year: Math.round(+s.year || 0),
+      player: String(s.player || '').slice(0, 60), galaxy: String(s.galaxy || '').slice(0, 60), over: !!s.over,
+      updated: F.serverTimestamp(), saved: Math.round(+s.saved || Date.now()), size: bytes.length, raw: s.json.length,
+      enc, hash: h, data: F.Bytes.fromUint8Array(bytes), client: CLIENT };
+    return F.setDoc(F.doc(S.db, 'users', u.uid, 'saves', s.id), data).then(() => {
+      const m = sentMap(u.uid); m[s.id] = h; store.set(sentKey(u.uid), JSON.stringify(m));
+      return 'sent';
+    });
+  });
+}
+function flush() {
+  clearTimeout(U.timer); U.timer = 0;
+  const fn = U.fn; U.fn = null;
+  if (!fn || !S.auth || !S.auth.currentUser || !API.keepSaves()) return Promise.resolve('off');
+  let s = null; try { s = fn(); } catch (e) { return Promise.resolve('off'); }
+  U.last = Date.now();
+  const p = (U.busy || Promise.resolve()).then(() => upload(s)).catch((e) => { if (API.onSaveProblem && e && e.code === 'resource-exhausted') API.onSaveProblem(errorText(e)); return 'error'; });
+  U.busy = p;
+  return p;
+}
+// the skin's save(): fn() gives the game as it is now (called only when it
+// is uploaded); urgent (End Turn): now, else within a minute of the last one
+API.noteSave = (fn, urgent) => {
+  if (!S.user || !API.keepSaves()) return;
+  U.fn = fn;
+  const wait = U.last + MIN_GAP - Date.now();
+  if (urgent || wait <= 0) { flush(); return; }
+  if (!U.timer) U.timer = setTimeout(flush, wait);
+};
+API.flushSave = flush;
+API.uploadNow = (s) => withSdk(() => upload(s, true));
+// leaving the page (or hiding it: a phone may never come back) sends what is waiting
+if (supported && doc) {
+  doc.addEventListener('visibilitychange', () => { if (doc.visibilityState === 'hidden' && U.fn) flush(); });
+  root.addEventListener('pagehide', () => { if (U.fn) flush(); });
+}
+
+// the account's saves, newest first: [{ id, rules, edition, year, player, galaxy, over, saved, updated (ms), size }]
+API.listSaves = () => withSdk((F) => {
+  const u = needUser();
+  return F.getDocs(F.query(F.collection(S.db, 'users', u.uid, 'saves'), F.orderBy('updated', 'desc'))).then(q => q.docs.map((d) => {
+    const x = d.data();
+    return { id: d.id, rules: x.rules, edition: x.edition, year: x.year, player: x.player, galaxy: x.galaxy, over: !!x.over, saved: x.saved, hash: x.hash,
+      updated: x.updated && x.updated.toMillis ? x.updated.toMillis() : x.saved, size: x.size, _data: x.data, _enc: x.enc };
+  }));
+});
+// one save's text (the same JSON the browser keeps), or null when it isn't there
+API.getSave = (idOrEntry) => withSdk((F) => {
+  if (idOrEntry && idOrEntry._data) return gunzip(idOrEntry._data.toUint8Array(), idOrEntry._enc);
+  const u = needUser();
+  return F.getDoc(F.doc(S.db, 'users', u.uid, 'saves', idOrEntry)).then(d => d.exists() ? gunzip(d.data().data.toUint8Array(), d.data().enc) : null);
+});
+// one save's details without its data's text: { year, saved, hash } or null
+API.saveInfo = (id) => withSdk((F) => {
+  const u = needUser();
+  return F.getDoc(F.doc(S.db, 'users', u.uid, 'saves', id)).then(d => d.exists() ? { id, year: d.data().year, saved: d.data().saved, hash: d.data().hash, _data: d.data().data, _enc: d.data().enc } : null);
+});
+API.deleteSave = (id) => withSdk((F) => {
+  const u = needUser();
+  return F.deleteDoc(F.doc(S.db, 'users', u.uid, 'saves', id)).then(() => { const m = sentMap(u.uid); delete m[id]; store.set(sentKey(u.uid), JSON.stringify(m)); });
+});
+
+// ---------- the shared Hall of Fame (halls/{rules}/entries/{auto id}) ----------
+// The fields an entry may carry (js/rules-405.js hallEntry, js/rules-301.js
+// hallEntry301), each a whole number or a short word; anything else the
+// ruleset puts in an entry (3.0.1's Play Again options) stays on this computer.
+const HALL_FIELDS = ['humans', 'computers', 'shape', 'density', 'size', 'iq', 'year', 'allies', 'difficulty', 'yearsPerTurn', 'skill', 'armageddons', 'replays', 'time'];
+function decency() {
+  if (root.HODECENCY) return Promise.resolve(root.HODECENCY);
+  if (!decencyP) decencyP = loadScript('js/decency-words.js').then(() => loadScript('js/decency.js')).then(() => root.HODECENCY, () => { decencyP = null; return null; });
+  return decencyP;
+}
+API.decency = decency;
+const FALLBACK_NAME = 'Anonymous Cowboy';
+// post one entry: { rules, edition, kind: 'fame' | 'shame', entry, name };
+// resolves { name, renamed } (renamed: the name didn't pass the decency
+// filter and went up as "Anonymous Cowboy")
+API.postHall = (o) => withSdk(F => decency().then((D) => {
+  const u = needUser(), e = o.entry || {};
+  const raw = String(o.name == null ? e.name : o.name);
+  const name = D ? D.clean(raw, FALLBACK_NAME) : FALLBACK_NAME;
+  const kind = o.kind === 'shame' ? 'shame' : 'fame';
+  const data = { uid: u.uid, name, kind, rules: String(o.rules).slice(0, 16), edition: String(o.edition || '').slice(0, 100), client: CLIENT, createdAt: F.serverTimestamp() };
+  for (const k of HALL_FIELDS) {
+    const v = e[k];
+    if (typeof v === 'number' && isFinite(v)) data[k] = k === 'difficulty' ? v : Math.round(v);
+    else if (typeof v === 'string' && k !== 'time' && v.length <= 16) data[k] = v;
+  }
+  if (typeof data.difficulty !== 'number') data.difficulty = 0;
+  if (typeof data.time !== 'number') data.time = Math.floor(Date.now() / 1000);
+  // a field only this kind has, so each list is one query on one field
+  // (no composite index to make): fameAt / fameDifficulty, shameAt / shameDifficulty
+  data[kind + 'At'] = F.serverTimestamp();
+  data[kind + 'Difficulty'] = data.difficulty;
+  return F.addDoc(F.collection(S.db, 'halls', data.rules, 'entries'), data).then(d => ({ id: d.id, name, renamed: name !== raw.trim() }));
+}));
+// the 25 best (order 'top': highest difficulty) or newest entries of a
+// ruleset's Hall of Fame or Shame, each name passed through the filter
+// again (a client can be changed; the rules can't read names)
+API.hallTop = (rules, kind, order) => withSdk(F => decency().then((D) => {
+  kind = kind === 'shame' ? 'shame' : 'fame';
+  const q = F.query(F.collection(S.db, 'halls', String(rules), 'entries'), F.orderBy(kind + (order === 'top' ? 'Difficulty' : 'At'), 'desc'), F.limit(25));
+  return F.getDocs(q).then(r => r.docs.map((d) => {
+    const x = Object.assign({ id: d.id }, d.data());
+    x.name = D ? D.clean(x.name, FALLBACK_NAME) : FALLBACK_NAME;
+    x.mine = !!(S.user && x.uid === S.user.uid);
+    return x;
+  }));
+}));
+// an admin's removal (firestore.rules: /admins/{uid} documents only)
+API.deleteHall = (rules, id) => withSdk(F => F.deleteDoc(F.doc(S.db, 'halls', String(rules), 'entries', id)));
+
+// start-up: a browser that was signed in brings its account back once the
+// page has loaded (and only then, so nothing slows the game's own start)
+if (supported && (store.get('ho5.cloud.was') === '1' || store.sget('ho5.cloud.redirect'))) {
+  const go = () => setTimeout(() => { ready(); }, 300);
+  if (doc.readyState === 'complete') go(); else root.addEventListener('load', go);
+}
+root.HOCLOUD = API;
+})(this);

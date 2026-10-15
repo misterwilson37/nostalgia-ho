@@ -1576,6 +1576,7 @@ function renderMsg() {
         winPending() ? el('button', { onclick: () => openWinWindows(renderMsg) }, HO.rules(G).conquered && !G.conqueredSeen ? 'You won…' : 'Name a star…') : null, ' ',
         el('button', { onclick: newGameDialog }, 'New game'), ' ',
         el('button', { class: 'quiet', onclick: () => openFeedback('game') }, 'Tell us how it went'))));
+    maybeHallOffer();
     return;
   }
   if (UI.msgIdx < UI.inbox.length) {
@@ -1621,13 +1622,13 @@ function renderMsg() {
       const im = IMG[T.endTurnPic], H = (im && im.height) || Y[4];
       btn.append(el('span', { class: 'clockyear', 'aria-hidden': 'true', style: `left:${Y[0] / Y[4] * 100}%;top:${Y[1] / H * 100}%;width:${Y[2] / Y[4] * 100}%;height:${Y[3] / H * 100}%` }, String(G.year)));
     }
-    box.append(btn); clockTime();
+    box.append(btn); clockTime(); maybeHallOffer();
     return;
   }
   const clock = el('button', { class: 'clock', onclick: doEndTurn, 'aria-label': 'End turn', 'aria-keyshortcuts': 'T', 'data-help': 'endTurn', 'data-key': END_KEY() },
     el('span', { class: 'face', html: '<svg viewBox="0 0 40 40" width="34" height="34" aria-hidden="true"><circle cx="20" cy="20" r="17" fill="#fffef6" stroke="#222" stroke-width="2.5"/><path d="M20 20V8M20 20l8 5" stroke="#222" stroke-width="3" stroke-linecap="round"/></svg>' }),
     el('span', null, 'End turn'));
-  box.append(clock); clockTime();
+  box.append(clock); clockTime(); maybeHallOffer();
 }
 // ---------- ranks and master points ----------
 // The original keeps a record of your wins. Each win in an Original-rules
@@ -1760,8 +1761,12 @@ function recordHall() {
     if (!won && !H.out(G, p)) continue;
     const e = H.entry(G, p, won);
     e.time = Math.floor(Date.now() / 1000);
+    // (a copy: hall.record keeps the entry it is given)
+    const shared = Object.assign({}, e);
     try { localStorage.setItem(hallKey(G), JSON.stringify(H.record(hallTables(G), e, won))); } catch (err) {}
     done[p.id] = 1;
+    // the shared Hall too, when signed in (else the offer, once the game's own windows are done)
+    cloudHall({ rules: G.rules, edition: editionLabel(G.rules), kind: won ? 'fame' : 'shame', entry: shared, name: p.name });
   }
 }
 // a list box: rows of cells laid out on the window's tab stops (--cols),
@@ -1786,19 +1791,32 @@ const hallHeads = (names, cols) => el('div', { class: 'lbhead', style: `--cols: 
 // FUN_0049883d): "Hall of Fame" or "Hall of Shame"; Name, When, Difficulty
 // on the list's tab stops (92, 209); the first row selected; Details (dimmed
 // with no entries) opens the Summary of the selected game.
-function openHall(kind, at) {
+function openHall(kind, at, everyone) {
   if (!hasHall(G)) return;
-  const H = HO.rules(G).hall, list = hallTables(G)[kind === 'shame' ? 'shame' : 'fame'], W = H.words || {};
+  const H = HO.rules(G).hall, local = hallTables(G)[kind === 'shame' ? 'shame' : 'fame'], W = H.words || {};
   // hall.words (3.0.1): the version's own titles and heads; hall.again: Play Again's New Game options
   const title = (kind === 'shame' ? W.shame : W.fame) || (kind === 'shame' ? 'Hall of Shame' : 'Hall of Fame'), cols = '92fr 117fr 71fr';
+  everyone = !!(everyone && CLOUD);
+  let list = everyone ? [] : local;
   let sel = Math.min(at | 0, Math.max(0, list.length - 1));
-  const details = () => { const i = sel; if (list[i]) openHallSummary(list[i], kind, () => openHall(kind, i)); };
-  const again = H.again && el('button', { class: 'quiet', disabled: !list.length, onclick: () => { const o = list[sel] && H.again(list[sel]); if (o) closeModal(), playAgain(o); } }, W.playAgain || 'Play Again');
+  const details = () => { const i = sel; if (list[i]) openHallSummary(list[i], kind, () => openHall(kind, everyone ? 0 : i, everyone)); };
+  const detailsBtn = el('button', { class: 'quiet', disabled: !list.length, onclick: details }, 'Details');
+  const again = H.again && !everyone && el('button', { class: 'quiet', disabled: !list.length, onclick: () => { const o = list[sel] && H.again(list[sel]); if (o) closeModal(), playAgain(o); } }, W.playAgain || 'Play Again');
+  // online (js/cloud.js): this computer's Hall, as the version kept it, or
+  // the one everyone shares for this ruleset (newest or best 25)
+  const radio = (label, on, go) => el('label', { class: 'chk' }, el('input', { type: 'radio', name: 'hallwhere', checked: on ? 'checked' : false, onchange: go }), el('span', null, label));
+  const order = everyone ? el('select', { 'aria-label': 'Which games', onchange: (e) => { UI.hallOrder = e.target.value; openHall(kind, 0, true); } },
+    el('option', { value: 'new', selected: UI.hallOrder !== 'top' ? 'selected' : false }, 'Newest'), el('option', { value: 'top', selected: UI.hallOrder === 'top' ? 'selected' : false }, 'Best (highest difficulty)')) : null;
+  const where = CLOUD ? el('div', { class: 'hwhere', role: 'radiogroup', 'aria-label': 'Whose games' },
+    radio('This computer', !everyone, () => openHall(kind, 0, false)), radio('Everyone', everyone, () => openHall(kind, 0, true)), order) : null;
+  const box = el('div', { class: 'hbox' });
+  if (everyone) hallEveryone(kind, H, cols, box, UI.hallOrder === 'top' ? 'top' : 'new', (L, i, open) => { list = L; sel = i | 0; detailsBtn.disabled = !L.length; if (open) details(); });
+  else box.append(hallListBox(list.map(e => [e.name, H.date(e.time, G), String(e.difficulty)]), cols, sel, (i) => { sel = i; }, (i) => { sel = i; details(); }));
   const body = el('div', { class: 'hall hall-list' },
-    el('div', { class: 'htitle' }, title),
+    el('div', { class: 'htitle' }, title), where,
     hallHeads(W.heads || ['Name', 'When', 'Difficulty'], cols),
-    hallListBox(list.map(e => [e.name, H.date(e.time, G), String(e.difficulty)]), cols, sel, (i) => { sel = i; }, (i) => { sel = i; details(); }),
-    el('div', { class: 'btns' }, el('button', { class: 'quiet', disabled: !list.length, onclick: details }, 'Details'), again, el('button', { onclick: closeModal }, 'OK')));
+    box,
+    el('div', { class: 'btns' }, detailsBtn, again, el('button', { onclick: closeModal }, 'OK')));
   modal((kind === 'shame' ? W.shameTitle : W.fameTitle) || title, body, { cls: 'mid hallwin' });
 }
 // Play Again (3.0.1, hall.again): the same galaxy, from its seed, with you as
@@ -1873,7 +1891,7 @@ function doEndTurn(confirmed) {
     if (!G.done.includes(ME)) G.done.push(ME);
     const next = seatOrder().find(p => !G.done.includes(p.id));
     Sound.play(11111);
-    if (next) { G.cur = next.id; save(); handOver(next); return; }
+    if (next) { G.cur = next.id; save(true); handOver(next); return; }
     G.done = [];
   }
   if (!playTurn('End Turn', before)) return;
@@ -1881,8 +1899,8 @@ function doEndTurn(confirmed) {
   recordHall();
   Sound.play(11111);
   for (const p of HO.humans(G)) addTurnNotes(p);
-  if (hotSeat()) { const first = seatOrder()[0] || me(); G.cur = first.id; save(); handOver(first); return; }
-  save();
+  if (hotSeat()) { const first = seatOrder()[0] || me(); G.cur = first.id; save(true); handOver(first); return; }
+  save(true);
   // keep selection valid
   if (UI.selFleet != null && !G.fleets.some(f => f.id === UI.selFleet)) UI.selFleet = null;
   renderPanel(); draw();
@@ -3866,6 +3884,7 @@ function openSavedGames(id) {
   const download = (g) => {
     const a = el('a', { href: URL.createObjectURL(new Blob([g.data], { type: 'application/json' })), download: `${g.galaxy} ${g.year}.hogame`.replace(/[\\/:*?"<>|]+/g, '-') });
     document.body.append(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+    maybeSaveOffer();
   };
   const del = (g) => confirmBox(`Delete the game in ${g.galaxy} (${g.year})?`, () => {
     try { localStorage.setItem(gamesKey(id), JSON.stringify(savedGames(id).filter(x => x.id !== g.id))); } catch (e) {}
@@ -3877,7 +3896,9 @@ function openSavedGames(id) {
     el('button', { class: 'quiet', onclick: () => del(g) }, 'Delete')));
   screen(S.savedGames || 'Saved Games', el('div', null,
     L.length ? el('ul', { class: 'slist' }, ...rows) : el('p', { class: 'sub' }, 'No saved games yet.'),
-    el('div', { class: 'btns' }, el('button', { class: 'quiet', onclick: () => fileIn.click() }, 'Open a downloaded game…'), fileIn)), { cls: 'saved' });
+    el('div', { class: 'btns' }, el('button', { class: 'quiet', onclick: () => fileIn.click() }, 'Open a downloaded game…'),
+      CLOUD ? el('button', { class: 'quiet', onclick: () => openAccountSaves() }, 'Account saves…') : null, fileIn)), { cls: 'saved' });
+  maybeSaveOffer();
 }
 function openHelpScreen() {
   const [url, name] = manualFor();
@@ -3917,6 +3938,290 @@ function titleScreens() {
   if (S.gameCenterButtons && GC && GC.leaderboards.length) b.append(mk('Achievements', () => openGameCenterScreen('achievements')), mk('Leaderboards', () => openGameCenterScreen('leaderboards')));
 }
 
+// ----- online: the account, saves kept in it, the shared Hall (js/cloud.js) -----
+// Everything here is optional and fails soft. With no HOCLOUD (the
+// single-file build, a page opened from disk) none of it shows; with it, the
+// Firebase SDK is fetched only when the player asks for something online
+// (Account, Account saves, the Hall's Everyone list) or at one of the two
+// offers below, or at start-up when this browser was signed in before. A
+// player who never signs in plays exactly as before: browser saves only, no
+// account made behind their back, no nagging. The browser saves ("ho5.save",
+// the Saved Games slots) are kept as they always were, signed in or not: they
+// are the offline option.
+//
+// Two offers, and only these, may suggest signing in, each at a moment that
+// can't surprise: a game put in this computer's Hall of Fame or Shame (after
+// the end of the game's own windows: "Put this game in the Hall everyone
+// sees?") and a deliberate save (the Saved Games window, its Download). Each
+// has a "Don't ask again" ("ho5.cloud.offer.<kind>"), is shown at most once a
+// visit, never during a battle or on page load, never once signed in, and
+// not at all when the SDK can't be loaded.
+const CLOUD = window.HOCLOUD && HOCLOUD.supported ? HOCLOUD : null;
+const cloudUser = () => (CLOUD && CLOUD.user) || null;
+const lsGet = (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+const lsSet = (k, v) => { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) {} };
+// "Google", "email", "guest": how the account signs in
+const accountKind = (u) => u.anonymous ? 'a guest account (no email)' : u.google && u.password ? 'Google and email' : u.google ? 'Google' : 'email and password';
+const dateText = (ms) => { try { return new Date(ms).toLocaleString(); } catch (e) { return ''; } };
+
+// the title screen's account button, under the skin and look pickers
+function titleAccount() {
+  if (!CLOUD) return;
+  let b = $('#tacct');
+  if (!b) {
+    const card = $('#titlescreen .tcard'); if (!card) return;
+    b = el('button', { id: 'tacct', class: 'quiet tacct', type: 'button', onclick: () => openAccount() });
+    const at = card.querySelector('.credit');
+    const p = el('p', { class: 'tacctp' }, b);
+    if (at) at.before(p); else card.append(p);
+    CLOUD.onChange(() => titleAccount());
+  }
+  const u = cloudUser(), name = u ? u.name : CLOUD.wasSignedIn && !CLOUD.known ? CLOUD.lastName : null;
+  b.textContent = name ? `Account: ${name}` : 'Sign in';
+  b.setAttribute('aria-label', name ? `Account: signed in as ${name}` : 'Sign in to keep saved games in an account and share the Hall of Fame');
+}
+
+// the sign-in form: Google, email and password (sign in, create, forgot),
+// guest. link: a guest adding Google or an email keeps its uid (and so its
+// saves and Hall entries). after(user): what to do once signed in.
+function signInForm(o) {
+  o = o || {};
+  const link = !!o.link;
+  const status = el('p', { class: 'sub cloudmsg', role: 'alert' });
+  const say = (t) => { status.textContent = t || ''; };
+  const busy = (on) => f.querySelectorAll('button, input').forEach(x => { x.disabled = on; });
+  const done = (u) => { busy(false); if (o.after) o.after(u || cloudUser()); };
+  const run = (p, okText) => { busy(true); say('Working…'); return p.then((r) => { say(okText || ''); done(); return r; }, (e) => { busy(false); say(CLOUD.errorText(e)); }); };
+  const email = el('input', { type: 'email', name: 'email', autocomplete: 'email', placeholder: 'you@example.com', 'aria-label': 'Email' });
+  const pw = el('input', { type: 'password', name: 'password', autocomplete: link ? 'new-password' : 'current-password', placeholder: 'Password (6 letters or more)', 'aria-label': 'Password' });
+  const f = el('form', { class: 'cloudform', onsubmit: (e) => { e.preventDefault(); } },
+    el('p', null, link
+      ? 'Add Google or an email and password to this guest account. It keeps everything it has: its saved games and its Hall entries.'
+      : 'An account keeps your saved games, so they follow you to another computer, and puts your wins and losses in the Hall of Fame everyone sees. The game plays just the same without one.'),
+    el('div', { class: 'btns' }, el('button', { type: 'button', onclick: () => run(link ? CLOUD.linkGoogle() : CLOUD.signInGoogle()) }, link ? 'Add a Google account' : 'Sign in with Google')),
+    el('p', { class: 'sub' }, link ? 'Or an email and a password:' : 'Or with an email and a password:'),
+    el('label', { class: 'cfield' }, el('span', null, 'Email'), email),
+    el('label', { class: 'cfield' }, el('span', null, 'Password'), pw),
+    el('div', { class: 'btns' },
+      link ? el('button', { type: 'button', onclick: () => run(CLOUD.linkEmail(email.value, pw.value)) }, 'Add this email')
+        : [el('button', { type: 'button', onclick: () => run(CLOUD.signInEmail(email.value, pw.value)) }, 'Sign in'),
+          el('button', { type: 'button', class: 'quiet', onclick: () => run(CLOUD.createAccount(email.value, pw.value)) }, 'Create account'),
+          el('button', { type: 'button', class: 'quiet', onclick: () => {
+            if (!email.value.trim()) { say('Type your email address above, then click Forgot password again.'); return; }
+            busy(true); say('Working…');
+            CLOUD.resetPassword(email.value).then(() => { busy(false); say(`If there is an account for ${email.value.trim()}, an email with a link to choose a new password is on its way.`); }, (e) => { busy(false); say(CLOUD.errorText(e)); });
+          } }, 'Forgot password?')]),
+    link ? null : el('p', { class: 'sub' }, 'No email? Play as a guest: an account just for this browser. Add Google or an email to it later to keep it; a guest account that never gets one is deleted after 30 days.'),
+    link ? null : el('div', { class: 'btns' }, el('button', { type: 'button', class: 'quiet', onclick: () => run(CLOUD.signInGuest()) }, 'Play as a guest')),
+    status);
+  return f;
+}
+
+// The Account window (the title's button, the Ho menu's Account…): who is
+// signed in, the saves preference, Account saves…, a guest's upgrade, sign out
+function openAccount(o) {
+  if (!CLOUD) return;
+  o = o || {};
+  const body = el('div', { class: 'account' }, el('p', { class: 'sub' }, 'Connecting…'));
+  modal('Account', body, { cls: 'small' });
+  CLOUD.ready().then((ok) => {
+    if (!body.isConnected) return;
+    body.innerHTML = '';
+    if (!ok) { body.append(el('p', null, 'Couldn’t load the account service. Check your connection and try again. Your games are saved in this browser either way.'), el('div', { class: 'btns right' }, el('button', { onclick: closeModal }, 'OK'))); return; }
+    const u = cloudUser(), err = CLOUD.takeRedirectError();
+    if (err) body.append(el('p', { class: 'cloudmsg', role: 'alert' }, err));
+    if (!u) {
+      body.append(signInForm({ after: (nu) => { if (o.after) { closeModal(); o.after(nu); } else openAccount(); } }));
+      return;
+    }
+    const keep = el('input', { type: 'checkbox', checked: CLOUD.keepSaves() ? 'checked' : false, onchange: (e) => { CLOUD.setKeepSaves(e.target.checked); if (e.target.checked && G) save(); } });
+    body.append(
+      el('p', null, 'Signed in as ', el('b', null, u.name), u.anonymous ? '' : ` (${accountKind(u)})`, u.anonymous ? ': a guest account, for this browser only.' : '.'),
+      u.email && u.name !== u.email ? el('p', { class: 'sub' }, u.email) : null,
+      el('label', { class: 'chk' }, keep, el('span', null, 'Keep my saved games in my account too (off: in this browser only)')),
+      el('p', { class: 'sub' }, 'Games are always saved in this browser as well, so they play offline. In the account they are sent at End Turn, when you leave the page, and at most once a minute in between.'),
+      u.anonymous ? el('div', { class: 'guestup' }, el('p', { class: 'sub' }, 'A guest account is deleted after 30 days unless you add Google or an email to it. Adding one keeps its games and Hall entries.'),
+        el('div', { class: 'btns' }, el('button', { type: 'button', onclick: () => { body.innerHTML = ''; body.append(signInForm({ link: true, after: () => openAccount(o) })); } }, 'Keep this account…'))) : null,
+      el('div', { class: 'btns' },
+        el('button', { type: 'button', onclick: () => openAccountSaves() }, 'Account saves…'),
+        el('button', { type: 'button', class: 'quiet', onclick: () => confirmBox(u.anonymous ? 'Sign out of the guest account? A guest can’t sign in again: its saved games in the account will be out of reach (they stay in this browser).' : 'Sign out? Your games stay saved in this browser.', () => {
+          CLOUD.flushSave(); CLOUD.signOut().then(() => toast('Signed out.'), (e) => toast(CLOUD.errorText(e)));
+        }) }, 'Sign out')),
+      el('div', { class: 'btns right' }, el('button', { onclick: closeModal }, 'OK')));
+    if (o.after) { const f = o.after; o.after = null; f(u); }
+  });
+}
+
+// ----- saves in the account -----
+// save() hands the game over each time; js/cloud.js sends it at End Turn
+// (urgent), when the page is hidden, and at most once a minute otherwise,
+// and only when it has changed. The browser copy's time ("ho5.save.when")
+// tells Continue whether the account's copy is newer.
+function cloudNoteSave(json, urgent) {
+  if (!CLOUD || !cloudUser() || !G || !G.gameId) return;
+  const p = G.players[ME] || G.players[0];
+  const s = { id: CLOUD.saveId(G.rules, G.gameId), rules: G.rules, edition: editionLabel(G.rules), year: G.year, player: p ? p.name : '',
+    galaxy: (G.opts && G.opts.galaxy) || '', over: !!G.over, json, saved: Date.now() };
+  CLOUD.noteSave(() => s, urgent);
+}
+if (CLOUD) CLOUD.onSaveProblem = (t) => toast(t);
+// Open a game's text: the browser copy is replaced, as Saved Games does
+function openGameText(t, when) {
+  try { HO.load(t); } catch (x) { toast('That saved game can’t be read by this version of the remake.'); return false; }
+  if (G) save();
+  localStorage.setItem('ho5.save', t); lsSet('ho5.save.when', String(when || Date.now()));
+  closeModal(); closeScreen(); continueGame();
+  return true;
+}
+const gameFileName = (g) => `${g.galaxy || 'Spaceward Ho'} ${g.year}.hogame`.replace(/[\\/:*?"<>|]+/g, '-');
+// The Account saves window: every game kept in the account, newest first,
+// for every ruleset: Open, Download (the .hogame file Saved Games gives),
+// Delete; and "Save this game to the account now"
+function openAccountSaves() {
+  if (!CLOUD) return;
+  if (!cloudUser()) { openAccount({ after: () => openAccountSaves() }); return; }
+  const body = el('div', { class: 'acsaves' }, el('p', { class: 'sub' }, 'Loading your saved games…'));
+  modal('Account saves', body, { cls: 'mid' });
+  const fill = () => CLOUD.listSaves().then((L) => {
+    if (!body.isConnected) return;
+    body.innerHTML = '';
+    const now = G && G.gameId ? CLOUD.saveId(G.rules, G.gameId) : null;
+    const rows = L.map(g => el('li', { class: 'acsave' + (g.id === now ? ' cur' : '') },
+      el('div', { class: 'acinfo' }, el('b', null, g.galaxy || 'Galaxy'), ' ', el('span', null, `${g.player || ''} · ${g.over ? 'over in' : 'year'} ${g.year}${g.id === now ? ' · playing now' : ''}`),
+        el('br'), el('small', null, `${g.edition || g.rules} · ${dateText(g.updated)} · ${Math.max(1, Math.round((g.size || 0) / 1024))} KB`)),
+      el('span', { class: 'btns' },
+        el('button', { type: 'button', onclick: () => CLOUD.getSave(g).then(t => t ? openGameText(t, g.saved) : toast('That game is no longer in the account.'), e => toast(CLOUD.errorText(e))) }, 'Open'),
+        el('button', { type: 'button', class: 'quiet', onclick: () => CLOUD.getSave(g).then(t => { if (t) downloadText(t, gameFileName(g)); }, e => toast(CLOUD.errorText(e))) }, 'Download'),
+        el('button', { type: 'button', class: 'quiet', onclick: () => confirmBox(`Delete the game in ${g.galaxy || 'this galaxy'} (${g.year}) from your account? A copy in this browser stays.`, () => {
+          CLOUD.deleteSave(g.id).then(() => { toast('Deleted from your account.'); openAccountSaves(); }, e => toast(CLOUD.errorText(e)));
+        }) }, 'Delete'))));
+    body.append(
+      L.length ? el('ul', { class: 'aclist' }, ...rows) : el('p', { class: 'sub' }, 'No games in your account yet.'),
+      CLOUD.keepSaves() ? null : el('p', { class: 'sub' }, 'Keeping saved games in the account is off (Account…), so new games stay in this browser only.'),
+      el('div', { class: 'btns right' },
+        G ? el('button', { type: 'button', class: 'quiet', onclick: () => {
+          save();
+          const p = G.players[ME] || G.players[0];
+          CLOUD.uploadNow({ id: CLOUD.saveId(G.rules, G.gameId), rules: G.rules, edition: editionLabel(G.rules), year: G.year, player: p ? p.name : '', galaxy: (G.opts && G.opts.galaxy) || '', over: !!G.over, json: HO.save(G), saved: Date.now() })
+            .then((r) => { if (r === 'big') return; toast(r === 'off' ? 'Sign in first.' : 'This game is saved in your account.'); if (body.isConnected) openAccountSaves(); }, e => toast(CLOUD.errorText(e)));
+        } }, 'Save this game to the account now') : null,
+        el('button', { type: 'button', onclick: closeModal }, 'OK')));
+  }, (e) => { if (body.isConnected) { body.innerHTML = ''; body.append(el('p', null, CLOUD.errorText(e)), el('div', { class: 'btns right' }, el('button', { onclick: closeModal }, 'OK'))); } });
+  fill();
+}
+// Continue: when this browser's game has a copy in the account that is newer
+// (played on another computer), ask which to play. Gives up after 5 seconds
+// (or with no network) and plays this browser's copy.
+function continueChecked() {
+  const raw = lsGet('ho5.save');
+  if (!CLOUD || !raw || !(cloudUser() || CLOUD.wasSignedIn) || !CLOUD.keepSaves()) { continueGame(); return; }
+  let g0 = null; try { g0 = JSON.parse(raw); } catch (e) {}
+  if (!g0 || !g0.gameId) { continueGame(); return; }
+  const id = CLOUD.saveId(g0.rules, g0.gameId), when = +lsGet('ho5.save.when') || 0;
+  const btn = $('#tcont'); if (btn) btn.disabled = true;
+  const go = (f) => { if (btn) btn.disabled = false; f(); };
+  CLOUD.within(CLOUD.ready().then(ok => ok && cloudUser() ? CLOUD.saveInfo(id) : null).catch(() => null), 5000, null).then((c) => {
+    const newer = c && c.hash !== CLOUD.hash(raw) && (c.year > g0.year || (c.year === g0.year && c.saved > when + 2000));
+    if (!newer) { go(() => continueGame()); return; }
+    go(() => {
+      const body = el('div', null,
+        el('p', null, `The copy of this game in your account is newer: the year ${c.year}, saved ${dateText(c.saved)}, probably on another computer. This browser’s copy is the year ${g0.year}${when ? `, saved ${dateText(when)}` : ''}.`),
+        el('p', { class: 'sub' }, 'The one you don’t choose is replaced the next time the game is saved.'),
+        el('div', { class: 'btns right' },
+          el('button', { type: 'button', class: 'quiet', onclick: () => { closeModal(); continueGame(); } }, 'This browser’s copy'),
+          el('button', { type: 'button', onclick: () => CLOUD.getSave(c).then(t => { if (!t || !openGameText(t, c.saved)) { closeModal(); continueGame(); } }, (e) => { toast(CLOUD.errorText(e)); closeModal(); continueGame(); }) }, 'The account’s copy')));
+      modal('Which copy?', body, { cls: 'small', sticky: true });
+    });
+  });
+}
+
+// ----- the shared Hall of Fame -----
+// recordHall's entries, posted when signed in; otherwise kept for the offer
+UI.hallWaiting = [];
+function cloudHall(rec) {
+  if (!CLOUD) return;
+  if (cloudUser()) { postHallEntry(rec); return; }
+  if (offerAllowed('hall')) UI.hallWaiting.push(rec);
+}
+function postHallEntry(rec) {
+  return CLOUD.postHall(rec).then((r) => {
+    // the name didn't pass js/decency.js: said once a name
+    if (r && r.renamed && lsGet('ho5.cloud.renamed') !== r.name + '|' + rec.name) {
+      lsSet('ho5.cloud.renamed', r.name + '|' + rec.name);
+      toast(`“${rec.name}” can’t go on the Hall everyone sees, so your game is there as “${r.name}”.`);
+    }
+    return r;
+  }, () => null);
+}
+const offerKey = (kind) => 'ho5.cloud.offer.' + kind;
+UI.offered = {};
+function offerAllowed(kind) {
+  return !!CLOUD && !cloudUser() && !CLOUD.wasSignedIn && lsGet(offerKey(kind)) !== 'no' && !UI.offered[kind] && navigator.onLine !== false;
+}
+// nothing else on screen: no window, no battle, no screen, the title hidden
+const quietMoment = () => !UI.modal && !UI.screen && !document.querySelector('.scrim') && $('#titlescreen') && $('#titlescreen').hidden;
+// The offer itself: text, then Sign in / Play as a guest / Not now and
+// "Don't ask again". then(user) runs once signed in either way.
+function showOffer(kind, title, text, then, no) {
+  if (!offerAllowed(kind)) return;
+  UI.offered[kind] = true;
+  // the SDK first, so an offer that can't be taken up is never shown
+  CLOUD.within(CLOUD.loadSdk(), 8000, false).then((ok) => {
+    if (!ok || cloudUser() || UI.modal) return;
+    const never = el('input', { type: 'checkbox' });
+    const remember = () => { if (never.checked) lsSet(offerKey(kind), 'no'); };
+    const status = el('p', { class: 'sub cloudmsg', role: 'alert' });
+    const body = el('div', { class: 'offer' }, el('p', null, text),
+      el('p', { class: 'sub' }, 'A guest account needs no email; add one later to keep it.'),
+      el('label', { class: 'chk' }, never, el('span', null, 'Don’t ask again')), status,
+      el('div', { class: 'btns right' },
+        el('button', { type: 'button', class: 'quiet', onclick: () => { remember(); closeModal(); if (no) no(); } }, 'Not now'),
+        el('button', { type: 'button', class: 'quiet', onclick: (e) => {
+          remember(); e.target.disabled = true; status.textContent = 'Working…';
+          CLOUD.signInGuest().then(() => { closeModal(); then(cloudUser()); }, (er) => { e.target.disabled = false; status.textContent = CLOUD.errorText(er); });
+        } }, 'Play as a guest'),
+        el('button', { type: 'button', onclick: () => { remember(); closeModal(); openAccount({ after: (u) => { if (u) then(u); } }); } }, 'Sign in')));
+    modal(title, body, { cls: 'small' });
+  });
+}
+// (a) after a game goes in this computer's Hall, once the game's own
+// end-of-game windows are done (renderMsg calls this when nothing is left)
+function maybeHallOffer() {
+  if (!CLOUD || !UI.hallWaiting.length || cloudUser()) return;
+  setTimeout(() => {
+    if (!UI.hallWaiting.length || !quietMoment() || (G && G.over && winPending())) return;
+    const rec = UI.hallWaiting[UI.hallWaiting.length - 1], hall = rec.kind === 'shame' ? 'Hall of Shame' : 'Hall of Fame';
+    showOffer('hall', hall, `Put this game in the ${hall} everyone sees? Your name and the game’s settings go on the shared ${hall} for ${rec.edition}.`, () => {
+      const L = UI.hallWaiting.splice(0);
+      Promise.all(L.map(postHallEntry)).then(rs => { if (rs.some(Boolean)) toast(`Your game is in the ${hall} everyone sees.`); });
+    }, () => { UI.hallWaiting = []; }); // Not now: nothing is posted
+  }, 600);
+}
+// (b) a deliberate save: the Saved Games window, its Download
+function maybeSaveOffer() {
+  if (!CLOUD) return;
+  setTimeout(() => {
+    if (!offerAllowed('saves') || UI.modal || document.querySelector('.battle')) return;
+    showOffer('saves', 'Saved games', 'Keep your saved games in an account too, so they follow you to another computer?', () => { CLOUD.setKeepSaves(true); if (G) save(); toast('Your saved games will be kept in your account too.'); });
+  }, 400);
+}
+// a sign-in from anywhere posts what the Hall offer was holding
+if (CLOUD) CLOUD.onChange((u) => { if (u && UI.hallWaiting.length) { const L = UI.hallWaiting.splice(0); L.forEach(postHallEntry); } });
+
+// The Hall window's Everyone list: the 25 newest or best entries of this
+// ruleset's shared Hall, in the version's own columns
+function hallEveryone(kind, H, cols, box, order, onRows) {
+  box.innerHTML = '';
+  box.append(el('p', { class: 'sub' }, 'Loading the Hall everyone shares…'));
+  CLOUD.hallTop(G.rules, kind, order).then((L) => {
+    box.innerHTML = '';
+    onRows(L);
+    box.append(hallListBox(L.map(e => [e.name + (e.mine ? ' (you)' : ''), H.date(e.time, G), String(e.difficulty)]), cols, 0, (i) => onRows(L, i), (i) => onRows(L, i, true)));
+    if (!L.length) box.append(el('p', { class: 'sub' }, 'Nobody is in it yet.'));
+    if (!cloudUser()) box.append(el('p', { class: 'sub' }, 'Sign in, or play as a guest, to add your games here.'));
+  }, (e) => { box.innerHTML = ''; box.append(el('p', { class: 'sub' }, CLOUD.errorText(e))); onRows([]); });
+}
+
 // ----- new game / title -----
 function titleScreen() {
   const t = $('#titlescreen');
@@ -3929,6 +4234,7 @@ function titleScreen() {
   if (here) $('#tname').textContent = `Spaceward Ho! ${here.name}`;
   titlePickers();
   titleScreens();
+  titleAccount();
   applySounds(); // no game: the skin's own sounds
   let i = 0;
   clearInterval(UI.anim);
@@ -4244,12 +4550,22 @@ function continueGame(resumed) {
     showMessages();
   });
 }
-function save() { if (!G) return; try { localStorage.setItem('ho5.save', HO.save(G)); } catch (e) {} saveSlot(); }
+// urgent (End Turn): the account's copy goes now, not within the minute
+function save(urgent) {
+  if (!G) return;
+  // every game has an id (its creation time), which names its slot in Saved
+  // Games and its copy in the account
+  if (!G.gameId) G.gameId = Date.now();
+  const json = HO.save(G);
+  try { localStorage.setItem('ho5.save', json); localStorage.setItem('ho5.save.when', String(Date.now())); } catch (e) {}
+  saveSlot();
+  cloudNoteSave(json, urgent === true);
+}
 
 // ---------- menus ----------
 function setupMenus() {
   const menus = {
-    Game: [['New game…', newGameDialog], [() => (G && HO.rules(G).switchPlayers) || 'End turn and switch players', () => switchPlayers(), () => !!(G && HO.rules(G).switchPlayers && hotSeat())], ['Players and history', () => G && openPlayers()], ['Auto-play this turn', () => playOneTurn()], ['Auto play…', () => G && !G.over && (hotSeat() ? toast('Auto play is for one-player games.') : openAutoPlay())], ['Preferences…', openPrefs], ['Saved games…', () => openSavedGames(), () => !!(screensOf(rulesId()) || {}).savedGames], ['Rank history…', openRanks, () => !G || hasRanks(G)], [() => ((HO.RULESETS[rulesId()] || {}).gameCenter || {}).menu || 'Rank and Game Center…', openGameCenter, () => !!(HO.RULESETS[rulesId()] || {}).gameCenter],
+    Game: [['New game…', newGameDialog], [() => (G && HO.rules(G).switchPlayers) || 'End turn and switch players', () => switchPlayers(), () => !!(G && HO.rules(G).switchPlayers && hotSeat())], ['Players and history', () => G && openPlayers()], ['Auto-play this turn', () => playOneTurn()], ['Auto play…', () => G && !G.over && (hotSeat() ? toast('Auto play is for one-player games.') : openAutoPlay())], ['Preferences…', openPrefs], ['Saved games…', () => openSavedGames(), () => !!(screensOf(rulesId()) || {}).savedGames], ['Account saves…', () => openAccountSaves(), () => !!CLOUD], ['Rank history…', openRanks, () => !G || hasRanks(G)], [() => ((HO.RULESETS[rulesId()] || {}).gameCenter || {}).menu || 'Rank and Game Center…', openGameCenter, () => !!(HO.RULESETS[rulesId()] || {}).gameCenter],
       ['Master Point List…', () => openMasterList(), () => hasHall(G) && HO.rules(G).hall.master !== false], ['Hall of Fame…', () => openHall('fame'), () => hasHall(G)], ['Hall of Shame…', () => openHall('shame'), () => hasHall(G)], ['-'], ['Quit to title', () => { save(); Sound.play(7002); G = null; renderPanel(); draw(); $('#panel').innerHTML = ''; $('#msg').innerHTML = ''; titleScreen(); }]],
     Ships: [['Build ships at selected colony…', () => { if (G && UI.sel != null && G.stars[UI.sel].owner === ME) openBuild(UI.sel); else toast('Select one of your colonies first.'); }], ['Review battle…', () => G && openBattleList()], ['List all fleets…', () => G && openFleetList()],
       [() => scrapWords('fleet')[G && curFleet() && curFleet().scrap301 ? 1 : 0], () => { if (!G || G.over) return; const f = curFleet(); if (f) toggleScrapFleet(f); else toast('Select one of your fleets first.'); }, () => marksScrap()],
@@ -4272,7 +4588,7 @@ function setupMenus() {
   // The Ho menu, under the skin's "Ho!" at the top left: this version, and
   // the modern conveniences a player may choose (all of them can change in
   // the middle of a game). Items: [label, fn, feature or null, checked()].
-  const ho = [['About this version…', openAbout], ['Patch notes…', openPatchNotes, () => patchOn()], ['-'],
+  const ho = [['About this version…', openAbout], ['Patch notes…', openPatchNotes, () => patchOn()], ['Account…', () => openAccount(), () => !!CLOUD], ['-'],
     ['Skin and OS look…', openSkin], ['Sounds…', () => openSounds()], ['Language…', openLanguage, () => !!(G && HO.languages(HO.ownRules(G)).length)],
     [MODERN_TEXT.replace(/:.*/, ''), () => { if (G) setModern(!modern()); else toast('Modern conveniences are chosen for each game: start or continue one first.'); }, null, () => modern()],
     ['Full Hoedown', () => setHoedown(!hoedownOn()), () => !!(G && HO.ownRules(G).hoedown), () => hoedownOn()],
@@ -4415,7 +4731,7 @@ window.addEventListener('DOMContentLoaded', () => {
   Object.assign(HO.DATA, window.HODATA);
   setupMenus();
   $('#tnew').addEventListener('click', guard(newGameDialog));
-  $('#tcont').addEventListener('click', guard(() => continueGame()));
+  $('#tcont').addEventListener('click', guard(() => continueChecked()));
   $('#thelp').addEventListener('click', guard(openHelp));
   const resume = window.HOSKINS && HOSKINS.takeResume() && localStorage.getItem('ho5.save');
   // the title screen's backdrop covers the empty game while the pictures load
