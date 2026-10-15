@@ -83,7 +83,8 @@ service cloud.firestore {
       allow read: if true;
       allow create: if signedIn() && validEntry();
       allow update: if false;
-      allow delete: if isAdmin();
+      // an admin, or the player who posted it (Delete my account and data)
+      allow delete: if isAdmin() || (signedIn() && resource.data.uid == request.auth.uid);
     }
 
     match /{document=**} {

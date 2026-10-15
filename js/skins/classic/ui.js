@@ -22,6 +22,7 @@ const PAGE = `
     <label class="tskin tos" hidden><span>OS look</span> <select id="tos"></select></label>
     <p class="credit">Art by Howard Vives and Bob Van de walle.</p>
     <p class="madeby">Updated and adapted for the web by Jake Wilson, with an abundance of help from Claude (Anthropic).</p>
+    <p class="madeby legal"><a href="privacy.html" target="_blank" rel="noopener">Privacy and terms</a></p>
   </div>
 </div>
 `;
@@ -4049,6 +4050,13 @@ function openAccount(o) {
         el('button', { type: 'button', class: 'quiet', onclick: () => confirmBox(u.anonymous ? 'Sign out of the guest account? A guest can’t sign in again: its saved games in the account will be out of reach (they stay in this browser).' : 'Sign out? Your games stay saved in this browser.', () => {
           CLOUD.flushSave(); CLOUD.signOut().then(() => toast('Signed out.'), (e) => toast(CLOUD.errorText(e)));
         }) }, 'Sign out')),
+      // privacy.html: what is kept, and deleting it all
+      el('p', { class: 'sub' }, el('a', { href: 'privacy.html', target: '_blank', rel: 'noopener' }, 'Privacy and terms'), ' · ',
+        el('a', { href: '#', onclick: (e) => { e.preventDefault(); confirmBox('Delete your account and everything in it: its saved games and its games in the shared Hall of Fame? This can’t be undone. Games saved in this browser stay here.', () => {
+          CLOUD.flushSave && CLOUD.flushSave();
+          const halls = Object.keys(HO.RULESETS).filter(id => HO.RULESETS[id] && HO.RULESETS[id].hall);
+          CLOUD.deleteAccount(halls).then(() => { closeModal(); toast('Your account and its data are deleted.'); }, (e) => toast(CLOUD.errorText(e)));
+        }); } }, 'Delete my account and data…')),
       el('div', { class: 'btns right' }, el('button', { onclick: closeModal }, 'OK')));
     if (o.after) { const f = o.after; o.after = null; f(u); }
   });

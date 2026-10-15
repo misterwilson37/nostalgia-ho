@@ -148,6 +148,8 @@ h3.scaleflip { cursor: pointer; }
 /* the art and sounds first and larger; the remake's own credit small, after them */
 .tcard .credit { margin-top: 20px; font-size: 13px; line-height: 1.4; color: inherit; }
 .madeby { margin: 8px auto 0; font-size: 11px; max-width: 52ch; opacity: .65; }
+.madeby.legal { margin-top: 4px; }
+.madeby a { color: inherit; }
 @media (max-width: 760px) {
   #main { grid-template-columns: 1fr; grid-template-rows: 58vh auto; overflow-y: auto; }
   #panel { order: 2; border-right: 0; border-top: 1px solid #444; overflow: visible; }

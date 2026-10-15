@@ -28,7 +28,7 @@ const AUTH = ['initializeAuth', 'indexedDBLocalPersistence', 'browserLocalPersis
   'onAuthStateChanged', 'connectAuthEmulator', 'signOut', 'updateProfile',
   'GoogleAuthProvider', 'EmailAuthProvider', 'signInWithPopup', 'signInWithRedirect', 'getRedirectResult',
   'signInWithEmailAndPassword', 'createUserWithEmailAndPassword', 'sendPasswordResetEmail', 'signInAnonymously',
-  'linkWithPopup', 'linkWithRedirect', 'linkWithCredential'];
+  'linkWithPopup', 'linkWithRedirect', 'linkWithCredential', 'deleteUser'];
 const STORE = ['initializeFirestore', 'connectFirestoreEmulator', 'doc', 'collection', 'getDoc', 'getDocs', 'setDoc', 'addDoc',
   'deleteDoc', 'query', 'where', 'orderBy', 'limit', 'serverTimestamp', 'Bytes', 'onSnapshot'];
 

@@ -149,7 +149,7 @@ const ERRORS = {
   'auth/operation-not-allowed': 'That way of signing in is turned off for this site.',
   'auth/admin-restricted-operation': 'That way of signing in is turned off for this site.',
   'auth/internal-error': 'The sign-in service couldn’t start. Check your connection, or try again in a moment.',
-  'auth/requires-recent-login': 'Please sign in again first.',
+  'auth/requires-recent-login': 'For safety, Firebase wants a fresh sign-in first: sign out, sign in again, and repeat.',
   'permission-denied': 'The account service refused that.',
   'unavailable': 'Couldn’t reach the account service. Check your connection and try again.',
   'deadline-exceeded': 'The account service took too long to answer. Try again.',
@@ -373,6 +373,20 @@ API.hallTop = (rules, kind, order) => withSdk(F => decency().then((D) => {
   }));
 }));
 // an admin's removal (firestore.rules: /admins/{uid} documents only)
+// Delete my account and data (the Account window; privacy.html): every save in
+// the account, every Hall entry this account posted (the rulesets with a
+// Hall), then the account itself. Firebase asks for a recent sign-in before
+// it deletes an account: that comes back as auth/requires-recent-login, and
+// errorText says to sign in again and repeat.
+API.deleteAccount = (hallRules) => withSdk((F) => {
+  const u = needUser();
+  const saves = F.getDocs(F.collection(S.db, 'users', u.uid, 'saves')).then(q => Promise.all(q.docs.map(d => F.deleteDoc(d.ref))));
+  const halls = Promise.all((hallRules || []).map(r => F.getDocs(F.query(F.collection(S.db, 'halls', String(r), 'entries'), F.where('uid', '==', u.uid)))
+    .then(q => Promise.all(q.docs.map(d => F.deleteDoc(d.ref))))));
+  return Promise.all([saves, halls]).then(() => F.deleteUser(u)).then(() => {
+    store.set(sentKey(u.uid), null); store.set('ho5.cloud.was', null); store.set('ho5.cloud.name', null); refresh();
+  });
+});
 API.deleteHall = (rules, id) => withSdk(F => F.deleteDoc(F.doc(S.db, 'halls', String(rules), 'entries', id)));
 
 // start-up: a browser that was signed in brings its account back once the

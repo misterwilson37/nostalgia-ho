@@ -95,7 +95,9 @@ await deny('an extra field', addDoc(hall(A), entry({ opts: { seed: 1 } })));
 await deny('a game time a week away', addDoc(hall(A), entry({ time: Math.floor(Date.now() / 1000) - 7 * 86400 })));
 await deny('a long word for the shape', addDoc(hall(A), entry({ shape: 'x'.repeat(17) })));
 await deny('its poster changes it', updateDoc(posted, { name: 'Bob' }));
-await deny('its poster deletes it', deleteDoc(posted));
+// its poster may delete their own (Delete my account and data), on a second entry
+const mine = await addDoc(hall(A), entry({}));
+await allow('its poster deletes their own (Delete my account)', deleteDoc(mine));
 await deny('another player deletes it', deleteDoc(doc(B.db, 'halls', '405', 'entries', posted.id)));
 
 // ---------- admins ----------
