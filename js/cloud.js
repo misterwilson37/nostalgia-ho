@@ -141,6 +141,8 @@ const ERRORS = {
   'auth/credential-already-in-use': 'That account already exists, so this guest can’t become it. Sign out of the guest and sign in to that account instead; the guest’s games stay with the guest.',
   'auth/provider-already-linked': 'This account already has that way of signing in.',
   'auth/popup-closed-by-user': 'The sign-in window was closed before you finished.',
+  'auth/popup-blocked': 'Your browser blocked the Google sign-in window. Allow pop-ups for this site (in the address bar or the browser settings) and try again.',
+  'auth/operation-not-supported-in-environment': 'This browser can’t open the Google sign-in window. Try another browser, or sign in with an email and password.',
   'auth/cancelled-popup-request': 'The sign-in window was closed before you finished.',
   'auth/user-cancelled': 'Sign-in was cancelled.',
   'auth/network-request-failed': 'Couldn’t reach the sign-in service. Check your connection and try again.',
@@ -173,21 +175,20 @@ const needUser = () => { if (!S.auth || !S.auth.currentUser) throw fail('Sign in
 
 // ---------- signing in ----------
 function google(link) {
-  return withSdk((F) => {
+  // The popup must open in the click itself: Safari blocks one opened even a
+  // moment later. So once the SDK is loaded (it is by the time the sign-in
+  // window shows) the popup opens at once, with no promise in between. No
+  // redirect fallback: signInWithRedirect through nostalgia-ho.firebaseapp.com
+  // fails in browsers that partition storage (Safari, newer Chrome: "missing
+  // initial state"), so a blocked popup is explained instead (errorText).
+  const open = (F) => {
     const p = new F.GoogleAuthProvider();
     p.setCustomParameters({ prompt: 'select_account' });
     const cur = S.auth.currentUser;
-    const go = link && cur ? F.linkWithPopup(cur, p) : F.signInWithPopup(S.auth, p);
-    return go.then(r => { refresh(); return r; }, (e) => {
-      // popups blocked (or not possible, as in some in-app browsers): the
-      // same sign-in by leaving the page and coming back
-      if (e && (e.code === 'auth/popup-blocked' || e.code === 'auth/operation-not-supported-in-environment')) {
-        store.sset('ho5.cloud.redirect', '1');
-        return (link && cur ? F.linkWithRedirect(cur, p) : F.signInWithRedirect(S.auth, p)).then(() => new Promise(() => {}));
-      }
-      throw e;
-    });
-  });
+    return (link && cur ? F.linkWithPopup(cur, p) : F.signInWithPopup(S.auth, p)).then(r => { refresh(); return r; });
+  };
+  if (root.HOFB && S.auth) { try { return open(root.HOFB); } catch (e) { return Promise.reject(e); } }
+  return withSdk(open);
 }
 // the user's details after a link (the auth state doesn't change on a link)
 function refresh() { const u = S.auth && S.auth.currentUser; S.user = u ? describe(u) : null; if (u) store.set('ho5.cloud.name', S.user.name); for (const f of S.listeners.slice()) { try { f(S.user); } catch (e) {} } }

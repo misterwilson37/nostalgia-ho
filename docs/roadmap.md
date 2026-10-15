@@ -40,3 +40,8 @@ Delta Tao, in `docs/open-questions.md`, "Unfinished").
 Sources: the German DOS 2.0 (first disk: `DOSHO.EXE` and `HO.PRS` with its German text; the colour
 pictures and sounds are on a later disk not yet in hand); the Spaceward Ho! 4 FAQ,
 https://www.deltatao.com/ho/ho4faq/.
+6. **An icon per skin.** The browser tab's icon follows the skin showing, like the title
+   picture does: each version's own application icon (the Mac versions' ICN#/icl8 for the
+   application, WINHO.EXE's and 4.0.5's Windows icons, the Palm's, iOS's and Android's).
+   For now every skin shows the Android app's icon (`favicon.ico`, `assets/icons/`); the
+   switch is a line per skin in `js/skins.js` once each icon is extracted.
