@@ -1,0 +1,14 @@
+{
+  "name": "nostalgia-ho-firebase-build",
+  "private": true,
+  "description": "Builds js/vendor/firebase.js (window.HOFB) from the pinned Firebase SDK; see build-firebase.mjs and docs/online.md",
+  "type": "module",
+  "scripts": {
+    "build": "node build-firebase.mjs"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2",
+    "firebase": "12.19.0",
+    "firebase-tools": "15.33.0"
+  }
+}
