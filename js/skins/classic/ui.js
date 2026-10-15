@@ -4017,6 +4017,8 @@ function signInForm(o) {
   return f;
 }
 
+// append what is there: the DOM's own append() writes a null as the text "null"
+const put = (box, ...kids) => box.append(...kids.filter(k => k != null && k !== false));
 // The Account window (the title's button, the Ho menu's Account…): who is
 // signed in, the saves preference, Account saves…, a guest's upgrade, sign out
 function openAccount(o) {
@@ -4035,7 +4037,7 @@ function openAccount(o) {
       return;
     }
     const keep = el('input', { type: 'checkbox', checked: CLOUD.keepSaves() ? 'checked' : false, onchange: (e) => { CLOUD.setKeepSaves(e.target.checked); if (e.target.checked && G) save(); } });
-    body.append(
+    put(body,
       el('p', null, 'Signed in as ', el('b', null, u.name), u.anonymous ? '' : ` (${accountKind(u)})`, u.anonymous ? ': a guest account, for this browser only.' : '.'),
       u.email && u.name !== u.email ? el('p', { class: 'sub' }, u.email) : null,
       el('label', { class: 'chk' }, keep, el('span', null, 'Keep my saved games in my account too (off: in this browser only)')),
@@ -4095,7 +4097,7 @@ function openAccountSaves() {
         el('button', { type: 'button', class: 'quiet', onclick: () => confirmBox(`Delete the game in ${g.galaxy || 'this galaxy'} (${g.year}) from your account? A copy in this browser stays.`, () => {
           CLOUD.deleteSave(g.id).then(() => { toast('Deleted from your account.'); openAccountSaves(); }, e => toast(CLOUD.errorText(e)));
         }) }, 'Delete'))));
-    body.append(
+    put(body,
       L.length ? el('ul', { class: 'aclist' }, ...rows) : el('p', { class: 'sub' }, 'No games in your account yet.'),
       CLOUD.keepSaves() ? null : el('p', { class: 'sub' }, 'Keeping saved games in the account is off (Account…), so new games stay in this browser only.'),
       el('div', { class: 'btns right' },
