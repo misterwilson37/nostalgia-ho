@@ -482,17 +482,23 @@ function translator(lang, official) {
   for (const [en, to] of official) { const k = normEn(en); if (!map.has(k)) map.set(k, [en, to]); }
   for (const [en, to] of Object.entries(R.over || {})) over.set(normEn(en), to);
   for (const [en, to] of Object.entries(R.own || {})) own.set(normEn(en), to);
+  // a line with a slip of the version's reads as the line it means (EQUIV),
+  // in the remake's lines too
+  const alias = new Map(EQUIV.map(([a, b]) => [normEn(a), normEn(b)]));
   const missing = [];
   // [translation, 'remake'?] or null
-  const line = (en) => {
-    const k = normEn(en);
-    if (over.has(k)) return [over.get(k), 'remake'];
-    if (map.has(k)) { const [e0, to] = map.get(k); return [addDollar(en, e0, to)]; }
-    if (own.has(k)) return [own.get(k), 'remake'];
-    if (!missing.includes(en)) missing.push(en);
+  const find = (en) => {
+    const k0 = normEn(en);
+    for (const k of [k0, alias.get(k0)]) {
+      if (k == null) continue;
+      if (over.has(k)) return [over.get(k), 'remake'];
+      if (map.has(k)) { const [e0, to] = map.get(k); return [addDollar(en, e0, to)]; }
+      if (own.has(k)) return [own.get(k), 'remake'];
+    }
     return null;
   };
-  return { line, missing, report: (en) => { const t = line(en); return t ? [en, ...t] : null; }, text: (en) => { const t = line(en); return t ? t[0] : en; } };
+  const line = (en) => { const t = find(en); if (!t && !missing.includes(en)) missing.push(en); return t; };
+  return { line, missing, has: (en) => !!find(en), report: (en) => { const t = line(en); return t ? [en, ...t] : null; }, text: (en) => { const t = line(en); return t ? t[0] : en; } };
 }
 // iOS's lines, as the iOS game's own languages read them (iosLang): its
 // reports (BY_PLACE, CELSIUS), alerts, the Hope question and the hints
@@ -581,6 +587,49 @@ function iosPanelText(lang) {
   };
 }
 
+// ---------- German from 2.0's: the words ----------
+// The German DOS 2.0's classes (368-375) and the remake's for the classes
+// 2.0 hadn't got, in its compounds ("Kampfschiff", "Kolonieschiff"); its
+// tech compounds ("Reichweitentech", 674-678); "Sie", "ein", "Schiffe" (83)
+const TYPE_EN = { scout: 'Scout', dread: 'Dreadnought', fighter: 'Fighter', tanker: 'Tanker', colony: 'Colony Ship', satellite: 'Satellite', bio: 'Biological', decoy: 'Decoy' };
+const CLASS_DE_ALL = { scout: CLASS_DE.scout, dread: 'Schlachtschiff', fighter: CLASS_DE.fighter, tanker: 'Tanker', colony: CLASS_DE.colony, satellite: CLASS_DE.satellite, bio: 'Bioschiff', decoy: 'Täuschschiff' };
+const PLURAL_DE_ALL = { scout: PLURAL_DE.scout, dread: 'Schlachtschiffe', fighter: PLURAL_DE.fighter, tanker: 'Tanker', colony: PLURAL_DE.colony, satellite: PLURAL_DE.satellite, bio: 'Bioschiffe', decoy: 'Täuschschiffe' };
+const EN_CLASS = new Map(Object.entries(TYPE_EN).map(([k, v]) => [v, k]));
+const EN_PLURAL = new Map(Object.entries(TYPE_EN).map(([k, v]) => [v + 's', k]));
+// techs: the version's tech names, each given the remake's German (HOLANG_REMAKE.de.techs)
+function germanWords(techs, T) {
+  const R = RMK.de || {}, TD = new Map(Object.entries(R.techs || {}).map(([k, v]) => [normEn(k).replace(/™/g, ''), v]));
+  const words = { You: 'Sie', 'Your enemies': 'Ihre Gegner', 'and your allies ': ' und Ihre Verbündeten', 'A meteor shower': 'Ein Meteoritenschauer',
+    Range: 'Reichweiten', Speed: 'Tempo', Weapons: 'Waffen', Shields: 'Schild', Miniaturization: 'Mini' };
+  for (const [k, v] of Object.entries(TYPE_EN)) words[v] = CLASS_DE_ALL[k];
+  for (const t of techs || []) {
+    if (/^\d*$/.test(t)) continue;
+    const w = TD.get(normEn(TECH_ALIAS[t] || t).replace(/™/g, ''));
+    if (w != null) words[t] = w; else if (T && T.has(t)) words[t] = T.text(t); else if (T && !T.missing.includes('tech: ' + t)) T.missing.push('tech: ' + t);
+  }
+  Object.assign(words, R.words || {});
+  const args = [['one %s', 'ein %s']].concat(Object.keys(TYPE_EN).map(k => ['%d ' + TYPE_EN[k] + 's', '%d ' + PLURAL_DE_ALL[k]]), [['%d ships', '%d ' + S(83)]]);
+  return { words, args, num: numDE };
+}
+// the battle windows' words in German: 5.0.5's ("one Name (W/S) Class", "N
+// dead … Classs", "n/N …", "N killed"): the German DOS 2.0's battle window
+// (66-67 "Kampfbericht", "von %s (%d)"; 64 "%d %s besiegt"; "%s Tote")
+const deClass = (c) => { const k = EN_CLASS.get(c); if (k) return CLASS_DE_ALL[k]; const p = EN_PLURAL.get(c); return p ? PLURAL_DE_ALL[p] : c; };
+const PANEL505_DE = {
+  head: (star, year) => `${S(66)} ${S(67).replace('%s', star).replace('%d', year)}`,
+  text: (t) => {
+    let m;
+    const N = (x) => numDE(x);
+    if ((m = /^(one|\d+) dead (.*) \((\d+\/\d+)\) (.+)$/.exec(t))) return S(64).replace('%d', m[1] === 'one' ? 1 : m[1]).replace('%s', `${m[2]} (${m[3]}) ${deClass(m[4])}`);
+    if ((m = /^(\d+)\/(\d+) (.*) \((\d+\/\d+)\) (.+)$/.exec(t))) return `${m[1]}/${m[2]} ${m[3]} (${m[4]}) ${deClass(m[5])}`;
+    if ((m = /^(?:(one|\d+) )?(.*) \((\d+\/\d+)\) (.+)$/.exec(t))) return `${m[1] === 'one' ? 'ein ' : m[1] ? m[1] + ' ' : ''}${m[2]} (${m[3]}) ${deClass(m[4])}`;
+    if ((m = /^([\d,.]+[KM]?) killed$/.exec(t))) return X(DE.exe.deadPeople).replace('%s', N(m[1]));
+    if ((m = /^([\d,.]+[KM]?)\/([\d,.]+[KM]?)$/.exec(t))) return `${N(m[1])}/${N(m[2])}`;
+    if (/^[\d,.]+[KM]?$/.test(t)) return N(t);
+    return t;
+  },
+};
+
 // ---------- 5.0.5 (Mac and Windows): French and Turkish from iOS ----------
 // iOS's text is 5.0.5's (the same 159 report templates, 39 alerts, the
 // lists entry for entry; its hints rewritten for touch): every line whose
@@ -588,10 +637,20 @@ function iosPanelText(lang) {
 const O505 = E.RULESETS.original;
 // the version's lines: its reports, alerts, hints (the first three are its
 // first messages) and the questions its rules ask (rules-original evacuateToggle)
-function lines505(rs, extra) {
-  const D = E.DATA;
-  return [].concat(D.reports || [], D.alerts || [], (D.hints || []).slice(0, 43), extra || []);
+// (the alerts: those the page shows, in German; every one in French and
+// Turkish, as iOS has them all)
+const SHOWN_ALERTS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 15, 16, 17, 28, 29, 35, 36, 37];
+function lines505(rs, extra, lang) {
+  const D = E.DATA, alerts = (D.alerts || []).filter((t, i) => lang !== 'de' || SHOWN_ALERTS.includes(i));
+  return [].concat(D.reports || [], alerts, (D.hints || []).slice(0, 43), RADICAL505, extra || []);
 }
+// the Radical Research window's projects (rules-original RADICAL_TEXT: 4.0.5's
+// for the 17 they share, the remake's words for 5.0.5's three)
+const RADICAL505 = ['Search for more metal on your planets.', 'Explore distant stars.', 'Get lots of money immediately.', 'Improve mining efficiency.',
+  'Improve population maximums.', 'Improve terraforming efficiency.', 'Educate battle generals better.', 'Improve recycling program.',
+  'Build a new research facility.', 'Raise the prime lending rate.', 'Renegotiate your line of credit.', 'Build a decoy ship.', 'Build a biological space monster.',
+  'Steal technology from another player.', 'Build a set of ships with no development cost.', 'Improve range tech dramatically.', 'Improve speed tech dramatically.',
+  'Improve weapons tech dramatically.', 'Improve shields tech dramatically.', 'Improve mini tech dramatically.'];
 // (and with Full Hoedown, 4.0.5's Armageddon questions: js/hoedown.js)
 const EXTRA505 = ['Dorothy, I guess that means we’re not in Kansas anymore', 'Dost thou truly wish to abandon Hope? All is not yet lost...',
   'Abandon Ship? Abandon Ship! All hands abandon ship! Women and children first!', 'Do you really want to evacuate %s? It\'s a profitable colony!',
@@ -613,21 +672,25 @@ function remake505(lang, rs, o) {
 }
 function build505(lang, rs, o) {
   o = o || {};
-  const T = translator(lang, iosOfficial(lang).concat(typeof o.official === 'function' ? o.official() : o.official || []));
+  const de = lang === 'de';
+  const T = translator(lang, (de ? officialFor('de') : iosOfficial(lang)).concat(typeof o.official === 'function' ? o.official() : o.official || []));
   const reports = [];
-  for (const en of (o.lines ? o.lines() : lines505(rs, (o.extra || EXTRA505).concat(hoedownLines(rs))))) { const r = T.report(en); if (r) reports.push(r); }
+  for (const en of (o.lines ? o.lines() : lines505(rs, (o.extra || EXTRA505).concat(hoedownLines(rs)), lang))) { const r = T.report(en); if (r) reports.push(r); }
   // the curse with the Mac's characters (iOS shows "¥ª")
   for (const r of reports.slice()) if (typeof r[1] === 'string' && /[¥ª]/.test(r[1])) r[1] = r[1].replace(/¥/g, '•').replace(/ª/g, '™');
   const D = E.DATA, techs = [].concat(...Object.values(rs.TECHNAMES || D.techNames || {}));
-  const { words, args } = iosWords(lang, techs);
+  const { words, args, num } = de ? germanWords(techs, T) : iosWords(lang, techs);
   const hints = (o.hints ? o.hints() : (D.hints || []).slice(3, 43));
-  const out = Object.assign(iosNames(lang, rs), {
+  const NS = rs.nameAStar || {};
+  const out = Object.assign(de ? namesFor('de', rs) : iosNames(lang, rs), {
     remake: true,
-    say: { reports, args, words },
+    say: Object.assign({ reports, args, words }, num ? { num, cap: true } : {}),
     hintTexts: hints.map(t => T.text(t)),
-    nameAStar: Object.assign({}, rs.nameAStar, { text: L(lang, 'Misc Strings')[74].trim(), taken: L(lang, 'Alert Strings')[9] }, o.nameAStar ? o.nameAStar(lang) : {}),
+    nameAStar: Object.assign({}, NS, de ? { text: T.text(NS.text), taken: T.text(NS.taken) } : { text: L(lang, 'Misc Strings')[74].trim(), taken: L(lang, 'Alert Strings')[9] }, o.nameAStar ? o.nameAStar(lang, T) : {}),
   });
-  out.battlePanel = rs.battlePanelIn && rs.battlePanel === O505.battlePanel ? rs.battlePanelIn(iosPanelText(lang)) : (o.battlePanel ? o.battlePanel(iosPanelText(lang)) : rs.battlePanel);
+  const panelText = de ? (o.panelDe ? o.panelDe() : PANEL505_DE) : iosPanelText(lang);
+  out.battlePanel = rs.battlePanelIn && rs.battlePanel === O505.battlePanel ? rs.battlePanelIn(panelText) : (o.battlePanel ? o.battlePanel(panelText) : rs.battlePanel);
+
   // (the lines no translation has: tools/lang-test.js lists them)
   out.missing = T.missing;
   out.hintRemake = hints.filter(t => (T.line(t) || [])[1] === 'remake');
@@ -635,8 +698,8 @@ function build505(lang, rs, o) {
 
 }
 if (O505) {
-  O505.languages = ['en', 'fr', 'tr'];
-  O505.lang = Object.assign({}, O505.lang, { fr: remake505('fr', O505), tr: remake505('tr', O505) });
+  O505.languages = ['en', 'fr', 'tr', 'de'];
+  O505.lang = Object.assign({}, O505.lang, { fr: remake505('fr', O505), tr: remake505('tr', O505), de: remake505('de', O505) });
 }
 
 // ---------- the Palm (5.0's code): French and Turkish from iOS ----------
@@ -652,17 +715,21 @@ const PALM = E.RULESETS.palm;
 const PALM_PANEL = {
   fr: { dead: (n, d) => `${n} ${d} détruit(s)`, people: (x) => `${x} habitants`, killed: (x) => `${x} habitants tués`, survived: (a, b) => `${a} habitants sur ${b} ont survécu` },
   tr: { dead: (n, d) => `${n} ölü ${d}`, people: (x) => `${x} insan`, killed: (x) => `${x} insan öldü`, survived: (a, b) => `${b} insandan ${a} kişi kurtuldu` },
+  // the German DOS 2.0's words: "%d %s besiegt" (64), "%s Tote", "Leute" (725)
+  de: { dead: (n, d) => S(64).replace('%d', n).replace('%s', d), people: (x) => `${numDE(x)} Leute`, killed: (x) => X(DE.exe.deadPeople).replace('%s', numDE(x)), survived: (a, b) => `${numDE(a)} von ${numDE(b)} Leuten überlebten` },
 };
 function palmPanelText(lang) {
-  const SC = L('en', 'Ship Class Names'), SCT = L(lang, 'Ship Class Names'), W = PALM_PANEL[lang];
-  const cls = (c, plural) => { if (c === 'Decoy') return L(lang, 'Misc Strings')[1]; const i = SC.indexOf(c); return i >= 0 && i < 7 ? SCT[plural ? i + 7 : i] : c; };
+  const W = PALM_PANEL[lang];
+  const cls = lang === 'de' ? (c, plural) => { const k = EN_CLASS.get(c); return k ? (plural ? PLURAL_DE_ALL : CLASS_DE_ALL)[k] : c; }
+    : (c, plural) => { const SC = L('en', 'Ship Class Names'), SCT = L(lang, 'Ship Class Names'); if (c === 'Decoy') return L(lang, 'Misc Strings')[1]; const i = SC.indexOf(c); return i >= 0 && i < 7 ? SCT[plural ? i + 7 : i] : c; };
   const desc = (t, plural) => { const m = /^(\d+ )?(.+?) (\(\d+\/\d+\))$/.exec(t); return m ? `${m[1] || ''}${cls(m[2], plural || (m[1] && +m[1] > 1))} ${m[3]}` : t; };
   const N = '([\\d,.]+[KM]?)';
   return {
-    head: iosPanelText(lang).head,
+    head: lang === 'de' ? PANEL505_DE.head : iosPanelText(lang).head,
     text: (t) => {
       let m;
       if ((m = /^(\d+) dead (.+)$/.exec(t))) return W.dead(m[1], desc(m[2], +m[1] > 1));
+
       if ((m = /^(\d+)\/(\d+) (.+)s$/.exec(t))) return `${m[1]}/${m[2]} ${desc(m[3], true)}`;
       if ((m = new RegExp('^' + N + ' People killed$').exec(t))) return W.killed(m[1]);
       if ((m = new RegExp('^' + N + ' of ' + N + ' People survived$').exec(t))) return W.survived(m[1], m[2]);
@@ -673,20 +740,21 @@ function palmPanelText(lang) {
 }
 if (PALM) {
   const welcomePalm = () => [].concat(PALM.welcome({ opts: {} }), PALM.welcome({ opts: { hints: false } })).map(x => x[0]);
-  const linesPalm = () => [].concat((E.DATA.reports || []).map(t => PALM.msgText(null, t.replace(/\$%s/, '%s'))), E.DATA.alerts || [], PALM.hintTexts, welcomePalm(),
+  const linesPalm = (lang) => () => [].concat((E.DATA.reports || []).map(t => PALM.msgText(null, t.replace(/\$%s/, '%s'))), (E.DATA.alerts || []).filter((t, i) => lang !== 'de' || SHOWN_ALERTS.includes(i)), PALM.hintTexts, welcomePalm(), RADICAL505,
     ['Dorothy, I guess that means we’re not in Kansas anymore', 'Dost thou truly wish to abandon Hope? All is not yet lost...',
       'Abandon Ship? Abandon Ship! All hands abandon ship! Women and children first!', 'Do you really want to evacuate %s? It\'s a profitable colony!', 'Year %d. Nothing much happened.'], hoedownLines(PALM));
   // the Palm's two slips in 5.0.5's lines are iOS's lines all the same (157, 158)
   const slips = (lang) => { const R = L(lang, 'Report Window Templates'); return [[PALM.msgText(null, E.DATA.reports ? E.DATA.reports[157] : ''), R[157]], [PALM.msgText(null, E.DATA.reports ? E.DATA.reports[158] : ''), R[158]]]; };
   const palm = (lang) => lazyLang(() => build505(lang, PALM, {
-    lines: linesPalm, hints: () => PALM.hintTexts, official: () => slips(lang),
+    lines: linesPalm(lang), hints: () => PALM.hintTexts, official: () => (lang === 'de' ? [] : slips(lang)),
+
 
     // tFRM 2900's title and buttons: iOS's "Congratulations!" (Misc Strings 73), the remake's buttons
-    nameAStar: (l) => ({ title: L(l, 'Misc Strings')[73], ok: { fr: 'Cool !', tr: 'Süper!' }[l], cancel: { fr: 'Laisse tomber', tr: 'Boşver' }[l] }),
+    nameAStar: (l) => (l === 'de' ? { title: 'Glückwunsch!', ok: 'Cool!', cancel: 'Lieber nicht' } : { title: L(l, 'Misc Strings')[73], ok: { fr: 'Cool !', tr: 'Süper!' }[l], cancel: { fr: 'Laisse tomber', tr: 'Boşver' }[l] }),
     battlePanel: () => PALM.battlePanelIn(palmPanelText(lang)),
   }), LANG_KEYS);
-  PALM.languages = ['en', 'fr', 'tr'];
-  PALM.lang = Object.assign({}, PALM.lang, { fr: palm('fr'), tr: palm('tr') });
+  PALM.languages = ['en', 'fr', 'tr', 'de'];
+  PALM.lang = Object.assign({}, PALM.lang, { fr: palm('fr'), tr: palm('tr'), de: palm('de') });
 }
 
 
@@ -877,7 +945,11 @@ const EQUIV = [
   // (4.0.5's and 3.0.1's Abandon is 5.0.5's Evacuate)
   ['You have abandoned %s.', 'You have evacuated %s.'],
   ['%s has run out of metal. You should probably abandon it.', '%s has run out of metal. You should probably evacuate it.'],
+  // (the Palm's two, rules-palm msgTextPalm)
+  ['It\'s a miracle! Your scientist have figured out how to prevent %s from going supernova.', 'It\'s a miracle! Your scientists have figured out to prevent %s from going supernova.'],
+  ['Wow, that\'s wierd! %s is no longer red and appears not to be in danger of going nova.', 'Wow, that\'s weird! %s is no longer red and appears not to be in danger of going nova.'],
 ];
+
 // the engine's own messages, which every version from 3.0.1 sends
 // (js/engine.js: arrivals, colonizing, exploring, the end), and the reports
 // it sends from 5.0.5's list for all of them (report(n): gifts, alliances,
@@ -944,6 +1016,8 @@ function words20(lang) {
   if (lang === 'fr') return Object.assign({}, BATTLE_FR, { desc: null, one: L('fr', 'Misc Strings')[0] + ' ', num: null, cls });
   if (lang === 'tr') return { head: (star, year) => ['Savaş özeti', `${star}de, ${year}:`], won: ['Tebrikler!', 'Savaşı kazandın!'], lost: ['Maalesef,', 'savaşı kaybettin'],
     cls, one: L('tr', 'Misc Strings')[0] + ' ', dead: (n0, desc) => `${n0} ölü ${desc}`, deadPeople: (x) => `${x} ölü` };
+  // the German DOS 2.0's window, with the remake's classes for 2.0's missing ones
+  if (lang === 'de') return Object.assign({}, BATTLE_DE, { cls: (type, n) => (n > 1 ? PLURAL_DE_ALL : CLASS_DE_ALL)[type] || '' });
   return null;
 }
 // a version's language from its own list of lines (o.lines), hints and
@@ -953,13 +1027,13 @@ function buildText(lang, rs, o) {
   const reports = [];
   for (const en of o.lines()) { const r = T.report(en); if (r) reports.push(r); }
   const techs = [].concat(...Object.values(rs.TECHNAMES || {}));
-  const { words, args } = o.words ? o.words(T) : iosWords(lang, techs);
+  const { words, args, num } = lang === 'de' ? germanWords(techs, T) : iosWords(lang, techs);
   // a tech name that is no tech name (4.0.5's Mini 20, the credit line)
   for (const t of techs) if (!(t in words) && / /.test(t) && T.line(t)) words[t] = T.text(t);
   const hints = (o.hints ? o.hints() : null) || [];
   const out = Object.assign(namesFor(lang, rs), {
     remake: true,
-    say: { reports, args, words },
+    say: Object.assign({ reports, args, words }, num ? { num, cap: true } : {}),
     hintTexts: hints.length ? hints.map(t => T.text(t)) : rs.hintTexts,
   });
   const NS = rs.nameAStar;
@@ -985,8 +1059,8 @@ if (W405) {
     battlePanel: (w) => w ? DOS.battlePanel20({ dots: mac ? '…' : '...', cols: 'mac', shade: true, words: w }) : rs.battlePanel }), LANG_KEYS405);
   for (const [rs, mac] of [[W405, false], [M405, true]]) {
     if (!rs) continue;
-    rs.languages = ['en', 'fr', 'tr'];
-    rs.lang = Object.assign({}, rs.lang, { fr: make('fr', rs, mac), tr: make('tr', rs, mac) });
+    rs.languages = ['en', 'fr', 'tr', 'de'];
+    rs.lang = Object.assign({}, rs.lang, { fr: make('fr', rs, mac), tr: make('tr', rs, mac), de: make('de', rs, mac) });
   }
 }
 
@@ -1071,7 +1145,8 @@ if (R301) {
     const out = buildText(lang, R301, { lines, battlePanel: (w) => w ? DOS.battlePanel20({ dots: '…', cols: 'mac', shade: true, words: w }) : R301.battlePanel });
     return out;
   }, LANG_KEYS405.concat(['fixSpending']));
-  R301.languages = ['en', 'fr', 'tr'];
-  R301.lang = Object.assign({}, R301.lang, { fr: make('fr'), tr: make('tr') });
+  R301.languages = ['en', 'fr', 'tr', 'de'];
+  R301.lang = Object.assign({}, R301.lang, { fr: make('fr'), tr: make('tr'), de: make('de') });
+
 }
 })(this);

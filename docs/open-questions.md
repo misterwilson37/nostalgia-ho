@@ -184,6 +184,7 @@ Where a browser can't do what the original did, or the remake had to pick.
 - No demo and no registration.
 - **French and Turkish (the remake's)**: iOS's for the lines the Palm shares with 5.0.5;
   the remake's for its own hints, first messages, decoy report and battle window.
+  **German (the remake's)**: the German DOS 2.0's for its 2.0 lines, the remake's for the rest.
 
 
 ### 5.0.5 (and the Palm and iOS)
@@ -203,7 +204,9 @@ Where a browser can't do what the original did, or the remake had to pick.
 - The bars' grid colour: a table we haven't read, so a 28 % black.
 - **French and Turkish (the remake's)**: iOS's official translations wherever the English
   is 5.0.5's (nearly everywhere); the remake's lines for what 5.0.5 says differently (the
-  mouse's hints, the fuel alert) and for the lines iOS got wrong. `docs/translations.md`.
+  mouse's hints, the fuel alert) and for the lines iOS got wrong. **German (the
+  remake's)**: the German DOS 2.0's for the lines 2.0 had, the remake's for the rest, in
+  its voice. `docs/translations.md`.
 
 - Played as released, though we weren't sure each was meant:
   - budget shares are used as they stand, even over 1,000 (Abundant starts at 1,050);
@@ -230,9 +233,10 @@ Where a browser can't do what the original did, or the remake had to pick.
   turn in ten years (`DoOneTurn`) needs network play, so it never comes up.
 - Mac: "Automatically end turn for unconnected players" is in the New Game window but
   changes nothing (no network play; its tooltip says so).
-- **French and Turkish (the remake's)**: iOS's (and 1.2F's) official lines wherever the
-  English is 4.0.5's, the remake's for the rest; names translated only where a list is
-  the same English list (the Mac's ships are 5.0.5's, two of the Windows lists 2.0's).
+- **French, Turkish and German (the remake's)**: the official lines wherever the English is
+  4.0.5's (iOS's and 1.2F's; for German the German DOS 2.0's), the remake's for the rest;
+  names translated only where a list is the same English list (the Mac's ships are
+  5.0.5's, two of the Windows lists 2.0's).
 
 
 ### 3.0.1
@@ -243,9 +247,10 @@ Where a browser can't do what the original did, or the remake had to pick.
   turn's purchases.
 - Played as released: an abandoned colony with a colony ship there is settled again at
   once.
-- **French and Turkish (the remake's)**: iOS's official lines wherever the English is
-  3.0.1's, 1.2F's for its 2.0 lines (Name a Star, Fix Spending), the remake's for the
-  rest (3.0.1's Name a Star rule of 2 to 7 letters, its battle reports' form).
+- **French, Turkish and German (the remake's)**: the official lines wherever the English is
+  3.0.1's (iOS's, and 1.2F's or the German DOS 2.0's for its 2.0 lines: Name a Star, Fix
+  Spending), the remake's for the rest (3.0.1's Name a Star rule of 2 to 7 letters, its
+  battle reports' form).
 
 
 ### 2.0 and 1.2

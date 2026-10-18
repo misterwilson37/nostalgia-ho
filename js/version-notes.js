@@ -197,6 +197,7 @@ root.HOVERSIONS = {
       'Evacuate is 3.0.1’s Abandon: the colony is given up at End Turn, and pressing it again takes it back. The planet doesn’t show it as marked.',
       'Evacuating a star named Hope or Ship asks 3.0.1’s jokes (“Dost thou truly wish to abandon Hope? All is not yet lost!”, “Abandon Ship? …”), every time.',
       REMAKE_LANG('French (“traduction du remake”) and Turkish (“yeniden yapımın çevirisi”): the official French and Turkish of the iOS game, and the French Mac 1.2’s for 3.0.1’s 2.0 lines (its Name a Star and Fix Spending among them), for every line 3.0.1 shares with them, with the remake’s own lines for the rest'),
+      REMAKE_LANG('German (“Übersetzung des Remakes”), forward from the German DOS 2.0: its official lines wherever the English is 2.0’s (the reports 2.0 already had, Name a Star, Fix Spending), and the remake’s German in its words for the rest'),
     ],
 
     missing: [
@@ -253,6 +254,7 @@ root.HOVERSIONS = {
       'Evacuating a star named Hope or Ship asks 4.0.5’s jokes, every time; turning Armageddon on asks two questions, one of five and one of six.',
       'Hints are drawn by the browser’s random numbers; 4.0.5 used its own.',
       REMAKE_LANG('French (“traduction du remake”) and Turkish (“yeniden yapımın çevirisi”): the official French and Turkish of the iOS game (and of the French Mac 1.2) for every line 4.0.5 shares with them, which is most of its reports, with the remake’s own lines for the rest (Armageddon’s questions, the Windows build’s own words)'),
+      REMAKE_LANG('German (“Übersetzung des Remakes”), forward from the German DOS 2.0: its official lines wherever the English is 2.0’s (the reports 2.0 already had, Name a Star), and the remake’s German in its words for the rest'),
     ],
     missing: [
       'The turn time limit and network play.',
@@ -340,6 +342,7 @@ root.HOVERSIONS = {
       'Evacuating a star named Hope or Ship asks 4.0.5’s jokes, every time; turning Armageddon on asks two questions, one of five and one of six.',
       'Hints are drawn by the browser’s random numbers, and the four named stars a new galaxy takes are picked from the game’s seed; the Mac used its own random numbers.',
       REMAKE_LANG('French (“traduction du remake”) and Turkish (“yeniden yapımın çevirisi”): the official French and Turkish of the iOS game (and of the French Mac 1.2) for every line 4.0.5 shares with them, which is most of its reports, with the remake’s own lines for the rest (Armageddon’s questions, the Mac’s own words)'),
+      REMAKE_LANG('German (“Übersetzung des Remakes”), forward from the German DOS 2.0: its official lines wherever the English is 2.0’s (the reports 2.0 already had, Name a Star), and the remake’s German in its words for the rest'),
     ],
 
     missing: [
@@ -385,6 +388,7 @@ root.HOVERSIONS = {
       'When you give a gift, you are told at once; 5.0.5 told you at the end of the turn.',
       'Every game starts from the default budget and research shares (research 18% each and Radical 10%); 5.0.5 started a new game with your first turn’s shares from the last one.',
       REMAKE_LANG('French (“traduction du remake”) and Turkish (“yeniden yapımın çevirisi”): the iOS game’s official French and Turkish wherever its English is 5.0.5’s, which is nearly everywhere, with the remake’s own lines for the few 5.0.5 says differently (the mouse’s hints, the fuel alert) and for a few lines the iOS translation got wrong'),
+      REMAKE_LANG('German (“Übersetzung des Remakes”), forward from the German DOS 2.0: its official lines wherever the English is 2.0’s (the reports 2.0 already had, Name a Star), and the remake’s German in its words for the rest'),
     ],
 
     missing: [
@@ -437,6 +441,7 @@ root.HOVERSIONS = {
       'Every game starts from the default budget and research shares; the Palm game started a new game with your first turn’s shares from the last one.',
       'Sounds are the skin’s, not the handheld’s few beeps.',
       REMAKE_LANG('French (“traduction du remake”) and Turkish (“yeniden yapımın çevirisi”): the iOS game’s official French and Turkish for every line the Palm shares with 5.0.5, with the remake’s own lines for the Palm’s own hints, first messages, decoy report and battle window'),
+      REMAKE_LANG('German (“Übersetzung des Remakes”), forward from the German DOS 2.0: its official lines wherever the English is 2.0’s (the reports 2.0 already had, Name a Star), and the remake’s German in its words for the rest'),
     ],
 
     missing: [

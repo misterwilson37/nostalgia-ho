@@ -76,6 +76,11 @@ verbatim from another version's official translation of the same English.
 | 4.0.5 Mac | Turkish (the remake's) | 168, hints 23 | 45, hints 4 | iOS's ships, stars by name |
 | 3.0.1 | French (the remake's) | 119 (iOS's and 1.2F's) | 13 | 1.2F's lists for its 2.0 lists (Scouts, Colony Ships, Satellites); stars by name |
 | 3.0.1 | Turkish (the remake's) | 111 (iOS's) | 21 | iOS's stars and ships by name |
+| 3.0.1 | German (the remake's) | 30 (the German DOS 2.0's) | 102 | the German DOS 2.0's lists for its 2.0 lists (Scouts, Colony Ships, Satellites); stars by name |
+| 4.0.5 Windows | German (the remake's) | 31, hints 0 | 165, hints 26 | the German DOS 2.0's Colony Ships and Satellites; stars by name |
+| 4.0.5 Mac | German (the remake's) | 31, hints 0 | 182, hints 27 | stars by name |
+| 5.0.5 | German (the remake's) | 25 (the German DOS 2.0's), hints 0 | 230, hints 40 | stars by name (the German DOS 2.0's); computers and ships English |
+| Palm OS 5 | German (the remake's) | 25, hints 0 | 231, hints 40 | stars by name |
 
 
 ## Mac 1.2 (French, as released)
@@ -196,7 +201,35 @@ rule (3.0.1 takes 2 to 7 letters, 1.2F's line says 4 to 7), the battle reports' 
 lines in 3.0.1's form, "ship money", the credit line, and the Turkish for the Name a Star
 and Fix Spending windows, which only 1.2F's French has.
 
+## German for 3.0.1 onward (the remake's)
+
+Forward from the German DOS 2.0 (`HO.PRS`, `DOSHO.EXE`), the one official German after
+1.2: its lines wherever a later version's English is 2.0's (the battle reports, "You have
+colonized", the tech levels, the debris, Name a Star's window and alert, Fix Spending),
+and for the rest the remake's German in its voice, `js/lang-remake.js` `de`: "Sie", the
+reports in the present tense ("Ihre Flotte von %s erreicht %s.", "Sie verlieren %d
+Schiffe."), its words (Reichweitentech, Tempotech, Waffentech, Schildtech, Minitech;
+Späher, Kampfschiff, Kolonieschiff, Satellit; Funkspruch for a message; verschrotten;
+Meteoritenschauer; "Glückwunsch!"), its numbers ("1.234") and its battle window
+(Kampfbericht, "%d %s besiegt", "%s Tote"). Where the DOS German has a line for the same
+alert, its words are used (3330, the fleet out of fuel, "keine Pfeilspitzen"; 3310, the
+battle record gone; 3280, the yards full; 5040, "Sie haben die Galaxis erobert!").
+
+The remake's own words for what 2.0 hadn't: the classes Schlachtschiff (Dreadnought),
+Tanker, Bioschiff (Biological), Täuschschiff (Decoy); the tech names (Volltanken,
+Fusionsmeiler, Gelb getupfter Bikini, Schon da, Gestern-Antrieb, +5 rostfreies
+Vorpalschwert…, the jokes kept); Radikalforscher; Bündnis, Verbündete, beste Kumpel;
+kapitulieren; Armageddon-Maschine; räumen for 5.0.5's Evacuate (2.0's "verlassen" stays
+for 3.0.1's and 4.0.5's Abandon). The jokes keep their star: "Willst du wahrhaftig alle
+Hope fahren lassen?" (Dante's "Lasst alle Hoffnung fahren", on a star still called
+Hope), "Ship verlassen? Alle Mann von Bord!". The alerts are those the page shows (5.0.5's
+network and registration alerts are never shown and stay untranslated). The names: the
+stars by name from the German DOS 2.0's list; a computer or ship list only where it is
+2.0's list (3.0.1's Scouts, Colony Ships and Satellites, 4.0.5's Colony Ships and
+Satellites); 5.0.5's computers and ships stay English.
+
 ## What stays English, and why
+
 
 
 
