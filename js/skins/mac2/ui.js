@@ -49,7 +49,8 @@ window.HOMAC2 = {
   // (Tech Spending Window, Report Window) have nothing the remake does, so
   // they are left out; its Zoom In and Zoom Out are in the Galaxy menu.
   menuLayout: {
-    File: [['New…', 'Game/New game…'], '-',
+    File: [['New…', 'Game/New game…'],
+      ['Import a Game…', 'Game/Import a game…'], ['Export This Game…', 'Game/Export this game…'], '-',
       ['End Turn', endTurn], ['Force End Turn…', 'Galaxy/Force end turn…'], '-',
       ['Quit', 'Game/Quit to title']],
     Options: [['Auto Play…', 'Game/Auto play…'], ['Auto-Play This Turn', 'Game/Auto-play this turn'], '-',
@@ -71,6 +72,7 @@ window.HOMAC2 = {
     const n = doc.querySelector('#tnew'), o = doc.querySelector('#tcont');
     if (n) n.textContent = 'New Game';
     if (o) { o.textContent = 'Open Game'; n.before(o); }
+    const im = doc.querySelector('#timport'); if (im) im.textContent = 'Import a Game…';
     // inside the start-up window, under the splash
     const b = doc.querySelector('#titlescreen .tbtns'), w = doc.querySelector('#titlescreen .tsplash .wbody');
     if (b && w) w.append(b);

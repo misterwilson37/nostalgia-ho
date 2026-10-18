@@ -17,7 +17,7 @@ const PAGE = `
     <p class="by">by Peter Commons &amp; Joe Williams · Delta Tao Software</p>
     <div class="win tsplash"><div class="wtitle"><span id="tname">Spaceward Ho!</span></div>
       <div class="wbody"><canvas id="tframe" width="304" height="200" role="img" aria-label="The Spaceward Ho! title picture"></canvas></div></div>
-    <div class="tbtns"><button id="tnew">New game</button><button id="tcont" hidden>Continue</button><button id="thelp" class="quiet">How to play</button></div>
+    <div class="tbtns"><button id="tnew">New game</button><button id="tcont" hidden>Continue</button><button id="timport" class="quiet">Import a game…</button><button id="thelp" class="quiet">How to play</button></div>
     <label class="tskin" hidden><span>Skin</span> <select id="tskin"></select></label>
     <label class="tskin tos" hidden><span>OS look</span> <select id="tos"></select></label>
     <p class="credit">Art by Howard Vives and Bob Van de walle.</p>
@@ -4162,6 +4162,42 @@ function openGameText(t, when) {
   return true;
 }
 const gameFileName = (g) => `${g.galaxy || 'Spaceward Ho'} ${g.year}.hogame`.replace(/[\\/:*?"<>|]+/g, '-');
+// Export and import, for every version and with no account (the Game menu;
+// Import also on the title screen): the same .hogame file Saved Games and
+// Account saves give. An online game exports as a snapshot of this page's
+// copy, and an imported one opens as a local game.
+function exportGame() {
+  if (!G) { toast('Start or continue a game first, then export it.'); return; }
+  if (!G.gameId) G.gameId = Date.now();
+  downloadText(HO.save(G), gameFileName({ galaxy: (G.opts && G.opts.galaxy) || 'Milky Way', year: G.year }));
+  if (G.online) toast('Exported a snapshot of this online game as it stands on this computer. Imported, it opens as a local game, not online.');
+  maybeSaveOffer();
+}
+function importGame() {
+  const fileIn = el('input', { type: 'file', accept: '.hogame,.json,application/json', hidden: true, onchange: () => {
+    const f = fileIn.files[0]; fileIn.remove();
+    if (f) f.text().then(importText, () => toast('That file couldn’t be read.'));
+  } });
+  document.body.append(fileIn); fileIn.click();
+}
+function importText(t) {
+  let g;
+  try { g = HO.load(t); } catch (x) { g = null; }
+  if (!g || !Array.isArray(g.players) || !Array.isArray(g.stars)) { toast('That file isn’t a saved game this remake can read.'); return; }
+  const online = !!g.online;
+  if (online) { delete g.online; t = HO.save(g); } // a local game from here on
+  const go = () => {
+    if (G && G.online) leaveOnlineView();
+    if (openGameText(t)) toast(online ? 'This was an online game. It opens here as a local game, every player on this computer: nothing done in it reaches the online game.' : 'The imported game is open.');
+  };
+  // a game in progress (playing, or waiting behind Continue) is asked about
+  // first; an online game's copy here is only a cache, so it isn't
+  let cur = G;
+  if (!cur && lsGet('ho5.save')) try { cur = HO.load(lsGet('ho5.save')); } catch (x) { cur = null; }
+  if (!cur || cur.over || cur.online) return go();
+  const kept = (screensOf(cur.rules) || {}).savedGames ? `It stays in ${(screensOf(cur.rules) || {}).savedGames}.` : 'It will be gone unless you export it first (Export this game…).';
+  confirmBox(`Open the imported game in place of the game in progress? ${kept}`, go);
+}
 // The Account saves window: every game kept in the account, newest first,
 // for every ruleset: Open, Download (the .hogame file Saved Games gives),
 // Delete; and "Save this game to the account now"
@@ -5062,7 +5098,7 @@ function save(urgent) {
 // ---------- menus ----------
 function setupMenus() {
   const menus = {
-    Game: [['New game…', newGameDialog], [() => (G && HO.rules(G).switchPlayers) || 'End turn and switch players', () => switchPlayers(), () => !!(G && HO.rules(G).switchPlayers && hotSeat())], ['Players and history', () => G && openPlayers()], ['Auto-play this turn', () => playOneTurn()], ['Auto play…', () => G && !G.over && (hotSeat() || G.online ? toast('Auto play is for one-player games.') : openAutoPlay())], ['Online game…', () => openOnlineInfo(), () => !!(G && G.online)], ['Preferences…', openPrefs], ['Saved games…', () => openSavedGames(), () => !!(screensOf(rulesId()) || {}).savedGames], ['Account saves…', () => openAccountSaves(), () => !!CLOUD], ['Rank history…', openRanks, () => !G || hasRanks(G)], [() => ((HO.RULESETS[rulesId()] || {}).gameCenter || {}).menu || 'Rank and Game Center…', openGameCenter, () => !!(HO.RULESETS[rulesId()] || {}).gameCenter],
+    Game: [['New game…', newGameDialog], [() => (G && HO.rules(G).switchPlayers) || 'End turn and switch players', () => switchPlayers(), () => !!(G && HO.rules(G).switchPlayers && hotSeat())], ['Players and history', () => G && openPlayers()], ['Auto-play this turn', () => playOneTurn()], ['Auto play…', () => G && !G.over && (hotSeat() || G.online ? toast('Auto play is for one-player games.') : openAutoPlay())], ['Online game…', () => openOnlineInfo(), () => !!(G && G.online)], ['Preferences…', openPrefs], ['Saved games…', () => openSavedGames(), () => !!(screensOf(rulesId()) || {}).savedGames], ['Account saves…', () => openAccountSaves(), () => !!CLOUD], ['Export this game…', () => exportGame(), () => !!G], ['Import a game…', () => importGame()], ['Rank history…', openRanks, () => !G || hasRanks(G)], [() => ((HO.RULESETS[rulesId()] || {}).gameCenter || {}).menu || 'Rank and Game Center…', openGameCenter, () => !!(HO.RULESETS[rulesId()] || {}).gameCenter],
       ['Master Point List…', () => openMasterList(), () => hasHall(G) && HO.rules(G).hall.master !== false], ['Hall of Fame…', () => openHall('fame'), () => hasHall(G)], ['Hall of Shame…', () => openHall('shame'), () => hasHall(G)], ['-'], ['Quit to title', () => { save(); Sound.play(7002); G = null; renderPanel(); draw(); $('#panel').innerHTML = ''; $('#msg').innerHTML = ''; titleScreen(); }]],
     Ships: [['Build ships at selected colony…', () => { if (G && UI.sel != null && G.stars[UI.sel].owner === ME) openBuild(UI.sel); else toast('Select one of your colonies first.'); }], ['Review battle…', () => G && openBattleList()], ['List all fleets…', () => G && openFleetList()],
       [() => scrapWords('fleet')[G && curFleet() && curFleet().scrap301 ? 1 : 0], () => { if (!G || G.over) return; const f = curFleet(); if (f) toggleScrapFleet(f); else toast('Select one of your fleets first.'); }, () => marksScrap()],
@@ -5231,6 +5267,7 @@ window.addEventListener('DOMContentLoaded', () => {
   $('#tnew').addEventListener('click', guard(newGameDialog));
   $('#tcont').addEventListener('click', guard(() => continueChecked()));
   $('#thelp').addEventListener('click', guard(openHelp));
+  $('#timport').addEventListener('click', guard(importGame));
   const resume = window.HOSKINS && HOSKINS.takeResume() && localStorage.getItem('ho5.save');
   // the title screen's backdrop covers the empty game while the pictures load
   const ts = $('#titlescreen'); ts.hidden = false; ts.classList.add('loading');

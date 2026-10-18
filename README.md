@@ -17,7 +17,10 @@ it needs to be served from a web address.
 ## Online (optional)
 
 Signing in is never needed: a player who doesn't plays exactly as before, offline, with
-the browser's saves. **Sign in** on the title screen (or the Ho menu's **Account…**:
+the browser's saves. **Export this game…** and **Import a game…** (the Game menu, File in the
+2.0.1 and 4.0.5 Mac skins; Import also on the title screen) move a game as a `.hogame`
+file, for every version and with no account; an online game exports as a snapshot and
+imports as a local game. **Sign in** on the title screen (or the Ho menu's **Account…**:
 Google, an email and password, or a guest account) keeps saved games in the account too,
 so they follow the player to another computer (**Account saves…** in the Game menu, for
 every ruleset; Continue asks when the account's copy is newer), and adds a **This

@@ -59,7 +59,13 @@ https://www.deltatao.com/ho/ho4faq/.
    tAIB 1000, the Amiga's HO!.info (the cowboy), iOS's AppIcon (CgBI, decoded), Android's
    launcher icon. The homages (cozy, gemini) have none and keep the default, `favicon.ico`
    (Android's), which is also what the page shows before its script runs.
-7. **Export and import saved games, for every version.** A Game menu "Export this game…"
-   (the .hogame file) and "Import a game…", with no account needed. Today Download exists
-   only in iOS/Android's Saved Games and in Account saves (signed in), and "Open a
-   downloaded game…" only in iOS/Android's Saved Games.
+7. **Export and import saved games, for every version.** Done (October 2026): the Game
+   menu's "Export this game…" (the .hogame file Saved Games and Account saves give:
+   `gameFileName`, `downloadText`) and "Import a game…" (a file picker; `HO.load` checks it,
+   a file it can't read is refused with a plain message, and a game in progress is asked
+   about first), with no account (`exportGame`, `importGame` in `js/skins/classic/ui.js`;
+   in the 2.0.1 and 4.0.5 Mac skins' File menus). "Import a game…" is also on the title
+   screen, a quiet button beside Continue and New game. An online game exports as a
+   snapshot of the page's copy; imported, it opens as a local game (its `online` dropped),
+   and says so. Export also makes the deliberate-save sign-in offer, as Saved Games'
+   Download does.

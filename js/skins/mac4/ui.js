@@ -205,7 +205,8 @@ window.HOMAC4 = {
   // (layoutMenus in js/skins/classic/ui.js). 4.0's Edit menu has nothing
   // the remake does, so it is left out.
   menuLayout: {
-    File: [['New Game…', 'Game/New game…'], '-',
+    File: [['New Game…', 'Game/New game…'],
+      ['Import a Game…', 'Game/Import a game…'], ['Export This Game…', 'Game/Export this game…'], '-',
       ['End Turn', () => { const b = document.querySelector('#msg .clock'); if (b) b.click(); }], ['End Turn and Switch Players', 'Game/#1'], '-',
       ['Quit', 'Game/Quit to title']],
     Options: [['Auto Play…', 'Game/Auto play…'], ['Auto-Play This Turn', 'Game/Auto-play this turn'], '-',
@@ -230,6 +231,7 @@ window.HOMAC4 = {
     const n = doc.querySelector('#tnew'), o = doc.querySelector('#tcont');
     if (n) n.textContent = 'New Game';
     if (o) { o.textContent = 'Open Game'; n.before(o); }
+    const im = doc.querySelector('#timport'); if (im) im.textContent = 'Import a Game…';
     // inside the start-up window, under the splash
     const b = doc.querySelector('#titlescreen .tbtns'), w = doc.querySelector('#titlescreen .tsplash .wbody');
     if (b && w) w.append(b);
