@@ -603,19 +603,19 @@ function remake505(lang, rs, o) {
 }
 function build505(lang, rs, o) {
   o = o || {};
-  const T = translator(lang, iosOfficial(lang).concat(o.official || []));
+  const T = translator(lang, iosOfficial(lang).concat(typeof o.official === 'function' ? o.official() : o.official || []));
   const reports = [];
-  for (const en of lines505(rs, (o.extra || EXTRA505))) { const r = T.report(en); if (r) reports.push(r); }
+  for (const en of (o.lines ? o.lines() : lines505(rs, o.extra || EXTRA505))) { const r = T.report(en); if (r) reports.push(r); }
   // the curse with the Mac's characters (iOS shows "¥ª")
   for (const r of reports.slice()) if (typeof r[1] === 'string' && /[¥ª]/.test(r[1])) r[1] = r[1].replace(/¥/g, '•').replace(/ª/g, '™');
   const D = E.DATA, techs = [].concat(...Object.values(rs.TECHNAMES || D.techNames || {}));
   const { words, args } = iosWords(lang, techs);
-  const hints = (o.hints || (D.hints || []).slice(3, 43));
+  const hints = (o.hints ? o.hints() : (D.hints || []).slice(3, 43));
   const out = Object.assign(iosNames(lang, rs), {
     remake: true,
     say: { reports, args, words },
     hintTexts: hints.map(t => T.text(t)),
-    nameAStar: Object.assign({}, rs.nameAStar, { text: L(lang, 'Misc Strings')[74].trim(), taken: L(lang, 'Alert Strings')[9] }),
+    nameAStar: Object.assign({}, rs.nameAStar, { text: L(lang, 'Misc Strings')[74].trim(), taken: L(lang, 'Alert Strings')[9] }, o.nameAStar ? o.nameAStar(lang) : {}),
   });
   out.battlePanel = rs.battlePanelIn && rs.battlePanel === O505.battlePanel ? rs.battlePanelIn(iosPanelText(lang)) : (o.battlePanel ? o.battlePanel(iosPanelText(lang)) : rs.battlePanel);
   // (the lines no translation has: tools/lang-test.js lists them)
@@ -628,5 +628,56 @@ if (O505) {
   O505.languages = ['en', 'fr', 'tr'];
   O505.lang = Object.assign({}, O505.lang, { fr: remake505('fr', O505), tr: remake505('tr', O505) });
 }
+
+// ---------- the Palm (5.0's code): French and Turkish from iOS ----------
+// Its reports are 5.0.5's as it words them (rules-palm msgTextPalm: the
+// decoy's own line, "Your scientist have figured out how to prevent", "wierd",
+// the sums with no "$"), its alerts 5.0.5's, its hints and first messages its
+// own, its battle window its own words (rules-palm battlePanelPalmIn)
+const PALM = E.RULESETS.palm;
+// the battle window's words: "N Class (W/S)", "N dead Class (W/S)", "n/N
+// Class (W/S)s", "N People", "N People killed", "n of N People survived";
+// the classes are iOS's, the rest the remake's in iOS's and 1.2F's words
+// ("habitants", "détruit(s)"; "insan", "ölü")
+const PALM_PANEL = {
+  fr: { dead: (n, d) => `${n} ${d} détruit(s)`, people: (x) => `${x} habitants`, killed: (x) => `${x} habitants tués`, survived: (a, b) => `${a} habitants sur ${b} ont survécu` },
+  tr: { dead: (n, d) => `${n} ölü ${d}`, people: (x) => `${x} insan`, killed: (x) => `${x} insan öldü`, survived: (a, b) => `${b} insandan ${a} kişi kurtuldu` },
+};
+function palmPanelText(lang) {
+  const SC = L('en', 'Ship Class Names'), SCT = L(lang, 'Ship Class Names'), W = PALM_PANEL[lang];
+  const cls = (c, plural) => { if (c === 'Decoy') return L(lang, 'Misc Strings')[1]; const i = SC.indexOf(c); return i >= 0 && i < 7 ? SCT[plural ? i + 7 : i] : c; };
+  const desc = (t, plural) => { const m = /^(\d+ )?(.+?) (\(\d+\/\d+\))$/.exec(t); return m ? `${m[1] || ''}${cls(m[2], plural || (m[1] && +m[1] > 1))} ${m[3]}` : t; };
+  const N = '([\\d,.]+[KM]?)';
+  return {
+    head: iosPanelText(lang).head,
+    text: (t) => {
+      let m;
+      if ((m = /^(\d+) dead (.+)$/.exec(t))) return W.dead(m[1], desc(m[2], +m[1] > 1));
+      if ((m = /^(\d+)\/(\d+) (.+)s$/.exec(t))) return `${m[1]}/${m[2]} ${desc(m[3], true)}`;
+      if ((m = new RegExp('^' + N + ' People killed$').exec(t))) return W.killed(m[1]);
+      if ((m = new RegExp('^' + N + ' of ' + N + ' People survived$').exec(t))) return W.survived(m[1], m[2]);
+      if ((m = new RegExp('^' + N + ' People$').exec(t))) return W.people(m[1]);
+      return desc(t);
+    },
+  };
+}
+if (PALM) {
+  const welcomePalm = () => [].concat(PALM.welcome({ opts: {} }), PALM.welcome({ opts: { hints: false } })).map(x => x[0]);
+  const linesPalm = () => [].concat((E.DATA.reports || []).map(t => PALM.msgText(null, t.replace(/\$%s/, '%s'))), E.DATA.alerts || [], PALM.hintTexts, welcomePalm(),
+    ['Dorothy, I guess that means we’re not in Kansas anymore', 'Dost thou truly wish to abandon Hope? All is not yet lost...',
+      'Abandon Ship? Abandon Ship! All hands abandon ship! Women and children first!', 'Do you really want to evacuate %s? It\'s a profitable colony!', 'Year %d. Nothing much happened.']);
+  // the Palm's two slips in 5.0.5's lines are iOS's lines all the same (157, 158)
+  const slips = (lang) => { const R = L(lang, 'Report Window Templates'); return [[PALM.msgText(null, E.DATA.reports ? E.DATA.reports[157] : ''), R[157]], [PALM.msgText(null, E.DATA.reports ? E.DATA.reports[158] : ''), R[158]]]; };
+  const palm = (lang) => lazyLang(() => build505(lang, PALM, {
+    lines: linesPalm, hints: () => PALM.hintTexts, official: () => slips(lang),
+
+    // tFRM 2900's title and buttons: iOS's "Congratulations!" (Misc Strings 73), the remake's buttons
+    nameAStar: (l) => ({ title: L(l, 'Misc Strings')[73], ok: { fr: 'Cool !', tr: 'Süper!' }[l], cancel: { fr: 'Laisse tomber', tr: 'Boşver' }[l] }),
+    battlePanel: () => PALM.battlePanelIn(palmPanelText(lang)),
+  }), LANG_KEYS);
+  PALM.languages = ['en', 'fr', 'tr'];
+  PALM.lang = Object.assign({}, PALM.lang, { fr: palm('fr'), tr: palm('tr') });
+}
+
 })(this);
 

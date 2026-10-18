@@ -68,6 +68,8 @@ verbatim from another version's official translation of the same English.
 | DOS 2.0, Mac 2.0.1 | French (the remake's) | 56 (1.2F's; one line and two messages the iOS game's) | 3 | 1.2F's lists |
 | 5.0.5 | French (the remake's) | 233 (iOS's), hints 35 | 13, of them hints 5 | iOS's lists (the same English lists) |
 | 5.0.5 | Turkish (the remake's) | 223 (iOS's), hints 35 | 23, of them hints 5 | iOS's lists |
+| Palm OS 5 | French (the remake's) | 230 (iOS's), hints 33 | 17, of them hints 7 | iOS's lists (the stars by name: Courasant stays) |
+| Palm OS 5 | Turkish (the remake's) | 220 (iOS's), hints 33 | 27, of them hints 7 | iOS's lists |
 
 
 ## Mac 1.2 (French, as released)
@@ -139,7 +141,23 @@ The remake now gives the alerts the page shows from 5.0.5's list (the gifts, the
 assembly lines, surrender, Armageddon, the many-scouts warning, the fuel alert) through
 the language, so iOS's French and Turkish show them too.
 
+## Palm OS 5
+
+**French and Turkish (the remake's), backwards from iOS**, as 5.0.5's: the Palm's
+reports are 5.0.5's as it words them (`rules-palm` msgTextPalm), so iOS's lines serve for
+all of them but its decoy report (4.0.5's, "Your ship technicians have designed a decoy
+ship…": the remake's) and its two slips ("Your scientist have figured out how to
+prevent", "wierd": iOS's lines for 157 and 158 all the same). The remake's own: its 7
+hints of its own (the Ship Info window, the Galaxy screen's menus, the Enemies and
+Allies screen…), its first messages (the G, $ and H buttons; "Palm OS version by…"),
+Name a Star's buttons (Cool! → "Cool !", "Süper!"; Nevermind → "Laisse tomber", "Boşver";
+the title is iOS's "Félicitations!" / "Tebrikler!", the Palm's "Congratulation!" being a
+slip) and its battle window's words ("N Class (W/S)", with iOS's class names; "détruit(s)",
+1.2F's word, and "habitants"; "ölü", "insan"). The names are iOS's lists; the stars are
+matched by name (the Palm's "Courasant" for Antares has no translation).
+
 ## What stays English, and why
+
 
 
 The remake's own interface (its windows, buttons, menus, New Game, Preferences, the help

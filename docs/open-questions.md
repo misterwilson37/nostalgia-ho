@@ -182,6 +182,9 @@ Where a browser can't do what the original did, or the remake had to pick.
 
 - Several people may play (the Palm game had room for one).
 - No demo and no registration.
+- **French and Turkish (the remake's)**: iOS's for the lines the Palm shares with 5.0.5;
+  the remake's for its own hints, first messages, decoy report and battle window.
+
 
 ### 5.0.5 (and the Palm and iOS)
 

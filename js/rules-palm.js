@@ -290,13 +290,16 @@ function shipDescPalm(d, n, mine) {
   return n < 1 ? `${cls} ${ws}` : n === 1 ? `1 ${cls} ${ws}` : `${n} ${cls} ${ws}`;
 }
 const popPalm = (pop) => E.fmt(Math.round(pop * 1e6));
-const battlePanelPalm = E.makeBattlePanel({
+// (tr: the window's words in another language, js/languages.js: the head
+// and a text's own translation)
+const battlePanelPalmIn = (tr) => E.makeBattlePanel({
   cols: 'viewer', byStance: true, owner: 'luck', pics: (n) => Math.min(n, 1),
-  head: (G, b) => [`Review Battle at ${G.stars[b.star].name} in ${b.year}`],
-  ship: (G, d, n, n0, mine) => n === 0 ? `${n0} dead ${shipDescPalm(d, 0, mine)}` // FUN_00030a80, an all-dead group: always 6003.11 "%ld dead %s" ("1 dead Fighter (5/4)"; 6003.10 "one dead %s" is never loaded there)
-    : n !== n0 ? `${n}/${n0} ${shipDescPalm(d, 0, mine)}s` : shipDescPalm(d, n, mine),
-  planet: (G, pop, pop0) => pop <= 0.0005 ? `${popPalm(pop0)} People killed` : Math.abs(pop - pop0) < 0.0005 ? `${popPalm(pop)} People` : `${popPalm(pop)} of ${popPalm(pop0)} People survived`,
+  head: (G, b) => [tr ? tr.head(G.stars[b.star].name, b.year) : `Review Battle at ${G.stars[b.star].name} in ${b.year}`],
+  ship: (G, d, n, n0, mine) => (tr ? tr.text : (t) => t)(n === 0 ? `${n0} dead ${shipDescPalm(d, 0, mine)}` // FUN_00030a80, an all-dead group: always 6003.11 "%ld dead %s" ("1 dead Fighter (5/4)"; 6003.10 "one dead %s" is never loaded there)
+    : n !== n0 ? `${n}/${n0} ${shipDescPalm(d, 0, mine)}s` : shipDescPalm(d, n, mine)),
+  planet: (G, pop, pop0) => (tr ? tr.text : (t) => t)(pop <= 0.0005 ? `${popPalm(pop0)} People killed` : Math.abs(pop - pop0) < 0.0005 ? `${popPalm(pop)} People` : `${popPalm(pop)} of ${popPalm(pop0)} People survived`),
 });
+const battlePanelPalm = battlePanelPalmIn(null);
 // CONFIRMED (FUN_0004af48, from FUN_000790ea): a pile (one design's ships,
 // all of them) moved to another fleet at the star is added to its count; to
 // "Empty Fleet" it makes a new fleet (FUN_0004adc0: a fresh record, no
@@ -339,7 +342,8 @@ const rs = Object.assign(base, {
   // 3-pixel tick and a faint line); the budget and technology bars alike
   // (the same control, kind +0x28 2 or 1).
   barGrid: { n: 10, tick: 0, line: true, color: '#666666', tech: true },
-  barLocked: barLockedPalm, battlePanel: battlePanelPalm,
+  barLocked: barLockedPalm, battlePanel: battlePanelPalm, battlePanelIn: battlePanelPalmIn,
+
   // CONFIRMED (FUN_0002c510, the CMiscUtilsPalm method +0x68 the report
   // formatter FUN_00027c4c calls): numbers in full with commas, however big,
   // not 5.0.5's "12,345K" (the compact money, FUN_0002c664: shortMoney below).

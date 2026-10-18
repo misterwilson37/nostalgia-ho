@@ -431,7 +431,9 @@ root.HOVERSIONS = {
       'When you give a gift, you are told at once; the Palm game told you at the end of the turn.',
       'Every game starts from the default budget and research shares; the Palm game started a new game with your first turn’s shares from the last one.',
       'Sounds are the skin’s, not the handheld’s few beeps.',
+      REMAKE_LANG('French (“traduction du remake”) and Turkish (“yeniden yapımın çevirisi”): the iOS game’s official French and Turkish for every line the Palm shares with 5.0.5, with the remake’s own lines for the Palm’s own hints, first messages, decoy report and battle window'),
     ],
+
     missing: [
       'Options locked by rank.',
     ],

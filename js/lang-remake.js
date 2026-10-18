@@ -49,6 +49,20 @@ fr: {
     'Abandon Ship? Abandon Ship! All hands abandon ship! Women and children first!': 'Abandonner le navire ? Abandonnez le navire ! Tout le monde quitte le navire ! Les femmes et les enfants d\'abord !',
     // the remake's own line for a turn with no news (js/skins/classic/ui.js)
     'Year %d. Nothing much happened.': 'Année %d. Rien de spécial ne s\'est passé.',
+    // ---- the Palm (5.0's code): its own hints, first messages and decoy ----
+    'Icons by your planet mean you have ships orbiting around it. Fleets are on the right; satellites are on the left.': 'Des icônes près d\'une planète signifient que vous y avez des vaisseaux en orbite. Les flottes sont à droite, les satellites à gauche.',
+    'To cancel a fleet’s movement, make sure that fleet is selected in the Ship Info window and click the origin planet. You can also use the ‘Cancel Fleet Trip’ menu item in the ‘Ships’ menu.':
+      'Pour annuler le déplacement d\'une flotte, sélectionnez-la dans la fenêtre Ship Info et cliquez sur sa planète d\'origine. Vous pouvez aussi utiliser la commande "Cancel Fleet Trip" du menu "Ships".',
+    'There are menus and menu shortcuts in the Galaxy screen for your convenience.': 'Pour plus de commodité, l\'écran Galaxie a des menus et des raccourcis de menu.',
+    'The computer will help choose the best path possible for your fleets.': 'L\'ordinateur vous aide à choisir le meilleur trajet possible pour vos flottes.',
+    'Change the battle attitude of ships in your fleets in the Organize Fleets screen.': 'Changez l\'attitude au combat des vaisseaux de vos flottes dans l\'écran "Organiser Flottes".',
+    'The Enemy and Allies screen can show who your friends and enemies are. It also so shows who is doing the best.': 'L\'écran Ennemis et Alliés vous montre qui sont vos amis et vos ennemis. Il montre aussi qui s\'en sort le mieux.',
+    'The first person in the Enemies and Allies list is winning.': 'Le joueur en tête de la liste Ennemis et Alliés est en train de gagner.',
+    'Click the G button to see the Galaxy, click the $ button to see the Spendingscreen and click the H button to see these messages.': 'Cliquez sur le bouton G pour voir la Galaxie, sur le bouton $ pour voir l\'écran des Dépenses et sur le bouton H pour voir ces messages.',
+    'Fleets appear as icons next to your planets. To send a fleet to another planet, select it and then drag it to the new planet.': 'Les flottes figurent sous forme d\'icônes près de vos planètes. Pour envoyer une flotte vers une autre planète, sélectionnez-la puis tirez-la vers la nouvelle planète.',
+    'Palm OS version by Christopher Cotton and Steve Orens of Mobilefreon (tm)': 'Version Palm OS par Christopher Cotton et Steve Orens de Mobilefreon (tm)',
+    // (4.0.5's decoy too)
+    'Your ship technicians have designed a decoy ship. It\'s really weak, but it looks menacing and can help keep your allies in line!': 'Vos techniciens viennent de concevoir un vaisseau leurre. Il est vraiment faible, mais il a l\'air menaçant et peut aider à garder vos alliés dans le droit chemin !',
   },
   words: {
     // iOS's "et vos alliés" (Misc Strings 39) with the space its reports need ("Vous%s avez perdu")
@@ -97,6 +111,19 @@ tr: {
     'Do you really want to evacuate %s?': 'Gerçekten %syi boşaltmak istiyor musun?',
     'Abandon Ship? Abandon Ship! All hands abandon ship! Women and children first!': 'Gemiyi terk et? Gemiyi terk edin! Herkes gemiyi terk etsin! Önce kadınlar ve çocuklar!',
     'Year %d. Nothing much happened.': 'Yıl %d. Pek bir şey olmadı.',
+    // ---- the Palm (5.0's code) ----
+    'Icons by your planet mean you have ships orbiting around it. Fleets are on the right; satellites are on the left.': 'Gezeğenlerinin yakınındaki simgeler, senin gemilerin gezeğen çevresindeki yörüngelerini gösterir. Filolar sağda, uydular da soldadır.',
+    'To cancel a fleet’s movement, make sure that fleet is selected in the Ship Info window and click the origin planet. You can also use the ‘Cancel Fleet Trip’ menu item in the ‘Ships’ menu.':
+      'Bir filonun hareketini iptal etmek için, o filonun Ship Info penceresinde seçili olduğuna emin ol ve çıkış gezeğenine tıkla. \'Ships\' menüsündeki \'Cancel Fleet Trip\' komutunu da kullanabilirsin.',
+    'There are menus and menu shortcuts in the Galaxy screen for your convenience.': 'Kolaylık olsun diye Galaksi ekranında menüler ve menü kısayolları var.',
+    'The computer will help choose the best path possible for your fleets.': 'Bilgisayar, filoların için mümkün olan en iyi yolu seçmene yardım eder.',
+    'Change the battle attitude of ships in your fleets in the Organize Fleets screen.': 'Filolarındaki gemilerin savaş tutumunu Organize gemileri ekranında değiştir.',
+    'The Enemy and Allies screen can show who your friends and enemies are. It also so shows who is doing the best.': 'Düşmanlar ve Ortaklar ekranı dostlarının ve düşmanlarının kim olduğunu gösterir. En iyi gidenin kim olduğunu da gösterir.',
+    'The first person in the Enemies and Allies list is winning.': 'Düşmanlar ve Ortaklar listesindeki ilk kişi oyunu kazanıyor.',
+    'Click the G button to see the Galaxy, click the $ button to see the Spendingscreen and click the H button to see these messages.': 'Galaksiyi görmek için G düğmesine, Harcama ekranı için $ düğmesine, bu mesajları görmek için de H düğmesine tıkla.',
+    'Fleets appear as icons next to your planets. To send a fleet to another planet, select it and then drag it to the new planet.': 'Filolar senin gezeğenlerinin yakınında simge olarak gözükür. Bir filoyu başka bir gezeğene göndermek için onu seç ve yeni gezeğene sürükle.',
+    'Palm OS version by Christopher Cotton and Steve Orens of Mobilefreon (tm)': 'Palm OS sürümü: Christopher Cotton ve Steve Orens, Mobilefreon (tm)',
+    'Your ship technicians have designed a decoy ship. It\'s really weak, but it looks menacing and can help keep your allies in line!': 'Senin gemi teknisyenlerin kandırıcı bir gemi tasarladılar. Gerçekten zayıf, fakat tehditkâr görünüyor ve ortaklarını hizada tutmana yardım edebilir!',
   },
   words: {},
 },
