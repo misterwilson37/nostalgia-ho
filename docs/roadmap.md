@@ -3,6 +3,10 @@
 Jake's order for the remake's own work (the originals' unbuilt windows are listed, for
 Delta Tao, in `docs/open-questions.md`, "Unfinished").
 
+**What's next, in Jake's order (October 2026):** online play's first games and fixes,
+then the remake's own translations (item 4's "Left"), then an icon per skin (item 6), and
+export and import for every version (item 7).
+
 1. **English 1.2.** Done (October 2026): New Game's Language, and the Ho menu's;
    `docs/12-findings.md`, "English". An English option for the French Mac 1.2F: its words from the
    official English of the nearest version (Mac 2.0.1 first, then later ones), and its
