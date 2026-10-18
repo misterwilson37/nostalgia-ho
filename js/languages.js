@@ -892,11 +892,16 @@ const engineLines = () => ENGINE_LINES.concat(ENGINE_REPORTS.map(n => (E.DATA.re
 // the official lines for 2.0's English: 1.2F's French (its reports, its
 // Name a Star window) and the German DOS 2.0's
 function official20(lang) {
+  // Mac 2.0.1's English for Name a Star (rules-12 lang.en) and Fix Spending
+  const EN = R12 && R12.lang.en.nameAStar, FIX_EN = ['You have no spending problems.', 'You were overspending at %s. The problem has been fixed.',
+    'You were underspending at %s. The problem has been fixed.', 'You’re abandoning %s.'];
   if (lang === 'fr' && R12) return REPORTS20.concat(CHAT20).filter(([, id]) => id !== 703).map(([en, id]) => [en, F(id)])
-    .concat([['You won the game, so you get to name a star.', R12.nameAStar.text], ['Sorry, there’s already a star named  “%s.” Please pick another name.', R12.nameAStar.taken]]);
+    .concat([[EN.text, R12.nameAStar.text], [EN.taken, R12.nameAStar.taken], [EN.label, R12.nameAStar.label], [EN.hint, R12.nameAStar.hint]], FIX_EN.map((t, i) => [t, FIX_FR[i]]));
   if (lang === 'de') return REPORTS20.concat(CHAT20).filter(([, id]) => id !== 703).map(([en, id]) => [en, S(id)])
-    .concat([['You won the game, so you get to name a star.', NAME_DE.text], ['Sorry, there’s already a star named  “%s.” Please pick another name.', NAME_DE.taken]]);
+    .concat([['You won the game, so you get to name a star.', NAME_DE.text], ['Sorry, there’s already a star named  “%s.” Please pick another name.', NAME_DE.taken],
+      ['New Star Name:', NAME_DE.label]], FIX_EN.map((t, i) => [t, X(DE.exe.fixSpending[i])]));
   return [];
+
 }
 // the official lines, the nearest first, with the equivalents
 function officialFor(lang, nearest) {
@@ -962,6 +967,8 @@ function buildText(lang, rs, o) {
     NS.rule ? { rule: T.text(NS.rule) } : {}, NS.label ? { label: T.text(NS.label) } : {}, NS.hint ? { hint: T.text(NS.hint) } : {});
   if (rs.conquered) out.conquered = T.text(rs.conquered);
   if (rs.armageddonAsk) out.armageddonAsk = rs.armageddonAsk.map(l => l.map(t => T.text(t)));
+  // Fix Spending's lines (3.0.1: Mac 2.0.1's)
+  if (rs.fixSpending && rs.fixSpending.lines) out.fixSpending = Object.assign({}, rs.fixSpending, { lines: rs.fixSpending.lines.map(t => (T.line(t) ? T.text(t) : (T.missing.push(t), t))) });
   out.battlePanel = o.battlePanel ? o.battlePanel(words20(lang)) : rs.battlePanel;
   out.missing = T.missing.slice();
   out.hintRemake = hints.filter(t => (T.line(t) || [])[1] === 'remake');
@@ -981,5 +988,90 @@ if (W405) {
     rs.languages = ['en', 'fr', 'tr'];
     rs.lang = Object.assign({}, rs.lang, { fr: make('fr', rs, mac), tr: make('tr', rs, mac) });
   }
+}
+
+// ---------- 3.0.1: French and Turkish backwards from iOS ----------
+// 3.0.1's lines (js/rules-301.js, js/ai-301.js), the engine's and its
+// Send Message window's (5.0.5's words, report templates 39-68), its first
+// messages, its Fix Spending (Mac 2.0.1's lines) and Name a Star (Mac
+// 2.0.1's window, with 3.0.1's own rule)
+const TEXT301 = [
+  '%s destroyed your colony at %s. You lost %s of your ships. %s lost %s. You lost %s people.',
+  '%s has just become a profitable colony.',
+  '%s has just been eliminated from the game.',
+  '%s has just gone supernova. The planet has been obliterated.',
+  '%s has just surrendered to %s.',
+  '%s has just surrendered.',
+  '%s has just won the game.',
+  '%s has run out of metal.',
+  '%s has run out of metal. You should probably abandon it.',
+  '%s metal has fallen onto %s from your recent battle.',
+  '%s survived an enemy attack from %s. You lost %s of your ships. %s lost %s. You lost %s people.',
+  '%s’s armageddon device has just been turned on!',
+  '%s’s population growth rate has slowed.',
+  'Abandon Ship? Abandon Ship! All hands abandon ship! Women and children first!',
+  'Artwork by Howard Vives and Bob Van de walle.',
+  'Congratulations! You won the game.',
+  'Dost thou truly wish to abandon Hope? All is not yet lost!',
+  'Due to a lack of funds, one of your fleets can’t be maintained. It is being scrapped.',
+  'Hmm! The armadeddon device was activated, but there wasn’t enough mass in the galaxy to get it to work…',
+  'It’s a baby boom! The population at %s has started growing quickly.',
+  'Oh No! It’s armageddon!',
+  'Oh no! %s people were killed when a heavy meteor shower hit %s.',
+  'Spaceward Ho! Version 3.0.1 by Peter Commons.',
+  'The amount of energy emanating from %s suggests a big battle just took place.',
+  'The armageddon device has caused half of the stars to supernova!',
+  'The meteor shower destroyed your colony at %s.',
+  'The shock wave from the supernova threw %s metal at %s, killing %s people.',
+  'Uh-oh! %s has started growing and is turning bright red in hue!',
+  'Uh-oh! Having to borrow more ship money to pay all your interest!',
+  'Warning! After supporting your planets and paying your interest, you have no money to spend!',
+  'Warning! Ship money is being used to support %s.',
+  'Warning: you are terraforming %s, a planet that will never become profitable.',
+  'Weird weather patterns have allowed astronomers to explore certain far away stars.',
+  'Whew! %s’s armageddon device was just turned off.',
+  'You are not spending any money on technology research.',
+  'You don’t have enough money! You’re neglecting your planets! Global warming is taking place!',
+  'You have abandoned %s.',
+  'You have colonized %s.',
+  'You have completely terraformed %s.',
+  'You have just been eliminated from the game.',
+  'You have just surrendered to %s.',
+  'You have just surrendered.',
+  'You just received %s metal from someone scrapping a fleet over %s.',
+  'You lost a battle at %s. You lost %s of your ships. %s lost %s.',
+  'You recovered %s metal from the battle at %s.',
+  'You won a battle at %s. You lost %s of your ships. %s lost %s.',
+  'Your %s can no longer reach %s.',
+  'Your %s technology just jumped to %s.',
+  'Your Radical researchers have just made another wild discovery!',
+  'Your alliance will win the game next turn if it holds!',
+  'Your archaeologists have found ancient scientific documents from a lost civilization. You can now mine more efficiently.',
+  'Your climatologists have discovered how to terraform planets more efficiently.',
+  'Your colony at %s is not receiving sufficient funds to support itself.',
+  'Your fleet of %s at %s has been scrapped for %s metal.',
+  'Your fleet of %s disappeared through a wormhole in space and is lost.',
+  'Your fleet of %s has arrived at %s.',
+  'Your military training program has improved. Your generals are now smarter.',
+  'Your mining consortium has just been able to extract an additional %s metal from every planet you have.',
+  'Your scientists have discovered how to turn your monitor from black and white to color!',
+  'Your ship technicians have designed a set of new ships with no development cost.',
+  'Your sociologists have discovered how to safely increase the maximum population of your planets!',
+  'Your spies have stolen some technological secrets from %s!',
+  'Your “%s” ship type has been scrapped. %s of this type scrapped for %s metal.',
+  'You have explored %s. Gravity: %d.%2.2dG. Temp: %s. Metal: %s.',
+  'Year %d:',
+].concat(TECH5(k => `Your ${k} Technology has reached level %d.`));
+
+const R301 = E.RULESETS['301'];
+if (R301) {
+  const welcome = (rs) => (typeof rs.welcome === 'function' ? welcomeLines(rs) : (rs.welcome || []).map(x => x[0]));
+  const lines = () => TEXT301.concat(engineLines(), welcome(R301), (E.DATA.reports || []).slice(38, 69), R301.colorMonitorBW ? [R301.colorMonitorBW.text] : []);
+  const make = (lang) => lazyLang(() => {
+    const out = buildText(lang, R301, { lines, battlePanel: (w) => w ? DOS.battlePanel20({ dots: '…', cols: 'mac', shade: true, words: w }) : R301.battlePanel });
+    return out;
+  }, LANG_KEYS405.concat(['fixSpending']));
+  R301.languages = ['en', 'fr', 'tr'];
+  R301.lang = Object.assign({}, R301.lang, { fr: make('fr'), tr: make('tr') });
 }
 })(this);

@@ -196,7 +196,9 @@ root.HOVERSIONS = {
       'Dip Into Savings takes a percentage of the most you may dip; 3.0.1 took an amount.',
       'Evacuate is 3.0.1’s Abandon: the colony is given up at End Turn, and pressing it again takes it back. The planet doesn’t show it as marked.',
       'Evacuating a star named Hope or Ship asks 3.0.1’s jokes (“Dost thou truly wish to abandon Hope? All is not yet lost!”, “Abandon Ship? …”), every time.',
+      REMAKE_LANG('French (“traduction du remake”) and Turkish (“yeniden yapımın çevirisi”): the official French and Turkish of the iOS game, and the French Mac 1.2’s for 3.0.1’s 2.0 lines (its Name a Star and Fix Spending among them), for every line 3.0.1 shares with them, with the remake’s own lines for the rest'),
     ],
+
     missing: [
     ],
     deltaTao: DT_3,

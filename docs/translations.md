@@ -74,6 +74,8 @@ verbatim from another version's official translation of the same English.
 | 4.0.5 Windows | Turkish (the remake's) | 152 (iOS's), hints 22 | 44, hints 4 | iOS's stars by name; ships by name |
 | 4.0.5 Mac | French (the remake's) | 180, hints 23 | 33, hints 4 | iOS's ships (5.0.5's lists), stars by name |
 | 4.0.5 Mac | Turkish (the remake's) | 168, hints 23 | 45, hints 4 | iOS's ships, stars by name |
+| 3.0.1 | French (the remake's) | 119 (iOS's and 1.2F's) | 13 | 1.2F's lists for its 2.0 lists (Scouts, Colony Ships, Satellites); stars by name |
+| 3.0.1 | Turkish (the remake's) | 111 (iOS's) | 21 | iOS's stars and ships by name |
 
 
 ## Mac 1.2 (French, as released)
@@ -183,7 +185,19 @@ savings…"; the French ones iOS's own words where iOS's French had already said
 that), the Send Message groups (Everyone, Your Allies, Your Buddies), and the Turkish
 for the lines whose only official translation is 1.2F's French.
 
+## 3.0.1
+
+**French and Turkish (the remake's)**, as 4.0.5's: 3.0.1's lines (`TEXT301`), the
+engine's, its Send Message window's (5.0.5's words) and its first messages get iOS's
+lines where the English is the same, and 1.2F's where it is 2.0's: Name a Star's text,
+field, note and alert (Mac 2.0.1's window, DITL 4050 and 3340 in 1.2F), and Fix
+Spending's four lines (Mac 2.0.1's, 1.2F's STR# 1050). The remake's own: Name a Star's
+rule (3.0.1 takes 2 to 7 letters, 1.2F's line says 4 to 7), the battle reports' colony
+lines in 3.0.1's form, "ship money", the credit line, and the Turkish for the Name a Star
+and Fix Spending windows, which only 1.2F's French has.
+
 ## What stays English, and why
+
 
 
 

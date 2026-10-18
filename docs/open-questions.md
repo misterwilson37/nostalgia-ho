@@ -243,6 +243,10 @@ Where a browser can't do what the original did, or the remake had to pick.
   turn's purchases.
 - Played as released: an abandoned colony with a colony ship there is settled again at
   once.
+- **French and Turkish (the remake's)**: iOS's official lines wherever the English is
+  3.0.1's, 1.2F's for its 2.0 lines (Name a Star, Fix Spending), the remake's for the
+  rest (3.0.1's Name a Star rule of 2 to 7 letters, its battle reports' form).
+
 
 ### 2.0 and 1.2
 
