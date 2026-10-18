@@ -24,7 +24,9 @@ remake's, version by version, and how the remake's was made.
   (`hintTexts`), and the version's window words that the rules carry (`nameAStar`,
   `fixSpending.lines`, `battlePanel`, `options`, `exploredList`, `forceEndTurn`,
   `battleLines`). `remake: true` marks the remake's own translation; a report the remake
-  wrote itself is marked `'remake'` (its third element), so it can be counted.
+  adapted from an official line is marked `'adapted'` (its third element) with that line's
+  English (its fourth), and one the remake wrote itself `'remake'`, so they can be
+  counted.
 - A version whose own language isn't the rules' English keeps its reports as `rs.say`
   (1.2F's French: shown with no `G.opts.lang`).
 - Names are translated only where an official list was made for the same English list,
@@ -35,7 +37,10 @@ remake's, version by version, and how the remake's was made.
 **Checks:** `node tools/lang-test.js [rules ...] [--lang=<code>]` plays games in every
 language and fails on a report left untranslated, a filling left in a translation, or a
 name list or hint list that isn't entry for entry the version's own; `--count` prints the
-counts below. `node tools/decency-test.js` passes every name in every language.
+counts below; `--adapted` lists the lines adapted from official, each with its source
+line, and fails on one whose source isn't an official line of the language or whose
+English is too unlike it. `node tools/decency-test.js` passes every name in every
+language.
 
 ## Method
 
@@ -46,7 +51,15 @@ counts below. `node tools/decency-test.js` passes every name in every language.
    aside), is given that official translation verbatim, from the nearest version that
    has one. 1.2F's French carries forward to 2.0 (1.2's reports are 2.0's line for line);
    the German DOS 2.0 carries back to 1.2.
-3. **The remake's own**: what no official translation says, translated in the voice of
+3. **Adapted from official**: a line whose English differs only a little from a line
+   that has an official translation (a word changed, a clause added or dropped, a number,
+   a placeholder or a name changed) is given that official translation, edited as little
+   as the difference needs, and never translated afresh. Candidates are picked by the
+   two Englishes' word-level likeness (2 × the longest common subsequence of words ÷ both
+   lengths, placeholders as words; `tools/lang-test.js --adapted`), from 0.5 up, and each
+   was read by hand: an adaptation says exactly what this version's English says, and no
+   rules text is invented. Many candidates were turned down (below, "Adapted lines").
+4. **The remake's own**: what no official translation says, translated in the voice of
    the nearest official one (its words for the game's things, its forms of address, its
    jokes), and marked.
 
@@ -60,40 +73,42 @@ order needs it, as the official translations' slips were (`docs/ios-findings.md`
 messages and questions its rules send, its first messages and the alerts the page shows
 (each counted once; for 5.0.5, the Palm and iOS the hint list is among them, as it is in
 their report list). **Hints** are the between-turn hints (`rs.hintTexts`), official /
-the remake's. "Official" includes lines carried verbatim from another version's official
-translation of the same English, and lines whose English differs from an official one
-only by the version's own slip (`EQUIV`); "the remake's" are the lines marked `'remake'`
-(`js/lang-remake.js`, and the few in `js/languages.js`).
+adapted / the remake's. "Official" includes lines carried verbatim from another version's
+official translation of the same English, and lines whose English differs from an official
+one only by the version's own slip (`EQUIV`); "adapted" are the lines marked `'adapted'`
+(`js/lang-remake.js` `adapted`, and the few in `js/languages.js`), listed below with their
+source lines; "the remake's" are the lines marked `'remake'` (`js/lang-remake.js` `own` and
+`over`, and the few in `js/languages.js`).
 
-| Version | Language | Lines, official | Lines, the remake's | Hints |
-|---|---|---|---|---|
-| Mac 1.2 | French (its own) | 57 | 3 | – |
-| Mac 1.2 | German (the remake's) | 54 | 6 | – |
-| DOS 2.0 | German (official) | 54 | 5 | – |
-| DOS 2.0 | French (the remake's) | 56 | 4 | – |
-| Mac 2.0.1 | German (official) | 54 | 5 | – |
-| Mac 2.0.1 | French (the remake's) | 56 | 4 | – |
-| Mac 3.0.1 | French (the remake's) | 119 | 13 | – |
-| Mac 3.0.1 | Turkish (the remake's) | 111 | 21 | – |
-| Mac 3.0.1 | German (the remake's) | 30 | 102 | – |
-| Windows 4.0.5 | French (the remake's) | 163 | 33 | 22 / 4 |
-| Windows 4.0.5 | Turkish (the remake's) | 152 | 44 | 22 / 4 |
-| Windows 4.0.5 | German (the remake's) | 31 | 165 | 0 / 26 |
-| Mac 4.0.5 | French (the remake's) | 180 | 33 | 23 / 4 |
-| Mac 4.0.5 | Turkish (the remake's) | 168 | 45 | 23 / 4 |
-| Mac 4.0.5 | German (the remake's) | 31 | 182 | 0 / 27 |
-| 5.0.5 | French (the remake's) | 250 | 27 | 35 / 5 |
-| 5.0.5 | Turkish (the remake's) | 240 | 37 | 35 / 5 |
-| 5.0.5 | German (the remake's) | 25 | 230 | 0 / 40 |
-| Palm OS 5 | French (the remake's) | 247 | 31 | 33 / 7 |
-| Palm OS 5 | Turkish (the remake's) | 237 | 41 | 33 / 7 |
-| Palm OS 5 | German (the remake's) | 25 | 231 | 0 / 40 |
-| iOS 1.2.9 | French (official) | 201 | 0 | – |
-| iOS 1.2.9 | Turkish (official) | 201 | 0 | – |
-| iOS 1.2.9 | German (the remake's) | 25 | 227 | 0 / 39 |
-| Android 1.2.8 | French (official) | 201 | 0 | – |
-| Android 1.2.8 | Turkish (official) | 201 | 0 | – |
-| Android 1.2.8 | German (the remake's) | 25 | 227 | 0 / 39 |
+| Version | Language | Lines, official | Lines, adapted | Lines, the remake's | Hints (official / adapted / the remake's) |
+|---|---|---|---|---|---|
+| Mac 1.2 | French (its own) | 57 | 2 | 1 | – |
+| Mac 1.2 | German (the remake's) | 54 | 3 | 3 | – |
+| DOS 2.0 | German (official) | 54 | 2 | 3 | – |
+| DOS 2.0 | French (the remake's) | 56 | 3 | 1 | – |
+| Mac 2.0.1 | German (official) | 54 | 2 | 3 | – |
+| Mac 2.0.1 | French (the remake's) | 56 | 3 | 1 | – |
+| Mac 3.0.1 | French (the remake's) | 119 | 11 | 2 | – |
+| Mac 3.0.1 | Turkish (the remake's) | 111 | 12 | 9 | – |
+| Mac 3.0.1 | German (the remake's) | 30 | 13 | 89 | – |
+| Windows 4.0.5 | French (the remake's) | 163 | 17 | 16 | 22 / 1 / 3 |
+| Windows 4.0.5 | Turkish (the remake's) | 152 | 17 | 27 | 22 / 1 / 3 |
+| Windows 4.0.5 | German (the remake's) | 31 | 18 | 147 | 0 / 0 / 26 |
+| Mac 4.0.5 | French (the remake's) | 180 | 17 | 16 | 23 / 1 / 3 |
+| Mac 4.0.5 | Turkish (the remake's) | 168 | 17 | 28 | 23 / 1 / 3 |
+| Mac 4.0.5 | German (the remake's) | 31 | 18 | 164 | 0 / 0 / 27 |
+| 5.0.5 | French (the remake's) | 251 | 5 | 21 | 35 / 1 / 4 |
+| 5.0.5 | Turkish (the remake's) | 241 | 5 | 31 | 35 / 1 / 4 |
+| 5.0.5 | German (the remake's) | 25 | 16 | 214 | 0 / 0 / 40 |
+| Palm OS 5 | French (the remake's) | 248 | 4 | 26 | 33 / 2 / 5 |
+| Palm OS 5 | Turkish (the remake's) | 238 | 4 | 36 | 33 / 2 / 5 |
+| Palm OS 5 | German (the remake's) | 25 | 16 | 215 | 0 / 0 / 40 |
+| iOS 1.2.9 | French (official) | 203 | 0 | 0 | – |
+| iOS 1.2.9 | Turkish (official) | 203 | 0 | 0 | – |
+| iOS 1.2.9 | German (the remake's) | 25 | 16 | 211 | 0 / 0 / 39 |
+| Android 1.2.8 | French (official) | 203 | 0 | 0 | – |
+| Android 1.2.8 | Turkish (official) | 203 | 0 | 0 | – |
+| Android 1.2.8 | German (the remake's) | 25 | 16 | 211 | 0 / 0 / 39 |
 
 Names, besides: 1.2F's French lists (1.2's own; carried to 2.0's French), the German DOS
 2.0's lists (2.0's own; carried to 1.2's German, and to 3.0.1's and 4.0.5's lists that
@@ -103,6 +118,136 @@ nearest official list. Window words: Name a Star, Fix Spending, the battle windo
 4.0.5's won window and Armageddon questions, 1.2's and 2.0's Options menu and Explored
 Planets list, Mac 2.0.1's Force End Turn (the counts above leave them out; they are said
 in each version's section).
+
+## Adapted lines
+
+`node tools/lang-test.js --adapted` prints them, with each one's likeness to its source.
+The source is the official line's English (the official translation is the one the
+language has for it: iOS's French and Turkish, 1.2F's French, the German DOS 2.0's). The
+versions are those whose reports have the line; "hint" a between-turn hint; "window" a
+window's line (Name a Star). Each was read against its source: what the adaptation
+changes is what the two Englishes change, and nothing else, but for three things the
+remake's languages always do: a slip of the official line put right where the English
+needs it (Turkish "Faizleini", "kiş", "kaybolmasi"; the Turkish "lost" left in English,
+iOS 11, as the patch's 'trLostWord' does), the version's own word for a thing where the
+official line's version used another (2.0's French "pluie de météores", 1.2F's 1000.54,
+for the shower; German "räumen" for 5.0.5's Evacuate), and the language's typography.
+
+**French** (30)
+
+| Line (versions) | Adapted from | Translation |
+|---|---|---|
+| A meteor shower destroyed your colony at %s. (1.2, DOS 2.0, Mac 2.0.1) | %s destroyed your colony at %s. | Une pluie de météores a détruit votre colonie à %s. |
+| Your fleet of %s is waiting to refuel before it can continue on to %s. (1.2, 3.0.1, Win 4.0.5, DOS 2.0, Mac 2.0.1, Mac 4.0.5) | Your %s is waiting to refuel before it can continue on to %s. | Votre flotte de %s est en attente pour faire le plein avant de pouvoir continuer à %s. |
+| %s destroyed your colony at %s. You lost %s of your ships. %s lost %s. You lost %s people. (3.0.1, Win 4.0.5, Mac 4.0.5) | %s destroyed your colony at %s. You %slost %d of your ships. %s lost %d. You lost %s people. | %s vous a vaincu à %s. Vous avez perdu %d de vos vaisseaux. %s en a perdu %d. Vous avez perdu %s habitant(s). |
+| %s survived an enemy attack from %s. You lost %s of your ships. %s lost %s. You lost %s people. (3.0.1, Win 4.0.5, Mac 4.0.5) | %s survived an attack from %s. You %slost %d of your ships; %s lost %d. You lost %s people. | %s a résisté à %s. Vous avez perdu %d de vos vaisseaux. %s en a perdu %d. Vous avez perdu %s habitant(s). |
+| Congratulations! You won the game. (3.0.1) | Congratulations! You have just won the game. | Bravo! Vous avez gagné. |
+| Spaceward Ho! Version 3.0.1 by Peter Commons. (3.0.1) | Spaceward Ho! Version 1.2 by Peter Commons. | Spaceward Ho! Version 3.0.1 par Peter Commons. |
+| Uh-oh! Having to borrow more ship money to pay all your interest! (3.0.1, Win 4.0.5, Mac 4.0.5) | Uh-oh! Having to borrow more to pay all your interest! | Oh-oh ! Devoir emprunter davantage sur l'argent des vaisseaux pour payer vos intérêts... |
+| Warning! Ship money is being used to support %s. (3.0.1, Win 4.0.5, Mac 4.0.5) | Warning! Savings is being used to support %s. | Attention ! De l'argent destiné à vos vaisseaux est utilisé pour soutenir %s. |
+| You just received %s metal from someone scrapping a fleet over %s. (3.0.1) | You just received %s metal from someone scrapping a fleet or from a battle over %s. | Vous venez de recevoir %s unités de métal de quelqu'un qui recyclait une flotte au-dessus de %s. |
+| Wow! You won! You and your allies have conquered the galaxy. Congratulations! (3.0.1, Win 4.0.5, Mac 4.0.5) | Congratulations! You have conquered the galaxy! | Wow ! Vous avez gagné ! Vous et vos alliés avez conquis la galaxie. Félicitations ! |
+| Wow! You won! You have conquered the galaxy. Congratulations! (3.0.1, Win 4.0.5, Mac 4.0.5) | Congratulations! You have conquered the galaxy! | Wow ! Vous avez gagné ! Vous avez conquis la galaxie. Félicitations ! |
+| %s have just won the game. (3.0.1, Win 4.0.5, Mac 4.0.5) | %s has just won the game. | %s viennent juste de gagner. |
+| %s says , "#!$*@%$&!" (Win 4.0.5, Mac 4.0.5) | %s says, “#!$@*$&@•™!” | %s dit: “#!$*@%$&!” |
+| Click here to make this message go away. (Win 4.0.5, Mac 4.0.5) | Tap here to make this message go away. Tap on the End Turn button to complete the turn. | Cliquez ici pour faire disparaître ce message. |
+| Congratulations! You won the game. Game difficulty rating was %s. (Win 4.0.5, Mac 4.0.5) | Congratulations! You have just won the game. | Bravo! Vous avez gagné. La difficulté du jeu était de %s. |
+| Play with the spending bars. Conquer the galaxy. Enjoy. (Win 4.0.5, Mac 4.0.5) | Play with the spending bars. Conquer the galaxy. Gain ranks to brag to your friends. Enjoy. | Modifiez les barres de dépenses. Partez à la conquête de la galaxie. Amusez-vous. |
+| You have conquered the galaxy! (Win 4.0.5, Mac 4.0.5) | Congratulations! You have conquered the galaxy! | Vous avez conquis la galaxie ! |
+| You said "!$@*$&@!" to %s. (Win 4.0.5, Mac 4.0.5) | You said “#!$@*$&@•™!” to %s. | Je crois bien que vous avez dit “!$@*$&@!” à %s... |
+| Click here to make this message go away. Click on the clock to end your turn. (Win 4.0.5, 5.0.5, Mac 4.0.5) | Tap here to make this message go away. Tap on the End Turn button to complete the turn. | Cliquez ici pour faire disparaître ce message. Cliquez sur l'horloge pour conclure le tour. |
+| Spaceward Ho! Version 4.0.5 by Peter Commons. (Win 4.0.5, Mac 4.0.5) | Spaceward Ho! Version 1.2 by Peter Commons. | Spaceward Ho! Version 4.0.5 par Peter Commons. |
+| Spaceward Ho! Version 4.0.3 by Peter Commons. (Win 4.0.5, Mac 4.0.5) | Spaceward Ho! Version 1.2 by Peter Commons. | Spaceward Ho! Version 4.0.3 par Peter Commons. |
+| Good planets are close to 72 degrees. (Win 4.0.5 (hint), Mac 4.0.5 (hint)) | Good planets are close to 72°F (20°C). | Les belles petites planètes sont proches de 72 degrés. |
+| Sorry, but that fleet doesn't have enough fuel to reach the selected destination. You can tell this because there are no arrows on either end of the dragged line. (5.0.5, Palm) | Sorry, but that fleet doesn't have enough fuel to reach the selected destination. You can tell this because of the red fleet line. | Désolé, mais cette flotte ne dispose pas d'assez de carburant pour atteindre la destination choisie. Vous pouvez le savoir grâce à l'absence de flèches aux extrémités de la ligne tirée. |
+| Fleets appear as dots next to your planets. Click one and drag it to send it to another star. (5.0.5) | Fleets appear as dots next to your planets. To move a fleet, select a star. Drag the ship to send it to another star. | Les flottes figurent sous forme de points près de vos planètes. Cliquez sur l'une d'elles et tirez-la vers une autre étoile pour l'y envoyer. |
+| Play with the spending bars. Conquer the galaxy. Gain ranks to unlock more game options. Enjoy. (5.0.5, Palm) | Play with the spending bars. Conquer the galaxy. Gain ranks to brag to your friends. Enjoy. | Modifiez les barres de dépenses. Partez à la conquête de la galaxie. Gagnez des grades pour débloquer d'autres options de jeu. Amusez-vous. |
+| Option-drag in Organize Fleets to split up ship piles. (5.0.5, 5.0.5 (hint)) | Use the Organize Fleets dialog to split up ship piles. | Tirez avec la touche option dans "Organiser Flotte" pour séparer les groupes de vaisseaux. |
+| Spaceward Ho! Version 2.0.1 by Peter Commons. (DOS 2.0, Mac 2.0.1) | Spaceward Ho! Version 1.2 by Peter Commons. | Spaceward Ho! Version 2.0.1 par Peter Commons. |
+| Icons by your planet mean you have ships orbiting around it. Fleets are on the right; satellites are on the left. (Palm, Palm (hint)) | Dots by your planet mean you have ships orbiting around it. Fleets are on the right; satellites are on the left. | Des icônes près d'une planète signifient que vous y avez des vaisseaux en orbite. Les flottes sont à droite, les satellites à gauche. |
+| The first person in the Enemies and Allies list is winning. (Palm, Palm (hint)) | The first person in the player list is winning. | Le joueur le plus fort se trouve en tête de la liste Ennemis et Alliés. |
+| Star names must be 2 to 7 characters long. (window) | Star names must be 4 to 7 characters long. | Le nom doit comprendre entre 2 et 7 lettres. |
+
+**Turkish** (25)
+
+| Line (versions) | Adapted from | Translation |
+|---|---|---|
+| %s destroyed your colony at %s. You lost %s of your ships. %s lost %s. You lost %s people. (3.0.1, Win 4.0.5, Mac 4.0.5) | %s destroyed your colony at %s. You %slost %d of your ships. %s lost %d. You lost %s people. | %s senin koloniyi %s de mahvetti. Sen gemilerinin %d tanesini kaybettin; %s %d tanesini kaybetti. Sen %s insan kaybettin. |
+| %s survived an enemy attack from %s. You lost %s of your ships. %s lost %s. You lost %s people. (3.0.1, Win 4.0.5, Mac 4.0.5) | %s survived an attack from %s. You %slost %d of your ships; %s lost %d. You lost %s people. | %s, %sden gelen bir hücumdan sağlam çıktı. Sen gemilerinin %d tanesini kaybettin; %s %d tanesini kaybetti. Sen %s tane insan kaybettin. |
+| Uh-oh! Having to borrow more ship money to pay all your interest! (3.0.1, Win 4.0.5, Mac 4.0.5) | Uh-oh! Having to borrow more to pay all your interest! | O, O! Faizlerini ödeyebilmek için gemi parasından tekrar borç almak zorundasın. |
+| Warning! Ship money is being used to support %s. (3.0.1, Win 4.0.5, Mac 4.0.5) | Warning! Savings is being used to support %s. | Dikkat! %syi desteklemek için gemi paran kullanılıyor. |
+| You just received %s metal from someone scrapping a fleet over %s. (3.0.1) | You just received %s metal from someone scrapping a fleet or from a battle over %s. | Sana %s metal geldi; %s üzerinde filosunu hurdaya çıkaran birinden. |
+| You lost a battle at %s. You lost %s of your ships. %s lost %s. (3.0.1, Win 4.0.5, Mac 4.0.5) | You %slost a battle at %s. You %slost %d of your ships. %s lost %d. | Sen %sde savaş kaybettin. Sen gemilerinin %d tanesini kaybettin. %s %dyi kaybetti. |
+| You won a battle at %s. You lost %s of your ships. %s lost %s. (3.0.1, Win 4.0.5, Mac 4.0.5) | You %swon a battle at %s. You %slost %d of your ships. %s lost %d. | Sen %sde savaş kazandın. Sen gemilerinin %d tanesini kaybettin. %s %dyi kaybetti. |
+| Your %s can no longer reach %s. (3.0.1, Win 4.0.5, Mac 4.0.5) | Your %s can no longer reach %s because some of the ships in the fleet don't have enough range. | Senin %s artık %sye ulaşamıyor. |
+| Your fleet of %s is waiting to refuel before it can continue on to %s. (3.0.1, Win 4.0.5, Mac 4.0.5) | Your %s is waiting to refuel before it can continue on to %s. | Senin %s filon, %sye devam etmeden önce yakıt almak için bekliyor. |
+| Wow! You won! You and your allies have conquered the galaxy. Congratulations! (3.0.1, Win 4.0.5, Mac 4.0.5) | Congratulations! You have conquered the galaxy! | Vay anasını! Kazandın! Sen ve ortakların galaksiyi fethettiniz. Tebrikler! |
+| Wow! You won! You have conquered the galaxy. Congratulations! (3.0.1, Win 4.0.5, Mac 4.0.5) | Congratulations! You have conquered the galaxy! | Vay anasını! Kazandın! Galaksiyi fethettin. Tebrikler! |
+| %s have just won the game. (3.0.1, Win 4.0.5, Mac 4.0.5) | %s has just won the game. | Şu anda %s oyunu kazandı. |
+| %s says , "#!$*@%$&!" (Win 4.0.5, Mac 4.0.5) | %s says, “#!$@*$&@•™!” | %s,"#!$*@%$&!" diyor. |
+| Click here to make this message go away. (Win 4.0.5, Mac 4.0.5) | Tap here to make this message go away. Tap on the End Turn button to complete the turn. | Uyarı yazıları kaybolması için buraya tıkla. |
+| Play with the spending bars. Conquer the galaxy. Enjoy. (Win 4.0.5, Mac 4.0.5) | Play with the spending bars. Conquer the galaxy. Gain ranks to brag to your friends. Enjoy. | Harcama şeritleri ile oyna. Galaksiyi fethet. Keyiflen. |
+| You have conquered the galaxy! (Win 4.0.5, Mac 4.0.5) | Congratulations! You have conquered the galaxy! | Galaksiyi fethettin! |
+| You said "!$@*$&@!" to %s. (Win 4.0.5, Mac 4.0.5) | You said “#!$@*$&@•™!” to %s. | Sen "!$@*$&@!" dedin %sye. |
+| Click here to make this message go away. Click on the clock to end your turn. (Win 4.0.5, 5.0.5, Mac 4.0.5) | Tap here to make this message go away. Tap on the End Turn button to complete the turn. | Uyarı yazıları kaybolması için buraya tıkla. Saate tıklarsan sıranı bitirebilirsin. |
+| Good planets are close to 72 degrees. (Win 4.0.5 (hint), Mac 4.0.5 (hint)) | Good planets are close to 72°F (20°C). | İyi uydular 72 dereceye yakındır. |
+| Sorry, but that fleet doesn't have enough fuel to reach the selected destination. You can tell this because there are no arrows on either end of the dragged line. (5.0.5, Palm) | Sorry, but that fleet doesn't have enough fuel to reach the selected destination. You can tell this because of the red fleet line. | Üzgünüm, filonun hedefe kadar gidecek yakıtı yok. Bunu anlıyorsunuz çünkü çekilen çizginin iki ucunda da ok yok. |
+| Fleets appear as dots next to your planets. Click one and drag it to send it to another star. (5.0.5) | Fleets appear as dots next to your planets. To move a fleet, select a star. Drag the ship to send it to another star. | Filolar senin gezegenlerin yakınında nokta olarak gözükür. Başka bir yıldıza göndermek için birine tıkla ve sürükle. |
+| Play with the spending bars. Conquer the galaxy. Gain ranks to unlock more game options. Enjoy. (5.0.5, Palm) | Play with the spending bars. Conquer the galaxy. Gain ranks to brag to your friends. Enjoy. | Harcama şeritleri ile oyna. Galaksiyi fethet. Yeni oyun seçeneklerini açacağın derecelere ulaş. Keyiflen. |
+| Option-drag in Organize Fleets to split up ship piles. (5.0.5, 5.0.5 (hint)) | Use the Organize Fleets dialog to split up ship piles. | Gemi çokluklarını ayırmak için Organize gemilerinde option tuşu ile sürükle. |
+| Icons by your planet mean you have ships orbiting around it. Fleets are on the right; satellites are on the left. (Palm, Palm (hint)) | Dots by your planet mean you have ships orbiting around it. Fleets are on the right; satellites are on the left. | Gezeğenlerinin yakınındaki simgeler, senin gemilerin gezeğen çevresindeki yörüngelerini gösterir. Filolar sağda, uydular da soldadır. |
+| The first person in the Enemies and Allies list is winning. (Palm, Palm (hint)) | The first person in the player list is winning. | Düşmanlar ve Ortaklar listesindeki ilk kişi oyunu kazanır. |
+
+**German** (24)
+
+| Line (versions) | Adapted from | Translation |
+|---|---|---|
+| Spaceward Ho! Version 1.2 by Peter Commons. (1.2) | Spaceward Ho! Version 2.0.1 by Peter Commons. | Spaceward Ho! Version 1.2 von Peter Commons. |
+| A meteor shower destroyed your colony at %s. (1.2, DOS 2.0, Mac 2.0.1) | %s destroyed your colony at %s. | Ein Meteoritenschauer besiegt Ihre Kolonie auf %s. |
+| Your message to %s: %s (1.2, 3.0.1, Win 4.0.5, 5.0.5, DOS 2.0, Palm, iOS, Android, Mac 2.0.1, Mac 4.0.5) | You sent a message to %s saying you like %s. | Sie senden einen Funkspruch an %s: %s |
+| Artwork by Howard Vives and Bob Van de walle. (3.0.1, Win 4.0.5, 5.0.5, Palm, iOS, Android, Mac 4.0.5) | Artwork by Howard Vives. | Grafiken von Howard Vives und Bob Van de walle. |
+| Congratulations! You won the game. (3.0.1) | Congratulations! You have just won the game. | Glückwunsch! Sie haben das Spiel gewonnen. |
+| Spaceward Ho! Version 3.0.1 by Peter Commons. (3.0.1) | Spaceward Ho! Version 2.0.1 by Peter Commons. | Spaceward Ho! Version 3.0.1 von Peter Commons. |
+| The meteor shower destroyed your colony at %s. (3.0.1, Win 4.0.5, 5.0.5, Palm, iOS, Android, Mac 4.0.5) | %s destroyed your colony at %s. | Der Meteoritenschauer besiegt Ihre Kolonie auf %s. |
+| You recovered %s metal from the battle at %s. (3.0.1, Win 4.0.5, 5.0.5, Palm, iOS, Android, Mac 4.0.5) | You have recovered %s metal from the battle at %s. | Sie gewinnen %s Metall aus dem Kampf bei %s. |
+| You have evacuated %s. (3.0.1, Win 4.0.5, 5.0.5, Palm, iOS, Android, Mac 4.0.5) | You have abandoned %s. | Sie räumen %s. |
+| %s have just won the game. (3.0.1, Win 4.0.5, Mac 4.0.5) | %s has just won the game. | %s gewinnen das Spiel. |
+| %s’s fleet of %s has arrived at %s. (3.0.1, Win 4.0.5, 5.0.5, Palm, iOS, Android, Mac 4.0.5) | Your fleet of %s has arrived at %s. | Die Flotte von %s (%s) erreicht %s. |
+| Your ally %s has just won the game. (3.0.1, Win 4.0.5, 5.0.5, Palm, iOS, Android, Mac 4.0.5) | %s has just won the game. | Ihr Verbündeter %s gewinnt das Spiel. |
+| You told %s that you don’t want %s. (3.0.1, Win 4.0.5, 5.0.5, Palm, iOS, Android, Mac 4.0.5) | You sent a message to %s saying you don’t like %s. | Sie senden einen Funkspruch an %s: Sie wollen %s nicht. |
+| You told %s that you like %s. (3.0.1, Win 4.0.5, 5.0.5, Palm, iOS, Android, Mac 4.0.5) | You sent a message to %s saying you like %s. | Sie senden einen Funkspruch an %s: Sie mögen %s. |
+| You told %s that you own %s. (3.0.1, Win 4.0.5, 5.0.5, Palm, iOS, Android, Mac 4.0.5) | You sent a message to %s saying you own %s. | Sie senden einen Funkspruch an %s: Sie besitzen %s. |
+| Congratulations! You won the game. Game difficulty rating was %s. (Win 4.0.5, Mac 4.0.5) | Congratulations! You have just won the game. | Glückwunsch! Sie haben das Spiel gewonnen. Die Schwierigkeit des Spiels war %s. |
+| Spaceward Ho! Version 4.0.5 by Peter Commons. (Win 4.0.5, Mac 4.0.5) | Spaceward Ho! Version 2.0.1 by Peter Commons. | Spaceward Ho! Version 4.0.5 von Peter Commons. |
+| Spaceward Ho! Version 4.0.3 by Peter Commons. (Win 4.0.5, Mac 4.0.5) | Spaceward Ho! Version 2.0.1 by Peter Commons. | Spaceward Ho! Version 4.0.3 von Peter Commons. |
+| Spaceward Ho! by Peter Commons. (5.0.5, Palm, iOS, Android) | Spaceward Ho! Version 2.0.1 by Peter Commons. | Spaceward Ho! von Peter Commons. |
+| Spaceward Ho! DEMO by Peter Commons. (5.0.5, Palm, iOS, Android) | Spaceward Ho! Version 2.0.1 by Peter Commons. | Spaceward Ho! DEMO von Peter Commons. |
+| %s has gone nova. (5.0.5, Palm, iOS, Android) | %s has gone nova. All inhabitants were killed. | %s wird zur Nova. |
+| %s has run out of metal. You should probably evacuate it. (5.0.5, Palm, iOS, Android) | %s has run out of metal. You should probably abandon it. | Auf %s gibt es kein Metall mehr. Sie sollten den Ort räumen. |
+| You %swon a battle at %s. You %slost %d of your ships. %s lost %d. (5.0.5, Palm, iOS, Android) | You won a battle at %s. You lost %d of your ships. %s lost %d. | Sie%s gewinnen einen Kampf bei %s. Sie%s verlieren %d Schiffe. %s verliert %d. |
+| You %slost a battle at %s. You %slost %d of your ships. %s lost %d. (5.0.5, Palm, iOS, Android) | You lost a battle at %s. You lost %d of your ships. %s lost %d. | Sie%s verlieren einen Kampf bei %s. Sie%s verlieren %d Schiffe. %s verliert %d. |
+
+**Turned down** (candidates from 0.5 up that are not small differences, so the remake's
+own): the Evacuate questions against "Do you really want to surrender?" (the question is
+the whole line; the iOS game's own sprintf Templates 17 and 35 turned out to be official
+translations of 5.0.5's Evacuate questions, now used verbatim in French and Turkish, as
+`iosOfficial` takes them, with the iOS Misc Strings that are whole lines); "Click and hold
+for a second to cancel…" against iOS's "Touch and drag a fleet back…" (another gesture);
+the Palm's "Fleets appear as icons…" (the second sentence rewritten); "Ship savings puts
+money away for shipbuilding." (the official "Savings…" lines say something else in French
+and Turkish); "A dot by a planet…" (0.31, though its French is iOS's words);
+"Year %d. Nothing much happened." against "Year %d:"; the Armageddon questions against
+the surrender question; and in German, every line whose likeness came from a shared
+"%s … %s" and not from its words ("%s says, “Look at %s.”" against "Built %s at %s."),
+the 4.0.5 and 5.0.5 colony-lost report (681 with two of 705's sentences and one of its
+own: more than a clause), "You told %s that you want / hate %s." (0.47, 0.44), "%s says:
+%s" (0.36) and the fleet waiting to refuel against "has stopped at" (another event).
+The German alerts in string 3280's, 3310's, 3330's and 5040's words stay the remake's: the
+repository has no English text for those DOS strings to measure them against.
+
+**Not adapted, by rule:** the lines the remake corrects (`over`: iOS's French 37, Turkish
+11, 14, 35, 38, 62, 124, 156 and its English credits) have the same English as the
+official line; they are corrections of it, the remake's.
 
 ## Mac 1.2 (French, as released)
 
@@ -114,7 +259,7 @@ less than the English: the scrapped fleet (1000.17, no metal) and a battle's los
 
 **German (the remake's):** the German DOS 2.0's reports, names, battle window, Name a
 Star and Fix Spending, which are 1.2's line for line (1.2's star list is 2.0's and
-Tiber). The remake's own: 1.2's credit line (2.0's German with "1.2"), the note under
+Tiber). Adapted: 1.2's credit line (2.0's German with "1.2"). The remake's own: the note under
 Name a Star's field, the Options menu (Kampfgeschwindigkeit…, Ereignismeldungen zeigen,
 Gemeldete Kämpfe zeigen, Berichtsfenster) and the Explored Planets list's title and
 button (its classes are the German table's 144-147). The battle window's two lines the
@@ -134,10 +279,12 @@ computer and ship names (1999-2004; 1.2F's women's names too, which 1.2 never dr
 the Name a Star window, the Options menu and the Explored Planets list. A report's
 numbers are "1 234". Where 1.2F says less than 2.0's English, the iOS game's line for the
 same English is used (the scrapped fleet's metal, Report Window Templates 18), and the
-free-text messages are iOS's ("%s dit: %s", "Votre message à %s: %s"). The remake's own:
-2.0.1's credit line (1.2F's with its number), the patch's meteor report ("Une pluie de
-météores a détruit votre colonie à %s.", 1000.10's and 1000.54's words), a fleet waiting
-for fuel, Mac 2.0.1's Force End Turn question and the polling time's window.
+free-text messages are iOS's ("%s dit: %s", "Votre message à %s: %s"). Adapted from
+official: 2.0.1's credit line (1.2F's with its number), the patch's meteor report ("Une
+pluie de météores a détruit votre colonie à %s.", 1000.10 with 1000.54's shower) and a
+fleet waiting for fuel (iOS's line for 5.0.5's "Your %s is waiting…"). The remake's own:
+Mac 2.0.1's Force End Turn question and the polling time's window, and the turn with no
+news.
 
 ## 5.0.5 (Mac and Windows)
 
@@ -156,13 +303,18 @@ lines (French Misc Strings 3-6 and report 7's "Miniaturisation"; Turkish reports
 iOS's words (sprintf Templates 9-14). Name a Star is iOS's (Misc Strings 74, Alert
 Strings 9).
 
-The remake's own (`js/lang-remake.js`), in iOS's words:
-- 5.0.5's own lines: its three first messages and five hints written for the mouse (click, the clock,
-  the contextual menu, the option key, option-drag, the graph), the fuel alert's "no
-  arrows on either end of the dragged line", the Evacuate questions for a profitable
-  colony and the Palm's "Ship" (Full Hoedown), the Radical Research window's three
-  projects 5.0.5 added (the remake's English for them, in iOS's words for their reports),
-  and the remake's "Year %d. Nothing much happened.".
+The Evacuate question for a profitable colony is iOS's own (sprintf Templates 17).
+Adapted from iOS's lines (`js/lang-remake.js` `adapted`, "Adapted lines" above): the
+first messages written for the mouse (the clock for the End Turn button, the ranks'
+options for bragging), option-drag in Organize Fleets, and the fuel alert's "no arrows on
+either end of the dragged line" for iOS's red line.
+
+The remake's own (`js/lang-remake.js` `own`), in iOS's words:
+- 5.0.5's own lines: four hints written for the mouse (click and hold, the contextual
+  menu, the option key, the graph), the Palm's "Ship" Evacuate question (Full Hoedown),
+  the Radical Research window's three projects 5.0.5 added (the remake's English for
+  them, in iOS's words for their reports), and the remake's "Year %d. Nothing much
+  happened.".
 
 - Lines the iOS translation got wrong, given right in the remake's languages (iOS keeps
   its own): French 37 ("You %savez perdu une bataille à%s…", the counts out of place);
@@ -207,14 +359,16 @@ names are iOS's, matched by name (two typos aside); the battle window is 2.0's w
 1.2F's words and iOS's classes (the Turkish the remake's); Name a Star and the won
 window ("You have conquered the galaxy!") are 1.2F's in French.
 
-The remake's own: Armageddon's two questions (the eleven jokes, strings 299-309, now
-also asked in the language: `rs.armageddonAsk`), the Windows build's own curse in the
+Adapted from official ("Adapted lines" above): the Windows build's own curse in the
 messages, the battle reports' colony lines in 4.0.5's form (no "and your allies"), the
-"ship money" lines, the welcome lines and credits, the fleet marked for scrapping, a
-handful of hints ("A dot by a planet…", "Good planets are close to 72 degrees.", "Ship
-savings…"; the French ones iOS's own words where iOS's French had already said just
-that), the Send Message groups (Everyone, Your Allies, Your Buddies), and the Turkish
-for the lines whose only official translation is 1.2F's French.
+"ship money" lines, the welcome lines and credits (the Turkish credits aside: iOS's are in
+English), the won window and the won messages, "Good planets are close to 72 degrees.",
+and the Turkish battle reports in 2.0's form. The remake's own: Armageddon's two
+questions (the eleven jokes, strings 299-309, now also asked in the language:
+`rs.armageddonAsk`), the fleet marked for scrapping, a handful of hints ("A dot by a
+planet…", in iOS's French words, "Click and Drag…", "Ship savings…"), the Send Message
+groups (Everyone, Your Allies, Your Buddies), and the Turkish for the lines whose only
+official translation is 1.2F's French.
 
 ## 3.0.1
 
@@ -222,10 +376,10 @@ for the lines whose only official translation is 1.2F's French.
 engine's, its Send Message window's (5.0.5's words) and its first messages get iOS's
 lines where the English is the same, and 1.2F's where it is 2.0's: Name a Star's text,
 field, note and alert (Mac 2.0.1's window, DITL 4050 and 3340 in 1.2F), and Fix
-Spending's four lines (Mac 2.0.1's, 1.2F's STR# 1050). The remake's own: Name a Star's
-rule (3.0.1 takes 2 to 7 letters, 1.2F's line says 4 to 7), the battle reports' colony
-lines in 3.0.1's form, "ship money", the credit line, and the Turkish for the Name a Star
-and Fix Spending windows, which only 1.2F's French has.
+Spending's four lines (Mac 2.0.1's, 1.2F's STR# 1050). Adapted from official: Name a
+Star's rule (3.0.1 takes 2 to 7 letters, 1.2F's line says 4 to 7), the battle reports'
+colony lines in 3.0.1's form, "ship money", the credit line. The remake's own: the
+Turkish for the Name a Star and Fix Spending windows, which only 1.2F's French has.
 
 ## German for 3.0.1 onward (the remake's): 3.0.1, 4.0.5, 5.0.5, the Palm, iOS and Android
 
@@ -233,6 +387,10 @@ and Fix Spending windows, which only 1.2F's French has.
 Forward from the German DOS 2.0 (`HO.PRS`, `DOSHO.EXE`), the one official German after
 1.2: its lines wherever a later version's English is 2.0's (the battle reports, "You have
 colonized", the tech levels, the debris, Name a Star's window and alert, Fix Spending),
+a line whose English differs a little from one of 2.0's is that line's German adapted (the
+credits, the colony lost to the meteor shower, "You %swon a battle…", "You have
+evacuated %s." as "Sie räumen %s.", the messages "You told %s that you like / own / don't
+want %s.", "Ihr Verbündeter %s gewinnt das Spiel."; "Adapted lines" above);
 and for the rest the remake's German in its voice, `js/lang-remake.js` `de`: "Sie", the
 reports in the present tense ("Ihre Flotte von %s erreicht %s.", "Sie verlieren %d
 Schiffe."), its words (Reichweitentech, Tempotech, Waffentech, Schildtech, Minitech;

@@ -116,14 +116,15 @@ const SAY_DE = {
   // the remake's report (its English, 2.0's own words) -> the German string with the same id
   reports: REPORTS20.concat(CHAT20).map(([en, id]) => [en, id === 703 ? explored20 : S(id)]).concat([
     // The remake's own (no 2.0 text: the remake's messages, its 1.2.1/2.0.1.1
-    // patch's report), in the German program's words: 681 with 725's
-    // "Meteoritenschauer"; the free-text messages with 708's and 718's
-    // "Funkspruch"; the fleet waiting to refuel with 697's "Die Flotte von"
-    // and "Treibstoff" (string 3330). docs/dos-findings.md, "Languages".
-    ['A meteor shower destroyed your colony at %s.', 'Ein Meteoritenschauer besiegt Ihre Kolonie auf %s.', 'remake'],
+    // patch's report), in the German program's words: adapted from 681, with
+    // 725's "Meteoritenschauer", and from 718 (the free-text message sent);
+    // the message received with 708's "Funkspruch"; the fleet waiting to
+    // refuel with 697's "Die Flotte von" and "Treibstoff" (string 3330).
+    // docs/dos-findings.md, "Languages".
+    ['A meteor shower destroyed your colony at %s.', 'Ein Meteoritenschauer besiegt Ihre Kolonie auf %s.', 'adapted', '%s destroyed your colony at %s.'],
     ['Your fleet of %s is waiting to refuel before it can continue on to %s.', 'Die Flotte von %s wartet auf Treibstoff, bevor sie nach %s weiterfliegt.', 'remake'],
     ['%s says: %s', '%s sendet einen Funkspruch: %s', 'remake'],
-    ['Your message to %s: %s', 'Sie senden einen Funkspruch an %s: %s', 'remake'],
+    ['Your message to %s: %s', 'Sie senden einen Funkspruch an %s: %s', 'adapted', 'You sent a message to %s saying you like %s.'],
     // the remake's line for a turn with no news (js/skins/classic/ui.js)
     ['Year %d. Nothing much happened.', 'Jahr %d. Nicht viel passiert.', 'remake'],
   ]),
@@ -218,19 +219,20 @@ function explored12(a) {
 const FR20_IOS = { 688: HOLANG.ios.fr['Report Window Templates'][18] };
 function sayFr(v20) {
   // (2.0's credit line is 1.2F's with 2.0's number: the remake's)
-  const own = (id) => id === 703 ? [explored12] : v20 && id === 672 ? [F(672).replace('1.2', '2.0.1'), 'remake'] : [(v20 && FR20_IOS[id]) || F(id)];
+  const own = (id) => id === 703 ? [explored12] : v20 && id === 672 ? [F(672).replace('1.2', '2.0.1'), 'adapted', 'Spaceward Ho! Version 1.2 by Peter Commons.'] : [(v20 && FR20_IOS[id]) || F(id)];
   return {
     cap: true, num: numFR,
     reports: REPORTS20.concat(CHAT20).map(([en, id]) => [en, ...own(id)])
       // 1.2's own credit line (1000.1)
       .concat([['Spaceward Ho! Version 1.2 by Peter Commons.', F(672)]])
       .concat([
-        // the remake's own (no 1.2F line): the patch's meteor report, in
-        // 1000.10's and 1000.54's words; a fleet waiting for fuel, in 1000.24's;
-        // the free-text messages, in the iOS game's words for the same English
-        // (Report Window Templates 54, 70)
-        ['A meteor shower destroyed your colony at %s.', 'Une pluie de météores a détruit votre colonie à %s.', 'remake'],
-        ['Your fleet of %s is waiting to refuel before it can continue on to %s.', 'Votre flotte de %s attend de faire le plein avant de pouvoir repartir pour %s.', 'remake'],
+        // adapted from official (no 1.2F line): the patch's meteor report, 1000.10
+        // with 1000.54's "pluie de météores"; a fleet waiting for fuel, the iOS
+        // game's line for 5.0.5's "Your %s is waiting…" (Report Window Templates
+        // 22). The free-text messages are the iOS game's words for the same
+        // English (Report Window Templates 54, 70)
+        ['A meteor shower destroyed your colony at %s.', 'Une pluie de météores a détruit votre colonie à %s.', 'adapted', '%s destroyed your colony at %s.'],
+        ['Your fleet of %s is waiting to refuel before it can continue on to %s.', 'Votre flotte de %s est en attente pour faire le plein avant de pouvoir continuer à %s.', 'adapted', 'Your %s is waiting to refuel before it can continue on to %s.'],
         ['%s says: %s', HOLANG.ios.fr['Report Window Templates'][54]],
         ['Your message to %s: %s', HOLANG.ios.fr['Report Window Templates'][70]],
         ['Year %d. Nothing much happened.', 'Année %d. Rien de spécial ne s\'est passé.', 'remake'],
@@ -320,7 +322,7 @@ if (R12) {
 
   DE12.battlePanel = DOS.battlePanel20({ dots: '…', cols: 'mac', shade: true, words: BATTLE_DE });
   // 1.2's credit line, in 2.0's German words with its own number
-  DE12.say = Object.assign({}, SAY_DE, { reports: [['Spaceward Ho! Version 1.2 by Peter Commons.', S(672).replace('2.0.1', '1.2'), 'remake']].concat(SAY_DE.reports) });
+  DE12.say = Object.assign({}, SAY_DE, { reports: [['Spaceward Ho! Version 1.2 by Peter Commons.', S(672).replace('2.0.1', '1.2'), 'adapted', 'Spaceward Ho! Version 2.0.1 by Peter Commons.']].concat(SAY_DE.reports) });
   // the windows 2.0's German had in the remake's words, with the German
   // table's own for the Explored Planets list's classes (strings 144-147)
   DE12.options = Object.assign({}, R12.options, {
@@ -349,6 +351,12 @@ const L = (lang, k) => IOS[lang][k];
 const SHIP_LISTS = { scout: 'Scout Names', dread: 'Dreadnought Names', fighter: 'Fighter Names', tanker: 'Tanker Names',
   colony: 'Colony Ship Names', satellite: 'Satellite Names', bio: 'Biological Names' };
 const TECH_LISTS = ['Range', 'Speed', 'Weapons', 'Shield', 'Mini'].map(k => k + ' Tech Strings').concat(['Radical Tech Strings']);
+// the Evacuate questions among the sprintf Templates (17, 35: the app's 18, 36)
+const EVACUATE_SPRINTF = [17, 35];
+// the Misc Strings that are whole lines (the battle window's verdicts, Name a
+// Star's, the won and lost windows', the Armageddon window's): official text
+// for the same English in another version
+const MISC_LINES = [53, 54, 55, 56, 57, 58, 73, 74, 103, 109, 110];
 const CLASS_KEYS = ['Scout', 'Dreadnought', 'Fighter', 'Tanker', 'Colony Ship', 'Satellite', 'Biological'];
 // a template whose fillings the translation takes in another order, or not
 // at all: [index in Report Window Templates, the translation with each
@@ -397,6 +405,8 @@ function iosLang(lang, rs) {
   });
   // the alerts the rules send as messages (engine.js surrender, Alert Strings 2)
   en('Alert Strings').forEach((t, i) => reports.push([t, tr('Alert Strings')[i]]));
+  // the Evacuate questions (rules-ios evacuateToggle: sprintf Templates 18, 36)
+  for (const i of EVACUATE_SPRINTF) reports.push([en('sprintf Templates')[i], tr('sprintf Templates')[i]]);
   // the words filled in: tech names (the patch's "™" too), the classes, "one",
   // "You", "Your enemies", "and your allies "
   const words = {};
@@ -473,6 +483,8 @@ const PH = /%(?:\d+\$)?(?:\.\*)?[-0-9.]*l?[sdu]|%P/g;
 const normEn = (s) => String(s).replace(/[‘’`´]/g, '\'').replace(/[“”]/g, '"').replace(/º/g, '°').replace(/¥/g, '•').replace(/ª/g, '™')
   .replace(/%%/g, '%').replace(/%(?:\.\*)?[-0-9.]*l?[sdu]/g, '%s').replace(/\$%s/g, '%s')
   .replace(/,/g, ' ').replace(/[.!]+"/g, '"').replace(/\s+/g, ' ').replace(/ ([.!?:;"])/g, '$1').trim().replace(/(\.\.\.|…|!!|[.!:])+$/, '').toLowerCase();
+// (for tools/lang-test.js: the same matching)
+E.langNormEn = normEn;
 // the fillings the version writes after a "$" that the official line's
 // English hasn't: the translation gets the "$" in front of the same filling
 function addDollar(en, enOff, to) {
@@ -485,21 +497,23 @@ function addDollar(en, enOff, to) {
 }
 // official: [[English, translation], ...], the nearest first
 function translator(lang, official) {
-  const R = RMK[lang] || {}, map = new Map(), over = new Map(), own = new Map();
+  const R = RMK[lang] || {}, map = new Map(), over = new Map(), own = new Map(), adapted = new Map();
   for (const [en, to] of official) { const k = normEn(en); if (!map.has(k)) map.set(k, [en, to]); }
   for (const [en, to] of Object.entries(R.over || {})) over.set(normEn(en), to);
+  for (const [en, a] of Object.entries(R.adapted || {})) adapted.set(normEn(en), a);
   for (const [en, to] of Object.entries(R.own || {})) own.set(normEn(en), to);
   // a line with a slip of the version's reads as the line it means (EQUIV),
   // in the remake's lines too
   const alias = new Map(EQUIV.map(([a, b]) => [normEn(a), normEn(b)]));
   const missing = [];
-  // [translation, 'remake'?] or null
+  // [translation, 'adapted' and the official line's English | 'remake'] or null
   const find = (en) => {
     const k0 = normEn(en);
     for (const k of [k0, alias.get(k0)]) {
       if (k == null) continue;
       if (over.has(k)) return [over.get(k), 'remake'];
       if (map.has(k)) { const [e0, to] = map.get(k); return [addDollar(en, e0, to)]; }
+      if (adapted.has(k)) return [adapted.get(k)[0], 'adapted', adapted.get(k)[1]];
       if (own.has(k)) return [own.get(k), 'remake'];
     }
     return null;
@@ -514,6 +528,8 @@ function iosOfficial(lang) {
   R.forEach((t, i) => o.push([t, CELSIUS[lang] && CELSIUS[lang][i] ? CELSIUS[lang][i](RT[i]) : BY_PLACE[lang] && BY_PLACE[lang][i] ? BY_PLACE[lang][i](RT[i]) : RT[i]]));
   L('en', 'Alert Strings').forEach((t, i) => o.push([t, L(lang, 'Alert Strings')[i]]));
   o.push([L('en', 'Misc Strings')[123], L(lang, 'Misc Strings')[123]]);
+  for (const i of MISC_LINES) o.push([L('en', 'Misc Strings')[i], L(lang, 'Misc Strings')[i]]);
+  for (const i of EVACUATE_SPRINTF) o.push([L('en', 'sprintf Templates')[i], L(lang, 'sprintf Templates')[i]]);
   L('en', 'Help Messages').forEach((t, i) => o.push([t, L(lang, 'Help Messages')[i]]));
   // the Radical Research window's projects
   L('en', 'Radical Tech Strings').forEach((t, i) => o.push([t, L(lang, 'Radical Tech Strings')[i]]));
@@ -670,7 +686,7 @@ function lazyLang(build, keys) {
   const get = () => v || (v = build());
   const o = {};
   for (const k of keys) Object.defineProperty(o, k, { enumerable: true, configurable: true, get: () => get()[k] });
-  for (const k of ['missing', 'hintRemake']) Object.defineProperty(o, k, { enumerable: false, get: () => get()[k] });
+  for (const k of ['missing', 'hintRemake', 'hintAdapted']) Object.defineProperty(o, k, { enumerable: false, get: () => get()[k] });
   return o;
 }
 const LANG_KEYS = ['remake', 'say', 'hintTexts', 'nameAStar', 'battlePanel', 'starNames', 'maleNames', 'femaleNames', 'shipNames'];
@@ -701,6 +717,7 @@ function build505(lang, rs, o) {
   // (the lines no translation has: tools/lang-test.js lists them)
   out.missing = T.missing;
   out.hintRemake = hints.filter(t => (T.line(t) || [])[1] === 'remake');
+  out.hintAdapted = hints.filter(t => (T.line(t) || [])[1] === 'adapted');
   return out;
 
 }
@@ -975,7 +992,8 @@ function official20(lang) {
   const EN = R12 && R12.lang.en.nameAStar, FIX_EN = ['You have no spending problems.', 'You were overspending at %s. The problem has been fixed.',
     'You were underspending at %s. The problem has been fixed.', 'You’re abandoning %s.'];
   if (lang === 'fr' && R12) return REPORTS20.concat(CHAT20).filter(([, id]) => id !== 703).map(([en, id]) => [en, F(id)])
-    .concat([[EN.text, R12.nameAStar.text], [EN.taken, R12.nameAStar.taken], [EN.label, R12.nameAStar.label], [EN.hint, R12.nameAStar.hint]], FIX_EN.map((t, i) => [t, FIX_FR[i]]));
+    .concat([[EN.text, R12.nameAStar.text], [EN.taken, R12.nameAStar.taken], [EN.label, R12.nameAStar.label], [EN.hint, R12.nameAStar.hint], [EN.rule, R12.nameAStar.rule]], FIX_EN.map((t, i) => [t, FIX_FR[i]]),
+      [['Spaceward Ho! Version 1.2 by Peter Commons.', F(672)]]);
   if (lang === 'de') return REPORTS20.concat(CHAT20).filter(([, id]) => id !== 703).map(([en, id]) => [en, S(id)])
     .concat([['You won the game, so you get to name a star.', NAME_DE.text], ['Sorry, there’s already a star named  “%s.” Please pick another name.', NAME_DE.taken],
       ['New Star Name:', NAME_DE.label]], FIX_EN.map((t, i) => [t, X(DE.exe.fixSpending[i])]));
@@ -990,6 +1008,8 @@ function officialFor(lang, nearest) {
   for (const [en, off] of EQUIV) if (by.has(normEn(off))) o.push([en, by.get(normEn(off))]);
   return o;
 }
+// (for tools/lang-test.js --adapted: the official lines a language has)
+E.langOfficial = (lang) => (lang === 'de' || IOS[lang] ? officialFor(lang) : []);
 // a name list in the language, class by class: an official list made for
 // the same English list (1.2F's and the German DOS 2.0's for 2.0's lists,
 // iOS's for 5.0.5's), else (French, Turkish) iOS's names one by one
@@ -1053,6 +1073,7 @@ function buildText(lang, rs, o) {
   out.battlePanel = o.battlePanel ? o.battlePanel(words20(lang)) : rs.battlePanel;
   out.missing = T.missing.slice();
   out.hintRemake = hints.filter(t => (T.line(t) || [])[1] === 'remake');
+  out.hintAdapted = hints.filter(t => (T.line(t) || [])[1] === 'adapted');
   return out;
 }
 const LANG_KEYS405 = LANG_KEYS.concat(['conquered', 'armageddonAsk']);

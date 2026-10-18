@@ -1,4 +1,4 @@
-// The versions' languages, checked: node tools/lang-test.js [ruleset ...] [--lang=<code>] [--seeds=6] [--count]
+// The versions' languages, checked: node tools/lang-test.js [ruleset ...] [--lang=<code>] [--seeds=6] [--count] [--adapted]
 //
 // For each ruleset and each of its languages (rs.languages; the version's own
 // too when it has its own reports, rs.say), plays a few computer-only games
@@ -12,8 +12,15 @@
 //   - name lists that aren't entry for entry the version's own (the same
 //     lengths: engine.js langMap), and hints that aren't (rs.hintTexts).
 // --count prints, per ruleset and language, how many of its reports are
-// official (an official translation's line) and how many the remake's own
-// (an entry marked 'remake', js/languages.js), for docs/translations.md.
+// official (an official translation's line), adapted from official (an entry
+// marked 'adapted': an official line for a slightly different English, edited
+// as little as the difference needs) and the remake's own (an entry marked
+// 'remake', js/languages.js), for docs/translations.md. --adapted lists the
+// adapted lines with their source line and the two Englishes' word-level
+// likeness (2 x the longest common subsequence of words / both lengths), and fails on
+// one whose source isn't an official line of the language, or is less like
+// it than ADAPT_MIN.
+
 // That the same seed plays the same game is tools/test.js --lang --digest's.
 'use strict';
 const path = require('path'), root = path.join(__dirname, '..');
@@ -34,16 +41,54 @@ function langsOf(rs) {
   return L.filter((c, i) => (ONLY ? c === ONLY : true) && c !== 'en' && (i > 0 || rs.say));
 
 }
-function counts(rs, code) {
+const tier = (r) => r[2] === 'remake' ? 'remake' : r[2] === 'adapted' ? 'adapted' : 'official';
+function reportsOf(rs, code) {
   const own = HO.languages(rs)[0] === code;
   const L = own ? rs.say : rs.lang[code] && rs.lang[code].say;
+  return (L && L.reports) || [];
+}
+function counts(rs, code) {
+  const own = HO.languages(rs)[0] === code;
   const seen = new Map();
-  for (const r of (L && L.reports) || []) if (!seen.has(r[0])) seen.set(r[0], r[2] === 'remake' ? 'remake' : 'official');
-  const n = { official: 0, remake: 0 };
+  for (const r of reportsOf(rs, code)) if (!seen.has(r[0])) seen.set(r[0], tier(r));
+  const n = { official: 0, adapted: 0, remake: 0 };
   for (const v of seen.values()) n[v]++;
   const o = own ? rs : rs.lang[code];
-  const hints = o.hintTexts && o.hintRemake ? { hints: o.hintTexts.length, hintsRemake: o.hintRemake.length } : {};
+  const hints = o.hintTexts && o.hintRemake ? { hints: o.hintTexts.length, hintsRemake: o.hintRemake.length, hintsAdapted: (o.hintAdapted || []).length } : {};
   return Object.assign(n, hints);
+}
+// adapted lines: the source must be an official line of the language, and like it
+const ADAPT_MIN = 0.5;
+const words = (t) => String(t).toLowerCase().replace(/[‘’`´]/g, '\'').replace(/%(?:\d+\$)?(?:\.\*)?[-0-9.]*l?[sdu]|%P/g, ' %s ').match(/[a-z0-9']+|%s/g) || [];
+function likeness(a, b) {
+  // the longest common subsequence of words
+  const x = words(a), y = words(b), L = Array.from({ length: x.length + 1 }, () => new Array(y.length + 1).fill(0));
+  for (let i = 1; i <= x.length; i++) for (let j = 1; j <= y.length; j++) L[i][j] = x[i - 1] === y[j - 1] ? L[i - 1][j - 1] + 1 : Math.max(L[i - 1][j], L[i][j - 1]);
+  return x.length + y.length ? 2 * L[x.length][y.length] / (x.length + y.length) : 1;
+}
+function adaptedList(code) {
+  const N = HO.langNormEn, off = new Set((HO.langOfficial(code) || []).map(([en]) => N(en))), list = new Map();
+  for (const id of Object.keys(HO.RULESETS)) {
+    const rs = HO.RULESETS[id];
+    if (!HO.languages(rs).includes(code)) continue;
+    for (const r of reportsOf(rs, code)) if (tier(r) === 'official') off.add(N(r[0]));
+    const o = HO.languages(rs)[0] === code ? null : rs.lang[code];
+    if (o && o.hintTexts && !o.remake) for (const t of rs.hintTexts || []) off.add(N(t));
+  }
+  for (const id of Object.keys(HO.RULESETS)) {
+    const rs = HO.RULESETS[id];
+    if (!HO.languages(rs).includes(code)) continue;
+    for (const r of reportsOf(rs, code)) if (tier(r) === 'adapted') { const k = r[0] + '\u0000' + r[3]; if (!list.has(k)) list.set(k, { en: r[0], to: r[1], src: r[3], ids: [] }); list.get(k).ids.push(id); }
+  }
+  const RMK = require(path.join(root, 'js/lang-remake.js'));
+  for (const [en, [to, src]] of Object.entries((RMK[code] || {}).adapted || {})) { const k = en + '\u0000' + src; if (!list.has(k)) list.set(k, { en, to, src, ids: [] }); }
+  let bad = 0;
+  for (const a of list.values()) {
+    const r = likeness(a.en, a.src), ok = off.has(N(a.src)) && r >= ADAPT_MIN;
+    if (!ok) bad++;
+    console.log(`${ok ? '' : 'FAIL '}${code} ${r.toFixed(2)}  ${a.en}\n      from: ${a.src}${off.has(N(a.src)) ? '' : '  (no official line)'}\n      ${a.to}${a.ids.length ? '' : '\n      (in no version\'s reports: a hint or a window\'s line)'}`);
+  }
+  return bad;
 }
 function listsOk(id, rs, code) {
   if (HO.languages(rs)[0] === code) return;
@@ -103,10 +148,16 @@ function play(id, code) {
   for (const [s, t] of shapes) console.log(`    untranslated: ${s}${s !== t ? `   (${t})` : ''}`);
   for (const [t, out] of left) console.log(`    left in: ${t}  ->  ${out}`);
 }
+if (ARGS.includes('--adapted')) {
+  let bad = 0;
+  for (const code of ONLY ? [ONLY] : ['fr', 'tr', 'de', 'es']) bad += adaptedList(code);
+  console.log(bad ? `${bad} adapted lines failed` : 'adapted lines ok');
+  process.exit(bad ? 1 : 0);
+}
 for (const id of all) {
   const rs = HO.RULESETS[id];
   for (const code of langsOf(rs)) {
-    if (COUNT) { const n = counts(rs, code); console.log(`${id} ${code}${rs.lang && rs.lang[code] && rs.lang[code].remake ? ' (remake)' : ''}: reports ${n.official} official, ${n.remake} the remake's${n.hints != null ? `; hints ${n.hints - n.hintsRemake} official, ${n.hintsRemake} the remake's` : ''}`); continue; }
+    if (COUNT) { const n = counts(rs, code); console.log(`${id} ${code}${rs.lang && rs.lang[code] && rs.lang[code].remake ? ' (remake)' : ''}: reports ${n.official} official, ${n.adapted} adapted, ${n.remake} the remake's${n.hints != null ? `; hints ${n.hints - n.hintsRemake - n.hintsAdapted} official, ${n.hintsAdapted} adapted, ${n.hintsRemake} the remake's` : ''}`); continue; }
     listsOk(id, rs, code);
     play(id, code);
   }
