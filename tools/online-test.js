@@ -20,7 +20,10 @@
 //     filter refuses goes up as "Anonymous Cowboy"; Not now posts nothing;
 //  9. the saves offer from Saved Games, and its Don't ask again;
 // 10. Google sign-in (the emulator's own account chooser in the popup);
-// 11. an email account: create, sign out, sign in, a wrong password, Forgot password.
+// 11. an email account: create, sign out, sign in, a wrong password, Forgot password;
+// 12. shared names: the names file and Name a Star posted to the version's
+//     pool, merged into another player's New Game (not with the preference
+//     off), a refused name never posted, and Delete my account removing them.
 'use strict';
 let chromium;
 try { ({ chromium } = require('playwright')); } catch (e) { console.error('Playwright is needed (npm i -g playwright; NODE_PATH=$(npm root -g)).'); process.exit(2); }
@@ -60,8 +63,28 @@ async function putGame(page, o) {
     // out: the human's colonies and fleets given away, so the next turn
     // eliminates them (4.0.5's doGameEndStuff) and puts them in the Hall of Shame
     if (o.out) { for (const s of G.stars) if (s.owner === 0) s.owner = 1; G.fleets = G.fleets.filter(f => f.owner !== 0); delete G.players[0].slots301; delete G.players[0].colOrder; }
+    // win: the computers' colonies and fleets given away the other way, so the human wins next turn
+    if (o.win) { for (const s of G.stars) if (s.owner > 0) { s.owner = -1; s.pop = 0; } G.fleets = G.fleets.filter(f => f.owner === 0); for (const p of G.players) if (!p.human) { delete p.slots301; delete p.colOrder; } }
     localStorage.setItem('ho5.save', HO.save(G)); localStorage.setItem('ho5.save.when', String(Date.now()));
   }, o);
+}
+// New Game through its window: o.version, o.rules, o.name; the classic skin
+// kept (no reload); o.wait: a condition to wait for before Create galaxy
+async function newGameVia(page, o) {
+  await page.click('#tnew');
+  await page.waitForSelector('.ngwin form.newgame');
+  await page.selectOption('.ngwin select[name=version]', o.version);
+  await page.selectOption('.ngwin select[name=rules]', o.rules);
+  await page.fill('.ngwin input[name=name]', o.name);
+  if (await page.$('.ngwin select[name=skin] option[value=classic]')) await page.selectOption('.ngwin select[name=skin]', 'classic');
+  if (o.wait) await waitFor(o.wait, 15000);
+  await page.click('.ngwin button:text-is("Create galaxy")');
+  await page.waitForSelector('#msg .card, #msg .clock', { timeout: 15000 });
+}
+async function quitToTitle(page) {
+  for (let i = 0; i < 5 && await page.$('.scrim'); i++) await page.keyboard.press('Escape');
+  await page.click('#menubar .mbtn:text-is("Game")'); await page.click('.dropdown.open [role=menuitem]:text-is("Quit to title")');
+  await page.waitForSelector('#titlescreen:not([hidden])');
 }
 async function continueGame(page) {
   await page.reload();
@@ -104,7 +127,10 @@ async function signInEmail(page, email, pw, create) {
   await fetch(`http://127.0.0.1:${FS}/emulator/v1/projects/${PROJECT}/databases/(default)/documents`, { method: 'DELETE' });
   await fetch(`http://127.0.0.1:${AUTH}/emulator/v1/projects/${PROJECT}/accounts`, { method: 'DELETE' });
   const browser = await chromium.launch({ headless: !args.includes('--headed') });
-
+  // --only=names (or online): just that part
+  const only = opt('only', null);
+  let A = null, B = null;
+  if (!only) {
   // 1. a fresh visit: nothing online
   {
     const { ctx, page, fb } = await fresh(browser, { name: 'fresh' });
@@ -130,7 +156,7 @@ async function signInEmail(page, email, pw, create) {
   }
 
   // 3. guest, and a turn's upload
-  const A = await fresh(browser, { name: 'A' });
+  A = await fresh(browser, { name: 'A' });
   await A.page.click('#tacct');
   await A.page.waitForSelector('.cloudform');
   await A.page.click('.cloudform button:text-is("Play as a guest")');
@@ -165,7 +191,7 @@ async function signInEmail(page, email, pw, create) {
   await A.page.keyboard.press('Escape');
 
   // 5. another browser
-  const B = await fresh(browser, { name: 'B' });
+  B = await fresh(browser, { name: 'B' });
   await signInEmail(B.page, 'ann@example.com', 'secret123');
   check(await uidOf(B.page) === guest, 'the same account signs in on another browser');
   // from the title: Account, then Account saves…
@@ -293,8 +319,73 @@ async function signInEmail(page, email, pw, create) {
   const codes = await fetch(`http://127.0.0.1:${AUTH}/emulator/v1/projects/${PROJECT}/oobCodes`).then(r => r.json());
   check((codes.oobCodes || []).some(c => c.email === 'cal@example.com' && c.requestType === 'PASSWORD_RESET'), 'the emulator has the reset email');
   await ctxClose(F);
+  }
 
-  await A.ctx.close(); await B.ctx.close();
+  // 12. shared names: a 2.0 player's name in the names file and a 4.0.5
+  // winner's star go to the version's pool; another player's New Game takes
+  // them in (and not with the preference off); a name the filter refuses
+  // never goes up; Delete my account and data takes them away again
+  if (!only || only === 'names') {
+    const X = await fresh(browser, { name: 'X' });
+    await X.page.click('#tacct'); await X.page.waitForSelector('.cloudform');
+    await X.page.click('.cloudform button:text-is("Play as a guest")');
+    const xuid = await waitFor(() => uidOf(X.page));
+    await X.page.keyboard.press('Escape');
+    await newGameVia(X.page, { version: '2.0', rules: 'dos', name: 'Zebediah' });
+    const zeb = await waitFor(() => fsGet('names/2.0/men/zebediah').then(d => d.fields ? d : null));
+    check(zeb && zeb.fields.name.stringValue === 'Zebediah' && zeb.fields.uid.stringValue === xuid && zeb.fields.kind.stringValue === 'men', 'a 2.0 player’s name goes to names/2.0/men (the names file)');
+    await quitToTitle(X.page);
+    await newGameVia(X.page, { version: '2.0', rules: 'dos', name: 'Fuckface' });
+    await sleep(1500);
+    check(!(await fsGet('names/2.0/men/fuckface')).fields, 'a name the decency filter refuses isn’t shared');
+    await quitToTitle(X.page);
+    // a 4.0.5 win: the computers' empires given to the human, so the next turn wins it
+    await putGame(X.page, { rules: '405', gameId: 1700000000010, name: 'Xena', win: true });
+    await continueGame(X.page); await endTurn(X.page);
+    for (let i = 0; i < 80; i++) {
+      if (await X.page.$('.namestar input')) { await X.page.fill('.namestar input', 'Quasar'); await X.page.click('.namestar button[type=submit]'); break; }
+      const ok = await X.page.$('.scrim .win button:text-is("OK")');
+      if (ok) { await ok.click(); continue; }
+      const c = await X.page.$('#msg .card:not(.end)'); if (c) await c.click().catch(() => null); else await sleep(150);
+    }
+    const qua = await waitFor(() => fsGet('names/4.0/stars/quasar').then(d => d.fields ? d : null));
+    check(qua && qua.fields.name.stringValue === 'Quasar', 'a 4.0.5 winner’s star goes to names/4.0/stars (Name a Star)');
+    // another player, the preference on (the default once signed in)
+    const Y = await fresh(browser, { name: 'Y' });
+    await Y.page.click('#tacct'); await Y.page.waitForSelector('.cloudform');
+    await Y.page.click('.cloudform button:text-is("Play as a guest")');
+    await waitFor(() => uidOf(Y.page));
+    await Y.page.keyboard.press('Escape');
+    await newGameVia(Y.page, { version: '2.0', rules: 'dos', name: 'Yolanda', wait: () => Y.page.evaluate(() => /Zebediah/.test(localStorage.getItem('ho5.names.shared.2.0') || '')) });
+    let o = await Y.page.evaluate(() => JSON.parse(localStorage.getItem('ho5.save')).opts);
+    check(o.namesKept && (o.namesKept.men || []).includes('Zebediah') && (o.namesKept.men || []).includes('Yolanda'), 'another 2.0 player’s New Game takes the shared name into its names file (opts.namesKept)');
+    check(!/Fuckface/.test(JSON.stringify(o)), 'and not the refused one');
+    await quitToTitle(Y.page);
+    await newGameVia(Y.page, { version: '4.0', rules: '405', name: 'Yolanda', wait: () => Y.page.evaluate(() => /Quasar/.test(localStorage.getItem('ho5.names.shared.4.0') || '')) });
+    o = await Y.page.evaluate(() => JSON.parse(localStorage.getItem('ho5.save')).opts);
+    check((o.starNamesKept || []).includes('Quasar') && (o.starNamesKept || []).length <= 4, 'a 4.0.5 New Game takes the shared star, within its list of four (opts.starNamesKept)');
+    // the preference off: nothing merged
+    await quitToTitle(Y.page);
+    await Y.page.click('#tacct'); await Y.page.waitForSelector('.account');
+    await Y.page.click('.account label:has-text("Use names other players have added") input');
+    await Y.page.keyboard.press('Escape');
+    await newGameVia(Y.page, { version: '4.0', rules: '405', name: 'Yolanda' });
+    o = await Y.page.evaluate(() => JSON.parse(localStorage.getItem('ho5.save')).opts);
+    check(!(o.starNamesKept || []).includes('Quasar'), 'with “Use names other players have added” off, no shared names');
+    await ctxClose(Y);
+    // Delete my account and data takes the names too
+    await quitToTitle(X.page);
+    await X.page.click('#tacct'); await X.page.waitForSelector('.account');
+    await X.page.click('.account a:text-is("Delete my account and data…")');
+    await X.page.click('.win.alert button:text-is("OK")');
+    await waitFor(() => X.page.evaluate(() => !HOCLOUD.user), 15000);
+    const gone = await waitFor(async () => !(await fsGet('names/2.0/men/zebediah')).fields && !(await fsGet('names/4.0/stars/quasar')).fields, 15000);
+    check(gone, 'Delete my account and data removes the names it added');
+    await ctxClose(X);
+  }
+
+  if (A) await A.ctx.close();
+  if (B) await B.ctx.close();
   await browser.close();
   if (fails.length) { console.log(`\n${fails.length} failed of ${checks}:\n` + fails.join('\n')); process.exit(1); }
   console.log(`online ok: ${checks} checks`);

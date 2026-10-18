@@ -3329,22 +3329,79 @@ function openRadicalHand() {
 // to later games (opts.starNamesKept), where the ruleset uses them.
 const starsKey = (id) => 'ho5.stars.' + id;
 function keptStars(id) { try { const v = JSON.parse(localStorage.getItem(starsKey(id)) || '[]'); return Array.isArray(v) ? v.filter(n => typeof n === 'string') : []; } catch (e) { return []; } }
-const keptStarsOpt = (id) => { const NS = (HO.RULESETS[id] || {}).nameAStar, k = NS ? keptStars(id) : []; return k.length ? { starNamesKept: k } : {}; };
+// With "Use names other players have added" (signed in), the stars other
+// winners of the version named (sharedStars) come after this browser's own,
+// and the version's own cap still holds (NS.keep: 4.0.5's list of four): the
+// player's own names first, the shared ones in the places left. The list the
+// game is made with is kept in it (opts.starNamesKept), so a seed and that
+// list always make the same galaxy; only names change, as they did when an
+// original's preferences file grew.
+const keptStarsOpt = (id) => {
+  const NS = (HO.RULESETS[id] || {}).nameAStar; if (!NS) return {};
+  let k = keptStars(id);
+  const sh = sharedStars(id, NS, k);
+  if (sh.length) { k = k.concat(sh); if (NS.keep) k = k.slice(0, NS.keep); }
+  return k.length ? { starNamesKept: k } : {};
+};
 // The names file (rs.namesFile, 1.2 and 2.0): the names humans gave
 // themselves and their ship types, kept in this browser for the version
 // (localStorage "ho5.names.<rules>", the original's preferences file) and
 // passed to later games (opts.namesKept), where the computers draw from them
 const namesKey = (id) => 'ho5.names.' + id;
 function keptNames(id) { try { const v = JSON.parse(localStorage.getItem(namesKey(id)) || '{}'); return v && typeof v === 'object' && !Array.isArray(v) ? v : {}; } catch (e) { return {}; } }
-const keptNamesOpt = (id) => { if (!(HO.RULESETS[id] || {}).namesFile) return {}; const k = keptNames(id); return Object.keys(k).length ? { namesKept: k } : {}; };
+// (with the shared names, signed in: each added after this browser's own
+// through namesFileAdd, so the file's own rules hold: 255 names a list at
+// most, none already in it, a name inside another counting)
+const keptNamesOpt = (id) => {
+  const rs = HO.RULESETS[id]; if (!rs || !rs.namesFile) return {};
+  const k = keptNames(id), sh = sharedNamesFor(id);
+  if (sh) {
+    for (const kind of ['men', 'women']) for (const n of sh[kind] || []) HO.namesFileAdd(rs, k, kind, n);
+    for (const c of Object.keys(HO.TYPES)) for (const n of sh['ships-' + c] || []) HO.namesFileAdd(rs, k, 'ships', n, c);
+  }
+  return Object.keys(k).length ? { namesKept: k } : {};
+};
 // add a name to the file (engine namesFileAdd); in a game, its own copy too,
-// as the original's computers read the file as it changes
+// as the original's computers read the file as it changes (not in an online
+// game: its options are everyone's, and change only at New Game). A name
+// the file takes goes to the shared pool too, when signed in.
 function keepName(kind, name, type) {
   if (!G || !HO.rules(G).namesFile) return;
   const id = G.rules, rs = HO.ownRules(G), k = keptNames(id);
-  if (HO.namesFileAdd(rs, k, kind, name, type)) try { localStorage.setItem(namesKey(id), JSON.stringify(k)); } catch (e) {}
+  if (HO.namesFileAdd(rs, k, kind, name, type)) {
+    try { localStorage.setItem(namesKey(id), JSON.stringify(k)); } catch (e) {}
+    shareName(id, kind === 'ships' ? 'ships-' + type : kind, name);
+  }
+  if (G.online) return;
   G.opts.namesKept = G.opts.namesKept || {};
   HO.namesFileAdd(rs, G.opts.namesKept, kind, name, type);
+}
+// ----- shared names (js/cloud.js, names/{pool}/{kind}) -----
+// The pool is the version ('1.2' … '5': its editions share one), the remake's
+// own rules each their own (the Claude rules' names never meet the
+// originals'); the kinds are the ones the version keeps: 'stars' (Name a
+// Star), 'men', 'women' and 'ships-<class>' (the names file). Signed out, or
+// with the preference off, nothing is fetched or merged.
+const namePool = (id) => { const f = famKey(familyOf(id)); return f === 'remake' ? id : f; };
+const nameKinds = (id) => { const rs = HO.RULESETS[id] || {}; return [...(rs.nameAStar ? ['stars'] : []), ...(rs.namesFile ? ['men', 'women', ...Object.keys(HO.TYPES).map(c => 'ships-' + c)] : [])]; };
+const sharedOn = () => !!(CLOUD && cloudUser() && CLOUD.useSharedNames());
+// the pool as fetched (at most once a day, cached in this browser), or null
+const sharedNamesFor = (id) => (sharedOn() && nameKinds(id).length ? CLOUD.cachedNames(namePool(id)) : null);
+// fetch it now (the New Game window, for the chosen edition: ready by Create galaxy)
+function fetchSharedNames(id) { if (sharedOn() && nameKinds(id).length) CLOUD.sharedNames(namePool(id), nameKinds(id)); }
+function shareName(id, kind, name) { if (CLOUD && cloudUser() && nameKinds(id).includes(kind)) CLOUD.postName(namePool(id), kind, name).catch(() => null); }
+// the shared stars a version may use: its own length limits, none it would
+// call taken (starTaken's matching, without a game), none this browser keeps
+function sharedStars(id, NS, kept) {
+  const sh = sharedNamesFor(id), L = (sh && sh.stars) || [];
+  if (!L.length) return [];
+  const base = HO.RULESETS[id].starNames || HO.DATA.starNames || [], lc = (x) => String(x).toLowerCase(), have = new Set(kept.map(lc));
+  const munger = NS.match === 'munger' || NS.match === '505';
+  return L.filter((n) => {
+    if (n.length > (NS.max || 7) || n.length < (NS.min || 1) || have.has(lc(n))) return false;
+    if (munger ? base.some(x => String(x).includes(n)) : base.some(x => lc(x) === lc(n))) return false;
+    have.add(lc(n)); return true;
+  });
 }
 const iWon = () => !!G && G.over && (G.winners || [G.winner]).includes(ME);
 const winReport = (m) => m && m.big === 'p3030' && iWon();
@@ -3379,6 +3436,7 @@ function starTaken(NS, id, n) {
 function keepStar(NS, id, n) {
   let k = NS.add ? NS.add(keptStars(id), n) : keptStars(id).concat([n]); if (NS.keep) k = k.slice(-NS.keep);
   try { localStorage.setItem(starsKey(id), JSON.stringify(k)); } catch (x) {}
+  shareName(id, 'stars', n); // the shared pool too, when signed in
 }
 function openNameStar(done, cancelled) {
   const NS = HO.rules(G).nameAStar, id = G.rules; if (!NS) return;
@@ -4043,6 +4101,10 @@ function openAccount(o) {
       u.email && u.name !== u.email ? el('p', { class: 'sub' }, u.email) : null,
       el('label', { class: 'chk' }, keep, el('span', null, 'Keep my saved games in my account too (off: in this browser only)')),
       el('p', { class: 'sub' }, 'Games are always saved in this browser as well, so they play offline. In the account they are sent at End Turn, when you leave the page, and at most once a minute in between.'),
+      // shared names: the stars winners named and the names in the names file, by version
+      el('label', { class: 'chk' }, el('input', { type: 'checkbox', checked: CLOUD.useSharedNames() ? 'checked' : false, onchange: (e) => { CLOUD.setUseSharedNames(e.target.checked); if (e.target.checked) fetchSharedNames(rulesId()); } }),
+        el('span', null, 'Use names other players have added')),
+      el('p', { class: 'sub' }, 'The stars winners named and the names the 1.2 to 4.0.5 names file kept (players’ names for the computers, ship type names), from everyone playing the same version, join your own at New Game. The names you add go to everyone too.'),
       u.anonymous ? el('div', { class: 'guestup' }, el('p', { class: 'sub' }, 'A guest account is deleted after 30 days unless you add Google or an email to it. Adding one keeps its games and Hall entries.'),
         el('div', { class: 'btns' }, el('button', { type: 'button', onclick: () => { body.innerHTML = ''; body.append(signInForm({ link: true, after: () => openAccount(o) })); } }, 'Keep this account…'))) : null,
       el('div', { class: 'btns' },
@@ -4052,10 +4114,13 @@ function openAccount(o) {
         }) }, 'Sign out')),
       // privacy.html: what is kept, and deleting it all
       el('p', { class: 'sub' }, el('a', { href: 'privacy.html', target: '_blank', rel: 'noopener' }, 'Privacy and terms'), ' · ',
-        el('a', { href: '#', onclick: (e) => { e.preventDefault(); confirmBox('Delete your account and everything in it: its saved games and its games in the shared Hall of Fame? This can’t be undone. Games saved in this browser stay here.', () => {
+        el('a', { href: '#', onclick: (e) => { e.preventDefault(); confirmBox('Delete your account and everything in it: its saved games, its games in the shared Hall of Fame and the names it added for everyone? This can’t be undone. Games saved in this browser stay here.', () => {
           CLOUD.flushSave && CLOUD.flushSave();
           const halls = Object.keys(HO.RULESETS).filter(id => HO.RULESETS[id] && HO.RULESETS[id].hall);
-          CLOUD.deleteAccount(halls).then(() => { closeModal(); toast('Your account and its data are deleted.'); }, (e) => toast(CLOUD.errorText(e)));
+          // every pool and kind a version shares names in
+          const pools = {};
+          for (const id of Object.keys(HO.RULESETS)) { const ks = nameKinds(id); if (ks.length) { const pl = namePool(id); pools[pl] = [...new Set((pools[pl] || []).concat(ks))]; } }
+          CLOUD.deleteAccount(halls, Object.entries(pools)).then(() => { closeModal(); toast('Your account and its data are deleted.'); }, (e) => toast(CLOUD.errorText(e)));
         }); } }, 'Delete my account and data…')),
       el('div', { class: 'btns right' }, el('button', { onclick: closeModal }, 'OK')));
     if (o.after) { const f = o.after; o.after = null; f(u); }
@@ -4217,6 +4282,8 @@ function maybeSaveOffer() {
 }
 // a sign-in from anywhere posts what the Hall offer was holding
 if (CLOUD) CLOUD.onChange((u) => { if (u && UI.hallWaiting.length) { const L = UI.hallWaiting.splice(0); L.forEach(postHallEntry); } });
+// and fetches the shared names of the version last chosen (once a day)
+if (CLOUD) CLOUD.onChange((u) => { if (u) fetchSharedNames(rulesId()); });
 
 // The Hall window's Everyone list: the 25 newest or best entries of this
 // ruleset's shared Hall, in the version's own columns
@@ -4350,11 +4417,15 @@ function newGameDialog() {
   };
   fillEditions(famNow, chosenRules());
   const pick = skinOSPickers(edSel.value);
-  famSel.addEventListener('change', () => { fillEditions(famSel.value, null); pick.forEdition(edSel.value); });
+  // the shared names for the edition chosen, fetched now (at most once a day)
+  // so they are there by Create galaxy; New Game itself never waits for them
+  fetchSharedNames(edSel.value);
+  famSel.addEventListener('change', () => { fillEditions(famSel.value, null); pick.forEdition(edSel.value); fetchSharedNames(edSel.value); });
   edSel.addEventListener('change', () => {
     const fm = edSel.selectedOptions[0] && edSel.selectedOptions[0].dataset.family;
     if (fm && fm !== famSel.value) { famSel.value = fm; fillEditions(fm, edSel.value); }
     pick.forEdition(edSel.value);
+    fetchSharedNames(edSel.value);
   });
   // the game's language, for a version that shipped in more than one
   // (rs.languages, its own first; G.opts.lang): only names and words change

@@ -1,4 +1,4 @@
-# Online: accounts, saved games in an account, the shared Hall of Fame
+# Online: accounts, saved games in an account, the shared Hall of Fame, shared names
 
 The remake is a static site that plays offline, and it still does: everything online
 is optional, loads only when a player asks for it, and fails soft. A player who never
@@ -30,6 +30,13 @@ Firebase project `nostalgia-ho` (Authentication and Firestore). No Analytics.
   (highest difficulty), of that ruleset's shared Hall, in the version's own columns;
   Details opens the version's Summary window. Not signed in, the list ends with one
   quiet line: "Sign in, or play as a guest, to add your games here."
+- **Use names other players have added** (Account…): on by default once signed in. What
+  the originals carried from game to game in their preferences or names file is pooled
+  for everyone playing the same version (below, "Shared names"): the stars winners name
+  (Name a Star) and the 1.2 to 4.0.5 names file (each human's name joins the computers'
+  names, each ship type a player names joins its class's list). With it on, New Game
+  merges the pool into this browser's own lists; the names this player adds go to the
+  pool either way, once signed in. Signed out, nothing is fetched or sent.
 - **Two offers, and only these.** (a) When a game is put in this computer's Hall (a win,
   or the Hall of Shame), once the game's own end-of-game windows are done: "Put this game
   in the Hall of Fame everyone sees?" [Sign in] [Play as a guest] [Not now] and "Don't
@@ -44,7 +51,9 @@ Firebase project `nostalgia-ho` (Authentication and Firestore). No Analytics.
 
 **In the browser** (as before): the current game (`ho5.save`, with the time it was saved,
 `ho5.save.when`), the iOS/Android slots (`ho5.games.<rules>`), the Halls
-(`ho5.hall.<rules>`). New: `ho5.cloud.was` and `ho5.cloud.name` (this browser was signed
+(`ho5.hall.<rules>`), the names file (`ho5.names.<rules>`) and the named stars
+(`ho5.stars.<rules>`). Shared names: `ho5.cloud.names` (the preference) and
+`ho5.names.shared.<pool>` (the pool as last fetched, with the time). New: `ho5.cloud.was` and `ho5.cloud.name` (this browser was signed
 in, and as whom: the SDK then loads at start-up to bring the account back),
 `ho5.cloud.saves` (the preference), `ho5.cloud.sent.<uid>` (a fingerprint of each game
 last sent, so an unchanged game isn't sent again), the offers' "Don't ask again".
@@ -69,8 +78,59 @@ Firebase keeps its own sign-in in the browser's IndexedDB.
   `fameAt` + `fameDifficulty` or `shameAt` + `shameDifficulty` (so each list is one query
   on one field, with no composite index to make). 3.0.1's Play Again options stay on
   the computer.
+- `names/{pool}/{kind}/{name in lower case}`: one document per shared name: `name` (as
+  typed), `uid`, `kind`, `createdAt` (server time). The pool is the version (`1.2`, `2.0`,
+  `3.0`, `4.0`, `5`: its editions share one; the remake's own rules would each have their
+  own, so the Claude rules' names never mix with the originals', though none of them
+  keeps names today); the kind `stars`, `men`, `women` or `ships-<class>` (`scout`,
+  `dread`, `fighter`, `tanker`, `colony`, `satellite`, `bio`, `decoy`). The id is the name
+  in lower case, so the rules refuse a second copy whatever its letter case: a name is in
+  the pool once, without a query first.
 - `admins/{uid}`: an empty document for each admin, made by hand in the console. No
   client can read or write it.
+
+## Shared names
+
+What the originals kept from game to game, found in the remake (localStorage):
+
+- **The names file** (1.2, 2.0, 3.0.1, 4.0.5: `rs.namesFile`, `{ max: 255 }`;
+  `ho5.names.<rules>`, `{ men, women, ships: { class: [...] } }`): at New Game each human's
+  name is added to the men's or women's list the computers draw from (2.0's
+  `DoGameSolidificationStuff`), and a ship type a human names is added to its class's
+  list, which the computers' designs are named from (`AddNewTypeNameToPrefs`); a list
+  stops at 255 names, its own included, and takes no name it already has (a name inside
+  another counts, Munger). Engine `namesFile`, `namesFileAdd`; skin `keepName`.
+- **Name a Star** (`rs.nameAStar`; `ho5.stars.<rules>`): a winner (1.2 to 4.0.5) or a new
+  rank (5.0.5, Palm OS, iOS, Android) names a star for later galaxies. 1.2 to 3.0.1 put the
+  names in the galaxy's pool of names; 4.0.5 keeps four (STR# 2000 'NameAStar', the
+  newest first) and puts them in; 5.0.5, the Palm, iOS and Android put five in, a run from
+  a start the seed picks. Engine `newGame`; skin `keepStar`, `openNameStar`.
+- (The Hall of Fame was already shared; master points and Game Center's record are the
+  player's own, not names.)
+
+**Posting.** When a signed-in player's game adds a name to this browser's list (the
+names file takes it; a star is named), it is posted to the version's pool too, if
+`HODECENCY.ok` passes it and it is 1 to 31 characters. A name already in the pool, in
+any letter case, is refused by the rules (its id is taken) and that is all.
+
+**Using.** With "Use names other players have added" on, the New Game window fetches the
+chosen version's pool (at most once a day a browser, cached in `ho5.names.shared.<pool>`;
+the newest 60 stars, 120 men's and 120 women's names, 40 of each ship class), each name
+through the decency filter again, and Create galaxy merges it, never waiting for it:
+
+- the names file: this browser's own names first, then the shared ones through
+  `namesFileAdd`, so the file's own rules hold (255 at most, no name it has);
+- the stars: this browser's own first, then the shared ones the version would take
+  (its length limits; not one of its own star names, matched as its Name a Star window
+  matches; not one already kept), and the version's own cap still holds: 4.0.5's list of
+  four keeps the player's own and fills only the places left.
+
+**Determinism.** The merged lists are what the game is made with, and they are kept in
+it (`G.opts.namesKept`, `G.opts.starNamesKept`), so a seed and those lists always make
+the same game, on any computer and after a reload. A longer list changes only names, as
+it did in the originals when the preferences file grew: the stars' and computers'
+positions, numbers and draws are the same (a name drawn from a longer list is a
+different name, which is all).
 
 **Writes.** The free tier allows 20,000 writes a day. A game is sent at End Turn, when the
 page is hidden or closed (`visibilitychange`, `pagehide`), and otherwise at most once a
@@ -87,14 +147,20 @@ minute, and only when it has changed. A Hall entry is one write per finished gam
   `shameAt` the server's time, the difficulty within ±10,000, the game's `time` within a
   day of the server's, whole numbers in range, short words at most 16 characters. No
   update by anyone; delete only by an admin.
+- `names/{pool}/{kind}/{id}`: anyone may read. Create only when signed in, as yourself,
+  with exactly `name` (1 to 31 characters, its lower case the document id), `uid`, `kind`
+  (the collection's, one of the fixed list) and `createdAt` (the server's time); the pool
+  a short word. No update by anyone; delete by an admin or by its poster (Delete my
+  account and data).
 - `admins/{uid}`: no client access. The rules ask
   `exists(/databases/$(database)/documents/admins/$(request.auth.uid))`, which needs no
   read permission.
 - Everything else is denied.
 
-`tools/firebase/rules-test.mjs` runs 50 cases against the emulators (one player can't
-read, list, write or delete another's saves; every malformed entry is refused; an admin
-deletes and nobody else; nobody reads the admin list).
+`tools/firebase/rules-test.mjs` runs 67 cases against the emulators (one player can't
+read, list, write or delete another's saves; every malformed entry or name is refused; a
+name is there once in any letter case; an admin deletes and nobody else; nobody reads the
+admin list).
 
 ## Setting it up in the Firebase console
 
@@ -145,8 +211,8 @@ when it shows the Everyone list.
 
 ## The decency filter (`js/decency.js`)
 
-For every name another player will see: the Hall's player names now, shared star and
-ship names later. `HODECENCY.ok(name)` and `HODECENCY.clean(name, fallback)`. The words
+For every name another player will see: the Hall's player names, and the shared star,
+player and ship type names (checked when posted and again when fetched). `HODECENCY.ok(name)` and `HODECENCY.clean(name, fallback)`. The words
 are every LDNOOBW language file (CC BY 4.0, `tools/ldnoobw/`, made into
 `js/decency-words.js` by `node tools/build-decency.js`). A name is folded (case, accents,
 Turkish ı/İ, ß and the like, leet digits and @ $) and matched by whole words, with
@@ -201,8 +267,11 @@ game plays with Firebase unreachable, guest sign-in, a guest's upgrade to an ema
 (same uid, same saves), the upload at End Turn and none when nothing changed, the round
 trip to another browser, Continue's "Which copy?", Delete, a Hall post and the Everyone
 view, both offers (Play as a guest, Not now, Don't ask again), a name refused by the
-filter, and email Create account, Sign out, Sign in, a wrong password and Forgot
-password. Google sign-in needs `apis.google.com`, which the build sandbox couldn't
+filter, email Create account, Sign out, Sign in, a wrong password and Forgot
+password, and the shared names (a 2.0 player's name and a 4.0.5 winner's star posted,
+another player's New Game taking them in and not with the preference off, a refused
+name never posted, Delete my account and data removing them). `--only=names` runs the
+shared names alone. Google sign-in needs `apis.google.com`, which the build sandbox couldn't
 reach; the test skips it there.
 
 ## Code

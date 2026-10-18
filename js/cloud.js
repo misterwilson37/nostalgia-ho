@@ -373,18 +373,91 @@ API.hallTop = (rules, kind, order) => withSdk(F => decency().then((D) => {
     return x;
   }));
 }));
+// ---------- shared names (names/{pool}/{kind}/{id}) ----------
+// What the originals carried from game to game in their preferences or names
+// file, pooled for everyone who plays the same version: the names file (1.2
+// to 4.0.5: the humans' names join the computers' lists, a ship type's name
+// its class's list; the skin's "ho5.names.<rules>") and Name a Star (a
+// winner's star, "ho5.stars.<rules>"). The skin names the pool (a version:
+// '1.2', '2.0', '3.0', '4.0', '5'; the remake's own rules each their own, so
+// the Claude rules' never mix with the originals') and the kind: 'stars',
+// 'men', 'women', or 'ships-<class>' (each class its own list, as in the
+// names file). A name's document id is its lower-case self, so the rules
+// refuse a second copy of a name whatever its letter case (create only, no
+// update): that is the dedup, server-side, with no query first.
+const SHIP_CLASSES = ['scout', 'dread', 'fighter', 'tanker', 'colony', 'satellite', 'bio', 'decoy'];
+const NAME_KINDS = ['stars', 'men', 'women'].concat(SHIP_CLASSES.map(c => 'ships-' + c));
+API.NAME_KINDS = NAME_KINDS;
+// how many of the newest of each kind a fetch takes (the reads cost: the free
+// tier allows 50,000 a day; a pool is fetched at most once a day a browser)
+const NAME_FETCH = { stars: 60, men: 120, women: 120 };
+const NAME_FETCH_SHIP = 40;
+const NAME_MAX = 31; // firestore.rules: a name is 1 to 31 characters
+const NAME_DAY = 24 * 3600e3;
+// "Use names other players have added" (Account…): on unless turned off;
+// it only counts when signed in (a player who never signs in loads nothing)
+API.useSharedNames = () => store.get('ho5.cloud.names') !== '0';
+API.setUseSharedNames = (on) => store.set('ho5.cloud.names', on ? '1' : '0');
+// a name's document id, or null when it can't be one (Firestore's: no "/",
+// not "." or "..", not __name__)
+const nameId = (n) => { const id = String(n).toLowerCase(); return !id || id.includes('/') || id === '.' || id === '..' || /^__.*__$/.test(id) ? null : id; };
+const namesKey = (pool) => 'ho5.names.shared.' + pool;
+// the pool as this browser last fetched it: { at (ms), kinds: { kind: [names, oldest first] } }, or null
+function namesCache(pool) { try { const v = JSON.parse(store.get(namesKey(pool)) || 'null'); return v && v.kinds && typeof v.kinds === 'object' ? v : null; } catch (e) { return null; } }
+API.cachedNames = (pool) => { const c = namesCache(pool); return c ? c.kinds : null; };
+// fetch a pool's kinds (at most once a day unless force), each name through
+// the decency filter again (a changed client could post anything); resolves
+// the kinds ({ kind: [names, oldest first] }), the cached ones when the
+// fetch fails, or null
+API.sharedNames = (pool, kinds, force) => {
+  const c = namesCache(pool), want = (kinds || []).filter(k => NAME_KINDS.includes(k));
+  if (!force && c && Date.now() - c.at < NAME_DAY && want.every(k => Array.isArray(c.kinds[k]))) return Promise.resolve(c.kinds);
+  return withSdk(F => decency().then((D) => {
+    if (!S.user) return c ? c.kinds : null;
+    return Promise.all(want.map(k => F.getDocs(F.query(F.collection(S.db, 'names', String(pool), k), F.orderBy('createdAt', 'desc'), F.limit(NAME_FETCH[k] || NAME_FETCH_SHIP)))
+      .then(q => [k, q.docs.map(d => d.data().name).filter(n => typeof n === 'string' && n.length <= NAME_MAX && D && D.ok(n)).reverse()])))
+      .then((L) => {
+        const kinds = Object.assign({}, c ? c.kinds : {}, Object.fromEntries(L));
+        store.set(namesKey(pool), JSON.stringify({ at: Date.now(), kinds }));
+        return kinds;
+      });
+  })).catch(() => (c ? c.kinds : null));
+};
+// post one name the player's game just kept (signed in only): resolves 'sent',
+// 'same' (already in the pool, any letter case), 'refused' (the decency
+// filter, or not a name the pool takes) or 'off' (not signed in)
+API.postName = (pool, kind, name) => {
+  name = String(name == null ? '' : name).trim();
+  if (!S.user || !NAME_KINDS.includes(kind) || !name || name.length > NAME_MAX || !nameId(name)) return Promise.resolve(S.user ? 'refused' : 'off');
+  const c = namesCache(pool), lc = name.toLowerCase();
+  if (c && (c.kinds[kind] || []).some(n => String(n).toLowerCase() === lc)) return Promise.resolve('same');
+  return withSdk(F => decency().then((D) => {
+    if (!D || !D.ok(name)) return 'refused';
+    const u = needUser();
+    return F.setDoc(F.doc(S.db, 'names', String(pool), kind, nameId(name)), { name, uid: u.uid, kind, createdAt: F.serverTimestamp() }).then(() => {
+      // into this browser's copy too, so it isn't sent again
+      const cc = namesCache(pool); if (cc) { (cc.kinds[kind] = cc.kinds[kind] || []).push(name); store.set(namesKey(pool), JSON.stringify(cc)); }
+      return 'sent';
+    }, (e) => (e && e.code === 'permission-denied' ? 'same' : 'error'));
+  })).catch(() => 'error');
+};
+
 // an admin's removal (firestore.rules: /admins/{uid} documents only)
 // Delete my account and data (the Account window; privacy.html): every save in
 // the account, every Hall entry this account posted (the rulesets with a
-// Hall), then the account itself. Firebase asks for a recent sign-in before
+// Hall), every name it added to a shared pool (namePools: the pools and their
+// kinds, [[pool, [kind, …]], …], from the skin), then the account itself.
+// Firebase asks for a recent sign-in before
 // it deletes an account: that comes back as auth/requires-recent-login, and
 // errorText says to sign in again and repeat.
-API.deleteAccount = (hallRules) => withSdk((F) => {
+API.deleteAccount = (hallRules, namePools) => withSdk((F) => {
   const u = needUser();
   const saves = F.getDocs(F.collection(S.db, 'users', u.uid, 'saves')).then(q => Promise.all(q.docs.map(d => F.deleteDoc(d.ref))));
   const halls = Promise.all((hallRules || []).map(r => F.getDocs(F.query(F.collection(S.db, 'halls', String(r), 'entries'), F.where('uid', '==', u.uid)))
     .then(q => Promise.all(q.docs.map(d => F.deleteDoc(d.ref))))));
-  return Promise.all([saves, halls]).then(() => F.deleteUser(u)).then(() => {
+  const names = Promise.all((namePools || []).flatMap(([pool, kinds]) => (kinds || []).map(k => F.getDocs(F.query(F.collection(S.db, 'names', String(pool), k), F.where('uid', '==', u.uid)))
+    .then(q => Promise.all(q.docs.map(d => F.deleteDoc(d.ref)))))));
+  return Promise.all([saves, halls, names]).then(() => F.deleteUser(u)).then(() => {
     store.set(sentKey(u.uid), null); store.set('ho5.cloud.was', null); store.set('ho5.cloud.name', null); refresh();
   });
 });

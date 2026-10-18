@@ -8,7 +8,7 @@
 // entry, and only an admin (an /admins/{uid} document) may delete one.
 import { initializeApp, deleteApp } from 'firebase/app';
 import { getAuth, connectAuthEmulator, signInAnonymously, createUserWithEmailAndPassword, signOut } from 'firebase/auth';
-import { initializeFirestore, connectFirestoreEmulator, doc, collection, getDoc, getDocs, setDoc, addDoc, updateDoc, deleteDoc, serverTimestamp, Bytes, query, orderBy, limit, setLogLevel } from 'firebase/firestore';
+import { initializeFirestore, connectFirestoreEmulator, doc, collection, getDoc, getDocs, setDoc, addDoc, updateDoc, deleteDoc, serverTimestamp, Bytes, query, where, orderBy, limit, setLogLevel } from 'firebase/firestore';
 setLogLevel('silent'); // the denied writes are expected; the cases below report
 
 const AUTH = +(process.env.FIREBASE_AUTH_PORT || 8811), FS = +(process.env.FIRESTORE_PORT || 8810), PROJECT = 'nostalgia-ho';
@@ -100,6 +100,26 @@ const mine = await addDoc(hall(A), entry({}));
 await allow('its poster deletes their own (Delete my account)', deleteDoc(mine));
 await deny('another player deletes it', deleteDoc(doc(B.db, 'halls', '405', 'entries', posted.id)));
 
+// ---------- shared names ----------
+const nm = (o) => Object.assign({ name: 'Zebulon', uid: a.uid, kind: 'stars', createdAt: serverTimestamp() }, o);
+const nref = (c, kind, id, pool) => doc(c.db, 'names', pool || '5', kind, id);
+await allow('a guest adds a star name', setDoc(nref(A, 'stars', 'zebulon'), nm()));
+await allow('a player adds a ship type name', setDoc(nref(B, 'ships-scout', 'pathfinder', '2.0'), nm({ name: 'Pathfinder', uid: b.uid, kind: 'ships-scout' })));
+await allow('anyone reads the names, signed in or not', getDocs(query(collection(N.db, 'names', '5', 'stars'), orderBy('createdAt', 'desc'), limit(60))));
+await deny('the same name again, in other letters', setDoc(nref(B, 'stars', 'zebulon'), nm({ name: 'ZEBULON', uid: b.uid })));
+await deny('a name whose id isn’t its lower case', setDoc(nref(A, 'stars', 'other'), nm({ name: 'Ganymede' })));
+await deny('nobody signed in adds a name', setDoc(nref(N, 'stars', 'quark'), nm({ name: 'Quark', uid: 'x' })));
+await deny('a name as someone else', setDoc(nref(A, 'stars', 'quark'), nm({ name: 'Quark', uid: b.uid })));
+await deny('a name over 31 characters', setDoc(nref(A, 'men', 'x'.repeat(32)), nm({ name: 'x'.repeat(32), kind: 'men' })));
+await deny('an unknown kind', setDoc(nref(A, 'planets', 'quark'), nm({ name: 'Quark', kind: 'planets' })));
+await deny('a kind that isn’t its collection', setDoc(nref(A, 'men', 'quark'), nm({ name: 'Quark', kind: 'women' })));
+await deny('a client time for createdAt', setDoc(nref(A, 'stars', 'quark'), nm({ name: 'Quark', createdAt: new Date() })));
+await deny('an extra field', setDoc(nref(A, 'stars', 'quark'), nm({ name: 'Quark', extra: 1 })));
+await deny('its poster changes it', updateDoc(nref(A, 'stars', 'zebulon'), { name: 'zebulon' }));
+await deny('another player deletes it', deleteDoc(nref(B, 'stars', 'zebulon')));
+await allow('its poster deletes it (Delete my account)', deleteDoc(nref(B, 'ships-scout', 'pathfinder', '2.0')));
+await allow('a player lists their own names (Delete my account)', getDocs(query(collection(A.db, 'names', '5', 'stars'), where('uid', '==', a.uid))));
+
 // ---------- admins ----------
 await deny('a player reads the admin list', getDoc(doc(A.db, 'admins', a.uid)));
 await deny('a player lists the admins', getDocs(collection(A.db, 'admins')));
@@ -111,6 +131,7 @@ if (!admin.ok) fails.push('could not make the admin document: ' + admin.status);
 await deny('an admin still can’t read the admin list', getDoc(doc(B.db, 'admins', b.uid)));
 await deny('an admin can’t change an entry', updateDoc(doc(B.db, 'halls', '405', 'entries', posted.id), { name: 'X' }));
 await allow('an admin deletes an entry', deleteDoc(doc(B.db, 'halls', '405', 'entries', posted.id)));
+await allow('an admin deletes a shared name', deleteDoc(nref(B, 'stars', 'zebulon')));
 
 // ---------- everything else ----------
 await deny('a document anywhere else', setDoc(doc(A.db, 'misc', 'x'), { a: 1 }));

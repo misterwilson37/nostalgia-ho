@@ -9,6 +9,11 @@ rules_version = '2';
 //   one per ruleset. Anyone may read; a signed-in player (a guest too) may
 //   add an entry as themselves, checked field by field; nobody may change
 //   one, and only an admin may delete one.
+// - names/{pool}/{kind}/{name}: the shared names (Name a Star, the names
+//   file), one pool a version. Anyone may read; a signed-in player may add a
+//   name as themselves, its document id its own lower-case self (so a name is
+//   there once, whatever its letter case); nobody may change one; an admin or
+//   its poster may delete it.
 // - admins/{uid}: who the admins are. No client may read or write it (it is
 //   made by hand in the console); the rules only ask whether a document
 //   exists, which needs no read permission.
@@ -84,6 +89,25 @@ service cloud.firestore {
       allow create: if signedIn() && validEntry();
       allow update: if false;
       // an admin, or the player who posted it (Delete my account and data)
+      allow delete: if isAdmin() || (signedIn() && resource.data.uid == request.auth.uid);
+    }
+
+    match /names/{pool}/{kind}/{id} {
+      function validName() {
+        let d = request.resource.data;
+        return d.keys().hasOnly(['name', 'uid', 'kind', 'createdAt'])
+          && d.keys().hasAll(['name', 'uid', 'kind', 'createdAt'])
+          && d.uid == request.auth.uid
+          && str(d.name, 1, 31) && id == d.name.lower()
+          && d.kind == kind
+          && kind in ['stars', 'men', 'women', 'ships-scout', 'ships-dread', 'ships-fighter', 'ships-tanker',
+            'ships-colony', 'ships-satellite', 'ships-bio', 'ships-decoy']
+          && pool.matches('[A-Za-z0-9._-]{1,16}')
+          && d.createdAt == request.time;
+      }
+      allow read: if true;
+      allow create: if signedIn() && validName();
+      allow update: if false;
       allow delete: if isAdmin() || (signedIn() && resource.data.uid == request.auth.uid);
     }
 

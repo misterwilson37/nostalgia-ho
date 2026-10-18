@@ -22,7 +22,10 @@ Google, an email and password, or a guest account) keeps saved games in the acco
 so they follow the player to another computer (**Account saves…** in the Game menu, for
 every ruleset; Continue asks when the account's copy is newer), and adds a **This
 computer / Everyone** switch to the Hall of Fame and Hall of Shame (4.0.5 and 3.0.1): one
-shared Hall per ruleset, its names through a decency filter (`js/decency.js`). The
+shared Hall per ruleset, its names through a decency filter (`js/decency.js`). Signed
+in, the names the originals carried from game to game (the stars winners name, and the
+1.2 to 4.0.5 names file: players' names for the computers, ship type names) are shared
+by everyone playing the same version ("Use names other players have added", Account…). The
 Firebase SDK (`js/vendor/firebase.js`) loads only when a player asks for any of this, and
 everything fails soft without a network. The single-file build has none of it. What is
 stored, the security rules (`firestore.rules`), the console steps, admins and the tests:
