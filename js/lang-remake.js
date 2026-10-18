@@ -464,6 +464,13 @@ de: {
     'Improve mini tech dramatically.': 'Die Minitech dramatisch verbessern.',
     // ---- Name a Star at a new rank (5.0.5, the Palm) ----
     'You may name a star for use in future games:': 'Sie dürfen einen Stern für spätere Spiele benennen:',
+    // ---- iOS and Android: their own lines (the touch) ----
+    'Congratulations! You may name a star for use in future games:': 'Glückwunsch! Sie dürfen einen Stern für spätere Spiele benennen:',
+    'Sorry, but that fleet doesn\'t have enough fuel to reach the selected destination. You can tell this because of the red fleet line.': 'Diese Flotte hat nicht genug Treibstoff, um das gewünschte Ziel zu erreichen. Das kann man an der roten Flottenlinie erkennen.',
+    'Touch and drag a fleet back to its current star to cancel a fleet\'s movement.': 'Ziehen Sie eine Flotte zu ihrem Stern zurück, um ihren Flug abzubrechen.',
+    'Use the Organize Fleets dialog to split up ship piles.': 'Mit „Flotten ordnen“ können Sie Schiffsstapel aufteilen.',
+    'Touch outside of a dialog to cancel that dialog without making any changes.': 'Tippen Sie neben ein Fenster, um es ohne Änderungen zu schließen.',
+    'Technology bars can be adjusted with a touch of your finger.': 'Die Technologiebalken lassen sich mit dem Finger einstellen.',
     // ---- the Palm's own ----
     'Your ship technicians have designed a decoy ship. It\'s really weak, but it looks menacing and can help keep your allies in line!': 'Ihre Schiffstechniker haben ein Täuschschiff entworfen. Es ist wirklich schwach, aber es sieht bedrohlich aus und kann Ihre Verbündeten bei der Stange halten!',
     'Icons by your planet mean you have ships orbiting around it. Fleets are on the right; satellites are on the left.': 'Symbole neben Ihrem Planeten bedeuten, dass Schiffe ihn umkreisen. Flotten stehen rechts, Satelliten links.',

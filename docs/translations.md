@@ -81,6 +81,8 @@ verbatim from another version's official translation of the same English.
 | 4.0.5 Mac | German (the remake's) | 31, hints 0 | 182, hints 27 | stars by name |
 | 5.0.5 | German (the remake's) | 25 (the German DOS 2.0's), hints 0 | 230, hints 40 | stars by name (the German DOS 2.0's); computers and ships English |
 | Palm OS 5 | German (the remake's) | 25, hints 0 | 231, hints 40 | stars by name |
+| iOS 1.2.9, Android 1.2.8 | French, Turkish (official) | 201 | 0 | the game's own lists |
+| iOS 1.2.9, Android 1.2.8 | German (the remake's) | 25, hints 0 | 227, hints 39 | stars by name |
 
 
 ## Mac 1.2 (French, as released)
@@ -201,7 +203,8 @@ rule (3.0.1 takes 2 to 7 letters, 1.2F's line says 4 to 7), the battle reports' 
 lines in 3.0.1's form, "ship money", the credit line, and the Turkish for the Name a Star
 and Fix Spending windows, which only 1.2F's French has.
 
-## German for 3.0.1 onward (the remake's)
+## German for 3.0.1 onward (the remake's): 3.0.1, 4.0.5, 5.0.5, the Palm, iOS and Android
+
 
 Forward from the German DOS 2.0 (`HO.PRS`, `DOSHO.EXE`), the one official German after
 1.2: its lines wherever a later version's English is 2.0's (the battle reports, "You have
@@ -226,7 +229,10 @@ Hope), "Ship verlassen? Alle Mann von Bord!". The alerts are those the page show
 network and registration alerts are never shown and stay untranslated). The names: the
 stars by name from the German DOS 2.0's list; a computer or ship list only where it is
 2.0's list (3.0.1's Scouts, Colony Ships and Satellites, 4.0.5's Colony Ships and
-Satellites); 5.0.5's computers and ships stay English.
+Satellites); 5.0.5's computers and ships stay English. iOS and Android get the same German
+for their own English (iOS's lists), with the remake's lines for their touch hints and
+alerts; their help page stays English (`js/help.js` has French and Turkish only).
+
 
 ## What stays English, and why
 

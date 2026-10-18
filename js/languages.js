@@ -1149,4 +1149,23 @@ if (R301) {
   R301.lang = Object.assign({}, R301.lang, { fr: make('fr'), tr: make('tr'), de: make('de') });
 
 }
+
+// ---------- iOS and Android: the remake's German ----------
+// as 5.0.5's (the same text but for the touch, and the iOS English's own
+// small differences: straight quotes, "!!"): the lines are iOS's own
+// English lists (Report Window Templates, the alerts the page shows, the
+// Hope question) and its hints, each given the German DOS 2.0's line or the
+// remake's German
+function linesIOS(rs) {
+  const A = L('en', 'Alert Strings').filter((t, i) => SHOWN_ALERTS.includes(i));
+  return () => [].concat(L('en', 'Report Window Templates'), A, [L('en', 'Misc Strings')[123]], rs.hintTexts || [], RADICAL505,
+    ['Do you really want to evacuate %s?', 'Do you really want to evacuate %s? It\'s a profitable colony!', 'Abandon Ship? Abandon Ship! All hands abandon ship! Women and children first!',
+      'Year %d. Nothing much happened.', 'Congratulations! You may name a star for use in future games:'], hoedownLines(rs));
+}
+for (const rs of [E.RULESETS.ios, E.RULESETS.android]) {
+  if (!rs) continue;
+  const de = lazyLang(() => build505('de', rs, { lines: linesIOS(rs), hints: () => rs.hintTexts }), LANG_KEYS);
+  rs.languages = rs.languages.concat(['de']);
+  rs.lang = Object.assign({}, rs.lang, { de });
+}
 })(this);

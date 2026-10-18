@@ -177,6 +177,9 @@ Where a browser can't do what the original did, or the remake had to pick.
 - A double tap is two taps within 0.4 s and 30 points (iOS asked the system).
 - Organize Fleets: a pinch counts past 10 %, and an emptied fleet goes at once (iOS: when
   the window closes).
+- **German (the remake's)**, iOS and Android: as 5.0.5's, with the remake's lines for the
+  touch hints; the help page stays English.
+
 
 ### Palm
 

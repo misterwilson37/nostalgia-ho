@@ -484,6 +484,8 @@ root.HOVERSIONS = {
       'Every game starts from the default budget and research shares; the iOS game started a new game with your first turn’s shares from the last one.',
       'Master points, games won and the seven achievements were Game Center’s; the remake keeps them in this browser, apart from the other versions’ records.',
       'Which five of your named stars go into a new galaxy is drawn from the game’s seed, not the phone’s random numbers.',
+      'French and Turkish are the game’s own (its fr.lproj and tr.lproj).',
+      REMAKE_LANG('German (“Übersetzung des Remakes”), as 5.0.5’s: the German DOS 2.0’s lines wherever the English is 2.0’s, the remake’s German in its words for the rest; the help page stays English'),
     ],
     missing: [
       'Game Center itself: the leaderboards and achievements are kept here, not shared.',
@@ -513,7 +515,10 @@ root.HOVERSIONS = {
       RANDOM,
       'Master points are one number kept in this browser; the game kept it in its preferences file.',
       'The Back key is Escape.',
+      'French and Turkish are the game’s own (its fr.lproj and tr.lproj).',
+      REMAKE_LANG('German (“Übersetzung des Remakes”), as 5.0.5’s: the German DOS 2.0’s lines wherever the English is 2.0’s, the remake’s German in its words for the rest; the help page stays English'),
     ],
+
     missing: [
       'Several saved games, sending a game by e-mail, and the help web page.',
     ],
