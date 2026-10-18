@@ -45,3 +45,7 @@ https://www.deltatao.com/ho/ho4faq/.
    application, WINHO.EXE's and 4.0.5's Windows icons, the Palm's, iOS's and Android's).
    For now every skin shows the Android app's icon (`favicon.ico`, `assets/icons/`); the
    switch is a line per skin in `js/skins.js` once each icon is extracted.
+7. **Export and import saved games, for every version.** A Game menu "Export this game…"
+   (the .hogame file) and "Import a game…", with no account needed. Today Download exists
+   only in iOS/Android's Saved Games and in Account saves (signed in), and "Open a
+   downloaded game…" only in iOS/Android's Saved Games.
