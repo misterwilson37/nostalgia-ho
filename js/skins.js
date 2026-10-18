@@ -138,24 +138,28 @@ const OSES = [
 ].sort((a, b) => a.year - b.year);
 // os: the skin's own OS looks, its default first (the systems its original
 // ran on); any other look can be chosen too
+// icon: the browser tab's icon, the original's own application icon
+// (assets/icons/<icon>.png, the large one, and <icon>-32.png; where each came
+// from: assets/icons/README.txt); none (the homages): the default, the
+// Android app's (favicon.ico)
 const SKINS = [
-  { id: 'dos', version: '2.0', platform: 'DOS and Windows 3.1', year: 1993, os: ['dos', 'win31'] },
-  { id: 'amiga', version: '2.0', platform: 'Amiga, German', year: 1994, os: ['workbench'] },
-  { id: 'mac12', bw: true, version: '1.2', platform: 'Mac, French, black and white', year: 1992, os: ['system6', 'system7'] },
-  { id: 'mac2', bw: true, version: '2.0.1', platform: 'Mac, black and white', year: 1992, os: ['system7', 'system6'] },
-  { id: 'mac2c', version: '2.0.1', platform: 'Mac, colour', year: 1992, os: ['system7', 'system6'] },
-  { id: 'mac3', bw: true, version: '3.0.1', platform: 'Mac, black and white', year: 1993, os: ['system7'] },
-  { id: 'mac3c', version: '3.0.1', platform: 'Mac, colour', year: 1993, os: ['system7'] },
-  { id: 'mac4', bw: true, version: '4.0.5', platform: 'Mac, black and white', year: 1996, os: ['system7', 'macos8'] },
-  { id: 'mac4c', version: '4.0.5', platform: 'Mac, colour', year: 1996, os: ['system7', 'macos8'] },
-  { id: 'w95', version: '4.0.5', platform: 'Windows 95', year: 1996, os: ['win95'] },
-  { id: 'palm', version: '5', platform: 'Palm OS, version 1.0.4', year: 2003, os: ['palmos'] },
+  { id: 'dos', version: '2.0', platform: 'DOS and Windows 3.1', year: 1993, os: ['dos', 'win31'], icon: 'dos' },
+  { id: 'amiga', version: '2.0', platform: 'Amiga, German', year: 1994, os: ['workbench'], icon: 'amiga' },
+  { id: 'mac12', bw: true, version: '1.2', platform: 'Mac, French, black and white', year: 1992, os: ['system6', 'system7'], icon: 'mac12' },
+  { id: 'mac2', bw: true, version: '2.0.1', platform: 'Mac, black and white', year: 1992, os: ['system7', 'system6'], icon: 'mac2' },
+  { id: 'mac2c', version: '2.0.1', platform: 'Mac, colour', year: 1992, os: ['system7', 'system6'], icon: 'mac2c' },
+  { id: 'mac3', bw: true, version: '3.0.1', platform: 'Mac, black and white', year: 1993, os: ['system7'], icon: 'mac3' },
+  { id: 'mac3c', version: '3.0.1', platform: 'Mac, colour', year: 1993, os: ['system7'], icon: 'mac3c' },
+  { id: 'mac4', bw: true, version: '4.0.5', platform: 'Mac, black and white', year: 1996, os: ['system7', 'macos8'], icon: 'mac4' },
+  { id: 'mac4c', version: '4.0.5', platform: 'Mac, colour', year: 1996, os: ['system7', 'macos8'], icon: 'mac4c' },
+  { id: 'w95', version: '4.0.5', platform: 'Windows 95', year: 1996, os: ['win95'], icon: 'w95' },
+  { id: 'palm', version: '5', platform: 'Palm OS, version 1.0.4', year: 2003, os: ['palmos'], icon: 'palm' },
   // 1.2.9 was built with the iOS 10.3 SDK (2017); iOS 6 is the 2012 launch's system
-  { id: 'ios', version: '1.2.9', platform: 'iPhone and iPad', year: 2012, os: ['ios10', 'ios6'] },
-  { id: 'android', version: '1.2.8', platform: 'Android', year: 2015, os: ['fireos', 'android4'] },
+  { id: 'ios', version: '1.2.9', platform: 'iPhone and iPad', year: 2012, os: ['ios10', 'ios6'], icon: 'ios' },
+  { id: 'android', version: '1.2.8', platform: 'Android', year: 2015, os: ['fireos', 'android4'], icon: 'android' },
   { id: 'cozy', version: 'Cozy western', platform: 'by Claude', year: 2026, homage: true, os: ['macos8', 'macos9', 'macosx'] },
   { id: 'gemini', version: 'Tactical console', platform: 'by Gemini', year: 2026, homage: true, os: ['macosx', 'macos9', 'win95', 'macos8', 'system7', 'win31'] },
-  { id: 'classic', version: '5.0.5', platform: 'Mac OS 9 and X', year: 2003, os: ['macos8', 'macos9', 'macosx'] },
+  { id: 'classic', version: '5.0.5', platform: 'Mac OS 9 and X', year: 2003, os: ['macos8', 'macos9', 'macosx'], icon: 'classic' },
 ].map(k => Object.assign(k, { name: `${k.version} (${k.platform}, ${k.year})`, sounds: k.id in SOUNDS ? SOUNDS[k.id] && k.id : 'classic' }))
   .sort((a, b) => a.year - b.year || a.version.localeCompare(b.version, 'en', { numeric: true }));
 const store = {
@@ -198,6 +202,29 @@ function applyOS(id) {
   const done = () => { if (old.parentNode) old.remove(); ln.id = 'ho-os'; };
   ln.onload = done; ln.onerror = done;
   old.after(ln);
+}
+
+// the tab's icon: the skin's own (a 32 px one for the tab, and the large one
+// for anything that wants more), else the default; the single-file build
+// leaves index.html's alone (its icon files aren't in it)
+const ICON_BIG = { amiga: 148, palm: 88, ios: 180, android: 144 };
+function applyIcon(id) {
+  const doc = root.document, k = skinOf(id);
+  if (root.HOSKINS_INLINE || !doc.head) return;
+  const links = k.icon ? [
+    { href: `assets/icons/${k.icon}-32.png`, type: 'image/png', sizes: '32x32' },
+    { href: `assets/icons/${k.icon}.png`, type: 'image/png', sizes: `${ICON_BIG[k.icon] || 128}x${ICON_BIG[k.icon] || 128}` },
+  ] : [
+    { href: 'favicon.ico', sizes: 'any' },
+    { href: 'assets/icons/favicon-32.png', type: 'image/png' },
+  ];
+  for (const l of doc.head.querySelectorAll('link[rel="icon"]')) l.remove();
+  for (const a of links) {
+    const l = doc.createElement('link');
+    l.rel = 'icon';
+    for (const [n, v] of Object.entries(a)) l.setAttribute(n, v);
+    doc.head.appendChild(l);
+  }
 }
 
 // the sound sets a player may choose: each original's own (one entry for
@@ -245,6 +272,7 @@ root.HOSKINS = {
   preview(id, os) {
     if (!valid(id) || id === current) return;
     store.set('ho5.skin', id);
+    applyIcon(id);
     if (validOS(os)) store.set('ho5.os.' + id, os);
     const u = new URL(root.location.href); u.searchParams.delete('skin');
     root.location.href = u.toString();
@@ -254,6 +282,7 @@ root.HOSKINS = {
   switchTo(id, os) {
     if (!valid(id)) return;
     store.set('ho5.skin', id);
+    applyIcon(id);
     if (validOS(os)) store.set('ho5.os.' + id, os);
     try { root.sessionStorage.setItem('ho5.resume', '1'); } catch (e) {}
     const u = new URL(root.location.href); u.searchParams.delete('skin');
@@ -262,6 +291,7 @@ root.HOSKINS = {
 };
 store.set('ho5.skin', current);
 store.set('ho5.os.' + current, currentOS);
+applyIcon(current);
 root.document.documentElement.classList.add('os-' + currentOS);
 root.document.documentElement.dataset.os = currentOS;
 if (root.HOSKINS_INLINE) applyOS(currentOS);

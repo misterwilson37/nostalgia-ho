@@ -188,6 +188,12 @@ title screen, and mid-game from the Ho menu's **Skin and OS look…**, where it 
 (`HOSKINS.setOS`); it is kept with the game (`G.opts.os`) and for the next one
 (`localStorage` "ho5.os"). `?os=<id>` in the address also picks one.
 
+The browser tab's icon follows the skin: each original's own application icon (the Macs'
+ICN# or icl8 200, 5.0.5's app.icns, WINHO.EXE's and SPACEHO.EXE's icons, the Palm's tAIB,
+the Amiga's HO!.info, iOS's AppIcon, Android's launcher icon), `SKINS`' `icon` and
+`assets/icons/` (sources in its `README.txt`, made by `tools/extract/icons.py`); the
+homages keep the default, `favicon.ico`.
+
 ## Each version as it was released
 
 Each ruleset plays one original version as it was released, bugs and quirks included.

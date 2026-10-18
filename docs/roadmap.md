@@ -49,11 +49,16 @@ export and import for every version (item 7).
 Sources: the German DOS 2.0 (first disk: `DOSHO.EXE` and `HO.PRS` with its German text; the colour
 pictures and sounds are on a later disk not yet in hand); the Spaceward Ho! 4 FAQ,
 https://www.deltatao.com/ho/ho4faq/.
-6. **An icon per skin.** The browser tab's icon follows the skin showing, like the title
-   picture does: each version's own application icon (the Mac versions' ICN#/icl8 for the
-   application, WINHO.EXE's and 4.0.5's Windows icons, the Palm's, iOS's and Android's).
-   For now every skin shows the Android app's icon (`favicon.ico`, `assets/icons/`); the
-   switch is a line per skin in `js/skins.js` once each icon is extracted.
+6. **An icon per skin.** Done (October 2026): the browser tab's icon follows the skin
+   showing, like the title picture does, each version's own application icon
+   (`tools/extract/icons.py`, `assets/icons/<skin>.png` and `<skin>-32.png`, sources in
+   `assets/icons/README.txt`; `SKINS`' `icon` and `applyIcon` in `js/skins.js`, on load and
+   on preview/switchTo). The Macs' application icon (the BNDL's APPL: ICN# 200 for the
+   black-and-white skins, icl8 200 masked by it for the colour ones, 32 px and 4x), 5.0.5's
+   app.icns, WINHO.EXE's (dos) and SPACEHO.EXE's (w95) 32x32 256-colour icons, the Palm's
+   tAIB 1000, the Amiga's HO!.info (the cowboy), iOS's AppIcon (CgBI, decoded), Android's
+   launcher icon. The homages (cozy, gemini) have none and keep the default, `favicon.ico`
+   (Android's), which is also what the page shows before its script runs.
 7. **Export and import saved games, for every version.** A Game menu "Export this game…"
    (the .hogame file) and "Import a game…", with no account needed. Today Download exists
    only in iOS/Android's Saved Games and in Account saves (signed in), and "Open a
