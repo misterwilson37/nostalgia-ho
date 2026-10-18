@@ -458,12 +458,14 @@ for (const rs of [E.RULESETS.ios, E.RULESETS.android]) {
 // that went wrong (HOLANG_REMAKE[lang].over); an official translation of the
 // same English (the nearest version's first); the remake's own line
 // (HOLANG_REMAKE[lang].own). Lines are matched by their English with the
-// quotes, the spaces, a "$" before a filling (the iOS formatter writes it),
-// "%%" and the last stop set aside. docs/translations.md.
+// quotes, the spaces, the commas, letter case, a "$" before a filling (the
+// iOS formatter writes it), "%%", which filling is "%s" and which "%d", and
+// the last stop set aside. docs/translations.md.
 const RMK = typeof module !== 'undefined' ? require('./lang-remake.js') : root.HOLANG_REMAKE;
 const PH = /%(?:\d+\$)?(?:\.\*)?[-0-9.]*l?[sdu]|%P/g;
 const normEn = (s) => String(s).replace(/[‘’`´]/g, '\'').replace(/[“”]/g, '"').replace(/º/g, '°').replace(/¥/g, '•').replace(/ª/g, '™')
-  .replace(/%%/g, '%').replace(/%\.\*s/g, '%s').replace(/\$(%[sd])/g, '$1').replace(/\s+/g, ' ').trim().replace(/(\.\.\.|…|!!|[.!:])+$/, '');
+  .replace(/%%/g, '%').replace(/%(?:\.\*)?[-0-9.]*l?[sdu]/g, '%s').replace(/\$%s/g, '%s')
+  .replace(/,/g, ' ').replace(/[.!]+"/g, '"').replace(/\s+/g, ' ').replace(/ ([.!?:;"])/g, '$1').trim().replace(/(\.\.\.|…|!!|[.!:])+$/, '').toLowerCase();
 // the fillings the version writes after a "$" that the official line's
 // English hasn't: the translation gets the "$" in front of the same filling
 function addDollar(en, enOff, to) {
@@ -500,16 +502,22 @@ function iosOfficial(lang) {
   L('en', 'Alert Strings').forEach((t, i) => o.push([t, L(lang, 'Alert Strings')[i]]));
   o.push([L('en', 'Misc Strings')[123], L(lang, 'Misc Strings')[123]]);
   L('en', 'Help Messages').forEach((t, i) => o.push([t, L(lang, 'Help Messages')[i]]));
+  // the Radical Research window's projects
+  L('en', 'Radical Tech Strings').forEach((t, i) => o.push([t, L(lang, 'Radical Tech Strings')[i]]));
   return o;
 }
+// 4.0.5's tech names with a slip of its own (rules-405 TECHNAMES), the iOS
+// list's names
+const TECH_ALIAS = { 'Advanced Space-Time Annihlation': 'Advanced Space-Time Annihilation', 'Mass Repulsor': 'Mass Repulser' };
 // the words a report is filled with, from iOS's lists: the tech names, the
 // classes, "one", "You", "Your enemies", "and your allies " (the remake's
 // words over them: HOLANG_REMAKE[lang].words); techs: the version's tech
 // names, each matched by name
 function iosWords(lang, techs) {
   const words = {}, find = new Map();
-  for (const k of TECH_LISTS) L('en', k).forEach((t, i) => find.set(normEn(t).toLowerCase(), L(lang, k)[i]));
-  for (const t of techs || []) { const w = find.get(normEn(t).toLowerCase()); if (w != null && !/^\d+$/.test(t)) words[t] = w; }
+  const tk = (t) => normEn(TECH_ALIAS[t] || t).replace(/™/g, '');
+  for (const k of TECH_LISTS) L('en', k).forEach((t, i) => find.set(tk(t), L(lang, k)[i]));
+  for (const t of techs || []) { const w = find.get(tk(t)); if (w != null && !/^\d+$/.test(t)) words[t] = w; }
   const SC = L('en', 'Ship Class Names'), SCT = L(lang, 'Ship Class Names');
   CLASS_KEYS.forEach((k, i) => { words[SC[i]] = SCT[i]; });
   const M = L('en', 'Misc Strings'), MT = L(lang, 'Misc Strings');
@@ -584,9 +592,11 @@ function lines505(rs, extra) {
   const D = E.DATA;
   return [].concat(D.reports || [], D.alerts || [], (D.hints || []).slice(0, 43), extra || []);
 }
+// (and with Full Hoedown, 4.0.5's Armageddon questions: js/hoedown.js)
 const EXTRA505 = ['Dorothy, I guess that means we’re not in Kansas anymore', 'Dost thou truly wish to abandon Hope? All is not yet lost...',
   'Abandon Ship? Abandon Ship! All hands abandon ship! Women and children first!', 'Do you really want to evacuate %s? It\'s a profitable colony!',
   'Year %d. Nothing much happened.'];
+const hoedownLines = (rs) => [].concat(...((rs.hoedown && rs.hoedown.armageddon) || []));
 // A language built when first read (the version's lists, E.DATA, are filled
 // in after this file in Node: tools/test.js), and then kept
 function lazyLang(build, keys) {
@@ -605,7 +615,7 @@ function build505(lang, rs, o) {
   o = o || {};
   const T = translator(lang, iosOfficial(lang).concat(typeof o.official === 'function' ? o.official() : o.official || []));
   const reports = [];
-  for (const en of (o.lines ? o.lines() : lines505(rs, o.extra || EXTRA505))) { const r = T.report(en); if (r) reports.push(r); }
+  for (const en of (o.lines ? o.lines() : lines505(rs, (o.extra || EXTRA505).concat(hoedownLines(rs))))) { const r = T.report(en); if (r) reports.push(r); }
   // the curse with the Mac's characters (iOS shows "¥ª")
   for (const r of reports.slice()) if (typeof r[1] === 'string' && /[¥ª]/.test(r[1])) r[1] = r[1].replace(/¥/g, '•').replace(/ª/g, '™');
   const D = E.DATA, techs = [].concat(...Object.values(rs.TECHNAMES || D.techNames || {}));
@@ -665,7 +675,7 @@ if (PALM) {
   const welcomePalm = () => [].concat(PALM.welcome({ opts: {} }), PALM.welcome({ opts: { hints: false } })).map(x => x[0]);
   const linesPalm = () => [].concat((E.DATA.reports || []).map(t => PALM.msgText(null, t.replace(/\$%s/, '%s'))), E.DATA.alerts || [], PALM.hintTexts, welcomePalm(),
     ['Dorothy, I guess that means we’re not in Kansas anymore', 'Dost thou truly wish to abandon Hope? All is not yet lost...',
-      'Abandon Ship? Abandon Ship! All hands abandon ship! Women and children first!', 'Do you really want to evacuate %s? It\'s a profitable colony!', 'Year %d. Nothing much happened.']);
+      'Abandon Ship? Abandon Ship! All hands abandon ship! Women and children first!', 'Do you really want to evacuate %s? It\'s a profitable colony!', 'Year %d. Nothing much happened.'], hoedownLines(PALM));
   // the Palm's two slips in 5.0.5's lines are iOS's lines all the same (157, 158)
   const slips = (lang) => { const R = L(lang, 'Report Window Templates'); return [[PALM.msgText(null, E.DATA.reports ? E.DATA.reports[157] : ''), R[157]], [PALM.msgText(null, E.DATA.reports ? E.DATA.reports[158] : ''), R[158]]]; };
   const palm = (lang) => lazyLang(() => build505(lang, PALM, {
@@ -679,5 +689,297 @@ if (PALM) {
   PALM.lang = Object.assign({}, PALM.lang, { fr: palm('fr'), tr: palm('tr') });
 }
 
-})(this);
 
+// ---------- 4.0.5 (Windows and Mac): French and Turkish backwards from iOS ----------
+// 4.0.5's report templates, messages and questions (js/rules-405.js,
+// js/ai-405.js: the English as the program writes it, the double spaces
+// too), its hints (rs.hintTexts) and first messages (rs.welcome) apart
+const TECH5 = (f) => ['Range', 'Speed', 'Weapons', 'Shield', 'Miniaturization'].map(f);
+const TEXT405 = [
+  '%s says "I hate %s."',
+  '%s says , "#!$*@%$&!"',
+  '%s says, "I like %s."',
+  '%s says, "I like planets that are %d.%2.2dG and %s."',
+  '%s says, "I need metal."',
+  '%s says, "I need money."',
+  '%s says, "I own %s."',
+  '%s says, "I saw %s at %s!"',
+  '%s says, "I want %s"',
+  '%s says, "Let\'s attack %s."',
+  '%s says, "Look at %s."',
+  '%s says, "Sorry!"',
+  '%s says, "Thank you!"',
+  '%s says, "You take %s"',
+  '%s destroyed your colony at %s.  You lost %s of your ships. %s lost %s.  You lost %s people.',
+  '%s has just become a profitable colony.',
+  '%s has just been eliminated from the game.',
+  '%s has just given you $%s.',
+  '%s has just given you %s metal.',
+  '%s has just gone supernova.  The planet has been obliterated.',
+  '%s has just surrendered',
+  '%s has just surrendered to %s.',
+  '%s has just won the game.',
+  '%s has offered to ally with you.',
+  '%s has offered to be your best buddy.',
+  '%s has run out of metal.',
+  '%s has run out of metal. You should probably abandon it.',
+  '%s metal has fallen onto %s from your recent battle.',
+  '%s no longer wants to ally with you.',
+  '%s no longer wants to be your best buddy.  He just wants to be allies.',
+  '%s surrenders to you, giving you $%s.',
+  '%s surrenders to you, giving you %s metal.',
+  '%s surrenders to you, giving you the planet %s.',
+  '%s survived an enemy attack from %s.  You lost %s of your ships.  %s lost %s.  You lost %s people.',
+  '%s\'s armageddon device has just been turned on!',
+  '%s\'s fleet of %s has arrived at %s.',
+  '%s\'s fleet of biologicals has eaten %s people while refueling at %s.',
+  '%s\'s population growth rate has slowed.',
+  'Abandon Ship? Abandon Ship! All hands abandon ship! Women and children first!',
+  'Are you just doing this because you think you\'ll win but it\'s really late and so you want to go to bed?',
+  'Aren\'t you sure you really don\'t want to have nothing to do with not launching the armageddon device?',
+  'Artwork by Howard Vives and Bob Van de Walle.',
+  'Build a biological space monster.',
+  'Build a decoy ship.',
+  'Build a set of ships with no development cost.',
+  'Click and Drag from one star to another to move fleets.',
+  'Click here to make this message go away.',
+  'Congratulations!  You won the game.  Game difficulty rating was %s.',
+  'Congratulations, %s!   Your population now exceeds %s!',
+  'Do you really want to launch the armageddon device?  Doing so decreases the difficulty score by half!',
+  'Do you really want to launch the armageddon device?  I mean, you\'d probably win anyway; why take the chance?',
+  'Do you really want to launch the armageddon device?  Isn\'t life too short as it is?',
+  'Do you really want to launch the armageddon device?  It\'ll blow up half of the galaxy!',
+  'Do you really want to launch the armageddon device?  Odds are you\'ll blow yourself up!',
+  'Dost thou truly wish to abandon Hope? All is not yet lost!',
+  'Due to a lack of funds, one of your fleets can\'t be maintained.  It is being scrapped.',
+  'Educate battle generals better.',
+  'Explore distant stars.',
+  'Get lots of money immediately.',
+  'Hmm!  The armageddon device was activated, but there wasn\'t enough mass in the galaxy to get it to work.',
+  'I get it.  You\'re losing big time and this is the only way you could possibly win!  That\'s it isn\'t it?',
+  'If you do this, everyone will hate you!  It\'s such a sissy way to try to win, anyway.',
+  'Improve mini tech dramatically.',
+  'Improve mining efficiency.',
+  'Improve population maximums.',
+  'Improve range tech dramatically.',
+  'Improve recycling program.',
+  'Improve shields tech dramatically.',
+  'Improve speed tech dramatically.',
+  'Improve terraforming efficiency.',
+  'Improve weapons tech dramatically.',
+  'It\'s a baby boom! The population at %s has started growing quickly.',
+  'Now look, this is NO laughing matter.  You just might get yourself killed!',
+  'Oh No!  It\'s armageddon!',
+  'Oh no!  %s people were killed when a heavy meteor shower hit %s.',
+  'Oh no!  The Valdez has sprung a leak!  The ecology on %s is in shambles!  The citizens are suing you for negligence for twice your net worth!',
+  'Play with the spending bars. Conquer the galaxy. Enjoy.',
+  'Search for more metal on your planets.',
+  'Sorry, but you have that fleet marked for the scrap heap.  it’s not going anywhere.',
+  'Sorry, there’s already a star named “%s.”  Please pick another name.',
+  'Steal technology from another player.',
+  'The amount of energy emanating from %s suggests a big battle just took place.',
+  'The armageddon device has caused half of the stars to supernova',
+  'The meteor shower destroyed your colony at %s.',
+  'The shock wave from the supernova threw %s metal at %s, killing %s people.',
+  'Uh-oh!  %s has started growing and is turning bright red in hue!',
+  'Uh-oh!  Having to borrow more ship money to pay all your interest!',
+  'Warning!  After supporting your planets and paying your interest, you have no money to spend!',
+  'Warning!  Ship money is being used to support %s.',
+  'Warning: you are terraforming %s, a planet that will never become profitable.',
+  'Weird weather patterns have allowed astronomers to explore certain far away stars.',
+  'Whew!  %s\'s armageddon device was just turned off.',
+  'You alliance with %s is gone.',
+  'You are not spending any money on technology research.',
+  'You are now best buddies with %s.',
+  'You best buddy relationship with %s is gone.  You\'re only allies now.',
+  'You don\'t have enough money!  You\'re neglecting your planets!  Global  warming is taking place.',
+  'You have abandoned %s.',
+  'You have colonized %s.',
+  'You have completely terraformed %s.',
+  'You have conquered the galaxy!',
+  'You have formed an alliance with %s.',
+  'You have found a wealth of precious metals and have increased your savings by %s.',
+  'You have improved your recycling program.  You can now get more metal from scrapped ships.',
+  'You have just been eliminated from the game.',
+  'You have just surrendered to %s.',
+  'You have just surrendered.',
+  'You have offered to ally with %s.',
+  'You have offered to be best buddies with %s.',
+  'You just gave %s $%s.',
+  'You just gave %s %s metal.',
+  'You just received %s metal from someone scrapping a fleet or from a battle over %s.',
+  'You lost a battle at %s.  You lost %s of your ships.  %s lost %s.',
+  'You no longer want to ally with %s.',
+  'You no longer want to be best buddies with %s.  You just want to be allies.',
+  'You recovered %s metal from the battle at %s.',
+  'You said "!$@*$&@!" to %s.',
+  'You told %s "Sorry!"',
+  'You told %s all about %s.',
+  'You told %s that you don\'t want %s.',
+  'You told %s that you hate %s.',
+  'You told %s that you like %s.',
+  'You told %s that you need metal.',
+  'You told %s that you need money.',
+  'You told %s that you own %s.',
+  'You told %s that you want %s.',
+  'You told %s what gravity and temperature you prefer.',
+  'You told %s you saw %s at %s.',
+  'You told %s, "Let\'s attack %s."',
+  'You told %s, "Thank You!"',
+  'You won a battle at %s.  You lost %s of your ships.  %s lost %s.',
+  'You won the game, so you get to name a star.',
+  'You\'re just doing this \'cause you enjoy the ultimate feeling of power, aren\'t you???',
+  'Your "%s" ship type has been scrapped. %s of this type scrapped for %s metal.',
+  'Your %s can no longer reach %s.',
+  'Your %s technology just jumped to %s.',
+  'Your Radical researchers have just made another wild discovery!',
+  'Your alliance will win the game next turn if it holds!',
+  'Your archaeologists have found ancient scientific documents from a lost civilization.  you can now mine more efficiently.',
+  'Your climatologists have discovered how to terraform planets more efficiently.',
+  'Your colony at %s is not receiving sufficient funds to support itself.',
+  'Your fleet of %s at %s has been scrapped for %s metal.',
+  'Your fleet of %s has eaten %s people while refueling at %s.',
+  'Your mad scientists have created a space monster ship!  It\'s not too powerful, but it doesn\'t cost any metal!',
+  'Your message to %s: %s.',
+  'Your military training program has improved.  Your generals are now smarter.',
+  'Your mining consortium has just been able to extract an additional %s metal from every planet you have.',
+  'Your radical researchers are hard at work on another discovery!',
+  'Your ship technicians have designed a decoy ship.  It\'s really weak, but it looks menacing and can help keep your allies in line!',
+  'Your ship technicians have designed a set of new ship types with no development cost.',
+  'Your sociologists have discovered how to safely increase the maximum population of your planets.',
+  'Your spies have stolen some technological secrets from %s!',
+  'Artwork by Howard Vives and Bob Van de walle.',
+  'Click here to make this message go away. Click on the clock to end your turn.',
+  'You said “#!$@*$&@•™!” to %s.',
+  'You told %s that you don’t want %s.',
+  'You told %s, “Let’s attack %s.”',
+  'You told %s, “Sorry!”',
+  'You told %s, “Thank You!”',
+  'Your message to %s: %s',
+  'Your scientists have discovered how to turn your monitor from black and white to color!',
+  'You have explored %s. Gravity: %d.%2.2dG. Temp: %s. Metal: %s.',
+  '%s has explored %s. Gravity: %d.%2.2dG. Temp: %s. Metal: %s.',
+  'Year %d.',
+].concat(TECH5(k => `Your ${k} Technology has reached level %d.`), TECH5(k => `You now have %s ${k} Technology (%d).`));
+// lines whose English says what an official line says, but for a slip of
+// the version's (a word, a typo): the official line's translation
+const EQUIV = [
+  ['Build a set of ships with no development cost.', 'Build a set of ships without development cost'],
+  ['Your ship technicians have designed a set of new ship types with no development cost.', 'Your ship technicians have designed a set of new ships with no development cost.'],
+  ['Hmm!  The armageddon device was activated, but there wasn\'t enough mass in the galaxy to get it to work.', 'Hmm! The armadeddon device was activated, but there wasn\'t enough mass in the galaxy to get it to work.'],
+  ['Mining takes metal from a planet and puts it in your reserve.', 'Mining takes metal from a planet and puts it into your reserve.'],
+  ['If your Shields are higher than the opponent\'s Weapons, he\'ll barely hurt you.', 'If your Shields are higher than the opponents Weapons, he\'ll barely hurt you.'],
+  ['You alliance with %s is gone.', 'Your alliance with %s is gone.'],
+  ['You best buddy relationship with %s is gone.  You\'re only allies now.', 'Your best buddy relationship with %s is gone. You\'re only allies now.'],
+  ['You no longer want to be best buddies with %s.  You just want to be allies.', 'You no longer want to be best buddies with with %s. You just want to be allies.'],
+  ['Your "%s" ship type has been scrapped. %s of this type scrapped for %s metal.', 'Your "%s" ship type has been dismantled. %d of this type scrapped for %s metal.'],
+  ['Your fleet of %s at %s has been scrapped for %s metal.', 'Your fleet of %s at %s has been dismantled for %s metal.'],
+  // (4.0.5's and 3.0.1's Abandon is 5.0.5's Evacuate)
+  ['You have abandoned %s.', 'You have evacuated %s.'],
+  ['%s has run out of metal. You should probably abandon it.', '%s has run out of metal. You should probably evacuate it.'],
+];
+// the engine's own messages, which every version from 3.0.1 sends
+// (js/engine.js: arrivals, colonizing, exploring, the end), and the reports
+// it sends from 5.0.5's list for all of them (report(n): gifts, alliances,
+// surrender, Armageddon, messages)
+const ENGINE_LINES = ['Your fleet of %s is waiting to refuel before it can continue on to %s.', 'Your fleet of %s has arrived at %s.',
+  'You have colonized %s.', 'You have explored %s. Gravity: %d.%2.2dG. Temp: %s. Metal: %s.', 'You have evacuated %s.',
+  'You have just been eliminated from the game.', '%s has just been eliminated from the game.', '%s has just won the game.',
+  'Wow! You won! You and your allies have conquered the galaxy. Congratulations!', 'Wow! You won! You have conquered the galaxy. Congratulations!',
+  '%s have just won the game.', 'You are no longer surrendering to anyone.', 'Year %d. Nothing much happened.'];
+const ENGINE_REPORTS = [21, 25, 26, 55, 71, 78, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 101, 102, 103, 104, 105, 106, 107, 108, 137, 138, 148, 149, 150];
+const engineLines = () => ENGINE_LINES.concat(ENGINE_REPORTS.map(n => (E.DATA.reports || [])[n - 1]).filter(Boolean));
+// the official lines for 2.0's English: 1.2F's French (its reports, its
+// Name a Star window) and the German DOS 2.0's
+function official20(lang) {
+  if (lang === 'fr' && R12) return REPORTS20.concat(CHAT20).filter(([, id]) => id !== 703).map(([en, id]) => [en, F(id)])
+    .concat([['You won the game, so you get to name a star.', R12.nameAStar.text], ['Sorry, there’s already a star named  “%s.” Please pick another name.', R12.nameAStar.taken]]);
+  if (lang === 'de') return REPORTS20.concat(CHAT20).filter(([, id]) => id !== 703).map(([en, id]) => [en, S(id)])
+    .concat([['You won the game, so you get to name a star.', NAME_DE.text], ['Sorry, there’s already a star named  “%s.” Please pick another name.', NAME_DE.taken]]);
+  return [];
+}
+// the official lines, the nearest first, with the equivalents
+function officialFor(lang, nearest) {
+  const ios = lang === 'de' ? [] : iosOfficial(lang);
+  const o = nearest === '20' ? official20(lang).concat(ios) : ios.concat(official20(lang));
+  const by = new Map(); for (const [en, to] of o) { const k = normEn(en); if (!by.has(k)) by.set(k, to); }
+  for (const [en, off] of EQUIV) if (by.has(normEn(off))) o.push([en, by.get(normEn(off))]);
+  return o;
+}
+// a name list in the language, class by class: an official list made for
+// the same English list (1.2F's and the German DOS 2.0's for 2.0's lists,
+// iOS's for 5.0.5's), else (French, Turkish) iOS's names one by one
+function namesFor(lang, rs) {
+  const D = E.DATA, own = { starNames: rs.starNames || D.starNames, maleNames: rs.maleNames || D.maleNames, femaleNames: rs.femaleNames || D.femaleNames, shipNames: rs.shipNames || D.shipNames };
+  const twenty = lang === 'fr' && R12 ? { men: R12.maleNames, women: FR12['2000'], ships: R12.shipNames, stars: null }
+    : lang === 'de' ? { men: range(112, 131, S), women: range(224, 243, S), ships: { scout: range(336, 349, S), fighter: range(304, 326, S), colony: range(288, 302, S), satellite: range(256, 273, S) }, stars: range(432, 621, S) } : null;
+  const ios = lang !== 'de';
+  const o = {};
+  // stars: by name (iOS's, the German DOS 2.0's)
+  o.starNames = own.starNames.slice();
+  if (ios) o.starNames = listIn(o.starNames, L('en', 'Star Names'), L(lang, 'Star Names'), true);
+  if (twenty && twenty.stars) o.starNames = listIn(o.starNames, DOS.starNames, twenty.stars, true);
+  const comp = (k, l20, iosK) => (l20 && sameList(own[k], DOS[k]) ? l20 : null) || (ios ? listIn(own[k], L('en', iosK), L(lang, iosK), false) : null) || own[k];
+  o.maleNames = comp('maleNames', twenty && twenty.men, 'Male Computer Names');
+  o.femaleNames = comp('femaleNames', twenty && twenty.women, 'Female Computer Names');
+  o.shipNames = {};
+  for (const k of Object.keys(own.shipNames)) {
+    const l = own.shipNames[k];
+    o.shipNames[k] = (twenty && DOS.shipNames[k] && sameList(l, DOS.shipNames[k]) && twenty.ships[k]) || (ios && SHIP_LISTS[k] ? listIn(l, L('en', SHIP_LISTS[k]), L(lang, SHIP_LISTS[k]), true) : null) || l;
+  }
+  return o;
+}
+// the battle window (2.0's, rules-dos battlePanel20, in 4.0.5's and 3.0.1's
+// words): 1.2F's words for it (STR# 1030) and iOS's classes; the remake's
+// Turkish
+const CLASS_IX = { scout: 0, dread: 1, fighter: 2, tanker: 3, colony: 4, satellite: 5, bio: 6 };
+function words20(lang) {
+  const SCT = lang === 'de' ? null : L(lang, 'Ship Class Names');
+  const cls = (type, n) => CLASS_IX[type] != null ? SCT[CLASS_IX[type] + (n > 1 ? 7 : 0)] : type === 'decoy' ? L(lang, 'Misc Strings')[1] : '';
+  if (lang === 'fr') return Object.assign({}, BATTLE_FR, { desc: null, one: L('fr', 'Misc Strings')[0] + ' ', num: null, cls });
+  if (lang === 'tr') return { head: (star, year) => ['Savaş özeti', `${star}de, ${year}:`], won: ['Tebrikler!', 'Savaşı kazandın!'], lost: ['Maalesef,', 'savaşı kaybettin'],
+    cls, one: L('tr', 'Misc Strings')[0] + ' ', dead: (n0, desc) => `${n0} ölü ${desc}`, deadPeople: (x) => `${x} ölü` };
+  return null;
+}
+// a version's language from its own list of lines (o.lines), hints and
+// windows; o.nearest '20' when 2.0's official text is the nearest (3.0.1)
+function buildText(lang, rs, o) {
+  const T = translator(lang, officialFor(lang, o.nearest));
+  const reports = [];
+  for (const en of o.lines()) { const r = T.report(en); if (r) reports.push(r); }
+  const techs = [].concat(...Object.values(rs.TECHNAMES || {}));
+  const { words, args } = o.words ? o.words(T) : iosWords(lang, techs);
+  // a tech name that is no tech name (4.0.5's Mini 20, the credit line)
+  for (const t of techs) if (!(t in words) && / /.test(t) && T.line(t)) words[t] = T.text(t);
+  const hints = (o.hints ? o.hints() : null) || [];
+  const out = Object.assign(namesFor(lang, rs), {
+    remake: true,
+    say: { reports, args, words },
+    hintTexts: hints.length ? hints.map(t => T.text(t)) : rs.hintTexts,
+  });
+  const NS = rs.nameAStar;
+  if (NS) out.nameAStar = Object.assign({}, NS, { text: T.text(NS.text), taken: T.text(NS.taken) },
+    NS.rule ? { rule: T.text(NS.rule) } : {}, NS.label ? { label: T.text(NS.label) } : {}, NS.hint ? { hint: T.text(NS.hint) } : {});
+  if (rs.conquered) out.conquered = T.text(rs.conquered);
+  if (rs.armageddonAsk) out.armageddonAsk = rs.armageddonAsk.map(l => l.map(t => T.text(t)));
+  out.battlePanel = o.battlePanel ? o.battlePanel(words20(lang)) : rs.battlePanel;
+  out.missing = T.missing.slice();
+  out.hintRemake = hints.filter(t => (T.line(t) || [])[1] === 'remake');
+  return out;
+}
+const LANG_KEYS405 = LANG_KEYS.concat(['conquered', 'armageddonAsk']);
+const W405 = E.RULESETS['405'], M405 = E.RULESETS.mac405;
+function welcomeLines(rs) { return [].concat(rs.welcome({ opts: {} }), rs.welcome({ opts: { hints: false } })).map(x => x[0]); }
+if (W405) {
+  const lines = (rs, mac) => () => TEXT405.concat(engineLines(), welcomeLines(rs), [rs.colorMonitorBW ? rs.colorMonitorBW.text : null].filter(Boolean),
+    mac ? (E.DATA.reports || []).slice(39, 69) : [], ['Spaceward Ho! Version 4.0.5 by Peter Commons.', 'Spaceward Ho! Version 4.0.3 by Peter Commons.']);
+
+  const make = (lang, rs, mac) => lazyLang(() => buildText(lang, rs, { lines: lines(rs, mac), hints: () => rs.hintTexts,
+    battlePanel: (w) => w ? DOS.battlePanel20({ dots: mac ? '…' : '...', cols: 'mac', shade: true, words: w }) : rs.battlePanel }), LANG_KEYS405);
+  for (const [rs, mac] of [[W405, false], [M405, true]]) {
+    if (!rs) continue;
+    rs.languages = ['en', 'fr', 'tr'];
+    rs.lang = Object.assign({}, rs.lang, { fr: make('fr', rs, mac), tr: make('tr', rs, mac) });
+  }
+}
+})(this);

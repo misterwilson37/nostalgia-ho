@@ -250,6 +250,7 @@ root.HOVERSIONS = {
       'Evacuate is 4.0.5’s Abandon: the colony is given up at End Turn, and pressing it again takes it back.',
       'Evacuating a star named Hope or Ship asks 4.0.5’s jokes, every time; turning Armageddon on asks two questions, one of five and one of six.',
       'Hints are drawn by the browser’s random numbers; 4.0.5 used its own.',
+      REMAKE_LANG('French (“traduction du remake”) and Turkish (“yeniden yapımın çevirisi”): the official French and Turkish of the iOS game (and of the French Mac 1.2) for every line 4.0.5 shares with them, which is most of its reports, with the remake’s own lines for the rest (Armageddon’s questions, the Windows build’s own words)'),
     ],
     missing: [
       'The turn time limit and network play.',
@@ -336,7 +337,9 @@ root.HOVERSIONS = {
       'Evacuate is 4.0.5’s Abandon: the colony is given up at End Turn, and pressing it again takes it back.',
       'Evacuating a star named Hope or Ship asks 4.0.5’s jokes, every time; turning Armageddon on asks two questions, one of five and one of six.',
       'Hints are drawn by the browser’s random numbers, and the four named stars a new galaxy takes are picked from the game’s seed; the Mac used its own random numbers.',
+      REMAKE_LANG('French (“traduction du remake”) and Turkish (“yeniden yapımın çevirisi”): the official French and Turkish of the iOS game (and of the French Mac 1.2) for every line 4.0.5 shares with them, which is most of its reports, with the remake’s own lines for the rest (Armageddon’s questions, the Mac’s own words)'),
     ],
+
     missing: [
       'The turn time limit, “Automatically end turn for unconnected players” and network play.',
     ],

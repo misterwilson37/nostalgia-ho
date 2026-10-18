@@ -230,6 +230,10 @@ Where a browser can't do what the original did, or the remake had to pick.
   turn in ten years (`DoOneTurn`) needs network play, so it never comes up.
 - Mac: "Automatically end turn for unconnected players" is in the New Game window but
   changes nothing (no network play; its tooltip says so).
+- **French and Turkish (the remake's)**: iOS's (and 1.2F's) official lines wherever the
+  English is 4.0.5's, the remake's for the rest; names translated only where a list is
+  the same English list (the Mac's ships are 5.0.5's, two of the Windows lists 2.0's).
+
 
 ### 3.0.1
 

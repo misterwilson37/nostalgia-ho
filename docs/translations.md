@@ -70,6 +70,10 @@ verbatim from another version's official translation of the same English.
 | 5.0.5 | Turkish (the remake's) | 223 (iOS's), hints 35 | 23, of them hints 5 | iOS's lists |
 | Palm OS 5 | French (the remake's) | 230 (iOS's), hints 33 | 17, of them hints 7 | iOS's lists (the stars by name: Courasant stays) |
 | Palm OS 5 | Turkish (the remake's) | 220 (iOS's), hints 33 | 27, of them hints 7 | iOS's lists |
+| 4.0.5 Windows | French (the remake's) | 163 (iOS's and 1.2F's), hints 22 | 33, hints 4 | iOS's stars by name; 1.2F's lists for its 2.0 lists (Colony Ships, Satellites) |
+| 4.0.5 Windows | Turkish (the remake's) | 152 (iOS's), hints 22 | 44, hints 4 | iOS's stars by name; ships by name |
+| 4.0.5 Mac | French (the remake's) | 180, hints 23 | 33, hints 4 | iOS's ships (5.0.5's lists), stars by name |
+| 4.0.5 Mac | Turkish (the remake's) | 168, hints 23 | 45, hints 4 | iOS's ships, stars by name |
 
 
 ## Mac 1.2 (French, as released)
@@ -156,7 +160,31 @@ slip) and its battle window's words ("N Class (W/S)", with iOS's class names; "d
 1.2F's word, and "habitants"; "ölü", "insan"). The names are iOS's lists; the stars are
 matched by name (the Palm's "Courasant" for Antares has no translation).
 
+## 4.0.5 (Windows and Mac)
+
+**French and Turkish (the remake's), backwards from iOS.** 4.0.5's lines are listed in
+`js/languages.js` (`TEXT405`: its reports, messages and questions as the program writes
+them, double spaces and all), with its hints, first messages and the engine's own lines.
+Most are 5.0.5's words, so they get iOS's lines; where 4.0.5's English is 2.0's (the
+battle reports without "and your allies", "You have abandoned …", the scrapped fleet),
+the French gets 1.2F's line for it. A few lines differ from an official one only by a
+slip of the version's ("You alliance with", "with with", "puts it in your reserve",
+"armadeddon"): they get that line's translation (`EQUIV`), counted as official. Tech
+names are iOS's, matched by name (two typos aside); the battle window is 2.0's with
+1.2F's words and iOS's classes (the Turkish the remake's); Name a Star and the won
+window ("You have conquered the galaxy!") are 1.2F's in French.
+
+The remake's own: Armageddon's two questions (the eleven jokes, strings 299-309, now
+also asked in the language: `rs.armageddonAsk`), the Windows build's own curse in the
+messages, the battle reports' colony lines in 4.0.5's form (no "and your allies"), the
+"ship money" lines, the welcome lines and credits, the fleet marked for scrapping, a
+handful of hints ("A dot by a planet…", "Good planets are close to 72 degrees.", "Ship
+savings…"; the French ones iOS's own words where iOS's French had already said just
+that), the Send Message groups (Everyone, Your Allies, Your Buddies), and the Turkish
+for the lines whose only official translation is 1.2F's French.
+
 ## What stays English, and why
+
 
 
 

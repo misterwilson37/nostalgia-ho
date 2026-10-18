@@ -3081,7 +3081,7 @@ function toggleArmageddon() {
   // Full Hoedown, the later versions ask them too (rs.hoedown.armageddon)
   const hq = HO.rules(G).armageddonAsk || (HO.hoedown(G) && HO.ownRules(G).hoedown.armageddon);
   const any = (L) => L[Math.floor(Math.random() * L.length)];
-  if (hq) return confirmBox(any(hq[0]), () => confirmBox(any(hq[1]), () => { HO.setArmageddon(G, ME, true); save(); toast('The armageddon device is on. It fires when every human player has turned theirs on.'); }));
+  if (hq) return confirmBox(HO.say(G, any(hq[0])), () => confirmBox(HO.say(G, any(hq[1])), () => { HO.setArmageddon(G, ME, true); save(); toast('The armageddon device is on. It fires when every human player has turned theirs on.'); }));
   confirmBox(HO.say(G, HO.DATA.alerts[3] || 'Are you sure you want to destroy half the galaxy?'), () => { HO.setArmageddon(G, ME, true); save(); toast('The armageddon device is on. It fires when every human player has turned theirs on.'); });
 }
 
@@ -3328,7 +3328,7 @@ function openRadicalHand() {
   const go = el('button', { disabled: true, onclick: () => { if (sel < 0) return; RH.discard(G, me(), cards[sel].id); save(); closeModal(); Sound.play(7002); toast('That project has been cancelled.'); } }, 'Cancel Project');
   const body = el('div', { class: 'hall radhand' },
     el('p', { class: 'htitle' }, 'Your radical researchers are working on these projects. You may cancel one; another takes its place after the next discovery.'),
-    hallListBox(cards.map(c => [c.text]), '1fr', sel, (i) => { sel = i; go.disabled = false; }),
+    hallListBox(cards.map(c => [HO.say(G, c.text)]), '1fr', sel, (i) => { sel = i; go.disabled = false; }),
     el('div', { class: 'btns right' }, go, el('button', { onclick: closeModal }, 'OK')));
   modal('Radical Research', body, { cls: 'mid' });
 }
