@@ -236,23 +236,26 @@ title bar and About this version, and the Ho menu then has **Patch notes…**. R
 no fixes don't offer it. `docs/fixes.md` lists every version's slips as obvious bugs,
 quirks and unclear cases; 1.2, 2.0 and 3.0.1 have their fixes so far.
 
-**Language**: a version that shipped in more than one language offers them below the line
-in New Game and in the Ho menu's **Language…** (`G.opts.lang`, remembered per ruleset in
-`localStorage` "ho5.lang.<id>"). Each version offers the languages there is official text
-for, English always among them:
+**Language**: a version offers its languages below the line in New Game and in the Ho
+menu's **Language…** (`G.opts.lang`, remembered per ruleset in `localStorage`
+"ho5.lang.<id>"): the ones it shipped in, from the official text, English always among
+them, and, where it had none, the remake's own translation, marked so in the list
+("Français (traduction du remake)", "Deutsch (Übersetzung des Remakes)", "Türkçe
+(yeniden yapımın çevirisi)") and in the version's notes:
 
-| Version | Languages | From |
+| Version | Official | The remake's (`docs/translations.md`) |
 |---|---|---|
-| 1.2 | French (its own), English | Mac 2.0.1's names and words (`docs/12-findings.md`, "English") |
-| DOS 2.0, Mac 2.0.1 | English (their own), German | the German DOS 2.0 (`docs/dos-findings.md`, "Languages") |
-| iOS, Android | English (their own), French, Turkish | the app's `fr.lproj` and `tr.lproj`, with its help pages (`docs/ios-findings.md`, "Languages") |
+| 1.2 | French (its own: names, reports, windows), English (Mac 2.0.1's words) | German, from the German DOS 2.0 |
+| DOS 2.0, Mac 2.0.1 | English (their own), German (the German DOS 2.0, `docs/dos-findings.md`) | French, 1.2F's text carried forward |
+| 3.0.1, 4.0.5, 5.0.5, Palm OS | English | French and Turkish, backwards from iOS (and 1.2F); German, forward from the German DOS 2.0 |
+| iOS, Android | English (their own), French, Turkish (the app's `fr.lproj`, `tr.lproj`, with its help pages) | German |
 
 Only names and words change: a seed plays the same game in every language, so it can
 change mid-game. The reports are kept in the version's own words and put in the game's
 language when shown (`HO.say`); the remake's own interface (its windows and buttons) stays
-English. The Amiga skin starts New Game in German (its `lang: 'de'`). 5.0.5, 4.0.5, 3.0.1
-and Palm OS are English only: they had no translation, and their languages wait for the
-remake's own text (`docs/roadmap.md`, item 4).
+English. The Amiga skin starts New Game in German (its `lang: 'de'`).
+`node tools/lang-test.js` checks every language (no report left untranslated, no filling
+left in one); `--count` prints how many lines are official and how many the remake's.
 
 Optional ruleset flags the skin reads (each is documented where it is read):
 

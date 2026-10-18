@@ -30,10 +30,17 @@ export and import for every version (item 7).
    **The official half done (October 2026):** DOS 2.0 and Mac 2.0.1 in German (the German
    DOS 2.0, `docs/dos-findings.md`, "Languages"; the Amiga skin starts in German), iOS and
    Android in French and Turkish (their `fr.lproj` and `tr.lproj`, help pages included,
-   `docs/ios-findings.md`, "Languages"), 1.2 in English (item 1). Left: the remake's own
-   text for the versions with no translation (5.0.5, 4.0.5, 3.0.1, Palm OS; French and
-   Turkish for 5.0.5 backwards from iOS, German for 3.0.1 onward from 2.0), and a German
-   1.2 or a French 2.0 the same way.
+   `docs/ios-findings.md`, "Languages"), 1.2 in English (item 1). **The remake's half done
+   (October 2026)** (`docs/translations.md`, with the counts of official and remake lines):
+   1.2's own French reports, battle window and Fix Spending (read from 1.2F, until then
+   shown in English); French and Turkish for 5.0.5, the Palm, 4.0.5 (Windows and Mac) and
+   3.0.1, backwards from iOS (and 1.2F); German for 3.0.1, 4.0.5, 5.0.5, the Palm, iOS and
+   Android, forward from the German DOS 2.0; a German 1.2 and a French 2.0 (1.2F's text
+   carried forward). Each marked as the remake's in the Language lists and the version
+   notes; `node tools/lang-test.js` checks them. Left: the remake's own windows stay
+   English (`docs/translations.md`, "What stays English"); the help pages exist in French
+   and Turkish for iOS and Android only.
+
 5. **Online.** Jake's order: (1) cloud saves, the browser's saves kept as the offline
    option; (2) a shared Hall of Fame; later (3) shared names, (4) online play. **1 and 2
    done (October 2026)**, with the decency filter shared names need: `docs/online.md`

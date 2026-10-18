@@ -607,10 +607,17 @@ program's own words:
 | Your fleet of %s is waiting to refuel before it can continue on to %s. | Die Flotte von %s wartet auf Treibstoff, bevor sie nach %s weiterfliegt. | 697, 3330 |
 | %s says: %s (the remake's free-text messages) | %s sendet einen Funkspruch: %s | 708 |
 | Your message to %s: %s | Sie senden einen Funkspruch an %s: %s | 718 |
+| Year %d. Nothing much happened. (the remake's line for a turn with no news) | Jahr %d. Nicht viel passiert. | 682 |
 
-Not changed by the language: the remake's interface (windows, buttons, its own lines such
-as "Nothing much happened"), the pictures (the Amiga skin's End Turn button stays the
-English copy), and the numbers in the windows.
+2.0's messages between players (the Send Message window's "… sends a message saying he
+likes …", rules-dos `canned20`) are the German table's 708-722, official.
+
+Not changed by the language: the remake's interface (windows, buttons), the pictures (the
+Amiga skin's End Turn button stays the English copy), and the numbers in the windows.
+
+**French (the remake's)** for DOS 2.0 and Mac 2.0.1: the French Mac 1.2F's text, which is
+2.0's line for line (`docs/translations.md`).
+
 
 **The Amiga 2.0's German** (`assets/skins/amiga/strings.json`, `tools/extract/amiga.py`,
 Stefan Franke's own translation, 1994) differs; the DOS one is used for both rulesets:

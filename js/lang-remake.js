@@ -50,6 +50,10 @@ fr: {
     'Abandon Ship? Abandon Ship! All hands abandon ship! Women and children first!': 'Abandonner le navire ? Abandonnez le navire ! Tout le monde quitte le navire ! Les femmes et les enfants d\'abord !',
     // the remake's own line for a turn with no news (js/skins/classic/ui.js)
     'Year %d. Nothing much happened.': 'Année %d. Rien de spécial ne s\'est passé.',
+    // the Radical Research window's three projects 5.0.5 added (the remake's English, in iOS's 121-123's words)
+    'Build a new research facility.': 'Construire une nouvelle installation de recherche.',
+    'Raise the prime lending rate.': 'Relever le taux directeur.',
+    'Renegotiate your line of credit.': 'Renégocier votre marge de crédit.',
     // ---- the Palm (5.0's code): its own hints, first messages and decoy ----
     'Icons by your planet mean you have ships orbiting around it. Fleets are on the right; satellites are on the left.': 'Des icônes près d\'une planète signifient que vous y avez des vaisseaux en orbite. Les flottes sont à droite, les satellites à gauche.',
     'To cancel a fleet’s movement, make sure that fleet is selected in the Ship Info window and click the origin planet. You can also use the ‘Cancel Fleet Trip’ menu item in the ‘Ships’ menu.':
@@ -157,6 +161,9 @@ tr: {
     'Do you really want to evacuate %s?': 'Gerçekten %syi boşaltmak istiyor musun?',
     'Abandon Ship? Abandon Ship! All hands abandon ship! Women and children first!': 'Gemiyi terk et? Gemiyi terk edin! Herkes gemiyi terk etsin! Önce kadınlar ve çocuklar!',
     'Year %d. Nothing much happened.': 'Yıl %d. Pek bir şey olmadı.',
+    'Build a new research facility.': 'Yeni bir araştırma ünitesi yap.',
+    'Raise the prime lending rate.': 'Faiz hattını artır.',
+    'Renegotiate your line of credit.': 'Borçlanma kıredini tekrar görüş.',
     // ---- the Palm (5.0's code) ----
     'Icons by your planet mean you have ships orbiting around it. Fleets are on the right; satellites are on the left.': 'Gezeğenlerinin yakınındaki simgeler, senin gemilerin gezeğen çevresindeki yörüngelerini gösterir. Filolar sağda, uydular da soldadır.',
     'To cancel a fleet’s movement, make sure that fleet is selected in the Ship Info window and click the origin planet. You can also use the ‘Cancel Fleet Trip’ menu item in the ‘Ships’ menu.':

@@ -56,34 +56,53 @@ order needs it, as the official translations' slips were (`docs/ios-findings.md`
 
 ## Counts
 
-Reports (the version's report templates, its messages and alerts the rules send; each
-counted once), from `node tools/lang-test.js --count`. "Official" includes lines carried
-verbatim from another version's official translation of the same English.
+`node tools/lang-test.js --count`. **Lines** are the version's report templates, the
+messages and questions its rules send, its first messages and the alerts the page shows
+(each counted once; for 5.0.5, the Palm and iOS the hint list is among them, as it is in
+their report list). **Hints** are the between-turn hints (`rs.hintTexts`), official /
+the remake's. "Official" includes lines carried verbatim from another version's official
+translation of the same English, and lines whose English differs from an official one
+only by the version's own slip (`EQUIV`); "the remake's" are the lines marked `'remake'`
+(`js/lang-remake.js`, and the few in `js/languages.js`).
 
-| Version | Language | Official | The remake's | Names |
+| Version | Language | Lines, official | Lines, the remake's | Hints |
 |---|---|---|---|---|
-| Mac 1.2 | French (its own) | 57 | 2 (the patch's meteor report, a fleet waiting for fuel) | 1.2F's |
-| Mac 1.2 | German (the remake's) | 54 (the German DOS 2.0's) | 5 (the credit line's number; the four the German 2.0 already had) | the German DOS 2.0's lists |
-| DOS 2.0, Mac 2.0.1 | German (official) | 54 | 4 (the remake's, before this work: the patch's meteor report, a fleet waiting for fuel, the free-text messages) | the German DOS 2.0's |
-| DOS 2.0, Mac 2.0.1 | French (the remake's) | 56 (1.2F's; one line and two messages the iOS game's) | 3 | 1.2F's lists |
-| 5.0.5 | French (the remake's) | 233 (iOS's), hints 35 | 13, of them hints 5 | iOS's lists (the same English lists) |
-| 5.0.5 | Turkish (the remake's) | 223 (iOS's), hints 35 | 23, of them hints 5 | iOS's lists |
-| Palm OS 5 | French (the remake's) | 230 (iOS's), hints 33 | 17, of them hints 7 | iOS's lists (the stars by name: Courasant stays) |
-| Palm OS 5 | Turkish (the remake's) | 220 (iOS's), hints 33 | 27, of them hints 7 | iOS's lists |
-| 4.0.5 Windows | French (the remake's) | 163 (iOS's and 1.2F's), hints 22 | 33, hints 4 | iOS's stars by name; 1.2F's lists for its 2.0 lists (Colony Ships, Satellites) |
-| 4.0.5 Windows | Turkish (the remake's) | 152 (iOS's), hints 22 | 44, hints 4 | iOS's stars by name; ships by name |
-| 4.0.5 Mac | French (the remake's) | 180, hints 23 | 33, hints 4 | iOS's ships (5.0.5's lists), stars by name |
-| 4.0.5 Mac | Turkish (the remake's) | 168, hints 23 | 45, hints 4 | iOS's ships, stars by name |
-| 3.0.1 | French (the remake's) | 119 (iOS's and 1.2F's) | 13 | 1.2F's lists for its 2.0 lists (Scouts, Colony Ships, Satellites); stars by name |
-| 3.0.1 | Turkish (the remake's) | 111 (iOS's) | 21 | iOS's stars and ships by name |
-| 3.0.1 | German (the remake's) | 30 (the German DOS 2.0's) | 102 | the German DOS 2.0's lists for its 2.0 lists (Scouts, Colony Ships, Satellites); stars by name |
-| 4.0.5 Windows | German (the remake's) | 31, hints 0 | 165, hints 26 | the German DOS 2.0's Colony Ships and Satellites; stars by name |
-| 4.0.5 Mac | German (the remake's) | 31, hints 0 | 182, hints 27 | stars by name |
-| 5.0.5 | German (the remake's) | 25 (the German DOS 2.0's), hints 0 | 230, hints 40 | stars by name (the German DOS 2.0's); computers and ships English |
-| Palm OS 5 | German (the remake's) | 25, hints 0 | 231, hints 40 | stars by name |
-| iOS 1.2.9, Android 1.2.8 | French, Turkish (official) | 201 | 0 | the game's own lists |
-| iOS 1.2.9, Android 1.2.8 | German (the remake's) | 25, hints 0 | 227, hints 39 | stars by name |
+| Mac 1.2 | French (its own) | 57 | 3 | – |
+| Mac 1.2 | German (the remake's) | 54 | 6 | – |
+| DOS 2.0 | German (official) | 54 | 5 | – |
+| DOS 2.0 | French (the remake's) | 56 | 4 | – |
+| Mac 2.0.1 | German (official) | 54 | 5 | – |
+| Mac 2.0.1 | French (the remake's) | 56 | 4 | – |
+| Mac 3.0.1 | French (the remake's) | 119 | 13 | – |
+| Mac 3.0.1 | Turkish (the remake's) | 111 | 21 | – |
+| Mac 3.0.1 | German (the remake's) | 30 | 102 | – |
+| Windows 4.0.5 | French (the remake's) | 163 | 33 | 22 / 4 |
+| Windows 4.0.5 | Turkish (the remake's) | 152 | 44 | 22 / 4 |
+| Windows 4.0.5 | German (the remake's) | 31 | 165 | 0 / 26 |
+| Mac 4.0.5 | French (the remake's) | 180 | 33 | 23 / 4 |
+| Mac 4.0.5 | Turkish (the remake's) | 168 | 45 | 23 / 4 |
+| Mac 4.0.5 | German (the remake's) | 31 | 182 | 0 / 27 |
+| 5.0.5 | French (the remake's) | 250 | 27 | 35 / 5 |
+| 5.0.5 | Turkish (the remake's) | 240 | 37 | 35 / 5 |
+| 5.0.5 | German (the remake's) | 25 | 230 | 0 / 40 |
+| Palm OS 5 | French (the remake's) | 247 | 31 | 33 / 7 |
+| Palm OS 5 | Turkish (the remake's) | 237 | 41 | 33 / 7 |
+| Palm OS 5 | German (the remake's) | 25 | 231 | 0 / 40 |
+| iOS 1.2.9 | French (official) | 201 | 0 | – |
+| iOS 1.2.9 | Turkish (official) | 201 | 0 | – |
+| iOS 1.2.9 | German (the remake's) | 25 | 227 | 0 / 39 |
+| Android 1.2.8 | French (official) | 201 | 0 | – |
+| Android 1.2.8 | Turkish (official) | 201 | 0 | – |
+| Android 1.2.8 | German (the remake's) | 25 | 227 | 0 / 39 |
 
+Names, besides: 1.2F's French lists (1.2's own; carried to 2.0's French), the German DOS
+2.0's lists (2.0's own; carried to 1.2's German, and to 3.0.1's and 4.0.5's lists that
+are 2.0's), iOS's lists (iOS's and Android's own; carried to 5.0.5 and the Palm, whose
+lists are the same, and to the Mac 4.0.5's ships); stars everywhere by name from the
+nearest official list. Window words: Name a Star, Fix Spending, the battle window,
+4.0.5's won window and Armageddon questions, 1.2's and 2.0's Options menu and Explored
+Planets list, Mac 2.0.1's Force End Turn (the counts above leave them out; they are said
+in each version's section).
 
 ## Mac 1.2 (French, as released)
 
@@ -104,7 +123,10 @@ German table has swapped are in their places.
 ## DOS 2.0 and Mac 2.0.1
 
 **German (official):** as before (`docs/dos-findings.md`, "Languages"), and now also
-2.0's messages between players (strings 708-722), which the remake had left in English.
+2.0's messages between players (strings 708-722) and the Explored Planets list's classes
+(144-147), which the remake had left in English, and the remake's line for a turn with
+no news.
+
 
 **French (the remake's):** 1.2F's text, which is 2.0's line for line: the reports by
 string id (1.2F's line = id − 671), the battle window, Fix Spending, the classes, the
@@ -138,8 +160,10 @@ The remake's own (`js/lang-remake.js`), in iOS's words:
 - 5.0.5's own lines: its three first messages and five hints written for the mouse (click, the clock,
   the contextual menu, the option key, option-drag, the graph), the fuel alert's "no
   arrows on either end of the dragged line", the Evacuate questions for a profitable
-  colony and the Palm's "Ship" (Full Hoedown), and the remake's "Year %d. Nothing much
-  happened.".
+  colony and the Palm's "Ship" (Full Hoedown), the Radical Research window's three
+  projects 5.0.5 added (the remake's English for them, in iOS's words for their reports),
+  and the remake's "Year %d. Nothing much happened.".
+
 - Lines the iOS translation got wrong, given right in the remake's languages (iOS keeps
   its own): French 37 ("You %savez perdu une bataille à%s…", the counts out of place);
   Turkish 11 ("lost" left in English), 14 (says the colony now does *not* belong to the
@@ -234,16 +258,54 @@ for their own English (iOS's lists), with the remake's lines for their touch hin
 alerts; their help page stays English (`js/help.js` has French and Turkish only).
 
 
+## Turkish suffixes
+
+iOS's Turkish puts a fixed suffix straight after a name ("%sye", "%sde", "%syi",
+"%snin"), whatever the name's last vowel, so "Argotye", "Polluxyi"; the iOS patch's fix
+'trLostWord' keeps that. The remake's Turkish does the same, so its lines read like the
+official ones around them; a suffix that agreed with each name would need the name's
+vowels in every report, which no official line does.
+
 ## What stays English, and why
 
+The remake's own interface stays English in every language, as it does for the official
+translations: it isn't the version's text, and putting all of `js/skins/classic/ui.js`
+into French, Turkish and German would put the remake's words in the original's mouth.
+What the language system carries is translated: the reports and questions the rules
+send, the alerts the page shows from 5.0.5's list, the names, the hints and the window
+words each version's rules hold. What stays English:
 
+- **The remake's windows and menus**: New Game, Preferences, the Ho, Game and Galaxy
+  menus, Saved Games and Account, the toasts ("That project has been cancelled."), the
+  remake's own Evacuate question for 3.0.1 and 4.0.5 ("Evacuate %s? Your colonists will
+  leave; satellites stay."), the help the remake wrote, About this version and its notes.
+  They are the remake's, in its own English.
+- **The versions' window words the rules don't carry**: the Send Message window's labels
+  and prompts ("I Want", "Saying What?", 3.0.1's and 4.0.5's `cannedChat`), the Hall of
+  Fame's ranks and columns, the Technology window's names, the planet and fleet panels,
+  4.0.5's "End Turn and Switch Players". They are drawn by the skin from its own words or
+  the version's English; translating them would mean translating the skin.
+- **The 2.0 German's Options menu, and the Explored Planets list's title and button**
+  (DOS 2.0 and Mac 2.0.1): the German table has no words for them (the list's four
+  classes are its strings 144-147, now used), so they keep 2.0's English; the remake's
+  German 1.2 has them in its own German.
 
+- **Help pages**: only iOS and Android have them in French and Turkish (their own); every
+  other version's manual is English.
+- **5.0.5's network and registration alerts** in German (never shown by the remake).
+- **The pictures**: words drawn in the art (1.2F's "Fin Tour", the title pictures).
 
+## Choices worth checking
 
-
-The remake's own interface (its windows, buttons, menus, New Game, Preferences, the help
-the remake wrote) stays English in every language, as it does for the official
-translations: it isn't the version's text, and translating every window of
-`js/skins/classic/ui.js` would put the remake's words in the original's mouth. What the
-language system already carries is translated: the reports and the questions the rules
-ask, the names, the hints, and the window words each version's rules hold (above).
+- iOS's own slips are kept in iOS's languages (as released) but put right in the
+  remake's: French 37; Turkish 11, 14, 35, 38, 62, 124, 156 and the credits. Other
+  official lines that are clumsy but say the right thing are used verbatim (French 20's
+  "Votre flotte de Type…", Turkish "Sizin Düşmanları", "1yi kaybetti").
+- 1.2F's battle window counts no ships lost ("%.*s détruit(s)") and its scrapped-fleet
+  report has no metal: shown as they are for 1.2, and for 2.0 the scrapped fleet is iOS's
+  line, which has it.
+- Lines matched by their English with the last stop set aside take the official line's
+  stop: 5.0.5's "…" in "Dorothy… Kansas anymore…" shows iOS's "?" in French.
+- German: 5.0.5's Evacuate is "räumen" and 3.0.1's and 4.0.5's Abandon "verlassen"
+  (2.0's word); Dreadnought "Schlachtschiff", Biological "Bioschiff", Decoy
+  "Täuschschiff"; the Hope joke keeps the star's English name.

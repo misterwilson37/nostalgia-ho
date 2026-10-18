@@ -124,6 +124,8 @@ const SAY_DE = {
     ['Your fleet of %s is waiting to refuel before it can continue on to %s.', 'Die Flotte von %s wartet auf Treibstoff, bevor sie nach %s weiterfliegt.', 'remake'],
     ['%s says: %s', '%s sendet einen Funkspruch: %s', 'remake'],
     ['Your message to %s: %s', 'Sie senden einen Funkspruch an %s: %s', 'remake'],
+    // the remake's line for a turn with no news (js/skins/classic/ui.js)
+    ['Year %d. Nothing much happened.', 'Jahr %d. Nicht viel passiert.', 'remake'],
   ]),
   // a fleet in a report: "one Scout", "3 Scouts", "3 ships" (engine.js
   // fleetLabel), "one Reliant" (a design, Built ...): the German battle
@@ -164,6 +166,9 @@ function german(rs, own) {
     // Fix Spending's lines (DOSHO.EXE, after the routine's debugging line)
     fixSpending: Object.assign({}, rs.fixSpending, { lines: DE.exe.fixSpending.map(X) }),
     battlePanel: own.battlePanel20(Object.assign({ name: 15, cls: 15, dots: '...', cols: 'mac', shade: true }, { words: BATTLE_DE })),
+    // the Explored Planets list's four words (strings 144-147; its title and button have no German)
+    exploredList: Object.assign({}, rs.exploredList, { noClimate: S(144), own: S(145), free: S(146), enemy: S(147) }),
+
     ...(rs.forceEndTurn ? { forceEndTurn: Object.assign({}, rs.forceEndTurn, { ask: S(3210) }) } : {}),
     say: SAY_DE,
     // the battle window's two lines for a fleet seen to nothing (strings 74, 75).
@@ -228,6 +233,8 @@ function sayFr(v20) {
         ['Your fleet of %s is waiting to refuel before it can continue on to %s.', 'Votre flotte de %s attend de faire le plein avant de pouvoir repartir pour %s.', 'remake'],
         ['%s says: %s', HOLANG.ios.fr['Report Window Templates'][54]],
         ['Your message to %s: %s', HOLANG.ios.fr['Report Window Templates'][70]],
+        ['Year %d. Nothing much happened.', 'Année %d. Rien de spécial ne s\'est passé.', 'remake'],
+
       ]),
     // a fleet in a report: "un Eclaireur", "3 Eclaireurs" (the classes and an
     // "s", as 1.2F's MakeFleetDescription writes them), "3 vaisseaux" (1000.34)
