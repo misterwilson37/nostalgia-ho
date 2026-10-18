@@ -174,7 +174,8 @@ function savePrefs() { try { localStorage.setItem('ho5.prefs', JSON.stringify(Ob
 const rsCelsius = () => !!(G && HO.rules(G).celsius);
 const toC = (f) => rsCelsius() ? ((f - 32) * 5 / 9).toFixed(1) : Math.round((f - 32) * 5 / 9);
 const degF = (f) => Prefs.celsius || rsCelsius() ? toC(f) + '°C' : Math.round(f) + '°';
-const degText = (t) => Prefs.celsius || rsCelsius() ? t.replace(/(-?\d+)°(F)?/g, (m, n) => toC(+n) + '°C') : t;
+// (a degree already in °C, as a translation writes it, stays as it is)
+const degText = (t) => Prefs.celsius || rsCelsius() ? t.replace(/(-?\d+)°(?!C)(F)?/g, (m, n) => toC(+n) + '°C') : t;
 // rs.options: the version's own Options menu preferences (1.2, 2.0)
 const verOpts = () => (G && HO.rules(G).options) || null;
 const optVal = (O, k) => { const v = Prefs[k]; return v != null && v >= O.min && v <= O.max ? v : O.def; };
@@ -3622,7 +3623,7 @@ const langKey = (id) => 'ho5.lang.' + id + (T.lang ? '.' + ((window.HOSKINS && H
 function openLanguage() {
   if (!G) return;
   const langs = HO.languages(HO.ownRules(G)), now = (G.opts && G.opts.lang) || langs[0];
-  const s = el('select', { 'aria-label': 'Language' }, ...langs.map((c, i) => el('option', { value: c, selected: c === now ? 'selected' : false }, (HO.LANGUAGES[c] || c) + (i ? '' : ' (original)'))));
+  const s = el('select', { 'aria-label': 'Language' }, ...langs.map((c, i) => el('option', { value: c, selected: c === now ? 'selected' : false }, HO.languageName(HO.ownRules(G), c) + (i ? '' : ' (original)'))));
   const ok = () => {
     closeModal();
     if (s.value === now) return;
@@ -4979,7 +4980,7 @@ function newGameDialog() {
     if (langs.length && langSel.dataset.rules !== d.rules) {
       langSel.dataset.rules = d.rules;
       let last = null; try { last = localStorage.getItem(langKey(d.rules)); } catch (e) { /* none kept */ }
-      langSel.replaceChildren(...langs.map((c, i) => el('option', { value: c }, (HO.LANGUAGES[c] || c) + (i ? '' : ' (original)'))));
+      langSel.replaceChildren(...langs.map((c, i) => el('option', { value: c }, HO.languageName(ngr, c) + (i ? '' : ' (original)'))));
       // a skin of a release in another language starts in it (T.lang: the
       // Amiga skin's German), else the version's own
       langSel.value = langs.includes(last) ? last : T.lang && langs.includes(T.lang) ? T.lang : langs[0];

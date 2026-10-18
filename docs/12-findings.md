@@ -405,11 +405,22 @@ the game's language, so a seed plays the same game in either: `node tools/test.j
 --lang=en` prints what `node tools/test.js 12` does, with the English names (and a save a
 few bytes longer).
 
-What is French in 1.2 is its names and its Name a Star window; its reports, battle
-reports and Fix Spending lines were already given in English (DOS 2.0's report strings,
-which are 1.2's STR# 1000 line for line, and Mac 2.0.1's STR# 1050). The English is the
-nearest official English, **Mac 2.0.1**'s (1.2 is a pre-release of 2.0), read from its
-resources (`STR#`, `DITL`):
+What is French in 1.2 is its names, its windows' words and its reports: STR# 1000 (the
+reports, DOS 2.0's strings 672–730 line for line), 1030 (the battle window), 1050 (Fix
+Spending) and the rest, read by `tools/extract/languages.py --mac12` into
+`js/lang-data.js` (`mac12Fr`). The remake shows them as released (`rs.say` in
+`js/languages.js`: the rules keep 2.0's English words, and the page puts them in 1.2F's
+French). The battle window's fleets are 1.2F's own order, the class first
+(`MakeFleetDescription`: "%d %.*ss %.*s (%d/%d)", "1 %.*s %.*s (%d/%d)", and with no count
+for the ships lost, "%.*s détruit(s)"); a report's numbers are written "1 234" (the
+program's "%d %.3d", "%d %.3dK"; LIKELY what `LongToNiceString` uses for them); the
+exploring report has the temperature in °C to a tenth. 1.2F says less than 2.0's English
+in two lines: 1000.17 ("Votre flotte de %.*s à %s a été recyclée.") has no metal, and
+1030.0's ships lost ("%.*s détruit(s)") no count; they are shown as they are.
+
+The English is the nearest official English, **Mac 2.0.1**'s (1.2 is a pre-release of
+2.0), read from its resources (`STR#`, `DITL`):
+
 
 - **Star names**: none change. 1.2F's STR# 1003 is 2.0.1's (and DOS 2.0's) list of 190,
   entry for entry, all in English, and STR# 2005 is "Tiber" in both.

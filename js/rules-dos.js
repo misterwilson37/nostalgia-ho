@@ -1891,7 +1891,10 @@ function battlePanel20(opt) {
   const desc = (d, n, mine) => {
     const t = d.type === 'decoy' && !mine ? 'fighter' : d.type;
     const cls = W === WORDS20 ? cut((E.TYPES[t] || { name: '' }).name, opt.cls) + (n > 1 ? 's' : '') : cut(W.cls(t, n), opt.cls), nm = cut(d.name, opt.name), ws = `(${d.W}/${d.S})`;
+    // (W.desc: a language's own order, 1.2F's "1 Eclaireur Sonde (1/1)")
+    if (W.desc) return W.desc(nm, ws, cls, n).slice(0, 39);
     return (n < 1 ? `${nm} ${ws} ${cls}` : n === 1 ? `${W.one}${nm} ${ws} ${cls}` : `${n} ${nm} ${ws} ${cls}`).slice(0, 39);
+
   };
   const pop = (G, x) => { const t = (E.rules(G).fmtNum || fmt)(Math.round(x * 1e6)); return W.num ? W.num(t) : t; };
   return E.makeBattlePanel({

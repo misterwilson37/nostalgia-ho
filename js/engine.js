@@ -107,7 +107,16 @@ function rules(G) {
 // are drawn from the version's own lists and then put in the game's language
 // (ownRules, gameName, ownName). A game's language is G.opts.lang (none: the
 // version's own). LANGUAGES names each code in its own language.
+//
+// A language the version never shipped in is the remake's own translation
+// (rs.lang[code].remake, js/languages.js): languageName marks it, in that
+// language, wherever a language is offered (docs/translations.md).
 const LANGUAGES = { en: 'English', fr: 'Français', de: 'Deutsch', tr: 'Türkçe' };
+const REMAKE_LANGUAGE = { en: 'the remake’s translation', fr: 'traduction du remake', de: 'Übersetzung des Remakes', tr: 'yeniden yapımın çevirisi' };
+function languageName(rs, code) {
+  const o = rs && rs.lang && rs.lang[code];
+  return (LANGUAGES[code] || code) + (o && o.remake ? ` (${REMAKE_LANGUAGE[code] || REMAKE_LANGUAGE.en})` : '');
+}
 const langCache = new WeakMap();
 function languages(rs) { return rs && Array.isArray(rs.languages) && rs.languages.length > 1 ? rs.languages : []; }
 // over.fix = { fixId: partial } holds the unofficial patch's corrections to a
@@ -237,7 +246,9 @@ function setHoedown(G, on) {
 // place), or a function (args, G) => text; args, the same for what is
 // filled in (a fleet's "one Scout"); words, whole fillings
 // (a tech's name); num(t), a number's form. A text no report matches stays
-// as it is.
+// as it is. A version whose reports were in another language than the rules'
+// words (1.2F's French) keeps them as rs.say, used with no G.opts.lang; a
+// language that sets no say of its own then shows the rules' words.
 const SAY_ARG = /(%(?:\d+\$)?(?:\.\*)?[-0-9.]*l?[sdu]|%%)/;
 const sayCache = new WeakMap();
 function sayList(list) {
@@ -262,9 +273,14 @@ function sayArgIn(L, C, a) {
   if (hit) return typeof hit[0].to === 'function' ? hit[0].to(hit[1]) : sayFill(hit[0].to, hit[1].map(x => sayArgIn(L, C, x)));
   return L.num && /^-?\$?[\d,]+(\.\d+)?K?$/.test(a) ? L.num(a) : a;
 }
+function sayRules(G) {
+  if (!G) return null;
+  const lang = G.opts && G.opts.lang, own = ownRules(G);
+  if (!lang) return own.say || null;
+  return own.lang && own.lang[lang] && own.lang[lang].say ? langRules(G).say : null;
+}
 function say(G, text) {
-  const t = String(text == null ? '' : text), lang = G && G.opts && G.opts.lang;
-  const own = lang && ownRules(G).lang, L = own && own[lang] && own[lang].say && langRules(G).say;
+  const t = String(text == null ? '' : text), L = sayRules(G);
   if (!L) return t;
   const C = sayOf(L), hit = sayMatch(C.reports, t);
   if (!hit) return t;
@@ -274,7 +290,7 @@ function say(G, text) {
 }
 // whether a text is one of the language's reports (tools: what isn't translated)
 function saysIn(G, text) {
-  const lang = G && G.opts && G.opts.lang, own = lang && ownRules(G).lang, L = own && own[lang] && own[lang].say && langRules(G).say;
+  const L = sayRules(G);
   return !!(L && sayMatch(sayOf(L).reports, String(text)));
 }
 // every ruleset names its computer players (rs.ai)
@@ -1439,7 +1455,8 @@ function makeBattlePanel(cfg) {
 const API = {
   DATA, SHIP_TYPES, TYPES: SHIP_TYPES, TECHS,
   BAR_SCALES, barScale, battleGroups, makeBattlePanel,
-  registerRules, registerAI, rules, rulesById, aiOf, LANGUAGES, languages, ownRules, gameName, ownName, setLanguage, say, saysIn, feature, RULESETS, fixes, fixed, hoedown, setHoedown, patchVersion,
+  registerRules, registerAI, rules, rulesById, aiOf, LANGUAGES, languages, languageName,
+ ownRules, gameName, ownName, setLanguage, say, saysIn, feature, RULESETS, fixes, fixed, hoedown, setHoedown, patchVersion,
   // [id, name] for the New Game window: the original games' rules by year of
   // release, then version ("2.0 (DOS and Windows 3.1, 1993)"); rulesets that
   // aren't an original game's (the remake's own) come last, by their label

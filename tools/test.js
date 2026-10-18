@@ -13,9 +13,11 @@ if (!RULES || !HO.RULESETS[RULES]) { console.error(`Usage: node tools/test.js <r
 // an exception anywhere in a turn stops the test with where it happened (the
 // engine's e.hoWhere: a computer's turn, ...), the game and the turn
 function fail(e,seed,G){ console.error(`FAILED: ${RULES}${PATCH?' --patch':''}, seed ${seed}${G?`, year ${G.year} (turn ${G.turn})`:', New Game'}${e&&e.hoWhere?`, in ${e.hoWhere}`:''}`); console.error(e&&e.stack||e); process.exit(1); }
-// the game's state without what Hoedown may change: messages, names, its own notes
+// the game's state without what Hoedown or the language may change: messages,
+// names, its own notes, the language's code (G.opts.lang)
 function digest(G){
-  const skip=new Set(['inbox','log','name','text','hoNames','hoColor','hoedown']);
+  const skip=new Set(['inbox','log','name','text','hoNames','hoColor','hoedown','lang']);
+
   const js=JSON.stringify(G,(k,v)=>skip.has(k)?undefined:v);
   return require('crypto').createHash('sha1').update(js).digest('hex').slice(0,16);
 }

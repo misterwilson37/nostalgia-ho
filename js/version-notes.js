@@ -98,6 +98,8 @@ const REQ_201 = {
   quote: 'TheHo now requires 6.0.5 (to avoid 6.0.2 color qd problem).',
   source: 'Changes for version 2.0.1 (Joe and Peter), on the Mac 2.0.1 disks',
 };
+// the languages the remake translated itself (docs/translations.md)
+const REMAKE_LANG = (what) => 'Language… also offers ' + what + ': the remake’s own translation, not an official one, and marked so in the list. It changes only words and names: the same game plays in every language.';
 const HOTSEAT = 'Several people play on one computer and take turns. The original let each player join a shared game file, with a password.';
 root.HOVERSIONS = {
   '12': {
@@ -118,7 +120,8 @@ root.HOVERSIONS = {
       'Dragging a budget bar works out the others once, from where the drag began; 1.2 did it at every step of the drag, so a long drag can end slightly differently.',
       'Battle replays are kept for the last 60 battles; 1.2 kept them for 500 years.',
       'Fix Spending shows each step’s line in a small window, whose Next is the original’s click on the message bubble.',
-      'Fix Spending’s lines and the Name a Star window are in English (Mac 2.0.1’s lines; 1.2’s are French).',
+      'Language… offers English, Mac 2.0.1’s own words for the same windows and reports, which are 1.2’s line for line.',
+      REMAKE_LANG('German (“Übersetzung des Remakes”), the German DOS 2.0’s words for the same reports, names and windows, with the remake’s own German for the few window words 2.0’s German hasn’t got'),
     ],
     missing: [
       'The preferences for battle speed, showing messages and watching battles, and the Explored Planets window.',
@@ -147,6 +150,7 @@ root.HOVERSIONS = {
       'Dragging a budget bar works out the others once, from where the drag began; 2.0 did it at every step of the drag, so a long drag can end slightly differently.',
       'Battle replays are kept for the last 60 battles; 2.0 kept them for 500 years.',
       'Fix Spending shows each step’s line in a small window, whose Next is the original’s click on the message bubble.',
+      REMAKE_LANG('French (“traduction du remake”), the French Mac 1.2’s own text, whose reports are 2.0’s line for line, with the remake’s words for the few lines 1.2 hasn’t got'),
     ],
     missing: [
       'The Explored Planets list and the poll and battle speed settings.',
@@ -281,6 +285,7 @@ root.HOVERSIONS = {
       'Battle replays are kept for the last 60 battles; 2.0.1 kept them for 500 years.',
       'An event with no sound of its own plays the skin’s; the Mac beeped (the system beep).',
       'Fix Spending shows each step’s line in a small window, whose Next is the original’s click on the message bubble.',
+      REMAKE_LANG('French (“traduction du remake”), the French Mac 1.2’s own text, whose reports are 2.0’s line for line, with the remake’s words for the few lines 1.2 hasn’t got'),
     ],
     missing: [
     ],

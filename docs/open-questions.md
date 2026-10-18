@@ -236,7 +236,13 @@ Where a browser can't do what the original did, or the remake had to pick.
 ### 2.0 and 1.2
 
 - Fix Spending's steps are shown in a small window with Next (the originals used the
-  message bubble); 1.2 shows Mac 2.0.1's English lines.
+  message bubble).
+- **The remake's own translations**, marked in the Language list: French for 2.0 (1.2F's
+  French, 2.0's reports line for line, carried forward; the remake's words for four
+  lines) and German for 1.2 (the German DOS 2.0's, carried back; the remake's words for
+  the Options menu and the Explored Planets list's title). `docs/translations.md`.
+
+
 - DOS's battle-damage shading uses the Mac's grey (its pattern wasn't identified).
 
 ---
