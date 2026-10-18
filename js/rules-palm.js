@@ -86,7 +86,7 @@ const evacuateToggle = {
   words: ['Evacuate Planet', 'Don’t Evacuate Planet'],
   marked: (G, sid) => !!G.stars[sid].abandon301,
   ask(G, p, sid) {
-    const s = G.stars[sid], nm = String(s.name).toLowerCase();
+    const s = G.stars[sid], nm = String(E.ownName(G, s.name, 'stars')).toLowerCase(); // (its own name, in any language)
     if (nm === 'kansas') return { text: 'Dorothy, I guess that means we’re not in Kansas anymore', notice: true };
     if (nm === 'hope') return { text: 'Dost thou truly wish to abandon Hope? All is not yet lost...' };
     if (nm === 'ship') return { text: 'Abandon Ship? Abandon Ship! All hands abandon ship! Women and children first!' };

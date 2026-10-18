@@ -135,8 +135,14 @@ function inLanguage(rs, lang, patch) {
     const p = over.fix[id];
     o = Object.assign({}, o, p, p.say ? { say: Object.assign({}, o.say, p.say, { reports: (p.say.reports || []).concat(o.say.reports || []) }) } : {});
   }
-  return m[key] = Object.assign({}, rs, o);
+  // the ruleset with the language's words over it; its own properties all kept
+  // as they are, the ones it hides from the rulesets built on it too (5.0.5's
+  // turn505 ..., rules-original), so the language plays the same game
+  const r = Object.defineProperties({}, Object.getOwnPropertyDescriptors(rs));
+  for (const k of Object.keys(o)) Object.defineProperty(r, k, { value: o[k], enumerable: true, writable: true, configurable: true });
+  return m[key] = r;
 }
+
 // the game's ruleset in the version's own language
 const langRules = (G) => rules(G);
 function ownRules(G) { return RULESETS[G.rules] || rulesById(G.rules); }

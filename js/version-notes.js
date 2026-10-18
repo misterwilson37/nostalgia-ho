@@ -379,7 +379,9 @@ root.HOVERSIONS = {
       'An order for ships stops at the first one you can’t pay for, so the ones after it don’t use up building places.',
       'When you give a gift, you are told at once; 5.0.5 told you at the end of the turn.',
       'Every game starts from the default budget and research shares (research 18% each and Radical 10%); 5.0.5 started a new game with your first turn’s shares from the last one.',
+      REMAKE_LANG('French (“traduction du remake”) and Turkish (“yeniden yapımın çevirisi”): the iOS game’s official French and Turkish wherever its English is 5.0.5’s, which is nearly everywhere, with the remake’s own lines for the few 5.0.5 says differently (the mouse’s hints, the fuel alert) and for a few lines the iOS translation got wrong'),
     ],
+
     missing: [
       'The Group Fleets window: “Merge all fleets here” and splitting follow its rules (Biologicals keep to themselves; the fleet that takes ships keeps its orders and the lower fuel).',
       'Options locked by rank (“Need more MPs”): every option is open.',

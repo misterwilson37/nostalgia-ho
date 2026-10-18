@@ -2632,7 +2632,7 @@ const evacuateToggle = {
   words: ['Evacuate Planet', 'Don’t Evacuate Planet'],
   marked: (G, sid) => !!G.stars[sid].abandon301,
   ask(G, p, sid) {
-    const s = G.stars[sid], nm = String(s.name).toLowerCase();
+    const s = G.stars[sid], nm = String(E.ownName(G, s.name, 'stars')).toLowerCase(); // (its own name, in any language)
     // Full Hoedown (E.hoedown): the one-in-three draws are still made, and
     // their result ignored; and the Palm's "Ship" (4.0.5's, cut by 5.0.5)
     const H = E.hoedown(G);
@@ -2726,11 +2726,15 @@ const words505 = {
     : n !== n0 ? `${n}/${n0} ${shipDesc505(d, 0, mine)}s` : shipDesc505(d, n, mine),
   planet: (G, pop, pop0) => pop <= 0.0005 ? `${pop505(G, pop0)} killed` : Math.abs(pop - pop0) < 0.0005 ? pop505(G, pop) : `${pop505(G, pop)}/${pop505(G, pop0)}`,
 };
-const battlePanel505 = E.makeBattlePanel(Object.assign({
+// (tr: the window's words in another language, js/languages.js: the head
+// and a text's own translation)
+const battlePanel505In = (tr) => E.makeBattlePanel(Object.assign({
   cols: 'viewer', byStance: true, owner: 'pill', luck: true, layout: 'pile505',
   pics: (n) => n <= 1 ? n : clamp(trunc(0.5 + Math.pow(n, 0.68)), 1, 30),
-  head: (G, b) => [`Review Battle at ${G.stars[b.star].name} in ${b.year}`],
-}, words505));
+  head: (G, b) => [tr ? tr.head(G.stars[b.star].name, b.year) : `Review Battle at ${G.stars[b.star].name} in ${b.year}`],
+}, tr ? { ship: (...a) => tr.text(words505.ship(...a)), planet: (...a) => tr.text(words505.planet(...a)) } : words505));
+const battlePanel505 = battlePanel505In(null);
+
 // CONFIRMED (FUN_1005d380, "Dip Into Savings…", dialog 0x9d): a percentage
 // kept (player +0x54), from the window's slider, 0 to 30 % (PPob 157: the
 // slider's minimum 0, maximum 30, marked 0%, 15% and 30%; the code would take
@@ -2911,7 +2915,7 @@ Object.defineProperties(E.RULESETS.original, Object.fromEntries(Object.entries({
   // a share's pixel; FUN_1008a7a0, the mouse's pixel through the table; the
   // grid at 100, 200 ... 1,000 per mille on it, FUN_1008aff0); the locked
   // bars (barLocked505) and the battle window's ship panel (battlePanel505)
-  barScale: { budget: 'log', tech: 'log' }, barGrid: { n: 10, tick: 3, line: true } /* FUN_1008aff0: ten lines through the bars, a black tick 3 pixels long at the top (the Palm's own: rules-palm) */, barLocked: barLocked505, battlePanel: battlePanel505, battlePanelWords: words505,
+  barScale: { budget: 'log', tech: 'log' }, barGrid: { n: 10, tick: 3, line: true } /* FUN_1008aff0: ten lines through the bars, a black tick 3 pixels long at the top (the Palm's own: rules-palm) */, barLocked: barLocked505, battlePanel: battlePanel505, battlePanelIn: battlePanel505In, battlePanelWords: words505,
   fleetFor: fleetFor505, shipsAdded: shipsAdded505, yardRoom: yardRoom505, addMasterPoints: addMasterPoints505,
   bars: bars505, setBars: setBars505, slots301: slots505, colSlots: colSlots505, keyPm, setKeyPm, giveBarPercent: giveBar505, share505,
   terraLeft: (G, p, s) => bars505(s)[0] !== -1,

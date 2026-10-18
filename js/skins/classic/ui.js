@@ -776,7 +776,7 @@ function onUp(e) {
   else if (tgt == null || tgt === f.star) { if (f.dest != null) { HO.cancelMove(G, f); Sound.play(4000); } }
   else if (HO.orderMove(G, f, tgt)) Sound.play(4001);
   else if (autoRoute(f, tgt)) Sound.play(4001);
-  else { Sound.play(7016); if (HO.rules(G).fuelAlert === '505') fuelAlert(HO.DATA.alerts[29], 'ho5.fuelAlert505'); else toast(outOfRange(f, tgt)); }
+  else { Sound.play(7016); if (HO.rules(G).fuelAlert === '505') fuelAlert(HO.say(G, HO.DATA.alerts[29]), 'ho5.fuelAlert505'); else toast(outOfRange(f, tgt)); }
   UI.hover = null; draw(); renderPanel(); save();
 }
 // Plan route…: a clicked (or tapped) star is the next stop
@@ -2214,7 +2214,7 @@ function openBuild(sid) {
   const carry = UI.buildCarry && UI.buildCarry.sid === sid ? UI.buildCarry : null; UI.buildCarry = null;
   const session = carry ? carry.session : {}, asked = carry ? carry.asked : {};
   const MS = !queue && HO.rules(G).manyShips;
-  const manyText = (d) => d.type === 'scout' ? HO.DATA.alerts[35] : d.type === 'tanker' ? HO.DATA.alerts[36] : null;
+  const manyText = (d) => d.type === 'scout' ? HO.say(G, HO.DATA.alerts[35]) : d.type === 'tanker' ? HO.say(G, HO.DATA.alerts[36]) : null;
   const manyAsk = (d, go) => {
     if (MS && MS.how === 'ask' && manyText(d) && (session[d.id] || 0) + 1 >= MS.at && !asked[d.id]) {
       UI.buildCarry = { sid, session, asked };
@@ -2304,7 +2304,7 @@ function openBuild(sid) {
     const live = p.designs.find(d => !d.scrapped && d.type === spec.type && d.R === spec.R && d.V === spec.V && d.W === spec.W && d.S === spec.S && d.M === spec.M);
     right.append(el('div', { class: 'btns' }, el('button', { disabled: !!(live && live.scrap301), title: live && live.scrap301 ? `${live.name} is marked for scrapping.` : null, onclick: () => {
       const lim = HO.rules(G).maxDesigns;
-      if (lim && !exists && HO.liveDesigns(p) >= lim) { toast(HO.DATA.alerts[15] || 'Your assembly lines are full.'); return; }
+      if (lim && !exists && HO.liveDesigns(p) >= lim) { toast(HO.say(G, HO.DATA.alerts[15] || 'Your assembly lines are full.')); return; }
       if (NF && st.name) spec.name = st.name;
       const d = HO.findOrCreateDesign(G, p, spec);
       if (NF && !exists && spec.name) { keepName('ships', d.name, d.type); st.name = ''; }
@@ -2927,12 +2927,12 @@ function openPlayers() {
 const others = () => G.players.filter(p => p.id !== 0 && p.alive && !p.surrendered);
 function playerSelect(name) { return el('select', { name }, ...others().map(p => el('option', { value: p.id }, p.name))); }
 function openGive() {
-  if (!others().length) { toast(HO.DATA.alerts[6] || 'There is no one else to give anything to.'); return; }
+  if (!others().length) { toast(HO.say(G, HO.DATA.alerts[6] || 'There is no one else to give anything to.')); return; }
   const f = el('form', { class: 'newgame', onsubmit: (e) => {
     e.preventDefault();
     const d = Object.fromEntries(new FormData(f).entries());
     const r = HO.give(G, ME, +d.to, +d.money || 0, +d.metal || 0);
-    if (r === 'limit') toast(HO.DATA.alerts[5] || 'Sorry, but you may only give 3 gifts per turn.');
+    if (r === 'limit') toast(HO.say(G, HO.DATA.alerts[5] || 'Sorry, but you may only give 3 gifts per turn.'));
     else if (r === 'short') toast('You don’t have that much to give.');
     else if (r === 'ok') { Sound.play(5000); closeModal(); renderPanel(); save(); }
   } });
@@ -2963,7 +2963,7 @@ function openCanned(C) {
   const sel = (name, opts, cur) => el('select', { name, 'aria-label': name }, ...opts.map(o => el('option', { value: String(o[0]), disabled: o[2] ? 'disabled' : false, selected: String(o[0]) === String(cur) ? 'selected' : false }, o[1])));
   const val = (v) => /^\d+$/.test(v) ? +v : v;
   const tos = C.to(G, ME), ok = tos.filter(o => !o[2]);
-  if (!ok.length) { toast(HO.DATA.alerts[6] || 'There is no one else to send something to.'); return; }
+  if (!ok.length) { toast(HO.say(G, HO.DATA.alerts[6] || 'There is no one else to send something to.')); return; }
   const f = el('form', { class: 'newgame' });
   if (C.style === 'popup') {
     const cur = C.remember && ok.some(o => o[0] === me().chatTo) ? me().chatTo : ok[0][0];
@@ -3018,7 +3018,7 @@ function openCanned(C) {
 }
 function openChat() {
   if (HO.rules(G).cannedChat) { openCanned(HO.rules(G).cannedChat); return; }
-  if (!others().length) { toast(HO.DATA.alerts[6] || 'There is no one else to send something to.'); return; }
+  if (!others().length) { toast(HO.say(G, HO.DATA.alerts[6] || 'There is no one else to send something to.')); return; }
   const lines = ['Thank You!', 'Sorry!', '#!$@*$&@•™!', 'I need money.', 'I need metal.', 'I like you.', 'I hate you.', 'Let’s be allies.'];
   const f = el('form', { class: 'newgame', onsubmit: (e) => {
     e.preventDefault();
@@ -3068,7 +3068,7 @@ function openSurrender() {
   if (p.surrenderTo != null) { confirmBox('You are surrendering at the end of this turn. Take it back?', () => { HO.surrender(G, ME, null); save(); }); return; }
   const sel = el('select', { name: 'to' }, ...others().map(q => el('option', { value: q.id }, q.name)), el('option', { value: -1 }, 'No one'));
   const f = el('form', { class: 'newgame', onsubmit: (e) => { e.preventDefault(); HO.surrender(G, ME, +sel.value); closeModal(); save(); toast('You will surrender at the end of this turn.'); } });
-  f.append(el('p', null, HO.DATA.alerts[1] || 'Do you really want to surrender?'),
+  f.append(el('p', null, HO.say(G, HO.DATA.alerts[1] || 'Do you really want to surrender?')),
     el('label', null, el('span', null, 'Surrender to'), sel),
     el('p', { class: 'sub' }, 'Your fleets are dismantled. Whoever you surrender to gets your savings, your metal, and your planets.'),
     el('div', { class: 'btns right' }, el('button', { type: 'button', class: 'quiet', onclick: closeModal }, 'Cancel'), el('button', { type: 'submit' }, 'Surrender')));
@@ -3076,13 +3076,13 @@ function openSurrender() {
 }
 function toggleArmageddon() {
   const p = me();
-  if (p.armageddon) { HO.setArmageddon(G, ME, false); toast(HO.DATA.alerts[4] || 'Whew!'); save(); return; }
+  if (p.armageddon) { HO.setArmageddon(G, ME, false); toast(HO.say(G, HO.DATA.alerts[4] || 'Whew!')); save(); return; }
   // 4.0.5's two questions, each drawn from its list (rs.armageddonAsk); with
   // Full Hoedown, the later versions ask them too (rs.hoedown.armageddon)
   const hq = HO.rules(G).armageddonAsk || (HO.hoedown(G) && HO.ownRules(G).hoedown.armageddon);
   const any = (L) => L[Math.floor(Math.random() * L.length)];
   if (hq) return confirmBox(any(hq[0]), () => confirmBox(any(hq[1]), () => { HO.setArmageddon(G, ME, true); save(); toast('The armageddon device is on. It fires when every human player has turned theirs on.'); }));
-  confirmBox(HO.DATA.alerts[3] || 'Are you sure you want to destroy half the galaxy?', () => { HO.setArmageddon(G, ME, true); save(); toast('The armageddon device is on. It fires when every human player has turned theirs on.'); });
+  confirmBox(HO.say(G, HO.DATA.alerts[3] || 'Are you sure you want to destroy half the galaxy?'), () => { HO.setArmageddon(G, ME, true); save(); toast('The armageddon device is on. It fires when every human player has turned theirs on.'); });
 }
 
 function table(head, rows) {

@@ -198,6 +198,10 @@ Where a browser can't do what the original did, or the remake had to pick.
 - A purchase that fails for money still uses a building place in 5.0.5; the remake stops
   at the first ship it can't pay for.
 - The bars' grid colour: a table we haven't read, so a 28 % black.
+- **French and Turkish (the remake's)**: iOS's official translations wherever the English
+  is 5.0.5's (nearly everywhere); the remake's lines for what 5.0.5 says differently (the
+  mouse's hints, the fuel alert) and for the lines iOS got wrong. `docs/translations.md`.
+
 - Played as released, though we weren't sure each was meant:
   - budget shares are used as they stand, even over 1,000 (Abundant starts at 1,050);
   - dipping into savings raises the borrowing limit;

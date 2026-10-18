@@ -56,6 +56,9 @@ function listsOk(id, rs, code) {
   const h0 = rs.hintTexts, h1 = rs.lang[code].hintTexts;
   if (h0 && h0.length && h1 && h1.length !== h0.length) bad.push(`hintTexts ${h1.length} for ${h0.length}`);
   if (h1) h1.forEach((t, i) => { if (LEFT.test(String(t).replace(/%%/g, ''))) bad.push(`hint ${i}: ${t}`); });
+  // a line of the version's that no translation has (js/languages.js translator)
+  for (const t of rs.lang[code].missing || []) bad.push(`no translation: ${t}`);
+
   if (bad.length) { failed++; console.log(`FAIL ${id} ${code}: lists: ${bad.join('; ')}`); }
 }
 function play(id, code) {

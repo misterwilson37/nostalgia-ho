@@ -410,7 +410,10 @@ function iosLang(lang, rs) {
   const names = (k) => tr(k).map(s => String(s).replace(/\r/g, ''));
   // (the same lists as the version's own: the decoys' 5.0.5 list isn't in the
   // app, whose decoys take a Fighter's name, so it stays as it is)
-  const shipNames = { decoy: (rs.shipNames || E.DATA.shipNames || {}).decoy };
+  // (read when the game starts: in Node the lists are filled in after this file)
+  const shipNames = {};
+  Object.defineProperty(shipNames, 'decoy', { enumerable: true, configurable: true, get: () => (rs.shipNames || E.DATA.shipNames || {}).decoy });
+
   for (const k in SHIP_LISTS) shipNames[k] = names(SHIP_LISTS[k]);
   // the battle window (rules-ios battlePanelIn): sprintf Templates 9-12, 14
   const SP = en('sprintf Templates'), SPT = tr('sprintf Templates');
@@ -447,4 +450,183 @@ for (const rs of [E.RULESETS.ios, E.RULESETS.android]) {
   rs.languages = ['en', 'fr', 'tr'];
   rs.lang = Object.assign({}, rs.lang, { fr: iosLang('fr', rs), tr: iosLang('tr', rs) });
 }
+
+// =====================================================================
+// The remake's own: the versions with no translation
+// =====================================================================
+// A line is given, in order: the remake's correction of an official line
+// that went wrong (HOLANG_REMAKE[lang].over); an official translation of the
+// same English (the nearest version's first); the remake's own line
+// (HOLANG_REMAKE[lang].own). Lines are matched by their English with the
+// quotes, the spaces, a "$" before a filling (the iOS formatter writes it),
+// "%%" and the last stop set aside. docs/translations.md.
+const RMK = typeof module !== 'undefined' ? require('./lang-remake.js') : root.HOLANG_REMAKE;
+const PH = /%(?:\d+\$)?(?:\.\*)?[-0-9.]*l?[sdu]|%P/g;
+const normEn = (s) => String(s).replace(/[‘’`´]/g, '\'').replace(/[“”]/g, '"').replace(/º/g, '°').replace(/¥/g, '•').replace(/ª/g, '™')
+  .replace(/%%/g, '%').replace(/%\.\*s/g, '%s').replace(/\$(%[sd])/g, '$1').replace(/\s+/g, ' ').trim().replace(/(\.\.\.|…|!!|[.!:])+$/, '');
+// the fillings the version writes after a "$" that the official line's
+// English hasn't: the translation gets the "$" in front of the same filling
+function addDollar(en, enOff, to) {
+  if (typeof to !== 'string') return to;
+  const at = (t) => { const o = []; let k = 0; String(t).replace(PH, (m, i, s) => { if (s[i - 1] === '$') o.push(k); k++; return m; }); return o; };
+  const want = at(en).filter(k => !at(enOff).includes(k));
+  if (!want.length) return to;
+  let k = 0;
+  return to.replace(PH, (m) => { const pos = (/%(\d+)\$/.exec(m) || [])[1]; const n = pos ? pos - 1 : k++; return want.includes(n) ? '$' + m : m; });
+}
+// official: [[English, translation], ...], the nearest first
+function translator(lang, official) {
+  const R = RMK[lang] || {}, map = new Map(), over = new Map(), own = new Map();
+  for (const [en, to] of official) { const k = normEn(en); if (!map.has(k)) map.set(k, [en, to]); }
+  for (const [en, to] of Object.entries(R.over || {})) over.set(normEn(en), to);
+  for (const [en, to] of Object.entries(R.own || {})) own.set(normEn(en), to);
+  const missing = [];
+  // [translation, 'remake'?] or null
+  const line = (en) => {
+    const k = normEn(en);
+    if (over.has(k)) return [over.get(k), 'remake'];
+    if (map.has(k)) { const [e0, to] = map.get(k); return [addDollar(en, e0, to)]; }
+    if (own.has(k)) return [own.get(k), 'remake'];
+    if (!missing.includes(en)) missing.push(en);
+    return null;
+  };
+  return { line, missing, report: (en) => { const t = line(en); return t ? [en, ...t] : null; }, text: (en) => { const t = line(en); return t ? t[0] : en; } };
+}
+// iOS's lines, as the iOS game's own languages read them (iosLang): its
+// reports (BY_PLACE, CELSIUS), alerts, the Hope question and the hints
+function iosOfficial(lang) {
+  const o = [], R = L('en', 'Report Window Templates'), RT = L(lang, 'Report Window Templates');
+  R.forEach((t, i) => o.push([t, CELSIUS[lang] && CELSIUS[lang][i] ? CELSIUS[lang][i](RT[i]) : BY_PLACE[lang] && BY_PLACE[lang][i] ? BY_PLACE[lang][i](RT[i]) : RT[i]]));
+  L('en', 'Alert Strings').forEach((t, i) => o.push([t, L(lang, 'Alert Strings')[i]]));
+  o.push([L('en', 'Misc Strings')[123], L(lang, 'Misc Strings')[123]]);
+  L('en', 'Help Messages').forEach((t, i) => o.push([t, L(lang, 'Help Messages')[i]]));
+  return o;
+}
+// the words a report is filled with, from iOS's lists: the tech names, the
+// classes, "one", "You", "Your enemies", "and your allies " (the remake's
+// words over them: HOLANG_REMAKE[lang].words); techs: the version's tech
+// names, each matched by name
+function iosWords(lang, techs) {
+  const words = {}, find = new Map();
+  for (const k of TECH_LISTS) L('en', k).forEach((t, i) => find.set(normEn(t).toLowerCase(), L(lang, k)[i]));
+  for (const t of techs || []) { const w = find.get(normEn(t).toLowerCase()); if (w != null && !/^\d+$/.test(t)) words[t] = w; }
+  const SC = L('en', 'Ship Class Names'), SCT = L(lang, 'Ship Class Names');
+  CLASS_KEYS.forEach((k, i) => { words[SC[i]] = SCT[i]; });
+  const M = L('en', 'Misc Strings'), MT = L(lang, 'Misc Strings');
+  for (const i of [29, 38, 39]) words[M[i]] = MT[i];
+  // the techs' own names in "Your %s technology just jumped to %d." (report
+  // 85): French Misc Strings 3-6 and report 7's "Miniaturisation"; Turkish
+  // reports 142-146's (its Misc Strings 3 "Dizi" is another sense of "Range")
+  const TL = { fr: ['Distance', 'Vitesse', 'Armes', 'Boucliers', 'Miniaturisation'], tr: ['Uzaklık', 'Hız', 'Silah', 'Zırh', 'Minyatürleme'] }[lang];
+  if (TL) ['Range', 'Speed', 'Weapons', 'Shields', 'Miniaturization'].forEach((k, i) => { words[k] = TL[i]; });
+  Object.assign(words, (RMK[lang] || {}).words || {});
+
+  const args = [['one %s', MT[0] + ' %s']];
+  CLASS_KEYS.forEach((k, i) => args.push(['%d ' + SC[i + 7], '%d ' + SCT[i + 7]]));
+  args.push(['%d ships', '%d ' + (lang === 'fr' ? 'vaisseaux' : 'gemi')]);
+  return { words, args };
+}
+// a name list in the language: where an official list was made for the same
+// English list, entry for entry, it is that list; star and ship names are
+// otherwise matched one by one (a name an official list has, in that list's
+// place); computer names, which are other names in the same places rather
+// than translations, stay as they are
+function sameList(a, b) { return a.length === b.length && a.every((x, i) => String(x).replace(/\r/g, '') === String(b[i]).replace(/\r/g, '')); }
+function listIn(own, offEn, offTo, byName) {
+  const clean = (x) => String(x).replace(/\r/g, '');
+  if (sameList(own, offEn)) return offTo.map(clean);
+  if (!byName) return null;
+  const m = new Map(offEn.map((x, i) => [clean(x), clean(offTo[i])]));
+  return own.map(x => m.has(clean(x)) ? m.get(clean(x)) : x);
+}
+function iosNames(lang, rs) {
+  const D = E.DATA, own = { starNames: rs.starNames || D.starNames, maleNames: rs.maleNames || D.maleNames, femaleNames: rs.femaleNames || D.femaleNames, shipNames: rs.shipNames || D.shipNames };
+  const o = {};
+  o.starNames = listIn(own.starNames, L('en', 'Star Names'), L(lang, 'Star Names'), true);
+  o.maleNames = listIn(own.maleNames, L('en', 'Male Computer Names'), L(lang, 'Male Computer Names'), false) || own.maleNames;
+  o.femaleNames = listIn(own.femaleNames, L('en', 'Female Computer Names'), L(lang, 'Female Computer Names'), false) || own.femaleNames;
+  const ships = {};
+  for (const k of Object.keys(own.shipNames)) {
+    const list = SHIP_LISTS[k] ? listIn(own.shipNames[k], L('en', SHIP_LISTS[k]), L(lang, SHIP_LISTS[k]), true) : null;
+    ships[k] = list || own.shipNames[k];
+  }
+  o.shipNames = ships;
+  return o;
+}
+// the battle window: iOS's sprintf Templates 9-12 and 14 (as iosLang)
+function iosPanelText(lang) {
+  const SP = L('en', 'sprintf Templates'), SPT = L(lang, 'sprintf Templates'), SC = L('en', 'Ship Class Names'), SCT = L(lang, 'Ship Class Names'), one = L(lang, 'Misc Strings')[0];
+  const esc = (t) => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const panel = [9, 10, 11, 14].map(i => [new RegExp('^' + esc(SP[i]).replace(/%d/g, '(\\d+)').replace(/%s/g, '(.*?)') + '$'), SPT[i]]);
+  const desc = (t) => {
+    const m = /^(?:(one) |(\d+) )?(.*) \((\d+)\/(\d+)\) (.+)$/.exec(t);
+    if (!m) return t;
+    let cls = m[6], plural = false;
+    if (m[2] && /s$/.test(cls)) { cls = cls.slice(0, -1); plural = true; }
+    const i = SC.indexOf(cls);
+    if (i < 0 || i > 6) return t;
+    return (m[1] ? one + ' ' : m[2] ? m[2] + ' ' : '') + `${m[3]} (${m[4]}/${m[5]}) ` + SCT[plural ? i + 7 : i];
+  };
+  return {
+    head: (star, year) => SPT[12].replace('%s', star).replace('%d', year).trim(),
+    text: (t) => { for (const [re, to] of panel) { const m = re.exec(t); if (m) { let i = 1; return to.replace(/%[sd]/g, () => { const a = m[i++] ?? ''; return /\(\d+\/\d+\)/.test(a) ? desc(a) : a; }); } } return desc(t); },
+  };
+}
+
+// ---------- 5.0.5 (Mac and Windows): French and Turkish from iOS ----------
+// iOS's text is 5.0.5's (the same 159 report templates, 39 alerts, the
+// lists entry for entry; its hints rewritten for touch): every line whose
+// English is 5.0.5's is iOS's translation, verbatim
+const O505 = E.RULESETS.original;
+// the version's lines: its reports, alerts, hints (the first three are its
+// first messages) and the questions its rules ask (rules-original evacuateToggle)
+function lines505(rs, extra) {
+  const D = E.DATA;
+  return [].concat(D.reports || [], D.alerts || [], (D.hints || []).slice(0, 43), extra || []);
+}
+const EXTRA505 = ['Dorothy, I guess that means we’re not in Kansas anymore', 'Dost thou truly wish to abandon Hope? All is not yet lost...',
+  'Abandon Ship? Abandon Ship! All hands abandon ship! Women and children first!', 'Do you really want to evacuate %s? It\'s a profitable colony!',
+  'Year %d. Nothing much happened.'];
+// A language built when first read (the version's lists, E.DATA, are filled
+// in after this file in Node: tools/test.js), and then kept
+function lazyLang(build, keys) {
+  let v = null;
+  const get = () => v || (v = build());
+  const o = {};
+  for (const k of keys) Object.defineProperty(o, k, { enumerable: true, configurable: true, get: () => get()[k] });
+  for (const k of ['missing', 'hintRemake']) Object.defineProperty(o, k, { enumerable: false, get: () => get()[k] });
+  return o;
+}
+const LANG_KEYS = ['remake', 'say', 'hintTexts', 'nameAStar', 'battlePanel', 'starNames', 'maleNames', 'femaleNames', 'shipNames'];
+function remake505(lang, rs, o) {
+  return lazyLang(() => build505(lang, rs, o), LANG_KEYS.concat((o && o.keys) || []));
+}
+function build505(lang, rs, o) {
+  o = o || {};
+  const T = translator(lang, iosOfficial(lang).concat(o.official || []));
+  const reports = [];
+  for (const en of lines505(rs, (o.extra || EXTRA505))) { const r = T.report(en); if (r) reports.push(r); }
+  // the curse with the Mac's characters (iOS shows "¥ª")
+  for (const r of reports.slice()) if (typeof r[1] === 'string' && /[¥ª]/.test(r[1])) r[1] = r[1].replace(/¥/g, '•').replace(/ª/g, '™');
+  const D = E.DATA, techs = [].concat(...Object.values(rs.TECHNAMES || D.techNames || {}));
+  const { words, args } = iosWords(lang, techs);
+  const hints = (o.hints || (D.hints || []).slice(3, 43));
+  const out = Object.assign(iosNames(lang, rs), {
+    remake: true,
+    say: { reports, args, words },
+    hintTexts: hints.map(t => T.text(t)),
+    nameAStar: Object.assign({}, rs.nameAStar, { text: L(lang, 'Misc Strings')[74].trim(), taken: L(lang, 'Alert Strings')[9] }),
+  });
+  out.battlePanel = rs.battlePanelIn && rs.battlePanel === O505.battlePanel ? rs.battlePanelIn(iosPanelText(lang)) : (o.battlePanel ? o.battlePanel(iosPanelText(lang)) : rs.battlePanel);
+  // (the lines no translation has: tools/lang-test.js lists them)
+  out.missing = T.missing;
+  out.hintRemake = hints.filter(t => (T.line(t) || [])[1] === 'remake');
+  return out;
+
+}
+if (O505) {
+  O505.languages = ['en', 'fr', 'tr'];
+  O505.lang = Object.assign({}, O505.lang, { fr: remake505('fr', O505), tr: remake505('tr', O505) });
+}
 })(this);
+

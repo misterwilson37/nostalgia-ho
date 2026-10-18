@@ -63,9 +63,12 @@ verbatim from another version's official translation of the same English.
 | Version | Language | Official | The remake's | Names |
 |---|---|---|---|---|
 | Mac 1.2 | French (its own) | 57 | 2 (the patch's meteor report, a fleet waiting for fuel) | 1.2F's |
-| Mac 1.2 | German (the remake's) | 58 (the German DOS 2.0's) | 1 (the credit line's number) + 4 the German 2.0 already had | the German DOS 2.0's lists |
-| DOS 2.0, Mac 2.0.1 | German (official) | 58 | 4 (the German had them) | the German DOS 2.0's |
+| Mac 1.2 | German (the remake's) | 54 (the German DOS 2.0's) | 5 (the credit line's number; the four the German 2.0 already had) | the German DOS 2.0's lists |
+| DOS 2.0, Mac 2.0.1 | German (official) | 54 | 4 (the remake's, before this work: the patch's meteor report, a fleet waiting for fuel, the free-text messages) | the German DOS 2.0's |
 | DOS 2.0, Mac 2.0.1 | French (the remake's) | 56 (1.2F's; one line and two messages the iOS game's) | 3 | 1.2F's lists |
+| 5.0.5 | French (the remake's) | 233 (iOS's), hints 35 | 13, of them hints 5 | iOS's lists (the same English lists) |
+| 5.0.5 | Turkish (the remake's) | 223 (iOS's), hints 35 | 23, of them hints 5 | iOS's lists |
+
 
 ## Mac 1.2 (French, as released)
 
@@ -99,7 +102,45 @@ free-text messages are iOS's ("%s dit: %s", "Votre message à %s: %s"). The rema
 météores a détruit votre colonie à %s.", 1000.10's and 1000.54's words), a fleet waiting
 for fuel, Mac 2.0.1's Force End Turn question and the polling time's window.
 
+## 5.0.5 (Mac and Windows)
+
+**French and Turkish (the remake's), backwards from iOS.** The iOS game is 5.0.5's code
+and text: its 159 report templates, 39 alerts and name lists are 5.0.5's entry for entry
+(quotes, the "$" its number formatter writes, "%%" and the "¥ª" for "•™" aside; three
+alerts end "!!" where 5.0.5 has "…"), and its hints are 5.0.5's but for the mouse. So
+every line whose English is 5.0.5's is iOS's translation, verbatim, as the iOS game reads
+it (`docs/ios-findings.md`, "Languages": the fillings given their places, the French
+temperatures in °C). The names are iOS's lists (5.0.5's computers, ships and stars are
+the same English lists; only the Turkish changes two stars, Sol → Güneş and Hope →
+Ümidini, and Hope is in 5.0.5's list only as a named star). Tech names and the classes
+are iOS's words; "Your %s technology just jumped" gets the techs' own names from iOS's
+lines (French Misc Strings 3-6 and report 7's "Miniaturisation"; Turkish reports
+142-146's, its Misc Strings 3 "Dizi" being another sense of "Range"). The battle window is
+iOS's words (sprintf Templates 9-14). Name a Star is iOS's (Misc Strings 74, Alert
+Strings 9).
+
+The remake's own (`js/lang-remake.js`), in iOS's words:
+- 5.0.5's own lines: its three first messages and five hints written for the mouse (click, the clock,
+  the contextual menu, the option key, option-drag, the graph), the fuel alert's "no
+  arrows on either end of the dragged line", the Evacuate questions for a profitable
+  colony and the Palm's "Ship" (Full Hoedown), and the remake's "Year %d. Nothing much
+  happened.".
+- Lines the iOS translation got wrong, given right in the remake's languages (iOS keeps
+  its own): French 37 ("You %savez perdu une bataille à%s…", the counts out of place);
+  Turkish 11 ("lost" left in English), 14 (says the colony now does *not* belong to the
+  rebels' new master), 35 (the exploring report's "inceledin" for "colonized"), 38 (the
+  star and the attacker run together, the attacker's losses left out), 62 (the star lost),
+  124 (a second copy of 123), 156 ("can no longer reach us"), and the credit lines iOS
+  left in English with a "!" in front.
+- The French "et vos alliés" gets the space its lines need ("Vous%s avez perdu" read
+  "Vouset vos alliés avez").
+
+The remake now gives the alerts the page shows from 5.0.5's list (the gifts, the
+assembly lines, surrender, Armageddon, the many-scouts warning, the fuel alert) through
+the language, so iOS's French and Turkish show them too.
+
 ## What stays English, and why
+
 
 The remake's own interface (its windows, buttons, menus, New Game, Preferences, the help
 the remake wrote) stays English in every language, as it does for the official
