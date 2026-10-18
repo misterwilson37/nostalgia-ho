@@ -389,7 +389,7 @@ dragging a fleet): the remake has its own windows for them, and the rule behind 
 
 | Routine @ address | What it does | Status | Where / why |
 |---|---|---|---|
-| `AddEasterEggs` @b0004 | the colour-monitor joke on a black-and-white screen, in a random year | IMPLEMENTED: a black-and-white skin is that screen; the year from the seed | engine.js `endTurn` (`rs.colorMonitorBW`); js/hoedown.js (Full Hoedown) |
+| `AddEasterEggs` @b0004 | the colour-monitor joke on a black-and-white screen, in a random year | IMPLEMENTED: a black-and-white skin is that screen; the year from the seed | engine.js `endTurn` (`rs.colorMonitorBW`) |
 
 ### Segment Initialize: start-up (12 routines)
 

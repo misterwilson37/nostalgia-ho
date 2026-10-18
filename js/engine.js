@@ -1036,19 +1036,15 @@ function endTurn(G) {
   // checked on the last (FUN_100728d0)
   const steps = feature(G, 'yearsPerTurn') ? Math.max(1, Math.round((G.opts.yearsPerTurn || 10) / 10)) : 1;
   for (let i = 0; i < steps && !G.over; i++) turnStep(G, i === 0, i === steps - 1);
-  // Full Hoedown: the version's colour-monitor joke (rs.hoedown.colorMonitor,
-  // js/hoedown.js) to each human once, at the first End Turn it is on for
-  const cm = hoedown(G) && ownRules(G).hoedown.colorMonitor;
-  if (cm) for (const p of G.players) if (p.human && !p.hoColor) { p.hoColor = true; msg(G, p.id, cm.text, { icon: cm.icon || 'm9039' }); }
   // The colour-monitor joke as Mac 3.0.1 and 4.0.5 sent it (rs.colorMonitorBW,
   // AddEasterEggs): in the player's joke year, when the screen is set to black
   // and white and could show colour. The page says whether its skin is a
   // black-and-white one (API.screenBW); a browser can always show colour. The
   // Mac 4.0.5 drew the year (p.colorJoke); 3.0.1's comes from the seed
   // (hoRand), so the game's numbers are untouched.
-  const bw = ownRules(G).colorMonitorBW && API.screenBW && API.screenBW();
-  const jokeText = ownRules(G).hoedown && ownRules(G).hoedown.colorMonitor;
-  if (bw && jokeText && !G.over) for (const p of G.players) {
+  // (Not Full Hoedown's: the joke only makes sense on a black-and-white screen.)
+  const jokeText = ownRules(G).colorMonitorBW, bw = jokeText && API.screenBW && API.screenBW();
+  if (bw && !G.over) for (const p of G.players) {
     const y = p.colorJoke || (20 + Math.floor(hoRand(G, 'colorJoke' + p.id) * 31)) * 100;
     if (p.human && !p.hoColor && y > yearBefore && y <= G.year) { p.hoColor = true; msg(G, p.id, jokeText.text, { icon: jokeText.icon || 'm9039' }); }
   }

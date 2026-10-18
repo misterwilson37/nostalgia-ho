@@ -32,24 +32,9 @@
 const E = typeof module !== 'undefined' ? require('./engine.js') : root.HO;
 const R = E.RULESETS;
 
-// The colour-monitor joke: Mac 3.0.1 (AddEasterEggs @b0004, segment
-// "TopSecret", STR# 1000.96) and Mac 4.0.5 (AddEasterEggs @b000c, string 1111)
-// report it in a random year from 2000 to 5000, and only on a black-and-white
-// screen that could show colour, which a browser never is. Windows 4.0.5
-// (string 1042), 5.0.5 (STR# 6020.114) and iOS and Android (Report Window
-// Templates 113) keep the line and never send it. With Hoedown it comes at
-// the first End Turn (Mac 4.0.5's year, p.colorJoke, is still drawn).
-// Checked again for 3.0.1 (AddEasterEggs @b0004): the year is CreatePlayer's
-// RND(20, 50) x 100 (player +0x5e); in it, RND(1, 100) is drawn and thrown
-// away, and the report goes out only when the main screen shows fewer than
-// 16 colours and could show 256 (the GDevice's pixel depth, HasDepth 8). So
-// the joke was the screen's, not the draw's: never in a browser, and it
-// numbers, so there is no year to keep). Since October 2026 the rules send it
-// too, as the Macs did, when the skin is a black-and-white one (a browser can
-// always show colour): rs.colorMonitorBW, engine.js endTurn; 3.0.1's year
-// from the seed (hoRand).
-const COLOR = { text: 'Your scientists have discovered how to turn your monitor from black and white to color!', icon: 'm9039' };
-const COLOR_ITEM = (where) => `The colour-monitor joke, “Your scientists have discovered how to turn your monitor from black and white to color!”, at your first End Turn (${where}).`;
+// The colour-monitor joke is not Hoedown's: it only makes sense on a screen
+// set to black and white, so the rules send it there (3.0.1 and the Mac 4.0.5
+// on a black-and-white skin: rs.colorMonitorBW, engine.js endTurn).
 
 // 4.0.5's Armageddon command (Windows FUN_0040bff1, Mac DoGalaxyMenu @838c0)
 // asks twice before it turns the device on: one of strings 299-303, then one
@@ -103,8 +88,8 @@ const PICTURES_ITEM = 'In the Mac 4.0.5 skins, a rich colony (making $30,000 or 
 const set = (id, h) => { if (R[id]) R[id].hoedown = h; };
 set('original', {
   items: [KANSAS_ITEM('5.0.5, FUN_10060fac'), SHIP_ITEM, VALDEZ_ITEM(250, '5.0.5, FUN_10077aa0'),
-    COLOR_ITEM('5.0.5 has the line, STR# 6020.114, and never sends it; Mac 3.0.1 and 4.0.5 sent it only on a black-and-white screen'), ARMAGEDDON_ITEM],
-  colorMonitor: COLOR, armageddon: ARMAGEDDON,
+    ARMAGEDDON_ITEM],
+  armageddon: ARMAGEDDON,
 });
 set('palm', {
   items: [VALDEZ_ITEM(250, 'the Palm version, FUN_00055844'), ARMAGEDDON_ITEM],
@@ -112,23 +97,16 @@ set('palm', {
 });
 for (const id of ['ios', 'android']) set(id, {
   items: [KANSAS_ITEM('iOS 1.2.9 and Android, tryEvacuatePlanet: 0x1000941e0'), SHIP_ITEM, VALDEZ_ITEM(250, '5.0.5 and iOS'),
-    COLOR_ITEM('iOS and Android have the line, Report Window Templates 113, and never send it'), ARMAGEDDON_ITEM],
-  colorMonitor: COLOR, armageddon: ARMAGEDDON,
+    ARMAGEDDON_ITEM],
+  armageddon: ARMAGEDDON,
 });
 set('405', {
-  items: [VALDEZ_ITEM(100, '4.0.5, FUN_00437ddd'),
-    COLOR_ITEM('Windows 4.0.5 has the line, string 1042, and never loads it; the Mac 4.0.5 sent it only on a black-and-white screen')],
-  colorMonitor: COLOR,
+  items: [VALDEZ_ITEM(100, '4.0.5, FUN_00437ddd')],
 });
 set('mac405', {
   items: [VALDEZ_ITEM(100, '4.0.5'),
-    COLOR_ITEM('Mac 4.0.5, AddEasterEggs @b000c, string 1111: in a random year from 2000 to 5000, on a black-and-white screen; the year is still drawn'),
     PICTURES_ITEM],
-  colorMonitor: COLOR, pictures: true,
-});
-set('301', {
-  items: [COLOR_ITEM('Mac 3.0.1, AddEasterEggs @b0004, STR# 1000.96: in a random year from 2000 to 5000, on a black-and-white screen')],
-  colorMonitor: COLOR,
+  pictures: true,
 });
 for (const id of ['dos', 'mac20']) set(id, {
   items: [AMIGA_ITEM],

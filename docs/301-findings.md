@@ -614,5 +614,4 @@ The questions 3.0.1's code doesn't settle, and the remake's own choices, are in
   (mac12, mac2, mac3, mac4) is a screen set to black and white that could show colour, so
   the joke comes in the player's year, once (`rs.colorMonitorBW`, engine.js `endTurn`). The
   remake doesn't draw 3.0.1's CreatePlayer numbers, so the year comes from the seed
-  (`hoRand`), and the game's numbers are untouched. Full Hoedown still sends it at the
-  first End Turn on any skin.
+  (`hoRand`), and the game's numbers are untouched. It is not in Full Hoedown, where it would make no sense on a colour skin.

@@ -180,7 +180,7 @@ root.HOVERSIONS = {
       'Fix Spending only cuts overspending colonies, sharing the difference between Savings and Technology by whole per cents, so a per mille or two can vanish; a colony being abandoned or finished is cut to 1 per mille.',
     ],
     differs: [
-      'The colour-monitor joke: 3.0.1 sent it, in a random year, only to a screen set to black and white that could show colour. Here a black-and-white skin is that screen; its year comes from the game’s seed. Full Hoedown sends it at the first End Turn on any skin.',
+      'The colour-monitor joke: 3.0.1 sent it, in a random year, only to a screen set to black and white that could show colour. Here a black-and-white skin is that screen; its year comes from the game’s seed.',
       RANDOM,
       'When every human is out, the game ends. 3.0.1 went on as long as the computers played.',
       'Fix Spending shows each step’s line in a small window, whose Next is the original’s click on the message bubble.',
@@ -319,7 +319,7 @@ root.HOVERSIONS = {
       'A star name found inside another name (“Veg” in “Vega”) counts as taken.',
     ],
     differs: [
-      'The colour-monitor joke: the Mac 4.0.5 sent it, in a random year, only to a screen set to black and white that could show colour. Here a black-and-white skin is that screen. Full Hoedown sends it at the first End Turn on any skin.',
+      'The colour-monitor joke: the Mac 4.0.5 sent it, in a random year, only to a screen set to black and white that could show colour. Here a black-and-white skin is that screen.',
       RANDOM,
       HOTSEAT + ' (4.0.5 could also play across a network.)',
       'The computers all plan, and every fleet moves, for all players at once; 4.0.5 did both in each player’s own turn. It comes out the same but for rare cases.',
