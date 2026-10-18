@@ -1613,6 +1613,8 @@ function renderMsg() {
     card.focus({ preventScroll: true });
     return;
   }
+  // online: once this player's orders are in (or they have no turn), who the turn waits for
+  if (G.online && (ONL.sent || !onlineCanMove()) && !G.over) { box.append(waitingCard()); maybeHallOffer(); return; }
   if (T.endTurnPic && A.img[T.endTurnPic]) { // the theme's own End Turn button picture
     const btn = el('button', { class: 'clock pic', onclick: doEndTurn, 'aria-label': 'End turn', 'aria-keyshortcuts': 'T', 'data-help': 'endTurn', 'data-key': END_KEY() }, el('img', { src: A.img[T.endTurnPic], alt: '' }));
     // T.endTurnYear [x, y, w, h, picture width]: the picture's window where
@@ -1756,7 +1758,8 @@ function hallTables(g) {
 function recordHall() {
   if (!hasHall(G)) return;
   const H = HO.rules(G).hall, done = G.hallDone = G.hallDone || {};
-  for (const p of HO.humans(G)) {
+  // (online: this computer's player only; each player's computer keeps its own)
+  for (const p of G.online ? [me()] : HO.humans(G)) {
     if (done[p.id]) continue;
     const won = !!G.over && (G.winners || [G.winner]).includes(p.id);
     if (!won && !H.out(G, p)) continue;
@@ -1884,6 +1887,8 @@ function doEndTurn(confirmed) {
   }
   // the turn time limit: this turn's time banked or taken from the bank
   timeAtEnd(me());
+  // online: the orders go; the turn is played when everyone's are in (online play, below)
+  if (G.online) { onlineEndTurn(); return; }
   // the game as it was: put back if the turn throws (playTurn)
   const before = HO.save(G);
   // hot seat: the turn goes to the next human; the year moves on after the last one
@@ -1923,7 +1928,8 @@ function addTurnNotes(p) {
 // order, and between turns a blank screen asks the next one to sit down,
 // so nobody sees anyone else's planets. Humans who are out of the game
 // get one last turn to read the news.
-function hotSeat() { return !!G && HO.humans(G).length > 1; }
+// (an online game's humans are each on their own computer: not hot seat)
+function hotSeat() { return !!G && !G.online && HO.humans(G).length > 1; }
 function seatOrder() {
   return HO.humans(G).filter(p => (p.alive && !p.auto) || (!p.alive && !p.sawEnd && (p.inbox || []).length));
 }
@@ -1944,7 +1950,7 @@ function timeLeftText(T, p) {
   const s = Math.max(0, Math.ceil(T.left(T, p.timeUsed || 0, p.timeBank || 0) * T.unit)), h = Math.floor(s / 3600), m = Math.floor(s / 60) % 60;
   return h ? `${h}:${pad2(m)}:${pad2(s % 60)}` : `${m}:${pad2(s % 60)}`;
 }
-const timeCounting = () => !!G && !G.over && me() && me().human && me().alive && !(G.done || []).includes(ME) && !($('#handover') && !$('#handover').hidden) && !$('#titlescreen:not([hidden])');
+const timeCounting = () => !!G && !G.over && me() && me().human && me().alive && !(G.done || []).includes(ME) && !(G.online && (ONL.sent || !onlineCanMove())) && !($('#handover') && !$('#handover').hidden) && !$('#titlescreen:not([hidden])');
 let timeLast = 0, timeSaved = 0;
 function timeTick() {
   const now = Date.now(), dt = Math.min(60, Math.max(0, (now - (timeLast || now)) / 1000)); timeLast = now;
@@ -3176,7 +3182,12 @@ function openExploredList() {
 }
 // the computer plays this one turn for you (the Game menu's "Auto-play this
 // turn"; iOS's Play One Turn)
-function playOneTurn() { if (!G || G.over) return; me().auto = true; doEndTurn(); me().auto = false; }
+function playOneTurn() {
+  if (!G || G.over) return;
+  // online: the computers' code plays this player's turn here, as their orders (recorded), and End Turn sends them
+  if (G.online) { if (ONL.sent || !onlineCanMove()) return; HO.aiOf(G).turn(G, me()); renderPanel(); draw(); doEndTurn(true); return; }
+  me().auto = true; doEndTurn(); me().auto = false;
+}
 // Auto Play: keep ending turns until something interesting happens
 function openAutoPlay() {
   if (HO.rules(G).autoPlayWindow === 'ios') return openAutoPlayIOS();
@@ -3914,7 +3925,7 @@ const gamesKey = (id) => 'ho5.games.' + id;
 function savedGames(id) { try { const v = JSON.parse(localStorage.getItem(gamesKey(id)) || '[]'); return Array.isArray(v) ? v : []; } catch (e) { return []; } }
 // the game in its slot (from save(): the slot is the game's creation time)
 function saveSlot() {
-  if (!G || !screensOf(G.rules) || !screensOf(G.rules).savedGames) return;
+  if (!G || G.online || !screensOf(G.rules) || !screensOf(G.rules).savedGames) return;
   if (!G.gameId) G.gameId = Date.now();
   const L = savedGames(G.rules).filter(x => x && x.id !== G.gameId), p = G.players[ME] || G.players[0];
   L.unshift({ id: G.gameId, galaxy: (G.opts && G.opts.galaxy) || 'Milky Way', player: p ? p.name : '', year: G.year, over: !!G.over, when: Date.now(), data: HO.save(G) });
@@ -4109,6 +4120,7 @@ function openAccount(o) {
         el('div', { class: 'btns' }, el('button', { type: 'button', onclick: () => { body.innerHTML = ''; body.append(signInForm({ link: true, after: () => openAccount(o) })); } }, 'Keep this account…'))) : null,
       el('div', { class: 'btns' },
         el('button', { type: 'button', onclick: () => openAccountSaves() }, 'Account saves…'),
+        el('button', { type: 'button', onclick: () => openOnlineGames() }, 'My online games…'),
         el('button', { type: 'button', class: 'quiet', onclick: () => confirmBox(u.anonymous ? 'Sign out of the guest account? A guest can’t sign in again: its saved games in the account will be out of reach (they stay in this browser).' : 'Sign out? Your games stay saved in this browser.', () => {
           CLOUD.flushSave(); CLOUD.signOut().then(() => toast('Signed out.'), (e) => toast(CLOUD.errorText(e)));
         }) }, 'Sign out')),
@@ -4133,7 +4145,8 @@ function openAccount(o) {
 // and only when it has changed. The browser copy's time ("ho5.save.when")
 // tells Continue whether the account's copy is newer.
 function cloudNoteSave(json, urgent) {
-  if (!CLOUD || !cloudUser() || !G || !G.gameId) return;
+  // (an online game is kept in its own place: My online games)
+  if (!CLOUD || !cloudUser() || !G || !G.gameId || G.online) return;
   const p = G.players[ME] || G.players[0];
   const s = { id: CLOUD.saveId(G.rules, G.gameId), rules: G.rules, edition: editionLabel(G.rules), year: G.year, player: p ? p.name : '',
     galaxy: (G.opts && G.opts.galaxy) || '', over: !!G.over, json, saved: Date.now() };
@@ -4297,6 +4310,395 @@ function hallEveryone(kind, H, cols, box, order, onRows) {
     if (!L.length) box.append(el('p', { class: 'sub' }, 'Nobody is in it yet.'));
     if (!cloudUser()) box.append(el('p', { class: 'sub' }, 'Sign in, or play as a guest, to add your games here.'));
   }, (e) => { box.innerHTML = ''; box.append(el('p', { class: 'sub' }, CLOUD.errorText(e))); onRows([]); });
+}
+
+// ----- online play (js/online.js, js/cloud.js "online play") -----
+// Several people, each on their own computer, play one game turn by turn,
+// as the originals' network play had it, with no server but Firestore.
+// - New Game's "Play online…" takes the window's settings to a lobby: the
+//   host picks the seats (people), and others join by its code or link
+//   (?join=CODE), signed in (a guest will do). Computers fill the seats left
+//   empty, as they fill a game's other places; the host starts it when ready.
+// - Each player plays their own turn on their own page, against the shared
+//   state, and sees only their own empire, as hot seat shows each player
+//   theirs. js/online.js records what they do (the orders); End Turn sends
+//   them. When the last player's orders are in, their page plays the turn
+//   (every seat's orders in seat order, then the turn itself) and writes the
+//   new state, once (a transaction on the turn number); every page picks it
+//   up (a realtime listener), plays the same orders itself to check it gets
+//   the same game, and shows the new year's reports with a toast.
+// - In the meantime the page says who the turn waits for ("Waiting for:
+//   Alice, Bob"); the host can end a turn for someone ("End turn for…"), as
+//   the time limit (4.0.5, 5.0.5) does on that player's own page. A player
+//   may resign (a computer plays their empire from the next turn) or leave.
+// - "My online games" (New Game, Account) lists the account's games, to
+//   open from any computer: the game is in Firestore, and this browser's
+//   save ("ho5.save", "ho5.online.<id>" for a turn in progress) is a cache.
+// Nothing here runs for a game on one computer, and nothing loads until a
+// player asks for online play (js/online.js comes with it, js/cloud.js's SDK
+// with the sign-in).
+const ONL = { id: null, card: null, seat: -1, start: null, turn: -1, sent: false, justSent: false, arriving: -1, done: {}, unsub: [], unsubO: [], timer: 0, busy: false, checks: [], self: [], processed: {} };
+const OL = () => window.HOONLINE;
+function loadOnline() { return OL() ? Promise.resolve(true) : new Promise((res) => { const s = el('script', { src: 'js/online.js' }); s.onload = () => res(!!OL()); s.onerror = () => res(false); document.head.append(s); }); }
+// the page's record of a turn in progress (its orders so far), for a reload or another skin
+const turnKey = (id) => 'ho5.online.' + id;
+const onlineNames = () => (ONL.card ? (ONL.card.seats || []).map(u => ((ONL.card.names || {})[u] || {}).name || 'Player') : []);
+// the test tools read where the page is (read only)
+window.HOONLINE_VIEW = () => ({ id: ONL.id, turn: ONL.turn, seat: ONL.seat, status: ONL.card && ONL.card.status, sent: ONL.sent, digest: ONL.start && OL() ? OL().digest(ONL.start) : null,
+  year: G && G.online ? G.year : null, battles: G && G.online ? G.stat.battles : 0, waiting: onlineWaiting().map(pid => onlineNames()[pid]), checks: ONL.checks.slice(), self: ONL.self.slice(), over: !!(G && G.over) });
+// sign in first (the Account window), then fn(user)
+function withAccount(fn) {
+  if (!CLOUD) return;
+  if (cloudUser()) { fn(cloudUser()); return; }
+  CLOUD.ready().then(() => { if (cloudUser()) fn(cloudUser()); else openAccount({ after: (u) => { if (u) fn(u); } }); });
+}
+function stopOrders() { for (const u of ONL.unsubO.splice(0)) { try { u(); } catch (e) {} } clearTimeout(ONL.timer); }
+function stopWatching() { stopOrders(); for (const u of ONL.unsub.splice(0)) { try { u(); } catch (e) {} } }
+function leaveOnlineView() { stopWatching(); if (OL() && OL().recording) OL().stop(); ONL.id = null; ONL.card = null; ONL.start = null; ONL.turn = -1; ONL.sent = false; }
+
+// ----- the lobby -----
+// Play online… from New Game: the window's settings (options()) make the lobby
+function hostOnline(options) {
+  withAccount(() => {
+    let r;
+    try { r = options(); } catch (e) { showBug(e, 'Play online'); return; }
+    const { d, o } = r, rs = HO.RULESETS[o.rules] || {};
+    if ((rs.maxHumans || 6) < 2) { toast(`${editionLabel(o.rules)} is for one player: online play needs a version several people can play.`); return; }
+    // the page's own look stays its own; the seed is drawn when the game starts
+    for (const k of ['sounds', 'os', 'humans']) delete o[k];
+    const seats = Math.min(Math.max(2, +d.humans || 2), Math.min(8, rs.maxHumans || 6));
+    closeModal();
+    const body = el('div', { class: 'lobby' }, el('p', { class: 'sub' }, 'Making the game…'));
+    modal('Play online', body, { cls: 'small', sticky: true });
+    CLOUD.games.create({ rules: o.rules, edition: editionLabel(o.rules), galaxy: o.galaxy, opts: o, nSeats: seats, name: o.name, female: !!o.female })
+      .then(({ id }) => openLobby(id), (e) => { body.innerHTML = ''; put(body, el('p', null, CLOUD.errorText(e)), el('div', { class: 'btns right' }, el('button', { onclick: closeModal }, 'OK'))); });
+  });
+}
+// the lobby window, for the host and for those who joined, live
+function openLobby(id) {
+  leaveOnlineView();
+  ONL.id = id;
+  const body = el('div', { class: 'lobby' }, el('p', { class: 'sub' }, 'Connecting…'));
+  modal('Online game', body, { cls: 'small', sticky: true, onClose: () => { if (ONL.id === id && (!ONL.card || ONL.card.status === 'lobby')) leaveOnlineView(); } });
+  const uid = cloudUser() && cloudUser().uid;
+  const draw0 = (c) => {
+    if (!body.isConnected) return;
+    if (!c) { body.innerHTML = ''; put(body, el('p', null, 'This game is gone: its host cancelled it, or you are no longer in it.'), el('div', { class: 'btns right' }, el('button', { onclick: closeModal }, 'OK'))); leaveOnlineView(); return; }
+    ONL.card = c;
+    if (c.status !== 'lobby') { closeModal(); openOnlineGame(id); return; }
+    const host = c.host === uid, link = `${location.origin}${location.pathname}?join=${c.code}`;
+    const rs = HO.RULESETS[c.rules] || {}, maxSeats = Math.min(8, rs.maxHumans || 6);
+    const seatSel = el('select', { 'aria-label': 'Seats', disabled: host ? false : 'disabled', onchange: (e) => CLOUD.games.settle(id, { nSeats: +e.target.value }).catch(er => toast(CLOUD.errorText(er))) },
+      ...[...Array(maxSeats - 1).keys()].map(i => i + 2).filter(n => n >= c.members.length).map(n => el('option', { value: String(n), selected: n === c.nSeats ? 'selected' : false }, String(n))));
+    const names = c.members.map((u, i) => el('li', null, `${i + 1}. ${((c.names || {})[u] || {}).name || 'Player'}${u === c.host ? ' (host)' : ''}${u === uid ? ' (you)' : ''}`));
+    for (let i = c.members.length; i < c.nSeats; i++) names.push(el('li', { class: 'sub' }, `${i + 1}. (open: a computer plays it if nobody joins)`));
+    body.innerHTML = '';
+    put(body,
+      el('p', null, `${c.galaxy || 'Galaxy'} · ${c.edition || c.rules}`),
+      el('p', { class: 'lobbycode' }, 'Code: ', el('b', { class: 'code' }, c.code)),
+      el('p', { class: 'sub' }, 'Others join with this code (New Game, Play online…, Join), or this link: ', el('a', { href: link, class: 'joinlink' }, link), ' ',
+        el('button', { type: 'button', class: 'quiet', onclick: () => { try { navigator.clipboard.writeText(link).then(() => toast('The link is copied.'), () => toast(link)); } catch (e) { toast(link); } } }, 'Copy link')),
+      el('label', null, el('span', null, 'Seats (people)'), seatSel),
+      el('ul', { class: 'lobbylist' }, ...names),
+      el('p', { class: 'sub' }, 'Players must be signed in (a guest account will do). Each plays their own turn on their own computer; the year moves on when everyone has ended theirs.'),
+      el('div', { class: 'btns right' },
+        host ? el('button', { type: 'button', class: 'quiet', onclick: () => confirmBox('Cancel this game? Those who joined are told it is gone.', () => CLOUD.games.cancel(id, c.code).then(() => { leaveOnlineView(); toast('The game is cancelled.'); }, e => toast(CLOUD.errorText(e)))) }, 'Cancel game')
+          : el('button', { type: 'button', class: 'quiet', onclick: () => CLOUD.games.leaveLobby(id).then(() => { leaveOnlineView(); closeModal(); toast('You left the game.'); }, e => toast(CLOUD.errorText(e))) }, 'Leave'),
+        host ? el('button', { type: 'button', disabled: c.members.length < 2 ? 'disabled' : false, onclick: (e) => { e.target.disabled = true; startOnline(c).catch((er) => { e.target.disabled = false; toast(CLOUD.errorText(er)); }); } }, c.members.length < 2 ? 'Start (waiting for players)' : 'Start the game')
+          : el('span', { class: 'sub' }, 'Waiting for the host to start…')));
+  };
+  loadOnline().then((ok) => {
+    if (!ok) { body.innerHTML = ''; body.append(el('p', null, 'Couldn’t load online play. Check your connection and try again.')); return; }
+    ONL.unsub.push(CLOUD.games.watch(id, draw0));
+  });
+}
+// the host starts it: the game made from the lobby's settings, a seat for
+// each player in the order they joined, computers in the seats left
+function startOnline(c) {
+  const o = JSON.parse(c.opts || '{}');
+  o.humans = c.members.map(u => ({ name: ((c.names || {})[u] || {}).name || 'Player', female: !!((c.names || {})[u] || {}).female }));
+  o.computers = Math.max(0, (+o.computers || 0) + (c.nSeats - c.members.length));
+  o.seed = (Math.random() * 2 ** 31) | 0;
+  delete o.name; delete o.female;
+  const g = HO.newGame(o);
+  const json = OL().shared(g);
+  return CLOUD.games.start(c.id, c.code, json, OL().digest(json), g.year, c.members, g.opts);
+}
+// Join… with a code (or the ?join= link): your name and hat, then the lobby
+function openJoin(code0) {
+  withAccount(() => {
+    const code = el('input', { name: 'code', maxlength: 6, value: CLOUD.cleanCode(code0 || ''), autocomplete: 'off', 'aria-label': 'Code', style: 'text-transform: uppercase' });
+    const name = el('input', { name: 'name', maxlength: 20, value: localStorage.getItem('ho5.name') || '', 'aria-label': 'Your name' });
+    const hat = el('select', { name: 'female', 'aria-label': 'Your hat' }, el('option', { value: '0' }, 'Cowboy'), el('option', { value: '1' }, 'Cowgirl'));
+    const msg = el('p', { class: 'sub cloudmsg', role: 'alert' });
+    const f = el('form', { class: 'newgame', onsubmit: (e) => {
+      e.preventDefault();
+      const c = CLOUD.cleanCode(code.value), n = name.value.trim() || 'Player';
+      if (c.length !== 6) { msg.textContent = 'A code has six letters and numbers.'; return; }
+      lsSet('ho5.name', n);
+      msg.textContent = 'Joining…';
+      // the name others will see goes through the decency filter, like the Hall's
+      CLOUD.decency().then(D => (D ? D.clean(n, 'Cowpoke') : n)).then(nn => CLOUD.games.find(c).then((id) => {
+        if (!id) { msg.textContent = 'There’s no game waiting with that code. Check it with the host.'; return; }
+        return CLOUD.games.join(id, c, { name: nn, female: hat.value === '1' }).then(() => openLobby(id));
+      })).catch((er) => { msg.textContent = CLOUD.errorText(er); });
+    } },
+      el('label', null, el('span', null, 'Code'), code),
+      el('label', null, el('span', null, 'Your name'), name),
+      el('label', null, el('span', null, 'Your hat'), hat), msg,
+      el('div', { class: 'btns right' }, el('button', { type: 'button', class: 'quiet', onclick: closeModal }, 'Cancel'), el('button', { type: 'submit' }, 'Join')));
+    modal('Join an online game', f, { cls: 'small' });
+  });
+}
+// My online games: the account's games, newest first, to open from any computer
+function openOnlineGames() {
+  withAccount((u) => {
+    const body = el('div', { class: 'acsaves' }, el('p', { class: 'sub' }, 'Loading your online games…'));
+    modal('My online games', body, { cls: 'mid' });
+    CLOUD.games.list().then((L) => {
+      if (!body.isConnected) return;
+      body.innerHTML = '';
+      const state = (g) => g.status === 'lobby' ? 'waiting to start' : g.status === 'over' ? `over in ${g.year}` : `${g.year}${(g.resigned || []).includes(u.uid) ? ' · resigned' : ''}`;
+      const rows = L.map(g => el('li', { class: 'acsave' },
+        el('div', { class: 'acinfo' }, el('b', null, g.galaxy || 'Galaxy'), ' ', el('span', null, `${(g.seats && g.seats.length ? g.seats : g.members).map(x => ((g.names || {})[x] || {}).name || '?').join(', ')} · ${state(g)}`),
+          el('br'), el('small', null, `${g.edition || g.rules} · ${dateText(g.updated)}`)),
+        el('span', { class: 'btns' },
+          el('button', { type: 'button', onclick: () => { closeModal(); if (g.status === 'lobby') openLobby(g.id); else openOnlineGame(g.id); } }, 'Open'),
+          el('button', { type: 'button', class: 'quiet', onclick: () => confirmBox(g.status === 'playing' ? 'Leave this game? A computer plays your empire from the next turn, and the game leaves your list.' : 'Take this game off your list?', () => {
+            const p = g.status === 'lobby' ? (g.host === u.uid ? CLOUD.games.cancel(g.id, g.code) : CLOUD.games.leaveLobby(g.id)) : CLOUD.games.leave(g.id, g.status === 'playing');
+            p.then(() => { if (ONL.id === g.id) leaveOnlineView(); toast('Done.'); openOnlineGames(); }, e => toast(CLOUD.errorText(e)));
+          }) }, g.status === 'lobby' && g.host === u.uid ? 'Cancel' : 'Leave'))));
+      put(body, L.length ? el('ul', { class: 'aclist' }, ...rows) : el('p', { class: 'sub' }, 'No online games yet. New Game, then Play online…, starts one.'),
+        el('div', { class: 'btns right' }, el('button', { type: 'button', class: 'quiet', onclick: () => openJoin() }, 'Join with a code…'), el('button', { type: 'button', onclick: closeModal }, 'OK')));
+    }, (e) => { if (body.isConnected) { body.innerHTML = ''; put(body, el('p', null, CLOUD.errorText(e)), el('div', { class: 'btns right' }, el('button', { onclick: closeModal }, 'OK'))); } });
+  });
+}
+
+// ----- playing -----
+// open a game being played (or over): its state at this turn, this player's
+// seat; a turn already begun on this computer goes on from its orders
+function openOnlineGame(id, cached) {
+  withAccount((u) => {
+    toast('Opening the online game…');
+    loadOnline().then(ok => { if (!ok) throw new Error('Couldn’t load online play.'); return CLOUD.games.get(id); }).then((c) => {
+      if (!c) { toast('That online game is gone, or you are no longer in it.'); return; }
+      if (c.status === 'lobby') { openLobby(id); return; }
+      const seat = (c.seats || []).indexOf(u.uid);
+      if (seat < 0) { toast('You don’t have a seat in that game.'); return; }
+      return CLOUD.games.state(id, c.turn).then((st) => {
+        if (!st) throw new Error('The game’s state for this turn is missing.');
+        leaveOnlineView();
+        Object.assign(ONL, { id, card: c, seat, done: {}, sent: false });
+        enterTurn(st.json, c.turn, cached && cached.online && cached.online.id === id ? cached : G && G.online && G.online.id === id ? G : null, true);
+        ONL.unsub.push(CLOUD.games.watch(id, onCard));
+        watchTurnOrders();
+      });
+    }).catch((e) => toast(CLOUD.errorText(e)));
+  });
+}
+// the page takes up a turn's state: its own copy, this seat's turn begun
+// (its block of ids, js/online.js prepare), the orders recorded from here
+function enterTurn(json, turn, prev, opening) {
+  const pid = ONL.seat;
+  ONL.start = json; ONL.turn = turn; ONL.sent = false; ONL.justSent = false; ONL.done = {};
+  G = OL().adopt(json, prev);
+  G.online = Object.assign({}, prev && prev.online, { id: ONL.id });
+  if (!G.gameId) G.gameId = Date.now();
+  OL().prepare(G, pid);
+  // a turn in progress on this computer (a reload, another skin): its orders played again
+  let log = null;
+  try { const k = JSON.parse(localStorage.getItem(turnKey(ONL.id)) || 'null'); if (k && k.turn === turn && Array.isArray(k.log)) log = k.log; } catch (e) {}
+  if (log) OL().replay(G, pid, log);
+  OL().record(G, pid, log);
+  ME = pid;
+  // the names file: this player's name, on their own computer, once a game (hot seat keeps every human's)
+  if (HO.rules(G).namesFile && !G.online.named) { G.online.named = true; keepName(me().female ? 'women' : 'men', me().name); }
+  useOS(G.opts && G.opts.os);
+  useSounds(soundsWanted(), () => {
+    hideTitle(); closeScreen(); if (UI.modal && !UI.bug) closeModal();
+    if ($('#handover')) $('#handover').hidden = true;
+    const p = me();
+    UI.sel = G.stars[p.homeStar].owner === ME ? p.homeStar : ((HO.colonies(G, ME)[0] || G.stars[p.homeStar]).id);
+    if (opening) { UI.selFleet = null; UI.fitted = false; fit(); }
+    if (UI.selFleet != null && !G.fleets.some(f => f.id === UI.selFleet)) UI.selFleet = null;
+    if (!opening) { awardMasterPoints(); awardGameCenter(); recordHall(); }
+    addTurnNotes(p);
+    save(); renderPanel(); draw(); showMessages();
+  });
+}
+// the card changed: a new turn (load it, check it), or who is in
+function onCard(c) {
+  if (!ONL.id) return;
+  if (!c) { toast('This online game is gone, or you are no longer in it.'); leaveOnlineView(); return; }
+  const prevTurn = ONL.turn;
+  ONL.card = c;
+  if (c.turn > prevTurn) { if (ONL.arriving !== c.turn) newTurnArrived(c, prevTurn); return; }
+  renderWaiting();
+  maybePlayTurn();
+}
+function watchTurnOrders() {
+  const id = ONL.id, turn = ONL.turn;
+  ONL.unsubO.push(CLOUD.games.watchOrders(id, turn, (done) => {
+    if (ONL.id !== id || ONL.turn !== turn) return;
+    ONL.done = done;
+    if (done[cloudUser() && cloudUser().uid] && !ONL.sent) { ONL.sent = true; if (OL().recording) OL().stop(); }
+    renderWaiting();
+    maybePlayTurn();
+  }));
+}
+// the seats the turn waits for (player numbers): humans still in, not
+// resigned, whose orders aren't in and whose turn the host hasn't ended
+function onlineWaiting() {
+  if (!G || !G.online || !ONL.card || G.over || !OL()) return [];
+  const c = ONL.card;
+  return (c.seats || []).map((u, pid) => [u, pid]).filter(([u, pid]) => {
+    const p = G.players[pid];
+    return p && p.alive && !p.resigned && !(c.resigned || []).includes(u) && !(c.skip || []).includes(u) && !ONL.done[u];
+  }).map(([, pid]) => pid);
+}
+// every order is in: this page plays the turn when it sent the last (at
+// once), or, so a turn never waits on a page that closed, after a while
+function maybePlayTurn() {
+  clearTimeout(ONL.timer);
+  if (!ONL.card || ONL.card.status !== 'playing' || ONL.card.turn !== ONL.turn || onlineWaiting().length || G.over) return;
+  const mineLast = ONL.sent && ONL.justSent;
+  ONL.timer = setTimeout(() => playOnlineTurn(), mineLast ? 0 : 12000 + 2000 * Math.max(0, ONL.seat));
+}
+function playOnlineTurn() {
+  const id = ONL.id, turn = ONL.turn, c = ONL.card;
+  if (ONL.busy || !id || ONL.processed[id + ':' + turn]) return;
+  ONL.busy = true;
+  CLOUD.games.orders(id, turn).then((orders) => {
+    if (ONL.id !== id || ONL.turn !== turn) return null;
+    const inputs = onlineInputs(c, orders);
+    const r = OL().play(ONL.start, inputs);
+    if (r.notes.length) console.warn('[HO online]', r.notes.join('; '));
+    ONL.processed[id + ':' + turn] = r.digest;
+    return CLOUD.games.advance(id, turn, r.json, r.digest, r.G.year, r.G.over, inputs.resigned);
+  }).then((res) => { if (res === 'late') ONL.processed[id + ':' + turn] = null; }, (e) => { ONL.processed[id + ':' + turn] = null; toast(CLOUD.errorText(e)); })
+    .then(() => { ONL.busy = false; });
+}
+// the card and the turn's orders as js/online.js plays them (seat numbers)
+function onlineInputs(c, orders, resignedUids) {
+  const inputs = { orders: {}, resigned: [] };
+  (c.seats || []).forEach((u, pid) => {
+    if (orders[u]) inputs.orders[pid] = { log: orders[u] };
+    if ((resignedUids || c.resigned || []).includes(u)) inputs.resigned.push(pid);
+  });
+  return inputs;
+}
+// a new turn is in: checked (the same orders played here, from the state
+// this page had), then taken up
+function newTurnArrived(c, prevTurn) {
+  const id = ONL.id, prevStart = ONL.start, mine = ONL.processed[id + ':' + prevTurn];
+  ONL.arriving = c.turn;
+  stopOrders();
+  CLOUD.games.state(id, c.turn).then((st) => {
+    if (!st || ONL.id !== id) { ONL.arriving = -1; return; }
+    const ownHash = OL().digest(st.json);
+    const check = { turn: c.turn, ok: ownHash === st.hash, by: st.by === (cloudUser() && cloudUser().uid) ? 'me' : 'other' };
+    const go = () => {
+      ONL.arriving = -1;
+      if (ONL.id !== id) return;
+      ONL.checks.push(check);
+      if (!check.ok) console.warn('[HO online] the new turn’s state doesn’t match what this page made of the same orders (turn ' + c.turn + ')', check);
+      const prev = G;
+      try { localStorage.removeItem(turnKey(id)); } catch (e) {}
+      enterTurn(st.json, c.turn, prev, false);
+      watchTurnOrders();
+      Sound.play(11111);
+      toast(G.over ? 'The game is over.' : `It’s ${G.year}: everyone has moved, and the turn has been played.`);
+    };
+    // this page played it: its own digest is the check
+    if (mine) { check.ok = check.ok && mine === st.hash; check.mine = true; go(); return; }
+    // else the same orders played here, from the state this page had (when it still has it)
+    if (prevStart && c.turn === prevTurn + 1) {
+      CLOUD.games.orders(id, prevTurn).then((orders) => {
+        const r = OL().play(prevStart, onlineInputs(c, orders, (st.resigned || []).map(pid => (c.seats || [])[pid])));
+        check.ok = check.ok && r.digest === st.hash; check.replayed = true;
+      }).catch(() => { check.replayed = false; }).then(go);
+    } else go();
+  }).catch((e) => { ONL.arriving = -1; toast(CLOUD.errorText(e)); });
+}
+// End Turn, online: the orders sent (and checked against this page's game first)
+function onlineEndTurn() {
+  if (ONL.sent || !ONL.id || !OL()) return;
+  const log = OL().stop(), id = ONL.id, turn = ONL.turn;
+  let sc = null;
+  try { sc = OL().selfCheck(ONL.start, ONL.seat, log, G); } catch (e) { sc = { ok: false, at: String(e && e.message) }; }
+  ONL.self.push(Object.assign({ turn }, sc));
+  if (!sc.ok) console.warn('[HO online] this turn’s orders don’t give this page’s game; first difference at', sc.at);
+  ONL.sent = true; ONL.justSent = true;
+  try { localStorage.setItem(turnKey(id), JSON.stringify({ turn, log, sent: true })); } catch (e) {}
+  renderMsg();
+  CLOUD.games.submit(id, turn, ONL.seat, log).then(() => {
+    Sound.play(11111);
+    ONL.done[cloudUser().uid] = true;
+    renderWaiting(); maybePlayTurn();
+  }, (e) => {
+    // not sent: the turn goes on, its orders as they were
+    ONL.sent = false; ONL.justSent = false;
+    OL().record(G, ONL.seat, log);
+    toast(CLOUD.errorText(e)); renderMsg();
+  });
+}
+function renderWaiting() { if (G && G.online && (ONL.sent || !onlineCanMove()) && !(UI.msgIdx < UI.inbox.length)) renderMsg(); }
+// this seat has a turn to play (in the game, not resigned, the turn not ended for it)
+function onlineCanMove() {
+  const c = ONL.card, u = cloudUser() && cloudUser().uid, p = G && G.players[ONL.seat];
+  return !!(c && p && p.alive && !p.resigned && !(c.resigned || []).includes(u) && !(c.skip || []).includes(u) && c.status === 'playing' && !G.over);
+}
+// the message area's card while the turn waits: who for, and the host's End turn for…
+function waitingCard() {
+  const names = onlineNames(), w = onlineWaiting(), host = ONL.card && cloudUser() && ONL.card.host === cloudUser().uid;
+  const text = !w.length ? 'Everyone has moved: the turn is being played…' : `Waiting for: ${w.map(pid => names[pid]).join(', ')}`;
+  return el('div', { class: 'card waiting', role: 'status' }, el('div', { class: 'mtext' },
+    el('p', null, text),
+    el('p', { class: 'sub' }, ONL.sent ? 'Your orders are in. The new year arrives here when everyone has ended their turn.' : 'You have no turn to play: the game goes on without you.'),
+    host && w.length ? el('div', { class: 'mbtns' }, el('button', { class: 'quiet', onclick: () => endTurnFor(w) }, 'End turn for…')) : null));
+}
+// the host ends the turn for those it waits for (the time limit's end, by hand)
+function endTurnFor(w) {
+  const names = onlineNames(), c = ONL.card;
+  const boxes = w.map(pid => el('label', { class: 'chk' }, el('input', { type: 'checkbox', value: c.seats[pid], checked: 'checked' }), el('span', null, names[pid])));
+  const f = el('form', { class: 'newgame', onsubmit: (e) => {
+    e.preventDefault();
+    const uids = [...f.querySelectorAll('input:checked')].map(x => x.value);
+    closeModal();
+    if (uids.length) CLOUD.games.skip(ONL.id, uids).then(() => toast('Their turn is ended: they make no moves this year.'), er => toast(CLOUD.errorText(er)));
+  } }, el('p', null, 'End the turn for these players? Their empires sit this year out, as when a turn’s time runs out.'), ...boxes,
+    el('div', { class: 'btns right' }, el('button', { type: 'button', class: 'quiet', onclick: closeModal }, 'Cancel'), el('button', { type: 'submit' }, 'End their turn')));
+  modal('End turn for…', f, { cls: 'small' });
+}
+// the Game menu's Online game…: who is in it, its code, Resign and Leave
+function openOnlineInfo() {
+  if (!G || !G.online || !ONL.card) return;
+  const c = ONL.card, names = onlineNames(), u = cloudUser() && cloudUser().uid, w = onlineWaiting();
+  const rows = (c.seats || []).map((x, pid) => {
+    const p = G.players[pid];
+    const st = !p ? '' : !p.alive ? 'out' : p.resigned || (c.resigned || []).includes(x) ? 'resigned (a computer plays)' : ONL.done[x] ? 'has moved' : (c.skip || []).includes(x) ? 'turn ended by the host' : 'to move';
+    return el('li', null, `${names[pid]}${x === c.host ? ' (host)' : ''}${x === u ? ' (you)' : ''}: ${st}`);
+  });
+  const body = el('div', { class: 'lobby' },
+    el('p', null, `${c.galaxy || 'Galaxy'} · ${c.edition || c.rules} · ${G.year}`),
+    el('ul', { class: 'lobbylist' }, ...rows),
+    el('p', { class: 'sub' }, 'The whole game is kept where every player’s page can read it (each page shows only its own player’s view), so this alpha can’t stop a determined player from peeking.'),
+    el('div', { class: 'btns right' },
+      c.host === u && w.length ? el('button', { type: 'button', class: 'quiet', onclick: () => endTurnFor(w) }, 'End turn for…') : null,
+      c.status === 'playing' && onlineCanMove() ? el('button', { type: 'button', class: 'quiet', onclick: () => confirmBox('Resign? A computer plays your empire from the next turn. You can still watch.', () => CLOUD.games.resign(ONL.id).then(() => toast('You have resigned.'), e => toast(CLOUD.errorText(e)))) }, 'Resign…') : null,
+      el('button', { type: 'button', class: 'quiet', onclick: () => confirmBox(c.status === 'playing' ? 'Leave this game? A computer plays your empire from the next turn, and the game leaves your list.' : 'Take this game off your list?', () => {
+        CLOUD.games.leave(ONL.id, c.status === 'playing').then(() => { try { localStorage.removeItem(turnKey(ONL.id)); } catch (e) {} leaveOnlineView(); G = null; $('#panel').innerHTML = ''; $('#msg').innerHTML = ''; titleScreen(); toast('You left the game.'); }, e => toast(CLOUD.errorText(e)));
+      }) }, 'Leave…'),
+      el('button', { type: 'button', onclick: closeModal }, 'OK')));
+  modal('Online game', body, { cls: 'small' });
+}
+// ?join=CODE: the join window, once the title is up (the address is tidied so a reload doesn't ask again)
+function joinFromAddress() {
+  let code = null;
+  try { code = new URLSearchParams(location.search).get('join'); } catch (e) {}
+  if (!code || !CLOUD) return;
+  try { const u = new URL(location.href); u.searchParams.delete('join'); history.replaceState(null, '', u.toString()); } catch (e) {}
+  setTimeout(() => openJoin(code), 300);
 }
 
 // ----- new game / title -----
@@ -4468,7 +4870,11 @@ function newGameDialog() {
       el('span', null, MODERN_TEXT)),
     hoBox,
     sounds,
-    el('div', { class: 'btns right' }, el('button', { type: 'submit' }, 'Create galaxy')));
+    el('div', { class: 'btns right' },
+      // online play (js/cloud.js): several people, each on their own computer
+      CLOUD ? el('button', { type: 'button', class: 'quiet', onclick: () => openOnlineGames() }, 'My online games…') : null,
+      CLOUD ? el('button', { type: 'button', class: 'quiet', onclick: () => hostOnline(options) }, 'Play online…') : null,
+      el('button', { type: 'submit' }, 'Create galaxy')));
   // which of the window's settings an edition has: its own, or (an edition
   // the window doesn't know by name) its version's other edition's
   const KIND = { claude: 'claude', original: 'original', palm: 'original', dos: 'dos', '405': '405', '301': '301', '12': '12' };
@@ -4554,7 +4960,9 @@ function newGameDialog() {
     }
   };
   f.addEventListener('input', refresh); f.addEventListener('change', refresh);
-  const start = () => {
+  // the window's settings as the options HO.newGame takes (and the form's
+  // values, d): Create galaxy plays them here, Play online… takes them to the lobby
+  const options = () => {
     const d = Object.fromEntries(new FormData(f).entries());
     localStorage.setItem('ho5.name', d.name); localStorage.setItem('ho5.rules', d.rules);
     if (d.computers === 'any') d.computers = String(1 + Math.floor(Math.random() * 8));
@@ -4579,18 +4987,22 @@ function newGameDialog() {
     if (k === 'original') {
       localStorage.setItem('ho5.iq', d.o_iq);
       const o = origOpts(d);
-      G = HO.newGame(Object.assign(common, o, { difficulty: rater(d.rules, 'original').difficulty(o) }));
+      return { d, o: Object.assign(common, o, { difficulty: rater(d.rules, 'original').difficulty(o) }) };
     } else if (k === '405') {
-      G = HO.newGame(Object.assign(common, { start: d.w_skill, iq: d.w_iq, shape: d.w_shape, size: d.w_size, density: d.w_density, yearsPerTurn: +d.w_years, novas: true }));
+      return { d, o: Object.assign(common, { start: d.w_skill, iq: d.w_iq, shape: d.w_shape, size: d.w_size, density: d.w_density, yearsPerTurn: +d.w_years, novas: true }) };
     } else if (k === '301') {
-      G = HO.newGame(Object.assign(common, { start: d.m_skill, iq: d.m_iq, shape: d.m_shape, size: d.m_size, density: d.m_density, yearsPerTurn: +d.m_years, novas: true, luck: true }));
+      return { d, o: Object.assign(common, { start: d.m_skill, iq: d.m_iq, shape: d.m_shape, size: d.m_size, density: d.m_density, yearsPerTurn: +d.m_years, novas: true, luck: true }) };
     } else if (k === 'dos') {
-      G = HO.newGame(Object.assign(common, { start: d.d_skill, iq: d.d_iq, size: d.d_size, shape: d.d_shape, density: d.d_density, novas: false, alliances: false, luck: false }));
+      return { d, o: Object.assign(common, { start: d.d_skill, iq: d.d_iq, size: d.d_size, shape: d.d_shape, density: d.d_density, novas: false, alliances: false, luck: false }) };
     } else if (k === 'claude' || k === '12') {
       // (1.2 had no New Game window: its ruleset fixes every choice, rs.fixOptions)
-      G = HO.newGame(Object.assign(common, { iq: d.iq, cstart: d.cstart, shape: d.shape, size: d.size, density: d.density,
-        ...(k === 'claude' ? { yearsPerTurn: +d.c_years || 10, buddies: !!d.c_buddies } : {}) }));
+      return { d, o: Object.assign(common, { iq: d.iq, cstart: d.cstart, shape: d.shape, size: d.size, density: d.density,
+        ...(k === 'claude' ? { yearsPerTurn: +d.c_years || 10, buddies: !!d.c_buddies } : {}) }) };
     } else throw new Error(`The New Game window has no settings for the "${d.rules}" rules`);
+  };
+  const start = () => {
+    const { d, o } = options();
+    G = HO.newGame(o);
     // the names file: in 2000, after the computers are named, the humans' names join it
     if (HO.rules(G).namesFile) for (const p of HO.humans(G)) keepName(p.female ? 'women' : 'men', p.name);
     // the OS look is kept with the game (G.opts.os) and for the next one
@@ -4621,6 +5033,8 @@ function continueGame(resumed) {
     if (resumed === true) titleScreen();
     return;
   }
+  // an online game: this browser's copy is a cache; the game is opened from Firestore
+  if (G.online && G.online.id && CLOUD) { const g = G; G = null; if (resumed === true) titleScreen(); openOnlineGame(g.online.id, g); return; }
   ME = G.cur || 0;
   useOS(G.opts && G.opts.os); // the game's own OS look
   // the game's sounds first, so its first message plays its own sound
@@ -4639,6 +5053,8 @@ function save(urgent) {
   if (!G.gameId) G.gameId = Date.now();
   const json = HO.save(G);
   try { localStorage.setItem('ho5.save', json); localStorage.setItem('ho5.save.when', String(Date.now())); } catch (e) {}
+  // online: the turn's orders so far, so a reload (or another skin) goes on from them
+  if (G.online && OL() && OL().recording && ONL.id === G.online.id) try { localStorage.setItem(turnKey(ONL.id), JSON.stringify({ turn: ONL.turn, log: OL().orders() })); } catch (e) {}
   saveSlot();
   cloudNoteSave(json, urgent === true);
 }
@@ -4646,7 +5062,7 @@ function save(urgent) {
 // ---------- menus ----------
 function setupMenus() {
   const menus = {
-    Game: [['New game…', newGameDialog], [() => (G && HO.rules(G).switchPlayers) || 'End turn and switch players', () => switchPlayers(), () => !!(G && HO.rules(G).switchPlayers && hotSeat())], ['Players and history', () => G && openPlayers()], ['Auto-play this turn', () => playOneTurn()], ['Auto play…', () => G && !G.over && (hotSeat() ? toast('Auto play is for one-player games.') : openAutoPlay())], ['Preferences…', openPrefs], ['Saved games…', () => openSavedGames(), () => !!(screensOf(rulesId()) || {}).savedGames], ['Account saves…', () => openAccountSaves(), () => !!CLOUD], ['Rank history…', openRanks, () => !G || hasRanks(G)], [() => ((HO.RULESETS[rulesId()] || {}).gameCenter || {}).menu || 'Rank and Game Center…', openGameCenter, () => !!(HO.RULESETS[rulesId()] || {}).gameCenter],
+    Game: [['New game…', newGameDialog], [() => (G && HO.rules(G).switchPlayers) || 'End turn and switch players', () => switchPlayers(), () => !!(G && HO.rules(G).switchPlayers && hotSeat())], ['Players and history', () => G && openPlayers()], ['Auto-play this turn', () => playOneTurn()], ['Auto play…', () => G && !G.over && (hotSeat() || G.online ? toast('Auto play is for one-player games.') : openAutoPlay())], ['Online game…', () => openOnlineInfo(), () => !!(G && G.online)], ['Preferences…', openPrefs], ['Saved games…', () => openSavedGames(), () => !!(screensOf(rulesId()) || {}).savedGames], ['Account saves…', () => openAccountSaves(), () => !!CLOUD], ['Rank history…', openRanks, () => !G || hasRanks(G)], [() => ((HO.RULESETS[rulesId()] || {}).gameCenter || {}).menu || 'Rank and Game Center…', openGameCenter, () => !!(HO.RULESETS[rulesId()] || {}).gameCenter],
       ['Master Point List…', () => openMasterList(), () => hasHall(G) && HO.rules(G).hall.master !== false], ['Hall of Fame…', () => openHall('fame'), () => hasHall(G)], ['Hall of Shame…', () => openHall('shame'), () => hasHall(G)], ['-'], ['Quit to title', () => { save(); Sound.play(7002); G = null; renderPanel(); draw(); $('#panel').innerHTML = ''; $('#msg').innerHTML = ''; titleScreen(); }]],
     Ships: [['Build ships at selected colony…', () => { if (G && UI.sel != null && G.stars[UI.sel].owner === ME) openBuild(UI.sel); else toast('Select one of your colonies first.'); }], ['Review battle…', () => G && openBattleList()], ['List all fleets…', () => G && openFleetList()],
       [() => scrapWords('fleet')[G && curFleet() && curFleet().scrap301 ? 1 : 0], () => { if (!G || G.over) return; const f = curFleet(); if (f) toggleScrapFleet(f); else toast('Select one of your fleets first.'); }, () => marksScrap()],
@@ -4670,9 +5086,10 @@ function setupMenus() {
   // the modern conveniences a player may choose (all of them can change in
   // the middle of a game). Items: [label, fn, feature or null, checked()].
   const ho = [['About this version…', openAbout], ['Patch notes…', openPatchNotes, () => patchOn()], ['Account…', () => openAccount(), () => !!CLOUD], ['-'],
-    ['Skin and OS look…', openSkin], ['Sounds…', () => openSounds()], ['Language…', openLanguage, () => !!(G && HO.languages(HO.ownRules(G)).length)],
+    ['Skin and OS look…', openSkin], ['Sounds…', () => openSounds()], ['Language…', openLanguage, () => !!(G && !G.online && HO.languages(HO.ownRules(G)).length)],
     [MODERN_TEXT.replace(/:.*/, ''), () => { if (G) setModern(!modern()); else toast('Modern conveniences are chosen for each game: start or continue one first.'); }, null, () => modern()],
-    ['Full Hoedown', () => setHoedown(!hoedownOn()), () => !!(G && HO.ownRules(G).hoedown), () => hoedownOn()],
+    // (not in an online game: the language and Hoedown are everyone's, chosen at New Game)
+    ['Full Hoedown', () => setHoedown(!hoedownOn()), () => !!(G && !G.online && HO.ownRules(G).hoedown), () => hoedownOn()],
     ['-'], ['Suggestion box…', () => openFeedback('idea')]];
   const bar = $('#menubar');
   const menu = (btn, items) => {
@@ -4820,6 +5237,7 @@ window.addEventListener('DOMContentLoaded', () => {
   loadManifest(() => loadImages(guard(() => {
     ts.classList.remove('loading'); setupMap();
     if (resume) { ts.hidden = true; continueGame(true); } else titleScreen();
+    joinFromAddress(); // ?join=CODE: an online game's invitation
   })));
 });
 })();

@@ -11,7 +11,8 @@
 //
 // Only what is named below goes in: esbuild drops the rest (Analytics is
 // never imported; Jake wants none). Full Firestore, not Lite: online play
-// will want realtime listeners later (onSnapshot is in for that).
+// keeps every page up to date with realtime listeners (onSnapshot), and
+// plays a turn once in a transaction (runTransaction).
 import { build } from 'esbuild';
 import { readFileSync, writeFileSync, statSync } from 'node:fs';
 import { gzipSync } from 'node:zlib';
@@ -30,7 +31,8 @@ const AUTH = ['initializeAuth', 'indexedDBLocalPersistence', 'browserLocalPersis
   'signInWithEmailAndPassword', 'createUserWithEmailAndPassword', 'sendPasswordResetEmail', 'signInAnonymously',
   'linkWithPopup', 'linkWithRedirect', 'linkWithCredential', 'deleteUser'];
 const STORE = ['initializeFirestore', 'connectFirestoreEmulator', 'doc', 'collection', 'getDoc', 'getDocs', 'setDoc', 'addDoc',
-  'deleteDoc', 'query', 'where', 'orderBy', 'limit', 'serverTimestamp', 'Bytes', 'onSnapshot'];
+  'deleteDoc', 'query', 'where', 'orderBy', 'limit', 'serverTimestamp', 'Bytes', 'onSnapshot',
+  'updateDoc', 'writeBatch', 'runTransaction', 'arrayUnion', 'arrayRemove', 'deleteField'];
 
 const entry = [
   `import { ${APP.join(', ')} } from 'firebase/app';`,

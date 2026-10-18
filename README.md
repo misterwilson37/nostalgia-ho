@@ -25,7 +25,13 @@ computer / Everyone** switch to the Hall of Fame and Hall of Shame (4.0.5 and 3.
 shared Hall per ruleset, its names through a decency filter (`js/decency.js`). Signed
 in, the names the originals carried from game to game (the stars winners name, and the
 1.2 to 4.0.5 names file: players' names for the computers, ship type names) are shared
-by everyone playing the same version ("Use names other players have added", Account…). The
+by everyone playing the same version ("Use names other players have added", Account…).
+**Online play** (New Game → **Play online…**): several people, each on their own computer,
+play one game turn by turn, as the originals' network play did, with no server: a lobby
+with a six-letter code and a `?join=` link, computers in the empty seats, each player's
+turn sent at End Turn, the year moving on in every browser when the last one is in
+("Waiting for: …" meanwhile), Resign, Leave and the host's End turn for…, and **My online
+games…** to open a game from any computer. The
 Firebase SDK (`js/vendor/firebase.js`) loads only when a player asks for any of this, and
 everything fails soft without a network. The single-file build has none of it. What is
 stored, the security rules (`firestore.rules`), the console steps, admins and the tests:
@@ -454,7 +460,9 @@ Optional ruleset flags the skin reads (each is documented where it is read):
   `tools/extract/languages.py` from the German DOS 2.0 and the iOS app
 - `js/hoedown.js`: Full Hoedown, each official release's jokes at their most (`rs.hoedown`: the items About this version lists, the colour-monitor joke, the Armageddon questions put back in the 5.0.5 family, the Amiga's German names; 4.0.5's Evacuate and Armageddon jokes are the rules' own now)
 - `js/cloud.js`: the online parts (`window.HOCLOUD`: accounts, saves in the account, the
-  shared Hall), with no UI; the windows are in `js/skins/classic/ui.js` ("online").
+  shared Hall, shared names, online play's documents), with no UI; `js/online.js`
+  (`window.HOONLINE`) plays online play's turns (orders recorded, played, checked;
+  `tools/online-sim.js` runs it under Node); the windows are in `js/skins/classic/ui.js` ("online").
   `js/vendor/firebase.js` is the Firebase SDK, built by `tools/firebase/build-firebase.mjs`;
   `js/decency.js` the filter for shared names (`tools/decency-test.js`); `docs/online.md`
 - `js/version-notes.js`: for each ruleset, its known quirks, where the remake differs and

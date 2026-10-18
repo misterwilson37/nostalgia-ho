@@ -23,12 +23,21 @@
 // 11. an email account: create, sign out, sign in, a wrong password, Forgot password;
 // 12. shared names: the names file and Name a Star posted to the version's
 //     pool, merged into another player's New Game (not with the preference
-//     off), a refused name never posted, and Delete my account removing them.
+//     off), a refused name never posted, and Delete my account removing them;
+// 13. online play: a 2-player 4.0.5 game and a 3-player 5.0.5 game, each
+//     player in their own browser (context), hosted from New Game's Play
+//     online…, joined by the ?join= link, through several turns with battles
+//     (moves by hand: the bars, a ship built; the rest by Auto-play this
+//     turn), a page reloaded mid-turn, a player who doesn't move and the
+//     host's End turn for…, a resignation; after every turn every browser's
+//     state digest must be the same, each must have played the orders itself
+//     to the same game, and each turn's orders must give the page's own game.
 'use strict';
 let chromium;
 try { ({ chromium } = require('playwright')); } catch (e) { console.error('Playwright is needed (npm i -g playwright; NODE_PATH=$(npm root -g)).'); process.exit(2); }
 const args = process.argv.slice(2);
 const opt = (k, d) => { const a = args.find(x => x.startsWith('--' + k + '=')); return a ? a.slice(k.length + 3) : d; };
+const SHOTS = opt('shots', null); // a folder for screenshots when an online play step fails
 const URL0 = opt('url', 'http://127.0.0.1:8801/'), AUTH = +opt('auth', 8811), FS = +opt('firestore', 8810);
 const PAGE = `${URL0}index.html?skin=classic&emulator=${AUTH},${FS}`;
 const PROJECT = 'nostalgia-ho';
@@ -384,6 +393,10 @@ async function signInEmail(page, email, pw, create) {
     await ctxClose(X);
   }
 
+  // 13. online play: a 2-player and a 3-player game, each player in their
+  // own browser; several turns with battles, every browser's state the same
+  if (!only || only === 'play') await onlinePlay(browser);
+
   if (A) await A.ctx.close();
   if (B) await B.ctx.close();
   await browser.close();
@@ -391,3 +404,160 @@ async function signInEmail(page, email, pw, create) {
   console.log(`online ok: ${checks} checks`);
 })().catch((e) => { console.error(e); process.exit(1); });
 function ctxClose(x) { return x.ctx.close(); }
+
+// ---------- online play ----------
+const view = (page) => page.evaluate(() => window.HOONLINE_VIEW && window.HOONLINE_VIEW());
+async function guest(page) {
+  await page.click('#tacct'); await page.waitForSelector('.cloudform');
+  await page.click('.cloudform button:text-is("Play as a guest")');
+  const u = await waitFor(() => uidOf(page));
+  await page.keyboard.press('Escape');
+  return u;
+}
+// click through the turn's reports (and any window), until the clock or the waiting card
+async function readReports(page) {
+  for (let i = 0; i < 200; i++) {
+    if (await page.$('.scrim')) { const ok = await page.$('.scrim .win button:text-is("OK")'); if (ok) await ok.click().catch(() => null); else await page.keyboard.press('Escape'); continue; }
+    if (await page.$('#msg .clock') || await page.$('#msg .card.waiting') || await page.$('#msg .card.end')) return;
+    const c = await page.$('#msg .card:not(.end):not(.waiting)'); if (c) await c.click().catch(() => null); else await sleep(80);
+  }
+}
+// the Budget / Technology bar dragged to share f (tools/human-play.js dragBar)
+async function dragBar(page, title, label, f) {
+  const row = page.locator('#panel section.box').filter({ has: page.locator('h3', { hasText: new RegExp('^' + title + '$') }) }).locator('.barrow').filter({ has: page.locator('.blabel', { hasText: label }) }).first();
+  if (!(await row.count())) return false;
+  const b = await row.locator('.track').boundingBox(); if (!b) return false;
+  const at = await page.evaluate(([kind, f]) => HO.BAR_SCALES[window.HOVIEW().barScale[kind]].toX(f * 1000), [title === 'Budget' ? 'budget' : 'tech', f]);
+  const x = b.x + b.width * at, y = b.y + b.height / 2;
+  await page.mouse.move(x - 2, y); await page.mouse.down(); await page.mouse.move(x, y, { steps: 2 }); await page.mouse.up();
+  return true;
+}
+// the Build window at the selected colony: one of the first type it can buy
+async function buildOne(page) {
+  const btn = page.locator('#panel .planet button', { hasText: /^(Build ships…|Queue ships…)$/ });
+  if (!(await btn.count())) return false;
+  await btn.first().click(); await sleep(80);
+  const plus = page.locator('.scrim .drow button[aria-label="Build one"], .scrim .drow button[aria-label="Queue one"]');
+  let ok = false;
+  for (let i = 0; i < await plus.count(); i++) if (await plus.nth(i).isEnabled()) { await plus.nth(i).click(); ok = true; break; }
+  await page.keyboard.press('Escape'); await sleep(60);
+  return ok;
+}
+async function gameMenu(page, item) {
+  await page.click('#menubar .mbtn:text-is("Game")'); await page.click(`.dropdown.open [role=menuitem]:text-is("${item}")`);
+}
+// one player's turn: the reports read, some moves by hand (the bars, a ship
+// built), then the computers' code plays the rest of it (Auto-play this
+// turn, which ends the turn) or the clock ends it
+async function playTurnIn(page, t, byHand) {
+  await readReports(page);
+  if (await page.$('#msg .card.waiting') || await page.$('#msg .card.end')) return 'waiting';
+  if (byHand) {
+    await dragBar(page, 'Technology', 'Weapons', 0.4 + (t % 3) * 0.1);
+    await dragBar(page, 'Budget', 'Savings', 0.1);
+    await buildOne(page);
+  }
+  if (byHand && t % 2) await page.click('#msg .clock', { timeout: 10000 }).catch(async (e) => { if (SHOTS) await page.screenshot({ path: SHOTS + '/clock-' + t + '.png' }); throw e; });
+  else await gameMenu(page, 'Auto-play this turn');
+  await waitFor(() => page.$('#msg .card.waiting, #msg .card.end'), 10000);
+  return 'sent';
+}
+async function onlineGame(browser, o) {
+  const P = [];
+  for (let i = 0; i < o.seats; i++) { P.push(await fresh(browser, { name: 'P' + (i + 1) })); await guest(P[i].page); }
+  const host = P[0].page;
+  // New Game, then Play online…: the window's settings, the seats
+  await host.click('#tnew'); await host.waitForSelector('.ngwin form.newgame');
+  await host.selectOption('.ngwin select[name=version]', o.version); await host.selectOption('.ngwin select[name=rules]', o.rules);
+  await host.fill('.ngwin input[name=name]', 'Host');
+  if (o.setup) await o.setup(host);
+  await host.selectOption('.ngwin select[name=humans]', String(o.seats));
+  await host.click('.ngwin button:text-is("Play online…")');
+  await host.waitForSelector('.lobby .lobbycode .code', { timeout: 15000 });
+  const code = (await host.textContent('.lobby .lobbycode .code')).trim();
+  check(/^[A-Z0-9]{6}$/.test(code), `${o.label}: the lobby shows a code (${code})`);
+  // the others join by the link
+  for (let i = 1; i < o.seats; i++) {
+    const pg = P[i].page;
+    await pg.goto(PAGE + '&join=' + code);
+    await pg.waitForSelector('form.newgame input[name=code]', { timeout: 20000 });
+    await pg.fill('form.newgame input[name=name]', 'Player' + (i + 1));
+    await pg.click('form.newgame button:text-is("Join")');
+    await pg.waitForSelector('.lobby .lobbylist', { timeout: 15000 });
+  }
+  await waitFor(async () => (await host.$$('.lobby .lobbylist li:not(.sub)')).length === o.seats, 15000);
+  check((await host.$$('.lobby .lobbylist li:not(.sub)')).length === o.seats, `${o.label}: the host’s lobby lists everyone who joined`);
+  await host.click('.lobby button:text-is("Start the game")');
+  for (const x of P) await waitFor(() => view(x.page).then(v => v && v.status === 'playing' && v.turn === 0), 20000);
+  const v0 = await Promise.all(P.map(x => view(x.page)));
+  check(v0.every(v => v && v.turn === 0 && v.digest === v0[0].digest), `${o.label}: every browser starts from the same state`);
+  check(new Set(v0.map(v => v.seat)).size === o.seats, `${o.label}: each player has their own seat`);
+  let bad = 0;
+  for (let t = 0; t < o.turns; t++) {
+    const before = await view(host);
+    if (before.over) break;
+    // the 3-player game: the third player sits one turn out, and the host ends it for them
+    const sitOut = o.skipAt === t ? o.seats - 1 : -1;
+    for (let i = 0; i < o.seats; i++) {
+      if (i === sitOut) continue;
+      if (o.resignAt === t && i === o.seats - 1) {
+        // the last player resigns instead of moving: the turn doesn't wait for them, and a computer plays them from now on
+        const pg = P[i].page;
+        await readReports(pg);
+        await gameMenu(pg, 'Online game…'); await pg.click('.scrim button:text-is("Resign…")'); await pg.click('.win.alert button:text-is("OK")');
+        continue;
+      }
+      // a reload in the middle of a turn: the turn goes on from its orders
+      if (o.reloadAt === t && i === 1) {
+        await readReports(P[i].page);
+        await dragBar(P[i].page, 'Technology', 'Shields', 0.5);
+        await buildOne(P[i].page);
+        await sleep(300);
+        await P[i].page.reload();
+        await P[i].page.waitForSelector('#tcont:not([hidden])', { timeout: 30000 });
+        await P[i].page.click('#tcont');
+        const back = await waitFor(() => view(P[i].page).then(v => (v && v.turn === t && v.status === 'playing' ? v : null)), 20000);
+        check(!!back, `${o.label}: a page reloaded in the middle of a turn opens the game again (Continue)`);
+        check(back && back.self.length === 0 && await P[i].page.evaluate((id) => { const k = JSON.parse(localStorage.getItem('ho5.online.' + id) || 'null'); return !!(k && k.log && k.log.length); }, back.id), `${o.label}: and goes on from the turn’s orders so far`);
+      }
+      await playTurnIn(P[i].page, t, i === 0 || t % 3 === 0);
+    }
+    if (sitOut >= 0) {
+      const w = await waitFor(() => view(host).then(v => v.waiting.length === 1 ? v : null), 10000);
+      check(w && w.waiting[0] === 'Player' + o.seats, `${o.label}: the turn waits for the player who hasn’t moved (${w && w.waiting})`);
+      check(/Waiting for: Player/.test(await host.textContent('#msg .card.waiting')), `${o.label}: the page says who the turn waits for`);
+      await host.click('#msg .card.waiting button:text-is("End turn for…")');
+      await host.click('.scrim button:text-is("End their turn")');
+    }
+    const ok = await waitFor(async () => { const vs = await Promise.all(P.map(x => view(x.page))); return vs.every(v => v.turn === t + 1 && v.checks.some(c => c.turn === t + 1)) ? vs : null; }, 60000);
+    if (!ok) { check(false, `${o.label}: turn ${t} wasn’t played in every browser`); bad++; break; }
+    const same = ok.every(v => v.digest === ok[0].digest);
+    const checks = ok.map(v => v.checks.find(c => c.turn === t + 1));
+    if (!same || !checks.every(c => c.ok)) bad++;
+    check(same, `${o.label}: after turn ${t}, every browser has the same state (${ok.map(v => v.digest.slice(0, 8)).join(' ')})`);
+    // (a page that played the turn, or more than one when they ended theirs at once: each made the same game itself)
+    check(checks.every(c => c.ok && (c.mine || c.replayed)), `${o.label}: turn ${t}: each browser played the orders itself and got the same game (${checks.map(c => (c.mine ? 'played' : c.replayed ? 'replayed' : '-') + (c.ok ? '' : ' MISMATCH')).join(', ')})`);
+    if (o.resignAt === t) check(!ok[0].waiting.includes('Player' + o.seats), `${o.label}: a resigned player isn’t waited for`);
+  }
+  const vs = await Promise.all(P.map(x => view(x.page)));
+  const self = vs.flatMap(v => v.self);
+  check(self.length && self.every(s => s.ok || s.news), `${o.label}: every turn’s orders give the page’s own game (${self.filter(s => !s.ok).map(s => s.turn + ':' + s.at).join(' ')})`);
+  check(vs[0].battles > 0, `${o.label}: battles were fought (${vs[0].battles})`);
+  check(!bad, `${o.label}: ${o.turns} turns, every one the same in every browser`);
+  console.log(`     ${o.label}: year ${vs[0].year}, ${vs[0].battles} battles`);
+  // My online games, from the Account window, lists it
+  await host.click('#menubar .logo'); await host.click('.dropdown.open [role=menuitem]:text-is("Account…")');
+  await host.click('.account button:text-is("My online games…")');
+  await host.waitForSelector('.aclist li', { timeout: 15000 });
+  check(/Player2/.test(await host.textContent('.aclist')), `${o.label}: My online games lists the game`);
+  await host.keyboard.press('Escape');
+  for (const x of P) await x.ctx.close();
+}
+async function onlinePlay(browser) {
+  // 2 players, 4.0.5, a small galaxy with two computers
+  await onlineGame(browser, { label: '2 players (4.0.5)', seats: 2, version: '4.0', rules: '405', turns: 14, reloadAt: 3,
+    setup: async (pg) => { await pg.selectOption('.ngwin select[name=w_size]', 'small'); await pg.selectOption('.ngwin select[name=computers]', '2'); } });
+  // 3 players, 5.0.5: one sits a turn out (End turn for…), one resigns
+  await onlineGame(browser, { label: '3 players (5.0.5)', seats: 3, version: '5', rules: 'original', turns: 12, skipAt: 4, resignAt: 8,
+    setup: async (pg) => { await pg.selectOption('.ngwin select[name=computers]', '2'); await pg.$eval('.ngwin input[name=o_size]', (e) => { e.value = '0'; e.dispatchEvent(new Event('input', { bubbles: true })); }); } });
+}

@@ -8,7 +8,7 @@
 // entry, and only an admin (an /admins/{uid} document) may delete one.
 import { initializeApp, deleteApp } from 'firebase/app';
 import { getAuth, connectAuthEmulator, signInAnonymously, createUserWithEmailAndPassword, signOut } from 'firebase/auth';
-import { initializeFirestore, connectFirestoreEmulator, doc, collection, getDoc, getDocs, setDoc, addDoc, updateDoc, deleteDoc, serverTimestamp, Bytes, query, where, orderBy, limit, setLogLevel } from 'firebase/firestore';
+import { initializeFirestore, connectFirestoreEmulator, doc, collection, getDoc, getDocs, setDoc, addDoc, updateDoc, deleteDoc, serverTimestamp, Bytes, query, where, orderBy, limit, setLogLevel, writeBatch, runTransaction, arrayUnion, arrayRemove, deleteField } from 'firebase/firestore';
 setLogLevel('silent'); // the denied writes are expected; the cases below report
 
 const AUTH = +(process.env.FIREBASE_AUTH_PORT || 8811), FS = +(process.env.FIRESTORE_PORT || 8810), PROJECT = 'nostalgia-ho';
@@ -133,13 +133,88 @@ await deny('an admin can’t change an entry', updateDoc(doc(B.db, 'halls', '405
 await allow('an admin deletes an entry', deleteDoc(doc(B.db, 'halls', '405', 'entries', posted.id)));
 await allow('an admin deletes a shared name', deleteDoc(nref(B, 'stars', 'zebulon')));
 
+// ---------- online play ----------
+const C = client('c');
+const c = (await createUserWithEmailAndPassword(C.auth, 'c@example.com', 'secret123')).user;
+const card = (o) => Object.assign({ code: 'ABC234', host: a.uid, members: [a.uid], names: { [a.uid]: { name: 'Ann', female: true } }, nSeats: 2, status: 'lobby',
+  rules: '405', edition: 'Windows 95 4.0.5', galaxy: 'Milky Way', opts: '{}', turn: 0, year: 0, hash: '', seats: [], resigned: [], skip: [],
+  createdAt: serverTimestamp(), updated: serverTimestamp(), client: 'web 5.1 Alpha' }, o);
+const gref = (x, id) => doc(x.db, 'games', id || 'g1');
+const newGameBatch = (x, id, code, o) => { const bt = writeBatch(x.db); bt.set(gref(x, id), card(Object.assign({ code }, o))); bt.set(doc(x.db, 'codes', code), { game: id, host: (o && o.host) || a.uid, createdAt: serverTimestamp() }); return bt.commit(); };
+await allow('a guest makes an online game and its code', newGameBatch(A, 'g1', 'ABC234'));
+await deny('a code for someone else’s game', setDoc(doc(B.db, 'codes', 'ZZZ234'), { game: 'g1', host: b.uid, createdAt: serverTimestamp() }));
+await deny('a game made for someone else', setDoc(gref(B, 'g2'), card({ host: a.uid })));
+await deny('a game that starts with others in it', setDoc(gref(B, 'g2'), card({ host: b.uid, members: [b.uid, a.uid], names: { [b.uid]: { name: 'Bob', female: false } } })));
+await allow('a signed-in player reads a code', getDoc(doc(B.db, 'codes', 'ABC234')));
+await deny('nobody signed in reads a code', getDoc(doc(N.db, 'codes', 'ABC234')));
+await deny('a player lists the codes', getDocs(collection(B.db, 'codes')));
+await deny('a player not in the game reads it', getDoc(gref(B)));
+const joinBatch = (x, u, code, name, id) => { const bt = writeBatch(x.db); bt.set(doc(x.db, 'games', id || 'g1', 'joins', u.uid), { uid: u.uid, code, name, createdAt: serverTimestamp() });
+  bt.update(gref(x, id), { members: arrayUnion(u.uid), ['names.' + u.uid]: { name, female: false }, updated: serverTimestamp() }); return bt.commit(); };
+await deny('a join with the wrong code', joinBatch(B, b, 'ZZZ999', 'Bob'));
+await deny('a join without a join request', updateDoc(gref(B), { members: arrayUnion(b.uid), ['names.' + b.uid]: { name: 'Bob', female: false }, updated: serverTimestamp() }));
+await allow('a join with the code', joinBatch(B, b, 'ABC234', 'Bob'));
+await deny('a join when every seat is taken', joinBatch(C, c, 'ABC234', 'Cal'));
+await allow('a member reads the game', getDoc(gref(B)));
+await allow('a member lists their games', getDocs(query(collection(B.db, 'games'), where('members', 'array-contains', b.uid))));
+await deny('a player lists games they aren’t in', getDocs(query(collection(C.db, 'games'), where('members', 'array-contains', a.uid))));
+await deny('a player not in it reads the game', getDoc(gref(C)));
+await deny('a member who isn’t the host changes the settings', updateDoc(gref(B), { opts: '{"x":1}', updated: serverTimestamp() }));
+await allow('the host changes the settings', updateDoc(gref(A), { opts: '{"seed":5}', updated: serverTimestamp() }));
+await deny('the host makes fewer seats than players', updateDoc(gref(A), { nSeats: 1, updated: serverTimestamp() }));
+await deny('a member adds someone else', updateDoc(gref(B), { members: arrayUnion(c.uid), updated: serverTimestamp() }));
+{ const bt = writeBatch(B.db); bt.update(gref(B), { members: arrayRemove(b.uid), ['names.' + b.uid]: deleteField(), updated: serverTimestamp() }); bt.delete(doc(B.db, 'games', 'g1', 'joins', b.uid));
+  await allow('a player leaves the lobby', bt.commit()); }
+await allow('and joins again', joinBatch(B, b, 'ABC234', 'Bob'));
+const st = (turn, x, o) => Object.assign({ turn, year: 2000 + turn * 10, hash: 'h' + turn, by: x, resigned: [], createdAt: serverTimestamp(), client: 'web 5.1 Alpha', data: bytes(20), enc: 'gzip', size: 20, raw: 200 }, o);
+const startBatch = (x, u, withState) => { const bt = writeBatch(x.db); if (withState) bt.set(doc(x.db, 'games', 'g1', 'states', '0'), st(0, u.uid));
+  bt.update(gref(x), { status: 'playing', seats: [a.uid, b.uid], turn: 0, year: 2000, hash: 'h0', opts: '{}', updated: serverTimestamp() }); bt.delete(doc(x.db, 'codes', 'ABC234')); return bt.commit(); };
+await deny('a member who isn’t the host starts it', startBatch(B, b, true));
+await deny('the host starts it without its first state', startBatch(A, a, false));
+await deny('a state written while the game is in its lobby', setDoc(doc(A.db, 'games', 'g1', 'states', '0'), st(0, a.uid)));
+await allow('the host starts it, with its first state', startBatch(A, a, true));
+await deny('a state written again', setDoc(doc(A.db, 'games', 'g1', 'states', '0'), st(0, a.uid)));
+await deny('a join once it has started', joinBatch(C, c, 'ABC234', 'Cal'));
+const ord = (u, turn, o) => Object.assign({ uid: u.uid, seat: u === a ? 0 : 1, turn, createdAt: serverTimestamp(), data: bytes(30), enc: 'gzip', size: 30, raw: 300 }, o);
+const oref = (x, turn, u) => doc(x.db, 'games', 'g1', 'turns', String(turn), 'orders', u.uid);
+await allow('a player sends their orders', setDoc(oref(B, 0, b), ord(b, 0)));
+await deny('a player sends them again', setDoc(oref(B, 0, b), ord(b, 0)));
+await deny('a player sends another’s orders', setDoc(oref(B, 0, a), ord(a, 0)));
+await deny('orders for a turn the game isn’t on', setDoc(oref(A, 1, a), ord(a, 1)));
+await deny('a player not in the game reads the orders', getDocs(collection(C.db, 'games', 'g1', 'turns', '0', 'orders')));
+await allow('a member reads the orders', getDocs(collection(A.db, 'games', 'g1', 'turns', '0', 'orders')));
+await allow('a member reads the state', getDoc(doc(A.db, 'games', 'g1', 'states', '0')));
+await deny('a player not in the game reads the state', getDoc(doc(C.db, 'games', 'g1', 'states', '0')));
+const adv = (x, u, from, to, withState) => runTransaction(x.db, (tx) => tx.get(gref(x)).then(() => {
+  if (withState) tx.set(doc(x.db, 'games', 'g1', 'states', String(to)), st(to, u.uid));
+  tx.update(gref(x), { turn: to, year: 2000 + to * 10, hash: 'h' + to, status: 'playing', skip: [], updated: serverTimestamp() });
+}));
+await deny('a turn played two turns on', adv(B, b, 0, 2, true));
+await deny('a turn played without its state', adv(B, b, 0, 1, false));
+await deny('a player not in the game plays the turn', adv(C, c, 0, 1, true));
+await allow('a member plays the turn, its state with it', adv(B, b, 0, 1, true));
+await deny('the same turn played again', runTransaction(B.db, (tx) => tx.get(gref(B)).then(() => { tx.set(doc(B.db, 'games', 'g1', 'states', '1'), st(1, b.uid)); })));
+await deny('the turn number put back', updateDoc(gref(A), { turn: 0, updated: serverTimestamp() }));
+await deny('a member who isn’t the host ends someone’s turn', updateDoc(gref(B), { skip: [a.uid], updated: serverTimestamp() }));
+await allow('the host ends a player’s turn for them', updateDoc(gref(A), { skip: [b.uid], updated: serverTimestamp() }));
+await deny('the host ends the turn for someone not in the game', updateDoc(gref(A), { skip: [c.uid], updated: serverTimestamp() }));
+await deny('a player resigns someone else', updateDoc(gref(B), { resigned: [a.uid], updated: serverTimestamp() }));
+await allow('a player resigns', updateDoc(gref(B), { resigned: arrayUnion(b.uid), updated: serverTimestamp() }));
+await deny('and resigns again', updateDoc(gref(B), { resigned: [b.uid, b.uid], updated: serverTimestamp() }));
+await deny('a member tidies the state the game is on', deleteDoc(doc(A.db, 'games', 'g1', 'states', '1')));
+await allow('a member tidies a played turn’s orders', deleteDoc(oref(A, 0, b)));
+await allow('a player leaves the game', updateDoc(gref(B), { members: arrayRemove(b.uid), updated: serverTimestamp() }));
+await deny('and can’t read it any more', getDoc(gref(B)));
+await deny('a player not in it deletes the game', deleteDoc(gref(C)));
+await allow('the host deletes the game', deleteDoc(gref(A)));
+
 // ---------- everything else ----------
 await deny('a document anywhere else', setDoc(doc(A.db, 'misc', 'x'), { a: 1 }));
 await deny('reading anywhere else', getDoc(doc(N.db, 'users', a.uid)));
 await deny('a player document above the saves', setDoc(doc(A.db, 'users', a.uid), { a: 1 }));
 
-await signOut(A.auth); await signOut(B.auth);
-for (const c of [A, B, N]) await deleteApp(c.app);
+await signOut(A.auth); await signOut(B.auth); await signOut(C.auth);
+for (const x of [A, B, C, N]) await deleteApp(x.app);
 if (fails.length) { console.log(fails.join('\n')); console.log(`${fails.length} of ${n} failed`); process.exit(1); }
 console.log(`rules ok: ${n} cases`);
 process.exit(0);

@@ -446,7 +446,8 @@ API.postName = (pool, kind, name) => {
 // Delete my account and data (the Account window; privacy.html): every save in
 // the account, every Hall entry this account posted (the rulesets with a
 // Hall), every name it added to a shared pool (namePools: the pools and their
-// kinds, [[pool, [kind, …]], …], from the skin), then the account itself.
+// kinds, [[pool, [kind, …]], …], from the skin), its place in every online
+// game (below, "online play"), then the account itself.
 // Firebase asks for a recent sign-in before
 // it deletes an account: that comes back as auth/requires-recent-login, and
 // errorText says to sign in again and repeat.
@@ -457,11 +458,155 @@ API.deleteAccount = (hallRules, namePools) => withSdk((F) => {
     .then(q => Promise.all(q.docs.map(d => F.deleteDoc(d.ref))))));
   const names = Promise.all((namePools || []).flatMap(([pool, kinds]) => (kinds || []).map(k => F.getDocs(F.query(F.collection(S.db, 'names', String(pool), k), F.where('uid', '==', u.uid)))
     .then(q => Promise.all(q.docs.map(d => F.deleteDoc(d.ref)))))));
-  return Promise.all([saves, halls, names]).then(() => F.deleteUser(u)).then(() => {
+  // the online games: left (resigned, when one is being played: the others play on, a
+  // computer in this seat); a game still in its lobby that this account made is cancelled
+  const games = F.getDocs(F.query(F.collection(S.db, 'games'), F.where('members', 'array-contains', u.uid))).then(q => Promise.all(q.docs.map((d) => {
+    const g = d.data();
+    if (g.status === 'lobby') return g.host === u.uid ? G0.cancel(d.id, g.code) : G0.leaveLobby(d.id);
+    return G0.leave(d.id, g.status === 'playing');
+  })));
+  return Promise.all([saves, halls, names, games]).then(() => F.deleteUser(u)).then(() => {
     store.set(sentKey(u.uid), null); store.set('ho5.cloud.was', null); store.set('ho5.cloud.name', null); refresh();
   });
 });
 API.deleteHall = (rules, id) => withSdk(F => F.deleteDoc(F.doc(S.db, 'halls', String(rules), 'entries', id)));
+
+// ---------- online play (games/{id}, codes/{code}) ----------
+// A game several people play, each on their own computer, turn by turn
+// (js/online.js plays the turns; the skin draws the windows). Firestore only:
+// the free tier has no Cloud Functions, so the pages do everything and the
+// rules keep each to their part. What is kept:
+// - games/{id}: the game's card. code (the six letters to join by), host,
+//   members (the uids who may read and write it: the host, then each player
+//   as they join), names ({ uid: { name, female } }, as they joined), nSeats
+//   (the people it is for), status ('lobby', 'playing', 'over'), rules,
+//   edition, galaxy, opts (the New Game options, as JSON text), seats (the
+//   members in seat order, fixed when the host starts it), turn (the state's
+//   number), year, hash (the state's digest), resigned (uids handed to the
+//   computer, still to be played as such), skip (uids whose turn the host
+//   ended), createdAt, updated, client.
+// - games/{id}/states/{turn}: the state at the start of that turn, the same
+//   JSON a save is, gzipped (data, enc, size, raw), with its digest (hash),
+//   who wrote it (by) and the resigned seats it played (resigned). Written
+//   in the transaction that moves the card's turn on; the one before it is
+//   kept (the pages check the new one against it), older ones deleted.
+// - games/{id}/turns/{turn}/orders/{uid}: one player's orders for a turn
+//   (js/online.js), gzipped (log), written once at End Turn.
+// - games/{id}/joins/{uid}: a join request: the code the player typed (the
+//   rules check it against the card's before the player is added).
+// - codes/{code}: { game, host, createdAt }: which game a code opens. A
+//   signed-in player may read one by its code (never list them); the host
+//   deletes it when the game starts.
+const CODE_LETTERS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // no 0/O, 1/I
+const newCode = () => { let c = ''; const r = new Uint32Array(6); (root.crypto || {}).getRandomValues ? root.crypto.getRandomValues(r) : r.forEach((x, i) => { r[i] = Math.random() * 2 ** 32; }); for (const x of r) c += CODE_LETTERS[x % CODE_LETTERS.length]; return c; };
+API.cleanCode = (c) => String(c || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6);
+const gameRef = (id) => root.HOFB.doc(S.db, 'games', id);
+const card = (d) => Object.assign({ id: d.id }, d.data(), { updated: d.data().updated && d.data().updated.toMillis ? d.data().updated.toMillis() : 0 });
+const who = (o) => ({ name: String(o.name || 'Player').slice(0, 40), female: !!o.female });
+// pack JSON text for a document: { data (Bytes), enc, size, raw }; too big: an error in words
+function pack(text, what) {
+  return gzip(text).then(({ enc, bytes }) => {
+    if (bytes.length > MAX_DATA) throw fail(`${what} is too big for the online game (${Math.round(bytes.length / 1024)} KB compressed; the limit is ${Math.round(MAX_DATA / 1024)} KB).`);
+    return { data: root.HOFB.Bytes.fromUint8Array(bytes), enc, size: bytes.length, raw: text.length };
+  });
+}
+const unpack = (x) => gunzip(x.data.toUint8Array(), x.enc);
+const G0 = {
+  // a new game in the lobby, for o = { rules, edition, galaxy, opts (object), nSeats, name, female }: resolves { id, code }
+  create: (o) => withSdk((F) => {
+    const u = needUser();
+    const ref = F.doc(F.collection(S.db, 'games'));
+    const tryCode = (n) => {
+      const code = newCode(), b = F.writeBatch(S.db);
+      b.set(ref, { code, host: u.uid, members: [u.uid], names: { [u.uid]: who(o) }, nSeats: Math.max(2, Math.min(8, o.nSeats | 0)), status: 'lobby',
+        rules: String(o.rules).slice(0, 16), edition: String(o.edition || '').slice(0, 100), galaxy: String(o.galaxy || '').slice(0, 60), opts: JSON.stringify(o.opts || {}),
+        turn: 0, year: 0, hash: '', seats: [], resigned: [], skip: [], createdAt: F.serverTimestamp(), updated: F.serverTimestamp(), client: CLIENT });
+      b.set(F.doc(S.db, 'codes', code), { game: ref.id, host: u.uid, createdAt: F.serverTimestamp() });
+      // a code already taken is refused by the rules (create only): another one
+      return b.commit().then(() => ({ id: ref.id, code }), (e) => { if (n < 4 && e && e.code === 'permission-denied') return tryCode(n + 1); throw e; });
+    };
+    return tryCode(0);
+  }),
+  // the game a code opens, or null
+  find: (code) => withSdk(F => (needUser(), F.getDoc(F.doc(S.db, 'codes', API.cleanCode(code))).then(d => (d.exists() ? d.data().game : null)))),
+  // join a game in the lobby: the join request and the card's new member in one batch
+  join: (id, code, o) => withSdk((F) => {
+    const u = needUser(), b = F.writeBatch(S.db);
+    b.set(F.doc(S.db, 'games', id, 'joins', u.uid), { uid: u.uid, code: API.cleanCode(code), name: who(o).name, createdAt: F.serverTimestamp() });
+    b.update(gameRef(id), { members: F.arrayUnion(u.uid), ['names.' + u.uid]: who(o), updated: F.serverTimestamp() });
+    return b.commit().catch((e) => { if (e && e.code === 'permission-denied') throw fail('That game can’t be joined: it may be full, already started, or the code is wrong.'); throw e; });
+  }),
+  // the card, live: fn(card) on every change (null: gone or out of reach); gives the unsubscribe
+  watch: (id, fn, onErr) => { const F = root.HOFB; if (!F || !S.db) return () => {}; return F.onSnapshot(gameRef(id), d => fn(d.exists() ? card(d) : null), e => (onErr ? onErr(e) : fn(null))); },
+  // a turn's orders as they come in: fn({ uid: true }) (the uids that have sent theirs)
+  watchOrders: (id, turn, fn) => { const F = root.HOFB; if (!F || !S.db) return () => {}; return F.onSnapshot(F.collection(S.db, 'games', id, 'turns', String(turn), 'orders'), q => fn(Object.fromEntries(q.docs.map(d => [d.id, true]))), () => {}); },
+  get: (id) => withSdk(F => F.getDoc(gameRef(id)).then(d => (d.exists() ? card(d) : null))),
+  // the host changes the lobby's settings (o: { opts, nSeats, rules, edition, galaxy })
+  settle: (id, o) => withSdk(F => F.updateDoc(gameRef(id), Object.assign({}, o.opts ? { opts: JSON.stringify(o.opts) } : {}, o.nSeats ? { nSeats: o.nSeats | 0 } : {},
+    o.rules ? { rules: String(o.rules).slice(0, 16), edition: String(o.edition || '').slice(0, 100), galaxy: String(o.galaxy || '').slice(0, 60) } : {}, { updated: F.serverTimestamp() }))),
+  // a player leaves the lobby (the host cancels instead)
+  leaveLobby: (id) => withSdk((F) => {
+    const u = needUser(), b = F.writeBatch(S.db);
+    b.update(gameRef(id), { members: F.arrayRemove(u.uid), ['names.' + u.uid]: F.deleteField(), updated: F.serverTimestamp() });
+    b.delete(F.doc(S.db, 'games', id, 'joins', u.uid));
+    return b.commit();
+  }),
+  // the host cancels a game in the lobby: its code and card go
+  cancel: (id, code) => withSdk((F) => { const b = F.writeBatch(S.db); if (code) b.delete(F.doc(S.db, 'codes', code)); b.delete(gameRef(id)); return b.commit(); }),
+  // the host starts it: the first state (turn 0), the seats fixed, the code deleted
+  start: (id, code, json, hash, year, seats, opts) => withSdk(F => pack(json, 'The game').then((pk) => {
+    const u = needUser(), b = F.writeBatch(S.db);
+    b.set(F.doc(S.db, 'games', id, 'states', '0'), Object.assign({ turn: 0, year: Math.round(year), hash, by: u.uid, resigned: [], createdAt: F.serverTimestamp(), client: CLIENT }, pk));
+    b.update(gameRef(id), { status: 'playing', seats, turn: 0, year: Math.round(year), hash, opts: JSON.stringify(opts || {}), updated: F.serverTimestamp() });
+    if (code) b.delete(F.doc(S.db, 'codes', code));
+    return b.commit();
+  })),
+  // a state's text and its record, or null
+  state: (id, turn) => withSdk(F => F.getDoc(F.doc(S.db, 'games', id, 'states', String(turn))).then(d => (d.exists() ? unpack(d.data()).then(json => ({ json, hash: d.data().hash, resigned: d.data().resigned || [], by: d.data().by })) : null))),
+  // this player's orders for the turn (orders: js/online.js's log, as an object); resolves 'sent' or 'already' (sent before)
+  submit: (id, turn, seat, log) => withSdk(F => pack(JSON.stringify(log), 'This turn’s orders').then((pk) => {
+    const u = needUser(), ref = F.doc(S.db, 'games', id, 'turns', String(turn), 'orders', u.uid);
+    return F.setDoc(ref, Object.assign({ uid: u.uid, seat: seat | 0, turn: turn | 0, createdAt: F.serverTimestamp() }, pk)).then(() => 'sent', (e) => {
+      if (e && e.code === 'permission-denied') return F.getDoc(ref).then(d => { if (d.exists()) return 'already'; throw e; }, () => { throw e; });
+      throw e;
+    });
+  })),
+  // every order sent for a turn: { uid: log }
+  orders: (id, turn) => withSdk(F => F.getDocs(F.collection(S.db, 'games', id, 'turns', String(turn), 'orders'))
+    .then(q => Promise.all(q.docs.map(d => unpack(d.data()).then(t => [d.id, JSON.parse(t)]))).then(Object.fromEntries))),
+  // The turn is played: the new state (turn + 1) and the card moved on, in a
+  // transaction that reads the card first, so a turn already played by
+  // another page is never written again (resolves 'late' then). Older states
+  // and orders are tidied after.
+  advance: (id, turn, json, hash, year, over, resigned) => withSdk(F => pack(json, 'The game').then((pk) => {
+    const u = needUser(), ref = gameRef(id), next = turn + 1;
+    return F.runTransaction(S.db, (tx) => tx.get(ref).then((d) => {
+      if (!d.exists() || d.data().turn !== turn || d.data().status !== 'playing') return 'late';
+      tx.set(F.doc(S.db, 'games', id, 'states', String(next)), Object.assign({ turn: next, year: Math.round(year), hash, by: u.uid, resigned: resigned || [], createdAt: F.serverTimestamp(), client: CLIENT }, pk));
+      tx.update(ref, { turn: next, year: Math.round(year), hash, status: over ? 'over' : 'playing', skip: [], updated: F.serverTimestamp() });
+      return 'played';
+    })).then((r) => {
+      if (r === 'played') {
+        // the state two turns back and the orders before the last turn's: not needed again
+        if (turn >= 1) F.deleteDoc(F.doc(S.db, 'games', id, 'states', String(turn - 1))).catch(() => null);
+        if (turn >= 1) F.getDocs(F.collection(S.db, 'games', id, 'turns', String(turn - 1), 'orders')).then(q => q.docs.forEach(x => F.deleteDoc(x.ref).catch(() => null))).catch(() => null);
+      }
+      return r;
+    });
+  })),
+  // a player hands their empire to the computer from the next turn (Resign)
+  resign: (id) => withSdk(F => F.updateDoc(gameRef(id), { resigned: F.arrayUnion(needUser().uid), updated: F.serverTimestamp() })),
+  // a player leaves a game for good (resigned too, if it is still being played): it leaves their list
+  leave: (id, playing) => withSdk((F) => { const uid = needUser().uid; return F.updateDoc(gameRef(id), Object.assign({ members: F.arrayRemove(uid), updated: F.serverTimestamp() }, playing ? { resigned: F.arrayUnion(uid) } : {})); }),
+  // the host ends the turn for players who haven't (uids): played as if they sent no orders
+  skip: (id, uids) => withSdk(F => F.updateDoc(gameRef(id), { skip: F.arrayUnion(...uids), updated: F.serverTimestamp() })),
+  // the games this account is in (no order in the query, so no index to make): newest first
+  list: () => withSdk((F) => {
+    const u = needUser();
+    return F.getDocs(F.query(F.collection(S.db, 'games'), F.where('members', 'array-contains', u.uid))).then(q => q.docs.map(card).sort((a, b) => b.updated - a.updated));
+  }),
+};
+API.games = G0;
 
 // start-up: a browser that was signed in brings its account back once the
 // page has loaded (and only then, so nothing slows the game's own start)

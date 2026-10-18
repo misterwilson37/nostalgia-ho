@@ -35,8 +35,12 @@ Delta Tao, in `docs/open-questions.md`, "Unfinished").
    done (October 2026)**, with the decency filter shared names need: `docs/online.md`
    (accounts, Account saves, the Hall's Everyone list, `firestore.rules`). **3 done
    (October 2026):** the names file and Name a Star pooled by version ("Use names other
-   players have added", `docs/online.md`, "Shared names"). Left: online play (full
-   Firestore is in the SDK bundle for its realtime listeners).
+   players have added", `docs/online.md`, "Shared names"). **4 done (October 2026),
+   as an alpha:** online play, turn by turn, each player on their own computer, with no
+   server (Play online…, My online games; `docs/online.md`, "Online play"). Left for it:
+   hiding each player's empire from the others' pages (today every member can read the
+   whole state), and notifications outside the tab (they need Cloud Functions, not on
+   the free tier).
 
 Sources: the German DOS 2.0 (first disk: `DOSHO.EXE` and `HO.PRS` with its German text; the colour
 pictures and sounds are on a later disk not yet in hand); the Spaceward Ho! 4 FAQ,

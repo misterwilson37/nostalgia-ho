@@ -14,6 +14,20 @@ rules_version = '2';
 //   name as themselves, its document id its own lower-case self (so a name is
 //   there once, whatever its letter case); nobody may change one; an admin or
 //   its poster may delete it.
+// - games/{id}: an online game's card, read and written only by its members
+//   (the uids in its members list). A player joins by a code: their join
+//   request (games/{id}/joins/{uid}) must carry the card's code, and the
+//   join adds only themselves, while the game is in its lobby and has a seat.
+//   Then each change is one of a few, each checked: the host's lobby
+//   settings and start, a turn played (the turn number up by exactly one,
+//   with its state written in the same transaction), the host ending a turn
+//   for someone, a player resigning or leaving.
+//   - states/{turn}: the game at the start of each turn, written by a
+//     member only with the card's move to that turn, never changed.
+//   - turns/{turn}/orders/{uid}: each player's orders, written once by that
+//     player, for the turn the card is on.
+// - codes/{code}: which game a join code opens: read by a signed-in player
+//   who has the code (never listed), made by the game's host with the game.
 // - admins/{uid}: who the admins are. No client may read or write it (it is
 //   made by hand in the console); the rules only ask whether a document
 //   exists, which needs no read permission.
@@ -109,6 +123,160 @@ service cloud.firestore {
       allow create: if signedIn() && validName();
       allow update: if false;
       allow delete: if isAdmin() || (signedIn() && resource.data.uid == request.auth.uid);
+    }
+
+    // ---------- online play ----------
+    match /codes/{code} {
+      function validCode() {
+        let d = request.resource.data;
+        let g = getAfter(/databases/$(database)/documents/games/$(d.game)).data;
+        return d.keys().hasOnly(['game', 'host', 'createdAt']) && d.keys().hasAll(['game', 'host', 'createdAt'])
+          && code.matches('[A-Z0-9]{6}') && d.game is string && d.host == request.auth.uid && d.createdAt == request.time
+          && g.code == code && g.host == request.auth.uid;
+      }
+      allow get: if signedIn();
+      allow list: if false;
+      allow create: if signedIn() && validCode();
+      allow update: if false;
+      allow delete: if signedIn() && resource.data.host == request.auth.uid;
+    }
+
+    match /games/{id} {
+      function me() { return request.auth.uid; }
+      function was() { return resource.data; }
+      function now() { return request.resource.data; }
+      function member() { return signedIn() && me() in was().members; }
+      function changed() { return now().diff(was()).affectedKeys(); }
+      function cardKeys(d) {
+        return d.keys().hasOnly(['code', 'host', 'members', 'names', 'nSeats', 'status', 'rules', 'edition', 'galaxy', 'opts',
+          'turn', 'year', 'hash', 'seats', 'resigned', 'skip', 'createdAt', 'updated', 'client']);
+      }
+      function who(w) { return w.keys().hasOnly(['name', 'female']) && str(w.name, 1, 40) && w.female is bool; }
+      function settings(d) {
+        return str(d.rules, 1, 16) && str(d.edition, 0, 100) && str(d.galaxy, 0, 60) && str(d.opts, 0, 20000);
+      }
+      function validNew() {
+        let d = now();
+        return cardKeys(d) && d.keys().hasAll(['code', 'host', 'members', 'names', 'nSeats', 'status', 'rules', 'opts', 'turn', 'seats', 'resigned', 'skip', 'createdAt', 'updated'])
+          && d.code is string && d.code.matches('[A-Z0-9]{6}') && d.host == me() && d.members == [me()]
+          && d.names.keys().hasOnly([me()]) && who(d.names[me()]) && whole(d.nSeats, 2, 8) && d.status == 'lobby'
+          && settings(d) && d.turn == 0 && d.seats == [] && d.resigned == [] && d.skip == []
+          && d.createdAt == request.time && d.updated == request.time && (!('client' in d) || str(d.client, 0, 40));
+      }
+      // a player not yet in it joins: only themselves, with their name, a seat free, the code right
+      function join() {
+        return !(me() in was().members) && was().status == 'lobby'
+          && changed().hasOnly(['members', 'names', 'updated'])
+          && now().members == was().members.concat([me()]) && now().members.size() <= was().nSeats
+          && now().names.diff(was().names).affectedKeys().hasOnly([me()]) && who(now().names[me()])
+          && getAfter(/databases/$(database)/documents/games/$(id)/joins/$(me())).data.code == was().code;
+      }
+      // a player (not the host) leaves the lobby
+      function leaveLobby() {
+        return member() && me() != was().host && was().status == 'lobby'
+          && changed().hasOnly(['members', 'names', 'updated'])
+          && now().members == was().members.removeAll([me()]) && !(me() in now().names)
+          && now().names.diff(was().names).affectedKeys().hasOnly([me()]);
+      }
+      // the host changes the lobby's settings
+      function hostLobby() {
+        return member() && me() == was().host && was().status == 'lobby' && now().status == 'lobby'
+          && changed().hasOnly(['opts', 'nSeats', 'rules', 'edition', 'galaxy', 'updated'])
+          && settings(now()) && whole(now().nSeats, 2, 8) && now().nSeats >= was().members.size();
+      }
+      // the host starts it: the seats are the members, the first state written with it
+      function start() {
+        return member() && me() == was().host && was().status == 'lobby' && now().status == 'playing'
+          && changed().hasOnly(['status', 'seats', 'turn', 'year', 'hash', 'opts', 'updated'])
+          && now().seats == was().members && now().turn == 0 && whole(now().year, -100000, 1000000) && str(now().hash, 1, 40)
+          && str(now().opts, 0, 20000)
+          && existsAfter(/databases/$(database)/documents/games/$(id)/states/0);
+      }
+      // a turn played: the turn number up by exactly one, its state written with it
+      function advance() {
+        return member() && was().status == 'playing' && now().turn == was().turn + 1 && now().status in ['playing', 'over']
+          && changed().hasOnly(['turn', 'year', 'hash', 'status', 'skip', 'updated'])
+          && now().skip == [] && whole(now().year, -100000, 1000000) && str(now().hash, 1, 40)
+          && existsAfter(/databases/$(database)/documents/games/$(id)/states/$(string(now().turn)));
+      }
+      // the host ends the turn for players who haven't sent theirs
+      function skip() {
+        return member() && me() == was().host && was().status == 'playing'
+          && changed().hasOnly(['skip', 'updated']) && now().skip.hasOnly(was().seats) && now().skip.size() <= 8;
+      }
+      // a player hands their empire to the computer
+      function resign() {
+        return member() && was().status == 'playing' && me() in was().seats && !(me() in was().resigned)
+          && changed().hasOnly(['resigned', 'updated']) && now().resigned == was().resigned.concat([me()]);
+      }
+      // a player leaves for good (resigning too, when the game is still being played)
+      function leave() {
+        return member() && was().status != 'lobby'
+          && changed().hasOnly(['members', 'resigned', 'updated'])
+          && now().members == was().members.removeAll([me()])
+          && (now().resigned == was().resigned || (!(me() in was().resigned) && now().resigned == was().resigned.concat([me()])))
+          && (was().status == 'over' || !(me() in was().seats) || me() in now().resigned);
+      }
+      allow read: if member();
+      allow create: if signedIn() && validNew();
+      allow update: if signedIn() && cardKeys(now()) && now().updated == request.time
+        && (join() || leaveLobby() || hostLobby() || start() || advance() || skip() || resign() || leave());
+      // the host (a lobby cancelled, a game given up), or the last member
+      allow delete: if member() && (was().host == me() || was().members.size() == 1);
+
+      function card() { return get(/databases/$(database)/documents/games/$(id)).data; }
+      function inGame() { return signedIn() && request.auth.uid in card().members; }
+
+      match /joins/{uid} {
+        function validJoin() {
+          let d = request.resource.data;
+          return d.keys().hasOnly(['uid', 'code', 'name', 'createdAt']) && d.uid == uid && uid == request.auth.uid
+            && d.code == card().code && card().status == 'lobby' && str(d.name, 1, 40) && d.createdAt == request.time;
+        }
+        allow read: if signedIn() && (uid == request.auth.uid || inGame());
+        allow create, update: if signedIn() && validJoin();
+        allow delete: if signedIn() && (uid == request.auth.uid || card().host == request.auth.uid);
+      }
+
+      match /states/{t} {
+        function after() { return getAfter(/databases/$(database)/documents/games/$(id)).data; }
+        function validState() {
+          let d = request.resource.data;
+          return d.keys().hasOnly(['turn', 'year', 'hash', 'by', 'resigned', 'createdAt', 'client', 'data', 'enc', 'size', 'raw'])
+            && d.keys().hasAll(['turn', 'year', 'hash', 'by', 'resigned', 'createdAt', 'data', 'enc', 'size'])
+            && d.turn == int(t) && whole(d.year, -100000, 1000000) && str(d.hash, 1, 40) && d.by == request.auth.uid
+            && d.resigned is list && d.resigned.size() <= 8 && d.createdAt == request.time
+            && d.data is bytes && d.data.size() <= 1000000 && d.size == d.data.size()
+            && (!('raw' in d) || whole(d.raw, 0, 100000000)) && d.enc in ['gzip', 'json']
+            && (!('client' in d) || str(d.client, 0, 40));
+        }
+        allow read: if inGame();
+        // only with the card's move to this turn (its start, or a turn played), and never again (no update)
+        allow create: if signedIn() && request.auth.uid in after().members && validState() && after().turn == int(t)
+          && ((int(t) == 0 && card().status == 'lobby' && after().status == 'playing' && card().host == request.auth.uid)
+            || (int(t) == card().turn + 1 && card().status == 'playing'));
+        allow update: if false;
+        // tidying: a state two turns back
+        allow delete: if inGame() && int(t) < card().turn - 1;
+      }
+
+      match /turns/{t}/orders/{uid} {
+        function validOrders() {
+          let d = request.resource.data;
+          return d.keys().hasOnly(['uid', 'seat', 'turn', 'createdAt', 'data', 'enc', 'size', 'raw'])
+            && d.keys().hasAll(['uid', 'seat', 'turn', 'createdAt', 'data', 'enc', 'size'])
+            && d.uid == uid && whole(d.seat, 0, 7) && d.turn == int(t) && d.createdAt == request.time
+            && d.data is bytes && d.data.size() <= 1000000 && d.size == d.data.size()
+            && (!('raw' in d) || whole(d.raw, 0, 100000000)) && d.enc in ['gzip', 'json'];
+        }
+        allow read: if inGame();
+        // a player's own, once, for the turn the game is on
+        allow create: if signedIn() && uid == request.auth.uid && uid in card().seats && card().status == 'playing'
+          && int(t) == card().turn && validOrders();
+        allow update: if false;
+        // tidying: a turn already played
+        allow delete: if inGame() && int(t) < card().turn;
+      }
     }
 
     match /{document=**} {

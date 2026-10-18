@@ -397,3 +397,12 @@ html.fleetdrag #panel .planet > .btns, html.fleetdrag.fleetdrag-pad #panel .plan
 .hall .hbox > .sub { margin: 4px 0; }
 /* a skin that draws the Hall at its original's fixed size (w95) grows it by the switch's row */
 .hall-list:has(> .hwhere) { height: auto; padding-bottom: 10px; }
+/* online play (ui.js "online play"): the lobby's code, its list of players,
+   and the message area's "Waiting for:" card */
+.lobby .lobbycode .code { font-size: 1.6em; letter-spacing: .15em; font-family: monospace; }
+.lobby .joinlink { word-break: break-all; }
+.lobby label { display: flex; gap: 8px; align-items: center; margin: 6px 0; }
+.lobbylist { list-style: none; margin: 4px 0 8px; padding: 6px 8px; border: 1px solid var(--edge); }
+.lobbylist li.sub { color: var(--sub); }
+#msg .card.waiting { cursor: default; }
+#msg .card.waiting .sub { color: var(--sub); font-size: .9em; margin: 4px 0 0; }
