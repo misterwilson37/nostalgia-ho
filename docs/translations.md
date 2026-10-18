@@ -4,8 +4,9 @@ Each version is offered in the languages it shipped in, from the official transl
 and in English, which is always there. Where a version had no translation, the remake
 makes its own, and marks it so everywhere: in New Game's Language list and the Ho menu's
 Language… (`HO.languageName`: "Français (traduction du remake)", "Deutsch (Übersetzung des
-Remakes)", "Türkçe (yeniden yapımın çevirisi)"), and in the version's notes (About this
-version, `js/version-notes.js`). This file says which text is official and which is the
+Remakes)", "Türkçe (yeniden yapımın çevirisi)", "Español (traducción del remake)"), and in
+the version's notes (About this version, `js/version-notes.js`). Spanish is the remake's in
+every version: there was never an official Spanish Spaceward Ho! ("Spanish glossary"). This file says which text is official and which is the
 remake's, version by version, and how the remake's was made.
 
 ## How a language works
@@ -84,31 +85,41 @@ source lines; "the remake's" are the lines marked `'remake'` (`js/lang-remake.js
 |---|---|---|---|---|---|
 | Mac 1.2 | French (its own) | 57 | 2 | 1 | – |
 | Mac 1.2 | German (the remake's) | 54 | 3 | 3 | – |
+| Mac 1.2 | Spanish (the remake's) | 0 | 0 | 60 | – |
 | DOS 2.0 | German (official) | 54 | 2 | 3 | – |
 | DOS 2.0 | French (the remake's) | 56 | 3 | 1 | – |
+| DOS 2.0 | Spanish (the remake's) | 0 | 0 | 60 | – |
 | Mac 2.0.1 | German (official) | 54 | 2 | 3 | – |
 | Mac 2.0.1 | French (the remake's) | 56 | 3 | 1 | – |
+| Mac 2.0.1 | Spanish (the remake's) | 0 | 0 | 60 | – |
 | Mac 3.0.1 | French (the remake's) | 119 | 11 | 2 | – |
 | Mac 3.0.1 | Turkish (the remake's) | 111 | 12 | 9 | – |
 | Mac 3.0.1 | German (the remake's) | 30 | 13 | 89 | – |
+| Mac 3.0.1 | Spanish (the remake's) | 0 | 0 | 132 | – |
 | Windows 4.0.5 | French (the remake's) | 163 | 17 | 16 | 22 / 1 / 3 |
 | Windows 4.0.5 | Turkish (the remake's) | 152 | 17 | 27 | 22 / 1 / 3 |
 | Windows 4.0.5 | German (the remake's) | 31 | 18 | 147 | 0 / 0 / 26 |
+| Windows 4.0.5 | Spanish (the remake's) | 0 | 0 | 196 | 0 / 0 / 26 |
 | Mac 4.0.5 | French (the remake's) | 180 | 17 | 16 | 23 / 1 / 3 |
 | Mac 4.0.5 | Turkish (the remake's) | 168 | 17 | 28 | 23 / 1 / 3 |
 | Mac 4.0.5 | German (the remake's) | 31 | 18 | 164 | 0 / 0 / 27 |
+| Mac 4.0.5 | Spanish (the remake's) | 0 | 0 | 213 | 0 / 0 / 27 |
 | 5.0.5 | French (the remake's) | 251 | 5 | 21 | 35 / 1 / 4 |
 | 5.0.5 | Turkish (the remake's) | 241 | 5 | 31 | 35 / 1 / 4 |
 | 5.0.5 | German (the remake's) | 25 | 16 | 214 | 0 / 0 / 40 |
+| 5.0.5 | Spanish (the remake's) | 0 | 0 | 255 | 0 / 0 / 40 |
 | Palm OS 5 | French (the remake's) | 248 | 4 | 26 | 33 / 2 / 5 |
 | Palm OS 5 | Turkish (the remake's) | 238 | 4 | 36 | 33 / 2 / 5 |
 | Palm OS 5 | German (the remake's) | 25 | 16 | 215 | 0 / 0 / 40 |
+| Palm OS 5 | Spanish (the remake's) | 0 | 0 | 256 | 0 / 0 / 40 |
 | iOS 1.2.9 | French (official) | 203 | 0 | 0 | – |
 | iOS 1.2.9 | Turkish (official) | 203 | 0 | 0 | – |
 | iOS 1.2.9 | German (the remake's) | 25 | 16 | 211 | 0 / 0 / 39 |
+| iOS 1.2.9 | Spanish (the remake's) | 0 | 0 | 252 | 0 / 0 / 39 |
 | Android 1.2.8 | French (official) | 203 | 0 | 0 | – |
 | Android 1.2.8 | Turkish (official) | 203 | 0 | 0 | – |
 | Android 1.2.8 | German (the remake's) | 25 | 16 | 211 | 0 / 0 / 39 |
+| Android 1.2.8 | Spanish (the remake's) | 0 | 0 | 252 | 0 / 0 / 39 |
 
 Names, besides: 1.2F's French lists (1.2's own; carried to 2.0's French), the German DOS
 2.0's lists (2.0's own; carried to 1.2's German, and to 3.0.1's and 4.0.5's lists that
@@ -416,6 +427,93 @@ for their own English (iOS's lists), with the remake's lines for their touch hin
 alerts; their help page stays English (`js/help.js` has French and Turkish only).
 
 
+## Spanish glossary
+
+There was never an official Spanish Spaceward Ho!, so every Spanish line is the remake's
+(`js/lang-remake.js` `es`), for every version the other languages cover: 1.2, DOS 2.0 and
+Mac 2.0.1, 3.0.1, 4.0.5 (Windows and Mac), 5.0.5, the Palm, iOS and Android. It is written
+"inspired by the official translations": where the French (1.2F, iOS) and the German (the
+DOS 2.0) made a choice, the Spanish makes the Spanish equivalent of it. One glossary for
+every version; the names stay English, as in the remake's other languages.
+
+**Address: "tú".** The officials split: the French and the German say "vous" and "Sie", the
+Turkish "sen". The originals' English is a cowboy game's informal "you" ("Whew!", "Wow!
+You won!", "It's such a sissy way to try to win"), and Spanish games speak "tú"; so "tú",
+as the Turkish, with "vosotros" where the English means you and your allies ("Tus aliados
+y tú habéis conquistado la galaxia"). The reports are in the perfect, as the English's
+"You have explored": "Has explorado %s.", "Has ganado una batalla en %s."
+
+**The game's things** (the French and German choices, and the Spanish):
+
+| English | French (iOS / 1.2F) | German (DOS 2.0 / the remake's) | Spanish |
+|---|---|---|---|
+| Scout | Eclaireur | Späher | Explorador |
+| Fighter | Croiseur (Chasseurs) | Kampfschiff | Caza |
+| Colony Ship | Transport | Kolonieschiff | Nave colonia |
+| Satellite | Satellite | Satellit | Satélite |
+| Dreadnought | Epouvante | Schlachtschiff | Acorazado |
+| Tanker | Tanker | Tanker | Cisterna |
+| Biological | Biologique | Bioschiff | Bionave |
+| Decoy | Leurre | Täuschschiff | Señuelo |
+| ship, fleet, star | vaisseau, flotte, étoile | Schiff, Flotte, Stern | nave, flota, estrella |
+| Range, Speed, Weapons, Shields, Miniaturization, Radical | Distance, Vitesse, Armes, Boucliers, Miniaturisation | Reichweite, Tempo, Waffen, Schild, Mini | Alcance, Velocidad, Armas, Escudos, Miniaturización, Radical |
+| Abandon (3.0.1, 4.0.5) / Evacuate (5.0.5) | abandonner / évacuer | verlassen / räumen | abandonar / evacuar |
+| scrap / dismantle | recycler | verschrotten / abwracken | desguazar / desmantelar |
+| terraform, mine, savings | terraformer, extraire, épargne | terraformen, Bergbau, Ersparnisse | terraformar, minas, ahorros |
+| alliance, ally, best buddy | alliance, allié, meilleur ami | Bündnis, Verbündeter, bester Kumpel | alianza, aliado, mejor amigo ("amistad del alma") |
+| surrender | se rendre | kapitulieren | rendirse |
+| armageddon device | Armageddon, l'arme ultime | Armageddon-Maschine | máquina del Armagedón |
+| meteor shower | pluie de météores | Meteoritenschauer | lluvia de meteoritos |
+| a message | (dit) | Funkspruch | mensaje ("%s dice: …") |
+| Radical researchers | chercheurs radicaux | Radikalforscher | investigadores radicales |
+
+The classes follow the German in kind (a ship's job, "Nave colonia" as "Kolonieschiff",
+"Bionave" as "Bioschiff"), with Spanish's own words where the officials kept the English
+("Cisterna" for Tanker, as the Spanish "avión cisterna"); "Acorazado" is the Spanish
+dreadnought, the meaning (as the German), the French "Epouvante" being a pun Spanish
+hasn't got. Classes are capitalised, as both officials do, and "one" agrees with them:
+"un Explorador", "una Nave colonia", "una Cisterna", "una Bionave".
+
+**Numbers and temperatures.** "1.234" and "12.345K", as the German; "$" stays (the iOS
+French's "€" isn't followed: the West's dollar is part of the joke). Temperatures are in
+°C, as the French and German officials give them: where the English fills in its
+Fahrenheit "72°" (the exploring reports, the volcano, "I like planets that are…"), the
+Spanish shows it converted, to the degree, as iOS's French does ("Temp.: 22°C"); the
+gravities get a decimal comma ("Gravedad: 1,02G"), as the German's. The hints keep what the
+English says ("72°F (20°C)"; 4.0.5's "72 grados (Fahrenheit)", as iOS's French "72 degrés
+F"). The page's own °C preference changes nothing more (its "N°" is already "N°C").
+
+**The jokes**, kept as the officials keep them, the stars keeping their English names:
+- Kansas: "Dorothy, me parece que ya no estamos en Kansas…" (the film's line in Spanish).
+- Hope: "¿En verdad deseas abandonar toda Hope? ¡Aún no está todo perdido!" (Dante's
+  "Abandonad toda esperanza", on a star still called Hope, as the German's "alle Hope
+  fahren lassen").
+- Ship: "¿Abandonar Ship? ¡Abandonen el barco! ¡Todo el mundo a los botes! ¡Las mujeres y
+  los niños primero!"
+- The tech names: "Bikini amarillo de lunares" and "Otra vez el bikini (nos hizo gracia)"
+  (the song is "Bikini amarillo" in Spanish), "Speedy González™", "Ida y vuelta" (There
+  and Back, the Hobbit's), "Ya has llegado" (Already There), "Motor de ayer" (Yesterday
+  Drive), "Espada vorpal inoxidable +5" (the German's sword made explicit), "Armadura de
+  placas bendita +5", "Esconderse detrás de una roca grande", "Wonkavisión", "Pero que
+  asombrosamente pequeño", "Píxel duro", "PowerPC™".
+- The canned messages: "%s dice: “Me gusta %s.”", the curses kept as they are
+  ("¡#!$@*$&@•™!"), "Le has dicho a %s que odias %s."
+- Armageddon's eleven questions keep their jokes, the double negative among them ("¿No
+  estás seguro de que de verdad no quieres no tener nada que ver con no lanzar la máquina
+  del Armagedón?").
+
+**Wordings the language needs.** "You %slost…" ("You and your allies lost") is "Has
+perdido%s…" with " junto a tus aliados" filled in, which keeps the verb's person; "%s lost
+%d" is "Pérdidas de %s: %d", which agrees with a name and with "tus enemigos" alike; "Built
+%s at %s" is "Construcción terminada en %s: %s" (the count's number and gender left
+alone); a fleet is "Tu flota de %s" wherever the English writes "Your %s" for one ("Your
+3 Scouts can no longer reach…"), as the German; the battle window's groups lost are
+"Bajas: 3 Needle (1/1) Exploradores" (a casualty count, number and gender aside), its
+people "%s muertos". The battle window's head is "Resumen de la batalla / en %s, año %d:"
+(2.0's "Summary of battle", 1.2F's "Résumé de la bataille") and 5.0.5's "Batalla en %s,
+año %d". Mac 2.0.1's polling time, the Options menu and the Explored Planets list are in
+Spanish in 1.2 and 2.0 (as the French).
+
 ## Turkish suffixes
 
 iOS's Turkish puts a fixed suffix straight after a name ("%sye", "%sde", "%syi",
@@ -428,7 +526,7 @@ vowels in every report, which no official line does.
 
 The remake's own interface stays English in every language, as it does for the official
 translations: it isn't the version's text, and putting all of `js/skins/classic/ui.js`
-into French, Turkish and German would put the remake's words in the original's mouth.
+into French, Turkish, German and Spanish would put the remake's words in the original's mouth.
 What the language system carries is translated: the reports and questions the rules
 send, the alerts the page shows from 5.0.5's list, the names, the hints and the window
 words each version's rules hold. What stays English:
@@ -449,7 +547,7 @@ words each version's rules hold. What stays English:
   German 1.2 has them in its own German.
 
 - **Help pages**: only iOS and Android have them in French and Turkish (their own); every
-  other version's manual is English.
+  other version's manual is English, and so are iOS's and Android's in German and Spanish.
 - **5.0.5's network and registration alerts** in German (never shown by the remake).
 - **The pictures**: words drawn in the art (1.2F's "Fin Tour", the title pictures).
 

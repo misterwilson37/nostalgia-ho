@@ -5,7 +5,8 @@
 // 1. Every name the game itself uses must pass: js/data.js and every
 //    ruleset's star, ship, computer (male and female) and tech-level names, in
 //    every language a ruleset has (French and Turkish iOS, German DOS and Mac
-//    2.0.1, French 1.2, the Amiga's extra German names of Full Hoedown). A
+//    2.0.1, French 1.2, the Amiga's extra German names of Full Hoedown), and
+//    the remake's German and Spanish tech names and Spanish ship classes. A
 //    false alarm on one of the game's own names is a bug in the filter.
 // 2. Known good names in several languages, the Scunthorpe set among them.
 // 3. Known bad names, disguised (leet, accents, repeats, separators, case,
@@ -36,6 +37,12 @@ function walk(o, where, depth, seen) {
 const before = n;
 walk(HODATA, 'data', 0, new Set());
 for (const id of Object.keys(HO.RULESETS)) walk(HO.RULESETS[id], id, 0, new Set());
+// the remake's own words for the game's things that a player may see named
+// (js/lang-remake.js): the German and Spanish tech names, the Spanish ship
+// classes
+const RMK = require('../js/lang-remake.js');
+for (const code of ['de', 'es']) for (const [en, w] of Object.entries((RMK[code] || {}).techs || {})) good(w, `lang-remake ${code}.techs[${en}]`);
+for (const [k, v] of Object.entries((RMK.es || {}).classes || {})) { good(v[0], `lang-remake es.classes.${k}`); good(v[1], `lang-remake es.classes.${k}`); }
 const own = n - before;
 if (own < 3000) fails.push(`only ${own} of the game's own names were found: the walk above has lost some lists`);
 

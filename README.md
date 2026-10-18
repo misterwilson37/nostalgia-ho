@@ -241,21 +241,24 @@ menu's **Language…** (`G.opts.lang`, remembered per ruleset in `localStorage`
 "ho5.lang.<id>"): the ones it shipped in, from the official text, English always among
 them, and, where it had none, the remake's own translation, marked so in the list
 ("Français (traduction du remake)", "Deutsch (Übersetzung des Remakes)", "Türkçe
-(yeniden yapımın çevirisi)") and in the version's notes:
+(yeniden yapımın çevirisi)", "Español (traducción del remake)") and in the version's notes:
 
 | Version | Official | The remake's (`docs/translations.md`) |
 |---|---|---|
-| 1.2 | French (its own: names, reports, windows), English (Mac 2.0.1's words) | German, from the German DOS 2.0 |
-| DOS 2.0, Mac 2.0.1 | English (their own), German (the German DOS 2.0, `docs/dos-findings.md`) | French, 1.2F's text carried forward |
-| 3.0.1, 4.0.5, 5.0.5, Palm OS | English | French and Turkish, backwards from iOS (and 1.2F); German, forward from the German DOS 2.0 |
-| iOS, Android | English (their own), French, Turkish (the app's `fr.lproj`, `tr.lproj`, with its help pages) | German |
+| 1.2 | French (its own: names, reports, windows), English (Mac 2.0.1's words) | German, from the German DOS 2.0; Spanish |
+| DOS 2.0, Mac 2.0.1 | English (their own), German (the German DOS 2.0, `docs/dos-findings.md`) | French, 1.2F's text carried forward; Spanish |
+| 3.0.1, 4.0.5, 5.0.5, Palm OS | English | French and Turkish, backwards from iOS (and 1.2F); German, forward from the German DOS 2.0; Spanish |
+| iOS, Android | English (their own), French, Turkish (the app's `fr.lproj`, `tr.lproj`, with its help pages) | German; Spanish |
 
 Only names and words change: a seed plays the same game in every language, so it can
 change mid-game. The reports are kept in the version's own words and put in the game's
 language when shown (`HO.say`); the remake's own interface (its windows and buttons) stays
 English. The Amiga skin starts New Game in German (its `lang: 'de'`).
 `node tools/lang-test.js` checks every language (no report left untranslated, no filling
-left in one); `--count` prints how many lines are official and how many the remake's.
+left in one); `--count` prints how many lines are official, how many adapted from an official
+line and how many the remake's own, and `--adapted` lists the adapted ones with their
+source lines. Spanish is the remake's in every version: there was never an official
+Spanish Spaceward Ho! (`docs/translations.md`, "Spanish glossary").
 
 Optional ruleset flags the skin reads (each is documented where it is read):
 

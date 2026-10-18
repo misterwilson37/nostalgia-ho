@@ -100,6 +100,8 @@ const REQ_201 = {
 };
 // the languages the remake translated itself (docs/translations.md)
 const REMAKE_LANG = (what) => 'Language… also offers ' + what + ': the remake’s own translation, not an official one, and marked so in the list. It changes only words and names: the same game plays in every language.';
+// the remake's Spanish, for every version (docs/translations.md, "Spanish glossary")
+const SPANISH = (more) => REMAKE_LANG('Spanish (“Español (traducción del remake)”): there was never an official Spanish Spaceward Ho!, so every line of it is the remake’s, written in the official translations’ spirit (their words for the game’s things, the informal “tú”, the jokes kept); the names stay English' + (more || ''));
 const HOTSEAT = 'Several people play on one computer and take turns. The original let each player join a shared game file, with a password.';
 root.HOVERSIONS = {
   '12': {
@@ -122,6 +124,7 @@ root.HOVERSIONS = {
       'Fix Spending shows each step’s line in a small window, whose Next is the original’s click on the message bubble.',
       'Language… offers English, Mac 2.0.1’s own words for the same windows and reports, which are 1.2’s line for line.',
       REMAKE_LANG('German (“Übersetzung des Remakes”), the German DOS 2.0’s words for the same reports, names and windows, with the remake’s own German for the few window words 2.0’s German hasn’t got'),
+      SPANISH(),
     ],
     missing: [
       'The preferences for battle speed, showing messages and watching battles, and the Explored Planets window.',
@@ -151,6 +154,7 @@ root.HOVERSIONS = {
       'Battle replays are kept for the last 60 battles; 2.0 kept them for 500 years.',
       'Fix Spending shows each step’s line in a small window, whose Next is the original’s click on the message bubble.',
       REMAKE_LANG('French (“traduction du remake”), the French Mac 1.2’s own text, whose reports are 2.0’s line for line, with the remake’s words for the few lines 1.2 hasn’t got'),
+      SPANISH(),
     ],
     missing: [
       'The Explored Planets list and the poll and battle speed settings.',
@@ -198,6 +202,7 @@ root.HOVERSIONS = {
       'Evacuating a star named Hope or Ship asks 3.0.1’s jokes (“Dost thou truly wish to abandon Hope? All is not yet lost!”, “Abandon Ship? …”), every time.',
       REMAKE_LANG('French (“traduction du remake”) and Turkish (“yeniden yapımın çevirisi”): the official French and Turkish of the iOS game, and the French Mac 1.2’s for 3.0.1’s 2.0 lines (its Name a Star and Fix Spending among them), for every line 3.0.1 shares with them, with the remake’s own lines for the rest'),
       REMAKE_LANG('German (“Übersetzung des Remakes”), forward from the German DOS 2.0: its official lines wherever the English is 2.0’s (the reports 2.0 already had, Name a Star, Fix Spending), and the remake’s German in its words for the rest'),
+      SPANISH(),
     ],
 
     missing: [
@@ -255,6 +260,7 @@ root.HOVERSIONS = {
       'Hints are drawn by the browser’s random numbers; 4.0.5 used its own.',
       REMAKE_LANG('French (“traduction du remake”) and Turkish (“yeniden yapımın çevirisi”): the official French and Turkish of the iOS game (and of the French Mac 1.2) for every line 4.0.5 shares with them, which is most of its reports, with the remake’s own lines for the rest (Armageddon’s questions, the Windows build’s own words)'),
       REMAKE_LANG('German (“Übersetzung des Remakes”), forward from the German DOS 2.0: its official lines wherever the English is 2.0’s (the reports 2.0 already had, Name a Star), and the remake’s German in its words for the rest'),
+      SPANISH(),
     ],
     missing: [
       'The turn time limit and network play.',
@@ -291,6 +297,7 @@ root.HOVERSIONS = {
       'An event with no sound of its own plays the skin’s; the Mac beeped (the system beep).',
       'Fix Spending shows each step’s line in a small window, whose Next is the original’s click on the message bubble.',
       REMAKE_LANG('French (“traduction du remake”), the French Mac 1.2’s own text, whose reports are 2.0’s line for line, with the remake’s words for the few lines 1.2 hasn’t got'),
+      SPANISH(),
     ],
     missing: [
     ],
@@ -343,6 +350,7 @@ root.HOVERSIONS = {
       'Hints are drawn by the browser’s random numbers, and the four named stars a new galaxy takes are picked from the game’s seed; the Mac used its own random numbers.',
       REMAKE_LANG('French (“traduction du remake”) and Turkish (“yeniden yapımın çevirisi”): the official French and Turkish of the iOS game (and of the French Mac 1.2) for every line 4.0.5 shares with them, which is most of its reports, with the remake’s own lines for the rest (Armageddon’s questions, the Mac’s own words)'),
       REMAKE_LANG('German (“Übersetzung des Remakes”), forward from the German DOS 2.0: its official lines wherever the English is 2.0’s (the reports 2.0 already had, Name a Star), and the remake’s German in its words for the rest'),
+      SPANISH(),
     ],
 
     missing: [
@@ -389,6 +397,7 @@ root.HOVERSIONS = {
       'Every game starts from the default budget and research shares (research 18% each and Radical 10%); 5.0.5 started a new game with your first turn’s shares from the last one.',
       REMAKE_LANG('French (“traduction du remake”) and Turkish (“yeniden yapımın çevirisi”): the iOS game’s official French and Turkish wherever its English is 5.0.5’s, which is nearly everywhere, with the remake’s own lines for the few 5.0.5 says differently (the mouse’s hints, the fuel alert) and for a few lines the iOS translation got wrong'),
       REMAKE_LANG('German (“Übersetzung des Remakes”), forward from the German DOS 2.0: its official lines wherever the English is 2.0’s (the reports 2.0 already had, Name a Star), and the remake’s German in its words for the rest'),
+      SPANISH(),
     ],
 
     missing: [
@@ -442,6 +451,7 @@ root.HOVERSIONS = {
       'Sounds are the skin’s, not the handheld’s few beeps.',
       REMAKE_LANG('French (“traduction du remake”) and Turkish (“yeniden yapımın çevirisi”): the iOS game’s official French and Turkish for every line the Palm shares with 5.0.5, with the remake’s own lines for the Palm’s own hints, first messages, decoy report and battle window'),
       REMAKE_LANG('German (“Übersetzung des Remakes”), forward from the German DOS 2.0: its official lines wherever the English is 2.0’s (the reports 2.0 already had, Name a Star), and the remake’s German in its words for the rest'),
+      SPANISH(),
     ],
 
     missing: [
@@ -486,6 +496,7 @@ root.HOVERSIONS = {
       'Which five of your named stars go into a new galaxy is drawn from the game’s seed, not the phone’s random numbers.',
       'French and Turkish are the game’s own (its fr.lproj and tr.lproj).',
       REMAKE_LANG('German (“Übersetzung des Remakes”), as 5.0.5’s: the German DOS 2.0’s lines wherever the English is 2.0’s, the remake’s German in its words for the rest; the help page stays English'),
+      SPANISH('; the help page stays English'),
     ],
     missing: [
       'Game Center itself: the leaderboards and achievements are kept here, not shared.',
@@ -517,6 +528,7 @@ root.HOVERSIONS = {
       'The Back key is Escape.',
       'French and Turkish are the game’s own (its fr.lproj and tr.lproj).',
       REMAKE_LANG('German (“Übersetzung des Remakes”), as 5.0.5’s: the German DOS 2.0’s lines wherever the English is 2.0’s, the remake’s German in its words for the rest; the help page stays English'),
+      SPANISH('; the help page stays English'),
     ],
 
     missing: [

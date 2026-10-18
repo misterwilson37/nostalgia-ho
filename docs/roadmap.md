@@ -37,7 +37,13 @@ export and import for every version (item 7).
    3.0.1, backwards from iOS (and 1.2F); German for 3.0.1, 4.0.5, 5.0.5, the Palm, iOS and
    Android, forward from the German DOS 2.0; a German 1.2 and a French 2.0 (1.2F's text
    carried forward). Each marked as the remake's in the Language lists and the version
-   notes; `node tools/lang-test.js` checks them. Left: the remake's own windows stay
+   notes; `node tools/lang-test.js` checks them. **Then (October 2026):** a third tier,
+   lines adapted from official (an official line's translation edited for a slightly
+   different English, counted apart: `tools/lang-test.js --count`, `--adapted`), and
+   Spanish for every version (1.2, 2.0, 3.0.1, 4.0.5 Windows and Mac, 5.0.5, the Palm,
+   iOS, Android), all of it the remake's, "Español (traducción del remake)", from one
+   glossary in the official translations' spirit (`docs/translations.md`, "Spanish
+   glossary"). Left: the remake's own windows stay
    English (`docs/translations.md`, "What stays English"); the help pages exist in French
    and Turkish for iOS and Android only.
 

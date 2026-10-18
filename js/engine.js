@@ -111,8 +111,8 @@ function rules(G) {
 // A language the version never shipped in is the remake's own translation
 // (rs.lang[code].remake, js/languages.js): languageName marks it, in that
 // language, wherever a language is offered (docs/translations.md).
-const LANGUAGES = { en: 'English', fr: 'Français', de: 'Deutsch', tr: 'Türkçe' };
-const REMAKE_LANGUAGE = { en: 'the remake’s translation', fr: 'traduction du remake', de: 'Übersetzung des Remakes', tr: 'yeniden yapımın çevirisi' };
+const LANGUAGES = { en: 'English', fr: 'Français', de: 'Deutsch', tr: 'Türkçe', es: 'Español' };
+const REMAKE_LANGUAGE = { en: 'the remake’s translation', fr: 'traduction du remake', de: 'Übersetzung des Remakes', tr: 'yeniden yapımın çevirisi', es: 'traducción del remake' };
 function languageName(rs, code) {
   const o = rs && rs.lang && rs.lang[code];
   return (LANGUAGES[code] || code) + (o && o.remake ? ` (${REMAKE_LANGUAGE[code] || REMAKE_LANGUAGE.en})` : '');
