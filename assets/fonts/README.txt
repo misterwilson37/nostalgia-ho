@@ -8,5 +8,9 @@ Roboto-Regular.woff2   Roboto, The Roboto Project Authors (android skin, Android
 Roboto-Bold.woff2      Roboto Bold, from the variable font at wght 700, wdth 100                  OFL-Roboto.txt
 
 Not from Google Fonts:
-HoAmiga*.woff2, HoAmigaTall*.woff2  the Amiga skin's bitmap fonts: the X11 Adobe 75 dpi
-                       Helvetica bitmaps (helvR12, 10 and 08), redrawn by tools/amiga-font.py   LICENSE-HoAmiga.txt
+Ho*.woff2              the Amiga skin's bitmap fonts: the Amiga game's own HoFont 13, 11 and 9,
+                       HoBold 11 and HoCond 9 (Spaceward Ho! 2.0 for the Amiga, New World
+                       Computing / SOFTGOLD, 1994, disk 1, HO!1:fonts), redrawn by
+                       tools/amiga-font.py (HoFont13.woff2 square pixels, HoFont13Tall.woff2
+                       tall ones, and so on). They come with the game, like its art and
+                       sounds in assets/skins/amiga/.

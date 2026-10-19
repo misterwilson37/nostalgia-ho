@@ -468,9 +468,11 @@ function centerOn(sid) {
   if (x > mapW * 0.2 && x < mapW * 0.8 && y > mapH * 0.2 && y < mapH * 0.8) return; // already in view
   UI.view.ox += mapW / 2 - x; UI.view.oy += mapH / 2 - y;
 }
+// T.zoomTo(s, f): a skin's own zoom levels (the Amiga's four): the scale
+// that a zoom by f from s gives (a pinch passes its whole factor so far)
 function zoomAt(px, py, f) {
   const v = UI.view;
-  const ns = Math.max(12, Math.min(140, v.s * f));
+  const ns = T.zoomTo ? T.zoomTo(v.s, f) : Math.max(12, Math.min(140, v.s * f));
   const wx = (px - v.ox) / v.s, wy = (py - v.oy) / v.s;
   v.s = ns; v.ox = px - wx * ns; v.oy = py - wy * ns;
   draw();
@@ -553,7 +555,7 @@ function draw0() {
     if (im) { const z = ps * (look.scale || 1); cx.drawImage(im, x - z / 2, y - z / 2, z, z); }
     // satellites ring
     const sats = G.fleets.filter(f => f.star === s.id && f.sat && (f.owner === ME || visibleTo(s.id)));
-    if (sats.length) {
+    if (sats.length && !(own && T.ownRings)) { // (T.ownRings: drawStar drew them)
       cx.strokeStyle = T.satRing || (sats.some(f => f.owner === ME) ? 'rgba(120,230,255,0.9)' : 'rgba(255,120,200,0.9)');
       cx.lineWidth = 1.5; cx.beginPath(); cx.ellipse(x, y, ps * 0.62, ps * 0.62, 0, 0, Math.PI * 2); cx.stroke();
     }
@@ -712,6 +714,16 @@ function drawDots(s, x, y, ps) {
   for (const f of here) {
     const mine = f.owner === ME;
     if (T.marker && !T.marker(f, mine)) continue; // the theme doesn't show this fleet
+    // T.markerAt(f, info): a skin places the marker itself ({x, y, w}; hidden:
+    // only where a drag can pick it up; null: none), without the extras
+    if (T.markerAt) {
+      const m = T.markerAt(f, { s, x, y, ps, mine, view: UI.view });
+      if (!m) continue;
+      const im = !m.hidden && IMG[T.marker(f, mine)];
+      if (im) cx.drawImage(im, m.x, m.y, m.w, m.w);
+      UI.dots.push({ x: m.x, y: m.y, w: m.w, h: m.w, f: f.id, star: s.id, mine, sat: f.sat });
+      continue;
+    }
     let dx, dy, dir = 1;
     if (f.sat) { dx = x - ps / 2 - w - 1; dy = y - ps / 2 + li * (w + 2); li++; dir = -1; }
     else { dx = x + ps / 2 + 1; dy = y - ps / 2 + ri * (w + 2); ri++; }
@@ -942,7 +954,8 @@ const Touch = {
       if (this.pts.size < 2) return;
       const [a, b] = [...this.pts.values()], v = UI.view, [lo, hi] = zoomRange();
       const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
-      v.s = Math.max(lo, Math.min(hi, this.s0 * Math.hypot(a.x - b.x, a.y - b.y) / this.d0));
+      const pf = Math.hypot(a.x - b.x, a.y - b.y) / this.d0;
+      v.s = T.zoomTo ? T.zoomTo(this.s0, pf) : Math.max(lo, Math.min(hi, this.s0 * pf));
       v.ox = mx - this.wx * v.s; v.oy = my - this.wy * v.s; // about the fingers' midpoint, panning with it
       clampView(); draw(); return;
     }

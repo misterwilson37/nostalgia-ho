@@ -497,11 +497,11 @@ Optional ruleset flags the skin reads (each is documented where it is read):
   and then loads the classic skin's `ui.js`, which uses that to swap pictures and sounds
 - `js/skins/amiga/`: the "Amiga 2.0" skin: the Amiga version's own screen, in German, on the
   classic page: the stacked panels (star, fleets, totals, Technik Ausgaben or the players and
-  spending), the map with its scroll bars and two zooms, the report cards and Nachrichten
+  spending), the map with its scroll bars and the Amiga's four zooms, the report cards and Nachrichten
   window, and its own windows (Neue Galaxis, Registration, Schiffsbau, Typen Manager,
   Spielervergleich, Aufteilen der Schiffe, About, Startup), matched to screenshots
   (`docs/amiga-skin.md`), with the Amiga version's 16-colour pictures and sounds (art in
-  `assets/skins/amiga/`) and the X11 Helvetica bitmaps its font matches (`assets/fonts/HoAmiga*`,
+  `assets/skins/amiga/`) and the Amiga game's own fonts, HoFont, HoBold and HoCond (`assets/fonts/Ho*`,
   `tools/amiga-font.py`). A look option draws its pixels tall, as an Amiga monitor did, or
   square. The Amiga game is the DOS game (same rules, same pictures in the same order), so
   play it with the DOS 2.0 rules

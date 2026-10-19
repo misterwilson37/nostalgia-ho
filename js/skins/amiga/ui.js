@@ -29,11 +29,12 @@
 //   (docs/amiga-skin.md); every other window is the classic one in the
 //   Workbench look.
 //
-// Nothing of the Amiga's windows was in its files (the program draws them),
-// so they are matched to emulator screenshots, pixel by pixel where they
-// show it; what they don't show is guessed in the same style (the list is
-// in docs/amiga-skin.md). Its type is the X11 Adobe Helvetica bitmaps the
-// Amiga's own font matches (assets/fonts/HoAmiga*, tools/amiga-font.py).
+// The Amiga program (ho!, a self-unpacking (Imploder-style) 68000 executable, unpacked and
+// decompiled: docs/amiga-skin.md) builds its windows from tables in its data
+// (each item's kind, text, place and size) and draws its panels and map in
+// code; this skin follows those, and the screenshots where the program draws
+// with the system's own gadgets. Its type is the game's own fonts, HoFont 13,
+// 11 and 9, HoBold 11 and HoCond 9 (assets/fonts/Ho*, tools/amiga-font.py).
 //
 // The Amiga's pixels are twice as tall as they are wide (PAL hires on a 4:3
 // monitor): "Amiga monitor (tall pixels)", the default, draws them so;
@@ -60,7 +61,9 @@ const WORDS = {
   owner: ['Besitzer:', 'Owner:'], nobody: ['Niemand', 'Nobody'], empty: ['Unbewohnt', 'Uninhabited'], seen: ['Info Datum:', 'Info date:'],
   orders: ['Aufträge:', 'Orders:'], none: ['Keine.', 'None.'], unexplored: ['Unerforscht.', 'Unexplored.'], battleSeen: ['Ein Kampf wurde hier gesehen.', 'A battle was seen here.'],
   terra: ['Terra.', 'Terra.'], met: ['Met.', 'Mine'], schf: ['Schf.', 'Ship'],
-  at: ['Stationiert auf:', 'Stationed at:'], to: ['Unterwegs nach:', 'Bound for:'], tank: ['Tank:', 'Fuel:'], speed: ['Tempo:', 'Speed:'],
+  at: ['Stationiert auf: %1', 'Stationed at: %1'], dest: ['Zielort: %1 (Entf. %2; Dauer %3)', 'Destination: %1 (dist. %2; %3 turns)'],
+  via: ['Unterwegs nach %1 (E %2; D %3) via %4', 'Bound for %1 (d %2; t %3) via %4'], scrapFleet: ['Flotte zum Verschrotten.', 'Fleet to be scrapped.'],
+  noFleets: ['Keine Flotten auf diesem Planeten', 'No fleets at this planet'], tank: ['Tank:', 'Fuel:'], speed: ['Tempo:', 'Speed:'],
   full: ['Voll', 'Full'], emptyShip: ['Leer', 'Empty'], scrap: ['Schrott', 'Scrap'],
   metalLeft: ['Metall übrig', 'Metal left'], moneyTotal: ['Geld total', 'Money total'], profitTotal: ['Profit total', 'Profit total'],
   tech: ['Technik Ausgaben', 'Technology'], levels: ['Akt. Stufen', 'Levels'],
@@ -68,18 +71,23 @@ const WORDS = {
   savings: ['Sparen', 'Savings'], techBar: ['Technik', 'Tech'], linear: ['linear', 'linear'], log: ['logar.', 'log'],
   news: ['Nachrichten', 'Messages'], more: ['--mehr--', '--more--'],
   endTurn: ['Zug Ende', 'End turn'],
-  title: ['Spaceward Ho! – %1 in %2 im Jahre %3', 'Spaceward Ho! – %1 in %2 in %3'], screen: ['Spaceward Ho! Amiga Version 2.0', 'Spaceward Ho! Amiga Version 2.0'],
+  title: ['Spaceward Ho! - %1 in %2 im Jahre %3', 'Spaceward Ho! - %1 in %2 in %3'], screen: ['Spaceward Ho! Amiga Version 2.0', 'Spaceward Ho! Amiga Version 2.0'],
   ok: ['Ok', 'OK'], cancel: ['Abbruch', 'Cancel'],
   build: ['Schiffsbau', 'Shipbuilding'], queueAt: ['Auftragsliste bei %1', 'Orders at %1'], types: ['Vorhandene Typen', 'Types'], waiting: ['Auf Warteliste:', 'Waiting:'],
   done: ['%1% fertig', '%1% done'], newType: ['Neuer Typ…', 'New type…'], noShip: ['Keine Schiffsbaugelder: Schf. im Sternfenster.', 'No shipbuilding money: Ship bar in the star panel.'],
   typeMgr: ['Spaceward Ho! Typen Manager', 'Spaceward Ho! Ship Types'], name: ['Name:', 'Name:'], cls: ['Klasse:', 'Class:'], devCost: ['Entw.kosten:', 'Design cost:'],
   prodCost: ['Prod.kosten:', 'Unit cost:'], built: ['# Gebaut: %1', '# Built: %1'], exist: ['# Existent: %1', '# Existing: %1'], scrapType: ['Typ verschrotten', 'Scrap type'],
   nameBtn: ['Name', 'Name'], rename: ['Neuer Name für %1:', 'New name for %1:'], shields2: ['Schilde:', 'Shields:'], weite: ['Weite:', 'Range:'], tempo: ['Tempo:', 'Speed:'], waffen: ['Waffen:', 'Weapons:'], miniC: ['Mini:', 'Mini:'],
+  rnHelp1: ['Geben Sie einen neuen Namen ein', 'Type a new name'], rnHelp2: ["oder wählen Sie 'Benennen' an", "or choose 'Name it'"],
+  autoName: ['Benennen', 'Name it'], renameTitle: ['Schiff umbenennen', 'Rename ship'],
+  noCompare: ['Es gibt keinen Vergleich vor dem Jahre 2010!', 'There is no comparison before 2010!'],
+  cWon: ['Sie haben das Spiel im Jahre %1 gewonnen!', 'You won the game in %1!'], cLost: ['Sie haben das Spiel im Jahre %1 verloren!', 'You lost the game in %1!'],
+  playerList: ['Liste aller Spieler und ihrer Eigenschaften', 'All the players and their settings'], iqLine: ['Computerintelligenz: %1', 'Computer intelligence: %1'],
   scrapAsk: ['%1 und alle %2 Schiffe dieses Typs verschrotten?', 'Scrap %1 and all %2 ships of that type?'],
   compare: ['Spielervergleich von noch %1 Spielern im Jahre %2', 'Comparing the %1 players left in %2'], first: ['erster', 'first'], middle: ['mittlerer', 'middle'], last: ['letzter', 'last'],
   cProfit: ['Profit', 'Profit'], cMetal: ['Metall', 'Metal'], cPlanets: ['Planeten', 'Planets'], cShips: ['Schiffe', 'Ships'], cShields: ['Schilde', 'Shields'], info: ['Info', 'Info'],
-  split: ['Aufteilen der Schiffe', 'Organize ships'], splitHelp1: ['– Stellen Sie die Schiffe beliebig zusammen.', '– Put the ships together as you like.'],
-  splitHelp2: ['– Klick mit UMSCHALTEN wählt eine ganze Flotte an.', '– A click with SHIFT picks a whole fleet.'], group: ['Guppieren', 'Group'], single: ['Vereinzeln', 'Split up'],
+  split: ['Aufteilen der Schiffe', 'Organize ships'], splitHelp1: ['- Stellen Sie die Schiffe beliebig zusammen.', '- Put the ships together as you like.'],
+  splitHelp2: ['- Klick mit UMSCHALTEN wählt eine ganze Flotte an.', '- A click with SHIFT picks a whole fleet.'], group: ['Guppieren', 'Group'], single: ['Vereinzeln', 'Split up'],
   about: ['Spaceward Ho!', 'Spaceward Ho!'],
   ngTitle: ['Neue Galaxis erstellen', 'Create a new galaxy'], density: ['Sterndichte:', 'Star density:'], shape: ['Art der Galaxis:', 'Kind of galaxy:'], iq: ['Computerintelligenz:', 'Computer intelligence:'],
   size: ['Größe der Galaxis:', 'Size of the galaxy:'], computers: ['Anzahl der Computerspieler:', 'Number of computer players:'], bang: ['Urknall', 'Big Bang'], moreSettings: ['Mehr…', 'More…'],
@@ -88,6 +96,8 @@ const WORDS = {
   startup: ['Spaceward Ho! Startup', 'Spaceward Ho! Startup'], open: ['Spiel öffnen', 'Open game'], newGame: ['Neues Spiel', 'New game'],
   pixels: ['Pixel', 'Pixels'], tall: ['Amiga monitor (tall pixels)', 'Amiga monitor (tall pixels)'], square: ['Square pixels', 'Square pixels'],
   commands: ['Befehle', 'Orders'], noCommands: ['(keine)', '(none)'],
+  credit1: ['Spaceward Ho! Amiga Version 2.0 von Stefan Bebbo Franke.', 'Spaceward Ho! Amiga Version 2.0 by Stefan Bebbo Franke.'],
+  credit2: ['Grafiken von Howard Vives.', 'Graphics by Howard Vives.'],
 };
 // no game yet: the Amiga's German
 const de = () => { const G = game(); return G ? !!(G.opts && G.opts.lang === 'de') : true; };
@@ -102,13 +112,29 @@ const CMD_DE = {
 const cmdWord = (t) => (de() && CMD_DE[t]) || (de() && /^Review (battle|duel)/.test(t) ? t.replace(/^Review battle/, 'Kampf ansehen').replace(/^Review duel/, 'Duell ansehen') : t);
 const CLASS_DE = { scout: 'Späher', fighter: 'Kampfschiff', colony: 'Kolonieschiff', satellite: 'Satellit', tanker: 'Tanker', dread: 'Schlachtschiff', bio: 'Biowaffe', decoy: 'Attrappe' };
 const className = (t) => (de() ? CLASS_DE[t] : null) || (HO.TYPES[t] ? HO.TYPES[t].name : t);
-// numbers the Amiga's way: 51.000, $ 51.000, $ -7.501
-const num = (n) => Math.round(n).toLocaleString(de() ? 'de-DE' : 'en-US');
-const cash = (n) => (de() ? '$ ' + num(n) : api().money(n));
-const signed = (n, money) => {
-  const a = Math.abs(Math.round(n)), s = n < 0 ? '–' : '+', m = money ? '$ ' : '';
-  return `(${s} ${m}${money && a >= 1000 ? Math.round(a / 1000) + 'K' : num(a)})`;
+// numbers the Amiga's way (ho!, FUN_0010eb24): 51.000, 1.234.567, and from
+// ten million on in thousands, 12.345K; the totals' changes in money
+// (FUN_0010ec04) in whole thousands or millions, 22K, 3M
+const num = (n) => {
+  const a = Math.abs(Math.trunc(n)), sg = n < 0 ? '-' : '', sep = de() ? '.' : ',';
+  const m = Math.trunc(a / 1e6), k = Math.trunc((a % 1e6) / 1000), u = a % 1000, p3 = (v) => String(v).padStart(3, '0');
+  if (m >= 10) return sg + m + sep + p3(k) + 'K';
+  if (m) return sg + m + sep + p3(k) + sep + p3(u);
+  if (k) return sg + k + sep + p3(u);
+  return sg + u;
 };
+const cash = (n) => (de() ? '$ ' + num(n) : api().money(n));
+// "(+ $ 22K)", "(- 889)": strings 90-93
+const signed = (n, money) => {
+  const a = Math.abs(Math.trunc(n)), s = n < 0 ? '-' : '+';
+  if (!money) return `(${s} ${num(a)})`;
+  const m = Math.trunc(a / 1e6), k = Math.trunc((a % 1e6) / 1000);
+  return `(${s} $ ${m ? m + 'M' : k ? k + 'K' : a})`;
+};
+// a bar's colour goes with its height (FUN_001110fc): of 50 pixels, the
+// colour table at data+0x21bc, pens 4, 11, 7 and 8 for a quarter each
+const BAR_PENS = ['#003399', '#3333ff', '#993399', '#cc33ff'];
+const barPen = (h) => BAR_PENS[Math.max(0, Math.min(3, Math.floor(Math.max(0, h) * 4 / 51)))];
 const celsius = (f) => ((f - 32) * 5 / 9).toFixed(1) + '°C';
 const temp = (f) => (de() ? celsius(f) : api().degF(f));
 
@@ -276,10 +302,9 @@ function dragColonyBar(G, s, bars, i, v) {
 function starChart(G, p, s) {
   const bars = colonyBars(G, p, s);
   const names = [w('terra'), w('met'), w('schf')].slice(0, bars.length);
-  const max = Math.max(...bars);
   const cols = bars.map((v, i) => {
-    const fill = el('div', { class: 'am-cfill' + (v === max && v > 0 ? ' top' : '') });
-    fill.style.height = Math.max(0, v) / 10 + '%';
+    const fill = el('div', { class: 'am-cfill' });
+    fill.style.height = Math.max(0, v) / 10 + '%'; fill.style.background = barPen(Math.floor(Math.max(0, v) * 50 / 1000));
     return el('div', { class: 'am-ccol' + (v < 0 ? ' done' : ''), role: 'slider', tabindex: 0, 'aria-label': names[i], 'aria-valuenow': Math.max(0, Math.round(v / 10)), 'data-i': i }, fill);
   });
   const area = el('div', { class: 'am-carea' }, el('i', { class: 'am-axis' }), ...cols);
@@ -290,7 +315,7 @@ function starChart(G, p, s) {
     const v = Math.max(0, Math.min(1000, Math.round((r.bottom - e.clientY) / r.height * 1000)));
     const now = cur || bars;
     cur = dragColonyBar(G, s, now, i, v);
-    cols.forEach((c, j) => { c.firstChild.style.height = Math.max(0, cur[j]) / 10 + '%'; });
+    cols.forEach((c, j) => { c.firstChild.style.height = Math.max(0, cur[j]) / 10 + '%'; c.firstChild.style.background = barPen(Math.floor(Math.max(0, cur[j]) * 50 / 1000)); });
   };
   cols.forEach((col, i) => {
     col.addEventListener('pointerdown', (e) => {
@@ -352,8 +377,8 @@ function fleetLine(G, f) {
 }
 function scrapValue(G, f) {
   const p = G.players[f.owner], rate = HO.rules(G).scrapReturn ? HO.rules(G).scrapReturn(G, p) : 0.75;
-  let m = 0; for (const k in f.ships) { const d = HO.getDesign(G, f.owner, +k); if (d) m += HO.designCost(G, d).metal * f.ships[k] * rate; }
-  return Math.round(m);
+  let m = 0; for (const k in f.ships) { const d = HO.getDesign(G, f.owner, +k); if (d) m += HO.designCost(G, d).metal * f.ships[k]; }
+  return Math.floor(m * rate + 1e-9);
 }
 function fleetPanel() {
   const a = api(), G = a.G, ME = a.ME, UI = a.UI, sid = UI.sel;
@@ -365,18 +390,22 @@ function fleetPanel() {
   if (!f && UI.selFleet != null) { const g = G.fleets.find(x => x.id === UI.selFleet && x.owner === ME); if (g) f = g; }
   const head = el('div', { class: 'am-fhead' });
   if (f && f.owner === ME) {
-    const where = f.to != null ? `${w('to')} ${G.stars[f.to].name}` : `${w('at')} ${G.stars[f.star].name}`;
+    const where = fleetWhere(G, f);
     const colony = HO.fleetDesigns(G, f).some(d => d.type === 'colony');
     const third = f.sat ? '' : colony ? (f.colonists > 0 ? w('full') : w('emptyShip')) : `${w('scrap')} ${num(scrapValue(G, f))}`;
     head.append(el('div', null, where),
       el('div', { class: 'am-f3' }, el('span', null, f.sat ? '' : `${w('tank')} ${Math.floor(f.fuel + 1e-9)}/${HO.fleetMaxRange(G, f)}`),
         el('span', null, f.sat ? '' : `${w('speed')} ${HO.fleetSpeed(G, f)}`), el('span', null, third)));
-  } else if (sid != null && list.length) head.append(el('div', null, `${w('at')} ${G.stars[sid].name}`), el('div', null, ' '));
+  } else if (sid != null && list.length) head.append(el('div', null, w('at', G.stars[sid].name)), el('div', null, ' '));
+  else if (sid != null) head.append(el('div', null, w('noFleets'))); // string 543 (FUN_00106294)
   const rows = el('div', { class: 'am-flist fleets' });
   for (const x of list) {
     const mine = x.owner === ME, inb = x.to != null;
     const t = (mine ? '' : G.players[x.owner].name + ': ') + (inb ? '» ' : '') + fleetLine(G, x) + (mine && x.scrap301 ? ' ✕' : '');
-    const r = el('div', { class: 'frow am-frow' + (x.id === UI.selFleet ? ' sel' : '') + (mine ? '' : ' enemy'), 'data-fleet': x.id, 'data-inbound': inb ? '1' : null,
+    // a fleet with orders in HoBold 11; a row too long for the panel in HoFont 9 (FUN_00105d5a)
+    const moving = mine && (x.to != null || x.dest != null);
+    const fit = fits(t, moving ? 'HoBold11' : 'HoFont11', 216) ? '' : ' f9';
+    const r = el('div', { class: 'frow am-frow' + (x.id === UI.selFleet ? ' sel' : '') + (mine ? '' : ' enemy') + (moving ? ' moving' : '') + fit, 'data-fleet': x.id, 'data-inbound': inb ? '1' : null,
       onclick: () => { UI.selFleet = x.id; a.renderPanel(); a.draw(); } }, t);
     r.addEventListener('dblclick', () => { if (mine && !inb && !x.sat && !G.over) a.openSplit(x); });
     r.addEventListener('contextmenu', (e) => { e.preventDefault(); UI.selFleet = x.id; a.renderPanel(); a.draw(); popup(commands(), e.clientX, e.clientY); });
@@ -388,6 +417,27 @@ function fleetPanel() {
   requestAnimationFrame(() => { const s = rows.querySelector('.sel'); if (s) { const o = s.offsetTop - rows.offsetTop; if (o < rows.scrollTop || o + s.offsetHeight > rows.scrollTop + rows.clientHeight) rows.scrollTop = o; } });
   return box;
 }
+// where the selected fleet is (FUN_00105e9a, strings 544-547): marked for
+// scrapping; at a star; bound for its next stop ("Zielort", with the
+// distance and the turns there); or with stops after that ("Unterwegs
+// nach" the last, "via" the next)
+function fleetWhere(G, f) {
+  if (f.scrap301) return w('scrapFleet');
+  if (f.to == null && f.dest == null) return w('at', G.stars[f.star].name);
+  const next = f.to != null ? f.to : f.dest, last = f.path && f.path.length ? f.path[f.path.length - 1] : next;
+  const d = f.to != null ? Math.max(0, f.dist - f.prog) : HO.starDist(G, f.star, next);
+  const t = Math.max(1, Math.ceil(d / Math.max(1, HO.fleetSpeed(G, f)) - 1e-9));
+  return last === next ? w('dest', G.stars[next].name, Math.round(d), t) : w('via', G.stars[last].name, Math.round(d), t, G.stars[next].name);
+}
+// whether a text fits a width in Amiga pixels in one of the fonts (as TextLength)
+let MEASURE = null;
+function fits(t, fam, width) {
+  MEASURE = MEASURE || document.createElement('canvas').getContext('2d');
+  MEASURE.font = `16px ${fam}, sans-serif`;
+  return MEASURE.measureText(t).width <= width;
+}
+// a ship's caption: HoFont 11, else 9, else HoCond 9, whichever fits (FUN_001214e2)
+const capFont = (t, width) => (fits(t, 'HoFont11', width) ? 'f11' : fits(t, 'HoFont9', width) ? 'f9' : 'fc9');
 function visibleAt(G, ME, sid) { return G.stars[sid].owner === ME || G.fleets.some(f => f.owner === ME && f.star === sid && f.to == null); }
 
 // ---------- the totals ----------
@@ -454,14 +504,13 @@ function techWin(tb) {
   const levels = el('div', { class: 'am-levels' }, el('div', null, w('levels')),
     ...['range', 'speed', 'weapons', 'shields', 'mini'].map(k => el('div', { class: 'am-lrow' }, el('span', null, w(KEYS[k])), el('span', null, String(p.tech[k])))));
   const h = tb.querySelector('h3'); if (h) h.remove();
-  let best = null, bv = -1;
   for (const r of tb.querySelectorAll('.barrow')) {
     const key = r.dataset.help, l = r.querySelector('.blabel');
     if (KEYS[key]) l.textContent = w(KEYS[key]);
-    const v = r.querySelector('.track')._v || 0;
-    if (v > bv + 1e-9) { bv = v; best = r; } else if (Math.abs(v - bv) < 1e-9) best = null;
   }
-  if (best) best.classList.add('top');
+  // each bar coloured by its height, again as it is dragged
+  const pens = () => { for (const f of tb.querySelectorAll('.fill')) f.style.setProperty('background', barPen(Math.round((parseFloat(f.style.height) || 0) / 100 * 50)), 'important'); };
+  pens(); for (const ev of ['pointermove', 'pointerup', 'keyup']) tb.addEventListener(ev, pens);
   tb.classList.add('am-techbars');
   const front = techFront();
   const win = screenWin('am-tech', w('tech'), { close: () => setTechFront(false), depth: () => setTechFront(false) }, el('div', { class: 'am-techbody' }, levels, tb));
@@ -490,35 +539,86 @@ function setTitle() {
 }
 
 // ---------- the map ----------
-// far: open circles (9 x 7 pixels, the selected one in a green ring, 13 x
-// 11), close up: the planet pictures (32 x 32) with their names under them
-const BIG = 18; // Amiga pixels per light year from which the pictures show
+// The Amiga's map (ho!, FUN_00104ade, one star; FUN_001048de, the stars in
+// view) has four zooms: 6, 9, 12 and 17 pixels to the light year (the menu's
+// Vergrößern and Verkleinern step through them, FUN_00123138 and
+// FUN_001231e4); a new player's preferences start at 17 (FUN_00100c60 sets
+// the view's +0x26 to 0x11, as THE_HO!.PRF on the disk has it). What a star
+// shows depends on the zoom alone, explored or not:
+// - 6: an open circle in pen 0 (the grey, #bbbbbb), DrawEllipse 4 x 3 (9 x 7
+//   pixels); the selected star first gets one in pen 10 (green), 6 x 5. No
+//   names, no fleets, no satellites.
+// - 9 and 12: the star's 16 x 16 picture (the player's view of it: the same
+//   pictures as DOS, 86 records after the 32 x 32 ones), the selected star's
+//   green ring (picture 242, DOS 501) 5 pixels up and left of it; your fleets'
+//   marker (picture 531, DOS 3114) 12 right of it and 6 up; satellites a
+//   white circle (pen 14) of radius 8 round its middle; the name in white,
+//   HoFont 9, centred under it.
+// - 17: the same with the 32 x 32 picture, the spiked ring (239, DOS 500) 12
+//   left and 9 up of it, the marker 28 right, the circle of radius 16 and the
+//   name in HoFont 11.
+// The remake's map has 2 light years to its unit (LY_PER_UNIT in the rulesets).
+const LY = 2, ZOOMS = [6, 9, 12, 17].map(z => z * LY);
+const zoomIdx = (s) => { let b = 0; ZOOMS.forEach((z, i) => { if (Math.abs(Math.log(z / s)) < Math.abs(Math.log(ZOOMS[b] / s))) b = i; }); return b; };
+// a wheel turn or a menu steps a zoom; a pinch goes to the zoom nearest its factor
+function zoomTo(s, f) {
+  const cur = zoomIdx(s);
+  let i = zoomIdx(s * f);
+  if (i === cur && Math.abs(Math.log(f)) >= 0.13) i = cur + (f > 1 ? 1 : -1);
+  return ZOOMS[Math.max(0, Math.min(ZOOMS.length - 1, i))];
+}
+const zoomOf = (view) => ZOOMS[zoomIdx(view.s)] / LY; // 6, 9, 12 or 17
+// DrawEllipse's pixels (graphics.library's midpoint ellipse), as sprites
+function ellipse(a, b, colour) {
+  const c = document.createElement('canvas'); c.width = 2 * a + 1; c.height = 2 * b + 1;
+  const x = c.getContext('2d'); x.fillStyle = colour;
+  const put = (i, j) => { for (const [p, q] of [[i, j], [-i, j], [i, -j], [-i, -j]]) x.fillRect(a + p, b + q, 1, 1); };
+  // the outline: for each column the rows it crosses, and for each row the columns
+  for (let i = 0; i <= a; i++) { const j = Math.round(b * Math.sqrt(Math.max(0, 1 - (i * i) / (a * a)))); put(i, j); }
+  for (let j = 0; j <= b; j++) { const i = Math.round(a * Math.sqrt(Math.max(0, 1 - (j * j) / (b * b)))); put(i, j); }
+  return c;
+}
 function sprite(rows, colour) {
   const c = document.createElement('canvas'); c.width = rows[0].length; c.height = rows.length;
   const x = c.getContext('2d'); x.fillStyle = colour;
   rows.forEach((r, j) => { for (let i = 0; i < r.length; i++) if (r[i] === '#') x.fillRect(i, j, 1, 1); });
   return c;
 }
+// (the 4 x 3 and 6 x 5 ellipses as the screenshots show them)
 const CIRCLE = ['..#####..', '.#.....#.', '#.......#', '#.......#', '#.......#', '.#.....#.', '..#####..'];
 const RING = ['....#####....', '..##.....##..', '.#.........#.', '.#.........#.', '#...........#', '#...........#', '#...........#', '.#.........#.', '.#.........#.', '..##.....##..', '....#####....'];
 let SPR = null;
-const sprites = () => SPR || (SPR = { grey: sprite(CIRCLE, '#bbbbbb'), white: sprite(CIRCLE, '#ffffff'), ring: sprite(RING, '#33ff33') });
+const sprites = () => SPR || (SPR = { circle: sprite(CIRCLE, '#bbbbbb'), ring: sprite(RING, '#33ff33'), sat16: ellipse(16, 16, '#ffffff'), sat8: ellipse(8, 8, '#ffffff') });
+const smallPic = (name) => name && name.replace(/^dos:i(\d+)$/, 'dos:s$1');
 function drawStar(cx, o) {
   const { s, x, y, look, sel, IMG, view, G, ME } = o;
-  const X = Math.round(x), Y = Math.round(y);
+  const X = Math.round(x), Y = Math.round(y), z = zoomOf(view), S = sprites();
   cx.imageSmoothingEnabled = false;
-  if (view.s < BIG) {
-    const S = sprites();
-    cx.drawImage(s.owner === ME ? S.white : S.grey, X - 4, Y - 3);
+  if (z <= 6) {
     if (sel) cx.drawImage(S.ring, X - 6, Y - 5);
+    cx.drawImage(S.circle, X - 4, Y - 3);
     return true;
   }
-  if (sel && IMG[P + 'd500']) { const r = IMG[P + 'd500']; cx.drawImage(r, X - Math.floor(r.width / 2), Y - Math.floor(r.height / 2)); }
-  const im = look.pic || IMG[look.base];
-  if (im) { const z = look.pic ? 32 : im.width; cx.drawImage(im, X - z / 2, Y - z / 2, z, look.pic ? 32 : im.height); }
-  cx.font = '16px HoAmiga, sans-serif'; cx.textAlign = 'center'; cx.textBaseline = 'alphabetic';
-  cx.fillStyle = '#ffffff'; cx.fillText(s.name, X, Y + 16 + 9);
+  const big = z === 17, n = big ? 32 : 16, L = X - n / 2, T0 = Y - n / 2;
+  const ring = sel && IMG[P + (big ? 'd500' : 'd501')];
+  if (ring) cx.drawImage(ring, L - (big ? 12 : 5), T0 - (big ? 9 : 5));
+  const im = look.pic || IMG[big ? look.base : smallPic(look.base)] || IMG[look.base];
+  if (im) cx.drawImage(im, L, T0, n, n);
+  // satellites (yours, or anyone's you can see there): the white circle
+  if (G.fleets.some(f => f.star === s.id && f.sat && f.to == null && (f.owner === ME || visibleAt(G, ME, s.id)))) cx.drawImage(big ? S.sat16 : S.sat8, X - n / 2, Y - n / 2);
+  cx.font = big ? '16px HoFont11, sans-serif' : '16px HoFont9, sans-serif';
+  cx.textAlign = 'left'; cx.textBaseline = 'alphabetic'; cx.fillStyle = '#ffffff';
+  const len = Math.round(cx.measureText(s.name).width);
+  cx.fillText(s.name, X - (len >> 1), T0 + n + (big ? 9 : 7));
   return true;
+}
+// your fleets at a star: the one marker, where the Amiga puts it (T.markerAt);
+// at the far zoom none is drawn, but a drag can still pick the fleets up there
+function markerAt(f, { x, y, view }) {
+  const z = zoomOf(view), X = Math.round(x), Y = Math.round(y);
+  if (z <= 6) return { x: X - 4, y: Y - 3, w: 9, hidden: true };
+  const big = z === 17, n = big ? 32 : 16;
+  return { x: X - n / 2 + (big ? 28 : 12), y: Y - n / 2 - 6, w: 16 };
 }
 // the scroll bars follow the view (T.afterDraw)
 function syncMapBars() {
@@ -558,19 +658,32 @@ function mapBars(wrap) {
   };
   wrap.append(mk(true), mk(false), el('div', { class: 'am-corner', 'aria-hidden': 'true' }));
 }
-// the first view: the Amiga's far zoom, on your home star
+// the first view: the Amiga's starting zoom, 17 pixels to the light year,
+// on your home star (or the selected one)
 function fitView(v, { G, ME, mapW, mapH, sel }) {
-  const s = Math.max(v.s, 14);
   const st = G.stars[sel != null ? sel : G.players[ME].homeStar];
-  if (s !== v.s && st) { v.s = s; v.ox = mapW / 2 - st.x * s; v.oy = mapH / 2 - st.y * s; }
+  v.s = ZOOMS[3];
+  if (st) { v.ox = mapW / 2 - st.x * v.s; v.oy = mapH / 2 - st.y * v.s; }
 }
 
 // ---------- the reports: the card, and the Nachrichten window ----------
 const NEWSKEY = 'ho5.amiga.news';
 // (open unless closed; on a phone, where it would hide the small map, closed unless opened)
 const newsOpen = () => { const v = LS.get(NEWSKEY); return v == null ? !PX.phone : v !== '0'; };
+// The first two reports credit the version: the Amiga's own (texte.pff,
+// strings 569 and 570, as the Amiga game writes them for a new player), in
+// place of the ruleset's (DOS 2.0: "Spaceward Ho! Version 2.0.1 von Peter
+// Commons."), as each skin's title credit follows the skin.
+function amigaSay(G, m) {
+  const t = m && m.text;
+  if (typeof t === 'string' && /^Spaceward Ho!.* by Peter Commons\.$/.test(t)) return w('credit1');
+  if (t === 'Artwork by Howard Vives.') return w('credit2');
+  return HO.say(G, m.text);
+}
 function afterMsg(box, ctx) {
   const card = box.querySelector('.card'), clock = box.querySelector('.clock');
+  const m = ctx.inbox && ctx.inbox[ctx.idx];
+  if (card && m) { const p = card.querySelector('.mtext p'), t = amigaSay(ctx.G, m); if (p && t !== HO.say(ctx.G, m.text)) p.textContent = t; }
   box.classList.toggle('am-cardbox', !!card && !clock);
   box.classList.toggle('am-clockbox', !!clock);
   if (card && !card.classList.contains('end') && !card.classList.contains('waiting') && ctx.idx < ctx.inbox.length - 1) {
@@ -602,7 +715,7 @@ function renderNews(inbox) {
     list.append(el('div', { class: 'am-nrow', role: 'button', tabindex: 0, onclick: () => {
       if (m.battle) { a.openBattle(m.battle); return; }
       if (m.star != null) { a.UI.sel = m.star; a.centerOn(m.star); a.renderPanel(); a.draw(); }
-    } }, img(newsIcon(m), 'am-nicon'), el('p', null, HO.say(G, m.text))));
+    } }, img(newsIcon(m), 'am-nicon'), el('p', null, amigaSay(G, m))));
   }
   const body = el('div', { class: 'am-nwrap' }, list, scroller(list, true));
   const nw = screenWin('am-news', w('news'), {
@@ -635,16 +748,22 @@ function shipCanvas(d, owner) {
   return im;
 }
 
-// Schiffsbau (13.png): the colony's build queue. The first order, its cost
-// ("[P]" with the prototype) and how much of it is paid; the next orders
-// ("Auf Warteliste", the ruleset's slots); the player's types, a click
-// queuing one. Ok keeps the orders, Abbruch takes back this window's. The
-// classic window (the designer) opens from "Neuer Typ…".
+// Schiffsbau (13.png; ho! FUN_00120e12, table data+0x2afa, the one for a
+// screen 256 to 399 lines high): the colony's orders. The big picture is the
+// ship being built (the first order's type), its cost ("[P]" with the
+// prototype) and how much of it is paid; "Auf Warteliste" shows the orders,
+// a slot each (type and count), two on this screen. A click on a type
+// (FUN_00121612) adds one ship to the first slot of that type, or fills the
+// first empty slot, or beeps; a click on a slot (FUN_001216f4) takes one
+// ship off it, and its last ship takes the order away (the first order's
+// part-payment with it); the big picture takes no clicks. Ok keeps the
+// orders, Abbruch takes back this window's. The classic window (the
+// designer) opens from "Neuer Typ…".
 function openShipyard(sid) {
   const a = api(), G = a.G, ME = a.ME, p = a.me(), s = G.stars[sid];
   if (!HO.feature(G, 'buildQueue') || G.over) return false;
   const before = JSON.stringify(s.queue || []), yard0 = s.yard, yardDid0 = s.yardDid;
-  const slots = HO.rules(G).queueSlots || 3;
+  const slots = Math.min(2, HO.rules(G).queueSlots || 3); // the Amiga's two slots on a 256-line screen
   const types = ['scout', 'fighter', 'colony', 'satellite', 'tanker', 'dread', 'bio', 'decoy'].filter(t => HO.canBuildType(G, p, t));
   let sel = null;
   const body = el('div', { class: 'am-yard' });
@@ -655,25 +774,26 @@ function openShipyard(sid) {
     const cost = first ? HO.shipCostNow(G, p, first) : null;
     const left = el('div', { class: 'am-yleft' },
       el('div', { class: 'am-ytitle' }, w('queueAt', s.name)),
-      el('div', { class: 'am-ybig', role: 'button', tabindex: 0, title: first ? first.name : '', onclick: () => { if (q[0]) { HO.unqueueShip(G, ME, sid, 0); render(); a.renderPanel(); } } }, first ? shipCanvas(first) : ''),
+      el('div', { class: 'am-ybig', title: first ? first.name : '' }, first ? shipCanvas(first) : ''),
       el('div', { class: 'am-ycost' }, el('span', null, cost ? `${cash(cost.money)}${cost.proto ? ' [P]' : ''}` : ''), el('span', null, pr ? w('done', pr.pct) : '')),
       el('div', { class: 'am-ywait' }, el('span', { class: 'am-ywl' }, w('waiting')),
-        el('div', { class: 'am-yslots' }, ...Array.from({ length: Math.max(1, slots - 1) }, (_, i) => {
-          // the ships waiting: the first order's others, then the next orders
-          const wait = [...(q[0] && q[0].n > 1 ? [{ did: q[0].did, n: q[0].n - 1, at: 0 }] : []), ...q.slice(1).map((x, j) => ({ did: x.did, n: x.n, at: j + 1 }))];
-          const it = wait[i], d = it && HO.getDesign(G, ME, it.did);
-          return el('div', { class: 'am-yslot', role: 'button', tabindex: 0, onclick: () => { if (it) { HO.unqueueShip(G, ME, sid, it.at); render(); a.renderPanel(); } } },
-            d ? shipCanvas(d) : '', d ? el('div', { class: 'am-ycap' }, `${countWord(it.n)} ${d.name} (${d.W}/${d.S}) ${className(d.type)}`) : '');
+        el('div', { class: 'am-yslots' }, ...Array.from({ length: slots }, (_, i) => {
+          // slot i is order i
+          const it = q[i], d = it && HO.getDesign(G, ME, it.did), cap = d ? `${countWord(it.n)} ${d.name} (${d.W}/${d.S}) ${className(d.type)}` : '';
+          return el('div', { class: 'am-yslot', role: 'button', tabindex: 0, onclick: () => { if (it) { HO.unqueueShip(G, ME, sid, i); render(); a.renderPanel(); } else a.beep(); } },
+            d ? shipCanvas(d) : '', d ? el('div', { class: 'am-ycap ' + capFont(cap, 120) }, cap) : '');
         }))),
       (s.ship || 0) > 0 || !q.length ? null : el('p', { class: 'am-ynote' }, w('noShip')));
     const listBox = el('div', { class: 'am-ytypes' });
     for (const d of p.designs.filter(x => !x.scrapped && types.includes(x.type))) {
+      const cap = `${d.name} (${d.W}/${d.S}) ${className(d.type)}`;
       listBox.append(el('div', { class: 'am-ytype' + (sel === d.id ? ' sel' : '') + (d.scrap301 ? ' scrap' : ''), role: 'button', tabindex: 0,
         onclick: () => {
           sel = d.id;
-          if (!d.scrap301 && HO.queueShips(G, ME, sid, d.id, 1)) a.Sound.play(7006); else a.beep();
+          const q = s.queue || [], open = q.slice(0, slots).some(x => x.did === d.id) || q.length < slots;
+          if (!d.scrap301 && open && HO.queueShips(G, ME, sid, d.id, 1)) a.Sound.play(7006); else a.beep();
           render(); a.renderPanel(); a.draw();
-        } }, shipCanvas(d), el('div', { class: 'am-ycap' }, `${d.name} (${d.W}/${d.S}) ${className(d.type)}`)));
+        } }, shipCanvas(d), el('div', { class: 'am-ycap ' + capFont(cap, 120) }, cap)));
     }
     const right = el('div', { class: 'am-yright' }, el('div', { class: 'am-ytitle' }, w('types')),
       el('div', { class: 'am-ylist' }, listBox, scroller(listBox, true)));
@@ -705,7 +825,7 @@ function openTypes() {
     const ds = live(); if (!ds.some(d => d.id === cur)) cur = ds.length ? ds[0].id : null;
     const d = ds.find(x => x.id === cur), n = count();
     const listBox = el('div', { class: 'am-tlist' }, ...ds.map(x => el('div', { class: 'am-ytype' + (x.id === cur ? ' sel' : '') + (x.scrap301 ? ' scrap' : ''), role: 'button', tabindex: 0,
-      onclick: () => { cur = x.id; render(); } }, shipCanvas(x), el('div', { class: 'am-ycap' }, `${x.name} (${x.W}/${x.S}) ${className(x.type)}`))));
+      onclick: () => { cur = x.id; render(); } }, shipCanvas(x), el('div', { class: 'am-ycap ' + capFont(`${x.name} (${x.W}/${x.S}) ${className(x.type)}`, 120) }, `${x.name} (${x.W}/${x.S}) ${className(x.type)}`))));
     const c = d ? HO.designCost(G, d) : null;
     const fig = (k, v) => [el('span', null, k), el('span', null, v)];
     const marks = !!HO.rules(G).flagScrapDesign;
@@ -721,6 +841,9 @@ function openTypes() {
           ...fig(w('metal'), num(c.metal)), ...fig(w('miniC'), String(d.M))] : []))),
       el('label', { class: 'am-radio am-tscrap' }, el('input', { type: 'checkbox', checked: d && d.scrap301 ? 'checked' : false, disabled: !d || G.over, onchange: (e) => {
         if (!d) return;
+        // the Amiga's is a toggle that marks the type for the end of the turn
+        // (FUN_00122412 sets the design's +0x26); a ruleset that scraps a type
+        // when ordered (DOS 2.0 here) asks first, as that can't be taken back
         if (marks) { HO.rules(G).flagScrapDesign(G, p, d, 'command'); a.save(); render(); a.renderPanel(); return; }
         e.target.checked = false;
         a.confirmBox(w('scrapAsk', d.name, n[d.id] || 0), () => {
@@ -735,119 +858,144 @@ function openTypes() {
   amWin(w('typeMgr'), body, 'am-wtypes', { onClose: () => a.save() });
   return true;
 }
-function renameType(d, done) {
-  const a = api();
-  const inp = el('input', { value: d.name, maxlength: 15, 'aria-label': w('name') });
-  const box = el('div', { class: 'am-rename' }, el('p', null, w('rename', d.name)), inp,
-    el('div', { class: 'am-tbtns' }, btn(w('ok'), () => { const v = inp.value.trim(); if (v) d.name = v; a.save(); a.closeModal(); openTypes(); a.renderPanel(); }), btn(w('cancel'), () => { a.closeModal(); openTypes(); })));
-  amWin(w('nameBtn'), box, 'am-wsmall');
+// "Name" (FUN_00122474): the "Schiff umbenennen" window (table data+0x2fd4,
+// 250 x 162): a new name typed in, or "Benennen" for one the game makes up
+// (FUN_00123126, the type's next name, here the ruleset's designName); Ok
+// keeps it, Abbruch doesn't.
+function renameType(d) {
+  const a = api(), G = a.G, p = a.me();
+  const inp = el('input', { class: 'am-field am-rnfield', value: d.name, maxlength: 14, 'aria-label': w('name') });
+  const back = () => { a.closeModal(); openTypes(); };
+  const box = el('div', { class: 'am-rename' }, el('p', { class: 'am-rn1' }, w('rnHelp1')), el('p', { class: 'am-rn2' }, w('rnHelp2')), inp,
+    el('div', { class: 'am-rnbtns' },
+      btn(w('ok'), () => { const v = inp.value.trim(); if (v) d.name = v; a.save(); back(); a.renderPanel(); }),
+      btn(w('autoName'), () => { inp.value = HO.designName(G, p, d.type); inp.focus(); }),
+      btn(w('cancel'), back)));
+  amWin(w('renameTitle'), box, 'am-wrename');
   inp.focus(); inp.select();
 }
 
-// Spielervergleich (18.png): where you stand among the players left, in
-// each of nine things: your picture at erster, mittlerer or letzter (a tie
-// is mittlerer). Info opens the players window.
+// Spielervergleich (18.png; ho! FUN_00123c0e, table data+0x35c2): for each
+// of nine figures (the turn's record: Profit total, Metall übrig, planets,
+// ships, the five tech levels) a score of 10 for each other player ahead of
+// you and 5 for each level with you; your picture goes down from "erster"
+// by score / (10 x (players - 1)) of the way to "letzter" (a tie with
+// everyone is the middle). None in 2000 ("Es gibt keinen Vergleich vor dem
+// Jahre 2010!"), nor for a player out of the game ("Sie haben das Spiel im
+// Jahre ... gewonnen/verloren!"). Info (gadget 2) opens the players' list.
 function openCompare() {
   const a = api(), G = a.G, ME = a.ME, me = a.me();
   const alive = G.players.filter(q => q.alive && !q.surrendered);
   const ships = (q) => G.fleets.filter(f => f.owner === q.id).reduce((n, f) => n + HO.fleetCount(f), 0);
-  const cats = [['cProfit', q => q.lastGross || 0], ['cMetal', q => q.metal], ['cPlanets', q => HO.colonies(G, q.id).length], ['cShips', ships],
+  const cats = [['cProfit', q => HO.projected(G, q).income], ['cMetal', q => q.metal], ['cPlanets', q => HO.colonies(G, q.id).length], ['cShips', ships],
     ['range', q => q.tech.range], ['vel', q => q.tech.speed], ['weapons', q => q.tech.weapons], ['cShields', q => q.tech.shields], ['mini', q => q.tech.mini]];
-  const rank = (fn) => {
-    const mine = fn(me), others = alive.filter(q => q.id !== ME).map(fn);
+  const others = alive.filter(q => q.id !== ME);
+  const place = (fn) => {
     if (!others.length) return 0;
-    if (others.every(v => mine > v)) return 0;
-    if (others.every(v => mine < v)) return 2;
-    return 1;
+    const v = fn(me); let sc = 0;
+    for (const q of others) { const u = fn(q); if (v < u) sc += 10; else if (v === u) sc += 5; }
+    return sc / (10 * others.length);
   };
   const icon = P + 'i' + (me.female ? 1500 : 1000);
-  const plot = el('div', { class: 'am-cplot' },
+  const over = G.over || !me.alive || me.surrendered;
+  const title = G.year <= 2000 ? w('noCompare') : over ? w(me.alive && !me.surrendered ? 'cWon' : 'cLost', G.year) : w('compare', alive.length, G.year);
+  const plot = G.year <= 2000 || over ? el('div', { class: 'am-cplot am-cnone' }) : el('div', { class: 'am-cplot' },
     ...[w('first'), w('middle'), w('last')].map((t, i) => el('span', { class: 'am-crank r' + i }, t)),
-    ...cats.map(([k, fn], i) => { const r = rank(fn); return el('div', { class: 'am-ccat', style: `--i:${i}` }, el('span', { class: 'am-cpic r' + r }, img(icon)), el('span', { class: 'am-cname' }, w(k))); }));
+    ...cats.map(([k, fn], i) => el('div', { class: 'am-ccat', style: `--i:${i}` }, el('span', { class: 'am-cpic', style: `--y:${place(fn)}` }, img(icon)), el('span', { class: 'am-cname' }, w(k)))));
   const body = el('div', { class: 'am-compare' }, frame('am-cframe', plot),
-    el('div', { class: 'am-cbtns' }, btn(w('ok'), () => a.closeModal()), btn(w('info'), () => { a.closeModal(); a.classic('players', a.openPlayers); }, 'am-default')));
-  amWin(w('compare', alive.length, G.year), body, 'am-wcompare');
+    el('div', { class: 'am-cbtns' }, btn(w('ok'), () => a.closeModal()), btn(w('info'), () => { a.closeModal(); openPlayerList(); }, 'am-default')));
+  amWin(title, body, 'am-wcompare');
   return true;
 }
+// "Liste aller Spieler und ihrer Eigenschaften" (FUN_00123a8c, table
+// data+0x34ea, 360 x 182): each player with the skill level (Neuling to
+// Profi, strings 76-79), and under the list "Computerintelligenz: ..."
+function openPlayerList() {
+  const a = api(), G = a.G;
+  const SK = { novice: 0, beginner: 1, normal: 2, advanced: 3, expert: 4 };
+  const IQ = { dumb: ['Dumm', 'Dumb'], average: ['Normal', 'Normal'], smart: ['Klug', 'Smart'] };
+  const rows = el('div', { class: 'am-plrows' }, ...G.players.map(q => {
+    const k = SKILLS[SK[q.skill] != null ? SK[q.skill] : 2];
+    return el('div', { class: 'am-plrow' }, el('span', null, q.name), el('span', null, de() ? k[1] : k[2]));
+  }));
+  const iq = IQ[G.opts.iq] || IQ.average;
+  const body = el('div', { class: 'am-plist2' }, frame('am-plframe', rows, scroller(rows, true)),
+    el('p', { class: 'am-pliq' }, w('iqLine', de() ? iq[0] : iq[1])),
+    el('div', { class: 'am-plbtns' }, btn(w('ok'), () => { a.closeModal(); openCompare(); }, 'am-default')));
+  amWin(w('playerList'), body, 'am-wplist');
+}
 
-// Aufteilen der Schiffe (16.png): your fleets at the star, a row each (its
-// count and picture). A click picks one ship of a row, a click with Shift
-// the whole fleet; Guppieren puts the picked ships together, Vereinzeln
-// makes each a fleet of its own; Abbruch puts the fleets back as they were.
-// It does what the classic page's Split and Merge do (the engine's
-// splitFleet and mergeFleets, with the ruleset's own fuel rules).
+// Aufteilen der Schiffe (16.png; ho! FUN_001229ea, table data+0x326e): the
+// ships of ONE type at this star, the selected fleet's, in a grid of 4 x 2
+// cells (145 x 41 pixels, filled down then across), a cell a fleet: its
+// count and the ship's picture; an eighth fleet and more go into the last
+// cell. A drag from one cell to another moves one ship, with Shift the whole
+// cell (FUN_001227fe, FUN_00122748; a finger: a long press first takes the
+// whole cell, the remake's stand-in for Shift). Guppieren puts every ship in
+// the first cell (FUN_00122950), Vereinzeln one in each of the first seven
+// and the rest in the last (FUN_0012298a). Ok makes the cells the fleets
+// (the Amiga's: the lowest fuel and no orders, as merging fleets gives
+// here: the engine's mergeFleets and splitFleet with the ruleset's rules);
+// Abbruch changes nothing.
 function openSplitter(f0) {
   const a = api(), G = a.G, ME = a.ME, sid = f0.star;
-  if (sid == null || G.over) return false;
-  const mineHere = () => a.fleetOrder(G.fleets.filter(f => f.owner === ME && f.star === sid && f.to == null && !f.sat));
-  const snap = JSON.stringify(mineHere()), nextId = G.nextId, sel0 = a.UI.selFleet;
-  const pick = new Map(); // fleet id -> ships picked
+  if (sid == null || G.over || f0.to != null) return false;
+  const did0 = +Object.keys(f0.ships)[0];
+  const only = (f) => Object.keys(f.ships).length === 1 && +Object.keys(f.ships)[0] === did0;
+  if (!only(f0)) return a.classic('split', a.openSplit, f0); // a fleet of several types: the classic window
+  const fleets = a.fleetOrder(G.fleets.filter(f => f.owner === ME && f.star === sid && f.to == null && !f.sat && only(f)));
+  const d = HO.getDesign(G, ME, did0);
+  const N = 8, cells = new Array(N).fill(0);
+  fleets.forEach((f, i) => { cells[Math.min(i, N - 1)] += HO.fleetCount(f); });
+  const start = cells.slice();
   const body = el('div', { class: 'am-split' });
-  const render = () => {
-    const rows = el('div', { class: 'am-srows' });
-    for (const f of mineHere()) {
-      const n = HO.fleetCount(f), k = pick.get(f.id) || 0, d = HO.fleetDesigns(G, f)[0];
-      rows.append(el('div', { class: 'am-srow' + (k ? ' sel' : ''), role: 'button', tabindex: 0, onclick: (e) => {
-        const now = pick.get(f.id) || 0;
-        pick.set(f.id, e.shiftKey ? (now === n ? 0 : n) : now ? 0 : 1);
-        render();
-      } }, el('span', { class: 'am-sn' }, k && k < n ? `${k}/${n}` : String(n)), ...HO.fleetDesigns(G, f).slice(0, 4).map(x => shipCanvas(x))));
-      void d;
-    }
-    const keep = rows.scrollTop;
-    body.replaceChildren(el('p', null, w('splitHelp1')), el('p', null, w('splitHelp2')), frame('am-sframe', rows),
-      el('div', { class: 'am-spbtns' },
-        btn(w('ok'), () => a.closeModal()),
-        btn(w('group'), group),
-        btn(w('single'), single),
-        btn(w('cancel'), cancel, 'am-default')));
-    rows.scrollTop = keep;
+  const grid = el('div', { class: 'am-sgrid' });
+  const paint = () => {
+    grid.replaceChildren(...cells.map((n, i) => el('div', { class: 'am-scell', 'data-i': i, style: `--c:${Math.floor(i / 2)};--r:${i % 2}` },
+      n ? el('span', { class: 'am-sn' }, num(n)) : null, n ? shipCanvas(d) : null)));
   };
-  // the picked ships of a fleet as a fleet of their own (the whole fleet when all are picked)
-  const takeOut = (f, k) => {
-    if (k >= HO.fleetCount(f)) return f;
-    const take = {}; let left = k;
-    for (const did of Object.keys(f.ships)) { const m = Math.min(left, f.ships[did]); if (m > 0) { take[did] = m; left -= m; } }
-    return HO.splitFleet(G, f, take);
+  // a drag: one ship, or the whole cell with Shift (or after a long press)
+  let drag = null;
+  const cellAt = (x, y) => { const e = document.elementFromPoint(x, y); const c = e && e.closest('.am-scell'); return c && grid.contains(c) ? +c.dataset.i : -1; };
+  grid.addEventListener('pointerdown', (e) => {
+    const i = cellAt(e.clientX, e.clientY);
+    if (i < 0 || !cells[i]) return;
+    e.preventDefault(); grid.setPointerCapture(e.pointerId);
+    drag = { i, all: e.shiftKey, t: setTimeout(() => { if (drag) { drag.all = true; grid.classList.add('am-sall'); } }, 500) };
+    grid.children[i].classList.add('am-sfrom');
+  });
+  grid.addEventListener('pointermove', (e) => {
+    if (!drag) return;
+    const j = cellAt(e.clientX, e.clientY);
+    for (const c of grid.children) c.classList.toggle('am-sto', +c.dataset.i === j && j !== drag.i);
+  });
+  const end = (e, ok) => {
+    if (!drag) return;
+    clearTimeout(drag.t); grid.classList.remove('am-sall');
+    const j = ok ? cellAt(e.clientX, e.clientY) : -1, i = drag.i, all = drag.all || e.shiftKey;
+    drag = null;
+    if (j >= 0 && j !== i && cells[i]) { const k = all ? cells[i] : 1; cells[j] += k; cells[i] -= k; }
+    paint();
   };
-  function group() {
-    const fs = mineHere().filter(f => pick.get(f.id));
-    if (fs.length < 2 && !(fs.length === 1 && pick.get(fs[0].id) < HO.fleetCount(fs[0]))) {
-      // nothing picked to group: every fleet that may join another, as Merge does
-      const all = mineHere(); let n = 0;
-      for (let i = 0; i < all.length; i++) for (let j = i + 1; j < all.length; j++) if (G.fleets.includes(all[i]) && G.fleets.includes(all[j]) && HO.canMerge(G, all[i], all[j])) { HO.mergeFleets(G, all[i], all[j]); n++; }
-      if (!n) a.beep();
-    } else {
-      const parts = fs.map(f => takeOut(f, pick.get(f.id))).filter(Boolean);
-      let into = parts[0], n = 0;
-      for (const f of parts.slice(1)) if (G.fleets.includes(f) && HO.canMerge(G, into, f)) { HO.mergeFleets(G, into, f); n++; }
-      if (!n && parts.length > 1) a.beep();
-      a.UI.selFleet = into ? into.id : a.UI.selFleet;
+  grid.addEventListener('pointerup', (e) => end(e, true));
+  grid.addEventListener('pointercancel', (e) => end(e, false));
+  const group = () => { const t = cells.reduce((x, y) => x + y, 0); cells.fill(0); cells[0] = t; paint(); };
+  const single = () => { let t = cells.reduce((x, y) => x + y, 0); for (let i = 0; i < N; i++) { const k = i < N - 1 ? Math.min(1, t) : t; cells[i] = k; t -= k; } paint(); };
+  const ok = () => {
+    const want = cells.filter(n => n > 0);
+    if (JSON.stringify(cells) !== JSON.stringify(start) && fleets.length && G.fleets.includes(fleets[0])) {
+      // one fleet of them all, then a fleet split off for each cell after the first
+      const into = fleets[0];
+      for (const f of fleets.slice(1)) if (G.fleets.includes(f)) HO.mergeFleets(G, into, f);
+      for (const n of want.slice(1)) if (HO.fleetCount(into) > n) HO.splitFleet(G, into, { [did0]: n });
+      a.UI.selFleet = into.id;
     }
-    pick.clear(); render(); a.renderPanel(); a.draw();
-  }
-  function single() {
-    const fs = mineHere().filter(f => pick.get(f.id));
-    if (!fs.length) { a.beep(); return; }
-    for (const f of fs) {
-      let k = pick.get(f.id);
-      while (k-- > 0 && G.fleets.includes(f) && HO.fleetCount(f) > 1) {
-        const did = Object.keys(f.ships)[0];
-        HO.splitFleet(G, f, { [did]: 1 });
-      }
-    }
-    pick.clear(); render(); a.renderPanel(); a.draw();
-  }
-  function cancel() {
-    const back = JSON.parse(snap);
-    const at = G.fleets.findIndex(f => f.owner === ME && f.star === sid && f.to == null && !f.sat);
-    G.fleets = G.fleets.filter(f => !(f.owner === ME && f.star === sid && f.to == null && !f.sat));
-    G.fleets.splice(at < 0 ? G.fleets.length : Math.min(at, G.fleets.length), 0, ...back);
-    G.nextId = nextId; a.UI.selFleet = sel0;
-    a.closeModal(); a.renderPanel(); a.draw();
-  }
-  render();
-  amWin(w('split'), body, 'am-wsplit', { onClose: () => { a.save(); a.renderPanel(); a.draw(); } });
+    a.closeModal(); a.save(); a.renderPanel(); a.draw();
+  };
+  paint();
+  body.append(el('p', null, w('splitHelp1')), el('p', null, w('splitHelp2')), frame('am-sframe', grid),
+    el('div', { class: 'am-spbtns' }, btn(w('ok'), ok), btn(w('group'), group), btn(w('single'), single), btn(w('cancel'), () => a.closeModal(), 'am-default')));
+  amWin(w('split'), body, 'am-wsplit', { onClose: () => { a.renderPanel(); a.draw(); } });
   return true;
 }
 
@@ -996,9 +1144,11 @@ function page(doc) {
   ts.prepend(scr);
   card.classList.add('am-tcard');
   const credit = card.querySelector('.credit');
-  if (credit) credit.textContent = 'With the art and sounds of Spaceward Ho! 2.0 for the Amiga (New World Computing / SOFTGOLD, 1994). Amiga version by Stefan "Bebbo" Franke; pictures by Howard Vives. Type: the X11 Adobe Helvetica bitmaps.';
+  if (credit) credit.textContent = 'With the art and sounds of Spaceward Ho! 2.0 for the Amiga (New World Computing / SOFTGOLD, 1994). Amiga version by Stefan "Bebbo" Franke; pictures by Howard Vives. Type: the Amiga game\'s own fonts.';
   const l = doc.querySelector('#menubar .logo'); if (l) l.textContent = 'Ho!';
   setTitle();
+  // the panels measure their texts in the Amiga's fonts: again once they are loaded
+  if (doc.fonts && doc.fonts.ready) doc.fonts.ready.then(() => { const A = api(); if (A && A.G) { A.renderPanel(); A.draw(); } });
   // the title screen's height changes with its credits: fit the screen again
   new ResizeObserver(() => layout()).observe(card);
   void a;
@@ -1054,9 +1204,9 @@ window.HOTHEME_OVER = {
   select: null, selectSmall: null, // the selection is drawStar's
   mapBg: '#000', bgStars: false,
   mapPixel: () => [PX.x, PX.y],
-  mapFont: () => '16px HoAmiga, sans-serif',
-  planetPx: (s) => (s >= BIG ? 32 : 12),
-  drawStar, afterDraw: syncMapBars, fitView,
+  mapFont: () => '16px HoFont11, sans-serif',
+  planetPx: (s) => [9, 16, 16, 32][zoomIdx(s)],
+  drawStar, markerAt, ownRings: true, zoomTo, afterDraw: syncMapBars, fitView,
   techBars: 'vertical', barGrid: false,
   panel, afterMsg, window: skinWindow, newGame, menus, lookOptions, page, title,
 };

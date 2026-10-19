@@ -6,19 +6,23 @@
    for the Workbench look (html.os-workbench); in any other OS look the
    windows keep that look's. The classic and DOS skins' rules come first. */
 @import url("../dos/style.css");
-/* the type: the X11 Adobe Helvetica bitmaps the Amiga's font matches
-   (assets/fonts, tools/amiga-font.py): a pixel 1/16 em high, square, or
-   half as wide as high ("Tall"), so the font size is 16 pixel heights */
-@font-face { font-family: "HoAmiga"; font-weight: 400; font-display: block; src: url("../../../assets/fonts/HoAmiga-Regular.woff2") format("woff2"); }
-@font-face { font-family: "HoAmiga"; font-weight: 700; font-display: block; src: url("../../../assets/fonts/HoAmiga-Bold.woff2") format("woff2"); }
-@font-face { font-family: "HoAmigaSmall"; font-weight: 400; font-display: block; src: url("../../../assets/fonts/HoAmigaSmall-Regular.woff2") format("woff2"); }
-@font-face { font-family: "HoAmigaTall"; font-weight: 400; font-display: block; src: url("../../../assets/fonts/HoAmigaTall-Regular.woff2") format("woff2"); }
-@font-face { font-family: "HoAmigaTall"; font-weight: 700; font-display: block; src: url("../../../assets/fonts/HoAmigaTall-Bold.woff2") format("woff2"); }
-@font-face { font-family: "HoAmigaTallSmall"; font-weight: 400; font-display: block; src: url("../../../assets/fonts/HoAmigaTallSmall-Regular.woff2") format("woff2"); }
+/* the type: the Amiga game's own fonts, HoFont 13, 11 and 9, HoBold 11 and
+   HoCond 9 (assets/fonts, tools/amiga-font.py): a pixel 1/16 em high, square,
+   or half as wide as high ("Tall"), so the font size is 16 pixel heights */
+@font-face { font-family: "HoFont13"; font-weight: 400; font-display: block; src: url("../../../assets/fonts/HoFont13.woff2") format("woff2"); }
+@font-face { font-family: "HoFont13Tall"; font-weight: 400; font-display: block; src: url("../../../assets/fonts/HoFont13Tall.woff2") format("woff2"); }
+@font-face { font-family: "HoFont11"; font-weight: 400; font-display: block; src: url("../../../assets/fonts/HoFont11.woff2") format("woff2"); }
+@font-face { font-family: "HoFont11Tall"; font-weight: 400; font-display: block; src: url("../../../assets/fonts/HoFont11Tall.woff2") format("woff2"); }
+@font-face { font-family: "HoFont9"; font-weight: 400; font-display: block; src: url("../../../assets/fonts/HoFont9.woff2") format("woff2"); }
+@font-face { font-family: "HoFont9Tall"; font-weight: 400; font-display: block; src: url("../../../assets/fonts/HoFont9Tall.woff2") format("woff2"); }
+@font-face { font-family: "HoBold11"; font-weight: 400; font-display: block; src: url("../../../assets/fonts/HoBold11.woff2") format("woff2"); }
+@font-face { font-family: "HoBold11Tall"; font-weight: 400; font-display: block; src: url("../../../assets/fonts/HoBold11Tall.woff2") format("woff2"); }
+@font-face { font-family: "HoCond9"; font-weight: 400; font-display: block; src: url("../../../assets/fonts/HoCond9.woff2") format("woff2"); }
+@font-face { font-family: "HoCond9Tall"; font-weight: 400; font-display: block; src: url("../../../assets/fonts/HoCond9Tall.woff2") format("woff2"); }
 :root {
   --hat: #3333ff; --space: #000;
   --am-grey: #bbbbbb; --am-blue: #3333ff; --am-cyan: #33ccff; --am-red: #880000; --am-green: #33ff33; --am-navy: #003399; --am-magenta: #cc33ff; --am-purple: #993399; --am-dot: #3399cc;
-  --amf: "HoAmigaTall"; --amfs: "HoAmigaTallSmall";
+  --amf: "HoFont13Tall"; --am11: "HoFont11Tall"; --amfs: "HoFont9Tall"; --amb: "HoBold11Tall"; --amc: "HoCond9Tall";
   --am-up: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 7' width='12' height='7' preserveAspectRatio='none' shape-rendering='crispEdges'%3E%3Crect x='5' y='2' width='2' height='1' fill='%23000'/%3E%3Crect x='4' y='3' width='4' height='1' fill='%23000'/%3E%3Crect x='3' y='4' width='6' height='1' fill='%23000'/%3E%3Crect x='2' y='5' width='3' height='1' fill='%23000'/%3E%3Crect x='7' y='5' width='3' height='1' fill='%23000'/%3E%3C/svg%3E");
   --am-down: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 7' width='12' height='7' preserveAspectRatio='none' shape-rendering='crispEdges'%3E%3Crect x='2' y='1' width='3' height='1' fill='%23000'/%3E%3Crect x='7' y='1' width='3' height='1' fill='%23000'/%3E%3Crect x='3' y='2' width='6' height='1' fill='%23000'/%3E%3Crect x='4' y='3' width='4' height='1' fill='%23000'/%3E%3Crect x='5' y='4' width='2' height='1' fill='%23000'/%3E%3C/svg%3E");
   --am-left: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 7' width='12' height='7' preserveAspectRatio='none' shape-rendering='crispEdges'%3E%3Crect x='7' y='1' width='2' height='1' fill='%23000'/%3E%3Crect x='5' y='2' width='3' height='1' fill='%23000'/%3E%3Crect x='3' y='3' width='4' height='1' fill='%23000'/%3E%3Crect x='5' y='4' width='3' height='1' fill='%23000'/%3E%3Crect x='7' y='5' width='2' height='1' fill='%23000'/%3E%3C/svg%3E");
@@ -32,7 +36,7 @@
   --am-radioon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 17 9' width='17' height='9' preserveAspectRatio='none' shape-rendering='crispEdges'%3E%3Crect x='2' y='0' width='12' height='1' fill='%23000'/%3E%3Crect x='14' y='0' width='1' height='1' fill='%23fff'/%3E%3Crect x='1' y='1' width='2' height='1' fill='%23000'/%3E%3Crect x='14' y='1' width='2' height='1' fill='%23fff'/%3E%3Crect x='0' y='2' width='2' height='1' fill='%23000'/%3E%3Crect x='5' y='2' width='7' height='1' fill='%233399cc'/%3E%3Crect x='15' y='2' width='2' height='1' fill='%23fff'/%3E%3Crect x='0' y='3' width='2' height='1' fill='%23000'/%3E%3Crect x='4' y='3' width='9' height='1' fill='%233399cc'/%3E%3Crect x='15' y='3' width='2' height='1' fill='%23fff'/%3E%3Crect x='0' y='4' width='2' height='1' fill='%23000'/%3E%3Crect x='4' y='4' width='9' height='1' fill='%233399cc'/%3E%3Crect x='15' y='4' width='2' height='1' fill='%23fff'/%3E%3Crect x='0' y='5' width='2' height='1' fill='%23000'/%3E%3Crect x='4' y='5' width='9' height='1' fill='%233399cc'/%3E%3Crect x='15' y='5' width='2' height='1' fill='%23fff'/%3E%3Crect x='0' y='6' width='2' height='1' fill='%23000'/%3E%3Crect x='5' y='6' width='7' height='1' fill='%233399cc'/%3E%3Crect x='15' y='6' width='2' height='1' fill='%23fff'/%3E%3Crect x='1' y='7' width='2' height='1' fill='%23000'/%3E%3Crect x='14' y='7' width='2' height='1' fill='%23fff'/%3E%3Crect x='2' y='8' width='1' height='1' fill='%23000'/%3E%3Crect x='3' y='8' width='12' height='1' fill='%23fff'/%3E%3C/svg%3E");
   --am-size: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 3' width='18' height='3' preserveAspectRatio='none' shape-rendering='crispEdges'%3E%3Crect x='1' y='0' width='2' height='1' fill='%23000'/%3E%3Crect x='0' y='1' width='3' height='1' fill='%23000'/%3E%3Crect x='16' y='1' width='2' height='1' fill='%23000'/%3E%3Crect x='0' y='2' width='18' height='1' fill='%23000'/%3E%3C/svg%3E");
 }
-html.am-square { --amf: "HoAmiga"; --amfs: "HoAmigaSmall"; }
+html.am-square { --amf: "HoFont13"; --am11: "HoFont11"; --amfs: "HoFont9"; --amb: "HoBold11"; --amc: "HoCond9"; }
 html.amiga, html.amiga body { background: #000; }
 /* one Amiga pixel: --u across, --v down; a part of the page names which (the screen, a window, the title screen) */
 html.amiga #app { --u: var(--x); --v: var(--y); }
@@ -499,7 +503,7 @@ html.amiga.am-phone .scrim { place-items: start center; padding-top: 4px; }
 /* ---------- the title screen: the Startup window on the empty screen (10.png), the remake's credits under it ---------- */
 html.amiga #titlescreen { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 0; padding: 0; background: #000; overflow: auto; }
 html.amiga #titlescreen[hidden] { display: none; }
-html.amiga #titlescreen.loading::after { font: 16px HoAmiga, sans-serif; color: #bbb; }
+html.amiga #titlescreen.loading::after { font: 16px HoFont13, sans-serif; color: #bbb; }
 html.amiga .am-tscreen { position: relative; flex: none; width: calc(640 * var(--u)); height: calc(256 * var(--v)); overflow: hidden; background: #000; }
 html.amiga .am-tbar { position: absolute; left: 0; top: 0; width: 100%; height: calc(17 * var(--v)); box-sizing: border-box; background: var(--am-blue); border-bottom: calc(1 * var(--v)) solid #fff; color: #fff; }
 html.amiga .am-tbar > span:first-child { position: absolute; left: calc(6 * var(--u)); top: calc(-1 * var(--v)); line-height: calc(16 * var(--v)); white-space: nowrap; }
@@ -539,3 +543,51 @@ html.amiga .am-tcard button, html.amiga .am-tcard select, html.amiga .am-tcard .
 html.amiga .am-tcard .credit, html.amiga .am-tcard .madeby { flex-basis: auto !important; }
 html.amiga .am-tcard button { min-height: calc(14 * var(--v)); padding: calc(1 * var(--v)) calc(8 * var(--u)) 0 !important; border: 0 !important; border-radius: 0 !important; background: var(--am-grey) !important; color: #000 !important; box-shadow: inset calc(2 * var(--u)) calc(1 * var(--v)) 0 #fff, inset calc(-2 * var(--u)) calc(-1 * var(--v)) 0 #000 !important; line-height: calc(10 * var(--v)) !important; }
 html.amiga .am-tcard select { height: calc(14 * var(--v)); color: #000; border: 0 !important; border-radius: 0; background-color: var(--am-grey) !important; box-shadow: inset calc(2 * var(--u)) calc(1 * var(--v)) 0 #fff, inset calc(-2 * var(--u)) calc(-1 * var(--v)) 0 #000 !important; padding: 0 calc(6 * var(--u)) 0 calc(22 * var(--u)) !important; background-size: calc(11 * var(--u)) calc(10 * var(--v)), calc(1 * var(--u)) 100%, calc(1 * var(--u)) 100% !important; background-position: calc(5 * var(--u)) center, calc(19 * var(--u)) 0, calc(20 * var(--u)) 0 !important; }
+/* ---------- which of the Amiga's fonts draws what (ho!, the SetFont before each Text) ----------
+   the screen's font, windows and their gadgets: HoFont 13; the left column,
+   the reports and the map's names close up: HoFont 11; the totals: HoBold 11
+   (FUN_00104fa4); a fleet with orders: HoBold 11, a row too long for its
+   panel: HoFont 9 (FUN_00105d5a); the picture buttons' labels and the
+   spending window's scale: HoFont 9; a ship's caption: HoFont 11, else 9,
+   else HoCond 9, whichever fits (FUN_001214e2) */
+html.amiga #panel, html.amiga #msg .card, html.amiga .am-nlist, html.amiga .am-popup { font-family: var(--am11), sans-serif; }
+html.amiga .am-sname, html.amiga .am-wname { font-family: var(--amf), sans-serif; }
+html.amiga .am-tk, html.amiga .am-tv { font-family: var(--amb), sans-serif; font-weight: 400; }
+html.amiga .am-frow.moving { font-family: var(--amb), sans-serif; }
+html.amiga .f9 { font-family: var(--amfs), sans-serif !important; }
+html.amiga .fc9 { font-family: var(--amc), sans-serif !important; }
+html.amiga .f11 { font-family: var(--am11), sans-serif !important; }
+html.amiga .wbody h3, html.amiga .wbody h4, html.amiga .wbody b, html.amiga .wbody strong { font-family: var(--amb), sans-serif; font-weight: 400; }
+/* Aufteilen der Schiffe: the 4 x 2 cells, 145 x 41 pixels, filled down then across (ho! FUN_0012263e) */
+html.amiga .am-sgrid { position: absolute; left: calc(2 * var(--u)); top: calc(1 * var(--v)); width: calc(580 * var(--u)); height: calc(82 * var(--v)); touch-action: none; }
+html.amiga .am-scell { position: absolute; left: calc(var(--c) * 145 * var(--u)); top: calc(var(--r) * 41 * var(--v)); width: calc(144 * var(--u)); height: calc(40 * var(--v)); cursor: grab; }
+html.amiga .am-scell .am-sn { position: absolute; left: calc(2 * var(--u)); bottom: calc(4 * var(--v)); }
+html.amiga .am-scell .am-ship { position: absolute; left: calc(24 * var(--u)); top: 0; width: calc(120 * var(--u)); height: calc(40 * var(--v)); background: #000; }
+html.amiga .am-scell.am-sfrom, html.amiga .am-scell.am-sto { outline: calc(1 * var(--u)) dashed #000; outline-offset: calc(-1 * var(--u)); }
+html.amiga .am-sall .am-scell.am-sfrom { outline-style: solid; }
+html.amiga .am-spbtns .am-btn:nth-child(1) { left: calc(70 * var(--u)); } html.amiga .am-spbtns .am-btn:nth-child(2) { left: calc(190 * var(--u)); }
+html.amiga .am-spbtns .am-btn:nth-child(3) { left: calc(310 * var(--u)); } html.amiga .am-spbtns .am-btn:nth-child(4) { left: calc(430 * var(--u)); }
+/* Schiff umbenennen (table data+0x2fd4: 250 x 162) */
+html.amiga .win.am-wrename { width: calc(258 * var(--u)); height: calc(180 * var(--v)); }
+html.amiga .am-rename { position: absolute; inset: 0; }
+html.amiga .am-rename > * { position: absolute; }
+html.amiga .am-rename > p { left: calc(30 * var(--u)); margin: 0 !important; white-space: nowrap; }
+html.amiga .am-rename > p.am-rn1 { top: calc(11 * var(--v)); } html.amiga .am-rename > p.am-rn2 { top: calc(26 * var(--v)); }
+html.amiga .am-rnfield { left: calc(36 * var(--u)); top: calc(58 * var(--v)); width: calc(176 * var(--u)); height: calc(16 * var(--v)); }
+html.amiga .am-rnbtns { inset: 0; pointer-events: none; }
+html.amiga .am-rnbtns .am-btn { pointer-events: auto; top: calc(120 * var(--v)); width: calc(70 * var(--u)); }
+html.amiga .am-rnbtns .am-btn:nth-child(1) { left: calc(10 * var(--u)); } html.amiga .am-rnbtns .am-btn:nth-child(2) { left: calc(90 * var(--u)); } html.amiga .am-rnbtns .am-btn:nth-child(3) { left: calc(170 * var(--u)); }
+/* Spielervergleich: the picture placed by the score, erster (0) to letzter (1) */
+html.amiga .am-cpic[style*="--y"] { top: calc((1 + var(--y) * 91) * var(--v)); }
+/* Liste aller Spieler und ihrer Eigenschaften (table data+0x34ea: 360 x 182) */
+html.amiga .win.am-wplist { width: calc(368 * var(--u)); height: calc(200 * var(--v)); }
+html.amiga .am-plist2 { position: absolute; inset: 0; }
+html.amiga .am-plist2 > * { position: absolute; }
+html.amiga .am-plframe { left: calc(16 * var(--u)); top: calc(8 * var(--v)); width: calc(328 * var(--u)); height: calc(144 * var(--v)); }
+html.amiga .am-plrows { position: absolute; left: calc(4 * var(--u)); top: calc(4 * var(--v)); width: calc(300 * var(--u)); height: calc(140 * var(--v)); overflow: hidden; }
+html.amiga .am-plrow { display: flex; height: calc(20 * var(--v)); padding: calc(3 * var(--v)) calc(4 * var(--u)) 0; box-sizing: border-box; white-space: nowrap; }
+html.amiga .am-plrow > span:first-child { width: calc(150 * var(--u)); overflow: hidden; }
+html.amiga .am-plframe > .am-prop { position: absolute; left: calc(306 * var(--u)); top: calc(4 * var(--v)); width: calc(18 * var(--u)); height: calc(139 * var(--v)); }
+html.amiga .am-pliq { left: calc(32 * var(--u)); top: calc(163 * var(--v)); margin: 0 !important; white-space: nowrap; }
+html.amiga .am-plbtns { inset: 0; pointer-events: none; }
+html.amiga .am-plbtns .am-btn { pointer-events: auto; left: calc(246 * var(--u)); top: calc(158 * var(--v)); width: calc(100 * var(--u)); }
