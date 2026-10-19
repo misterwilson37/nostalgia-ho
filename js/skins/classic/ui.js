@@ -108,15 +108,22 @@ function useSounds(id, done) {
 }
 const applySounds = () => useSounds(soundsWanted());
 const $ = (s, el) => (el || document).querySelector(s);
+// The remake's own words in the chosen language (js/ui-lang.js): every string
+// el() is given, and the words a skin writes into the page, are put in
+// HOUI's language, keeping their English; tl() for text drawn on a canvas.
+const UIL = window.HOUI || { t: (s, ...a) => { let i = 0; return s.replace(/%(?:\d+\$)?[sd]/g, () => String(a[i++])); }, tr: (s) => s, text: (d, s) => d.createTextNode(s), en: (n) => n.textContent, set: () => false, store: { get: () => null, set() {} }, onChange() {}, lang: 'en' };
+const tl = (s, ...a) => (a.length ? UIL.t(s, ...a) : UIL.tr(s));
+const TL_ATTRS = ['title', 'aria-label', 'placeholder', 'alt'];
 const el = (tag, attrs, ...kids) => {
   const e = document.createElement(tag);
   if (attrs) for (const k in attrs) {
     if (k === 'class') e.className = attrs[k];
     else if (k.startsWith('on')) e.addEventListener(k.slice(2), guard(attrs[k])); // an exception: the bug report window
     else if (k === 'html') e.innerHTML = attrs[k];
+    else if (TL_ATTRS.includes(k) && typeof attrs[k] === 'string') { const v = attrs[k], w = UIL.tr(v); e.setAttribute(k, w); if (w !== v) (e.hoA || (e.hoA = {}))[k] = [v, w]; }
     else if (attrs[k] !== false && attrs[k] != null) e.setAttribute(k, attrs[k]);
   }
-  for (const c of kids.flat()) if (c != null && c !== false) e.append(c.nodeType ? c : document.createTextNode(c));
+  for (const c of kids.flat()) if (c != null && c !== false) e.append(c.nodeType ? c : UIL.text(document, String(c)));
   return e;
 };
 // numbers and sums as the game's version writes them (rs.fmtNum, rs.fmtMoney:
@@ -530,7 +537,7 @@ function draw0() {
     const a = G.stars[UI.ruler.from], b = G.stars[UI.ruler.to], x2 = sx(b.x), y2 = sy(b.y);
     cx.save(); cx.strokeStyle = '#bfe8ff'; cx.lineWidth = 2; cx.setLineDash([6, 5]);
     cx.beginPath(); cx.moveTo(sx(a.x), sy(a.y)); cx.lineTo(x2, y2); cx.stroke(); cx.setLineDash([]);
-    const label = `${b.name}: ${HO.starDist(G, a.id, b.id).toFixed(1)} away`;
+    const label = tl('%s: %s away', b.name, HO.starDist(G, a.id, b.id).toFixed(1));
     cx.font = mapFont(12); cx.textAlign = 'left';
     const tw = cx.measureText(label).width;
     cx.fillStyle = 'rgba(0,0,0,0.7)'; cx.fillRect(x2 + 12, y2 - 24, tw + 10, 18);
@@ -609,7 +616,7 @@ function draw0() {
       const d = HO.starDist(G, f.star, tgt);
       const turns = Math.ceil(d / HO.fleetSpeed(G, f) - 1e-9);
       const via = !ok && modern() && HO.feature(G, 'waypoints') && !f.sat ? findRoute(f, tgt) : null;
-      const label = ok ? `${d.toFixed(1)} away · ${turns} turn${turns === 1 ? '' : 's'}` : via ? `Too far to fly straight: will go via ${via.length - 1} stop${via.length === 2 ? '' : 's'}` : `Too far: ${d.toFixed(1)} away, fuel ${f.fuel.toFixed(1)}`;
+      const label = ok ? tl(turns === 1 ? '%s away · %s turn' : '%s away · %s turns', d.toFixed(1), turns) : via ? tl(via.length === 2 ? 'Too far to fly straight: will go via %s stop' : 'Too far to fly straight: will go via %s stops', via.length - 1) : tl('Too far: %s away, fuel %s', d.toFixed(1), f.fuel.toFixed(1));
       cx.font = mapFont(12); cx.textAlign = 'left';
       const tw = cx.measureText(label).width;
       cx.fillStyle = 'rgba(0,0,0,0.7)'; cx.fillRect(x2 + 12, y2 - 24, tw + 10, 18);
@@ -1319,6 +1326,7 @@ function budgetEntries() {
 }
 function renderPanel() {
   if (!G) return;
+  syncLang();
   const p = me();
   const panel = $('#panel');
   const scroll = panel.scrollTop;
@@ -2046,6 +2054,7 @@ function switchPlayers() {
 }
 function handOver(p) {
   closeModal(); clearInterval(UI.anim);
+  syncLang();
   $('#msg').innerHTML = '';
   let cover = $('#handover');
   if (!cover) { cover = el('div', { id: 'handover', role: 'dialog', 'aria-modal': 'true' }); document.body.append(cover); }
@@ -2622,6 +2631,12 @@ function battleReport(b) {
   const sum = b.sides.map(o => `${o === ME ? 'You' : G.players[o].name} lost ${b.lost[o] || 0}`).join('; ') + '.';
   return el('details', { class: 'breport-box' }, el('summary', null, `Written report (${b.rounds.length} round${b.rounds.length === 1 ? '' : 's'}): ${sum}`), list);
 }
+// the battle window's last line: the rounds, each side's losses, the colony
+function battleOver(b, sides) {
+  const n = b.rounds.length;
+  return tl(n === 1 ? 'Battle over after %s round.' : 'Battle over after %s rounds.', n) + ' ' +
+    sides.map(o => o === ME ? tl('You lost %s', b.lost[o] || 0) : tl('%s lost %s', G.players[o].name, b.lost[o] || 0)).join('; ') + '.' + (b.planetDied ? ' ' + tl('The colony was wiped out.') : '');
+}
 // the shots shown at once: one, or (not fully animated, verBattle) the
 // shooting pile's run of shots
 function pileShots(round, e, VB) {
@@ -2677,14 +2692,14 @@ function openBattle(bid) {
     sides.forEach((o, si) => {
       const pp = G.players[o];
       x.fillStyle = T.battleBg ? '#000' : o === ME ? '#fff2c0' : '#ffb3d9'; x.font = '13px Geneva, Verdana, sans-serif'; x.textAlign = 'center';
-      x.fillText(o === ME ? 'You' : pp.name, si * (760 / cols) + (760 / cols) / 2, 24);
+      x.fillText(o === ME ? tl('You') : pp.name, si * (760 / cols) + (760 / cols) / 2, 24);
     });
     if (pl.x >= 0) {
       const s = G.stars[b.star]; const p = me();
       x.globalAlpha = pop > 0.01 ? 1 : 0.3;
       x.drawImage(planetBattlePic(), pl.x - 24, pl.y - 24, 48, 48);
       x.globalAlpha = 1;
-      x.fillStyle = T.battleBg ? '#000' : '#ccc'; x.font = '11px Geneva, Verdana, sans-serif'; x.fillText(`pop ${fmt(pop * 1e6)}`, pl.x, pl.y + 36);
+      x.fillStyle = T.battleBg ? '#000' : '#ccc'; x.font = '11px Geneva, Verdana, sans-serif'; x.fillText(tl('pop %s', fmt(pop * 1e6)), pl.x, pl.y + 36);
     }
     b.start.forEach((u, i) => {
       if (!alive[i]) return;
@@ -2706,11 +2721,11 @@ function openBattle(bid) {
     if (r >= b.rounds.length) {
       drawAll();
       const mine = (b.survivors[0] || 0);
-      status.textContent = `Battle over after ${b.rounds.length} round${b.rounds.length === 1 ? '' : 's'}. ` + sides.map(o => `${o === ME ? 'You' : G.players[o].name} lost ${b.lost[o] || 0}`).join('; ') + '.' + (b.planetDied ? ' The colony was wiped out.' : '');
+      status.textContent = battleOver(b, sides);
       return;
     }
     const ev = b.rounds[r][e];
-    if (!ev) { r++; e = 0; if (b.popR) pop = b.popR[r - 1]; status.textContent = `Round ${r + 1}`; setTimeout(step, 160 / speed * VB.f); return; }
+    if (!ev) { r++; e = 0; if (b.popR) pop = b.popR[r - 1]; status.textContent = tl('Round %s', r + 1); setTimeout(step, 160 / speed * VB.f); return; }
     const evs = pileShots(b.rounds[r], e, VB);
     const shots = evs.map((ev, j) => {
       const a = center(ev.si), q = e + j;
@@ -2732,7 +2747,7 @@ function openBattle(bid) {
     }
     step();
   };
-  status.textContent = 'Round 1';
+  status.textContent = tl('Round %s', 1);
   drawAll(); setTimeout(step, 400);
 }
 
@@ -2786,10 +2801,10 @@ function openBattlePanel(b) {
     x.fillStyle = T.battleBg || '#04030c'; x.fillRect(0, 0, W, H);
     if (!dark) for (let i = 0; i < 70; i++) { x.fillStyle = 'rgba(200,210,255,.35)'; x.fillRect((i * 97) % W, (i * 53) % H, 1, 1); }
     x.textAlign = 'center'; x.fillStyle = ink;
-    P.head.forEach((t, i) => { x.font = (i ? '' : 'bold ') + '13px ' + font; x.fillText(t, W / 2, 20 + i * 18); });
+    P.head.forEach((t, i) => { x.font = (i ? '' : 'bold ') + '13px ' + font; x.fillText(tl(t), W / 2, 20 + i * 18); });
     if (!P.owner) { // the remake's own: each column headed with its side's name (the version drew none)
       x.font = '12px ' + font; x.fillStyle = sub;
-      [P.leftSide ?? b.sides[0], b.sides.find(o => o !== (P.leftSide ?? b.sides[0]))].forEach((o, ci) => { if (o == null) return; x.fillText(o === ME ? 'You' : (G.players[o] || {}).name || '', ci * (W / 2) + W / 4 + (ci ? 20 : 0), headH - 6); });
+      [P.leftSide ?? b.sides[0], b.sides.find(o => o !== (P.leftSide ?? b.sides[0]))].forEach((o, ci) => { if (o == null) return; x.fillText(o === ME ? tl('You') : (G.players[o] || {}).name || '', ci * (W / 2) + W / 4 + (ci ? 20 : 0), headH - 6); });
     }
     if (!L) { x.strokeStyle = dark ? '#000' : 'rgba(200,210,255,.25)'; x.beginPath(); x.moveTo(W / 2 + 10, headH - 2); x.lineTo(W / 2 + 10, H - 40); x.stroke(); }
     P.cols.forEach((col, ci) => col.forEach((g, k) => {
@@ -2823,9 +2838,9 @@ function openBattlePanel(b) {
         x.fillStyle = '#fff'; x.font = 'bold 11px ' + font; x.fillText(g.luck > 0 ? '+' : '−', at.x + 40, at.y - 4);
       }
       x.font = '11px ' + font; x.fillStyle = ink;
-      x.fillText(cut(g.text, CW - 6), at.x, at.y + (P.owner === 'pill' ? 36 : 32));
+      x.fillText(cut(tl(g.text), CW - 6), at.x, at.y + (P.owner === 'pill' ? 36 : 32));
     }));
-    if (P.end) { x.font = 'bold 13px ' + font; x.fillStyle = ink; x.fillText(P.end.join(' '), W / 2, H - 14); }
+    if (P.end) { x.font = 'bold 13px ' + font; x.fillStyle = ink; x.fillText(P.end.map(e => tl(e)).join(' '), W / 2, H - 14); }
     for (const sh of [].concat(shot || [])) {
       x.strokeStyle = dark ? '#000' : sh.a === viewer ? '#ffe066' : '#ff6fb5'; x.lineWidth = 2;
       x.beginPath(); x.moveTo(sh.x1, sh.y1); x.lineTo(sh.x2, sh.y2); x.stroke();
@@ -2837,11 +2852,11 @@ function openBattlePanel(b) {
     if (b._stop) return;
     if (r >= b.rounds.length) {
       over = true; drawAll();
-      status.textContent = `Battle over after ${b.rounds.length} round${b.rounds.length === 1 ? '' : 's'}. ` + b.sides.map(o => `${o === ME ? 'You' : G.players[o].name} lost ${b.lost[o] || 0}`).join('; ') + '.' + (b.planetDied ? ' The colony was wiped out.' : '');
+      status.textContent = battleOver(b, b.sides);
       return;
     }
     const ev = b.rounds[r][e];
-    if (!ev) { r++; e = 0; if (b.popR) pop = b.popR[r - 1]; status.textContent = `Round ${r + 1}`; setTimeout(step, 160 / speed * VB.f); return; }
+    if (!ev) { r++; e = 0; if (b.popR) pop = b.popR[r - 1]; status.textContent = tl('Round %s', r + 1); setTimeout(step, 160 / speed * VB.f); return; }
     const evs = pileShots(b.rounds[r], e, VB);
     let t;
     const shots = evs.map((ev, j) => {
@@ -2862,7 +2877,7 @@ function openBattlePanel(b) {
     }
     step();
   };
-  status.textContent = 'Round 1';
+  status.textContent = tl('Round %s', 1);
   drawAll(); setTimeout(step, 400);
 }
 // 5.0.5's battle window (FUN_1007f560, FUN_1007f7f0, FUN_1007f9f0 lay the
@@ -2936,7 +2951,7 @@ function drawGroup505(x, g, at, ci, font) {
   const lim = g.luck && IMG[g.luck > 0 ? 'm9017' : 'm9018'];
   if (lim && lim.complete && lim.naturalWidth) x.drawImage(lim, ci ? at.x + 82 : at.x - 132, at.y - 20, 40, 40);
   const lh = g.planet ? sz.h : pile505Size(p.w, p.h, g.pics ? Math.max(1, Math.min(30, Math.trunc(0.5 + Math.pow(n, 0.68)))) : 1).h;
-  const t = g.text, w = x.measureText(t).width, y0 = at.y + Math.trunc(lh / 2);
+  const t = tl(g.text), w = x.measureText(t).width, y0 = at.y + Math.trunc(lh / 2);
   x.fillStyle = '#000'; roundRect(x, at.x - w / 2 - 51, y0 + 2, w + 102, 14, 2.5); x.fill();
   x.fillStyle = '#fff'; x.fillText(t, at.x - w / 2, y0 + 11);
   x.textAlign = 'center';
@@ -3691,6 +3706,21 @@ const fixList = (rs) => el('ul', null, ...HO.fixes(rs).map(f => el('li', null, e
 // the language last chosen for a ruleset (a skin with a language of its
 // own, T.lang, keeps its own choice)
 const langKey = (id) => 'ho5.lang.' + id + (T.lang ? '.' + ((window.HOSKINS && HOSKINS.current) || '') : '');
+// The interface's language (js/ui-lang.js): in a game, the game's (its
+// G.opts.lang, else the version's own, rs.languages), kept as the last one
+// used ("ho5.uilang"); with no game, the last one used, else the skin's own
+// (T.lang, the Amiga's German), else English. New Game shows the language
+// its Language menu has chosen (newGameDialog).
+const gameLang = (g) => (g && ((g.opts && g.opts.lang) || HO.languages(HO.ownRules(g))[0])) || 'en';
+const titleLang = () => UIL.store.get() || T.lang || 'en';
+function syncLang() {
+  if (!G) { UIL.set(titleLang()); return; }
+  const l = gameLang(G);
+  UIL.set(l);
+  if (UIL.store.get() !== l) UIL.store.set(l);
+}
+// a change of language redoes the page (js/ui-lang.js); the map is drawn again
+UIL.onChange(() => { if (cv) draw(); });
 // Ho menu, "Language…" (a version that shipped in more than one, rs.languages):
 // the game's names and words in another; the game plays on the same
 function openLanguage() {
@@ -4822,6 +4852,7 @@ function joinFromAddress() {
 function titleScreen() {
   const t = $('#titlescreen');
   t.hidden = false;
+  syncLang();
   const has = !!localStorage.getItem('ho5.save');
   const frame = $('#tframe'), fx = frame.getContext('2d');
   // the splash sits in a window named for the release this skin is, and a
@@ -5066,6 +5097,9 @@ function newGameDialog() {
       // Amiga skin's German), else the version's own
       langSel.value = langs.includes(last) ? last : T.lang && langs.includes(T.lang) ? T.lang : langs[0];
     }
+    // the window in the language it has chosen (else the last one used),
+    // its default names with it (js/ui-lang.js)
+    ngLang(langRow.hidden ? titleLang() : langSel.value);
     hoBox.hidden = !(HO.RULESETS[d.rules] || {}).hoedown;
     // the patch: only for rules that have fixes
     const prs = HO.RULESETS[d.rules], nfx = HO.fixes(prs).length;
@@ -5078,6 +5112,14 @@ function newGameDialog() {
     }
   };
   f.addEventListener('input', refresh); f.addEventListener('change', refresh);
+  // a default name (the galaxy's, the players') follows the window's language
+  // until the player types another
+  const defNames = [[f.querySelector('input[name=galaxy]'), 'Milky Way'], ...[2, 3, 4, 5, 6].map(i => [f.querySelector(`input[name=h${i}]`), `Player ${i}`])];
+  const ngLang = (l) => {
+    const was = UIL.lang;
+    UIL.set(l);
+    for (const [inp, def] of defNames) if (inp && (inp.value === def || inp.value === UIL.tr(def, was))) inp.value = UIL.tr(def);
+  };
   // the window's settings as the options HO.newGame takes (and the form's
   // values, d): Create galaxy plays them here, Play online… takes them to the lobby
   const options = () => {
@@ -5137,7 +5179,7 @@ function newGameDialog() {
       showMessages();
     });
   };
-  modal('Create galaxy', f, { cls: 'mid ngwin' });
+  modal('Create galaxy', f, { cls: 'mid ngwin', onClose: () => syncLang() });
   refresh();
   // T.newGame(form, ctx): a skin dresses the window its own way (the Amiga's
   // Neue Galaxis erstellen and Spieler Registration), the form staying the same
@@ -5362,6 +5404,7 @@ window.addEventListener('DOMContentLoaded', () => {
   if (T.page) T.page(document);
   Object.assign(HO.DATA, window.HODATA);
   setupMenus();
+  syncLang(); // the title in the last language used (js/ui-lang.js)
   $('#tnew').addEventListener('click', guard(newGameDialog));
   $('#tcont').addEventListener('click', guard(() => continueChecked()));
   $('#thelp').addEventListener('click', guard(openHelp));

@@ -227,6 +227,9 @@ async function playOne(browser, rules, url) {
   // Claude rules, Gemini's for Gemini's), which would reload the page into it; this test
   // is about the rules, and runs through the classic page
   { const sk = form.locator('select[name=skin]'); if (await sk.count() && await sk.locator('option[value=classic]').count()) await sk.selectOption('classic'); }
+  // in English: the test finds the page's controls by their English words (a
+  // version's other languages change only words, never the rules: js/ui-lang.js)
+  { const lg = form.locator('select[name=lang]'); if (await lg.isVisible() && await lg.locator('option[value=en]').count()) await lg.selectOption('en'); }
   if (rules !== '12') await form.locator('select[name=computers]').selectOption('3');
   if (rules === 'original' || rules === 'palm' || rules === 'ios' || rules === 'android') {
     // Abundant for both: the second colony from the start (and its shares)
