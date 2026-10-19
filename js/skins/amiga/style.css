@@ -53,8 +53,13 @@ html.amiga #main { display: block; position: absolute; left: 0; top: calc(17 * v
 html.amiga #menubar { position: absolute; left: 0; top: 0; width: 100%; height: calc(17 * var(--v)); padding: 0; gap: 0; background: var(--am-blue); border: 0; border-bottom: calc(1 * var(--v)) solid #fff; box-sizing: border-box; display: flex; align-items: stretch; box-shadow: none; z-index: 20; }
 html.amiga #title { display: block; position: absolute; left: calc(6 * var(--u)); top: calc(-1 * var(--v)); right: calc(30 * var(--u)); margin: 0; color: #fff; line-height: calc(16 * var(--v)); text-align: left; overflow: hidden; white-space: nowrap; cursor: default; }
 html.amiga #menubar .menu { display: none; position: relative; }
-html.amiga #menubar:hover .menu, html.amiga #menubar.am-menus .menu, html.amiga #menubar:has(.dropdown.open) .menu, html.amiga #menubar:focus-within .menu { display: block; }
-html.amiga #menubar:hover #title, html.amiga #menubar.am-menus #title, html.amiga #menubar:has(.dropdown.open) #title, html.amiga #menubar:focus-within #title { visibility: hidden; }
+html.amiga #menubar.am-menus .menu, html.amiga #menubar:has(.dropdown.open) .menu, html.amiga #menubar:focus-within .menu { display: block; }
+html.amiga #menubar.am-menus #title, html.amiga #menubar:has(.dropdown.open) #title, html.amiga #menubar:focus-within #title { visibility: hidden; }
+/* a mouse: the menus show while it is on the bar (a finger taps the bar for them) */
+@media (hover: hover) {
+  html.amiga #menubar:hover .menu { display: block; }
+  html.amiga #menubar:hover #title { visibility: hidden; }
+}
 html.amiga #menubar .mbtn { height: calc(16 * var(--v)); padding: 0 calc(6 * var(--u)); margin: 0; border: 0; border-radius: 0; background: none; color: #fff; line-height: calc(14 * var(--v)); font: inherit; box-shadow: none; cursor: pointer; }
 html.amiga #menubar .mbtn.logo { margin-left: calc(2 * var(--u)); font-weight: 400; color: #fff; }
 html.amiga #menubar .mbtn:hover, html.amiga #menubar .mbtn[aria-expanded=true], html.amiga #menubar .mbtn:focus-visible { background: #fff; color: var(--am-blue); outline: none; }
@@ -479,14 +484,15 @@ html.amiga.am-phone #app { position: relative; left: 0; top: 0; width: 100vw; he
 html.amiga.am-phone #menubar { position: sticky; top: 0; }
 html.amiga.am-phone .am-sdepth { width: calc(23 * var(--u)); }
 html.amiga.am-phone #main { position: relative; top: 0; height: auto; display: flex; flex-direction: column; }
-html.amiga.am-phone #mapwrap { position: relative; left: 0; order: -1; width: 100%; height: max(240px, calc(100svh - 17 * var(--v) - 40px)); border-left: 0; border-bottom: calc(1 * var(--v)) solid #fff; }
+html.amiga.am-phone #mapwrap { position: relative; left: 0; order: -1; width: 100%; height: max(220px, calc(100svh - 128 * var(--v))); border-left: 0; border-bottom: calc(1 * var(--v)) solid #fff; }
 html.amiga.am-phone #mapview { width: calc(100% - 16 * var(--u)); height: calc(100% - 9 * var(--v)); }
 html.amiga.am-phone #mapwrap > .am-pv { height: calc(100% - 9 * var(--v)); }
 html.amiga.am-phone #mapwrap > .am-ph { width: calc(100% - 16 * var(--u)); }
 html.amiga.am-phone #panel { position: relative; width: 100%; height: calc(239 * var(--v)); }
 html.amiga.am-phone #am-news { left: auto; right: calc(16 * var(--u)); top: auto; bottom: calc(9 * var(--v)); width: calc(200 * var(--u)); height: calc(90 * var(--v)); }
 html.amiga.am-phone .dropdown { max-width: calc(100vw - 8px); }
-html.amiga.am-phone #menubar .mbtn { padding: 0 calc(1.5 * var(--u)); }
+html.amiga.am-phone #menubar .mbtn { padding: 0 calc(1.5 * var(--u)); font-size: calc(16 * var(--v) * .62); }
+html.amiga.am-phone .dropdown { font-size: calc(16 * var(--v) * .75); }
 html.amiga.am-phone #menubar .mbtn.logo { margin-left: 0; }
 html.amiga.am-phone .scrim { place-items: start center; padding-top: 4px; }
 

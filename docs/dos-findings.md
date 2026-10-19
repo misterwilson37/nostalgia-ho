@@ -612,8 +612,10 @@ program's own words:
 2.0's messages between players (the Send Message window's "… sends a message saying he
 likes …", rules-dos `canned20`) are the German table's 708-722, official.
 
-Not changed by the language: the remake's interface (windows, buttons), the pictures (the
-Amiga skin's End Turn button stays the English copy), and the numbers in the windows.
+Not changed by the language: the remake's interface (windows, buttons), the pictures, and
+the numbers in the windows. The Amiga skin is the exception: its own screen and windows
+(`docs/amiga-skin.md`) are in the Amiga's German, and its End Turn button the German one,
+in a German game.
 
 **French (the remake's)** for DOS 2.0 and Mac 2.0.1: the French Mac 1.2F's text, which is
 2.0's line for line (`docs/translations.md`).

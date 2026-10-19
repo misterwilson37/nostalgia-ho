@@ -567,7 +567,8 @@ function fitView(v, { G, ME, mapW, mapH, sel }) {
 
 // ---------- the reports: the card, and the Nachrichten window ----------
 const NEWSKEY = 'ho5.amiga.news';
-const newsOpen = () => LS.get(NEWSKEY) !== '0';
+// (open unless closed; on a phone, where it would hide the small map, closed unless opened)
+const newsOpen = () => { const v = LS.get(NEWSKEY); return v == null ? !PX.phone : v !== '0'; };
 function afterMsg(box, ctx) {
   const card = box.querySelector('.card'), clock = box.querySelector('.clock');
   box.classList.toggle('am-cardbox', !!card && !clock);
@@ -965,7 +966,8 @@ function page(doc) {
   const bar = doc.getElementById('menubar');
   bar.append(el('span', { class: 'am-sdepth', 'aria-hidden': 'true' }));
   bar.addEventListener('contextmenu', (e) => { e.preventDefault(); bar.classList.toggle('am-menus'); });
-  doc.getElementById('title').addEventListener('click', () => bar.classList.toggle('am-menus'));
+  // a tap (or click) on the bar itself, not on a menu, shows or hides the menus
+  bar.addEventListener('click', (e) => { if (e.target === bar || e.target.id === 'title' || e.target.classList.contains('am-sdepth')) bar.classList.toggle('am-menus'); });
   doc.addEventListener('click', (e) => { if (!e.target.closest('#menubar')) bar.classList.remove('am-menus'); });
   const logo = doc.querySelector('#menubar .logo'); if (logo) logo.textContent = 'Ho!';
   // the map in its window: the canvas, its scroll bars
@@ -1021,7 +1023,7 @@ function menus(M, ho) {
   const a = () => api();
   M.Ships.push(['-'], [w('split') + '…', () => { const A2 = a(), G = A2.G; if (!G) return; const f = A2.curFleet() || G.fleets.find(x => x.owner === A2.ME && x.star === A2.UI.sel && x.to == null && !x.sat); if (f) openSplitter(f); else A2.toast(de() ? 'Wählen Sie eine Flotte.' : 'Select one of your fleets first.'); }],
     [() => w('typeMgr').replace('Spaceward Ho! ', '') + '…', () => a().G && openTypes()]);
-  M.Galaxy.push(['-'], [() => w('compare', '', '').replace(/ von noch.*| the .*/, '').replace('Comparing', 'Compare players') + '…', () => a().G && openCompare()]);
+  M.Galaxy.push(['-'], [() => (de() ? 'Spielervergleich…' : 'Compare players…'), () => a().G && openCompare()]);
   M.View.push(['-'], [() => w('tech'), () => setTechFront(!techFront()), () => !!game(), () => techFront()],
     [() => w('news'), toggleNews, () => !!game(), () => newsOpen()],
     [w('tall'), () => setPixels(pixMode() === 'tall' ? 'square' : 'tall'), null, () => pixMode() === 'tall']);

@@ -176,7 +176,7 @@ skin's own chrome) and draw everything in CSS and inline SVG.
 | DOS | `dos` | the DOS 2.0 game's own Windows 3.1 style windows | dos |
 | Windows 3.1 | `win31` | the DOS look with a sizing frame, control-menu box, minimize and maximize, bold System font | |
 | Windows 95 | `win95` | silver 3-D controls, gradient navy title bars, close box at the right | w95 |
-| Workbench | `workbench` | Amiga Workbench 2 colours and bevels | amiga |
+| Workbench | `workbench` | Amiga Workbench 2 colours and bevels (the Amiga skin draws the Amiga 2.0's own windows in it) | amiga |
 | Palm OS | `palmos` | Palm OS forms: a black title tab, thin round buttons, small bold type | palm |
 | iOS 6 | `ios6` | the 2012 launch's system: Helvetica Neue, the blue-grey navigation bar, the dark blue glassy alert, a black action sheet of glossy buttons for the menus, the blue ON / grey OFF switch for every check box, the blue-filled slider | |
 | iOS 10 | `ios10` | the system 1.2.9 was built for (iOS 10.3 SDK, 2017): San Francisco (Helvetica Neue where it's missing), a translucent bar, 270-point alerts with their buttons along the bottom, action sheets for the menus, green switches for every check box, the thin slider with its white knob, rounded text fields; no status bar (the app hid it) | ios |
@@ -495,10 +495,16 @@ Optional ruleset flags the skin reads (each is documented where it is read):
 - `js/skins/dos/`: the "DOS 2.0" skin: the classic page with the DOS game's art,
   sounds and Windows 3.1 look (art in `assets/skins/dos/`). It sets `window.HOTHEME`
   and then loads the classic skin's `ui.js`, which uses that to swap pictures and sounds
-- `js/skins/amiga/`: the "Amiga 2.0" skin: the DOS skin with the Amiga version's 16-colour
-  pictures, sounds and title, and Workbench colours (art in `assets/skins/amiga/`). The
-  Amiga game is the DOS game (same rules, same pictures in the same order), so play it with
-  the DOS 2.0 rules
+- `js/skins/amiga/`: the "Amiga 2.0" skin: the Amiga version's own screen, in German, on the
+  classic page: the stacked panels (star, fleets, totals, Technik Ausgaben or the players and
+  spending), the map with its scroll bars and two zooms, the report cards and Nachrichten
+  window, and its own windows (Neue Galaxis, Registration, Schiffsbau, Typen Manager,
+  Spielervergleich, Aufteilen der Schiffe, About, Startup), matched to screenshots
+  (`docs/amiga-skin.md`), with the Amiga version's 16-colour pictures and sounds (art in
+  `assets/skins/amiga/`) and the X11 Helvetica bitmaps its font matches (`assets/fonts/HoAmiga*`,
+  `tools/amiga-font.py`). A look option draws its pixels tall, as an Amiga monitor did, or
+  square. The Amiga game is the DOS game (same rules, same pictures in the same order), so
+  play it with the DOS 2.0 rules
 - `js/rules-gemini.js`, `js/ai-gemini.js`, `js/skins/gemini/`: the AI homage by Google's Gemini:
   its own rules and computer players, written from the 5.0.5 manual alone, and its
   "Tactical console" skin (`docs/gemini-rules/`, `docs/gemini-skin/`)
