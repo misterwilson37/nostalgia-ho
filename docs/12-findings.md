@@ -535,7 +535,15 @@ everyone pays, then everyone moves" gives the same game), losses falling on the 
 fleets (`ResolveVictorFleetsAtStar`), the design limit of 20 (`CreateShipType @111866`),
 scrapping a fleet (`ScrapCurrentFleet @1128ce` only marks it, and a second use takes the
 mark off; `ScrapFleetsAndTypes` scraps it at the start of the next turn's pass, where it is;
-the remake now marks it too: js/rules-dos.js `flagScrap20`, `scrapMarked20`).
+the remake now marks it too: js/rules-dos.js `flagScrap20`, `scrapMarked20`). A fleet marked in hyperspace has star −1, and report 1016 (`GetReportString`'s
+case 1016 @130838; `ScrapFleetsAndTypes` @a0f82-a0fc0) reads "star −1" in the galaxy
+header, big-endian with 0x22-byte stars: its name (a C string from +0x31) is the low byte
+of player slot 17's home star and then a 0, one stray character (none for star 0); its
+owner (+0x1c) is slot 7's home star, so the English report's metal shows only when that
+number is the player's (1.2F's French report has no metal). 1.2's galaxy is always a
+Circle, so the 20 slots' homes are kept (`G.homes20`); the remake prints the same
+(`limboMac20`: the Mac Roman letter, a box for a code below 32, as the Geneva 9 report
+window has no letter there), and the patch says "at hyperspace" (fix `scrapLimbo`).
 
 ## The turn, read in 1.2's code
 

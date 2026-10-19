@@ -84,13 +84,17 @@ function staleName(G, w) {
 // 2.0's list (rules-dos FIXES20) without the Windows build's own slips: the
 // average fuel counted over at most 11 fleets ('orgFuelCount') and the
 // attack rating in 16 bits ('attack16') are not in the Mac code.
-const FIXES = D.fixes.filter(f => f.id !== 'orgFuelCount' && f.id !== 'attack16').map(f => f.id !== 'meteorReport' ? f
+const SCRAP_LIMBO_MAC = 'A fleet marked for scrapping while it was in hyperspace was reported “at” the star before the first one, which is part of the galaxy’s header: one stray character (the letter of the 18th home slot’s star number, or none), and no metal unless the 8th home slot’s star number happened to be yours. The patch reports it “at hyperspace” with no metal, as 3.0.1 does.';
+const FIXES = D.fixes.filter(f => f.id !== 'orgFuelCount' && f.id !== 'attack16').map(f => f.id === 'scrapLimbo' ? Object.assign({}, f, { text: SCRAP_LIMBO_MAC }) : f.id !== 'meteorReport' ? f
   : Object.assign({}, f, { text: 'A colony wiped out by a meteor shower was reported as “… destroyed your colony”, naming whoever a report ten messages earlier happened to leave behind, or reading a name out of whatever memory lay past the game’s own data. The patch reports “A meteor shower destroyed your colony at …”.' }));
 
 // Mac 2.0.1 plays 2.0's turn (js/rules-dos.js), with the differences above
 E.registerRules('mac20', Object.assign({}, D, {
   // the Ships menu's item (STR# 1010.9-10) and the panel's line (DrawSelectedFleetInfo)
   scrapWords: Object.assign({}, D.scrapWords, { fleet: ['Scrap Current Fleet', 'Don’t Scrap Current Fleet'], marked: 'Fleet to be scrapped for metal.' }),
+  // report 1016 for a fleet scrapped in hyperspace: "star -1" read big-endian
+  // (ScrapFleetsAndTypes @a0f76, GetReportString @13082e; rules-dos limboMac20)
+  limbo: D.limboMac,
   // the bars' ticks (DrawHBarControl @c091e): ten, 2 pixels high, on the heading strip's rule, following the scale; nothing through the bars
   barGrid: { n: 10, tick: 2, line: false, above: true },
   // the battle window's words are the Mac's (rules-dos battlePanel20: no

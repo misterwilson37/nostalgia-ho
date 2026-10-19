@@ -392,6 +392,9 @@ E.registerRules('12', Object.assign({}, D, {
   },
   // the Ship Types window's check box (DITL 6000 item 17; Mac 2.0.1's "Scrap This Type")
   // (STR# 1010.9-10 and 4000.12: the Ships menu's item and the panel's line for a marked fleet)
+  // report 1016 for a fleet scrapped in hyperspace: "star -1" read big-endian
+  // (ScrapFleetsAndTypes @a0f82, GetReportString @130838; rules-dos limboMac20)
+  limbo: D.limboMac,
   scrapWords: { type: ['Modèle à recycler', 'Modèle à recycler'], typeCheck: true, fleet: ['Recycler flotte sélectionnée', 'Ne pas recycler cette flotte'], marked: 'En recyclage.' },
   exploredList: Object.assign({}, D.exploredList, { title: 'Répertoire des planètes explorées:', go: 'Rejoindre planète', noClimate: 'Climat inconnu', own: 'Contrôlée', free: 'Explorée', enemy: 'Ennemie' }),
   // Languages (engine.js rs.languages; G.opts.lang, New Game's Language):
@@ -441,6 +444,8 @@ E.registerRules('12', Object.assign({}, D, {
   fixes: [
     { id: 'meteorReport', title: 'The meteor report has a text',
       text: 'A colony wiped out by a meteor shower got a blank report: its number is past the end of 1.2’s list of report texts. The patch gives it 2.0’s report, naming the meteor shower: “A meteor shower destroyed your colony at …”.' },
+    { id: 'scrapLimbo', title: 'A fleet scrapped in hyperspace is reported in hyperspace',
+      text: 'A fleet marked for scrapping while it was in hyperspace was reported “at” the star before the first one, which is part of the galaxy’s header: one stray character (the letter of the 18th home slot’s star number, or none) and, in the English report, no metal unless the 8th home slot’s star number happened to be yours. The patch reports it “at hyperspace” with no metal, as 3.0.1 does.' },
     { id: 'colonyBars32', title: 'The computer’s colony bars no longer overflow',
       text: 'When the computer gave a colony more than $2,147,483 for one part, the sum overflowed and the colony’s bars came out wrong. The patch works them out without overflowing.' },
   ],

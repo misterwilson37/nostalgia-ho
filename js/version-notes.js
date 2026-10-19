@@ -108,6 +108,7 @@ root.HOVERSIONS = {
     intro: 'The French edition of the Mac game, a cut-down pre-release of 2.0. Every routine of its program has been read, and every rule comes from its own code.',
     quirks: [
       { text: 'A colony wiped out by a meteor shower gets a blank report.', fix: 'meteorReport' },
+      { text: 'A fleet marked for scrapping while in hyperspace is reported at a stray character, read from before the start of the star list (the letter of an unused home slot’s star number).', fix: 'scrapLimbo' },
       'Organize Fleets refuels and reloads: rearranging one design’s ships at a star gives every fleet of that design there the best fuel among them, and each new Colony Ship fleet it makes comes loaded with colonists.',
       'The game has the text for messages between players, but no way to send one.',
       'There is no command to give up a colony, so there is no Evacuate button: a colony goes only when it is left unfunded until its people are gone.',
@@ -142,6 +143,7 @@ root.HOVERSIONS = {
       'Players who are out still play their turn: their money still earns interest and their research goes on.',
       { text: 'A slip in how the computers scrap old fighters has no effect on play.', fix: 'scrapRange' },
       { text: 'A colony wiped out by a meteor shower is reported as “… destroyed your colony”, naming whoever a report ten messages earlier happened to leave behind: often you or another player, sometimes no one. (Where 2.0 would have read past its own data and crashed, the remake names no one.)', fix: 'meteorReport' },
+      { text: 'A fleet marked for scrapping while in hyperspace is reported “at” an empty name, read from before the start of the star list, with its metal shown as 0.', fix: 'scrapLimbo' },
       { text: 'The computers work out their designs’ attack rating in 16 bits, so from about Weapons 4 it wraps round and they misjudge their warships.', fix: 'attack16' },
       { text: 'The computers’ colony bars go wrong when one gives a colony more than $2,147,483 for one part (the sum overflows).', fix: 'colonyBars32' },
       'There is no command to give up a colony, so there is no Evacuate button: a colony goes only when it is left unfunded until its people are gone (the “Let ’em die” warning).',
@@ -285,6 +287,7 @@ root.HOVERSIONS = {
       'Players who are out still play their turn: their money still earns interest and their research goes on.',
       { text: 'A slip in how the computers scrap old fighters has no effect on play.', fix: 'scrapRange' },
       { text: 'A colony wiped out by a meteor shower is reported as “… destroyed your colony”, naming whoever a report ten messages earlier happened to leave behind: often you or another player. Where that report left something other than a player’s number, the Mac printed whatever bytes lay past the game’s own data; the remake names no one.', fix: 'meteorReport' },
+      { text: 'A fleet marked for scrapping while in hyperspace is reported at a stray character, read from before the start of the star list (the letter of an unused home slot’s star number), with its metal shown as 0 unless that slot’s numbers happen to match yours.', fix: 'scrapLimbo' },
       { text: 'The computers’ colony bars go wrong when one gives a colony more than $2,147,483 for one part (the sum overflows).', fix: 'colonyBars32' },
       'There is no command to give up a colony, so there is no Evacuate button: a colony goes only when it is left unfunded until its people are gone (the “Let ’em die” warning).',
     ],

@@ -139,7 +139,7 @@ const SAY_DE = {
     ['%d ships', '%d ' + S(83)],
   ],
   words: { Scout: CLASS_DE.scout, Fighter: CLASS_DE.fighter, 'Colony Ship': CLASS_DE.colony, Satellite: CLASS_DE.satellite,
-    'A meteor shower': 'Ein Meteoritenschauer' },
+    'A meteor shower': 'Ein Meteoritenschauer', hyperspace: 'Hyperraum' }, // (the patch's "at hyperspace", fix 'scrapLimbo': strings 3120, 3290's word)
 };
 // the battle window (rules-dos battlePanel20): strings 66-72 and 64-65, the
 // classes 368-375, DOSHO.EXE's "Ein %s (%d/%d) %s" (the name and the class
@@ -250,7 +250,7 @@ function sayFr(v20) {
       ['%d ships', '%d vaisseaux'],
     ],
     words: { Scout: CLASS_FR.scout, Fighter: CLASS_FR.fighter, 'Colony Ship': CLASS_FR.colony, Satellite: CLASS_FR.satellite,
-      'A meteor shower': 'Une pluie de météores' },
+      'A meteor shower': 'Une pluie de météores', hyperspace: 'hyperespace' }, // (fix 'scrapLimbo': the French Mac's later "en hyperespace")
   };
 }
 // the battle window: STR# 1030 and 1.2F's MakeFleetDescription, which puts

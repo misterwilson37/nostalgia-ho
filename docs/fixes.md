@@ -46,9 +46,9 @@ their entries are below so the list is complete, but their rulesets list no fixe
 
 | Version | Obvious bug | Quirk or design | Unclear |
 |---|---|---|---|
-| Mac 1.2 | 2 | 8 | 2 |
-| 2.0 | 6 | 5 | 3 |
-| Mac 2.0.1 | 4 | 5 | 2 |
+| Mac 1.2 | 3 | 8 | 2 |
+| 2.0 | 7 | 5 | 3 |
+| Mac 2.0.1 | 5 | 5 | 2 |
 | Mac 3.0.1 | 5 | 6 | 3 |
 | 4.0.5 | 11 fixed (+ 3 the remake already plays fixed, + 3 with nothing in the remake to fix) | 4 | 6 |
 | Mac 4.0.5 | 7 fixed (+ 3 the remake already plays fixed, + 1 with nothing in the remake to fix) | 4 | 6 |
@@ -76,6 +76,14 @@ version's slips that are in its own code, without the other edition's.
    works out each part's money × 1,000 in 32 bits (@9363c, @936a4, @936ec), so a part
    over $2,147,483 wraps and the bar comes out wrong. *Fix:* the same rounded-up per mille
    without the overflow (`js/rules-12.js` `setColonyBars12`).
+3. **`scrapLimbo`: a fleet scrapped in hyperspace is reported at a stray character.**
+   `ScrapFleetsAndTypes @a0e02` sends report 1016 with the fleet's star, −1 in
+   hyperspace, and `GetReportString`'s case 1016 (@130838) prints star −1's name: the
+   galaxy header's bytes from +0x31, the low byte of the 18th player slot's home star and
+   then a 0, so one character (none when that star is star 0). (1.2F's French report has
+   no metal; the English one shows it only when the 8th slot's home star's number is the
+   player's, @a0f9e.) *Fix:* "at hyperspace", no metal, as 3.0.1 (`js/rules-dos.js`
+   `scrapMarked20`, `limboMac20`).
 
 ### Quirk or design (left as released)
 
@@ -153,6 +161,16 @@ The program's own credits read "Version 2.0.1" (string 672), so its patch is 2.0
    in a German game (`rs.lang.de.battleLines`, `js/languages.js`); the remake's battle
    window shows neither line today, so the fix is in the data. *Fix:* each line under
    its own id.
+7. **`scrapLimbo`: a fleet scrapped in hyperspace is reported "at" nothing.** A marked
+   fleet in hyperspace has star −1 (fleet +0xa), and `FUN_1040_0fca` (@1040:117b-11bb)
+   sends report 1016 with it as with any star; the report (`FUN_10c0_0784`, case 0x3f8)
+   reads star −1's name 0x21 bytes before star 0's, in the galaxy header: +0x31, the high
+   byte of the 18th player slot's home star (+0xe + 2 × 17), always 0, so "at  has been
+   scrapped" with an empty name. The metal is the ships' metal times star −1's owner
+   being you: the header word at +0x1d, 256 × the 9th slot's home star, which is a
+   player's number only when that home is star 0, and then only the first player's.
+   Deterministic, so vanilla play prints the same (`limbo20`). *Fix:* "at hyperspace",
+   no metal, as 3.0.1 (`js/rules-dos.js` `scrapMarked20`).
 
 ### Quirk or design (left as released)
 
@@ -198,6 +216,12 @@ with its own names. Its list is 2.0's without the Windows build's own slips.
    `DeterminePath` wants its Range (its fourth argument, the Range elsewhere). *Fix:* as
    2.0 (no effect on play).
 4. **`deBattleLines`**: as 2.0's 6, in a German game (the same German table).
+5. **`scrapLimbo`** (`ScrapFleetsAndTypes @a0f76`, `GetReportString`'s case 1016
+   @13082e): as 2.0's 7, but big-endian with 0x22-byte stars: star −1's name, a C string
+   from the header's +0x31, is the low byte of the 18th slot's home star and then 0, one
+   stray character (the report window is Geneva 9, `CreateReportWin` @130162; the remake
+   shows the Mac Roman letter, a box for a code below 32); the metal is shown when the
+   8th slot's home star's number (+0x1c) is the player's. *Fix:* as 2.0.
 
 **Not in its list** (Windows slips; the Mac code is right): `orgFuelCount` (the Mac's
 Organize Fleets takes the least fuel used, `OrganizeFleets` @1137e6) and `attack16`

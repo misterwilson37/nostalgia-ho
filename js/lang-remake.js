@@ -1077,7 +1077,7 @@ es: {
     bio: ['Bionave', 'Bionaves', 'una'], decoy: ['Señuelo', 'Señuelos', 'un'],
   },
   fill: {
-    You: 'Tú', 'Your enemies': 'tus enemigos', 'and your allies ': ' junto a tus aliados', 'A meteor shower': 'Una lluvia de meteoritos',
+    You: 'Tú', 'Your enemies': 'tus enemigos', 'and your allies ': ' junto a tus aliados', 'A meteor shower': 'Una lluvia de meteoritos', hyperspace: 'hiperespacio',
     Range: 'Alcance', Speed: 'Velocidad', Weapons: 'Armas', Shields: 'Escudos', Miniaturization: 'Miniaturización',
   },
   // the windows the rules carry (1.2's and 2.0's battle window, Name a Star's

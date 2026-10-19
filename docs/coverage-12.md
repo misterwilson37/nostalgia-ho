@@ -332,7 +332,7 @@ stubs). Addresses are in that layout, as in `docs/12-findings.md`.
 | `EndTurn` @a0004 | the turn: per player plan, scrap, support, terraform/mine, build, research, move, restore bars; then battles; then per player income, colonize/explore, end of game | RULE, implemented | js/engine.js endTurn with js/rules-dos.js economy20 and pass2_20 (js/rules-12.js pass2_12); the year moved on first (rs.aiYear), both passes for every player (rs.economyForAll) |
 | `KillUnsupportedStars` @a0960 | losing colonies paid from their own share or lose people | RULE, implemented | js/rules-dos.js economy20 |
 | `TerraformMineStars` @a0a9e | terraforming and mining by the colony bars, finished parts marked -1 | RULE, implemented | js/rules-dos.js terraMine20 |
-| `ScrapFleetsAndTypes` @a0e02 | scrap marked fleets and designs; metal returned; queued scrapped type dropped | RULE, implemented | js/rules-dos.js scrapMarked20 (engine scrapFleet, scrapDesign, shipyard) |
+| `ScrapFleetsAndTypes` @a0e02 | scrap marked fleets and designs; metal returned; queued scrapped type dropped | RULE, implemented | js/rules-dos.js scrapMarked20 (engine scrapFleet, scrapDesign, shipyard); report 1016 in hyperspace: "star −1" read big-endian, limboMac20 (rs.limbo), fix scrapLimbo |
 | `BuildNewShips` @a1406 | the three-slot ship queues, part-payment | RULE, implemented | js/rules-dos.js shipyard (called from economy20) |
 | `PutNewShipAtStar` @a18b8 | a new ship joins an idle fleet of its design, else a new fleet | RULE, implemented | js/rules-dos.js fleetFor |
 | `SpendTechMoney` @a1a58 | research at 60-140 % | RULE, implemented | js/rules-dos.js research20 |

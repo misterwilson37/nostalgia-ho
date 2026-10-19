@@ -216,6 +216,10 @@ function makeGalaxy(G, opts, nPlayers) {
       }
       homes.push(pickd);
     }
+    // the galaxy header keeps all 20 slots' home stars (+0xe), and report
+    // 1016 for a fleet scrapped in hyperspace reads three of them (limbo20,
+    // below), so they are kept (a Random galaxy's are 0..19 and aren't)
+    G.homes20 = homes.slice();
     homes = homes.slice(0, nPlayers);
   }
   // CONFIRMED (FUN_1030_0e47): shift so the smallest x and y are 2 ly; S = max(maxX, maxY + 2) + 3
@@ -1405,17 +1409,56 @@ function flagScrapDesign20(G, p, d, how) {
 // Marked fleets first, in the fleet list's order (newest first), each with
 // report 1016: "Your fleet of %s at %s has been scrapped for %s metal.", its
 // metal only when it came back to you (@1040:1175-11a6: times the star's
-// owner being you). In hyperspace 2.0 names the star at index -1 (before its
-// star list, @1040:11b1); the remake writes "hyperspace" (3.0.1's word) and
-// 0 metal, as 2.0's owner test of that record would almost always fail.
+// owner being you). In hyperspace the fleet's star is -1, and 2.0 reads
+// "star -1", the 0x21 bytes before the star list (limbo20, below).
 function scrapMarked20(G, p) {
+  const rs = E.rules(G);
   for (const f of G.fleets.filter(x => x.owner === p.id && x.scrap301).reverse()) {
     const at = f.star != null && f.to == null ? f.star : null, label = E.fleetLabel(G, f);
-    const own = at != null && G.stars[at].owner === p.id;
+    // the patch (fix 'scrapLimbo'): "hyperspace" (3.0.1's word), no metal back
+    const L = at != null ? { name: G.stars[at].name, own: G.stars[at].owner === p.id }
+      : E.fixed(G, 'scrapLimbo') ? { name: 'hyperspace', own: false } : (rs.limbo || limbo20)(G, p);
     const m = E.scrapFleet(G, f);
-    if (p.human) msg(G, p.id, `Your fleet of ${label} at ${at != null ? G.stars[at].name : 'hyperspace'} has been scrapped for ${num(G, own ? Math.floor(m) : 0)} metal.`, { icon: 'm9014', star: at, quiet: true });
+    if (p.human) msg(G, p.id, `Your fleet of ${label} at ${L.name} has been scrapped for ${num(G, L.own ? Math.floor(m) : 0)} metal.`, { icon: 'm9014', star: at, quiet: true });
   }
   for (const d of p.designs) if (d.scrap301 && !d.scrapped) { E.scrapDesign(G, p.id, d.id); d.scrap301 = false; }
+}
+// CONFIRMED (FUN_1040_0fca @1040:117b-11bb, the report @10c0:0784 case 0x3f8;
+// DOSHO.EXE the same): a fleet in hyperspace has star -1 (fleet +0xa), and
+// report 1016 takes "star -1" as any other. The galaxy block (0x2062) is a
+// 0x3a-byte header and then the 0x21-byte stars: a star's owner at +0x3e and
+// its name at +0x52 from the block plus 0x21 x its number. Star -1's owner is
+// the header's word at +0x1d and its name the bytes from +0x31. The header's
+// +0xe..+0x35 are the 20 player slots' home stars (FUN_1030_03ba sets them to
+// 0..19 for a Random galaxy, FUN_1030_0c97 picks them for the other shapes,
+// for all 20 slots), little-endian words below 190. So the name starts at the
+// high byte of slot 17's home star, always 0: an empty name ("at  has been",
+// two spaces). The owner word is the high byte of slot 7's (0) and the low
+// byte of slot 8's, i.e. 256 x slot 8's home star, which is a player's number
+// only when slot 8's home is star 0, and then only player 0's: only then is
+// the metal shown. (The metal itself is scrapped as always: a meteor shower
+// at the fleet's next star.) Nothing here is random: the remake writes the
+// same. The Amiga reads the same header big-endian (FUN_0011aa10, report
+// FUN_0010dc66): an empty name too, the owner slot 7's home star.
+const homeSlot20 = (G, i) => G.homes20 && G.homes20[i] != null ? G.homes20[i] : G.players[i] ? G.players[i].homeStar : i;
+function limbo20(G, p) {
+  return { name: '', own: p.id === 0 && homeSlot20(G, 8) === 0 };
+}
+// Mac 2.0.1 and 1.2 (ScrapFleetsAndTypes @a0f76-a0fb4 / @a0f82-a0fc0,
+// GetReportString's case 1016 @13082e / @130838): the same header, 0x22-byte
+// stars, big-endian: star -1's owner is slot 7's home star (+0x1c), and its
+// name, a C string from +0x31 (the star's Pascal name at +0x52, read from
+// +0x53), is the low byte of slot 17's home star followed by slot 18's high
+// byte (0): one character, the Mac Roman letter of that star's number (none
+// for star 0). The report window is Geneva 9 (CreateReportWin @130162);
+// codes below 32 have no letter, and the remake shows the missing-character
+// box for them. The metal is shown when slot 7's home star's number is the
+// player's.
+// Mac Roman 0x80-0xbf (star numbers go up to 189)
+const MAC_HIGH = 'ÄÅÇÉÑÖÜáàâäãåçéèêëíìîïñóòôöõúùûü†°¢£§•¶ß®©™´¨≠ÆØ∞±≤≥¥µ∂∑∏π∫ªºΩæø';
+const macChar = (c) => c === 0 ? '' : c < 32 || c === 127 ? '□' : c < 127 ? String.fromCharCode(c) : MAC_HIGH[c - 128];
+function limboMac20(G, p) {
+  return { name: macChar(homeSlot20(G, 17) & 0xff), own: homeSlot20(G, 7) === p.id };
 }
 function flushScraps20(G, p) {
   if (!p.human || !log20On(G)) return;
@@ -1779,6 +1822,8 @@ const FIXES20 = [
     text: 'When a computer gave a colony more than $2,147,483 for one part, the sum overflowed and the colony’s bars came out wrong. The patch works them out without overflowing.' },
   { id: 'scrapRange', title: 'Old fighters sent home are routed with their own Range',
     text: 'When the computers sent old fighters home, the program passed the fleet’s place in a list where the route finder wants its Range. It made no difference to play (the colony is always within reach), and the remake already routes these fleets by their own Range; it is listed so the patch covers every slip found.' },
+  { id: 'scrapLimbo', title: 'A fleet scrapped in hyperspace is reported in hyperspace',
+    text: 'A fleet marked for scrapping while it was in hyperspace was reported “at” the star before the first one, which is part of the galaxy’s header: an empty name, and no metal (unless your fleet was the first player’s and the ninth home slot was the first star). The patch reports it “at hyperspace” with no metal, as 3.0.1 does.' },
   { id: 'deBattleLines', title: 'The German battle window’s two no-information lines are the right way round',
     text: 'In the German version the battle window’s lines “You have no information.” and “You were destroyed immediately.” (strings 74 and 75) are swapped. The patch puts each in its place; it matters only when the game is played in German.' },
 ];
@@ -2011,6 +2056,8 @@ E.registerRules('dos', Object.assign({}, O, {
   scrapMarkedMoves: true,                 // a marked fleet can still be given orders (no "scrap heap" alert)
   scrapSound: false,                      // no sound when marking
   queueMarked: true,                      // a marked type can still be queued (it leaves the queue with the type)
+  limbo: limbo20,                         // report 1016's "star -1" for a fleet in hyperspace (above)
+  limboMac: limboMac20,                   // the same read by Mac 2.0.1 and 1.2 (rules-mac20, rules-12: limbo)
   scrapTypeOwnMetal: true,                // report 1017 counts only the metal that came back to you
   scrapWords: { type: ['Scrap This Type', 'Scrap This Type'], typeCheck: true, fleet: ['Scrap Current Fleet', 'Don\'t Scrap Current Fleet'], marked: 'Fleet to be scrapped for metal.' }, // dialog 31 item 400, a check box; strings 0x168-0x169; the panel's line (string at 1a2c)
   hints: false, // this game had no between-turn tips (4.0.5 and 5.0.5 do)
