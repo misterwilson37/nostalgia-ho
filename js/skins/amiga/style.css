@@ -85,7 +85,7 @@ html.amiga .am-keep { display: none !important; }
 /* the star */
 html.amiga .am-sname { position: absolute; left: 0; top: calc(2 * var(--v)); width: calc(98 * var(--u)); text-align: center; white-space: nowrap; }
 html.amiga .am-rows { position: absolute; left: 0; top: calc(12 * var(--v)); width: calc(150 * var(--u)); }
-html.amiga .am-kv { display: grid; grid-template-columns: calc(42 * var(--u)) auto; column-gap: calc(3 * var(--u)); height: calc(10 * var(--v)); white-space: nowrap; }
+html.amiga .am-kv { display: grid; grid-template-columns: calc(43 * var(--u)) auto; column-gap: calc(4 * var(--u)); height: calc(10 * var(--v)); white-space: nowrap; }
 html.amiga .am-k { text-align: right; }
 html.amiga .am-note { padding-left: calc(6 * var(--u)); white-space: normal; width: calc(220 * var(--u)); }
 html.amiga .am-seen { position: absolute; left: calc(120 * var(--u)); top: calc(12 * var(--v)); white-space: nowrap; }
@@ -102,8 +102,8 @@ html.amiga .am-ccol:focus-visible { outline: calc(1 * var(--u)) dotted #000; }
 html.amiga .am-cfill { position: absolute; left: 0; right: 0; bottom: 0; background: var(--am-navy); }
 html.amiga .am-cfill.top { background: var(--am-magenta); }
 html.amiga .am-clabs { position: absolute; left: 0; top: calc(53 * var(--v)); width: 100%; display: flex; gap: 0; }
-html.amiga .am-clabs span { position: absolute; width: calc(27 * var(--u)); text-align: center; white-space: nowrap; }
-html.amiga .am-clabs span:nth-child(1) { left: calc(5 * var(--u)); } html.amiga .am-clabs span:nth-child(2) { left: calc(33 * var(--u)); } html.amiga .am-clabs span:nth-child(3) { left: calc(60 * var(--u)); }
+html.amiga .am-clabs span { position: absolute; white-space: nowrap; }
+html.amiga .am-clabs span:nth-child(1) { left: calc(7 * var(--u)); } html.amiga .am-clabs span:nth-child(2) { left: calc(36 * var(--u)); } html.amiga .am-clabs span:nth-child(3) { left: calc(61 * var(--u)); }
 /* the fleets */
 html.amiga .am-fhead { position: absolute; left: calc(3 * var(--u)); top: calc(3 * var(--v)); width: calc(232 * var(--u)); white-space: nowrap; }
 html.amiga .am-fhead > div { height: calc(10 * var(--v)); }
@@ -269,8 +269,8 @@ html.amiga.os-workbench .wbody button:not(.am-gad):not(.am-arrow):not(.am-picbtn
   box-shadow: inset calc(2 * var(--u)) calc(1 * var(--v)) 0 #fff, inset calc(-2 * var(--u)) calc(-1 * var(--v)) 0 #000 !important; font: inherit !important; line-height: calc(10 * var(--v)) !important; cursor: pointer; text-shadow: none; }
 html.amiga.os-workbench .wbody button:not(.am-gad):not(.am-arrow):not(.am-picbtn):not(.tbtn):active, html.amiga .am-btn:active, html.amiga.os-workbench .tcard button:active { box-shadow: inset calc(2 * var(--u)) calc(1 * var(--v)) 0 #000, inset calc(-2 * var(--u)) calc(-1 * var(--v)) 0 #fff !important; }
 html.amiga .wbody button:disabled { color: #777 !important; cursor: default; }
-html.amiga .am-btn.am-default, html.amiga.os-workbench .wbody .am-btn.am-default, html.amiga.os-workbench .wbody button[type=submit]:not(.am-btn) { outline: calc(1 * var(--v)) solid var(--am-red); box-shadow: inset calc(2 * var(--u)) calc(1 * var(--v)) 0 #fff, inset calc(-2 * var(--u)) calc(-1 * var(--v)) 0 #000, 0 0 0 calc(1 * var(--u)) var(--am-red), calc(1 * var(--u)) 0 0 calc(1 * var(--u)) var(--am-red), calc(-1 * var(--u)) 0 0 calc(1 * var(--u)) var(--am-red) !important; outline: 0; }
-html.amiga .am-btn.am-orange, html.amiga.os-workbench .wbody .am-btn.am-orange { box-shadow: inset calc(2 * var(--u)) calc(1 * var(--v)) 0 #fff, inset calc(-2 * var(--u)) calc(-1 * var(--v)) 0 #000, 0 0 0 calc(1 * var(--u)) #ff9966, calc(1 * var(--u)) 0 0 calc(1 * var(--u)) #ff9966 !important; }
+html.amiga .am-btn.am-default, html.amiga.os-workbench .wbody button.am-btn.am-default:not(.am-gad):not(.am-arrow):not(.am-picbtn):not(.tbtn), html.amiga.os-workbench .wbody button[type=submit]:not(.am-btn) { outline: calc(1 * var(--v)) solid var(--am-red); box-shadow: inset calc(2 * var(--u)) calc(1 * var(--v)) 0 #fff, inset calc(-2 * var(--u)) calc(-1 * var(--v)) 0 #000, 0 0 0 calc(1 * var(--u)) var(--am-red), calc(1 * var(--u)) 0 0 calc(1 * var(--u)) var(--am-red), calc(-1 * var(--u)) 0 0 calc(1 * var(--u)) var(--am-red) !important; outline: 0; }
+html.amiga .am-btn.am-orange, html.amiga.os-workbench .wbody button.am-btn.am-orange:not(.am-gad):not(.am-arrow):not(.am-picbtn):not(.tbtn) { box-shadow: inset calc(2 * var(--u)) calc(1 * var(--v)) 0 #fff, inset calc(-2 * var(--u)) calc(-1 * var(--v)) 0 #000, 0 0 0 calc(1 * var(--u)) #ff9966, calc(1 * var(--u)) 0 0 calc(1 * var(--u)) #ff9966 !important; }
 html.amiga .wbody button:focus-visible, html.amiga .am-btn:focus-visible { outline: calc(1 * var(--u)) dotted var(--am-red) !important; outline-offset: calc(1 * var(--u)); }
 /* fields (recessed), lists (a raised cycle gadget), check boxes and radio buttons */
 html.amiga.os-workbench .wbody input[type=text], html.amiga.os-workbench .wbody input:not([type]), html.amiga.os-workbench .wbody input[type=number], html.amiga.os-workbench .wbody input[type=password], html.amiga.os-workbench .wbody textarea, html.amiga .am-field {
@@ -280,8 +280,8 @@ html.amiga.os-workbench .wbody textarea { height: auto; }
 html.amiga.os-workbench .wbody select, html.amiga.os-workbench .tcard select { height: calc(14 * var(--v)); font: inherit !important; color: #000; border: 0 !important; border-radius: 0; background-color: var(--am-grey) !important;
   box-shadow: inset calc(2 * var(--u)) calc(1 * var(--v)) 0 #fff, inset calc(-2 * var(--u)) calc(-1 * var(--v)) 0 #000 !important; padding: 0 calc(6 * var(--u)) 0 calc(22 * var(--u)) !important; background-size: calc(11 * var(--u)) calc(10 * var(--v)), calc(1 * var(--u)) 100%, calc(1 * var(--u)) 100% !important; background-position: calc(5 * var(--u)) center, calc(19 * var(--u)) 0, calc(20 * var(--u)) 0 !important; }
 html.amiga.os-workbench .wbody input[type=checkbox] { width: calc(17 * var(--u)); height: calc(9 * var(--v)); margin: 0 calc(4 * var(--u)) 0 0; border: 0; box-shadow: inset calc(2 * var(--u)) calc(1 * var(--v)) 0 #fff, inset calc(-2 * var(--u)) calc(-1 * var(--v)) 0 #000; background-color: var(--am-grey); background-size: calc(7 * var(--u)) calc(7 * var(--v)); vertical-align: middle; }
-html.amiga .wbody input[type=radio], html.amiga .am-radio input, html.amiga.os-workbench .wbody .am-radio input[type=checkbox] { -webkit-appearance: none; appearance: none; width: calc(17 * var(--u)); height: calc(9 * var(--v)); margin: 0 calc(5 * var(--u)) 0 0; border: 0; border-radius: 0; background: var(--am-radio) 0 0 / 100% 100%; vertical-align: middle; flex: none; cursor: pointer; }
-html.amiga .wbody input[type=radio]:checked, html.amiga .am-radio input:checked, html.amiga.os-workbench .wbody .am-radio input[type=checkbox]:checked { background-image: var(--am-radioon); }
+html.amiga .wbody input[type=radio], html.amiga .am-radio input, html.amiga.os-workbench .wbody .am-radio input[type=checkbox] { -webkit-appearance: none; appearance: none; width: calc(17 * var(--u)); height: calc(9 * var(--v)); margin: 0 calc(5 * var(--u)) 0 0; border: 0 !important; border-radius: 0; box-shadow: none !important; background: var(--am-radio) 0 0 / 100% 100% no-repeat !important; vertical-align: middle; flex: none; cursor: pointer; }
+html.amiga .wbody input[type=radio]:checked, html.amiga .am-radio input:checked, html.amiga.os-workbench .wbody .am-radio input[type=checkbox]:checked { background-image: var(--am-radioon) !important; }
 html.amiga .am-radio { display: flex; align-items: center; white-space: nowrap; cursor: pointer; }
 /* sliders: a prop gadget (the knob a raised white bar on the dithered track) */
 html.amiga.os-workbench .wbody input[type=range], html.amiga .am-slider { -webkit-appearance: none; appearance: none; height: calc(11 * var(--v)); margin: 0; padding: 0; border: 0; background: var(--am-dither) 0 0 / calc(2 * var(--u)) calc(2 * var(--v)) !important; box-shadow: inset calc(2 * var(--u)) calc(1 * var(--v)) 0 #000, inset calc(-2 * var(--u)) calc(-1 * var(--v)) 0 #fff; cursor: pointer; }
@@ -297,6 +297,11 @@ html.amiga .tip p, html.amiga .tip small { font: inherit; line-height: calc(11 *
 html.amiga .starmenu { --u: var(--dx); --v: var(--dy); font: 400 calc(16 * var(--v)) / calc(10 * var(--v)) var(--amf), sans-serif; background: var(--am-blue); color: #fff; border: calc(1 * var(--v)) solid #000; border-radius: 0; box-shadow: none; }
 html.amiga .starmenu button { color: #fff; background: none; border: 0; font: inherit; }
 html.amiga .starmenu button:hover { background: #fff; color: var(--am-blue); }
+/* six research bars (the rules with Radical): narrower */
+html.amiga .am-techbars:has(.barrow:nth-of-type(6)) .barrow { width: calc(17 * var(--u)); }
+html.amiga .am-techbars:has(.barrow:nth-of-type(6)) .barrow:nth-of-type(1) { left: calc(6 * var(--u)); } html.amiga .am-techbars:has(.barrow:nth-of-type(6)) .barrow:nth-of-type(2) { left: calc(29 * var(--u)); }
+html.amiga .am-techbars:has(.barrow:nth-of-type(6)) .barrow:nth-of-type(3) { left: calc(52 * var(--u)); } html.amiga .am-techbars:has(.barrow:nth-of-type(6)) .barrow:nth-of-type(4) { left: calc(75 * var(--u)); }
+html.amiga .am-techbars:has(.barrow:nth-of-type(6)) .barrow:nth-of-type(5) { left: calc(98 * var(--u)); } html.amiga .am-techbars:has(.barrow:nth-of-type(6)) .barrow:nth-of-type(6) { left: calc(121 * var(--u)); }
 
 /* ---------- the Amiga's own windows: each laid out on the screenshot's pixels (body origin: 4 across, 16 down) ---------- */
 html.amiga .win.am-win { position: relative; display: block; flex: none; }
@@ -330,7 +335,7 @@ html.amiga .am-picbtn { position: relative; width: calc(52 * var(--u)); height: 
   box-shadow: inset calc(2 * var(--u)) calc(1 * var(--v)) 0 #fff, inset calc(-2 * var(--u)) calc(-1 * var(--v)) 0 #000 !important; display: block; }
 html.amiga .am-picbtn.on { box-shadow: inset calc(2 * var(--u)) calc(1 * var(--v)) 0 #000, inset calc(-2 * var(--u)) calc(-1 * var(--v)) 0 #fff !important; }
 html.amiga .am-picbtn img { position: absolute; left: calc(10 * var(--u)); top: calc(3 * var(--v)); width: calc(32 * var(--u)); height: calc(32 * var(--v)); }
-html.amiga .am-picbtn span { position: absolute; left: 0; right: 0; top: calc(39 * var(--v)); text-align: center; font: 400 calc(16 * var(--v)) / calc(10 * var(--v)) var(--amfs), sans-serif; white-space: nowrap; line-height: calc(10 * var(--v)); }
+html.amiga .am-picbtn span { position: absolute; left: 0; right: 0; top: calc(37 * var(--v)); text-align: center; font: 400 calc(16 * var(--v)) / calc(10 * var(--v)) var(--amfs), sans-serif; white-space: nowrap; line-height: calc(10 * var(--v)); }
 html.amiga .am-picbtn:focus-visible { outline: calc(1 * var(--u)) dotted var(--am-red); }
 html.amiga .am-comprow { position: relative; display: flex; align-items: center; gap: 0; margin-top: calc(1 * var(--v)); }
 html.amiga .am-cnum { width: calc(26 * var(--u)); padding-left: calc(9 * var(--u)); }

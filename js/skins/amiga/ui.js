@@ -781,7 +781,6 @@ function openSplitter(f0) {
   const mineHere = () => a.fleetOrder(G.fleets.filter(f => f.owner === ME && f.star === sid && f.to == null && !f.sat));
   const snap = JSON.stringify(mineHere()), nextId = G.nextId, sel0 = a.UI.selFleet;
   const pick = new Map(); // fleet id -> ships picked
-  if (f0) pick.set(f0.id, HO.fleetCount(f0));
   const body = el('div', { class: 'am-split' });
   const render = () => {
     const rows = el('div', { class: 'am-srows' });
@@ -933,7 +932,7 @@ function newGame(f, ctx) {
       frame('am-rname', el('div', null, w('yourName')), nameBox, el('div', null, w('password')), el('input', { class: 'am-field', type: 'password', disabled: 'disabled', 'aria-label': w('password'), title: 'Not used: this remake keeps no passwords.' })),
       frame('am-rsex', el('div', null, w('sex')), el('div', { class: 'am-rsexrow' }, radio('sex', '0', w('man'), !fem, (x) => { if (femSel) { femSel.value = x; fire(femSel); } }), radio('sex', '1', w('woman'), fem, (x) => { if (femSel) { femSel.value = x; fire(femSel); } }))),
       el('div', { class: 'am-rpic' }, img(P + 'd3520')),
-      el('div', { class: 'am-rbtns' }, btn(w('ok'), () => f.requestSubmit(), 'am-default'), btn(w('cancel'), () => { reg.hidden = true; galaxy.hidden = false; win.classList.remove('am-regstep'); titleSpan.textContent = w('ngTitle'); })));
+      el('div', { class: 'am-rbtns' }, btn(w('ok'), () => f.requestSubmit()), btn(w('cancel'), () => { reg.hidden = true; galaxy.hidden = false; win.classList.remove('am-regstep'); titleSpan.textContent = w('ngTitle'); })));
     galaxy.hidden = true; reg.hidden = false; win.classList.add('am-regstep'); titleSpan.textContent = w('reg');
     nameBox.focus();
   };

@@ -9,4 +9,4 @@ Roboto-Bold.woff2      Roboto Bold, from the variable font at wght 700, wdth 100
 
 Not from Google Fonts:
 HoAmiga*.woff2, HoAmigaTall*.woff2  the Amiga skin's bitmap fonts: the X11 Adobe 75 dpi
-                       Helvetica bitmaps (helvR12, helvR10), redrawn by tools/amiga-font.py   LICENSE-HoAmiga.txt
+                       Helvetica bitmaps (helvR12, 10 and 08), redrawn by tools/amiga-font.py   LICENSE-HoAmiga.txt

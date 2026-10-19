@@ -11,14 +11,15 @@ notice is assets/fonts/LICENSE-HoAmiga.txt). Get them with
 
     apt-get download xfonts-75dpi pcf2bdf
     dpkg-deb -x xfonts-75dpi_*.deb x; dpkg-deb -x pcf2bdf_*.deb x
-    for f in helvR12 helvR10; do
+    for f in helvR12 helvR10 helvR08; do
       gunzip -c x/usr/share/fonts/X11/75dpi/$f.pcf.gz > $f.pcf
       x/usr/bin/pcf2bdf -o $f.bdf $f.pcf
     done
-    python3 tools/amiga-font.py helvR12.bdf helvR10.bdf
+    python3 tools/amiga-font.py helvR12.bdf helvR10.bdf helvR08.bdf
 
-Each pixel becomes a square (HoAmiga-Regular, HoAmiga-Bold and the
-10-pixel HoAmigaSmall-Regular), or a rectangle half as wide as it is tall
+The picture buttons' and ship lists' labels are a third, 8-pixel one
+(helvR08). Each pixel becomes a square (HoAmiga-Regular, HoAmiga-Bold,
+HoAmigaSmall-Regular), or a rectangle half as wide as it is tall
 (HoAmigaTall-*, HoAmigaTallSmall-*), so the same CSS
 font size (16 times the height of an Amiga pixel) draws the Amiga's
 own pixels on a square screen or on an Amiga monitor's tall ones. The
@@ -151,10 +152,10 @@ def build(src, name, style, xunit, bold):
 
 
 if __name__ == '__main__':
-    if len(sys.argv) != 3:
+    if len(sys.argv) != 4:
         sys.exit(__doc__)
-    r12, r10 = sys.argv[1], sys.argv[2]
+    r12, r10, r08 = sys.argv[1], sys.argv[2], sys.argv[3]
     for fam, xu in (('HoAmiga', UNIT), ('HoAmigaTall', UNIT // 2)):
         build(r12, fam, 'Regular', xu, False)
         build(r10, fam, 'Bold', xu, True)
-        build(r10, fam + 'Small', 'Regular', xu, False)  # the picture buttons' labels
+        build(r08, fam + 'Small', 'Regular', xu, False)  # the picture buttons' and ship lists' labels

@@ -1,6 +1,6 @@
 HoAmiga-Regular, HoAmiga-Bold, HoAmigaSmall-Regular and their Tall twins
-(HoAmigaTall-*, HoAmigaTallSmall-*; woff2) are the X Window System's Adobe Helvetica bitmaps at 75 dpi (helvR12 and
-helvR10, font-adobe-75dpi, from Debian's xfonts-75dpi 1.0.5), each pixel
+(HoAmigaTall-*, HoAmigaTallSmall-*; woff2) are the X Window System's Adobe Helvetica bitmaps at 75 dpi (helvR12, helvR10 and
+helvR08, font-adobe-75dpi, from Debian's xfonts-75dpi 1.0.5), each pixel
 drawn as a square (HoAmiga) or as a rectangle half as wide as it is tall
 (HoAmigaTall), the Bold ones emboldened by one pixel, by tools/amiga-font.py,
 for the Spaceward Ho! web remake's Amiga skin. They are renamed: Helvetica is
