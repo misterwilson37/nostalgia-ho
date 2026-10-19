@@ -89,6 +89,8 @@ const WORDS = {
   flHyper: ['Diese Flotte ist zur Zeit im Hyperraum, Sie können sie derzeit nicht erreichen!', 'This fleet is in hyperspace: it cannot be reached now!'],
   stMine: ['meiner', 'mine'], stNobody: ['erforscht', 'explored'], stEnemy: ['feindlich', 'enemy'],
   scrapAsk: ['%1 und alle %2 Schiffe dieses Typs verschrotten?', 'Scrap %1 and all %2 ships of that type?'],
+  aslOpen: ['Name der zu öffnenden Galaxis:', 'Name of the galaxy to open:'], open2: ['Öffnen...', 'Open...'],
+  aslMissing: ['Kann die Datei nicht lesen!', 'Can’t read the file!'], // (string 8)
   compare: ['Spielervergleich von noch %1 Spielern im Jahre %2', 'Comparing the %1 players left in %2'], first: ['erster', 'first'], middle: ['mittlerer', 'middle'], last: ['letzter', 'last'],
   cProfit: ['Profit', 'Profit'], cMetal: ['Metall', 'Metal'], cPlanets: ['Planeten', 'Planets'], cShips: ['Schiffe', 'Ships'], cShields: ['Schilde', 'Shields'], info: ['Info', 'Info'],
   split: ['Aufteilen der Schiffe', 'Organize ships'], splitHelp1: ['- Stellen Sie die Schiffe beliebig zusammen.', '- Put the ships together as you like.'],
@@ -193,7 +195,35 @@ function screenWin(id, title, gads, body) {
   bar.append(el('span', { class: 'am-wname' }, title));
   if (gads.zoom) bar.append(gadget('zoom', 'Zoom', gads.zoom));
   if (gads.depth) bar.append(gadget('depth', 'Depth', gads.depth));
-  return el('section', { id, class: 'am-swin' }, bar, el('div', { class: 'am-sbody' }, body));
+  const sec = el('section', { id, class: 'am-swin' }, bar, el('div', { class: 'am-sbody' }, body));
+  if (gads.size) sizer(sec, gads.size);
+  return sec;
+}
+// The sizing gadget (Intuition's: the Nachrichten window is opened with
+// WFLG_SIZEGADGET, NewWindow data+0x2ec, so it gets one in its bottom right
+// corner, and with it the zoom gadget the capture shows). No capture shows
+// it: it is drawn as AROS's sysiclass draws SIZEIMAGE (18 x 10 at hires; a
+// triangle on the border's pen, the inactive window's without its white),
+// docs/amiga-skin.md. A drag sizes the window, not under 240 x 120 (the
+// NewWindow's MinWidth and MinHeight). size: { get, set } in Amiga pixels.
+function sizer(sec, size) {
+  const g = el('div', { class: 'am-sizeg', role: 'button', 'aria-label': 'Size', title: 'Size' });
+  const apply = (wh) => { if (!wh) return; sec.style.width = `calc(${wh[0]} * var(--u))`; sec.style.height = `calc(${wh[1]} * var(--v))`; };
+  apply(size.get());
+  g.addEventListener('pointerdown', (e) => {
+    e.preventDefault(); e.stopPropagation();
+    try { g.setPointerCapture(e.pointerId); } catch (x) { /* (an old browser) */ }
+    const r = sec.getBoundingClientRect(), x0 = e.clientX, y0 = e.clientY, w0 = r.width / PX.x, h0 = r.height / PX.y;
+    const box = sec.parentElement ? sec.parentElement.getBoundingClientRect() : null;
+    const maxW = box ? (box.right - r.left) / PX.x : 640, maxH = box ? (box.bottom - r.top) / PX.y : 256;
+    const move = (ev) => {
+      const wh = [Math.round(Math.max(240, Math.min(maxW, w0 + (ev.clientX - x0) / PX.x))), Math.round(Math.max(120, Math.min(maxH, h0 + (ev.clientY - y0) / PX.y)))];
+      apply(wh); size.set(wh);
+    };
+    const up = () => { g.removeEventListener('pointermove', move); g.removeEventListener('pointerup', up); g.removeEventListener('pointercancel', up); };
+    g.addEventListener('pointermove', move); g.addEventListener('pointerup', up); g.addEventListener('pointercancel', up);
+  });
+  sec.append(g);
 }
 // an Amiga scroll bar (a prop gadget with its two arrows) for a scrolling box
 function scroller(box, vertical) {
@@ -680,6 +710,7 @@ function fitView(v, { G, ME, mapW, mapH, sel }) {
 
 // ---------- the reports: the card, and the Nachrichten window ----------
 const NEWSKEY = 'ho5.amiga.news';
+let newsSize = null; // (the size the window was dragged to, for this page)
 // (open unless closed; on a phone, where it would hide the small map, closed unless opened)
 const newsOpen = () => { const v = LS.get(NEWSKEY); return v == null ? !PX.phone : v !== '0'; };
 // The first two reports credit the version: the Amiga's own (texte.pff,
@@ -731,6 +762,7 @@ function renderNews(inbox) {
   }
   const body = el('div', { class: 'am-nwrap' }, list, scroller(list, true));
   const nw = screenWin('am-news', w('news'), {
+    size: { get: () => newsSize, set: (wh) => { newsSize = wh; } },
     close: () => { LS.set(NEWSKEY, '0'); renderNews(null); },
     zoom: () => { const n = document.getElementById('am-news'); if (n) n.classList.toggle('zoomed'); },
     depth: () => { LS.set(NEWSKEY, '0'); renderNews(null); },
@@ -1200,7 +1232,6 @@ function page(doc) {
   // the title screen
   const ts = doc.getElementById('titlescreen'), card = ts.querySelector('.tcard');
   const frameC = doc.getElementById('tframe');
-  const hasSave = () => { try { return !!localStorage.getItem('ho5.save'); } catch (e) { return false; } };
   const info = frame('am-sinfo', el('p', { class: 'am-s1' }, 'Spaceward Ho! Amiga Version 2.0'), el('p', null, 'Copyright 1992-94 New World Computing Inc.'),
     el('p', { class: 'am-slic' }, el('span', null, 'Lizenz:'), el('span', null, 'Marc & Christoph')), el('p', { class: 'am-slic2' }, 'Airospace'));
   const startup = el('div', { class: 'win am-win am-wstartup', role: 'dialog', 'aria-label': w('startup') },
@@ -1208,7 +1239,7 @@ function page(doc) {
     el('div', { class: 'wbody' },
       el('div', { class: 'am-sleft' }, info,
         el('div', { class: 'am-sbtns' },
-          btn(w('open'), () => { const c = doc.getElementById('tcont'); if (c && !c.hidden && hasSave()) c.click(); else doc.getElementById('timport').click(); }),
+          btn(w('open'), () => openAslLoad()),
           btn(w('newGame'), () => doc.getElementById('tnew').click()),
           btn(w('cancel'), () => { a.hideTitle(); setTitle(); a.draw(); }, 'am-default am-orange')),
         el('div', { class: 'am-nwc' })),
@@ -1226,6 +1257,10 @@ function page(doc) {
   if (doc.fonts && doc.fonts.ready) doc.fonts.ready.then(() => { const A = api(); if (A && A.G) { A.renderPanel(); A.draw(); } });
   // the title screen's height changes with its credits: fit the screen again
   new ResizeObserver(() => layout()).observe(card);
+  // the menus' Amiga-key glyphs, as each menu is opened
+  const mbar = doc.getElementById('menubar');
+  if (mbar) new MutationObserver(() => markKeys(mbar)).observe(mbar, { childList: true, subtree: true });
+  stringCursor();
   void a;
 }
 function title(frameC, IMG, Sound) {
@@ -1238,6 +1273,87 @@ function title(frameC, IMG, Sound) {
   Sound.play(2000);
   setTitle();
   layout();
+  return true;
+}
+
+// ---------- Intuition's string gadget ----------
+// The program's text fields are string gadgets with no StringExtend
+// (FUN_001022ba: GadgetType 4, a StringInfo and nothing more), so Intuition
+// draws their text itself: TEXTPEN (1) on BACKGROUNDPEN (0), active or not,
+// and while one is being edited the character under the cursor on FILLPEN
+// (9), a whole cell past the last character (as AROS's strgadgets.c, which
+// follows the V37 rendering). A browser's caret is a line, so the skin hides
+// it and draws that cell over the field.
+function stringCursor() {
+  const doc = document, ctx = doc.createElement('canvas').getContext('2d');
+  let inp = null, box = null;
+  const ok = (n) => n && n.tagName === 'INPUT' && (n.type === 'text' || n.type === 'search') && doc.documentElement.classList.contains('amiga') && !n.disabled && !n.readOnly;
+  const place = () => {
+    if (!inp || !box) return;
+    if (!inp.isConnected) { drop(); return; }
+    const cs = getComputedStyle(inp), r = inp.getBoundingClientRect();
+    ctx.font = `${cs.fontStyle} ${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+    const pos = inp.selectionDirection === 'backward' ? inp.selectionStart : inp.selectionEnd, v = inp.value;
+    const at = pos == null ? v.length : pos, ch = v[at] || ' ';
+    const left = r.left + parseFloat(cs.borderLeftWidth || 0) + parseFloat(cs.paddingLeft || 0) + ctx.measureText(v.slice(0, at)).width - inp.scrollLeft;
+    // (the cell over the field's own line box, so its character sits where the field's does)
+    const top = r.top + parseFloat(cs.borderTopWidth || 0) + parseFloat(cs.paddingTop || 0);
+    const h = r.bottom - parseFloat(cs.borderBottomWidth || 0) - parseFloat(cs.paddingBottom || 0) - top;
+    Object.assign(box.style, { left: left + 'px', top: top + 'px', width: Math.max(1, ctx.measureText(ch).width) + 'px', height: Math.max(1, h) + 'px', font: ctx.font, lineHeight: cs.lineHeight });
+    box.textContent = ch;
+    box.hidden = left < r.left || left > r.right;
+  };
+  const drop = () => { if (box) box.remove(); if (inp) inp.classList.remove('am-editing'); box = null; inp = null; };
+  doc.addEventListener('focusin', (e) => {
+    drop();
+    if (!ok(e.target)) return;
+    inp = e.target; inp.classList.add('am-editing');
+    box = el('span', { class: 'am-cursor', 'aria-hidden': 'true' }); doc.body.append(box);
+    place();
+  });
+  doc.addEventListener('focusout', () => drop());
+  for (const ev of ['input', 'keyup', 'keydown', 'pointerup', 'select']) doc.addEventListener(ev, () => { if (inp) requestAnimationFrame(place); }, true);
+  doc.addEventListener('selectionchange', () => { if (inp) place(); });
+  window.addEventListener('resize', () => { if (inp) place(); });
+  doc.addEventListener('scroll', () => { if (inp) place(); }, true);
+}
+
+// ---------- the ASL file requester ----------
+// Spiel öffnen and Datei → Öffnen (FUN_00108904, FUN_0010840e) ask
+// asl.library's file requester (the arp.library one when that is there) for
+// the galaxy, its hail string 716 "Name der zu öffnenden Galaxis:" and its
+// FileRequester's drawer. ASL draws the window itself: in 2.0 (asl.library
+// 37, before locale.library) always in English: the list of the drawer's
+// files with its scroller, the Drawer and File fields, and OK, Volumes,
+// Parent and Cancel (asl.doc; AROS's filereqhooks.c lays out the same
+// gadgets), on the program's screen, in its pens. The page's "files" are
+// the game this browser keeps; Volumes stands for the disks (the browser's
+// own file picker, to import a saved game).
+function openAslLoad() {
+  const a = api(), doc = document;
+  const save = (() => { try { return localStorage.getItem('ho5.save'); } catch (e) { return null; } })();
+  let name = null;
+  if (save) { try { const g = HO.load(save); name = String((g.opts && g.opts.galaxy) || 'Galaxis').slice(0, 30); } catch (e) { name = null; } }
+  const files = name ? [name] : [];
+  const fileIn = el('input', { class: 'am-field am-aslfile', value: '', 'aria-label': 'File' });
+  const list = el('div', { class: 'am-asllist', role: 'listbox' }, ...files.map(f => el('div', { class: 'am-aslrow', role: 'option', tabindex: 0,
+    onclick: (e) => { for (const r of list.children) r.classList.toggle('sel', r === e.currentTarget); fileIn.value = f; },
+    ondblclick: () => { fileIn.value = f; go(); } }, f)));
+  const go = () => {
+    const f = fileIn.value.trim();
+    if (!f) { a.beep(); return; }
+    a.closeModal();
+    if (name && f === name) { const c = doc.getElementById('tcont'), ts = doc.getElementById('titlescreen'); if (ts && !ts.hidden && c && !c.hidden) c.click(); return; } // (a game being played is that one)
+    a.toast(w('aslMissing'));
+  };
+  const body = el('div', { class: 'am-asl' },
+    el('div', { class: 'am-asllistf' }, list, scroller(list, true)),
+    el('label', { class: 'am-aslline' }, el('span', null, 'Drawer'), el('input', { class: 'am-field', value: '', 'aria-label': 'Drawer' })),
+    el('label', { class: 'am-aslline' }, el('span', null, 'File'), fileIn),
+    el('div', { class: 'am-aslbtns' }, btn('OK', go), btn('Volumes', () => { a.closeModal(); doc.getElementById('timport').click(); }), btn('Parent', () => a.beep()), btn('Cancel', () => a.closeModal())));
+  const win = amWin(w('aslOpen'), body, 'am-wasl');
+  win.querySelector('.wtitle').append(gadget('depth', 'Depth', () => a.closeModal()));
+  fileIn.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); go(); } });
   return true;
 }
 
@@ -1254,6 +1370,26 @@ const MENU_DE = {
   'Fix spending': ['Ausgaben anpassen', null], 'Scrap ship types…': ['Schiffstypen', null], 'Players and alliances…': ['Spielervergleich', 'C'],
   'Build ships at selected colony…': ['Schiffbau', 'B'],
 };
+const AKEYS = []; // { key, labels (German, English), fn, feat }: the items with an Amiga-key
+// the glyph and letter at the right of an item (Intuition's, for COMMSEQ items: FUN_00102d98 sets
+// COMMSEQ and the letter for each '~' in the menu table and leaves 32 pixels for them)
+function markKeys(root) {
+  for (const b of root.querySelectorAll('.dropdown button[role=menuitem]')) {
+    if (b.querySelector('.am-akey')) continue;
+    const t = b.textContent.trim(), k = AKEYS.find(x => x.labels.includes(t));
+    if (k) b.append(el('span', { class: 'am-akey', 'aria-hidden': 'true' }, k.key));
+  }
+}
+const KEYCODES = { '+': ['Equal', 'NumpadAdd', 'BracketRight'], '-': ['Minus', 'NumpadSubtract', 'Slash'] };
+document.addEventListener('keydown', (e) => {
+  if (!document.documentElement.classList.contains('amiga') || !(e.altKey || e.metaKey) || e.ctrlKey) return;
+  const t = e.target; if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
+  const k = AKEYS.find(x => (KEYCODES[x.key] || ['Key' + x.key, 'Digit' + x.key]).includes(e.code));
+  if (!k) return;
+  const G = game();
+  if (k.feat && !(typeof k.feat === 'function' ? k.feat() : G && HO.feature(G, k.feat))) return;
+  e.preventDefault(); k.fn();
+});
 const menuWord = (label) => {
   if (typeof label !== 'string' || !de()) return label;
   const m = MENU_DE[label];
@@ -1267,7 +1403,14 @@ function menus(M, ho) {
   const zoom = take(M.View, ['Zoom in', 'Zoom out']);
   const fitG = take(M.View, ['Fit galaxy']);
   const split = [w('split') + '…', () => { const A2 = a(), G = A2.G; if (!G) return; const f = A2.curFleet() || G.fleets.find(x => x.owner === A2.ME && x.star === A2.UI.sel && x.to == null && !x.sat); if (f) openSplitter(f); else A2.toast(de() ? 'Wählen Sie eine Flotte.' : 'Select one of your fleets first.'); }];
-  const Datei = tr(M.Game); Datei.splice(1, 0, [g ? 'Startfenster…' : 'Startup window…', () => { const A2 = a(); if (A2.G) A2.save(); A2.titleScreen(); }]);
+  // the Amiga-keys: Intuition draws them, the remake answers them (Alt or the Command key for the right Amiga key)
+  AKEYS.length = 0;
+  for (const it of [].concat(M.Game || [], M.Ships || [], M.Galaxy || [], M.View || [], zoom)) {
+    const m = Array.isArray(it) && typeof it[0] === 'string' ? MENU_DE[it[0]] : null;
+    if (m && m[1]) AKEYS.push({ key: m[1], labels: [m[0], it[0]], fn: it[1], feat: it[2] });
+  }
+  AKEYS.push({ key: 'O', labels: ['Öffnen...', 'Open...'], fn: () => openAslLoad() });
+  const Datei = tr(M.Game); Datei.splice(1, 0, [() => w('open2'), () => openAslLoad()], [g ? 'Startfenster…' : 'Startup window…', () => { const A2 = a(); if (A2.G) A2.save(); A2.titleScreen(); }]);
   const Optionen = tr(M.View.filter(it => it[0] !== '-'));
   const Schiffe = tr(M.Ships).concat([['-'], split, [() => w('typeMgr').replace('Spaceward Ho! ', '') + '…', () => a().G && openTypes()]]);
   const Galaxis = tr(M.Galaxy).concat([['-'], ...tr(zoom)]);

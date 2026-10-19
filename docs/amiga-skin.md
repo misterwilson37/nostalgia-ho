@@ -117,8 +117,9 @@ Fenster → Nachrichtenfenster opens it, and a tap on the title bar shows its me
   Ausgaben anpassen), Fenster (Technikfenster, Nachrichtenfenster, Fenster aufräumen), Info
   (Über Spaceward Ho!). The skin puts the remake's commands into these six, under the Amiga's
   words where the Amiga has the command, the rest under their own (and the remake's "Ho!" and
-  "Befehle" menus). Each item's flags are 0x52, HIGHCOMP: the item under the pointer is
-  complemented, pen 11 → 4 and 14 → 1, navy with black text.
+  "Befehle" menus). Each item's flags are 0x52, HIGHCOMP, and its IntuiText's FrontPen is 1
+  (black), so the items are black on blue and the one under the pointer navy with white text
+  (see "What Intuition draws").
 - **The left column** (`FUN_00103d2a` lays it out from the fonts' heights): the star panel
   (`FUN_001052e8`: name in HoFont 13, Profit, Bev., Temp. in °C, Gravit., Metall in HoFont 11;
   the Terra./Met./Schf. bars, or "Aufträge:"; Besitzer and Info Datum for other stars), the
@@ -214,8 +215,7 @@ All placed by their tables; what each does, from its code:
   is started without a game. Spiel öffnen opens the file requester for a saved galaxy
   (`FUN_00108904`, "Name der zu öffnenden Galaxis:"); Neues Spiel the requester for a new one's
   file and then Neue Galaxis erstellen (`FUN_001084f2`); **Abbruch quits the program**
-  (`FUN_001009e2(0)`). The skin's Spiel öffnen continues the saved game, else imports a file
-  (the browser's stand-in for the requester); Abbruch shows the empty screen, the web's
+  (`FUN_001009e2(0)`). The skin's Spiel öffnen opens the ASL requester (below, "What Intuition draws"); Abbruch shows the empty screen, the web's
   stand-in for quitting (Datei → Startfenster brings the window back).
 - **The Paßwort field** (Registration, data+0x1e22) is the hot-seat lock: at a turn of a game
   with several humans the program asks **Spaceward Ho! Spieleintrag** (`FUN_0010ce20`,
@@ -248,19 +248,100 @@ message pictures of 48 × 42, Senden, Abbruch), **Sterntaufe** (216 × 128), **A
 map at 17 pixels to the light year). Their remake counterparts are the classic windows in the
 Amiga's chrome and type.
 
+## What Intuition draws
+
+The program builds its menus, gadgets and windows from plain Intuition structures: no
+GadTools and no BOOPSI (it opens dos, intuition, graphics, layers, icon, diskfont, asl and
+utility, data+0x240; its one NewObjectA-sized call is a graphics one). Intuition then draws
+the menus, the gadgets' states, the window frames and gadgets, and asl.library the file
+requester. Each is drawn here from the documented AmigaOS 2.0 behaviour, with the program's
+own pens:
+
+- **The screen's pens** are exactly the program's: `SA_Pens` in the ExtNewScreen's tag list
+  (data+0x3e0: SA_DisplayID, SA_Pens → data+0x3cc, SA_Overscan 1, SA_Interleaved 1) points at
+  `{14, 11, 1, 14, 1, 9, 1, 0, 14, ~0}`: DETAILPEN 14, BLOCKPEN 11, TEXTPEN 1, SHINEPEN 14,
+  SHADOWPEN 1, FILLPEN 9, FILLTEXTPEN 1, BACKGROUNDPEN 0, HIGHLIGHTTEXTPEN 14. Nine pens, so
+  no BARDETAILPEN/BARBLOCKPEN (V39): the menus are the old look, drawn in DetailPen and
+  BlockPen (the NewScreen at data+0x408 gives the same 14 and 11).
+- **Menus** (`FUN_00102d98`, the table at data+0x430): titles 5 pixels either side of their
+  text (Menu.Width = TextLength + 10); items one line of the screen font high (TxHeight), at
+  LeftEdge 0; each IntuiText FrontPen 1, JAM1, LeftEdge 0, or 16 for a `^` item (CHECKIT |
+  MENUTOGGLE, room for the checkmark); a `~` item gets COMMSEQ and its letter, and 32 more
+  pixels. Intuition fills the box with BlockPen 11 and frames it in DetailPen 14, 2 pixels at
+  the sides and 1 at top and bottom (AROS `menutask.c` RenderMenuBG, "Amiga look", with
+  MenuHBorder 4 / MenuVBorder 2 halved; in V37 the bar pens are DetailPen and BlockPen). The
+  item under the pointer is complemented (HIGHCOMP; RKRM: the select box's bits inverted, on
+  16 colours pen p → 15 − p): 11 → 4 navy, 1 → 14 white, 14 → 1. The title being shown is
+  complemented the same way (navy, black text). A checked toggle shows the checkmark at the
+  item's left, a `~` item the Amiga-key glyph and its letter at the right, both in DetailPen
+  (AROS menudecorclass MENUCHECK, AMIGAKEY: a filled key with a cut-out italic A). A disabled
+  item is ghosted with the pattern 0x8888 / 0x2222 in BlockPen (AROS RenderDisabledPattern);
+  the remake hides items rather than disabling them, so this is only in the CSS. The program
+  has no separators; the remake's are drawn as a GadTools bar label (2 pixels of DetailPen,
+  AROS `gadtools/menus.c`). The Amiga-keys answer Alt or Command + the letter.
+- **Gadget states.** Buttons and toggles are BOOLGADGETs with Flags 0, that is GADGHCOMP
+  (`FUN_001022ba`): while held, Intuition complements the select box, so a button turns dark
+  red (15) with white text and its bevel turns round. A GADGDISABLED gadget (table flag
+  0x10000) is ghosted with 0x8888 / 0x2222 in SHADOWPEN (AROS `gadgets.c`). The toggles'
+  pictures are the program's, not Intuition's: off is a raised oval (white left, black right),
+  on a recessed one filled with pen 6, from the captures (11.png "Anfänger" and "Neuling";
+  21.png "Typ verschrotten" off is pixel for pixel the off radio). The skin had the off oval
+  recessed; it is now the capture's. "Typ verschrotten" ticked is assumed to be the "on" radio
+  picture (no capture shows it ticked).
+- **String gadgets** have a StringInfo and no StringExtend (`FUN_001022ba`), so Intuition draws
+  their text in TEXTPEN 1 on BACKGROUNDPEN 0, active or not, and the character under the
+  cursor on FILLPEN 9, a whole cell at the end of the text (AROS `strgadgets.c`, written to
+  match V37). The skin hides the browser's caret and draws that cell. (Fixed on the way: the
+  rename field sat over its two lines of text.)
+- **Window gadgets**, from each NewWindow's flags: the program's windows (data+0x1870)
+  have only a drag bar; the About window (data+0xef6) drag and depth; Technik Ausgaben
+  (data+0x31c) close and depth; Nachrichten (data+0x2ec) close, depth and sizing, which brings
+  the zoom gadget the capture shows. Close, depth and zoom are the captures' pixels; a held
+  gadget shows its frame recessed (AROS windecorclass, IDS_SELECTED). The **sizing gadget** is
+  in no capture: it is drawn as AROS draws SIZEIMAGE (18 × 10 hires, a triangle; the inactive
+  window's without fill) and sizes the window, not below the NewWindow's 240 × 120.
+- **Requesters**: the program calls no AutoRequest or EasyRequest; its messages are its own
+  windows (the drag-and-depth "Spaceward Ho!" window), so nothing more is Intuition's.
+- **The ASL file requester** (`FUN_00108904` → `FUN_0010840e`: asl's AslRequest with the hail
+  string 716 "Name der zu öffnenden Galaxis:", arp.library's when that is there): asl.library
+  37 draws its own window on the program's screen: the file list with its scroller, Drawer and
+  File fields, OK, Volumes, Parent and Cancel (asl.doc; AROS `asl/filereqhooks.c` has the same
+  gadgets), in English, as 2.0's asl had no locale. Spiel öffnen and Datei → Öffnen... open
+  it; its file is the galaxy this browser keeps, and Volumes stands for the disks (the
+  browser's file picker).
+
+Sources: the program (above); the AmigaOS 2.0/3.x include files and the RKRM Libraries' rules
+as reimplemented and commented in AROS (`compiler/include/intuition/screens.h`,
+`rom/intuition/menutask.c`, `strgadgets.c`, `gadgets.c`, `windecorclass.c`,
+`menudecorclass.c`, `barlabelclass.c`, `workbench/libs/gadtools/menus.c`,
+`workbench/libs/asl/filereqhooks.c`, github.com/aros-development-team/AROS, fetched October
+2026). The RKRM text and the Amiga NDK hosts were not reachable from this session (only
+GitHub was), so the RKRM rules cited are from those sources and memory, not quoted.
+
 ## What is still guessed, and why
 
-- **The menu panels' edge** (a black line): Intuition draws it, not the program, and no
-  screenshot shows an open menu.
-- **The window chrome, gadgets and their colours** come from the screenshots (the system draws
-  them); where a gadget kind isn't in a screenshot (the toggle of "Typ verschrotten" ticked,
-  a text field being edited) it is drawn in the same style.
+Only a real Amiga with Kickstart 2.04 (or an emulator with that ROM, which Jake would have to
+supply) can settle these:
+
+- **The menu checkmark and Amiga-key glyphs**: V37 draws fixed images of its own (the
+  MENUCHECK and AMIGAKEY images arrived in V39); their shapes and whether they use DetailPen
+  or the item's FrontPen are AROS's (V39) reading. The bar label's look for the remake's
+  separators likewise.
+- **The menu frame's thickness** (2 × 1 pixels) and that the drop-down sits flush under the
+  bar: from AROS's defaults, not a capture.
+- **The string cursor**: AROS's FILLPEN cell; V37 may complement the cell instead. Whether
+  2.0 draws the text in the screen font (the captures' field shows a proportional font, so
+  the skin keeps HoFont) or the system default font (AROS: topaz 8).
+- **The sizing gadget** (no capture shows it) and the pressed window gadgets.
+- **Complementing pictures**: the picture buttons keep the old invert filter; an exact
+  palette complement (pen p → 15 − p) is not a per-channel colour filter.
+- **"Typ verschrotten" ticked** (above), and the ASL requester's exact layout and sizes.
+- **Which Kickstart the captures used**: if 3.x, the window gadgets drawn from them are 3.x's.
 - **The order within the explored-planets list and its columns**: the nobody's and the other
   players' groups are sorted by `FUN_0011468c` (a value the program works out for the player,
   not read further) and the rows padded with spaces to pixel widths; the skin sorts each group
   by name and uses columns.
-- **Abbruch on the Startup window and Spiel öffnen**: the program quits or opens a file
-  requester, which a web page can't; the stand-ins are above.
+- **Abbruch on the Startup window**: the program quits, which a web page can't.
 - **Long press for Shift** in Aufteilen, on a touch screen: the Amiga had a mouse.
 
 ## Rules differences found
