@@ -1,11 +1,530 @@
-/* Spaceward Ho! — Amiga 2.0 skin: the DOS skin's layout with the Amiga
-   version's pictures, in Workbench 2 colours. Its windows, menus and
-   controls are the "Workbench" OS look (js/os/workbench.css). */
+/* Spaceward Ho! — Amiga 2.0 skin: the Amiga version's own screen, drawn
+   as the screenshots show it (docs/amiga-skin.md), on the classic page
+   (js/skins/amiga/ui.js lays it out). Every size is in Amiga pixels:
+   --u across and --v down are the CSS pixels one takes (ui.js sets them:
+   tall pixels, --v = 2 --u, or square). The windows' chrome is drawn here
+   for the Workbench look (html.os-workbench); in any other OS look the
+   windows keep that look's. The classic and DOS skins' rules come first. */
 @import url("../dos/style.css");
-:root { --hat: #0055aa; --west: Verdana, Arial, sans-serif; }
-.box h3 { color: #0055aa; }
-.fill { background: #0055aa; }
-.card { background: #aaaaaa; border-top-color: #6688bb; }
-.frow.sel { border-color: #0055aa; }
-/* the End Turn button is a 48x32 picture: the Amiga's own "Zug Ende" one, redrawn in English */
-.clock.pic img { width: 96px; }
+/* the type: the X11 Adobe Helvetica bitmaps the Amiga's font matches
+   (assets/fonts, tools/amiga-font.py): a pixel 1/16 em high, square, or
+   half as wide as high ("Tall"), so the font size is 16 pixel heights */
+@font-face { font-family: "HoAmiga"; font-weight: 400; font-display: block; src: url("../../../assets/fonts/HoAmiga-Regular.woff2") format("woff2"); }
+@font-face { font-family: "HoAmiga"; font-weight: 700; font-display: block; src: url("../../../assets/fonts/HoAmiga-Bold.woff2") format("woff2"); }
+@font-face { font-family: "HoAmigaSmall"; font-weight: 400; font-display: block; src: url("../../../assets/fonts/HoAmigaSmall-Regular.woff2") format("woff2"); }
+@font-face { font-family: "HoAmigaTall"; font-weight: 400; font-display: block; src: url("../../../assets/fonts/HoAmigaTall-Regular.woff2") format("woff2"); }
+@font-face { font-family: "HoAmigaTall"; font-weight: 700; font-display: block; src: url("../../../assets/fonts/HoAmigaTall-Bold.woff2") format("woff2"); }
+@font-face { font-family: "HoAmigaTallSmall"; font-weight: 400; font-display: block; src: url("../../../assets/fonts/HoAmigaTallSmall-Regular.woff2") format("woff2"); }
+:root {
+  --hat: #3333ff; --space: #000;
+  --am-grey: #bbbbbb; --am-blue: #3333ff; --am-cyan: #33ccff; --am-red: #880000; --am-green: #33ff33; --am-navy: #003399; --am-magenta: #cc33ff; --am-purple: #993399; --am-dot: #3399cc;
+  --amf: "HoAmigaTall"; --amfs: "HoAmigaTallSmall";
+  --am-up: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 7' width='12' height='7' preserveAspectRatio='none' shape-rendering='crispEdges'%3E%3Crect x='5' y='2' width='2' height='1' fill='%23000'/%3E%3Crect x='4' y='3' width='4' height='1' fill='%23000'/%3E%3Crect x='3' y='4' width='6' height='1' fill='%23000'/%3E%3Crect x='2' y='5' width='3' height='1' fill='%23000'/%3E%3Crect x='7' y='5' width='3' height='1' fill='%23000'/%3E%3C/svg%3E");
+  --am-down: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 7' width='12' height='7' preserveAspectRatio='none' shape-rendering='crispEdges'%3E%3Crect x='2' y='1' width='3' height='1' fill='%23000'/%3E%3Crect x='7' y='1' width='3' height='1' fill='%23000'/%3E%3Crect x='3' y='2' width='6' height='1' fill='%23000'/%3E%3Crect x='4' y='3' width='4' height='1' fill='%23000'/%3E%3Crect x='5' y='4' width='2' height='1' fill='%23000'/%3E%3C/svg%3E");
+  --am-left: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 7' width='12' height='7' preserveAspectRatio='none' shape-rendering='crispEdges'%3E%3Crect x='7' y='1' width='2' height='1' fill='%23000'/%3E%3Crect x='5' y='2' width='3' height='1' fill='%23000'/%3E%3Crect x='3' y='3' width='4' height='1' fill='%23000'/%3E%3Crect x='5' y='4' width='3' height='1' fill='%23000'/%3E%3Crect x='7' y='5' width='2' height='1' fill='%23000'/%3E%3C/svg%3E");
+  --am-right: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 7' width='12' height='7' preserveAspectRatio='none' shape-rendering='crispEdges'%3E%3Crect x='3' y='1' width='2' height='1' fill='%23000'/%3E%3Crect x='4' y='2' width='3' height='1' fill='%23000'/%3E%3Crect x='5' y='3' width='4' height='1' fill='%23000'/%3E%3Crect x='4' y='4' width='3' height='1' fill='%23000'/%3E%3Crect x='3' y='5' width='2' height='1' fill='%23000'/%3E%3C/svg%3E");
+  --am-sdepth: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 23 16' width='23' height='16' preserveAspectRatio='none' shape-rendering='crispEdges'%3E%3Crect x='0' y='0' width='23' height='1' fill='%23fff'/%3E%3Crect x='0' y='1' width='1' height='1' fill='%23fff'/%3E%3Crect x='22' y='1' width='1' height='1' fill='%23000'/%3E%3Crect x='0' y='2' width='1' height='1' fill='%23fff'/%3E%3Crect x='22' y='2' width='1' height='1' fill='%23000'/%3E%3Crect x='0' y='3' width='1' height='1' fill='%23fff'/%3E%3Crect x='4' y='3' width='11' height='1' fill='%23000'/%3E%3Crect x='22' y='3' width='1' height='1' fill='%23000'/%3E%3Crect x='0' y='4' width='1' height='1' fill='%23fff'/%3E%3Crect x='4' y='4' width='1' height='1' fill='%23000'/%3E%3Crect x='14' y='4' width='1' height='1' fill='%23000'/%3E%3Crect x='22' y='4' width='1' height='1' fill='%23000'/%3E%3Crect x='0' y='5' width='1' height='1' fill='%23fff'/%3E%3Crect x='4' y='5' width='1' height='1' fill='%23000'/%3E%3Crect x='14' y='5' width='1' height='1' fill='%23000'/%3E%3Crect x='22' y='5' width='1' height='1' fill='%23000'/%3E%3Crect x='0' y='6' width='1' height='1' fill='%23fff'/%3E%3Crect x='4' y='6' width='1' height='1' fill='%23000'/%3E%3Crect x='8' y='6' width='11' height='1' fill='%23000'/%3E%3Crect x='22' y='6' width='1' height='1' fill='%23000'/%3E%3Crect x='0' y='7' width='1' height='1' fill='%23fff'/%3E%3Crect x='4' y='7' width='1' height='1' fill='%23000'/%3E%3Crect x='8' y='7' width='1' height='1' fill='%23000'/%3E%3Crect x='9' y='7' width='9' height='1' fill='%23fff'/%3E%3Crect x='18' y='7' width='1' height='1' fill='%23000'/%3E%3Crect x='22' y='7' width='1' height='1' fill='%23000'/%3E%3Crect x='0' y='8' width='1' height='1' fill='%23fff'/%3E%3Crect x='4' y='8' width='1' height='1' fill='%23000'/%3E%3Crect x='8' y='8' width='1' height='1' fill='%23000'/%3E%3Crect x='9' y='8' width='9' height='1' fill='%23fff'/%3E%3Crect x='18' y='8' width='1' height='1' fill='%23000'/%3E%3Crect x='22' y='8' width='1' height='1' fill='%23000'/%3E%3Crect x='0' y='9' width='1' height='1' fill='%23fff'/%3E%3Crect x='4' y='9' width='5' height='1' fill='%23000'/%3E%3Crect x='9' y='9' width='9' height='1' fill='%23fff'/%3E%3Crect x='18' y='9' width='1' height='1' fill='%23000'/%3E%3Crect x='22' y='9' width='1' height='1' fill='%23000'/%3E%3Crect x='0' y='10' width='1' height='1' fill='%23fff'/%3E%3Crect x='8' y='10' width='1' height='1' fill='%23000'/%3E%3Crect x='9' y='10' width='9' height='1' fill='%23fff'/%3E%3Crect x='18' y='10' width='1' height='1' fill='%23000'/%3E%3Crect x='22' y='10' width='1' height='1' fill='%23000'/%3E%3Crect x='0' y='11' width='1' height='1' fill='%23fff'/%3E%3Crect x='8' y='11' width='1' height='1' fill='%23000'/%3E%3Crect x='9' y='11' width='9' height='1' fill='%23fff'/%3E%3Crect x='18' y='11' width='1' height='1' fill='%23000'/%3E%3Crect x='22' y='11' width='1' height='1' fill='%23000'/%3E%3Crect x='0' y='12' width='1' height='1' fill='%23fff'/%3E%3Crect x='8' y='12' width='11' height='1' fill='%23000'/%3E%3Crect x='22' y='12' width='1' height='1' fill='%23000'/%3E%3Crect x='0' y='13' width='1' height='1' fill='%23fff'/%3E%3Crect x='22' y='13' width='1' height='1' fill='%23000'/%3E%3Crect x='0' y='14' width='1' height='1' fill='%23fff'/%3E%3Crect x='22' y='14' width='1' height='1' fill='%23000'/%3E%3Crect x='0' y='15' width='23' height='1' fill='%23000'/%3E%3C/svg%3E");
+  --am-depth: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 21 10' width='21' height='10' preserveAspectRatio='none' shape-rendering='crispEdges'%3E%3Crect x='3' y='0' width='11' height='1' fill='%23000'/%3E%3Crect x='3' y='1' width='1' height='1' fill='%23000'/%3E%3Crect x='13' y='1' width='1' height='1' fill='%23000'/%3E%3Crect x='3' y='2' width='1' height='1' fill='%23000'/%3E%3Crect x='13' y='2' width='1' height='1' fill='%23000'/%3E%3Crect x='3' y='3' width='1' height='1' fill='%23000'/%3E%3Crect x='7' y='3' width='11' height='1' fill='%23000'/%3E%3Crect x='3' y='4' width='1' height='1' fill='%23000'/%3E%3Crect x='7' y='4' width='1' height='1' fill='%23000'/%3E%3Crect x='17' y='4' width='1' height='1' fill='%23000'/%3E%3Crect x='3' y='5' width='1' height='1' fill='%23000'/%3E%3Crect x='7' y='5' width='1' height='1' fill='%23000'/%3E%3Crect x='17' y='5' width='1' height='1' fill='%23000'/%3E%3Crect x='3' y='6' width='5' height='1' fill='%23000'/%3E%3Crect x='17' y='6' width='1' height='1' fill='%23000'/%3E%3Crect x='7' y='7' width='1' height='1' fill='%23000'/%3E%3Crect x='17' y='7' width='1' height='1' fill='%23000'/%3E%3Crect x='7' y='8' width='1' height='1' fill='%23000'/%3E%3Crect x='17' y='8' width='1' height='1' fill='%23000'/%3E%3Crect x='7' y='9' width='11' height='1' fill='%23000'/%3E%3C/svg%3E");
+  --am-close: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 5 7' width='5' height='7' preserveAspectRatio='none' shape-rendering='crispEdges'%3E%3Crect x='0' y='0' width='5' height='1' fill='%23000'/%3E%3Crect x='0' y='1' width='1' height='1' fill='%23000'/%3E%3Crect x='4' y='1' width='1' height='1' fill='%23000'/%3E%3Crect x='0' y='2' width='1' height='1' fill='%23000'/%3E%3Crect x='4' y='2' width='1' height='1' fill='%23000'/%3E%3Crect x='0' y='3' width='1' height='1' fill='%23000'/%3E%3Crect x='4' y='3' width='1' height='1' fill='%23000'/%3E%3Crect x='0' y='4' width='1' height='1' fill='%23000'/%3E%3Crect x='4' y='4' width='1' height='1' fill='%23000'/%3E%3Crect x='0' y='5' width='1' height='1' fill='%23000'/%3E%3Crect x='4' y='5' width='1' height='1' fill='%23000'/%3E%3Crect x='0' y='6' width='5' height='1' fill='%23000'/%3E%3C/svg%3E");
+  --am-zoom: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 13 10' width='13' height='10' preserveAspectRatio='none' shape-rendering='crispEdges'%3E%3Crect x='0' y='0' width='13' height='1' fill='%23000'/%3E%3Crect x='0' y='1' width='2' height='1' fill='%23000'/%3E%3Crect x='5' y='1' width='2' height='1' fill='%23000'/%3E%3Crect x='12' y='1' width='1' height='1' fill='%23000'/%3E%3Crect x='0' y='2' width='2' height='1' fill='%23000'/%3E%3Crect x='5' y='2' width='2' height='1' fill='%23000'/%3E%3Crect x='12' y='2' width='1' height='1' fill='%23000'/%3E%3Crect x='0' y='3' width='2' height='1' fill='%23000'/%3E%3Crect x='5' y='3' width='2' height='1' fill='%23000'/%3E%3Crect x='12' y='3' width='1' height='1' fill='%23000'/%3E%3Crect x='0' y='4' width='7' height='1' fill='%23000'/%3E%3Crect x='12' y='4' width='1' height='1' fill='%23000'/%3E%3Crect x='0' y='5' width='1' height='1' fill='%23000'/%3E%3Crect x='12' y='5' width='1' height='1' fill='%23000'/%3E%3Crect x='0' y='6' width='1' height='1' fill='%23000'/%3E%3Crect x='12' y='6' width='1' height='1' fill='%23000'/%3E%3Crect x='0' y='7' width='1' height='1' fill='%23000'/%3E%3Crect x='12' y='7' width='1' height='1' fill='%23000'/%3E%3Crect x='0' y='8' width='1' height='1' fill='%23000'/%3E%3Crect x='12' y='8' width='1' height='1' fill='%23000'/%3E%3Crect x='0' y='9' width='13' height='1' fill='%23000'/%3E%3C/svg%3E");
+  --am-dither: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 2 2' width='2' height='2' preserveAspectRatio='none' shape-rendering='crispEdges'%3E%3Crect x='0' y='0' width='1' height='1' fill='%23bbb'/%3E%3Crect x='1' y='0' width='1' height='1' fill='%23000'/%3E%3Crect x='0' y='1' width='1' height='1' fill='%23000'/%3E%3Crect x='1' y='1' width='1' height='1' fill='%23bbb'/%3E%3C/svg%3E");
+  --am-radio: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 17 9' width='17' height='9' preserveAspectRatio='none' shape-rendering='crispEdges'%3E%3Crect x='2' y='0' width='12' height='1' fill='%23000'/%3E%3Crect x='14' y='0' width='1' height='1' fill='%23fff'/%3E%3Crect x='1' y='1' width='2' height='1' fill='%23000'/%3E%3Crect x='14' y='1' width='2' height='1' fill='%23fff'/%3E%3Crect x='0' y='2' width='2' height='1' fill='%23000'/%3E%3Crect x='15' y='2' width='2' height='1' fill='%23fff'/%3E%3Crect x='0' y='3' width='2' height='1' fill='%23000'/%3E%3Crect x='15' y='3' width='2' height='1' fill='%23fff'/%3E%3Crect x='0' y='4' width='2' height='1' fill='%23000'/%3E%3Crect x='15' y='4' width='2' height='1' fill='%23fff'/%3E%3Crect x='0' y='5' width='2' height='1' fill='%23000'/%3E%3Crect x='15' y='5' width='2' height='1' fill='%23fff'/%3E%3Crect x='0' y='6' width='2' height='1' fill='%23000'/%3E%3Crect x='15' y='6' width='2' height='1' fill='%23fff'/%3E%3Crect x='1' y='7' width='2' height='1' fill='%23000'/%3E%3Crect x='14' y='7' width='2' height='1' fill='%23fff'/%3E%3Crect x='2' y='8' width='1' height='1' fill='%23000'/%3E%3Crect x='3' y='8' width='12' height='1' fill='%23fff'/%3E%3C/svg%3E");
+  --am-radioon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 17 9' width='17' height='9' preserveAspectRatio='none' shape-rendering='crispEdges'%3E%3Crect x='2' y='0' width='12' height='1' fill='%23000'/%3E%3Crect x='14' y='0' width='1' height='1' fill='%23fff'/%3E%3Crect x='1' y='1' width='2' height='1' fill='%23000'/%3E%3Crect x='14' y='1' width='2' height='1' fill='%23fff'/%3E%3Crect x='0' y='2' width='2' height='1' fill='%23000'/%3E%3Crect x='5' y='2' width='7' height='1' fill='%233399cc'/%3E%3Crect x='15' y='2' width='2' height='1' fill='%23fff'/%3E%3Crect x='0' y='3' width='2' height='1' fill='%23000'/%3E%3Crect x='4' y='3' width='9' height='1' fill='%233399cc'/%3E%3Crect x='15' y='3' width='2' height='1' fill='%23fff'/%3E%3Crect x='0' y='4' width='2' height='1' fill='%23000'/%3E%3Crect x='4' y='4' width='9' height='1' fill='%233399cc'/%3E%3Crect x='15' y='4' width='2' height='1' fill='%23fff'/%3E%3Crect x='0' y='5' width='2' height='1' fill='%23000'/%3E%3Crect x='4' y='5' width='9' height='1' fill='%233399cc'/%3E%3Crect x='15' y='5' width='2' height='1' fill='%23fff'/%3E%3Crect x='0' y='6' width='2' height='1' fill='%23000'/%3E%3Crect x='5' y='6' width='7' height='1' fill='%233399cc'/%3E%3Crect x='15' y='6' width='2' height='1' fill='%23fff'/%3E%3Crect x='1' y='7' width='2' height='1' fill='%23000'/%3E%3Crect x='14' y='7' width='2' height='1' fill='%23fff'/%3E%3Crect x='2' y='8' width='1' height='1' fill='%23000'/%3E%3Crect x='3' y='8' width='12' height='1' fill='%23fff'/%3E%3C/svg%3E");
+  --am-size: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 3' width='18' height='3' preserveAspectRatio='none' shape-rendering='crispEdges'%3E%3Crect x='1' y='0' width='2' height='1' fill='%23000'/%3E%3Crect x='0' y='1' width='3' height='1' fill='%23000'/%3E%3Crect x='16' y='1' width='2' height='1' fill='%23000'/%3E%3Crect x='0' y='2' width='18' height='1' fill='%23000'/%3E%3C/svg%3E");
+}
+html.am-square { --amf: "HoAmiga"; --amfs: "HoAmigaSmall"; }
+html.amiga, html.amiga body { background: #000; }
+/* one Amiga pixel: --u across, --v down; a part of the page names which (the screen, a window, the title screen) */
+html.amiga #app { --u: var(--x); --v: var(--y); }
+html.amiga .scrim, html.amiga .am-popup, html.amiga .toast, html.amiga .tip, html.amiga .touchdrag { --u: var(--dx); --v: var(--dy); }
+html.amiga #titlescreen { --u: var(--tx); --v: var(--ty); }
+html.amiga #app, html.amiga .scrim, html.amiga .am-popup, html.amiga .toast, html.amiga .tip, html.amiga #titlescreen .am-tscreen {
+  font: 400 calc(16 * var(--v)) / calc(10 * var(--v)) var(--amf), sans-serif; color: #000; letter-spacing: 0;
+  -webkit-font-smoothing: none; font-smooth: never; text-rendering: optimizeSpeed;
+}
+html.amiga img, html.amiga canvas { image-rendering: pixelated; }
+html.amiga button { font: inherit; color: inherit; letter-spacing: 0; }
+
+/* ---------- the screen: 640 x 256 ---------- */
+html.amiga.am-desk body { overflow: hidden; }
+html.amiga #app { display: block; position: fixed; left: calc((100vw - 640 * var(--u)) / 2); top: calc((100vh - 256 * var(--v)) / 2); width: calc(640 * var(--u)); height: calc(256 * var(--v)); background: #000; overflow: hidden; }
+html.amiga #main { display: block; position: absolute; left: 0; top: calc(17 * var(--v)); width: 100%; height: calc(239 * var(--v)); }
+/* the title bar (rows 0-15) and its white line; its menus show while the pointer is on it */
+html.amiga #menubar { position: absolute; left: 0; top: 0; width: 100%; height: calc(17 * var(--v)); padding: 0; gap: 0; background: var(--am-blue); border: 0; border-bottom: calc(1 * var(--v)) solid #fff; box-sizing: border-box; display: flex; align-items: stretch; box-shadow: none; z-index: 20; }
+html.amiga #title { display: block; position: absolute; left: calc(6 * var(--u)); top: calc(-1 * var(--v)); right: calc(30 * var(--u)); margin: 0; color: #fff; line-height: calc(16 * var(--v)); text-align: left; overflow: hidden; white-space: nowrap; cursor: default; }
+html.amiga #menubar .menu { display: none; position: relative; }
+html.amiga #menubar:hover .menu, html.amiga #menubar.am-menus .menu, html.amiga #menubar:has(.dropdown.open) .menu, html.amiga #menubar:focus-within .menu { display: block; }
+html.amiga #menubar:hover #title, html.amiga #menubar.am-menus #title, html.amiga #menubar:has(.dropdown.open) #title, html.amiga #menubar:focus-within #title { visibility: hidden; }
+html.amiga #menubar .mbtn { height: calc(16 * var(--v)); padding: 0 calc(6 * var(--u)); margin: 0; border: 0; border-radius: 0; background: none; color: #fff; line-height: calc(14 * var(--v)); font: inherit; box-shadow: none; cursor: pointer; }
+html.amiga #menubar .mbtn.logo { margin-left: calc(2 * var(--u)); font-weight: 400; color: #fff; }
+html.amiga #menubar .mbtn:hover, html.amiga #menubar .mbtn[aria-expanded=true], html.amiga #menubar .mbtn:focus-visible { background: #fff; color: var(--am-blue); outline: none; }
+html.amiga .am-sdepth { position: absolute; right: 0; top: 0; width: calc(23 * var(--u)); height: calc(16 * var(--v)); background: var(--am-grey) var(--am-sdepth) no-repeat 0 0 / 100% 100%; }
+/* menus: the bar's colours, a black edge; the item under the pointer inverted (guessed) */
+html.amiga .dropdown { position: absolute; top: calc(16 * var(--v)); left: 0; min-width: calc(150 * var(--u)); padding: calc(2 * var(--v)) 0; background: var(--am-blue); border: calc(1 * var(--v)) solid #000; border-left-width: calc(2 * var(--u)); border-right-width: calc(2 * var(--u)); box-shadow: none; border-radius: 0; z-index: 30; }
+html.amiga .dropdown button[role=menuitem] { display: block; width: 100%; text-align: left; padding: 0 calc(8 * var(--u)) 0 calc(16 * var(--u)); height: calc(11 * var(--v)); line-height: calc(10 * var(--v)); border: 0; border-radius: 0; background: none; color: #fff; white-space: nowrap; cursor: pointer; }
+html.amiga .dropdown button[role=menuitem]:hover, html.amiga .dropdown button[role=menuitem]:focus-visible { background: #fff; color: var(--am-blue); outline: none; }
+html.amiga .dropdown button.check::before { content: '✓'; width: calc(12 * var(--u)); margin-left: calc(-12 * var(--u)); }
+html.amiga .dropdown hr { border: 0; height: calc(1 * var(--v)); margin: calc(2 * var(--v)) calc(4 * var(--u)); background: repeating-linear-gradient(90deg, #fff 0 calc(1 * var(--u)), transparent 0 calc(2 * var(--u))); }
+html.amiga .am-popup { position: fixed; z-index: 90; }
+
+/* ---------- the left column: four stacked panels ---------- */
+html.amiga #panel { position: absolute; left: 0; top: 0; width: calc(241 * var(--u)); height: 100%; padding: 0; overflow: hidden; background: var(--am-grey); border: 0; }
+html.amiga #panel:empty { background:
+  linear-gradient(#000, #000) 0 calc(65 * var(--v)) / 100% calc(1 * var(--v)) no-repeat, linear-gradient(#fff, #fff) 0 calc(66 * var(--v)) / 100% calc(1 * var(--v)) no-repeat,
+  linear-gradient(#000, #000) 0 calc(110 * var(--v)) / 100% calc(1 * var(--v)) no-repeat, linear-gradient(#fff, #fff) 0 calc(111 * var(--v)) / 100% calc(1 * var(--v)) no-repeat,
+  linear-gradient(#000, #000) 0 calc(145 * var(--v)) / 100% calc(1 * var(--v)) no-repeat, linear-gradient(#fff, #fff) 0 calc(146 * var(--v)) / 100% calc(1 * var(--v)) no-repeat,
+  linear-gradient(90deg, #fff 0 calc(2 * var(--u)), transparent 0 calc(239 * var(--u)), #000 0), var(--am-grey); }
+html.amiga #panel > section { position: absolute; left: 0; width: calc(241 * var(--u)); box-sizing: border-box; background: var(--am-grey); border-left: calc(2 * var(--u)) solid #fff; border-right: calc(2 * var(--u)) solid #000; border-bottom: calc(1 * var(--v)) solid #000; margin: 0; padding: 0; overflow: hidden; }
+html.amiga #panel > section + section, html.amiga #panel > div + section { border-top: calc(1 * var(--v)) solid #fff; }
+html.amiga .am-star { top: 0; height: calc(66 * var(--v)); border-top: 0 !important; }
+html.amiga .am-fleet { top: calc(66 * var(--v)); height: calc(45 * var(--v)); }
+html.amiga .am-totals { top: calc(111 * var(--v)); height: calc(35 * var(--v)); }
+html.amiga .am-bottom { position: absolute; left: 0; top: calc(146 * var(--v)); width: calc(241 * var(--u)); height: calc(93 * var(--v)); }
+html.amiga #am-tech { top: calc(139 * var(--v)); height: calc(100 * var(--v)); border: 0 !important; background: none; z-index: 2; }
+html.amiga .am-keep { display: none !important; }
+/* the star */
+html.amiga .am-sname { position: absolute; left: 0; top: calc(2 * var(--v)); width: calc(98 * var(--u)); text-align: center; white-space: nowrap; }
+html.amiga .am-rows { position: absolute; left: 0; top: calc(12 * var(--v)); width: calc(150 * var(--u)); }
+html.amiga .am-kv { display: grid; grid-template-columns: calc(42 * var(--u)) auto; column-gap: calc(3 * var(--u)); height: calc(10 * var(--v)); white-space: nowrap; }
+html.amiga .am-k { text-align: right; }
+html.amiga .am-note { padding-left: calc(6 * var(--u)); white-space: normal; width: calc(220 * var(--u)); }
+html.amiga .am-seen { position: absolute; left: calc(120 * var(--u)); top: calc(12 * var(--v)); white-space: nowrap; }
+html.amiga .am-orders { position: absolute; left: calc(99 * var(--u)); top: calc(12 * var(--v)); white-space: nowrap; }
+html.amiga .am-oline { padding-left: calc(4 * var(--u)); }
+html.amiga .am-chart { position: absolute; left: calc(101 * var(--u)); top: calc(2 * var(--v)); width: calc(92 * var(--u)); height: calc(62 * var(--v)); }
+html.amiga .am-carea { position: absolute; left: 0; top: 0; width: 100%; height: calc(52 * var(--v)); border-bottom: calc(1 * var(--v)) solid #000; box-sizing: content-box; touch-action: none; }
+html.amiga .am-chart .am-axis, html.amiga .am-techbars::before { position: absolute; left: 0; top: 0; bottom: 0; width: calc(3 * var(--u));
+  background: linear-gradient(90deg, transparent calc(2 * var(--u)), #000 0) 0 0 / 100% 100%, repeating-linear-gradient(transparent 0 calc(4 * var(--v)), #000 0 calc(5 * var(--v))) 0 0 / calc(2 * var(--u)) 100% no-repeat; }
+html.amiga .am-ccol { position: absolute; bottom: 0; width: calc(19 * var(--u)); height: calc(51 * var(--v)); cursor: ns-resize; touch-action: none; outline: none; }
+html.amiga .am-ccol:nth-of-type(1) { left: calc(10 * var(--u)); } html.amiga .am-ccol:nth-of-type(2) { left: calc(37 * var(--u)); } html.amiga .am-ccol:nth-of-type(3) { left: calc(64 * var(--u)); }
+html.amiga .am-ccol.done { cursor: not-allowed; }
+html.amiga .am-ccol:focus-visible { outline: calc(1 * var(--u)) dotted #000; }
+html.amiga .am-cfill { position: absolute; left: 0; right: 0; bottom: 0; background: var(--am-navy); }
+html.amiga .am-cfill.top { background: var(--am-magenta); }
+html.amiga .am-clabs { position: absolute; left: 0; top: calc(53 * var(--v)); width: 100%; display: flex; gap: 0; }
+html.amiga .am-clabs span { position: absolute; width: calc(27 * var(--u)); text-align: center; white-space: nowrap; }
+html.amiga .am-clabs span:nth-child(1) { left: calc(5 * var(--u)); } html.amiga .am-clabs span:nth-child(2) { left: calc(33 * var(--u)); } html.amiga .am-clabs span:nth-child(3) { left: calc(60 * var(--u)); }
+/* the fleets */
+html.amiga .am-fhead { position: absolute; left: calc(3 * var(--u)); top: calc(3 * var(--v)); width: calc(232 * var(--u)); white-space: nowrap; }
+html.amiga .am-fhead > div { height: calc(10 * var(--v)); }
+html.amiga .am-f3 { position: relative; }
+html.amiga .am-f3 span { position: absolute; top: 0; }
+html.amiga .am-f3 span:nth-child(2) { left: calc(69 * var(--u)); } html.amiga .am-f3 span:nth-child(3) { left: calc(127 * var(--u)); }
+html.amiga .am-fwrap { position: absolute; left: 0; top: calc(23 * var(--v)); width: calc(237 * var(--u)); height: calc(21 * var(--v)); }
+html.amiga .am-flist { position: absolute; left: 0; top: 0; width: calc(222 * var(--u)); height: 100%; overflow: hidden; margin: 0; padding: 0; }
+html.amiga .am-frow { height: calc(10 * var(--v)); padding: calc(1 * var(--v)) 0 0 calc(3 * var(--u)); white-space: nowrap; overflow: hidden; cursor: pointer; border: 0; border-radius: 0; background: none; display: block; }
+html.amiga .am-frow.sel { background: linear-gradient(var(--am-red) 0 calc(9 * var(--v)), transparent 0); color: #fff; }
+html.amiga .am-frow.enemy { color: #000; font-style: italic; }
+html.amiga .am-fwrap > .am-prop { position: absolute; right: 0; top: 0; width: calc(15 * var(--u)); height: calc(21 * var(--v)); }
+/* the totals */
+html.amiga .am-totals { padding-top: calc(2 * var(--v)) !important; }
+html.amiga .am-trow { position: relative; height: calc(10 * var(--v)); white-space: nowrap; }
+html.amiga .am-tk { position: absolute; right: calc(164 * var(--u)); font-weight: 700; }
+html.amiga .am-tv { position: absolute; left: calc(77 * var(--u)); font-weight: 700; }
+html.amiga .am-td { position: absolute; right: calc(1 * var(--u)); }
+/* players and spending */
+html.amiga .am-players, html.amiga .am-spendwin { position: absolute; top: 0; height: 100%; box-sizing: border-box; background: var(--am-grey); border-left: calc(2 * var(--u)) solid #fff; border-bottom: calc(1 * var(--v)) solid #000; }
+html.amiga .am-players { left: 0; width: calc(93 * var(--u)); }
+html.amiga .am-spendwin { left: calc(93 * var(--u)); width: calc(148 * var(--u)); border-right: calc(2 * var(--u)) solid #000; }
+html.amiga .am-plist { position: absolute; left: 0; top: 0; width: calc(74 * var(--u)); height: 100%; overflow: hidden; }
+html.amiga .am-prow { display: flex; align-items: center; gap: calc(3 * var(--u)); height: calc(18 * var(--v)); padding-left: calc(8 * var(--u)); padding-top: calc(2 * var(--v)); white-space: nowrap; cursor: pointer; }
+html.amiga .am-prow .am-pic { width: calc(16 * var(--u)); height: calc(16 * var(--v)); flex: none; }
+html.amiga .am-players > .am-prop { position: absolute; right: 0; top: 0; width: calc(17 * var(--u)); height: 100%; }
+html.amiga .am-spend { position: absolute; left: 0; top: 0; width: calc(129 * var(--u)); height: 100%; overflow: hidden; }
+html.amiga .am-spendwin > .am-prop { position: absolute; right: 0; top: 0; width: calc(15 * var(--u)); height: 100%; }
+html.amiga .am-budget { display: flex; flex-direction: column; position: relative; margin: 0; padding: 0 !important; border: 0 !important; background: none !important; box-shadow: none !important; min-height: 100%; }
+html.amiga .am-budget::before { content: ''; position: absolute; left: calc(50 * var(--u)); top: calc(14 * var(--v)); width: calc(1 * var(--u)); height: calc(500 * var(--v)); background: #000; }
+html.amiga .am-budget h3 { order: -2; position: relative; height: calc(12 * var(--v)); margin: 0; padding: 0; font: inherit; color: #000; cursor: default; }
+html.amiga .am-budget h3.scaleflip { cursor: pointer; }
+html.amiga .am-budget h3 span { position: absolute; top: calc(3 * var(--v)); white-space: nowrap; font-family: var(--amfs), sans-serif; }
+html.amiga .am-budget h3 span:nth-child(1) { left: calc(39 * var(--u)); } html.amiga .am-budget h3 span:nth-child(2) { left: calc(72 * var(--u)); } html.amiga .am-budget h3 span:nth-child(3) { left: calc(113 * var(--u)); }
+html.amiga .am-ruler { order: -1; position: relative; margin-left: calc(50 * var(--u)); width: calc(80 * var(--u)); height: calc(3 * var(--v)); border-bottom: calc(1 * var(--v)) solid #000; box-sizing: content-box; }
+html.amiga .am-ruler i { position: absolute; bottom: 0; width: calc(1 * var(--u)); height: calc(2 * var(--v)); background: #000; }
+html.amiga .am-budget .barrow { display: block; position: relative; height: calc(11 * var(--v)); margin: 0; padding: 0; }
+html.amiga .am-budget .warn { order: 100; }
+html.amiga .am-budget .am-ruler { margin-bottom: calc(3 * var(--v)); }
+html.amiga .am-budget .blabel { position: absolute; left: 0; top: calc(1 * var(--v)); width: calc(47 * var(--u)); text-align: right; overflow: hidden; text-overflow: clip; font-weight: 400 !important; }
+html.amiga .am-budget .barrow.hl .blabel { text-decoration: underline; text-underline-offset: calc(2 * var(--v)); text-decoration-thickness: calc(1 * var(--v)); }
+html.amiga .am-budget .barrow.loss .blabel { font-style: italic; }
+html.amiga .am-budget .track { position: absolute; left: calc(51 * var(--u)); top: calc(1 * var(--v)); width: calc(78 * var(--u)); height: calc(9 * var(--v)); background: none !important; border: 0 !important; box-shadow: none !important; border-radius: 0 !important; cursor: ew-resize; }
+html.amiga .am-budget .fill { position: absolute; left: 0; top: 0; bottom: 0; background: var(--am-green) !important; border: 0 !important; }
+html.amiga .am-budget .fill.tech { background: #000 !important; }
+html.amiga .am-budget .fill.sav { background: #fff !important; }
+html.amiga .am-budget .bval, html.amiga .am-budget .grid, html.amiga .am-budget .locktext { display: none; }
+html.amiga .am-budget .track.locked { cursor: not-allowed; }
+html.amiga .am-budget .warn { margin: calc(2 * var(--v)) calc(2 * var(--u)); font-size: inherit; color: #000; line-height: calc(10 * var(--v)); }
+/* Technik Ausgaben: an inactive window over the bottom panels */
+html.amiga .am-swin { box-sizing: border-box; background: var(--am-grey); }
+html.amiga .am-wbar { position: relative; display: flex; align-items: stretch; height: calc(16 * var(--v)); box-sizing: border-box; background: var(--am-grey); border-top: calc(1 * var(--v)) solid #fff; border-bottom: calc(1 * var(--v)) solid #000; border-left: calc(1 * var(--u)) solid #fff; }
+html.amiga .am-wname { flex: 1; padding-left: calc(11 * var(--u)); line-height: calc(14 * var(--v)); white-space: nowrap; overflow: hidden; }
+html.amiga .am-gad { flex: none; height: 100%; padding: 0; margin: 0; border: 0 !important; border-radius: 0; box-shadow: none !important; background-color: transparent !important; background-repeat: no-repeat !important; cursor: pointer; }
+html.amiga .am-gad.am-close { width: calc(19 * var(--u)); border-right: calc(1 * var(--u)) solid #000 !important; box-shadow: calc(1 * var(--u)) 0 0 #fff !important; margin-right: calc(1 * var(--u)); background-image: var(--am-close) !important; background-position: calc(6 * var(--u)) calc(3 * var(--v)) !important; background-size: calc(5 * var(--u)) calc(7 * var(--v)) !important; }
+html.amiga .am-gad.am-depth, html.amiga .am-gad.am-zoom { width: calc(23 * var(--u)); border-left: calc(1 * var(--u)) solid #000 !important; box-shadow: inset calc(1 * var(--u)) 0 0 #fff !important; }
+html.amiga .am-gad.am-depth { background-image: var(--am-depth) !important; background-position: calc(1 * var(--u)) calc(2 * var(--v)) !important; background-size: calc(21 * var(--u)) calc(10 * var(--v)) !important; }
+html.amiga .am-gad.am-zoom { background-image: var(--am-zoom) !important; background-position: calc(5 * var(--u)) calc(2 * var(--v)) !important; background-size: calc(13 * var(--u)) calc(10 * var(--v)) !important; }
+html.amiga .am-gad:active { filter: invert(1); }
+html.amiga .am-sbody { position: relative; box-sizing: border-box; border-left: calc(2 * var(--u)) solid #fff; border-right: calc(2 * var(--u)) solid #000; border-bottom: calc(1 * var(--v)) solid #000; }
+html.amiga #am-tech .am-sbody { height: calc(84 * var(--v)); }
+html.amiga .am-levels { position: absolute; left: calc(8 * var(--u)); top: calc(8 * var(--v)); width: calc(60 * var(--u)); }
+html.amiga .am-levels > div { height: calc(11 * var(--v)); white-space: nowrap; }
+html.amiga .am-lrow { display: flex; justify-content: space-between; }
+html.amiga .am-techbars { position: absolute !important; left: calc(83 * var(--u)); top: calc(5 * var(--v)); width: calc(148 * var(--u)); height: calc(52 * var(--v)); margin: 0; padding: 0 !important; border: 0 !important; border-bottom: calc(1 * var(--v)) solid #000 !important; background: none !important; box-shadow: none !important; box-sizing: content-box; }
+html.amiga .am-techbars::before { content: ''; }
+html.amiga .am-techbars .barrow { display: block; position: absolute; top: 0; bottom: 0; width: calc(19 * var(--u)); margin: 0; }
+html.amiga .am-techbars .barrow:nth-of-type(1) { left: calc(9 * var(--u)); } html.amiga .am-techbars .barrow:nth-of-type(2) { left: calc(36 * var(--u)); }
+html.amiga .am-techbars .barrow:nth-of-type(3) { left: calc(63 * var(--u)); } html.amiga .am-techbars .barrow:nth-of-type(4) { left: calc(90 * var(--u)); }
+html.amiga .am-techbars .barrow:nth-of-type(5) { left: calc(117 * var(--u)); } html.amiga .am-techbars .barrow:nth-of-type(6) { left: calc(144 * var(--u)); }
+html.amiga .am-techbars .track { position: absolute; left: 0; right: 0; top: calc(1 * var(--v)); bottom: 0; width: auto; height: auto; background: none !important; border: 0 !important; box-shadow: none !important; border-radius: 0 !important; cursor: ns-resize; }
+html.amiga .am-techbars .fill { position: absolute; left: 0; right: 0; top: auto; bottom: 0; width: auto !important; background: var(--am-blue) !important; border: 0 !important; }
+html.amiga .am-techbars .barrow.top .fill { background: var(--am-purple) !important; }
+html.amiga .am-techbars .blabel { position: absolute; top: calc(55 * var(--v)); left: 50%; transform: translateX(-50%); width: auto; overflow: visible; white-space: nowrap; font-weight: 400 !important; }
+html.amiga .am-techbars .barrow:nth-of-type(even) .blabel { top: calc(66 * var(--v)); }
+html.amiga .am-techbars .bval, html.amiga .am-techbars .grid { display: none; }
+
+/* ---------- the map window ---------- */
+html.amiga #mapwrap { position: absolute; left: calc(241 * var(--u)); top: 0; width: calc(399 * var(--u)); height: 100%; overflow: hidden; background: #000; border-left: calc(2 * var(--u)) solid #fff; box-sizing: border-box; }
+html.amiga #mapview { position: absolute; left: 0; top: 0; width: calc(381 * var(--u)); height: calc(230 * var(--v)); overflow: hidden; }
+html.amiga #map { display: block; }
+html.amiga #mapwrap > .am-pv { position: absolute; right: 0; top: 0; width: calc(16 * var(--u)); height: calc(230 * var(--v)); }
+html.amiga #mapwrap > .am-ph { position: absolute; left: 0; bottom: 0; width: calc(381 * var(--u)); height: calc(9 * var(--v)); }
+html.amiga .am-corner { position: absolute; right: 0; bottom: 0; width: calc(16 * var(--u)); height: calc(9 * var(--v)); background: var(--am-grey); border-left: calc(1 * var(--u)) solid #000; }
+/* a prop gadget: a dithered track (the map's) or a plain one, a white knob, two arrows */
+html.amiga .am-prop { display: flex; flex-direction: column; background: #000; box-sizing: border-box; }
+html.amiga .am-prop.am-ph { flex-direction: row; }
+html.amiga .am-track { position: relative; flex: 1; min-height: 0; min-width: 0; background: #000; }
+html.amiga #mapwrap .am-track { background: var(--am-dither) 0 0 / calc(2 * var(--u)) calc(2 * var(--v)); }
+html.amiga #mapwrap > .am-pv .am-track { margin: 0 calc(2 * var(--u)) 0 calc(1 * var(--u)); }
+html.amiga #mapwrap > .am-ph .am-track { margin: calc(1 * var(--v)) 0; }
+html.amiga .am-knob { position: absolute; left: 0; top: 0; width: 100%; height: 100%; box-sizing: border-box; background: #fff; cursor: grab; touch-action: none; }
+html.amiga .am-pv .am-knob { left: calc(1 * var(--u)); right: calc(2 * var(--u)); width: auto; border-top: calc(1 * var(--v)) solid #000; border-bottom: calc(1 * var(--v)) solid #000; }
+html.amiga .am-ph .am-knob { top: 0; bottom: 0; height: auto; border-left: calc(2 * var(--u)) solid #000; border-right: calc(2 * var(--u)) solid #000; }
+html.amiga .am-arrow { flex: none; height: calc(10 * var(--v)); width: 100%; padding: 0; margin: 0; border: 0 !important; border-radius: 0; box-sizing: border-box; cursor: pointer;
+  background: var(--am-up) no-repeat calc(2 * var(--u)) 0 / calc(12 * var(--u)) calc(7 * var(--v)), var(--am-grey) !important;
+  box-shadow: inset calc(2 * var(--u)) calc(1 * var(--v)) 0 #fff, inset calc(-2 * var(--u)) calc(-1 * var(--v)) 0 #000 !important; background-position: center !important; }
+html.amiga .am-arrow.am-down { background-image: var(--am-down) !important; }
+html.amiga .am-ph .am-arrow { width: calc(17 * var(--u)); height: 100%; background-image: var(--am-left) !important; }
+html.amiga .am-ph .am-arrow.am-down { background-image: var(--am-right) !important; }
+html.amiga .am-arrow:active { filter: invert(1); }
+/* the list scroll bars: a plain track, white knob */
+html.amiga #panel .am-track { margin: 0 calc(2 * var(--u)) 0 calc(1 * var(--u)); }
+html.amiga #panel .am-knob, html.amiga .scrim .am-knob, html.amiga #am-news .am-knob { left: 0; right: 0; border: 0; }
+/* the reports: a white card at the map's lower left; End Turn at its top left */
+html.amiga #msg { position: absolute; left: 0; top: auto; right: auto; bottom: calc(11 * var(--v)); max-width: none; z-index: 5; }
+html.amiga #msg.am-clockbox { top: 0; bottom: auto; }
+html.amiga #msg .card { display: flex; gap: 0; align-items: flex-start; width: calc(185 * var(--u)); min-height: calc(79 * var(--v)); padding: calc(10 * var(--v)) calc(10 * var(--u)) calc(14 * var(--v)) calc(14 * var(--u)); box-sizing: border-box;
+  background: #fff; border: 0; border-radius: 0; box-shadow: none; color: #000; cursor: pointer;
+  border-image: url("../../../assets/skins/amiga/sprites/d5030.png") 4 4 4 4 fill / calc(4 * var(--v)) calc(4 * var(--u)); image-rendering: pixelated; }
+html.amiga #msg .card:focus-visible { outline: calc(1 * var(--u)) dotted var(--am-red); outline-offset: 0; }
+html.amiga #msg .card .icon { width: calc(32 * var(--u)); height: calc(32 * var(--v)); margin: calc(12 * var(--v)) calc(14 * var(--u)) 0 calc(4 * var(--u)); }
+html.amiga #msg .card .bigicon, html.amiga #msg .card .jpg { width: calc(80 * var(--u)); height: auto; margin-right: calc(6 * var(--u)); }
+html.amiga #msg .card .mtext { flex: 1; min-width: 0; }
+html.amiga #msg .card .mtext, html.amiga #msg .card .mtext p, html.amiga #msg .card button { font: inherit; }
+html.amiga #msg .card .mtext p { margin: 0; line-height: calc(11 * var(--v)); }
+html.amiga #msg .card .count { display: none; }
+html.amiga #msg .am-more { position: absolute; left: calc(7 * var(--u)); bottom: calc(7 * var(--v)); }
+html.amiga #msg .card { position: relative; }
+html.amiga #msg .card .mbtns:empty { display: none; }
+html.amiga #msg .card .mbtns { margin-top: calc(3 * var(--v)); }
+html.amiga #msg .card.end, html.amiga #msg .card.waiting { width: calc(300 * var(--u)); cursor: default; }
+html.amiga #msg .card.end img { width: calc(74 * var(--u)); height: auto; margin-right: calc(8 * var(--u)); }
+html.amiga #msg .clock.pic { padding: 0; margin: 0; border: 0; background: none; box-shadow: none; display: block; }
+html.amiga #msg .clock.pic img { display: block; width: calc(48 * var(--u)); height: calc(33 * var(--v)); image-rendering: pixelated; }
+html.amiga #msg .clock.pic:active img { transform: none; filter: brightness(.8); }
+html.amiga #msg .clock .clockyear, html.amiga #msg .clock .timeleft { font: inherit; color: #000; }
+html.amiga #routebar { position: absolute; left: calc(52 * var(--u)); top: 0; display: flex; gap: calc(4 * var(--u)); align-items: center; padding: calc(2 * var(--v)) calc(4 * var(--u)); background: var(--am-grey); border: 0; border-image: none; box-shadow: inset calc(2 * var(--u)) calc(1 * var(--v)) 0 #fff, inset calc(-2 * var(--u)) calc(-1 * var(--v)) 0 #000; z-index: 6; max-width: calc(320 * var(--u)); }
+/* Nachrichten: an inactive window on the map */
+html.amiga #am-news { position: absolute; left: calc(157 * var(--u)); top: calc(119 * var(--v)); width: calc(240 * var(--u)); height: calc(120 * var(--v)); z-index: 4; }
+html.amiga #am-news.zoomed { top: 0; height: 100%; }
+html.amiga #am-news .am-sbody { height: calc(100% - 16 * var(--v)); border-right: 0; }
+html.amiga .am-nwrap { position: absolute; inset: 0; }
+html.amiga .am-nlist { position: absolute; left: 0; top: 0; right: calc(16 * var(--u)); bottom: 0; overflow: hidden; }
+html.amiga .am-nrow { display: flex; gap: calc(10 * var(--u)); align-items: flex-start; padding: calc(8 * var(--v)) calc(4 * var(--u)) calc(4 * var(--v)) calc(2 * var(--u)); min-height: calc(40 * var(--v)); cursor: pointer; }
+html.amiga .am-nrow p { margin: 0; line-height: calc(11 * var(--v)); }
+html.amiga .am-nicon { width: calc(32 * var(--u)); height: calc(32 * var(--v)); flex: none; }
+html.amiga .am-nwrap > .am-prop { position: absolute; right: 0; top: 0; width: calc(16 * var(--u)); height: 100%; }
+
+/* ---------- windows (the Workbench look): cyan title, grey body, bevels ---------- */
+html.amiga .scrim { background: transparent; padding: 0; overflow: auto; place-items: center; }
+html.amiga.os-workbench .win { width: auto; max-width: none; max-height: none; box-sizing: border-box; background: var(--am-cyan); border: 0; border-radius: 0; box-shadow: none; padding: 0 calc(2 * var(--u));
+  border-top: calc(1 * var(--v)) solid #fff; border-left: calc(1 * var(--u)) solid #fff; border-right: calc(1 * var(--u)) solid #000; border-bottom: calc(1 * var(--v)) solid #000; }
+html.amiga.os-workbench .win > .wtitle { position: relative; height: calc(15 * var(--v)); margin: 0 calc(-2 * var(--u)); padding: 0 calc(3 * var(--u)); box-sizing: border-box; background: var(--am-cyan); border: 0; border-bottom: calc(1 * var(--v)) solid #000; display: flex; align-items: stretch; gap: 0; }
+html.amiga.os-workbench .win > .wtitle span { color: #000; line-height: calc(14 * var(--v)); font: inherit; font-weight: 400; text-align: left; flex: 1; white-space: nowrap; overflow: hidden; text-shadow: none; }
+html.amiga.os-workbench .win > .wtitle .close { flex: none; width: calc(19 * var(--u)); height: 100%; margin: 0 calc(6 * var(--u)) 0 calc(-3 * var(--u)); padding: 0; border: 0; border-radius: 0; border-right: calc(1 * var(--u)) solid #000; box-shadow: calc(1 * var(--u)) 0 0 #fff;
+  background: var(--am-close) no-repeat calc(6 * var(--u)) calc(3 * var(--v)) / calc(5 * var(--u)) calc(7 * var(--v)), transparent; }
+html.amiga.os-workbench .win.am-win > .wtitle .close { display: none; }
+html.amiga.os-workbench .win > .wtitle .am-gad { margin-right: calc(-3 * var(--u)); }
+html.amiga.os-workbench .win > .wbody { background: var(--am-grey); color: #000; border-left: calc(1 * var(--u)) solid #000; border-right: calc(1 * var(--u)) solid #fff; border-bottom: calc(1 * var(--v)) solid #fff; padding: calc(6 * var(--v)) calc(10 * var(--u)); overflow: auto; }
+html.amiga.os-workbench .win:not(.am-win) { width: calc(460 * var(--u)); max-width: calc(100vw - 4px); max-height: calc(100vh - 4px); }
+html.amiga.os-workbench .win.small:not(.am-win) { width: calc(340 * var(--u)); }
+html.amiga.os-workbench .win.mid:not(.am-win) { width: calc(540 * var(--u)); }
+html.amiga.os-workbench .win.wide:not(.am-win), html.amiga.os-workbench .win.ngwin:not(.am-win) { width: calc(620 * var(--u)); }
+html.amiga .wbody p, html.amiga .wbody li, html.amiga .wbody td, html.amiga .wbody th, html.amiga .wbody label, html.amiga .wbody h3, html.amiga .wbody h4, html.amiga .wbody legend, html.amiga .wbody summary, html.amiga .wbody small, html.amiga .wbody .sub, html.amiga .wbody .note { font: inherit; line-height: calc(11 * var(--v)); color: #000; }
+html.amiga .wbody p { margin: calc(3 * var(--v)) 0; }
+html.amiga .wbody h3, html.amiga .wbody h4 { font-weight: 700; margin: calc(4 * var(--v)) 0 calc(2 * var(--v)); }
+html.amiga .wbody .sub, html.amiga .wbody .note { color: #000; opacity: 1; }
+html.amiga .wbody a { color: var(--am-blue); }
+/* buttons: raised (white top-left, black bottom-right); the default one in a dark red frame */
+html.amiga.os-workbench .wbody button:not(.am-gad):not(.am-arrow):not(.am-picbtn):not(.tbtn), html.amiga .am-btn, html.amiga.os-workbench .tcard button {
+  min-height: calc(14 * var(--v)); padding: calc(1 * var(--v)) calc(8 * var(--u)) 0; margin: calc(1 * var(--v)) calc(2 * var(--u)); border: 0 !important; border-radius: 0 !important; background: var(--am-grey) !important; color: #000 !important;
+  box-shadow: inset calc(2 * var(--u)) calc(1 * var(--v)) 0 #fff, inset calc(-2 * var(--u)) calc(-1 * var(--v)) 0 #000 !important; font: inherit !important; line-height: calc(10 * var(--v)) !important; cursor: pointer; text-shadow: none; }
+html.amiga.os-workbench .wbody button:not(.am-gad):not(.am-arrow):not(.am-picbtn):not(.tbtn):active, html.amiga .am-btn:active, html.amiga.os-workbench .tcard button:active { box-shadow: inset calc(2 * var(--u)) calc(1 * var(--v)) 0 #000, inset calc(-2 * var(--u)) calc(-1 * var(--v)) 0 #fff !important; }
+html.amiga .wbody button:disabled { color: #777 !important; cursor: default; }
+html.amiga .am-btn.am-default, html.amiga.os-workbench .wbody .am-btn.am-default, html.amiga.os-workbench .wbody button[type=submit]:not(.am-btn) { outline: calc(1 * var(--v)) solid var(--am-red); box-shadow: inset calc(2 * var(--u)) calc(1 * var(--v)) 0 #fff, inset calc(-2 * var(--u)) calc(-1 * var(--v)) 0 #000, 0 0 0 calc(1 * var(--u)) var(--am-red), calc(1 * var(--u)) 0 0 calc(1 * var(--u)) var(--am-red), calc(-1 * var(--u)) 0 0 calc(1 * var(--u)) var(--am-red) !important; outline: 0; }
+html.amiga .am-btn.am-orange, html.amiga.os-workbench .wbody .am-btn.am-orange { box-shadow: inset calc(2 * var(--u)) calc(1 * var(--v)) 0 #fff, inset calc(-2 * var(--u)) calc(-1 * var(--v)) 0 #000, 0 0 0 calc(1 * var(--u)) #ff9966, calc(1 * var(--u)) 0 0 calc(1 * var(--u)) #ff9966 !important; }
+html.amiga .wbody button:focus-visible, html.amiga .am-btn:focus-visible { outline: calc(1 * var(--u)) dotted var(--am-red) !important; outline-offset: calc(1 * var(--u)); }
+/* fields (recessed), lists (a raised cycle gadget), check boxes and radio buttons */
+html.amiga.os-workbench .wbody input[type=text], html.amiga.os-workbench .wbody input:not([type]), html.amiga.os-workbench .wbody input[type=number], html.amiga.os-workbench .wbody input[type=password], html.amiga.os-workbench .wbody textarea, html.amiga .am-field {
+  height: calc(14 * var(--v)); padding: calc(1 * var(--v)) calc(4 * var(--u)) 0; border: 0 !important; border-radius: 0; background: var(--am-grey) !important; color: #000; font: inherit !important; line-height: calc(12 * var(--v)) !important; box-sizing: border-box;
+  box-shadow: inset calc(2 * var(--u)) calc(1 * var(--v)) 0 #000, inset calc(-2 * var(--u)) calc(-1 * var(--v)) 0 #fff !important; outline: none; }
+html.amiga.os-workbench .wbody textarea { height: auto; }
+html.amiga.os-workbench .wbody select, html.amiga.os-workbench .tcard select { height: calc(14 * var(--v)); font: inherit !important; color: #000; border: 0 !important; border-radius: 0; background-color: var(--am-grey) !important;
+  box-shadow: inset calc(2 * var(--u)) calc(1 * var(--v)) 0 #fff, inset calc(-2 * var(--u)) calc(-1 * var(--v)) 0 #000 !important; padding: 0 calc(6 * var(--u)) 0 calc(22 * var(--u)) !important; background-size: calc(11 * var(--u)) calc(10 * var(--v)), calc(1 * var(--u)) 100%, calc(1 * var(--u)) 100% !important; background-position: calc(5 * var(--u)) center, calc(19 * var(--u)) 0, calc(20 * var(--u)) 0 !important; }
+html.amiga.os-workbench .wbody input[type=checkbox] { width: calc(17 * var(--u)); height: calc(9 * var(--v)); margin: 0 calc(4 * var(--u)) 0 0; border: 0; box-shadow: inset calc(2 * var(--u)) calc(1 * var(--v)) 0 #fff, inset calc(-2 * var(--u)) calc(-1 * var(--v)) 0 #000; background-color: var(--am-grey); background-size: calc(7 * var(--u)) calc(7 * var(--v)); vertical-align: middle; }
+html.amiga .wbody input[type=radio], html.amiga .am-radio input, html.amiga.os-workbench .wbody .am-radio input[type=checkbox] { -webkit-appearance: none; appearance: none; width: calc(17 * var(--u)); height: calc(9 * var(--v)); margin: 0 calc(5 * var(--u)) 0 0; border: 0; border-radius: 0; background: var(--am-radio) 0 0 / 100% 100%; vertical-align: middle; flex: none; cursor: pointer; }
+html.amiga .wbody input[type=radio]:checked, html.amiga .am-radio input:checked, html.amiga.os-workbench .wbody .am-radio input[type=checkbox]:checked { background-image: var(--am-radioon); }
+html.amiga .am-radio { display: flex; align-items: center; white-space: nowrap; cursor: pointer; }
+/* sliders: a prop gadget (the knob a raised white bar on the dithered track) */
+html.amiga.os-workbench .wbody input[type=range], html.amiga .am-slider { -webkit-appearance: none; appearance: none; height: calc(11 * var(--v)); margin: 0; padding: 0; border: 0; background: var(--am-dither) 0 0 / calc(2 * var(--u)) calc(2 * var(--v)) !important; box-shadow: inset calc(2 * var(--u)) calc(1 * var(--v)) 0 #000, inset calc(-2 * var(--u)) calc(-1 * var(--v)) 0 #fff; cursor: pointer; }
+html.amiga .wbody input[type=range]::-webkit-slider-runnable-track { height: 100%; background: none; border: 0; }
+html.amiga .wbody input[type=range]::-webkit-slider-thumb, html.amiga .am-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: calc(8 * var(--u)) !important; height: calc(11 * var(--v)) !important; margin: 0; border: 0 !important; border-radius: 0 !important; background: #fff !important; box-shadow: inset calc(2 * var(--u)) 0 0 #000, inset calc(-2 * var(--u)) 0 0 #000 !important; }
+html.amiga .wbody input[type=range]::-moz-range-thumb, html.amiga .am-slider::-moz-range-thumb { width: calc(8 * var(--u)); height: calc(11 * var(--v)); border: 0; border-radius: 0; background: #fff; }
+/* frames: a raised box (the Amiga's double bevel), a recessed one */
+html.amiga .am-frame { position: relative; box-sizing: border-box; box-shadow: inset calc(2 * var(--u)) calc(1 * var(--v)) 0 #fff, inset calc(-2 * var(--u)) calc(-1 * var(--v)) 0 #000; }
+html.amiga .scrim .am-prop { width: calc(15 * var(--u)); }
+html.amiga .toast { background: var(--am-grey); color: #000; border-radius: 0; padding: calc(4 * var(--v)) calc(10 * var(--u)); box-shadow: inset calc(2 * var(--u)) calc(1 * var(--v)) 0 #fff, inset calc(-2 * var(--u)) calc(-1 * var(--v)) 0 #000, 0 0 0 calc(1 * var(--u)) #000; max-width: calc(400 * var(--u)); }
+html.amiga .tip { background: #fff; color: #000; border: calc(1 * var(--v)) solid #000; border-radius: 0; box-shadow: none; font-size: calc(16 * var(--v)); }
+html.amiga .tip p, html.amiga .tip small { font: inherit; line-height: calc(11 * var(--v)); margin: 0 0 calc(3 * var(--v)); }
+html.amiga .starmenu { --u: var(--dx); --v: var(--dy); font: 400 calc(16 * var(--v)) / calc(10 * var(--v)) var(--amf), sans-serif; background: var(--am-blue); color: #fff; border: calc(1 * var(--v)) solid #000; border-radius: 0; box-shadow: none; }
+html.amiga .starmenu button { color: #fff; background: none; border: 0; font: inherit; }
+html.amiga .starmenu button:hover { background: #fff; color: var(--am-blue); }
+
+/* ---------- the Amiga's own windows: each laid out on the screenshot's pixels (body origin: 4 across, 16 down) ---------- */
+html.amiga .win.am-win { position: relative; display: block; flex: none; }
+html.amiga .win.am-win > .wbody { position: absolute; top: calc(15 * var(--v)); left: calc(2 * var(--u)); right: calc(2 * var(--u)); bottom: 0; padding: 0 !important; overflow: hidden; }
+html.amiga .am-win .am-btn { position: absolute; margin: 0; padding: 0; height: calc(20 * var(--v)); }
+html.amiga .am-win .wbody > * , html.amiga .am-win form > .am-ngpane > * { position: absolute; }
+html.amiga .am-win .am-ytitle, html.amiga .am-win .am-nglabel { white-space: nowrap; }
+html.amiga .am-ship { display: block; width: calc(243 * var(--u)); height: calc(76 * var(--v)); }
+/* Neue Galaxis erstellen (608 x 200) and Spieler Registration (450 x 178) */
+html.amiga .win.am-wng { width: calc(608 * var(--u)); height: calc(200 * var(--v)); }
+html.amiga .win.am-wng.am-regstep { width: calc(450 * var(--u)); height: calc(178 * var(--v)); }
+html.amiga .win.am-wng.am-showmore, html.amiga .win.am-wng.am-plain { height: auto; max-height: calc(100vh - 8px); overflow: auto; }
+html.amiga .win.am-wng.am-showmore > .wbody, html.amiga .win.am-wng.am-plain > .wbody { position: relative; top: 0; left: 0; right: 0; overflow: visible; }
+html.amiga .am-wng form.newgame { position: absolute; inset: 0; display: block; margin: 0; padding: 0; }
+html.amiga .am-wng.am-showmore form.newgame, html.amiga .am-wng.am-plain form.newgame { position: relative; }
+html.amiga .am-ngpane { position: absolute; inset: 0; }
+html.amiga .am-showmore .am-galaxy, html.amiga .am-plain .am-galaxy { position: relative; height: calc(184 * var(--v)); }
+html.amiga .am-plain .am-galaxy { height: calc(26 * var(--v)); }
+html.amiga .am-ngpane[hidden] { display: none; }
+html.amiga .am-wng .am-more { display: none; padding: calc(4 * var(--v)) calc(10 * var(--u)) calc(8 * var(--v)); border-top: calc(1 * var(--v)) solid #000; }
+html.amiga .am-wng.am-showmore .am-more, html.amiga .am-wng.am-plain .am-more { display: block; }
+html.amiga .am-wng.am-regstep .am-more { display: none !important; }
+html.amiga .am-nggroup { position: absolute; }
+html.amiga .am-nggroup[hidden] { display: none; }
+html.amiga .am-g-density { left: calc(31 * var(--u)); top: calc(6 * var(--v)); } html.amiga .am-g-shape { left: calc(261 * var(--u)); top: calc(6 * var(--v)); }
+html.amiga .am-g-iq { left: calc(31 * var(--u)); top: calc(76 * var(--v)); } html.amiga .am-g-size { left: calc(261 * var(--u)); top: calc(76 * var(--v)); }
+html.amiga .am-g-comp { left: calc(31 * var(--u)); top: calc(146 * var(--v)); }
+html.amiga .am-nglabel { height: calc(14 * var(--v)); }
+html.amiga .am-ngrow { display: flex; gap: calc(8 * var(--u)); }
+html.amiga .am-picbtn { position: relative; width: calc(52 * var(--u)); height: calc(52 * var(--v)); margin: 0; padding: 0; border: 0 !important; border-radius: 0; background: var(--am-grey) !important; cursor: pointer;
+  box-shadow: inset calc(2 * var(--u)) calc(1 * var(--v)) 0 #fff, inset calc(-2 * var(--u)) calc(-1 * var(--v)) 0 #000 !important; display: block; }
+html.amiga .am-picbtn.on { box-shadow: inset calc(2 * var(--u)) calc(1 * var(--v)) 0 #000, inset calc(-2 * var(--u)) calc(-1 * var(--v)) 0 #fff !important; }
+html.amiga .am-picbtn img { position: absolute; left: calc(10 * var(--u)); top: calc(3 * var(--v)); width: calc(32 * var(--u)); height: calc(32 * var(--v)); }
+html.amiga .am-picbtn span { position: absolute; left: 0; right: 0; top: calc(39 * var(--v)); text-align: center; font: 400 calc(16 * var(--v)) / calc(10 * var(--v)) var(--amfs), sans-serif; white-space: nowrap; line-height: calc(10 * var(--v)); }
+html.amiga .am-picbtn:focus-visible { outline: calc(1 * var(--u)) dotted var(--am-red); }
+html.amiga .am-comprow { position: relative; display: flex; align-items: center; gap: 0; margin-top: calc(1 * var(--v)); }
+html.amiga .am-cnum { width: calc(26 * var(--u)); padding-left: calc(9 * var(--u)); }
+html.amiga .am-comprow .am-arrow { width: calc(16 * var(--u)) !important; height: calc(13 * var(--v)) !important; background-image: var(--am-left) !important; }
+html.amiga .am-comprow .am-arrow.am-sr { background-image: var(--am-right) !important; }
+html.amiga .am-slider { width: calc(106 * var(--u)); height: calc(13 * var(--v)) !important; }
+html.amiga .am-ngbtns .am-btn:nth-child(1) { left: calc(530 * var(--u)); top: calc(155 * var(--v)); width: calc(66 * var(--u)); }
+html.amiga .am-ngbtns .am-btn:nth-child(2) { left: calc(291 * var(--u)); top: calc(155 * var(--v)); width: calc(100 * var(--u)); }
+html.amiga .am-ngbtns .am-btn:nth-child(3) { left: calc(419 * var(--u)); top: calc(155 * var(--v)); width: calc(101 * var(--u)); }
+html.amiga .am-plain .am-ngbtns .am-btn { top: calc(4 * var(--v)) !important; }
+html.amiga .am-rskill { left: calc(16 * var(--u)); top: calc(8 * var(--v)); width: calc(96 * var(--u)); height: calc(144 * var(--v)); }
+html.amiga .am-rskill > div { position: absolute; left: calc(13 * var(--u)); top: calc(9 * var(--v)); }
+html.amiga .am-rskill .am-radio { position: absolute; left: calc(14 * var(--u)); padding: calc(5 * var(--v)) calc(2 * var(--u)); }
+html.amiga .am-rskill .am-radio:nth-of-type(1) { top: calc(22 * var(--v)); } html.amiga .am-rskill .am-radio:nth-of-type(2) { top: calc(46 * var(--v)); } html.amiga .am-rskill .am-radio:nth-of-type(3) { top: calc(70 * var(--v)); }
+html.amiga .am-rskill .am-radio:nth-of-type(4) { top: calc(94 * var(--v)); } html.amiga .am-rskill .am-radio:nth-of-type(5) { top: calc(118 * var(--v)); }
+html.amiga .am-rskill .am-radio:has(input:checked) { box-shadow: 0 0 0 calc(1 * var(--v)) var(--am-red), calc(1 * var(--u)) 0 0 calc(1 * var(--v)) var(--am-red), calc(-1 * var(--u)) 0 0 calc(1 * var(--v)) var(--am-red); }
+html.amiga .am-rname { left: calc(128 * var(--u)); top: calc(8 * var(--v)); width: calc(184 * var(--u)); height: calc(88 * var(--v)); }
+html.amiga .am-rname > div { position: absolute; left: calc(15 * var(--u)); }
+html.amiga .am-rname > div:nth-of-type(1) { top: calc(10 * var(--v)); } html.amiga .am-rname > div:nth-of-type(2) { top: calc(54 * var(--v)); }
+html.amiga .am-rname .am-field { position: absolute; left: calc(16 * var(--u)); width: calc(152 * var(--u)); height: calc(16 * var(--v)); }
+html.amiga .am-rname .am-field:nth-of-type(1) { top: calc(22 * var(--v)); } html.amiga .am-rname .am-field:nth-of-type(2) { top: calc(65 * var(--v)); }
+html.amiga .am-rsex { left: calc(128 * var(--u)); top: calc(104 * var(--v)); width: calc(184 * var(--u)); height: calc(48 * var(--v)); }
+html.amiga .am-rsex > div:first-child { position: absolute; left: calc(15 * var(--u)); top: calc(11 * var(--v)); }
+html.amiga .am-rsexrow .am-radio { position: absolute; top: calc(26 * var(--v)); }
+html.amiga .am-rsexrow .am-radio:nth-child(1) { left: calc(18 * var(--u)); } html.amiga .am-rsexrow .am-radio:nth-child(2) { left: calc(103 * var(--u)); }
+html.amiga .am-rpic { left: calc(336 * var(--u)); top: calc(8 * var(--v)); width: calc(88 * var(--u)); height: calc(80 * var(--v)); background: #fff; box-shadow: inset calc(2 * var(--u)) calc(1 * var(--v)) 0 #000, inset calc(-2 * var(--u)) calc(-1 * var(--v)) 0 #000; display: grid; place-items: center; }
+html.amiga .am-rpic img { width: calc(74 * var(--u)); height: calc(74 * var(--v)); }
+html.amiga .am-rbtns .am-btn { left: calc(336 * var(--u)); width: calc(90 * var(--u)); }
+html.amiga .am-rbtns .am-btn:nth-child(1) { top: calc(104 * var(--v)); } html.amiga .am-rbtns .am-btn:nth-child(2) { top: calc(133 * var(--v)); }
+html.amiga .am-rbtns .am-btn.am-default { box-shadow: inset calc(2 * var(--u)) calc(1 * var(--v)) 0 #fff, inset calc(-2 * var(--u)) calc(-1 * var(--v)) 0 #000 !important; }
+/* Schiffsbau (528 x 256) */
+html.amiga .win.am-wyard { width: calc(528 * var(--u)); height: calc(256 * var(--v)); }
+html.amiga .am-yard, html.amiga .am-types, html.amiga .am-compare, html.amiga .am-split, html.amiga .am-about { position: absolute; inset: 0; }
+html.amiga .am-yard > *, html.amiga .am-types > *, html.amiga .am-compare > *, html.amiga .am-split > *, html.amiga .am-about > * { position: absolute; }
+html.amiga .am-yleft, html.amiga .am-yright { inset: 0; }
+html.amiga .am-yleft > *, html.amiga .am-yright > * { position: absolute; }
+html.amiga .am-yleft > .am-ytitle { left: calc(61 * var(--u)); top: calc(12 * var(--v)); }
+html.amiga .am-ybig { left: calc(58 * var(--u)); top: calc(25 * var(--v)); width: calc(248 * var(--u)); height: calc(78 * var(--v)); background: #fff; box-shadow: inset calc(1 * var(--u)) calc(1 * var(--v)) 0 #000, inset calc(-1 * var(--u)) calc(-1 * var(--v)) 0 #000; cursor: pointer; }
+html.amiga .am-ybig .am-ship { position: absolute; left: calc(2 * var(--u)); top: calc(1 * var(--v)); }
+html.amiga .am-ybig::after { content: ''; position: absolute; inset: calc(1 * var(--v)) calc(1 * var(--u)); background: conic-gradient(#fff 25%, transparent 0 50%, #fff 0 75%, transparent 0) 0 0 / calc(2 * var(--u)) calc(2 * var(--v)); pointer-events: none; }
+html.amiga .am-ybig:empty::after { display: none; }
+html.amiga .am-ycost { left: calc(60 * var(--u)); top: calc(112 * var(--v)); width: calc(242 * var(--u)); display: flex; justify-content: space-between; white-space: nowrap; }
+html.amiga .am-ywait { inset: 0; }
+html.amiga .am-ywl { position: absolute; right: calc(359 * var(--u)); top: calc(135 * var(--v)); white-space: nowrap; }
+html.amiga .am-yslot { position: absolute; left: calc(170 * var(--u)); width: calc(124 * var(--u)); height: calc(54 * var(--v)); background: var(--am-grey); box-shadow: inset calc(2 * var(--u)) calc(1 * var(--v)) 0 #fff, inset calc(-2 * var(--u)) calc(-1 * var(--v)) 0 #000; cursor: pointer; overflow: hidden; }
+html.amiga .am-yslot:nth-child(1) { top: calc(126 * var(--v)); } html.amiga .am-yslot:nth-child(2) { top: calc(181 * var(--v)); } html.amiga .am-yslot:nth-child(n+3) { display: none; }
+html.amiga .am-yslot .am-ship, html.amiga .am-ytype .am-ship { position: absolute; left: calc(2 * var(--u)); top: calc(1 * var(--v)); width: calc(121 * var(--u)); height: calc(40 * var(--v)); background: #000; }
+html.amiga .am-ycap { position: absolute; left: 0; right: 0; top: calc(41 * var(--v)); height: calc(12 * var(--v)); text-align: center; white-space: nowrap; overflow: hidden; font: 400 calc(16 * var(--v)) / calc(12 * var(--v)) var(--amfs), sans-serif; }
+html.amiga .am-ynote { left: calc(4 * var(--u)); top: calc(126 * var(--v)); width: calc(150 * var(--u)); margin: 0 !important; font-family: var(--amfs), sans-serif !important; }
+html.amiga .am-yright > .am-ytitle { left: calc(361 * var(--u)); top: calc(12 * var(--v)); }
+html.amiga .am-ylist { left: calc(361 * var(--u)); top: calc(24 * var(--v)); width: calc(144 * var(--u)); height: calc(165 * var(--v)); }
+html.amiga .am-ytypes, html.amiga .am-tlist { position: absolute; left: 0; top: 0; width: calc(124 * var(--u)); height: 100%; overflow: hidden; }
+html.amiga .am-ytype { position: relative; width: calc(124 * var(--u)); height: calc(54 * var(--v)); margin-bottom: calc(1 * var(--v)); background: var(--am-grey); box-shadow: inset calc(2 * var(--u)) calc(1 * var(--v)) 0 #fff, inset calc(-2 * var(--u)) calc(-1 * var(--v)) 0 #000; cursor: pointer; }
+html.amiga .am-ytype.sel { outline: calc(1 * var(--v)) solid var(--am-red); outline-offset: 0; box-shadow: inset calc(2 * var(--u)) calc(1 * var(--v)) 0 #fff, inset calc(-2 * var(--u)) calc(-1 * var(--v)) 0 #000, 0 0 0 calc(1 * var(--u)) var(--am-red); z-index: 1; }
+html.amiga .am-ytype.scrap .am-ycap { text-decoration: line-through; }
+html.amiga .am-ylist > .am-prop { position: absolute; left: calc(127 * var(--u)); top: 0; width: calc(16 * var(--u)); height: 100%; }
+html.amiga .am-ybtns { inset: 0; pointer-events: none; }
+html.amiga .am-ybtns .am-btn { pointer-events: auto; top: calc(210 * var(--v)); width: calc(80 * var(--u)); }
+html.amiga .am-ybtns .am-btn:nth-child(1) { left: calc(58 * var(--u)); width: calc(90 * var(--u)); } html.amiga .am-ybtns .am-btn:nth-child(2) { left: calc(320 * var(--u)); } html.amiga .am-ybtns .am-btn:nth-child(3) { left: calc(420 * var(--u)); }
+/* Typen Manager (528 x 200) */
+html.amiga .win.am-wtypes { width: calc(528 * var(--u)); height: calc(200 * var(--v)); }
+html.amiga .am-tleft, html.amiga .am-tright { inset: 0; }
+html.amiga .am-tleft > *, html.amiga .am-tright > * { position: absolute; }
+html.amiga .am-tlistf { left: calc(15 * var(--u)); top: calc(8 * var(--v)); width: calc(148 * var(--u)); height: calc(114 * var(--v)); }
+html.amiga .am-tlistf .am-tlist { left: calc(5 * var(--u)); top: calc(3 * var(--v)); height: calc(108 * var(--v)); }
+html.amiga .am-tlistf > .am-prop { position: absolute; left: calc(129 * var(--u)); top: calc(3 * var(--v)); width: calc(16 * var(--u)); height: calc(108 * var(--v)); }
+html.amiga .am-tcount { left: calc(15 * var(--u)); top: calc(126 * var(--v)); width: calc(144 * var(--u)); height: calc(26 * var(--v)); padding: calc(2 * var(--v)) calc(5 * var(--u)); }
+html.amiga .am-tcount div { height: calc(12 * var(--v)); line-height: calc(12 * var(--v)); }
+html.amiga .am-tscrap { left: calc(17 * var(--u)); top: calc(160 * var(--v)); }
+html.amiga .am-tscrap input { margin-right: calc(15 * var(--u)) !important; }
+html.amiga .am-tbig { left: calc(227 * var(--u)); top: calc(7 * var(--v)); width: calc(247 * var(--u)); height: calc(78 * var(--v)); background: #fff; box-shadow: inset calc(2 * var(--u)) calc(1 * var(--v)) 0 #000, inset calc(-2 * var(--u)) calc(-1 * var(--v)) 0 #000; }
+html.amiga .am-tbig .am-ship { position: absolute; left: calc(2 * var(--u)); top: calc(1 * var(--v)); }
+html.amiga .am-tfigs { left: calc(199 * var(--u)); top: calc(88 * var(--v)); width: calc(304 * var(--u)); height: calc(64 * var(--v)); display: grid; grid-template-columns: calc(100 * var(--u)) calc(100 * var(--u)) calc(70 * var(--u)) calc(22 * var(--u)); grid-auto-rows: calc(12.5 * var(--v)); padding: calc(3 * var(--v)) 0 0 calc(6 * var(--u)); white-space: nowrap; }
+html.amiga .am-tfigs span:nth-child(4n) { text-align: right; }
+html.amiga .am-tbtns .am-btn, html.amiga .am-wtypes .am-tbtns .am-btn { top: calc(158 * var(--v)); }
+html.amiga .am-wtypes .am-tbtns { inset: 0; pointer-events: none; }
+html.amiga .am-wtypes .am-tbtns .am-btn { pointer-events: auto; }
+html.amiga .am-wtypes .am-tbtns .am-btn:nth-child(1) { left: calc(200 * var(--u)); width: calc(118 * var(--u)); } html.amiga .am-wtypes .am-tbtns .am-btn:nth-child(2) { left: calc(381 * var(--u)); width: calc(124 * var(--u)); }
+html.amiga .win.am-wsmall { width: calc(260 * var(--u)); height: calc(80 * var(--v)); }
+html.amiga .am-rename { position: absolute; inset: 0; }
+html.amiga .am-rename > * { position: absolute; }
+html.amiga .am-rename p { left: calc(10 * var(--u)); top: calc(4 * var(--v)); margin: 0 !important; }
+html.amiga .am-rename input { left: calc(10 * var(--u)); top: calc(18 * var(--v)); width: calc(232 * var(--u)) !important; }
+html.amiga .am-rename .am-tbtns { inset: 0; pointer-events: none; }
+html.amiga .am-rename .am-btn { pointer-events: auto; top: calc(40 * var(--v)); width: calc(80 * var(--u)); }
+html.amiga .am-rename .am-btn:nth-child(1) { left: calc(30 * var(--u)); } html.amiga .am-rename .am-btn:nth-child(2) { left: calc(150 * var(--u)); }
+/* Spielervergleich (616 x 200) */
+html.amiga .win.am-wcompare { width: calc(616 * var(--u)); height: calc(200 * var(--v)); }
+html.amiga .am-cframe { left: calc(16 * var(--u)); top: calc(8 * var(--v)); width: calc(576 * var(--u)); height: calc(144 * var(--v)); }
+html.amiga .am-cplot { position: absolute; inset: 0; }
+html.amiga .am-cplot::before { content: ''; position: absolute; left: calc(53 * var(--u)); top: calc(1 * var(--v)); width: calc(521 * var(--u)); height: calc(123 * var(--v)); border-left: calc(1 * var(--u)) solid #000; border-bottom: calc(1 * var(--v)) solid #000; }
+html.amiga .am-crank { position: absolute; right: calc(524 * var(--u)); white-space: nowrap; }
+html.amiga .am-crank::after { content: ''; position: absolute; right: calc(-4 * var(--u)); top: calc(4 * var(--v)); width: calc(3 * var(--u)); height: calc(1 * var(--v)); background: #000; }
+html.amiga .am-crank.r0 { top: calc(13 * var(--v)); } html.amiga .am-crank.r1 { top: calc(58 * var(--v)); } html.amiga .am-crank.r2 { top: calc(104 * var(--v)); }
+html.amiga .am-ccat { position: absolute; left: calc(82.5 * var(--u) + var(--i) * 57 * var(--u) - 28 * var(--u)); top: 0; width: calc(56 * var(--u)); height: 100%; }
+html.amiga .am-ccat::after { content: ''; position: absolute; left: calc(28 * var(--u)); top: calc(125 * var(--v)); width: calc(1 * var(--u)); height: calc(2 * var(--v)); background: #000; }
+html.amiga .am-cpic { position: absolute; left: calc(12 * var(--u)); }
+html.amiga .am-cpic img { display: block; width: calc(32 * var(--u)); height: calc(32 * var(--v)); }
+html.amiga .am-cpic.r0 { top: calc(1 * var(--v)); } html.amiga .am-cpic.r1 { top: calc(46 * var(--v)); } html.amiga .am-cpic.r2 { top: calc(92 * var(--v)); }
+html.amiga .am-cname { position: absolute; left: calc(-10 * var(--u)); right: calc(-10 * var(--u)); top: calc(127 * var(--v)); text-align: center; white-space: nowrap; }
+html.amiga .am-cbtns { inset: 0; pointer-events: none; }
+html.amiga .am-cbtns .am-btn { pointer-events: auto; top: calc(155 * var(--v)); }
+html.amiga .am-cbtns .am-btn:nth-child(1) { left: calc(180 * var(--u)); width: calc(100 * var(--u)); } html.amiga .am-cbtns .am-btn:nth-child(2) { left: calc(327 * var(--u)); width: calc(101 * var(--u)); }
+/* Aufteilen der Schiffe (608 x 168) */
+html.amiga .win.am-wsplit { width: calc(608 * var(--u)); height: calc(168 * var(--v)); }
+html.amiga .am-split > p { left: calc(9 * var(--u)); margin: 0 !important; white-space: nowrap; }
+html.amiga .am-split > p:nth-of-type(1) { top: calc(11 * var(--v)); } html.amiga .am-split > p:nth-of-type(2) { top: calc(26 * var(--v)); }
+html.amiga .am-sframe { left: calc(7 * var(--u)); top: calc(39 * var(--v)); width: calc(584 * var(--u)); height: calc(84 * var(--v)); }
+html.amiga .am-srows { position: absolute; left: calc(2 * var(--u)); top: calc(1 * var(--v)); right: calc(18 * var(--u)); bottom: calc(1 * var(--v)); overflow: hidden; }
+html.amiga .am-sframe > .am-prop { position: absolute; right: calc(2 * var(--u)); top: calc(1 * var(--v)); width: calc(15 * var(--u)); bottom: calc(1 * var(--v)); }
+html.amiga .am-srow { position: relative; display: flex; align-items: flex-end; gap: calc(2 * var(--u)); height: calc(41 * var(--v)); padding-left: calc(24 * var(--u)); cursor: pointer; }
+html.amiga .am-srow .am-sn { position: absolute; left: calc(2 * var(--u)); bottom: calc(4 * var(--v)); }
+html.amiga .am-srow .am-ship { width: calc(121 * var(--u)); height: calc(40 * var(--v)); background: #000; }
+html.amiga .am-srow.sel .am-ship { outline: calc(1 * var(--v)) solid var(--am-red); box-shadow: 0 0 0 calc(1 * var(--u)) var(--am-red); }
+html.amiga .am-srow.sel .am-sn { color: var(--am-red); }
+html.amiga .am-spbtns { inset: 0; pointer-events: none; }
+html.amiga .am-spbtns .am-btn { pointer-events: auto; top: calc(126 * var(--v)); width: calc(100 * var(--u)); }
+html.amiga .am-spbtns .am-btn:nth-child(1) { left: calc(70 * var(--u)); } html.amiga .am-spbtns .am-btn:nth-child(2) { left: calc(189 * var(--u)); }
+html.amiga .am-spbtns .am-btn:nth-child(3) { left: calc(309 * var(--u)); } html.amiga .am-spbtns .am-btn:nth-child(4) { left: calc(428 * var(--u)); }
+/* About (462 x 190): a dithered body */
+html.amiga .win.am-wabout { width: calc(462 * var(--u)); height: calc(190 * var(--v)); }
+html.amiga .am-wabout > .wbody { background: var(--am-dither) 0 0 / calc(2 * var(--u)) calc(2 * var(--v)) !important; }
+html.amiga .am-wabout > .wtitle .am-gad { position: absolute; right: 0; top: 0; width: calc(23 * var(--u)); height: calc(14 * var(--v)); }
+html.amiga .am-apic { left: calc(10 * var(--u)); top: calc(11 * var(--v)); width: calc(78 * var(--u)); height: calc(75 * var(--v)); background: #fff; display: grid; place-items: center; overflow: hidden; }
+html.amiga .am-apic img { width: calc(78 * var(--u)); height: calc(78 * var(--v)); }
+html.amiga .am-atext { left: calc(98 * var(--u)); top: calc(10 * var(--v)); width: calc(348 * var(--u)); height: calc(125 * var(--v)); background: var(--am-grey); padding: calc(12 * var(--v)) 0 0 calc(9 * var(--u)); }
+html.amiga .am-atext p { margin: 0 !important; height: calc(13 * var(--v)); line-height: calc(13 * var(--v)); white-space: nowrap; }
+html.amiga .am-abtns { inset: 0; pointer-events: none; }
+html.amiga .am-abtns .am-btn { pointer-events: auto; left: calc(247 * var(--u)); top: calc(143 * var(--v)); width: calc(48 * var(--u)); height: calc(22 * var(--v)); }
+html.amiga .am-btn.am-dotted { outline: calc(1 * var(--v)) dashed var(--am-red) !important; outline-offset: calc(1 * var(--v)); }
+/* the classic windows' insides, in the Amiga's type (guessed: none of them is in the screenshots) */
+html.amiga.os-workbench .win:not(.am-win) .wbody img { image-rendering: pixelated; }
+html.amiga .wbody table { border-collapse: collapse; }
+html.amiga .wbody td, html.amiga .wbody th { padding: calc(1 * var(--v)) calc(4 * var(--u)); }
+html.amiga .newgame label > span, html.amiga .newgame legend { font: inherit; color: #000; }
+html.amiga .newgame .opts { border: 0; box-shadow: inset calc(2 * var(--u)) calc(1 * var(--v)) 0 #fff, inset calc(-2 * var(--u)) calc(-1 * var(--v)) 0 #000; }
+
+/* ---------- a phone: the screen's parts stacked, the map first, each at the column's width (241 pixels) ---------- */
+html.amiga.am-phone, html.amiga.am-phone body { height: auto; min-height: 100%; overflow-x: hidden; overflow-y: auto; }
+html.amiga.am-phone #app { position: relative; left: 0; top: 0; width: 100vw; height: auto; overflow: visible; }
+html.amiga.am-phone #menubar { position: sticky; top: 0; }
+html.amiga.am-phone .am-sdepth { width: calc(23 * var(--u)); }
+html.amiga.am-phone #main { position: relative; top: 0; height: auto; display: flex; flex-direction: column; }
+html.amiga.am-phone #mapwrap { position: relative; left: 0; order: -1; width: 100%; height: max(240px, calc(100svh - 17 * var(--v) - 40px)); border-left: 0; border-bottom: calc(1 * var(--v)) solid #fff; }
+html.amiga.am-phone #mapview { width: calc(100% - 16 * var(--u)); height: calc(100% - 9 * var(--v)); }
+html.amiga.am-phone #mapwrap > .am-pv { height: calc(100% - 9 * var(--v)); }
+html.amiga.am-phone #mapwrap > .am-ph { width: calc(100% - 16 * var(--u)); }
+html.amiga.am-phone #panel { position: relative; width: 100%; height: calc(239 * var(--v)); }
+html.amiga.am-phone #am-news { left: auto; right: calc(16 * var(--u)); top: auto; bottom: calc(9 * var(--v)); width: calc(200 * var(--u)); height: calc(90 * var(--v)); }
+html.amiga.am-phone .dropdown { max-width: calc(100vw - 8px); }
+html.amiga.am-phone #menubar .mbtn { padding: 0 calc(1.5 * var(--u)); }
+html.amiga.am-phone #menubar .mbtn.logo { margin-left: 0; }
+html.amiga.am-phone .scrim { place-items: start center; padding-top: 4px; }
+
+/* ---------- the title screen: the Startup window on the empty screen (10.png), the remake's credits under it ---------- */
+html.amiga #titlescreen { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 0; padding: 0; background: #000; overflow: auto; }
+html.amiga #titlescreen[hidden] { display: none; }
+html.amiga #titlescreen.loading::after { font: 16px HoAmiga, sans-serif; color: #bbb; }
+html.amiga .am-tscreen { position: relative; flex: none; width: calc(640 * var(--u)); height: calc(256 * var(--v)); overflow: hidden; background: #000; }
+html.amiga .am-tbar { position: absolute; left: 0; top: 0; width: 100%; height: calc(17 * var(--v)); box-sizing: border-box; background: var(--am-blue); border-bottom: calc(1 * var(--v)) solid #fff; color: #fff; }
+html.amiga .am-tbar > span:first-child { position: absolute; left: calc(6 * var(--u)); top: calc(-1 * var(--v)); line-height: calc(16 * var(--v)); white-space: nowrap; }
+html.amiga .am-tback { position: absolute; left: 0; top: calc(17 * var(--v)); width: 100%; bottom: 0;
+  background: linear-gradient(90deg, #fff 0 calc(2 * var(--u)), var(--am-grey) 0 calc(239 * var(--u)), #000 0 calc(241 * var(--u)), #fff 0 calc(243 * var(--u)), #000 0); }
+html.amiga .win.am-wstartup { position: absolute; left: calc(12 * var(--u)); top: calc(19 * var(--v)); width: calc(616 * var(--u)); height: calc(218 * var(--v)); display: block; }
+html.amiga .am-wstartup > .wbody { position: absolute; left: calc(3 * var(--u)); top: calc(15 * var(--v)); width: calc(608 * var(--u)); height: calc(201 * var(--v)); padding: 0 !important; overflow: hidden; }
+html.amiga .am-sleft { position: absolute; left: 0; top: 0; width: calc(304 * var(--u)); height: 100%; }
+html.amiga .am-sinfo { position: absolute; left: calc(8 * var(--u)); top: calc(8 * var(--v)); width: calc(288 * var(--u)); height: calc(80 * var(--v)); }
+html.amiga .am-sinfo p { position: absolute; margin: 0; white-space: nowrap; line-height: calc(10 * var(--v)); }
+html.amiga .am-sinfo p:nth-child(1) { left: calc(68 * var(--u)); top: calc(4 * var(--v)); }
+html.amiga .am-sinfo p:nth-child(2) { left: calc(6 * var(--u)); top: calc(21 * var(--v)); }
+html.amiga .am-sinfo p:nth-child(3) { left: calc(42 * var(--u)); top: calc(38 * var(--v)); }
+html.amiga .am-sinfo p:nth-child(3) span + span { position: absolute; left: calc(50 * var(--u)); }
+html.amiga .am-sinfo p:nth-child(4) { left: calc(92 * var(--u)); top: calc(55 * var(--v)); }
+html.amiga .am-sbtns { position: absolute; left: calc(8 * var(--u)); top: calc(108 * var(--v)); width: calc(288 * var(--u)); height: calc(20 * var(--v)); }
+html.amiga .am-sbtns .am-btn { white-space: nowrap; position: absolute; top: 0; width: calc(86 * var(--u)); height: calc(20 * var(--v)); margin: 0; padding: 0; }
+html.amiga .am-sbtns .am-btn:nth-child(1) { left: 0; } html.amiga .am-sbtns .am-btn:nth-child(2) { left: calc(102 * var(--u)); } html.amiga .am-sbtns .am-btn:nth-child(3) { left: calc(203 * var(--u)); }
+html.amiga .am-nwc { position: absolute; left: 0; top: calc(143 * var(--v)); width: calc(304 * var(--u)); height: calc(58 * var(--v)); background: #fff; }
+html.amiga .am-nwc img { display: block; width: calc(304 * var(--u)); height: calc(57 * var(--v)); }
+html.amiga .am-spic { position: absolute; left: calc(304 * var(--u)); top: 0; width: calc(304 * var(--u)); height: calc(201 * var(--v)); background: #000; }
+html.amiga .am-spic canvas { display: block; width: calc(304 * var(--u)) !important; height: calc(200 * var(--v)) !important; border: 0; }
+html.amiga .am-sdepth.am-sdepth { z-index: 1; }
+/* the remake's own lines, under the screen, in the Amiga's type */
+html.amiga.am-tall .am-tcard { --u: 1px; --v: 2px; } html.amiga.am-square .am-tcard { --u: 1.5px; --v: 1.5px; }
+html.amiga .am-tcard { flex: none; width: min(100%, 1100px); padding: 6px 12px 10px; box-sizing: border-box; color: #bbb; text-align: center; font: 400 calc(16 * var(--v)) / calc(11 * var(--v)) var(--amf), sans-serif; display: flex; flex-wrap: wrap; justify-content: center; align-items: baseline; column-gap: calc(12 * var(--u)); row-gap: calc(3 * var(--v)); }
+html.amiga .am-tcard h1 { font: 700 calc(32 * var(--v)) / calc(20 * var(--v)) var(--amf), sans-serif; color: #fff; text-shadow: none; margin: 0; letter-spacing: 0; }
+html.amiga .am-tcard .ver, html.amiga .am-tcard .by { margin: 0; font: inherit; letter-spacing: 0; text-transform: none; color: #bbb; opacity: 1; }
+html.amiga .am-tcard .tsplash { display: none; }
+html.amiga .am-tcard .tbtns, html.amiga .am-tcard .tskin, html.amiga .am-tcard .credit, html.amiga .am-tcard .madeby, html.amiga .am-tcard > :not(h1):not(.ver):not(.by) { flex-basis: 100%; }
+html.amiga .am-tcard .tbtns { display: flex; justify-content: center; gap: calc(6 * var(--u)); margin: calc(4 * var(--v)) 0 0; }
+html.amiga .am-tcard label.tskin:not([hidden]) { flex-basis: auto; display: inline-flex; align-items: center; gap: calc(4 * var(--u)); color: #bbb; margin: 0; }
+html.amiga .am-tcard .credit, html.amiga .am-tcard .madeby { margin: 0; font: inherit; color: #bbb; }
+html.amiga .am-tcard .madeby { color: #888; }
+html.amiga .am-tcard a { color: #33ccff; }
+html.amiga .am-tcard button, html.amiga .am-tcard select, html.amiga .am-tcard .tskin, html.amiga .am-tcard .tskin span { font: inherit !important; font-size: calc(16 * var(--v)) !important; }
+html.amiga .am-tcard .credit, html.amiga .am-tcard .madeby { flex-basis: auto !important; }
+html.amiga .am-tcard button { min-height: calc(14 * var(--v)); padding: calc(1 * var(--v)) calc(8 * var(--u)) 0 !important; border: 0 !important; border-radius: 0 !important; background: var(--am-grey) !important; color: #000 !important; box-shadow: inset calc(2 * var(--u)) calc(1 * var(--v)) 0 #fff, inset calc(-2 * var(--u)) calc(-1 * var(--v)) 0 #000 !important; line-height: calc(10 * var(--v)) !important; }
+html.amiga .am-tcard select { height: calc(14 * var(--v)); color: #000; border: 0 !important; border-radius: 0; background-color: var(--am-grey) !important; box-shadow: inset calc(2 * var(--u)) calc(1 * var(--v)) 0 #fff, inset calc(-2 * var(--u)) calc(-1 * var(--v)) 0 #000 !important; padding: 0 calc(6 * var(--u)) 0 calc(22 * var(--u)) !important; background-size: calc(11 * var(--u)) calc(10 * var(--v)), calc(1 * var(--u)) 100%, calc(1 * var(--u)) 100% !important; background-position: calc(5 * var(--u)) center, calc(19 * var(--u)) 0, calc(20 * var(--u)) 0 !important; }

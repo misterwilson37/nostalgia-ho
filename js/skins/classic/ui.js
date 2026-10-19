@@ -394,6 +394,13 @@ function hatFor(p, s) {
 // ---------- map ----------
 let cv, cx, mapW = 0, mapH = 0, dpr = 1;
 const bgStars = [];
+// A skin may draw the map in pixels of its own (T.mapPixel(): [w, h], the
+// CSS pixels one map pixel takes; the Amiga skin's tall pixels): mapW, mapH,
+// the view and every pointer position are then in those pixels.
+const mapPx = () => (T.mapPixel && T.mapPixel()) || [1, 1];
+const ox = (e) => e.offsetX / mapPx()[0], oy = (e) => e.offsetY / mapPx()[1];
+// the map's type (T.mapFont(px): a skin's own font for its names and labels)
+const mapFont = (n, fam) => (T.mapFont && T.mapFont(n)) || `${n}px ${fam || 'Geneva, Verdana, sans-serif'}`;
 function setupMap() {
   cv = $('#map'); cx = cv.getContext('2d');
   for (let i = 0; i < 260; i++) bgStars.push({ x: Math.random(), y: Math.random(), b: Math.random() });
@@ -405,16 +412,17 @@ function setupMap() {
   cv.addEventListener('pointerup', guard((e) => isTouch(e) ? Touch.mapUp(e) : onUp(e)));
   cv.addEventListener('pointercancel', guard((e) => { if (isTouch(e)) Touch.mapCancel(e); else { UI.drag = null; draw(); } }));
   cv.addEventListener('dblclick', guard((e) => { if (lastPointer !== 'touch') onDbl(e); })); // iOS: a double tap on the map does nothing
-  cv.addEventListener('contextmenu', guard((e) => { if (!G) return; e.preventDefault(); if (lastPointer === 'touch') return; const s = starAt(e.offsetX, e.offsetY); if (s != null) starMenu(s, e.clientX, e.clientY); }));
-  cv.addEventListener('wheel', guard((e) => { e.preventDefault(); zoomAt(e.offsetX, e.offsetY, e.deltaY < 0 ? 1.15 : 1 / 1.15); }), { passive: false });
+  cv.addEventListener('contextmenu', guard((e) => { if (!G) return; e.preventDefault(); if (lastPointer === 'touch') return; const s = starAt(ox(e), oy(e)); if (s != null) starMenu(s, e.clientX, e.clientY); }));
+  cv.addEventListener('wheel', guard((e) => { e.preventDefault(); zoomAt(ox(e), oy(e), e.deltaY < 0 ? 1.15 : 1 / 1.15); }), { passive: false });
   resize();
 }
 function resize() {
   const r = cv.parentElement.getBoundingClientRect();
   dpr = window.devicePixelRatio || 1;
-  mapW = r.width; mapH = r.height;
-  cv.width = Math.round(mapW * dpr); cv.height = Math.round(mapH * dpr);
-  cv.style.width = mapW + 'px'; cv.style.height = mapH + 'px';
+  const [kx, ky] = mapPx();
+  mapW = r.width / kx; mapH = r.height / ky;
+  cv.width = Math.round(r.width * dpr); cv.height = Math.round(r.height * dpr);
+  cv.style.width = r.width + 'px'; cv.style.height = r.height + 'px';
   if (G && !UI.fitted) fit();
   draw();
 }
@@ -423,6 +431,8 @@ function fit() {
   const pad = 30;
   const s = Math.min((mapW - pad * 2) / G.W, (mapH - pad * 2 - 30) / G.H);
   UI.view = { s, ox: (mapW - G.W * s) / 2, oy: (mapH - 30 - G.H * s) / 2 + 4 };
+  // T.fitView(view, ctx): a skin's own first view (the Amiga's zoom, on your home)
+  if (T.fitView) T.fitView(UI.view, { G, ME, mapW, mapH, sel: UI.sel });
   UI.fitted = true;
 }
 // right-click on a star: the commands that apply to it (5.0.5 had a
@@ -467,7 +477,7 @@ function zoomAt(px, py, f) {
 }
 const sx = (x) => UI.view.ox + x * UI.view.s;
 const sy = (y) => UI.view.oy + y * UI.view.s;
-function planetPx() { return Math.max(18, Math.min(52, UI.view.s * 0.9)); }
+function planetPx() { return T.planetPx ? T.planetPx(UI.view.s) : Math.max(18, Math.min(52, UI.view.s * 0.9)); }
 function starAt(px, py) {
   const r = planetPx() * 0.6;
   let best = null, bd = 1e9;
@@ -480,11 +490,16 @@ function dotAt(px, py) {
 }
 function countBucket(n) { return n <= 1 ? 0 : n <= 10 ? 1 : n <= 30 ? 2 : 3; }
 
+// T.afterDraw(): a skin follows the view (the Amiga's scroll bars)
 function draw() {
+  draw0();
+  if (T.afterDraw) T.afterDraw();
+}
+function draw0() {
   if (!cx) return;
-  cx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  cx.fillStyle = '#04030c'; cx.fillRect(0, 0, mapW, mapH);
-  for (const b of bgStars) { cx.fillStyle = `rgba(200,210,255,${0.15 + b.b * 0.5})`; cx.fillRect(b.x * mapW, b.y * mapH, b.b > 0.9 ? 2 : 1, b.b > 0.9 ? 2 : 1); }
+  cx.setTransform(dpr * mapPx()[0], 0, 0, dpr * mapPx()[1], 0, 0);
+  cx.fillStyle = T.mapBg || '#04030c'; cx.fillRect(0, 0, mapW, mapH);
+  if (T.bgStars !== false) for (const b of bgStars) { cx.fillStyle = `rgba(200,210,255,${0.15 + b.b * 0.5})`; cx.fillRect(b.x * mapW, b.y * mapH, b.b > 0.9 ? 2 : 1, b.b > 0.9 ? 2 : 1); }
   if (!G) return;
   const ps = planetPx();
   cx.imageSmoothingEnabled = ps < 40;
@@ -514,7 +529,7 @@ function draw() {
     cx.save(); cx.strokeStyle = '#bfe8ff'; cx.lineWidth = 2; cx.setLineDash([6, 5]);
     cx.beginPath(); cx.moveTo(sx(a.x), sy(a.y)); cx.lineTo(x2, y2); cx.stroke(); cx.setLineDash([]);
     const label = `${b.name}: ${HO.starDist(G, a.id, b.id).toFixed(1)} away`;
-    cx.font = '12px Geneva, Verdana, sans-serif'; cx.textAlign = 'left';
+    cx.font = mapFont(12); cx.textAlign = 'left';
     const tw = cx.measureText(label).width;
     cx.fillStyle = 'rgba(0,0,0,0.7)'; cx.fillRect(x2 + 12, y2 - 24, tw + 10, 18);
     cx.fillStyle = '#bfe8ff'; cx.fillText(label, x2 + 17, y2 - 11); cx.restore();
@@ -524,14 +539,17 @@ function draw() {
     const x = sx(s.x), y = sy(s.y);
     if (x < -60 || y < -60 || x > mapW + 60 || y > mapH + 60) continue;
     const look = starLook(s.id);
-    const selPic = T.select && (ps < 24 && T.selectSmall ? IMG[T.selectSmall] : IMG[T.select]);
+    // T.drawStar(cx, info): a skin draws the star, its selection and its
+    // name its own way (true: done); the rings, hats and fleets follow
+    const own = T.drawStar && T.drawStar(cx, { s, x, y, ps, look, sel: UI.sel === s.id, IMG, view: UI.view, G, ME });
+    const selPic = !own && T.select && (ps < 24 && T.selectSmall ? IMG[T.selectSmall] : IMG[T.select]);
     if (UI.sel === s.id && selPic) { const r = ps * 0.85; cx.drawImage(selPic, x - r, y - r, r * 2, r * 2); }
-    else if (UI.sel === s.id) {
+    else if (!own && UI.sel === s.id) {
       const g = cx.createRadialGradient(x, y, ps * 0.3, x, y, ps * 0.95);
       g.addColorStop(0, 'rgba(255,240,170,0.75)'); g.addColorStop(1, 'rgba(255,200,80,0)');
       cx.fillStyle = g; cx.beginPath(); cx.arc(x, y, ps * 0.95, 0, Math.PI * 2); cx.fill();
     }
-    const im = look.pic || IMG[look.base];
+    const im = !own && (look.pic || IMG[look.base]);
     if (im) { const z = ps * (look.scale || 1); cx.drawImage(im, x - z / 2, y - z / 2, z, z); }
     // satellites ring
     const sats = G.fleets.filter(f => f.star === s.id && f.sat && (f.owner === ME || visibleTo(s.id)));
@@ -542,8 +560,8 @@ function draw() {
     if (s.owner >= 0 && s.owner !== ME && HO.feature(G, 'alliances') && HO.isAllied(G, ME, s.owner) && HO.know(G, me(), s.id).explored && IMG.haloAlly) cx.drawImage(IMG.haloAlly, x - ps * 0.6, y + ps * 0.28, ps * 1.2, ps * 0.4);
     if (look.hat && IMG[look.hat]) { const h = ps * 1.18; cx.drawImage(IMG[look.hat], x - h / 2, y - h * 0.62, h, h * (IMG[look.hat].height / IMG[look.hat].width)); }
     // name
-    if (UI.view.s > 18) {
-      cx.font = `${Math.max(9, Math.min(12, UI.view.s / 3.6))}px Geneva, Verdana, sans-serif`;
+    if (!own && UI.view.s > 18) {
+      cx.font = mapFont(Math.max(9, Math.min(12, UI.view.s / 3.6)));
       cx.textAlign = 'center'; cx.fillStyle = s.owner === ME ? '#fff6d0' : '#9aa3c7';
       cx.fillText(s.name, x, y + ps / 2 + 11);
     }
@@ -590,7 +608,7 @@ function draw() {
       const turns = Math.ceil(d / HO.fleetSpeed(G, f) - 1e-9);
       const via = !ok && modern() && HO.feature(G, 'waypoints') && !f.sat ? findRoute(f, tgt) : null;
       const label = ok ? `${d.toFixed(1)} away · ${turns} turn${turns === 1 ? '' : 's'}` : via ? `Too far to fly straight: will go via ${via.length - 1} stop${via.length === 2 ? '' : 's'}` : `Too far: ${d.toFixed(1)} away, fuel ${f.fuel.toFixed(1)}`;
-      cx.font = '12px Geneva, Verdana, sans-serif'; cx.textAlign = 'left';
+      cx.font = mapFont(12); cx.textAlign = 'left';
       const tw = cx.measureText(label).width;
       cx.fillStyle = 'rgba(0,0,0,0.7)'; cx.fillRect(x2 + 12, y2 - 24, tw + 10, 18);
       cx.fillStyle = ok ? '#ffe066' : '#ccc'; cx.fillText(label, x2 + 17, y2 - 11);
@@ -631,7 +649,7 @@ function iosFleetPath(f, tgt) {
     legs.push([a, b]); a = b;
   }
   const disc = IMG[(T.prefix || '') + 'supernovaed'];
-  cx.font = '14px Arial, Helvetica, sans-serif'; cx.textAlign = 'center'; cx.textBaseline = 'middle';
+  cx.font = mapFont(14, 'Arial, Helvetica, sans-serif'); cx.textAlign = 'center'; cx.textBaseline = 'middle';
   for (const [p, q] of legs) {
     const x1 = sx(p.x), y1 = sy(p.y), x2 = sx(q.x), y2 = sy(q.y);
     const lx = (x1 + x2) / 2 + ((x2 - x1) * (y2 - y1) <= 0 ? 10 : -22), ly = (y1 + y2) / 2 + 10;
@@ -728,7 +746,7 @@ function arrowHead(x1, y1, x2, y2, color) {
 function onDown(e) {
   if (!G) return;
   cv.setPointerCapture(e.pointerId);
-  const px = e.offsetX, py = e.offsetY;
+  const px = ox(e), py = oy(e);
   const dot = dotAt(px, py);
   if (dot && dot.mine && !dot.sat && !dot.transit && !G.over) {
     UI.drag = { fleet: dot.f, x: px, y: py, sx: px, sy: py, moved: false, t: performance.now() };
@@ -740,7 +758,7 @@ function onDown(e) {
 }
 function onMove(e) {
   if (!G) return;
-  const px = e.offsetX, py = e.offsetY;
+  const px = ox(e), py = oy(e);
   const d = UI.drag;
   if (!d) { const s = starAt(px, py); cv.style.cursor = dotAt(px, py) ? 'grab' : s != null ? 'pointer' : 'default'; return; }
   if (Math.hypot(px - d.sx, py - d.sy) > 4) d.moved = true;
@@ -759,7 +777,7 @@ function dragTick(fid, s) {
 function onUp(e) {
   const d = UI.drag; UI.drag = null;
   if (!G || !d) return;
-  const px = e.offsetX, py = e.offsetY;
+  const px = ox(e), py = oy(e);
   if (d.pan) {
     if (!d.moved && UI.route) { routeStop(starAt(px, py)); return; }
     if (!d.moved) { const s = starAt(px, py); UI.sel = s; UI.selFleet = null; renderPanel(); draw(); }
@@ -789,7 +807,7 @@ function routeStop(s) {
 }
 function onDbl(e) {
   if (!G) return;
-  const s = starAt(e.offsetX, e.offsetY);
+  const s = starAt(ox(e), oy(e));
   if (s == null) return;
   if (G.stars[s].owner === ME) openBuild(s);
   else { const b = [...G.battles].reverse().find(b => b.star === s && b.sides.includes(ME)); if (b) openBattle(b.id); }
@@ -901,7 +919,7 @@ const Touch = {
     if (!G) return;
     this.stopFling(); tipHide();
     try { cv.setPointerCapture(e.pointerId); } catch (x) {}
-    const x = e.offsetX, y = e.offsetY;
+    const x = ox(e), y = oy(e);
     this.pts.set(e.pointerId, { x, y });
     if (this.pts.size === 2) { // a pinch is never a tap
       const [a, b] = [...this.pts.values()], v = UI.view, mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
@@ -918,7 +936,7 @@ const Touch = {
   },
   mapMove(e) {
     if (!G || !this.pts.has(e.pointerId)) return;
-    const x = e.offsetX, y = e.offsetY, p = this.pts.get(e.pointerId);
+    const x = ox(e), y = oy(e), p = this.pts.get(e.pointerId);
     p.x = x; p.y = y;
     if (this.mode === 'pinch') {
       if (this.pts.size < 2) return;
@@ -943,7 +961,7 @@ const Touch = {
   },
   mapUp(e) {
     if (!G || !this.pts.has(e.pointerId)) return;
-    const x = e.offsetX, y = e.offsetY, mode = this.mode;
+    const x = ox(e), y = oy(e), mode = this.mode;
     this.pts.delete(e.pointerId);
     if (mode === 'pinch') { // the finger left goes on panning, never a tap
       this.lastTap = null;
@@ -1111,8 +1129,8 @@ Object.assign(List, {
   dragTo(x, y) {
     const t = this.t; if (!t || !UI.drag) return;
     t.sprite.style.left = x + 'px'; t.sprite.style.top = (y - (t.sprite.offsetHeight || 30) - 8) + 'px';
-    const r = cv.getBoundingClientRect(), px = x - r.left, py = y - r.top;
-    const inMap = px >= 0 && py >= 0 && px <= r.width && py <= r.height;
+    const r = cv.getBoundingClientRect(), px = (x - r.left) / mapPx()[0], py = (y - r.top) / mapPx()[1];
+    const inMap = px >= 0 && py >= 0 && px <= mapW && py <= mapH;
     const s = inMap ? pickStar(px, py) : null;
     UI.drag.x = px; UI.drag.y = py;
     if (s !== UI.hover) { UI.hover = s; dragTick(t.f.id, s); }
@@ -1163,13 +1181,16 @@ function scrollerOf(n) {
 // whether it can be dragged (`free`), a click opening Dip Into Savings
 // (`dip`) or doing nothing (`silent`) instead of the beep. A finger stays on
 // the bar's row while it drags (HoBarLayer ccTouchMoved:, iOS).
+// opts.vertical: the bar stands up (the Amiga's Technik Ausgaben), filled
+// from the bottom, and the pointer's height sets it.
 function bar(label, val, max, onSet, opts) {
   opts = opts || {};
   const sc = opts.scale || HO.BAR_SCALES.linear, lk = opts.locked || null, refuse = !!lk && !lk.free;
-  const track = el('div', { class: 'track' + (lk ? ' locked' : ''), role: 'slider', tabindex: 0, 'aria-label': label, 'aria-valuenow': Math.round(val / max * 100), 'aria-disabled': refuse ? 'true' : null, title: lk && lk.text ? lk.text : null });
+  const track = el('div', { class: 'track' + (lk ? ' locked' : '') + (opts.vertical ? ' vert' : ''), 'aria-orientation': opts.vertical ? 'vertical' : null, role: 'slider', tabindex: 0, 'aria-label': label, 'aria-valuenow': Math.round(val / max * 100), 'aria-disabled': refuse ? 'true' : null, title: lk && lk.text ? lk.text : null });
   const fill = el('div', { class: 'fill' + (opts.cls ? ' ' + opts.cls : '') });
+  fill._vert = !!opts.vertical;
   track._v = max > 0 ? Math.min(1, val / max) : 0;
-  fill.style.width = barWidth(track._v, sc);
+  setFill(fill, track._v, sc);
   track.append(fill);
   // 5.0.5's grid (FUN_1008aff0): ten lines at 100 ... 1,000 per mille on the bar's scale,
   // each a black tick 3 pixels long at the top, the rest of the line a faint blend
@@ -1180,9 +1201,9 @@ function bar(label, val, max, onSet, opts) {
   if (lk && lk.text) track.append(el('span', { class: 'locktext' }, lk.text));
   const set = (ev) => {
     const r = track.getBoundingClientRect();
-    const x = Math.max(0, Math.min(1, (ev.clientX - r.left) / r.width));
+    const x = Math.max(0, Math.min(1, opts.vertical ? (r.bottom - ev.clientY) / r.height : (ev.clientX - r.left) / r.width));
     const f = sc.toValue(x) / 1000;
-    track._v = f; fill.style.width = barWidth(f, sc);
+    track._v = f; setFill(fill, f, sc);
     onSet(f, false);
   };
   // a locked bar refuses the drag: the version's beep (5.0.5 SysBeep, 3.0.1
@@ -1194,19 +1215,20 @@ function bar(label, val, max, onSet, opts) {
   }));
   track.addEventListener('pointermove', guard((ev) => {
     if (!track._drag) return;
-    if (isTouch(ev)) { const r = track.parentElement.getBoundingClientRect(); if (ev.clientY < r.top || ev.clientY > r.bottom) return; }
+    if (isTouch(ev) && !opts.vertical) { const r = track.parentElement.getBoundingClientRect(); if (ev.clientY < r.top || ev.clientY > r.bottom) return; }
     set(ev);
   }));
   track.addEventListener('pointerup', guard((ev) => { if (!track._drag) return; track._drag = false; onSet(null, true); }));
   track.addEventListener('pointercancel', guard((ev) => { if (track._drag) { track._drag = false; onSet(null, true); } }));
   track.addEventListener('keydown', (ev) => {
-    if (ev.key !== 'ArrowLeft' && ev.key !== 'ArrowRight') return;
+    const up = ev.key === 'ArrowRight' || ev.key === 'ArrowUp';
+    if (!up && ev.key !== 'ArrowLeft' && ev.key !== 'ArrowDown') return;
     ev.preventDefault();
     if (refuse) { refused(); return; }
     // a step of 5% of the bar's length, on its own scale
-    const x = Math.max(0, Math.min(1, sc.toX((track._v || 0) * 1000) + (ev.key === 'ArrowRight' ? 0.05 : -0.05)));
+    const x = Math.max(0, Math.min(1, sc.toX((track._v || 0) * 1000) + (up ? 0.05 : -0.05)));
     const f = sc.toValue(x) / 1000;
-    track._v = f; fill.style.width = barWidth(f, sc); onSet(f, false); onSet(null, true);
+    track._v = f; setFill(fill, f, sc); onSet(f, false); onSet(null, true);
   });
   return el('div', { class: 'barrow' + (opts.rowCls ? ' ' + opts.rowCls : ''), 'data-help': opts.help || null },
     el('span', { class: 'blabel', title: opts.title || label }, label),
@@ -1216,6 +1238,8 @@ function bar(label, val, max, onSet, opts) {
 // a share's length on the bar's scale (engine BAR_SCALES: the log scale's
 // GetHPercBarAmt, or the share itself)
 const barWidth = (f, sc) => (sc || HO.BAR_SCALES.linear).toX(f * 1000) * 100 + '%';
+// a bar's fill: its width, or its height when the bar stands up
+const setFill = (fill, f, sc) => { if (fill.parentElement && fill.parentElement.classList.contains('vert') || fill._vert) fill.style.height = barWidth(f, sc); else fill.style.width = barWidth(f, sc); };
 // The budget bars' scale switch (rs.barScale.toggle: Mac 1.2 to 3.0.1, DOS
 // 2.0): a click on the strip above the bars flips the setup's scale, kept
 // with the player's other settings (the original kept it in its setup file),
@@ -1314,7 +1338,7 @@ function renderPanel() {
     bb.append(bar(e.label, e.get(), 1, (f, end) => {
       if (f != null && own) { if (!start) start = JSON.stringify(p.budget); dragBudget(p, e.key, f, start); }
       else if (f != null) setShare(ents, i, f);
-      if (f != null) { ents.forEach((x, j) => { const r = bb.querySelectorAll('.barrow')[j]; if (r) { r.querySelector('.track')._v = x.get(); r.querySelector('.fill').style.width = barWidth(x.get(), bsc); r.querySelector('.bval').textContent = money(x.get() * spendable); } }); }
+      if (f != null) { ents.forEach((x, j) => { const r = bb.querySelectorAll('.barrow')[j]; if (r) { r.querySelector('.track')._v = x.get(); setFill(r.querySelector('.fill'), x.get(), bsc); r.querySelector('.bval').textContent = money(x.get() * spendable); } }); }
       if (end) { start = null; renderPanel(); save(); }
     }, { scale: bsc, grid: rsB.barGrid && T.barGrid !== false && (!rsB.barGrid.above || i === 0) ? rsB.barGrid : null, locked: rsB.barLocked ? rsB.barLocked(G, p, e.key) : null, right: money(amt), cls: e.key === 'tech' ? 'tech' : e.key === 'savings' ? 'sav' : 'col', rowCls: (s && UI.sel === s.id ? 'hl' : '') + (s && HO.planetIncome(G, p, s) < 0 ? ' loss' : ''), help: e.key === 'tech' ? 'tech' : e.key === 'savings' ? 'savingsBar' : 'colonyBar' }));
   });
@@ -1336,14 +1360,18 @@ function renderPanel() {
     tb.append(bar(`${tnames[e.key]}${lvl !== '' ? ' ' + lvl : ''}`, e.get(), 1, (f, end) => {
       if (f != null && tdrag) { if (!tstart) tstart = JSON.stringify(p.talloc); Object.assign(p.talloc, JSON.parse(tstart)); tdrag(G, p, e.key, Math.max(0, Math.min(1000, Math.round(f * 1000)))); }
       else if (f != null) setShare(tents, i, f);
-      if (f != null) { tents.forEach((x, j) => { const r = tb.querySelectorAll('.barrow')[j]; if (r) { r.querySelector('.track')._v = x.get(); r.querySelector('.fill').style.width = barWidth(x.get(), tsc); } }); }
+      if (f != null) { tents.forEach((x, j) => { const r = tb.querySelectorAll('.barrow')[j]; if (r) { r.querySelector('.track')._v = x.get(); setFill(r.querySelector('.fill'), x.get(), tsc); } }); }
       if (end) { tstart = null; renderPanel(); save(); }
-    }, { scale: tsc, grid: rsB.barGrid && rsB.barGrid.tech && T.barGrid !== false ? rsB.barGrid : null, right: money(e.get() * techSpend), cls: 'tbar', title: nm && !/^\d+$/.test(nm) ? nm : tnames[e.key], help: e.key }));
+    }, { vertical: T.techBars === 'vertical', scale: tsc, grid: rsB.barGrid && rsB.barGrid.tech && T.barGrid !== false ? rsB.barGrid : null, right: money(e.get() * techSpend), cls: 'tbar', title: nm && !/^\d+$/.test(nm) ? nm : tnames[e.key], help: e.key }));
   });
   panel.append(tb);
   // planet
-  if (UI.sel != null) panel.append(planetBox(UI.sel));
+  const pb = UI.sel != null ? planetBox(UI.sel) : null;
+  if (pb) panel.append(pb);
   fitBars(bb); fitBars(tb);
+  // T.panel: a skin lays these out its own way (the Amiga's windows), its
+  // controls being these same ones
+  if (T.panel) T.panel(panel, { info: panel.querySelector('.box.info'), budget: bb, tech: tb, planet: pb, ents, tents });
   panel.scrollTop = scroll;
 }
 // Widen a box's bar labels and amounts to fit their text (long colony
@@ -1569,7 +1597,13 @@ function showMessages() {
   const O = verOpts(); if (O && O.showMessages && Prefs.showMsgs === false) UI.msgIdx = UI.inbox.length;
   renderMsg();
 }
+// T.afterMsg(box, ctx): a skin dresses the report card or the End Turn
+// button after they are drawn (the Amiga's "--mehr--")
 function renderMsg() {
+  renderMsg0();
+  if (T.afterMsg) T.afterMsg($('#msg'), { inbox: UI.inbox, idx: UI.msgIdx, G });
+}
+function renderMsg0() {
   const box = $('#msg');
   box.innerHTML = '';
   if (G.over && UI.msgIdx >= UI.inbox.length) {
@@ -2195,7 +2229,16 @@ function yardBox(s) {
   } else box.append(el('p', { class: 'sub' }, 'Nothing queued.'));
   return box;
 }
+// T.window(name, ...): a skin's own window in place of this one (true: shown);
+// T.api.classic(name, fn, ...) opens this skin's anyway (the Amiga's
+// Schiffsbau keeps the designer here)
+let skipSkinWin = null;
+function skinWindow(name, ...a) {
+  if (skipSkinWin === name) { skipSkinWin = null; return false; }
+  return !!(T.window && T.window(name, ...a));
+}
 function openBuild(sid) {
+  if (skinWindow('build', sid)) return;
   const p = me(), s = G.stars[sid];
   const types = ['scout', 'fighter', 'colony', 'satellite', 'tanker', 'dread', 'bio', 'decoy'].filter(t => HO.canBuildType(G, p, t));
   const queue = HO.feature(G, 'buildQueue'); // DOS 2.0 rules: ships are queued and paid for over time
@@ -2319,6 +2362,7 @@ function openBuild(sid) {
   modal(`${queue ? 'Queue' : 'Build'} ships at ${s.name}`, body, { cls: 'wide', onClose: () => save() });
 }
 function openSplit(f) {
+  if (skinWindow('split', f)) return;
   const take = {};
   const body = el('div', null, el('p', { class: 'sub' }, 'Choose ships to move into a new fleet.'));
   for (const k in f.ships) {
@@ -2881,6 +2925,7 @@ function roundRect(x, l, t, w, h, r) { x.beginPath(); x.moveTo(l + r, t); x.arcT
 
 // ----- players -----
 function openPlayers() {
+  if (skinWindow('players')) return;
   const rows = G.players.map(p => ({ p, sc: HO.score(G, p) })).sort((a, b) => b.sc - a.sc);
   const pacts = HO.feature(G, 'alliances');
   // rs.bestBuddies false: the version had alliances but no best buddies (3.0.1)
@@ -3099,6 +3144,7 @@ function openFleetList() {
   modal('All your fleets', mine.length ? table(['Fleet', 'Where', 'Going to', 'Fuel'], rows) : el('p', null, 'You have no fleets.'), { cls: 'mid' });
 }
 function openScrapTypes() {
+  if (skinWindow('types')) return;
   const p = me();
   const count = {}; for (const f of G.fleets) if (f.owner === ME) for (const k in f.ships) count[k] = (count[k] || 0) + f.ships[k];
   const live = p.designs.filter(d => !d.scrapped);
@@ -3822,6 +3868,10 @@ function skinOSPickers(rulesId) {
   };
   return { skinSel, osSel, forEdition };
 }
+// T.lookOptions(where): a skin's own look options ('title', 'newgame',
+// 'skinos'), kept with the Skin and OS look pickers, never with the rules
+// (the Amiga's tall or square pixels); they take effect at once
+const lookOptions = (where) => (T.lookOptions && T.lookOptions(where)) || null;
 // the title screen's Skin and OS look pop-ups: a skin reloads the page in it,
 // a look goes on at once
 function titlePickers() {
@@ -3838,6 +3888,8 @@ function titlePickers() {
     to.addEventListener('change', () => { picked.set('os'); useOS(to.value); });
     to.closest('label').hidden = false;
   }
+  const lo = !$('#tlook') && lookOptions('title');
+  if (lo) { lo.id = 'tlook'; to.closest('label').after(lo); }
 }
 // Ho menu, "Skin and OS look…": the skin reloads the page and carries on with
 // the saved game; the look goes on at once. Both are kept with the game
@@ -3855,6 +3907,7 @@ function openSkin() {
   const f = el('form', { class: 'newgame skinos', onsubmit: (e) => { e.preventDefault(); go(); } },
     el('label', null, el('span', null, 'Skin'), skinSel),
     el('label', null, el('span', null, 'OS look'), osSel),
+    lookOptions('skinos'),
     el('p', { class: 'sub' }, 'The skin is the game’s pictures and sounds from one release, the OS look the windows, menus and buttons around them; any skin can wear any look. ' +
       (G ? 'A new skin opens the saved game in it; a new look goes on at once. The rules stay as they are.' : 'A new look goes on at once.')),
     el('div', { class: 'btns right' }, el('button', { type: 'button', class: 'quiet', onclick: closeModal }, 'Cancel'), el('button', { type: 'submit' }, 'OK')));
@@ -4878,7 +4931,8 @@ function newGameDialog() {
     langRow);
   const lookRow = el('div', { class: 'picks' },
     el('label', null, el('span', null, 'Skin'), pick.skinSel),
-    el('label', null, el('span', null, 'OS look'), pick.osSel));
+    el('label', null, el('span', null, 'OS look'), pick.osSel),
+    lookOptions('newgame'));
   if (!window.HOSKINS || HOSKINS.list.length < 2) pick.skinSel.closest('label').hidden = true;
   if (!window.HOSKINS || !HOSKINS.osChoices) pick.osSel.closest('label').hidden = true;
   f.append(
@@ -5058,6 +5112,9 @@ function newGameDialog() {
   };
   modal('Create galaxy', f, { cls: 'mid ngwin' });
   refresh();
+  // T.newGame(form, ctx): a skin dresses the window its own way (the Amiga's
+  // Neue Galaxis erstellen and Spieler Registration), the form staying the same
+  if (T.newGame) T.newGame(f, { refresh });
 }
 // resumed: the game was just started (or saved) in another skin, so keep its messages
 function continueGame(resumed) {
@@ -5157,6 +5214,8 @@ function setupMenus() {
   };
   const logo = $('#menubar .logo');
   if (logo) { const at = el('span'); logo.replaceWith(at); at.replaceWith(menu(logo, ho)); }
+  // T.menus(menus, ho): a skin adds its own items (its windows); it never drops one
+  if (T.menus) T.menus(menus, ho);
   const laid = T.menuLayout ? layoutMenus(menus, T.menuLayout) : menus;
   for (const name in laid) bar.append(menu(el('button', { class: 'mbtn' }, name), laid[name]));
   document.addEventListener('click', () => document.querySelectorAll('.dropdown.open').forEach(d => { d.classList.remove('open'); d.previousElementSibling.setAttribute('aria-expanded', 'false'); }));
@@ -5262,6 +5321,17 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape') tipHide();
 // ---------- boot ----------
 window.addEventListener('DOMContentLoaded', () => {
   document.body.insertAdjacentHTML('afterbegin', PAGE);
+  // what a skin's hooks may use (the Amiga skin builds windows of its own with these)
+  T.api = {
+    get G() { return G; }, get ME() { return ME; }, UI, IMG, A, el, $, me, money, fmt, degF, toC, panelFig,
+    toast, modal, closeModal, confirmBox, renderPanel, renderMsg, draw, save, Sound, beep, guard,
+    shipPic, shipImgEl, starLook, fleetOrder, curFleet, centerOn, zoomAt, resize, map: () => ({ w: mapW, h: mapH, ready: !!cv }),
+    fit() { UI.fitted = false; fit(); draw(); }, clampView,
+    openBuild, openSplit, openOrganize, organizeStyle, openPlayers, openScrapTypes, openBattle, lastBattles, battleName, openReports, openAbout, openHelp,
+    newGameDialog, titleScreen, hideTitle, continueChecked, importGame, doEndTurn, flipBarScale, marksScrap, scrapWords, toggleScrapFleet,
+    verOpts, modern, hotSeat,
+    classic(name, fn, ...a) { skipSkinWin = name; try { return fn(...a); } finally { skipSkinWin = null; } },
+  };
   if (T.page) T.page(document);
   Object.assign(HO.DATA, window.HODATA);
   setupMenus();
