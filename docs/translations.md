@@ -7,7 +7,8 @@ Language… (`HO.languageName`: "Français (traduction du remake)", "Deutsch (Ü
 Remakes)", "Türkçe (yeniden yapımın çevirisi)", "Español (traducción del remake)"), and in
 the version's notes (About this version, `js/version-notes.js`). Spanish is the remake's in
 every version: there was never an official Spanish Spaceward Ho! ("Spanish glossary"). This file says which text is official and which is the
-remake's, version by version, and how the remake's was made.
+remake's, version by version, and how the remake's was made; the remake's own interface
+follows the language too ("The remake's interface").
 
 ## How a language works
 
@@ -424,7 +425,8 @@ stars by name from the German DOS 2.0's list; a computer or ship list only where
 2.0's list (3.0.1's Scouts, Colony Ships and Satellites, 4.0.5's Colony Ships and
 Satellites); 5.0.5's computers and ships stay English. iOS and Android get the same German
 for their own English (iOS's lists), with the remake's lines for their touch hints and
-alerts; their help page stays English (`js/help.js` has French and Turkish only).
+alerts; their help page is English, with a line in German that says so (`js/help.js` has
+French and Turkish only).
 
 
 ## Spanish glossary
@@ -522,34 +524,99 @@ iOS's Turkish puts a fixed suffix straight after a name ("%sye", "%sde", "%syi",
 official ones around them; a suffix that agreed with each name would need the name's
 vowels in every report, which no official line does.
 
+## The remake's interface (`js/ui-lang.js`, `js/ui-text.js`, `js/ui-text-help.js`)
+
+The remake's own interface follows the game's language too: the menus, buttons, window
+titles and labels, the New Game window, the toasts, the short help (How to play), the
+Account and online windows, the Hall, the Ho menu, Preferences, About this version's and
+the patch notes' headings, the skins' credit lines and the versions' window words the
+rules carry in English (the Send Message windows, the Hall's columns and summary, the time
+limits, 1.2's and 2.0's Options menu and Explored Planets list, 5.0.5's ranks, iOS's Game
+Center), and the hover help (`js/help.js`, the manuals' words trimmed for a tooltip:
+`js/ui-text-help.js`, 72 paragraphs and their pages' names). Which language:
+
+- **in a game**, the game's (`G.opts.lang`, else the version's own, `rs.languages`), kept
+  as the last one used (`localStorage` "ho5.uilang");
+- **on the title screen**, the last one used, else the skin's own (`T.lang`: the Amiga's
+  German), else English; **in New Game**, the one its Language menu has chosen (the
+  window changes language with it; for rules with one language, the last one used).
+
+English is always complete: it is the interface as the skins write it. `js/ui-lang.js`
+(`HOUI`) holds the mechanism: `el()` in `js/skins/classic/ui.js` puts every string it is
+given through `HOUI.tr`, and outside English a MutationObserver does the same for what a
+skin writes into the page by other means; each text node and title / aria-label /
+placeholder / alt keeps its English (`hoEn`), so a change of language redoes the page.
+A row with `%s` / `%d` is a pattern ("Review %s" turns "Review battle (2010)" into
+"Revoir bataille (2010)", each filling put in the language where it can be); a pattern
+never takes apart a string whose filling would be English prose (more than three words,
+or one of English's little words), nor one whose literal part has no letters ("%s: %s"
+fills a template, `HOUI.t`, but never takes a string apart). Text drawn on a canvas (the
+map's labels, the battle windows) goes through `tl()`. Text inside `translate="no"` is
+left as it is.
+
+**Tiers**, as for the game's text: a word a version's official translation has is used
+and its source named in the row (the iOS game's French and Turkish Misc Strings, Alert
+Strings and sprintf Templates; 1.2F's STR# lists; the German DOS 2.0's `HO.PRS`; the
+Amiga 2.0's German menus and windows, `js/skins/amiga/ui.js`); "adapted" is an official
+word or line edited for a slightly different English ("Organize fleets…" from iOS's
+"Organize Fleets"); everything else is the remake's own, in the official translations'
+voices: French "vous" and iOS's and 1.2F's words (flotte, vaisseau, recycler, évacuer,
+Epargne, Fin Tour), German "Sie" and the DOS 2.0's and the Amiga's (Weite, Tempo,
+Schilder, Sparen, Schiffsbau, Zug Ende, verschrotten, räumen for 5.0.5's Evacuate),
+Turkish "sen" and iOS's (Birikim, Tahliye Et, Sıran Bitti, Filoları Hazırla; "Menzil"
+for Range, iOS's "Dizi" being another sense of the word), Spanish "tú" and the glossary
+above. `node tools/ui-lang-audit.js --count`:
+
+| Language | Strings | Official | Adapted | The remake's |
+|---|---|---|---|---|
+| French | 1,180 | 131 | 63 | 986 |
+| German | 1,180 | 130 | 46 | 1,004 |
+| Turkish | 1,180 | 100 | 38 | 1,042 |
+| Spanish | 1,180 | 0 | 0 | 1,180 |
+
+**The Amiga skin** has its own words (`WORDS`, the Amiga's German and the remake's
+English for its panels and windows); each entry now has French, Turkish and Spanish too,
+translated from the Amiga's own words (its "Stationiert auf", "Schiffsbau", "Urknall"),
+as are its New Game and Registration windows' buttons, its About window's credits and its
+menus' names (Datei, Optionen, Schiffe, Galaxis, Fenster, Info). Its German stays the
+Amiga's wherever it has the word (its menus, the classic page's commands in its words,
+`CMD_DE`, `MENU_DE`); a game in French, Turkish or Spanish shows that language, or
+English, never German. The End Turn picture has German and English only (the pictures
+are the game's): the English one shows in the other languages.
+
+**Checks:** `node tools/ui-lang-audit.js` opens every skin in every language its
+versions offer (the title screen, New Game, a game's main screen, each menu, Build
+Ships, Players, Preferences, About, How to play, Account, the lists, Give, Send a
+message, Skin and OS look, Sounds, Language, Auto play, Surrender, the Hall and master
+points where the version has them) and fails on a string of the table left in English, a
+word of a third language, or a string shown the same as in the English run that the
+table doesn't say is the same in that language. The English runs show no French,
+German, Turkish or Spanish at all.
+
 ## What stays English, and why
 
-The remake's own interface stays English in every language, as it does for the official
-translations: it isn't the version's text, and putting all of `js/skins/classic/ui.js`
-into French, Turkish, German and Spanish would put the remake's words in the original's mouth.
-What the language system carries is translated: the reports and questions the rules
-send, the alerts the page shows from 5.0.5's list, the names, the hints and the window
-words each version's rules hold. What stays English:
-
-- **The remake's windows and menus**: New Game, Preferences, the Ho, Game and Galaxy
-  menus, Saved Games and Account, the toasts ("That project has been cancelled."), the
-  remake's own Evacuate question for 3.0.1 and 4.0.5 ("Evacuate %s? Your colonists will
-  leave; satellites stay."), the help the remake wrote, About this version and its notes.
-  They are the remake's, in its own English.
-- **The versions' window words the rules don't carry**: the Send Message window's labels
-  and prompts ("I Want", "Saying What?", 3.0.1's and 4.0.5's `cannedChat`), the Hall of
-  Fame's ranks and columns, the Technology window's names, the planet and fleet panels,
-  4.0.5's "End Turn and Switch Players". They are drawn by the skin from its own words or
-  the version's English; translating them would mean translating the skin.
-- **The 2.0 German's Options menu, and the Explored Planets list's title and button**
-  (DOS 2.0 and Mac 2.0.1): the German table has no words for them (the list's four
-  classes are its strings 144-147, now used), so they keep 2.0's English; the remake's
-  German 1.2 has them in its own German.
-
-- **Help pages**: only iOS and Android have them in French and Turkish (their own); every
-  other version's manual is English, and so are iOS's and Android's in German and Spanish.
+- **The long documents**: the version notes (About this version's lists, Delta Tao's own
+  words, the Full Hoedown items), the unofficial patches' fixes (Patch notes, New Game's
+  list) and the manuals themselves. Translating them would be some 70,000 characters a
+  language of the remake's own reading of the originals, and they change whenever the
+  research does; each says in
+  a line in the language that it is in English ("Ces notes sont en anglais.", "Diese
+  Hilfe ist auf Englisch.", "Bu notlar İngilizce.", "Esta ayuda está en inglés."), and
+  the Help menu says so beside the manual ("Manuel (en anglais) : …"). The short help
+  (How to play) is translated; iOS's and Android's help pages are their own in French and
+  Turkish, and English with the line in German and Spanish. The hover help, short
+  paragraphs, is translated (`js/ui-text-help.js`); a paragraph added to `js/help.js`
+  without a row shows in English with the line, until it has one.
+- **The bug report and feedback issues** opened on GitHub: their body (the facts and the
+  questions) is written for the remake's maintainers; the window that opens them is
+  translated.
+- **Names**: the products' and people's (Spaceward Ho!, Game Center, Mac OS, Workbench,
+  the credits' names), the skins' version numbers, and what players typed.
+- **The numbers' forms**: a version writes its sums and counts its own way ("12,345K",
+  "1.00G") in every language, as the rules have them.
 - **5.0.5's network and registration alerts** in German (never shown by the remake).
-- **The pictures**: words drawn in the art (1.2F's "Fin Tour", the title pictures).
+- **The pictures**: words drawn in the art (1.2F's "Fin Tour", the title pictures, the
+  Amiga's two End Turn pictures).
 
 ## Choices worth checking
 

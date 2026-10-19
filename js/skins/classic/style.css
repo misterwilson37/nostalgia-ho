@@ -371,6 +371,8 @@ html.fleetdrag #panel .planet > .btns, html.fleetdrag.fleetdrag-pad #panel .plan
 .hoscreen .gcpct, .hoscreen .gcscore { color: #6d6d72; }
 .hoscreen.helpscreen .sbody { max-width: none; padding: 0; display: flex; }
 .hoscreen .shelp { flex: 1; border: 0; width: 100%; min-height: 100%; background: #fff; }
+.hoscreen .shelpbox { flex: 1; display: flex; flex-direction: column; }
+.hoscreen .shelpbox > .note { margin: 8px 16px; }
 @media (max-width: 480px) { .hoscreen .sbody { padding: 16px; } .hoscreen.helpscreen .sbody { padding: 0; } }
 /* a window opened over an iOS / Android screen (Saved Games' Delete, the
    Account windows) sits above it */

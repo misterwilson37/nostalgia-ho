@@ -1310,6 +1310,9 @@ function spanish20(rs, en, panel) {
       showMessages: W.options.showMessages, reviewBattles: W.options.reviewBattles, reports: W.options.reports },
     rs.options.poll ? { poll: Object.assign({}, rs.options.poll, W.options.poll) } : {}),
     exploredList: Object.assign({}, rs.exploredList, W.exploredList),
+    // the Scrap commands' words: the English (1.2's own are 1.2F's French), put
+    // in Spanish with the rest of the remake's interface (js/ui-text.js)
+    scrapWords: en.scrapWords || rs.scrapWords,
     battlePanel: DOS.battlePanel20(Object.assign({ cols: 'mac', shade: true, words: WORDS20_ES }, panel)),
     battleLines: Object.assign({}, W.battleLines),
   };

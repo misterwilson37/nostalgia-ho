@@ -243,17 +243,30 @@ them, and, where it had none, the remake's own translation, marked so in the lis
 ("Français (traduction du remake)", "Deutsch (Übersetzung des Remakes)", "Türkçe
 (yeniden yapımın çevirisi)", "Español (traducción del remake)") and in the version's notes:
 
-| Version | Official | The remake's (`docs/translations.md`) |
-|---|---|---|
-| 1.2 | French (its own: names, reports, windows), English (Mac 2.0.1's words) | German, from the German DOS 2.0; Spanish |
-| DOS 2.0, Mac 2.0.1 | English (their own), German (the German DOS 2.0, `docs/dos-findings.md`) | French, 1.2F's text carried forward; Spanish |
-| 3.0.1, 4.0.5, 5.0.5, Palm OS | English | French and Turkish, backwards from iOS (and 1.2F); German, forward from the German DOS 2.0; Spanish |
-| iOS, Android | English (their own), French, Turkish (the app's `fr.lproj`, `tr.lproj`, with its help pages) | German; Spanish |
+| Version | Official | The remake's (`docs/translations.md`) | The remake's interface |
+|---|---|---|---|
+| 1.2 | French (its own: names, reports, windows), English (Mac 2.0.1's words) | German, from the German DOS 2.0; Spanish | French, German, Spanish, English |
+| DOS 2.0, Mac 2.0.1 | English (their own), German (the German DOS 2.0, `docs/dos-findings.md`) | French, 1.2F's text carried forward; Spanish | English, German, French, Spanish |
+| 3.0.1, 4.0.5, 5.0.5, Palm OS | English | French and Turkish, backwards from iOS (and 1.2F); German, forward from the German DOS 2.0; Spanish | English, French, Turkish, German, Spanish |
+| iOS, Android | English (their own), French, Turkish (the app's `fr.lproj`, `tr.lproj`, with its help pages) | German; Spanish | English, French, Turkish, German, Spanish |
+| The AI homages (Claude's, Gemini's rules) | English | – | English |
+
+The interface's words (1,180 strings, the hover help's among them) are official where a
+version's translation has the word (French 131, German 130, Turkish 100), adapted from one
+(63, 46, 38) and otherwise
+the remake's own (`node tools/ui-lang-audit.js --count`).
 
 Only names and words change: a seed plays the same game in every language, so it can
 change mid-game. The reports are kept in the version's own words and put in the game's
-language when shown (`HO.say`); the remake's own interface (its windows and buttons) stays
-English. The Amiga skin starts New Game in German (its `lang: 'de'`).
+language when shown (`HO.say`). The remake's own interface follows the language too
+(`js/ui-lang.js`, its words in `js/ui-text.js`): in a game the game's language, on the
+title screen the last one used, in New Game the one it has chosen; English is always
+there and always complete. The hover help is translated too; the long documents (the
+version and patch notes, the manuals) stay English, with a line in the language that says so
+(`docs/translations.md`, "The remake's interface"). The Amiga skin starts in German (its
+`lang: 'de'`) and has its own words in every language.
+`node tools/ui-lang-audit.js` opens every skin in every language its versions offer and
+fails on English left from the table or a word of a third language.
 `node tools/lang-test.js` checks every language (no report left untranslated, no filling
 left in one); `--count` prints how many lines are official, how many adapted from an official
 line and how many the remake's own, and `--adapted` lists the adapted ones with their
@@ -473,6 +486,12 @@ Optional ruleset flags the skin reads (each is documented where it is read):
   iOS and Android in French and Turkish), matched entry for entry to each ruleset's names,
   words and reports; `js/lang-data.js` holds the text, written by
   `tools/extract/languages.py` from the German DOS 2.0 and the iOS app
+- `js/ui-lang.js`: the remake's own interface in the game's language (`window.HOUI`: the
+  language showing, `HOUI.t` / `HOUI.tr`, the page kept in step with it); `js/ui-text.js`
+  its words, one row per English string with each language's and their official sources
+  (`js/ui-text-help.js`, the hover help's);
+  `tools/ui-lang-audit.js` checks every skin in every language (`docs/translations.md`,
+  "The remake's interface")
 - `js/hoedown.js`: Full Hoedown, each official release's jokes at their most (`rs.hoedown`: the items About this version lists, the colour-monitor joke, the Armageddon questions put back in the 5.0.5 family, the Amiga's German names; 4.0.5's Evacuate and Armageddon jokes are the rules' own now)
 - `js/cloud.js`: the online parts (`window.HOCLOUD`: accounts, saves in the account, the
   shared Hall, shared names, online play's documents), with no UI; `js/online.js`

@@ -424,6 +424,16 @@ nicht angefunkt werden, bis sie den nächsten Zielort erreicht.", "Technik Ausga
 Ausgaben", "(+ $ %s)" for "+ $%s", the labels without the DOS colons and ellipses, "Schilde"
 for "Schilder"); the messages between players' words lower-case ("ich mag", "ich hasse").
 
+**Other languages.** The skin's words (`WORDS` in `js/skins/amiga/ui.js`, and its New Game,
+Registration, About and menu words) are the Amiga's German, the remake's English for a game
+played in English, and the remake's French, Turkish and Spanish, translated from the Amiga's
+own words, so a game in those languages shows them and never German (the skin follows the
+interface's language, `js/ui-lang.js`; with no game and none used yet, the Amiga's German).
+Numbers are written "51.000" in German, Turkish and Spanish, "51 000" in French; temperatures
+in °C in German, French and Spanish. The End Turn picture is German or English (the pictures
+are the game's): the English one in the other languages. `docs/translations.md`, "The
+remake's interface".
+
 ## The remake's controls in the Amiga's screen
 
 Every control the ruleset gives a star and its fleets (Build ships, Evacuate, Stay here, Split,

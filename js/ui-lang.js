@@ -40,6 +40,10 @@ const OTHER = LANGS.slice(1);
 const MAP = {}, PAT = {}, SRC = {};
 for (const l of OTHER) { MAP[l] = new Map(); PAT[l] = new Map(); }
 const ROWS = [];
+// a skin's own words, already in a language (the Amiga's WORDS): never put
+// in it again, though one may be spelled like an English string of the table
+// (its French "Mine", 1.2F's word, is also the English for the bar)
+const OWN = {};
 let cur = 'en';
 const hasPh = (s) => /%(\d+\$)?[sd]/.test(s);
 const esc = (t) => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -50,6 +54,8 @@ function compile(en) {
   parts.forEach((p, i) => { re += i % 2 ? (/d$/.test(p) ? '(-?[\\d.,]+)' : '(.+?)') : esc(p); });
   return new RegExp(re + '$');
 }
+// English's little words: a filling with one is a phrase the table hasn't got, not a name
+const PROSE = /(^|[^\p{L}])(the|of|to|all|and|a|an|in|for|with|your|you|is|are|this|that|on|at|by|from|as|it|be|not|no)(?![\p{L}])/u;
 const lead = (en) => en.split(/%(?:\d+\$)?[sd]/)[0].slice(0, 2);
 // rows: [en, fr, de, tr, es, sources?]
 function add(rows) {
@@ -63,7 +69,10 @@ function add(rows) {
       const t = r[i + 1];
       if (typeof t !== 'string') return;
       MAP[l].set(en, t);
-      if (hasPh(en)) {
+      // a pattern whose words are only fillings and punctuation ("%s: %s")
+      // fills a template (HOUI.t) but never takes a string apart: it would
+      // take apart one already in the language
+      if (hasPh(en) && /[A-Za-z]/.test(en.replace(/%(\d+\$)?[sd]/g, ''))) {
         const k = lead(en), b = PAT[l].get(k) || [];
         b.push({ en, re: compile(en), tr: t, n: en.replace(/%(\d+\$)?[sd]/g, '').length });
         b.sort((x, y) => y.n - x.n);
@@ -84,6 +93,7 @@ function tr(s, lang, depth) {
   lang = lang || cur;
   if (lang === 'en' || typeof s !== 'string' || !MAP[lang]) return s;
   const M = MAP[lang];
+  if (OWN[lang] && OWN[lang].has(s.trim())) return s; // a skin's own word in this language (HOUI.own)
   const r = M.get(s);
   if (r != null) return r;
   const t = s.trim();
@@ -95,7 +105,12 @@ function tr(s, lang, depth) {
     if (!B) continue;
     for (const p of B) {
       const m = p.re.exec(t);
-      if (m) return fill(p.tr, m.slice(1).map(a => tr(a, lang, (depth || 0) + 1)));
+      if (!m) continue;
+      // a filling is a name, a number or words the table has: never a
+      // sentence of English the table hasn't got (that string isn't this pattern's)
+      const a = m.slice(1).map(x => tr(x, lang, (depth || 0) + 1));
+      if (a.some((x, i) => x === m[i + 1] && /[a-z]/.test(x) && (x.trim().split(/\s+/).length > 3 || PROSE.test(x)))) continue;
+      return fill(p.tr, a);
     }
   }
   return s;
@@ -195,9 +210,12 @@ root.HOUI = {
   LANGS, add, t, tr, text, en, sweep, set, store, count,
   get lang() { return cur; },
   has: (s, lang) => !!MAP[lang || cur] && MAP[lang || cur].has(s),
+  // whether the table knows a string (as it is, or by a pattern): the audit's
+  known: (s, lang) => { const l = lang || cur, t = String(s).trim(); if (!MAP[l]) return false; if (MAP[l].has(t)) return true; for (const k of [t.slice(0, 2), '']) for (const p of PAT[l].get(k) || []) if (p.re.test(t)) return true; return false; },
   rows: () => ROWS.slice(),
   source: (s) => SRC[s] || null,
   onChange: (f) => listeners.push(f),
+  own: (lang, words) => { const o = OWN[lang] || (OWN[lang] = new Set()); for (const w of words) if (typeof w === 'string' && w.trim()) o.add(w.trim()); },
 };
 if (typeof module !== 'undefined') module.exports = root.HOUI;
 })(typeof window !== 'undefined' ? window : globalThis);

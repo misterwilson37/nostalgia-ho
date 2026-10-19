@@ -43,9 +43,16 @@ export and import for every version (item 7).
    Spanish for every version (1.2, 2.0, 3.0.1, 4.0.5 Windows and Mac, 5.0.5, the Palm,
    iOS, Android), all of it the remake's, "Español (traducción del remake)", from one
    glossary in the official translations' spirit (`docs/translations.md`, "Spanish
-   glossary"). Left: the remake's own windows stay
-   English (`docs/translations.md`, "What stays English"); the help pages exist in French
-   and Turkish for iOS and Android only.
+   glossary"). **And the remake's own interface
+   (October 2026):** its menus, windows, buttons, toasts, the short help, the Account and
+   online windows, the Hall and the Ho menu in every language a version offers
+   (`js/ui-lang.js`, `js/ui-text.js`, `js/ui-text-help.js`, 1,180 strings with the hover help; official words from iOS, 1.2F, the
+   German DOS 2.0 and the Amiga where they have them, otherwise the remake's own), the
+   Amiga skin's own words in French, Turkish and Spanish too; `tools/ui-lang-audit.js`
+   checks every skin in every language (`docs/translations.md`, "The remake's
+   interface"). Left: the long documents (the version and patch notes, the
+   manuals) are English, each with a line in the language that says so; the help
+   pages exist in French and Turkish for iOS and Android only.
 
 5. **Online.** Jake's order: (1) cloud saves, the browser's saves kept as the offline
    option; (2) a shared Hall of Fame; later (3) shared names, (4) online play. **1 and 2

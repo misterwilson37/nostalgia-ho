@@ -55,82 +55,119 @@ const TH = () => window.HOTHEME;
 const api = () => TH() && TH().api;
 const game = () => { const a = api(); return a && a.G; };
 
-// ---------- words: the Amiga's German, and English for a game played in English ----------
+// ---------- words: the Amiga's German, its English, and the other languages ----------
+// Each entry: [German (the Amiga's own), English, French, Turkish, Spanish].
+// The Amiga game was German; its English is the remake's for a game played in
+// English, and French, Turkish and Spanish are the remake's from the Amiga's
+// own words (as js/ui-text.js, in the voices docs/translations.md gives), so
+// a game in another language shows that language, or English, never German.
 const WORDS = {
-  profit: ['Profit:', 'Profit:'], pop: ['Bev:', 'Pop:'], temp: ['Temp:', 'Temp:'], grav: ['Gravit:', 'Grav:'], metal: ['Metall:', 'Metal:'],
-  owner: ['Besitzer:', 'Owner:'], nobody: ['Niemand', 'Nobody'], empty: ['Unbewohnt', 'Uninhabited'], seen: ['Info Datum:', 'Info date:'],
-  orders: ['Aufträge:', 'Orders:'], none: ['Keine.', 'None.'], unexplored: ['Unerforscht.', 'Unexplored.'], battleSeen: ['Ein Kampf wurde hier gesehen.', 'A battle was seen here.'],
-  terra: ['Terra.', 'Terra.'], met: ['Met.', 'Mine'], schf: ['Schf.', 'Ship'],
-  at: ['Stationiert auf: %1', 'Stationed at: %1'], dest: ['Zielort: %1 (Entf. %2; Dauer %3)', 'Destination: %1 (dist. %2; %3 turns)'],
-  via: ['Unterwegs nach %1 (E %2; D %3) via %4', 'Bound for %1 (d %2; t %3) via %4'], scrapFleet: ['Flotte zum Verschrotten.', 'Fleet to be scrapped.'],
-  noFleets: ['Keine Flotten auf diesem Planeten', 'No fleets at this planet'], tank: ['Tank:', 'Fuel:'], speed: ['Tempo:', 'Speed:'],
-  full: ['Voll', 'Full'], emptyShip: ['Leer', 'Empty'], scrap: ['Schrott', 'Scrap'],
-  metalLeft: ['Metall übrig', 'Metal left'], moneyTotal: ['Geld total', 'Money total'], profitTotal: ['Profit total', 'Profit total'],
-  tech: ['Technik Ausgaben', 'Technology'], levels: ['Akt. Stufen', 'Levels'],
-  range: ['Weite', 'Range'], vel: ['Tempo', 'Speed'], weapons: ['Waffen', 'Weapons'], shields: ['Schilder', 'Shields'], mini: ['Mini', 'Mini'], radical: ['Radikal', 'Radical'],
-  savings: ['Sparen', 'Savings'], techBar: ['Technik', 'Tech'], linear: ['linear', 'linear'], log: ['logar.', 'log'],
-  news: ['Nachrichten', 'Messages'], more: ['--mehr--', '--more--'],
-  endTurn: ['Zug Ende', 'End turn'],
-  title: ['Spaceward Ho! - %1 in %2 im Jahre %3', 'Spaceward Ho! - %1 in %2 in %3'], screen: ['Spaceward Ho! Amiga Version 2.0', 'Spaceward Ho! Amiga Version 2.0'],
-  ok: ['Ok', 'OK'], cancel: ['Abbruch', 'Cancel'],
-  build: ['Schiffsbau', 'Shipbuilding'], queueAt: ['Auftragsliste bei %1', 'Orders at %1'], types: ['Vorhandene Typen', 'Types'], waiting: ['Auf Warteliste:', 'Waiting:'],
-  done: ['%1% fertig', '%1% done'], newType: ['Neuer Typ…', 'New type…'], noShip: ['Keine Schiffsbaugelder: Schf. im Sternfenster.', 'No shipbuilding money: Ship bar in the star panel.'],
-  typeMgr: ['Spaceward Ho! Typen Manager', 'Spaceward Ho! Ship Types'], name: ['Name:', 'Name:'], cls: ['Klasse:', 'Class:'], devCost: ['Entw.kosten:', 'Design cost:'],
-  prodCost: ['Prod.kosten:', 'Unit cost:'], built: ['# Gebaut: %1', '# Built: %1'], exist: ['# Existent: %1', '# Existing: %1'], scrapType: ['Typ verschrotten', 'Scrap type'],
-  nameBtn: ['Name', 'Name'], rename: ['Neuer Name für %1:', 'New name for %1:'], shields2: ['Schilde:', 'Shields:'], weite: ['Weite:', 'Range:'], tempo: ['Tempo:', 'Speed:'], waffen: ['Waffen:', 'Weapons:'], miniC: ['Mini:', 'Mini:'],
-  rnHelp1: ['Geben Sie einen neuen Namen ein', 'Type a new name'], rnHelp2: ["oder wählen Sie 'Benennen' an", "or choose 'Name it'"],
-  autoName: ['Benennen', 'Name it'], renameTitle: ['Schiff umbenennen', 'Rename ship'],
-  noCompare: ['Es gibt keinen Vergleich vor dem Jahre 2010!', 'There is no comparison before 2010!'],
-  cWon: ['Sie haben das Spiel im Jahre %1 gewonnen!', 'You won the game in %1!'], cLost: ['Sie haben das Spiel im Jahre %1 verloren!', 'You lost the game in %1!'],
-  playerList: ['Liste aller Spieler und ihrer Eigenschaften', 'All the players and their settings'], iqLine: ['Computerintelligenz: %1', 'Computer intelligence: %1'],
-  fleetList: ['Liste der Flotten', 'Fleets'], starList: ['Liste der erforschten Planeten', 'Explored planets'], goTo: ['Gehe zu ...', 'Go to ...'],
-  flAt: ['%1 stationiert auf %2.', '%1 at %2.'], flFly: ['%1 fliegt von %2 nach %3. Ankunft: %4.', '%1 flying from %2 to %3. Arrival: %4.'],
-  flSoll: ['%1 soll %2 %3 erreichen.', '%1 to reach %2 in %3.'], flStuck: ['%1 hängt auf %2 fest.', '%1 is stuck at %2.'],
-  flHyper: ['Diese Flotte ist zur Zeit im Hyperraum, Sie können sie derzeit nicht erreichen!', 'This fleet is in hyperspace: it cannot be reached now!'],
-  stMine: ['meiner', 'mine'], stNobody: ['erforscht', 'explored'], stEnemy: ['feindlich', 'enemy'],
-  scrapAsk: ['%1 und alle %2 Schiffe dieses Typs verschrotten?', 'Scrap %1 and all %2 ships of that type?'],
-  aslOpen: ['Name der zu öffnenden Galaxis:', 'Name of the galaxy to open:'], open2: ['Öffnen...', 'Open...'],
-  aslMissing: ['Kann die Datei nicht lesen!', 'Can’t read the file!'], // (string 8)
-  compare: ['Spielervergleich von noch %1 Spielern im Jahre %2', 'Comparing the %1 players left in %2'], first: ['erster', 'first'], middle: ['mittlerer', 'middle'], last: ['letzter', 'last'],
-  cProfit: ['Profit', 'Profit'], cMetal: ['Metall', 'Metal'], cPlanets: ['Planeten', 'Planets'], cShips: ['Schiffe', 'Ships'], cShields: ['Schilde', 'Shields'], info: ['Info', 'Info'],
-  split: ['Aufteilen der Schiffe', 'Organize ships'], splitHelp1: ['- Stellen Sie die Schiffe beliebig zusammen.', '- Put the ships together as you like.'],
-  splitHelp2: ['- Klick mit UMSCHALTEN wählt eine ganze Flotte an.', '- A click with SHIFT picks a whole fleet.'], group: ['Guppieren', 'Group'], single: ['Vereinzeln', 'Split up'],
-  about: ['Spaceward Ho!', 'Spaceward Ho!'],
-  ngTitle: ['Neue Galaxis erstellen', 'Create a new galaxy'], density: ['Sterndichte:', 'Star density:'], shape: ['Art der Galaxis:', 'Kind of galaxy:'], iq: ['Computerintelligenz:', 'Computer intelligence:'],
-  size: ['Größe der Galaxis:', 'Size of the galaxy:'], computers: ['Anzahl der Computerspieler:', 'Number of computer players:'], bang: ['Urknall', 'Big Bang'], moreSettings: ['Mehr…', 'More…'],
-  reg: ['Spaceward Ho! Spieler Registration', 'Spaceward Ho! Player Registration'], skill: ['Spielstufe:', 'Skill:'], yourName: ['Ihr Name:', 'Your name:'], password: ['Paßwort:', 'Password:'],
-  sex: ['Geschlecht:', 'Sex:'], man: ['Mann', 'Man'], woman: ['Frau', 'Woman'],
-  startup: ['Spaceward Ho! Startup', 'Spaceward Ho! Startup'], open: ['Spiel öffnen', 'Open game'], newGame: ['Neues Spiel', 'New game'],
-  pixels: ['Pixel', 'Pixels'], tall: ['Amiga monitor (tall pixels)', 'Amiga monitor (tall pixels)'], square: ['Square pixels', 'Square pixels'],
-  commands: ['Befehle', 'Orders'], noCommands: ['(keine)', '(none)'],
-  credit1: ['Spaceward Ho! Amiga Version 2.0 von Stefan Bebbo Franke.', 'Spaceward Ho! Amiga Version 2.0 by Stefan Bebbo Franke.'],
-  credit2: ['Grafiken von Howard Vives.', 'Graphics by Howard Vives.'],
+  profit: ['Profit:', 'Profit:', 'Revenu :', 'Kâr:', 'Beneficio:'], pop: ['Bev:', 'Pop:', 'Pop :', 'Nüfus:', 'Pob.:'], temp: ['Temp:', 'Temp:', 'Temp :', 'Isı:', 'Temp.:'], grav: ['Gravit:', 'Grav:', 'Gravité :', 'Yerçekimi:', 'Gravedad:'], metal: ['Metall:', 'Metal:', 'Métal :', 'Metâl:', 'Metal:'],
+  owner: ['Besitzer:', 'Owner:', 'Proprio :', 'Sahip:', 'Dueño:'], nobody: ['Niemand', 'Nobody', 'Personne', 'Hiç kimse', 'Nadie'], empty: ['Unbewohnt', 'Uninhabited', 'Inhabitée', 'Issız', 'Deshabitado'], seen: ['Info Datum:', 'Info date:', 'Date info :', 'Bilgi tarihi:', 'Fecha info:'],
+  orders: ['Aufträge:', 'Orders:', 'Commandes :', 'Siparişler:', 'Encargos:'], none: ['Keine.', 'None.', 'Aucune.', 'Yok.', 'Ninguno.'], unexplored: ['Unerforscht.', 'Unexplored.', 'Inexplorée.', 'Keşfedilmemiş.', 'Sin explorar.'], battleSeen: ['Ein Kampf wurde hier gesehen.', 'A battle was seen here.', 'Une bataille a été vue ici.', 'Burada bir savaş görüldü.', 'Aquí se vio una batalla.'],
+  terra: ['Terra.', 'Terra.', 'Terra.', 'Terra.', 'Terra.'], met: ['Met.', 'Mine', 'Mine', 'Maden', 'Minas'], schf: ['Schf.', 'Ship', 'Prod', 'Gemi', 'Naves'],
+  at: ['Stationiert auf: %1', 'Stationed at: %1', 'En orbite à : %1', 'Konum: %1', 'En órbita en: %1'], dest: ['Zielort: %1 (Entf. %2; Dauer %3)', 'Destination: %1 (dist. %2; %3 turns)', 'Départ pour : %1 (dist. %2 ; %3 tours)', 'Hedef: %1 (uzaklık %2; %3 sıra)', 'Destino: %1 (dist. %2; %3 turnos)'],
+  via: ['Unterwegs nach %1 (E %2; D %3) via %4', 'Bound for %1 (d %2; t %3) via %4', 'Allant à %1 (D %2 ; T %3) via %4', '%1 yolunda (u %2; s %3), %4 üzerinden', 'Rumbo a %1 (d %2; t %3) por %4'], scrapFleet: ['Flotte zum Verschrotten.', 'Fleet to be scrapped.', 'En recyclage.', 'Hurdaya çıkacak filo.', 'Flota para desguazar.'],
+  noFleets: ['Keine Flotten auf diesem Planeten', 'No fleets at this planet', 'Pas de vaisseau sur cette planète', 'Bu gezegende filo yok', 'No hay flotas en este planeta'], tank: ['Tank:', 'Fuel:', 'Fuel :', 'Yakıt:', 'Combustible:'], speed: ['Tempo:', 'Speed:', 'Vitesse :', 'Hız:', 'Velocidad:'],
+  full: ['Voll', 'Full', 'Plein', 'Dolu', 'Lleno'], emptyShip: ['Leer', 'Empty', 'Vide', 'Boş', 'Vacío'], scrap: ['Schrott', 'Scrap', 'Recycl.', 'Hurda', 'Desguace'],
+  metalLeft: ['Metall übrig', 'Metal left', 'Métal dispo', 'Kalan metâl', 'Metal libre'], moneyTotal: ['Geld total', 'Money total', 'Fonds total', 'Toplam para', 'Dinero total'], profitTotal: ['Profit total', 'Profit total', 'Revenu total', 'Toplam kâr', 'Benef. total'],
+  tech: ['Technik Ausgaben', 'Technology', 'Technologie', 'Teknoloji', 'Tecnología'], levels: ['Akt. Stufen', 'Levels', 'Niveaux actuels', 'Seviyeler', 'Niveles'],
+  range: ['Weite', 'Range', 'Distance', 'Menzil', 'Alcance'], vel: ['Tempo', 'Speed', 'Vitesse', 'Hız', 'Velocidad'], weapons: ['Waffen', 'Weapons', 'Armes', 'Silâhlar', 'Armas'], shields: ['Schilder', 'Shields', 'Boucliers', 'Kalkanlar', 'Escudos'], mini: ['Mini', 'Mini', 'Mini', 'Mini', 'Mini'], radical: ['Radikal', 'Radical', 'Radicaux', 'Radikal', 'Radical'],
+  savings: ['Sparen', 'Savings', 'Epargne', 'Birikim', 'Ahorros'], techBar: ['Technik', 'Tech', 'Tech', 'Teknoloji', 'Tecnología'], linear: ['linear', 'linear', 'linéaire', 'doğrusal', 'lineal'], log: ['logar.', 'log', 'log', 'log', 'log'],
+  news: ['Nachrichten', 'Messages', 'Messages', 'Mesajlar', 'Mensajes'], more: ['--mehr--', '--more--', '--suite--', '--devamı--', '--más--'],
+  endTurn: ['Zug Ende', 'End turn', 'Fin Tour', 'Sıran Bitti', 'Fin del turno'],
+  title: ['Spaceward Ho! - %1 in %2 im Jahre %3', 'Spaceward Ho! - %1 in %2 in %3', 'Spaceward Ho! - %1 dans %2 en %3', 'Spaceward Ho! - %1, %2, %3', 'Spaceward Ho! - %1 en %2 en %3'], screen: ['Spaceward Ho! Amiga Version 2.0', 'Spaceward Ho! Amiga Version 2.0', 'Spaceward Ho! Amiga Version 2.0', 'Spaceward Ho! Amiga Sürüm 2.0', 'Spaceward Ho! Amiga Versión 2.0'],
+  ok: ['Ok', 'OK', 'OK', 'Tamam', 'Aceptar'], cancel: ['Abbruch', 'Cancel', 'Annuler', 'İptal', 'Cancelar'],
+  build: ['Schiffsbau', 'Shipbuilding', 'Construction', 'Gemi yapımı', 'Astillero'], queueAt: ['Auftragsliste bei %1', 'Orders at %1', 'Commandes à %1', '%1 sipariş listesi', 'Encargos en %1'], types: ['Vorhandene Typen', 'Types', 'Types existants', 'Var olan tipler', 'Tipos existentes'], waiting: ['Auf Warteliste:', 'Waiting:', 'En attente :', 'Sırada:', 'En espera:'],
+  done: ['%1% fertig', '%1% done', '%1 % fini', '%%1 bitti', '%1 % hecho'], newType: ['Neuer Typ…', 'New type…', 'Nouveau type…', 'Yeni tip…', 'Tipo nuevo…'], noShip: ['Keine Schiffsbaugelder: Schf. im Sternfenster.', 'No shipbuilding money: Ship bar in the star panel.', 'Pas d’argent pour la construction : barre Prod dans la fenêtre de l’étoile.', 'Gemi yapımına para yok: yıldız panelinde Gemi çubuğu.', 'No hay dinero para construir: barra Naves en el panel de la estrella.'],
+  typeMgr: ['Spaceward Ho! Typen Manager', 'Spaceward Ho! Ship Types', 'Spaceward Ho! Gestion des types', 'Spaceward Ho! Gemi Tipleri', 'Spaceward Ho! Gestor de tipos'], name: ['Name:', 'Name:', 'Nom :', 'Ad:', 'Nombre:'], cls: ['Klasse:', 'Class:', 'Classe :', 'Sınıf:', 'Clase:'], devCost: ['Entw.kosten:', 'Design cost:', 'Coût dév. :', 'Tasarım bedeli:', 'Coste diseño:'],
+  prodCost: ['Prod.kosten:', 'Unit cost:', 'Coût prod. :', 'Üretim bedeli:', 'Coste unidad:'], built: ['# Gebaut: %1', '# Built: %1', '# Construits : %1', '# Yapılan: %1', '# Construidas: %1'], exist: ['# Existent: %1', '# Existing: %1', '# Existants : %1', '# Var olan: %1', '# Existentes: %1'], scrapType: ['Typ verschrotten', 'Scrap type', 'Recycler le type', 'Tipi hurdaya çıkar', 'Desguazar el tipo'],
+  nameBtn: ['Name', 'Name', 'Nom', 'Ad', 'Nombre'], rename: ['Neuer Name für %1:', 'New name for %1:', 'Nouveau nom pour %1 :', '%1 için yeni ad:', 'Nombre nuevo para %1:'], shields2: ['Schilde:', 'Shields:', 'Boucliers :', 'Kalkanlar:', 'Escudos:'], weite: ['Weite:', 'Range:', 'Distance :', 'Menzil:', 'Alcance:'], tempo: ['Tempo:', 'Speed:', 'Vitesse :', 'Hız:', 'Velocidad:'], waffen: ['Waffen:', 'Weapons:', 'Armes :', 'Silâhlar:', 'Armas:'], miniC: ['Mini:', 'Mini:', 'Mini :', 'Mini:', 'Mini:'],
+  rnHelp1: ['Geben Sie einen neuen Namen ein', 'Type a new name', 'Tapez un nouveau nom', 'Yeni bir ad yaz', 'Escribe un nombre nuevo'], rnHelp2: ["oder wählen Sie 'Benennen' an", "or choose 'Name it'", 'ou choisissez « Nommer »', "ya da 'Adlandır'ı seç", 'o elige «Nombrar»'],
+  autoName: ['Benennen', 'Name it', 'Nommer', 'Adlandır', 'Nombrar'], renameTitle: ['Schiff umbenennen', 'Rename ship', 'Renommer le vaisseau', 'Gemiyi yeniden adlandır', 'Renombrar la nave'],
+  noCompare: ['Es gibt keinen Vergleich vor dem Jahre 2010!', 'There is no comparison before 2010!', 'Pas de comparaison avant 2010 !', '2010’dan önce karşılaştırma yok!', '¡No hay comparación antes de 2010!'],
+  cWon: ['Sie haben das Spiel im Jahre %1 gewonnen!', 'You won the game in %1!', 'Vous avez gagné en %1 !', 'Oyunu %1 yılında kazandın!', '¡Ganaste la partida en %1!'], cLost: ['Sie haben das Spiel im Jahre %1 verloren!', 'You lost the game in %1!', 'Vous avez perdu en %1 !', 'Oyunu %1 yılında kaybettin!', '¡Perdiste la partida en %1!'],
+  playerList: ['Liste aller Spieler und ihrer Eigenschaften', 'All the players and their settings', 'Liste de tous les joueurs et de leurs réglages', 'Bütün oyuncular ve özellikleri', 'Todos los jugadores y sus ajustes'], iqLine: ['Computerintelligenz: %1', 'Computer intelligence: %1', 'Intelligence des ordinateurs : %1', 'Bilgisayar zekâsı: %1', 'Inteligencia del ordenador: %1'],
+  fleetList: ['Liste der Flotten', 'Fleets', 'Liste des flottes', 'Filoların listesi', 'Lista de flotas'], starList: ['Liste der erforschten Planeten', 'Explored planets', 'Liste des planètes explorées', 'Keşfedilen gezegenlerin listesi', 'Lista de planetas explorados'], goTo: ['Gehe zu ...', 'Go to ...', 'Aller à ...', 'Git ...', 'Ir a ...'],
+  flAt: ['%1 stationiert auf %2.', '%1 at %2.', '%1 en orbite à %2.', '%1, %2 konumunda.', '%1 en órbita en %2.'], flFly: ['%1 fliegt von %2 nach %3. Ankunft: %4.', '%1 flying from %2 to %3. Arrival: %4.', '%1 quittant %2 pour %3. Prévision : %4.', '%1, %2’den %3’e uçuyor. Varış: %4.', '%1 vuela de %2 a %3. Llegada: %4.'],
+  flSoll: ['%1 soll %2 %3 erreichen.', '%1 to reach %2 in %3.', '%1 arrivant à %2 en %3.', '%1, %2’e %3 yılında varacak.', '%1 llegará a %2 en %3.'], flStuck: ['%1 hängt auf %2 fest.', '%1 is stuck at %2.', '%1 en panne sèche à %2.', '%1, %2’de mahsur kaldı.', '%1 está varada en %2.'],
+  flHyper: ['Diese Flotte ist zur Zeit im Hyperraum, Sie können sie derzeit nicht erreichen!', 'This fleet is in hyperspace: it cannot be reached now!', 'Cette flotte est dans l’hyperespace : impossible de la joindre pour l’instant !', 'Bu filo şu an hiperuzayda: ona şimdi ulaşılamaz!', '¡Esta flota está en el hiperespacio: ahora no se puede contactar con ella!'],
+  stMine: ['meiner', 'mine', 'à moi', 'benim', 'mía'], stNobody: ['erforscht', 'explored', 'explorée', 'keşfedildi', 'explorada'], stEnemy: ['feindlich', 'enemy', 'ennemie', 'düşman', 'enemiga'],
+  scrapAsk: ['%1 und alle %2 Schiffe dieses Typs verschrotten?', 'Scrap %1 and all %2 ships of that type?', 'Recycler %1 et les %2 vaisseaux de ce type ?', '%1 ve o tipteki %2 geminin hepsi hurdaya çıkarılsın mı?', '¿Desguazar %1 y las %2 naves de ese tipo?'],
+  aslOpen: ['Name der zu öffnenden Galaxis:', 'Name of the galaxy to open:', 'Fichier galactique à ouvrir :', 'Açılacak galaksinin adı:', 'Nombre de la galaxia que abrir:'], open2: ['Öffnen...', 'Open...', 'Ouvrir...', 'Aç...', 'Abrir...'],
+  aslMissing: ['Kann die Datei nicht lesen!', 'Can’t read the file!', 'Impossible de lire le fichier !', 'Dosya okunamıyor!', '¡No se puede leer el archivo!'], // (string 8)
+  compare: ['Spielervergleich von noch %1 Spielern im Jahre %2', 'Comparing the %1 players left in %2', 'Comparaison des %1 joueurs restants en %2', '%2 yılında kalan %1 oyuncunun karşılaştırması', 'Comparación de los %1 jugadores que quedan en %2'], first: ['erster', 'first', 'premier', 'birinci', 'primero'], middle: ['mittlerer', 'middle', 'moyen', 'orta', 'medio'], last: ['letzter', 'last', 'dernier', 'sonuncu', 'último'],
+  cProfit: ['Profit', 'Profit', 'Revenus', 'Kâr', 'Beneficio'], cMetal: ['Metall', 'Metal', 'Métal', 'Metâl', 'Metal'], cPlanets: ['Planeten', 'Planets', 'Planètes', 'Gezegenler', 'Planetas'], cShips: ['Schiffe', 'Ships', 'Flottes', 'Gemiler', 'Naves'], cShields: ['Schilde', 'Shields', 'Boucliers', 'Kalkanlar', 'Escudos'], info: ['Info', 'Info', 'Info', 'Bilgi', 'Info'],
+  split: ['Aufteilen der Schiffe', 'Organize ships', 'Répartir vaisseaux', 'Gemileri düzenle', 'Repartir las naves'], splitHelp1: ['- Stellen Sie die Schiffe beliebig zusammen.', '- Put the ships together as you like.', '- Groupez les vaisseaux comme vous voulez.', '- Gemileri istediğin gibi bir araya getir.', '- Junta las naves como quieras.'],
+  splitHelp2: ['- Klick mit UMSCHALTEN wählt eine ganze Flotte an.', '- A click with SHIFT picks a whole fleet.', '- Un clic avec MAJ choisit toute une flotte.', '- SHIFT ile tıklamak bütün bir filoyu seçer.', '- Un clic con MAYÚS elige una flota entera.'], group: ['Guppieren', 'Group', 'Grouper', 'Grupla', 'Agrupar'], single: ['Vereinzeln', 'Split up', 'Séparer', 'Ayır', 'Separar'],
+  about: ['Spaceward Ho!', 'Spaceward Ho!', 'Spaceward Ho!', 'Spaceward Ho!', 'Spaceward Ho!'],
+  ngTitle: ['Neue Galaxis erstellen', 'Create a new galaxy', 'Créer une nouvelle galaxie', 'Yeni bir galaksi yarat', 'Crear una galaxia nueva'], density: ['Sterndichte:', 'Star density:', 'Densité des étoiles :', 'Yıldız yoğunluğu:', 'Densidad de estrellas:'], shape: ['Art der Galaxis:', 'Kind of galaxy:', 'Type de galaxie :', 'Galaksi türü:', 'Tipo de galaxia:'], iq: ['Computerintelligenz:', 'Computer intelligence:', 'Intelligence des ordinateurs :', 'Bilgisayar zekâsı:', 'Inteligencia del ordenador:'],
+  size: ['Größe der Galaxis:', 'Size of the galaxy:', 'Taille de la galaxie :', 'Galaksinin büyüklüğü:', 'Tamaño de la galaxia:'], computers: ['Anzahl der Computerspieler:', 'Number of computer players:', 'Nombre de joueurs ordinateurs :', 'Bilgisayar oyuncusu sayısı:', 'Número de jugadores del ordenador:'], bang: ['Urknall', 'Big Bang', 'Big Bang', 'Büyük Patlama', 'Big Bang'], moreSettings: ['Mehr…', 'More…', 'Plus…', 'Daha…', 'Más…'],
+  reg: ['Spaceward Ho! Spieler Registration', 'Spaceward Ho! Player Registration', 'Spaceward Ho! Inscription du joueur', 'Spaceward Ho! Oyuncu Kaydı', 'Spaceward Ho! Registro del jugador'], skill: ['Spielstufe:', 'Skill:', 'Niveau :', 'Beceri:', 'Nivel:'], yourName: ['Ihr Name:', 'Your name:', 'Votre nom :', 'Adın:', 'Tu nombre:'], password: ['Paßwort:', 'Password:', 'Mot de passe :', 'Parola:', 'Contraseña:'],
+  sex: ['Geschlecht:', 'Sex:', 'Sexe :', 'Cinsiyet:', 'Sexo:'], man: ['Mann', 'Man', 'Homme', 'Erkek', 'Hombre'], woman: ['Frau', 'Woman', 'Femme', 'Kadın', 'Mujer'],
+  startup: ['Spaceward Ho! Startup', 'Spaceward Ho! Startup', 'Spaceward Ho! Démarrage', 'Spaceward Ho! Başlangıç', 'Spaceward Ho! Inicio'], open: ['Spiel öffnen', 'Open game', 'Ouvrir une partie', 'Oyun aç', 'Abrir partida'], newGame: ['Neues Spiel', 'New game', 'Nouvelle partie', 'Yeni oyun', 'Nueva partida'],
+  pixels: ['Pixel', 'Pixels', 'Pixels', 'Pikseller', 'Píxeles'], tall: ['Amiga-Monitor (hohe Pixel)', 'Amiga monitor (tall pixels)', 'Moniteur Amiga (pixels hauts)', 'Amiga monitörü (uzun pikseller)', 'Monitor Amiga (píxeles altos)'], square: ['Quadratische Pixel', 'Square pixels', 'Pixels carrés', 'Kare pikseller', 'Píxeles cuadrados'],
+  commands: ['Befehle', 'Orders', 'Ordres', 'Emirler', 'Órdenes'], noCommands: ['(keine)', '(none)', '(aucun)', '(yok)', '(ninguna)'],
+  credit1: ['Spaceward Ho! Amiga Version 2.0 von Stefan Bebbo Franke.', 'Spaceward Ho! Amiga Version 2.0 by Stefan Bebbo Franke.', 'Spaceward Ho! Amiga Version 2.0 par Stefan Bebbo Franke.', 'Spaceward Ho! Amiga Sürüm 2.0, Stefan Bebbo Franke.', 'Spaceward Ho! Amiga Versión 2.0 de Stefan Bebbo Franke.'],
+  credit2: ['Grafiken von Howard Vives.', 'Graphics by Howard Vives.', 'Graphismes de Howard Vives.', 'Grafikler: Howard Vives.', 'Gráficos de Howard Vives.'],
+  // the menus (the Amiga's Datei, Optionen, Schiffe, Galaxis, Fenster, Info) and their own items
+  mFile: ['Datei', 'File', 'Fichier', 'Dosya', 'Archivo'], mOptions: ['Optionen', 'Options', 'Options', 'Seçenekler', 'Opciones'], mShips: ['Schiffe', 'Ships', 'Vaisseaux', 'Gemiler', 'Naves'], mGalaxy: ['Galaxis', 'Galaxy', 'Galaxie', 'Galaksi', 'Galaxia'],
+  mWindows: ['Fenster', 'Windows', 'Fenêtres', 'Pencereler', 'Ventanas'], mInfo: ['Info', 'Info', 'Info', 'Bilgi', 'Info'],
+  startupWin: ['Startfenster…', 'Startup window…', 'Fenêtre de démarrage…', 'Başlangıç penceresi…', 'Ventana de inicio…'], techWin: ['Technikfenster', 'Technology window', 'Fenêtre Technologie', 'Teknoloji penceresi', 'Ventana de tecnología'],
+  newsWin: ['Nachrichtenfenster', 'Messages window', 'Fenêtre des messages', 'Mesaj penceresi', 'Ventana de mensajes'], aboutAm: ['Über Spaceward Ho!', 'About Spaceward Ho! Amiga', 'À propos de Spaceward Ho! Amiga', 'Spaceward Ho! Amiga hakkında', 'Acerca de Spaceward Ho! Amiga'],
+  pickFleet: ['Wählen Sie eine Flotte.', 'Select one of your fleets first.', 'Choisissez d’abord une de vos flottes.', 'Önce filolarından birini seç.', 'Elige primero una de tus flotas.'],
+  stance: ['Haltung: ', 'Battle stance: ', 'Attitude : ', 'Savaş tutumu: ', 'Actitud: '], one: ['Ein', 'One', 'Un', 'Bir', 'Una'], metalWord: ['Metall', 'metal', 'métal', 'metâl', 'de metal'],
+  licence: ['Lizenz:', 'Licence:', 'Licence :', 'Lisans:', 'Licencia:'], noPassword: ['Nicht benutzt: Dieses Remake speichert keine Passwörter.', 'Not used: this remake keeps no passwords.', 'Inutilisé : ce remake ne garde aucun mot de passe.', 'Kullanılmıyor: bu yeniden yapım parola saklamaz.', 'No se usa: este remake no guarda contraseñas.'],
 };
-// no game yet: the Amiga's German
-const de = () => { const G = game(); return G ? !!(G.opts && G.opts.lang === 'de') : true; };
-const w = (k, ...v) => { const e = WORDS[k]; let s = e ? e[de() ? 0 : 1] : k; v.forEach((x, i) => { s = s.split('%' + (i + 1)).join(x); }); return s; };
+// the Amiga's About window (its credits, German), in each language
+const ABOUT = [
+  ['Spaceward HO! © by NewWorld Computing in 1992-1994', 'Spaceward HO! © by NewWorld Computing in 1992-1994', 'Spaceward HO! © NewWorld Computing 1992-1994', 'Spaceward HO! © NewWorld Computing 1992-1994', 'Spaceward HO! © NewWorld Computing 1992-1994'],
+  ['lizensiert durch SOFTGOLD Computerspiele GmbH', 'licensed by SOFTGOLD Computerspiele GmbH', 'sous licence de SOFTGOLD Computerspiele GmbH', 'SOFTGOLD Computerspiele GmbH lisansıyla', 'con licencia de SOFTGOLD Computerspiele GmbH'],
+  ['', '', '', '', ''],
+  ['AMIGA-Umsetzung von Stefan Bebbo Franke, BebboSoft', 'AMIGA version by Stefan Bebbo Franke, BebboSoft', 'Version AMIGA de Stefan Bebbo Franke, BebboSoft', 'AMIGA sürümü: Stefan Bebbo Franke, BebboSoft', 'Versión para AMIGA de Stefan Bebbo Franke, BebboSoft'],
+  ['Vorlage von Joe Williams und Peter Commons', 'Original by Joe Williams and Peter Commons', 'Original de Joe Williams et Peter Commons', 'Özgün oyun: Joe Williams ve Peter Commons', 'Original de Joe Williams y Peter Commons'],
+  ['Grafik von Howard Vives', 'Graphics by Howard Vives', 'Graphismes de Howard Vives', 'Grafikler: Howard Vives', 'Gráficos de Howard Vives'],
+  ['', '', '', '', ''],
+  ['Dank an: Frank, Ilja, Michael, Micky, Olaf und Thomas', 'Thanks to: Frank, Ilja, Michael, Micky, Olaf and Thomas', 'Merci à : Frank, Ilja, Michael, Micky, Olaf et Thomas', 'Teşekkürler: Frank, Ilja, Michael, Micky, Olaf ve Thomas', 'Gracias a: Frank, Ilja, Michael, Micky, Olaf y Thomas'],
+];
+// the language showing (js/ui-lang.js: the game's, or New Game's, or the
+// last used; no game and none used: the Amiga's German, the skin's T.lang)
+const LIDX = { de: 0, en: 1, fr: 2, tr: 3, es: 4 };
+// (its words in each language are its own: the interface's table leaves them as they are)
+if (window.HOUI) for (const l in LIDX) if (l !== 'en') HOUI.own(l, [].concat(...Object.values(WORDS).map(e => [e[LIDX[l]]]), ...ABOUT.map(e => [e[LIDX[l]]])));
+const lang = () => (window.HOUI ? HOUI.lang : (game() ? (game().opts && game().opts.lang) || 'en' : 'de'));
+const de = () => lang() === 'de';
+const pick = (e) => (e ? (e[LIDX[lang()]] != null ? e[LIDX[lang()]] : e[1]) : '');
+const w = (k, ...v) => { const e = WORDS[k]; let s = e ? pick(e) : k; v.forEach((x, i) => { s = s.split('%' + (i + 1)).join(x); }); return s; };
+// a word of WORDS in a part of the page built once (the Startup window, the
+// title bar): kept in step with the language (relabel)
+const W = (k) => el('span', { 'data-amw': k }, w(k));
+const relabel = () => { for (const n of document.querySelectorAll('[data-amw]')) n.textContent = w(n.dataset.amw); };
 // the classic page's own buttons, in the Amiga's German where a game is German
+// (by their English, js/ui-lang.js HOUI.en; in other languages they are the
+// classic page's own, already in the language)
 const CMD_DE = {
   'Build ships…': 'Schiffsbau…', 'Queue ships…': 'Schiffsbau…', Evacuate: 'Evakuieren', 'Stay here': 'Hierbleiben', 'Split…': 'Aufteilen der Schiffe…',
   'Plan route…': 'Route planen…', Scrap: 'Verschrotten', 'Arrive late': 'Später ankommen', 'Merge fleets of the same type': 'Flotten gleichen Typs vereinen',
   'Merge all fleets here': 'Alle Flotten hier vereinen', 'Group fleets…': 'Flotten gruppieren…', 'Organize fleets…': 'Flotten ordnen…',
   'Dismantle in hyperspace': 'Im Hyperraum verschrotten', Normal: 'Normal', Offensive: 'Angriff', Defensive: 'Verteidigung',
 };
-const cmdWord = (t) => (de() && CMD_DE[t]) || (de() && /^Review (battle|duel)/.test(t) ? t.replace(/^Review battle/, 'Kampf ansehen').replace(/^Review duel/, 'Duell ansehen') : t);
+const enOf = (n) => (window.HOUI ? HOUI.en(n) : n.textContent).trim();
+const cmdWord = (t, shown) => (de() && CMD_DE[t]) || (de() && /^Review (battle|duel)/.test(t) ? t.replace(/^Review battle/, 'Kampf ansehen').replace(/^Review duel/, 'Duell ansehen') : shown != null ? shown : t);
 const CLASS_DE = { scout: 'Späher', fighter: 'Kampfschiff', colony: 'Kolonieschiff', satellite: 'Satellit', tanker: 'Tanker', dread: 'Schlachtschiff', bio: 'Biowaffe', decoy: 'Attrappe' };
-const className = (t) => (de() ? CLASS_DE[t] : null) || (HO.TYPES[t] ? HO.TYPES[t].name : t);
+const className = (t) => (de() ? CLASS_DE[t] : null) || (HO.TYPES[t] ? (window.HOUI ? HOUI.tr(HO.TYPES[t].name) : HO.TYPES[t].name) : t);
 // numbers the Amiga's way (ho!, FUN_0010eb24): 51.000, 1.234.567, and from
 // ten million on in thousands, 12.345K; the totals' changes in money
 // (FUN_0010ec04) in whole thousands or millions, 22K, 3M
 const num = (n) => {
-  const a = Math.abs(Math.trunc(n)), sg = n < 0 ? '-' : '', sep = de() ? '.' : ',';
+  const a = Math.abs(Math.trunc(n)), sg = n < 0 ? '-' : '', sep = lang() === 'en' ? ',' : lang() === 'fr' ? ' ' : '.';
   const m = Math.trunc(a / 1e6), k = Math.trunc((a % 1e6) / 1000), u = a % 1000, p3 = (v) => String(v).padStart(3, '0');
   if (m >= 10) return sg + m + sep + p3(k) + 'K';
   if (m) return sg + m + sep + p3(k) + sep + p3(u);
   if (k) return sg + k + sep + p3(u);
   return sg + u;
 };
-const cash = (n) => (de() ? '$ ' + num(n) : api().money(n));
+const cash = (n) => (lang() !== 'en' ? '$ ' + num(n) : api().money(n));
 // "(+ $ 22K)", "(- 889)": strings 90-93
 const signed = (n, money) => {
   const a = Math.abs(Math.trunc(n)), s = n < 0 ? '-' : '+';
@@ -143,7 +180,7 @@ const signed = (n, money) => {
 const BAR_PENS = ['#003399', '#3333ff', '#993399', '#cc33ff'];
 const barPen = (h) => BAR_PENS[Math.max(0, Math.min(3, Math.floor(Math.max(0, h) * 4 / 51)))];
 const celsius = (f) => ((f - 32) * 5 / 9).toFixed(1) + '°C';
-const temp = (f) => (de() ? celsius(f) : api().degF(f));
+const temp = (f) => (['de', 'fr', 'es'].includes(lang()) ? celsius(f) : api().degF(f)); // (°C where the officials and the glossary give it)
 
 // ---------- the screen's pixels ----------
 const PIXKEY = 'ho5.amiga.pixels';
@@ -286,13 +323,13 @@ function commands() {
   if (!planetBox) return out;
   for (const n of planetBox.querySelectorAll('button, select, input[type=checkbox]')) {
     if (n.closest('.frow') && !n.closest('.frow.sel')) continue; // only the selected fleet's
-    if (n.tagName === 'BUTTON') { if (!n.disabled) out.push({ label: cmdWord(n.textContent.trim()), fn: () => n.click() }); }
+    if (n.tagName === 'BUTTON') { if (!n.disabled) out.push({ label: cmdWord(enOf(n), n.textContent.trim()), fn: () => n.click() }); }
     else if (n.tagName === 'SELECT') {
-      const lab = n.getAttribute('aria-label') || '';
-      for (const o of n.options) out.push({ label: (de() && lab === 'Battle stance' ? 'Haltung: ' : lab ? lab + ': ' : '') + cmdWord(o.textContent), checked: n.value === o.value, fn: () => { n.value = o.value; n.dispatchEvent(new Event('change', { bubbles: true })); api().renderPanel(); } });
+      const lab = n.getAttribute('aria-label') || '', labEn = n.hoA && n.hoA['aria-label'] ? n.hoA['aria-label'][0] : lab;
+      for (const o of n.options) out.push({ label: (labEn === 'Battle stance' ? w('stance') : lab ? lab + ': ' : '') + cmdWord(enOf(o), o.textContent), checked: n.value === o.value, fn: () => { n.value = o.value; n.dispatchEvent(new Event('change', { bubbles: true })); api().renderPanel(); } });
     } else {
       const lab = n.closest('label'), t = lab ? lab.textContent.trim() : '';
-      out.push({ label: cmdWord(t), checked: n.checked, fn: () => { n.checked = !n.checked; n.dispatchEvent(new Event('change', { bubbles: true })); api().renderPanel(); } });
+      out.push({ label: cmdWord(lab ? enOf(lab) : '', t), checked: n.checked, fn: () => { n.checked = !n.checked; n.dispatchEvent(new Event('change', { bubbles: true })); api().renderPanel(); } });
     }
   }
   return out;
@@ -400,7 +437,7 @@ function ordersList(G, p, s) {
   const lines = q.map(it => { const d = HO.getDesign(G, p.id, it.did); return d ? `${countWord(it.n)} ${d.name}` : ''; }).filter(Boolean);
   return el('div', { class: 'am-orders' }, el('div', null, w('orders')), ...(lines.length ? lines : [w('none')]).map(t => el('div', { class: 'am-oline' }, t)));
 }
-const countWord = (n) => (n === 1 ? (de() ? 'Ein' : 'One') : String(n));
+const countWord = (n) => (n === 1 ? w('one') : String(n));
 
 // ---------- the fleet panel ----------
 function fleetLine(G, f) {
@@ -892,7 +929,7 @@ function openTypes() {
         if (marks) { HO.rules(G).flagScrapDesign(G, p, d, 'command'); a.save(); render(); a.renderPanel(); return; }
         e.target.checked = false;
         a.confirmBox(w('scrapAsk', d.name, n[d.id] || 0), () => {
-          const m = HO.scrapDesign(G, ME, d.id); a.Sound.play(7003); a.toast(`${d.name}: ${num(m)} ${de() ? 'Metall' : 'metal'}`);
+          const m = HO.scrapDesign(G, ME, d.id); a.Sound.play(7003); a.toast(`${d.name}: ${num(m)} ${w('metalWord')}`);
           if (a.UI.selFleet != null && !G.fleets.some(f => f.id === a.UI.selFleet)) a.UI.selFleet = null;
           a.renderPanel(); a.draw(); a.save(); openTypes();
         });
@@ -958,14 +995,14 @@ function openCompare() {
 function openPlayerList() {
   const a = api(), G = a.G;
   const SK = { novice: 0, beginner: 1, normal: 2, advanced: 3, expert: 4 };
-  const IQ = { dumb: ['Dumm', 'Dumb'], average: ['Normal', 'Normal'], smart: ['Klug', 'Smart'] };
+  const IQ = { dumb: ['Dumm', 'Dumb', 'Stupide', 'Aptal', 'Torpe'], average: ['Normal', 'Normal', 'Moyen', 'Ortalama', 'Normal'], smart: ['Klug', 'Smart', 'Brillant', 'Akıllı', 'Listo'] };
   const rows = el('div', { class: 'am-plrows' }, ...G.players.map(q => {
     const k = SKILLS[SK[q.skill] != null ? SK[q.skill] : 2];
-    return el('div', { class: 'am-plrow' }, el('span', null, q.name), el('span', null, de() ? k[1] : k[2]));
+    return el('div', { class: 'am-plrow' }, el('span', null, q.name), el('span', null, pick(k.slice(1))));
   }));
   const iq = IQ[G.opts.iq] || IQ.average;
   const body = el('div', { class: 'am-plist2' }, frame('am-plframe', rows, scroller(rows, true)),
-    el('p', { class: 'am-pliq' }, w('iqLine', de() ? iq[0] : iq[1])),
+    el('p', { class: 'am-pliq' }, w('iqLine', pick(iq))),
     el('div', { class: 'am-plbtns' }, btn(w('ok'), () => { a.closeModal(); openCompare(); }, 'am-default')));
   amWin(w('playerList'), body, 'am-wplist');
 }
@@ -1107,9 +1144,7 @@ function openStarListAm() {
 // the About window (20.png): the Amiga version's credits
 function openAmigaAbout() {
   const a = api();
-  const lines = ['Spaceward HO! © by NewWorld Computing in 1992-1994', 'lizensiert durch SOFTGOLD Computerspiele GmbH', '',
-    'AMIGA-Umsetzung von Stefan Bebbo Franke, BebboSoft', 'Vorlage von Joe Williams und Peter Commons', 'Grafik von Howard Vives', '',
-    'Dank an: Frank, Ilja, Michael, Micky, Olaf und Thomas'];
+  const lines = ABOUT.map(pick);
   const body = el('div', { class: 'am-about' }, el('div', { class: 'am-apic' }, img(P + 'd3520')),
     frame('am-atext', ...lines.map(t => el('p', null, t || ' '))), el('div', { class: 'am-abtns' }, btn(w('ok'), () => a.closeModal(), 'am-dotted')));
   const win = amWin(w('about'), body, 'am-wabout');
@@ -1134,12 +1169,13 @@ function skinWindow(name, ...args) {
 // and slider, and its player's the Registration window; anything else it
 // has is under "Mehr…". Another ruleset shows the whole form.
 const PICS = {
-  density: { sel: 'd_density', opts: [['dense', 3050, 'Dicht', 'Dense'], ['sparse', 3051, 'Licht', 'Sparse']] },
-  shape: { sel: 'd_shape', opts: [['circle', 3020, 'Kreis', 'Circle'], ['random', 3021, 'Zufall', 'Random'], ['ring', 3022, 'Ring', 'Ring'], ['spiral', 3023, 'Spiral', 'Spiral'], ['grid', 3024, 'Gitter', 'Grid']] },
-  iq: { sel: 'd_iq', opts: [['dumb', 3030, 'Dumm', 'Dumb'], ['average', 3031, 'Normal', 'Normal'], ['smart', 3032, 'Klug', 'Smart']] },
-  size: { sel: 'd_size', opts: [['small', 3040, 'Klein', 'Small'], ['medium', 3041, 'Mittel', 'Medium'], ['large', 3042, 'Groß', 'Large'], ['xl', 3043, 'Sehr Groß', 'Very large'], ['huge', 3044, 'Riesig', 'Huge']] },
+  density: { sel: 'd_density', opts: [['dense', 3050, 'Dicht', 'Dense', 'Dense', 'Yoğun', 'Densa'], ['sparse', 3051, 'Licht', 'Sparse', 'Clairsemée', 'Seyrek', 'Dispersa']] },
+  shape: { sel: 'd_shape', opts: [['circle', 3020, 'Kreis', 'Circle', 'Cercle', 'Daire', 'Círculo'], ['random', 3021, 'Zufall', 'Random', 'Aléatoire', 'Rastgele', 'Aleatoria'], ['ring', 3022, 'Ring', 'Ring', 'Anneau', 'Halka', 'Anillo'], ['spiral', 3023, 'Spiral', 'Spiral', 'Spirale', 'Sarmal', 'Espiral'], ['grid', 3024, 'Gitter', 'Grid', 'Grille', 'Izgara', 'Cuadrícula']] },
+  iq: { sel: 'd_iq', opts: [['dumb', 3030, 'Dumm', 'Dumb', 'Stupide', 'Aptal', 'Torpe'], ['average', 3031, 'Normal', 'Normal', 'Moyen', 'Ortalama', 'Normal'], ['smart', 3032, 'Klug', 'Smart', 'Brillant', 'Akıllı', 'Listo']] },
+  size: { sel: 'd_size', opts: [['small', 3040, 'Klein', 'Small', 'Petite', 'Küçük', 'Pequeña'], ['medium', 3041, 'Mittel', 'Medium', 'Moyenne', 'Orta', 'Mediana'], ['large', 3042, 'Groß', 'Large', 'Grande', 'Büyük', 'Grande'], ['xl', 3043, 'Sehr Groß', 'Very large', 'Très grande', 'Çok büyük', 'Muy grande'], ['huge', 3044, 'Riesig', 'Huge', 'Gigantesque', 'Devasa', 'Descomunal']] },
 };
-const SKILLS = [['novice', 'Neuling', 'Novice'], ['beginner', 'Anfänger', 'Beginner'], ['normal', 'Normal', 'Normal'], ['advanced', 'Profi', 'Advanced'], ['expert', 'Experte', 'Expert']];
+// [value, the Amiga's German, English, French, Turkish, Spanish]
+const SKILLS = [['novice', 'Neuling', 'Novice', 'Novice', 'Acemi', 'Novato'], ['beginner', 'Anfänger', 'Beginner', 'Débutant', 'Yeni başlayan', 'Principiante'], ['normal', 'Normal', 'Normal', 'Normal', 'Normal', 'Normal'], ['advanced', 'Profi', 'Advanced', 'Avancé', 'Gelişmiş', 'Avanzado'], ['expert', 'Experte', 'Expert', 'Expert', 'Uzman', 'Experto']];
 function newGame(f, ctx) {
   const a = api(), win = f.closest('.win');
   if (!win) return;
@@ -1154,9 +1190,9 @@ function newGame(f, ctx) {
   const group = (key, label) => {
     const P2 = PICS[key], sel = field(P2.sel);
     const row = el('div', { class: 'am-ngrow am-ng-' + key, role: 'radiogroup', 'aria-label': label });
-    for (const [v, n, deW, enW] of P2.opts) {
+    for (const [v, n, ...words5] of P2.opts) {
       row.append(el('button', { type: 'button', class: 'am-picbtn' + (sel && sel.value === v ? ' on' : ''), role: 'radio', 'aria-checked': sel && sel.value === v ? 'true' : 'false',
-        onclick: () => { if (!sel) return; sel.value = v; fire(sel); paint(); } }, img(P + 'i' + n), el('span', null, de() ? deW : enW)));
+        onclick: () => { if (!sel) return; sel.value = v; fire(sel); paint(); } }, img(P + 'i' + n), el('span', null, pick(words5))));
     }
     return el('div', { class: 'am-nggroup am-g-' + key }, el('div', { class: 'am-nglabel' }, label), row);
   };
@@ -1184,8 +1220,8 @@ function newGame(f, ctx) {
     const fem = femSel && femSel.value === '1';
     const nameBox = el('input', { class: 'am-field', value: nameIn ? nameIn.value : '', maxlength: 20, 'aria-label': w('yourName'), oninput: (e) => { if (nameIn) nameIn.value = e.target.value; } });
     reg.replaceChildren(
-      frame('am-rskill', el('div', null, w('skill')), ...SKILLS.map(([v, d1, e1]) => radio('skill', v, de() ? d1 : e1, skillSel && skillSel.value === v, (x) => { skillSel.value = x; fire(skillSel); }))),
-      frame('am-rname', el('div', null, w('yourName')), nameBox, el('div', null, w('password')), el('input', { class: 'am-field', type: 'password', disabled: 'disabled', 'aria-label': w('password'), title: 'Not used: this remake keeps no passwords.' })),
+      frame('am-rskill', el('div', null, w('skill')), ...SKILLS.map(([v, ...k5]) => radio('skill', v, pick(k5), skillSel && skillSel.value === v, (x) => { skillSel.value = x; fire(skillSel); }))),
+      frame('am-rname', el('div', null, w('yourName')), nameBox, el('div', null, w('password')), el('input', { class: 'am-field', type: 'password', disabled: 'disabled', 'aria-label': w('password'), title: w('noPassword') })),
       frame('am-rsex', el('div', null, w('sex')), el('div', { class: 'am-rsexrow' }, radio('sex', '0', w('man'), !fem, (x) => { if (femSel) { femSel.value = x; fire(femSel); } }), radio('sex', '1', w('woman'), fem, (x) => { if (femSel) { femSel.value = x; fire(femSel); } }))),
       el('div', { class: 'am-rpic' }, img(P + 'd3520')),
       el('div', { class: 'am-rbtns' }, btn(w('ok'), () => f.requestSubmit()), btn(w('cancel'), () => { reg.hidden = true; galaxy.hidden = false; win.classList.remove('am-regstep'); titleSpan.textContent = w('ngTitle'); })));
@@ -1233,19 +1269,19 @@ function page(doc) {
   const ts = doc.getElementById('titlescreen'), card = ts.querySelector('.tcard');
   const frameC = doc.getElementById('tframe');
   const info = frame('am-sinfo', el('p', { class: 'am-s1' }, 'Spaceward Ho! Amiga Version 2.0'), el('p', null, 'Copyright 1992-94 New World Computing Inc.'),
-    el('p', { class: 'am-slic' }, el('span', null, 'Lizenz:'), el('span', null, 'Marc & Christoph')), el('p', { class: 'am-slic2' }, 'Airospace'));
+    el('p', { class: 'am-slic' }, W('licence'), el('span', null, 'Marc & Christoph')), el('p', { class: 'am-slic2' }, 'Airospace'));
   const startup = el('div', { class: 'win am-win am-wstartup', role: 'dialog', 'aria-label': w('startup') },
-    el('div', { class: 'wtitle' }, el('span', null, w('startup'))),
+    el('div', { class: 'wtitle' }, W('startup')),
     el('div', { class: 'wbody' },
       el('div', { class: 'am-sleft' }, info,
         el('div', { class: 'am-sbtns' },
-          btn(w('open'), () => openAslLoad()),
-          btn(w('newGame'), () => doc.getElementById('tnew').click()),
-          btn(w('cancel'), () => { a.hideTitle(); setTitle(); a.draw(); }, 'am-default am-orange')),
+          btn(W('open'), () => openAslLoad()),
+          btn(W('newGame'), () => doc.getElementById('tnew').click()),
+          btn(W('cancel'), () => { a.hideTitle(); setTitle(); a.draw(); }, 'am-default am-orange')),
         el('div', { class: 'am-nwc' })),
       el('div', { class: 'am-spic' }, frameC)));
   const scr = el('div', { class: 'am-tscreen' },
-    el('div', { class: 'am-tbar' }, el('span', null, w('screen')), el('span', { class: 'am-sdepth', 'aria-hidden': 'true' })),
+    el('div', { class: 'am-tbar' }, W('screen'), el('span', { class: 'am-sdepth', 'aria-hidden': 'true' })),
     el('div', { class: 'am-tback', 'aria-hidden': 'true' }), startup);
   ts.prepend(scr);
   card.classList.add('am-tcard');
@@ -1253,6 +1289,8 @@ function page(doc) {
   if (credit) credit.textContent = 'With the art and sounds of Spaceward Ho! 2.0 for the Amiga (New World Computing / SOFTGOLD, 1994). Amiga version by Stefan "Bebbo" Franke; pictures by Howard Vives. Type: the Amiga game\'s own fonts.';
   const l = doc.querySelector('#menubar .logo'); if (l) l.textContent = 'Ho!';
   setTitle();
+  // a change of language (js/ui-lang.js): the parts built once follow it
+  if (window.HOUI) HOUI.onChange(() => { relabel(); setTitle(); for (const s of doc.querySelectorAll('select.am-pixsel')) s.replaceWith(lookOptions(s.name === 'pixels' ? 'title' : 'newgame').querySelector('select')); });
   // the panels measure their texts in the Amiga's fonts: again once they are loaded
   if (doc.fonts && doc.fonts.ready) doc.fonts.ready.then(() => { const A = api(); if (A && A.G) { A.renderPanel(); A.draw(); } });
   // the title screen's height changes with its credits: fit the screen again
@@ -1376,7 +1414,7 @@ const AKEYS = []; // { key, labels (German, English), fn, feat }: the items with
 function markKeys(root) {
   for (const b of root.querySelectorAll('.dropdown button[role=menuitem]')) {
     if (b.querySelector('.am-akey')) continue;
-    const t = b.textContent.trim(), k = AKEYS.find(x => x.labels.includes(t));
+    const t = b.textContent.trim(), te = enOf(b), k = AKEYS.find(x => x.labels.includes(t) || x.labels.includes(te));
     if (k) b.append(el('span', { class: 'am-akey', 'aria-hidden': 'true' }, k.key));
   }
 }
@@ -1391,18 +1429,17 @@ document.addEventListener('keydown', (e) => {
   e.preventDefault(); k.fn();
 });
 const menuWord = (label) => {
-  if (typeof label !== 'string' || !de()) return label;
+  if (typeof label !== 'string' || !de()) return label; // (in another language, the classic page's own words in it)
   const m = MENU_DE[label];
   return m ? m[0] : label.replace(/…/g, '...'); // (HoFont has no "…": the Amiga writes three dots) // (the Amiga-keys are the Amiga's; the remake's keys stay its own)
 };
 function menus(M, ho) {
-  const g = de();
   const a = () => api();
   const tr = (items) => items.map(it => (Array.isArray(it) && typeof it[0] === 'string' && it[0] !== '-' ? [() => menuWord(it[0]), ...it.slice(1)] : it));
   const take = (items, labels) => { const out = []; for (let i = items.length - 1; i >= 0; i--) if (labels.includes(items[i][0])) out.unshift(items.splice(i, 1)[0]); return out; };
   const zoom = take(M.View, ['Zoom in', 'Zoom out']);
   const fitG = take(M.View, ['Fit galaxy']);
-  const split = [w('split') + '…', () => { const A2 = a(), G = A2.G; if (!G) return; const f = A2.curFleet() || G.fleets.find(x => x.owner === A2.ME && x.star === A2.UI.sel && x.to == null && !x.sat); if (f) openSplitter(f); else A2.toast(de() ? 'Wählen Sie eine Flotte.' : 'Select one of your fleets first.'); }];
+  const split = [w('split') + '…', () => { const A2 = a(), G = A2.G; if (!G) return; const f = A2.curFleet() || G.fleets.find(x => x.owner === A2.ME && x.star === A2.UI.sel && x.to == null && !x.sat); if (f) openSplitter(f); else A2.toast(w('pickFleet')); }];
   // the Amiga-keys: Intuition draws them, the remake answers them (Alt or the Command key for the right Amiga key)
   AKEYS.length = 0;
   for (const it of [].concat(M.Game || [], M.Ships || [], M.Galaxy || [], M.View || [], zoom)) {
@@ -1414,17 +1451,18 @@ function menus(M, ho) {
   // ruleset's Scrap Current Fleet
   AKEYS.push({ key: 'V', labels: ['Verschrotten', 'Nicht verschrotten', 'Scrap Current Fleet', 'Don\'t Scrap Current Fleet', 'Don’t Scrap Current Fleet'],
     fn: () => { const A2 = a(), f = A2.G && A2.curFleet(); if (f && !A2.G.over) A2.toggleScrapFleet(f); }, feat: () => !!(a().G && a().marksScrap()) });
-  const Datei = tr(M.Game); Datei.splice(1, 0, [() => w('open2'), () => openAslLoad()], [g ? 'Startfenster…' : 'Startup window…', () => { const A2 = a(); if (A2.G) A2.save(); A2.titleScreen(); }]);
+  const Datei = tr(M.Game); Datei.splice(1, 0, [() => w('open2'), () => openAslLoad()], [() => w('startupWin'), () => { const A2 = a(); if (A2.G) A2.save(); A2.titleScreen(); }]);
   const Optionen = tr(M.View.filter(it => it[0] !== '-'));
   const Schiffe = tr(M.Ships).concat([['-'], split, [() => w('typeMgr').replace('Spaceward Ho! ', '') + '…', () => a().G && openTypes()]]);
   const Galaxis = tr(M.Galaxy).concat([['-'], ...tr(zoom)]);
-  const Fenster = [[() => (de() ? 'Technikfenster' : 'Technology window'), () => setTechFront(!techFront()), () => !!game(), () => techFront()],
-    [() => (de() ? 'Nachrichtenfenster' : 'Messages window'), toggleNews, () => !!game(), () => newsOpen()], ['-'], ...fitG,
-    [w('tall'), () => setPixels(pixMode() === 'tall' ? 'square' : 'tall'), null, () => pixMode() === 'tall']];
-  const Info = [[g ? 'Über Spaceward Ho!' : 'About Spaceward Ho! Amiga', openAmigaAbout], ['-'], ...M.Help];
+  const Fenster = [[() => w('techWin'), () => setTechFront(!techFront()), () => !!game(), () => techFront()],
+    [() => w('newsWin'), toggleNews, () => !!game(), () => newsOpen()], ['-'], ...fitG,
+    [() => w('tall'), () => setPixels(pixMode() === 'tall' ? 'square' : 'tall'), null, () => pixMode() === 'tall']];
+  const Info = [[() => w('aboutAm'), openAmigaAbout], ['-'], ...M.Help];
   for (const k of Object.keys(M)) delete M[k];
-  Object.assign(M, { [g ? 'Datei' : 'File']: Datei, [g ? 'Optionen' : 'Options']: Optionen, [g ? 'Schiffe' : 'Ships']: Schiffe, [g ? 'Galaxis' : 'Galaxy']: Galaxis,
-    [g ? 'Fenster' : 'Windows']: Fenster, [g ? 'Info' : 'Info']: Info, [w('commands')]: CMDS });
+  // (the menus' names: the classic page builds the bar once, so each is a
+  // word kept in step with the language: menuBar below)
+  Object.assign(M, { mFile: Datei, mOptions: Optionen, mShips: Schiffe, mGalaxy: Galaxis, mWindows: Fenster, mInfo: Info, commands: CMDS });
   void ho;
 }
 // the pixels, with the Skin and OS look pickers
@@ -1452,6 +1490,7 @@ window.HOTHEME_OVER = {
   drawStar, markerAt, ownRings: true, zoomTo, beforeTurn, afterDraw: syncMapBars, fitView,
   techBars: 'vertical', barGrid: false,
   panel, afterMsg, window: skinWindow, newGame, menus, lookOptions, page, title,
+  menuName: (k) => (WORDS[k] ? W(k) : k), // the menus' names (menus above), in the language
 };
 if (!window.HOSKINS_INLINE) document.write('<script src="js/skins/dos/ui.js"><\/script>');
 })();

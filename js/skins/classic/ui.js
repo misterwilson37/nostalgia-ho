@@ -1758,7 +1758,7 @@ function openGameCenter() {
   const body = el('div', { class: 'rank gamecenter' },
     A.jpg[cur] ? el('img', { src: A.jpg[cur], alt: '' }) : null, R[cur] ? el('h3', null, R[cur][0]) : null,
     GC.leaderboards.length ? el('h4', null, 'Leaderboards') : null, GC.leaderboards.length ? el('table', { class: 'ptable' }, ...GC.leaderboards.map(b => el('tr', null, el('td', null, b.title), el('td', null, fmt(rec[b.id] || 0))))) : null,
-    GC.achievements.length ? el('h4', null, 'Achievements') : null, GC.achievements.length ? el('table', { class: 'ptable' }, ...GC.achievements.map(a => { const n = (rec.achievements || {})[a.id] || 0; return el('tr', { class: n >= a.goal ? 'me' : '' }, el('td', null, (n >= a.goal ? '★ ' : '') + a.title), el('td', null, a.goal > 1 ? `${fmt(n)} of ${fmt(a.goal)}` : n ? 'Done' : '')); })) : null,
+    GC.achievements.length ? el('h4', null, 'Achievements') : null, GC.achievements.length ? el('table', { class: 'ptable' }, ...GC.achievements.map(a => { const n = (rec.achievements || {})[a.id] || 0; return el('tr', { class: n >= a.goal ? 'me' : '' }, el('td', null, n >= a.goal ? '★ ' : null, a.title), el('td', null, a.goal > 1 ? `${fmt(n)} of ${fmt(a.goal)}` : n ? 'Done' : '')); })) : null,
     // no leaderboards (Android): just the points the app kept in its preferences file
     GC.leaderboards.length ? null : el('p', null, `Master points: ${fmt(rec.master_points)}`),
     el('p', { class: 'sub' }, GC.note || 'The app kept these on Game Center; here they stay in this browser.'));
@@ -1795,7 +1795,7 @@ function openRanks() {
     el('h3', null, R[cur][0]), el('p', null, `Total master points: ${fmt(pr.points)}`),
     el('p', { class: 'sub' }, 'You earn master points by winning games with the 5.0.5 or Palm OS 5 rules. The harder the game, the more points.'),
     el('table', { class: 'ptable' }, el('tr', null, el('th', null, 'Rank'), el('th', null, 'Points'), el('th', null, 'Unlocks')),
-      ...R.map((r, i) => el('tr', { class: i === cur ? 'me' : '' }, el('td', null, (i <= cur ? '★ ' : '') + r[0]), el('td', null, fmt(r[1])), el('td', null, r[2] || '')))));
+      ...R.map((r, i) => el('tr', { class: i === cur ? 'me' : '' }, el('td', null, i <= cur ? '★ ' : null, r[0]), el('td', null, fmt(r[1])), el('td', null, r[2] || '')))));
   if (pr.games.length) body.append(el('h4', null, 'Wins'), el('table', { class: 'ptable' }, el('tr', null, el('th', null, 'Date'), el('th', null, 'Year'), el('th', null, 'Difficulty'), el('th', null, 'Points')),
     ...pr.games.slice(-30).reverse().map(g => el('tr', null, el('td', null, g.date), el('td', null, String(g.year)), el('td', null, String(g.difficulty)), el('td', null, fmt(g.points))))));
   modal('Rank history', body, { cls: 'mid' });
@@ -3690,7 +3690,11 @@ const HOEDOWN_TEXT = 'Full Hoedown: Delta Tao’s own jokes at their most, every
 const hoedownOn = () => !!(G && HO.hoedown(G));
 function setHoedown(on) { if (!G) return; HO.setHoedown(G, !!on); save(); renderPanel(); draw(); toast(on ? 'Full Hoedown is on.' : 'Full Hoedown is off.'); }
 // the Hoedown items of a ruleset, as a list
-const hoedownList = (rs) => el('ul', null, ...((rs.hoedown || {}).items || []).map(t => el('li', null, t)));
+const hoedownList = (rs) => el('ul', { translate: 'no', lang: 'en' }, ...((rs.hoedown || {}).items || []).map(t => el('li', null, t)));
+// The long documents (the version notes, the patch's fixes, the Hoedown
+// items and the manuals) are in English: kept out of the
+// translation (translate="no") with a line in the language that says so
+const inEnglish = (text) => UIL.lang === 'en' ? null : el('p', { class: 'note' }, text || 'These notes are in English.');
 // The unofficial patch: fixes for a version's obvious bugs (rs.fixes,
 // docs/fixes.md), chosen at New Game only (G.opts.patch, a rule: it can't be
 // changed mid-game) and remembered for the next New Game ("ho5.patch"). Its
@@ -3701,7 +3705,7 @@ const patchName = (rs) => `${HO.patchVersion(rs)} (unofficial patch)`;
 const patchOn = () => !!(G && G.opts && G.opts.patch) && HO.fixes(HO.rules(G)).length > 0;
 const titleTag = () => patchOn() ? ` · ${patchName(HO.rules(G))}` : '';
 // the fixes as a list: each one's title and what it does
-const fixList = (rs) => el('ul', null, ...HO.fixes(rs).map(f => el('li', null, el('b', null, f.title), el('br'), f.text)));
+const fixList = (rs) => el('ul', { translate: 'no', lang: 'en' }, ...HO.fixes(rs).map(f => el('li', null, el('b', null, f.title), el('br'), f.text)));
 // Ho menu, "Patch notes…" (only while the game has the patch on)
 // the language last chosen for a ruleset (a skin with a language of its
 // own, T.lang, keeps its own choice)
@@ -3746,7 +3750,7 @@ function openPatchNotes() {
     el('h3', null, rs.label || rs.id),
     el('p', { class: 'sub' }, `Version ${patchName(rs)} · ${rs.platform} · ${rs.year}`),
     el('p', null, `This game plays ${rs.version} with the fixes below for its obvious bugs; everything else is as ${rs.version} was released. The patch is the remake’s own, not a release of the original game, and was chosen at New Game: it stays on for the whole game.`),
-    el('section', { class: 'vnotes' }, el('h4', null, 'Fixed'), fixList(rs)),
+    el('section', { class: 'vnotes' }, el('h4', null, 'Fixed'), inEnglish(), fixList(rs)),
     el('div', { class: 'btns right' }, el('button', { onclick: closeModal }, 'OK')));
   modal(`${pv} patch notes (unofficial)`, body, { cls: 'mid' });
 }
@@ -3769,14 +3773,15 @@ function openAbout() {
     if (!L.length && !chk[key] && !none) return null;
     return el('section', { class: 'vnotes' }, el('h4', null, title),
       chk[key] ? el('p', { class: 'note' }, 'Still being checked: this version’s notes aren’t finished yet.') : null,
-      L.length ? el('ul', null, ...L.map(t => el('li', null, t))) : none ? el('p', { class: 'sub' }, none) : null);
+      L.length ? el('ul', { translate: 'no', lang: 'en' }, ...L.map(t => el('li', null, t))) : none ? el('p', { class: 'sub' }, none) : null);
   };
   const body = el('div', { class: 'about' },
     el('h3', null, rs.label || id),
     rs.version ? el('p', { class: 'sub' }, `Version ${patched ? patchName(rs) : rs.version} · ${rs.platform} · ${rs.year}`) : null,
     G ? null : el('p', { class: 'sub' }, 'The rules chosen for the next game.'),
     patched ? el('p', { class: 'note' }, `This game has the ${pv} patch on: the remake’s own fixes for ${rs.version}’s obvious bugs, not an official release. The Ho menu’s Patch notes say what each one fixes.`) : null,
-    N.intro ? el('p', null, N.intro) : null,
+    inEnglish(),
+    N.intro ? el('p', { translate: 'no', lang: 'en' }, N.intro) : null,
     rs.hoedown ? el('section', { class: 'vnotes' }, el('h4', null, 'Full Hoedown'),
       el('p', { class: 'sub' }, `${G && HO.hoedown(G) ? 'On in this game' : 'Off in this game'} (New Game and the Ho menu turn it on and off): ${rs.version || rs.id}’s own jokes at their most, and only Delta Tao’s. The game plays the same.`),
       hoedownList(rs)) : null,
@@ -3786,8 +3791,8 @@ function openAbout() {
     N.previous !== undefined ? part(N.previous ? `What changed from ${N.previous}` : 'What changed', N.changes, 'changes', N.previous ? null : 'The earliest version in this remake: there is nothing earlier to compare it with.') : null,
     // Delta Tao's own words on what changed, quoted from the 5.0 manual
     N.deltaTao ? el('section', { class: 'vnotes' }, el('h4', null, `What Delta Tao said (${N.deltaTao.from})`),
-      ...N.deltaTao.text.map(t => el('p', null, t)),
-      el('p', { class: 'sub' }, N.deltaTao.source, ' ', el('a', { href: N.deltaTao.url, target: '_blank', rel: 'noopener' }, N.deltaTao.url))) : null,
+      ...N.deltaTao.text.map(t => el('p', { translate: 'no', lang: 'en' }, t)),
+      el('p', { class: 'sub', translate: 'no', lang: 'en' }, N.deltaTao.source, ' ', el('a', { href: N.deltaTao.url, target: '_blank', rel: 'noopener' }, N.deltaTao.url))) : null,
     el('div', { class: 'btns right' }, el('button', { onclick: closeModal }, 'OK')));
   modal('About this version', body, { cls: 'mid' });
 }
@@ -3857,7 +3862,7 @@ function editionLabel(id) {
   const rs = HO.RULESETS[id] || {}, e = rs.edition || {};
   const ver = e.version || rs.version, year = e.year || rs.year;
   if (famKey(familyOf(id)) === 'remake') return editionName(id);
-  return ver ? `${editionName(id)} (${ver}, ${year})` : editionName(id);
+  return ver ? tl('%s (%s, %s)', tl(editionName(id)), ver, year) : editionName(id);
 }
 // an edition's own skins, the first to offer first (only the ones this copy has)
 function editionSkins(id) {
@@ -4009,10 +4014,14 @@ function openSounds() {
 function manualFor() {
   const M = window.HOMANUALS || {}, r = rulesId();
   // a version's help in the game's language (HOMANUALS[id][lang])
-  const own = M[r] && !Array.isArray(M[r]) ? M[r] : null, lang = (G && G.rules === r && G.opts && G.opts.lang) || 'en';
+  const own = M[r] && !Array.isArray(M[r]) ? M[r] : null, lang = UIL.lang || 'en';
   if (own) return own[lang] || own.en;
   return M[r] || M.original || ['assets/manuals/5.0.5/index.html', 'Spaceward Ho! 5 manual'];
 }
+// the manual (or help page) is English while the interface isn't
+const manualEnglish = () => { const M = window.HOMANUALS || {}, own = M[rulesId()] && !Array.isArray(M[rulesId()]) ? M[rulesId()] : null; return UIL.lang !== 'en' && !(own && own[UIL.lang]); };
+// a 5.0.5 hint in the interface's language (5.0.5's say has its hints)
+const tipSay = (t) => { if (UIL.lang === 'en') return t.trim(); const g = { rules: 'original', opts: { lang: UIL.lang } }, a = HO.say(g, t); return a !== t ? a : HO.say(g, t.trim()); };
 function openHelp() {
   if ((screensOf(rulesId()) || {}).help) return openHelpScreen();
   const tips = HO.DATA.tips || [];
@@ -4021,7 +4030,7 @@ function openHelp() {
     el('h4', null, 'Planets'), el('p', null, 'Good planets are near 1.00G and 72°. Terraforming moves temperature toward 72°; gravity never changes. Anything above 2.5G or below 0.4G will never turn a profit, but you can still strip-mine it and then evacuate. Every colony costs $7,500 a turn to support until its population grows.'),
     el('h4', null, 'Ships'), el('p', null, 'Range is total fuel; ships refuel at your own colonies. A path drawn with two arrowheads means the fleet can get there and back. Speed sets how far a fleet goes each turn and who shoots first. Weapons against Shields decides damage. Mini makes ships cost more money but less metal.'),
     el('h4', null, 'Money and metal'), el('p', null, 'Savings earn a little interest. You can borrow up to five times your income, at 15% a turn. Metal only comes from mining, and it runs out.'),
-    el('h4', null, 'Tip'), el('p', { class: 'tip' }, tips.length ? tips[Math.floor(Math.random() * tips.length)] : ''),
+    el('h4', null, 'Tip'), el('p', { class: 'tip' }, tips.length ? tipSay(tips[Math.floor(Math.random() * tips.length)]) : ''),
     el('p', { class: 'sub' }, 'This remake uses the original art, sounds, and text. Its rules are reconstructed from the manual (the “Claude” ruleset); numbers are not the original formulas.'));
   modal('How to play', body, { cls: 'mid' });
 }
@@ -4083,7 +4092,7 @@ function openSavedGames(id) {
 }
 function openHelpScreen() {
   const [url, name] = manualFor();
-  screen((screensOf(rulesId()) || {}).help || 'Help', el('iframe', { class: 'shelp', src: url, title: name }), { cls: 'helpscreen', back: 'Done' });
+  screen((screensOf(rulesId()) || {}).help || 'Help', el('div', { class: 'shelpbox' }, manualEnglish() ? inEnglish('This help is in English.') : null, el('iframe', { class: 'shelp', src: url, title: name })), { cls: 'helpscreen', back: 'Done' });
 }
 // Game Center's own windows (iOS: GKLeaderboardViewController,
 // GKAchievementViewController), from the record the remake keeps
@@ -5108,7 +5117,7 @@ function newGameDialog() {
       patchBox.dataset.rules = d.rules;
       patchText.textContent = PATCH_TEXT(prs);
       patchSum.textContent = `What the ${HO.patchVersion(prs)} patch fixes (${nfx})`;
-      patchFixes.replaceChildren(fixList(prs));
+      patchFixes.replaceChildren(...[inEnglish(), fixList(prs)].filter(Boolean));
     }
   };
   f.addEventListener('input', refresh); f.addEventListener('change', refresh);
@@ -5243,7 +5252,7 @@ function setupMenus() {
       ['Radical research…', () => openRadicalHand(), () => !!(G && (HO.rules(G).radicalHand || {}).menu)],
       ['Force end turn…', () => forceEndTurn(), () => !!(G && HO.rules(G).forceEndTurn && hotSeat())]],
     View: [['Zoom in', () => zoomAt(mapW / 2, mapH / 2, 1.3)], ['Zoom out', () => zoomAt(mapW / 2, mapH / 2, 1 / 1.3)], ['Fit galaxy', () => { UI.fitted = false; fit(); draw(); }], ['-'], [() => (Sound.on ? 'Turn sound off' : 'Turn sound on'), () => { Sound.on = !Sound.on; savePrefs(); }], [() => (Sound.music ? 'Turn theme music off' : 'Turn theme music on'), () => { Sound.music = !Sound.music; savePrefs(); if (Sound.music && !$('#titlescreen').hidden) Sound.startTheme(); else Sound.stopTheme(); }]],
-    Help: [['How to play', openHelp], [() => 'Manual: ' + manualFor()[1], () => window.open(manualFor()[0], '_blank', 'noopener')]],
+    Help: [['How to play', openHelp], [() => (manualEnglish() ? 'Manual (in English): ' : 'Manual: ') + manualFor()[1], () => window.open(manualFor()[0], '_blank', 'noopener')]],
   };
   // The Ho menu, under the skin's "Ho!" at the top left: this version, and
   // the modern conveniences a player may choose (all of them can change in
@@ -5286,7 +5295,8 @@ function setupMenus() {
   // T.menus(menus, ho): a skin adds its own items (its windows); it never drops one
   if (T.menus) T.menus(menus, ho);
   const laid = T.menuLayout ? layoutMenus(menus, T.menuLayout) : menus;
-  for (const name in laid) bar.append(menu(el('button', { class: 'mbtn' }, name), laid[name]));
+  // (T.menuName(name): a skin's own name for a menu, as text or a node: the Amiga's, in the language)
+  for (const name in laid) bar.append(menu(el('button', { class: 'mbtn' }, T.menuName ? T.menuName(name) : name), laid[name]));
   document.addEventListener('click', () => document.querySelectorAll('.dropdown.open').forEach(d => { d.classList.remove('open'); d.previousElementSibling.setAttribute('aria-expanded', 'false'); }));
 }
 // A skin may lay these same items out as its original's menus did
@@ -5352,7 +5362,7 @@ function tipShow(target) {
   if (!h || !Prefs.tips) return;
   if (!Tip.el) { Tip.el = el('div', { class: 'tip', role: 'tooltip', id: 'hotip' }); document.body.append(Tip.el); }
   Tip.el.innerHTML = '';
-  Tip.el.append(el('p', null, h[0]), el('small', null, `Adapted from the ${R[k] ? manualFor()[1] : 'Spaceward Ho! 5 manual'}: ${h[1]}`));
+  Tip.el.append(el('p', null, h[0]), el('small', null, `Adapted from the ${R[k] ? manualFor()[1] : 'Spaceward Ho! 5 manual'}: ${h[1]}`), UIL && UIL.lang !== 'en' && UIL.tr(h[0]) === h[0] ? inEnglish('This help is in English.') : null);
   if (target.dataset.key) Tip.el.append(el('p', { class: 'key' }, target.dataset.key));
   Tip.el.hidden = false; Tip.at = target;
   target.setAttribute('aria-describedby', 'hotip');
@@ -5399,8 +5409,12 @@ window.addEventListener('DOMContentLoaded', () => {
     openBuild, openSplit, openOrganize, organizeStyle, openPlayers, openScrapTypes, openBattle, lastBattles, battleName, openReports, openAbout, openHelp,
     newGameDialog, titleScreen, hideTitle, continueChecked, importGame, doEndTurn, flipBarScale, marksScrap, scrapWords, toggleScrapFleet,
     verOpts, modern, hotSeat,
+    // (and the windows tools/ui-lang-audit.js opens in every skin and language)
+    openPrefs, openAccount, openHall, hasHall, openMasterList, openRanks, openGameCenter, openFleetList, openStarList, openGive, openChat,
+    openSkin, openSounds, openLanguage, openAutoPlay, openDip, openSurrender, openSavedGames, closeScreen, openPatchNotes,
     classic(name, fn, ...a) { skipSkinWin = name; try { return fn(...a); } finally { skipSkinWin = null; } },
   };
+  window.HOAPI = T.api; // (the test tools: tools/ui-lang-audit.js)
   if (T.page) T.page(document);
   Object.assign(HO.DATA, window.HODATA);
   setupMenus();
