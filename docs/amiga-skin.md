@@ -353,6 +353,14 @@ Rules stay with the ruleset; these are what the Amiga's code does differently fr
   (design, count) slots as DOS does, but the Schiffsbau window only edits as many as its table
   has (`FUN_00120e12`: 1 under 256 lines, 2 to 399, 3 from 400), so on the standard PAL screen
   a third order can't be given. The skin's window has the Amiga's two.
+- **A fleet scrapped in hyperspace: whose metal report 1016 shows.** As in DOS 2.0 the report
+  names "star −1", read from the galaxy header before the stars (`FUN_0011aa10` @11ab40-11ab82,
+  the report's case 0x10 in `FUN_0010dc66`: `star × 0x22 + galaxy + 0x52`, a C string), and
+  the name is empty there too (the high byte of slot 17's home star, +0x30). But the Amiga
+  reads the header big-endian, so the owner it tests (+0x1c) is slot 7's home star itself:
+  the metal is shown when that number is the scrapping player's (a Random galaxy: player 7),
+  where DOS shows it only for player 0 when slot 8's home is star 0. The ruleset keeps
+  DOS's (`js/rules-dos.js` `limbo20`).
 
 **Settled: "Typ verschrotten".** It marks the type for the end of the turn and can be taken
 back before then (`FUN_00122412`: the toggle gadget's state into design +0x26), and the
@@ -370,7 +378,20 @@ the mark. The build window (`FUN_00121612`) queues a marked type, as DOS does
 the panel then says "Flotte zum Verschrotten." (string 544), as DOS 2.0 does (`FUN_10f0_0000`,
 the German DOSHO.EXE's "Flotte zum Verschrotten."); the turn scraps it (`FUN_0011aa10`). The
 ruleset now marks fleets too (`rs.flagScrap`), so the skin's item is the mark and Amiga+V
-answers it.
+answers it. Read again in the program: the item (`FUN_00117cac`) sets the selected fleet's +8 to 1
+minus itself and redraws the fleet panel (`FUN_00106294`) and the menus (`FUN_00118746`),
+with no sound. Nothing that gives orders reads +8: the only readers are the panel's line
+(`FUN_00105e9a`, string 544 in place of where the fleet is going) and the turn's scrapping
+(`FUN_0011aa10`; the computers' own plans set it, and new fleets clear it in
+`FUN_001170e4`), so a marked fleet can still be sent anywhere, as in DOS 2.0 (whose only
+readers are the menu `FUN_1090_0388`, the panel `FUN_1088_26be` and `FUN_1040_0fca`), Mac
+2.0.1 and 1.2 (`DrawSelectedFleetInfo`, `ScrapFleetsAndTypes`). The mark is carried out in
+the next End Turn's pass for the player (`FUN_00119f18`): after the "updated to the year"
+report and the computer's plan (`FUN_0011302c`), before the losing colonies, mining,
+shipbuilding and moves (`FUN_0011a62e` ...), as DOS's `FUN_1040_0038` orders them; each
+marked fleet gets report 1016 (string 585, "Ihre Flotte von %s auf %s wurde für %s Metall
+verschrottet."), its metal shown only when the fleet was at your own star (`seq` of the
+star's owner @11ab5a-11ab6e, as DOS @1040:117b-119b). The same rules as the ruleset's.
 
 Nothing else read here (the bars, scrap value, queue clicks, organizing ships, the comparison's
 figures) differs from DOS 2.0; the turn's own rules were not compared routine by routine.
