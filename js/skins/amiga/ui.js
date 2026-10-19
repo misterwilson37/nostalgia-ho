@@ -446,18 +446,25 @@ const capFont = (t, width) => (fits(t, 'HoFont11', width) ? 'f11' : fits(t, 'HoF
 function visibleAt(G, ME, sid) { return G.stars[sid].owner === ME || G.fleets.some(f => f.owner === ME && f.star === sid && f.to == null); }
 
 // ---------- the totals ----------
-// "(+ $ 22K)": the change since the turn before, kept for each game and
-// player in localStorage (the game keeps no such record)
+// "(+ $ 22K)": what the last turn's processing changed (ho!, the end of turn,
+// FUN_00119f18 and its caller: before a player's turn is worked out the
+// metal, money and profit are kept, and afterwards the difference is the
+// change shown all through the next turn). The skin keeps those figures in
+// localStorage for each game and player as the turn is played (T.beforeTurn).
 function totalsNow(G, p) { return { m: p.metal, s: p.savings, p: HO.projected(G, p).income }; }
+const totalsKey = (G, p) => 'ho5.amiga.totals.' + (G.opts.seed || 0) + '.' + p.id;
+function beforeTurn(G) {
+  for (const p of G.players) if (p.human) LS.set(totalsKey(G, p), JSON.stringify({ snapAt: G.turn, snap: totalsNow(G, p) }));
+}
 function totalsDelta(G, p) {
-  const key = 'ho5.amiga.totals.' + (G.opts.seed || 0) + '.' + p.id;
-  let rec = null; try { rec = JSON.parse(LS.get(key) || 'null'); } catch (e) { rec = null; }
-  const now = totalsNow(G, p);
-  if (!rec || rec.turn > G.turn) rec = { turn: G.turn, start: now, prev: null };
-  if (rec.turn !== G.turn) { rec.prev = rec.start; rec.start = now; rec.turn = G.turn; }
-  LS.set(key, JSON.stringify(rec));
-  const b = rec.prev || rec.start;
-  return { m: rec.start.m - b.m, s: rec.start.s - b.s, p: rec.start.p - b.p };
+  let rec = null; try { rec = JSON.parse(LS.get(totalsKey(G, p)) || 'null'); } catch (e) { rec = null; }
+  if (!rec) return { m: 0, s: 0, p: 0 };
+  if (rec.turn !== G.turn) {
+    const now = totalsNow(G, p);
+    rec = { turn: G.turn, d: rec.snap && rec.snapAt === G.turn - 1 ? { m: now.m - rec.snap.m, s: now.s - rec.snap.s, p: now.p - rec.snap.p } : { m: 0, s: 0, p: 0 } };
+    LS.set(totalsKey(G, p), JSON.stringify(rec));
+  }
+  return rec.d || { m: 0, s: 0, p: 0 };
 }
 function totals() {
   const a = api(), G = a.G, p = a.me(), now = totalsNow(G, p), d = totalsDelta(G, p);
@@ -1294,7 +1301,7 @@ window.HOTHEME_OVER = {
   mapPixel: () => [PX.x, PX.y],
   mapFont: () => '16px HoFont11, sans-serif',
   planetPx: (s) => [9, 16, 16, 32][zoomIdx(s)],
-  drawStar, markerAt, ownRings: true, zoomTo, afterDraw: syncMapBars, fitView,
+  drawStar, markerAt, ownRings: true, zoomTo, beforeTurn, afterDraw: syncMapBars, fitView,
   techBars: 'vertical', barGrid: false,
   panel, afterMsg, window: skinWindow, newGame, menus, lookOptions, page, title,
 };

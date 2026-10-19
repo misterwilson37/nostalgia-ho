@@ -2214,7 +2214,9 @@ window.addEventListener('error', (ev) => {
 window.addEventListener('unhandledrejection', (ev) => showBug(ev.reason, ''));
 // End Turn (and auto play): the game saved just before is put back when the
 // turn throws, so a turn is never half played
+// (T.beforeTurn(G): a skin notes what it needs as the turn is played)
 function playTurn(where, before) {
+  try { if (T.beforeTurn) T.beforeTurn(G); } catch (e) { /* a skin's note never stops a turn */ }
   try { HO.endTurn(G); return true; } catch (e) {
     G = HO.load(before); save();
     if (UI.selFleet != null && !G.fleets.some(f => f.id === UI.selFleet)) UI.selFleet = null;
