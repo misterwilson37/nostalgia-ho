@@ -3147,6 +3147,7 @@ function table(head, rows) {
   return el('table', { class: 'ptable list' }, el('thead', null, el('tr', null, ...head.map(h => el('th', null, h)))), el('tbody', null, ...rows));
 }
 function openFleetList() {
+  if (skinWindow('fleets')) return;
   const mine = fleetOrder(G.fleets.filter(f => f.owner === ME));
   const rows = mine.map(f => {
     const where = f.star != null ? G.stars[f.star].name : `${G.stars[f.from].name} → ${G.stars[f.to].name}`;
@@ -3200,6 +3201,7 @@ function openBattleList() {
   modal('Review battle', table(['Star', 'Year', 'Against', 'Lost (you / them)'], rows), { cls: 'mid' });
 }
 function openStarList() {
+  if (skinWindow('stars')) return;
   if (HO.rules(G).exploredList) return openExploredList();
   const p = me();
   const ks = G.stars.map(s => ({ s, k: HO.know(G, p, s.id) })).filter(o => o.k.explored);

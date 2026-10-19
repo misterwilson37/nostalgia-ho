@@ -83,6 +83,11 @@ const WORDS = {
   noCompare: ['Es gibt keinen Vergleich vor dem Jahre 2010!', 'There is no comparison before 2010!'],
   cWon: ['Sie haben das Spiel im Jahre %1 gewonnen!', 'You won the game in %1!'], cLost: ['Sie haben das Spiel im Jahre %1 verloren!', 'You lost the game in %1!'],
   playerList: ['Liste aller Spieler und ihrer Eigenschaften', 'All the players and their settings'], iqLine: ['Computerintelligenz: %1', 'Computer intelligence: %1'],
+  fleetList: ['Liste der Flotten', 'Fleets'], starList: ['Liste der erforschten Planeten', 'Explored planets'], goTo: ['Gehe zu ...', 'Go to ...'],
+  flAt: ['%1 stationiert auf %2.', '%1 at %2.'], flFly: ['%1 fliegt von %2 nach %3. Ankunft: %4.', '%1 flying from %2 to %3. Arrival: %4.'],
+  flSoll: ['%1 soll %2 %3 erreichen.', '%1 to reach %2 in %3.'], flStuck: ['%1 hängt auf %2 fest.', '%1 is stuck at %2.'],
+  flHyper: ['Diese Flotte ist zur Zeit im Hyperraum, Sie können sie derzeit nicht erreichen!', 'This fleet is in hyperspace: it cannot be reached now!'],
+  stMine: ['meiner', 'mine'], stNobody: ['erforscht', 'explored'], stEnemy: ['feindlich', 'enemy'],
   scrapAsk: ['%1 und alle %2 Schiffe dieses Typs verschrotten?', 'Scrap %1 and all %2 ships of that type?'],
   compare: ['Spielervergleich von noch %1 Spielern im Jahre %2', 'Comparing the %1 players left in %2'], first: ['erster', 'first'], middle: ['mittlerer', 'middle'], last: ['letzter', 'last'],
   cProfit: ['Profit', 'Profit'], cMetal: ['Metall', 'Metal'], cPlanets: ['Planeten', 'Planets'], cShips: ['Schiffe', 'Ships'], cShields: ['Schilde', 'Shields'], info: ['Info', 'Info'],
@@ -999,6 +1004,66 @@ function openSplitter(f0) {
   return true;
 }
 
+// ---------- the windows the screenshots don't show, from the program's tables ----------
+// An item's place in a window table is in pixels inside the window's borders
+// (ho! FUN_0010c1e0); the window is that plus its borders and title bar.
+const at = (x, y, w2, h) => `left:calc(${x} * var(--u));top:calc(${y} * var(--v));` + (w2 ? `width:calc(${w2} * var(--u));` : '') + (h ? `height:calc(${h} * var(--v));` : '');
+// a list window: a frame of rows 20 pixels apart with a scroll bar, and buttons
+function listWin({ title, size: [W, H], frame: [fx, fy, fw, fh], rows: [rx, ry, rw], scroll: [sx, sy, sh], items, buttons, pick }) {
+  const a = api();
+  let sel = -1;
+  const list = el('div', { class: 'am-lrows', style: at(rx - fx, ry - fy, rw, sh) });
+  const paint = () => list.replaceChildren(...items.map((t, i) => el('div', { class: 'am-lrw' + (i === sel ? ' sel' : ''), role: 'option', tabindex: 0,
+    onclick: () => { sel = i; paint(); }, ondblclick: () => { sel = i; if (pick) pick(i); } }, ...(Array.isArray(t) ? t.map(c => el('span', null, c)) : [t]))));
+  paint();
+  const bar = scroller(list, true); bar.setAttribute('style', at(sx - fx, sy - fy, 16, sh));
+  const body = el('div', { class: 'am-listwin' }, el('div', { class: 'am-frame', style: at(fx, fy, fw, fh) }, list, bar),
+    ...buttons.map(([label, x, y, bw, fn]) => { const b = btn(label, () => fn(sel)); b.setAttribute('style', at(x, y, bw, 20)); return b; }));
+  const win = amWin(title, body, 'am-wlist');
+  win.style.width = `calc(${W + 8} * var(--u))`; win.style.height = `calc(${H + 18} * var(--v))`;
+  return win;
+}
+// "Liste der Flotten" (FUN_00122f78, table data+0x3322, 560 x 182): your
+// fleets but satellites, a line each (FUN_00122d64, strings 712-715); "Gehe
+// zu ..." selects the fleet and its star, unless it is in hyperspace (727)
+function openFleetListAm() {
+  const a = api(), G = a.G, ME = a.ME;
+  const fl = a.fleetOrder(G.fleets.filter(f => f.owner === ME && !f.sat));
+  const year = (t) => G.year + 10 * t;
+  const line = (f) => {
+    const n = fleetLine(G, f);
+    if (f.to != null) return w('flFly', n, G.stars[f.from].name, G.stars[f.to].name, year(Math.ceil(Math.max(0, f.dist - f.prog) / Math.max(1, HO.fleetSpeed(G, f)) - 1e-9)));
+    if (f.dest != null) return w('flSoll', n, G.stars[f.dest].name, year(Math.ceil(HO.starDist(G, f.star, f.dest) / Math.max(1, HO.fleetSpeed(G, f)) - 1e-9)));
+    const stuck = G.stars[f.star].owner !== ME && !G.stars.some(s => s.id !== f.star && HO.starDist(G, f.star, s.id) <= f.fuel + 1e-9);
+    return w(stuck ? 'flStuck' : 'flAt', n, G.stars[f.star].name);
+  };
+  const go = (i) => {
+    const f = fl[i]; if (!f) return;
+    if (f.to != null) { a.toast(w('flHyper')); return; }
+    a.closeModal(); a.UI.sel = f.star; a.UI.selFleet = f.id; a.centerOn(f.star); a.renderPanel(); a.draw();
+  };
+  listWin({ title: w('fleetList'), size: [560, 182], frame: [16, 8, 528, 144], rows: [20, 10, 500], scroll: [522, 10, 139], items: fl.map(line), pick: go,
+    buttons: [[w('ok'), 160, 155, 100, () => a.closeModal()], [w('goTo'), 300, 155, 100, go]] });
+  return true;
+}
+// "Liste der erforschten Planeten" (FUN_001239ac, table data+0x33fc, 456 x
+// 182; the order, FUN_00123294: nobody's, then other players', then yours):
+// name, temperature, gravity, metal and whose (strings 735-737)
+function openStarListAm() {
+  const a = api(), G = a.G, ME = a.ME, p = a.me();
+  const ks = G.stars.map(s => ({ s, k: HO.know(G, p, s.id) })).filter(o => o.s.owner === ME || o.k.explored);
+  const grp = (o) => (o.s.owner === ME ? 2 : o.k.owner >= 0 ? 1 : 0);
+  ks.sort((x, y) => grp(x) - grp(y) || x.s.name.localeCompare(y.s.name));
+  const row = ({ s, k }) => {
+    const src = s.owner === ME ? s : k;
+    return [s.name, temp(72 + (src.t - p.homeT)), (src.g / p.homeG).toFixed(2) + 'G', num(src.metal), w(['stNobody', 'stEnemy', 'stMine'][grp({ s, k })])];
+  };
+  const go = (i) => { const o = ks[i]; if (!o) return; a.closeModal(); a.UI.sel = o.s.id; a.UI.selFleet = null; a.centerOn(o.s.id); a.renderPanel(); a.draw(); };
+  listWin({ title: w('starList'), size: [456, 182], frame: [16, 8, 424, 142], rows: [20, 10, 398], scroll: [420, 10, 139], items: ks.map(row), pick: go,
+    buttons: [[w('ok'), 100, 155, 100, () => a.closeModal()], [w('goTo'), 256, 155, 100, go]] });
+  return true;
+}
+
 // the About window (20.png): the Amiga version's credits
 function openAmigaAbout() {
   const a = api();
@@ -1018,6 +1083,8 @@ function skinWindow(name, ...args) {
   if (name === 'types') return openTypes();
   if (name === 'players') return openCompare();
   if (name === 'split') return openSplitter(args[0]);
+  if (name === 'fleets') return openFleetListAm();
+  if (name === 'stars') return openStarListAm();
   return false;
 }
 
@@ -1167,22 +1234,43 @@ function title(frameC, IMG, Sound) {
 }
 
 // ---------- menus: the Amiga's German names, its windows, the pixels ----------
+// The Amiga's menus (ho!, the menu table at data+0x430, built with
+// FUN_00102d98 in the screen's font, HoFont 13): Datei, Optionen, Schiffe,
+// Galaxis, Fenster, Info. The remake's commands go into them, under the
+// Amiga's own words where the Amiga has the command (MENU_DE also notes its
+// Amiga-key), and the rest under their own.
+const MENU_DE = {
+  'New game…': ['Neu', null], 'Quit to title': ['Schließen', 'W'], 'End turn and switch players': ['Zug Ende & Spielerwechsel', 'Y'],
+  'Auto play…': ['Autospiel', null], 'Force end turn…': ['Zugende erzwingen', null], 'Zoom in': ['Vergrößern', '+'], 'Zoom out': ['Verkleinern', '-'],
+  'List all fleets…': ['Liste der Flotten', 'L'], 'List explored stars…': ['Liste der Sterne', 'T'], 'Send a message…': ['Funkspruch', 'F'],
+  'Fix spending': ['Ausgaben anpassen', null], 'Scrap ship types…': ['Schiffstypen', null], 'Players and alliances…': ['Spielervergleich', 'C'],
+  'Build ships at selected colony…': ['Schiffbau', 'B'],
+};
+const menuWord = (label) => {
+  if (typeof label !== 'string' || !de()) return label;
+  const m = MENU_DE[label];
+  return m ? m[0] : label.replace(/…/g, '...'); // (HoFont has no "…": the Amiga writes three dots) // (the Amiga-keys are the Amiga's; the remake's keys stay its own)
+};
 function menus(M, ho) {
   const g = de();
-  const ren = { Game: g ? 'Projekt' : 'Game', Ships: g ? 'Schiffe' : 'Ships', Galaxy: g ? 'Galaxis' : 'Galaxy', View: g ? 'Ansicht' : 'View', Help: g ? 'Hilfe' : 'Help' };
   const a = () => api();
-  M.Ships.push(['-'], [w('split') + '…', () => { const A2 = a(), G = A2.G; if (!G) return; const f = A2.curFleet() || G.fleets.find(x => x.owner === A2.ME && x.star === A2.UI.sel && x.to == null && !x.sat); if (f) openSplitter(f); else A2.toast(de() ? 'Wählen Sie eine Flotte.' : 'Select one of your fleets first.'); }],
-    [() => w('typeMgr').replace('Spaceward Ho! ', '') + '…', () => a().G && openTypes()]);
-  M.Galaxy.push(['-'], [() => (de() ? 'Spielervergleich…' : 'Compare players…'), () => a().G && openCompare()]);
-  M.View.push(['-'], [() => w('tech'), () => setTechFront(!techFront()), () => !!game(), () => techFront()],
-    [() => w('news'), toggleNews, () => !!game(), () => newsOpen()],
-    [w('tall'), () => setPixels(pixMode() === 'tall' ? 'square' : 'tall'), null, () => pixMode() === 'tall']);
-  M.Game.splice(1, 0, [de() ? 'Startfenster…' : 'Startup window…', () => { const A2 = a(); if (A2.G) A2.save(); A2.titleScreen(); }]);
-  ho.splice(1, 0, [de() ? 'Über Spaceward Ho! Amiga…' : 'About Spaceward Ho! Amiga…', openAmigaAbout]);
-  const out = {};
-  for (const k of Object.keys(M)) { out[ren[k] || k] = M[k]; delete M[k]; }
-  out[w('commands')] = CMDS;
-  Object.assign(M, out);
+  const tr = (items) => items.map(it => (Array.isArray(it) && typeof it[0] === 'string' && it[0] !== '-' ? [() => menuWord(it[0]), ...it.slice(1)] : it));
+  const take = (items, labels) => { const out = []; for (let i = items.length - 1; i >= 0; i--) if (labels.includes(items[i][0])) out.unshift(items.splice(i, 1)[0]); return out; };
+  const zoom = take(M.View, ['Zoom in', 'Zoom out']);
+  const fitG = take(M.View, ['Fit galaxy']);
+  const split = [w('split') + '…', () => { const A2 = a(), G = A2.G; if (!G) return; const f = A2.curFleet() || G.fleets.find(x => x.owner === A2.ME && x.star === A2.UI.sel && x.to == null && !x.sat); if (f) openSplitter(f); else A2.toast(de() ? 'Wählen Sie eine Flotte.' : 'Select one of your fleets first.'); }];
+  const Datei = tr(M.Game); Datei.splice(1, 0, [g ? 'Startfenster…' : 'Startup window…', () => { const A2 = a(); if (A2.G) A2.save(); A2.titleScreen(); }]);
+  const Optionen = tr(M.View.filter(it => it[0] !== '-'));
+  const Schiffe = tr(M.Ships).concat([['-'], split, [() => w('typeMgr').replace('Spaceward Ho! ', '') + '…', () => a().G && openTypes()]]);
+  const Galaxis = tr(M.Galaxy).concat([['-'], ...tr(zoom)]);
+  const Fenster = [[() => (de() ? 'Technikfenster' : 'Technology window'), () => setTechFront(!techFront()), () => !!game(), () => techFront()],
+    [() => (de() ? 'Nachrichtenfenster' : 'Messages window'), toggleNews, () => !!game(), () => newsOpen()], ['-'], ...fitG,
+    [w('tall'), () => setPixels(pixMode() === 'tall' ? 'square' : 'tall'), null, () => pixMode() === 'tall']];
+  const Info = [[g ? 'Über Spaceward Ho!' : 'About Spaceward Ho! Amiga', openAmigaAbout], ['-'], ...M.Help];
+  for (const k of Object.keys(M)) delete M[k];
+  Object.assign(M, { [g ? 'Datei' : 'File']: Datei, [g ? 'Optionen' : 'Options']: Optionen, [g ? 'Schiffe' : 'Ships']: Schiffe, [g ? 'Galaxis' : 'Galaxy']: Galaxis,
+    [g ? 'Fenster' : 'Windows']: Fenster, [g ? 'Info' : 'Info']: Info, [w('commands')]: CMDS });
+  void ho;
 }
 // the pixels, with the Skin and OS look pickers
 function lookOptions(where) {

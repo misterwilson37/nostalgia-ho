@@ -66,12 +66,14 @@ html.amiga #menubar.am-menus #title, html.amiga #menubar:has(.dropdown.open) #ti
 }
 html.amiga #menubar .mbtn { height: calc(16 * var(--v)); padding: 0 calc(6 * var(--u)); margin: 0; border: 0; border-radius: 0; background: none; color: #fff; line-height: calc(14 * var(--v)); font: inherit; box-shadow: none; cursor: pointer; }
 html.amiga #menubar .mbtn.logo { margin-left: calc(2 * var(--u)); font-weight: 400; color: #fff; }
-html.amiga #menubar .mbtn:hover, html.amiga #menubar .mbtn[aria-expanded=true], html.amiga #menubar .mbtn:focus-visible { background: #fff; color: var(--am-blue); outline: none; }
+/* the menus' colours: the screen's BlockPen 11 (blue) and DetailPen 14 (white) (the NewScreen at
+   data+0x408); the item under the pointer complemented (each item's flags 0x52: HIGHCOMP), pen 4 on 1 */
+html.amiga #menubar .mbtn:hover, html.amiga #menubar .mbtn[aria-expanded=true], html.amiga #menubar .mbtn:focus-visible { background: #003399; color: #000; outline: none; }
 html.amiga .am-sdepth { position: absolute; right: 0; top: 0; width: calc(23 * var(--u)); height: calc(16 * var(--v)); background: var(--am-grey) var(--am-sdepth) no-repeat 0 0 / 100% 100%; }
-/* menus: the bar's colours, a black edge; the item under the pointer inverted (guessed) */
+/* menus: the bar's colours, a black edge (guessed) */
 html.amiga .dropdown { position: absolute; top: calc(16 * var(--v)); left: 0; min-width: calc(150 * var(--u)); padding: calc(2 * var(--v)) 0; background: var(--am-blue); border: calc(1 * var(--v)) solid #000; border-left-width: calc(2 * var(--u)); border-right-width: calc(2 * var(--u)); box-shadow: none; border-radius: 0; z-index: 30; }
 html.amiga .dropdown button[role=menuitem] { display: block; width: 100%; text-align: left; padding: 0 calc(8 * var(--u)) 0 calc(16 * var(--u)); height: calc(11 * var(--v)); line-height: calc(10 * var(--v)); border: 0; border-radius: 0; background: none; color: #fff; white-space: nowrap; cursor: pointer; }
-html.amiga .dropdown button[role=menuitem]:hover, html.amiga .dropdown button[role=menuitem]:focus-visible { background: #fff; color: var(--am-blue); outline: none; }
+html.amiga .dropdown button[role=menuitem]:hover, html.amiga .dropdown button[role=menuitem]:focus-visible { background: #003399; color: #000; outline: none; }
 html.amiga .dropdown button.check::before { content: '✓'; width: calc(12 * var(--u)); margin-left: calc(-12 * var(--u)); }
 html.amiga .dropdown hr { border: 0; height: calc(1 * var(--v)); margin: calc(2 * var(--v)) calc(4 * var(--u)); background: repeating-linear-gradient(90deg, #fff 0 calc(1 * var(--u)), transparent 0 calc(2 * var(--u))); }
 html.amiga .am-popup { position: fixed; z-index: 90; }
@@ -550,7 +552,7 @@ html.amiga .am-tcard select { height: calc(14 * var(--v)); color: #000; border: 
    panel: HoFont 9 (FUN_00105d5a); the picture buttons' labels and the
    spending window's scale: HoFont 9; a ship's caption: HoFont 11, else 9,
    else HoCond 9, whichever fits (FUN_001214e2) */
-html.amiga #panel, html.amiga #msg .card, html.amiga .am-nlist, html.amiga .am-popup { font-family: var(--am11), sans-serif; }
+html.amiga #panel, html.amiga #msg .card, html.amiga .am-nlist { font-family: var(--am11), sans-serif; }
 html.amiga .am-sname, html.amiga .am-wname { font-family: var(--amf), sans-serif; }
 html.amiga .am-tk, html.amiga .am-tv { font-family: var(--amb), sans-serif; font-weight: 400; }
 html.amiga .am-frow.moving { font-family: var(--amb), sans-serif; }
@@ -591,3 +593,13 @@ html.amiga .am-plframe > .am-prop { position: absolute; left: calc(306 * var(--u
 html.amiga .am-pliq { left: calc(32 * var(--u)); top: calc(163 * var(--v)); margin: 0 !important; white-space: nowrap; }
 html.amiga .am-plbtns { inset: 0; pointer-events: none; }
 html.amiga .am-plbtns .am-btn { pointer-events: auto; left: calc(246 * var(--u)); top: calc(158 * var(--v)); width: calc(100 * var(--u)); }
+/* the list windows (Liste der Flotten, Liste der erforschten Planeten): rows 20 pixels apart */
+html.amiga .am-listwin { position: absolute; inset: 0; }
+html.amiga .am-listwin > * { position: absolute; }
+html.amiga .am-lrws { position: absolute; overflow: hidden; }
+html.amiga .am-lrw { height: calc(20 * var(--v)); padding: calc(4 * var(--v)) calc(4 * var(--u)) 0; box-sizing: border-box; white-space: nowrap; overflow: hidden; cursor: pointer; display: flex; }
+html.amiga .am-lrw.sel { background: linear-gradient(var(--am-red) 0 calc(18 * var(--v)), transparent 0); color: #fff; }
+html.amiga .am-lrw > span:nth-child(1) { width: calc(80 * var(--u)); } html.amiga .am-lrw > span:nth-child(2) { width: calc(64 * var(--u)); }
+html.amiga .am-lrw > span:nth-child(3) { width: calc(60 * var(--u)); } html.amiga .am-lrw > span:nth-child(4) { width: calc(72 * var(--u)); }
+html.amiga .am-listwin .am-prop { position: absolute; }
+html.amiga .am-listwin .am-lrws, html.amiga .am-listwin .am-prop, html.amiga .am-plist2 .am-plrows { pointer-events: auto; z-index: 1; }
