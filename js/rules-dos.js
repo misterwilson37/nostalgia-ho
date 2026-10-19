@@ -983,8 +983,7 @@ const cls20 = (p, s) => s.cls20 != null ? s.cls20 : (s.oInc || 0) >= 0 ? 0 : hab
 
 // ---------- pass 1 (FUN_1040_0038 @1040:02de-038b) ----------
 // For each player in turn: the computer plans (FUN_1020_0000), then
-// scrapping (FUN_1040_0fca: marked ship types, scrapMarked20; the remake
-// scraps a fleet when you give the order), the
+// scrapping (FUN_1040_0fca: marked fleets and ship types, scrapMarked20), the
 // losing colonies (0925), terraforming and mining (0aea), shipbuilding
 // (1479), research (1b11), the fleets move (23ed, with every route checked
 // first, 25ce) and the bars are restored (269d). Every loop goes through the
@@ -1352,9 +1351,10 @@ function flushExplores20(G, p, sid) {
 // CONFIRMED (FUN_1040_0fca @1040:0fca-11bb, 13a4-13cd): 2.0 scraps at the
 // start of the next turn (after the "updated to the year" report), with
 // report 1016 for each marked fleet, in fleet-list order (newest first), then
-// 1017 for each marked design. The remake scraps a fleet when you give the
-// order (same place and metal) and a ship type at that point of the turn
-// (scrapMarked20), so the reports are kept in this list until then.
+// 1017 for each marked design. The computers mark and are scrapped within
+// their own plan (js/ai-12.js scraps at once); a human's marks are carried
+// out at that point of the turn (scrapMarked20). The reports are kept in
+// this list until then.
 function scrapped20(G, p, f, d) {
   if (!p || !p.human || !log20On(G)) return;
   const L = log20(p);
@@ -1371,6 +1371,22 @@ function scrapped20(G, p, f, d) {
 // (BUILDSHIPSDLGPROC @10e8:1bf9, Mac AddTypeToQueue @113094, Amiga @121612:
 // rs.queueMarked), and it still counts toward the 20 designs (10e8:1538).
 // `how`: 'command' toggles; left out or true marks; false unmarks.
+// CONFIRMED (FUN_10f0_0000, the Ships menu's item 0x196; Mac 2.0.1 and 1.2
+// ScrapCurrentFleet @112848 / @1128ce): Scrap Current Fleet sets the
+// selected fleet's +8 to 1 minus itself, redraws the fleet box and the menus,
+// and plays no sound; the item then reads "Don't Scrap Current Fleet"
+// (strings 0x168 / 0x169, FUN_1090_0388; Mac STR# 1010.9-10, SetMenuItems).
+// The fleet panel shows "Fleet to be scrapped for metal." in place of where
+// the fleet is or is going (FUN_1088_230b @string 1a2c; Mac
+// DrawSelectedFleetInfo @c504c). Nothing else reads the mark before the
+// turn: the fleet can still be given orders (Mac FollowPathDrag @c69ba and
+// GiveFleetPath don't look at it; 3.0.1 added the "scrap heap" alert), and is
+// scrapped before it moves. There is no purchase to undo (ships are built at
+// the turn). `how` as for flagScrapDesign20.
+function flagScrap20(G, f, how) {
+  f.scrap301 = how === 'command' ? !f.scrap301 : how !== false;
+  return f.scrap301;
+}
 function flagScrapDesign20(G, p, d, how) {
   d.scrap301 = how === 'command' ? !d.scrap301 : how !== false;
   return d.scrap301;
@@ -1386,7 +1402,19 @@ function flagScrapDesign20(G, p, d, how) {
 // ships, and the metal that came back to you (only fleets at your own stars
 // add to it, @1040:1102-1136: rs.scrapTypeOwnMetal). Before support,
 // shipbuilding and moves, so the ships don't move or fight first.
+// Marked fleets first, in the fleet list's order (newest first), each with
+// report 1016: "Your fleet of %s at %s has been scrapped for %s metal.", its
+// metal only when it came back to you (@1040:1175-11a6: times the star's
+// owner being you). In hyperspace 2.0 names the star at index -1 (before its
+// star list, @1040:11b1); the remake writes "hyperspace" (3.0.1's word) and
+// 0 metal, as 2.0's owner test of that record would almost always fail.
 function scrapMarked20(G, p) {
+  for (const f of G.fleets.filter(x => x.owner === p.id && x.scrap301).reverse()) {
+    const at = f.star != null && f.to == null ? f.star : null, label = E.fleetLabel(G, f);
+    const own = at != null && G.stars[at].owner === p.id;
+    const m = E.scrapFleet(G, f);
+    if (p.human) msg(G, p.id, `Your fleet of ${label} at ${at != null ? G.stars[at].name : 'hyperspace'} has been scrapped for ${num(G, own ? Math.floor(m) : 0)} metal.`, { icon: 'm9014', star: at, quiet: true });
+  }
   for (const d of p.designs) if (d.scrap301 && !d.scrapped) { E.scrapDesign(G, p.id, d.id); d.scrap301 = false; }
 }
 function flushScraps20(G, p) {
@@ -1979,9 +2007,12 @@ E.registerRules('dos', Object.assign({}, O, {
   fixSpending: { lines: FIX_LINES20, single: false, next: fixSpending20 },
   scrapped: scrapped20,                   // the report list (log20): 2.0 reports scrapping next turn
   flagScrapDesign: flagScrapDesign20,     // Ship Types' "Scrap This Type" marks the type for the turn (above)
+  flagScrap: flagScrap20,                 // Scrap Current Fleet marks the fleet for the turn (above)
+  scrapMarkedMoves: true,                 // a marked fleet can still be given orders (no "scrap heap" alert)
+  scrapSound: false,                      // no sound when marking
   queueMarked: true,                      // a marked type can still be queued (it leaves the queue with the type)
   scrapTypeOwnMetal: true,                // report 1017 counts only the metal that came back to you
-  scrapWords: { type: ['Scrap This Type', 'Scrap This Type'], typeCheck: true }, // dialog 31 item 400, a check box
+  scrapWords: { type: ['Scrap This Type', 'Scrap This Type'], typeCheck: true, fleet: ['Scrap Current Fleet', 'Don\'t Scrap Current Fleet'], marked: 'Fleet to be scrapped for metal.' }, // dialog 31 item 400, a check box; strings 0x168-0x169; the panel's line (string at 1a2c)
   hints: false, // this game had no between-turn tips (4.0.5 and 5.0.5 do)
   // CONFIRMED (FUN_1040_269d): a finished terraforming or mining part's share
   // goes to the colony's other bars (the planet panel says so)

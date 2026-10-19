@@ -587,7 +587,7 @@ stubs). Addresses are in that layout, as in `docs/12-findings.md`.
 | `ListAllFleets` @1120dc | Fleet Status window | NOT A RULE | interface |
 | `InitFleetsList` @1123a0 | fleet list | NOT A RULE | interface |
 | `FleetStuck` @1127ee | flag a fleet that cannot reach any star (list display) | NOT A RULE | interface |
-| `ScrapCurrentFleet` @1128ce | mark/unmark the selected fleet for scrapping at the end of the turn | RULE, implemented | js/engine.js scrapFleet (immediate in the remake: same place and metal) |
+| `ScrapCurrentFleet` @1128ce | mark/unmark the selected fleet for scrapping at the end of the turn (+8 = 1 − itself; no sound) | RULE, implemented | js/rules-dos.js flagScrap20, scrapMarked20 |
 | `BuildShips` @112946 | Build Ships window: three slots, OK writes them back with the part-payment | RULE, implemented | js/engine.js queueShips/unqueueShip with js/rules-12.js yardRefund12, queueMergeAny |
 | `FindFirstSelection` @112ce2 | list selection | NOT A RULE | interface |
 | `InitBuildShipsTypesList` @112d82 | build list | NOT A RULE | interface |

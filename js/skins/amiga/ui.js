@@ -1410,6 +1410,10 @@ function menus(M, ho) {
     if (m && m[1]) AKEYS.push({ key: m[1], labels: [m[0], it[0]], fn: it[1], feat: it[2] });
   }
   AKEYS.push({ key: 'O', labels: ['Öffnen...', 'Open...'], fn: () => openAslLoad() });
+  // Schiffe's "~VVerschrotten" (strings 18, 19: "Verschrotten" / "Nicht verschrotten"), the
+  // ruleset's Scrap Current Fleet
+  AKEYS.push({ key: 'V', labels: ['Verschrotten', 'Nicht verschrotten', 'Scrap Current Fleet', 'Don\'t Scrap Current Fleet', 'Don’t Scrap Current Fleet'],
+    fn: () => { const A2 = a(), f = A2.G && A2.curFleet(); if (f && !A2.G.over) A2.toggleScrapFleet(f); }, feat: () => !!(a().G && a().marksScrap()) });
   const Datei = tr(M.Game); Datei.splice(1, 0, [() => w('open2'), () => openAslLoad()], [g ? 'Startfenster…' : 'Startup window…', () => { const A2 = a(); if (A2.G) A2.save(); A2.titleScreen(); }]);
   const Optionen = tr(M.View.filter(it => it[0] !== '-'));
   const Schiffe = tr(M.Ships).concat([['-'], split, [() => w('typeMgr').replace('Spaceward Ho! ', '') + '…', () => a().G && openTypes()]]);

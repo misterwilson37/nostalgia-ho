@@ -802,7 +802,7 @@ function onUp(e) {
     if (performance.now() - d.t > 700 && f.dest != null) { HO.cancelMove(G, f); Sound.play(4000); }
     draw(); renderPanel(); return;
   }
-  if (f.scrap301 && marksScrap() && tgt != null && tgt !== f.star) { toast(scrapWords('heap')); HO.cancelMove(G, f); Sound.play(4000); } // (FollowPathDrag @1516d8-151702: the alert, no path, sound 4000)
+  if (scrapBlocks(f) && tgt != null && tgt !== f.star) { toast(scrapWords('heap')); HO.cancelMove(G, f); Sound.play(4000); } // (FollowPathDrag @1516d8-151702: the alert, no path, sound 4000)
   else if (tgt == null || tgt === f.star) { if (f.dest != null) { HO.cancelMove(G, f); Sound.play(4000); } }
   else if (HO.orderMove(G, f, tgt)) Sound.play(4001);
   else if (autoRoute(f, tgt)) Sound.play(4001);
@@ -1158,7 +1158,7 @@ Object.assign(List, {
     document.documentElement.classList.remove('fleetdrag', 'fleetdrag-pad'); // fleetDraggingChanged: 0
     UI.drag = null; UI.hover = null;
     if (f && tgt != null) {
-      if (f.scrap301 && marksScrap() && tgt !== f.star) { toast(scrapWords('heap')); HO.cancelMove(G, f); Sound.play(4000); }
+      if (scrapBlocks(f) && tgt !== f.star) { toast(scrapWords('heap')); HO.cancelMove(G, f); Sound.play(4000); }
       else if (tgt === f.star) { if (f.dest != null) { HO.cancelMove(G, f); Sound.play(4000); } }
       else if (HO.orderMove(G, f, tgt)) Sound.play(4001);
       else if (autoRoute(f, tgt)) Sound.play(4001);
@@ -1494,13 +1494,18 @@ const SCRAP_HEAP = 'Sorry, but you have that fleet marked for the scrap heap. It
 // menu's string list; 4.0.5: "Scrap Current Fleet" both ways, and its own
 // alert, string 518)
 const scrapWords = (k) => (G && (HO.rules(G).scrapWords || {})[k]) || (k === 'type' ? SCRAP_TYPE : k === 'heap' ? SCRAP_HEAP : SCRAP_FLEET);
-const MARKED_FLEET = 'Fleet to be scrapped for metal.'; // (STR# 4000.12, DrawSelectedFleetInfo @155826)
+const MARKED_FLEET = 'Fleet to be scrapped for metal.'; // (STR# 4000.12, DrawSelectedFleetInfo @155826; rs.scrapWords.marked: a version's own)
+const markedLine = () => (G && (HO.rules(G).scrapWords || {}).marked) || MARKED_FLEET;
+// a fleet marked for scrapping can't be given orders (3.0.1's FollowPathDrag
+// alert), unless the ruleset says it can (rs.scrapMarkedMoves: 2.0)
+const scrapBlocks = (f) => !!(f && f.scrap301 && marksScrap() && !HO.rules(G).scrapMarkedMoves);
 // Scrap Current Fleet (ScrapCurrentFleet @133a24): sound 7003 when the mark
 // was off; a fleet bought this turn is given back instead (it is gone)
+// (rs.scrapSound false: 2.0 marks in silence, FUN_10f0_0000, Mac ScrapCurrentFleet)
 function toggleScrapFleet(f) {
   const was = !!f.scrap301;
   HO.rules(G).flagScrap(G, f, 'command');
-  if (!was) Sound.play(7003);
+  if (!was && HO.rules(G).scrapSound !== false) Sound.play(7003);
   if (!G.fleets.includes(f)) { UI.selFleet = null; toast('Purchase undone.'); }
   renderPanel(); draw(); save();
 }
@@ -1533,7 +1538,7 @@ function fleetRow(f, inbound) {
   else if (!mine) status = p.name;
   else if (f.sat) status = 'satellites';
   else status = (f.dest != null ? `→ ${G.stars[f.dest].name}` : 'holding') + ` · fuel ${f.fuel.toFixed(1)}/${HO.fleetMaxRange(G, f)} · speed ${HO.fleetSpeed(G, f)}`;
-  if (marked) status = MARKED_FLEET + (inbound ? ` · ${status}` : '');
+  if (marked) status = markedLine() + (inbound ? ` · ${status}` : '');
   r.append(el('div', { class: 'ftext' }, el('div', null, parts.join(', ')), el('div', { class: 'sub' }, status)));
   // (3.0.1 scraps satellites as any other fleet: Scrap Current Fleet)
   if (sel && mine && !inbound && f.sat && marksScrap())
@@ -1560,7 +1565,7 @@ function fleetRow(f, inbound) {
 }
 // multi-star route: click stars in order, then Done
 function startRoute(f) {
-  if (f.scrap301 && marksScrap()) { Sound.play(4000); toast(scrapWords('heap')); return; }
+  if (scrapBlocks(f)) { Sound.play(4000); toast(scrapWords('heap')); return; }
   UI.route = { fleet: f.id, stops: [] };
   toast('Click the stars to visit in order, then press Done.');
   renderRouteBar();
@@ -3154,7 +3159,7 @@ function openFleetList() {
   const rows = mine.map(f => {
     const where = f.star != null ? G.stars[f.star].name : `${G.stars[f.from].name} → ${G.stars[f.to].name}`;
     const go = f.dest != null ? G.stars[f.dest].name + (f.path && f.path.length ? ' → …' : '') : f.to != null ? `${Math.ceil((f.dist - f.prog) / HO.fleetSpeed(G, f))} turn(s)` : '';
-    return el('tr', { class: 'click' + (f.scrap301 ? ' scrap' : ''), title: f.scrap301 ? MARKED_FLEET : null, onclick: () => { UI.selFleet = f.id; UI.sel = f.star != null ? f.star : f.to; closeModal(); renderPanel(); draw(); } },
+    return el('tr', { class: 'click' + (f.scrap301 ? ' scrap' : ''), title: f.scrap301 ? markedLine() : null, onclick: () => { UI.selFleet = f.id; UI.sel = f.star != null ? f.star : f.to; closeModal(); renderPanel(); draw(); } },
       el('td', null, HO.fleetLabel(G, f)), el('td', null, where), el('td', null, f.scrap301 ? 'to be scrapped' : go), el('td', null, f.sat ? '' : `${Math.floor(f.fuel)}/${HO.fleetMaxRange(G, f)}`));
   });
   modal('All your fleets', mine.length ? table(['Fleet', 'Where', 'Going to', 'Fuel'], rows) : el('p', null, 'You have no fleets.'), { cls: 'mid' });

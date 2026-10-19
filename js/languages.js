@@ -169,6 +169,9 @@ function german(rs, own) {
     battlePanel: own.battlePanel20(Object.assign({ name: 15, cls: 15, dots: '...', cols: 'mac', shade: true }, { words: BATTLE_DE })),
     // the Explored Planets list's four words (strings 144-147; its title and button have no German)
     exploredList: Object.assign({}, rs.exploredList, { noClimate: S(144), own: S(145), free: S(146), enemy: S(147) }),
+    // scrapping: the Ships menu's item (strings 360, 361), the panel's line and the
+    // Ship Types check box (DOSHO.EXE: "Flotte zum Verschrotten.", "~Typ verschrotten")
+    scrapWords: Object.assign({}, rs.scrapWords, { fleet: [S(360), S(361)], marked: 'Flotte zum Verschrotten.', type: ['Typ verschrotten', 'Typ verschrotten'] }),
 
     ...(rs.forceEndTurn ? { forceEndTurn: Object.assign({}, rs.forceEndTurn, { ask: S(3210) }) } : {}),
     say: SAY_DE,
@@ -277,6 +280,7 @@ function french20(rs, own) {
     // 1.2F's Name a Star window (DITL 4050, 3340) for 2.0's, which asks the same
     nameAStar: Object.assign({}, rs.nameAStar, R12 ? { text: R12.nameAStar.text, rule: R12.nameAStar.rule, label: R12.nameAStar.label, hint: R12.nameAStar.hint, taken: R12.nameAStar.taken } : {}),
     fixSpending: Object.assign({}, rs.fixSpending, { lines: FIX_FR }),
+    scrapWords: R12 ? R12.scrapWords : rs.scrapWords, // (1.2F's STR# 1010.9-10, 4000.12, DITL 6000)
     // 1.2F's Options menu and Explored Planets list (rules-12), and the
     // remake's words for 2.0's polling time, which 1.2 hasn't got
     options: Object.assign({}, rs.options, R12 ? R12.options : {}, rs.options && rs.options.poll ? { poll: Object.assign({}, rs.options.poll, {

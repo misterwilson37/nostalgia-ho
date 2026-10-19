@@ -117,7 +117,6 @@ root.HOVERSIONS = {
     ],
     differs: [
       RANDOM,
-      'Scrapping a fleet happens when you give the order; 1.2 marked the fleet, let you take the mark off, and scrapped it at the start of the next turn, in the same place and for the same metal. (Scrapping a ship type is marked, as in 1.2.)',
       'If every player is out at once, the game ends with no winner. 1.2 just went on with no one able to win.',
       HOTSEAT + ' (1.2 allowed up to 19 humans.)',
       'Dragging a budget bar works out the others once, from where the drag began; 1.2 did it at every step of the drag, so a long drag can end slightly differently.',
@@ -149,7 +148,6 @@ root.HOVERSIONS = {
     ],
     differs: [
       RANDOM,
-      'Scrapping a fleet happens when you give the order; 2.0 marked the fleet, let you take the mark off, and scrapped it at the start of the next turn, in the same place and for the same metal. (Scrapping a ship type is marked, as in 2.0.)',
       'When every human is out, the game ends (with no winner if nobody is left). 2.0 went on as long as the computers played.',
       HOTSEAT + ' (2.0 could also play across machines.)',
       'Dragging a budget bar works out the others once, from where the drag began; 2.0 did it at every step of the drag, so a long drag can end slightly differently.',
@@ -292,7 +290,6 @@ root.HOVERSIONS = {
     ],
     differs: [
       RANDOM,
-      'Scrapping a fleet happens when you give the order; 2.0 marked the fleet, let you take the mark off, and scrapped it at the start of the next turn, in the same place and for the same metal. (Scrapping a ship type is marked, as in 2.0.)',
       'When every human is out, the game ends (with no winner if nobody is left). 2.0.1 went on as long as the computers played.',
       HOTSEAT + ' (2.0.1 could also play across a network.)',
       'Dragging a budget bar works out the others once, from where the drag began; 2.0.1 did it at every step of the drag, so a long drag can end slightly differently.',

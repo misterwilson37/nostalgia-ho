@@ -89,6 +89,8 @@ const FIXES = D.fixes.filter(f => f.id !== 'orgFuelCount' && f.id !== 'attack16'
 
 // Mac 2.0.1 plays 2.0's turn (js/rules-dos.js), with the differences above
 E.registerRules('mac20', Object.assign({}, D, {
+  // the Ships menu's item (STR# 1010.9-10) and the panel's line (DrawSelectedFleetInfo)
+  scrapWords: Object.assign({}, D.scrapWords, { fleet: ['Scrap Current Fleet', 'Don’t Scrap Current Fleet'], marked: 'Fleet to be scrapped for metal.' }),
   // the bars' ticks (DrawHBarControl @c091e): ten, 2 pixels high, on the heading strip's rule, following the scale; nothing through the bars
   barGrid: { n: 10, tick: 2, line: false, above: true },
   // the battle window's words are the Mac's (rules-dos battlePanel20: no

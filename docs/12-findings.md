@@ -533,9 +533,9 @@ player's planning, money and moves before the next player's; nothing a computer 
 is changed by another player's money or moves, so the remake's "everyone plans, then
 everyone pays, then everyone moves" gives the same game), losses falling on the oldest
 fleets (`ResolveVictorFleetsAtStar`), the design limit of 20 (`CreateShipType @111866`),
-scrapping a fleet (`ScrapCurrentFleet @1128ce` only marks it; `ScrapFleetsAndTypes`
-scraps it at the start of the next turn's pass, where it is, so the remake's immediate
-scrapping gives the same metal in the same place).
+scrapping a fleet (`ScrapCurrentFleet @1128ce` only marks it, and a second use takes the
+mark off; `ScrapFleetsAndTypes` scraps it at the start of the next turn's pass, where it is;
+the remake now marks it too: js/rules-dos.js `flagScrap20`, `scrapMarked20`).
 
 ## The turn, read in 1.2's code
 

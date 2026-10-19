@@ -391,7 +391,8 @@ E.registerRules('12', Object.assign({}, D, {
     showMessages: 'Montrer messages', reviewBattles: 'Voir batailles', reports: 'Fenêtre Rapports',
   },
   // the Ship Types window's check box (DITL 6000 item 17; Mac 2.0.1's "Scrap This Type")
-  scrapWords: { type: ['Modèle à recycler', 'Modèle à recycler'], typeCheck: true },
+  // (STR# 1010.9-10 and 4000.12: the Ships menu's item and the panel's line for a marked fleet)
+  scrapWords: { type: ['Modèle à recycler', 'Modèle à recycler'], typeCheck: true, fleet: ['Recycler flotte sélectionnée', 'Ne pas recycler cette flotte'], marked: 'En recyclage.' },
   exploredList: Object.assign({}, D.exploredList, { title: 'Répertoire des planètes explorées:', go: 'Rejoindre planète', noClimate: 'Climat inconnu', own: 'Contrôlée', free: 'Explorée', enemy: 'Ennemie' }),
   // Languages (engine.js rs.languages; G.opts.lang, New Game's Language):
   // 1.2F's own French names and words, or English. The English is the
@@ -412,7 +413,7 @@ E.registerRules('12', Object.assign({}, D, {
       // Mac 2.0.1's English for the same windows (MENU 131, DITL 4040, 6040, STR# 1020)
       options: { battleSpeed: { min: 10, max: 60, def: 30, menu: 'Set Battle Speed…', title: 'Battle Speed:', fast: 'Fast', slow: 'Slow', full: 'Fully Animated Battles' },
         showMessages: 'Show Event Messages', reviewBattles: 'Review Announced Battles', reports: 'Report Window' },
-      exploredList: Object.assign({}, D.exploredList), scrapWords: D.scrapWords },
+      exploredList: Object.assign({}, D.exploredList), scrapWords: Object.assign({}, D.scrapWords, { fleet: ['Scrap Current Fleet', 'Don’t Scrap Current Fleet'] }) }, // (Mac 2.0.1's)
   },
   ai: '12',                // 1.2's own computer players (js/ai-12.js)
   // CONFIRMED (above): the turn is 2.0's (rules-dos economy20, battle20,

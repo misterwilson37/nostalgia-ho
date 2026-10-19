@@ -365,6 +365,13 @@ ruleset now marks (`rs.flagScrapDesign`, `docs/dos-findings.md`) and the skin's 
 the mark. The build window (`FUN_00121612`) queues a marked type, as DOS does
 (`rs.queueMarked`).
 
+**Settled: Verschrotten (a fleet).** Schiffe's "~VVerschrotten" (strings 18 and 19,
+"Verschrotten" / "Nicht verschrotten") marks the selected fleet and takes the mark off, and
+the panel then says "Flotte zum Verschrotten." (string 544), as DOS 2.0 does (`FUN_10f0_0000`,
+the German DOSHO.EXE's "Flotte zum Verschrotten."); the turn scraps it (`FUN_0011aa10`). The
+ruleset now marks fleets too (`rs.flagScrap`), so the skin's item is the mark and Amiga+V
+answers it.
+
 Nothing else read here (the bars, scrap value, queue clicks, organizing ships, the comparison's
 figures) differs from DOS 2.0; the turn's own rules were not compared routine by routine.
 

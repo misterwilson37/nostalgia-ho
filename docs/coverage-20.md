@@ -857,7 +857,7 @@ calls (`GETDC`, `LOADSTRING` …); they are imports, not code of the program.
 | `BUILDSHIPSDLGPROC` @10e8:1bf9 | `BuildShips` @1128c0 | BUILDSHIPSDLGPROC: Build Ships window; OK writes the three slots and the part-payment back | RULE, implemented | js/engine.js queueShips/unqueueShip |
 | `FUN_10e8_2291 †` @10e8:2291 | — | dialog helper | NOT A RULE | interface |
 | `FUN_10e8_22bb` @10e8:22bb | — | fleet list: distance to the destination | NOT A RULE | interface |
-| `LISTFLEETSDLGPROC` @10e8:235d | `ListAllFleets` @1120de | LISTFLEETSDLGPROC: Fleets window: mark / unmark a fleet for scrapping at the end of the turn; a fleet in hyperspace can't be given orders (box 3290) | RULE, implemented | js/engine.js scrapFleet (scrapped when ordered; same place and metal) |
+| `LISTFLEETSDLGPROC` @10e8:235d | `ListAllFleets` @1120de | LISTFLEETSDLGPROC: Fleets window: mark / unmark a fleet for scrapping at the end of the turn; a fleet in hyperspace can't be given orders (box 3290) | RULE, implemented | js/rules-dos.js flagScrap20 (the Ships menu's Scrap Current Fleet, FUN_10f0_0000, toggles +8; scrapped by scrapMarked20 in the next turn's first pass, report 1016) |
 | `FUN_10e8_278b †` @10e8:278b | — | dialog helper | NOT A RULE | interface |
 | `FUN_10e8_27b5` @10e8:27b5 | `DRAWORGFLEETS` @113df8 | Organize Ships: draw the piles | NOT A RULE | drawing |
 | `FUN_10e8_2949` @10e8:2949 | — | Organize Ships helper | NOT A RULE | interface |
