@@ -803,7 +803,8 @@ function openShipyard(sid) {
         onclick: () => {
           sel = d.id;
           const q = s.queue || [], open = q.slice(0, slots).some(x => x.did === d.id) || q.length < slots;
-          if (!d.scrap301 && open && HO.queueShips(G, ME, sid, d.id, 1)) a.Sound.play(7006); else a.beep();
+          // (FUN_00121612 doesn't look at the scrap mark: rs.queueMarked)
+          if ((!d.scrap301 || HO.rules(G).queueMarked) && open && HO.queueShips(G, ME, sid, d.id, 1)) a.Sound.play(7006); else a.beep();
           render(); a.renderPanel(); a.draw();
         } }, shipCanvas(d), el('div', { class: 'am-ycap ' + capFont(cap, 120) }, cap)));
     }
@@ -854,8 +855,8 @@ function openTypes() {
       el('label', { class: 'am-radio am-tscrap' }, el('input', { type: 'checkbox', checked: d && d.scrap301 ? 'checked' : false, disabled: !d || G.over, onchange: (e) => {
         if (!d) return;
         // the Amiga's is a toggle that marks the type for the end of the turn
-        // (FUN_00122412 sets the design's +0x26); a ruleset that scraps a type
-        // when ordered (DOS 2.0 here) asks first, as that can't be taken back
+        // (FUN_00122412 sets the design's +0x26), as DOS 2.0's; a ruleset that
+        // scraps a type when ordered asks first, as that can't be taken back
         if (marks) { HO.rules(G).flagScrapDesign(G, p, d, 'command'); a.save(); render(); a.renderPanel(); return; }
         e.target.checked = false;
         a.confirmBox(w('scrapAsk', d.name, n[d.id] || 0), () => {

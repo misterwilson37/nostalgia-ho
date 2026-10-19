@@ -1263,18 +1263,20 @@ function scrapFleet(G, f) {
 }
 
 // Ships > Scrap Ship Types: every ship of a design is dismantled and the
-// design is retired (STR# 6020 #21)
+// design is retired (STR# 6020 #21). rs.scrapTypeOwnMetal: the report counts
+// only the metal that came back to the player (2.0: fleets at its own stars)
 function scrapDesign(G, pid, did) {
   const p = G.players[pid], d = getDesign(G, pid, did);
   if (!d) return 0;
   if (rules(G).scrapped) rules(G).scrapped(G, p, null, d);
-  const rate = rules(G).scrapReturn(G, p);
+  const rate = rules(G).scrapReturn(G, p), ownOnly = !!rules(G).scrapTypeOwnMetal;
   const unit = designCost(G, d).metal;
   let n = 0, metal = 0;
   for (const f of G.fleets.slice()) {
     if (f.owner !== pid || !f.ships[did]) continue;
     const c = f.ships[did]; n += c;
-    const m = Math.floor(unit * c * rate); metal += m;
+    const m = Math.floor(unit * c * rate), own = f.star != null && G.stars[f.star].owner === pid;
+    if (own || !ownOnly) metal += m;
     if (f.star != null) { const s = G.stars[f.star]; if (s.owner === pid) p.metal += m; else if (rules(G).scrapAt) rules(G).scrapAt(G, pid, s, m); else s.metal += m; }
     else if (rules(G).scrapInSpace) rules(G).scrapInSpace(G, { owner: pid, to: f.to, ships: { [did]: c } }, m);
     delete f.ships[did];

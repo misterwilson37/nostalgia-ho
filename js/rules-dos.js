@@ -983,7 +983,8 @@ const cls20 = (p, s) => s.cls20 != null ? s.cls20 : (s.oInc || 0) >= 0 ? 0 : hab
 
 // ---------- pass 1 (FUN_1040_0038 @1040:02de-038b) ----------
 // For each player in turn: the computer plans (FUN_1020_0000), then
-// scrapping (FUN_1040_0fca: the remake scraps when you give the order), the
+// scrapping (FUN_1040_0fca: marked ship types, scrapMarked20; the remake
+// scraps a fleet when you give the order), the
 // losing colonies (0925), terraforming and mining (0aea), shipbuilding
 // (1479), research (1b11), the fleets move (23ed, with every route checked
 // first, 25ce) and the bars are restored (269d). Every loop goes through the
@@ -992,6 +993,7 @@ const cls20 = (p, s) => s.cls20 != null ? s.cls20 : (s.oInc || 0) >= 0 ? 0 : hab
 function economy20(G, p) {
   // CONFIRMED (FUN_1040_0038 @1040:02af): report 1010 to every player
   if (p.human) msg(G, p.id, `The game has been updated to the year ${G.year + 10}.`, { icon: 'm9024', sound: 2000, quiet: true });
+  scrapMarked20(G, p); // FUN_1040_0fca: the ship types marked last turn
   sync20(G, p); flushScraps20(G, p); // report-list bookkeeping (log20), for the meteor report's name
   const share = shareOf20(G, p);
   p.oRefund = 0;
@@ -1347,15 +1349,45 @@ function flushExplores20(G, p, sid) {
   const L = log20(p);
   L.defer = L.defer.filter(x => { if (sid != null && x.star !== sid) return true; addLog20(L, x.w); return false; });
 }
-// CONFIRMED (FUN_1040_0fca @1040:0fca-11bb, 13a4-13cd): the remake scraps
-// when you give the order; 2.0 scraps at the start of the next turn (after
-// the "updated to the year" report), with report 1016 for each marked fleet,
-// in fleet-list order (newest first), then 1017 for each marked design
+// CONFIRMED (FUN_1040_0fca @1040:0fca-11bb, 13a4-13cd): 2.0 scraps at the
+// start of the next turn (after the "updated to the year" report), with
+// report 1016 for each marked fleet, in fleet-list order (newest first), then
+// 1017 for each marked design. The remake scraps a fleet when you give the
+// order (same place and metal) and a ship type at that point of the turn
+// (scrapMarked20), so the reports are kept in this list until then.
 function scrapped20(G, p, f, d) {
   if (!p || !p.human || !log20On(G)) return;
   const L = log20(p);
   if (f) L.pend.push({ f: f.id, w: labelWord20(fleetCount(f), (fleetDesigns(G, f)[0] || {}).name) });
   else if (d) L.pend.push({ d: p.designs.indexOf(d), w: word2(d.name) });
+}
+// CONFIRMED (LISTSHIPTYPESDLGPROC's WM_COMMAND, @10e8:0a23-0a96: the "Scrap
+// This Type" check box, item 400 of dialog 31, sets design +0x26 to 1 minus
+// itself and ticks the box to match; Mac 2.0.1 ListShipTypes @11116e and 1.2
+// @110fc0, DITL 6000 item 17 "Scrap This Type" / "Modèle à recycler"; Amiga
+// FUN_00122412, the toggle gadget's state): Ship Types only marks a type, and
+// a second click takes the mark off, until End Turn. Nothing reads the mark
+// before the turn: the build window still queues a marked type
+// (BUILDSHIPSDLGPROC @10e8:1bf9, Mac AddTypeToQueue @113094, Amiga @121612:
+// rs.queueMarked), and it still counts toward the 20 designs (10e8:1538).
+// `how`: 'command' toggles; left out or true marks; false unmarks.
+function flagScrapDesign20(G, p, d, how) {
+  d.scrap301 = how === 'command' ? !d.scrap301 : how !== false;
+  return d.scrap301;
+}
+// CONFIRMED (FUN_1040_0fca @1040:105a-1478, called in the player's first
+// pass right after the computer's plan, @1040:02de; Mac 2.0.1
+// ScrapFleetsAndTypes @a0df6 from EndTurn @a02e0, 1.2 @a0e02, Amiga
+// FUN_0011aa10 from FUN_00119f18): every fleet of a marked type is scrapped
+// where it is (3/4 of its metal to a human; over someone else's star the
+// metal stays on that star; in hyperspace it falls on the next star), then
+// the type leaves every queue (in shipyard: what was paid toward it is lost
+// when it was first in line) and the list, with report 1017: its name, its
+// ships, and the metal that came back to you (only fleets at your own stars
+// add to it, @1040:1102-1136: rs.scrapTypeOwnMetal). Before support,
+// shipbuilding and moves, so the ships don't move or fight first.
+function scrapMarked20(G, p) {
+  for (const d of p.designs) if (d.scrap301 && !d.scrapped) { E.scrapDesign(G, p.id, d.id); d.scrap301 = false; }
 }
 function flushScraps20(G, p) {
   if (!p.human || !log20On(G)) return;
@@ -1946,6 +1978,10 @@ E.registerRules('dos', Object.assign({}, O, {
   // the Galaxy menu's Fix Spending (above): its lines, and whether the need is rounded to single precision (the Mac's SANE)
   fixSpending: { lines: FIX_LINES20, single: false, next: fixSpending20 },
   scrapped: scrapped20,                   // the report list (log20): 2.0 reports scrapping next turn
+  flagScrapDesign: flagScrapDesign20,     // Ship Types' "Scrap This Type" marks the type for the turn (above)
+  queueMarked: true,                      // a marked type can still be queued (it leaves the queue with the type)
+  scrapTypeOwnMetal: true,                // report 1017 counts only the metal that came back to you
+  scrapWords: { type: ['Scrap This Type', 'Scrap This Type'], typeCheck: true }, // dialog 31 item 400, a check box
   hints: false, // this game had no between-turn tips (4.0.5 and 5.0.5 do)
   // CONFIRMED (FUN_1040_269d): a finished terraforming or mining part's share
   // goes to the colony's other bars (the planet panel says so)

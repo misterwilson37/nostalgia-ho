@@ -277,6 +277,12 @@ Four 1.2 rules were changed after comparing 1.2's code with 2.0's; each is 1.2's
   `GiveGalaxyCircleCoords @e05a6` (A5 − 0x710, − 0x70c).
 - **A scrapped type in a ship queue** leaves the queue and, if it was first, what was paid
   toward it is lost (`ScrapFleetsAndTypes @a0e02`).
+- **Scrapping a ship type** only marks it: the Existing Designs window's check box (DITL
+  6000 item 17, "Modèle à recycler") sets the design's +0x6a to 1 minus itself
+  (`ListShipTypes @110fc0`), so it can be taken off again, and `ScrapFleetsAndTypes`
+  scraps the type and its ships at the start of the next turn. Nothing reads the mark
+  before then (the build window queues a marked type). The remake scraped a type when it
+  was ordered; it now marks it (js/rules-dos.js `flagScrapDesign20`, `scrapMarked20`).
 
 ## Pictures and sounds the skin needs
 

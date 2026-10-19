@@ -2307,7 +2307,7 @@ function openBuild(sid) {
       const c = HO.shipCostNow(G, p, d);
       const n = builtHere(d.id);
       const slots = HO.rules(G).queueSlots, sq = s.queue || [];
-      const can = !d.scrap301 && (queue ? !(slots && sq.length >= slots && sq[sq.length - 1].did !== d.id) : affordable(c));
+      const can = (!d.scrap301 || !!HO.rules(G).queueMarked) && (queue ? !(slots && sq.length >= slots && sq[sq.length - 1].did !== d.id) : affordable(c));
       left.append(el('div', { class: 'drow' + (d.scrap301 ? ' scrap' : '') },
         shipImgEl(d, 26),
         el('div', { class: 'dtext' }, el('b', null, d.name), el('div', { class: 'sub' }, `${HO.TYPES[d.type].name} · R${d.type === 'satellite' ? 0 : d.R} Sp${d.V} W${d.W} Sh${d.S} M${d.M}`),
@@ -3167,9 +3167,14 @@ function openScrapTypes() {
   if (marksScrapDesign()) {
     // marks, as the Ship Types window's "Scrap All" / "Don't Scrap": a
     // marked type and every ship of it are scrapped at End Turn
+    // (rs.scrapWords.typeCheck: 2.0's is a check box, "Scrap This Type",
+    // dialog 31 item 400 / DITL 6000 item 17)
+    const flip = (d) => { HO.rules(G).flagScrapDesign(G, p, d, 'command'); save(); closeModal(); openScrapTypes(); };
+    const check = !!(HO.rules(G).scrapWords || {}).typeCheck;
     const rows = live.map(d => el('tr', { class: d.scrap301 ? 'scrap' : null },
       el('td', null, shipImgEl(d, 18), ' ', d.name), el('td', null, HO.TYPES[d.type].name), el('td', null, String(count[d.id] || 0)),
-      el('td', null, el('button', { class: 'quiet', onclick: () => { HO.rules(G).flagScrapDesign(G, p, d, 'command'); save(); closeModal(); openScrapTypes(); } }, scrapWords('type')[d.scrap301 ? 1 : 0]))));
+      el('td', null, check ? el('label', { class: 'chk' }, el('input', { type: 'checkbox', checked: d.scrap301 ? 'checked' : false, onchange: () => flip(d) }), el('span', null, scrapWords('type')[0]))
+        : el('button', { class: 'quiet', onclick: () => flip(d) }, scrapWords('type')[d.scrap301 ? 1 : 0]))));
     modal('Scrap ship types', el('div', null, el('p', { class: 'sub' }, `A type marked here is scrapped at the end of the turn, with every ship of it, and frees an assembly line${HO.rules(G).maxDesigns ? ` (you can have ${HO.rules(G).maxDesigns})` : ''}. Until then you can take the mark off.`),
       table(['Type', 'Class', 'Ships', ''], rows)), { cls: 'mid' });
     return;

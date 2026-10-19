@@ -266,16 +266,23 @@ Amiga's chrome and type.
 ## Rules differences found
 
 Rules stay with the ruleset; these are what the Amiga's code does differently from the DOS
-2.0 ruleset as the remake has it (none of them is changed):
+2.0 ruleset as the remake has it (none of them is changed by the skin):
 
 - **Two build slots, not three, on a 256-line screen.** The player record keeps three
   (design, count) slots as DOS does, but the Schiffsbau window only edits as many as its table
   has (`FUN_00120e12`: 1 under 256 lines, 2 to 399, 3 from 400), so on the standard PAL screen
   a third order can't be given. The skin's window has the Amiga's two.
-- **"Typ verschrotten" marks the type for the end of the turn** and can be taken back before
-  then (`FUN_00122412`). DOS 2.0 does the same (`LISTSHIPTYPESDLGPROC` marks +0x26), but the
-  remake's DOS ruleset scraps a type when it is ordered (`docs/coverage-20.md`), so the skin
-  asks first there.
+
+**Settled: "Typ verschrotten".** It marks the type for the end of the turn and can be taken
+back before then (`FUN_00122412`: the toggle gadget's state into design +0x26), and the
+turn scraps it (`FUN_0011aa10`, called by `FUN_00119f18`: the fleets of a marked type, then
+the type out of the queues and the list). The remake's DOS ruleset used to scrap a type when
+it was ordered, so the skin asked first. DOS 2.0's own code does what the Amiga does
+(`LISTSHIPTYPESDLGPROC` @10e8:0a23 toggles +0x26; `FUN_1040_0fca` scraps it in the next
+turn's first pass), as do Mac 2.0.1 (`ListShipTypes` @11116e) and 1.2 (@110fc0), so the
+ruleset now marks (`rs.flagScrapDesign`, `docs/dos-findings.md`) and the skin's toggle is
+the mark. The build window (`FUN_00121612`) queues a marked type, as DOS does
+(`rs.queueMarked`).
 
 Nothing else read here (the bars, scrap value, queue clicks, organizing ships, the comparison's
 figures) differs from DOS 2.0; the turn's own rules were not compared routine by routine.

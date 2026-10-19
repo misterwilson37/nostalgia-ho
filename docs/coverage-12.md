@@ -332,7 +332,7 @@ stubs). Addresses are in that layout, as in `docs/12-findings.md`.
 | `EndTurn` @a0004 | the turn: per player plan, scrap, support, terraform/mine, build, research, move, restore bars; then battles; then per player income, colonize/explore, end of game | RULE, implemented | js/engine.js endTurn with js/rules-dos.js economy20 and pass2_20 (js/rules-12.js pass2_12); the year moved on first (rs.aiYear), both passes for every player (rs.economyForAll) |
 | `KillUnsupportedStars` @a0960 | losing colonies paid from their own share or lose people | RULE, implemented | js/rules-dos.js economy20 |
 | `TerraformMineStars` @a0a9e | terraforming and mining by the colony bars, finished parts marked -1 | RULE, implemented | js/rules-dos.js terraMine20 |
-| `ScrapFleetsAndTypes` @a0e02 | scrap marked fleets and designs; metal returned; queued scrapped type dropped | RULE, implemented | js/rules-dos.js (engine scrapFleet, shipyard) |
+| `ScrapFleetsAndTypes` @a0e02 | scrap marked fleets and designs; metal returned; queued scrapped type dropped | RULE, implemented | js/rules-dos.js scrapMarked20 (engine scrapFleet, scrapDesign, shipyard) |
 | `BuildNewShips` @a1406 | the three-slot ship queues, part-payment | RULE, implemented | js/rules-dos.js shipyard (called from economy20) |
 | `PutNewShipAtStar` @a18b8 | a new ship joins an idle fleet of its design, else a new fleet | RULE, implemented | js/rules-dos.js fleetFor |
 | `SpendTechMoney` @a1a58 | research at 60-140 % | RULE, implemented | js/rules-dos.js research20 |
@@ -572,7 +572,7 @@ stubs). Addresses are in that layout, as in `docs/12-findings.md`.
 | `DeterminePath` @1105ae | route through your colonies, at most 42/Range hops, under 3x direct | RULE, implemented | js/rules-dos.js route |
 | `GiveFleetPath` @110d56 | store a route in the fleet | RULE, implemented | js/rules-dos.js route20/replan20 |
 | `MakeFleetDescription` @110e28 | "N Classes Name (W/S)" text (French order; October 2026) | NOT A RULE | text (`battlePanelMac`) |
-| `ListShipTypes` @110fc0 | Existing Designs window: rename, mark designs for scrapping | RULE, implemented | js/engine.js scrapDesign (scrapped at the end of the turn in 1.2; same effect) |
+| `ListShipTypes` @110fc0 | Existing Designs window: rename, mark designs for scrapping (item 17, "Modèle à recycler": +0x6a = 1 − itself, so it can be taken off) | RULE, implemented | js/rules-dos.js flagScrapDesign20 (scrapped by scrapMarked20 at the start of the next turn) |
 | `InitShipTypesList` @1112c0 | designs list | NOT A RULE | interface |
 | `DRAWLISTBORDER` @11145e | list border | NOT A RULE | drawing |
 | `DRAWSHIPTYPEPICTURE` @1114ae | ship picture | NOT A RULE | drawing |

@@ -117,7 +117,9 @@ function aiTurn(G, p) {
     I: (p.oInc || 0) + (p.oInterest || 0),     // last turn's income and interest (d88e)
     cols: rs.colOrder(G, p),                   // the colony slots, in order
     support: {}, terra: {}, mine: {}, finish: {}, // money per slot ('sav', 'tech' or a colony's star)
-    acts: [], used: new Set(), scrapF: new Set(), scrapD: new Set(), T: {},
+    // scrapD: the designs marked (+0x6a), a human's own marks among them
+    // (Auto Play: the routines read and write the same mark)
+    acts: [], used: new Set(), scrapF: new Set(), scrapD: new Set(p.designs.filter(d => d.scrap301 && !d.scrapped)), T: {},
   };
   maintainShipTypes(C);
   computeStatus(C);
@@ -184,7 +186,7 @@ function maintainShipTypes(C) {
       spec.W = Math.max(1, spec.W); spec.S = Math.max(1, spec.S);
       const d = findOrCreateDesign(G, p, spec);
       if (!live.includes(d)) nTypes++;
-      C.scrapD.delete(d);
+      C.scrapD.delete(d); if (d.scrap301) d.scrap301 = false; // (the remake reuses a design of the same make: kept)
       C.T[type] = d;
     } else C.T[type] = best;
   }
