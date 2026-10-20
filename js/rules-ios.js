@@ -353,6 +353,12 @@ const rs = Object.assign(base, {
   },
   // the auto play window (above)
   autoPlayWindow: 'ios', autoPlayRange: { aggr: [0, 100], where: 'autoplay' }, autoPlayDefaults: AUTO_DEFAULTS,
+  // the Radical Research window (RadicalResearchLayer; Misc Strings 107, 108:
+  // "Radical Research", "Don't Cancel Any Programs"; Radical Tech Strings,
+  // 5.0.5's names)
+  radicalHand: Object.assign({}, O.radicalHand, { words: { title: 'Radical Research', keep: 'Don\'t Cancel Any Programs', ok: 'OK', pic: 'm9010' } }),
+  // (its other windows are its own: not 5.0.5's words, You Won window or rank after it)
+  windowWords: null, conquered: null, rankAfterWin: false,
   // CONFIRMED (the calls of the report routine, 0x10003b028 and 0x10003af9c:
   // the battles 0x100021108, the turn 0x10002dca8, exploring 0x10003405c and
   // the new colony 0x100034238; no pointer to either is stored anywhere): no

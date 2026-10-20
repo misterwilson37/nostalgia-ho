@@ -178,40 +178,54 @@ function refillDeck(G, p) {
     if (!p.deck.includes(i) && radicalAllowed(G, p, i)) p.deck.push(i);
   }
 }
-// CONFIRMED (FUN_1005f280, dialog 0x99; Palm FUN_00041aa4, FUN_00075ff0):
-// the Radical Research window, opened from the report "Your Radical
-// researchers are hard at work on another discovery!" (0x466) or the menu
-// (Palm: also the Radical bar). With a full hand (four programs, player
-// +0x1118) the player may cancel one, which leaves the hand until the next
-// discovery deals it full again; with fewer than four it closes at once.
-// Its program names weren't read: the window lists 4.0.5's (strings
-// 821-837, the 17 discoveries both have) and, for the three 5.0.5 added,
-// words from their own reports (docs/open-questions.md).
-const RADICAL_TEXT = { metal: 'Search for more metal on your planets.', explore: 'Explore distant stars.', money: 'Get lots of money immediately.',
-  mining: 'Improve mining efficiency.', pop: 'Improve population maximums.', terra: 'Improve terraforming efficiency.', generals: 'Educate battle generals better.',
-  recycle: 'Improve recycling program.', research: 'Build a new research facility.', save: 'Raise the prime lending rate.', borrow: 'Renegotiate your line of credit.',
-  decoy: 'Build a decoy ship.', bio: 'Build a biological space monster.', steal: 'Steal technology from another player.', protos: 'Build a set of ships with no development cost.',
-  range: 'Improve range tech dramatically.', speed: 'Improve speed tech dramatically.', weapons: 'Improve weapons tech dramatically.', shields: 'Improve shields tech dramatically.',
-  mini: 'Improve mini tech dramatically.' };
+// CONFIRMED (FUN_1005f280, dialog 0x99 = PPob 153 "Radical Tech Choice";
+// Palm FUN_00041aa4, FUN_00075ff0, tFRM 3000): the Radical Research window,
+// opened from the report "Your Radical researchers are hard at work on another
+// discovery!" (0x466) or the menu (Palm: also the Radical bar). With a full
+// hand (four programs, player +0x1118) the player may cancel one, which leaves
+// the hand until the next discovery deals it full again; with fewer than four
+// it closes at once. Its words (docs/505-windows.md, PPob 153): "Radical
+// Research", "You may cancel one research program:", the four programs, each
+// a button with PICT 9010 (9011 when picked, FUN_1005f280 on message 1000,
+// with sound 7001) and its name from STR# 6260 "Radical Tech Strings" (no
+// full stop), then "Don’t Cancel Any Programs" (picked when the window
+// opens: the radio group 10 set to 5) and OK. The Palm's tSTL 6260 and iOS's
+// Radical Tech Strings are the same 20 names.
+const RADICAL_TEXT = { metal: 'Search for more metal on your planets', explore: 'Explore distant stars', money: 'Get lots of money immediately',
+  mining: 'Improve mining efficiency', pop: 'Improve population maximums', terra: 'Improve terraforming efficiency', generals: 'Educate battle generals better',
+  recycle: 'Improve recycling program', research: 'Improve technology output', save: 'Increase savings interest rate', borrow: 'Decrease borrowing interest rate',
+  decoy: 'Build a decoy ship', bio: 'Build a biological space monster', steal: 'Steal technology from another player', protos: 'Build a set of ships without development cost',
+  range: 'Improve range tech dramatically', speed: 'Improve speed tech dramatically', weapons: 'Improve weapons tech dramatically', shields: 'Improve shields tech dramatically',
+  mini: 'Improve mini tech dramatically' };
 const radicalHand505 = {
   full: 4, menu: true, // (the menu dispatch opens it too; the remake's Galaxy menu)
   cards: (G, p) => (p.deck || []).map(i => ({ id: i, text: RADICAL_TEXT[RADICAL[i]] })),
   discard(G, p, id) { const at = (p.deck || []).indexOf(id); if (at >= 0) p.deck.splice(at, 1); },
+  // the window (js/skins/classic/ui.js openRadicalHand): its title, its line,
+  // the choice that cancels nothing (picked at first), each program's picture
+  words: { title: 'Radical Research', prompt: 'You may cancel one research program:', keep: 'Don’t Cancel Any Programs', ok: 'OK', pic: 'm9010' },
 };
-// CONFIRMED (FUN_1005ec40, FUN_10066bb0; Palm FUN_000713be, FUN_0002d14a):
-// the auto play settings, the Friendly-Aggressive and Dig In-No Defense
-// sliders (0-100; 5.0.5's Preferences, prefs +0x211, +0x212; the Palm's Auto
-// Play window). Each turn the computer plays for a human it sets
-// aggressiveness to a tenth of the first and colonies defended to the
-// second, then plans (js/ai-original.js aiTurn). The remake keeps them with
-// the player (p.autoPrefs505) once set; until then the auto play record
-// keeps its own values (the Preferences' defaults weren't read). With no
-// set it gives the values the window opens with.
+// CONFIRMED (FUN_1005ec40 = the Auto Play window, dialog 0x9f = PPob 159;
+// FUN_10066bb0, the Auto button; CPrefs FUN_10072490; Palm FUN_000718c2,
+// FUN_000713be, tFRM 1700, its defaults FUN_0002b274): the auto play
+// settings, the Friendly-Aggressive slider (pane 1000, 0-100, prefs +0x211)
+// and the No Defense-Dig In slider (pane 1001, 0-100, prefs +0x212: Dig In at
+// the right, 100), on the Auto Play window between "Have Computer Play For
+// Me" and "Just End My Turns" (enabled only with the first). Each turn the
+// computer plays for a human it sets aggressiveness to a tenth of the first
+// and colonies defended to the second, then plans (js/ai-original.js aiTurn).
+// The preferences start them at 50 and 50 (+0x211, +0x212 = 0x32), with
+// "Have Computer Play For Me" (+0x210), "Turn Off When Something Interesting
+// Happens" on (+0x213) and the messages clicked through every 4 seconds
+// (+0x216, the slider 0-10); the Palm's preferences the same (+0x20e-0x214).
+// The remake keeps them with the player (p.autoPrefs505) once set; until
+// then the preferences' defaults (rs.autoPlayDefaults). With no set it gives
+// the values the window opens with.
+const AUTO_DEFAULTS505 = { aggr: 50, colDef: 50, stop: true, every: 4 };
 function autoPlaySettings505(G, p, set) {
   if (set) { p.autoPrefs505 = { aggr: clamp(set.aggr | 0, 0, 100), colDef: clamp(set.colDef | 0, 0, 100) }; return; }
   if (p.autoPrefs505) return Object.assign({}, p.autoPrefs505);
-  const ai = p.ai && p.ai.v505 ? p.ai : null;
-  return ai ? { aggr: clamp(ai.aggr * 10, 0, 100), colDef: ai.colDef } : { aggr: 50, colDef: 50 };
+  return { aggr: AUTO_DEFAULTS505.aggr, colDef: AUTO_DEFAULTS505.colDef };
 }
 function radical(G, p) {
   msg(G, p.id, 'Your Radical researchers have just made another wild discovery!', { icon: 'm9010' });
@@ -2920,8 +2934,33 @@ Object.defineProperties(E.RULESETS.original, Object.fromEntries(Object.entries({
   bars: bars505, setBars: setBars505, slots301: slots505, colSlots: colSlots505, keyPm, setKeyPm, giveBarPercent: giveBar505, share505,
   terraLeft: (G, p, s) => bars505(s)[0] !== -1,
   // the windows (the skin builds them; docs/coverage-505.md)
-  autoPlaySettings: autoPlaySettings505, autoPlayRange: { aggr: [0, 100], where: 'prefs' },
+  // the Auto Play window (PPob 159, FUN_1005ec40; above): the settings on it,
+  // No Defense at the left and Dig In at the right; the preferences' defaults
+  autoPlaySettings: autoPlaySettings505, autoPlayRange: { aggr: [0, 100], where: 'autoplay', digRight: true },
+  autoPlayWindow: '505', autoPlayDefaults: AUTO_DEFAULTS505,
   radicalHand: radicalHand505,
+  // CONFIRMED (FUN_10060580 on report 0x436, "Congratulations! You won a %d
+  // difficulty game and have earned %s master points.": FUN_100967c0(0x96),
+  // the You Won window, PPob 150, with no title bar, "Congratulations! You
+  // have conquered the galaxy!", PICT 3030 and OK; then the rank window,
+  // FUN_1005e2b0. The demo's are PPob 167 and 168.) The report the remake's
+  // win gives opens it (rs.conquered, js/skins/classic/ui.js openWinWindows),
+  // and a new rank's window comes after it (rs.rankAfterWin).
+  conquered: 'Congratulations! You have conquered the galaxy!', conqueredTitle: '', rankAfterWin: true,
+  // the windows' own words (docs/505-windows.md; js/skins/classic/ui.js):
+  // Dip Into Savings (PPob 157, FUN_1005d380: a slider 0-30 set from and to
+  // the player's +0x54, 30% at the top), Surrender (PPob 147, FUN_1005d5a0:
+  // the players, yourself and the dead greyed, then "No One"; the current
+  // choice picked, "No One" when not surrendering; OK asks Alert 2 the first
+  // time; Cancel while surrendering takes it back with Alert 3), Scrap Ship
+  // Types (PPob 165) and List All Fleets (PPob 166)
+  windowWords: {
+    dip: { title: 'Dip Into Savings', text: 'What percentage of your savings would you like to use each turn to increase your income?',
+      note: 'Once started, you will continue to dip each turn until cancelled.', marks: ['30%', '15%', '0%'], cancel: 'Cancel', ok: 'OK' },
+    surrender: { title: 'Surrender', text: 'Who would you like to surrender to?', noOne: 'No One', cancel: 'Cancel', ok: 'OK' },
+    scrapTypes: { title: 'Scrap Ship Types', lines: ['Select the ship types you would like to scrap.', 'If any ships of that type exist, they will be scrapped at their current location during the next turn update.'] },
+    fleets: { title: 'List All Fleets', note: 'Double-click a fleet to select it in the map view.' },
+  },
   // the computers' sexes and names, the ship type names, the first messages
   // (FUN_10059570, FUN_1006d0c0, FUN_1007dcf0, FUN_1006f870; above)
   computerIdentity: computerIdentity505, designName: designName505, newDesign505, shipName505, welcome: welcome505,
@@ -2943,10 +2982,15 @@ Object.defineProperties(E.RULESETS.original, Object.fromEntries(Object.entries({
   // names none. New Game (FUN_10059570 @1005a2f0) takes up to five, in a row
   // from the clock's rand(0, kept - 5), into the game (+0x170), and
   // FUN_1006f280 gives them the first places of the star list before it is
-  // shuffled (engine newGame). The window's own words weren't read (its PPob
-  // isn't in the remake's copy): the iOS port's, the same 5.0 source
-  // (docs/open-questions.md).
+  // shuffled (engine newGame). The window's words are PPob 156 "Name A
+  // Star" (docs/505-windows.md): titled "Congratulations!", the rank's
+  // picture, "Congratulations! You have achieved the rank of:" and the rank,
+  // "You may name a star for use in future games:" with the field, then
+  // "You have earned the ability to %s." (STR# 6003.20) or, with no ability
+  // left to earn, "You have already earned all abilities.", and the buttons
+  // "Never Mind" and "Cool!".
   nameAStar: { when: 'rank', inRank: true, text: 'You may name a star for use in future games:', keep: 0, use: 'put', put: 5, pick: 'run', max: 11, match: '505',
+    title: 'Congratulations!', ok: 'Cool!', cancel: 'Never Mind', allEarned: 'You have already earned all abilities.',
     taken: 'Sorry, but there is already a star with that name. How about a different name?' },
   // CONFIRMED (FUN_10061af0 @10061d88, the status of Send Message, command
   // 0x13ab): the command is on only while the player's outbox (player

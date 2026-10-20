@@ -408,3 +408,23 @@ html.fleetdrag #panel .planet > .btns, html.fleetdrag.fleetdrag-pad #panel .plan
 .lobbylist li.sub { color: var(--sub); }
 #msg .card.waiting { cursor: default; }
 #msg .card.waiting .sub { color: var(--sub); font-size: .9em; margin: 4px 0 0; }
+/* the originals' own windows, from their layouts (docs/505-windows.md) */
+.win.notitle .wtitle span { display: none; }
+.radwin p { margin: 0 0 .6em; }
+.radwin .radrow { display: flex; align-items: center; gap: .6em; margin: .35em 0; cursor: pointer; }
+.radwin .radrow .radpic { width: 32px; height: 32px; image-rendering: pixelated; }
+.radwin .radrow.keep { margin-top: .8em; padding-top: .5em; border-top: 1px solid var(--line, #8888); }
+.dip505 .dipbox { display: flex; gap: 1em; align-items: flex-start; }
+.dip505 .dipbox p { flex: 1; margin: 0; }
+.dip505 .dipslider { display: flex; gap: .4em; align-items: stretch; height: 7em; }
+.dip505 .dipslider input[type=range] { writing-mode: vertical-lr; direction: rtl; width: 1.6em; height: 7em; margin: 0; }
+.dip505 .dipmarks { display: flex; flex-direction: column; justify-content: space-between; font-size: .85em; }
+.origwin > p, .origwin > .btns { margin: .5em 0 0; }
+.origwin label.chk { display: flex; gap: 6px; align-items: center; margin: .3em 0; }
+.origwin .note { color: var(--sub); }
+.autoplay505 fieldset { display: block; padding: 4px 10px 8px; }
+.autoplay505 fieldset legend { color: inherit; }
+.autoplay505 .apsettings { margin: .2em 0 .4em 1.6em; display: grid; gap: 4px; }
+.autoplay505 .note { margin: 0 0 .4em 1.9em; }
+.autoplay505 hr { border: 0; border-top: 1px solid var(--line, #8888); margin: .6em 0; }
+.autoplay505 .slider { display: inline-flex; gap: 6px; align-items: center; margin-left: .5em; }

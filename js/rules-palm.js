@@ -400,10 +400,30 @@ const rs = Object.assign(base, {
   // (pick 'run'); FUN_00025f4a gives them the first places of the star list,
   // the other stars distinct names of its own, and shuffles the list with
   // the game's numbers, so they land on stars at random (engine newGame). The
-  // form's words weren't read (docs/research-log.md), nor how the list
-  // grows: the remake keeps every name.
-  // the auto play settings are on the Auto Play form (tFRM 1700, FUN_000713be)
-  autoPlayRange: { aggr: [0, 100], where: 'autoplay' },
+  // form's words (tFRM 2900, tools/extract/palmforms.py): titled
+  // "Congratulation!", "Congratulations!", "You have achieved  the rank of:",
+  // "You may name a star for use in future games:", "Nevermind" and "Cool!"
+  // (nameAStar below). How the list grows wasn't read: the remake keeps every
+  // name.
+  // the auto play settings are on the Auto Play form (tFRM 1700, FUN_000713be:
+  // "Auto Play", "Have Computer Play For Me" over the sliders, "Just End My
+  // Turns", "Turn Off When Something Interesting Happens: battles,
+  // colonizations, tech level changes, etc.", Cancel, OK), as 5.0.5's Auto
+  // Play window (rs.autoPlayWindow '505', inherited)
+  // (the sliders 0-100 by FUN_000718c2, from the preferences' +0x20f and
+  // +0x210, 50 and 50 at first, FUN_0002b274; tFRM 1700 labels "Friendly" at
+  // the first's left and "Dig in" at the second's right)
+  autoPlayRange: { aggr: [0, 100], where: 'autoplay', digRight: true },
+  // the Radical Research form (tFRM 3000): its title, the programs (tSTL 6260,
+  // 5.0.5's names) beside their pictures (Tbmp 8010, 8011 picked), "Don't
+  // Cancel Any Programs" and OK; no line of words above them
+  radicalHand: Object.assign({}, O.radicalHand, { words: { title: 'Radical Research', keep: 'Don\'t Cancel Any Programs', ok: 'OK', pic: 'm9010' } }),
+  // its forms with 5.0.5's words: Dip Into Savings (tFRM 2000), Surrender
+  // (tFRM 2700), Scrap Ship Types (tFRM 2400); its List All (tFRM 3600) and
+  // Game Over (tFRM 3400) are its own, so not 5.0.5's List All Fleets line,
+  // You Won window or rank after it
+  windowWords: { dip: O.windowWords.dip, surrender: O.windowWords.surrender, scrapTypes: O.windowWords.scrapTypes },
+  conquered: null, rankAfterWin: false,
   // Organize Fleets (tFRM 2300 "Organize Fleets": two fleet lists, each
   // ending in "Empty Fleet", their piles, the arrows between them, Split,
   // Group All, Done). Group All (FUN_00079a18) and Split (FUN_00079ea8) are

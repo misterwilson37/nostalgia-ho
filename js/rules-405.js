@@ -2566,20 +2566,37 @@ E.registerRules('405', Object.assign({}, D, {
     if (!set) return { aggr: ai.aggr, colDef: ai.colDef };
     ai.aggr = set.aggr; ai.colDef = set.colDef; ai.metalDef = old;
   },
-  autoPlayRange: { aggr: [0, 10] }, // the window's scroll bars (their ranges weren't read: docs/open-questions.md)
+  // CONFIRMED (dialog 380, "Configure Computer's Auto Play Style:", its
+  // OnInitDialog FUN_00408f3b: SetScrollRange 0-10 for scroll bar 1171,
+  // Friendly to Aggressive, and 0-100 for 1172, No Defense at the left to Dig
+  // In at the right, each the value itself (FUN_00404c4e); the Mac's DITL
+  // 4021 and CNTL 4021 "Aggressiveness" 0-10, 4022 "Defensiveness" 0-100, laid
+  // out the same; docs/source-inventory.md)
+  autoPlayRange: { aggr: [0, 10], digRight: true, title: 'Configure Computer’s Auto Play Style:' },
   // CONFIRMED (FUN_00471587 = Mac DoRadicalChoiceDlg @1529e2): the radical
   // card window, opened by clicking the report "Your radical researchers are
   // hard at work on another discovery!", shows the hand of four (strings
   // 821-837, one a discovery) and, on a pick, takes that card out of the hand
   // (+0x18ce); the next discovery deals the hand full again (dealHand)
+  // CONFIRMED (dialog 348, FUN_0047a6f8; the Mac's DLOG/DITL 6170 "Radical
+  // Choice"): no title, "You can cancel one research program:", the four
+  // programs each beside its picture, and OK; a program clicked (+0x434) is
+  // cancelled by OK. With fewer than four in the hand it doesn't open
+  // (FUN_00471587). On Windows the window closes itself after 18,000 ticks
+  // (FUN_0042404f is GetTickCount x 60 / 1000: 5 minutes; a timed network
+  // game's own deadline instead; FUN_0047aa1b), which the remake leaves out.
   radicalHand: {
+    full: 4,
     cards: (G, p) => RADICAL.map((k, i) => i).filter(i => p.hand405 & (1 << i)).map(i => ({ id: i, text: RADICAL_TEXT[i] })),
     discard(G, p, id) { p.hand405 &= ~(1 << id); },
+    words: { title: '', prompt: 'You can cancel one research program:', ok: 'OK', pic: 'm9010' },
   },
   // CONFIRMED (FUN_00470dec, FUN_0044bf5a, dialog 377): clicking the winner's
-  // report opens "You have conquered the galaxy!" with its picture (the skin's
-  // won picture, p3030), then Name a Star (FUN_00456047, dialog 378)
-  conquered: 'You have conquered the galaxy!',
+  // report opens "Congratulations!  You have conquered the galaxy!" (the
+  // Mac's DITL 5040 with one space) with its picture (the skin's won picture,
+  // p3030) and OK, in a window with no title, then Name a Star (FUN_00456047,
+  // dialog 378)
+  conquered: 'Congratulations! You have conquered the galaxy!', conqueredTitle: '',
   // CONFIRMED (FUN_00456047, dialog 378; string 513): the winner names a star,
   // 2 to 7 letters (the dialog says so; blank names none), not one there is
   // already. The program keeps four (the application's CStringArray +0xcc):

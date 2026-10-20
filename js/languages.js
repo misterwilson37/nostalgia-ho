@@ -753,13 +753,13 @@ function lines505(rs, extra, lang) {
   const D = E.DATA, alerts = (D.alerts || []).filter((t, i) => !DICT(lang) || SHOWN_ALERTS.includes(i));
   return [].concat(D.reports || [], alerts, (D.hints || []).slice(0, 43), RADICAL505, extra || []);
 }
-// the Radical Research window's projects (rules-original RADICAL_TEXT: 4.0.5's
-// for the 17 they share, the remake's words for 5.0.5's three)
-const RADICAL505 = ['Search for more metal on your planets.', 'Explore distant stars.', 'Get lots of money immediately.', 'Improve mining efficiency.',
-  'Improve population maximums.', 'Improve terraforming efficiency.', 'Educate battle generals better.', 'Improve recycling program.',
-  'Build a new research facility.', 'Raise the prime lending rate.', 'Renegotiate your line of credit.', 'Build a decoy ship.', 'Build a biological space monster.',
-  'Steal technology from another player.', 'Build a set of ships with no development cost.', 'Improve range tech dramatically.', 'Improve speed tech dramatically.',
-  'Improve weapons tech dramatically.', 'Improve shields tech dramatically.', 'Improve mini tech dramatically.'];
+// the Radical Research window's programs (rules-original RADICAL_TEXT: 5.0.5's
+// STR# 6260, the same as iOS's Radical Tech Strings and the Palm's tSTL 6260)
+const RADICAL505 = ['Search for more metal on your planets', 'Explore distant stars', 'Get lots of money immediately', 'Improve mining efficiency',
+  'Improve population maximums', 'Improve terraforming efficiency', 'Educate battle generals better', 'Improve recycling program',
+  'Improve technology output', 'Increase savings interest rate', 'Decrease borrowing interest rate', 'Build a decoy ship', 'Build a biological space monster',
+  'Steal technology from another player', 'Build a set of ships without development cost', 'Improve range tech dramatically', 'Improve speed tech dramatically',
+  'Improve weapons tech dramatically', 'Improve shields tech dramatically', 'Improve mini tech dramatically'];
 // (and with Full Hoedown, 4.0.5's Armageddon questions: js/hoedown.js)
 const EXTRA505 = ['Dorothy, I guess that means we’re not in Kansas anymore', 'Dost thou truly wish to abandon Hope? All is not yet lost...',
   'Abandon Ship? Abandon Ship! All hands abandon ship! Women and children first!', 'Do you really want to evacuate %s? It\'s a profitable colony!',
@@ -977,7 +977,7 @@ const TEXT405 = [
   'You have abandoned %s.',
   'You have colonized %s.',
   'You have completely terraformed %s.',
-  'You have conquered the galaxy!',
+  'Congratulations! You have conquered the galaxy!',
   'You have formed an alliance with %s.',
   'You have found a wealth of precious metals and have increased your savings by %s.',
   'You have improved your recycling program.  You can now get more metal from scrapped ships.',

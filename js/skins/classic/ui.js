@@ -174,7 +174,9 @@ const Prefs = { celsius: false, important: false, review: false, hints: true, au
   // the version's own preferences (rs.options, 1.2 and 2.0): battle speed in
   // ticks a shot (null: the version's default), fully animated battles,
   // event messages shown, the polling time in seconds (null: the default)
-  battleSpeed: null, fullAnim: true, showMsgs: true, poll: null };
+  battleSpeed: null, fullAnim: true, showMsgs: true, poll: null,
+  // 5.0.5's Auto Play window's own settings (openAutoPlay505)
+  auto505: null };
 try { const s = JSON.parse(localStorage.getItem('ho5.prefs') || '{}'); if (s.sound === false) Sound.on = false; if (s.music) Sound.music = true; for (const k in Prefs) if (s[k] != null) Prefs[k] = s[k]; } catch (e) {}
 function savePrefs() { try { localStorage.setItem('ho5.prefs', JSON.stringify(Object.assign({ sound: Sound.on, music: Sound.music }, Prefs))); } catch (e) {} }
 // rs.celsius: the version showed temperatures in °C, to a tenth (1.2, the
@@ -1727,6 +1729,9 @@ function awardMasterPoints(byComputer) {
   const after = rankOf(pr.points);
   // the Palm OS names a star at a new rank (rs.nameAStar.when 'rank', tFRM 2900)
   const NS = RS.nameAStar, named = NS && NS.when === 'rank' && !NS.inRank ? () => openNameStar() : null;
+  // rs.rankAfterWin (5.0.5, FUN_10060580): the rank window comes after the
+  // You Won window, which the winner's report opens (openWinWindows)
+  if (after > before && RS.rankAfterWin && RS.conquered && !G.conqueredSeen && !byComputer) { G.rankAfter = after; return; }
   if (after > before) setTimeout(() => showRank(after, named), 300);
 }
 // Game Center (rs.gameCenter, iOS 1.2.9): the app keeps master points and
@@ -1767,14 +1772,17 @@ function openGameCenter() {
 }
 function showRank(i, then) {
   const R = HO.DATA.ranks[i];
+  // 5.0.5's rank window has the star-name field itself (rs.nameAStar.inRank,
+  // FUN_1005e2b0, PPob 156): OK with a name keeps it, unless it is taken (the
+  // alert, and the window stays); OK blank or Cancel names none. Its words:
+  // NS.title, the ability or NS.allEarned, NS.cancel and NS.ok
+  const NS = G && HO.rules(G).nameAStar, inRank = NS && NS.when === 'rank' && NS.inRank;
   const body = el('div', { class: 'rank' },
     el('img', { src: A.jpg[i], alt: '' }),
     el('p', null, 'Congratulations! You have achieved the rank of:'), el('h3', null, R[0]));
-  if (R[2]) body.append(el('p', null, `You have earned the ability to ${R[2]}.`));
-  // 5.0.5's rank window has the star-name field itself (rs.nameAStar.inRank,
-  // FUN_1005e2b0): OK with a name keeps it, unless it is taken (the alert,
-  // and the window stays); OK blank or Cancel names none
-  const NS = G && HO.rules(G).nameAStar, inRank = NS && NS.when === 'rank' && NS.inRank;
+  // the ability (STR# 6003.20), or NS.allEarned (5.0.5: pane 3, under the star's field)
+  const ability = R[2] ? el('p', null, `You have earned the ability to ${R[2]}.`) : inRank && NS.allEarned ? el('p', null, NS.allEarned) : null;
+  if (ability && !inRank) body.append(ability);
   if (inRank) {
     const inp = el('input', { name: 'star', maxlength: NS.max || 11, autocomplete: 'off', 'aria-label': 'Star name' }), err = el('p', { class: 'note', role: 'alert' });
     const ok = () => {
@@ -1783,11 +1791,11 @@ function showRank(i, then) {
       if (n) { keepStar(NS, G.rules, n); toast(`“${n}” will be among the stars of your next galaxies.`); }
       closeModal(); if (then) then();
     };
-    body.append(el('form', { class: 'newgame namestar', onsubmit: (e) => { e.preventDefault(); ok(); } }, el('p', null, NS.text), el('label', null, el('span', null, 'Star name'), inp), err,
-      el('div', { class: 'btns right' }, el('button', { type: 'button', class: 'quiet', onclick: () => { closeModal(); if (then) then(); } }, 'Cancel'), el('button', { type: 'submit' }, 'OK'))));
+    body.append(el('form', { class: 'newgame namestar', onsubmit: (e) => { e.preventDefault(); ok(); } }, el('p', null, NS.text), el('label', null, el('span', null, 'Star name'), inp), err, ability,
+      el('div', { class: 'btns right' }, el('button', { type: 'button', class: 'quiet', onclick: () => { closeModal(); if (then) then(); } }, NS.cancel || 'Cancel'), el('button', { type: 'submit' }, NS.ok || 'OK'))));
   } else body.append(el('div', { class: 'btns right' }, el('button', { onclick: () => { closeModal(); if (then) then(); } }, 'OK')));
   Sound.play(7021);
-  modal('New rank', body, { cls: 'mid' });
+  modal(inRank && NS.title || 'New rank', body, { cls: 'mid' });
 }
 function openRanks() {
   const pr = profile(), cur = rankOf(pr.points), R = HO.DATA.ranks || [];
@@ -2082,7 +2090,8 @@ function takeSeat(id) {
 function modal(title, content, opts) {
   opts = opts || {};
   closeModal();
-  const win = el('div', { class: 'win ' + (opts.cls || ''), role: 'dialog', 'aria-modal': 'true', 'aria-label': title },
+  // (a window with no title bar, as the originals' alerts: opts.label names it)
+  const win = el('div', { class: 'win ' + (opts.cls || '') + (title ? '' : ' notitle'), role: 'dialog', 'aria-modal': 'true', 'aria-label': title || opts.label || null },
     el('div', { class: 'wtitle' }, el('button', { class: 'close', 'aria-label': 'Close', onclick: closeModal }), el('span', null, title)),
     el('div', { class: 'wbody' }, content));
   const back = el('div', { class: 'scrim', onclick: (e) => { if (e.target === back && !opts.sticky) closeModal(); } }, win);
@@ -3135,8 +3144,25 @@ function openFixSpending() {
   step();
   if (UI.modal) next.focus();
 }
+// the version's own words for a window (rs.windowWords, 5.0.5: its PPobs)
+const winWords = (k) => (G && (HO.rules(G).windowWords || {})[k]) || null;
 function openDip() {
   const p = me();
+  // 5.0.5's Dip Into Savings (PPob 157): the question, a slider standing up,
+  // 30% at the top, the note, Cancel and OK
+  const W = winWords('dip');
+  if (W) {
+    const max = HO.rules(G).dipMax || 100;
+    const out = el('b', null, (p.dip || 0) + '%');
+    const f = el('form', { class: 'origwin dip505', onsubmit: (e) => { e.preventDefault(); const v = +new FormData(f).get('dip'); const rs = HO.rules(G); if (rs.dipSet) rs.dipSet(G, p, v); else p.dip = v; closeModal(); renderPanel(); save(); } },
+      el('div', { class: 'dipbox' }, el('p', null, W.text),
+        el('div', { class: 'dipslider' }, el('input', { name: 'dip', type: 'range', min: 0, max, step: 1, value: p.dip || 0, 'aria-label': W.title, oninput: (e) => { out.textContent = e.target.value + '%'; } }),
+          el('div', { class: 'dipmarks' }, ...W.marks.map(m => el('span', null, m))))),
+      el('p', { class: 'note' }, W.note, ' ', out),
+      el('div', { class: 'btns right' }, el('button', { type: 'button', class: 'quiet', onclick: closeModal }, W.cancel), el('button', { type: 'submit' }, W.ok)));
+    modal(W.title, f, { cls: 'small' });
+    return;
+  }
   const f = el('form', { class: 'newgame', onsubmit: (e) => { e.preventDefault(); const v = +new FormData(f).get('dip'); const rs = HO.rules(G); if (rs.dipSet) rs.dipSet(G, p, v); else p.dip = v; closeModal(); renderPanel(); save(); } });
   const out = el('b', null, (p.dip || 0) + '%');
   f.append(el('label', null, el('span', null, 'Each turn, move this share of your savings into the budget'),
@@ -3146,6 +3172,30 @@ function openDip() {
 }
 function openSurrender() {
   const p = me();
+  // 5.0.5's Surrender (PPob 147, FUN_1005d5a0): every player in the menu,
+  // yourself and those out greyed, then "No One"; picked: the one you are
+  // surrendering to, else "No One". OK the first time asks Alert 2; Cancel
+  // while surrendering takes it back (Alert 3)
+  const W = winWords('surrender');
+  if (W) {
+    const cur = p.surrenderTo;
+    const sel = el('select', { name: 'to', 'aria-label': W.text }, ...G.players.map(q => el('option', { value: q.id, disabled: q.id === ME || !q.alive || q.surrendered ? 'disabled' : false, selected: cur === q.id ? 'selected' : false }, q.name)),
+      el('option', { disabled: 'disabled' }, '-'), el('option', { value: -1, selected: cur == null || cur === -1 ? 'selected' : false }, W.noOne));
+    const set = (to) => { HO.surrender(G, ME, to); save(); renderPanel(); };
+    const f = el('form', { class: 'newgame', onsubmit: (e) => {
+      e.preventDefault();
+      const to = +sel.value;
+      closeModal();
+      if (cur == null) confirmBox(HO.say(G, HO.DATA.alerts[1] || 'Do you really want to surrender?'), () => set(to));
+      else if (to !== cur) set(to);
+    } }, el('p', null, W.text), sel,
+    el('div', { class: 'btns right' }, el('button', { type: 'button', class: 'quiet', onclick: () => {
+      closeModal();
+      if (cur != null) { set(null); toast(HO.say(G, HO.DATA.alerts[2] || 'You are no longer surrendering to anyone.')); } // (engine surrender reports it too)
+    } }, W.cancel), el('button', { type: 'submit' }, W.ok)));
+    modal(W.title, f, { cls: 'small' });
+    return;
+  }
   if (p.surrenderTo != null) { confirmBox('You are surrendering at the end of this turn. Take it back?', () => { HO.surrender(G, ME, null); save(); }); return; }
   const sel = el('select', { name: 'to' }, ...others().map(q => el('option', { value: q.id }, q.name)), el('option', { value: -1 }, 'No one'));
   const f = el('form', { class: 'newgame', onsubmit: (e) => { e.preventDefault(); HO.surrender(G, ME, +sel.value); closeModal(); save(); toast('You will surrender at the end of this turn.'); } });
@@ -3178,7 +3228,10 @@ function openFleetList() {
     return el('tr', { class: 'click' + (f.scrap301 ? ' scrap' : ''), title: f.scrap301 ? markedLine() : null, onclick: () => { UI.selFleet = f.id; UI.sel = f.star != null ? f.star : f.to; closeModal(); renderPanel(); draw(); } },
       el('td', null, HO.fleetLabel(G, f)), el('td', null, where), el('td', null, f.scrap301 ? 'to be scrapped' : go), el('td', null, f.sat ? '' : `${Math.floor(f.fuel)}/${HO.fleetMaxRange(G, f)}`));
   });
-  modal('All your fleets', mine.length ? table(['Fleet', 'Where', 'Going to', 'Fuel'], rows) : el('p', null, 'You have no fleets.'), { cls: 'mid' });
+  // 5.0.5's List All Fleets (PPob 166): its title and its line under the list
+  const W = winWords('fleets');
+  const list = mine.length ? table(['Fleet', 'Where', 'Going to', 'Fuel'], rows) : el('p', null, 'You have no fleets.');
+  modal(W ? W.title : 'All your fleets', W ? el('div', null, list, el('p', { class: 'note' }, W.note)) : list, { cls: 'mid' });
 }
 function openScrapTypes() {
   if (skinWindow('types')) return;
@@ -3196,7 +3249,9 @@ function openScrapTypes() {
       el('td', null, shipImgEl(d, 18), ' ', d.name), el('td', null, HO.TYPES[d.type].name), el('td', null, String(count[d.id] || 0)),
       el('td', null, check ? el('label', { class: 'chk' }, el('input', { type: 'checkbox', checked: d.scrap301 ? 'checked' : false, onchange: () => flip(d) }), el('span', null, scrapWords('type')[0]))
         : el('button', { class: 'quiet', onclick: () => flip(d) }, scrapWords('type')[d.scrap301 ? 1 : 0]))));
-    modal('Scrap ship types', el('div', null, el('p', { class: 'sub' }, `A type marked here is scrapped at the end of the turn, with every ship of it, and frees an assembly line${HO.rules(G).maxDesigns ? ` (you can have ${HO.rules(G).maxDesigns})` : ''}. Until then you can take the mark off.`),
+    // 5.0.5's Scrap Ship Types (PPob 165): its title and its two lines
+    const W = winWords('scrapTypes');
+    modal(W ? W.title : 'Scrap ship types', el('div', null, ...(W ? W.lines.map(t => el('p', { class: 'sub' }, t)) : [el('p', { class: 'sub' }, `A type marked here is scrapped at the end of the turn, with every ship of it, and frees an assembly line${HO.rules(G).maxDesigns ? ` (you can have ${HO.rules(G).maxDesigns})` : ''}. Until then you can take the mark off.`)]),
       table(['Type', 'Class', 'Ships', ''], rows)), { cls: 'mid' });
     return;
   }
@@ -3281,6 +3336,7 @@ function playOneTurn() {
 // Auto Play: keep ending turns until something interesting happens
 function openAutoPlay() {
   if (HO.rules(G).autoPlayWindow === 'ios') return openAutoPlayIOS();
+  if (HO.rules(G).autoPlayWindow === '505') return openAutoPlay505();
   const f = el('form', { class: 'newgame', onsubmit: (e) => {
     e.preventDefault();
     const d = Object.fromEntries(new FormData(f).entries());
@@ -3330,6 +3386,40 @@ function openAutoPlayIOS() {
       // Play One Turn: the computer plays this one turn for you
       el('button', { type: 'button', class: 'quiet', onclick: () => { if (sl) sl.apply(); closeModal(); playOneTurn(); } }, 'Play One Turn'),
       el('button', { type: 'submit' }, 'Start')));
+  modal('Auto Play', f, { cls: 'mid' });
+}
+// 5.0.5's Auto Play window (rs.autoPlayWindow '505'; FUN_1005ec40, PPob 159,
+// docs/505-windows.md): the "Auto Play" check box over the rest; "Have
+// Computer Play For Me" with the Friendly-Aggressive and No Defense-Dig In
+// sliders under it (enabled only when it is picked), "Just End My Turns";
+// "Turn Off When Something Interesting Happens" ("Battles, colonizations,
+// tech level changes, etc."); "Click through messages every:" 0-10 Seconds;
+// Cancel and OK. Its first settings are the preferences' (rs.autoPlayDefaults:
+// FUN_10072490); the remake keeps the window's in this browser (Prefs.auto505).
+function openAutoPlay505() {
+  const D = Object.assign({ on: true, computer: true }, HO.rules(G).autoPlayDefaults || { stop: true, every: 4 }, Prefs.auto505 || {});
+  const sl = autoPlaySliders();
+  const secs = el('b', null, String(D.every));
+  const radio = (value, text) => el('label', { class: 'chk' }, el('input', { type: 'radio', name: 'mode', value, checked: (value === 'computer') === !!D.computer ? 'checked' : false }), el('span', null, text));
+  const f = el('form', { class: 'origwin autoplay505', onsubmit: (e) => {
+    e.preventDefault();
+    const d = Object.fromEntries(new FormData(f).entries());
+    const o = { on: !!d.on, computer: d.mode === 'computer', stop: !!d.stop, every: +d.every || 0 };
+    Prefs.auto505 = o; savePrefs();
+    sl.apply();
+    closeModal();
+    if (o.on) runAutoPlay({ turns: Infinity, computer: o.computer, won: o.stop, lost: o.stop, news: o.stop, every: o.every, stopButton: true });
+  } });
+  const sync = () => { const c = f.querySelector('input[name=mode]:checked'); for (const i of sl.box.querySelectorAll('input')) i.disabled = !c || c.value !== 'computer'; };
+  f.append(el('fieldset', { class: 'opts' }, el('legend', null, el('label', { class: 'chk' }, el('input', { type: 'checkbox', name: 'on', checked: D.on ? 'checked' : false }), el('span', null, 'Auto Play'))),
+    radio('computer', 'Have Computer Play For Me'), sl.box, radio('end', 'Just End My Turns'), el('hr'),
+    el('label', { class: 'chk' }, el('input', { type: 'checkbox', name: 'stop', checked: D.stop !== false ? 'checked' : false }), el('span', null, 'Turn Off When Something Interesting Happens')),
+    el('p', { class: 'note' }, 'Battles, colonizations, tech level changes, etc.'),
+    el('label', null, el('span', null, 'Click through messages every:'),
+      el('span', { class: 'slider' }, el('input', { type: 'range', name: 'every', min: 0, max: 10, value: D.every, 'aria-label': 'Seconds', oninput: (e) => { secs.textContent = e.target.value; } }), el('output', null, secs, ' ', 'Seconds')))),
+    el('div', { class: 'btns right' }, el('button', { type: 'button', class: 'quiet', onclick: closeModal }, 'Cancel'), el('button', { type: 'submit' }, 'OK')));
+  f.addEventListener('change', sync);
+  sync();
   modal('Auto Play', f, { cls: 'mid' });
 }
 function runAutoPlay(o) {
@@ -3413,16 +3503,42 @@ function openRadicalHand() {
   const RH = G && HO.rules(G).radicalHand; if (!RH || G.over) return;
   const cards = RH.cards(G, me());
   if (!cards.length || (RH.full && cards.length < RH.full)) { toast(cards.length ? 'Your radical researchers have fewer than four projects: none can be cancelled.' : 'Your radical researchers have no projects yet.'); return; }
-  let sel = -1;
-  const go = el('button', { disabled: true, onclick: () => { if (sel < 0) return; RH.discard(G, me(), cards[sel].id); save(); closeModal(); Sound.play(7002); toast('That project has been cancelled.'); } }, 'Cancel Project');
-  const body = el('div', { class: 'hall radhand' },
-    el('p', { class: 'htitle' }, 'Your radical researchers are working on these projects. You may cancel one; another takes its place after the next discovery.'),
-    hallListBox(cards.map(c => [HO.say(G, c.text)]), '1fr', sel, (i) => { sel = i; go.disabled = false; }),
-    el('div', { class: 'btns right' }, go, el('button', { onclick: closeModal }, 'OK')));
-  modal('Radical Research', body, { cls: 'mid' });
+  const W = RH.words;
+  if (!W) {
+    let sel = -1;
+    const go = el('button', { disabled: true, onclick: () => { if (sel < 0) return; RH.discard(G, me(), cards[sel].id); save(); closeModal(); Sound.play(7002); toast('That project has been cancelled.'); } }, 'Cancel Project');
+    const body = el('div', { class: 'hall radhand' },
+      el('p', { class: 'htitle' }, 'Your radical researchers are working on these projects. You may cancel one; another takes its place after the next discovery.'),
+      hallListBox(cards.map(c => [HO.say(G, c.text)]), '1fr', sel, (i) => { sel = i; go.disabled = false; }),
+      el('div', { class: 'btns right' }, go, el('button', { onclick: closeModal }, 'OK')));
+    modal('Radical Research', body, { cls: 'mid' });
+    return;
+  }
+  // the version's own window (rs.radicalHand.words): W.prompt above the four
+  // programs, each a choice beside its picture (W.pic); W.keep, a last choice
+  // that cancels nothing, picked at first (5.0.5, the Palm, iOS); without it
+  // nothing is picked until one is clicked (4.0.5). OK cancels the program
+  // picked.
+  const name = 'radpick';
+  const row = (value, text, pic) => el('label', { class: 'radrow' + (pic ? '' : ' keep') },
+    el('input', { type: 'radio', name, value, checked: W.keep && value === 'keep' ? 'checked' : false, onchange: () => Sound.play(7001) }),
+    pic && A.img[pic] ? el('img', { class: 'radpic', src: A.img[pic], alt: '' }) : null, el('span', null, text));
+  const f = el('form', { class: 'radhand radwin', onsubmit: (e) => {
+    e.preventDefault();
+    const v = (f.querySelector(`input[name=${name}]:checked`) || {}).value;
+    closeModal();
+    if (v == null || v === 'keep') return;
+    RH.discard(G, me(), cards[+v].id); save(); Sound.play(7002);
+  } },
+  W.prompt ? el('p', null, W.prompt) : null,
+  ...cards.map((c, i) => row(String(i), HO.say(G, c.text), W.pic)),
+  W.keep ? row('keep', W.keep, null) : null,
+  el('div', { class: 'btns right' }, el('button', { type: 'submit' }, W.ok || 'OK')));
+  modal(W.title || '', f, { cls: 'mid', label: 'Radical Research' });
 }
 // Winning (rs.conquered, rs.nameAStar): clicking the winner's report opens
-// 4.0.5's "You have conquered the galaxy!" window with the won picture
+// the "Congratulations! You have conquered the galaxy!" window with the won
+// picture (4.0.5; 5.0.5, with the rank window after it: rs.rankAfterWin)
 // (dialog 377), then Name a Star (dialog 378; 2.0's NAMESTARDLGPROC, 1.2's
 // and 3.0.1's NameAStar). The Palm OS names a star at a new rank (tFRM 2900).
 // The names are kept in this browser for the version (localStorage
@@ -3511,12 +3627,16 @@ function openWinWindows(done) {
   const rs = HO.rules(G);
   if (rs.conquered && !G.conqueredSeen) {
     G.conqueredSeen = true; save();
-    const body = el('div', { class: 'conquered' }, A.img.p3030 ? el('img', { src: A.img.p3030, alt: '' }) : null, el('p', null, rs.conquered),
+    const body = el('div', { class: 'conquered' }, el('p', null, rs.conquered), A.img.p3030 ? el('img', { src: A.img.p3030, alt: '' }) : null,
       el('div', { class: 'btns right' }, el('button', { onclick: () => { closeModal(); openWinWindows(done); } }, 'OK')));
     Sound.play(7021);
-    modal('You won', body, { cls: 'small', sticky: true });
+    // rs.conqueredTitle: '' for a window with no title bar (4.0.5's dialog
+    // 377, 5.0.5's PPob 150)
+    modal(rs.conqueredTitle != null ? rs.conqueredTitle : 'You won', body, { cls: 'small', sticky: true, label: 'You won' });
     return;
   }
+  // a new rank's window, kept for after the You Won window (rs.rankAfterWin)
+  if (G.rankAfter != null) { const r = G.rankAfter; delete G.rankAfter; save(); showRank(r, () => openWinWindows(done)); return; }
   if (rs.nameAStar && rs.nameAStar.when === 'win' && !G.starNamed) { openNameStar(() => { G.starNamed = true; save(); if (done) done(); }); return; }
   if (done) done();
 }
@@ -5465,6 +5585,7 @@ window.addEventListener('DOMContentLoaded', () => {
     shipPic, shipImgEl, starLook, fleetOrder, curFleet, centerOn, zoomAt, resize, map: () => ({ w: mapW, h: mapH, ready: !!cv }),
     fit() { UI.fitted = false; fit(); draw(); }, clampView,
     openBuild, openSplit, openOrganize, organizeStyle, openPlayers, openScrapTypes, openBattle, lastBattles, battleName, openReports, openAbout, openHelp,
+    openRadicalHand, showRank, openWinWindows, // (the originals' own windows, for the tests)
     newGameDialog, titleScreen, hideTitle, continueChecked, importGame, doEndTurn, flipBarScale, marksScrap, scrapWords, toggleScrapFleet,
     verOpts, modern, hotSeat,
     // (and the windows tools/ui-lang-audit.js opens in every skin and language)

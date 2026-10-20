@@ -269,9 +269,12 @@ function aiTurn(G, p) {
   if (!p.alive || p.surrendered) return; // player +0x34
   // CONFIRMED (FUN_10066bb0; Palm FUN_0002d14a): for a human the auto play
   // settings come first: aggressiveness a tenth of the Friendly-Aggressive
-  // slider, colonies defended the Dig In-No Defense slider (js/rules-original.js
-  // autoPlaySettings505; only once the player has set them in the remake)
-  if (p.human && p.autoPrefs505) { ai.aggr = trunc(p.autoPrefs505.aggr / 10); ai.colDef = p.autoPrefs505.colDef; }
+  // slider, colonies defended the No Defense-Dig In slider (js/rules-original.js
+  // autoPlaySettings505): the player's, or the preferences' defaults, 50 and
+  // 50 (CPrefs FUN_10072490 +0x211, +0x212; Palm FUN_0002b274; iOS CPrefs
+  // 0x10003dbd8: rs.autoPlayDefaults)
+  const AP = p.human && (p.autoPrefs505 || E.rules(G).autoPlayDefaults);
+  if (AP) { ai.aggr = trunc(AP.aggr / 10); ai.colDef = AP.colDef; }
   const auto = !!p.human;
   const Y = G.year + (auto ? 0 : 10);
   // CONFIRMED (FUN_10081cc0): the money to share out is the net (player
