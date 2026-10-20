@@ -425,7 +425,12 @@ const rs = Object.assign(base, {
   // Game Over (tFRM 3400) are its own, so not 5.0.5's List All Fleets line,
   // You Won window or rank after it
   windowWords: { dip: O.windowWords.dip, surrender: O.windowWords.surrender, scrapTypes: O.windowWords.scrapTypes },
-  conquered: null, rankAfterWin: false,
+  rankAfterWin: false,
+  // CONFIRMED (FUN_00041604 on report 0x436; the Game Over form, tFRM 3400,
+  // FUN_00071e06): tSTL 1001's first line, "Congratulations! You have
+  // conquered the galaxy!" (the demo's third adds "That's no small feat in
+  // demo mode."), the won picture (Tbmp 9403, the cowboy on his planet) and OK
+  youWon: { title: 'Game Over', text: 'Congratulations! You have conquered the galaxy!', ok: 'OK', align: 'right', pic: 'p3030' },
   // CONFIRMED (FUN_00041604 on report 0x433; the form FUN_00071d66,
   // FUN_00071e06): the Game Over form, tFRM 3400 (156 x 156, titled "Game
   // Over"), with tSTL 1001's "Unfortunately, you have been eliminated from the

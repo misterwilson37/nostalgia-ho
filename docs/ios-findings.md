@@ -835,7 +835,7 @@ the groups of players who aren't the viewer's allies aren't drawn at all.
   the dialog's close button (`button-check.png`; the cancel button, `button-x.png`,
   hidden); then `doUpdateMPs` (Game Center's "lost a game"). Report 0x436 opens
   `youWon` the same way (Misc Strings 109, `Game_You_Won.png`). Built: `rs.youLost`, with
-  the check-mark button (`okPic`); `youWon` is not (`rs.conquered` null).
+  the check-mark button (`okPic`); `youWon` the same (`rs.youWon`: "Congratulations! You have conquered the galaxy!", `Game_You_Won.png`, the check mark). Android the same.
 
 ## Still open
 

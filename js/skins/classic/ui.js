@@ -1645,7 +1645,7 @@ function renderMsg0() {
   if (G.over && UI.msgIdx >= UI.inbox.length) {
     box.append(el('div', { class: 'card end' }, el('img', { src: A.img[G.winner === ME ? 'p3030' : 'p3040'], alt: '' }),
       el('div', null, el('p', null, G.winner === ME ? 'You conquered the galaxy.' : 'The game is over.'),
-        winPending() ? el('button', { onclick: () => openWinWindows(renderMsg) }, HO.rules(G).conquered && !G.conqueredSeen ? 'You won…' : 'Name a star…') : null, ' ',
+        winPending() ? el('button', { onclick: () => openWinWindows(renderMsg) }, youWonWords() && !G.conqueredSeen ? 'You won…' : 'Name a star…') : null, ' ',
         el('button', { onclick: newGameDialog }, 'New game'), ' ',
         el('button', { class: 'quiet', onclick: () => openFeedback('game') }, 'Tell us how it went'))));
     maybeHallOffer();
@@ -1675,13 +1675,15 @@ function renderMsg0() {
     body.append(extra, el('div', { class: 'count' }, `${UI.msgIdx + 1} of ${UI.inbox.length} · click to continue`));
     card.append(body);
     const next0 = () => { if (m.star != null) { UI.sel = m.star; renderPanel(); } UI.msgIdx++; Sound.play(7001); renderMsg(); draw(); };
-    // clicking the winner's report opens the version's win windows first (rs.conquered, rs.nameAStar)
+    // the winner's report has opened the version's win windows as it came up (below); a Next that finds them still pending opens them
     const next = () => winReport(m) && winPending() ? openWinWindows(next0) : next0();
     card.addEventListener('click', guard(next));
     card.addEventListener('keydown', guard((e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); next(); } }));
     if (m.star != null) { UI.sel = m.star; if (modern()) centerOn(m.star); renderPanel(); draw(); }
     box.append(card);
     card.focus({ preventScroll: true });
+    // the winner's report opens the version's You Won window as it comes up, then the rank window and Name a Star (rs.youWon)
+    if (winReport(m) && winPending() && !UI.modal) openWinWindows(() => { if (card.isConnected) card.focus({ preventScroll: true }); });
     // the eliminated player's report opens the version's You Lost window as it comes up (rs.youLost)
     if (lostReport(m) && !m.lostSeen && !UI.modal) { m.lostSeen = true; save(); openYouLost(() => { if (card.isConnected) card.focus({ preventScroll: true }); }); }
     return;
@@ -1740,7 +1742,7 @@ function awardMasterPoints(byComputer) {
   const NS = RS.nameAStar, named = NS && NS.when === 'rank' && !NS.inRank ? () => openNameStar() : null;
   // rs.rankAfterWin (5.0.5, FUN_10060580): the rank window comes after the
   // You Won window, which the winner's report opens (openWinWindows)
-  if (after > before && RS.rankAfterWin && RS.conquered && !G.conqueredSeen && !byComputer) { G.rankAfter = after; return; }
+  if (after > before && RS.rankAfterWin && youWonWords() && !G.conqueredSeen && !byComputer) { G.rankAfter = after; return; }
   if (after > before) setTimeout(() => showRank(after, named), 300);
 }
 // Game Center (rs.gameCenter, iOS 1.2.9): the app keeps master points and
@@ -3684,7 +3686,7 @@ function openRadicalHand() {
   const win = modal(W.title || '', f, { cls: 'mid', label: 'Radical Research', onClose: () => { clearTimeout(timer); } });
   if (RH.timeout) timer = setTimeout(() => { if (UI.modal && UI.modal.contains(f)) f.requestSubmit(); }, RH.timeout * 1000);
 }
-// Winning (rs.conquered, rs.nameAStar): clicking the winner's report opens
+// Winning (rs.youWon, rs.nameAStar): clicking the winner's report opens
 // the "Congratulations! You have conquered the galaxy!" window with the won
 // picture (4.0.5; 5.0.5, with the rank window after it: rs.rankAfterWin)
 // (dialog 377), then Name a Star (dialog 378; 2.0's NAMESTARDLGPROC, 1.2's
@@ -3770,17 +3772,12 @@ function sharedStars(id, NS, kept) {
 }
 const iWon = () => !!G && G.over && (G.winners || [G.winner]).includes(ME);
 const winReport = (m) => m && m.big === 'p3030' && iWon();
-const winPending = () => { const rs = HO.rules(G); return iWon() && ((rs.conquered && !G.conqueredSeen) || (rs.nameAStar && rs.nameAStar.when === 'win' && !G.starNamed)); };
+const winPending = () => { const rs = HO.rules(G); return iWon() && ((youWonWords() && !G.conqueredSeen) || (rs.nameAStar && rs.nameAStar.when === 'win' && !G.starNamed)); };
 function openWinWindows(done) {
   const rs = HO.rules(G);
-  if (rs.conquered && !G.conqueredSeen) {
+  if (youWonWords() && !G.conqueredSeen) {
     G.conqueredSeen = true; save();
-    const body = el('div', { class: 'conquered' }, el('p', null, rs.conquered), A.img.p3030 ? el('img', { src: A.img.p3030, alt: '' }) : null,
-      el('div', { class: 'btns right' }, el('button', { onclick: () => { closeModal(); openWinWindows(done); } }, 'OK')));
-    Sound.play(7021);
-    // rs.conqueredTitle: '' for a window with no title bar (4.0.5's dialog
-    // 377, 5.0.5's PPob 150)
-    modal(rs.conqueredTitle != null ? rs.conqueredTitle : 'You won', body, { cls: 'small', sticky: true, label: 'You won' });
+    openYouWon(() => openWinWindows(done));
     return;
   }
   // a new rank's window, kept for after the You Won window (rs.rankAfterWin)
@@ -3813,6 +3810,32 @@ function youLostWords() {
 }
 const LOST_REPORT = 'You have just been eliminated from the game.';
 const lostReport = (m) => !!(m && m.big === 'p3040' && m.text === LOST_REPORT && youLostWords());
+// You Won (rs.youWon, the same shape as rs.youLost; the window each version
+// opens as the winner's report comes up: 5.0.5's PPob 150, 4.0.5's dialog 377
+// and DLOG 5040, 3.0.1's, 2.0.1's and 1.2's ALRT 5040, 2.0's alert and
+// DOSHO box, the Palm's Game Over form, iOS's EndGameLayer youWon), then the
+// rank window and Name a Star (openWinWindows). The Amiga says
+// T.youWon = false (texte.pff has only the report 626).
+function youWonWords() {
+  if (!G || T.youWon === false) return null;
+  let Y = HO.rules(G).youWon;
+  if (!Y) return null;
+  const os = document.documentElement.dataset.os;
+  if (Y.looks && Y.looks[os]) Y = Object.assign({}, Y, Y.looks[os]);
+  if (Y.bw && HO.screenBW()) Y = Object.assign({}, Y, Y.bw);
+  return Y;
+}
+function openYouWon(done) {
+  const Y = youWonWords();
+  if (!Y) { if (done) done(); return; }
+  const pic = A.img[Y.pic || 'p3030'], okPic = Y.okPic && A.img[(T.prefix || '') + Y.okPic];
+  const ok = el('button', { class: okPic ? 'picbtn' : null, 'aria-label': okPic ? (Y.ok || 'OK') : null, onclick: () => closeModal() },
+    okPic ? el('img', { src: okPic, alt: '' }) : (Y.ok || 'OK'));
+  const body = el('div', { class: 'conquered youlost' }, el('p', null, Y.text), pic ? el('img', { src: pic, alt: '' }) : null,
+    el('div', { class: 'btns ' + (Y.align || 'right') }, ok));
+  Sound.play(7021);
+  modal(Y.title != null ? Y.title : 'You won', body, { cls: 'small', sticky: true, label: 'You won', onClose: done });
+}
 function openYouLost(done) {
   const Y = youLostWords();
   if (!Y) { if (done) done(); return; }
@@ -4006,6 +4029,7 @@ function openReports() {
   const rows = ms.map(m => el('li', { class: 'click', tabindex: 0, onclick: () => {
     closeModal();
     if (winReport(m) && winPending()) { openWinWindows(() => renderMsg()); return; }
+    if (winReport(m) && youWonWords()) { openYouWon(); return; }
     if (lostReport(m)) { openYouLost(); return; }
     if (m.battle) { openBattle(m.battle); return; }
     if (m.star != null) { UI.sel = m.star; centerOn(m.star); renderPanel(); draw(); }
@@ -5811,7 +5835,7 @@ window.addEventListener('DOMContentLoaded', () => {
     shipPic, shipImgEl, starLook, fleetOrder, curFleet, centerOn, zoomAt, resize, map: () => ({ w: mapW, h: mapH, ready: !!cv }),
     fit() { UI.fitted = false; fit(); draw(); }, clampView,
     openBuild, openSplit, openOrganize, organizeStyle, openPlayers, openScrapTypes, openBattle, lastBattles, battleName, openReports, openAbout, openHelp,
-    openRadicalHand, showRank, openWinWindows, openYouLost, // (the originals' own windows, for the tests)
+    openRadicalHand, showRank, openWinWindows, openYouWon, openYouLost, // (the originals' own windows, for the tests)
     newGameDialog, titleScreen, hideTitle, continueChecked, importGame, doEndTurn, flipBarScale, marksScrap, scrapWords, toggleScrapFleet,
     verOpts, modern, hotSeat,
     // (and the windows tools/ui-lang-audit.js opens in every skin and language)

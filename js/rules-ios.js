@@ -359,7 +359,12 @@ const rs = Object.assign(base, {
   // 5.0.5's names)
   radicalHand: Object.assign({}, O.radicalHand, { words: { title: 'Radical Research', keep: 'Don\'t Cancel Any Programs', ok: 'OK', pic: 'm9010' } }),
   // (its other windows are its own: not 5.0.5's words, You Won window or rank after it)
-  windowWords: null, conquered: null, rankAfterWin: false,
+  windowWords: null, rankAfterWin: false,
+  // CONFIRMED (report 0x436, +[EndGameLayer youWon] 0x1bb9fc / iOS 0x10009cd18
+  // by name and size, setup: 0x10009cd90): the same dialog as You Lost, with
+  // Misc Strings 109 "Congratulations! You have conquered the galaxy!",
+  // Game_You_Won.png and the check-mark button. Android 1.2.8 the same
+  youWon: { text: 'Congratulations! You have conquered the galaxy!', ok: 'OK', okPic: 'button-check', title: '', align: 'center' },
   // CONFIRMED (report 0x433 in the message view's action, 0x10001394c ff.:
   // auto play stops, then +[EndGameLayer youLost], setup: 0x10009cd90): a
   // dialog with no title, Misc Strings 110 "Unfortunately, you have been

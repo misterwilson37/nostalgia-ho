@@ -394,7 +394,7 @@ dialogs have no caption bar.
 **Built since:** naming a star after a win (dialog 378, `FUN_00456047`: "You won the game,
 so you get to name a star", kept in a list of four for later galaxies; `rs.nameAStar`) and
 the "You have conquered the galaxy!" window with its picture (dialog 377, `FUN_0044bf5a`;
-`rs.conquered`), opened by clicking the winner's report; the radical card window
+`rs.youWon`), opened as the winner's report comes up; the radical card window
 (`rs.radicalHand`, strings 821-837) and the auto play settings (`rs.autoPlaySettings`).
 
 **Their layouts** (CONFIRMED, October 2026; `docs/405-windows.md`, both programs' dialogs,
@@ -417,10 +417,12 @@ read with `tools/extract/ppob.py` and `tools/extract/windlg.py`):
   unknown) is not followed: the 5 minutes stand.
 - "You have conquered the galaxy!": Windows dialog 377, "Congratulations!  You have
   conquered the galaxy!" (the Mac's DITL 5040, one space), the won picture, OK, no title.
-  Built (`rs.conquered`, `rs.conqueredTitle`). (Not yet followed: `FUN_00470dec` sets the
-  dialog's line itself before it opens, +0x9c, to "Congratulations! You conquered the
-  Galaxy!" (0x59e364), and its picture, +0x98, to bitmap 3000: the template's words never
-  show on Windows.)
+  Built (`rs.youWon`). `FUN_00470dec` sets the dialog's line itself before it opens, +0x9c,
+  to "Congratulations! You conquered the Galaxy!" (0x59e364), and its picture, +0x98, to
+  bitmap 3000: the template's words never show on Windows, so the remake shows those
+  (the Mac's DITL 5040, "Congratulations! You have conquered the galaxy!", PICT 3030, 5041
+  and 3530 in black and white). The window opens as the report comes up (and from the
+  report list), like You Lost, then Name a Star.
 - **You Lost** (CONFIRMED, October 2026): Windows `FUN_00470dec` on report 0x432 (the
   player's own "You have just been eliminated from the game."): the same dialog 377
   (`FUN_0044bf5a`, no title), its line set to "Unfortunately, you have been eliminated from

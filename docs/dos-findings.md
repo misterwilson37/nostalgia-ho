@@ -754,6 +754,18 @@ a teal End Turn button, after the DOS game's `d5000` button picture.
 
 ## Built later (October 2026)
 
+- **You Won** (CONFIRMED, October 2026): the winner's report opens, in Windows 3.1, alert
+  5040 (type 32513), "Congratulations!  You have conquered the galaxy!" and OK; in DOS the
+  box "YouWonDlgBox" (strings next to "YouLostDlgBox" in the unpacked DOSHO.EXE),
+  "Congratulations!" / "You have conquered" / "the galaxy!" on three lines with the won
+  picture `d5040` (the button, OK: LIKELY); then Name a Star. German: "Glückwunsch! / Sie
+  haben die / Galaxis erobert!". Mac 2.0.1, 3.0.1 and 1.2: ALRT/DITL 5040 "YOU WON!"
+  (5041 on fewer than 16 colours), "Congratulations! You have conquered the galaxy!" over
+  PICT 3030 (3530) and OK; 1.2F "Bravo, vous venez de conquérir la Galaxie!" (5041
+  "galaxie"); 3.0.1's `DoMessageAction` @161e44 on report 0x42c: the alert, `NameAStar`,
+  `AddToHall(1000)`, `MarkEndGameDone`. Built: `rs.youWon`. **The Amiga** has none: 626
+  "Glückwunsch! Sie haben das Spiel gewonnen." is the report only (633-634 are the
+  battle's, 740 the Spielervergleich's). The Amiga skin says `youWon: false`.
 - **You Lost** (CONFIRMED, October 2026): the dying player's own "You have just been
   eliminated from the game." (report 0x41f) opens the program's loss box. Windows 3.1
   (`FUN_10c0_12de`, its jump table @10c0:13a2, @10c0:1392): alert 5050 (resource type

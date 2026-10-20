@@ -2100,6 +2100,11 @@ E.registerRules('301', Object.assign({}, D, {
   // and white) and "Oh, well…"; then AddToHall(1001), the Hall of Shame, and
   // MarkEndGameDone. A player back in and out again sees it again
   youLost: { text: 'Unfortunately, you have been eliminated from the game…', ok: 'Oh, well…', title: '', align: 'center' },
+  // CONFIRMED (DoMessageAction @161e44 on report 0x42c, the win: Alert, then
+  // NameAStar, AddToHall(1000), MarkEndGameDone; ALRT 5040 "YOU WON!", 5041 on
+  // fewer than 16 colours): no title, "Congratulations! You have conquered the
+  // galaxy!" beside PICT 3030 (3530) and OK
+  youWon: { text: 'Congratulations! You have conquered the galaxy!', ok: 'OK', title: '', align: 'center' },
   // CONFIRMED (DoGiveThingsDlg @1437e0, DLOG/DITL 6120 "Send Money/Metal",
   // no title bar; InitGTPlayerList @143b00, SetCellsToPlayers @141776): with
   // three gifts given (galaxy +0x1592) alert 5010 with STR# 1020.21 "Sorry,

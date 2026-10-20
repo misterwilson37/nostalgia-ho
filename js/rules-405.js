@@ -2598,12 +2598,14 @@ E.registerRules('405', Object.assign({}, D, {
     discard(G, p, id) { p.hand405 &= ~(1 << id); },
     words: { title: '', prompt: 'You can cancel one research program:', ok: 'OK', pic: 'm9010' },
   },
-  // CONFIRMED (FUN_00470dec, FUN_0044bf5a, dialog 377): clicking the winner's
-  // report opens "Congratulations!  You have conquered the galaxy!" (the
-  // Mac's DITL 5040 with one space) with its picture (the skin's won picture,
-  // p3030) and OK, in a window with no title, then Name a Star (FUN_00456047,
-  // dialog 378)
-  conquered: 'Congratulations! You have conquered the galaxy!', conqueredTitle: '',
+  // CONFIRMED (FUN_00470dec on report 0x436, FUN_0044bf5a, dialog 377): the
+  // winner's report opens the dialog, no title, with its line set by the code
+  // (+0x9c) to "Congratulations! You conquered the Galaxy!" (0x59e364; the
+  // template's own "Congratulations!  You have conquered the galaxy!" never
+  // shows) and its picture (+0x98) to bitmap 3000 (the skin's won picture,
+  // p3030), and OK; it closes itself after 5 minutes (as You Lost); then Name
+  // a Star (FUN_00456047, dialog 378). The Mac (rules-mac405): DLOG 5040
+  youWon: { text: 'Congratulations! You conquered the Galaxy!', ok: 'OK', title: '', align: 'center' },
   // CONFIRMED (FUN_00470dec on report 0x432, the player's "You have just been
   // eliminated from the game."): the same dialog 377 (FUN_0044bf5a, no
   // title), its line set to "Unfortunately, you have been eliminated from the

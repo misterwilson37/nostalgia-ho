@@ -2105,6 +2105,13 @@ E.registerRules('dos', Object.assign({}, O, {
   // as dying (checkElimination above), so the window can come before a
   // colony founded in time brings the player back. The Windows 3.1 look
   // (the skin's win31) shows the Windows alert
+  // CONFIRMED (the win report's alert 5040 in WINHO.EXE, "Congratulations!
+  // You have conquered the galaxy!" and one button, OK; DOSHO.EXE's box
+  // "YouWonDlgBox", its strings in the unpacked image: "Congratulations!" /
+  // "You have conquered" / "the galaxy!" on three lines with the won picture
+  // (d5040); its button, as the lost box's, OK (LIKELY). Then Name a Star
+  youWon: { text: 'Congratulations!\nYou have conquered\nthe galaxy!', ok: 'OK', title: '', align: 'center',
+    looks: { win31: { text: 'Congratulations! You have conquered the galaxy!' } } },
   youLost: { text: 'Unfortunately,\nyou have been\neliminated from\nthe game...', ok: 'OK', title: '', align: 'center',
     looks: { win31: { text: 'Unfortunately, you have been eliminated from the game...', ok: 'Oh Well...' } } },
   // CONFIRMED (FUN_1040_4028, FUN_10e8_0f64, FUN_1020_4711; Mac 2.0.1

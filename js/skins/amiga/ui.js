@@ -1494,6 +1494,10 @@ window.HOTHEME_OVER = {
   // report "Sie werden aus dem Spiel gelöscht." (624) and Spielervergleich's
   // "Sie haben das Spiel im Jahre %ld verloren!" (741), which the skin has
   youLost: false,
+  // nor a You Won window: 626 "Glückwunsch! Sie haben das Spiel gewonnen." is the
+  // report; 633-634 ("Glückwunsch!", "Sie haben gewonnen!") are the battle's, and
+  // 740 the Spielervergleich's
+  youWon: false,
 };
 if (!window.HOSKINS_INLINE) document.write('<script src="js/skins/dos/ui.js"><\/script>');
 })();

@@ -538,6 +538,11 @@ root.HOUI.add([
 ['Don’t Cancel Any Programs', 'Ne pas annuler aucun programme', 'Kein Programm abbrechen', 'Hiç Bir Programı İptal Etme', 'No cancelar ningún programa', I],
 ['Don\'t Cancel Any Programs', 'Ne pas annuler aucun programme', 'Kein Programm abbrechen', 'Hiç Bir Programı İptal Etme', 'No cancelar ningún programa', I],
 ['Congratulations! You have conquered the galaxy!', 'Félicitations ! Vous avez conquis la galaxie !', 'Glückwunsch! Sie haben die Galaxis erobert!', 'Tebrikler! Galaksiyi fethettin', '¡Enhorabuena! ¡Has conquistado la galaxia!', { fr: 'iOS', de: '~DOS 2.0', tr: 'iOS' }],
+// the You Won windows (rs.youWon: 4.0.5 Windows' "You conquered the Galaxy!"
+// (0x59e364), DOS 2.0's three-line box, whose German is the DOS 2.0's own string
+// 5040; the others say "You have conquered the galaxy!" above)
+['Congratulations! You conquered the Galaxy!', 'Félicitations ! Vous avez conquis la Galaxie !', 'Glückwunsch! Sie haben die Galaxis erobert!', 'Tebrikler! Galaksiyi fethettin', '¡Enhorabuena! ¡Has conquistado la Galaxia!', { fr: '~iOS', de: '~DOS 2.0', tr: '~iOS' }],
+['Congratulations!\nYou have conquered\nthe galaxy!', 'Félicitations !\nVous avez conquis\nla galaxie !', 'Glückwunsch!\nSie haben die\nGalaxis erobert!', 'Tebrikler!\nGalaksiyi\nfethettin', '¡Enhorabuena!\nHas conquistado\nla galaxia!', { fr: '~iOS', de: 'DOS 2.0', tr: '~iOS' }],
 ['Congratulations!', 'Félicitations!', 'Glückwunsch!', 'Tebrikler!', '¡Enhorabuena!', I],
 // the You Lost windows (rs.youLost: 5.0.5's PPob 151, the Macs' ALRT 5050 and
 // 1.2F's own French, 4.0.5's dialog 377, 2.0's alert and box 5050, the Palm's

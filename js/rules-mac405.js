@@ -262,6 +262,11 @@ E.registerRules('mac405', Object.assign({}, W, {
   // AddToHall (the Hall of Shame), MarkEndGameDone and, with every human out,
   // ExploreEverything
   youLost: { text: 'Unfortunately, you have been eliminated from the game…', ok: 'Oh, well…', title: '', align: 'center' },
+  // CONFIRMED (DoMessageAction on the win report; DLOG/DITL 5040 "You Won",
+  // 5041 on fewer than 16 colours: PICT 3030 / 3530, the same words): no
+  // title, "Congratulations! You have conquered the galaxy!" and OK; then Name
+  // a Star
+  youWon: { text: 'Congratulations! You have conquered the galaxy!', ok: 'OK', title: '', align: 'center' },
   // CONFIRMED (DoGiveThingsDlg @103a70, DLOG/DITL 6120 as 3.0.1's,
   // InitGTPlayerList @103d94, SetCellsToPlayers @10188c): Windows' window
   // (js/rules-405.js) in the Mac's list, cells of 45 x 45, the last one given

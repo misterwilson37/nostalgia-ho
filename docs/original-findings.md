@@ -1148,10 +1148,11 @@ What they settle, with the code that opens each:
   won a %d difficulty game and have earned %s master points." is clicked; then the rank
   window): no title bar (WIND proc 1), "Congratulations! You have conquered the galaxy!",
   PICT 3030, OK. You Lost (PPob 151, report 0x433): "Unfortunately, you have been eliminated
-  from the game…", PICT 3040. Built: `rs.conquered`, `rs.conqueredTitle` '', and the rank
-  window after it (`rs.rankAfterWin`). (`FUN_10060580` runs a report's action as the
-  message view brings the report up, `FUN_1009bbc0`, and again when it is clicked in the
-  list, `FUN_100b9250`; the remake opens You Won on the click.)
+  from the game…", PICT 3040. Built: `rs.youWon` (as `rs.youLost`, OK at the right), and the rank
+  window after it (`rs.rankAfterWin`). `FUN_10060580` runs a report's action as the
+  message view brings the report up (`FUN_1009bbc0`) and again when it is clicked in the
+  list (`FUN_100b9250`): the remake opens You Won as the winner's report comes up, then
+  the rank window and Name a Star, and again, alone, from the Report Window.
 - **You Lost** (PPob 151 "You Lost Dialog", `FUN_10060580` on report 0x433 "You have just
   been eliminated from the game.", `FUN_100967c0(0x97)`): no title bar (WIND proc 1, 225 x
   282), "Unfortunately, you have been eliminated from the game…" over PICT 3040 ("You

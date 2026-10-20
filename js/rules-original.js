@@ -2944,9 +2944,11 @@ Object.defineProperties(E.RULESETS.original, Object.fromEntries(Object.entries({
   // the You Won window, PPob 150, with no title bar, "Congratulations! You
   // have conquered the galaxy!", PICT 3030 and OK; then the rank window,
   // FUN_1005e2b0. The demo's are PPob 167 and 168.) The report the remake's
-  // win gives opens it (rs.conquered, js/skins/classic/ui.js openWinWindows),
-  // and a new rank's window comes after it (rs.rankAfterWin).
-  conquered: 'Congratulations! You have conquered the galaxy!', conqueredTitle: '', rankAfterWin: true,
+  // win gives opens it as the report comes up (FUN_1009bbc0 runs the report's
+  // action, FUN_10060580) and again when it is clicked in the list
+  // (FUN_100b9250), js/skins/classic/ui.js openWinWindows), and a new rank's
+  // window comes after it (rs.rankAfterWin). OK is at the right (138, 242).
+  youWon: { text: 'Congratulations! You have conquered the galaxy!', ok: 'OK', title: '', align: 'right' }, rankAfterWin: true,
   // CONFIRMED (FUN_10060580 on report 0x433, "You have just been eliminated
   // from the game.", sent once, when the player goes out: checkElimination505;
   // a surrender ends there too): FUN_100967c0(0x97), the You Lost window, PPob

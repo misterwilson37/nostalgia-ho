@@ -121,6 +121,10 @@ E.registerRules('mac20', Object.assign({}, D, {
   // have been eliminated from the game…" over PICT 3040 (3540) and "Oh,
   // well…" (DITL 5050, 5051: the same words)
   youLost: { text: 'Unfortunately, you have been eliminated from the game…', ok: 'Oh, well…', title: '', align: 'center', looks: null },
+  // CONFIRMED (the win report's alert, ALRT 5040 "YOU WON!", 5041 on fewer
+  // than 16 colours; DITL 5040): no title, "Congratulations! You have
+  // conquered the galaxy!" beside PICT 3030 (3530) and OK; then Name a Star
+  youWon: { text: 'Congratulations! You have conquered the galaxy!', ok: 'OK', title: '', align: 'center', looks: null },
   // CONFIRMED (FixNextSpendingBar @c1b48, ComputeMaxPercent @c2046,
   // ComputeMinPercent @c22b2: 2.0's Fix Spending, rules-dos fixSpending20,
   // with its lines kept in the code, @c1f6e-c1ff8) and the need rounded to
