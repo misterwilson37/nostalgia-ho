@@ -22,8 +22,12 @@ Delta Tao, in `docs/open-questions.md`, "Unfinished").
 6. Mac 4.0.5's floating windows (Tech Spending, Report, Chat; Window menu: Zoom, Hide
    Information, Clean Up Windows). Optional.
 7. The Palm's and iOS's own Preferences windows, if job 1 leaves them.
-8. Hot-seat passwords: the originals asked each player's name and password at their turn
-   (1.2 to 3.0.1, Amiga "Spieleintrag"); the remake's cover screen has none. Optional.
+8. Optional passwords on exported games, for the original play-by-file experience: the
+   originals asked each player's name and password at their turn (1.2 to 3.0.1; the Amiga's
+   "Spieleintrag"). Not for the hot seat, which stays as it is (Jake: players share directly).
+   An exported game could carry each player's password, asked when the game is opened, with a
+   note quoting the version's own manual on it (WINHO.WRI for 2.0, the Amiga's
+   Briefspiel.dok and Netzwerk.dok, the Mac manuals where we have them).
 9. Art the older skins borrow from classic for later rulesets (`docs/missing-assets.md`):
    novas, Dreadnoughts, Biologicals and so on in each version's style, and the DOS battle
    sparks. Creative work, optional.
