@@ -24,7 +24,10 @@
 // 12. shared names: the names file and Name a Star posted to the version's
 //     pool, merged into another player's New Game (not with the preference
 //     off), a refused name never posted, and Delete my account removing them;
-// 13. online play: a 2-player 4.0.5 game and a 3-player 5.0.5 game, each
+// 13. the language: the title screen's Language kept in the account
+//     (users/{uid}/prefs/main), brought to another browser at sign-in, the
+//     most recent choice winning, Delete my account and data removing it;
+// 14. online play: a 2-player 4.0.5 game and a 3-player 5.0.5 game, each
 //     player in their own browser (context), hosted from New Game's Play
 //     online…, joined by the ?join= link, through several turns with battles
 //     (moves by hand: the bars, a ship built; the rest by Auto-play this
@@ -136,7 +139,7 @@ async function signInEmail(page, email, pw, create) {
   await fetch(`http://127.0.0.1:${FS}/emulator/v1/projects/${PROJECT}/databases/(default)/documents`, { method: 'DELETE' });
   await fetch(`http://127.0.0.1:${AUTH}/emulator/v1/projects/${PROJECT}/accounts`, { method: 'DELETE' });
   const browser = await chromium.launch({ headless: !args.includes('--headed') });
-  // --only=names (or online): just that part
+  // --only=names (or prefs, or play): just that part
   const only = opt('only', null);
   let A = null, B = null;
   if (!only) {
@@ -393,7 +396,52 @@ async function signInEmail(page, email, pw, create) {
     await ctxClose(X);
   }
 
-  // 13. online play: a 2-player and a 3-player game, each player in their
+  // 13. the title screen's Language follows the player: kept in the account
+  // (users/{uid}/prefs/main), brought to another browser at sign-in, the most
+  // recent choice winning, and taken away by Delete my account and data
+  if (!only || only === 'prefs') {
+    const NEW = { en: 'New game', fr: 'Nouvelle partie', de: 'Neues Spiel', tr: 'Yeni oyun' };
+    const shows = (x, l) => waitFor(() => x.page.evaluate((t) => document.querySelector('#tnew').textContent === t && HOUI.lang === document.querySelector('#tlang').value, NEW[l]), 15000);
+    const prefDoc = (uid) => fsGet(`users/${uid}/prefs/main`).then(d => (d.fields ? d.fields : null));
+    const P = await fresh(browser, { name: 'P' });
+    check(await P.page.evaluate(() => HOUI.lang === 'en' && document.querySelector('#tlang').value === 'en' && !document.querySelector('.tlang').hidden), 'a fresh visit shows the title in English, with the Language picker');
+    await signInEmail(P.page, 'lang@example.com', 'secret789', true);
+    const puid = await uidOf(P.page);
+    await P.page.selectOption('#tlang', 'fr');
+    check(await shows(P, 'fr'), 'the title screen’s Language puts the interface in French at once');
+    const p1 = await waitFor(() => prefDoc(puid).then(f => (f && f.lang.stringValue === 'fr' ? f : null)));
+    check(p1 && p1.updated.timestampValue && Object.keys(p1).length === 2, 'signed in, the choice goes to users/{uid}/prefs/main as { lang, updated }');
+    // another browser: English until it signs in, then the account's choice
+    const Q = await fresh(browser, { name: 'Q' });
+    check(await Q.page.evaluate(() => HOUI.lang === 'en'), 'another browser starts in English');
+    await signInEmail(Q.page, 'lang@example.com', 'secret789');
+    check(await shows(Q, 'fr'), 'signing in there brings the account’s language (French)');
+    // a newer choice there wins in the first browser when it comes back
+    await Q.page.selectOption('#tlang', 'de');
+    await waitFor(() => prefDoc(puid).then(f => f && f.lang.stringValue === 'de'));
+    await P.page.reload();
+    await P.page.waitForSelector('#titlescreen:not(.loading) .tbtns button', { timeout: 30000 });
+    check(await shows(P, 'de'), 'the most recent choice (German, made in the other browser) wins after a reload');
+    // a choice made signed out, newer than the account's, goes up at the next sign-in
+    await P.page.evaluate(() => HOCLOUD.signOut());
+    await waitFor(() => P.page.evaluate(() => !HOCLOUD.user));
+    await P.page.selectOption('#tlang', 'tr');
+    check(await shows(P, 'tr'), 'signed out, the picker still changes the interface (Turkish)');
+    await sleep(500);
+    check((await prefDoc(puid)).lang.stringValue === 'de', 'and signed out, nothing goes to the account');
+    await P.page.evaluate(() => HOCLOUD.signInEmail('lang@example.com', 'secret789'));
+    check(!!await waitFor(() => prefDoc(puid).then(f => f && f.lang.stringValue === 'tr')), 'at sign-in, the newer choice of this browser goes to the account');
+    check(await shows(P, 'tr'), 'and stays');
+    await P.page.reload();
+    await P.page.waitForSelector('#titlescreen:not(.loading) .tbtns button', { timeout: 30000 });
+    check(await shows(P, 'tr'), 'the choice survives a reload');
+    // Delete my account and data takes the preferences too
+    await P.page.evaluate(() => HOCLOUD.deleteAccount([], []));
+    check(await waitFor(() => prefDoc(puid).then(f => !f), 15000), 'Delete my account and data removes users/{uid}/prefs');
+    await ctxClose(P); await ctxClose(Q);
+  }
+
+  // 14. online play: a 2-player and a 3-player game, each player in their
   // own browser; several turns with battles, every browser's state the same
   if (!only || only === 'play') await onlinePlay(browser);
 

@@ -5,6 +5,9 @@ rules_version = '2';
 //
 // - users/{uid}/saves/{id}: a player's saved games, read and written only by
 //   that player, each field's type and size checked.
+// - users/{uid}/prefs/{doc}: a player's preferences (one document, main: the
+//   interface's language and the server's time it was chosen), read and
+//   written only by that player.
 // - halls/{rules}/entries/{id}: the shared Hall of Fame and Hall of Shame,
 //   one per ruleset. Anyone may read; a signed-in player (a guest too) may
 //   add an entry as themselves, checked field by field; nobody may change
@@ -71,6 +74,19 @@ service cloud.firestore {
       }
       allow read, delete: if owner();
       allow create, update: if owner() && validSave();
+    }
+
+    match /users/{uid}/prefs/{doc} {
+      function owner() { return signedIn() && request.auth.uid == uid; }
+      function validPrefs() {
+        let d = request.resource.data;
+        return doc == 'main'
+          && d.keys().hasOnly(['lang', 'updated']) && d.keys().hasAll(['lang', 'updated'])
+          && str(d.lang, 2, 2) && d.lang in ['en', 'fr', 'de', 'tr', 'es']
+          && d.updated == request.time;
+      }
+      allow read, delete: if owner();
+      allow create, update: if owner() && validPrefs();
     }
 
     match /halls/{rules}/entries/{id} {

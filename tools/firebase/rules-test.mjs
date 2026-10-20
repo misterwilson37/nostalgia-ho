@@ -4,7 +4,7 @@
 //   node tools/firebase/rules-test.mjs        (in another terminal; prints "rules ok")
 // Ports from firebase.json (auth 8811, Firestore 8810), or FIREBASE_AUTH_PORT
 // and FIRESTORE_PORT. Each case says what must be allowed or denied; one
-// player can never read or write another's saves, nobody may change a Hall
+// player can never read or write another's saves or preferences, nobody may change a Hall
 // entry, and only an admin (an /admins/{uid} document) may delete one.
 import { initializeApp, deleteApp } from 'firebase/app';
 import { getAuth, connectAuthEmulator, signInAnonymously, createUserWithEmailAndPassword, signOut } from 'firebase/auth';
@@ -61,6 +61,30 @@ await deny('a save with an unknown encoding', setDoc(aSave, save({ enc: 'zip' })
 await deny('a save over 1,000,000 bytes', setDoc(aSave, save({ data: bytes(1000001), size: 1000001 })));
 await allow('a save of 1,000,000 bytes', setDoc(doc(A.db, 'users', a.uid, 'saves', 'big'), save({ data: bytes(1000000), size: 1000000 })));
 await allow('a player deletes their own save', deleteDoc(doc(A.db, 'users', a.uid, 'saves', 'big')));
+
+// ---------- preferences (users/{uid}/prefs/main: the interface's language) ----------
+const pref = (o) => Object.assign({ lang: 'fr', updated: serverTimestamp() }, o);
+const aPrefs = doc(A.db, 'users', a.uid, 'prefs', 'main'), bOnA = doc(B.db, 'users', a.uid, 'prefs', 'main');
+await allow('a player keeps their language in the account', setDoc(aPrefs, pref()));
+await allow('and changes it', setDoc(aPrefs, pref({ lang: 'de' })));
+await allow('every language of the list', Promise.all(['en', 'fr', 'de', 'tr', 'es'].map(l => setDoc(doc(A.db, 'users', a.uid, 'prefs', 'main'), pref({ lang: l })))));
+await allow('a player reads their own preferences', getDoc(aPrefs));
+await allow('a player lists their own preferences', getDocs(collection(A.db, 'users', a.uid, 'prefs')));
+await deny('another player reads them', getDoc(bOnA));
+await deny('another player lists them', getDocs(collection(B.db, 'users', a.uid, 'prefs')));
+await deny('another player writes them', setDoc(bOnA, pref()));
+await deny('another player deletes them', deleteDoc(bOnA));
+await deny('nobody signed in reads them', getDoc(doc(N.db, 'users', a.uid, 'prefs', 'main')));
+await deny('nobody signed in writes them', setDoc(doc(N.db, 'users', a.uid, 'prefs', 'main'), pref()));
+await deny('a language not in the list', setDoc(aPrefs, pref({ lang: 'it' })));
+await deny('a long string for the language', setDoc(aPrefs, pref({ lang: 'english' })));
+await deny('a number for the language', setDoc(aPrefs, pref({ lang: 1 })));
+await deny('no language', setDoc(aPrefs, { updated: serverTimestamp() }));
+await deny('a client time for updated', setDoc(aPrefs, pref({ updated: new Date() })));
+await deny('no time', setDoc(aPrefs, { lang: 'fr' }));
+await deny('an extra field', setDoc(aPrefs, pref({ theme: 'dark' })));
+await deny('a document other than main', setDoc(doc(A.db, 'users', a.uid, 'prefs', 'other'), pref()));
+await allow('a player deletes their own preferences', deleteDoc(aPrefs));
 
 // ---------- the Hall ----------
 const entry = (o, kind) => {

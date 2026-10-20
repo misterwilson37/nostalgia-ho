@@ -326,6 +326,28 @@ API.deleteSave = (id) => withSdk((F) => {
   return F.deleteDoc(F.doc(S.db, 'users', u.uid, 'saves', id)).then(() => { const m = sentMap(u.uid); delete m[id]; store.set(sentKey(u.uid), JSON.stringify(m)); });
 });
 
+// ---------- preferences in the account (users/{uid}/prefs/main) ----------
+// { lang, updated }: the interface's language the player chose (the title
+// screen's Language) and the server's time of the choice, so that it follows
+// the player to every device and the most recent choice wins (the skin's
+// cloudPrefsSync). Read and written only while signed in, when the SDK is
+// loaded anyway: never a reason to load it.
+const PREF_LANGS = ['en', 'fr', 'de', 'tr', 'es']; // firestore.rules: the same list
+const prefsRef = (uid) => root.HOFB.doc(S.db, 'users', uid, 'prefs', 'main');
+const ms = (t) => (t && t.toMillis ? t.toMillis() : 0);
+// the account's choice: { lang, updated (ms) }, or null when there is none
+API.getPrefs = () => withSdk(F => F.getDoc(prefsRef(needUser().uid)).then((d) => {
+  if (!d.exists()) return null;
+  const x = d.data();
+  return PREF_LANGS.includes(x.lang) ? { lang: x.lang, updated: ms(x.updated) } : null;
+}));
+// keep a choice in the account: resolves the server's time of it (ms)
+API.setPrefs = (p) => withSdk((F) => {
+  const ref = prefsRef(needUser().uid);
+  if (!p || !PREF_LANGS.includes(p.lang)) return Promise.reject(fail('That isn’t one of the languages.'));
+  return F.setDoc(ref, { lang: p.lang, updated: F.serverTimestamp() }).then(() => F.getDoc(ref)).then(d => (d.exists() ? ms(d.data().updated) : 0));
+});
+
 // ---------- the shared Hall of Fame (halls/{rules}/entries/{auto id}) ----------
 // The fields an entry may carry (js/rules-405.js hallEntry, js/rules-301.js
 // hallEntry301), each a whole number or a short word; anything else the
@@ -444,7 +466,7 @@ API.postName = (pool, kind, name) => {
 
 // an admin's removal (firestore.rules: /admins/{uid} documents only)
 // Delete my account and data (the Account window; privacy.html): every save in
-// the account, every Hall entry this account posted (the rulesets with a
+// the account, its preferences (users/{uid}/prefs), every Hall entry this account posted (the rulesets with a
 // Hall), every name it added to a shared pool (namePools: the pools and their
 // kinds, [[pool, [kind, …]], …], from the skin), its place in every online
 // game (below, "online play"), then the account itself.
@@ -454,6 +476,7 @@ API.postName = (pool, kind, name) => {
 API.deleteAccount = (hallRules, namePools) => withSdk((F) => {
   const u = needUser();
   const saves = F.getDocs(F.collection(S.db, 'users', u.uid, 'saves')).then(q => Promise.all(q.docs.map(d => F.deleteDoc(d.ref))));
+  const prefs = F.getDocs(F.collection(S.db, 'users', u.uid, 'prefs')).then(q => Promise.all(q.docs.map(d => F.deleteDoc(d.ref))));
   const halls = Promise.all((hallRules || []).map(r => F.getDocs(F.query(F.collection(S.db, 'halls', String(r), 'entries'), F.where('uid', '==', u.uid)))
     .then(q => Promise.all(q.docs.map(d => F.deleteDoc(d.ref))))));
   const names = Promise.all((namePools || []).flatMap(([pool, kinds]) => (kinds || []).map(k => F.getDocs(F.query(F.collection(S.db, 'names', String(pool), k), F.where('uid', '==', u.uid)))
@@ -465,7 +488,7 @@ API.deleteAccount = (hallRules, namePools) => withSdk((F) => {
     if (g.status === 'lobby') return g.host === u.uid ? G0.cancel(d.id, g.code) : G0.leaveLobby(d.id);
     return G0.leave(d.id, g.status === 'playing');
   })));
-  return Promise.all([saves, halls, names, games]).then(() => F.deleteUser(u)).then(() => {
+  return Promise.all([saves, prefs, halls, names, games]).then(() => F.deleteUser(u)).then(() => {
     store.set(sentKey(u.uid), null); store.set('ho5.cloud.was', null); store.set('ho5.cloud.name', null); refresh();
   });
 });
