@@ -585,3 +585,13 @@ generator) has the same pi; it keeps the exact pi for now (its output is unchang
   in `FUN_00438f47` (SetPlanetTypesForStar; Mac @d020a): on 25 December your colonies show
   the Christmas planet, already in the w95 and mac4 skins. The other clock reads are the
   Hall of Fame's dates (`FUN_0049883d`, `FUN_00498b6a`) and the Mac's licence strings.
+
+## The Give window (CONFIRMED, October 2026)
+
+Windows `FUN_00457c55`, dialog 362 (class `FUN_004537d0`, no caption): string 759 at three
+gifts; "Give Stuff To:" over a picture list (60 x 60 cells, 5 a row, the others still in;
+an empty cell beeps), the last recipient (+100) picked (`FUN_00457f78`); "Give How Much
+Money?" / "Metal?" (1145, 1146) clamped to 0..what you have as typed (`FUN_00453b7f`,
+`FUN_00453c20`); both 0 gives nothing. Mac `DoGiveThingsDlg @103a70`: the same with DLOG 6120,
+45 x 45 cells, `GetCellForPlayer(+100)`, STR# 6140.10. The giver hears in pass 2 only
+(`rs.giftNewsAtEnd`). Built: `rs.giveWindow` ('grid').

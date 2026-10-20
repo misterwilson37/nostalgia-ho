@@ -667,6 +667,16 @@ RidL 153 (listened to): 5, 1, 2, 3, 4, 11, 14, 13, 12, 900.
 
 ### PPob 154 "Give Money Metal"
 
+Run by `FUN_1005dcb0` (built: `rs.giveWindow`, js/skins/classic/ui.js `openGiveWindow`):
+Alert 6 at three gifts (player +0x10e4); the popup lists every player, yourself and those
+out (+0x34) greyed ("(" added), on +0xa0 (the last given or sent to) when it can be
+chosen, else the first who can; none: Alert 7. Each slider is set to 0, then its maximum
+to the savings (+0x48) or the metal (+0x58), or disabled at 0 or less; 'mona'/'meta'
+follow it (FUN_10055050, no "$"), 'monx' is "$" and the savings, 'metx' the metal alone.
+Any whole amount (the ticks are drawn only). Give records the gift whatever the amounts
+(0 and 0 too), sets +0xa0, takes them at once, sound 5000; pass 2b delivers it
+(0x44c-0x44f).
+
 WIND 154: title "Give Money/Metal", 318 x 226 at (40, 40), proc 5.
 RidL 154 (listened to): 'mona', 'meta', 'recp', 'mons', 'monx', 'mets', 'metx', 901, 900.
 

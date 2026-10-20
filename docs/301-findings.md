@@ -616,3 +616,13 @@ The questions 3.0.1's code doesn't settle, and the remake's own choices, are in
   the joke comes in the player's year, once (`rs.colorMonitorBW`, engine.js `endTurn`). The
   remake doesn't draw 3.0.1's CreatePlayer numbers, so the year comes from the seed
   (`hoRand`), and the game's numbers are untouched. It is not in Full Hoedown, where it would make no sense on a colour skin.
+
+## The Give window (CONFIRMED, October 2026)
+
+`DoGiveThingsDlg @1437e0`, DLOG/DITL 6120 "Send Money/Metal" (no title bar): at three gifts
+alert 5010 with STR# 1020.21 "Sorry, you can only give three gifts per turn."; else "Give
+Stuff To:" over a 5 x 4 List Manager list (`InitGTPlayerList`, `SetCellsToPlayers`: the
+others still in, icon 2000 + face (+500 a woman) and name), the first cell picked; "Give How
+Much Money?" and "Give How Much Metal?" fields at "0", each put back between 0 and the Ship
+Savings (the metal) at every key; Cancel over Give. Give with both 0 or nothing picked gives
+nothing. Built: `rs.giveWindow` ('grid'), js/skins/classic/ui.js `openGiveWindow`.

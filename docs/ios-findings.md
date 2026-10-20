@@ -869,3 +869,13 @@ the groups of players who aren't the viewer's allies aren't drawn at all.
   galiba biz artık Kansas'da değiliz") and Misc Strings 123 ("Voulez vous vraiment laisser tomber ? Tout
   n'est pas encore perdu ..." / "Yani, sen şimdi tüm ümidini terketmek mi istiyorsun? Henüz her şey
   kaybolmadı ki..."), from `fr.lproj` and `tr.lproj`. The other Evacuate questions stay English.
+
+## The Give dialog (CONFIRMED, October 2026)
+
+`+[GiveDialogLayer give]` (Alert 6 at three gifts, +0x10ec; Alert 7 with no one), `initDialog`,
+`generatePlayerToggle`, `valueChanged:tag:`, `doClose:`: Misc Strings 75 "Give Money/Metal",
+76 "Recipient: " with a toggle of the others still in (+0x3c), on the last recipient (+0xa8)
+else the first; 77 "Money:" and 23 "Metal:" over CCSliderDeluxe sliders (0-1, no steps), the
+amount (int)(float)(have x fraction) over the middle, "$0"/"0" and the most under the ends;
+the check mark records the gift whatever the amounts (sound 5000), the X closes. Android
+1.2.8 the same. Built: `rs.giveWindow` ('ios').

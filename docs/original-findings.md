@@ -1209,8 +1209,11 @@ What they settle, with the code that opens each:
 - **Give Money/Metal** (PPob 154, `FUN_1005dcb0`): "Recipient:" (MENU 216, the last one given
   to, or the first other player alive), "Money: $" and "Metal:" each with a standing slider
   from 0 to what you have (savings +0x48, metal +0x58), starting at 0; Cancel, Give; Alert 6
-  at three gifts a turn, Alert 7 with no one to give to. The remake's window keeps its
-  number fields.
+  at three gifts a turn, Alert 7 with no one to give to; yourself and those out greyed;
+  any whole amount; Give records even 0 and 0 (one of the three). Built: `rs.giveWindow`
+  ('505'), `rs.giftEmpty`, `openGiveWindow`. The Palm's (tFRM 2500: sliders of thousandths),
+  iOS's (GiveDialogLayer: fractions), 3.0.1's and 4.0.5's (DITL 6120, dialog 362: an icon
+  list and number fields) are in their findings; 1.2, 2.0 and the Amiga had none.
 - **Scrap Ship Types** (PPob 165): the ship type list, "Select the ship types you would like
   to scrap.", "If any ships of that type exist, they will be scrapped at their current
   location during the next turn update.", Cancel, OK. **List All Fleets** (PPob 166): the

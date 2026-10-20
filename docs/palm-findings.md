@@ -467,3 +467,12 @@ for the computer player %s.").
   Ships its colonists are replaced by the ones that come (10 a ship, no more than there
   were). No Biological check. Group All and Split stay 5.0.5's (`rs.pileMove`,
   `organizeFleets: 'palm'`).
+
+## The Give form (CONFIRMED, October 2026)
+
+`FUN_000370ac` (three gifts, +0x1b0: "Sorry, but you may only give 3 gifts per turn."; no one:
+Talt 2200), tFRM 2500 (`FUN_000745b0`, `FUN_000748d0`, `FUN_00074a6c`, `FUN_00074b36`,
+`FUN_00074738`, `FUN_00074bfe`): "Recipient:" a popup of the others still in, on the first;
+two feedback sliders 0-1,000 at 0 (disabled at 0 or less), amount trunc(have / 1,000) x k, all
+of it at 1,000; amounts in full with commas, "$" for money; "$0"/"0" and the most under each
+slider; Give records whatever the amounts. Built: `rs.giveWindow` ('palm').
