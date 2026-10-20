@@ -518,3 +518,9 @@ outside the repo: the session's `images/25`–`39`). What they settle, and what 
     warning triangle; explored and colonized stars have the planet's picture.
   - **A scroll arrow held down:** drawn complemented (red on the dark pens), and the sizing
     gadget beside it cyan.
+  - **Correction (Jake): the route's ends** are not arrowheads but two short strokes out of the
+    line's tip, an open chevron, at both ends when in range.
+  - **The underfunded-colony warning** at End Turn: "Achtung! Sie geben für einige Kolonien nicht
+    genug Geld aus, um sie am Leben zu erhalten. Wollen Sie sie wirklich verlassen?", in the
+    alert style (the cowboy picture on white, the dithered frame, the text panel), with Ok and
+    Abbruch, Abbruch the default (dark-red dotted frame).
