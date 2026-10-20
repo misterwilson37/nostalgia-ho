@@ -461,3 +461,45 @@ Import, How to play, the legal link) under the Amiga screen.
 amitools 0.8.1 (`hunktool`), unicorn 2.1.4 (running the decruncher), Ghidra 11.4.2 (headless
 decompile and listing), capstone 5 (spot disassembly), fontTools (the fonts), Pillow, and
 Playwright with Chromium for the side-by-side screenshots.
+
+## Real-Amiga captures (Jake, October 2026, FS-UAE, Kickstart 2.04 37.175 A500+)
+
+Jake ran the German 2.0 under emulation and captured the screens below (the images are kept
+outside the repo: the session's `images/25`–`39`). What they settle, and what they correct:
+
+- **Menus (corrects the skin).** Holding the right button turns the blue screen title bar into a
+  **white** menu strip with **black** titles; the open title is **black with white text**. The
+  menu boxes are **white with a black frame and black text**, not blue. The Amiga-key shortcut is
+  the system's slanted "A" glyph on a small checkered box, then the letter. Ticks are black
+  check marks before the item; unticked toggle items are indented the same. Disabled items and
+  their shortcuts are ghosted (dotted).
+- **The menus' items, as released:**
+  - Datei: Neu; Öffnen (A-O); Speichern (A-S); Zurücksetzen; Schließen (A-W); Aufteilen
+    (ghosted); Vereinen (ghosted); Zug Ende (A-Z); Zug Ende & Spielerwechsel (A-Y, ghosted with
+    one human: the hot seat's switch); Drucken; Beenden (A-Q).
+  - Optionen: Zugende erzwingen (ghosted); Autospiel; ✓ Ich bearbeite die Züge; Kontrollzeit;
+    Kampftempo; ✓ Nachrichten zeigen; ✓ Kämpfe zeigen; ✓ Warnungen ausgeben; ✓ Sound; Bildschirm.
+  - Schiffe: Schiffstypen; Neuer Schiffstyp (A-N); Liste der Flotten (A-L); Flottenaufteilung
+    (A-G); Schiffbau auf <star> (A-B); Verschrotten (A-V); Kein Kampf hier (ghosted).
+  - Galaxis: Spielervergleich (A-C); Liste der Sterne (A-T); Funkspruch (A-F); Vergrößern (A-+,
+    ghosted at the closest zoom); Verkleinern (A--); Ausgaben anpassen.
+  - Fenster: ✓ Technikfenster (A-1); Nachrichtenfenster (A-2); Fenster aufräumen (A-A).
+  - Info: not captured yet.
+- **The ASL file requester (corrects the skin).** Title "Name der neuen Galaxis:" with close,
+  zoom and depth gadgets; a file list in the system font (Topaz) with drawers marked "(Drw)" on
+  an orange-gold cell; a scroller with arrows; **Pattern** "#?.HO!", **Drawer** and **File**
+  fields with their labels in white; buttons **OK, Disks, Parent, Cancel** ("Disks", not
+  "Volumes"); a sizing gadget at the bottom right of the cyan frame.
+- **The string cursor:** a dark-red block; on a character it is that character on dark red. The
+  active field's frame is dark red too (Spieleintrag).
+- **Disabled buttons:** ghosted with a dot pattern (Spieleintrag's Ok and Info.. before a name
+  is typed).
+- **A picture button pressed:** dark-red fill, white label, the picture inverted (New Galaxy's
+  Spiral). Selected ship types in Schiffsbau: the label on dark red, the picture inverted.
+- **Spieleintrag** appears at the start of the game, before the first turn.
+- **The busy pointer** is the game's own: the letters W, A, I, T running diagonally, in yellow and
+  red. **Saving** shows "Neuer Spielstand wird gespeichert" over the star panel, with "Speichern
+  der Galaxis" and a red progress bar with its percentage.
+- **The Technik Ausgaben window can be dragged over the map.**
+- **Fleet routes:** the path shows while dragging, then not again until the fleet arrives.
+- **The Workbench icon** is the 4-colour Workbench 2 drawing the skin's icon already uses.
