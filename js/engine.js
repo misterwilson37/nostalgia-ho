@@ -98,15 +98,18 @@ function rules(G) {
   return G.opts && G.opts.lang ? inLanguage(rs, G.opts.lang, !!G.opts.patch) : rs;
 }
 // ---------- languages (rs.languages, rs.lang, G.opts.lang) ----------
-// A version that shipped in more than one language lists them, its own
-// first (rs.languages, e.g. 1.2F's ['fr', 'en']); rs.lang[code] holds what
+// A version that shipped in more than one language lists them, English
+// first (rs.languages, e.g. 1.2F's ['en', 'fr']: English is every version's
+// default, Jake's choice); its own language, the one its rules' words and
+// names are in, is rs.ownLanguage when that isn't English (1.2F's 'fr':
+// ownLanguage below). rs.lang[code] holds what
 // another language changes, and only text and names: the name lists
 // (starNames, maleNames, femaleNames, shipNames by class), each entry for
 // entry with the version's own, and words (nameAStar, welcome, ...). The
 // rules never change, so a seed plays the same game in every language: names
 // are drawn from the version's own lists and then put in the game's language
 // (ownRules, gameName, ownName). A game's language is G.opts.lang (none: the
-// version's own). LANGUAGES names each code in its own language.
+// version's own, ownLanguage). LANGUAGES names each code in its own language.
 //
 // A language the version never shipped in is the remake's own translation
 // (rs.lang[code].remake, js/languages.js): languageName marks it, in that
@@ -117,8 +120,30 @@ function languageName(rs, code) {
   const o = rs && rs.lang && rs.lang[code];
   return (LANGUAGES[code] || code) + (o && o.remake ? ` (${REMAKE_LANGUAGE[code] || REMAKE_LANGUAGE.en})` : '');
 }
+// the title screen's Language: English, then every language a version offers,
+// each named in itself and marked where it is official (a version's own
+// words, or a release's official translation: the versions named), else as
+// the remake's translation (it is in every version). [{ code, name }]
+const OFFICIAL_IN = { fr: 'officiel : %s', de: 'offiziell: %s', tr: 'resmî: %s', es: 'oficial: %s' };
+function languageChoices() {
+  const where = {};
+  for (const f of families()) for (const id of f.editions) {
+    const rs = RULESETS[id];
+    for (const c of languages(rs)) {
+      const w = where[c] || (where[c] = []);
+      const official = c === ownLanguage(rs) || !(rs.lang && rs.lang[c] && rs.lang[c].remake);
+      const v = /iPhone|iPad|iOS/.test(rs.platform || '') ? 'iOS' : /Android/.test(rs.platform || '') ? 'Android' : f.id;
+      if (official && !w.includes(v)) w.push(v);
+    }
+  }
+  return Object.keys(LANGUAGES).filter(c => c === 'en' || where[c]).map(c => ({ code: c,
+    name: c === 'en' ? LANGUAGES.en : `${LANGUAGES[c]} (${where[c].length && OFFICIAL_IN[c] ? OFFICIAL_IN[c].replace('%s', where[c].join(', ')) : REMAKE_LANGUAGE[c]})` }));
+}
 const langCache = new WeakMap();
 function languages(rs) { return rs && Array.isArray(rs.languages) && rs.languages.length > 1 ? rs.languages : []; }
+// the language a version's own words and names are in (a game with no
+// G.opts.lang is in it): rs.ownLanguage, else English
+function ownLanguage(rs) { return (rs && rs.ownLanguage) || 'en'; }
 // over.fix = { fixId: partial } holds the unofficial patch's corrections to a
 // translation's own slips (docs/fixes.md): with the patch on and the fix listed,
 // the partial is laid over the language (a say's reports go in front of its own)
@@ -172,7 +197,7 @@ function ownName0(G, n, kind) { return G.opts && G.opts.lang ? langMap(ownRules(
 // designs' names from the lists are put in the new language; reports already
 // received keep theirs
 function setLanguage(G, lang) {
-  const rs = ownRules(G), from = G.opts.lang || null, to = lang && lang !== languages(rs)[0] ? lang : null;
+  const rs = ownRules(G), from = G.opts.lang || null, to = lang && lang !== ownLanguage(rs) ? lang : null;
   if (from === to) return;
   hoNamesOff(G);
   const tr = (n, kind) => langMap(rs, from, to, kind).get(n) || n;
@@ -201,7 +226,7 @@ function hoRand(G, key) {
 }
 function hoExtras(G) {
   const x = hoedown(G) && ownRules(G).hoedown.extraNames;
-  return (x && x[G.opts.lang || languages(ownRules(G))[0] || 'en']) || null;
+  return (x && x[G.opts.lang || ownLanguage(ownRules(G))]) || null;
 }
 // n, a name drawn from the game's list of its kind (ships: of class cls), or
 // an extra name in its place; key names the draw
@@ -884,7 +909,7 @@ function newGame(opts) {
     opts, stat: { battles: 0, captures: 0, colonized: 0 }, stars: [], players: [], fleets: [], battles: [], cur: 0, over: false, winner: -1, log: [],
   };
   // the game's language (rs.languages): none for the version's own, or one it doesn't have
-  if (opts.lang != null && (!languages(RULESETS[G.rules]).includes(opts.lang) || opts.lang === languages(RULESETS[G.rules])[0])) delete opts.lang;
+  if (opts.lang != null && (!languages(RULESETS[G.rules]).includes(opts.lang) || opts.lang === ownLanguage(RULESETS[G.rules]))) delete opts.lang;
   const rs = rules(G);
   // a ruleset whose original game had no New Game choices fixes them here
   if (rs.fixOptions) rs.fixOptions(opts);
@@ -1463,7 +1488,7 @@ function makeBattlePanel(cfg) {
 const API = {
   DATA, SHIP_TYPES, TYPES: SHIP_TYPES, TECHS,
   BAR_SCALES, barScale, battleGroups, makeBattlePanel,
-  registerRules, registerAI, rules, rulesById, aiOf, LANGUAGES, languages, languageName,
+  registerRules, registerAI, rules, rulesById, aiOf, LANGUAGES, languages, ownLanguage, languageName, languageChoices,
  ownRules, gameName, ownName, setLanguage, say, saysIn, feature, RULESETS, fixes, fixed, hoedown, setHoedown, patchVersion,
   // [id, name] for the New Game window: the original games' rules by year of
   // release, then version ("2.0 (DOS and Windows 3.1, 1993)"); rulesets that

@@ -21,9 +21,11 @@
 //
 // HOUI.lang is the language showing ('en', 'fr', 'de', 'tr' or 'es'); the
 // skin sets it (HOUI.set): in a game, the game's language; on the title
-// screen and in New Game, the one New Game has chosen, or the last one
-// used (localStorage "ho5.uilang"), else English. English is always
-// complete: it is the interface as written.
+// screen, the player's choice (HOUI.pref: the title screen's Language,
+// kept in this browser and, signed in, in the account), else English, in
+// every skin; in New Game, the one its Language menu has chosen (it starts
+// from the player's choice). English is always complete: it is the
+// interface as written.
 //
 // HOUI.t(english, ...fillings) gives a string in the language. The skins'
 // el() helper puts every string it is given through HOUI.tr, and, outside
@@ -190,9 +192,20 @@ function set(lang) {
   for (const f of listeners) { try { f(lang); } catch (e) { /* a listener never stops the change */ } }
   return true;
 }
-const store = {
-  get() { try { return root.localStorage.getItem('ho5.uilang'); } catch (e) { return null; } },
-  set(v) { try { root.localStorage.setItem('ho5.uilang', v); } catch (e) { /* not kept */ } },
+// the player's choice of language (the title screen's Language): localStorage
+// "ho5.language", with when it was made ("ho5.language.at", ms), so that,
+// signed in, the most recent choice wins (js/cloud.js, users/{uid}/prefs/main);
+// none chosen: English. (The "ho5.uilang" of earlier versions, the last
+// language a game was in, is no longer read: a game's language isn't a choice.)
+const ls = () => { try { return root.localStorage; } catch (e) { return null; } };
+const pref = {
+  get() { let v = null; try { v = ls().getItem('ho5.language'); } catch (e) { /* none kept */ } return LANGS.includes(v) ? v : null; },
+  at() { let v = 0; try { v = +ls().getItem('ho5.language.at') || 0; } catch (e) { /* none kept */ } return v; },
+  set(v, at) {
+    if (!LANGS.includes(v)) return false;
+    try { ls().setItem('ho5.language', v); ls().setItem('ho5.language.at', String(Math.round(at || Date.now()))); } catch (e) { /* not kept */ }
+    return true;
+  },
 };
 // counts for docs/translations.md (tools/ui-lang-audit.js --count): per
 // language, the strings official, adapted and the remake's own
@@ -207,7 +220,7 @@ function count() {
   return c;
 }
 root.HOUI = {
-  LANGS, add, t, tr, text, en, sweep, set, store, count,
+  LANGS, add, t, tr, text, en, sweep, set, pref, count,
   get lang() { return cur; },
   has: (s, lang) => !!MAP[lang || cur] && MAP[lang || cur].has(s),
   // whether the table knows a string (as it is, or by a pattern): the audit's

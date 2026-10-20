@@ -38,17 +38,17 @@ function langsOf(rs) {
   const L = HO.languages(rs);
   // the version's own language counts when it has its own reports (1.2F's
   // French); English is the rules' own words
-  return L.filter((c, i) => (ONLY ? c === ONLY : true) && c !== 'en' && (i > 0 || rs.say));
+  return L.filter((c) => (ONLY ? c === ONLY : true) && c !== 'en' && (c !== HO.ownLanguage(rs) || rs.say));
 
 }
 const tier = (r) => r[2] === 'remake' ? 'remake' : r[2] === 'adapted' ? 'adapted' : 'official';
 function reportsOf(rs, code) {
-  const own = HO.languages(rs)[0] === code;
+  const own = HO.ownLanguage(rs) === code;
   const L = own ? rs.say : rs.lang[code] && rs.lang[code].say;
   return (L && L.reports) || [];
 }
 function counts(rs, code) {
-  const own = HO.languages(rs)[0] === code;
+  const own = HO.ownLanguage(rs) === code;
   const seen = new Map();
   for (const r of reportsOf(rs, code)) if (!seen.has(r[0])) seen.set(r[0], tier(r));
   const n = { official: 0, adapted: 0, remake: 0 };
@@ -72,7 +72,7 @@ function adaptedList(code) {
     const rs = HO.RULESETS[id];
     if (!HO.languages(rs).includes(code)) continue;
     for (const r of reportsOf(rs, code)) if (tier(r) === 'official') off.add(N(r[0]));
-    const o = HO.languages(rs)[0] === code ? null : rs.lang[code];
+    const o = HO.ownLanguage(rs) === code ? null : rs.lang[code];
     if (o && o.hintTexts && !o.remake) for (const t of rs.hintTexts || []) off.add(N(t));
   }
   for (const id of Object.keys(HO.RULESETS)) {
@@ -91,7 +91,7 @@ function adaptedList(code) {
   return bad;
 }
 function listsOk(id, rs, code) {
-  if (HO.languages(rs)[0] === code) return;
+  if (HO.ownLanguage(rs) === code) return;
   const a = rs, b = Object.assign({}, rs, rs.lang[code]);
   const D = HO.DATA, len = (x) => (x || []).length;
   const bad = [];
@@ -107,7 +107,7 @@ function listsOk(id, rs, code) {
   if (bad.length) { failed++; console.log(`FAIL ${id} ${code}: lists: ${bad.join('; ')}`); }
 }
 function play(id, code) {
-  const rs = HO.RULESETS[id], own = HO.languages(rs)[0] === code;
+  const rs = HO.RULESETS[id], own = HO.ownLanguage(rs) === code;
   const shapes = new Map(), left = new Map();
   for (let seed = 1; seed <= SEEDS; seed++) {
     const o = { seed: 1000 + seed, rules: id, size: seed % 2 ? 'small' : 'medium', computers: 2 + seed % 4, iq: ['average', 'smart', 'dumb'][seed % 3], shape: 'random',

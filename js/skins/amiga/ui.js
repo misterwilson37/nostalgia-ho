@@ -131,11 +131,11 @@ const ABOUT = [
   ['Dank an: Frank, Ilja, Michael, Micky, Olaf und Thomas', 'Thanks to: Frank, Ilja, Michael, Micky, Olaf and Thomas', 'Merci à : Frank, Ilja, Michael, Micky, Olaf et Thomas', 'Teşekkürler: Frank, Ilja, Michael, Micky, Olaf ve Thomas', 'Gracias a: Frank, Ilja, Michael, Micky, Olaf y Thomas'],
 ];
 // the language showing (js/ui-lang.js: the game's, or New Game's, or the
-// last used; no game and none used: the Amiga's German, the skin's T.lang)
+// player's choice on the title screen; none chosen: English, as in every skin)
 const LIDX = { de: 0, en: 1, fr: 2, tr: 3, es: 4 };
 // (its words in each language are its own: the interface's table leaves them as they are)
 if (window.HOUI) for (const l in LIDX) if (l !== 'en') HOUI.own(l, [].concat(...Object.values(WORDS).map(e => [e[LIDX[l]]]), ...ABOUT.map(e => [e[LIDX[l]]])));
-const lang = () => (window.HOUI ? HOUI.lang : (game() ? (game().opts && game().opts.lang) || 'en' : 'de'));
+const lang = () => (window.HOUI ? HOUI.lang : (game() && game().opts && game().opts.lang) || 'en');
 const de = () => lang() === 'de';
 const pick = (e) => (e ? (e[LIDX[lang()]] != null ? e[LIDX[lang()]] : e[1]) : '');
 const w = (k, ...v) => { const e = WORDS[k]; let s = e ? pick(e) : k; v.forEach((x, i) => { s = s.split('%' + (i + 1)).join(x); }); return s; };
@@ -1476,10 +1476,9 @@ function lookOptions(where) {
 
 window.HOTHEME_OVER = {
   dir: 'assets/skins/amiga/',
-  // the Amiga game is German: New Game starts in German for the rulesets
-  // that have it (DOS 2.0 and Mac 2.0.1, js/languages.js); English can be
-  // chosen there, and is kept for this skin
-  lang: 'de',
+  // (the Amiga game was German; the skin starts in English like every other,
+  // Jake's choice: German, the Amiga's words, is the title screen's Language
+  // or New Game's for DOS 2.0 and Mac 2.0.1, js/languages.js)
   endTurnPic: P + 'd5000', // (a getter from page(): the English copy in an English game)
   endTurnKey: 'Amiga+Z',
   select: null, selectSmall: null, // the selection is drawStar's

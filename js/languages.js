@@ -340,7 +340,7 @@ if (R12) {
   DE12.battleLines = { noInfo: S(75), destroyed: S(74) };
   delete DE12.fix;
 
-  R12.languages = ['fr', 'en', 'de'];
+  R12.languages = ['en', 'fr', 'de'];
   R12.lang = Object.assign({}, R12.lang, { de: DE12 });
 }
 

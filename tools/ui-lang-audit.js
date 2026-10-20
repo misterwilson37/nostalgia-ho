@@ -143,8 +143,9 @@ async function audit(browser, url, run) {
   page.on('pageerror', e => errors.push(e.message));
   page.on('console', m => { if (m.type() === 'error' && m.text().startsWith('[HO bug]')) errors.push(m.text()); });
   page.on('dialog', d => d.accept());
-  const lk = 'ho5.lang.' + run.rules + (run.skin === 'amiga' ? '.amiga' : '');
-  await page.addInitScript(([r, l, lk]) => { try { if (!sessionStorage.getItem('aud')) { localStorage.clear(); localStorage.setItem('ho5.rules', r); localStorage.setItem('ho5.uilang', l); localStorage.setItem(lk, l); sessionStorage.setItem('aud', '1'); for (const k of ['rules.claude', 'rules.gemini', 'skins.cozy', 'skins.gemini']) localStorage.setItem('ho5.homage.hide.' + k, '1'); } } catch (e) {} }, [run.rules, run.lang, lk]);
+  // the run's language chosen as the player would (the title screen's Language,
+  // js/ui-lang.js HOUI.pref): the title in it, and New Game starting from it
+  await page.addInitScript(([r, l]) => { try { if (!sessionStorage.getItem('aud')) { localStorage.clear(); localStorage.setItem('ho5.rules', r); localStorage.setItem('ho5.language', l); localStorage.setItem('ho5.language.at', String(Date.now())); sessionStorage.setItem('aud', '1'); for (const k of ['rules.claude', 'rules.gemini', 'skins.cozy', 'skins.gemini']) localStorage.setItem('ho5.homage.hide.' + k, '1'); } } catch (e) {} }, [run.rules, run.lang]);
   await page.goto(`${url}?skin=${run.skin}`);
   await page.waitForFunction(() => window.HOAPI && document.querySelector('#titlescreen') && !document.querySelector('#titlescreen').classList.contains('loading'), null, { timeout: 30000 });
   await sleep(400);

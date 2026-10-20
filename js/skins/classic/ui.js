@@ -20,6 +20,7 @@ const PAGE = `
     <div class="tbtns"><button id="tnew">New game</button><button id="tcont" hidden>Continue</button><button id="timport" class="quiet">Import a game…</button><button id="thelp" class="quiet">How to play</button></div>
     <label class="tskin" hidden><span>Skin</span> <select id="tskin"></select></label>
     <label class="tskin tos" hidden><span>OS look</span> <select id="tos"></select></label>
+    <label class="tskin tlang" hidden><span>Language</span> <select id="tlang"></select></label>
     <p class="credit">Art by Howard Vives and Bob Van de walle.</p>
     <p class="madeby">Updated and adapted for the web by Jake Wilson, with an abundance of help from Claude (Anthropic).</p>
     <p class="madeby legal"><a href="privacy.html" target="_blank" rel="noopener">Privacy and terms</a></p>
@@ -111,7 +112,7 @@ const $ = (s, el) => (el || document).querySelector(s);
 // The remake's own words in the chosen language (js/ui-lang.js): every string
 // el() is given, and the words a skin writes into the page, are put in
 // HOUI's language, keeping their English; tl() for text drawn on a canvas.
-const UIL = window.HOUI || { t: (s, ...a) => { let i = 0; return s.replace(/%(?:\d+\$)?[sd]/g, () => String(a[i++])); }, tr: (s) => s, text: (d, s) => d.createTextNode(s), en: (n) => n.textContent, set: () => false, store: { get: () => null, set() {} }, onChange() {}, lang: 'en' };
+const UIL = window.HOUI || { t: (s, ...a) => { let i = 0; return s.replace(/%(?:\d+\$)?[sd]/g, () => String(a[i++])); }, tr: (s) => s, text: (d, s) => d.createTextNode(s), en: (n) => n.textContent, set: () => false, pref: { get: () => null, at: () => 0, set: () => false }, onChange() {}, lang: 'en' };
 const tl = (s, ...a) => (a.length ? UIL.t(s, ...a) : UIL.tr(s));
 const TL_ATTRS = ['title', 'aria-label', 'placeholder', 'alt'];
 const el = (tag, attrs, ...kids) => {
@@ -3707,21 +3708,22 @@ const titleTag = () => patchOn() ? ` · ${patchName(HO.rules(G))}` : '';
 // the fixes as a list: each one's title and what it does
 const fixList = (rs) => el('ul', { translate: 'no', lang: 'en' }, ...HO.fixes(rs).map(f => el('li', null, el('b', null, f.title), el('br'), f.text)));
 // Ho menu, "Patch notes…" (only while the game has the patch on)
-// the language last chosen for a ruleset (a skin with a language of its
-// own, T.lang, keeps its own choice)
-const langKey = (id) => 'ho5.lang.' + id + (T.lang ? '.' + ((window.HOSKINS && HOSKINS.current) || '') : '');
 // The interface's language (js/ui-lang.js): in a game, the game's (its
-// G.opts.lang, else the version's own, rs.languages), kept as the last one
-// used ("ho5.uilang"); with no game, the last one used, else the skin's own
-// (T.lang, the Amiga's German), else English. New Game shows the language
-// its Language menu has chosen (newGameDialog).
-const gameLang = (g) => (g && ((g.opts && g.opts.lang) || HO.languages(HO.ownRules(g))[0])) || 'en';
-const titleLang = () => UIL.store.get() || T.lang || 'en';
-function syncLang() {
-  if (!G) { UIL.set(titleLang()); return; }
-  const l = gameLang(G);
-  UIL.set(l);
-  if (UIL.store.get() !== l) UIL.store.set(l);
+// G.opts.lang, else the version's own, HO.ownLanguage); with no game, the
+// player's choice (the title screen's Language, HOUI.pref), else English, in
+// every skin (English is every version's default, the Amiga's and 1.2's
+// too: Jake's choice). New Game starts from that choice and shows the
+// language its Language menu has chosen (newGameDialog).
+const gameLang = (g) => (g && ((g.opts && g.opts.lang) || HO.ownLanguage(HO.ownRules(g)))) || 'en';
+const titleLang = () => UIL.pref.get() || 'en';
+function syncLang() { UIL.set(G ? gameLang(G) : titleLang()); }
+// the player chooses a language (the title screen's Language): the whole
+// interface changes at once, the choice is kept (and, signed in, sent to the
+// account: cloudPrefsUp); a game being played keeps its own
+function chooseLang(l) {
+  if (!UIL.pref.set(l)) return;
+  if (!G) UIL.set(l);
+  cloudPrefsUp();
 }
 // a change of language redoes the page (js/ui-lang.js); the map is drawn again
 UIL.onChange(() => { if (cv) draw(); });
@@ -3729,13 +3731,12 @@ UIL.onChange(() => { if (cv) draw(); });
 // the game's names and words in another; the game plays on the same
 function openLanguage() {
   if (!G) return;
-  const langs = HO.languages(HO.ownRules(G)), now = (G.opts && G.opts.lang) || langs[0];
-  const s = el('select', { 'aria-label': 'Language' }, ...langs.map((c, i) => el('option', { value: c, selected: c === now ? 'selected' : false }, HO.languageName(HO.ownRules(G), c) + (i ? '' : ' (original)'))));
+  const rs = HO.ownRules(G), langs = HO.languages(rs), own = HO.ownLanguage(rs), now = (G.opts && G.opts.lang) || own;
+  const s = el('select', { 'aria-label': 'Language' }, ...langs.map((c) => el('option', { value: c, selected: c === now ? 'selected' : false }, HO.languageName(rs, c) + (c === own ? ' (original)' : ''))));
   const ok = () => {
     closeModal();
     if (s.value === now) return;
     HO.setLanguage(G, s.value);
-    try { localStorage.setItem(langKey(G.rules), s.value); } catch (e) { /* not kept */ }
     save(); renderPanel(); draw();
   };
   modal('Language', el('div', { class: 'about' },
@@ -3952,6 +3953,26 @@ function titlePickers() {
   }
   const lo = !$('#tlook') && lookOptions('title');
   if (lo) { lo.id = 'tlook'; to.closest('label').after(lo); }
+  titleLangPicker();
+}
+// the title screen's Language, beside Skin and OS look in every skin: English
+// and every language a version offers, each marked (HO.languageChoices: where
+// it is official, else the remake's translation), named in itself (never put
+// in another language: translate="no")
+function titleLangPicker() {
+  const s = $('#tlang');
+  if (!s || !window.HOUI) return;
+  if (!s.options.length) {
+    for (const c of HO.languageChoices()) {
+      const o = document.createElement('option');
+      o.value = c.code; o.lang = c.code; o.setAttribute('translate', 'no'); o.textContent = c.name;
+      s.append(o);
+    }
+    s.addEventListener('change', () => chooseLang(s.value));
+    UIL.onChange(() => { if (!G) s.value = titleLang(); });
+    s.closest('label').hidden = false;
+  }
+  s.value = titleLang();
 }
 // Ho menu, "Skin and OS look…": the skin reloads the page and carries on with
 // the saved game; the look goes on at once. Both are kept with the game
@@ -4453,6 +4474,33 @@ function maybeSaveOffer() {
 if (CLOUD) CLOUD.onChange((u) => { if (u && UI.hallWaiting.length) { const L = UI.hallWaiting.splice(0); L.forEach(postHallEntry); } });
 // and fetches the shared names of the version last chosen (once a day)
 if (CLOUD) CLOUD.onChange((u) => { if (u) fetchSharedNames(rulesId()); });
+// ----- the player's language in the account (users/{uid}/prefs/main) -----
+// Signed in, the title screen's Language follows the player: when the account
+// is known (a sign-in, or at start-up when this browser was signed in) the
+// account's choice and this browser's are compared and the most recent is
+// kept in both; a choice made while signed in is sent at once. Not signed
+// in: this browser only (HOUI.pref). Neither ever loads the SDK.
+function cloudPrefsSync() {
+  if (!CLOUD || !cloudUser() || !CLOUD.getPrefs) return Promise.resolve(null);
+  return CLOUD.getPrefs().then((r) => {
+    const mine = UIL.pref.get(), at = UIL.pref.at();
+    if (r && (!mine || r.updated > at)) {
+      // the account's is newer (or this browser has none): it is the choice here too
+      UIL.pref.set(r.lang, r.updated);
+      if (!G && UIL.lang !== r.lang) UIL.set(r.lang);
+      return 'got';
+    }
+    if (mine && (!r || (at > r.updated && r.lang !== mine))) { cloudPrefsUp(); return 'sent'; }
+    return 'same';
+  }).catch(() => null);
+}
+function cloudPrefsUp() {
+  const l = UIL.pref.get();
+  if (!CLOUD || !cloudUser() || !CLOUD.setPrefs || !l) return;
+  // the server's time of the choice, so this browser compares like the account
+  CLOUD.setPrefs({ lang: l }).then((t) => { if (t && UIL.pref.get() === l) UIL.pref.set(l, t); }).catch(() => null);
+}
+if (CLOUD) CLOUD.onChange((u) => { if (u) cloudPrefsSync(); });
 
 // The Hall window's Everyone list: the 25 newest or best entries of this
 // ruleset's shared Hall, in the version's own columns
@@ -4986,10 +5034,14 @@ function newGameDialog() {
     pick.forEdition(edSel.value);
     fetchSharedNames(edSel.value);
   });
-  // the game's language, for a version that shipped in more than one
-  // (rs.languages, its own first; G.opts.lang): only names and words change
+  // the game's language, for a version offered in more than one
+  // (rs.languages, English first; G.opts.lang): only names and words change.
+  // It starts from the player's choice (the title screen's Language); a
+  // version that hasn't got it starts in English, and langNote says so in
+  // the language chosen
   const langSel = el('select', { name: 'lang', 'aria-label': 'Language' });
   const langRow = el('label', { class: 'langpick' }, el('span', null, 'Language'), langSel);
+  const langNote = el('p', { class: 'sub langnote', translate: 'no', hidden: 'hidden' });
   // two rows: what the game is (version, edition, language), then how it
   // looks (skin, OS look)
   const pickRow = el('div', { class: 'picks' },
@@ -5022,6 +5074,7 @@ function newGameDialog() {
     // the line: below it, the remake's own choices
     el('hr', { class: 'ngline' }),
     pickRow,
+    langNote,
     lookRow,
     patchBox,
     el('label', { class: 'chk modern' }, el('input', { type: 'checkbox', name: 'modern', checked: localStorage.getItem('ho5.modern') === '1' ? 'checked' : false }),
@@ -5098,17 +5151,21 @@ function newGameDialog() {
     // the language: only for rules with more than one (rs.languages)
     const langs = HO.languages(ngr);
     langRow.hidden = !langs.length;
+    const want = titleLang(), offered = want === 'en' || langs.includes(want);
     if (langs.length && langSel.dataset.rules !== d.rules) {
       langSel.dataset.rules = d.rules;
-      let last = null; try { last = localStorage.getItem(langKey(d.rules)); } catch (e) { /* none kept */ }
-      langSel.replaceChildren(...langs.map((c, i) => el('option', { value: c }, HO.languageName(ngr, c) + (i ? '' : ' (original)'))));
-      // a skin of a release in another language starts in it (T.lang: the
-      // Amiga skin's German), else the version's own
-      langSel.value = langs.includes(last) ? last : T.lang && langs.includes(T.lang) ? T.lang : langs[0];
+      const own = HO.ownLanguage(ngr);
+      langSel.replaceChildren(...langs.map((c) => el('option', { value: c }, HO.languageName(ngr, c) + (c === own ? ' (original)' : ''))));
+      // the player's language, else English (every version's default)
+      langSel.value = offered ? want : 'en';
     }
-    // the window in the language it has chosen (else the last one used),
-    // its default names with it (js/ui-lang.js)
-    ngLang(langRow.hidden ? titleLang() : langSel.value);
+    // the player's language isn't this version's: the game is in English, as
+    // the note says (in the player's language)
+    langNote.hidden = offered || (langs.length > 0 && langSel.value !== 'en');
+    if (!offered) { langNote.lang = want; langNote.textContent = UIL.tr(`${HO.LANGUAGES[want]} isn’t one of this version’s languages: the game will be in English.`, want); }
+    // the window in the language it has chosen (a version with one: English,
+    // unless it offers the player's), its default names with it (js/ui-lang.js)
+    ngLang(langRow.hidden ? (offered ? want : 'en') : langSel.value);
     hoBox.hidden = !(HO.RULESETS[d.rules] || {}).hoedown;
     // the patch: only for rules that have fixes
     const prs = HO.RULESETS[d.rules], nfx = HO.fixes(prs).length;
@@ -5126,8 +5183,10 @@ function newGameDialog() {
   const defNames = [[f.querySelector('input[name=galaxy]'), 'Milky Way'], ...[2, 3, 4, 5, 6].map(i => [f.querySelector(`input[name=h${i}]`), `Player ${i}`])];
   const ngLang = (l) => {
     const was = UIL.lang;
-    UIL.set(l);
+    if (!UIL.set(l)) return;
     for (const [inp, def] of defNames) if (inp && (inp.value === def || inp.value === UIL.tr(def, was))) inp.value = UIL.tr(def);
+    // the editions' names are made in the language (editionLabel): again in the new one
+    for (const o of edSel.options) o.textContent = editionLabel(o.value);
   };
   // the window's settings as the options HO.newGame takes (and the form's
   // values, d): Create galaxy plays them here, Play online… takes them to the lobby
@@ -5148,7 +5207,6 @@ function newGameDialog() {
     if (!patchBox.hidden) localStorage.setItem('ho5.patch', patch ? '1' : '0');
     const snd = sounds.value(); localStorage.setItem('ho5.sounds', snd || '');
     const lang = !langRow.hidden && d.lang ? d.lang : null;
-    if (lang) localStorage.setItem(langKey(d.rules), lang);
     // hints: the creator's "Give helpful game play hints" preference, which 5.0.5 and the Palm game read for the first messages (rs.welcome)
     const common = { modern: !!d.modern, ...(patch ? { patch: true } : {}), ...(hoedown ? { hoedown: true } : {}), ...(snd ? { sounds: snd } : {}), ...(lang ? { lang } : {}), hints: !!Prefs.hints, humans, seed: (Math.random() * 2 ** 31) | 0, name: d.name || 'You', galaxy: d.galaxy || 'Milky Way', female: d.female === '1', computers: +d.computers, start: d.start, rules: d.rules, alliances: !!d.alliances, luck: !!d.luck, novas: !!d.novas, ...keptStarsOpt(d.rules), ...keptNamesOpt(d.rules),
       ...(+d.timelimit > 0 && !tlRow.hidden ? { timeLimit: +d.timelimit } : {}), ...(d.autoend && !autoEndBox.hidden ? { autoEnd: true } : {}) };
@@ -5418,7 +5476,7 @@ window.addEventListener('DOMContentLoaded', () => {
   if (T.page) T.page(document);
   Object.assign(HO.DATA, window.HODATA);
   setupMenus();
-  syncLang(); // the title in the last language used (js/ui-lang.js)
+  syncLang(); // the title in the player's language, else English (js/ui-lang.js)
   $('#tnew').addEventListener('click', guard(newGameDialog));
   $('#tcont').addEventListener('click', guard(() => continueChecked()));
   $('#thelp').addEventListener('click', guard(openHelp));

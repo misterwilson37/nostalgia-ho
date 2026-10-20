@@ -406,7 +406,10 @@ E.registerRules('12', Object.assign({}, D, {
   // places), and the same as DOS 2.0's; its star names (STR# 1003, 2005) are
   // 1.2F's, so they don't change; Name a Star's words are its DITL 4050 and
   // DITL 3340. docs/12-findings.md, "English".
-  languages: ['fr', 'en'],
+  // English first: every version starts in English (Jake's choice); 1.2F's
+  // own words are French (ownLanguage), offered next
+  languages: ['en', 'fr'],
+  ownLanguage: 'fr',
   lang: {
     en: { maleNames: D.maleNames, femaleNames: D.femaleNames, shipNames: D.shipNames,
       nameAStar: { when: 'win', keep: 0, use: 'pool', max: 7, min: 4, match: 'munger',
