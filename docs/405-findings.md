@@ -396,7 +396,27 @@ so you get to name a star", kept in a list of four for later galaxies; `rs.nameA
 the "You have conquered the galaxy!" window with its picture (dialog 377, `FUN_0044bf5a`;
 `rs.conquered`), opened by clicking the winner's report; the radical card window
 (`rs.radicalHand`, strings 821-837) and the auto play settings (`rs.autoPlaySettings`).
-What of them is open is in `docs/open-questions.md`.
+
+**Their layouts** (CONFIRMED, October 2026; `docs/405-windows.md`, both programs' dialogs,
+read with `tools/extract/ppob.py` and `tools/extract/windlg.py`):
+- the radical card window: Windows dialog 348 (`FUN_0047a6f8`, `FUN_00471587`), the Mac's
+  DLOG/DITL 6170 "Radical Choice": no title, "You can cancel one research program:", the
+  four programs each beside its picture (statics 1070-1073 / user items), and OK. A program
+  clicked is cancelled by OK (+0x434, -1 until one is clicked). With fewer than four in the
+  hand it doesn't open. Windows closes it by itself 18,000 ticks after it opens
+  (`FUN_0042404f` is GetTickCount × 60 / 1000, so 5 minutes; a timed network game's own
+  deadline instead; the dialog's timer `FUN_0047aa1b`). Built (`rs.radicalHand.words`); the
+  remake leaves the timer out.
+- "You have conquered the galaxy!": Windows dialog 377, "Congratulations!  You have
+  conquered the galaxy!" (the Mac's DITL 5040, one space), the won picture, OK, no title.
+  Built (`rs.conquered`, `rs.conqueredTitle`).
+- the auto play settings (Config…): Windows dialog 380, the Mac's DLOG/DITL 4021, "Configure
+  Computer's Auto Play Style:", Friendly to Aggressive (scroll bar 1171, 0-10:
+  `SetScrollRange` in `FUN_00408f3b`; the Mac's CNTL 4021 "Aggressiveness" 0-10) and No
+  Defense to Dig In (1172, 0-100; CNTL 4022 "Defensiveness" 0-100): **Dig In at the right**,
+  the value the colonies defended itself (`FUN_00404c4e`). The Auto Play window's delay
+  slider is 0-15 on Windows (`FUN_00404d29`), CNTL 4020 "Message Delay" 1-15 on the Mac.
+  Built (`rs.autoPlayRange` digRight).
 
 ## Read against the Mac 4.0.5
 

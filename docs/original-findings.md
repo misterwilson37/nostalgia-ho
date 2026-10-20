@@ -955,8 +955,8 @@ blank or Cancel names none. New Game (`FUN_10059570` @1005a2f0) takes up to five
 kept names, in a row from the clock's rand(0, kept − 5), into the game (+0x170), and the
 galaxy set-up (`FUN_1006f280`) gives them the first places of the star list, draws the
 other stars' names, distinct, from its own, and shuffles the list: the names land on
-stars at random. The window's own words weren't read (its PPob isn't in the remake's
-copy): the remake shows the iOS port's. (`rs.nameAStar.inRank`, ui.js `showRank`.)
+stars at random. The window's words are PPob 156 "Name A Star" (`docs/505-windows.md`;
+section 14, "The windows, from their layouts"). (`rs.nameAStar.inRank`, ui.js `showRank`.)
 
 ### Numbers (CONFIRMED, October 2026)
 
@@ -967,8 +967,8 @@ ten million reads "$12,345K" in a report. With the currency (the income view
 `FUN_10098650`, the budget bars `FUN_1008a120`, the planet panel `FUN_10092300`) it
 writes "$1,234", and from ten million "$12.345M", a negative sum "($1,234)"
 ("%s%s%d%s" ... "%s%s%d.%.3dM%s"). `FUN_100552e0`'s shorter "1.23M" / "12K" (no
-currency) is used only by the income view's interest, inside a template (its string 8)
-whose words weren't read, and by the network lobby; the remake's Interest row writes
+currency) is used only by the income view's interest, inside a template (STR# 6003
+item 8, "(Int: $%s)"), and by the network lobby; the remake's Interest row writes
 the sum with the currency, as the other rows. (`rs.fmtNum`, `rs.fmtMoney`.)
 
 ### Ship pictures (CONFIRMED)
@@ -1130,6 +1130,101 @@ and the stances). In the interface the bars are now on the log scale for the mou
 and a locked bar refuses the drag and says why. Not read: the exact pixels of the pile's
 pictures and the damage shading.
 
+### The windows, from their layouts (CONFIRMED, October 2026)
+
+5.0.5's windows are PowerPlant `PPob` resources, which earlier research didn't read (it read
+only the two `DLOG`/`DITL`, the system's folder dialogs). `tools/extract/ppob.py` reads all 50,
+with the `STR#`, `MENU`, `Txtr` and the program's own classes (`CTYP`): `docs/505-windows.md`.
+What they settle, with the code that opens each:
+
+- **The rank window** (PPob 156 "Name A Star", `FUN_1005e2b0`): titled "Congratulations!";
+  the rank's picture (a QuickTime pane); "Congratulations! You have achieved the rank of:"
+  and the rank (pane 1); "You may name a star for use in future games:" with the field
+  'NAME' (11 letters); pane 3, "You have earned the ability to %s." (STR# 6003.20) or, when
+  the rank has no ability, the layout's own "You have already earned all abilities.";
+  "Never Mind" (cancel) and "Cool!" (default). Built: `rs.nameAStar` title, ok, cancel,
+  allEarned.
+- **You Won** (PPob 150, opened by `FUN_10060580` when the report 0x436 "Congratulations! You
+  won a %d difficulty game and have earned %s master points." is clicked; then the rank
+  window): no title bar (WIND proc 1), "Congratulations! You have conquered the galaxy!",
+  PICT 3030, OK. You Lost (PPob 151, report 0x433): "Unfortunately, you have been eliminated
+  from the game…", PICT 3040. Built: `rs.conquered`, `rs.conqueredTitle` '', and the rank
+  window after it (`rs.rankAfterWin`). The lost window isn't built (the remake's own end
+  card).
+- **Radical Research** (PPob 153 "Radical Tech Choice", `FUN_1005f280`): "You may cancel one
+  research program:", four bevel buttons with PICT 9010 (9011 once picked; sound 7001) each
+  beside its program's name from STR# 6260 "Radical Tech Strings", then the radio "Don’t
+  Cancel Any Programs" (picked when it opens) and OK; with fewer than four programs it
+  doesn't open. The 20 names (no full stops): "Search for more metal on your planets",
+  "Explore distant stars", "Get lots of money immediately", "Improve mining efficiency",
+  "Improve population maximums", "Improve terraforming efficiency", "Educate battle
+  generals better", "Improve recycling program", "Improve technology output", "Increase
+  savings interest rate", "Decrease borrowing interest rate", "Build a decoy ship", "Build a
+  biological space monster", "Steal technology from another player", "Build a set of ships
+  without development cost", "Improve range / speed / weapons / shields / mini tech
+  dramatically". Built: `rs.radicalHand.words`, `RADICAL_TEXT`.
+- **Auto Play** (PPob 159 "Auto Play Dialog", `FUN_1005ec40`): the "Auto Play" check box
+  group (prefs +4); "Have Computer Play For Me" (radio 1, prefs +0x210) with the two sliders
+  under it, enabled only when it is picked: Friendly to Aggressive (pane 1000, 0-100, prefs
+  +0x211) and No Defense to Dig In (pane 1001, 0-100, +0x212: **Dig In at the right**, 100 %
+  of colonies defended); "Just End My Turns"; "Turn Off When Something Interesting Happens"
+  (+0x213) with "Battles, colonizations, tech level changes, etc."; "Click through messages
+  every:" 0-10 "Seconds" (+0x216); Cancel, OK. The preferences start them (CPrefs
+  `FUN_10072490`) at auto play off, Have Computer Play For Me, **50 and 50**, turn off on,
+  4 seconds. Preferences (PPob 139) has no auto play settings. Built: `rs.autoPlayWindow`
+  '505', `rs.autoPlayDefaults`; the rule (`js/ai-original.js` aiTurn): a human on auto play
+  who never moved the sliders plays at aggressiveness 5 and 50 % defended.
+- **Preferences** (PPob 139): "Show Event Messages" (check box group) over "But Only The Most
+  Important Ones", "Review Battles", "Give Helpful Game Play Hints", "Tell You About Stars
+  Best Buddies Explore"; "Battle Review Speed:" slider 0-30 (15), Slow to Fast; "Player
+  Sex:" (MENU 203 Male, Female); "Temperatures in Celsius (not °F)"; "AutoSave Each Turn";
+  "Sound" (group) over "Vocalize Chat Keywords"; Cancel, OK. The remake's Preferences keep
+  its own words for the preferences it has.
+- **Dip Into Savings** (PPob 157, `FUN_1005d380`): "What percentage of your savings would you
+  like to use each turn to increase your income?", a standing slider 0-30 (set from and to
+  the player's +0x54) marked 30%, 15%, 0%, "Once started, you will continue to dip each turn
+  until cancelled.", Cancel, OK. Built (`rs.windowWords.dip`).
+- **Surrender** (PPob 147 "Surrender To", `FUN_1005d5a0`): "Who would you like to surrender
+  to?", a menu of every player (yourself and the dead greyed), "-", "No One" (MENU 215); OK
+  the first time asks Alert 2 "Do you really want to surrender?"; Cancel while surrendering
+  takes it back with Alert 3. Built (`rs.windowWords.surrender`).
+- **Give Money/Metal** (PPob 154, `FUN_1005dcb0`): "Recipient:" (MENU 216, the last one given
+  to, or the first other player alive), "Money: $" and "Metal:" each with a standing slider
+  from 0 to what you have (savings +0x48, metal +0x58), starting at 0; Cancel, Give; Alert 6
+  at three gifts a turn, Alert 7 with no one to give to. The remake's window keeps its
+  number fields.
+- **Scrap Ship Types** (PPob 165): the ship type list, "Select the ship types you would like
+  to scrap.", "If any ships of that type exist, they will be scrapped at their current
+  location during the next turn update.", Cancel, OK. **List All Fleets** (PPob 166): the
+  list, "Double-click a fleet to select it in the map view.", OK (a "Go To" button hidden).
+  Built (`rs.windowWords`).
+- **Rank History** (PPob 163, WIND "Rank History"; STR# 6003.19 "%s’s Rank History"):
+  "Network Master Points:", "Total Master Points:", "MPs Needed to Advance:", the ranks list,
+  OK. **Group Fleets** (PPob 140; WIND title "Group Fleets"): "Fleet Information" (Range,
+  Current Fuel, Speed, Num. Colonists, Departing To, Final Destination, Arriving In, Scrap
+  Value), "Ship Information" with "Delayed Arrival" and "Battle Attitude" (Offensive,
+  Defensive, Normal), "Ship Type Information", Split, Group All, Done. **Build Ships** (PPob
+  137): Dev Cost, Pro Cost, Metal Cost, Built, In Service, Type (MENU 210), the five tech
+  sliders, "Your Current Reserves:", "Number To Build:" (a number field with arrows and a
+  slider), "Allow Debt", Money, Metal, "Ship Build Capacity Left:", Max Out, Cancel, "Build
+  & Continue", Build. **How Many?** (PPob 155): "How many ships would you like to move?".
+  **Armageddon** (PPob 152): its text, the device's pictures 9400 / 9401, an On/Off switch.
+  **Send Message** (PPob 160): "To Whom:", "Say What:" (MENU 218), Cancel, Send (as built).
+  **Abandon Hope** (PPob 158): "Misery, Sadness, Despair...", "Dost thou truly wish to
+  abandon Hope? All is not yet lost...".
+- **Startup** (PPob 130): the animated guy (`LAnimatedGuy`), Name, Screen Name, "What would
+  you like to do?", New…, Open…, spacewardho.net, Quit. **About** (PPob 162): "Spaceward
+  Ho!" and the version, "©1990-2002 Peter Commons and Delta Tao Software, Inc.", "Written By
+  Peter Commons", "Designed By Joe Williams and Peter Commons", "Artwork by Howard Vives and
+  Bob van de Walle", "Sounds by Mark Madeley", the registration, Deregister…, OK. **Create
+  Individual Game** (PPob 133, and 233 for OS 9): Galaxy Name ("Milky Way", 31 letters);
+  "Player Information": Home System (MENU 202); "Computer Players": Bad Guys (MENU 207, its
+  second item, "1", at first), IQ slider 50-200 (50), Home System (MENU 217, "Based on IQ"
+  at first), Best Buddies (on); "Galaxy": the sample map, Shape (MENU 205), Size and
+  Density sliders 0-100 (50, 25; Small-Large, Dense-Sparse); "Details": Years Per Turn
+  (MENU 204); Alliances and Luck in Battles are in the layout but hidden (the code shows
+  them); Game Difficulty Rating; Cancel, Create. As section 2.
+
 ## 15. What can't be done in a browser, and what isn't done yet
 
 - **Network play** (hosting, joining, the lobby, the spacewardho.net server,
@@ -1155,8 +1250,8 @@ pictures and the damage shading.
   copied (section 1).
 - **Computers knowing all stars**: an option in some versions; no such switch
   was found in 5.0.5's New Game window, so it isn't offered.
-- **The auto play settings** (Preferences: the Friendly-Aggressive and Dig In-No
-  Defense sliders the Auto button uses): NOT IMPLEMENTED.
+- **The auto play settings**: built, on 5.0.5's Auto Play window (section 14, "The
+  windows, from their layouts").
 - **The canned-message window** (`FUN_1005d940`): built (`js/rules-original.js`
   canned505). Its menus offer only Thank You, Sorry and %$*^&%! (MENU 218, codes
   0x417-0x419), to a player, Everyone, Allies or Best Buddies (MENU 201); "Look at %s",

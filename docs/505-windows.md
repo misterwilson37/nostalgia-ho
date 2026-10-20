@@ -8,7 +8,7 @@ objects, read by `tools/extract/ppob.py`), each with a `WIND` (title and size) a
 the system's folder dialogs, and nine `ALRT`s). Research before October 2026 read only the
 `DLOG`/`DITL` and so recorded the rank window, the Radical Research window, the auto play
 settings and "You have conquered the galaxy!" as missing; they are all here. What the code
-does with each window is in `docs/original-findings.md` (section 16, "The windows, from
+does with each window is in `docs/original-findings.md` (section 14, "The windows, from
 their layouts"); which windows the remake builds from them is in `docs/coverage-505.md`.
 
 Regenerate with:

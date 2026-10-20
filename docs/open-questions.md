@@ -21,83 +21,62 @@ fix. Any answer helps, even "I don't remember". Thank you!
 
 ## 1. Open questions
 
-Things the code can't decide for us. Each says what the remake does for now.
+Things the code and the files can't decide for us. Each says what the remake does for now,
+and what was searched. Every file of every version was gone through again in October 2026
+(`docs/source-inventory.md`); what that answered has moved out of this list.
 
 ### Every version
 
 - **Were there other translations?** We know of French (Mac 1.2F, and the iOS and Android
   ports), German (the Amiga 2.0, and a German DOS 2.0) and Turkish (iOS and Android). Were
   there others, such as Japanese or Spanish, for any version? For now: the remake will
-  offer only the translations we have, each with the version it came with.
-
-### 5.0.5
-
-- **The rank window's words.** At a new rank you may name a star, but that window's
-  layout isn't in our copy of the program, so we don't have its words. For now: the iOS
-  port's "You may name a star for use in future games:".
-- **The Radical Research window's program names.** We don't have 5.0.5's names for the
-  programs in your hand. For now: 4.0.5's names for the 17 the two share, and words from
-  the reports for the three new ones ("Build a new research facility.", "Raise the prime
-  lending rate.", "Renegotiate your line of credit.").
-- **The auto play sliders.** What did Preferences' Friendly–Aggressive and Dig In–No
-  Defense sliders start at, and which end of Dig In–No Defense meant "defend every
-  colony"? For now: the auto play player's own values until the sliders are moved, and
-  100 % defended at Dig In.
+  offer only the translations we have, each with the version it came with. Searched: the
+  string resources of every program we have (no other language in any).
 
 ### Android
 
-- **When the first Android release came out**, and which face the game's "Arial" was drawn in on a device (Droid Sans or Roboto). For now: 2015, the build's date, and Roboto.
-
-### Palm
-
-- **The same two as 5.0.5**: the Radical Research program names and the auto play
-  sliders' starting values and direction. For now: as 5.0.5.
+- **When the first Android release came out**, and which face the game's "Arial" was drawn in on a device (Droid Sans or Roboto). For now: 2015, the build's date, and Roboto. Searched: the APK's manifest (its version code is the build's time, 16 February 2015) and Apportable's fonts folder (four fallback faces for other scripts, no Latin face).
 
 ### 4.0.5 (Windows and Mac)
 
 - **Do stars ever turn red?** Red stars need an option bit that the New Game window never
   sets; the rest of the options word comes from memory that is never cleared, so it is
-  luck whether novas happen. For now: novas on, as in 3.0.1.
+  luck whether novas happen. For now: novas on, as in 3.0.1. Searched: both programs' New
+  Game dialogs (Windows dialog 111, the Mac's DITL 6080: no novas switch) and their
+  "Default Setup" (`Stup` 1000).
 - **A Radical level before the first deal.** Before the first hand is dealt (2010), a
   Radical level draws a card at random, but then acts on the loop counter instead of the
-  draw. For now: the draw is used.
+  draw. For now: the draw is used. (A question of intent: the code is plain.)
 - **A hand that runs out on a design card.** When a decoy, Biological or free-design card
   can't be played (too many designs) and no card is left, the deal loops forever. For
-  now: that discovery is lost.
+  now: that discovery is lost. (Intent.)
 - **The Biologicals' retire mark.** The computers' retire table has no entry for
   Biologicals, so the code reads one past its end and gets the Scouts' redesign mark
-  (30). Was a mark of their own meant? For now: 30, as the code reads it.
+  (30). Was a mark of their own meant? For now: 30, as the code reads it. (Intent.)
 - **The Master Point List's picture (Windows).** For 50,000 to 499,999 points it asks
   for bitmap 0x7c, which isn't in SPACEHO.EXE, so nothing is drawn (the Mac shows the
-  computer faces). Which picture was meant? For now: none, as released.
-- **The radical hand window's words.** Its title and button words aren't in our copy, and
-  we don't know whether it had a timer or let you thin a hand of fewer than four. For
-  now: "Radical Research", "Cancel Project" and "OK", with a full hand only.
-- **The "You have conquered the galaxy!" window's title** isn't in our copy. For now:
-  "You won".
-- **The auto play settings' ranges.** What were the scroll bars' ranges, and the human's
-  settings before the first auto play turn? For now: aggressiveness 0 to 10, colonies
-  defended from 100 % at Dig In to 0 at No Defense, and the window starts from the
-  auto play player's own values.
-
-### 3.0.1
-
-- **Was the bars' zero lock new in 3.0?** 3.0.1 locks the budget bar of a colony that is
-  finished or being abandoned; 2.0 and 1.2 have no lock at all. For now: each version as
-  its code does it.
+  computer faces). Which picture was meant? For now: none, as released. Searched again:
+  its 684 bitmaps have 123 and 125 but no 124.
+- **The auto play settings before the first auto play turn.** The Config window's ranges
+  and directions are now known (aggressiveness 0-10, colonies defended 0-100 with Dig In
+  at the right: dialog 380, `FUN_00408f3b`; the Mac's CNTL 4021-4022), but not what it
+  shows for a human who has never been on auto play. For now: the auto play player's own
+  values.
 
 ### 2.0 (and 1.2)
 
-- **Were the budget bars meant to start linear?** In 2.0 and 1.2 the budget bars start on
-  a linear scale and a click above them switches to log (technology is always log);
-  from 3.0.1 they start on log. Was linear the intended default then? For now: linear,
-  with the switch.
+- **The bars' zero lock.** 2.0's manual says "When you've finished terraforming or mining a
+  planet, the appropriate bar will automatically go to zero and won't let you play with it
+  any more" (`WINHO.WRI`, the Windows 2.0 manual, "The Bar Charts"; the DOS manual the
+  same), but 2.0's and 1.2's code never lock a bar, and 3.0.1's does. Was the lock meant
+  for 2.0 and left out? For now: each version as its code does it.
 
 ### 1.2
 
 - **The colour pictures.** 1.2F kept its colour pictures in a separate file, "TheHo F
   CPicts", which wasn't in our copy. If it survives anywhere, we'd love to see it. For
-  now: black and white.
+  now: black and white. Searched: the 1.2 folder holds only the program, its icon and the
+  saved galaxy "Voie Lactée".
 
 ---
 
@@ -211,6 +190,11 @@ Where a browser can't do what the original did, or the remake had to pick.
   remake's)**: the German DOS 2.0's for the lines 2.0 had, the remake's for the rest, in
   its voice. `docs/translations.md`.
 
+- The windows from their layouts (`docs/505-windows.md`) keep a few of the remake's own
+  ways: Give Money/Metal has number fields where 5.0.5 had sliders from 0 to what you
+  have; Preferences has the remake's preferences in its words; the You Lost window
+  (PPob 151) is the remake's end card. The Palm's Auto Play form (tFRM 1700) is shown as
+  5.0.5's Auto Play window, which has the same parts and adds the click-through slider.
 - Played as released, though we weren't sure each was meant:
   - budget shares are used as they stand, even over 1,000 (Abundant starts at 1,050);
   - dipping into savings raises the borrowing limit;
@@ -222,6 +206,7 @@ Where a browser can't do what the original did, or the remake had to pick.
 ### 4.0.5
 
 - Dip Into Savings takes a percentage of the most you may dip (4.0.5 and 3.0.1: an amount).
+- The radical card window doesn't close itself (Windows: after five minutes, dialog 348).
 - Abandon is the Evacuate button, with the remake's own confirmation (3.0.1 too).
 - Alliances during a step are read as they stand (4.0.5: the copy made in pass 1).
 - The Hall of Fame, Hall of Shame and Master Point List are in the Game menu.

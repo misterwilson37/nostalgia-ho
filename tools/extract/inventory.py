@@ -4,7 +4,7 @@
     python3 tools/extract/inventory.py <file or folder> ...
 
 Knows Mac resource forks (raw, AppleDouble "._name", the resource fork of each
-file on an HFS disk image if machfs is installed), Windows PE and NE programs
+file on an HFS disk image or DiskCopy 4.2 image if machfs is installed), Windows PE and NE programs
 (their resource tables), DOS 2.0's PRS files, Palm .prc/.pdb databases, and
 names anything else by its first bytes. docs/source-inventory.md is its output,
 with what each resource type was read by.
@@ -104,12 +104,14 @@ def describe(path):
         if d[off:off + 2] == b'NE':
             return 'Windows NE (16-bit) program', ne_types(d, off)
         return 'DOS program', {}
-    if len(d) > 0x30 and d[0x30:0x34].rstrip(b'\0').isalpha() and prs_types(d):
+    if d[:8] == b'PRS Form' or (len(d) > 0x30 and d[0x30:0x34].rstrip(b'\0').isalpha() and prs_types(d)):
         t = prs_types(d)
         if sum(t.values()) > 1:
             return 'DOS 2.0 PRS resource file', t
     if len(d) > 78 and d[60:68] in (b'applPaHo', b'appl\0\0\0\0') or path.lower().endswith(('.prc', '.pdb')):
         return 'Palm database (%s/%s)' % (d[60:64].decode('latin1'), d[64:68].decode('latin1')), prc_types(d)
+    if len(d) > 0x54 + 1026 and d[0x52:0x54] == b'\x01\x00' and d[0x54 + 1024:0x54 + 1026] == b'BD':
+        d = d[0x54:0x54 + struct.unpack('>I', d[0x40:0x44])[0]]  # a DiskCopy 4.2 image: its disk
     if len(d) > 1026 and d[1024:1026] == b'BD':
         try:
             import machfs
