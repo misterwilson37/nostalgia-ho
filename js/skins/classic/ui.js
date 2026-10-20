@@ -3677,7 +3677,12 @@ function openRadicalHand() {
   ...cards.map((c, i) => row(String(i), HO.say(G, c.text), W.pic)),
   W.keep ? row('keep', W.keep, null) : null,
   el('div', { class: 'btns right' }, el('button', { type: 'submit' }, W.ok || 'OK')));
-  modal(W.title || '', f, { cls: 'mid', label: 'Radical Research' });
+  // rs.radicalHand.timeout (4.0.5, Windows and Mac): after 5 minutes the
+  // window answers OK as it stands (the program picked is cancelled, none
+  // picked cancels nothing)
+  let timer = null;
+  const win = modal(W.title || '', f, { cls: 'mid', label: 'Radical Research', onClose: () => { clearTimeout(timer); } });
+  if (RH.timeout) timer = setTimeout(() => { if (UI.modal && UI.modal.contains(f)) f.requestSubmit(); }, RH.timeout * 1000);
 }
 // Winning (rs.conquered, rs.nameAStar): clicking the winner's report opens
 // the "Congratulations! You have conquered the galaxy!" window with the won

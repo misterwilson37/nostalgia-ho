@@ -2582,11 +2582,18 @@ E.registerRules('405', Object.assign({}, D, {
   // Choice"): no title, "You can cancel one research program:", the four
   // programs each beside its picture, and OK; a program clicked (+0x434) is
   // cancelled by OK. With fewer than four in the hand it doesn't open
-  // (FUN_00471587). On Windows the window closes itself after 18,000 ticks
-  // (FUN_0042404f is GetTickCount x 60 / 1000: 5 minutes; a timed network
-  // game's own deadline instead; FUN_0047aa1b), which the remake leaves out.
+  // (FUN_00471587). The window closes itself after 18,000 ticks (Windows:
+  // FUN_0042404f is GetTickCount x 60 / 1000, so 5 minutes; the Mac: the
+  // modal filter TIMEDOKMODALFILTER @a05fa sets the deadline DAT_00efd8d2 =
+  // TickCount + 18000 in DoRadicalChoiceDlg and answers item 1, OK, on the
+  // first idle past it). Windows' timer FUN_0047aa1b calls the dialog's
+  // virtual slot 50 (vtable 0x57f130 -> 0x4ea396), CDialog::OnOK: a time-out
+  // is OK pressed as things stand. A program clicked is cancelled; none
+  // clicked, nothing is. (A timed network game's deadline, a short at +0x82
+  // / +0x52 of the game's settings, replaces the 5 minutes there; the remake
+  // keeps the 5 minutes: its turn clock ends the turn first.)
   radicalHand: {
-    full: 4,
+    full: 4, timeout: 300,
     cards: (G, p) => RADICAL.map((k, i) => i).filter(i => p.hand405 & (1 << i)).map(i => ({ id: i, text: RADICAL_TEXT[i] })),
     discard(G, p, id) { p.hand405 &= ~(1 << id); },
     words: { title: '', prompt: 'You can cancel one research program:', ok: 'OK', pic: 'm9010' },

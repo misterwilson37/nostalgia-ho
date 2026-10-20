@@ -204,7 +204,6 @@ Where a browser can't do what the original did, or the remake had to pick.
 ### 4.0.5
 
 - Dip Into Savings takes a percentage of the most you may dip (4.0.5 and 3.0.1: an amount).
-- The radical card window doesn't close itself (Windows: after five minutes, dialog 348).
 - Abandon is the Evacuate button, with the remake's own confirmation (3.0.1 too).
 - Alliances during a step are read as they stand (4.0.5: the copy made in pass 1).
 - The Hall of Fame, Hall of Shame and Master Point List are in the Game menu.

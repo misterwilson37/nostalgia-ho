@@ -405,8 +405,16 @@ read with `tools/extract/ppob.py` and `tools/extract/windlg.py`):
   clicked is cancelled by OK (+0x434, -1 until one is clicked). With fewer than four in the
   hand it doesn't open. Windows closes it by itself 18,000 ticks after it opens
   (`FUN_0042404f` is GetTickCount × 60 / 1000, so 5 minutes; a timed network game's own
-  deadline instead; the dialog's timer `FUN_0047aa1b`). Built (`rs.radicalHand.words`); the
-  remake leaves the timer out.
+  deadline instead; the dialog's timer `FUN_0047aa1b`). **What the time-out does**
+  (CONFIRMED): `FUN_0047aa1b` calls the dialog's virtual slot 50 (vtable 0x57f130 slot 50 =
+  0x4ea396, `CDialog::OnOK`), so it is OK pressed as things stand: a program already
+  clicked is cancelled, none clicked cancels nothing (DoModal returns 1, and
+  `FUN_00471587` takes the card only if +0x434 ≥ 0). The Mac does the same:
+  `DoRadicalChoiceDlg` @1529e2 sets `DAT_00efd8d2` = TickCount + 18000 (a timed game's
+  limit instead) and `TIMEDOKMODALFILTER` @a05fa answers item 1 (OK) on the first idle
+  event past it. Built (`rs.radicalHand.words`, `rs.radicalHand.timeout` = 300 seconds;
+  both 4.0.5 builds); a timed game's own deadline (a short in the game settings, units
+  unknown) is not followed: the 5 minutes stand.
 - "You have conquered the galaxy!": Windows dialog 377, "Congratulations!  You have
   conquered the galaxy!" (the Mac's DITL 5040, one space), the won picture, OK, no title.
   Built (`rs.conquered`, `rs.conqueredTitle`). (Not yet followed: `FUN_00470dec` sets the
