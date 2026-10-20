@@ -28,7 +28,8 @@ computer / Everyone** switch to the Hall of Fame and Hall of Shame (4.0.5 and 3.
 shared Hall per ruleset, its names through a decency filter (`js/decency.js`). Signed
 in, the names the originals carried from game to game (the stars winners name, and the
 1.2 to 4.0.5 names file: players' names for the computers, ship type names) are shared
-by everyone playing the same version ("Use names other players have added", Account…).
+by everyone playing the same version ("Use names other players have added", Account…),
+and the interface's language chosen on the title screen follows the player.
 **Online play** (New Game → **Play online…**): several people, each on their own computer,
 play one game turn by turn, as the originals' network play did, with no server: a lobby
 with a six-letter code and a `?join=` link, computers in the empty seats, each player's
@@ -236,10 +237,17 @@ title bar and About this version, and the Ho menu then has **Patch notes…**. R
 no fixes don't offer it. `docs/fixes.md` lists every version's slips as obvious bugs,
 quirks and unclear cases; 1.2, 2.0 and 3.0.1 have their fixes so far.
 
-**Language**: a version offers its languages below the line in New Game and in the Ho
-menu's **Language…** (`G.opts.lang`, remembered per ruleset in `localStorage`
-"ho5.lang.<id>"): the ones it shipped in, from the official text, English always among
-them, and, where it had none, the remake's own translation, marked so in the list
+**Language**: English is the default everywhere, for every version and skin, 1.2 (released
+in French) and the Amiga and the German DOS 2.0 (German) too. The title screen's
+**Language** (beside Skin and OS look, in every skin) is the player's choice for the whole
+interface: English, French, German, Turkish or Spanish, each marked where it is official
+("Français (officiel : 1.2, iOS, Android)") or the remake's ("Español (traducción del
+remake)"). It is kept in this browser (`localStorage` "ho5.language") and, signed in, in the
+account (`users/{uid}/prefs/main`, `docs/online.md`, "The language"), so it follows the
+player to any device, the most recent choice winning. New Game starts from it (a version
+without it starts in English and says so). A version offers its languages below the line
+in New Game and in the Ho menu's **Language…** (`G.opts.lang`): the ones it shipped in,
+from the official text, English always among them and first, and, where it had none, the remake's own translation, marked so in the list
 ("Français (traduction du remake)", "Deutsch (Übersetzung des Remakes)", "Türkçe
 (yeniden yapımın çevirisi)", "Español (traducción del remake)") and in the version's notes:
 
@@ -251,7 +259,7 @@ them, and, where it had none, the remake's own translation, marked so in the lis
 | iOS, Android | English (their own), French, Turkish (the app's `fr.lproj`, `tr.lproj`, with its help pages) | German; Spanish | English, French, Turkish, German, Spanish |
 | The AI homages (Claude's, Gemini's rules) | English | – | English |
 
-The interface's words (1,180 strings, the hover help's among them) are official where a
+The interface's words (1,181 strings, the hover help's among them) are official where a
 version's translation has the word (French 131, German 130, Turkish 100), adapted from one
 (63, 46, 38) and otherwise
 the remake's own (`node tools/ui-lang-audit.js --count`).
@@ -260,11 +268,12 @@ Only names and words change: a seed plays the same game in every language, so it
 change mid-game. The reports are kept in the version's own words and put in the game's
 language when shown (`HO.say`). The remake's own interface follows the language too
 (`js/ui-lang.js`, its words in `js/ui-text.js`): in a game the game's language, on the
-title screen the last one used, in New Game the one it has chosen; English is always
+title screen the player's choice (else English), in New Game the one it has chosen; English is always
 there and always complete. The hover help is translated too; the long documents (the
 version and patch notes, the manuals) stay English, with a line in the language that says so
-(`docs/translations.md`, "The remake's interface"). The Amiga skin starts in German (its
-`lang: 'de'`) and has its own words in every language.
+(`docs/translations.md`, "The remake's interface"). The Amiga skin starts in English like
+every skin; its German (the Amiga's own words) is a choice, and it has its own words in
+every language.
 `node tools/ui-lang-audit.js` opens every skin in every language its versions offer and
 fails on English left from the table or a word of a third language.
 `node tools/lang-test.js` checks every language (no report left untranslated, no filling
@@ -338,8 +347,10 @@ Optional ruleset flags the skin reads (each is documented where it is read):
   `fixSpending301`; `js/skins/classic/ui.js`, `openFixSpending`)
 - `rs.celsius`: `true` when the version showed temperatures only in °C, to a tenth (1.2,
   the French edition); Preferences then shows °C as fixed. (`js/skins/classic/ui.js`, `degF`)
-- `rs.languages`: the languages the version is offered in, its own first (1.2: `['fr',
-  'en']`, DOS 2.0 `['en', 'de']`, iOS `['en', 'fr', 'tr']`); `rs.lang[code]`: what another
+- `rs.languages`: the languages the version is offered in, English first, the default
+  (1.2: `['en', 'fr']`, DOS 2.0 `['en', 'de']`, iOS `['en', 'fr', 'tr']`);
+  `rs.ownLanguage`: the language its own words and names are in when that isn't English
+  (1.2: `'fr'`; a game with no `G.opts.lang` is in it, `HO.ownLanguage`); `rs.lang[code]`: what another
   language changes, only names and words (the name lists entry for entry with the
   version's own, `nameAStar`, `fixSpending`, `battlePanel`, `hintTexts`, ...), and `say`:
   the reports, each the version's template and the language's, put in the game's language

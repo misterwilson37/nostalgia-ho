@@ -1,7 +1,9 @@
 # Translations
 
 Each version is offered in the languages it shipped in, from the official translations,
-and in English, which is always there. Where a version had no translation, the remake
+and in English, which is always there and is every version's default (Jake's choice):
+1.2, released in French, and the Amiga skin and the German DOS 2.0, released in German,
+start in English too unless the player has chosen otherwise ("Which language" below). Where a version had no translation, the remake
 makes its own, and marks it so everywhere: in New Game's Language list and the Ho menu's
 Language… (`HO.languageName`: "Français (traduction du remake)", "Deutsch (Übersetzung des
 Remakes)", "Türkçe (yeniden yapımın çevirisi)", "Español (traducción del remake)"), and in
@@ -30,7 +32,12 @@ follows the language too ("The remake's interface").
   English (its fourth), and one the remake wrote itself `'remake'`, so they can be
   counted.
 - A version whose own language isn't the rules' English keeps its reports as `rs.say`
-  (1.2F's French: shown with no `G.opts.lang`).
+  (1.2F's French: shown with no `G.opts.lang`) and names that language
+  `rs.ownLanguage` (`HO.ownLanguage`, else English). `rs.languages` lists English first
+  (1.2: `['en', 'fr', 'de', 'es']`), the default, and the menus mark the own language
+  "(original)"; a game with no `G.opts.lang` is in the own language, so a 1.2 game saved
+  before this change still plays in its French, and New Game passes `lang: 'en'` for a
+  1.2 game in English.
 - Names are translated only where an official list was made for the same English list,
   entry for entry. Computer names are not translations but other names in the same
   places (Peter → François → Tantek), so a version whose computer list differs keeps its
@@ -535,11 +542,29 @@ limits, 1.2's and 2.0's Options menu and Explored Planets list, 5.0.5's ranks, i
 Center), and the hover help (`js/help.js`, the manuals' words trimmed for a tooltip:
 `js/ui-text-help.js`, 72 paragraphs and their pages' names). Which language:
 
-- **in a game**, the game's (`G.opts.lang`, else the version's own, `rs.languages`), kept
-  as the last one used (`localStorage` "ho5.uilang");
-- **on the title screen**, the last one used, else the skin's own (`T.lang`: the Amiga's
-  German), else English; **in New Game**, the one its Language menu has chosen (the
-  window changes language with it; for rules with one language, the last one used).
+- **the player's choice**: the title screen's **Language**, beside Skin and OS look in
+  every skin (after the Amiga's Pixels). It lists English and every language a version
+  offers, each named in itself and marked (`HO.languageChoices`): where it is official
+  ("Français (officiel : 1.2, iOS, Android)", "Deutsch (offiziell: 2.0)", "Türkçe (resmî:
+  iOS, Android)") or the remake's everywhere ("Español (traducción del remake)"); in the
+  versions not named, French, German and Turkish are the remake's, as New Game's and the
+  Ho menu's lists say. Changing it redoes the whole interface at once, the title screen
+  included. It is kept in this browser (`HOUI.pref`: `localStorage` "ho5.language", with
+  the time, "ho5.language.at") and, signed in, in the account (`users/{uid}/prefs/main`,
+  the most recent choice winning: `docs/online.md`, "The language"). None chosen:
+  English, in every skin (no skin has a language of its own any more: the Amiga's
+  `T.lang: 'de'` is gone). The "ho5.uilang" of earlier versions (the last language a game
+  was in) and "ho5.lang.<id>" (New Game's last language for a version) are no longer
+  read: a game's language isn't a choice of the interface's;
+- **on the title screen**, the player's choice, else English;
+- **in New Game**, the Language menu starts from the player's choice; a version that
+  hasn't got it (2.0 has no Turkish; the AI homages are English only) starts in English
+  and says so under the menu in the player's language ("Türkçe bu sürümün dilleri
+  arasında yok: oyun İngilizce olacak."). The window shows the language its menu has
+  chosen;
+- **in a game**, the game's (`G.opts.lang`, else the version's own, `HO.ownLanguage`):
+  its text and its interface keep it, whatever the title screen's choice, and the Ho
+  menu's Language… changes it, as before. Back at the title screen, the player's choice.
 
 English is always complete: it is the interface as the skins write it. `js/ui-lang.js`
 (`HOUI`) holds the mechanism: `el()` in `js/skins/classic/ui.js` puts every string it is
@@ -569,10 +594,10 @@ above. `node tools/ui-lang-audit.js --count`:
 
 | Language | Strings | Official | Adapted | The remake's |
 |---|---|---|---|---|
-| French | 1,180 | 131 | 63 | 986 |
-| German | 1,180 | 130 | 46 | 1,004 |
-| Turkish | 1,180 | 100 | 38 | 1,042 |
-| Spanish | 1,180 | 0 | 0 | 1,180 |
+| French | 1,181 | 131 | 63 | 987 |
+| German | 1,181 | 130 | 46 | 1,005 |
+| Turkish | 1,181 | 100 | 38 | 1,043 |
+| Spanish | 1,181 | 0 | 0 | 1,181 |
 
 **The Amiga skin** has its own words (`WORDS`, the Amiga's German and the remake's
 English for its panels and windows); each entry now has French, Turkish and Spanish too,
@@ -581,14 +606,16 @@ as are its New Game and Registration windows' buttons, its About window's credit
 menus' names (Datei, Optionen, Schiffe, Galaxis, Fenster, Info). Its German stays the
 Amiga's wherever it has the word (its menus, the classic page's commands in its words,
 `CMD_DE`, `MENU_DE`); a game in French, Turkish or Spanish shows that language, or
-English, never German. The End Turn picture has German and English only (the pictures
+English, never German. The skin starts in English, like every other; German is the
+player's choice (the title screen's Language, or New Game's for 2.0). The End Turn picture has German and English only (the pictures
 are the game's): the English one shows in the other languages.
 
 **Checks:** `node tools/ui-lang-audit.js` opens every skin in every language its
 versions offer (the title screen, New Game, a game's main screen, each menu, Build
 Ships, Players, Preferences, About, How to play, Account, the lists, Give, Send a
 message, Skin and OS look, Sounds, Language, Auto play, Surrender, the Hall and master
-points where the version has them) and fails on a string of the table left in English, a
+points where the version has them), each language chosen as a player would (the title
+screen's Language, "ho5.language"), and fails on a string of the table left in English, a
 word of a third language, or a string shown the same as in the English run that the
 table doesn't say is the same in that language. The English runs show no French,
 German, Turkish or Spanish at all.

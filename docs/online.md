@@ -1,4 +1,4 @@
-# Online: accounts, saved games in an account, the shared Hall of Fame, shared names, online play
+# Online: accounts, saved games in an account, the language, the shared Hall of Fame, shared names, online play
 
 The remake is a static site that plays offline, and it still does: everything online
 is optional, loads only when a player asks for it, and fails soft. A player who never
@@ -37,6 +37,12 @@ Firebase project `nostalgia-ho` (Authentication and Firestore). No Analytics.
   names, each ship type a player names joins its class's list). With it on, New Game
   merges the pool into this browser's own lists; the names this player adds go to the
   pool either way, once signed in. Signed out, nothing is fetched or sent.
+- **The language follows the player.** The title screen's **Language** (beside Skin and
+  OS look) is the player's choice for the whole interface. Not signed in, it is kept in
+  this browser; signed in, in the account too (`users/{uid}/prefs/main`), and applied at
+  sign-in on any device, the most recent choice winning (below, "The language"). Nothing
+  is loaded for it: the account's choice is read only when the SDK is loading anyway
+  because the player is signed in.
 - **Two offers, and only these.** (a) When a game is put in this computer's Hall (a win,
   or the Hall of Shame), once the game's own end-of-game windows are done: "Put this game
   in the Hall of Fame everyone sees?" [Sign in] [Play as a guest] [Not now] and "Don't
@@ -55,7 +61,9 @@ Firebase project `nostalgia-ho` (Authentication and Firestore). No Analytics.
 (`ho5.stars.<rules>`). Shared names: `ho5.cloud.names` (the preference) and
 `ho5.names.shared.<pool>` (the pool as last fetched, with the time). New: `ho5.cloud.was` and `ho5.cloud.name` (this browser was signed
 in, and as whom: the SDK then loads at start-up to bring the account back),
-`ho5.cloud.saves` (the preference), `ho5.cloud.sent.<uid>` (a fingerprint of each game
+`ho5.cloud.saves` (the preference), `ho5.language` and `ho5.language.at` (the
+interface's language the player chose on the title screen, and when, in ms: signed in or
+not), `ho5.cloud.sent.<uid>` (a fingerprint of each game
 last sent, so an unchanged game isn't sent again), the offers' "Don't ask again".
 Firebase keeps its own sign-in in the browser's IndexedDB.
 
@@ -69,6 +77,9 @@ Firebase keeps its own sign-in in the browser's IndexedDB.
   Bytes), `client`. A game's data may be up to 1,000,000 bytes (Firestore's document
   limit is 1 MiB); a bigger one is not sent and the player is told so. Saves are about
   40 to 70 KB compressed (0.3 to 0.6 MB of JSON).
+- `users/{uid}/prefs/main`: the player's preferences, today only `lang` (the
+  interface's language chosen on the title screen: `en`, `fr`, `de`, `tr` or `es`) and
+  `updated` (the server's time of the choice).
 - `halls/{rules}/entries/{auto id}`: one document per game put in a shared Hall. The
   ruleset's own entry fields (`humans`, `computers`, `shape`, `density`, `size`, `iq`,
   `year`, `allies`, `difficulty`, `yearsPerTurn`, `skill`, `armageddons`, `replays`,
@@ -88,6 +99,27 @@ Firebase keeps its own sign-in in the browser's IndexedDB.
   the pool once, without a query first.
 - `admins/{uid}`: an empty document for each admin, made by hand in the console. No
   client can read or write it.
+
+## The language
+
+The title screen's Language (`js/ui-lang.js` `HOUI.pref`, `js/skins/classic/ui.js`
+`chooseLang`, `cloudPrefsSync`, `cloudPrefsUp`; `docs/translations.md`, "The remake's
+interface") is the one preference kept in the account. In the browser it is
+`ho5.language` with the time it was chosen (`ho5.language.at`). Signed in:
+
+- a choice is sent at once (`HOCLOUD.setPrefs`: `{ lang, updated: serverTimestamp() }`),
+  and the server's time read back is kept as `ho5.language.at`, so later comparisons on
+  this browser are in the server's time;
+- when the account is known (a sign-in, or start-up when this browser was signed in, the
+  SDK then loading anyway), the account's choice is read (`HOCLOUD.getPrefs`) and compared
+  with this browser's: the more recent wins in both (the account's applied here, the
+  page's interface changing at once on the title screen; or this browser's, made while
+  signed out, sent up). A browser with no choice of its own takes the account's;
+- a game being played keeps its own language (its interface and its text); the choice
+  shows at the title screen and starts New Game.
+
+Not signed in, nothing is fetched or sent for it. Signing out leaves this browser's
+choice as it is. Delete my account and data deletes `users/{uid}/prefs`.
 
 ## Shared names
 
@@ -265,6 +297,10 @@ it says so on every page; Leave takes it off the list.
 - `users/{uid}/saves/{id}`: read, list and delete only by that user; create and update
   only by that user, with exactly the fields above, each of its type and size (`data`
   Bytes of at most 1,000,000, `size` equal to it, `updated` the server's time).
+- `users/{uid}/prefs/{doc}`: read, list and delete only by that user; create and update
+  only by that user, only the document `main`, with exactly `lang` (a two-letter string
+  from the fixed list `en`, `fr`, `de`, `tr`, `es`) and `updated` (the server's time,
+  `request.time`).
 - `halls/{rules}/entries/{id}`: anyone may read (signed in or not). Create only when
   signed in (a guest too), as yourself (`uid == request.auth.uid`), with the fields above
   only: the name 1 to 40 characters, `rules` the path's, `createdAt` and `fameAt` /
@@ -309,8 +345,9 @@ it says so on every page; Leave takes it off the list.
   read permission.
 - Everything else is denied.
 
-`tools/firebase/rules-test.mjs` runs 121 cases against the emulators (one player can't
-read, list, write or delete another's saves; every malformed entry or name is refused; a
+`tools/firebase/rules-test.mjs` runs 141 cases against the emulators (one player can't
+read, list, write or delete another's saves or preferences; a language outside the list,
+a client's time or an extra field is refused; every malformed entry or name is refused; a
 name is there once in any letter case; an admin deletes and nobody else; nobody reads the
 admin list; online play: nobody outside a game reads or changes it, a join needs the code
 and a free seat, only the host starts it, the turn goes up by exactly one and only with
@@ -432,7 +469,14 @@ filter, email Create account, Sign out, Sign in, a wrong password and Forgot
 password, and the shared names (a 2.0 player's name and a 4.0.5 winner's star posted,
 another player's New Game taking them in and not with the preference off, a refused
 name never posted, Delete my account and data removing them). `--only=names` runs the
-shared names alone. And online play (`--only=play`): a 2-player 4.0.5 game and a
+shared names alone. The language (`--only=prefs`): a fresh visit in English with the
+Language picker; the picker changing the interface at once and, signed in, writing
+`users/{uid}/prefs/main` as `{ lang, updated }`; another browser starting in English and
+taking the account's language at sign-in; a newer choice there winning in the first
+browser after a reload; a choice made signed out changing the page but not the account,
+and going up at the next sign-in because it is newer; the choice surviving a reload;
+Delete my account and data removing the preferences.
+And online play (`--only=play`): a 2-player 4.0.5 game and a
 3-player 5.0.5 game, each player in their own browser context, hosted from Play online…
 and joined by the `?join=` link, through 14 and 12 turns with battles (moves by hand: the
 technology and budget bars, a ship built, the clock; the rest by Auto-play this turn),
@@ -444,8 +488,8 @@ reach; the test skips it there.
 
 ## Code
 
-- `js/cloud.js` (`window.HOCLOUD`): the config, loading the SDK, auth, saves, the Hall,
-  shared names and online play's documents (`HOCLOUD.games`); no UI.
+- `js/cloud.js` (`window.HOCLOUD`): the config, loading the SDK, auth, saves, the
+  preferences (`getPrefs`, `setPrefs`), the Hall, shared names and online play's documents (`HOCLOUD.games`); no UI.
 - `js/online.js` (`window.HOONLINE`): online play's turns (the recorder, the orders,
   playing them, the checks); no page, no network; loaded only when online play opens.
   `tools/online-sim.js` runs it under Node.
