@@ -524,3 +524,7 @@ outside the repo: the session's `images/25`–`39`). What they settle, and what 
     genug Geld aus, um sie am Leben zu erhalten. Wollen Sie sie wirklich verlassen?", in the
     alert style (the cowboy picture on white, the dithered frame, the text panel), with Ok and
     Abbruch, Abbruch the default (dark-red dotted frame).
+  - **Players who have ended the turn** get a "√" before their hat in the player list (Grid and
+    Jake, both ticked, while the turn waits to run). After both ended, the captured game sat
+    with the normal pointer: probably waiting on the shared game file's poll (Optionen →
+    Kontrollzeit), or on a slow emulated 68000; not yet seen through to the next year.
