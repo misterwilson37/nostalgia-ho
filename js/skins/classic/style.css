@@ -178,6 +178,12 @@ h3.scaleflip { cursor: pointer; }
 .prefs label.chk { display: flex; gap: 8px; align-items: center; }
 .prefs .slider { display: flex; gap: 8px; align-items: center; }
 .prefs .slider input { flex: 1; min-width: 0; }
+.prefs fieldset.opts { display: grid; gap: 6px; margin: 0; }
+.prefs fieldset.opts legend label.chk { display: inline-flex; }
+.prefs .speedrow { display: grid; gap: 4px; }
+.prefs .sexrow { display: flex; gap: 8px; align-items: center; }
+.prefs fieldset.opts input:disabled + span { opacity: .55; }
+.prefs .ngline { margin: 2px 0; width: 100%; border: 0; border-top: 1px solid var(--edge); }
 .ptable.list tr.sel td { background: Highlight; color: HighlightText; }
 ul.reports { list-style: none; margin: 0; padding: 0; max-height: 60vh; overflow: auto; }
 ul.reports li { padding: 4px 6px; border-bottom: 1px solid rgba(128,128,128,.3); cursor: pointer; }

@@ -352,6 +352,7 @@ const rs = Object.assign(base, {
     }
   },
   // the auto play window (above)
+  prefsWindow: null, // iOS's settings keep the remake's own words (not 5.0.5's Preferences window)
   autoPlayWindow: 'ios', autoPlayRange: { aggr: [0, 100], where: 'autoplay' }, autoPlayDefaults: AUTO_DEFAULTS,
   // the Radical Research window (RadicalResearchLayer; Misc Strings 107, 108:
   // "Radical Research", "Don't Cancel Any Programs"; Radical Tech Strings,

@@ -405,6 +405,8 @@ const rs = Object.assign(base, {
   // "You may name a star for use in future games:", "Nevermind" and "Cool!"
   // (nameAStar below). How the list grows wasn't read: the remake keeps every
   // name.
+  // the Palm's Preferences form (tFRM 3200) keeps the remake's own words, not 5.0.5's window (rs.prefsWindow)
+  prefsWindow: null,
   // the auto play settings are on the Auto Play form (tFRM 1700, FUN_000713be:
   // "Auto Play", "Have Computer Play For Me" over the sliders, "Just End My
   // Turns", "Turn Off When Something Interesting Happens: battles,

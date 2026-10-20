@@ -176,7 +176,10 @@ const Prefs = { celsius: false, important: false, review: false, hints: true, au
   // event messages shown, the polling time in seconds (null: the default)
   battleSpeed: null, fullAnim: true, showMsgs: true, poll: null,
   // 5.0.5's Auto Play window's own settings (openAutoPlay505)
-  auto505: null };
+  auto505: null,
+  // 5.0.5's Preferences window (rs.prefsWindow, prefs505): stars best buddies
+  // explore, battle review speed 0-30 (null: 15), vocalized chat keywords
+  buddyStars: true, reviewSpeed: null, vocal: true };
 try { const s = JSON.parse(localStorage.getItem('ho5.prefs') || '{}'); if (s.sound === false) Sound.on = false; if (s.music) Sound.music = true; for (const k in Prefs) if (s[k] != null) Prefs[k] = s[k]; } catch (e) {}
 function savePrefs() { try { localStorage.setItem('ho5.prefs', JSON.stringify(Object.assign({ sound: Sound.on, music: Sound.music }, Prefs))); } catch (e) {} }
 // rs.celsius: the version showed temperatures in °C, to a tenth (1.2, the
@@ -193,7 +196,10 @@ const optVal = (O, k) => { const v = Prefs[k]; return v != null && v >= O.min &&
 // ticks a shot, the remake's pace at the default) and fully animated
 // battles (off: each pile shoots as a group, no explosions)
 function verBattle() {
-  const BS = (verOpts() || {}).battleSpeed;
+  const BS = (verOpts() || {}).battleSpeed, PW = G && HO.rules(G).prefsWindow;
+  // 5.0.5's Battle Review Speed (0 Slow to 30 Fast, 15 the remake's pace):
+  // each step is a quarter of an octave
+  if (PW && !BS) { const v = Prefs.reviewSpeed != null ? Prefs.reviewSpeed : PW.def; return { f: Math.pow(2, (PW.def - v) / 7.5), full: true }; }
   return BS ? { f: optVal(BS, 'battleSpeed') / BS.def, full: Prefs.fullAnim !== false } : { f: 1, full: true };
 }
 
@@ -1623,7 +1629,8 @@ function originalLook(m) {
 function showMessages() {
   UI.inbox = me().inbox.slice(); UI.msgIdx = 0;
   // Show Event Messages off (rs.options): the reports are only in the Report Window
-  const O = verOpts(); if (O && O.showMessages && Prefs.showMsgs === false) UI.msgIdx = UI.inbox.length;
+  const O = verOpts(), PW = G && HO.rules(G).prefsWindow;
+  if (((O && O.showMessages) || PW) && Prefs.showMsgs === false) UI.msgIdx = UI.inbox.length;
   renderMsg();
 }
 // T.afterMsg(box, ctx): a skin dresses the report card or the End Turn
@@ -3909,6 +3916,7 @@ function autoRoute(f, tgt) {
   return true;
 }
 function openPrefs() {
+  if (G && HO.rules(G).prefsWindow) return prefs505(HO.rules(G).prefsWindow);
   const box = (k, label) => el('label', { class: 'chk' }, el('input', { type: 'checkbox', checked: Prefs[k] ? 'checked' : false, onchange: (e) => { Prefs[k] = e.target.checked; savePrefs(); renderPanel(); } }), el('span', null, label));
   // hints: only for a version that had them (rs.hints false: none between
   // turns); °C: fixed on for a version that showed only °C (rs.celsius)
@@ -3922,6 +3930,47 @@ function openPrefs() {
       el('span', null, 'Modern conveniences in this game (automatic routes, the map follows the news, battle speed and written reports)')) : null,
     box('tips', 'Explain things when the pointer rests on them (text from the original manual)'),
     autoPlayWhere() === 'prefs' ? prefsAutoPlay() : null), { cls: 'small' });
+}
+// 5.0.5's Preferences window (PPob 139, rs.prefsWindow) in its own words, with
+// its controls and order; Cancel keeps everything as it was, OK applies. The
+// remake's own options are below the line. Wired: Show Event Messages (off:
+// the reports wait in the Report window), Only The Most Important Ones, Review
+// Battles, hints, Battle Review Speed (the battle's pace), Player Sex (your
+// hat), Celsius. Kept as chosen with nothing yet to act on: Best Buddies
+// explore (no such report), Vocalize Chat Keywords (no keyword sounds); and
+// AutoSave Each Turn, always on (the browser keeps the game after every move).
+function prefs505(W) {
+  const D = { showMsgs: Prefs.showMsgs !== false, important: !!Prefs.important, review: !!Prefs.review, hints: !!Prefs.hints, buddyStars: Prefs.buddyStars !== false,
+    speed: Prefs.reviewSpeed != null ? Prefs.reviewSpeed : W.def, female: !!me().female, celsius: !!Prefs.celsius, vocal: Prefs.vocal !== false };
+  const chk = (k, label, extra) => el('label', { class: 'chk' }, el('input', { type: 'checkbox', checked: D[k] ? 'checked' : false, ...(extra || {}), onchange: (e) => { D[k] = e.target.checked; if (k === 'showMsgs') sync(); } }), el('span', null, label));
+  const imp = chk('important', W.important), rev = chk('review', W.review), hnt = chk('hints', W.hints), bud = chk('buddyStars', W.buddies);
+  const sync = () => { for (const l of [imp, rev, hnt, bud]) l.querySelector('input').disabled = !D.showMsgs; };
+  const speed = el('input', { type: 'range', min: W.range[0], max: W.range[1], step: 1, value: D.speed, 'aria-label': W.speed.replace(/:$/, ''), oninput: (e) => { D.speed = +e.target.value; } });
+  const sex = el('select', { 'aria-label': W.sex.replace(/:$/, ''), onchange: (e) => { D.female = e.target.value === '1'; } },
+    ...W.sexes.map((t, i) => el('option', { value: String(i), selected: (i === 1) === D.female ? 'selected' : false }, t)));
+  const showBox = el('fieldset', { class: 'opts prefs5' }, el('legend', null, chk('showMsgs', W.show)), imp, rev, hnt, bud);
+  sync();
+  const ok = () => {
+    Prefs.showMsgs = D.showMsgs; Prefs.important = D.important; Prefs.review = D.review; Prefs.hints = D.hints; Prefs.buddyStars = D.buddyStars;
+    Prefs.reviewSpeed = D.speed === W.def ? null : D.speed; Prefs.celsius = D.celsius; Prefs.vocal = D.vocal;
+    if (me().female !== D.female) { me().female = D.female; save(); }
+    savePrefs(); closeModal(); renderPanel(); draw();
+  };
+  const remake = [
+    el('label', { class: 'chk' }, el('input', { type: 'checkbox', checked: Sound.on ? 'checked' : false, onchange: (e) => { Sound.on = e.target.checked; savePrefs(); } }), el('span', null, 'Sound effects')),
+    el('label', { class: 'chk' }, el('input', { type: 'checkbox', checked: modern() ? 'checked' : false, onchange: (e) => setModern(e.target.checked) }), el('span', null, 'Modern conveniences in this game (automatic routes, the map follows the news, battle speed and written reports)')),
+    el('label', { class: 'chk' }, el('input', { type: 'checkbox', checked: Prefs.tips ? 'checked' : false, onchange: (e) => { Prefs.tips = e.target.checked; savePrefs(); } }), el('span', null, 'Explain things when the pointer rests on them (text from the original manual)')),
+    autoPlayWhere() === 'prefs' ? prefsAutoPlay() : null];
+  modal(W.title, el('div', { class: 'prefs' },
+    showBox,
+    el('div', { class: 'speedrow' }, el('span', null, W.speed), el('div', { class: 'slider' }, el('span', null, W.slow), speed, el('span', null, W.fast))),
+    el('label', { class: 'sexrow' }, el('span', null, W.sex), ' ', sex),
+    chk('celsius', W.celsius),
+    el('label', { class: 'chk' }, el('input', { type: 'checkbox', checked: 'checked', disabled: true }), el('span', null, W.autosave)),
+    el('fieldset', { class: 'opts prefs5' }, el('legend', null, W.sound), chk('vocal', W.vocal)),
+    el('div', { class: 'btns right' }, el('button', { type: 'button', class: 'quiet', onclick: closeModal }, W.cancel), el('button', { type: 'button', onclick: ok }, W.ok)),
+    el('hr', { class: 'ngline' }),
+    el('fieldset', { class: 'opts' }, el('legend', null, 'Remake options'), ...remake)), { cls: 'small' });
 }
 // The version's own Options menu items (rs.options, 1.2 and 2.0), in its
 // words: Show Event Messages, Review Announced Battles, the battle speed
@@ -5595,7 +5644,7 @@ function setupMenus() {
       ['Send a message…', () => G && !G.over && openChat(), () => commandShown('chat')],
       ['Dip into savings…', () => G && !G.over && openDip(), 'dip'],
       ['Fix spending', () => G && !G.over && openFixSpending(), () => !!(G && HO.rules(G).fixSpending)],
-      ['Report window…', () => openReports(), () => !!(verOpts() || {}).reports],
+      ['Report window…', () => openReports(), () => !!(verOpts() || {}).reports || (!!(G && HO.rules(G).prefsWindow) && Prefs.showMsgs === false)],
       ['-'],
       [() => (G && me().surrenderTo != null ? 'Take back surrender' : 'Surrender…'), () => G && !G.over && openSurrender(), () => commandShown('surrender')],
       [() => (G && me().armageddon ? 'Turn off the armageddon device' : 'Armageddon device…'), () => G && !G.over && toggleArmageddon(), 'armageddon'],

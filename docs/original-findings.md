@@ -1196,8 +1196,17 @@ What they settle, with the code that opens each:
   Important Ones", "Review Battles", "Give Helpful Game Play Hints", "Tell You About Stars
   Best Buddies Explore"; "Battle Review Speed:" slider 0-30 (15), Slow to Fast; "Player
   Sex:" (MENU 203 Male, Female); "Temperatures in Celsius (not °F)"; "AutoSave Each Turn";
-  "Sound" (group) over "Vocalize Chat Keywords"; Cancel, OK. The remake's Preferences keep
-  its own words for the preferences it has.
+  "Sound" (group) over "Vocalize Chat Keywords"; Cancel, OK. Built (`rs.prefsWindow`,
+  `prefs505` in `js/skins/classic/ui.js`) in those words and that order; Cancel leaves
+  everything, OK keeps it; the remake's own options (sound effects, modern conveniences,
+  pointer hints) sit below a line, "Remake options". Wired: Show Event Messages (off: the
+  reports wait in the Report window), Only The Most Important Ones, Review Battles, hints,
+  Battle Review Speed (0 Slow to 30 Fast, 15 the remake's pace, a quarter octave a step),
+  Player Sex (your hat), Celsius. Kept as chosen with nothing to act on: Best Buddies
+  Explore (no such report yet), Vocalize Chat Keywords (no keyword sounds found);
+  AutoSave Each Turn is always on (shown ticked and greyed). The Palm (tFRM 3200, its own
+  list: Sound, Money in € not $, Temp, Player Sex, Jump To History, hints, Best Buddies
+  Stars, Auto-Zoom, Disable Auto-Off) and iOS keep the remake's words.
 - **Dip Into Savings** (PPob 157, `FUN_1005d380`): "What percentage of your savings would you
   like to use each turn to increase your income?", a standing slider 0-30 (set from and to
   the player's +0x54) marked 30%, 15%, 0%, "Once started, you will continue to dip each turn
