@@ -379,6 +379,13 @@ E.registerRules('12', Object.assign({}, D, {
     label: 'Nouveau nom d\'étoile:', hint: '(Si vous ne voulez pas donner un nom à une étoile, cliquez juste sur OK).',
     taken: 'Désolé, il y a déjà une Etoile nommée “%s.” Soyons créatifs!' },
   welcome: WELCOME,
+  // CONFIRMED (DoMessageAction @1315f0 on report 0x41f, "You have just been
+  // eliminated from the game."; @131700): Alert(5050), or 5051 on a screen
+  // of fewer than 16 colours (the mac12 skin's), 1.2F's ALRT "You lost...":
+  // no title, "Il est regrettable que vous ayez été éliminé…" over PICT 3040
+  // and "Bon, ça va…"; 5051 writes "..." for "…" and has PICT 3540
+  youLost: { text: 'Il est regrettable que vous ayez été éliminé…', ok: 'Bon, ça va…', title: '', align: 'center',
+    bw: { text: 'Il est regrettable que vous ayez été éliminé...', ok: 'Bon, ça va...' } },
   // CONFIRMED (DoOptionsMenu @e2784, doBattleSpeedDialog @120c48, BattleWait
   // @d4414; MENU 131, DITL 4040, CNTL 4040: 10 to 60 ticks a shot; Stup
   // 1000's defaults: 30 ticks, fully animated, messages and battles shown;
@@ -412,6 +419,8 @@ E.registerRules('12', Object.assign({}, D, {
   ownLanguage: 'fr',
   lang: {
     en: { maleNames: D.maleNames, femaleNames: D.femaleNames, shipNames: D.shipNames,
+      // Mac 2.0.1's ALRT 5050 (rules-mac20)
+      youLost: { text: 'Unfortunately, you have been eliminated from the game…', ok: 'Oh, well…', title: '', align: 'center' },
       nameAStar: { when: 'win', keep: 0, use: 'pool', max: 7, min: 4, match: 'munger',
         text: 'You won the game, so you get to name a star.', rule: 'Star names must be 4 to 7 characters long.',
         label: 'New Star Name:', hint: '(If you’d rather not name a star, click “OK” with the name blank.)',

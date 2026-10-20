@@ -2947,6 +2947,18 @@ Object.defineProperties(E.RULESETS.original, Object.fromEntries(Object.entries({
   // win gives opens it (rs.conquered, js/skins/classic/ui.js openWinWindows),
   // and a new rank's window comes after it (rs.rankAfterWin).
   conquered: 'Congratulations! You have conquered the galaxy!', conqueredTitle: '', rankAfterWin: true,
+  // CONFIRMED (FUN_10060580 on report 0x433, "You have just been eliminated
+  // from the game.", sent once, when the player goes out: checkElimination505;
+  // a surrender ends there too): FUN_100967c0(0x97), the You Lost window, PPob
+  // 151, no title bar (WIND proc 1), 225 x 282, "Unfortunately, you have been
+  // eliminated from the game…" over PICT 3040 ("You lost") and OK at the
+  // right; nothing after it (no rank, no points). The demo opens PPob 168
+  // instead (its own words and "Not Yet" / "Buy It!"). The message view runs
+  // FUN_10060580 for the report as it comes up (LHoMessageView FUN_1009bbc0)
+  // and again when it is clicked in the list (FUN_100b9250), so the remake
+  // opens it as the report shows, and from the Report Window
+  // (js/skins/classic/ui.js openYouLost)
+  youLost: { text: 'Unfortunately, you have been eliminated from the game…', ok: 'OK', title: '', align: 'right' },
   // the windows' own words (docs/505-windows.md; js/skins/classic/ui.js):
   // Dip Into Savings (PPob 157, FUN_1005d380: a slider 0-30 set from and to
   // the player's +0x54, 30% at the top), Surrender (PPob 147, FUN_1005d5a0:

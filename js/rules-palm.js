@@ -424,6 +424,13 @@ const rs = Object.assign(base, {
   // You Won window or rank after it
   windowWords: { dip: O.windowWords.dip, surrender: O.windowWords.surrender, scrapTypes: O.windowWords.scrapTypes },
   conquered: null, rankAfterWin: false,
+  // CONFIRMED (FUN_00041604 on report 0x433; the form FUN_00071d66,
+  // FUN_00071e06): the Game Over form, tFRM 3400 (156 x 156, titled "Game
+  // Over"), with tSTL 1001's "Unfortunately, you have been eliminated from the
+  // game..." (its second line; the demo's fourth, with the "order the full
+  // version" lines under it), the lost picture (Tbmp 9404, the angel; 9403,
+  // the won one, is for a win) and OK at the bottom right
+  youLost: { title: 'Game Over', text: 'Unfortunately, you have been eliminated from the game...', ok: 'OK', align: 'right', pic: 'p3040' },
   // Organize Fleets (tFRM 2300 "Organize Fleets": two fleet lists, each
   // ending in "Empty Fleet", their piles, the arrows between them, Split,
   // Group All, Done). Group All (FUN_00079a18) and Split (FUN_00079ea8) are

@@ -255,6 +255,13 @@ E.registerRules('mac405', Object.assign({}, W, {
   // GiveStarsValues @81a0a numbers them one place late as Windows does
   // ("Hope", STR# 6060.191; the patch's 'keptStarNames').
   nameAStar: Object.assign({}, W.nameAStar, { keep: 0, add: null, pick: 'run', match: 'munger' }),
+  // CONFIRMED (DoMessageAction @1523c2 on report 0x432): SimpleOKDialog with
+  // DLOG 5050 "You Lose Color" (a screen of 16 colours or more; 5051 "You
+  // Lose", PICT 3540, on fewer: the same words), no title, "Unfortunately, you
+  // have been eliminated from the game…" over PICT 3040 and "Oh, well…"; then
+  // AddToHall (the Hall of Shame), MarkEndGameDone and, with every human out,
+  // ExploreEverything
+  youLost: { text: 'Unfortunately, you have been eliminated from the game…', ok: 'Oh, well…', title: '', align: 'center' },
   computerIdentity,
   setupPlayer,
   autoPlaySettings,

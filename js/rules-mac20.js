@@ -115,6 +115,12 @@ E.registerRules('mac20', Object.assign({}, D, {
   // and its own words (DITL 4050)
   nameAStar: Object.assign({}, D.nameAStar, { min: 4, match: 'munger', taken: 'Sorry, there’s already a star named  “%s.” Please pick another name.', // DITL 3340
     hint: '(If you’d rather not name a star, click “OK” with the name blank.)' }),
+  // CONFIRMED (DoMessageAction @131538 on report 0x41f, "You have just been
+  // eliminated from the game."; @131648): Alert(5050), or 5051 on a screen of
+  // fewer than 16 colours, ALRT "You lost...": no title, "Unfortunately, you
+  // have been eliminated from the game…" over PICT 3040 (3540) and "Oh,
+  // well…" (DITL 5050, 5051: the same words)
+  youLost: { text: 'Unfortunately, you have been eliminated from the game…', ok: 'Oh, well…', title: '', align: 'center', looks: null },
   // CONFIRMED (FixNextSpendingBar @c1b48, ComputeMaxPercent @c2046,
   // ComputeMinPercent @c22b2: 2.0's Fix Spending, rules-dos fixSpending20,
   // with its lines kept in the code, @c1f6e-c1ff8) and the need rounded to

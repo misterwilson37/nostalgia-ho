@@ -65,6 +65,7 @@ h3.scaleflip { cursor: pointer; }
 .tip .key { margin: 6px 0 0; font-weight: bold; }
 .btns { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
 .btns.right { justify-content: flex-end; }
+.btns.center { justify-content: center; }
 .fleets { border-top: 1px solid #aaa; margin-top: 8px; }
 .frow { display: grid; grid-template-columns: auto 1fr; gap: 6px; padding: 4px; border: 1px solid transparent; cursor: pointer; align-items: center; }
 .frow.sel { background: #fff7d6; border-color: #b59a3b; }
@@ -309,6 +310,12 @@ button[data-help] { cursor: pointer; }
 .conquered { text-align: center; }
 .conquered img { max-width: 100%; image-rendering: pixelated; }
 .conquered p { font-weight: bold; }
+/* "Unfortunately, you have been eliminated from the game…" (rs.youLost): the
+   version's line breaks kept (DOS 2.0's box); a button that is a picture
+   (iOS's check mark) */
+.youlost p { white-space: pre-line; }
+.youlost .picbtn { padding: 0; border: 0; background: none; box-shadow: none; min-width: 0; cursor: pointer; }
+.youlost .picbtn img { display: block; width: 44px; height: auto; }
 .namestar input[name=star] { width: 9em; }
 /* touch (ui.js "touch: iOS 1.2.9's gestures"): the lists and windows slide
    by the remake's own code after 30 points, so the browser mustn't scroll

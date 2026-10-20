@@ -292,6 +292,9 @@ function french20(rs, own) {
       ask: '%s, %s des %s joueurs n\'ont pas encore fini leur tour.\n\nVoulez-vous vraiment forcer la fin du tour, ou préférez-vous attendre qu\'ils aient fini?' }) } : {}),
     say: sayFr(true),
     battleLines: { noInfo: FR(1030, 10), destroyed: FR(1030, 11) },
+    // 1.2F's You Lost alert (ALRT 5050) for 2.0's, which says the same
+    // (DOS writes "..." as 1.2F's black and white alert, 5051, does)
+    youLost: !R12 ? rs.youLost : rs === DOS ? Object.assign({}, R12.youLost, R12.youLost.bw, { bw: null }) : R12.youLost,
   };
 }
 for (const rs of [DOS, MAC20]) {
@@ -340,6 +343,8 @@ if (R12) {
   DE12.battleLines = { noInfo: S(75), destroyed: S(74) };
   delete DE12.fix;
 
+  // the You Lost alert in English (Mac 2.0.1's), which the interface puts in German (js/ui-text.js)
+  DE12.youLost = EN12.youLost;
   R12.languages = ['en', 'fr', 'de'];
   R12.lang = Object.assign({}, R12.lang, { de: DE12 });
 }
@@ -1327,6 +1332,6 @@ for (const [rs, panel] of [[DOS, { name: 15, cls: 15, dots: '...' }], [MAC20, { 
 }
 if (R12) {
   R12.languages = R12.languages.concat(['es']);
-  R12.lang = Object.assign({}, R12.lang, { es: spanish20(R12, R12.lang.en, { dots: '…' }) });
+  R12.lang = Object.assign({}, R12.lang, { es: Object.assign(spanish20(R12, R12.lang.en, { dots: '…' }), { youLost: R12.lang.en.youLost }) });
 }
 })(this);

@@ -539,6 +539,17 @@ root.HOUI.add([
 ['Don\'t Cancel Any Programs', 'Ne pas annuler aucun programme', 'Kein Programm abbrechen', 'Hiç Bir Programı İptal Etme', 'No cancelar ningún programa', I],
 ['Congratulations! You have conquered the galaxy!', 'Félicitations ! Vous avez conquis la galaxie !', 'Glückwunsch! Sie haben die Galaxis erobert!', 'Tebrikler! Galaksiyi fethettin', '¡Enhorabuena! ¡Has conquistado la galaxia!', { fr: 'iOS', de: '~DOS 2.0', tr: 'iOS' }],
 ['Congratulations!', 'Félicitations!', 'Glückwunsch!', 'Tebrikler!', '¡Enhorabuena!', I],
+// the You Lost windows (rs.youLost: 5.0.5's PPob 151, the Macs' ALRT 5050 and
+// 1.2F's own French, 4.0.5's dialog 377, 2.0's alert and box 5050, the Palm's
+// Game Over form, iOS's EndGameLayer): iOS's Misc Strings 110, the German
+// DOS 2.0's string 5050 and its "YouLostDlgBox", 1.2F's DITL 5050-5051
+['Unfortunately, you have been eliminated from the game...', 'Malheureusement, vous avez été éliminé de la partie ...', 'Leider wurden Sie aus dem Spiel gelöscht...', 'Ne yazık ki, sen oyundan elendin', 'Por desgracia, has sido eliminado de la partida...', { fr: 'iOS', de: 'DOS 2.0', tr: 'iOS' }],
+['Unfortunately, you have been eliminated from the game…', 'Malheureusement, vous avez été éliminé de la partie…', 'Leider wurden Sie aus dem Spiel gelöscht…', 'Ne yazık ki, sen oyundan elendin', 'Por desgracia, has sido eliminado de la partida…', { fr: '~iOS', de: '~DOS 2.0', tr: '~iOS' }],
+['Unfortunately,\nyou have been\neliminated from\nthe game...', 'Malheureusement,\nvous avez été\néliminé de\nla partie ...', 'Leider wurden\nSie aus dem\nSpiel eliminiert.\nSchade...', 'Ne yazık ki,\nsen oyundan\nelendin', 'Por desgracia,\nhas sido\neliminado de\nla partida...', { fr: '~iOS', de: 'DOS 2.0', tr: '~iOS' }],
+['Oh, well…', 'Bon, ça va…', 'Schade…', 'Ne yapalım…', 'Qué se le va a hacer…', { fr: '1.2F', de: '~DOS 2.0' }],
+['Oh Well...', 'Bon, ça va...', 'Schade...', 'Ne yapalım...', 'Qué se le va a hacer...', { fr: '1.2F', de: '~DOS 2.0' }],
+['Game Over', 'Partie terminée', 'Spiel vorbei', 'Oyun Bitti', 'Fin de la partida'],
+['You lost', 'Vous avez perdu', 'Sie haben verloren', 'Kaybettin', 'Has perdido', { de: '~Amiga' }],
 ['Cool!', 'Super !', 'Klasse!', 'Harika!', '¡Genial!'],
 ['Never Mind', 'Laisser tomber', 'Lieber nicht', 'Boş ver', 'Déjalo'],
 ['You have already earned all abilities.', 'Vous avez déjà gagné toutes les capacités.', 'Sie haben bereits alle Rechte erworben.', 'Bütün becerileri zaten kazandın.', 'Ya has ganado todas las posibilidades.'],

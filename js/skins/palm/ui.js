@@ -15,7 +15,10 @@ const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 const trunc = Math.trunc;
 
 const images = {
-  p3030: 'b9403', p3040: 'b9401', // won, lost
+  // won, lost: the Game Over form's two pictures (tFRM 3400, FUN_00071e06:
+  // Tbmp 9403 the cowboy on his planet, 9404 the angel); 9401-9402 are the
+  // Armageddon device's (tFRM 3300)
+  p3030: 'b9403', p3040: 'b9404',
   haloAlly: 'b3400', // an ally's colony: the gold halo (FUN_00014670)
 };
 // report pictures: the same numbers as 5.0.5's (FUN_000292f8)

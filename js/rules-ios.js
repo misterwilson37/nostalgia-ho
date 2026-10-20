@@ -359,6 +359,14 @@ const rs = Object.assign(base, {
   radicalHand: Object.assign({}, O.radicalHand, { words: { title: 'Radical Research', keep: 'Don\'t Cancel Any Programs', ok: 'OK', pic: 'm9010' } }),
   // (its other windows are its own: not 5.0.5's words, You Won window or rank after it)
   windowWords: null, conquered: null, rankAfterWin: false,
+  // CONFIRMED (report 0x433 in the message view's action, 0x10001394c ff.:
+  // auto play stops, then +[EndGameLayer youLost], setup: 0x10009cd90): a
+  // dialog with no title, Misc Strings 110 "Unfortunately, you have been
+  // eliminated from the game...", Game_You_Lost.png in the middle and the
+  // dialog's close button only (button-check.png; no cancel); then
+  // doUpdateMPs, Game Center's "lost a game" (the remake's Game Center record,
+  // awardGameCenter). Android 1.2.8 the same
+  youLost: { text: 'Unfortunately, you have been eliminated from the game...', ok: 'OK', okPic: 'button-check', title: '', align: 'center' },
   // CONFIRMED (the calls of the report routine, 0x10003b028 and 0x10003af9c:
   // the battles 0x100021108, the turn 0x10002dca8, exploring 0x10003405c and
   // the new colony 0x100034238; no pointer to either is stored anywhere): no

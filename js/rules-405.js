@@ -2597,6 +2597,16 @@ E.registerRules('405', Object.assign({}, D, {
   // p3030) and OK, in a window with no title, then Name a Star (FUN_00456047,
   // dialog 378)
   conquered: 'Congratulations! You have conquered the galaxy!', conqueredTitle: '',
+  // CONFIRMED (FUN_00470dec on report 0x432, the player's "You have just been
+  // eliminated from the game."): the same dialog 377 (FUN_0044bf5a, no
+  // title), its line set to "Unfortunately, you have been eliminated from the
+  // game..." (0x59e390) and its picture to bitmap 3010 (+0x98 = 0xbc2; a win's
+  // is 3000), OK; it closes itself after 18,000 ticks (5 minutes; a timed
+  // network game's own deadline instead), which the remake leaves out. Then
+  // the Hall of Shame (FUN_00497e58(0x3e9), once a game: FUN_00478196) and,
+  // with every human out, the whole map (FUN_0047fb7b). A player who comes
+  // back and is out again hears the report, and sees the window, again
+  youLost: { text: 'Unfortunately, you have been eliminated from the game...', ok: 'OK', title: '', align: 'center' },
   // CONFIRMED (FUN_00456047, dialog 378; string 513): the winner names a star,
   // 2 to 7 letters (the dialog says so; blank names none), not one there is
   // already. The program keeps four (the application's CStringArray +0xcc):

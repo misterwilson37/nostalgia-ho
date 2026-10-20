@@ -2093,6 +2093,13 @@ E.registerRules('301', Object.assign({}, D, {
   nameAStar: { when: 'win', text: 'You won the game, so you get to name a star.', keep: 0, use: 'pool', max: 7, min: 2, match: 'munger',
     rule: 'Star names must be 2 to 7 characters long.', label: 'New Star Name:', hint: '(If you’d rather not name a star, click “OK” with the name blank.)',
     taken: 'Sorry, there’s already a star named  “%s.” Please pick another name.' },
+  // CONFIRMED (DoMessageAction @161e44 on report 0x42a, "You have just been
+  // eliminated from the game."): Alert(5050) on a screen of 16 colours or more,
+  // else Alert(5051) (@161fa6), ALRT "You lost...": no title, "Unfortunately,
+  // you have been eliminated from the game…" over PICT 3040 (3540 in black
+  // and white) and "Oh, well…"; then AddToHall(1001), the Hall of Shame, and
+  // MarkEndGameDone. A player back in and out again sees it again
+  youLost: { text: 'Unfortunately, you have been eliminated from the game…', ok: 'Oh, well…', title: '', align: 'center' },
   SKILLS, HIT, hit, SHAPES: W.SHAPES, SIZES: W.SIZES, interestOn, techLevelCost, research, aiSpec,
   setupPlayer, defaultDesigns, afterSetup, computerSetup, makeGalaxy, distance: W.distance, galaxySizes: O.galaxySizes,
   designCost, designLimits, designMin, paysPrototype, shotsPerShip, planetShots, borrowLimit,

@@ -1490,6 +1490,10 @@ window.HOTHEME_OVER = {
   techBars: 'vertical', barGrid: false,
   panel, afterMsg, window: skinWindow, newGame, menus, lookOptions, page, title,
   menuName: (k) => (WORDS[k] ? W(k) : k), // the menus' names (menus above), in the language
+  // no You Lost window: the Amiga game's words (texte.pff) have none, only the
+  // report "Sie werden aus dem Spiel gelöscht." (624) and Spielervergleich's
+  // "Sie haben das Spiel im Jahre %ld verloren!" (741), which the skin has
+  youLost: false,
 };
 if (!window.HOSKINS_INLINE) document.write('<script src="js/skins/dos/ui.js"><\/script>');
 })();

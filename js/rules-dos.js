@@ -2094,6 +2094,19 @@ E.registerRules('dos', Object.assign({}, O, {
   nameAStar: { when: 'win', text: 'You won the game, so you get to name a star.', keep: 0, use: 'pool', max: 7,
     rule: 'Star names must be 4 to 7 characters long.', label: 'New Star Name:', hint: '(If you\'d rather not name a star, click "OK" with the name blank.)',
     taken: 'Sorry, there’s already a star named ‘%s’.  Please pick another name.' },
+  // CONFIRMED (WINHO.EXE FUN_10c0_12de, its jump table @10c0:13a2: report
+  // 0x41f, "You have just been eliminated from the game.", @10c0:1392 opens
+  // alert 5050, type 32513: "Unfortunately, you have been eliminated from the
+  // game..." and one button, "&Oh Well..."; DOSHO.EXE the same report opens
+  // its box 5050 (FUN_b717_1743, unpacked), "YouLostDlgBox": "Unfortunately, /
+  // you have been / eliminated from / the game..." on four lines, with the
+  // lost picture (d5050). The DOS box's button isn't among its words: OK,
+  // as its other boxes (LIKELY). The report comes when the player is marked
+  // as dying (checkElimination above), so the window can come before a
+  // colony founded in time brings the player back. The Windows 3.1 look
+  // (the skin's win31) shows the Windows alert
+  youLost: { text: 'Unfortunately,\nyou have been\neliminated from\nthe game...', ok: 'OK', title: '', align: 'center',
+    looks: { win31: { text: 'Unfortunately, you have been eliminated from the game...', ok: 'Oh Well...' } } },
   // CONFIRMED (FUN_1040_4028, FUN_10e8_0f64, FUN_1020_4711; Mac 2.0.1
   // GetPrefNamesResource @12c2a, DoGameSolidificationStuff @a40d8,
   // AddNewTypeNameToPrefs @11202a, GiveTypeCoolName @9457e; 1.2 the same,

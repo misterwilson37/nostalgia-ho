@@ -1675,6 +1675,8 @@ function renderMsg0() {
     if (m.star != null) { UI.sel = m.star; if (modern()) centerOn(m.star); renderPanel(); draw(); }
     box.append(card);
     card.focus({ preventScroll: true });
+    // the eliminated player's report opens the version's You Lost window as it comes up (rs.youLost)
+    if (lostReport(m) && !m.lostSeen && !UI.modal) { m.lostSeen = true; save(); openYouLost(() => { if (card.isConnected) card.focus({ preventScroll: true }); }); }
     return;
   }
   // online: once this player's orders are in (or they have no turn), who the turn waits for
@@ -3640,6 +3642,41 @@ function openWinWindows(done) {
   if (rs.nameAStar && rs.nameAStar.when === 'win' && !G.starNamed) { openNameStar(() => { G.starNamed = true; save(); if (done) done(); }); return; }
   if (done) done();
 }
+// Losing (rs.youLost): the player's own "You have just been eliminated from
+// the game." opens the version's You Lost window as the report comes up
+// (5.0.5: LHoMessageView FUN_1009bbc0 runs the report's action, FUN_10060580,
+// PPob 151; 4.0.5, 3.0.1, 2.0 and 1.2: DoMessageAction's alert 5050; the
+// Palm's Game Over form; iOS's EndGameLayer youLost), once a report
+// (m.lostSeen), and again when it is clicked in the Report Window, as the
+// originals' message lists did. In hot seat the report, and so the window,
+// is the eliminated player's, on their last turn to read the news
+// (seatOrder); online, on their own page. rs.youLost: { text, ok, title,
+// align, pic (the skin's picture, p3040 unless said), okPic (a picture for
+// the button: iOS's check mark), looks: { <OS look>: words } (Windows 3.1's
+// alert for DOS 2.0's box), bw: words on a black-and-white screen (1.2F's
+// ALRT 5051) }. A skin whose original had none says T.youLost = false (the
+// Amiga).
+function youLostWords() {
+  if (!G || T.youLost === false) return null;
+  let Y = HO.rules(G).youLost;
+  if (!Y) return null;
+  const os = document.documentElement.dataset.os;
+  if (Y.looks && Y.looks[os]) Y = Object.assign({}, Y, Y.looks[os]);
+  if (Y.bw && HO.screenBW()) Y = Object.assign({}, Y, Y.bw);
+  return Y;
+}
+const LOST_REPORT = 'You have just been eliminated from the game.';
+const lostReport = (m) => !!(m && m.big === 'p3040' && m.text === LOST_REPORT && youLostWords());
+function openYouLost(done) {
+  const Y = youLostWords();
+  if (!Y) { if (done) done(); return; }
+  const pic = A.img[Y.pic || 'p3040'], okPic = Y.okPic && A.img[(T.prefix || '') + Y.okPic];
+  const ok = el('button', { class: okPic ? 'picbtn' : null, 'aria-label': okPic ? (Y.ok || 'OK') : null, onclick: () => closeModal() },
+    okPic ? el('img', { src: okPic, alt: '' }) : (Y.ok || 'OK'));
+  const body = el('div', { class: 'conquered youlost' }, el('p', null, Y.text), pic ? el('img', { src: pic, alt: '' }) : null,
+    el('div', { class: 'btns ' + (Y.align || 'right') }, ok));
+  modal(Y.title != null ? Y.title : 'You lost', body, { cls: 'small', sticky: true, label: 'You lost', onClose: done });
+}
 // Is the name taken? NS.match 'munger': found anywhere in the kept names or
 // the version's star names, a name inside another too, letter case counting
 // (the Mac versions' Munger); '505': equal to a kept name, letter case aside,
@@ -3781,6 +3818,7 @@ function openReports() {
   const rows = ms.map(m => el('li', { class: 'click', tabindex: 0, onclick: () => {
     closeModal();
     if (winReport(m) && winPending()) { openWinWindows(() => renderMsg()); return; }
+    if (lostReport(m)) { openYouLost(); return; }
     if (m.battle) { openBattle(m.battle); return; }
     if (m.star != null) { UI.sel = m.star; centerOn(m.star); renderPanel(); draw(); }
   } }, degText(HO.say(G, m.text))));
@@ -5585,7 +5623,7 @@ window.addEventListener('DOMContentLoaded', () => {
     shipPic, shipImgEl, starLook, fleetOrder, curFleet, centerOn, zoomAt, resize, map: () => ({ w: mapW, h: mapH, ready: !!cv }),
     fit() { UI.fitted = false; fit(); draw(); }, clampView,
     openBuild, openSplit, openOrganize, organizeStyle, openPlayers, openScrapTypes, openBattle, lastBattles, battleName, openReports, openAbout, openHelp,
-    openRadicalHand, showRank, openWinWindows, // (the originals' own windows, for the tests)
+    openRadicalHand, showRank, openWinWindows, openYouLost, // (the originals' own windows, for the tests)
     newGameDialog, titleScreen, hideTitle, continueChecked, importGame, doEndTurn, flipBarScale, marksScrap, scrapWords, toggleScrapFleet,
     verOpts, modern, hotSeat,
     // (and the windows tools/ui-lang-audit.js opens in every skin and language)
