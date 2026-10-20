@@ -2959,6 +2959,31 @@ Object.defineProperties(E.RULESETS.original, Object.fromEntries(Object.entries({
   // opens it as the report shows, and from the Report Window
   // (js/skins/classic/ui.js openYouLost)
   youLost: { text: 'Unfortunately, you have been eliminated from the game…', ok: 'OK', title: '', align: 'right' },
+  // CONFIRMED (FUN_1005dcb0, Galaxy > "Give Money/Metal To…", Mcmd 5028):
+  // with three gifts given this turn (player +0x10e4) Alert 6 ("Sorry, but
+  // you may only give 3 gifts per turn."), else PPob 154 "Give Money Metal"
+  // (WIND "Give Money/Metal", 318 x 226, a title bar): the popup
+  // "Recipient:" (MENU 216) lists every player, yourself and those out
+  // (player +0x34) greyed ("(" added to the item), and starts on the one you
+  // last gave or sent a message to (player +0xa0, which Send Message shares)
+  // when that one can be chosen, else on the first who can; with no one,
+  // Alert 7. "Money: $" and "Metal:" each over a standing slider (LSliderUpdater
+  // 'mons', 'mets', 20 x 100, 11 tick marks), set to 0 and then to a maximum
+  // of the savings (+0x48) and the metal (+0x58), or disabled when that is 0
+  // or less; the amount beside the label follows the slider (FUN_10055050,
+  // no "$": 'mona', 'meta'), the maximum ("$" and FUN_10055050 for the money,
+  // the number alone for the metal: 'monx', 'metx') is written at the top of
+  // the slider and "0" at its foot. Any whole amount, no steps. Cancel; Give
+  // (the default) records the gift whatever the amounts, 0 and 0 too (one of
+  // the three: rs.giftEmpty), at +0x10e8 (from, to, metal, money), sets
+  // +0xa0, takes the money and metal at once, plays sound 5000 and redraws.
+  // In pass 2b (FUN_10072a10) the receiver gets each amount over 0 with
+  // "%s has just given you $%s." / "... %s metal." (0x44c, 0x44d) and the
+  // giver hears "You just gave %s $%s." / "... %s metal." (0x44e, 0x44f; the
+  // remake tells the giver at once, docs/open-questions.md). No other limit:
+  // an ally or not, at war or not. (js/skins/classic/ui.js openGive)
+  giveWindow: { style: '505', title: 'Give Money/Metal', recipient: 'Recipient:', money: 'Money:', metal: 'Metal:', cancel: 'Cancel', ok: 'Give', remember: 'chatTo', ticks: 11 },
+  giftEmpty: true,
   // the windows' own words (docs/505-windows.md; js/skins/classic/ui.js):
   // Dip Into Savings (PPob 157, FUN_1005d380: a slider 0-30 set from and to
   // the player's +0x54, 30% at the top), Surrender (PPob 147, FUN_1005d5a0:

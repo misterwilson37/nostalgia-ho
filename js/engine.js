@@ -663,16 +663,23 @@ function setPact(G, pid, other, kind, on) {
   if (kind === 'ally' && !on) p.buddies = (p.buddies || []).filter(x => x !== other);
   if (kind === 'buddy' && on && !(p.allies || []).includes(other)) (p.allies = p.allies || []).push(other);
 }
-// up to three gifts a turn; they arrive at the end of the turn
+// up to three gifts a turn; they arrive at the end of the turn. rs.giftEmpty:
+// a gift of nothing is still one of the three (5.0.5, the Palm, iOS: their
+// Give records whatever the sliders say). The giver is told at once (the
+// remake's), each amount over 0, unless the ruleset tells at the end of the
+// turn itself (rs.giftNewsAtEnd: 4.0.5)
 function give(G, from, to, money, metal) {
-  const p = G.players[from];
+  const p = G.players[from], rs = rules(G);
   money = Math.max(0, Math.floor(money || 0)); metal = Math.max(0, Math.floor(metal || 0));
   if (!feature(G, 'gifts') || from === to || !G.players[to] || !G.players[to].alive) return 'no';
   if ((p.giftsThisTurn || 0) >= 3) return 'limit';
-  if (money > Math.max(0, p.savings) || metal > p.metal || (!money && !metal)) return 'short';
+  if (money > Math.max(0, p.savings) || metal > p.metal || (!money && !metal && !rs.giftEmpty)) return 'short';
   p.savings -= money; p.metal -= metal; p.giftsThisTurn = (p.giftsThisTurn || 0) + 1;
   (G.gifts = G.gifts || []).push({ from, to, money, metal });
-  msg(G, from, money ? report(103, G.players[to].name, num(G, money)) : report(104, G.players[to].name, num(G, metal)), { icon: 'm9048', quiet: true });
+  if (!rs.giftNewsAtEnd) {
+    if (money) msg(G, from, report(103, G.players[to].name, num(G, money)), { icon: 'm9048', quiet: true });
+    if (metal) msg(G, from, report(104, G.players[to].name, num(G, metal)), { icon: 'm9046', quiet: true });
+  }
   return 'ok';
 }
 // surrender to a player, or to no one (to = -1); null cancels

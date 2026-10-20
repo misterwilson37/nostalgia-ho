@@ -427,6 +427,42 @@ html.fleetdrag #panel .planet > .btns, html.fleetdrag.fleetdrag-pad #panel .plan
 .dip505 .dipslider input[type=range] { writing-mode: vertical-lr; direction: rtl; width: 1.6em; height: 7em; margin: 0; }
 .dip505 .dipmarks { display: flex; flex-direction: column; justify-content: space-between; font-size: .85em; }
 .origwin > p, .origwin > .btns { margin: .5em 0 0; }
+/* the Give windows (js/skins/classic/ui.js openGiveWindow) */
+.give505, .givepalm, .giveios { min-width: min(300px, 100%); }
+.origwin .giverow { display: flex; align-items: center; gap: .5em; margin: 0 0 .6em; }
+.origwin .giverow select { flex: 1; min-width: 0; }
+.give505 .givecols { display: flex; gap: 1.5em; justify-content: space-around; }
+.give505 .givecol { display: flex; flex-direction: column; gap: .3em; }
+.origwin .giveamt { display: flex; gap: .35em; align-items: baseline; }
+.origwin .giveamt output { min-width: 6em; font-variant-numeric: tabular-nums; }
+.give505 .givesl { display: flex; gap: .3em; height: 100px; margin-left: 10px; }
+.give505 input.vert { writing-mode: vertical-lr; direction: rtl; width: 22px; height: 100px; margin: 0; touch-action: none; }
+.give505 .giveticks { display: flex; flex-direction: column; justify-content: space-between; padding: 6px 0; }
+.give505 .giveticks i { display: block; width: 5px; height: 1px; background: currentColor; opacity: .7; }
+.give505 .giveends { display: flex; flex-direction: column; justify-content: space-between; font-variant-numeric: tabular-nums; }
+.givepalm .giverow2, .giveios .giverow2 { margin: .4em 0; }
+.givepalm input[type=range], .giveios input[type=range] { width: 100%; margin: .2em 0 0; touch-action: none; }
+.givepalm .giveends, .giveios .giveends { display: flex; justify-content: space-between; font-size: .9em; }
+.giveios .giveamt { justify-content: center; }
+.giveios .giveamt span { margin-right: auto; }
+.giveios .giveamt output { min-width: 0; margin-right: auto; }
+.giveios .givetoggle { flex: 1; }
+.give505 .btns, .givepalm .btns, .giveios .btns { margin-top: .8em; }
+.picbtn { padding: 0; border: 0; background: none; box-shadow: none; min-width: 0; cursor: pointer; }
+.picbtn img { display: block; width: 44px; height: auto; }
+.give-grid .givecols { display: flex; flex-wrap: wrap; gap: 1em; align-items: flex-start; }
+.give-grid .gtitle { margin: 0 0 .2em; font-weight: bold; }
+.givegrid { display: grid; grid-template-columns: repeat(var(--cols), var(--cell)); grid-auto-rows: var(--cell); border: 1px solid currentColor; max-width: 100%; }
+.givegrid .givecell { box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1px; margin: 0; min-width: 0; border: 0; border-radius: 0; background: none; box-shadow: none; color: inherit; font-size: 9px; line-height: 1.1; overflow: hidden; cursor: pointer; }
+.givegrid .givecell img { width: 32px; height: 32px; image-rendering: pixelated; }
+.givegrid .givecell span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.givegrid .givecell.on { background: #000; color: #fff; }
+.givegrid .givecell:focus-visible { outline: 2px dotted currentColor; outline-offset: -3px; }
+.givegrid .givecell.empty { cursor: default; }
+.give-grid .givef { display: flex; flex-direction: column; gap: .6em; flex: 1; min-width: 10em; }
+.give-grid .givef label { display: flex; flex-direction: column; gap: .2em; }
+.give-grid .givef input { width: 6em; }
+.give-grid .btns.col { display: flex; flex-direction: column; align-items: flex-end; gap: .5em; margin-top: auto; }
 .origwin label.chk { display: flex; gap: 6px; align-items: center; margin: .3em 0; }
 .origwin .note { color: var(--sub); }
 .autoplay505 fieldset { display: block; padding: 4px 10px 8px; }

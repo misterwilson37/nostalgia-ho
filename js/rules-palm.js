@@ -431,6 +431,22 @@ const rs = Object.assign(base, {
   // version" lines under it), the lost picture (Tbmp 9404, the angel; 9403,
   // the won one, is for a win) and OK at the bottom right
   youLost: { title: 'Game Over', text: 'Unfortunately, you have been eliminated from the game...', ok: 'OK', align: 'right', pic: 'p3040' },
+  // CONFIRMED (FUN_000370ac, the Give command; tFRM 2500; FUN_000745b0,
+  // FUN_000748d0, FUN_00074a6c, FUN_00074b36, FUN_00074738, FUN_00074bfe):
+  // with three gifts given (player +0x1b0) "Sorry, but you may only give 3
+  // gifts per turn.", with no one "Sorry, but there is no one else alive to
+  // give or send something to." (Talt 2200), else the form "Give Money/Metal"
+  // (156 x 156): "Recipient:" a popup of the others still in (player +0x36),
+  // on the first; "Money:" and "Metal:" each with the amount after it and a
+  // feedback slider under it (100 x 15) of 0 to 1,000, at 0 (disabled when the
+  // savings or the metal is 0 or less), "$0" / "0" under its left end and the
+  // most (the savings with "$", the metal) from x 100: a slider at k gives
+  // trunc(what you have / 1,000) x k, all of it at 1,000; the amounts in full
+  // with commas (FUN_0002c510, "$" for the money). Cancel; Give records the
+  // gift whatever the amounts (0 and 0 too), takes them at once and sets
+  // +0x9e (which the form doesn't read back). Delivered as 5.0.5's.
+  giveWindow: { style: 'palm', title: 'Give Money/Metal', recipient: 'Recipient:', money: 'Money:', metal: 'Metal:', cancel: 'Cancel', ok: 'Give', remember: false, steps: 1000,
+    none: 'Sorry, but there is no one else alive to give or send something to.' },
   // Organize Fleets (tFRM 2300 "Organize Fleets": two fleet lists, each
   // ending in "Empty Fleet", their piles, the arrows between them, Split,
   // Group All, Done). Group All (FUN_00079a18) and Split (FUN_00079ea8) are

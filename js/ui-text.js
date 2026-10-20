@@ -550,6 +550,18 @@ root.HOUI.add([
 ['Oh Well...', 'Bon, ça va...', 'Schade...', 'Ne yapalım...', 'Qué se le va a hacer...', { fr: '1.2F', de: '~DOS 2.0' }],
 ['Game Over', 'Partie terminée', 'Spiel vorbei', 'Oyun Bitti', 'Fin de la partida'],
 ['You lost', 'Vous avez perdu', 'Sie haben verloren', 'Kaybettin', 'Has perdido', { de: '~Amiga' }],
+// the Give windows (rs.giveWindow: 5.0.5's PPob 154, the Palm's tFRM 2500,
+// iOS's GiveDialogLayer and Misc Strings 75-77, 23; 3.0.1's and 4.0.5's
+// DITL 6120 and dialog 362, alert 5010 / STR# 6140.10 / string 759)
+['Give Money/Metal', 'Donner de l\'argent / métal', 'Geld/Metall geben', 'Para/Metâl Ver', 'Dar dinero/metal', I],
+['Recipient:', 'Destinataire :', 'Empfänger:', 'Alıcı:', 'Destinatario:', { fr: '~iOS', tr: '~iOS' }],
+['Recipient: ', 'Destinataire :', 'Empfänger:', 'Alıcı: ', 'Destinatario:', I],
+['Money:', 'Argent :', 'Geld:', 'Para:', 'Dinero:', I],
+['Metal:', 'Métal:', 'Metall:', 'Metâl:', 'Metal:', { fr: 'iOS', de: 'Amiga', tr: 'iOS' }],
+['Give Stuff To:', 'Donner à :', 'Geben an:', 'Şuna ver:', 'Dar a:'],
+['Give How Much Money?', 'Donner combien d\'argent ?', 'Wie viel Geld geben?', 'Ne kadar para verilsin?', '¿Cuánto dinero das?'],
+['Give How Much Metal?', 'Donner combien de métal ?', 'Wie viel Metall geben?', 'Ne kadar metâl verilsin?', '¿Cuánto metal das?'],
+['Sorry, you can only give three gifts per turn.', 'Désolé, mais vous ne pouvez donner plus de trois cadeaux par tour.', 'Tut mir leid, aber Sie dürfen nur drei Geschenke pro Zug machen.', 'Üzgünüm, her seferinde sadece üç hediye verebilirsin.', 'Lo siento, pero solo puedes hacer tres regalos por turno.', { fr: '~iOS', tr: '~iOS' }],
 ['Cool!', 'Super !', 'Klasse!', 'Harika!', '¡Genial!'],
 ['Never Mind', 'Laisser tomber', 'Lieber nicht', 'Boş ver', 'Déjalo'],
 ['You have already earned all abilities.', 'Vous avez déjà gagné toutes les capacités.', 'Sie haben bereits alle Rechte erworben.', 'Bütün becerileri zaten kazandın.', 'Ya has ganado todas las posibilidades.'],

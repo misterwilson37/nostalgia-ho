@@ -2607,6 +2607,22 @@ E.registerRules('405', Object.assign({}, D, {
   // with every human out, the whole map (FUN_0047fb7b). A player who comes
   // back and is out again hears the report, and sees the window, again
   youLost: { text: 'Unfortunately, you have been eliminated from the game...', ok: 'OK', title: '', align: 'center' },
+  // CONFIRMED (FUN_00457c55, dialog 362 FUN_004537d0, no caption): with three
+  // gifts given (+0x189c) string 759 "Sorry, you can only give three gifts
+  // per turn." (FUN_004183b9); else "Give Stuff To:" over the picture list
+  // (group box 1148: cells of 60 x 60, 5 a row, the others still in, +0x2dc;
+  // FUN_00499ee9, a click on an empty cell beeps, FUN_004539a5), the cell of
+  // the player last given to (+100, FUN_00457f78) picked, else the first;
+  // "Give How Much Money?" (1145) and "Give How Much Metal?" (1146) at 0,
+  // each put back between 0 and the Ship Savings (the metal) as it is typed
+  // (FUN_00453b7f, FUN_00453c20); Cancel over Give. Give with both 0 gives
+  // nothing; else the gift is recorded, +100 set, taken at once, sound
+  // MESSAGE. Mac 4.0.5's DoGiveThingsDlg @103a70 the same (DLOG 6120, 45 x
+  // 45 cells, GetCellForPlayer(+100), STR# 6140.10). The giver hears in pass
+  // 2 (giftNews below), not at once (rs.giftNewsAtEnd)
+  giveWindow: { style: 'grid', to: 'Give Stuff To:', money: 'Give How Much Money?', metal: 'Give How Much Metal?', cancel: 'Cancel', ok: 'Give',
+    remember: 'giveTo', cols: 5, rows: 4, cell: 60, order: order405, limit: 'Sorry, you can only give three gifts per turn.' },
+  giftNewsAtEnd: true,
   // CONFIRMED (FUN_00456047, dialog 378; string 513): the winner names a star,
   // 2 to 7 letters (the dialog says so; blank names none), not one there is
   // already. The program keeps four (the application's CStringArray +0xcc):

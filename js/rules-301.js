@@ -2100,6 +2100,21 @@ E.registerRules('301', Object.assign({}, D, {
   // and white) and "Oh, well…"; then AddToHall(1001), the Hall of Shame, and
   // MarkEndGameDone. A player back in and out again sees it again
   youLost: { text: 'Unfortunately, you have been eliminated from the game…', ok: 'Oh, well…', title: '', align: 'center' },
+  // CONFIRMED (DoGiveThingsDlg @1437e0, DLOG/DITL 6120 "Send Money/Metal",
+  // no title bar; InitGTPlayerList @143b00, SetCellsToPlayers @141776): with
+  // three gifts given (galaxy +0x1592) alert 5010 with STR# 1020.21 "Sorry,
+  // you can only give three gifts per turn."; else "Give Stuff To:" over a
+  // list of 5 x 4 cells (227 x 182), each the icon (2000 + face, + 500 a
+  // woman) and name of another player still in (state 3 or less), the first
+  // cell picked; "Give How Much Money?" and "Give How Much Metal?" each a
+  // field at "0", the money field selected: each key typed puts the field
+  // back between 0 and the Ship Savings (the metal), 0 when below 0; Cancel
+  // above Give (the default). Give with both 0, or with no cell picked,
+  // gives nothing; else the gift (to the first picked cell's player) is
+  // recorded, taken at once, sound 5000. Delivered in pass 2 (the giver's
+  // note at once in the remake)
+  giveWindow: { style: 'grid', to: 'Give Stuff To:', money: 'Give How Much Money?', metal: 'Give How Much Metal?', cancel: 'Cancel', ok: 'Give',
+    remember: false, cols: 5, rows: 4, cell: 45, order: order301, limit: 'Sorry, you can only give three gifts per turn.' },
   SKILLS, HIT, hit, SHAPES: W.SHAPES, SIZES: W.SIZES, interestOn, techLevelCost, research, aiSpec,
   setupPlayer, defaultDesigns, afterSetup, computerSetup, makeGalaxy, distance: W.distance, galaxySizes: O.galaxySizes,
   designCost, designLimits, designMin, paysPrototype, shotsPerShip, planetShots, borrowLimit,

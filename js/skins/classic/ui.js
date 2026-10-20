@@ -3018,7 +3018,38 @@ function openPlayers() {
 }
 const others = () => G.players.filter(p => p.id !== 0 && p.alive && !p.surrendered);
 function playerSelect(name) { return el('select', { name }, ...others().map(p => el('option', { value: p.id }, p.name))); }
+// the version's own Give window (rs.giveWindow; js/engine.js give, which
+// online play records): 'style' '505' (5.0.5's PPob 154: the Recipient
+// popup, every player with yourself and those out greyed, and two standing
+// sliders from 0 to what you have, any whole amount), 'palm' (tFRM 2500: the
+// others in a popup, sliders lying down of 1,000 steps, each a thousandth of
+// what you have, rounded down), 'ios' (GiveDialogLayer: a name that a tap
+// steps on, sliders lying down of fractions, the check mark and the X),
+// 'grid' (3.0.1 and 4.0.5: "Give Stuff To:" over a list of the others'
+// icons, 5 a row, and two number fields put back between 0 and what you have
+// as they are typed; both 0 gives nothing). W.remember: the player field
+// that keeps the last one given to ('chatTo', which 5.0.5's Send Message
+// shares; 'giveTo'); W.order: the list's order. Without rs.giveWindow (the
+// remake's own rules), number fields.
+function giveSlider(max, label, onval, o) {
+  o = o || {};
+  const s = el('input', { type: 'range', min: 0, max: Math.max(0, max), step: 1, value: 0, 'aria-label': label, disabled: max > 0 ? false : 'disabled', class: o.vertical ? 'vert' : null });
+  const set = (v) => { s.value = String(Math.max(0, Math.min(max, v))); onval(+s.value); };
+  // keys: an arrow moves a hundredth of the way, Page Up / Down a tenth,
+  // Home / End to the ends (the originals' sliders took only the mouse)
+  s.addEventListener('keydown', (e) => {
+    const k = e.key, step = Math.max(1, Math.round(max / 100)), v = +s.value;
+    const to = k === 'ArrowUp' || k === 'ArrowRight' ? v + step : k === 'ArrowDown' || k === 'ArrowLeft' ? v - step
+      : k === 'PageUp' ? v + step * 10 : k === 'PageDown' ? v - step * 10 : k === 'Home' ? 0 : k === 'End' ? max : null;
+    if (to == null) return;
+    e.preventDefault(); set(to);
+  });
+  s.addEventListener('input', () => onval(+s.value));
+  return s;
+}
 function openGive() {
+  const W = G && HO.rules(G).giveWindow;
+  if (W) { openGiveWindow(W); return; }
   if (!others().length) { toast(HO.say(G, HO.DATA.alerts[6] || 'There is no one else to give anything to.')); return; }
   const f = el('form', { class: 'newgame', onsubmit: (e) => {
     e.preventDefault();
@@ -3034,6 +3065,109 @@ function openGive() {
     el('p', { class: 'sub' }, 'Gifts arrive at the end of the turn. You can give three a turn.'),
     el('div', { class: 'btns right' }, el('button', { type: 'submit' }, 'Give')));
   modal('Give money or metal', f, { cls: 'mid' });
+}
+function openGiveWindow(W) {
+  const p = me(), out = (q) => !q.alive || q.surrendered;
+  if ((p.giftsThisTurn || 0) >= 3) { toast(HO.say(G, W.limit || HO.DATA.alerts[5] || 'Sorry, but you may only give 3 gifts per turn.')); return; }
+  const order = W.order ? W.order(G) : G.players;
+  const can = order.filter(q => q.id !== ME && !out(q));
+  const noOne = W.none || HO.DATA.alerts[6] || 'Sorry, but there is no one else alive to give or send something to.';
+  if (W.style !== 'grid' && !can.length) { toast(HO.say(G, noOne)); return; }
+  const last = W.remember ? p[W.remember] : null;
+  const first = can.some(q => q.id === last) ? last : can.length ? can[0].id : null;
+  const have = Math.max(0, p.savings), hasM = Math.max(0, p.metal);
+  const give = (to, m, x) => {
+    const r = HO.give(G, ME, to, m, x);
+    if (r === 'limit') { toast(HO.say(G, W.limit || HO.DATA.alerts[5])); return; }
+    if (r !== 'ok') return;
+    if (W.remember) p[W.remember] = to;
+    Sound.play(5000); closeModal(); renderPanel(); save();
+  };
+  const cancel = el('button', { type: 'button', class: 'quiet', onclick: closeModal }, W.cancel || 'Cancel');
+  if (W.style === 'grid') {
+    // the list: cols x rows cells, the others' icons and names, the empty
+    // cells left blank (a click there picks nothing)
+    let pick = first;
+    const n = (W.cols || 5) * (W.rows || 4), cells = [];
+    const face = (q) => A.img[q.human ? 'white0_' + (q.female ? 1 : 0) : 'bad' + q.face + '_' + (q.female ? 1 : 0)];
+    const mark = () => { for (const c of cells) if (c.dataset.pid) { const on = +c.dataset.pid === pick; c.classList.toggle('on', on); c.setAttribute('aria-checked', on ? 'true' : 'false'); c.tabIndex = on || (pick == null && c === cells[0]) ? 0 : -1; } };
+    const grid = el('div', { class: 'givegrid', role: 'radiogroup', 'aria-label': W.to, style: `--cols:${W.cols || 5};--cell:${W.cell || 45}px` });
+    for (let i = 0; i < n; i++) {
+      const q = can[i];
+      const c = q ? el('div', { class: 'givecell', role: 'radio', tabindex: -1, 'data-pid': q.id, onclick: () => { pick = q.id; mark(); } },
+        face(q) ? el('img', { src: face(q), alt: '' }) : null, el('span', { translate: 'no' }, q.name)) : el('span', { class: 'givecell empty' });
+      cells.push(c); grid.append(c);
+    }
+    grid.addEventListener('keydown', (e) => {
+      const live = cells.filter(c => c.dataset.pid), i = live.findIndex(c => +c.dataset.pid === pick), cols = W.cols || 5;
+      const d = { ArrowRight: 1, ArrowLeft: -1, ArrowDown: cols, ArrowUp: -cols, ' ': 0, Enter: 0 }[e.key];
+      if (d == null || !live.length) return;
+      e.preventDefault();
+      const at = live.indexOf(document.activeElement), j = d === 0 ? Math.max(0, at) : Math.max(0, Math.min(live.length - 1, (i < 0 ? 0 : i) + d));
+      pick = +live[j].dataset.pid; mark(); live[j].focus();
+    });
+    mark();
+    // the fields: each change puts the number back between 0 and what you have
+    const field = (name, max) => {
+      const f = el('input', { type: 'text', inputmode: 'numeric', name, value: '0', 'aria-label': name === 'money' ? W.money : W.metal, autocomplete: 'off', size: 9 });
+      f.addEventListener('input', () => { const t = f.value.trim(), v = Math.max(0, Math.min(max, parseInt(t, 10) || 0)); if (t !== String(v)) f.value = String(v); });
+      return f;
+    };
+    const fm = field('money', have), fx = field('metal', hasM);
+    const f = el('form', { class: 'origwin give-grid', onsubmit: (e) => {
+      e.preventDefault();
+      const m = +fm.value || 0, x = +fx.value || 0;
+      if (!(m > 0 || x > 0) || pick == null) { closeModal(); return; } // nothing to give: the window just closes
+      give(pick, m, x);
+    } }, el('div', { class: 'givecols' },
+      el('div', null, el('p', { class: 'gtitle' }, W.to), grid),
+      el('div', { class: 'givef' }, el('label', null, el('span', null, W.money), fm), el('label', null, el('span', null, W.metal), fx),
+        el('div', { class: 'btns col' }, cancel, el('button', { type: 'submit' }, W.ok)))));
+    modal('', f, { cls: 'mid', label: W.ok });
+    fm.focus(); fm.select();
+    return;
+  }
+  // the recipient: 5.0.5's and the Palm's popup, iOS's name to tap
+  let toPick = first;
+  let who;
+  if (W.style === 'ios') {
+    const btn = el('button', { type: 'button', class: 'givetoggle', translate: 'no', onclick: () => { const i = can.findIndex(q => q.id === toPick); toPick = can[(i + 1) % can.length].id; btn.textContent = G.players[toPick].name; } }, G.players[toPick].name);
+    who = el('div', { class: 'giverow' }, el('span', null, W.recipient), btn);
+  } else {
+    const list = W.style === '505' ? G.players : can;
+    const sel = el('select', { name: 'to', 'aria-label': W.recipient, translate: 'no', onchange: () => { toPick = +sel.value; } },
+      ...list.map(q => el('option', { value: q.id, disabled: q.id === ME || out(q) ? 'disabled' : false, selected: q.id === first ? 'selected' : false }, q.name)));
+    who = el('label', { class: 'giverow' }, el('span', null, W.recipient), sel);
+  }
+  // the amounts
+  let mAmt = 0, xAmt = 0;
+  const amtOf = W.style === 'palm' ? (H, v) => v >= W.steps ? H : v <= 0 ? 0 : Math.trunc(H / W.steps) * v
+    : W.style === 'ios' ? (H, v) => Math.trunc(Math.fround(Math.fround(H) * Math.fround(v / 10000))) : (H, v) => v;
+  const range = W.style === 'palm' ? () => W.steps : W.style === 'ios' ? () => 10000 : (H) => H;
+  const moneyText = (n) => W.style === 'ios' ? money(n) : '$' + fmt(n);
+  const mOut = el('output', null, W.style === '505' ? fmt(0) : moneyText(0)), xOut = el('output', null, fmt(0));
+  const ms = giveSlider(have > 0 ? range(have) : 0, W.money, (v) => { mAmt = amtOf(have, v); mOut.textContent = W.style === '505' ? fmt(mAmt) : moneyText(mAmt); }, { vertical: W.style === '505' });
+  const xs = giveSlider(hasM > 0 ? range(hasM) : 0, W.metal, (v) => { xAmt = amtOf(hasM, v); xOut.textContent = fmt(xAmt); }, { vertical: W.style === '505' });
+  const okBtn = W.okPic && A.img[(T.prefix || '') + W.okPic], noBtn = W.cancelPic && A.img[(T.prefix || '') + W.cancelPic];
+  const pb = (img, text, attrs) => el('button', Object.assign({ class: img ? 'picbtn' : null, 'aria-label': img ? text : null }, attrs), img ? el('img', { src: img, alt: '' }) : text);
+  const btns = el('div', { class: 'btns right' }, pb(noBtn, W.cancel || 'Cancel', { type: 'button', class: noBtn ? 'picbtn' : 'quiet', onclick: closeModal }), pb(okBtn, W.ok, { type: 'submit' }));
+  let body;
+  if (W.style === '505') {
+    // two columns: "Money: $" and the amount over the slider, its most at the
+    // top and 0 at the foot, the 11 tick marks beside it
+    const ticks = () => el('div', { class: 'giveticks', 'aria-hidden': 'true' }, ...Array.from({ length: W.ticks || 11 }, () => el('i')));
+    const col = (label, dollar, out, s, top) => el('div', { class: 'givecol' },
+      el('div', { class: 'giveamt' }, el('span', null, label), dollar ? el('span', null, '$') : null, out),
+      el('div', { class: 'givesl' }, s, ticks(), el('div', { class: 'giveends' }, el('span', null, top), el('span', null, '0'))));
+    body = el('div', null, who, el('div', { class: 'givecols' }, col(W.money, true, mOut, ms, '$' + fmt(p.savings)), col(W.metal, false, xOut, xs, fmt(p.metal))));
+  } else {
+    // a label and the amount, the slider lying down, its ends under it
+    const row = (label, out, s, lo, hi) => el('div', { class: 'giverow2' }, el('div', { class: 'giveamt' }, el('span', null, label), out), s,
+      el('div', { class: 'giveends' }, el('span', null, lo), el('span', null, hi)));
+    body = el('div', null, who, row(W.money, mOut, ms, moneyText(0), moneyText(have)), row(W.metal, xOut, xs, fmt(0), fmt(hasM)));
+  }
+  const f = el('form', { class: 'origwin give' + W.style, onsubmit: (e) => { e.preventDefault(); if (toPick != null) give(toPick, mAmt, xAmt); } }, body, btns);
+  modal(W.title, f, { cls: 'small' });
 }
 // the version's own Send Message window (rs.cannedChat, js/engine.js
 // sendCanned): 'popup' (5.0.5, the Palm) two menus, To Whom and Say What;

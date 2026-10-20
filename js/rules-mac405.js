@@ -262,6 +262,11 @@ E.registerRules('mac405', Object.assign({}, W, {
   // AddToHall (the Hall of Shame), MarkEndGameDone and, with every human out,
   // ExploreEverything
   youLost: { text: 'Unfortunately, you have been eliminated from the game…', ok: 'Oh, well…', title: '', align: 'center' },
+  // CONFIRMED (DoGiveThingsDlg @103a70, DLOG/DITL 6120 as 3.0.1's,
+  // InitGTPlayerList @103d94, SetCellsToPlayers @10188c): Windows' window
+  // (js/rules-405.js) in the Mac's list, cells of 45 x 45, the last one given
+  // to (+100) picked (GetCellForPlayer), STR# 6140.10 at three gifts
+  giveWindow: Object.assign({}, W.giveWindow, { cell: 45 }),
   computerIdentity,
   setupPlayer,
   autoPlaySettings,

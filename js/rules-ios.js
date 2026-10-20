@@ -367,6 +367,19 @@ const rs = Object.assign(base, {
   // doUpdateMPs, Game Center's "lost a game" (the remake's Game Center record,
   // awardGameCenter). Android 1.2.8 the same
   youLost: { text: 'Unfortunately, you have been eliminated from the game...', ok: 'OK', okPic: 'button-check', title: '', align: 'center' },
+  // CONFIRMED (+[GiveDialogLayer give] 0x1000a8584, -[GiveDialogLayer
+  // initDialog] 0x1000a8678, valueChanged:tag:, generatePlayerToggle,
+  // doClose:): Alert 6 at three gifts (player +0x10ec), Alert 7 with no one,
+  // else a dialog: Misc Strings 75 "Give Money/Metal", 76 "Recipient: " and a
+  // toggle of the others still in (+0x3c) that a tap steps through, on the
+  // one last given to (+0xa8) when listed, else the first; 77 "Money:" and 23
+  // "Metal:" each over a CCSliderDeluxe (0 to 1, no steps) with "$0" / "0"
+  // under its left end, the most (the savings with "$", the metal) under its
+  // right and the amount over its middle: (int)(float)(what you have x the
+  // slider). The check-mark button records the gift whatever the amounts,
+  // sets +0xa8, takes them at once (sound 5000); the X closes. Delivered as
+  // 5.0.5's. Android 1.2.8 the same
+  giveWindow: { style: 'ios', title: 'Give Money/Metal', recipient: 'Recipient: ', money: 'Money:', metal: 'Metal:', cancel: 'Cancel', ok: 'OK', okPic: 'button-check', cancelPic: 'button-x', remember: 'giveTo' },
   // CONFIRMED (the calls of the report routine, 0x10003b028 and 0x10003af9c:
   // the battles 0x100021108, the turn 0x10002dca8, exploring 0x10003405c and
   // the new colony 0x100034238; no pointer to either is stored anywhere): no
