@@ -3,9 +3,48 @@
 Jake's order for the remake's own work (the originals' unbuilt windows are listed, for
 Delta Tao, in `docs/open-questions.md`, "Unfinished").
 
-**What's next, in Jake's order (October 2026):** online play's first games and fixes,
-then the remake's own translations (item 4's "Left"), then an icon per skin (item 6), and
-export and import for every version (item 7).
+## The queue (kept complete; Jake's order, October 2026)
+
+**In progress, in this order:**
+1. 5.0.5's Preferences window in its own words (PPob 139); the remake's extras below a line.
+2. 4.0.5's radical research window: its 5-minute timer (Windows dialog 348; the Mac if it has one).
+3. You Won in every version: 5.0.5 opening on its report, Windows 4.0.5's real words and
+   picture, and the windows 1.2, 2.0, 3.0.1, the Palm and iOS/Android had but the remake lacks.
+4. The Amiga skin from Jake's real-Amiga captures (`docs/amiga-skin.md`, "Real-Amiga
+   captures"): white menus, the ASL requester, cursor, toggles, routes, ticks, icons, warning,
+   busy pointer, saving panel, movable windows.
+
+**Then:**
+5. Spaceward Ho! 2.1 for the Amiga: the German 2.1 (both disks) and the 1995-06-06 disk 1
+   ("[h WT]", likely English, hacked), kept unopened in the scratchpad's `amiga21/zips`.
+   Unpack, compare with 2.0 (rules, text, windows, art), and add 2.1 as its own version if it
+   differs; check what the hack changed.
+6. Mac 4.0.5's floating windows (Tech Spending, Report, Chat; Window menu: Zoom, Hide
+   Information, Clean Up Windows). Optional.
+7. The Palm's and iOS's own Preferences windows, if job 1 leaves them.
+8. Hot-seat passwords: the originals asked each player's name and password at their turn
+   (1.2 to 3.0.1, Amiga "Spieleintrag"); the remake's cover screen has none. Optional.
+9. Art the older skins borrow from classic for later rulesets (`docs/missing-assets.md`):
+   novas, Dreadnoughts, Biologicals and so on in each version's style, and the DOS battle
+   sparks. Creative work, optional.
+10. Translating the long English-only texts (version notes, patch notes, Full Hoedown list,
+    manuals; about 70,000 characters a language). Optional.
+11. A home-screen (apple-touch) icon per skin; today every skin's is the Android one.
+
+**Online, outside the code:**
+12. A real two-player online game (a private window as a guest is the second player), and
+    fixes from it.
+13. Make sure the latest `firestore.rules` is published (it gained users/{uid}/prefs).
+14. Optional: serve sign-in from spacewardho.com (Firebase Hosting) so Google's screen stops
+    naming nostalgia-ho.firebaseapp.com; server-side turns (Cloud Functions, Blaze plan) would
+    end peeking and cheating in online games.
+
+**Waiting on others:**
+15. Delta Tao (Joe): the questions in `docs/open-questions.md` section 1.
+16. A real Mac: what Geneva 9 drew for character code 17 (2.0's hyperspace report).
+17. Files not in hand: 1.2F's colour pictures file; the German DOS 2.0's disk 2 (optional:
+    its pictures and sounds are very likely the English DOS ones).
+18. A real Amiga, optional: the sizing gadget held, a battle.
 
 1. **English 1.2.** Done (October 2026): New Game's Language, and the Ho menu's;
    `docs/12-findings.md`, "English". An English option for the French Mac 1.2F: its words from the
