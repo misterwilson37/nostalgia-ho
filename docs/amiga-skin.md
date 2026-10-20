@@ -503,3 +503,18 @@ outside the repo: the session's `images/25`–`39`). What they settle, and what 
 - **The Technik Ausgaben window can be dragged over the map.**
 - **Fleet routes:** the path shows while dragging, then not again until the fleet arrives.
 - **The Workbench icon** is the 4-colour Workbench 2 drawing the skin's icon already uses.
+- **More captures (the same session):**
+  - **A route being dragged:** a double white line from the fleet to the pointer, with the trip's
+    length in turns ("5") beside the end. Jake: arrowheads at both ends when the star is in
+    range, none when it isn't. The line goes when the drag ends, and isn't drawn again until
+    the fleet arrives.
+  - **"Typ verschrotten" ticked:** the box shows a large X (corner to corner), not a tick, and
+    the whole gadget gets the dark-red frame while it has the pointer.
+  - **Info menu:** one item, "Über Spaceward Ho!".
+  - **The active window:** its title bar turns cyan (Nachrichten once clicked); inactive ones are
+    grey.
+  - **Report icons:** the new year's report has the calendar (a page "FEB 3"); a warning such as
+    "Sie geben Geld für Schiffsbau auf Regor aus, bauen aber keine Schiffe." has a yellow
+    warning triangle; explored and colonized stars have the planet's picture.
+  - **A scroll arrow held down:** drawn complemented (red on the dark pens), and the sizing
+    gadget beside it cyan.
