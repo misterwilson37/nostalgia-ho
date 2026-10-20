@@ -748,7 +748,7 @@ calls (`GETDC`, `LOADSTRING` …); they are imports, not code of the program.
 | `FUN_10c0_1161` @10c0:1161 | — | report window | NOT A RULE | interface |
 | `FUN_10c0_116b` @10c0:116b | — | report window | NOT A RULE | interface |
 | `FUN_10c0_1222` @10c0:1222 | — | report window | NOT A RULE | interface |
-| `FUN_10c0_12de` @10c0:12de | `DoMessageAction` @131538 | clicking a report: go to its star, review a battle, name a star after winning | NOT A RULE | interface |
+| `FUN_10c0_12de` @10c0:12de | `DoMessageAction` @131538 | clicking a report: go to its star, review a battle, name a star after winning, the You Lost alert 5050 (report 0x41f) | NOT A RULE | interface: js/skins/classic/ui.js openReports, openYouLost (`rs.youLost`) |
 | `FUN_10c0_13c6 †` @10c0:13c6 | — | report window | NOT A RULE | interface |
 | `FUN_10c0_145f` @10c0:145f | — | report window | NOT A RULE | interface |
 | `FUN_10c0_14bd` @10c0:14bd | — | report window | NOT A RULE | interface |

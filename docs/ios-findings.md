@@ -825,6 +825,18 @@ button ends it. Two cases differ from what the remake draws: a battle that ended
 first round with nothing of the viewer's left shows no shots or explosions, and in it
 the groups of players who aren't the viewer's allies aren't drawn at all.
 
+## The end of the game's windows (October 2026)
+
+- **You Lost** (CONFIRMED): the message view's action for report 0x433 (`0x10001394c`
+  ff.) stops auto play and opens `+[EndGameLayer youLost]` (`0x10009cd54`; `setup:`
+  `0x10009cd90`): a dialog with no title, Misc Strings 110 "Unfortunately, you have been
+  eliminated from the game..." (fr "Malheureusement, vous avez été éliminé de la partie
+  ...", tr "Ne yazık ki, sen oyundan elendin"), `Game_You_Lost.png` in the middle and only
+  the dialog's close button (`button-check.png`; the cancel button, `button-x.png`,
+  hidden); then `doUpdateMPs` (Game Center's "lost a game"). Report 0x436 opens
+  `youWon` the same way (Misc Strings 109, `Game_You_Won.png`). Built: `rs.youLost`, with
+  the check-mark button (`okPic`); `youWon` is not (`rs.conquered` null).
+
 ## Still open
 
 - The battle routines' inner loops were compared by structure, constants and the hit

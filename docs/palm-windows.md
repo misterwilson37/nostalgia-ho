@@ -352,6 +352,10 @@ tFRM 3400 (2, 2, 156 x 156) default button 3403, help 0, menu 0
   - field id 3405 frame (2, 60, 152, 80) maxChars 256
   - bitmap frame (2, 14) bitmap 9036
   - bitmap frame (2, 14) bitmap 9037
+
+> tFRM 3400: the end of the game (`FUN_00041604` on reports 0x436 and 0x433, `FUN_00071e06`):
+> field 3404 tSTL 1001's won or lost line, bitmap 9403 (won) or 9404 (lost), field 3405 and
+> the small pictures only in the demo. Built for a loss: `rs.youLost`.
 tFRM 3600 (2, 2, 156 x 156) default button 3601, help 0, menu 0
   - title 'List All' frame (0, 0, 0, 0)
   - control button id 3601 'OK' frame (117, 141, 36, 12)

@@ -1149,8 +1149,26 @@ What they settle, with the code that opens each:
   window): no title bar (WIND proc 1), "Congratulations! You have conquered the galaxy!",
   PICT 3030, OK. You Lost (PPob 151, report 0x433): "Unfortunately, you have been eliminated
   from the game…", PICT 3040. Built: `rs.conquered`, `rs.conqueredTitle` '', and the rank
-  window after it (`rs.rankAfterWin`). The lost window isn't built (the remake's own end
-  card).
+  window after it (`rs.rankAfterWin`). (`FUN_10060580` runs a report's action as the
+  message view brings the report up, `FUN_1009bbc0`, and again when it is clicked in the
+  list, `FUN_100b9250`; the remake opens You Won on the click.)
+- **You Lost** (PPob 151 "You Lost Dialog", `FUN_10060580` on report 0x433 "You have just
+  been eliminated from the game.", `FUN_100967c0(0x97)`): no title bar (WIND proc 1, 225 x
+  282), "Unfortunately, you have been eliminated from the game…" over PICT 3040 ("You
+  lost", the angel over the crater) and OK at the right. When: only on being eliminated,
+  which a surrender leads to (`surrender505` gives up every colony and fleet, and
+  `checkElimination505` sends 0x433 at the step's end); another player's or an
+  alliance's win sends 0x434 / 0x435, which open nothing. The report is sent once a game
+  (player +0x34), so no later turn brings the window up again, but clicking the report
+  in that turn's list opens it again. Before it: the turn's reports (the battles, a
+  surrender's 0x452 / 0x453); after it: nothing (5.0.5 has no Hall of Shame, a loss
+  earns no master points and opens no rank window). The game goes on for the others;
+  with no human left in, the computers still in win and the game is over (the remake's
+  game ends there too, section 3). The demo opens PPob 168 (its own words, "Not Yet" and
+  "Buy It!"). Built: `rs.youLost` and `js/skins/classic/ui.js` `openYouLost`, opened as
+  the player's own report comes up (once a report) and from the Report Window; in hot
+  seat on the eliminated player's last turn, online on their own page. The Palm, iOS
+  and Android, 4.0.5, 3.0.1, 2.0 and 1.2 have their own (their findings).
 - **Radical Research** (PPob 153 "Radical Tech Choice", `FUN_1005f280`): "You may cancel one
   research program:", four bevel buttons with PICT 9010 (9011 once picked; sound 7001) each
   beside its program's name from STR# 6260 "Radical Tech Strings", then the radio "Don’t

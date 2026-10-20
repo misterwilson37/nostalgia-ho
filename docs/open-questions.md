@@ -192,8 +192,7 @@ Where a browser can't do what the original did, or the remake had to pick.
 
 - The windows from their layouts (`docs/505-windows.md`) keep a few of the remake's own
   ways: Give Money/Metal has number fields where 5.0.5 had sliders from 0 to what you
-  have; Preferences has the remake's preferences in its words; the You Lost window
-  (PPob 151) is the remake's end card. The Palm's Auto Play form (tFRM 1700) is shown as
+  have; Preferences has the remake's preferences in its words. The Palm's Auto Play form (tFRM 1700) is shown as
   5.0.5's Auto Play window, which has the same parts and adds the click-through slider.
 - Played as released, though we weren't sure each was meant:
   - budget shares are used as they stand, even over 1,000 (Abundant starts at 1,050);

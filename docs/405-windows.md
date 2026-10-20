@@ -704,6 +704,10 @@ DITL 5051 "":
   - picture (39, 52, 149 x 152) id 3540
   - static text (13, 13, 209 x 34) "Unfortunately, you have been eliminated from the game…"
 
+> DLOG 5050 / 5051: the Mac's You Lost (`DoMessageAction` on report 0x432); Windows shows
+> dialog 377 with its line and bitmap set by the code (`FUN_00470dec`: "Unfortunately, you
+> have been eliminated from the game...", bitmap 3010). Built: `rs.youLost`.
+
 DITL 6000 "":
   - button (420, 284, 58 x 20) "OK"
   - button (368, 252, 111 x 20) "Build & Continue"

@@ -339,9 +339,10 @@ levels) print the new level over the picture.
 
 3201–3207 are the galaxy-shape icons of the New Game windows (Circle, Spiral, Cluster,
 Ring, Grid, Random, Hex; `FUN_00070938`, `FUN_00070a86`); 3300–3302 the list marks
-(cross, smiley, frown) of the Enemies and Allies screen (`FUN_00076988`); 9401–9404 the
-won and lost pictures (`FUN_00071acc`…); 1170–1173 scroll arrows; 1007 the splash
-screen.
+(cross, smiley, frown) of the Enemies and Allies screen (`FUN_00076988`); 9401–9402 the
+Armageddon device off and on (tFRM 3300, `FUN_00071acc`), 9403–9404 the won and lost
+pictures (the cowboy on his planet, the angel: the Game Over form, `FUN_00071e06`);
+1170–1173 scroll arrows; 1007 the splash screen.
 
 
 ## Changes to the shared code
@@ -435,6 +436,13 @@ for the computer player %s.").
   answer but OK sets the count to 0.
 
 ## Built later (October 2026)
+
+- **You Lost** (CONFIRMED, October 2026; `FUN_00041604` on report 0x433, the form
+  `FUN_00071d66` / `FUN_00071e06`): the Game Over form, tFRM 3400 (156 x 156, "Game
+  Over"), with tSTL 1001's "Unfortunately, you have been eliminated from the game..."
+  (1-based 2; a win 1, then the rank, `FUN_00041348`; the demo's 3 and 4, with the "order
+  the full version" lines in field 3405), Tbmp 9404 and OK. Built: `rs.youLost`; the palm
+  skin's lost picture is now 9404 (it had shown 9401, the Armageddon device's).
 
 - **Send Message** (built, October 2026; tFRM 2600, `FUN_00075266`, `FUN_000754b6`):
   "To Whom:" the others still in, "Say What:" Thank You, Sorry, %$*^&%!! (0x417 + item),

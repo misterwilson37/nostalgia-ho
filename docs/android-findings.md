@@ -107,6 +107,11 @@ Built since: Saved Games (slots in the browser, Download for the one-game e-mail
 
 ## The same as iOS 1.2.9
 
+- **The end of the game's windows**: `+[EndGameLayer youLost]` `0x1bba44`, `youWon`
+  `0x1bb9fc`, `setup:` `0x1bba8c`, the same methods as iOS's (`docs/ios-findings.md`, "The
+  end of the game's windows"); built the same (`rs.youLost`, from rules-ios). LIKELY (paired
+  by name and size, not read line by line).
+
 Checked and the same (CONFIRMED unless marked). The method is in
 `docs/coverage-android.md`.
 

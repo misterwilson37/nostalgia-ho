@@ -620,6 +620,12 @@ RidL 151 (listened to): 900, 100.
   - `picd` id 0 (38, 73, 151 x 149) picture (no tracking) value 3040
   - `push` id 900 (138, 242, 69 x 20) "OK" Txtr 128 message 900 **default**
 
+> Opened by `FUN_10060580` for report 0x433, "You have just been eliminated from the game."
+> (sent once, when the player goes out, a surrender included), as the report comes up
+> (`FUN_1009bbc0`) and when it is clicked in the message list (`FUN_100b9250`); the demo
+> opens PPob 168 instead. PICT 3040 is "You lost" (149 x 150, the angel over the crater).
+> Nothing follows it. Built: `rs.youLost` (`docs/original-findings.md`, section 14).
+
 ### PPob 152 "Armageddon"
 
 WIND 152: title "Armageddon", 307 x 260 at (40, 40), proc 5.
@@ -924,6 +930,9 @@ RidL 168 (listened to): 100, 901, 900.
   - `stxt` id 0 (21, 318, 378 x 18) "•  And much more..." Txtr 128
   - `push` id 901 (149, 354, 80 x 20) "Not Yet" Txtr 128 message 901
   - `push` id 900 (248, 354, 80 x 20) "Buy It!" Txtr 128 message 900 **default** bound LB
+
+> The demo's You Lost (`FUN_10060580`, report 0x433, when `FUN_100c1a80` says demo): "Buy
+> It!" (900) opens the purchase page. The remake has no demo, so builds PPob 151.
 
 ### PPob 169 "Connecting to Server"
 

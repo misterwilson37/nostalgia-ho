@@ -754,6 +754,22 @@ a teal End Turn button, after the DOS game's `d5000` button picture.
 
 ## Built later (October 2026)
 
+- **You Lost** (CONFIRMED, October 2026): the dying player's own "You have just been
+  eliminated from the game." (report 0x41f) opens the program's loss box. Windows 3.1
+  (`FUN_10c0_12de`, its jump table @10c0:13a2, @10c0:1392): alert 5050 (resource type
+  32513), "Unfortunately, you have been eliminated from the game..." and one button, "&Oh
+  Well..."; the win's is 5040, then Name a Star. DOS (`FUN_b717_1743` in the unpacked
+  DOSHO.EXE): box 5050, "YouLostDlgBox", "Unfortunately, / you have been / eliminated from
+  / the game..." on four lines, with the lost picture `d5050`; its button isn't among its
+  words (OK, LIKELY, as its other boxes). The German DOS's box: "Leider wurden / Sie aus
+  dem / Spiel eliminiert. / Schade...". Mac 2.0.1 (`DoMessageAction` @131538, @131648):
+  `Alert(5050)` (5051 on fewer than 16 colours), "Unfortunately, you have been eliminated
+  from the game…" over PICT 3040 and "Oh, well…". Built: `rs.youLost` (the dos skin's box;
+  its Windows 3.1 look the Windows alert; mac2 and mac2c the Mac's); French: 1.2F's alert.
+  The Amiga 2.0 has none: its words (`texte.pff`) have no such line, only the report
+  ("Sie werden aus dem Spiel gelöscht.") and the players' comparison's "Sie haben das
+  Spiel im Jahre %ld verloren!"; the amiga skin opens nothing (`T.youLost = false`).
+
 - **Send Message** (built, October 2026; Mac 2.0.1 `SendMessage` @120f42 and
   `SetCellsTo*`, the same window as `SENDMESSAGEDLGPROC`): to whom, I Like / I Don't Like /
   I Own, Planet or Player, which one; codes 0x40c-0x410, ten a turn, reported in pass 2

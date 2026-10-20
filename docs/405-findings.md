@@ -409,7 +409,26 @@ read with `tools/extract/ppob.py` and `tools/extract/windlg.py`):
   remake leaves the timer out.
 - "You have conquered the galaxy!": Windows dialog 377, "Congratulations!  You have
   conquered the galaxy!" (the Mac's DITL 5040, one space), the won picture, OK, no title.
-  Built (`rs.conquered`, `rs.conqueredTitle`).
+  Built (`rs.conquered`, `rs.conqueredTitle`). (Not yet followed: `FUN_00470dec` sets the
+  dialog's line itself before it opens, +0x9c, to "Congratulations! You conquered the
+  Galaxy!" (0x59e364), and its picture, +0x98, to bitmap 3000: the template's words never
+  show on Windows.)
+- **You Lost** (CONFIRMED, October 2026): Windows `FUN_00470dec` on report 0x432 (the
+  player's own "You have just been eliminated from the game."): the same dialog 377
+  (`FUN_0044bf5a`, no title), its line set to "Unfortunately, you have been eliminated from
+  the game..." (0x59e390) and its picture to bitmap 3010 (0xbc2), OK; it closes itself
+  after 18,000 ticks (5 minutes; a timed network game's deadline instead), which the
+  remake leaves out. Then the Hall of Shame (`FUN_00497e58(0x3e9)`, once a game) and, with
+  every human out, the whole map (`FUN_0047fb7b`). The Mac's `DoMessageAction` @1523c2:
+  `SimpleOKDialog` with DLOG 5050 "You Lose Color" (16 colours or more; 5051 "You Lose",
+  PICT 3540, otherwise), no title, "Unfortunately, you have been eliminated from the
+  game…" over PICT 3040 and "Oh, well…"; then `AddToHall`, `MarkEndGameDone`,
+  `ExploreEverything` with every human out. Only being eliminated opens it (a surrender
+  leads there; "%s has just won the game." opens nothing). A player who is out, comes
+  back with a colony or Colony Ship and goes out again hears the report, and sees the
+  window, again; clicking the report in the list opens it again. Built: `rs.youLost`
+  (`js/skins/classic/ui.js` `openYouLost`), in the w95 skin with bitmap 3010 and in mac4 /
+  mac4c with "Oh, well…".
 - the auto play settings (Config…): Windows dialog 380, the Mac's DLOG/DITL 4021, "Configure
   Computer's Auto Play Style:", Friendly to Aggressive (scroll bar 1171, 0-10:
   `SetScrollRange` in `FUN_00408f3b`; the Mac's CNTL 4021 "Aggressiveness" 0-10) and No

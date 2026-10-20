@@ -278,6 +278,7 @@ set) and the C++ run-time glue. Each was read for what it touches; none holds a 
 | `-[PlayerPlanetsLayer isBarLocked:]` | `0x10000b2b8` | locked bars |
 | `-[BuildSingleShipDialog determineCapacity]` | `0x1000b6a08` | how many can be built |
 | `-[BuildSingleShipDialog buildShips]` | `0x1000b7630` | buying |
+| `+[EndGameLayer youLost]`, `-[EndGameLayer setup:]` | `0x10009cd54`, `0x10009cd90` | the You Lost window (`rs.youLost`, js/skins/classic/ui.js openYouLost) |
 | `-[EndGameLayer doUpdateMPs]` | `0x10009ce54` | achievements |
 | `-[EndGameLayer updateMasterPoints]` | `0x10009d2cc` | master points, leaderboards |
 | `-[BaseHoScene updateScore]` | `0x100007b3c` | rank shown |
