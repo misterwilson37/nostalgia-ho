@@ -1,0 +1,70 @@
+0	La edición francesa del juego para Mac, una versión preliminar reducida de la 2.0. Se ha leído cada rutina de su programa, y cada regla sale de su propio código.
+1	Una colonia arrasada por una lluvia de meteoritos recibe un informe en blanco.
+2	Una flota marcada para desguace mientras está en el hiperespacio se informa en un carácter perdido, leído de antes del comienzo de la lista de estrellas (la letra del número de estrella de una casilla de origen sin usar).
+3	Organizar flotas reposta y recarga: al reorganizar las naves de un modelo en una estrella, cada flota de ese modelo que haya allí recibe el mejor combustible de entre todas, y cada flota nueva de Naves colonia que se crea sale cargada de colonos.
+4	El juego tiene el texto de los mensajes entre jugadores, pero ningún modo de enviar uno.
+5	No hay ningún comando para abandonar una colonia, así que no existe el botón Evacuar: una colonia solo desaparece si se la deja sin fondos hasta que no queda nadie.
+6	La potencia de las naves y del planeta de cada estrella se calcula en cada turno y nunca se usa.
+7	Los jugadores eliminados siguen jugando su turno: su dinero sigue generando intereses y su investigación continúa.
+8	Las barras de las colonias del ordenador fallan cuando este da a una colonia más de $2.147.483 para una sola partida (la suma se desborda). Hace falta un ordenador riquísimo para verlo.
+9	Los números aleatorios son los propios del remake, así que una partida no se puede repetir jugada por jugada.
+10	Si todos los jugadores quedan eliminados a la vez, la partida termina sin ganador. En la 1.2 simplemente seguía sin que nadie pudiera ganar.
+11	Varias personas juegan en un mismo ordenador por turnos. El original dejaba que cada jugador se uniera a un archivo de partida compartido, con contraseña. (La 1.2 admitía hasta 19 humanos.)
+12	Al arrastrar una barra del presupuesto, las demás se calculan una sola vez, desde donde empezó el arrastre; la 1.2 lo hacía en cada paso del arrastre, así que un arrastre largo puede terminar de forma algo distinta.
+13	Las repeticiones de batallas se guardan de las últimas 60 batallas; la 1.2 las guardaba durante 500 años.
+14	Corregir los gastos muestra la línea de cada paso en una ventana pequeña, cuyo botón Siguiente equivale al clic del original en el globo de mensaje.
+15	Idioma… ofrece inglés, las palabras propias de Mac 2.0.1 para las mismas ventanas e informes, que son las de la 1.2 línea por línea.
+16	Idioma… también ofrece alemán (“Übersetzung des Remakes”), las palabras del DOS 2.0 alemán para los mismos informes, nombres y ventanas, con el alemán propio del remake para las pocas palabras de ventana que el alemán de la 2.0 no tiene: la traducción propia del remake, no una oficial, y marcada así en la lista. Cambia solo palabras y nombres: se juega la misma partida en todos los idiomas.
+17	Idioma… también ofrece español (“Español (traducción del remake)”): nunca hubo un Spaceward Ho! oficial en español, así que cada línea es del remake, escrita con el espíritu de las traducciones oficiales (sus palabras para las cosas del juego, el “tú” informal, los chistes conservados); los nombres siguen en inglés: la traducción propia del remake, no una oficial, y marcada así en la lista. Cambia solo palabras y nombres: se juega la misma partida en todos los idiomas.
+18	Las preferencias de velocidad de las batallas, de mostrar mensajes y de ver batallas, y la ventana de Planetas explorados.
+19	Una versión de Mac en color y en blanco y negro (el color llegó con la 2.0): el juego de la 2.0 con el modelo de dinero, las alianzas, la tecnología Radical y las novas de las versiones posteriores. Se ha leído cada rutina de su programa, y cada regla sale de su propio código.
+20	2.0
+21	En 2010, en los mapas de Espiral y Cúmulo, los ordenadores se saltan su primer turno.
+22	Un descuido en cómo los ordenadores desguazan las naves viejas no afecta a la partida.
+23	Las flotas de Cazas varadas piden siempre una colonia, incluso con una al alcance.
+24	Desactivar Abandonar no devuelve a la colonia su parte.
+25	Una colonia abandonada que tiene allí una nave colonia se vuelve a colonizar en el mismo turno.
+26	Organizar naves da a cada flota del modelo que hay en la estrella el combustible más gastado de entre todas.
+27	Las barras de las colonias del ordenador fallan cuando este da a una colonia más de $2.147.483 para una sola partida.
+28	La potencia de las naves de cada estrella se calcula en cada turno y nunca se usa.
+29	Corregir los gastos solo recorta las colonias que gastan de más, repartiendo la diferencia entre Ahorros y Tecnología por porcentajes enteros, así que pueden perderse una o dos milésimas; una colonia que se abandona o está terminada se recorta a 1 milésima.
+30	El chiste del monitor en color: la 3.0.1 lo enviaba, en un año al azar, solo a una pantalla configurada en blanco y negro que podía mostrar color. Aquí esa pantalla es un aspecto en blanco y negro; su año sale de la semilla de la partida.
+31	Cuando todos los humanos quedan eliminados, la partida termina. La 3.0.1 seguía mientras jugaran los ordenadores.
+32	Varias personas juegan en un mismo ordenador por turnos. El original dejaba que cada jugador se uniera a un archivo de partida compartido, con contraseña. (La 3.0.1 también permitía jugar en red.)
+33	Los ordenadores planifican todos antes de calcular el dinero de nadie; la 3.0.1 planificaba para cada uno en su propio turno. El resultado es el mismo salvo en casos raros.
+34	Desguazar marca una flota o un tipo de nave, y se desguaza al terminar el turno, como en la 3.0.1. La fila de la flota tiene el botón Desguazar la flota actual además del menú Naves, y la fila de un tipo marcado aparece atenuada (la 3.0.1 solo cambiaba el título de su botón).
+35	Al arrastrar una barra del presupuesto, las demás se calculan una sola vez, desde donde empezó el arrastre; la 3.0.1 lo hacía en cada paso del arrastre.
+36	Los mapas de Espiral y Cúmulo se trazan al empezar; la 3.0.1 los trazaba en 2010.
+37	Tirar de los ahorros toma un porcentaje de lo máximo que puedes sacar; la 3.0.1 tomaba una cantidad.
+38	Evacuar es el Abandonar de la 3.0.1: la colonia se abandona al terminar el turno, y al pulsarlo otra vez se recupera. El planeta no aparece como marcado.
+39	Evacuar una estrella llamada Hope o Ship plantea los chistes de la 3.0.1 (“¿En verdad deseas abandonar toda Hope? ¡Aún no está todo perdido!”, “¿Abandonar Ship? …”), siempre.
+40	Idioma… también ofrece francés (“traduction du remake”) y turco (“yeniden yapımın çevirisi”): el francés y el turco oficiales del juego de iOS, y los del Mac 1.2 francés para las líneas de la 2.0 de la 3.0.1 (entre ellas Dar nombre a una estrella y Corregir los gastos), para toda línea que la 3.0.1 comparte con ellos, con las líneas propias del remake para el resto: la traducción propia del remake, no una oficial, y marcada así en la lista. Cambia solo palabras y nombres: se juega la misma partida en todos los idiomas.
+41	Idioma… también ofrece alemán (“Übersetzung des Remakes”), a partir del DOS 2.0 alemán: sus líneas oficiales siempre que el inglés es el de la 2.0 (los informes que la 2.0 ya tenía, Dar nombre a una estrella, Corregir los gastos), y el alemán del remake en sus palabras para el resto: la traducción propia del remake, no una oficial, y marcada así en la lista. Cambia solo palabras y nombres: se juega la misma partida en todos los idiomas.
+42	De la versión 2 a la 3
+43	Del manual de Spaceward Ho! 5 de Delta Tao, “Changes From Previous Versions” (en inglés)
+44	Hicimos que el gasto dependa de los ingresos, y no del total de dinero. Hicimos que las naves se construyan el mismo turno en que las pides, en lugar de la antigua cola de construcción. Asignamos dinero a tus planetas automáticamente, para que no puedas gastar de menos en ellos por accidente. Añadimos el gráfico de Historial, para que veas tus tendencias a largo plazo. Añadimos varios gráficos y sonidos superfluos. Añadimos algunos tipos de galaxia nuevos.
+45	También añadimos un montón de mensajes nuevos, hicimos que los jugadores del ordenador traten con amigos y enemigos, y que los ordenadores envíen mensajes semiinteligentes a todo el mundo. Ahora puedes dar dinero y metal a tus amigos (o enemigos), o rendirte ante ellos.
+46	En color.
+47	Ahorros de naves: una parte del dinero de cada turno se ahorra, gana intereses, compra naves al instante (sin colas) y puede endeudarse hasta un límite de préstamo. (La 2.0 tenía una sola reserva y ningún préstamo.)
+48	Dos barras por colonia, Terraformar y Minas; una colonia que tiene ambas terminadas da su parte a las demás.
+49	La investigación es estable (× 8/10) en lugar de un 60–140% al azar, con ventaja inicial en cada nivel, y la tecnología Radical con seis resultados.
+50	Las batallas tienen suerte, siempre activada, y el planeta combate con los Escudos de su dueño.
+51	Novas y Armagedón.
+52	Alianzas, regalos, rendición y mensajes enlatados; una alianza gana si se mantiene durante un turno.
+53	Abandonar una colonia, y Tirar de los ahorros.
+54	Un jugador sin colonias ni naves colonia queda eliminado al instante, y sus flotas se desguazan.
+55	El generador de galaxias de las versiones posteriores: seis estilos, con Cúmulo como novedad.
+56	Un cuarto nivel de ordenador, Diabólico; ordenadores con sentimientos, alianzas y modelos que van y vienen.
+57	La edición de Windows 95, que permite jugar entre plataformas con el Mac 4.0.5: el juego de la 3.0.1 con Acorazados, Cisternas, Bionaves y señuelos, tecnología Radical como una mano de cartas, y mejores amigos. Se ha leído cada rutina de su programa, y cada regla sale de su propio código.
+58	3.0.1
+59	Que las estrellas lleguen a volverse rojas depende de un ajuste que el código de Nueva partida nunca establece; el remake las deja.
+60	Una colonia no puede construir más naves por turno que habitantes tiene (en miles).
+61	Un descubrimiento Radical antes de repartir la primera mano (2010), o con la mano vacía, puede salir mal en el original; el remake lo hace con una carta al azar o lo pierde.
+62	Un ordenador que busca al jugador más pobre cuenta a los jugadores eliminados.
+63	Con 30 modelos, un ordenador sigue construyendo los modelos del turno anterior para las clases que no había alcanzado, guardados por su posición en su lista, que puede haber cambiado desde entonces.
+64	Las flotas de Cazas y Acorazados varadas piden siempre una colonia, incluso con una al alcance.
+65	Un descuido en cómo los ordenadores mandan a casa las naves viejas para desguazarlas (una posición de lista pasada como el Alcance).
+66	Los ordenadores nunca conservan Cisternas: las desguazan en casa y las mandan a casa desde otros lugares.
+67	En una colonia de la primera estrella de la lista siempre se puede arrastrar su barra del presupuesto, y se la deja fuera de los hitos de población.
+68	Los mejores amigos comparten las noticias de batalla entregándose todo su registro de la estrella; el que no combatió no puede revisar la batalla (en Windows, el registro del amigo también lo dice hasta que se guarda la partida).
+69	Tras fallar un dispositivo de Armagedón, todos oyen que cada dispositivo se apagó, y que el turno siguiente vuelve a encenderse.

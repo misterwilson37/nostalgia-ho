@@ -1,0 +1,83 @@
+216	{font1}Yakıt alma ayrıcalıklarını ve bir saldırmazlık anlaşmasını paylaştığın bir uzaylı.{/font1}
+217	En İyi Arkadaş
+218	{font1}Gezegenler hakkındaki bilgileri paylaştığın bir müttefik.{/font1}
+219	Biyolojik
+220	Metâlsiz bir gemi. Pahalıdır ve eski teknoloji kullanır, ama metâl kıtken seni kurtarabilir. Çoğu gemiden farklı biçimde yakıt alır.
+221	Aba
+222	{font1}Büyük, kötü bir gemi. Abaları yok etmek 25 kat hasar gerektirir ve savaşın her turunda 25 kez ateş ederler.{/font1}
+223	Düşman
+224	{font1}Seninle müttefik olmayan herkes.{/font1}
+225	Yerçekimi
+226	{font1}Bir yıldız sisteminde değiştirilemeyen her şey. 0,4 G ile 2,5 G arasındaki her gezegen, üzerinde yeterince insan varsa ve tamamen terraform edilmişse kârlı hâle getirilebilir. İdeal bir gezegen 1,0 G’dir. Her oyuncunun 1,0 G’nin ne olduğuna dair farklı bir fikri vardır.{/font1}
+227	Gelir
+228	{font1}Geçen sıra eline geçen para.{/font1}
+229	Metâl
+230	{font1}Yenilenemeyen bütün kaynakların toplamı.{/font1}
+231	Mini
+232	{font1}Bir geminin ne kadar küçültüldüğü. Mini’si yüksek gemiler daha az Metâl kullanır ama daha çok Paraya mal olur.{/font1}
+233	Para
+234	{font1}Yenilenebilen bütün kaynakların toplamı. Kârlı gezegenlerden her sıra para alırsın.{/font1}
+235	Gezegen
+236	{font1}Yıldızla aynı şey. Bütün yıldız sistemini temsil eder.{/font1}
+237	Radikal Teknoloji
+238	{font1}Yüksek riskli, yüksek kazançlı araştırma. Bazen gerçekten harika bir şey elde edersin, bazen de çöp.{/font1}
+239	Menzil
+240	{font1}Bir geminin yakıt almadan ne kadar uzağa gidebildiği. Menzili 8 olan bir gemi 4 gidip 4 dönebilir ya da 5 gidip mahsur kalabilir.{/font1}
+241	Uydu
+242	{font1}Hareket edemeyen bir gemi. Menzili sıfırdır. Her Uydu savaşın her turunda iki kez ateş eder: motor yerine silâhları vardır.{/font1}
+243	Kalkanlar
+244	{font1}Bir gemiyi koruyan şey. Kalkan Teknolojisi 8 olan bir gemi, Silâh Teknolojisi 4 olan bir gemiye karşı neredeyse yenilmez çıkar.{/font1}
+245	Birikim
+247	Hız
+249	Yıldız
+250	{font1}Gezegenle aynı şey.{/font1}
+251	Tanker
+252	{font1}Başka gemilere yakıt veren bir gemi. Bir yıldızda tanker varsa oradaki filolar zamanla yakıtlarını geri kazanır.{/font1}
+253	Sıcaklık
+254	{font1}Bir yıldız sisteminde değiştirilebilen her şey. İdeal sıcaklık 72°’dir. Her oyuncunun 72°’nin ne olduğuna dair farklı bir fikri vardır.{/font1}
+255	Terraform
+256	{font1}Bir yıldız sisteminin sıcaklığını iyileştirmek. Bir gezegen tamamen terraform edildiğinde sıcaklığı 72°’dir.{/font1}
+257	Ho!
+258	{font1}Deneyimli oyuncuların Spaceward Ho!’ya verdiği ad. Gerçekten havalı olmak istiyorsan “Ho! oynuyorum” de.{/font1}
+259	Silâhlar
+260	{font1}Bir geminin ateş ettiği şey. Silâh Teknolojisi 8 olan bir gemi, Kalkan Teknolojisi 4 olan gemileri paramparça eder.{/font1}
+261	Grafik Geçmişi
+262	{a1}{/a1}Zaman içinde nasıl gittiğini ve oyundaki öteki oyunculara göre durumunu görmek istersen Grafik Geçmişi’ne bak. Harita penceresinin köşesindeki küçüğüne ya da Pencere menüsünden açabileceğin büyük, ayrı pencereye.
+263	Grafikteki ilk dört öğe, para, metâl, birikim ve gemi gücü, oyun boyunca bu alanlarda nasıl gittiğini gösterir. (“Gemi Gücü” filolarının ne kadar büyük ve sağlam olduğudur. Bütün gemilerinin bütün teknoloji seviyelerinin toplamıdır. Filolarının ne kadar güçlü olduğu hakkında sana bir fikir verebilir.)
+264	Son 6 öğe, sıra sıra seninle oyundaki öteki oyuncular arasındaki karşılaştırmaları gösterir. Derece, gelir derecesidir. Sıralar boyunca en yüksek gelir sendeyse oyunda büyük olasılıkla epey iyi gideceğini göreceksin. Öteki 5 öğe göreli teknoloji derecelerindir; teknolojide fazla geri düşersen hiçbir paranın seni ezici düşman kuvvetlerinden büyük olasılıkla kurtaramayacağını göreceksin.
+265	{a1}{/a1}{a2}{/a2}Grafikteki çeşitli öğeleri grafiğin altındaki simgelerle açıp kapatabilirsin.
+266	Spaceward Ho! 5 Kılavuzu
+267	{span1}{b2}Spaceward Ho! 5{/b2}{/span1}
+268	{span1}{b2}Yazan: Peter Commons{/b2}{/span1}
+269	{span1}{b2}Yapımcı: Joe Williams{/b2}{/span1}
+270	{span1}{b2}Grafik ve Animasyon: Howard Vives{/b2}{/span1}
+271	{span1}{b2}Seslendirme: Mark Madeley{/b2}{/span1}
+272	{a1}Spaceward Ho! Hızlı Kılavuzu{/a1}
+273	{a1}Spaceward Ho! Sözlüğü{/a1}
+274	{a1}Oyunun Özeti{/a1}
+275	{a1}Kalın Kafalılar İçin Talimatlar{/a1}
+276	{a1}Spaceward Ho!’yu Kurmak{/a1}
+277	{a1}Yeni Bir Oyuna Başlamak{/a1}
+278	{a1}Ekonomi{/a1}
+279	{a1}Gemiler{/a1}
+280	{a1}Gezegenleri Keşfetmek: Sıcaklık ve Yerçekimi{/a1}
+281	{a1}Teknolojiyi Geliştirmek{/a1}
+282	{a1}İttifaklar{/a1}
+283	{a1}Savaşlar{/a1}
+284	{a1}Grafik Geçmişi{/a1}
+285	{a1}İnternet Üzerinden Oyun: spacewardho.net{/a1}
+286	{a1}Özel Galaksiler{/a1}
+287	{a1}Bilgisayar Oyuncuları{/a1}
+288	{a1}Seçenekler Menüsü{/a1}
+289	{a1}Tercihler{/a1}
+290	{a1}Kısayollar{/a1}
+291	{a1}Kopya Korumasına Karşı Tutumumuz{/a1}
+292	{a1}Delta Tao Hakkında{/a1}
+293	{a1}Ambalaj Hakkında{/a1}
+294	{a1}Spaceward Ho! Hakkında{/a1}
+295	{a1}Neden Bölümü{/a1}
+296	{a1}Gelecekteki Yönelimler{/a1}
+297	{a1}Uzay Programı{/a1}
+298	{a1}Sık Karşılaşılan Sorunlar{/a1}
+299	{a1}Önceki Sürümlerden Değişiklikler{/a1}
+300	{a1}Önerilen Kitaplar{/a1}

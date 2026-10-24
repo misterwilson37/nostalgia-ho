@@ -1,0 +1,91 @@
+326	{a1}{/a1}Bei „Automatisch spielen“ erledigt der Computer Ihren Zug automatisch.
+327	{a1}{/a1}Wenn Sie den Computer für sich spielen lassen, entwickelt er eine eigene Strategie, genau wie die normalen Computergegner. Das ist für Anfänger ein guter Weg zum Lernen. Es ist auch sehr praktisch, wenn Sie kurz vor dem Sieg (oder der Niederlage) stehen, das Spiel aber nicht selbst zu Ende spielen wollen. Wählen Sie diese Option auch, wenn Sie eine Mehrspielerpartie vorzeitig verlassen müssen, Ihr Gebiet aber nicht völlig zerfallen soll. (Sie müssen das Spiel dazu weiterlaufen lassen.)
+328	{a1}{/a1}Auch wenn der Computer für Sie spielt, behalten Sie etwas Kontrolle. Der Computer ändert nie Ihre Balken für die Technikausgaben. Wenn Sie Schiffe bauen, setzt der Computer sie ein. Wenn Sie Schiffe irgendwohin schicken, lenkt der Computer sie nicht um, bevor sie ihr Ziel erreicht haben. Der Computer versucht im Allgemeinen, die Kolonien zu behalten, die Sie haben, es sei denn, er hält sich für zu weit ausgedehnt.
+329	{a1}{/a1}Wählen Sie „nur meinen Zug als beendet markieren“, geschieht auch nur das. Keiner Ihrer Budgetbalken ändert sich je (außer wenn Sie Planeten verlieren oder gewinnen). Das ist eine praktische Option, wenn mehrere Züge hintereinander nichts Interessantes passiert, etwa wenn Sie darauf warten, dass eine Kolonie rentabel wird.
+330	{a1}{/a1}Nehmen Sie das Häkchen im Kontrollkästchen weg, wenn Sie mit dem automatischen Spielen fertig sind.
+331	{a1}{/a1}Der Schieberegler unten im Dialog „Automatisch spielen“ bestimmt, wie lange jede Nachricht angezeigt wird. Normalerweise müssen Sie jede Nachricht anklicken, damit sie verschwindet. Beim automatischen Spielen können Sie weiterhin klicken, aber läuft die Zeit ab, verschwindet sie von selbst. Das ist nur wichtig, wenn Sie dem Computer beim automatischen Spielen zusehen.
+332	{a1}{/a1}Den Stil des Computerspiels legen Sie fest, wenn Sie ihn auf automatisches Spielen schalten. Die Schieberegler im Dialog „Automatisch spielen“ bestimmen, wie sehr Ihr Computer zum Angreifen und Verteidigen neigt. Probieren Sie die Regler aus – Sie kommen schon dahinter.
+333	Sie können das automatische Spielen von selbst ausschalten lassen, wenn etwas „Interessantes“ passiert (etwa ein Kampf). Hören Sie bei der Aktualisierung eines Zuges „Check this out!“ (auf Englisch), wurde das automatische Spielen automatisch abgeschaltet, und Sie sollten nachsehen, warum.{a1}{/a1}{a2}{/a2}{a3}{/a3}{a4}{/a4}
+334	{a1}{/a1}Über die Verpackung
+335	{a1}{/a1}Spaceward Ho! kommt nicht in einer Schachtel mit ausgefallener Styroporpolsterung oder im Dunkeln leuchtenden Aufklebern. Das ist Absicht. Wir hassen überflüssigen Karton und Styropor aus Umweltgründen. Wir haben unser Bestes getan, nichts in die Packung zu legen, was Sie ohnehin nur wegwerfen. Wir mögen Bäume. Unsere Verpackung hat genau die richtige Größe und braucht weder Styroporflocken noch flauschiges Kartonfüllmaterial, damit sich die Schachtel voll anfühlt.
+336	{a1}{/a1}Ein Experiment: Kaufen Sie 10 Macintosh-Produkte. Zählen Sie, wie viele viel Füllmaterial haben, damit die Schachtel größer aussieht. Sehen Sie, um wie viel kleiner die Schachtel sein könnte, wenn das Ziel nicht einfach eine größere Schachtel wäre. Rufen Sie diese Firmen an und sagen Sie ihnen, sie sollen ihre Schachteln kleiner machen und aufhören, sie einzuschweißen. Hören Sie, was sie sagen.
+337	{a1}{/a1}{img2/}Über dieses Handbuch
+338	{a1}{/a1}Dieses Handbuch wurde von Joe Williams und Peter Commons mit FrameMaker von Frame Technologies geschrieben. Die Bildschirmfotos wurden mit Flash-It aufgenommen und mit Color MacCheese oder Zeus nachbearbeitet. Alles wurde auf einem LaserWriter IINT ausgegeben.
+339	{a1}{/a1}Falls Sie es nicht bemerkt haben: Ja, wir machen alles auf Macs.
+340	{a1}{/a1}{img2/}Über Peter Commons
+341	{a1}{/a1}Peter hat das Gefühl, er schreibe schon seit dem Kindergarten Versionen von Spaceward Ho!. Nicht ganz, aber es ist etwa ein Drittel{sup2}{/sup2} seines Lebens. Zum Glück ist es keine Vollzeitbeschäftigung. Peter lebt mit seiner Frau Claire und den Kindern Brennan und Sabrina in Danville, Kalifornien, ganz zu schweigen von 2 Hunden, einer Katze, einem Meerschweinchen und, nach der letzten Zählung, 7 Fischen. Peter mag außerdem Yoga, A-cappella-Gesang und Fliegen.
+342	Einstellungen
+343	Wenn Sie Spaceward Ho! zum ersten Mal starten, wird im Ordner „Preferences“ im Systemordner Ihres Startvolumes eine Einstellungsdatei namens „Spaceward Ho! 5.0 Prefs“ angelegt.
+344	Wir speichern alles in der Einstellungsdatei: wo Sie die Fenster gern platzieren, ob der Ton ein- oder ausgeschaltet sein soll, Ihre bevorzugte Kampfgeschwindigkeit und so weiter.
+345	Außerdem enthält die Einstellungsdatei die Namen der Leute, mit denen Sie das Spiel gespielt haben, die Namen der Schiffe, die Sie entwerfen, und die Sterne, die Sie nach einem gewonnenen Spiel benennen.
+346	Um ganz neu anzufangen (etwa wenn Sie einmal ein Schiff nach Ihrer neuen Exfreundin benannt haben und der Anblick ihres Namens schmerzliche Erinnerungen weckt), werfen Sie einfach die Einstellungsdatei weg. Alle diese Informationen (einschließlich Ihrer Meisterpunkte außerhalb des Netzwerks!) werden gelöscht.
+347	Die meisten Einstellungen nehmen Sie über „{em1}Einstellungen…{/em1} “ vor.
+348	Ereignismeldungen anzeigen
+349	Ist dieser Punkt angekreuzt, werden Ereignismeldungen zu Beginn jedes Zuges in der linken unteren Ecke der Karte angezeigt. Klicken Sie auf die Meldung oder drücken Sie die Return-Taste, um zur nächsten zu gelangen. Alle Meldungen erscheinen im Berichtsfenster, egal ob dieser Punkt angekreuzt ist oder nicht.
+350	Aber nur die wichtigsten
+351	Dies lässt viele „Plauder“-Meldungen weg, etwa wenn Schiffe auftanken oder wenn Sie Geld für das Terraformen unrentabler Sterne ausgeben. Kampfmeldungen und Meldungen über technische Fortschritte bleiben ebenso erhalten wie Supernovae und Ähnliches.
+352	Kämpfe ansehen
+353	Dieser Punkt wirkt nur, wenn der darüber, „Ereignismeldungen anzeigen“, ebenfalls angekreuzt ist. Sind beide angekreuzt, wird jedes Mal, wenn eine Kampfmeldung angezeigt werden soll, der Kampf automatisch angesehen. Ist er nicht angekreuzt, wird nur die Zusammenfassung gezeigt.
+354	Geschwindigkeit der Kampfansicht
+355	Die Geschwindigkeit von Schüssen und Explosionen in den Kampfansichten legen Sie hier fest. Wenn Sie sich beim Zusehen langweilen, machen Sie sie schneller. „Stapel schießen gemeinsam“ beschleunigt Kämpfe erheblich, besonders bei riesigen Kämpfen. Wenn Sie „Vollanimierte Kämpfe“ abwählen, entfallen die Explosionsgrafiken, und die Kämpfe laufen noch schneller.
+356	Jeden Zug automatisch sichern
+357	Ist dies angekreuzt, sichert Spaceward Ho! das Spiel jeden Zug in seiner Spieldatei, sodass Sie bei einem unerwarteten Stromausfall genau dort weitermachen können, wo Sie aufgehört haben.
+358	Chat-Stichwörter vertonen
+359	Damit spielt Spaceward Ho! Töne ab, wenn bestimmte Chat-Wörter im Chatfenster erscheinen. Beispiele sind LOL, hehe und das beliebte #$&@!
+360	{a1}{/a1}Häufige Probleme
+361	{a1}{/a1}„Spaceward Ho! startet, beendet sich aber sofort.“
+362	{a1}{/a1}Gelegentlich wird die Einstellungsdatei beschädigt. Sie wegzuwerfen löst dieses Problem oft. Siehe {a2}Einstellungen{/a2}.
+363	{a1}{/a1}„Die Computerspieler benennen ihre Schiffe nach Namen, die ich früher für meine Schiffe benutzt habe und die wirklich dumm sind.“
+364	{a1}{/a1}Das sollen sie auch. Wenn Ihnen das nicht gefällt, werfen Sie Ihre Datei „Spaceward Ho! Prefs“ weg. Auch hier: siehe {a2}Einstellungen{/a2}.
+365	{a1}{/a1}„Wie bewege ich Schiffe?“
+366	{a1}{/a1}Klicken Sie auf den Stern, an dem die Schiffe sind, und ziehen Sie zu dem Stern, zu dem sie fliegen sollen. Zwischen den beiden Planeten erscheint eine Linie. Ist am Ende der Linie ein Pfeil, lassen Sie einfach die Maus los, und Sie hören ein „Hyaa!“. Die Schiffe sind unterwegs. In ein, zwei Zügen sollten sie am Zielplaneten ankommen. Ist am Ende der Linie kein Pfeil, ist der Planet, zu dem die Schiffe fliegen sollen, zu weit entfernt, als dass Sie ihn mit den ausgewählten Schiffen erreichen könnten.
+367	Sie können eine Route für das Schiff von Hand festlegen, indem Sie beim Klicken die Wahltaste gedrückt halten und einen Weg Schritt für Schritt anklicken.
+368	{a1}{/a1}„Außerirdische greifen immer wieder meinen Heimatplaneten an und töten alle meine Leute.“
+369	{a1}{/a1}Bauen Sie ein paar Verteidigungssatelliten und halten Sie sie technisch auf dem neuesten Stand, überall dort, wo die Bösewichte Sie zerquetschen könnten. Beginnen Sie außerdem nicht mit einer kleinen Galaxie mit vielen Gegnern.
+370	{a1}{/a1}„Was sind die Geheimnisse des Spiels?“
+371	{a1}{/a1}Wenn wir sie verrieten, wären es keine Geheimnisse mehr, oder? Fragen Sie uns also nicht. Finden Sie sie selbst heraus, wenn es sein muss.
+372	{a1}{/a1}„Das Spiel ist zu langsam.“
+373	{a1}{/a1}Machen Sie die Galaxie kleiner. Im Allgemeinen machen die Computer es Ihnen umso schwerer, je kleiner die Galaxie ist. Stellen Sie die Galaxiegröße nicht einfach automatisch auf „Riesig“. Sie können auch gegen weniger Computerspieler spielen. Mehr Spieler sind nicht wirklich schwerer, nur voller.
+374	{a1}{/a1}„Ich stürze ständig ab.“
+375	{a1}{/a1}Sehen Sie uns nicht an – unsere Software stürzt nie ab. Es muss die Schuld von jemand anderem sein. Im Ernst: Wenn Sie Ihre Datei „Ho! Prefs“ wegwerfen und alle Ihre Systemerweiterungen ausschalten, werden Sie wahrscheinlich feststellen, dass das Ho! kugelsicher ist. Falls Sie dagegen einen reproduzierbaren Absturz finden, rufen Sie uns an und erzählen Sie uns davon, damit wir ihn in späteren Versionen beheben können.
+376	{a1}{/a1}„Ich brauche mehr Platz auf dem Bildschirm.“
+377	{a1}{/a1}Sie können das Diagrammfenster und das Berichtsfenster schließen, wenn Sie sie nicht brauchen; das hilft. Es ist auch vernünftig, in der zweitweitesten Zoomstufe zu arbeiten – wählen Sie ein paarmal „{em2} Verkleinern{/em2} “ aus dem Menü „{em3} Fenster{/em3} “. Schließlich können Sie mit „{em4} Info anzeigen{/em4} “ im Menü „{em5} Fenster{/em5} “ umschalten, ob all die Informationen links angezeigt werden oder nicht.
+378	{a1}{/a1}Unser Standpunkt zum Kopierschutz
+379	{a1}{/a1}(Artikel aus „The Changing Path“, Frühjahr 1991, nachgedruckt)
+380	{a1}{/a1}Wir bei Delta Tao halten Kopierschutz für etwas Böses, das das Wachstum der Softwarebranche und der Computerbranche insgesamt ernsthaft schädigen könnte. Wir empfehlen, dass alle kopiergeschützte Produkte boykottieren. Hier ist der Grund.
+381	{a1}{/a1}Unsere Theorie ist, dass Leute eine bestimmte Summe Geld haben, die sie für Software ausgeben. Sie geben sie für Produkte aus, ob kopiergeschützt oder nicht. Wenn sie ihr Softwarebudget verbraucht haben, wollen sie trotzdem weitere Software. Herrscht der Kopierschutz vor, sind sie aufgeschmissen. Die Software, die sie kaufen, ist die einzige, die sie haben. Sie finden ihre Computer weniger nützlich und ermutigen ihre Freunde nicht, mehr zu kaufen. Die Hardware- und Softwarebranche schrumpft und stirbt.
+382	{a1}{/a1}Ist dagegen nichts kopiergeschützt, kopieren die Leute Software, sobald sie ihr Softwarebudget verbraucht haben. Sie lernen aus erster Hand, welche Programme gut und nützlich sind. Im nächsten Jahr treffen sie fundierte Entscheidungen darüber, welche Software sie kaufen. In der Zwischenzeit finden sie ihren Computer ein nützlicheres und freundlicheres Werkzeug, benutzen ihn mehr und empfehlen ihn ihren Freunden wärmstens, die dann zu Softwarekäufern werden.
+383	{a1}{/a1}Es gibt zwei Probleme. Erstens: In einer Welt, in der manche Programme kopiergeschützt sind und andere nicht, neigen die Leute womöglich dazu, die kopiergeschützten Sachen zu kaufen, da dies der einzige Weg ist, sie zu bekommen, und die ungeschützte Software raubzukopieren. Das belohnt (zumindest kurzfristig) die Leute, die der Branche schaden, und bestraft die, die ihr helfen. Eine Folgerung aus der „Tragik der Allmende“, von der wir in der Grundschule gelesen haben.
+384	{a1}{/a1}Zweitens: Verlage ohne Kopierschutz werden es schwerer haben, schlechte Software mit massiver Werbung zu verkaufen. Da die Leute Software eher ausprobieren, bevor sie sie kaufen, verkaufen Firmen Software nur noch an Leute, die sie wirklich brauchen und nützlich finden. Das heißt, Firmen mit minderwertigen Produkten, aber großen Budgets, sollten den Kopierschutz mögen.
+385	{a1}{/a1}Das zweite Problem stört uns nicht so sehr, aber das erste macht uns Angst. Die Lösung: den Kopierschutz boykottieren. Sorgen Sie dafür, dass es sich nicht lohnt, Software mit Kopierschutz zu versehen.
+386	{a1}{/a1}Bevor uns die Software Publishers Association lynchen lässt (sie behauptet, „jedes Jahr gehen durch Piraterie Milliarden Dollar Umsatz verloren“), erfinden wir wenigstens ein bisschen Beweismaterial für unsere Theorie. Erinnern Sie sich, als die Kassette erfunden wurde? Plötzlich konnten die Leute Schallplatten wahllos kopieren, und die Plattenfirmen konnten nichts dagegen tun. „Wir sind verloren!“, riefen sie. „Jetzt verkaufen wir von jeder Platte nur noch eine!“ Was geschah wirklich? Die Musikbranche hob auf ein zuvor unvorstellbares Niveau ab und brachte mehr Gewinn für mehr Künstler als je zuvor.
+387	{a1}{/a1}Als es die ersten Videorekorder gab, konnten die Leute Filme wahllos kopieren, und die Filmfirmen konnten kaum etwas dagegen tun. „Wir sind verloren!“, riefen sie. „Jetzt verkaufen wir nie wieder einen Film!“ Was geschah? Die Filmbranche hob auf ein zuvor unvorstellbares Niveau ab und brachte mehr Gewinn für mehr Menschen als je zuvor.
+388	{a1}{/a1}Bezahlen Sie Software nach ihrer Qualität, nicht nach Werbung, Verpackung und Kopierschutz.
+389	Kurzanleitung
+390	Ultrakurze Ho!-Anleitung
+391	{font1}Hier ist die Zusammenfassung dessen, was Sie wissen müssen, in einem Absatz.{/font1}
+392	{font1}Starten Sie {i2}Spaceward Ho!{/i2}. Spielen Sie mit den Balkendiagrammen, um die Ausgaben einzustellen. Klicken Sie auf die Meldungen in der Karte, damit sie verschwinden. Doppelklicken Sie auf eine Kolonie, um Schiffe zu entwerfen und zu bauen. Ziehen Sie Flottenpunkte von einem Stern zum anderen, um Schiffe zu bewegen. Experimentieren Sie. Erobern Sie die Galaxie.{/font1}
+393	{a1}{/a1}Lesetipps
+394	{a1}{/a1}Das sind ein paar Bücher, die nichts mit Macintosh-Software zu tun haben, die wir aber immer wieder gern lesen. Außerdem finden wir, dass sie etwas über die Philosophie von Delta Tao aussagen.
+395	{a1}{/a1}{em2}The Tao of Pooh{/em2} (Das Tao von Pu dem Bären), von Benjamin Hoff, Penguin Books, New York, 1982. Das beste Buch über den Taoismus überhaupt.
+396	{a1}{/a1}{em2}Calvin and Hobbes{/em2} (Calvin und Hobbes), von Bill Watterson, Andrews and McMeel, Kansas City, 1987.
+397	{a1}{/a1}{em2}The Macintosh Way{/em2} (Der Macintosh-Weg), von Guy Kawasaki, Scott, Foresman and Company, Glenview, Illinois, 1989.
+398	{a1}{/a1}Surely You Must Be Joking, Mr. Feynman (auf Deutsch: „Sie belieben wohl zu scherzen, Mr. Feynman!“), von Richard Feynman.
+399	Schiffe
+400	Mit Schiffen erkunden Sie neue Sterne, verteidigen Ihre Kolonien und kolonisieren neue Planeten. Es gibt mehrere Arten von Schiffen, und Sie können eigene entwerfen.
+401	Die Schiffe in Spaceward Ho! sind unglaublich groß und teuer. Ihr erstes Kolonieschiff verschlingt zum Beispiel fast ein Drittel der gesamten Ressourcen Ihres Planeten sowie die gesamte industrielle Produktion des Planeten über dreißig Jahre. Es ist ein großer Kahn.
+402	Schiffe bauen
+403	Schiffe können Sie in jeder Ihrer Kolonien bauen. Klicken Sie dazu auf den Planeten, auf dem Sie Schiffe bauen wollen, und wählen Sie im Menü „{em2} Schiffe{/em2} “ den Eintrag „{em1} Schiffbau…{/em1} “ oder doppelklicken Sie einfach auf den Planeten. Ein großer Dialog erscheint. In diesem Dialog können Sie sowohl Schiffe bauen als auch neue Schiffstypen entwerfen.
+404	Links im Dialog sehen Sie eine Liste der verfügbaren Schiffstypen. Wenn keiner davon Ihrem Geschmack entspricht, können Sie unten rechts mit den Schiebereglern eine neue Klasse entwerfen.
+405	Schiffe bewegen
+406	Um eine Flotte zu bewegen, klicken Sie sie einfach an und ziehen Sie sie von dem Planeten, auf dem sie steht, dorthin, wohin sie fliegen soll. Wenn Sie das Ziel erreichen können, sehen Sie einen Pfeil entlang der Route der Flotte. Lassen Sie die Maus los, hören Sie ein „Hyahh!“, das Ihnen sagt, dass der Kurs gesetzt ist. Wenn Sie den Zug beenden, fliegt das Schiff los.
+407	Kann die Flotte den Stern, zu dem Sie gezogen haben, nicht erreichen, wird der Weg als gepunktete graue Linie angezeigt. Hat die Flotte genug Treibstoff, um zu dem ausgewählten Stern und wieder zurück zu fliegen, ist der Weg ein Doppelpfeil.
+408	Damit eine Flotte stillhält oder ihre Bewegung abgebrochen wird, klicken Sie auf das Symbol der Flotte und halten es eine Sekunde gedrückt. Haben Sie es richtig gemacht, hören Sie beim Loslassen der Maus ein „Whoa!“.
+409	Hat eine Flotte ein Ziel und will sich bewegen, wenn Sie den Zug beenden, zeigt ein Weg, wohin sie fliegt. Der Weg ist in Abschnitte unterteilt, die zeigen, wie viele Züge sie bis dorthin braucht.
+410	Drücken Sie die Tabulatortaste, um zur nächsten Flotte an diesem Planeten zu springen.
+411	Eine Flotte tankt automatisch auf, sobald sie einen Planeten erreicht, der Ihnen oder Ihren Verbündeten gehört. Hat eine Flotte nicht genug Treibstoff zum Abflug, können Sie ein Kolonieschiff zu diesem Planeten schicken, ihn einen Zug lang kolonisieren und dann alle abfliegen lassen oder einen Tanker schicken.
+412	Der Kurs einer Flotte kann nicht geändert werden, solange sie zwischen Planeten ist – im Hyperraum gibt es kein Zurück.
+413	Sie können auch eine Flotte mit gedrückter Control-Taste anklicken (oder mit der rechten Maustaste), um einiges rund um Flotten zu erledigen.
+414	Ist eine Flotte durchgestrichen, wird sie aufgelöst und zum nächsten Zug zu Metall verschrottet.
+415	Flotten ordnen
+416	Manchmal möchten Sie eine Flotte in Teile aufteilen oder mehrere Flotten zusammenlegen. Wählen Sie dazu im Menü „{em2} Schiffe{/em2} “ den Eintrag „{em1} Flotten ordnen…{/em1} “. Klicken Sie dann auf die Schiffe und ziehen Sie sie hin und her, bis sie so verteilt sind, wie Sie es wollen.

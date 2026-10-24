@@ -1,0 +1,45 @@
+519	La fenêtre principale
+520	{b1}La fenêtre principale{/b1}
+521	La fenêtre principale est la seule fenêtre vraiment importante de {b1}Spaceward Ho!{/b1}. Elle contient la carte des étoiles et les informations sur le budget, les planètes et les flottes. La barre de titre de la fenêtre indiquera quelque chose comme « Peter dans Voie lactée en 2000 », ce qui signifie que vous êtes actuellement inscrit sous le nom de Peter dans la partie « Voie lactée » en l’an 2000. Ça va de soi !
+522	Le menu Options
+523	Voici un résumé des options disponibles dans le menu “Options”.
+524	{a1}Auto Play {/a1}
+525	{a1}Le Panthéon et le Mur de la honte {/a1}
+526	{a1}Préférences {/a1}
+527	{a1}Afficher les trajets des flottes {/a1}
+528	{a1}Trier automatiquement la liste des planètes {/a1}
+529	{a1}Afficher les messages d’événements {/a1}
+530	{a1}Revoir les batailles d’événements {/a1}
+531	{a1}Régler la vitesse des batailles {/a1}
+532	{a1}Régler la fréquence de consultation {/a1}
+534	{b1}La carte des étoiles{/b1}
+535	La partie droite de la fenêtre principale de {b1}Spaceward Ho!{/b1} est la carte des étoiles. Elle vous permet de voir où vous êtes, où vous êtes allé, où vous pouvez aller. Vous utilisez la carte des étoiles pour déplacer des vaisseaux (cliquez et faites glisser d’une étoile à l’autre) et pour choisir la planète à examiner et à gérer.
+536	En haut à gauche de la carte des étoiles se trouve l’horloge de tour. Vous cliquez sur l’horloge de tour pour terminer votre tour. Si vous jouez sans limite de temps par tour, elle compte simplement les heures et les minutes que cette partie de Ho! a duré. Si vous jouez avec une limite de temps, l’aiguille mobile montre le temps qu’il vous reste pour ce tour. Quand vous n’avez plus de temps, vous passez en « temps bonus » et l’horloge numérique se met à décompter. Si elle atteint zéro, vous n’avez plus de temps. Le temps bonus est cumulatif : vous pouvez en gagner davantage en terminant votre tour plus tôt que nécessaire. Vous réglez les limites de temps quand vous créez une partie.
+537	Il y a plusieurs types d’étoiles sur la carte des étoiles. Pour l’instant, nous allons simplement expliquer celles que l’on voit tout au début d’une partie.
+538	{a1}Une planète inexplorée{/a1}{b2} {/b2}
+539	{a1}Une planète sélectionnée. {/a1}
+540	{a1}Voir les différentes images de planètes. {/a1}
+541	La fenêtre des dépenses en technologie
+542	{b1}La fenêtre des dépenses en technologie{/b1}
+543	Utilisez la fenêtre des dépenses en technologie pour montrer les technologies que vous voulez développer en priorité. Vous pouvez choisir de rechercher des technologies différentes selon votre stratégie, votre philosophie et la situation de la partie. La plupart du temps, vous n’avez pas besoin de trop vous occuper de cette fenêtre.
+544	N’oubliez pas que la fenêtre des dépenses en technologie ne fait que répartir l’argent de la technologie, et ne décide pas de son montant : celui-ci se règle avec les barres de la fenêtre du budget.
+545	Les fenêtres
+546	{b1}Les fenêtres{/b1}
+547	{b1}Spaceward Ho!{/b1} a trois fenêtres. Vous pouvez les déplacer et les redimensionner comme vous voulez, afin de configurer le jeu pour votre écran et votre style de jeu. {b2}Spaceward Ho!{/b2} enregistre automatiquement la disposition de vos fenêtres quand vous quittez et la rétablit la prochaine fois que vous jouez, de sorte que vous n’avez pas à la retoucher sans cesse.
+548	C’est une planète où votre population a grandi au point de pouvoir subvenir à ses besoins…
+549	Instructions ultra-rapides pour le Ho!
+550	{b1}Instructions ultra-rapides pour le Ho!{/b1}
+551	Voici le résumé en un paragraphe de ce que vous devez savoir. Installez {b1}Spaceward Ho! 4.0{/b1} sur votre disque dur. Jouez avec les barres pour ajuster les dépenses. Cliquez sur les messages de la carte pour les faire disparaître. Double-cliquez sur une colonie pour concevoir et construire des vaisseaux. Faites glisser d’une étoile à l’autre pour déplacer les vaisseaux. Expérimentez. Conquérez la galaxie.
+552	Armes et Boucliers
+553	{b1}Armes et Boucliers{/b1}
+554	Les technologies d’Armes et de Boucliers déterminent la qualité d’un vaisseau au combat. Les dégâts que vous infligez dépendent de la différence entre votre technologie d’Armes et la technologie de Boucliers du défenseur. Si votre technologie d’Armes est supérieure à la technologie de Boucliers de l’ennemi, vous infligerez de gros dégâts à son vaisseau à chaque tour. Si elle est inférieure, vous ne ferez que peu ou pas de dégâts à chaque tour.
+555	Par exemple, supposons que votre vaisseau ait une technologie d’Armes de 5. Si vous attaquez quelqu’un qui a une technologie de Boucliers de 1, ses boucliers seront inefficaces contre vos armes et vous le décimerez. Si le défenseur a une technologie de Boucliers de 5, vous endommagerez un peu son vaisseau, mais son bouclier bloquera le reste. S’il a une technologie de Boucliers de 8, votre attaque sera bloquée à près de 100 %, et il se moquera de votre attaque ridicule.
+556	En général, pour mener une bataille équilibrée contre un ennemi qui a de hautes technologies d’Armes et de Boucliers, il vous faut deux fois plus de vaisseaux pour chaque niveau de retard. Par exemple, si vous avez une technologie d’Armes et de Boucliers de 5 et que l’ennemi en a une de 7, il vous faut quatre fois plus de vaisseaux pour une bataille équilibrée. En fait, vous en voudrez probablement plutôt 10 ; qui veut une bataille équilibrée ?
+557	Pourquoi un thème de cow-boys ?
+558	{b1}Pourquoi un thème de cow-boys ?{/b1}
+559	Depuis la création de {b1}Spaceward Ho!{/b1}, on nous a posé beaucoup de questions sur le choix d’un thème western pour un jeu d’exploration spatiale. Apparemment, ces gens n’ont pas assez regardé Star Trek pour savoir que l’espace est « la dernière frontière ».
+560	Il y a beaucoup à dire en faveur d’un thème de frontière : votre race a une destinée manifeste, celle de contrôler la galaxie. Vous transformerez peu à peu des avant-postes stériles en économies florissantes. Vous vous livrerez à des escarmouches aux frontières et à des conflits territoriaux, comme dans le Far West.
+561	Dans la vraie vie, il fallait un moyen de distinguer les planètes amies des planètes hostiles. Si une couleur différente avait été donnée à chaque joueur, on aurait manqué de couleurs en un rien de temps, et les possesseurs de machines en noir et blanc auraient été déroutés. En plus, il aurait été difficile de repérer facilement vos propres planètes parmi toutes les autres, ou les planètes inexploitables parmi les bonnes. Quelqu’un a eu la brillante idée de mettre simplement des chapeaux sur les planètes pour les distinguer, et c’est ce qui a mené au thème de la frontière. Bien sûr, la mécanique du jeu est de la pure « conquête stratégique galactique », pas « les cow-boys et les Indiens dans l’espace ».
+562	Votre planète d’origine
+563	{b1}Votre planète d’origine{/b1}
+564	C’est là que vous vivez. C’est une planète très peuplée, très rentable et technologiquement avancée, prête à partir explorer l’univers. C’est ici que vous construirez vos premiers vaisseaux.

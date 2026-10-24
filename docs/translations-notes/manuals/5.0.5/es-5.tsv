@@ -1,0 +1,55 @@
+231	Mini
+232	{font1}La cantidad de reducción de tamaño de una nave. Las naves de Mini alta usan menos Metal, pero cuestan más Dinero.{/font1}
+233	Dinero
+234	{font1}La suma de todos los recursos renovables. Recibes dinero cada turno de los planetas rentables.{/font1}
+235	Planeta
+236	{font1}Lo mismo que una estrella. Representa todo el sistema estelar.{/font1}
+237	Tecnología Radical
+238	{font1}Investigación de alto riesgo y alta ganancia. A veces consigues algo realmente estupendo y a veces consigues basura.{/font1}
+239	Alcance
+240	{font1}Hasta dónde puede llegar una nave sin repostar. Una nave de Alcance 8 puede ir 4 y volver 4, o puede ir 5 y quedarse tirada.{/font1}
+241	Satélite
+242	{font1}Una nave que no puede moverse. Su Alcance es cero. Cada Satélite dispara dos veces por ronda de batalla: tiene armas en lugar de motores.{/font1}
+243	Escudos
+244	{font1}Algo que protege a una nave. Una nave con tecnología de Escudos 8 resultará casi invencible para una nave con tecnología de Armas 4.{/font1}
+245	Ahorros
+247	Velocidad
+249	Estrella
+250	{font1}Lo mismo que un planeta.{/font1}
+251	Cisterna
+252	{font1}Una nave que reposta a otras naves. Si hay una cisterna en una estrella, las flotas que estén allí irán recuperando combustible con el tiempo.{/font1}
+253	Temperatura
+254	{font1}Todo lo que se puede cambiar de un sistema estelar. La temperatura ideal es 72°. Cada jugador tiene una idea distinta de lo que es 72°.{/font1}
+255	Terraformación
+256	{font1}Mejorar la temperatura de un sistema estelar. Cuando un planeta está totalmente terraformado, su temperatura es 72°.{/font1}
+257	El Ho!
+258	{font1}Cómo llaman los jugadores expertos a Spaceward Ho!. Si quieres ser realmente guay, di que estás “jugando al Ho!”{/font1}
+259	Armas
+260	{font1}Algo que dispara una nave. Una nave con tecnología de Armas 8 destrozará naves con tecnología de Escudos 4.{/font1}
+261	Historial gráfico
+262	{a1}{/a1}Si alguna vez te entran ganas de ver cómo te va con el tiempo y en comparación con los demás jugadores de la partida, mira el Historial gráfico. Tanto el diminuto de la esquina de la ventana del mapa como la ventana grande aparte que puedes abrir desde el menú Ventana.
+263	Los cuatro primeros elementos del gráfico, dinero, metal, ahorros y poder de las naves, solo muestran cómo te ha ido en esos campos a lo largo de la partida. (“Poder de las naves” es lo grandes y duras que son tus flotas. Es la suma de todos los niveles de tecnología de todas tus naves. Puede darte una idea de lo potentes que son tus flotas.)
+264	Los últimos 6 elementos muestran comparaciones entre tú y los demás jugadores de la partida, turno a turno. Rango es el rango de ingresos. Verás que si tienes los ingresos más altos turno tras turno, probablemente te irá bastante bien en la partida. Los otros 5 elementos son tus rangos de tecnología relativos; verás que si te quedas demasiado atrás en tecnología, probablemente ninguna cantidad de dinero te salvará de unas fuerzas enemigas abrumadoras.
+265	{a1}{/a1}{a2}{/a2}Puedes activar y desactivar los distintos elementos del gráfico con los iconos de la parte inferior del gráfico.
+266	Manual de Spaceward Ho! 5
+267	{span1}{b2}Spaceward Ho! 5{/b2}{/span1}
+268	{span1}{b2}escrito por Peter Commons{/b2}{/span1}
+269	{span1}{b2}Producido por Joe Williams{/b2}{/span1}
+270	{span1}{b2}Arte y animación de Howard Vives{/b2}{/span1}
+271	{span1}{b2}Caracterización de voces por Mark Madeley{/b2}{/span1}
+272	{a1}Guía rápida de Spaceward Ho!{/a1}
+273	{a1}Glosario de Spaceward Ho!{/a1}
+274	{a1}Resumen del juego{/a1}
+275	{a1}Instrucciones para torpes{/a1}
+276	{a1}Instalar Spaceward Ho!{/a1}
+277	{a1}Empezar una partida nueva{/a1}
+278	{a1}La economía{/a1}
+279	{a1}Naves{/a1}
+280	{a1}Explorar planetas: temperatura y gravedad{/a1}
+281	{a1}Avanzar en tecnología{/a1}
+282	{a1}Alianzas{/a1}
+283	{a1}Batallas{/a1}
+284	{a1}Historial gráfico{/a1}
+285	{a1}Juego por Internet: spacewardho.net{/a1}
+286	{a1}Galaxias personalizadas{/a1}
+287	{a1}Jugadores del ordenador{/a1}

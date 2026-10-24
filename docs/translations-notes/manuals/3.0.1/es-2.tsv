@@ -1,0 +1,60 @@
+98	Problemas comunes
+100	De vez en cuando el archivo de preferencias se corrompe. Tirarlo suele resolver este problema. Consulta “{a1}Preferencias{/a1}” en la página 41.
+102	Se supone que lo hacen. Si no te gusta, tira tu archivo “{i1}Spaceward Ho!{/i1} Prefs”. Otra vez, consulta “{a2}Preferencias{/a2}” en la página 41.
+109	“El juego va demasiado lento.”
+111	“Se me cuelga todo el rato.”
+112	No nos mires a nosotros: {i1}nuestro{/i1} software nunca se cuelga. Tiene que ser culpa de otro. En serio, si tiras tu archivo “Ho! Prefs” y desactivas todas tus extensiones del sistema, probablemente verás que el Ho! es a prueba de balas. Por otro lado, si encuentras un error reproducible que lo cuelgue, llámanos y cuéntanoslo para que podamos arreglarlo en versiones posteriores.
+114	Puedes cerrar la Ventana de tecnología y la Ventana de informes cuando no las necesites; eso ayuda. También es razonable trabajar con el segundo modo más alejado: elige “{b1}Alejar{/b1}” en el menú “{b2}Ventana{/b2}” un par de veces. Por último, puedes usar “{b3}Mostrar información{/b3}” en el menú “{b4}Ventana{/b4}” para mostrar u ocultar toda esa información de la izquierda.
+115	Comparar jugadores
+116	Si alguna vez te entran ganas de ver cómo te va en comparación con los demás jugadores de la partida, elige “{b1}Comparar jugadores…{/b1}” en el menú “{b2}Galaxia{/b2}”. Podrás ver cómo se comparan algunos de tus atributos (como la tecnología de Armas o los Ingresos) con los de los demás.
+117	“Poder de las naves” es lo grandes y duras que son tus flotas. Es la suma de todos los niveles de tecnología de todas tus naves. Puede darte una idea de lo potentes que son tus flotas.
+118	El número de jugadores de la partida no incluirá a nadie que esté muerto.
+119	Haz clic en el botón “Mostrar niveles…” para ver el nivel de cada jugador: novato, principiante, normal, experto o avanzado. Los jugadores del ordenador mostrarán un nivel elegido al azar entre los de los distintos jugadores, para ayudar a disimular quiénes son los jugadores del ordenador. La inteligencia real del ordenador está en la parte inferior de esta ventana.
+120	El Historial gráfico
+121	Esto muestra un historial de 1.000 años de tu progreso. Puedes activar y desactivar las distintas barras con los iconos de la parte inferior del gráfico. Los gráficos de tecnología muestran tu posición relativa a la de los demás jugadores, igual que el cuadro de diálogo “{b1}Comparar jugadores…{/b1}”. Los otros tres son indicadores “absolutos”: cuanto más dinero ganas, más alto subes en el gráfico, sin importar cómo les vaya a los demás jugadores.
+122	Galaxias personalizadas
+123	Cuando empiezas una partida de {i1}Spaceward Ho!{/i1} por primera vez, tienes muchas opciones sobre cómo quieres que sea la galaxia. Puedes decidir contra cuántos jugadores juegas, lo buenos que serán, lo grande que es la galaxia y cosas por el estilo. Aquí explicamos las opciones.
+124	El “{b1}Número de jugadores del ordenador{/b1}” es bastante evidente: es el número de enemigos que ocuparán la galaxia contigo. Cuantos más haya, más resistencia encontrarás.
+125	El “{b1}Tamaño de la galaxia{/b1}” determina lo grande que es la galaxia. Cuanto más grande sea, más espacio tendrá cada jugador para moverse. En una galaxia pequeña con muchos jugadores, la partida tenderá a ser reñida y rápida. En una galaxia grande con pocos jugadores, la partida se desarrollará durante mucho tiempo antes de que haya combate. Las partidas en galaxias descomunales durarán una eternidad.
+126	El “{b1}Estilo del mapa{/b1}” es la forma general que tendrá la galaxia. Las galaxias de Anillo suelen tener los comienzos más parejos, con cada jugador repartido por el anillo. Las galaxias de Cúmulo y de Espiral colocan a los jugadores de forma {i2}bastante{/i2} pareja. Una galaxia Aleatoria tiene las estrellas esparcidas de cualquier manera. Cualquier jugador puede empezar en una posición buenísima o malísima: justo encima de varios enemigos, o sin nadie en ninguna estrella cercana.
+127	El “{b1}Nivel del ordenador{/b1}” determina lo difícil que será la partida que te darán los jugadores del ordenador. Los más listos aprenderán de sus errores, construirán flotas más grandes, invertirán más en Tecnología y se expandirán más rápido. Los jugadores listos también empiezan con todas las ventajas de un jugador humano “Novato”: mucho metal, varias naves para empezar y una población planetaria alta. Los jugadores torpes, además de ser tontos, tienen que empezar con el ajuste humano “Experto”, que no les da metal inicial, ni naves, ni una población planetaria alta.
+128	Al principio, incluso los jugadores del ordenador Torpes resultarán oponentes difíciles, pero a medida que mejores tu nivel los encontrarás sin gracia. Con el tiempo, quizá seas lo bastante bueno para derrotar siempre a los jugadores Listos, incluso empezando tú en Experto. Eso te sitúa entre los mejores jugadores del {i1}Ho!{/i1} Prueba a jugar contra humanos. Prueba a jugar contra Joe y Peter.
+129	Los juegos favoritos de Delta Tao
+130	{i1}Strategic Conquest 3.0{/i1}: Hemos pasado más tiempo jugando a Strategic Conquest que a todos los demás juegos de Mac juntos (aunque el Ho! empieza a acercarse). Especialmente bueno con dos jugadores conectados por AppleTalk. Nos alegra publicarlo.
+131	{i1}Dark Castle{/i1} y {i2}Beyond Dark Castle{/i2}: Juegos totalmente impecables. Acción ingeniosa, animación fantástica, efectos de sonido maravillosos. Desafiantes y graciosos. Los juegos de Mac más profesionales que hemos visto.
+132	{i1}PlayMaker Football{/i1}: Nos da rabia incluir este, porque está protegido contra copia. Qué sinvergüenzas. Por desgracia para los aspirantes a entrenador de fútbol americano empedernidos como nosotros, no hay ningún otro juego que simule el fútbol de verdad ni la mitad de bien.
+133	{i1}3 in Three{/i1}: Un juego muy bueno de Cliff Johnson, que escribió {i2}Fool’s Errand{/i2}. Nos entretuvo durante muchas horas. Montones de rompecabezas interesantes.
+134	{i1}Spaceward Ho!{/i1}: Qué sorpresa.
+135	Somos bastante duros con los juegos, y hay varios que son buenos, pero no nos hemos puesto todos de acuerdo para incluirlos en nuestra lista de “recomendados”. Una muestra:
+136	{i1}Prince of Persia{/i1}, de Broderbund; {i2}Hellcats over the Pacific{/i2}, de Graphic Simulations; {i3}Spectre{/i3}, de Peninsula Gameworks; {i4}Armor Alley{/i4}, de Three-Sixty Pacific; {i5}Pipe Dreams{/i5}, de Lucasfilm; {i6}Sim City{/i6}, de Maxis; {i7}King’s Bounty{/i7}, de New World Computing; y un par más que no se nos ocurrieron de pronto.
+137	Algunos juegos que no nos gustaron a ninguno:
+138	{i1}Harpoon, Capitalist Pig, Full Metal Mac, Galactic Frontiers, No Greater Glory, Creepy Castle, Blade, Mutant Beach, V is for Victory, Starflight{/i1} y docenas de otros oscuros.
+143	Cómo colonizar planetas
+145	El primer paso es construir una Nave colonia de algún tipo y enviarla allí. (Si tu nivel es “Novato”, ya tendrás construida una nave colonia.) Cuando llegue, recibirás un mensaje que te avisa de que has colonizado un planeta nuevo. Dirá algo así como “Acabas de colonizar Sol”.
+151	Notarás que todas tus colonias parecen buenas. Es decir, no llevan máscara, ni gafas de sol oscuras, ni crestas, ni pendientes. Es sencillo: a ti te toca llevar el sombrero blanco. Claro que todos los demás jugadores también se creen {i1}ellos{/i1} los buenos.
+153	A veces te quedarás corto de metal. Es buen momento para colonizar un planeta que sabes perfectamente que nunca dará beneficios, por mucho que lo terraformes y por mucho que esperes. Quizá sea de 3,5 G, o incluso peor. Colonízalo, pero ajusta el gasto del planeta para no gastar nada en Terraformar. Gástalo todo en Minas. Cuando hayas sacado del planeta todo el metal que quieras, “{b1}Abandónalo{/b1}”. Los Satélites que hayas construido allí se quedarán, pero tus colonos serán evacuados.
+155	Cómo matar planetas enemigos
+157	Distintas imágenes de planetas
+163	Un planeta semihabitable
+164	Un planeta entre 0,4 y 0,5 G, o entre 2,0 y 2,5 G, entra en esta categoría. Con el tiempo, este tipo de planeta puede hacerse rentable. Aun así, nunca va a ser {i1}muy{/i1} rentable, así que muchas veces lo mejor es explotar sus minas y dejarlo.
+165	Un planeta inhóspito
+166	Un planeta con una gravedad superior a 2,5 G o inferior a 0,4 G será casi imposible de hacer rentable. Aun así, en raras ocasiones puede ser buena idea conservar un planeta así por razones estratégicas. El resto del tiempo, saca todo el Metal que tenga y “{b1}Abandónalo{/b1}”: no te molestes en terraformarlo.
+169	Un planeta sin explorar
+172	Si envías una flota a un planeta sin explorar, el signo de interrogación se convertirá en uno de exclamación, para avisarte de que pronto sabrás más. Si tienes activada la opción “{b1}Mostrar rutas de flotas{/b1}” en el cuadro de diálogo “{b2}Preferencias…{/b2}”, verás una línea de puntos para la flota dirigida a este planeta.
+173	Un planeta enemigo
+176	Un planeta aliado
+178	Un planeta de batalla
+180	Satélites
+182	Flotas
+183	Si tienes una flota en un planeta, aparecerá una pequeña imagen de una flota en la esquina superior derecha del planeta para avisarte. Ya sabemos que parece una luna, pero no te dejes engañar.
+184	Flotas aliadas
+185	Si ves flotas amigas aparcadas en uno de tus planetas, tendrán un símbolo de flota en la parte superior izquierda del planeta (en lugar de en la superior derecha, donde va el símbolo de tu flota).
+186	Un icono de planeta con la etiqueta Dweezil
+187	Dos iconos de planeta, Almak y Delta
+188	Dos iconos de planeta, ambos con la etiqueta Maaz
+189	Dos iconos de planeta, Regor y Phact
+190	Dos iconos de planeta, ambos con la etiqueta Regor
+191	Un icono de planeta oscuro con un signo de interrogación, con la etiqueta Zaphod
+192	Un icono de planeta enemigo con la etiqueta Gienah
+193	Un icono de planeta con la etiqueta Polaris
+194	Rumbos futuros

@@ -1,0 +1,17 @@
+{
+ "bm0.png": "home-star-map.png",
+ "bm1.png": "unexplored.png",
+ "bm2.png": "report-window.png",
+ "bm3.png": "budget-window.png",
+ "bm4.png": "tech-spending.png",
+ "bm5.png": "ship-design.png",
+ "bm6.png": "potentially-profitable.png",
+ "bm7.png": "strip-mined.png",
+ "bm8.png": "soon-explored.png",
+ "bm9.png": "explored-habitable.png",
+ "bm10.png": "enemy-a.png",
+ "bm11.png": "enemy-b.png",
+ "bm12.png": "enemy-c.png",
+ "bm13.png": "almost-explored.png",
+ "bm14.png": "satellites.png"
+}

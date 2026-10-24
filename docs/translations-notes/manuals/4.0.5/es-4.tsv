@@ -1,0 +1,60 @@
+208	Rendimientos decrecientes
+209	{b1}Rendimientos decrecientes{/b1}
+211	Por eso conviene mantener estable tu gasto en Tecnología. Si gastas solo en tecnología de Armas, luego solo en la de Escudos, luego en Alcance, y así sucesivamente, tus niveles generales de Tecnología subirán más despacio que si gastas un poco en todas a la vez.
+217	La Temperatura representa todo lo que puedes cambiar de un sistema estelar, desde el contenido de la atmósfera hasta la ecología del planeta. Tu planeta de origen está a 72{img1/}. Cuando gastas dinero en Terraformar un planeta nuevo, su temperatura se acerca a 72{img2/}. Cuando la temperatura llega a 72{img3/}, el planeta es tan bueno como va a llegar a ser, y no puedes gastar más en Terraformar.
+219	Tamaño de la galaxia
+220	El Tamaño de la galaxia determina lo grande que es la galaxia. Cuanto más grande sea, más espacio tendrá cada jugador para moverse. En una galaxia pequeña con muchos jugadores, la partida tenderá a ser reñida y rápida. En una galaxia grande con pocos jugadores, la partida se desarrollará durante mucho tiempo antes de que haya combate. Las partidas en galaxias descomunales durarán una eternidad.
+221	Estilo de la galaxia
+222	El Estilo de la galaxia es la forma general que tendrá la galaxia. Las galaxias de Anillo suelen tener los comienzos más parejos, con cada jugador repartido por el anillo. Las galaxias de Cúmulo y de Espiral colocan a los jugadores de forma bastante pareja. Una galaxia Aleatoria tiene las estrellas esparcidas de cualquier manera. Cualquier jugador puede empezar en una posición buenísima o malísima: justo encima de varios enemigos, o sin nadie en ninguna estrella cercana.
+223	Glosario
+224	{a1}Contenido{/a1} {a2}← Anterior{/a2}
+225	{b1}Glosario{/b1}
+226	Aliado {span1} {/span1}{span2} {/span2}Un alienígena con quien compartes privilegios de
+227	{span1} {/span1}{span2} {/span2}repostaje y un pacto de no agresión.
+228	Enemigo {span1} {/span1}{span2} {/span2}Cualquiera que no esté aliado contigo.
+229	Gravedad{span1} {/span1}{span2} {/span2}Todo lo que no se puede cambiar de un sistema
+230	{span1} {/span1}{span2} {/span2}estelar. Cualquier planeta entre 0,4 G y 2,5 G
+231	{span1} {/span1}{span2} {/span2}puede hacerse rentable, si hay suficiente gente
+232	{span1} {/span1}{span2} {/span2}en él y está totalmente terraformado. Un planeta
+233	{span1} {/span1}{span2} {/span2}ideal es de 1,0 G. Cada jugador tiene una idea
+234	{span1} {/span1}{span2} {/span2}distinta de lo que es 1,0 G.
+235	Ingresos{span1} {/span1}{span2} {/span2}El dinero que ingresaste el turno pasado.
+236	Metal{span1} {/span1} {span2} {/span2}La suma de todos los recursos no renovables.
+237	Mini {span1} {/span1}{span2} {/span2}La cantidad de reducción de tamaño de una nave. Las naves de Mini alta
+238	{span1} {/span1}{span2} {/span2}usan menos Metal, pero cuestan más Dinero.
+239	Dinero {span1} {/span1}{span2} {/span2}La suma de todos los recursos renovables. Recibes
+240	{span1} {/span1}{span2} {/span2}dinero cada turno de los planetas rentables.
+241	Planeta{span1} {/span1} {span2} {/span2}Lo mismo que una estrella. Representa todo el
+242	{span1} {/span1}{span2} {/span2}sistema estelar.
+243	Tecnología Radical {span1} {/span1}Investigación de alto riesgo y alta ganancia. A veces
+244	{span1} {/span1}{span2} {/span2}consigues algo realmente estupendo, a veces
+245	{span1} {/span1}{span2} {/span2}consigues basura.
+246	Alcance{span1} {/span1} {span2} {/span2}Hasta dónde puede llegar una nave sin repostar. Una
+247	{span1} {/span1}{span2} {/span2}nave de Alcance 8 puede ir 4 y volver 4, o puede
+248	{span1} {/span1}{span2} {/span2}ir 5 y quedarse tirada.
+249	Satélite{span1} {/span1}{span2} {/span2} Una nave que no puede moverse. Su Alcance es cero.
+250	{span1} {/span1}{span2} {/span2}Los Satélites son mucho más pequeños que otras naves.
+251	Escudo{span1} {/span1} {span2} {/span2}Algo que protege a una nave. Una nave de Tecnología de Escudos {span3} {/span3}
+252	{span1} {/span1}8 resultará casi invencible para una nave de Tecnología
+253	{span1} {/span1}de Armas 4.
+254	Ahorros {span1} {/span1}Dinero que has acumulado para construir naves.
+255	{span1} {/span1}{span2} {/span2}Recibes intereses por este dinero. Si has gastado
+256	{span1} {/span1}{span2} {/span2}más de lo que has ahorrado, pagas intereses.
+257	Velocidad{span1} {/span1} {span2} {/span2}Lo rápido que va una nave. Una nave de Velocidad 3 tardará {span3} {/span3}
+258	{span1} {/span1}2 turnos en ir a una estrella que esté a 5 unidades.
+259	Estrella {span1} {/span1}{span2} {/span2}Lo mismo que un planeta.
+260	Temperatura {span1} {/span1}Todo lo que se puede cambiar de un sistema
+261	{span1} {/span1}{span2} {/span2}estelar. La temperatura ideal es 72{img3/}. Cada
+262	{span1} {/span1}jugador tiene una idea distinta de lo que es 72{img2/}.
+263	Terraformación {span1} {/span1}Mejorar la temperatura de un sistema estelar.{span2} {/span2}
+264	Cuando un planeta está totalmente terraformado, su{span1} {/span1}
+265	temperatura es 72{img1/}.
+266	El Ho! {span1} {/span1}Cómo llaman los jugadores expertos a Spaceward Ho!.
+267	{span1} {/span1}Si quieres ser realmente guay, di que estás “jugando
+268	{span1} {/span1}al Ho!”
+269	Arma {span1} {/span1}Algo que dispara una nave. Una nave de Tecnología de Armas 8
+270	{span1} {/span1}destrozará naves de Tecnología de Escudos 4.
+271	Cómo colonizar planetas
+272	{b1}Cómo colonizar planetas{/b1}
+273	En algún momento u otro encontrarás un planeta jugoso que querrás quedarte. Será algo así como 1,16 G y 98{img1/}. Tendrá 9.487 de metal, y simplemente no podrás resistirte.
+274	El primer paso es construir una Nave colonia de algún tipo y enviarla allí. (Si tu nivel es “Novato”, ya tendrás construida una nave colonia.) Cuando llegue, recibirás un mensaje que te avisa de que has colonizado un planeta nuevo. Dirá algo así como “Acabas de colonizar Sol”.

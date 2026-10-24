@@ -1,0 +1,80 @@
+391	{font1}Bilmen gerekenlerin tek paragraflık özeti.{/font1}
+392	{font1}{i2}Spaceward Ho!{/i2}’yu çalıştır. Harcamayı ayarlamak için çubuk grafiklerle oyna. Haritadaki mesajları kaybetmek için üzerlerine tıkla. Gemi tasarlamak ve yapmak için bir koloniye çift tıkla. Gemileri hareket ettirmek için filo noktalarını bir yıldızdan ötekine sürükle. Deney yap. Galaksiyi fethet.{/font1}
+393	{a1}{/a1}Önerilen Kitaplar
+394	{a1}{/a1}Bunlar Macintosh yazılımıyla hiçbir ilgisi olmayan, ama tekrar tekrar okumaktan hoşlandığımız birkaç kitap. Üstelik Delta Tao felsefesi hakkında bir şey söylediklerini düşünüyoruz.
+395	{a1}{/a1}{em2}The Tao of Pooh{/em2} (Pooh’un Tao’su), Benjamin Hoff, Penguin Books, New York, 1982. Taoculuk üzerine yazılmış en iyi kitap.
+396	{a1}{/a1}{em2}Calvin and Hobbes{/em2} (Calvin ve Hobbes), Bill Watterson, Andrews and McMeel, Kansas City, 1987.
+397	{a1}{/a1}{em2}The Macintosh Way{/em2} (Macintosh Yolu), Guy Kawasaki, Scott, Foresman and Company, Glenview, Illinois, 1989.
+398	{a1}{/a1}Surely You Must Be Joking, Mr. Feynman (Eminim Şaka Yapıyorsunuz Bay Feynman!), Richard Feynman.
+399	Gemiler
+400	Gemiler yeni yıldızları keşfetmek, kolonilerini savunmak ve yeni gezegenleri kolonileştirmek için kullandığın şeylerdir. Birkaç farklı türde gemi vardır ve kendi gemilerini de yaratabilirsin.
+401	Spaceward Ho! gemileri inanılmaz derecede büyük ve pahalıdır. Örneğin ilk Koloni Gemin, gezegeninin toplam kaynaklarının neredeyse üçte birini, artı gezegenin otuz yıllık bütün sanayi üretimini alır. Koca bir tekne.
+402	Gemi Yapmak
+403	Kolonilerinin herhangi birinde gemi yapabilirsin. Bunun için gemi yapmak istediğin gezegene tıkla ve “{em2} Gemiler{/em2} ” menüsünden “{em1} Gemi Yap...{/em1} ” seç ya da gezegene çift tıkla. Büyük bir iletişim kutusu açılır. Bu iletişim kutusu hem gemi yapmanı hem de yeni gemi tipleri tasarlamanı sağlar.
+404	İletişim kutusunun sol yanında kullanılabilir gemi tiplerinin bir listesi var. Bunlar zevkine uymuyorsa sağ alttaki kaydırma çubuklarıyla oynayarak yeni bir sınıf tasarlayabilirsin.
+405	Gemileri Hareket Ettirmek
+406	Bir filoyu hareket ettirmek için filoyu bulunduğu gezegenden gitmesini istediğin yere tıklayıp sürüklemen yeterli. Ulaşabiliyorsan filonun izleyeceği rota boyunca uzanan bir ok görürsün. Fareyi bıraktığında rotanın belirlendiğini bildiren bir “Hyahh!” sesi duyarsın. Sırayı bitirdiğinde gemi yoluna çıkar.
+407	Filo sürüklediğin yıldıza ulaşamıyorsa yol kesik kesik gri bir çizgiyle gösterilir. Filonun seçtiğin yıldıza gidip geri dönecek kadar yakıtı varsa yol çift uçlu bir ok olur.
+408	Bir filoyu yerinde tutmak ya da hareketini iptal etmek için filonun simgesine tıkla ve bir saniye basılı tut. Doğru yaptıysan fareyi bıraktığında bir “Whoa!” sesi duyarsın.
+409	Bir filonun varış yeri varsa ve sırayı bitirdiğinde hareket etmeyi planlıyorsa nereye gittiğini gösteren bir yol olur. Yol, oraya varmanın kaç sıra süreceğini gösteren parçalara bölünmüştür.
+410	O gezegendeki bir sonraki filoya geçmek için TAB tuşuna bas.
+411	Bir filo, senin ya da müttefiklerinin sahip olduğu bir gezegene her gittiğinde kendiliğinden yakıt alır. Bir filonun ayrılacak kadar yakıtı yoksa o gezegene bir Koloni Gemisi gönderip bir sıralığına kolonileştirebilir, sonra herkesi ayrılmaya bırakabilir ya da bir tanker gönderebilirsin.
+412	Bir filonun rotası gezegenlerin arasındayken değiştirilemez: hiperuzayda geri dönüş yoktur.
+413	Filoyla ilgili çeşitli işler yapmak için bir filoya control tuşuyla (ya da sağ) tıklayabilirsin.
+414	Bir filonun üzeri çiziliyse dağıtılıyordur ve bir sonraki sıra için metâle dönüştürülmek üzere hurdaya çıkarılacaktır.
+415	Filoları Düzenlemek
+416	Bazen bir filoyu parçalara ayırmak ya da birkaç filoyu bir araya getirmek isteyebilirsin. Bunun için “{em2} Gemiler{/em2} ” menüsünden “{em1} Filoları Hazırla...{/em1} ” seç. Sonra gemileri istediğin gibi dağılana kadar tıklayıp sürükle.
+417	Farklı tiplerdeki farklı gemileri aynı filoda birleştirebilirsin. Ama bir filodaki her gemi tipinin kendi filo seçenekleri olabilir. Savaş tavrı kendini epey açıklıyor. Gecikmeli varış, geminin hiperuzaydan varışını standart varış zamanından biraz sonraya ayarlaması demektir. Bir savaş olursa gecikmeli gemi savaşın başlangıcını kaçırır.
+418	Filoları ve Gemileri Dağıtmak/Hurdaya Çıkarmak
+419	Oyun ilerledikçe metâlin kıt olduğunu ve eskimiş gemilerinin neredeyse işe yaramaz olduğunu göreceksin. Eski gemilerinin bazılarından kurtulmak isteyebilirsin. Kolonilerindeki bir filoyu dağıtarak (“{em2} Gemiler{/em2} ” menüsünden “{em1} Filoyu Dağıt{/em1} ” seç) metâlinin %75’ini geri kazanabilirsin. Ya da bütün bir gemi tipini hurdaya çıkarabilirsin (“{i4}Gemiler{/i4}{span5}” menüsünden “{em3} Çöpe Atılacak Gemiler”{/em3} seç).{/span5}
+420	Bir gemi tipini ya da filoyu hurdaya çıkarılmak üzere işaretlediğinde, sırayı bitirene kadar hurdaya çıkarılmaz. O zamana kadar cesaretin kırılırsa sırayı bitirmeden değişikliğini geri alman yeterli.
+421	Bir filonun yalnızca bir kısmını dağıtmak istiyorsan, filoyu tutmak istediklerinle hurdaya çıkarmak istediklerine ayırmak için “{em1} Filoları Hazırla...{/em1} ” iletişim kutusunu kullan.
+422	Gemileri dağıttığında, bir koloninin üzerindelerse metâl hemen genel stokuna geçer ve onu hemen kullanabilirsin. Gemilerin üzerinde bulunduğu gezegen senin değilse metâl gezegenin üzerine düşer. Onu kolonileştiren bir sonraki kişi, hurdaya çıkardığın gemilerin metâlini kazıp çıkarabilir.
+423	Gemi Tasarlamak
+424	Bu belki de oyunun en havalı yanı. Teknolojin arttıkça bu yeni teknolojileri kullanarak daha gelişmiş gemiler yapmaya başlamak isteyeceksin. Kolay. “{em1} Gemi Yap/Tasarla{/em1} ...” iletişim kutusunda teknoloji seviyelerini yeni tipinin olmasını istediğin gibi ayarlaman yeterli. Yeni geminin niteliklerini belirlemek için kaydırma çubuklarını oynatman yeter. (Kaydırma çubuğunun en sağı her zaman o anki Teknoloji seviyen neyse odur.) Gemin istediğin gibi olduğunda bir tane yapman yeterli (“+” düğmesine basarak) ve prototip kendiliğinden tasarlanıp yapılır.
+425	Dört ana gemi sınıfı vardır: Koloni Gemileri, Uydular, İzciler ve Savaşcılar.
+426	Koloni Gemileri
+427	{img1/}Koloni gemileri insan taşır ve senin için yeni yıldızları kolonileştirir. Koloni Gemileri hem Para hem de Metâl olarak inanılmaz derecede pahalıdır. Koloni Gemileri o kadar pahalıdır ki yalnızca birkaç tane yapmak isteyeceksin. Bu yüzden ve minyatürleştirme onlara pek yarar sağlamadığı için Koloni Gemilerinde büyük olasılıkla hiç Mini kullanmak istemeyeceksin. Koloni Gemileri düşmanın bir savaşta ilk ateş edeceği şeydir de, bu yüzden onlara da dikkat etmek isteyeceksin.
+428	Uydular
+429	{img1/}Uydular motoru olmayan gemilerdir. Yani Menzilleri sıfırdır. Uydular gezegenlerini düşman saldırısına karşı savunmanın ucuz, etkili bir yoludur. Ne yazık ki hareket edemezler; yalnızca yapıldıkları gezegeni savunabilirler. Uydular normal gemilerden çok daha küçüktür, bu yüzden onları yok etmek o kadar çok atış gerektirmez. Tabii ki Uydu yapmak da Savaşcı yapmak kadar metâl gerektirmez.
+430	Bir gezegenin Uyduları varsa Yıldız Haritası’nda çevresinde bir ya da daha çok halka olur.
+431	İzciler ve Savaşcılar
+432	{img1/}İzciler ve Savaşcılar temel gemilerindir. İzcilerle savaşcılar arasındaki fark Motorlarla Silâhlar arasındaki bir değiş tokuştur. İzcilerin Menzili, Menzil Teknolojinden üç birim yüksek olabilir. Ne yazık ki en yüksek Silâh ve Kalkan Teknolojileri o anki seviyelerinden bir düşüktür. Bu, İzcileri keşif için ideal ama savaşta pek iyi olmayan gemiler yapar.
+433	Spaceward Ho! her İzciyi kendiliğinden kendi filosuna koyar, böylece keşfe tek başına uçup gidebilir. Savaşcılar kendiliğinden tek bir grupta toplanır.
+434	Abalar
+435	Abalar bir filonun zırhlılarıdır. Çok büyük. Çok güçlü. Çok pahalı. Bir tane yapabilirsen epey güçlü bir yumruğu vardır.
+436	Tankerler
+437	Tankerler öteki filo tiplerinle birlikte ya da onların arkasından gidebilir ve her sıra bulundukları yıldızda konaklamış gemilere yakıt verir. Tek tek tankerlerin etkililiğinin bir sınırı vardır ve büyük filolara hemen yakıt veremezler.
+438	Biyolojikler{o:p1}{/o:p1}
+439	Hımm. Canlı gemiler. İlginç bir fikir. Nasıl çalışırlar acaba…
+440	Geliştirme Maliyeti
+441	Yeni bir gemi tipinin prototipini yapmak ondan sonra gelenleri yapmaktan daha pahalıdır: aksaklıkları gidermek ve testleri yapmak emek ister. Bu özellikle minyatürleştirmesi yüksek gemiler için geçerlidir. Geliştirme maliyetinin her yeni gemi tipine bağlı tek seferlik bir şey olduğunu aklında tut.
+442	{a1}{/a1}Kısayollar
+443	{a1}{/a1}Spaceward Ho!’da çeşitli şeyler için birkaç kısayol sağladık. Bu bölüm onları sana tanıtacak ve bazıları için örnekler verecek.
+444	{a1}{/a1}Rapor Penceresi’ndeki herhangi bir olaya tıklarsan haritan kendiliğinden olayın gerçekleştiği yere kayar.
+445	{a1}{/a1}Bütün galaksiyi daha iyi görmek ya da belirli bir kısmına yakından bakmak için Yıldız Haritası’nın ölçeğini değiştirebilirsin. Bunun için “{em4} Pencere{/em4} ” menüsünden “{em2} Yakınlaştır{/em2} ” ya da “{em3} Uzaklaştır{/em3} ” seçmen yeterli. Komut tuşları sırasıyla Komut-eksi ve Komut-eşittir’dir. Sonuna kadar uzaklaştığında pek çok ayrıntı kaybolur.
+446	{a1}{/a1}Genellikle nerede yaşadığını anlamak için uzaklaşmak, sonra ne olup bittiğini görebilmek için yakınlaşmak isteyeceksin. Oyun ilerledikçe mahallenin artık Yıldız Haritası’na sığmadığını göreceksin, bu yüzden ortadaki büyütme seviyelerini kullanmak isteyeceksin.
+447	{a1}{/a1}Yıldız Haritası’nı bir yıldıza kaydırıp onu seçmek için Bütçe Penceresi’nde o yıldızın adına tıklayabilirsin. Yıldız Haritası’nda bir yıldız seçtiğinde Yıldız listesi o yıldıza kayar ve onu orada da seçer.
+448	{a1}{/a1}{a2}{/a2}{a3}{/a3}Kaybolmuş bir filoyu “{em4} Tüm filoları listele...{/em4} ” iletişim kutusunda seçip “{em5} Filoya Git{/em5} ” öğesini seçerek hızla seçebilir ve ona kayabilirsin.
+449	{a1}{/a1}İlgini çeken bir yıldızı bulmak için “{em2} Keşfedilen Tüm Yıldızları Listele...{/em2} ” seçip (keşfedilmiş bir yıldızsa) “{em3} Yıldıza Git{/em3} ” düğmesine basabilirsin.
+450	{a1}{/a1}Gemileri hareket ettirirken Tab tuşuna basarak gezegenin listesindeki bir sonraki gemiyi seçebilirsin.
+451	{a1}{/a1}Return tuşuna basarak bir sonraki olay mesajına geçebilirsin.
+452	Harita penceresi bağlam menülerini destekler; gezegenlere ve yıldızlara sağ tıklamak her biriyle ilgili o anki eylemleri gösterir.
+453	{a1}{/a1}Uzay Programı Hakkında
+454	{a1}{/a1}İnsanı kalıcı olarak başka gezegenlere yerleştirmenin türümüz için tek en önemli hedef olduğuna inanıyoruz. Bu çağda yaşayan bizler bu hedefe doğru ciddi adımlar atma yeteneğine sahibiz. Ne yazık ki siyaset ve kısa vadeli ekonomi uzaydaki çabalarımızı neredeyse önemsizlik düzeyine itti.
+455	{a1}{/a1}Uzay keşfinin pahalı ve tehlikeli olduğunun farkındayız. Roketler yarı denetimli koşullar altında patlayan dev, pahalı bombalardan başka bir şey değil. Ancak uzayda hayatlarını tehlikeye atmaya tamamen istekli sürüyle yetenekli insan var ve teknoloji araştırması uzun vadede her zaman mali açıdan kendini öder.
+456	{a1}{/a1}İnsanlığı galaksiye yayarak, bir tür olarak salgın, savaş ya da küresel felaket yoluyla yok olmaya karşı neredeyse bağışık hâle geliriz. Dünya dışı kolonileşme yakında gerçekleşmeyecek, ama bugün attığımız adımlar onun gerçekleşip gerçekleşmeyeceğini belirleyen adımlar olabilir.
+457	{a1}{/a1}1968’de Mars’a insan göndermeye bugün olduğumuzdan daha yakındık. Yıldızlara giden yolda basamak olarak bir Ay üssüne ve büyük yörünge uzay istasyonlarına ihtiyacımız var. Bin yıl sonra insanlık bize teşekkür edecek.
+458	{a1}{/a1}Senatörlerine ve kongre üyelerine yaz. Gerçekten senin çıkarlarına hizmet etmeye çalışıyorlar (tuhaf görünse de) ve neyin önemli olduğunu düşündüğünü bilirlerse işleri çok daha kolay olur. O yüzden onlara söyle.
+459	Yeni Bir Oyuna Başlamak
+460	Spaceward Ho! açıldığında yeni bir oyuna başlamanı ya da kayıtlı bir oyuna devam etmeni sağlayan bir iletişim kutusu gösterir. “{em1}Yeni oyun{/em1} ” seç. Sonra galaksine bir ad vermen gerekir. Ardından büyük, korkutucu bir “{em2} Galaksi yarat{/em2} ” iletişim kutusu açılır. “{em3} Yarat{/em3} ” düğmesine basman yeterli.
+461	Spaceward Ho!’yu öğrenmenin en iyi yolu, oyunu ilk kez oynarken kılavuzu okumaktır. Bu kitabı sorularını akla geldikçe yanıtlayacak biçimde düzenlemeye çalıştık. Sana “oynamaya başlamadan önce kılavuzun tamamını iyice oku” türünden saçmalıklar vermeyeceğiz. Otur ve oyunu bir dene. Yalnızca sorularının olacağını ve bu kılavuzun onları yanıtladığını unutma.
+462	Ayrıca “{em2} Galaksi{/em2} ” menüsünden “{em1} Otomatik oyna{/em1} ...” öğesini açıp bilgisayarın nasıl oynayacağını görebilirsin. İşlerin nasıl gittiği hakkında bir fikir edinirsin ve Otomatik Oyna’yı istediğin an kapatıp yönetimi kendin alabilirsin.
+463	Pencereler
+464	Spaceward Ho!’nun üç penceresi vardır. Pencereleri istediğin gibi sürükleyip yeniden boyutlandırabilirsin, böylece oyunu monitörlerine ve oyun tarzına göre ayarlayabilirsin. Spaceward Ho! çıktığında pencere düzenini kendiliğinden kaydeder ve bir sonraki oynayışında geri getirir, böylece sürekli onunla uğraşman gerekmez.
+465	Ana Pencere
+466	Ana Pencere, Spaceward Ho!’daki gerçekten önemli tek penceredir. Yıldız Haritası’nı ve bütçe, gezegen ve filo bilgilerini içerir. Pencerenin başlık çubuğunda “Peter, Samanyolu, 2000” gibi bir şey yazar; bu, şu anda “Samanyolu” oyununda 2000 yılında Peter olarak kayıtlı olduğun anlamına gelir. Ne sandın.
+467	Yıldız Haritası
+468	Spaceward Ho!’nun ana penceresinin sağ kısmı Yıldız Haritası’dır. Nerede olduğunu, nerelerde bulunduğunu, nereye gidebileceğini görmeni sağlar. Yıldız Haritası’nı gemileri hareket ettirmek (bir yıldızdan ötekine tıklayıp sürükleyerek) ve bakıp ilgileneceğin gezegeni seçmek için kullanırsın.
+469	Yıldız Haritası’nda göreceğin birkaç türde yıldız vardır. Şimdilik yalnızca bir oyunun en başında görebileceğin türleri açıklayacağız.
+470	Ana Gezegenin{img1/}

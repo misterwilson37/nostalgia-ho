@@ -1,0 +1,67 @@
+1	{a1}İçindekiler{/a1} {a2}← Önceki{/a2} {a3}Sonraki →{/a3}
+27	Silâh ve Kalkan teknolojileri bir geminin ne kadar iyi savaştığını belirler. Verdiğin hasarın miktarı, Silâh Teknolojinle savunanın Kalkan Teknolojisi arasındaki farka dayanır. Silâh Teknolojin düşmanın Kalkan Teknolojisinden yüksekse her sıra onun gemisine çok hasar verirsin. Silâh Teknolojin düşmanın Kalkan Teknolojisinden düşükse her sıra çok az hasar verirsin ya da hiç vermezsin.
+29	Genel olarak, silâh ve kalkan teknolojileri yüksek bir düşmana karşı dengeli bir savaş yapmak için geride olduğun her seviye için iki kat gemi gerekir. Örneğin Silâh ve Kalkan Teknolojin 5, düşmanınki 7 ise dengeli bir savaş için dört kat gemi istersin. Aslında büyük olasılıkla 10 kat gibi bir şey istersin; kim dengeli bir savaş ister ki?
+35	Savaşa girdiysen iyi silâhlar ve kalkanlar şarttır, ama unutma, teknoloji tek başına yetmez. Silâh Teknolojisi yüksek uzay gemileri yapabilme yeteneğine sahip olmak savaşta hiçbir şey ifade etmez; Silâh Teknolojisi yüksek çok sayıda uzay gemisine sahip olmak eder.
+43	Yani Teknolojiye ve gezegenine aynı miktarda para harcamak için doğrudan Teknoloji çubuğuna tıklayıp sürüklemen yeterli. Fareyi oynattıkça Teknoloji çubuğunun ötekiler inerken çıktığını, ötekiler çıkarken indiğini fark edeceksin. Onu Teknoloji çubuğunla koloni çubuğun aynı uzunlukta olacak biçimde ayarla. Aynı şeyi gezegenin çubuğunu sürükleyerek de yapabilirsin. Seçim senin.
+58	“Bilgisayar oyuncuları gemilerine, eskiden benim gemilerime verdiğim gerçekten aptalca adları veriyor.”
+60	“Gemileri nasıl hareket ettiririm?”
+61	Gemilerin bulunduğu yıldıza tıkla ve gitmelerini istediğin yıldıza sürükle. İki gezegenin arasında bir çizgi belirir. Çizginin ucunda bir ok varsa fareyi bırakman yeterli; bir “Hyaa!” sesi duyarsın. Gemiler yola çıktı. Birkaç sıra kadar sonra varış gezegenine ulaşmaları gerekir. Çizginin ucunda ok yoksa gemilerin gitmesini istediğin gezegen, seçili gemilerle ulaşamayacağın kadar uzaktadır.
+62	“Uzaylılar ana gezegenime saldırıp bütün insanlarımı öldürüp duruyor.”
+63	Birkaç savunma uydusu yap ve kötü adamların seni ezebileceği her yerde onları teknolojik olarak güncel tut. Ayrıca pek çok rakibin olduğu küçük bir galaksiyle başlama.
+68	“Oyunun sırları neler?”
+69	Sana söyleseydik sır olmazlardı, değil mi? O yüzden bize sorma. Mutlaka bilmen gerekiyorsa kendin çöz.
+71	Galaksiyi küçült. Genel olarak, galaksi ne kadar küçükse bilgisayarlar sana o kadar zor anlar yaşatır. Galaksinin büyüklüğünü düşünmeden “Devasa”ya koyma. Ayrıca daha az bilgisayar oyuncusuna karşı oynayabilirsin. Daha çok oyuncu aslında daha zor değildir, yalnızca daha kalabalıktır.
+88	Gezegenleri Keşfetmek: Sıcaklık ve Yerçekimi
+89	Bir noktada ana gezegenini bırakıp başka yaşanabilir gezegenler aramak için yakındaki yıldızları keşfetmeye biraz emek harcamak isteyeceksin. Her gezegenin iki önemli özelliği vardır: Sıcaklık ve Yerçekimi.
+109	Kolonileştirilmiş, Kârlı Bir Gezegen
+117	Bu tür bir gezegen yalnızca hiçbir zaman kâr etmemekle kalmaz, kazabileceğin hiç metâli de yoktur. Iyy! Stratejik bir önemi yoksa ya da orada bir düşman üssü olmasından korkmuyorsan bu hurdayı rahat bırak.
+119	Bu, hiç gitmediğin bir gezegendir.
+120	Yakında Keşfedilecek Bir Gezegen
+135	Herhangi bir gezegende filon varsa, bunu sana bildirmek için gezegenin sağ üst köşesinde küçük bir filo resmi görünür. Biliyoruz, bir aya benziyor, ama buna aldanma.
+155	Bir yıldız sisteminde değiştirilemeyen her şey. 0,4 G ile 2,5 G arasındaki her gezegen, üzerinde yeterince insan varsa ve tamamen terraform edilmişse kârlı hâle getirilebilir. İdeal bir gezegen 1,0 G’dir. Her oyuncunun 1,0 G’nin ne olduğuna dair farklı bir fikri vardır.
+157	Geçen sıra eline geçen para.
+159	Logaritmik ölçek, küçük sayılarda büyük sayılardan daha çok duyarlılık veren eşit aralıklı olmayan bir ölçektir.
+161	Bir geminin, bulunduğu gezegenden ayrılmaya yetecek yakıtı olmadığında içinde bulunduğu durum.
+163	Yenilenemeyen bütün kaynakların toplamı.
+164	Bir geminin ne kadar küçültüldüğü. Mini’si yüksek gemiler daha az Metâl kullanır ama daha çok Paraya mal olur.
+166	Yenilenebilen bütün kaynakların toplamı. Kârlı gezegenlerden her sıra para alırsın.
+173	Bir gemiyi koruyan şey. Kalkan Teknolojisi 8 olan bir gemi, Silâh Teknolojisi 4 olan bir gemiye karşı neredeyse yenilmez çıkar.
+174	Bir geminin ne kadar hızlı gittiği. Hız 3 olan bir gemi 5 birim uzaktaki bir yıldıza 2 sırada gider.
+178	Bir yıldız sisteminde değiştirilebilen her şey. İdeal sıcaklık 72°’dir. Her oyuncunun 72°’nin ne olduğuna dair farklı bir fikri vardır.
+180	Bir yıldız sisteminin sıcaklığını iyileştirmek. Bir gezegen tamamen terraform edildiğinde sıcaklığı 72°’dir.
+182	Bir geminin ateş ettiği şey. Silâh Teknolojisi 8 olan bir gemi, Kalkan Teknolojisi 4 olan gemileri paramparça eder.
+264	Gemiler yeni yıldızları keşfetmek, kolonilerini savunmak ve yeni gezegenleri kolonileştirmek için kullandığın şeylerdir. Birkaç farklı türde gemi vardır ve kendi gemilerini de yaratabilirsin.
+265	Spaceward Ho! gemileri inanılmaz derecede büyük ve pahalıdır. Örneğin ilk Koloni Gemin, gezegeninin toplam kaynaklarının neredeyse üçte birini, artı gezegenin otuz yıllık bütün sanayi üretimini alır. Koca bir tekne.
+270	Bir filoyu hareket ettirmek için bulunduğu gezegenden gitmesini istediğin yere tıklayıp sürüklemen yeter. Ulaşabiliyorsan, filonun izleyeceği rota boyunca uzanan bir ok görürsün. Fareyi bıraktığında rotanın belirlendiğini bildiren bir “Hyahh!” sesi duyarsın. Sırayı bitirdiğinde gemi yoluna koyulur.
+271	Filo sürüklediğin yıldıza ulaşamıyorsa yol kesik kesik gri bir çizgiyle gösterilir. Filonun seçtiğin yıldıza gidip geri dönecek kadar yakıtı varsa yol çift uçlu bir ok olur.
+275	Bir filonun rotası gezegenlerin arasındayken değiştirilemez: hiperuzayda geri dönüş yoktur.
+278	Filoları ve Gemileri Hurdaya Çıkarmak
+282	Gemileri hurdaya çıkardığında, bir koloninin üstündelerse metâl anında genel stokuna geçer ve onu hemen kullanabilirsin. Gemilerin üstünde bulunduğu gezegen senin değilse, metâl gezegenin üstüne düşer. Orayı kolonileştiren bir sonraki kişi, hurdaya çıkardığın gemilerin metâlini oradan çıkarabilir.
+288	Dört ana gemi sınıfı vardır: Koloni Gemileri, Uydular, İzciler ve Savaşcılar.
+293	Bir gezegende Uydular varsa, Yıldız Haritası’nda çevresinde bir halka olur.
+300	Rapor Penceresi’ndeki herhangi bir olaya tıklarsan haritan kendiliğinden olayın gerçekleştiği yere kayar.
+302	Genellikle nerede yaşadığını anlamak için uzaklaşmak, sonra ne olup bittiğini görebilmek için yakınlaşmak isteyeceksin. Oyun ilerledikçe mahallenin artık Yıldız Haritası’na sığmadığını göreceksin, bu yüzden ortadaki büyütme seviyelerini kullanmak isteyeceksin.
+303	Yıldız Haritası’nı bir yıldıza kaydırıp onu seçmek için Bütçe Penceresi’nde o yıldızın adına tıklayabilirsin. Yıldız Haritası’nda bir yıldız seçtiğinde Yıldız listesi o yıldıza kayar ve onu orada da seçer.
+305	Çok sayıda yıldızı kolonileştirdiğinde, bütçe çubuklarındaki gezegen sayısının ekrana sığmayacak kadar arttığını fark edeceksin. Sonunda bütün gezegenlerini görmek için kaydırmak zorunda kalırsın. Bunu yapmak yerine, önem verdiğin gezegenleri listede aynı yere taşıyabilirsin. Bütçe listesinde bir gezegenin adına tıkla ve onu olmasını istediğin yere sürükle. Birikim ve Teknoloji çubuklarını, onları hep görebilmek için listenin en üstüne yakın bir yere sürüklemek iyi bir fikirdir.
+308	Gemileri hareket ettirirken Tab tuşuna basarak gezegenin listesindeki bir sonraki gemiyi seçebilirsin.
+309	Return tuşuna basarak bir sonraki olay mesajına geçebilirsin.
+317	Bize yazılı olarak ulaşmak istersen adresimiz şu:
+327	Para enerjiyi, yiyeceği, üretilmiş malları, eğitimli insanları, yani her yıl yenilenebilen her şeyi temsil eder. Tükenmesi mümkün değilse Para sayılır.
+329	Parayı pek çok şeye harcayabilirsin: araştırma, terraform, madencilik, gemi yapımı vb. Metâli kullandığın tek şey gemi yapımıdır. Daha gelişmiş gemilerin yapımı daha çok para ve metâl ister.
+335	Spaceward Ho!’da çoğu şeye para harcadığında, ne kadar çok harcarsan dolar başına o kadar az değer alırsın. Bu, acelen yoksa bir günde 20 dolar harcamaktansa iki gün 10’ar dolar harcamanın daha iyi olduğu anlamına gelir.
+337	Bu madencilik ve terraform için de geçerlidir. Bunları birden yapmaya çalışmak, uzun yıllara yayarak yavaş yavaş yapmaktan daha az verimlidir.
+341	Bu yazılım sana bir lisansla sağlanır; bu bir satış değildir.
+343	Kısacası çok oyunculu oyunlarda “Monopoly Kuramı”nı benimsiyoruz. Bir kutu oyunu satın aldığında, oyunun izin verdiği sayıda insanın birlikte oynaması için tek bir kopya yeterlidir. Öte yandan oyunu herkes evine götürebilsin diye çoğaltmak yasa dışıdır. Anladın mı? Biz de aynı şekilde çalışıyoruz.
+345	Hiçbir nedenle bize dava açma, yoksa havalı oyunlar yazmayı bırakır ve bütün suçu sana atarız.
+358	Çok oyunculu bir oyunda bazı Mac’ler ötekilerden hızlıysa, sıra güncellemelerini büyük olasılıkla hızlı Mac’lerin yapmasını istersin. Sırayı güncellemek istemeyen Mac’ler bu seçeneğin işaretini kaldırsın.
+360	Bu seçenek kimsede seçili değilse sıra hiç güncellenmez. Bu kötüdür.
+368	Bu öğe ancak üstündeki “Olay mesajlarını göster” de işaretliyse önemlidir. İkisi de işaretliyse bir savaş olay mesajı gösterilmek üzereyken savaş her seferinde kendiliğinden gözden geçirilir. İşaretli değilse yalnızca özet mesajı gösterilir.
+373	Her şeyi tercihler dosyasında saklıyoruz: pencerelerin nereye konmasını sevdiğin, sesin açık mı kapalı mı olmasını istediğin, tercih ettiğin savaş hızı vb.
+387	Yıldız Haritası’nda göreceğin birkaç türde yıldız vardır. Şimdilik yalnızca bir oyunun en başında görebileceğin türleri açıklayacağız.
+389	Burası yaşadığın yer. Yoğun nüfuslu, çok kârlı, teknolojik olarak gelişmiş, evreni keşfe çıkmaya hazır bir gezegen. İlk gemilerini burada yapacaksın.
+390	Oyunun başında ana gezegenin dışındaki her şey keşfedilmemiştir. Bir gezegene gittiğinde onun hakkında daha çok şey öğrenirsin ve resmi yeni keşiflerini gösterecek biçimde değişir. Öteki gezegen türleri daha sonra, “Gezegenler” bölümünde ele alınacak.
+392	Bir gezegeni seçtiğinde, çevresinde bir taç belirir ve böylece vurgulanır. Yıldız haritasının solundaki bütün bilgiler artık o gezegenle ilgilidir: sıcaklığı, yerçekimi, geliri ve benzerleri.
+395	Pek çok farklı türde mesaj vardır. Bir yıldızı keşfettiğinde yıldızın sıcaklığı ve yerçekimi hakkında bir mesaj alırsın. Bir gezegeni kolonileştirdiğinde dostça bir bildirim alırsın. Bir savaşa girdiğinde sonucu özetleyen bir mesaj alırsın.
+396	Daha fazla bilgi almak için Rapor Penceresi’ndeki eski bir mesaja tıklayabilirsin. Örneğin bir savaş özetine tıkladığında Spaceward Ho! savaşı yeniden oynatır. Bir gezegenden söz eden bir mesaja tıkladığında harita o gezegene kayar ve onu seçer.
+400	Ho! İçin Süper Hızlı Talimatlar
+401	Bilmen gerekenlerin tek paragraflık özeti.

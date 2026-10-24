@@ -1,0 +1,60 @@
+135	Cuando empiezas una partida de {b1}Spaceward Ho!{/b1} por primera vez, tienes muchas opciones sobre cómo quieres que sea la galaxia. Puedes decidir contra cuántos jugadores juegas, lo buenos que serán, lo grande que es la galaxia y cosas por el estilo. Aquí se explican las opciones.
+136	{a1}Número de jugadores del ordenador {/a1}
+137	{a1}Tamaño de la galaxia {/a1}
+138	{a1}Estilo de la galaxia {/a1}
+139	{a1}Inteligencia del ordenador {/a1}
+140	{a1}Los jugadores del ordenador{/a1}
+141	{a1}Preparar una partida multijugador{/a1}
+142	{a1}Juego multijugador multiplataforma{/a1}
+143	Atención al cliente
+144	{b1}Atención al cliente{/b1}
+145	{b1}Cómo contactar con la atención al cliente de New World Computing{/b1}
+146	{b1}Atención al cliente por teléfono:{/b1} Puedes llamar a la línea de asistencia técnica y atención al cliente de New World Computing al (818) 889-5650 de 9:00 a 12:00 y de 14:00 a 17:00 (hora del Pacífico).
+147	{b1}America Online:{/b1} Puedes enviar un correo electrónico a la atención al cliente a NewWorldCo. Para llegar a nuestro tablón de atención al cliente en Industry Connection, usa “Go to” y escribe NewWorld. Además de leer y publicar mensajes, puedes descargar archivos de la “New World Software Library”. Para información sobre la suscripción y un kit de inicio gratuito, puedes llamar gratis a America Online al 1 (800) 827-6364.
+148	{b1}CompuServe:{/b1} Para llegar a nuestro tablón de atención al cliente en el Game Publishers Forum, usa “Go to” y escribe “GAMEDPUB”. Luego elige New World Computing. Además de leer y publicar mensajes, puedes descargar archivos de los Library Files. Para contactar con nuestro departamento de atención al cliente por correo electrónico, nuestra dirección es 76004-3610. Para información sobre la suscripción y un kit de inicio gratuito, puedes llamar gratis a CompuServe al 1 (800) 848-8199 y pedir el representante n.º 368, que incluye una suscripción introductoria y un crédito de uso de $15.
+149	{b1}GEnie:{/b1} Puedes enviar un correo electrónico a la atención al cliente a “NEW.WORLD”. Para llegar a nuestro tablón de atención al cliente en la Games RoundTable, Scorpia RT, escribe M805;1 en cualquier indicador “?”. Luego elige New World Computing. Además de leer y publicar mensajes, puedes descargar archivos de las “Games RoundTable Libraries”. Para información sobre la suscripción, puedes llamar gratis a GEnie al 1 (800) 638-9636.
+150	{b1}BBS de New World Computing:{/b1} La BBS de New World Computing admite velocidades de 1200/2400/9600/14400 baudios con un ajuste de módem de 8,N,1. Funciona las 24 horas del día, los 7 días de la semana. En este sistema encontrarás archivos para descargar y atención al cliente. Llama al 1 (818) 889-5684 para conectarte. No hace falta suscripción y el único coste son las posibles llamadas de larga distancia.
+151	Deuda
+152	{b1}La economía{/b1}
+153	{b1}Deuda{/b1}
+156	Puedes sacar cierta cantidad de tu dinero de los Ahorros de naves para usarla en tecnología o en terraformación entrando en {b1}Tirar de los ahorros…{/b1} en el menú “Galaxia”.
+158	La deuda nacional de Estados Unidos se acerca a los 5 billones de dólares. Los ingresos del gobierno son de aproximadamente 1 billón. Caramba, nos preguntamos por qué hay tan poco dinero para crecer. Mmmm.
+159	Si alguna vez llegas a una situación en la que tus ingresos totales ni siquiera bastan para pagar los intereses de tu deuda, pasan cosas malas. Hasta ahora nunca hemos conseguido recuperarnos de esa situación. Se recomienda encarecidamente no meterse en ella.
+160	Diseñar naves
+161	{b1}Diseñar naves{/b1}
+162	Esta es posiblemente la parte más genial del juego. A medida que aumente tu tecnología, querrás empezar a construir naves más avanzadas con estas tecnologías nuevas. Es fácil. Solo tienes que fijar los niveles de tecnología como quieras que sea tu nuevo tipo en el cuadro de diálogo {b1}Construir/diseñar naves{/b1}. Basta con mover los deslizadores para fijar las cualidades de la nueva nave. (El extremo derecho del deslizador es siempre tu nivel de Tecnología actual.) Cuando tengas la nave como la quieres, constrúyela (pulsando el botón {b2}+{/b2}) y el prototipo se diseñará y construirá automáticamente.
+163	Hay siete grandes clases de naves: Naves colonia, Satélites, Exploradores, Cazas, Acorazados, Cisternas y Bionaves.
+164	Naves colonia
+166	Satélites
+167	Los satélites son naves que no tienen motores. Eso significa que su Alcance es cero. Los Satélites son un medio barato y eficaz de defender tus planetas de los ataques enemigos. Por desgracia, no pueden moverse; solo pueden defender el planeta donde se construyen. Los Satélites son mucho más pequeños que las naves normales, así que no hacen falta tantos disparos para destruirlos. Claro que tampoco hace falta ni de lejos tanto metal para construir Satélites como Cazas. Cuando un planeta tiene Satélites, tendrá un anillo alrededor en el Mapa estelar.
+168	Exploradores y Cazas
+169	Los Exploradores y los Cazas son tus naves básicas. La diferencia entre unos y otros es un equilibrio entre Motores y Armas. Los Exploradores pueden tener un Alcance dos unidades superior a tu tecnología de Alcance. Por desgracia, su tecnología máxima de Armas y de Escudos es una unidad inferior a tus niveles actuales. Esto hace que los exploradores sean ideales para explorar, pero no demasiado buenos en combate.{b1} Spaceward Ho!{/b1} pondrá automáticamente a cada explorador en su propia flota, para que pueda salir volando por su cuenta a explorar. Los Cazas se agrupan automáticamente en un solo grupo.
+170	Acorazados
+171	Los Acorazados son los cazas más grandes y más malos del juego. Pueden aguantar una paliza enorme. Tienen la capacidad de lanzar 30 disparos a la vez. Cuesta una fortuna en dinero y en metal fabricarlos.
+172	Cisternas
+173	Las Cisternas son naves colonia que no colonizan. Las Cisternas reabastecen a todas las naves del mismo sistema. Si una flota lleva una cisterna, reposta automáticamente en cada estrella que visita, sin tener que colonizar la estrella. Las Cisternas nunca se quedan sin combustible.
+174	Las Cisternas cuestan menos que una Nave colonia, pero más que un Caza.
+175	Bionaves
+176	Las Bionaves son gigantescas criaturas espaciales y no son naves en absoluto. No cuesta metal fabricarlas, porque son puramente orgánicas. Cuestan mucho dinero y sus ajustes iniciales de tecnología son inferiores a tus niveles de tecnología actuales. Además, las Bionaves no repostan como otras naves. Solo puedes diseñar nuevos tipos de Bionaves con investigación Radical.
+177	Coste de desarrollo
+178	{b1}Coste de desarrollo{/b1}
+179	Construir el prototipo del primer tipo de nave nuevo cuesta más que construir las naves que vienen después. Esto es especialmente cierto en las naves con mucha miniaturización. Ten en cuenta que el coste de desarrollo se paga una sola vez por cada nuevo tipo de nave.
+180	Distintas imágenes de planetas
+181	{b1}Explorar planetas{/b1}
+182	{b1}Distintas imágenes de planetas{/b1}
+185	Un planeta de esta categoría, con tiempo y esfuerzo suficientes, podría ser rentable algún día. Para hacerlo rentable, tendrás que terraformarlo hasta acercarlo a 72{img1/} y dar tiempo a que crezca la población.
+186	{b1}Un planeta semihabitable{/b1}
+188	{b1}Un planeta inhóspito{/b1}
+189	Un planeta con una gravedad superior a 2,5 G o inferior a 0,4 G será casi imposible de hacer rentable. Aun así, en raras ocasiones puede ser buena idea conservar un planeta así por razones estratégicas. El resto del tiempo, saca todo el Metal que tenga y “Abandónalo”: no te molestes en terraformarlo.
+191	Este tipo de planeta nunca dará beneficios y no tiene metal que extraer. ¡Puaj! A menos que tenga alguna importancia estratégica o temes que haya allí una base enemiga, deja en paz esta basura.
+194	Si envías una flota a un planeta sin explorar, el signo de interrogación se convertirá en uno de exclamación, para avisarte de que pronto sabrás más. Si tienes activada la opción Mostrar rutas de flotas en el cuadro de diálogo “Preferencias”, verás una línea para la flota dirigida a este planeta.
+195	{b1}Un planeta enemigo{/b1}
+196	Cualquier planeta en el que pierdas una batalla se convierte en un planeta enemigo. Un planeta seguirá siendo enemigo hasta que envíes otra flota allí y ganes una batalla. De hecho, puede que envíes una flota a un planeta enemigo y no encuentres a nadie, o a un enemigo distinto. Toda la información que tienes sobre los planetas se basa en la última vez que estuviste allí. Si hace mucho que estuviste en un planeta, tu información sobre él puede estar anticuada.
+198	{b1}Un planeta aliado{/b1}
+199	Cuando te alías con otro jugador, su icono en el Mapa estelar cambia para reflejarlo. Su icono adquiere un color más claro y le sale un “halo” sobre la cabeza, porque ahora es de los buenos.
+200	{b1}Un planeta de batalla{/b1}
+202	{b1}Satélites{/b1}
+204	{b1}Flotas{/b1}
+205	Si tienes una flota en un planeta, aparecerá una pequeña imagen de una flota en la esquina superior derecha del planeta para avisarte. Parece una luna, pero no te dejes engañar.
+206	{b1}Flotas aliadas{/b1}
+207	Si ves flotas amigas aparcadas en uno de tus planetas, tendrán un símbolo de flota en la parte superior izquierda del planeta (en lugar de en la superior derecha, donde va el símbolo de tu flota).

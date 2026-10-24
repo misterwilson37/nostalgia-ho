@@ -1,0 +1,87 @@
+471	Burası yaşadığın yer. Yoğun nüfuslu, çok kârlı, teknolojik olarak gelişmiş, evreni keşfe çıkmaya hazır bir gezegen. İlk gemilerini burada yapacaksın.
+472	{img1/}Keşfedilmemiş Bir Gezegen{img2/}
+473	Oyunun başında ana gezegenin dışındaki her şey keşfedilmemiştir. Bir gezegene gittiğinde onun hakkında daha çok şey öğrenirsin ve resmi yeni keşiflerini gösterecek biçimde değişir. Öteki gezegen türleri daha sonra, “Gezegenler” bölümünde ele alınacak.
+474	{img1/}Seçili Bir Gezegen{img2/}
+475	Bir gezegeni seçtiğinde çevresinde bir taç belirerek vurgulanır. Gezegen hakkındaki bütün bilgiler altında gösterilir.
+477	Rapor Penceresi, son birkaç sırada olan önemli şeylerin kaydırılabilen bir geçmişidir. Her mesaj her sıranın başında Yıldız Haritası’nın sol alt köşesinde belirir. Mesaja tıkladığında bir sonrakine geçer. Bütün mesajları okuduğunda haritanın sol alt köşesinde bir “Sıran Bitti” saat düğmesi belirir.
+478	Pek çok farklı türde mesaj vardır. Bir yıldızı keşfettiğinde yıldızın sıcaklığı ve yerçekimi hakkında bir mesaj alırsın. Bir gezegeni kolonileştirdiğinde dostça bir bildirim alırsın. Bir savaşa girdiğinde sonucu özetleyen bir mesaj alırsın.
+479	Daha fazla bilgi almak için Rapor Penceresi’ndeki eski bir mesaja tıklayabilirsin. Örneğin bir savaş özetine tıkladığında Spaceward Ho! savaşı yeniden oynatır. Bir gezegenden söz eden bir mesaja tıkladığında harita o gezegene kayar ve onu seçer.
+480	{img1/}Bütçe Bilgileri
+481	Bütçe bilgilerindeki sayılar yalnızca bilgi vermek için oradadır. Onları doğrudan değiştiremezsin. (Gerçi “Bence kendime biraz daha para vereyim!” diyebilmek kullanışlı olurdu.) Değiştirebileceğin şey, altlarındaki çubuk grafiktir.
+482	{img1/}Çubuk Grafikler
+483	Spaceward Ho!’daki en önemli denetimlerin çubuk grafiklerindir. Paranı harcamak ve stratejini uygulamak için onları kullanırsın. İş sunumlarında tepegözde gördüğün sıkıcı çubuk grafiklerin aksine Spaceward Ho!’daki çubuk grafikleri değiştirebilirsin.
+484	Örneğin Bütçe çubuk grafiği, paranı kolonilerinin her biri arasında paylaştırmak için kullandığın şeydir. Bir kısmını teknoloji araştırması için de kullanabilir, bir kısmını da birikim/gemi yapımı için ayırabilirsin. Bir gezegen adının sağındaki çubuğu ne kadar büyütürsen toplam bütçenin o kadar büyük bir payı o gezegene gider. Çubuğu tıkladığın yere kadar uzatmak ya da kısaltmak için fareyle çubuk grafiğe tıklayıp sürükle; öteki çubuklara orantılı olarak eklenir ya da onlardan düşülür.
+485	Yani Teknolojiye ve gezegenine aynı miktarda para harcamak için doğrudan Teknoloji çubuğuna tıklayıp sürüklemen yeterli. Fareyi oynattıkça Teknoloji çubuğunun ötekiler inerken çıktığını, ötekiler çıkarken indiğini fark edeceksin. Onu Teknoloji çubuğunla koloni çubuğun aynı uzunlukta olacak biçimde ayarla. Aynı şeyi gezegenin çubuğunu sürükleyerek de yapabilirsin. Seçim senin.
+487	Gezegen Bilgileri
+488	O anda seçili gezegen hakkındaki bilgiler onun altında görünür. Büyüyen bir koloni seçersen o gezegene harcadığın paranın madencilik ve terraform arasında nasıl bölündüğünü gösteren bir kaydırıcı görürsün. Yine, her bir kaleme tam olarak yüzde kaç harcadığına fazla takılma; yalnızca oranları doğru tutturmaya çalış.
+489	Bir gezegenin sıcaklığını 72°’ye getirmek için Terraforma para harca. (O senin en sevdiğin sıcaklık.) Bir gezegen zaten 72° ise terraforma para harcayamazsın.
+490	Gezegenin kaynaklarını açığa çıkarmak ve metâli gemi yapımında kullanılabilir hâle getirmek için Madenciliğe para harca. Yine, gezegenin metâli bittiğinde onu kazmaya daha fazla para harcayamazsın.
+491	Bir gezegenin “Gelir”i, o gezegenin toplam bütçene kattığı fazladan paradır. Yeni kolonileştirdiğin bir gezegense bu eksi olur; yani onu yalnızca hayatta tutmak için para akıtman gerekir. Bir gezegen ana gezegenine (72° ve 1,00 G) ne kadar benzerse para kazandırma potansiyeli o kadar yüksektir. Ana gezegenine fazla benzemeyen gezegenler hiçbir zaman kâr etmez.
+492	Teknoloji Harcamaları
+493	En çok hangi teknolojileri geliştirmek istediğini göstermek için Teknoloji Harcamaları kaydırıcılarını kullan. Stratejine, felsefene ve oyunun o anki durumuna göre farklı teknolojileri araştırmayı seçebilirsin. Çoğu zaman bu pencereyle pek uğraşman gerekmez.
+494	Kısa Bir Özet
+495	Spaceward Ho!’nun amacı galaksiyi fethetmektir. Tek bir harika, yoğun nüfuslu gezegende başlarsın. İlk yıldızlar arası uzay gemilerini yapabilecek duruma yeni gelmişsindir. Böylece birkaç keşif gemisi yapıp yakındaki yıldızlara gönderirsin. Bazı yıldız sistemleri ötekilerden daha yaşanabilir olacaktır.
+496	Ana gezegenine benzeyen bir gezegen bulduğunda bir Koloni Gemisi yapıp gidip onu kolonileştirirsin. Oraya varınca terraform ederek sıcaklığını iyileştirir, bütün metâlini kazıp çıkarır, sonra onu daha ileri keşif ve kolonileştirme için bir üs olarak kullanırsın. Birkaç yüzyıl sonra yeni gezegenin nüfusu o kadar büyür ki, tıpkı ana gezegenin gibi, kayda değer bir kâr getirmeye başlar.
+497	Galaktik imparatorluğunu genişleterek gezegenden gezegene sıçrayacaksın. Sonunda direnişle karşılaşacaksın: galaksiyi fethetmeye çıkmış başka kötü adamlar. Keşfetmenin ve kolonileştirmenin yanı sıra bu uzaylı ırkların daha saldırgan olanlarına karşı kendini savunman gerekecek. Bunu kolonilerinde savunma uyduları yaparak yapabilirsin. Savaşcı filoları yapıp uzaylılara önleyici karşı saldırılar düzenleyerek de kendini savunabilirsin: eski “en iyi savunma iyi bir saldırıdır” stratejisi. Savaşmak zevkine uygun değilse bu uzaylıların bazılarıyla dost olabilir, düşman yerine müttefik edinebilirsin.
+498	Gemi yapmanın, gezegenleri terraform edip kazmanın yanı sıra teknoloji araştırmasına da para harcayacaksın. Yaptığın ilk gemiler başka yıldızlara gidebilir, ama büyük, yavaş, hantal ve zayıftırlar. Araştırmaya para harcadığında gemi teknolojisi seviyelerin iyileşir. Kimseyi şaşırtmayacak biçimde, daha iyi gemiler savaşta eskimiş gemileri yok eder.
+499	Bütün düşman kolonilerini yok ettiğinde kazanırsın. Oynamaya devam etmekte özgürsün, ama kötü adamlardan hiç direniş gelmez, çünkü öldüler.
+500	{a1}{/a1}Teknik Destek
+501	{a1}{/a1}Bir yazılım şirketinin (yazılım dışında) sağladığı tek en önemli şeyin Teknik Destek olduğunu düşünüyoruz. Spaceward Ho! ile ilgili birinin yaşayabileceği neredeyse her sorunu, ayrıca daha pek çok başka sorunu çözebilmekle övünüyoruz. Bizi makul Kaliforniya iş saatlerinde doğrudan ararsan elimizden gelen her konuda sana seve seve yardım ederiz. Sıkı ve geç saatlere kadar çalıştığımız için bize makul olmayan saatlerde de ulaşabilirsin, ama bunu garanti edemeyiz.
+502	{a1}{/a1}Oyunlar için ücretsiz teknik destek sağlayan dünyadaki az sayıdaki şirketten biriyiz. Personelimizin az, işimizin çok olduğunu ve kısa konuşmayı takdir ettiğimizi aklında tut. “Hangi System ve Finder sürümünü kullanıyorsun?” gibi soruları bakmadan yanıtlayabilirsen kendimizden geçeriz. “Finder ne?” gibi sorularla ararsan canımız sıkılır. Tamam mı?
+503	{a1}{/a1}Delta Tao
+504	{a1}{/a1}8032 Twin Oaks Ave.
+505	{a1}{/a1}Citrus Heights, CA 95610
+506	{a1}{/a1}help@deltatao.com
+507	Teknoloji
+508	Teknolojiyi Geliştirmek
+509	Yeni teknolojileri araştırmak kolaydır. Oyuncu Penceresi’nde Teknolojiye para harcarsın, işte o kadar. “{em1} Pencere{/em1} ” menüsünden açılan Teknoloji Harcamaları Penceresi’nde Teknoloji bütçeni dengeleyerek araştırmanı belirli alanlara ağırlık verecek biçimde yönlendirebilirsin.
+510	{img1/} Menzil
+511	Menzil, bir filonun yakıt almadan ne kadar ilerleyebileceğidir. Bir geminin menzili 8 ise 4 kare gidip yakıt almak için geri dönebilir ya da 8 kare gidip oraya vardığında mahsur kalabilir. Bir geminin Menzili 12 olduğunda 6 kare gidip güvenle dönebilir ya da 12 kareye kadar tek yönlü bir yolculuk yapabilir. Bu uzun bir yol ve düşman topraklarının derinliklerine akınlar yapmanı ya da Galaksinin kıyılarındaki gezegenleri keşfetmeni sağlar.
+512	{img1/} Hız
+513	Hız, bir geminin ne kadar hızlı gittiğidir. Bir geminin hızı 1 ise beş kare ilerlemesi beş sıra sürer. Hızı 3 ise aynı yolculuğu yalnızca iki sırada yapar. Hız bir düşman saldırısına hızla karşılık vermek ya da onu kendi saldırınla şaşırtmak için önemli olabilir. Yüksek bir hız teknolojisi yeni sistemleri başka türlü yapabileceğinden çok daha hızlı keşfetmeni de sağlayabilir. Belki de en önemlisi, savaşta önce en yüksek hızdaki gemiler ateş eder.
+514	{img1/} {img2/}Silâhlar ve Kalkanlar
+515	Silâh ve Kalkan teknolojileri bir geminin ne kadar iyi savaştığını belirler. Verdiğin hasarın miktarı, Silâh Teknolojinle savunanın Kalkan Teknolojisi arasındaki farka dayanır. Silâh Teknolojin düşmanın Kalkan Teknolojisinden yüksekse her sıra onun gemisine çok hasar verirsin. Silâh Teknolojin düşmanın Kalkan Teknolojisinden düşükse her sıra çok az hasar verirsin ya da hiç vermezsin.
+516	Örneğin geminin Silâh Teknolojisi 5 olsun. Kalkan Teknolojisi 1 olan birine saldırırsan kalkanları silâhlarına karşı etkisiz kalır ve onu kırıp geçirirsin. Savunanın Kalkan Teknolojisi 5 ise gemisine biraz hasar verirsin, ama kalkanı gerisini engeller. Kalkan Teknolojisi 8 ise saldırın neredeyse %100 engellenir ve cılız saldırına güler.
+517	Genel olarak, silâh ve kalkan teknolojileri yüksek bir düşmana karşı dengeli bir savaş yapmak için geride olduğun her seviye için iki kat gemi gerekir. Örneğin Silâh ve Kalkan Teknolojin 5, düşmanınki 7 ise dengeli bir savaş için dört kat gemi istersin. Aslında büyük olasılıkla 10 kat gibi bir şey istersin; kim dengeli bir savaş ister ki?
+518	{img1/} Mini
+520	{img1/} Radikal
+521	Radikal araştırma sana öteki teknolojilerin hiçbirinin veremeyeceği şeyler verebilir. Radikal Teknolojiye para koyduğunda bilim insanların arada bir şaşırtıcı bir keşif yapabilir. Bazı Radikal keşifler sana daha yüksek teknoloji seviyeleri, biyolojik silâhlar, hava denetimi, zihin denetimi, gizlenme ya da yeni madencilik teknikleri verebilir. Her neyse.
+522	Bir sonraki Radikal Teknoloji sıçramasının ne zaman olacağını hiçbir zaman bilemezsin: öteki teknolojilerden çok daha rastgeledir. Radikal Teknolojiyle olabilecek bütün şeyleri anlatmayacağız; bunu kendin keşfetmen gerekecek.
+523	Radikal Teknolojinin öteki teknolojilere getirdiği artışlar o teknolojilerdeki temel araştırma çizgini değiştirmez. Örneğin Silâh ve Kalkan Teknolojisi seviyelerin 5 ve 5 ise ve Radikal Teknolojin Kalkanlarını 7’ye çıkarırsa Silâh Teknolojin, Kalkan Teknolojisiyle aynı anda 8’e ulaşır. Bu, Radikal Teknoloji üstünlüğünün yalnızca geçici olduğu anlamına gelir, bu yüzden onu iyi kullan.
+524	Teknolojileri Seçmek
+525	Geliştirmeyi seçtiğin teknolojiler tamamen sana kalmıştır ve o oyundaki hedeflerine bağlıdır.
+526	Yüksek bir Menzil Teknolojisi geliştirirsen galaksinin kıyılarında başka kimsenin ulaşamayacağı pek çok gezegene ulaşabilirsin. Onları savunmak için endişelenmeden geliştirebilirsin.
+527	Savaşa girdiysen iyi silâhlar ve kalkanlar şarttır, ama unutma, teknoloji tek başına yetmez. Silâh Teknolojisi yüksek uzay gemileri yapabilme yeteneğine sahip olmak savaşta hiçbir şey ifade etmez; Silâh Teknolojisi yüksek çok sayıda uzay gemisine sahip olmak eder.
+528	Minyatürleştirme oyun ilerledikçe daha önemli hâle gelir. Oyunun başında galakside bol metâl vardır ve bulması kolaydır. Oyunun sonlarında filolarının büyüklüğünü sınırlayan etken olabilir ve yüksek bir Mini sana iyi hizmet eder.
+529	Hızın hemen göze çarpmayan üstünlükleri vardır. Hızlı bir karşı saldırı filosu, saldıran bir düşman kuvvetini gezegenlerinden birini ele geçirdikten sonra çoğu zaman yakalayıp yok edebilir. Genellikle saldıran, yalnızca yakıt alabilmek için bir Koloni Gemisi getirmek, eski gezegenini kolonileştirmek ve onu bir sıra boyunca geçindirmek zorundadır. Hızlı gemilerin varsa onu orada yakalayabilirsin. Yavaş gemilerin varsa burnu bile kanamadan kaçar.
+530	Radikal Teknoloji bir kumardır. Şansın yaver gider ve yararlı keşifleri çabuk yaparsan oyununun gidişatını değiştirebilir. Öte yandan bazen çağlar boyunca ondan hiçbir şey elde edemezsin.
+531	Neden?
+532	Neden Bölümü
+533	Spaceward Ho!, tarihteki en çok revize edilmiş mikrobilgisayar oyunlarından biridir. 1970’lerin sonunda tasarlanmaya başlandı, 80’lerde tasarlandı, 1990’da Macintosh’ta doğdu ve o zamandan beri 5 büyük (ve çok daha fazla küçük) revizyondan geçti. Sürüm 5’e ulaşmış başka bir ticari oyunun adını ver. Hadi bakalım.
+534	Uzay fethi türünün pek çok yönünü değerlendirmek için herkesten çok vaktimiz oldu. Spaceward Ho!’daki her şeyin bir nedeni var. Bu bölüm o nedenlerin çoğunu açıklayacak ve en sık sorulan “Neden” sorularının çoğunu yanıtlayacak.
+535	Neden yer savaşı yok?
+536	Söz ettiğimiz savaşın ölçeği buna uygun değil. Spaceward Ho!’da bir gezegeni ele geçirdiğinde önce onu her canlı organizmayı yok edecek kadar toz duman edersin, sonra tamamen kendi tasarladığın ekosistemle değiştirirsin. Bu en iyi uzaydan yapılır. Bir gezegenin çevresindeki uzayı kim denetliyorsa on yıllık sıranın içinde gezegeni de o denetler.
+537	Hiperuzaydaki bir filoyu neden geri çağıramıyorum?
+538	Uzay yolculuğu benzetmemiz hiperuzaydaki filolarla iletişimi ya da yıldızlardan başka bir yerde hiperuzaydan çıkmayı içermez. Bu çoğunlukla oyunu sadeleştirmek için: oyun sonunda pek fark etmez, çünkü gemi hızları zaten yıldızlar arasını bir sırada aşacak kadar yüksek olma eğilimindedir.
+539	Savaştan neden geri çekilemiyorum?
+540	Bir hiperuzay sıçramasına hazırlanmanın yıllar sürdüğünü ve o sürede savaşın biteceğini varsayıyoruz. Bunun gibi birkaç oyun tasarımı özelliği, kaybeden oyuncuya sürpriz bir zafer kazanıp yeniden toparlanma şansı vermek içindir. Tek bir savaşın ya da filonun önemini azaltan özellikler kazanan oyuncunun üstünlüğünü artırır.
+541	Savaşları neden yönetemiyorum?
+542	Spaceward Ho! hızlı, eşzamanlı çok oyunculu oyun için tasarlandı. Herkes sırasını aynı anda oynar, böylece başka bir oyuncuyu nadiren beklemek zorunda kalırsın. Bir oyuncunun savaşının ayrıntılarını yönetmesi, o sıra savaşı olmayan oyuncular için oyunu yavaşlatırdı.
+543	Yıldız sistemlerinde neden birden çok gezegen yok?
+544	Bu “gereksiz karmaşa” kategorisine girer. {i1}Spaceward Ho!{/i1}{span2} {/span2}{i5}karmaşık{/i5}{span4} olmadan {/span4}{i3}derin{/i3}{span6} olmaya çalışır. İlginç kısımlara odaklanmak için oyunun eğlencesine ve zorluğuna kayda değer bir katkı yapmayan her oyun öğesini ayıklamaya çalıştık. Gösterdiğimiz tek gezegenin sistemdeki bütün gezegenlerin bir bileşimi (ortalaması) olduğunu varsay yeter.{/span6}
+545	Yendiğim bir oyuncunun parasını ve metâlini neden alamıyorum?
+546	Yenilen bir oyuncunun stoklarını düşmanına teslim etmektense kendisinin yok ettiğini varsayıyoruz. Yine, bu genel olarak zaten kazanmakta olan oyunculara daha büyük bir üstünlük verirdi. Spaceward Ho!’da gerçekten sevdiğimiz bir şey, yeniden toparlanmanın mümkün olmasıdır: epey geride olup kurnaz ve şanslı davranarak üstün bir rakibi saf dışı bırakmak. Bunu azaltan etkenlerden kaçınılır.
+547	İnsanları öldürmek yerine neden esir alamıyorum?
+548	Gereksiz karmaşa.
+549	Kazandıktan sonra galaksimi neden başka birininkiyle karşı karşıya getiremiyorum?
+550	Bu tür bir şey sık sık istenir, çoğunlukla oyuncular heyecanlı bir oyunun eğlencesini uzatmak istedikleri için. Ama bu sadece saçma. En azından bizce.
+551	Teknolojiler neden belirli buluşlar değil de yalnızca sayılar?
+552	Şey, radikaller belirli buluşlar verir. Çoğunlukla iyi ölçeklenen ve dengeli bir sistem tasarlamaya çalıştık. Belirli buluşlara dayanan oyunlarda odak fazlasıyla hangilerinin en iyi olduğunu ve onları en hızlı nasıl elde edeceğini bulmaktadır.
+553	Para ve metâl neden tam ihtiyacım olan yerde beliriyor? Onları taşımam gerekmez mi?
+554	Evet, para ve metâlin taşınmasını görmezden gelmek gerçekçi değil. Ancak bir oyunu böyle oynamak için gereken ayrıntı yönetiminin sıkıcı olduğunu ve oyunu tatsızlaştırdığını düşünüyoruz. Sıralar arasındaki on yıllarda bilge yardımcılarının malzemeleri gerekecekleri yere ulaştırdığını varsayıyoruz.
+555	Koloni gemilerim neden hep önce patlıyor?
+556	Spaceward Ho! savaşında her gemi hedefini seçer ve filo kaptanları koloni gemilerini ve tankerleri her zaman savaşcılara ve uydulara tercih eder. Bunlar daha düşük teknolojili (dolayısıyla yok etmesi daha kolay) ve sahipleri için daha değerli olma eğilimindedir, bu da onları birinci sınıf hedef yapar. Ho! 5’te onları saldırı filonun arkasından gecikmeli gelecek biçimde ayarlayabilirsin; böylece en azından kazandığın saldırılarda yok edilmeleri gerekmez.
+557	Galaksi neden 3B değil?
+558	Çok boyutlu bir galaksinin getireceği ek ilgiyi kullanıcı arayüzündeki ek karmaşa bastırır.
+559	Gelen filoları görmek için neden radarım olamıyor?
+560	Gizli bilgi, kaybeden oyuncuları korumak için gizlidir. Bütün bilgiler bilinseydi (ya da bilinebilseydi) bir oyuncu küçük bir üstünlüğü daha kolayca basit bir zafere dönüştürebilirdi; bunun da hiç eğlencesi yok.

@@ -1,0 +1,103 @@
+261	Öteki mesajların ise elbette onları alan kişi üzerinde farklı etkileri olur. Bir oyuncuya ondan nefret ettiğini söylersen, seni eskisinden daha az sevmeye yatkın olur. Onu sevdiğini söylersen, o da seni sevebilir ya da sevmeyebilir.
+262	Bilgisayar oyuncuları mesajlarında arada bir yalan söyler; bazıları ötekilerden daha çok. (Ama bir gezegeni sahiplenme konusunda yalan söyleyemezsin.)
+263	Gemiler
+266	Gemi Yapmak
+267	Kolonilerinin herhangi birinde gemi yapabilirsin. Bunun için gemi yapmak istediğin gezegene tıkla ve “Gemiler” menüsünden “Gemi Yap” komutunu seç ya da gezegene çift tıkla. Büyük bir iletişim kutusu açılır. Sağda kullanılabilir bütün gemi tiplerinin listesi olur. Solda ise sıradaki gemilerin listesi. Yapmak istediğin gemi tipine tıkladığında soldaki listeye eklenir. Bir gemiyi sıradan çıkarmak için ona tıklaman yeter; kaybolur.
+268	Bir gezegende gemileri sıraya koyduktan sonra o gezegene para harcamayı ve gezegenin parasının bir bölümünü gemi yapımına ayırmayı unutma. Yoksa hiç gemi yapılmaz. Üç sıra sonra bir gemi yalnızca %5 bitmişse, büyük olasılıkla ona daha çok para harcamak istersin; yoksa bitmeden eskir.
+269	Gemileri Hareket Ettirmek
+272	Bir filoyu yerinde tutmak ya da hareketini iptal etmek için filonun bulunduğu gezegene tıkla ve bir saniye basılı tut. Doğru yaptıysan, fareyi bıraktığında bir “Whoa!” sesi duyarsın.
+273	Bir gezegende birden çok filon varsa, Gezegen Penceresi’nde filonun adına tıklayarak hangi filoyu hareket ettireceğini seçebilirsin. Bir filonun gideceği bir yer varsa ve sırayı bitirdiğinde hareket edecekse, bunu sana bildirmek için filonun adı kalın görünür. TAB tuşuna basmak o gezegendeki filoların listesinde bir sonraki filoyu kendiliğinden seçer.
+274	Bir filo, sahip olduğun bir gezegene her gittiğinde kendiliğinden yakıt alır. Gemilerin mahsur kalırsa ve ayrılmaya yetecek yakıtları yoksa, o gezegene bir Koloni Gemisi gönderip gezegeni bir sıralığına kolonileştirebilir, sonra herkesi oradan ayırabilirsin.
+276	Filoları Düzenlemek
+277	Bazen bir filoyu parçalara bölmek ya da birkaç filoyu bir araya getirmek isteyebilirsin. Bunun için “Gemiler” menüsünden “Filoları Hazırla” komutunu seç. Sonra gemileri istediğin gibi dağılana kadar tıklayıp sürükle. Kusura bakma, bir filoda yalnızca aynı tipte gemiler olabilir (dosya boyutunu küçültmek için). Birden çok gemi tipinin konuşlandığı bir yıldızda filoları düzenlemeye karar verirsen, önce düzenlemek istediğin tipteki filoyu seçtiğinden emin ol.
+279	Oyun ilerledikçe metâlin kıt olduğunu ve eskimiş gemilerinin neredeyse işe yaramadığını görürsün. Eski teknelerinin bazılarından kurtulmak isteyebilirsin. Kolonilerinden birinde bulunan gemilerin metâlinin %75’ini, ya filoları hurdaya çıkararak (“Gemiler” menüsünden “Filoyu Parçala” komutunu seç) ya da bütün bir gemi tipini hurdaya çıkararak (“Gemi Tiplerini Listele” iletişim kutusunda belirli bir tip için “Gemi Tipini Hurdaya Çıkar” seçeneğine tıkla) geri kazanabilirsin.
+280	Bir gemi tipini ya da filoyu hurdaya çıkarılmak üzere işaretlediğinde, hurdaya çıkarma işi ancak sırayı bitirdiğinde yapılır. O zamana kadar caydıysan, “Gemi Tipini Hurdaya Çıkar” kutusunun işaretini kaldırman ya da “Gemiler” menüsünden “Filoyu Parçalama” komutunu seçmen yeter.
+281	Bir filonun yalnızca bir bölümünü hurdaya çıkarmak istiyorsan, filoyu saklamak istediklerinle hurdaya çıkarmak istediklerine ayırmak için “Filoları Hazırla” iletişim kutusunu kullan.
+283	Kendi Gemilerini Tasarlamak
+284	Bu, büyük olasılıkla oyunun en havalı bölümüdür. Teknolojin ilerledikçe, bu yeni teknolojileri kullanan gitgide daha gelişmiş gemiler yapmaya başlamak isteyeceksin. Kolaydır. “Gemiler” menüsünden “Yeni Gemi Tipi Yarat” komutunu seç. “Gemi Tasarımı” iletişim kutusu açılır. Yeni geminin özelliklerini ayarlamak için kaydırma çubuklarını oynatman yeter. Kaydırma çubuğunun en sağı her zaman o anki Teknoloji düzeyindir.
+285	Geliştirme Maliyeti
+286	Yeni bir gemi tipinin ilkini yapmak, ardından gelenlerin her birini yapmaktan daha pahalıdır: aksaklıkları gidermek ve denemeler yapmak emek ister. Bu, özellikle yüksek minyatürleştirmeli gemiler için geçerlidir. Geliştirme maliyetinin her yeni gemi tipine bağlı, bir kerelik bir şey olduğunu unutma.
+287	Gemi Tipleri
+289	Koloni Gemileri
+290	Koloni gemileri insan taşır ve senin için yeni yıldızları kolonileştirir. Koloni Gemileri hem Para hem de Metâl olarak inanılmaz derecede pahalıdır. Koloni Gemileri o kadar pahalıdır ki yalnızca birkaç tane yapmak isteyeceksin. Bu ve minyatürleştirmenin onlara pek yararı olmaması, büyük olasılıkla Koloni Gemilerinde hiç Mini kullanmak istemeyeceğin anlamına gelir. Koloni Gemileri ayrıca bir savaşta düşmanın ilk ateş edeceği şeydir, bu yüzden onlara karşı da dikkatli olmak isteyeceksin.
+291	Uydular
+292	Uydular motoru olmayan gemilerdir. Yani Menzilleri sıfırdır. Uydular, gezegenlerini düşman saldırısına karşı savunmanın ucuz ve etkili bir yoludur. Ne yazık ki hareket edemezler; yalnızca yapıldıkları gezegeni savunabilirler.
+294	İzciler ve Savaşcılar
+295	İzciler ve Savaşcılar temel gemilerindir. İzcilerle savaşcılar arasındaki fark, Menzil ile Silâhlar arasında bir değiş tokuştur. İzcilerin Menzili, Menzil Teknolojinden iki birim yüksek olabilir. Ne yazık ki en yüksek Silâh ve Kalkan Teknolojileri o anki düzeylerinden bir düşüktür. Bu da İzcileri keşif için biçilmiş kaftan yapar, ama savaşta pek iyi değildirler.
+296	Spaceward Ho! yapılan her izciyi kendiliğinden kendi filosuna koyar, böylece tek başına keşfe uçabilir. Savaşcılar, yapıldıkları yıldızlardaki aynı gemi tipinin filolarına kendiliğinden katılır.
+297	Gemi Tasarımı iletişim kutusu
+298	Kısayollar
+304	Çok para biriktirirsen tek bir yıldıza azıcık para harcamayı zor bulabilirsin. Bütçe harcama çubuklarının alt ucunda daha çok duyarlılık elde etmek için bütçe çubuk grafiğinin üstündeki “Doğrusal” sözcüğüne tıkla. “Logaritmik” bir ölçeğe dönüştürülür. Teknoloji Harcamaları çubukları her zaman logaritmik ölçektedir.
+306	Kayıp bir filoyu, “Filoların Listesini Yap” iletişim kutusunda seçip “Filoya Git” düğmesine basarak çabucak seçebilir ve ona kayabilirsin.
+307	İlgini çeken bir yıldızı bulmak için “Keşfedilen Tüm Yıldızları Listele” komutunu kullanıp “Yıldıza Git” düğmesine basabilirsin (keşfedilmiş bir yıldızsa). Ya da yıldızın adını klavyeden yazmaya başlaman yeter.
+310	Yeni Bir Oyuna Başlamak
+311	Spaceward Ho! açıldığında, yeni bir oyuna başlamanı ya da kayıtlı bir oyunu sürdürmeni sağlayan bir iletişim kutusu gösterir. “Yeni Oyun” seçeneğini seç. Sonra galaksine bir ad vermen gerekir. Ardından büyük ve korkunç bir “Galaksi Yarat” iletişim kutusu açılır. “Yarat” düğmesine basman yeter. Spaceward Ho! sonra adını sorar. Adını girdiğinde oynamaya hazırsın.
+312	Spaceward Ho!’yu öğrenmenin en iyi yolu, oyunu ilk kez oynarken kılavuzu okumaktır. Bu kitabı soruların aklına geldikçe yanıtlanacak şekilde düzenlemeye çalıştık. Sana “oynamaya başlamadan önce kılavuzun tamamını dikkatle oku” gibi bir sürü saçmalık söylemeyeceğiz. Otur ve oyunu bir dene. Yalnızca sorularının olacağını ve bu kılavuzun onları yanıtladığını unutma.
+313	“Seçenekler” menüsünde “Otomatik Oyna” seçeneğini açıp bilgisayarın nasıl oynayacağını da görebilirsin. İşlerin nasıl gittiği hakkında bir fikir edinirsin ve otomatik oyunu istediğin an kapatıp oyunu kendin devralabilirsin.
+314	Teknik Destek
+316	Elemanımızın az, işimizin çok olduğunu ve kısa konuşmayı takdir ettiğimizi unutma. “Hangi Windows ve DOS sürümünü kullanıyorsun?” gibi soruları bakmadan yanıtlayabilirsen havalara uçarız. “DOS ne?” gibi sorularla ararsan sinirleniriz. Tamam mı?
+318	Delta Tao Software, Inc. 760 Harvard Ave. Sunnyvale, CA 94087
+319	Bilgisayar Oyuncuları
+320	Spaceward Ho! oynarken birçok insana, birçok bilgisayara ya da ikisinin bir karışımına karşı oynayabilirsin. Herkesi tahmin yürütmeye zorlamak için her oyuna birkaç bilgisayar oyuncusu koymanı öneriyoruz. Kimin bilgisayar, kimin insan olduğunu tam olarak anlamak bilerek zorlaştırılmıştır.
+321	Tıpkı her insan gibi, bilgisayar oyuncularının her biri de kendine özgü bir strateji benimser. Bazıları ana gezegenlerinde oturup uydu yapmaktan ve yeni teknolojiler araştırmaktan memnun olur. Bazıları saldırgan olur ve hızla yayılmaya çalışır. Bazıları yüksek silâh ve kalkan teknolojisine yönelir, sonra galaksinin geri kalanının peşine düşer. Hepsi de fethedilmemek için ellerinden geleni yapar.
+322	Daha zeki bilgisayar oyuncuları bir oyun sırasında senin hamlelerine uyum sağlar ve stratejilerini o anki duruma göre ayarlar. Daha az zeki bilgisayar oyuncularından daha uzun vadeli düşünmeye yatkındırlar ve galaksiyi genellikle daha hızlı ve daha verimli keşfederler (stratejileri buysa). Daha büyük filolar toplamaya yatkındırlar ve büyük bir savaşta onları yenmek daha zordur. Silâhlanma yarışında geri kaldıklarını hissederlerse Teknoloji harcamalarını artırırlar.
+323	İlk oturum açtığında, bilgisayar oyuncularının ne kadar iyi olacağını Spaceward Ho!’ya söyleyebilirsin. Uzman bilgisayar oyuncularının daha iyi bir strateji kullanması ve aptal bilgisayar oyuncularından çok daha tehlikeli olması olasıdır.
+324	Oynadıkça bilgisayar oyuncularının senin nasıl oynadığını biraz öğrendiğini fark edeceksin. Gemilerine senin gemilerine verdiğin gibi adlar vermeye başlarlar, hatta çok oyunculu bir oyun için gelmiş arkadaşlarının adlarını kendilerine bile koymaya başlarlar. Daha fazla bilgi için Prefs dosyası bölümüne bak.
+325	Ekonomi
+326	Galaksinin bütün bütçesi yalnızca iki sayıyla gösterilir: Para ve Metâl.
+328	Metâl bulduğun şeyleri temsil eder: madenler, petrol, uranyum, o türden şeyler. Tükenebilecek her şey Metâldir. Galakside sınırlı miktarda Metâl vardır. Oyunun sonlarına doğru Metâli denetim altında tutmak çok önemli olabilir.
+330	Ekonomi bu kadar. Kararlarının çoğu paranı nasıl harcayacağınla ilgili olacak. Bir şey için gerektiğinden fazla para harcarsan, fazlası senin için kolayca biriktirilir ve bir sonraki sıra kullanılabilir. Örneğin yalnızca $3.000 tutan bir gemiye $10.000 harcarsan, bir sonraki sıra fazladan $7.000’in olur. Üstüne biraz da faiz.
+331	Metâli ya da Parayı taşımak hiç dert etmen gereken bir şey değildir. Neye ihtiyacın varsa orada kendiliğinden belirir. Metâli kocaman bir galaksinin en sağ ucunda çıkarıp aynı sıra içinde en sol ucunda kullanabilirsin. Yani gemileri nerede gerekiyorsa orada yapabilirsin. Para da aynı şekilde davranır: onu harcayacağın yere taşıman hiç gerekmez. Seni ikmal hatlarını korumaya zorlamak daha gerçekçi olurdu, ama pek eğlenceli olmazdı.
+332	Paranı kendi felsefene ve hedeflerine göre farklı biçimlerde harcamayı seçebilirsin. Teknoloji araştırmasına ne kadar çok para harcarsan gezegen geliştirmeye o kadar az kalır. Gezegenleri terraform etmeye ne kadar çok para harcarsan, en azından kısa vadede araştırmaya o kadar az kalır. Daha çok kârlı gezegenin olması uzun vadede sana daha çok para kazandırır. Elbette savunacak daha çok yer de demektir.
+333	Bir uzay gemisi her yok edildiğinde, yapımında kullanılan Metâlin çoğunun sonsuza dek gittiğini unutma. Bu, gitgide daha çok gemi yapıldıkça (ve yok edildikçe) onları yaptığın malzemenin yok olduğu anlamına gelir. Kalıcı olarak. Oyunun sonlarına doğru Metâl korkunç derecede kıtlaşabilir ve bu yüzden son derece değerli olur.
+334	Azalan Getiri
+336	Bu yüzden örneğin Teknoloji harcamanı dengeli tutmak iyi bir fikirdir. Önce yalnızca Silâh Teknolojisine, sonra yalnızca Kalkan Teknolojisine, sonra Menzil’e harcar ve böyle sürdürürsen, genel Teknoloji düzeylerin hepsine aynı anda biraz biraz harcayan birininkinden çok daha yavaş yükselir.
+338	Azalan getiri gemi yapımı için geçerli değildir. Bir sırada on tane de yapılsa yalnızca bir tane de yapılsa her gemi aynı fiyattır.
+339	İnce Yazılar
+340	{a1}İçindekiler{/a1} {a2}Sonraki →{/a2}
+342	Bu yazılımı sabit diskine koyabilirsin. İstediğin kadar yedek kopya alabilirsin. Arkadaşların seninle bir ağ oyununa katılabilsin diye oyunu çoğaltabilirsin; yeter ki sen içinde olmadan hiçbir oyunu çalıştırmadıklarından emin ol.
+344	Satın aldıktan sonraki ilk 30 gün içinde herhangi bir nedenle bu yazılımın başarımını yetersiz bulursan, parasının tamamını geri almak için onu satın aldığın yere iade edebilirsin. Bu yazılım çeşitli koşullar altında denendi ve tatmin edici ve güvenli biçimde çalıştığına inanıyoruz. Yine de senin makinende çalışacağı garanti edilemez. Delta Tao, hiçbir koşulda bilgisayar sistemine ve/veya kişine gelecek zarardan sorumlu tutulamaz (günün her saati Spaceward Ho! oynamaktan gözlerine gelecek zarar dahil); yazılımın satın alma bedelini geri ödemek dışında, böyle bir zarar olasılığı bize bildirilmiş olsa bile.
+346	Seçenekler Menüsü
+347	Aşağıda “Seçenekler” menüsündeki bütün seçeneklerin bir özeti var.
+348	Sıra Güncellemesini Zorla
+349	Bu menü öğesi çok oyunculu bir oyunda yalnızca “Oyun Yöneticisi” için etkindir. Sıralarını gerçekten bitirmemiş olsalar bile o kişinin herkesin sırasını zorla bitirmesine olanak verir. Parolası bilinmeyen biri ayrılır ve oyuncusunu otomatik oyuna almayı unutursa, yönetici sırayı zorla bitirerek oyunun sürmesini sağlayabilir. Süreli sıraları zorlamak ya da arkadaşlarını kızdırmak için de kullanabilirsin (ikincisi önerilmez). Oyun yöneticisi, bir oyunda oturum açan ilk kişidir.
+350	Otomatik Oyna
+351	Otomatik Oyna, sıranın bilgisayar tarafından kendiliğinden bitti sayılmasını sağlar.
+352	Bilgisayara senin yerine oynatırsan bilgisayar, tıpkı sıradan bilgisayar rakipleri gibi gerçekten kendi stratejisini geliştirir. Bu, acemilerin biraz strateji öğrenmesi için iyi bir yoldur. Kazanmak (ya da kaybetmek) üzereyken oyunu kendin bitirmek istemediğinde de çok kullanışlıdır. Çok oyunculu bir oyundan erken ayrılmak zorunda kaldığında ama topraklarının çöküp gitmesini istemediğinde de bu seçeneği seç.
+353	Bilgisayara senin yerine oynatmak yine de sana biraz denetim bırakır. Bilgisayar teknoloji harcama çubuklarını hiçbir zaman değiştirmez. Bir yerde gemi sıraya koyarsan bilgisayar onları yapmak için para ayırır. Bir yere gemi gönderirsen bilgisayar onları hedeflerine varana kadar başka yöne çevirmez. Bilgisayar, fazla dağıldığına inanmadıkça genellikle elindeki kolonileri korumaya çalışır.
+354	“Sadece sıramı bitti say” seçeneğini seçersen olan tek şey budur. Sıradaki gemiler yapılmaya devam eder, ama hiçbir yere gönderilmez. Bütçe çubuklarının hiçbiri de değişmez. Hiçbir ilginç şeyin olmadığı birkaç sıra üst üste geldiğinde, örneğin bir koloninin kâra geçmesini beklerken, bu kullanışlı bir seçenektir.
+355	“Sıralarımı kendim oynayacağım” seçeneğini seçmek otomatik oyunu kapatır.
+356	Otomatik Oyna iletişim kutusunun altındaki kaydırma çubuğu, her sıranın başında her mesajın haritanın altında kaç saniye gösterileceğini belirler. Normalde her mesajı kaybolması için tıklaman gerekir. Otomatik oyundayken yine tıklayabilirsin, ama süre dolarsa mesaj kendiliğinden kaybolur. Bu yalnızca bilgisayarı otomatik oyunda izlerken önemlidir.
+357	Sıraları Ben Güncellerim
+359	FileShare ya da benzeri bir şey kullanıyorsan, sıra güncellemesini, oyun dosyası kendi makinesinde olan kişinin yapmasını sağlamak istersin. Yani öteki herkes bu seçeneğin işaretini kaldırsın.
+361	Yoklama Süresini Ayarla
+362	Yoklama süresi, bilgisayarın kimin sırasını bitirip kimin bitirmediğini görmek için oyun dosyasını ne sıklıkla denetleyeceğini belirler. Yoklama süresi ne kadar kısaysa, bilgisayar herkesin bitirdiğini o kadar çabuk öğrenir. Ne yazık ki yavaş bir ağda (örneğin EtherTalk değil de AppleTalk) çok sayıda kişiyle (özellikle 10’dan fazla) oynuyorsan, aşırı ağ trafiğini önlemek için yoklama süresini epey uzun tut.
+363	Savaş Hızını Ayarla
+364	Savaş hızını burada ayarlayarak savaş gözden geçirmelerindeki atışların ve patlamaların hızını denetleyebilirsin. Savaşları izlemekten sıkılırsan, onları hızlandır. “Tam Canlandırılmış Savaşlar” seçeneğinin işaretini kaldırmak, her gemi yığınının topluca ateş etmesini sağlar ve patlama grafiklerini de atlar.
+365	Olay mesajlarını göster
+366	Bu seçenek seçiliyse, bütün olay mesajları her sıranın başında haritanın sol alt köşesinde gösterilir. Bir sonrakine geçmek için mesaja tıkla ya da Return tuşuna bas. Bu seçenek işaretli olsun ya da olmasın, bütün mesajlar Rapor Penceresi’nde görünür.
+367	Bildirilen savaşları gözden geçir
+369	Fazla Harcama Uyarıları Ver
+370	Bu seçeneği kapatırsan Spaceward Ho! “Zosma’da gemi yapımına para harcıyorsun ama sırada hiç gemin yok.” mesajını hiç göstermez. Bu mesaj, tamamen terraform edilip kazılmış ama henüz kâra geçmemiş gezegenleri olan deneyimli oyuncuları rahatsız edebilir. Bu durumda siyah çizgiye kadar harcamak zorundadırlar, yoksa gezegen nüfus kaybeder. Fazla harcama başka hiçbir yere gidemeyeceği için gemi yapımına gider. Harcama çubuğunu tam bu çizgiye oturtmak zor olduğu ve fazla harcamak az harcamaktan çok daha iyi olduğu için, uyarı mesajını almak sık görülür ve sinir bozucu olabilir. Bu soruna başka bir çözüm için “Harcamaları Düzelt” bölümüne bak.
+371	Prefs Dosyası
+372	Spaceward Ho!’yu ilk çalıştırdığında “Spaceward Ho! Prefs” adlı bir tercihler dosyası yaratılır. System 7.0’ın varsa, bu dosya başlangıç diskinin Sistem Klasörü’ndeki Preferences klasöründe yaratılır. Yoksa Spaceward Ho! uygulamasıyla aynı dizinde yaratılır.
+374	Ayrıca tercihler dosyası, oyunu birlikte oynadığın bütün insanların adlarını, tasarladığın bütün gemilerin adlarını ve oyunu kazandığın için ad verdiğin bütün yıldızları saklar.
+375	Sıfırdan başlamak için (örneğin bir gemiye yeni eski sevgilinin adını verdiysen ve adını görmek acı anılar uyandırıyorsa) tercihler dosyasını çöpe atman yeter. Bütün bu bilgiler silinir.
+376	Teknoloji Harcamaları Penceresi
+377	Teknoloji Harcamaları Penceresi, hangi teknolojileri en çok geliştirmek istediğini göstermek için kullandığın penceredir. Stratejine, felsefene ve oyunun o anki durumuna göre farklı teknolojileri araştırmayı seçebilirsin. Çoğu zaman bu pencereyle pek uğraşman gerekmez. Araştırma paranı nasıl harcamak istediğine karar verdikten sonra, oyunun geri kalanında parayı aynı oranlarda paylaştırmasına izin verebilirsin. Ya da değiştirebilirsin.
+378	Teknoloji Harcamaları Penceresi’nin yalnızca Teknoloji parasını paylaştırdığını, ne kadar Teknoloji parası olacağına karar vermediğini unutma; buna Bütçe Penceresi’nde karar verilir.
+379	Teknoloji Harcamaları çubuk grafiğinin solundaki çentiklerin eşit aralıklı olmadığına dikkat et. Her çentik %10’u gösterir, ama teknoloji harcamanı paylaştırırken daha çok duyarlılık sağlamak için logaritmik olarak gösterilirler.
+380	Teknoloji Harcamaları penceresi: o anki düzeyler ve Menzil, Hız, Silâhlar, Kalkanlar, Mini ve Radikal için bir çubuk grafik
+381	Pencereler
+382	Spaceward Ho!’nun üç penceresi var. Pencereleri istediğin gibi sürükleyip boyutlandırabilir, böylece oyunu ekranlarına ve oyun tarzına göre ayarlayabilirsin. Spaceward Ho! çıktığında pencere düzenini kendiliğinden kaydeder ve bir dahaki oynayışında geri getirir, böylece onunla sürekli uğraşman gerekmez.
+383	Ana Pencere
+384	Ana Pencere, Spaceward Ho!’daki gerçekten önemli tek penceredir. Yıldız Haritası’nı ve bütün bütçe, gezegen ve filo bilgilerini içerir. Pencerenin başlık çubuğunda “Peter, Samanyolu, 2000” gibi bir şey yazar; bu da şu anda “Samanyolu” oyununda 2000 yılında Peter olarak kayıtlı olduğun anlamına gelir.
+385	Yıldız Haritası
+386	Spaceward Ho!’nun ana penceresinin sağ kısmı Yıldız Haritası’dır. Nerede olduğunu, nerelerde bulunduğunu, nereye gidebileceğini görmeni sağlar. Yıldız Haritası’nı gemileri hareket ettirmek (bir yıldızdan ötekine tıklayıp sürükleyerek) ve hangi gezegene bakıp uğraşacağını seçmek için kullanırsın.
+388	Ana Gezegenin
+391	Seçili Bir Gezegen
+394	Rapor Penceresi, son birkaç sırada oyunda olan bütün önemli şeylerin kaydırılabilen bir geçmişidir. Her mesaj, her sıranın başında Yıldız Haritası’nın sol alt köşesinde görünür. Mesaja tıkladığında bir sonrakine geçer. Bütün mesajları okuduğunda haritanın sol üst köşesinde bir “Sıran Bitti” düğmesi belirir.
+397	Ana gezegenin ortada olduğu bir yıldız haritası
+398	Keşfedilmemiş bir gezegen: soru işaretli karanlık bir disk
+399	Raporlar penceresi: kaydırılabilen bir mesaj listesi
+402	Harcamayı ayarlamak için çubuk grafiklerle oyna. Haritadaki mesajları kaybolmaları için tıkla. Gemileri hareket ettirmek için bir yıldızdan ötekine sürükle. Dene. Galaksiyi fethet.

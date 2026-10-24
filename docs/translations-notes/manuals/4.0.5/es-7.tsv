@@ -1,0 +1,70 @@
+426	Ajustar la velocidad de las batallas
+427	{b1}Ajustar la velocidad de las batallas{/b1}
+428	Aquí puedes controlar la velocidad de los disparos y las explosiones en las revisiones de batalla. Si te aburre ver batallas, acelérala. Activar {b1}Los grupos disparan juntos{/b1} acelerará las batallas considerablemente, sobre todo las batallas gigantes. Desmarcar {b2}Batallas con animación completa{/b2} se saltará los gráficos de las explosiones y las batallas irán todavía más rápido.
+429	Frecuencia de consulta
+430	{b1}Frecuencia de consulta{/b1}
+431	El tiempo de consulta determina cada cuánto comprueba el ordenador el archivo de la partida para ver quién ha terminado su turno y quién no. Cuanto más rápido sea el tiempo de consulta, antes sabrá el ordenador cuándo han terminado todos. Eso sí, si juegas con mucha gente en una red lenta, mantén el tiempo de consulta bastante largo para evitar un tráfico de red excesivo.
+432	Preparar una partida multijugador
+433	{b1}Preparar una partida multijugador{/b1}
+434	Para jugar a {b1}Spaceward Ho! IV{/b1} en red, un jugador debe {b2}Crear la galaxia{/b2} en un servidor de archivos al que tengan acceso todos los jugadores (ya sea un servidor aparte o mediante el uso compartido de archivos de Windows). Todos los jugadores deben abrir esa partida para unirse y luego hacer clic en el botón {b3}Todos listos{/b3}.
+435	Si hay una partida en red en curso, puedes tomar el relevo de un jugador del ordenador abriendo la partida y escribiendo tu nombre como jugador nuevo.
+436	La pantalla multijugador se verá como una partida de un solo jugador, y es intencionado. Puede ser difícil distinguir entre los jugadores humanos y los del ordenador (salvo que los humanos suelen ser más retorcidos).
+437	Puedes comunicarte directamente con otros humanos mediante la ventana de chat ({b1}Ctrl-3{/b1} para abrirla o cerrarla). Los jugadores del ordenador nunca se comunican en la ventana de chat.
+438	Naves
+439	{b1}Introducción{/b1}
+441	Las naves de {b1}Spaceward Ho!{/b1} son increíblemente enormes y caras. Por ejemplo, tu primera Nave colonia se llevará casi un tercio de los recursos totales de tu planeta, más toda la producción industrial del planeta durante treinta años. ¡Es un barco grande!
+442	Atajos
+443	{b1}Atajos{/b1}
+444	Se han incluido un par de atajos para varias cosas de {b1}Spaceward Ho!{/b1} Esta sección te hablará de ellos y pondrá ejemplos de algunos.
+446	Puedes cambiar la escala del Mapa estelar para tener una mejor vista de toda la galaxia o para mirar de cerca alguna sección concreta. Para ello, elige {b1}Acercar{/b1} o {b2}Alejar{/b2} en el menú “Ventana”.
+449	Puedes seleccionar y desplazarte rápidamente hasta una flota perdida seleccionándola en el cuadro de diálogo {b1}Lista de todas las flotas{/b1} y eligiendo {b2}Ir a la flota{/b2}.
+450	Para encontrar una estrella que te interese, puedes usar {b1}Lista de estrellas exploradas{/b1} y pulsar el botón {b2}Ir a la estrella{/b2} (si es una estrella explorada). O simplemente escribe el nombre de la estrella con el teclado.
+451	Para ver todas las estrellas que has explorado, elige {b1}Lista de estrellas exploradas…{/b1} en el menú “Galaxia”.
+452	Cuando estés moviendo naves, puedes elegir la nave siguiente de la lista del planeta pulsando la tecla {b1}TAB{/b1}.
+453	Puedes pasar al siguiente mensaje de sucesos pulsando la tecla {b1}RETURN{/b1}.
+454	Mostrar los mensajes de sucesos
+455	{b1}Mostrar los mensajes de sucesos{/b1}
+456	Si esta opción está seleccionada, todos los mensajes de sucesos se mostrarán en la esquina inferior izquierda del mapa al comienzo de cada turno. Haz clic en el mensaje o pulsa Return para pasar al siguiente.
+457	Todos los mensajes aparecen en la Ventana de informes, esté o no marcada esta opción.
+458	Puedes configurar el {b1}Ho!{/b1} para que solo te dé mensajes sobre cosas “importantes”: batallas y aumentos de tecnología. Para ello, elige {b2}Pero solo los más importantes{/b2}. Es muy útil en partidas de alta velocidad.
+459	Mostrar rutas de flotas
+460	{b1}Mostrar rutas de flotas{/b1}
+461	Esta opción hace que {b1}Spaceward Ho!{/b1} muestre una línea recta cuando tus flotas van de camino a algún sitio. A medida que las flotas se acercan, la línea se acorta. Es cómodo e informativo.
+462	Spaceward Ho!: novedades de la 3.0 a la 4.0
+463	{b1}Cambios y novedades {/b1}
+464	{b1}Spaceward Ho!: novedades de la 3.0 a la 4.0{/b1}
+465	Hay un montón de cosas nuevas en la versión 4.0 del Ho! Si conoces la 3.0, podrás jugar con la versión nueva y descubrirlo todo. Sin embargo, esta es una práctica lista de funciones nuevas para que sepas lo que te llevas.
+466	Se han añadido varias tecnologías radicales nuevas, y se han ajustado las antiguas para equilibrar mejor el juego. Se han añadido tres nuevos tipos de nave: Acorazados, Cisternas y Bionaves. Se han rehecho varios cuadros de diálogo, sobre todo el de construcción de naves.
+467	Ahora puedes desactivar la suerte en las batallas al empezar una partida nueva, de modo que ningún jugador reciba el gato negro ni la herradura en combate. Se han añadido toneladas de gráficos y sonidos nuevos. Ahora puedes saber la gravedad de un planeta mirando su imagen: los planetas más grandes tienen más gravedad. Además, en el Mapa estelar puedes saber si un planeta azul es caliente o frío. Los Satélites son el doble de difíciles de matar y disparan dos veces en cada ronda. También cuesta el doble de dinero y de metal construirlos. La corrección de gastos ocurre automáticamente al terminar el turno, así que ya no está en los menús.
+468	Ahora fijas tu proporción de minería y terraformación con un deslizador en lugar del antiguo gráfico circular. Puedes ver la imagen del planeta antes de haberlo terraformado. Haz clic en la imagen para ver sus detalles.
+469	El Ho! ahora lleva estadísticas de cómo te ha ido a lo largo de la partida, así como estadísticas del progreso de un jugador a lo largo de varias partidas, con un sistema de “Puntos maestros”. Cada vez que ganas una partida recibes “Puntos maestros” según la dificultad de la partida. Acumula todos los que puedas; las partidas más difíciles valen muchos más puntos.
+470	El nuevo sistema califica la dificultad de la partida en una escala aproximada de 0 a 100. La dificultad final depende del número de aliados, de la velocidad de la partida, etcétera. Ahora puedes enviar mensajes privados a otros jugadores, pero el mensaje tarda un turno en llegar, igual que los demás mensajes.
+471	También se ha añadido un reloj de turnos al estilo del ajedrez para acelerar el juego. Los jugadores del ordenador ahora se listan por orden de ingresos en la lista de iconos. Además, los jugadores diabólicos del ordenador son aún más listos, así que cuidado. Les encantan los Acorazados.
+472	Ahora hay dos niveles de alianzas: normal y mejores amigos. Además, los jugadores que se incorporan tarde pueden tomar el relevo de un jugador del ordenador. Notarás que en una partida en red los turnos se actualizan muchas veces más rápido que antes. Las partidas de un solo jugador también se actualizan más rápido. Se han añadido el chat en tiempo real y los mensajes libres para la comunicación privada.
+473	En cada turno recibirás consejos para jugar a {b1}Spaceward Ho!{/b1}. Puedes desactivarlos en el cuadro de diálogo Preferencias cuando creas que ya los has visto todos.
+474	Nuevos huevos de Pascua, pero aquí no podemos hablarte de ellos. Los encontrarás, o te enterarás por la red. También podrás encontrar actualizaciones de software de Spaceward Ho! (según se publiquen) en America Online (palabra clave: delta tao) o en el ftp de sumex.aim.stanford.edu (o en otros muchos).
+475	SPACEWARD HO!: CAMBIOS DE LA 2.0 A LA 3.0
+476	{a1}Contenido{/a1} {a2}Siguiente →{/a2}
+477	{b1}Cambios y novedades{/b1}
+478	{b1}Spaceward Ho!: cambios de la 2.0 a la 3.0{/b1}
+479	El gasto ahora depende de los ingresos, y no del total de dinero. Las naves se construyen el mismo turno en que las pides, en lugar de la antigua cola de construcción. El dinero se asigna a tus planetas automáticamente, para que no puedas gastar de menos en ellos por accidente. Se ha añadido el gráfico de Historial, para que veas tus tendencias a largo plazo. Se han añadido varios gráficos y sonidos superfluos. También se han añadido algunos tipos de galaxia nuevos.
+480	Se han añadido las alianzas, para que no tengas que matar a todo el mundo para ganar. Se han añadido mensajes nuevos, y ahora los jugadores del ordenador tratan con amigos y enemigos. Los ordenadores ahora envían mensajes semiinteligentes a todo el mundo. Puedes dar dinero y metal a tus amigos (o enemigos), o rendirte ante ellos.
+481	Velocidad
+482	{b1}Velocidad{/b1}
+484	Empezar una partida nueva
+485	{b1}Empezar una partida nueva{/b1}
+486	Cuando {b1}Spaceward Ho!{/b1} arranca, muestra un cuadro de diálogo que te permite empezar una partida nueva o reanudar una guardada. Elige {b2}Nueva partida{/b2}. Luego tendrás que ponerle nombre a tu galaxia. A continuación aparecerá un cuadro de diálogo grande y aterrador, “Crear la galaxia”. Pulsa simplemente {b3}Crear{/b3}. Spaceward Ho! te pedirá entonces tu nombre. Cuando lo escribas, ya estarás listo para jugar.
+487	La mejor manera de aprender {b1}Spaceward Ho!{/b1} es jugar tu primera partida mientras lees el manual. Hemos intentado organizar el manual (y este archivo de ayuda) para que responda a tus preguntas a medida que surjan. No vamos a soltarte esa basura de “lee todo el manual a fondo antes de empezar a jugar”. Siéntate y échale un vistazo al juego. Solo recuerda que tendrás preguntas, y que el manual las responde.
+488	También puedes activar {b1}Juego automático{/b1} en el menú “Opciones” y ver cómo jugaría el ordenador. Te harás una idea de cómo van las cosas, y puedes desactivar el {b2}Juego automático{/b2} en cualquier momento y tomar tú el mando.
+489	Los gráficos de barras
+490	{b1}Los gráficos de barras{/b1}
+491	Los controles más importantes que tienes en {b1}Spaceward Ho!{/b1} son tus gráficos de barras. Con ellos gastas tu dinero y llevas a cabo tu estrategia. A diferencia de los aburridos gráficos de barras que ves en las transparencias de las presentaciones de negocios, los gráficos de barras de {b2}Spaceward Ho!{/b2} se pueden cambiar.
+492	Por ejemplo, el gráfico de barras del Presupuesto es lo que usas para repartir tu dinero entre cada una de tus colonias. También puedes usar parte para investigación de tecnología y reservar otra para la construcción de naves. Cuanto más grande hagas la barra a la derecha del nombre de un planeta, mayor será la parte de tu presupuesto total que irá a ese planeta. Haz clic y arrastra el ratón en el gráfico de barras para alargar o acortar la barra hasta donde hiciste clic, sumando o restando proporcionalmente a las otras barras.
+494	Las barras del Presupuesto pueden desglosarse en gráficos de barras más pequeños. Por ejemplo, haz clic en la palabra “Tecnología” en la Ventana de presupuesto. Aparecerá la Ventana de tecnología. Es una vista detallada y concreta de tu Gasto en tecnología. Es decir, divide el dinero que gastas en tecnología en la Ventana de presupuesto. Más adelante te contaremos más sobre la Ventana de tecnología.
+496	Los jugadores del ordenador
+497	Cuando juegas a {b1}Spaceward Ho!{/b1} puedes jugar contra mucha gente, contra muchos ordenadores o contra una mezcla. Prueba a poner un par de jugadores del ordenador en cada partida para que todos anden con la mosca detrás de la oreja. Es intencionadamente difícil saber con exactitud quién es un ordenador y quién es un humano. Cada jugador del ordenador adoptará una estrategia propia, igual que cada persona. Algunos se contentarán con quedarse en sus planetas de origen, construyendo satélites e investigando tecnologías nuevas. Otros serán agresivos e intentarán expandirse rápido. Otros irán a por una tecnología alta de armas y escudos, y luego saldrán a por el resto de la Galaxia. Todos harán lo posible por evitar la derrota.
+499	Notarás al jugar que los jugadores del ordenador aprenden un poco de cómo juegas tú. Empezarán a poner nombre a sus naves igual que tú a las tuyas, e incluso empezarán a ponerse nombres de amigos que han venido a una partida multijugador. Consulta la Tarjeta de referencia rápida.
+500	{b1}Spaceward Ho!{/b1} ahora lleva la cuenta de cuánta gente y cuántas naves has acumulado, matado y perdido. Además, tu población aparece en este gráfico. Esta información está en {b2}Estadísticas…{/b2} del menú “Galaxia”.
+501	También puedes rendirte ante cualquiera de los otros jugadores de la partida eligiendo {b1}Rendirse ante…{/b1} en el menú “Galaxia”. Cuando te rindes, pierdes tu metal, tu dinero y tus planetas en favor del jugador ante quien te has rendido.
+502	La economía
+503	{b1}Dinero y metal{/b1}

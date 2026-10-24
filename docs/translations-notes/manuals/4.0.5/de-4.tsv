@@ -1,0 +1,41 @@
+516	Gewinnen Sie eine Partie {b1}Spaceward Ho!{/b1}, werden die Angaben zu Ihrem Sieg in der {b2}Ruhmeshalle{/b2} festgehalten. Verlieren Sie, kommen diese Angaben (so peinlich sie auch sind) in die {b3}Halle der Schande{/b3}. So können Sie Ihre Fortschritte festhalten und bekommen eine Rangfolge, mit der Sie sich mit anderen Spielern vergleichen können.
+517	Die „Schwierigkeit“ hängt davon ab, wie schwer Ihr Spiel war. Natürlich hat ein Spiel gegen schlaue Spieler mit Ihnen als „Experte“ eine höhere Schwierigkeit als ein Spiel gegen dumme Spieler mit Ihnen als „Neuling“. Auch einiges andere zählt, etwa die Zahl der Verbündeten, mit denen Sie den Sieg geteilt haben, wie groß die Galaxie war und wie lange Sie bis zur Siegeserklärung gebraucht haben.
+518	Wollen Sie Ihre {b1}Ruhmeshalle{/b1} jemals leeren, werfen Sie einfach die Datei „Spaceward Ho! 4.0 Prefs“ weg.
+519	Das Hauptfenster
+520	{b1}Das Hauptfenster{/b1}
+521	Das Hauptfenster ist das einzige wirklich wichtige Fenster in {b1}Spaceward Ho!{/b1}. Es enthält die Sternkarte sowie die Informationen zu Budget, Planeten und Flotten. In der Titelleiste des Fensters steht etwa „Peter in Milchstraße im Jahr 2000“, was bedeutet, dass Sie gerade als Peter im Spiel „Milchstraße“ im Jahr 2000 angemeldet sind. Na klar!
+522	Das Menü „Optionen“
+523	Unten finden Sie eine Zusammenfassung der Einträge im Menü „Optionen“.
+524	{a1}Automatisch spielen {/a1}
+525	{a1}Die Ruhmeshalle und die Halle der Schande {/a1}
+526	{a1}Einstellungen {/a1}
+527	{a1}Flottenwege anzeigen {/a1}
+528	{a1}Planetenliste automatisch sortieren {/a1}
+529	{a1}Ereignismeldungen anzeigen {/a1}
+530	{a1}Kämpfe bei Ereignissen ansehen {/a1}
+531	{a1}Kampfgeschwindigkeit einstellen {/a1}
+532	{a1}Abfragezeit einstellen {/a1}
+533	Die Sternkarte
+534	{b1}Die Sternkarte{/b1}
+536	Oben links in der Sternkarte ist die Zuguhr. Mit einem Klick auf die Zuguhr beenden Sie Ihren Zug. Spielen Sie ohne Zeitlimit, zählt sie einfach die Stunden und Minuten hoch, die dieses Ho!-Spiel gedauert hat. Spielen Sie mit Zeitlimit, zeigt der wandernde Zeiger, wie viel Zeit Ihnen für diesen Zug bleibt. Ist Ihre Zeit abgelaufen, gehen Sie in die „Bonuszeit“, und die Digitaluhr beginnt abwärts zu zählen. Erreicht sie null, ist Ihre Zeit um. Bonuszeit ist kumulativ – Sie bekommen mehr, wenn Sie Ihren Zug früher beenden als nötig. Die Zeitlimits legen Sie beim Erstellen eines Spiels fest.
+538	{a1}Ein unerforschter Planet{/a1}{b2} {/b2}
+539	{a1}Ein ausgewählter Planet. {/a1}
+540	{a1}Verschiedene Planetenbilder ansehen. {/a1}
+541	Das Fenster für die Technikausgaben
+542	{b1}Das Fenster für die Technikausgaben{/b1}
+543	Mit dem Fenster für die Technikausgaben legen Sie fest, welche Technologien Sie am stärksten entwickeln wollen. Je nach Strategie, Philosophie und aktueller Spielsituation erforschen Sie vielleicht unterschiedliche Technologien. Meistens müssen Sie an diesem Fenster nicht viel herumspielen.
+544	Denken Sie daran, dass das Fenster für die Technikausgaben nur das Technikgeld aufteilt und nicht entscheidet, wie viel Technikgeld es gibt – das legen Sie mit den Balkendiagrammen im Budgetfenster fest.
+545	Die Fenster
+546	{b1}Die Fenster{/b1}
+547	{b1}Spaceward Ho!{/b1} hat drei Fenster. Sie können die Fenster verschieben und in der Größe ändern, wie Sie wollen, sodass Sie das Spiel für Ihren Monitor und Ihren Spielstil einrichten können. {b2}Spaceward Ho!{/b2} sichert Ihre Fensteranordnung beim Beenden automatisch und stellt sie beim nächsten Spiel wieder her, sodass Sie nicht ständig daran herumfummeln müssen.
+548	Dies ist ein Planet, auf dem Ihre Bevölkerung so weit gewachsen ist, dass
+551	Hier ist die Zusammenfassung dessen, was Sie wissen müssen, in einem Absatz. Legen Sie {b1}Spaceward Ho! 4.0{/b1} auf Ihre Festplatte. Spielen Sie mit den Ausgabenbalken, um die Ausgaben einzustellen. Klicken Sie auf die Meldungen in der Karte, damit sie verschwinden. Doppelklicken Sie auf eine Kolonie, um Schiffe zu entwerfen und zu bauen. Ziehen Sie von einem Stern zum anderen, um Schiffe zu bewegen. Experimentieren Sie. Erobern Sie die Galaxie.
+552	Waffen und Schilde
+553	{b1}Waffen und Schilde{/b1}
+557	Warum ein Cowboy-Thema?
+558	{b1}Warum ein Cowboy-Thema?{/b1}
+559	Seit der Entstehung von {b1}Spaceward Ho!{/b1} wurden viele Fragen dazu gestellt, warum wir für ein Spiel über Weltraumforschung ein Westernthema gewählt haben. Offenbar haben diese Leute nicht genug Star Trek gesehen, um zu wissen, dass der Weltraum „die letzte Grenze“ ist.
+561	In Wirklichkeit brauchte man nur eine Möglichkeit, die freundlichen von den unfreundlichen Planeten zu unterscheiden. Hätte man jedem Spieler eine andere Farbe gegeben, wären die Farben verdammt schnell ausgegangen, und Leute an Schwarzweiß-Rechnern wären verwirrt gewesen. Außerdem wäre es schwierig gewesen, die eigenen Planeten unter all den anderen oder die nicht besiedelbaren unter den guten bequem zu erkennen. Jemand kam auf die geniale Idee, den Planeten einfach Hüte aufzusetzen, um sie auseinanderzuhalten, und das führte zum Grenzland-Thema. Die Spielmechanik ist natürlich reine „galaktische Strategie-Eroberung“, nicht „Cowboys und Indianer im Weltraum“.
+562	Ihr Heimatplanet
+563	{b1}Ihr Heimatplanet{/b1}
+564	Hier leben Sie. Es ist ein dicht bevölkerter, hochrentabler, technisch fortgeschrittener Planet, bereit, hinauszugehen und das Universum zu erkunden. Hier bauen Sie Ihre ersten Schiffe.

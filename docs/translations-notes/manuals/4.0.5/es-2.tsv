@@ -1,0 +1,60 @@
+70	Elegir tecnologías
+71	{b1}Elegir tecnologías{/b1}
+75	La Miniaturización se vuelve más importante a medida que avanza la partida. Al principio de la partida hay mucho metal en la galaxia y es fácil de conseguir. Al final, puede ser el factor que limite el tamaño de tu flota, y una Mini alta te vendrá muy bien.
+78	Comparar jugadores
+79	{b1}Comparar jugadores{/b1}
+80	Si alguna vez te entran ganas de ver cómo te va en comparación con los demás jugadores de la partida, elige {b1}Comparar jugadores{/b1} en el menú “Galaxia”. Podrás ver cómo se comparan algunos de tus atributos (como la tecnología de Armas o los Ingresos) con los de los demás.
+81	“Poder de las naves” es lo grandes y duras que son tus flotas. Es la suma de todos los niveles de tecnología de todas tus naves. Puede darte una idea de lo potentes que son tus flotas.
+82	El número de jugadores de la partida no incluirá a nadie que esté muerto.
+83	Haz clic en el botón {b1}Mostrar niveles…{/b1} para ver el nivel de cada jugador: novato, principiante, normal, experto o avanzado. Los jugadores del ordenador mostrarán un nivel elegido al azar entre los de los distintos jugadores, para ayudar a disimular quiénes son los jugadores del ordenador. La inteligencia real del ordenador está en la parte inferior de esta ventana.
+84	Inteligencia del ordenador
+85	{b1}Crear galaxias personalizadas{/b1}
+86	{b1}Inteligencia del ordenador{/b1}
+87	La Inteligencia del ordenador determina lo difícil que será la partida que te darán los jugadores del ordenador. Los más listos aprenderán de sus errores, construirán flotas más grandes, invertirán más en Tecnología y se expandirán más rápido. Los jugadores listos también empiezan con todas las ventajas de un jugador humano “Novato”: mucho metal, varias naves para empezar y una población planetaria alta. Los jugadores torpes, además de ser tontos, tienen que empezar con el ajuste humano “Experto”, que no les da metal inicial, ni naves, ni una población planetaria alta.
+88	Al principio, incluso los jugadores del ordenador Torpes resultarán oponentes difíciles, pero a medida que mejores tu nivel los encontrarás sin gracia. Con el tiempo, quizá seas lo bastante bueno para derrotar siempre a los jugadores listos, incluso empezando tú en Experto. Eso te sitúa entre los mejores jugadores de Ho! Prueba a jugar contra humanos.
+89	Información de copyright
+90	{b1}Información de copyright{/b1}
+91	Copyright del software © 1996 Delta Tao Software, Inc.
+92	Copyright del manual y del archivo de ayuda en línea © 1996 Delta Tao Software, Inc. y New World Computing.
+93	El programa de software adjunto y el archivo de ayuda en línea están protegidos por derechos de autor. Todos los derechos reservados. El archivo de ayuda en línea no puede copiarse, imprimirse, fotografiarse, reproducirse ni traducirse, ni reducirse a ningún medio eléctrico o forma legible por máquina, en su totalidad o en parte, sin el consentimiento previo por escrito de New World Computing. El comprador original, y solo él, podrá copiar partes del programa y de la ayuda en línea según sea necesario para su uso en el ordenador para el que fue adquirido.
+94	Parte del copyright © Blue Sky Software Corporation. Todos los derechos reservados.
+95	Créditos
+96	{b1}Spaceward Ho! 4.0{/b1}
+97	Publicado por:{span1} {/span1}{span2} {/span2}New World Computing
+98	{b1}Desarrollado por{/b1}:{span2} {/span2}{span3} {/span3}Delta Tao Software, Inc.
+99	{b1}Diseñadores{/b1}:{span2} {/span2}{span3} {/span3}Joe Williams
+100	{span1} {/span1}{span2} {/span2}{span3} {/span3}Peter Commons
+101	{b1}Productor ejecutivo{/b1}:{span2} {/span2}Jon Van Canegham
+102	{b1}Productores{/b1}:{span2} {/span2}{span3} {/span3}Mark Caldwell
+103	{span1} {/span1}{span2} {/span2}{span3} {/span3}Deane Rettig
+104	{b1}Programador{/b1}:{span2} {/span2}{span3} {/span3}Peter Commons
+105	{b1}Artistas{/b1}:{span2} {/span2}{span3} {/span3}{span4} {/span4}Howard Vives
+106	{span1} {/span1}{span2} {/span2}{span3} {/span3}Bob Van de walle
+107	{b1}Sonidos{/b1}: {span2} {/span2}{span3} {/span3}Mark Madeley
+108	{span1} {/span1}{span2} {/span2}{span3} {/span3}Guy Vardaman
+109	{b1}Manual{/b1}:{span2} {/span2}{span3} {/span3}Delta Tao Software, Inc y
+110	{span1} {/span1}{span2} {/span2}{span3} {/span3}Rozita Tolouey
+111	{b1}Versión para Windows 95{/b1}
+112	{b1}Productor ejecutivo{/b1}:{span2} {/span2}Mark Caldwell
+113	{b1}Productor{/b1}:{span2} {/span2}{span3} {/span3}Bruce Schlickbernd
+114	{span1} {/span1}{span2} {/span2}{span3} {/span3}Peter Ryu
+115	{b1}Programador{/b1}:{span2} {/span2}{span3} {/span3}Paul Toth
+116	{b1}Jefe de control de calidad{/b1}:{span2} {/span2}{span3} {/span3}Peter Ryu
+117	{b1}Probadores{/b1}:{span2} {/span2}{span3} {/span3}David Botan
+118	Bryan Farina
+119	David Fernandez
+120	Walter Johnson
+121	Kate McClelland
+122	William Nesemeier
+123	{span1} {/span1}{span2} {/span2}{span3} {/span3}Jennifer Schlickbernd
+124	{span1} {/span1}{span2} {/span2}{span3} {/span3}Walt Hochbrueckner
+125	{span1} {/span1}{span2} {/span2}{span3} {/span3}Benjamin Bent
+126	Tim Lang
+127	Juego multijugador multiplataforma
+128	{b1}Juego multijugador multiplataforma{/b1}
+129	Spaceward Ho! se puede jugar como juego multiplataforma entre las versiones de Win95{img1/} y de Macintosh{img2/} (versión 4.0.5 o posterior). Estas son algunas reglas sencillas que seguir al preparar y jugar una partida multiplataforma:
+130	Todas las partidas multiplataforma deben iniciarse en un Macintosh{img1/} (si no, los Mac no podrán unirse a la diversión).
+131	Debes añadir la extensión de archivo {b1}.Ho!{/b1} al nombre de tu {b2}Archivo de galaxia{/b2} (si no, las máquinas Win95{img3/} no podrán unirse a la diversión).
+132	No podrás incluir en el nombre de tu archivo el asterisco (*), el signo de interrogación (?) ni la barra invertida (\\) (en Win95{img1/} estos caracteres están reservados para fines especiales).
+133	Galaxias personalizadas
+134	{b1}Galaxias personalizadas{/b1}

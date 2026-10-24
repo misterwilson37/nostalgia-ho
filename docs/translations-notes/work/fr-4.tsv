@@ -1,0 +1,130 @@
+231	Un portage de la Mac 5.0 sur les ordinateurs de poche Palm : le jeu 5.0 recompilé, les mêmes règles avec les mêmes bizarreries. Chaque routine de son programme a été lue, et chaque règle vient de son propre code.
+232	5.0.5 (Mac)
+233	Quand tous les camps d’une bataille sont battus, ses débris sont perdus.
+234	Les moteurs les plus rapides et les nez les plus solides n’ont pas d’image, si bien que ces vaisseaux sont dessinés avec une pièce manquante.
+235	Rien ne vous empêche d’envoyer plus de trois messages par tour, alors que le jeu ne garde de la place que pour trois : un quatrième est écrit par-dessus vos cadeaux du tour. Le remake vous laisse en envoyer autant que vous voulez.
+236	Évacuer une étoile appelée Kansas déclenche toujours la réplique de Dorothy, Hope demande toujours, et une étoile appelée Ship vous demande d’abandonner le navire. (À partir de la liste des messages, les anciennes blagues une fois sur trois s’appliquent.)
+237	Les nombres aléatoires sont ceux du remake (le jeu Palm lit une table fixe de 5 000 nombres), donc une partie ne peut pas être rejouée coup pour coup.
+238	Plusieurs personnes jouent sur un même ordinateur à tour de rôle. Le jeu Palm n’avait de place que pour une personne : le bouton Ajouter de sa fenêtre Joueurs refuse tout le monde dès que la partie existe.
+239	Les ordinateurs font tous leurs plans, et chaque flotte se déplace, pour tous les joueurs à la fois ; le jeu Palm faisait les deux au tour de chaque joueur. Le résultat est le même sauf cas rares.
+240	Faire glisser une barre de budget calcule les autres une seule fois, à partir du début du glissement.
+241	Quand vous faites un cadeau, vous en êtes informé aussitôt ; le jeu Palm vous le disait à la fin du tour.
+242	Chaque partie démarre avec le budget et les parts de recherche par défaut ; le jeu Palm démarrait une nouvelle partie avec les parts de votre premier tour de la précédente.
+243	Les sons sont ceux de l’habillage, et non les quelques bips de l’ordinateur de poche.
+244	Langue… propose aussi le français (“traduction du remake”) et le turc (“yeniden yapımın çevirisi”) : le français et le turc officiels du jeu iOS pour toutes les lignes que le Palm partage avec la 5.0.5, avec les lignes propres au remake pour les astuces, les premiers messages, le rapport sur le leurre et la fenêtre de bataille du Palm : traduction du remake, et non officielle, signalée comme telle dans la liste. Elle ne change que les mots et les noms : la même partie se joue dans toutes les langues.
+245	Options verrouillées par le rang.
+246	90 étoiles au plus (5.0.5 : 220), si bien que les grandes galaxies sont plus petites.
+247	Pas de cases Alliances ni Chance en bataille : les deux sont toujours actives, et les novas aussi.
+248	Pas de choix “N’importe (1-8)” pour le nombre d’ordinateurs, et une personne par partie : neuf joueurs au plus (5.0.5 : seize, huit personnes et huit ordinateurs).
+249	Nouvelles blagues d’évacuation : Kansas et Hope à chaque fois, et une étoile appelée Ship.
+250	Courasant remplace Antares parmi les noms d’étoiles.
+251	Ses propres astuces, une à chaque tour, et ses propres premiers messages, avec les crédits de Mobilefreon.
+252	Fenêtres Palm et une version de démonstration.
+253	Un portage de la Mac 5.0 sur iPhone et iPad par Ariton (première sortie en 2012 ; ceci est la version 1.2.9, de 2017 ou plus tard) : le jeu 5.0 recompilé, les mêmes règles avec les mêmes bizarreries, avec les 220 étoiles et les 16 places de joueurs du Mac. Chaque routine de règles de son programme a été lue à côté de sa jumelle de la 5.0.5 ; ce qui est nouveau, c’est l’interface tactile qui l’entoure.
+254	Les caractères Mac du jeu sont lus à la façon de l’iPhone : les noms de technologies affichent “PowerPCª” et “Speedy Gonzalezª”, et le juron se lit “#!$@*$&@¥ª!”.
+255	Évacuer demande toujours confirmation d’abord, même pour une colonie qui perd de l’argent ; Kansas, une fois sur trois, déclenche la réplique de Dorothy, désormais avec un bouton Annuler.
+256	Les ordinateurs font tous leurs plans, et chaque flotte se déplace, pour tous les joueurs à la fois ; le jeu iOS faisait les deux au tour de chaque joueur. Le résultat est le même sauf cas rares.
+257	Quand vous faites un cadeau, vous en êtes informé aussitôt ; le jeu iOS vous le disait à la fin du tour.
+258	Chaque partie démarre avec le budget et les parts de recherche par défaut ; le jeu iOS démarrait une nouvelle partie avec les parts de votre premier tour de la précédente.
+259	Les master points, les parties gagnées et les sept succès relevaient de Game Center ; le remake les garde dans ce navigateur, à part des archives des autres versions.
+260	Le choix des cinq de vos étoiles nommées qui entrent dans une nouvelle galaxie se fait à partir de la graine du jeu, et non des nombres aléatoires du téléphone.
+261	Le français et le turc sont ceux du jeu lui-même (ses fr.lproj et tr.lproj).
+262	Langue… propose aussi l’allemand (“Übersetzung des Remakes”), comme pour la 5.0.5 : les lignes du DOS 2.0 allemand partout où l’anglais est celui de la 2.0, l’allemand du remake, dans ses mots, pour le reste ; la page d’aide reste en anglais : traduction du remake, et non officielle, signalée comme telle dans la liste. Elle ne change que les mots et les noms : la même partie se joue dans toutes les langues.
+263	Langue… propose aussi l’espagnol (“Español (traducción del remake)”) : il n’y a jamais eu de Spaceward Ho! officiel en espagnol, donc chaque ligne est celle du remake, écrite dans l’esprit des traductions officielles (leurs mots pour les éléments du jeu, le “tú” familier, les blagues conservées) ; les noms restent en anglais ; la page d’aide reste en anglais : traduction du remake, et non officielle, signalée comme telle dans la liste. Elle ne change que les mots et les noms : la même partie se joue dans toutes les langues.
+264	Game Center lui-même : les classements et les succès sont gardés ici, et non partagés.
+265	Plusieurs parties sauvegardées, l’envoi d’une partie par e-mail, et la page web d’aide.
+266	La façon qu’a Organiser Flottes de déplacer les vaisseaux entre les flottes.
+267	De 1 à 8 ordinateurs, sans “N’importe (1-8)”, et le QI par pas de 10.
+268	Rien n’est verrouillé par le rang.
+269	Une personne par partie, et pas de commandes Se rendre ou Envoyer un message (les ordinateurs envoient toujours les leurs).
+270	Évacuer le demande pour chaque colonie (“Voulez-vous vraiment évacuer … ?”) ; Kansas et Hope restent une fois sur trois, le nom entier dans tous les cas.
+271	Construire des vaisseaux a un interrupteur Autoriser la dette : désactivé, vous ne pouvez pas acheter au-delà de votre Épargne des vaisseaux.
+272	Une fenêtre Auto Play : L’Ordinateur joue pour moi, Uniquement terminer mes tours ou Jouer un tour, avec ses propres curseurs et un message toutes les quelques secondes.
+273	Ses propres astuces, réécrites pour le tactile, une à chaque tour, et pas de premiers messages.
+274	“Hope” et “SparksMcGee” rejoignent les noms d’étoiles, et les étoiles que vous nommez à un nouveau rang entrent dans les galaxies suivantes.
+275	Les master points sur un classement Game Center, avec les parties gagnées et sept succès.
+276	Guillemets droits dans les rapports.
+277	Le jeu pour iPhone et iPad recompilé pour Android par Ariton (version 1.2.8, compilée en février 2015, depuis l’Amazon Appstore) : le même code source qu’iOS 1.2.9, donc il se joue exactement de la même façon. Seule la plateforme diffère.
+278	iOS 1.2.9
+279	Les master points sont un nombre gardé dans ce navigateur ; le jeu le gardait dans son fichier de préférences.
+280	La touche Retour est Échap.
+281	Pas de Game Center : pas de succès, pas de classements, pas de total de parties gagnées, et pas de boutons pour eux sur l’écran-titre.
+282	Pas de touche cachée “envoyer par e-mail toutes les parties sauvegardées” sur l’écran-titre.
+283	La touche Retour ferme la fenêtre ouverte, ou demande “Quitter Spaceward Ho ?” sur l’écran-titre.
+284	Pas une version originale : un hommage d’IA. Gemini, de Google, l’a écrit à partir du seul manuel de Spaceward Ho! 5, pour que l’on puisse jouer pendant que les originaux n’étaient pas disponibles, comme expérience à côté des règles de Claude. Gemini n’a jamais vu le programme original ni les autres jeux de règles ; il a travaillé à partir du manuel, du moteur et de résultats de tests transmis tour après tour.
+285	Tous les nombres que le manuel ne donne pas sont des inventions de Gemini, et ses blagues aussi.
+286	Les Biologiques (“Monstres de l’espace”) se ravitaillent en mangeant des colons, où qu’ils soient.
+287	La faillite a des conséquences : les colons se révoltent, la recherche en cours est perdue, la plus grande partie du métal stocké est saisie, et la moitié de chaque flotte est reprise et vendue pour rembourser la dette.
+288	Pas une version originale : le Spaceward Ho! propre au remake, reconstruit à partir du seul manuel de Spaceward Ho! 5, sans lire le programme original ni les autres jeux de règles. Là où le manuel donne un nombre, il est utilisé ; tout le reste (et les joueurs ordinateur, et les blagues) est une estimation, réglée par des parties contre soi-même.
+289	Tous les nombres que le manuel ne donne pas sont inventés : croissance, coûts de recherche, prix des vaisseaux, dégâts de bataille, probabilités des Radicaux.
+290	Les Biologiques broutent la lumière des étoiles n’importe où (un tiers de leur distance par tour) au lieu de se ravitailler dans les colonies.
+291	Les postures de bataille s’appliquent à toute une flotte, et non à chaque type de vaisseau qu’elle contient.
+292	Les joueurs ordinateur ne savent que ce qu’ils ont vu : les planètes telles qu’elles étaient à leur dernière visite, la technologie ennemie d’après les vaisseaux qu’ils ont combattus.
+293	Les master points et les niveaux de compétence (le profil des rangs est partagé avec les règles Originales, donc les règles de Claude n’y touchent pas).
+294	Les dix éléments de l’Historique graphique (le graphique d’historique de l’habillage montre la population, le revenu et la technologie).
+295	Les curseurs d’attaque et de défense d’Auto Play.
+296	Le rapport de météores a un texte
+297	Une colonie rayée de la carte par une pluie de météores donnait un rapport vide : son numéro dépasse la fin de la liste des textes de rapport de la 1.2. Le correctif lui donne le rapport de la 2.0, qui nomme la pluie de météores : “Une pluie de météores a détruit votre colonie à …”.
+298	Une flotte recyclée dans l’hyperespace est signalée dans l’hyperespace
+299	Une flotte marquée pour le recyclage pendant qu’elle était dans l’hyperespace était signalée “à” l’étoile précédant la première, qui fait partie de l’en-tête de la galaxie : un caractère égaré (la lettre du numéro d’étoile du 18e emplacement de base, ou aucune) et, dans le rapport anglais, pas de métal sauf si le numéro d’étoile du 8e emplacement de base était par hasard le vôtre. Le correctif la signale “à l’hyperespace” sans métal, comme le fait la 3.0.1.
+300	Les barres de colonie de l’ordinateur ne débordent plus
+301	Quand l’ordinateur donnait à une colonie plus de 2 147 483 $ pour un seul poste, la somme débordait et les barres de la colonie étaient fausses. Le correctif les calcule sans débordement.
+302	Les ordinateurs jouent leur premier tour sur les cartes Spirale et Amas
+303	Sur les cartes Spirale et Amas, les ordinateurs ne faisaient rien en 2010 : un marqueur posé pour que la carte soit tracée en 2010 n’était jamais effacé. Le correctif les laisse planifier dès le premier tour, comme le fait la 4.0.5.
+304	Les croiseurs bloqués ne demandent une colonie que lorsqu’ils sont vraiment bloqués
+305	Une flotte de croiseurs de l’ordinateur à court de carburant cherchait une colonie à portée, mais le test de la réponse lisait un indicateur effacé juste avant, si bien qu’elle demandait toujours une nouvelle colonie là où elle se trouvait. Le correctif ne demande que lorsqu’aucune colonie n’est à portée du carburant qui lui reste.
+306	Les barres de colonie de l’ordinateur ne débordent plus
+307	Quand un ordinateur donnait à une colonie plus de 2 147 483 $ pour un seul poste, la somme débordait et les barres de la colonie étaient fausses. Le correctif les calcule sans débordement.
+308	Les vieux vaisseaux renvoyés à la maison sont routés avec leur propre Distance
+309	Quand les ordinateurs renvoyaient de vieux vaisseaux à la maison, le programme passait la place de la flotte dans une liste là où le calcul d’itinéraire attend sa Distance. Cela ne changeait rien au jeu (la colonie est toujours à portée) ; le correctif passe la Distance.
+310	Une colonie terminée à la première étoile est verrouillée comme toute autre
+311	Le test qui vous empêche de faire glisser la barre de budget d’une colonie terminée regardait le numéro de l’étoile au lieu de ce qu’est l’emplacement de budget, si bien qu’une colonie terminée à la première étoile de la liste pouvait encore voir sa barre déplacée. Le correctif la verrouille comme toute autre.
+312	Chaque étoile nommée par un gagnant entre dans les galaxies suivantes
+313	Les noms que les gagnants donnaient aux étoiles étaient numérotés avec une place de retard quand une nouvelle galaxie était créée : le premier devenait “Hope”, le 191e nom du programme, et le dernier nommé n’était jamais utilisé. Le correctif met tous les noms conservés.
+314	Les joueurs éliminés ne comptent pas parmi les plus pauvres
+315	Un ordinateur qui cherchait les joueurs les plus pauvres et les plus riches sautait les joueurs éliminés d’après un marqueur qu’ils n’avaient plus, si bien qu’un joueur éliminé (sans argent) comptait généralement comme le plus pauvre, et qu’un ordinateur était rarement “de loin le plus pauvre”. Le correctif laisse de côté les joueurs éliminés, comme le font la 3.0.1 et la 5.0.5.
+316	Avec 30 modèles, les ordinateurs gardent les modèles du tour précédent
+317	Avec 30 modèles, un ordinateur continue de construire les choix du tour précédent pour les classes qu’il n’avait pas atteintes, mais il les gardait sous forme de places dans sa liste de modèles, qui ont pu bouger depuis, si bien qu’il pouvait construire un autre modèle ou aucun. Le correctif garde les modèles eux-mêmes.
+318	La flotte de croiseurs ou d’Épouvantes d’un ordinateur à court de carburant cherchait une colonie à portée puis ignorait la réponse, si bien qu’elle demandait toujours une nouvelle colonie là où elle se trouvait. Le correctif ne demande que lorsqu’aucune colonie n’est à portée du carburant qui lui reste, comme le fait le correctif de la 3.0.1.1.
+319	Quand les ordinateurs renvoyaient de vieux vaisseaux à la maison, le programme passait la place de la flotte dans une liste là où le calcul d’itinéraire attend sa Distance. Le correctif passe la Distance.
+320	Une colonie à la première étoile est traitée comme toute autre
+321	Deux tests regardaient le numéro de l’étoile au lieu de ce qu’est l’emplacement de budget, si bien qu’une colonie terminée à la première étoile de la liste pouvait encore voir sa barre de budget déplacée, et que ses habitants étaient laissés de côté dans les jalons de population. Le correctif la traite comme toute autre colonie.
+322	Marquer un type de vaisseau rend chaque vaisseau de ce type que vous avez commandé
+323	Marquer un type de vaisseau pour le recyclage dans la fenêtre de construction ne rendait qu’un seul des vaisseaux de ce type commandés là ; les autres étaient construits puis recyclés avec le type. Le correctif les rend tous.
+324	Le rang au-delà de 1 000 000 de master points a un nom
+325	À partir de 1 000 000 de master points, la Liste des Master Points affichait “%s: %s” comme rang, un texte fait pour être rempli. Le correctif affiche le rang le plus haut : Champion de Ho!
+326	Les dates du Panthéon montrent les deux derniers chiffres de l’année
+327	Le Panthéon et le Mur de la honte imprimaient le nombre d’années depuis 1900, qui ne s’écrivait sur deux chiffres que jusqu’en 1999 : 2026 s’affiche 126. Le correctif montre les deux derniers chiffres, donc 2026 donne 26.
+328	Le Mur de la honte dit “Perdant :”
+329	Le résumé du Mur de la honte vous désignait comme “Perdant”, sans les deux-points que porte toute autre étiquette. Le correctif les ajoute.
+330	Un nouveau niveau de technologie est signalé par son propre nom
+331	Le rapport d’un nouveau niveau de technologie imprimait le nom du niveau suivant : Distance 7 était “Pile à Fusion” au lieu de “Réservoirs Supplémentaires”, et Miniaturisation 20 était la ligne de crédits du programme. Le correctif imprime le nom du niveau lui-même, comme le fait la Mac 4.0.5.
+332	Les intérêts impayables provoquent le réchauffement climatique
+333	Quand vos intérêts dépassaient l’argent du tour et tout ce que vous pouviez encore emprunter, un test écrit à l’envers (une erreur de signe) mettait tout sur l’Épargne des vaisseaux, aussi endetté que vous soyez, si bien que le réchauffement climatique pour lequel le jeu prévoit un message n’arrivait jamais. Le correctif compare dans le bon sens, comme le faisait la 4.0.5 : alors vos planètes se réchauffent ou se refroidissent en s’éloignant de votre température et l’une de vos flottes est recyclée faute de fonds.
+334	Les vaisseaux renvoyés à la maison pour être recyclés sont routés avec leur propre Distance
+335	Quand les ordinateurs renvoyaient des vaisseaux obsolètes et des Tankers à la maison pour les recycler, le programme passait la place de la flotte dans une liste là où le calcul d’itinéraire attend sa Distance, si bien que les itinéraires trouvés pouvaient être faux. Le correctif passe la Distance.
+336	Le rapport de météores nomme la pluie de météores
+337	Une colonie rayée de la carte par une pluie de météores était signalée par “… a détruit votre colonie”, avec le nom de celui que le rapport dix messages plus tôt avait laissé derrière lui (là où la 2.0 elle-même pouvait planter). Le correctif signale “Une pluie de météores a détruit votre colonie à …”.
+338	Organiser Vaisseaux fait la moyenne du carburant sur toutes les flottes
+339	Organiser Vaisseaux donne à chaque flotte du modèle le carburant moyen utilisé, mais ne comptait que 11 flottes au plus, si bien qu’avec 12 la moyenne était trop élevée. Le correctif divise par le vrai nombre de flottes.
+340	La cote d’attaque des ordinateurs ne boucle plus
+341	Les ordinateurs calculaient la force d’un modèle sur 16 bits, si bien qu’à partir de Armes 4 environ la somme bouclait et qu’ils jugeaient mal leurs propres vaisseaux de guerre. Le correctif la calcule sur 32 bits, comme le font la 1.2 et la 3.0.1.
+342	Les vieux croiseurs renvoyés à la maison sont routés avec leur propre Distance
+343	Quand les ordinateurs renvoyaient de vieux croiseurs à la maison, le programme passait la place de la flotte dans une liste là où le calcul d’itinéraire attend sa Distance. Cela ne changeait rien au jeu (la colonie est toujours à portée), et le remake route déjà ces flottes d’après leur propre Distance ; c’est listé pour que le correctif couvre toutes les erreurs trouvées.
+344	Une flotte marquée pour le recyclage pendant qu’elle était dans l’hyperespace était signalée “à” l’étoile précédant la première, qui fait partie de l’en-tête de la galaxie : un nom vide, et pas de métal (sauf si votre flotte était celle du premier joueur et que le neuvième emplacement de base était la première étoile). Le correctif la signale “à l’hyperespace” sans métal, comme le fait la 3.0.1.
+345	Les deux lignes “aucune information” de la fenêtre de bataille allemande sont dans le bon sens
+346	Dans la version allemande, les lignes “Vous n’avez aucune information.” et “Vous avez été détruit immédiatement.” de la fenêtre de bataille (chaînes 74 et 75) sont inversées. Le correctif remet chacune à sa place ; cela n’a d’importance que lorsque le jeu se joue en allemand.
+347	Pas plus de trois messages par tour
+348	Le jeu garde de la place pour trois messages par tour, et les ordinateurs n’en envoient jamais plus, mais rien ne vous empêchait d’en envoyer un quatrième : il était écrit par-dessus vos cadeaux du tour et au-delà de l’espace que la Fin Tour garde pour chaque joueur. Le correctif s’arrête à trois, comme le faisait le jeu Mac.
+349	Les moteurs les plus rapides et les nez les plus solides sont dessinés
+350	Un vaisseau est dessiné à partir d’un moteur, d’une coque et d’un nez, mais le jeu Palm n’a pas d’image pour le moteur le plus haut (6205) ni pour le nez le plus haut (6105), si bien que ces vaisseaux étaient dessinés avec une pièce manquante. Le correctif dessine le moteur et le nez les plus hauts qui existent.
+351	Le signe de marque déposée et la puce sont affichés
+352	Les textes du jeu venaient du Mac, où “™” et “•” sont d’autres octets que sur l’iPhone, si bien que les noms de technologies affichaient “PowerPCª” et “Speedy Gonzalezª” et que le juron se lisait “#!$@*$&@¥ª!”. Le correctif affiche “™” et “•”.
+353	Le rapport des espions turcs est un rapport à lui
+354	Dans la version turque, le rapport sur les secrets technologiques volés est une copie du rapport de ligne de crédit. Le correctif l’écrit en turc (la formulation du remake) ; cela n’a d’importance que lorsque le jeu se joue en turc.
+355	Le rapport turc de colonie détruite traduit “lost”
+356	Dans la version turque, le rapport d’une colonie détruite en bataille laissait le mot “lost” en anglais, collé au nombre de vaisseaux. Le correctif formule cette phrase comme le fait le rapport de bataille turc (la formulation du remake) ; cela n’a d’importance que lorsque le jeu se joue en turc.
+357	Une colonie rayée de la carte par une pluie de météores était signalée par “… a détruit votre colonie”, avec le nom de celui que le rapport dix messages plus tôt avait laissé derrière lui, ou en lisant un nom dans la mémoire qui se trouvait au-delà des données du jeu. Le correctif signale “Une pluie de météores a détruit votre colonie à …”.
+358	Une flotte marquée pour le recyclage pendant qu’elle était dans l’hyperespace était signalée “à” l’étoile précédant la première, qui fait partie de l’en-tête de la galaxie : un caractère égaré (la lettre du numéro d’étoile du 18e emplacement de base, ou aucune), et pas de métal sauf si le numéro d’étoile du 8e emplacement de base était par hasard le vôtre. Le correctif la signale “à l’hyperespace” sans métal, comme le fait la 3.0.1.
+359	Le rapport de bienvenue donne la bonne version
+360	Le premier rapport d’une partie disait “Spaceward Ho! Version 4.0.3” : le texte n’avait jamais été mis à jour pour la 4.0.5. Le correctif dit 4.0.5.

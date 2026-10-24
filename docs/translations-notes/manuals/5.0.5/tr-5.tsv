@@ -1,0 +1,90 @@
+301	{a1}Delta Tao’nun Öteki Oyunları{/a1}
+302	{a1}İnce Yazılar{/a1}
+303	{a1}Teknik Destek{/a1}
+304	Spaceward Ho!’yu Kurmak
+305	Spaceward Ho!’yu sabit diskine koymak en iyisidir. İstersen CD’den de çalıştırabilirsin, ama öyle daha yavaş ve daha can sıkıcıdır.
+306	Spaceward Ho!’yu kurmak için simgesini bu paketle gelen CD’den sabit diskine sürüklemen yeterli.
+307	Genellikle o kadar kısa keseriz ki açıklamanın tamamı bu olurdu. Ama kılavuzu biraz şişirmeye çalıştığımız için karşılaşabileceğin bütün olası sorunları ele alacağız.
+308	Olası Kurulum Sorunları
+309	Mac’im diskimin dolu olduğuyla ilgili bir şeyler söyleyen bir iletişim kutusu gösteriyor.
+310	Yalnızca bir sezgi, ama belki sabit diskinde oyunun sığacağı kadar yer kalmamıştır. Sabit diskindeki bazı gereksiz şeyleri at; o 200 TeachText kopyası, fazladan Sistem Klasörleri ya da King’s Quest LXII gibi.
+311	CD’m yok.
+312	Bir yerde kaybolmuş olmalı; tabii yazılım yerine belgeleri kopyaladığın aptalca bir yazılım korsanlığı yapmıyorsan. Ara onu. Belki pakete disk koymayı unuttuk. Belki düşmüştür. Belki köpeğin yemiştir. (Köpeğin yoksa gel bizimkini al.) Bulamazsan bizi ara; sana söylenip yerine yenisini göndeririz.
+313	Tabii ki onu web’den indirdiysen CD’n olmaz. Ama o zaman onu sabit diskine kurman da gerekmez, çünkü zaten orada olur. O durumda bu kurulum işini okumak büyük olasılıkla vaktine değmez.
+314	Macintosh’um yok.
+315	Artık işi zorlaştırmaya başlıyorsun. Bir Macintosh al. Seveceksin.
+316	Should I stay, or should I go?
+317	If you stay, there will be trouble. If you go, it will be double. Yoksa tam tersi mi?
+318	{a1}{/a1}{a2}{/a2}İnternet Üzerinden Oyun: spacewardho.net
+319	{a1}{/a1}Spaceward Ho!’yu pek çok insanla oynanmak üzere tasarladık. Kendine özgü “oturum açma” oyun biçimi, kayıtlı oyunun bir tür dosya sunucusunda durmasına, her oyuncunun da sıralarını kendi makinesinde oynamasına çok uygundur.
+320	{a1}{/a1}Oyunu oluşturan kişi “Oyun Sahibi” olur. Oyunun ne zaman başlayacağını söyleme yetkisi yalnızca ondadır. O zamana kadar oyun “başlamadan önce” kipindedir ve herkes daha fazla kişinin katılmasını bekler. Herkes katıldığında oyun sahibi oyunu başlatır ve yola çıkarsınız.
+321	{a1}{/a1}Çok oyunculu oyun, tek oyunculu bir oyuna şaşırtıcı derecede benzer. Ana fark, tabii ki, karşılaştığın uzaylıların bazılarının bilgisayar oyuncularından daha sinsi ve kurnaz olabilen insanlar olmasıdır. Öteki fark, bir sonraki sıraya geçmeden önce öteki insanların sıralarını bitirmesini beklemek zorunda olmandır. {a2}{/a2}
+322	Bir sırayı bitirdiğinde Spaceward Ho!, Ana Pencere’nin sol alt köşesinde resminin ve adının soluna bir onay işareti koyar. Başka kimlerin bitirip bitirmediğini adlarının yanında onay işareti olup olmadığına bakarak görebilirsin. İnsanlara acele etmeleri için bağırmak, çok oyunculu bir Spaceward Ho! oyununda tamamen kabul edilebilir bir davranıştır.
+323	Öteki insanlara söyleyecek bir şeyin varsa sohbet penceresine yazmaktan çekinme.
+324	Otomatik Oyna
+325	{a1}{/a1}Aşağıda otomatik oyun seçeneklerinin ve tercihlerinin bir özeti var.
+326	{a1}{/a1}Otomatik Oyna, sıranı bilgisayara kendiliğinden oynatır.
+327	{a1}{/a1}Bilgisayara senin yerine oynatırsan bilgisayar, tıpkı sıradan bilgisayar rakipleri gibi, kendi stratejisini geliştirir. Bu, acemilerin öğrenmesi için iyi bir yoldur. Kazanmak (ya da kaybetmek) üzereyken oyunu kendin bitirmek istemediğinde de çok kullanışlıdır. Çok oyunculu bir oyundan erken ayrılmak zorunda kalıp topraklarının tamamen dağılmasını istemediğinde de bu seçeneği seç. (Oyunu çalışır durumda bırakman gerekir.)
+328	{a1}{/a1}Bilgisayara senin yerine oynatmak yine de sana biraz denetim bırakır. Bilgisayar teknoloji harcama çubuklarını hiçbir zaman değiştirmez. Gemi yaparsan bilgisayar onları kullanır. Gemileri bir yere gönderirsen bilgisayar onlar varış yerlerine ulaşana kadar yönlerini değiştirmez. Bilgisayar genellikle, fazla dağıldığına inanmadıkça, sahip olduğun kolonileri korumaya çalışır.
+329	{a1}{/a1}“Yalnızca sıramı bitti diye işaretle”yi seçersen olacak olan yalnızca budur. Bütçe çubuklarının hiçbiri hiçbir zaman değişmez (gezegen kaybettiğin ya da kazandığın durumlar dışında). Bu, bir koloninin kâra geçmesini beklerken olduğu gibi, art arda hiçbir ilginç şeyin olmadığı birkaç sıran olduğunda kullanışlı bir seçenektir.
+330	{a1}{/a1}Otomatik oyunla işin bittiyse onay kutusundaki işareti kaldır.
+331	{a1}{/a1}Otomatik Oyna iletişim kutusunun altındaki kaydırma çubuğu her mesajın ne kadar süre gösterileceğini belirler. Normalde her mesajı kaybolması için tıklaman gerekir. Otomatik Oyna’da yine tıklayabilirsin, ama süre dolarsa mesaj kendiliğinden kaybolur. Bu yalnızca Otomatik Oyna’daki bilgisayarı izlerken önemlidir.
+332	{a1}{/a1}Bilgisayarı Otomatik Oyna’ya aldığında oyun tarzını ayarlayabilirsin. Otomatik Oyna iletişim kutusundaki kaydırma çubukları bilgisayarının saldırmayı ve savunmayı ne kadar tercih edeceğini belirler. Denetimlerle oyna; çözersin.
+333	“İlginç” bir şey olduğunda (bir savaş ya da başka bir şey gibi) otomatik oyunun kendini kapatmasını sağlayabilirsin. Bir sıra güncellenirken “Check this out!” sesini duyarsan otomatik oyun kendiliğinden kapanmıştır ve nedenine bakmalısın.{a1}{/a1}{a2}{/a2}{a3}{/a3}{a4}{/a4}
+334	{a1}{/a1}Ambalaj Hakkında
+335	{a1}{/a1}Spaceward Ho!, süslü strafor dolgulu ya da karanlıkta parlayan çıkartmalı bir kutuda gelmez. Bunu bilerek yaptık. Çevre nedeniyle gereğinden fazla kartondan ve strafordan nefret ediyoruz. Pakete, sonra atıp gideceğin hiçbir şey koymamak için elimizden geleni yaptık. Ağaçları seviyoruz. Paketimiz tam gereken büyüklükte ve kutunun dolu görünmesi için hiç patlamış mısır ya da kabarık karton dolguya ihtiyaç duymuyor.
+336	{a1}{/a1}İşte bir deney. 10 Macintosh ürünü al. Kaçında kutuyu büyük gösteren bol dolgu olduğunu say. Amaç sırf daha büyük bir kutu olmasaydı kutunun ne kadar küçük olabileceğine bak. O şirketleri ara ve kutularını küçültmelerini ve streç ambalajı bırakmalarını söyle. Ne diyeceklerini gör.
+337	{a1}{/a1}{img2/}Bu Kılavuz Hakkında
+338	{a1}{/a1}Bu kılavuz Joe Williams ve Peter Commons tarafından Frame Technologies’in FrameMaker’ı kullanılarak yazıldı. Ekran görüntüleri Flash-It ile alındı ve Color MacCheese ya da Zeus ile rötuşlandı. Her şey bir LaserWriter IINT’de basıldı.
+339	{a1}{/a1}Anlamadıysan diye söyleyelim: evet, her şeyi Mac’lerde yapıyoruz.
+340	{a1}{/a1}{img2/}Peter Commons Hakkında
+341	{a1}{/a1}Peter anaokulundan beri Spaceward Ho! sürümleri yazıyormuş gibi hissediyor. Tam öyle değil, ama hayatının yaklaşık üçte biri{sup2}{/sup2} oldu. Neyse ki tam zamanlı bir iş değil. Peter, Danville, Kaliforniya’da eşi Claire ve çocukları Brennan ve Sabrina ile yaşıyor; 2 köpekten, bir kediden, bir kobaydan ve son sayımda 7 balıktan söz etmeye bile gerek yok. Peter ayrıca yogadan, a cappella şarkı söylemekten ve uçmaktan hoşlanıyor.
+342	Tercihler
+343	Spaceward Ho!’yu ilk çalıştırdığında, başlangıç diskinin Sistem Klasörü’ndeki Preferences klasöründe “Spaceward Ho! 5.0 Prefs” adlı bir tercihler dosyası oluşturulur.
+344	Her şeyi tercihler dosyasında saklıyoruz: pencerelerin nereye konmasını sevdiğin, sesin açık mı kapalı mı olmasını istediğin, tercih ettiğin savaş hızı vb.
+345	Ayrıca tercihler dosyası oyunu birlikte oynadığın insanların adlarını, tasarladığın gemilerin adlarını ve oyunu kazandığın için ad verdiğin yıldızları da tutar.
+346	Sıfırdan başlamak için (bir zamanlar bir gemiye yeni eski sevgilinin adını verdiysen ve adını görmek acı anılar uyandırıyorsa) tercihler dosyasını atman yeterli. Bütün bu bilgiler (ağ dışı usta puanların dahil!) silinir.
+347	Tercihlerin çoğu “{em1}Tercihler...{/em1} ” ile ayarlanır.
+348	Olay mesajlarını göster
+349	Bu öğe işaretliyse olay mesajları her sıranın başında haritanın sol alt köşesinde gösterilir. Bir sonrakine geçmek için mesaja tıkla ya da return tuşuna bas. Bu öğe işaretli olsun olmasın bütün mesajlar Rapor Penceresi’nde görünür.
+350	Ama Yalnızca En Önemlileri
+351	Bu, gemilerin yakıt aldığını ya da kârsız yıldızları terraform etmeye para harcadığını bildiren mesajlar gibi “gevezelik” mesajlarının çoğunu ortadan kaldırır. Savaş mesajlarını ve teknoloji ilerleme mesajlarını, süpernovaları ve benzerlerini bırakır.
+352	Muharebeleri Gözden Geçir
+353	Bu öğe ancak üstündeki “Olay mesajlarını göster” de işaretliyse önemlidir. İkisi de işaretliyse bir savaş olay mesajı gösterilmek üzereyken savaş her seferinde kendiliğinden gözden geçirilir. İşaretli değilse yalnızca özet mesajı gösterilir.
+354	Muharebe İnceleme Hızı
+355	Savaş incelemelerindeki atışların ve patlamaların hızını burada savaş hızını ayarlayarak denetleyebilirsin. Savaşları izlemekten sıkılırsan hızlandır. “Yığınlar Birlikte Ateş Eder”, özellikle dev savaşlarda, savaşları epey hızlandırır. “Tam Canlandırılmış Savaşlar”ın işaretini kaldırmak patlama grafiklerini atlar ve savaşları daha da hızlandırır.
+356	Her Turda Otomatik Kaydet
+357	Bu işaretliyse Spaceward Ho! oyunu her sıra kayıtlı oyun dosyasına kaydeder; böylece elektrik beklenmedik biçimde kesilirse kaldığın yerden devam edebilirsin.
+358	Sohbet Anahtar Kelimelerini Seslendir
+359	Bu, sohbet penceresinde belirli sohbet sözcükleri göründüğünde Spaceward Ho!’nun ses çalmasını sağlar. Örnekler arasında LOL, hehe ve gözde #$&@! var.
+360	{a1}{/a1}Sık Karşılaşılan Sorunlar
+361	{a1}{/a1}“Spaceward Ho! açılıyor ama hemen kapanıyor.”
+362	{a1}{/a1}Arada bir tercihler dosyası bozulur. Onu atmak bu sorunu çoğu zaman çözer. Bkz. {a2}Tercihler{/a2} .
+363	{a1}{/a1}“Bilgisayar oyuncuları gemilerine, eskiden benim gemilerime verdiğim gerçekten aptalca adları veriyor.”
+364	{a1}{/a1}Bunu yapmaları gerekiyor. Hoşuna gitmiyorsa “Spaceward Ho! Prefs” dosyanı at. Yine, bkz. {a2}Tercihler{/a2} .
+365	{a1}{/a1}“Gemileri nasıl hareket ettiririm?”
+366	{a1}{/a1}Gemilerin bulunduğu yıldıza tıkla ve gitmelerini istediğin yıldıza sürükle. İki gezegenin arasında bir çizgi belirir. Çizginin ucunda bir ok varsa fareyi bırakman yeterli; bir “Hyaa!” sesi duyarsın. Gemiler yola çıktı. Birkaç sıra kadar sonra varış gezegenine ulaşmaları gerekir. Çizginin ucunda ok yoksa gemilerin gitmesini istediğin gezegen, seçili gemilerle ulaşamayacağın kadar uzaktadır.
+367	Adım adım bir yol üzerine tıklarken option tuşunu basılı tutarak gemi için elle bir rota seçebilirsin.
+368	{a1}{/a1}“Uzaylılar ana gezegenime saldırıp bütün insanlarımı öldürüp duruyor.”
+369	{a1}{/a1}Birkaç savunma uydusu yap ve kötü adamların seni ezebileceği her yerde onları teknolojik olarak güncel tut. Ayrıca pek çok rakibin olduğu küçük bir galaksiyle başlama.
+370	{a1}{/a1}“Oyunun sırları neler?”
+371	{a1}{/a1}Sana söyleseydik sır olmazlardı, değil mi? O yüzden bize sorma. Mutlaka bilmen gerekiyorsa kendin çöz.
+372	{a1}{/a1}“Oyun çok yavaş gidiyor.”
+373	{a1}{/a1}Galaksiyi küçült. Genel olarak, galaksi ne kadar küçükse bilgisayarlar sana o kadar zor anlar yaşatır. Galaksinin büyüklüğünü düşünmeden “Devasa”ya koyma. Ayrıca daha az bilgisayar oyuncusuna karşı oynayabilirsin. Daha çok oyuncu aslında daha zor değildir, yalnızca daha kalabalıktır.
+374	{a1}{/a1}“Sürekli çöküyorum.”
+375	{a1}{/a1}Bize bakma; yazılımımız hiç çökmez. Başka birinin suçu olmalı. Ciddi söylüyoruz: “Ho! Prefs” dosyanı atar ve bütün sistem uzantılarını kapatırsan Ho!’nun büyük olasılıkla kurşun geçirmez olduğunu görürsün. Öte yandan, yeniden oluşturulabilen bir çökme bulursan bizi ara ve anlat ki sonraki sürümlerde düzeltelim.
+376	{a1}{/a1}“Ekranda daha çok yere ihtiyacım var.”
+377	{a1}{/a1}Grafik Penceresi’ni ve Rapor Penceresi’ni gerek duymadığında kapatabilirsin; bu yardımcı olur. En uzak ikinci yakınlaştırma kipinde çalışmak da makul: “{em3} Pencere{/em3} ” menüsünden birkaç kez “{em2} Uzaklaştır{/em2} ” seç. Son olarak, soldaki bütün o bilgilerin gösterilip gösterilmeyeceğini değiştirmek için “{em5} Pencere{/em5} ” menüsündeki “{em4} Bilgiyi Göster{/em4} ” öğesini kullanabilirsin.
+378	{a1}{/a1}Kopya Korumasına Karşı Tutumumuz
+379	{a1}{/a1}(The Changing Path’ten yeniden basılan makale, 1991 İlkbaharı)
+380	{a1}{/a1}Delta Tao’da biz kopya korumasının, yazılım endüstrisinin ve bir bütün olarak bilgisayar endüstrisinin büyümesine ciddi zarar verebilecek kötü bir şey olduğunu düşünüyoruz. Herkesin kopya korumalı ürünleri boykot etmesini öneriyoruz. Nedeni şu.
+381	{a1}{/a1}Kuramımız, insanların yazılıma harcayacakları belli bir miktar parası olduğudur. Bunu, ürünler kopya korumalı olsun olmasın, ürünlere harcarlar. Yazılım bütçelerini tükettikten sonra da daha çok yazılım isterler. Kopya koruması her yerdeyse yandılar. Satın aldıkları yazılım, sahip oldukları tek yazılımdır. Bilgisayarlarını daha az yararlı bulurlar ve arkadaşlarını daha fazlasını almaya özendirmezler. Donanım ve yazılım endüstrileri küçülür ve ölür.
+382	{a1}{/a1}Öte yandan, ürünler kopya korumalı değilse insanlar yazılım bütçelerini tükettikten sonra yazılım korsanlığı yaparlar. Hangi programların iyi ve yararlı olduğunu ilk elden öğrenirler. Bir sonraki yıl hangi yazılımı satın alacaklarına bilgiyle karar verirler. Bu arada bilgisayarlarını daha yararlı ve dostça bir araç bulurlar, onu daha çok kullanırlar ve arkadaşlarına şiddetle önerirler; arkadaşları da yazılım alıcısı olur.
+383	{a1}{/a1}İki sorun var. Birincisi, bazı programların kopya korumalı, ötekilerinin korumasız olduğu bir dünyada insanlar, onları edinmenin tek yolu bu olduğu için kopya korumalı şeyleri satın almaya, korumasız yazılımın ise korsanını yapmaya eğilimli olabilir. Bunun etkisi, endüstriye zarar verenleri (en azından kısa vadede) ödüllendirmek, ona katkıda bulunanları ise cezalandırmaktır. İlkokulda okuduğumuz “ortak alanların trajedisi”nin bir uzantısı.
+384	{a1}{/a1}İkincisi, kopya koruması kullanmayan yayıncılar kötü yazılımı yoğun reklamla satmayı daha zor bulacaklardır. İnsanlar yazılımı satın almadan önce deneme eğiliminde olacağı için şirketler yazılımı yalnızca ona gerçekten ihtiyacı olan ve onu yararlı bulan insanlara satabilir. Bu da ürünleri vasat ama bütçeleri büyük şirketlerin kopya korumasını sevmesi gerektiği anlamına gelir.
+385	{a1}{/a1}İkinci sorun bizi pek rahatsız etmiyor, ama birincisi korkutuyor. Çözüm: kopya korumasını boykot et. Yazılımı kopya korumalı yapmanın kârlı olmadığından emin ol.
+386	{a1}{/a1}Software Publisher’s Association bizi linç etmeden önce (“her yıl korsanlık yüzünden milyarlarca dolar gelir kaybedildiğini” iddia ediyorlar) kuramımız için en azından biraz kanıt uyduralım. Kaset bandının icat edildiği zamanı hatırla. İnsanlar artık plakları gelişigüzel kopyalayabiliyordu ve plak şirketinin bu konuda yapabileceği hiçbir şey yoktu. “Mahvolduk!” diye bağırdılar. “Artık her plaktan yalnızca bir tane satacağız!” Gerçekte ne oldu? Müzik endüstrisi daha önce hayal bile edilemeyen düzeylere fırladı ve her zamankinden çok sanatçıya her zamankinden çok kâr getirdi.
+387	{a1}{/a1}Video kaydediciler ilk çıktığında insanlar filmleri gelişigüzel kopyalayabiliyordu ve film şirketlerinin bu konuda yapabileceği pek bir şey yoktu. “Mahvolduk!” diye haykırdılar. “Artık bir daha hiç film satamayacağız!” Ne oldu? Film endüstrisi daha önce hayal bile edilemeyen düzeylere fırladı ve her zamankinden çok insana her zamankinden çok kâr getirdi.
+388	{a1}{/a1}Yazılımın parasını reklamına, ambalajına ve kopya korumasına göre değil, kalitesine göre öde.
+389	Hızlı Talimatlar
+390	Ho! İçin Süper Hızlı Talimatlar

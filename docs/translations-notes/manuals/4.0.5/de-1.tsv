@@ -1,0 +1,136 @@
+1	{a1}Inhalt{/a1}
+4	Spaceward Ho! 4.0.5 Hilfe – aus der WinHelp-Datei umgewandelt.
+5	Eine kurze Zusammenfassung
+6	{a1}Inhalt{/a1} {a2}← Zurück{/a2} {a3}Weiter →{/a3}
+7	{b1}Erste Schritte{/b1}
+8	{b1}Eine kurze Zusammenfassung{/b1}
+14	Ein ausgewählter Planet
+15	{b1}Ein ausgewählter Planet{/b1}
+16	Wenn Sie einen Planeten auswählen, wird er hervorgehoben, indem er eine Korona bekommt. Alle Informationen links von der Sternkarte beziehen sich dann auf diesen Planeten – seine Temperatur, Schwerkraft, sein Einkommen und so weiter.
+17	Über Spaceward Ho!
+18	{b1}Über das Spiel{/b1}
+19	{b1}Über Spaceward Ho!{/b1}
+20	Das Wichtigste an{b1} Spaceward Ho!{/b1} ist seine Einfachheit. Jeden Aspekt einer fremden Rasse zu steuern, könnte kompliziert werden und dem Spielspaß im Weg stehen. Spaß ist das oberste Ziel, und der Realismus wurde überall, wo es ging, dem Spaß geopfert. Wenn Sie Realismus in der Raumfahrt wollen, spielen Sie „Kürzen wir der NASA das Budget“, wie es der Kongress jedes Jahr tut.
+21	Über den Autor, Peter Commons
+22	{b1}Über den Autor, Peter Commons{/b1}
+23	Peter hat in Stanford studiert und setzt sich in freien Augenblicken für die Rechte wehrloser Fellwesen ein. Er ist eine recht zwiespältige Seele und kann sich nicht entscheiden, ob er lieber Spiele oder professionelle Grafikprogramme schreibt – ganz zu schweigen von seinem Wunsch, den Soundtrack für einen großen Kinofilm zu schreiben. Er trauert noch immer um seinen Hund Delbert und hat sich kürzlich einen neuen Welpen zugelegt, damit Enid und Ignacio zufrieden sind. Nachdem er erwogen hatte, ihn Delia, Denise oder Darlene zu nennen, entschied er sich schließlich für Fritz, weil ihn der Name an einen alten Freund erinnere, an dem er einmal auf der Straße vorbeigekommen sei.
+24	Technischer Fortschritt
+25	{b1}Technik{/b1}
+26	{b1}Technischer Fortschritt{/b1}
+27	Neue Technologien zu erforschen ist leicht. Sie geben einfach im Spielerfenster Geld für Technik aus, und schon geht es los. Sie können Ihre Forschung auf bestimmte Bereiche lenken, indem Sie Ihr Technikbudget im Fenster für die Technikausgaben ausbalancieren, das Sie im Menü „Fenster“ finden.
+28	{a1}Reichweite {/a1}
+29	{a1}Tempo {/a1}
+30	{a1}Waffen und Schilde {/a1}
+31	{a1}Miniaturisierung {/a1}
+32	{a1}Radikal {/a1}
+33	Bündnisse
+34	{b1}Andere Spieler{/b1}
+35	{b1}Bündnisse{/b1}
+36	Sie können Ho! als Fremdenfeind spielen und jeden töten, den Sie sehen. Oder, wenn Sie sich freundlich fühlen, können Sie anderen Spielern gegenüber neutral sein (sodass Sie sie nicht ohne Grund angreifen) oder sogar ein enges Bündnis eingehen, in dem Sie Informationen mit Ihren Freunden teilen. Um ein Bündnis zu schließen, müssen natürlich beide Spieler es wollen. Ihre Meinung über die anderen Spieler zeigen Sie im Dialog {b1}Bündnisse{/b1} im Menü „Galaxie“. Dort sehen Sie auch, was sie von Ihnen halten.
+37	Es gibt jetzt zwei Stufen von Bündnissen. Wählen beide Spieler gegenseitig „Beste Freunde“, teilen sie automatisch Informationen über alle ihre Planeten und ihre Erkundungen. Computerspieler wählen nie „Beste Freunde“, das gibt es also nur im Netzwerkspiel.
+38	Neutrale Verbündete töten einander einfach nicht. Freundliche Verbündete erhalten von ihren Freunden automatisch Informationen über die Galaxie. Sie können ihnen auch Geld und Metall geben, wenn sie es am dringendsten brauchen. Das geht mit {b1}Geld/Metall geben{/b1} im Menü „Galaxie“.
+39	Ein Bündnis lösen Sie, indem Sie den betreffenden Außerirdischen im Dialog {b1}Bündnisse{/b1} aus der Spalte „Mag ich“ in die Spalte „Mag ich nicht“ verschieben. Sie kämpfen dann überall auf Leben und Tod, wo Sie bisher nebeneinander bestanden haben. Nebenbei erwerben Sie damit auch seinen dauerhaften Hass und sein Misstrauen.
+40	Ein unerforschter Planet
+41	{b1}Ein unerforschter Planet{/b1}
+42	Zu Spielbeginn ist alles außer Ihrem Heimatplaneten unerforscht. Sobald Sie zu einem Planeten fliegen, erfahren Sie mehr über ihn, und sein Bild spiegelt Ihre neuen Entdeckungen wider.
+43	Automatisch spielen…
+44	{b1}Das Menü „Optionen“{/b1}
+45	{b1}Autospiel…{/b1}
+47	Wenn Sie wollen, dass der Computer für Sie spielt, wählen Sie {b1}Der Computer spielt für mich{/b1}. Der Computer entwickelt eine eigene Strategie, genau wie die normalen Computergegner. Das ist für Anfänger ein guter Weg zum Lernen. Es ist auch sehr praktisch, wenn Sie kurz vor dem Sieg (oder der Niederlage) stehen, das Spiel aber nicht selbst zu Ende spielen wollen. Wählen Sie diese Option auch, wenn Sie eine Mehrspielerpartie vorzeitig verlassen müssen, Ihr Gebiet aber nicht völlig zerfallen soll.
+49	Wählen Sie {b1}Mich in jedem Zug nur als fertig markieren{/b1}, geschieht auch nur das. Keiner Ihrer Budgetbalken ändert sich je (außer wenn Sie Planeten verlieren oder gewinnen). Das ist eine praktische Option, wenn mehrere Züge hintereinander nichts Interessantes passiert, etwa wenn Sie darauf warten, dass eine Kolonie rentabel wird.
+50	Wählen Sie {b1}Mich als fertig markieren, bis etwas Interessantes passiert{/b1}, spielen Sie nicht, bis ein Kampf stattfindet. Dann spielen Sie weiter.
+51	Wählen Sie {b1}Ich spiele meine Züge selbst{/b1}, um das automatische Spielen auszuschalten.
+52	Der Schieberegler unten im Dialog {b1}Autospiel…{/b1} bestimmt, wie lange jede Nachricht angezeigt wird. Normalerweise müssen Sie jede Nachricht anklicken, damit sie verschwindet. Beim automatischen Spielen können Sie weiterhin klicken, aber läuft die Zeit ab, verschwindet sie von selbst. Das ist nur wichtig, wenn Sie dem Computer beim automatischen Spielen zusehen.
+53	Den Stil des Computerspiels legen Sie fest, wenn Sie ihn auf automatisches Spielen schalten. Die Schieberegler unter {b1}Einstellen{/b1} bestimmen, wie sehr Ihr Computer zum Angreifen und Verteidigen neigt. Probieren Sie die Regler aus – Sie kommen schon dahinter.
+54	Planetenliste automatisch sortieren
+55	{b1}Planetenliste automatisch sortieren{/b1}
+56	Damit werden Ihre Planeten jeden Zug nach Einkommen sortiert. Das heißt, Ihre besten Planeten stehen immer unten in der Liste (da Sie sich vermutlich nicht um sie kümmern müssen) und Ihre ganz neuen Planeten ganz oben. So müssen Sie die Liste nicht nach den wichtigen Planeten durchsuchen.
+57	Budgetinformationen
+58	{b1}Spaceward Ho! spielen{/b1}
+59	Informationen zum gerade ausgewählten Planeten.
+60	Informationen zur ausgewählten Flotte (eine Flotte wählen Sie, indem Sie sie in der Liste anklicken).
+61	Globale Informationen für alle Ihre Planeten. Alles Ihr Geld und Metall kommt aus diesen Zahlen und fließt in sie. Rechts steht die Veränderung seit dem letzten Zug.
+62	Links steht eine Liste der Spieler im Spiel. Die Häkchen zeigen, ob sie ihren Zug schon beendet haben. Rechts steht ein Balkendiagramm, mit dem Sie Ihre Ausgaben auf die Planeten verteilen.
+63	Die Zahlen in den Budgetinformationen dienen nur zur Information. Sie können sie nicht direkt ändern. Was Sie ändern können, sind die {a1}Balkendiagramme{/a1} darunter.
+64	{a1}Balkendiagramme{/a1}.
+65	Schiffe bauen
+66	{b1}Schiffe{/b1}
+67	{b1}Schiffe bauen{/b1}
+68	Schiffe können Sie in jeder Ihrer Kolonien bauen. Klicken Sie dazu auf den Planeten, auf dem Sie Schiffe bauen wollen, und wählen Sie im Menü „Schiffe“ den Eintrag {b1}Schiffbau{/b1} oder doppelklicken Sie einfach auf den Planeten. Ein großer Dialog erscheint. In diesem Dialog können Sie sowohl Schiffe bauen als auch neue Schiffstypen entwerfen. Sie können die Anzahl der Schiffe wählen, bevor Sie den Typ wählen, und dann ihre Technikstufen anpassen, bis Metall- und Geldkosten da liegen, wo Sie sie haben möchten.
+69	Links im Dialog sehen Sie eine Liste der verfügbaren Schiffstypen. Wenn keiner davon Ihrem Geschmack entspricht, können Sie unten in der Mitte des Bildschirms mit den Schiebereglern eine neue Klasse entwerfen.
+70	Technologien wählen
+71	{b1}Technologien wählen{/b1}
+75	Miniaturisierung wird im Lauf des Spiels wichtiger. Zu Spielbeginn gibt es reichlich Metall in der Galaxie, und es ist leicht zu bekommen. Spät im Spiel kann es die Größe Ihrer Flotte begrenzen, und eine hohe Miniaturisierung leistet Ihnen gute Dienste.
+78	Spieler vergleichen
+79	{b1}Spieler vergleichen{/b1}
+80	Wenn Sie je Lust bekommen, zu sehen, wie Sie im Vergleich zu den anderen Spielern im Spiel abschneiden, wählen Sie im Menü „Galaxie“ den Eintrag {b1}Spielervergleich{/b1}. Dort sehen Sie, wie einige Ihrer Werte (etwa Waffentechnik oder Einkommen) im Vergleich zu denen der anderen aussehen.
+81	„Schiffsstärke“ besagt, wie groß und zäh Ihre Flotten sind. Es ist die Summe aller Technikstufen aller Ihrer Schiffe. Sie gibt einen Hinweis darauf, wie mächtig Ihre Flotten sind.
+82	Die Zahl der Spieler im Spiel enthält keine ausgeschiedenen Spieler.
+83	Klicken Sie auf die Taste {b1}Fertigkeiten anzeigen…{/b1}, um zu sehen, welche Spielstärke jeder Spieler hat: Neuling, Anfänger, Normal, Experte oder Fortgeschritten. Bei Computerspielern steht eine unter den Fertigkeiten der verschiedenen Spieler zufällig gewählte, damit sich schwerer erkennen lässt, wer ein Computerspieler ist. Die tatsächliche Computerintelligenz steht unten in diesem Fenster.
+84	Computerintelligenz
+85	{b1}Eigene Galaxien erstellen{/b1}
+86	{b1}Computerintelligenz{/b1}
+87	Die Computerintelligenz bestimmt, wie schwer das Spiel gegen die Computerspieler wird. Klügere Spieler lernen aus ihren Fehlern, bauen größere Flotten, investieren stärker in Technik und expandieren schneller. Die schlauen Spieler beginnen außerdem mit allen Vorteilen eines menschlichen „Neulings“ – viel Metall, mehrere Schiffe zum Start und eine hohe Planetenbevölkerung. Dumme Spieler müssen, abgesehen davon, dass sie dumm sind, mit der Einstellung „Experte“ eines Menschen beginnen, die ihnen kein Startmetall, keine Schiffe und eine niedrige Planetenbevölkerung gibt.
+88	Anfangs werden selbst die dummen Computerspieler sich als schwierige Gegner erweisen, aber mit wachsendem Können werden Sie sie als wenig fordernd empfinden. Irgendwann sind Sie vielleicht gut genug, um schlaue Spieler regelmäßig zu besiegen, sogar mit sich selbst als Experte. Damit gehören Sie zu den besten Ho!-Spielern. Versuchen Sie, gegen Menschen zu spielen.
+89	Urheberrechtsinformationen
+90	{b1}Urheberrechtsinformationen{/b1}
+91	Software-Urheberrecht © 1996 Delta Tao Software, Inc.
+92	Urheberrecht für Handbuch und Online-Hilfedatei © 1996 Delta Tao Software, Inc. und New World Computing.
+93	Das mitgelieferte Softwareprogramm und die Online-Hilfedatei sind urheberrechtlich geschützt. Alle Rechte vorbehalten. Die Online-Hilfedatei darf ohne vorherige schriftliche Genehmigung von New World Computing weder ganz noch teilweise kopiert, gedruckt, fotografiert, vervielfältigt oder übersetzt noch auf ein elektrisches Medium oder in maschinenlesbare Form gebracht werden. Teile des Programms und der Online-Hilfe dürfen vom ursprünglichen Käufer nur insoweit kopiert werden, wie es für die Nutzung auf dem Computer, für den es gekauft wurde, erforderlich ist.
+94	Teile Urheberrecht © Blue Sky Software Corporation. Alle Rechte vorbehalten.
+95	Mitwirkende
+96	{b1}Spaceward Ho! 4.0{/b1}
+97	Herausgegeben von:{span1} {/span1}{span2} {/span2}New World Computing
+98	{b1}Entwickelt von{/b1}:{span2} {/span2}{span3} {/span3}Delta Tao Software, Inc.
+99	{b1}Entwurf{/b1}:{span2} {/span2}{span3} {/span3}Joe Williams
+100	{span1} {/span1}{span2} {/span2}{span3} {/span3}Peter Commons
+101	{b1}Ausführender Produzent{/b1}:{span2} {/span2}Jon Van Canegham
+102	{b1}Produzenten{/b1}:{span2} {/span2}{span3} {/span3}Mark Caldwell
+103	{span1} {/span1}{span2} {/span2}{span3} {/span3}Deane Rettig
+104	{b1}Programmierer{/b1}:{span2} {/span2}{span3} {/span3}Peter Commons
+105	{b1}Grafiker{/b1}:{span2} {/span2}{span3} {/span3}{span4} {/span4}Howard Vives
+106	{span1} {/span1}{span2} {/span2}{span3} {/span3}Bob Van de walle
+107	{b1}Klänge{/b1}: {span2} {/span2}{span3} {/span3}Mark Madeley
+108	{span1} {/span1}{span2} {/span2}{span3} {/span3}Guy Vardaman
+109	{b1}Handbuch{/b1}:{span2} {/span2}{span3} {/span3}Delta Tao Software, Inc &
+110	{span1} {/span1}{span2} {/span2}{span3} {/span3}Rozita Tolouey
+111	{b1}Windows-95-Version{/b1}
+112	{b1}Ausführender Produzent{/b1}:{span2} {/span2}Mark Caldwell
+113	{b1}Produzent{/b1}:{span2} {/span2}{span3} {/span3}Bruce Schlickbernd
+114	{span1} {/span1}{span2} {/span2}{span3} {/span3}Peter Ryu
+115	{b1}Programmierer{/b1}:{span2} {/span2}{span3} {/span3}Paul Toth
+116	{b1}Leiter Qualitätssicherung{/b1}:{span2} {/span2}{span3} {/span3}Peter Ryu
+117	{b1}Tester{/b1}:{span2} {/span2}{span3} {/span3}David Botan
+118	Bryan Farina
+119	David Fernandez
+120	Walter Johnson
+121	Kate McClelland
+122	William Nesemeier
+123	{span1} {/span1}{span2} {/span2}{span3} {/span3}Jennifer Schlickbernd
+124	{span1} {/span1}{span2} {/span2}{span3} {/span3}Walt Hochbrueckner
+125	{span1} {/span1}{span2} {/span2}{span3} {/span3}Benjamin Bent
+126	Tim Lang
+127	Plattformübergreifendes Mehrspielerspiel
+128	{b1}Plattformübergreifendes Mehrspielerspiel{/b1}
+129	Spaceward Ho! kann als plattformübergreifendes Spiel zwischen den Versionen für Win95{img1/} und Macintosh{img2/} (Version 4.0.5 oder höher) gespielt werden. Hier ein paar einfache Regeln für das Einrichten und Spielen eines plattformübergreifenden Spiels:
+130	Alle plattformübergreifenden Spiele müssen auf einem Macintosh{img1/} gestartet werden (sonst können Macs nicht mitmachen).
+131	Sie müssen an den Namen Ihrer {b2}Galaxiedatei{/b2} die Dateinamenerweiterung {b1}.Ho!{/b1} anhängen (sonst können die Win95{img3/}-Rechner nicht mitmachen).
+132	Im Dateinamen dürfen Sie weder das Sternchen (*), das Fragezeichen (?) noch den Backslash (\) verwenden (diese Zeichen sind in Win95{img1/} für besondere Zwecke reserviert).
+133	Eigene Galaxien
+134	{b1}Eigene Galaxien{/b1}
+135	Wenn Sie ein {b1}Spaceward Ho!{/b1}-Spiel zum ersten Mal beginnen, haben Sie viele Möglichkeiten, wie die Galaxie aussehen soll. Sie können festlegen, gegen wie viele Spieler Sie antreten, wie gut sie sind, wie groß die Galaxie ist und dergleichen. Die Optionen werden hier behandelt.
+136	{a1}Anzahl der Computerspieler {/a1}
+137	{a1}Galaxiegröße {/a1}
+138	{a1}Galaxiestil {/a1}
+139	{a1}Computerintelligenz {/a1}
+140	{a1}Die Computerspieler{/a1}
+141	{a1}Ein Mehrspielerspiel einrichten{/a1}
+142	{a1}Plattformübergreifendes Mehrspielerspiel{/a1}
+143	Kundendienst
+144	{b1}Kundendienst{/b1}
+145	{b1}So erreichen Sie den Kundendienst von New World Computing{/b1}
+146	{b1}Kundendienst per Telefon:{/b1} Sie erreichen die Support-Hotline von New World Computing unter (818) 889-5650 von 9 bis 12 Uhr und von 14 bis 17 Uhr (PST).
+147	{b1}America Online:{/b1} Sie können dem Kundendienst eine E-Mail an NewWorldCo schicken. Um zu unserem Kundendienst-Forum in der Industry Connection zu gelangen, verwenden Sie „Go to“ und geben NewWorld ein. Neben dem Lesen und Verfassen von Nachrichten können Sie Dateien aus der „New World Software Library“ herunterladen. Informationen zur Mitgliedschaft und ein kostenloses Starterpaket erhalten Sie unter der gebührenfreien Nummer von America Online, 1 (800) 827-6364.
+148	{b1}CompuServe:{/b1} Um zu unserem Kundendienst-Forum im Game Publishers Forum zu gelangen, verwenden Sie „Go to“ und geben „GAMEDPUB“ ein. Wählen Sie dann New World Computing. Neben dem Lesen und Verfassen von Nachrichten können Sie Dateien aus den Library Files herunterladen. Unsere E-Mail-Adresse für den Kundendienst ist 76004-3610. Informationen zur Mitgliedschaft und ein kostenloses Starterpaket erhalten Sie unter der gebührenfreien Nummer von CompuServe, 1 (800) 848-8199; fragen Sie nach dem Vertreter Nr. 368, der eine Einführungsmitgliedschaft und ein Nutzungsguthaben von 15 $ umfasst.
+149	{b1}GEnie:{/b1} Sie können dem Kundendienst eine E-Mail an „NEW.WORLD“ schicken. Um zu unserem Kundendienst-Forum im Games RoundTable, Scorpia RT, zu gelangen, geben Sie an einer beliebigen „?“-Eingabeaufforderung M805;1 ein. Wählen Sie dann New World Computing. Neben dem Lesen und Verfassen von Nachrichten können Sie Dateien aus den „Games RoundTable Libraries“ herunterladen. Informationen zur Mitgliedschaft erhalten Sie unter der gebührenfreien Nummer von GEnie, 1 (800) 638-9636.
+150	{b1}New World Computing BBS:{/b1} Die BBS von New World Computing unterstützt Baudraten von 1200/2400/9600/14400 bei einer Modemeinstellung von 8,N,1. Sie ist 24 Stunden am Tag, 7 Tage die Woche in Betrieb. In diesem System finden Sie Dateien zum Herunterladen und Kundendienst. Wählen Sie zum Verbinden 1 (818) 889-5684. Eine Mitgliedschaft ist nicht nötig, und die einzigen Kosten sind eventuelle Ferngesprächsgebühren.

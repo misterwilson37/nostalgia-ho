@@ -1,0 +1,129 @@
+114	Une planète colonisée et inhospitalière
+115	Une planète dont la gravité dépasse 2,5 G ou est inférieure à 0,4 G sera pratiquement impossible à rendre rentable, quoi que vous fassiez pour la terraformer et quel que soit le temps que vous attendiez. Toutefois, il peut arriver, rarement, qu’il soit judicieux de garder une telle planète pour des raisons stratégiques. Le reste du temps, prenez-en simplement tout le métal puis abandonnez-la : ne vous donnez pas la peine de la terraformer. Nous, nous prenons tout le métal, puis nous construisons un satellite pour garder un œil sur la planète, puis nous abandonnons la colonie (en n’y dépensant plus d’argent).
+116	Une planète colonisée, épuisée et inhospitalière
+118	Une planète inexplorée
+121	Si vous envoyez une flotte vers une planète inexplorée, le point d’interrogation se change en point d’exclamation, pour vous faire savoir que vous en saurez bientôt plus. C’est pratique pour explorer plusieurs planètes en un seul tour, puisqu’on voit facilement celles vers lesquelles on envoie des vaisseaux.
+122	Une planète explorée et habitable
+123	C’est une planète que vous avez explorée récemment, mais où vous n’avez pas établi de colonie. Toute planète accompagnée d’un point a au moins une flotte. Ce n’est pas une mauvaise idée de laisser des flottes aux planètes que vous avez explorées, juste pour les surveiller.
+124	Une colonie d’extraction
+125	C’est une planète que vous avez colonisée, mais dont la gravité n’est pas assez bonne pour qu’elle devienne jamais rentable. Ne vous donnez pas la peine de terraformer ces colonies.
+126	Une planète ennemie
+127	Toute planète où vous perdez une bataille devient une planète ennemie. Parfois, il n’y aura ni vaisseaux ni habitants ennemis, par exemple quand un ennemi arrive, vous tue et repart. Parfois, il y aura là une énorme armada.
+128	Notez qu’une planète sera affichée comme « ennemie » jusqu’à ce que vous y envoyiez une autre flotte et gagniez une bataille ; en fait, vous pouvez très bien envoyer une flotte vers une planète ennemie et n’y trouver personne. Toutes les informations que vous avez sur les planètes datent de votre dernière visite. S’il y a longtemps que vous n’êtes pas allé sur une planète donnée, les informations sur elle peuvent être inexactes.
+129	Les planètes ennemies ont l’air de méchants très variés. Chaque joueur ennemi a son propre aspect, ce qui vous permet de savoir qui vous combattez et où.
+130	Une planète presque explorée
+131	De temps en temps, vous enverrez une flotte vers une étoile où vous n’êtes jamais allé et vous y trouverez une flotte ennemie de force comparable à la vôtre. Si cette bataille se solde réellement par un match nul, vous obtiendrez cette drôle d’icône, qui vous rappelle que vous n’avez pas encore exploré la planète, mais que vous savez que des méchants rôdent.
+132	Des satellites à une planète
+133	Si vous mettez des satellites en orbite autour d’une planète, un cercle entourera cette planète sur la carte des étoiles pour vous indiquer qu’elle est défendue.
+134	Des flottes à une planète
+136	Une planète bleu vif coiffée d’un chapeau
+137	Une planète rouge couverte de cratères
+138	Une planète inexplorée
+139	Une planète avec un point d’exclamation
+140	Une planète bleu vif
+141	Une planète ennemie
+142	Une autre planète ennemie
+143	Une troisième planète ennemie
+144	Une planète barrée d’une croix rouge
+145	Une planète entourée d’un anneau
+146	Corriger les dépenses
+147	La commande « Corriger les dépenses » se trouve dans le menu « Galaxie ». Elle fait plusieurs choses.
+148	Si vous ne dépensez pas assez pour certaines planètes (sans atteindre le trait noir), juste assez d’argent est ajouté pour toucher ce trait noir. L’argent est prélevé sur votre épargne : si vous n’avez pas d’épargne, il ne se passe rien. Si vous dépensez zéro pour cent pour une planète, la commande suppose que vous voulez l’abandonner et ne corrige pas ses barres de dépenses.
+149	Si vous dépensez trop pour certaines planètes (plus d’argent que nécessaire pour terraformer, extraire et construire les vaisseaux actuellement en file d’attente), la barre de la planète est abaissée au niveau juste suffisant pour payer ce qui doit être fait. L’argent en trop est versé à l’épargne.
+150	Pour chaque barre corrigée, un message apparaît dans le coin inférieur gauche de la carte des étoiles. Si des messages de tour ordinaires sont encore affichés dans le coin inférieur gauche, l’option « Corriger les dépenses » est grisée jusqu’à ce que vous les ayez tous passés.
+151	Glossaire
+152	Ennemi
+153	Quiconque n’est pas vous.
+154	Gravité
+156	Revenu
+158	Échelle log
+160	Bloqué
+162	Métal
+165	Argent
+167	Planète
+168	La même chose qu’une étoile.
+169	La distance qu’un vaisseau peut parcourir sans se ravitailler. Un vaisseau de Distance 6 peut faire 3 à l’aller et 3 au retour, ou aller jusqu’à 5 et y rester bloqué.
+170	Satellite
+171	Un vaisseau qui ne peut pas bouger. Sa Distance est zéro.
+172	Bouclier
+175	Étoile
+176	La même chose qu’une planète.
+177	Température
+179	Terraformation
+181	Arme
+183	Manuel de Spaceward Ho! 2.0 (DOS)
+184	{a1}Sommaire{/a1}
+185	C’est le manuel qui était fourni avec l’édition DOS/Windows de Spaceward Ho! 2.0 (Delta Tao Software). C’est un simple extrait en texte brut des mots du manuel Mac : il parle donc encore de Mac, de Système 7 et d’AppleTalk. Les numéros de page entre crochets sont ceux du manuel d’origine.
+186	{a1}Les petits caractères{/a1} {small2}(p. 4){/small2}
+187	{a1}Instructions ultra-rapides pour le Ho!{/a1} {small2}(p. 4){/small2}
+188	{a1}Installer le jeu{/a1} {small2}(p. 5){/small2}
+189	{a1}Aperçu rapide{/a1} {small2}(p. 5){/small2}
+190	{b1}Jouer{/b1}
+191	{a1}Commencer une nouvelle partie{/a1} {small2}(p. 7){/small2}
+192	{a1}Galaxies personnalisées{/a1} {small2}(p. 7){/small2}
+193	{a1}Les joueurs ordinateur{/a1} {small2}(p. 9){/small2}
+194	{a1}Les fenêtres{/a1} {small2}(p. 9){/small2}
+195	{a1}Informations sur le budget{/a1} {small2}(p. 13){/small2}
+196	{a1}La fenêtre des dépenses en technologie{/a1} {small2}(p. 17){/small2}
+197	{a1}L’économie{/a1} {small2}(p. 17){/small2}
+198	{a1}Les vaisseaux{/a1} {small2}(p. 20){/small2}
+199	{a1}Le progrès technologique{/a1} {small2}(p. 26){/small2}
+200	{a1}Explorer les planètes : température et gravité{/a1} {small2}(p. 29){/small2}
+201	{b1}Autres choses{/b1}
+202	{a1}Envoyer des messages{/a1} {small2}(p. 38){/small2}
+203	{a1}Revoir les batailles{/a1} {small2}(p. 39){/small2}
+204	{a1}Comparer les joueurs{/a1} {small2}(p. 40){/small2}
+205	{a1}Parties à plusieurs{/a1} {small2}(p. 40){/small2}
+206	{a1}Corriger les dépenses{/a1} {small2}(p. 42){/small2}
+207	{a1}Le fichier de préférences{/a1} {small2}(p. 43){/small2}
+208	{a1}Le menu Options{/a1} {small2}(p. 44){/small2}
+209	{a1}Raccourcis{/a1} {small2}(p. 48){/small2}
+210	{b1}Le reste{/b1}
+211	{a1}À propos de Spaceward Ho!{/a1} {small2}(p. 50){/small2}
+212	{a1}Problèmes courants{/a1} {small2}(p. 51){/small2}
+213	{a1}Glossaire{/a1} {small2}(p. 54){/small2}
+214	{a1}Assistance technique{/a1} {small2}(p. 56){/small2}
+215	{a1}Lisez-moi : informations mises à jour{/a1}
+216	Installer le jeu
+217	Installation sous DOS
+218	Installation sous Windows
+219	Le PDF dont cette page est tirée liste ces deux titres sans donner de texte sous aucun des deux.
+220	Parties à plusieurs
+221	Spaceward Ho! est vraiment conçu pour se jouer à beaucoup. Le style de jeu unique par « connexion » se prête à ce que la partie principale soit sur un serveur de fichiers quelconque, chaque joueur mettant à jour ses tours sur sa propre machine.
+222	Voici comment faire si vous avez une installation AppleShare. Demandez à quelqu’un de créer la galaxie sur un serveur de fichiers auquel tout le monde a accès. (N’oubliez pas que sous Système 7.0, n’importe qui peut être un serveur de fichiers.) Puis demandez à chacun d’ouvrir la partie à tour de rôle, car le serveur de fichiers ne peut accueillir qu’une personne à la fois.
+223	La première personne à rejoindre la partie devient l’« administrateur de la partie ». C’est la seule à pouvoir dire quand traiter le premier tour. Quand tous ceux qui ont rejoint la partie ont terminé leur premier tour, une alerte apparaît sur l’ordinateur de l’administrateur, lui indiquant combien de personnes sont entrées dans la partie et lui demandant s’il veut passer au tour suivant. Une fois la partie arrivée après l’an 2000, plus personne ne peut la rejoindre : si le nombre de personnes inscrites est inférieur à ce que l’administrateur attend, il doit cliquer sur le bouton « Attendre » et trouver qui ne s’est pas connecté. Quand ils se connectent et terminent leur tour, l’alerte réapparaît, avec un plus grand nombre de joueurs humains.
+224	La partie à plusieurs ressemblera étonnamment à une partie à un joueur. La principale différence, bien sûr, est que certains des extraterrestres que vous croisez sont joués par des humains, qui peuvent être nettement plus rusés et plus fourbes que les joueurs ordinateur. L’autre différence est que vous devrez attendre que les autres humains aient terminé leur tour avant de passer au tour suivant. Et AppleTalk est bien plus lent que votre disque dur local, la mise à jour des tours prend donc plus de temps.
+225	Quand vous avez fini un tour, Spaceward Ho! vous le signale en mettant une coche à gauche de votre icône et de votre nom, dans le coin inférieur gauche de la fenêtre principale. Vous pouvez voir qui d’autre a fini ou non en regardant s’il y a une coche à côté de son nom. Crier aux gens de se dépêcher est un comportement parfaitement acceptable dans une partie à plusieurs de Spaceward Ho!.
+226	Si vous n’avez pas AppleTalk ou si vous n’avez qu’un seul Mac, vous pouvez quand même jouer à plusieurs : utilisez une seule machine et jouez à tour de rôle. Essayez la commande « Fin du tour et changer de joueur… » du menu Fichier. Son raccourci clavier est Commande-Option-T. (Au premier tour, il se peut que vous deviez fermer la partie puis la rouvrir, en saisissant le nom du second joueur dans la boîte de dialogue du mot de passe.)
+227	Autre moyen de jouer avec beaucoup de monde : sauvegarder simplement le fichier de la partie sur une disquette. Vous pouvez alors faire circuler la disquette, chacun jouant son tour quand il l’a, puis la passant à quelqu’un d’autre. C’est lent, mais faisable si vous n’êtes pas en réseau.
+228	Lisez-moi : informations mises à jour
+229	{a1}Sommaire{/a1} {a2}← Précédent{/a2}
+230	Le PDF place ce fichier texte devant une seconde copie du manuel. C’est le fichier READ.ME de l’édition Windows, « VERSION 0.5 ».
+231	Note spéciale sur la protection par mot de passe
+232	Spaceward Ho! demande à l’utilisateur de saisir un mot de passe à intervalles aléatoires pendant la partie. Les mots de passe sont fournis sur un encart séparé, pour votre commodité.
+233	Spaceward Ho! : informations mises à jour
+234	Informations importantes sur Spaceward Ho! pour Windows. Ce fichier contient des informations qui ne figurent peut-être pas dans votre manuel. Veuillez prendre quelques instants pour les lire. Ce texte sera peut-être plus facile à lire si vous agrandissez la fenêtre du Bloc-notes au maximum. Pour cela, cliquez sur le bouton Agrandir dans le coin supérieur droit, ou utilisez les touches ALT+ESPACE puis X. Pour obtenir de l’aide sur le Bloc-notes, appuyez sur F1.
+235	256 couleurs, 16 couleurs ou noir et blanc
+236	Spaceward Ho! prend en charge les modes noir et blanc (monochrome), 16 couleurs et 256 couleurs. À l’installation de Windows, un pilote générique 16 couleurs est normalement installé. Chaque fabricant de cartes vidéo fournit une disquette de pilotes pour Windows qui tirent parti des capacités de votre carte vidéo.
+237	Pour installer un autre pilote ou changer de résolution, consultez votre manuel Windows et/ou le fabricant de votre carte vidéo pour obtenir des détails et des informations précises sur votre carte.
+238	Nous recommandons d’utiliser 640x480 en mode 256 couleurs, même si des résolutions supérieures donneront aussi des résultats impressionnants.
+239	Parties en réseau
+240	Quand vous lancez Spaceward Ho! sur un réseau, assurez-vous de travailler sous SHARE. Consultez votre manuel DOS ou la documentation de votre réseau pour plus de détails sur le partage de fichiers sur votre système.
+241	Avant de créer un fichier de partie, assurez-vous que tous les joueurs ont un accès complet en lecture et en écriture au répertoire du serveur que vous choisissez. Les utilisateurs sans accès complet ne pourront pas rejoindre la partie.
+242	Assurez-vous que chaque joueur en réseau utilise sa propre copie locale de Spaceward Ho!. Si plusieurs joueurs en réseau lancent le même exécutable, les fichiers de partie risquent d’être corrompus, ou le programme de planter.
+243	Utilisation du son
+244	{b1}UTILISATION DU SON MULTIMÉDIA (Windows 3.1 et Windows 3.0 avec extensions MPC){/b1}
+245	Le son de forme d’onde du système multimédia de Windows est pris en charge. Assurez-vous que votre système est correctement configuré pour votre matériel sonore. Consultez la documentation de Windows pour plus de détails.
+246	{b1}UTILISATION DE LA CARTE SOUNDBLASTER® SOUS WINDOWS 3.0{/b1}
+247	Si une carte SoundBlaster® est installée dans votre système et que vous travaillez sous Windows 3.0, vous pourrez peut-être utiliser le fichier SNDBLST.DLL fourni par Creative Labs, Inc. Le fichier SNDBLST.DLL a peut-être été fourni avec votre carte SoundBlaster®, ou vous pouvez contacter directement Creative Labs pour en recevoir une copie. Une fois la DLL installée dans votre répertoire Windows, la section suivante doit être ajoutée à votre fichier WIN.INI :
+248	[SoundBlaster] Port=220 Int=7 DMA=1
+249	Si votre carte SoundBlaster® est configurée avec des réglages différents de ceux indiqués ci-dessus (les réglages par défaut), modifiez le fichier WIN.INI et utilisez le port et le numéro d’interruption corrects pour votre installation de la SoundBlaster®. Consultez la documentation de votre SoundBlaster® pour plus de détails. (SoundBlaster® est une marque déposée de Creative Labs, Inc.)
+250	Revoir les batailles
+251	Il arrive que vos vaisseaux croisent ceux d’autres joueurs. Dans ce cas, ils se battent jusqu’à ce qu’un camp soit anéanti. Il faut avouer que cela ne favorise pas la coexistence pacifique, mais c’est un jeu de guerre. Quoi qu’il en soit, après un combat, vous voudrez savoir ce qui s’est passé. Il y a plusieurs moyens de le savoir. D’abord, si « Toujours revoir les batailles » est coché dans le menu « Options », vous obtiendrez un résumé des batailles qui viennent d’avoir lieu au début de chaque tour, avec vos autres messages.
+252	Vous pouvez aussi sélectionner une étoile et revoir la dernière bataille qui s’y est déroulée en choisissant « Revoir la bataille à Proxima » (ou autre) dans le menu « Galaxie ». S’il y a eu deux batailles ou plus à une étoile, vous ne pourrez voir que la plus récente de cette façon.
+253	Double-cliquer sur une étoile où vous avez livré bataille mais qui n’est pas votre colonie revoit aussi la bataille la plus récente. (Double-cliquer sur une colonie ouvre la boîte de dialogue « Construire des vaisseaux ».)
+254	Cliquer sur un message de résumé de bataille dans la fenêtre des rapports vous fait revoir cette bataille. S’il y a eu plus d’une bataille à une étoile, vous pouvez revoir une ancienne bataille de cette façon.
+255	Vous pouvez régler la vitesse à laquelle Spaceward Ho! rejoue la bataille avec la boîte de dialogue « Vitesse des batailles… » du menu « Options ». Si vous décochez l’option « Batailles entièrement animées », chaque pile de vaisseaux tire simultanément et il n’y a plus d’images d’explosion. Cela rend les batailles bien plus rapides.
+256	Si vous perdez une bataille dès le tout premier round, vos commandants n’auront pas eu le temps de vous envoyer des informations sur la bataille avant d’être détruits. Vous n’aurez donc guère idée du nombre de vaisseaux ennemis présents, juste qu’ils étaient assez nombreux pour vous anéantir.
+257	Envoyer des messages
+258	Vous pouvez envoyer des messages aux autres joueurs d’une partie de Spaceward Ho! Comme les joueurs ordinateur doivent pouvoir comprendre les messages et en envoyer eux-mêmes, nous avons conçu un langage très simple, assez universel pour que vous communiquiez avec tout le monde dans la partie.

@@ -1,0 +1,65 @@
+296	El informe del meteorito tiene texto
+297	Una colonia arrasada por una lluvia de meteoritos recibía un informe en blanco: su número está más allá del final de la lista de textos de informe de la 1.2. El parche le da el informe de la 2.0, que nombra la lluvia de meteoritos: “Una lluvia de meteoritos destruyó tu colonia en …”.
+298	Una flota desguazada en el hiperespacio se informa en el hiperespacio
+299	Una flota marcada para desguace mientras estaba en el hiperespacio se informaba “en” la estrella anterior a la primera, que forma parte de la cabecera de la galaxia: un carácter perdido (la letra del número de estrella de la 18.ª casilla de origen, o ninguno) y, en el informe en inglés, sin metal salvo que el número de estrella de la 8.ª casilla de origen fuera casualmente el tuyo. El parche la informa “en el hiperespacio” sin metal, como hace la 3.0.1.
+300	Las barras de las colonias del ordenador ya no se desbordan
+301	Cuando el ordenador daba a una colonia más de $2.147.483 para una sola partida, la suma se desbordaba y las barras de la colonia salían mal. El parche las calcula sin desbordamiento.
+302	Los ordenadores juegan su primer turno en los mapas de Espiral y Cúmulo
+303	En los mapas de Espiral y Cúmulo los ordenadores no hacían nada en 2010: una marca puesta para que el mapa se trazara en 2010 nunca se borraba. El parche les deja planificar desde el primer turno, como hace la 4.0.5.
+304	Los Cazas varados piden una colonia solo cuando están varados
+305	Una flota de Cazas del ordenador con poco combustible buscaba una colonia al alcance, pero la comprobación de la respuesta leía una marca borrada justo antes, así que siempre pedía una colonia nueva donde estaba. El parche solo la pide cuando no hay ninguna colonia dentro del combustible que le queda.
+306	Las barras de las colonias del ordenador ya no se desbordan
+307	Cuando un ordenador daba a una colonia más de $2.147.483 para una sola partida, la suma se desbordaba y las barras de la colonia salían mal. El parche las calcula sin desbordamiento.
+308	Las naves viejas enviadas a casa se encaminan con su propio Alcance
+309	Cuando los ordenadores mandaban naves viejas a casa, el programa pasaba la posición de la flota en una lista donde el buscador de rutas quiere su Alcance. No afectaba a la partida (la colonia siempre está al alcance); el parche pasa el Alcance.
+310	Una colonia terminada en la primera estrella se bloquea como cualquier otra
+311	La comprobación que impide arrastrar la barra del presupuesto de una colonia terminada miraba el número de la estrella en lugar de lo que es la casilla del presupuesto, así que a una colonia terminada en la primera estrella de la lista todavía se le podía arrastrar la barra. El parche la bloquea como a cualquier otra.
+312	Cada estrella que nombró un ganador entra en las galaxias siguientes
+313	Los nombres que los ganadores dieron a las estrellas se numeraban con un puesto de retraso al crear una galaxia nueva: el primero se convertía en “Hope”, el 191.º nombre del propio programa, y el último nombrado nunca se usaba. El parche pone todos los nombres guardados.
+314	Los jugadores eliminados no cuentan como los más pobres
+315	Un ordenador que buscaba al jugador más pobre y al más rico se saltaba a los jugadores eliminados por una marca que ya no tenían, así que un jugador eliminado (sin dinero) solía contar como el más pobre, y un ordenador rara vez era “con diferencia el más pobre”. El parche deja fuera a los jugadores eliminados, como hacen la 3.0.1 y la 5.0.5.
+316	Con 30 modelos, los ordenadores conservan los modelos del turno anterior
+317	Con 30 modelos, un ordenador sigue construyendo las elecciones del turno anterior para las clases que no había alcanzado, pero las guardaba como posiciones en su lista de modelos, que puede haber cambiado desde entonces, así que podía construir otro modelo o ninguno. El parche conserva los propios modelos.
+318	Una flota de Cazas o Acorazados del ordenador con poco combustible buscaba una colonia al alcance y luego ignoraba la respuesta, así que siempre pedía una colonia nueva donde estaba. El parche solo la pide cuando no hay ninguna colonia dentro del combustible que le queda, como hace el parche 3.0.1.1.
+319	Cuando los ordenadores mandaban naves viejas a casa, el programa pasaba la posición de la flota en una lista donde el buscador de rutas quiere su Alcance. El parche pasa el Alcance.
+320	Una colonia en la primera estrella se trata como cualquier otra
+321	Dos comprobaciones miraban el número de la estrella en lugar de lo que es la casilla del presupuesto, así que a una colonia terminada en la primera estrella de la lista todavía se le podía arrastrar la barra del presupuesto, y su gente quedaba fuera de los hitos de población. El parche la trata como a cualquier otra colonia.
+322	Marcar un tipo de nave devuelve todas las naves de ese tipo que pediste
+323	Marcar un tipo de nave para desguace en la ventana de construcción devolvía solo una de las naves de ese tipo pedidas allí; el resto se construían y luego se desguazaban con el tipo. El parche las devuelve todas.
+324	El rango por encima de 1.000.000 de puntos maestros tiene nombre
+325	Desde 1.000.000 de puntos maestros la Lista de puntos maestros mostraba “%s: %s” como rango, un texto pensado para rellenarse. El parche muestra el rango máximo, Ho! Champion.
+326	Las fechas del Salón de la Fama muestran las dos últimas cifras del año
+327	El Salón de la Fama y el Salón de la Vergüenza imprimían los años desde 1900, que solo tenían dos cifras hasta 1999: 2026 se muestra como 126. El parche muestra las dos últimas cifras, así que 2026 es 26.
+328	El Salón de la Vergüenza dice “Loser:”
+329	El resumen del Salón de la Vergüenza te rotulaba “Loser”, sin los dos puntos que lleva cualquier otra etiqueta. El parche los añade.
+330	Un nuevo nivel de tecnología se informa con su propio nombre
+331	El informe de un nuevo nivel de tecnología imprimía el nombre del nivel siguiente: Alcance 7 era “Pila de fusión” en lugar de “Llenar el depósito”, y Miniaturización 20 era la línea de créditos del programa. El parche imprime el nombre propio del nivel, como hace el Mac 4.0.5.
+332	Los intereses que no puedes pagar traen el calentamiento global
+333	Cuando tus intereses eran más que el dinero de este turno y todo lo que aún podías pedir prestado, una comprobación escrita al revés (un error de signo) lo cargaba todo a los Ahorros de naves, por muy endeudado que estuvieras, así que el calentamiento global para el que el juego tiene un mensaje nunca ocurría. El parche compara en el sentido correcto, como hacía la 4.0.5: entonces tus planetas se calientan o se enfrían alejándose de tu temperatura y una de tus flotas se desguaza por falta de fondos.
+334	Las naves enviadas a casa para desguazarlas se encaminan con su propio Alcance
+335	Cuando los ordenadores mandaban a casa naves obsoletas y Cisternas para desguazarlas, el programa pasaba la posición de la flota en una lista donde el buscador de rutas quiere su Alcance, así que las rutas que encontraba podían ser erróneas. El parche pasa el Alcance.
+336	El informe del meteorito nombra la lluvia de meteoritos
+337	Una colonia arrasada por una lluvia de meteoritos se informaba como “… destruyó tu colonia”, nombrando a quien un informe diez mensajes antes dejó en memoria por casualidad (donde la propia 2.0 podía colgarse). El parche informa “Una lluvia de meteoritos destruyó tu colonia en …”.
+338	Organizar naves promedia el combustible de todas las flotas
+339	Organizar naves da a cada flota del modelo el combustible medio gastado, pero contaba como máximo 11 flotas, así que con 12 la media salía demasiado alta. El parche divide por el número real de flotas.
+340	La valoración de ataque de los ordenadores ya no se desborda
+341	Los ordenadores calculaban la fuerza de un modelo en 16 bits, así que desde aproximadamente Armas 4 la suma se desbordaba y juzgaban mal sus propias naves de guerra. El parche la calcula en 32 bits, como hacen la 1.2 y la 3.0.1.
+342	Los Cazas viejos enviados a casa se encaminan con su propio Alcance
+343	Cuando los ordenadores mandaban Cazas viejos a casa, el programa pasaba la posición de la flota en una lista donde el buscador de rutas quiere su Alcance. No afectaba a la partida (la colonia siempre está al alcance), y el remake ya encamina estas flotas por su propio Alcance; se incluye en la lista para que el parche cubra todos los descuidos encontrados.
+344	Una flota marcada para desguace mientras estaba en el hiperespacio se informaba “en” la estrella anterior a la primera, que forma parte de la cabecera de la galaxia: un nombre vacío, y sin metal (salvo que tu flota fuera la del primer jugador y la novena casilla de origen fuera la primera estrella). El parche la informa “en el hiperespacio” sin metal, como hace la 3.0.1.
+345	Las dos líneas sin información de la ventana de batalla alemana están en el orden correcto
+346	En la versión alemana, las líneas de la ventana de batalla “You have no information.” y “You were destroyed immediately.” (cadenas 74 y 75) están intercambiadas. El parche pone cada una en su sitio; solo importa cuando se juega en alemán.
+347	No más de tres mensajes por turno
+348	El juego guarda sitio para tres mensajes por turno, y los ordenadores nunca envían más, pero nada impedía enviar un cuarto: se escribía encima de tus regalos del turno y más allá del espacio que Terminar el turno guarda para cada jugador. El parche se detiene en tres, como hacía el juego de Mac.
+349	Se dibujan los motores más rápidos y las proas más fuertes
+350	Una nave se dibuja a partir de un motor, un casco y una proa, pero el juego de Palm no tiene imagen para el motor más alto (6205) ni para la proa más alta (6105), así que esas naves se dibujaban con una pieza que faltaba. El parche dibuja el motor y la proa más altos que existen.
+351	Se muestran el signo de marca registrada y la viñeta
+352	Los textos del juego venían del Mac, donde “™” y “•” son otros bytes que en el iPhone, así que los nombres de tecnología mostraban “PowerPCª” y “Speedy Gonzalezª” y la maldición se leía “#!$@*$&@¥ª!”. El parche muestra “™” y “•”.
+353	El informe de los espías turcos es un informe propio
+354	En la versión turca el informe de secretos tecnológicos robados es una copia del informe de la línea de crédito. El parche lo escribe en turco (con las palabras del remake); solo importa cuando se juega en turco.
+355	El informe de colonia destruida en turco traduce “lost”
+356	En la versión turca el informe de una colonia destruida en batalla dejaba la palabra “lost” en inglés, pegada al número de naves. El parche redacta esa frase como lo hace el informe de batalla turco (con las palabras del remake); solo importa cuando se juega en turco.
+357	Una colonia arrasada por una lluvia de meteoritos se informaba como “… destruyó tu colonia”, nombrando a quien un informe diez mensajes antes dejó en memoria por casualidad, o leyendo un nombre de la memoria que hubiera más allá de los datos del propio juego. El parche informa “Una lluvia de meteoritos destruyó tu colonia en …”.
+358	Una flota marcada para desguace mientras estaba en el hiperespacio se informaba “en” la estrella anterior a la primera, que forma parte de la cabecera de la galaxia: un carácter perdido (la letra del número de estrella de la 18.ª casilla de origen, o ninguno), y sin metal salvo que el número de estrella de la 8.ª casilla de origen fuera casualmente el tuyo. El parche la informa “en el hiperespacio” sin metal, como hace la 3.0.1.
+359	El informe de bienvenida da la versión correcta
+360	El primer informe de una partida decía “Spaceward Ho! Version 4.0.3”: la cadena nunca se actualizó para la 4.0.5. El parche dice 4.0.5.

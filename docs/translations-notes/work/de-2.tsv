@@ -1,0 +1,130 @@
+115	Mehrere Personen spielen an einem Computer und kommen abwechselnd an die Reihe. Das Original ließ jeden Spieler einer gemeinsamen Spieldatei beitreten, mit einem Passwort. (2.0 konnte auch über mehrere Rechner gespielt werden.)
+116	Das Ziehen eines Budgetbalkens berechnet die anderen einmal, von dort an, wo das Ziehen begann; 2.0 tat es bei jedem Schritt des Ziehens, sodass ein langes Ziehen etwas anders enden kann.
+117	Kampfwiederholungen werden für die letzten 60 Kämpfe aufbewahrt; 2.0 behielt sie 500 Jahre lang.
+118	Sprache… bietet auch Französisch („traduction du remake“), den eigenen Text des französischen Mac 1.2, dessen Berichte Zeile für Zeile die von 2.0 sind, mit den Worten des Remakes für die wenigen Zeilen, die 1.2 nicht hat: die eigene Übersetzung des Remakes, keine offizielle, und in der Liste so gekennzeichnet. Sie ändert nur Wörter und Namen: In jeder Sprache wird dasselbe Spiel gespielt.
+119	Die Liste der erforschten Planeten und die Einstellungen für Abfragezeit und Kampfgeschwindigkeit.
+120	Version 1 zu 2
+121	Wir haben die Planeten-, Budget- und Flottenfenster in das Kartenfenster integriert und nach links verschoben, um Bildschirmplatz zu sparen. Wir haben Nachrichtenaustausch und Kommunikation hinzugefügt. Wir sind für Schiffe und Planeten auf volle Farbe umgestiegen. Die Computerstrategien wurden von Grund auf neu geschrieben. Die Option „Langsames Spiel“ wurde entfernt; Partien liegen jetzt zwischen den alten langsamen und schnellen Geschwindigkeiten. Wir sind auf ein Ausgabenfenster mit logarithmischer Skala umgestiegen, um bei niedrigen Ausgaben eine bessere Auflösung zu ermöglichen.
+122	Wir haben dafür gesorgt, dass die Computerspieler ihre Schiffe und Flotten (und sich selbst) so benennen wie Menschen. Wir haben einen „Hauptspieler“ (Spielverwalter) hinzugefügt, der in einem Mehrspielerspiel die Aktualisierung zum nächsten Zug erzwingen kann. Wir haben die Funktionen für zeitbegrenzte Züge entfernt, weil wir Spieler mit unterschiedlichen Uhreinstellungen nicht berücksichtigen konnten. Wir haben die Kosten der Technologien geändert, um das Spiel auszubalancieren, und dafür gesorgt, dass das Tempo den Kampf beeinflusst. Wir haben das Drucken zum Laufen gebracht.
+123	Ein Fenster „Galaxis erstellen“: fünf Größen, fünf Formen, Dicht oder Licht, 0 bis 19 Computer und ihr IQ (Dumm, Normal oder Klug). Jeder Mensch wählt eine Stufe, von Novize bis Experte. (1.2 machte jede Galaxis zu einem kleinen dichten Kreis mit einem normalen Computer.)
+124	Frauen: Frauengesichter und -namen, und jeder Computer ist zur Hälfte der Zeit eine Frau.
+125	Keine Novae (1.2 hatte den Code, nie eingeschaltet).
+126	Das Fenster „Funkspruch senden“: zehn Nachrichten pro Zug.
+127	Flotten ordnen gibt den Flotten den durchschnittlichen verbrauchten Treibstoff statt des geringsten und löscht ihre Befehle.
+128	Die Angriffswertung der Computer läuft ab etwa Waffen 4 über (eine 16-Bit-Summe).
+129	Eine von Meteoriten zerstörte Kolonie bekommt einen Bericht, der einen verirrten Spieler nennt (der von 1.2 war leer).
+130	Temperaturen in °F statt °C und englische Namen; 190 Sternnamen.
+131	Autospiel, Spielervergleich (Ranglisten ab 2010) und „Einen Stern benennen“ für den Gewinner.
+132	Der Zug selbst ist der von 1.2, Routine für Routine.
+133	Delta Taos eigene Mac-Fassung von 2.0.1, der Version, von der die DOS- und Windows-3.1-Ausgabe eine Portierung ist: dieselben Regeln, Routine für Routine, mit ein paar Unterschieden in ihrem Code. Jede Regelroutine des Mac-Programms wurde mit ihren eigenen Namen gelesen.
+134	Schiffe ordnen gibt jeder Flotte des Typs am Stern den geringsten unter ihnen verbrauchten Treibstoff und lässt ihre Befehle in Ruhe (wie 1.2).
+135	Eine von einem Meteoritenschauer ausgelöschte Kolonie wird als „… hat Ihre Kolonie zerstört“ gemeldet, mit dem Namen dessen, den ein Bericht zehn Nachrichten früher zufällig zurückgelassen hat: oft Sie oder ein anderer Spieler. Wo dieser Bericht etwas anderes als die Nummer eines Spielers hinterließ, druckte der Mac beliebige Bytes, die hinter den eigenen Daten des Spiels lagen; das Remake nennt niemanden.
+136	Eine Flotte, die im Hyperraum zum Verschrotten markiert wird, wird bei einem verirrten Zeichen gemeldet, das von vor dem Anfang der Sternliste gelesen wird (der Buchstabe der Sternnummer eines unbenutzten Heimatplatzes), mit ihrem Metall als 0 angezeigt, es sei denn, die Nummern dieses Platzes stimmen zufällig mit Ihren überein.
+137	Sind alle Menschen ausgeschieden, endet das Spiel (ohne Sieger, wenn niemand übrig ist). 2.0.1 ging weiter, solange die Computer spielten.
+138	Mehrere Personen spielen an einem Computer und kommen abwechselnd an die Reihe. Das Original ließ jeden Spieler einer gemeinsamen Spieldatei beitreten, mit einem Passwort. (2.0.1 konnte auch über ein Netzwerk gespielt werden.)
+139	Das Ziehen eines Budgetbalkens berechnet die anderen einmal, von dort an, wo das Ziehen begann; 2.0.1 tat es bei jedem Schritt des Ziehens, sodass ein langes Ziehen etwas anders enden kann.
+140	Kampfwiederholungen werden für die letzten 60 Kämpfe aufbewahrt; 2.0.1 behielt sie 500 Jahre lang.
+141	Ein Ereignis ohne eigenen Klang spielt den des Skins; der Mac piepste (der Systemton).
+142	System 6.0.5 oder neuer
+143	TheHo benötigt jetzt 6.0.5 (um das Color-QD-Problem von 6.0.2 zu vermeiden).
+144	Änderungen für Version 2.0.1 (Joe und Peter), auf den Disketten des Mac 2.0.1
+145	Dasselbe Spiel wie die DOS- und Windows-3.1-Ausgabe, außer: Flotten ordnen behält den geringsten verbrauchten Treibstoff von 1.2 und lässt die Befehle in Ruhe (Windows: der Durchschnitt, und die Befehle werden gelöscht), und die Angriffswertung der Computer wird wie bei 1.2 in 32 Bit berechnet, sodass sie nie überläuft (Windows: 16 Bit).
+146	Autospiel, Spielervergleich (Ranglisten ab 2010), Zugende erzwingen und „Einen Stern benennen“ für den Gewinner.
+147	Die Mac-Ausgabe von 4.0.5, eine „fette“ Anwendung für 68k- und PowerPC-Macs, die plattformübergreifend mit der Windows-95-Ausgabe spielt: dasselbe Programm für den Mac kompiliert, Routine für Routine, mit ein paar Unterschieden in ihrem Code. Jede Regelroutine wurde mit ihren eigenen Namen gelesen.
+148	Beste Kumpel teilen Kampfnachrichten, indem sie eine Kopie ihrer Aufzeichnung des Sterns übergeben; wer nicht gekämpft hat, kann den Kampf nicht ansehen.
+149	Die erste Nachricht sagt immer noch „Version 4.0.3“.
+150	Die Sterne, die Gewinner benannt haben, kommen einen Platz zu spät in spätere Galaxien: Der erste wird zu „Hope“, dem 191. Namen des Spiels, und der letzte der vier übernommenen wird nie benutzt.
+151	Ein Sternname, der in einem anderen steckt („Veg“ in „Vega“), gilt als vergeben.
+152	Der Scherz mit dem Farbmonitor: Der Mac 4.0.5 schickte ihn, in einem zufälligen Jahr, nur an einen auf Schwarzweiß gestellten Bildschirm, der Farbe zeigen konnte. Hier ist ein Schwarzweiß-Skin dieser Bildschirm.
+153	Die Namen der Computer stammen aus den 20 Namen pro Geschlecht des Spiels; der Mac fügte außerdem den Namen jedes Menschen hinzu, der auf diesem Mac gespielt hatte.
+154	Die Namen der Schiffstypen stammen aus den 15 pro Klasse des Spiels; der Mac fügte außerdem die Namen hinzu, die Sie ins Typenfenster getippt hatten.
+155	Hinweise werden mit den Zufallszahlen des Browsers gezogen, und die vier benannten Sterne, die eine neue Galaxis übernimmt, werden aus dem Startwert des Spiels gewählt; der Mac benutzte seine eigenen Zufallszahlen.
+156	Sprache… bietet auch Französisch („traduction du remake“) und Türkisch („yeniden yapımın çevirisi“): das offizielle Französisch und Türkisch des iOS-Spiels (und des französischen Mac 1.2) für jede Zeile, die 4.0.5 mit ihnen teilt, also die meisten seiner Berichte, mit den eigenen Zeilen des Remakes für den Rest (die Fragen zu Armageddon, die eigenen Worte des Mac): die eigene Übersetzung des Remakes, keine offizielle, und in der Liste so gekennzeichnet. Sie ändert nur Wörter und Namen: In jeder Sprache wird dasselbe Spiel gespielt.
+157	Das Zeitlimit pro Zug, „Zug für nicht verbundene Spieler automatisch beenden“ und das Netzwerkspiel.
+158	Dasselbe Spiel wie die Windows-95-Ausgabe, außer: Auf einen Tanker wird nach den Kolonieschiffen und vor den Satelliten geschossen; eine neue Technikstufe wird mit ihrem eigenen Namen gemeldet; 15 Schiffsnamen pro Klasse, mehr als Windows für die meisten hat; Geschlecht und Namen der Computer benutzen nicht die Zufallszahlen des Spiels; die Autospiel-Einstellungen stecken die neuen „verteidigten Kolonien“ ins Metall für die Verteidigung; wer im Baufenster einen Schiffstyp markiert, bekommt jedes dort bestellte Schiff dieses Typs zurück; elf Ränge, mit Ho!-Meister ab 1.000.000 Meisterpunkten; ganze Jahre in der Ruhmeshalle.
+159	Die letzte Mac-Version, für Mac OS 9 und X. Jede Routine ihres Programms wurde gelesen, und jede Regel stammt aus ihrem eigenen Code.
+160	4.0.5
+161	Zinsen, die Sie nicht zahlen können, werden den Schiffsersparnissen abgezogen, wie tief Sie auch verschuldet sind: Die globale Erwärmung, für die das Spiel eine Nachricht hat, tritt nie ein.
+162	Ein Versehen dabei, wie die Computer veraltete Schiffe und Tanker zum Verschrotten nach Hause schicken (ein Listenplatz wird als Weite übergeben).
+163	Budgetbalken werden so verwendet, wie sie stehen, auch wenn sie zusammen mehr als 100 % ergeben (Balken, die sich nicht bewegen können, behalten ihre Anteile, wenn man einen anderen zieht), sodass mehr als das eigene Geld ausgegeben werden kann.
+164	Das Anzapfen von Ersparnissen zählt als Einkommen und erhöht daher, wie viel Sie leihen dürfen.
+165	Ein Schiff, das Sie bestellen, aber nicht bezahlen können, belegt trotzdem einen der Bauplätze der Kolonie für den Zug.
+166	Nachdem eine Armageddon-Maschine versagt hat, bleiben die Maschinen eingeschaltet, und es versucht es jeden Zug erneut und versagt erneut.
+167	Sie erfahren pro Zug nur von einer Bevölkerungsmarke jeder Art; ein Sprung über zwei hinaus meldet die zweite später.
+168	Auf einer Spiralkarte wissen die Computer vor 2100, wo jede Heimat liegt.
+169	Die Warnungen „nie rentabel“ und „keine Ausgaben für Forschung“ und die Warnung vor dem roten Stern kommen jeden Zug.
+170	Ein Computer, der eine Kolonie räumt, fragt nicht, und sein Budget ändert sich nicht, bevor der Zug berechnet ist.
+171	Die Route eines Tankers führt nur durch Sterne, die in diesem Jahr erfasst wurden.
+172	Bei einem Start mit Reichtum kommt Ihre zweite Kolonie in der Budgetliste vor Ihrer Heimat.
+173	Ein Computer, dessen Name mit dem Namen eines anderen Spielers beginnt oder selbst den Anfang von dessen Namen bildet, wird nach den Namen der Entwickler umbenannt: Spielen Sie als „Edward“, und ein Computer namens Ed wird zu Peter.
+174	Mehrere Personen spielen an einem Computer und kommen abwechselnd an die Reihe. Das Original ließ jeden Spieler einer gemeinsamen Spieldatei beitreten, mit einem Passwort.
+175	Die Namen der Computer stammen aus den 20 Männer- und 22 Frauennamen des Spiels; 5.0.5 fügte außerdem den Namen jedes Spielers hinzu, der auf diesem Mac gespielt hatte. Die Namen der Schiffstypen stammen aus den 15 pro Klasse des Spiels.
+176	Die Computer planen alle, und jede Flotte bewegt sich, für alle Spieler gleichzeitig; 5.0.5 tat beides im Zug jedes einzelnen Spielers. Das Ergebnis ist bis auf seltene Fälle dasselbe.
+177	Das Ziehen eines Budgetbalkens berechnet die anderen einmal, von dort an, wo das Ziehen begann; 5.0.5 tat es bei jedem Schritt des Ziehens.
+178	Eine Schiffsbestellung hört beim ersten Schiff auf, das Sie nicht bezahlen können, sodass die folgenden keine Bauplätze belegen.
+179	Wenn Sie ein Geschenk machen, werden Sie sofort informiert; 5.0.5 sagte es Ihnen am Ende des Zuges.
+180	Jedes Spiel beginnt mit den Standardanteilen für Budget und Forschung (Forschung je 18 % und Radikal 10 %); 5.0.5 begann ein neues Spiel mit den Anteilen Ihres ersten Zuges aus dem letzten.
+181	Sprache… bietet auch Französisch („traduction du remake“) und Türkisch („yeniden yapımın çevirisi“): das offizielle Französisch und Türkisch des iOS-Spiels überall dort, wo sein Englisch das von 5.0.5 ist, also fast überall, mit den eigenen Zeilen des Remakes für die wenigen Stellen, die 5.0.5 anders sagt (die Hinweise zur Maus, die Treibstoffwarnung) und für ein paar Zeilen, die die iOS-Übersetzung verfehlt hat: die eigene Übersetzung des Remakes, keine offizielle, und in der Liste so gekennzeichnet. Sie ändert nur Wörter und Namen: In jeder Sprache wird dasselbe Spiel gespielt.
+182	Das Fenster „Flotten gruppieren“: „Alle Flotten hier vereinen“ und das Aufteilen folgen seinen Regeln (Bioschiffe bleiben unter sich; die Flotte, die Schiffe übernimmt, behält ihre Befehle und den niedrigeren Treibstoff).
+183	Nach Rang gesperrte Optionen („Mehr Meisterpunkte nötig“): Alle Optionen sind offen.
+184	Die eigenen Worte des Rangfensters zum Benennen eines Sterns (die der iOS-Version werden angezeigt).
+185	Version 4 zu 5
+186	Sieben Jahre sind eine lange Zeit zwischen zwei Überarbeitungen, man könnte also sagen, dass Spaceward Ho! unter der Haube allmählich in die Jahre kam. Nicht für den allgemeinen Gebrauch, denn Sie können Version 1.0 immer noch in der neuesten Version von MacOS X spielen (welche anderen Programme können das?), aber als wir beschlossen, noch einen Haufen Funktionen hinzuzufügen, musste es, nun ja, neu geschrieben werden.
+187	Für alle, die akronymkonforme Anwendungen mögen: Version 5.0 ist jetzt PowerPC, Carbon, multithreaded, TCP/IP und OS-X-freundlich.
+188	Was die Funktionen angeht (auf der Haube), gibt es in Version 5.0 des Ho! eine ganze Menge Neues. Trotzdem werden Sie, wenn Sie 4.0 kennen, mit der neuen spielen und alles herausfinden können. Wir geben Ihnen aber diese praktische Liste der neuen Funktionen, damit Sie wissen, was Sie bekommen.
+189	Systemvoraussetzungen
+190	Spaceward Ho! 5.0 ist größer als je zuvor und benötigt etwa 20 Megabyte Festplattenplatz, 10 Megabyte RAM und OS 8.6 oder neuer.
+191	Internetspiel
+192	Treten Sie spacewardho.net bei, um mit Menschen aus aller Welt zu spielen.
+193	Klügere Computer
+194	Die Computer können jetzt Bio- und Tankerschiffe einsetzen, Angriffe auf mehrere Planeten fliegen und sparen im Endspiel besser mit ihrem Metall.
+195	Mehrparteienkämpfe
+196	Wenn mehrere Spieler gleichzeitig an einem Stern ankommen, gibt es jetzt einen einzigen großen Kampf, in dem sich Verbündete im Gefecht zusammenschließen. (Manchmal schießen auch zwei mit Ihnen Verbündete aufeinander.)
+197	Gruppierte Flotten
+198	Sie können mehrere Schiffstypen zu einer einzigen Flotte zusammenfassen, damit sie sich leichter bewegen lassen und Flotten verschiedener Geschwindigkeit zusammenbleiben.
+199	Kampfoptionen
+200	Sie können jedem Schiffstyp einer Flotte andere Kampfoptionen geben, sodass manche voll auf Angriff gehen (mit einem Waffenbonus und einem Schildabzug) oder auf Verteidigung. Und Sie können einige Schiffe – meist Ihr Kolonieschiff – hinter der Hauptflotte herfliegen lassen, sodass sie erst eingreifen, wenn der Hauptkampf vorbei ist.
+201	Flottenrouten
+202	Sie können jetzt mit gedrückter Wahltaste auf eine lange Route für eine Flotte klicken, damit sie, soweit der Treibstoff reicht, eine Folge von Sternen besucht.
+203	Neue Radikaltechniken
+204	Dazu gehören bessere Forschung, höhere Sparzinsen, niedrigere Kreditzinsen und vieles mehr.
+205	Schneller und einfacher
+206	Wir sind stolz darauf, dass Spaceward Ho! entgegen der allgemeinen Neigung von Software, immer aufgeblähter zu werden, mit jeder Version leichter zu spielen und schneller geworden ist. Version 5 ist die bisher schnellste.
+207	Neue Benutzeroberfläche
+208	Jede Flotte hat ihren eigenen Punkt auf der Sternkarte, und Sie können eine Flotte einfach zu ihrem Ziel ziehen, um sie zu bewegen. Kontextmenüs gibt es auch.
+209	Nativ für OS X
+210	Spaceward Ho! 5 ist für den optimalen Einsatz unter OS X oder OS 8 oder 9 „carbonisiert“.
+211	Kooperatives Spiel
+212	Mehrspielerspiele können automatisch alle Menschen gegen die Computer antreten lassen, für lustige und freundschaftliche Partien.
+213	Neue Ostereier
+214	Aber hier können wir Ihnen nichts darüber verraten. Sie werden sie finden oder im Netz von ihnen hören.
+215	Aktualisierungen
+216	Software-Aktualisierungen für Spaceward Ho! (sobald wir sie veröffentlichen) finden Sie auf unserer Website unter http://www.deltatao.com
+217	Danke an alle, die Vorschläge geschickt haben, ob persönlich, auf ihrer Garantiekarte, auf comp.sys.mac.games oder am Telefon. Wir haben alles in Betracht gezogen, was irgendjemand vorgeschlagen hat, und auch wenn wir nicht jede neue Idee umsetzen konnten, werden Sie, denken wir, vieles finden, das wir umgesetzt haben.
+218	OS 8.6 oder neuer
+219	20 MB
+220	10 MB
+221	Sie wählen ein Heimatsystem statt einer Stufe, der IQ der Computer ist eine Zahl von 50 bis 200, und es gibt Sechseck-Galaxien.
+222	Schiffe kosten bei hoher Technik weniger (die Kosten von 4.0.5 sind ein Produkt aller vier Werte); höchstens 24 Typen.
+223	Alle an einem Stern kämpfen gleichzeitig statt in Duellen, mit Haltungen und „Verspätet ankommen“ (ein zweiter Kampf).
+224	Die Forschungseinrichtung, der Leitzins und billigerer Kredit.
+225	Novae warnen mehr, mit einer wundersamen Rettung, und Armageddon verkürzt Entfernungen.
+226	Ersparnisse anzapfen nimmt jeden Zug bis zu 30 % Ihrer Ersparnisse, bis Sie es abstellen.
+227	Kolonien werden nach Einkommen aufgelistet, und die ärmsten werden zuerst bezahlt.
+228	Meisterpunkte und 25 Ränge, mit einer Grenze dafür, wie weit ein Sieg Sie bringt.
+229	Ein neuer Rang erlaubt es Ihnen, einen Stern (bis zu 11 Buchstaben) für Ihre nächsten Galaxien zu benennen, fünf pro Galaxis.
+230	Summen ab zehn Millionen werden in den Feldern als „$12.345M“ geschrieben.
+231	Eine Portierung des Mac 5.0 auf Palm-Handhelds: das Spiel 5.0 neu kompiliert, dieselben Regeln mit denselben Eigenheiten. Jede Routine ihres Programms wurde gelesen, und jede Regel stammt aus ihrem eigenen Code.
+232	5.0.5 (Mac)
+233	Wenn alle Seiten eines Kampfes geschlagen sind, gehen seine Trümmer verloren.
+234	Die schnellsten Triebwerke und die stärksten Bugs haben kein Bild, sodass diese Schiffe mit einem fehlenden Teil gezeichnet werden.
+235	Nichts hindert Sie daran, mehr als drei Nachrichten pro Zug zu senden, obwohl das Spiel nur Platz für drei hat: Eine vierte wird über Ihre Geschenke des Zuges geschrieben. Das Remake lässt Sie so viele senden, wie Sie wollen.
+236	Wer einen Stern namens Kansas räumt, bekommt immer den Dorothy-Spruch, Hope fragt immer, und ein Stern namens Ship fordert Sie auf, das Schiff zu verlassen. (Aus der Nachrichtenliste gelten die alten Scherze, einer von dreien.)
+237	Die Zufallszahlen sind die des Remakes (das Palm-Spiel liest eine feste Tabelle von 5.000 Zahlen), daher lässt sich eine Partie nicht Zug um Zug wiederholen.
+238	Mehrere Personen spielen an einem Computer und kommen abwechselnd an die Reihe. Das Palm-Spiel hatte Platz für eine Person: Das „Hinzufügen“ seines Spielerfensters weist jeden ab, sobald das Spiel existiert.
+239	Die Computer planen alle, und jede Flotte bewegt sich, für alle Spieler gleichzeitig; das Palm-Spiel tat beides im Zug jedes einzelnen Spielers. Das Ergebnis ist bis auf seltene Fälle dasselbe.
+240	Das Ziehen eines Budgetbalkens berechnet die anderen einmal, von dort an, wo das Ziehen begann.
+241	Wenn Sie ein Geschenk machen, werden Sie sofort informiert; das Palm-Spiel sagte es Ihnen am Ende des Zuges.
+242	Jedes Spiel beginnt mit den Standardanteilen für Budget und Forschung; das Palm-Spiel begann ein neues Spiel mit den Anteilen Ihres ersten Zuges aus dem letzten.
+243	Die Klänge sind die des Skins, nicht die wenigen Pieptöne des Handhelds.
+244	Sprache… bietet auch Französisch („traduction du remake“) und Türkisch („yeniden yapımın çevirisi“): das offizielle Französisch und Türkisch des iOS-Spiels für jede Zeile, die der Palm mit 5.0.5 teilt, mit den eigenen Zeilen des Remakes für die Hinweise, die ersten Nachrichten, den Täuschschiff-Bericht und das Kampffenster des Palm: die eigene Übersetzung des Remakes, keine offizielle, und in der Liste so gekennzeichnet. Sie ändert nur Wörter und Namen: In jeder Sprache wird dasselbe Spiel gespielt.

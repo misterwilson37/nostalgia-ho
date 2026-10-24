@@ -1,0 +1,137 @@
+322	{a1}Menzil{/a1}
+323	{a1}Hız{/a1}
+324	{a1}Silâhlar ve Kalkanlar{/a1}
+325	{a1}Mini{/a1}
+326	{a1}Radikal{/a1}
+327	{a1}Mesaj Göndermek{/a1}
+328	{a1}İttifaklar{/a1}
+329	{a1}Oyuncuları Karşılaştırmak{/a1}
+330	{b1}Savaş{/b1}
+331	{a1}Savaşları Gözden Geçirmek{/a1}
+332	{b1}Grafik Geçmişi{/b1}
+333	{a1}Grafik Geçmişi{/a1}
+334	{a1}Özel Galaksiler{/a1}
+335	{a1}Bilgisayar Oyuncularının Sayısı{/a1}
+336	{a1}Galaksinin Büyüklüğü{/a1}
+337	{a1}Galaksinin Tarzı{/a1}
+338	{a1}Bilgisayar Zekâsı{/a1}
+339	{a1}Otomatik Oyna...{/a1}
+340	{a1}Şeref Listesi ve Utanç Listesi{/a1}
+341	{a1}Tercihler{/a1}
+342	{a1}Filo Rotalarını Göster{/a1}
+343	{a1}Gezegen Listesini Kendiliğinden Sırala{/a1}
+344	{a1}Olay mesajlarını göster{/a1}
+345	{a1}Olay Savaşlarını Gözden Geçir{/a1}
+346	{a1}Savaş Hızını Ayarla{/a1}
+347	{a1}Yoklama Süresini Ayarla{/a1}
+348	{a1}Yazar Peter Commons Hakkında{/a1}
+349	{a1}Spaceward Ho! Hakkında{/a1}
+350	{a1}Neden Kovboy Teması?{/a1}
+351	{a1}Emeği Geçenler{/a1}
+352	{a1}Müşteri Desteği{/a1}
+353	{a1}Telif Hakkı Bilgileri{/a1}
+354	{a1}Sözlük{/a1}
+355	Öteki konular
+356	{a1}Seçenekler Menüsü{/a1}
+357	{a1}Ana Gezegenin{/a1}
+358	{a1}Seçili Bir Gezegen{/a1}
+359	{a1}Keşfedilmemiş Bir Gezegen{/a1}
+360	{a1}Bu, halkının kendini geçindirebilecek nok{/a1}
+364	Rapor Penceresi, son birkaç sırada olan önemli şeylerin kaydırılabilen bir geçmişidir. Her mesaj, her sıranın başında Yıldız Haritası’nın sol alt köşesinde görünür. Mesaja tıkladığında bir sonrakine geçer.
+366	Her sıra{b1} Spaceward Ho!{/b1} oynamayla ilgili ipuçları alırsın. Hepsini gördükten sonra, “Seçenekler” menüsündeki {b2}Tercihler...{/b2} komutundan bunu kapatabilirsin.
+368	Mini
+369	{b1}Mini{/b1}
+371	Gemileri Hareket Ettirmek
+372	{b1}Gemileri Hareket Ettirmek{/b1}
+373	Bir filoyu hareket ettirmek için bulunduğu gezegenden gitmesini istediğin yere tıklayıp sürüklemen yeter. Ulaşabiliyorsan, filonun izleyeceği rota boyunca uzanan bir ok görürsün. Fareyi bıraktığında rotanın belirlendiğini bildiren bir “Hyahh!” sesi duyarsın. Sırayı bitirdiğinde gemi yoluna koyulur.
+375	Bir filoyu yerinde tutmak ya da hareketini iptal etmek için filonun gezegenine tıkla ve bir saniye basılı tut. Doğru yaptıysan, fareyi bıraktığında bir “Whoa!” sesi duyarsın.
+376	Bir gezegende birden çok filon varsa, Bütçe Bilgileri’nde filonun adına tıklayarak hareket ettirilecek filoyu seçebilirsin. Bir filonun gideceği bir yer varsa ve sırayı bitirdiğinde hareket edecekse, bunu sana bildirmek için filonun adı kalın yazılır. O gezegendeki bir sonraki filoya geçmek için {b1}TAB{/b1} tuşuna bas.
+377	Bir filo, senin ya da müttefiklerinin sahip olduğu bir gezegene her gittiğinde kendiliğinden yakıt alır. Bir filonun ayrılmaya yetecek yakıtı yoksa, o gezegene bir Koloni Gemisi gönderip gezegeni bir sıralığına kolonileştirebilir, sonra herkesi oradan ayırabilirsin. Ya da filonun yakıtını doldurmak için bir tanker gönderebilirsin.
+379	Bilgisayar Oyuncularının Sayısı
+380	{b1}Bilgisayar Oyuncularının Sayısı{/b1}
+381	Bilgisayar Oyuncularının Sayısı epey açıktır: galaksiyi seninle paylaşacak düşmanların sayısıdır. Ne kadar çok olurlarsa o kadar çok direnişle karşılaşırsın.
+382	Filoları Düzenlemek
+383	{b1}Filoları Düzenlemek{/b1}
+384	Bazen bir filoyu parçalara bölmek ya da birkaç filoyu bir araya getirmek isteyebilirsin. Bunun için “Gemiler” menüsünden {b1}Gemileri Hazırla{/b1} komutunu seç. Sonra gemileri istediğin gibi dağılana kadar tıklayıp sürükle. Kusura bakma, bir filoda yalnızca aynı tipte gemiler olabilir (dosya boyutunu küçültmek için).
+385	Gezegen Bilgileri
+386	{b1}Gezegen Bilgileri{/b1}
+387	Seçili gezegenle (çevresinde “taç” olanla) ilgili bilgiler Ana Pencere’nin sol üst köşesindedir. Büyüyen bir koloniyi seçersen, o gezegene harcadığın paranın madencilikle terraform arasında nasıl paylaştırıldığını gösteren bir pasta grafik görürsün. Yine, her birine tam olarak yüzde kaç harcadığına fazla takılma; yalnızca oranları doğru tutturmaya çalış.
+388	Bir gezegenin sıcaklığını 72{img1/} değerine (en sevdiğin sıcaklık) getirmek için Terraform’a para harca. Gezegen zaten 72{img2/} ise terraform’a para harcayamazsın.
+390	Bir gezegenin “Geliri”, o gezegenin toplam bütçene kattığı fazladan paradır. Yeni kolonileştirdiğin bir gezegense bu eksi olur; yani onu yalnızca hayatta tutmak için bile ona para akıtman gerekir. Bir gezegen ana gezegenine (72{img1/} ve 1,00 G) ne kadar benziyorsa, para kazandırma olasılığı o kadar yüksektir. Ana gezegenine fazla benzemeyen gezegenler hiçbir zaman kâr getirmez.
+391	Tercihler
+392	{b1}Tercihler{/b1}
+393	Tercihlerin çoğu “Seçenekler” menüsündeki {b1}Tercihler{/b1} iletişim kutusuyla ayarlanır.
+394	Radikal
+395	{b1}Teknoloji {/b1}
+396	{b1}Radikal{/b1}
+397	Radikal araştırma sana öteki teknolojilerin hiçbirinin veremeyeceği şeyler verebilir. Radikal Teknoloji’ye para yatırdığında, bilim insanların arada bir şaşırtıcı bir buluş yapabilir. Bazı Radikal buluşlar sana daha yüksek teknoloji düzeyleri, biyolojik silâhlar, hava denetimi ya da yeni madencilik teknikleri kazandırabilir. Bir sonraki Radikal Teknoloji sıçramasının ne zaman olacağını asla bilemezsin; öteki teknolojilerden çok daha rastgeledir. Radikal Teknoloji’yle olabilecek her şeyi anlatmayacağız; bunu kendin keşfetmen gerekecek.
+398	Radikal Teknoloji öteki teknolojileri yükseltir, ama o teknolojilerin araştırma temelini değiştirmez. Örneğin Silâh ve Kalkan Teknolojisi düzeylerin 5 ve 5 ise ve Radikal Teknolojin Kalkanlarını 7’ye çıkarırsa, Silâh Teknolojin Kalkan Teknolojisiyle aynı anda 8’e ulaşır. Yani Radikal Teknoloji’nin sağladığı üstünlük yalnızca geçicidir; onu iyi kullan.
+399	Menzil
+400	{b1}Menzil{/b1}
+402	Olay Savaşlarını Gözden Geçir
+403	{b1}Olay Savaşlarını Gözden Geçir{/b1}
+404	Bu seçenek yalnızca üstündeki {b1}Olay mesajlarını göster{/b1} de işaretliyse önemlidir. İkisi de işaretliyse, bir savaş olayı mesajı gösterilmek üzereyken savaş her seferinde kendiliğinden gözden geçirilir. İşaretli değilse yalnızca özet mesajı gösterilir.
+405	Savaşları Gözden Geçirmek
+406	{b1}Savaşları Gözden Geçirmek{/b1}
+407	Gemilerin düşman gemilerine rastladığında, taraflardan biri ölene kadar savaşırlar. Kabul edelim, bu barış içinde bir arada yaşamayı pek kolaylaştırmaz, ama bu bir savaş oyunu. Neyse, bir çarpışma olduğunda ne halt olduğunu bilmek isteyeceksin. Bunu öğrenmenin birkaç yolu var. Birincisi, {b2}Tercihler {/b2}iletişim kutusunda {b1}Muharebeleri Gözden Geçir{/b1} işaretliyse, her sıranın başında savaşların bir özetini alırsın.
+408	Ayrıca herhangi bir yıldızı seçip “Gemiler” menüsünden {b1}Proxima’daki Savaşı Gözden Geçir{/b1} (ya da adı neyse) komutunu seçerek o yıldızdaki son savaşı gözden geçirebilirsin. Bir yıldızda iki ya da daha çok savaş olduysa, bu yolla yalnızca en sonuncusunu görebilirsin.
+409	Oradaki en son savaşı gözden geçirmek için bir {i1}düşman{/i1} yıldızına çift tıkla.
+410	Bir savaşı gözden geçirmek için Rapor Penceresi’nde o savaşın özet mesajına tıkla. Bir yıldızda birden çok savaş olduysa, eski bir savaşı bu yolla gözden geçirebilirsin. Spaceward Ho!’nun savaşı ne kadar hızlı oynatacağını {b1}Tercihler{/b1} iletişim kutusunda ayarlayabilirsin.
+411	Bir savaşı ilk turda kaybedersen, gemi komutanlarının yok edilmeden önce sana savaş hakkında bilgi gönderecek zamanı olmaz. Bu yüzden orada kaç düşman gemisi olduğu hakkında pek bir fikrin olmaz; yalnızca seni yok edecek kadar çok olduklarını bilirsin.
+412	Filoları ve Gemileri Hurdaya Çıkarmak
+413	{b1}Filoları ve Gemileri Hurdaya Çıkarmak{/b1}
+414	Oyun ilerledikçe metâlin kıt olduğunu ve eskimiş gemilerinin neredeyse işe yaramadığını görürsün. Eski teknelerinin bazılarından kurtulmak isteyebilirsin. Kolonilerinden birindeki bir filoyu hurdaya çıkararak metâlinin %75’ini geri kazanabilirsin (“Gemiler” menüsünden {b1}Filoyu Parçala{/b1} komutunu seç). Ya da bütün bir gemi tipini hurdaya çıkarabilirsin ({b3}Gemi Yap/Tasarla{/b3} iletişim kutusunda belirli bir tip için {b2}Hepsini hurdaya çıkar{/b2} düğmesine tıkla).
+415	Bir gemi tipini ya da filoyu hurdaya çıkarılmak üzere işaretlediğinde, sırayı bitirene kadar hurdaya çıkarılmaz. O zamana kadar caydıysan, {b2}Gemi Yap/Tasarla{/b2} iletişim kutusundaki {b1}Hurdaya çıkarma{/b1} düğmesine basman ya da “Gemiler” menüsünden {b3}Filoyu Parçalama{/b3} komutunu seçmen yeter.
+416	Bir filonun yalnızca bir bölümünü hurdaya çıkarmak istiyorsan, filoyu saklamak istediklerinle hurdaya çıkarmak istediklerine ayırmak için {b1}Gemileri Hazırla{/b1} iletişim kutusunu kullan.
+417	Gemileri hurdaya çıkardığında, bir koloninin üstündelerse metâl anında genel stokuna geçer ve onu hemen kullanabilirsin. Gemilerin üstünde bulunduğu gezegen senin değilse, metâl gezegenin üstüne düşer. Orayı kolonileştiren bir sonraki kişi, hurdaya çıkardığın gemilerin metâlini oradan çıkarabilir.
+418	Mesaj Göndermek
+419	{b1}Mesaj Göndermek{/b1}
+420	Bir {b1}Spaceward Ho!{/b1} oyununda öteki oyunculara mesaj gönderebilirsin. Bilgisayar oyuncularının da mesajları anlaması ve kendi mesajlarını göndermesi gerektiği için oyundaki herkes için basit bir dil tasarlandı.
+421	Mesaj göndermek için “Galaksi” menüsünden Mesaj Gönder komutunu seçmen yeter. Kime gönderileceğine, ne söyleneceğine ve bunun gibi şeylere karar vermeni sağlayan bir iletişim kutusu açılır. Bütün mesajları öğrenmenin en iyi yolu hepsini denemektir.
+422	Mesajların, onları alan kişi üzerinde farklı etkileri olur. Bir oyuncuya ondan nefret ettiğini söylersen, seni eskisinden daha az sevmeye yatkın olur. Onu sevdiğini söylersen, o da seni sevebilir ya da sevmeyebilir.
+423	Bilgisayar oyuncuları mesajlarında arada bir yalan söyler; bazıları ötekilerden daha çok. Ama tıpkı senin gibi, bazı mesajlarda yalan söyleyemezler.
+424	Öteki oyunculara özel mesaj gönderebilirsin, ama öteki mesajlar gibi mesajın ulaşması bir sıra sürer.
+425	Ağ oyunlarında Sohbet Penceresi’nde öteki oyuncularla gerçek zamanlı sohbet edebilirsin. Mesajlarını yazman yeter; öteki oyuncular yorumlarını kendi Sohbet Pencerelerinde anında görür.
+426	Savaş Hızını Ayarla
+427	{b1}Savaş Hızını Ayarla{/b1}
+428	Savaş hızını burada ayarlayarak savaş gözden geçirmelerindeki atışların ve patlamaların hızını denetleyebilirsin. Savaşları izlemekten sıkılırsan, onları hızlandır. {b1}Gruplar Birlikte Ateş Eder{/b1} seçeneğini açmak, özellikle dev savaşlarda savaşları epey hızlandırır. {b2}Tam Canlandırılmış Savaşlar{/b2} seçeneğinin işaretini kaldırmak patlama grafiklerini atlar ve savaşların daha da hızlı geçmesini sağlar.
+429	Yoklama Süresini Ayarla
+430	{b1}Yoklama Süresini Ayarla{/b1}
+431	Yoklama süresi, bilgisayarın kimin sırasını bitirip kimin bitirmediğini görmek için oyun dosyasını ne sıklıkla denetleyeceğini belirler. Yoklama süresi ne kadar kısaysa, bilgisayar herkesin bitirdiğini o kadar çabuk öğrenir. Ne yazık ki yavaş bir ağda çok sayıda kişiyle oynuyorsan, aşırı ağ trafiğini önlemek için yoklama süresini epey uzun tut.
+432	Çok Oyunculu Bir Oyun Kurmak
+433	{b1}Çok Oyunculu Bir Oyun Kurmak{/b1}
+434	{b1}Spaceward Ho! IV{/b1}’ü ağ üzerinden oynamak için bir oyuncunun, bütün oyuncuların erişebildiği bir dosya sunucusunda (ayrı bir sunucu ya da Windows’taki dosya paylaşımı yoluyla) {b2}Galaksiyi Yaratması{/b2} gerekir. Katılmak için bütün oyuncular o oyunu açmalı, sonra {b3}Herkes Hazır{/b3} düğmesine tıklamalıdır.
+435	Süren bir ağ oyunu varsa, oyunu açıp adını yeni bir oyuncu olarak yazarak bir bilgisayar oyuncusunun yerini alabilirsin.
+436	Çok oyunculu ekran tek oyunculu bir oyuna benzer ve bu bilerek yapılmıştır. İnsan oyuncuları bilgisayar oyuncularından ayırt etmek zor olabilir (insanların genellikle daha sinsi olması dışında).
+437	Sohbet penceresi yoluyla öteki insanlarla doğrudan konuşabilirsin (sohbet penceresini açıp kapatmak için {b1}Ctrl-3{/b1}). Bilgisayar oyuncuları sohbet penceresinde hiç konuşmaz.
+438	Gemiler
+439	{b1}Giriş{/b1}
+441	{b1}Spaceward Ho!{/b1} gemileri inanılmaz derecede büyük ve pahalıdır. Örneğin ilk Koloni Gemin, gezegeninin bütün kaynaklarının neredeyse üçte birini, üstüne de gezegenin otuz yıllık bütün sanayi üretimini yutar. Koca bir gemi!
+442	Kısayollar
+443	{b1}Kısayollar{/b1}
+444	{b1}Spaceward Ho!{/b1}’da çeşitli şeyler için birkaç kısayol var. Bu bölüm onları sana tanıtıyor ve bazıları için örnekler veriyor.
+446	Bütün galaksiyi daha iyi görmek ya da galaksinin belirli bir bölümüne yakından bakmak için Yıldız Haritası’nın ölçeğini değiştirebilirsin. Bunun için “Pencere” menüsünden {b1}Yakınlaştır{/b1} ya da {b2}Uzaklaştır{/b2} komutunu seçmen yeter.
+449	Kayıp bir filoyu, {b1}Filoların Listesini Yap{/b1} iletişim kutusunda seçip {b2}Filoya Git{/b2} düğmesine basarak çabucak seçebilir ve ona kayabilirsin.
+450	İlgini çeken bir yıldızı bulmak için {b1}Keşfedilen Tüm Yıldızları Listele{/b1} komutunu kullanıp {b2}Yıldıza Git{/b2} düğmesine basabilirsin (keşfedilmiş bir yıldızsa). Ya da yıldızın adını klavyeden yazman yeter.
+451	Keşfettiğin bütün yıldızları görmek için “Galaksi” menüsünden {b1}Keşfedilen Tüm Yıldızları Listele...{/b1} komutunu seç.
+452	Gemileri hareket ettirirken {b1}TAB{/b1} tuşuna basarak gezegenin listesindeki bir sonraki gemiyi seçebilirsin.
+453	{b1}RETURN{/b1} tuşuna basarak bir sonraki olay mesajına geçebilirsin.
+454	Olay mesajlarını göster
+455	{b1}Olay mesajlarını göster{/b1}
+456	Bu seçenek seçiliyse, bütün olay mesajları her sıranın başında haritanın sol alt köşesinde gösterilir. Bir sonrakine geçmek için mesaja tıkla ya da Return tuşuna bas.
+457	Bu seçenek işaretli olsun ya da olmasın, bütün mesajlar Rapor Penceresi’nde görünür.
+458	{b1}Ho!{/b1}’yu, yalnızca “önemli” şeyler (savaşlar ve teknoloji artışları) için mesaj verecek şekilde ayarlayabilirsin. Bunu {b2}Ama Yalnızca En Önemlileri{/b2} seçeneğini seçerek yaparsın. Yüksek hızlı oyunlarda çok kullanışlıdır.
+459	Filo Rotalarını Göster
+460	{b1}Filo Rotalarını Göster{/b1}
+461	Bu seçenek, filoların bir yere giderken {b1}Spaceward Ho!{/b1}’nun düz bir çizgi göstermesini sağlar. Filolar yaklaştıkça çizgi kısalır. Hem kullanışlı hem de bilgilendiricidir.
+462	Spaceward Ho! - 3.0’dan 4.0’a Eklemeler
+463	{b1}Değişiklikler ve Eklemeler {/b1}
+464	{b1}Spaceward Ho! - 3.0’dan 4.0’a Eklemeler{/b1}
+465	Ho!’nun 4.0 sürümünde müthiş çok yenilik var. 3.0’ı biliyorsan yeni sürümle oynayıp her şeyi çözebilirsin. Yine de neler elde ettiğini bilmen için yeni özelliklerin kullanışlı bir listesi aşağıda.
+466	Birkaç yeni radikal teknoloji eklendi ve eskileri daha iyi bir oyun dengesi için ayarlandı. Üç yeni gemi tipi eklendi: Abalar, Tankerler ve Biyolojikler. Birkaç iletişim kutusu, özellikle gemi yapımınınki, yenilendi.
+467	Artık yeni bir oyuna başlarken savaş şansını kapatabilirsin; böylece hiçbir oyuncu savaşta kara kedi ya da at nalı almaz. Tonlarca yeni grafik ve ses eklendi. Artık bir gezegenin yerçekimini resmine bakarak anlayabilirsin: büyük gezegenlerin yerçekimi daha yüksektir. Ayrıca Yıldız Haritası’nda mavi bir gezegenin sıcak mı soğuk mu olduğunu anlayabilirsin. Uyduları öldürmek iki kat zorlaştı ve her turda iki kez ateş ediyorlar. Yapımları da iki kat para ve metâle mal oluyor. Harcamaları düzeltme sırayı bitirdiğinde kendiliğinden yapılıyor, bu yüzden artık menülerde yok.
+468	Madencilik/terraform oranını artık eski pasta grafik yerine bir kaydırıcıyla ayarlıyorsun. Bir gezegeni terraform etmeden önce resmini görebilirsin. Ayrıntılarını görmek için resme tıkla.
+469	Ho! artık oyun boyunca nasıl gittiğine dair istatistikler tutuyor; ayrıca bir “Usta Puanı” düzeniyle bir oyuncunun birkaç oyun boyunca nasıl ilerlediğine dair istatistikler de tutuyor. Her oyun kazandığında oyunun zorluğuna göre “Usta Puanları” alırsın. Toplayabildiğin kadar topla; zor oyunlar çok daha fazla puan eder.
+470	Yeni düzen oyunun zorluğunu kabaca 0-100 arası bir ölçekte derecelendiriyor. Son zorluk müttefik sayısına, oyunun hızına ve benzerlerine bağlıdır. Artık öteki oyunculara özel mesaj gönderebilirsin, ama öteki mesajlar gibi mesajın ulaşması bir sıra sürer.
+471	Oyunu hızlandırmak için satranç tarzı bir sıra saati de eklendi. Bilgisayar oyuncuları artık simge listesinde gelir sırasına göre listeleniyor. Ayrıca şeytani bilgisayar oyuncuları artık daha da akıllı, dikkat et. Abalara bayılırlar.
+472	Artık iki ittifak düzeyi var: normal ve en iyi arkadaşlar. Ayrıca oyuna geç katılanlar bir bilgisayar oyuncusunun yerini alabiliyor. Bir ağ oyununda sıraların eskisinden kat kat hızlı güncellendiğini fark edeceksin. Tek oyunculu oyunlar da daha hızlı güncelleniyor. Gerçek zamanlı sohbet ile özel iletişim için serbest biçimli mesajlar eklendi.

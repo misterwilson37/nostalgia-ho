@@ -1,0 +1,120 @@
+70	La filtración de Valdez amenaza con una demanda, pero no se lleva nada.
+71	Marcar un tipo de nave para desguace en la ventana de construcción devuelve solo una de las naves de ese tipo que pediste allí; el resto se construyen y luego se desguazan con el tipo.
+72	Pasado 1.000.000 de puntos maestros, la Lista de puntos maestros muestra “%s: %s” como tu rango.
+73	El Salón de la Fama escribe el año como los años desde 1900: 1996 es 96, 2026 es 126.
+74	El resumen del Salón de la Vergüenza te llama “Loser”, sin dos puntos.
+75	De 50.000 a 499.999 puntos maestros la Lista de puntos maestros no tiene imagen: el juego no la tiene.
+76	Un nuevo nivel de tecnología se informa con el nombre del nivel siguiente: Alcance 7 es “Pila de fusión” en lugar de “Llenar el depósito”, y Miniaturización 20 es la línea de créditos del programa.
+77	Las estrellas que nombraron los ganadores se ponen en las galaxias posteriores con un puesto de retraso: la primera se convierte en “Hope”, el 191.º nombre del propio juego, y la última nombrada nunca se usa.
+78	Un quinto nombre de estrella sustituye al cuarto guardado y pasa a ser el primero, de modo que el más reciente de los cuatro es el que se descarta.
+79	Varias personas juegan en un mismo ordenador por turnos. El original dejaba que cada jugador se uniera a un archivo de partida compartido, con contraseña. (La 4.0.5 también permitía jugar en red.)
+80	Los ordenadores planifican, y cada flota se mueve, para todos los jugadores a la vez; la 4.0.5 hacía ambas cosas en el turno de cada jugador. El resultado es el mismo salvo en casos raros.
+81	El Salón de la Fama, el Salón de la Vergüenza y la Lista de puntos maestros se guardan en este navegador, y sus elementos de menú están en el menú Partida (4.0.5: Opciones).
+82	Al arrastrar una barra del presupuesto, las demás se calculan una sola vez, desde donde empezó el arrastre; la 4.0.5 lo hacía en cada paso del arrastre.
+83	Tirar de los ahorros toma un porcentaje de lo máximo que puedes sacar; la 4.0.5 tomaba una cantidad.
+84	Evacuar es el Abandonar de la 4.0.5: la colonia se abandona al terminar el turno, y al pulsarlo otra vez se recupera.
+85	Evacuar una estrella llamada Hope o Ship plantea los chistes de la 4.0.5, siempre; activar Armagedón plantea dos preguntas, una de cinco y otra de seis.
+86	Las pistas se sacan con los números aleatorios del navegador; la 4.0.5 usaba los suyos.
+87	Idioma… también ofrece francés (“traduction du remake”) y turco (“yeniden yapımın çevirisi”): el francés y el turco oficiales del juego de iOS (y del Mac 1.2 francés) para toda línea que la 4.0.5 comparte con ellos, que es la mayoría de sus informes, con las líneas propias del remake para el resto (las preguntas de Armagedón, las palabras propias de la versión de Windows): la traducción propia del remake, no una oficial, y marcada así en la lista. Cambia solo palabras y nombres: se juega la misma partida en todos los idiomas.
+88	Idioma… también ofrece alemán (“Übersetzung des Remakes”), a partir del DOS 2.0 alemán: sus líneas oficiales siempre que el inglés es el de la 2.0 (los informes que la 2.0 ya tenía, Dar nombre a una estrella), y el alemán del remake en sus palabras para el resto: la traducción propia del remake, no una oficial, y marcada así en la lista. Cambia solo palabras y nombres: se juega la misma partida en todos los idiomas.
+89	El límite de tiempo por turno y el juego en red.
+90	De la versión 3 a la 4
+91	Añadimos muchos tipos de nave nuevos, entre ellos Cisternas, Acorazados, Bionaves y Señuelos. Hicimos los Satélites el doble de fuertes (y de caros).
+92	Hicimos el juego nativo para PowerPC, y añadimos funciones que aceleran el juego, como “mostrar solo los mensajes importantes” y la corrección automática de gastos.
+93	Mejoramos mucho el juego multijugador. El reloj de turnos hizo que las partidas avanzaran al ritmo correcto, se añadieron las alianzas de mejores amigos, la suerte en las batallas pasó a ser opcional, añadimos una ventana de chat y mensajes de texto. Los turnos ahora se actualizan en local, y no en la máquina maestra, así que las actualizaciones en red son mucho más rápidas. Permitimos que los jugadores se unan a las partidas una vez empezadas.
+94	Mejoramos la facilidad de uso: se arreglaron varios cuadros de diálogo (sobre todo el de Construir naves), se añadieron mensajes de ayuda, e hicimos que la terraformación fuera un deslizador en lugar del antiguo gráfico circular. Y, por supuesto, los gráficos y los sonidos mejoraron enormemente.
+95	Cambiamos las calificaciones de dificultad, y añadimos los puntos maestros y muchas más estadísticas.
+96	Acorazados (25 disparos por ronda) y Cisternas (reabastecen a todas las flotas de su estrella); 30 modelos en lugar de 20.
+97	La tecnología Radical es una mano de cuatro de 17 descubrimientos, repartida desde 2010: bonificaciones, señuelos, Bionaves que comen gente para repostar, tecnología robada, modelos gratis.
+98	Mejores amigos: aliados que pasan por las colonias del otro y comparten sus mapas.
+99	Una colonia no construye más naves por turno que habitantes tiene.
+100	Ahorros de naves desde el principio, según el nivel.
+101	Los Satélites disparan dos veces, el planeta una vez por cada 200.000 habitantes, y la suerte es opcional.
+102	Terraformación, minas e ingresos como en las versiones posteriores; rangos y puntos maestros por ganar.
+103	El juego del que la 1.2 era una versión preliminar: primero llegó la edición para Windows 3.1, y la edición para DOS es una adaptación suya con los mismos gráficos, sonidos y reglas. Se ha leído cada rutina del programa de Windows.
+104	1.2
+105	Organizar naves da a cada flota del modelo que hay en la estrella el combustible medio gastado, pero cuenta como máximo 11 flotas, así que con 12 o más la media sale demasiado alta.
+106	Organizar naves borra las órdenes de todas las flotas de ese modelo que hay en la estrella, incluso las de una que dejaste en paz.
+107	Una flota nueva creada en Organizar naves se carga de colonos, así que separar una flota colonial vacía de tus colonias la rellena en parte.
+108	Un descuido en cómo los ordenadores desguazan los Cazas viejos no afecta a la partida.
+109	Una colonia arrasada por una lluvia de meteoritos se informa como “… destruyó tu colonia”, nombrando a quien un informe diez mensajes antes dejó en memoria por casualidad: a menudo tú u otro jugador, a veces nadie. (Donde la 2.0 habría leído más allá de sus propios datos y se habría colgado, el remake no nombra a nadie.)
+110	Una flota marcada para desguace mientras está en el hiperespacio se informa “en” un nombre vacío, leído de antes del comienzo de la lista de estrellas, con su metal mostrado como 0.
+111	Los ordenadores calculan en 16 bits la valoración de ataque de sus modelos, así que desde aproximadamente Armas 4 se desborda y juzgan mal sus naves de guerra.
+112	Las barras de las colonias de los ordenadores fallan cuando uno da a una colonia más de $2.147.483 para una sola partida (la suma se desborda).
+113	No hay ningún comando para abandonar una colonia, así que no existe el botón Evacuar: una colonia solo desaparece si se la deja sin fondos hasta que no queda nadie (el aviso “¡Que se mueran!”).
+114	Cuando todos los humanos quedan eliminados, la partida termina (sin ganador si no queda nadie). La 2.0 seguía mientras jugaran los ordenadores.
+115	Varias personas juegan en un mismo ordenador por turnos. El original dejaba que cada jugador se uniera a un archivo de partida compartido, con contraseña. (La 2.0 también permitía jugar entre máquinas.)
+116	Al arrastrar una barra del presupuesto, las demás se calculan una sola vez, desde donde empezó el arrastre; la 2.0 lo hacía en cada paso del arrastre, así que un arrastre largo puede terminar de forma algo distinta.
+117	Las repeticiones de batallas se guardan de las últimas 60 batallas; la 2.0 las guardaba durante 500 años.
+118	Idioma… también ofrece francés (“traduction du remake”), el texto propio del Mac 1.2 francés, cuyos informes son los de la 2.0 línea por línea, con las palabras del remake para las pocas líneas que la 1.2 no tiene: la traducción propia del remake, no una oficial, y marcada así en la lista. Cambia solo palabras y nombres: se juega la misma partida en todos los idiomas.
+119	La lista de Planetas explorados y los ajustes de velocidad de consulta y de batalla.
+120	De la versión 1 a la 2
+121	Incorporamos las ventanas del planeta, del presupuesto y de la flota a la ventana del mapa y las movimos a la izquierda para ahorrar espacio en pantalla. Añadimos el paso de mensajes y la comunicación. Pasamos a todo color para las naves y los planetas. Se reescribieron desde cero las estrategias del ordenador. Se eliminó la opción de “juego lento”; ahora las partidas tienen una velocidad entre la antigua lenta y la rápida. Pasamos a una ventana de gasto en escala logarítmica para tener mejor resolución en los niveles de gasto más bajos.
+122	Hicimos que los jugadores del ordenador pongan nombre a sus naves y flotas (y a sí mismos) igual que las personas. Añadimos un “jugador maestro” (Administrador del juego) que puede forzar la actualización al turno siguiente en una partida multijugador. Eliminamos las funciones de turnos cronometrados, porque no podíamos compensar los distintos ajustes de reloj de la gente. Cambiamos el coste de las Tecnologías para equilibrar el juego, e hicimos que la Velocidad afecte al combate. Hicimos que la impresión funcionara.
+123	Una ventana Crear galaxia: cinco tamaños, cinco formas, Densa o Dispersa, de 0 a 19 ordenadores y su CI (Tonto, Medio o Listo). Cada humano elige un nivel, de Novato a Experto. (La 1.2 hacía de cada galaxia un círculo pequeño y denso con un ordenador medio.)
+124	Mujeres: rostros y nombres de mujer, y cada ordenador es una mujer la mitad de las veces.
+125	Sin novas (la 1.2 tenía el código, nunca activado).
+126	La ventana Enviar mensaje: diez mensajes por turno.
+127	Organizar flotas da a las flotas el combustible medio gastado en lugar del mínimo, y borra sus órdenes.
+128	La valoración de ataque de los ordenadores se desborda desde aproximadamente Armas 4 (una suma de 16 bits).
+129	Una colonia arrasada por meteoritos recibe un informe que nombra a un jugador perdido (el de la 1.2 estaba en blanco).
+130	Temperaturas en °F en lugar de °C, y nombres en inglés; 190 nombres de estrellas.
+131	Juego automático, Comparar jugadores (clasificaciones desde 2010) y Dar nombre a una estrella para el ganador.
+132	El turno en sí es el de la 1.2, rutina por rutina.
+133	La propia versión para Mac de Delta Tao de la 2.0.1, la versión de la que son adaptaciones las ediciones de DOS y Windows 3.1: las mismas reglas, rutina por rutina, con unas pocas diferencias en su código. Se ha leído cada rutina de reglas del programa de Mac con sus propios nombres.
+134	Organizar naves da a cada flota del modelo que hay en la estrella el menor combustible gastado de entre todas, y deja sus órdenes en paz (como la 1.2).
+135	Una colonia arrasada por una lluvia de meteoritos se informa como “… destruyó tu colonia”, nombrando a quien un informe diez mensajes antes dejó en memoria por casualidad: a menudo tú u otro jugador. Cuando ese informe dejó algo que no era el número de un jugador, el Mac imprimía los bytes que hubiera más allá de los datos del propio juego; el remake no nombra a nadie.
+136	Una flota marcada para desguace mientras está en el hiperespacio se informa en un carácter perdido, leído de antes del comienzo de la lista de estrellas (la letra del número de estrella de una casilla de origen sin usar), con su metal mostrado como 0 a menos que los números de esa casilla coincidan por casualidad con los tuyos.
+137	Cuando todos los humanos quedan eliminados, la partida termina (sin ganador si no queda nadie). La 2.0.1 seguía mientras jugaran los ordenadores.
+138	Varias personas juegan en un mismo ordenador por turnos. El original dejaba que cada jugador se uniera a un archivo de partida compartido, con contraseña. (La 2.0.1 también permitía jugar en red.)
+139	Al arrastrar una barra del presupuesto, las demás se calculan una sola vez, desde donde empezó el arrastre; la 2.0.1 lo hacía en cada paso del arrastre, así que un arrastre largo puede terminar de forma algo distinta.
+140	Las repeticiones de batallas se guardan de las últimas 60 batallas; la 2.0.1 las guardaba durante 500 años.
+141	Un suceso sin sonido propio reproduce el del aspecto; el Mac pitaba (el pitido del sistema).
+142	System 6.0.5 o posterior
+143	TheHo ahora requiere 6.0.5 (para evitar el problema de color qd de la 6.0.2).
+144	Cambios de la versión 2.0.1 (Joe y Peter), en los discos del Mac 2.0.1
+145	El mismo juego que la edición para DOS y Windows 3.1, salvo que: Organizar flotas conserva el menor combustible gastado de la 1.2 y deja las órdenes en paz (Windows: la media, y las órdenes borradas), y la valoración de ataque de los ordenadores se calcula en 32 bits, como en la 1.2, así que nunca se desborda (Windows: 16 bits).
+146	Juego automático, Comparar jugadores (clasificaciones desde 2010), Forzar el fin del turno y Dar nombre a una estrella para el ganador.
+147	La edición para Mac de la 4.0.5, una aplicación fat para Mac 68k y PowerPC, que permite jugar entre plataformas con la edición para Windows 95: el mismo programa compilado para Mac, rutina por rutina, con unas pocas diferencias en su código. Se ha leído cada rutina de reglas con sus propios nombres.
+148	Los mejores amigos comparten las noticias de batalla entregándose una copia de su registro de la estrella; el que no combatió no puede revisar la batalla.
+149	El primer mensaje todavía dice “Version 4.0.3”.
+150	Las estrellas que nombraron los ganadores se ponen en las galaxias posteriores con un puesto de retraso: la primera se convierte en “Hope”, el 191.º nombre del propio juego, y la última de las cuatro tomadas nunca se usa.
+151	Un nombre de estrella que se halla dentro de otro (“Veg” en “Vega”) cuenta como ya tomado.
+152	El chiste del monitor en color: el Mac 4.0.5 lo enviaba, en un año al azar, solo a una pantalla configurada en blanco y negro que podía mostrar color. Aquí esa pantalla es un aspecto en blanco y negro.
+153	Los nombres de los ordenadores salen de los 20 nombres por sexo del juego; el Mac añadía además el nombre de cada humano que había jugado en ese Mac.
+154	Los nombres de los modelos de nave salen de los 15 por clase del juego; el Mac añadía además los nombres que habías escrito en la ventana de modelos.
+155	Las pistas se sacan con los números aleatorios del navegador, y las cuatro estrellas nombradas que toma una galaxia nueva se escogen de la semilla del juego; el Mac usaba sus propios números aleatorios.
+156	Idioma… también ofrece francés (“traduction du remake”) y turco (“yeniden yapımın çevirisi”): el francés y el turco oficiales del juego de iOS (y del Mac 1.2 francés) para toda línea que la 4.0.5 comparte con ellos, que es la mayoría de sus informes, con las líneas propias del remake para el resto (las preguntas de Armagedón, las palabras propias del Mac): la traducción propia del remake, no una oficial, y marcada así en la lista. Cambia solo palabras y nombres: se juega la misma partida en todos los idiomas.
+157	El límite de tiempo por turno, “Terminar el turno automáticamente para los jugadores no conectados” y el juego en red.
+158	El mismo juego que la edición para Windows 95, salvo que: a una Cisterna se le dispara después de las Naves colonia y antes de los Satélites; un nuevo nivel de tecnología se informa con su propio nombre; 15 nombres de nave por clase, más de los que tiene Windows para la mayoría; los sexos y nombres de los ordenadores no usan los números aleatorios del juego; los ajustes del juego automático ponen las nuevas “colonias defendidas” en metal para defensa; marcar un tipo de nave en la ventana de construcción devuelve todas las naves de ese tipo pedidas allí; once rangos, con Ho! Champion desde 1.000.000 de puntos maestros; años enteros en el Salón de la Fama.
+159	La última versión para Mac, para Mac OS 9 y X. Se ha leído cada rutina de su programa, y cada regla sale de su propio código.
+160	4.0.5
+161	Los intereses que no puedes pagar salen de los Ahorros de naves, por muy endeudado que estés: el calentamiento global para el que el juego tiene un mensaje nunca ocurre.
+162	Un descuido en cómo los ordenadores mandan a casa las naves obsoletas y las Cisternas para desguazarlas (una posición de lista pasada como el Alcance).
+163	Las barras del presupuesto se usan tal como están, incluso cuando suman más del 100% (las barras que no se pueden mover conservan su parte cuando arrastras otra), así que se puede gastar más de lo que tienes.
+164	Tirar de los ahorros cuenta como ingreso, así que aumenta cuánto puedes pedir prestado.
+165	Una nave que pides pero no puedes pagar gasta igualmente uno de los puestos de construcción de la colonia en ese turno.
+166	Tras fallar un dispositivo de Armagedón, los dispositivos siguen activados y lo intenta de nuevo, y vuelve a fallar, en cada turno.
+167	Solo te enteras de un hito de población de cada clase por turno; si saltas dos, el segundo se informa más tarde.
+168	En un mapa de Espiral los ordenadores saben dónde está cada hogar antes de 2100.
+169	Los avisos de “nunca rentable” y de “no se gasta en investigación”, y el aviso de estrella roja, llegan en cada turno.
+170	Un ordenador que evacúa una colonia no pregunta, y su presupuesto no cambia hasta que se calcula el turno.
+171	La ruta de una cisterna solo pasa por estrellas registradas este año.
+172	Con un comienzo Abundante, tu segunda colonia va antes que tu hogar en la lista del presupuesto.
+173	Un ordenador cuyo nombre empieza como el de otro jugador, o es el principio de este, se renombra con los nombres de los diseñadores: si juegas como “Edward”, un ordenador llamado Ed se convierte en Peter.
+174	Varias personas juegan en un mismo ordenador por turnos. El original dejaba que cada jugador se uniera a un archivo de partida compartido, con contraseña.
+175	Los nombres de los ordenadores salen de los 20 nombres de hombre y 22 de mujer del juego; la 5.0.5 añadía además el nombre de cada jugador que había jugado en ese Mac. Los nombres de los tipos de nave salen de los 15 por clase del juego.
+176	Los ordenadores planifican, y cada flota se mueve, para todos los jugadores a la vez; la 5.0.5 hacía ambas cosas en el turno de cada jugador. El resultado es el mismo salvo en casos raros.
+177	Al arrastrar una barra del presupuesto, las demás se calculan una sola vez, desde donde empezó el arrastre; la 5.0.5 lo hacía en cada paso del arrastre.
+178	Un pedido de naves se detiene en la primera que no puedes pagar, así que las siguientes no gastan puestos de construcción.
+179	Cuando haces un regalo, se te avisa en el acto; la 5.0.5 te avisaba al final del turno.
+180	Toda partida empieza con el presupuesto y los porcentajes de investigación por defecto (investigación 18% cada una y Radical 10%); la 5.0.5 empezaba una partida nueva con los porcentajes de tu primer turno de la anterior.
+181	Idioma… también ofrece francés (“traduction du remake”) y turco (“yeniden yapımın çevirisi”): el francés y el turco oficiales del juego de iOS donde su inglés es el de la 5.0.5, que es casi en todas partes, con las líneas propias del remake para las pocas que la 5.0.5 dice de otro modo (las pistas del ratón, el aviso de combustible) y para unas pocas líneas que la traducción de iOS tenía mal: la traducción propia del remake, no una oficial, y marcada así en la lista. Cambia solo palabras y nombres: se juega la misma partida en todos los idiomas.
+182	La ventana Agrupar flotas: “Unir todas las flotas de aquí” y la división siguen sus reglas (las Bionaves van por su cuenta; la flota que recibe naves conserva sus órdenes y el menor combustible).
+183	Opciones bloqueadas por rango (“Need more MPs”): todas las opciones están abiertas.
+184	Las palabras propias de la ventana de rango para dar nombre a una estrella (se muestran las de la versión de iOS).
+185	De la versión 4 a la 5
+186	Siete años es mucho tiempo entre revisiones, así que se podría decir que, por debajo del capó, Spaceward Ho! se estaba quedando un poco viejo. No para uso general, pues todavía puedes jugar a la versión 1.0 en la última versión de MacOS X (¿qué otras aplicaciones pueden hacer eso?), pero cuando decidimos que queríamos añadir un montón de funciones más, bueno, necesitaba una reescritura.
+187	Así que, para quienes les gustan las aplicaciones que cumplen con los acrónimos, la versión 5.0 es ahora PowerPC, Carbon, multihilo, TCP/IP y compatible con OS X.
+188	En cuanto a funciones (por encima del capó), hay un montón de cosas nuevas en la versión 5.0 del Ho! Aun así, si conoces la 4.0, podrás jugar con la nueva y descubrirlo todo. Sin embargo, te ofrecemos esta práctica lista de funciones nuevas para que sepas lo que te llevas.
+189	Requisitos

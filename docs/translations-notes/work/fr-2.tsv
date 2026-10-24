@@ -1,0 +1,75 @@
+61	Une découverte Radicaux avant la distribution de la première main (2010), ou avec une main vide, peut mal tourner dans l’original ; le remake la tire d’une carte au hasard ou la perd.
+62	Un ordinateur qui cherche le joueur le plus pauvre compte les joueurs éliminés.
+63	Avec 30 modèles, un ordinateur continue de construire les modèles du tour précédent pour les classes qu’il n’avait pas atteintes, conservés par leur place dans sa liste, qui a pu bouger depuis.
+64	Les flottes de croiseurs et d’Épouvantes bloquées demandent toujours une colonie, même quand il y en a une à portée.
+65	Une erreur dans la façon dont les ordinateurs renvoient leurs vieux vaisseaux à la maison pour les recycler (une place de liste passée à la place de la Distance).
+66	Les ordinateurs ne gardent jamais de Tankers : ils les recyclent chez eux et les renvoient chez eux depuis ailleurs.
+67	Une colonie à la première étoile de la liste peut toujours voir sa barre de budget déplacée, et est laissée de côté dans les jalons de population.
+68	Les meilleurs amis partagent les nouvelles de bataille en se remettant tout leur relevé de l’étoile ; celui qui n’a pas combattu ne peut pas revoir la bataille (sous Windows, le relevé de l’ami le dit aussi jusqu’à la sauvegarde de la partie).
+69	Après l’échec d’un dispositif Armageddon, tout le monde apprend que chaque dispositif a été éteint, puis rallumé au tour suivant.
+70	La fuite du Valdez menace d’un procès, mais rien n’est pris.
+71	Marquer un type de vaisseau pour le recyclage dans la fenêtre de construction ne rend qu’un seul des vaisseaux de ce type commandés là ; les autres sont construits, puis recyclés avec le type.
+72	Au-delà de 1 000 000 de master points, la Liste des Master Points affiche “%s: %s” comme rang.
+73	Le Panthéon écrit l’année comme le nombre d’années depuis 1900 : 1996 donne 96, 2026 donne 126.
+74	Le résumé du Mur de la honte vous traite de “Perdant”, sans deux-points.
+75	De 50 000 à 499 999 master points, la Liste des Master Points n’a pas d’image : le jeu n’en a pas.
+76	Un nouveau niveau de technologie est signalé par le nom du niveau suivant : Distance 7 devient “Pile à Fusion” au lieu de “Réservoirs Supplémentaires”, et Miniaturisation 20 est la ligne de crédits du programme.
+77	Les étoiles nommées par les gagnants sont placées dans les galaxies suivantes avec une place de retard : la première devient “Hope”, le 191e nom du jeu, et la dernière nommée n’est jamais utilisée.
+78	Un cinquième nom d’étoile remplace le quatrième conservé et passe en premier, si bien que le plus récent des quatre est celui qui est écarté.
+79	Plusieurs personnes jouent sur un même ordinateur à tour de rôle. L’original laissait chaque joueur rejoindre un fichier de partie partagé, avec un mot de passe. (La 4.0.5 pouvait aussi se jouer en réseau.)
+80	Les ordinateurs font tous leurs plans, et chaque flotte se déplace, pour tous les joueurs à la fois ; la 4.0.5 faisait les deux au tour de chaque joueur. Le résultat est le même sauf cas rares.
+81	Le Panthéon, le Mur de la honte et la Liste des Master Points sont conservés dans ce navigateur, et leurs éléments de menu sont dans le menu Partie (4.0.5 : Options).
+82	Faire glisser une barre de budget calcule les autres une seule fois, à partir du début du glissement ; la 4.0.5 le faisait à chaque étape du glissement.
+83	Puiser dans l’épargne prend un pourcentage du maximum que vous pouvez puiser ; la 4.0.5 prenait un montant.
+84	Évacuer est l’Abandonner de la 4.0.5 : la colonie est abandonnée à la Fin Tour, et appuyer de nouveau dessus la reprend.
+85	Évacuer une étoile nommée Hope ou Ship déclenche les blagues de la 4.0.5, à chaque fois ; activer Armageddon pose deux questions, une parmi cinq et une parmi six.
+86	Les astuces sont tirées par les nombres aléatoires du navigateur ; la 4.0.5 utilisait les siens.
+87	Langue… propose aussi le français (“traduction du remake”) et le turc (“yeniden yapımın çevirisi”) : le français et le turc officiels du jeu iOS (et de la Mac 1.2 française) pour toutes les lignes que la 4.0.5 partage avec eux, soit l’essentiel de ses rapports, avec les lignes propres au remake pour le reste (les questions d’Armageddon, les mots propres à la version Windows) : traduction du remake, et non officielle, signalée comme telle dans la liste. Elle ne change que les mots et les noms : la même partie se joue dans toutes les langues.
+88	Langue… propose aussi l’allemand (“Übersetzung des Remakes”), dans le prolongement de l’allemand du DOS 2.0 : ses lignes officielles partout où l’anglais est celui de la 2.0 (les rapports que la 2.0 avait déjà, Nommer une étoile), et l’allemand du remake, dans ses mots, pour le reste : traduction du remake, et non officielle, signalée comme telle dans la liste. Elle ne change que les mots et les noms : la même partie se joue dans toutes les langues.
+89	La limite de temps par tour et le jeu en réseau.
+90	Version 3 à 4
+91	Nous avons ajouté de nombreux nouveaux types de vaisseaux, dont les Tankers, les Épouvantes, les Biologiques et les Leurres. Nous avons rendu les Satellites deux fois plus puissants (et plus chers).
+92	Nous avons rendu le jeu natif PowerPC et ajouté des fonctions qui accélèrent le jeu, comme “n’afficher que les messages importants” et la correction automatique des dépenses.
+93	Nous avons nettement amélioré le jeu à plusieurs. L’horloge de tour fait avancer les parties au bon rythme, les alliances de meilleurs amis ont été ajoutées, la chance en bataille est devenue facultative, et nous avons ajouté une fenêtre de discussion et des messages texte. Les tours sont désormais mis à jour localement, et non plus sur la machine maître, si bien que les mises à jour réseau sont beaucoup plus rapides. Nous avons permis aux joueurs de rejoindre une partie déjà commencée.
+94	Nous avons amélioré la facilité d’utilisation : plusieurs boîtes de dialogue (surtout Construire des vaisseaux) ont été corrigées, des messages d’aide ont été ajoutés, et la terraformation est désormais un curseur à la place de l’ancien camembert. Et, bien sûr, les graphismes et les sons ont été grandement améliorés.
+95	Nous avons modifié les niveaux de difficulté, et ajouté les Master Points et beaucoup d’autres statistiques.
+96	Épouvantes (25 tirs par round) et Tankers (qui ravitaillent toutes les flottes à leur étoile) ; 30 modèles au lieu de 20.
+97	La technologie radicale est une main de quatre découvertes parmi 17, distribuée à partir de 2010 : bonus, leurres, Biologiques qui mangent des gens pour se ravitailler, technologie volée, modèles gratuits.
+98	Meilleurs amis : des alliés qui passent par les colonies les uns des autres et partagent leurs cartes.
+99	Une colonie ne construit pas plus de vaisseaux par tour qu’elle n’a d’habitants.
+100	Épargne des vaisseaux au départ, selon le niveau.
+101	Les Satellites tirent deux fois, la planète une fois par 200 000 habitants, et la chance est une option.
+102	Terraformation, extraction et revenu comme dans les versions suivantes ; rangs et master points pour une victoire.
+103	Le jeu dont la 1.2 était une préversion : l’édition Windows 3.1 est venue en premier, et l’édition DOS en est un portage avec les mêmes graphismes, les mêmes sons et les mêmes règles. Chaque routine du programme Windows a été lue.
+104	1.2
+105	Organiser Vaisseaux donne à chaque flotte du modèle présente à l’étoile le carburant moyen utilisé, mais ne compte que 11 flottes au plus, si bien qu’à partir de 12 flottes la moyenne est trop élevée.
+106	Organiser Vaisseaux efface les ordres de chaque flotte de ce modèle présente à l’étoile, même celle que vous n’avez pas touchée.
+107	Une nouvelle flotte créée avec Organiser Vaisseaux est chargée de colons, si bien que détacher une flotte de colonisation vide de vos colonies en recharge une partie.
+108	Une erreur dans la façon dont les ordinateurs recyclent leurs vieux croiseurs n’a aucun effet sur le jeu.
+109	Une colonie rayée de la carte par une pluie de météores est signalée par “… a détruit votre colonie”, avec le nom de celui que le rapport dix messages plus tôt a laissé derrière lui : souvent vous ou un autre joueur, parfois personne. (Là où la 2.0 aurait lu au-delà de ses propres données et planté, le remake ne nomme personne.)
+110	Une flotte marquée pour le recyclage dans l’hyperespace est signalée “à” un nom vide, lu avant le début de la liste des étoiles, avec son métal affiché à 0.
+111	Les ordinateurs calculent la cote d’attaque de leurs modèles sur 16 bits, si bien qu’à partir de Armes 4 environ elle boucle et qu’ils jugent mal leurs vaisseaux de guerre.
+112	Les barres de colonie de l’ordinateur se dérèglent quand il donne à une colonie plus de 2 147 483 $ pour un seul poste (la somme déborde).
+113	Il n’existe aucune commande pour abandonner une colonie, donc pas de bouton Évacuer : une colonie ne disparaît que si on la laisse sans financement jusqu’à la mort de ses habitants (l’avertissement “Laissons-les mourir”).
+114	Quand tous les humains sont éliminés, la partie se termine (sans vainqueur s’il ne reste personne). La 2.0 continuait tant que les ordinateurs jouaient.
+115	Plusieurs personnes jouent sur un même ordinateur à tour de rôle. L’original laissait chaque joueur rejoindre un fichier de partie partagé, avec un mot de passe. (La 2.0 pouvait aussi se jouer entre machines.)
+116	Faire glisser une barre de budget calcule les autres une seule fois, à partir du début du glissement ; la 2.0 le faisait à chaque étape du glissement, si bien qu’un long glissement peut finir un peu différemment.
+117	Les rediffusions de bataille sont conservées pour les 60 dernières batailles ; la 2.0 les gardait pendant 500 ans.
+118	Langue… propose aussi le français (“traduction du remake”), le texte propre de la Mac 1.2 française, dont les rapports sont ceux de la 2.0 ligne pour ligne, avec les mots du remake pour les quelques lignes qui manquent à la 1.2 : traduction du remake, et non officielle, signalée comme telle dans la liste. Elle ne change que les mots et les noms : la même partie se joue dans toutes les langues.
+119	La liste des Planètes explorées et les réglages de la fréquence de consultation et de la vitesse des batailles.
+120	Version 1 à 2
+121	Nous avons intégré les fenêtres de la planète, du budget et des flottes dans la fenêtre de la carte et les avons déplacées vers la gauche pour économiser de la place à l’écran. Nous avons ajouté l’échange de messages et la communication. Nous sommes passés à la pleine couleur pour les vaisseaux et les planètes. Les stratégies des ordinateurs ont été réécrites de fond en comble. L’option “jeu lent” a été supprimée ; les parties se situent désormais entre les anciennes vitesses lente et rapide. Nous sommes passés à une fenêtre de dépenses à échelle logarithmique pour permettre une meilleure résolution aux niveaux de dépenses les plus bas.
+122	Nous avons fait en sorte que les joueurs ordinateur nomment leurs vaisseaux et leurs flottes (et eux-mêmes) comme le font les humains. Nous avons ajouté un “joueur maître” (Administrateur de la partie) qui peut forcer le passage au tour suivant dans une partie à plusieurs. Nous avons supprimé les fonctions de tours chronométrés, car nous ne pouvions pas tenir compte de joueurs aux réglages d’horloge différents. Nous avons changé le coût des technologies pour équilibrer le jeu, et fait en sorte que la Vitesse influe sur le combat. Nous avons fait fonctionner l’impression.
+123	Une fenêtre Créer une galaxie : cinq tailles, cinq formes, Dense ou Clairsemée, de 0 à 19 ordinateurs et leur QI (Stupide, Moyen ou Brillant). Chaque humain choisit un niveau, de Novice à Expert. (La 1.2 faisait de chaque galaxie un petit cercle dense avec un ordinateur moyen.)
+124	Femmes : visages et prénoms féminins, et chaque ordinateur est une femme une fois sur deux.
+125	Pas de novas (la 1.2 avait le code, jamais activé).
+126	La fenêtre Envoyer un message : dix messages par tour.
+127	Organiser Flottes donne aux flottes le carburant moyen utilisé au lieu du minimum, et efface leurs ordres.
+128	La cote d’attaque des ordinateurs boucle à partir de Armes 4 environ (une somme sur 16 bits).
+129	Une colonie détruite par des météores donne un rapport qui nomme un joueur égaré (celui de la 1.2 était vide).
+130	Températures en °F au lieu de °C, et noms anglais ; 190 noms d’étoiles.
+131	Auto Play, Comparer les joueurs (classements à partir de 2010) et Nommer une étoile pour le gagnant.
+132	Le tour lui-même est celui de la 1.2, routine par routine.
+133	La propre version Mac de Delta Tao de la 2.0.1, la version dont les éditions DOS et Windows 3.1 sont des portages : les mêmes règles, routine pour routine, avec quelques différences dans son code. Chaque routine de règles du programme Mac a été lue avec ses propres noms.
+134	Organiser Vaisseaux donne à chaque flotte du modèle présente à l’étoile le moins de carburant utilisé parmi elles, et laisse leurs ordres tranquilles (comme la 1.2).
+135	Une colonie rayée de la carte par une pluie de météores est signalée par “… a détruit votre colonie”, avec le nom de celui que le rapport dix messages plus tôt a laissé derrière lui : souvent vous ou un autre joueur. Là où ce rapport a laissé autre chose que le numéro d’un joueur, le Mac imprimait les octets qui se trouvaient au-delà des données du jeu ; le remake ne nomme personne.

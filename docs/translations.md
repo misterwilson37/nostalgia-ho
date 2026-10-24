@@ -620,20 +620,41 @@ word of a third language, or a string shown the same as in the English run that 
 table doesn't say is the same in that language. The English runs show no French,
 German, Turkish or Spanish at all.
 
+## The long documents: notes and manuals (French, German, Spanish, Turkish)
+
+All four languages now have, as the remake's own translation (tier "the remake's own": no
+official French, German, Spanish or Turkish of these exists, and Delta Tao's change lists are
+translated from their English, with the source line saying so):
+
+- **The version notes** (About this version) and **Patch notes** (and the patch's fixes in New
+  Game): `js/ui-text-notes-<code>.js`, 363 rows each, one per source line of `js/version-notes.js`
+  and of every ruleset's `fixes`, plus the two "fixed in the patch" suffix lines. `node
+  tools/notes-check.js` fails on a source line with no row, a stale row, a filling that
+  differs, an empty or untranslated row, and a language with no notes file; run it after
+  editing the notes. English stays the source: the rows are keyed by it. A document shows in
+  the language only when every line of it has a row (`inLang` in `js/skins/classic/ui.js`);
+  otherwise it is English with the line that says so.
+- **The four manuals** (5.0.5, 4.0.5, 3.0.1, 2.0-dos), in `assets/manuals/<version>-<code>/`,
+  built from the translators' tables (`docs/translations-notes/manuals/`) by
+  `tools/manuals/translate/manualtr.py`; pictures and style are linked from the English
+  folder. Each page ends with a line saying it is the remake's translation, linking its
+  English page. The Help menu opens the game's language (`HOMANUALS[id][code]`, `js/help.js`),
+  else English with "(in English)". New English manuals: the DOS 2.0 manual as pages
+  (`2.0-dos`, from `dos-2.0.pdf`) and the printed Mac 3.0 manual (`3.0.1`), which Mac 3.0.1,
+  1.2 and 2.0.1 now open. Build and notes: `docs/manuals/`, `tools/manuals/`.
+- **Not reviewed by a native speaker**: Gemini checked the rows and pages (the translators'
+  README, "Gemini's review"); no native speaker has. The translation notice and a "Translation
+  notes..." item (`docs/translations-notes/FOR-THE-MAIN-CLAUDLING-translation-notice.md`) are
+  specified but not built.
+
 ## What stays English, and why
 
-- **The long documents**: the version notes (About this version's lists, Delta Tao's own
-  words, the Full Hoedown items), the unofficial patches' fixes (Patch notes, New Game's
-  list) and the manuals themselves. Translating them would be some 70,000 characters a
-  language of the remake's own reading of the originals, and they change whenever the
-  research does; each says in
-  a line in the language that it is in English ("Ces notes sont en anglais.", "Diese
-  Hilfe ist auf Englisch.", "Bu notlar İngilizce.", "Esta ayuda está en inglés."), and
-  the Help menu says so beside the manual ("Manuel (en anglais) : …"). The short help
-  (How to play) is translated; iOS's and Android's help pages are their own in French and
-  Turkish, and English with the line in German and Spanish. The hover help, short
-  paragraphs, is translated (`js/ui-text-help.js`); a paragraph added to `js/help.js`
-  without a row shows in English with the line, until it has one.
+- **The Full Hoedown list** (Delta Tao's jokes, in About this version) stays English, with
+  `translate="no"`: the package that translated the other long documents did not cover it.
+  The iOS and Android help pages are their own in French and Turkish, and English with the
+  line in German and Spanish. A paragraph added to `js/help.js` without a row shows in English
+  with the line, until it has one. A line added to `js/version-notes.js` or to a ruleset's
+  `fixes` without a row fails `node tools/notes-check.js`.
 - **The bug report and feedback issues** opened on GitHub: their body (the facts and the
   questions) is written for the remake's maintainers; the window that opens them is
   translated.

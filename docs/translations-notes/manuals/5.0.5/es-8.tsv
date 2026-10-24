@@ -1,0 +1,60 @@
+388	{a1}{/a1}Paga por el software según su calidad, no según su publicidad, su embalaje ni su protección contra copia.
+389	Instrucciones rápidas
+390	Instrucciones ultrarrápidas del Ho!
+391	{font1}Este es el resumen en un solo párrafo de lo que necesitas saber.{/font1}
+392	{font1}Ejecuta {i2}Spaceward Ho!{/i2}. Juega con los gráficos de barras para ajustar el gasto. Haz clic en los mensajes del mapa para que desaparezcan. Haz doble clic en una colonia para diseñar y construir naves. Arrastra los puntos de flota de una estrella a otra para mover las naves. Experimenta. Conquista la galaxia.{/font1}
+393	{a1}{/a1}Lecturas recomendadas
+394	{a1}{/a1}Estos son un par de libros que no tienen nada que ver con el software para Macintosh, pero que nos gusta leer una y otra vez. Además, creemos que dicen algo sobre la filosofía de Delta Tao.
+395	{a1}{/a1}{em2}The Tao of Pooh{/em2} (El Tao de Pooh), de Benjamin Hoff, Penguin Books, Nueva York, 1982. El mejor libro sobre el taoísmo jamás escrito.
+396	{a1}{/a1}{em2}Calvin and Hobbes{/em2} (Calvin y Hobbes), de Bill Watterson, Andrews and McMeel, Kansas City, 1987.
+397	{a1}{/a1}{em2}The Macintosh Way{/em2} (El camino Macintosh), de Guy Kawasaki, Scott, Foresman and Company, Glenview, Illinois, 1989.
+398	{a1}{/a1}Surely You Must Be Joking, Mr. Feynman (¿Está usted de broma, Sr. Feynman? Aventuras de un curioso personaje), de Richard Feynman.
+399	Naves
+400	Las naves son lo que usas para explorar estrellas nuevas, defender tus colonias y colonizar planetas nuevos. Hay varios tipos de naves distintos, y puedes crear las tuyas.
+401	Las naves de Spaceward Ho! son increíblemente enormes y caras. Por ejemplo, tu primera Nave colonia se llevará casi un tercio de los recursos totales de tu planeta, más toda la producción industrial del planeta durante treinta años. Es un barco grande.
+402	Construir naves
+403	Puedes construir naves en cualquiera de tus colonias. Para ello, haz clic en el planeta donde quieras construir naves y elige “{em1} Construir naves…{/em1} ” en el menú “{em2} Naves{/em2} ”, o simplemente haz doble clic en el planeta. Se abrirá un cuadro de diálogo grande. Este cuadro te permite tanto construir naves como diseñar nuevos tipos de nave.
+404	En la parte izquierda del cuadro hay una lista de los tipos de nave disponibles. Si ninguno es de tu gusto, puedes diseñar una clase nueva jugando con los deslizadores de la parte inferior derecha.
+405	Mover naves
+406	Para mover una flota, basta con hacer clic en la flota y arrastrarla desde el planeta donde está hasta donde quieres que vaya. Si llega, verás una flecha que señala la ruta que seguirá tu flota. Cuando sueltes el ratón, oirás un “Hyahh!” que te avisa de que el rumbo está fijado. Cuando termines el turno, la nave seguirá su camino.
+407	Si la flota no puede llegar a la estrella a la que has arrastrado, la ruta se mostrará con una línea gris de puntos. Si la flota tiene combustible suficiente para ir a la estrella que has elegido y volver, la ruta será una flecha de doble punta.
+408	Para hacer que una flota se quede quieta, o para cancelar su movimiento, haz clic en el icono de la flota y mantenlo pulsado un segundo. Cuando lo hayas hecho bien, oirás un “Whoa!” al soltar el ratón.
+409	Cuando una flota tiene destino y piensa moverse al terminar el turno, habrá una ruta que muestra adónde va. La ruta se dividirá en segmentos que indican cuántos turnos tardará en llegar.
+410	Pulsa la tecla Tab para pasar a la flota siguiente de ese planeta.
+411	Una flota reposta automáticamente cada vez que va a un planeta que es tuyo o de tus aliados. Si una flota no tiene combustible suficiente para salir, puedes enviar una Nave colonia a ese planeta, colonizarlo durante un turno y luego hacer que todos se marchen, o enviar una cisterna.
+412	El rumbo de una flota no se puede cambiar mientras está entre planetas: en el hiperespacio no hay vuelta atrás.
+413	También puedes hacer Control-clic (o clic derecho) en una flota para hacer varias cosas relacionadas con ella.
+414	Si una flota tiene una línea tachada, se está disolviendo y se desguazará para convertirse en metal el turno siguiente.
+415	Organizar flotas
+416	A veces querrás dividir una flota en trozos o juntar varias flotas. Para ello, elige “{em1} Organizar flotas…{/em1} ” en el menú “{em2} Naves{/em2} ”. Luego haz clic y arrastra las naves hasta que queden distribuidas como quieres.
+417	Puedes combinar naves de distintos tipos en una misma flota. Pero cada tipo de nave de una flota puede tener sus propias opciones de flota. La actitud en combate se explica por sí sola. Llegada retardada significa que la nave calculará su llegada del hiperespacio para que sea un poco después de la hora de llegada normal. Si hay una batalla, una nave retardada se perderá el comienzo.
+418	Disolver y desguazar flotas y naves
+419	A medida que avanza la partida, verás que el metal escasea y que tus naves obsoletas son casi inútiles. Quizá quieras deshacerte de algunas de tus naves más viejas. Puedes recuperar el 75% del metal de una flota que esté en tus colonias disolviéndola (elige “{em1} Disolver la flota actual{/em1} ” en el menú “{em2} Naves{/em2} ”). O puedes desguazar todo un tipo de nave (elige “{em3} Desguazar tipos de nave”{/em3} en el menú “{i4}Naves{/i4}{span5}” ).{/span5}
+420	Cuando marcas un tipo de nave o una flota para desguazarlos, no se desguazan hasta que termines el turno. Si te arrepientes antes, puedes deshacer el cambio antes de terminar el turno.
+421	Si solo quieres disolver parte de una flota, usa el cuadro de diálogo “{em1} Organizar flotas…{/em1} ” para dividir la flota entre las naves que quieres conservar y las que quieres desguazar.
+422	Cuando disuelves naves que están sobre una colonia, el metal pasa al instante a tu reserva global, y puedes usarlo de inmediato. Si no eres dueño del planeta sobre el que están las naves, el metal caerá sobre el planeta. La siguiente persona que lo colonice podrá extraer entonces el metal de tus naves desguazadas.
+423	Diseñar naves
+424	Esta es posiblemente la parte más genial del juego. A medida que aumente tu tecnología, querrás empezar a construir naves más avanzadas con estas tecnologías nuevas. Es fácil. Solo tienes que fijar los niveles de tecnología como quieras que sea tu nuevo tipo en el cuadro de diálogo “{em1} Construir/diseñar naves{/em1} …”. Basta con mover los deslizadores para fijar las cualidades de la nueva nave. (El extremo derecho del deslizador es siempre tu nivel de Tecnología actual.) Cuando tengas la nave como la quieres, constrúyela (pulsando el botón “+”) y el prototipo se diseñará y construirá automáticamente.
+425	Hay cuatro grandes clases de naves: Naves colonia, Satélites, Exploradores y Cazas.
+426	Naves colonia
+427	{img1/}Las naves colonia transportan gente y colonizan estrellas nuevas por ti. Las Naves colonia son increíblemente caras, tanto en Dinero como en Metal. Cuestan tanto que querrás construir solo unas pocas. Eso, y que la miniaturización no les sirve de mucho, hará que probablemente no quieras usar nada de Mini en tus Naves colonia. Las Naves colonia también son lo primero a lo que dispara el enemigo en una batalla, así que tendrás que ir con cuidado con ellas.
+428	Satélites
+429	{img1/}Los satélites son naves que no tienen motores. Eso significa que su Alcance es cero. Los Satélites son un medio barato y eficaz de defender tus planetas de los ataques enemigos. Por desgracia, no pueden moverse; solo pueden defender el planeta donde se construyen. Los Satélites son mucho más pequeños que las naves normales, así que no hacen falta tantos disparos para destruirlos. Claro que tampoco hace falta ni de lejos tanto metal para construir Satélites como Cazas.
+430	Cuando un planeta tiene Satélites, tendrá uno o más anillos alrededor en el Mapa estelar.
+431	Exploradores y Cazas
+432	{img1/}Los Exploradores y los Cazas son tus naves básicas. La diferencia entre unos y otros es un equilibrio entre Motores y Armas. Los Exploradores pueden tener un Alcance tres unidades superior a tu tecnología de Alcance. Por desgracia, su tecnología máxima de Armas y de Escudos es una unidad inferior a tus niveles actuales. Esto hace que los Exploradores sean ideales para explorar, pero no demasiado buenos en combate.
+433	Spaceward Ho! pondrá automáticamente a cada Explorador en su propia flota, para que pueda salir volando por su cuenta a explorar. Los Cazas se agrupan automáticamente en un solo grupo.
+434	Acorazados
+435	Los Acorazados son los buques de guerra de una flota. Muy grandes. Muy potentes. Muy caros. Si puedes construir uno, pega un buen puñetazo.
+436	Cisternas
+437	Las Cisternas pueden viajar con tus otros tipos de flota o detrás de ellos y reabastecerán cada turno a las naves aparcadas en la misma estrella en que estén. Cada cisterna tiene un límite de eficacia y no podrá reabastecer enseguida a flotas grandes.
+438	Bionaves{o:p1}{/o:p1}
+439	Mmm. Naves de formas de vida. Idea interesante. Me pregunto cómo funcionarían…
+440	Coste de desarrollo
+441	Construir el prototipo de un nuevo tipo de nave cuesta más que construir las siguientes: cuesta esfuerzo pulir los defectos y hacer pruebas. Esto es especialmente cierto en las naves con mucha miniaturización. Ten en cuenta que el coste de desarrollo se paga una sola vez por cada nuevo tipo de nave.
+442	{a1}{/a1}Atajos
+443	{a1}{/a1}Hemos incluido un par de atajos para varias cosas de Spaceward Ho! Esta sección te hablará de ellos y pondrá ejemplos de algunos.
+444	{a1}{/a1}Si haces clic en cualquier suceso de la Ventana de informes, tu mapa se desplazará automáticamente al lugar donde ocurrió el suceso.
+445	{a1}{/a1}Puedes cambiar la escala del Mapa estelar para tener una mejor vista de toda la galaxia o para mirar de cerca alguna sección concreta. Para ello, elige “{em2} Acercar{/em2} ” o “{em3} Alejar{/em3} ” en el menú “{em4} Ventana{/em4} ”. Sus atajos de teclado son Comando-menos y Comando-igual, respectivamente. Al alejar al máximo se pierde mucho detalle.
+446	{a1}{/a1}Por lo general, querrás alejar para hacerte una idea de dónde vives y luego acercar para saber qué pasa. A medida que avanza la partida, probablemente verás que tu vecindario ya no cabe en tu Mapa estelar, así que querrás usar los aumentos intermedios.
+447	{a1}{/a1}Puedes hacer clic en el nombre de una estrella en la Ventana de presupuesto para desplazar el Mapa estelar hasta esa estrella y seleccionarla. Cuando seleccionas una estrella en el Mapa estelar, la lista de Estrellas se desplazará hasta la estrella actual y la seleccionará allí.

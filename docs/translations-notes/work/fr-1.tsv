@@ -1,0 +1,61 @@
+0	L’édition française du jeu Mac, une préversion allégée de la 2.0. Chaque routine de son programme a été lue, et chaque règle vient de son propre code.
+1	Une colonie rayée de la carte par une pluie de météores donne un rapport vide.
+2	Une flotte marquée pour le recyclage pendant qu’elle est dans l’hyperespace est signalée à un caractère égaré, lu avant le début de la liste des étoiles (la lettre du numéro d’étoile d’un emplacement de base inutilisé).
+3	Organiser Flottes fait le plein et recharge : réorganiser les vaisseaux d’un modèle à une étoile donne à chaque flotte de ce modèle qui s’y trouve le meilleur niveau de carburant parmi elles, et chaque nouvelle flotte de Transports qu’il crée est livrée chargée de colons.
+4	Le jeu contient le texte des messages entre joueurs, mais aucun moyen d’en envoyer un.
+5	Il n’existe aucune commande pour abandonner une colonie, donc pas de bouton Évacuer : une colonie ne disparaît que si on la laisse sans financement jusqu’à la mort de ses habitants.
+6	La puissance des vaisseaux et de la planète à chaque étoile est calculée à chaque tour et ne sert jamais.
+7	Les joueurs éliminés jouent quand même leur tour : leur argent rapporte toujours des intérêts et leurs recherches continuent.
+8	Les barres de colonie de l’ordinateur se dérèglent quand il donne à une colonie plus de 2 147 483 $ pour un seul poste (la somme déborde). Il faut un ordinateur très riche pour que cela arrive.
+9	Les nombres aléatoires sont ceux du remake, donc une partie ne peut pas être rejouée coup pour coup.
+10	Si tous les joueurs sont éliminés en même temps, la partie se termine sans vainqueur. La 1.2 continuait simplement sans que personne ne puisse gagner.
+11	Plusieurs personnes jouent sur un même ordinateur à tour de rôle. L’original laissait chaque joueur rejoindre un fichier de partie partagé, avec un mot de passe. (La 1.2 autorisait jusqu’à 19 humains.)
+12	Faire glisser une barre de budget calcule les autres une seule fois, à partir du début du glissement ; la 1.2 le faisait à chaque étape du glissement, si bien qu’un long glissement peut finir un peu différemment.
+13	Les rediffusions de bataille sont conservées pour les 60 dernières batailles ; la 1.2 les gardait pendant 500 ans.
+14	Corriger les dépenses montre la ligne de chaque étape dans une petite fenêtre, dont le bouton Suivant remplace le clic de l’original sur la bulle de message.
+15	Langue… propose l’anglais, les propres mots de la Mac 2.0.1 pour les mêmes fenêtres et rapports, qui sont ceux de la 1.2 ligne pour ligne.
+16	Langue… propose aussi l’allemand (“Übersetzung des Remakes”), avec les mots du DOS 2.0 allemand pour les mêmes rapports, noms et fenêtres, et l’allemand propre au remake pour les quelques mots de fenêtre qui manquent à l’allemand de la 2.0 : traduction du remake, et non officielle, signalée comme telle dans la liste. Elle ne change que les mots et les noms : la même partie se joue dans toutes les langues.
+17	Langue… propose aussi l’espagnol (“Español (traducción del remake)”) : il n’y a jamais eu de Spaceward Ho! officiel en espagnol, donc chaque ligne est celle du remake, écrite dans l’esprit des traductions officielles (leurs mots pour les éléments du jeu, le “tú” familier, les blagues conservées) ; les noms restent en anglais : traduction du remake, et non officielle, signalée comme telle dans la liste. Elle ne change que les mots et les noms : la même partie se joue dans toutes les langues.
+18	Les préférences de vitesse des batailles, d’affichage des messages et de visionnage des batailles, et la fenêtre Planètes explorées.
+19	Une version Mac en couleur et en noir et blanc (la couleur est arrivée avec la 2.0) : le jeu de la 2.0 avec le modèle d’argent, les alliances, la technologie radicale et les novas des versions suivantes. Chaque routine de son programme a été lue, et chaque règle vient de son propre code.
+20	2.0
+21	En 2010, sur les cartes Spirale et Amas, les ordinateurs sautent leur premier tour.
+22	Une erreur dans la façon dont les ordinateurs recyclent leurs vieux vaisseaux n’a aucun effet sur le jeu.
+23	Les flottes de croiseurs bloquées demandent toujours une colonie, même quand il y en a une à portée.
+24	Désactiver Abandonner ne rend pas à la colonie sa part.
+25	Une colonie abandonnée où se trouve un Transport est recolonisée au même tour.
+26	Organiser Vaisseaux donne à chaque flotte du modèle présente à l’étoile le plus de carburant utilisé parmi elles.
+27	Les barres de colonie de l’ordinateur se dérèglent quand il donne à une colonie plus de 2 147 483 $ pour un seul poste.
+28	La puissance des vaisseaux à chaque étoile est calculée à chaque tour et ne sert jamais.
+29	Corriger les dépenses ne réduit que les colonies qui dépensent trop, en partageant la différence entre Épargne et Technologie par pourcentages entiers, si bien qu’un ou deux pour mille peuvent disparaître ; une colonie en cours d’abandon ou terminée est ramenée à 1 pour mille.
+30	La blague de l’écran couleur : la 3.0.1 l’envoyait, une année aléatoire, uniquement à un écran réglé sur le noir et blanc mais capable d’afficher la couleur. Ici, un habillage noir et blanc fait office de cet écran ; son année vient de la graine de la partie.
+31	Quand tous les humains sont éliminés, la partie se termine. La 3.0.1 continuait tant que les ordinateurs jouaient.
+32	Plusieurs personnes jouent sur un même ordinateur à tour de rôle. L’original laissait chaque joueur rejoindre un fichier de partie partagé, avec un mot de passe. (La 3.0.1 pouvait aussi se jouer en réseau.)
+33	Les ordinateurs font tous leurs plans avant que l’argent de quiconque soit calculé ; la 3.0.1 planifiait pour chacun à son propre tour. Le résultat est le même sauf cas rares.
+34	Le recyclage marque une flotte ou un type de vaisseau, et le recyclage a lieu à la Fin Tour, comme dans la 3.0.1. La ligne de la flotte a le bouton Recycler la flotte actuelle en plus du menu Vaisseaux, et la ligne d’un type marqué est grisée (la 3.0.1 ne changeait que le titre de son bouton).
+35	Faire glisser une barre de budget calcule les autres une seule fois, à partir du début du glissement ; la 3.0.1 le faisait à chaque étape du glissement.
+36	Les cartes Spirale et Amas sont tracées au début ; la 3.0.1 les traçait en 2010.
+37	Puiser dans l’épargne prend un pourcentage du maximum que vous pouvez puiser ; la 3.0.1 prenait un montant.
+38	Évacuer est l’Abandonner de la 3.0.1 : la colonie est abandonnée à la Fin Tour, et appuyer de nouveau dessus la reprend. La planète ne l’affiche pas comme marquée.
+39	Évacuer une étoile nommée Hope ou Ship déclenche les blagues de la 3.0.1 (“Voulez-vous vraiment laisser tomber ? Tout n’est pas encore perdu…”, “Abandonner le navire ? …”), à chaque fois.
+40	Langue… propose aussi le français (“traduction du remake”) et le turc (“yeniden yapımın çevirisi”) : le français et le turc officiels du jeu iOS, et ceux de la Mac 1.2 française pour les lignes 2.0 de la 3.0.1 (dont Nommer une étoile et Corriger les dépenses), pour toutes les lignes que la 3.0.1 partage avec eux, avec les lignes propres au remake pour le reste : traduction du remake, et non officielle, signalée comme telle dans la liste. Elle ne change que les mots et les noms : la même partie se joue dans toutes les langues.
+41	Langue… propose aussi l’allemand (“Übersetzung des Remakes”), dans le prolongement de l’allemand du DOS 2.0 : ses lignes officielles partout où l’anglais est celui de la 2.0 (les rapports que la 2.0 avait déjà, Nommer une étoile, Corriger les dépenses), et l’allemand du remake, dans ses mots, pour le reste : traduction du remake, et non officielle, signalée comme telle dans la liste. Elle ne change que les mots et les noms : la même partie se joue dans toutes les langues.
+42	Version 2 à 3
+43	Tiré du manuel de Spaceward Ho! 5 de Delta Tao, chapitre “Changes From Previous Versions” (en anglais)
+44	Nous avons basé les dépenses sur le revenu plutôt que sur la masse totale d’argent. Nous avons fait construire les vaisseaux dès le tour où vous les commandez, au lieu de l’ancienne file de construction. Nous répartissons automatiquement l’argent entre vos planètes, pour que vous ne puissiez pas les sous-financer par accident. Nous avons ajouté le graphique Historique, pour que vous voyiez vos tendances à long terme. Nous avons ajouté plusieurs graphismes et sons purement superflus. Nous avons ajouté quelques nouveaux types de galaxies.
+45	Nous avons aussi ajouté un tas de nouveaux messages, fait en sorte que les joueurs ordinateur s’occupent de leurs amis et de leurs ennemis, et fait envoyer à tout le monde des messages semi-intelligents par les ordinateurs. Vous pouvez désormais donner de l’argent et du métal à vos amis (ou à vos ennemis), ou vous rendre à eux.
+46	En couleur.
+47	Épargne des vaisseaux : une part de l’argent de chaque tour est épargnée, rapporte des intérêts, achète des vaisseaux sur-le-champ (pas de files) et peut se transformer en dette jusqu’à une limite d’emprunt. (La 2.0 avait une seule réserve et aucun emprunt.)
+48	Deux barres par colonie, Terraformer et Extraire ; une colonie dont les deux sont terminés donne sa part aux autres.
+49	La recherche est régulière (× 8/10) au lieu d’un aléatoire de 60 à 140 %, avec une avance sur chaque niveau, et une technologie radicale à six issues.
+50	Les batailles ont de la chance, toujours active, et la planète se bat avec les Boucliers de son propriétaire.
+51	Novas et Armageddon.
+52	Alliances, cadeaux, reddition et messages préparés ; une alliance gagne si elle tient un tour.
+53	Abandonner une colonie, et Puiser dans l’épargne.
+54	Un joueur sans colonie ni Transport est éliminé aussitôt, et ses flottes sont recyclées.
+55	Le générateur de galaxies des versions suivantes : six styles, dont Amas, nouveau.
+56	Un quatrième niveau d’ordinateur, Diabolique ; des ordinateurs avec des sentiments, des alliances et des modèles qui vont et viennent.
+57	L’édition Windows 95, qui est compatible multiplateforme avec la Mac 4.0.5 : le jeu de la 3.0.1 avec Épouvantes, Tankers, Biologiques et leurres, la technologie radicale en main de cartes, et les meilleurs amis. Chaque routine de son programme a été lue, et chaque règle vient de son propre code.
+58	3.0.1
+59	Que les étoiles deviennent rouges un jour dépend d’un réglage que le code de Nouveau Jeu ne définit jamais ; le remake les laisse faire.
+60	Une colonie ne peut pas construire plus de vaisseaux par tour qu’elle n’a d’habitants (en milliers).

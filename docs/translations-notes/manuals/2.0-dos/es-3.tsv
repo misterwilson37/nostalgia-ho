@@ -1,0 +1,80 @@
+168	Lo mismo que una estrella.
+169	Hasta dónde puede llegar una nave sin repostar. Una nave de Alcance 6 puede ir 3 y volver 3, o puede ir 5 y quedarse tirada.
+170	Satélite
+171	Una nave que no puede moverse. Su Alcance es cero.
+172	Escudo
+174	Lo rápido que va una nave. Una nave de Velocidad 3 tardará 2 turnos en ir a una estrella que esté a 5 unidades.
+175	Estrella
+176	Lo mismo que un planeta.
+177	Temperatura
+179	Terraformación
+181	Arma
+183	Manual de Spaceward Ho! 2.0 (DOS)
+184	{a1}Contenido{/a1}
+185	Este es el manual que venía con la edición para DOS/Windows de Spaceward Ho! 2.0 (Delta Tao Software). Es un volcado de solo texto de las palabras del manual del Mac, así que todavía habla de Macs, de System 7 y de AppleTalk. Los números de página entre corchetes son los del manual original.
+186	{a1}La letra pequeña{/a1} {small2}(pág. 4){/small2}
+187	{a1}Instrucciones ultrarrápidas del Ho!{/a1} {small2}(pág. 4){/small2}
+188	{a1}Instalar el juego{/a1} {small2}(pág. 5){/small2}
+189	{a1}Un resumen rápido{/a1} {small2}(pág. 5){/small2}
+190	{b1}Jugar la partida{/b1}
+191	{a1}Empezar una partida nueva{/a1} {small2}(pág. 7){/small2}
+192	{a1}Galaxias personalizadas{/a1} {small2}(pág. 7){/small2}
+193	{a1}Los jugadores del ordenador{/a1} {small2}(pág. 9){/small2}
+194	{a1}Las ventanas{/a1} {small2}(pág. 9){/small2}
+195	{a1}Información del presupuesto{/a1} {small2}(pág. 13){/small2}
+196	{a1}La Ventana de gasto en tecnología{/a1} {small2}(pág. 17){/small2}
+197	{a1}La economía{/a1} {small2}(pág. 17){/small2}
+198	{a1}Naves{/a1} {small2}(pág. 20){/small2}
+199	{a1}Avanzar en tecnología{/a1} {small2}(pág. 26){/small2}
+200	{a1}Explorar planetas: temperatura y gravedad{/a1} {small2}(pág. 29){/small2}
+201	{b1}Otras cosas{/b1}
+202	{a1}Enviar mensajes{/a1} {small2}(pág. 38){/small2}
+203	{a1}Revisar las batallas{/a1} {small2}(pág. 39){/small2}
+204	{a1}Comparar jugadores{/a1} {small2}(pág. 40){/small2}
+205	{a1}Varios jugadores{/a1} {small2}(pág. 40){/small2}
+206	{a1}Corregir los gastos{/a1} {small2}(pág. 42){/small2}
+207	{a1}El archivo de preferencias{/a1} {small2}(pág. 43){/small2}
+208	{a1}El menú Opciones{/a1} {small2}(pág. 44){/small2}
+209	{a1}Atajos{/a1} {small2}(pág. 48){/small2}
+210	{b1}El resto{/b1}
+211	{a1}Acerca de Spaceward Ho!{/a1} {small2}(pág. 50){/small2}
+212	{a1}Problemas comunes{/a1} {small2}(pág. 51){/small2}
+213	{a1}Glosario{/a1} {small2}(pág. 54){/small2}
+214	{a1}Asistencia técnica{/a1} {small2}(pág. 56){/small2}
+215	{a1}Léeme: información actualizada{/a1}
+216	Instalar el juego
+217	Instalación en DOS
+218	Instalación en Windows
+219	El PDF a partir del cual se hizo esta página enumera estos dos encabezados y no da ningún texto bajo ninguno de ellos.
+220	Varios jugadores
+221	Spaceward Ho! está pensado de verdad para jugarse con mucha gente. El peculiar estilo de juego de “inicio de sesión” se presta a tener la partida principal en algún tipo de servidor de archivos, con cada jugador actualizando sus turnos en su propia máquina.
+222	Así se hace si tienes una configuración AppleShare. Pide a alguien que cree la Galaxia en un servidor de archivos al que todos tengan acceso. (Recuerda que en System 7.0 cualquiera puede ser servidor de archivos.) Luego haz que todos abran la partida de uno en uno, ya que el servidor de archivos solo admite a una persona a la vez.
+223	La primera persona que se une a la partida se convierte en el “Administrador del juego”. Es el único que puede decidir cuándo debe procesarse el primer turno. Cuando todos los que se han unido a la partida han terminado su primer turno, aparecerá un aviso en el ordenador del administrador, que le dirá cuántas personas han entrado en la partida y le preguntará si quiere pasar al turno siguiente. Una vez que la partida ha pasado del año 2000, nadie más puede unirse, así que, si el número de personas registradas es menor de lo que espera el administrador, debe hacer clic en el botón “Esperar” y averiguar quién no se ha conectado. Cuando se hayan conectado y terminado sus turnos, el aviso volverá a aparecer, con un número mayor de jugadores humanos.
+224	La partida multijugador se parecerá notablemente a una partida de un solo jugador. La principal diferencia, claro, es que algunos de los alienígenas con los que te topas los juegan humanos, que pueden ser bastante más retorcidos y astutos que los jugadores del ordenador. La otra diferencia es que tendrás que esperar a que los demás humanos terminen sus turnos antes de pasar al turno siguiente. Y AppleTalk es bastante más lento que tu disco duro local, así que actualizar los turnos tarda más.
+225	Cuando termines un turno, Spaceward Ho! te lo hará saber poniendo una marca de verificación a la izquierda de tu icono y tu nombre en la esquina inferior izquierda de la Ventana principal. Puedes ver quién más ha terminado o no mirando si tiene una marca junto a su nombre. Gritar a la gente que se dé prisa es un comportamiento perfectamente aceptable en una partida multijugador de Spaceward Ho!.
+226	Si no tienes AppleTalk o no tienes más de un Mac, aun así puedes jugar una partida multijugador: usa una sola máquina y túrnense. Prueba a usar el comando “Terminar el turno y cambiar de jugador…” del menú Archivo. Su atajo de teclado es comando-opción-T. (En el primer turno, puede que tengas que cerrar la partida y volver a abrirla, pero escribiendo el nombre del segundo jugador en el cuadro de diálogo de la contraseña.)
+227	Otra cosa que puedes hacer para jugar con mucha gente es guardar el archivo de la partida en un disquete. Luego pueden pasarse el disquete, y cada uno hace su turno cuando lo tiene y luego se lo pasa a otra persona. Es lento, pero viable si no estás en red.
+228	Léeme: información actualizada
+229	{a1}Contenido{/a1} {a2}← Anterior{/a2}
+230	El PDF pone este archivo de texto delante de una segunda copia del manual. Es el READ.ME de la edición para Windows, “VERSION 0.5”.
+231	Nota especial sobre la protección con contraseña
+232	Spaceward Ho! exige que el usuario escriba una contraseña a intervalos aleatorios durante la partida. Las contraseñas se facilitan en un encarte aparte para tu comodidad.
+233	Spaceward Ho!: información actualizada
+234	Información importante sobre Spaceward Ho! para Windows. Este archivo contiene información que puede no estar incluida en tu manual. Dedica unos minutos a leerla. Este texto puede ser más fácil de leer si amplías la ventana del Bloc de notas al máximo. Para ello, haz clic en el botón Maximizar de la esquina superior derecha, o usa las teclas ALT+BARRA ESPACIADORA y luego X. Para obtener ayuda sobre el uso del Bloc de notas, pulsa F1.
+235	256 colores, 16 colores o blanco y negro
+236	Spaceward Ho! admite los modos de blanco y negro (monocromo), de 16 colores y de 256 colores. Cuando se instala Windows, normalmente se instala un controlador genérico de 16 colores. Cada fabricante de tarjetas de vídeo suministra un disco de controladores para Windows que aprovecharán las capacidades de tu tarjeta de vídeo.
+237	Para instalar un controlador distinto o cambiar de resolución, consulta tu manual de Windows o al fabricante de tu tarjeta de vídeo para obtener detalles e información específica sobre tu tarjeta.
+238	Recomendamos usar 640x480 en el modo de 256 colores, aunque las resoluciones más altas también darán resultados impresionantes.
+239	Partidas en red
+240	Cuando ejecutes Spaceward Ho! en una red, asegúrate de que se ejecuta bajo SHARE. Consulta tu manual de DOS o la documentación de tu red para más detalles sobre el uso compartido de archivos en tu sistema.
+241	Antes de crear un archivo de partida, asegúrate de que todos los jugadores tienen acceso completo de lectura y escritura al directorio del servidor que elijas. Los usuarios sin acceso completo no podrán unirse a la partida.
+242	Asegúrate de que cada jugador de la red ejecuta su propia copia local de Spaceward Ho!. Si más de un jugador de la red ejecuta el mismo ejecutable, los archivos de partida pueden corromperse o el programa puede fallar.
+243	Uso del sonido
+244	{b1}USO DEL SONIDO MULTIMEDIA (Windows 3.1 y Windows 3.0 con extensiones MPC){/b1}
+245	Se admite el sonido de forma de onda del sistema multimedia de Windows. Asegúrate de que tu sistema está configurado correctamente para tu hardware de sonido. Consulta la documentación de Windows para más detalles.
+246	{b1}USO DE LA TARJETA SOUNDBLASTER® EN WINDOWS 3.0{/b1}
+247	Si tienes instalada una tarjeta SoundBlaster® en tu sistema y trabajas con Windows 3.0, quizá puedas usar el SNDBLST.DLL que facilita Creative Labs, Inc. El SNDBLST.DLL puede haber venido con tu tarjeta SoundBlaster®, o puedes ponerte en contacto directamente con Creative Labs para recibir una copia. Una vez que hayas instalado la DLL en tu directorio de Windows, habrá que añadir la siguiente sección a tu archivo WIN.INI:
+248	[SoundBlaster] Port=220 Int=7 DMA=1
+249	Si tu tarjeta SoundBlaster® está configurada con ajustes distintos de los que se muestran arriba (los ajustes por defecto), edita el archivo WIN.INI y usa el puerto y el número de interrupción correctos para tu instalación de la SoundBlaster®. Consulta la documentación de tu SoundBlaster® para más detalles. (SoundBlaster® es una marca registrada de Creative Labs, Inc.)
+250	Revisar las batallas
+251	A veces tus naves chocan con las naves de otros jugadores. Cuando esto ocurre, luchan hasta que un bando muere. Es cierto que eso no facilita una convivencia pacífica, pero esto es un juego de guerra. En fin, cuando tengas un combate, querrás saber qué diablos ha pasado. Hay un par de maneras de averiguarlo. Primero, si tienes marcada la opción “Revisar siempre las batallas” en el menú “Opciones”, recibirás un resumen de las batallas que acaban de ocurrir al comienzo de cada turno, junto con tus demás mensajes.

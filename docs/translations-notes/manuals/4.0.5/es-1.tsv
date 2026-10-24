@@ -1,0 +1,60 @@
+1	{a1}Contenido{/a1}
+4	Ayuda de Spaceward Ho! 4.0.5 — convertida del archivo WinHelp.
+5	Un resumen rápido
+6	{a1}Contenido{/a1} {a2}← Anterior{/a2} {a3}Siguiente →{/a3}
+7	{b1}Primeros pasos{/b1}
+8	{b1}Un resumen rápido{/b1}
+14	Un planeta seleccionado
+15	{b1}Un planeta seleccionado{/b1}
+16	Cuando seleccionas un planeta, se resalta con una corona alrededor. Toda la información que hay a la izquierda del mapa estelar se referirá ahora a ese planeta: su temperatura, su gravedad, sus ingresos, etcétera.
+17	Acerca de Spaceward Ho!
+18	{b1}Acerca del juego{/b1}
+19	{b1}Acerca de Spaceward Ho!{/b1}
+20	Lo más importante de{b1} Spaceward Ho!{/b1} es su sencillez. Controlar todos los aspectos de una raza alienígena podría ser complicado y podría estorbar a la diversión del juego. La diversión es el objetivo número uno, y se ha sacrificado el realismo por la diversión siempre que ha sido posible. Si quieres realismo en la exploración espacial, juega a “Recortemos el presupuesto de la NASA”, como hacen en el Congreso todos los años.
+21	Acerca del autor, Peter Commons
+22	{b1}Acerca del autor, Peter Commons{/b1}
+23	Peter es un licenciado de Stanford que dedica sus ratos libres a defender los derechos de los indefensos animales peludos. Es un alma bastante esquizofrénica, incapaz de decidir si prefiere escribir juegos o aplicaciones gráficas profesionales, sin contar su deseo de escribir la banda sonora de una gran película. Todavía de luto por la pérdida de su perro Delbert, Peter se ha hecho hace poco con un cachorro nuevo para que Enid e Ignacio estén contentos. Tras plantearse llamarlo Delia, Denise o Darlene, al final decidió que fuera Fritz, diciendo que le recordaba a un viejo amigo con el que se cruzó una vez en la carretera.
+24	Avanzar en tecnología
+25	{b1}Tecnología{/b1}
+26	{b1}Avanzar en tecnología{/b1}
+27	Investigar tecnologías nuevas es fácil. Solo tienes que gastar dinero en Tecnología en la Ventana de jugadores, y listo. Puedes dar más peso a tu investigación en ciertas áreas equilibrando tu presupuesto de Tecnología en la Ventana de gasto en tecnología, que está en el menú “Ventana”.
+28	{a1}Alcance {/a1}
+29	{a1}Velocidad {/a1}
+30	{a1}Armas y Escudos {/a1}
+31	{a1}Miniaturización {/a1}
+32	{a1}Radical {/a1}
+33	Alianzas
+34	{b1}Otros jugadores{/b1}
+35	{b1}Alianzas{/b1}
+36	Puedes jugar al Ho! como un xenófobo, matando a todo el que veas. O, si te sientes amistoso, puedes ser neutral con otros jugadores (así no los atacas sin motivo) o incluso tener una alianza fuerte en la que compartes información con tus amigos. Por supuesto, para formar una alianza, los dos jugadores tienen que quererlo. Muestras tu opinión sobre los demás jugadores con el cuadro de diálogo {b1}Alianzas{/b1} del menú “Galaxia”. Ahí también ves su opinión sobre ti.
+37	Ahora hay dos niveles de alianzas. Si dos jugadores eligen alianzas de “Mejores amigos” entre sí, compartirán automáticamente la información de todos sus planetas y de su exploración. Los jugadores del ordenador nunca eligen ser Mejores amigos, así que esto es solo para el juego en red.
+38	Los aliados neutrales simplemente no se matan entre sí. Los aliados amistosos reciben automáticamente información sobre la galaxia de sus amigos. También puedes darles dinero y metal cuando más lo necesiten. Hazlo con {b1}Dar dinero/metal{/b1} del menú “Galaxia”.
+39	Puedes romper una alianza pasando al alienígena en cuestión de la columna “Me gusta” a la columna “No me gusta” en el cuadro de diálogo {b1}Alianzas{/b1}. A partir de ese momento lucharéis a muerte en todos los lugares en que coexistíais con él. De paso, te ganarás también su odio y su desconfianza permanentes.
+40	Un planeta sin explorar
+41	{b1}Un planeta sin explorar{/b1}
+42	Al empezar la partida, todo salvo tu planeta de origen está sin explorar. Cuando vayas a un planeta, sabrás más sobre él, y su imagen reflejará tus nuevos descubrimientos.
+43	Juego automático…
+44	{b1}El menú Opciones{/b1}
+45	{b1}Juego automático…{/b1}
+47	Si quieres que el ordenador juegue por ti, elige {b1}Que el ordenador juegue por mí{/b1}. El ordenador desarrollará su propia estrategia, igual que los oponentes normales del ordenador. Es una buena manera de aprender para los novatos. También es muy cómodo cuando estás a punto de ganar (o perder) pero no quieres terminar la partida tú mismo. Elige también esta opción cuando tengas que abandonar antes de tiempo una partida multijugador pero no quieras que tu territorio se desmorone por completo.
+49	Si eliges {b1}Solo marcar mi turno como terminado cada turno{/b1}, eso es lo único que pasará. Ninguna de tus barras del presupuesto cambiará jamás (salvo cuando pierdas o ganes planetas). Es una opción cómoda cuando tienes varios turnos seguidos en los que no pasa nada interesante, como cuando esperas a que una colonia se vuelva rentable.
+50	Si eliges {b1}Marcarme como terminado hasta que ocurra algo interesante{/b1}, no jugarás hasta que haya una batalla. Entonces vuelves a jugar la partida.
+51	Elige {b1}Jugaré mis propios turnos{/b1} para desactivar el Juego automático.
+52	El deslizador de la parte inferior del cuadro de diálogo {b1}Juego automático…{/b1} determina cuánto tiempo se muestra cada mensaje. Normalmente tienes que hacer clic en cada mensaje para que desaparezca. Con el Juego automático puedes seguir haciendo clic, pero si se agota el tiempo, desaparecerá automáticamente. Esto solo importa cuando estás mirando cómo juega el ordenador en Juego automático.
+53	Puedes ajustar el estilo de juego del ordenador cuando lo pones en Juego automático. Los deslizadores de {b1}Configurar{/b1} establecen cuánto preferirá tu ordenador atacar y defender. Juega con los controles: ya los descubrirás.
+54	Ordenar automáticamente la lista de planetas
+55	{b1}Ordenar automáticamente la lista de planetas{/b1}
+56	Esto ordenará tus planetas por ingresos en cada turno. Significa que tus mejores planetas estarán siempre al final de la lista (ya que presumiblemente no necesitas ocuparte de ellos) y tus planetas recién estrenados estarán arriba del todo. Así no tienes que buscar en la lista los planetas relevantes.
+57	Información del presupuesto
+58	{b1}Jugar a Spaceward Ho!{/b1}
+59	Información sobre el planeta seleccionado en ese momento.
+60	Información sobre la flota seleccionada (selecciona una flota haciendo clic en ella en la lista).
+61	Información global de todos tus planetas. Todo tu dinero y tu metal sale de estos números y va a parar a ellos. A la derecha está el cambio desde el turno anterior.
+62	A la izquierda hay una lista de los jugadores de la partida. Las marcas indican si ya han terminado su turno. A la derecha hay un gráfico de barras para repartir tu gasto entre los planetas.
+63	Los números de la información del presupuesto están ahí solo a título informativo. No puedes cambiarlos directamente. Lo que sí puedes cambiar son los {a1}gráficos de barras{/a1} que hay debajo.
+64	{a1}Gráficos de barras{/a1}.
+65	Construir naves
+66	{b1}Naves{/b1}
+67	{b1}Construir naves{/b1}
+68	Puedes construir naves en cualquiera de tus colonias. Para ello, haz clic en el planeta donde quieras construir naves y elige {b1}Construir naves{/b1} en el menú “Naves”, o simplemente haz doble clic en el planeta. Se abrirá un cuadro de diálogo grande. Este cuadro te permite tanto construir naves como diseñar nuevos tipos de nave. Puedes elegir la cantidad de naves antes de elegir el tipo y luego ajustar sus niveles de tecnología hasta que su coste en metal y en dinero sea el que quieres.
+69	En la parte izquierda del cuadro hay una lista de los tipos de nave disponibles. Si ninguno es de tu gusto, puedes diseñar una clase nueva jugando con los deslizadores de la parte central inferior de la pantalla.

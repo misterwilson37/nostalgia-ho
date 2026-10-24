@@ -1,0 +1,123 @@
+115	Comparer les joueurs
+116	Si l’envie vous prend de voir où vous en êtes par rapport aux autres joueurs de la partie, choisissez “{b1}Comparer les joueurs…{/b1}” dans le menu “{b2}Galaxie{/b2}”. Vous pourrez voir comment certains de vos attributs (comme la technologie d’Armes ou le revenu) se comparent à ceux des autres.
+119	Cliquez sur le bouton « Afficher les niveaux… » pour voir le niveau de compétence de chaque joueur : novice, débutant, normal, expert ou avancé. Les joueurs ordinateur affichent un niveau tiré au hasard parmi ceux des différents joueurs, pour aider à cacher qui sont les joueurs ordinateur. L’intelligence réelle de l’ordinateur figure au bas de cette fenêtre.
+120	L’historique graphique
+121	Il montre un historique de 1 000 ans de vos progrès. Vous pouvez activer et désactiver les diverses barres avec les icônes au bas du graphique. Les graphiques de technologie montrent votre position par rapport aux autres joueurs, comme la boîte de dialogue “{b1}Comparer les joueurs…{/b1}”. Les trois autres sont des indicateurs « absolus » : plus vous gagnez d’argent, plus vous montez dans le graphique, quel que soit le niveau des autres joueurs.
+122	Galaxies personnalisées
+123	Quand vous lancez une partie de {i1}Spaceward Ho!{/i1} pour la première fois, vous disposez de nombreuses options pour décider de l’aspect de la galaxie. Vous pouvez décider contre combien de joueurs vous jouerez, leur niveau, la taille de la galaxie, et ainsi de suite. Nous passons ici ces options en revue.
+124	“{b1}Nombre d’ordinateurs{/b1}” est assez évident : c’est le nombre d’ennemis qui occuperont la galaxie avec vous. Plus ils sont nombreux, plus vous rencontrerez de résistance.
+125	“{b1}Taille de la galaxie{/b1}” détermine la taille de la galaxie. Plus la galaxie est grande, plus chaque joueur a de place pour se déplacer. Dans une petite galaxie avec beaucoup de joueurs, la partie sera généralement intense et rapide. Dans une grande galaxie avec seulement quelques joueurs, la partie se développera longtemps avant le moindre combat. Les parties dans des galaxies gigantesques dureront une éternité.
+126	“{b1}Style de carte{/b1}” est la forme générale que prendra la galaxie. Les galaxies en Anneau donnent généralement les départs les plus équitables, chaque joueur étant disséminé autour de l’anneau. Les galaxies en Amas et en Spirale placent les joueurs {i2}à peu près{/i2} à égalité. Une galaxie Aléatoire a ses étoiles jetées en vrac. N’importe quel joueur peut se retrouver dans une position extrêmement bonne ou mauvaise : en plein sur plusieurs ennemis, ou sans personne dans les étoiles voisines.
+127	“{b1}Niveau des ordinateurs{/b1}” détermine la difficulté de la partie que vous donneront les joueurs ordinateur. Les plus intelligents apprennent de leurs erreurs, construisent de plus grandes flottes, investissent davantage dans la technologie et s’étendent plus vite. Les joueurs brillants commencent aussi avec tous les avantages d’un joueur humain « Novice » : beaucoup de métal, plusieurs vaisseaux au départ et une forte population sur la planète. Les joueurs stupides, en plus d’être bêtes, doivent commencer au réglage humain « Expert », qui ne leur donne ni métal de départ, ni vaisseaux, ni grande population.
+128	Au début, même les joueurs ordinateur Stupides se révéleront des adversaires difficiles, mais à mesure que votre niveau progresse, vous les trouverez sans défi. Avec le temps, vous serez peut-être assez bon pour battre régulièrement des joueurs Brillants, même en jouant en Expert. Cela vous place parmi les tout meilleurs joueurs de {i1}Ho!{/i1}. Essayez de jouer contre des humains. Essayez de jouer contre Joe et Peter.
+129	Les jeux préférés de Delta Tao
+130	{i1}Strategic Conquest 3.0{/i1} : nous avons passé plus de temps à jouer à Strategic Conquest qu’à tous les autres jeux Mac réunis (même si le Ho! commence à le rattraper). Particulièrement bon à deux joueurs reliés par AppleTalk. Nous sommes ravis de le publier.
+131	{i1}Dark Castle{/i1} et {i2}Beyond Dark Castle{/i2} : des jeux sans aucun défaut. Action inventive, animation formidable, effets sonores merveilleux. Difficiles et drôles. Les jeux Mac les plus professionnels que nous ayons vus.
+132	{i1}PlayMaker Football{/i1} : nous détestons le mettre dans la liste, puisqu’il est protégé contre la copie. Ces salauds. Malheureusement pour nous, apprentis entraîneurs de football (américain) acharnés, aucun autre jeu ne simule le vrai football même à moitié aussi bien.
+133	{i1}3 in Three{/i1} : un très bon jeu de Cliff Johnson, qui a écrit {i2}Fool’s Errand{/i2}. Il nous a amusés pendant de longues heures. Plein d’énigmes intéressantes.
+134	{i1}Spaceward Ho!{/i1} : quelle surprise.
+135	Nous sommes plutôt durs avec les jeux, et plusieurs sont bons, mais nous ne nous sommes pas tous mis d’accord pour les mettre dans notre liste de jeux « recommandés ». Un échantillon :
+136	{i1}Prince of Persia{/i1}, de Broderbund ; {i2}Hellcats over the Pacific{/i2}, de Graphic Simulations ; {i3}Spectre{/i3}, de Peninsula Gameworks ; {i4}Armor Alley{/i4}, de Three-Sixty Pacific ; {i5}Pipe Dreams{/i5}, de Lucasfilm ; {i6}Sim City{/i6}, de Maxis ; {i7}King’s Bounty{/i7}, de New World Computing ; et quelques autres qui ne nous reviennent pas sur-le-champ.
+137	Quelques jeux qu’aucun d’entre nous n’a aimés :
+138	{i1}Harpoon, Capitalist Pig, Full Metal Mac, Galactic Frontiers, No Greater Glory, Creepy Castle, Blade, Mutant Beach, V is for Victory, Starflight{/i1} et des dizaines d’autres jeux obscurs.
+151	Vous remarquerez que toutes vos colonies ont l’air de gentils. C’est-à-dire qu’elles ne portent ni masque, ni lunettes noires, ni crête punk, ni boucles d’oreilles. C’est simple : c’est vous qui portez le chapeau blanc. Bien sûr, tous les autres joueurs se croient {i1}eux aussi{/i1} les gentils.
+155	Détruire les planètes ennemies
+157	Les différentes images de planètes
+163	Une planète semi-habitable
+164	Une planète entre 0,4 et 0,5 G, ou entre 2,0 et 2,5 G, tombe dans cette catégorie. À terme, ce type de planète peut devenir rentable. Mais elle ne sera jamais {i1}très{/i1} rentable, aussi vaut-il souvent mieux l’exploiter pour son métal et la quitter.
+165	Une planète inhospitalière
+169	Une planète inexplorée
+172	Si vous envoyez une flotte vers une planète inexplorée, le point d’interrogation se change en point d’exclamation, pour vous faire savoir que vous en saurez bientôt plus. Si “{b1}Afficher les trajets des flottes{/b1}” est activé dans la boîte de dialogue “{b2}Préférences…{/b2}”, vous verrez une ligne pointillée pour la flotte dirigée vers cette planète.
+173	Une planète ennemie
+176	Une planète alliée
+178	Une planète de bataille
+180	Satellites
+182	Flottes
+183	Si vous avez une flotte à une planète, une petite image de flotte apparaît dans le coin supérieur droit de la planète pour vous le signaler. Nous savons que cela ressemble à une lune, mais ne vous laissez pas tromper.
+184	Flottes alliées
+186	Une icône de planète nommée Dweezil
+187	Deux icônes de planète, Almak et Delta
+188	Deux icônes de planète, toutes deux nommées Maaz
+189	Deux icônes de planète, Regor et Phact
+190	Deux icônes de planète, toutes deux nommées Regor
+191	Une icône de planète sombre avec un point d’interrogation, nommée Zaphod
+192	Une icône de planète ennemie nommée Gienah
+193	Une icône de planète nommée Polaris
+194	Orientations futures
+195	{i1}Spaceward Ho!{/i1} va probablement connaître quelques révisions dans les deux prochaines années, mais il s’efforcera de rester simple et amusant. Nous accueillons vos suggestions : beaucoup de choses suggérées par les premiers utilisateurs sont aujourd’hui dans le jeu. Les suggestions qui rendent les choses plus simples et plus amusantes ont le plus de chances d’être retenues.
+197	Glossaire
+198	Allié
+199	Un extraterrestre avec qui vous partagez le ravitaillement et un pacte de non-agression.
+200	Ennemi
+202	Gravité
+204	Revenu
+206	Échelle log
+207	L’échelle logarithmique est une échelle inégale qui donne plus de précision aux petits nombres qu’aux grands.
+208	Bloqué
+209	L’état d’un vaisseau qui n’a pas assez de carburant pour quitter la planète où il se trouve.
+210	Métal
+213	Argent
+215	Planète
+217	Technologie Radicale
+220	Satellite
+221	Un vaisseau qui ne peut pas bouger. Sa Distance est zéro. Les Satellites sont beaucoup plus petits que les autres vaisseaux.
+222	Bouclier
+224	Épargne des vaisseaux
+225	L’argent que vous avez accumulé pour construire des vaisseaux. Cet argent vous rapporte des intérêts. Si vous avez dépensé plus que vous n’avez épargné, vous {i1}payez{/i1} des intérêts.
+226	La rapidité d’un vaisseau. Un vaisseau de Vitesse 3 mettra 2 tours pour aller à une étoile située à 5 unités.
+227	Étoile
+228	La même chose qu’une planète.
+229	Température
+231	Terraformation
+233	Le Ho!
+235	Arme
+237	Manuel de Spaceward Ho! 3.0.1 (Macintosh)
+238	{a1}Sommaire{/a1}
+239	{b1}{i2}Spaceward Ho! 3.0{/i2}{/b1}
+240	par Peter Commons
+241	{i1}Illustrations de Howard Vives et Bob van de Walle{br2/}Sons de Mark Madeley{br3/}Conçu par Joe Williams et Peter Commons{/i1}
+242	{i1}Manuel et logiciel © Copyright 1991-1993{br2/}Delta Tao Software, Inc.{br3/}Tous droits réservés{/i1}
+243	{a1}Instructions ultra-rapides pour le Ho!{/a1} {small2}(p. 1){/small2}
+244	{a1}Glossaire{/a1} {small2}(p. 2){/small2}
+245	{a1}Résumé rapide{/a1} {small2}(p. 4){/small2}
+246	{a1}Informations plus détaillées{/a1} {small2}(p. 5){/small2}
+247	{a1}L’économie{/a1} {small2}(p. 13){/small2}
+248	{a1}Les vaisseaux{/a1} {small2}(p. 16){/small2}
+249	{a1}Explorer les planètes : température et gravité{/a1} {small2}(p. 21){/small2}
+250	{a1}Le progrès technologique{/a1} {small2}(p. 28){/small2}
+251	{a1}Envoyer des messages{/a1} {small2}(p. 31){/small2}
+252	{a1}Alliances{/a1} {small2}(p. 32){/small2}
+253	{a1}Revoir les batailles{/a1} {small2}(p. 33){/small2}
+254	{a1}Comparer les joueurs{/a1} {small2}(p. 34){/small2}
+255	{a1}Parties à plusieurs{/a1} {small2}(p. 35){/small2}
+256	{a1}Galaxies personnalisées{/a1} {small2}(p. 37){/small2}
+257	{a1}Les joueurs ordinateur{/a1} {small2}(p. 38){/small2}
+258	{a1}Le menu Options{/a1} {small2}(p. 39){/small2}
+259	{a1}Préférences{/a1} {small2}(p. 41){/small2}
+260	{a1}Raccourcis{/a1} {small2}(p. 43){/small2}
+261	{a1}Système 7{/a1} {small2}(p. 45){/small2}
+262	{a1}Notre position sur la protection contre la copie{/a1} {small2}(p. 46){/small2}
+263	{a1}À propos de Delta Tao{/a1} {small2}(p. 48){/small2}
+264	{a1}À propos de l’emballage{/a1} {small2}(p. 51){/small2}
+265	{a1}À propos de Spaceward Ho!{/a1} {small2}(p. 52){/small2}
+266	{a1}Orientations futures{/a1} {small2}(p. 53){/small2}
+267	{a1}À propos du programme spatial{/a1} {small2}(p. 54){/small2}
+268	{a1}Problèmes courants{/a1} {small2}(p. 55){/small2}
+269	{a1}Changements de la version 1 à la version 2{/a1} {small2}(p. 57){/small2}
+270	{a1}Changements de la version 2 à la version 3{/a1} {small2}(p. 58){/small2}
+271	{a1}Lectures recommandées{/a1} {small2}(p. 59){/small2}
+272	{a1}Les jeux préférés de Delta Tao{/a1} {small2}(p. 60){/small2}
+273	{a1}Les petits caractères{/a1} {small2}(p. 61){/small2}
+274	{a1}Assistance technique{/a1} {small2}(p. 62){/small2}
+275	{b1}Encarts{/b1}
+276	{a1}Carte de garantie / questionnaire{/a1}
+277	{a1}Quatrième de couverture{/a1}
+278	Couverture du manuel de Spaceward Ho! 3.0 : Conquérez la galaxie sur votre Macintosh
+279	Informations plus détaillées
+280	Installer {i1}Spaceward Ho!{/i1}
+281	Le mieux est d’installer {i1}Spaceward Ho!{/i1} sur votre disque dur. Si vous avez un Macintosh couleur, vous voudrez aussi mettre le fichier Color Pictures dans le même dossier que l’application {i2}Spaceward Ho!{/i2}, pour voir côte à côte les petites images de planètes. Si votre Mac est en noir et blanc, vous pouvez économiser de l’espace disque en n’installant pas les images en couleur. Au premier lancement du jeu, {i3}Spaceward Ho!{/i3} vous demandera de le personnaliser en saisissant votre nom.
+282	Commencer une nouvelle partie
+283	Quand {i1}Spaceward Ho!{/i1} démarre, il affiche une boîte de dialogue qui vous permet de commencer une nouvelle partie ou d’en reprendre une sauvegardée. Choisissez “Nouvelle partie”. Vous devrez ensuite donner un nom à votre galaxie. Puis une grande boîte de dialogue effrayante “{b2}Créer la galaxie{/b2}” s’affichera. Cliquez simplement sur “{b3}Créer{/b3}”. {i4}Spaceward Ho!{/i4} vous demandera ensuite votre nom. Une fois que vous l’aurez saisi, vous êtes prêt à jouer.
+285	Vous pouvez aussi activer “{b1}Auto Play…{/b1}” dans le menu “{b2}Options{/b2}” et voir comment l’ordinateur jouerait. Vous aurez une idée de la façon dont les choses se passent, et vous pouvez désactiver Auto Play à tout moment et reprendre la main.
+286	Les fenêtres
+287	{i1}Spaceward Ho!{/i1} a trois fenêtres. Vous pouvez les déplacer et les redimensionner comme vous voulez, afin de configurer le jeu pour vos écrans et votre style de jeu. {i2}Spaceward Ho!{/i2} enregistre automatiquement la disposition de vos fenêtres quand vous quittez et la rétablit la prochaine fois que vous jouez, de sorte que vous n’avez pas à la retoucher sans cesse.

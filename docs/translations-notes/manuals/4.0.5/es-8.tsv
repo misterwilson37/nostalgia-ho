@@ -1,0 +1,49 @@
+504	{b1}Spaceward Ho!{/b1} representa toda la economía de la galaxia con solo dos números: Dinero y Metal.
+506	El Metal representa las cosas que se encuentran: metales, petróleo, uranio, ese tipo de cosas. Lo único que se puede agotar es el metal. En la Galaxia hay una cantidad limitada de metal. Controlar el metal puede ser muy importante.
+508	Eso es todo sobre la economía. La mayoría de tus decisiones tratarán de cómo gastas el dinero. La corrección de gastos ahora ocurre automáticamente al terminar el turno, así que ya no está en los menús. Si alguna vez gastas más dinero del que necesitas para algo, lo que sobre se ahorrará convenientemente. Por ejemplo, si gastas $10.000 en explotar un planeta que solo tiene 100 de metal, los $9.000 de más se pondrán en los ahorros, donde podrás usarlos más adelante.
+509	Nunca tienes que preocuparte por trasladar metal ni dinero. Aparecerá automáticamente donde lo necesites. Puedes extraerlo en el extremo derecho de una galaxia enorme y usarlo el turno siguiente en el extremo izquierdo. Esto significa que puedes construir naves donde las necesites. El dinero se comporta igual: nunca tienes que llevarlo adonde vayas a gastarlo. Obligarte a mantener líneas de suministro sería más realista, pero no sería muy divertido.
+512	El Historial gráfico
+513	El gráfico de historial, que está en {b1}Historial gráfico…{/b1} en el menú “Galaxia”, muestra tu progreso a lo largo del tiempo en forma gráfica. Por ejemplo, haz clic en él para ver cómo ha aumentado o disminuido tu población en los últimos 20 años.
+514	El Salón de la Fama y el Salón de la Vergüenza
+515	{b1}El Salón de la Fama y el Salón de la Vergüenza{/b1}
+516	Siempre que ganes una partida de {b1}Spaceward Ho!{/b1}, la información de tu victoria quedará registrada en el {b2}Salón de la Fama{/b2}. Cuando pierdas, esa información (por embarazosa que sea) irá al {b3}Salón de la Vergüenza{/b3}. Esto te permite llevar un registro de tu progreso y te da algún tipo de clasificación que puedes usar para compararte con otros jugadores.
+517	La “dificultad” depende de lo difícil que fue tu partida. Obviamente, una partida contra jugadores listos con tu nivel en “experto” tiene una dificultad mayor que una partida contra jugadores torpes con tu nivel en “novato”. También cuentan otras cosas, como el número de aliados con los que compartiste la victoria, lo grande que era la galaxia y lo que tardaste en declarar la victoria.
+518	Si alguna vez quieres vaciar tu {b1}Salón de la Fama{/b1}, basta con tirar el archivo “Spaceward Ho! 4.0 Prefs”.
+519	La Ventana principal
+520	{b1}La Ventana principal{/b1}
+521	La Ventana principal es la única ventana realmente importante de {b1}Spaceward Ho!{/b1}. Contiene el Mapa estelar y la información de presupuesto, planeta y flota. La barra de título de la ventana dirá algo como “Peter en Milky Way en 2000”, lo que significa que ahora estás registrado como Peter en la partida “Milky Way” en el año 2000. ¡Vaya!
+522	El menú Opciones
+523	A continuación hay un resumen de las opciones disponibles en el menú “Opciones”.
+524	{a1}Juego automático {/a1}
+525	{a1}El Salón de la Fama y el Salón de la Vergüenza {/a1}
+526	{a1}Preferencias {/a1}
+527	{a1}Mostrar rutas de flotas {/a1}
+528	{a1}Ordenar automáticamente la lista de planetas {/a1}
+529	{a1}Mostrar los mensajes de sucesos {/a1}
+530	{a1}Revisar las batallas de sucesos {/a1}
+531	{a1}Ajustar la velocidad de las batallas {/a1}
+532	{a1}Frecuencia de consulta {/a1}
+533	El Mapa estelar
+534	{b1}El Mapa estelar{/b1}
+536	En la parte superior izquierda del mapa estelar está el reloj de turnos. Haces clic en el reloj de turnos para terminar tu turno. Si juegas sin límite de tiempo por turno, simplemente contará las horas y los minutos que ha durado esta partida del Ho!. Si juegas con límite de tiempo, la aguja móvil muestra el tiempo que te queda en este turno. Cuando se te acaba el tiempo, entras en el “Tiempo extra” y el reloj digital empieza la cuenta atrás. Si llega a cero, se te acabó el tiempo. El tiempo extra es acumulativo: puedes conseguir más terminando tu turno antes de lo necesario. Los límites de tiempo se fijan al crear una partida.
+538	{a1}Un planeta sin explorar{/a1}{b2} {/b2}
+539	{a1}Un planeta seleccionado. {/a1}
+540	{a1}Ver distintas imágenes de planetas. {/a1}
+541	La Ventana de gasto en tecnología
+542	{b1}La Ventana de gasto en tecnología{/b1}
+543	Usa la Ventana de gasto en tecnología para indicar qué tecnologías quieres desarrollar más. Puedes elegir investigar tecnologías distintas según tu estrategia, tu filosofía y la situación de la partida. En su mayor parte, no necesitas trastear mucho con esta ventana.
+544	Recuerda que la Ventana de gasto en tecnología solo reparte el dinero de Tecnología y no decide cuánto dinero de Tecnología hay: eso lo fijas con los gráficos de barras de la Ventana de presupuesto.
+545	Las ventanas
+546	{b1}Las ventanas{/b1}
+547	{b1}Spaceward Ho!{/b1} tiene tres ventanas. Puedes arrastrar las ventanas y cambiarles el tamaño como quieras, para configurar el juego según tu monitor y tu estilo de juego. {b2}Spaceward Ho!{/b2} guarda automáticamente la disposición de tus ventanas al salir y la restaura la próxima vez que juegues, así que no tienes que estar trasteando con ella.
+548	Este es un planeta donde tu población ha crecido hasta el pun
+551	Este es el resumen en un solo párrafo de lo que necesitas saber. Pon {b1}Spaceward Ho! 4.0{/b1} en tu disco duro. Juega con las barras de gasto para ajustar el gasto. Haz clic en los mensajes del mapa para que desaparezcan. Haz doble clic en una colonia para diseñar y construir naves. Arrastra de una estrella a otra para mover las naves. Experimenta. Conquista la galaxia.
+552	Armas y Escudos
+553	{b1}Armas y Escudos{/b1}
+557	¿Por qué un tema de vaqueros?
+558	{b1}¿Por qué un tema de vaqueros?{/b1}
+559	Desde que se hizo {b1}Spaceward Ho!{/b1} se han hecho muchas preguntas sobre por qué elegimos un tema del Oeste para un juego de exploración espacial. Al parecer, esa gente no ha visto suficiente Star Trek para saber que el espacio es “la última frontera”.
+561	En la vida real, hacía falta alguna manera de distinguir los planetas amistosos de los hostiles. Si se diera un color distinto a cada jugador, los colores se acabarían enseguida, y la gente se desconcertaría en las máquinas en blanco y negro. Además, costaría distinguir cómodamente tus propios planetas entre todos los demás, o los no colonizables de los buenos. A alguien se le ocurrió la brillante idea de ponerles sombreros a los planetas para diferenciarlos, y eso condujo al tema de frontera. Claro que la mecánica del juego es pura “Conquista Estratégica Galáctica”, no “Vaqueros e indios en el espacio”.
+562	Tu planeta de origen
+563	{b1}Tu planeta de origen{/b1}
+564	Aquí es donde vives. Es un planeta muy poblado, muy rentable y tecnológicamente avanzado, listo para salir a explorar el universo. Aquí construirás tus primeras naves.

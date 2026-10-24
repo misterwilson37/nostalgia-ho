@@ -1,0 +1,39 @@
+465	Les rendements décroissants ne s’appliquent {i1}pas{/i1} à la construction de vaisseaux. Chaque vaisseau coûte le même prix, que vous en construisiez dix en un tour ou un seul.
+466	La dette
+467	Dans {i1}Spaceward Ho! 3.0{/i1}, vous pouvez vous endetter. Cela signifie que vous pouvez dépenser plus d’argent en construction de vaisseaux que vous n’en avez épargné. Vous pouvez emprunter jusqu’à cinq fois le revenu total de toutes vos planètes.
+472	Les petits caractères
+474	Vous pouvez installer ce logiciel sur votre disque dur. Vous pouvez en faire autant de copies de sauvegarde que vous le souhaitez. Vous pouvez dupliquer le jeu pour que des amis puissent participer avec vous à une partie en réseau, à condition de vous assurer qu’ils ne peuvent lancer aucune partie sans vous.
+475	En gros, nous souscrivons à la « théorie du Monopoly » pour les jeux à plusieurs. Quand vous achetez un jeu de plateau, un seul exemplaire suffit pour que jouent ensemble autant de personnes que le jeu en accepte. En revanche, dupliquer le jeu pour que chacun l’emporte chez soi est illégal. Compris ? Chez nous, c’est pareil.
+476	Si, pour une raison quelconque, vous estimez que les performances de ce logiciel ne sont pas satisfaisantes dans les 30 jours suivant l’achat, vous pouvez le rapporter à l’endroit où vous l’avez acheté pour un remboursement intégral. Ce logiciel a été testé dans des conditions variées, et nous pensons qu’il fonctionne de façon satisfaisante et sûre. Cependant, nous ne pouvons garantir qu’il fonctionnera sur votre machine. {b1}En aucun cas Delta Tao ne sera responsable des dommages causés à votre système informatique et/ou à votre personne{/b1} (y compris les dommages oculaires dus à des parties de {i2}Spaceward Ho!{/i2} à toute heure du jour et de la nuit), autres que le remboursement du prix d’achat du logiciel, même si nous avons été avertis de la possibilité de tels dommages.
+478	Le menu Options
+480	Auto Play
+482	Si vous laissez l’ordinateur jouer à votre place, il développera sa propre stratégie, comme les adversaires ordinateur habituels. C’est une bonne façon pour les novices d’apprendre. C’est aussi très pratique quand vous êtes sur le point de gagner (ou de perdre) mais que vous ne voulez pas finir la partie vous-même. Choisissez aussi cette option quand vous devez quitter une partie à plusieurs plus tôt que prévu sans vouloir que votre territoire s’effondre complètement.
+485	Choisissez « Je jouerai mes propres tours » pour désactiver Auto Play.
+488	Je mets à jour les tours
+489	Dans une partie à plusieurs, si certains Mac sont plus rapides que d’autres, vous voudrez probablement que les Mac rapides s’occupent des mises à jour des tours. Demandez aux Mac qui ne veulent pas mettre à jour le tour de désactiver cette option.
+490	Si vous utilisez FileShare, ou quelque chose de similaire, vous voudrez faire en sorte que la personne qui a le fichier de la partie sur sa propre machine mette à jour le tour. Demandez donc à tous les autres de désactiver cette option.
+491	Si personne n’a sélectionné cette option, le tour ne sera jamais mis à jour. C’est mauvais.
+493	Chaque fois que vous gagnez une partie de {i1}Spaceward Ho!{/i1}, les informations sur votre victoire sont enregistrées dans le Panthéon. Quand vous perdez, {i2}ces{/i2} informations (même embarrassantes) vont dans le Mur de la honte. Cela vous permet de garder une trace de vos progrès et vous donne une sorte de classement pour vous comparer aux autres joueurs.
+494	La « difficulté » dépend de la dureté que nous avons jugée à votre partie. Évidemment, une partie contre des joueurs brillants avec vous en « expert » a une difficulté plus élevée qu’une partie contre des joueurs stupides avec vous en « novice ». Plusieurs autres éléments comptent aussi, comme le nombre d’alliés avec lesquels vous avez partagé la victoire, la taille de la galaxie et le temps qu’il vous a fallu pour déclarer la victoire.
+495	Une excellente fonction du Panthéon est de pouvoir rejouer des parties gagnées par quelqu’un d’autre, ou de rejouer une partie que vous avez perdue. Cela vous permet d’essayer différentes stratégies et vous offre un autre moyen de vous mesurer aux autres joueurs.
+496	Si jamais vous voulez vider votre Panthéon, jetez simplement le fichier “{i1}Ho! 3.0 Prefs{/i1}”.
+498	{a1}Sommaire{/a1} {a2}Suivant →{/a2}
+500	Installez {i1}Spaceward Ho!{/i1} (et {i2}Spaceward Ho! 3.0 Color Picts{/i2}, si vous voulez jouer en couleur) sur votre disque dur. Jouez avec les graphiques en barres et les camemberts pour ajuster les dépenses. Cliquez sur les messages de la carte pour les faire disparaître. Double-cliquez sur une colonie pour concevoir et construire des vaisseaux. Faites glisser d’une étoile à l’autre pour déplacer les vaisseaux. Expérimentez. Conquérez la galaxie.
+501	Carte de garantie / questionnaire
+502	C’est la carte détachable reliée au manuel. Les champs à remplir ne sont pas reproduits. Le verso de la carte est adressé à : {i1}Spaceward Ho! 3.0{/i1} Warranty Registration, Delta Tao Software, Inc., 760 Harvard Ave., Sunnyvale, CA 94087. La page qui la précède est un formulaire « Avez-vous des commentaires ? » à lignes à remplir.
+503	{i1}Carte de garantie et questionnaire de Spaceward Ho! 3.0{/i1}
+504	Veuillez remplir cette carte, la détacher et nous la renvoyer par la poste. Ne la pliez pas.
+505	Nom{br1/}Adresse{br2/}Numéro de téléphone
+506	Comment est votre Mac principal ? (processeur, mémoire, taille du disque, périphériques, écran couleur)
+507	Quelle est votre activité principale ?
+508	Quand et où avez-vous obtenu {i1}Spaceward Ho!{/i1} ?
+509	Quels sont vos jeux préférés ?
+510	Quels jeux sont des navets ?
+511	Que pensez-vous du manuel ?
+512	Notez {i1}Spaceward Ho!{/i1} sur une échelle de 1 à 10 (10 étant le meilleur) :
+513	Le prix de {i1}Spaceward Ho!{/i1} est-il juste ?
+514	Quels jeux aimeriez-vous nous voir écrire ?
+515	Quel pourcentage de vos parties de {i1}Ho!{/i1} se jouent en réseau ?
+516	Quels autres produits aimeriez-vous le plus nous voir développer ?
+517	Quelle est votre société de logiciels Macintosh préférée ? Pourquoi ?
+518	Que pensez-vous de notre emballage ?

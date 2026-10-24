@@ -1,0 +1,80 @@
+361	Mostrar rutas de flotas
+362	Esta opción hace que {i1}Spaceward Ho!{/i1} muestre una línea de puntos cuando tus flotas van de camino a algún sitio. A medida que las flotas se acercan, la línea se acorta. Es cómodo e informativo.
+363	Ordenar automáticamente la lista de planetas
+364	Esto ordenará tus planetas por ingresos en cada turno. Significa que tus mejores planetas estarán siempre al final de la lista (ya que presumiblemente no necesitas ocuparte de ellos) y tus planetas recién estrenados estarán arriba del todo. Así no tienes que buscar en la lista los planetas relevantes. Si quieres, puedes desactivar esta opción y arrastrar los planetas para ponerlos en el orden que prefieras, como se hacía antes. Aunque no lo recomendamos.
+365	Mostrar los mensajes de sucesos
+366	Si esta opción está seleccionada, todos los mensajes de sucesos se mostrarán en la esquina inferior izquierda del mapa al comienzo de cada turno. Haz clic en el mensaje o pulsa Return para pasar al siguiente.
+367	Todos los mensajes aparecen en la Ventana de informes, esté o no marcada esta opción.
+368	Revisar las batallas anunciadas
+370	Ajustar la velocidad de las batallas
+372	Frecuencia de consulta
+373	La frecuencia de consulta determina cada cuánto comprueba el ordenador el archivo de la partida para ver quién ha terminado su turno y quién no. Cuanto más rápida sea la frecuencia, antes sabrá el ordenador cuándo han terminado todos. Eso sí, si juegas con mucha gente en una red lenta (AppleTalk en lugar de EtherTalk), mantén la frecuencia bastante larga para evitar un tráfico de red excesivo.
+374	Lecturas recomendadas
+375	Estos son un par de libros que no tienen nada que ver con el software para Macintosh, pero que nos gusta leer una y otra vez. Además, creemos que dicen algo sobre la filosofía de Delta Tao.
+376	{i1}The Tao of Pooh{/i1} (El Tao de Pooh), de Benjamin Hoff, Penguin Books, Nueva York, 1982. El mejor libro sobre el taoísmo jamás escrito.
+377	{i1}Calvin and Hobbes{/i1} (Calvin y Hobbes), de Bill Watterson, Andrews and McMeel, Kansas City, 1987.
+378	{i1}The Macintosh Way{/i1} (El camino Macintosh), de Guy Kawasaki, Scott, Foresman and Company, Glenview, Illinois, 1989.
+379	{i1}Surely You Must Be Joking, Mr. Feynman{/i1} (¿Está usted de broma, Sr. Feynman? Aventuras de un curioso personaje), de Richard Feynman.
+380	Revisar las batallas
+381	A veces tus naves chocan con las naves de otros jugadores. Cuando esto ocurre, luchan hasta que un bando muere. Es cierto que eso no facilita una convivencia pacífica, pero esto {i1}es{/i1} un juego de guerra. En fin, cuando tengas un combate, querrás saber qué diablos ha pasado. Hay un par de maneras de averiguarlo. Primero, si tienes marcada la opción “{b2}Revisar las batallas{/b2}” en el cuadro de diálogo “{b3}Preferencias…{/b3}”, recibirás un resumen de las batallas al comienzo de cada turno.
+382	También puedes elegir cualquier estrella y revisar la última batalla que hubo en ella eligiendo “{b1}Revisar batalla en Proxima{/b1}” (o la que sea) en el menú “{b2}Galaxia{/b2}”. Si ha habido dos o más batallas en una estrella, así solo puedes ver la más reciente.
+383	Haz doble clic en una estrella para revisar la batalla más reciente que hubo allí.
+385	Puedes ajustar la velocidad a la que {i1}Spaceward Ho!{/i1} reproduce la batalla en el cuadro de diálogo “{b2}Preferencias…{/b2}”.
+387	Enviar mensajes
+388	Puedes enviar mensajes a los demás jugadores de una partida de {i1}Spaceward Ho!{/i1}. Como los jugadores del ordenador tienen que entender y enviar mensajes propios, hemos ideado un lenguaje sencillo para todos los de la partida.
+389	Para enviar un mensaje, basta con elegir “{b1}Enviar mensaje…{/b1}” en el menú “{b2}Galaxia{/b2}”. Aparecerá un cuadro de diálogo en el que podrás decidir a quién enviarlo, qué decir y cosas así. La mejor manera de aprender todos los mensajes es probarlos todos.
+390	Los mensajes tendrán un efecto distinto en quien los recibe. Si le dices a un jugador que lo odias, tenderá a apreciarte menos que antes. Si le dices que te cae bien, puede que él a ti también o puede que no.
+391	Los jugadores del ordenador mentirán de vez en cuando con sus mensajes, unos más que otros. Pero no pueden mentir con algunos mensajes, igual que tú.
+392	Naves
+394	Las naves de {i1}Spaceward Ho!{/i1} son increíblemente enormes y caras. Por ejemplo, tu primera Nave colonia se llevará casi un tercio de los recursos totales de tu planeta, más toda la producción industrial del planeta durante {i2}treinta años{/i2}. Es un barco grande.
+395	Construir naves
+396	Puedes construir naves en cualquiera de tus colonias. Para ello, haz clic en el planeta donde quieras construir naves y elige “{b1}Construir/diseñar naves…{/b1}” en el menú “{b2}Naves{/b2}”, o simplemente haz doble clic en el planeta. Se abrirá un cuadro de diálogo grande. Este cuadro te permite tanto construir naves como diseñar nuevos tipos de nave.
+398	Mover naves
+399	Para mover una flota, basta con hacer clic y arrastrar desde el planeta donde está hasta donde quieres que vaya. Si llega, verás una flecha que señala la ruta que seguirá tu flota. Cuando sueltes el ratón, oirás un “Hyahh!” que te avisa de que el rumbo está fijado. Cuando termines el turno, la nave seguirá su camino.
+401	Para hacer que una flota se quede quieta, o para cancelar su movimiento, haz clic en el planeta de la flota y mantenlo pulsado un segundo. Cuando lo hayas hecho bien, oirás un “Whoa!” al soltar el ratón.
+402	Si tienes más de una flota en un planeta, puedes elegir la flota que quieres mover haciendo clic en su nombre en la Información del presupuesto. Cuando una flota tiene destino y piensa moverse al terminar el turno, su nombre aparecerá en {b1}negrita{/b1} para avisarte. Al pulsar la tecla {i2}TAB{/i2} se seleccionará automáticamente la flota siguiente de ese planeta.
+403	Una flota reposta automáticamente cada vez que va a un planeta que es tuyo o de tus aliados. Si una flota no tiene combustible suficiente para salir, puedes enviar una Nave colonia a ese planeta, colonizarlo durante un turno y luego hacer que todos se marchen. Esto significa que una Nave colonia sirve también de Cisterna.
+405	Organizar flotas
+406	A veces querrás dividir una flota en trozos o juntar varias flotas. Para ello, elige “{b1}Organizar flotas…{/b1}” en el menú “{b2}Naves{/b2}”. Luego haz clic y arrastra las naves hasta que queden distribuidas como quieres. Lo sentimos: una flota solo puede contener naves del mismo tipo (para reducir el tamaño del archivo).
+407	Desguazar flotas y naves
+408	A medida que avanza la partida, verás que el metal escasea y que tus naves obsoletas son casi inútiles. Quizá quieras deshacerte de algunas de tus naves más viejas. Puedes recuperar el 75% del metal de una flota que esté en tus colonias desguazándola (elige “{b1}Desguazar la flota actual{/b1}” en el menú “{b2}Naves{/b2}”). O puedes desguazar todo un tipo de nave (haz clic en “{b3}Desguazar este tipo{/b3}” para un tipo concreto en el cuadro de diálogo “{b4}Naves…{/b4}”).
+409	Cuando marcas un tipo de nave o una flota para desguazarlos, no se desguazan hasta que termines el turno. Si te arrepientes antes, puedes pulsar el botón “{b1}No desguazar este tipo{/b1}” en el cuadro de diálogo “{b2}Naves…{/b2}”, o elegir “{b3}No desguazar la flota actual{/b3}” en el menú “{b4}Naves{/b4}”.
+410	Si solo quieres desguazar parte de una flota, usa el cuadro de diálogo “{b1}Organizar flotas…{/b1}” para dividir la flota entre las naves que quieres conservar y las que quieres desguazar.
+411	Cuando desguazas naves que están sobre una colonia, el metal pasa al instante a tu reserva global, y puedes usarlo de inmediato. Si no eres dueño del planeta sobre el que están las naves, el metal caerá sobre el planeta. La siguiente persona que lo colonice podrá extraer entonces el metal de tus naves desguazadas.
+412	Diseñar naves
+413	Esta es posiblemente la parte más genial del juego. A medida que aumente tu tecnología, querrás empezar a construir naves más avanzadas con estas tecnologías nuevas. Es fácil. Solo tienes que fijar los niveles de tecnología como quieras que sea tu nuevo tipo en el cuadro de diálogo “{b1}Construir/diseñar naves…{/b1}”. Basta con mover los deslizadores para fijar las cualidades de la nueva nave. (El extremo derecho del deslizador es siempre tu nivel de Tecnología actual.) Cuando tengas la nave como la quieres, constrúyela (pulsando el botón “+”) y el prototipo se diseñará y construirá automáticamente.
+415	Naves colonia
+418	Cuando un planeta tiene Satélites, tendrá un anillo alrededor en el Mapa estelar.
+419	Exploradores y Cazas
+420	Los Exploradores y los Cazas son tus naves básicas. La diferencia entre unos y otros es un equilibrio entre Motores y Armas. Los Exploradores pueden tener un Alcance dos unidades superior a tu tecnología de Alcance. Por desgracia, su tecnología máxima de Armas y de Escudos es una unidad inferior a tus niveles actuales. Esto hace que los Exploradores sean ideales para explorar, pero no demasiado buenos en combate.
+421	{i1}Spaceward Ho!{/i1} pondrá automáticamente a cada Explorador en su propia flota, para que pueda salir volando por su cuenta a explorar. Los Cazas se agrupan automáticamente en un solo grupo.
+422	Coste de desarrollo
+424	Ficha de nave: Minnow (2/2) Nave colonia
+425	Ficha de nave: Berry (2/2) Satélite
+426	Ficha de nave: Patton (2/2) Caza
+427	Atajos
+430	Puedes cambiar la escala del Mapa estelar para tener una mejor vista de toda la galaxia o para mirar de cerca alguna sección concreta. Para ello, elige “{b1}Acercar{/b1}” o “{b2}Alejar{/b2}” en el menú “{b3}Galaxia{/b3}”. Sus atajos de teclado son Comando-menos y Comando-más, respectivamente. Al alejar al máximo se pierde mucho detalle.
+433	Si ahorras mucho dinero, quizá te resulte difícil gastar solo un poquito en una estrella. Para tener más precisión en el extremo bajo de las barras de gasto del presupuesto, haz clic en la palabra “Lineal” de la parte superior del gráfico de barras del presupuesto. Cambiará a una escala “Log”. Las barras de Gasto en tecnología siempre están en escala logarítmica.
+434	Cuando colonizas muchas estrellas, verás que el número de planetas de tus barras del presupuesto se vuelve demasiado grande para que quepa en la pantalla. Acabarás teniendo que desplazarte para ver todos tus planetas. En lugar de eso, puedes mover los planetas que te interesan al mismo sitio de la lista. Haz clic en el nombre de un planeta en la lista del presupuesto y arrástralo hasta donde quieras. Es buena idea arrastrar tus barras de Ahorros y de Tecnología cerca de la parte superior de la lista para poder verlas siempre.
+435	Puedes seleccionar y desplazarte rápidamente hasta una flota perdida seleccionándola en el cuadro de diálogo “{b1}Lista de todas las flotas…{/b1}” y eligiendo “{b2}Ir a la flota{/b2}”.
+436	Para encontrar una estrella que te interese, puedes usar “{b1}Lista de estrellas exploradas…{/b1}” y pulsar el botón “{b2}Ir a la estrella{/b2}” (si es una estrella explorada). O simplemente empieza a escribir el nombre de la estrella con el teclado.
+439	System 7
+440	La mejor manera de jugar a {i1}Spaceward Ho!{/i1} implica usar System 7. Con System 7 puedes configurar cualquier ordenador para que sea un ordenador {i2}y{/i2} un servidor de archivos. Esto permite que alguien cree una partida en su máquina y deje que otros se conecten a ella y jueguen. Para ello, activa FileShare eligiendo “{b3}Compartir{/b3}” en el menú “{b4}Archivo{/b4}” después de elegir la carpeta de tu partida o tu disco duro. Probablemente también tendrás que usar el panel de control “Usuarios y grupos”.
+441	Hemos incluido un par de funciones especiales pensando en FileShare. Una de ellas es la opción “{b1}Yo actualizo los turnos{/b1}”. Cuando alguien juega en el servidor de archivos, querrás que esa persona actualice los turnos en su propia máquina, para no tener que pasar toda la información de la partida por la red. Esto es mucho más rápido, ya que los discos duros son más veloces que las redes. En fin, en este caso, haz que la persona que inició la partida elija esta opción mientras todos los demás la desactivan. Así se evita actualizar el turno por la red. Cuando todos han terminado su turno, la máquina con “{b2}Yo actualizo los turnos{/b2}” marcada lo actualizará y luego todos los demás recibirán los resultados.
+442	Esto también puede resultar útil cuando los jugadores usan máquinas de distinta velocidad, aunque todavía no tengas System 7. El del Quadra puede actualizar los turnos, mientras los de los Mac Classic simplemente lo dejan hacer.
+443	Asistencia técnica
+444	Creemos que lo más importante que ofrece una empresa de software (aparte del software) es la asistencia técnica. Nos enorgullece poder resolver prácticamente cualquier problema que se pueda tener con {i1}Spaceward Ho!{/i1}, y muchos otros problemas también. Si nos llamas directamente al (408) 730-9336 en horario laboral razonable de California y pides asistencia técnica, estaremos encantados de ayudarte en todo lo que podamos. También es posible que nos encuentres a horas poco razonables, porque trabajamos duro y hasta tarde, pero no podemos garantizarlo. Somos una de las pocas empresas del mundo que ofrece asistencia técnica gratuita para juegos.
+445	Ten en cuenta que somos pocos, estamos sobrecargados de trabajo y agradecemos la brevedad. Si puedes responder sin comprobar preguntas como “¿Qué versión del Sistema y del Finder estás usando?”, estaremos eufóricos. Si llamas con preguntas como “¿Qué es el Finder?”, nos molestaremos. ¿De acuerdo?
+446	Si alguna vez te entran ganas de ponerte en contacto con nosotros por escrito, nuestra dirección es:
+447	Delta Tao Software, Inc. • 760 Harvard Ave. • Sunnyvale, CA 94087
+448	Los jugadores del ordenador
+449	Cuando juegas a {i1}Spaceward Ho!{/i1} puedes jugar contra mucha gente, contra muchos ordenadores o contra una mezcla. Recomendamos poner un par de jugadores del ordenador en cada partida para que todos anden con la mosca detrás de la oreja. Es intencionadamente difícil saber con exactitud quién es un ordenador y quién es un humano. Cada jugador del ordenador adoptará una estrategia propia, igual que cada persona. Algunos se contentarán con quedarse en sus planetas de origen, construyendo satélites e investigando tecnologías nuevas. Otros serán agresivos e intentarán expandirse rápido. Otros irán a por una tecnología alta de armas y escudos, y luego saldrán a por el resto de la Galaxia. Todos harán lo posible por evitar la derrota.
+451	Notarás al jugar que los jugadores del ordenador aprenden un poco de cómo juegas tú. Empezarán a poner nombre a sus naves igual que tú a las tuyas, e incluso empezarán a ponerse nombres de amigos que han venido a una partida multijugador. Consulta “{a1}Preferencias{/a1}” en la página 41 para más información.
+452	La economía
+453	{i1}Spaceward Ho!{/i1} representa toda la economía de la galaxia con solo dos números: Dinero y Metal.
+460	Recuerda que cada vez que se destruye una nave estelar, la mayor parte del Metal usado para construirla se pierde {i1}para siempre{/i1}. Esto significa que, a medida que se construyen (y se destruyen) naves, el material con que las construyes desaparece. Para siempre. Hacia el final de la partida el Metal puede escasear y, por tanto, volverse {i2}extremadamente{/i2} valioso.
+461	Rendimientos decrecientes
+463	Por eso conviene, por ejemplo, mantener estable tu gasto en Tecnología. Si gastas solo en tecnología de Armas, luego solo en la de Escudos, luego en Alcance, y así sucesivamente, tus niveles generales de Tecnología subirán más despacio que si gastas un poco en todas a la vez.
+465	Los rendimientos decrecientes {i1}no{/i1} se aplican a la construcción de naves. Cada nave cuesta lo mismo tanto si construyes diez en un turno como si solo construyes una.
+466	Deuda
+467	En {i1}Spaceward Ho! 3.0{/i1} puedes endeudarte. Esto significa que puedes gastar en construir naves más dinero del que has ahorrado. Puedes pedir prestado hasta cinco veces los ingresos totales de todos tus planetas.

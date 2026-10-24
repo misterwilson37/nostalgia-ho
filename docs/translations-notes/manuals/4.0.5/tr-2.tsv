@@ -1,0 +1,142 @@
+149	{b1}GEnie:{/b1} Müşteri Desteğine “NEW.WORLD” adresinden e-posta gönderebilirsin. Games RoundTable’daki (Scorpia RT) Müşteri Destek panomuza ulaşmak için herhangi bir “?” isteminde M805;1 yaz. Sonra New World Computing’i seç. Mesaj okuyup göndermenin yanı sıra “Games RoundTable Libraries”den dosya da indirebilirsin. Üyelik bilgisi için GEnie’yi ücretsiz 1 (800) 638-9636 numarasından arayabilirsin.
+150	{b1}New World Computing BBS:{/b1} New World Computing’in BBS’i, 8,N,1 modem ayarıyla 1200/2400/9600/14400 baud hızlarını destekler. Haftanın 7 günü, günün 24 saati çalışır. Bu sistemde indirilecek dosyalar ve Müşteri Desteği bulabilirsin. Bağlanmak için 1 (818) 889-5684 numarasını ara. Üyelik gerekmez; tek maliyet, ödemen gerekebilecek şehirlerarası arama ücretleridir.
+151	Borç
+152	{b1}Ekonomi{/b1}
+153	{b1}Borç{/b1}
+156	“Galaksi” menüsündeki {b1}Birikimden Harca...{/b1} komutuyla Gemi Tasarrufu paranın belirli bir miktarını çekip teknoloji ya da terraform için kullanabilirsin.
+158	ABD’nin ulusal borcu 5 trilyon dolara yaklaşıyor. Devletin geliri aşağı yukarı 1 trilyon dolar. Vay be, büyümeye neden bu kadar az para kaldığını merak ediyoruz. Hımmm.
+159	Toplam gelirinin borcunun faizini bile karşılamadığı bir duruma düşersen kötü şeyler olur. Şimdiye kadar bu durumdan bir kez bile kurtulamadık. Bu duruma hiç düşmemen şiddetle önerilir.
+160	Gemi Tasarlamak
+161	{b1}Gemi Tasarlamak{/b1}
+162	Bu, belki de oyunun en havalı bölümüdür. Teknolojin ilerledikçe, bu yeni teknolojileri kullanan daha gelişmiş gemiler yapmaya başlamak isteyeceksin. Kolaydır. {b1}Gemi Yap/Tasarla{/b1} iletişim kutusunda teknoloji düzeylerini yeni tipinin olmasını istediğin gibi ayarla. Yeni geminin özelliklerini ayarlamak için kaydırma çubuklarını oynatman yeter. (Kaydırma çubuğunun en sağı her zaman o anki Teknoloji düzeyindir.) Gemin istediğin gibi olunca bir tane yap ({b2}+{/b2} düğmesine basarak); prototip kendiliğinden tasarlanıp yapılır.
+163	Yedi ana gemi sınıfı var: Koloni Gemileri, Uydular, İzciler, Savaşcılar, Abalar, Tankerler ve Biyolojikler.
+164	Koloni Gemileri
+166	Uydular
+167	Uydular motoru olmayan gemilerdir. Yani Menzilleri sıfırdır. Uydular, gezegenlerini düşman saldırısına karşı savunmanın ucuz ve etkili bir yoludur. Ne yazık ki hareket edemezler; yalnızca yapıldıkları gezegeni savunabilirler. Uydular normal gemilerden çok daha küçüktür, bu yüzden onları yok etmek için o kadar çok atış gerekmez. Elbette Uydu yapmak için de Savaşcılar kadar metâl gerekmez. Bir gezegende Uydular varsa, Yıldız Haritası’nda çevresinde bir halka olur.
+168	İzciler ve Savaşcılar
+169	İzciler ve Savaşcılar temel gemilerindir. İzcilerle savaşcılar arasındaki fark, Motorlar ile Silâhlar arasında bir değiş tokuştur. İzcilerin Menzili, Menzil Teknolojinden iki birim yüksek olabilir. Ne yazık ki en yüksek Silâh ve Kalkan Teknolojileri o anki düzeylerinden bir düşüktür. Bu da izcileri keşif için biçilmiş kaftan yapar, ama savaşta pek iyi değildirler.{b1} Spaceward Ho!{/b1} her izciyi kendiliğinden kendi filosuna koyar, böylece tek başına keşfe uçabilir. Savaşcılar kendiliğinden tek bir grupta toplanır.
+170	Abalar
+171	Abalar oyunun en büyük, en kötü savaş gemileridir. Müthiş bir dayağa dayanabilirler. Bir seferde 30 atış yapabilirler. Yapımları servet değerinde para ve metâle mal olur.
+172	Tankerler
+173	Tankerler koloni kurmayan koloni gemileridir. Tankerler aynı sistemdeki bütün gemilerin yakıtını doldurur. Bir filonun yanında tanker varsa, yıldızı kolonileştirmek zorunda kalmadan uğradığı her yıldızda kendiliğinden yakıt alır. Tankerlerin yakıtı hiç bitmez.
+174	Tankerler bir Koloni Gemisinden ucuz, ama bir Savaşcıdan pahalıdır.
+175	Biyolojikler
+176	Biyolojikler gemi değil, uzayda yol alan dev yaratıklardır. Tamamen organik oldukları için yapımları hiç metâl gerektirmez. Çok paraya mal olurlar ve başlangıçtaki teknoloji ayarları o anki teknoloji düzeylerinden düşüktür. Biyolojikler öteki gemiler gibi yakıt da almaz. Yeni Biyolojik tiplerini ancak Radikal araştırmayla tasarlayabilirsin.
+177	Geliştirme Maliyeti
+178	{b1}Geliştirme Maliyeti{/b1}
+179	İlk yeni gemi tipinin prototipini yapmak, ardından gelen gemileri yapmaktan daha pahalıdır. Bu, özellikle yüksek minyatürleştirmeli gemiler için geçerlidir. Geliştirme maliyetinin her yeni gemi tipine bağlı, bir kerelik bir şey olduğunu unutma.
+180	Farklı Gezegen Resimleri
+181	{b1}Gezegenleri Keşfetmek{/b1}
+182	{b1}Farklı Gezegen Resimleri{/b1}
+185	Bu kategorideki bir gezegen, yeterince zaman ve emek verilirse bir gün kârlı olabilir. Onu kârlı yapmak için sıcaklığı 72{img1/} dolayına gelene kadar terraform etmen ve nüfusa büyümesi için zaman tanıman gerekir.
+186	{b1}Yarı Yaşanabilir Bir Gezegen{/b1}
+188	{b1}Yaşanmaz Bir Gezegen{/b1}
+189	Yerçekimi 2,5 G’den büyük ya da 0,4 G’den küçük bir gezegeni kârlı yapmak neredeyse imkânsızdır. Yine de seyrek olarak böyle bir gezegeni stratejik nedenlerle elde tutmak iyi bir fikir olabilir. Geri kalan zamanlarda bütün Metâlini çıkar ve onu “Terk Et”; terraform etmekle uğraşma.
+191	Bu tür bir gezegen hiçbir zaman kâr getirmez ve çıkarabileceğin hiç metâli de yoktur. Iyy! Stratejik bir önemi yoksa ya da orada bir düşman üssü olmasından korkmuyorsan, bu çöpe hiç bulaşma.
+194	Keşfedilmemiş bir gezegene filo gönderirsen soru işareti ünleme dönüşür ve yakında daha çok şey öğreneceğini sana bildirir. “Tercihler” iletişim kutusunda Filo Rotalarını Göster açıksa, filonun bu gezegene yönelmiş bir çizgisini görürsün.
+195	{b1}Bir Düşman Gezegeni{/b1}
+196	Savaş kaybettiğin her gezegen bir düşman gezegeni olur. Bir gezegen, oraya başka bir filo gönderip savaş kazanana kadar düşman kalır. Hatta bir düşman gezegenine filo gönderip orada kimseyi ya da başka bir düşmanı bulabilirsin. Gezegenler hakkında sahip olduğun bütün bilgiler, oraya son gittiğin zamana dayanır. Belirli bir gezegene gitmeyeli uzun zaman olduysa, o gezegen hakkındaki bilgilerin eskimiş olabilir.
+198	{b1}Bir Müttefik Gezegeni{/b1}
+199	Başka bir oyuncuyla müttefik olduğunda, onun Yıldız Haritası’ndaki simgesi bunu yansıtacak şekilde değişir. Simgesi daha açık bir renge döner ve artık iyi biri olduğu için başının üstünde bir “hale” belirir.
+200	{b1}Bir Savaş Gezegeni{/b1}
+202	{b1}Uydular{/b1}
+204	{b1}Filolar{/b1}
+205	Herhangi bir gezegende filon varsa, bunu sana bildirmek için gezegenin sağ üst köşesinde küçük bir filo resmi görünür. Bir aya benzer, ama buna aldanma.
+206	{b1}Müttefik Filolar{/b1}
+207	Gezegenlerinden birinde park etmiş dost filolar görürsen, gezegenin sol üstünde (senin filo simgenin bulunduğu sağ üst yerine) bir filo simgesi olur.
+208	Azalan Getiri
+209	{b1}Azalan Getiri{/b1}
+211	Bu yüzden Teknoloji harcamanı dengeli tutmak iyi bir fikirdir. Önce yalnızca Silâh Teknolojisine, sonra yalnızca Kalkan Teknolojisine, sonra Menzil’e harcar ve böyle sürdürürsen, genel Teknoloji düzeylerin hepsine aynı anda biraz biraz harcadığın duruma göre daha yavaş yükselir.
+217	Sıcaklık, bir yıldız sisteminde değiştirebileceğin her şeyi temsil eder: atmosferin bileşiminden gezegenin ekolojisine kadar. Ana gezegeninin sıcaklığı 72{img1/}. Yeni bir gezegeni Terraform etmeye para harcadığında, sıcaklığı 72{img2/} değerine yaklaşır. Sıcaklık 72{img3/} değerine ulaştığında gezegen olabileceği kadar iyidir ve Terraform’a daha fazla harcayamazsın.
+219	Galaksinin Büyüklüğü
+220	Galaksinin Büyüklüğü, galaksinin ne kadar büyük olduğunu belirler. Galaksi ne kadar büyükse her oyuncunun dolaşacağı o kadar çok yer olur. Çok oyunculu küçük bir galakside oyun kızışmaya ve hızlı geçmeye yatkındır. Yalnızca birkaç oyunculu büyük bir galakside, herhangi bir çatışma çıkmadan önce oyun uzun süre gelişir. Devasa galaksilerdeki oyunlar ise bitmek bilmez.
+221	Galaksinin Tarzı
+222	Galaksinin Tarzı, galaksinin genel olarak hangi biçimde olacağıdır. Halka galaksiler, her oyuncu halkanın çevresine dağıldığı için en dengeli başlangıçları verir. Küme ve Sarmal galaksiler de oyuncuları oldukça dengeli başlatır. Rastgele bir galakside yıldızlar darmadağınık atılmıştır. Herhangi bir oyuncu son derece iyi ya da kötü bir yerde başlayabilir: birkaç düşmanın tam dibinde ya da yakındaki yıldızların hiçbirinde kimse olmadan.
+223	Sözlük
+224	{a1}İçindekiler{/a1} {a2}← Önceki{/a2}
+225	{b1}Sözlük{/b1}
+226	Müttefik {span1} {/span1}{span2} {/span2}Yakıt alma ayrıcalıklarını ve saldırmazlık
+227	{span1} {/span1}{span2} {/span2}paktını paylaştığın bir uzaylı.
+228	Düşman {span1} {/span1}{span2} {/span2}Seninle müttefik olmayan herkes.
+229	Yerçekimi{span1} {/span1}{span2} {/span2}Bir yıldız sisteminde değiştirilemeyen her
+230	{span1} {/span1}{span2} {/span2}şey. 0,4 G ile 2,5 G arasındaki her gezegen,
+231	{span1} {/span1}{span2} {/span2}üzerinde yeterince insan varsa ve tamamen
+232	{span1} {/span1}{span2} {/span2}terraform edilmişse kârlı yapılabilir. İdeal gezegen
+233	{span1} {/span1}{span2} {/span2}1,0 G’dir. Her oyuncunun 1,0 G’nin ne olduğu
+234	{span1} {/span1}{span2} {/span2}hakkında farklı bir fikri vardır.
+235	Gelir{span1} {/span1}{span2} {/span2}Geçen sıra eline geçen para.
+236	Metâl{span1} {/span1} {span2} {/span2}Yenilenemeyen bütün kaynakların toplamı.
+237	Mini {span1} {/span1}{span2} {/span2}Bir geminin ne kadar küçültüldüğü. Yüksek Mini’li
+238	{span1} {/span1}{span2} {/span2}gemiler daha az Metâl kullanır, ama daha çok Paraya mal olur.
+239	Para {span1} {/span1}{span2} {/span2}Yenilenebilen bütün kaynakların toplamı. Kârlı
+240	{span1} {/span1}{span2} {/span2}gezegenlerden her sıra para alırsın.
+241	Gezegen{span1} {/span1} {span2} {/span2}Yıldızla aynı şey. Bütün yıldız sistemini
+242	{span1} {/span1}{span2} {/span2}temsil eder.
+243	Radikal Teknoloji {span1} {/span1}Yüksek riskli, yüksek kazançlı araştırma. Bazen
+244	{span1} {/span1}{span2} {/span2}gerçekten harika bir şey elde edersin, bazen
+245	{span1} {/span1}{span2} {/span2}çöp.
+246	Menzil{span1} {/span1} {span2} {/span2}Bir geminin yakıt almadan ne kadar uzağa gidebildiği. Menzil 8
+247	{span1} {/span1}{span2} {/span2}olan bir gemi 4 gidip 4 dönebilir ya da
+248	{span1} {/span1}{span2} {/span2}5 gidip orada mahsur kalabilir.
+249	Uydu{span1} {/span1}{span2} {/span2} Hareket edemeyen bir gemi. Menzili sıfırdır.
+250	{span1} {/span1}{span2} {/span2}Uydular öteki gemilerden çok daha küçüktür.
+251	Kalkan{span1} {/span1} {span2} {/span2}Bir gemiyi koruyan şey. Kalkan Teknolojisi {span3} {/span3}
+252	{span1} {/span1}8 olan bir gemi, Silâh Teknolojisi 4 olan bir gemi
+253	{span1} {/span1}karşısında neredeyse yenilmez olur.
+254	Birikim {span1} {/span1}Gemi yapmak için biriktirdiğin para.
+255	{span1} {/span1}{span2} {/span2}Bu paraya faiz alırsın. Biriktirdiğinden
+256	{span1} {/span1}{span2} {/span2}fazlasını harcadıysan faiz ödersin.
+257	Hız{span1} {/span1} {span2} {/span2}Bir geminin ne kadar hızlı gittiği. Hız 3 olan bir gemi {span3} {/span3}
+258	{span1} {/span1}5 birim uzaktaki bir yıldıza 2 sırada gider.
+259	Yıldız {span1} {/span1}{span2} {/span2}Gezegenle aynı şey.
+260	Sıcaklık {span1} {/span1}Bir yıldız sisteminde değiştirilebilen her
+261	{span1} {/span1}{span2} {/span2}şey. İdeal sıcaklık 72{img3/}. Her
+262	{span1} {/span1}oyuncunun 72{img2/} hakkında farklı bir fikri vardır.
+263	Terraform {span1} {/span1}Bir yıldız sisteminin sıcaklığını iyileştirmek.{span2} {/span2}
+264	Bir gezegen tamamen terraform edildiğinde{span1} {/span1}
+265	sıcaklığı 72{img1/} olur.
+266	Ho! {span1} {/span1}Deneyimli oyuncuların Spaceward Ho!’ya verdiği ad.
+267	{span1} {/span1}Gerçekten havalı olmak istiyorsan, “Ho!’yu
+268	{span1} {/span1}oynuyorum” de.
+269	Silâh {span1} {/span1}Bir geminin ateşlediği şey. Silâh Teknolojisi 8
+270	{span1} {/span1}olan bir gemi, Kalkan Teknolojisi 4 olan gemileri parçalar.
+271	Gezegenler Nasıl Kolonileştirilir
+272	{b1}Gezegenler Nasıl Kolonileştirilir{/b1}
+273	Er ya da geç elinde tutmak isteyeceğin leziz bir gezegen bulursun. 1,16 G ve 98{img1/} gibi bir şey olur. 9.487 metâli vardır ve sen de bir türlü dayanamazsın.
+274	İlk adım, bir tür Koloni Gemisi yapıp oraya göndermektir. (Beceri düzeyin “Acemi” ise bir koloni gemisi senin için zaten yapılmış olur.) Gemi vardığında yeni bir gezegeni kolonileştirdiğini bildiren bir mesaj alırsın. Şuna benzer bir şey der: “Sol’ü az önce kolonileştirdin.”
+276	Harika bir gezegen bile olsa, bir gezegenin kârlı hâle gelmesi zaman alır. On yıllar boyunca gezegeni terraform edip madenini işleyerek ona para akıtırsın. Nüfusun küçük bir avuç insandan, Galaktik İmparatorluğuna katkıda bulunan canlı, kârlı bir ekonomiye büyüyüşünü izlersin. Bir gezegen başlangıçta ne kadar kötüyse, onu kâra geçirmen o kadar uzun sürer.
+277	Bir gezegeni Terraform etmeye ne kadar çok para harcarsan o kadar hızlı büyür. Ne yazık ki sıcaklık kusursuz bir 72{img1/} olduğunda bile, herhalde bütün gezegeni taşıyacak kadar insanın orada olmaz. Sabırlı ol, nüfus büyüyecektir. Madencilik ve gemi yapımının nüfusun ne kadar hızlı büyüdüğüne hiçbir etkisi yoktur.
+279	Çok sayıda kolonileştirilmiş gezegenin olması iyidir. Ne kadar çok kârlı gezegenin olursa o kadar çok para kazanırsın. Ne kadar çok para kazanırsan araştırmaya o kadar çok harcayabilirsin. Teknolojin ne kadar yüksekse (o yüksek teknolojiyle gemiler yaptığını varsayarsak), bir düşmanın seni ezip geçme olasılığı o kadar düşüktür. Ayrıca çok gezegenin varsa, bir ikisinin düşman gemilerince çiğnenmesini kaldırabilirsin.
+281	Düşman Gezegenler Nasıl Yok Edilir
+282	{b1}Düşman Gezegenler Nasıl Yok Edilir{/b1}
+284	Düşman gezegenlerini yok etmenin bir başka öldürücü yolu, “Galaksi” menüsünden {b1}Armageddon{/b1} komutunu seçmektir. Armageddon galaksinin yarısını yok eder. Ama düşman gezegenlerinin yanı sıra senin gezegenlerini de öldürebilir.
+287	Bazen metâl sıkıntısı çektiğini görürsün. İşte, ne kadar terraform edersen et ve ne kadar beklersen bekle hiçbir zaman kâr getirmeyeceğini çok iyi bildiğin bir gezegeni kolonileştirmenin tam zamanı. Belki 3,5 G’dir, hatta daha kötüsü. Gezegeni kolonileştir, ama Terraform’a hiç para harcamayacak şekilde gezegenin harcamasını ayarla. Hepsini madenciliğe harca. Gezegenden istediğin kadar metâl aldığında onu “Terk Et”. Orada yaptığın Uydular kalır, ama kolonicilerin tahliye edilir.
+289	Spaceward Ho! 4.0.5 Yardımı
+290	{b1}Spaceward Ho! - Değişiklikler ve Eklemeler{/b1}
+291	{a1}2.0’dan 3.0’a Değişiklikler{/a1}
+292	{a1}3.0’dan 4.0’a Eklemeler{/a1}
+294	{a1}Kısa Bir Özet{/a1}
+295	{a1}Yeni Bir Oyuna Başlamak{/a1}
+296	{a1}Pencereler{/a1}
+297	{a1}Ana Pencere{/a1}
+298	{a1}Yıldız Haritası{/a1}
+299	{a1}Bütçe Bilgileri{/a1}
+300	{a1}Çubuk Grafikler{/a1}
+301	{a1}Gezegen Bilgileri{/a1}
+302	{a1}Teknoloji Harcamaları Penceresi{/a1}
+304	{a1}Kısayollar{/a1}
+305	{a1}Para ve Metâl{/a1}
+306	{a1}Azalan Getiri{/a1}
+307	{a1}Borç{/a1}
+308	{a1}Giriş{/a1}
+309	{a1}Gemi Yapmak{/a1}
+310	{a1}Gemileri Hareket Ettirmek{/a1}
+311	{a1}Filoları Düzenlemek{/a1}
+312	{a1}Filoları ve Gemileri Hurdaya Çıkarmak{/a1}
+313	{a1}Gemi Tasarlamak{/a1}
+314	{a1}Geliştirme Maliyeti{/a1}
+316	{a1}Gezegenler Nasıl Kolonileştirilir{/a1}
+318	{a1}Düşman Gezegenler Nasıl Yok Edilir{/a1}
+319	{a1}Farklı Gezegen Resimleri{/a1}
+320	{a1}Teknolojileri Seçmek{/a1}
+321	{a1}Teknolojiyi Geliştirmek{/a1}

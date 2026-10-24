@@ -1,0 +1,115 @@
+0	Die französische Ausgabe des Mac-Spiels, eine abgespeckte Vorabversion von 2.0. Jede Routine ihres Programms wurde gelesen, und jede Regel stammt aus ihrem eigenen Code.
+1	Eine Kolonie, die ein Meteoritenschauer auslöscht, bekommt einen leeren Bericht.
+2	Eine Flotte, die im Hyperraum zum Verschrotten markiert wird, wird bei einem verirrten Zeichen gemeldet, das von vor dem Anfang der Sternliste gelesen wird (der Buchstabe der Sternnummer eines unbenutzten Heimatplatzes).
+3	Flotten ordnen tankt und lädt nach: Ordnet man die Schiffe eines Typs an einem Stern neu, bekommt jede Flotte dieses Typs dort den besten Treibstoffstand unter ihnen, und jede neue Kolonieschiff-Flotte, die dabei entsteht, wird mit Kolonisten beladen geliefert.
+4	Das Spiel enthält den Text für Nachrichten zwischen Spielern, aber keine Möglichkeit, eine zu senden.
+5	Es gibt keinen Befehl, eine Kolonie aufzugeben, also auch keine Schaltfläche „Räumen“: Eine Kolonie verschwindet nur, wenn man sie unfinanziert lässt, bis ihre Bewohner gestorben sind.
+6	Die Stärke der Schiffe und des Planeten an jedem Stern wird jeden Zug berechnet und nie benutzt.
+7	Ausgeschiedene Spieler spielen ihren Zug trotzdem: Ihr Geld bringt weiter Zinsen und ihre Forschung läuft weiter.
+8	Die Kolonie-Balken des Computers geraten durcheinander, wenn er einer Kolonie für einen Posten mehr als 2.147.483 $ gibt (die Summe läuft über). Dazu muss ein Computer schon sehr reich sein.
+9	Die Zufallszahlen sind die des Remakes, daher lässt sich eine Partie nicht Zug um Zug wiederholen.
+10	Scheiden alle Spieler gleichzeitig aus, endet das Spiel ohne Sieger. 1.2 ging einfach weiter, ohne dass jemand gewinnen konnte.
+11	Mehrere Personen spielen an einem Computer und kommen abwechselnd an die Reihe. Das Original ließ jeden Spieler einer gemeinsamen Spieldatei beitreten, mit einem Passwort. (1.2 erlaubte bis zu 19 Menschen.)
+12	Das Ziehen eines Budgetbalkens berechnet die anderen einmal, von dort an, wo das Ziehen begann; 1.2 tat es bei jedem Schritt des Ziehens, sodass ein langes Ziehen etwas anders enden kann.
+13	Kampfwiederholungen werden für die letzten 60 Kämpfe aufbewahrt; 1.2 behielt sie 500 Jahre lang.
+14	Ausgaben anpassen zeigt die Zeile jedes Schritts in einem kleinen Fenster, dessen Weiter das Anklicken der Nachrichtenblase im Original ersetzt.
+15	Sprache… bietet Englisch, die eigenen Worte des Mac 2.0.1 für dieselben Fenster und Berichte, die Zeile für Zeile die von 1.2 sind.
+16	Sprache… bietet auch Deutsch („Übersetzung des Remakes“), die Worte des deutschen DOS 2.0 für dieselben Berichte, Namen und Fenster, mit dem eigenen Deutsch des Remakes für die wenigen Fensterwörter, die das Deutsch von 2.0 nicht hat: die eigene Übersetzung des Remakes, keine offizielle, und in der Liste so gekennzeichnet. Sie ändert nur Wörter und Namen: In jeder Sprache wird dasselbe Spiel gespielt.
+17	Sprache… bietet auch Spanisch („Español (traducción del remake)“): Es gab nie ein offizielles spanisches Spaceward Ho!, daher stammt jede Zeile vom Remake, geschrieben im Geist der offiziellen Übersetzungen (deren Wörter für die Dinge des Spiels, das vertraute „tú“, die beibehaltenen Witze); die Namen bleiben englisch: die eigene Übersetzung des Remakes, keine offizielle, und in der Liste so gekennzeichnet. Sie ändert nur Wörter und Namen: In jeder Sprache wird dasselbe Spiel gespielt.
+18	Die Einstellungen für Kampfgeschwindigkeit, das Anzeigen von Nachrichten und das Ansehen von Kämpfen sowie das Fenster „Erforschte Planeten“.
+19	Eine Mac-Version in Farbe und Schwarzweiß (die Farbe kam mit 2.0): das Spiel von 2.0 mit dem Geldmodell, den Bündnissen, der Radikaltech und den Novae der späteren Versionen. Jede Routine ihres Programms wurde gelesen, und jede Regel stammt aus ihrem eigenen Code.
+20	2.0
+21	Im Jahr 2010 überspringen die Computer auf Spiral- und Haufenkarten ihren ersten Zug.
+22	Ein Versehen beim Verschrotten alter Schiffe durch die Computer hat keine Auswirkung auf das Spiel.
+23	Gestrandete Kampfschiff-Flotten bitten immer um eine Kolonie, auch wenn eine in Reichweite ist.
+24	Wer „Verlassen“ ausschaltet, gibt der Kolonie ihren Anteil nicht zurück.
+25	Eine verlassene Kolonie, bei der ein Kolonieschiff steht, wird im selben Zug erneut kolonisiert.
+26	Schiffe ordnen gibt jeder Flotte des Typs am Stern den höchsten unter ihnen verbrauchten Treibstoff.
+27	Die Kolonie-Balken des Computers geraten durcheinander, wenn er einer Kolonie für einen Posten mehr als 2.147.483 $ gibt.
+28	Die Stärke der Schiffe an jedem Stern wird jeden Zug berechnet und nie benutzt.
+29	Ausgaben anpassen kürzt nur überziehende Kolonien und teilt die Differenz zwischen Ersparnissen und Technik in ganzen Prozent auf, sodass ein oder zwei Promille verschwinden können; eine Kolonie, die verlassen wird oder fertig ist, wird auf 1 Promille gekürzt.
+30	Der Scherz mit dem Farbmonitor: 3.0.1 schickte ihn, in einem zufälligen Jahr, nur an einen auf Schwarzweiß gestellten Bildschirm, der Farbe zeigen konnte. Hier ist ein Schwarzweiß-Skin dieser Bildschirm; sein Jahr kommt vom Startwert des Spiels.
+31	Sind alle Menschen ausgeschieden, endet das Spiel. 3.0.1 ging weiter, solange die Computer spielten.
+32	Mehrere Personen spielen an einem Computer und kommen abwechselnd an die Reihe. Das Original ließ jeden Spieler einer gemeinsamen Spieldatei beitreten, mit einem Passwort. (3.0.1 konnte auch über ein Netzwerk gespielt werden.)
+33	Die Computer planen alle, bevor irgendjemandes Geld berechnet wird; 3.0.1 plante für jeden in seinem eigenen Zug. Das Ergebnis ist bis auf seltene Fälle dasselbe.
+34	Das Verschrotten markiert eine Flotte oder einen Schiffstyp und wird bei Zug Ende ausgeführt, wie in 3.0.1. Die Zeile der Flotte hat neben dem Menü Schiffe die Schaltfläche „Verschrotten“, und die Zeile eines markierten Typs ist abgeblendet (3.0.1 änderte nur den Titel seiner Schaltfläche).
+35	Das Ziehen eines Budgetbalkens berechnet die anderen einmal, von dort an, wo das Ziehen begann; 3.0.1 tat es bei jedem Schritt des Ziehens.
+36	Spiral- und Haufenkarten werden am Anfang angelegt; 3.0.1 legte sie erst 2010 an.
+37	Ersparnisse anzapfen nimmt einen Prozentsatz des höchsten Betrags, den man anzapfen darf; 3.0.1 nahm einen Betrag.
+38	Räumen ist das Verlassen von 3.0.1: Die Kolonie wird bei Zug Ende aufgegeben, und erneutes Drücken nimmt es zurück. Der Planet zeigt es nicht als markiert an.
+39	Wer einen Stern namens Hope oder Ship räumt, bekommt jedes Mal die Scherze von 3.0.1 („Willst du wahrhaftig alle Hope fahren lassen?“, „Ship verlassen? Alle Mann von Bord!“).
+40	Sprache… bietet auch Französisch („traduction du remake“) und Türkisch („yeniden yapımın çevirisi“): das offizielle Französisch und Türkisch des iOS-Spiels und das des französischen Mac 1.2 für die 2.0-Zeilen von 3.0.1 (darunter „Einen Stern benennen“ und „Ausgaben anpassen“) für jede Zeile, die 3.0.1 mit ihnen teilt, mit den eigenen Zeilen des Remakes für den Rest: die eigene Übersetzung des Remakes, keine offizielle, und in der Liste so gekennzeichnet. Sie ändert nur Wörter und Namen: In jeder Sprache wird dasselbe Spiel gespielt.
+41	Sprache… bietet auch Deutsch („Übersetzung des Remakes“), fortgeführt vom deutschen DOS 2.0: seine offiziellen Zeilen überall dort, wo das Englisch das von 2.0 ist (die Berichte, die 2.0 schon hatte, „Einen Stern benennen“, „Ausgaben anpassen“), und das Deutsch des Remakes in seinen Worten für den Rest: die eigene Übersetzung des Remakes, keine offizielle, und in der Liste so gekennzeichnet. Sie ändert nur Wörter und Namen: In jeder Sprache wird dasselbe Spiel gespielt.
+42	Version 2 zu 3
+43	Aus Delta Taos Spaceward-Ho!-5-Handbuch, Kapitel „Changes From Previous Versions“ (auf Englisch)
+44	Wir haben die Ausgaben an das Einkommen gekoppelt statt an die gesamte Geldmenge. Wir haben dafür gesorgt, dass Schiffe in dem Zug gebaut werden, in dem man sie bestellt, statt in der alten Bauwarteschlange. Wir verteilen das Geld automatisch auf Ihre Planeten, damit Sie sie nicht versehentlich unterfinanzieren können. Wir haben das Verlaufsdiagramm hinzugefügt, damit Sie Ihre langfristigen Trends sehen. Wir haben einige völlig überflüssige Grafiken und Klänge hinzugefügt. Wir haben ein paar neue Galaxientypen hinzugefügt.
+45	Wir haben außerdem eine Menge neuer Nachrichten hinzugefügt, die Computerspieler mit Freunden und Feinden umgehen lassen und die Computer halbwegs intelligente Nachrichten an alle schicken lassen. Sie können jetzt Geld und Metall an Ihre Freunde (oder Feinde) geben oder vor ihnen kapitulieren.
+46	In Farbe.
+47	Schiffsersparnisse: Ein Teil des Geldes jedes Zuges wird gespart, bringt Zinsen, kauft Schiffe sofort (keine Warteschlangen) und kann sich bis zu einer Kreditgrenze in Schulden verwandeln. (2.0 hatte einen einzigen Topf und keine Kredite.)
+48	Zwei Balken pro Kolonie, Terraformen und Abbauen; eine Kolonie, bei der beide fertig sind, gibt ihren Anteil an die anderen ab.
+49	Die Forschung ist gleichmäßig (× 8/10) statt zufälliger 60–140 %, mit einem Vorsprung in jede Stufe, und die Radikaltech hat sechs Ausgänge.
+50	Kämpfe haben Glück, immer an, und der Planet kämpft mit den Schilden seines Besitzers.
+51	Novae und Armageddon.
+52	Bündnisse, Geschenke, Kapitulation und vorgefertigte Nachrichten; ein Bündnis gewinnt, wenn es einen Zug hält.
+53	Eine Kolonie verlassen und Ersparnisse anzapfen.
+54	Ein Spieler ohne Kolonien und ohne Kolonieschiffe scheidet sofort aus, und seine Flotten werden verschrottet.
+55	Der Galaxiengenerator der späteren Versionen: sechs Stile, davon Haufen neu.
+56	Eine vierte Computerstufe, Teuflisch; Computer mit Gefühlen, Bündnissen und Typen, die kommen und gehen.
+57	Die Windows-95-Ausgabe, die plattformübergreifend mit dem Mac 4.0.5 spielt: das Spiel von 3.0.1 mit Schlachtschiffen, Tankern, Bioschiffen und Täuschschiffen, der Radikaltech als Kartenhand und besten Kumpeln. Jede Routine ihres Programms wurde gelesen, und jede Regel stammt aus ihrem eigenen Code.
+58	3.0.1
+59	Ob Sterne jemals rot werden, hängt von einer Einstellung ab, die der Code von „Neues Spiel“ nie setzt; das Remake lässt es zu.
+60	Eine Kolonie kann pro Zug nicht mehr Schiffe bauen, als sie Einwohner hat (in Tausend).
+61	Eine Radikalentdeckung vor der Ausgabe der ersten Hand (2010) oder bei leerer Hand kann im Original schiefgehen; das Remake zieht sie aus einer zufälligen Karte oder verliert sie.
+62	Ein Computer, der den ärmsten Spieler sucht, zählt ausgeschiedene Spieler mit.
+63	Bei 30 Typen baut ein Computer weiter die Typen des letzten Zuges für die Klassen, die er nicht erreicht hatte, behalten nach ihren Plätzen in seiner Liste, die sich seither verschoben haben können.
+64	Gestrandete Kampfschiff- und Schlachtschiff-Flotten bitten immer um eine Kolonie, auch wenn eine in Reichweite ist.
+65	Ein Versehen dabei, wie die Computer alte Schiffe zum Verschrotten nach Hause schicken (ein Listenplatz wird als Weite übergeben).
+66	Computer behalten nie Tanker: Sie verschrotten sie zu Hause und schicken sie von anderswo nach Hause.
+67	Bei einer Kolonie am ersten Stern der Liste lässt sich der Budgetbalken immer ziehen, und sie bleibt bei den Bevölkerungsmarken außen vor.
+68	Beste Kumpel teilen Kampfnachrichten, indem sie ihre ganze Aufzeichnung des Sterns übergeben; wer nicht gekämpft hat, kann den Kampf nicht ansehen (unter Windows sagt das die Aufzeichnung des Kumpels bis zum Speichern des Spiels auch).
+69	Nachdem eine Armageddon-Maschine versagt hat, erfährt jeder, dass jede Maschine abgeschaltet wurde, und im nächsten Zug wieder an.
+70	Das Valdez-Leck droht mit einer Klage, aber es wird nichts genommen.
+71	Wer im Baufenster einen Schiffstyp zum Verschrotten markiert, bekommt nur eines der dort bestellten Schiffe dieses Typs zurück; die übrigen werden gebaut und dann mit dem Typ verschrottet.
+72	Ab 1.000.000 Meisterpunkten zeigt die Liste der Meisterpunkte „%s: %s“ als Ihren Rang.
+73	Die Ruhmeshalle schreibt das Jahr als die Jahre seit 1900: 1996 ist 96, 2026 ist 126.
+74	Die Zusammenfassung der Halle der Schande nennt Sie „Verlierer“, ohne Doppelpunkt.
+75	Von 50.000 bis 499.999 Meisterpunkten hat die Liste der Meisterpunkte kein Bild: Das Spiel hat keins.
+76	Eine neue Technikstufe wird mit dem Namen der nächsten Stufe gemeldet: Weite 7 heißt „Fusionsmeiler“ statt „Volltanken“, und Miniaturisierung 20 ist die Danksagungszeile des Programms.
+77	Die Sterne, die Gewinner benannt haben, kommen einen Platz zu spät in spätere Galaxien: Der erste wird zu „Hope“, dem 191. Namen des Spiels, und der zuletzt benannte wird nie benutzt.
+78	Ein fünfter Sternname ersetzt den vierten behaltenen und kommt an die erste Stelle, sodass der neueste der vier derjenige ist, der fällt.
+79	Mehrere Personen spielen an einem Computer und kommen abwechselnd an die Reihe. Das Original ließ jeden Spieler einer gemeinsamen Spieldatei beitreten, mit einem Passwort. (4.0.5 konnte auch über ein Netzwerk gespielt werden.)
+80	Die Computer planen alle, und jede Flotte bewegt sich, für alle Spieler gleichzeitig; 4.0.5 tat beides im Zug jedes einzelnen Spielers. Das Ergebnis ist bis auf seltene Fälle dasselbe.
+81	Ruhmeshalle, Halle der Schande und die Liste der Meisterpunkte werden in diesem Browser aufbewahrt, und ihre Menüeinträge stehen im Menü Spiel (4.0.5: Optionen).
+82	Das Ziehen eines Budgetbalkens berechnet die anderen einmal, von dort an, wo das Ziehen begann; 4.0.5 tat es bei jedem Schritt des Ziehens.
+83	Ersparnisse anzapfen nimmt einen Prozentsatz des höchsten Betrags, den man anzapfen darf; 4.0.5 nahm einen Betrag.
+84	Räumen ist das Verlassen von 4.0.5: Die Kolonie wird bei Zug Ende aufgegeben, und erneutes Drücken nimmt es zurück.
+85	Wer einen Stern namens Hope oder Ship räumt, bekommt jedes Mal die Scherze von 4.0.5; wer Armageddon einschaltet, wird zwei Dinge gefragt, eines aus fünf und eines aus sechs Fragen.
+86	Hinweise werden mit den Zufallszahlen des Browsers gezogen; 4.0.5 benutzte seine eigenen.
+87	Sprache… bietet auch Französisch („traduction du remake“) und Türkisch („yeniden yapımın çevirisi“): das offizielle Französisch und Türkisch des iOS-Spiels (und des französischen Mac 1.2) für jede Zeile, die 4.0.5 mit ihnen teilt, also die meisten seiner Berichte, mit den eigenen Zeilen des Remakes für den Rest (die Fragen zu Armageddon, die eigenen Worte der Windows-Fassung): die eigene Übersetzung des Remakes, keine offizielle, und in der Liste so gekennzeichnet. Sie ändert nur Wörter und Namen: In jeder Sprache wird dasselbe Spiel gespielt.
+88	Sprache… bietet auch Deutsch („Übersetzung des Remakes“), fortgeführt vom deutschen DOS 2.0: seine offiziellen Zeilen überall dort, wo das Englisch das von 2.0 ist (die Berichte, die 2.0 schon hatte, „Einen Stern benennen“), und das Deutsch des Remakes in seinen Worten für den Rest: die eigene Übersetzung des Remakes, keine offizielle, und in der Liste so gekennzeichnet. Sie ändert nur Wörter und Namen: In jeder Sprache wird dasselbe Spiel gespielt.
+89	Das Zeitlimit pro Zug und das Netzwerkspiel.
+90	Version 3 zu 4
+91	Wir haben viele neue Schiffstypen hinzugefügt, darunter Tanker, Schlachtschiffe, Bioschiffe und Täuschschiffe. Wir haben Satelliten doppelt so stark (und teuer) gemacht.
+92	Wir haben das Spiel PowerPC-nativ gemacht und Funktionen hinzugefügt, die das Spiel beschleunigen, etwa „nur wichtige Nachrichten zeigen“ und die automatische Korrektur der Ausgaben.
+93	Wir haben das Mehrspielerspiel deutlich verbessert. Die Zuguhr sorgte dafür, dass Partien im richtigen Tempo vorankamen, Bündnisse unter besten Kumpeln wurden hinzugefügt, das Kampfglück wurde optional, und wir haben ein Chatfenster und Textnachrichten hinzugefügt. Züge werden jetzt lokal aktualisiert statt auf dem Hauptrechner, sodass Netzwerkaktualisierungen viel schneller sind. Wir haben Spielern erlaubt, einem Spiel beizutreten, nachdem es begonnen hat.
+94	Wir haben die Bedienbarkeit verbessert: Mehrere Dialoge (besonders Schiffe bauen) wurden repariert, Hilfemeldungen wurden hinzugefügt, und wir haben das Terraformen zu einem Schieberegler statt des alten Kuchendiagramms gemacht. Und natürlich wurden Grafiken und Klänge stark verbessert.
+95	Wir haben die Schwierigkeitsstufen geändert und Meisterpunkte und viele weitere Statistiken hinzugefügt.
+96	Schlachtschiffe (25 Schüsse pro Runde) und Tanker (die jede Flotte an ihrem Stern auftanken); 30 Typen statt 20.
+97	Radikaltech ist eine Hand aus vier von 17 Entdeckungen, ausgeteilt ab 2010: Boni, Täuschschiffe, Bioschiffe, die Menschen fressen, um aufzutanken, gestohlene Technik, kostenlose Typen.
+98	Beste Kumpel: Verbündete, die über die Kolonien der anderen fliegen und ihre Karten teilen.
+99	Eine Kolonie baut pro Zug nicht mehr Schiffe, als sie Einwohner hat.
+100	Zu Beginn Schiffsersparnisse, je nach Stufe.
+101	Satelliten feuern zweimal, der Planet einmal pro 200.000 Einwohner, und Glück ist eine Option.
+102	Terraformen, Abbauen und Einkommen wie in den späteren Versionen; Ränge und Meisterpunkte für einen Sieg.
+103	Das Spiel, dessen Vorabversion 1.2 war: Die Windows-3.1-Ausgabe kam zuerst, und die DOS-Ausgabe ist eine Portierung davon mit denselben Grafiken, Klängen und Regeln. Jede Routine des Windows-Programms wurde gelesen.
+104	1.2
+105	Schiffe ordnen gibt jeder Flotte des Typs am Stern den durchschnittlichen verbrauchten Treibstoff, zählt aber höchstens 11 Flotten, sodass der Durchschnitt bei 12 oder mehr Flotten zu hoch ausfällt.
+106	Schiffe ordnen löscht die Befehle jeder Flotte dieses Typs am Stern, auch die einer Flotte, die Sie unberührt gelassen haben.
+107	Eine neue Flotte, die mit Schiffe ordnen entsteht, wird mit Kolonisten beladen, sodass das Abspalten einer leeren Kolonieflotte von Ihren Kolonien einen Teil davon wieder auffüllt.
+108	Ein Versehen beim Verschrotten alter Kampfschiffe durch die Computer hat keine Auswirkung auf das Spiel.
+109	Eine von einem Meteoritenschauer ausgelöschte Kolonie wird als „… hat Ihre Kolonie zerstört“ gemeldet, mit dem Namen dessen, den ein Bericht zehn Nachrichten früher zufällig zurückgelassen hat: oft Sie oder ein anderer Spieler, manchmal niemand. (Wo 2.0 über seine eigenen Daten hinausgelesen hätte und abgestürzt wäre, nennt das Remake niemanden.)
+110	Eine Flotte, die im Hyperraum zum Verschrotten markiert wird, wird „bei“ einem leeren Namen gemeldet, gelesen von vor dem Anfang der Sternliste, mit ihrem Metall als 0 angezeigt.
+111	Die Computer berechnen die Angriffswertung ihrer Typen in 16 Bit, sodass sie ab etwa Waffen 4 überläuft und sie ihre Kriegsschiffe falsch einschätzen.
+112	Die Kolonie-Balken des Computers geraten durcheinander, wenn er einer Kolonie für einen Posten mehr als 2.147.483 $ gibt (die Summe läuft über).
+113	Es gibt keinen Befehl, eine Kolonie aufzugeben, also auch keine Schaltfläche „Räumen“: Eine Kolonie verschwindet nur, wenn man sie unfinanziert lässt, bis ihre Bewohner gestorben sind (die Warnung „Sollen sie doch sterben“).
+114	Sind alle Menschen ausgeschieden, endet das Spiel (ohne Sieger, wenn niemand übrig ist). 2.0 ging weiter, solange die Computer spielten.

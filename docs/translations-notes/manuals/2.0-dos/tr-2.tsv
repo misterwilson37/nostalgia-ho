@@ -1,0 +1,147 @@
+96	Harika bir gezegen bile olsa, bir gezegenin kârlı hâle gelmesi zaman alır. On yıllar boyunca para akıtır, gezegeni terraform eder ve nüfusun başladığın küçük bir avuç insandan, Galaktik İmparatorluğuna katkıda bulunan canlı, kârlı bir ekonomiye büyüyüşünü izlersin. Bir gezegen başlangıçta ne kadar kötüyse, onu kâra geçirmen o kadar uzun sürer.
+97	Bir gezegeni Terraform etmeye ne kadar çok para harcarsan o kadar hızlı büyür. Ne yazık ki sıcaklık kusursuz bir 72° olduğunda bile, herhalde bütün gezegeni gerçekten taşıyacak kadar insanın orada olmaz. Sabırlı ol, nüfus büyüyecektir. Madencilik ve gemi yapımının nüfusun ne kadar hızlı büyüdüğüne hiçbir etkisi yoktur.
+98	Bir gezegeni geçindirmenin temel maliyeti 7.500 dolardır. Ana gezegenin sırada yalnızca yaklaşık 30.000 dolar ürettiğine göre, aynı anda yalnızca dört gezegeni kolonileştirmeye yetecek paran var. En fazla. Büyük olasılıkla, en azından kâra geçene kadar yalnızca birini kolonileştirmek isteyeceksin. Yoksa bütün paranı yalnızca insanlarını hayatta tutmaya harcarsın ve gezegenleri geliştirmek, gemi yapmak ve yeni teknolojiler araştırmak için elinde pek az şey kalır.
+99	Çok sayıda kolonileştirilmiş gezegenin olması iyidir. Ne kadar çok kârlı gezegenin olursa o kadar çok para kazanırsın. Ne kadar çok para kazanırsan araştırmaya o kadar çok harcayabilirsin. Teknolojin ne kadar yüksekse, bir düşmanın seni ezip geçme olasılığı o kadar düşüktür (o yüksek teknolojiyle gemiler yaptığını varsayarsak). Üstelik çok gezegenin varsa, bir ikisinin düşman gemilerince çiğnenmesini kaldırabilirsin.
+100	Bütün kolonilerinin iyi adamlara benzediğini fark edeceksin. Yani maske, koyu güneş gözlüğü, mohikan saç ya da küpe takmıyorlar. Basit: beyaz şapka sana düşer. Elbette öteki oyuncuların hepsi de iyi adamların kendileri olduğunu düşünüyor.
+102	Bazen metâl sıkıntısı çektiğini görürsün. Bu durumda, ne kadar terraform edersen et ve ne kadar beklersen bekle hiçbir zaman kâr getiremeyeceğini çok iyi bildiğin bir gezegeni kolonileştirmek çoğu zaman iyi bir fikirdir. Belki 3,5 G’dir, hatta daha kötüsü. Bu durumda yapacağın şey, gezegeni kolonileştirmek, ama Terraform’a hiç para harcamayacak, Gemi Yapımına da çok az ya da hiç harcamayacak şekilde gezegenin harcamasını ayarlamaktır. Hepsini Madenciliğe harca. Bütçe Penceresi’nde siyah çizginin epey üstünde harcamayı unutma, çünkü Madenciliğe ayrılan para odur; çizgiye kadar olan her şey yalnızca koloniyi geçindirmeye gider.
+103	Gezegenden istediğin kadar metâl aldığında ona para harcamayı bırakman yeter. Orada yaptığın Uydular kalır, ama kolonicilerin tahliye edilir.
+104	Bazen bir gezegeni, sırf bir düşman metâlini almasın diye talan etmek isteyebilirsin.
+105	Düşman Gezegenler Nasıl Yok Edilir
+106	Bir düşmanın kolonileştirdiği bir gezegene filo gönderirsen ve filon düşman gemilerini ve uydularını yok ederse, gezegenin kendisini dövmeye geçer ve halkını sürüler hâlinde öldürür. Gezegen çetin bir direniş gösterebilir, ama bu büyük olasılıkla ancak keşif kuvvetlerine karşı koymaya yeter. Bir istila filosuna karşı gezegenin nüfusunun tamamen yok edilmesi kuvvetle olasıdır. Düşman artık gezegene sahip olmaz. Onu kolonileştirmekte ya da başka ne istersen yapmakta özgürsün. Elbette düşman kızıp gezegeni geri almaya çalışabilir, bu yüzden dikkatli olmak iyi bir fikirdir.
+107	Farklı Gezegen Resimleri
+108	Farklı türden gezegenlerin her birinin kendine özgü bir görünüşü vardır. Bu bölüm bir tür gezegen resimleri sözlüğüdür.
+110	Bu, bir koloni kurduğun ve nüfusun kendini geçindirebilecek noktaya kadar büyümesine yetecek kadar uzun süre elinde tuttuğun bir gezegendir. Yıldızlar arası çabana para bile sağlayabilir. Renkli ekranda iri, yeşil ve mavi görünür. Ana gezegenin böyledir.
+111	Kaynak PDF’te bu başlığın altında resim yok.
+112	Kolonileştirilmiş, Kâr Etme Olasılığı Olan Bir Gezegen
+113	Bu kategorideki bir gezegen şu anda zarar ediyordur (yani onu hayatta tutmak için ona para koyman gerekir), ama yeterince zaman ve emek verilirse bir gün kârlı olabilir. Renkli ekranda parlak mavi görünür. Onu kârlı yapmak için sıcaklığı 72° dolayına gelene kadar terraform etmen ve nüfusa büyümesi için zaman tanıman gerekir.
+114	Kolonileştirilmiş, Yaşanmaz Bir Gezegen
+115	Yerçekimi 2,5 G’den büyük ya da 0,4 G’den küçük bir gezegeni, ne kadar terraform edersen et ya da ne kadar beklersen bekle, kârlı yapmak neredeyse imkânsızdır. Yine de seyrek olarak böyle bir gezegeni stratejik nedenlerle elde tutmak iyi bir fikir olabilir. Geri kalan zamanlarda bütün Metâlini çıkar ve onu terk et; terraform etmekle uğraşma. Biz bütün metâli alıyor, sonra gezegene göz kulak olsun diye bir uydu yapıyor, sonra da koloniyi (ona hiç para harcamayarak) terk ediyoruz.
+116	Kolonileştirilmiş, Talan Edilmiş, Yaşanmaz Bir Gezegen
+118	Keşfedilmemiş Bir Gezegen
+121	Keşfedilmemiş bir gezegene filo gönderirsen soru işareti ünleme dönüşür ve yakında daha çok şey öğreneceğini sana bildirir. Hangilerine gemi gönderdiğini görmek kolay olduğu için bu, bir sırada bir sürü gezegeni keşfetmeyi kolaylaştırır.
+122	Keşfedilmiş, Yaşanabilir Bir Gezegen
+123	Bu, yakın zamanda keşfettiğin ama koloni kurmadığın bir gezegendir. Yanında nokta olan her gezegende en az bir filo vardır. Keşfettiğin gezegenlere, onlara göz kulak olsun diye filo bırakmak kötü bir fikir değildir.
+124	Bir Talan Kolonisi
+125	Bu, kolonileştirdiğin ama kâr getirmeye yetecek kadar iyi bir yerçekimi hiçbir zaman olmayacak bir gezegendir. Bu kolonileri terraform etmekle uğraşmamalısın.
+126	Bir Düşman Gezegeni
+127	Savaş kaybettiğin her gezegen bir düşman gezegeni olur. Bazen orada hiç düşman gemisi ya da insanı olmaz; örneğin bir düşman gelip seni öldürüp gittiğinde. Bazen de orada koca bir donanma olur.
+128	Bir gezegenin, oraya başka bir filo gönderip savaş kazanana kadar “düşman” olarak gösterileceğini unutma; hatta bir düşman gezegenine filo gönderip orada kimseyi bulamayabilirsin. Gezegenler hakkında sahip olduğun bütün bilgiler, oraya son gittiğin zamana dayanır. Belirli bir gezegene gitmeyeli uzun zaman olduysa, o gezegen hakkındaki bilgiler yanlış olabilir.
+129	Düşman gezegenleri türlü türlü kötü adamlara benzer. Her düşman oyuncunun kendi görünüşü olur, böylece nerede kiminle savaştığını anlarsın.
+130	Neredeyse Keşfedilmiş Bir Gezegen
+131	Arada bir hiç gitmediğin bir yıldıza bir filo gönderir ve orada gücü seninkine yakın bir düşman filosu bulursun. Savaş gerçekten berabere biterse, gezegeni henüz keşfetmediğini ama kötü adamların yakında olduğunu bildiğini sana hatırlatan bu tuhaf simgeyi görürsün.
+132	Bir Gezegendeki Uydular
+133	Herhangi bir gezegene uydu yerleştirirsen, o gezegenin yıldız haritasında savunulduğunu bildiren bir halkası olur.
+134	Bir Gezegendeki Filolar
+136	Şapkalı parlak mavi bir gezegen
+137	Kızıl, kraterli bir gezegen
+138	Keşfedilmemiş bir gezegen
+139	Ünlem işaretli bir gezegen
+140	Parlak mavi bir gezegen
+141	Bir düşman gezegeni
+142	Başka bir düşman gezegeni
+143	Üçüncü bir düşman gezegeni
+144	Kırmızı bir X ile üstü çizilmiş bir gezegen
+145	Çevresinde halka olan bir gezegen
+146	Harcamaları Düzelt
+147	“Harcamaları Düzelt” komutu “Galaksi” menüsündedir. Birkaç şey yapar.
+148	Herhangi bir gezegene az harcıyorsan (siyah çizgiye kadar harcamıyorsan), o siyah çizgiye değecek kadar para eklenir. Para birikiminden düşülür, bu yüzden hiç birikimin yoksa hiçbir şey olmaz. Herhangi bir gezegene yüzde sıfır harcıyorsan, onları terk etmek istediğini varsayar ve harcama çubuklarını düzeltmez.
+149	Herhangi bir gezegene fazla harcıyorsan (terraform, madencilik ve sıradaki gemilerin yapımı için gerekenden fazla para), gezegenin çubuğu yapılması gerekenleri ancak karşılayacak kadar indirilir. Fazla para birikime verilir.
+150	Düzeltilen her çubuk için yıldız haritasının sol alt köşesinde bir mesaj belirir. Sol alt köşede hâlâ olağan sıra mesajları gösteriliyorsa, sen hepsini tıklayıp geçene kadar Harcamaları Düzelt seçeneği soluk görünür.
+151	Sözlük
+152	Düşman
+153	Sen olmayan herkes.
+154	Yerçekimi
+156	Gelir
+158	Logaritmik
+160	Mahsur
+162	Metâl
+165	Para
+167	Gezegen
+168	Yıldızla aynı şey.
+169	Bir geminin yakıt almadan ne kadar uzağa gidebildiği. Menzil 6 olan bir gemi 3 gidip 3 dönebilir ya da 5 gidip orada mahsur kalabilir.
+170	Uydu
+171	Hareket edemeyen bir gemi. Menzili sıfırdır.
+172	Kalkan
+175	Yıldız
+176	Gezegenle aynı şey.
+177	Sıcaklık
+179	Terraform
+181	Silâh
+183	Spaceward Ho! 2.0 Kılavuzu (DOS)
+184	{a1}İçindekiler{/a1}
+185	Bu, Spaceward Ho! 2.0’ın DOS/Windows baskısıyla (Delta Tao Software) gelen kılavuzdur. Mac kılavuzunun sözcüklerinin yalnızca metin olarak aktarılmış hâlidir, bu yüzden hâlâ Mac’lerden, System 7’den ve AppleTalk’tan söz eder. Parantez içindeki sayfa numaraları özgün kılavuzunkilerdir.
+186	{a1}İnce Yazılar{/a1} {small2}(s. 4){/small2}
+187	{a1}Ho! İçin Süper Hızlı Talimatlar{/a1} {small2}(s. 4){/small2}
+188	{a1}Oyunu Kurmak{/a1} {small2}(s. 5){/small2}
+189	{a1}Kısa Bir Genel Bakış{/a1} {small2}(s. 5){/small2}
+190	{b1}Oyunu oynamak{/b1}
+191	{a1}Yeni Bir Oyuna Başlamak{/a1} {small2}(s. 7){/small2}
+192	{a1}Özel Galaksiler{/a1} {small2}(s. 7){/small2}
+193	{a1}Bilgisayar Oyuncuları{/a1} {small2}(s. 9){/small2}
+194	{a1}Pencereler{/a1} {small2}(s. 9){/small2}
+195	{a1}Bütçe Bilgileri{/a1} {small2}(s. 13){/small2}
+196	{a1}Teknoloji Harcamaları Penceresi{/a1} {small2}(s. 17){/small2}
+197	{a1}Ekonomi{/a1} {small2}(s. 17){/small2}
+198	{a1}Gemiler{/a1} {small2}(s. 20){/small2}
+199	{a1}Teknolojiyi Geliştirmek{/a1} {small2}(s. 26){/small2}
+200	{a1}Gezegenleri Keşfetmek: Sıcaklık ve Yerçekimi{/a1} {small2}(s. 29){/small2}
+201	{b1}Öteki şeyler{/b1}
+202	{a1}Mesaj Göndermek{/a1} {small2}(s. 38){/small2}
+203	{a1}Savaşları Gözden Geçirmek{/a1} {small2}(s. 39){/small2}
+204	{a1}Oyuncuları Karşılaştırmak{/a1} {small2}(s. 40){/small2}
+205	{a1}Birden Çok Oyuncu{/a1} {small2}(s. 40){/small2}
+206	{a1}Harcamaları Düzelt{/a1} {small2}(s. 42){/small2}
+207	{a1}Prefs Dosyası{/a1} {small2}(s. 43){/small2}
+208	{a1}Seçenekler Menüsü{/a1} {small2}(s. 44){/small2}
+209	{a1}Kısayollar{/a1} {small2}(s. 48){/small2}
+210	{b1}Geri kalanı{/b1}
+211	{a1}Spaceward Ho! Hakkında{/a1} {small2}(s. 50){/small2}
+212	{a1}Sık Karşılaşılan Sorunlar{/a1} {small2}(s. 51){/small2}
+213	{a1}Sözlük{/a1} {small2}(s. 54){/small2}
+214	{a1}Teknik Destek{/a1} {small2}(s. 56){/small2}
+215	{a1}Beni Oku: Güncel Bilgiler{/a1}
+216	Oyunu Kurmak
+217	DOS Kurulumu
+218	Windows Kurulumu
+219	Bu sayfanın yapıldığı PDF bu iki başlığı listeliyor, ama ikisinin altında da metin vermiyor.
+220	Birden Çok Oyuncu
+221	Spaceward Ho! aslında çok sayıda insanla oynanmak için tasarlandı. Kendine özgü “oturum açma” tarzındaki oyun, ana oyunun bir tür dosya sunucusunda durmasına ve her oyuncunun sıralarını kendi makinesinde güncellemesine çok uygundur.
+222	AppleShare kurulumun varsa bunu şöyle yaparsın. Birine Galaksiyi herkesin erişebileceği bir dosya sunucusunda yarattır. (System 7.0’da herkesin dosya sunucusu olabileceğini unutma.) Sonra dosya sunucusu aynı anda yalnızca bir kişiye hizmet verebildiği için herkes oyunu teker teker açsın.
+223	Oyuna ilk katılan kişi “Oyun Yöneticisi” olur. İlk sıranın ne zaman işleneceğini söyleyebilen tek kişi odur. Oyuna katılan herkes ilk sırasını bitirdiğinde, oyun yöneticisinin bilgisayarında oyuna kaç kişinin girdiğini söyleyen ve bir sonraki sıraya geçmek isteyip istemediğini soran bir uyarı belirir. Oyun 2000 yılını geçtiğinde artık kimse katılamaz; bu yüzden kayıtlı kişilerin sayısı yöneticinin beklediğinden azsa, “Bekle” düğmesine tıklayıp kimin oturum açmadığını bulmalıdır. Onlar oturum açıp sıralarını bitirdiğinde uyarı, daha çok insan oyuncuyla, yeniden belirir.
+224	Çok oyunculu oyun, tek oyunculu bir oyuna şaşırtıcı derecede benzer. Elbette asıl fark, karşılaştığın uzaylıların bazılarını, bilgisayar oyuncularından çok daha sinsi ve kurnaz olabilen insanların oynamasıdır. Öteki fark, bir sonraki sıraya geçmeden önce öteki insanların sıralarını bitirmesini beklemek zorunda olmandır. Üstelik AppleTalk yerel sabit diskinden epey yavaştır, bu yüzden sıraların güncellenmesi daha uzun sürer.
+225	Bir sırayı bitirdiğinde Spaceward Ho!, Ana Pencere’nin sol alt köşesinde simgenin ve adının soluna bir işaret koyarak bunu sana bildirir. Başka kimin bitirip kimin bitirmediğini adlarının yanında işaret olup olmadığına bakarak görebilirsin. Çok oyunculu bir Spaceward Ho! oyununda insanlara acele etmeleri için bağırmak tamamen kabul edilebilir bir davranıştır.
+226	AppleTalk’un yoksa ya da birden çok Mac’in yoksa yine de çok oyunculu bir oyun oynayabilirsin: tek bir makine kullanıp sırayla oynayın. Dosya menüsündeki “Sırayı Bitir ve Oyuncu Değiştir...” komutunu kullanmayı dene. Klavye kısayolu Komut-Option-T’dir. (İlk sırada oyunu kapatıp yeniden açman, ama parola iletişim kutusuna ikinci oyuncunun adını yazman gerekebilir.)
+227	Çok sayıda insanla oynamak için yapabileceğin bir başka şey de oyun dosyasını bir diskete kaydetmektir. Sonra disketi elden ele dolaştırırsınız; herkes disket kendisindeyken sırasını oynar, sonra başkasına verir. Yavaştır, ama ağın yoksa işe yarar.
+228	Beni Oku: Güncel Bilgiler
+229	{a1}İçindekiler{/a1} {a2}← Önceki{/a2}
+230	PDF bu metin dosyasını kılavuzun ikinci bir kopyasının önüne koyuyor. Bu, Windows baskısının READ.ME dosyasıdır, “VERSION 0.5”.
+231	Parola Koruması Hakkında Özel Not
+232	Spaceward Ho!, oyun boyunca rastgele aralıklarla kullanıcının bir parola girmesini ister. Parolalar kolaylık olsun diye ayrı bir ekte verilmiştir.
+233	Spaceward Ho! Güncel Bilgiler
+234	Windows için Spaceward Ho! hakkında önemli bilgiler. Bu dosya, kılavuzunda bulunmayabilecek bilgiler içerir. Lütfen bu bilgileri okumak için birkaç dakikanı ayır. Not Defteri penceresini en büyük boyutuna getirirsen bu metni okumak daha kolay olabilir. Bunun için sağ üst köşedeki Ekranı Kapla düğmesine tıkla ya da ALT+ARA ÇUBUĞU, ardından X tuşlarını kullan. Not Defteri’ni kullanma konusunda yardım için F1’e bas.
+235	256 Renk, 16 Renk ve Siyah Beyaz
+236	Spaceward Ho!, Siyah Beyaz (Tek Renkli), 16 renkli ve 256 renkli kipleri destekler. Windows kurulduğunda normalde genel bir 16 renk sürücüsü kurar. Her ekran kartı üreticisi, ekran kartının olanaklarından yararlanacak Windows sürücülerini içeren bir disk verir.
+237	Başka bir sürücü kurmak ya da çözünürlüğü değiştirmek için ayrıntılar ve kartınla ilgili özel bilgiler konusunda Windows kılavuzuna ve/veya ekran kartının üreticisine başvur.
+238	256 renk kipinde 640x480 kullanmanı öneriyoruz, ama daha yüksek çözünürlükler de etkileyici sonuçlar verir.
+239	Ağ oyunları
+240	Spaceward Ho!’yu bir ağda çalıştırırken SHARE altında çalıştığından emin ol. Sistemindeki dosya paylaşımıyla ilgili daha fazla ayrıntı için DOS kılavuzuna ya da ağ belgelerine başvur.
+241	Bir oyun dosyası yaratmadan önce, bütün oyuncuların sunucuda seçtiğin dizine tam okuma ve yazma erişimi olduğundan emin ol. Tam erişimi olmayan kullanıcılar oyuna katılamaz.
+242	Her ağ oyuncusunun kendi yerel Spaceward Ho! kopyasını çalıştırdığından emin ol. Birden çok ağ oyuncusu aynı çalıştırılabilir dosyadan çalışıyorsa oyun dosyaları bozulabilir ya da program çalışmayabilir.
+243	Sesin kullanımı
+244	{b1}MULTIMEDIA SESİ KULLANMAK (Windows 3.1 ve MPC uzantılı Windows 3.0){/b1}
+245	Windows MultiMedia sisteminin dalga biçimli sesi desteklenir. Sisteminin ses donanımın için doğru kurulduğundan emin ol. Ayrıntılar için Windows belgelerine başvur.
+246	{b1}WINDOWS 3.0’DA SOUNDBLASTER® KARTINI KULLANMAK{/b1}
+247	Sistemine bir SoundBlaster® kartı takılıysa ve Windows 3.0 altında çalışıyorsan, Creative Labs, Inc.’in sağladığı SNDBLST.DLL dosyasını kullanabilirsin. SNDBLST.DLL, SoundBlaster® kartınla birlikte gelmiş olabilir; ya da bir kopyasını almak için doğrudan Creative Labs’e başvurabilirsin. DLL’yi Windows dizinine kurduktan sonra WIN.INI dosyana şu bölüm eklenmelidir:
+248	[SoundBlaster] Port=220 Int=7 DMA=1
+249	SoundBlaster® kartın yukarıda gösterilenlerden (varsayılan ayarlardan) farklı ayarlarla yapılandırılmışsa, WIN.INI dosyasını düzenleyip SoundBlaster® kurulumun için doğru bağlantı noktasını ve kesme numarasını kullan. Ayrıntılar için SoundBlaster® belgelerine başvur. (SoundBlaster®, Creative Labs, Inc.’in tescilli ticari markasıdır.)
+250	Savaşları Gözden Geçirmek
+251	Bazen gemilerin öteki oyuncuların gemilerine rastlar. Bu olduğunda, taraflardan biri ölene kadar savaşırlar. Kabul edelim, bu barış içinde bir arada yaşamayı pek kolaylaştırmaz, ama bu bir savaş oyunu. Neyse, bir çarpışma olduğunda ne halt olduğunu bilmek isteyeceksin. Bunu öğrenmenin birkaç yolu var. Birincisi, “Seçenekler” menüsünde “Savaşları Her Zaman Gözden Geçir” işaretliyse, her sıranın başında öteki mesajlarınla birlikte az önce olan savaşların bir özetini alırsın.
+252	Ayrıca herhangi bir yıldızı seçip “Galaksi” menüsünden “Proxima’daki Savaşı Gözden Geçir” (ya da adı neyse) komutunu seçerek o yıldızdaki son savaşı gözden geçirebilirsin. Bir yıldızda iki ya da daha çok savaş olduysa, bu yolla yalnızca en sonuncusunu görebilirsin.
+253	Savaş yaptığın ama senin kolonin olmayan herhangi bir yıldıza çift tıklamak da en son savaşı gözden geçirir. (Bir koloniye çift tıklamak “Gemi Yap” iletişim kutusunu açar.)
+254	Rapor Penceresi’nde bir savaş özeti mesajına tıklamak o savaşı senin için gözden geçirir. Bir yıldızda birden çok savaş olduysa, eski bir savaşı bu yolla gözden geçirebilirsin.
+255	Spaceward Ho!’nun savaşı ne kadar hızlı oynatacağını “Seçenekler” menüsündeki “Savaş Hızını Ayarla...” iletişim kutusuyla ayarlayabilirsin. “Tam Canlandırılmış Savaşlar” seçeneğinin işaretini kaldırırsan her gemi yığını aynı anda ateş eder ve patlama grafikleri olmaz. Bu, savaşların çok daha hızlı geçmesini sağlar.
+256	Bir savaşı daha ilk turda kaybedersen, gemi komutanlarının yok edilmeden önce sana savaş hakkında bilgi gönderecek zamanı olmamıştır. Bu yüzden orada kaç düşman gemisi olduğu hakkında pek bir fikrin olmaz; yalnızca seni yok edecek kadar çok olduklarını bilirsin.
+257	Mesaj Göndermek
+258	Bir Spaceward Ho! oyununda öteki oyunculara mesaj gönderebilirsin. Bilgisayar oyuncularının da mesajları anlayabilmesi ve kendi mesajlarını gönderebilmesi gerektiği için, oyundaki herkesle iletişim kurmana yetecek kadar evrensel, çok basit bir dil bulduk.
+259	Mesaj göndermek için “Galaksi” menüsünden “Mesaj Gönder” komutunu seçmen yeter. Kime gönderileceğine, ne söyleneceğine ve bunun gibi şeylere karar vermeni sağlayan bir iletişim kutusu açılır. Bütün mesajları tanımanın en iyi yolu hepsini denemektir.
+260	Oyunda gerçekten bir etkisi olan tek mesaj, bir gezegeni sahiplenmektir. Bunu yaptığında öteki bütün oyuncular orada bir kolonin olduğunu öğrenir. Bu bilgiye verdikleri karşılık değişir: bazıları seni rahat bırakması gerektiğini anlar, ötekiler nereye saldıracağını.

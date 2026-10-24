@@ -270,8 +270,9 @@ language when shown (`HO.say`). The remake's own interface follows the language 
 (`js/ui-lang.js`, its words in `js/ui-text.js`): in a game the game's language, on the
 title screen the player's choice (else English), in New Game the one it has chosen; English is always
 there and always complete. The hover help is translated too; the long documents (the
-version and patch notes, the manuals) stay English, with a line in the language that says so
-(`docs/translations.md`, "The remake's interface"). The Amiga skin starts in English like
+version notes, patch notes and the four manuals) are translated too in French, German, Spanish and
+Turkish, the remake's own (`js/ui-text-notes-<code>.js`, `assets/manuals/<version>-<code>/`); only the
+Full Hoedown list stays English (`docs/translations.md`, "The remake's interface"). The Amiga skin starts in English like
 every skin; its German (the Amiga's own words) is a choice, and it has its own words in
 every language.
 `node tools/ui-lang-audit.js` opens every skin in every language its versions offer and
@@ -596,6 +597,12 @@ Optional ruleset flags the skin reads (each is documented where it is read):
   out as the ruleset's own units would, and that the human's research and terraforming keep
   up with the computers' (`node tools/human-play.js`, or `node tools/human-play.js 405
   original`; it serves the folder with `python3 -m http.server 8000` when nothing answers)
+- `tools/notes-check.js`: fails when a version note or patch fix has no row in a language's
+  `js/ui-text-notes-<code>.js`, or a row is stale or mis-filled (run it after editing
+  `js/version-notes.js` or a ruleset's `fixes`)
+- `tools/manuals/`: the DOS 2.0 and Mac 3.0.1 manuals' sources and `build-manuals.py`; `translate/manualtr.py`
+  builds the `-fr`, `-de`, `-es`, `-tr` manual folders from the tables in `docs/translations-notes/manuals/`
+  (`docs/manuals/`, `docs/notes-and-manuals-integration.md`)
 - `tools/bundle.py`: builds `dist/spaceward-ho.html`, a single self-contained file with one
   skin built in (`python3 tools/bundle.py cozy` for another)
   (only needed for publishing somewhere that wants one file)

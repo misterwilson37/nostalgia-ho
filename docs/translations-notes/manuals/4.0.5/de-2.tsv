@@ -1,0 +1,189 @@
+151	Schulden
+152	{b1}Die Wirtschaft{/b1}
+153	{b1}Schulden{/b1}
+156	Einen bestimmten Teil Ihrer Schiffsersparnisse können Sie für Technik oder Terraformen verwenden, indem Sie im Menü „Galaxie“ {b1}Ersparnisse anzapfen…{/b1} wählen.
+158	Die Staatsverschuldung der USA nähert sich 5 Billionen $. Das Einkommen der Regierung beträgt etwa 1 Billion $. Na so was, wir fragen uns, warum für Wachstum so wenig Geld da ist. Hmmmm.
+159	Geraten Sie jemals in eine Lage, in der Ihr gesamtes Einkommen nicht einmal die Zinsen Ihrer Schulden deckt, passieren schlimme Dinge. Bisher haben wir es nie geschafft, uns aus dieser Lage zu erholen. Wir raten dringend, gar nicht erst hineinzugeraten.
+160	Schiffe entwerfen
+161	{b1}Schiffe entwerfen{/b1}
+162	Das ist vielleicht der coolste Teil des Spiels. Wenn Ihre Technik steigt, werden Sie anfangen wollen, fortschrittlichere Schiffe mit diesen neuen Technologien zu bauen. Das ist leicht. Stellen Sie im Dialog {b1}Schiffe bauen/entwerfen{/b1} einfach die Technikstufen so ein, wie Ihr neuer Typ sein soll. Sie bewegen dazu nur die Schieberegler, um die Eigenschaften des neuen Schiffs festzulegen. (Das rechte Ende des Schiebereglers entspricht immer Ihrer aktuellen Technikstufe.) Wenn Ihr Schiff so ist, wie Sie es wollen, bauen Sie einfach eines (mit der Taste {b2}+{/b2}), und der Prototyp wird automatisch entworfen und gebaut.
+163	Es gibt sieben große Schiffsklassen: Kolonieschiffe, Satelliten, Späher, Kampfschiffe, Schlachtschiffe, Tanker und Bioschiffe.
+164	Kolonieschiffe
+166	Satelliten
+167	Satelliten sind Schiffe ohne Triebwerke. Das heißt, ihre Reichweite ist null. Satelliten sind ein billiges, wirksames Mittel, Ihre Planeten gegen feindliche Angriffe zu verteidigen. Leider können sie sich nicht bewegen; sie können nur den Planeten verteidigen, auf dem sie gebaut wurden. Satelliten sind viel kleiner als normale Schiffe, sodass es nicht so viele Treffer braucht, sie zu zerstören. Natürlich braucht man zum Bau von Satelliten auch längst nicht so viel Metall wie für Kampfschiffe. Hat ein Planet Satelliten, hat er auf der Sternkarte einen Ring um sich.
+168	Späher und Kampfschiffe
+169	Späher und Kampfschiffe sind Ihre Grundschiffe. Der Unterschied zwischen Spähern und Kampfschiffen ist ein Kompromiss zwischen Triebwerken und Waffen. Späher können eine Reichweite haben, die zwei Einheiten über Ihrer Reichweitentechnik liegt. Leider liegt ihre maximale Waffen- und Schildtechnik eine Stufe unter Ihren aktuellen Stufen. Das macht Späher ideal zum Erkunden, aber nicht besonders gut im Kampf.{b1} Spaceward Ho!{/b1} setzt jeden Späher automatisch in seine eigene Flotte, damit er unabhängig losfliegen und erkunden kann. Kampfschiffe schließen sich automatisch zu einer Gruppe zusammen.
+170	Schlachtschiffe
+171	Schlachtschiffe sind die größten, bösesten Kampfschiffe im Spiel. Sie halten enorme Prügel aus. Sie können 30 Schüsse auf einmal abgeben. Sie kosten ein Vermögen an Geld und Metall.
+172	Tanker
+173	Tanker sind Kolonieschiffe, die nicht kolonisieren. Tanker tanken alle Schiffe im selben System auf. Hat eine Flotte einen Tanker dabei, tankt sie an jedem Stern, den sie besucht, automatisch auf, ohne den Stern kolonisieren zu müssen. Tankern geht nie der Treibstoff aus.
+174	Tanker kosten weniger als ein Kolonieschiff, aber mehr als ein Kampfschiff.
+175	Bioschiffe
+176	Bioschiffe sind riesige Raumwesen und gar keine Schiffe. Sie kosten kein Metall, da sie rein organisch sind. Sie kosten viel Geld, und ihre anfänglichen Technikwerte liegen unter Ihren aktuellen Technikstufen. Bioschiffe tanken auch nicht wie andere Schiffe auf. Neue Arten von Bioschiffen können Sie nur durch Radikalforschung entwerfen.
+177	Entwicklungskosten
+178	{b1}Entwicklungskosten{/b1}
+179	Der Bau des Prototyps des ersten neuen Schiffstyps kostet mehr als der der nachfolgenden Schiffe. Das gilt besonders für Schiffe mit hoher Miniaturisierung. Denken Sie daran, dass die Entwicklungskosten einmalig sind und zu jedem neuen Schiffstyp gehören.
+180	Verschiedene Planetenbilder
+181	{b1}Planeten erkunden{/b1}
+182	{b1}Verschiedene Planetenbilder{/b1}
+185	Ein Planet dieser Kategorie kann mit genug Zeit und Mühe eines Tages rentabel werden. Damit er rentabel wird, müssen Sie ihn terraformen, bis er nahe an 72{img1/} liegt, und der Bevölkerung Zeit zum Wachsen geben.
+186	{b1}Ein bedingt bewohnbarer Planet{/b1}
+188	{b1}Ein unwirtlicher Planet{/b1}
+189	Ein Planet mit einer Schwerkraft über 2,5 G oder unter 0,4 G lässt sich fast unmöglich rentabel machen. Trotzdem kann es in seltenen Fällen aus strategischen Gründen eine gute Idee sein, einen solchen Planeten zu behalten. Ansonsten bauen Sie einfach sein ganzes Metall ab und „verlassen“ ihn – terraformen Sie ihn gar nicht erst.
+191	Ein solcher Planet wird nie Gewinn abwerfen und hat kein Metall, das Sie abbauen könnten. Igitt! Sofern er keine strategische Bedeutung hat oder Sie dort keinen feindlichen Stützpunkt fürchten, lassen Sie diesen Schrott einfach in Ruhe.
+194	Schicken Sie eine Flotte zu einem unerforschten Planeten, wird aus dem Fragezeichen ein Ausrufezeichen, damit Sie wissen, dass Sie bald mehr wissen. Haben Sie im Dialog „Einstellungen“ „Flottenwege anzeigen“ eingeschaltet, sehen Sie eine Linie für die Flotte, die auf diesen Planeten gerichtet ist.
+195	{b1}Ein feindlicher Planet{/b1}
+196	Jeder Planet, an dem Sie einen Kampf verlieren, wird zum feindlichen Planeten. Ein Planet bleibt so lange feindlich, bis Sie eine weitere Flotte dorthin schicken und einen Kampf gewinnen. Es kann sogar sein, dass Sie eine Flotte zu einem feindlichen Planeten schicken und dort niemanden oder einen anderen Feind antreffen. Alle Informationen über Planeten beruhen darauf, wann Sie zuletzt dort waren. Ist es lange her, dass Sie an einem bestimmten Planeten waren, kann Ihre Information über ihn veraltet sein.
+198	{b1}Ein verbündeter Planet{/b1}
+199	Wenn Sie sich mit einem anderen Spieler verbünden, ändert sich sein Symbol auf der Sternkarte entsprechend. Sein Symbol wird heller, und er bekommt einen „Heiligenschein“ über dem Kopf, denn er ist jetzt ein Guter.
+200	{b1}Ein Kampfplanet{/b1}
+202	{b1}Satelliten{/b1}
+204	{b1}Flotten{/b1}
+205	Haben Sie an einem Planeten eine Flotte, erscheint oben rechts am Planeten ein kleines Bild einer Flotte, damit Sie es wissen. Es sieht aus wie ein Mond, aber lassen Sie sich davon nicht täuschen.
+206	{b1}Verbündete Flotten{/b1}
+207	Sehen Sie befreundete Flotten an einem Ihrer Planeten geparkt, haben sie oben links am Planeten ein Flottensymbol (statt oben rechts, wo Ihr Flottensymbol hingehört).
+208	Abnehmender Ertrag
+209	{b1}Abnehmender Ertrag{/b1}
+211	Deshalb ist es klug, Ihre Technikausgaben gleichmäßig zu halten. Wenn Sie nur für Waffentechnik ausgeben, dann nur für Schildtechnik, dann für Reichweite und so weiter, steigen Ihre Technikstufen insgesamt langsamer, als wenn Sie für alle gleichzeitig ein wenig ausgeben.
+217	Die Temperatur steht für alles, was Sie an einem Sternsystem ändern können, vom Gehalt der Atmosphäre bis zur Ökologie des Planeten. Ihr Heimatplanet hat 72{img1/}. Wenn Sie Geld für das Terraformen eines neuen Planeten ausgeben, nähert sich seine Temperatur 72{img2/}. Hat die Temperatur 72{img3/} erreicht, ist der Planet so gut, wie er werden kann, und Sie können nicht mehr für das Terraformen ausgeben.
+219	Galaxiegröße
+220	Die Galaxiegröße bestimmt, wie groß die Galaxie ist. Je größer die Galaxie, desto mehr Raum hat jeder Spieler zum Umherstreifen. In einer kleinen Galaxie mit vielen Spielern geht es meist hitzig und schnell zu. In einer großen Galaxie mit nur wenigen Spielern entwickelt sich das Spiel lange, bevor es zu Kämpfen kommt. Partien in riesigen Galaxien dauern ewig.
+221	Galaxiestil
+222	Der Galaxiestil ist die allgemeine Gestalt der Galaxie. Ringgalaxien haben meist die ausgeglichensten Starts, wobei jeder Spieler um den Ring verteilt ist. Haufen- und Spiralgalaxien lassen die Spieler recht ausgeglichen starten. Eine Zufallsgalaxie hat Sterne, die kreuz und quer hingeworfen sind. Jeder Spieler kann in einer extrem guten oder schlechten Lage beginnen – direkt neben mehreren Feinden oder ohne jemanden in den nahen Sternen.
+223	Glossar
+224	{a1}Inhalt{/a1} {a2}← Zurück{/a2}
+225	{b1}Glossar{/b1}
+226	Verbündeter {span1} {/span1}{span2} {/span2}Ein Außerirdischer, mit dem Sie das Recht zum
+227	{span1} {/span1}{span2} {/span2}Auftanken und einen Nichtangriffspakt teilen.
+228	Feind {span1} {/span1}{span2} {/span2}Jeder, der nicht mit Ihnen verbündet ist.
+229	Schwerkraft{span1} {/span1}{span2} {/span2}Alles, was sich an einem Sternsystem nicht
+230	{span1} {/span1}{span2} {/span2}ändern lässt. Jeder Planet zwischen 0,4 G und
+231	{span1} {/span1}{span2} {/span2}2,5 G kann rentabel werden, wenn genug Leute
+232	{span1} {/span1}{span2} {/span2}darauf leben und er vollständig terraformt ist.
+233	{span1} {/span1}{span2} {/span2}Ein idealer Planet hat 1,0 G. Jeder Spieler hat
+234	{span1} {/span1}{span2} {/span2}eine andere Vorstellung davon, was 1,0 G ist.
+235	Einkommen{span1} {/span1}{span2} {/span2}Das Geld, das Sie im letzten Zug eingenommen haben.
+236	Metall{span1} {/span1} {span2} {/span2}Die Summe aller nicht erneuerbaren Ressourcen.
+237	Miniaturisierung {span1} {/span1}{span2} {/span2}Das Maß, in dem ein Schiff verkleinert wurde. Schiffe mit hoher
+238	{span1} {/span1}{span2} {/span2}Miniaturisierung brauchen weniger Metall, kosten aber mehr Geld.
+239	Geld {span1} {/span1}{span2} {/span2}Die Summe aller erneuerbaren Ressourcen. Sie
+240	{span1} {/span1}{span2} {/span2}bekommen jeden Zug Geld von rentablen Planeten.
+241	Planet{span1} {/span1} {span2} {/span2}Dasselbe wie ein Stern. Steht für das ganze
+242	{span1} {/span1}{span2} {/span2}Sternsystem.
+243	Radikaltech {span1} {/span1}Forschung mit hohem Risiko und hohem Gewinn.
+244	{span1} {/span1}{span2} {/span2}Manchmal bekommen Sie etwas wirklich Großartiges,
+245	{span1} {/span1}{span2} {/span2}manchmal Müll.
+246	Reichweite{span1} {/span1} {span2} {/span2}Wie weit ein Schiff ohne Auftanken kommt. Ein
+247	{span1} {/span1}{span2} {/span2}Schiff mit Reichweite 8 kann 4 hinaus und 4 zurück
+248	{span1} {/span1}{span2} {/span2}fliegen oder 5 hinaus und dann festsitzen.
+249	Satellit{span1} {/span1}{span2} {/span2} Ein Schiff, das sich nicht bewegen kann. Seine
+250	{span1} {/span1}{span2} {/span2}Reichweite ist null. Satelliten sind viel kleiner als andere Schiffe.
+251	Schild{span1} {/span1} {span2} {/span2}Etwas, das ein Schiff schützt. Ein Schiff mit {span3} {/span3}
+252	{span1} {/span1}Schildtechnik 8 ist für ein Schiff mit
+253	{span1} {/span1}Waffentechnik 4 fast unverwundbar.
+254	Ersparnisse {span1} {/span1}Geld, das Sie zum Schiffbau angesammelt haben.
+255	{span1} {/span1}{span2} {/span2}Auf dieses Geld bekommen Sie Zinsen. Haben Sie
+256	{span1} {/span1}{span2} {/span2}mehr ausgegeben, als Sie gespart haben, zahlen Sie Zinsen.
+257	Tempo{span1} {/span1} {span2} {/span2}Wie schnell ein Schiff fliegt. Ein Schiff mit Tempo 3 braucht {span3} {/span3}
+258	{span1} {/span1}2 Züge zu einem Stern, der 5 Einheiten entfernt ist.
+259	Stern {span1} {/span1}{span2} {/span2}Dasselbe wie ein Planet.
+260	Temperatur {span1} {/span1}Alles, was sich an einem Sternsystem ändern lässt.
+261	{span1} {/span1}{span2} {/span2}Die ideale Temperatur ist 72{img3/}. Jeder
+262	{span1} {/span1}Spieler hat eine andere Vorstellung davon, was 72{img2/} sind.
+263	Terraformen {span1} {/span1}Die Temperatur eines Sternsystems verbessern.{span2} {/span2}
+264	Ist ein Planet vollständig terraformt, beträgt seine Tempe-{span1} {/span1}
+265	ratur 72{img1/}.
+266	Das Ho! {span1} {/span1}Wie erfahrene Spieler Spaceward Ho! nennen.
+267	{span1} {/span1}Wenn Sie richtig cool sein wollen, sagen Sie, Sie „spie-
+268	{span1} {/span1}len das Ho!“
+269	Waffe {span1} {/span1}Etwas, womit ein Schiff schießt. Ein Schiff mit
+270	{span1} {/span1}Waffentechnik 8 reißt Schiffe mit Schildtechnik 4 in Stücke.
+271	So kolonisieren Sie Planeten
+272	{b1}So kolonisieren Sie Planeten{/b1}
+273	Früher oder später finden Sie einen saftigen Planeten, den Sie behalten möchten. Er hat etwa 1,16 G und 98{img1/}. Er hat 9.487 Metall, und Sie können einfach nicht widerstehen.
+274	Zuerst bauen Sie ein Kolonieschiff irgendeiner Art und schicken es dorthin. (Ist Ihre Spielstufe „Neuling“, ist bereits ein Kolonieschiff für Sie gebaut.) Wenn es ankommt, erhalten Sie eine Nachricht, dass Sie einen neuen Planeten kolonisiert haben. Sie lautet etwa: „Sie haben gerade Sol kolonisiert.“
+276	Es dauert eine Weile, bis ein Planet rentabel wird, selbst wenn es ein großartiger Planet ist. Jahrzehntelang pumpen Sie Geld hinein, terraformen und bauen den Planeten ab. Sie sehen zu, wie die Bevölkerung von einer winzigen Handvoll zu einer blühenden, rentablen Wirtschaft heranwächst, die zu Ihrem Galaktischen Imperium beiträgt. Je schlechter ein Planet anfangs ist, desto länger dauert es, bis er Gewinn abwirft.
+277	Je mehr Geld Sie in das Terraformen eines Planeten stecken, desto schneller wächst er. Leider haben Sie selbst bei einer perfekten Temperatur von 72{img1/} dort wahrscheinlich noch nicht genug Leute, um den ganzen Planeten zu tragen. Haben Sie Geduld, die Bevölkerung wächst. Abbau und Schiffbau haben keinen Einfluss darauf, wie schnell die Bevölkerung wächst.
+279	Es ist gut, viele kolonisierte Planeten zu haben. Je mehr rentable Planeten Sie haben, desto mehr Geld verdienen Sie. Je mehr Geld Sie verdienen, desto mehr können Sie in die Forschung stecken. Je höher Ihre Technik, desto unwahrscheinlicher ist es, dass ein Feind Sie überrennt, vorausgesetzt, Sie haben Schiffe mit dieser höheren Technik gebaut. Und wenn Sie viele Planeten haben, können Sie es sich leisten, einen oder zwei von feindlichen Schiffen niedertrampeln zu lassen.
+281	So töten Sie feindliche Planeten
+282	{b1}So töten Sie feindliche Planeten{/b1}
+284	Eine weitere tödliche Möglichkeit, feindliche Planeten zu vernichten, ist {b1}Armageddon{/b1} im Menü „Galaxie“. Armageddon zerstört die Hälfte der Galaxie. Es kann jedoch auch Ihre Planeten töten, nicht nur die des Feindes.
+287	Manchmal geht Ihnen das Metall aus. Dann ist ein guter Zeitpunkt, einen Planeten zu kolonisieren, von dem Sie genau wissen, dass er nie Gewinn abwerfen wird, egal wie viel Sie terraformen und wie lange Sie warten. Vielleicht hat er 3,5 G oder sogar noch mehr. Kolonisieren Sie den Planeten, aber stellen Sie seine Ausgaben so ein, dass Sie kein Geld für das Terraformen ausgeben. Stecken Sie alles in den Abbau. Wenn Sie so viel Metall vom Planeten geholt haben, wie Sie wollen, „verlassen“ Sie ihn. Alle Satelliten, die Sie dort gebaut haben, bleiben, aber Ihre Kolonisten werden evakuiert.
+289	Spaceward Ho! 4.0.5 Hilfe
+290	{b1}Spaceward Ho! – Änderungen und Ergänzungen{/b1}
+291	{a1}Änderungen von 2.0 zu 3.0{/a1}
+292	{a1}Ergänzungen von 3.0 zu 4.0{/a1}
+294	{a1}Eine kurze Zusammenfassung{/a1}
+295	{a1}Ein neues Spiel beginnen{/a1}
+296	{a1}Die Fenster{/a1}
+297	{a1}Das Hauptfenster{/a1}
+298	{a1}Die Sternkarte{/a1}
+299	{a1}Budgetinformationen{/a1}
+300	{a1}Die Balkendiagramme{/a1}
+301	{a1}Planeteninformationen{/a1}
+302	{a1}Das Fenster für die Technikausgaben{/a1}
+304	{a1}Tastenkürzel{/a1}
+305	{a1}Geld und Metall{/a1}
+306	{a1}Abnehmender Ertrag{/a1}
+307	{a1}Schulden{/a1}
+308	{a1}Einführung{/a1}
+309	{a1}Schiffe bauen{/a1}
+310	{a1}Schiffe bewegen{/a1}
+311	{a1}Flotten ordnen{/a1}
+312	{a1}Flotten und Schiffe verschrotten{/a1}
+313	{a1}Schiffe entwerfen{/a1}
+314	{a1}Entwicklungskosten{/a1}
+316	{a1}So kolonisieren Sie Planeten{/a1}
+318	{a1}So töten Sie feindliche Planeten{/a1}
+319	{a1}Verschiedene Planetenbilder{/a1}
+320	{a1}Technologien wählen{/a1}
+321	{a1}Technischer Fortschritt{/a1}
+322	{a1}Reichweite{/a1}
+323	{a1}Tempo{/a1}
+324	{a1}Waffen und Schilde{/a1}
+325	{a1}Miniaturisierung{/a1}
+326	{a1}Radikal{/a1}
+327	{a1}Funksprüche senden{/a1}
+328	{a1}Bündnisse{/a1}
+329	{a1}Spieler vergleichen{/a1}
+330	{b1}Kampf{/b1}
+331	{a1}Kämpfe ansehen{/a1}
+332	{b1}Das Verlaufsdiagramm{/b1}
+333	{a1}Das Verlaufsdiagramm{/a1}
+334	{a1}Eigene Galaxien{/a1}
+335	{a1}Anzahl der Computerspieler{/a1}
+336	{a1}Galaxiegröße{/a1}
+337	{a1}Galaxiestil{/a1}
+338	{a1}Computerintelligenz{/a1}
+339	{a1}Automatisch spielen…{/a1}
+340	{a1}Die Ruhmeshalle und die Halle der Schande{/a1}
+341	{a1}Einstellungen{/a1}
+342	{a1}Flottenwege anzeigen{/a1}
+343	{a1}Planetenliste automatisch sortieren{/a1}
+344	{a1}Ereignismeldungen anzeigen{/a1}
+345	{a1}Kämpfe bei Ereignissen ansehen{/a1}
+346	{a1}Kampfgeschwindigkeit einstellen{/a1}
+347	{a1}Abfragezeit einstellen{/a1}
+348	{a1}Über den Autor, Peter Commons{/a1}
+349	{a1}Über Spaceward Ho!{/a1}
+350	{a1}Warum ein Cowboy-Thema?{/a1}
+351	{a1}Mitwirkende{/a1}
+352	{a1}Kundendienst{/a1}
+353	{a1}Urheberrechtsinformationen{/a1}
+354	{a1}Glossar{/a1}
+355	Weitere Themen
+356	{a1}Das Menü „Optionen“{/a1}
+357	{a1}Ihr Heimatplanet{/a1}
+358	{a1}Ein ausgewählter Planet{/a1}
+359	{a1}Ein unerforschter Planet{/a1}
+360	{a1}Dies ist ein Planet, auf dem Ihre Bevölkerung so weit gewachsen ist, dass sie{/a1}
+364	Das Berichtsfenster ist ein scrollbarer Verlauf der wichtigen Dinge, die in den letzten Zügen geschehen sind. Jede Nachricht erscheint zu Beginn jedes Zuges in der linken unteren Ecke der Sternkarte. Klicken Sie auf die Nachricht, geht es zur nächsten.
+366	Jeden Zug erhalten Sie Tipps zum Spielen von{b1} Spaceward Ho!{/b1}. Haben Sie sie alle gesehen, können Sie sie abschalten, indem Sie im Menü „Optionen“ {b2}Einstellungen…{/b2} wählen.
+368	Miniaturisierung
+369	{b1}Miniaturisierung{/b1}
+371	Schiffe bewegen
+372	{b1}Schiffe bewegen{/b1}
+373	Um eine Flotte zu bewegen, klicken Sie einfach auf den Planeten, auf dem sie steht, und ziehen dorthin, wohin sie fliegen soll. Wenn Sie das Ziel erreichen können, sehen Sie einen Pfeil entlang der Route der Flotte. Lassen Sie die Maus los, hören Sie ein „Hyahh!“, das Ihnen sagt, dass der Kurs gesetzt ist. Wenn Sie den Zug beenden, fliegt das Schiff los.
+375	Damit eine Flotte stillhält oder ihre Bewegung abgebrochen wird, klicken Sie auf den Planeten der Flotte und halten die Maustaste eine Sekunde gedrückt. Haben Sie es richtig gemacht, hören Sie beim Loslassen der Maus ein „Whoa!“.
+376	Haben Sie an einem Planeten mehr als eine Flotte, wählen Sie die zu bewegende Flotte, indem Sie in den Budgetinformationen auf ihren Namen klicken. Hat eine Flotte ein Ziel und will sich bewegen, wenn Sie den Zug beenden, steht ihr Name fett, damit Sie es wissen. Mit der Taste {b1}TAB{/b1} springen Sie zur nächsten Flotte an diesem Planeten.
+377	Eine Flotte tankt automatisch auf, sobald sie einen Planeten erreicht, der Ihnen oder Ihren Verbündeten gehört. Hat eine Flotte nicht genug Treibstoff zum Abflug, können Sie ein Kolonieschiff zu diesem Planeten schicken, ihn einen Zug lang kolonisieren und dann alle abfliegen lassen. Oder Sie schicken einen Tanker, der die Flotte auftankt.

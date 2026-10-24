@@ -1,0 +1,96 @@
+0	Mac oyununun Fransızca baskısı, 2.0’ın kısaltılmış bir ön sürümü. Programının her rutini okundu ve her kural kendi kodundan geliyor.
+1	Meteor yağmurunun yok ettiği bir koloni boş bir rapor alır.
+2	Hiperuzaydayken hurdaya çıkarılmak üzere işaretlenen bir filo, yıldız listesinin başından önce okunan başıboş bir karakterde gösterilir (kullanılmayan bir başlangıç yuvasının yıldız numarasının harfi).
+3	Filoları Hazırla yakıt ve yük de doldurur: bir yıldızda bir tasarımın gemilerini yeniden düzenlemek, oradaki o tasarımdan her filoya aralarındaki en iyi yakıtı verir ve oluşturduğu her yeni Koloni Gemisi filosu kolonicilerle dolu çıkar.
+4	Oyunda oyuncular arası mesajların metni var, ama bir mesaj göndermenin yolu yok.
+5	Bir koloniden vazgeçme komutu yok, bu yüzden Tahliye Et düğmesi de yok: bir koloni ancak halkı tükenene kadar parasız bırakılırsa gider.
+6	Her yıldızdaki gemilerin ve gezegenin gücü her sıra hesaplanır ve hiç kullanılmaz.
+7	Oyundan çıkmış oyuncular yine de sıralarını oynar: paraları faiz getirmeye, araştırmaları sürmeye devam eder.
+8	Bilgisayar bir koloniye tek bir kalem için 2.147.483 dolardan fazla verdiğinde koloni çubukları bozulur (toplam taşar). Bunu görmek için çok zengin bir bilgisayar gerekir.
+9	Rastgele sayılar yeniden yapımın kendi sayıları, bu yüzden bir oyun hamle hamle yeniden oynanamaz.
+10	Bütün oyuncular aynı anda oyundan çıkarsa oyun kazanansız biter. 1.2 ise kimse kazanamadan sürüp giderdi.
+11	Birkaç kişi tek bir bilgisayarda sırayla oynar. Orijinal oyunda her oyuncu ortak bir oyun dosyasına şifreyle katılabiliyordu. (1.2’de en çok 19 insan oynayabiliyordu.)
+12	Bir bütçe çubuğunu sürüklemek, ötekileri sürüklemenin başladığı yerden bir kez hesaplar; 1.2 bunu sürüklemenin her adımında yapardı, bu yüzden uzun bir sürükleme biraz farklı bitebilir.
+13	Savaş tekrarları son 60 savaş için saklanır; 1.2 onları 500 yıl saklardı.
+14	Harcamaları Düzelt her adımın satırını küçük bir pencerede gösterir; penceredeki İleri, orijinaldeki mesaj balonuna tıklamanın yerini tutar.
+15	Dil… İngilizceyi sunar: Mac 2.0.1’in aynı pencereler ve raporlar için kendi sözleri, ki bunlar satırı satırına 1.2’ninkilerdir.
+16	Dil… Almancayı da sunar (“Übersetzung des Remakes”): aynı raporlar, adlar ve pencereler için Almanca DOS 2.0’ın sözleri, 2.0’ın Almancasında bulunmayan birkaç pencere sözü için de yeniden yapımın kendi Almancası: resmî değil, yeniden yapımın kendi çevirisi ve listede öyle işaretli. Yalnızca sözleri ve adları değiştirir: her dilde aynı oyun oynanır.
+17	Dil… İspanyolcayı da sunar (“Español (traducción del remake)”): resmî bir İspanyolca Spaceward Ho! hiç olmadı, bu yüzden her satırı yeniden yapımın, resmî çevirilerin ruhuyla yazıldı (oyunun nesneleri için onların sözleri, samimi “tú”, korunan şakalar); adlar İngilizce kalır: resmî değil, yeniden yapımın kendi çevirisi ve listede öyle işaretli. Yalnızca sözleri ve adları değiştirir: her dilde aynı oyun oynanır.
+18	Savaş hızı, mesajları gösterme ve savaşları izleme tercihleri ve Keşfedilen Gezegenler penceresi.
+19	Renkli ve siyah-beyaz bir Mac sürümü (renk 2.0 ile geldi): 2.0’ın oyunu, sonraki sürümlerin para modeli, ittifakları, Radikal teknolojisi ve novalarıyla. Programının her rutini okundu ve her kural kendi kodundan geliyor.
+20	2.0
+21	2010’da, Sarmal ve Küme haritalarında bilgisayarlar ilk sıralarını atlar.
+22	Bilgisayarların eski gemileri hurdaya çıkarma biçimindeki bir kayma oyuna hiç etki etmez.
+23	Mahsur kalan savaş gemisi filoları, menzillerinde bir koloni olsa bile her zaman koloni ister.
+24	Terk Et’i kapatmak koloniye payını geri vermez.
+25	Orada bir koloni gemisi bulunan terk edilmiş bir koloni, aynı sırada yeniden kolonileştirilir.
+26	Gemileri Hazırla, yıldızdaki o tasarımın her filosuna aralarında kullanılmış en fazla yakıtı verir.
+27	Bilgisayar bir koloniye tek bir kalem için 2.147.483 dolardan fazla verdiğinde koloni çubukları bozulur.
+28	Her yıldızdaki gemilerin gücü her sıra hesaplanır ve hiç kullanılmaz.
+29	Harcamaları Düzelt yalnızca fazla harcayan kolonileri kısar ve Birikim ile Teknoloji arasındaki farkı tam yüzdelerle paylaştırır, bu yüzden binde bir iki kaybolabilir; terk edilmekte olan ya da tamamlanmış bir koloni binde 1’e kısılır.
+30	Renkli monitör şakası: 3.0.1 onu rastgele bir yılda, yalnızca renk gösterebildiği hâlde siyah-beyaza ayarlanmış bir ekrana gönderirdi. Burada o ekran siyah-beyaz bir görünüm; yılı da oyunun tohumundan gelir.
+31	Bütün insanlar oyundan çıkınca oyun biter. 3.0.1, bilgisayarlar oynadığı sürece devam ederdi.
+32	Birkaç kişi tek bir bilgisayarda sırayla oynar. Orijinal oyunda her oyuncu ortak bir oyun dosyasına şifreyle katılabiliyordu. (3.0.1 ağ üzerinden de oynanabiliyordu.)
+33	Bilgisayarların hepsi, kimsenin parası hesaplanmadan önce plan yapar; 3.0.1 her biri için kendi sırasında plan yapardı. Ender durumlar dışında sonuç aynıdır.
+34	Hurdaya çıkarmak bir filoyu ya da bir gemi tipini işaretler; 3.0.1’deki gibi Sıran Bitti’de hurdaya çıkarılır. Filonun satırında Gemiler menüsünün yanı sıra Filoyu Parçala düğmesi de vardır ve işaretli bir tipin satırı soluklaşır (3.0.1 yalnızca düğmesinin başlığını değiştirirdi).
+35	Bir bütçe çubuğunu sürüklemek, ötekileri sürüklemenin başladığı yerden bir kez hesaplar; 3.0.1 bunu sürüklemenin her adımında yapardı.
+36	Sarmal ve Küme haritaları başlangıçta yerleştirilir; 3.0.1 onları 2010’da yerleştirirdi.
+37	Birikimden Harca, harcayabileceğin en yüksek miktarın bir yüzdesini alır; 3.0.1 bir miktar alırdı.
+38	Tahliye Et, 3.0.1’in Terk Et’idir: koloniden Sıran Bitti’de vazgeçilir ve düğmeye yeniden basmak bunu geri alır. Gezegen işaretli olduğunu göstermez.
+39	Hope ya da Ship adlı bir yıldızı tahliye etmek her seferinde 3.0.1’in şakalarını sorar (“Yani, sen şimdi tüm ümidini terketmek mi istiyorsun? Henüz her şey kaybolmadı ki...”, “Gemiyi terk et? …”).
+40	Dil… Fransızcayı (“traduction du remake”) ve Türkçeyi (“yeniden yapımın çevirisi”) da sunar: 3.0.1’in onlarla paylaştığı her satır için iOS oyununun resmî Fransızcası ve Türkçesi, 3.0.1’in 2.0 satırları için de (aralarında Bir Yıldıza Ad Ver ve Harcamaları Düzelt) Fransızca Mac 1.2’ninki; geri kalanı için yeniden yapımın kendi satırları: resmî değil, yeniden yapımın kendi çevirisi ve listede öyle işaretli. Yalnızca sözleri ve adları değiştirir: her dilde aynı oyun oynanır.
+41	Dil… Almancayı da sunar (“Übersetzung des Remakes”), Almanca DOS 2.0’dan ileriye doğru: İngilizcenin 2.0’ınki olduğu her yerde onun resmî satırları (2.0’ın zaten sahip olduğu raporlar, Bir Yıldıza Ad Ver, Harcamaları Düzelt), geri kalanı için de onun sözleriyle yeniden yapımın Almancası: resmî değil, yeniden yapımın kendi çevirisi ve listede öyle işaretli. Yalnızca sözleri ve adları değiştirir: her dilde aynı oyun oynanır.
+42	Sürüm 2’den 3’e
+43	Delta Tao’nun Spaceward Ho! 5 kılavuzundan, “Changes From Previous Versions” bölümü (İngilizcesinden çeviri)
+44	Harcamayı toplam para miktarına değil, gelire bağladık. Gemilerin, eski gemi yapım kuyruğu yerine, istediğin sırada yapılmasını sağladık. Gezegenlerine parayı kendiliğinden dağıtıyoruz, böylece onlara yanlışlıkla az harcayamazsın. Uzun vadeli eğilimlerini görebilmen için Grafik Geçmişi çizelgesini ekledik. Birkaç gereksiz grafik ve ses ekledik. Bazı yeni galaksi türleri ekledik.
+45	Ayrıca bir sürü yeni mesaj ekledik, bilgisayar oyuncularını dostlarla ve düşmanlarla ilgilenir hâle getirdik ve bilgisayarların herkese yarı akıllıca mesajlar göndermesini sağladık. Artık dostlarına (ya da düşmanlarına) para ve metâl verebilir ya da onlara teslim olabilirsin.
+46	Renkli.
+47	Gemi Tasarrufu: her sıranın parasının bir payı biriktirilir, faiz getirir, gemileri hemen satın alır (kuyruk yok) ve bir borç sınırına kadar borca girebilir. (2.0’da tek bir havuz vardı ve borçlanma yoktu.)
+48	Koloni başına iki çubuk, Terraform ve Maden; ikisi de tamamlanmış bir koloni payını ötekilere verir.
+49	Araştırma rastgele bir %60–140 yerine düzenlidir (× 8/10) ve her seviyeye bir avansla başlar; altı sonuçlu Radikal teknoloji de var.
+50	Savaşlarda şans vardır, hep açıktır, ve gezegen sahibinin Kalkanlarıyla savaşır.
+51	Novalar ve Armageddon.
+52	İttifaklar, hediyeler, teslim olma ve hazır mesajlar; bir ittifak bir sıra boyunca dayanırsa kazanır.
+53	Bir koloniyi terk etmek ve Birikimden Harca.
+54	Kolonisi ve koloni gemisi olmayan bir oyuncu hemen oyundan çıkar ve filoları hurdaya çıkarılır.
+55	Sonraki sürümlerin galaksi üreticisi: altı tarz, Küme yeni.
+56	Dördüncü bir bilgisayar seviyesi, Şeytani; duyguları, gelip giden ittifakları ve tasarımları olan bilgisayarlar.
+57	Mac 4.0.5 ile platformlar arası oynanan Windows 95 baskısı: 3.0.1’in oyunu, Abalar, Tankerler, Biyolojikler ve tuzaklarla, bir el kart olarak Radikal teknolojiyle ve en iyi arkadaşlarla. Programının her rutini okundu ve her kural kendi kodundan geliyor.
+58	3.0.1
+59	Yıldızların hiç kızarıp kızarmayacağı, Yeni Oyun kodunun hiç ayarlamadığı bir ayara bağlıdır; yeniden yapım kızarmalarına izin verir.
+60	Bir koloni bir sırada, halkından (binlerle) fazla gemi yapamaz.
+61	İlk el dağıtılmadan önce (2010) ya da el boşken yapılan bir Radikal buluş orijinalde ters gidebilir; yeniden yapım onu rastgele bir karttan yapar ya da kaybeder.
+62	En yoksul oyuncuyu arayan bir bilgisayar, oyundan çıkmış oyuncuları da sayar.
+63	30 tasarımla bir bilgisayar, ulaşamadığı sınıflar için geçen sıranın tasarımlarını yapmaya devam eder; bunları listesindeki yerleriyle tutar, oysa o yerler o zamandan beri kaymış olabilir.
+64	Mahsur kalan savaş gemisi ve Aba filoları, menzillerinde bir koloni olsa bile her zaman koloni ister.
+65	Bilgisayarların eski gemileri hurdaya çıkarılmak üzere eve göndermesindeki bir kayma (Menzil yerine bir liste sırası verilir).
+66	Bilgisayarlar Tanker hiç tutmaz: evdekileri hurdaya çıkarır, başka yerdekileri eve gönderir.
+67	Listenin ilk yıldızındaki bir koloninin bütçe çubuğu her zaman sürüklenebilir ve nüfus eşiklerine dahil edilmez.
+68	En iyi arkadaşlar savaş haberlerini yıldızla ilgili bütün kayıtlarını devrederek paylaşır; savaşmamış olan savaşı gözden geçiremez (Windows’ta arkadaşın kendi kaydı da oyun kaydedilene kadar bunu söyler).
+69	Bir Armageddon aygıtı boşa çıktıktan sonra herkes her aygıtın kapatıldığını, sonraki sıra da yeniden açıldığını duyar.
+70	Valdez sızıntısı dava açmakla tehdit eder, ama hiçbir şey alınmaz.
+71	Yapım penceresinde bir gemi tipini hurdaya çıkarılmak üzere işaretlemek, orada o tipten sipariş ettiğin gemilerin yalnızca birini geri verir; geri kalanı yapılır, sonra tiple birlikte hurdaya çıkarılır.
+72	1.000.000 usta puanından sonra Usta Puanı Listesi rütbe olarak “%s: %s” gösterir.
+73	Şeref Listesi yılı 1900’den beri geçen yıllar olarak yazar: 1996, 96; 2026, 126 olur.
+74	Utanç Listesi’nin özeti sana iki nokta üst üste olmadan “Kaybeden” der.
+75	50.000 ile 499.999 usta puanı arasında Usta Puanı Listesi’nde resim yoktur: oyunda o resim yok.
+76	Yeni bir teknoloji seviyesi bir sonraki seviyenin adıyla bildirilir: Menzil 7, “Tankların depolarını dolduruyor” yerine “Fuziyon Yığılımı” olur, Minyatürleştirme 20 ise programın emeği geçenler satırıdır.
+77	Kazananların ad verdiği yıldızlar sonraki galaksilere bir yer kaymış olarak konur: ilki oyunun kendi 191. adı olan “Hope” olur, son ad verilen de hiç kullanılmaz.
+78	Beşinci bir yıldız adı, saklanan dördüncünün yerini alır ve başa geçer, böylece dördün en yenisi atılan olur.
+79	Birkaç kişi tek bir bilgisayarda sırayla oynar. Orijinal oyunda her oyuncu ortak bir oyun dosyasına şifreyle katılabiliyordu. (4.0.5 ağ üzerinden de oynanabiliyordu.)
+80	Bilgisayarların hepsi plan yapar ve her filo bütün oyuncular için aynı anda hareket eder; 4.0.5 ikisini de her oyuncunun kendi sırasında yapardı. Ender durumlar dışında sonuç aynıdır.
+81	Şeref Listesi, Utanç Listesi ve Usta Puanı Listesi bu tarayıcıda saklanır ve menü öğeleri Oyun menüsündedir (4.0.5: Seçenekler).
+82	Bir bütçe çubuğunu sürüklemek, ötekileri sürüklemenin başladığı yerden bir kez hesaplar; 4.0.5 bunu sürüklemenin her adımında yapardı.
+83	Birikimden Harca, harcayabileceğin en yüksek miktarın bir yüzdesini alır; 4.0.5 bir miktar alırdı.
+84	Tahliye Et, 4.0.5’in Terk Et’idir: koloniden Sıran Bitti’de vazgeçilir ve düğmeye yeniden basmak bunu geri alır.
+85	Hope ya da Ship adlı bir yıldızı tahliye etmek her seferinde 4.0.5’in şakalarını sorar; Armageddon’u açmak iki soru sorar: biri beş, öteki altı soru arasından seçilir.
+86	İpuçları tarayıcının rastgele sayılarıyla seçilir; 4.0.5 kendi sayılarını kullanırdı.
+87	Dil… Fransızcayı (“traduction du remake”) ve Türkçeyi (“yeniden yapımın çevirisi”) da sunar: 4.0.5’in onlarla paylaştığı, raporlarının çoğunu oluşturan her satır için iOS oyununun (ve Fransızca Mac 1.2’nin) resmî Fransızcası ve Türkçesi; geri kalanı için yeniden yapımın kendi satırları (Armageddon’un soruları, Windows sürümünün kendi sözleri): resmî değil, yeniden yapımın kendi çevirisi ve listede öyle işaretli. Yalnızca sözleri ve adları değiştirir: her dilde aynı oyun oynanır.
+88	Dil… Almancayı da sunar (“Übersetzung des Remakes”), Almanca DOS 2.0’dan ileriye doğru: İngilizcenin 2.0’ınki olduğu her yerde onun resmî satırları (2.0’ın zaten sahip olduğu raporlar, Bir Yıldıza Ad Ver), geri kalanı için de onun sözleriyle yeniden yapımın Almancası: resmî değil, yeniden yapımın kendi çevirisi ve listede öyle işaretli. Yalnızca sözleri ve adları değiştirir: her dilde aynı oyun oynanır.
+89	Sıra süre sınırı ve ağ üzerinden oyun.
+90	Sürüm 3’ten 4’e
+91	Tankerler, Abalar, Biyolojikler ve Tuzaklar dahil pek çok yeni gemi tipi ekledik. Uyduları iki kat güçlü (ve pahalı) yaptık.
+92	Oyunu PowerPC’ye özgü yaptık ve “yalnızca önemli mesajları göster” ile kendiliğinden harcama düzeltme gibi hız artıran özellikler ekledik.
+93	Çok oyunculu oyunu çok daha iyi yaptık. Sıra saati oyunların doğru hızda ilerlemesini sağladı, En İyi Arkadaş ittifakları eklendi, savaş şansı isteğe bağlı oldu, bir Sohbet Penceresi ve Metin Mesajları ekledik. Sıralar artık ana makinede değil yerel olarak güncelleniyor, bu yüzden ağ güncellemeleri çok daha hızlı. Oyunculara, oyunlar başladıktan sonra katılma imkânı verdik.
+94	Kullanılabilirliği iyileştirdik: birkaç iletişim kutusu (özellikle Gemi Yap) düzeltildi, yardım mesajları eklendi ve terraformu eski pasta grafiği yerine bir kaydırıcı yaptık. Ve tabii ki grafikler ve sesler çok iyileştirildi.
+95	Zorluk derecelerini değiştirdik, Usta Puanları ve çok daha fazla istatistik ekledik.

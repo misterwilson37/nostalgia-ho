@@ -1,0 +1,50 @@
+338	{a1}{/a1}Este manual lo escribieron Joe Williams y Peter Commons con FrameMaker, de Frame Technologies. Las capturas de pantalla se hicieron con Flash-It y se retocaron con Color MacCheese o Zeus. Todo se imprimió en una LaserWriter IINT.
+339	{a1}{/a1}Por si no te has dado cuenta, sí, lo hacemos todo en Macs.
+340	{a1}{/a1}{img2/}Acerca de Peter Commons
+341	{a1}{/a1}Peter tiene la sensación de llevar escribiendo versiones de Spaceward Ho! desde el jardín de infancia. No exactamente, pero ya es casi un tercio{sup2}{/sup2} de su vida. Por suerte no es un trabajo a jornada completa. Peter vive en Danville, California, con su esposa Claire y sus hijos Brennan y Sabrina, sin contar 2 perros, un gato, un conejillo de indias y, en el último recuento, 7 peces. A Peter también le gustan el yoga, el canto a capela y volar.
+342	Preferencias
+343	La primera vez que ejecutes Spaceward Ho!, se creará un archivo de preferencias llamado “Spaceward Ho! 5.0 Prefs” en la carpeta Preferencias de la Carpeta del Sistema de tu disco de arranque.
+344	Guardamos todo en el archivo de preferencias: dónde te gusta colocar las ventanas, si quieres el sonido activado o desactivado, tu velocidad de batalla preferida, etcétera.
+345	Además, el archivo de preferencias guarda los nombres de las personas con las que has jugado, los nombres de las naves que diseñas y las estrellas a las que pones nombre por ganar la partida.
+346	Para empezar de cero (por ejemplo, si una vez pusiste a una nave el nombre de tu nueva exnovia y ver su nombre te trae recuerdos dolorosos), basta con tirar el archivo de preferencias. Toda esta información (¡incluidos tus puntos maestros fuera de la red!) se borrará.
+347	La mayoría de las Preferencias se ajustan con “{em1}Preferencias…{/em1} ”.
+348	Mostrar los mensajes de sucesos
+349	Si esta opción está marcada, los mensajes de sucesos se mostrarán en la esquina inferior izquierda del mapa al comienzo de cada turno. Haz clic en el mensaje o pulsa Retorno para pasar al siguiente. Todos los mensajes aparecen en la Ventana de informes, esté o no marcada esta opción.
+350	Pero solo los más importantes
+351	Esto elimina muchos de los mensajes de “cháchara”, como cuando las naves reposta y cuando gastas dinero en terraformar estrellas no rentables. Deja los mensajes de batalla y de avance tecnológico, así como las supernovas y cosas por el estilo.
+352	Revisar las batallas
+353	Esta opción solo importa si la de arriba, “Mostrar los mensajes de sucesos”, también está marcada. Si lo están las dos, cada vez que esté a punto de mostrarse un mensaje de batalla, la batalla se revisará automáticamente. Si no está marcada, solo se mostrará el mensaje de resumen.
+354	Velocidad de revisión de batallas
+355	Aquí puedes controlar la velocidad de los disparos y las explosiones en las revisiones de batalla. Si te aburre ver batallas, acelérala. Activar “Las pilas disparan juntas” acelerará las batallas considerablemente, sobre todo las batallas gigantes. Desmarcar “Batallas con animación completa” se saltará los gráficos de las explosiones y las batallas irán todavía más rápido.
+356	Guardar automáticamente cada turno
+357	Si esta opción está marcada, Spaceward Ho! guardará la partida en su archivo de partida guardada cada turno, de modo que, si se va la luz inesperadamente, puedes seguir justo donde lo dejaste.
+358	Pronunciar las palabras clave del chat
+359	Esto hace que Spaceward Ho! reproduzca sonidos cuando ciertas palabras del chat aparecen en la ventana de chat. Algunos ejemplos son LOL, jeje y el favorito #$&@!
+360	{a1}{/a1}Problemas comunes
+361	{a1}{/a1}“Spaceward Ho! arranca pero se cierra enseguida.”
+362	{a1}{/a1}De vez en cuando el archivo de preferencias se corrompe. Tirarlo suele resolver este problema. Consulta {a2}Preferencias{/a2} .
+363	{a1}{/a1}“Los jugadores del ordenador ponen a sus naves nombres que yo solía poner a las mías y que son una estupidez.”
+364	{a1}{/a1}Se supone que lo hacen. Si no te gusta, tira tu archivo “Spaceward Ho! Prefs”. Otra vez, consulta {a2}Preferencias{/a2} .
+365	{a1}{/a1}“¿Cómo muevo las naves?”
+366	{a1}{/a1}Haz clic en la estrella donde están las naves y arrastra hasta la estrella adonde quieras que vayan. Aparecerá una línea entre los dos planetas. Si hay una flecha al final de la línea, suelta el ratón y oirás un “Hyaa!”. Las naves ya están en camino. En un par de turnos, más o menos, deberían llegar al planeta de destino. Si no hay flecha al final de la línea, el planeta adonde quieres enviar las naves está demasiado lejos para que lo alcances con las naves seleccionadas.
+367	Puedes elegir a mano una ruta para la nave manteniendo pulsada la tecla Opción mientras haces clic en un camino paso a paso.
+368	{a1}{/a1}“Unos alienígenas atacan sin parar mi planeta de origen y matan a toda mi gente.”
+369	{a1}{/a1}Construye algunos satélites de defensa y mantenlos al día tecnológicamente en cualquier sitio donde los malos puedan darte una paliza. Además, no empieces con una galaxia pequeña y con muchos oponentes.
+370	{a1}{/a1}“¿Cuáles son los secretos del juego?”
+371	{a1}{/a1}Si te lo contáramos, no serían secretos, ¿verdad? Así que no nos lo preguntes. Averígualos tú mismo, si te empeñas.
+372	{a1}{/a1}“El juego va demasiado lento.”
+373	{a1}{/a1}Haz la galaxia más pequeña. En general, cuanto más pequeña es la galaxia, más difícil te lo ponen los ordenadores. No pongas automáticamente el tamaño de la galaxia en “Descomunal”. Además, puedes jugar contra menos jugadores del ordenador. Más jugadores no es más difícil de verdad, solo hay más gente apretujada.
+374	{a1}{/a1}“Se me cuelga todo el rato.”
+375	{a1}{/a1}No nos mires a nosotros: nuestro software nunca se cuelga. Tiene que ser culpa de otro. En serio, si tiras tu archivo “Ho! Prefs” y desactivas todas tus extensiones del sistema, probablemente verás que el Ho! es a prueba de balas. Por otro lado, si encuentras un error reproducible que lo cuelgue, llámanos y cuéntanoslo para que podamos arreglarlo en versiones posteriores.
+376	{a1}{/a1}“Necesito más espacio en pantalla.”
+377	{a1}{/a1}Puedes cerrar la Ventana de gráficos y la Ventana de informes cuando no las necesites; eso ayuda. También es razonable trabajar con el segundo modo más alejado: elige “{em2} Alejar{/em2} ” en el menú “{em3} Ventana{/em3} ” un par de veces. Por último, puedes usar “{em4} Mostrar información{/em4} ” en el menú “{em5} Ventana{/em5} ” para mostrar u ocultar toda esa información de la izquierda.
+378	{a1}{/a1}Nuestra postura sobre la protección contra copia
+379	{a1}{/a1}(Artículo reimpreso de The Changing Path, primavera de 1991)
+380	{a1}{/a1}En Delta Tao pensamos que la protección contra copia es algo malvado que podría dañar gravemente el crecimiento de la industria del software y de la industria informática en su conjunto. Recomendamos que todo el mundo boicotee los productos protegidos contra copia. Te explicamos por qué.
+381	{a1}{/a1}Nuestra teoría es que la gente tiene una cierta cantidad de dinero que gastará en software. La gastará en productos estén o no protegidos contra copia. Cuando hayan agotado su presupuesto de software, seguirán queriendo más software. Si predomina la protección contra copia, están fastidiados. El software que compran es el único software que tienen. Encontrarán sus ordenadores menos útiles y no animarán a sus amigos a comprar más. Las industrias del hardware y del software menguan y mueren.
+382	{a1}{/a1}Por otro lado, si las cosas no están protegidas contra copia, la gente pirateará software una vez agotado su presupuesto de software. Aprenderán de primera mano qué programas son buenos y útiles. Al año siguiente tomarán decisiones informadas sobre qué software comprar. Mientras tanto, encuentran su ordenador una herramienta más útil y amigable, lo usarán más y lo recomendarán calurosamente a sus amigos, que se convertirán en compradores de software.
+383	{a1}{/a1}Hay dos problemas. El primero: en un mundo donde algunos programas están protegidos contra copia y otros no, la gente puede tender a comprar lo protegido, porque es la única manera de conseguirlo, y a piratear el software sin protección. Eso tiene el efecto de premiar (al menos a corto plazo) a quienes dañan la industria y de castigar a quienes la ayudan a salir adelante. Un corolario de la “tragedia de los bienes comunes” sobre la que leímos en la escuela.
+384	{a1}{/a1}El segundo: a los editores sin protección contra copia les resultará más difícil vender software malo con publicidad masiva. Como la gente tenderá a probar el software antes de comprarlo, las empresas solo venderán software a quienes de verdad lo necesiten y lo encuentren útil. Esto significa que a las empresas con productos inferiores, pero con grandes presupuestos, les debería gustar la protección contra copia.
+385	{a1}{/a1}El segundo problema no nos importa tanto, pero el primero nos asusta. La solución: boicotear la protección contra copia. Asegurarse de que no sea rentable proteger el software contra copia.
+386	{a1}{/a1}Antes de que la Asociación de Editores de Software nos linche (afirman que “cada año se pierden miles de millones de dólares de ingresos por la piratería”), inventaremos al menos un poco de evidencia para nuestra teoría. ¿Recuerdas cuando se inventó la cinta de casete? La gente ya podía copiar discos sin distinción, y la discográfica no podía hacer nada al respecto. “¡Estamos perdidos!”, gritaron. “¡Ahora solo venderemos un ejemplar de cada disco!” ¿Qué pasó en realidad? La industria musical se disparó hasta niveles antes inimaginables, generando más beneficios para más artistas que nunca.
+387	{a1}{/a1}Cuando aparecieron los vídeos domésticos, la gente podía copiar películas sin distinción, y los estudios de cine podían hacer poco al respecto. “¡Estamos perdidos!”, lloraron. “¡Ahora nunca venderemos otra película!” ¿Qué pasó? La industria del cine se disparó hasta niveles antes inimaginables, generando más beneficios para más gente que nunca.

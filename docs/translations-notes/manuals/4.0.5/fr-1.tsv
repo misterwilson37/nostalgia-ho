@@ -1,0 +1,131 @@
+0	Une planète colonisée et rentable
+1	{a1}Sommaire{/a1}
+2	{b1}Une planète colonisée et rentable{/b1}
+3	C’est une planète où votre population a grandi au point de pouvoir subvenir à ses besoins. Elle peut même fournir de l’argent pour votre effort interstellaire. Votre planète d’origine est comme cela.
+4	Aide de Spaceward Ho! 4.0.5 — convertie à partir du fichier WinHelp.
+5	Résumé rapide
+6	{a1}Sommaire{/a1} {a2}← Précédent{/a2} {a3}Suivant →{/a3}
+7	{b1}Pour commencer{/b1}
+8	{b1}Résumé rapide{/b1}
+9	Le but de {b1}Spaceward Ho!{/b1} est de conquérir la galaxie. Vous commencez sur une planète unique, merveilleuse et très peuplée. Vous venez de devenir capable de construire vos premiers vaisseaux spatiaux interstellaires. Vous construisez donc quelques vaisseaux d’exploration et vous les envoyez vers les étoiles proches. Certains systèmes stellaires seront plus habitables que d’autres.
+10	Quand vous trouvez une planète semblable à votre planète d’origine, vous construisez un Transport et vous allez la coloniser. Une fois sur place, vous améliorez sa température en la terraformant, vous en extrayez tout le métal, puis vous l’utilisez comme base pour continuer l’exploration et la colonisation. Au bout de plusieurs siècles, la population de la nouvelle planète sera devenue si nombreuse qu’elle commencera à rapporter des profits importants, comme votre planète d’origine.
+11	Vous sauterez de planète en planète en étendant votre empire galactique. Tôt ou tard, vous rencontrerez de l’opposition : des méchants qui cherchent eux aussi à conquérir la galaxie. Outre explorer et coloniser, vous devrez vous défendre contre les plus agressives de ces races extraterrestres. Vous pouvez le faire en construisant des satellites défensifs à vos colonies. Vous pouvez aussi vous défendre en construisant des flottes de Croiseurs et en contre-attaquant les extraterrestres de façon préventive : la vieille stratégie du « la meilleure défense, c’est l’attaque ». Si le combat n’est pas votre truc, vous pouvez vous lier d’amitié avec certains de ces extraterrestres et vous faire des alliés au lieu d’ennemis.
+12	En plus de construire des vaisseaux, de terraformer et d’exploiter des planètes, vous dépenserez de l’argent en recherche technologique. Les premiers vaisseaux que vous construisez peuvent voyager vers d’autres étoiles, mais ils sont gros, lents, balourds et faibles. Quand vous dépensez de l’argent en recherche, vos niveaux de technologie de vaisseaux s’améliorent. Sans surprise, de meilleurs vaisseaux détruisent les vaisseaux obsolètes au combat.
+13	Quand vous avez détruit toutes les colonies ennemies, vous avez gagné. Vous pouvez continuer à jouer si vous le souhaitez, mais il n’y aura plus de résistance de la part des méchants, puisqu’ils sont morts.
+14	Une planète sélectionnée
+15	{b1}Une planète sélectionnée{/b1}
+16	Quand vous sélectionnez une planète, elle est mise en évidence par une couronne qui l’entoure. Toutes les informations à gauche de la carte des étoiles se rapportent désormais à cette planète : sa température, sa gravité, son revenu, et ainsi de suite.
+17	À propos de Spaceward Ho!
+18	{b1}À propos du jeu{/b1}
+19	{b1}À propos de Spaceward Ho!{/b1}
+20	Le plus important dans{b1} Spaceward Ho!{/b1}, c’est sa simplicité. Contrôler tous les aspects d’une race extraterrestre pourrait être compliqué et gâcher le plaisir du jeu. Le plaisir est notre but numéro un, et le réalisme a été sacrifié au plaisir partout où c’était possible. Si vous voulez du réalisme dans l’exploration spatiale, jouez à « Réduisons le budget de la NASA », comme le fait le Congrès chaque année.
+21	À propos de l’auteur, Peter Commons
+22	{b1}À propos de l’auteur, Peter Commons{/b1}
+23	Peter est diplômé de Stanford et passe ses moments perdus à défendre les droits des petits animaux à poils sans défense. C’est une âme assez schizophrène, incapable de décider s’il préfère écrire des jeux ou des applications graphiques professionnelles, sans parler de son désir d’écrire la bande originale d’un grand film. Encore en deuil de son chien Delbert, Peter a récemment pris un nouveau chiot pour rendre Enid et Ignacio heureux. Après avoir songé à l’appeler Delia, Denise ou Darlene, il a fini par choisir Fritz, disant que cela lui rappelait un vieil ami croisé un jour sur la route.
+25	{b1}Technologie{/b1}
+26	{b1}Le progrès technologique{/b1}
+27	Rechercher de nouvelles technologies est facile. Il suffit de dépenser de l’argent en technologie dans la fenêtre du joueur, et c’est parti. Vous pouvez orienter votre recherche vers certains domaines en équilibrant votre budget de technologie dans la fenêtre des dépenses en technologie, accessible depuis le menu “Fenêtre”.
+28	{a1}Distance {/a1}
+29	{a1}Vitesse {/a1}
+30	{a1}Armes et Boucliers {/a1}
+31	{a1}Miniaturisation {/a1}
+32	{a1}Radicaux {/a1}
+33	Alliances
+34	{b1}Les autres joueurs{/b1}
+35	{b1}Alliances{/b1}
+36	Vous pouvez jouer au Ho! en xénophobe, en tuant tout ce qui bouge. Ou, si vous vous sentez amical, vous pouvez rester neutre envers les autres joueurs (pour ne pas les attaquer sans raison) ou même conclure une alliance solide dans laquelle vous partagez vos informations avec vos amis. Bien sûr, pour former une alliance, les deux joueurs doivent le vouloir. Vous montrez votre opinion sur les autres joueurs avec la boîte de dialogue {b1}Alliances{/b1} du menu “Galaxie”. C’est aussi là que vous voyez leur opinion sur vous.
+37	Il existe désormais deux niveaux d’alliance. Si deux joueurs choisissent tous deux une alliance « Meilleurs amis » l’un avec l’autre, ils partagent automatiquement les informations sur toutes leurs planètes et leurs explorations. Les joueurs ordinateur ne choisissent jamais d’être Meilleurs amis, ce niveau ne concerne donc que le jeu en réseau.
+38	Les alliés neutres ne font que ne pas s’entretuer. Les alliés amicaux reçoivent automatiquement de leurs amis des informations sur la galaxie. Vous pouvez aussi leur donner de l’argent et du métal quand ils en ont le plus besoin. Utilisez pour cela {b1}Donner de l’argent / métal{/b1} dans le menu “Galaxie”.
+39	Vous pouvez rompre une alliance en déplaçant l’extraterrestre en question de la colonne « J’aime » à la colonne « Je n’aime pas » dans la boîte de dialogue {b1}Alliances{/b1}. Vous vous battrez alors à mort partout où vous cohabitiez avec lui. Par la même occasion, vous gagnerez aussi sa haine et sa méfiance éternelles.
+40	Une planète inexplorée
+41	{b1}Une planète inexplorée{/b1}
+42	Au début de la partie, tout est inexploré sauf votre planète d’origine. Une fois que vous êtes allé sur une planète, vous en apprenez davantage, et son image reflète vos nouvelles découvertes.
+43	Auto Play…
+44	{b1}Le menu Options{/b1}
+45	{b1}Auto Play…{/b1}
+46	Auto Play fait jouer votre tour automatiquement par l’ordinateur.
+47	Si vous voulez que l’ordinateur joue à votre place, choisissez {b1}L’Ordinateur joue pour moi{/b1}. L’ordinateur développera sa propre stratégie, comme les adversaires ordinateur habituels. C’est une bonne façon pour les novices d’apprendre. C’est aussi très pratique quand vous êtes sur le point de gagner (ou de perdre) mais que vous ne voulez pas finir la partie vous-même. Choisissez aussi cette option quand vous devez quitter une partie à plusieurs plus tôt que prévu sans vouloir que votre territoire s’effondre complètement.
+48	Laisser l’ordinateur jouer à votre place vous laisse tout de même un certain contrôle. L’ordinateur ne modifiera jamais vos barres de dépenses en technologie. Si vous construisez des vaisseaux, l’ordinateur les utilisera. Si vous envoyez des vaisseaux quelque part, l’ordinateur ne les redirigera pas avant qu’ils arrivent à destination. L’ordinateur essaiera en général de conserver les colonies que vous avez, sauf s’il estime que vous êtes trop dispersé.
+49	Si vous choisissez {b1}Me marquer comme ayant fini à chaque tour{/b1}, c’est tout ce qui se passera. Aucune de vos barres de budget ne changera jamais (sauf quand vous perdez ou gagnez des planètes). C’est une option pratique quand plusieurs tours de suite sont sans intérêt, par exemple quand vous attendez qu’une colonie devienne rentable.
+50	Si vous choisissez {b1}Me marquer comme ayant fini jusqu’à ce qu’il se passe quelque chose d’intéressant{/b1}, vous ne jouerez pas avant qu’une bataille ait lieu. Vous reprenez alors la partie.
+51	Choisissez {b1}Je jouerai mes propres tours{/b1} pour désactiver Auto Play.
+52	Le curseur au bas de la boîte de dialogue {b1}Auto Play…{/b1} détermine combien de temps chaque message reste affiché. Normalement, vous devez cliquer sur chaque message pour le faire disparaître. Sous Auto Play, vous pouvez toujours cliquer, mais si le temps est écoulé, le message disparaît tout seul. Cela n’a d’importance que lorsque vous regardez l’ordinateur jouer en Auto Play.
+53	Vous pouvez régler le style de jeu de l’ordinateur quand vous le mettez en Auto Play. Les curseurs de {b1}Config{/b1} déterminent dans quelle mesure votre ordinateur préférera attaquer ou défendre. Jouez avec les commandes : vous les comprendrez.
+54	Trier automatiquement la liste des planètes
+55	{b1}Trier automatiquement la liste des planètes{/b1}
+56	Cela trie vos planètes par revenu à chaque tour. Vos meilleures planètes seront donc toujours en bas de la liste (puisque vous n’avez sans doute pas besoin de vous en occuper) et vos toutes nouvelles planètes seront tout en haut. Vous n’avez donc pas à chercher dans la liste les planètes qui vous intéressent.
+57	Informations sur le budget
+58	{b1}Jouer à Spaceward Ho!{/b1}
+59	Informations sur la planète actuellement sélectionnée.
+60	Informations sur la flotte sélectionnée (sélectionnez une flotte en cliquant dessus dans la liste).
+61	Informations globales pour toutes vos planètes. Tout votre argent et tout votre métal vont vers ces nombres et en viennent. À droite se trouve la variation depuis le dernier tour.
+62	À gauche se trouve la liste des joueurs de la partie. Les coches indiquent s’ils ont déjà fini leur tour. À droite se trouve un graphique en barres pour répartir vos dépenses entre les planètes.
+63	Les nombres des informations sur le budget sont là uniquement à titre informatif. Vous ne pouvez pas les modifier directement. Ce que vous pouvez modifier, ce sont les {a1}barres{/a1} qui se trouvent en dessous.
+64	{a1}Les barres{/a1}.
+66	{b1}Les vaisseaux{/b1}
+67	{b1}Construire des vaisseaux{/b1}
+68	Vous pouvez construire des vaisseaux à n’importe laquelle de vos colonies. Pour cela, cliquez sur la planète où vous voulez construire des vaisseaux et choisissez {b1}Construire des vaisseaux{/b1} dans le menu “Vaisseaux”, ou bien double-cliquez simplement sur la planète. Une grande boîte de dialogue s’ouvre. Elle vous permet à la fois de construire des vaisseaux et de concevoir de nouveaux types de vaisseaux. Vous pouvez choisir la quantité de vaisseaux avant de choisir le type, puis ajuster leurs niveaux de technologie jusqu’à ce que leur coût en métal et en argent vous convienne.
+69	À gauche de la boîte de dialogue se trouve la liste des types de vaisseaux disponibles. Si aucun ne vous convient, vous pouvez concevoir une nouvelle classe en jouant avec les curseurs en bas au milieu de l’écran.
+70	Choisir les technologies
+71	{b1}Choisir les technologies{/b1}
+72	Les technologies que vous choisissez de développer ne dépendent que de vous, et de vos objectifs pour cette partie.
+73	Si vous développez une haute technologie de Distance, vous pourrez atteindre de nombreuses planètes aux confins de la galaxie que personne d’autre ne peut atteindre. Vous pouvez les développer sans avoir à vous soucier de les défendre.
+74	De bonnes armes et de bons boucliers sont essentiels si vous participez au combat, mais n’oubliez pas que la technologie seule ne suffit pas. Avoir la capacité de construire des vaisseaux spatiaux à haute technologie d’Armes ne signifie rien au combat ; avoir beaucoup de vaisseaux spatiaux à haute technologie d’Armes, si.
+75	La miniaturisation prend de l’importance à mesure que la partie avance. Au début de la partie, il y a beaucoup de métal dans la galaxie, et il est facile à obtenir. En fin de partie, il peut devenir le facteur limitant de la taille de votre flotte, et une Mini élevée vous sera très utile.
+76	La Vitesse a des avantages qui ne sont pas immédiatement évidents. Une flotte de contre-attaque rapide peut souvent rattraper et détruire une force ennemie attaquante après qu’elle a capturé l’une de vos planètes. Généralement, l’attaquant doit arriver en Transport, coloniser votre ex-planète et l’entretenir pendant un tour, simplement pour pouvoir se ravitailler. Si vous avez des vaisseaux rapides, vous pouvez l’y rattraper. Si vos vaisseaux sont lents, il s’en tirera indemne.
+77	La technologie Radicale est un pari. Si vous avez de la chance et faites rapidement des découvertes utiles, elle peut retourner votre partie. En revanche, il arrive qu’elle ne vous rapporte rien pendant des éternités.
+78	Comparer les joueurs
+79	{b1}Comparer les joueurs{/b1}
+80	Si l’envie vous prend de voir où vous en êtes par rapport aux autres joueurs de la partie, choisissez {b1}Comparer les joueurs{/b1} dans le menu “Galaxie”. Vous pourrez voir comment certains de vos attributs (comme la technologie d’Armes ou le revenu) se comparent à ceux des autres.
+81	La « puissance des vaisseaux » mesure la taille et la robustesse de vos flottes. C’est la somme de tous les niveaux de technologie de tous vos vaisseaux. Elle peut vous donner une idée de la puissance de vos flottes.
+82	Le nombre de joueurs de la partie ne comprend aucun joueur mort.
+83	Cliquez sur le bouton {b1}Afficher les niveaux…{/b1} pour voir le niveau de compétence de chaque joueur : novice, débutant, normal, expert ou avancé. Les joueurs ordinateur affichent un niveau tiré au hasard parmi ceux des différents joueurs, pour aider à cacher qui sont les joueurs ordinateur. L’intelligence réelle de l’ordinateur figure au bas de cette fenêtre.
+84	Intelligence des ordinateurs
+85	{b1}Créer des galaxies personnalisées{/b1}
+86	{b1}Intelligence des ordinateurs{/b1}
+87	L’intelligence des ordinateurs détermine la difficulté de la partie que vous donneront les joueurs ordinateur. Les plus intelligents apprennent de leurs erreurs, construisent de plus grandes flottes, investissent davantage dans la technologie et s’étendent plus vite. Les joueurs brillants commencent aussi avec tous les avantages d’un joueur humain « Novice » : beaucoup de métal, plusieurs vaisseaux au départ et une forte population sur la planète. Les joueurs stupides, en plus d’être bêtes, doivent commencer au réglage humain « Expert », qui ne leur donne ni métal de départ, ni vaisseaux, ni grande population.
+88	Au début, même les joueurs ordinateur Stupides se révéleront des adversaires difficiles, mais à mesure que votre niveau progresse, vous les trouverez sans défi. Avec le temps, vous serez peut-être assez bon pour battre régulièrement des joueurs brillants, même en jouant en Expert. Cela vous place parmi les tout meilleurs joueurs de Ho!. Essayez de jouer contre des humains.
+89	Informations de copyright
+90	{b1}Informations de copyright{/b1}
+91	Copyright du logiciel © 1996 Delta Tao Software, Inc.
+92	Copyright du manuel et du fichier d’aide en ligne © 1996 Delta Tao Software, Inc. et New World Computing.
+93	Le logiciel et le fichier d’aide en ligne qui l’accompagnent sont protégés par le droit d’auteur. Tous droits réservés. Le fichier d’aide en ligne ne peut être copié, imprimé, photographié, reproduit, traduit ni réduit à aucun support électronique ou forme lisible par machine, en tout ou en partie, sans l’accord écrit préalable de New World Computing. Des parties du programme et de l’aide en ligne peuvent être copiées, par l’acheteur d’origine uniquement, dans la mesure nécessaire à l’utilisation sur l’ordinateur pour lequel il a été acheté.
+94	Certaines parties : Copyright © Blue Sky Software Corporation. Tous droits réservés.
+95	Crédits
+96	{b1}Spaceward Ho! 4.0{/b1}
+97	Édité par :{span1} {/span1}{span2} {/span2}New World Computing
+98	{b1}Développé par{/b1} :{span2} {/span2}{span3} {/span3}Delta Tao Software, Inc.
+99	{b1}Concepteurs{/b1} :{span2} {/span2}{span3} {/span3}Joe Williams
+100	{span1} {/span1}{span2} {/span2}{span3} {/span3}Peter Commons
+101	{b1}Producteur exécutif{/b1} :{span2} {/span2}Jon Van Canegham
+102	{b1}Producteurs{/b1} :{span2} {/span2}{span3} {/span3}Mark Caldwell
+103	{span1} {/span1}{span2} {/span2}{span3} {/span3}Deane Rettig
+104	{b1}Programmeur{/b1} :{span2} {/span2}{span3} {/span3}Peter Commons
+105	{b1}Artistes{/b1} :{span2} {/span2}{span3} {/span3}{span4} {/span4}Howard Vives
+106	{span1} {/span1}{span2} {/span2}{span3} {/span3}Bob Van de walle
+107	{b1}Sons{/b1} : {span2} {/span2}{span3} {/span3}Mark Madeley
+108	{span1} {/span1}{span2} {/span2}{span3} {/span3}Guy Vardaman
+109	{b1}Manuel{/b1} :{span2} {/span2}{span3} {/span3}Delta Tao Software, Inc &
+110	{span1} {/span1}{span2} {/span2}{span3} {/span3}Rozita Tolouey
+111	{b1}Version Windows 95{/b1}
+112	{b1}Producteur exécutif{/b1} :{span2} {/span2}Mark Caldwell
+113	{b1}Producteur{/b1} :{span2} {/span2}{span3} {/span3}Bruce Schlickbernd
+114	{span1} {/span1}{span2} {/span2}{span3} {/span3}Peter Ryu
+115	{b1}Programmeur{/b1} :{span2} {/span2}{span3} {/span3}Paul Toth
+116	{b1}Responsable assurance qualité{/b1} :{span2} {/span2}{span3} {/span3}Peter Ryu
+117	{b1}Testeurs{/b1} :{span2} {/span2}{span3} {/span3}David Botan
+118	Bryan Farina
+119	David Fernandez
+120	Walter Johnson
+121	Kate McClelland
+122	William Nesemeier
+123	{span1} {/span1}{span2} {/span2}{span3} {/span3}Jennifer Schlickbernd
+124	{span1} {/span1}{span2} {/span2}{span3} {/span3}Walt Hochbrueckner
+125	{span1} {/span1}{span2} {/span2}{span3} {/span3}Benjamin Bent
+126	Tim Lang
+127	Jeu multijoueur multiplateforme
+128	{b1}Jeu multijoueur multiplateforme{/b1}
+129	Spaceward Ho! peut se jouer en multiplateforme entre les versions Win95{img1/} et Macintosh{img2/} (version 4.0.5 ou ultérieure). Voici quelques règles simples à suivre pour mettre en place et jouer une partie multiplateforme :
+130	Toutes les parties multiplateformes doivent être lancées sur un Macintosh{img1/} (sinon les Mac ne pourront pas participer à la fête).
+131	Vous devez ajouter l’extension de fichier {b1}.Ho!{/b1} au nom de votre {b2}fichier de galaxie{/b2} (sinon les machines Win95{img3/} ne pourront pas participer à la fête).
+132	Vous ne pourrez pas utiliser l’astérisque (*), le point d’interrogation (?) ni la barre oblique inverse (\) dans le nom de votre fichier (ces caractères sont réservés dans Win95{img1/} à des usages particuliers).

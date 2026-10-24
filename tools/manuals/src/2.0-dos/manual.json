@@ -1,0 +1,17 @@
+{
+ "title": "Spaceward Ho! 2.0 Manual (DOS)",
+ "footer": "Spaceward Ho! 2.0 Manual (DOS) &mdash; converted from the PDF (assets/manuals/dos-2.0.pdf).",
+ "smart": false,
+ "imgscale": 1,
+ "front": "!raw <p class=\"note\">This is the manual that came with the DOS/Windows edition of Spaceward Ho! 2.0 (Delta Tao Software). It is a text-only dump of the Mac manual's words, so it still talks about Macs, System 7 and AppleTalk. Page numbers in brackets are the original manual's.</p>",
+ "contents": [
+  {"items": ["the-fine-print","ultra-quick-ho-instructions","installing-the-game","a-quick-overview"],
+   "pages": {"the-fine-print":"p. 4","ultra-quick-ho-instructions":"p. 4","installing-the-game":"p. 5","a-quick-overview":"p. 5"}},
+  {"group": "Playing the game", "items": ["starting-a-new-game","custom-galaxies","the-computer-players","the-windows","budget-information","the-tech-spending-window","the-economy","ships","advancing-technology","exploring-planets"],
+   "pages": {"starting-a-new-game":"p. 7","custom-galaxies":"p. 7","the-computer-players":"p. 9","the-windows":"p. 9","budget-information":"p. 13","the-tech-spending-window":"p. 17","the-economy":"p. 17","ships":"p. 20","advancing-technology":"p. 26","exploring-planets":"p. 29"}},
+  {"group": "Other stuff", "items": ["sending-messages","reviewing-battles","comparing-players","multiple-players","fix-spending","the-prefs-file","the-options-menu","shortcuts"],
+   "pages": {"sending-messages":"p. 38","reviewing-battles":"p. 39","comparing-players":"p. 40","multiple-players":"p. 40","fix-spending":"p. 42","the-prefs-file":"p. 43","the-options-menu":"p. 44","shortcuts":"p. 48"}},
+  {"group": "The rest", "items": ["about-spaceward-ho","common-problems","glossary","technical-support","read-me"],
+   "pages": {"about-spaceward-ho":"p. 50","common-problems":"p. 51","glossary":"p. 54","technical-support":"p. 56"}}
+ ]
+}

@@ -1,0 +1,51 @@
+62	{a1}{/a1}{img2/}Sürüm 1’den 2’ye
+63	{a1}{/a1}Gezegen, bütçe ve filo pencerelerini harita penceresine kattık ve ekranda yer kazanmak için sola taşıdık. Mesajlaşma ve iletişim ekledik. Gemiler ve gezegenler için tam renge geçtik. Bilgisayar stratejileri baştan yazıldı. “Yavaş oyun” seçeneği kaldırıldı; oyunlar artık eski yavaş ve hızlı hızların arasında. Düşük harcama seviyelerinde daha iyi bir çözünürlük için logaritmik ölçekli bir harcama penceresine geçtik.
+64	{a1}{/a1}Bilgisayar oyuncularının gemilerine ve filolarına (ve kendilerine) insanların yaptığı gibi ad vermesini sağladık. Çok oyunculu bir oyunda bir sonraki sıraya güncellemeyi zorlayabilen bir “usta oyuncu” (Oyun Yöneticisi) ekledik. Saat ayarları farklı olan kişilere göre ayarlama yapamadığımız için süreli sıra özelliklerinden kurtulduk. Oyunu dengelemek için Teknolojilerin maliyetini değiştirdik ve Hız’ı savaşı etkiler hâle getirdik. Yazdırmayı çalışır hâle getirdik.
+65	{a1}{/a1}{img2/}Sürüm 2’den 3’e
+66	{a1}{/a1}Harcamayı toplam para miktarına değil, gelire bağladık. Gemilerin, eski gemi yapım kuyruğu yerine, istediğin sırada yapılmasını sağladık. Gezegenlerine parayı kendiliğinden dağıtıyoruz, böylece onlara yanlışlıkla az harcayamazsın. Uzun vadeli eğilimlerini görebilmen için Grafik Geçmişi çizelgesini ekledik. Birkaç gereksiz grafik ve ses ekledik. Bazı yeni galaksi türleri ekledik.
+67	{a1}{/a1}Ayrıca bir sürü yeni mesaj ekledik, bilgisayar oyuncularını dostlarla ve düşmanlarla ilgilenir hâle getirdik ve bilgisayarların herkese yarı akıllıca mesajlar göndermesini sağladık. Artık dostlarına (ya da düşmanlarına) para ve metâl verebilir ya da onlara teslim olabilirsin.
+68	{a1}{/a1}{img2/}Sürüm 3’ten 4’e
+69	{a1}{/a1}Tankerler, Abalar, Biyolojikler ve Tuzaklar dahil pek çok yeni gemi tipi ekledik. Uyduları iki kat güçlü (ve pahalı) yaptık.
+70	{a1}{/a1}Oyunu PowerPC’ye özgü yaptık ve “yalnızca önemli mesajları göster” ile kendiliğinden harcama düzeltme gibi hız artıran özellikler ekledik.
+71	{a1}{/a1}Çok oyunculu oyunu çok daha iyi yaptık. Sıra saati oyunların doğru hızda ilerlemesini sağladı, En İyi Arkadaş ittifakları eklendi, savaş şansı isteğe bağlı oldu, bir Sohbet Penceresi ve Metin Mesajları ekledik. Sıralar artık ana makinede değil yerel olarak güncelleniyor, bu yüzden ağ güncellemeleri çok daha hızlı. Oyunculara, oyunlar başladıktan sonra katılma imkânı verdik.
+72	{a1}{/a1}Kullanılabilirliği iyileştirdik: birkaç iletişim kutusu (özellikle Gemi Yap) düzeltildi, yardım mesajları eklendi ve terraformu eski pasta grafiği yerine bir kaydırıcı yaptık. Ve tabii ki grafikler ve sesler çok iyileştirildi.
+73	{a1}{/a1}Zorluk derecelerini değiştirdik, Usta Puanları ve çok daha fazla istatistik ekledik.
+74	{a1}{/a1}{img2/}Sürüm 4’ten 5’e
+75	Revizyonlar arasında yedi yıl uzun bir süre, yani kaputun altında Spaceward Ho!’nun biraz yaşlanmaya başladığı söylenebilir. Genel kullanım açısından değil elbette, çünkü sürüm 1.0’ı MacOS X’in en son sürümünde hâlâ oynayabilirsin (başka hangi uygulama bunu yapabilir?), ama bir sürü yeni özellik eklemek istediğimize karar verdiğimizde, yani, yeniden yazılması gerekiyordu.
+76	Kısaltma uyumlu uygulamalardan hoşlananlar için söyleyelim: sürüm 5.0 artık PowerPC, Carbon, çoklu iş parçacıklı, TCP/IP ve OS X dostu.
+77	Özellikler açısından (kaputun üstünde), Ho!’nun 5.0 sürümünde çok fazla yenilik var. Yine de 4.0’ı biliyorsan yenisiyle oynayıp her şeyi çözebilirsin. Ama ne aldığını bilesin diye yeni özelliklerin bu kullanışlı listesini veriyoruz.
+78	Gereksinimler
+79	Spaceward Ho! 5.0 her zamankinden büyük ve yaklaşık 20 megabayt sabit disk alanı, 10 megabayt RAM ve OS 8.6 veya sonrasını gerektiriyor.
+80	İnternet Üzerinden Oyun
+81	Dünyanın dört bir yanından insanlarla oynamak için spacewardho.net’e katıl.
+82	Daha Akıllı Bilgisayarlar
+83	Bilgisayarlar artık biyolojik ve tanker gemileri kullanabiliyor, çok gezegenli saldırılar yapabiliyor ve oyun sonunda metâllerini korumakta daha iyiler.
+84	Çok Taraflı Savaşlar
+85	Birkaç oyuncu bir yıldıza aynı anda gelirse artık tek bir büyük savaş oluyor ve müttefikler savaşta birbirine katılıyor. (Bazen seninle müttefik iki kişi birbirine de ateş eder.)
+86	Gruplanmış Filolar
+87	Kolay hareket ettirmek ve farklı hızlardaki filoların bir arada kalması için birkaç gemi tipini tek bir filoda gruplayabilirsin.
+88	Savaş Seçenekleri
+89	Bir filodaki her gemi tipine farklı savaş seçenekleri verebilirsin; böylece bazıları tam saldırıya geçer (silâh bonusu ve kalkan cezasıyla), bazıları savunmada kalır. Bazı gemilerin de (genellikle koloni gemin) ana filonun arkasından gelmesini, ana savaş bitene kadar girmemesini sağlayabilirsin.
+90	Filo Rotaları
+91	Artık bir filo için option tuşuyla tıklayarak uzun bir rota çizebilirsin; filo yakıtı yettikçe bir dizi yıldızı ziyaret eder.
+92	Yeni Radikal Teknolojiler
+93	Bunlar arasında araştırmayı geliştirmek, birikim faizini iyileştirmek, borç faizini düşürmek ve daha pek çoğu var.
+94	Daha Hızlı ve Daha Kolay
+95	Yazılımın şişmeye yönelik evrensel eğilimine karşın Spaceward Ho!’nun her sürümde daha kolay oynanır ve daha hızlı hâle gelmesiyle gurur duyuyoruz. Sürüm 5 şimdiye kadarkilerin en hızlısı.
+96	Yeni Kullanıcı Arayüzü
+97	Her filonun yıldız haritasında kendi noktası var; bir filoyu hareket ettirmek için onu varış yerine sürüklemen yeterli. Bağlam menüleri de var.
+98	OS X’e Özgü
+99	Spaceward Ho! 5, OS X’te ya da OS 8 veya 9’da en iyi kullanım için Carbon’a geçirildi.
+100	Ortak Oyun
+101	Çok oyunculu oyunlar, eğlenceli ve dostça oyunlar için bütün insanları kendiliğinden bilgisayarlara karşı yarıştırabilir.
+102	Yeni Sürprizler
+103	Ama onları burada sana anlatamayız. Onları bulursun ya da internette duyarsın.
+104	Güncellemeler
+105	Spaceward Ho!’nun yazılım güncellemelerini (biz yayımladıkça) http://www.deltatao.com adresindeki web sitemizde bulabileceksin
+106	Önerilerini bize gönderen herkese teşekkürler; ister yüz yüze, ister garanti kaydında, ister comp.sys.mac.games’te, ister telefonda olsun. Herkesin önerdiği her şeyi değerlendirdik ve her yeni fikri ekleyemesek de eklediğimiz pek çok şey bulacağını düşünüyoruz.
+160	{a1}{/a1}{img2/}Bir gezegeni sömürmek
+246	{font1}Biriktirdiğin para. Bu para sana faiz getirir. Biriktirdiğinden fazlasını harcadıysan faiz ödersin.{/font1}
+248	{font1}Bir geminin ne kadar hızlı gittiği. Hızı 3 olan gemi 5 birim uzaktaki bir yıldıza 2 sırada varır. Hız, savaşta kimin önce ateş edeceğini de belirler.{/font1}
+476	{img1/}Mesajlar ve Rapor Penceresi
+486	Birikim, sonra kullanmak ve gemi yapmak için saklanan paradır. Genelde kara gün için para saklamak iyi fikirdir. Birikimin, tıpkı bankanda olduğu gibi faiz getirir.
+519	Mini (minyatürleştirme), daha az metâl ama daha çok parayla gemi yapmanı sağlar. Metâl paradan çok daha kıt olabileceği için yüksek Mini teknolojili gemiler yapmak iyi bir fikir olabilir. Koloniciler minyatürleştirilemez, bu yüzden Mini’nin koloni gemilerine etkisi azdır.

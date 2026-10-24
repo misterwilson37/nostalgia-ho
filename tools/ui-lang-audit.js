@@ -40,6 +40,7 @@ global.window = global;
 require(path.join(root, 'js/ui-lang.js'));
 require(path.join(root, 'js/ui-text.js'));
 try { require(path.join(root, 'js/ui-text-help.js')); } catch (e) { /* (not there yet) */ }
+for (const f of require('fs').readdirSync(path.join(root, 'js')).filter(f => /^ui-text-notes-[a-z]{2}\.js$/.test(f))) require(path.join(root, 'js', f));
 if (args.includes('--count')) {
   const c = HOUI.count(), N = { fr: 'French', de: 'German', tr: 'Turkish', es: 'Spanish' };
   console.log(`${HOUI.rows().length} strings`);

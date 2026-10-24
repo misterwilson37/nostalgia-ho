@@ -1,0 +1,35 @@
+0	Kolonileştirilmiş, Kârlı Bir Gezegen
+2	{b1}Kolonileştirilmiş, Kârlı Bir Gezegen{/b1}
+3	Bu, halkının kendini geçindirebilecek noktaya kadar büyüdüğü bir gezegendir. Yıldızlar arası çabana para bile sağlayabilir. Ana gezegenin böyledir.
+9	{b1}Spaceward Ho!{/b1}’nun amacı galaksiyi fethetmektir. Tek bir harika, yoğun nüfuslu gezegende başlarsın. İlk yıldızlar arası uzay gemilerini yapabilecek duruma yeni gelmişsindir. Böylece birkaç keşif gemisi yapıp yakındaki yıldızlara gönderirsin. Bazı yıldız sistemleri ötekilerden daha yaşanabilir olacaktır.
+46	Otomatik Oyna, sıranı bilgisayara kendiliğinden oynatır.
+48	Bilgisayara senin yerine oynatmak yine de sana biraz denetim bırakır. Bilgisayar teknoloji harcama çubuklarını hiçbir zaman değiştirmez. Gemi yaparsan bilgisayar onları kullanır. Gemileri bir yere gönderirsen bilgisayar onlar varış yerlerine ulaşana kadar yönlerini değiştirmez. Bilgisayar genellikle, fazla dağıldığına inanmadıkça, sahip olduğun kolonileri korumaya çalışır.
+154	{b1}Spaceward Ho!{/b1}’da borca girebilirsin. Bu, gemi yapımına biriktirdiğinden fazla para harcayabileceğin anlamına gelir. Bütün gezegenlerinin toplam gelirinin beş katına kadar borç alabilirsin.
+165	Koloni gemileri insan taşır ve senin için yeni yıldızları kolonileştirir. Koloni Gemileri hem Para hem de Metâl olarak inanılmaz derecede pahalıdır. Koloni Gemileri o kadar pahalıdır ki yalnızca birkaç tane yapmak isteyeceksin. Bu yüzden ve minyatürleştirme onlara pek yarar sağlamadığı için Koloni Gemilerinde büyük olasılıkla hiç Mini kullanmak istemeyeceksin. Koloni Gemileri düşmanın bir savaşta ilk ateş edeceği şeydir de, bu yüzden onlara da dikkat etmek isteyeceksin.
+183	Farklı türden gezegenlerin her birinin kendine özgü bir görünüşü vardır. Bu bölüm gezegen resimlerinin bir sözlüğüdür.
+184	{b1}Kâr Etme Olasılığı Olan Bir Gezegen{/b1}
+187	0,4 ile 0,5 G ya da 2,0 ile 2,5 G arasındaki bir gezegen bu kategoriye girer. Sonunda bu tür bir gezegen kârlı hâle getirilebilir. Yine de hiçbir zaman çok kârlı olmayacaktır, bu yüzden çoğu zaman en iyisi bu tür bir gezegeni kazıp bırakmaktır.
+190	{b1}Talan Edilmiş, Yaşanmaz Bir Gezegen{/b1}
+192	Bu, hiç gitmediğin bir gezegendir.
+193	{b1}Yakında Keşfedilecek Bir Gezegen{/b1}
+197	Düşman gezegenleri türlü türlü kötü adamlara benzer. Her düşman oyuncunun kendi görünüşü olur, böylece nerede kiminle savaştığını anlarsın.
+201	Arada bir hiç gitmediğin bir yıldıza bir filo gönderir ve orada gücü seninkine yakın bir düşman filosu bulursun. Sen de düşman da ölürseniz bu gezegen resmini görürsün. Gezegeni henüz keşfetmediğini, ama kötü adamların yakında olduğunu bildiğini söyler. Henüz keşfetmediğin bir gezegende iki başka oyuncunun savaştığı büyük bir savaşı fark edersen de bu gezegeni görürsün.
+203	Herhangi bir gezegene uydu yerleştirirsen, o gezegenin yıldız haritasında savunulduğunu bildiren bir halkası olur.
+210	{b1}Spaceward Ho!{/b1}’da çoğu şeye para harcadığında, ne kadar çok harcarsan dolar başına o kadar az değer alırsın. Bu, acelen yoksa bir günde 20 dolar harcamaktansa iki gün 10’ar dolar harcamanın daha iyi olduğu anlamına gelir.
+216	Bir noktada ana gezegenini bırakıp başka yaşanabilir gezegenler aramak için yakındaki yıldızları keşfetmeye biraz emek harcamak isteyeceksin. Her gezegenin iki önemli özelliği vardır: Sıcaklık ve Yerçekimi.
+218	Yerçekimi, bir yıldız sisteminde değiştiremeyeceğin her şeyi temsil eder: güneşin ışımasından uyduların gelgit kuvvetlerine kadar. Bazı yerler düpedüz ötekiler kadar yaşanabilir değildir. Ana gezegenin 1,00 G’dir ve bir gezegen buna ne kadar yakınsa halkı o kadar iyi durumda olur. 2,5 G’den çok büyük ya da 0,4 G’den küçük gezegenler hiçbir zaman kâr etmez ve uzun vadede kolonileştirmeye değmez. Tabii ki metâl bu kadar kıt bir mal olduğuna göre, bütün metâlini alacak kadar bir süre yaşanmaz bir gezegeni kolonileştirmekten kaçınmamalısın.
+275	Bu noktada Bütçe Penceresi’nde yeni yıldızın adıyla yeni bir yuvanın belirdiğini fark edeceksin. Bu gezegen için Terraform ve Madenciliğe parayı burada ayırırsın.
+278	Bir gezegeni geçindirmenin temel maliyeti $7.500’dür. Ana gezegenin sırada yalnızca yaklaşık $30.000 ürettiğine göre, aynı anda yalnızca dört gezegeni kolonileştirmeye yetecek paran olur. En fazla. Büyük olasılıkla, en azından o kâra geçene kadar, yalnızca birini kolonileştirmek isteyeceksin. Yoksa bütün paranı yalnızca insanlarını hayatta tutmaya harcarsın ve gezegenleri geliştirmek, gemi yapmak ve yeni teknoloji araştırmak için elinde çok az şey kalır.
+280	Bütün kolonilerinin iyi adamlara benzediğini fark edeceksin. Yani maske, koyu güneş gözlüğü, mohikan saç ya da küpe takmıyorlar. Basit: beyaz şapka sana düşer. Tabii ki öteki oyuncuların hepsi de iyi adamların kendileri olduğunu düşünüyor.
+283	Bir düşman kolonisine bir filo gönder. Filon düşman gemilerini ve uydularını yok ettiğinde gezegenin kendisini dövmeye geçer ve halkını sürüler hâlinde öldürür. Gezegenin kendisi sert bir direniş gösterebilir, ama bu büyük olasılıkla yalnızca keşif kuvvetlerine karşı korunmaya yeter. İstila filona karşı gezegenin halkının tamamen silinmesi kuvvetle olasıdır. Düşman artık gezegenin sahibi olmaz. Onu kolonileştirmekte ya da başka ne istersen yapmakta özgür olursun. Tabii ki düşman canı sıkılıp onu geri almaya çalışabilir, bu yüzden dikkatli olmak iyi bir fikirdir.
+288	Bazen bir gezegeni, sırf bir düşman metâlini almasın diye kazmak isteyebilirsin.
+293	{a1}Ho! İçin Süper Hızlı Talimatlar{/a1}
+315	{a1}Gezegenleri Keşfetmek: Sıcaklık ve Yerçekimi{/a1}
+361	{a1}Kolonileştirilmiş, Kârlı Bir Gezegen{/a1}
+367	Daha fazla bilgi almak için Rapor Penceresi’ndeki eski bir mesaja tıklayabilirsin. Örneğin bir savaş özetine tıkladığında {b1}Spaceward Ho!{/b1} savaşı yeniden oynatır. Bir gezegenden söz eden bir mesaja tıkladığında harita o gezegene kayar ve onu seçer.
+445	Rapor Penceresi’ndeki herhangi bir olaya tıklarsan haritan kendiliğinden olayın gerçekleştiği yere kayar.
+447	Genellikle nerede yaşadığını anlamak için uzaklaşmak, sonra ne olup bittiğini görebilmek için yakınlaşmak isteyeceksin. Oyun ilerledikçe mahallenin artık Yıldız Haritası’na sığmadığını göreceksin, bu yüzden ortadaki büyütme seviyelerini kullanmak isteyeceksin.
+448	Yıldız Haritası’nı bir yıldıza kaydırıp onu seçmek için Bütçe Penceresi’nde o yıldızın adına tıklayabilirsin. Yıldız Haritası’nda bir yıldız seçtiğinde Yıldız listesi o yıldıza kayar ve onu orada da seçer.
+535	{b1}Spaceward Ho!{/b1}’nun ana penceresinin sağ kısmı Yıldız Haritası’dır. Nerede olduğunu, nerelerde bulunduğunu, nereye gidebileceğini görmeni sağlar. Yıldız Haritası’nı gemileri hareket ettirmek (bir yıldızdan ötekine tıklayıp sürükleyerek) ve bakıp ilgileneceğin gezegeni seçmek için kullanırsın.
+550	{b1}Ho! İçin Süper Hızlı Talimatlar{/b1}
+560	Bir sınır temasının söylenecek pek çok yanı var: ırkının galaksiyi yönetmek gibi apaçık bir kaderi var. Çorak karakolları yavaş yavaş hareketli ekonomilere dönüştüreceksin. Tıpkı Vahşi Batı’daki gibi sınır çatışmalarına ve toprak anlaşmazlıklarına gireceksin.

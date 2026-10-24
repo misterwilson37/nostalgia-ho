@@ -4158,7 +4158,12 @@ const hoedownList = (rs) => el('ul', { translate: 'no', lang: 'en' }, ...((rs.ho
 // The long documents (the version notes, the patch's fixes, the Hoedown
 // items and the manuals) are in English: kept out of the
 // translation (translate="no") with a line in the language that says so
-const inEnglish = (text) => UIL.lang === 'en' ? null : el('p', { class: 'note' }, text || 'These notes are in English.');
+// A document whose every line has a row in the language (js/ui-text-notes-<code>.js,
+// checked by tools/notes-check.js) is shown in it: no line says it's English, and
+// it isn't kept out of the translation. Any other stays English, as before.
+const inLang = (lines) => UIL.lang !== 'en' && !!lines && lines.length > 0 && lines.every(s => UIL.has(s));
+const docAttrs = (lines) => inLang(lines) ? {} : { translate: 'no', lang: 'en' };
+const inEnglish = (text, lines) => UIL.lang === 'en' || inLang(lines) ? null : el('p', { class: 'note' }, text || 'These notes are in English.');
 // The unofficial patch: fixes for a version's obvious bugs (rs.fixes,
 // docs/fixes.md), chosen at New Game only (G.opts.patch, a rule: it can't be
 // changed mid-game) and remembered for the next New Game ("ho5.patch"). Its
@@ -4169,7 +4174,8 @@ const patchName = (rs) => `${HO.patchVersion(rs)} (unofficial patch)`;
 const patchOn = () => !!(G && G.opts && G.opts.patch) && HO.fixes(HO.rules(G)).length > 0;
 const titleTag = () => patchOn() ? ` · ${patchName(HO.rules(G))}` : '';
 // the fixes as a list: each one's title and what it does
-const fixList = (rs) => el('ul', { translate: 'no', lang: 'en' }, ...HO.fixes(rs).map(f => el('li', null, el('b', null, f.title), el('br'), f.text)));
+const fixLines = (rs) => HO.fixes(rs).flatMap(f => [f.title, f.text]);
+const fixList = (rs) => el('ul', docAttrs(fixLines(rs)), ...HO.fixes(rs).map(f => el('li', null, el('b', null, f.title), el('br'), f.text)));
 // Ho menu, "Patch notes…" (only while the game has the patch on)
 // The interface's language (js/ui-lang.js): in a game, the game's (its
 // G.opts.lang, else the version's own, HO.ownLanguage); with no game, the
@@ -4214,7 +4220,7 @@ function openPatchNotes() {
     el('h3', null, rs.label || rs.id),
     el('p', { class: 'sub' }, `Version ${patchName(rs)} · ${rs.platform} · ${rs.year}`),
     el('p', null, `This game plays ${rs.version} with the fixes below for its obvious bugs; everything else is as ${rs.version} was released. The patch is the remake’s own, not a release of the original game, and was chosen at New Game: it stays on for the whole game.`),
-    el('section', { class: 'vnotes' }, el('h4', null, 'Fixed'), inEnglish(), fixList(rs)),
+    el('section', { class: 'vnotes' }, el('h4', null, 'Fixed'), inEnglish(null, fixLines(rs)), fixList(rs)),
     el('div', { class: 'btns right' }, el('button', { onclick: closeModal }, 'OK')));
   modal(`${pv} patch notes (unofficial)`, body, { cls: 'mid' });
 }
@@ -4230,22 +4236,27 @@ function openAbout() {
   // that this game has it fixed (the Patch notes say how); otherwise, which
   // patch fixes it
   const patched = !!G && patchOn(), pv = HO.patchVersion(rs), fixIds = HO.fixes(rs).map(f => f.id);
-  const fixNote = (x) => typeof x !== 'string' && x.fix && fixIds.includes(x.fix) ? (patched ? ` (fixed in this game by the ${pv} patch: see Patch notes)` : ` (fixed in the ${pv} patch)`) : '';
-  const lines = (list) => (list || []).filter(x => typeof x === 'string' || !x.show || x.show(rs)).map(x => typeof x === 'string' ? x : x.text + fixNote(x));
+  const fixNote = (x) => typeof x !== 'string' && x.fix && fixIds.includes(x.fix) ? ' ' + UIL.t(patched ? '(fixed in this game by the %s patch: see Patch notes)' : '(fixed in the %s patch)', pv) : '';
+  const shown = (list) => (list || []).filter(x => typeof x === 'string' || !x.show || x.show(rs));
+  const base = (list) => shown(list).map(x => typeof x === 'string' ? x : x.text);
+  // a line is its text and, for a quirk the patch fixes, the note after it: el() puts each in the language
+  const lines = (list) => shown(list).map(x => typeof x === 'string' ? x : [x.text, fixNote(x)]);
   const part = (title, list, key, none) => {
     const L = lines(list);
     if (!L.length && !chk[key] && !none) return null;
     return el('section', { class: 'vnotes' }, el('h4', null, title),
       chk[key] ? el('p', { class: 'note' }, 'Still being checked: this version’s notes aren’t finished yet.') : null,
-      L.length ? el('ul', { translate: 'no', lang: 'en' }, ...L.map(t => el('li', null, t))) : none ? el('p', { class: 'sub' }, none) : null);
+      L.length ? el('ul', docAttrs(base(list)), ...L.map(t => el('li', null, t))) : none ? el('p', { class: 'sub' }, none) : null);
   };
+  const noteLines = [N.intro, ...base(N.quirks), ...base(N.differs), ...base(N.missing), ...(N.previous !== undefined ? base(N.changes) : []),
+    ...(N.deltaTao ? [...N.deltaTao.text, N.deltaTao.source] : [])].filter(Boolean);
   const body = el('div', { class: 'about' },
     el('h3', null, rs.label || id),
     rs.version ? el('p', { class: 'sub' }, `Version ${patched ? patchName(rs) : rs.version} · ${rs.platform} · ${rs.year}`) : null,
     G ? null : el('p', { class: 'sub' }, 'The rules chosen for the next game.'),
     patched ? el('p', { class: 'note' }, `This game has the ${pv} patch on: the remake’s own fixes for ${rs.version}’s obvious bugs, not an official release. The Ho menu’s Patch notes say what each one fixes.`) : null,
-    inEnglish(),
-    N.intro ? el('p', { translate: 'no', lang: 'en' }, N.intro) : null,
+    inEnglish(null, noteLines),
+    N.intro ? el('p', docAttrs([N.intro]), N.intro) : null,
     rs.hoedown ? el('section', { class: 'vnotes' }, el('h4', null, 'Full Hoedown'),
       el('p', { class: 'sub' }, `${G && HO.hoedown(G) ? 'On in this game' : 'Off in this game'} (New Game and the Ho menu turn it on and off): ${rs.version || rs.id}’s own jokes at their most, and only Delta Tao’s. The game plays the same.`),
       hoedownList(rs)) : null,
@@ -4255,8 +4266,8 @@ function openAbout() {
     N.previous !== undefined ? part(N.previous ? `What changed from ${N.previous}` : 'What changed', N.changes, 'changes', N.previous ? null : 'The earliest version in this remake: there is nothing earlier to compare it with.') : null,
     // Delta Tao's own words on what changed, quoted from the 5.0 manual
     N.deltaTao ? el('section', { class: 'vnotes' }, el('h4', null, `What Delta Tao said (${N.deltaTao.from})`),
-      ...N.deltaTao.text.map(t => el('p', { translate: 'no', lang: 'en' }, t)),
-      el('p', { class: 'sub', translate: 'no', lang: 'en' }, N.deltaTao.source, ' ', el('a', { href: N.deltaTao.url, target: '_blank', rel: 'noopener' }, N.deltaTao.url))) : null,
+      ...N.deltaTao.text.map(t => el('p', docAttrs([t]), t)),
+      el('p', Object.assign({ class: 'sub' }, docAttrs([N.deltaTao.source])), N.deltaTao.source, ' ', el('a', { href: N.deltaTao.url, target: '_blank', rel: 'noopener' }, N.deltaTao.url))) : null,
     el('div', { class: 'btns right' }, el('button', { onclick: closeModal }, 'OK')));
   modal('About this version', body, { cls: 'mid' });
 }
@@ -5637,7 +5648,7 @@ function newGameDialog() {
       patchBox.dataset.rules = d.rules;
       patchText.textContent = PATCH_TEXT(prs);
       patchSum.textContent = `What the ${HO.patchVersion(prs)} patch fixes (${nfx})`;
-      patchFixes.replaceChildren(...[inEnglish(), fixList(prs)].filter(Boolean));
+      patchFixes.replaceChildren(...[inEnglish(null, fixLines(prs)), fixList(prs)].filter(Boolean));
     }
   };
   f.addEventListener('input', refresh); f.addEventListener('change', refresh);

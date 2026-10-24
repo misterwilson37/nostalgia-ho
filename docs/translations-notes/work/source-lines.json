@@ -1,0 +1,3128 @@
+[
+ {
+  "kind": "notes",
+  "en": "The French edition of the Mac game, a cut-down pre-release of 2.0. Every routine of its program has been read, and every rule comes from its own code.",
+  "in": [
+   "12"
+  ],
+  "id": 0
+ },
+ {
+  "kind": "notes",
+  "en": "A colony wiped out by a meteor shower gets a blank report.",
+  "in": [
+   "12"
+  ],
+  "id": 1
+ },
+ {
+  "kind": "notes",
+  "en": "A fleet marked for scrapping while in hyperspace is reported at a stray character, read from before the start of the star list (the letter of an unused home slot’s star number).",
+  "in": [
+   "12"
+  ],
+  "id": 2
+ },
+ {
+  "kind": "notes",
+  "en": "Organize Fleets refuels and reloads: rearranging one design’s ships at a star gives every fleet of that design there the best fuel among them, and each new Colony Ship fleet it makes comes loaded with colonists.",
+  "in": [
+   "12"
+  ],
+  "id": 3
+ },
+ {
+  "kind": "notes",
+  "en": "The game has the text for messages between players, but no way to send one.",
+  "in": [
+   "12"
+  ],
+  "id": 4
+ },
+ {
+  "kind": "notes",
+  "en": "There is no command to give up a colony, so there is no Evacuate button: a colony goes only when it is left unfunded until its people are gone.",
+  "in": [
+   "12"
+  ],
+  "id": 5
+ },
+ {
+  "kind": "notes",
+  "en": "The power of the ships and planet at every star is worked out each turn and never used.",
+  "in": [
+   "12"
+  ],
+  "id": 6
+ },
+ {
+  "kind": "notes",
+  "en": "Players who are out still play their turn: their money still earns interest and their research goes on.",
+  "in": [
+   "12",
+   "dos",
+   "mac20"
+  ],
+  "id": 7
+ },
+ {
+  "kind": "notes",
+  "en": "The computer’s colony bars go wrong when it gives a colony more than $2,147,483 for one part (the sum overflows). It takes a very rich computer to see it.",
+  "in": [
+   "12"
+  ],
+  "id": 8
+ },
+ {
+  "kind": "notes",
+  "en": "The random numbers are the remake’s own, so a game can’t be replayed move for move.",
+  "in": [
+   "12",
+   "301",
+   "405",
+   "dos",
+   "mac20",
+   "mac405",
+   "original",
+   "ios",
+   "android",
+   "gemini",
+   "claude"
+  ],
+  "id": 9
+ },
+ {
+  "kind": "notes",
+  "en": "If every player is out at once, the game ends with no winner. 1.2 just went on with no one able to win.",
+  "in": [
+   "12"
+  ],
+  "id": 10
+ },
+ {
+  "kind": "notes",
+  "en": "Several people play on one computer and take turns. The original let each player join a shared game file, with a password. (1.2 allowed up to 19 humans.)",
+  "in": [
+   "12"
+  ],
+  "id": 11
+ },
+ {
+  "kind": "notes",
+  "en": "Dragging a budget bar works out the others once, from where the drag began; 1.2 did it at every step of the drag, so a long drag can end slightly differently.",
+  "in": [
+   "12"
+  ],
+  "id": 12
+ },
+ {
+  "kind": "notes",
+  "en": "Battle replays are kept for the last 60 battles; 1.2 kept them for 500 years.",
+  "in": [
+   "12"
+  ],
+  "id": 13
+ },
+ {
+  "kind": "notes",
+  "en": "Fix Spending shows each step’s line in a small window, whose Next is the original’s click on the message bubble.",
+  "in": [
+   "12",
+   "301",
+   "dos",
+   "mac20"
+  ],
+  "id": 14
+ },
+ {
+  "kind": "notes",
+  "en": "Language… offers English, Mac 2.0.1’s own words for the same windows and reports, which are 1.2’s line for line.",
+  "in": [
+   "12"
+  ],
+  "id": 15
+ },
+ {
+  "kind": "notes",
+  "en": "Language… also offers German (“Übersetzung des Remakes”), the German DOS 2.0’s words for the same reports, names and windows, with the remake’s own German for the few window words 2.0’s German hasn’t got: the remake’s own translation, not an official one, and marked so in the list. It changes only words and names: the same game plays in every language.",
+  "in": [
+   "12"
+  ],
+  "id": 16
+ },
+ {
+  "kind": "notes",
+  "en": "Language… also offers Spanish (“Español (traducción del remake)”): there was never an official Spanish Spaceward Ho!, so every line of it is the remake’s, written in the official translations’ spirit (their words for the game’s things, the informal “tú”, the jokes kept); the names stay English: the remake’s own translation, not an official one, and marked so in the list. It changes only words and names: the same game plays in every language.",
+  "in": [
+   "12",
+   "301",
+   "405",
+   "dos",
+   "mac20",
+   "mac405",
+   "original",
+   "palm"
+  ],
+  "id": 17
+ },
+ {
+  "kind": "notes",
+  "en": "The preferences for battle speed, showing messages and watching battles, and the Explored Planets window.",
+  "in": [
+   "12"
+  ],
+  "id": 18
+ },
+ {
+  "kind": "notes",
+  "en": "A colour and black-and-white Mac version (colour came with 2.0): 2.0’s game with the money model, alliances, Radical tech and novas of the later versions. Every routine of its program has been read, and every rule comes from its own code.",
+  "in": [
+   "301"
+  ],
+  "id": 19
+ },
+ {
+  "kind": "notes",
+  "en": "2.0",
+  "in": [
+   "301"
+  ],
+  "id": 20
+ },
+ {
+  "kind": "notes",
+  "en": "In 2010, on Spiral and Cluster maps, the computers skip their first turn.",
+  "in": [
+   "301"
+  ],
+  "id": 21
+ },
+ {
+  "kind": "notes",
+  "en": "A slip in how the computers scrap old ships has no effect on play.",
+  "in": [
+   "301"
+  ],
+  "id": 22
+ },
+ {
+  "kind": "notes",
+  "en": "Stranded fighter fleets always ask for a colony, even with one in reach.",
+  "in": [
+   "301"
+  ],
+  "id": 23
+ },
+ {
+  "kind": "notes",
+  "en": "Turning Abandon off doesn’t give the colony its share back.",
+  "in": [
+   "301"
+  ],
+  "id": 24
+ },
+ {
+  "kind": "notes",
+  "en": "An abandoned colony with a colony ship there is colonized again in the same turn.",
+  "in": [
+   "301"
+  ],
+  "id": 25
+ },
+ {
+  "kind": "notes",
+  "en": "Organize Ships gives every fleet of the design at the star the most fuel used among them.",
+  "in": [
+   "301"
+  ],
+  "id": 26
+ },
+ {
+  "kind": "notes",
+  "en": "The computer’s colony bars go wrong when it gives a colony more than $2,147,483 for one part.",
+  "in": [
+   "301"
+  ],
+  "id": 27
+ },
+ {
+  "kind": "notes",
+  "en": "The power of the ships at every star is worked out each turn and never used.",
+  "in": [
+   "301",
+   "405",
+   "mac405"
+  ],
+  "id": 28
+ },
+ {
+  "kind": "notes",
+  "en": "Fix Spending only cuts overspending colonies, sharing the difference between Savings and Technology by whole per cents, so a per mille or two can vanish; a colony being abandoned or finished is cut to 1 per mille.",
+  "in": [
+   "301"
+  ],
+  "id": 29
+ },
+ {
+  "kind": "notes",
+  "en": "The colour-monitor joke: 3.0.1 sent it, in a random year, only to a screen set to black and white that could show colour. Here a black-and-white skin is that screen; its year comes from the game’s seed.",
+  "in": [
+   "301"
+  ],
+  "id": 30
+ },
+ {
+  "kind": "notes",
+  "en": "When every human is out, the game ends. 3.0.1 went on as long as the computers played.",
+  "in": [
+   "301"
+  ],
+  "id": 31
+ },
+ {
+  "kind": "notes",
+  "en": "Several people play on one computer and take turns. The original let each player join a shared game file, with a password. (3.0.1 could also play across a network.)",
+  "in": [
+   "301"
+  ],
+  "id": 32
+ },
+ {
+  "kind": "notes",
+  "en": "The computers all plan before anyone’s money is worked out; 3.0.1 planned for each in its own turn. It comes out the same but for rare cases.",
+  "in": [
+   "301"
+  ],
+  "id": 33
+ },
+ {
+  "kind": "notes",
+  "en": "Scrapping marks a fleet or a ship type, and it is scrapped at End Turn, as in 3.0.1. The fleet’s row has the Scrap Current Fleet button as well as the Ships menu, and a marked type’s row is dimmed (3.0.1 changed only its button’s title).",
+  "in": [
+   "301"
+  ],
+  "id": 34
+ },
+ {
+  "kind": "notes",
+  "en": "Dragging a budget bar works out the others once, from where the drag began; 3.0.1 did it at every step of the drag.",
+  "in": [
+   "301"
+  ],
+  "id": 35
+ },
+ {
+  "kind": "notes",
+  "en": "Spiral and Cluster maps are laid out at the start; 3.0.1 laid them out in 2010.",
+  "in": [
+   "301"
+  ],
+  "id": 36
+ },
+ {
+  "kind": "notes",
+  "en": "Dip Into Savings takes a percentage of the most you may dip; 3.0.1 took an amount.",
+  "in": [
+   "301"
+  ],
+  "id": 37
+ },
+ {
+  "kind": "notes",
+  "en": "Evacuate is 3.0.1’s Abandon: the colony is given up at End Turn, and pressing it again takes it back. The planet doesn’t show it as marked.",
+  "in": [
+   "301"
+  ],
+  "id": 38
+ },
+ {
+  "kind": "notes",
+  "en": "Evacuating a star named Hope or Ship asks 3.0.1’s jokes (“Dost thou truly wish to abandon Hope? All is not yet lost!”, “Abandon Ship? …”), every time.",
+  "in": [
+   "301"
+  ],
+  "id": 39
+ },
+ {
+  "kind": "notes",
+  "en": "Language… also offers French (“traduction du remake”) and Turkish (“yeniden yapımın çevirisi”): the official French and Turkish of the iOS game, and the French Mac 1.2’s for 3.0.1’s 2.0 lines (its Name a Star and Fix Spending among them), for every line 3.0.1 shares with them, with the remake’s own lines for the rest: the remake’s own translation, not an official one, and marked so in the list. It changes only words and names: the same game plays in every language.",
+  "in": [
+   "301"
+  ],
+  "id": 40
+ },
+ {
+  "kind": "notes",
+  "en": "Language… also offers German (“Übersetzung des Remakes”), forward from the German DOS 2.0: its official lines wherever the English is 2.0’s (the reports 2.0 already had, Name a Star, Fix Spending), and the remake’s German in its words for the rest: the remake’s own translation, not an official one, and marked so in the list. It changes only words and names: the same game plays in every language.",
+  "in": [
+   "301"
+  ],
+  "id": 41
+ },
+ {
+  "kind": "notes",
+  "en": "Version 2 to 3",
+  "in": [
+   "301"
+  ],
+  "id": 42
+ },
+ {
+  "kind": "notes",
+  "en": "From Delta Tao's Spaceward Ho! 5 manual, 'Changes From Previous Versions'",
+  "in": [
+   "301",
+   "405",
+   "dos",
+   "mac20",
+   "mac405",
+   "original",
+   "palm",
+   "ios"
+  ],
+  "id": 43
+ },
+ {
+  "kind": "notes",
+  "en": "We made spending based on income, rather than total money supply. We made ships get built the turn you ask for them, instead of the old shipbuilding queue. We allocate money to your planets automatically, so you can't accidentally underspend on them. We added the Graph History chart, so you can see your long-term trends. We added several gratuitous graphics and sounds. We added some new galaxy types.",
+  "in": [
+   "301"
+  ],
+  "id": 44
+ },
+ {
+  "kind": "notes",
+  "en": "We also added a bunch of new messages, made the computer players deal with friends and enemies, and made the computers send semi-intelligent messages to everyone. You can now give money and metal to your friends (or enemies), or surrender to them.",
+  "in": [
+   "301"
+  ],
+  "id": 45
+ },
+ {
+  "kind": "notes",
+  "en": "In colour.",
+  "in": [
+   "301"
+  ],
+  "id": 46
+ },
+ {
+  "kind": "notes",
+  "en": "Ship Savings: a share of each turn’s money is saved, earns interest, buys ships at once (no queues) and can go into debt down to a borrowing limit. (2.0 had one pool and no borrowing.)",
+  "in": [
+   "301"
+  ],
+  "id": 47
+ },
+ {
+  "kind": "notes",
+  "en": "Two bars a colony, Terraform and Mine; a colony with both done gives its share to the others.",
+  "in": [
+   "301"
+  ],
+  "id": 48
+ },
+ {
+  "kind": "notes",
+  "en": "Research is steady (× 8/10) instead of a random 60–140 %, with a head start into each level, and Radical tech with six outcomes.",
+  "in": [
+   "301"
+  ],
+  "id": 49
+ },
+ {
+  "kind": "notes",
+  "en": "Battles have luck, always on, and the planet fights with its owner’s Shields.",
+  "in": [
+   "301"
+  ],
+  "id": 50
+ },
+ {
+  "kind": "notes",
+  "en": "Novas and Armageddon.",
+  "in": [
+   "301"
+  ],
+  "id": 51
+ },
+ {
+  "kind": "notes",
+  "en": "Alliances, gifts, surrender and canned messages; an alliance wins if it holds for a turn.",
+  "in": [
+   "301"
+  ],
+  "id": 52
+ },
+ {
+  "kind": "notes",
+  "en": "Abandon a colony, and Dip Into Savings.",
+  "in": [
+   "301"
+  ],
+  "id": 53
+ },
+ {
+  "kind": "notes",
+  "en": "A player with no colonies and no colony ships is out at once, and its fleets are scrapped.",
+  "in": [
+   "301"
+  ],
+  "id": 54
+ },
+ {
+  "kind": "notes",
+  "en": "The galaxy generator of the later versions: six styles, with Cluster new.",
+  "in": [
+   "301"
+  ],
+  "id": 55
+ },
+ {
+  "kind": "notes",
+  "en": "A fourth computer level, Diabolical; computers with feelings, alliances and designs that come and go.",
+  "in": [
+   "301"
+  ],
+  "id": 56
+ },
+ {
+  "kind": "notes",
+  "en": "The Windows 95 edition, which plays across platforms with the Mac 4.0.5: 3.0.1’s game with Dreadnoughts, Tankers, Biologicals and decoys, Radical tech as a hand of cards, and best buddies. Every routine of its program has been read, and every rule comes from its own code.",
+  "in": [
+   "405"
+  ],
+  "id": 57
+ },
+ {
+  "kind": "notes",
+  "en": "3.0.1",
+  "in": [
+   "405",
+   "mac405"
+  ],
+  "id": 58
+ },
+ {
+  "kind": "notes",
+  "en": "Whether stars ever turn red depends on a setting the New Game code never sets; the remake lets them.",
+  "in": [
+   "405",
+   "mac405"
+  ],
+  "id": 59
+ },
+ {
+  "kind": "notes",
+  "en": "A colony can build no more ships a turn than it has people (in thousands).",
+  "in": [
+   "405",
+   "mac405"
+  ],
+  "id": 60
+ },
+ {
+  "kind": "notes",
+  "en": "A Radical discovery before the first hand is dealt (2010), or with an empty hand, may go wrong in the original; the remake makes it from a random card or loses it.",
+  "in": [
+   "405",
+   "mac405"
+  ],
+  "id": 61
+ },
+ {
+  "kind": "notes",
+  "en": "A computer looking for the poorest player counts players who are out.",
+  "in": [
+   "405",
+   "mac405"
+  ],
+  "id": 62
+ },
+ {
+  "kind": "notes",
+  "en": "With 30 designs, a computer goes on building last turn’s designs for the classes it hadn’t reached, kept by their places in its list, which may since have moved.",
+  "in": [
+   "405",
+   "mac405"
+  ],
+  "id": 63
+ },
+ {
+  "kind": "notes",
+  "en": "Stranded fighter and Dreadnought fleets always ask for a colony, even with one in reach.",
+  "in": [
+   "405",
+   "mac405"
+  ],
+  "id": 64
+ },
+ {
+  "kind": "notes",
+  "en": "A slip in how the computers send old ships home to be scrapped (a list place passed as the Range).",
+  "in": [
+   "405",
+   "mac405"
+  ],
+  "id": 65
+ },
+ {
+  "kind": "notes",
+  "en": "Computers never keep Tankers: they scrap them at home and send them home from elsewhere.",
+  "in": [
+   "405",
+   "mac405"
+  ],
+  "id": 66
+ },
+ {
+  "kind": "notes",
+  "en": "A colony at the first star of the list can always have its budget bar dragged, and is left out of the population milestones.",
+  "in": [
+   "405",
+   "mac405"
+  ],
+  "id": 67
+ },
+ {
+  "kind": "notes",
+  "en": "Best buddies share battle news by handing over their whole record of the star; the one who didn’t fight can’t review the battle (on Windows, the buddy’s own record says so too until the game is saved).",
+  "in": [
+   "405"
+  ],
+  "id": 68
+ },
+ {
+  "kind": "notes",
+  "en": "After an Armageddon device fizzles, everyone hears each device was turned off, and next turn on again.",
+  "in": [
+   "405",
+   "mac405"
+  ],
+  "id": 69
+ },
+ {
+  "kind": "notes",
+  "en": "The Valdez leak threatens a lawsuit, but nothing is taken.",
+  "in": [
+   "405",
+   "mac405"
+  ],
+  "id": 70
+ },
+ {
+  "kind": "notes",
+  "en": "Marking a ship type for scrapping in the build window gives back only one of the ships of it you ordered there; the rest are built, then scrapped with the type.",
+  "in": [
+   "405"
+  ],
+  "id": 71
+ },
+ {
+  "kind": "notes",
+  "en": "Past 1,000,000 master points the Master Point List shows “%s: %s” as your rank.",
+  "in": [
+   "405"
+  ],
+  "id": 72
+ },
+ {
+  "kind": "notes",
+  "en": "The Hall of Fame writes the year as the years since 1900: 1996 is 96, 2026 is 126.",
+  "in": [
+   "405"
+  ],
+  "id": 73
+ },
+ {
+  "kind": "notes",
+  "en": "The Hall of Shame’s summary calls you “Loser”, without a colon.",
+  "in": [
+   "405"
+  ],
+  "id": 74
+ },
+ {
+  "kind": "notes",
+  "en": "From 50,000 to 499,999 master points the Master Point List has no picture: the game hasn’t got it.",
+  "in": [
+   "405"
+  ],
+  "id": 75
+ },
+ {
+  "kind": "notes",
+  "en": "A new technology level is reported by the next level’s name: Range 7 is “Fusion Pile” instead of “Topping off the Tanks”, and Miniaturization 20 is the program’s credits line.",
+  "in": [
+   "405"
+  ],
+  "id": 76
+ },
+ {
+  "kind": "notes",
+  "en": "The stars winners named are put in later galaxies one place late: the first becomes “Hope”, the game’s own 191st name, and the last one named is never used.",
+  "in": [
+   "405"
+  ],
+  "id": 77
+ },
+ {
+  "kind": "notes",
+  "en": "A fifth star name replaces the fourth kept and goes first, so the newest of the four is the one dropped.",
+  "in": [
+   "405"
+  ],
+  "id": 78
+ },
+ {
+  "kind": "notes",
+  "en": "Several people play on one computer and take turns. The original let each player join a shared game file, with a password. (4.0.5 could also play across a network.)",
+  "in": [
+   "405",
+   "mac405"
+  ],
+  "id": 79
+ },
+ {
+  "kind": "notes",
+  "en": "The computers all plan, and every fleet moves, for all players at once; 4.0.5 did both in each player’s own turn. It comes out the same but for rare cases.",
+  "in": [
+   "405",
+   "mac405"
+  ],
+  "id": 80
+ },
+ {
+  "kind": "notes",
+  "en": "The Hall of Fame, Hall of Shame and Master Point List are kept in this browser, and their menu items are in the Game menu (4.0.5: Options).",
+  "in": [
+   "405",
+   "mac405"
+  ],
+  "id": 81
+ },
+ {
+  "kind": "notes",
+  "en": "Dragging a budget bar works out the others once, from where the drag began; 4.0.5 did it at every step of the drag.",
+  "in": [
+   "405",
+   "mac405"
+  ],
+  "id": 82
+ },
+ {
+  "kind": "notes",
+  "en": "Dip Into Savings takes a percentage of the most you may dip; 4.0.5 took an amount.",
+  "in": [
+   "405",
+   "mac405"
+  ],
+  "id": 83
+ },
+ {
+  "kind": "notes",
+  "en": "Evacuate is 4.0.5’s Abandon: the colony is given up at End Turn, and pressing it again takes it back.",
+  "in": [
+   "405",
+   "mac405"
+  ],
+  "id": 84
+ },
+ {
+  "kind": "notes",
+  "en": "Evacuating a star named Hope or Ship asks 4.0.5’s jokes, every time; turning Armageddon on asks two questions, one of five and one of six.",
+  "in": [
+   "405",
+   "mac405"
+  ],
+  "id": 85
+ },
+ {
+  "kind": "notes",
+  "en": "Hints are drawn by the browser’s random numbers; 4.0.5 used its own.",
+  "in": [
+   "405"
+  ],
+  "id": 86
+ },
+ {
+  "kind": "notes",
+  "en": "Language… also offers French (“traduction du remake”) and Turkish (“yeniden yapımın çevirisi”): the official French and Turkish of the iOS game (and of the French Mac 1.2) for every line 4.0.5 shares with them, which is most of its reports, with the remake’s own lines for the rest (Armageddon’s questions, the Windows build’s own words): the remake’s own translation, not an official one, and marked so in the list. It changes only words and names: the same game plays in every language.",
+  "in": [
+   "405"
+  ],
+  "id": 87
+ },
+ {
+  "kind": "notes",
+  "en": "Language… also offers German (“Übersetzung des Remakes”), forward from the German DOS 2.0: its official lines wherever the English is 2.0’s (the reports 2.0 already had, Name a Star), and the remake’s German in its words for the rest: the remake’s own translation, not an official one, and marked so in the list. It changes only words and names: the same game plays in every language.",
+  "in": [
+   "405",
+   "mac405",
+   "original",
+   "palm"
+  ],
+  "id": 88
+ },
+ {
+  "kind": "notes",
+  "en": "The turn time limit and network play.",
+  "in": [
+   "405",
+   "original"
+  ],
+  "id": 89
+ },
+ {
+  "kind": "notes",
+  "en": "Version 3 to 4",
+  "in": [
+   "405",
+   "mac405"
+  ],
+  "id": 90
+ },
+ {
+  "kind": "notes",
+  "en": "We added many new ship types, including Tankers, Dreadnoughts, Biologicals, and Decoys. We made Satellites twice as strong (and expensive).",
+  "in": [
+   "405",
+   "mac405"
+  ],
+  "id": 91
+ },
+ {
+  "kind": "notes",
+  "en": "We made the game PowerPC native, and added speed improving features such as \"only show important messages\" and automatic spending fixing.",
+  "in": [
+   "405",
+   "mac405"
+  ],
+  "id": 92
+ },
+ {
+  "kind": "notes",
+  "en": "We made the multi-player game much better. The turn clock made games progress at the right rate, Best-buddies alliances were added, battle luck was made optional, we added a Chat Window and Text Messages. Turns are updated locally now, instead of on the master machine, so network updates are much faster. We allowed players to join games after they've begun.",
+  "in": [
+   "405",
+   "mac405"
+  ],
+  "id": 93
+ },
+ {
+  "kind": "notes",
+  "en": "We improved usability: Several dialogs (especially Build ships) were fixed, help messages were added, and we made the terraforming a slider instead of the old pie chart. And, of course, the graphics and sounds were greatly improved.",
+  "in": [
+   "405",
+   "mac405"
+  ],
+  "id": 94
+ },
+ {
+  "kind": "notes",
+  "en": "We changed the difficulty ratings, and added Master Points and many more statistics.",
+  "in": [
+   "405",
+   "mac405"
+  ],
+  "id": 95
+ },
+ {
+  "kind": "notes",
+  "en": "Dreadnoughts (25 shots a round) and Tankers (refuel every fleet at their star); 30 designs instead of 20.",
+  "in": [
+   "405",
+   "mac405"
+  ],
+  "id": 96
+ },
+ {
+  "kind": "notes",
+  "en": "Radical tech is a hand of four out of 17 discoveries, dealt from 2010: bonuses, decoys, Biologicals that eat people to refuel, stolen tech, free designs.",
+  "in": [
+   "405",
+   "mac405"
+  ],
+  "id": 97
+ },
+ {
+  "kind": "notes",
+  "en": "Best buddies: allies who route through each other’s colonies and share their maps.",
+  "in": [
+   "405",
+   "mac405"
+  ],
+  "id": 98
+ },
+ {
+  "kind": "notes",
+  "en": "A colony builds no more ships a turn than it has people.",
+  "in": [
+   "405",
+   "mac405"
+  ],
+  "id": 99
+ },
+ {
+  "kind": "notes",
+  "en": "Ship Savings to start with, by skill.",
+  "in": [
+   "405",
+   "mac405"
+  ],
+  "id": 100
+ },
+ {
+  "kind": "notes",
+  "en": "Satellites fire twice, the planet once per 200,000 people, and luck is an option.",
+  "in": [
+   "405",
+   "mac405"
+  ],
+  "id": 101
+ },
+ {
+  "kind": "notes",
+  "en": "Terraforming, mining and income as the later versions; ranks and master points for a win.",
+  "in": [
+   "405",
+   "mac405"
+  ],
+  "id": 102
+ },
+ {
+  "kind": "notes",
+  "en": "The game 1.2 was a pre-release of: the Windows 3.1 edition came first, and the DOS edition is a port of it with the same art, sounds and rules. Every routine of the Windows program has been read.",
+  "in": [
+   "dos"
+  ],
+  "id": 103
+ },
+ {
+  "kind": "notes",
+  "en": "1.2",
+  "in": [
+   "dos",
+   "mac20"
+  ],
+  "id": 104
+ },
+ {
+  "kind": "notes",
+  "en": "Organize Ships gives every fleet of the design at the star the average fuel used, but counts at most 11 fleets, so with 12 or more fleets the average comes out too high.",
+  "in": [
+   "dos"
+  ],
+  "id": 105
+ },
+ {
+  "kind": "notes",
+  "en": "Organize Ships clears the orders of every fleet of that design at the star, even one you left alone.",
+  "in": [
+   "dos"
+  ],
+  "id": 106
+ },
+ {
+  "kind": "notes",
+  "en": "A new fleet made in Organize Ships is loaded with colonists, so splitting an empty colony fleet away from your colonies refills part of it.",
+  "in": [
+   "dos",
+   "mac20"
+  ],
+  "id": 107
+ },
+ {
+  "kind": "notes",
+  "en": "A slip in how the computers scrap old fighters has no effect on play.",
+  "in": [
+   "dos",
+   "mac20"
+  ],
+  "id": 108
+ },
+ {
+  "kind": "notes",
+  "en": "A colony wiped out by a meteor shower is reported as “… destroyed your colony”, naming whoever a report ten messages earlier happened to leave behind: often you or another player, sometimes no one. (Where 2.0 would have read past its own data and crashed, the remake names no one.)",
+  "in": [
+   "dos"
+  ],
+  "id": 109
+ },
+ {
+  "kind": "notes",
+  "en": "A fleet marked for scrapping while in hyperspace is reported “at” an empty name, read from before the start of the star list, with its metal shown as 0.",
+  "in": [
+   "dos"
+  ],
+  "id": 110
+ },
+ {
+  "kind": "notes",
+  "en": "The computers work out their designs’ attack rating in 16 bits, so from about Weapons 4 it wraps round and they misjudge their warships.",
+  "in": [
+   "dos"
+  ],
+  "id": 111
+ },
+ {
+  "kind": "notes",
+  "en": "The computers’ colony bars go wrong when one gives a colony more than $2,147,483 for one part (the sum overflows).",
+  "in": [
+   "dos",
+   "mac20"
+  ],
+  "id": 112
+ },
+ {
+  "kind": "notes",
+  "en": "There is no command to give up a colony, so there is no Evacuate button: a colony goes only when it is left unfunded until its people are gone (the “Let ’em die” warning).",
+  "in": [
+   "dos",
+   "mac20"
+  ],
+  "id": 113
+ },
+ {
+  "kind": "notes",
+  "en": "When every human is out, the game ends (with no winner if nobody is left). 2.0 went on as long as the computers played.",
+  "in": [
+   "dos"
+  ],
+  "id": 114
+ },
+ {
+  "kind": "notes",
+  "en": "Several people play on one computer and take turns. The original let each player join a shared game file, with a password. (2.0 could also play across machines.)",
+  "in": [
+   "dos"
+  ],
+  "id": 115
+ },
+ {
+  "kind": "notes",
+  "en": "Dragging a budget bar works out the others once, from where the drag began; 2.0 did it at every step of the drag, so a long drag can end slightly differently.",
+  "in": [
+   "dos"
+  ],
+  "id": 116
+ },
+ {
+  "kind": "notes",
+  "en": "Battle replays are kept for the last 60 battles; 2.0 kept them for 500 years.",
+  "in": [
+   "dos"
+  ],
+  "id": 117
+ },
+ {
+  "kind": "notes",
+  "en": "Language… also offers French (“traduction du remake”), the French Mac 1.2’s own text, whose reports are 2.0’s line for line, with the remake’s words for the few lines 1.2 hasn’t got: the remake’s own translation, not an official one, and marked so in the list. It changes only words and names: the same game plays in every language.",
+  "in": [
+   "dos",
+   "mac20"
+  ],
+  "id": 118
+ },
+ {
+  "kind": "notes",
+  "en": "The Explored Planets list and the poll and battle speed settings.",
+  "in": [
+   "dos"
+  ],
+  "id": 119
+ },
+ {
+  "kind": "notes",
+  "en": "Version 1 to 2",
+  "in": [
+   "dos",
+   "mac20"
+  ],
+  "id": 120
+ },
+ {
+  "kind": "notes",
+  "en": "We incorporated the planet, budget, and fleet windows into the map window and moved them to the left to save screen space. We added message passing and communication. We went to full color for the ships and planets. The computer strategies were rewritten from the ground up. The \"slow game\" option was removed; games are now between the old slow and fast speeds. We went to a log scale spending window to allow for better resolution at the lower spending levels.",
+  "in": [
+   "dos",
+   "mac20"
+  ],
+  "id": 121
+ },
+ {
+  "kind": "notes",
+  "en": "We made the computer players name their ships and fleets (and themselves) the same way people do. We added a \"master player\" (Game Administrator) who can force an update to the next turn in a multi-player game. We got rid of the timed turn features, since we couldn't adjust for people with different clock settings. We changed the cost of the Technologies to balance out the game, and we made Speed affect combat. We made printing work.",
+  "in": [
+   "dos",
+   "mac20"
+  ],
+  "id": 122
+ },
+ {
+  "kind": "notes",
+  "en": "A Create Galaxy window: five sizes, five shapes, Dense or Sparse, 0 to 19 computers and their IQ (Dumb, Average or Smart). Each human picks a skill, Novice to Expert. (1.2 made every galaxy a small dense circle with one average computer.)",
+  "in": [
+   "dos",
+   "mac20"
+  ],
+  "id": 123
+ },
+ {
+  "kind": "notes",
+  "en": "Women: women’s faces and names, and each computer is a woman half the time.",
+  "in": [
+   "dos",
+   "mac20"
+  ],
+  "id": 124
+ },
+ {
+  "kind": "notes",
+  "en": "No novas (1.2 had the code, never switched on).",
+  "in": [
+   "dos"
+  ],
+  "id": 125
+ },
+ {
+  "kind": "notes",
+  "en": "The Send Message window: ten messages a turn.",
+  "in": [
+   "dos",
+   "mac20"
+  ],
+  "id": 126
+ },
+ {
+  "kind": "notes",
+  "en": "Organize Fleets gives the fleets the average fuel used instead of the least, and clears their orders.",
+  "in": [
+   "dos"
+  ],
+  "id": 127
+ },
+ {
+  "kind": "notes",
+  "en": "The computers’ attack rating wraps around from about Weapons 4 (a 16-bit sum).",
+  "in": [
+   "dos"
+  ],
+  "id": 128
+ },
+ {
+  "kind": "notes",
+  "en": "A colony wiped out by meteors gets a report naming a stray player (1.2’s was blank).",
+  "in": [
+   "dos",
+   "mac20"
+  ],
+  "id": 129
+ },
+ {
+  "kind": "notes",
+  "en": "Temperatures in °F instead of °C, and English names; 190 star names.",
+  "in": [
+   "dos",
+   "mac20"
+  ],
+  "id": 130
+ },
+ {
+  "kind": "notes",
+  "en": "Auto Play, Compare Players (rankings from 2010) and Name a Star for the winner.",
+  "in": [
+   "dos"
+  ],
+  "id": 131
+ },
+ {
+  "kind": "notes",
+  "en": "The turn itself is 1.2’s, routine by routine.",
+  "in": [
+   "dos",
+   "mac20"
+  ],
+  "id": 132
+ },
+ {
+  "kind": "notes",
+  "en": "Delta Tao’s own Mac build of 2.0.1, the version the DOS and Windows 3.1 edition ports: the same rules, routine for routine, with a few differences in its code. Every rule routine of the Mac program has been read with its own names.",
+  "in": [
+   "mac20"
+  ],
+  "id": 133
+ },
+ {
+  "kind": "notes",
+  "en": "Organize Ships gives every fleet of the design at the star the least fuel used among them, and leaves their orders alone (as 1.2).",
+  "in": [
+   "mac20"
+  ],
+  "id": 134
+ },
+ {
+  "kind": "notes",
+  "en": "A colony wiped out by a meteor shower is reported as “… destroyed your colony”, naming whoever a report ten messages earlier happened to leave behind: often you or another player. Where that report left something other than a player’s number, the Mac printed whatever bytes lay past the game’s own data; the remake names no one.",
+  "in": [
+   "mac20"
+  ],
+  "id": 135
+ },
+ {
+  "kind": "notes",
+  "en": "A fleet marked for scrapping while in hyperspace is reported at a stray character, read from before the start of the star list (the letter of an unused home slot’s star number), with its metal shown as 0 unless that slot’s numbers happen to match yours.",
+  "in": [
+   "mac20"
+  ],
+  "id": 136
+ },
+ {
+  "kind": "notes",
+  "en": "When every human is out, the game ends (with no winner if nobody is left). 2.0.1 went on as long as the computers played.",
+  "in": [
+   "mac20"
+  ],
+  "id": 137
+ },
+ {
+  "kind": "notes",
+  "en": "Several people play on one computer and take turns. The original let each player join a shared game file, with a password. (2.0.1 could also play across a network.)",
+  "in": [
+   "mac20"
+  ],
+  "id": 138
+ },
+ {
+  "kind": "notes",
+  "en": "Dragging a budget bar works out the others once, from where the drag began; 2.0.1 did it at every step of the drag, so a long drag can end slightly differently.",
+  "in": [
+   "mac20"
+  ],
+  "id": 139
+ },
+ {
+  "kind": "notes",
+  "en": "Battle replays are kept for the last 60 battles; 2.0.1 kept them for 500 years.",
+  "in": [
+   "mac20"
+  ],
+  "id": 140
+ },
+ {
+  "kind": "notes",
+  "en": "An event with no sound of its own plays the skin’s; the Mac beeped (the system beep).",
+  "in": [
+   "mac20"
+  ],
+  "id": 141
+ },
+ {
+  "kind": "notes",
+  "en": "System 6.0.5 or later",
+  "in": [
+   "mac20"
+  ],
+  "id": 142
+ },
+ {
+  "kind": "notes",
+  "en": "TheHo now requires 6.0.5 (to avoid 6.0.2 color qd problem).",
+  "in": [
+   "mac20"
+  ],
+  "id": 143
+ },
+ {
+  "kind": "notes",
+  "en": "Changes for version 2.0.1 (Joe and Peter), on the Mac 2.0.1 disks",
+  "in": [
+   "mac20"
+  ],
+  "id": 144
+ },
+ {
+  "kind": "notes",
+  "en": "The same game as the DOS and Windows 3.1 edition, except: Organize Fleets keeps 1.2’s least fuel used and leaves the orders alone (Windows: the average, and the orders cleared), and the computers’ attack rating is worked out in 32 bits, as 1.2’s, so it never wraps round (Windows: 16 bits).",
+  "in": [
+   "mac20"
+  ],
+  "id": 145
+ },
+ {
+  "kind": "notes",
+  "en": "Auto Play, Compare Players (rankings from 2010), Force End Turn and Name a Star for the winner.",
+  "in": [
+   "mac20"
+  ],
+  "id": 146
+ },
+ {
+  "kind": "notes",
+  "en": "The Mac edition of 4.0.5, a fat application for 68k and PowerPC Macs, which plays across platforms with the Windows 95 edition: the same program compiled for the Mac, routine for routine, with a few differences in its code. Every rule routine has been read with its own names.",
+  "in": [
+   "mac405"
+  ],
+  "id": 147
+ },
+ {
+  "kind": "notes",
+  "en": "Best buddies share battle news by handing over a copy of their record of the star; the one who didn’t fight can’t review the battle.",
+  "in": [
+   "mac405"
+  ],
+  "id": 148
+ },
+ {
+  "kind": "notes",
+  "en": "The first message still says “Version 4.0.3”.",
+  "in": [
+   "mac405"
+  ],
+  "id": 149
+ },
+ {
+  "kind": "notes",
+  "en": "The stars winners named are put in later galaxies one place late: the first becomes “Hope”, the game’s own 191st name, and the last of the four taken is never used.",
+  "in": [
+   "mac405"
+  ],
+  "id": 150
+ },
+ {
+  "kind": "notes",
+  "en": "A star name found inside another name (“Veg” in “Vega”) counts as taken.",
+  "in": [
+   "mac405"
+  ],
+  "id": 151
+ },
+ {
+  "kind": "notes",
+  "en": "The colour-monitor joke: the Mac 4.0.5 sent it, in a random year, only to a screen set to black and white that could show colour. Here a black-and-white skin is that screen.",
+  "in": [
+   "mac405"
+  ],
+  "id": 152
+ },
+ {
+  "kind": "notes",
+  "en": "The computers’ names come from the game’s 20 names a sex; the Mac also added the name of every human who had played on that Mac.",
+  "in": [
+   "mac405"
+  ],
+  "id": 153
+ },
+ {
+  "kind": "notes",
+  "en": "Ship design names come from the game’s 15 a class; the Mac also added the names you typed into the design window.",
+  "in": [
+   "mac405"
+  ],
+  "id": 154
+ },
+ {
+  "kind": "notes",
+  "en": "Hints are drawn by the browser’s random numbers, and the four named stars a new galaxy takes are picked from the game’s seed; the Mac used its own random numbers.",
+  "in": [
+   "mac405"
+  ],
+  "id": 155
+ },
+ {
+  "kind": "notes",
+  "en": "Language… also offers French (“traduction du remake”) and Turkish (“yeniden yapımın çevirisi”): the official French and Turkish of the iOS game (and of the French Mac 1.2) for every line 4.0.5 shares with them, which is most of its reports, with the remake’s own lines for the rest (Armageddon’s questions, the Mac’s own words): the remake’s own translation, not an official one, and marked so in the list. It changes only words and names: the same game plays in every language.",
+  "in": [
+   "mac405"
+  ],
+  "id": 156
+ },
+ {
+  "kind": "notes",
+  "en": "The turn time limit, “Automatically end turn for unconnected players” and network play.",
+  "in": [
+   "mac405"
+  ],
+  "id": 157
+ },
+ {
+  "kind": "notes",
+  "en": "The same game as the Windows 95 edition, except: a Tanker is shot at after Colony Ships and before Satellites; a new technology level is reported by its own name; 15 ship names a class, more than Windows has for most; the computers’ sexes and names don’t use the game’s random numbers; the auto play settings put the new “colonies defended” into metal for defence; marking a ship type in the build window gives back every ship of it ordered there; eleven ranks, with Ho! Champion from 1,000,000 master points; whole years in the Hall of Fame.",
+  "in": [
+   "mac405"
+  ],
+  "id": 158
+ },
+ {
+  "kind": "notes",
+  "en": "The last Mac version, for Mac OS 9 and X. Every routine of its program has been read, and every rule comes from its own code.",
+  "in": [
+   "original"
+  ],
+  "id": 159
+ },
+ {
+  "kind": "notes",
+  "en": "4.0.5",
+  "in": [
+   "original"
+  ],
+  "id": 160
+ },
+ {
+  "kind": "notes",
+  "en": "Interest you can’t pay comes out of Ship Savings, however deep in debt: the global warming the game has a message for never happens.",
+  "in": [
+   "original",
+   "palm",
+   "ios"
+  ],
+  "id": 161
+ },
+ {
+  "kind": "notes",
+  "en": "A slip in how the computers send obsolete ships and Tankers home to be scrapped (a list place passed as the Range).",
+  "in": [
+   "original",
+   "palm",
+   "ios"
+  ],
+  "id": 162
+ },
+ {
+  "kind": "notes",
+  "en": "Budget bars are used as they stand, even when they add up to more than 100% (bars that can’t move keep their shares when you drag another), so more than your money can be spent.",
+  "in": [
+   "original",
+   "palm",
+   "ios"
+  ],
+  "id": 163
+ },
+ {
+  "kind": "notes",
+  "en": "Dipping into savings counts as income, so it raises how far you may borrow.",
+  "in": [
+   "original",
+   "palm",
+   "ios"
+  ],
+  "id": 164
+ },
+ {
+  "kind": "notes",
+  "en": "A ship you order but can’t pay for still uses up one of the colony’s building places for the turn.",
+  "in": [
+   "original",
+   "palm",
+   "ios"
+  ],
+  "id": 165
+ },
+ {
+  "kind": "notes",
+  "en": "After an Armageddon device fizzles, the devices stay on and it tries again, and fizzles again, every turn.",
+  "in": [
+   "original",
+   "palm",
+   "ios"
+  ],
+  "id": 166
+ },
+ {
+  "kind": "notes",
+  "en": "You hear of only one population milestone of each kind a turn; a jump past two reports the second later.",
+  "in": [
+   "original",
+   "palm",
+   "ios"
+  ],
+  "id": 167
+ },
+ {
+  "kind": "notes",
+  "en": "On a Spiral map the computers know where every home is before 2100.",
+  "in": [
+   "original",
+   "palm",
+   "ios"
+  ],
+  "id": 168
+ },
+ {
+  "kind": "notes",
+  "en": "The “never profitable” and “not spending on research” warnings, and the red-star warning, come every turn.",
+  "in": [
+   "original",
+   "palm",
+   "ios"
+  ],
+  "id": 169
+ },
+ {
+  "kind": "notes",
+  "en": "A computer evacuating a colony doesn’t ask, and its budget doesn’t change until the turn is worked out.",
+  "in": [
+   "original"
+  ],
+  "id": 170
+ },
+ {
+  "kind": "notes",
+  "en": "A tanker’s route goes only through stars recorded this year.",
+  "in": [
+   "original"
+  ],
+  "id": 171
+ },
+ {
+  "kind": "notes",
+  "en": "With an Abundant start your second colony comes before your home in the budget list.",
+  "in": [
+   "original",
+   "palm",
+   "ios"
+  ],
+  "id": 172
+ },
+ {
+  "kind": "notes",
+  "en": "A computer whose name begins another player’s, or is the start of it, is renamed from the designers’ names: play as “Edward” and a computer called Ed becomes Peter.",
+  "in": [
+   "original"
+  ],
+  "id": 173
+ },
+ {
+  "kind": "notes",
+  "en": "Several people play on one computer and take turns. The original let each player join a shared game file, with a password.",
+  "in": [
+   "original",
+   "gemini",
+   "claude"
+  ],
+  "id": 174
+ },
+ {
+  "kind": "notes",
+  "en": "The computers’ names come from the game’s 20 men’s and 22 women’s names; 5.0.5 also added the name of every player who had played on that Mac. Ship type names come from the game’s 15 a class.",
+  "in": [
+   "original"
+  ],
+  "id": 175
+ },
+ {
+  "kind": "notes",
+  "en": "The computers all plan, and every fleet moves, for all players at once; 5.0.5 did both in each player’s own turn. It comes out the same but for rare cases.",
+  "in": [
+   "original"
+  ],
+  "id": 176
+ },
+ {
+  "kind": "notes",
+  "en": "Dragging a budget bar works out the others once, from where the drag began; 5.0.5 did it at every step of the drag.",
+  "in": [
+   "original"
+  ],
+  "id": 177
+ },
+ {
+  "kind": "notes",
+  "en": "An order for ships stops at the first one you can’t pay for, so the ones after it don’t use up building places.",
+  "in": [
+   "original",
+   "palm",
+   "ios"
+  ],
+  "id": 178
+ },
+ {
+  "kind": "notes",
+  "en": "When you give a gift, you are told at once; 5.0.5 told you at the end of the turn.",
+  "in": [
+   "original"
+  ],
+  "id": 179
+ },
+ {
+  "kind": "notes",
+  "en": "Every game starts from the default budget and research shares (research 18% each and Radical 10%); 5.0.5 started a new game with your first turn’s shares from the last one.",
+  "in": [
+   "original"
+  ],
+  "id": 180
+ },
+ {
+  "kind": "notes",
+  "en": "Language… also offers French (“traduction du remake”) and Turkish (“yeniden yapımın çevirisi”): the iOS game’s official French and Turkish wherever its English is 5.0.5’s, which is nearly everywhere, with the remake’s own lines for the few 5.0.5 says differently (the mouse’s hints, the fuel alert) and for a few lines the iOS translation got wrong: the remake’s own translation, not an official one, and marked so in the list. It changes only words and names: the same game plays in every language.",
+  "in": [
+   "original"
+  ],
+  "id": 181
+ },
+ {
+  "kind": "notes",
+  "en": "The Group Fleets window: “Merge all fleets here” and splitting follow its rules (Biologicals keep to themselves; the fleet that takes ships keeps its orders and the lower fuel).",
+  "in": [
+   "original"
+  ],
+  "id": 182
+ },
+ {
+  "kind": "notes",
+  "en": "Options locked by rank (“Need more MPs”): every option is open.",
+  "in": [
+   "original"
+  ],
+  "id": 183
+ },
+ {
+  "kind": "notes",
+  "en": "The rank window’s own words for naming a star (the iOS version’s are shown).",
+  "in": [
+   "original"
+  ],
+  "id": 184
+ },
+ {
+  "kind": "notes",
+  "en": "Version 4 to 5",
+  "in": [
+   "original",
+   "palm",
+   "ios"
+  ],
+  "id": 185
+ },
+ {
+  "kind": "notes",
+  "en": "Seven years is a long time to go between revisions, so you might say that under the hood, Spaceward Ho! was getting a bit long in the tooth. Not for general use, as you can still play version 1.0 in the latest version of MacOS X (what other apps can do that?), but when we decided we wanted to add a bunch more features, it, well, needed a rewrite.",
+  "in": [
+   "original",
+   "palm",
+   "ios"
+  ],
+  "id": 186
+ },
+ {
+  "kind": "notes",
+  "en": "So for those of you who like acronym-compliant applications, version 5.0 is now PowerPC, Carbon, multi-threaded, TCP/IP, and OS X-friendly.",
+  "in": [
+   "original",
+   "palm",
+   "ios"
+  ],
+  "id": 187
+ },
+ {
+  "kind": "notes",
+  "en": "Feature-wise (on top of the hood), there's an awful lot of new stuff in version 5.0 of the Ho! Even so, if you're familiar with 4.0, you'll be able to play with the new one and figure everything out. However, we're providing this handy list of new features so you'll know what you're getting.",
+  "in": [
+   "original",
+   "palm",
+   "ios"
+  ],
+  "id": 188
+ },
+ {
+  "kind": "notes",
+  "en": "Requirements",
+  "in": [
+   "original",
+   "palm",
+   "ios"
+  ],
+  "id": 189
+ },
+ {
+  "kind": "notes",
+  "en": "Spaceward Ho! 5.0 is bigger than ever, and requires some 20 megabytes of hard disk space, 10 megabytes of RAM, and OS 8.6 or later.",
+  "in": [
+   "original",
+   "palm",
+   "ios"
+  ],
+  "id": 190
+ },
+ {
+  "kind": "notes",
+  "en": "Internet Play",
+  "in": [
+   "original",
+   "palm",
+   "ios"
+  ],
+  "id": 191
+ },
+ {
+  "kind": "notes",
+  "en": "Join spacewardho.net to play games with people from around the world.",
+  "in": [
+   "original",
+   "palm",
+   "ios"
+  ],
+  "id": 192
+ },
+ {
+  "kind": "notes",
+  "en": "Smarter Computers",
+  "in": [
+   "original",
+   "palm",
+   "ios"
+  ],
+  "id": 193
+ },
+ {
+  "kind": "notes",
+  "en": "The computers can now use biological and tanker ships, can make multi-planet attacks, and are better at preserving their metal in the endgame.",
+  "in": [
+   "original",
+   "palm",
+   "ios"
+  ],
+  "id": 194
+ },
+ {
+  "kind": "notes",
+  "en": "Multiway Battles",
+  "in": [
+   "original",
+   "palm",
+   "ios"
+  ],
+  "id": 195
+ },
+ {
+  "kind": "notes",
+  "en": "If several players arrive at a star at the same time, there's now a single large battle, with allies joining each other in combat. (Sometimes two people allied with you will shoot at each other, too.)",
+  "in": [
+   "original",
+   "palm",
+   "ios"
+  ],
+  "id": 196
+ },
+ {
+  "kind": "notes",
+  "en": "Grouped Fleets",
+  "in": [
+   "original",
+   "palm",
+   "ios"
+  ],
+  "id": 197
+ },
+ {
+  "kind": "notes",
+  "en": "You can group several ship types into a single fleet, for ease of movement and so that fleets of different speeds will stay together.",
+  "in": [
+   "original",
+   "palm",
+   "ios"
+  ],
+  "id": 198
+ },
+ {
+  "kind": "notes",
+  "en": "Battle Options",
+  "in": [
+   "original",
+   "palm",
+   "ios"
+  ],
+  "id": 199
+ },
+ {
+  "kind": "notes",
+  "en": "You can give different battle options to each ship type in a fleet, so that some go all-out offensive (giving a weapons bonus and shields penalty) or defensive. And you can have some ships - usually your colony ship - follow behind the main fleet, not coming in until the main battle is over.",
+  "in": [
+   "original",
+   "palm",
+   "ios"
+  ],
+  "id": 200
+ },
+ {
+  "kind": "notes",
+  "en": "Fleet Paths",
+  "in": [
+   "original",
+   "palm",
+   "ios"
+  ],
+  "id": 201
+ },
+ {
+  "kind": "notes",
+  "en": "You can now option-click a long route for a fleet, so it will visit a sequence of stars as fuel allows.",
+  "in": [
+   "original",
+   "palm",
+   "ios"
+  ],
+  "id": 202
+ },
+ {
+  "kind": "notes",
+  "en": "New Radical Techs",
+  "in": [
+   "original",
+   "palm",
+   "ios"
+  ],
+  "id": 203
+ },
+ {
+  "kind": "notes",
+  "en": "These include improving research, improving savings interest, decreasing the borrowing interest, and lots more.",
+  "in": [
+   "original",
+   "palm",
+   "ios"
+  ],
+  "id": 204
+ },
+ {
+  "kind": "notes",
+  "en": "Faster and Easier",
+  "in": [
+   "original",
+   "palm",
+   "ios"
+  ],
+  "id": 205
+ },
+ {
+  "kind": "notes",
+  "en": "We're proud that, contrary to the universal tendency for software to bloat, Spaceward Ho! has gotten easier to play and faster with each version. Version 5 is the fastest yet.",
+  "in": [
+   "original",
+   "palm",
+   "ios"
+  ],
+  "id": 206
+ },
+ {
+  "kind": "notes",
+  "en": "New User Interface",
+  "in": [
+   "original",
+   "palm",
+   "ios"
+  ],
+  "id": 207
+ },
+ {
+  "kind": "notes",
+  "en": "Each fleet has its own dot on the star map, and you can just drag a fleet to its destination to move it. Contextual menus are also available.",
+  "in": [
+   "original",
+   "palm",
+   "ios"
+  ],
+  "id": 208
+ },
+ {
+  "kind": "notes",
+  "en": "OS X Native",
+  "in": [
+   "original",
+   "palm",
+   "ios"
+  ],
+  "id": 209
+ },
+ {
+  "kind": "notes",
+  "en": "Spaceward Ho! 5 is Carbonized for optimal use on OS X or OS 8 or 9.",
+  "in": [
+   "original",
+   "palm",
+   "ios"
+  ],
+  "id": 210
+ },
+ {
+  "kind": "notes",
+  "en": "Cooperative Play",
+  "in": [
+   "original",
+   "palm",
+   "ios"
+  ],
+  "id": 211
+ },
+ {
+  "kind": "notes",
+  "en": "Multiplayer games can automatically pit all humans against the computers, for fun and friendly games.",
+  "in": [
+   "original",
+   "palm",
+   "ios"
+  ],
+  "id": 212
+ },
+ {
+  "kind": "notes",
+  "en": "New Easter Eggs",
+  "in": [
+   "original",
+   "palm",
+   "ios"
+  ],
+  "id": 213
+ },
+ {
+  "kind": "notes",
+  "en": "But we can't tell you about them here. You'll find them, or hear about them on the net.",
+  "in": [
+   "original",
+   "palm",
+   "ios"
+  ],
+  "id": 214
+ },
+ {
+  "kind": "notes",
+  "en": "Updates",
+  "in": [
+   "original",
+   "palm",
+   "ios"
+  ],
+  "id": 215
+ },
+ {
+  "kind": "notes",
+  "en": "You'll be able to find software updates to Spaceward Ho! (as we release them) at our web site at http://www.deltatao.com",
+  "in": [
+   "original",
+   "palm",
+   "ios"
+  ],
+  "id": 216
+ },
+ {
+  "kind": "notes",
+  "en": "Thanks to everyone who sent in suggestions, whether in person, on their warranty registration, on comp.sys.mac.games, or on the phone. We considered everything everyone suggested, and, although we couldn't incorporate every new idea, we think you'll find a lot we did.",
+  "in": [
+   "original",
+   "palm",
+   "ios"
+  ],
+  "id": 217
+ },
+ {
+  "kind": "notes",
+  "en": "OS 8.6 or later",
+  "in": [
+   "original"
+  ],
+  "id": 218
+ },
+ {
+  "kind": "notes",
+  "en": "20 MB",
+  "in": [
+   "original"
+  ],
+  "id": 219
+ },
+ {
+  "kind": "notes",
+  "en": "10 MB",
+  "in": [
+   "original"
+  ],
+  "id": 220
+ },
+ {
+  "kind": "notes",
+  "en": "You pick a home system instead of a skill level, the computers’ IQ is a number from 50 to 200, and there are Hex galaxies.",
+  "in": [
+   "original"
+  ],
+  "id": 221
+ },
+ {
+  "kind": "notes",
+  "en": "Ships cost less at high tech (4.0.5’s cost is a product of all four stats); at most 24 designs.",
+  "in": [
+   "original"
+  ],
+  "id": 222
+ },
+ {
+  "kind": "notes",
+  "en": "Everyone at a star fights at once instead of in duels, with stances and “arrive late” (a second battle).",
+  "in": [
+   "original"
+  ],
+  "id": 223
+ },
+ {
+  "kind": "notes",
+  "en": "The research facility, the prime rate and cheaper credit.",
+  "in": [
+   "original"
+  ],
+  "id": 224
+ },
+ {
+  "kind": "notes",
+  "en": "Novas give more warning, with a miracle rescue, and Armageddon shrinks distances.",
+  "in": [
+   "original"
+  ],
+  "id": 225
+ },
+ {
+  "kind": "notes",
+  "en": "Dip Into Savings takes up to 30% of your savings every turn until you stop it.",
+  "in": [
+   "original"
+  ],
+  "id": 226
+ },
+ {
+  "kind": "notes",
+  "en": "Colonies are listed by income, and the poorest are paid first.",
+  "in": [
+   "original"
+  ],
+  "id": 227
+ },
+ {
+  "kind": "notes",
+  "en": "Master points and 25 ranks, with a limit on how far one win takes you.",
+  "in": [
+   "original"
+  ],
+  "id": 228
+ },
+ {
+  "kind": "notes",
+  "en": "A new rank lets you name a star (up to 11 letters) for your next galaxies, five a galaxy.",
+  "in": [
+   "original"
+  ],
+  "id": 229
+ },
+ {
+  "kind": "notes",
+  "en": "Sums from ten million are written “$12.345M” in the panels.",
+  "in": [
+   "original"
+  ],
+  "id": 230
+ },
+ {
+  "kind": "notes",
+  "en": "A port of the Mac 5.0 to Palm handhelds: the 5.0 game recompiled, the same rules with the same quirks. Every routine of its program has been read, and every rule comes from its own code.",
+  "in": [
+   "palm"
+  ],
+  "id": 231
+ },
+ {
+  "kind": "notes",
+  "en": "5.0.5 (Mac)",
+  "in": [
+   "palm",
+   "ios"
+  ],
+  "id": 232
+ },
+ {
+  "kind": "notes",
+  "en": "When every side in a battle is beaten, its debris is lost.",
+  "in": [
+   "palm"
+  ],
+  "id": 233
+ },
+ {
+  "kind": "notes",
+  "en": "The fastest engines and strongest noses have no picture, so those ships are drawn with a part missing.",
+  "in": [
+   "palm"
+  ],
+  "id": 234
+ },
+ {
+  "kind": "notes",
+  "en": "Nothing stops you sending more than three messages a turn, though the game keeps room for three: a fourth is written over your gifts for the turn. The remake lets you send as many as you like.",
+  "in": [
+   "palm"
+  ],
+  "id": 235
+ },
+ {
+  "kind": "notes",
+  "en": "Evacuating a star called Kansas always gets the Dorothy line, Hope always asks, and a star called Ship asks you to abandon ship. (From the message list the old one-in-three jokes apply.)",
+  "in": [
+   "palm"
+  ],
+  "id": 236
+ },
+ {
+  "kind": "notes",
+  "en": "The random numbers are the remake’s own (the Palm game reads a fixed table of 5,000 numbers), so a game can’t be replayed move for move.",
+  "in": [
+   "palm"
+  ],
+  "id": 237
+ },
+ {
+  "kind": "notes",
+  "en": "Several people play on one computer and take turns. The Palm game had room for one person: its Players window’s Add refuses anyone once the game exists.",
+  "in": [
+   "palm"
+  ],
+  "id": 238
+ },
+ {
+  "kind": "notes",
+  "en": "The computers all plan, and every fleet moves, for all players at once; the Palm game did both in each player’s own turn. It comes out the same but for rare cases.",
+  "in": [
+   "palm"
+  ],
+  "id": 239
+ },
+ {
+  "kind": "notes",
+  "en": "Dragging a budget bar works out the others once, from where the drag began.",
+  "in": [
+   "palm",
+   "ios"
+  ],
+  "id": 240
+ },
+ {
+  "kind": "notes",
+  "en": "When you give a gift, you are told at once; the Palm game told you at the end of the turn.",
+  "in": [
+   "palm"
+  ],
+  "id": 241
+ },
+ {
+  "kind": "notes",
+  "en": "Every game starts from the default budget and research shares; the Palm game started a new game with your first turn’s shares from the last one.",
+  "in": [
+   "palm"
+  ],
+  "id": 242
+ },
+ {
+  "kind": "notes",
+  "en": "Sounds are the skin’s, not the handheld’s few beeps.",
+  "in": [
+   "palm"
+  ],
+  "id": 243
+ },
+ {
+  "kind": "notes",
+  "en": "Language… also offers French (“traduction du remake”) and Turkish (“yeniden yapımın çevirisi”): the iOS game’s official French and Turkish for every line the Palm shares with 5.0.5, with the remake’s own lines for the Palm’s own hints, first messages, decoy report and battle window: the remake’s own translation, not an official one, and marked so in the list. It changes only words and names: the same game plays in every language.",
+  "in": [
+   "palm"
+  ],
+  "id": 244
+ },
+ {
+  "kind": "notes",
+  "en": "Options locked by rank.",
+  "in": [
+   "palm"
+  ],
+  "id": 245
+ },
+ {
+  "kind": "notes",
+  "en": "At most 90 stars (5.0.5: 220), so big galaxies come out smaller.",
+  "in": [
+   "palm"
+  ],
+  "id": 246
+ },
+ {
+  "kind": "notes",
+  "en": "No Alliances or Luck in Battles check boxes: both are always on, and so are novas.",
+  "in": [
+   "palm",
+   "ios"
+  ],
+  "id": 247
+ },
+ {
+  "kind": "notes",
+  "en": "No “Any (1-8)” choice for the number of computers, and one person a game: nine players at most (5.0.5: sixteen, eight people and eight computers).",
+  "in": [
+   "palm"
+  ],
+  "id": 248
+ },
+ {
+  "kind": "notes",
+  "en": "New Evacuate jokes: Kansas and Hope every time, and a star called Ship.",
+  "in": [
+   "palm"
+  ],
+  "id": 249
+ },
+ {
+  "kind": "notes",
+  "en": "Courasant replaces Antares among the star names.",
+  "in": [
+   "palm"
+  ],
+  "id": 250
+ },
+ {
+  "kind": "notes",
+  "en": "Its own hints, one every turn, and its own first messages, with the Mobilefreon credits.",
+  "in": [
+   "palm"
+  ],
+  "id": 251
+ },
+ {
+  "kind": "notes",
+  "en": "Palm windows and a demo version.",
+  "in": [
+   "palm"
+  ],
+  "id": 252
+ },
+ {
+  "kind": "notes",
+  "en": "A port of the Mac 5.0 to the iPhone and iPad by Ariton (first released in 2012; this is version 1.2.9, from 2017 or later): the 5.0 game recompiled, the same rules with the same quirks, keeping the Mac’s 220 stars and 16 player slots. Every rule routine of its program has been read beside its 5.0.5 twin; what is new is the touch interface around it.",
+  "in": [
+   "ios"
+  ],
+  "id": 253
+ },
+ {
+  "kind": "notes",
+  "en": "The game’s Mac characters are read the iPhone’s way: the tech names show “PowerPCª” and “Speedy Gonzalezª”, and the curse reads “#!$@*$&@¥ª!”.",
+  "in": [
+   "ios"
+  ],
+  "id": 254
+ },
+ {
+  "kind": "notes",
+  "en": "Evacuating always asks first, even for a colony losing money; Kansas, one time in three, gets the Dorothy line, now with a Cancel button.",
+  "in": [
+   "ios"
+  ],
+  "id": 255
+ },
+ {
+  "kind": "notes",
+  "en": "The computers all plan, and every fleet moves, for all players at once; the iOS game did both in each player’s own turn. It comes out the same but for rare cases.",
+  "in": [
+   "ios"
+  ],
+  "id": 256
+ },
+ {
+  "kind": "notes",
+  "en": "When you give a gift, you are told at once; the iOS game told you at the end of the turn.",
+  "in": [
+   "ios"
+  ],
+  "id": 257
+ },
+ {
+  "kind": "notes",
+  "en": "Every game starts from the default budget and research shares; the iOS game started a new game with your first turn’s shares from the last one.",
+  "in": [
+   "ios"
+  ],
+  "id": 258
+ },
+ {
+  "kind": "notes",
+  "en": "Master points, games won and the seven achievements were Game Center’s; the remake keeps them in this browser, apart from the other versions’ records.",
+  "in": [
+   "ios"
+  ],
+  "id": 259
+ },
+ {
+  "kind": "notes",
+  "en": "Which five of your named stars go into a new galaxy is drawn from the game’s seed, not the phone’s random numbers.",
+  "in": [
+   "ios"
+  ],
+  "id": 260
+ },
+ {
+  "kind": "notes",
+  "en": "French and Turkish are the game’s own (its fr.lproj and tr.lproj).",
+  "in": [
+   "ios",
+   "android"
+  ],
+  "id": 261
+ },
+ {
+  "kind": "notes",
+  "en": "Language… also offers German (“Übersetzung des Remakes”), as 5.0.5’s: the German DOS 2.0’s lines wherever the English is 2.0’s, the remake’s German in its words for the rest; the help page stays English: the remake’s own translation, not an official one, and marked so in the list. It changes only words and names: the same game plays in every language.",
+  "in": [
+   "ios",
+   "android"
+  ],
+  "id": 262
+ },
+ {
+  "kind": "notes",
+  "en": "Language… also offers Spanish (“Español (traducción del remake)”): there was never an official Spanish Spaceward Ho!, so every line of it is the remake’s, written in the official translations’ spirit (their words for the game’s things, the informal “tú”, the jokes kept); the names stay English; the help page stays English: the remake’s own translation, not an official one, and marked so in the list. It changes only words and names: the same game plays in every language.",
+  "in": [
+   "ios",
+   "android"
+  ],
+  "id": 263
+ },
+ {
+  "kind": "notes",
+  "en": "Game Center itself: the leaderboards and achievements are kept here, not shared.",
+  "in": [
+   "ios"
+  ],
+  "id": 264
+ },
+ {
+  "kind": "notes",
+  "en": "Several saved games, sending a game by e-mail, and the help web page.",
+  "in": [
+   "ios",
+   "android"
+  ],
+  "id": 265
+ },
+ {
+  "kind": "notes",
+  "en": "Organize Fleets’ way of moving ships between fleets.",
+  "in": [
+   "ios"
+  ],
+  "id": 266
+ },
+ {
+  "kind": "notes",
+  "en": "From 1 to 8 computers, with no “Any (1-8)”, and the IQ in steps of 10.",
+  "in": [
+   "ios"
+  ],
+  "id": 267
+ },
+ {
+  "kind": "notes",
+  "en": "Nothing is locked by rank.",
+  "in": [
+   "ios"
+  ],
+  "id": 268
+ },
+ {
+  "kind": "notes",
+  "en": "One person a game, and no Surrender or Send Message commands (the computers still send theirs).",
+  "in": [
+   "ios"
+  ],
+  "id": 269
+ },
+ {
+  "kind": "notes",
+  "en": "Evacuate asks for every colony (“Do you really want to evacuate …?”); Kansas and Hope stay one time in three, the whole name in any case.",
+  "in": [
+   "ios"
+  ],
+  "id": 270
+ },
+ {
+  "kind": "notes",
+  "en": "Build Ships has an Allow Debt switch: off, you can’t buy past your Ship Savings.",
+  "in": [
+   "ios"
+  ],
+  "id": 271
+ },
+ {
+  "kind": "notes",
+  "en": "An Auto Play window: Computer Play For Me, Just End My Turns Only or Play One Turn, with its own sliders and a message every few seconds.",
+  "in": [
+   "ios"
+  ],
+  "id": 272
+ },
+ {
+  "kind": "notes",
+  "en": "Its own hints, rewritten for touch, one every turn, and no first messages.",
+  "in": [
+   "ios"
+  ],
+  "id": 273
+ },
+ {
+  "kind": "notes",
+  "en": "“Hope” and “SparksMcGee” join the star names, and the stars you name at a new rank go into later galaxies.",
+  "in": [
+   "ios"
+  ],
+  "id": 274
+ },
+ {
+  "kind": "notes",
+  "en": "Master points on a Game Center leaderboard, with games won and seven achievements.",
+  "in": [
+   "ios"
+  ],
+  "id": 275
+ },
+ {
+  "kind": "notes",
+  "en": "Straight quotes in the reports.",
+  "in": [
+   "ios"
+  ],
+  "id": 276
+ },
+ {
+  "kind": "notes",
+  "en": "The iPhone and iPad game recompiled for Android by Ariton (version 1.2.8, built in February 2015, from the Amazon Appstore): the same source as iOS 1.2.9, so it plays exactly like it. Only the platform differs.",
+  "in": [
+   "android"
+  ],
+  "id": 277
+ },
+ {
+  "kind": "notes",
+  "en": "iOS 1.2.9",
+  "in": [
+   "android"
+  ],
+  "id": 278
+ },
+ {
+  "kind": "notes",
+  "en": "Master points are one number kept in this browser; the game kept it in its preferences file.",
+  "in": [
+   "android"
+  ],
+  "id": 279
+ },
+ {
+  "kind": "notes",
+  "en": "The Back key is Escape.",
+  "in": [
+   "android"
+  ],
+  "id": 280
+ },
+ {
+  "kind": "notes",
+  "en": "No Game Center: no achievements, no leaderboards, no games-won count, and no buttons for them on the title.",
+  "in": [
+   "android"
+  ],
+  "id": 281
+ },
+ {
+  "kind": "notes",
+  "en": "No hidden “e-mail every saved game” tap on the title.",
+  "in": [
+   "android"
+  ],
+  "id": 282
+ },
+ {
+  "kind": "notes",
+  "en": "The Back key closes the open window, or asks “Exit Spaceward Ho?” on the title.",
+  "in": [
+   "android"
+  ],
+  "id": 283
+ },
+ {
+  "kind": "notes",
+  "en": "Not an original version: an AI homage. Google’s Gemini wrote it from the Spaceward Ho! 5 manual alone, so the game could be played while the originals weren’t available, as an experiment alongside Claude’s rules. Gemini never saw the original program or the other rulesets; it worked from the manual, the engine, and test results relayed round by round.",
+  "in": [
+   "gemini"
+  ],
+  "id": 284
+ },
+ {
+  "kind": "notes",
+  "en": "Every number the manual doesn’t give is Gemini’s invention, and so are its jokes.",
+  "in": [
+   "gemini"
+  ],
+  "id": 285
+ },
+ {
+  "kind": "notes",
+  "en": "Biologicals (“Space Monsters”) refuel by eating colonists, wherever they are.",
+  "in": [
+   "gemini"
+  ],
+  "id": 286
+ },
+ {
+  "kind": "notes",
+  "en": "Bankruptcy has consequences: colonists riot, research in progress is lost, most stored metal is seized, and half of every fleet is repossessed and sold toward the debt.",
+  "in": [
+   "gemini"
+  ],
+  "id": 287
+ },
+ {
+  "kind": "notes",
+  "en": "Not an original version: the remake’s own Spaceward Ho!, rebuilt from the Spaceward Ho! 5 manual alone, without reading the original program or the other rulesets. Where the manual gives a number it is used; everything else (and the computer players, and the jokes) is a guess, tuned by self-play.",
+  "in": [
+   "claude"
+  ],
+  "id": 288
+ },
+ {
+  "kind": "notes",
+  "en": "Every number the manual doesn’t give is invented: growth, research costs, ship prices, battle damage, Radical odds.",
+  "in": [
+   "claude"
+  ],
+  "id": 289
+ },
+ {
+  "kind": "notes",
+  "en": "Biologicals graze on starlight anywhere (a third of their range a turn) instead of refueling at colonies.",
+  "in": [
+   "claude"
+  ],
+  "id": 290
+ },
+ {
+  "kind": "notes",
+  "en": "Battle stances apply to a whole fleet, not to each ship type in it.",
+  "in": [
+   "claude"
+  ],
+  "id": 291
+ },
+ {
+  "kind": "notes",
+  "en": "Computer players only know what they’ve seen: planets as they were when last visited, enemy tech from ships they’ve fought.",
+  "in": [
+   "claude"
+  ],
+  "id": 292
+ },
+ {
+  "kind": "notes",
+  "en": "Master points and skill levels (the ranks profile is shared with the Original rules, so the Claude rules leave it alone).",
+  "in": [
+   "claude"
+  ],
+  "id": 293
+ },
+ {
+  "kind": "notes",
+  "en": "The Graph History’s ten items (the skin’s history graph shows population, income and tech).",
+  "in": [
+   "claude"
+  ],
+  "id": 294
+ },
+ {
+  "kind": "notes",
+  "en": "The Auto Play attack and defend sliders.",
+  "in": [
+   "claude"
+  ],
+  "id": 295
+ },
+ {
+  "kind": "patch",
+  "en": "The meteor report has a text",
+  "in": [
+   "12:meteorReport.title"
+  ],
+  "id": 296
+ },
+ {
+  "kind": "patch",
+  "en": "A colony wiped out by a meteor shower got a blank report: its number is past the end of 1.2’s list of report texts. The patch gives it 2.0’s report, naming the meteor shower: “A meteor shower destroyed your colony at …”.",
+  "in": [
+   "12:meteorReport.text"
+  ],
+  "id": 297
+ },
+ {
+  "kind": "patch",
+  "en": "A fleet scrapped in hyperspace is reported in hyperspace",
+  "in": [
+   "12:scrapLimbo.title",
+   "dos:scrapLimbo.title",
+   "mac20:scrapLimbo.title"
+  ],
+  "id": 298
+ },
+ {
+  "kind": "patch",
+  "en": "A fleet marked for scrapping while it was in hyperspace was reported “at” the star before the first one, which is part of the galaxy’s header: one stray character (the letter of the 18th home slot’s star number, or none) and, in the English report, no metal unless the 8th home slot’s star number happened to be yours. The patch reports it “at hyperspace” with no metal, as 3.0.1 does.",
+  "in": [
+   "12:scrapLimbo.text"
+  ],
+  "id": 299
+ },
+ {
+  "kind": "patch",
+  "en": "The computer’s colony bars no longer overflow",
+  "in": [
+   "12:colonyBars32.title"
+  ],
+  "id": 300
+ },
+ {
+  "kind": "patch",
+  "en": "When the computer gave a colony more than $2,147,483 for one part, the sum overflowed and the colony’s bars came out wrong. The patch works them out without overflowing.",
+  "in": [
+   "12:colonyBars32.text"
+  ],
+  "id": 301
+ },
+ {
+  "kind": "patch",
+  "en": "The computers play their first turn on Spiral and Cluster maps",
+  "in": [
+   "301:skip2010.title"
+  ],
+  "id": 302
+ },
+ {
+  "kind": "patch",
+  "en": "On Spiral and Cluster maps the computers did nothing in 2010: a mark set so the map would be laid out in 2010 was never cleared. The patch lets them plan from the first turn, as 4.0.5 does.",
+  "in": [
+   "301:skip2010.text"
+  ],
+  "id": 303
+ },
+ {
+  "kind": "patch",
+  "en": "Stranded fighters ask for a colony only when they are stranded",
+  "in": [
+   "301:refuelCheck.title",
+   "405:refuelCheck.title",
+   "mac405:refuelCheck.title"
+  ],
+  "id": 304
+ },
+ {
+  "kind": "patch",
+  "en": "A computer’s fighter fleet low on fuel looked for a colony within reach, but the test of the answer read a flag cleared just before, so it always asked for a new colony where it was. The patch asks only when no colony is within the fuel it has left.",
+  "in": [
+   "301:refuelCheck.text"
+  ],
+  "id": 305
+ },
+ {
+  "kind": "patch",
+  "en": "The computers’ colony bars no longer overflow",
+  "in": [
+   "301:colonyBars32.title",
+   "dos:colonyBars32.title",
+   "mac20:colonyBars32.title"
+  ],
+  "id": 306
+ },
+ {
+  "kind": "patch",
+  "en": "When a computer gave a colony more than $2,147,483 for one part, the sum overflowed and the colony’s bars came out wrong. The patch works them out without overflowing.",
+  "in": [
+   "301:colonyBars32.text",
+   "dos:colonyBars32.text",
+   "mac20:colonyBars32.text"
+  ],
+  "id": 307
+ },
+ {
+  "kind": "patch",
+  "en": "Old ships sent home are routed with their own Range",
+  "in": [
+   "301:scrapRange.title",
+   "405:scrapRange.title",
+   "mac405:scrapRange.title"
+  ],
+  "id": 308
+ },
+ {
+  "kind": "patch",
+  "en": "When the computers sent old ships home, the program passed the fleet’s place in a list where the route finder wants its Range. It made no difference to play (the colony is always within reach); the patch passes the Range.",
+  "in": [
+   "301:scrapRange.text"
+  ],
+  "id": 309
+ },
+ {
+  "kind": "patch",
+  "en": "A finished colony at the first star is locked like any other",
+  "in": [
+   "301:star0.title"
+  ],
+  "id": 310
+ },
+ {
+  "kind": "patch",
+  "en": "The test that stops you dragging the budget bar of a finished colony looked at the star’s number instead of what the budget slot is, so a finished colony at the first star of the list could still have its bar dragged. The patch locks it like any other.",
+  "in": [
+   "301:star0.text"
+  ],
+  "id": 311
+ },
+ {
+  "kind": "patch",
+  "en": "Every star a winner named is in the next galaxies",
+  "in": [
+   "405:keptStarNames.title",
+   "mac405:keptStarNames.title"
+  ],
+  "id": 312
+ },
+ {
+  "kind": "patch",
+  "en": "The names winners gave stars were numbered one place late when a new galaxy was made: the first became “Hope”, the program’s own 191st name, and the last one named was never used. The patch puts every kept name in.",
+  "in": [
+   "405:keptStarNames.text",
+   "mac405:keptStarNames.text"
+  ],
+  "id": 313
+ },
+ {
+  "kind": "patch",
+  "en": "Players who are out don’t count as the poorest",
+  "in": [
+   "405:poorestOut.title",
+   "mac405:poorestOut.title"
+  ],
+  "id": 314
+ },
+ {
+  "kind": "patch",
+  "en": "A computer looking for the poorest and richest players skipped players who were out by a mark they no longer had, so an out player (with no money) usually counted as the poorest, and a computer was seldom “far the poorest”. The patch leaves out players who are out, as 3.0.1 and 5.0.5 do.",
+  "in": [
+   "405:poorestOut.text",
+   "mac405:poorestOut.text"
+  ],
+  "id": 315
+ },
+ {
+  "kind": "patch",
+  "en": "With 30 designs, the computers keep last turn’s designs",
+  "in": [
+   "405:designs30.title",
+   "mac405:designs30.title"
+  ],
+  "id": 316
+ },
+ {
+  "kind": "patch",
+  "en": "With 30 designs a computer goes on building last turn’s choices for the classes it hadn’t reached, but it kept them as places in its list of designs, which may since have moved, so it could build some other design or none. The patch keeps the designs themselves.",
+  "in": [
+   "405:designs30.text",
+   "mac405:designs30.text"
+  ],
+  "id": 317
+ },
+ {
+  "kind": "patch",
+  "en": "A computer’s fighter or Dreadnought fleet low on fuel looked for a colony within reach and then ignored the answer, so it always asked for a new colony where it was. The patch asks only when no colony is within the fuel it has left, as the 3.0.1.1 patch does.",
+  "in": [
+   "405:refuelCheck.text",
+   "mac405:refuelCheck.text"
+  ],
+  "id": 318
+ },
+ {
+  "kind": "patch",
+  "en": "When the computers sent old ships home, the program passed the fleet’s place in a list where the route finder wants its Range. The patch passes the Range.",
+  "in": [
+   "405:scrapRange.text",
+   "mac405:scrapRange.text"
+  ],
+  "id": 319
+ },
+ {
+  "kind": "patch",
+  "en": "A colony at the first star is treated like any other",
+  "in": [
+   "405:star0.title",
+   "mac405:star0.title"
+  ],
+  "id": 320
+ },
+ {
+  "kind": "patch",
+  "en": "Two tests looked at the star’s number instead of what the budget slot is, so a finished colony at the first star of the list could still have its budget bar dragged, and its people were left out of the population milestones. The patch treats it like any other colony.",
+  "in": [
+   "405:star0.text",
+   "mac405:star0.text"
+  ],
+  "id": 321
+ },
+ {
+  "kind": "patch",
+  "en": "Marking a ship type gives back every ship of it you ordered",
+  "in": [
+   "405:scrapTypeRefund.title"
+  ],
+  "id": 322
+ },
+ {
+  "kind": "patch",
+  "en": "Marking a ship type for scrapping in the build window gave back only one of the ships of it ordered there; the rest were built and then scrapped with the type. The patch gives them all back.",
+  "in": [
+   "405:scrapTypeRefund.text"
+  ],
+  "id": 323
+ },
+ {
+  "kind": "patch",
+  "en": "The rank past 1,000,000 master points has a name",
+  "in": [
+   "405:rankName.title"
+  ],
+  "id": 324
+ },
+ {
+  "kind": "patch",
+  "en": "From 1,000,000 master points the Master Point List showed “%s: %s” as the rank, a text meant to be filled in. The patch shows the top rank, Ho! Champion.",
+  "in": [
+   "405:rankName.text"
+  ],
+  "id": 325
+ },
+ {
+  "kind": "patch",
+  "en": "The Hall of Fame’s dates show the year’s last two digits",
+  "in": [
+   "405:hallYear.title"
+  ],
+  "id": 326
+ },
+ {
+  "kind": "patch",
+  "en": "The Hall of Fame and Hall of Shame printed the years since 1900, which read as two digits only until 1999: 2026 shows as 126. The patch shows the last two digits, so 2026 is 26.",
+  "in": [
+   "405:hallYear.text"
+  ],
+  "id": 327
+ },
+ {
+  "kind": "patch",
+  "en": "The Hall of Shame says “Loser:”",
+  "in": [
+   "405:loserColon.title"
+  ],
+  "id": 328
+ },
+ {
+  "kind": "patch",
+  "en": "The Hall of Shame’s summary labelled you “Loser”, without the colon every other label has. The patch adds it.",
+  "in": [
+   "405:loserColon.text"
+  ],
+  "id": 329
+ },
+ {
+  "kind": "patch",
+  "en": "A new technology level is reported by its own name",
+  "in": [
+   "405:techNames.title"
+  ],
+  "id": 330
+ },
+ {
+  "kind": "patch",
+  "en": "The report of a new technology level printed the next level’s name: Range 7 was “Fusion Pile” instead of “Topping off the Tanks”, and Miniaturization 20 was the program’s credits line. The patch prints the level’s own name, as the Mac 4.0.5 does.",
+  "in": [
+   "405:techNames.text"
+  ],
+  "id": 331
+ },
+ {
+  "kind": "patch",
+  "en": "Interest you can’t pay brings global warming",
+  "in": [
+   "original:globalWarming.title",
+   "palm:globalWarming.title",
+   "ios:globalWarming.title",
+   "android:globalWarming.title"
+  ],
+  "id": 332
+ },
+ {
+  "kind": "patch",
+  "en": "When your interest was more than this turn’s money and all you could still borrow, a test written the wrong way round (a sign slip) put it all on Ship Savings, however deep in debt, so the global warming the game has a message for never happened. The patch compares it the right way round, as 4.0.5 did: then your planets warm or cool away from your temperature and one of your fleets is scrapped for lack of funds.",
+  "in": [
+   "original:globalWarming.text",
+   "palm:globalWarming.text",
+   "ios:globalWarming.text",
+   "android:globalWarming.text"
+  ],
+  "id": 333
+ },
+ {
+  "kind": "patch",
+  "en": "Ships sent home to be scrapped are routed with their own Range",
+  "in": [
+   "original:scrapRange.title",
+   "palm:scrapRange.title",
+   "ios:scrapRange.title",
+   "android:scrapRange.title"
+  ],
+  "id": 334
+ },
+ {
+  "kind": "patch",
+  "en": "When the computers sent obsolete ships and Tankers home to be scrapped, the program passed the fleet’s place in a list where the route finder wants its Range, so the routes it found could be wrong. The patch passes the Range.",
+  "in": [
+   "original:scrapRange.text",
+   "palm:scrapRange.text",
+   "ios:scrapRange.text",
+   "android:scrapRange.text"
+  ],
+  "id": 335
+ },
+ {
+  "kind": "patch",
+  "en": "The meteor report names the meteor shower",
+  "in": [
+   "dos:meteorReport.title",
+   "mac20:meteorReport.title"
+  ],
+  "id": 336
+ },
+ {
+  "kind": "patch",
+  "en": "A colony wiped out by a meteor shower was reported as “… destroyed your colony”, naming whoever a report ten messages earlier happened to leave behind (where 2.0 itself could crash). The patch reports “A meteor shower destroyed your colony at …”.",
+  "in": [
+   "dos:meteorReport.text"
+  ],
+  "id": 337
+ },
+ {
+  "kind": "patch",
+  "en": "Organize Ships averages the fuel over every fleet",
+  "in": [
+   "dos:orgFuelCount.title"
+  ],
+  "id": 338
+ },
+ {
+  "kind": "patch",
+  "en": "Organize Ships gives every fleet of the design the average fuel used, but counted at most 11 fleets, so with 12 the average came out too high. The patch divides by the real number of fleets.",
+  "in": [
+   "dos:orgFuelCount.text"
+  ],
+  "id": 339
+ },
+ {
+  "kind": "patch",
+  "en": "The computers’ attack rating no longer wraps round",
+  "in": [
+   "dos:attack16.title"
+  ],
+  "id": 340
+ },
+ {
+  "kind": "patch",
+  "en": "The computers worked out a design’s strength in 16 bits, so from about Weapons 4 the sum wrapped round and they misjudged their own warships. The patch works it out in 32 bits, as 1.2 and 3.0.1 do.",
+  "in": [
+   "dos:attack16.text"
+  ],
+  "id": 341
+ },
+ {
+  "kind": "patch",
+  "en": "Old fighters sent home are routed with their own Range",
+  "in": [
+   "dos:scrapRange.title",
+   "mac20:scrapRange.title"
+  ],
+  "id": 342
+ },
+ {
+  "kind": "patch",
+  "en": "When the computers sent old fighters home, the program passed the fleet’s place in a list where the route finder wants its Range. It made no difference to play (the colony is always within reach), and the remake already routes these fleets by their own Range; it is listed so the patch covers every slip found.",
+  "in": [
+   "dos:scrapRange.text",
+   "mac20:scrapRange.text"
+  ],
+  "id": 343
+ },
+ {
+  "kind": "patch",
+  "en": "A fleet marked for scrapping while it was in hyperspace was reported “at” the star before the first one, which is part of the galaxy’s header: an empty name, and no metal (unless your fleet was the first player’s and the ninth home slot was the first star). The patch reports it “at hyperspace” with no metal, as 3.0.1 does.",
+  "in": [
+   "dos:scrapLimbo.text"
+  ],
+  "id": 344
+ },
+ {
+  "kind": "patch",
+  "en": "The German battle window’s two no-information lines are the right way round",
+  "in": [
+   "dos:deBattleLines.title",
+   "mac20:deBattleLines.title"
+  ],
+  "id": 345
+ },
+ {
+  "kind": "patch",
+  "en": "In the German version the battle window’s lines “You have no information.” and “You were destroyed immediately.” (strings 74 and 75) are swapped. The patch puts each in its place; it matters only when the game is played in German.",
+  "in": [
+   "dos:deBattleLines.text",
+   "mac20:deBattleLines.text"
+  ],
+  "id": 346
+ },
+ {
+  "kind": "patch",
+  "en": "No more than three messages a turn",
+  "in": [
+   "palm:palmMessages.title"
+  ],
+  "id": 347
+ },
+ {
+  "kind": "patch",
+  "en": "The game keeps room for three messages a turn, and the computers never send more, but nothing stopped you sending a fourth: it was written over your gifts for the turn and past the space the End Turn keeps for each player. The patch stops at three, as the Mac game did.",
+  "in": [
+   "palm:palmMessages.text"
+  ],
+  "id": 348
+ },
+ {
+  "kind": "patch",
+  "en": "The fastest engines and strongest noses are drawn",
+  "in": [
+   "palm:palmPictures.title"
+  ],
+  "id": 349
+ },
+ {
+  "kind": "patch",
+  "en": "A ship is drawn from an engine, a hull and a nose, but the Palm game has no picture for the top engine (6205) or the top nose (6105), so those ships were drawn with a part missing. The patch draws the highest engine and nose there are.",
+  "in": [
+   "palm:palmPictures.text"
+  ],
+  "id": 350
+ },
+ {
+  "kind": "patch",
+  "en": "The trademark sign and the bullet are shown",
+  "in": [
+   "ios:iosCharacters.title",
+   "android:iosCharacters.title"
+  ],
+  "id": 351
+ },
+ {
+  "kind": "patch",
+  "en": "The game’s texts came from the Mac, where “™” and “•” are other bytes than on the iPhone, so the tech names showed “PowerPCª” and “Speedy Gonzalezª” and the curse read “#!$@*$&@¥ª!”. The patch shows “™” and “•”.",
+  "in": [
+   "ios:iosCharacters.text",
+   "android:iosCharacters.text"
+  ],
+  "id": 352
+ },
+ {
+  "kind": "patch",
+  "en": "The Turkish spies’ report is its own report",
+  "in": [
+   "ios:trSpiesReport.title",
+   "android:trSpiesReport.title"
+  ],
+  "id": 353
+ },
+ {
+  "kind": "patch",
+  "en": "In the Turkish version the report of stolen technological secrets is a copy of the line-of-credit report. The patch writes it out in Turkish (the remake’s wording); it matters only when the game is played in Turkish.",
+  "in": [
+   "ios:trSpiesReport.text",
+   "android:trSpiesReport.text"
+  ],
+  "id": 354
+ },
+ {
+  "kind": "patch",
+  "en": "The Turkish colony-destroyed report translates “lost”",
+  "in": [
+   "ios:trLostWord.title",
+   "android:trLostWord.title"
+  ],
+  "id": 355
+ },
+ {
+  "kind": "patch",
+  "en": "In the Turkish version the report of a colony destroyed in battle left the word “lost” in English, glued to the number of ships. The patch words that sentence as the Turkish battle report does (the remake’s wording); it matters only when the game is played in Turkish.",
+  "in": [
+   "ios:trLostWord.text",
+   "android:trLostWord.text"
+  ],
+  "id": 356
+ },
+ {
+  "kind": "patch",
+  "en": "A colony wiped out by a meteor shower was reported as “… destroyed your colony”, naming whoever a report ten messages earlier happened to leave behind, or reading a name out of whatever memory lay past the game’s own data. The patch reports “A meteor shower destroyed your colony at …”.",
+  "in": [
+   "mac20:meteorReport.text"
+  ],
+  "id": 357
+ },
+ {
+  "kind": "patch",
+  "en": "A fleet marked for scrapping while it was in hyperspace was reported “at” the star before the first one, which is part of the galaxy’s header: one stray character (the letter of the 18th home slot’s star number, or none), and no metal unless the 8th home slot’s star number happened to be yours. The patch reports it “at hyperspace” with no metal, as 3.0.1 does.",
+  "in": [
+   "mac20:scrapLimbo.text"
+  ],
+  "id": 358
+ },
+ {
+  "kind": "patch",
+  "en": "The welcome report gives the right version",
+  "in": [
+   "mac405:welcomeVersion.title"
+  ],
+  "id": 359
+ },
+ {
+  "kind": "patch",
+  "en": "The first report of a game said “Spaceward Ho! Version 4.0.3”: the string was never updated for 4.0.5. The patch says 4.0.5.",
+  "in": [
+   "mac405:welcomeVersion.text"
+  ],
+  "id": 360
+ },
+ {
+  "id": 361,
+  "kind": "ui",
+  "en": "(fixed in this game by the %s patch: see Patch notes)",
+  "in": [
+   "ui.js"
+  ]
+ },
+ {
+  "id": 362,
+  "kind": "ui",
+  "en": "(fixed in the %s patch)",
+  "in": [
+   "ui.js"
+  ]
+ }
+]

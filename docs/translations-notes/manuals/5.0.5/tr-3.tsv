@@ -1,0 +1,74 @@
+141	{img1/}Borç
+142	Spaceward Ho!’da borca girebilirsin. Bu, gemi yapımına biriktirdiğinden fazla para harcayabileceğin anlamına gelir. Bütün gezegenlerinin toplam gelirinin beş katına kadar borç alabilirsin.
+143	Ne yazık ki borç aldığın paranın faizini ödemek zorundasın. Borcunun %15’i her sıra gelirinden kendiliğinden düşülür. Yüksek bir borç, terraforma, madenciliğe ve teknoloji araştırmasına harcayacak daha az paran kalması demektir. Borcunu ödemek için Gemi Tasarrufuna para koyman yeterli.
+144	Borçla deneyler yap. Kısa vadede verimliliğini çarpıcı biçimde artırabildiğini, ama uzun vadede büyük olasılıkla felaket olduğunu fark edeceksin.
+145	ABD’nin ulusal borcu 6 trilyon doları aşıyor. Devletin geliri yaklaşık 2 trilyon dolar. Vay be, büyümeye neden bu kadar az para kaldığını merak ediyoruz. Hımmm.
+146	Toplam gelirinin borcunun faizini bile karşılamadığı bir duruma düşersen kötü şeyler olur. Şimdiye kadar bu durumdan hiç kurtulmayı başaramadık. Bu duruma düşmemeni şiddetle öneririz.
+147	Gezegenleri Keşfetmek: Sıcaklık ve Yerçekimi
+148	{a1}{/a1}{em2}Bir noktada ana gezegenini bırakıp başka yaşanabilir gezegenler aramak için yakındaki yıldızları keşfetmeye biraz emek harcamak isteyeceksin. Her gezegenin iki önemli özelliği vardır: Sıcaklık ve Yerçekimi. {/em2}
+149	{a1}{/a1}{em2}Sıcaklık, bir yıldız sisteminde değiştirebileceğin her şeyi temsil eder: atmosferin bileşiminden gezegenin ekolojisine kadar. Ana gezegenin 72°’dir. Yeni bir gezegeni Terraform etmeye para harcadığında sıcaklığı 72°’ye yaklaşır. Sıcaklık 72°’ye ulaştığında gezegen olabileceği kadar iyidir ve Terraforma daha fazla harcayamazsın.{/em2}
+150	{a1}{/a1}{em2}Yerçekimi, bir yıldız sisteminde değiştiremeyeceğin her şeyi temsil eder: güneşin ışımasından uyduların gelgit kuvvetlerine kadar. Bazı yerler düpedüz ötekiler kadar yaşanabilir değildir. Ana gezegenin 1,00 G’dir ve bir gezegen buna ne kadar yakınsa halkı o kadar iyi durumda olur. 2,5 G’den çok büyük ya da 0,4 G’den küçük gezegenler hiçbir zaman kâr etmez ve uzun vadede kolonileştirmeye değmez. Tabii ki metâl bu kadar kıt bir mal olduğuna göre, bütün metâlini alacak kadar bir süre yaşanmaz bir gezegeni kolonileştirmekten kaçınmamalısın.{/em2}
+151	{a1}{/a1}{img2/}Gezegenler Nasıl Kolonileştirilir
+152	{a1}{/a1}Bir noktada elinde tutmak isteyeceğin leziz bir gezegen bulacaksın. 1,46 G ve 198° gibi bir şey olacak. 9.487 Metâli olacak ve ona karşı koyamayacaksın.
+153	{a1}{/a1}İlk adım bir tür Koloni Gemisi yapıp oraya göndermektir. (Başlangıç konumun “Gelişen” ya da “Bereketli” ise bir koloni gemisi senin için zaten yapılmış olur.) Gemi vardığında yeni bir gezegeni kolonileştirdiğini bildiren bir mesaj alırsın. “Sen Güneş’i kolonileştirdin.” gibi bir şey der.
+154	{a1}{/a1}Bu noktada Bütçe Penceresi’nde yeni yıldızın adıyla yeni bir yuvanın belirdiğini fark edeceksin. Bu gezegen için Terraform ve Madenciliğe parayı burada ayırırsın.
+155	{a1}{/a1}Bir gezegenin kârlı hâle gelmesi, harika bir gezegen olsa bile, biraz zaman alır. Onlarca yıl boyunca gezegeni terraform ederek ve kazarak para akıtacaksın. Halkın küçücük bir avuçtan Galaktik İmparatorluğuna katkıda bulunan canlı, kârlı bir ekonomiye büyümesini izleyeceksin. Bir gezegen başlangıçta ne kadar kötüyse onu kâra geçirmen o kadar uzun sürer.
+156	{a1}{/a1}Bir gezegeni Terraform etmeye ne kadar çok para harcarsan o kadar hızlı büyür. Ne yazık ki sıcaklık kusursuz bir 72° olduğunda bile, bütün gezegeni geçindirecek kadar insanın büyük olasılıkla hâlâ olmaz. Sabırlı ol, nüfus büyüyecek. Madencilik ve gemi yapımının nüfusun ne kadar hızlı büyüdüğüne hiçbir etkisi yoktur.
+157	{a1}{/a1}Bir gezegeni geçindirmenin temel maliyeti $7.500’dür. Ana gezegenin sırada yalnızca yaklaşık $30.000 ürettiğine göre, aynı anda yalnızca dört gezegeni kolonileştirmeye yetecek paran olur. En fazla. Büyük olasılıkla, en azından o kâra geçene kadar, yalnızca birini kolonileştirmek isteyeceksin. Yoksa bütün paranı yalnızca insanlarını hayatta tutmaya harcarsın ve gezegenleri geliştirmek, gemi yapmak ve yeni teknoloji araştırmak için elinde çok az şey kalır.
+158	{a1}{/a1}Pek çok kolonileştirilmiş gezegenin olması iyidir. Ne kadar çok kârlı gezegenin olursa o kadar çok para kazanırsın. Ne kadar çok para kazanırsan araştırmaya o kadar çok harcayabilirsin. Teknolojin ne kadar yüksekse bir düşmanın seni ezip geçme olasılığı o kadar düşüktür; tabii o yüksek teknolojiyle gemiler yaptıysan. Ayrıca pek çok gezegenin varsa bir ikisinin düşman gemilerince çiğnenmesini göze alabilirsin.
+159	{a1}{/a1}Bütün kolonilerinin iyi adamlara benzediğini fark edeceksin. Yani maske, koyu güneş gözlüğü, mohikan saç ya da küpe takmıyorlar. Basit: beyaz şapka sana düşer. Tabii ki öteki oyuncuların hepsi de iyi adamların kendileri olduğunu düşünüyor.
+161	{a1}{/a1}Bazen kendini metâl sıkıntısı içinde bulacaksın. İşte, ne kadar terraform edersen et ve ne kadar beklersen bekle hiçbir zaman kâr etmeyeceğini adın gibi bildiğin bir gezegeni kolonileştirmenin tam zamanı. Belki 3,5 G’dir, hatta daha kötü. Gezegeni kolonileştir, ama harcamasını Terraforma hiç para gitmeyecek biçimde ayarla. Hepsini Madenciliğe harca. Gezegenden istediğin kadar metâl aldığında onu “{em2} Tahliye et{/em2} ”. Orada yaptığın Uydular kalır, ama kolonicilerin gider.
+162	{a1}{/a1}Bazen bir gezegeni, sırf bir düşman metâlini almasın diye kazmak isteyebilirsin.
+163	{a1}{/a1}{img2/}Düşman Gezegenler Nasıl Yok Edilir
+164	{a1}{/a1}Bir düşman kolonisine bir filo gönder. Filon düşman gemilerini ve uydularını yok ettiğinde gezegenin kendisini dövmeye geçer ve halkını sürüler hâlinde öldürür. Gezegenin kendisi sert bir direniş gösterebilir, ama bu büyük olasılıkla yalnızca keşif kuvvetlerine karşı korunmaya yeter. İstila filona karşı gezegenin halkının tamamen silinmesi kuvvetle olasıdır. Düşman artık gezegenin sahibi olmaz. Onu kolonileştirmekte ya da başka ne istersen yapmakta özgür olursun. Tabii ki düşman canı sıkılıp onu geri almaya çalışabilir, bu yüzden dikkatli olmak iyi bir fikirdir.
+165	{a1}{/a1}{img2/}Farklı Gezegen Resimleri
+166	{a1}{/a1}Farklı türden gezegenlerin her birinin kendine özgü bir görünüşü vardır. Bu bölüm gezegen resimlerinin bir sözlüğüdür.
+167	{a1}{/a1}Kolonileştirilmiş, Kârlı Bir Gezegen
+168	{a1}{/a1}Bu, halkının kendini geçindirebilecek noktaya kadar büyüdüğü bir gezegendir. Yıldızlar arası çabana para bile sağlayabilir. Ana gezegenin böyledir.
+169	{a1}{/a1}Kâr Etme Olasılığı Olan Bir Gezegen
+170	{a1}{/a1}Bu kategorideki bir gezegen, yeterince zaman ve emekle bir gün kârlı olabilir. Onu kârlı yapmak için 72°’ye yaklaşana kadar terraform etmen ve halkına büyümesi için zaman tanıman gerekir.
+171	{a1}{/a1}Yarı Yaşanabilir Bir Gezegen
+172	{a1}{/a1}0,4 ile 0,5 G ya da 2,0 ile 2,5 G arasındaki bir gezegen bu kategoriye girer. Sonunda bu tür bir gezegen kârlı hâle getirilebilir. Yine de hiçbir zaman çok kârlı olmayacaktır, bu yüzden çoğu zaman en iyisi bu tür bir gezegeni kazıp bırakmaktır.
+173	{a1}{/a1}Yaşanmaz Bir Gezegen
+174	{a1}{/a1}Yerçekimi 2,5 G’den büyük ya da 0,4 G’den küçük bir gezegeni kârlı hâle getirmek neredeyse olanaksızdır. Yine de ender durumlarda stratejik nedenlerle böyle bir gezegeni elde tutmak iyi bir fikir olabilir. Geri kalan zamanlarda bütün Metâlini kaz ve onu “{em2} Tahliye et{/em2} ”; terraform etmeye uğraşma.
+175	{a1}{/a1}Talan Edilmiş, Yaşanmaz Bir Gezegen
+176	{a1}{/a1}Bu tür bir gezegen yalnızca hiçbir zaman kâr etmemekle kalmaz, kazabileceğin hiç metâli de yoktur. Iyy! Stratejik bir önemi yoksa ya da orada bir düşman üssü olmasından korkmuyorsan bu hurdayı rahat bırak.
+177	{a1}{/a1}Keşfedilmemiş Bir Gezegen
+178	{a1}{/a1}Bu, hiç gitmediğin bir gezegendir.
+179	{a1}{/a1}Yakında Keşfedilecek Bir Gezegen
+180	{a1}{/a1}Keşfedilmemiş bir gezegene bir filo gönderirsen soru işareti ünlem işaretine dönüşür ve yakında daha çok şey öğreneceğini bildirir.
+181	{a1}{/a1}Bir Düşman Gezegeni
+182	{a1}{/a1}Bir savaş kaybettiğin her gezegen düşman gezegeni olur. Bir gezegen, oraya başka bir filo gönderip bir savaş kazanana kadar düşman olarak kalır. Aslında bir düşman gezegenine filo gönderip orada kimseyi ya da başka bir düşmanı bulabilirsin. Gezegenler hakkındaki bütün bilgilerin en son orada bulunduğun zamana dayanır. Belli bir gezegende bulunmanın üzerinden uzun zaman geçtiyse o gezegen hakkındaki bilgilerin eskimiş olabilir.
+183	{a1}{/a1}Düşman gezegenleri türlü türlü kötü adamlara benzer. Her düşman oyuncunun kendi görünüşü olur, böylece nerede kiminle savaştığını anlarsın.
+184	{a1}{/a1}Bir Müttefik Gezegeni
+185	{a1}{/a1}Başka bir oyuncuyla müttefik olduğunda, Yıldız Haritası’ndaki simgesi bunu gösterecek biçimde değişir. Simgesi daha açık bir renge döner ve artık iyi adam olduğu için başının üstünde bir “hale” belirir.
+186	{a1}{/a1}Bir Savaş Gezegeni
+187	{a1}{/a1}Arada bir hiç gitmediğin bir yıldıza bir filo gönderir ve orada gücü seninkine yakın bir düşman filosu bulursun. Sen de düşman da ölürseniz bu gezegen resmini görürsün. Gezegeni henüz keşfetmediğini, ama kötü adamların yakında olduğunu bildiğini söyler. Henüz keşfetmediğin bir gezegende iki başka oyuncunun savaştığı büyük bir savaşı fark edersen de bu gezegeni görürsün.
+188	{a1}{/a1}Uydular
+189	{a1}{/a1}Herhangi bir gezegene uydu yerleştirirsen, o gezegenin yıldız haritasında savunulduğunu bildiren bir halkası olur.
+190	{a1}{/a1}Filolar
+191	{a1}{/a1}Herhangi bir gezegende filon varsa, filoyu ve filodaki gemilerin tipini gösteren küçük simgeler gezegenin sağ üst köşesinden başlayıp aşağı doğru belirir. Biliyoruz, noktalar ay gibi görünebilir, ama bu seni aldatmasın. Bir filoyu seçmek için filo “noktalarına” tıkla. Bir filoyu başka bir gezegene göndermek için tıklayıp sürükle.
+192	{a1}{/a1}Müttefik Filolar
+193	{a1}{/a1}Gezegenlerinden birinde konaklamış dost filolar görürsen, orada onların da bir filo simgesi olur. {span2} {/span2}Ve hayır, müttefiklerinin filolarına tıklayıp sürükleyerek nereye gideceklerini söyleyemezsin.
+194	İnce Yazılar
+195	{span1}Bu yazılım sana bir lisansla sağlanır; bu bir satış değildir.{/span1}
+196	{span1}Bu yazılımı sabit diskine koyabilirsin. Bu yazılımın bir yedek kopyasını alabilirsin. Bu yazılımı en çok iki ayrı makineye, ama yalnızca kendi kişisel kullanımın için kurabilirsin. Başka biri kendi makinesinde oynamak isterse kendi kopyasına ihtiyacı vardır.{/span1}
+197	Herhangi bir nedenle bu yazılımın performansının satın alındıktan sonraki ilk 30 gün içinde tatmin edici olmadığını düşünürsen, parasının tamamının iadesi için onu satın aldığın yere geri verebilirsin. Bu yazılım çeşitli koşullar altında test edildi ve tatmin edici ve güvenli biçimde çalıştığına inanıyoruz. Ancak senin makinende çalışacağına dair hiçbir garanti verilemez. Delta Tao, böyle bir zarar olasılığı konusunda uyarılmış olsa bile, yazılımın satın alma bedelini iade etmenin dışında, hiçbir koşulda bilgisayar sistemine ve/veya kişine gelecek zarardan (gece gündüz Spaceward Ho! oynamaktan kaynaklanan göz hasarı dahil) sorumlu tutulamaz.
+198	{span1}Hiçbir nedenle bize dava açma, yoksa havalı oyunlar yazmayı bırakır ve bütün suçu sana atarız.{/span1}
+199	{span1}Tebrikler! 9 numaralı gizli mesajı buldun. Birinin bunları okuduğunu biliyorduk.{/span1}
+200	{a1}{/a1}Gelecekteki Yönelimler
+201	{a1}{/a1}Spaceward Ho! önümüzdeki birkaç yılda büyük olasılıkla bazı revizyonlardan geçecek, ama sade ve eğlenceli kalmaya devam etmeye çalışacak. Önerilere açığız: ilk kullanıcıların önerdiği pek çok şey artık oyunda. İşleri daha sade ve daha eğlenceli yapan önerilerin uygulanma olasılığı en yüksektir.
+202	{a1}{/a1}Ho! için bize öneri vermenin en iyi yolu yazılı olarak bildirmektir. Bizimle telefonda konuştuğunda, öneri programcıya ulaşmadan önce o kadar çok kez aktarılır ki öneriyi yapanın aklından ne geçtiğini gerçekten anlayamayız.
+203	Delta Tao Oyunları
+204	Delta Tao’nun Öteki Oyunları
+205	{em1}Strategic Conquest{/em1}
+206	Bir başka mükemmel ağ strateji oyunu. Spaceward Ho! gibi uzayda geçmek yerine, tek bir dünyayı keşfedip fethedersin. Rakibini alt etmeye çalışırken ordular, uçaklar, bombardıman uçakları, savaş gemileri, uçak gemileri, denizaltılar ve çok daha fazlasını yaparsın. Tabii ki tek oyuncu için de harika. Yalnızca Macintosh.
+207	{em1}Return to Dark Castle{/em1}
+208	Klasikleşmiş Dark Castle ve Beyond Dark Castle’ın devamı. Kahramana gizemli Dark Castle’da yarasalarla, farelerle, süpürgelerle, tuzaklarla ve kötü şöhretli tek gözlü dirseksiz mutantlarla savaştığı gülünç maceralarında rehberlik et. Yalnızca Macintosh.
+209	Eric’s Ultimate Solitaire
+210	En iyi solitaire oyunu, nokta. 23 harika oyun, hile, meydan okuma oyunları, harika grafikler ve sesler ve çok daha fazlasını içerir. En sevilen oyunumuz. Macintosh ya da Windows.
+211	Clan Lord
+212	Herhangi bir bilgisayarda bulabileceğin en eğlenceli ve en dostça devasa çok oyunculu internet rol yapma oyunu. Canavarlarla savaşmak, görevleri çözmek ve keşfetmek için dünyanın dört bir yanından arkadaşlarına katıl. Yalnızca Macintosh.
+213	Terimler Sözlüğü
+214	Sözlük
+215	Müttefik

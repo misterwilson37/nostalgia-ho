@@ -1,0 +1,45 @@
+62	{a1}{/a1}{img2/}Version 1 zu 2
+63	{a1}{/a1}Wir haben die Planeten-, Budget- und Flottenfenster in das Kartenfenster integriert und nach links verschoben, um Bildschirmplatz zu sparen. Wir haben Nachrichtenaustausch und Kommunikation hinzugefügt. Wir sind für Schiffe und Planeten auf volle Farbe umgestiegen. Die Computerstrategien wurden von Grund auf neu geschrieben. Die Option „Langsames Spiel“ wurde entfernt; Partien liegen jetzt zwischen den alten langsamen und schnellen Geschwindigkeiten. Wir sind auf ein Ausgabenfenster mit logarithmischer Skala umgestiegen, um bei niedrigen Ausgaben eine bessere Auflösung zu ermöglichen.
+64	{a1}{/a1}Wir haben dafür gesorgt, dass die Computerspieler ihre Schiffe und Flotten (und sich selbst) so benennen wie Menschen. Wir haben einen „Hauptspieler“ (Spielverwalter) hinzugefügt, der in einem Mehrspielerspiel die Aktualisierung zum nächsten Zug erzwingen kann. Wir haben die Funktionen für zeitbegrenzte Züge entfernt, weil wir Spieler mit unterschiedlichen Uhreinstellungen nicht berücksichtigen konnten. Wir haben die Kosten der Technologien geändert, um das Spiel auszubalancieren, und dafür gesorgt, dass das Tempo den Kampf beeinflusst. Wir haben das Drucken zum Laufen gebracht.
+65	{a1}{/a1}{img2/}Version 2 zu 3
+66	{a1}{/a1}Wir haben die Ausgaben an das Einkommen gekoppelt statt an die gesamte Geldmenge. Wir haben dafür gesorgt, dass Schiffe in dem Zug gebaut werden, in dem man sie bestellt, statt in der alten Bauwarteschlange. Wir verteilen das Geld automatisch auf Ihre Planeten, damit Sie sie nicht versehentlich unterfinanzieren können. Wir haben das Verlaufsdiagramm hinzugefügt, damit Sie Ihre langfristigen Trends sehen. Wir haben einige völlig überflüssige Grafiken und Klänge hinzugefügt. Wir haben ein paar neue Galaxientypen hinzugefügt.
+67	{a1}{/a1}Wir haben außerdem eine Menge neuer Nachrichten hinzugefügt, die Computerspieler mit Freunden und Feinden umgehen lassen und die Computer halbwegs intelligente Nachrichten an alle schicken lassen. Sie können jetzt Geld und Metall an Ihre Freunde (oder Feinde) geben oder vor ihnen kapitulieren.
+68	{a1}{/a1}{img2/}Version 3 zu 4
+69	{a1}{/a1}Wir haben viele neue Schiffstypen hinzugefügt, darunter Tanker, Schlachtschiffe, Bioschiffe und Täuschschiffe. Wir haben Satelliten doppelt so stark (und teuer) gemacht.
+70	{a1}{/a1}Wir haben das Spiel PowerPC-nativ gemacht und Funktionen hinzugefügt, die das Spiel beschleunigen, etwa „nur wichtige Nachrichten zeigen“ und die automatische Korrektur der Ausgaben.
+71	{a1}{/a1}Wir haben das Mehrspielerspiel deutlich verbessert. Die Zuguhr sorgte dafür, dass Partien im richtigen Tempo vorankamen, Bündnisse unter besten Kumpeln wurden hinzugefügt, das Kampfglück wurde optional, und wir haben ein Chatfenster und Textnachrichten hinzugefügt. Züge werden jetzt lokal aktualisiert statt auf dem Hauptrechner, sodass Netzwerkaktualisierungen viel schneller sind. Wir haben Spielern erlaubt, einem Spiel beizutreten, nachdem es begonnen hat.
+72	{a1}{/a1}Wir haben die Bedienbarkeit verbessert: Mehrere Dialoge (besonders Schiffe bauen) wurden repariert, Hilfemeldungen wurden hinzugefügt, und wir haben das Terraformen zu einem Schieberegler statt des alten Kuchendiagramms gemacht. Und natürlich wurden Grafiken und Klänge stark verbessert.
+73	{a1}{/a1}Wir haben die Schwierigkeitsstufen geändert und Meisterpunkte und viele weitere Statistiken hinzugefügt.
+74	{a1}{/a1}{img2/}Version 4 zu 5
+75	Sieben Jahre sind eine lange Zeit zwischen zwei Überarbeitungen, man könnte also sagen, dass Spaceward Ho! unter der Haube allmählich in die Jahre kam. Nicht für den allgemeinen Gebrauch, denn Sie können Version 1.0 immer noch in der neuesten Version von MacOS X spielen (welche anderen Programme können das?), aber als wir beschlossen, noch einen Haufen Funktionen hinzuzufügen, musste es, nun ja, neu geschrieben werden.
+76	Für alle, die akronymkonforme Anwendungen mögen: Version 5.0 ist jetzt PowerPC, Carbon, multithreaded, TCP/IP und OS-X-freundlich.
+77	Was die Funktionen angeht (auf der Haube), gibt es in Version 5.0 des Ho! eine ganze Menge Neues. Trotzdem werden Sie, wenn Sie 4.0 kennen, mit der neuen spielen und alles herausfinden können. Wir geben Ihnen aber diese praktische Liste der neuen Funktionen, damit Sie wissen, was Sie bekommen.
+78	Systemvoraussetzungen
+79	Spaceward Ho! 5.0 ist größer als je zuvor und benötigt etwa 20 Megabyte Festplattenplatz, 10 Megabyte RAM und OS 8.6 oder neuer.
+80	Internetspiel
+81	Treten Sie spacewardho.net bei, um mit Menschen aus aller Welt zu spielen.
+82	Klügere Computer
+83	Die Computer können jetzt Bio- und Tankerschiffe einsetzen, Angriffe auf mehrere Planeten fliegen und sparen im Endspiel besser mit ihrem Metall.
+84	Mehrparteienkämpfe
+85	Wenn mehrere Spieler gleichzeitig an einem Stern ankommen, gibt es jetzt einen einzigen großen Kampf, in dem sich Verbündete im Gefecht zusammenschließen. (Manchmal schießen auch zwei mit Ihnen Verbündete aufeinander.)
+86	Gruppierte Flotten
+87	Sie können mehrere Schiffstypen zu einer einzigen Flotte zusammenfassen, damit sie sich leichter bewegen lassen und Flotten verschiedener Geschwindigkeit zusammenbleiben.
+88	Kampfoptionen
+89	Sie können jedem Schiffstyp einer Flotte andere Kampfoptionen geben, sodass manche voll auf Angriff gehen (mit einem Waffenbonus und einem Schildabzug) oder auf Verteidigung. Und Sie können einige Schiffe – meist Ihr Kolonieschiff – hinter der Hauptflotte herfliegen lassen, sodass sie erst eingreifen, wenn der Hauptkampf vorbei ist.
+90	Flottenrouten
+91	Sie können jetzt mit gedrückter Wahltaste auf eine lange Route für eine Flotte klicken, damit sie, soweit der Treibstoff reicht, eine Folge von Sternen besucht.
+92	Neue Radikaltechniken
+93	Dazu gehören bessere Forschung, höhere Sparzinsen, niedrigere Kreditzinsen und vieles mehr.
+94	Schneller und einfacher
+95	Wir sind stolz darauf, dass Spaceward Ho! entgegen der allgemeinen Neigung von Software, immer aufgeblähter zu werden, mit jeder Version leichter zu spielen und schneller geworden ist. Version 5 ist die bisher schnellste.
+96	Neue Benutzeroberfläche
+97	Jede Flotte hat ihren eigenen Punkt auf der Sternkarte, und Sie können eine Flotte einfach zu ihrem Ziel ziehen, um sie zu bewegen. Kontextmenüs gibt es auch.
+98	Nativ für OS X
+99	Spaceward Ho! 5 ist für den optimalen Einsatz unter OS X oder OS 8 oder 9 „carbonisiert“.
+100	Kooperatives Spiel
+101	Mehrspielerspiele können automatisch alle Menschen gegen die Computer antreten lassen, für lustige und freundschaftliche Partien.
+102	Neue Ostereier
+103	Aber hier können wir Ihnen nichts darüber verraten. Sie werden sie finden oder im Netz von ihnen hören.
+104	Aktualisierungen
+105	Software-Aktualisierungen für Spaceward Ho! (sobald wir sie veröffentlichen) finden Sie auf unserer Website unter http://www.deltatao.com
+106	Danke an alle, die Vorschläge geschickt haben, ob persönlich, auf ihrer Garantiekarte, auf comp.sys.mac.games oder am Telefon. Wir haben alles in Betracht gezogen, was irgendjemand vorgeschlagen hat, und auch wenn wir nicht jede neue Idee umsetzen konnten, werden Sie, denken wir, vieles finden, das wir umgesetzt haben.

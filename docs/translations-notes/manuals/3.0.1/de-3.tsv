@@ -1,0 +1,128 @@
+348	Ist dagegen {i1}nichts{/i1} kopiergeschützt, kopieren die Leute Software, sobald sie ihr Softwarebudget verbraucht haben. Sie lernen aus erster Hand, welche Programme gut und nützlich sind. Im nächsten Jahr treffen sie fundierte Entscheidungen darüber, welche Software sie kaufen. In der Zwischenzeit finden sie ihren Computer ein nützlicheres und freundlicheres Werkzeug, benutzen ihn mehr und empfehlen ihn ihren Freunden wärmstens, die dann zu Softwarekäufern werden.
+349	Es gibt zwei Probleme. Erstens: In einer Welt, in der manche Programme kopiergeschützt sind und andere nicht, neigen die Leute womöglich dazu, die kopiergeschützten Sachen zu {i1}kaufen{/i1}, da dies der einzige Weg ist, sie zu bekommen, und die ungeschützte Software {i2}raubzukopieren{/i2}. Das belohnt (zumindest kurzfristig) die Leute, die der Branche schaden, und bestraft die, die ihr helfen. Eine Folgerung aus der „Tragik der Allmende“, von der wir in der Grundschule gelesen haben.
+350	Zweitens: Verlage ohne Kopierschutz werden es schwerer haben, schlechte Software mit massiver Werbung zu verkaufen. Da die Leute Software eher ausprobieren, bevor sie sie kaufen, verkaufen Firmen Software nur noch an Leute, die sie wirklich brauchen und nützlich finden. Das heißt, Firmen mit minderwertigen Produkten, aber großen Budgets, sollten den Kopierschutz {i1}mögen{/i1}.
+352	Bevor uns die Software Publishers Association lynchen lässt (sie behauptet, „jedes Jahr gehen durch Piraterie Milliarden Dollar Umsatz verloren“), erfinden wir wenigstens ein {i1}bisschen{/i1} Beweismaterial für unsere Theorie. Erinnern Sie sich, als die Kassette erfunden wurde? Plötzlich konnten die Leute Schallplatten wahllos kopieren, und die Plattenfirmen konnten nichts dagegen tun. „Wir sind verloren!“, riefen sie. „Jetzt verkaufen wir von jeder Platte nur noch eine!“ Was geschah wirklich? Die Musikbranche hob auf ein zuvor unvorstellbares Niveau ab und brachte mehr Gewinn für mehr Künstler als je zuvor.
+353	Als es die ersten Videorekorder gab, konnten die Leute {i1}Filme{/i1} wahllos kopieren, und die Filmfirmen konnten kaum etwas dagegen tun. „Wir sind verloren!“, riefen sie. „Jetzt verkaufen wir nie wieder einen Film!“ Was geschah? Die Filmbranche hob auf ein zuvor unvorstellbares Niveau ab und brachte mehr Gewinn für mehr Menschen als je zuvor.
+355	Einstellungen
+356	Wenn Sie {i1}Spaceward Ho!{/i1} zum ersten Mal starten, wird eine Einstellungsdatei namens „{i2}Spaceward Ho!{/i2} Prefs“ angelegt. Haben Sie System 7, wird sie im Ordner „Preferences“ im Systemordner Ihres Startvolumes angelegt. Andernfalls wird sie im selben Verzeichnis wie das Programm {i3}Spaceward Ho!{/i3} angelegt.
+359	Um ganz neu anzufangen (etwa wenn Sie einmal ein Schiff nach Ihrer neuen Exfreundin benannt haben und der Anblick ihres Namens schmerzliche Erinnerungen weckt), werfen Sie einfach die Einstellungsdatei weg. Alle diese Informationen werden gelöscht.
+360	Die meisten Einstellungen nehmen Sie im Dialog „{b1}Einstellungen…{/b1}“ im Menü „{b2}Optionen{/b2}“ vor.
+361	Flottenwege anzeigen
+362	Mit dieser Option zeigt {i1}Spaceward Ho!{/i1} eine gepunktete Linie, wenn Ihre Flotten irgendwohin unterwegs sind. Je näher die Flotten ihrem Ziel kommen, desto kürzer wird die Linie. Das ist praktisch und informativ.
+363	Planetenliste automatisch sortieren
+364	Damit werden Ihre Planeten jeden Zug nach Einkommen sortiert. Das heißt, Ihre besten Planeten stehen immer unten in der Liste (da Sie sich vermutlich nicht um sie kümmern müssen) und Ihre ganz neuen Planeten ganz oben. So müssen Sie die Liste nicht nach den wichtigen Planeten durchsuchen. Wenn Sie möchten, können Sie diese Option ausschalten und die Planeten einfach wie früher in die gewünschte Reihenfolge ziehen. Wir empfehlen es aber nicht.
+365	Ereignismeldungen anzeigen
+366	Ist dieser Punkt ausgewählt, werden alle Ereignismeldungen zu Beginn jedes Zuges in der linken unteren Ecke der Karte angezeigt. Klicken Sie auf die Meldung oder drücken Sie die Return-Taste, um zur nächsten zu gelangen.
+367	Alle Meldungen erscheinen im Berichtsfenster, egal ob dieser Punkt angekreuzt ist oder nicht.
+368	Angekündigte Kämpfe ansehen
+370	Kampfgeschwindigkeit einstellen
+372	Abfragezeit einstellen
+373	Die Abfragezeit bestimmt, wie oft der Computer die Spieldatei prüft, um zu sehen, wer seinen Zug beendet hat und wer nicht. Je kürzer die Abfragezeit, desto früher weiß der Computer, wann alle fertig sind. Leider sollten Sie die Abfragezeit ziemlich lang halten, wenn Sie mit vielen Leuten in einem langsamen Netzwerk spielen (AppleTalk statt EtherTalk), um übermäßigen Netzwerkverkehr zu vermeiden.
+374	Lesetipps
+375	Das sind ein paar Bücher, die nichts mit Macintosh-Software zu tun haben, die wir aber immer wieder gern lesen. Außerdem finden wir, dass sie etwas über die Philosophie von Delta Tao aussagen.
+376	{i1}The Tao of Pooh{/i1} (Das Tao von Pu dem Bären), von Benjamin Hoff, Penguin Books, New York, 1982. Das beste Buch über den Taoismus überhaupt.
+377	{i1}Calvin and Hobbes{/i1} (Calvin und Hobbes), von Bill Watterson, Andrews and McMeel, Kansas City, 1987.
+378	{i1}The Macintosh Way{/i1} (Der Macintosh-Weg), von Guy Kawasaki, Scott, Foresman and Company, Glenview, Illinois, 1989.
+379	{i1}Surely You Must Be Joking, Mr. Feynman{/i1} (auf Deutsch: „Sie belieben wohl zu scherzen, Mr. Feynman!“), von Richard Feynman.
+380	Kämpfe ansehen
+381	Manchmal stoßen Ihre Schiffe auf Schiffe anderer Spieler. Dann kämpfen sie, bis eine Seite tot ist. Zugegeben, das macht ein friedliches Nebeneinander nicht leicht, aber dies {i1}ist{/i1} ein Kriegsspiel. Jedenfalls wollen Sie nach einem Kampf wissen, was zum Kuckuck passiert ist. Es gibt ein paar Wege, das herauszufinden. Erstens: Wenn Sie im Dialog „{b3}Einstellungen…{/b3}“ den Eintrag „{b2}Kämpfe ansehen{/b2}“ angekreuzt haben, bekommen Sie zu Beginn jedes Zuges eine Zusammenfassung der Kämpfe.
+382	Sie können auch einen beliebigen Stern auswählen und den letzten Kampf an diesem Stern ansehen, indem Sie im Menü „{b2}Galaxis{/b2}“ den Eintrag „{b1}Kampf bei Proxima ansehen{/b1}“ (oder wie der Stern heißt) wählen. Gab es an einem Stern zwei oder mehr Kämpfe, können Sie auf diese Weise nur den letzten sehen.
+383	Doppelklicken Sie auf einen Stern, um den letzten Kampf dort anzusehen.
+385	Wie schnell {i1}Spaceward Ho!{/i1} den Kampf abspielt, stellen Sie im Dialog „{b2}Einstellungen…{/b2}“ ein.
+387	Funksprüche senden
+388	Sie können in einer Partie {i1}Spaceward Ho!{/i1} anderen Spielern Funksprüche senden. Da die Computerspieler Nachrichten verstehen und selbst senden müssen, haben wir uns eine einfache Sprache für alle im Spiel ausgedacht.
+389	Um einen Funkspruch zu senden, wählen Sie im Menü „{b2}Galaxis{/b2}“ einfach „{b1}Funkspruch senden…{/b1}“. Es erscheint ein Dialog, in dem Sie festlegen, an wen Sie senden, was Sie sagen und dergleichen. Am besten lernen Sie alle Nachrichten, indem Sie sie alle ausprobieren.
+390	Die Nachrichten wirken unterschiedlich auf den Empfänger. Sagen Sie einem Spieler, dass Sie ihn hassen, mag er Sie tendenziell weniger als zuvor. Sagen Sie, dass Sie ihn mögen, mag er Sie vielleicht auch, vielleicht aber nicht.
+391	Die Computerspieler lügen in ihren Nachrichten gelegentlich, manche mehr als andere. Bei manchen Nachrichten können sie aber nicht lügen, genau wie Sie nicht.
+392	Schiffe
+394	Die Schiffe in {i1}Spaceward Ho!{/i1} sind unglaublich groß und teuer. Ihr erstes Kolonieschiff verschlingt zum Beispiel fast ein Drittel der gesamten Ressourcen Ihres Planeten sowie die gesamte industrielle Produktion des Planeten über {i2}dreißig Jahre{/i2}. Es ist ein großer Kahn.
+395	Schiffe bauen
+396	Schiffe können Sie in jeder Ihrer Kolonien bauen. Klicken Sie dazu auf den Planeten, auf dem Sie Schiffe bauen wollen, und wählen Sie im Menü „{b2}Schiffe{/b2}“ den Eintrag „{b1}Schiffe bauen/entwerfen…{/b1}“ oder doppelklicken Sie einfach auf den Planeten. Ein großer Dialog erscheint. In diesem Dialog können Sie sowohl Schiffe bauen als auch neue Schiffstypen entwerfen.
+398	Schiffe bewegen
+399	Um eine Flotte zu bewegen, klicken Sie einfach auf den Planeten, auf dem sie steht, und ziehen dorthin, wohin sie fliegen soll. Wenn Sie das Ziel erreichen können, sehen Sie einen Pfeil entlang der Route der Flotte. Lassen Sie die Maus los, hören Sie ein „Hyahh!“, das Ihnen sagt, dass der Kurs gesetzt ist. Wenn Sie den Zug beenden, fliegt das Schiff los.
+401	Damit eine Flotte stillhält oder ihre Bewegung abgebrochen wird, klicken Sie auf den Planeten der Flotte und halten die Maustaste eine Sekunde gedrückt. Haben Sie es richtig gemacht, hören Sie beim Loslassen der Maus ein „Whoa!“.
+402	Haben Sie an einem Planeten mehr als eine Flotte, wählen Sie die zu bewegende Flotte, indem Sie in den Budgetinformationen auf ihren Namen klicken. Hat eine Flotte ein Ziel und will sich bewegen, wenn Sie den Zug beenden, steht ihr Name {b1}fett{/b1}, damit Sie es wissen. Drücken Sie die Taste {i2}TAB{/i2}, wählt das Spiel automatisch die nächste Flotte an diesem Planeten.
+403	Eine Flotte tankt automatisch auf, sobald sie einen Planeten erreicht, der Ihnen oder Ihren Verbündeten gehört. Hat eine Flotte nicht genug Treibstoff zum Abflug, können Sie ein Kolonieschiff zu diesem Planeten schicken, ihn einen Zug lang kolonisieren und dann alle abfliegen lassen. Das heißt, ein Kolonieschiff dient auch als Tanker.
+405	Flotten ordnen
+406	Manchmal möchten Sie eine Flotte in Teile aufteilen oder mehrere Flotten zusammenlegen. Wählen Sie dazu im Menü „{b2}Schiffe{/b2}“ den Eintrag „{b1}Flotten ordnen…{/b1}“. Klicken Sie dann auf die Schiffe und ziehen Sie sie hin und her, bis sie so verteilt sind, wie Sie es wollen. Leider kann eine Flotte nur Schiffe desselben Typs enthalten (um die Dateigröße zu verringern).
+407	Flotten und Schiffe verschrotten
+408	Im Lauf des Spiels werden Sie feststellen, dass Metall knapp ist und Ihre veralteten Schiffe so gut wie nutzlos sind. Vielleicht möchten Sie einige Ihrer älteren Schiffe loswerden. 75 % des Metalls einer Flotte an Ihren Kolonien holen Sie zurück, indem Sie die Flotte verschrotten (wählen Sie im Menü „{b2}Schiffe{/b2}“ den Eintrag „{b1}Aktuelle Flotte verschrotten{/b1}“). Oder Sie verschrotten einen ganzen Schiffstyp (klicken Sie im Dialog „{b4}Schiffe…{/b4}“ bei einem bestimmten Typ auf „{b3}Diesen Typ verschrotten{/b3}“).
+409	Wenn Sie einen Schiffstyp oder eine Flotte zum Verschrotten markieren, wird sie erst verschrottet, wenn Sie den Zug beenden. Bekommen Sie bis dahin kalte Füße, können Sie einfach im Dialog „{b2}Schiffe…{/b2}“ auf die Taste „{b1}Typ nicht verschrotten{/b1}“ klicken oder im Menü „{b4}Schiffe{/b4}“ den Eintrag „{b3}Flotte nicht verschrotten{/b3}“ wählen.
+410	Wollen Sie nur einen Teil einer Flotte verschrotten, teilen Sie die Flotte im Dialog „{b1}Flotten ordnen…{/b1}“ in die Schiffe, die Sie behalten wollen, und die, die Sie verschrotten wollen.
+411	Verschrotten Sie Schiffe, die sich über einer Kolonie befinden, geht das Metall sofort in Ihren globalen Vorrat, und Sie können es sofort verwenden. Gehört Ihnen der Planet unter den Schiffen nicht, fällt das Metall auf den Planeten. Wer ihn als Nächster kolonisiert, kann dann das Metall Ihrer verschrotteten Schiffe abbauen.
+412	Schiffe entwerfen
+413	Das ist vielleicht der coolste Teil des Spiels. Wenn Ihre Technik steigt, werden Sie anfangen wollen, fortschrittlichere Schiffe mit diesen neuen Technologien zu bauen. Das ist leicht. Stellen Sie im Dialog „{b1}Schiffe bauen/entwerfen…{/b1}“ einfach die Technikstufen so ein, wie Ihr neuer Typ sein soll. Sie bewegen dazu nur die Schieberegler, um die Eigenschaften des neuen Schiffs festzulegen. (Das rechte Ende des Schiebereglers entspricht immer Ihrer aktuellen Technikstufe.) Wenn Ihr Schiff so ist, wie Sie es wollen, bauen Sie einfach eines (mit der Taste „+“), und der Prototyp wird automatisch entworfen und gebaut.
+415	Kolonieschiffe
+418	Hat ein Planet Satelliten, hat er auf der Sternkarte einen Ring um sich.
+419	Späher und Kampfschiffe
+420	Späher und Kampfschiffe sind Ihre Grundschiffe. Der Unterschied zwischen Spähern und Kampfschiffen ist ein Kompromiss zwischen Triebwerken und Waffen. Späher können eine Reichweite haben, die zwei Einheiten über Ihrer Reichweitentechnik liegt. Leider liegt ihre maximale Waffen- und Schildtechnik eine Stufe unter Ihren aktuellen Stufen. Das macht Späher ideal zum Erkunden, aber nicht besonders gut im Kampf.
+421	{i1}Spaceward Ho!{/i1} setzt jeden Späher automatisch in seine eigene Flotte, damit er unabhängig losfliegen und erkunden kann. Kampfschiffe schließen sich automatisch zu einer Gruppe zusammen.
+422	Entwicklungskosten
+424	Schiffskarte: Minnow (2/2), Kolonieschiff
+425	Schiffskarte: Berry (2/2), Satellit
+426	Schiffskarte: Patton (2/2), Kampfschiff
+427	Tastenkürzel
+430	Sie können den Maßstab der Sternkarte ändern, um die ganze Galaxie besser zu überblicken oder einen bestimmten Abschnitt genauer anzusehen. Wählen Sie dazu im Menü „{b3}Galaxis{/b3}“ „{b1}Vergrößern{/b1}“ oder „{b2}Verkleinern{/b2}“. Die Tastenkürzel dafür sind Befehlstaste-Minus beziehungsweise Befehlstaste-Plus. Beim vollständigen Herauszoomen gehen viele Einzelheiten verloren.
+433	Wenn Sie viel Geld sparen, fällt es Ihnen vielleicht schwer, nur ein wenig Geld für einen Stern auszugeben. Für mehr Genauigkeit am unteren Ende der Budgetbalken klicken Sie oben im Budget-Balkendiagramm auf das Wort „Linear“. Es wird in eine „Log“-Skala umgeschaltet. Die Balken der Technikausgaben sind immer logarithmisch.
+434	Wenn Sie viele Sterne kolonisieren, werden Sie bemerken, dass die Zahl der Planeten in Ihren Budgetbalken zu groß wird, um auf den Bildschirm zu passen. Sie müssten dann scrollen, um alle Ihre Planeten zu sehen. Stattdessen können Sie die Planeten, die Ihnen wichtig sind, an dieselbe Stelle der Liste verschieben. Klicken Sie in der Budgetliste auf den Namen eines Planeten und ziehen Sie ihn an die gewünschte Stelle. Es ist eine gute Idee, die Balken für Ersparnisse und Technik ganz nach oben zu ziehen, damit Sie sie immer sehen.
+435	Eine verlorene Flotte können Sie schnell auswählen und anspringen, indem Sie die Flotte im Dialog „{b1}Liste der Flotten…{/b1}“ auswählen und „{b2}Zur Flotte{/b2}“ wählen.
+436	Um einen interessanten Stern zu finden, können Sie „{b1}Liste der Sterne…{/b1}“ wählen und auf die Taste „{b2}Zum Stern{/b2}“ klicken (wenn es ein erforschter Stern ist). Oder fangen Sie einfach an, den Namen des Sterns auf der Tastatur einzutippen.
+439	System 7
+440	Am besten spielen Sie {i1}Spaceward Ho!{/i1} unter System 7. Mit System 7 können Sie jeden Computer zu einem Computer {i2}und{/i2} einem Dateiserver machen. So kann jemand auf seinem Rechner ein Spiel erstellen und andere sich anmelden und mitspielen lassen. Schalten Sie dazu FileShare ein, indem Sie, nachdem Sie Ihren Spielordner oder Ihre Festplatte gewählt haben, im Menü „{b4}Datei{/b4}“ den Eintrag „{b3}Freigabe…{/b3}“ wählen. Wahrscheinlich müssen Sie auch das Kontrollfeld „Benutzer & Gruppen“ verwenden.
+441	Wir haben ein paar besondere Funktionen im Hinblick auf FileShare eingebaut. Eine davon ist die Option „{b1}Ich aktualisiere die Züge{/b1}“. Wenn jemand das Spiel auf dem Dateiserver spielt, soll diese Person die Züge auf ihrem eigenen Rechner aktualisieren, damit nicht alle Spielinformationen über das Netzwerk laufen müssen. Das ist viel schneller, da Festplatten schneller sind als Netzwerke. Lassen Sie jedenfalls in diesem Fall die Person, die das Spiel gestartet hat, diese Option wählen, während alle anderen sie ausschalten. So wird der Zug nicht über das Netzwerk aktualisiert. Haben alle ihren Zug beendet, aktualisiert ihn der Rechner mit angekreuztem „{b2}Ich aktualisiere die Züge{/b2}“, und alle anderen bekommen dann die Ergebnisse.
+442	Das kann auch praktisch sein, wenn die Spieler Rechner unterschiedlicher Geschwindigkeit haben, auch wenn Sie noch kein System 7 haben. Der Typ am Quadra kann die Züge aktualisieren, während die Leute an ihren Mac Classics es einfach ihn machen lassen.
+443	Technischer Support
+444	Wir halten Technischen Support für das Wichtigste, was eine Softwarefirma (abgesehen von der Software) bietet. Wir sind stolz darauf, praktisch jedes Problem lösen zu können, das man mit {i1}Spaceward Ho!{/i1} haben kann, und noch viele andere dazu. Wenn Sie uns zu vernünftigen kalifornischen Geschäftszeiten direkt unter (408) 730-9336 anrufen und nach dem technischen Support fragen, helfen wir Ihnen gern bei allem, was wir können. Möglicherweise erreichen Sie uns auch zu unvernünftigen Zeiten, denn wir arbeiten hart und lange, garantieren können wir es aber nicht. Wir sind eine der wenigen Firmen der Welt, die kostenlosen technischen Support für Spiele anbietet.
+445	Bedenken Sie, dass wir zu wenig Personal haben, überarbeitet sind und Kürze schätzen. Wenn Sie Fragen wie „Welche Version von System und Finder haben Sie?“ aus dem Stand beantworten können, sind wir begeistert. Rufen Sie mit Fragen wie „Was ist ein Finder?“ an, sind wir verschnupft. Okay?
+446	Wenn Sie uns einmal schriftlich kontaktieren möchten, lautet unsere Adresse:
+447	Delta Tao Software, Inc. • 760 Harvard Ave. • Sunnyvale, CA 94087
+448	Die Computerspieler
+449	Wenn Sie {i1}Spaceward Ho!{/i1} spielen, können Sie gegen viele Menschen, viele Computer oder eine Mischung aus beidem antreten. Wir empfehlen, in jede Partie ein paar Computerspieler zu setzen, damit alle im Ungewissen bleiben. Es ist absichtlich schwer, genau zu erkennen, wer Computer und wer Mensch ist. Jeder Computerspieler verfolgt eine eigene Strategie, genau wie jeder Mensch. Manche sitzen zufrieden auf ihren Heimatplaneten, bauen Satelliten und erforschen neue Technologien. Manche sind aggressiv und versuchen, schnell zu expandieren. Manche streben hohe Waffen- und Schildtechnik an und kommen dann über den Rest der Galaxie. Alle tun ihr Bestes, um eine Niederlage zu vermeiden.
+451	Beim Spielen werden Sie bemerken, dass die Computerspieler ein wenig lernen, wie Sie spielen. Sie benennen ihre Schiffe bald so, wie Sie Ihre benennen, und nennen sich sogar nach Freunden, die für eine Mehrspielerpartie vorbeigekommen sind. Weitere Informationen unter „{a1}Einstellungen{/a1}“ auf Seite 41.
+452	Die Wirtschaft
+453	{i1}Spaceward Ho!{/i1} bildet die gesamte Wirtschaft der Galaxie mit nur zwei Zahlen ab: Geld und Metall.
+460	Denken Sie daran, dass jedes Mal, wenn ein Raumschiff zerstört wird, der Großteil des Metalls, aus dem es gebaut wurde, {i1}für immer{/i1} verloren ist. Das heißt, mit jedem gebauten (und zerstörten) Schiff verschwindet der Stoff, aus dem Sie es bauen. Für immer. Gegen Spielende kann das Metall knapp und damit {i2}äußerst{/i2} wertvoll werden.
+461	Abnehmender Ertrag
+463	Deshalb ist es zum Beispiel klug, Ihre Technikausgaben gleichmäßig zu halten. Wenn Sie nur für Waffentechnik ausgeben, dann nur für Schildtechnik, dann für Reichweite und so weiter, steigen Ihre Technikstufen insgesamt langsamer, als wenn Sie für alle gleichzeitig ein wenig ausgeben.
+465	Der abnehmende Ertrag gilt {i1}nicht{/i1} für den Schiffbau. Jedes Schiff kostet gleich viel, ob Sie zehn davon in einem Zug bauen oder nur eines.
+466	Schulden
+467	In {i1}Spaceward Ho! 3.0{/i1} können Sie Schulden machen. Das heißt, Sie können mehr Geld für den Schiffbau ausgeben, als Sie gespart haben. Sie können bis zum Fünffachen des gesamten Einkommens aller Ihrer Planeten leihen.
+470	Die Staatsverschuldung der USA nähert sich 5 Billionen $. Das Einkommen der Regierung beträgt etwa 1 Billion $. Na so was, wir fragen uns, warum für Wachstum so wenig Geld da ist. Hmmmm.
+472	Das Kleingedruckte
+474	Sie dürfen diese Software auf Ihre Festplatte legen. Sie dürfen beliebig viele Sicherungskopien anfertigen. Sie dürfen das Spiel vervielfältigen, damit Freunde mit Ihnen an einem Netzwerkspiel teilnehmen können, solange Sie sicherstellen, dass sie kein Spiel ohne Sie starten können.
+475	Im Grunde halten wir uns an die „Monopoly-Theorie“ der Mehrspielerspiele. Kaufen Sie ein Brettspiel, genügt ein einziges Exemplar, damit so viele Leute zusammen spielen können, wie das Spiel zulässt. Das Spiel zu vervielfältigen, damit jeder es mit nach Hause nehmen kann, ist dagegen illegal. Verstanden? Bei uns ist es genauso.
+476	Wenn Sie aus irgendeinem Grund innerhalb der ersten 30 Tage nach dem Kauf mit der Leistung dieser Software nicht zufrieden sind, können Sie sie dort, wo Sie sie gekauft haben, gegen volle Erstattung zurückgeben. Diese Software wurde unter verschiedensten Bedingungen getestet, und wir glauben, dass sie zufriedenstellend und sicher funktioniert. Es kann jedoch nicht garantiert werden, dass sie auf Ihrem Rechner läuft. {b1}Delta Tao haftet unter keinen Umständen für Schäden an Ihrem Computersystem und/oder Ihrer Person{/b1} (einschließlich Augenschäden vom Spielen von {i2}Spaceward Ho!{/i2} zu allen Tages- und Nachtzeiten), außer durch Erstattung des Kaufpreises der Software, auch wenn wir auf die Möglichkeit solcher Schäden hingewiesen worden sind.
+478	Das Menü „Optionen“
+479	Unten finden Sie eine Zusammenfassung der Einträge im Menü „{b1}Optionen{/b1}“.
+480	Automatisch spielen
+482	Wenn Sie den Computer für sich spielen lassen, entwickelt er eine eigene Strategie, genau wie die normalen Computergegner. Das ist für Anfänger ein guter Weg zum Lernen. Es ist auch sehr praktisch, wenn Sie kurz vor dem Sieg (oder der Niederlage) stehen, das Spiel aber nicht selbst zu Ende spielen wollen. Wählen Sie diese Option auch, wenn Sie eine Mehrspielerpartie vorzeitig verlassen müssen, Ihr Gebiet aber nicht völlig zerfallen soll.
+485	Wählen Sie „Ich spiele meine Züge selbst“, um das automatische Spielen auszuschalten.
+488	Ich aktualisiere die Züge
+489	Sind in einem Mehrspielerspiel einige Macs schneller als andere, sollen vermutlich die schnellen Macs die Züge aktualisieren. Lassen Sie die Macs, die den Zug nicht aktualisieren sollen, diese Option abwählen.
+490	Arbeiten Sie mit FileShare oder etwas Ähnlichem, richten Sie es so ein, dass die Person, die die Spieldatei auf ihrem eigenen Rechner hat, den Zug aktualisiert. Alle anderen wählen diese Option also ab.
+491	Hat niemand diese Option gewählt, wird der Zug nie aktualisiert. Das ist schlecht.
+492	Die Ruhmeshalle und die Halle der Schande
+493	Gewinnen Sie eine Partie {i1}Spaceward Ho!{/i1}, werden die Angaben zu Ihrem Sieg in der Ruhmeshalle festgehalten. Verlieren Sie, kommen {i2}diese{/i2} Angaben (so peinlich sie auch sind) in die Halle der Schande. So können Sie Ihre Fortschritte festhalten und bekommen eine Rangfolge, mit der Sie sich mit anderen Spielern vergleichen können.
+494	Die „Schwierigkeit“ hängt davon ab, wie schwer wir Ihr Spiel eingeschätzt haben. Natürlich hat ein Spiel gegen schlaue Spieler mit Ihnen als „Experte“ eine höhere Schwierigkeit als ein Spiel gegen dumme Spieler mit Ihnen als „Neuling“. Auch einiges andere zählt, etwa die Zahl der Verbündeten, mit denen Sie den Sieg geteilt haben, wie groß die Galaxie war und wie lange Sie bis zur Siegeserklärung gebraucht haben.
+495	Eine großartige Funktion der Ruhmeshalle ist, dass Sie Spiele, die jemand anderes gewonnen hat, oder ein Spiel, das Sie zuvor verloren haben, noch einmal spielen können. So können Sie andere Strategien ausprobieren und sich auf eine weitere Art mit anderen Spielern messen.
+496	Wollen Sie Ihre Ruhmeshalle jemals leeren, werfen Sie einfach die Datei „{i1}Ho! 3.0 Prefs{/i1}“ weg.
+498	{a1}Inhalt{/a1} {a2}Weiter →{/a2}
+500	Legen Sie {i1}Spaceward Ho!{/i1} (und {i2}Spaceward Ho! 3.0 Color Picts{/i2}, wenn Sie in Farbe spielen wollen) auf Ihre Festplatte. Spielen Sie mit den Balken- und Kreisdiagrammen, um die Ausgaben einzustellen. Klicken Sie auf die Meldungen in der Karte, damit sie verschwinden. Doppelklicken Sie auf eine Kolonie, um Schiffe zu entwerfen und zu bauen. Ziehen Sie von einem Stern zum anderen, um Schiffe zu bewegen. Experimentieren Sie. Erobern Sie die Galaxie.
+501	Garantieregistrierung/Umfrage
+502	Dies ist die herausnehmbare Karte, die in das Handbuch eingebunden ist. Die Ausfüllfelder sind nicht wiedergegeben. Die Rückseite der Karte ist adressiert an: {i1}Spaceward Ho! 3.0{/i1} Warranty Registration, Delta Tao Software, Inc., 760 Harvard Ave., Sunnyvale, CA 94087. Die Seite davor ist ein Antwortbogen „Haben Sie Anmerkungen?“ mit Linien.
+503	{i1}Spaceward Ho! 3.0 Garantieregistrierung/Umfrage{/i1}
+504	Bitte füllen Sie diese Karte aus, trennen Sie sie heraus und schicken Sie sie an uns. Nicht falten.
+505	Name{br1/}Adresse{br2/}Telefonnummer
+506	Wie sieht Ihr wichtigster Mac aus? (CPU, Arbeitsspeicher, Plattengröße, Peripheriegeräte, Farbbildschirm)
+507	Was ist Ihr Hauptgeschäftsfeld?
+508	Wann und wo haben Sie {i1}Spaceward Ho!{/i1} bekommen?
+509	Was sind Ihre Lieblingsspiele?
+510	Welche Spiele sind Flops?
+511	Wie gefällt Ihnen das Handbuch?
+512	Bewerten Sie {i1}Spaceward Ho!{/i1} auf einer Skala von 1 bis 10 (10 ist am besten):
+513	Ist der Preis von {i1}Spaceward Ho!{/i1} angemessen?
+514	Welche Spiele sollen wir Ihrer Meinung nach schreiben?
+515	Wie viel Prozent Ihrer {i1}Ho!{/i1}-Spiele sind vernetzt?
+516	Welche anderen Produkte sollen wir Ihrer Meinung nach am dringendsten entwickeln?
+517	Welche ist Ihre Lieblings-Macintosh-Softwarefirma? Warum?
+518	Was halten Sie von unserer Verpackung?

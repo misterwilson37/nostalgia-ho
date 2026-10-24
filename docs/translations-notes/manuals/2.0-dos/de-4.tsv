@@ -1,0 +1,26 @@
+367	Angekündigte Kämpfe ansehen
+369	Warnungen bei zu hohen Ausgaben anzeigen
+370	Ist dieser Punkt abgewählt, zeigt Spaceward Ho! nie die Meldung „Sie geben auf Zosma Geld für den Schiffbau aus, haben aber keine Schiffe eingereiht.“ an. Diese Meldung kann alte Hasen nerven, wenn sie noch nicht rentable Planeten haben, die vollständig terraformt und abgebaut sind. In diesem Fall müssen sie bis zum schwarzen Balken ausgeben, sonst verliert der Planet Bevölkerung. Jede zu hohe Ausgabe fließt in den Schiffbau, da sie sonst nirgendwohin kann. Da es schwierig ist, den Ausgabenbalken genau auf diese Linie zu setzen, und zu hohe Ausgaben viel besser sind als zu niedrige, ist die Warnmeldung häufig und kann ärgerlich werden. Eine andere Lösung für dieses Problem finden Sie unter „Ausgaben anpassen“.
+371	Die Prefs-Datei
+372	Wenn Sie Spaceward Ho! zum ersten Mal starten, wird eine Einstellungsdatei namens „Spaceward Ho! Prefs“ angelegt. Haben Sie System 7.0, wird sie im Ordner „Preferences“ im Systemordner Ihres Startvolumes angelegt. Andernfalls wird sie im selben Verzeichnis wie das Programm Spaceward Ho! angelegt.
+374	Außerdem speichert die Einstellungsdatei die Namen aller Leute, mit denen Sie je gespielt haben, alle Namen der Schiffe, die Sie je entworfen haben, und alle Sterne, die Sie je nach einem gewonnenen Spiel benannt haben.
+375	Um ganz neu anzufangen (etwa wenn Sie einmal ein Schiff nach Ihrer neuen Exfreundin benannt haben und der Anblick ihres Namens schmerzliche Erinnerungen weckt), werfen Sie einfach die Einstellungsdatei weg. Alle diese Informationen werden gelöscht.
+376	Das Fenster für die Technikausgaben
+377	Mit dem Fenster für die Technikausgaben legen Sie fest, welche Technologien Sie am stärksten entwickeln wollen. Je nach Strategie, Philosophie und aktueller Spielsituation erforschen Sie vielleicht unterschiedliche Technologien. Meistens müssen Sie an diesem Fenster nicht viel herumspielen. Haben Sie einmal entschieden, wie Sie Ihr Forschungsgeld ausgeben wollen, können Sie das Geld für den Rest des Spiels einfach im selben Verhältnis aufteilen lassen. Oder Sie ändern es.
+378	Denken Sie daran, dass das Fenster für die Technikausgaben nur das Technikgeld aufteilt und nicht entscheidet, wie viel Technikgeld es gibt – das wird im Budgetfenster entschieden.
+379	Beachten Sie, dass die Teilstriche links am Balkendiagramm der Technikausgaben nicht gleichmäßig verteilt sind. Jeder Teilstrich steht für 10 %, aber sie werden logarithmisch dargestellt, damit Sie die Technikausgaben genauer aufteilen können.
+380	Das Fenster für die Technikausgaben: aktuelle Stufen und ein Balkendiagramm für Reichweite, Tempo, Waffen, Schilde, Miniaturisierung und Radikal
+381	Die Fenster
+382	Spaceward Ho! hat drei Fenster. Sie können die Fenster verschieben und in der Größe ändern, wie Sie wollen, sodass Sie das Spiel für Ihre Monitore und Ihren Spielstil einrichten können. Spaceward Ho! sichert Ihre Fensterkonfiguration beim Beenden automatisch und stellt sie beim nächsten Spiel wieder her, sodass Sie nicht ständig daran herumfummeln müssen.
+383	Das Hauptfenster
+384	Das Hauptfenster ist das einzige wirklich wichtige Fenster in Spaceward Ho!. Es enthält die Sternkarte samt allen Informationen zu Budget, Planeten und Flotten. In der Titelleiste des Fensters steht etwa „Peter in Milchstraße im Jahr 2000“, was bedeutet, dass Sie gerade als Peter im Spiel „Milchstraße“ im Jahr 2000 angemeldet sind.
+385	Die Sternkarte
+386	Der rechte Teil des Hauptfensters von Spaceward Ho! ist die Sternkarte. Sie zeigt Ihnen, wo Sie sind, wo Sie gewesen sind und wohin Sie fliegen können. Mit der Sternkarte bewegen Sie Schiffe (indem Sie von einem Stern zum anderen klicken und ziehen) und wählen aus, welchen Planeten Sie ansehen und bearbeiten wollen.
+388	Ihr Heimatplanet
+391	Ein ausgewählter Planet
+392	Wenn Sie einen Planeten auswählen, wird er hervorgehoben, indem er eine Korona bekommt. Alle Informationen links von der Sternkarte beziehen sich dann auf diesen Planeten – seine Temperatur, Schwerkraft, sein Einkommen und so weiter.
+394	Das Berichtsfenster ist ein scrollbarer Verlauf aller wichtigen Dinge, die im Spiel in den letzten Zügen geschehen sind. Jede Nachricht erscheint zu Beginn jedes Zuges in der linken unteren Ecke der Sternkarte. Klicken Sie auf die Nachricht, geht es zur nächsten. Haben Sie alle Nachrichten gelesen, erscheint oben links auf der Karte eine Taste „Zug beenden“.
+397	Eine Sternkarte mit dem Heimatplaneten in der Mitte
+398	Ein unerforschter Planet: eine dunkle Scheibe mit einem Fragezeichen
+399	Das Berichtsfenster: eine scrollbare Liste von Nachrichten
+402	Spielen Sie mit den Balkendiagrammen, um die Ausgaben einzustellen. Klicken Sie auf die Meldungen in der Karte, damit sie verschwinden. Ziehen Sie von einem Stern zum anderen, um Schiffe zu bewegen. Experimentieren Sie. Erobern Sie die Galaxie.

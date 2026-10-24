@@ -1,0 +1,105 @@
+96	Abalar (her turda 25 atış) ve Tankerler (yıldızlarındaki her filoya yakıt verir); 20 yerine 30 tasarım.
+97	Radikal teknoloji, 2010’dan itibaren dağıtılan, 17 buluştan dört kartlık bir eldir: ikramiyeler, tuzaklar, yakıt almak için insan yiyen Biyolojikler, çalınan teknoloji, bedava tasarımlar.
+98	En iyi arkadaşlar: birbirlerinin kolonileri üzerinden yol bulan ve haritalarını paylaşan müttefikler.
+99	Bir koloni bir sırada halkından fazla gemi yapamaz.
+100	Beceriye göre başlangıçta Gemi Tasarrufu.
+101	Uydular iki kez ateş eder, gezegen de her 200.000 kişi için bir kez; şans bir seçenektir.
+102	Sonraki sürümlerdeki gibi terraform, madencilik ve gelir; bir galibiyet için dereceler ve usta puanları.
+103	1.2’nin ön sürümü olduğu oyun: önce Windows 3.1 baskısı geldi, DOS baskısı da aynı grafikler, sesler ve kurallarla onun bir aktarımıdır. Windows programının her rutini okundu.
+104	1.2
+105	Gemileri Hazırla, yıldızdaki o tasarımın her filosuna kullanılmış yakıtın ortalamasını verir, ama en çok 11 filo sayar, bu yüzden 12 ya da daha fazla filoyla ortalama fazla yüksek çıkar.
+106	Gemileri Hazırla, yıldızdaki o tasarımın her filosunun emirlerini siler; dokunmadığın bir filonunkileri bile.
+107	Gemileri Hazırla’da yapılan yeni bir filo kolonicilerle dolu çıkar, bu yüzden boş bir koloni filosunu kolonilerinden ayırmak onu kısmen yeniden doldurur.
+108	Bilgisayarların eski savaş gemilerini hurdaya çıkarma biçimindeki bir kayma oyuna hiç etki etmez.
+109	Meteor yağmurunun yok ettiği bir koloni “… senin koloniyi mahvetti” diye bildirilir; on mesaj önceki bir raporun rastlantıyla geride bıraktığı kişinin adı verilir: çoğu zaman sen ya da başka bir oyuncu, bazen hiç kimse. (2.0’ın kendi verisinin ötesini okuyup çökeceği yerde yeniden yapım kimsenin adını vermez.)
+110	Hiperuzaydayken hurdaya çıkarılmak üzere işaretlenen bir filo, yıldız listesinin başından önce okunan boş bir adda “bulunuyor” diye bildirilir ve metâli 0 olarak gösterilir.
+111	Bilgisayarlar tasarımlarının saldırı değerini 16 bitle hesaplar, bu yüzden yaklaşık Silâhlar 4’ten itibaren sayı başa döner ve savaş gemilerini yanlış değerlendirirler.
+112	Bilgisayarlardan biri bir koloniye tek bir kalem için 2.147.483 dolardan fazla verdiğinde koloni çubukları bozulur (toplam taşar).
+113	Bir koloniden vazgeçme komutu yok, bu yüzden Tahliye Et düğmesi de yok: bir koloni ancak halkı tükenene kadar parasız bırakılırsa gider (“Bırak ölsünler” uyarısı).
+114	Bütün insanlar oyundan çıkınca oyun biter (kimse kalmadıysa kazanansız). 2.0, bilgisayarlar oynadığı sürece devam ederdi.
+115	Birkaç kişi tek bir bilgisayarda sırayla oynar. Orijinal oyunda her oyuncu ortak bir oyun dosyasına şifreyle katılabiliyordu. (2.0 birden çok makinede de oynanabiliyordu.)
+116	Bir bütçe çubuğunu sürüklemek, ötekileri sürüklemenin başladığı yerden bir kez hesaplar; 2.0 bunu sürüklemenin her adımında yapardı, bu yüzden uzun bir sürükleme biraz farklı bitebilir.
+117	Savaş tekrarları son 60 savaş için saklanır; 2.0 onları 500 yıl saklardı.
+118	Dil… Fransızcayı da sunar (“traduction du remake”): raporları satırı satırına 2.0’ınki olan Fransızca Mac 1.2’nin kendi metni, 1.2’de bulunmayan birkaç satır için de yeniden yapımın sözleri: resmî değil, yeniden yapımın kendi çevirisi ve listede öyle işaretli. Yalnızca sözleri ve adları değiştirir: her dilde aynı oyun oynanır.
+119	Keşfedilen Gezegenler listesi ile yoklama ve savaş hızı ayarları.
+120	Sürüm 1’den 2’ye
+121	Gezegen, bütçe ve filo pencerelerini harita penceresine kattık ve ekranda yer kazanmak için sola taşıdık. Mesajlaşma ve iletişim ekledik. Gemiler ve gezegenler için tam renge geçtik. Bilgisayar stratejileri baştan yazıldı. “Yavaş oyun” seçeneği kaldırıldı; oyunlar artık eski yavaş ve hızlı hızların arasında. Düşük harcama seviyelerinde daha iyi bir çözünürlük için logaritmik ölçekli bir harcama penceresine geçtik.
+122	Bilgisayar oyuncularının gemilerine ve filolarına (ve kendilerine) insanların yaptığı gibi ad vermesini sağladık. Çok oyunculu bir oyunda bir sonraki sıraya güncellemeyi zorlayabilen bir “usta oyuncu” (Oyun Yöneticisi) ekledik. Saat ayarları farklı olan kişilere göre ayarlama yapamadığımız için süreli sıra özelliklerinden kurtulduk. Oyunu dengelemek için Teknolojilerin maliyetini değiştirdik ve Hız’ı savaşı etkiler hâle getirdik. Yazdırmayı çalışır hâle getirdik.
+123	Bir Galaksi Yarat penceresi: beş büyüklük, beş biçim, Yoğun ya da Seyrek, 0 ile 19 arası bilgisayar ve zekâları (Aptal, Ortalama ya da Akıllı). Her insan Acemi’den Uzman’a bir beceri seçer. (1.2 her galaksiyi tek bir ortalama bilgisayarla küçük, yoğun bir daire yapardı.)
+124	Kadınlar: kadın yüzleri ve adları; her bilgisayar yarı yarıya bir kadındır.
+125	Nova yok (1.2’de kodu vardı, hiç açılmadı).
+126	Mesaj Gönder penceresi: sırada on mesaj.
+127	Filoları Hazırla, filolara en az yakıt yerine kullanılmış yakıtın ortalamasını verir ve emirlerini siler.
+128	Bilgisayarların saldırı değeri yaklaşık Silâhlar 4’ten itibaren başa döner (16 bitlik bir toplam).
+129	Meteorların yok ettiği bir koloni, başıboş bir oyuncunun adını veren bir rapor alır (1.2’ninki boştu).
+130	°C yerine °F sıcaklıklar ve İngilizce adlar; 190 yıldız adı.
+131	Otomatik Oyna, Oyuncuları Karşılaştır (2010’dan itibaren sıralamalar) ve kazanan için Bir Yıldıza Ad Ver.
+132	Sıranın kendisi 1.2’ninkidir, rutin rutin.
+133	Delta Tao’nun 2.0.1’in kendi Mac derlemesi, DOS ve Windows 3.1 baskısının aktardığı sürüm: rutini rutinine aynı kurallar, kodunda birkaç farkla. Mac programının her kural rutini kendi adlarıyla okundu.
+134	Gemileri Hazırla, yıldızdaki o tasarımın her filosuna aralarında kullanılmış en az yakıtı verir ve emirlerine dokunmaz (1.2’deki gibi).
+135	Meteor yağmurunun yok ettiği bir koloni “… senin koloniyi mahvetti” diye bildirilir; on mesaj önceki bir raporun rastlantıyla geride bıraktığı kişinin adı verilir: çoğu zaman sen ya da başka bir oyuncu. O rapor bir oyuncunun numarasından başka bir şey bıraktığında Mac, oyunun kendi verisinin ötesindeki baytlar neyse onları yazdırırdı; yeniden yapım kimsenin adını vermez.
+136	Hiperuzaydayken hurdaya çıkarılmak üzere işaretlenen bir filo, yıldız listesinin başından önce okunan başıboş bir karakterde gösterilir (kullanılmayan bir başlangıç yuvasının yıldız numarasının harfi); metâli de, o yuvanın sayıları rastlantıyla seninkilere uymadıkça, 0 olarak gösterilir.
+137	Bütün insanlar oyundan çıkınca oyun biter (kimse kalmadıysa kazanansız). 2.0.1, bilgisayarlar oynadığı sürece devam ederdi.
+138	Birkaç kişi tek bir bilgisayarda sırayla oynar. Orijinal oyunda her oyuncu ortak bir oyun dosyasına şifreyle katılabiliyordu. (2.0.1 ağ üzerinden de oynanabiliyordu.)
+139	Bir bütçe çubuğunu sürüklemek, ötekileri sürüklemenin başladığı yerden bir kez hesaplar; 2.0.1 bunu sürüklemenin her adımında yapardı, bu yüzden uzun bir sürükleme biraz farklı bitebilir.
+140	Savaş tekrarları son 60 savaş için saklanır; 2.0.1 onları 500 yıl saklardı.
+141	Kendi sesi olmayan bir olay görünümün sesini çalar; Mac bip derdi (sistem bipi).
+142	System 6.0.5 veya sonrası
+143	TheHo artık 6.0.5 gerektiriyor (6.0.2’nin renkli qd sorunundan kaçınmak için).
+144	Sürüm 2.0.1’deki değişiklikler (Joe ve Peter), Mac 2.0.1 disklerinde
+145	DOS ve Windows 3.1 baskısıyla aynı oyun, şu farklarla: Filoları Hazırla 1.2’nin kullanılmış en az yakıtını korur ve emirlere dokunmaz (Windows: ortalama, emirler silinir), bilgisayarların saldırı değeri de 1.2’deki gibi 32 bitle hesaplanır, bu yüzden hiç başa dönmez (Windows: 16 bit).
+146	Otomatik Oyna, Oyuncuları Karşılaştır (2010’dan itibaren sıralamalar), Sırayı Zorla Bitir ve kazanan için Bir Yıldıza Ad Ver.
+147	4.0.5’in Mac baskısı, 68k ve PowerPC Mac’ler için bir “fat” uygulama, Windows 95 baskısıyla platformlar arası oynanır: Mac için derlenmiş aynı program, rutini rutinine, kodunda birkaç farkla. Her kural rutini kendi adlarıyla okundu.
+148	En iyi arkadaşlar savaş haberlerini yıldızla ilgili kayıtlarının bir kopyasını devrederek paylaşır; savaşmamış olan savaşı gözden geçiremez.
+149	İlk mesaj hâlâ “Version 4.0.3” der.
+150	Kazananların ad verdiği yıldızlar sonraki galaksilere bir yer kaymış olarak konur: ilki oyunun kendi 191. adı olan “Hope” olur, alınan dördün sonuncusu da hiç kullanılmaz.
+151	Başka bir adın içinde bulunan bir yıldız adı (“Vega”daki “Veg”) alınmış sayılır.
+152	Renkli monitör şakası: Mac 4.0.5 onu rastgele bir yılda, yalnızca renk gösterebildiği hâlde siyah-beyaza ayarlanmış bir ekrana gönderirdi. Burada o ekran siyah-beyaz bir görünüm.
+153	Bilgisayarların adları oyunun her cinsiyet için 20 adından gelir; Mac ayrıca o Mac’te oynamış her insanın adını da eklerdi.
+154	Gemi tasarımı adları oyunun her sınıf için 15 adından gelir; Mac ayrıca tasarım penceresine yazdığın adları da eklerdi.
+155	İpuçları tarayıcının rastgele sayılarıyla seçilir, yeni bir galaksinin aldığı dört adlı yıldız da oyunun tohumundan seçilir; Mac kendi rastgele sayılarını kullanırdı.
+156	Dil… Fransızcayı (“traduction du remake”) ve Türkçeyi (“yeniden yapımın çevirisi”) da sunar: 4.0.5’in onlarla paylaştığı, raporlarının çoğunu oluşturan her satır için iOS oyununun (ve Fransızca Mac 1.2’nin) resmî Fransızcası ve Türkçesi; geri kalanı için yeniden yapımın kendi satırları (Armageddon’un soruları, Mac’in kendi sözleri): resmî değil, yeniden yapımın kendi çevirisi ve listede öyle işaretli. Yalnızca sözleri ve adları değiştirir: her dilde aynı oyun oynanır.
+157	Sıra süre sınırı, “Bağlı olmayan oyuncuların sırasını kendiliğinden bitir” ve ağ üzerinden oyun.
+158	Windows 95 baskısıyla aynı oyun, şu farklarla: bir Tankere Koloni Gemilerinden sonra ve Uydulardan önce ateş edilir; yeni bir teknoloji seviyesi kendi adıyla bildirilir; her sınıf için 15 gemi adı, çoğu sınıf için Windows’takinden fazla; bilgisayarların cinsiyetleri ve adları oyunun rastgele sayılarını kullanmaz; otomatik oyun ayarları yeni “savunulan koloniler”i savunma için metâle katar; yapım penceresinde bir gemi tipini işaretlemek orada o tipten sipariş edilen her gemiyi geri verir; 1.000.000 usta puanından itibaren Ho! Champion ile on bir derece; Şeref Listesi’nde tam yıllar.
+159	Mac OS 9 ve X için son Mac sürümü. Programının her rutini okundu ve her kural kendi kodundan geliyor.
+160	4.0.5
+161	Ödeyemediğin faiz, ne kadar borçta olursan ol Gemi Tasarrufundan çıkar: oyunda mesajı olan küresel ısınma hiç gerçekleşmez.
+162	Bilgisayarların eskimiş gemileri ve Tankerleri hurdaya çıkarılmak üzere eve göndermesindeki bir kayma (Menzil yerine bir liste sırası verilir).
+163	Bütçe çubukları, toplamları %100’den fazla olsa bile oldukları gibi kullanılır (başka birini sürüklediğinde hareket edemeyen çubuklar paylarını korur), bu yüzden paranın fazlası harcanabilir.
+164	Birikimden harcamak gelir sayılır, bu yüzden ne kadar borç alabileceğini artırır.
+165	Sipariş edip parasını ödeyemediğin bir gemi bile o sıra için koloninin yapım yerlerinden birini harcar.
+166	Bir Armageddon aygıtı boşa çıktıktan sonra aygıtlar açık kalır ve her sıra yeniden dener, yeniden boşa çıkar.
+167	Her türden nüfus eşiğinin sırada yalnızca birini duyarsın; iki eşiği birden aşan bir sıçrama ikincisini sonra bildirir.
+168	Sarmal bir haritada bilgisayarlar 2100’den önce her başlangıç sisteminin nerede olduğunu bilir.
+169	“Hiç kâr etmeyecek” ve “araştırmaya harcama yapmıyorsun” uyarıları ile kırmızı yıldız uyarısı her sıra gelir.
+170	Bir koloniyi tahliye eden bir bilgisayar sormaz ve sıra hesaplanana kadar bütçesi değişmez.
+171	Bir tankerin rotası yalnızca bu yıl kaydedilmiş yıldızlardan geçer.
+172	Bereketli bir başlangıçta ikinci kolonin bütçe listesinde ana gezegeninden önce gelir.
+173	Adı başka bir oyuncunun adıyla başlayan ya da onun başı olan bir bilgisayara tasarımcıların adlarından yeni bir ad verilir: “Edward” olarak oyna, Ed adlı bir bilgisayar Peter olur.
+174	Birkaç kişi tek bir bilgisayarda sırayla oynar. Orijinal oyunda her oyuncu ortak bir oyun dosyasına şifreyle katılabiliyordu.
+175	Bilgisayarların adları oyunun 20 erkek ve 22 kadın adından gelir; 5.0.5 ayrıca o Mac’te oynamış her oyuncunun adını da eklerdi. Gemi tipi adları oyunun her sınıf için 15 adından gelir.
+176	Bilgisayarların hepsi plan yapar ve her filo bütün oyuncular için aynı anda hareket eder; 5.0.5 ikisini de her oyuncunun kendi sırasında yapardı. Ender durumlar dışında sonuç aynıdır.
+177	Bir bütçe çubuğunu sürüklemek, ötekileri sürüklemenin başladığı yerden bir kez hesaplar; 5.0.5 bunu sürüklemenin her adımında yapardı.
+178	Bir gemi siparişi parasını ödeyemediğin ilk gemide durur, bu yüzden ondan sonrakiler yapım yeri harcamaz.
+179	Bir hediye verdiğinde bunu hemen öğrenirsin; 5.0.5 bunu sıranın sonunda söylerdi.
+180	Her oyun varsayılan bütçe ve araştırma paylarıyla başlar (araştırmaya her biri %18, Radikale %10); 5.0.5 yeni bir oyuna, bir öncekindeki ilk sıranın paylarıyla başlardı.
+181	Dil… Fransızcayı (“traduction du remake”) ve Türkçeyi (“yeniden yapımın çevirisi”) da sunar: iOS oyununun İngilizcesinin 5.0.5’inki olduğu her yerde, yani neredeyse her yerde, onun resmî Fransızcası ve Türkçesi; 5.0.5’in farklı söylediği birkaç satır (farenin ipuçları, yakıt uyarısı) ve iOS çevirisinin yanlış yaptığı birkaç satır için de yeniden yapımın kendi satırları: resmî değil, yeniden yapımın kendi çevirisi ve listede öyle işaretli. Yalnızca sözleri ve adları değiştirir: her dilde aynı oyun oynanır.
+182	Filoları Grupla penceresi: “Buradaki tüm filoları birleştir” ve ayırma onun kurallarına uyar (Biyolojikler kendi başlarına kalır; gemi alan filo kendi emirlerini ve daha düşük yakıtı korur).
+183	Dereceyle kilitli seçenekler (“Need more MPs”): her seçenek açık.
+184	Derece penceresinin bir yıldıza ad verme için kendi sözleri (iOS sürümününkiler gösterilir).
+185	Sürüm 4’ten 5’e
+186	Revizyonlar arasında yedi yıl uzun bir süre, yani kaputun altında Spaceward Ho!’nun biraz yaşlanmaya başladığı söylenebilir. Genel kullanım açısından değil elbette, çünkü sürüm 1.0’ı MacOS X’in en son sürümünde hâlâ oynayabilirsin (başka hangi uygulama bunu yapabilir?), ama bir sürü yeni özellik eklemek istediğimize karar verdiğimizde, yani, yeniden yazılması gerekiyordu.
+187	Kısaltma uyumlu uygulamalardan hoşlananlar için söyleyelim: sürüm 5.0 artık PowerPC, Carbon, çoklu iş parçacıklı, TCP/IP ve OS X dostu.
+188	Özellikler açısından (kaputun üstünde), Ho!’nun 5.0 sürümünde çok fazla yenilik var. Yine de 4.0’ı biliyorsan yenisiyle oynayıp her şeyi çözebilirsin. Ama ne aldığını bilesin diye yeni özelliklerin bu kullanışlı listesini veriyoruz.
+189	Gereksinimler
+190	Spaceward Ho! 5.0 her zamankinden büyük ve yaklaşık 20 megabayt sabit disk alanı, 10 megabayt RAM ve OS 8.6 veya sonrasını gerektiriyor.
+191	İnternet Üzerinden Oyun
+192	Dünyanın dört bir yanından insanlarla oynamak için spacewardho.net’e katıl.
+193	Daha Akıllı Bilgisayarlar
+194	Bilgisayarlar artık biyolojik ve tanker gemileri kullanabiliyor, çok gezegenli saldırılar yapabiliyor ve oyun sonunda metâllerini korumakta daha iyiler.
+195	Çok Taraflı Savaşlar
+196	Birkaç oyuncu bir yıldıza aynı anda gelirse artık tek bir büyük savaş oluyor ve müttefikler savaşta birbirine katılıyor. (Bazen seninle müttefik iki kişi birbirine de ateş eder.)
+197	Gruplanmış Filolar
+198	Kolay hareket ettirmek ve farklı hızlardaki filoların bir arada kalması için birkaç gemi tipini tek bir filoda gruplayabilirsin.
+199	Savaş Seçenekleri
+200	Bir filodaki her gemi tipine farklı savaş seçenekleri verebilirsin; böylece bazıları tam saldırıya geçer (silâh bonusu ve kalkan cezasıyla), bazıları savunmada kalır. Bazı gemilerin de (genellikle koloni gemin) ana filonun arkasından gelmesini, ana savaş bitene kadar girmemesini sağlayabilirsin.

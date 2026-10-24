@@ -38,13 +38,13 @@ root.HOHELP = {
 // The same tips in the words of other versions' manuals, for games played
 // with those rules (keys as above; anything missing falls back to the
 // 5.0.5 text): dos = the DOS 2.0 manual, 405 = the 4.0.5 Windows help,
-// 301 = the Mac 3.0.1 program's own Quick Help (DITL 3010; it has no manual),
+// 301 = the Mac 3.0.1 program's own Quick Help (DITL 3010) and the printed 3.0 manual (assets/manuals/3.0.1/),
 // 12 = the Mac 1.2F program's dialog boxes, translated from the French (it has
 // no Quick Help and no manual).
 root.HOHELP_RULES = root.HOHELP_RULES || { dos: {}, 405: {}, 301: {}, 12: {} };
 root.HOHELP_RULES['301'] = root.HOHELP_RULES['301'] || {};
 root.HOHELP_RULES['12'] = root.HOHELP_RULES['12'] || {};
-// DOS 2.0 manual (assets/manuals/dos-2.0.pdf): no debt, no Radical tech,
+// DOS 2.0 manual (assets/manuals/2.0-dos/, from assets/manuals/dos-2.0.pdf): no debt, no Radical tech,
 // ships are queued and paid for out of each planet's shipbuilding money.
 Object.assign(root.HOHELP_RULES.dos, {
   savings: ['Savings is money that will be saved until next turn. Money will be saved automatically if you don’t spend it, too. You get interest on your savings, just like at your local bank.', 'The Bar Charts'],
@@ -115,27 +115,30 @@ Object.assign(root.HOHELP_RULES['12'], {
 });
 // each ruleset's own manual, opened from the Help menu
 root.HOMANUALS = {
-  original: ['assets/manuals/5.0.5/index.html', 'Spaceward Ho! 5 manual'],
-  claude: ['assets/manuals/5.0.5/index.html', 'Spaceward Ho! 5 manual'],
-  gemini: ['assets/manuals/5.0.5/index.html', 'Spaceward Ho! 5 manual'],
+  // a version's manual in the game's language: { en: [path, name], fr: ..., de: ..., es: ..., tr: ... }. The name stays the
+  // English one (its row is in js/ui-text.js); a language with no entry opens the English manual and the
+  // Help menu says "(in English)".
+  original: { en: ['assets/manuals/5.0.5/index.html', 'Spaceward Ho! 5 manual'], fr: ['assets/manuals/5.0.5-fr/index.html', 'Spaceward Ho! 5 manual'], de: ['assets/manuals/5.0.5-de/index.html', 'Spaceward Ho! 5 manual'], es: ['assets/manuals/5.0.5-es/index.html', 'Spaceward Ho! 5 manual'], tr: ['assets/manuals/5.0.5-tr/index.html', 'Spaceward Ho! 5 manual'] },
+  claude: { en: ['assets/manuals/5.0.5/index.html', 'Spaceward Ho! 5 manual'], fr: ['assets/manuals/5.0.5-fr/index.html', 'Spaceward Ho! 5 manual'], de: ['assets/manuals/5.0.5-de/index.html', 'Spaceward Ho! 5 manual'], es: ['assets/manuals/5.0.5-es/index.html', 'Spaceward Ho! 5 manual'], tr: ['assets/manuals/5.0.5-tr/index.html', 'Spaceward Ho! 5 manual'] },
+  gemini: { en: ['assets/manuals/5.0.5/index.html', 'Spaceward Ho! 5 manual'], fr: ['assets/manuals/5.0.5-fr/index.html', 'Spaceward Ho! 5 manual'], de: ['assets/manuals/5.0.5-de/index.html', 'Spaceward Ho! 5 manual'], es: ['assets/manuals/5.0.5-es/index.html', 'Spaceward Ho! 5 manual'], tr: ['assets/manuals/5.0.5-tr/index.html', 'Spaceward Ho! 5 manual'] },
   // the iOS and Android games' own help page (en.lproj, fr.lproj, tr.lproj
   // help_index.html: the same pages in both), in the game's language
   // (rs.languages; tools/extract/ios.py, tools/extract/languages.py)
   ios: { en: ['assets/skins/ios/help/help_index.html', 'Spaceward Ho! for iPhone and iPad help'],
     fr: ['assets/skins/ios/help-fr/help_index.html', 'Aide de Spaceward Ho! (iPhone et iPad)'],
     tr: ['assets/skins/ios/help-tr/help_index.html', 'Spaceward Ho! yardım (iPhone ve iPad)'] },
-  dos: ['assets/manuals/dos-2.0.pdf', 'Spaceward Ho! 2.0 manual (DOS)'],
-  405: ['assets/manuals/4.0.5/index.html', 'Spaceward Ho! 4.0.5 help'],
-  // 3.0.1 shipped without an online manual; the 4.0.5 help is the closest
-  // (it has a page on what changed from 3.0 to 4.0)
-  301: ['assets/manuals/4.0.5/index.html', 'Spaceward Ho! 4.0.5 help (closest to 3.0.1)'],
+  dos: { en: ['assets/manuals/2.0-dos/index.html', 'Spaceward Ho! 2.0 manual (DOS)'], fr: ['assets/manuals/2.0-dos-fr/index.html', 'Spaceward Ho! 2.0 manual (DOS)'], de: ['assets/manuals/2.0-dos-de/index.html', 'Spaceward Ho! 2.0 manual (DOS)'], es: ['assets/manuals/2.0-dos-es/index.html', 'Spaceward Ho! 2.0 manual (DOS)'], tr: ['assets/manuals/2.0-dos-tr/index.html', 'Spaceward Ho! 2.0 manual (DOS)'] },
+  405: { en: ['assets/manuals/4.0.5/index.html', 'Spaceward Ho! 4.0.5 help'], fr: ['assets/manuals/4.0.5-fr/index.html', 'Spaceward Ho! 4.0.5 help'], de: ['assets/manuals/4.0.5-de/index.html', 'Spaceward Ho! 4.0.5 help'], es: ['assets/manuals/4.0.5-es/index.html', 'Spaceward Ho! 4.0.5 help'], tr: ['assets/manuals/4.0.5-tr/index.html', 'Spaceward Ho! 4.0.5 help'] },
+  // the printed Mac manual for 3.0 (the scan is titled 3.0.1); it has the
+  // chapter on what changed from 2.0 to 3.0
+  301: { en: ['assets/manuals/3.0.1/index.html', 'Spaceward Ho! 3.0 manual (Mac 3.0.1)'], fr: ['assets/manuals/3.0.1-fr/index.html', 'Spaceward Ho! 3.0 manual (Mac 3.0.1)'], de: ['assets/manuals/3.0.1-de/index.html', 'Spaceward Ho! 3.0 manual (Mac 3.0.1)'], es: ['assets/manuals/3.0.1-es/index.html', 'Spaceward Ho! 3.0 manual (Mac 3.0.1)'], tr: ['assets/manuals/3.0.1-tr/index.html', 'Spaceward Ho! 3.0 manual (Mac 3.0.1)'] },
   // no 1.2F manual is in the archive; its rules are DOS 2.0's, so the DOS
   // 2.0 manual is the closest
-  12: ['assets/manuals/dos-2.0.pdf', 'Spaceward Ho! 2.0 manual (DOS; closest to Mac 1.2)'],
+  12: { en: ['assets/manuals/2.0-dos/index.html', 'Spaceward Ho! 2.0 manual (DOS; closest to Mac 1.2)'], fr: ['assets/manuals/2.0-dos-fr/index.html', 'Spaceward Ho! 2.0 manual (DOS; closest to Mac 1.2)'], de: ['assets/manuals/2.0-dos-de/index.html', 'Spaceward Ho! 2.0 manual (DOS; closest to Mac 1.2)'], es: ['assets/manuals/2.0-dos-es/index.html', 'Spaceward Ho! 2.0 manual (DOS; closest to Mac 1.2)'], tr: ['assets/manuals/2.0-dos-tr/index.html', 'Spaceward Ho! 2.0 manual (DOS; closest to Mac 1.2)'] },
   // the Mac editions (js/rules-mac20.js, js/rules-mac405.js): their manuals
   // aren't in the archive; the same version's other edition's is the closest
-  mac20: ['assets/manuals/dos-2.0.pdf', 'Spaceward Ho! 2.0 manual (DOS; the same version as Mac 2.0.1)'],
-  mac405: ['assets/manuals/4.0.5/index.html', 'Spaceward Ho! 4.0.5 help (Windows; the same version as Mac 4.0.5)'],
+  mac20: { en: ['assets/manuals/2.0-dos/index.html', 'Spaceward Ho! 2.0 manual (DOS; the same version as Mac 2.0.1)'], fr: ['assets/manuals/2.0-dos-fr/index.html', 'Spaceward Ho! 2.0 manual (DOS; the same version as Mac 2.0.1)'], de: ['assets/manuals/2.0-dos-de/index.html', 'Spaceward Ho! 2.0 manual (DOS; the same version as Mac 2.0.1)'], es: ['assets/manuals/2.0-dos-es/index.html', 'Spaceward Ho! 2.0 manual (DOS; the same version as Mac 2.0.1)'], tr: ['assets/manuals/2.0-dos-tr/index.html', 'Spaceward Ho! 2.0 manual (DOS; the same version as Mac 2.0.1)'] },
+  mac405: { en: ['assets/manuals/4.0.5/index.html', 'Spaceward Ho! 4.0.5 help (Windows; the same version as Mac 4.0.5)'], fr: ['assets/manuals/4.0.5-fr/index.html', 'Spaceward Ho! 4.0.5 help (Windows; the same version as Mac 4.0.5)'], de: ['assets/manuals/4.0.5-de/index.html', 'Spaceward Ho! 4.0.5 help (Windows; the same version as Mac 4.0.5)'], es: ['assets/manuals/4.0.5-es/index.html', 'Spaceward Ho! 4.0.5 help (Windows; the same version as Mac 4.0.5)'], tr: ['assets/manuals/4.0.5-tr/index.html', 'Spaceward Ho! 4.0.5 help (Windows; the same version as Mac 4.0.5)'] },
 };
 root.HOMANUALS.android = root.HOMANUALS.ios;
 // the Mac editions' hover help: the same version's other edition's texts

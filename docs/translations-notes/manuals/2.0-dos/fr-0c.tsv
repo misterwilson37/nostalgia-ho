@@ -1,0 +1,67 @@
+1	{a1}Sommaire{/a1} {a2}← Précédent{/a2} {a3}Suivant →{/a3}
+27	Les technologies d’Armes et de Boucliers déterminent la qualité d’un vaisseau au combat. Les dégâts que vous infligez dépendent de la différence entre votre technologie d’Armes et la technologie de Boucliers du défenseur. Si votre technologie d’Armes est supérieure à la technologie de Boucliers de l’ennemi, vous infligerez de gros dégâts à son vaisseau à chaque tour. Si elle est inférieure, vous ne ferez que peu ou pas de dégâts à chaque tour.
+29	En général, pour mener une bataille équilibrée contre un ennemi qui a de hautes technologies d’Armes et de Boucliers, il vous faut deux fois plus de vaisseaux pour chaque niveau de retard. Par exemple, si vous avez une technologie d’Armes et de Boucliers de 5 et que l’ennemi en a une de 7, il vous faut quatre fois plus de vaisseaux pour une bataille équilibrée. En fait, vous en voudrez probablement plutôt 10 ; qui veut une bataille équilibrée ?
+35	De bonnes armes et de bons boucliers sont essentiels si vous participez au combat, mais n’oubliez pas que la technologie seule ne suffit pas. Avoir la capacité de construire des vaisseaux spatiaux à haute technologie d’Armes ne signifie rien au combat ; avoir beaucoup de vaisseaux spatiaux à haute technologie d’Armes, si.
+43	Ainsi, pour dépenser la même somme pour la technologie et pour votre planète, cliquez et faites glisser directement sur la barre de technologie. En déplaçant la souris, vous verrez la barre de technologie monter quand les autres descendent, et descendre quand les autres montent. Réglez-la pour que la barre de technologie et la barre de colonie aient la même longueur. Vous pouvez faire la même chose en faisant glisser la barre de la planète. À vous de choisir.
+58	« Les joueurs ordinateur donnent à leurs vaisseaux des noms que je donnais aux miens et qui sont vraiment stupides. »
+60	« Comment déplacer des vaisseaux ? »
+61	Cliquez sur l’étoile où se trouvent les vaisseaux et faites glisser jusqu’à l’étoile où vous voulez les envoyer. Une ligne apparaît entre les deux planètes. S’il y a une flèche au bout de la ligne, relâchez simplement la souris et vous entendrez un « Hyaa ! ». Les vaisseaux sont en route. En deux ou trois tours, ils devraient arriver à la planète de destination. S’il n’y a pas de flèche au bout de la ligne, la planète où vous voulez envoyer les vaisseaux est trop loin pour que vous l’atteigniez avec les vaisseaux sélectionnés.
+62	« Des extraterrestres n’arrêtent pas d’attaquer ma planète d’origine et de tuer tous mes gens. »
+63	Construisez des satellites de défense et gardez-les à jour sur le plan technologique partout où les méchants risquent de vous écraser. Et ne commencez pas avec une petite galaxie remplie d’adversaires.
+68	« Quels sont les secrets du jeu ? »
+69	Si nous vous les disions, ce ne seraient plus des secrets, n’est-ce pas ? Alors ne nous le demandez pas. Découvrez-les vous-même, si vous y tenez.
+71	Rendez la galaxie plus petite. En général, plus la galaxie est petite, plus les ordinateurs vous donnent de fil à retordre. Ne mettez pas automatiquement la taille de la galaxie sur « Gigantesque ». Vous pouvez aussi jouer contre moins de joueurs ordinateur. Plus de joueurs, ce n’est pas vraiment plus difficile, c’est simplement plus encombré.
+88	Explorer les planètes : température et gravité
+89	À un moment donné, vous voudrez quitter votre planète d’origine et faire quelques efforts pour explorer les étoiles voisines à la recherche d’autres planètes habitables. Chaque planète a deux caractéristiques importantes : la température et la gravité.
+109	Une planète colonisée et rentable
+117	Ce genre de planète ne sera jamais rentable, et elle n’a même plus de métal à extraire. Beurk ! À moins qu’elle ait une importance stratégique ou que vous craigniez qu’une base ennemie s’y trouve, laissez ce tas de ferraille tranquille.
+119	C’est une planète où vous n’êtes jamais allé.
+120	Une planète bientôt explorée
+135	Si vous avez une flotte à une planète, une petite image de flotte apparaît dans le coin supérieur droit de la planète pour vous le signaler. Nous savons que cela ressemble à une lune, mais ne vous laissez pas tromper.
+155	Tout ce qui ne peut pas être changé dans un système stellaire. Toute planète entre 0,4 G et 2,5 G peut être rendue rentable, s’il y a assez de monde dessus et si elle est entièrement terraformée. Une planète idéale est à 1,0 G. Chaque joueur a sa propre idée de ce que représente 1,0 G.
+157	L’argent que vous avez touché au dernier tour.
+159	L’échelle logarithmique est une échelle inégale qui donne plus de précision aux petits nombres qu’aux grands.
+161	L’état d’un vaisseau qui n’a pas assez de carburant pour quitter la planète où il se trouve.
+163	La somme de toutes les ressources non renouvelables.
+164	Le degré de miniaturisation d’un vaisseau. Les vaisseaux à Mini élevée utilisent moins de métal, mais coûtent plus d’argent.
+166	La somme de toutes les ressources renouvelables. Vous recevez de l’argent à chaque tour des planètes rentables.
+173	Ce qui protège un vaisseau. Un vaisseau de Technologie de Boucliers 8 sera presque invincible face à un vaisseau de Technologie d’Armes 4.
+174	La rapidité d’un vaisseau. Un vaisseau de Vitesse 3 mettra 2 tours pour aller à une étoile située à 5 unités.
+178	Tout ce qui peut être changé dans un système stellaire. La température idéale est 72°. Chaque joueur a sa propre idée de ce que représente 72°.
+180	Amélioration de la température d’un système stellaire. Quand une planète est entièrement terraformée, sa température est de 72°.
+182	Ce qu’un vaisseau tire. Un vaisseau de Technologie d’Armes 8 mettra en pièces des vaisseaux de Technologie de Boucliers 4.
+264	Les vaisseaux servent à explorer de nouvelles étoiles, à défendre vos colonies et à coloniser de nouvelles planètes. Il existe plusieurs sortes de vaisseaux, et vous pouvez créer les vôtres.
+265	Les vaisseaux de Spaceward Ho! sont incroyablement gros et chers. Par exemple, votre premier Transport absorbera presque un tiers des ressources totales de votre planète, plus toute la production industrielle de la planète pendant trente ans. C’est un gros bateau.
+270	Pour déplacer une flotte, cliquez et faites glisser depuis la planète où elle se trouve jusqu’à l’endroit où vous voulez qu’elle aille. Si elle peut y arriver, vous verrez une flèche qui suit la route que prendra votre flotte. Quand vous relâchez la souris, vous entendrez un « Hyahh ! » qui vous indique que le cap est fixé. Quand vous terminez le tour, le vaisseau part en voyage.
+271	Si la flotte ne peut pas atteindre l’étoile vers laquelle vous l’avez fait glisser, le trajet sera montré par une ligne grise en pointillés. Si la flotte a assez de carburant pour aller à l’étoile choisie et en revenir, le trajet sera une flèche à double pointe.
+275	La trajectoire d’une flotte ne peut pas être changée entre deux planètes : dans l’hyperespace, on ne peut pas faire demi-tour.
+278	Recycler des flottes et des vaisseaux
+282	Quand vous recyclez des vaisseaux qui se trouvent au-dessus d’une colonie, le métal passe instantanément dans votre réserve globale et vous pouvez l’utiliser tout de suite. Si vous ne possédez pas la planète au-dessus de laquelle se trouvent les vaisseaux, le métal tombe sur la planète. La prochaine personne qui la colonisera pourra alors extraire le métal de vos vaisseaux recyclés.
+288	Il y a quatre grandes classes de vaisseaux : les Transports, les Satellites, les Éclaireurs et les Croiseurs.
+293	Quand une planète a des Satellites, elle est entourée d’un anneau sur la carte des étoiles.
+300	Si vous cliquez sur n’importe quel événement dans la fenêtre des rapports, votre carte défile automatiquement jusqu’à l’endroit où l’événement s’est produit.
+302	En général, vous voudrez dézoomer pour avoir une idée de l’endroit où vous vivez, puis zoomer pour voir ce qui se passe. À mesure que la partie avance, vous constaterez probablement que votre voisinage ne tient plus dans la carte des étoiles, et vous utiliserez donc les grossissements intermédiaires.
+303	Vous pouvez cliquer sur le nom d’une étoile dans la fenêtre du budget pour faire défiler la carte des étoiles jusqu’à cette étoile et la sélectionner. Quand vous sélectionnez une étoile dans la carte, la liste des étoiles défile jusqu’à l’étoile courante et la sélectionne.
+305	Quand vous colonisez beaucoup d’étoiles, vous remarquerez que le nombre de planètes dans vos barres de budget devient trop grand pour tenir à l’écran. Vous finirez par devoir faire défiler pour voir toutes vos planètes. Plutôt que de faire cela, vous pouvez en fait déplacer les planètes qui vous intéressent au même endroit de la liste. Cliquez sur le nom d’une planète dans la liste du budget et faites-la glisser à l’endroit où vous voulez qu’elle soit. C’est une bonne idée de faire glisser vos barres d’Épargne et de Technologie vers le haut de la liste, pour toujours les avoir sous les yeux.
+308	Quand vous déplacez des vaisseaux, vous pouvez choisir le vaisseau suivant dans la liste de la planète en appuyant sur la touche Tab.
+309	Vous pouvez passer au message d’événement suivant en appuyant sur la touche Retour.
+317	Si jamais vous avez envie de nous contacter par écrit, notre adresse est :
+327	L’argent représente l’énergie, la nourriture, les objets manufacturés, les gens instruits : tout ce qui peut être renouvelé chaque année. Si on ne peut pas en manquer, cela compte comme de l’argent.
+329	Vous pouvez dépenser de l’argent pour beaucoup de choses : la recherche, la terraformation, l’extraction, la construction de vaisseaux, et ainsi de suite. Le métal ne sert qu’à construire des vaisseaux. Plus les vaisseaux sont avancés, plus ils demandent d’argent et de métal.
+335	Quand vous dépensez de l’argent pour la plupart des choses dans Spaceward Ho!, plus vous en dépensez, moins vous en tirez de valeur pour chaque dollar. Cela signifie qu’il vaut mieux dépenser 10 $ pendant deux jours que 20 $ pendant un jour, sauf si vous êtes pressé.
+337	Cela s’applique aussi à l’extraction et à la terraformation. Il est moins efficace d’essayer de faire ces choses toutes à la fois que de les faire progressivement sur de nombreuses années.
+341	Ce logiciel vous est fourni sous licence ; il ne fait pas l’objet d’une vente.
+343	En gros, nous souscrivons à la « théorie du Monopoly » pour les jeux à plusieurs. Quand vous achetez un jeu de plateau, un seul exemplaire suffit pour que jouent ensemble autant de personnes que le jeu en accepte. En revanche, dupliquer le jeu pour que chacun l’emporte chez soi est illégal. Compris ? Chez nous, c’est pareil.
+345	Ne nous poursuivez pas en justice pour quelque raison que ce soit, ou nous cesserons d’écrire de super jeux et vous en rendrons responsable.
+358	Dans une partie à plusieurs, si certains Mac sont plus rapides que d’autres, vous voudrez probablement que les Mac rapides s’occupent des mises à jour des tours. Demandez aux Mac qui ne veulent pas mettre à jour le tour de désactiver cette option.
+360	Si personne n’a sélectionné cette option, le tour ne sera jamais mis à jour. C’est mauvais.
+368	Cet élément n’a d’effet que si celui qui est au-dessus, « Afficher les messages d’événements », est aussi coché. Si les deux le sont, chaque fois qu’un message de bataille est sur le point d’être affiché, la bataille est automatiquement rejouée. S’il n’est pas coché, seul le message de résumé s’affiche.
+373	Nous y rangeons tout : l’endroit où vous aimez placer les fenêtres, si vous voulez le son ou pas, votre vitesse de bataille préférée, et ainsi de suite.
+387	Il y a plusieurs types d’étoiles sur la carte des étoiles. Pour l’instant, nous allons simplement expliquer celles que l’on voit tout au début d’une partie.
+389	C’est là que vous vivez. C’est une planète très peuplée, très rentable et technologiquement avancée, prête à partir explorer l’univers. C’est ici que vous construirez vos premiers vaisseaux.
+390	Au début de la partie, tout est inexploré sauf votre planète d’origine. Une fois que vous êtes allé sur une planète, vous en apprenez davantage, et son image change pour refléter vos nouvelles découvertes. Les autres types de planètes seront traités plus loin, dans le chapitre « Planètes ».
+392	Quand vous sélectionnez une planète, elle est mise en évidence par une couronne qui l’entoure. Toutes les informations à gauche de la carte des étoiles se rapportent désormais à cette planète : sa température, sa gravité, son revenu, et ainsi de suite.
+395	Il y a beaucoup de sortes de messages. Quand vous explorez une étoile, vous recevez un message sur sa température et sa gravité. Quand vous colonisez une planète, vous recevez un petit mot sympathique. Quand vous êtes dans une bataille, vous recevez un message qui en résume le résultat.
+396	Vous pouvez cliquer sur un ancien message de la fenêtre des rapports pour obtenir plus d’informations. Par exemple, quand vous cliquez sur un résumé de bataille, Spaceward Ho! rejoue la bataille. Quand vous cliquez sur un message qui mentionne une planète, la carte défile jusqu’à cette planète et la sélectionne.
+400	Instructions ultra-rapides pour le Ho!
+401	Voici le résumé en un paragraphe de ce que vous devez savoir.

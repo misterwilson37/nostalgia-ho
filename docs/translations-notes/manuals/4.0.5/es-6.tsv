@@ -1,0 +1,60 @@
+356	{a1}El menú Opciones{/a1}
+357	{a1}Tu planeta de origen{/a1}
+358	{a1}Un planeta seleccionado{/a1}
+359	{a1}Un planeta sin explorar{/a1}
+360	{a1}Este es un planeta donde tu población ha crecido hasta el pun{/a1}
+364	La Ventana de informes es un historial desplazable de las cosas importantes que han ocurrido en los últimos turnos. Cada mensaje aparecerá en la esquina inferior izquierda del Mapa estelar al comienzo de cada turno. Cuando haces clic en el mensaje, pasa al siguiente.
+366	En cada turno recibirás consejos para jugar a{b1} Spaceward Ho!{/b1}. Cuando los hayas visto todos, puedes desactivarlos entrando en {b2}Preferencias…{/b2} en el menú “Opciones”.
+368	Mini
+369	{b1}Mini{/b1}
+371	Mover naves
+372	{b1}Mover naves{/b1}
+373	Para mover una flota, basta con hacer clic y arrastrar desde el planeta donde está hasta donde quieres que vaya. Si llega, verás una flecha que señala la ruta que seguirá tu flota. Cuando sueltes el ratón, oirás un “Hyahh!” que te avisa de que el rumbo está fijado. Cuando termines el turno, la nave seguirá su camino.
+375	Para hacer que una flota se quede quieta, o para cancelar su movimiento, haz clic en el planeta de la flota y mantenlo pulsado un segundo. Cuando lo hayas hecho bien, oirás un “Whoa!” al soltar el ratón.
+376	Si tienes más de una flota en un planeta, puedes elegir la flota que quieres mover haciendo clic en su nombre en la Información del presupuesto. Cuando una flota tiene destino y piensa moverse al terminar el turno, su nombre aparecerá en negrita para avisarte. Pulsa la tecla {b1}TAB{/b1} para pasar a la flota siguiente de ese planeta.
+377	Una flota reposta automáticamente cada vez que va a un planeta que es tuyo o de tus aliados. Si una flota no tiene combustible suficiente para salir, puedes enviar una Nave colonia a ese planeta, colonizarlo durante un turno y luego hacer que todos se marchen. O puedes enviar una cisterna para repostar la flota.
+379	Número de jugadores del ordenador
+380	{b1}Número de jugadores del ordenador{/b1}
+381	El Número de jugadores del ordenador es bastante evidente: es el número de enemigos que ocuparán la galaxia contigo. Cuantos más haya, más resistencia encontrarás.
+382	Organizar flotas
+383	{b1}Organizar flotas{/b1}
+384	A veces querrás dividir una flota en trozos o juntar varias flotas. Para ello, elige {b1}Organizar naves{/b1} en el menú “Naves”. Luego haz clic y arrastra las naves hasta que queden distribuidas como quieres. Lo sentimos: una flota solo puede contener naves del mismo tipo (para reducir el tamaño del archivo).
+385	Información del planeta
+386	{b1}Información del planeta{/b1}
+387	La información del planeta seleccionado en ese momento (el que tiene la “corona” alrededor) está en la esquina superior izquierda de la Ventana principal. Si seleccionas una colonia en crecimiento, verás un gráfico circular que muestra cómo se reparte el dinero que gastas en ese planeta entre minería y terraformación. De nuevo, no te preocupes demasiado por el porcentaje exacto que gastas en cada cosa; limítate a acertar las proporciones.
+388	Gasta dinero en Terraformar para modificar la temperatura de un planeta hasta 72{img1/} (es tu temperatura favorita). Si un planeta ya está a 72{img2/}, no puedes gastar dinero en terraformar.
+390	Los “Ingresos” de un planeta son el dinero extra que ese planeta aporta a tu presupuesto total. Si es un planeta que acabas de colonizar, serán negativos, lo que significa que tienes que meterle dinero solo para mantenerlo vivo. Cuanto más se parece un planeta a tu planeta de origen (que está a 72{img1/} y 1,00 G), más potencial de ganar dinero tiene. Los planetas demasiado distintos de tu planeta de origen nunca darán beneficios.
+391	Preferencias
+392	{b1}Preferencias{/b1}
+393	La mayoría de las Preferencias se ajustan con el cuadro de diálogo {b1}Preferencias{/b1} del menú “Opciones”.
+394	Radical
+395	{b1}Tecnología {/b1}
+396	{b1}Radical{/b1}
+397	La investigación Radical puede darte cosas que ninguna de las otras tecnologías puede. Cuando pones dinero en Tecnología Radical, de vez en cuando tus científicos pueden hacer un descubrimiento asombroso. Algunos descubrimientos Radicales podrían darte niveles de tecnología más altos, armas biológicas, control del clima o nuevas técnicas mineras. Nunca sabes cuándo llegará el próximo salto de Tecnología Radical: es mucho más aleatorio que las otras tecnologías. No vamos a describir todas las cosas posibles que pueden pasar con la Tecnología Radical: tendrás que descubrirlo tú mismo.
+398	La Tecnología Radical aumenta las otras tecnologías, así que no cambia tu base de investigación en esas tecnologías. Por ejemplo, si tus niveles de tecnología de Armas y de Escudos son 5 y 5, y tu Tecnología Radical hace que tus Escudos suban a 7, tu tecnología de Armas llegará a 8 al mismo tiempo que la de Escudos. Esto significa que la ventaja de la Tecnología Radical es solo temporal, así que aprovéchala bien.
+399	Alcance
+400	{b1}Alcance{/b1}
+402	Revisar las batallas de sucesos
+403	{b1}Revisar las batallas de sucesos{/b1}
+404	Esta opción solo importa si la de arriba, {b1}Mostrar los mensajes de sucesos{/b1}, también está marcada. Si lo están las dos, cada vez que esté a punto de mostrarse un mensaje de batalla, la batalla se revisará automáticamente. Si no está marcada, solo se mostrará el mensaje de resumen.
+405	Revisar las batallas
+406	{b1}Revisar las batallas{/b1}
+407	Cuando tus naves chocan con naves enemigas, luchan hasta que un bando muere. Es cierto que eso no facilita una convivencia pacífica, pero esto es un juego de guerra. En fin, cuando tengas un combate, querrás saber qué diablos ha pasado. Hay un par de maneras de averiguarlo. Primero, si tienes marcada la opción {b1}Revisar las batallas{/b1} en el cuadro de diálogo {b2}Preferencias {/b2}, recibirás un resumen de las batallas al comienzo de cada turno.
+408	También puedes elegir cualquier estrella y revisar la última batalla que hubo en ella eligiendo {b1}Revisar batalla en Proxima{/b1} (o la que sea) en el menú “Naves”. Si ha habido dos o más batallas en una estrella, así solo puedes ver la más reciente.
+409	Haz doble clic en una estrella {i1}enemiga{/i1} para revisar la batalla más reciente que hubo allí.
+410	Haz clic en un mensaje de resumen de batalla en la Ventana de informes para revisar esa batalla. Si ha habido más de una batalla en una estrella, así puedes revisar una batalla antigua. Puedes ajustar la velocidad a la que Spaceward Ho! reproduce la batalla en el cuadro de diálogo {b1}Preferencias{/b1}.
+411	Si pierdes una batalla en la primera ronda, los comandantes de tus naves no tienen tiempo de enviarte información sobre la batalla antes de ser destruidos. Así que tendrás poca idea de cuántas naves enemigas hay allí; solo sabrás que hay las suficientes para aniquilarte.
+412	Desguazar flotas y naves
+413	{b1}Desguazar flotas y naves{/b1}
+414	A medida que avanza la partida, verás que el metal escasea y que tus naves obsoletas son casi inútiles. Quizá quieras deshacerte de algunas de tus naves más viejas. Puedes recuperar el 75% del metal de una flota que esté en tus colonias desguazándola (elige {b1}Desguazar la flota actual{/b1} en el menú “Naves”). O puedes desguazar todo un tipo de nave (haz clic en {b2}Desguazar todas{/b2} para un tipo concreto en el cuadro de diálogo {b3}Construir/diseñar naves{/b3}).
+415	Cuando marcas un tipo de nave o una flota para desguazarlos, no se desguazan hasta que termines el turno. Si te arrepientes antes, puedes pulsar el botón {b1}No desguazar{/b1} en el cuadro de diálogo {b2}Construir/diseñar naves{/b2}, o elegir {b3}No desguazar la flota actual{/b3} en el menú “Naves”.
+416	Si solo quieres desguazar parte de una flota, usa el cuadro de diálogo {b1}Organizar naves{/b1} para dividir la flota entre las naves que quieres conservar y las que quieres desguazar.
+417	Cuando desguazas naves que están sobre una colonia, el metal pasa al instante a tu reserva global, y puedes usarlo de inmediato. Si no eres dueño del planeta sobre el que están las naves, el metal caerá sobre el planeta. La siguiente persona que lo colonice podrá extraer entonces el metal de tus naves desguazadas.
+418	Enviar mensajes
+419	{b1}Enviar mensajes{/b1}
+420	Puedes enviar mensajes a los demás jugadores de una partida de {b1}Spaceward Ho!{/b1}. Como los jugadores del ordenador tienen que entender y enviar mensajes propios, se ha diseñado un lenguaje sencillo para todos los de la partida.
+421	Para enviar un mensaje, basta con elegir Enviar mensaje en el menú “Galaxia”. Aparecerá un cuadro de diálogo en el que podrás decidir a quién enviarlo, qué decir y cosas así. La mejor manera de aprender todos los mensajes es probarlos todos.
+422	Los mensajes tendrán un efecto distinto en quien los recibe. Si le dices a un jugador que lo odias, tenderá a apreciarte menos que antes. Si le dices que te cae bien, puede que él a ti también o puede que no.
+423	Los jugadores del ordenador mentirán de vez en cuando con sus mensajes, unos más que otros. Pero no pueden mentir con algunos mensajes, igual que tú.
+424	Puedes enviar mensajes privados a otros jugadores, pero el mensaje tarda un turno en llegar, igual que los demás mensajes.
+425	En las partidas en red, puedes charlar con otros jugadores en tiempo real en la Ventana de chat. Basta con escribir los mensajes, y los demás jugadores verán al instante tus comentarios en su Ventana de chat.

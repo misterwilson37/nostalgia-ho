@@ -1,0 +1,158 @@
+262	{span1} {/span1}joueur a sa propre idée de ce que représente 72{img2/}.
+263	Terraformation {span1} {/span1}Amélioration de la température d’un système stellaire.{span2} {/span2}
+264	Quand une planète est entièrement terraformée, sa tempé-{span1} {/span1}
+265	rature est de 72{img1/}.
+266	Le Ho! {span1} {/span1}Ce que les joueurs expérimentés appellent Spaceward Ho!.
+267	{span1} {/span1}Si vous voulez vraiment avoir l’air cool, dites que vous « jouez
+268	{span1} {/span1}au Ho! ».
+269	Armes {span1} {/span1}Ce qu’un vaisseau tire. Un vaisseau de Technologie d’Armes 8
+270	{span1} {/span1}mettra en pièces des vaisseaux de Technologie de Boucliers 4.
+272	{b1}Coloniser des planètes{/b1}
+273	À un moment ou à un autre, vous trouverez une planète appétissante que vous voudrez garder. Elle sera à peu près à 1,16 G et 98{img1/}. Elle aura 9 487 unités de métal, et vous ne pourrez tout simplement pas y résister.
+274	La première étape consiste à construire un Transport d’un modèle ou d’un autre et à l’y envoyer. (Si votre niveau de compétence est « Novice », un Transport sera déjà construit pour vous.) À son arrivée, vous recevrez un message vous informant que vous avez colonisé une nouvelle planète. Il dira quelque chose comme : « Vous venez de coloniser Sol. »
+275	Vous remarquerez à ce moment-là que, dans votre fenêtre du budget, une nouvelle ligne est apparue avec le nom de la nouvelle étoile. C’est là que vous répartissez l’argent entre la terraformation et l’extraction pour cette planète.
+276	Il faut un certain temps pour qu’une planète devienne rentable, même si c’est une excellente planète. Pendant des décennies, vous y injecterez de l’argent en terraformant et en exploitant la planète. Vous verrez la population passer d’une poignée de colons à une économie prospère, qui contribue à votre empire galactique. Plus une planète est mauvaise au départ, plus il vous faudra de temps pour la rendre rentable.
+277	Plus vous dépensez d’argent pour terraformer une planète, plus elle grandira vite. Malheureusement, même quand la température est un parfait 72{img1/}, vous n’aurez probablement toujours pas assez de monde sur place pour peupler toute la planète. Soyez patient, la population va croître. L’extraction et la construction de vaisseaux n’ont aucun effet sur la vitesse de croissance de la population.
+278	Il faut un minimum de 7 500 $ pour entretenir une planète. Comme votre planète d’origine ne produit qu’environ 30 000 $ par tour, vous n’avez de quoi coloniser que quatre planètes à la fois. Au maximum. Vous voudrez probablement n’en coloniser qu’une, au moins jusqu’à ce qu’elle tourne le coin de la rentabilité. Sinon, vous finissez par dépenser tout votre argent juste pour garder vos gens en vie, et il ne vous en reste qu’un peu pour améliorer les planètes, construire des vaisseaux et rechercher de nouvelles technologies.
+279	C’est bien d’avoir beaucoup de planètes colonisées. Plus vous avez de planètes rentables, plus vous gagnez d’argent. Plus vous gagnez d’argent, plus vous pouvez dépenser en recherche. Plus votre technologie est élevée, moins vous risquez d’être submergé par un ennemi, à condition d’avoir construit des vaisseaux avec cette technologie plus élevée. Et si vous avez beaucoup de planètes, vous pouvez vous permettre d’en voir une ou deux piétinées par des vaisseaux ennemis.
+280	Vous remarquerez que toutes vos colonies ont l’air de gentils. C’est-à-dire qu’elles ne portent ni masque, ni lunettes noires, ni crête punk, ni boucles d’oreilles. C’est simple : c’est vous qui portez le chapeau blanc. Bien sûr, tous les autres joueurs se croient eux aussi les gentils.
+281	Détruire les planètes ennemies
+282	{b1}Détruire les planètes ennemies{/b1}
+283	Envoyez une flotte à une colonie ennemie. Une fois que votre flotte a détruit les vaisseaux et les satellites ennemis, elle passe à la planète elle-même et la pilonne, tuant la population par vagues entières. La planète peut opposer une résistance féroce, mais elle ne suffira probablement qu’à se défendre contre des forces d’exploration. Face à votre flotte d’invasion, il y a de bonnes chances que la population de la planète soit entièrement anéantie. L’ennemi ne possédera plus la planète. Vous serez libre de la coloniser ou d’en faire ce que vous voulez. Bien sûr, l’ennemi risque d’être contrarié et de tenter de la reprendre, aussi la prudence est-elle de mise.
+284	Un autre moyen mortel de détruire des planètes ennemies est de choisir {b1}Armageddon{/b1} dans le menu “Galaxie”. Armageddon détruit la moitié de la galaxie. Mais il risque de tuer vos planètes aussi bien que celles de l’ennemi.
+286	{b1}Exploiter une planète à fond{/b1}
+287	Parfois, vous vous retrouverez à court de métal. C’est le bon moment pour coloniser une planète dont vous savez pertinemment qu’elle ne sera jamais rentable, quoi que vous fassiez pour la terraformer et quel que soit le temps que vous attendiez. Peut-être est-elle à 3,5 G, ou pire encore. Colonisez la planète, mais réglez ses dépenses de façon à ne rien dépenser pour la terraformation. Mettez tout dans l’extraction. Quand vous avez pris à la planète tout le métal que vous vouliez, “Abandonner” la planète. Les Satellites que vous y avez construits resteront, mais vos colons seront évacués.
+288	Parfois, vous voudrez peut-être exploiter une planète simplement pour empêcher un ennemi d’en récupérer le métal.
+289	Aide de Spaceward Ho! 4.0.5
+290	{b1}Spaceward Ho! : changements et ajouts{/b1}
+291	{a1}Changements de la 2.0 à la 3.0{/a1}
+292	{a1}Ajouts de la 3.0 à la 4.0{/a1}
+293	{a1}Instructions ultra-rapides pour le Ho!{/a1}
+294	{a1}Résumé rapide{/a1}
+295	{a1}Commencer une nouvelle partie{/a1}
+296	{a1}Les fenêtres{/a1}
+297	{a1}La fenêtre principale{/a1}
+298	{a1}La carte des étoiles{/a1}
+299	{a1}Informations sur le budget{/a1}
+300	{a1}Les barres{/a1}
+301	{a1}Informations sur la planète{/a1}
+302	{a1}La fenêtre des dépenses en technologie{/a1}
+303	{a1}Les messages et la fenêtre des rapports{/a1}
+304	{a1}Raccourcis{/a1}
+305	{a1}Argent et métal{/a1}
+306	{a1}Les rendements décroissants{/a1}
+307	{a1}La dette{/a1}
+308	{a1}Introduction{/a1}
+309	{a1}Construire des vaisseaux{/a1}
+310	{a1}Déplacer des vaisseaux{/a1}
+311	{a1}Organiser les flottes{/a1}
+312	{a1}Recycler des flottes et des vaisseaux{/a1}
+313	{a1}Concevoir des vaisseaux{/a1}
+314	{a1}Coût de développement{/a1}
+315	{a1}Explorer les planètes : température et gravité{/a1}
+316	{a1}Coloniser des planètes{/a1}
+317	{a1}Exploiter une planète à fond{/a1}
+318	{a1}Détruire les planètes ennemies{/a1}
+319	{a1}Les différentes images de planètes{/a1}
+320	{a1}Choisir les technologies{/a1}
+321	{a1}Le progrès technologique{/a1}
+322	{a1}Distance{/a1}
+323	{a1}Vitesse{/a1}
+324	{a1}Armes et Boucliers{/a1}
+325	{a1}Mini{/a1}
+326	{a1}Radicaux{/a1}
+327	{a1}Envoyer des messages{/a1}
+328	{a1}Alliances{/a1}
+329	{a1}Comparer les joueurs{/a1}
+330	{b1}Combat{/b1}
+331	{a1}Revoir les batailles{/a1}
+332	{b1}L’historique graphique{/b1}
+333	{a1}L’historique graphique{/a1}
+334	{a1}Galaxies personnalisées{/a1}
+335	{a1}Nombre d’ordinateurs{/a1}
+336	{a1}Taille de la galaxie{/a1}
+337	{a1}Style de la galaxie{/a1}
+338	{a1}Intelligence des ordinateurs{/a1}
+339	{a1}Auto Play…{/a1}
+340	{a1}Le Panthéon et le Mur de la honte{/a1}
+341	{a1}Préférences{/a1}
+342	{a1}Afficher les trajets des flottes{/a1}
+343	{a1}Trier automatiquement la liste des planètes{/a1}
+344	{a1}Afficher les messages d’événements{/a1}
+345	{a1}Revoir les batailles d’événements{/a1}
+346	{a1}Régler la vitesse des batailles{/a1}
+347	{a1}Régler la fréquence de consultation{/a1}
+348	{a1}À propos de l’auteur, Peter Commons{/a1}
+349	{a1}À propos de Spaceward Ho!{/a1}
+350	{a1}Pourquoi un thème de cow-boys ?{/a1}
+351	{a1}Crédits{/a1}
+352	{a1}Assistance clientèle{/a1}
+353	{a1}Informations de copyright{/a1}
+354	{a1}Glossaire{/a1}
+355	Autres sujets
+356	{a1}Le menu Options{/a1}
+357	{a1}Votre planète d’origine{/a1}
+358	{a1}Une planète sélectionnée{/a1}
+359	{a1}Une planète inexplorée{/a1}
+360	{a1}C’est une planète où votre population a grandi au point de pouvoir subvenir à ses besoins…{/a1}
+361	{a1}Une planète colonisée et rentable{/a1}
+363	{b1}Les messages et la fenêtre des rapports{/b1}
+364	La fenêtre des rapports est un historique défilant des choses importantes qui se sont passées au cours des derniers tours. Chaque message apparaît dans le coin inférieur gauche de la carte des étoiles au début de chaque tour. Quand vous cliquez sur le message, vous passez au suivant.
+365	Il y a beaucoup de sortes de messages. Quand vous explorez une étoile, vous recevez un message sur sa température et sa gravité. Quand vous colonisez une planète, vous recevez un petit mot sympathique. Quand vous êtes dans une bataille, vous recevez un message qui en résume le résultat.
+366	À chaque tour, vous recevez des astuces pour jouer à{b1} Spaceward Ho!{/b1}. Quand vous les avez toutes vues, vous pouvez les désactiver dans {b2}Préférences…{/b2}, dans le menu “Options”.
+367	Vous pouvez cliquer sur un ancien message de la fenêtre des rapports pour obtenir plus d’informations. Par exemple, quand vous cliquez sur un résumé de bataille, {b1}Spaceward Ho!{/b1} rejoue la bataille. Quand vous cliquez sur un message qui mentionne une planète, la carte défile jusqu’à cette planète et la sélectionne.
+368	Mini
+369	{b1}Mini{/b1}
+372	{b1}Déplacer des vaisseaux{/b1}
+373	Pour déplacer une flotte, cliquez et faites glisser depuis la planète où elle se trouve jusqu’à l’endroit où vous voulez qu’elle aille. Si elle peut y arriver, vous verrez une flèche qui suit la route que prendra votre flotte. Quand vous relâchez la souris, vous entendrez un « Hyahh ! » qui vous indique que le cap est fixé. Quand vous terminez le tour, le vaisseau part en voyage.
+374	Si la flotte ne peut pas atteindre l’étoile vers laquelle vous l’avez fait glisser, le trajet sera montré par une ligne grise en pointillés. Si la flotte a assez de carburant pour aller à l’étoile choisie et en revenir, le trajet sera une flèche à double pointe.
+375	Pour qu’une flotte reste immobile, ou pour annuler son déplacement, cliquez sur la planète de la flotte et maintenez le clic une seconde. Quand vous le faites correctement, vous entendrez un « Whoa ! » en relâchant la souris.
+376	Si vous avez plus d’une flotte à une planète, vous pouvez choisir la flotte à déplacer en cliquant sur son nom dans les informations sur le budget. Quand une flotte a une destination et prévoit de partir à la fin du tour, son nom s’affiche en gras pour vous le signaler. Appuyez sur la touche {b1}TAB{/b1} pour passer à la flotte suivante à cette planète.
+377	Une flotte se ravitaille automatiquement chaque fois qu’elle va sur une planète qui vous appartient ou qui appartient à vos alliés. Si une flotte n’a pas assez de carburant pour repartir, vous pouvez envoyer un Transport sur cette planète, la coloniser pendant un tour, puis faire partir tout le monde. Ou vous pouvez envoyer un tanker pour ravitailler la flotte.
+378	La trajectoire d’une flotte ne peut pas être changée entre deux planètes : dans l’hyperespace, on ne peut pas faire demi-tour.
+379	Nombre d’ordinateurs
+380	{b1}Nombre d’ordinateurs{/b1}
+381	Le nombre d’ordinateurs est assez évident : c’est le nombre d’ennemis qui occuperont la galaxie avec vous. Plus ils sont nombreux, plus vous rencontrerez de résistance.
+382	Organiser les flottes
+383	{b1}Organiser les flottes{/b1}
+384	Il arrive que vous vouliez diviser une flotte en plusieurs morceaux ou réunir plusieurs flottes. Pour cela, choisissez {b1}Organiser vaisseaux{/b1} dans le menu “Vaisseaux”. Puis faites glisser les vaisseaux jusqu’à ce qu’ils soient répartis comme vous le voulez. Désolé, une flotte ne peut contenir que des vaisseaux du même type (pour réduire la taille des fichiers).
+386	{b1}Informations sur la planète{/b1}
+387	Les informations sur la planète actuellement sélectionnée (celle qui est entourée d’une « couronne ») se trouvent dans le coin supérieur gauche de la fenêtre principale. Si vous sélectionnez une colonie en croissance, vous verrez un camembert qui montre comment l’argent que vous dépensez pour cette planète se répartit entre l’extraction et la terraformation. Là encore, ne vous souciez pas trop du pourcentage exact que vous dépensez pour chaque poste ; essayez simplement d’avoir les bonnes proportions.
+388	Dépensez de l’argent en terraformation pour ramener la température d’une planète à 72{img1/} (c’est votre température préférée). Si une planète est déjà à 72{img2/}, vous ne pouvez plus dépenser d’argent pour la terraformer.
+389	Dépensez de l’argent en extraction pour libérer les ressources de la planète et rendre le métal disponible pour la construction de vaisseaux. Là encore, quand la planète n’a plus de métal, vous ne pouvez plus dépenser d’argent pour l’exploiter.
+390	Le « revenu » d’une planète est la somme supplémentaire qu’elle apporte à votre budget total. Si c’est une planète que vous venez de coloniser, il sera négatif, ce qui signifie que vous devez y injecter de l’argent rien que pour la maintenir en vie. Plus une planète ressemble à votre planète d’origine (qui est à 72{img1/} et 1,00 G), plus elle a de potentiel pour rapporter de l’argent. Les planètes trop différentes de votre planète d’origine ne seront jamais rentables.
+391	Préférences
+392	{b1}Préférences{/b1}
+393	La plupart des préférences se règlent avec la boîte de dialogue {b1}Préférences{/b1} du menu “Options”.
+395	{b1}Technologie {/b1}
+396	{b1}Radicaux{/b1}
+397	La recherche radicale peut vous apporter des choses qu’aucune autre technologie ne peut offrir. Quand vous investissez de l’argent en technologie Radicale, il arrive de temps en temps que vos scientifiques fassent une découverte stupéfiante. Certaines découvertes radicales peuvent vous donner des niveaux de technologie plus élevés, des armes biologiques, le contrôle du climat ou de nouvelles techniques d’extraction. Vous ne savez jamais quand aura lieu le prochain bond de technologie Radicale : c’est bien plus aléatoire que les autres technologies. Nous n’allons pas décrire tout ce qui peut arriver avec la technologie Radicale : vous devrez le découvrir par vous-même.
+398	Les augmentations de technologie Radicale sur les autres technologies ne changent pas votre base de recherche pour ces technologies. Par exemple, si vos niveaux de technologie d’Armes et de Boucliers sont de 5 et 5, et que votre technologie Radicale fait passer vos Boucliers à 7, votre technologie d’Armes atteindra 8 en même temps que celle des Boucliers. Cela signifie que l’avantage de la technologie Radicale n’est que temporaire : utilisez-le bien.
+400	{b1}Distance{/b1}
+401	La Distance est la longueur que peut parcourir une flotte avant de se ravitailler. Si un vaisseau a une Distance de 8, il peut aller à 4 cases et revenir se ravitailler, ou aller à 8 cases et y rester bloqué. Quand la Distance d’un vaisseau est de 12, il peut aller à 6 cases et revenir sans risque, ou faire un aller simple jusqu’à 12 cases. C’est loin, et cela vous permettra de mener des raids profonds en territoire ennemi ou d’explorer les planètes aux confins de la galaxie.
+402	Revoir les batailles d’événements
+403	{b1}Revoir les batailles d’événements{/b1}
+404	Cet élément n’a d’effet que si celui qui est au-dessus, {b1}Afficher les messages d’événements{/b1}, est aussi coché. Si les deux le sont, chaque fois qu’un message de bataille est sur le point d’être affiché, la bataille est automatiquement rejouée. S’il n’est pas coché, seul le message de résumé s’affiche.
+405	Revoir les batailles
+406	{b1}Revoir les batailles{/b1}
+407	Quand vos vaisseaux croisent des vaisseaux ennemis, ils se battent jusqu’à ce qu’un camp soit anéanti. Il faut avouer que cela ne favorise pas la coexistence pacifique, mais c’est un jeu de guerre. Quoi qu’il en soit, après un combat, vous voudrez savoir ce qui s’est passé. Il y a plusieurs moyens de le savoir. D’abord, si {b1}Revoir les batailles{/b1} est coché dans la boîte de dialogue {b2}Préférences {/b2}, vous obtiendrez un résumé des batailles au début de chaque tour.
+408	Vous pouvez aussi sélectionner une étoile et revoir la dernière bataille qui s’y est déroulée en choisissant {b1}Revoir la bataille à Proxima{/b1} (ou autre) dans le menu “Vaisseaux”. S’il y a eu deux batailles ou plus à une étoile, vous ne pouvez voir que la plus récente de cette façon.
+409	Double-cliquez sur une étoile {i1}ennemie{/i1} pour revoir la bataille la plus récente qui s’y est déroulée.
+410	Cliquez sur un message de résumé de bataille dans la fenêtre des rapports pour revoir cette bataille. S’il y a eu plus d’une bataille à une étoile, vous pouvez revoir une ancienne bataille de cette façon. Vous pouvez régler la vitesse à laquelle Spaceward Ho! rejoue la bataille dans la boîte de dialogue {b1}Préférences{/b1}.
+411	Si vous perdez une bataille dès le premier round, vos commandants n’ont pas le temps de vous envoyer des informations sur la bataille avant d’être détruits. Vous n’aurez donc guère idée du nombre de vaisseaux ennemis présents, juste qu’ils sont assez nombreux pour vous anéantir.
+412	Recycler des flottes et des vaisseaux
+413	{b1}Recycler des flottes et des vaisseaux{/b1}
+414	À mesure que la partie avance, vous constaterez que le métal se fait rare et que vos vaisseaux obsolètes ne servent presque plus à rien. Vous voudrez peut-être vous débarrasser de certains de vos plus vieux vaisseaux. Vous pouvez récupérer 75 % du métal d’une flotte qui se trouve à l’une de vos colonies en la recyclant (choisissez {b1}Recycler la flotte actuelle{/b1} dans le menu “Vaisseaux”). Ou vous pouvez recycler tout un type de vaisseau (cliquez sur {b2}Tout recycler{/b2} pour un type précis dans la boîte de dialogue {b3}Construire/concevoir des vaisseaux{/b3}).
+415	Quand vous marquez un type de vaisseau ou une flotte pour le recyclage, il n’est recyclé qu’à la fin du tour. Si vous avez des regrets d’ici là, vous pouvez simplement appuyer sur le bouton {b1}Ne pas recycler{/b1} de la boîte de dialogue {b2}Construire/concevoir des vaisseaux{/b2}, ou choisir {b3}Ne pas recycler la flotte actuelle{/b3} dans le menu “Vaisseaux”.
+416	Si vous voulez recycler seulement une partie d’une flotte, utilisez la boîte de dialogue {b1}Organiser vaisseaux{/b1} pour diviser la flotte entre ce que vous voulez garder et ce que vous voulez recycler.
+417	Quand vous recyclez des vaisseaux qui se trouvent au-dessus d’une colonie, le métal passe instantanément dans votre réserve globale et vous pouvez l’utiliser tout de suite. Si vous ne possédez pas la planète au-dessus de laquelle se trouvent les vaisseaux, le métal tombe sur la planète. La prochaine personne qui la colonisera pourra alors extraire le métal de vos vaisseaux recyclés.
+418	Envoyer des messages
+419	{b1}Envoyer des messages{/b1}
+420	Vous pouvez envoyer des messages aux autres joueurs d’une partie de {b1}Spaceward Ho!{/b1}. Comme les joueurs ordinateur doivent comprendre et envoyer leurs propres messages, un langage simple a été conçu pour tout le monde dans la partie.
+421	Pour envoyer un message, choisissez simplement Envoyer un message dans le menu “Galaxie”. Une boîte de dialogue s’ouvre et vous permet de décider à qui envoyer, quoi dire, et ainsi de suite. Le meilleur moyen d’apprendre tous les messages est de les essayer tous.
+422	Les messages auront des effets variables sur la personne qui les reçoit. Si vous dites à un joueur que vous le détestez, il aura tendance à moins vous apprécier qu’avant. Si vous dites que vous l’aimez bien, il vous aimera peut-être en retour, ou peut-être pas.
+423	Les joueurs ordinateur mentent parfois dans leurs messages, certains plus que d’autres. Mais ils ne peuvent pas mentir sur certains messages, tout comme vous.
+424	Vous pouvez envoyer des messages privés à d’autres joueurs, mais il faut un tour pour que le message arrive, comme pour les autres messages.
+425	Dans les parties en réseau, vous pouvez discuter en temps réel avec les autres joueurs dans la fenêtre de discussion. Tapez simplement vos messages et les autres joueurs verront instantanément vos commentaires dans leur fenêtre de discussion.
+426	Régler la vitesse des batailles
+427	{b1}Régler la vitesse des batailles{/b1}
