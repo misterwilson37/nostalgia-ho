@@ -352,7 +352,22 @@ const rs = Object.assign(base, {
     }
   },
   // the auto play window (above)
-  prefsWindow: null, // iOS's settings keep the remake's own words (not 5.0.5's Preferences window)
+  // CONFIRMED (PreferencesLayer, docs/ios-findings.md; initDialog 0x1000a6a4c,
+  // the toggles 0x1000a75dc-0x1000a7940, Misc Strings 82, 195-200, 149, 14,
+  // 97-99, 104-105, 186-194): "Preferences" over eight rows, each a label and a
+  // switch with the state's words beside it: Event Messages (Show, Hide),
+  // Messages (Only Important, All), Battles (Review, Skip), Hints (On, Off),
+  // Best Buddies (On, Off), Temp: (\u00baC, \u00baF), Sound (On, Off), Gender
+  // (Male, Female); then "Review Battle Speed:" (Slow, Fast), a slider 0-30
+  // (the preference is the delay, 30 minus it: +0x220, Android +0x218); OK and
+  // Cancel. Event Messages on Hide hides the rows under it. Defaults
+  // (Preferences init 0x10003dbd8): Show, All, Review, Hints On, Best Buddies
+  // On, \u00baF, Sound On, Male; the delay 20, the slider at 10. The remake's own
+  // options are below a line (js/skins/classic/ui.js prefsIOS).
+  prefsWindow: { style: 'ios', title: 'Preferences', show: 'Event Messages',
+    rows: [['show', 'Event Messages', 'Show', 'Hide'], ['important', 'Messages', 'Only Important', 'All'], ['review', 'Battles', 'Review', 'Skip'], ['hints', 'Hints', 'On', 'Off'],
+      ['buddies', 'Best Buddies', 'On', 'Off'], ['celsius', 'Temp:', '\u00baC', '\u00baF'], ['sound', 'Sound', 'On', 'Off'], ['male', 'Gender', 'Male', 'Female']],
+    speed: 'Review Battle Speed:', slow: 'Slow', fast: 'Fast', range: [0, 30], def: 10, defaults: { review: true }, cancel: 'Cancel', ok: 'OK', okPic: 'button-check', cancelPic: 'button-x' },
   autoPlayWindow: 'ios', autoPlayRange: { aggr: [0, 100], where: 'autoplay' }, autoPlayDefaults: AUTO_DEFAULTS,
   // the Radical Research window (RadicalResearchLayer; Misc Strings 107, 108:
   // "Radical Research", "Don't Cancel Any Programs"; Radical Tech Strings,

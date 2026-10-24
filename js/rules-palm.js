@@ -405,8 +405,17 @@ const rs = Object.assign(base, {
   // "You may name a star for use in future games:", "Nevermind" and "Cool!"
   // (nameAStar below). How the list grows wasn't read: the remake keeps every
   // name.
-  // the Palm's Preferences form (tFRM 3200) keeps the remake's own words, not 5.0.5's window (rs.prefsWindow)
-  prefsWindow: null,
+  // CONFIRMED (tFRM 3200, 156 x 156, docs/palm-windows.md; FUN_00070a86 sets it
+  // up, FUN_00070d06 runs it): "Preferences" with Player Sex: (a pop-up, Female
+  // then Male: the value 1 a man), "Money in \u20ac not $", "Temp in \u00b0C not
+  // \u00b0F", "Jump To History", "Give Helpful Hints", "Show Best Buddies
+  // Stars", "Enable Auto-Zoom", "Disable Auto-Off" (a field below them is not
+  // used), then Sound, Cancel and OK. Defaults (FUN_000171aa, FUN_0001727e,
+  // the preferences' reset): Sound on, euros off, \u00b0F, Jump To History on,
+  // hints on, Best Buddies Stars on, Auto-Zoom off. The remake's own options
+  // are below a line (js/skins/classic/ui.js prefsPalm).
+  prefsWindow: { style: 'palm', title: 'Preferences', sex: 'Player Sex:', sexes: ['Female', 'Male'], euro: 'Money in \u20ac not $', celsius: 'Temp in \u00b0C not \u00b0F',
+    history: 'Jump To History', hints: 'Give Helpful Hints', buddies: 'Show Best Buddies Stars', zoom: 'Enable Auto-Zoom', autooff: 'Disable Auto-Off', sound: 'Sound', cancel: 'Cancel', ok: 'OK' },
   // the auto play settings are on the Auto Play form (tFRM 1700, FUN_000713be:
   // "Auto Play", "Have Computer Play For Me" over the sliders, "Just End My
   // Turns", "Turn Off When Something Interesting Happens: battles,

@@ -191,8 +191,7 @@ Where a browser can't do what the original did, or the remake had to pick.
   its voice. `docs/translations.md`.
 
 - The Palm's Auto Play form (tFRM 1700) is shown as 5.0.5's Auto Play window, which has
-  the same parts and adds the click-through slider. The Palm's and iOS's own Preferences
-  forms keep the remake's words (5.0.5's window is built for 5.0.5 only).
+  the same parts and adds the click-through slider.
 - Played as released, though we weren't sure each was meant:
   - budget shares are used as they stand, even over 1,000 (Abundant starts at 1,050);
   - dipping into savings raises the borrowing limit;

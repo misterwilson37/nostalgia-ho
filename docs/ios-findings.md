@@ -879,3 +879,41 @@ else the first; 77 "Money:" and 23 "Metal:" over CCSliderDeluxe sliders (0-1, no
 amount (int)(float)(have x fraction) over the middle, "$0"/"0" and the most under the ends;
 the check mark records the gift whatever the amounts (sound 5000), the X closes. Android
 1.2.8 the same. Built: `rs.giveWindow` ('ios').
+
+## The Preferences screen (CONFIRMED and built, October 2026)
+
+`PreferencesLayer` (`initDialog` `0x1000a6a4c`, `doClose:` `0x1000a74c8`, the toggles
+`0x1000a75dc`-`0x1000a7940`, `valueChanged:tag:` `0x1000a799c`, `setupPreference...choiceLabel:`
+`0x1000a7b3c`): the title "Preferences" (Misc Strings 82) over eight rows, each a label, a
+switch and the words of its state beside it, in this order (the state's words for the switch
+on, then off):
+
+| Row (Misc Strings) | On | Off | Preferences byte | Default |
+|---|---|---|---|---|
+| Event Messages (195) | Show (186) | Hide (187) | +0x210 | Show |
+| Messages (196) | Only Important (188) | All (189) | +0x211 | All |
+| Battles (197) | Review (190) | Skip (154) | +0x212 | Review |
+| Hints (198) | On (105) | Off (104) | +0x213 | On |
+| Best Buddies (149) | On | Off | +0x214 | On |
+| Temp: (14) | ºC (192) | ºF (191) | +0x215 | ºF |
+| Sound (199) | On | Off | +0x217 | On |
+| Gender (200) | Male (193) | Female (194) | +0x1b8 (a short) | Male (1) |
+
+then "Review Battle Speed:" (97) with a slider, "Slow" (98) to "Fast" (99), 0-30 in the
+preference's delay: delay = 30 - 30 x the slider's fraction (`+0x220`, default 20, so the
+slider sits at 10); and the dialog's check mark (OK) and X (Cancel) buttons
+(`enableCloseButton:cancelButton:`), the same two as the Give dialog. Event Messages on Hide
+hides the four rows under it (Messages, Battles, Hints, Best Buddies). `doClose:` copies the
+dialog's bytes to the preferences only for OK, then posts `HoAppNotify send:`. The defaults
+are from the Preferences constructor `0x10003dbd8`. Android 1.2.8: the same class, selectors
+and strings (`libApplication.so`; the delay at +0x218, as for `shipShootDelay`).
+
+Built as `rs.prefsWindow` (style `'ios'`, inherited by Android; `prefsIOS` in
+`js/skins/classic/ui.js`) with those words and that order. Wired: Event Messages (Hide: the
+reports wait in the Report window), Messages, Battles (a battle report opens the replay; on
+by default as iOS's), Hints, Temp, Sound (the remake's sound switch), Gender (your hat), the
+speed (the replay's pace, 10 the remake's, a quarter octave a step). Kept as chosen with
+nothing yet to act on: Best Buddies (no such report). The remake's own options (modern
+conveniences, pointer hints) sit under a line headed "Remake options". French and Turkish are
+the app's own (`fr.lproj`, `tr.lproj`) where they exist; "All" in Turkish (the app has
+"Müttefik", ally) and a few more are the remake's own or adapted (`js/ui-text.js`).

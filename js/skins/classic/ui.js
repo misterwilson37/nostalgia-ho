@@ -170,7 +170,7 @@ const Sound = {
   stopTheme() { if (this.theme) this.theme.pause(); },
 };
 // preferences (the original's Preferences window: Celsius, only important messages, review battles, hints)
-const Prefs = { celsius: false, important: false, review: false, hints: true, autoRoute: true, tips: true,
+const Prefs = { celsius: false, important: false, review: null, hints: true, autoRoute: true, tips: true,
   // the version's own preferences (rs.options, 1.2 and 2.0): battle speed in
   // ticks a shot (null: the version's default), fully animated battles,
   // event messages shown, the polling time in seconds (null: the default)
@@ -179,8 +179,15 @@ const Prefs = { celsius: false, important: false, review: false, hints: true, au
   auto505: null,
   // 5.0.5's Preferences window (rs.prefsWindow, prefs505): stars best buddies
   // explore, battle review speed 0-30 (null: 15), vocalized chat keywords
-  buddyStars: true, reviewSpeed: null, vocal: true };
+  buddyStars: true, reviewSpeed: null, vocal: true,
+  // the Palm's Preferences form (rs.prefsWindow style 'palm', prefsPalm): money
+  // in euros, Jump To History, Auto-Zoom, Disable Auto-Off (kept, nothing yet
+  // to act on)
+  euro: false, jumpHistory: true, autoZoom: false, autoOff: false };
 try { const s = JSON.parse(localStorage.getItem('ho5.prefs') || '{}'); if (s.sound === false) Sound.on = false; if (s.music) Sound.music = true; for (const k in Prefs) if (s[k] != null) Prefs[k] = s[k]; } catch (e) {}
+// Review Battles: what was chosen, else the version's own default (iOS: on;
+// rs.prefsWindow.defaults), else off
+function prefReview() { const PW = G && HO.rules(G).prefsWindow; return Prefs.review != null ? !!Prefs.review : !!(PW && PW.defaults && PW.defaults.review); }
 function savePrefs() { try { localStorage.setItem('ho5.prefs', JSON.stringify(Object.assign({ sound: Sound.on, music: Sound.music }, Prefs))); } catch (e) {} }
 // rs.celsius: the version showed temperatures in °C, to a tenth (1.2, the
 // French edition); otherwise °C is the player's preference
@@ -199,7 +206,7 @@ function verBattle() {
   const BS = (verOpts() || {}).battleSpeed, PW = G && HO.rules(G).prefsWindow;
   // 5.0.5's Battle Review Speed (0 Slow to 30 Fast, 15 the remake's pace):
   // each step is a quarter of an octave
-  if (PW && !BS) { const v = Prefs.reviewSpeed != null ? Prefs.reviewSpeed : PW.def; return { f: Math.pow(2, (PW.def - v) / 7.5), full: true }; }
+  if (PW && PW.range && !BS) { const v = Prefs.reviewSpeed != null ? Prefs.reviewSpeed : PW.def; return { f: Math.pow(2, (PW.def - v) / 7.5), full: true }; }
   return BS ? { f: optVal(BS, 'battleSpeed') / BS.def, full: Prefs.fullAnim !== false } : { f: 1, full: true };
 }
 
@@ -1637,7 +1644,7 @@ function showMessages() {
   UI.inbox = me().inbox.slice(); UI.msgIdx = 0;
   // Show Event Messages off (rs.options): the reports are only in the Report Window
   const O = verOpts(), PW = G && HO.rules(G).prefsWindow;
-  if (((O && O.showMessages) || PW || T.showMsgsPref) && Prefs.showMsgs === false) UI.msgIdx = UI.inbox.length;
+  if (((O && O.showMessages) || (PW && PW.show) || T.showMsgsPref) && Prefs.showMsgs === false) UI.msgIdx = UI.inbox.length;
   renderMsg();
 }
 // T.afterMsg(box, ctx): a skin dresses the report card or the End Turn
@@ -1665,7 +1672,7 @@ function renderMsg0() {
     let sound = look ? look.sound : m.sound, icon = look ? look.icon : m.icon;
     if (T.messageLook) { const t = T.messageLook(m, { icon, sound }, { G, ME, starLook }); if (t) { icon = t.icon; if (ownSounds()) sound = t.sound; } }
     if (sound) Sound.play(sound);
-    if (Prefs.review && m.battle && !m._reviewed) { m._reviewed = true; setTimeout(() => openBattle(m.battle), 50); }
+    if (prefReview() && m.battle && !m._reviewed) { m._reviewed = true; setTimeout(() => openBattle(m.battle), 50); }
     const card = el('div', { class: 'card', tabindex: 0, role: 'button', 'aria-label': 'Next message' });
     const big = m.big || (m.jpg != null ? 'jpg' : null);
     if (m.jpg != null) card.append(el('img', { class: 'jpg', src: A.jpg[m.jpg], alt: '' }));
@@ -3956,7 +3963,8 @@ function autoRoute(f, tgt) {
   return true;
 }
 function openPrefs() {
-  if (G && HO.rules(G).prefsWindow) return prefs505(HO.rules(G).prefsWindow);
+  const PW = G && HO.rules(G).prefsWindow;
+  if (PW) return PW.style === 'ios' ? prefsIOS(PW) : PW.style === 'palm' ? prefsPalm(PW) : prefs505(PW);
   const box = (k, label) => el('label', { class: 'chk' }, el('input', { type: 'checkbox', checked: Prefs[k] ? 'checked' : false, onchange: (e) => { Prefs[k] = e.target.checked; savePrefs(); renderPanel(); } }), el('span', null, label));
   // hints: only for a version that had them (rs.hints false: none between
   // turns); °C: fixed on for a version that showed only °C (rs.celsius)
@@ -4011,6 +4019,79 @@ function prefs505(W) {
     el('div', { class: 'btns right' }, el('button', { type: 'button', class: 'quiet', onclick: closeModal }, W.cancel), el('button', { type: 'button', onclick: ok }, W.ok)),
     el('hr', { class: 'ngline' }),
     el('fieldset', { class: 'opts' }, el('legend', null, 'Remake options'), ...remake)), { cls: 'small' });
+}
+// The remake's own options, under the line in each ruleset's Preferences window
+// (`sound`: the window has its own Sound control)
+function remakeOptions(sound) {
+  const chk = (on, fn, label) => el('label', { class: 'chk' }, el('input', { type: 'checkbox', checked: on ? 'checked' : false, onchange: fn }), el('span', null, label));
+  return [el('hr', { class: 'ngline' }), el('fieldset', { class: 'opts' }, el('legend', null, 'Remake options'),
+    sound ? null : chk(Sound.on, (e) => { Sound.on = e.target.checked; savePrefs(); }, 'Sound effects'),
+    chk(modern(), (e) => setModern(e.target.checked), 'Modern conveniences in this game (automatic routes, the map follows the news, battle speed and written reports)'),
+    chk(Prefs.tips, (e) => { Prefs.tips = e.target.checked; savePrefs(); }, 'Explain things when the pointer rests on them (text from the original manual)'),
+    autoPlayWhere() === 'prefs' ? prefsAutoPlay() : null)];
+}
+// iOS 1.2.9's and Android 1.2.8's Preferences screen (PreferencesLayer
+// initDialog 0x1000a6a4c; rs.prefsWindow style 'ios'): eight rows, each a label
+// and a switch with the words of its state beside it (Event Messages Show or
+// Hide, Messages Only Important or All, Battles Review or Skip, Hints, Best
+// Buddies, Temp: ºF or ºC, Sound, Gender Male or Female), then the slider
+// "Review Battle Speed:" (Slow to Fast), OK and Cancel. With Event Messages on
+// Hide the four rows under it (Messages to Best Buddies) are hidden. OK applies;
+// Cancel leaves everything as it was. Wired: Event Messages (Hide: the reports
+// wait in the Report window), Messages, Battles, Hints, Temp, Sound (the
+// remake's sound switch), Gender (your hat), the speed (the battle's pace, 10
+// the remake's). Kept with nothing yet to act on: Best Buddies (no such report).
+function prefsIOS(W) {
+  const D = { show: Prefs.showMsgs !== false, important: !!Prefs.important, review: prefReview(), hints: !!Prefs.hints, buddies: Prefs.buddyStars !== false,
+    celsius: !!Prefs.celsius, sound: !!Sound.on, male: !me().female, speed: Prefs.reviewSpeed != null ? Prefs.reviewSpeed : W.def };
+  const rows = {}, sync = () => { for (const k of ['important', 'review', 'hints', 'buddies']) rows[k].hidden = !D.show; };
+  const row = ([k, label, on, off]) => {
+    const txt = el('span', { class: 'choice' }, D[k] ? on : off);
+    rows[k] = el('label', { class: 'chk switchrow', 'data-pref': k }, el('span', null, label), txt,
+      el('input', { type: 'checkbox', class: 'switch', role: 'switch', checked: D[k] ? 'checked' : false, onchange: (e) => { D[k] = e.target.checked; txt.textContent = UIL.t(D[k] ? on : off); if (k === 'show') sync(); } }));
+    return rows[k];
+  };
+  const list = W.rows.map(row);
+  // OK and Cancel are the check mark and the X, as on Give Money/Metal
+  const okBtn = W.okPic && A.img[(T.prefix || '') + W.okPic], noBtn = W.cancelPic && A.img[(T.prefix || '') + W.cancelPic];
+  const pb = (img, text, attrs) => el('button', Object.assign({ class: img ? 'picbtn' : null, 'aria-label': img ? text : null }, attrs), img ? el('img', { src: img, alt: '' }) : text);
+  sync();
+  const speed = el('input', { type: 'range', min: W.range[0], max: W.range[1], step: 1, value: D.speed, 'aria-label': W.speed.replace(/:$/, ''), oninput: (e) => { D.speed = +e.target.value; } });
+  const ok = () => {
+    Prefs.showMsgs = D.show; Prefs.important = D.important; Prefs.review = D.review; Prefs.hints = D.hints; Prefs.buddyStars = D.buddies;
+    Prefs.celsius = D.celsius; Sound.on = D.sound; Prefs.reviewSpeed = D.speed === W.def ? null : D.speed;
+    if (me().female === D.male) { me().female = !D.male; save(); }
+    savePrefs(); closeModal(); renderPanel(); draw();
+  };
+  modal(W.title, el('div', { class: 'prefs prefs-ios' }, ...list,
+    el('div', { class: 'speedrow' }, el('span', null, W.speed), el('div', { class: 'slider' }, el('span', null, W.slow), speed, el('span', null, W.fast))),
+    el('div', { class: 'btns right' }, pb(noBtn, W.cancel, { type: 'button', class: noBtn ? 'picbtn' : 'quiet', onclick: closeModal }), pb(okBtn, W.ok, { type: 'button', onclick: ok })),
+    ...remakeOptions(true)), { cls: 'small' });
+}
+// The Palm's Preferences form (tFRM 3200, FUN_00070a86 and FUN_00070d06;
+// rs.prefsWindow style 'palm'): Player Sex (a pop-up, Female then Male), Money
+// in € not $, Temp in °C not °F, Jump To History, Give Helpful Hints, Show Best
+// Buddies Stars, Enable Auto-Zoom, Disable Auto-Off, then Sound, Cancel and OK on
+// the bottom line. OK keeps it all. Wired: Sex (your hat), Temp, Hints, Sound
+// (the remake's sound switch; this skin is silent). Kept with nothing yet to act
+// on: Money in €, Jump To History, Best Buddies Stars, Auto-Zoom, Disable Auto-Off.
+function prefsPalm(W) {
+  const D = { female: !!me().female, euro: !!Prefs.euro, celsius: !!Prefs.celsius, history: Prefs.jumpHistory !== false, hints: !!Prefs.hints,
+    buddies: Prefs.buddyStars !== false, zoom: !!Prefs.autoZoom, autooff: !!Prefs.autoOff, sound: !!Sound.on };
+  const chk = (k, label) => el('label', { class: 'chk' }, el('input', { type: 'checkbox', checked: D[k] ? 'checked' : false, onchange: (e) => { D[k] = e.target.checked; } }), el('span', null, label));
+  const sex = el('select', { 'aria-label': W.sex.replace(/:$/, ''), onchange: (e) => { D.female = e.target.value === '0'; } },
+    ...W.sexes.map((t, i) => el('option', { value: String(i), selected: (i === 0) === D.female ? 'selected' : false }, t)));
+  const ok = () => {
+    Prefs.euro = D.euro; Prefs.celsius = D.celsius; Prefs.jumpHistory = D.history; Prefs.hints = D.hints; Prefs.buddyStars = D.buddies; Prefs.autoZoom = D.zoom; Prefs.autoOff = D.autooff;
+    Sound.on = D.sound;
+    if (me().female !== D.female) { me().female = D.female; save(); }
+    savePrefs(); closeModal(); renderPanel(); draw();
+  };
+  modal(W.title, el('div', { class: 'prefs prefs-palm' },
+    el('label', { class: 'sexrow' }, el('span', null, W.sex), ' ', sex),
+    chk('euro', W.euro), chk('celsius', W.celsius), chk('history', W.history), chk('hints', W.hints), chk('buddies', W.buddies), chk('zoom', W.zoom), chk('autooff', W.autooff),
+    el('div', { class: 'btns' }, chk('sound', W.sound), el('button', { type: 'button', class: 'quiet', onclick: closeModal }, W.cancel), el('button', { type: 'button', onclick: ok }, W.ok)),
+    ...remakeOptions(true)), { cls: 'small' });
 }
 // The version's own Options menu items (rs.options, 1.2 and 2.0), in its
 // words: Show Event Messages, Review Announced Battles, the battle speed
@@ -5689,7 +5770,7 @@ function setupMenus() {
       ['Send a message…', () => G && !G.over && openChat(), () => commandShown('chat')],
       ['Dip into savings…', () => G && !G.over && openDip(), 'dip'],
       ['Fix spending', () => G && !G.over && openFixSpending(), () => !!(G && HO.rules(G).fixSpending)],
-      ['Report window…', () => openReports(), () => !!(verOpts() || {}).reports || (!!(G && HO.rules(G).prefsWindow) && Prefs.showMsgs === false)],
+      ['Report window…', () => openReports(), () => !!(verOpts() || {}).reports || (!!(G && (HO.rules(G).prefsWindow || {}).show) && Prefs.showMsgs === false)],
       ['-'],
       [() => (G && me().surrenderTo != null ? 'Take back surrender' : 'Surrender…'), () => G && !G.over && openSurrender(), () => commandShown('surrender')],
       [() => (G && me().armageddon ? 'Turn off the armageddon device' : 'Armageddon device…'), () => G && !G.over && toggleArmageddon(), 'armageddon'],

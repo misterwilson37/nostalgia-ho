@@ -1453,3 +1453,35 @@ tSTR 2004: 'You are in DEMO mode. You can not make allies in DEMO mode. To unloc
 tSTR 2005: 'This is the Allies screen. Here you can adjust your relationship with the other players. Use the pop-ups next to each player to set the desired state of friendliness. If the player in question responds, you will be notified.'
 tSTR 25000: '^0'
 ```
+
+## The Preferences form (tFRM 3200), built (October 2026)
+
+`tFRM 3200` above is set up by `FUN_00070a86` and run by `FUN_00070d06` (the
+OK button 0xc81 writes the form's copies to the preferences record and goes back to the
+map form 0x578). Controls and what each keeps (the preferences record `DAT_00efd7a6`; the
+form's copies at +0x3c-0x43):
+
+| Control | Id | Kept in | Default (the preferences' reset, `FUN_0001727e`, `FUN_000171aa`) |
+|---|---|---|---|
+| Player Sex: pop-up (list 3206: "Female", then "Male"; the strings are in the code, `0x708c4`) | 3205 | +0x1ae (0 Female, 1 Male: the same 1 = a man as the computers' names) | the player's |
+| Sound | 3202 | +0x20d (and the system's sound setting, `PrefSetPreference`) | on |
+| Money in € not $ | 3203 | +0x2e6 (the currency sign: tSTL 1001 item 46 "$", 0x80 the euro) | off |
+| Temp in °C not °F | 3204 | +0x20b (and the player's +0x1dd) | off |
+| Jump To History | 3208 | +0x36c (after End Turn the Message History form 0x898 opens; off: asks, alert 0xa28) | on |
+| Give Helpful Hints | 3209 | +0x209 (and the player's +0x1db) | on |
+| Show Best Buddies Stars | 3210 | +0x20a (and the player's +0x1dc) | on |
+| Enable Auto-Zoom | 3211 | +0x36d (the map's zoom level 12 when it is on, the four map drawing routines) | off |
+| Disable Auto-Off | 3212 | no handler in the form (nothing is read or written for it) | off |
+| field 3213 (59, 129, 50 x 12) | 3213 | not touched by the form's code | |
+
+Built as `rs.prefsWindow` (style `'palm'`; `prefsPalm` in `js/skins/classic/ui.js`): the
+words and the order of the form (Player Sex, Money, Temp, Jump To History, hints, Best
+Buddies Stars, Auto-Zoom, Auto-Off, then Sound with Cancel and OK on the bottom line),
+Cancel leaves everything, OK keeps it. Wired: Player Sex (your hat), Temp, hints, Sound
+(the remake's sound switch; this skin is silent). Kept as chosen with nothing yet to act
+on: Money in € (the Palm's money figures stay "$"), Jump To History (the remake's
+messages come as cards; there is no Message History form to jump to), Show Best Buddies
+Stars (no such report), Enable Auto-Zoom, Disable Auto-Off. The remake's own options (modern
+conveniences, pointer hints) are under a line headed "Remake options". Strings in all five
+languages (`js/ui-text.js`). The form's 156 x 156 frame, pixel positions and the field 3213
+are not reproduced.

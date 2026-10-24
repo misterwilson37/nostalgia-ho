@@ -232,3 +232,12 @@ else the first; 77 "Money:" and 23 "Metal:" over CCSliderDeluxe sliders (0-1, no
 amount (int)(float)(have x fraction) over the middle, "$0"/"0" and the most under the ends;
 the check mark records the gift whatever the amounts (sound 5000), the X closes. Android
 1.2.8 the same. Built: `rs.giveWindow` ('ios').
+
+## The Preferences screen (CONFIRMED, October 2026)
+
+`PreferencesLayer` and its selectors (`toggleEventMessages`, `toggleImportantMessages`,
+`toggleBattles`, `toggleHints`, `toggleBuddies`, `toggleTemperature`, `toggleSound`,
+`toggleGender`, `setupPreferenceXPosition:yPosition:label:tag:choiceLabel:`) are in
+`libApplication.so`, the same names as iOS's; the strings are iOS's (the lists are identical).
+Built: `rs.prefsWindow` ('ios', inherited), see `docs/ios-findings.md`, "The Preferences
+screen".
