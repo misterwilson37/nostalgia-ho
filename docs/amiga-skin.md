@@ -528,3 +528,49 @@ outside the repo: the session's `images/25`–`39`). What they settle, and what 
     Jake, both ticked, while the turn waits to run). After both ended, the captured game sat
     with the normal pointer: probably waiting on the shared game file's poll (Optionen →
     Kontrollzeit), or on a slow emulated 68000; not yet seen through to the next year.
+
+### What the skin does with them (built October 2026; each item **from a real Amiga**)
+
+Captures 47-51 added: a route to a star in reach (the double line, "4" turns beside the line's middle and open
+chevrons at both ends), to one out of reach ("11", the double line, no chevrons), the fleet in flight (no route
+drawn) and its arrival. All of these are `js/skins/amiga/ui.js` and `style.css`, with a few hooks in the classic
+page (`T.busy`, `T.onSave`, `T.alert`, `T.dragRoute`, `T.routes`, `T.beforeFirstTurn`, the menu items' ghosted flag).
+The side-by-side sheet is the session's `amiga-real.png`.
+
+- **Menus** (from a real Amiga): while they show the strip is white with black titles, the open title black on
+  white; the boxes white, black frame, black text, the item under the pointer inverted. The Amiga-key is the slanted A
+  on a grey box with corner dots; ticks black; disabled items and their keys dotted (white dots over the text).
+  The six menus have exactly the captured items and keys (Datei, Optionen, Schiffe, Galaxis, Fenster, Info: "Über
+  Spaceward Ho!"); what the remake adds (Befehle, and the classic page's other commands) is in the "Ho!" menu and
+  the Befehle title at the strip's right. Zurücksetzen puts back the state Speichern kept; Aufteilen, Vereinen,
+  Zugende erzwingen, Zug Ende & Spielerwechsel, Kein Kampf hier and Vergrößern (at the closest zoom) are ghosted
+  when they can't be used. Optionen's toggles: Nachrichten zeigen, Kämpfe zeigen (starts ticked), Warnungen
+  ausgeben (off: no colony warning), Sound; Kontrollzeit and Kampftempo open Preferences; Bildschirm picks the pixels.
+- **The ASL file requester** (from a real Amiga): "Name der neuen Galaxis:" / "Name der zu öffnenden Galaxis:" with
+  close, zoom and depth gadgets, the list in a Topaz-like font (`tools/amiga-topaz.py`: the real Topaz is Commodore's
+  ROM font; this is the public-domain font8x8 set) with "(Drw)" on an orange-gold cell, Pattern "#?.HO!", Drawer and
+  File with white labels, OK, Disks, Parent, Cancel, and a sizing gadget in the cyan frame. Neues Spiel asks it
+  first; its file name becomes the galaxy's.
+- **Spieleintrag** (from a real Amiga): at the start of a new game, "Identifizieren Sie sich:", Name, Paßwort; Ok and
+  Info.. dotted until a name is typed; Abbruch goes on too.
+- **The string cursor** (from a real Amiga): a dark-red block with the character on it; the active field framed dark red.
+- **Pressed picture buttons** (from a real Amiga): dark-red fill, white label, inverted picture; in Schiffsbau the
+  selected type's label is on dark red and its picture inverted. **A ticked "Typ verschrotten"** shows a large X,
+  and the gadget gets the dark-red frame under the pointer.
+- **Routes** (from a real Amiga): drawn only while a fleet is dragged (no lines for fleets in flight); the double
+  white line, its turns beside the middle, open chevrons at both ends when the star is in range, none when not.
+  **Arrival** plays "Ya!" (sound 4001, "hyahh2"), as the later versions' do.
+- **The players' list** (from a real Amiga): a "√" before the hat of each player who has ended the turn (hot seat).
+- **The active window** (from a real Amiga): its title bar is cyan (click Nachrichten or Technik Ausgaben), the
+  others grey. **Technik Ausgaben** can be dragged over the map; Fenster aufräumen puts the windows back.
+- **Report icons** (from a real Amiga): the calendar (i3111) for the new year and the yellow warning triangle (i3112)
+  for warnings, from the DOS skin's report looks, which the Amiga skin uses.
+- **The underfunded-colony warning** (from a real Amiga): the alert style, the cowboy (d3520) on white, the dithered
+  frame, the text panel with the captured German text, Ok and Abbruch, Abbruch the default (Return takes it).
+- **The busy pointer** (from a real Amiga): W, A, I, T diagonally in yellow and red while a turn runs (kept half a second).
+- **The saving panel** (from a real Amiga): "Neuer Spielstand wird gespeichert" / "Speichern der Galaxis", a red bar
+  and its percentage, shown briefly when the turn's copy is saved and by Datei > Speichern.
+- Words: every new string has German, English, French, Turkish and Spanish (`WORDS`); the requester's own words
+  stay English, as asl.library draws them.
+- Still the remake's: the menus show while the pointer is on the bar (or after a right click or tap there), not
+  only while the right button is held.

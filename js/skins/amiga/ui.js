@@ -115,6 +115,33 @@ const WORDS = {
   mWindows: ['Fenster', 'Windows', 'Fenêtres', 'Pencereler', 'Ventanas'], mInfo: ['Info', 'Info', 'Info', 'Bilgi', 'Info'],
   startupWin: ['Startfenster…', 'Startup window…', 'Fenêtre de démarrage…', 'Başlangıç penceresi…', 'Ventana de inicio…'], techWin: ['Technikfenster', 'Technology window', 'Fenêtre Technologie', 'Teknoloji penceresi', 'Ventana de tecnología'],
   newsWin: ['Nachrichtenfenster', 'Messages window', 'Fenêtre des messages', 'Mesaj penceresi', 'Ventana de mensajes'], aboutAm: ['Über Spaceward Ho!', 'About Spaceward Ho! Amiga', 'À propos de Spaceward Ho! Amiga', 'Spaceward Ho! Amiga hakkında', 'Acerca de Spaceward Ho! Amiga'],
+  // the menus' items (Jake's captures: the real Amiga's Datei, Optionen, Schiffe, Galaxis, Fenster and Info)
+  mNew: ['Neu', 'New', 'Nouveau', 'Yeni', 'Nuevo'], mOpen: ['Öffnen', 'Open', 'Ouvrir', 'Aç', 'Abrir'], mSave: ['Speichern', 'Save', 'Enregistrer', 'Kaydet', 'Guardar'],
+  mRevert: ['Zurücksetzen', 'Revert', 'Rétablir', 'Geri al', 'Revertir'], mClose: ['Schließen', 'Close', 'Fermer', 'Kapat', 'Cerrar'],
+  mSplit: ['Aufteilen', 'Split', 'Diviser', 'Böl', 'Dividir'], mMerge: ['Vereinen', 'Merge', 'Fusionner', 'Birleştir', 'Unir'],
+  mEndSwitch: ['Zug Ende & Spielerwechsel', 'End turn & switch player', 'Fin du tour & changement de joueur', 'Sırayı bitir & oyuncu değiştir', 'Fin del turno y cambio de jugador'],
+  mPrint: ['Drucken', 'Print', 'Imprimer', 'Yazdır', 'Imprimir'], mQuit: ['Beenden', 'Quit', 'Quitter', 'Çık', 'Salir'],
+  mForce: ['Zugende erzwingen', 'Force end of turn', 'Forcer la fin du tour', 'Turu zorla bitir', 'Forzar el fin del turno'], mAuto: ['Autospiel', 'Auto play', 'Jeu auto', 'Otomatik oyun', 'Juego automático'],
+  mHandle: ['Ich bearbeite die Züge', 'I make the moves', 'Je joue mes tours', 'Hamleleri ben yaparım', 'Yo hago los movimientos'],
+  mHandleNote: ['Die Züge bearbeiten Sie selbst. Autospiel überlässt sie dem Computer.', 'You make the moves yourself. Auto play leaves them to the computer.', 'Vous jouez vos tours vous-même. Jeu auto les laisse à l’ordinateur.', 'Hamleleri kendin yaparsın. Otomatik oyun onları bilgisayara bırakır.', 'Haces los movimientos tú mismo. El juego automático se los deja al ordenador.'],
+  mPoll: ['Kontrollzeit', 'Check time', 'Temps de contrôle', 'Kontrol süresi', 'Tiempo de control'], mBattleSpeed: ['Kampftempo', 'Battle speed', 'Vitesse des combats', 'Savaş hızı', 'Velocidad de combate'],
+  mShowMsgs: ['Nachrichten zeigen', 'Show messages', 'Afficher les messages', 'Mesajları göster', 'Mostrar mensajes'], mShowBattles: ['Kämpfe zeigen', 'Show battles', 'Afficher les combats', 'Savaşları göster', 'Mostrar combates'],
+  mWarnings: ['Warnungen ausgeben', 'Give warnings', 'Donner des avertissements', 'Uyarıları ver', 'Dar avisos'], mSound: ['Sound', 'Sound', 'Son', 'Ses', 'Sonido'],
+  mScreen: ['Bildschirm', 'Screen', 'Écran', 'Ekran', 'Pantalla'],
+  mShipTypes: ['Schiffstypen', 'Ship types', 'Types de vaisseaux', 'Gemi tipleri', 'Tipos de nave'], mNewType: ['Neuer Schiffstyp', 'New ship type', 'Nouveau type de vaisseau', 'Yeni gemi tipi', 'Tipo de nave nuevo'],
+  mFleets: ['Liste der Flotten', 'List of fleets', 'Liste des flottes', 'Filo listesi', 'Lista de flotas'], mSplitFleets: ['Flottenaufteilung', 'Fleet division', 'Répartition des flottes', 'Filo bölme', 'División de flotas'],
+  mBuildAt: ['Schiffbau auf %1', 'Build ships at %1', 'Construction à %1', '%1 üzerinde gemi yapımı', 'Construir en %1'], mScrap: ['Verschrotten', 'Scrap', 'Recycler', 'Hurdaya çıkar', 'Desguazar'],
+  mScrap2: ['Nicht verschrotten', 'Don’t scrap', 'Ne pas recycler', 'Hurdaya çıkarma', 'No desguazar'], mBattle: ['Kampf ansehen', 'Review battle', 'Revoir le combat', 'Savaşı gözden geçir', 'Revisar el combate'], mNoBattle: ['Kein Kampf hier', 'No battle here', 'Pas de combat ici', 'Burada savaş yok', 'Aquí no hay combate'],
+  mCompare: ['Spielervergleich', 'Compare players', 'Comparaison des joueurs', 'Oyuncu karşılaştırması', 'Comparar jugadores'], mStarList: ['Liste der Sterne', 'List of stars', 'Liste des étoiles', 'Yıldız listesi', 'Lista de estrellas'],
+  mMessage: ['Funkspruch', 'Radio message', 'Message radio', 'Telsiz mesajı', 'Mensaje de radio'], mZoomIn: ['Vergrößern', 'Zoom in', 'Agrandir', 'Yakınlaştır', 'Acercar'], mZoomOut: ['Verkleinern', 'Zoom out', 'Réduire', 'Uzaklaştır', 'Alejar'],
+  mFix: ['Ausgaben anpassen', 'Adjust spending', 'Ajuster les dépenses', 'Harcamaları ayarla', 'Ajustar los gastos'], mTidy: ['Fenster aufräumen', 'Tidy windows', 'Ranger les fenêtres', 'Pencereleri topla', 'Ordenar las ventanas'],
+  colonyWarn: ['Achtung! Sie geben für einige Kolonien nicht genug Geld aus, um sie am Leben zu erhalten. Wollen Sie sie wirklich verlassen?', 'Warning! You are not spending enough money on some colonies to keep them alive. Do you really want to abandon them?', 'Attention ! Vous ne dépensez pas assez d’argent pour certaines colonies afin de les maintenir en vie. Voulez-vous vraiment les abandonner ?', 'Dikkat! Bazı koloniler için onları hayatta tutacak kadar para harcamıyorsun. Onları gerçekten terk etmek istiyor musun?', '¡Atención! No estás gastando suficiente dinero en algunas colonias para mantenerlas con vida. ¿Realmente quieres abandonarlas?'],
+  savingTitle: ['Neuer Spielstand wird gespeichert', 'Saving a new game state', 'Enregistrement d’une nouvelle sauvegarde', 'Yeni oyun kaydı kaydediliyor', 'Guardando una partida nueva'], savingLine: ['Speichern der Galaxis', 'Saving the galaxy', 'Enregistrement de la galaxie', 'Galaksi kaydediliyor', 'Guardando la galaxia'],
+  revertAsk: ['Das Spiel auf den zuletzt gespeicherten Stand zurücksetzen?', 'Put the game back to the state last saved?', 'Remettre la partie dans l’état de la dernière sauvegarde ?', 'Oyun en son kaydedilen duruma döndürülsün mü?', '¿Devolver la partida al último estado guardado?'],
+  aslNew: ['Name der neuen Galaxis:', 'Name of the new galaxy:', 'Nom de la nouvelle galaxie :', 'Yeni galaksinin adı:', 'Nombre de la galaxia nueva:'],
+  entryTitle: ['Spaceward Ho! Spieleintrag', 'Spaceward Ho! Game entry', 'Spaceward Ho! Entrée dans la partie', 'Spaceward Ho! Oyuna giriş', 'Spaceward Ho! Entrada en la partida'], identify: ['Identifizieren Sie sich:', 'Identify yourself:', 'Identifiez-vous :', 'Kendini tanıt:', 'Identifícate:'],
+  infoDots: ['Info..', 'Info..', 'Info..', 'Bilgi..', 'Info..'],
+  pickColony: ['Wählen Sie eine Ihrer Kolonien.', 'Select one of your colonies first.', 'Choisissez d’abord une de vos colonies.', 'Önce kolonilerinden birini seç.', 'Elige primero una de tus colonias.'],
   pickFleet: ['Wählen Sie eine Flotte.', 'Select one of your fleets first.', 'Choisissez d’abord une de vos flottes.', 'Önce filolarından birini seç.', 'Elige primero una de tus flotas.'],
   stance: ['Haltung: ', 'Battle stance: ', 'Attitude : ', 'Savaş tutumu: ', 'Actitud: '], one: ['Ein', 'One', 'Un', 'Bir', 'Una'], metalWord: ['Metall', 'metal', 'métal', 'metâl', 'de metal'],
   licence: ['Lizenz:', 'Licence:', 'Licence :', 'Lisans:', 'Licencia:'], noPassword: ['Nicht benutzt: Dieses Remake speichert keine Passwörter.', 'Not used: this remake keeps no passwords.', 'Inutilisé : ce remake ne garde aucun mot de passe.', 'Kullanılmıyor: bu yeniden yapım parola saklamaz.', 'No se usa: este remake no guarda contraseñas.'],
@@ -232,9 +259,31 @@ function screenWin(id, title, gads, body) {
   bar.append(el('span', { class: 'am-wname' }, title));
   if (gads.zoom) bar.append(gadget('zoom', 'Zoom', gads.zoom));
   if (gads.depth) bar.append(gadget('depth', 'Depth', gads.depth));
-  const sec = el('section', { id, class: 'am-swin' }, bar, el('div', { class: 'am-sbody' }, body));
+  const sec = el('section', { id, class: 'am-swin' + (id === activeWin ? ' am-active' : '') }, bar, el('div', { class: 'am-sbody' }, body));
   if (gads.size) sizer(sec, gads.size);
+  if (gads.drag) dragWin(sec, bar, gads.drag);
   return sec;
+}
+// The active window (Jake's captures: Nachrichten once clicked): its title bar cyan, the inactive ones grey
+let activeWin = null;
+document.addEventListener('pointerdown', (e) => {
+  const sw = e.target.closest && e.target.closest('.am-swin'), id = sw ? sw.id : null;
+  if (id === activeWin) return;
+  activeWin = id;
+  for (const n of document.querySelectorAll('.am-swin')) n.classList.toggle('am-active', n.id === activeWin);
+}, true);
+// a window moved by its title bar: set(x, y) in Amiga pixels on the screen
+function dragWin(sec, bar, set) {
+  bar.addEventListener('pointerdown', (e) => {
+    if (e.button !== 0 || e.target.closest('.am-gad')) return;
+    e.preventDefault();
+    const app = document.getElementById('app').getBoundingClientRect(), r = sec.getBoundingClientRect();
+    const gx = e.clientX - r.left, gy = e.clientY - r.top;
+    try { bar.setPointerCapture(e.pointerId); } catch (x) { /* (an old browser) */ }
+    const move = (ev) => set(Math.round((ev.clientX - gx - app.left) / PX.x), Math.round((ev.clientY - gy - app.top) / PX.y));
+    const up = () => { bar.removeEventListener('pointermove', move); bar.removeEventListener('pointerup', up); bar.removeEventListener('pointercancel', up); };
+    bar.addEventListener('pointermove', move); bar.addEventListener('pointerup', up); bar.addEventListener('pointercancel', up);
+  });
 }
 // The sizing gadget (Intuition's: the Nachrichten window is opened with
 // WFLG_SIZEGADGET, NewWindow data+0x2ec, so it gets one in its bottom right
@@ -549,7 +598,9 @@ function playersBox() {
   const list = el('div', { class: 'am-plist' });
   for (const q of G.players.filter(x => x.alive && !x.surrendered)) {
     const icon = q.human ? 's' + (q.female ? 1500 : 1000) : 's' + ((q.female ? 2500 : 2000) + (q.face % 20));
-    list.append(el('div', { class: 'am-prow', role: 'button', tabindex: 0, onclick: () => a.openPlayers() }, img(P + icon, 'am-pic'), el('span', null, q.name)));
+    // a "√" before the hat of a player who has ended the turn (Jake's captures: the turn waits to run)
+    const ended = !!(G.done && G.done.includes(q.id));
+    list.append(el('div', { class: 'am-prow', role: 'button', tabindex: 0, onclick: () => a.openPlayers() }, el('span', { class: 'am-tick' + (ended ? ' on' : ''), 'aria-hidden': 'true' }), img(P + icon, 'am-pic'), el('span', null, q.name)));
   }
   return el('section', { class: 'am-players' }, list, scroller(list, true));
 }
@@ -592,9 +643,23 @@ function techWin(tb) {
   pens(); for (const ev of ['pointermove', 'pointerup', 'keyup']) tb.addEventListener(ev, pens);
   tb.classList.add('am-techbars');
   const front = techFront();
-  const win = screenWin('am-tech', w('tech'), { close: () => setTechFront(false), depth: () => setTechFront(false) }, el('div', { class: 'am-techbody' }, levels, tb));
+  const win = screenWin('am-tech', w('tech'), { close: () => setTechFront(false), depth: () => setTechFront(false), drag: (x, y) => moveTech(x, y) }, el('div', { class: 'am-techbody' }, levels, tb));
   win.hidden = !front;
   return win;
+}
+// Technik Ausgaben can be dragged over the map (Jake's captures): where it was put (Amiga pixels on the
+// screen) is kept until Fenster aufräumen; the window then lives on the screen, not in the left column
+let techPos = null;
+function placeTech(t) {
+  const app = document.getElementById('app');
+  if (!t || !techPos || !app) return;
+  if (t.parentElement !== app) app.append(t);
+  t.classList.add('am-float');
+  t.style.left = `calc(${techPos.x} * var(--u))`; t.style.top = `calc(${techPos.y} * var(--v))`;
+}
+function moveTech(x, y) {
+  techPos = { x: Math.max(0, Math.min(640 - 60, x)), y: Math.max(0, Math.min(256 - 30, y)) };
+  placeTech(document.getElementById('am-tech'));
 }
 
 // the left column, laid out on the classic panel's own boxes (T.panel)
@@ -604,7 +669,9 @@ function panel(box, parts) {
   const keep = el('div', { class: 'am-keep', 'aria-hidden': 'true' }, parts.info, parts.planet);
   keep.hidden = true;
   const bottom = el('div', { class: 'am-bottom' }, playersBox(), spendBox(parts.budget));
+  for (const n of document.querySelectorAll('#app > #am-tech')) n.remove();
   box.replaceChildren(starPanel(), fleetPanel(), totals(), bottom, techWin(parts.tech), keep);
+  placeTech(document.getElementById('am-tech'));
   setTitle();
   fillCommandMenu();
   if (!a.UI._amWheel) { a.UI._amWheel = true; }
@@ -1183,6 +1250,7 @@ function newGame(f, ctx) {
   const titleSpan = win.querySelector('.wtitle span');
   const field = (n) => f.querySelector(`[name="${n}"]`);
   const fire = (n) => n.dispatchEvent(new Event('change', { bubbles: true }));
+  if (pendingGalaxy && field('galaxy')) { field('galaxy').value = pendingGalaxy; pendingGalaxy = null; } // (the name Neues Spiel's file requester took)
   const more = el('div', { class: 'am-more' }, ...[...f.childNodes]);
   f.append(more);
   const dosOn = () => { const g = field('d_skill'); const box = g && g.closest('.group'); return !!box && !box.hidden; };
@@ -1276,7 +1344,7 @@ function page(doc) {
       el('div', { class: 'am-sleft' }, info,
         el('div', { class: 'am-sbtns' },
           btn(W('open'), () => openAslLoad()),
-          btn(W('newGame'), () => doc.getElementById('tnew').click()),
+          btn(W('newGame'), () => openAsl('new')),
           btn(W('cancel'), () => { a.hideTitle(); setTitle(); a.draw(); }, 'am-default am-orange')),
         el('div', { class: 'am-nwc' })),
       el('div', { class: 'am-spic' }, frameC)));
@@ -1298,6 +1366,11 @@ function page(doc) {
   // the menus' Amiga-key glyphs, as each menu is opened
   const mbar = doc.getElementById('menubar');
   if (mbar) new MutationObserver(() => markKeys(mbar)).observe(mbar, { childList: true, subtree: true });
+  // Optionen > Kämpfe zeigen starts checked, as on the Amiga (the classic page's "review battles as they happen")
+  if (optGet('battles', null) == null) { optSet('battles', true); a.Prefs.review = true; a.savePrefs(); }
+  // a fleet's arrival plays "Ya!" (sound 4001, "hyahh2"), as the later versions' do
+  const base = TH().messageLook;
+  if (base) TH().messageLook = (m, cur, x) => { const r = base.call(TH(), m, cur, x); if (r && /has arrived at|ist angekommen|a atteint/.test(String(m.text || ''))) r.sound = 4001; return r; };
   stringCursor();
   void a;
 }
@@ -1350,6 +1423,7 @@ function stringCursor() {
     place();
   });
   doc.addEventListener('focusout', () => drop());
+  if (doc.fonts && doc.fonts.addEventListener) doc.fonts.addEventListener('loadingdone', () => { if (inp) place(); }); // (a font that loads after the cell was measured)
   for (const ev of ['input', 'keyup', 'keydown', 'pointerup', 'select']) doc.addEventListener(ev, () => { if (inp) requestAnimationFrame(place); }, true);
   doc.addEventListener('selectionchange', () => { if (inp) place(); });
   window.addEventListener('resize', () => { if (inp) place(); });
@@ -1357,42 +1431,187 @@ function stringCursor() {
 }
 
 // ---------- the ASL file requester ----------
-// Spiel öffnen and Datei → Öffnen (FUN_00108904, FUN_0010840e) ask
-// asl.library's file requester (the arp.library one when that is there) for
-// the galaxy, its hail string 716 "Name der zu öffnenden Galaxis:" and its
-// FileRequester's drawer. ASL draws the window itself: in 2.0 (asl.library
-// 37, before locale.library) always in English: the list of the drawer's
-// files with its scroller, the Drawer and File fields, and OK, Volumes,
-// Parent and Cancel (asl.doc; AROS's filereqhooks.c lays out the same
-// gadgets), on the program's screen, in its pens. The page's "files" are
-// the game this browser keeps; Volumes stands for the disks (the browser's
-// own file picker, to import a saved game).
-function openAslLoad() {
-  const a = api(), doc = document;
+// Spiel öffnen, Datei > Öffnen and Neues Spiel (FUN_00108904, FUN_0010840e, FUN_001084f2) ask asl.library's file
+// requester for the galaxy, its hail string 716 "Name der zu öffnenden Galaxis:" ("Name der neuen Galaxis:" for a
+// new one). Jake's captures 28: ASL draws the window itself, in English whatever the game's language (asl.library
+// 37, before locale.library) and in the system font, Topaz: the title with the close, zoom and depth gadgets, the
+// file list with its drawers marked "(Drw)" on an orange-gold cell and its scroller, the Pattern ("#?.HO!"), Drawer
+// and File fields with their labels in white, the buttons OK, Disks, Parent and Cancel, and a sizing gadget in the
+// cyan frame's bottom right. The page's "files" are the game this browser keeps; Disks stands for the disks (the
+// browser's own file picker, to import a saved game).
+let pendingGalaxy = null; // the name Neues Spiel's requester took, for Neue Galaxis erstellen
+const ASL_DRAWERS = ['c', 's', 'libs', 'devs', 'fonts']; // (stand-ins: the system disk's drawers the capture lists)
+function openAsl(mode) {
+  const a = api(), doc = document, isNew = mode === 'new';
   const save = (() => { try { return localStorage.getItem('ho5.save'); } catch (e) { return null; } })();
   let name = null;
   if (save) { try { const g = HO.load(save); name = String((g.opts && g.opts.galaxy) || 'Galaxis').slice(0, 30); } catch (e) { name = null; } }
-  const files = name ? [name] : [];
-  const fileIn = el('input', { class: 'am-field am-aslfile', value: '', 'aria-label': 'File' });
-  const list = el('div', { class: 'am-asllist', role: 'listbox' }, ...files.map(f => el('div', { class: 'am-aslrow', role: 'option', tabindex: 0,
-    onclick: (e) => { for (const r of list.children) r.classList.toggle('sel', r === e.currentTarget); fileIn.value = f; },
-    ondblclick: () => { fileIn.value = f; go(); } }, f)));
+  const fileName = name ? name + '.Ho!' : null;
+  let drawer = '';
+  const fileIn = el('input', { class: 'am-field am-aslfile', value: isNew ? 'Mars.Ho!' : '', 'aria-label': 'File', spellcheck: 'false' });
+  const drawIn = el('input', { class: 'am-field', value: '', 'aria-label': 'Drawer', spellcheck: 'false' });
+  const patIn = el('input', { class: 'am-field', value: '#?.HO!', 'aria-label': 'Pattern', spellcheck: 'false' });
+  const list = el('div', { class: 'am-asllist', role: 'listbox' });
+  const fill = () => {
+    list.replaceChildren();
+    if (drawer) return; // (an empty drawer: the page keeps no files but the game)
+    for (const d of ASL_DRAWERS) list.append(el('div', { class: 'am-aslrow am-asldrw', role: 'option', tabindex: 0, onclick: () => { drawer = d; drawIn.value = d; fill(); } }, raw(el('span', { class: 'am-asltag' }), '(Drw)'), raw(el('span'), d)));
+    if (fileName) list.append(el('div', { class: 'am-aslrow', role: 'option', tabindex: 0,
+      onclick: (e) => { for (const r of list.children) r.classList.toggle('sel', r === e.currentTarget); fileIn.value = fileName; },
+      ondblclick: () => { fileIn.value = fileName; go(); } }, el('span', null, fileName)));
+  };
   const go = () => {
     const f = fileIn.value.trim();
     if (!f) { a.beep(); return; }
     a.closeModal();
-    if (name && f === name) { const c = doc.getElementById('tcont'), ts = doc.getElementById('titlescreen'); if (ts && !ts.hidden && c && !c.hidden) c.click(); return; } // (a game being played is that one)
+    if (isNew) { pendingGalaxy = f.replace(/\.ho!$/i, ''); doc.getElementById('tnew').click(); return; }
+    if (fileName && f === fileName) { const c = doc.getElementById('tcont'), ts = doc.getElementById('titlescreen'); if (ts && !ts.hidden && c && !c.hidden) c.click(); return; } // (a game being played is that one)
     a.toast(w('aslMissing'));
   };
-  const body = el('div', { class: 'am-asl' },
-    el('div', { class: 'am-asllistf' }, list, scroller(list, true)),
-    el('label', { class: 'am-aslline' }, el('span', null, 'Drawer'), el('input', { class: 'am-field', value: '', 'aria-label': 'Drawer' })),
-    el('label', { class: 'am-aslline' }, el('span', null, 'File'), fileIn),
-    el('div', { class: 'am-aslbtns' }, btn('OK', go), btn('Volumes', () => { a.closeModal(); doc.getElementById('timport').click(); }), btn('Parent', () => a.beep()), btn('Cancel', () => a.closeModal())));
-  const win = amWin(w('aslOpen'), body, 'am-wasl');
-  win.querySelector('.wtitle').append(gadget('depth', 'Depth', () => a.closeModal()));
+  // (asl.library's own English: set as text after the page's translating el, which would put 'File' into Datei)
+  const raw = (n, t) => { n.textContent = t; return n; };
+  const lab = (t) => raw(el('span', { class: 'am-asllab' }), t);
+  const scr = scroller(list, true);
+  const body = el('div', { class: 'am-asl', translate: 'no', lang: 'en' }, // (asl.library draws in English whatever the language)
+    el('div', { class: 'am-asllistf' }, list, scr),
+    lab('Pattern'), patIn, lab('Drawer'), drawIn, lab('File'), fileIn,
+    el('div', { class: 'am-aslbtns' }, raw(btn('x', go), 'OK'), raw(btn('x', () => { a.closeModal(); doc.getElementById('timport').click(); }), 'Disks'), raw(btn('x', () => { if (drawer) { drawer = ''; drawIn.value = ''; fill(); } else a.beep(); }), 'Parent'), raw(btn('x', () => a.closeModal()), 'Cancel')));
+  fill();
+  const win = amWin(isNew ? w('aslNew') : w('aslOpen'), body, 'am-wasl');
+  const bar = win.querySelector('.wtitle');
+  const close = bar.querySelector('.close'); if (close) bar.prepend(close);
+  bar.append(gadget('zoom', 'Zoom', () => {}), gadget('depth', 'Depth', () => a.closeModal()));
+  win.append(el('div', { class: 'am-sizeg', 'aria-hidden': 'true' }));
   fileIn.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); go(); } });
+  if (isNew) { fileIn.focus(); fileIn.setSelectionRange(0, 0); }
+  requestAnimationFrame(() => { if (scr._sync) scr._sync(); });
   return true;
+}
+const openAslLoad = () => openAsl('open');
+
+// Spaceward Ho! Spieleintrag (capture 33; FUN_0010ce20, data+0x41a4): the program asks who is playing at the start of
+// a game: "Identifizieren Sie sich:", Name, Paßwort, and Ok and Info... (ghosted until a name is typed) and Abbruch.
+// The remake keeps no passwords, so the field is there and used for nothing; Ok goes on to the first turn, Info...
+// shows the players, and Abbruch goes on too (there is no program to leave).
+function spieleintrag(done) {
+  const a = api();
+  if (!game()) return false;
+  const name = el('input', { class: 'am-field am-enname', maxlength: 20, 'aria-label': w('name'), spellcheck: 'false', autocomplete: 'off' });
+  const pass = el('input', { class: 'am-field am-enpass', type: 'password', maxlength: 8, 'aria-label': w('password'), autocomplete: 'off' });
+  let ok = null, info = null;
+  const next = () => { a.closeModal(); done(); };
+  ok = btn(w('ok'), () => { if (name.value.trim()) next(); });
+  info = btn(w('infoDots'), () => { if (name.value.trim()) openPlayerList(); });
+  const sync = () => { const none = !name.value.trim(); ok.disabled = none; info.disabled = none; };
+  name.addEventListener('input', sync);
+  name.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); if (name.value.trim()) next(); } });
+  const body = el('div', { class: 'am-entry' },
+    frame('am-enframe', el('p', { class: 'am-en1' }, w('identify')), el('p', { class: 'am-en2' }, w('name')), name, el('p', { class: 'am-en3' }, w('password')), pass),
+    el('div', { class: 'am-enbtns' }, ok, info, btn(w('cancel'), next)));
+  sync();
+  const win = amWin(w('entryTitle'), body, 'am-wentry', { sticky: true });
+  win.querySelector('.wtitle').append(gadget('depth', 'Depth', () => {}));
+  name.focus();
+  return true;
+}
+
+// ---------- what Jake's captures settle: the alert, the saving panel, the busy pointer, the dragged route ----------
+// The alert (Jake's captures 27 and 45: Intuition's AutoRequest-style window on the screen): the title bar
+// "Spaceward Ho!" with the depth gadget, the dithered frame, the standing cowboy (picture d3520) on white,
+// the text on a grey panel, and the buttons at the bottom; the default one has the dark-red dotted frame.
+function amigaAlert(kind, text, yes) {
+  if (kind !== 'underfunded' || !game()) return false;
+  const a = api();
+  // Optionen > Warnungen ausgeben, off: the program doesn't warn, the turn just goes on
+  if (!warningsOn()) { yes(); return true; }
+  alertWindow(w('colonyWarn'), [[w('ok'), () => { a.closeModal(); yes(); }], [w('cancel'), () => a.closeModal(), true]]);
+  void text;
+  return true;
+}
+function alertWindow(text, buttons) {
+  const a = api();
+  const body = el('div', { class: 'am-alert' }, el('div', { class: 'am-apic' }, img(P + 'd3520')), el('div', { class: 'am-atext' }, el('p', null, text)),
+    el('div', { class: 'am-abtn2' }, ...buttons.map(([label, fn, dflt]) => btn(label, fn, dflt ? 'am-default am-dotted' : ''))));
+  const win = amWin(w('about'), body, 'am-walert');
+  win.querySelector('.wtitle').append(gadget('depth', 'Depth', () => a.closeModal()));
+  // (Return takes the default button: Abbruch, as the capture has it)
+  win.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); const d = buttons.find(b => b[2]); if (d) d[1](); } });
+  const d = win.querySelector('.am-default'); if (d) d.focus();
+  return win;
+}
+// "Neuer Spielstand wird gespeichert" over the star panel, with "Speichern der Galaxis" and a red bar with its
+// percentage (capture 31): shown briefly when the game saves (End Turn's copy, Datei > Speichern)
+let savingTimer = null;
+function savingPanel() {
+  const app = document.getElementById('app');
+  if (!app || !game()) return;
+  clearInterval(savingTimer);
+  for (const n of document.querySelectorAll('.am-saving')) n.remove();
+  const bar = el('div', { class: 'am-sbar' }), pct = el('span', { class: 'am-spct' }, '0%');
+  const box = el('div', { class: 'am-saving', role: 'status' }, el('div', { class: 'am-sttl' }, w('savingTitle')),
+    el('div', { class: 'am-sfr' }, el('p', null, w('savingLine')), el('div', { class: 'am-sprog' }, bar, pct)));
+  app.append(box);
+  let n = 0;
+  savingTimer = setInterval(() => { n += 10; bar.style.width = n + '%'; pct.textContent = n + '%'; pct.style.left = `calc(${n}% + 4px)`; if (n >= 100) { clearInterval(savingTimer); setTimeout(() => box.remove(), 160); } }, 45);
+}
+// Datei > Speichern keeps this state for Datei > Zurücksetzen (the game file the Amiga wrote)
+const SAVEDKEY = 'ho5.amiga.saved';
+function savedSnapshot() { try { const o = JSON.parse(LS.get(SAVEDKEY) || 'null'); const G = game(); return o && G && o.id === G.gameId ? o.text : null; } catch (e) { return null; } }
+function saveGame() {
+  const a = api(), G = a.G; if (!G) return;
+  a.save(); LS.set(SAVEDKEY, JSON.stringify({ id: G.gameId, text: HO.save(G) }));
+  savingPanel();
+}
+function revertGame() {
+  const a = api(), t = savedSnapshot(); if (!a.G || !t) return;
+  a.confirmBox(w('revertAsk'), () => a.openGameText(t));
+}
+// Optionen > Bildschirm: the pixels (the screen mode the Amiga asked for here)
+let lastPointer = { x: 200, y: 40 };
+document.addEventListener('pointermove', (e) => { lastPointer = { x: e.clientX, y: e.clientY }; }, true);
+function screenMenu() {
+  popup([{ label: w('tall'), checked: pixMode() === 'tall', fn: () => setPixels('tall') }, { label: w('square'), checked: pixMode() === 'square', fn: () => setPixels('square') }], lastPointer.x, lastPointer.y);
+}
+// Fenster > Fenster aufräumen: the windows back where the program put them
+function tidyWindows() {
+  const a = api();
+  techPos = null; newsSize = null;
+  for (const n of document.querySelectorAll('#app > #am-tech')) n.remove();
+  LS.set(TECHFRONT, '1'); LS.set(NEWSKEY, '1');
+  if (a && a.G) { a.renderPanel(); a.renderMsg(); }
+}
+// The game's busy pointer (capture 25): the letters W, A, I, T running diagonally, in yellow and red, while a
+// turn runs (T.busy from the classic page's turn); kept at least half a second, as the turn itself is quick here
+let busyAt = 0, busyTimer = null;
+function busyCursor() {
+  const G5 = { W: ['X...X', 'X...X', 'X.X.X', 'XX.XX', 'X...X'], A: ['.XXX.', 'X...X', 'XXXXX', 'X...X', 'X...X'], I: ['XXX', '.X.', '.X.', '.X.', 'XXX'], T: ['XXXXX', '..X..', '..X..', '..X..', '..X..'] };
+  const col = { W: '#dddd99', A: '#ff3333', I: '#ff3333', T: '#ff3333' };
+  let r = '';
+  'WAIT'.split('').forEach((ch, i) => G5[ch].forEach((row, y) => row.split('').forEach((c, x) => { if (c === 'X') r += `<rect x='${i * 7 + x}' y='${i * 4 + y}' width='1' height='1' fill='${col[ch].replace('#', '%23')}'/>`; })));
+  const wd = 26, ht = 17, k = Math.max(1, Math.round(PX.x)), kv = Math.max(1, Math.round(PX.y));
+  return `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 ${wd} ${ht}' width='${wd * k}' height='${ht * kv}' shape-rendering='crispEdges' preserveAspectRatio='none'%3E${r.replace(/</g, '%3C').replace(/>/g, '%3E')}%3C/svg%3E") 0 0, wait`;
+}
+function busy(on) {
+  const root = document.documentElement;
+  if (on) { busyAt = Date.now(); clearTimeout(busyTimer); root.style.setProperty('--am-busy', busyCursor()); root.classList.add('am-busy'); return; }
+  clearTimeout(busyTimer);
+  busyTimer = setTimeout(() => root.classList.remove('am-busy'), Math.max(0, 500 - (Date.now() - busyAt)));
+}
+// A route while it is dragged (captures 40 and the corrections): a double white line from the fleet to the pointer,
+// the trip's length in turns beside the end, and, when the star is in reach, open chevrons (two short strokes) at both
+// ends of the line, none when it isn't. (The classic page draws no other route in this skin: T.routes false.)
+function dragRoute(cx, d) {
+  const dx = d.x2 - d.x1, dy = d.y2 - d.y1, len = Math.hypot(dx, dy) || 1, ux = dx / len, uy = dy / len, nx = -uy, ny = ux;
+  cx.save();
+  cx.strokeStyle = '#ffffff'; cx.lineWidth = 1; cx.lineCap = 'butt';
+  for (const k of [-1, 1]) { cx.beginPath(); cx.moveTo(d.x1 + nx * k * 1.2, d.y1 + ny * k * 1.2); cx.lineTo(d.x2 + nx * k * 1.2, d.y2 + ny * k * 1.2); cx.stroke(); }
+  const chevron = (x, y, vx, vy) => {
+    const L = 7, a = 0.62;
+    for (const s of [-1, 1]) { const c = Math.cos(a * s), sn = Math.sin(a * s); cx.beginPath(); cx.moveTo(x, y); cx.lineTo(x - L * (vx * c - vy * sn), y - L * (vx * sn + vy * c)); cx.stroke(); }
+  };
+  if (d.ok) { chevron(d.x2, d.y2, ux, uy); chevron(d.x1, d.y1, -ux, -uy); }
+  if (d.turns != null) { cx.font = TH().mapFont ? TH().mapFont() : '16px HoFont11, sans-serif'; cx.textAlign = 'left'; cx.textBaseline = 'alphabetic'; cx.fillStyle = '#ffffff'; cx.fillText(String(d.turns), (d.x1 + d.x2) / 2 + 3, (d.y1 + d.y2) / 2 - 4); } // (beside the line's middle, as captures 47 and 48)
+  cx.restore();
 }
 
 // ---------- menus: the Amiga's German names, its windows, the pixels ----------
@@ -1408,13 +1627,13 @@ const MENU_DE = {
   'Fix spending': ['Ausgaben anpassen', null], 'Scrap ship types…': ['Schiffstypen', null], 'Players and alliances…': ['Spielervergleich', 'C'],
   'Build ships at selected colony…': ['Schiffbau', 'B'],
 };
-const AKEYS = []; // { key, labels (German, English), fn, feat }: the items with an Amiga-key
+const AKEYS = []; // { key, labels (German, English), fn, feat, match }: the items with an Amiga-key
 // the glyph and letter at the right of an item (Intuition's, for COMMSEQ items: FUN_00102d98 sets
 // COMMSEQ and the letter for each '~' in the menu table and leaves 32 pixels for them)
 function markKeys(root) {
   for (const b of root.querySelectorAll('.dropdown button[role=menuitem]')) {
     if (b.querySelector('.am-akey')) continue;
-    const t = b.textContent.trim(), te = enOf(b), k = AKEYS.find(x => x.labels.includes(t) || x.labels.includes(te));
+    const t = b.textContent.trim(), te = enOf(b), k = AKEYS.find(x => x.labels.includes(t) || x.labels.includes(te) || (x.match && (x.match(t) || x.match(te))));
     if (k) b.append(el('span', { class: 'am-akey', 'aria-hidden': 'true' }, k.key));
   }
 }
@@ -1426,6 +1645,7 @@ document.addEventListener('keydown', (e) => {
   if (!k) return;
   const G = game();
   if (k.feat && !(typeof k.feat === 'function' ? k.feat() : G && HO.feature(G, k.feat))) return;
+  if (k.ghost && k.ghost()) return;
   e.preventDefault(); k.fn();
 });
 const menuWord = (label) => {
@@ -1433,37 +1653,99 @@ const menuWord = (label) => {
   const m = MENU_DE[label];
   return m ? m[0] : label.replace(/…/g, '...'); // (HoFont has no "…": the Amiga writes three dots) // (the Amiga-keys are the Amiga's; the remake's keys stay its own)
 };
+// The skin's own preferences (the Optionen menu's toggles, kept in this browser)
+const OPTKEY = 'ho5.amiga.opts';
+const optGet = (k, d) => { try { const o = JSON.parse(LS.get(OPTKEY) || '{}'); return o[k] != null ? o[k] : d; } catch (e) { return d; } };
+const optSet = (k, v) => { try { const o = JSON.parse(LS.get(OPTKEY) || '{}'); o[k] = v; LS.set(OPTKEY, JSON.stringify(o)); } catch (e) { /* (no storage) */ } };
+// Warnungen ausgeben: the warnings the program gives at End Turn (js/skins/amiga/ui.js amigaWarn)
+const warningsOn = () => optGet('warn', true) !== false;
 function menus(M, ho) {
   const a = () => api();
-  const tr = (items) => items.map(it => (Array.isArray(it) && typeof it[0] === 'string' && it[0] !== '-' ? [() => menuWord(it[0]), ...it.slice(1)] : it));
-  const take = (items, labels) => { const out = []; for (let i = items.length - 1; i >= 0; i--) if (labels.includes(items[i][0])) out.unshift(items.splice(i, 1)[0]); return out; };
-  const zoom = take(M.View, ['Zoom in', 'Zoom out']);
-  const fitG = take(M.View, ['Fit galaxy']);
-  const split = [w('split') + '…', () => { const A2 = a(), G = A2.G; if (!G) return; const f = A2.curFleet() || G.fleets.find(x => x.owner === A2.ME && x.star === A2.UI.sel && x.to == null && !x.sat); if (f) openSplitter(f); else A2.toast(w('pickFleet')); }];
+  const G0 = () => a().G, me0 = () => G0() && a().me();
+  // the menus as the real Amiga showed them (Jake's captures 35-42; docs/amiga-skin.md "Real-Amiga captures"):
+  // each item [label, action, feature, checked, ghosted], and its Amiga-key
+  const cmdBy = (re) => commands().find(c => re.test(c.en || ''));
+  const C = { Game: M.Game, Ships: M.Ships, Galaxy: M.Galaxy, View: M.View, Help: M.Help }; // (the classic page's lists, kept: M is emptied below)
+  const classicItem = (menu, en) => (C[menu] || []).find(it => it[0] === en || (typeof it[0] === 'function' && it[0]() === en));
+  const classicFn = (menu, en) => { const it = classicItem(menu, en); return it ? it[1] : null; };
+  const splitNow = () => { const A2 = a(), G = A2.G; if (!G) return; const f = A2.curFleet() || G.fleets.find(x => x.owner === A2.ME && x.star === A2.UI.sel && x.to == null && !x.sat); if (f) openSplitter(f); else A2.toast(w('pickFleet')); };
+  const hasCmd = (re) => !!(planetBox && [...planetBox.querySelectorAll('button')].some(n => !n.disabled && re.test(enOf(n))));
+  const clickCmd = (re) => { const n = planetBox && [...planetBox.querySelectorAll('button')].find(x => !x.disabled && re.test(enOf(x))); if (n) n.click(); };
+  const ownStar = () => { const A2 = a(), G = A2.G; return G && A2.UI.sel != null && G.stars[A2.UI.sel].owner === A2.ME ? G.stars[A2.UI.sel] : null; };
+  const zoomIdxNow = () => { const v = a().UI.view; return v ? zoomIdx(v.s) : 3; };
+  const alive = () => { const G = G0(); return !!G && !G.over; };
+  const fe = (en) => classicFn('Galaxy', en) || classicFn('Game', en) || classicFn('Ships', en);
+  const ITEMS = {
+    mFile: [
+      [() => w('mNew'), () => openAsl('new')],
+      [() => w('mOpen'), () => openAslLoad(), null, null, null, 'O'],
+      [() => w('mSave'), () => saveGame(), null, null, () => !G0(), 'S'],
+      [() => w('mRevert'), () => revertGame(), null, null, () => !G0() || !savedSnapshot()],
+      [() => w('mClose'), () => classicFn('Game', 'Quit to title')(), null, null, () => !G0(), 'W'],
+      [() => w('mSplit'), () => clickCmd(/^Split/), null, null, () => !hasCmd(/^Split/)],
+      [() => w('mMerge'), () => clickCmd(/^Merge/), null, null, () => !hasCmd(/^Merge/)],
+      [() => w('endTurn'), () => a().doEndTurn(), null, null, () => !alive(), 'Z'],
+      [() => w('mEndSwitch'), () => a().switchPlayers(), null, null, () => !(G0() && HO.rules(G0()).switchPlayers && a().hotSeat()), 'Y'],
+      [() => w('mPrint'), () => window.print()],
+      [() => w('mQuit'), () => { const A2 = a(); if (A2.G) A2.save(); A2.titleScreen(); }, null, null, null, 'Q'],
+    ],
+    mOptions: [
+      [() => w('mForce'), () => fe('Force end turn…')(), null, null, () => !(G0() && HO.rules(G0()).forceEndTurn && a().hotSeat())],
+      [() => w('mAuto'), () => classicFn('Game', 'Auto play…')(), null, null, () => !G0()],
+      [() => w('mHandle'), () => { const A2 = a(); A2.toast(w('mHandleNote')); }, null, () => true],
+      [() => w('mPoll'), () => a().openPrefs(), null, null, () => !G0()],
+      [() => w('mBattleSpeed'), () => a().openPrefs(), null, null, () => !G0()],
+      [() => w('mShowMsgs'), () => { const P = a().Prefs; P.showMsgs = P.showMsgs === false; a().savePrefs(); }, null, () => a().Prefs.showMsgs !== false],
+      [() => w('mShowBattles'), () => { const P = a().Prefs; P.review = !P.review; optSet('battles', P.review); a().savePrefs(); }, null, () => !!a().Prefs.review],
+      [() => w('mWarnings'), () => optSet('warn', !warningsOn()), null, () => warningsOn()],
+      [() => w('mSound'), () => { a().Sound.on = !a().Sound.on; a().savePrefs(); }, null, () => !!a().Sound.on],
+      [() => w('mScreen'), (e) => screenMenu()],
+    ],
+    mShips: [
+      [() => w('mShipTypes'), () => a().G && openTypes(), null, null, () => !G0()],
+      [() => w('mNewType'), () => { const st = ownStar(); if (st) a().classic('build', a().openBuild, st.id); else a().toast(w('pickColony')); }, null, null, () => !alive(), 'N'],
+      [() => w('mFleets'), () => G0() && openFleetListAm(), null, null, () => !G0(), 'L'],
+      [() => w('mSplitFleets'), () => splitNow(), null, null, () => !alive(), 'G'],
+      [() => { const st = ownStar(); return w('mBuildAt', st ? st.name : (G0() && a().UI.sel != null ? G0().stars[a().UI.sel].name : '')); }, () => { const st = ownStar(); if (st) { if (!openShipyard(st.id)) a().classic('build', a().openBuild, st.id); } else a().toast(w('pickColony')); }, null, null, () => !alive() || !ownStar(), 'B'],
+      [() => { const A2 = a(), f = A2.G && A2.curFleet(); return f && f.scrap301 ? w('mScrap2') : w('mScrap'); }, () => { const A2 = a(), f = A2.G && A2.curFleet(); if (f && !A2.G.over) A2.toggleScrapFleet(f); }, () => !!(a().G && a().marksScrap()), null, () => !(a().G && a().curFleet()), 'V'],
+      [() => { const A2 = a(), G = A2.G; return G && A2.UI.sel != null && A2.lastBattles(A2.UI.sel).length ? w('mBattle') : w('mNoBattle'); }, () => { const A2 = a(), G = A2.G, bs = G ? A2.lastBattles(A2.UI.sel) : []; if (bs.length) A2.openBattle(bs[0].id); }, null, null, () => { const A2 = a(); return !(A2.G && A2.UI.sel != null && A2.lastBattles(A2.UI.sel).length); }],
+    ],
+    mGalaxy: [
+      [() => w('mCompare'), () => G0() && openCompare(), null, null, () => !G0(), 'C'],
+      [() => w('mStarList'), () => G0() && openStarListAm(), null, null, () => !G0(), 'T'],
+      [() => w('mMessage'), () => classicFn('Galaxy', 'Send a message…')(), () => !!(G0() && (HO.feature(G0(), 'chat') || HO.rules(G0()).chatCommand !== false) && classicItem('Galaxy', 'Send a message…')), null, () => !alive(), 'F'],
+      [() => w('mZoomIn'), () => classicFn('View', 'Zoom in') ? classicZoom(1) : null, null, null, () => zoomIdxNow() >= 3, '+'],
+      [() => w('mZoomOut'), () => classicZoom(-1), null, null, () => zoomIdxNow() <= 0, '-'],
+      [() => w('mFix'), () => classicFn('Galaxy', 'Fix spending')(), () => !!(G0() && HO.rules(G0()).fixSpending && classicItem('Galaxy', 'Fix spending')), null, () => !alive()],
+    ],
+    mWindows: [
+      [() => w('techWin'), () => setTechFront(!techFront()), () => !!game(), () => techFront(), null, '1'],
+      [() => w('newsWin'), toggleNews, () => !!game(), () => newsOpen(), null, '2'],
+      [() => w('mTidy'), () => tidyWindows(), null, null, () => !G0(), 'A'],
+    ],
+    mInfo: [[() => w('aboutAm'), openAmigaAbout]],
+  };
+  const classicZoom = (d) => { const A2 = a(), v = A2.UI.view; if (!v) return; const cx = (A2.map().w) / 2, cy = (A2.map().h) / 2; A2.zoomAt(cx, cy, d > 0 ? 1.3 : 1 / 1.3); };
   // the Amiga-keys: Intuition draws them, the remake answers them (Alt or the Command key for the right Amiga key)
   AKEYS.length = 0;
-  for (const it of [].concat(M.Game || [], M.Ships || [], M.Galaxy || [], M.View || [], zoom)) {
-    const m = Array.isArray(it) && typeof it[0] === 'string' ? MENU_DE[it[0]] : null;
-    if (m && m[1]) AKEYS.push({ key: m[1], labels: [m[0], it[0]], fn: it[1], feat: it[2] });
+  for (const k of Object.keys(ITEMS)) for (const it of ITEMS[k]) {
+    const key = it[5]; if (!key) continue;
+    const word = typeof it[0] === 'function' ? it[0] : null;
+    AKEYS.push({ key, labels: [], match: (t) => { try { return t === word(); } catch (e) { return false; } }, fn: () => it[1](), ghost: it[4], feat: it[2] });
   }
-  AKEYS.push({ key: 'O', labels: ['Öffnen...', 'Open...'], fn: () => openAslLoad() });
-  // Schiffe's "~VVerschrotten" (strings 18, 19: "Verschrotten" / "Nicht verschrotten"), the
-  // ruleset's Scrap Current Fleet
-  AKEYS.push({ key: 'V', labels: ['Verschrotten', 'Nicht verschrotten', 'Scrap Current Fleet', 'Don\'t Scrap Current Fleet', 'Don’t Scrap Current Fleet'],
-    fn: () => { const A2 = a(), f = A2.G && A2.curFleet(); if (f && !A2.G.over) A2.toggleScrapFleet(f); }, feat: () => !!(a().G && a().marksScrap()) });
-  const Datei = tr(M.Game); Datei.splice(1, 0, [() => w('open2'), () => openAslLoad()], [() => w('startupWin'), () => { const A2 = a(); if (A2.G) A2.save(); A2.titleScreen(); }]);
-  const Optionen = tr(M.View.filter(it => it[0] !== '-'));
-  const Schiffe = tr(M.Ships).concat([['-'], split, [() => w('typeMgr').replace('Spaceward Ho! ', '') + '…', () => a().G && openTypes()]]);
-  const Galaxis = tr(M.Galaxy).concat([['-'], ...tr(zoom)]);
-  const Fenster = [[() => w('techWin'), () => setTechFront(!techFront()), () => !!game(), () => techFront()],
-    [() => w('newsWin'), toggleNews, () => !!game(), () => newsOpen()], ['-'], ...fitG,
-    [() => w('tall'), () => setPixels(pixMode() === 'tall' ? 'square' : 'tall'), null, () => pixMode() === 'tall']];
-  const Info = [[() => w('aboutAm'), openAmigaAbout], ['-'], ...M.Help];
+  // what the Amiga has no command for stays reachable, in the remake's own Ho! menu at the right of the strip
+  // (after a line), under their own words: the Amiga's six menus have exactly the items Jake's captures show
+  const used = new Set(['New game…', 'Quit to title', 'End turn and switch players', 'Auto play…', 'Force end turn…', 'Zoom in', 'Zoom out', 'Turn sound off', 'Turn sound on',
+    'List all fleets…', 'List explored stars…', 'Send a message…', 'Fix spending', 'Scrap ship types…', 'Players and alliances…', 'Build ships at selected colony…', 'Next fleet', 'Review battle…', 'Turn theme music off', 'Turn theme music on']);
+  const left = (items) => items.filter(it => it[0] !== '-' && !(typeof it[0] === 'string' && used.has(it[0])));
+  const tr = (items) => items.map(it => (Array.isArray(it) && typeof it[0] === 'string' && it[0] !== '-' ? [() => menuWord(it[0]), ...it.slice(1)] : it));
+  const others = [].concat(left(M.Game || []), left(M.Ships || []), left(M.Galaxy || []), left((M.View || []).filter(it => !(typeof it[0] === 'function' && /sound|music/i.test(String(it[0]())))), ), M.Help || []);
+  const mine = { mFile: ITEMS.mFile, mOptions: ITEMS.mOptions, mShips: ITEMS.mShips, mGalaxy: ITEMS.mGalaxy, mWindows: ITEMS.mWindows, mInfo: ITEMS.mInfo };
+  if (others.length) ho.push(['-'], ...tr(others));
   for (const k of Object.keys(M)) delete M[k];
   // (the menus' names: the classic page builds the bar once, so each is a
   // word kept in step with the language: menuBar below)
-  Object.assign(M, { mFile: Datei, mOptions: Optionen, mShips: Schiffe, mGalaxy: Galaxis, mWindows: Fenster, mInfo: Info, commands: CMDS });
-  void ho;
+  Object.assign(M, mine, { commands: CMDS });
 }
 // the pixels, with the Skin and OS look pickers
 function lookOptions(where) {
@@ -1494,6 +1776,8 @@ window.HOTHEME_OVER = {
   // report "Sie werden aus dem Spiel gelöscht." (624) and Spielervergleich's
   // "Sie haben das Spiel im Jahre %ld verloren!" (741), which the skin has
   youLost: false,
+  // the skin's own alert, saving panel, busy pointer and dragged route (Jake's captures), and no other route lines
+  alert: amigaAlert, beforeFirstTurn: spieleintrag, onSave: savingPanel, busy, dragRoute, routes: false, showMsgsPref: true,
   // nor a You Won window: 626 "Glückwunsch! Sie haben das Spiel gewonnen." is the
   // report; 633-634 ("Glückwunsch!", "Sie haben gewonnen!") are the battle's, and
   // 740 the Spielervergleich's

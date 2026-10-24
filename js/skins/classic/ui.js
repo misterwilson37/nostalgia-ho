@@ -523,7 +523,7 @@ function draw0() {
   cx.imageSmoothingEnabled = ps < 40;
   UI.dots = [];
   // routes of my fleets
-  for (const f of G.fleets) {
+  for (const f of T.routes === false ? [] : G.fleets) { // (T.routes false: the Amiga draws a route only while it is dragged)
     if (f.owner !== ME) continue;
     if (f.to != null) {
       const a = G.stars[f.from], b = G.stars[f.to];
@@ -606,6 +606,13 @@ function draw0() {
     if (tgt != null && tgt !== f.star) {
       x2 = sx(G.stars[tgt].x); y2 = sy(G.stars[tgt].y);
       const d = HO.starDist(G, f.star, tgt); ok = d <= f.fuel + 1e-9; round = 2 * d <= f.fuel + 1e-9;
+    }
+    // T.dragRoute(cx, { x1, y1, x2, y2, ok, turns }): a skin's own line for a fleet being dragged
+    // (the Amiga's double white line, its turns and its open chevrons)
+    if (T.dragRoute) {
+      const inReach = tgt != null && tgt !== f.star;
+      T.dragRoute(cx, { x1: sx(a.x), y1: sy(a.y), x2, y2, ok: inReach && ok, turns: inReach ? Math.ceil(HO.starDist(G, f.star, tgt) / HO.fleetSpeed(G, f) - 1e-9) : null, round: inReach && ok && round });
+      return;
     }
     cx.save();
     // too far, but a route through your colonies exists (modern): show it
@@ -1630,7 +1637,7 @@ function showMessages() {
   UI.inbox = me().inbox.slice(); UI.msgIdx = 0;
   // Show Event Messages off (rs.options): the reports are only in the Report Window
   const O = verOpts(), PW = G && HO.rules(G).prefsWindow;
-  if (((O && O.showMessages) || PW) && Prefs.showMsgs === false) UI.msgIdx = UI.inbox.length;
+  if (((O && O.showMessages) || PW || T.showMsgsPref) && Prefs.showMsgs === false) UI.msgIdx = UI.inbox.length;
   renderMsg();
 }
 // T.afterMsg(box, ctx): a skin dresses the report card or the End Turn
@@ -1963,8 +1970,8 @@ function doEndTurn(confirmed) {
   if (!G || G.over) return;
   if (confirmed !== true && HO.feature(G, 'buildQueue')) {
     const rs = HO.rules(G), starved = rs.underfunded ? rs.underfunded(G, me()) : HO.colonies(G, ME).filter(s => s.id !== me().homeStar && !(me().budget.col[s.id] > 0));
-    if (starved.length && rs.underfunded) { confirmBox(`${starved.map(s => s.name).join(', ')} ${starved.length === 1 ? 'isn’t' : 'aren’t'} getting enough money to cover ${starved.length === 1 ? 'its' : 'their'} losses. Ending the turn will cost colonists, and a colony left with none is abandoned. Go ahead?`, () => doEndTurn(true)); return; }
-    if (starved.length) { confirmBox(`You aren’t spending any money on ${starved.map(s => s.name).join(', ')}. Ending the turn will abandon ${starved.length === 1 ? 'it' : 'them'}. Go ahead?`, () => doEndTurn(true)); return; }
+    if (starved.length && rs.underfunded) { confirmBox(`${starved.map(s => s.name).join(', ')} ${starved.length === 1 ? 'isn’t' : 'aren’t'} getting enough money to cover ${starved.length === 1 ? 'its' : 'their'} losses. Ending the turn will cost colonists, and a colony left with none is abandoned. Go ahead?`, () => doEndTurn(true), 'underfunded'); return; }
+    if (starved.length) { confirmBox(`You aren’t spending any money on ${starved.map(s => s.name).join(', ')}. Ending the turn will abandon ${starved.length === 1 ? 'it' : 'them'}. Go ahead?`, () => doEndTurn(true), 'underfunded'); return; }
   }
   // the turn time limit: this turn's time banked or taken from the bank
   timeAtEnd(me());
@@ -2113,7 +2120,9 @@ function modal(title, content, opts) {
 }
 function closeModal() { if (UI.modal) { UI.modal.remove(); UI.modal = null; const c = UI.onClose; UI.onClose = null; if (c) c(); } }
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && UI.modal) closeModal(); });
-function confirmBox(text, yes) {
+function confirmBox(text, yes, kind) {
+  // a skin's own alert for a kind of question ('underfunded': the colonies left short at End Turn): T.alert(kind, text, yes)
+  if (kind && T.alert && T.alert(kind, text, yes)) return;
   const w = modal('Are you sure?', el('div', null, text.nodeType ? text : el('p', null, text), el('div', { class: 'btns right' },
     el('button', { class: 'quiet', onclick: closeModal }, 'Cancel'), el('button', { onclick: () => { closeModal(); yes(); } }, 'OK'))), { cls: 'small alert' });
 }
@@ -2252,7 +2261,10 @@ window.addEventListener('unhandledrejection', (ev) => showBug(ev.reason, ''));
 // (T.beforeTurn(G): a skin notes what it needs as the turn is played)
 function playTurn(where, before) {
   try { if (T.beforeTurn) T.beforeTurn(G); } catch (e) { /* a skin's note never stops a turn */ }
-  try { HO.endTurn(G); return true; } catch (e) {
+  // T.busy(on): a skin's busy pointer while the turn runs (the Amiga's W A I T)
+  if (T.busy) try { T.busy(true); } catch (e) { /* (a skin's pointer never stops a turn) */ }
+  try { HO.endTurn(G); if (T.busy) T.busy(false); return true; } catch (e) {
+    if (T.busy) try { T.busy(false); } catch (x) { /* (as above) */ }
     G = HO.load(before); save();
     if (UI.selFleet != null && !G.fleets.some(f => f.id === UI.selFleet)) UI.selFleet = null;
     try { renderPanel(); draw(); renderMsg(); } catch (x) {}
@@ -5613,6 +5625,8 @@ function newGameDialog() {
     useSounds(soundsWanted(), () => {
       Sound.play(128);
       if (hotSeat()) { draw(); handOver(me()); return; }
+      // T.beforeFirstTurn(go): a skin's own first window (the Amiga's Spieleintrag); true: it calls go when done
+      if (T.beforeFirstTurn && T.beforeFirstTurn(() => showMessages())) return;
       showMessages();
     });
   };
@@ -5648,6 +5662,8 @@ function continueGame(resumed) {
 // urgent (End Turn): the account's copy goes now, not within the minute
 function save(urgent) {
   if (!G) return;
+  // T.onSave(): a skin shows its saving panel when the turn's copy goes (the Amiga's "Neuer Spielstand wird gespeichert")
+  if (urgent === true && T.onSave) try { T.onSave(); } catch (e) { /* (a skin's panel never stops a save) */ }
   // every game has an id (its creation time), which names its slot in Saved
   // Games and its copy in the account
   if (!G.gameId) G.gameId = Date.now();
@@ -5701,14 +5717,16 @@ function setupMenus() {
       document.querySelectorAll('.dropdown.open').forEach(d => { d.classList.remove('open'); d.previousElementSibling.setAttribute('aria-expanded', 'false'); });
       if (open) return;
       dd.innerHTML = '';
-      for (const [label, fn, feat, checked] of items) {
+      for (const [label, fn, feat, checked, ghosted] of items) {
         if (label === '-') { dd.append(el('hr')); continue; }
         // feat: a feature the rules must have (HO.feature), or a function that says whether to show the item
         if (feat && !(typeof feat === 'function' ? feat() : G && HO.feature(G, feat))) continue;
         const on = checked ? !!checked() : null;
         const text = typeof label === 'function' ? label() : label;
         // (role menuitem: every skin styles its menus' items by that role)
-        dd.append(el('button', { role: 'menuitem', 'aria-label': checked ? `${text}: ${on ? 'on' : 'off'}` : null, class: checked ? 'check' + (on ? ' on' : '') : null,
+        // ghosted(): a skin's item that shows but can't be chosen now (the Amiga's dotted ones)
+        const off = ghosted ? !!ghosted() : false;
+        dd.append(el('button', { role: 'menuitem', 'aria-label': checked ? `${text}: ${on ? 'on' : 'off'}` : null, class: checked ? 'check' + (on ? ' on' : '') : null, disabled: off ? 'disabled' : false,
           onclick: () => { dd.classList.remove('open'); btn.setAttribute('aria-expanded', 'false'); fn(); } }, text));
       }
       dd.classList.add('open'); btn.setAttribute('aria-expanded', 'true');
@@ -5837,7 +5855,7 @@ window.addEventListener('DOMContentLoaded', () => {
     openBuild, openSplit, openOrganize, organizeStyle, openPlayers, openScrapTypes, openBattle, lastBattles, battleName, openReports, openAbout, openHelp,
     openRadicalHand, showRank, openWinWindows, openYouWon, openYouLost, // (the originals' own windows, for the tests)
     newGameDialog, titleScreen, hideTitle, continueChecked, importGame, doEndTurn, flipBarScale, marksScrap, scrapWords, toggleScrapFleet,
-    verOpts, modern, hotSeat,
+    verOpts, modern, hotSeat, openGameText, Prefs, savePrefs, switchPlayers, forceEndTurn, openBattleList, openFixSpending, lastBattles, playOneTurn,
     // (and the windows tools/ui-lang-audit.js opens in every skin and language)
     openPrefs, openAccount, openHall, hasHall, openMasterList, openRanks, openGameCenter, openFleetList, openStarList, openGive, openChat,
     openSkin, openSounds, openLanguage, openAutoPlay, openDip, openSurrender, openSavedGames, closeScreen, openPatchNotes,
