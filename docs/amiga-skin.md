@@ -54,6 +54,9 @@ Galaxis erstellen, the Startup window, Spieler Registration, the main screen in 
 2050, Schiffsbau, a report card, Aufteilen der Schiffe, Spielervergleich, the About window,
 the Typen Manager and a card with "--mehr--".
 
+**Version 2.1.** The Amiga's 2.1 (German 1995-01-09, English 1995-06-06) is studied in
+`docs/amiga-21.md`: the same game, pictures and windows, with its own English text file.
+
 ## The type
 
 The Amiga game brings its own fonts on disk 1, `HO!1:fonts`: HoFont 9, 11 and 13, HoBold 11

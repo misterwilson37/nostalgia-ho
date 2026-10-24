@@ -182,6 +182,16 @@ read** (and why it doesn't matter, or what it might hold).
   remake doesn't have. `More`, `HDInstall`, `DosPatch`, `c/`, `libs/`, `devs/`, `s/`, the
   `.info` icons: the disk's system files. Nothing is left that holds the game's words.
 
+## Amiga 2.1 (German 1995-01-09 and English 1995-06-06)
+
+- German 2.1 disk 1 (`ho!` 2.1ge1.02, `textge.pff`, the same pictures, sounds and fonts as 2.0,
+  no `More`) and disk 2 (`image256.pff`, identical to 2.0's); the 1995-06-06 disk 1 "[h WT]"
+  (`HO!` 2.1ge1.05, the English `texte.pff`, `Changes.dok`, `WT-SWHE.NFO`; its disk 2 is missing):
+  read, program, strings, windows and art compared with 2.0 (`tools/extract/amiga21.py`,
+  `tools/decompile/AmigaDump.java`, `tools/decompile/amiga-fcmp.py`, `docs/amiga-21.md`).
+  `Changes.dok` (the author's changelog) read; the English text table not yet used by the
+  remake.
+
 ## The listing (`tools/extract/inventory.py`)
 
 ```
@@ -211,7 +221,8 @@ mac201/6d53558a-Spaceward_Ho_v2.01/Spaceward Ho v2.01 - Disk 1 - Program.dc42: H
     TeachText 1.2: ALRT 5, BNDL 1, CODE 3, DITL 4, FREF 3, ICN# 3, MENU 3, SIZE 1, STR# 1, WIND 1, ttxt 1, vers 2
 mac201/6d53558a-Spaceward_Ho_v2.01/Spaceward Ho v2.01 - Disk 2 - Color Pictures.dc42: HFS disk image
     TheHo Color Picts: PICT 13, PPMp 231, TMPL 1
-ho12/The Ho! 1.2/._Icon: data (0005160700020000)
+ho12/The Ho! 1.2/._Icon
+: data (0005160700020000)
 ho12/The Ho! 1.2/._TheHo 1.2 : AppleDouble resource fork: ALRT 53, BNDL 1, CDEF 6, CNTL 11, CODE 23, CURS 8, DITL 72, DLOG 20, FREF 4, ICN# 90, LDEF 3, MBAR 1, MENU 8, MaTh 3, PICT 242, Reqd 1, SH2∆ 1, SIZE 1, STR# 23, Stup 1, TMPL 1, WDEF 4, acur 1, dctb 1, icl4 4, icl8 92, ics# 62, ics4 3, ics8 62, snd  13, vers 2
 ho12/The Ho! 1.2/._Voie Lactée: AppleDouble resource fork: FlEt 2, PlYr 2, ViEw 2
 ho12/The Ho! 1.2/Voie Lactée: data (29bf5e2929bc5e3b)

@@ -9,13 +9,17 @@ Delta Tao, in `docs/open-questions.md`, "Unfinished").
 Preferences screen; the Palm's own Preferences form; 4.0.5's radical window closing itself
 after 5 minutes; You Won in every version; You Lost; Give Money/Metal; Mac 4.0.5's floating
 windows (Tech Spending, Report, Chat; Window menu: Zoom, Hide Information, Clean Up Windows).
+Spaceward Ho! 2.1 for the Amiga studied: `docs/amiga-21.md`.
 
 **In progress:** the Amiga skin from Jake's real-Amiga captures.
 
 **Next, in Jake's order (October 2026):**
-1. Spaceward Ho! 2.1 for the Amiga: the German 2.1 (both disks) and the 1995-06-06 disk 1
-   ("[h WT]", likely English, hacked), kept unopened in the scratchpad's `amiga21/zips`.
-   Compare with 2.0 and add 2.1 as its own version if it differs.
+1. Spaceward Ho! 2.1 for the Amiga: **studied** (October 2026), `docs/amiga-21.md`. The German
+   2.1 (both disks) and the 1995-06-06 English disk 1 ("[h WT]", a repack, not a crack) play
+   the same game as 2.0 (same engine, pictures, sounds, fonts and windows; the changes are file
+   handling, a new button look, DOS game files and the English text file). Not built: Jake
+   decides whether to add its English as a text variant of the Amiga skin (the doc
+   recommends that, and no new ruleset).
 2. Translating the English-only texts: Jake's package
    `nostalgia-ho-notes-fr-de-es-tr-and-manuals_1.zip` (scratchpad `incoming/`) has the
    manuals converted from PDF to HTML and the notes, translated into French, German,
