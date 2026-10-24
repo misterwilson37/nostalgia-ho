@@ -98,3 +98,15 @@ button:not(.mbtn):not(.close):not(.tbtn):not(.clock):not([role=menuitem]) {
 ::-webkit-scrollbar-button:single-button:vertical:increment { background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='7' height='4'><path fill='%23000' d='M0 0h7L3.5 4z'/></svg>"); background-repeat: no-repeat; background-position: center; }
 ::-webkit-scrollbar-button:single-button:horizontal:decrement { background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='4' height='7'><path fill='%23000' d='M4 0v7L0 3.5z'/></svg>"); background-repeat: no-repeat; background-position: center; }
 ::-webkit-scrollbar-button:single-button:horizontal:increment { background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='4' height='7'><path fill='%23000' d='M0 0v7L4 3.5z'/></svg>"); background-repeat: no-repeat; background-position: center; }
+
+/* ---------- the floating windows (the Mac 4.0.5 skins' Window menu): a windoid, System 7's thin title bar
+   (11 pixels, fine horizontal stripes, a small close box at the left), a black frame and a one-pixel shadow ---------- */
+.mwin { background: #fff; color: #000; border: 1px solid #000; box-shadow: 1px 1px 0 #000, 2px 2px 0 #000; }
+.mwbar { height: 11px; background: repeating-linear-gradient(#000 0 1px, #fff 1px 3px) 0 2px / 100% 6px no-repeat, #fff; border-bottom: 1px solid #000; }
+.mwbar .mwclose { position: relative; margin: 0 0 0 3px; border: 1px solid #000 !important; background: #fff !important; box-shadow: 0 0 0 2px #fff !important; }
+.mwbar .mwclose:active { background: #000 !important; }
+.mwgrow { background: linear-gradient(135deg, transparent 0 50%, #000 50% 58%, transparent 58% 70%, #000 70% 78%, transparent 78%); }
+.mwin .mwrow + .mwrow { border-top: 1px dotted #000; }
+.mwyear { border-bottom: 1px solid #000; }
+.mwbody .track { background: #fff; border: 1px solid #000; }
+.mwsend { border-radius: 8px !important; }

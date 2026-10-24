@@ -21,3 +21,54 @@
 .tsplash .tbtns { margin: 0; gap: 26px; }
 .tsplash .tbtns button { font: 12px Chicago, Charcoal, Geneva, var(--ui) !important; padding: 2px 10px !important; min-width: 75px; }
 .tsplash .tbtns #tnew { outline: 3px solid #000; outline-offset: 1px; }
+
+/* ---------- the floating windows (js/skins/mac4/ui.js; the look of their bars is the OS look's, js/os) ----------
+   Windoids over the map: Tech Spending (the Technology box, its bars standing up), Report and Chat (a list of
+   32-pixel rows, a picture and a line each). Hide Information takes the panel away. On a phone they are stacked
+   panels under the map. */
+.mw-layer { position: absolute; inset: 0; z-index: 6; pointer-events: none; font: 10px/12px Geneva, var(--ui); }
+.mw-layer[hidden] { display: none; }
+.mwin { position: absolute; pointer-events: auto; display: flex; flex-direction: column; min-width: 0; overflow: hidden; box-sizing: border-box; }
+.mwin[hidden] { display: none; }
+.mwbar { flex: none; display: flex; align-items: center; position: relative; touch-action: none; user-select: none; -webkit-user-select: none; }
+.mwbar .mwclose { flex: none; padding: 0 !important; min-width: 0 !important; min-height: 0 !important; width: 9px !important; height: 9px !important; border-radius: 0 !important; font-size: 0; cursor: pointer; } /* (over the OS look's button rule) */
+.mwtitle { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; } /* (the windoid's WDEF draws no title) */
+.mwbody { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; overflow: hidden; }
+.mw-tech .mwbody { min-height: 96px; touch-action: none; }
+.mwgrow { position: absolute; right: 0; bottom: 0; width: 12px; height: 12px; cursor: nwse-resize; touch-action: none; }
+.mwlist { list-style: none; margin: 0; padding: 0; flex: 1 1 auto; min-height: 0; overflow-y: auto; touch-action: pan-y; }
+.mwrow { display: flex; align-items: center; gap: 6px; min-height: 32px; padding: 1px 4px; }
+.mwrow img { width: 30px; height: 30px; flex: none; object-fit: contain; image-rendering: pixelated; }
+.mwrow span { min-width: 0; overflow-wrap: anywhere; }
+.mwrow.click { cursor: pointer; }
+.mwrow.cur span { font-weight: bold; }
+.mwyear, .mwnone { padding: 2px 4px; }
+.mwyear { font-weight: bold; }
+.mwsend { flex: none; margin: 2px 4px 14px; min-height: 18px !important; font: 10px Geneva, var(--ui) !important; padding: 0 6px !important; }
+/* the Technology box in its window: six bars standing up, each named under it */
+.mw-techbars { display: flex !important; justify-content: space-around; gap: 2px; flex: 1 1 auto; margin: 0 !important; padding: 4px 0 3px !important; border: 0 !important; box-shadow: none !important; background: none !important; }
+.mw-techbars h3 { display: none; }
+.mw-techbars .barrow { display: grid; grid-template-rows: 1fr auto; grid-template-columns: 1fr; width: 37px; gap: 2px; margin: 0; align-items: stretch; justify-items: center; }
+.mw-techbars .track { grid-row: 1; width: 20px; height: auto; min-height: 60px; cursor: ns-resize; }
+.mw-techbars .fill { inset: auto 0 0 0; width: auto !important; }
+.mw-techbars .blabel { grid-row: 2; white-space: normal; text-align: center; overflow: visible; font-size: 9px; line-height: 10px; letter-spacing: -.2px; }
+.mw-techbars .bval { display: none; }
+.mw-techbars .grid { display: none; }
+/* Hide Information: the map has the whole width */
+html.mw-noinfo #panel { display: none; }
+html.mw-noinfo #main { grid-template-columns: 1fr; }
+/* the route bar (a fleet being sent) stays above the windows */
+#routebar { z-index: 8; }
+/* the stacked panels (a phone) */
+.mw-layer.stack { position: static; order: 3; display: flex; flex-direction: column; gap: 8px; padding: 8px 8px 12px; pointer-events: auto; font-size: 12px; line-height: 15px; }
+.mw-layer.stack .mwin { position: static; width: auto !important; height: auto !important; }
+.mw-layer.stack .mwbar { height: auto; min-height: 16px; }
+.mw-layer.stack .mwtitle { position: static; width: auto; height: auto; overflow: visible; clip: auto; text-align: center; font: bold 12px Chicago, Charcoal, Geneva, var(--ui); }
+.mw-layer.stack { background: var(--plat, #fff); border-top: 1px solid #000; }
+.mw-layer.stack .mwtitle { background: var(--plat, #fff); flex: none; margin: 0 auto; padding: 0 8px; }
+.mw-layer.stack .mwgrow { display: none; }
+.mw-layer.stack .mwlist { max-height: 180px; }
+.mw-layer.stack .mwrow { font-size: 12px; }
+.mw-layer.stack .mw-tech .mwbody { min-height: 120px; }
+.mw-layer.stack .mwsend { margin-bottom: 4px; min-height: 28px !important; font-size: 12px !important; }
+@media (max-width: 760px) { #main { grid-template-rows: 58vh min-content min-content; } html.mw-noinfo #main { grid-template-columns: 1fr; } }

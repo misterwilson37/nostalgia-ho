@@ -5929,7 +5929,7 @@ window.addEventListener('DOMContentLoaded', () => {
   document.body.insertAdjacentHTML('afterbegin', PAGE);
   // what a skin's hooks may use (the Amiga skin builds windows of its own with these)
   T.api = {
-    get G() { return G; }, get ME() { return ME; }, UI, IMG, A, el, $, me, money, fmt, degF, toC, panelFig,
+    get G() { return G; }, get ME() { return ME; }, UI, IMG, A, el, $, me, money, fmt, degF, toC, degText, panelFig,
     toast, modal, closeModal, confirmBox, renderPanel, renderMsg, draw, save, Sound, beep, guard,
     shipPic, shipImgEl, starLook, fleetOrder, curFleet, centerOn, zoomAt, resize, map: () => ({ w: mapW, h: mapH, ready: !!cv }),
     fit() { UI.fitted = false; fit(); draw(); }, clampView,

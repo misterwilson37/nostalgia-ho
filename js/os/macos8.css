@@ -60,3 +60,14 @@ html input[type=range]::-moz-range-track { background: transparent; }
 ::-webkit-scrollbar-button:single-button:vertical:increment { background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='7' height='4'><path fill='%23000' d='M0 0h7L3.5 4z'/></svg>"); background-repeat: no-repeat; background-position: center; }
 ::-webkit-scrollbar-button:single-button:horizontal:decrement { background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='4' height='7'><path fill='%23000' d='M4 0v7L0 3.5z'/></svg>"); background-repeat: no-repeat; background-position: center; }
 ::-webkit-scrollbar-button:single-button:horizontal:increment { background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='4' height='7'><path fill='%23000' d='M0 0v7L4 3.5z'/></svg>"); background-repeat: no-repeat; background-position: center; }
+
+/* ---------- the floating windows (the Mac 4.0.5 skins' Window menu): Platinum's windoid, a thin ridged title bar
+   with a bevelled close box ---------- */
+.mwin { background: var(--plat); color: #000; border: 1px solid #222; box-shadow: 1px 2px 0 rgba(0,0,0,.55); }
+.mwbar { height: 13px; background: repeating-linear-gradient(#fff 0 1px, #9a9a9a 1px 2px, transparent 2px 3px) 0 2px / 100% 9px no-repeat, linear-gradient(#e8e8e8, #c4c4c4); border-bottom: 1px solid #555; }
+.mwbar .mwclose { position: relative; margin: 0 0 0 3px; border: 1px solid #333 !important; background: linear-gradient(135deg, #fff, #b8b8b8) !important; box-shadow: 0 0 0 2px #d6d6d6 !important; }
+.mwbar .mwclose:active { background: #888 !important; }
+.mwgrow { background: linear-gradient(135deg, transparent 0 45%, #777 45% 52%, transparent 52% 62%, #777 62% 69%, transparent 69%); }
+.mwin .mwrow + .mwrow { border-top: 1px solid #b8b8b8; }
+.mwyear { border-bottom: 1px solid #999; background: #cfcfcf; }
+.mwbody { background: #e6e6e6; }

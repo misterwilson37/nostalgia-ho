@@ -83,11 +83,7 @@ and what was searched. Every file of every version was gone through again in Oct
 ## 2. Unfinished
 
 Windows, commands and pictures of the originals that the remake hasn't built yet. Everything
-once queued here is built; one optional piece is left:
-
-### 4.0.5
-
-- Mac: the floating windows.
+once queued here is built (the last piece, 4.0.5's Mac floating windows, in October 2026).
 
 (The remake's own work, such as the translations, is in `docs/roadmap.md`.)
 

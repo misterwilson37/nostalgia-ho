@@ -1230,5 +1230,16 @@ root.HOUI.add([
 ['Won %s games', '%s parties gagnées', '%s Spiele gewonnen', '%s oyun kazandı', 'Ganó %s partidas'],
 ['Lost a game', 'Une partie perdue', 'Ein Spiel verloren', 'Bir oyun kaybetti', 'Perdió una partida'],
 ['Played %s games', '%s parties jouées', '%s Spiele gespielt', '%s oyun oynadı', 'Jugó %s partidas'],
+// ---------- the Mac 4.0.5 skins' floating windows and Window menu (js/skins/mac4/ui.js) ----------
+['Tech Spending Window', 'Fenêtre des dépenses de technologie', 'Technik-Ausgaben-Fenster', 'Teknoloji harcaması penceresi', 'Ventana de gasto en tecnología'],
+['Report Window', 'Fenêtre des rapports', 'Berichtsfenster', 'Rapor penceresi', 'Ventana de informes'],
+['Chat Window', 'Fenêtre de discussion', 'Gesprächsfenster', 'Sohbet penceresi', 'Ventana de charla'],
+['Hide Information', 'Masquer les informations', 'Informationen ausblenden', 'Bilgiyi gizle', 'Ocultar la información'],
+['Show Information', 'Afficher les informations', 'Informationen einblenden', 'Bilgiyi göster', 'Mostrar la información'],
+['Clean Up Windows', 'Ranger les fenêtres', 'Fenster aufräumen', 'Pencereleri topla', 'Ordenar las ventanas', { de: 'Amiga' }],
+['Tech Spending', 'Dépenses de technologie', 'Technik Ausgaben', 'Teknoloji harcaması', 'Gasto en tecnología', { de: 'Amiga' }],
+['Report', 'Rapport', 'Bericht', 'Rapor', 'Informe'],
+['Chat', 'Discussion', 'Gespräch', 'Sohbet', 'Charla'],
+['No messages yet.', 'Pas encore de messages.', 'Noch keine Nachrichten.', 'Henüz mesaj yok.', 'Aún no hay mensajes.'],
 ]);
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -2174,6 +2174,85 @@ Menu bars: MBAR 128: 128, 129, 130, 131, 132, 133, 134.
   - "50"
 
 
+## Floating windows (the Window menu; `WinMgr`)
+
+Read by hand from the decompile (`ho405.c`: `DoWindowMenu` @83eec, `MatchFlagsToWindows`
+@83faa, `SetMenuItems` @84028, `ResetWindows` @8477a, `SetWindowLocations` @84916,
+`AdjustFloatingWindows` @84aa8, `SaveWindowLocations` @84cb0, `SetupPlayerWindows` @e05bc,
+`NewXWindow` @170bca, `ToggleToolWindow` @1a1304, `ShowHideMapInfo` @111d32,
+`CreateTechWin`, `CreateReportWin`, `CreateMessageWin`, `CreateServerWin`) and from `Stup` 1000
+and `WDEF` 1000 / 1500 (October 2026). **There is no `WIND` resource in 4.0.5** (the
+resource list above has none): the floating windows are made in code, `NewXWindow(0xc4, ...)`
+(0xc4 is the size of the window record it allocates, a colour window record and 40 bytes of
+the program's own) calling `NewCWindow` with the rectangle kept in the setup record.
+
+| Window | Window menu item (MENU 134) | procID | Title in the code | Kind (refCon) | Size when cleaned up |
+|---|---|---|---|---|---|
+| Tech Spending | "Tech Spending Window" (cmd-1) | 16000 = `WDEF` 1000 "Floating Window" (code "TOOLWDEF") | "TechWindow" | 0x4000 | 225 x 96 |
+| Report | "Report Window" (cmd-2) | 24000 = `WDEF` 1500 "Growable Floating Window" ("GROWTOOLWDEF") | "Report Window" | 0x4001 | 250 x 96, growable |
+| Chat | "Chat Window" (cmd-3) | 24000 = `WDEF` 1500 | "Message Window" | 0x4002 | 250 x 96, growable |
+| Server (not in the menu) | none | 16000 | "ServerWindow" | 0x4003 | 260 x 175 |
+
+- **Kind.** Floating windows with a thin title bar and a close box: the two `WDEF`s are the
+  program's own and never call `DrawString` or `DrawText`, so **the windoids show no title**
+  (the strings above are only the Window Manager's names). The growable two have a grow box
+  and scroll bars (`ScrollReportWindow`, `ScrollMessageWindow`; their `Create...Win` calls pass 0x10001 where
+  Tech's passes 0x10000).
+  The Server window is the network server's.
+- **Where (the setup, `Stup` 1000 "Default Setup", whose words are the rectangles as top,
+  left, bottom, right).** Map window +2: (40, 2, 342, 510); Tech +0xa: (355, 2, 435, 226);
+  Report +0x12 and Chat +0x1a: both (355, 249, 451, 499); Server +0x22: (90, 50, 225, 350);
+  the screen rectangle +0x2a is zeros until `SetupPlayerWindows` fills it in; the three
+  open-flags +0x32 (Tech), +0x34 (Report), +0x36 (Chat) are 1, 1, 1. **All three are open at start.**
+  The Report and Chat rectangles are the same, so the setup alone would stack them.
+- **Clean Up Windows** (`ResetWindows`, then `SetWindowLocations`; `SetupPlayerWindows` calls
+  `ResetWindows` as well, so the original lays them out afresh each time a game's windows are set up;
+  `SaveWindowLocations` keeps their rectangles in the setup when it quits). With the screen's rectangle
+  (top, left, bottom, right): the map window is (top + 40, left + 2, bottom - 110, right - 2)
+  (the whole of it down to bottom - 2 on a screen under 400 pixels high); the three windows
+  are 96 pixels high with their tops at bottom - 98 (bottom - 108 on a short screen, over the map): Tech at
+  left + 2, 225 wide; Report at right - 252, 250 wide; Chat centred, 250 wide. It moves them
+  and sizes them; it does not open a closed window or close an open one.
+- **Window menu items 1-3** are ticked while their window is open (`CheckItem` in
+  `AdjustFloatingWindows`; `DoWindowMenu` toggles the window with `ToggleToolWindow`, a
+  `ShowWindow`/`HideWindow`, and stores the new state in the flag; `MatchFlagsToWindows`,
+  called at the end of `SetMenuItems`, reads the flags back from the windows' visibility).
+  `AdjustFloatingWindows` (run as a game opens and closes) hides all three when no game
+  is open; with a game it shows Tech and Report by their flags, and Chat by its flag only
+  when a network game has more than one player or `DAT_00efce7a` is 0.
+- **Window menu items 5 and 6**, "Zoom In" / "Zoom Out" (cmd-= and cmd--): `ZoomIn`, `ZoomOut`.
+  **Item 7, Hide Information** (cmd-I, `ShowHideMapInfo`): flips the map window's information
+  column, `DAT_00eff60c`, between 0 and 226 (0xe2) pixels. The column is the strip at the left of the
+  map window (the map's own x starts at it: `ClickInMapWindow` subtracts it) and the
+  item reads "Hide Information" while it is 226 and "Show Information" while it is 0 (`STR#` 6120, items
+  11 and 12; items 1 and 2 of the same list, "Show Floating Windows" and "Hide Floating
+  Windows", are not set by `SetMenuItems`). **Item 9, Clean Up Windows**, is above.
+- **Contents.** Tech Spending: the six vertical research bars (`DoVBarClick` @5060c,
+  the log scale `InitVLogBarAmts`), named by `STR#` 6050 ("Range", "Speed", "Weapons",
+  "Shields", "Mini", "Radical", "100%", "Tech Spending", "Current Levels:"). Report: a
+  scrolling list of the player's reports, 32 pixels a row (`UpdateReportWin` draws
+  `DrawMessage` for each row that fits: height >> 5), scrolled to the current date
+  (`ScrollReportToCurrentDate`), a click on a row acts on it (`ClickInReportWindow`).
+  Chat ("Message Window"): a text field along the bottom 15 pixels under a rule
+  (`UpdateMessageWin`); Return sends what was typed (`KeyInMessageWindow`, up to 240
+  characters); with the field empty, Return, Space and Tab step to the next announcement.
+
+### What the remake does (`js/skins/mac4/ui.js`, `style.css`; the bars' look in `js/os/system7.css` and `macos8.css`)
+
+The Mac 4.0.5 skins (`mac4`, `mac4c`; both OS looks): the three as windoids over the map, with
+the OS look's thin title bar (System 7's: 11 pixels, fine stripes, a small close box; Platinum's
+ridged) and no title text, as the original's. The contents are the classic page's: the
+Technology box (its bars standing up, as 4.0.5's), the turn's reports and the chat lines
+(this session's last twelve turns), with "Send a message…" opening the version's Send Message
+window (4.0.5's `cannedChat`, in place of a typed line). Drag by the bar, close with the box;
+the growable two have a grow box. Positions, sizes and open flags are kept for each skin in
+localStorage (`ho5.win.mac4`, `ho5.win.mac4c`) and, unlike the original's, kept from game to
+game. Defaults and Clean Up: the original's row (Tech left, Chat in the middle, Report right,
+at 225 / 250 / 250 wide and 96 high); the remake has no strip under the map, so the row runs along the top edge of
+the map. The Chat window and its menu item exist only where the version has Send Message. Hide
+Information hides the panel (the information column: money, budget bars, planet). On a phone
+(760 pixels or less) the windows are stacked panels under the map, with their titles shown.
+
 ## Windows 95: SPACEHO.EXE
 
 ```

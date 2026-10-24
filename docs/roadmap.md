@@ -7,29 +7,28 @@ Delta Tao, in `docs/open-questions.md`, "Unfinished").
 
 **Done (October 2026):** 5.0.5's Preferences in its own words; iOS's and Android's own
 Preferences screen; the Palm's own Preferences form; 4.0.5's radical window closing itself
-after 5 minutes; You Won in every version; You Lost; Give Money/Metal.
+after 5 minutes; You Won in every version; You Lost; Give Money/Metal; Mac 4.0.5's floating
+windows (Tech Spending, Report, Chat; Window menu: Zoom, Hide Information, Clean Up Windows).
 
 **In progress:** the Amiga skin from Jake's real-Amiga captures.
 
 **Next, in Jake's order (October 2026):**
-1. Mac 4.0.5's floating windows (Tech Spending, Report, Chat; Window menu: Zoom, Hide
-   Information, Clean Up Windows).
-2. Spaceward Ho! 2.1 for the Amiga: the German 2.1 (both disks) and the 1995-06-06 disk 1
+1. Spaceward Ho! 2.1 for the Amiga: the German 2.1 (both disks) and the 1995-06-06 disk 1
    ("[h WT]", likely English, hacked), kept unopened in the scratchpad's `amiga21/zips`.
    Compare with 2.0 and add 2.1 as its own version if it differs.
-3. Translating the English-only texts: Jake's package
+2. Translating the English-only texts: Jake's package
    `nostalgia-ho-notes-fr-de-es-tr-and-manuals_1.zip` (scratchpad `incoming/`) has the
    manuals converted from PDF to HTML and the notes, translated into French, German,
    Spanish and Turkish. Check and add.
-4. Design: write prompts for Gemini for any art or design work, unless it can be done here.
+3. Design: write prompts for Gemini for any art or design work, unless it can be done here.
    Jake's art package `nostalgia-ho-art.zip` (made by another Claude to fill the missing
    assets, `docs/missing-assets.md`) and browser skins `browser-looks-1.0.0.zip` (scratchpad
    `incoming/`) come into this step: check and integrate them.
-5. Optional passwords on exported games, for the original play-by-file experience (not for
+4. Optional passwords on exported games, for the original play-by-file experience (not for
    the hot seat): each player's name and password asked at their turn, with a note quoting
    the version's manual (WINHO.WRI, the Amiga's Briefspiel.dok and Netzwerk.dok, the Mac
    manuals).
-6. Last: a home-screen (apple-touch) icon per skin, the icon a phone shows when the site is
+5. Last: a home-screen (apple-touch) icon per skin, the icon a phone shows when the site is
    added to its home screen; today every skin's is the Android one.
 
 **Online, outside the code:**

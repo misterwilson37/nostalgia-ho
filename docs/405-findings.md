@@ -469,6 +469,29 @@ decompile failed ("Cannot properly adjust input varnodes": `GiveBarPercent`,
 computes: the hit table is resource MaTh 1002 ("Weapon Ratios", the same 51 values as
 50 + 31.51 atan), the angles MaTh 1000 / 1001.
 
+### The floating windows (Mac only; CONFIRMED, October 2026)
+
+Read in the decompile and `Stup` 1000 (`docs/405-windows.md`, "Floating windows"): there is no
+`WIND` resource; `CreateTechWin`, `CreateReportWin` and `CreateMessageWin` make the three in code
+(`NewXWindow` -> `NewCWindow`, procIDs 16000 and 24000 = `WDEF` 1000 and 1500, the program's own
+windoid and growable windoid, with a thin title bar and a close box, **no title text**: the
+`WDEF`s never draw a string). Tech Spending 225 x 96, Report and Chat 250 x 96 (growable); the
+default setup has all three **open at start** (flags 1, 1, 1; Chat shows only where a network
+game has other players or `DAT_00efce7a` is 0). Clean Up Windows (`ResetWindows`) puts Tech at the
+left, Chat in the middle and Report at the right of the strip under the map window, and, as
+`SetupPlayerWindows` calls it too, the original opens its windows there each game; it neither
+opens nor closes any. Hide Information flips the map window's 226-pixel information column
+(`DAT_00eff60c`) and the item reads "Show Information" while it is hidden (`STR#` 6120).
+Window menu items 1-3 carry a tick while their window is open (`AdjustFloatingWindows`).
+Built: `js/skins/mac4/ui.js` (the `mac4` and `mac4c` skins, under `mac405`; the Window menu
+with the real words; windows draggable, closable, growable, kept per skin in localStorage
+`ho5.win.<skin>`; the Report window lists the reports, the Chat window the chat lines with Send
+Message, the Tech window the classic Technology box with its bars standing up; stacked panels
+under 760 pixels). The remake's differences: the windows keep their place from game to game;
+the row runs along the top of the map (no strip under it); Chat opens a Send Message window
+rather than a typed line. Not built: the keys (cmd-1, 2, 3, =, -, I: a browser keeps them), the
+Server window (network server).
+
 ### What the names corrected (Windows read again)
 
 - **The galaxy's angles** use pi = 3.14159 (`FUN_00440f8a` and the other shapes; the Mac's
@@ -563,9 +586,9 @@ and the four winners' star names are drawn as the window opens (`rs.nameAStar.pi
   Mac), Page Setup and Print; Options has Auto Play, Sound, Master Point List, Hall of
   Fame, Hall of Shame, Preferences; Ships' "Scrap Current Fleet" reads "Don't Scrap
   Current Fleet" for a marked fleet (`SetMenuItems`; Windows' text never changes); a
-  Window menu shows the
-  floating Tech Spending, Report and Chat windows, Zoom In / Out, Hide Information and
-  Clean Up Windows (`WinMgr`).
+  Window menu shows the floating Tech Spending, Report and Chat windows (ticked while open),
+  Zoom In / Out, Hide Information and Clean Up Windows (`WinMgr`). Built (October 2026): see
+  "The floating windows" above.
 - **Auto Play** (`doAutoPlayDialog`, DITL 4020): "Have computer play for me", "Just mark
   me done every turn", "I'll play my own turns", "Mark me done until something
   interesting happens", with a Config window (Friendly, Aggressive, Dig In, No Defense).
