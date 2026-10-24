@@ -49,13 +49,17 @@ function loadManifest(done) {
   });
 }
 // The theme's pictures are added as T.prefix + name, and T.images shows
-// one of its pictures in place of one of ours. (Its sounds are a sound set:
-// see useSounds.)
+// one of its pictures in place of one of ours: a name, or a list of names
+// of which the first the theme has wins. T.explore(i), likewise, names the
+// theme's pictures for rank picture i (assets/explore). (Its sounds are a
+// sound set: see useSounds.)
 function loadTheme(done) {
   if (!T.dir) return done();
   const use = (sk) => {
+    const pick = (v) => [].concat(v).find(n => sk.img[n]);
     for (const k in sk.img) A.img[T.prefix + k] = sk.img[k];
-    for (const k in T.images || {}) if (sk.img[T.images[k]]) A.img[k] = sk.img[T.images[k]];
+    for (const k in T.images || {}) { const n = pick(T.images[k]); if (n) A.img[k] = sk.img[n]; }
+    if (T.explore) A.jpg = A.jpg.map((u, i) => { const n = pick(T.explore(i)); return n ? sk.img[n] : u; });
     done();
   };
   if (A.skin) return use(A.skin); // single-file build
@@ -311,7 +315,19 @@ function shipPic(d, owner) {
   const palmFix = !!(G && HO.fixed(G, 'palmPictures'));
   const key = [d.type, d.R, d.V, d.W, d.S, d.M, rusty].join(':') + (palmFix ? ':fix' : '');
   if (shipCache[key]) return shipCache[key];
+  // 1.2's and 2.0's two hidden special ships (Weapons 12, Shields 12, Range
+  // 9-11: the shark; Weapons and Shields 15, Range 12-14: the skull), which
+  // 3.0.1 on dropped: with those rules, a later skin shows the originals
+  // (tools/skins/fill_art.py SPECIALS: the skin's own stand-in, else this
+  // skin's, 120x40). The 1.2 and 2.0 skins draw their own (their shipPic).
+  const sp = ['12', 'dos', 'mac20'].includes(G && G.rules) && d.type !== 'colony' &&
+    (d.W === 12 && d.S === 12 && d.R > 8 && d.R < 12 ? 'special20a' : d.W === 15 && d.S === 15 && d.R > 11 && d.R < 15 ? 'special20b' : null);
+  const spPic = (pre) => { const k = ['mac2', 'mac2c'].map(v => pre + 'fill/' + v + '-' + sp).find(n => IMG[n] && IMG[n].width); return k && IMG[k]; };
+  const spIm = sp && spPic(T.prefix || '');
+  if (spIm) { const c = document.createElement('canvas'); c.width = spIm.width; c.height = spIm.height; c.getContext('2d').drawImage(spIm, 0, 0); return (shipCache[key] = c); }
   if (T.shipPic) { const t = T.shipPic(d, IMG, rusty, palmFix); if (t) return (shipCache[key] = t); }
+  const spBase = sp && spPic('');
+  if (spBase) { const c = document.createElement('canvas'); c.width = spBase.width; c.height = spBase.height; c.getContext('2d').drawImage(spBase, 0, 0); return (shipCache[key] = c); }
   const { ops } = shipParts(d);
   let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
   for (const [, r] of ops) { x0 = Math.min(x0, r[0]); y0 = Math.min(y0, r[1]); x1 = Math.max(x1, r[2]); y1 = Math.max(y1, r[3]); }
@@ -582,8 +598,23 @@ function draw0() {
       cx.strokeStyle = T.satRing || (sats.some(f => f.owner === ME) ? 'rgba(120,230,255,0.9)' : 'rgba(255,120,200,0.9)');
       cx.lineWidth = 1.5; cx.beginPath(); cx.ellipse(x, y, ps * 0.62, ps * 0.62, 0, 0, Math.PI * 2); cx.stroke();
     }
-    if (s.owner >= 0 && s.owner !== ME && HO.feature(G, 'alliances') && HO.isAllied(G, ME, s.owner) && HO.know(G, me(), s.id).explored && IMG.haloAlly) cx.drawImage(IMG.haloAlly, x - ps * 0.6, y + ps * 0.28, ps * 1.2, ps * 0.4);
     if (look.hat && IMG[look.hat]) { const h = ps * 1.18; cx.drawImage(IMG[look.hat], x - h / 2, y - h * 0.62, h, h * (IMG[look.hat].height / IMG[look.hat].width)); }
+    // an ally's planet: a halo over it, yellow (haloAlly) or, for a best
+    // buddy, cyan (haloBuddy). GUESS: where 5.0.5 puts it isn't decompiled;
+    // this is where the halos sit in 3.0.1's and 4.0's ally pictures (p506,
+    // the top of the 56x51 selection-ring cell) and the Windows 4.0.5's
+    // (b175's yellow and cyan rows): above the planet, over its hat.
+    // T.allyPic(IMG, small): a skin's own picture, laid over the planet as
+    // the selection ring is.
+    if (s.owner >= 0 && s.owner !== ME && HO.feature(G, 'alliances') && HO.isAllied(G, ME, s.owner) && HO.know(G, me(), s.id).explored) {
+      // (T.allyAt({ x, y, view }): where a skin that draws its own stars puts
+      // it, { x, y, w, h, small }, or null for none)
+      const box = T.allyAt ? T.allyAt({ x, y, view: UI.view }) : { x: x - ps * 0.85, y: y - ps * 0.85, w: ps * 1.7, h: ps * 1.7, small: ps < 24 };
+      const ap = box && T.allyPic && T.allyPic(IMG, box.small);
+      const halo = (HO.isBuddy(G, ME, s.owner) && IMG.haloBuddy) || IMG.haloAlly;
+      if (ap && ap.width) cx.drawImage(ap, box.x, box.y, box.w, box.h);
+      else if (halo && !(T.allyAt && !box)) cx.drawImage(halo, x - ps * 0.6, y - ps * 0.85, ps * 1.2, ps * 0.46);
+    }
     // name
     if (!own && UI.view.s > 18) {
       cx.font = mapFont(Math.max(9, Math.min(12, UI.view.s / 3.6)));
@@ -1619,6 +1650,25 @@ function renderRouteBar() {
 // "has run out of metal. You should probably evacuate it." wins over
 // "has run out of metal."
 let LOOKS = null;
+// A report in 1.2's or 2.0's words (their templates, HO.REPORTS20), which
+// 5.0.5's templates don't match: the picture and sound 5.0.5 gives the same
+// kind of report (its report number, i: 1000 + i), so a later skin shows
+// its own picture for it. 2.0-only kinds (the build queue's warnings) take
+// 5.0.5's money warning. The game's year has no picture in 5.0.5 either.
+const MEANING20 = [
+  [/^Spaceward Ho! Version [\d.]+ by /, 0], [/^Artwork by /, 2], [/^You have abandoned /, 9],
+  [/ destroyed your colony at /, 11], [/^The game has been updated to the year /, 12],
+  [/ has been scrapped for | ship type has been scrapped\./, 20], [/shipbuilding at |for shipbuilding/, 128],
+  [/^Built .* at /, 156], [/ can no longer reach /, 156], [/^You have explored /, 33],
+  [/^You lost a battle at /, 37], [/ successfully defended itself against an enemy attack from /, 36],
+  [/^You have recovered .* metal from the battle at /, 71], [/^Congratulations! You have just won the game/, 78],
+  [/ sends a message saying |^You sent a message to /, 54],
+];
+function meaning20(t) {
+  const L = HO.DATA.reportLook || [];
+  for (const [re, i] of MEANING20) if (re.test(t) && L[i]) return { i, look: L[i] };
+  return null;
+}
 function originalLook(m) {
   if (!LOOKS) {
     const R = HO.DATA.reports || [], L = HO.DATA.reportLook || [];
@@ -1627,8 +1677,8 @@ function originalLook(m) {
       re: new RegExp('^' + t.split(/(%(?:\.\*|\d*\.?\d*)?[sd]|%%)/).map((x, j) => j % 2 ? (x === '%%' ? '%' : '(.*?)') : esc(x)).join('')) }))
       .filter(o => o.look && o.len > 8).sort((a, b) => b.len - a.len);
   }
-  const t = String(m.text || '');
-  const hit = LOOKS.find(o => o.re.test(t));
+  const t = String(m.text || '').replace(/(\S) {2,}/g, '$1 '); // (4.0.5 puts three spaces after a sentence: "Congratulations, Jake!   Your population …")
+  const hit = LOOKS.find(o => o.re.test(t)) || meaning20(t);
   if (!hit) return null;
   let [pic, snd] = hit.look;
   const id = 1000 + hit.i;

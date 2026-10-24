@@ -111,6 +111,9 @@ const CHAT20 = [
   ['%s sends a message saying she likes %s.', 713], ['%s sends a message saying she doesn’t like %s.', 714], ['%s sends a message saying she owns %s.', 717],
   ['You sent a message to %s saying you like %s.', 718], ['You sent a message to %s saying you don’t like %s.', 719], ['You sent a message to %s saying you own %s.', 722],
 ];
+// the 1.2 / 2.0 report templates in English, for the 1.2 skin to tell its
+// own reports from later versions' (js/skins/mac3/ui.js)
+E.REPORTS20 = REPORTS20.concat(CHAT20).map(([t]) => t).concat(['Spaceward Ho! Version 1.2 by Peter Commons.']);
 const SAY_DE = {
   cap: true, num: numDE,
   // the remake's report (its English, 2.0's own words) -> the German string with the same id

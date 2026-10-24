@@ -758,6 +758,15 @@ function drawStar(cx, o) {
   cx.fillText(s.name, X - (len >> 1), T0 + n + (big ? 9 : 7));
   return true;
 }
+// an ally's halo (the 2.0 skins' stand-in, 3.0.1's p506 / p507, the size of
+// the selection ring): where the Amiga puts its selection ring, d500 / d501
+// (drawStar above); none at the far zoom, where stars are circles
+function allyAt({ x, y, view }) {
+  const z = zoomOf(view), X = Math.round(x), Y = Math.round(y);
+  if (z <= 6) return null;
+  const big = z === 17, n = big ? 32 : 16, L = X - n / 2, T0 = Y - n / 2;
+  return big ? { x: L - 12, y: T0 - 9, w: 56, h: 51, small: false } : { x: L - 5, y: T0 - 5, w: 26, h: 26, small: true };
+}
 // your fleets at a star: the one marker, where the Amiga puts it (T.markerAt);
 // at the far zoom none is drawn, but a drag can still pick the fleets up there
 function markerAt(f, { x, y, view }) {
@@ -1772,7 +1781,7 @@ window.HOTHEME_OVER = {
   mapPixel: () => [PX.x, PX.y],
   mapFont: () => '16px HoFont11, sans-serif',
   planetPx: (s) => [9, 16, 16, 32][zoomIdx(s)],
-  drawStar, markerAt, ownRings: true, zoomTo, beforeTurn, afterDraw: syncMapBars, fitView,
+  drawStar, markerAt, allyAt, ownRings: true, zoomTo, beforeTurn, afterDraw: syncMapBars, fitView,
   techBars: 'vertical', barGrid: false,
   panel, afterMsg, window: skinWindow, newGame, menus, lookOptions, page, title,
   menuName: (k) => (WORDS[k] ? W(k) : k), // the menus' names (menus above), in the language

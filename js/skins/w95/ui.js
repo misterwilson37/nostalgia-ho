@@ -18,6 +18,10 @@ window.HOTHEME = {
   prefix: P,
   // its sounds (named, not numbered): SOUNDS.w95 in js/skins.js
   images: Object.assign({
+    // stand-ins (tools/skins/fill_art.py): 5.0.5's debris and nova wreck in
+    // 4.0.5's colours; the ally and best-buddy halos cut from b175 (4.0.5
+    // draws them only inside that ring), drawn over the planet as 5.0.5's are
+    debris: 'fill/classic-debris', nova18: 'fill/classic-nova18', haloAlly: 'fill/w95-haloAlly', haloBuddy: 'fill/w95-haloBuddy',
     p3030: 'b3000', p3040: 'b3010', // won / eliminated (FUN_00470dec)
     white0_0: 'b1405', white0_1: 'b1905', // you, in the Players window
   }, faces()),

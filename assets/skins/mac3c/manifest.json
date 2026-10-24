@@ -1,5 +1,13 @@
 {
  "sprites": [
+  "fill/classic-debris",
+  "fill/mac2c-special20a",
+  "fill/mac2c-special20b",
+  "fill/mac3c-p506",
+  "fill/mac3c-p507",
+  "fill/mac4c-p2261",
+  "fill/mac4c-p2263",
+  "fill/mac4c-p2758",
   "i1000",
   "i1001",
   "i1002",
@@ -433,6 +441,8 @@
   7001,
   7002,
   7003,
+  7004,
+  7012,
   8000,
   10000
  ]

@@ -26,7 +26,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 SRC = os.path.join(ROOT, 'assets', 'sprites')
 OUT = os.path.join(ROOT, 'assets', 'skins', 'cozy')
 RULES = [  # (pattern, scale)
-    (r'^(planet\d|mined\d|metal\d|unknown|soon|battle|haloAlly|bad\d+_\d|white\d_\d)$', 3),
+    (r'^(planet\d|mined\d|metal\d|unknown|soon|battle|haloAlly|haloBuddy|bad\d+_\d|white\d_\d)$', 3),
     (r'^(nova\d+|m9\d\d\d|p30[0-4]0)$', 2),
 ]
 TITLE = r'^(p6999|t70\d\d)$'

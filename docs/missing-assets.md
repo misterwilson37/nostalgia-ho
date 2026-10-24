@@ -27,11 +27,42 @@ from another's picture.
 | Your colony, with your hat | <img src="../assets/sprites/planet3.png" alt="planet" height="40"> <img src="../assets/sprites/white0_0.png" alt="hat" height="40"> [`planet3`](../assets/sprites/planet3.png) + [`white0_0`](../assets/sprites/white0_0.png) | <img src="../assets/skins/dos/sprites/i1000.png" alt="your planet" height="40"> [`i1000`](../assets/skins/dos/sprites/i1000.png) | <img src="../assets/skins/w95/sprites/b1053.png" alt="your planet" height="40"> [`b1053`](../assets/skins/w95/sprites/b1053.png) |
 | A computer player's planet | <img src="../assets/sprites/bad3_0.png" alt="face" height="40"> [`bad3_0`](../assets/sprites/bad3_0.png) | <img src="../assets/skins/dos/sprites/i2003.png" alt="face" height="40"> [`i2003`](../assets/skins/dos/sprites/i2003.png) | <img src="../assets/skins/w95/sprites/b2003.png" alt="face" height="40"> [`b2003`](../assets/skins/w95/sprites/b2003.png) |
 | A ship (engine, hull, nose) | [`ships`](../assets/sprites/ships.png) (one sheet of parts) | <img src="../assets/skins/dos/sprites/d12100.png" alt="engine" height="32"><img src="../assets/skins/dos/sprites/d12199.png" alt="hull" height="32"><img src="../assets/skins/dos/sprites/d12350.png" alt="nose" height="32"> [`d12100`](../assets/skins/dos/sprites/d12100.png) [`d12199`](../assets/skins/dos/sprites/d12199.png) [`d12350`](../assets/skins/dos/sprites/d12350.png) | <img src="../assets/skins/w95/sprites/b2600.png" alt="engine" height="32"><img src="../assets/skins/w95/sprites/b2699.png" alt="hull" height="32"><img src="../assets/skins/w95/sprites/b2850.png" alt="nose" height="32"> [`b2600`](../assets/skins/w95/sprites/b2600.png) [`b2699`](../assets/skins/w95/sprites/b2699.png) [`b2850`](../assets/skins/w95/sprites/b2850.png) |
-| A satellite | <img src="../assets/sprites/satellite.png" alt="satellite" height="40"> [`satellite`](../assets/sprites/satellite.png) | <img src="../assets/skins/dos/sprites/d12401.png" alt="satellite" height="40"> [`d12401`](../assets/skins/dos/sprites/d12401.png) | <img src="../assets/skins/w95/sprites/b2901.png" alt="satellite" height="40"> [`b2901`](../assets/skins/w95/sprites/b2901.png) |
+| A satellite | <img src="../assets/sprites/part3_4.png" alt="satellite" height="40"> [`part3_4`](../assets/sprites/part3_4.png) (one of 30, by Weapons: `part3_0`–`29`) | <img src="../assets/skins/dos/sprites/d12401.png" alt="satellite" height="40"> [`d12401`](../assets/skins/dos/sprites/d12401.png) | <img src="../assets/skins/w95/sprites/b2901.png" alt="satellite" height="40"> [`b2901`](../assets/skins/w95/sprites/b2901.png) |
 | A money message | <img src="../assets/sprites/m9000.png" alt="money" height="40"> [`m9000`](../assets/sprites/m9000.png) | <img src="../assets/skins/dos/sprites/i3110.png" alt="money" height="40"> [`i3110`](../assets/skins/dos/sprites/i3110.png) | <img src="../assets/skins/w95/sprites/b3110.png" alt="money" height="40"> [`b3110`](../assets/skins/w95/sprites/b3110.png) |
 
 Title pictures, for the overall look: [5.0.5 `p6999`](../assets/sprites/p6999.png),
 [2.0 `d998`](../assets/skins/dos/sprites/d998.png) / [`d999`](../assets/skins/dos/sprites/d999.png), [4.0.5 `b316`](../assets/skins/w95/sprites/b316.png).
+
+## What was made for the remake (not from the original release)
+
+The originals' own art always wins; these pictures only fill true gaps. Every file in a
+`sprites/fill/` folder (`assets/sprites/fill/` for classic, `assets/skins/<skin>/sprites/fill/`
+for the others, each with a `README.txt` saying so) is **the remake's**: a picture from
+the nearest version that has it, re-filtered to the skin's look by `tools/skins/fill_art.py`,
+from the art package `nostalgia-ho-art` (Jake and Brand Inspector Sage, October 2026).
+Also the remake's, not the original release's: the classic sprite files renamed to what
+the game uses each for (`dreadBody`, `colonyBody`, `satCritter0`..., `haloBuddy`, the
+`fighterSpecial`/`dreadSpecial` cuts; `docs/sprite-names/`), the cozy skin's regenerated
+halos, and the turn timer's stand-in sounds `7004`/`7012` in the skins whose game had none
+(`tools/skins/fill_sounds.py`). No original file was replaced; the only changed original-derived
+file is `haloAlly.png`, re-cut from the same sheet without a stray purple column.
+
+## Finding what a skin borrows
+
+`node tools/skin-holes.js <skin> [--rules=<id>]` plays a game in the skin (5.0.5's rules by
+default), draws every planet state, ship type, report, rank picture, battle and window, and
+lists every classic picture that reached the screen, with where. With `--json` it also
+gives each 5.0.5 report's picture, which shows the quiet holes: reports that all get the
+same fallback picture.
+
+**Stand-ins (October 2026).** Every skin's holes under later rules are now filled from the
+nearest later version that has the picture, in art of the same kind, filtered to the skin's
+look (`tools/skins/fill_art.py`; `docs/forward-fill/`). With 5.0.5's rules,
+`skin-holes.js` finds no classic pictures left in mac12, mac2, mac3, mac4 and amiga. The
+256-colour skins (dos, mac2c, mac3c, mac4c, w95) still show 5.0.5's 25 colour rank
+pictures, on purpose: they already look like 256-colour pictures. palm, ios and android,
+ports of 5.0 itself, still show 5.0.5's own debris and rank pictures (and palm its enemy
+fleet dots): the same generation's art, not a later version's.
 
 ## What a full skin provides
 
@@ -46,14 +77,14 @@ page can use any names it likes.
 | Unknown planets | `unknown`, `soon`, `battle` | unexplored, fleet on its way, battle seen |
 | Novas | `nova0`–`4` (turning red), `nova12` (explosion), `nova18` (wreck) | Original and DOS rules |
 | Hats | `white0`–`3_0/1` (yours: profitable / good / so-so / hostile; man / woman), `bad0`–`15_0/1` (16 computer players) | owner shown on the planet; faces in the Players window |
-| Ships | `ships` (one sheet of parts), `part*`, `colony*`, `satellite*`, `dread*`, `tanker*`, `bio*`, `decoy*`, `eyeship*` | a ship's picture from its type and tech |
+| Ships | `ships` (one sheet of parts), `part*` (`part3_*` are the satellites), the bodies `colonyBody`, `tanker`, `dreadBody`, the whole-ship specials `dreadSpecial*`, `fighterSpecial*`, `satCritter*`, `bio*`, `eyeship` | a ship's picture from its type and tech (see "Classic ship pictures" below) |
 | Fleet markers | `dot0`–`4` × type 0–6 × count 0–3 | the little squares beside planets |
-| Map extras | `haloAlly`, `haloSel`, `sun` | ally underline, selection, galaxy centre |
-| Battle | `debris`, the planet picture in the `ships` sheet | battle replay |
+| Map extras | `haloAlly`, `haloBuddy`, `sun` | ally and best-buddy halos (over the planet), galaxy centre |
+| Battle | `debris`, `battlePlanet` | battle replay |
 | Message pictures | `m9000`–`m9051` | one per kind of report |
 | Big pictures | `p3030` (won), `p3040` (lost), `p6999` and `t7000`–`7017` (title animation) | |
 | Rank pictures | `assets/explore/01`–`25.jpg` | Original rules ranks |
-| Panel extras | `tempbar`, `g*`, `crit*` | planet panel bars and markers |
+| Unused | `tempbar` (a temperature bar), `g3550`–`g3555` (six frames of the cowboy planet glowing brighter) | nothing in the game draws these yet; a skin needn't provide them |
 | Sounds | `2000` good news, `2001` bad news, `3000`–`3003` battle, `4000`/`4001` fleet stays/goes, `5000`–`5003` messages and pacts, `6000`–`6002` explored (good/so-so/bad), `7001` next message, `7002` evacuate, `7003` scrap, `7006` build, `7016` out of range, `7013`–`7020` reports, `7021` won / eliminated / new rank, `7022`/`7023` title, `8000` meteors, `11111` end turn, `128` new game | |
 | Music | `assets/theme.mp3` | title screen (optional) |
 
@@ -69,6 +100,35 @@ give them pictures:
 - the End Turn clock button;
 - the toast pop-ups.
 
+### Classic ship pictures
+
+The game doesn't draw ships from the single-picture files below: it draws every ship straight from
+the sheet [`ships`](../assets/sprites/ships.png) with the rectangles in
+`js/skins/classic/ui.js` (`shipParts`, `specialShip`, `planetBattlePic`). The files are cut
+from the same places (`tools/extract/assets.py`) so they can be looked at and redrawn, and
+their names say what the game uses each one for. Only `debris` and the report icons `tanker` and `fighterSpecial1` are read by name. Several had wrong names until
+October 2026; the old name is in parentheses.
+
+| File | What the game draws it for |
+|---|---|
+| `part0_*` / `part1_*` / `part2_*` | engines (by Range + Speed − 8), hulls (by Shields), noses (by Weapons) |
+| `part3_*` | Satellites (by Weapons) |
+| [`colonyBody`](../assets/sprites/colonyBody.png) (was `satellite`) | the Colony Ship's body, between an engine and a nose |
+| [`tanker`](../assets/sprites/tanker.png) | the Tanker's body, between an engine and a nose |
+| [`dreadBody`](../assets/sprites/dreadBody.png) (new) | the Dreadnought's body, with three engines and three noses |
+| [`dreadSpecial0`](../assets/sprites/dreadSpecial0.png) (was `dread`) | a whole Dreadnought: Weapons over 30 |
+| [`dreadSpecial1`](../assets/sprites/dreadSpecial1.png) (new) | a whole Dreadnought: Weapons 8, Range 11–13, Mini over 1 |
+| [`fighterSpecial0`](../assets/sprites/fighterSpecial0.png) (was `bio2`) | a whole Fighter or Decoy: Weapons under 9, Speed over 5 |
+| [`fighterSpecial1`](../assets/sprites/fighterSpecial1.png) (was `decoy`) | a whole Fighter or Decoy: Weapons 12, Shields under 11 (also the Claude rules' Decoy report icon) |
+| [`bio0`](../assets/sprites/bio0.png), [`bio1`](../assets/sprites/bio1.png), [`bio3`](../assets/sprites/bio3.png) | a Biological: Weapons under 7; any other Weapons; Weapons 13–15 |
+| [`eyeship`](../assets/sprites/eyeship.png) | a whole Scout: Weapons 1 |
+| [`satCritter0`](../assets/sprites/satCritter0.png)–[`3`](../assets/sprites/satCritter3.png) (were `crit0`–`3`) | a whole Satellite: Weapons 5 and Shields 4–6; Weapons 15 and Shields 14–16; Weapons under 9 and Shields 10–14; Shields under 5 and Weapons 16–20 |
+| [`battlePlanet`](../assets/sprites/battlePlanet.png) (was `colony`) | the planet in a battle replay |
+| [`debris`](../assets/sprites/debris.png) | battle debris, and the rust laid over designs far behind your tech |
+
+Decoys have no picture of their own: they're drawn as Fighters. `python3 tools/doc-sprites.py`
+checks that every picture this page links to exists.
+
 ## dos (DOS 2.0)
 
 The DOS 2.0 game (and the identical Windows 3.1 2.0 game) has fewer pictures and sounds
@@ -81,8 +141,8 @@ than the Mac 5.0.5 game.
   add these to the DOS look.
 - **Novas:** none. The 2.0 game hasn't got novas yet, so there's no nova picture; with other
   rules a nova shows as a plain empty planet. To draw: the turning-red stages [`nova0`](../assets/sprites/nova0.png), [`nova1`](../assets/sprites/nova1.png), [`nova2`](../assets/sprites/nova2.png), [`nova3`](../assets/sprites/nova3.png), [`nova4`](../assets/sprites/nova4.png), the explosion [`nova12`](../assets/sprites/nova12.png) and the wreck [`nova18`](../assets/sprites/nova18.png).
-- **Ships added after 2.0** (Original and Claude rules only): Dreadnought [`dread`](../assets/sprites/dread.png), Tanker
-  [`tanker`](../assets/sprites/tanker.png), Biologicals [`bio0`](../assets/sprites/bio0.png), [`bio1`](../assets/sprites/bio1.png), [`bio2`](../assets/sprites/bio2.png), [`bio3`](../assets/sprites/bio3.png), Decoy [`decoy`](../assets/sprites/decoy.png), the eye ship [`eyeship`](../assets/sprites/eyeship.png).
+- **Ships added after 2.0** (Original and Claude rules only): Dreadnought [`dreadBody`](../assets/sprites/dreadBody.png) (and the specials [`dreadSpecial0`](../assets/sprites/dreadSpecial0.png), [`dreadSpecial1`](../assets/sprites/dreadSpecial1.png)), Tanker
+  [`tanker`](../assets/sprites/tanker.png), Biologicals [`bio0`](../assets/sprites/bio0.png), [`bio1`](../assets/sprites/bio1.png), [`bio3`](../assets/sprites/bio3.png), the eye ship [`eyeship`](../assets/sprites/eyeship.png). (A Decoy is drawn as a Fighter.) A converted Tanker or Dreadnought body can go between the skin's own engine and nose parts, so only the body is borrowed.
 - **Fleets:** the DOS game marks only your own fleets at a star, all with the same small
   icon (`s3114`), plus a white ring for satellites. It draws nothing for fleets in flight
   or for anyone else's fleets. The skin does the same, except that it keeps the icon on
@@ -98,9 +158,8 @@ than the Mac 5.0.5 game.
   aren't shown yet.
 - **Other pictures:**
   - the rank pictures, [`assets/explore/01`–`25.jpg`](../assets/explore/) (ranks came later);
-  - the alliance underline [`haloAlly`](../assets/sprites/haloAlly.png) (alliances came later);
+  - the ally halos [`haloAlly`](../assets/sprites/haloAlly.png), [`haloBuddy`](../assets/sprites/haloBuddy.png) (alliances came later);
   - battle [`debris`](../assets/sprites/debris.png);
-  - the temperature and gravity bars [`tempbar`](../assets/sprites/tempbar.png), [`g3550`](../assets/sprites/g3550.png), [`g3551`](../assets/sprites/g3551.png), [`g3552`](../assets/sprites/g3552.png), [`g3553`](../assets/sprites/g3553.png), [`g3554`](../assets/sprites/g3554.png), [`g3555`](../assets/sprites/g3555.png);
   - the alert picture `d3520` and the message-bar backdrop `d5030`.
 - **Hats for players 16–19:** the DOS game has 20 computer faces and the engine uses 16,
   so four DOS faces go unused.
@@ -190,6 +249,33 @@ icon choices (1.2 has the same set of icons as the DOS game).
   lines in English.
 - **Missing:** colour. 1.2's colour pictures were in a separate file, "TheHo F CPicts", which
   wasn't in the archive. 1.2 has 13 sounds (no "next message" click, no "Move 'em out!").
+- **Stand-ins for later versions' rules.** Played with 2.0's or later rules (5.0.5's above
+  all), the skin needs pictures 1.2 never had. Each comes from the nearest version that has
+  it, 1.2 → 2.0.1 → 3.0.1 → 4.0.5 (black and white) → 5.0.5, filtered to one bit, and lives
+  in [`assets/skins/mac12/sprites/fill/`](../assets/skins/mac12/sprites/fill/) as
+  `<version>-<name>` (`tools/skins/fill_art.py` makes them; `fillPic` in
+  `js/skins/mac3/ui.js` picks them in the same order). Today that's:
+  - from 4.0.5: the Dreadnought ([`mac4-p2263`](../assets/skins/mac12/sprites/fill/mac4-p2263.png)),
+    the Biological ([`mac4-p2261`](../assets/skins/mac12/sprites/fill/mac4-p2261.png)) and the
+    Tanker's body ([`mac4-p2758`](../assets/skins/mac12/sprites/fill/mac4-p2758.png), between
+    1.2's own engine and nose), all turned black on white; the report icons `i4024`
+    (population milestone) and `i3170` (hints);
+  - from 3.0.1: a star turning red or gone nova
+    ([`mac3-i1020`](../assets/skins/mac12/sprites/fill/mac3-i1020.png)), the ally's halo laid
+    over the planet ([`mac3-p506`](../assets/skins/mac12/sprites/fill/mac3-p506.png), small
+    `p507`; GUESS: 3.0.1 has these unused, the size of its selection ring), and 15 report
+    icons, by 3.0.1's own choice of picture for each report (alliances, supernovas, gifts,
+    surrender, Radical breakthroughs, luck, the chat scroll …);
+  - from 5.0.5, dithered to one bit: battle debris
+    ([`classic-debris`](../assets/skins/mac12/sprites/fill/classic-debris.png)), the 25 rank
+    pictures (`classic-rank01`–`25`) and its 52 report pictures (`classic-m9000`–`9051`), for
+    reports no Mac black-and-white version has a picture for (armageddon, lending rates,
+    Valdez, surrender gifts …).
+  - Decoys need none: they are drawn as Fighters, with 1.2's parts.
+
+  A report 1.2 has itself (its templates are 2.0's, `HO.REPORTS20`) keeps 1.2's picture,
+  so 1.2's own rules look as before. `node tools/skin-holes.js mac12` checks that no
+  classic picture is left (0 with every ruleset at handoff).
 
 ## mac2, mac2c (Mac 2.0.1, black and white and colour)
 
@@ -310,7 +396,7 @@ were made, so a Mac difference there would not show yet.
 - **A nova's wreck** is the classic picture [`nova18`](../assets/sprites/nova18.png), as in the
   w95 skin; the red frames 4.0 has for a star turning red and exploding (colour icons
   `i728`–`i741`, [`p750`](../assets/skins/mac4c/sprites/p750.png)–`p758`) aren't shown, only `i1403`.
-- **Not in 4.0 at all:** the alliance underline, rank pictures (4.0.5's Master Point List shows
+- **Not in 4.0 at all:** 5.0.5's own ally halos, rank pictures (4.0.5's Master Point List shows
   the w95 skin's cowboy planets in every skin), battle debris (classic), and for 5.0.5's special
   ships the classic pictures.
 - **Not extracted:** PICT 4010, new in 4.0.5's program: no art but the registration plate under
@@ -401,8 +487,8 @@ and 5.0.5: it has most of 5.0.5's features, so less is borrowed than for DOS.
 ### Sounds
 
 All 37 sounds are wired to their 4.0.5 events except: `ahem` and `checkout` (what triggers
-them is unclear), `bonus`, `timeup` and `hurryup` (the turn timer and network play aren't
-in the remake), `nocheat` (4.0.5's cheat detector) and `shipbp` (the 4.0.5 game never plays
+them is unclear), `hurryup` (network play isn't in the remake; the turn timer, built since,
+plays 5.0.5's 7004 and 7012, which this set maps by name), `nocheat` (4.0.5's cheat detector) and `shipbp` (the 4.0.5 game never plays
 it). There is no theme music.
 
 ## 5.0.5 entries for things 4.0.5 had
@@ -412,7 +498,8 @@ with the 4.0.5 rules (they fall back to general pictures):
 
 - the "your population now exceeds …" milestones and the "a big battle just took place"
   rumours (4.0.5: [`b4024`](../assets/skins/w95/sprites/b4024.png), [`b3119`](../assets/skins/w95/sprites/b3119.png));
-- the turn timer (the clock with time left, and its `bonus` / `timeup` sounds);
+- (the turn timer is built since: the time left is drawn on every skin's End Turn clock,
+  and its sounds, 7004 and 7012, are in the classic and iOS sets; see `docs/backward/`);
 - the ten 4.0.5 ranks (Red-Neck … Ho! Champion) and the Hall of Shame (every skin shows
   the 4.0.5 Master Point List's pictures);
 - the money and metal piles and the planet window's globe and landscapes (5.0.5 shows

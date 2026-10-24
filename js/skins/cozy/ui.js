@@ -30,7 +30,7 @@ for (const i of range(16)) names.push('bad' + i + '_0', 'bad' + i + '_1');
 for (const i of range(4)) names.push('white' + i + '_0', 'white' + i + '_1');
 for (const i of range(20)) names.push('nova' + i);
 for (const i of range(52)) names.push('m' + (9000 + i));
-names.push('unknown', 'soon', 'battle', 'haloAlly', 'p3000', 'p3030', 'p3040');
+names.push('unknown', 'soon', 'battle', 'haloAlly', 'haloBuddy', 'p3000', 'p3030', 'p3040');
 const images = {};
 for (const n of names) images[n] = n; // the skin's picture of the same name (missing ones are skipped)
 

@@ -20,6 +20,7 @@ const trunc = Math.trunc;
 const images = {
   p3030: 'Game_You_Won', p3040: 'Game_You_Lost', // the end of the game
   haloAlly: 'halo1', // an ally's colony (StarNode's halo)
+  haloBuddy: 'halo2', // a best buddy's (the cyan one)
 };
 // the report pictures: 5.0.5's message pictures 9000-9050 redrawn at 80 x 80
 // (+[MessageNode reportIcon:] builds "report_icon-%ld")

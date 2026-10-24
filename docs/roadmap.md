@@ -24,9 +24,10 @@ and the translation notice (`docs/translations-notes/`) are not done.
    decides whether to add its English as a text variant of the Amiga skin (the doc
    recommends that, and no new ruleset).
 2. Design: write prompts for Gemini for any art or design work, unless it can be done here.
-   Jake's art package `nostalgia-ho-art.zip` (made by another Claude to fill the missing
-   assets, `docs/missing-assets.md`) and browser skins `browser-looks-1.0.0.zip` (scratchpad
-   `incoming/`) come into this step: check and integrate them.
+   **Art part done** (October 2026): Jake's art package `nostalgia-ho-art.zip` is integrated
+   (stand-in pictures in every skin's `sprites/fill/`, marked as the remake's;
+   `docs/missing-assets.md`). Still open in this step: check and integrate the browser skins
+   `browser-looks-1.0.0.zip` (scratchpad `incoming/`).
 3. Optional passwords on exported games, for the original play-by-file experience (not for
    the hot seat): each player's name and password asked at their turn, with a note quoting
    the version's manual (WINHO.WRI, the Amiga's Briefspiel.dok and Netzwerk.dok, the Mac

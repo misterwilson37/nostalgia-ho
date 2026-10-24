@@ -20,6 +20,7 @@ const images = {
   // Armageddon device's (tFRM 3300)
   p3030: 'b9403', p3040: 'b9404',
   haloAlly: 'b3400', // an ally's colony: the gold halo (FUN_00014670)
+  haloBuddy: 'b3401', // a best buddy's: the blue one (unused until 5.0.5's own was drawn)
 };
 // report pictures: the same numbers as 5.0.5's (FUN_000292f8)
 for (let n = 9000; n <= 9052; n++) images['m' + n] = 'b' + n;

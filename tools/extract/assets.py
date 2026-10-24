@@ -42,10 +42,10 @@ for k in range(7):
 put('icecap',sheet.crop((116,60,156,100)))
 put('hot',sheet.crop((116,18,156,58)))
 for k in range(5): put(f'metal{k}',keywhite(sheet.crop((6+42*k,335,46+42*k,375))))
-def nomag(im):
-    a=np.array(im);m=(a[:,:,0]>200)&(a[:,:,1]<90)&(a[:,:,2]>200);a[m,3]=0;return trim(Image.fromarray(a))
-put('haloAlly',nomag(keywhite(sheet.crop((167,376,215,395)))))
-put('haloSel',nomag(keywhite(sheet.crop((167,395,215,414)))))
+def nomag(im):  # (and the sheet's purple divider, 148,64,191, at the right edge)
+    a=np.array(im);m=((a[:,:,0]>200)&(a[:,:,1]<90)&(a[:,:,2]>200))|((a[:,:,0]==148)&(a[:,:,1]==64)&(a[:,:,2]==191));a[m,3]=0;return trim(Image.fromarray(a))
+put('haloAlly',nomag(keywhite(sheet.crop((167,376,215,395)))))   # an ally's halo, yellow
+put('haloBuddy',nomag(keywhite(sheet.crop((167,395,215,414)))))  # a best buddy's, cyan (once misnamed 'haloSel')
 put('tempbar',sheet.crop((101,17,111,80)))
 cx=[215,266,317,368];cy=[11,64,116,168,219,270,322,373]
 for r in range(8):
@@ -68,9 +68,30 @@ R=[(0,45),(45,82),(82,125),(125,166)]
 for r in range(4):
     for c in range(30):
         x=1+41*c;put(f'part{r}_{c}',ships.crop((x,R[r][0],x+41,R[r][1])))
-big={'tanker':(1,166,66,208),'satellite':(67,166,137,221),'dread':(482,166,687,255),'colony':(1,222,63,284),'decoy':(70,255,268,313),
- 'bio0':(1,322,119,358),'bio1':(716,167,873,220),'bio2':(692,227,890,277),'bio3':(714,279,891,338),'eyeship':(270,237,365,287),
- 'crit0':(121,321,159,359),'crit1':(162,321,201,358),'crit2':(202,320,242,360),'crit3':(244,322,282,359),'debris':(900,166,1188,304)}
+# The sheet's whole pictures, cut out one by one so they can be looked at and
+# redrawn. The game itself never reads these files: it draws every ship
+# straight from the sheet with the rectangles in js/skins/classic/ui.js
+# (shipParts, specialShip, planetBattlePic). The names say what the game uses
+# each one for. The first eleven are the crops these files always had (the
+# game's rectangles are a pixel or two bigger); dreadBody and dreadSpecial1
+# are cut with the game's own rectangles.
+big={'tanker':(1,166,66,208),          # the Tanker's body (engine and nose added)
+ 'colonyBody':(67,166,137,221),        # the Colony Ship's body (once misnamed 'satellite')
+ 'battlePlanet':(1,222,63,284),        # a planet in a battle (once misnamed 'colony')
+ 'dreadBody':(138,165,269,253),        # the Dreadnought's body (3 noses and 3 engines added)
+ 'dreadSpecial0':(482,166,687,255),    # Dreadnought, Weapons over 30 (once misnamed 'dread')
+ 'dreadSpecial1':(270,165,480,235),    # Dreadnought, Weapons 8, Range 11-13, Mini over 1
+ 'fighterSpecial0':(692,227,890,277),  # Fighter or Decoy, Weapons under 9, Speed over 5 (once misnamed 'bio2')
+ 'fighterSpecial1':(70,255,268,313),   # Fighter or Decoy, Weapons 12, Shields under 11 (once misnamed 'decoy')
+ 'bio0':(1,322,119,358),               # Biological, Weapons under 7 (the squid)
+ 'bio1':(716,167,873,220),             # Biological, any other Weapons (the worm)
+ 'bio3':(714,279,891,338),             # Biological, Weapons 13-15 (the cow-fish)
+ 'eyeship':(270,237,365,287),          # Scout, Weapons 1
+ 'satCritter0':(121,321,159,359),      # Satellite, Weapons 5, Shields 4-6 (once 'crit0')
+ 'satCritter1':(162,321,201,358),      # Satellite, Weapons 15, Shields 14-16 (once 'crit1')
+ 'satCritter2':(202,320,242,360),      # Satellite, Weapons under 9, Shields 10-14 (once 'crit2')
+ 'satCritter3':(244,322,282,359),      # Satellite, Shields under 5, Weapons 16-20 (once 'crit3')
+ 'debris':(900,166,1188,304)}          # battle debris; also the rust laid over old designs
 for k,b in big.items(): put(k,ships.crop(b))
 # pictures
 def pic(i,key,white=False):

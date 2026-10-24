@@ -161,7 +161,7 @@ const RADICALS = [
   } },
   { id: 'decoy', w: 5, ok: (G, p) => !p.hasDecoy, go: (G, p) => {
     p.hasDecoy = true; const d = findOrCreateDesign(G, p, { type: 'decoy', R: p.tech.range, V: p.tech.speed, W: 1, S: 1, M: 1 }); d.free = true;
-    return ['Your Radical engineers have built a Decoy: a cardboard starship with a really convincing paint job. It can’t shoot, but enemy gunners can’t tell. It can’t stop anyone from colonizing, either.', 'decoy'];
+    return ['Your Radical engineers have built a Decoy: a cardboard starship with a really convincing paint job. It can’t shoot, but enemy gunners can’t tell. It can’t stop anyone from colonizing, either.', 'fighterSpecial1'];
   } },
   { id: 'cloak', w: 3, ok: (G, p) => !p.cloak, go: (G, p) => {
     p.cloak = true;

@@ -144,7 +144,7 @@ If you do Step 2, nothing else changes here. If you don't, add this to
   lateArrival, waypoints, luck, supernova, yearsPerTurn` are on.
   `armageddon` is off, and `dip` is not set: neither is in the 5 manual.
 - **Skin art:** message icons `m9000`–`m9051`, `p3000`/`p3030`/`p3040`,
-  `hot`, `icecap` and `decoy` as the message `icon`. The nova look comes from
+  `hot`, `icecap` and `fighterSpecial1` (once named `decoy`) as the message `icon`. The nova look comes from
   the skin's `novaLook` (`s.nova` 10–209 reddening, then the year it blew).
 - **Classic sounds:** 2000, 2001, 3000–3003, 5001, 5003, 7003, 7004, 7007,
   7013, 7019, 7020, 7021, 7027, 8000 and 11111.

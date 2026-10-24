@@ -22,7 +22,9 @@ const I = (n) => P + 'i' + n, PIC = (n) => P + 'p' + n;
 // 5.0.5, whose numbers the remake plays by, so each of its files is also
 // "m<number>" (SOUNDS.mac4 in js/skins.js)
 const M = (n) => 'm' + n;
+const fillNames = (name) => ['mac4', 'mac4c', 'classic'].map(v => 'fill/' + v + '-' + name); // stand-ins (js/skins/dos HOFILL)
 const images = {
+  debris: fillNames('debris'), nova18: fillNames('nova18'), // stand-ins: only 5.0.5 has these (tools/skins/fill_art.py)
   p3030: 'p3530', p3040: 'p3540', // game won, lost
   white0_0: 'i1405', white0_1: 'i1905', // you, in the Players window
 };

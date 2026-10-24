@@ -64,10 +64,10 @@ const DOS_MAP = { 7001: 1000, 11111: 7000, 7006: 1000 };
 // buddy 7017, awww 7020, abandon 7002, scrap 7003, wow 7021, explode 3003
 const MAC4_MAP = {
   5001: 7017, 5002: 7020, 5003: 2001, // pacts and chat
-  7004: 7001, 7006: 7001, 7007: 2000, 7013: 7001, 7014: 7001, 7015: 7001, 7016: 4000, 7017: 7001,
+  7004: 7004, 7006: 7001, 7007: 2000, // (7004 bonus time and 7012 time's almost up: 4.0's own, same numbers, the turn timer) 7013: 7001, 7014: 7001, 7015: 7001, 7016: 4000, 7017: 7001,
   7018: 7001, 7019: 2000, 7020: 2001, 8000: 3003, 128: 4001, 7022: null, 7023: null,
   11111: 7000, // "New Turn", which the Windows one hasn't got: played at End Turn, as 3.0.1's 7000
-  7005: null, 7008: null, 7009: null, 7010: null, 7011: null, 7012: null, 7024: null, 10000: null,
+  7005: null, 7008: null, 7009: null, 7010: null, 7011: null, 7012: 7012, 7024: null, 10000: null,
 };
 for (const n of [2000, 2001, 3000, 3001, 3002, 3003, 4000, 4001, 5000, 5001, 5002, 5003, 6000, 6001, 6002,
   7000, 7001, 7002, 7003, 7004, 7005, 7006, 7007, 7008, 7009, 7010, 7011, 7012, 7013, 7014, 7015, 7016, 7017,
@@ -106,7 +106,7 @@ const SOUNDS = {
     4000: 'whoa', 4001: 'hyahh', // fleet stays / goes
     5000: 'message', 5001: 'buddy', 5002: 'awww', 5003: 'shucks', // messages and pacts
     6000: 'goodmmm', 6001: 'bad', 6002: 'medex', // exploring: good, worthless, so-so
-    7001: 'click', 7002: 'abandon', 7003: 'scrap', 7004: 'click', 7006: 'click', 7007: 'burst',
+    7001: 'click', 7002: 'abandon', 7003: 'scrap', 7004: 'bonus', 7006: 'click', 7007: 'burst', 7012: 'timeup', // (the turn timer's)
     7013: 'click', 7014: 'click', 7015: 'click', 7016: 'whoa', 7017: 'click', 7018: 'click', 7019: 'burst',
     7020: 'shucks', 7021: 'wow', 8000: 'explode', 128: 'hyahh', 11111: null, 7022: null, 7023: null,
   } },

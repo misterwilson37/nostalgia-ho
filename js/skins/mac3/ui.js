@@ -24,7 +24,13 @@ const v12 = window.HOMAC_VERSION === '1.2';
 // js/skins/mac2: 2.0.1 (1992), between the two, with 1.2's icons and big ship pictures
 const v2 = !!window.HOMAC2;
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+// Stand-ins (tools/skins/fill_art.py, window.HOFILL in js/skins/dos/ui.js):
+// a picture this version hasn't got, from the nearest later version that
+// has it. fillNames is HOFILL.names (needed before that file has loaded).
+const fillNames = (name) => ['mac12', 'mac2', 'mac2c', 'mac3', 'mac3c', 'mac4', 'mac4c', 'w95', 'classic'].map(v => 'fill/' + v + '-' + name);
+const fillPic = (IMG, name) => window.HOFILL.pic(IMG, name);
 const images = {
+  debris: fillNames('debris'), nova18: fillNames('nova18'), // stand-ins: only 5.0.5 has these
   p3030: 'p3530', p3040: 'p3540', // won, eliminated
   white0_0: 'i1000', white0_1: 'i1500', // you, in the Players window
 };
@@ -70,25 +76,40 @@ window.HOTHEME_OVER = {
   endTurnKey: '⌘T',
   // 1.2's black-on-white ship pictures are drawn on a white battle screen
   battleBg: v12 ? '#fff' : undefined,
+  // 3.0.1 on picks its own report pictures (messageLook below); only the 2.0
+  // skins (1.2, 2.0.1) take later versions' for reports they never had
+  cascadeReports: v12 || v2,
   endTurnPic: P + (v12 ? 'endturn' : 'p5500'), // "End Turn ⌘T" (1.2's own says "Fin Tour"; endturn is 3.0.1's)
   // Ship pictures: engine, hull and nose side by side, as in the DOS game,
   // but 40x40 parts (2600 + the DOS part number less 100), shown twice the size.
   shipPic(d, IMG) {
     const big = v12 || v2; // 1.2 and 2.0.1 have the 81x76 parts (2100 + n) too
     const part = (n) => IMG[P + 'p' + ((big ? 2100 : 2600) + n)];
-    let parts;
-    if (d.type === 'satellite') parts = [part(301 + clamp(d.W - 1, 0, 25))];
-    else if (d.type === 'scout' || d.type === 'fighter' || d.type === 'colony') {
+    const w = big ? 81 : 80, h = big ? 76 : 80;
+    const fill = (n) => { const k = fillNames('p' + n).map(x => P + x).find(x => IMG[x]); return k ? IMG[k] : null; }; // (stand-ins only: these are 4.0.5's numbers, and 2.0.1's and 3.0.1's p2758 is a globe)
+    // Dreadnoughts and Biologicals (4.0's): one 120x40 picture, twice the size
+    const bg = () => part(0) && part(0).width ? window.HOFILL.partBg(part(0)) : null; // the skin's ship background
+    if (d.type === 'dread' || d.type === 'bio') {
+      const im = fill(d.type === 'dread' ? 2263 : 2261);
+      return im && im.width ? window.HOFILL.wholeShip(im, h, bg()) : null;
+    }
+    let parts, body = null; // body: a 40x40 middle part (4.0's Tanker's), drawn twice the size
+    if (d.type === 'tanker') {
+      body = fill(2758);
+      if (!body || !body.width) return null;
+      parts = [part(clamp(d.R + d.V - 8, 0, 23)), body, part(250 + clamp(d.W - 1, 0, 29))];
+    } else if (d.type === 'satellite') parts = [part(301 + clamp(d.W - 1, 0, 25))];
+    else if (d.type === 'scout' || d.type === 'fighter' || d.type === 'decoy' || d.type === 'colony') { // a Decoy looks like a Fighter
       if (d.type !== 'colony' && d.W === 12 && d.S === 12 && d.R > 8 && d.R < 12) parts = [part(151), part(152), part(153)];
       else if (d.type !== 'colony' && d.W === 15 && d.S === 15 && d.R > 11 && d.R < 15) parts = [part(154), part(155), part(156)];
       else parts = [part(clamp(d.R + d.V - 8, 0, 23)), d.type === 'colony' ? part(150) : part(99 + clamp(d.S - 1, 0, 25)), part(250 + clamp(d.W - 1, 0, 29))];
     } else return null;
     if (parts.some(im => !im || !im.width)) return null;
-    const w = big ? 81 : 80, h = big ? 76 : 80;
     const c = document.createElement('canvas'); c.width = parts.length * w; c.height = h;
     const x = c.getContext('2d');
     x.imageSmoothingEnabled = false;
-    parts.forEach((im, i) => x.drawImage(im, i * w, 0, w, h));
+    if (body && bg()) { x.fillStyle = bg(); x.fillRect(0, 0, c.width, c.height); } // (the body's surroundings may be see-through)
+    parts.forEach((im, i) => im === body ? x.drawImage(im, i * w + (w - 80) / 2, (h - 80) / 2, 80, 80) : x.drawImage(im, i * w, 0, w, h));
     return c;
   },
   // Report pictures, as 3.0.1 picks them (GetIconID @161216: by report
@@ -96,27 +117,9 @@ window.HOTHEME_OVER = {
   // not listed are the DOS skin's choice. 3161 (the scroll) is for chat.
   messageLook(m, cur, ctx) {
     const look = window.HOTHEME.base.messageLook(m, cur, ctx);
-    const t = String(m.text || ''), me = ctx.G.players[ctx.ME];
-    const ICONS = [
-      [/Radical researchers|mining consortium|weather patterns|ship technicians|black and white to colou?r|hardware problems|already are running in colou?r/, 3105],
-      [/not receiving sufficient funds|not spending any money on (technology|research)|Ship money is being used|no money to spend|borrow more ship money|enough money! You.re neglecting/, 4013],
-      [/never become profitable|computer bug/, 3112],
-      [/baby boom/i, 4017],
-      [/meteor shower|shock wave from the supernova/, 4015],
-      [/gone supernova|armageddon!|armageddon device was activated|half of the stars/i, 3118],
-      [/has offered to ally|You have offered to ally/, 3164],
-      [/no longer wants? to ally/, 3163],
-      [/formed an alliance|alliance with .* is gone/, 3160],
-      [/energy emanating/, 3119],
-      [/given you \$|You just gave .* \$/, 3110],
-      [/given you [\d,]+ metal|You just gave .* metal|archaeologists/, 3162],
-      [/has just surrendered/, 4016],
-      [/climatologists/, 1001],
-      [/generals are now smarter/, 3142],
-    ];
-    for (const [re, n] of ICONS) if (re.test(t)) return Object.assign({}, look, { icon: P + 'i' + n });
-    if (/^You have just surrendered|^You have abandoned|has revolted|people have revolted|sociologists|spies have stolen|alliance will win/.test(t)) return Object.assign({}, look, { icon: P + 'i' + (me.female ? 1500 : 1000) });
-    if (m.chat) return Object.assign({}, look, { icon: P + 'i3161' });
+    const n = window.HOFILL.look301(m, String(m.text || '')), me = ctx.G.players[ctx.ME];
+    if (n === 'own') return Object.assign({}, look, { icon: P + 'i' + (me.female ? 1500 : 1000) });
+    if (n) return Object.assign({}, look, { icon: P + 'i' + n });
     return look;
   },
   // the title screen: 3.0.1's credits picture
@@ -140,7 +143,7 @@ window.HOTHEME_OVER = {
     const l = doc.querySelector('#menubar .logo'); if (l) l.textContent = 'Ho! 3.0.1';
   },
 };
-if (v12) { delete window.HOTHEME_OVER.starLook; delete window.HOTHEME_OVER.messageLook; } // 1.2 has only the DOS game's icons
+if (v12) { delete window.HOTHEME_OVER.starLook; delete window.HOTHEME_OVER.messageLook; } // 1.2 has only the DOS game's icons (and stand-ins: js/skins/dos)
 // js/skins/mac2 (2.0.1, 1992): 1.2's icons, which are the DOS game's, so the DOS
 // skin's planets and report pictures, and 2.0's own pictures, sounds and hooks
 if (v2) { delete window.HOTHEME_OVER.starLook; delete window.HOTHEME_OVER.messageLook; Object.assign(window.HOTHEME_OVER, window.HOMAC2); }
