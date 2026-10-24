@@ -1605,9 +1605,13 @@ function dragRoute(cx, d) {
   cx.save();
   cx.strokeStyle = '#ffffff'; cx.lineWidth = 1; cx.lineCap = 'butt';
   for (const k of [-1, 1]) { cx.beginPath(); cx.moveTo(d.x1 + nx * k * 1.2, d.y1 + ny * k * 1.2); cx.lineTo(d.x2 + nx * k * 1.2, d.y2 + ny * k * 1.2); cx.stroke(); }
+  // each stroke long and doubled like the line itself (Jake: the original's were "pretty beefy")
   const chevron = (x, y, vx, vy) => {
-    const L = 7, a = 0.62;
-    for (const s of [-1, 1]) { const c = Math.cos(a * s), sn = Math.sin(a * s); cx.beginPath(); cx.moveTo(x, y); cx.lineTo(x - L * (vx * c - vy * sn), y - L * (vx * sn + vy * c)); cx.stroke(); }
+    const L = 22, a = 0.7;
+    for (const s of [-1, 1]) {
+      const c = Math.cos(a * s), sn = Math.sin(a * s), ex = -(vx * c - vy * sn), ey = -(vx * sn + vy * c);
+      for (const k of [-1, 1]) { const ox = -ey * k * 1.2, oy = ex * k * 1.2; cx.beginPath(); cx.moveTo(x + ox, y + oy); cx.lineTo(x + L * ex + ox, y + L * ey + oy); cx.stroke(); }
+    }
   };
   if (d.ok) { chevron(d.x2, d.y2, ux, uy); chevron(d.x1, d.y1, -ux, -uy); }
   if (d.turns != null) { cx.font = TH().mapFont ? TH().mapFont() : '16px HoFont11, sans-serif'; cx.textAlign = 'left'; cx.textBaseline = 'alphabetic'; cx.fillStyle = '#ffffff'; cx.fillText(String(d.turns), (d.x1 + d.x2) / 2 + 3, (d.y1 + d.y2) / 2 - 4); } // (beside the line's middle, as captures 47 and 48)
