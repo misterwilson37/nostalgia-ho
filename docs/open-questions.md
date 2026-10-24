@@ -242,8 +242,10 @@ Where a browser can't do what the original did, or the remake had to pick.
 
 - A fleet scrapped in hyperspace is reported at "star −1", read from the galaxy header
   (Mac 2.0.1 and 1.2: one byte, the 18th player slot's home star number, as a character).
-  For a number below 32 the remake shows a box (the missing-character symbol); we don't
-  know what Geneva 9 drew for those codes on the real Macs.
+  For a number below 32 the remake shows a box, the missing-character symbol. Checked
+  (October 2026) in System 7.0.1's own Geneva 9 (NFNT 5415 in the System file): codes 17
+  to 20 have no glyph, so QuickDraw drew the font's missing-character symbol, a 6 x 7 empty
+  box, as the remake does.
 - Fix Spending's steps are shown in a small window with Next (the originals used the
   message bubble).
 - **The remake's own translations**, marked in the Language list: French for 2.0 (1.2F's

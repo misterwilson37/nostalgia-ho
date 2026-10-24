@@ -5,39 +5,36 @@ Delta Tao, in `docs/open-questions.md`, "Unfinished").
 
 ## The queue (kept complete; Jake's order, October 2026)
 
-**In progress, in this order:**
-1. 5.0.5's Preferences window in its own words (PPob 139); the remake's extras below a line.
-2. 4.0.5's radical research window: its 5-minute timer (Windows dialog 348; the Mac if it has one).
-3. You Won in every version: 5.0.5 opening on its report, Windows 4.0.5's real words and
-   picture, and the windows 1.2, 2.0, 3.0.1, the Palm and iOS/Android had but the remake lacks.
-4. The Amiga skin from Jake's real-Amiga captures (`docs/amiga-skin.md`, "Real-Amiga
-   captures"): white menus, the ASL requester, cursor, toggles, routes, ticks, icons, warning,
-   busy pointer, saving panel, movable windows.
+**Done (October 2026):** 5.0.5's Preferences in its own words; 4.0.5's radical window
+closing itself after 5 minutes; You Won in every version; You Lost; Give Money/Metal.
 
-**Then:**
-5. Spaceward Ho! 2.1 for the Amiga: the German 2.1 (both disks) and the 1995-06-06 disk 1
+**In progress:** the Amiga skin from Jake's real-Amiga captures.
+
+**Next, in Jake's order (October 2026):**
+1. iOS's own Preferences window.
+2. The Palm's own Preferences window.
+3. Mac 4.0.5's floating windows (Tech Spending, Report, Chat; Window menu: Zoom, Hide
+   Information, Clean Up Windows).
+4. Spaceward Ho! 2.1 for the Amiga: the German 2.1 (both disks) and the 1995-06-06 disk 1
    ("[h WT]", likely English, hacked), kept unopened in the scratchpad's `amiga21/zips`.
-   Unpack, compare with 2.0 (rules, text, windows, art), and add 2.1 as its own version if it
-   differs; check what the hack changed.
-6. Mac 4.0.5's floating windows (Tech Spending, Report, Chat; Window menu: Zoom, Hide
-   Information, Clean Up Windows). Optional.
-7. The Palm's and iOS's own Preferences windows, if job 1 leaves them.
-8. Optional passwords on exported games, for the original play-by-file experience: the
-   originals asked each player's name and password at their turn (1.2 to 3.0.1; the Amiga's
-   "Spieleintrag"). Not for the hot seat, which stays as it is (Jake: players share directly).
-   An exported game could carry each player's password, asked when the game is opened, with a
-   note quoting the version's own manual on it (WINHO.WRI for 2.0, the Amiga's
-   Briefspiel.dok and Netzwerk.dok, the Mac manuals where we have them).
-9. Art the older skins borrow from classic for later rulesets (`docs/missing-assets.md`):
-   novas, Dreadnoughts, Biologicals and so on in each version's style, and the DOS battle
-   sparks. Creative work, optional.
-10. Translating the long English-only texts (version notes, patch notes, Full Hoedown list,
-    manuals; about 70,000 characters a language). Optional.
-11. A home-screen (apple-touch) icon per skin; today every skin's is the Android one.
+   Compare with 2.0 and add 2.1 as its own version if it differs.
+5. Translating the English-only texts: Jake's package
+   `nostalgia-ho-notes-fr-de-es-tr-and-manuals_1.zip` (scratchpad `incoming/`) has the
+   manuals converted from PDF to HTML and the notes, translated into French, German,
+   Spanish and Turkish. Check and add.
+6. Design: write prompts for Gemini for any art or design work, unless it can be done here.
+   Jake's art package `nostalgia-ho-art.zip` (made by another Claude to fill the missing
+   assets, `docs/missing-assets.md`) and browser skins `browser-looks-1.0.0.zip` (scratchpad
+   `incoming/`) come into this step: check and integrate them.
+7. Optional passwords on exported games, for the original play-by-file experience (not for
+   the hot seat): each player's name and password asked at their turn, with a note quoting
+   the version's manual (WINHO.WRI, the Amiga's Briefspiel.dok and Netzwerk.dok, the Mac
+   manuals).
+8. Last: a home-screen (apple-touch) icon per skin, the icon a phone shows when the site is
+   added to its home screen; today every skin's is the Android one.
 
 **Online, outside the code:**
-12. A real two-player online game (a private window as a guest is the second player), and
-    fixes from it.
+12. Two-player online games work (Jake, October 2026).
 13. Make sure the latest `firestore.rules` is published (it gained users/{uid}/prefs).
 14. Optional: serve sign-in from spacewardho.com (Firebase Hosting) so Google's screen stops
     naming nostalgia-ho.firebaseapp.com; server-side turns (Cloud Functions, Blaze plan) would
@@ -45,7 +42,7 @@ Delta Tao, in `docs/open-questions.md`, "Unfinished").
 
 **Waiting on others:**
 15. Delta Tao (Joe): the questions in `docs/open-questions.md` section 1.
-16. A real Mac: what Geneva 9 drew for character code 17 (2.0's hyperspace report).
+16. Settled: Geneva 9 drew its missing-character box for code 17 (System 7.0.1's Geneva).
 17. Files not in hand: 1.2F's colour pictures file; the German DOS 2.0's disk 2 (optional:
     its pictures and sounds are very likely the English DOS ones).
 18. A real Amiga, optional: the sizing gadget held, a battle.
