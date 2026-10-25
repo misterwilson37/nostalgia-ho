@@ -193,7 +193,7 @@ const hall = Object.assign({}, W.hall, { rank, date, loser: () => 'Loser:' });
 // 4.0.5's list without the Windows build's own slips: the Ship Types
 // window's refund, the rank past 1,000,000 points, the Hall of Fame's year,
 // the missing colon and the technology names are right on the Mac (above).
-const MAC_SLIPS = ['poorestOut', 'designs30', 'refuelCheck', 'scrapRange', 'star0', 'keptStarNames'];
+const MAC_SLIPS = ['poorestOut', 'designs30', 'refuelCheck', 'scrapRange', 'star0', 'keptStarNames', 'translations'];
 const FIXES = W.fixes.filter(f => MAC_SLIPS.includes(f.id)).concat([
   { id: 'welcomeVersion', title: 'The welcome report gives the right version',
     text: 'The first report of a game said “Spaceward Ho! Version 4.0.3”: the string was never updated for 4.0.5. The patch says 4.0.5.' },

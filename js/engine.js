@@ -146,7 +146,8 @@ function languages(rs) { return rs && Array.isArray(rs.languages) && rs.language
 function ownLanguage(rs) { return (rs && rs.ownLanguage) || 'en'; }
 // over.fix = { fixId: partial } holds the unofficial patch's corrections to a
 // translation's own slips (docs/fixes.md): with the patch on and the fix listed,
-// the partial is laid over the language (a say's reports go in front of its own)
+// the partial is laid over the language (a say's reports go in front of its own,
+// its words over its own; a later fix over an earlier one)
 function inLanguage(rs, lang, patch) {
   const over = lang && rs.lang && rs.lang[lang];
   if (!over) return rs;
@@ -158,7 +159,7 @@ function inLanguage(rs, lang, patch) {
   if (key !== lang) for (const id of Object.keys(over.fix)) {
     if (!fixes(rs).some(f => f.id === id)) continue;
     const p = over.fix[id];
-    o = Object.assign({}, o, p, p.say ? { say: Object.assign({}, o.say, p.say, { reports: (p.say.reports || []).concat(o.say.reports || []) }) } : {});
+    o = Object.assign({}, o, p, p.say ? { say: Object.assign({}, o.say, p.say, { reports: (p.say.reports || []).concat(o.say.reports || []), words: Object.assign({}, o.say.words, p.say.words) }) } : {});
   }
   // the ruleset with the language's words over it; its own properties all kept
   // as they are, the ones it hides from the rulesets built on it too (5.0.5's
@@ -170,6 +171,14 @@ function inLanguage(rs, lang, patch) {
 
 // the game's ruleset in the version's own language
 const langRules = (G) => rules(G);
+// the interface's words of an official translation's windows, [[English, translation], ...],
+// for a game in a language whose version has them (3.0.1 in French: 3.0.1F's menus and
+// windows, rs.lang.fr.officialWindows); null otherwise. js/ui-lang.js puts them over
+// the remake's own words for the same English.
+function windowWords(G) {
+  const lang = G && G.opts && G.opts.lang;
+  return lang ? langRules(G).officialWindows || null : null;
+}
 function ownRules(G) { return RULESETS[G.rules] || rulesById(G.rules); }
 // name lists by kind: stars, men, women, ships (every class's)
 // (a ruleset without its own lists draws from DATA's, 5.0.5's)
@@ -338,6 +347,12 @@ function feature(G, name) { return !!(rules(G).features || {})[name]; }
 // fix. A saved game without G.opts.patch plays the version as released.
 // (A ruleset built with Object.assign over another must set its own fixes.)
 function fixes(rs) { return (rs && rs.fixes) || []; }
+// The patch's corrections of the French and Turkish translations (js/languages.js
+// builds them, rs.lang.fr.fix.translations; the interface's are js/ui-text.js, a
+// row's seventh element). Listed by every version that takes its French and
+// Turkish from the iOS game's (3.0.1, 4.0.5, 5.0.5, the Palm, iOS and Android).
+const TRANSLATIONS_FIX = { id: 'translations', title: 'The French and Turkish wording is put right',
+  text: 'The French and Turkish lines come from the iOS game’s translations, which have slips: a word left in English, a filling lost, a name run into its ending, a word misspelled. The patch shows the corrected wording, in the game’s reports and tips and in the remake’s menus and windows. It matters only when the game is played in French or Turkish.' };
 function fixed(G, id) { return !!(G && G.opts && G.opts.patch) && fixes(rules(G)).some(f => f.id === id); }
 // Full Hoedown (G.opts.hoedown, off unless chosen at New Game or in the Ho
 // menu): Delta Tao's own jokes at their most (js/hoedown.js, docs/hoedown.md).
@@ -1496,7 +1511,7 @@ const API = {
   DATA, SHIP_TYPES, TYPES: SHIP_TYPES, TECHS,
   BAR_SCALES, barScale, battleGroups, makeBattlePanel,
   registerRules, registerAI, rules, rulesById, aiOf, LANGUAGES, languages, ownLanguage, languageName, languageChoices,
- ownRules, gameName, ownName, setLanguage, say, saysIn, feature, RULESETS, fixes, fixed, hoedown, setHoedown, patchVersion,
+ ownRules, gameName, ownName, setLanguage, windowWords, say, saysIn, feature, RULESETS, fixes, fixed, TRANSLATIONS_FIX, hoedown, setHoedown, patchVersion,
   // [id, name] for the New Game window: the original games' rules by year of
   // release, then version ("2.0 (DOS and Windows 3.1, 1993)"); rulesets that
   // aren't an original game's (the remake's own) come last, by their label

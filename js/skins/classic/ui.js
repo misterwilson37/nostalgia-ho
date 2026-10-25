@@ -4235,7 +4235,9 @@ const fixList = (rs) => el('ul', docAttrs(fixLines(rs)), ...HO.fixes(rs).map(f =
 // language its Language menu has chosen (newGameDialog).
 const gameLang = (g) => (g && ((g.opts && g.opts.lang) || HO.ownLanguage(HO.ownRules(g)))) || 'en';
 const titleLang = () => UIL.pref.get() || 'en';
-function syncLang() { UIL.set(G ? gameLang(G) : titleLang()); }
+// (a game with the patch on shows the corrected wording of the official French and Turkish: HO.fixed, js/ui-text.js rows' seventh element;
+// 3.0.1 in French shows 3.0.1F's menus and windows: HO.windowWords)
+function syncLang() { UIL.set(G ? gameLang(G) : titleLang(), !!G && HO.fixed(G, 'translations'), G ? HO.windowWords(G) : null); }
 // the player chooses a language (the title screen's Language): the whole
 // interface changes at once, the choice is kept (and, signed in, sent to the
 // account: cloudPrefsUp); a game being played keeps its own

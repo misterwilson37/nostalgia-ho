@@ -2885,7 +2885,7 @@ E.registerRules('original', {
       text: 'When your interest was more than this turn’s money and all you could still borrow, a test written the wrong way round (a sign slip) put it all on Ship Savings, however deep in debt, so the global warming the game has a message for never happened. The patch compares it the right way round, as 4.0.5 did: then your planets warm or cool away from your temperature and one of your fleets is scrapped for lack of funds.' },
     { id: 'scrapRange', title: 'Ships sent home to be scrapped are routed with their own Range',
       text: 'When the computers sent obsolete ships and Tankers home to be scrapped, the program passed the fleet’s place in a list where the route finder wants its Range, so the routes it found could be wrong. The patch passes the Range.' },
-  ],
+  ].concat(E.TRANSLATIONS_FIX),
   ai: 'original',
   yearsPerTurn: 10,
   galaxySizes: SIZES,

@@ -99,6 +99,7 @@ const REQ_201 = {
   source: 'Changes for version 2.0.1 (Joe and Peter), on the Mac 2.0.1 disks',
 };
 // the languages the remake translated itself (docs/translations.md)
+const OFFICIAL_LANG = (what) => 'Language… also offers ' + what + '. It changes only words and names: the same game plays in every language.';
 const REMAKE_LANG = (what) => 'Language… also offers ' + what + ': the remake’s own translation, not an official one, and marked so in the list. It changes only words and names: the same game plays in every language.';
 // the remake's Spanish, for every version (docs/translations.md, "Spanish glossary")
 const SPANISH = (more) => REMAKE_LANG('Spanish (“Español (traducción del remake)”): there was never an official Spanish Spaceward Ho!, so every line of it is the remake’s, written in the official translations’ spirit (their words for the game’s things, the informal “tú”, the jokes kept); the names stay English' + (more || ''));
@@ -202,7 +203,8 @@ root.HOVERSIONS = {
       'Dip Into Savings takes a percentage of the most you may dip; 3.0.1 took an amount.',
       'Evacuate is 3.0.1’s Abandon: the colony is given up at End Turn, and pressing it again takes it back. The planet doesn’t show it as marked.',
       'Evacuating a star named Hope or Ship asks 3.0.1’s jokes (“Dost thou truly wish to abandon Hope? All is not yet lost!”, “Abandon Ship? …”), every time.',
-      REMAKE_LANG('French (“traduction du remake”) and Turkish (“yeniden yapımın çevirisi”): the official French and Turkish of the iOS game, and the French Mac 1.2’s for 3.0.1’s 2.0 lines (its Name a Star and Fix Spending among them), for every line 3.0.1 shares with them, with the remake’s own lines for the rest'),
+      OFFICIAL_LANG('French, the French Mac 3.0.1’s own text (Delta Tao and Upgrade Editions, 1993), shown as it was released: its reports, Name a Star, Fix Spending, the Hope and Ship jokes, Armageddon’s questions, and its menus and windows where the remake has them. The few lines it has no text for come from the iOS game’s French or the French Mac 1.2’s, or are the remake’s own'),
+      REMAKE_LANG('Turkish (“yeniden yapımın çevirisi”): the official Turkish of the iOS game for every line 3.0.1 shares with it, with the remake’s own lines for the rest'),
       REMAKE_LANG('German (“Übersetzung des Remakes”), forward from the German DOS 2.0: its official lines wherever the English is 2.0’s (the reports 2.0 already had, Name a Star, Fix Spending), and the remake’s German in its words for the rest'),
       SPANISH(),
     ],
@@ -260,7 +262,7 @@ root.HOVERSIONS = {
       'Evacuate is 4.0.5’s Abandon: the colony is given up at End Turn, and pressing it again takes it back.',
       'Evacuating a star named Hope or Ship asks 4.0.5’s jokes, every time; turning Armageddon on asks two questions, one of five and one of six.',
       'Hints are drawn by the browser’s random numbers; 4.0.5 used its own.',
-      REMAKE_LANG('French (“traduction du remake”) and Turkish (“yeniden yapımın çevirisi”): the official French and Turkish of the iOS game (and of the French Mac 1.2) for every line 4.0.5 shares with them, which is most of its reports, with the remake’s own lines for the rest (Armageddon’s questions, the Windows build’s own words)'),
+      REMAKE_LANG('French (“traduction du remake”) and Turkish (“yeniden yapımın çevirisi”): the official French and Turkish of the iOS game (and of the French Macs 3.0.1 and 1.2) for every line 4.0.5 shares with them, which is most of its reports, with the remake’s own lines for the rest (Armageddon’s questions in Turkish, the Windows build’s own words)'),
       REMAKE_LANG('German (“Übersetzung des Remakes”), forward from the German DOS 2.0: its official lines wherever the English is 2.0’s (the reports 2.0 already had, Name a Star), and the remake’s German in its words for the rest'),
       SPANISH(),
     ],
@@ -351,7 +353,7 @@ root.HOVERSIONS = {
       'Evacuate is 4.0.5’s Abandon: the colony is given up at End Turn, and pressing it again takes it back.',
       'Evacuating a star named Hope or Ship asks 4.0.5’s jokes, every time; turning Armageddon on asks two questions, one of five and one of six.',
       'Hints are drawn by the browser’s random numbers, and the four named stars a new galaxy takes are picked from the game’s seed; the Mac used its own random numbers.',
-      REMAKE_LANG('French (“traduction du remake”) and Turkish (“yeniden yapımın çevirisi”): the official French and Turkish of the iOS game (and of the French Mac 1.2) for every line 4.0.5 shares with them, which is most of its reports, with the remake’s own lines for the rest (Armageddon’s questions, the Mac’s own words)'),
+      REMAKE_LANG('French (“traduction du remake”) and Turkish (“yeniden yapımın çevirisi”): the official French and Turkish of the iOS game (and of the French Macs 3.0.1 and 1.2) for every line 4.0.5 shares with them, which is most of its reports, with the remake’s own lines for the rest (Armageddon’s questions in Turkish, the Mac’s own words)'),
       REMAKE_LANG('German (“Übersetzung des Remakes”), forward from the German DOS 2.0: its official lines wherever the English is 2.0’s (the reports 2.0 already had, Name a Star), and the remake’s German in its words for the rest'),
       SPANISH(),
     ],

@@ -450,6 +450,8 @@ rs.patchVersion = '1.2.9.1';
 rs.fixes = O.fixes.concat([
   { id: 'iosCharacters', title: 'The trademark sign and the bullet are shown',
     text: 'The game’s texts came from the Mac, where “™” and “•” are other bytes than on the iPhone, so the tech names showed “PowerPCª” and “Speedy Gonzalezª” and the curse read “#!$@*$&@¥ª!”. The patch shows “™” and “•”.' },
+  { id: 'iosFillings', title: 'Four French and Turkish reports put a word where a number goes',
+    text: 'The app filled each translated report’s blanks in the English sentence’s order, though the French and Turkish sentences take some in another order. So the French “You won a battle” report, and the Turkish “colony destroyed”, “survived an attack” and supernova shock-wave reports, showed a word where a number goes and the other way round. The patch fills each blank by its meaning; it matters only when the game is played in French or Turkish.' },
   { id: 'trSpiesReport', title: 'The Turkish spies’ report is its own report',
     text: 'In the Turkish version the report of stolen technological secrets is a copy of the line-of-credit report. The patch writes it out in Turkish (the remake’s wording); it matters only when the game is played in Turkish.' },
   { id: 'trLostWord', title: 'The Turkish colony-destroyed report translates “lost”',

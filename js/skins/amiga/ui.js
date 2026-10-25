@@ -1700,7 +1700,12 @@ document.addEventListener('keydown', (e) => {
 const menuWord = (label) => {
   if (typeof label !== 'string' || !de()) return label; // (in another language, the classic page's own words in it)
   const m = MENU_DE[label];
-  return m ? m[0] : label.replace(/…/g, '...'); // (HoFont has no "…": the Amiga writes three dots) // (the Amiga-keys are the Amiga's; the remake's keys stay its own)
+  if (m) return m[0];
+  // the remake's own items (Preferences…, Export this game…): its German (js/ui-text.js), looked up as the page
+  // writes it, with "…" ("..." too, as an earlier version wrote it), then written with three dots
+  // (HoFont has no "…": the Amiga writes three dots); the Amiga-keys are the Amiga's, the remake's keys stay its own
+  const g = window.HOUI ? HOUI.tr(label, 'de') : label;
+  return (g !== label ? g : window.HOUI ? HOUI.tr(label.replace(/\.\.\.$/, '…'), 'de') : label).replace(/…/g, '...');
 };
 // The skin's own preferences (the Optionen menu's toggles, kept in this browser)
 const OPTKEY = 'ho5.amiga.opts';

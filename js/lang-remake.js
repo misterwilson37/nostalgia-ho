@@ -15,6 +15,10 @@
 //         filling lost, a word left in English, another report's text): the
 //         remake's line is used instead in the remake's languages (the
 //         official one stays as it is in the version that shipped it)
+//   patch: an official line's (or the remake's line that keeps its wording) slips put
+//         right, English -> the corrected translation: shown when the game has the
+//         unofficial patch on (js/languages.js, the fix 'translations'; engine.js
+//         inLanguage), never by default. patchWords: the same for a whole filling.
 //   adapted: the version's English -> [the translation, the official line's
 //         English]: an official line's translation for a slightly different
 //         English, edited as little as the difference needs
@@ -34,14 +38,16 @@ fr: {
   // the patch's corrections (G.opts.patch): an official line's slips, kept in the default as
   // the official translation has them (Jake's rule: accuracy first), put right here.
   // English -> the corrected translation (docs/proofread-2026-10.md, "The patch table").
-  // Not read yet: js/languages.js is to lay it over the language as a fix (engine.js
-  // inLanguage, rs.lang[code].fix), as iOS's trLostWord is.
+  // Read by js/languages.js (the fix 'translations': engine.js inLanguage, rs.lang[code].fix, as
+  // iOS's trLostWord is), wherever the version shows the line.
   over: {},
   patch: {
     // iOS 37 left "You" in English and lost the counts' places
     'You %slost a battle at %s. You %slost %d of your ships. %s lost %d.': 'Vous%1$s avez perdu une bataille à %2$s. Vous%3$s avez perdu %4$d de vos vaisseaux. %5$s en a perdu %6$d.',
     // iOS spells the screen "Organiser Flotte"
     'Option-drag in Organize Fleets to split up ship piles.': 'Tirez avec la touche option dans "Organiser Flottes" pour séparer les groupes de vaisseaux.',
+    // 3.0.1F's Ship joke (DITL 3030): "Tous le monde"
+    'Abandon Ship? Abandon Ship! All hands abandon ship! Women and children first!': 'Abandonner le vaisseau? Abandonnez le vaisseau! Tout le monde abandonne le vaisseau! Les femmes et les enfants d\'abord!',
   },
   // adapted from official: a line whose English differs a little from one an
   // official translation has (a word, a clause, a number, a name): that
@@ -57,24 +63,16 @@ fr: {
     'Icons by your planet mean you have ships orbiting around it. Fleets are on the right; satellites are on the left.': ['Des icônes près d\'une planète signifient que vous y avez des vaisseaux en orbite. Les flottes sont à droite, les satellites à gauche.', 'Dots by your planet mean you have ships orbiting around it. Fleets are on the right; satellites are on the left.'],
     'The first person in the Enemies and Allies list is winning.': ['Le joueur le plus fort se trouve en tête de la liste Ennemis et Alliés.', 'The first person in the player list is winning.'],
     // ---- 4.0.5 (Windows and Mac) and 3.0.1 ----
-    '%s destroyed your colony at %s.  You lost %s of your ships. %s lost %s.  You lost %s people.': ['%s vous a vaincu à %s. Vous avez perdu %d de vos vaisseaux. %s en a perdu %d. Vous avez perdu %s habitant(s).', '%s destroyed your colony at %s. You %slost %d of your ships. %s lost %d. You lost %s people.'],
-    '%s survived an enemy attack from %s.  You lost %s of your ships.  %s lost %s.  You lost %s people.': ['%s a résisté à %s. Vous avez perdu %d de vos vaisseaux. %s en a perdu %d. Vous avez perdu %s habitant(s).', '%s survived an attack from %s. You %slost %d of your ships; %s lost %d. You lost %s people.'],
     'Play with the spending bars. Conquer the galaxy. Enjoy.': ['Modifiez les barres de dépenses. Partez à la conquête de la galaxie. Amusez-vous.', 'Play with the spending bars. Conquer the galaxy. Gain ranks to brag to your friends. Enjoy.'],
     'Click here to make this message go away.': ['Cliquez ici pour faire disparaître ce message.', 'Tap here to make this message go away. Tap on the End Turn button to complete the turn.'],
     'Good planets are close to 72 degrees.': ['Les belles petites planètes sont proches de 72 degrés.', 'Good planets are close to 72°F (20°C).'],
     'Spaceward Ho! Version 4.0.5 by Peter Commons.': ['Spaceward Ho! Version 4.0.5 par Peter Commons.', 'Spaceward Ho! Version 1.2 by Peter Commons.'],
     'Spaceward Ho! Version 4.0.3 by Peter Commons.': ['Spaceward Ho! Version 4.0.3 par Peter Commons.', 'Spaceward Ho! Version 1.2 by Peter Commons.'],
-    'Spaceward Ho! Version 3.0.1 by Peter Commons.': ['Spaceward Ho! Version 3.0.1 par Peter Commons.', 'Spaceward Ho! Version 1.2 by Peter Commons.'],
     'Your fleet of %s is waiting to refuel before it can continue on to %s.': ['Votre flotte de %s est en attente pour faire le plein avant de pouvoir continuer à %s.', 'Your %s is waiting to refuel before it can continue on to %s.'],
     'Wow! You won! You have conquered the galaxy. Congratulations!': ['Wow ! Vous avez gagné ! Vous avez conquis la galaxie. Félicitations !', 'Congratulations! You have conquered the galaxy!'],
     'Wow! You won! You and your allies have conquered the galaxy. Congratulations!': ['Wow ! Vous avez gagné ! Vous et vos alliés avez conquis la galaxie. Félicitations !', 'Congratulations! You have conquered the galaxy!'],
     '%s have just won the game.': ['%s viennent juste de gagner. Hi hi.', '%s has just won the game.'],
-    'Star names must be 2 to 7 characters long.': ['Le nom doit comprendre entre 2 et 7 lettres.', 'Star names must be 4 to 7 characters long.'],
     'Congratulations!  You won the game.  Game difficulty rating was %s.': ['Bravo! Vous avez gagné. La difficulté du jeu était de %s.', 'Congratulations! You have just won the game.'],
-    'Congratulations! You won the game.': ['Bravo! Vous avez gagné.', 'Congratulations! You have just won the game.'],
-    'Uh-oh!  Having to borrow more ship money to pay all your interest!': ['Oh-oh ! Devoir emprunter davantage sur l\'argent des vaisseaux pour payer vos intérêts...', 'Uh-oh! Having to borrow more to pay all your interest!'],
-    'Warning!  Ship money is being used to support %s.': ['Attention ! De l\'argent destiné à vos vaisseaux est utilisé pour soutenir %s.', 'Warning! Savings is being used to support %s.'],
-    'You just received %s metal from someone scrapping a fleet over %s.': ['Vous venez de recevoir %s unités de métal de quelqu\'un qui recyclait une flotte quelque part au-dessus de %s.', 'You just received %s metal from someone scrapping a fleet or from a battle over %s.'],
     '%s says , "#!$*@%$&!"': ['%s dit: “#!$*@%$&!”', '%s says, “#!$@*$&@•™!”'],
     'You said "!$@*$&@!" to %s.': ['Je crois bien que vous avez dit “!$@*$&@!” à %s...', 'You said “#!$@*$&@•™!” to %s.'],
   },
@@ -86,8 +84,6 @@ fr: {
     'There\'s a contextual menu in the map window for convenience.': 'Pour plus de commodité, la fenêtre de la carte a un menu contextuel.',
     'Hold down the option key and click planets to specify your fleet\'s path more exactly.': 'Maintenez la touche option enfoncée et cliquez sur des planètes pour préciser le trajet de votre flotte.',
     'Use the graph to see how well you\'re doing technology-wise vs. the other players.': 'Utilisez le graphique pour voir où en est votre technologie par rapport à celle des autres joueurs.',
-    // the Palm's "Ship" Evacuate question (5.0.5's two are the iOS game's, sprintf Templates 17, 35)
-    'Abandon Ship? Abandon Ship! All hands abandon ship! Women and children first!': 'Abandonner Ship ? Abandonnez le navire ! Tout le monde quitte le navire ! Les femmes et les enfants d\'abord !',
     // the remake's own line for a turn with no news (js/skins/classic/ui.js)
     'Year %d. Nothing much happened.': 'Année %d. Rien de spécial ne s\'est passé.',
     // ---- the Palm (5.0's code): its own hints, first messages and decoy ----
@@ -108,20 +104,6 @@ fr: {
     'A dot by a planet means you have ships in orbit there.': 'Un point près d\'une planète signifie que vous y avez des vaisseaux en orbite.',
     'Click and Drag from one star to another to move fleets.': 'Cliquez et tirez d\'une étoile à une autre pour déplacer vos flottes.',
     'Ship savings puts money away for shipbuilding.': 'L\'épargne des vaisseaux met de l\'argent de côté pour leur construction.',
-    'Sorry, but you have that fleet marked for the scrap heap.  it’s not going anywhere.': 'Désolé, mais cette flotte est marquée pour la ferraille. Elle ne va nulle part.',
-    // Windows' own curse ("#!$*@%$&!", "!$@*$&@!") in iOS's 49 and 65
-    // Armageddon's two questions (4.0.5, strings 299-309)
-    'Do you really want to launch the armageddon device?  It\'ll blow up half of the galaxy!': 'Voulez-vous vraiment déclencher Armageddon, l\'arme ultime ? Elle va faire sauter la moitié de la galaxie !',
-    'Do you really want to launch the armageddon device?  Isn\'t life too short as it is?': 'Voulez-vous vraiment déclencher Armageddon, l\'arme ultime ? La vie n\'est-elle pas déjà assez courte ?',
-    'Do you really want to launch the armageddon device?  I mean, you\'d probably win anyway; why take the chance?': 'Voulez-vous vraiment déclencher Armageddon, l\'arme ultime ? Vous gagneriez sans doute de toute façon ; pourquoi prendre le risque ?',
-    'Do you really want to launch the armageddon device?  Doing so decreases the difficulty score by half!': 'Voulez-vous vraiment déclencher Armageddon, l\'arme ultime ? Cela divise par deux la note de difficulté !',
-    'Do you really want to launch the armageddon device?  Odds are you\'ll blow yourself up!': 'Voulez-vous vraiment déclencher Armageddon, l\'arme ultime ? Il y a de fortes chances que vous sautiez vous-même !',
-    'Are you just doing this because you think you\'ll win but it\'s really late and so you want to go to bed?': 'Vous faites ça juste parce que vous pensez gagner, mais qu\'il est vraiment tard et que vous voulez aller vous coucher ?',
-    'Aren\'t you sure you really don\'t want to have nothing to do with not launching the armageddon device?': 'N\'êtes-vous pas sûr de ne vraiment pas vouloir n\'avoir rien à voir avec le non-déclenchement d\'Armageddon ?',
-    'You\'re just doing this \'cause you enjoy the ultimate feeling of power, aren\'t you???': 'Vous faites ça juste pour le plaisir de vous sentir tout-puissant, hein ???',
-    'If you do this, everyone will hate you!  It\'s such a sissy way to try to win, anyway.': 'Si vous faites ça, tout le monde va vous détester ! C\'est vraiment une façon de poule mouillée d\'essayer de gagner, de toute façon.',
-    'Now look, this is NO laughing matter.  You just might get yourself killed!': 'Écoutez, ce n\'est PAS une plaisanterie. Vous pourriez bien y laisser votre peau !',
-    'I get it.  You\'re losing big time and this is the only way you could possibly win!  That\'s it isn\'t it?': 'J\'ai compris. Vous êtes en train de perdre lamentablement et c\'est le seul moyen pour vous de gagner ! C\'est ça, hein ?',
   },
   words: {
     // iOS's "et vos alliés" (Misc Strings 39) with the space its reports need ("Vous%s avez perdu")
@@ -138,8 +120,8 @@ tr: {
   // the patch's corrections (G.opts.patch): an official line's slips, kept in the default as
   // the official translation has them (Jake's rule: accuracy first), put right here.
   // English -> the corrected translation (docs/proofread-2026-10.md, "The patch table").
-  // Not read yet: js/languages.js is to lay it over the language as a fix (engine.js
-  // inLanguage, rs.lang[code].fix), as iOS's trLostWord is.
+  // Read by js/languages.js (the fix 'translations': engine.js inLanguage, rs.lang[code].fix, as
+  // iOS's trLostWord is), wherever the version shows the line.
   over: {},
   patch: {
     // iOS's credits

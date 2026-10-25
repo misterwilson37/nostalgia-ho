@@ -16,6 +16,15 @@
 //    entry with en.lproj's; the Android build's lists are the same), and the
 //    help pages. docs/ios-findings.md, "Languages".
 //
+//  - Mac 3.0.1 ('301'): French from the French Mac 3.0.1 (3.0.1F: its STR# lists and
+//    windows, paired with the English 3.0.1's by resource and index). docs/301fr-findings.md.
+//
+// The patch (docs/proofread-2026-10.md, docs/fixes.md "Translations"): the corrections of an
+// official translation's wording are never the default; HOLANG_REMAKE[lang].patch and
+// .patchWords become rs.lang[code].fix.translations (patchFix), and iOS's own (BY_PLACE,
+// trLostWord, trSpiesReport) its fix map: engine.js inLanguage lays them over the language
+// when the game has the patch on and the version's rs.fixes lists them.
+//
 // The reports are put in the game's language when shown (engine.js say): the
 // rules and the skins keep reading them in the version's own words.
 (function (root) {
@@ -205,6 +214,73 @@ for (const rs of [DOS, MAC20]) {
 // own words only where 2.0 says something 1.2F doesn't (marked 'remake').
 // docs/translations.md.
 const FR12 = HOLANG.mac12Fr;
+// ---------- 3.0.1F: the official French 3.0.1 ----------
+// The French Mac 3.0.1 ("The Ho! 3 F", Delta Tao and Upgrade Editions, 1993;
+// docs/301fr-findings.md). Its resources keep the English 3.0.1's numbering, so
+// each of its lines is paired with the English line of the same resource and
+// index (HOLANG.mac301En is the English program's, tools/extract/languages.py
+// --mac301-en). It has a few lines past the English's last (the training
+// version's) and the hints (STR# 3100, iOS's word for word, which the English
+// 3.0.1 has no list for): those have no English to pair with and are left.
+const F301 = HOLANG.mac301Fr, E301 = HOLANG.mac301En;
+// (a line break in a window's sentence is a space; "%P", the program's Pascal string, is a "%s" here)
+const lineOf301 = (t) => String(t).replace(/\s*\n\s*/g, ' ').replace(/%P/g, '%s').trim();
+let OFFICIAL301 = null;
+// [[English, French], ...]: every STR# line, and the sentences of the windows
+// (each DITL's static text, buttons and check boxes, of the windows both
+// programs have)
+function official301() {
+  if (OFFICIAL301) return OFFICIAL301;
+  const o = [];
+  if (F301 && E301) {
+    for (const k of Object.keys(E301)) {
+      if (!/^\d+$/.test(k) || !F301[k]) continue;
+      E301[k].forEach((en, i) => { const fr = F301[k][i]; if (typeof en === 'string' && typeof fr === 'string' && en.trim() && fr.trim()) o.push([lineOf301(en), lineOf301(fr)]); });
+    }
+    for (const [id, items] of Object.entries(E301.DITL)) {
+      const f = F301.DITL[id];
+      if (!f || f.length !== items.length) continue;
+      items.forEach((it, i) => {
+        if (it[0] !== 'text' || typeof it[1] !== 'string' || typeof f[i][1] !== 'string' || !/[A-Za-z]{3}/.test(it[1]) || /\^\d/.test(it[1])) return;
+        o.push([lineOf301(it[1]), lineOf301(f[i][1])]);
+      });
+    }
+  }
+  return (OFFICIAL301 = o);
+}
+// 3.0.1F's windows' words for the interface (js/ui-lang.js, HOUI.set's words):
+// English 3.0.1's menu items and titles, window titles, buttons, check boxes and
+// labels, each with the French of the same place. A word that stands for more
+// than one French in the windows takes the one most of them have (none when
+// they tie); one the French program left in English is not here (the
+// interface's own French stands).
+let WINDOWS301 = null;
+function windows301() {
+  if (WINDOWS301) return WINDOWS301;
+  const seen = new Map();
+  const add = (en, fr) => {
+    en = lineOf301(String(en).replace(/\t.*$/, '')); fr = lineOf301(String(fr).replace(/\t.*$/, ''));
+    if (!/[A-Za-z]{2}/.test(en) || /\^\d|^(Edit|Static) Text$/.test(en) || en === '-' || en === fr) return;
+    if (!seen.has(en)) seen.set(en, new Map());
+    seen.get(en).set(fr, (seen.get(en).get(fr) || 0) + 1);
+  };
+  if (F301 && E301) {
+    for (const [id, items] of Object.entries(E301.DITL)) {
+      const f = F301.DITL[id];
+      if (!f || f.length !== items.length) continue;
+      items.forEach((it, i) => { if (['text', 'button', 'check', 'radio'].includes(it[0]) && typeof it[1] === 'string' && typeof f[i][1] === 'string') add(it[1], f[i][1]); });
+    }
+    for (const id of Object.keys(E301.MENU)) if (F301.MENU[id] && F301.MENU[id].length === E301.MENU[id].length) E301.MENU[id].forEach((en, i) => add(en, F301.MENU[id][i]));
+    for (const k of ['DLOG', 'CNTL']) for (const id of Object.keys(E301[k])) if (F301[k][id] != null) add(E301[k][id], F301[k][id]);
+  }
+  const out = [];
+  for (const [en, m] of seen) {
+    const r = [...m].sort((a, b) => b[1] - a[1]);
+    if (r.length > 1 && r[0][1] === r[1][1]) continue;
+    out.push([en, r[0][0]]);
+  }
+  return (WINDOWS301 = out);
+}
 const F = (id) => { const t = FR12['1000'][id - 672]; if (t == null) throw new Error('1.2F report ' + id + ' missing'); return t.replace(/%\.\*s/g, '%s'); };
 const FR = (n, i) => FR12[String(n)][i].replace(/%\.\*s/g, '%s');
 const CLASS_FR = { scout: FR(1006, 0), fighter: FR(1006, 1), colony: FR(1006, 2), satellite: FR(1006, 3) };
@@ -373,8 +449,10 @@ const CLASS_KEYS = ['Scout', 'Dreadnought', 'Fighter', 'Tanker', 'Colony Ship', 
 // a template whose fillings the translation takes in another order, or not
 // at all: [index in Report Window Templates, the translation with each
 // filling by place]. In the app the translation took them in order, so these
-// came out wrong (a word where a number goes); the remake gives each its
-// meaning. docs/ios-findings.md, "Languages".
+// came out wrong (a word where a number goes): iOS and Android play them so
+// (as released); the patch (fix 'iosFillings') gives each its meaning, and
+// the versions that carry these lines (5.0.5, the Palm, 4.0.5, 3.0.1) always
+// do. French 85's "%P" is only the formatter's "%s". docs/ios-findings.md, "Languages".
 const BY_PLACE = {
   fr: {
     36: (t) => t.replace('%s', '%2$s').replace('%d', '%4$d').replace('%s', '%5$s').replace('%d', '%6$d'),
@@ -401,12 +479,18 @@ const CELSIUS = {
 };
 function iosLang(lang, rs) {
   const en = (k) => L('en', k), tr = (k) => L(lang, k);
-  const reports = [], fixReports = [], fixSpies = [];
+  const reports = [], fixReports = [], fixSpies = [], fixPlaces = [];
+  let fixCache = null;
   const R = en('Report Window Templates'), RT = tr('Report Window Templates');
   R.forEach((t, i) => {
+    // as the app showed it: the translation's fillings taken in the English's
+    // order, so a word where a number goes (BY_PLACE); the patch (fix
+    // 'iosFillings') fills each by its meaning
     let to = RT[i];
     if (CELSIUS[lang] && CELSIUS[lang][i]) to = CELSIUS[lang][i](to);
-    else if (BY_PLACE[lang] && BY_PLACE[lang][i]) to = BY_PLACE[lang][i](to);
+    // (French 85's "%P" is the remake's formatter's "%s", in the English's order: not a slip)
+    else if (lang === 'fr' && i === 85) to = BY_PLACE.fr[85](to);
+    else if (BY_PLACE[lang] && BY_PLACE[lang][i]) fixPlaces.push([t, BY_PLACE[lang][i](to)]);
     reports.push([t, to]);
     if (lang === 'tr' && i === 11) fixReports.push([t, BY_PLACE.tr['11p'](RT[i])]);
     // the Turkish spies' report is a second copy of 123 (the credit report); the
@@ -437,6 +521,7 @@ function iosLang(lang, rs) {
   // report 36's "gemi")
   args.push(['%d ships', '%d ' + (lang === 'fr' ? 'vaisseaux' : 'gemi')]);
   const names = (k) => tr(k).map(s => String(s).replace(/\r/g, ''));
+  const HELP = en('Help Messages').slice(3), hintTexts = tr('Help Messages').slice(3);
   // (the same lists as the version's own: the decoys' 5.0.5 list isn't in the
   // app, whose decoys take a Fighter's name, so it stays as it is)
   // (read when the game starts: in Node the lists are filled in after this file)
@@ -468,10 +553,32 @@ function iosLang(lang, rs) {
     // a new rank's star (Misc Strings 73, 74; Alert Strings 9)
     nameAStar: Object.assign({}, rs.nameAStar, { text: (MT[73] + ' ' + MT[74]).replace(/\s+/g, ' ').trim(), taken: tr('Alert Strings')[9] }),
     // the hints: Help Messages 4-42 (rules-ios HINTS)
-    hintTexts: tr('Help Messages').slice(3),
+    hintTexts,
     battlePanel: rs.battlePanelIn ? rs.battlePanelIn({ head: (star, year) => SPT[12].replace('%s', star).replace('%d', year).trim(), text: panelText }) : undefined,
     say: { reports, args, words },
-    fix: lang === 'tr' ? { trLostWord: { say: { reports: fixReports } }, trSpiesReport: { say: { reports: fixSpies } } } : undefined,
+    // the patch's: the fillings by place, the corrected wording (read when the
+    // patch is on: the remake's translations are loaded after this)
+    get fix() {
+      if (fixCache) return fixCache.v;
+      const o = {};
+      if (fixPlaces.length) o.iosFillings = { say: { reports: fixPlaces } };
+      const own = new Set((lang === 'tr' ? fixReports.concat(fixSpies) : []).map(r => normEn(r[0])));
+      const rep = [];
+      for (const r of reports) { const p = own.has(normEn(r[0])) ? null : patchOfficial(lang, r[0]); if (p != null && !rep.some(x => x[0] === r[0])) rep.push([r[0], p]); }
+      const W = {};
+      for (const [k, v] of Object.entries((RMK[lang] || {}).patchWords || {})) if (Object.prototype.hasOwnProperty.call(words, k)) W[k] = v;
+      const hf = HELP.map(t => patchOfficial(lang, t));
+      const part = {};
+      const say = {};
+      if (rep.length) say.reports = rep;
+      if (Object.keys(W).length) say.words = W;
+      if (Object.keys(say).length) part.say = say;
+      if (hf.some(x => x != null)) part.hintTexts = HELP.map((t, i) => (hf[i] != null ? hf[i] : hintTexts[i]));
+      if (Object.keys(part).length) o.translations = part;
+      if (lang === 'tr') { o.trLostWord = { say: { reports: fixReports } }; o.trSpiesReport = { say: { reports: fixSpies } }; }
+      fixCache = { v: Object.keys(o).length ? o : undefined };
+      return fixCache.v;
+    },
   };
 }
 for (const rs of [E.RULESETS.ios, E.RULESETS.android]) {
@@ -518,9 +625,42 @@ function matchDollar(en, enOwn, to) {
   const out = drop.length ? to.replace(/\$?(%(?:\d+\$)?(?:\.\*)?[-0-9.]*l?[sdu]|%P)/g, (m, ph) => { const pos = (/%(\d+)\$/.exec(ph) || [])[1]; const n = pos ? pos - 1 : k++; return drop.includes(n) ? ph : m; }) : to;
   return addDollar(en, enOwn, out);
 }
+// the patch's table of a language, by normalised English (translator, iosLang)
+const PATCH_TABLES = {};
+function patchTable(lang) {
+  if (!PATCH_TABLES[lang]) PATCH_TABLES[lang] = new Map(Object.entries((RMK[lang] || {}).patch || {}).map(([en, to]) => [normEn(en), [en, to]]));
+  return PATCH_TABLES[lang];
+}
+// the patch's correction of an official line as it stands in its own English
+function patchOfficial(lang, en) { const p = patchTable(lang).get(normEn(en)); return p ? matchDollar(en, p[0], p[1]) : null; }
+// The patch's corrections of a language's text (HOLANG_REMAKE[lang].patch and
+// .patchWords, docs/proofread-2026-10.md), as the fix 'translations' that
+// engine.js inLanguage lays over the language when the patch is on: the
+// corrected report lines, the corrected hints and the corrected words, each only
+// where the version shows the official line as it is (translator fix). T the
+// version's translator, reports its [English, translation] list, hints its
+// English hints, words its say.words. undefined when nothing is corrected.
+function patchFix(lang, T, reports, hints, words, hintTexts) {
+  const rep = [], seen = new Set();
+  for (const r of reports) {
+    if (typeof r[1] !== 'string' || seen.has(r[0])) continue;
+    const p = T.fix(r[0]);
+    if (p != null) { rep.push([r[0], p]); seen.add(r[0]); }
+  }
+  const say = {};
+  if (rep.length) say.reports = rep;
+  const W = {};
+  for (const [k, v] of Object.entries((RMK[lang] || {}).patchWords || {})) if (words && Object.prototype.hasOwnProperty.call(words, k)) W[k] = v;
+  if (Object.keys(W).length) say.words = W;
+  const part = {};
+  if (Object.keys(say).length) part.say = say;
+  const hf = (hints || []).map(t => T.fix(t));
+  if (hf.some(x => x != null)) part.hintTexts = hints.map((t, i) => (hf[i] != null ? hf[i] : hintTexts[i]));
+  return Object.keys(part).length ? { translations: part } : undefined;
+}
 // official: [[English, translation], ...], the nearest first
 function translator(lang, official) {
-  const R = RMK[lang] || {}, map = new Map(), over = new Map(), own = new Map(), adapted = new Map();
+  const R = RMK[lang] || {}, map = new Map(), over = new Map(), own = new Map(), adapted = new Map(), patch = patchTable(lang);
   for (const [en, to] of official) { const k = normEn(en); if (!map.has(k)) map.set(k, [en, to]); }
   for (const [en, to] of Object.entries(R.over || {})) over.set(normEn(en), [en, to]);
   for (const [en, a] of Object.entries(R.adapted || {})) adapted.set(normEn(en), [en].concat(a));
@@ -542,7 +682,21 @@ function translator(lang, official) {
     return null;
   };
   const line = (en) => { const t = find(en); if (!t && !missing.includes(en)) missing.push(en); return t; };
-  return { line, missing, has: (en) => !!find(en), report: (en) => { const t = line(en); return t ? [en, ...t] : null; }, text: (en) => { const t = line(en); return t ? t[0] : en; } };
+  // the patch's correction of a line (HOLANG_REMAKE[lang].patch: English -> the
+  // corrected translation), or null; a line the patch has no entry for stays
+  // as it is. The entries keep the wording of an official translation, whether
+  // the version shows the official line as it is or the remake's own line
+  // follows it.
+  const fix = (en) => {
+    if (!patch.size) return null;
+    const k0 = normEn(en);
+    for (const k of [k0, alias.get(k0)]) {
+      const p = k != null && patch.get(k);
+      if (p) return matchDollar(en, p[0], p[1]);
+    }
+    return null;
+  };
+  return { line, fix, missing, has: (en) => !!find(en), report: (en) => { const t = line(en); return t ? [en, ...t] : null; }, text: (en) => { const t = line(en); return t ? t[0] : en; } };
 }
 // iOS's lines, as the iOS game's own languages read them (iosLang): its
 // reports (BY_PLACE, CELSIUS), alerts, the Hope question and the hints
@@ -783,14 +937,14 @@ function lazyLang(build, keys) {
   for (const k of ['missing', 'hintRemake', 'hintAdapted']) Object.defineProperty(o, k, { enumerable: false, get: () => get()[k] });
   return o;
 }
-const LANG_KEYS = ['remake', 'say', 'hintTexts', 'nameAStar', 'battlePanel', 'starNames', 'maleNames', 'femaleNames', 'shipNames'];
+const LANG_KEYS = ['remake', 'fix', 'say', 'hintTexts', 'nameAStar', 'battlePanel', 'starNames', 'maleNames', 'femaleNames', 'shipNames'];
 function remake505(lang, rs, o) {
   return lazyLang(() => build505(lang, rs, o), LANG_KEYS.concat((o && o.keys) || []));
 }
 function build505(lang, rs, o) {
   o = o || {};
   const de = DICT(lang), es = lang === 'es';
-  const T = translator(lang, (de ? officialFor(lang) : iosOfficial(lang)).concat(typeof o.official === 'function' ? o.official() : o.official || []));
+  const T = translator(lang, (de ? officialFor(lang) : iosOfficial(lang).concat(lang === 'fr' ? official301() : [])).concat(typeof o.official === 'function' ? o.official() : o.official || []));
   const reports = [];
   for (const en of (o.lines ? o.lines() : lines505(rs, (o.extra || EXTRA505).concat(hoedownLines(rs)), lang))) { const r = T.report(en); if (r) reports.push(r); }
   // the curse with the Mac's characters (iOS shows "¥ª")
@@ -799,10 +953,12 @@ function build505(lang, rs, o) {
   const { words, args, num } = es ? spanishWords(techs, T) : de ? germanWords(techs, T) : iosWords(lang, techs);
   const hints = (o.hints ? o.hints() : (D.hints || []).slice(3, 43));
   const NS = rs.nameAStar || {};
+  const hintTexts = hints.map(t => T.text(t));
   const out = Object.assign(de ? namesFor(lang, rs) : iosNames(lang, rs), {
     remake: true,
+    fix: patchFix(lang, T, reports, hints, words, hintTexts),
     say: Object.assign({ reports: es ? reports.map(esReport) : reports, args, words }, num ? { num, cap: true } : {}),
-    hintTexts: hints.map(t => T.text(t)),
+    hintTexts,
     nameAStar: Object.assign({}, NS, de ? { text: T.text(NS.text), taken: T.text(NS.taken) } : { text: L(lang, 'Misc Strings')[74].trim(), taken: L(lang, 'Alert Strings')[9] }, o.nameAStar ? o.nameAStar(lang, T) : {}),
   });
   const panelText = es ? (o.panelEs ? o.panelEs() : PANEL505_ES) : de ? (o.panelDe ? o.panelDe() : PANEL505_DE) : iosPanelText(lang);
@@ -1098,9 +1254,12 @@ function official20(lang) {
 
 }
 // the official lines, the nearest first, with the equivalents
+// (nearest '20': 2.0's first; '301': 3.0.1F's first, then iOS's, for the versions
+// after 3.0.1 and before 5.0.5; else iOS's, then 3.0.1F's, then 2.0's)
 function officialFor(lang, nearest) {
   const ios = IOS[lang] ? iosOfficial(lang) : [];
-  const o = nearest === '20' ? official20(lang).concat(ios) : ios.concat(official20(lang));
+  const f301 = lang === 'fr' ? official301() : [];
+  const o = nearest === '20' ? official20(lang).concat(ios) : nearest === '301' ? f301.concat(ios, official20(lang)) : ios.concat(f301, official20(lang));
   const by = new Map(); for (const [en, to] of o) { const k = normEn(en); if (!by.has(k)) by.set(k, to); }
   for (const [en, off] of EQUIV) if (by.has(normEn(off))) o.push([en, by.get(normEn(off))]);
   return o;
@@ -1110,8 +1269,9 @@ E.langOfficial = (lang) => officialFor(lang);
 // a name list in the language, class by class: an official list made for
 // the same English list (1.2F's and the German DOS 2.0's for 2.0's lists,
 // iOS's for 5.0.5's), else (French, Turkish) iOS's names one by one
-function namesFor(lang, rs) {
+function namesFor(lang, rs, nearest301) {
   const D = E.DATA, own = { starNames: rs.starNames || D.starNames, maleNames: rs.maleNames || D.maleNames, femaleNames: rs.femaleNames || D.femaleNames, shipNames: rs.shipNames || D.shipNames };
+  // (3.0.1F's computer and ship names are 1.2F's: the same lists)
   const twenty = lang === 'fr' && R12 ? { men: R12.maleNames, women: FR12['2000'], ships: R12.shipNames, stars: null }
     : lang === 'de' ? { men: range(112, 131, S), women: range(224, 243, S), ships: { scout: range(336, 349, S), fighter: range(304, 326, S), colony: range(288, 302, S), satellite: range(256, 273, S) }, stars: range(432, 621, S) } : null;
   const ios = !!IOS[lang];
@@ -1120,13 +1280,18 @@ function namesFor(lang, rs) {
   o.starNames = own.starNames.slice();
   if (ios) o.starNames = listIn(o.starNames, L('en', 'Star Names'), L(lang, 'Star Names'), true);
   if (twenty && twenty.stars) o.starNames = listIn(o.starNames, DOS.starNames, twenty.stars, true);
-  const comp = (k, l20, iosK) => (l20 && sameList(own[k], DOS[k]) ? l20 : null) || (ios ? listIn(own[k], L('en', iosK), L(lang, iosK), false) : null) || own[k];
+  // 3.0.1F's star list (the English 3.0.1's, STR# 1003), for 3.0.1 and 4.0.5
+  if (nearest301 && lang === 'fr' && F301 && E301) o.starNames = listIn(o.starNames, E301['1003'], F301['1003'], true);
+  // 3.0.1F's lists (the English 3.0.1's STR# 1999-2004), where the version's are 3.0.1's
+  const f301 = nearest301 && lang === 'fr' && F301 && E301 ? { maleNames: ['1999'], femaleNames: ['2000'], scout: ['2001'], fighter: ['2002'], colony: ['2003'], satellite: ['2004'] } : null;
+  const of301 = (list, key) => (f301 && f301[key] && sameList(list, E301[f301[key][0]]) ? F301[f301[key][0]].slice() : null);
+  const comp = (k, l20, iosK) => of301(own[k], k) || (l20 && sameList(own[k], DOS[k]) ? l20 : null) || (ios ? listIn(own[k], L('en', iosK), L(lang, iosK), false) : null) || own[k];
   o.maleNames = comp('maleNames', twenty && twenty.men, 'Male Computer Names');
   o.femaleNames = comp('femaleNames', twenty && twenty.women, 'Female Computer Names');
   o.shipNames = {};
   for (const k of Object.keys(own.shipNames)) {
     const l = own.shipNames[k];
-    o.shipNames[k] = (twenty && DOS.shipNames[k] && sameList(l, DOS.shipNames[k]) && twenty.ships[k]) || (ios && SHIP_LISTS[k] ? listIn(l, L('en', SHIP_LISTS[k]), L(lang, SHIP_LISTS[k]), true) : null) || l;
+    o.shipNames[k] = of301(l, k) || (twenty && DOS.shipNames[k] && sameList(l, DOS.shipNames[k]) && twenty.ships[k]) || (ios && SHIP_LISTS[k] ? listIn(l, L('en', SHIP_LISTS[k]), L(lang, SHIP_LISTS[k]), true) : null) || l;
   }
   return o;
 }
@@ -1156,10 +1321,12 @@ function buildText(lang, rs, o) {
   // a tech name that is no tech name (4.0.5's Mini 20, the credit line)
   for (const t of techs) if (!(t in words) && / /.test(t) && T.line(t)) words[t] = T.text(t);
   const hints = (o.hints ? o.hints() : null) || [];
-  const out = Object.assign(namesFor(lang, rs), {
+  const hintTexts = hints.length ? hints.map(t => T.text(t)) : rs.hintTexts;
+  const out = Object.assign(namesFor(lang, rs, o.nearest === '301'), {
     remake: true,
+    fix: patchFix(lang, T, reports, hints, words, hintTexts),
     say: Object.assign({ reports: lang === 'es' ? reports.map(esReport) : reports, args, words }, num ? { num, cap: true } : {}),
-    hintTexts: hints.length ? hints.map(t => T.text(t)) : rs.hintTexts,
+    hintTexts,
   });
   const NS = rs.nameAStar;
   if (NS) out.nameAStar = Object.assign({}, NS, { text: T.text(NS.text), taken: T.text(NS.taken) },
@@ -1181,7 +1348,7 @@ if (W405) {
   const lines = (rs, mac) => () => TEXT405.concat(engineLines(), welcomeLines(rs), [rs.colorMonitorBW ? rs.colorMonitorBW.text : null].filter(Boolean),
     mac ? (E.DATA.reports || []).slice(39, 69) : [], ['Spaceward Ho! Version 4.0.5 by Peter Commons.', 'Spaceward Ho! Version 4.0.3 by Peter Commons.']);
 
-  const make = (lang, rs, mac) => lazyLang(() => buildText(lang, rs, { lines: lines(rs, mac), hints: () => rs.hintTexts,
+  const make = (lang, rs, mac) => lazyLang(() => buildText(lang, rs, { lines: lines(rs, mac), hints: () => rs.hintTexts, nearest: '301',
     battlePanel: (w) => w ? DOS.battlePanel20({ dots: mac ? '…' : '...', cols: 'mac', shade: true, words: w }) : rs.battlePanel }), LANG_KEYS405);
   for (const [rs, mac] of [[W405, false], [M405, true]]) {
     if (!rs) continue;
@@ -1268,9 +1435,14 @@ if (R301) {
   const welcome = (rs) => (typeof rs.welcome === 'function' ? welcomeLines(rs) : (rs.welcome || []).map(x => x[0]));
   const lines = () => TEXT301.concat(engineLines(), welcome(R301), (E.DATA.reports || []).slice(38, 69), R301.colorMonitorBW ? [R301.colorMonitorBW.text] : []);
   const make = (lang) => lazyLang(() => {
-    const out = buildText(lang, R301, { lines, battlePanel: (w) => w ? DOS.battlePanel20({ dots: '…', cols: 'mac', shade: true, words: w }) : R301.battlePanel });
+    const out = buildText(lang, R301, { lines, nearest: '301', battlePanel: (w) => w ? DOS.battlePanel20({ dots: '…', cols: 'mac', shade: true, words: w }) : R301.battlePanel });
+    // 3.0.1's French is the official one, 3.0.1F's (not the remake's beside it): its
+    // lines are 3.0.1F's, and the lines it has none for (the remake's engine
+    // messages) are iOS's or 1.2F's, adapted, or the remake's; its windows' words
+    // are the interface's in a 3.0.1 game in French
+    if (lang === 'fr' && F301 && E301) { out.remake = false; out.officialWindows = windows301(); }
     return out;
-  }, LANG_KEYS405.concat(['fixSpending']));
+  }, LANG_KEYS405.concat(['fixSpending', 'officialWindows']));
   R301.languages = ['en', 'fr', 'tr', 'de', 'es'];
   R301.lang = Object.assign({}, R301.lang, { fr: make('fr'), tr: make('tr'), de: make('de'), es: make('es') });
 
