@@ -20,9 +20,10 @@ and the translation notice (`docs/translations-notes/`) are not done.
 1. Spaceward Ho! 2.1 for the Amiga: **studied** (October 2026), `docs/amiga-21.md`. The German
    2.1 (both disks) and the 1995-06-06 English disk 1 ("[h WT]", a repack, not a crack) play
    the same game as 2.0 (same engine, pictures, sounds, fonts and windows; the changes are file
-   handling, a new button look, DOS game files and the English text file). Not built: Jake
-   decides whether to add its English as a text variant of the Amiga skin (the doc
-   recommends that, and no new ruleset).
+   handling, a new button look, DOS game files and the English text file). **Jake's decision
+   (October 2026): yes**, its English (844 strings, the Amiga's own translation) becomes the
+   Amiga skin's English, in place of falling back to the DOS English; no new ruleset. See
+   item 4a.
 2. Design: write prompts for Gemini for any art or design work, unless it can be done here.
    **Art part done** (October 2026): Jake's art package `nostalgia-ho-art.zip` is integrated
    (stand-in pictures in every skin's `sprites/fill/`, marked as the remake's;
@@ -56,8 +57,38 @@ and the translation notice (`docs/translations-notes/`) are not done.
    English only, `assets/manuals/2.0-windows/file-menu-commands.html`) and the Amiga's
    Briefspiel.dok (not in the repo as text). Code: `exportGame`, `withUnlocked` in
    `js/skins/classic/ui.js`; strings in `js/ui-text.js`.
-4. Last: a home-screen (apple-touch) icon per skin, the icon a phone shows when the site is
+4. Added by Jake (October 2026), in this order:
+   a. **The Amiga 2.1 English as the Amiga skin's English** (item 1). Count how many lines
+      differ from the DOS English, and note any that suggest wording elsewhere.
+   b. **Links to the original PDFs** from each adapted manual's cover page: the 3.0.1 manual
+      (3.0.1.pdf, 8 MB, never an HTML manual), the DOS 2.0 manual, and any other manual adapted
+      from a PDF, so the historical document stays reachable.
+   c. **Translate the Full Hoedown list** (`docs/hoedown.md`'s jokes as shown in game) into
+      every language a version offers, under the translation rule below.
+   d. **Tidy the 5.0.5 manual's 34 broken links** (the original's own; invisible to players,
+      so this is code tidying, not a change anyone sees).
+   e. **"Every version's jokes"**, lower: a second box, shown only when Full Hoedown is checked,
+      that lets every joke from every version appear (today Full Hoedown maximizes the jokes
+      of the version being played). Official releases' jokes only, as Full Hoedown.
+   f. **Translation corrections into the patch**, when the other Claude's and the Geminis'
+      notes arrive (their menu checks, the French 3.0.1 demo disc, patch notes): see the rule
+      below. No work until then.
+   g. **Version notes:** Android was first released by Ariton in spring 2013 (March 2013,
+      per Gemini; 1.1 widely listed from 13 April 2013), about a year after the iOS port
+      (March 2012). The remake plays 1.2.8 (built February 2015), so its label stays 2015;
+      the first-release date goes in the notes as reported, not confirmed. Then list any other
+      missing dates for Jake.
+   h. **Japanese**, far down: there was a Japanese port, but no copy can be found; the remake's
+      own Japanese translation is not planned soon.
+5. Last: a home-screen (apple-touch) icon per skin, the icon a phone shows when the site is
    added to its home screen; today every skin's is the Android one.
+
+**The translation rule (Jake, October 2026).** A version's translation matches the originals
+as closely as possible, flaws and all: a French player of 2.0 sees the same wording he would
+have seen in 1.2F or 3.0.1, even where that version never had an official French, and a line
+3.0.1 took from iOS stays as it was, for history's sake. Corrections to the originals'
+translations (from the Claude and Gemini notes) are optional language updates in the patch
+system (`rs.fixes` / the patch), never changes to the base text.
 
 **Online, outside the code:**
 12. Two-player online games work (Jake, October 2026).
