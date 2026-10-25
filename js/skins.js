@@ -135,6 +135,11 @@ const OSES = [
   { id: 'android4', name: 'Android 4 (Holo dark)', year: 2012 },
   { id: 'fireos', name: 'Fire OS 3 and 4 (Amazon)', year: 2013 },
   { id: 'ios10', name: 'iOS 10', year: 2017 },
+  { id: 'netscape', name: 'Netscape Navigator 3 (Windows)', year: 1996 },
+  { id: 'netscapemac', name: 'Netscape Navigator 3 (Mac)', year: 1996 },
+  { id: 'firefox', name: 'Firefox (2026)', year: 2026 },
+  { id: 'edge', name: 'Edge (2026)', year: 2026 },
+  { id: 'safari', name: 'Safari (2026)', year: 2026 },
 ].sort((a, b) => a.year - b.year);
 // os: the skin's own OS looks, its default first (the systems its original
 // ran on); any other look can be chosen too
@@ -150,15 +155,15 @@ const SKINS = [
   { id: 'mac2c', version: '2.0.1', platform: 'Mac, colour', year: 1992, os: ['system7', 'system6'], icon: 'mac2c' },
   { id: 'mac3', bw: true, version: '3.0.1', platform: 'Mac, black and white', year: 1993, os: ['system7'], icon: 'mac3' },
   { id: 'mac3c', version: '3.0.1', platform: 'Mac, colour', year: 1993, os: ['system7'], icon: 'mac3c' },
-  { id: 'mac4', bw: true, version: '4.0.5', platform: 'Mac, black and white', year: 1996, os: ['system7', 'macos8'], icon: 'mac4' },
-  { id: 'mac4c', version: '4.0.5', platform: 'Mac, colour', year: 1996, os: ['system7', 'macos8'], icon: 'mac4c' },
-  { id: 'w95', version: '4.0.5', platform: 'Windows 95', year: 1996, os: ['win95'], icon: 'w95' },
+  { id: 'mac4', bw: true, version: '4.0.5', platform: 'Mac, black and white', year: 1996, os: ['system7', 'macos8', 'netscapemac'], icon: 'mac4' },
+  { id: 'mac4c', version: '4.0.5', platform: 'Mac, colour', year: 1996, os: ['system7', 'macos8', 'netscapemac'], icon: 'mac4c' },
+  { id: 'w95', version: '4.0.5', platform: 'Windows 95', year: 1996, os: ['win95', 'netscape'], icon: 'w95' },
   { id: 'palm', version: '5', platform: 'Palm OS, version 1.0.4', year: 2003, os: ['palmos'], icon: 'palm' },
   // 1.2.9 was built with the iOS 10.3 SDK (2017); iOS 6 is the 2012 launch's system
   { id: 'ios', version: '1.2.9', platform: 'iPhone and iPad', year: 2012, os: ['ios10', 'ios6'], icon: 'ios' },
   { id: 'android', version: '1.2.8', platform: 'Android', year: 2015, os: ['fireos', 'android4'], icon: 'android' },
-  { id: 'cozy', version: 'Cozy western', platform: 'by Claude', year: 2026, homage: true, os: ['macos8', 'macos9', 'macosx'] },
-  { id: 'gemini', version: 'Tactical console', platform: 'by Gemini', year: 2026, homage: true, os: ['macosx', 'macos9', 'win95', 'macos8', 'system7', 'win31'] },
+  { id: 'cozy', version: 'Cozy western', platform: 'by Claude', year: 2026, homage: true, os: ['macos8', 'macos9', 'macosx', 'firefox', 'safari', 'edge'] },
+  { id: 'gemini', version: 'Tactical console', platform: 'by Gemini', year: 2026, homage: true, os: ['macosx', 'macos9', 'win95', 'macos8', 'system7', 'win31', 'firefox', 'safari', 'edge'] },
   { id: 'classic', version: '5.0.5', platform: 'Mac OS 9 and X', year: 2003, os: ['macos8', 'macos9', 'macosx'], icon: 'classic' },
 ].map(k => Object.assign(k, { name: `${k.version} (${k.platform}, ${k.year})`, sounds: k.id in SOUNDS ? SOUNDS[k.id] && k.id : 'classic' }))
   .sort((a, b) => a.year - b.year || a.version.localeCompare(b.version, 'en', { numeric: true }));

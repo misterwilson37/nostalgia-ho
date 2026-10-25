@@ -1,0 +1,153 @@
+/* Spaceward Ho! — OS look "Edge" (1.0.0): Microsoft Edge as it draws its own
+   interface in 2026, in the Fluent 2 design language on Windows 11. The bar
+   at the top is Edge's toolbar on a Mica-like frosted surface (a translucent
+   grey with the backdrop blurred); the menus are Fluent menu flyouts (8 px
+   corners, a soft shadow, rounded highlights); the game's windows are Fluent
+   dialogs (8 px corners, a 20 px semibold title, the close X at the right);
+   buttons are Fluent's (white with a hairline, 4 px corners, semibold, the
+   default one in Edge's blue #0f6cbd); fields with the darker bottom edge
+   that turns blue on focus; 16 px check boxes and radio buttons; the slider's
+   white thumb with the blue centre; thin scroll bars. It follows the system's
+   light or dark setting, as Edge does. The system's own font (Segoe UI
+   Variable on Windows 11, Segoe UI before it). No logos, all CSS. Among the
+   homage skins' own looks (Cozy, Gemini); no original ran in a browser. */
+@import url("base.css");
+:root {
+  --plat: #f7f7f7; --plat2: #ffffff; --edge: #e0e0e0; --ink: #242424; --sub: #616161; --hi: #0f6cbd;
+  --ui: "Segoe UI Variable Text", "Segoe UI Variable", "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
+  --eg-text: #242424; --eg-text2: #616161;
+  --eg-bar: rgba(238,238,238,.82); --eg-panel: rgba(252,252,252,.92); --eg-win: #ffffff;
+  --eg-btn: #ffffff; --eg-btn-hover: #f5f5f5; --eg-btn-active: #e0e0e0; --eg-btn-edge: #d1d1d1; --eg-btn-edge-hover: #c7c7c7;
+  --eg-accent: #0f6cbd; --eg-accent-hover: #115ea3; --eg-accent-active: #0c3b5e; --eg-on-accent: #ffffff;
+  --eg-hover: rgba(0,0,0,.05); --eg-line: #e0e0e0; --eg-field: #ffffff; --eg-field-edge: #d1d1d1; --eg-field-bottom: #616161;
+  --eg-track: #8a8a8a; --eg-box-edge: #616161;
+  --eg-shadow: 0 0 2px rgba(0,0,0,.12), 0 8px 16px rgba(0,0,0,.14); --eg-win-shadow: 0 0 8px rgba(0,0,0,.12), 0 32px 64px rgba(0,0,0,.24);
+  --eg-tick: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16'><path d='M4.2 8.3l2.5 2.4 5-5.2' fill='none' stroke='white' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+  --eg-chev: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12'><path d='M2.5 4.5L6 8l3.5-3.5' fill='none' stroke='%23424242' stroke-width='1.2' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+  --eg-x: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16'><path d='M4 4l8 8M12 4l-8 8' stroke='%23424242' stroke-width='1.2' stroke-linecap='round'/></svg>");
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --eg-text: #ffffff; --eg-text2: #d6d6d6;
+    --plat: #1f1f1f; --plat2: #292929; --edge: #3d3d3d; --ink: #ffffff; --sub: #d6d6d6; --hi: #479ef5;
+    --eg-bar: rgba(32,32,32,.82); --eg-panel: rgba(44,44,44,.94); --eg-win: #292929;
+    --eg-btn: #292929; --eg-btn-hover: #3d3d3d; --eg-btn-active: #1f1f1f; --eg-btn-edge: #666666; --eg-btn-edge-hover: #757575;
+    --eg-accent: #479ef5; --eg-accent-hover: #62abf5; --eg-accent-active: #2886de; --eg-on-accent: #000000;
+    --eg-hover: rgba(255,255,255,.06); --eg-line: #3d3d3d; --eg-field: #292929; --eg-field-edge: #666666; --eg-field-bottom: #adadad;
+    --eg-track: #adadad; --eg-box-edge: #adadad;
+    --eg-shadow: 0 0 2px rgba(0,0,0,.24), 0 8px 16px rgba(0,0,0,.28); --eg-win-shadow: 0 0 8px rgba(0,0,0,.24), 0 32px 64px rgba(0,0,0,.4);
+    --eg-tick: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16'><path d='M4.2 8.3l2.5 2.4 5-5.2' fill='none' stroke='black' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+    --eg-chev: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12'><path d='M2.5 4.5L6 8l3.5-3.5' fill='none' stroke='%23d6d6d6' stroke-width='1.2' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+    --eg-x: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16'><path d='M4 4l8 8M12 4l-8 8' stroke='%23d6d6d6' stroke-width='1.2' stroke-linecap='round'/></svg>");
+  }
+  :root:root { color-scheme: dark; }
+}
+body { font-size: 13px; }
+/* the toolbar on its frosted (Mica-like) surface */
+#menubar { background: var(--eg-bar); -webkit-backdrop-filter: blur(30px) saturate(125%); backdrop-filter: blur(30px) saturate(125%);
+  border-bottom: 1px solid var(--eg-line); height: 40px; padding: 0 6px; gap: 2px; box-shadow: none; }
+#menubar .logo { font: 600 14px var(--ui); color: var(--eg-text); letter-spacing: 0; }
+#menubar .logo:hover, #menubar .logo:focus-visible { color: var(--eg-text); background: var(--eg-hover); }
+.mbtn { font: 13px var(--ui); color: var(--eg-text); border-radius: 4px; padding: 6px 10px; }
+.mbtn:hover, .mbtn:focus-visible, .mbtn[aria-expanded=true] { background: var(--eg-hover); color: var(--eg-text); }
+.mbtn:focus-visible { outline: 2px solid var(--eg-text); outline-offset: -2px; }
+#title { color: var(--eg-text2); font: 13px var(--ui); }
+/* the menus: Fluent flyouts (acrylic) */
+.dropdown { top: 38px; min-width: 240px; background: var(--eg-panel); color: var(--eg-text); -webkit-backdrop-filter: blur(30px) saturate(125%); backdrop-filter: blur(30px) saturate(125%);
+  border: 1px solid var(--eg-line); border-radius: 8px; padding: 4px; box-shadow: var(--eg-shadow); }
+.dropdown button { font: 13px var(--ui); color: var(--eg-text); padding: 7px 12px 7px 30px; border-radius: 4px; }
+.dropdown button:hover, .dropdown button:focus-visible { background: var(--eg-hover); color: var(--eg-text); }
+.dropdown button:disabled { color: var(--eg-text2); opacity: .55; }
+.dropdown hr { border: 0; border-top: 1px solid var(--eg-line); margin: 4px -4px; }
+.dropdown button.check::before { color: var(--eg-text); width: 16px; margin-left: -20px; }
+.starmenu .mhead { font: 600 12px var(--ui); color: var(--eg-text2); padding: 6px 12px; margin: 0 0 2px; border-bottom: 1px solid var(--eg-line); }
+/* the panel and its boxes: Fluent cards */
+#panel { background: var(--plat); border-right: 1px solid var(--eg-line); color: var(--ink); }
+.box, .designer { background: var(--plat2); color: var(--ink); border: 1px solid var(--eg-line); border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,.06); }
+/* windows: Fluent dialogs */
+.win { background: var(--eg-win); color: var(--eg-text); border: 1px solid var(--eg-line); border-radius: 8px; box-shadow: var(--eg-win-shadow); overflow: hidden; }
+.wtitle { height: 52px; padding: 0 12px 0 24px; gap: 8px; background: none; border-bottom: 0; }
+.wtitle span { order: 1; background: none; padding: 0; margin: 0 auto 0 0; text-align: left; font: 600 20px var(--ui); color: var(--eg-text); }
+.close { order: 2; width: 32px; height: 32px; border: 0; border-radius: 4px; padding: 0; flex: none; background: var(--eg-x) center / 16px no-repeat; cursor: pointer; }
+.close:hover { background-color: var(--eg-hover); }
+.close:focus-visible { outline: 2px solid var(--eg-text); outline-offset: 0; }
+.wbody { padding: 4px 24px 24px; }
+.win .sub, .win .note { color: var(--eg-text2); }
+.win.alert .wtitle span { white-space: normal; }
+/* buttons: Fluent's, the default one in the brand blue */
+button:not(.mbtn):not(.close):not(.tbtn):not(.clock):not([role=menuitem]) {
+  background: var(--eg-btn); color: var(--eg-text); border: 1px solid var(--eg-btn-edge); border-radius: 4px; padding: 4px 10px; min-height: 30px; font: 600 13px var(--ui); box-shadow: none;
+}
+button:not(.mbtn):not(.close):not(.tbtn):not(.clock):not([role=menuitem]):not(.quiet) { border: 1px solid var(--eg-btn-edge); border-radius: 4px; font-weight: 600; }
+button:not(.mbtn):not(.close):not(.tbtn):not(.clock):not([role=menuitem]):hover:not(:disabled) { background: var(--eg-btn-hover); border-color: var(--eg-btn-edge-hover); }
+button:not(.mbtn):not(.close):not(.tbtn):not(.clock):not([role=menuitem]):active:not(:disabled) { background: var(--eg-btn-active); }
+.win .btns > button:not(.quiet):last-child, .newgame .btns > button:last-child, #tnew { background: var(--eg-accent) !important; border-color: transparent !important; color: var(--eg-on-accent) !important; }
+.win .btns > button:not(.quiet):last-child:hover, .newgame .btns > button:last-child:hover, #tnew:hover { background: var(--eg-accent-hover) !important; }
+.win .btns > button:not(.quiet):last-child:active, .newgame .btns > button:last-child:active, #tnew:active { background: var(--eg-accent-active) !important; }
+button:disabled { opacity: .45; }
+button:focus-visible { outline: 2px solid var(--eg-text); outline-offset: 1px; }
+/* the segmented toggles */
+.tbtn { background: var(--eg-btn); color: var(--eg-text); border: 1px solid var(--eg-btn-edge); border-radius: 4px; padding: 3px 10px; font: 13px var(--ui); }
+.tbtn:hover { background: var(--eg-btn-hover); }
+.tbtn.on { background: var(--eg-accent); border-color: transparent; color: var(--eg-on-accent); }
+/* the budget bars' troughs */
+.track { height: 12px; background: var(--eg-field); border: 1px solid var(--eg-field-edge); border-radius: 4px; overflow: hidden; }
+.track:focus-visible { outline: 2px solid var(--eg-text); outline-offset: 1px; }
+/* fields: the hairline frame and the darker bottom edge, blue when typing */
+html input[type=text], html input[type=number], html input:not([type]), html input[type=password], html textarea {
+  font: 13px var(--ui); color: var(--eg-text); padding: 5px 10px; border: 1px solid var(--eg-field-edge); border-bottom-color: var(--eg-field-bottom); border-radius: 4px; background: var(--eg-field); box-shadow: none;
+}
+html input[type=text]:focus, html input:not([type]):focus, html input[type=number]:focus, html input[type=password]:focus, html textarea:focus { outline: 0; box-shadow: inset 0 -2px 0 var(--eg-accent); }
+html input[type=number] { -moz-appearance: textfield; appearance: textfield; }
+html input[type=number]::-webkit-inner-spin-button, html input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+/* drop-downs: a field with the chevron */
+html select, html .newgame select {
+  -webkit-appearance: none; appearance: none; font: 13px var(--ui); color: var(--eg-text); cursor: pointer; padding: 4px 30px 4px 10px; min-height: 30px;
+  border: 1px solid var(--eg-field-edge); border-bottom-color: var(--eg-field-bottom); border-radius: 4px; box-shadow: none;
+  background: var(--eg-chev) no-repeat right 9px center / 12px 12px, var(--eg-field);
+}
+html select:hover:not(:disabled) { border-color: var(--eg-btn-edge-hover); border-bottom-color: var(--eg-field-bottom); }
+html select option { background: var(--eg-win); color: var(--eg-text); }
+/* check boxes and radio buttons */
+html input[type=checkbox], html input[type=radio] {
+  -webkit-appearance: none; appearance: none; width: 16px; height: 16px; margin: 0 8px 0 0; padding: 0; flex: none; vertical-align: middle; cursor: pointer;
+  border: 1px solid var(--eg-box-edge); border-radius: 2px; background: transparent; box-shadow: none;
+}
+html input[type=radio] { border-radius: 50%; }
+html input[type=checkbox]:hover:not(:disabled), html input[type=radio]:hover:not(:disabled) { border-color: var(--eg-text); }
+html input[type=checkbox]:checked { border-color: var(--eg-accent); background: var(--eg-tick) center / 16px no-repeat, var(--eg-accent); }
+html input[type=radio]:checked { border-color: var(--eg-accent); background: radial-gradient(circle, var(--eg-accent) 0 4px, transparent 4.5px); }
+html input[type=checkbox]:disabled, html input[type=radio]:disabled, html input[type=range]:disabled, html select:disabled { opacity: .45; cursor: default; }
+html input[type=checkbox]:focus-visible, html input[type=radio]:focus-visible, html select:focus-visible, html input[type=range]:focus-visible { outline: 2px solid var(--eg-text); outline-offset: 2px; }
+/* the slider: a thin rail, the white thumb ringed with the blue centre */
+html input[type=range], html .newgame .slider input[type=range] {
+  -webkit-appearance: none; appearance: none; height: 4px; margin: 9px 0; padding: 0; min-width: 0; cursor: pointer; border: 0; border-radius: 2px; background: var(--eg-track); box-shadow: none;
+}
+html input[type=range]::-webkit-slider-thumb, html .tm input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%; cursor: pointer; border: 0;
+  background: radial-gradient(circle, var(--eg-accent) 0 5.5px, var(--eg-win) 6px); box-shadow: 0 0 0 1px var(--eg-btn-edge), 0 1px 2px rgba(0,0,0,.2);
+}
+html input[type=range]::-moz-range-thumb, html .tm input[type=range]::-moz-range-thumb { width: 20px; height: 20px; border-radius: 50%; border: 0; background: radial-gradient(circle, var(--eg-accent) 0 5.5px, var(--eg-win) 6px); box-shadow: 0 0 0 1px var(--eg-btn-edge); }
+html input[type=range]::-moz-range-track { background: transparent; }
+html .tm input[type=range] { height: 8px; border-radius: 4px; background: linear-gradient(90deg, #107c10 0 var(--split, 50%), #ca5010 var(--split, 50%) 100%); }
+html .yard .tm input[type=range] { background: linear-gradient(90deg, var(--eg-accent) 0 var(--split, 0%), var(--eg-track) var(--split, 0%) 100%); }
+.tm .tml { color: #107c10; } .tm .tmr { color: #bc4b09; }
+@media (prefers-color-scheme: dark) { .tm .tml { color: #54b054; } .tm .tmr { color: #f4a266; } }
+.newgame .opts { border: 1px solid var(--eg-line); border-radius: 8px; background: none; }
+a:link, a:visited { color: var(--eg-accent); }
+/* scroll bars: Windows 11's thin ones (standard properties) */
+html, html * { scrollbar-width: thin; scrollbar-color: var(--eg-track) transparent; }
+/* dark: the game's own light surfaces keep dark words; the skin's reds are
+   lightened from its own colours; the title screen's pop-ups take the look's */
+@media (prefers-color-scheme: dark) {
+  html .card, html .clock, html .tip, html .hall .lb { color: #242424; }
+  html .card .sub, html .card .note, html .tip small { color: #616161; }
+  html .frow.sel, html .ptable tr.click:hover { background: rgba(255,214,0,.16); }
+  html .box h3, html .frow.enemy .ftext div:first-child, html #handover h2 { color: color-mix(in srgb, var(--hat) 60%, var(--ink)); }
+  html .kv.neg b, html .warn, html .breport .kill { color: color-mix(in srgb, var(--neg) 60%, var(--ink)); }
+  html .ptable th { border-bottom-color: var(--eg-line); }
+  html .tskin select { color: var(--eg-text); }
+}
+/* the title screen's picture window: a smaller title than a dialog's */
+.tsplash .wtitle { height: 40px; padding-left: 16px; }
+.tsplash .wtitle span { font-size: 14px; }

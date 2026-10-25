@@ -97,7 +97,7 @@ for (const skin of SKINS) {
   for (const r of mine) if (!ONLY || ONLY === r.lang || r.lang === 'en') runs.push(Object.assign(r, { quiet: ONLY && ONLY !== r.lang }));
 }
 // what may show the same in every language: names of products and people
-const SAME = /^(Spaceward Ho!?|Ho!.*|Game Center|System \d|Windows (3\.1|95)|Palm OS|Mac OS 9|iOS \d+|Mac OS X \(Aqua\)|Workbench \(Amiga\)|Mac OS 8\.6\/9\/X|Mac|DOS|Amiga|Delta Tao Software|#!\$@\*\$&@•™!|%\$\*\^&%!!|Jake|Player \d|iOS .*|you@example\.com|Marc & Christoph|Airospace|Copyright 1992-94 New World Computing Inc\.|Big Bang|Terra\.|Info|Mini:?|Tip|Profit:?|Profit total|Temp:|linear|log|Pixels|Metal:|Spaceward HO! © .*)$/;
+const SAME = /^(Spaceward Ho!?|Ho!.*|Game Center|System \d|Windows (3\.1|95)|Palm OS|Netscape Navigator 3 \((Windows|Mac)\)|(Firefox|Edge|Safari) \(2026\)|Mac OS 9|iOS \d+|Mac OS X \(Aqua\)|Workbench \(Amiga\)|Mac OS 8\.6\/9\/X|Mac|DOS|Amiga|Delta Tao Software|#!\$@\*\$&@•™!|%\$\*\^&%!!|Jake|Player \d|iOS .*|you@example\.com|Marc & Christoph|Airospace|Copyright 1992-94 New World Computing Inc\.|Big Bang|Terra\.|Info|Mini:?|Tip|Profit:?|Profit total|Temp:|linear|log|Pixels|Metal:|Spaceward HO! © .*)$/;
 
 const up = (url) => new Promise(res => { const r = http.get(url, (x) => { x.resume(); res(x.statusCode < 500); }); r.on('error', () => res(false)); r.setTimeout(1500, () => { r.destroy(); res(false); }); });
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));

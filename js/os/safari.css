@@ -1,0 +1,151 @@
+/* Spaceward Ho! — OS look "Safari" (1.0.0): Safari 26 on macOS 26 (2025-26),
+   the "Liquid Glass" design. The bar at the top is Safari's toolbar of
+   translucent glass (the backdrop blurred and brightened, a bright rim of
+   light along its top edge); the menus are glass menus (12 px corners, the
+   chosen item a rounded pill in the system blue); the game's windows are
+   glass-rimmed windows with the large 16 px corners, the red, yellow and
+   green window buttons at the left and the title in the middle; buttons are
+   capsules (white glass, the default one blue); check boxes with 4 px
+   corners; pop-up buttons with their up-and-down chevrons; rounded fields
+   with the soft blue focus ring; the slider's capsule-shaped knob; thin
+   overlay scroll bars. It follows the system's light or dark setting, as
+   macOS does. The system's own font (San Francisco on a Mac, else the
+   platform's). No logos, all CSS. Among the homage skins' own
+   looks (Cozy, Gemini); no original ran in a browser. */
+@import url("base.css");
+:root {
+  --plat: #f2f2f5; --plat2: rgba(255,255,255,.78); --edge: rgba(0,0,0,.12); --ink: rgba(0,0,0,.88); --sub: rgba(0,0,0,.52); --hi: #007aff;
+  --ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, "Helvetica Neue", "Segoe UI", Roboto, Arial, sans-serif;
+  --sf-text: rgba(0,0,0,.88); --sf-text2: rgba(0,0,0,.52);
+  --sf-glass: rgba(255,255,255,.62); --sf-glass-strong: rgba(250,250,252,.86); --sf-rim: rgba(255,255,255,.9); --sf-win: rgba(252,252,253,.96);
+  --sf-btn: rgba(255,255,255,.9); --sf-btn-active: rgba(0,0,0,.08); --sf-line: rgba(0,0,0,.1);
+  --sf-accent: #007aff; --sf-accent-active: #0062cc; --sf-on-accent: #ffffff; --sf-ring: rgba(0,122,255,.45);
+  --sf-hover: rgba(0,0,0,.06); --sf-field: #ffffff; --sf-field-edge: rgba(0,0,0,.14); --sf-track: rgba(0,0,0,.16);
+  --sf-shadow: 0 10px 30px rgba(0,0,0,.18), 0 0 0 .5px rgba(0,0,0,.12); --sf-win-shadow: 0 22px 60px rgba(0,0,0,.35), 0 0 0 .5px rgba(0,0,0,.18);
+  --sf-btn-shadow: 0 1px 2px rgba(0,0,0,.12), 0 0 0 .5px rgba(0,0,0,.12), inset 0 1px 0 rgba(255,255,255,.8);
+  --sf-tick: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14'><path d='M3.4 7.4l2.4 2.4L10.6 4' fill='none' stroke='white' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+  --sf-chev: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='12'><path d='M1.5 4.5L4 2l2.5 2.5M1.5 7.5L4 10l2.5-2.5' fill='none' stroke='%23555' stroke-width='1.3' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+  -webkit-font-smoothing: antialiased;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --sf-text: rgba(255,255,255,.9); --sf-text2: rgba(255,255,255,.55);
+    --plat: #1e1e20; --plat2: rgba(255,255,255,.06); --edge: rgba(255,255,255,.14); --ink: rgba(255,255,255,.9); --sub: rgba(255,255,255,.55); --hi: #0a84ff;
+    --sf-glass: rgba(40,40,44,.6); --sf-glass-strong: rgba(44,44,48,.88); --sf-rim: rgba(255,255,255,.18); --sf-win: rgba(36,36,40,.97);
+    --sf-btn: rgba(255,255,255,.12); --sf-btn-active: rgba(255,255,255,.22); --sf-line: rgba(255,255,255,.12);
+    --sf-accent: #0a84ff; --sf-accent-active: #409cff; --sf-on-accent: #ffffff; --sf-ring: rgba(10,132,255,.55);
+    --sf-hover: rgba(255,255,255,.08); --sf-field: rgba(255,255,255,.07); --sf-field-edge: rgba(255,255,255,.16); --sf-track: rgba(255,255,255,.18);
+    --sf-shadow: 0 10px 30px rgba(0,0,0,.5), 0 0 0 .5px rgba(255,255,255,.12); --sf-win-shadow: 0 22px 60px rgba(0,0,0,.6), 0 0 0 .5px rgba(255,255,255,.16);
+    --sf-btn-shadow: 0 1px 2px rgba(0,0,0,.3), 0 0 0 .5px rgba(255,255,255,.12), inset 0 1px 0 rgba(255,255,255,.12);
+    --sf-chev: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='12'><path d='M1.5 4.5L4 2l2.5 2.5M1.5 7.5L4 10l2.5-2.5' fill='none' stroke='%23ccc' stroke-width='1.3' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+  }
+  :root:root { color-scheme: dark; }
+}
+body { font-size: 13px; }
+/* the toolbar: translucent glass with its rim of light */
+#menubar { background: var(--sf-glass); -webkit-backdrop-filter: blur(24px) saturate(180%); backdrop-filter: blur(24px) saturate(180%);
+  border-bottom: .5px solid var(--sf-line); box-shadow: inset 0 1px 0 var(--sf-rim); height: 44px; padding: 0 10px; gap: 2px; }
+#menubar .logo { font: 600 14px var(--ui); color: var(--sf-text); letter-spacing: 0; border-radius: 999px; padding: 5px 12px; }
+#menubar .logo:hover, #menubar .logo:focus-visible { color: var(--sf-text); background: var(--sf-hover); }
+.mbtn { font: 13px var(--ui); color: var(--sf-text); border-radius: 999px; padding: 6px 12px; }
+.mbtn:hover, .mbtn:focus-visible, .mbtn[aria-expanded=true] { background: var(--sf-hover); color: var(--sf-text); }
+.mbtn:focus-visible { outline: 3px solid var(--sf-ring); outline-offset: 0; }
+#title { color: var(--sf-text2); font: 13px var(--ui); }
+/* the menus: glass, the chosen item a blue pill */
+.dropdown { top: 42px; min-width: 240px; background: var(--sf-glass-strong); color: var(--sf-text); -webkit-backdrop-filter: blur(30px) saturate(180%); backdrop-filter: blur(30px) saturate(180%);
+  border: 0; border-radius: 12px; padding: 5px; box-shadow: var(--sf-shadow), inset 0 1px 0 var(--sf-rim); }
+.dropdown button { font: 13px var(--ui); color: var(--sf-text); padding: 4px 12px 4px 26px; border-radius: 7px; }
+.dropdown button:hover, .dropdown button:focus-visible { background: var(--sf-accent); color: var(--sf-on-accent); }
+.dropdown button:disabled { color: var(--sf-text2); background: none; }
+.dropdown hr { border: 0; border-top: 1px solid var(--sf-line); margin: 5px 10px; }
+.dropdown button.check::before { width: 14px; margin-left: -16px; }
+.starmenu .mhead { font: 600 12px var(--ui); color: var(--sf-text2); padding: 4px 12px; margin: 0 0 2px; }
+/* the panel and its boxes: a sidebar of rounded groups */
+#panel { background: var(--plat); border-right: .5px solid var(--sf-line); color: var(--ink); }
+.box, .designer { background: var(--plat2); color: var(--ink); border: .5px solid var(--sf-line); border-radius: 12px; box-shadow: 0 1px 2px rgba(0,0,0,.05); }
+/* windows: large corners, a rim of light, the window buttons at the left */
+.win { background: var(--sf-win); color: var(--sf-text); border: 0; border-radius: 16px; box-shadow: var(--sf-win-shadow), inset 0 1px 0 var(--sf-rim); overflow: hidden;
+  -webkit-backdrop-filter: blur(30px) saturate(180%); backdrop-filter: blur(30px) saturate(180%); }
+.wtitle { position: relative; height: 40px; padding: 0 14px; gap: 0; background: none; border-bottom: 0; }
+.wtitle span { background: none; padding: 0 56px; margin: 0 auto; font: 600 13px var(--ui); color: var(--sf-text); }
+.close { width: 12px; height: 12px; border: .5px solid rgba(0,0,0,.18); border-radius: 50%; padding: 0; flex: none; background: #ff5f57; cursor: pointer; }
+.close:hover { background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12'><path d='M4 4l4 4M8 4l-4 4' stroke='%23700' stroke-width='1.2' stroke-linecap='round'/></svg>") center / 12px no-repeat, #ff5f57; }
+.close:focus-visible { outline: 3px solid var(--sf-ring); outline-offset: 1px; }
+/* the yellow and green window buttons beside the red close one (only in a
+   title bar that has the close button) */
+.wtitle:has(> .close)::before { content: ''; position: absolute; left: 34px; top: 14px; width: 32px; height: 12px; pointer-events: none;
+  background: radial-gradient(circle at 6px 6px, #febc2e 0 5.6px, rgba(0,0,0,.18) 6px, transparent 6.3px), radial-gradient(circle at 26px 6px, #28c840 0 5.6px, rgba(0,0,0,.18) 6px, transparent 6.3px); }
+.wbody { padding: 6px 18px 18px; }
+.win .sub, .win .note { color: var(--sf-text2); }
+.win.alert { border-radius: 22px; }
+.win.alert .wtitle span { white-space: normal; padding: 0 8px; }
+/* buttons: capsules, the default one blue */
+button:not(.mbtn):not(.close):not(.tbtn):not(.clock):not([role=menuitem]) {
+  background: var(--sf-btn); color: var(--sf-text); border: 0; border-radius: 999px; padding: 4px 14px; min-height: 26px; font: 13px var(--ui); box-shadow: var(--sf-btn-shadow);
+}
+button:not(.mbtn):not(.close):not(.tbtn):not(.clock):not([role=menuitem]):not(.quiet) { border: 0; border-radius: 999px; font-weight: 500; }
+button:not(.mbtn):not(.close):not(.tbtn):not(.clock):not([role=menuitem]):active:not(:disabled) { background: var(--sf-btn-active); }
+.win .btns > button:not(.quiet):last-child, .newgame .btns > button:last-child, #tnew {
+  background: linear-gradient(rgba(255,255,255,.18), rgba(255,255,255,0)), var(--sf-accent) !important; color: var(--sf-on-accent) !important;
+  box-shadow: 0 1px 3px rgba(0,80,200,.35), inset 0 1px 0 rgba(255,255,255,.35) !important; }
+.win .btns > button:not(.quiet):last-child:active, .newgame .btns > button:last-child:active, #tnew:active { background: var(--sf-accent-active) !important; }
+button:disabled { opacity: .4; }
+button:focus-visible { outline: 3px solid var(--sf-ring); outline-offset: 1px; }
+/* the segmented control: capsules side by side, the chosen one white */
+.tbtn { background: var(--sf-hover); color: var(--sf-text); border: 0; border-radius: 999px; padding: 3px 11px; font: 12px var(--ui); }
+.tbtn.on { background: var(--sf-accent); color: var(--sf-on-accent); box-shadow: 0 1px 2px rgba(0,0,0,.18); }
+/* the budget bars' troughs */
+.track { height: 12px; background: var(--sf-field); border: .5px solid var(--sf-field-edge); border-radius: 6px; overflow: hidden; box-shadow: inset 0 1px 1px rgba(0,0,0,.06); }
+.track:focus-visible { outline: 3px solid var(--sf-ring); outline-offset: 1px; }
+/* fields: rounded, the soft blue focus ring */
+html input[type=text], html input[type=number], html input:not([type]), html input[type=password], html textarea {
+  font: 13px var(--ui); color: var(--sf-text); padding: 5px 9px; border: .5px solid var(--sf-field-edge); border-radius: 8px; background: var(--sf-field); box-shadow: inset 0 1px 1px rgba(0,0,0,.05);
+}
+html input[type=text]:focus, html input:not([type]):focus, html input[type=number]:focus, html input[type=password]:focus, html textarea:focus { outline: 0; box-shadow: 0 0 0 3.5px var(--sf-ring); }
+html input[type=number] { -moz-appearance: textfield; appearance: textfield; }
+html input[type=number]::-webkit-inner-spin-button, html input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+/* pop-up buttons: a rounded glass button with the up-and-down chevrons */
+html select, html .newgame select {
+  -webkit-appearance: none; appearance: none; font: 13px var(--ui); color: var(--sf-text); cursor: pointer; padding: 3px 26px 3px 10px; min-height: 26px;
+  border: 0; border-radius: 8px; box-shadow: var(--sf-btn-shadow); background: var(--sf-chev) no-repeat right 9px center / 8px 12px, var(--sf-btn);
+}
+html select option { background: var(--sf-win); color: var(--sf-text); }
+/* check boxes and radio buttons */
+html input[type=checkbox], html input[type=radio] {
+  -webkit-appearance: none; appearance: none; width: 14px; height: 14px; margin: 0 6px 0 0; padding: 0; flex: none; vertical-align: middle; cursor: pointer;
+  border: 0; border-radius: 4px; background: var(--sf-btn); box-shadow: var(--sf-btn-shadow), inset 0 0 0 .5px var(--sf-field-edge), 0 0 0 .5px rgba(0,0,0,.14);
+}
+html input[type=radio] { border-radius: 50%; }
+html input[type=checkbox]:checked { background: var(--sf-tick) center / 14px no-repeat, var(--sf-accent); box-shadow: inset 0 0 0 .5px rgba(0,0,0,.15); }
+html input[type=radio]:checked { background: radial-gradient(circle, #fff 0 2.6px, transparent 3px), var(--sf-accent); box-shadow: inset 0 0 0 .5px rgba(0,0,0,.15); }
+html input[type=checkbox]:disabled, html input[type=radio]:disabled, html input[type=range]:disabled, html select:disabled { opacity: .4; cursor: default; }
+html input[type=checkbox]:focus-visible, html input[type=radio]:focus-visible, html select:focus-visible, html input[type=range]:focus-visible { outline: 3px solid var(--sf-ring); outline-offset: 1px; }
+/* the slider: a thin track and the capsule-shaped knob */
+html input[type=range], html .newgame .slider input[type=range] {
+  -webkit-appearance: none; appearance: none; height: 4px; margin: 9px 0; padding: 0; min-width: 0; cursor: pointer; border: 0; border-radius: 2px; background: var(--sf-track); box-shadow: none;
+}
+html input[type=range]::-webkit-slider-thumb, html .tm input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 24px; height: 16px; border-radius: 999px; cursor: pointer; border: 0; background: #fff;
+  box-shadow: 0 1px 4px rgba(0,0,0,.25), 0 0 0 .5px rgba(0,0,0,.12);
+}
+html input[type=range]::-moz-range-thumb, html .tm input[type=range]::-moz-range-thumb { width: 24px; height: 16px; border-radius: 999px; border: 0; background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,.25), 0 0 0 .5px rgba(0,0,0,.12); }
+html input[type=range]::-moz-range-track { background: transparent; }
+html .tm input[type=range] { height: 8px; border-radius: 4px; background: linear-gradient(90deg, #34c759 0 var(--split, 50%), #ff9500 var(--split, 50%) 100%); }
+html .yard .tm input[type=range] { background: linear-gradient(90deg, var(--sf-accent) 0 var(--split, 0%), var(--sf-track) var(--split, 0%) 100%); }
+.tm .tml { color: #248a3d; } .tm .tmr { color: #c93400; }
+@media (prefers-color-scheme: dark) { .tm .tml { color: #30d158; } .tm .tmr { color: #ff9f0a; } }
+.newgame .opts { border: .5px solid var(--sf-line); border-radius: 12px; background: var(--plat2); }
+a:link, a:visited { color: var(--sf-accent); }
+/* scroll bars: thin overlay ones (standard properties) */
+html, html * { scrollbar-width: thin; scrollbar-color: rgba(128,128,128,.55) transparent; }
+/* dark: the game's own light surfaces keep dark words; the skin's reds are
+   lightened from its own colours; the title screen's pop-ups take the look's */
+@media (prefers-color-scheme: dark) {
+  html .card, html .clock, html .tip, html .hall .lb { color: rgba(0,0,0,.88); }
+  html .card .sub, html .card .note, html .tip small { color: rgba(0,0,0,.52); }
+  html .frow.sel, html .ptable tr.click:hover { background: rgba(255,214,0,.16); }
+  html .box h3, html .frow.enemy .ftext div:first-child, html #handover h2 { color: color-mix(in srgb, var(--hat) 60%, var(--ink)); }
+  html .kv.neg b, html .warn, html .breport .kill { color: color-mix(in srgb, var(--neg) 60%, var(--ink)); }
+  html .ptable th { border-bottom-color: var(--sf-line); }
+  html .tskin select { color: var(--sf-text); }
+}

@@ -26,8 +26,19 @@ and the translation notice (`docs/translations-notes/`) are not done.
 2. Design: write prompts for Gemini for any art or design work, unless it can be done here.
    **Art part done** (October 2026): Jake's art package `nostalgia-ho-art.zip` is integrated
    (stand-in pictures in every skin's `sprites/fill/`, marked as the remake's;
-   `docs/missing-assets.md`). Still open in this step: check and integrate the browser skins
-   `browser-looks-1.0.0.zip` (scratchpad `incoming/`).
+   `docs/missing-assets.md`). **Browser looks done** (October 2026): Jake's `browser-looks-1.0.0.zip`
+   is integrated: five new OS looks, CSS only (`js/os/netscape.css`, `netscapemac.css`,
+   `firefox.css`, `edge.css`, `safari.css`; docs in `docs/browser-looks/`): Netscape Navigator 3
+   on Windows 95 and on Platinum (Location field, throbber, status bar), and Firefox, Edge and
+   Safari as of 2026 (light and dark with the system). Offered by w95 (Netscape), mac4/mac4c
+   (Netscape Mac), cozy and gemini (the three modern ones), and by every skin through the OS
+   look menu or `?os=`; no skin's default changed. Left for a Gemini design prompt: a colour
+   System 7.5 base for a truer Mac Navigator, Communicator 4, Safari 1.0 and Firefox 1.0 looks
+   (`docs/browser-looks/HANDOFF.md`, "Ideas for later"); the Firefox scroll-bar approximation,
+   and the Mac OS X, Android 4 and Fire OS fixes the package lists
+   (`FOR-THE-MAIN-CLAUDLING.md`, "Found along the way") are small code jobs still open. The
+   looks' few words ("Location:", "Document: Done") are CSS in English, as the browsers of the
+   time showed them; the look names are proper names, like the other looks'.
 3. Optional passwords on exported games, for the original play-by-file experience (not for
    the hot seat): each player's name and password asked at their turn, with a note quoting
    the version's manual (WINHO.WRI, the Amiga's Briefspiel.dok and Netzwerk.dok, the Mac

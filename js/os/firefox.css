@@ -1,0 +1,147 @@
+/* Spaceward Ho! — OS look "Firefox" (1.0.0): the browser the remake is
+   played in, as Firefox draws its own interface in 2026 (the Proton toolbar
+   and the Acorn design system's controls). The bar at the top is the
+   toolbar: light grey, the menus as rounded toolbar buttons that open
+   Firefox's menu panels (white, 8 px corners, rounded highlights); the game's
+   windows are Firefox's dialogs (white, rounded, a close X at the right); the
+   buttons are Acorn's (grey, 4 px corners, the default one blue); 16 px check
+   boxes and radio buttons in the accent; thin sliders with a round thumb;
+   thin scroll bars. It follows the system's light or dark setting, as Firefox
+   does (dark: the toolbar #2b2a33, the panels #42414d, the cyan accent).
+   The system's own font (Firefox uses the platform's). No logos, all CSS.
+   Among the
+   homage skins' own looks (Cozy, Gemini); no original ran in a browser. */
+@import url("base.css");
+:root {
+  --plat: #f9f9fb; --plat2: #ffffff; --edge: #cfcfd8; --ink: #15141a; --sub: #5b5b66; --hi: #0061e0;
+  --ui: system-ui, -apple-system, "Segoe UI", Ubuntu, Cantarell, "Noto Sans", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --ff-text: #15141a; --ff-text2: #5b5b66;
+  --ff-bar: #f0f0f4; --ff-panel: #ffffff; --ff-win: #ffffff;
+  --ff-btn: #e9e9ed; --ff-btn-hover: #d0d0d7; --ff-btn-active: #b1b1b9;
+  --ff-accent: #0061e0; --ff-accent-hover: #0250bb; --ff-accent-active: #053e94; --ff-on-accent: #ffffff;
+  --ff-hover: rgba(207,207,216,.66); --ff-line: #cfcfd8; --ff-field: #ffffff; --ff-field-edge: #8f8f9d;
+  --ff-track: #cfcfd8; --ff-shadow: 0 2px 14px rgba(58,57,68,.2); --ff-win-shadow: 0 8px 32px rgba(58,57,68,.35);
+  --ff-tick: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16'><path d='M4 8.2l2.6 2.6L12 5.4' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+  --ff-chev: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6'><path d='M1 1l4 4 4-4' fill='none' stroke='%2315141a' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+  --ff-x: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16'><path d='M4 4l8 8M12 4l-8 8' stroke='%235b5b66' stroke-width='1.6' stroke-linecap='round'/></svg>");
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ff-text: #fbfbfe; --ff-text2: #bfbfc9;
+    --plat: #2b2a33; --plat2: #42414d; --edge: #52525e; --ink: #fbfbfe; --sub: #bfbfc9; --hi: #00ddff;
+    --ff-bar: #1c1b22; --ff-panel: #42414d; --ff-win: #42414d;
+    --ff-btn: #2b2a33; --ff-btn-hover: #52525e; --ff-btn-active: #5b5b66;
+    --ff-accent: #00ddff; --ff-accent-hover: #80ebff; --ff-accent-active: #aaf2ff; --ff-on-accent: #15141a;
+    --ff-hover: rgba(251,251,254,.1); --ff-line: #52525e; --ff-field: #1c1b22; --ff-field-edge: #8f8f9d;
+    --ff-track: #5b5b66; --ff-shadow: 0 2px 14px rgba(0,0,0,.5); --ff-win-shadow: 0 8px 32px rgba(0,0,0,.6);
+    --ff-tick: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16'><path d='M4 8.2l2.6 2.6L12 5.4' fill='none' stroke='%2315141a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+    --ff-chev: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6'><path d='M1 1l4 4 4-4' fill='none' stroke='%23fbfbfe' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+    --ff-x: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16'><path d='M4 4l8 8M12 4l-8 8' stroke='%23fbfbfe' stroke-width='1.6' stroke-linecap='round'/></svg>");
+  }
+  :root:root { color-scheme: dark; }
+}
+body { font-size: 13px; }
+/* the toolbar: the menus as rounded toolbar buttons */
+#menubar { background: var(--plat); border-bottom: 1px solid var(--ff-line); height: 40px; padding: 0 6px; gap: 2px; box-shadow: none; }
+#menubar .logo { font: 600 14px var(--ui); color: var(--ff-text); letter-spacing: 0; }
+#menubar .logo:hover, #menubar .logo:focus-visible { color: var(--ff-text); background: var(--ff-hover); }
+.mbtn { font: 13px var(--ui); color: var(--ff-text); border-radius: 4px; padding: 7px 10px; }
+.mbtn:hover, .mbtn:focus-visible, .mbtn[aria-expanded=true] { background: var(--ff-hover); color: var(--ff-text); }
+.mbtn:focus-visible { outline: 2px solid var(--ff-accent); outline-offset: -2px; }
+#title { color: var(--ff-text2); font: 13px var(--ui); }
+/* the menus: Firefox's menu panels */
+.dropdown { top: 38px; min-width: 240px; background: var(--ff-panel); color: var(--ff-text); border: 1px solid var(--ff-line); border-radius: 8px; padding: 4px; box-shadow: var(--ff-shadow); }
+.dropdown button { font: 13px var(--ui); color: var(--ff-text); padding: 7px 12px 7px 28px; border-radius: 4px; }
+.dropdown button:hover, .dropdown button:focus-visible { background: var(--ff-hover); color: var(--ff-text); }
+.dropdown button:disabled { color: var(--ff-text2); opacity: .6; }
+.dropdown hr { border: 0; border-top: 1px solid var(--ff-line); margin: 4px 8px; }
+.dropdown button.check::before { color: var(--ff-text); width: 16px; margin-left: -18px; }
+.starmenu .mhead { font: 600 13px var(--ui); color: var(--ff-text2); padding: 7px 12px; margin: 0 0 2px; border-bottom: 1px solid var(--ff-line); }
+/* the panel and its boxes */
+#panel { background: var(--plat); border-right: 1px solid var(--ff-line); color: var(--ink); }
+.box, .designer { background: var(--plat2); color: var(--ink); border: 1px solid var(--ff-line); border-radius: 8px; box-shadow: none; }
+/* windows: Firefox's dialogs */
+.win { background: var(--ff-win); color: var(--ff-text); border: 1px solid var(--ff-line); border-radius: 8px; box-shadow: var(--ff-win-shadow); overflow: hidden; }
+.wtitle { height: 44px; padding: 0 8px 0 16px; gap: 8px; background: none; border-bottom: 0; }
+.wtitle span { order: 1; background: none; padding: 0; margin: 0 auto 0 0; text-align: left; font: 600 15px var(--ui); color: var(--ff-text); }
+.close { order: 2; width: 32px; height: 32px; border: 0; border-radius: 4px; padding: 0; flex: none; background: var(--ff-x) center / 16px no-repeat; cursor: pointer; }
+.close:hover { background-color: var(--ff-hover); }
+.close:focus-visible { outline: 2px solid var(--ff-accent); outline-offset: 0; }
+.wbody { padding: 4px 16px 16px; }
+.win .sub, .win .note { color: var(--ff-text2); }
+.win.alert .wtitle span { white-space: normal; }
+/* buttons: Acorn's grey, the default one in the accent */
+button:not(.mbtn):not(.close):not(.tbtn):not(.clock):not([role=menuitem]) {
+  background: var(--ff-btn); color: var(--ff-text); border: 0; border-radius: 4px; padding: 5px 11px; min-height: 30px; font: 600 13px var(--ui); box-shadow: none;
+}
+button:not(.mbtn):not(.close):not(.tbtn):not(.clock):not([role=menuitem]):not(.quiet) { border: 0; border-radius: 4px; font-weight: 600; }
+button:not(.mbtn):not(.close):not(.tbtn):not(.clock):not([role=menuitem]):hover:not(:disabled) { background: var(--ff-btn-hover); }
+button:not(.mbtn):not(.close):not(.tbtn):not(.clock):not([role=menuitem]):active:not(:disabled) { background: var(--ff-btn-active); }
+.win .btns > button:not(.quiet):last-child, .newgame .btns > button:last-child, #tnew { background: var(--ff-accent) !important; color: var(--ff-on-accent) !important; }
+.win .btns > button:not(.quiet):last-child:hover, .newgame .btns > button:last-child:hover, #tnew:hover { background: var(--ff-accent-hover) !important; }
+.win .btns > button:not(.quiet):last-child:active, .newgame .btns > button:last-child:active, #tnew:active { background: var(--ff-accent-active) !important; }
+button:disabled { opacity: .4; }
+button:focus-visible { outline: 2px solid var(--ff-accent); outline-offset: 2px; }
+/* the segmented toggles: rounded buttons, the chosen one in the accent */
+.tbtn { background: var(--ff-btn); color: var(--ff-text); border: 0; border-radius: 4px; padding: 4px 10px; font: 13px var(--ui); }
+.tbtn:hover { background: var(--ff-btn-hover); }
+.tbtn.on { background: var(--ff-accent); color: var(--ff-on-accent); }
+/* the budget bars' troughs */
+.track { height: 12px; background: var(--ff-field); border: 1px solid var(--ff-field-edge); border-radius: 4px; overflow: hidden; }
+.track:focus-visible { outline: 2px solid var(--ff-accent); outline-offset: 1px; }
+/* fields and drop-downs */
+html input[type=text], html input[type=number], html input:not([type]), html input[type=password], html textarea {
+  font: 13px var(--ui); color: var(--ff-text); padding: 6px 8px; border: 1px solid var(--ff-field-edge); border-radius: 4px; background: var(--ff-field); box-shadow: none;
+}
+html input[type=text]:focus, html input:not([type]):focus, html input[type=number]:focus, html input[type=password]:focus, html textarea:focus { outline: 2px solid var(--ff-accent); outline-offset: -1px; border-color: transparent; }
+html input[type=number] { -moz-appearance: textfield; appearance: textfield; }
+html input[type=number]::-webkit-inner-spin-button, html input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+html select, html .newgame select {
+  -webkit-appearance: none; appearance: none; font: 13px var(--ui); color: var(--ff-text); cursor: pointer; padding: 5px 30px 5px 10px; min-height: 32px;
+  border: 0; border-radius: 4px; box-shadow: none; background: var(--ff-chev) no-repeat right 11px center / 10px 6px, var(--ff-btn);
+}
+html select:hover:not(:disabled) { background-color: var(--ff-btn-hover); }
+html select option { background: var(--ff-panel); color: var(--ff-text); }
+/* check boxes and radio buttons */
+html input[type=checkbox], html input[type=radio] {
+  -webkit-appearance: none; appearance: none; width: 16px; height: 16px; margin: 0 6px 0 0; padding: 0; flex: none; vertical-align: middle; cursor: pointer;
+  border: 1px solid var(--ff-field-edge); border-radius: 2px; background: var(--ff-field); box-shadow: none;
+}
+html input[type=radio] { border-radius: 50%; }
+html input[type=checkbox]:hover:not(:disabled), html input[type=radio]:hover:not(:disabled) { border-color: var(--ff-text); }
+html input[type=checkbox]:checked { border-color: var(--ff-accent); background: var(--ff-tick) center / 16px no-repeat, var(--ff-accent); }
+html input[type=radio]:checked { border: 5px solid var(--ff-accent); background: var(--ff-field); }
+html input[type=checkbox]:disabled, html input[type=radio]:disabled, html input[type=range]:disabled, html select:disabled { opacity: .4; cursor: default; }
+html input[type=checkbox]:focus-visible, html input[type=radio]:focus-visible, html select:focus-visible, html input[type=range]:focus-visible { outline: 2px solid var(--ff-accent); outline-offset: 2px; }
+/* sliders: a thin rounded track and a round thumb in the accent */
+html input[type=range], html .newgame .slider input[type=range] {
+  -webkit-appearance: none; appearance: none; height: 4px; margin: 8px 0; padding: 0; min-width: 0; cursor: pointer; border: 0; border-radius: 2px; background: var(--ff-track); box-shadow: none;
+}
+html input[type=range]::-webkit-slider-thumb, html .tm input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; cursor: pointer; border: 2px solid var(--ff-field); background: var(--ff-accent); box-shadow: 0 0 0 1px var(--ff-accent);
+}
+html input[type=range]::-moz-range-thumb, html .tm input[type=range]::-moz-range-thumb { width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--ff-field); background: var(--ff-accent); box-shadow: 0 0 0 1px var(--ff-accent); }
+html input[type=range]::-moz-range-track { background: transparent; }
+/* terraform / mine and shipbuilding: the track in two colours */
+html .tm input[type=range] { height: 8px; border-radius: 4px; background: linear-gradient(90deg, #2ac3a2 0 var(--split, 50%), #ff8a50 var(--split, 50%) 100%); }
+html .yard .tm input[type=range] { background: linear-gradient(90deg, var(--ff-accent) 0 var(--split, 0%), var(--ff-track) var(--split, 0%) 100%); }
+.tm .tml { color: #017a40; } .tm .tmr { color: #c45a27; }
+@media (prefers-color-scheme: dark) { .tm .tml { color: #54ffbd; } .tm .tmr { color: #ffa436; } }
+.newgame .opts { border: 1px solid var(--ff-line); border-radius: 8px; background: none; }
+a:link { color: var(--ff-accent); } a:visited { color: var(--ff-accent); }
+/* scroll bars: Firefox's own thin ones (the standard properties; Firefox
+   ignores ::-webkit-scrollbar) */
+html, html * { scrollbar-width: thin; scrollbar-color: var(--ff-field-edge) transparent; }
+/* dark: the game's own light surfaces (the message card, the clock, the tips,
+   the Hall's list) keep dark words; the skin's red headings and warnings are
+   lightened from its own colours so they read on the dark panel; the title
+   screen's pop-ups (black words in the classic skin) take the look's */
+@media (prefers-color-scheme: dark) {
+  html .card, html .clock, html .tip, html .hall .lb { color: #15141a; }
+  html .card .sub, html .card .note, html .tip small { color: #5b5b66; }
+  html .frow.sel, html .ptable tr.click:hover { background: rgba(255,214,0,.16); }
+  html .box h3, html .frow.enemy .ftext div:first-child, html #handover h2 { color: color-mix(in srgb, var(--hat) 60%, var(--ink)); }
+  html .kv.neg b, html .warn, html .breport .kill { color: color-mix(in srgb, var(--neg) 60%, var(--ink)); }
+  html .ptable th { border-bottom-color: var(--ff-line); }
+  html .tskin select { color: var(--ff-text); }
+}

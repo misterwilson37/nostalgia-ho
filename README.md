@@ -183,9 +183,14 @@ skin's own chrome) and draw everything in CSS and inline SVG.
 | iOS 10 | `ios10` | the system 1.2.9 was built for (iOS 10.3 SDK, 2017): San Francisco (Helvetica Neue where it's missing), a translucent bar, 270-point alerts with their buttons along the bottom, action sheets for the menus, green switches for every check box, the thin slider with its white knob, rounded text fields; no status bar (the app hid it) | ios |
 | Android 4 | `android4` | Holo dark (a best guess, no screenshots of the game): dark grey dialogs with a cyan (#33b5e5) title rule and focus, flat buttons, Holo switches, square check boxes, thin sliders, underlined fields, Roboto | android |
 | Fire OS 3 and 4 | `fireos` | the Android 4 look in Amazon's orange (#f90, #e47911), a best guess | android |
+| Netscape Navigator 3 (Windows) | `netscape` | the Windows 95 look with Navigator 3's parts: raised text-only toolbar buttons for the menus, a sunken "Location:" field (the game's title line), the throbber (the remake's own ringed planet and moon, turning while the title screen loads), a status bar with "Document: Done", Navigator's link colours | |
+| Netscape Navigator 3 (Mac) | `netscapemac` | the same Navigator parts on Platinum, the menus kept as Mac menu titles | |
+| Firefox | `firefox` | Firefox in 2026: toolbar, rounded menu panels, Acorn buttons and controls, dialogs with the X at the right; light or dark with the system | |
+| Edge | `edge` | Edge in 2026, Fluent 2: frosted toolbar and menus, 8 px dialogs with the 20 px title, fields with the blue focus edge; light or dark with the system | |
+| Safari | `safari` | Safari 26, Liquid Glass: glass toolbar and menus, 16 px windows with the three window buttons, capsule buttons and slider knob; light or dark with the system | |
 
 Each skin lists its own looks in `js/skins.js` (`SKINS`' `os`, the default first: mac2 System
-6 and 7, mac4 System 7 and Mac OS 8, dos DOS and Windows 3.1, classic Mac OS 8.6, 9 and X, ios iOS 10 and 6, android Fire OS and Android 4);
+6 and 7, mac4 System 7 and Mac OS 8, dos DOS and Windows 3.1, classic Mac OS 8.6, 9 and X, ios iOS 10 and 6, android Fire OS and Android 4, w95 Windows 95 and Netscape (Windows), mac4 and mac4c also Netscape (Mac), cozy and gemini also Firefox, Safari and Edge);
 the OS look menu offers those first, then a line, then every other look, so anything can be
 mixed. The list follows the skin, not the version. The look is chosen in New Game, on the
 title screen, and mid-game from the Ho menu's **Skin and OS look…**, where it changes at once
