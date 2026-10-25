@@ -4,4 +4,4 @@
 // colour Mac got from 3.0's "Ho! 3.0 Color Picts" file
 // (tools/extract/mac3.py writes them to assets/skins/mac3c).
 window.HOMAC3_COLOUR = true;
-if (!window.HOSKINS_INLINE) document.write('<script src="js/skins/mac3/ui.js"><\/script>');
+if (!window.HOSKINS_INLINE) document.write('<script src="js/skins/mac3/ui.js' + (window.HO_BUILD || '') + '"><\/script>');

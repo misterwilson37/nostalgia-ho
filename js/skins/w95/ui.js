@@ -201,5 +201,5 @@ function faces() {
   for (let n = 0; n < 16; n++) { o['bad' + n + '_0'] = 'b' + (2000 + n); o['bad' + n + '_1'] = 'b' + (2500 + n); }
   return o;
 }
-if (!window.HOSKINS_INLINE) document.write('<script src="js/skins/classic/ui.js"><\/script>');
+if (!window.HOSKINS_INLINE) document.write('<script src="js/skins/classic/ui.js' + (window.HO_BUILD || '') + '"><\/script>');
 })();

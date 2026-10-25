@@ -268,5 +268,5 @@ function faces() {
 // a skin built on this one (js/skins/amiga, mac3) changes what it needs; its
 // hooks can call this skin's own as HOTHEME.base
 window.HOTHEME = Object.assign({ base: window.HOTHEME }, window.HOTHEME, window.HOTHEME_OVER || {});
-if (!window.HOSKINS_INLINE) document.write('<script src="js/skins/classic/ui.js"><\/script>');
+if (!window.HOSKINS_INLINE) document.write('<script src="js/skins/classic/ui.js' + (window.HO_BUILD || '') + '"><\/script>');
 })();

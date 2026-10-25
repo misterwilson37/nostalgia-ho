@@ -74,5 +74,5 @@ function backKey(doc) {
     if (used) { e.preventDefault(); e.stopImmediatePropagation(); }
   }, true);
 }
-if (!window.HOSKINS_INLINE) document.write('<script src="js/skins/ios/ui.js"><\/script>');
+if (!window.HOSKINS_INLINE) document.write('<script src="js/skins/ios/ui.js' + (window.HO_BUILD || '') + '"><\/script>');
 })();

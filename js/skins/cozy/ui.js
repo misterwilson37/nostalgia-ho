@@ -116,5 +116,5 @@ window.HOTHEME = {
     if (by) by.textContent = 'by Peter Commons and Joe Williams, Delta Tao Software';
   },
 };
-if (!window.HOSKINS_INLINE) document.write('<script src="js/skins/classic/ui.js"><\/script>');
+if (!window.HOSKINS_INLINE) document.write('<script src="js/skins/classic/ui.js' + (window.HO_BUILD || '') + '"><\/script>');
 })();

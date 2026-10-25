@@ -6023,7 +6023,7 @@ function tipShow(target) {
   if (!h || !Prefs.tips) return;
   if (!Tip.el) { Tip.el = el('div', { class: 'tip', role: 'tooltip', id: 'hotip' }); document.body.append(Tip.el); }
   Tip.el.innerHTML = '';
-  Tip.el.append(el('p', null, h[0]), el('small', null, `Adapted from the ${R[k] ? manualFor()[1] : 'Spaceward Ho! 5 manual'}: ${h[1]}`), UIL && UIL.lang !== 'en' && UIL.tr(h[0]) === h[0] ? inEnglish('This help is in English.') : null);
+  put(Tip.el, el('p', null, h[0]), el('small', null, `Adapted from the ${R[k] ? manualFor()[1] : 'Spaceward Ho! 5 manual'}: ${h[1]}`), UIL && UIL.lang !== 'en' && UIL.tr(h[0]) === h[0] ? inEnglish('This help is in English.') : null);
   if (target.dataset.key) Tip.el.append(el('p', { class: 'key' }, target.dataset.key));
   Tip.el.hidden = false; Tip.at = target;
   target.setAttribute('aria-describedby', 'hotip');

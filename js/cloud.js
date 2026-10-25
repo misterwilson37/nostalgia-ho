@@ -65,7 +65,7 @@ function loadScript(src, timeout) {
   return new Promise((resolve, reject) => {
     const s = doc.createElement('script');
     const t = setTimeout(() => { s.onload = s.onerror = null; reject(new Error('timeout')); }, timeout || 20000);
-    s.src = src; s.async = true;
+    s.src = src + (root.HO_BUILD || ''); s.async = true;
     s.onload = () => { clearTimeout(t); resolve(); };
     s.onerror = () => { clearTimeout(t); s.remove(); reject(new Error('load')); };
     doc.head.append(s);

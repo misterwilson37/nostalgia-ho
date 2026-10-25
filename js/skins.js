@@ -192,6 +192,10 @@ let currentOS = [wantedOS, store.get('ho5.os.' + current)].find(validOS) || osDe
 // data-os> (tools/bundle.py) and turns one on; otherwise the one <link>
 // (#ho-os) is pointed at js/os/<id>.css, the old one kept until the new one
 // has loaded so nothing flashes unstyled
+// the build stamp (index.html's ho-build, tools/stamp.js) for the files this
+// loads itself, so an update never mixes cached old files with new
+const BUILD = (() => { const m = root.document && root.document.querySelector('meta[name="ho-build"]'); return m ? '?v=' + m.content : ''; })();
+root.HO_BUILD = BUILD;
 function applyOS(id) {
   const doc = root.document, de = doc.documentElement;
   for (const c of [...de.classList]) if (c.startsWith('os-')) de.classList.remove(c);
@@ -200,7 +204,7 @@ function applyOS(id) {
   if (inl.length) { for (const st of inl) st.media = st.dataset.os === id ? 'all' : 'not all'; return; }
   const old = doc.getElementById('ho-os');
   if (!old) return;
-  const href = `js/os/${id}.css`;
+  const href = `js/os/${id}.css${BUILD}`;
   if (old.getAttribute('href') === href) return;
   const ln = doc.createElement('link');
   ln.rel = 'stylesheet'; ln.href = href;
@@ -301,8 +305,8 @@ root.document.documentElement.classList.add('os-' + currentOS);
 root.document.documentElement.dataset.os = currentOS;
 if (root.HOSKINS_INLINE) applyOS(currentOS);
 else {
-  root.document.write(`<link rel="stylesheet" id="ho-os" href="js/os/${currentOS}.css">` +
-    `<link rel="stylesheet" href="js/skins/${current}/style.css">` +
-    `<script src="js/skins/${current}/ui.js"><\/script>`);
+  root.document.write(`<link rel="stylesheet" id="ho-os" href="js/os/${currentOS}.css${BUILD}">` +
+    `<link rel="stylesheet" href="js/skins/${current}/style.css${BUILD}">` +
+    `<script src="js/skins/${current}/ui.js${BUILD}"><\/script>`);
 }
 })(this);

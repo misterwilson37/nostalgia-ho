@@ -343,5 +343,5 @@ HOTHEME.shipPic = function(design, IMG, rusty, palmFix) {
 };
 
 if (!window.HOSKINS_INLINE) {
-    document.write('<script src="js/skins/classic/ui.js"><\/script>');
+    document.write('<script src="js/skins/classic/ui.js' + (window.HO_BUILD || '') + '"><\/script>');
 }

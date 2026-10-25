@@ -102,5 +102,5 @@ window.HOTHEME = {
     const l = doc.querySelector('#menubar .logo'); if (l) l.textContent = 'Ho! 5 Palm';
   },
 };
-if (!window.HOSKINS_INLINE) document.write('<script src="js/skins/classic/ui.js"><\/script>');
+if (!window.HOSKINS_INLINE) document.write('<script src="js/skins/classic/ui.js' + (window.HO_BUILD || '') + '"><\/script>');
 })();

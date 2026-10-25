@@ -1837,5 +1837,5 @@ window.HOTHEME_OVER = {
   // 740 the Spielervergleich's
   youWon: false,
 };
-if (!window.HOSKINS_INLINE) document.write('<script src="js/skins/dos/ui.js"><\/script>');
+if (!window.HOSKINS_INLINE) document.write('<script src="js/skins/dos/ui.js' + (window.HO_BUILD || '') + '"><\/script>');
 })();

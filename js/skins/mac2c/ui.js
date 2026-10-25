@@ -5,4 +5,4 @@
 // ics8) and that file's colour pictures (tools/extract/mac2.py writes them
 // to assets/skins/mac2c).
 window.HOMAC2_COLOUR = true;
-if (!window.HOSKINS_INLINE) document.write('<script src="js/skins/mac2/ui.js"><\/script>');
+if (!window.HOSKINS_INLINE) document.write('<script src="js/skins/mac2/ui.js' + (window.HO_BUILD || '') + '"><\/script>');

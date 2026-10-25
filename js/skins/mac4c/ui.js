@@ -4,4 +4,4 @@
 // colour Mac got from 4.0's "Ho! 4.0 Color Picts" file, the moving title
 // among them (tools/extract/mac4.py writes them to assets/skins/mac4c).
 window.HOMAC4_COLOUR = true;
-if (!window.HOSKINS_INLINE) document.write('<script src="js/skins/mac4/ui.js"><\/script>');
+if (!window.HOSKINS_INLINE) document.write('<script src="js/skins/mac4/ui.js' + (window.HO_BUILD || '') + '"><\/script>');

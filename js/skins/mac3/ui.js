@@ -149,5 +149,5 @@ if (v12) { delete window.HOTHEME_OVER.starLook; delete window.HOTHEME_OVER.messa
 if (v2) { delete window.HOTHEME_OVER.starLook; delete window.HOTHEME_OVER.messageLook; Object.assign(window.HOTHEME_OVER, window.HOMAC2); }
 // js/skins/mac4 (4.0.5, 1996): this skin with 4.0's own pictures, sounds and hooks
 if (window.HOMAC4) Object.assign(window.HOTHEME_OVER, window.HOMAC4);
-if (!window.HOSKINS_INLINE) document.write('<script src="js/skins/dos/ui.js"><\/script>');
+if (!window.HOSKINS_INLINE) document.write('<script src="js/skins/dos/ui.js' + (window.HO_BUILD || '') + '"><\/script>');
 })();

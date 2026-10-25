@@ -25,7 +25,7 @@ def inline(m):
     src = m.group(1)
     return '<script>\n' + open(P(src)).read() + '\n</script>'
 
-page = re.sub(r'<script src="([^"]+)"></script>', inline, page)
+page = re.sub(r'<script src="([^"?]+)(?:\?v=[^"]*)?"></script>', inline, page)
 # one skin is built in (python3 tools/bundle.py <skin>, default classic);
 # js/skins.js is told not to load one itself
 skin = sys.argv[1] if len(sys.argv) > 1 else 'classic'
@@ -48,7 +48,7 @@ js = open(P('js', 'skins', skin, 'ui.js')).read()
 # (and so on, if that one is built on another)
 part = js
 while True:
-    srcs = re.findall(r"document\.write\('<script src=\"(js/skins/[^\"]+)\"><\\/script>'\)", part)
+    srcs = re.findall(r"document\.write\('<script src=\"(js/skins/[^\"']+)(?:' \+ \(window\.HO_BUILD \|\| ''\) \+ ')?\"><\\/script>'\)", part)
     if not srcs:
         break
     part = ''.join('\n' + open(P(src)).read() for src in srcs)

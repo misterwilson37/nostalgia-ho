@@ -78,5 +78,5 @@ window.HOMAC2 = {
     if (b && w) w.append(b);
   },
 };
-if (!window.HOSKINS_INLINE) document.write('<script src="js/skins/mac3/ui.js"><\/script>');
+if (!window.HOSKINS_INLINE) document.write('<script src="js/skins/mac3/ui.js' + (window.HO_BUILD || '') + '"><\/script>');
 })();

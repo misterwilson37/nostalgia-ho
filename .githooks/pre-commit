@@ -1,0 +1,6 @@
+#!/bin/sh
+# a new build stamp in index.html when a commit changes the page or its code
+# (tools/stamp.js); set up with: git config core.hooksPath .githooks
+if git diff --cached --name-only | grep -q -E '^(js/|index\.html$)'; then
+  node tools/stamp.js >/dev/null && git add index.html
+fi
