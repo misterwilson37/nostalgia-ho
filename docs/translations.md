@@ -3,7 +3,8 @@
 Each version is offered in the languages it shipped in, from the official translations,
 and in English, which is always there and is every version's default (Jake's choice):
 1.2, released in French, and the Amiga skin and the German DOS 2.0, released in German,
-start in English too unless the player has chosen otherwise ("Which language" below). Where a version had no translation, the remake
+start in English too unless the player has chosen otherwise ("Which language" below). 3.0.1's French is official too
+(the French Mac 3.0.1, "3.0.1F", found in October 2026). Where a version had no translation, the remake
 makes its own, and marks it so everywhere: in New Game's Language list and the Ho menu's
 Language… (`HO.languageName`: "Français (traduction du remake)", "Deutsch (Übersetzung des
 Remakes)", "Türkçe (yeniden yapımın çevirisi)", "Español (traducción del remake)"), and in
@@ -16,6 +17,14 @@ follows the language too ("The remake's interface").
 
 `js/engine.js` (rs.languages, rs.lang, `inLanguage`, `say`) and `js/languages.js`:
 
+- **A correction of official wording is the patch's, never the default** (Jake's rule,
+  October 2026): a version plays its official translation as released, slips and all, and
+  so does every version that carries that line; `js/lang-remake.js` `patch` / `patchWords`
+  (English line to corrected line) and the interface rows' seventh element hold the
+  corrections, and `js/languages.js` builds them as `rs.lang[code].fix.translations`
+  (`engine.js` `inLanguage` lays it over the language when the game has the patch on and the
+  version's `rs.fixes` lists `translations`; iOS's own `iosFillings`, `trLostWord` and
+  `trSpiesReport` are fixes of the same kind). `docs/fixes.md`, "Translations".
 - **Only words and names change.** The rules keep the version's own (English) words; the
   page puts a report in the game's language when it shows it (`HO.say`). Names are drawn
   from the version's own lists and then put in the game's language, entry for entry. So
@@ -53,13 +62,18 @@ language.
 
 ## Method
 
-1. **Official, the version's own**: 1.2F's French; the German DOS 2.0 for DOS 2.0 and Mac
-   2.0.1; iOS's and Android's French and Turkish.
+1. **Official, the version's own**: 1.2F's French; 3.0.1F's French (the French Mac 3.0.1,
+   `docs/301fr-findings.md`); the German DOS 2.0 for DOS 2.0 and Mac 2.0.1; iOS's and
+   Android's French and Turkish.
 2. **Official, the same English in another version**: a line whose English is the
    version's own, word for word (quotes, the "$" the number formatter writes and "%%"
    aside), is given that official translation verbatim, from the nearest version that
    has one. 1.2F's French carries forward to 2.0 (1.2's reports are 2.0's line for line);
-   the German DOS 2.0 carries back to 1.2.
+   the German DOS 2.0 carries back to 1.2. 3.0.1F's French is the nearest for 4.0.5 (Windows and
+   Mac), then iOS's; for 5.0.5 and the Palm iOS's comes first and 3.0.1F's covers the lines
+   whose English is 3.0.1's and not iOS's (the Hope and Ship jokes, Armageddon's questions).
+   Its lines are paired with the English 3.0.1's by (resource, index): `HOLANG.mac301En`
+   beside `mac301Fr`, `official301()` in `js/languages.js`.
 3. **Adapted from official**: a line whose English differs only a little from a line
    that has an official translation (a word changed, a clause added or dropped, a number,
    a placeholder or a name changed) is given that official translation, edited as little
@@ -87,7 +101,7 @@ official translation of the same English, and lines whose English differs from a
 one only by the version's own slip (`EQUIV`); "adapted" are the lines marked `'adapted'`
 (`js/lang-remake.js` `adapted`, and the few in `js/languages.js`), listed below with their
 source lines; "the remake's" are the lines marked `'remake'` (`js/lang-remake.js` `own` and
-`over`, and the few in `js/languages.js`).
+`over` (empty now), and the few in `js/languages.js`).
 
 | Version | Language | Lines, official | Lines, adapted | Lines, the remake's | Hints (official / adapted / the remake's) |
 |---|---|---|---|---|---|
@@ -100,24 +114,24 @@ source lines; "the remake's" are the lines marked `'remake'` (`js/lang-remake.js
 | Mac 2.0.1 | German (official) | 54 | 2 | 3 | – |
 | Mac 2.0.1 | French (the remake's) | 56 | 3 | 1 | – |
 | Mac 2.0.1 | Spanish (the remake's) | 0 | 0 | 60 | – |
-| Mac 3.0.1 | French (the remake's) | 119 | 11 | 2 | – |
-| Mac 3.0.1 | Turkish (the remake's) | 111 | 12 | 9 | – |
+| Mac 3.0.1 | French (official, 3.0.1F) | 127 | 4 | 1 | – |
+| Mac 3.0.1 | Turkish (the remake's) | 116 | 12 | 4 | – |
 | Mac 3.0.1 | German (the remake's) | 30 | 13 | 89 | – |
 | Mac 3.0.1 | Spanish (the remake's) | 0 | 0 | 132 | – |
-| Windows 4.0.5 | French (the remake's) | 163 | 17 | 16 | 22 / 1 / 3 |
-| Windows 4.0.5 | Turkish (the remake's) | 152 | 17 | 27 | 22 / 1 / 3 |
+| Windows 4.0.5 | French (the remake's) | 181 | 12 | 3 | 22 / 1 / 3 |
+| Windows 4.0.5 | Turkish (the remake's) | 159 | 16 | 21 | 22 / 1 / 3 |
 | Windows 4.0.5 | German (the remake's) | 31 | 18 | 147 | 0 / 0 / 26 |
 | Windows 4.0.5 | Spanish (the remake's) | 0 | 0 | 196 | 0 / 0 / 26 |
-| Mac 4.0.5 | French (the remake's) | 180 | 17 | 16 | 23 / 1 / 3 |
-| Mac 4.0.5 | Turkish (the remake's) | 168 | 17 | 28 | 23 / 1 / 3 |
+| Mac 4.0.5 | French (the remake's) | 198 | 12 | 3 | 23 / 1 / 3 |
+| Mac 4.0.5 | Turkish (the remake's) | 176 | 16 | 21 | 23 / 1 / 3 |
 | Mac 4.0.5 | German (the remake's) | 31 | 18 | 164 | 0 / 0 / 27 |
 | Mac 4.0.5 | Spanish (the remake's) | 0 | 0 | 213 | 0 / 0 / 27 |
-| 5.0.5 | French (the remake's) | 251 | 5 | 21 | 35 / 1 / 4 |
-| 5.0.5 | Turkish (the remake's) | 241 | 5 | 31 | 35 / 1 / 4 |
+| 5.0.5 | French (the remake's) | 267 | 5 | 5 | 35 / 1 / 4 |
+| 5.0.5 | Turkish (the remake's) | 255 | 5 | 17 | 35 / 1 / 4 |
 | 5.0.5 | German (the remake's) | 25 | 16 | 214 | 0 / 0 / 40 |
 | 5.0.5 | Spanish (the remake's) | 0 | 0 | 255 | 0 / 0 / 40 |
-| Palm OS 5 | French (the remake's) | 248 | 4 | 26 | 33 / 2 / 5 |
-| Palm OS 5 | Turkish (the remake's) | 238 | 4 | 36 | 33 / 2 / 5 |
+| Palm OS 5 | French (the remake's) | 264 | 4 | 10 | 33 / 2 / 5 |
+| Palm OS 5 | Turkish (the remake's) | 252 | 4 | 22 | 33 / 2 / 5 |
 | Palm OS 5 | German (the remake's) | 25 | 16 | 215 | 0 / 0 / 40 |
 | Palm OS 5 | Spanish (the remake's) | 0 | 0 | 256 | 0 / 0 / 40 |
 | iOS 1.2.9 | French (official) | 203 | 0 | 0 | – |
@@ -142,32 +156,28 @@ in each version's section).
 
 `node tools/lang-test.js --adapted` prints them, with each one's likeness to its source.
 The source is the official line's English (the official translation is the one the
-language has for it: iOS's French and Turkish, 1.2F's French, the German DOS 2.0's). The
+language has for it: iOS's French and Turkish, 1.2F's and 3.0.1F's French, the German DOS 2.0's). The
 versions are those whose reports have the line; "hint" a between-turn hint; "window" a
 window's line (Name a Star). Each was read against its source: what the adaptation
-changes is what the two Englishes change, and nothing else, but for three things the
-remake's languages always do: a slip of the official line put right where the English
-needs it (Turkish "Faizleini", "kiş", "kaybolmasi"; the Turkish "lost" left in English,
-iOS 11, as the patch's 'trLostWord' does), the version's own word for a thing where the
+changes is what the two Englishes change, and nothing else, but for two things the
+remake's languages always do: the version's own word for a thing where the
 official line's version used another (2.0's French "pluie de météores", 1.2F's 1000.54,
 for the shower; German "räumen" for 5.0.5's Evacuate), and the language's typography.
+A third, an official slip put right in the adaptation, was the earlier policy; under Jake's
+rule (the patch carries corrections of official wording) the Turkish and French
+adaptations were checked against it in `docs/proofread-2026-10.md` (a few lines keep an
+official slip as the default and have a `patch` entry); **the German adaptations of the
+DOS 2.0's text and 1.2F's French adaptations have not been audited for it yet.**
 
-**French** (30)
+**French** (22)
 
 | Line (versions) | Adapted from | Translation |
 |---|---|---|
 | A meteor shower destroyed your colony at %s. (1.2, DOS 2.0, Mac 2.0.1) | %s destroyed your colony at %s. | Une pluie de météores a détruit votre colonie à %s. |
 | Your fleet of %s is waiting to refuel before it can continue on to %s. (1.2, 3.0.1, Win 4.0.5, DOS 2.0, Mac 2.0.1, Mac 4.0.5) | Your %s is waiting to refuel before it can continue on to %s. | Votre flotte de %s est en attente pour faire le plein avant de pouvoir continuer à %s. |
-| %s destroyed your colony at %s. You lost %s of your ships. %s lost %s. You lost %s people. (3.0.1, Win 4.0.5, Mac 4.0.5) | %s destroyed your colony at %s. You %slost %d of your ships. %s lost %d. You lost %s people. | %s vous a vaincu à %s. Vous avez perdu %d de vos vaisseaux. %s en a perdu %d. Vous avez perdu %s habitant(s). |
-| %s survived an enemy attack from %s. You lost %s of your ships. %s lost %s. You lost %s people. (3.0.1, Win 4.0.5, Mac 4.0.5) | %s survived an attack from %s. You %slost %d of your ships; %s lost %d. You lost %s people. | %s a résisté à %s. Vous avez perdu %d de vos vaisseaux. %s en a perdu %d. Vous avez perdu %s habitant(s). |
-| Congratulations! You won the game. (3.0.1) | Congratulations! You have just won the game. | Bravo! Vous avez gagné. |
-| Spaceward Ho! Version 3.0.1 by Peter Commons. (3.0.1) | Spaceward Ho! Version 1.2 by Peter Commons. | Spaceward Ho! Version 3.0.1 par Peter Commons. |
-| Uh-oh! Having to borrow more ship money to pay all your interest! (3.0.1, Win 4.0.5, Mac 4.0.5) | Uh-oh! Having to borrow more to pay all your interest! | Oh-oh ! Devoir emprunter davantage sur l'argent des vaisseaux pour payer vos intérêts... |
-| Warning! Ship money is being used to support %s. (3.0.1, Win 4.0.5, Mac 4.0.5) | Warning! Savings is being used to support %s. | Attention ! De l'argent destiné à vos vaisseaux est utilisé pour soutenir %s. |
-| You just received %s metal from someone scrapping a fleet over %s. (3.0.1) | You just received %s metal from someone scrapping a fleet or from a battle over %s. | Vous venez de recevoir %s unités de métal de quelqu'un qui recyclait une flotte au-dessus de %s. |
 | Wow! You won! You and your allies have conquered the galaxy. Congratulations! (3.0.1, Win 4.0.5, Mac 4.0.5) | Congratulations! You have conquered the galaxy! | Wow ! Vous avez gagné ! Vous et vos alliés avez conquis la galaxie. Félicitations ! |
 | Wow! You won! You have conquered the galaxy. Congratulations! (3.0.1, Win 4.0.5, Mac 4.0.5) | Congratulations! You have conquered the galaxy! | Wow ! Vous avez gagné ! Vous avez conquis la galaxie. Félicitations ! |
-| %s have just won the game. (3.0.1, Win 4.0.5, Mac 4.0.5) | %s has just won the game. | %s viennent juste de gagner. |
+| %s have just won the game. (3.0.1, Win 4.0.5, Mac 4.0.5) | %s has just won the game. | %s viennent juste de gagner. Hi hi. |
 | %s says , "#!$*@%$&!" (Win 4.0.5, Mac 4.0.5) | %s says, “#!$@*$&@•™!” | %s dit: “#!$*@%$&!” |
 | Click here to make this message go away. (Win 4.0.5, Mac 4.0.5) | Tap here to make this message go away. Tap on the End Turn button to complete the turn. | Cliquez ici pour faire disparaître ce message. |
 | Congratulations! You won the game. Game difficulty rating was %s. (Win 4.0.5, Mac 4.0.5) | Congratulations! You have just won the game. | Bravo! Vous avez gagné. La difficulté du jeu était de %s. |
@@ -185,7 +195,6 @@ for the shower; German "räumen" for 5.0.5's Evacuate), and the language's typog
 | Spaceward Ho! Version 2.0.1 by Peter Commons. (DOS 2.0, Mac 2.0.1) | Spaceward Ho! Version 1.2 by Peter Commons. | Spaceward Ho! Version 2.0.1 par Peter Commons. |
 | Icons by your planet mean you have ships orbiting around it. Fleets are on the right; satellites are on the left. (Palm, Palm (hint)) | Dots by your planet mean you have ships orbiting around it. Fleets are on the right; satellites are on the left. | Des icônes près d'une planète signifient que vous y avez des vaisseaux en orbite. Les flottes sont à droite, les satellites à gauche. |
 | The first person in the Enemies and Allies list is winning. (Palm, Palm (hint)) | The first person in the player list is winning. | Le joueur le plus fort se trouve en tête de la liste Ennemis et Alliés. |
-| Star names must be 2 to 7 characters long. (window) | Star names must be 4 to 7 characters long. | Le nom doit comprendre entre 2 et 7 lettres. |
 
 **Turkish** (25)
 
@@ -366,7 +375,8 @@ matched by name (the Palm's "Courasant" for Antares has no translation).
 
 ## 4.0.5 (Windows and Mac)
 
-**French and Turkish (the remake's), backwards from iOS.** 4.0.5's lines are listed in
+**French and Turkish (the remake's), backwards from iOS** (French: 3.0.1F's first, then
+iOS's, then 1.2F's). 4.0.5's lines are listed in
 `js/languages.js` (`TEXT405`: its reports, messages and questions as the program writes
 them, double spaces and all), with its hints, first messages and the engine's own lines.
 Most are 5.0.5's words, so they get iOS's lines; where 4.0.5's English is 2.0's (the
@@ -376,29 +386,56 @@ slip of the version's ("You alliance with", "with with", "puts it in your reserv
 "armadeddon"): they get that line's translation (`EQUIV`), counted as official. Tech
 names are iOS's, matched by name (two typos aside); the battle window is 2.0's with
 1.2F's words and iOS's classes (the Turkish the remake's); Name a Star and the won
-window ("You have conquered the galaxy!") are 1.2F's in French.
+window ("You have conquered the galaxy!") are 3.0.1F's and 1.2F's in French, and
+Armageddon's questions and the Hope and Ship jokes 3.0.1F's.
 
 Adapted from official ("Adapted lines" above): the Windows build's own curse in the
 messages, the battle reports' colony lines in 4.0.5's form (no "and your allies"), the
 "ship money" lines, the welcome lines and credits (the Turkish credits aside: iOS's are in
 English), the won window and the won messages, "Good planets are close to 72 degrees.",
-and the Turkish battle reports in 2.0's form. The remake's own: Armageddon's two
+and the Turkish battle reports in 2.0's form. The remake's own, in Turkish: Armageddon's two
 questions (the eleven jokes, strings 299-309, now also asked in the language:
-`rs.armageddonAsk`), the fleet marked for scrapping, a handful of hints ("A dot by a
+`rs.armageddonAsk`; in French they are 3.0.1F's), the fleet marked for scrapping (3.0.1F's in French), a handful of hints ("A dot by a
 planet…", in iOS's French words, "Click and Drag…", "Ship savings…"), the Send Message
 groups (Everyone, Your Allies, Your Buddies), and the Turkish for the lines whose only
 official translation is 1.2F's French.
 
 ## 3.0.1
 
-**French and Turkish (the remake's)**, as 4.0.5's: 3.0.1's lines (`TEXT301`), the
-engine's, its Send Message window's (5.0.5's words) and its first messages get iOS's
-lines where the English is the same, and 1.2F's where it is 2.0's: Name a Star's text,
-field, note and alert (Mac 2.0.1's window, DITL 4050 and 3340 in 1.2F), and Fix
-Spending's four lines (Mac 2.0.1's, 1.2F's STR# 1050). Adapted from official: Name a
-Star's rule (3.0.1 takes 2 to 7 letters, 1.2F's line says 4 to 7), the battle reports'
-colony lines in 3.0.1's form, "ship money", the credit line. The remake's own: the
-Turkish for the Name a Star and Fix Spending windows, which only 1.2F's French has.
+**French (official, 3.0.1F).** The French Mac 3.0.1 ("The Ho! 3 F", Delta Tao and Upgrade
+Editions, 1993; `docs/301fr-findings.md`) is 3.0.1's French as released. Its program keeps
+the English 3.0.1's resource numbers, so each of its `STR#` lines is paired with the
+English line of the same list and index (`HOLANG.mac301En` and `mac301Fr`, `official301()`
+in `js/languages.js`; the lists 1000, 1020, 4000 and 4001 have two or one lines past the
+English's last, the training version's, which have no English to pair with), and so is
+each sentence of its windows (the `DITL`s' static text, matched by window number and item;
+the English 3.0.1 has one `DITL` and one `DLOG` more, 4001, which the French lacks). It
+replaced the remake's French for 3.0.1 (iOS's and 1.2F's lines): not beside it. Its text is
+the default as released, slips and all (Version 3.01, "Tous le monde abandonne le
+vaisseau", the Hope joke's "tu", "Armaggeddon"); the Ship joke's "Tout le monde" is the
+patch's (`fr.patch`). Where it comes from, by line (`--count`, 127 lines counted once):
+3.0.1F's reports (STR# 1000), Name a Star (DITL 4050), Fix Spending (STR# 1050), the Hope
+and Ship jokes (DITL 3020, 3030), Armageddon's questions (DITL 3240-3255), the battle window
+(STR# 1030) and names (stars 1003, computers 1999-2000, ships 2001-2004); the lines it has no
+text for are the remake's engine messages and the late versions' (best buddies, surrender
+gifts, the free-text message), taken from iOS's French or 1.2F's, four adapted from them
+(the fleet waiting to refuel, the two "Wow! You won!" lines, "%s have just won the game.")
+and one the remake's own ("Year %d. Nothing much happened."). Its fr.own Ship joke is gone.
+No hints (3.0.1 had none; its STR# 3100 is iOS's French hints word for word).
+
+3.0.1F is also French 3.0.1's **windows**: a 3.0.1 game in French puts the menus' items
+and titles, window titles, buttons and labels of the French program over the remake's
+interface words for the same English (`rs.lang.fr.officialWindows`, 261 English-to-French
+pairs from `MENU`, `DITL`, `DLOG` and `CNTL`; `HO.windowWords(G)`, `HOUI.set`'s third
+argument): "Fenêtre" for Window, "Panthéon" for Hall Of Fame, "Zoom avant". A word the French
+program left in English ("Name", "Density") or translates two ways (Cancel, Annuler and
+Cancel) is not in it: the interface's own French stands. No manual is on the disc.
+
+**Turkish (the remake's)**: 3.0.1's lines (`TEXT301`), the engine's, its Send Message
+window's (5.0.5's words) and its first messages get iOS's lines where the English is the
+same; Turkish for the Name a Star and Fix Spending windows, which only 1.2F's French has,
+and for the rest, is the remake's own, in iOS's voice. Adapted from official: Name a Star's
+rule, the battle reports' colony lines in 3.0.1's form, "ship money", the credit line.
 
 ## German for 3.0.1 onward (the remake's): 3.0.1, 4.0.5, 5.0.5, the Palm, iOS and Android
 
@@ -545,7 +582,7 @@ Center), and the hover help (`js/help.js`, the manuals' words trimmed for a tool
 - **the player's choice**: the title screen's **Language**, beside Skin and OS look in
   every skin (after the Amiga's Pixels). It lists English and every language a version
   offers, each named in itself and marked (`HO.languageChoices`): where it is official
-  ("Français (officiel : 1.2, iOS, Android)", "Deutsch (offiziell: 2.0)", "Türkçe (resmî:
+  ("Français (officiel : 1.2, 3.0, iOS, Android)", "Deutsch (offiziell: 2.0)", "Türkçe (resmî:
   iOS, Android)") or the remake's everywhere ("Español (traducción del remake)"); in the
   versions not named, French, German and Turkish are the remake's, as New Game's and the
   Ho menu's lists say. Changing it redoes the whole interface at once, the title screen
@@ -579,6 +616,20 @@ fills a template, `HOUI.t`, but never takes a string apart). Text drawn on a can
 map's labels, the battle windows) goes through `tl()`. Text inside `translate="no"` is
 left as it is.
 
+**The patch and 3.0.1F.** A row's seventh element, `{ lang: corrected }`, is the corrected
+wording of an official line the row keeps as released (six rows: the Turkish fuel alert,
+Auto Play's "Click through the messages every" and "Have Computer Play For Me", the two
+Preferences battle rows, the French Armageddon window's "Êtes-vous"): `HOUI.tr` and `HOUI.t`
+use it while the game in progress has the patch on and its version lists the fix
+`translations` (`HOUI.set(lang, patch, words)`, called by the classic page's `syncLang` with
+`HO.fixed(G, 'translations')`; on the title screen there is no game and no patch). And the
+third argument, `HO.windowWords(G)`, is an official translation's windows' words laid over
+the rows for the game in progress: a 3.0.1 game in French shows 3.0.1F's menus and windows
+(the 3.0.1 section above). "..." for "…" (the Amiga's font has no
+ellipsis, so its German menus write three dots) finds the same row: `HOUI.tr("Preferences...")`
+is "Einstellungen...", and the Amiga's `menuWord` translates the remake's own Ho menu items
+before it writes the dots.
+
 **Tiers**, as for the game's text: a word a version's official translation has is used
 and its source named in the row (the iOS game's French and Turkish Misc Strings, Alert
 Strings and sprintf Templates; 1.2F's STR# lists; the German DOS 2.0's `HO.PRS`; the
@@ -594,10 +645,14 @@ above. `node tools/ui-lang-audit.js --count`:
 
 | Language | Strings | Official | Adapted | The remake's |
 |---|---|---|---|---|
-| French | 1,181 | 131 | 63 | 987 |
-| German | 1,181 | 130 | 46 | 1,005 |
-| Turkish | 1,181 | 100 | 38 | 1,043 |
-| Spanish | 1,181 | 0 | 0 | 1,181 |
+| French | 1,653 | 164 | 74 | 1,415 |
+| German | 1,653 | 135 | 52 | 1,466 |
+| Turkish | 1,653 | 129 | 49 | 1,475 |
+| Spanish | 1,653 | 0 | 0 | 1,653 |
+
+(Every row of the table, the hover help and the version and patch notes included; the
+earlier count, 1,181, was of the interface's rows alone and is not comparable. 3.0.1F's
+windows are not counted here: they are a layer over these rows.)
 
 **The Amiga skin** has its own words (`WORDS`, the Amiga's German and the remake's
 English for its panels and windows); each entry now has French, Turkish and Spanish too,
@@ -668,17 +723,27 @@ translated from their English, with the source line saying so):
 
 ## Choices worth checking
 
-**Changed since (Jake's rule, `docs/proofread-2026-10.md`, "The patch table"):** an official
-translation's wording, slips and all, is the default in its own version *and* wherever the
-remake carries it; corrections of it are the patch's. So the first point below no longer holds
-for the remake's versions: `js/lang-remake.js` `over` is empty, its lines are in `patch` (with
-the other corrections of official wording), and the default shows the official lines. The
-patch tables aren't wired yet. This file's Method, Adapted lines and Counts sections still
-describe the earlier policy in places, and are to be brought up to date with that wiring and
-with 3.0.1F (`docs/301fr-findings.md`).
+**The rule (Jake, October 2026; `docs/proofread-2026-10.md`, "The patch table"):** an
+official translation's wording, slips and all, is the default in its own version *and*
+wherever the remake carries it; corrections of it are the patch's, wired: `js/lang-remake.js`
+`patch` and `patchWords`, the interface rows' seventh element, the fix `translations`
+(`docs/fixes.md`, "Translations"). `over` is empty. The first point below, from the earlier
+policy, is replaced by it. Under the rule iOS and Android play their placeholder order as
+released too: French 36 and Turkish 11, 38 and 84 put a word where a number goes by default
+(the patch's `iosFillings` fills each by its meaning; French 85's "%P" is only the
+remake's formatter's "%s" and shows as it always did). Where other versions carry those
+lines (5.0.5, the Palm, 4.0.5), the remake still fills them by place: their English isn't
+iOS's word for word, and nothing was released in those versions to play as it was.
 
-- iOS's own slips are kept in iOS's languages (as released) but put right in the
-  remake's: French 37; Turkish 11, 14, 35, 38, 62, 124, 156 and the credits. Other
+**Not audited for the rule yet:** the German adaptations of the DOS 2.0's text
+(`de.adapted`), 1.2F's French adaptations, and the interface's other adapted rows
+(`~iOS`, `~1.2F`, `~DOS 2.0`, `~Amiga` sources; only the six above were checked): an
+adaptation may have quietly corrected an official slip. And 3.0.1F's window words that the
+French program left in English or translates two ways are left to the interface's own French.
+
+- (Earlier policy, replaced above:) iOS's own slips were kept in iOS's languages (as
+  released) but put right in the remake's: French 37; Turkish 11, 14, 35, 38, 62, 124, 156
+  and the credits. They are now the patch's, in every version that shows them. Other
   official lines that are clumsy but say the right thing are used verbatim (French 20's
   "Votre flotte de Type…", Turkish "Sizin Düşmanları", "1yi kaybetti").
 - 1.2F's battle window counts no ships lost ("%.*s détruit(s)") and its scrapped-fleet

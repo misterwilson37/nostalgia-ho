@@ -74,9 +74,21 @@ and the translation notice (`docs/translations-notes/`) are not done.
    e. **"Every version's jokes"**, lower: a second box, shown only when Full Hoedown is checked,
       that lets every joke from every version appear (today Full Hoedown maximizes the jokes
       of the version being played). Official releases' jokes only, as Full Hoedown.
-   f. **Translation corrections into the patch**, when the other Claude's and the Geminis'
-      notes arrive (their menu checks, the French 3.0.1 demo disc, patch notes): see the rule
-      below. No work until then.
+   f. **Done (October 2026).** **Translation corrections into the patch**, under the rule below
+      (`docs/proofread-2026-10.md`, `docs/translations.md`, `docs/fixes.md`, "Translations"). The
+      proofread of the remake's French, German, Turkish and Spanish (90 changes to the default
+      text, 25 in the hover help) is in; every correction of *official* wording moved out of the
+      default into the patch: a fix `translations` (3.0.1, 4.0.5 both, 5.0.5, Palm, iOS, Android)
+      lays `fr.patch` (3 lines), `tr.patch` (22 lines) and `tr.patchWords` (1) over the game's
+      reports and tips (`rs.lang[code].fix`, `inLanguage`) and six interface rows' corrected
+      wording (a row's seventh element, `HOUI.set`'s patch flag); iOS's placeholder order
+      (`BY_PLACE`) is the patch's too (`iosFillings`), so iOS and Android play as released.
+      **3.0.1F**, the official French 3.0.1 (Jake's disc), replaced the remake's French for
+      3.0.1, windows included, and is the nearest official source for 4.0.5's French (then iOS's);
+      its Ship joke replaced `fr.own`'s. Counts in `docs/translations.md`. Menu notes in four
+      languages for the two new fixes. **Not audited yet** (another Claude may do it): the German
+      adaptations of the DOS 2.0 text, 1.2F's French adaptations, the interface's other adapted
+      rows (`~iOS`, `~1.2F`, `~DOS 2.0`, `~Amiga`); and 3.0.1F has no manual (none on the disc).
    g. **Version notes:** Android was first released by Ariton in spring 2013 (March 2013,
       per Gemini; 1.1 widely listed from 13 April 2013), about a year after the iOS port
       (March 2012). The remake plays 1.2.8 (built February 2015), so its label stays 2015;

@@ -218,10 +218,12 @@ The hover help's review documents for Gemini are `help-review-<lang>.md` (`node 
 
 Jake's rule, set after the rounds above: **a version plays its official translation as released, slips and all; an official translation's wording is also the default wherever the remake carries it; corrections of official wording are the patch's** (optional, New Game's unofficial patch). The remake's own text, which no player ever saw in any other form, is corrected in the default. So every correction of *official* wording, this work's and the older ones, now sits in a patch table, and the default shows the official wording again.
 
-**Not wired yet.** The tables are data the game doesn't read:
+**Wired (October 2026, by the main Claudling).** The tables below were data the game didn't read when this was written; they are read now (the "Wired" paragraph after the list). They were:
 
 - the game's text: `js/lang-remake.js` `fr.patch`, `tr.patch` (English → corrected line, each with its reason as a comment) and `tr.patchWords` (a filling). The engine already has the mechanism: `inLanguage` (`js/engine.js`) lays `rs.lang[code].fix[id]` over a language when the patch is on and `rs.fixes` lists `id`, as iOS's `trLostWord` and `trSpiesReport` do. `js/languages.js` has to build that `fix` from these tables for the remake's languages (every version but iOS and Android, whose own fixes stay), and each version's `rs.fixes` needs the entry (its title and text shown in New Game's list and the Patch notes; `docs/fixes.md`).
 - the interface: a corrected row of `js/ui-text.js` has a seventh element, `{ lang: corrected }`, ignored by `HOUI.add` today. `js/ui-lang.js` has no patch yet: `HOUI.tr` would take that element when the game in progress has the patch on (outside a game, the title screen, there is no game and no patch).
+
+**What was done when it was wired.** Game text: `js/languages.js` builds `rs.lang[code].fix.translations` from `fr.patch`, `tr.patch` and `tr.patchWords` for every version that shows a line with an entry (the translator's `fix`, `patchFix`; hints too, as `hintTexts`), wherever the version shows the official line or the remake's line that follows it; `engine.js` `inLanguage` lays it over when the patch is on and `rs.fixes` lists `translations` (`E.TRANSLATIONS_FIX`, in 3.0.1's, 4.0.5's, Mac 4.0.5's, 5.0.5's list, and so the Palm's, iOS's and Android's); a fix's `say.words` now merge over the language's. The interface: `HOUI.set(lang, patch, words)` and the rows' seventh element (`js/ui-lang.js`; `syncLang` in the classic page passes `HO.fixed(G, 'translations')`). iOS and Android get the same fix for their own lines and, by Jake's decision, play their placeholder order (`BY_PLACE`) as released: the patch's `iosFillings` puts French 36 and Turkish 11, 38 and 84 right. Entries in the game's text: French 3 (the 2 below and 3.0.1F's Ship joke "Tout le monde"), Turkish 22 and 1 word; the interface 6 rows. Per version (reports + hints): 3.0.1 Turkish 7, Windows 4.0.5 Turkish 10 + 1, Mac 4.0.5 Turkish 11 + 1, 5.0.5 French 2 + 1 and Turkish 14 + 1, the Palm French 1 and Turkish 16 + 3, iOS and Android French 1 and Turkish 9 (and the fix's word), each plus the Ship joke in French where it shows it.
 
 The old `over` tables (French 1 line, Turkish 11) were the remake's corrections of broken official lines, applied by default; they are now the `patch` tables' first entries, and `over` is empty, so `languages.js` already shows the official lines. `node tools/lang-test.js` (every language, every ruleset) and `--adapted` pass, `ui-lang-audit.js` passes (classic, mac4, palm, ios: 20 runs).
 
@@ -326,7 +328,7 @@ The review documents now say all of this (`%s`/`%d`, the "Adapted from" column, 
 ## Files
 
 - `js/lang-remake.js`, `js/ui-text.js`, `js/ui-text-help.js`: the corrections, and the patch tables ("The patch table").
-- `tools/extract/languages.py` (`--mac301`), `js/lang-data.js` (`mac301Fr`), `docs/301fr-findings.md`: the official French 3.0.1, extracted, not yet used.
+- `tools/extract/languages.py` (`--mac301`), `js/lang-data.js` (`mac301Fr`), `docs/301fr-findings.md`: the official French 3.0.1, extracted and now routed (`mac301En` beside it).
 - `tools/translation-review.js` (new): one review document per language. `node tools/translation-review.js --out=<dir> --before=<copy of js/ before a pass>`; with `--help`, the hover help's.
 - `docs/proofread-2026-10.md`: this file.
 
@@ -334,6 +336,6 @@ No version bump: wording only.
 
 ## Next
 
-- Wire the patch tables ("The patch table", "Not wired yet"), and route 3.0.1F (`docs/301fr-findings.md`); both are the main Claudling's.
+- Done (October 2026): the patch tables are wired and 3.0.1F routed (below). Left: the audit of the German adaptations of DOS 2.0 text, 1.2F's French adaptations and the interface's other adapted rows.
 
 Integration by the main Claudling: see `HANDOFF-proofread.md` in the bundle.

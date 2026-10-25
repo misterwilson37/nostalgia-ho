@@ -27,11 +27,11 @@ with the program ("The Ho! 3 F", resource fork 788,904 bytes, 1 Dec 1993), its c
   picture, icon or control as its number), `MENU` (title, then items with their command key
   after a tab), `DLOG` and `CNTL` titles. The `ALRT`s use the `DITL`s of the same numbers.
 
-Nothing uses `mac301Fr` yet: `js/languages.js` still builds 3.0.1's French from iOS and 1.2F.
+**Routed (October 2026).** `mac301Fr` is 3.0.1's French now, with the English 3.0.1's STR# lists and windows beside it (`mac301En`, `tools/extract/languages.py --mac301-en`, from `app.rsrc`, the English program's fork). See `docs/translations.md`, "3.0.1"; what follows is the plan it followed.
 
 ## The numbers are the English 3.0.1's
 
-The English 3.0.1 fork (`app.rsrc`) isn't in the repo, so the pairing couldn't be done line for
+When this was first written the English 3.0.1 fork (`app.rsrc`) wasn't to hand, so the pairing couldn't be done line for
 line here. Checked instead against the English lines `js/rules-301.js` and `docs/301-findings.md`
 quote with their STR# numbers: 1000.3, 9, 12, 13, 16, 18-23, 25, 30-32, 65, 73, 84, 105 are the
 same lines in both languages (e.g. 1000.12 "Year %d:" / "Année %d:"; 1000.105 "Warning! After
@@ -39,7 +39,11 @@ supporting your planets…" / "Attention! Une fois le soutien à vos planètes e
 quotes that don't line up (66, 69, 78, 85, 91) are loose references in comments, not a shifted
 list. As 1.2F's, the French program keeps the English one's numbering: **with `app.rsrc`, pair
 by (resource, index) mechanically**, then check the counts (English 3.0.1 has one `DITL` and
-one `DLOG` more; find which).
+one `DLOG` more; find which). Done: the pairing is index for index, the French lists having a
+few lines past the English's last (STR# 1000.115-116, 1020.21-22, 4000.41, 4001.26-27, the
+training version's: "Version d'entraînement 3.01", "Si vous aviez eu la version réelle…") and the
+hints list 3100 (the English has none); the extra `DITL` and `DLOG` are 4001, which the French
+lacks; the shared windows have the same number of items.
 
 ## What it changes
 
