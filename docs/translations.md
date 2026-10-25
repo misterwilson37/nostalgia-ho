@@ -668,6 +668,15 @@ translated from their English, with the source line saying so):
 
 ## Choices worth checking
 
+**Changed since (Jake's rule, `docs/proofread-2026-10.md`, "The patch table"):** an official
+translation's wording, slips and all, is the default in its own version *and* wherever the
+remake carries it; corrections of it are the patch's. So the first point below no longer holds
+for the remake's versions: `js/lang-remake.js` `over` is empty, its lines are in `patch` (with
+the other corrections of official wording), and the default shows the official lines. The
+patch tables aren't wired yet. This file's Method, Adapted lines and Counts sections still
+describe the earlier policy in places, and are to be brought up to date with that wiring and
+with 3.0.1F (`docs/301fr-findings.md`).
+
 - iOS's own slips are kept in iOS's languages (as released) but put right in the
   remake's: French 37; Turkish 11, 14, 35, 38, 62, 124, 156 and the credits. Other
   official lines that are clumsy but say the right thing are used verbatim (French 20's

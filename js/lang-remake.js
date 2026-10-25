@@ -31,9 +31,17 @@ const HOLANG_REMAKE = {
 // French: from iOS's French (fr.lproj), itself 1.2F's for the old lines
 // =====================================================================
 fr: {
-  over: {
+  // the patch's corrections (G.opts.patch): an official line's slips, kept in the default as
+  // the official translation has them (Jake's rule: accuracy first), put right here.
+  // English -> the corrected translation (docs/proofread-2026-10.md, "The patch table").
+  // Not read yet: js/languages.js is to lay it over the language as a fix (engine.js
+  // inLanguage, rs.lang[code].fix), as iOS's trLostWord is.
+  over: {},
+  patch: {
     // iOS 37 left "You" in English and lost the counts' places
     'You %slost a battle at %s. You %slost %d of your ships. %s lost %d.': 'Vous%1$s avez perdu une bataille à %2$s. Vous%3$s avez perdu %4$d de vos vaisseaux. %5$s en a perdu %6$d.',
+    // iOS spells the screen "Organiser Flotte"
+    'Option-drag in Organize Fleets to split up ship piles.': 'Tirez avec la touche option dans "Organiser Flottes" pour séparer les groupes de vaisseaux.',
   },
   // adapted from official: a line whose English differs a little from one an
   // official translation has (a word, a clause, a number, a name): that
@@ -60,13 +68,13 @@ fr: {
     'Your fleet of %s is waiting to refuel before it can continue on to %s.': ['Votre flotte de %s est en attente pour faire le plein avant de pouvoir continuer à %s.', 'Your %s is waiting to refuel before it can continue on to %s.'],
     'Wow! You won! You have conquered the galaxy. Congratulations!': ['Wow ! Vous avez gagné ! Vous avez conquis la galaxie. Félicitations !', 'Congratulations! You have conquered the galaxy!'],
     'Wow! You won! You and your allies have conquered the galaxy. Congratulations!': ['Wow ! Vous avez gagné ! Vous et vos alliés avez conquis la galaxie. Félicitations !', 'Congratulations! You have conquered the galaxy!'],
-    '%s have just won the game.': ['%s viennent juste de gagner.', '%s has just won the game.'],
+    '%s have just won the game.': ['%s viennent juste de gagner. Hi hi.', '%s has just won the game.'],
     'Star names must be 2 to 7 characters long.': ['Le nom doit comprendre entre 2 et 7 lettres.', 'Star names must be 4 to 7 characters long.'],
     'Congratulations!  You won the game.  Game difficulty rating was %s.': ['Bravo! Vous avez gagné. La difficulté du jeu était de %s.', 'Congratulations! You have just won the game.'],
     'Congratulations! You won the game.': ['Bravo! Vous avez gagné.', 'Congratulations! You have just won the game.'],
     'Uh-oh!  Having to borrow more ship money to pay all your interest!': ['Oh-oh ! Devoir emprunter davantage sur l\'argent des vaisseaux pour payer vos intérêts...', 'Uh-oh! Having to borrow more to pay all your interest!'],
     'Warning!  Ship money is being used to support %s.': ['Attention ! De l\'argent destiné à vos vaisseaux est utilisé pour soutenir %s.', 'Warning! Savings is being used to support %s.'],
-    'You just received %s metal from someone scrapping a fleet over %s.': ['Vous venez de recevoir %s unités de métal de quelqu\'un qui recyclait une flotte au-dessus de %s.', 'You just received %s metal from someone scrapping a fleet or from a battle over %s.'],
+    'You just received %s metal from someone scrapping a fleet over %s.': ['Vous venez de recevoir %s unités de métal de quelqu\'un qui recyclait une flotte quelque part au-dessus de %s.', 'You just received %s metal from someone scrapping a fleet or from a battle over %s.'],
     '%s says , "#!$*@%$&!"': ['%s dit: “#!$*@%$&!”', '%s says, “#!$@*$&@•™!”'],
     'You said "!$@*$&@!" to %s.': ['Je crois bien que vous avez dit “!$@*$&@!” à %s...', 'You said “#!$@*$&@•™!” to %s.'],
   },
@@ -79,7 +87,7 @@ fr: {
     'Hold down the option key and click planets to specify your fleet\'s path more exactly.': 'Maintenez la touche option enfoncée et cliquez sur des planètes pour préciser le trajet de votre flotte.',
     'Use the graph to see how well you\'re doing technology-wise vs. the other players.': 'Utilisez le graphique pour voir où en est votre technologie par rapport à celle des autres joueurs.',
     // the Palm's "Ship" Evacuate question (5.0.5's two are the iOS game's, sprintf Templates 17, 35)
-    'Abandon Ship? Abandon Ship! All hands abandon ship! Women and children first!': 'Abandonner le navire ? Abandonnez le navire ! Tout le monde quitte le navire ! Les femmes et les enfants d\'abord !',
+    'Abandon Ship? Abandon Ship! All hands abandon ship! Women and children first!': 'Abandonner Ship ? Abandonnez le navire ! Tout le monde quitte le navire ! Les femmes et les enfants d\'abord !',
     // the remake's own line for a turn with no news (js/skins/classic/ui.js)
     'Year %d. Nothing much happened.': 'Année %d. Rien de spécial ne s\'est passé.',
     // ---- the Palm (5.0's code): its own hints, first messages and decoy ----
@@ -106,12 +114,12 @@ fr: {
     'Do you really want to launch the armageddon device?  It\'ll blow up half of the galaxy!': 'Voulez-vous vraiment déclencher Armageddon, l\'arme ultime ? Elle va faire sauter la moitié de la galaxie !',
     'Do you really want to launch the armageddon device?  Isn\'t life too short as it is?': 'Voulez-vous vraiment déclencher Armageddon, l\'arme ultime ? La vie n\'est-elle pas déjà assez courte ?',
     'Do you really want to launch the armageddon device?  I mean, you\'d probably win anyway; why take the chance?': 'Voulez-vous vraiment déclencher Armageddon, l\'arme ultime ? Vous gagneriez sans doute de toute façon ; pourquoi prendre le risque ?',
-    'Do you really want to launch the armageddon device?  Doing so decreases the difficulty score by half!': 'Voulez-vous vraiment déclencher Armageddon, l\'arme ultime ? Cela divise par deux la difficulté de la partie !',
-    'Do you really want to launch the armageddon device?  Odds are you\'ll blow yourself up!': 'Voulez-vous vraiment déclencher Armageddon, l\'arme ultime ? Il y a de fortes chances que vous sautiez avec !',
+    'Do you really want to launch the armageddon device?  Doing so decreases the difficulty score by half!': 'Voulez-vous vraiment déclencher Armageddon, l\'arme ultime ? Cela divise par deux la note de difficulté !',
+    'Do you really want to launch the armageddon device?  Odds are you\'ll blow yourself up!': 'Voulez-vous vraiment déclencher Armageddon, l\'arme ultime ? Il y a de fortes chances que vous sautiez vous-même !',
     'Are you just doing this because you think you\'ll win but it\'s really late and so you want to go to bed?': 'Vous faites ça juste parce que vous pensez gagner, mais qu\'il est vraiment tard et que vous voulez aller vous coucher ?',
     'Aren\'t you sure you really don\'t want to have nothing to do with not launching the armageddon device?': 'N\'êtes-vous pas sûr de ne vraiment pas vouloir n\'avoir rien à voir avec le non-déclenchement d\'Armageddon ?',
     'You\'re just doing this \'cause you enjoy the ultimate feeling of power, aren\'t you???': 'Vous faites ça juste pour le plaisir de vous sentir tout-puissant, hein ???',
-    'If you do this, everyone will hate you!  It\'s such a sissy way to try to win, anyway.': 'Si vous faites ça, tout le monde va vous détester ! C\'est une façon tellement mauviette d\'essayer de gagner, de toute façon.',
+    'If you do this, everyone will hate you!  It\'s such a sissy way to try to win, anyway.': 'Si vous faites ça, tout le monde va vous détester ! C\'est vraiment une façon de poule mouillée d\'essayer de gagner, de toute façon.',
     'Now look, this is NO laughing matter.  You just might get yourself killed!': 'Écoutez, ce n\'est PAS une plaisanterie. Vous pourriez bien y laisser votre peau !',
     'I get it.  You\'re losing big time and this is the only way you could possibly win!  That\'s it isn\'t it?': 'J\'ai compris. Vous êtes en train de perdre lamentablement et c\'est le seul moyen pour vous de gagner ! C\'est ça, hein ?',
   },
@@ -127,26 +135,57 @@ fr: {
 // after a name as the official lines do ("%sye", "%sde", "%syi")
 // =====================================================================
 tr: {
-  over: {
-    // the credits iOS left in English (marked "!")
+  // the patch's corrections (G.opts.patch): an official line's slips, kept in the default as
+  // the official translation has them (Jake's rule: accuracy first), put right here.
+  // English -> the corrected translation (docs/proofread-2026-10.md, "The patch table").
+  // Not read yet: js/languages.js is to lay it over the language as a fix (engine.js
+  // inLanguage, rs.lang[code].fix), as iOS's trLostWord is.
+  over: {},
+  patch: {
+    // iOS's credits
     'Spaceward Ho! by Peter Commons.': 'Spaceward Ho!, yazan: Peter Commons.',
+    // iOS's credits
     'Spaceward Ho! DEMO by Peter Commons.': 'Spaceward Ho! DEMO, yazan: Peter Commons.',
+    // iOS's credits
     'Artwork by Howard Vives and Bob Van de walle.': 'Grafikler: Howard Vives ve Bob Van de walle.',
+    // iOS's credits
     'Designed by Joe Williams.': 'Tasarım: Joe Williams.',
-    // iOS 11 left "lost" in English (the iOS patch's fix 'trLostWord', 38's words)
-    '%s destroyed your colony at %s. You %slost %d of your ships. %s lost %d. You lost %s people.': '%1$s senin koloniyi %2$s de mahvetti. Sen %3$sgemilerinin %4$d tanesini kaybettin. Sen %7$s insan kaybettin.',
-    // iOS 14 says the colony now does not belong to the rebels' new master
-    'You are not supporting %s enough. The people have revolted and now belong to %s': 'Sen %s yi yeterince desteklemiyorsun. Halk isyan etti ve şimdi %s e ait.',
-    // iOS 35 is the exploring report's words ("inceledin")
+    // iOS 11 left "lost" in English and the enemy's losses out (the iOS patch's trLostWord, for iOS)
+    '%s destroyed your colony at %s. You %slost %d of your ships. %s lost %d. You lost %s people.': '%1$s senin koloniyi %2$sde mahvetti. Sen%3$s gemilerinin %4$d tanesini kaybettin; %5$s %6$d tanesini kaybetti. Sen %7$s insan kaybettin.',
+    // iOS 14: the suffixes spaced off the names
+    'You are not supporting %s enough. The people have revolted and now belong to %s': 'Sen %syi yeterince desteklemiyorsun. Halk isyan etti ve şimdi %se ait.',
+    // iOS: the filling lost
     'You have colonized %s.': 'Sen %syi kolonileştirdin.',
-    // iOS 38 runs the star and the attacker together ("%s%sden") and leaves out the attacker's losses
-    '%s survived an attack from %s. You %slost %d of your ships; %s lost %d. You lost %s people.': '%1$s, %2$sden gelen bir hücumdan sağlam çıktı. Sen %3$sgemilerinin %4$d tanesini kaybettin; %5$s %6$d tanesini kaybetti. Sen %7$s tane insan kaybettin.',
-    // iOS 62 lost the star
+    // iOS 38: the names run together, the counts' places
+    '%s survived an attack from %s. You %slost %d of your ships; %s lost %d. You lost %s people.': '%1$s, %2$sden gelen bir hücumdan sağlam çıktı. Sen%3$s gemilerinin %4$d tanesini kaybettin; %5$s %6$d tanesini kaybetti. Sen %7$s tane insan kaybettin.',
+    // iOS: the filling lost
     'You told %s, "Let\'s attack %.*s."': 'Sen %sye "haydi %sye hücum edelim" dedin.',
-    // iOS 124 is a second copy of 123 (the iOS patch's fix 'trSpiesReport')
-    'Your spies have stolen some technological secrets from %s!': 'Senin casusların %s den bazı teknolojik sırlar çaldı!',
-    // iOS 156 says "can no longer reach us"
+    // iOS 62: the line-of-credit report's text (the iOS patch's trSpiesReport, for iOS)
+    'Your spies have stolen some technological secrets from %s!': 'Senin casusların %sden bazı teknolojik sırlar çaldı!',
+    // iOS 156: the fillings lost
     'Your %s can no longer reach %s because some of the ships in the fleet don\'t have enough range.': 'Senin %s artık %sye ulaşamıyor çünkü filodaki gemilerin bazılarının menzili yetersiz.',
+    // iOS: "yazıları kaybolmasi" (no genitive; ı written i)
+    'Click here to make this message go away. Click on the clock to end your turn.': 'Uyarı yazılarının kaybolması için buraya tıkla. Saate tıklarsan sıranı bitirebilirsin.',
+    // iOS: "yazıları kaybolmasi"
+    'Click here to make this message go away.': 'Uyarı yazılarının kaybolması için buraya tıkla.',
+    // iOS: "anlıyorsunuz" (siz, the rest is sen)
+    'Sorry, but that fleet doesn\'t have enough fuel to reach the selected destination. You can tell this because there are no arrows on either end of the dragged line.': 'Üzgünüm, filonun hedefe kadar gidecek yakıtı yok. Bunu anlıyorsun çünkü çekilen çizginin iki ucunda da ok yok.',
+    // iOS spells planet "gezeğen"
+    'Icons by your planet mean you have ships orbiting around it. Fleets are on the right; satellites are on the left.': 'Gezegenlerinin yakınındaki simgeler, senin gemilerin gezegen çevresindeki yörüngelerini gösterir. Filolar sağda, uydular da soldadır.',
+    // iOS: "ilk kiş     oyunu" ("kişi" cut short)
+    'The first person in the Enemies and Allies list is winning.': 'Düşmanlar ve Ortaklar listesindeki ilk kişi oyunu kazanır.',
+    // iOS 11: "lost" left in English before the number, the enemy's losses left out, the suffix spaced
+    '%s destroyed your colony at %s.  You lost %s of your ships. %s lost %s.  You lost %s people.': '%s senin koloniyi %sde mahvetti. Sen gemilerinin %d tanesini kaybettin; %s %d tanesini kaybetti. Sen %s insan kaybettin.',
+    // iOS 38: the names run together ("%s%sden"), the enemy's losses left out
+    '%s survived an enemy attack from %s.  You lost %s of your ships.  %s lost %s.  You lost %s people.': '%s, %sden gelen bir hücumdan sağlam çıktı. Sen gemilerinin %d tanesini kaybettin; %s %d tanesini kaybetti. Sen %s tane insan kaybettin.',
+    // iOS spells planet "gezeğen"
+    'Hold down the option key and click planets to specify your fleet\'s path more exactly.': 'Filonun yolunu daha kesin belirlemek için option tuşunu basılı tut ve gezegenlere tıkla.',
+    // iOS spells planet "gezeğen"
+    'To cancel a fleet’s movement, make sure that fleet is selected in the Ship Info window and click the origin planet. You can also use the ‘Cancel Fleet Trip’ menu item in the ‘Ships’ menu.': 'Bir filonun hareketini iptal etmek için, o filonun Ship Info penceresinde seçili olduğuna emin ol ve çıkış gezegenine tıkla. \'Ships\' menüsündeki \'Cancel Fleet Trip\' komutunu da kullanabilirsin.',
+    // iOS spells planet "gezeğen"
+    'Fleets appear as icons next to your planets. To send a fleet to another planet, select it and then drag it to the new planet.': 'Filolar senin gezegenlerinin yakınında simge olarak gözükür. Bir filoyu başka bir gezegene göndermek için onu seç ve yeni gezegene sürükle.',
+    // iOS spells planet "gezeğen"
+    'A dot by a planet means you have ships in orbit there.': 'Bir gezegenin yanındaki nokta, orada yörüngede gemilerin olduğunu gösterir.',
   },
   // adapted from official: a line whose English differs a little from one an
   // official translation has (a word, a clause, a number, a name): that
@@ -154,18 +193,18 @@ tr: {
   // the official line's English] (tools/lang-test.js --adapted)
   adapted: {
     // ---- 5.0.5's lines that iOS words for its touch, and the Palm's ----
-    'Click here to make this message go away. Click on the clock to end your turn.': ['Uyarı yazıları kaybolması için buraya tıkla. Saate tıklarsan sıranı bitirebilirsin.', 'Tap here to make this message go away. Tap on the End Turn button to complete the turn.'],
+    'Click here to make this message go away. Click on the clock to end your turn.': ['Uyarı yazıları kaybolmasi için buraya tıkla. Saate tıklarsan sıranı bitirebilirsin.', 'Tap here to make this message go away. Tap on the End Turn button to complete the turn.'],
     'Fleets appear as dots next to your planets. Click one and drag it to send it to another star.': ['Filolar senin gezegenlerin yakınında nokta olarak gözükür. Başka bir yıldıza göndermek için birine tıkla ve sürükle.', 'Fleets appear as dots next to your planets. To move a fleet, select a star. Drag the ship to send it to another star.'],
     'Play with the spending bars. Conquer the galaxy. Gain ranks to unlock more game options. Enjoy.': ['Harcama şeritleri ile oyna. Galaksiyi fethet. Yeni oyun seçeneklerini açacağın derecelere ulaş. Keyiflen.', 'Play with the spending bars. Conquer the galaxy. Gain ranks to brag to your friends. Enjoy.'],
     'Option-drag in Organize Fleets to split up ship piles.': ['Gemi çokluklarını ayırmak için Organize gemilerinde option tuşu ile sürükle.', 'Use the Organize Fleets dialog to split up ship piles.'],
     'Sorry, but that fleet doesn\'t have enough fuel to reach the selected destination. You can tell this because there are no arrows on either end of the dragged line.': ['Üzgünüm, filonun hedefe kadar gidecek yakıtı yok. Bunu anlıyorsunuz çünkü çekilen çizginin iki ucunda da ok yok.', 'Sorry, but that fleet doesn\'t have enough fuel to reach the selected destination. You can tell this because of the red fleet line.'],
     'Icons by your planet mean you have ships orbiting around it. Fleets are on the right; satellites are on the left.': ['Gezeğenlerinin yakınındaki simgeler, senin gemilerin gezeğen çevresindeki yörüngelerini gösterir. Filolar sağda, uydular da soldadır.', 'Dots by your planet mean you have ships orbiting around it. Fleets are on the right; satellites are on the left.'],
-    'The first person in the Enemies and Allies list is winning.': ['Düşmanlar ve Ortaklar listesindeki ilk kişi oyunu kazanır.', 'The first person in the player list is winning.'],
+    'The first person in the Enemies and Allies list is winning.': ['Düşmanlar ve Ortaklar listesindeki ilk kiş     oyunu kazanır.', 'The first person in the player list is winning.'],
     // ---- 4.0.5 (Windows and Mac) and 3.0.1 ----
-    '%s destroyed your colony at %s.  You lost %s of your ships. %s lost %s.  You lost %s people.': ['%s senin koloniyi %s de mahvetti. Sen gemilerinin %d tanesini kaybettin; %s %d tanesini kaybetti. Sen %s insan kaybettin.', '%s destroyed your colony at %s. You %slost %d of your ships. %s lost %d. You lost %s people.'],
-    '%s survived an enemy attack from %s.  You lost %s of your ships.  %s lost %s.  You lost %s people.': ['%s, %sden gelen bir hücumdan sağlam çıktı. Sen gemilerinin %d tanesini kaybettin; %s %d tanesini kaybetti. Sen %s tane insan kaybettin.', '%s survived an attack from %s. You %slost %d of your ships; %s lost %d. You lost %s people.'],
+    '%s destroyed your colony at %s.  You lost %s of your ships. %s lost %s.  You lost %s people.': ['%1$s senin koloniyi %2$s de mahvetti. Sen gemilerinin  lost%3$s miktarını kaybettin. Sen %6$s insan kaybettin.', '%s destroyed your colony at %s. You %slost %d of your ships. %s lost %d. You lost %s people.'],
+    '%s survived an enemy attack from %s.  You lost %s of your ships.  %s lost %s.  You lost %s people.': ['%1$s%2$sden gelen bir hücumdan sağlam çıktı. Sen gemilerinin %3$s tanesini kaybettin. Sen %6$s tane insan kaybettin.', '%s survived an attack from %s. You %slost %d of your ships; %s lost %d. You lost %s people.'],
     'Play with the spending bars. Conquer the galaxy. Enjoy.': ['Harcama şeritleri ile oyna. Galaksiyi fethet. Keyiflen.', 'Play with the spending bars. Conquer the galaxy. Gain ranks to brag to your friends. Enjoy.'],
-    'Click here to make this message go away.': ['Uyarı yazıları kaybolması için buraya tıkla.', 'Tap here to make this message go away. Tap on the End Turn button to complete the turn.'],
+    'Click here to make this message go away.': ['Uyarı yazıları kaybolmasi için buraya tıkla.', 'Tap here to make this message go away. Tap on the End Turn button to complete the turn.'],
     'Good planets are close to 72 degrees.': ['İyi uydular 72 dereceye yakındır.', 'Good planets are close to 72°F (20°C).'],
     'Your fleet of %s is waiting to refuel before it can continue on to %s.': ['Senin %s filon, %sye devam etmeden önce yakıt almak için bekliyor.', 'Your %s is waiting to refuel before it can continue on to %s.'],
     'Wow! You won! You have conquered the galaxy. Congratulations!': ['Vay anasını! Kazandın! Galaksiyi fethettin. Tebrikler!', 'Congratulations! You have conquered the galaxy!'],
@@ -184,23 +223,23 @@ tr: {
     // ---- 5.0.5 (and the Palm) ----
     'Click and hold for a second to cancel a fleet\'s movement.': 'Filonun hareketini iptal etmek için ona tıkla ve bir saniye basılı tut.',
     'There\'s a contextual menu in the map window for convenience.': 'Kolaylık olsun diye harita penceresinde bir bağlam menüsü var.',
-    'Hold down the option key and click planets to specify your fleet\'s path more exactly.': 'Filonun yolunu daha tam belirlemek için option tuşunu basılı tut ve gezeğenlere tıkla.',
+    'Hold down the option key and click planets to specify your fleet\'s path more exactly.': 'Filonun yolunu daha kesin belirlemek için option tuşunu basılı tut ve gezeğenlere tıkla.',
     'Use the graph to see how well you\'re doing technology-wise vs. the other players.': 'Teknolojide öteki oyunculara göre ne durumda olduğunu görmek için grafiği kullan.',
-    'Abandon Ship? Abandon Ship! All hands abandon ship! Women and children first!': 'Gemiyi terk et? Gemiyi terk edin! Herkes gemiyi terk etsin! Önce kadınlar ve çocuklar!',
+    'Abandon Ship? Abandon Ship! All hands abandon ship! Women and children first!': 'Ship’i terk etmek mi? Gemiyi terk edin! Herkes gemiyi terk etsin! Önce kadınlar ve çocuklar!',
     'Year %d. Nothing much happened.': 'Yıl %d. Pek bir şey olmadı.',
     // ---- the Palm (5.0's code) ----
     'To cancel a fleet’s movement, make sure that fleet is selected in the Ship Info window and click the origin planet. You can also use the ‘Cancel Fleet Trip’ menu item in the ‘Ships’ menu.':
       'Bir filonun hareketini iptal etmek için, o filonun Ship Info penceresinde seçili olduğuna emin ol ve çıkış gezeğenine tıkla. \'Ships\' menüsündeki \'Cancel Fleet Trip\' komutunu da kullanabilirsin.',
     'There are menus and menu shortcuts in the Galaxy screen for your convenience.': 'Kolaylık olsun diye Galaksi ekranında menüler ve menü kısayolları var.',
     'The computer will help choose the best path possible for your fleets.': 'Bilgisayar, filoların için mümkün olan en iyi yolu seçmene yardım eder.',
-    'Change the battle attitude of ships in your fleets in the Organize Fleets screen.': 'Filolarındaki gemilerin savaş tutumunu Organize gemileri ekranında değiştir.',
+    'Change the battle attitude of ships in your fleets in the Organize Fleets screen.': 'Filolarındaki gemilerin savaş tutumunu Filoları Hazırla ekranında değiştir.',
     'The Enemy and Allies screen can show who your friends and enemies are. It also so shows who is doing the best.': 'Düşmanlar ve Ortaklar ekranı dostlarının ve düşmanlarının kim olduğunu gösterir. En iyi gidenin kim olduğunu da gösterir.',
     'Click the G button to see the Galaxy, click the $ button to see the Spendingscreen and click the H button to see these messages.': 'Galaksiyi görmek için G düğmesine, Harcama ekranı için $ düğmesine, bu mesajları görmek için de H düğmesine tıkla.',
     'Fleets appear as icons next to your planets. To send a fleet to another planet, select it and then drag it to the new planet.': 'Filolar senin gezeğenlerinin yakınında simge olarak gözükür. Bir filoyu başka bir gezeğene göndermek için onu seç ve yeni gezeğene sürükle.',
     'Palm OS version by Christopher Cotton and Steve Orens of Mobilefreon (tm)': 'Palm OS sürümü: Christopher Cotton ve Steve Orens, Mobilefreon (tm)',
-    'Your ship technicians have designed a decoy ship. It\'s really weak, but it looks menacing and can help keep your allies in line!': 'Senin gemi teknisyenlerin kandırıcı bir gemi tasarladılar. Gerçekten zayıf, fakat tehditkâr görünüyor ve ortaklarını hizada tutmana yardım edebilir!',
+    'Your ship technicians have designed a decoy ship. It\'s really weak, but it looks menacing and can help keep your allies in line!': 'Senin gemi teknisyenlerin bir tuzak gemi tasarladı. Gerçekten zayıf, fakat tehditkâr görünüyor ve ortaklarını hizada tutmana yardım edebilir!',
     // ---- 4.0.5 (Windows and Mac) and 3.0.1 ----
-    'A dot by a planet means you have ships in orbit there.': 'Gezeğeninin yanındaki bir nokta, orada yörüngede gemilerin olduğunu gösterir.',
+    'A dot by a planet means you have ships in orbit there.': 'Bir gezeğenin yanındaki nokta, orada yörüngede gemilerin olduğunu gösterir.',
     'Click and Drag from one star to another to move fleets.': 'Filoları hareket ettirmek için bir yıldızdan ötekine tıkla ve sürükle.',
     'Ship savings puts money away for shipbuilding.': 'Gemi tasarrufu, gemi yapımı için para ayırır.',
     // (the credits: iOS's Turkish has them in English)
@@ -210,28 +249,32 @@ tr: {
     'Star names must be 2 to 7 characters long.': 'Yıldız isimleri 2 ile 7 harf arasında olmalı.',
     'New Star Name:': 'Yeni Yıldız İsmi:',
     '(If you’d rather not name a star, click “OK” with the name blank.)': '(Bir yıldıza isim vermek istemiyorsan, ismi boş bırakıp “OK” düğmesine tıkla.)',
-    'Sorry, there’s already a star named  “%s.” Please pick another name.': 'Üzgünüm, %s isimli bir yıldız zaten var. Lütfen başka bir isim seç.',
+    'Sorry, there’s already a star named  “%s.” Please pick another name.': 'Üzgünüm, “%s” isimli bir yıldız zaten var. Lütfen başka bir isim seç.',
     // Fix Spending (3.0.1, Mac 2.0.1's lines)
-    'You have no spending problems.': 'Harcama problemin yok.',
-    'You were overspending at %s. The problem has been fixed.': '%sde fazla harcıyordun. Problem çözüldü.',
-    'You were underspending at %s. The problem has been fixed.': '%sde az harcıyordun. Problem çözüldü.',
+    'You have no spending problems.': 'Harcama sorunun yok.',
+    'You were overspending at %s. The problem has been fixed.': '%sde fazla harcıyordun. Sorun giderildi.',
+    'You were underspending at %s. The problem has been fixed.': '%sde az harcıyordun. Sorun giderildi.',
     'You’re abandoning %s.': '%syi terk ediyorsun.',
     'Congratulations!  You won the game.  Game difficulty rating was %s.': 'Tebrikler! Oyunu kazandın. Oyunun zorluk derecesi %s idi.',
     'Congratulations! You won the game.': 'Tebrikler! Oyunu kazandın.',
     'Sorry, but you have that fleet marked for the scrap heap.  it’s not going anywhere.': 'Üzgünüm, o filoyu hurdaya ayırdın. Hiçbir yere gitmiyor.',
     'You won the game, so you get to name a star.': 'Oyunu kazandın, bu yüzden bir yıldıza isim verebilirsin.',
-    'Sorry, there’s already a star named “%s.”  Please pick another name.': 'Üzgünüm, %s isimli bir yıldız zaten var. Lütfen başka bir isim seç.',
-    'Do you really want to launch the armageddon device?  It\'ll blow up half of the galaxy!': 'Gerçekten mahşer günü aletini başlatmak istiyor musun? Galaksinin yarısını havaya uçuracak!',
-    'Do you really want to launch the armageddon device?  Isn\'t life too short as it is?': 'Gerçekten mahşer günü aletini başlatmak istiyor musun? Hayat zaten yeterince kısa değil mi?',
-    'Do you really want to launch the armageddon device?  I mean, you\'d probably win anyway; why take the chance?': 'Gerçekten mahşer günü aletini başlatmak istiyor musun? Yani, herhalde nasılsa kazanırsın; ne diye riske giriyorsun?',
-    'Do you really want to launch the armageddon device?  Doing so decreases the difficulty score by half!': 'Gerçekten mahşer günü aletini başlatmak istiyor musun? Bunu yaparsan oyunun zorluk puanı yarıya iner!',
-    'Do you really want to launch the armageddon device?  Odds are you\'ll blow yourself up!': 'Gerçekten mahşer günü aletini başlatmak istiyor musun? Büyük ihtimalle kendini de havaya uçurursun!',
+    'Sorry, there’s already a star named “%s.”  Please pick another name.': 'Üzgünüm, “%s” isimli bir yıldız zaten var. Lütfen başka bir isim seç.',
+    'Do you really want to launch the armageddon device?  It\'ll blow up half of the galaxy!': 'Gerçekten Armageddon aygıtını başlatmak istiyor musun? Galaksinin yarısını havaya uçuracak!',
+    'Do you really want to launch the armageddon device?  Isn\'t life too short as it is?': 'Gerçekten Armageddon aygıtını başlatmak istiyor musun? Hayat zaten yeterince kısa değil mi?',
+    'Do you really want to launch the armageddon device?  I mean, you\'d probably win anyway; why take the chance?': 'Gerçekten Armageddon aygıtını başlatmak istiyor musun? Yani, herhalde nasılsa kazanırsın; ne diye riske giriyorsun?',
+    'Do you really want to launch the armageddon device?  Doing so decreases the difficulty score by half!': 'Gerçekten Armageddon aygıtını başlatmak istiyor musun? Bunu yaparsan oyunun zorluk puanı yarıya iner!',
+    'Do you really want to launch the armageddon device?  Odds are you\'ll blow yourself up!': 'Gerçekten Armageddon aygıtını başlatmak istiyor musun? Büyük ihtimalle kendini de havaya uçurursun!',
     'Are you just doing this because you think you\'ll win but it\'s really late and so you want to go to bed?': 'Bunu sadece kazanacağını düşündüğün, ama saat çok geç olduğu ve yatmak istediğin için mi yapıyorsun?',
-    'Aren\'t you sure you really don\'t want to have nothing to do with not launching the armageddon device?': 'Mahşer günü aletini başlatmamakla hiçbir ilgin olmasını gerçekten istemediğinden emin değil misin?',
+    'Aren\'t you sure you really don\'t want to have nothing to do with not launching the armageddon device?': 'Armageddon aygıtını başlatmamakla hiçbir ilgin olmasını gerçekten istemediğinden emin değil misin?',
     'You\'re just doing this \'cause you enjoy the ultimate feeling of power, aren\'t you???': 'Bunu sadece mutlak gücün tadını çıkardığın için yapıyorsun, değil mi???',
-    'If you do this, everyone will hate you!  It\'s such a sissy way to try to win, anyway.': 'Bunu yaparsan herkes senden nefret edecek! Zaten kazanmanın ne kadar korkakça bir yolu.',
+    'If you do this, everyone will hate you!  It\'s such a sissy way to try to win, anyway.': 'Bunu yaparsan herkes senden nefret edecek! Zaten bu, kazanmanın çok korkakça bir yolu.',
     'Now look, this is NO laughing matter.  You just might get yourself killed!': 'Bak, bu gülünecek bir şey DEĞİL. Kendini öldürtebilirsin!',
     'I get it.  You\'re losing big time and this is the only way you could possibly win!  That\'s it isn\'t it?': 'Anladım. Fena halde kaybediyorsun ve kazanmanın tek yolu bu! Öyle değil mi?',
+  },
+  patchWords: {
+    // iOS's Misc Strings filler "Ve Müttefikleri " is capitalised and says "and HIS allies"
+    'and your allies ': ' ve müttefiklerin',
   },
   words: {
     // 3.0.1's and 4.0.5's Send Message groups (iOS's "ortak", "en iyi oyun arkadaşı")
@@ -359,7 +402,7 @@ de: {
     'Your climatologists have discovered how to terraform planets more efficiently.': 'Ihre Klimaforscher haben entdeckt, wie man Planeten besser terraformt.',
     'Your military training program has improved. Your generals are now smarter.': 'Ihre militärische Ausbildung ist besser geworden. Ihre Generäle sind jetzt klüger.',
     'You have improved your recycling program. You can now get more metal from scrapped ships.': 'Sie haben Ihr Recycling verbessert. Verschrottete Schiffe bringen jetzt mehr Metall ein.',
-    'You have built a new research facility; tech spending is now 10% more effective.': 'Sie haben ein neues Forschungszentrum gebaut; Geld für Technologie wirkt jetzt 10% besser.',
+    'You have built a new research facility; tech spending is now 10% more effective.': 'Sie haben ein neues Forschungszentrum gebaut; Ausgaben für Technologie sind jetzt 10% wirksamer.',
     'You\'ve raised the prime lending rate and can now earn 50%% higher interest on savings.': 'Sie haben den Leitzins angehoben und bekommen jetzt 50%% mehr Zinsen auf Ihre Ersparnisse.',
     'You have renegotiated your line of credit and can now borrow at a 50%% better interest rate.': 'Sie haben Ihren Kreditrahmen neu verhandelt und leihen jetzt zu einem um 50%% besseren Zins.',
     'Your spies have stolen some technological secrets from %s!': 'Ihre Spione haben %s technische Geheimnisse gestohlen!',
@@ -367,9 +410,9 @@ de: {
     'Your Radical researchers are hard at work on another discovery!': 'Ihre Radikalforscher arbeiten hart an der nächsten Entdeckung!',
     'Warning! Savings is being used to support %s.': 'Achtung! Ihre Ersparnisse werden für den Unterhalt von %s verbraucht.',
     'Warning! After supporting your planets and paying your interest, you have no money to spend!': 'Achtung! Nach dem Unterhalt Ihrer Planeten und den Zinsen bleibt Ihnen kein Geld zum Ausgeben!',
-    'Your alliance will win the game next turn if it holds!': 'Ihr Bündnis gewinnt nächsten Zug das Spiel, wenn es hält!',
+    'Your alliance will win the game next turn if it holds!': 'Ihr Bündnis gewinnt im nächsten Zug das Spiel, wenn es hält!',
     'Uh-oh! Having to borrow more to pay all your interest!': 'Oh je! Sie müssen mehr leihen, um alle Zinsen zu zahlen!',
-    'You don’t have enough money! You’re neglecting your planets! Global warming is taking place!': 'Sie haben nicht genug Geld! Sie vernachlässigen Ihre Planeten! Die Erwärmung schreitet voran!',
+    'You don’t have enough money! You’re neglecting your planets! Global warming is taking place!': 'Sie haben nicht genug Geld! Sie vernachlässigen Ihre Planeten! Die globale Erwärmung schreitet voran!',
     'Due to a lack of funds, one of your fleets can’t be maintained. It is being scrapped.': 'Mangels Geld kann eine Ihrer Flotten nicht unterhalten werden. Sie wird verschrottet.',
     'Oh No! It’s armageddon!': 'Oh nein! Armageddon!',
     'Hmm! The armadeddon device was activated, but there wasn\'t enough mass in the galaxy to get it to work…': 'Hmm! Die Armageddon-Maschine wurde gestartet, aber in der Galaxis war nicht genug Masse, damit sie funktioniert…',
@@ -422,7 +465,7 @@ de: {
     'Abandon Ship? Abandon Ship! All hands abandon ship! Women and children first!': 'Ship verlassen? Alle Mann von Bord! Rette sich, wer kann! Frauen und Kinder zuerst!',
     'Do you really want to evacuate %s? It\'s a profitable colony!': 'Wollen Sie %s wirklich räumen? Die Kolonie wirft Profit ab!',
     'Do you really want to evacuate %s?': 'Wollen Sie %s wirklich räumen?',
-    'Year %d. Nothing much happened.': 'Jahr %d. Nicht viel passiert.',
+    'Year %d. Nothing much happened.': 'Jahr %d. Es ist nicht viel passiert.',
     // ---- 5.0.5's hints (STR# 6021) and first messages ----
     'Click here to make this message go away. Click on the clock to end your turn.': 'Klicken Sie hier, damit diese Meldung verschwindet. Klicken Sie auf die Uhr, um Ihren Zug zu beenden.',
     'Fleets appear as dots next to your planets. Click one and drag it to send it to another star.': 'Flotten erscheinen als Punkte neben Ihren Planeten. Klicken Sie eine an und ziehen Sie sie zu einem anderen Stern, um sie dorthin zu schicken.',
@@ -436,7 +479,7 @@ de: {
     'Miniaturization makes ships cost more money, but less metal.': 'Miniaturisierung macht Schiffe teurer, aber sie brauchen weniger Metall.',
     'Radical Tech can have a variety of effects.': 'Radikaltech kann die verschiedensten Folgen haben.',
     'Be careful with your metal--it can easily run out.': 'Gehen Sie sparsam mit Ihrem Metall um, es kann leicht ausgehen.',
-    'Click and hold for a second to cancel a fleet\'s movement.': 'Klicken und eine Sekunde halten, um den Flug einer Flotte abzubrechen.',
+    'Click and hold for a second to cancel a fleet\'s movement.': 'Halten Sie die Maustaste eine Sekunde gedrückt, um den Flug einer Flotte abzubrechen.',
     'Build Satellites to protect vulnerable planets.': 'Bauen Sie Satelliten, um gefährdete Planeten zu schützen.',
     'Colonize good planets with Colony ships.': 'Kolonisieren Sie gute Planeten mit Kolonieschiffen.',
     'Scout ships have higher Range, but lower Weapons and Shields.': 'Späher haben mehr Reichweite, aber schwächere Waffen und Schilde.',
@@ -444,15 +487,15 @@ de: {
     'If your Shields are higher than the opponents Weapons, he\'ll barely hurt you.': 'Sind Ihre Schilde stärker als die Waffen des Gegners, kann er Ihnen kaum etwas anhaben.',
     'Lots of ships can make up for having low Technology.': 'Viele Schiffe können schwache Technologie wettmachen.',
     'You get money every turn.': 'Sie bekommen jeden Zug Geld.',
-    'Good planets are close to 1.0 G.': 'Gute Planeten haben fast 1,0 G.',
-    'Good planets are close to 72°F (20°C).': 'Gute Planeten haben fast 72°F (20°C).',
+    'Good planets are close to 1.0 G.': 'Gute Planeten liegen nahe bei 1,0 G.',
+    'Good planets are close to 72°F (20°C).': 'Gute Planeten liegen nahe bei 72°F (20°C).',
     'Each player has a different idea of what a good planet is.': 'Jeder Spieler hat seine eigene Vorstellung von einem guten Planeten.',
     'If a planet is over 2.5 G or below 0.4 G, it will never make a profit.': 'Ein Planet mit über 2,5 G oder unter 0,4 G wirft niemals Profit ab.',
     'Abandon bad planets after you strip-mine them.': 'Verlassen Sie schlechte Planeten, wenn Sie sie ausgebeutet haben.',
     'Terraforming improves a planet\'s temperature.': 'Terraforming verbessert die Temperatur eines Planeten.',
     'Mining takes metal from a planet and puts it into your reserve.': 'Bergbau holt Metall aus einem Planeten und legt es in Ihren Vorrat.',
-    'Savings puts money away for shipbuilding.': 'Ersparnisse legen Geld für den Schiffsbau zurück.',
-    'Savings generates extra income.': 'Ersparnisse bringen zusätzliches Einkommen.',
+    'Savings puts money away for shipbuilding.': 'Sparen legt Geld für den Schiffsbau zurück.',
+    'Savings generates extra income.': 'Sparen bringt zusätzliches Einkommen.',
     'If you go into debt, part of your income goes to pay interest.': 'Wenn Sie Schulden machen, geht ein Teil Ihres Einkommens für Zinsen drauf.',
     'If you have a fleet with fighters and a colony ship, mark the colony ship to arrive late. It\'ll probably survive longer.': 'Haben Sie eine Flotte mit Kampfschiffen und einem Kolonieschiff, lassen Sie das Kolonieschiff später ankommen. Es überlebt dann wahrscheinlich länger.',
     'Ships in a fleet that arrive late may miss the worst initial battle.': 'Schiffe einer Flotte, die später ankommen, verpassen vielleicht den schlimmsten Teil des Kampfes.',
@@ -548,14 +591,14 @@ de: {
     // (string 5040's "Sie haben die Galaxis erobert!")
     'Congratulations! You have conquered the galaxy!': 'Glückwunsch! Sie haben die Galaxis erobert!',
     'A dot by a planet means you have ships in orbit there.': 'Ein Punkt neben einem Planeten bedeutet, dass dort Schiffe im Orbit sind.',
-    'Good planets are close to 72 degrees.': 'Gute Planeten haben fast 72 Grad.',
-    'Ship savings puts money away for shipbuilding.': 'Schiffsersparnisse legen Geld für den Schiffsbau zurück.',
+    'Good planets are close to 72 degrees.': 'Gute Planeten liegen nahe bei 72 Grad.',
+    'Ship savings puts money away for shipbuilding.': 'Schiffssparen legt Geld für den Schiffsbau zurück.',
     'You just received %s metal from someone scrapping a fleet over %s.': 'Sie erhalten %s Metall von einer Flotte, die über %s verschrottet wurde.',
     'Star names must be 2 to 7 characters long.': 'Sternnamen müssen 2 bis 7 Buchstaben lang sein.',
     'New Star Name:': 'Neuer Name:',
     '(If you’d rather not name a star, click “OK” with the name blank.)': '(Wenn Sie keinen Stern benennen möchten, klicken Sie einfach mit leerem Namen auf „OK“.)',
     // the remake's own messages (js/engine.js; 2.0's German had the first)
-    'Your fleet of %s is waiting to refuel before it can continue on to %s.': 'Die Flotte von %s wartet auf Treibstoff, bevor sie nach %s weiterfliegt.',
+    'Your fleet of %s is waiting to refuel before it can continue on to %s.': 'Ihre Flotte von %s wartet auf Treibstoff, bevor sie nach %s weiterfliegt.',
     'Wow! You won! You have conquered the galaxy. Congratulations!': 'Wow! Sie haben gewonnen! Sie haben die Galaxis erobert. Glückwunsch!',
     'Wow! You won! You and your allies have conquered the galaxy. Congratulations!': 'Wow! Sie haben gewonnen! Sie und Ihre Verbündeten haben die Galaxis erobert. Glückwunsch!',
     // (2.0's German had them: the free-text messages)
@@ -740,7 +783,7 @@ es: {
     'The meteor shower destroyed your colony at %s.': 'La lluvia de meteoritos ha destruido tu colonia en %s.',
     'The shock wave from the supernova threw %s metal at %s, killing %s people.': 'La onda expansiva de la supernova ha lanzado %s unidades de metal sobre %s y ha matado a %s personas.',
     'Uh-oh! %s has started growing and is turning bright red in hue!': '¡Ay, ay, ay! ¡%s ha empezado a crecer y se está poniendo de un rojo intenso!',
-    'Uh-oh! Having to borrow more ship money to pay all your interest!': '¡Ay, ay, ay! ¡Hay que pedir más dinero para naves prestado para pagar todos tus intereses!',
+    'Uh-oh! Having to borrow more ship money to pay all your interest!': '¡Ay, ay, ay! ¡Hay que pedir prestado más dinero para naves y así pagar todos tus intereses!',
     'Uh-oh! Having to borrow more to pay all your interest!': '¡Ay, ay, ay! ¡Hay que pedir más prestado para pagar todos tus intereses!',
     'Warning! After supporting your planets and paying your interest, you have no money to spend!': '¡Atención! Después de mantener tus planetas y pagar tus intereses, ¡no te queda dinero que gastar!',
     'Warning! Ship money is being used to support %s.': '¡Atención! Se está usando el dinero para naves para mantener %s.',
@@ -806,7 +849,7 @@ es: {
     '%s says , "#!$*@%$&!"': '%s dice: “¡#!$*@%$&!”',
     '%s says, “I like planets that are %d.%2.2dG and %s.”': '%s dice: “Me gustan los planetas de %d,%2.2dG y %s.”',
     '%s says, “I saw %s at %s!”': '%s dice: “¡He visto %s en %s!”',
-    '%s says, “Look at %s.”': '%s dice: “Mirad %s.”',
+    '%s says, “Look at %s.”': '%s dice: “Mira %s.”',
     '%s is cheating.': '%s está haciendo trampa.',
     'You told %s that you want %s.': 'Le has dicho a %s que quieres %s.',
     'You told %s that you don’t want %s.': 'Le has dicho a %s que no quieres %s.',
@@ -854,7 +897,7 @@ es: {
     '%s people managed to escape the meteor shower at %s by fleeing to the orbiting colony ship(s).': '%s personas han logrado escapar de la lluvia de meteoritos de %s huyendo a las naves colonia en órbita.',
     'Your %s can no longer reach %s because some of the ships in the fleet don\'t have enough range.': 'Tu flota de %s ya no puede llegar a %s porque algunas naves de la flota no tienen alcance suficiente.',
     'It\'s a miracle! Your scientists have figured out to prevent %s from going supernova.': '¡Es un milagro! Tus científicos han averiguado cómo impedir que %s estalle en supernova.',
-    'Wow, that\'s weird! %s is no longer red and appears not to be in danger of going nova.': '¡Uau, qué raro! %s ya no está rojo y parece que no corre peligro de convertirse en nova.',
+    'Wow, that\'s weird! %s is no longer red and appears not to be in danger of going nova.': '¡Uau, qué raro! %s ya no está roja y parece que no corre peligro de convertirse en nova.',
     // ---- the alerts the page shows ----
     'Do you really want to surrender?': '¿De verdad quieres rendirte?',
     'Are you sure you want to destroy half the galaxy? Millions of innocent lives will be lost…': '¿Seguro que quieres destruir media galaxia? Se perderán millones de vidas inocentes…',
@@ -928,7 +971,7 @@ es: {
     'Are you just doing this because you think you\'ll win but it\'s really late and so you want to go to bed?': '¿Haces esto solo porque crees que vas a ganar, pero es tardísimo y te quieres ir a la cama?',
     'Aren\'t you sure you really don\'t want to have nothing to do with not launching the armageddon device?': '¿No estás seguro de que de verdad no quieres no tener nada que ver con no lanzar la máquina del Armagedón?',
     'You\'re just doing this \'cause you enjoy the ultimate feeling of power, aren\'t you???': 'Haces esto solo porque te encanta sentirte todopoderoso, ¿¿¿a que sí???',
-    'If you do this, everyone will hate you!  It\'s such a sissy way to try to win, anyway.': '¡Si haces esto, todo el mundo te odiará! Además, es una forma de gallina de intentar ganar.',
+    'If you do this, everyone will hate you!  It\'s such a sissy way to try to win, anyway.': '¡Si haces esto, todo el mundo te odiará! Además, intentar ganar así es de gallinas.',
     'Now look, this is NO laughing matter.  You just might get yourself killed!': 'A ver, esto NO es cosa de risa. ¡Podrías acabar muerto!',
     'I get it.  You\'re losing big time and this is the only way you could possibly win!  That\'s it isn\'t it?': 'Ya lo entiendo. Vas perdiendo por goleada y esta es la única forma de que puedas ganar. Es eso, ¿verdad?',
     // ---- the first messages and hints ----
@@ -946,7 +989,7 @@ es: {
     'Icons by your planet mean you have ships orbiting around it. Fleets are on the right; satellites are on the left.': 'Los iconos junto a tu planeta indican que tienes naves en órbita a su alrededor. Las flotas, a la derecha; los satélites, a la izquierda.',
     'Good planets look "prettier" than bad planets when you explore them.': 'Al explorarlos, los planetas buenos se ven “más bonitos” que los malos.',
     'Range is how far your ships can reach.': 'El Alcance es hasta dónde pueden llegar tus naves.',
-    'Satellites can\'t move,, but they shoot just as well as any other ship.': 'Los satélites no se mueven, pero disparan igual de bien que cualquier otra nave.',
+    'Satellites can\'t move,, but they shoot just as well as any other ship.': 'Los Satélites no se mueven, pero disparan igual de bien que cualquier otra nave.',
     'There\'s a limited amount of metal in the game.': 'La cantidad de metal de la partida es limitada.',
     'Miniaturization makes ships cost more money, but less metal.': 'La Miniaturización hace que las naves cuesten más dinero, pero menos metal.',
     'Radical Tech can have a variety of effects.': 'La tecnología Radical puede tener efectos muy variados.',
