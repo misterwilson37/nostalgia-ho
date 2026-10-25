@@ -60,13 +60,13 @@ and the translation notice (`docs/translations-notes/`) are not done.
 4. Added by Jake (October 2026), in this order:
    a. **The Amiga 2.1 English as the Amiga skin's English** (item 1). Count how many lines
       differ from the DOS English, and note any that suggest wording elsewhere.
-   b. **Links to the original PDFs** from each adapted manual's cover page: the 3.0.1 manual
+   b. **Done (October 2026).** **Links to the original PDFs** from each adapted manual's cover page: the 3.0.1 manual
       (3.0.1.pdf, 8 MB, never an HTML manual), the DOS 2.0 manual, and any other manual adapted
-      from a PDF, so the historical document stays reachable.
+      from a PDF, so the historical document stays reachable. Done: the DOS 2.0 and 3.0.1 manuals (the only two adapted from PDFs; 2.0-windows and 5.0.5/4.0.5 come from help files) link their PDF (`assets/manuals/dos-2.0.pdf`, `3.0.1.pdf`, newly committed) from the cover page in all five languages, opening in a new tab.
    c. **Translate the Full Hoedown list** (`docs/hoedown.md`'s jokes as shown in game) into
       every language a version offers, under the translation rule below.
-   d. **Tidy the 5.0.5 manual's 34 broken links** (the original's own; invisible to players,
-      so this is code tidying, not a change anyone sees).
+   d. **Done (October 2026).** **Tidy the 5.0.5 manual's 34 broken links** (the original's own; invisible to players,
+      so this is code tidying, not a change anyone sees). Done: `tools/manual-links.js` checks every relative href/src and anchor in assets/manuals; 33 broken per 5.0.5 copy (165 in all) are now 0 (dead Word `filelist.xml`/`editdata.mso` head links removed; `ho5docs.html#16799` now points to `preferences.html`).
    e. **"Every version's jokes"**, lower: a second box, shown only when Full Hoedown is checked,
       that lets every joke from every version appear (today Full Hoedown maximizes the jokes
       of the version being played). Official releases' jokes only, as Full Hoedown.
