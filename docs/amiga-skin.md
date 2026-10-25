@@ -428,8 +428,8 @@ Ausgaben", "(+ $ %s)" for "+ $%s", the labels without the DOS colons and ellipse
 for "Schilder"); the messages between players' words lower-case ("ich mag", "ich hasse").
 
 **Other languages.** The skin's words (`WORDS` in `js/skins/amiga/ui.js`, and its New Game,
-Registration, About and menu words) are the Amiga's German, the remake's English for a game
-played in English, and the remake's French, Turkish and Spanish, translated from the Amiga's
+Registration, About and menu words) are the Amiga's German, the Amiga 2.1's own English for a game
+played in English (`docs/amiga-21.md`, "The Amiga English in the remake"), and the remake's French, Turkish and Spanish, translated from the Amiga's
 own words, so a game in those languages shows them and never German (the skin follows the
 interface's language, `js/ui-lang.js`; with no game and none used yet, the Amiga's German).
 Numbers are written "51.000" in German, Turkish and Spanish, "51 000" in French; temperatures

@@ -795,3 +795,5 @@ html.amiga .am-aslbtns .am-btn { min-height: calc(12 * var(--v)); }
 html.amiga .am-aslbtns { top: calc(169 * var(--v)); }
 html.amiga.os-workbench .wbody .am-radio.am-tscrap input[type=checkbox]:checked, html.amiga .am-radio.am-tscrap input:checked { background-image: var(--am-xbox) !important; }
 html.amiga .am-atext p { white-space: normal !important; overflow-wrap: anywhere; }
+/* (the Amiga English's alert has its line breaks: string 56) */
+html.amiga .am-walert .am-atext p { white-space: pre-line !important; }

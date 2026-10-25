@@ -4,7 +4,8 @@
     pip install pillow amitools
     xdftool "Disk 1 of 2.adf" unpack amiga/
     xdftool "Disk 2 of 2.adf" unpack amiga/
-    python3 tools/extract/amiga.py amiga/
+    python3 tools/extract/amiga.py amiga/ [amiga-en/]   (the second folder: the 2.1 English disk 1,
+    unpacked the same way; adds strings-en.json)
 
 (Any way of copying the files off the two floppies works; the extractor
 only needs image16.pff, sound.pff, texte.pff and p16.iff from disk 1 and
@@ -185,7 +186,7 @@ def find(src, fn):
     sys.exit('No %s under %s' % (fn, src))
 
 
-def main(src):
+def main(src, en=None):
     cm = open(find(src, 'p16.iff'), 'rb').read()
     c = cm.find(b'CMAP')
     pal = cm[c + 8:c + 8 + struct.unpack('>I', cm[c + 4:c + 8])[0]]
@@ -215,9 +216,13 @@ def main(src):
         sounds.append(sid)
     strings = {i: s.rstrip(b'\0').decode('latin1') for i, s in enumerate(records(find(src, 'texte.pff')))}
     json.dump(strings, open(os.path.join(OUT, 'strings.json'), 'w'), ensure_ascii=False, indent=0)
+    if en:  # the 2.1 English disk's texte.pff (docs/amiga-21.md): 844 records, numbered as the German ones
+        english = {i: s.rstrip(b'\0').decode('latin1') for i, s in enumerate(records(find(en, 'texte.pff')))}
+        json.dump(english, open(os.path.join(OUT, 'strings-en.json'), 'w'), ensure_ascii=False, indent=0)
+        print(len(english), 'English strings (Amiga 2.1) -> strings-en.json')
     json.dump({'sprites': sorted(sprites), 'sounds': sorted(sounds)}, open(os.path.join(OUT, 'manifest.json'), 'w'), indent=1)
     print(len(sprites), 'sprites,', len(sounds), 'sounds,', len(strings), 'strings ->', OUT)
 
 
 if __name__ == '__main__':
-    main(sys.argv[1])
+    main(sys.argv[1], sys.argv[2] if len(sys.argv) > 2 else None)

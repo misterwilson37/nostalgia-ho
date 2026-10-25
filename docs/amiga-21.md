@@ -288,6 +288,144 @@ and 2.0's are the DOS 2.0 ones (`docs/dos-findings.md`).
 - Not worth doing: the Envoy/BFS notes, the changelog's network items (the remake has no
   Amiga network).
 
+## The Amiga English in the remake
+
+**Done (October 2026).** The Amiga skin's English is now the Amiga 2.1 English (build 2.1ge1.05,
+the `[h WT]` disk), word for word, in place of the remake's own English. No new ruleset, no new
+version: the skin is still "2.0 (Amiga, German, 1994)" in the version list (see "For Jake" below).
+
+**How it is wired.** The Amiga skin never loaded `strings.json`: its German is typed into
+`WORDS` (and `ABOUT`, `SKILLS`, `IQ`, `PICS`, `CLASS_DE`) in `js/skins/amiga/ui.js`, one entry per
+word, `[German, English, French, Turkish, Spanish]`, with the string numbers in comments. The
+English column of the same tables is now the Amiga's, by string number (the English file is
+numbered as the German one: 0 to 837 the same, 838 to 843 new):
+
+- **170 of the skin's 197 words** take their English from the Amiga strings (113 of them changed;
+  the rest were the same already). The other 27 are the remake's own windows and controls
+  (Pixels, Square pixels, "Startup window", "Orders", "More…", the password note, the picks
+  "Select one of your colonies first" …) and a few words with no English counterpart in the
+  table: 739 is empty (so "There is no comparison before 2010!" stays) and 715 "%s hängt auf %s
+  fest." is still German (so "is stuck at" stays).
+- **The menu bar** is string 842 (menu names and items, in the order of the German menu in the
+  German program's data): Project, Options, Ships, Galaxy, Windows, Info and every item as the
+  English has it ("Do Turn", "Do Turn & Change Player", "Force Turn", "I'll Update the Turns",
+  "Control Time", "ScreenMode", "Fix Spendings", "Cleanup Windows" …). The Ships menu's items that
+  change with the state take their texts from the strings (22 "Organize Ships", 18 "Scrap
+  Current Fleet", 19 "Don`t Scrap Fleet", 21 "No Battle here", 20 "Review Battle on %s", now
+  with the star's name as the Amiga has it).
+- **The About window** is string 835, its eight lines; **the radio buttons** (galaxy size, shape,
+  density, computer intelligence, skill) and the ship classes' four names (81 to 84) are the
+  Amiga's too. The other classes (tanker, dreadnought, bio weapon, decoy) have no Amiga word and
+  keep the ruleset's.
+- **Reports in English** (`amigaEnReport`, `AM_EN_REPORTS`): 23 lines, in 14 patterns, that the Amiga
+  words differently from the DOS English text the ruleset writes: the five tech messages ("Your RangeTech
+  has reached Level 3."), "You abandon %s.", the nova line, "%s has destroyed your colony at %s.",
+  the baby boom and the slowed growth, the receiver's "sends a message saying …" lines (605 to
+  614, with the Amiga's missing full stops: 608 and all the "she" lines), "metall", "crunched",
+  and the research warning with its "!". The first two reports were already the Amiga's. A text
+  no line matches stays the ruleset's. The German skin does the same as before: its reports are
+  the ruleset's German (docs/amiga-skin.md, "Text"); only the English is new.
+- Line breaks: the file's backslash is a forced line break. They are new lines in the texts
+  (the alert is drawn with `white-space: pre-line`); elsewhere a line break shows as a space.
+  `%s`, `%ld` and `%d` become `%1`, `%2` in the order the Amiga fills them. Apostrophes are
+  the Amiga's backticks ("Can`t read file!"), kept.
+- **`assets/skins/amiga/strings-en.json`** holds all 844 English strings (as `strings.json` holds
+  the German 838), written by `tools/extract/amiga.py <amiga/> <amiga-en/>` (the second folder:
+  the English disk, unpacked). The page does not read it (as it does not read `strings.json`).
+
+**The difference from the DOS English.** Counted by a script (October 2026): each Amiga string
+is paired with the DOS English string (`assets/skins/dos/strings.json`) it translates, by their
+German (the German DOS 2.0's HO.PRS against the Amiga's German: the same text once placeholders,
+case and punctuation are ignored, or one of 35 near pairs checked by eye), and the English is
+compared. "Exact": the same after `%Fs`, `%d` and `%ld` are made alike and line breaks are
+spaces. "Near": the same once capitals, apostrophes (`'`, `` ` ``), full stops and other
+punctuation are ignored. "Different": the words differ. The pairing is a script's, so the
+counts are good to a few lines, not to the line.
+
+| Group | Lines | Exact | Near | Different |
+|---|---|---|---|---|
+| Report lines (569 to 627, against DOS 672 to 730, in the same order) | 59 | 30 | 10 | 19 |
+| Other words, windows and messages the DOS English has too | 127 | 40 | 32 | 55 |
+| **Both together** | **186** | **70** | **42** | **74** |
+| The Amiga's own (its windows, file, printer, memory and copy-protection messages, the menu: nothing in the DOS English) | 291 | | | |
+| Names: stars 119 to 333, people 382 to 440, ships 441 to 533 | 367 | 222 are a name in the DOS English lists | | 145 are the Amiga's own (Urmel, Eimer, Bebbo V, Anton to Jupp, "Bebbo-Ex" …) |
+
+So of the 186 lines that exist in both, **112 are the same words** (70 exactly, 42 apart from
+capitals, apostrophes or full stops) and **74 differ**; of the 59 reports, 40 are the same
+words and 19 differ. (The "33 of 56" in "Against DOS 2.0's English" above counted the 56
+messages 571 to 626 and allowed only the apostrophe.)
+
+**Notable differences**, the Amiga English against the DOS English:
+
+- *Jokes:* "Yep" / "Nope" / "Ok, ok" (DOS: Yes / No / OK), "Closing Game... sigh..." (33), "File
+  in use / Please wait for getting bored" (55), "Too many fingers on keyboard error!" (42,
+  44), "You are free to leave this game / but do you really want to? / Naaah?" (15), "Hm? Quo vadis?"
+  (557), "Snoopy: Is something going on??" (722), "Out of chipmem error... please buy some
+  new!" (558), "Sorry! But all changes are lost!" (40). Computer intelligence is "Bundy"
+  (Al Bundy) for Dumb, "Normal", "Smart"; the skill "Profi" is left German.
+- *What the words reveal:* the planet panel's bars are "Terra / Met. / Constr." (DOS: Terra /
+  Mine / Ship): the second is **metal**, the third **construction**; the Auto Play window's title is
+  "Computer Player" (674) while its menu item is "Autoplay"; the Amiga says **Stars** where DOS
+  says Planets (748, 764); "Total money / Total Income / Metal Reserve" (DOS: "Reserve Metal:").
+  The two battle lines "You were destroyed immediately" (637) and "You got no information..."
+  (638) are in the German's order; the DOS English strings 74 and 75 have them the other way
+  round. The five sizes read Small, Big, Huge, Giant, Extra Large for the German Klein, Mittel,
+  Groß, Sehr Groß, Riesig; DOS English reads Small, Medium, Large, Extra Large, Humongous: the
+  Amiga's English is one name off the DOS ones from the second on, and its "Extra Large" is what
+  the German "Riesig" calls DOS's "Humongous".
+- *Reports:* "RangeTech" and "Level" for DOS's "Range Technology" and "level"; "You abandon %s."
+  for "You have abandoned %s."; "%s has become Nova. All colonists were vaporized." for "%s has
+  gone nova. All inhabitants were killed."; "crunched" for "killed" in the meteor shower; "metall"
+  (a typo); the volcano and "You have explored" lines in **°C** (DOS English: °F); shorter
+  alerts ("Warning! Some colonies are running out of money" for DOS's "You are not spending
+  enough money to support some of your colonies"; "Your fleet is in hyperspace. No way to make
+  contact!" for DOS's "… can't be contacted until it arrives at its next location").
+- *Flaws the skin keeps (Jake's rule):* "Typs available" (644), "Please indentify:" (371),
+  "Sreenmode Preferences" (728), "Battle information no available" (642), "Hurrican" (470),
+  `Don`t` and `Can`t` with backticks, "i like" in lower case (761), "Step 2 für Player" (565, a German
+  "für" left in), "Profi", 379 "other" for Mann and 380 "female" for Frau, the German
+  "%s hängt auf %s fest." (715) and the copy protection's German word table, which the skin
+  does not show.
+
+**Notes for Jake: wording elsewhere** (nothing changed for these, only noted):
+
+- The Amiga's "Met." and "Constr." say what the DOS English "Mine" and "Ship" bars are for
+  (mining metal, constructing ships); a skin that labels the bars could use either.
+- The remake's English panel already says "Income" (the DOS English word; the German "Profit"
+  is its translation), so the Amiga skin's "Income:" changes nothing elsewhere.
+- DOS English strings 74 and 75 look swapped against the German and the Amiga English (above).
+- The five "You send a message saying you like %s" lines (615 to 619) lack the recipient: the
+  German lines have two names ("an %s: Sie mögen %s"), the English one `%s`, so a real Amiga most
+  likely prints the recipient where the subject belongs. **Not reworded in the skin:** the
+  ruleset's "You sent a message to X saying you like Y." stays.
+- The English file's ship and people names are the DOS English lists with the Amiga's own names
+  added; from string 441 on the English and German ship lists do not line up by string number
+  (the German has names the English lacks), so the German list is not a translation of the
+  English one.
+
+**For Jake: decisions the change leaves open**
+
+1. **The version label.** The English text says "Spaceward Ho! Amiga Version 2.1" (the start
+   title bar, string 117), "Spaceward Ho! V2.1 - %s in %s at %ld" (the title bar of a game, 839)
+   and "Spaceward Ho! Amiga version 2.1 by Stefan Bebbo Franke." (the first report, 569), word
+   for word, while the version list still says "2.0 (Amiga, German, 1994)". The German still says
+   "Version 2.0" (the German 2.1's own text does). The label could read "2.0/2.1 (Amiga, German
+   and English)"; not changed, since you said no new version.
+2. **The End Turn picture** stays the remake's English copy of the German button. The English
+   2.1 disk has the same pictures byte for byte, so the real English Amiga shows the German "Zug
+   Ende" button.
+3. **Temperatures.** The English reports 584 and 600 and the Amiga program print °C. The skin's
+   English panels still show °F (the DOS English's unit), and those two reports are the
+   ruleset's. Making the English Amiga skin show °C everywhere is a one-line change
+   (`temp` in `js/skins/amiga/ui.js`, add `'en'`) plus rewriting the two reports.
+4. **The skin's German is not all the Amiga's own.** Some German lines were written by the
+   remake (the revert question, "Wählen Sie eine Ihrer Kolonien.", the "Keine Schiffsbaugelder"
+   line), where the Amiga has a line (36 "Wollen Sie wirklich zum zuletzt gespeicherten
+   Spielstand zurückkehren?" and 56). The English now has the Amiga's, the German not. And in a
+   German game the Ho! menu's remake-only items show in English where they carry an ellipsis
+   ("Preferences...", "Export this game..."): `menuWord` turns "…" into "..." before the
+   translation looks the word up. Both are older than this change.
+
 ## Where the tools are
 
 - `python3 -I tools/extract/amiga21.py out/ 2.0.adf 2.1de-disk1.adf 2.1en-disk1.adf` unpacks the

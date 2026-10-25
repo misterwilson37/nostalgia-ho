@@ -22,8 +22,8 @@ and the translation notice (`docs/translations-notes/`) are not done.
    the same game as 2.0 (same engine, pictures, sounds, fonts and windows; the changes are file
    handling, a new button look, DOS game files and the English text file). **Jake's decision
    (October 2026): yes**, its English (844 strings, the Amiga's own translation) becomes the
-   Amiga skin's English, in place of falling back to the DOS English; no new ruleset. See
-   item 4a.
+   Amiga skin's English, in place of falling back to the DOS English; no new ruleset.
+   **Done** (October 2026): see item 4a.
 2. Design: write prompts for Gemini for any art or design work, unless it can be done here.
    **Art part done** (October 2026): Jake's art package `nostalgia-ho-art.zip` is integrated
    (stand-in pictures in every skin's `sprites/fill/`, marked as the remake's;
@@ -58,8 +58,12 @@ and the translation notice (`docs/translations-notes/`) are not done.
    Briefspiel.dok (not in the repo as text). Code: `exportGame`, `withUnlocked` in
    `js/skins/classic/ui.js`; strings in `js/ui-text.js`.
 4. Added by Jake (October 2026), in this order:
-   a. **The Amiga 2.1 English as the Amiga skin's English** (item 1). Count how many lines
-      differ from the DOS English, and note any that suggest wording elsewhere.
+   a. **Done** (October 2026): **the Amiga 2.1 English is the Amiga skin's English** (item 1):
+      170 of the skin's 197 words, the whole menu bar, the About window, the radio buttons and
+      23 English report lines are the Amiga's own words (flaws kept: "Typs available", "Ok, ok"),
+      the rest the remake's; of the 186 lines that exist in both the Amiga's and the DOS English, 112
+      are the same words and 74 differ. Notes for Jake (version label, End Turn picture, °C,
+      unwired lines) in `docs/amiga-21.md`, "The Amiga English in the remake".
    b. **Done (October 2026).** **Links to the original PDFs** from each adapted manual's cover page: the 3.0.1 manual
       (3.0.1.pdf, 8 MB, never an HTML manual), the DOS 2.0 manual, and any other manual adapted
       from a PDF, so the historical document stays reachable. Done: the DOS 2.0 and 3.0.1 manuals (the only two adapted from PDFs; 2.0-windows and 5.0.5/4.0.5 come from help files) link their PDF (`assets/manuals/dos-2.0.pdf`, `3.0.1.pdf`, newly committed) from the cover page in all five languages, opening in a new tab.
