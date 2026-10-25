@@ -4613,7 +4613,7 @@ function openSavedGames(id) {
   const S = screensOf(id) || {}, L = savedGames(id);
   const fileIn = el('input', { type: 'file', accept: '.hogame,.json,application/json', hidden: true, onchange: (e) => {
     const f = e.target.files[0]; if (!f) return;
-    f.text().then((t) => { try { HO.load(t); } catch (x) { toast('That file isn’t a saved game this remake can read.'); return; } localStorage.setItem('ho5.save', t); closeScreen(); continueGame(); });
+    f.text().then((t) => withUnlocked(t, (t) => { try { HO.load(t); } catch (x) { toast('That file isn’t a saved game this remake can read.'); return; } localStorage.setItem('ho5.save', t); closeScreen(); continueGame(); }));
   } });
   const open = (g) => { if (G) save(); localStorage.setItem('ho5.save', g.data); closeScreen(); continueGame(); };
   const download = (g) => {
@@ -4827,6 +4827,51 @@ function openGameText(t, when) {
   return true;
 }
 const gameFileName = (g) => `${g.galaxy || 'Spaceward Ho'} ${g.year}.hogame`.replace(/[\\/:*?"<>|]+/g, '-');
+// Optional password on an exported file (off unless the player turns it on;
+// hot seat and every other way of playing never ask): one password for the
+// file, kept as a salted PBKDF2 hash (Web Crypto) beside the game, never the
+// password. The originals' passwords were each player's own, asked at their
+// turn; a file is passed around whole, so one lock for the file stands in for
+// them. It is a lock, not encryption: the game stays readable in the file.
+const pwOK = () => !!(window.crypto && crypto.subtle && window.TextEncoder);
+const pwB64 = (u) => btoa(String.fromCharCode.apply(null, u));
+const pwUnB64 = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
+async function pwHash(pw, salt, iter) {
+  const k = await crypto.subtle.importKey('raw', new TextEncoder().encode(String(pw).normalize('NFC')), 'PBKDF2', false, ['deriveBits']);
+  return pwB64(new Uint8Array(await crypto.subtle.deriveBits({ name: 'PBKDF2', hash: 'SHA-256', salt, iterations: iter }, k, 256)));
+}
+async function pwProtect(text, pw) {
+  const salt = crypto.getRandomValues(new Uint8Array(16)), iter = 100000;
+  return JSON.stringify({ hoPassword: 1, kdf: 'PBKDF2-SHA256', iter, salt: pwB64(salt), hash: await pwHash(pw, salt, iter), game: text });
+}
+// a protected file's wrapper, or null for any other text
+function pwWrapper(t) {
+  if (typeof t !== 'string' || t.charCodeAt(0) !== 123) return null;
+  try { const o = JSON.parse(t); return o && o.hoPassword === 1 && typeof o.game === 'string' && o.salt && o.hash ? o : null; } catch (x) { return null; }
+}
+// the file's text, ready for next(): asks for the password first when the file has one
+function withUnlocked(t, next) {
+  const w = pwWrapper(t);
+  if (!w) return next(t);
+  if (!pwOK()) { toast('This browser can’t check passwords here (it needs a secure page, https), so this file can’t be opened.'); return; }
+  const pw = el('input', { type: 'password', autocomplete: 'off', required: true }), err = el('p', { class: 'note', role: 'alert' });
+  const f = el('form', { class: 'pwask', onsubmit: (e) => {
+    e.preventDefault();
+    pwHash(pw.value, pwUnB64(w.salt), w.iter || 100000).then((h) => {
+      if (h === w.hash) { closeModal(); next(w.game); } else { err.textContent = UIL.t('That isn’t the right password.'); pw.select(); }
+    }, () => { err.textContent = UIL.t('That isn’t the right password.'); });
+  } },
+    el('p', null, 'Type the password it was exported with.'), el('label', null, el('span', null, 'Password'), ' ', pw), err,
+    el('div', { class: 'btns right' }, el('button', { type: 'button', class: 'quiet', onclick: closeModal }, 'Cancel'), el('button', { type: 'submit' }, 'Open')));
+  modal('This file has a password', f, { cls: 'small' });
+}
+// what the version's own manual says about passwords (the first version whose
+// manual says anything; 4.0.5's and 5.0.5's say nothing): { quote, manual, chapter }
+function pwManual() {
+  const two = ['dos', '12', 'mac20'].includes(rulesId());
+  return two ? { manual: 'Spaceward Ho! 2.0 manual (DOS)', quote: '(On the first turn, you may have to close the game, and then open it again, but type in the second player\'s name into the password dialog.)' }
+    : { manual: 'Spaceward Ho! 3.0 manual (Mac 3.0.1)', quote: 'Log on, do your turn, and instead of ending the turn normally, choose “End Turn and Switch Players” from the “File” menu. This will close your game, reopen it for the other player, and let him enter his name and password.' };
+}
 // Export and import, for every version and with no account (the Game menu;
 // Import also on the title screen): the same .hogame file Saved Games and
 // Account saves give. An online game exports as a snapshot of this page's
@@ -4834,9 +4879,34 @@ const gameFileName = (g) => `${g.galaxy || 'Spaceward Ho'} ${g.year}.hogame`.rep
 function exportGame() {
   if (!G) { toast('Start or continue a game first, then export it.'); return; }
   if (!G.gameId) G.gameId = Date.now();
-  downloadText(HO.save(G), gameFileName({ galaxy: (G.opts && G.opts.galaxy) || 'Milky Way', year: G.year }));
-  if (G.online) toast('Exported a snapshot of this online game as it stands on this computer. Imported, it opens as a local game, not online.');
-  maybeSaveOffer();
+  const text = HO.save(G), name = gameFileName({ galaxy: (G.opts && G.opts.galaxy) || 'Milky Way', year: G.year });
+  const done = (out, locked) => {
+    closeModal(); downloadText(out, name);
+    if (G.online) toast('Exported a snapshot of this online game as it stands on this computer. Imported, it opens as a local game, not online.');
+    else if (locked) toast('Exported with a password. Keep it: it can’t be recovered.');
+    maybeSaveOffer();
+  };
+  const can = pwOK(), M = pwManual();
+  const err = el('p', { class: 'note', role: 'alert' });
+  const pw1 = el('input', { type: 'password', autocomplete: 'new-password' }), pw2 = el('input', { type: 'password', autocomplete: 'new-password' });
+  const fields = el('div', { class: 'pwfields' }, el('label', null, el('span', null, 'Password'), ' ', pw1), el('label', null, el('span', null, 'Type it again'), ' ', pw2));
+  fields.hidden = true;
+  const on = el('input', { type: 'checkbox', disabled: !can, onchange: () => { fields.hidden = !on.checked; err.textContent = ''; if (on.checked) pw1.focus(); } });
+  const f = el('form', { class: 'pwexport', onsubmit: (e) => {
+    e.preventDefault();
+    if (!on.checked) return done(text, false);
+    if (!pw1.value) { err.textContent = UIL.t('Type a password, or turn the password off.'); return; }
+    if (pw1.value !== pw2.value) { err.textContent = UIL.t('The two passwords differ.'); return; }
+    pwProtect(text, pw1.value).then((out) => done(out, true), () => { err.textContent = UIL.t('This browser can’t make a password here (it needs a secure page, https). The file can still be exported without one.'); });
+  } },
+    el('label', { class: 'chk' }, on, ' ', el('span', null, 'Protect the file with a password (optional)')),
+    can ? null : el('p', { class: 'note' }, 'This browser can’t make a password here (it needs a secure page, https). The file can still be exported without one.'),
+    fields, err,
+    el('p', { class: 'sub' }, 'Off unless you turn it on, and the game plays the same either way. Whoever imports the file is asked for the password first. It is a lock for friends passing the file around, not a safe: the game is still readable in a text editor, and a forgotten password can’t be recovered.'),
+    el('p', { class: 'note' }, 'What the original manual says about passwords:'),
+    el('blockquote', { class: 'pwquote' }, M.quote, el('br'), el('small', null, '— ' + UIL.t(M.manual) + ', “' + UIL.t('Multiple Players') + '”')),
+    el('div', { class: 'btns right' }, el('button', { type: 'button', class: 'quiet', onclick: closeModal }, 'Cancel'), el('button', { type: 'submit' }, 'Export')));
+  modal('Export this game', f, { cls: 'mid' });
 }
 function importGame() {
   const fileIn = el('input', { type: 'file', accept: '.hogame,.json,application/json', hidden: true, onchange: () => {
@@ -4845,7 +4915,8 @@ function importGame() {
   } });
   document.body.append(fileIn); fileIn.click();
 }
-function importText(t) {
+const importText = (t) => withUnlocked(t, importPlain);
+function importPlain(t) {
   let g;
   try { g = HO.load(t); } catch (x) { g = null; }
   if (!g || !Array.isArray(g.players) || !Array.isArray(g.stars)) { toast('That file isn’t a saved game this remake can read.'); return; }

@@ -39,10 +39,23 @@ and the translation notice (`docs/translations-notes/`) are not done.
    (`FOR-THE-MAIN-CLAUDLING.md`, "Found along the way") are small code jobs still open. The
    looks' few words ("Location:", "Document: Done") are CSS in English, as the browsers of the
    time showed them; the look names are proper names, like the other looks'.
-3. Optional passwords on exported games, for the original play-by-file experience (not for
-   the hot seat): each player's name and password asked at their turn, with a note quoting
-   the version's manual (WINHO.WRI, the Amiga's Briefspiel.dok and Netzwerk.dok, the Mac
-   manuals).
+3. **Done** (October 2026): optional passwords on exported games, for the original play-by-file
+   experience (not the hot seat, which asks for none). Export this game… now opens a small window:
+   "Protect the file with a password (optional)", off by default, and Export is one click without
+   it. With it on, one password for the file (not one per player: a file is passed around whole,
+   and a per-player lock at each turn would need the hot seat's switching to ask, which Jake ruled
+   out) is kept as a salted PBKDF2-SHA256 hash (Web Crypto, 100,000 rounds) beside the game, never
+   the password; importing such a file, from the title screen, the Game menu or Saved games, asks
+   for it (wrong: asked again; no way back in if forgotten). It is a lock, not encryption: the game
+   stays readable in the file, and the window says so. Files without a password import as before;
+   cloud saves and online games are untouched. The window quotes the version's own manual, in its
+   language: DOS 2.0, 1.2F and Mac 2.0.1 the 2.0 manual's "Multiple Players" (second player's name
+   into the password dialog); every other version the 3.0 manual's "Multiple Players" ("let him
+   enter his name and password"), since the 4.0.5 and 5.0.5 manuals say nothing of passwords.
+   Not quoted: Windows 2.0's help ("You must enter your name and -- if you choose -- a password",
+   English only, `assets/manuals/2.0-windows/file-menu-commands.html`) and the Amiga's
+   Briefspiel.dok (not in the repo as text). Code: `exportGame`, `withUnlocked` in
+   `js/skins/classic/ui.js`; strings in `js/ui-text.js`.
 4. Last: a home-screen (apple-touch) icon per skin, the icon a phone shows when the site is
    added to its home screen; today every skin's is the Android one.
 

@@ -482,3 +482,8 @@ html.fleetdrag #panel .planet > .btns, html.fleetdrag.fleetdrag-pad #panel .plan
 .autoplay505 .note { margin: 0 0 .4em 1.9em; }
 .autoplay505 hr { border: 0; border-top: 1px solid var(--line, #8888); margin: .6em 0; }
 .autoplay505 .slider { display: inline-flex; gap: 6px; align-items: center; margin-left: .5em; }
+.pwexport .pwfields { display: grid; gap: 6px; margin: 8px 0 0 24px; }
+.pwexport .pwfields label, .pwask label { display: grid; gap: 2px; }
+.pwquote { margin: 4px 0 8px; padding: 4px 0 4px 10px; border-left: 3px solid var(--sub, #888); }
+.pwquote small, .pwask .note, .pwexport .note[role=alert] { color: var(--sub); }
+.pwexport .pwfields[hidden] { display: none; }
