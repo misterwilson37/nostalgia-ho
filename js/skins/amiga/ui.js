@@ -1022,7 +1022,8 @@ function openShipyard(sid) {
           return el('div', { class: 'am-yslot', role: 'button', tabindex: 0, onclick: () => { if (it) { HO.unqueueShip(G, ME, sid, i); render(); a.renderPanel(); } else a.beep(); } },
             d ? shipCanvas(d) : '', d ? el('div', { class: 'am-ycap ' + capFont(cap, 120) }, cap) : '');
         }))),
-      (s.ship || 0) > 0 || !q.length ? null : el('p', { class: 'am-ynote' }, w('noShip')));
+      // (the remake's own hint, not the Amiga's: only with Modern conveniences)
+      (s.ship || 0) > 0 || !q.length || !G.opts.modern ? null : el('p', { class: 'am-ynote' }, w('noShip')));
     const listBox = el('div', { class: 'am-ytypes' });
     for (const d of p.designs.filter(x => !x.scrapped && types.includes(x.type))) {
       const cap = `${d.name} (${d.W}/${d.S}) ${className(d.type)}`;
