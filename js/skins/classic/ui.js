@@ -1754,14 +1754,15 @@ function renderMsg0() {
   }
   // online: once this player's orders are in (or they have no turn), who the turn waits for
   if (G.online && (ONL.sent || !onlineCanMove()) && !G.over) { box.append(waitingCard()); maybeHallOffer(); return; }
-  if (T.endTurnPic && A.img[T.endTurnPic]) { // the theme's own End Turn button picture
-    const btn = el('button', { class: 'clock pic', onclick: doEndTurn, 'aria-label': 'End turn', 'aria-keyshortcuts': 'T', 'data-help': 'endTurn', 'data-key': END_KEY() }, el('img', { src: A.img[T.endTurnPic], alt: '' }));
+  const endPic = (T.endTurnPics && window.HOUI && T.endTurnPics[HOUI.lang]) || T.endTurnPic; // (a picture in the game's language, where the original has one: T.endTurnPics)
+  if (endPic && A.img[endPic]) { // the theme's own End Turn button picture
+    const btn = el('button', { class: 'clock pic', onclick: doEndTurn, 'aria-label': 'End turn', 'aria-keyshortcuts': 'T', 'data-help': 'endTurn', 'data-key': END_KEY() }, el('img', { src: A.img[endPic], alt: '' }));
     // T.endTurnYear [x, y, w, h, picture width]: the picture's window where
     // the original writes the year (4.0: p5500's black window, the Windows
     // 4.0.5's clock); placed in percent, so it follows the picture's size
     const Y = T.endTurnYear;
     if (Y) {
-      const im = IMG[T.endTurnPic], H = (im && im.height) || Y[4];
+      const im = IMG[endPic], H = (im && im.height) || Y[4];
       btn.append(el('span', { class: 'clockyear', 'aria-hidden': 'true', style: `left:${Y[0] / Y[4] * 100}%;top:${Y[1] / H * 100}%;width:${Y[2] / Y[4] * 100}%;height:${Y[3] / H * 100}%` }, String(G.year)));
     }
     box.append(btn); clockTime(); maybeHallOffer();
@@ -6078,7 +6079,7 @@ window.addEventListener('DOMContentLoaded', () => {
     openBuild, openSplit, openOrganize, organizeStyle, openPlayers, openScrapTypes, openBattle, lastBattles, battleName, openReports, openAbout, openHelp,
     openRadicalHand, showRank, openWinWindows, openYouWon, openYouLost, // (the originals' own windows, for the tests)
     newGameDialog, titleScreen, hideTitle, continueChecked, importGame, doEndTurn, flipBarScale, marksScrap, scrapWords, toggleScrapFleet,
-    verOpts, modern, hotSeat, openGameText, Prefs, savePrefs, switchPlayers, forceEndTurn, openBattleList, openFixSpending, lastBattles, playOneTurn,
+    verOpts, modern, hotSeat, openGameText, Prefs, savePrefs, switchPlayers, forceEndTurn, openBattleList, openFixSpending, lastBattles, playOneTurn, showMessages,
     // (and the windows tools/ui-lang-audit.js opens in every skin and language)
     openPrefs, openAccount, openHall, hasHall, openMasterList, openRanks, openGameCenter, openFleetList, openStarList, openGive, openChat,
     openSkin, openSounds, openLanguage, openAutoPlay, openDip, openSurrender, openSavedGames, closeScreen, openPatchNotes,

@@ -1826,6 +1826,10 @@ const FIXES20 = [
     text: 'A fleet marked for scrapping while it was in hyperspace was reported “at” the star before the first one, which is part of the galaxy’s header: an empty name, and no metal (unless your fleet was the first player’s and the ninth home slot was the first star). The patch reports it “at hyperspace” with no metal, as 3.0.1 does.' },
   { id: 'deBattleLines', title: 'The German battle window’s two no-information lines are the right way round',
     text: 'In the German version the battle window’s lines “You have no information.” and “You were destroyed immediately.” (strings 74 and 75) are swapped. The patch puts each in its place; it matters only when the game is played in German.' },
+  { id: 'amigaTenths', title: 'The Amiga’s °C readings show real tenths',
+    text: 'The Amiga writes its temperatures in °C (the star panel, the explored-stars list and the exploring report) with a tenths digit that is only the whole degrees’ last digit again: 22 °C reads “22.2°C” and 37 °C reads “37.7°C”. The patch writes the real tenths. It matters only in the Amiga skin.' },
+  { id: 'amigaChatNames', title: 'The Amiga English’s “You send a message” reports name the recipient',
+    text: 'In the Amiga’s English, the five reports of a message you send (“You send a message saying you like …”) lost the recipient and fill their one blank with the recipient’s name, so you seem to like the player you wrote to. The patch shows 2.0’s sentence, with both names. It matters only in the Amiga skin, in English.' },
 ].concat(E.TRANSLATIONS_FIX); // (the Turkish 2.0's and Mac 2.0.1's corrections: js/languages.js turkish20)
 
 // ---------- set-up (FUN_1030_1299 @1030:19ae-1b32) ----------

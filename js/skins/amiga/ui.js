@@ -143,7 +143,7 @@ const WORDS = {
   mFix: ['Ausgaben anpassen', 'Fix Spendings', 'Ajuster les dépenses', 'Harcamaları ayarla', 'Ajustar los gastos'], mTidy: ['Fenster aufräumen', 'Cleanup Windows', 'Ranger les fenêtres', 'Pencereleri topla', 'Ordenar las ventanas'],
   colonyWarn: ['Achtung! Sie geben für einige Kolonien nicht genug Geld aus, um sie am Leben zu erhalten. Wollen Sie sie wirklich verlassen?', 'Warning! Some colonies are running out of money\nDo you really want to abandon them?', 'Attention ! Vous ne dépensez pas assez d’argent pour certaines colonies afin de les maintenir en vie. Voulez-vous vraiment les abandonner ?', 'Dikkat! Bazı koloniler için onları hayatta tutacak kadar para harcamıyorsun. Onları gerçekten terk etmek istiyor musun?', '¡Atención! No estás gastando suficiente dinero en algunas colonias para mantenerlas con vida. ¿Realmente quieres abandonarlas?'],
   savingTitle: ['Neuer Spielstand wird gespeichert', 'Writing new game-file', 'Enregistrement d’une nouvelle sauvegarde', 'Yeni oyun kaydı kaydediliyor', 'Guardando una partida nueva'], savingLine: ['Speichern der Galaxis', 'Saving galaxy', 'Enregistrement de la galaxie', 'Galaksi kaydediliyor', 'Guardando la galaxia'],
-  revertAsk: ['Das Spiel auf den zuletzt gespeicherten Stand zurücksetzen?', 'Do you really want to return to your last saved game?\n\nAll changes will be lost!', 'Remettre la partie dans l’état de la dernière sauvegarde ?', 'Oyun en son kaydedilen duruma döndürülsün mü?', '¿Devolver la partida al último estado guardado?'],
+  revertAsk: ['Wollen Sie wirklich zum zuletzt gespeicherten Spielstand zurückkehren?\n\nAlle Änderungen gehen verloren!', 'Do you really want to return to your last saved game?\n\nAll changes will be lost!', 'Remettre la partie dans l’état de la dernière sauvegarde ?', 'Oyun en son kaydedilen duruma döndürülsün mü?', '¿Devolver la partida al último estado guardado?'],
   aslNew: ['Name der neuen Galaxis:', 'File name of new galaxy:', 'Nom de la nouvelle galaxie :', 'Yeni galaksinin adı:', 'Nombre de la galaxia nueva:'],
   entryTitle: ['Spaceward Ho! Spieleintrag', 'Spaceward Ho! Enter game', 'Spaceward Ho! Entrée dans la partie', 'Spaceward Ho! Oyuna giriş', 'Spaceward Ho! Entrada en la partida'], identify: ['Identifizieren Sie sich:', 'Please indentify:', 'Identifiez-vous :', 'Kendini tanıt:', 'Identifícate:'],
   infoDots: ['Info..', 'Info..', 'Info..', 'Bilgi..', 'Info..'],
@@ -213,8 +213,25 @@ const signed = (n, money) => {
 // colour table at data+0x21bc, pens 4, 11, 7 and 8 for a quarter each
 const BAR_PENS = ['#003399', '#3333ff', '#993399', '#cc33ff'];
 const barPen = (h) => BAR_PENS[Math.max(0, Math.min(3, Math.floor(Math.max(0, h) * 4 / 51)))];
-const celsius = (f) => ((f - 32) * 5 / 9).toFixed(1) + '°C';
-const temp = (f) => (['de', 'fr', 'es'].includes(lang()) ? celsius(f) : api().degF(f)); // (°C where the officials and the glossary give it)
+// The temperatures, as the Amiga program writes them (Ghidra, German 2.1: the star panel FUN_00105278, a row of
+// the explored-stars list @12393a, the exploring report 600 in FUN_0010ddf6 type 31; the English 2.1 has the same
+// arithmetic in all three): from the temperature in tenths of a degree Fahrenheit, F = trunc(tenths / 10) - 32
+// whole degrees, C = trunc(F x 5 / 9) (divs.w, toward zero), written "%d.%1.1d%cC" with the arguments C, |C| mod 10
+// and 0xb0: so the "tenths" digit is the whole degrees' last digit again (22 reads "22.2°C", 37 "37.7°C", -3 "-3.3°C").
+// The patch (fix 'amigaTenths') writes the real tenths, truncated as the program truncates.
+const amigaC = (f, fixed) => {
+  const tenths = Math.round(f * 10);
+  if (fixed) {
+    const c = Math.trunc((tenths - 320) * 5 / 9), a = Math.abs(c);
+    return (c < 0 ? '-' : '') + Math.trunc(a / 10) + '.' + (a % 10) + '°C';
+  }
+  const c = Math.trunc((Math.trunc(tenths / 10) - 32) * 5 / 9);
+  return c + '.' + (Math.abs(c) % 10) + '°C';
+};
+// °C in English, German, French and Spanish: the Amiga's own text says °C in both its languages, and the French
+// (1.2F, 3.0.1F, iOS) and the Spanish (no official one: the Amiga's) follow; Turkish follows iOS's Turkish, which
+// fills in the English's degrees Fahrenheit (docs/amiga-skin.md, "Temperatures")
+const temp = (f) => (['en', 'de', 'fr', 'es'].includes(lang()) ? amigaC(f, HO.fixed(game(), 'amigaTenths')) : api().degF(f));
 
 // ---------- the screen's pixels ----------
 const PIXKEY = 'ho5.amiga.pixels';
@@ -841,15 +858,42 @@ function amigaSay(G, m) {
   const t = m && m.text;
   if (typeof t === 'string' && /^Spaceward Ho!.* by Peter Commons\.$/.test(t)) return w('credit1');
   if (t === 'Artwork by Howard Vives.') return w('credit2');
-  if (typeof t === 'string' && lang() === 'en') { const r = amigaEnReport(G, t); if (r != null) return r; }
+  if (typeof t === 'string') {
+    // the exploring report (600): the temperature as the program writes it (amigaC)
+    const x = /^You have explored (.+)\. Gravity: (\d+\.\d\d)G\. Temp: -?\d+°\. Metal: ([\d,]+)\.$/.exec(t);
+    if (x && m.star != null) {
+      const a = api(), F = m.temp != null ? m.temp : HO.seenT(a.me(), G.stars[m.star]);
+      if (lang() === 'en') return `You have explored ${x[1]}. Gravity: ${x[2]}G. Temp: ${temp(F)}. Metal: ${x[3]}.`;
+      const out = HO.say(G, t);
+      if (lang() === 'de') { const d = /^Sie haben (.+) erforscht\. .*Metall: (.+)\.$/.exec(out); if (d) return `Sie haben ${d[1]} erforscht. Schwerkraft: ${x[2]}G. Temp: ${temp(F)}. Metall: ${d[2]}.`; }
+      if (lang() === 'fr' || lang() === 'es') return out.replace(/-?[\d.,]+°C/, temp(F));
+      return out;
+    }
+    if (lang() === 'en') { const r = amigaEnReport(G, t); if (r != null) return r; }
+    if (lang() === 'de') { const r = amigaDeReport(HO.say(G, t)); if (r != null) return r; }
+  }
   return HO.say(G, m.text);
+}
+// German: the reports the Amiga's German words differently from the German DOS 2.0 the ruleset has (texte.pff
+// 582, 592, 594, 624 against HO.PRS 685, 695, 697, 727; 569 is the credit, 600 the exploring report, above; the
+// revolt 581, the volcano 584 and the nova 577 never come up in 2.0), as the Amiga has them
+const AM_DE_REPORTS = [
+  [/^Achtung: Sie terraformen (.+), ein Planet, der niemals Profit abwerfen wird\.$/, (m) => `Achtung: Sie terraformen ${m[1]}, einen Planeten, der niemals Profit abwerfen wird.`], // 582
+  [/^Ihre Flotte von (.+) kann (.+) nicht mehr erreichen\.$/, (m) => `Ihr ${m[1]} kann ${m[2]} nicht mehr erreichen.`], // 592
+  [/^Die Flotte von (.+) macht halt auf (.+) auf dem Weg nach (.+)\.$/, (m) => `Die Flotte von ${m[1]} wurde bei ${m[2]} auf dem Weg nach ${m[3]} aufgehalten.`], // 594
+  [/^Sie wurden aus dem Spiel gelöscht\.$/, () => 'Sie werden aus dem Spiel gelöscht.'], // 624
+];
+function amigaDeReport(t) {
+  for (const [re, f] of AM_DE_REPORTS) { const m = re.exec(t); if (m) return f(m); }
+  return null;
 }
 // In English, the reports the Amiga 2.1 words differently from the DOS English the ruleset writes (texte.pff
 // 571-627, docs/amiga-21.md "The Amiga English in the remake"), as the Amiga has them, flaws and all: "RangeTech",
-// "Level", "metall", the backticks, the full stops it leaves out. A text no line matches stays the ruleset's. Left
-// as the ruleset has them: the temperatures (the Amiga's two say °C; the ruleset's English keeps its degrees as
-// they are) and the five "You send a message saying you like %s" lines, which take one name where the Amiga's
-// German takes two (the recipient's and the subject's).
+// "Level", "metall", the backticks, the full stops it leaves out, and the five "You send a message saying you like
+// %s" lines (615-619), whose one %s the program fills with the RECIPIENT's name (FUN_0010ecd8, types 46-50: its
+// first argument is the player the message went to, the second, which the German format takes, the subject; the
+// patch's fix 'amigaChatNames' shows 2.0's sentence with both). A text no line matches stays the ruleset's. The
+// exploring report with its °C is in amigaSay.
 const AM_TECH = { Range: 'Range', Speed: 'Speed', Weapons: 'Weapon', Shield: 'Shield', Miniaturization: 'Mini' };
 const AM_EN_REPORTS = [
   [/^Your (Range|Speed|Weapons|Shield|Miniaturization) Technology has reached level (\d+)\.$/, (G, m) => `Your ${AM_TECH[m[1]]}Tech has reached Level ${m[2]}.`], // 571-575
@@ -867,6 +911,8 @@ const AM_EN_REPORTS = [
   [/^(.+) metal has fallen onto (.+) from your recent battle\.$/, (G, m) => `${m[1]} metall has fallen onto ${m[2]} from your recent battle.`], // 621
   [/^Oh no! (.+) people were killed when a heavy meteor shower hit (.+)\.$/, (G, m) => `Oh no! ${m[1]} people were crunched when a heavy meteor shower hits ${m[2]}.`], // 622
   [/^You are not spending any money on technology research\.$/, () => 'You are not spending any money on technology research!'], // 627
+  // 615-619: the recipient where the subject belongs (see above); the patch leaves the ruleset's sentence
+  [/^You sent a message to (.+?) saying you (like|don\u2019t like|own) (.+)\.$/, (G, m) => (HO.fixed(G, 'amigaChatNames') ? null : `You send a message saying you ${m[2].replace('\u2019', '`')} ${m[1]}`)],
 ];
 function amigaEnReport(G, t) {
   for (const [re, f] of AM_EN_REPORTS) { const m = re.exec(t); if (m) return f(G, m); }
@@ -1364,8 +1410,9 @@ function newGame(f, ctx) {
 function page(doc) {
   const a = api();
   doc.body.classList.add('amiga');
-  // the End Turn picture: the German one in a German game
-  Object.defineProperty(TH(), 'endTurnPic', { configurable: true, get: () => (de() ? P + 'd5000' : P + 'endturn') });
+  // the End Turn picture in the game's language: the German one is the Amiga's own (d5000); the English, French,
+  // Turkish and Spanish are drawn into it in its lettering (tools/skins/amiga_endturn.py)
+  Object.defineProperty(TH(), 'endTurnPic', { configurable: true, get: () => P + ({ de: 'd5000', en: 'endturn', fr: 'endturn-fr', tr: 'endturn-tr', es: 'endturn-es' }[lang()] || 'endturn') });
   // the screen's title bar and its depth gadget
   const bar = doc.getElementById('menubar');
   bar.append(el('span', { class: 'am-sdepth', 'aria-hidden': 'true' }));
@@ -1815,7 +1862,7 @@ window.HOTHEME_OVER = {
   // (the Amiga game was German; the skin starts in English like every other,
   // Jake's choice: German, the Amiga's words, is the title screen's Language
   // or New Game's for DOS 2.0 and Mac 2.0.1, js/languages.js)
-  endTurnPic: P + 'd5000', // (a getter from page(): the English copy in an English game)
+  endTurnPic: P + 'd5000', // (a getter from page(): the picture of the game's language)
   endTurnKey: 'Amiga+Z',
   select: null, selectSmall: null, // the selection is drawStar's
   mapBg: '#000', bgStars: false,

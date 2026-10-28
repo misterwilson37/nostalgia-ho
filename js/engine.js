@@ -528,6 +528,13 @@ function fixes(rs) { return (rs && rs.fixes) || []; }
 // and whose French is 1.2F's (1.2's own, rs.ownFix; 2.0's, french20's fix).
 const TRANSLATIONS_FIX = { id: 'translations', title: 'The French and Turkish wording is put right',
   text: 'The official French (Mac 1.2’s, the French Mac 3.0.1’s and the iOS game’s) and the iOS game’s Turkish have slips: a word left in English, a filling lost, a sentence that says something else, a name run into its ending, a word misspelled. The patch shows the corrected wording, in the game’s reports and tips and in the remake’s menus and windows; in French also French typography and better ship names (Chasseur, Cuirassé, Ravitailleur). It matters only when the game is played in French or Turkish.' };
+// The iOS lines that fill a report's blanks in another order than the English sentence's (French "You won a
+// battle", Turkish "colony destroyed", "survived an attack", the supernova's shock wave), as the shipped
+// games filled them: a word where a number goes. The versions that carry those exact iOS lines (3.0.1, 4.0.5,
+// 5.0.5, the Palm) show them so by default; the patch fills each blank by its meaning (js/languages.js
+// BY_PLACE, placesFix). iOS and Android list their own wording of the same fix (js/rules-ios.js).
+const IOS_FILLINGS_FIX = { id: 'iosFillings', title: 'Some French and Turkish reports put a word where a number goes',
+  text: 'The French and Turkish lines come from the iOS game’s translations, which the game filled in the English sentence’s order, though the French “You won a battle” report and the Turkish “colony destroyed”, “survived an attack” and supernova shock-wave reports take some blanks in another order. So they show a word where a number goes and the other way round. The patch fills each blank by its meaning. It matters only when the game is played in French or Turkish.' };
 function fixed(G, id) { return !!(G && G.opts && G.opts.patch) && fixes(rules(G)).some(f => f.id === id); }
 // Full Hoedown (G.opts.hoedown, off unless chosen at New Game or in the Ho
 // menu): Delta Tao's own jokes at their most (js/hoedown.js, docs/hoedown.md).
@@ -1413,7 +1420,7 @@ function exploreMsg(G, p, s) {
   const snd = quality === 'good' ? 6000 : quality === 'mediocre' ? 6002 : 6001;
   const icon = quality === 'good' ? 'm9027' : quality === 'mediocre' ? 'm9028' : 'm9029';
   const gStr = gs.toFixed(2) + 'G';
-  msg(G, p.id, `You have explored ${s.name}. Gravity: ${gStr}. Temp: ${Math.round(ts)}°. Metal: ${num(G, s.metal)}.`, { icon, sound: snd, star: s.id, explore: quality });
+  msg(G, p.id, `You have explored ${s.name}. Gravity: ${gStr}. Temp: ${Math.round(ts)}°. Metal: ${num(G, s.metal)}.`, { icon, sound: snd, star: s.id, explore: quality, temp: ts });
 }
 
 // ---------- battles ----------
@@ -1686,7 +1693,7 @@ const API = {
   DATA, SHIP_TYPES, TYPES: SHIP_TYPES, TECHS,
   BAR_SCALES, barScale, battleGroups, makeBattlePanel,
   registerRules, registerAI, rules, rulesById, aiOf, LANGUAGES, languages, ownLanguage, languageName, languageChoices,
- ownRules, gameName, ownName, setLanguage, frPatchText, windowWords, say, saysIn, trSuffixes, feature, RULESETS, fixes, fixed, TRANSLATIONS_FIX, hoedown, setHoedown, patchVersion,
+ ownRules, gameName, ownName, setLanguage, frPatchText, windowWords, say, saysIn, trSuffixes, feature, RULESETS, fixes, fixed, TRANSLATIONS_FIX, IOS_FILLINGS_FIX, hoedown, setHoedown, patchVersion,
   // [id, name] for the New Game window: the original games' rules by year of
   // release, then version ("2.0 (DOS and Windows 3.1, 1993)"); rulesets that
   // aren't an original game's (the remake's own) come last, by their label

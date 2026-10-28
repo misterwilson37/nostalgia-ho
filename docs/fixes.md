@@ -47,7 +47,7 @@ their entries are below so the list is complete, but their rulesets list no fixe
 | Version | Obvious bug | Quirk or design | Unclear |
 |---|---|---|---|
 | Mac 1.2 | 3 | 8 | 2 |
-| 2.0 | 7 | 5 | 3 |
+| 2.0 | 9 (7 + the Amiga skin's two) | 5 | 3 |
 | Mac 2.0.1 | 5 | 5 | 2 |
 | Mac 3.0.1 | 5 | 6 | 3 |
 | 4.0.5 | 11 fixed (+ 3 the remake already plays fixed, + 3 with nothing in the remake to fix) | 4 | 6 |
@@ -83,14 +83,20 @@ language update in the patch, never the default. So the patch carries them, in t
   French typography, accents on capitals, the official texts' spelling slips and the patch's ship
   names (Chasseur, Cuirassé, Ravitailleur), in the game and in the interface. 1.2's own French takes
   it as `rs.ownFix`. Only in a French or Turkish game.
-- **`iosFillings`** (iOS, Android): "Four French and Turkish reports put a word where a number
-  goes". The app filled a translated report's blanks in the English sentence's order, though
-  French 36 ("You won a battle…") and Turkish 11, 38 and 84 (colony destroyed, survived an
-  attack, the supernova's shock wave) take some in another order; the shipped games showed
-  a word where a number goes. Played as released by default; the patch fills each blank by its
-  meaning (`js/languages.js` `BY_PLACE`). The other versions that carry these iOS lines show
-  them by place, as the remake always has (their English is not iOS's word for word, and
-  a patch of their own would add nothing to what they show).
+- **`iosFillings`** (iOS and Android with their own wording; 3.0.1, 4.0.5 on Windows and Mac, 5.0.5
+  and the Palm with the shared one, `engine.js` `IOS_FILLINGS_FIX`): "Four French and Turkish reports
+  put a word where a number goes". The app filled a translated report's blanks in the English
+  sentence's order, though French 36 ("You won a battle…") and Turkish 11, 38 and 84 (colony
+  destroyed, survived an attack, the supernova's shock wave) take some in another order; the
+  shipped games showed a word where a number goes. Played as released by default, and so in
+  every version that carries those exact iOS lines (October 2026, by Jake's rule that a version
+  shows the same official wording, slips and all, that it would have inherited): French 36 in
+  5.0.5 and the Palm; Turkish 11 in 5.0.5 and the Palm; Turkish 38 in 3.0.1, 5.0.5 and the Palm;
+  Turkish 84 in 3.0.1, both 4.0.5s, 5.0.5 and the Palm. The patch fills each blank by its meaning
+  (`js/languages.js` `BY_PLACE`, `placesFix`); where the translations patch has its own corrected
+  line (Turkish 11, 38, 84 in the proofread), that line goes over it. Lines taken from 3.0.1F or
+  1.2F, and the remake's adapted lines (3.0.1's and 4.0.5's Turkish 11 and 38, written for
+  their own English), follow their own source and are not touched.
 
 ---
 
@@ -203,6 +209,23 @@ The program's own credits read "Version 2.0.1" (string 672), so its patch is 2.0
    player's number only when that home is star 0, and then only the first player's.
    Deterministic, so vanilla play prints the same (`limbo20`). *Fix:* "at hyperspace",
    no metal, as 3.0.1 (`js/rules-dos.js` `scrapMarked20`).
+
+8. **`amigaTenths`: the Amiga's °C readings.** The Amiga program (German 2.0 and 2.1, and the
+   English 2.1) writes a temperature in °C as "%d.%1.1d%cC" with the arguments C, |C| mod 10
+   and 0xb0, where C = trunc((trunc(tenths of °F / 10) − 32) × 5 / 9): in the star panel
+   (`FUN_00105278`), the explored-stars list (row function @12393a) and the exploring report
+   (`FUN_0010ddf6`, type 31, report 600). The "tenths" digit is the whole degrees' last digit
+   again (22 reads "22.2°C", 37 "37.7°C", −3 "−3.3°C"), which the Amiga skin shows by default.
+   *Fix:* the real tenths of °C, truncated as the program truncates (`js/skins/amiga/ui.js`
+   `amigaC`). Only in the Amiga skin (English, German, French and Spanish; Turkish keeps
+   iOS's °F).
+9. **`amigaChatNames`: the Amiga English's sent-message reports.** The English 2.1 strings 615 to
+   619 ("You send a message saying you like %s") have one blank where the German ones have two
+   ("an %s: Sie mögen %s"); the program (`FUN_0010ecd8`, types 46 to 50) passes the recipient
+   first and the subject second, so the English prints the recipient where the subject belongs
+   ("You send a message saying you like Paul" for a message to Paul about Kansas). Shown so by
+   default in the Amiga skin's English. *Fix:* 2.0's sentence, "You sent a message to Paul saying
+   you like Kansas." (The German is right and is the same in 2.0 and the Amiga.)
 
 ### Quirk or design (left as released)
 

@@ -683,6 +683,20 @@ function patchTable(lang) {
 }
 // the patch's correction of an official line as it stands in its own English
 function patchOfficial(lang, en) { const p = patchTable(lang).get(normEn(en)); return p ? matchDollar(en, p[0], p[1]) : null; }
+// The fix 'iosFillings' of a version that carries iOS's lines as they are: each such line (the English matches iOS's
+// template, the translation is iOS's as released) with every blank filled by its meaning (BY_PLACE)
+function placesFix(lang, reports) {
+  const bp = BY_PLACE[lang];
+  if (!bp) return null;
+  const R = L('en', 'Report Window Templates'), rep = [];
+  for (const k of Object.keys(bp)) {
+    const i = +k;
+    if (!Number.isInteger(i) || (lang === 'fr' && i === 85)) continue;
+    const want = normEn(R[i]);
+    for (const r of reports) if (r.length === 2 && typeof r[1] === 'string' && normEn(r[0]) === want) rep.push([r[0], bp[i](r[1])]);
+  }
+  return rep.length ? { say: { reports: rep } } : null;
+}
 // The patch's corrections of a language's text (HOLANG_REMAKE[lang].patch and
 // .patchWords, docs/proofread-2026-10.md), as the fix 'translations' that
 // engine.js inLanguage lays over the language when the patch is on: the
@@ -714,7 +728,13 @@ function patchFix(lang, T, reports, hints, words, hintTexts, extra) {
     if (es) part.say = Object.assign({}, part.say, es, { words: Object.assign({}, es.words, (part.say || {}).words) });
   }
   // (French always: the patch's typography and words go over all of it, engine.js frPatchLayer)
-  return Object.keys(part).length || lang === 'fr' ? { translations: part } : undefined;
+  const places = placesFix(lang, reports);
+  if (!(Object.keys(part).length || lang === 'fr') && !places) return undefined;
+  // (the fillings first: the translations' own corrected lines, which carry their own places, go over them)
+  const fix = {};
+  if (places) fix.iosFillings = places;
+  if (Object.keys(part).length || lang === 'fr') fix.translations = part;
+  return fix;
 }
 // official: [[English, translation], ...], the nearest first
 function translator(lang, official) {
@@ -772,7 +792,8 @@ const TR_TECHS_PATCHED = ['Menzil', 'Hız', 'Silah', 'Kalkan', 'Minyatürleştir
 // reports (BY_PLACE, CELSIUS), alerts, the Hope question and the hints
 function iosOfficial(lang) {
   const o = [], R = L('en', 'Report Window Templates'), RT = L(lang, 'Report Window Templates');
-  R.forEach((t, i) => o.push([t, CELSIUS[lang] && CELSIUS[lang][i] ? CELSIUS[lang][i](RT[i]) : BY_PLACE[lang] && BY_PLACE[lang][i] ? BY_PLACE[lang][i](RT[i]) : RT[i]]));
+  // (the fillings as the iOS game released them, in the English's order: a version that carries such a line shows it so, and its patch, fix 'iosFillings', fills each blank by its meaning: placesFix)
+  R.forEach((t, i) => o.push([t, CELSIUS[lang] && CELSIUS[lang][i] ? CELSIUS[lang][i](RT[i]) : lang === 'fr' && i === 85 ? BY_PLACE.fr[85](RT[i]) : RT[i]]));
   L('en', 'Alert Strings').forEach((t, i) => o.push([t, L(lang, 'Alert Strings')[i]]));
   o.push([L('en', 'Misc Strings')[123], L(lang, 'Misc Strings')[123]]);
   for (const i of MISC_LINES) o.push([L('en', 'Misc Strings')[i], L(lang, 'Misc Strings')[i]]);

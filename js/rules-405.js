@@ -2472,7 +2472,7 @@ E.registerRules('405', Object.assign({}, D, {
       text: 'The Hall of Shame’s summary labelled you “Loser”, without the colon every other label has. The patch adds it.' },
     { id: 'techNames', title: 'A new technology level is reported by its own name',
       text: 'The report of a new technology level printed the next level’s name: Range 7 was “Fusion Pile” instead of “Topping off the Tanks”, and Miniaturization 20 was the program’s credits line. The patch prints the level’s own name, as the Mac 4.0.5 does.' },
-  ].concat(E.TRANSLATIONS_FIX),
+  ].concat(E.TRANSLATIONS_FIX, E.IOS_FILLINGS_FIX),
   patchVersion: null, // its own (4.0.5.1), not 2.0's
   ai: '405',               // its own computer players (js/ai-405.js)
   // CONFIRMED (FUN_0045aa60 and FUN_00459ba0 build the 77- and 50-pixel log

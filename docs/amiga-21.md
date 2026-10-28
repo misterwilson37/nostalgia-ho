@@ -141,8 +141,9 @@ colony.", "Your fleet of %s has arrived at %s."). The other 23 are reworded:
 - temperatures in **°C** (DOS: °F);
 - the five messages you send ("You send a message saying you like %s") **lack the recipient**
   ("You sent a message to %Fs saying you like %Fs."), with one `%s` for the two names the
-  German format ("Sie senden einen Funkspruch an %s: Sie mögen %s.") takes: most likely the
-  recipient's name is printed where the star's should be.
+  German format ("Sie senden einen Funkspruch an %s: Sie mögen %s.") takes: the program fills
+  that `%s` with the recipient's name, where the subject's belongs (read in October 2026,
+  `docs/amiga-skin.md`, "The sent messages").
 
 Of the 459 English strings longer than six characters, 74 are verbatim a DOS string; the rest
 are the Amiga's own interface (windows, gadgets, errors). Faults in the table: 63 is a bare
@@ -292,7 +293,7 @@ and 2.0's are the DOS 2.0 ones (`docs/dos-findings.md`).
 
 **Done (October 2026).** The Amiga skin's English is now the Amiga 2.1 English (build 2.1ge1.05,
 the `[h WT]` disk), word for word, in place of the remake's own English. No new ruleset, no new
-version: the skin is still "2.0 (Amiga, German, 1994)" in the version list (see "For Jake" below).
+version: the skin is "2.x Amiga (1994–95)" in the version list (see "For Jake" below).
 
 **How it is wired.** The Amiga skin never loaded `strings.json`: its German is typed into
 `WORDS` (and `ABOUT`, `SKILLS`, `IQ`, `PICS`, `CLASS_DE`) in `js/skins/amiga/ui.js`, one entry per
@@ -376,7 +377,7 @@ messages 571 to 626 and allowed only the apostrophe.)
 - *Reports:* "RangeTech" and "Level" for DOS's "Range Technology" and "level"; "You abandon %s."
   for "You have abandoned %s."; "%s has become Nova. All colonists were vaporized." for "%s has
   gone nova. All inhabitants were killed."; "crunched" for "killed" in the meteor shower; "metall"
-  (a typo); the volcano and "You have explored" lines in **°C** (DOS English: °F); shorter
+  (a typo); the volcano and "You have explored" lines in **°C** (DOS English: °F; the "tenths" are the whole degrees' last digit); shorter
   alerts ("Warning! Some colonies are running out of money" for DOS's "You are not spending
   enough money to support some of your colonies"; "Your fleet is in hyperspace. No way to make
   contact!" for DOS's "… can't be contacted until it arrives at its next location").
@@ -395,36 +396,36 @@ messages 571 to 626 and allowed only the apostrophe.)
   is its translation), so the Amiga skin's "Income:" changes nothing elsewhere.
 - DOS English strings 74 and 75 look swapped against the German and the Amiga English (above).
 - The five "You send a message saying you like %s" lines (615 to 619) lack the recipient: the
-  German lines have two names ("an %s: Sie mögen %s"), the English one `%s`, so a real Amiga most
-  likely prints the recipient where the subject belongs. **Not reworded in the skin:** the
-  ruleset's "You sent a message to X saying you like Y." stays.
+  German lines have two names ("an %s: Sie mögen %s"), the English one `%s`. **Settled** by the
+  program (`docs/amiga-skin.md`, "The sent messages"): the English prints the recipient's name
+  where the subject belongs. The Amiga skin's English shows exactly that ("You send a message
+  saying you like Paul"); the patch (fix `amigaChatNames`) shows 2.0's sentence.
 - The English file's ship and people names are the DOS English lists with the Amiga's own names
   added; from string 441 on the English and German ship lists do not line up by string number
   (the German has names the English lacks), so the German list is not a translation of the
   English one.
 
-**For Jake: decisions the change leaves open**
+**For Jake: decisions the change left open** (October 2026: resolved or answered)
 
-1. **The version label.** The English text says "Spaceward Ho! Amiga Version 2.1" (the start
-   title bar, string 117), "Spaceward Ho! V2.1 - %s in %s at %ld" (the title bar of a game, 839)
-   and "Spaceward Ho! Amiga version 2.1 by Stefan Bebbo Franke." (the first report, 569), word
-   for word, while the version list still says "2.0 (Amiga, German, 1994)". The German still says
-   "Version 2.0" (the German 2.1's own text does). The label could read "2.0/2.1 (Amiga, German
-   and English)"; not changed, since you said no new version.
-2. **The End Turn picture** stays the remake's English copy of the German button. The English
-   2.1 disk has the same pictures byte for byte, so the real English Amiga shows the German "Zug
-   Ende" button.
-3. **Temperatures.** The English reports 584 and 600 and the Amiga program print °C. The skin's
-   English panels still show °F (the DOS English's unit), and those two reports are the
-   ruleset's. Making the English Amiga skin show °C everywhere is a one-line change
-   (`temp` in `js/skins/amiga/ui.js`, add `'en'`) plus rewriting the two reports.
-4. **The skin's German is not all the Amiga's own.** Some German lines were written by the
-   remake (the revert question, "Wählen Sie eine Ihrer Kolonien.", the "Keine Schiffsbaugelder"
-   line), where the Amiga has a line (36 "Wollen Sie wirklich zum zuletzt gespeicherten
-   Spielstand zurückkehren?" and 56). The English now has the Amiga's, the German not. And in a
-   German game the Ho! menu's remake-only items show in English where they carry an ellipsis
-   ("Preferences...", "Export this game..."): `menuWord` turns "…" into "..." before the
-   translation looks the word up. Both are older than this change.
+1. **The version label.** Now "2.x Amiga (1994–95)" (`js/skins.js`, and its translation row).
+   The German text still says "Version 2.0" and the English "Amiga Version 2.1" as the programs
+   do.
+2. **The End Turn picture.** Each language shows its own: the Amiga's German one, and English,
+   French, Turkish and Spanish buttons drawn into it (`tools/skins/amiga_endturn.py`). The real
+   English Amiga showed the German button (the 2.1 English disk's pictures are the German
+   ones, byte for byte); that was never the remake's default for English, so no patch is
+   involved. The English one still reads "End Turn", though the Amiga English's own word for the
+   command is "Do Turn" (menu, string 842): say if the picture should follow it.
+3. **Temperatures.** Settled from the code (`docs/amiga-skin.md`, "Temperatures"): both Amiga
+   languages write °C, truncated, with the last digit of the whole degrees as the "tenths"
+   (22 reads "22.2°C"). The Amiga skin's English and German show exactly that everywhere
+   (panel, star list, exploring report); the patch (`amigaTenths`) writes real tenths. A
+   °C/°F choice is queued in `docs/roadmap.md`.
+4. **The skin's German.** The revert question is now the Amiga's string 36, and the five reports
+   the Amiga words differently from the German DOS (582, 592, 594, 600, 624) are the Amiga's.
+   The lines left as the remake's, with the reason, are in `docs/amiga-skin.md` ("Where the
+   German skin's words differ"); the "Keine Schiffsbaugelder" note is for you to decide (the
+   Amiga's report 587 is the nearest line, of another purpose).
 
 ## Where the tools are
 

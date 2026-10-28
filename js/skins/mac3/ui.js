@@ -79,7 +79,9 @@ window.HOTHEME_OVER = {
   // 3.0.1 on picks its own report pictures (messageLook below); only the 2.0
   // skins (1.2, 2.0.1) take later versions' for reports they never had
   cascadeReports: v12 || v2,
-  endTurnPic: P + (v12 ? 'endturn' : 'p5500'), // "End Turn ⌘T" (1.2's own says "Fin Tour"; endturn is 3.0.1's)
+  // "End Turn ⌘T"; 1.2's own says "Fin Tour" (p5500), which a French game shows; the English one (endturn, 3.0.1's) any other language
+  endTurnPic: P + (v12 ? 'endturn' : 'p5500'),
+  endTurnPics: v12 ? { fr: P + 'p5500' } : undefined,
   // Ship pictures: engine, hull and nose side by side, as in the DOS game,
   // but 40x40 parts (2600 + the DOS part number less 100), shown twice the size.
   shipPic(d, IMG) {

@@ -63,7 +63,17 @@ and the translation notice (`docs/translations-notes/`) are not done.
       23 English report lines are the Amiga's own words (flaws kept: "Typs available", "Ok, ok"),
       the rest the remake's; of the 186 lines that exist in both the Amiga's and the DOS English, 112
       are the same words and 74 differ. Notes for Jake (version label, End Turn picture, °C,
-      unwired lines) in `docs/amiga-21.md`, "The Amiga English in the remake".
+      unwired lines) in `docs/amiga-21.md`, "The Amiga English in the remake". **Done (October
+      2026), the follow-up:** the label is "2.x Amiga (1994–95)"; the End Turn button is drawn
+      per language (Amiga: English, French, Turkish, Spanish beside the German; Mac 1.2: its own
+      French one in French); the temperatures and the sent-message lines are read from the
+      program and shown as it printed them, with two patch fixes (`amigaTenths`,
+      `amigaChatNames`); the skin's German uses the Amiga's own line for the revert question and
+      five reports; 5.0.5, the Palm, 3.0.1 and both 4.0.5s show iOS's French and Turkish lines in
+      the fill order iOS released them with, the patch (`iosFillings`) filling them by meaning.
+      **Not done:** End Turn pictures in French, Turkish and Spanish (and German, where the
+      original shows no German one) for the DOS, Mac 2.0.1 and 3.0.1 skins, whose buttons are
+      drawn in the Mac's and DOS's lettering the remake has no font for.
    b. **Done (October 2026).** **Links to the original PDFs** from each adapted manual's cover page: the 3.0.1 manual
       (3.0.1.pdf, 8 MB, never an HTML manual), the DOS 2.0 manual, and any other manual adapted
       from a PDF, so the historical document stays reachable. Done: the DOS 2.0 and 3.0.1 manuals (the only two adapted from PDFs; 2.0-windows and 5.0.5/4.0.5 come from help files) link their PDF (`assets/manuals/dos-2.0.pdf`, `3.0.1.pdf`, newly committed) from the cover page in all five languages, opening in a new tab.
@@ -94,7 +104,11 @@ and the translation notice (`docs/translations-notes/`) are not done.
       (March 2012). The remake plays 1.2.8 (built February 2015), so its label stays 2015;
       the first-release date goes in the notes as reported, not confirmed. Then list any other
       missing dates for Jake.
-   h. **Japanese**, far down: there was a Japanese port, but no copy can be found; the remake's
+   h. **A °C/°F preference (lower priority)**: let the player choose the temperature unit in any
+      version (Prefs already has `celsius` for the classic skins), including the Amiga skin,
+      which today writes °C in English, German, French and Spanish as the Amiga does
+      (`docs/amiga-skin.md`, "Temperatures") and °F in Turkish as iOS's Turkish does.
+   i. **Japanese**, far down: there was a Japanese port, but no copy can be found; the remake's
       own Japanese translation is not planned soon.
 5. Last: a home-screen (apple-touch) icon per skin, the icon a phone shows when the site is
    added to its home screen; today every skin's is the Android one.

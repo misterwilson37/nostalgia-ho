@@ -433,9 +433,63 @@ played in English (`docs/amiga-21.md`, "The Amiga English in the remake"), and t
 own words, so a game in those languages shows them and never German (the skin follows the
 interface's language, `js/ui-lang.js`; with no game and none used yet, the Amiga's German).
 Numbers are written "51.000" in German, Turkish and Spanish, "51 000" in French; temperatures
-in °C in German, French and Spanish. The End Turn picture is German or English (the pictures
-are the game's): the English one in the other languages. `docs/translations.md`, "The
+are described under "Temperatures" below. The End Turn picture is in the game's language: the
+Amiga's own German one, and English, French, Turkish and Spanish buttons the remake draws into
+it in its lettering (`tools/skins/amiga_endturn.py`, `sprites/endturn*.png`); the Amiga has no
+other (the English 2.1 disk's pictures are the same bytes). `docs/translations.md`, "The
 remake's interface".
+
+## Temperatures
+
+Read from the program (Ghidra; German 2.1, and the English 2.1 for the same three places, whose
+arithmetic is identical): the temperature is a word in tenths of a degree Fahrenheit
+(`planet + 0x3a` or `+ 6`, plus 720, less the player's home temperature, `player + 0x28`). In
+the star panel (`FUN_00105278` @105436-105484), the explored-stars list (the row function at
+@12393a, @1239a8-1239fe) and the exploring report (`FUN_0010ddf6`, message type 31, report 600,
+@10e034-10e0b6; the message is made by `FUN_0011c6be`) it is worked out the same way:
+
+1. F = (value ÷ 10, `divs.w`, truncated toward zero) − 32;
+2. C = (F × 5) ÷ 9, truncated toward zero (`divs.w #9`);
+3. written with "%d.%1.1d%cC" (strings data+0xef0 and +0x2d1c; for the report, string 600
+   "…Temp: %d.%1.1d°C…", and English 600 "%ld.%1.1d°C") with the arguments C, |C| mod 10 and
+   0xb0 (°). So the digit after the point is the last digit of the whole degrees: 22 °C reads
+   "22.2°C", 37 °C "37.7°C", −3 °C "−3.3°C", 0 "0.0°C".
+
+Both Amiga languages show °C, and nothing in the Amiga is shown in °F. The skin shows exactly
+this in English and German (`amigaC`); the patch (fix `amigaTenths`, docs/fixes.md) writes the
+real tenths of °C, truncated. The volcano report (584, "…auf %d.%1.1d°C") and the revolt report
+are never made in 2.0 (no random events, `docs/dos-findings.md`); its formatter in any case
+passes the star's name only, so the real Amiga would print stack leftovers for the numbers.
+French follows the French officials (1.2F, 3.0.1F and iOS write °C), Spanish the Amiga's (it has
+no Spanish official), both with the Amiga's arithmetic; Turkish follows iOS's Turkish, which
+fills the English's degrees Fahrenheit ("72°") in, so the Turkish Amiga skin shows °F as before.
+A °C/°F choice for the player is queued (docs/roadmap.md).
+
+## The sent messages (strings 615 to 619)
+
+`FUN_0010ecd8` (the report formatter; German `FUN_0010ddf6`) fills the five "you send a message"
+reports (types 46 to 50, strings 569 + type) from a record made when the turn runs (@11a57e:
+type = the message's kind + 10, the star or player it is about, and the recipient): the
+**recipient's name first, the subject second**. The German format takes both ("Sie senden einen
+Funkspruch an %s: Sie mögen %s."; for a player as the subject, a "Dich" or the name). The
+English 2.1 format has one blank ("You send a message saying you like %s"), so it prints the
+recipient's name where the subject should be. The English skin shows that as released; the patch
+(fix `amigaChatNames`) shows 2.0's "You sent a message to Paul saying you like Kansas." The
+German is the same as 2.0's German and shows as it is.
+
+## Where the German skin's words differ from the Amiga's own
+
+Checked against `texte.pff`, the window tables and the program's strings (October 2026, with
+the English likewise): the skin's German is the Amiga's own wherever the Amiga has a line for
+the purpose. Replaced: the revert question is the Amiga's string 36 ("Wollen Sie wirklich zum
+zuletzt gespeicherten Spielstand zurückkehren? Alle Änderungen gehen verloren!"); the reports
+the Amiga words differently from the German DOS 2.0 (582, 592, 594, 624 and the exploring report
+600 with its decimal point and °C) are the Amiga's. Left as the remake's, since the Amiga has no
+line (or none of that purpose): "Wählen Sie eine Ihrer Kolonien." and "Wählen Sie eine Flotte."
+(the Amiga does nothing), the scrapping question, "Keine Schiffsbaugelder: Schf. im Sternfenster."
+(the Amiga's nearest line is report 587, "Sie haben auf %s Schiffe in Auftrag gegeben, aber kein
+Geld dafür angelegt.", a report and not a note in the window: for Jake), "Haltung:", the commands
+the remake adds, and the preferences' words.
 
 ## The remake's controls in the Amiga's screen
 

@@ -668,8 +668,10 @@ menus' names (Datei, Optionen, Schiffe, Galaxis, Fenster, Info). Its German stay
 Amiga's wherever it has the word (its menus, the classic page's commands in its words,
 `CMD_DE`, `MENU_DE`); a game in French, Turkish or Spanish shows that language, or
 English, never German. The skin starts in English, like every other; German is the
-player's choice (the title screen's Language, or New Game's for 2.0). The End Turn picture has German and English only (the pictures
-are the game's): the English one shows in the other languages.
+player's choice (the title screen's Language, or New Game's for 2.0). The End Turn picture is in the game's language in the Amiga skin
+(the German one is the game's, the English, French, Turkish and Spanish are drawn into it) and in
+Mac 1.2's (its own French one in French); the other skins' buttons have the originals' English
+only, shown in every language.
 
 **Checks:** `node tools/ui-lang-audit.js` opens every skin in every language its
 versions offer (the title screen, New Game, a game's main screen, each menu, Build
@@ -725,7 +727,7 @@ translated from their English, with the source line saying so):
   "1.00G") in every language, as the rules have them.
 - **5.0.5's network and registration alerts** in German (never shown by the remake).
 - **The pictures**: words drawn in the art (1.2F's "Fin Tour", the title pictures, the
-  Amiga's two End Turn pictures).
+  Amiga's German End Turn picture and Mac 1.2's French one).
 
 ## Choices worth checking
 

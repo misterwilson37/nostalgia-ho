@@ -2039,7 +2039,7 @@ E.registerRules('301', Object.assign({}, D, {
       text: 'When the computers sent old ships home, the program passed the fleet’s place in a list where the route finder wants its Range. It made no difference to play (the colony is always within reach); the patch passes the Range.' },
     { id: 'star0', title: 'A finished colony at the first star is locked like any other',
       text: 'The test that stops you dragging the budget bar of a finished colony looked at the star’s number instead of what the budget slot is, so a finished colony at the first star of the list could still have its bar dragged. The patch locks it like any other.' },
-  ].concat(E.TRANSLATIONS_FIX),
+  ].concat(E.TRANSLATIONS_FIX, E.IOS_FILLINGS_FIX),
   ai: '301',               // its own computer players (js/ai-301.js)
   // CONFIRMED (InitHLogBarAmts @d091c, GetHPercBarAmt @d0a30, DrawHBarControl
   // @d0a7c, DoHBarClick @d18a0; 'Stup' 1000 "Default Setup" +0x2a = 1): the

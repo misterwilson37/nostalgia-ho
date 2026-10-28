@@ -447,7 +447,7 @@ rs.patchVersion = '1.2.9.1';
 // the unofficial 1.2.9.1 patch (docs/fixes.md, "iOS"): 5.0.5's fixes, where
 // the iOS code is the same (interest 0x10003cb84 keeps the sign slip; the
 // computers are 5.0.5's code), and its own
-rs.fixes = O.fixes.concat([
+rs.fixes = O.fixes.filter(f => f.id !== 'iosFillings').concat([
   { id: 'iosCharacters', title: 'The trademark sign and the bullet are shown',
     text: 'The game’s texts came from the Mac, where “™” and “•” are other bytes than on the iPhone, so the tech names showed “PowerPCª” and “Speedy Gonzalezª” and the curse read “#!$@*$&@¥ª!”. The patch shows “™” and “•”.' },
   { id: 'iosFillings', title: 'Four French and Turkish reports put a word where a number goes',
