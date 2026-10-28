@@ -81,7 +81,7 @@ const SOUNDS = {
   // FUN_10c0_0c50 and the callers of FUN_1100_03c9 in the Windows build.)
   dos: { name: '2.0 (DOS and Windows 3.1, 1993)', year: 1993, dir: 'assets/skins/dos/', map: DOS_MAP },
   // the Amiga game has the DOS game's sounds, some of them resampled
-  amiga: { name: '2.0 (Amiga, German, 1994)', year: 1994, dir: 'assets/skins/amiga/', map: DOS_MAP },
+  amiga: { name: '2.x Amiga (1994–95)', year: 1994, dir: 'assets/skins/amiga/', map: DOS_MAP },
   // 1.2 has thirteen sounds: good and bad news, battle, exploring, end of turn
   mac12: { name: '1.2 (Mac, French, 1992)', year: 1992, dir: 'assets/skins/mac12/', map: { 11111: 7000 } },
   // 2.0.1 has the same thirteen sounds as 1.2 (the same files); no click
@@ -149,7 +149,7 @@ const OSES = [
 // Android app's (favicon.ico)
 const SKINS = [
   { id: 'dos', version: '2.0', platform: 'DOS and Windows 3.1', year: 1993, os: ['dos', 'win31'], icon: 'dos' },
-  { id: 'amiga', version: '2.0', platform: 'Amiga, German', year: 1994, os: ['workbench'], icon: 'amiga' },
+  { id: 'amiga', version: '2.x', platform: 'Amiga', label: '2.x Amiga (1994–95)', year: 1994, os: ['workbench'], icon: 'amiga' },
   { id: 'mac12', bw: true, version: '1.2', platform: 'Mac, French, black and white', year: 1992, os: ['system6', 'system7'], icon: 'mac12' },
   { id: 'mac2', bw: true, version: '2.0.1', platform: 'Mac, black and white', year: 1992, os: ['system7', 'system6'], icon: 'mac2' },
   { id: 'mac2c', version: '2.0.1', platform: 'Mac, colour', year: 1992, os: ['system7', 'system6'], icon: 'mac2c' },
@@ -165,7 +165,7 @@ const SKINS = [
   { id: 'cozy', version: 'Cozy western', platform: 'by Claude', year: 2026, homage: true, os: ['macos8', 'macos9', 'macosx', 'firefox', 'safari', 'edge'] },
   { id: 'gemini', version: 'Tactical console', platform: 'by Gemini', year: 2026, homage: true, os: ['macosx', 'macos9', 'win95', 'macos8', 'system7', 'win31', 'firefox', 'safari', 'edge'] },
   { id: 'classic', version: '5.0.5', platform: 'Mac OS 9 and X', year: 2003, os: ['macos8', 'macos9', 'macosx'], icon: 'classic' },
-].map(k => Object.assign(k, { name: `${k.version} (${k.platform}, ${k.year})`, sounds: k.id in SOUNDS ? SOUNDS[k.id] && k.id : 'classic' }))
+].map(k => Object.assign(k, { name: k.label || `${k.version} (${k.platform}, ${k.year})`, sounds: k.id in SOUNDS ? SOUNDS[k.id] && k.id : 'classic' }))
   .sort((a, b) => a.year - b.year || a.version.localeCompare(b.version, 'en', { numeric: true }));
 const store = {
   get(k) { try { return root.localStorage.getItem(k); } catch (e) { return null; } },

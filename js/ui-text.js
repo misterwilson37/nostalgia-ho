@@ -707,7 +707,6 @@ root.HOUI.add([
 ['Mac OS 8.6/9/X', 'Mac OS 8.6/9/X', 'Mac OS 8.6/9/X', 'Mac OS 8.6/9/X', 'Mac OS 8.6/9/X'],
 ['%s (%s, %d)', '%s (%s, %s)', '%s (%s, %s)', '%s (%s, %s)', '%s (%s, %s)'],
 // the skins (js/skins.js: version, platform, year) and the OS looks
-['Amiga, German', 'Amiga, allemand', 'Amiga, deutsch', 'Amiga, Almanca', 'Amiga, alemán'],
 ['Mac, French, black and white', 'Mac, français, noir et blanc', 'Mac, französisch, schwarzweiß', 'Mac, Fransızca, siyah beyaz', 'Mac, francés, blanco y negro'],
 ['Mac, black and white', 'Mac, noir et blanc', 'Mac, schwarzweiß', 'Mac, siyah beyaz', 'Mac, blanco y negro'],
 ['Mac, colour', 'Mac, couleur', 'Mac, Farbe', 'Mac, renkli', 'Mac, color'],
@@ -729,7 +728,7 @@ root.HOUI.add([
 // the sound sets (js/skins.js SOUNDS)
 ['5.0.5 (Mac OS 9 and X, 2003)', '5.0.5 (Mac OS 9 et X, 2003)', '5.0.5 (Mac OS 9 und X, 2003)', '5.0.5 (Mac OS 9 ve X, 2003)', '5.0.5 (Mac OS 9 y X, 2003)'],
 ['2.0 (DOS and Windows 3.1, 1993)', '2.0 (DOS et Windows 3.1, 1993)', '2.0 (DOS und Windows 3.1, 1993)', '2.0 (DOS ve Windows 3.1, 1993)', '2.0 (DOS y Windows 3.1, 1993)'],
-['2.0 (Amiga, German, 1994)', '2.0 (Amiga, allemand, 1994)', '2.0 (Amiga, deutsch, 1994)', '2.0 (Amiga, Almanca, 1994)', '2.0 (Amiga, alemán, 1994)'],
+['2.x Amiga (1994–95)', '2.x Amiga (1994–95)', '2.x Amiga (1994–95)', '2.x Amiga (1994–95)', '2.x Amiga (1994–95)'],
 ['1.2 (Mac, French, 1992)', '1.2 (Mac, français, 1992)', '1.2 (Mac, französisch, 1992)', '1.2 (Mac, Fransızca, 1992)', '1.2 (Mac, francés, 1992)'],
 ['1.2.9 (iPhone and iPad, 2012)', '1.2.9 (iPhone et iPad, 2012)', '1.2.9 (iPhone und iPad, 2012)', '1.2.9 (iPhone ve iPad, 2012)', '1.2.9 (iPhone y iPad, 2012)'],
 ['Skin and OS look', 'Habillage et style du système', 'Oberfläche und Systemstil', 'Görünüm ve işletim sistemi görünümü', 'Aspecto y estilo del sistema'],
