@@ -95,7 +95,9 @@ function rulesById(id) {
 function rules(G) {
   if (!G) throw new Error('rules(G) was asked for the ruleset with no game; with no game, name the ruleset (HO.rulesById)');
   const rs = RULESETS[G.rules] || rulesById(G.rules);
-  return G.opts && G.opts.lang ? inLanguage(rs, G.opts.lang, !!G.opts.patch) : rs;
+  if (!G.opts) return rs;
+  // (a version's own language with the patch on: its own corrections, rs.ownFix, 1.2F's)
+  return G.opts.lang || (G.opts.patch && rs.ownFix) ? inLanguage(rs, G.opts.lang || null, !!G.opts.patch) : rs;
 }
 // ---------- languages (rs.languages, rs.lang, G.opts.lang) ----------
 // A version that shipped in more than one language lists them, English
@@ -149,24 +151,150 @@ function ownLanguage(rs) { return (rs && rs.ownLanguage) || 'en'; }
 // the partial is laid over the language (a say's reports go in front of its own,
 // its words over its own; a later fix over an earlier one)
 function inLanguage(rs, lang, patch) {
-  const over = lang && rs.lang && rs.lang[lang];
+  // lang null: the version's own language, which the patch corrects with rs.ownFix (1.2's French)
+  const over = lang ? rs.lang && rs.lang[lang] : (patch && rs.ownFix ? { fix: rs.ownFix } : null);
   if (!over) return rs;
   let m = langCache.get(rs);
   if (!m) langCache.set(rs, m = {});
-  const key = patch && over.fix ? lang + '+patch' : lang;
+  const key = patch && over.fix ? (lang || '') + '+patch' : lang;
   if (m[key]) return m[key];
-  let o = over;
+  let o = over, fixedFr = false;
   if (key !== lang) for (const id of Object.keys(over.fix)) {
     if (!fixes(rs).some(f => f.id === id)) continue;
     const p = over.fix[id];
-    o = Object.assign({}, o, p, p.say ? { say: Object.assign({}, o.say, p.say, { reports: (p.say.reports || []).concat(o.say.reports || []), words: Object.assign({}, o.say.words, p.say.words) }) } : {});
+    const s0 = o.say || rs.say || {};
+    o = Object.assign({}, o, p, p.say ? { say: Object.assign({}, s0, p.say, { reports: (p.say.reports || []).concat(s0.reports || []), words: Object.assign({}, s0.words, p.say.words) }) } : {});
+    if (id === 'translations') fixedFr = true;
   }
+  // the French patch's typography and words over all its text (frPatchText): the
+  // language's own, or the version's own French (1.2F)
+  if (fixedFr && (lang || ownLanguage(rs)) === 'fr') o = frPatchLayer(o, lang ? rs : (rs.lang && rs.lang.en) || {}, rs);
   // the ruleset with the language's words over it; its own properties all kept
   // as they are, the ones it hides from the rulesets built on it too (5.0.5's
   // turn505 ..., rules-original), so the language plays the same game
   const r = Object.defineProperties({}, Object.getOwnPropertyDescriptors(rs));
   for (const k of Object.keys(o)) Object.defineProperty(r, k, { value: o[k], enumerable: true, writable: true, configurable: true });
   return m[key] = r;
+}
+// ---------- the French patch's text (fix 'translations', French) ----------
+// The patch is the best French it can be (Jake, October 2026), so over every
+// French line it shows, official or the remake's, and the interface's French
+// (js/ui-lang.js): French typography (a no-break space before ? ! : ; and
+// inside « », which replace the English quotes; a decimal comma; "10 %"; one
+// space between words), accents on capitals (Éclaireur, Êtes-vous, À cause), the
+// official texts' spelling slips ("dévellopement", "Armaggeddon", "Tous le
+// monde"), and the patch's words for the ship classes: Fighter "Chasseur" (the
+// official "Croiseur" is a cruiser, a big warship), Dreadnought "Cuirassé"
+// (iOS's "Epouvante"), Tanker "Ravitailleur", Colony Ship "Transport"
+// everywhere. docs/glossary-fr.md, "The patch's words". Each line by itself:
+// what the patch has a whole line for (HOLANG_REMAKE.fr.patch) is put right first.
+const NB = '\u00a0';
+const FR_SPELL = [
+  [/\bdévellopement/g, 'développement'], [/éfficace/g, 'efficace'], [/\bdisnt\b/g, 'disant'], [/\bchaines\b/g, 'chaînes'],
+  [/\bLe Recherche\b/g, 'La Recherche'], [/Armaggeddon/g, 'Armageddon'], [/\bMeileurs\b/g, 'Meilleurs'], [/\bvoeux\b/g, 'vœux'],
+  [/\bd(['’])oeil\b/g, 'd$1œil'], [/qui que se soit/g, 'qui que ce soit'], [/\bTous le monde\b/g, 'Tout le monde'],
+  [/\bprends place\b/g, 'a lieu'], [/\bDevons nous\b/g, 'Devons-nous'], [/\bVoulez vous\b/g, 'Voulez-vous'],
+  [/\bparce vous\b/g, 'parce que vous'], [/\bQuelque d(['’])imprévu/g, 'Quelque chose d$1imprévu'],
+  [/\bont fait commentaires\b/g, 'ont fait des commentaires'], [/\bm(['’])ai-ment\b/g, 'm$1aiment'], [/\bdé- ?tes- ?tent\b/g, 'détestent'],
+  [/\bN(['’])est-ce-pas\b/g, 'N$1est-ce pas'], [/\bn(['’])est-ce-pas\b/g, 'n$1est-ce pas'], [/\bbaby boom\b/g, 'baby-boom'],
+  [/\bUn fois\b/g, 'Une fois'], [/\bvous aller\b/g, 'vous allez'], [/\bjusqu(['’])a\b/g, 'jusqu$1à'], [/\bNe pas annuler aucun\b/g, 'N\'annuler aucun'],
+  [/\bavec par\b/g, 'avec'], [/\bIl ya\b/g, 'Il y a'], [/\btrou noir\b/g, 'trou de ver'],
+  [/\b(planète|colonie) profitable\b/g, '$1 rentable'], [/\b(être|devenir|deviendra jamais|devenir une colonie) profitable\b/g, '$1 rentable'],
+  [/\bune averse de météorites\b/gi, (m) => (m[0] === 'U' ? 'Une' : 'une') + ' pluie de météores'], [/\bpluie d(['’])étoiles filantes\b/g, 'pluie de météores'],
+  [/\b(dit|murmure) “/g, '$1 : “'], [/\bCliquez et tirez\b/g, 'Cliquez et faites glisser'], [/\bCliquer et tirer\b/g, 'Cliquez et faites glisser'],
+  [/\bAuto Play\b/g, 'Jeu automatique'], [/\bauto-play\b/g, 'le jeu automatique'],
+];
+const FR_WORDS = [
+  [/\b([dD])(['’])Epouvante(s?)\b/g, (m, d, a, s) => (d === 'D' ? 'De' : 'de') + ' Cuirassé' + s], [/\b([lL])(['’])Epouvante\b/g, (m, l) => (l === 'L' ? 'Le' : 'le') + ' Cuirassé'],
+  [/\b([uU])ne Epouvante\b/g, (m, u) => u + 'n Cuirassé'], [/\bEpouvante(s?)\b/g, 'Cuirassé$1'],
+  [/\bCroiseur(s?)\b/g, 'Chasseur$1'], [/\bcroiseur(s?)\b/g, 'chasseur$1'],
+  [/\bVaisseaux de Colonisation\b/g, 'Transports'], [/\bvaisseaux-citernes\b/g, 'Ravitailleurs'], [/\bTanker(s?)\b/g, 'Ravitailleur$1'],
+];
+// capitals' accents: the words the official texts write without them
+const FR_CAPS = [[/\bEchelle/g, 'Échelle'], [/\bEclaireur/g, 'Éclaireur'], [/\bEcoutez\b/g, 'Écoutez'], [/(^|[^\p{L}])(?<!Upgrade )Edition/gu, '$1Édition'],
+  [/\bElimin/g, 'Élimin'], [/\bEnergie\b/g, 'Énergie'], [/\bEpargn/g, 'Épargn'], [/\bEtes\b/g, 'Êtes'], [/\bEtoile/g, 'Étoile'], [/\bEtonnez\b/g, 'Étonnez'],
+  [/\bEvacu/g, 'Évacu'], [/\bEvolu/g, 'Évolu'], [/\bEtat/g, 'État'], [/\bEcran/g, 'Écran'],
+  [/\bA (?=(?:cause|propos|partir|bientôt|vous|votre|vos|chaque|nouveau|tout|la |l['’]|plus)\b)/g, 'À '], [/\bA (?=(?:la|l['’]))/g, 'À ']];
+function frTypography(t) {
+  // the game's name and the curse keep their own "!"
+  const keep = [];
+  let s = t.replace(/Spaceward Ho!|Ho! Ho!|#!\$@\*\$&@[•¥][™ª]!/g, (m) => { keep.push(m); return '\u0001' + (keep.length - 1) + '\u0002'; });
+  // the quotes: English and straight ones to « », by pairs
+  if (/[“”"]/.test(s)) {
+    let open = false;
+    s = s.replace(/\s*([“”"])\s*/g, (m, q, i, all) => {
+      const opening = q === '“' ? true : q === '”' ? false : !open;
+      open = opening;
+      const rest = all.slice(i + m.length);
+      if (opening) return (i > 0 ? ' ' : '') + '«' + NB;
+      return NB + '»' + (rest && /^[\p{L}\p{N}«(%]/u.test(rest) ? ' ' : '');
+    }).replace(/^ +/, '');
+  }
+  s = s
+    // "1.0 G", "%d.%2.2dG": the decimal comma
+    .replace(/(\d)\.(\d+) ?G\b/g, '$1,$2 G').replace(/%d\.%2\.2dG/g, '%d,%2.2dG')
+    // "10 %"
+    .replace(/(\d) ?(%%?)(?=[\s.,;!?)]|$)/g, '$1' + NB + '$2')
+    // one space between words
+    .replace(/(\S) {2,}(?=\S)/g, '$1 ')
+    // a no-break space before ? ! ; and : (not in "!!", a time, a link, "%d:%02d")
+    .replace(/([\p{L}\p{N}%»)…\.'’\u0002]) ?([?!;])/gu, (m, a, p) => a + NB + p)
+    .replace(/([\p{L}\p{N}%»)…'’\u0002]) ?:(?![\d%\/])/gu, (m, a) => a + NB + ':')
+    .replace(/\u0001(\d+)\u0002/g, (m, i) => keep[+i]);
+  return s;
+}
+// a French line once filled in, with the patch on: "de" elided before a vowel ("la
+// bataille d'Alcor", "votre flotte d'un Transport") and the English thousands' comma
+// ("15,181") the French no-break space
+const FR_DE = /(^|[^\p{L}])([dD])e (?=[AEIOUYÉÈÊÀÂÎÔaeiouyéèêàâîôœ])/gu;
+function frFilled(t) {
+  return String(t).replace(FR_DE, "$1$2'").replace(/(\d),(?=\d{3}(?!\d))/g, '$1' + NB).replace(/(\d),(?=\d{3}(?!\d))/g, '$1' + NB);
+}
+function frPatched(G) {
+  if (!G || !G.opts || !G.opts.patch) return false;
+  return (G.opts.lang || ownLanguage(ownRules(G))) === 'fr' && fixed(G, 'translations');
+}
+function frPatchText(t) {
+  if (typeof t !== 'string' || !/[\p{L}]/u.test(t)) return t;
+  let s = t;
+  for (const [re, to] of FR_SPELL) s = s.replace(re, to);
+  for (const [re, to] of FR_WORDS) s = s.replace(re, to);
+  for (const [re, to] of FR_CAPS) s = s.replace(re, to);
+  return frTypography(s);
+}
+// over a language's text (the keys a translation lays over a ruleset): a string
+// the English ruleset has in the same place is English the interface translates,
+// so is left as it is
+const FR_TEXT_KEYS = ['say', 'hintTexts', 'nameAStar', 'battlePanel', 'battleLines', 'fixSpending', 'conquered', 'armageddonAsk', 'forceEndTurn',
+  'youWon', 'youLost', 'options', 'exploredList', 'scrapWords'];
+function frDeep(v, base, d) {
+  if (d > 6) return v;
+  if (typeof v === 'string') return v === base ? v : frPatchText(v);
+  if (typeof v === 'function') return function (...a) { return frDeep(v.apply(this, a), undefined, 0); };
+  if (Array.isArray(v)) return v.map((x, i) => frDeep(x, Array.isArray(base) ? base[i] : undefined, d + 1));
+  if (v && typeof v === 'object' && Object.getPrototypeOf(v) === Object.prototype) {
+    const o = {};
+    for (const k of Object.keys(v)) o[k] = frDeep(v[k], base && typeof base === 'object' ? base[k] : undefined, d + 1);
+    return o;
+  }
+  return v;
+}
+function frPatchLayer(o, base, rs) {
+  const out = Object.assign({}, o);
+  for (const k of FR_TEXT_KEYS) {
+    const v = k in o ? o[k] : (o === rs ? undefined : rs[k]);
+    if (v == null) continue;
+    if (k === 'say') {
+      const sy = Object.assign({}, v);
+      // [English, French, ...]: the French only; a filling's words (English -> French; the
+      // patch's own for a word French and English share, "Tanker")
+      if (Array.isArray(sy.reports)) sy.reports = sy.reports.map(r => (Array.isArray(r) && r[1] !== r[0] ? [r[0], frDeep(r[1], undefined, 0)].concat(r.slice(2)) : r));
+      if (Array.isArray(sy.args)) sy.args = sy.args.map(r => [r[0], frDeep(r[1], undefined, 0)].concat(r.slice(2)));
+      if (sy.words) { const w = {}; for (const [a, b] of Object.entries(sy.words)) w[a] = frDeep(b, undefined, 0); sy.words = w; }
+      out.say = sy;
+    } else out[k] = frDeep(v, base ? base[k] : undefined, 0);
+  }
+  return out;
 }
 
 // the game's ruleset in the version's own language
@@ -316,8 +444,51 @@ function sayArgIn(L, C, a) {
 function sayRules(G) {
   if (!G) return null;
   const lang = G.opts && G.opts.lang, own = ownRules(G);
-  if (!lang) return own.say || null;
+  // (the version's own language with the patch on: its corrections, rs.ownFix)
+  if (!lang) return (G.opts && G.opts.patch && own.ownFix ? rules(G) : own).say || null;
   return own.lang && own.lang[lang] && own.lang[lang].say ? langRules(G).say : null;
+}
+// Turkish case endings by vowel harmony, for the patch's Turkish (js/lang-remake.js
+// tr.patch): a line writes "%s’{e}" (dative), {de} (locative), {den} (ablative), {i}
+// (accusative), {in} (genitive), {le} (instrumental) or {deki} after a filling, and the
+// ending is made to fit the word just before it ("Argot’a", "Leo’ya", "Sirius’tan",
+// "3’ü"; a number as it is read). The official lines glue fixed endings on ("%sye"),
+// as iOS shipped them, and have none of these. {^}: the letter after it in capitals.
+const TR_ONES = ['sıfır', 'bir', 'iki', 'üç', 'dört', 'beş', 'altı', 'yedi', 'sekiz', 'dokuz'];
+const TR_TENS = ['', 'on', 'yirmi', 'otuz', 'kırk', 'elli', 'altmış', 'yetmiş', 'seksen', 'doksan'];
+function trSpoken(w) {
+  const m = /(\d[\d,.]*)\D*$/.exec(w);
+  if (!m || /[A-Za-zÇĞİÖŞÜçğıöşüâîû]\W*$/.test(w)) return w;
+  const n = parseInt(m[1].replace(/[,.]/g, ''), 10);
+  if (!n) return 'sıfır';
+  if (n % 1000000 === 0) return 'milyon';
+  if (n % 1000 === 0) return 'bin';
+  if (n % 100 === 0) return 'yüz';
+  if (n % 10 === 0) return TR_TENS[(n / 10) % 10];
+  return TR_ONES[n % 10];
+}
+function trEnding(word, code) {
+  // (an English name's final consonant + "y" is read as "i": Gorby’yi, Nancy’den)
+  const w = trSpoken(String(word)).replace(/[^A-Za-zÇĞİÖŞÜçğıöşüâîûÂÎÛ]+$/, '').replace(/I/g, 'ı').replace(/İ/g, 'i').toLowerCase().replace(/([^aıoueiöüâîû])y$/, '$1i');
+  const vs = w.match(/[aıoueiöüâîû]/g), v = vs ? vs[vs.length - 1] : 'e';
+  const back = /[aıouâû]/.test(v), round = /[ouöüû]/.test(v);
+  const A = back ? 'a' : 'e', I = back ? (round ? 'u' : 'ı') : (round ? 'ü' : 'i');
+  const last = w.slice(-1), vowel = /[aıoueiöüâîû]/.test(last), D = /[çfhkpsştx]/.test(last) ? 't' : 'd';
+  switch (code) {
+    case 'e': return (vowel ? 'y' : '') + A;
+    case 'de': return D + A;
+    case 'den': return D + A + 'n';
+    case 'deki': return D + A + 'ki';
+    case 'i': return (vowel ? 'y' : '') + I;
+    case 'in': return (vowel ? 'n' : '') + I + 'n';
+    case 'le': return (vowel ? 'y' : '') + 'l' + A;
+  }
+  return '';
+}
+// ({^} at the start: the next letter in capitals, for a line that opens with a filling)
+function trSuffixes(s) {
+  s = String(s).replace(/\{\^\}(\s*)(\S)/g, (m, sp, c) => sp + c.toLocaleUpperCase('tr'));
+  return s.replace(/([^\s’'{}]*)([’']?)\{(e|de|den|deki|i|in|le)\}/g, (m, w, ap, code) => w + ap + trEnding(w, code));
 }
 function say(G, text) {
   const t = String(text == null ? '' : text), L = sayRules(G);
@@ -325,7 +496,9 @@ function say(G, text) {
   const C = sayOf(L), hit = sayMatch(C.reports, t);
   if (!hit) return t;
   const args = hit[1].map(a => sayArgIn(L, C, a));
-  const out = typeof hit[0].to === 'function' ? hit[0].to(args, G, hit[1]) : sayFill(hit[0].to, args);
+  let out = typeof hit[0].to === 'function' ? hit[0].to(args, G, hit[1]) : sayFill(hit[0].to, args);
+  if (out.indexOf('{') >= 0) out = trSuffixes(out);
+  if (frPatched(G)) out = frFilled(out);
   return L.cap ? out.charAt(0).toUpperCase() + out.slice(1) : out;
 }
 // whether a text is one of the language's reports (tools: what isn't translated)
@@ -350,9 +523,11 @@ function fixes(rs) { return (rs && rs.fixes) || []; }
 // The patch's corrections of the French and Turkish translations (js/languages.js
 // builds them, rs.lang.fr.fix.translations; the interface's are js/ui-text.js, a
 // row's seventh element). Listed by every version that takes its French and
-// Turkish from the iOS game's (3.0.1, 4.0.5, 5.0.5, the Palm, iOS and Android).
+// Turkish from the iOS game's (3.0.1, 4.0.5, 5.0.5, the Palm, iOS and Android), and by
+// 1.2, 2.0 and 2.0.1, whose Turkish is the remake's in iOS's words (js/languages.js turkish20)
+// and whose French is 1.2F's (1.2's own, rs.ownFix; 2.0's, french20's fix).
 const TRANSLATIONS_FIX = { id: 'translations', title: 'The French and Turkish wording is put right',
-  text: 'The French and Turkish lines come from the iOS game’s translations, which have slips: a word left in English, a filling lost, a name run into its ending, a word misspelled. The patch shows the corrected wording, in the game’s reports and tips and in the remake’s menus and windows. It matters only when the game is played in French or Turkish.' };
+  text: 'The official French (Mac 1.2’s, the French Mac 3.0.1’s and the iOS game’s) and the iOS game’s Turkish have slips: a word left in English, a filling lost, a sentence that says something else, a name run into its ending, a word misspelled. The patch shows the corrected wording, in the game’s reports and tips and in the remake’s menus and windows; in French also French typography and better ship names (Chasseur, Cuirassé, Ravitailleur). It matters only when the game is played in French or Turkish.' };
 function fixed(G, id) { return !!(G && G.opts && G.opts.patch) && fixes(rules(G)).some(f => f.id === id); }
 // Full Hoedown (G.opts.hoedown, off unless chosen at New Game or in the Ho
 // menu): Delta Tao's own jokes at their most (js/hoedown.js, docs/hoedown.md).
@@ -1511,7 +1686,7 @@ const API = {
   DATA, SHIP_TYPES, TYPES: SHIP_TYPES, TECHS,
   BAR_SCALES, barScale, battleGroups, makeBattlePanel,
   registerRules, registerAI, rules, rulesById, aiOf, LANGUAGES, languages, ownLanguage, languageName, languageChoices,
- ownRules, gameName, ownName, setLanguage, windowWords, say, saysIn, feature, RULESETS, fixes, fixed, TRANSLATIONS_FIX, hoedown, setHoedown, patchVersion,
+ ownRules, gameName, ownName, setLanguage, frPatchText, windowWords, say, saysIn, trSuffixes, feature, RULESETS, fixes, fixed, TRANSLATIONS_FIX, hoedown, setHoedown, patchVersion,
   // [id, name] for the New Game window: the original games' rules by year of
   // release, then version ("2.0 (DOS and Windows 3.1, 1993)"); rulesets that
   // aren't an original game's (the remake's own) come last, by their label

@@ -1826,7 +1826,7 @@ const FIXES20 = [
     text: 'A fleet marked for scrapping while it was in hyperspace was reported “at” the star before the first one, which is part of the galaxy’s header: an empty name, and no metal (unless your fleet was the first player’s and the ninth home slot was the first star). The patch reports it “at hyperspace” with no metal, as 3.0.1 does.' },
   { id: 'deBattleLines', title: 'The German battle window’s two no-information lines are the right way round',
     text: 'In the German version the battle window’s lines “You have no information.” and “You were destroyed immediately.” (strings 74 and 75) are swapped. The patch puts each in its place; it matters only when the game is played in German.' },
-];
+].concat(E.TRANSLATIONS_FIX); // (the Turkish 2.0's and Mac 2.0.1's corrections: js/languages.js turkish20)
 
 // ---------- set-up (FUN_1030_1299 @1030:19ae-1b32) ----------
 // CONFIRMED: the budget slots are Savings (0), Technology (150) and the home

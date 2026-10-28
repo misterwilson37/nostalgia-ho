@@ -350,7 +350,35 @@ const R12 = E.RULESETS['12'];
 // 1.2F's names, as rules-12 has them (its own lists)
 const NAMES12 = R12 ? { maleNames: R12.maleNames, femaleNames: FR12['2000'].slice(), shipNames: R12.shipNames } : {};
 const FIX_FR = FR12['1050'].map((t) => t.replace(/%\.\*s/g, '%s'));
+// The patch's French for 1.2F's lines and 2.0's (fix 'translations'): each report
+// by its English (2.0's, REPORTS20), the windows' lines by the English version's
+// (en: Mac 2.0.1's), the fillings' words; engine.js frPatchLayer puts the
+// patch's typography and words over all of it. Always a fix, so that it does.
+function frFix20(say, en, own) {
+  const rep = [];
+  for (const r of say.reports) { if (typeof r[1] !== 'string') continue; const p = patchOfficial('fr', r[0]); if (p != null && !rep.some(x => x[0] === r[0])) rep.push([r[0], p]); }
+  const part = {};
+  if (rep.length) part.say = { reports: rep };
+  const W = {};
+  for (const [k, v] of Object.entries(RMK.fr.patchWords || {})) if (Object.prototype.hasOwnProperty.call(say.words || {}, k)) W[k] = v;
+  if (Object.keys(W).length) part.say = Object.assign({}, part.say, { words: W });
+  const NS = en.nameAStar, ON = own.nameAStar;
+  if (NS && ON) {
+    const ks = ['text', 'taken', 'rule', 'label', 'hint'].filter(k => typeof NS[k] === 'string' && patchOfficial('fr', NS[k]) != null);
+    if (ks.length) part.nameAStar = Object.assign({}, ON, ...ks.map(k => ({ [k]: patchOfficial('fr', NS[k]) })));
+  }
+  const FL = en.fixSpending && en.fixSpending.lines, OF = own.fixSpending;
+  if (FL && OF && FL.some(t => patchOfficial('fr', t) != null)) part.fixSpending = Object.assign({}, OF, { lines: FL.map((t, i) => patchOfficial('fr', t) || OF.lines[i]) });
+  return { translations: part };
+}
 function french20(rs, own) {
+  const out = french20Own(rs, own);
+  // (read when the game is played: the patch's tables are defined further on)
+  let fx;
+  Object.defineProperty(out, 'fix', { enumerable: true, configurable: true, get: () => fx || (fx = frFix20(out.say, rs, out)) });
+  return out;
+}
+function french20Own(rs, own) {
   return {
     remake: true,
     // 1.2F's lists (its women's names too, which 1.2 never draws); the stars
@@ -400,6 +428,9 @@ if (R12) {
   EN12.battleLines = DOS.battleLines;
   EN12.fixSpending = Object.assign({}, R12.fixSpending, { lines: ['You have no spending problems.',
     'You were overspending at %s. The problem has been fixed.', 'You were underspending at %s. The problem has been fixed.', 'You’re abandoning %s.'] });
+  // the patch's French over 1.2F's own (engine.js rules: rs.ownFix, the version's own language)
+  let ownFix12;
+  Object.defineProperty(R12, 'ownFix', { enumerable: false, configurable: true, get: () => ownFix12 || (ownFix12 = frFix20(R12.say, EN12, R12)) });
   const DE12 = german(Object.assign({}, R12, { forceEndTurn: null }), DOS);
   DE12.remake = true;
   // 1.2's stars are 2.0's and "Tiber" (STR# 2005, the German table's string 32)
@@ -424,6 +455,8 @@ if (R12) {
 
   // the You Lost alert in English (Mac 2.0.1's), which the interface puts in German (js/ui-text.js)
   DE12.youLost = EN12.youLost;
+  // and the You Won alert (1.2's own is 1.2F's French, ALRT 5040)
+  DE12.youWon = EN12.youWon;
   R12.languages = ['en', 'fr', 'de'];
   R12.lang = Object.assign({}, R12.lang, { de: DE12 });
 }
@@ -513,6 +546,10 @@ function iosLang(lang, rs) {
   // the Evacuate question for a star named Hope (Misc Strings 123; Kansas's is Alert Strings 37, above)
   reports.push([M[123], MT[123]]);
   for (const i of [29, 38, 39]) words[M[i]] = MT[i];
+  // the tech kinds in "Your %s technology just jumped to %d." (report 85): the remake fills in
+  // the English kind, as it always has (which language the app filled in is not known); the
+  // patch's words put it in the language (HOLANG_REMAKE[lang].patchWords)
+  for (const k of ['Range', 'Speed', 'Weapons', 'Shields', 'Miniaturization']) words[k] = k;
   const one = MT[0]; // "un", "bir"
   const args = [['one %s', one + ' %s']];
   CLASS_KEYS.forEach((k, i) => args.push(['%d ' + SC[i + 7], '%d ' + SCT[i + 7]]));
@@ -574,7 +611,20 @@ function iosLang(lang, rs) {
       if (Object.keys(W).length) say.words = W;
       if (Object.keys(say).length) part.say = say;
       if (hf.some(x => x != null)) part.hintTexts = HELP.map((t, i) => (hf[i] != null ? hf[i] : hintTexts[i]));
-      if (Object.keys(part).length) o.translations = part;
+      // iOS's lists with the patch's words (patchLists): the classes (singular after a
+      // number), the tech names, the decoy, the fillings, the battle window, Name a Star
+      if (patchesLists(lang)) {
+        const P = iosWords(lang, null, true), PW = {};
+        for (const k of TECH_LISTS) en(k).forEach((t, i) => { PW[t] = LP(lang, k)[i]; PW[t.replace(/ª/g, '™')] = LP(lang, k)[i]; });
+        Object.assign(PW, P.words);
+        part.say = Object.assign({}, part.say, { args: P.args, words: Object.assign(PW, (part.say || {}).words) });
+        if (rs.battlePanelIn) part.battlePanel = rs.battlePanelIn(iosPanelText(lang, true));
+        const pm = (i) => patchOfficial(lang, M[i]) || MT[i];
+        part.nameAStar = Object.assign({}, rs.nameAStar, { text: (pm(73) + ' ' + pm(74)).replace(/\s+/g, ' ').trim(), taken: patchOfficial(lang, en('Alert Strings')[9]) || tr('Alert Strings')[9] });
+      }
+      // (French: Name a Star in the patch's words; Turkish has it above, with its lists)
+      if (lang === 'fr') { const pm = (i) => patchOfficial(lang, M[i]) || MT[i]; part.nameAStar = Object.assign({}, rs.nameAStar, { text: (pm(73) + ' ' + pm(74)).replace(/\s+/g, ' ').trim(), taken: patchOfficial(lang, en('Alert Strings')[9]) || tr('Alert Strings')[9] }); }
+      if (Object.keys(part).length || lang === 'fr') o.translations = part;
       if (lang === 'tr') { o.trLostWord = { say: { reports: fixReports } }; o.trSpiesReport = { say: { reports: fixSpies } }; }
       fixCache = { v: Object.keys(o).length ? o : undefined };
       return fixCache.v;
@@ -640,7 +690,9 @@ function patchOfficial(lang, en) { const p = patchTable(lang).get(normEn(en)); r
 // where the version shows the official line as it is (translator fix). T the
 // version's translator, reports its [English, translation] list, hints its
 // English hints, words its say.words. undefined when nothing is corrected.
-function patchFix(lang, T, reports, hints, words, hintTexts) {
+// extra: more of the patch's own (iOS's lists with the patch's words: say.args, say.words,
+// battlePanel, nameAStar), merged into the fix
+function patchFix(lang, T, reports, hints, words, hintTexts, extra) {
   const rep = [], seen = new Set();
   for (const r of reports) {
     if (typeof r[1] !== 'string' || seen.has(r[0])) continue;
@@ -656,7 +708,13 @@ function patchFix(lang, T, reports, hints, words, hintTexts) {
   if (Object.keys(say).length) part.say = say;
   const hf = (hints || []).map(t => T.fix(t));
   if (hf.some(x => x != null)) part.hintTexts = hints.map((t, i) => (hf[i] != null ? hf[i] : hintTexts[i]));
-  return Object.keys(part).length ? { translations: part } : undefined;
+  if (extra) {
+    const { say: es, ...rest } = extra;
+    Object.assign(part, rest);
+    if (es) part.say = Object.assign({}, part.say, es, { words: Object.assign({}, es.words, (part.say || {}).words) });
+  }
+  // (French always: the patch's typography and words go over all of it, engine.js frPatchLayer)
+  return Object.keys(part).length || lang === 'fr' ? { translations: part } : undefined;
 }
 // official: [[English, translation], ...], the nearest first
 function translator(lang, official) {
@@ -698,6 +756,18 @@ function translator(lang, official) {
   };
   return { line, fix, missing, has: (en) => !!find(en), report: (en) => { const t = line(en); return t ? [en, ...t] : null; }, text: (en) => { const t = line(en); return t ? t[0] : en; } };
 }
+// iOS's list k in a language with the patch's words over it (HOLANG_REMAKE[lang].patchLists,
+// by index: docs/glossary-tr.md), for a game with the patch on; L's list where it has none
+const LP_CACHE = {};
+function patchesLists(lang) { return !!((RMK[lang] || {}).patchLists); }
+function LP(lang, k) {
+  const key = lang + '\u0000' + k;
+  if (LP_CACHE[key]) return LP_CACHE[key];
+  const o = ((RMK[lang] || {}).patchLists || {})[k];
+  return (LP_CACHE[key] = o ? L(lang, k).map((t, i) => (Object.prototype.hasOwnProperty.call(o, i) ? o[i] : t)) : L(lang, k));
+}
+// the tech kinds' names in the patch's Turkish (Range, Speed, Weapons, Shields, Miniaturization)
+const TR_TECHS_PATCHED = ['Menzil', 'Hız', 'Silah', 'Kalkan', 'Minyatürleştirme'];
 // iOS's lines, as the iOS game's own languages read them (iosLang): its
 // reports (BY_PLACE, CELSIUS), alerts, the Hope question and the hints
 function iosOfficial(lang) {
@@ -719,24 +789,27 @@ const TECH_ALIAS = { 'Advanced Space-Time Annihlation': 'Advanced Space-Time Ann
 // classes, "one", "You", "Your enemies", "and your allies " (the remake's
 // words over them: HOLANG_REMAKE[lang].words); techs: the version's tech
 // names, each matched by name
-function iosWords(lang, techs) {
-  const words = {}, find = new Map();
+// patched: iOS's lists with the patch's words over them (LP)
+function iosWords(lang, techs, patched) {
+  const words = {}, find = new Map(), Lt = patched ? LP : L, sing = patched && patchesLists(lang);
   const tk = (t) => normEn(TECH_ALIAS[t] || t).replace(/™/g, '');
-  for (const k of TECH_LISTS) L('en', k).forEach((t, i) => find.set(tk(t), L(lang, k)[i]));
+  for (const k of TECH_LISTS) L('en', k).forEach((t, i) => find.set(tk(t), Lt(lang, k)[i]));
   for (const t of techs || []) { const w = find.get(tk(t)); if (w != null && !/^\d+$/.test(t)) words[t] = w; }
-  const SC = L('en', 'Ship Class Names'), SCT = L(lang, 'Ship Class Names');
+  const SC = L('en', 'Ship Class Names'), SCT = Lt(lang, 'Ship Class Names');
   CLASS_KEYS.forEach((k, i) => { words[SC[i]] = SCT[i]; });
-  const M = L('en', 'Misc Strings'), MT = L(lang, 'Misc Strings');
+  const M = L('en', 'Misc Strings'), MT = Lt(lang, 'Misc Strings');
   for (const i of [29, 38, 39]) words[M[i]] = MT[i];
   // the techs' own names in "Your %s technology just jumped to %d." (report
   // 85): French Misc Strings 3-6 and report 7's "Miniaturisation"; Turkish
-  // reports 142-146's (its Misc Strings 3 "Dizi" is another sense of "Range")
-  const TL = { fr: ['Distance', 'Vitesse', 'Armes', 'Boucliers', 'Miniaturisation'], tr: ['Uzaklık', 'Hız', 'Silah', 'Zırh', 'Minyatürleme'] }[lang];
+  // reports 142-146's (its Misc Strings 3 "Dizi" is another sense of "Range");
+  // the patch's Turkish, its tech names (docs/glossary-tr.md)
+  const TL = { fr: ['Distance', 'Vitesse', 'Armes', 'Boucliers', 'Miniaturisation'], tr: sing ? TR_TECHS_PATCHED : ['Uzaklık', 'Hız', 'Silah', 'Zırh', 'Minyatürleme'] }[lang];
   if (TL) ['Range', 'Speed', 'Weapons', 'Shields', 'Miniaturization'].forEach((k, i) => { words[k] = TL[i]; });
-  Object.assign(words, (RMK[lang] || {}).words || {});
+  Object.assign(words, (RMK[lang] || {}).words || {}, patched ? (RMK[lang] || {}).patchWords || {} : {});
 
   const args = [['one %s', MT[0] + ' %s']];
-  CLASS_KEYS.forEach((k, i) => args.push(['%d ' + SC[i + 7], '%d ' + SCT[i + 7]]));
+  // (the patch's Turkish: the singular after a number, "12 Savaşçı"; iOS has the plural)
+  CLASS_KEYS.forEach((k, i) => args.push(['%d ' + SC[i + 7], '%d ' + SCT[sing ? i : i + 7]]));
   args.push(['%d ships', '%d ' + (lang === 'fr' ? 'vaisseaux' : 'gemi')]);
   return { words, args };
 }
@@ -768,8 +841,9 @@ function iosNames(lang, rs) {
   return o;
 }
 // the battle window: iOS's sprintf Templates 9-12 and 14 (as iosLang)
-function iosPanelText(lang) {
-  const SP = L('en', 'sprintf Templates'), SPT = L(lang, 'sprintf Templates'), SC = L('en', 'Ship Class Names'), SCT = L(lang, 'Ship Class Names'), one = L(lang, 'Misc Strings')[0];
+function iosPanelText(lang, patched) {
+  const Lt = patched ? LP : L, sing = patched && patchesLists(lang);
+  const SP = L('en', 'sprintf Templates'), SPT = Lt(lang, 'sprintf Templates'), SC = L('en', 'Ship Class Names'), SCT = Lt(lang, 'Ship Class Names'), one = Lt(lang, 'Misc Strings')[0];
   const esc = (t) => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const panel = [9, 10, 11, 14].map(i => [new RegExp('^' + esc(SP[i]).replace(/%d/g, '(\\d+)').replace(/%s/g, '(.*?)') + '$'), SPT[i]]);
   const desc = (t) => {
@@ -779,11 +853,12 @@ function iosPanelText(lang) {
     if (m[2] && /s$/.test(cls)) { cls = cls.slice(0, -1); plural = true; }
     const i = SC.indexOf(cls);
     if (i < 0 || i > 6) return t;
-    return (m[1] ? one + ' ' : m[2] ? m[2] + ' ' : '') + `${m[3]} (${m[4]}/${m[5]}) ` + SCT[plural ? i + 7 : i];
+    return (m[1] ? one + ' ' : m[2] ? m[2] + ' ' : '') + `${m[3]} (${m[4]}/${m[5]}) ` + SCT[plural && !sing ? i + 7 : i];
   };
+  const fit = (t) => (sing ? E.trSuffixes(t) : t);
   return {
-    head: (star, year) => SPT[12].replace('%s', star).replace('%d', year).trim(),
-    text: (t) => { for (const [re, to] of panel) { const m = re.exec(t); if (m) { let i = 1; return to.replace(/%[sd]/g, () => { const a = m[i++] ?? ''; return /\(\d+\/\d+\)/.test(a) ? desc(a) : a; }); } } return desc(t); },
+    head: (star, year) => fit(SPT[12].replace('%s', star).replace('%d', year).trim()),
+    text: (t) => fit((() => { for (const [re, to] of panel) { const m = re.exec(t); if (m) { let i = 1; return to.replace(/%[sd]/g, () => { const a = m[i++] ?? ''; return /\(\d+\/\d+\)/.test(a) ? desc(a) : a; }); } } return desc(t); })()),
   };
 }
 
@@ -937,13 +1012,14 @@ function lazyLang(build, keys) {
   for (const k of ['missing', 'hintRemake', 'hintAdapted']) Object.defineProperty(o, k, { enumerable: false, get: () => get()[k] });
   return o;
 }
-const LANG_KEYS = ['remake', 'fix', 'say', 'hintTexts', 'nameAStar', 'battlePanel', 'starNames', 'maleNames', 'femaleNames', 'shipNames'];
+const LANG_KEYS = ['remake', 'fix', 'say', 'hintTexts', 'nameAStar', 'battlePanel', 'starNames', 'maleNames', 'femaleNames', 'shipNames', 'officialWindows'];
 function remake505(lang, rs, o) {
   return lazyLang(() => build505(lang, rs, o), LANG_KEYS.concat((o && o.keys) || []));
 }
 function build505(lang, rs, o) {
   o = o || {};
   const de = DICT(lang), es = lang === 'es';
+  // French: iOS's line first (iOS is 5.0.5's game ported, the Palm's too: Jake, October 2026), 3.0.1F's where iOS has none
   const T = translator(lang, (de ? officialFor(lang) : iosOfficial(lang).concat(lang === 'fr' ? official301() : [])).concat(typeof o.official === 'function' ? o.official() : o.official || []));
   const reports = [];
   for (const en of (o.lines ? o.lines() : lines505(rs, (o.extra || EXTRA505).concat(hoedownLines(rs)), lang))) { const r = T.report(en); if (r) reports.push(r); }
@@ -954,15 +1030,28 @@ function build505(lang, rs, o) {
   const hints = (o.hints ? o.hints() : (D.hints || []).slice(3, 43));
   const NS = rs.nameAStar || {};
   const hintTexts = hints.map(t => T.text(t));
+  const iosP = !de && !es && patchesLists(lang);
   const out = Object.assign(de ? namesFor(lang, rs) : iosNames(lang, rs), {
     remake: true,
-    fix: patchFix(lang, T, reports, hints, words, hintTexts),
     say: Object.assign({ reports: es ? reports.map(esReport) : reports, args, words }, num ? { num, cap: true } : {}),
     hintTexts,
     nameAStar: Object.assign({}, NS, de ? { text: T.text(NS.text), taken: T.text(NS.taken) } : { text: L(lang, 'Misc Strings')[74].trim(), taken: L(lang, 'Alert Strings')[9] }, o.nameAStar ? o.nameAStar(lang, T) : {}),
   });
   const panelText = es ? (o.panelEs ? o.panelEs() : PANEL505_ES) : de ? (o.panelDe ? o.panelDe() : PANEL505_DE) : iosPanelText(lang);
-  out.battlePanel = rs.battlePanelIn && rs.battlePanel === O505.battlePanel ? rs.battlePanelIn(panelText) : (o.battlePanel ? o.battlePanel(panelText) : rs.battlePanel);
+  const panelOf = (pt, patched) => (rs.battlePanelIn && rs.battlePanel === O505.battlePanel ? rs.battlePanelIn(pt) : (o.battlePanel ? o.battlePanel(pt, patched) : rs.battlePanel));
+  out.battlePanel = panelOf(panelText);
+  // the patch's: iOS's lists with its words (the classes, the techs, the battle window, Name a Star)
+  let extra;
+  if (iosP) {
+    const P = iosWords(lang, techs, true);
+    const nas = { text: (patchOfficial(lang, L('en', 'Misc Strings')[74]) || L(lang, 'Misc Strings')[74]).trim(), taken: patchOfficial(lang, L('en', 'Alert Strings')[9]) || L(lang, 'Alert Strings')[9] };
+    extra = { say: { args: P.args, words: P.words }, battlePanel: panelOf(iosPanelText(lang, true), true), nameAStar: Object.assign({}, out.nameAStar, nas) };
+  }
+  if (lang === 'fr') {
+    const nas = { text: (patchOfficial(lang, L('en', 'Misc Strings')[74]) || out.nameAStar.text).trim(), taken: patchOfficial(lang, L('en', 'Alert Strings')[9]) || out.nameAStar.taken };
+    extra = Object.assign({}, extra, { nameAStar: Object.assign({}, out.nameAStar, nas) });
+  }
+  out.fix = patchFix(lang, T, reports, hints, words, hintTexts, extra);
 
   // (the lines no translation has: tools/lang-test.js lists them)
   out.missing = T.missing;
@@ -994,15 +1083,15 @@ const PALM_PANEL = {
   es: { dead: (n, d) => esDead(n, d), people: (x) => WB.people.replace('%s', numES(x)), killed: (x) => WB.killed.replace('%s', numES(x)), survived: (a, b) => WB.survived.replace('%s', numES(a)).replace('%s', numES(b)) },
   de: { dead: (n, d) => S(64).replace('%d', n).replace('%s', d), people: (x) => `${numDE(x)} Leute`, killed: (x) => X(DE.exe.deadPeople).replace('%s', numDE(x)), survived: (a, b) => `${numDE(a)} von ${numDE(b)} Leuten überlebten` },
 };
-function palmPanelText(lang) {
-  const W = PALM_PANEL[lang];
+function palmPanelText(lang, patched) {
+  const W = PALM_PANEL[lang], Lt = patched ? LP : L, sing = patched && patchesLists(lang);
   const cls = lang === 'es' ? (c, plural) => { const k = EN_CLASS.get(c); return k ? esClass(k, plural ? 2 : 1) : c; }
     : lang === 'de' ? (c, plural) => { const k = EN_CLASS.get(c); return k ? (plural ? PLURAL_DE_ALL : CLASS_DE_ALL)[k] : c; }
-    : (c, plural) => { const SC = L('en', 'Ship Class Names'), SCT = L(lang, 'Ship Class Names'); if (c === 'Decoy') return L(lang, 'Misc Strings')[1]; const i = SC.indexOf(c); return i >= 0 && i < 7 ? SCT[plural ? i + 7 : i] : c; };
+    : (c, plural) => { const SC = L('en', 'Ship Class Names'), SCT = Lt(lang, 'Ship Class Names'); if (c === 'Decoy') return Lt(lang, 'Misc Strings')[1]; const i = SC.indexOf(c); return i >= 0 && i < 7 ? SCT[plural && !sing ? i + 7 : i] : c; };
   const desc = (t, plural) => { const m = /^(\d+ )?(.+?) (\(\d+\/\d+\))$/.exec(t); return m ? `${m[1] || ''}${cls(m[2], plural || (m[1] && +m[1] > 1))} ${m[3]}` : t; };
   const N = '([\\d,.]+[KM]?)';
   return {
-    head: lang === 'es' ? PANEL505_ES.head : lang === 'de' ? PANEL505_DE.head : iosPanelText(lang).head,
+    head: lang === 'es' ? PANEL505_ES.head : lang === 'de' ? PANEL505_DE.head : iosPanelText(lang, patched).head,
     text: (t) => {
       let m;
       if ((m = /^(\d+) dead (.+)$/.exec(t))) return W.dead(m[1], desc(m[2], +m[1] > 1));
@@ -1028,7 +1117,7 @@ if (PALM) {
 
     // tFRM 2900's title and buttons: iOS's "Congratulations!" (Misc Strings 73), the remake's buttons
     nameAStar: (l) => (l === 'es' ? Object.assign({}, ES.win.nameAStarPalm) : l === 'de' ? { title: 'Glückwunsch!', ok: 'Cool!', cancel: 'Lieber nicht' } : { title: L(l, 'Misc Strings')[73], ok: { fr: 'Cool !', tr: 'Süper!' }[l], cancel: { fr: 'Laisse tomber', tr: 'Boşver' }[l] }),
-    battlePanel: () => PALM.battlePanelIn(palmPanelText(lang)),
+    battlePanel: (pt, patched) => PALM.battlePanelIn(palmPanelText(lang, patched)),
   }), LANG_KEYS);
   PALM.languages = ['en', 'fr', 'tr', 'de', 'es'];
   PALM.lang = Object.assign({}, PALM.lang, { fr: palm('fr'), tr: palm('tr'), de: palm('de'), es: palm('es') });
@@ -1219,6 +1308,8 @@ const EQUIV = [
   ['You no longer want to be best buddies with %s.  You just want to be allies.', 'You no longer want to be best buddies with with %s. You just want to be allies.'],
   ['Your "%s" ship type has been scrapped. %s of this type scrapped for %s metal.', 'Your "%s" ship type has been dismantled. %d of this type scrapped for %s metal.'],
   ['Your fleet of %s at %s has been scrapped for %s metal.', 'Your fleet of %s at %s has been dismantled for %s metal.'],
+  // (2.0's own, with its `%s' quotes: the Turkish 2.0's, which has no official line of its own)
+  ['Your `%s\' ship type has been scrapped. %d of this type scrapped for %s metal.', 'Your "%s" ship type has been dismantled. %d of this type scrapped for %s metal.'],
   // (4.0.5's and 3.0.1's Abandon is 5.0.5's Evacuate)
   ['You have abandoned %s.', 'You have evacuated %s.'],
   ['%s has run out of metal. You should probably abandon it.', '%s has run out of metal. You should probably evacuate it.'],
@@ -1299,16 +1390,35 @@ function namesFor(lang, rs, nearest301) {
 // words): 1.2F's words for it (STR# 1030) and iOS's classes; the remake's
 // Turkish
 const CLASS_IX = { scout: 0, dread: 1, fighter: 2, tanker: 3, colony: 4, satellite: 5, bio: 6 };
-function words20(lang) {
+// patched: iOS's lists with the patch's words (LP; the Turkish singular after a number, and
+// the star's case ending fitted, js/engine.js trSuffixes)
+function words20(lang, patched) {
   if (lang === 'es') return WORDS20_ES;
-  const SCT = lang === 'de' ? null : L(lang, 'Ship Class Names');
-  const cls = (type, n) => CLASS_IX[type] != null ? SCT[CLASS_IX[type] + (n > 1 ? 7 : 0)] : type === 'decoy' ? L(lang, 'Misc Strings')[1] : '';
+  const Lt = patched ? LP : L, sing = patched && patchesLists(lang);
+  const SCT = lang === 'de' ? null : Lt(lang, 'Ship Class Names');
+  const cls = (type, n) => CLASS_IX[type] != null ? SCT[CLASS_IX[type] + (n > 1 && !sing ? 7 : 0)] : type === 'decoy' ? Lt(lang, 'Misc Strings')[1] : '';
   if (lang === 'fr') return Object.assign({}, BATTLE_FR, { desc: null, one: L('fr', 'Misc Strings')[0] + ' ', num: null, cls });
-  if (lang === 'tr') return { head: (star, year) => ['Savaş özeti', `${star}de, ${year}:`], won: ['Tebrikler!', 'Savaşı kazandın!'], lost: ['Maalesef,', 'savaşı kaybettin'],
+  if (lang === 'tr') return { head: (star, year) => ['Savaş özeti', sing ? E.trSuffixes(`${star}’{de}, ${year}:`) : `${star}de, ${year}:`], won: ['Tebrikler!', 'Savaşı kazandın!'], lost: ['Maalesef,', 'savaşı kaybettin'],
     cls, one: L('tr', 'Misc Strings')[0] + ' ', dead: (n0, desc) => `${n0} ölü ${desc}`, deadPeople: (x) => `${x} ölü` };
   // the German DOS 2.0's window, with the remake's classes for 2.0's missing ones
   if (lang === 'de') return Object.assign({}, BATTLE_DE, { cls: (type, n) => (n > 1 ? PLURAL_DE_ALL : CLASS_DE_ALL)[type] || '' });
   return null;
+}
+// the windows' sentences of a language the patch has lines for (Name a Star, the
+// conquered line, the Armageddon questions, Fix Spending's lines), by their English
+// (rs's, the version's own): extra with them, or extra as it was
+function patchedWindows(T, rs, out, extra) {
+  const fx = (en, cur) => { const p = typeof en === 'string' ? T.fix(en) : null; return p != null ? p : cur; };
+  const add = {};
+  const NS = rs.nameAStar;
+  if (NS && out.nameAStar) {
+    const ks = ['text', 'taken', 'rule', 'label', 'hint'].filter(k => NS[k] && T.fix(NS[k]) != null);
+    if (ks.length) add.nameAStar = Object.assign({}, (extra && extra.nameAStar) || out.nameAStar, ...ks.map(k => ({ [k]: fx(NS[k]) })));
+  }
+  if (rs.conquered && out.conquered && T.fix(rs.conquered) != null) add.conquered = fx(rs.conquered);
+  if (rs.armageddonAsk && out.armageddonAsk && rs.armageddonAsk.some(l => l.some(t => T.fix(t) != null))) add.armageddonAsk = rs.armageddonAsk.map((l, i) => l.map((t, j) => fx(t, out.armageddonAsk[i][j])));
+  if (!(extra && extra.fixSpending) && rs.fixSpending && rs.fixSpending.lines && out.fixSpending && rs.fixSpending.lines.some(t => T.fix(t) != null)) add.fixSpending = Object.assign({}, out.fixSpending, { lines: rs.fixSpending.lines.map((t, i) => fx(t, out.fixSpending.lines[i])) });
+  return Object.keys(add).length ? Object.assign({}, extra, add) : extra;
 }
 // a version's language from its own list of lines (o.lines), hints and
 // windows; o.nearest '20' when 2.0's official text is the nearest (3.0.1)
@@ -1322,9 +1432,11 @@ function buildText(lang, rs, o) {
   for (const t of techs) if (!(t in words) && / /.test(t) && T.line(t)) words[t] = T.text(t);
   const hints = (o.hints ? o.hints() : null) || [];
   const hintTexts = hints.length ? hints.map(t => T.text(t)) : rs.hintTexts;
+  let extra;
+  if (lang !== 'es' && lang !== 'de' && patchesLists(lang)) { const P = iosWords(lang, techs, true); for (const t of techs) if (!(t in P.words) && / /.test(t) && T.line(t)) P.words[t] = T.text(t); extra = { say: { args: P.args, words: P.words } }; }
   const out = Object.assign(namesFor(lang, rs, o.nearest === '301'), {
     remake: true,
-    fix: patchFix(lang, T, reports, hints, words, hintTexts),
+    fix: null,
     say: Object.assign({ reports: lang === 'es' ? reports.map(esReport) : reports, args, words }, num ? { num, cap: true } : {}),
     hintTexts,
   });
@@ -1335,7 +1447,12 @@ function buildText(lang, rs, o) {
   if (rs.armageddonAsk) out.armageddonAsk = rs.armageddonAsk.map(l => l.map(t => T.text(t)));
   // Fix Spending's lines (3.0.1: Mac 2.0.1's)
   if (rs.fixSpending && rs.fixSpending.lines) out.fixSpending = Object.assign({}, rs.fixSpending, { lines: rs.fixSpending.lines.map(t => (T.line(t) ? T.text(t) : (T.missing.push(t), t))) });
+  // (and with the patch's wording, where it has some: the Turkish case endings)
+  if (extra && out.fixSpending && rs.fixSpending.lines.some(t => T.fix(t) != null)) extra.fixSpending = Object.assign({}, out.fixSpending, { lines: rs.fixSpending.lines.map((t, i) => T.fix(t) ?? out.fixSpending.lines[i]) });
   out.battlePanel = o.battlePanel ? o.battlePanel(words20(lang)) : rs.battlePanel;
+  if (extra && o.battlePanel) extra.battlePanel = o.battlePanel(words20(lang, true));
+  extra = patchedWindows(T, rs, out, extra);
+  out.fix = patchFix(lang, T, reports, hints, words, hintTexts, extra);
   out.missing = T.missing.slice();
   out.hintRemake = hints.filter(t => (T.line(t) || [])[1] === 'remake');
   out.hintAdapted = hints.filter(t => (T.line(t) || [])[1] === 'adapted');
@@ -1348,8 +1465,14 @@ if (W405) {
   const lines = (rs, mac) => () => TEXT405.concat(engineLines(), welcomeLines(rs), [rs.colorMonitorBW ? rs.colorMonitorBW.text : null].filter(Boolean),
     mac ? (E.DATA.reports || []).slice(39, 69) : [], ['Spaceward Ho! Version 4.0.5 by Peter Commons.', 'Spaceward Ho! Version 4.0.3 by Peter Commons.']);
 
-  const make = (lang, rs, mac) => lazyLang(() => buildText(lang, rs, { lines: lines(rs, mac), hints: () => rs.hintTexts, nearest: '301',
-    battlePanel: (w) => w ? DOS.battlePanel20({ dots: mac ? '…' : '...', cols: 'mac', shade: true, words: w }) : rs.battlePanel }), LANG_KEYS405);
+  const make = (lang, rs, mac) => lazyLang(() => {
+    const out = buildText(lang, rs, { lines: lines(rs, mac), hints: () => rs.hintTexts, nearest: '301',
+      battlePanel: (w) => w ? DOS.battlePanel20({ dots: mac ? '…' : '...', cols: 'mac', shade: true, words: w }) : rs.battlePanel });
+    // French: 3.0.1F's windows' words over the interface's, for what 4.0.5 shares with 3.0.1
+    // (the same English), as in a 3.0.1 game (rule 4; HO.windowWords)
+    if (lang === 'fr' && F301 && E301) out.officialWindows = windows301();
+    return out;
+  }, LANG_KEYS405);
   for (const [rs, mac] of [[W405, false], [M405, true]]) {
     if (!rs) continue;
     rs.languages = ['en', 'fr', 'tr', 'de', 'es'];
@@ -1507,6 +1630,70 @@ for (const [rs, panel] of [[DOS, { name: 15, cls: 15, dots: '...' }], [MAC20, { 
 }
 if (R12) {
   R12.languages = R12.languages.concat(['es']);
-  R12.lang = Object.assign({}, R12.lang, { es: Object.assign(spanish20(R12, R12.lang.en, { dots: '…' }), { youLost: R12.lang.en.youLost }) });
+  R12.lang = Object.assign({}, R12.lang, { es: Object.assign(spanish20(R12, R12.lang.en, { dots: '…' }), { youLost: R12.lang.en.youLost, youWon: R12.lang.en.youWon }) });
+}
+
+// ---------- 1.2, DOS 2.0 and Mac 2.0.1: the remake's Turkish ----------
+// As 3.0.1's and 4.0.5's (buildText), in docs/glossary-tr.md's default words:
+// iOS's line wherever iOS has 2.0's English (its slips as released: rule 1),
+// else an iOS line adapted, else the remake's own (js/lang-remake.js tr, the
+// 3.0.1 lines among them); iOS's fillings (the classes, "bir"), the
+// battle window 3.0.1 and 4.0.5 show in Turkish (words20), iOS's star and ship
+// names one by one (namesFor), and the windows 2.0 and 1.2 carry: Name a
+// Star, Fix Spending, Mac 2.0.1's Force End Turn, and the battle window's two
+// lines (tr.win20). The Options menu, the Explored Planets list, the Scrap
+// commands and the You Won and You Lost alerts stay in the English, Mac
+// 2.0.1's, which the interface puts in Turkish (js/ui-text.js). With the
+// patch (fix 'translations'): tr.patch by English, the case endings fitted
+// (engine.js trSuffixes), iOS's lists with the patch's words (LP).
+const LINES20 = () => REPORTS20.concat(CHAT20).map(([t]) => t).concat(['Spaceward Ho! Version 1.2 by Peter Commons.',
+  'A meteor shower destroyed your colony at %s.', 'Your fleet of %s is waiting to refuel before it can continue on to %s.', '%s says: %s', 'Your message to %s: %s', 'Year %d. Nothing much happened.']);
+const TR20 = (RMK.tr && RMK.tr.win20) || { words: {}, battleLines: {}, forceEndTurn: null };
+const TR20_KEYS = ['remake', 'fix', 'say', 'nameAStar', 'fixSpending', 'battlePanel', 'battleLines', 'options', 'exploredList', 'scrapWords', 'youLost', 'youWon',
+  'starNames', 'maleNames', 'femaleNames', 'shipNames'];
+// rs the ruleset, en its English (1.2's is Mac 2.0.1's, rules-12 lang.en), panel the battle window's options
+function turkish20(rs, en, panel) {
+  const T = translator('tr', officialFor('tr', '20'));
+  const reports = [];
+  for (const t of LINES20()) { const r = T.report(t); if (r) reports.push(r); }
+  const { words, args } = iosWords('tr', []);
+  Object.assign(words, TR20.words);
+  const text = (t) => (T.line(t) ? T.text(t) : (T.missing.includes(t) ? t : (T.missing.push(t), t)));
+  const NS = en.nameAStar;
+  const fixLines = en.fixSpending.lines;
+  const out = Object.assign(namesFor('tr', rs), {
+    remake: true,
+    say: { reports, args, words },
+    nameAStar: Object.assign({}, rs.nameAStar, { text: text(NS.text), rule: text(NS.rule), label: text(NS.label), hint: text(NS.hint), taken: text(NS.taken) }),
+    fixSpending: Object.assign({}, rs.fixSpending, { lines: fixLines.map(text) }),
+    options: Object.assign({}, rs.options, en.options),
+    exploredList: Object.assign({}, rs.exploredList, en.exploredList),
+    scrapWords: en.scrapWords || rs.scrapWords,
+    youLost: en.youLost || rs.youLost, youWon: en.youWon || rs.youWon,
+    battlePanel: DOS.battlePanel20(Object.assign({ cols: 'mac', shade: true, words: words20('tr') }, panel)),
+    battleLines: Object.assign({}, TR20.battleLines),
+  });
+  if (rs.forceEndTurn) out.forceEndTurn = Object.assign({}, rs.forceEndTurn, { ask: TR20.forceEndTurn });
+  // the patch's: iOS's lists with its words, the battle window, Fix Spending's lines
+  const P = iosWords('tr', [], true);
+  Object.assign(P.words, TR20.words);
+  const extra = { say: { args: P.args, words: P.words }, battlePanel: DOS.battlePanel20(Object.assign({ cols: 'mac', shade: true, words: words20('tr', true) }, panel)),
+    fixSpending: Object.assign({}, out.fixSpending, { lines: fixLines.map((t, i) => T.fix(t) ?? out.fixSpending.lines[i]) }) };
+  out.fix = patchFix('tr', T, reports, [], words, [], extra);
+  out.missing = T.missing.slice();
+  return out;
+}
+// (built when first read: the names lists are read then)
+const lazyTr20 = (rs, en, panel) => lazyLang(() => turkish20(rs, en, panel), TR20_KEYS.concat(rs.forceEndTurn ? ['forceEndTurn'] : []));
+// Turkish after French, before Spanish, as the later versions list them
+const withTr = (list) => { const i = list.indexOf('es'); return i < 0 ? list.concat(['tr']) : list.slice(0, i).concat(['tr'], list.slice(i)); };
+for (const [rs, panel] of [[DOS, { name: 15, cls: 15, dots: '...' }], [MAC20, { dots: '…' }]]) {
+  if (!rs) continue;
+  rs.languages = withTr(rs.languages);
+  rs.lang = Object.assign({}, rs.lang, { tr: lazyTr20(rs, rs, panel) });
+}
+if (R12) {
+  R12.languages = withTr(R12.languages);
+  R12.lang = Object.assign({}, R12.lang, { tr: lazyTr20(R12, R12.lang.en, { dots: '…' }) });
 }
 })(this);

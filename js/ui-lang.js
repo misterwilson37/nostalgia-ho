@@ -103,14 +103,33 @@ function fill(t, args) {
 }
 // a whole string in the language: as it is in the table, or by a pattern
 // (each filling in the language too), else unchanged
+// the French patch (HO.fixed(G, 'translations') in a French game): the patch's
+// typography and words over the interface's French too (HO.frPatchText), and its
+// corrections of 3.0.1F's window words (HOLANG_REMAKE.fr.patchWindows)
+const frP = (x, lang) => (curPatch && lang === 'fr' && typeof x === 'string' && root.HO && root.HO.frPatchText ? root.HO.frPatchText(x) : x);
+function patchWindow(en, lang) {
+  if (!curPatch) return null;
+  const W = root.HOLANG_REMAKE && root.HOLANG_REMAKE[lang] && root.HOLANG_REMAKE[lang].patchWindows;
+  if (!W) return null;
+  if (!PW[lang]) PW[lang] = new Map(Object.entries(W).map(([e, t]) => [wkey(e), t]));
+  const t = PW[lang].get(wkey(en));
+  return t == null ? null : t;
+}
+const PW = {};
 function tr(s, lang, depth) {
   lang = lang || cur;
+  const x = trIn(s, lang, depth);
+  // (a word the table has the same in both, "Tanker", "Auto Play", is French too)
+  return x !== s || (MAP[lang] && MAP[lang].has(s)) ? frP(x, lang) : x;
+}
+function trIn(s, lang, depth) {
   if (lang === 'en' || typeof s !== 'string' || !MAP[lang]) return s;
   const M = MAP[lang];
   if (OWN[lang] && OWN[lang].has(s.trim())) return s; // a skin's own word in this language (HOUI.own)
   const r = (curPatch && MAPP[lang].get(s)) || M.get(s);
   if (curWordsMap && lang === curWordsLang) {
-    const w = curWordsMap.get(wkey(s));
+    let w = curWordsMap.get(wkey(s));
+    if (w != null) { const p = patchWindow(s, lang); if (p != null) w = p; }
     if (w != null) return s.trim() === s ? w : s.replace(s.trim(), w);
   }
   if (r != null) return r;
@@ -137,9 +156,10 @@ function tr(s, lang, depth) {
 }
 // a template and its fillings
 function t(en, ...args) {
-  const w = cur !== 'en' && curWordsMap && cur === curWordsLang ? curWordsMap.get(wkey(en)) : null;
+  let w = cur !== 'en' && curWordsMap && cur === curWordsLang ? curWordsMap.get(wkey(en)) : null;
+  if (w != null) { const p = patchWindow(en, cur); if (p != null) w = p; }
   const x = w != null ? w : cur === 'en' ? en : (MAP[cur] && ((curPatch && MAPP[cur].get(en)) || MAP[cur].get(en)));
-  return fill(x != null ? x : en, args);
+  return x != null ? frP(fill(x, args), cur) : fill(en, args);
 }
 
 // ---------- the page ----------

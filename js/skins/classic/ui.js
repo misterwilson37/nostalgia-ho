@@ -3352,7 +3352,8 @@ function openFixSpending() {
     const r = FS.next(G, me(), cur); cur = r.cur;
     renderPanel(); save();
     if (r.text == null) { closeModal(); return; }
-    line.textContent = r.text;
+    // (the patch's Turkish writes its case endings as tokens, fitted once the star is filled in, as HO.say does)
+    line.textContent = r.text.indexOf('{') >= 0 ? HO.trSuffixes(r.text) : r.text;
   };
   modal('Fix Spending', el('div', null, line, el('div', { class: 'btns right' }, el('button', { class: 'quiet', onclick: closeModal }, 'Done'), next)), { cls: 'small' });
   step();
@@ -4236,8 +4237,14 @@ const fixList = (rs) => el('ul', docAttrs(fixLines(rs)), ...HO.fixes(rs).map(f =
 const gameLang = (g) => (g && ((g.opts && g.opts.lang) || HO.ownLanguage(HO.ownRules(g)))) || 'en';
 const titleLang = () => UIL.pref.get() || 'en';
 // (a game with the patch on shows the corrected wording of the official French and Turkish: HO.fixed, js/ui-text.js rows' seventh element;
-// 3.0.1 in French shows 3.0.1F's menus and windows: HO.windowWords)
-function syncLang() { UIL.set(G ? gameLang(G) : titleLang(), !!G && HO.fixed(G, 'translations'), G ? HO.windowWords(G) : null); }
+// 3.0.1 and 4.0.5 in French show 3.0.1F's menus and windows: HO.windowWords; with no game, the
+// title screen of a 3.0.1 or 4.0.5 skin shows them too, its New Game is 3.0.1F's: Jake, October 2026)
+const TITLE_RULES = { mac3: '301', mac3c: '301', mac4: 'mac405', mac4c: 'mac405', w95: '405' };
+function titleWindows(lang) {
+  const id = window.HOSKINS && TITLE_RULES[HOSKINS.current], rs = id && HO.RULESETS[id];
+  return (rs && rs.lang && rs.lang[lang] && rs.lang[lang].officialWindows) || null;
+}
+function syncLang() { const l = G ? gameLang(G) : titleLang(); UIL.set(l, !!G && HO.fixed(G, 'translations'), G ? HO.windowWords(G) : titleWindows(l)); }
 // the player chooses a language (the title screen's Language): the whole
 // interface changes at once, the choice is kept (and, signed in, sent to the
 // account: cloudPrefsUp); a game being played keeps its own
@@ -4558,15 +4565,16 @@ function openSounds() {
 
 // ----- help -----
 // the manual for the rules being played (or last chosen on the New Game window)
+// (a version with none of its own, the Palm's, takes 5.0.5's)
+const manualEntry = () => { const M = window.HOMANUALS || {}; return M[rulesId()] || M.original; };
 function manualFor() {
-  const M = window.HOMANUALS || {}, r = rulesId();
   // a version's help in the game's language (HOMANUALS[id][lang])
-  const own = M[r] && !Array.isArray(M[r]) ? M[r] : null, lang = UIL.lang || 'en';
-  if (own) return own[lang] || own.en;
-  return M[r] || M.original || ['assets/manuals/5.0.5/index.html', 'Spaceward Ho! 5 manual'];
+  const e = manualEntry(), lang = UIL.lang || 'en';
+  if (e && !Array.isArray(e)) return e[lang] || e.en;
+  return e || ['assets/manuals/5.0.5/index.html', 'Spaceward Ho! 5 manual'];
 }
 // the manual (or help page) is English while the interface isn't
-const manualEnglish = () => { const M = window.HOMANUALS || {}, own = M[rulesId()] && !Array.isArray(M[rulesId()]) ? M[rulesId()] : null; return UIL.lang !== 'en' && !(own && own[UIL.lang]); };
+const manualEnglish = () => { const e = manualEntry(), own = e && !Array.isArray(e) ? e : null; return UIL.lang !== 'en' && !(own && own[UIL.lang]); };
 // a 5.0.5 hint in the interface's language (5.0.5's say has its hints)
 const tipSay = (t) => { if (UIL.lang === 'en') return t.trim(); const g = { rules: 'original', opts: { lang: UIL.lang } }, a = HO.say(g, t); return a !== t ? a : HO.say(g, t.trim()); };
 function openHelp() {
@@ -5911,7 +5919,7 @@ function setupMenus() {
       ['Radical research…', () => openRadicalHand(), () => !!(G && (HO.rules(G).radicalHand || {}).menu)],
       ['Force end turn…', () => forceEndTurn(), () => !!(G && HO.rules(G).forceEndTurn && hotSeat())]],
     View: [['Zoom in', () => zoomAt(mapW / 2, mapH / 2, 1.3)], ['Zoom out', () => zoomAt(mapW / 2, mapH / 2, 1 / 1.3)], ['Fit galaxy', () => { UI.fitted = false; fit(); draw(); }], ['-'], [() => (Sound.on ? 'Turn sound off' : 'Turn sound on'), () => { Sound.on = !Sound.on; savePrefs(); }], [() => (Sound.music ? 'Turn theme music off' : 'Turn theme music on'), () => { Sound.music = !Sound.music; savePrefs(); if (Sound.music && !$('#titlescreen').hidden) Sound.startTheme(); else Sound.stopTheme(); }]],
-    Help: [['How to play', openHelp], [() => (manualEnglish() ? 'Manual (in English): ' : 'Manual: ') + manualFor()[1], () => window.open(manualFor()[0], '_blank', 'noopener')]],
+    Help: [['How to play', openHelp], [() => { const s = manualEnglish() ? tl('%s (in English)', manualFor()[1]) : tl(manualFor()[1]); return s.charAt(0).toUpperCase() + s.slice(1); }, () => window.open(manualFor()[0], '_blank', 'noopener')]],
   };
   // The Ho menu, under the skin's "Ho!" at the top left: this version, and
   // the modern conveniences a player may choose (all of them can change in

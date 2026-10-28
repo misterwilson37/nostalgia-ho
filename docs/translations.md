@@ -70,8 +70,9 @@ language.
    aside), is given that official translation verbatim, from the nearest version that
    has one. 1.2F's French carries forward to 2.0 (1.2's reports are 2.0's line for line);
    the German DOS 2.0 carries back to 1.2. 3.0.1F's French is the nearest for 4.0.5 (Windows and
-   Mac), then iOS's; for 5.0.5 and the Palm iOS's comes first and 3.0.1F's covers the lines
-   whose English is 3.0.1's and not iOS's (the Hope and Ship jokes, Armageddon's questions).
+   Mac), then iOS's; for 5.0.5 and the Palm iOS's comes first (iOS is 5.0.5's game ported:
+   Jake, October 2026) and 3.0.1F's covers the lines whose English is 3.0.1's and not iOS's
+   (the Hope and Ship jokes, Armageddon's questions).
    Its lines are paired with the English 3.0.1's by (resource, index): `HOLANG.mac301En`
    beside `mac301Fr`, `official301()` in `js/languages.js`.
 3. **Adapted from official**: a line whose English differs only a little from a line
@@ -107,12 +108,15 @@ source lines; "the remake's" are the lines marked `'remake'` (`js/lang-remake.js
 |---|---|---|---|---|---|
 | Mac 1.2 | French (its own) | 57 | 2 | 1 | – |
 | Mac 1.2 | German (the remake's) | 54 | 3 | 3 | – |
+| Mac 1.2 | Turkish (the remake's) | 31 | 12 | 17 | – |
 | Mac 1.2 | Spanish (the remake's) | 0 | 0 | 60 | – |
 | DOS 2.0 | German (official) | 54 | 2 | 3 | – |
 | DOS 2.0 | French (the remake's) | 56 | 3 | 1 | – |
+| DOS 2.0 | Turkish (the remake's) | 31 | 12 | 17 | – |
 | DOS 2.0 | Spanish (the remake's) | 0 | 0 | 60 | – |
 | Mac 2.0.1 | German (official) | 54 | 2 | 3 | – |
 | Mac 2.0.1 | French (the remake's) | 56 | 3 | 1 | – |
+| Mac 2.0.1 | Turkish (the remake's) | 31 | 12 | 17 | – |
 | Mac 2.0.1 | Spanish (the remake's) | 0 | 0 | 60 | – |
 | Mac 3.0.1 | French (official, 3.0.1F) | 127 | 4 | 1 | – |
 | Mac 3.0.1 | Turkish (the remake's) | 116 | 12 | 4 | – |
@@ -142,6 +146,8 @@ source lines; "the remake's" are the lines marked `'remake'` (`js/lang-remake.js
 | Android 1.2.8 | Turkish (official) | 203 | 0 | 0 | – |
 | Android 1.2.8 | German (the remake's) | 25 | 16 | 211 | 0 / 0 / 39 |
 | Android 1.2.8 | Spanish (the remake's) | 0 | 0 | 252 | 0 / 0 / 39 |
+
+**The patch's Turkish since chunk 3** (`docs/proofread-2026-10.md`, "The patch for iOS's Turkish (chunk 3)"): the last column's Turkish counts predate it. With the patch on, the Turkish reports corrected are now 3.0.1 123, Windows 4.0.5 171, Mac 4.0.5 187, 5.0.5 251, the Palm 250, iOS and Android 194, and the hints 22, 23, 35, 36, 38 and 38; every version that carries iOS's Turkish also takes the patch's class and tech names (`tr.patchLists`) and its case endings (`trSuffixes`). **Turkish in Mac 1.2, DOS 2.0 and Mac 2.0.1 (chunk 4)**: offered since chunk 4 (Jake: every game should have every translation), built by `js/languages.js` `turkish20` (record: "Turkish for 1.2 and 2.0 (chunk 4)"); the patch corrects 53 of the 60 reports there, the battle window and Fix Spending, and those three versions now list the fix `translations`.
 
 Names, besides: 1.2F's French lists (1.2's own; carried to 2.0's French), the German DOS
 2.0's lists (2.0's own; carried to 1.2's German, and to 3.0.1's and 4.0.5's lists that
@@ -426,8 +432,7 @@ No hints (3.0.1 had none; its STR# 3100 is iOS's French hints word for word).
 3.0.1F is also French 3.0.1's **windows**: a 3.0.1 game in French puts the menus' items
 and titles, window titles, buttons and labels of the French program over the remake's
 interface words for the same English (`rs.lang.fr.officialWindows`, 261 English-to-French
-pairs from `MENU`, `DITL`, `DLOG` and `CNTL`; `HO.windowWords(G)`, `HOUI.set`'s third
-argument): "Fenêtre" for Window, "Panthéon" for Hall Of Fame, "Zoom avant". A word the French
+pairs from `MENU`, `DITL`, `DLOG` and `CNTL`; `HO.windowWords(G)`, `HOUI.set`'s third argument; since October 2026 also a 4.0.5 game in French, for what it shares with 3.0.1, rule 4, and the title screen of a 3.0.1 or 4.0.5 skin): "Fenêtre" for Window, "Panthéon" for Hall Of Fame, "Zoom avant". A word the French
 program left in English ("Name", "Density") or translates two ways (Cancel, Annuler and
 Cancel) is not in it: the interface's own French stands. No manual is on the disc.
 
@@ -624,8 +629,7 @@ use it while the game in progress has the patch on and its version lists the fix
 `translations` (`HOUI.set(lang, patch, words)`, called by the classic page's `syncLang` with
 `HO.fixed(G, 'translations')`; on the title screen there is no game and no patch). And the
 third argument, `HO.windowWords(G)`, is an official translation's windows' words laid over
-the rows for the game in progress: a 3.0.1 game in French shows 3.0.1F's menus and windows
-(the 3.0.1 section above). "..." for "…" (the Amiga's font has no
+the rows for the game in progress: a 3.0.1 or 4.0.5 game in French, or the title screen of a 3.0.1 or 4.0.5 skin, shows 3.0.1F's menus and windows where it has the same English (the 3.0.1 section above). "..." for "…" (the Amiga's font has no
 ellipsis, so its German menus write three dots) finds the same row: `HOUI.tr("Preferences...")`
 is "Einstellungen...", and the Amiga's `menuWord` translates the remake's own Ho menu items
 before it writes the dots.
@@ -639,15 +643,17 @@ word or line edited for a slightly different English ("Organize fleets…" from 
 voices: French "vous" and iOS's and 1.2F's words (flotte, vaisseau, recycler, évacuer,
 Epargne, Fin Tour), German "Sie" and the DOS 2.0's and the Amiga's (Weite, Tempo,
 Schilder, Sparen, Schiffsbau, Zug Ende, verschrotten, räumen for 5.0.5's Evacuate),
-Turkish "sen" and iOS's (Birikim, Tahliye Et, Sıran Bitti, Filoları Hazırla; "Menzil"
-for Range, iOS's "Dizi" being another sense of the word), Spanish "tú" and the glossary
-above. `node tools/ui-lang-audit.js --count`:
+Turkish "sen" and iOS's words, iOS's own spelling included: its label word on a label
+(Birikim, Dizi for Range, Kalkanları, Yükseklik for Attitude, Filoarı Hazırla, Oyunlar
+Kaydet, Yeni Oyn) and its sentences' word in a sentence (tasarruf, zırh, öncü gemi,
+kandırıcı gemi, ortak, mahşer günü aleti), each mistake's correction in the row's patch
+element (option C: `docs/glossary-tr.md`), Spanish "tú" and the glossary above. `node tools/ui-lang-audit.js --count`:
 
 | Language | Strings | Official | Adapted | The remake's |
 |---|---|---|---|---|
-| French | 1,653 | 164 | 74 | 1,415 |
+| French | 1,653 | 169 | 71 | 1,413 |
 | German | 1,653 | 135 | 52 | 1,466 |
-| Turkish | 1,653 | 129 | 49 | 1,475 |
+| Turkish | 1,653 | 150 | 53 | 1,450 |
 | Spanish | 1,653 | 0 | 0 | 1,653 |
 
 (Every row of the table, the hover help and the version and patch notes included; the

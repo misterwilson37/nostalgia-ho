@@ -69,7 +69,7 @@ official translation as released, slips and all, and the remake's own translatio
 originals as closely as possible; every correction of official wording is an optional
 language update in the patch, never the default. So the patch carries them, in two fixes:
 
-- **`translations`** (Mac 3.0.1, Windows and Mac 4.0.5, 5.0.5, Palm, iOS, Android): "The French
+- **`translations`** (Mac 1.2, DOS 2.0, Mac 2.0.1, Mac 3.0.1, Windows and Mac 4.0.5, 5.0.5, Palm, iOS, Android): "The French
   and Turkish wording is put right". The tables are `js/lang-remake.js` `fr.patch`, `tr.patch`
   (English line to corrected line, each with its reason as a comment) and `tr.patchWords` (a
   filling); `js/languages.js` lays them over the language as `rs.lang[code].fix.translations`
@@ -77,9 +77,12 @@ language update in the patch, never the default. So the patch carries them, in t
   puts it on when the patch is on and `rs.fixes` lists the id, as it does iOS's `trLostWord`.
   The interface's corrections are the seventh element of a row in `js/ui-text.js` (`{ lang: corrected }`):
   `HOUI.set`'s patch flag, which the game in progress sets (`HO.fixed(G, 'translations')`). The
-  record of what changed and why is `docs/proofread-2026-10.md`, "The patch table". Entries per
-  language: see that file's tables (French 2 lines in the game, 1 row in the interface; Turkish
-  22 lines, 1 word and 5 rows). Only in a French or Turkish game.
+  record of what changed and why is `docs/proofread-2026-10.md`, "The patch table", and for French
+  "The patch for the official French (chunk 5)". French also has `fr.patchWords`, `fr.patchWindows`
+  (3.0.1F's window words) and, over every French line the patch shows, `engine.js` `frPatchText`:
+  French typography, accents on capitals, the official texts' spelling slips and the patch's ship
+  names (Chasseur, Cuirassé, Ravitailleur), in the game and in the interface. 1.2's own French takes
+  it as `rs.ownFix`. Only in a French or Turkish game.
 - **`iosFillings`** (iOS, Android): "Four French and Turkish reports put a word where a number
   goes". The app filled a translated report's blanks in the English sentence's order, though
   French 36 ("You won a battle…") and Turkish 11, 38 and 84 (colony destroyed, survived an

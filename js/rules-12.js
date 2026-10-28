@@ -467,6 +467,6 @@ E.registerRules('12', Object.assign({}, D, {
       text: 'A fleet marked for scrapping while it was in hyperspace was reported “at” the star before the first one, which is part of the galaxy’s header: one stray character (the letter of the 18th home slot’s star number, or none) and, in the English report, no metal unless the 8th home slot’s star number happened to be yours. The patch reports it “at hyperspace” with no metal, as 3.0.1 does.' },
     { id: 'colonyBars32', title: 'The computer’s colony bars no longer overflow',
       text: 'When the computer gave a colony more than $2,147,483 for one part, the sum overflowed and the colony’s bars came out wrong. The patch works them out without overflowing.' },
-  ],
+  ].concat(E.TRANSLATIONS_FIX), // (the Turkish 1.2's corrections: js/languages.js turkish20)
 }));
 })(this);

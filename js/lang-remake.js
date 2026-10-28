@@ -42,13 +42,151 @@ fr: {
   // iOS's trLostWord is), wherever the version shows the line.
   over: {},
   patch: {
-    // iOS 37 left "You" in English and lost the counts' places
-    'You %slost a battle at %s. You %slost %d of your ships. %s lost %d.': 'Vous%1$s avez perdu une bataille à %2$s. Vous%3$s avez perdu %4$d de vos vaisseaux. %5$s en a perdu %6$d.',
-    // iOS spells the screen "Organiser Flotte"
-    'Option-drag in Organize Fleets to split up ship piles.': 'Tirez avec la touche option dans "Organiser Flottes" pour séparer les groupes de vaisseaux.',
-    // 3.0.1F's Ship joke (DITL 3030): "Tous le monde"
-    'Abandon Ship? Abandon Ship! All hands abandon ship! Women and children first!': 'Abandonner le vaisseau? Abandonnez le vaisseau! Tout le monde abandonne le vaisseau! Les femmes et les enfants d\'abord!',
+    // (chunk 5, Guillemet: the official French's slips, iOS's, 1.2F's and 3.0.1F's; every
+    // line the patch shows also gets frPatchText's typography and words, js/engine.js)
+    // iOS R 2: "and" left in English
+    "Artwork by Howard Vives and Bob Van de walle.": "Graphismes de Howard Vives et Bob Van de walle.",
+    // iOS R 9: evacuated, not abandoned (the command is Évacuer)
+    "You have evacuated %s.": "Vous avez évacué %s.",
+    // iOS R 29: the same
+    "%s has run out of metal. You should probably evacuate it.": "%s a épuisé son métal. Vous devriez sans doute l'évacuer.",
+    // iOS R 11: "vous a vaincu" (beat you) for a colony destroyed
+    "%s destroyed your colony at %s. You %slost %d of your ships. %s lost %d. You lost %s people.": "%s a détruit votre colonie à %s. Vous%s avez perdu %d de vos vaisseaux. %s en a perdu %d. Vous avez perdu %s habitants.",
+    // 3.0.1F 1000.10: the same
+    "%s destroyed your colony at %s. You lost %d of your ships. %s lost %d. You lost %s people.": "%s a détruit votre colonie à %s. Vous avez perdu %d de vos vaisseaux. %s en a perdu %d. Vous avez perdu %s habitants.",
+    // iOS R 20: "flotte de Type" for a ship type, the metal lost
+    "Your \"%s\" ship type has been dismantled. %d of this type scrapped for %s metal.": "Votre type de vaisseau « %s » a été recyclé. %d vaisseaux de ce type ont été mis à la ferraille pour %s unités de métal.",
+    // 1.2F 1000.16: the metal left out (iOS R 18's wording)
+    "Your fleet of %s at %s has been dismantled for %s metal.": "Votre flotte de %s à %s a été recyclée pour %s unités de métal.",
+    // iOS R 22: "est en attente pour"
+    "Your %s is waiting to refuel before it can continue on to %s.": "Votre %s attend de faire le plein avant de pouvoir continuer vers %s.",
+    // the remake's 2.0 line in iOS R 22's words
+    "Your fleet of %s is waiting to refuel before it can continue on to %s.": "Votre flotte de %s attend de faire le plein avant de pouvoir continuer vers %s.",
+    // iOS R 26: "a mangé les gens %s"
+    "Your fleet of %s has eaten %s people while refueling at %s.": "Votre flotte de %s a mangé %s habitants pendant son ravitaillement à %s.",
+    // iOS R 27: "%s de la flotte biologique" (the owner as a number)
+    "%s's fleet of biologicals has eaten %s people while refueling at %s.": "La flotte biologique de %s a mangé %s habitants pendant son ravitaillement à %s.",
+    // 1.2F 1000.28, 3.0.1F 1000.26, iOS R 30: "devenir profitable", the colony left out
+    "%s has just become a profitable colony.": "%s vient de devenir une colonie rentable.",
+    // iOS R 34: the decimal point, "Temp" (iOS R 33 writes them out)
+    "%s has explored %s. Gravity: %d.%2.2dG. Temp: %s. Metal: %s.": "%s a exploré %s. Gravité : %d,%2.2dG. Température : %s. Métal : %s.",
+    // iOS R 36: the allies left out
+    "You %swon a battle at %s. You %slost %d of your ships. %s lost %d.": "Vous%s avez gagné une bataille à %s. Vous%s avez perdu %d de vos vaisseaux. %s en a perdu %d.",
+    // iOS R 37 left "You" in English and lost the counts' places
+    "You %slost a battle at %s. You %slost %d of your ships. %s lost %d.": "Vous%1$s avez perdu une bataille à %2$s. Vous%3$s avez perdu %4$d de vos vaisseaux. %5$s en a perdu %6$d.",
+    // iOS R 38: "a résisté à %s" (resisted the attacker)
+    "%s survived an attack from %s. You %slost %d of your ships; %s lost %d. You lost %s people.": "%s a résisté à une attaque de %s. Vous%s avez perdu %d de vos vaisseaux ; %s en a perdu %d. Vous avez perdu %s habitants.",
+    // 3.0.1F 1000.33: the same
+    "%s survived an enemy attack from %s. You lost %d of your ships. %s lost %d. You lost %s people.": "%s a résisté à une attaque ennemie de %s. Vous avez perdu %d de vos vaisseaux. %s en a perdu %d. Vous avez perdu %s habitants.",
+    // iOS R 39, 3.0.1F 1000.34: "affection" for "I want"
+    "%s says, \"I want %s.\"": "%s dit : « Je veux %s. »",
+    // iOS R 77: "le match"
+    "Your ally %s has just won the game.": "Votre allié %s vient de remporter la partie.",
+    // iOS R 78: "un jeu", "gagné" twice
+    "Congratulations! You won a %d difficulty game and have earned %s master points.": "Félicitations ! Vous avez gagné une partie de difficulté %d et obtenu %s Master Points.",
+    // 1.2F 1000.58, 3.0.1F 1000.69, iOS R 79: "pas assez" for "not any"
+    "You are not spending any money on technology research.": "Vous n'investissez rien dans la recherche technologique.",
+    // 3.0.1F 1000.70, iOS R 80: "averse de météorites" (the others: "pluie de météores")
+    "The meteor shower destroyed your colony at %s.": "La pluie de météores a détruit votre colonie à %s.",
+    // iOS R 96: "avec par" (the English's "with with")
+    "You no longer want to be best buddies with with %s. You just want to be allies.": "Vous ne voulez plus être les meilleurs copains de %s. Vous voulez juste être des alliés.",
+    // iOS R 8, 3.0.1F 1000.7: "découvrir une découverte", the wild discovery lost
+    "Your Radical researchers have just made another wild discovery!": "Vos chercheurs Radicaux viennent de faire une nouvelle découverte insensée !",
+    // iOS R 113: "faire modifier votre moniteur"
+    "Your scientists have discovered how to turn your monitor from black and white to color!": "Vos scientifiques viennent de trouver comment faire passer votre moniteur du noir et blanc à la couleur !",
+    // iOS R 115: "courir dans tous les sens" for a shrug
+    "Your scientists realize you already are running in color, shrug, and go back off to work.": "Vos scientifiques se rendent compte que vous êtes déjà en couleur, haussent les épaules et retournent au travail.",
+    // iOS R 117, 3.0.1F 1000.99: "en toute simplicité" for safely, the maximum lost
+    "Your sociologists have discovered how to safely increase the maximum population of your planets!": "Vos sociologues ont découvert comment augmenter sans danger la population maximale de vos planètes !",
+    // iOS R 122: "atteint le plafond de la prime" for the prime lending rate
+    "You've raised the prime lending rate and can now earn 50%% higher interest on savings.": "Vous avez relevé le taux directeur et pouvez maintenant gagner 50 %% d'intérêts de plus sur votre épargne.",
+    // iOS R 125: "et ont augmenté de"
+    "You have found a wealth of precious metals and have increased your savings by %s": "Vous avez trouvé une mine de métaux précieux et avez augmenté votre épargne de %s",
+    // iOS R 131: "prends place"; 3.0.1F 1000.107 dropped the global warming
+    "You don't have enough money! You're neglecting your planets! Global warming is taking place!": "Vous n'avez pas assez d'argent ! Vous négligez vos planètes ! Le réchauffement climatique est en marche !",
+    // iOS R 136, 3.0.1F 1000.112: "a juste été" (English "just")
+    "%s's armageddon device has just been turned on!": "L'arme ultime Armageddon vient d'être actionnée par %s !",
+    // iOS R 138: the battle left out
+    "You just received %s metal from someone scrapping a fleet or from a battle over %s.": "Vous venez de recevoir %s unités de métal, du recyclage d'une flotte ou d'une bataille au-dessus de %s.",
+    // iOS R 141: "battre" (beat) for taking over
+    "%s has just taken over for the computer player %s.": "%s vient de prendre la place du joueur ordinateur %s.",
+    // iOS R 142-146: the five in one order
+    "You now have %s Range Technology (%d).": "Vous avez maintenant %s en technologie Distance (%d).",
+    "You now have %s Speed Technology (%d).": "Vous avez maintenant %s en technologie Vitesse (%d).",
+    "You now have %s Weapons Technology (%d).": "Vous avez maintenant %s en technologie Armes (%d).",
+    "You now have %s Shield Technology (%d).": "Vous avez maintenant %s en technologie Boucliers (%d).",
+    "You now have %s Miniaturization Technology (%d).": "Vous avez maintenant %s en technologie Miniaturisation (%d).",
+    // iOS R 148: "%s Métal"
+    "%s surrenders to you, giving you %s metal.": "%s se rend à vous et vous donne %s unités de métal.",
+    // iOS R 150: "revenu" for net worth
+    "Oh no! The Valdez has sprung a leak! The ecology on %s is in shambles! The citizens are suing you for negligence for twice your net worth!": "Oh non ! Le Valdez a une fuite ! L'écologie de %s est en ruine ! Les citoyens vous poursuivent pour négligence et réclament le double de votre fortune !",
+    // iOS R 154: "ont réussis", "étoiles filantes", "le vaisseau en orbite colonie"
+    "%s people managed to escape the meteor shower at %s by fleeing to the orbiting colony ship(s).": "%s personnes ont réussi à échapper à la pluie de météores sur %s en se réfugiant dans les Transports en orbite.",
+    // iOS R 157: "éviter %s de devenir"
+    "It's a miracle! Your scientists have figured out to prevent %s from going supernova.": "C'est un miracle ! Vos scientifiques ont trouvé comment empêcher %s de se transformer en supernova.",
+    // 1.2F 1000.8: "Tous ses habitants aussi" (became a nova too)
+    "%s has gone nova. All inhabitants were killed.": "%s s'est transformée en nova. Tous ses habitants ont péri.",
+    // iOS A 0: "jeu en réseau courant"
+    "Are you sure you want to leave your current network game?": "Êtes-vous sûr de vouloir quitter votre partie en réseau en cours ?",
+    // iOS A 10
+    "Sorry, but spacewardho.net already has a game with that name running. Please try a different name.": "Désolé, mais une partie portant ce nom est déjà en cours sur spacewardho.net. Merci d'essayer un autre nom.",
+    // iOS A 14: "Il peut être en panne ou que votre connexion peut"
+    "We haven't heard from the server in a while. It may be down or your connection may be severed. You may want to quit and then try to reconnect.": "Le serveur ne donne plus de nouvelles depuis un moment. Il est peut-être en panne, ou votre connexion a peut-être été coupée. Vous pouvez quitter puis essayer de vous reconnecter.",
+    // iOS A 21: "est déjà été pris"
+    "Sorry, but the screen name you have requested has already been taken. Please try a different username.": "Désolé, mais le pseudo que vous avez choisi est déjà pris. Merci d'en essayer un autre.",
+    // iOS A 23: "Ne" after the title, "vous assurez"
+    "Sorry, but Spaceward Ho! cannot connect to the registration server. Please make sure you are connected to the Internet.": "Désolé, mais Spaceward Ho! ne parvient pas à se connecter au serveur d'enregistrement. Merci de vous assurer que vous êtes bien connecté à Internet.",
+    // iOS A 27: "inactif … déconnectés"
+    "You were idle for 15 minutes and have been disconnected for spacewardho.net.": "Vous étiez inactif depuis 15 minutes et avez été déconnecté de spacewardho.net.",
+    // iOS A 31: "Il reviendra" (la copie)
+    "Are you sure you want to de-register this copy of Spaceward Ho!? It will revert to demo mode.": "Êtes-vous sûr de vouloir annuler l'enregistrement de cette copie de Spaceward Ho! ? Elle reviendra en mode démo.",
+    // iOS sprintf 18: "vraiment à évacuer"
+    "Do you really want to evacuate %s? It's a profitable colony!": "Voulez-vous vraiment évacuer %s ? C'est une colonie rentable !",
+    // iOS sprintf 36
+    "Do you really want to evacuate %s?": "Voulez-vous vraiment évacuer %s ?",
+    // iOS H 2: the ranks left out
+    "Play with the spending bars. Conquer the galaxy. Gain ranks to brag to your friends. Enjoy.": "Modifiez les barres de dépenses. Partez à la conquête de la galaxie. Gagnez des grades pour épater vos amis. Amusez-vous.",
+    // iOS H 4: the second sentence left out
+    "Dots by your planet mean you have ships orbiting around it. Fleets are on the right; satellites are on the left.": "Un point près d'une planète signifie que vous y avez des vaisseaux en orbite. Les flottes sont à droite, les satellites à gauche.",
+    // iOS H 12: "tirez" (pull) for drag
+    "Touch and drag a fleet back to its current star to cancel a fleet's movement.": "Touchez une flotte et faites-la glisser vers l'étoile où elle se trouve pour annuler son déplacement.",
+    // iOS H 21: the Celsius left out
+    "Good planets are close to 72ºF (20ºC).": "Les belles petites planètes sont proches de 72 °F (20 °C).",
+    // iOS H 23: "profitable"
+    "If a planet is over 2.5 G or below 0.4 G, it will never make a profit.": "Si une planète dépasse 2,5 G ou est inférieure à 0,4 G, elle ne deviendra jamais rentable.",
+    // iOS H 27: savings into "Placements" (investments), the shipbuilding lost
+    "Savings puts money away for shipbuilding.": "L'Épargne met de l'argent de côté pour construire des vaisseaux.",
+    // iOS H 28
+    "Savings generates extra income.": "L'Épargne rapporte des intérêts.",
+    // iOS H 30: "marquer … pour arriver"
+    "If you have a fleet with fighters and a colony ship, mark the colony ship to arrive late. It'll probably survive longer.": "Si vous avez une flotte avec des Chasseurs et un Transport, faites arriver le Transport en retard : il survivra sans doute plus longtemps.",
+    // iOS H 34
+    "Put multiple ships in the same fleet with Organize Fleets.": "Regroupez plusieurs vaisseaux dans une même flotte avec « Organiser Flottes ».",
+    // iOS H 35: "Organiser Flotte"
+    "Use the Organize Fleets dialog to split up ship piles.": "Utilisez « Organiser Flottes » pour séparer les groupes de vaisseaux.",
+    // iOS H 38: "auto-play" left in English
+    "If you've just started, you might want to try turning on auto-play and watching.": "Si vous venez de commencer, essayez d'activer le jeu automatique et de regarder.",
+    // iOS spells the screen "Organiser Flotte"; "tirez" (pull) for drag
+    "Option-drag in Organize Fleets to split up ship piles.": "Faites glisser avec la touche Option dans « Organiser Flottes » pour séparer les groupes de vaisseaux.",
+    // iOS MS 74: "un nom d'étoile pour les futurs jeux"
+    "You may name a star for use in future games:": "Vous pouvez donner un nom à une étoile pour les prochaines parties :",
+    // iOS MS 123, 3.0.1F DITL 3020: "Voulez vous"; 3.0.1F's thou kept
+    "Dost thou truly wish to abandon Hope? All is not yet lost!": "Veux-tu vraiment abandonner Hope ? Tout n'est pas encore perdu !",
+    // 3.0.1F DITL 3030: "Tous le monde"
+    "Abandon Ship? Abandon Ship! All hands abandon ship! Women and children first!": "Abandonner le vaisseau ? Abandonnez le vaisseau ! Tout le monde abandonne le vaisseau ! Les femmes et les enfants d'abord !",
+    // 3.0.1F DITL 3255: "perdre du temps" (wasting time) for losing big
+    "I get it. You’re losing big time and this is the only way you could possibly win! That’s it isn’t it?": "J'ai compris. Vous êtes en train de perdre à plate couture, et c'est votre seule chance de gagner ! C'est ça, n'est-ce pas ?",
+    // 3.0.1F DITL 4050: "lettres" (any character will do)
+    "Star names must be 2 to 7 characters long.": "Le nom doit comprendre entre 2 et 7 caractères.",
+    // 3.0.1F DITL 4050: "une planète" for a star
+    // 1.2F's Name a Star (DITL 4050, 3340), for 1.2 and 2.0: "lettres", the full stop inside the quotes
+    "Star names must be 4 to 7 characters long.": "Le nom doit comprendre entre 4 et 7 caractères.",
+    "(If you’d rather not name a star, click “OK” with the name blank.)": "(Si vous ne voulez pas donner de nom à une étoile, cliquez sur OK sans rien écrire.)",
+    "Sorry, there’s already a star named  “%s.” Please pick another name.": "Désolé, il y a déjà une étoile nommée « %s ». Soyons créatifs !",
+    "Sorry, there’s already a star named ‘%s’.  Please pick another name.": "Désolé, il y a déjà une étoile nommée « %s ». Soyons créatifs !",
+    "You won the game, so you get to name a star.": "Vous avez gagné la partie : vous pouvez donc donner un nom à une étoile.",
   },
+
   // adapted from official: a line whose English differs a little from one an
   // official translation has (a word, a clause, a number, a name): that
   // translation, edited as little as the difference needs. [the translation,
@@ -111,6 +249,39 @@ fr: {
     // 3.0.1's and 4.0.5's Send Message groups (iOS's "allié", "meilleur ami")
     Everyone: 'Tout le monde', 'Your Allies': 'Vos alliés', 'Your Buddies': 'Vos meilleurs amis',
   },
+  // the patch's words for a report's fillings, over iOS's and the remake's (iOS's lists' Radical
+  // discoveries: Radical Tech Strings 4, 10, 12, 14-19)
+  patchWords: {
+    "and your allies ": " et vos alliés",
+    // iOS's report 85 filled with the English tech kind ("Votre niveau en Speed")
+    "Range": "Distance", "Speed": "Vitesse", "Weapons": "Armes", "Shields": "Boucliers", "Miniaturization": "Miniaturisation",
+    "Improve population maximums": "Augmenter la population maximale",
+    "Decrease borrowing interest rate": "Diminuer le taux d'intérêt des emprunts",
+    "Build a biological space monster": "Construire un monstre biologique de l'espace",
+    "Build a set of ships without development cost": "Construire une série de vaisseaux sans frais de développement",
+    "Improve range tech dramatically": "Améliorer considérablement la technologie Distance",
+    "Improve speed tech dramatically": "Améliorer considérablement la technologie Vitesse",
+    "Improve weapons tech dramatically": "Améliorer considérablement la technologie Armes",
+    "Improve shields tech dramatically": "Améliorer considérablement la technologie Boucliers",
+    "Improve mini tech dramatically": "Améliorer considérablement la technologie Mini",
+  },
+  // the patch's window words, over 3.0.1F's (HO.windowWords) in a 3.0.1 or 4.0.5 game (js/ui-lang.js)
+  patchWindows: {
+    "Male": "Homme",
+    "Female": "Femme",
+    "Force End": "Forcer la fin",
+    "Skip": "Passer",
+    "Revert": "Revenir",
+    "They Like Me": "Ils m'aiment",
+    "They Don’t Like Me": "Ils me détestent",
+    "Star names must be 2 to 7 characters long.": "Le nom doit comprendre entre 2 et 7 caractères.",
+    "You won the game, so you get to name a star.": "Vous avez gagné la partie : vous pouvez donc donner un nom à une étoile.",
+    "New Star Name:": "Nouveau nom d'étoile :",
+    "(If you’d rather not name a star, click “OK” with the name blank.)": "(Si vous ne voulez pas donner de nom à une étoile, cliquez sur OK sans rien écrire.)",
+    "I get it. You’re losing big time and this is the only way you could possibly win! That’s it isn’t it?": "J'ai compris. Vous êtes en train de perdre à plate couture, et c'est votre seule chance de gagner ! C'est ça, n'est-ce pas ?",
+    "Dost thou truly wish to abandon Hope? All is not yet lost!": "Veux-tu vraiment abandonner Hope ? Tout n'est pas encore perdu !",
+    "• Click and drag fleets into desired number of piles": "• Cliquez sur les vaisseaux et faites-les glisser dans le nombre de groupes voulu.",
+  },
 },
 // =====================================================================
 // Turkish: from iOS's Turkish (tr.lproj): "sen", the suffixes put straight
@@ -124,50 +295,640 @@ tr: {
   // iOS's trLostWord is), wherever the version shows the line.
   over: {},
   patch: {
-    // iOS's credits
+    // ---- iOS's own lines (tr.lproj), every one the patch rewrites: the iOS list and index, what iOS has wrong ----
+    // (Cedilla, chunk 3; docs/glossary-tr.md, docs/proofread-2026-10.md "The patch for iOS's Turkish (chunk 3)".
+    // {e} {de} {den} {i} {in} {le} {deki}: a case ending fitted to the word before it, js/engine.js trSuffixes)
+    // iOS R 0: iOS's credits, in English with a stray "!"
     'Spaceward Ho! by Peter Commons.': 'Spaceward Ho!, yazan: Peter Commons.',
-    // iOS's credits
+    // iOS R 1: iOS's credits
     'Spaceward Ho! DEMO by Peter Commons.': 'Spaceward Ho! DEMO, yazan: Peter Commons.',
-    // iOS's credits
+    // iOS R 2: iOS's credits
     'Artwork by Howard Vives and Bob Van de walle.': 'Grafikler: Howard Vives ve Bob Van de walle.',
-    // iOS's credits
+    // iOS R 3: iOS "çeşitlilik" (variety) for Range; "Senin" dropped
+    'Your Range Technology has reached level %d.': 'Menzil teknolojin %d. seviyeye ulaştı.',
+    // iOS R 4: iOS "Senin hız  teknoloji seviyen %d" (no verb)
+    'Your Speed Technology has reached level %d.': 'Hız teknolojin %d. seviyeye ulaştı.',
+    // iOS R 5: as above
+    'Your Weapons Technology has reached level %d.': 'Silah teknolojin %d. seviyeye ulaştı.',
+    // iOS R 6: iOS "zırh" (armour) for Shield
+    'Your Shield Technology has reached level %d.': 'Kalkan teknolojin %d. seviyeye ulaştı.',
+    // iOS R 7: iOS "minyatürleme"
+    'Your Miniaturization Technology has reached level %d.': 'Minyatürleştirme teknolojin %d. seviyeye ulaştı.',
+    // iOS R 8: iOS "köklü"; one name, Radikal
+    'Your Radical researchers have just made another wild discovery!': 'Radikal araştırmacıların yine akıl almaz bir keşif yaptı!',
+    // iOS R 9: iOS "Sen %s 'i boşalttın" (the suffix spaced off); Evacuate is "tahliye"
+    'You have evacuated %s.': '%s’{i} tahliye ettin.',
+    // iOS R 10: iOS "novaya gitti" ("went to nova")
+    '%s has gone nova.': '%s nova oldu.',
+    // iOS R 11: iOS left "lost" in English and the enemy's losses out; "senin koloniyi"
+    '%s destroyed your colony at %s. You %slost %d of your ships. %s lost %d. You lost %s people.': '%1$s, %2$s’{deki} koloniyi yok etti. Gemilerinin %4$d tanesini%3$s kaybettin; %5$s %6$d gemi kaybetti. %7$s insan kaybettin.',
+    // iOS R 12: the double space
+    'Year %d:': 'Yıl %d:',
+    // iOS R 13: "Senin %s deki koloni" (the suffix spaced off)
+    'Your colony at %s is not receiving sufficient funds to support itself.': '%s’{deki} kolonin kendini geçindirecek kadar para alamıyor.',
+    // iOS R 14: iOS "artık %s e ait değil" (says the opposite: "no longer belongs")
+    'You are not supporting %s enough. The people have revolted and now belong to %s': '%s’{i} yeterince desteklemiyorsun. Halk ayaklandı ve artık %s’{e} ait.',
+    // iOS R 15: iOS "Uyarma", "o uyduhiç" (a satellite, the words run together)
+    'Warning: you are terraforming %s, a planet that will never become profitable.': 'Uyarı: %s’{i} yaşanabilir hâle getiriyorsun, ama bu gezegen hiçbir zaman kâr getirmeyecek.',
+    // iOS R 16: the suffix spaced off
+    'You have completely terraformed %s.': '%s’{i} tamamen yaşanabilir hâle getirdin.',
+    // iOS R 17: iOS "artırıp %s!a yaptı" (the "!" inside the sentence)
+    'A volcanic eruption at %s has drastically warmed the temperature to %s!': '%s’{deki} bir yanardağ patlaması ortalığı fena ısıttı: sıcaklık artık %s!',
+    // iOS R 18: iOS "%s metal ihtiyacı için" ("for the need of")
+    'Your fleet of %s at %s has been dismantled for %s metal.': '{^}%s filon %s’{de} %s metal karşılığında parçalandı.',
+    // iOS R 19: iOS "%s deki filon" ("your fleet at %s")
+    'Your fleet of %s was dismantled while in hyperspace.': '{^}%s filon hiperuzaydayken parçalandı.',
+    // iOS R 20: iOS "%d miktarı", "parçlandı"
+    'Your "%s" ship type has been dismantled. %d of this type scrapped for %s metal.': '“%s” gemi tipin hurdaya çıkarıldı. Bu tipten %d gemi %s metal karşılığında parçalandı.',
+    // iOS R 21: iOS "sıcak delik" ("hot hole") for wormhole
+    'Your fleet of %s disappeared through a wormhole in space and is lost.': '{^}%s filon uzaydaki bir solucan deliğinden geçip kayboldu.',
+    // iOS R 22: glued suffix, the double space
+    'Your %s is waiting to refuel before it can continue on to %s.': 'Senin %s, %s’{e} devam etmeden önce yakıt almayı bekliyor.',
+    // iOS R 23: "Senin" dropped; the suffix
+    'Your fleet of %s has arrived at %s.': '{^}%s filon %s’{e} ulaştı.',
+    // iOS R 24: iOS says it stopped and then went on ("durduktan sonra … devam etti")
+    'Your fleet of %s has stopped at %s on the way to %s.': '{^}%1$s filon, %3$s’{e} giderken %2$s’{de} durdu.',
+    // iOS R 25: iOS "Filo %sya dahil %sler %sye vardı" (garbled)
+    '%s\'s fleet of %s has arrived at %s.': '%s’{in} %s filosu %s’{e} vardı.',
+    // iOS R 26: iOS lower-case "senin", "%slerden oluşan"
+    'Your fleet of %s has eaten %s people while refueling at %s.': '{^}%1$s filon %3$s’{de} yakıt alırken %2$s insanı yedi.',
+    // iOS R 27: spacing
+    '%s\'s fleet of biologicals has eaten %s people while refueling at %s.': '%1$s’{in} biyolojik filosu %3$s’{de} yakıt alırken %2$s insanı yedi.',
+    // iOS R 28: iOS "metalı btti"
+    '%s has run out of metal.': '%s’{in} metali bitti.',
+    // iOS R 29: iOS "metalı btti"; Evacuate "tahliye"
+    '%s has run out of metal. You should probably evacuate it.': '%s’{in} metali bitti. Orayı tahliye etsen iyi olur.',
+    // iOS R 30: iOS "coloni"
+    '%s has just become a profitable colony.': '%s artık kâr getiren bir koloni oldu.',
+    // iOS R 31: iOS "Bebeler kıyamet gibi!", "nufusu"
+    'It\'s a baby boom! The population at %s has started growing quickly.': 'Bebek patlaması! %s’{in} nüfusu hızla artmaya başladı.',
+    // iOS R 32: iOS "nüfus artımı"
+    '%s\'s population growth rate has slowed.': '%s’{in} nüfus artış hızı yavaşladı.',
+    // iOS R 33: iOS "inceledin" (examined) for explored; the double spaces
+    'You have explored %s. Gravity: %d.%2.2dG. Temp: %s. Metal: %s.': '%s’{i} keşfettin. Yer çekimi: %d.%2.2dG. Sıcaklık: %s. Metal: %s.',
+    // iOS R 34: as above
+    '%s has explored %s. Gravity: %d.%2.2dG. Temp: %s. Metal: %s.': '%s, %s’{i} keşfetti. Yer çekimi: %d.%2.2dG. Sıcaklık: %s. Metal: %s.',
+    // iOS R 35: iOS "Sen %syi inceledin" (the explored report's text; the filling lost its meaning)
+    'You have colonized %s.': '%s’{i} kolonileştirdin.',
+    // iOS R 36: iOS "%dyi kaybetti" (a suffix on the number)
+    'You %swon a battle at %s. You %slost %d of your ships. %s lost %d.': '%2$s’{de}%1$s bir savaş kazandın. Gemilerinin %4$d tanesini%3$s kaybettin. %5$s %6$d gemi kaybetti.',
+    // iOS R 37: as above
+    'You %slost a battle at %s. You %slost %d of your ships. %s lost %d.': '%2$s’{de}%1$s bir savaş kaybettin. Gemilerinin %4$d tanesini%3$s kaybettin. %5$s %6$d gemi kaybetti.',
+    // iOS R 38: iOS runs the names together and leaves the enemy's losses out
+    '%s survived an attack from %s. You %slost %d of your ships; %s lost %d. You lost %s people.': '%1$s, %2$s’{den} gelen bir saldırıdan sağ çıktı. Gemilerinin %4$d tanesini%3$s kaybettin; %5$s %6$d gemi kaybetti. %7$s insan kaybettin.',
+    // iOS R 39: iOS "ben %s isterim" (no accusative; "ben")
+    '%s says, "I want %s."': '%s, “%s’{i} istiyorum” diyor.',
+    // iOS R 40: glued suffix
+    '%s says, "You take %s."': '%s, “%s’{i} sen al” diyor.',
+    // iOS R 41: iOS "ben %syi severim"
+    '%s says, "I like %s."': '%s, “%s’{i} beğeniyorum” diyor.',
+    // iOS R 42: iOS "ben … nefret ederim"
+    '%s says, "I hate %s."': '%s, “%s’{den} nefret ediyorum” diyor.',
+    // iOS R 43: iOS "ben %sye sahibim" (the dative)
+    '%s says, "I own %s."': '%s, “%s benim” diyor.',
+    // iOS R 44: iOS "para ihtiyacım var"
+    '%s says, "I need money."': '%s, “Paraya ihtiyacım var” diyor.',
+    // iOS R 45: as above
+    '%s says, "I need metal."': '%s, “Metale ihtiyacım var” diyor.',
+    // iOS R 46: iOS lost the star ("haydi hücum yapalım")
+    '%s says, "Let\'s attack %s."': '%s, “Haydi %s’{e} saldıralım” diyor.',
+    // iOS R 47: the comma
+    '%s says, "Thank You!"': '%s, “Teşekkür ederim!” diyor.',
+    // iOS R 48: iOS lost the opening quotation mark
+    '%s says, "Sorry!"': '%s, “Özür dilerim!” diyor.',
+    // iOS R 49: the Mac's characters (iOS "¥ª"); the space
+    '%s says, "#!$@*$&@¥ª!"': '%s, “#!$@*$&@•™!” diyor.',
+    // iOS R 50: iOS "planet" for gezegen, "ben"
+    '%s says, "I like planets that are %d.%2.2dG and %s."': '%s, “%d.%2.2dG ve %s olan gezegenleri severim” diyor.',
+    // iOS R 51: "ben" dropped
+    '%s says, "I saw %s at %s!"': '%s, “%s’{i} %s’{de} gördüm” diyor.',
+    // iOS R 52: iOS "bakın" (siz; the game says sen)
+    '%s says, "Look at %s."': '%s, “%s’{e} bak” diyor.',
+    // iOS R 55: iOS "Sen %sye dedin ki, %syi istiyorsun"
+    'You told %s that you want %s.': '%s’{e} %s’{i} istediğini söyledin.',
+    // iOS R 56: as above
+    'You told %s that you don\'t want %s.': '%s’{e} %s’{i} istemediğini söyledin.',
+    // iOS R 57: as above
+    'You told %s that you like %s.': '%s’{e} %s’{i} beğendiğini söyledin.',
+    // iOS R 58: as above
+    'You told %s that you hate %s.': '%s’{e} %s’{den} nefret ettiğini söyledin.',
+    // iOS R 59: iOS "%s senin malındır"
+    'You told %s that you own %s.': '%s’{e} %s’{in} senin olduğunu söyledin.',
+    // iOS R 60: as above
+    'You told %s that you need money.': '%s’{e} paraya ihtiyacın olduğunu söyledin.',
+    // iOS R 61: as above
+    'You told %s that you need metal.': '%s’{e} metale ihtiyacın olduğunu söyledin.',
+    // iOS R 62: iOS lost the star ("haydi  ye hücum edelim")
+    'You told %s, "Let\'s attack %.*s."': '%s’{e} “Haydi %s’{e} saldıralım” dedin.',
+    // iOS R 63: "Sen" dropped
+    'You told %s, "Thank You!"': '%s’{e} “Teşekkür ederim!” dedin.',
+    // iOS R 64: "Sen" dropped
+    'You told %s, "Sorry!"': '%s’{e} “Özür dilerim!” dedin.',
+    // iOS R 65: iOS "Sen "…" dedin %sye" (the words out of order)
+    'You said "#!$@*$&@¥ª!" to %s.': '%s’{e} “#!$@*$&@•™!” dedin.',
+    // iOS R 66: "Sen" dropped
+    'You told %s what gravity and temperature you prefer.': '%s’{e} hangi yer çekimini ve sıcaklığı tercih ettiğini söyledin.',
+    // iOS R 67: "Sen" dropped
+    'You told %s you saw %s at %.*s.': '%s’{e} %s’{i} %s’{de} gördüğünü söyledin.',
+    // iOS R 68: iOS "%syi anlattın" ("all about" lost)
+    'You told %s all about %s.': '%s’{e} %s hakkında her şeyi anlattın.',
+    // iOS R 69: iOS "gercekten"
+    'Wow! You seem to be doing really well! Congratulations!': 'Vay canına! Gerçekten çok iyi gidiyorsun! Tebrikler!',
+    // iOS R 70: "Senin" dropped
+    'Your message to %s: %s': '%s’{e} mesajın: %s',
+    // iOS R 71: iOS "metalı", "kazandın"
+    'You recovered %s metal from the battle at %s.': '%2$s’{deki} savaştan %1$s metal kurtardın.',
+    // iOS R 72: iOS says the opposite: you lost the metal to %s
+    '%s metal has fallen onto %s from your recent battle.': 'Son savaşından %2$s üzerine %1$s metal düştü.',
+    // iOS R 73: iOS "%s kadar insan"
+    'Oh no! %s people were killed when a heavy meteor shower hit %s.': 'Eyvah! %2$s üzerine düşen ağır bir meteor yağmurunda %1$s insan öldü.',
+    // iOS R 74: iOS "şu anda" ("at the moment") for "just"
+    '%s has just been eliminated from the game.': '%s oyundan elendi.',
+    // iOS R 75: as above
+    'You have just been eliminated from the game.': 'Oyundan elendin.',
+    // iOS R 76: as above
+    '%s has just won the game.': '%s oyunu kazandı.',
+    // iOS R 77: iOS lost the name ("Senin ortağın …"); ally is "müttefik"
+    'Your ally %s has just won the game.': 'Müttefikin %s oyunu kazandı.',
+    // iOS R 78: iOS "%d gibi zor bir oyunu" ("a game as hard as %d")
+    'Congratulations! You won a %d difficulty game and have earned %s master points.': 'Tebrikler! %d zorluk derecesindeki bir oyunu kazandın ve %s usta puanı topladın.',
+    // iOS R 79: "Sen," dropped
+    'You are not spending any money on technology research.': 'Teknoloji araştırmasına hiç para harcamıyorsun.',
+    // iOS R 80: glued suffix
+    'The meteor shower destroyed your colony at %s.': 'Meteor yağmuru %s’{deki} kolonini yok etti.',
+    // iOS R 81: iOS "yapma be!" ("don't, man!"), "metallar"
+    'Oh, no! All the metal on %s has suddenly disappeared.': 'Eyvah! %s’{deki} bütün metal birden yok oldu.',
+    // iOS R 82: iOS "vay be!"
+    'Uh-oh! %s has started growing and is turning bright red in hue!': 'Eyvah! %s büyümeye başladı ve parlak kırmızıya dönüyor!',
+    // iOS R 83: iOS "Planet tamamen eriyip"
+    '%s has just gone supernova. The planet has been obliterated.': '%s süpernova oldu. Gezegen tamamen yok oldu.',
+    // iOS R 84: iOS lost the star; "yüksek dalga" (high wave)
+    'The shock wave from the supernova threw %s metal at %s, killing %s people.': 'Süpernovanın şok dalgası %2$s üzerine %1$s metal fırlattı ve %3$s insanı öldürdü.',
+    // iOS R 85: iOS "%dye yükseldi" (a suffix on the number)
+    'Your %s technology just jumped to %d.': '%s teknolojin birden %d. seviyeye çıktı.',
+    // iOS R 86: iOS "Cırt!", "virüs" (the joke is a bug)
+    'Eeek! A nasty computer bug has broken into your game and started wreaking havoc!': 'Iyy! Pis bir bilgisayar böceği oyununa sızdı ve ortalığı birbirine katıyor!',
+    // iOS R 87: iOS "ortak" (partner) for ally
+    '%s has offered to ally with you.': '%s seninle müttefik olmayı teklif etti.',
+    // iOS R 88: as above
+    '%s no longer wants to ally with you.': '%s artık seninle müttefik olmak istemiyor.',
+    // iOS R 89: iOS "ortaklık"
+    'You have offered to ally with %s.': '%s’{e} ittifak teklif ettin.',
+    // iOS R 90: iOS "ortak"
+    'You no longer want to ally with %s.': 'Artık %s ile müttefik olmak istemiyorsun.',
+    // iOS R 91: iOS "ortaklık"
+    'You have formed an alliance with %s.': '%s ile ittifak kurdun.',
+    // iOS R 92: iOS "ortaklığın"
+    'Your alliance with %s is gone.': '%s ile ittifakın sona erdi.',
+    // iOS R 93: iOS "en iyi oyun arkadaşı"; one name, en iyi arkadaş
+    '%s has offered to be your best buddy.': '%s sana en iyi arkadaşın olmayı teklif etti.',
+    // iOS R 94: as above; "ortak"
+    '%s no longer wants to be your best buddy. He just wants to be allies.': '%s artık en iyi arkadaşın olmak istemiyor. Sadece müttefik olmak istiyor.',
+    // iOS R 95: iOS "olma teklif ettin"
+    'You have offered to be best buddies with %s.': '%s’{e} en iyi arkadaş olmayı teklif ettin.',
+    // iOS R 96: as above
+    'You no longer want to be best buddies with with %s. You just want to be allies.': 'Artık %s ile en iyi arkadaş olmak istemiyorsun. Sadece müttefik olmak istiyorsun.',
+    // iOS R 97: iOS "en iyi oyun arkadaşı oldun"
+    'You are now best buddies with %s.': 'Artık %s ile en iyi arkadaşsınız.',
+    // iOS R 98: iOS "ortaksınız"
+    'Your best buddy relationship with %s is gone. You\'re only allies now.': '%s ile en iyi arkadaşlığın sona erdi. Artık yalnızca müttefiksiniz.',
+    // iOS R 100: iOS "%s yi" (the suffix spaced off), "şimdi"
+    '%s has just given you %s.': '%s az önce sana %s’{i} verdi.',
+    // iOS R 101: iOS "%s  kadar metal"
+    '%s has just given you %s metal.': '%s az önce sana %s metal verdi.',
+    // iOS R 102: no accusative
+    'You just gave %s %s.': '%s’{e} %s’{i} verdin.',
+    // iOS R 103: "Sen" dropped
+    'You just gave %s %s metal.': '%s’{e} %s metal verdin.',
+    // iOS R 104: iOS "şimdi"
+    '%s has just surrendered.': '%s az önce teslim oldu.',
+    // iOS R 105: iOS "%s,şu anda"
+    '%s has just surrendered to %s.': '%s az önce %s’{e} teslim oldu.',
+    // iOS R 106: iOS "şu anda"
+    'You have just surrendered.': 'Teslim oldun.',
+    // iOS R 107: as above
+    'You have just surrendered to %s.': '%s’{e} teslim oldun.',
+    // iOS R 108: iOS "ortakların" (partners), "planetlerinden"; "additional" and "every planet" lost
+    'Your mining consortium has just been able to extract an additional %s metal from every planet you have.': 'Madencilik şirketin, sahip olduğun her gezegenden %s metal daha çıkarmayı başardı.',
+    // iOS R 109: iOS "Alışılmamıs"
+    'Weird weather patterns have allowed astronomers to explore certain far away stars.': 'Garip hava koşulları sayesinde gökbilimciler bazı uzak yıldızları keşfedebildi.',
+    // iOS R 110: iOS "yaratma ve geliştirme masrafları"
+    'Your ship technicians have designed a set of new ships with no development cost.': 'Gemi teknisyenlerin, geliştirme maliyeti olmayan bir dizi yeni gemi tasarladı.',
+    // iOS R 111: iOS "kandırıcı bir gemi", "düşmalarını"; Decoy is "sahte gemi"
+    'Your scientists have invented a decoy ship. It can\'t fight, but it\'s cheap. Amaze your friends and confuse your enemies.': 'Bilim insanların sahte bir gemi icat etti. Savaşamaz ama ucuzdur. Dostlarını hayrete düşür, düşmanlarını şaşırt.',
+    // iOS R 112: iOS "acayip bir gemi" (the monster lost)
+    'Your mad scientists have created a space monster ship! It\'s not too powerful, but it doesn\'t cost any metal!': 'Çılgın bilim insanların bir uzay canavarı gemisi yarattı! Çok güçlü değil, ama hiç metal gerektirmiyor!',
+    // iOS R 113: "Senin" dropped
+    'Your scientists have discovered how to turn your monitor from black and white to color!': 'Bilim insanların monitörünü siyah beyazdan renkliye çevirmenin yolunu buldu!',
+    // iOS R 114: iOS "onların donanım problemi var" (the joke's quotation marks lost)
+    'Your scientists apologize, but they seem to be having "hardware problems."': 'Bilim insanların özür diliyor, ama galiba “donanım sorunları” yaşıyorlar.',
+    // iOS R 115: iOS "senin renkli çalıştığını farkettiler"
+    'Your scientists realize you already are running in color, shrug, and go back off to work.': 'Bilim insanların zaten renkli çalıştığını fark edince omuz silkip işlerinin başına döndü.',
+    // iOS R 116: iOS "eski medeniyetlerden" ("lost" lost)
+    'Your archaeologists have found ancient scientific documents from a lost civilization. You can now mine more efficiently.': 'Arkeologların kayıp bir uygarlıktan kalma eski bilimsel belgeler buldu. Artık daha verimli maden çıkarabilirsin.',
+    // iOS R 117: iOS "uydularındaki" (satellites)
+    'Your sociologists have discovered how to safely increase the maximum population of your planets!': 'Sosyologların gezegenlerinin azami nüfusunu güvenle artırmanın yolunu buldu!',
+    // iOS R 118: iOS "uyduları" (satellites)
+    'Your climatologists have discovered how to terraform planets more efficiently.': 'İklim bilimcilerin gezegenleri daha verimli yaşanabilir hâle getirmenin yolunu buldu.',
+    // iOS R 119: iOS "proğramların aşama yaptı", "generalları"
+    'Your military training program has improved. Your generals are now smarter.': 'Askerî eğitim programın gelişti. Generallerin artık daha akıllı.',
+    // iOS R 120: iOS "tekrar kullanma", "atılmış gemilerden"
+    'You have improved your recycling program. You can now get more metal from scrapped ships.': 'Geri dönüşüm programını geliştirdin. Artık hurdaya çıkarılan gemilerden daha çok metal elde ediyorsun.',
+    // iOS R 121: iOS "10%%" (Turkish writes the sign first), "ünitesi"
+    'You have built a new research facility; tech spending is now 10%% more effective.': 'Yeni bir araştırma tesisi kurdun; teknoloji harcamaların artık %%10 daha etkili.',
+    // iOS R 122: iOS "faiz hattını", "simdi", "50%%"
+    'You\'ve raised the prime lending rate and can now earn 50%% higher interest on savings.': 'Temel kredi faizini yükselttin; artık birikiminden %%50 daha yüksek faiz kazanıyorsun.',
+    // iOS R 123: iOS "kıredi", "50%%"
+    'You have renegotiated your line of credit and can now borrow at a 50%% better interest rate.': 'Kredi limitini yeniden müzakere ettin; artık %%50 daha iyi bir faizle borç alabilirsin.',
+    // iOS R 124: iOS shows the line-of-credit report's text here
+    'Your spies have stolen some technological secrets from %s!': 'Casusların %s’{den} bazı teknolojik sırlar çaldı!',
+    // iOS R 125: iOS "zengin kıymetli metallar", "tasarruf"
+    'You have found a wealth of precious metals and have increased your savings by %s': 'Bol miktarda değerli metal buldun; birikimin %s arttı.',
+    // iOS R 126: iOS "calışıyorlar"
+    'Your Radical researchers are hard at work on another discovery!': 'Radikal araştırmacıların yeni bir keşif için var güçleriyle çalışıyor!',
+    // iOS R 127: iOS "tasarrufların"; one name, birikim
+    'Warning! Savings is being used to support %s.': 'Dikkat! %s’{i} desteklemek için birikimin kullanılıyor.',
+    // iOS R 128: iOS "Planetleri"
+    'Warning! After supporting your planets and paying your interest, you have no money to spend!': 'Dikkat! Gezegenlerini destekleyip faizini ödedikten sonra harcayacak paran kalmadı!',
+    // iOS R 129: iOS "bir sonrki oyunu" (the next game)
+    'Your alliance will win the game next turn if it holds!': 'Bu durum sürerse ittifakın bir sonraki sırada oyunu kazanacak!',
+    // iOS R 130: iOS "O, O!", "Faizleini"
+    'Uh-oh! Having to borrow more to pay all your interest!': 'Eyvah! Bütün faizini ödeyebilmek için yine borç almak zorundasın!',
+    // iOS R 131: iOS "Planetlerini", "küresel" lower-case
+    'You don\'t have enough money! You\'re neglecting your planets! Global warming is taking place!': 'Yeterince paran yok! Gezegenlerini ihmal ediyorsun! Küresel ısınma başladı!',
+    // iOS R 132: iOS "bakımi", "O hurdaya çıkıyor"
+    'Due to a lack of funds, one of your fleets can\'t be maintained. It is being scrapped.': 'Para yetersizliği yüzünden filolarından birinin bakımı yapılamıyor. Filo hurdaya çıkarılıyor.',
+    // iOS R 134: iOS "workE ye varılamaıyor" (an English word left in)
+    'Hmm! The armadeddon device was activated, but there wasn\'t enough mass in the galaxy to get it to work.': 'Hımm! Mahşer günü aleti çalıştırıldı, ama galakside onu işletmeye yetecek kadar kütle yoktu.',
+    // iOS R 135: iOS "yarısını süper nova olmasına yol açtı" (ungrammatical)
+    'The armageddon device has caused half of the stars to supernova!': 'Mahşer günü aleti yıldızların yarısını süpernovaya çevirdi!',
+    // iOS R 136: iOS "mahşer aleti"; one name
+    '%s\'s armageddon device has just been turned on!': '%s’{in} mahşer günü aleti az önce çalıştırıldı!',
+    // iOS R 137: iOS "Vay anasını!" for "Whew!"
+    'Whew! %s\'s armageddon device was just turned off.': 'Oh be! %s’{in} mahşer günü aleti az önce kapatıldı.',
+    // iOS R 138: iOS "%s için olan bir savaştan" ("a battle for %s")
+    'You just received %s metal from someone scrapping a fleet or from a battle over %s.': 'Sana %s metal geldi: ya biri %s üzerinde bir filoyu hurdaya çıkardı ya da orada bir savaş oldu.',
+    // iOS R 139: iOS "Tebikler", "%syi geçti" (a suffix on a number)
+    'Congratulations, %s! Your population now exceeds %s!': 'Tebrikler, %s! Nüfusun artık %s kişiyi aşıyor!',
+    // iOS R 140: iOS "demo çıkışı", "tech ücretin" ("tech fee")
+    'Your %s tech would have just gone up if you hadn\'t been playing the demo version!': 'Demo sürümünü oynamıyor olsaydın %s teknolojin şimdi yükselmiş olacaktı!',
+    // iOS R 141: iOS "gasbetti" (usurped)
+    '%s has just taken over for the computer player %s.': '%s az önce bilgisayar oyuncusu %s’{in} yerini aldı.',
+    // iOS R 142: iOS "Uzaklık" for Range
+    'You now have %s Range Technology (%d).': 'Menzil teknolojin artık %s (%d).',
+    // iOS R 143: iOS "Senin    şu anda"
+    'You now have %s Speed Technology (%d).': 'Hız teknolojin artık %s (%d).',
+    // iOS R 144: "Senin" dropped
+    'You now have %s Weapons Technology (%d).': 'Silah teknolojin artık %s (%d).',
+    // iOS R 145: iOS "Zırh" for Shield
+    'You now have %s Shield Technology (%d).': 'Kalkan teknolojin artık %s (%d).',
+    // iOS R 146: iOS "Minyatürleme"
+    'You now have %s Miniaturization Technology (%d).': 'Minyatürleştirme teknolojin artık %s (%d).',
+    // iOS R 147: glued suffix
+    '%s surrenders to you, giving you %s.': '%s sana teslim oluyor ve sana %s’{i} veriyor.',
+    // iOS R 148: iOS "teslim olup, sana"
+    '%s surrenders to you, giving you %s metal.': '%s sana teslim oluyor ve sana %s metal veriyor.',
+    // iOS R 149: iOS "planetini"
+    '%s surrenders to you, giving you the planet %s.': '%s sana teslim oluyor ve sana %s gezegenini veriyor.',
+    // iOS R 150: iOS "Valdez bir delik yarattı" ("created a hole"), "dökülüyor"
+    'Oh no! The Valdez has sprung a leak! The ecology on %s is in shambles! The citizens are suing you for negligence for twice your net worth!': 'Eyvah! Valdez sızdırmaya başladı! %s’{deki} ekoloji darmadağın! Vatandaşlar ihmalden ötürü sana servetinin iki katı tazminat davası açıyor!',
+    // iOS R 151: iOS "savaştığı muhabereyi" ("the correspondence they fought")
+    'You just watched some of your allies fight a battle at %s.': 'Müttefiklerinden bazılarının %s’{de} savaşmasını izledin.',
+    // iOS R 152: iOS "Senin %s filonu" (accusative), "tankerlerin yoktu"
+    'There were not enough tankers to fully refuel your fleet of %s at %s.': '{^}%s filonun yakıtını %s’{de} tamamen dolduracak kadar tanker yoktu.',
+    // iOS R 153: iOS "tam yakıtlandı"
+    'Your fleet of %s is fully refueled and is ready to depart %s for %s.': '{^}%s filonun yakıtı tamamen doldu; %s’{den} %s’{e} kalkmaya hazır.',
+    // iOS R 154: iOS "%s halkı" ("the people of %s": the number read as a place), "orbitteki"
+    '%s people managed to escape the meteor shower at %s by fleeing to the orbiting colony ship(s).': '{^}%s insan, yörüngedeki koloni gemilerine sığınarak %s’{deki} meteor yağmurundan kaçmayı başardı.',
+    // iOS R 155: iOS's credits
     'Designed by Joe Williams.': 'Tasarım: Joe Williams.',
-    // iOS 11 left "lost" in English and the enemy's losses out (the iOS patch's trLostWord, for iOS)
-    '%s destroyed your colony at %s. You %slost %d of your ships. %s lost %d. You lost %s people.': '%1$s senin koloniyi %2$sde mahvetti. Sen%3$s gemilerinin %4$d tanesini kaybettin; %5$s %6$d tanesini kaybetti. Sen %7$s insan kaybettin.',
-    // iOS 14: the suffixes spaced off the names
-    'You are not supporting %s enough. The people have revolted and now belong to %s': 'Sen %syi yeterince desteklemiyorsun. Halk isyan etti ve şimdi %se ait.',
-    // iOS: the filling lost
-    'You have colonized %s.': 'Sen %syi kolonileştirdin.',
-    // iOS 38: the names run together, the counts' places
-    '%s survived an attack from %s. You %slost %d of your ships; %s lost %d. You lost %s people.': '%1$s, %2$sden gelen bir hücumdan sağlam çıktı. Sen%3$s gemilerinin %4$d tanesini kaybettin; %5$s %6$d tanesini kaybetti. Sen %7$s tane insan kaybettin.',
-    // iOS: the filling lost
-    'You told %s, "Let\'s attack %.*s."': 'Sen %sye "haydi %sye hücum edelim" dedin.',
-    // iOS 62: the line-of-credit report's text (the iOS patch's trSpiesReport, for iOS)
-    'Your spies have stolen some technological secrets from %s!': 'Senin casusların %sden bazı teknolojik sırlar çaldı!',
-    // iOS 156: the fillings lost
-    'Your %s can no longer reach %s because some of the ships in the fleet don\'t have enough range.': 'Senin %s artık %sye ulaşamıyor çünkü filodaki gemilerin bazılarının menzili yetersiz.',
-    // iOS: "yazıları kaybolmasi" (no genitive; ı written i)
-    'Click here to make this message go away. Click on the clock to end your turn.': 'Uyarı yazılarının kaybolması için buraya tıkla. Saate tıklarsan sıranı bitirebilirsin.',
-    // iOS: "yazıları kaybolmasi"
-    'Click here to make this message go away.': 'Uyarı yazılarının kaybolması için buraya tıkla.',
-    // iOS: "anlıyorsunuz" (siz, the rest is sen)
-    'Sorry, but that fleet doesn\'t have enough fuel to reach the selected destination. You can tell this because there are no arrows on either end of the dragged line.': 'Üzgünüm, filonun hedefe kadar gidecek yakıtı yok. Bunu anlıyorsun çünkü çekilen çizginin iki ucunda da ok yok.',
-    // iOS spells planet "gezeğen"
-    'Icons by your planet mean you have ships orbiting around it. Fleets are on the right; satellites are on the left.': 'Gezegenlerinin yakınındaki simgeler, senin gemilerin gezegen çevresindeki yörüngelerini gösterir. Filolar sağda, uydular da soldadır.',
-    // iOS: "ilk kiş     oyunu" ("kişi" cut short)
-    'The first person in the Enemies and Allies list is winning.': 'Düşmanlar ve Ortaklar listesindeki ilk kişi oyunu kazanır.',
-    // iOS 11: "lost" left in English before the number, the enemy's losses left out, the suffix spaced
-    '%s destroyed your colony at %s.  You lost %s of your ships. %s lost %s.  You lost %s people.': '%s senin koloniyi %sde mahvetti. Sen gemilerinin %d tanesini kaybettin; %s %d tanesini kaybetti. Sen %s insan kaybettin.',
-    // iOS 38: the names run together ("%s%sden"), the enemy's losses left out
-    '%s survived an enemy attack from %s.  You lost %s of your ships.  %s lost %s.  You lost %s people.': '%s, %sden gelen bir hücumdan sağlam çıktı. Sen gemilerinin %d tanesini kaybettin; %s %d tanesini kaybetti. Sen %s tane insan kaybettin.',
-    // iOS spells planet "gezeğen"
-    'Hold down the option key and click planets to specify your fleet\'s path more exactly.': 'Filonun yolunu daha kesin belirlemek için option tuşunu basılı tut ve gezegenlere tıkla.',
-    // iOS spells planet "gezeğen"
-    'To cancel a fleet’s movement, make sure that fleet is selected in the Ship Info window and click the origin planet. You can also use the ‘Cancel Fleet Trip’ menu item in the ‘Ships’ menu.': 'Bir filonun hareketini iptal etmek için, o filonun Ship Info penceresinde seçili olduğuna emin ol ve çıkış gezegenine tıkla. \'Ships\' menüsündeki \'Cancel Fleet Trip\' komutunu da kullanabilirsin.',
-    // iOS spells planet "gezeğen"
-    'Fleets appear as icons next to your planets. To send a fleet to another planet, select it and then drag it to the new planet.': 'Filolar senin gezegenlerinin yakınında simge olarak gözükür. Bir filoyu başka bir gezegene göndermek için onu seç ve yeni gezegene sürükle.',
-    // iOS spells planet "gezeğen"
-    'A dot by a planet means you have ships in orbit there.': 'Bir gezegenin yanındaki nokta, orada yörüngede gemilerin olduğunu gösterir.',
+    // iOS R 156: iOS "bize ulaşamıyor" ("can no longer reach us"; the star lost)
+    'Your %s can no longer reach %s because some of the ships in the fleet don\'t have enough range.': 'Senin %s artık %s’{e} ulaşamıyor, çünkü filodaki bazı gemilerin menzili yetmiyor.',
+    // iOS R 157: iOS "önlemenin hesaplamasını yaptılar"
+    'It\'s a miracle! Your scientists have figured out to prevent %s from going supernova.': 'Bir mucize! Bilim insanların %s’{in} süpernova olmasını önlemenin yolunu buldu.',
+    // iOS R 158: iOS "dweğil", "teklikesinde"
+    'Wow, that\'s weird! %s is no longer red and appears not to be in danger of going nova.': 'Vay, bu çok tuhaf! %s artık kırmızı değil ve nova olma tehlikesi kalmamış görünüyor.',
+    // iOS A 0: iOS "networkden"
+    'Are you sure you want to leave your current network game?': 'Bu ağ oyunundan çıkmak istediğine emin misin?',
+    // iOS A 4: iOS "Vay anasını!" for "Whew!"
+    'Whew! It\'s good to see that that clearer heads have prevailed!': 'Oh be! Sağduyunun galip geldiğini görmek ne güzel!',
+    // iOS A 5: iOS "her seferinde" (each time) for "per turn"
+    'Sorry, but you may only give 3 gifts per turn.': 'Üzgünüm, her sırada yalnızca 3 hediye verebilirsin.',
+    // iOS A 6: iOS "gönderilece"
+    'Sorry, but there is no one else alive to give or send something to.': 'Üzgünüm, bir şey verebileceğin ya da gönderebileceğin hayatta kimse kalmadı.',
+    // iOS A 7: iOS "çürüğe çıkarmak" (to discard as rotten); Scrap is "hurdaya çıkarmak"
+    'Do you really want to scrap all existing ships of this type?': 'Bu tipteki bütün gemileri gerçekten hurdaya çıkarmak istiyor musun?',
+    // iOS A 8: iOS "Üzgünüm ama, artık … bulmak mümkün değil"
+    'Sorry, but the battle record for this battle is no longer available.': 'Üzgünüm, ama bu savaşın kaydı artık yok.',
+    // iOS A 9: the double spaces
+    'Sorry, but there is already a star with that name. How about a different name?': 'Üzgünüm, bu isimde bir yıldız zaten var. Başka bir isim dener misin?',
+    // iOS A 10: iOS "bir bir oyun"
+    'Sorry, but spacewardho.net already has a game with that name running. Please try a different name.': 'Üzgünüm, spacewardho.net’te bu isimde bir oyun zaten oynanıyor. Lütfen başka bir isim dene.',
+    // iOS A 11: iOS "istediğin galaksinin ismini yaz"
+    'Please name your galaxy.': 'Lütfen galaksine bir isim ver.',
+    // iOS A 12: iOS "dağıtıcısına bağlanadım" ("distributor"; a typo)
+    'Unable to connect to game server at spacewardho.net.': 'spacewardho.net oyun sunucusuna bağlanılamadı.',
+    // iOS A 13: iOS "bağlantınız", "İsterseniz" (siz)
+    'You have become disconnected from spacewardho.net. Try to reconnect if you want.': 'spacewardho.net ile bağlantın koptu. İstersen yeniden bağlanmayı dene.',
+    // iOS A 14: iOS "dağıtıcı", "sonar" for sonra
+    'We haven\'t heard from the server in a while. It may be down or your connection may be severed. You may want to quit and then try to reconnect.': 'Bir süredir sunucudan haber alamadık. Sunucu çökmüş ya da bağlantın kopmuş olabilir. Çıkıp yeniden bağlanmayı deneyebilirsin.',
+    // iOS A 15: iOS "vasıta" (vehicle), "üretim tezgahların"
+    'Sorry, but your assembly lines are full. You must scrap a ship type first before you can design any more ship types.': 'Üzgünüm, ama üretim hatların dolu. Yeni gemi tipleri tasarlayabilmek için önce bir gemi tipini hurdaya çıkarmalısın.',
+    // iOS A 16: iOS "muhabere" (correspondence) for muharebe; "ortağının"
+    'Sorry, you don\'t have the details about this battle that your ally fought.': 'Üzgünüm, müttefikinin girdiği bu muharebenin ayrıntılarını bilmiyorsun.',
+    // iOS A 17: iOS "muhabere"
+    'Sorry, but you have no additional information about this battle; all you know is that is was pretty big.': 'Üzgünüm, bu muharebe hakkında başka bilgin yok; tek bildiğin, oldukça büyük olduğu.',
+    // iOS A 18: iOS "bilgilerin girilmesi gerek"
+    'You must fill in all fields with the proper data before you can register.': 'Kaydolabilmek için bütün alanları doğru bilgilerle doldurmalısın.',
+    // iOS A 19: iOS "doğusunu" for doğrusunu
+    'The serial number you entered is not valid. Please check that you entered it in correctly.': 'Girdiğin seri numarası geçerli değil. Lütfen doğru girdiğinden emin ol.',
+    // iOS A 20: iOS "seri Numara", "ilk önce yazdığın aynı ismi"
+    'The serial number you have entered has already been registered under a different login/screen name. Please enter the same name you did the first time.': 'Girdiğin seri numarası başka bir kullanıcı adıyla kaydedilmiş. Lütfen ilk seferde girdiğin ismi gir.',
+    // iOS A 21: the double spaces
+    'Sorry, but the screen name you have requested has already been taken. Please try a different username.': 'Üzgünüm, istediğin ekran ismini başkası almış. Lütfen başka bir kullanıcı adı dene.',
+    // iOS A 22: the double spaces
+    'Sorry, but the screen name you have requested is invalid. Please try again.': 'Üzgünüm, istediğin ekran ismi geçersiz. Lütfen yeniden dene.',
+    // iOS A 23: iOS "kanıtlayın" ("prove it")
+    'Sorry, but Spaceward Ho! cannot connect to the registration server. Please make sure you are connected to the Internet.': 'Üzgünüm, Spaceward Ho! kayıt sunucusuna bağlanamıyor. Lütfen İnternet’e bağlı olduğundan emin ol.',
+    // iOS A 24: iOS "telefon edin" (siz)
+    'Sorry, but this serial number has been overused in some way and has been locked out. Please call tech support for assistance.': 'Üzgünüm, bu seri numarası bir şekilde aşırı kullanıldığı için kilitlendi. Yardım için lütfen teknik desteği ara.',
+    // iOS A 25: iOS "network-ağda", "‘nun"
+    'Sorry, but this version of Spaceward Ho! only permits network play.': 'Üzgünüm, Spaceward Ho!’nun bu sürümü yalnızca ağ üzerinden oynanabilir.',
+    // iOS A 26: iOS "hata diye cevap veriyor", "‘nun"
+    'Sorry, but the Registration server is returning an error. You may be trying to connect with an old version of Spaceward Ho! that is no longer compatible.': 'Üzgünüm, ama kayıt sunucusu hata veriyor. Spaceward Ho!’nun artık uyumlu olmayan eski bir sürümüyle bağlanmaya çalışıyor olabilirsin.',
+    // iOS A 27: iOS "eylemsiz kaldınız" (siz), "spacewardho.net."
+    'You were idle for 15 minutes and have been disconnected for spacewardho.net.': '15 dakika boyunca hiçbir şey yapmadığın için spacewardho.net ile bağlantın kesildi.',
+    // iOS A 28: iOS "muhabere", "bilginiz" (siz), "onu büyük oluşu"
+    'Sorry, but you have no detailed information about the battle. All you know was that it was big.': 'Üzgünüm, bu muharebe hakkında ayrıntılı bilgin yok. Tek bildiğin, büyük olduğu.',
+    // iOS A 29: iOS "anlıyorsunuz" (siz), "fleet-filo"
+    'Sorry, but that fleet doesn\'t have enough fuel to reach the selected destination. You can tell this because of the red fleet line.': 'Üzgünüm, ama bu filonun seçilen hedefe ulaşacak kadar yakıtı yok. Bunu filo çizgisinin kırmızı olmasından anlayabilirsin.',
+    // iOS A 30: iOS "seri numara"
+    'The serial number you entered is invalid. Please check it and try again.': 'Girdiğin seri numarası geçersiz. Lütfen kontrol edip yeniden dene.',
+    // iOS A 31: iOS "‘nin", "tanıtım versiyonuna"
+    'Are you sure you want to de-register this copy of Spaceward Ho!? It will revert to demo mode.': 'Spaceward Ho!’nun bu kopyasının kaydını silmek istediğine emin misin? Demo moduna geri dönecek.',
+    // iOS A 32: iOS "kapat-quit"
+    'This copy has been de-registered. You must quit Spaceward Ho! for this operation to be complete.': 'Bu kopyanın kaydı silindi. İşlemin tamamlanması için Spaceward Ho!’dan çıkmalısın.',
+    // iOS A 33: iOS "Ekranı … olmayan bir ekran ile"
+    'You are playing with a monitor depth less than millions of colors. Please change to millions if possible, as graphic glitches may otherwise result.': 'Ekranın milyonlarca rengin altında bir renk derinliğinde. Mümkünse milyonlarca renge geç; yoksa grafik bozuklukları olabilir.',
+    // iOS A 34: iOS "oyunlari", "ile ile açmazsın"
+    'Sorry, but you cannot open saved games in demo mode.': 'Üzgünüm, demo modunda kayıtlı oyunları açamazsın.',
+    // iOS A 35: iOS "öncü taşıt-ship"
+    'Are you sure you want to build that many scout ships?': 'Bu kadar çok keşif gemisi yapmak istediğine emin misin?',
+    // iOS A 36: iOS "öncü yakıt gemisi" (scout fuel ships)
+    'Are you sure you want to build that many tankers?': 'Bu kadar çok tanker yapmak istediğine emin misin?',
+    // iOS A 37: iOS "Kansas'da"; the "!!" lost
+    'Dorothy, I guess that means we\'re not in Kansas anymore!!': 'Dorothy, galiba artık Kansas’ta değiliz!!',
+    // iOS A 38: iOS "dağıtıcısının", "yenileme-upgrade"
+    'This version of the client is not compatible with the current version of the spacewardho.net server. You will need to upgrade first before you can register.': 'İstemcinin bu sürümü, spacewardho.net sunucusunun şu anki sürümüyle uyumlu değil. Kaydolabilmek için önce güncellemen gerekiyor.',
+    // iOS ST 17: iOS "boşaltmak", "gelir getiren" lower-case
+    'Do you really want to evacuate %s? It\'s a profitable colony!': '%s’{i} gerçekten tahliye etmek istiyor musun? Kâr getiren bir koloni!',
+    // iOS ST 35: iOS "boşaltmak"; Evacuate is "tahliye"
+    'Do you really want to evacuate %s?': '%s’{i} gerçekten tahliye etmek istiyor musun?',
+    // iOS MS 54: iOS "Maalesef, Bu"
+    'Unfortunately, you lost the battle.': 'Maalesef bu savaşı kaybettin.',
+    // iOS MS 55: iOS "muhabere ile hiç bilgin yok"
+    'You have no information about the battle; your fleet was destroyed too quickly.': 'Muharebe hakkında hiç bilgin yok; filon çok çabuk yok edildi.',
+    // iOS MS 56: iOS "muhabere"
+    'Cool! Your best buddy won this battle.': 'Güzel! En iyi arkadaşın bu muharebeyi kazandı.',
+    // iOS MS 57: iOS "Vay be." for "Darn."; "muhabere"
+    'Darn. Your best buddy lost this battle.': 'Tüh. En iyi arkadaşın bu muharebeyi kaybetti.',
+    // iOS MS 58: iOS "Muhaber"
+    'Your buddy was destroyed too fast and has no information about this battle.': 'Arkadaşın çok çabuk yok edildi ve bu muharebe hakkında hiç bilgisi yok.',
+    // iOS MS 74: iOS "İlerdeki oyunlada"
+    'You may name a star for use in future games: ': 'İleriki oyunlarda kullanılmak üzere bir yıldıza isim verebilirsin:',
+    // iOS MS 103: iOS lost "Here is your armageddon device"
+    'Here is your armageddon device. If all living human players turn their devices on, a cataclysm of unprecented proportions will lay waste to half the galaxy...': 'İşte mahşer günü aletin. Hayatta olan bütün insan oyuncular aletlerini açarsa, görülmemiş büyüklükte bir felaket galaksinin yarısını yerle bir edecek...',
+    // iOS MS 109: the "!"
+    'Congratulations! You have conquered the galaxy!': 'Tebrikler! Galaksiyi fethettin!',
+    // iOS MS 110: "sen", the "..."
+    'Unfortunately, you have been eliminated from the game...': 'Ne yazık ki oyundan elendin...',
+    // iOS MS 123: iOS lost the joke (Hope is the star): "tüm ümidini terketmek"
+    'Dost thou truly wish to abandon Hope? All is not yet lost...': 'Demek Hope’u, yani bütün umudunu terk etmek istiyorsun? Henüz her şey kaybolmadı...',
+    // iOS H 0: iOS "Uyarı yazıları kaybolmasi", "Son Hak işaretine" for the End Turn button
+    'Tap here to make this message go away. Tap on the End Turn button to complete the turn.': 'Bu mesajı kapatmak için buraya dokun. Sırayı tamamlamak için Sırayı Bitir düğmesine dokun.',
+    // iOS H 1
+    'Fleets appear as dots next to your planets. To move a fleet, select a star. Drag the ship to send it to another star.': 'Filolar, gezegenlerinin yanında nokta olarak görünür. Bir filoyu taşımak için bir yıldız seç. Sonra gemiyi sürükleyip başka bir yıldıza gönder.',
+    // iOS H 2: iOS "şeritleri" (ribbons) for bars, "Keyiflen"
+    'Play with the spending bars. Conquer the galaxy. Gain ranks to brag to your friends. Enjoy.': 'Harcama çubuklarıyla oyna. Galaksiyi fethet. Arkadaşlarına hava atmak için derece kazan. İyi eğlenceler.',
+    // iOS H 3: iOS "Önce hızlı gemiler ateş eder.." (the tech lost)
+    'Ships with higher Speed Tech shoot first.': 'Hız teknolojisi yüksek olan gemiler önce ateş eder.',
+    // iOS H 4: iOS "gezeğen"
+    'Dots by your planet mean you have ships orbiting around it. Fleets are on the right; satellites are on the left.': 'Gezegeninin yanındaki noktalar, onun yörüngesinde gemilerin olduğunu gösterir. Filolar sağda, uydular soldadır.',
+    // iOS H 5: iOS "Araştırip", "gezeğenler"
+    'Good planets look "prettier" than bad planets when you explore them.': 'İyi gezegenler, keşfettiğinde kötülerden daha “güzel” görünür.',
+    // iOS H 6: iOS "Hedef" (target) for Range
+    'Range is how far your ships can reach.': 'Menzil, gemilerinin ne kadar uzağa gidebileceğidir.',
+    // iOS H 7: iOS "hareket edemez ama,"
+    'Satellites can\'t move, but they shoot just as well as any other ship.': 'Uydular hareket edemez, ama her gemi kadar iyi ateş ederler.',
+    // iOS H 9: iOS "Gemileri küçültmek … hiç olmazsa az malzeme"
+    'Miniaturization makes ships cost more money, but less metal.': 'Minyatürleştirme, gemilerin para maliyetini artırır ama metal maliyetini düşürür.',
+    // iOS H 10: iOS "Radical Teck"
+    'Radical Tech can have a variety of effects.': 'Radikal teknolojinin çok çeşitli etkileri olabilir.',
+    // iOS H 11: iOS "Metallarını"
+    'Be careful with your metal--it can easily run out.': 'Metalini dikkatli kullan; kolayca tükenebilir.',
+    // iOS H 12: iOS "Filoyu hareketlerini", "hazır olan yıldıza"
+    'Touch and drag a fleet back to its current star to cancel a fleet\'s movement.': 'Bir filonun hareketini iptal etmek için ona dokun ve bulunduğu yıldıza geri sürükle.',
+    // iOS H 13: iOS "gezeğenleri"
+    'Build Satellites to protect vulnerable planets.': 'Savunmasız gezegenleri korumak için uydu yap.',
+    // iOS H 14: iOS "yerleşme gemileri ile işgal et" (occupy)
+    'Colonize good planets with Colony ships.': 'İyi gezegenleri koloni gemileriyle kolonileştir.',
+    // iOS H 15: iOS "Öncü gemilerin", "zırhları"
+    'Scout ships have higher Range, but lower Weapons and Shields.': 'Keşif gemilerinin menzili daha yüksektir, ama silahları ve kalkanları daha zayıftır.',
+    // iOS H 16: iOS "Senin silahlar", "zırhlarından"
+    'If your Weapons are higher than the opponent\'s Shields, you\'ll do lots of damage.': 'Silahların rakibinin kalkanlarından güçlüyse çok hasar verirsin.',
+    // iOS H 17: iOS "Senin zırhlar", "sana zarar az olur"
+    'If your Shields are higher than the opponents Weapons, he\'ll barely hurt you.': 'Kalkanların rakibinin silahlarından güçlüyse sana pek zarar veremez.',
+    // iOS H 18: iOS "teknoloji eskiliğine çözümdür"
+    'Lots of ships can make up for having low Technology.': 'Çok sayıda gemi, düşük teknolojiyi telafi edebilir.',
+    // iOS H 19: iOS "Her seferinde" (each time) for "every turn"
+    'You get money every turn.': 'Her sırada para kazanırsın.',
+    // iOS H 20: iOS "İyi uydular" (satellites) for good planets
+    'Good planets are close to 1.0 G.': 'İyi gezegenler 1.0 G’ye yakındır.',
+    // iOS H 21: iOS "uydular", "72iF (20iC) ye"
+    'Good planets are close to 72ºF (20ºC).': 'İyi gezegenler 72°F (20°C) civarındadır.',
+    // iOS H 22: iOS "Uydunun iyi oluşu"
+    'Each player has a different idea of what a good planet is.': 'Her oyuncunun iyi gezegen anlayışı farklıdır.',
+    // iOS H 23: iOS "uydular", "yada", "kar"
+    'If a planet is over 2.5 G or below 0.4 G, it will never make a profit.': 'Bir gezegen 2.5 G’nin üstünde ya da 0.4 G’nin altındaysa hiçbir zaman kâr getirmez.',
+    // iOS H 24: iOS "uyduları" (and "bad" lost)
+    'Abandon bad planets after you strip-mine them.': 'Kötü gezegenlerin metalini sonuna kadar çıkardıktan sonra onları tahliye et.',
+    // iOS H 25: iOS "Uyduda dünyay benzer değişiklik"
+    'Terraforming improves a planet\'s temperature.': 'Yaşanabilir hâle getirmek, bir gezegenin sıcaklığını iyileştirir.',
+    // iOS H 26: iOS "Madende  çıkan metal senin yedek stoklarındır"
+    'Mining takes metal from a planet and puts it into your reserve.': 'Madencilik, bir gezegenden metal çıkarıp stoğuna ekler.',
+    // iOS H 27: iOS "Tasarruf … yapılır"; Savings is "Birikim", the bar's word
+    'Savings puts money away for shipbuilding.': 'Birikim, gemi yapımı için para ayırır.',
+    // iOS H 28: iOS "Tasarruf"
+    'Savings generates extra income.': 'Birikim ek gelir sağlar.',
+    // iOS H 29: iOS "kullnılır"
+    'If you go into debt, part of your income goes to pay interest.': 'Borca girersen gelirinin bir kısmı faiz ödemeye gider.',
+    // iOS H 30: iOS says something else ("İşleme süreleri uzayabilir")
+    'If you have a fleet with fighters and a colony ship, mark the colony ship to arrive late. It\'ll probably survive longer.': 'Savaşçıları ve bir koloni gemisi olan bir filon varsa, koloni gemisini geç varacak şekilde işaretle. Muhtemelen daha uzun hayatta kalır.',
+    // iOS H 31: iOS "muhabereden etkisiz kalbilirler"
+    'Ships in a fleet that arrive late may miss the worst initial battle.': 'Bir filoda geç varan gemiler ilk ve en kötü çatışmayı kaçırabilir.',
+    // iOS H 32: iOS "Hücum gemileri"
+    'Offensive ships attack better but defend worse.': 'Saldırgan gemiler daha iyi saldırır ama daha kötü savunur.',
+    // iOS H 33: iOS "Savunma gemileri"
+    'Defensive ships defend better but attack worse.': 'Savunucu gemiler daha iyi savunur ama daha kötü saldırır.',
+    // iOS H 34: iOS "Organize gemilerinin filosuna" ("Organize" left in English)
+    'Put multiple ships in the same fleet with Organize Fleets. ': 'Filoları Düzenle ile birden çok gemiyi aynı filoya koy.',
+    // iOS H 35: iOS "Organize gemileri"
+    'Use the Organize Fleets dialog to split up ship piles.': 'Gemi yığınlarını ayırmak için Filoları Düzenle penceresini kullan.',
+    // iOS H 36: iOS "diyoloğun"
+    'Touch outside of a dialog to cancel that dialog without making any changes.': 'Bir pencereyi hiçbir değişiklik yapmadan kapatmak için pencerenin dışına dokun.',
+    // iOS H 37: iOS "ilk kiş     oyunu kazanır"
+    'The first person in the player list is winning.': 'Oyuncu listesindeki ilk kişi önde gidiyor.',
+    // iOS H 38: iOS "oto-play"
+    'If you\'ve just started, you might want to try turning on auto-play and watching.': 'Yeni başladıysan, otomatik oynamayı açıp izlemeyi deneyebilirsin.',
+    // iOS H 39: iOS "ortakların aynı zamanda yıldıza, aynı sırada"
+    'If you and your allies arrive at  a star in the same turn, they\'ll fight side-by-side in battle.': 'Sen ve müttefiklerin aynı sırada bir yıldıza varırsanız, savaşta yan yana çarpışırsınız.',
+    // iOS H 40: iOS "glaksiyi"
+    'Armageddons make the galaxy smaller.': 'Armageddonlar galaksiyi küçültür.',
+    // iOS H 41: iOS "şeritleri", "dokunmakla"
+    'Technology bars can be adjusted with a touch of your finger.': 'Teknoloji çubukları parmağınla dokunarak ayarlanabilir.',
+    // iOS Radical 0
+    'Search for more metal on your planets': 'Gezegenlerinde daha fazla metal ara',
+    // iOS Radical 1
+    'Explore distant stars': 'Uzak yıldızları keşfet',
+    // iOS Radical 2
+    'Get lots of money immediately': 'Hemen bol para bul',
+    // iOS Radical 3
+    'Improve mining efficiency': 'Madencilik verimini artır',
+    // iOS Radical 4
+    'Improve population maximums': 'Azami nüfusu artır',
+    // iOS Radical 5
+    'Improve terraforming efficiency': 'Yaşanabilir hâle getirme verimini artır',
+    // iOS Radical 6
+    'Educate battle generals better': 'Muharebe generallerini daha iyi eğit',
+    // iOS Radical 7
+    'Improve recycling program': 'Geri dönüşüm programını geliştir',
+    // iOS Radical 8
+    'Improve technology output': 'Teknoloji verimini artır',
+    // iOS Radical 9
+    'Increase savings interest rate': 'Birikim faizini artır',
+    // iOS Radical 10
+    'Decrease borrowing interest rate': 'Borç faizini düşür',
+    // iOS Radical 11
+    'Build a decoy ship': 'Sahte bir gemi yap',
+    // iOS Radical 13
+    'Steal technology from another player': 'Başka bir oyuncudan teknoloji çal',
+    // iOS Radical 14
+    'Build a set of ships without development cost': 'Geliştirme maliyeti olmayan bir dizi gemi yap',
+    // iOS Radical 15
+    'Improve range tech dramatically': 'Menzil teknolojisini büyük ölçüde geliştir',
+    // iOS Radical 16
+    'Improve speed tech dramatically': 'Hız teknolojisini büyük ölçüde geliştir',
+    // iOS Radical 17
+    'Improve weapons tech dramatically': 'Silah teknolojisini büyük ölçüde geliştir',
+    // iOS Radical 18
+    'Improve shields tech dramatically': 'Kalkan teknolojisini büyük ölçüde geliştir',
+    // iOS Radical 19
+    'Improve mini tech dramatically': 'Minyatürleştirme teknolojisini büyük ölçüde geliştir',
+    // ---- the versions' own lines that keep iOS's wording (js/lang-remake.js adapted, own) ----
+    // the remake's hint in iOS's words ("yükseklik", "Organize gemileri")
+    'Change the battle attitude of ships in your fleets in the Organize Fleets screen.': 'Filolarındaki gemilerin savaş tutumunu Filoları Düzenle ekranında değiştir.',
+    // iOS "Uyarı yazıları kaybolmasi" ("warning texts", no genitive, ı written i)
+    'Click here to make this message go away. Click on the clock to end your turn.': 'Bu mesajı kapatmak için buraya tıkla. Sıranı bitirmek için saate tıkla.',
+    // as above
+    'Click here to make this message go away.': 'Bu mesajı kapatmak için buraya tıkla.',
+    // iOS "anlıyorsunuz" (siz)
+    'Sorry, but that fleet doesn\'t have enough fuel to reach the selected destination. You can tell this because there are no arrows on either end of the dragged line.': 'Üzgünüm, ama bu filonun seçilen hedefe ulaşacak kadar yakıtı yok. Bunu sürüklediğin çizginin iki ucunda da ok olmamasından anlayabilirsin.',
+    // iOS "gezeğen"
+    'Icons by your planet mean you have ships orbiting around it. Fleets are on the right; satellites are on the left.': 'Gezegeninin yanındaki simgeler, onun yörüngesinde gemilerin olduğunu gösterir. Filolar sağda, uydular soldadır.',
+    // iOS "ilk kiş     oyunu kazanır"; ally is "müttefik"
+    'The first person in the Enemies and Allies list is winning.': 'Düşmanlar ve Müttefikler listesindeki ilk kişi önde gidiyor.',
+    // iOS's "ortak" for ally
+    'The Enemy and Allies screen can show who your friends and enemies are. It also so shows who is doing the best.': 'Düşmanlar ve Müttefikler ekranı dostlarının ve düşmanlarının kim olduğunu gösterir. En iyi gidenin kim olduğunu da gösterir.',
+    // iOS 11: "lost" left in English, the enemy's losses left out
+    '%s destroyed your colony at %s.  You lost %s of your ships. %s lost %s.  You lost %s people.': '%s, %s’{deki} koloniyi yok etti. Gemilerinin %s tanesini kaybettin; %s %s gemi kaybetti. %s insan kaybettin.',
+    // iOS 38: the names run together, the enemy's losses left out
+    '%s survived an enemy attack from %s.  You lost %s of your ships.  %s lost %s.  You lost %s people.': '%s, %s’{den} gelen bir düşman saldırısından sağ çıktı. Gemilerinin %s tanesini kaybettin; %s %s gemi kaybetti. %s insan kaybettin.',
+    // iOS "kandırıcı bir gemi", "ortak"
+    'Your ship technicians have designed a decoy ship. It\'s really weak, but it looks menacing and can help keep your allies in line!': 'Gemi teknisyenlerin sahte bir gemi tasarladı. Gerçekten zayıf, ama tehditkâr görünüyor ve müttefiklerini hizada tutmana yardım edebilir!',
+    // iOS "senin gezegenlerin yakınında … gözükür"
+    'Fleets appear as dots next to your planets. Click one and drag it to send it to another star.': 'Filolar, gezegenlerinin yanında nokta olarak görünür. Birine tıklayıp başka bir yıldıza sürükleyerek gönder.',
+    // iOS "şeritleri", "Keyiflen"
+    'Play with the spending bars. Conquer the galaxy. Gain ranks to unlock more game options. Enjoy.': 'Harcama çubuklarıyla oyna. Galaksiyi fethet. Daha fazla oyun seçeneğinin kilidini açmak için derece kazan. İyi eğlenceler.',
+    // as above
+    'Play with the spending bars. Conquer the galaxy. Enjoy.': 'Harcama çubuklarıyla oyna. Galaksiyi fethet. İyi eğlenceler.',
+    // iOS "Organize gemilerinde", "çokluklarını"
+    'Option-drag in Organize Fleets to split up ship piles.': 'Gemi yığınlarını ayırmak için Filoları Düzenle’de option tuşuyla sürükle.',
+    // iOS "İyi uydular" (satellites)
+    'Good planets are close to 72 degrees.': 'İyi gezegenler 72 derece civarındadır.',
+    // glued suffix, "Senin"
+    'Your fleet of %s is waiting to refuel before it can continue on to %s.': '{^}%s filon, %s’{e} devam etmeden önce yakıt almayı bekliyor.',
+    'Wow! You won! You have conquered the galaxy. Congratulations!': 'Vay canına! Kazandın! Galaksiyi fethettin. Tebrikler!',
+    // iOS "ortak"
+    'Wow! You won! You and your allies have conquered the galaxy. Congratulations!': 'Vay canına! Kazandın! Müttefiklerinle birlikte galaksiyi fethettin. Tebrikler!',
+    // iOS "Şu anda"
+    '%s have just won the game.': '%s oyunu kazandı.',
+    // iOS "O, O!"
+    'Uh-oh!  Having to borrow more ship money to pay all your interest!': 'Eyvah! Bütün faizini ödeyebilmek için gemi parasından yine borç almak zorundasın!',
+    // glued suffix
+    'Warning!  Ship money is being used to support %s.': 'Dikkat! %s’{i} desteklemek için gemi paran kullanılıyor.',
+    // iOS "%dyi kaybetti"
+    'You won a battle at %s. You lost %d of your ships. %s lost %d.': '%s’{de} bir savaş kazandın. Gemilerinin %d tanesini kaybettin. %s %d gemi kaybetti.',
+    // as above
+    'You lost a battle at %s. You lost %d of your ships. %s lost %d.': '%s’{de} bir savaş kaybettin. Gemilerinin %d tanesini kaybettin. %s %d gemi kaybetti.',
+    // glued suffix
+    'Your %s can no longer reach %s.': 'Senin %s artık %s’{e} ulaşamıyor.',
+    'You just received %s metal from someone scrapping a fleet over %s.': 'Sana %s metal geldi: biri %s üzerinde bir filoyu hurdaya çıkardı.',
+    // the space
+    '%s says , "#!$*@%$&!"': '%s, “#!$*@%$&!” diyor.',
+    // iOS's word order ("dedin %sye")
+    'You said "!$@*$&@!" to %s.': '%s’{e} “!$@*$&@!” dedin.',
+    // ---- Mac 1.2's, DOS 2.0's and Mac 2.0.1's lines (Breve, chunk 4; js/languages.js turkish20) ----
+    // adapted from iOS 10 ("novaya gitti": "went to the nova")
+    '%s has gone nova. All inhabitants were killed.': '%s nova oldu. Bütün sakinleri öldü.',
+    // adapted from iOS 80 ("senin %sdeki", "mahvetti"), as its patch
+    '%s destroyed your colony at %s.': '%s, %s’{deki} kolonini yok etti.',
+    'A meteor shower destroyed your colony at %s.': 'Bir meteor yağmuru %s’{deki} kolonini yok etti.',
+    // adapted from iOS 33 ("inceledin": examined)
+    'You have explored %s. Gravity: %s. Temp: %d°. Metal: %s.': '%s’{i} keşfettin. Yer çekimi: %s. Sıcaklık: %d°. Metal: %s.',
+    // adapted from iOS 71 ("metalı", "won" the metal), as its patch
+    'You have recovered %s metal from the battle at %s.': '%2$s’{deki} savaştan %1$s metal kurtardın.',
+    // adapted from iOS 57 and 59 ("dedin ki", "severim"; 59's "senin malındır" says the star is the other's), as their patch
+    'You sent a message to %s saying you like %s.': '%s’{e} bir mesaj gönderip %s’{i} beğendiğini söyledin.',
+    'You sent a message to %s saying you don’t like %s.': '%s’{e} bir mesaj gönderip %s’{i} beğenmediğini söyledin.',
+    'You sent a message to %s saying you own %s.': '%s’{e} bir mesaj gönderip %s’{in} senin olduğunu söyledin.',
+    // the remake's own lines with glued suffixes ("%sde", "%syi"), and iOS 41's "sev-" for the patch's "beğen-"
+    '%s sends a message saying he likes %s.': '%s, %s’{i} beğendiğini bildiren bir mesaj gönderdi.',
+    '%s sends a message saying he doesn’t like %s.': '%s, %s’{i} beğenmediğini bildiren bir mesaj gönderdi.',
+    '%s sends a message saying he owns %s.': '%s, %s’{in} kendisinin olduğunu bildiren bir mesaj gönderdi.',
+    '%s sends a message saying she likes %s.': '%s, %s’{i} beğendiğini bildiren bir mesaj gönderdi.',
+    '%s sends a message saying she doesn’t like %s.': '%s, %s’{i} beğenmediğini bildiren bir mesaj gönderdi.',
+    '%s sends a message saying she owns %s.': '%s, %s’{in} kendisinin olduğunu bildiren bir mesaj gönderdi.',
+    'You have ships queued at %s but have no money allocated for shipbuilding.': '%s’{de} sırada bekleyen gemilerin var, ama gemi yapımına hiç para ayırmadın.',
+    'Built %s at %s.': '%2$s’{de} %1$s yapıldı.',
+    'You are spending money on shipbuilding at %s but have no ships queued.': '%s’{de} gemi yapımına para harcıyorsun, ama sırada hiç gemi yok.',
+    'You are spending money on shipbuilding at %s but have no metal available.': '%s’{de} gemi yapımına para harcıyorsun, ama kullanabileceğin hiç metal yok.',
+    // ("hücum", iOS's, as the patch's "saldırı" in iOS 38)
+    '%s successfully defended itself against an enemy attack from %s.': '%s, %s’{den} gelen bir düşman saldırısına karşı kendini başarıyla savundu.',
+    // Fix Spending (Mac 2.0.1's lines, 3.0.1's too): glued suffixes; Abandon is the patch's "tahliye" (Evacuate)
+    'You were overspending at %s. The problem has been fixed.': '%s’{de} fazla harcıyordun. Sorun giderildi.',
+    'You were underspending at %s. The problem has been fixed.': '%s’{de} az harcıyordun. Sorun giderildi.',
+    'You’re abandoning %s.': '%s’{i} tahliye ediyorsun.',
+    'You are abandoning %s.': '%s’{i} tahliye ediyorsun.',
+  },
+  // the patch's words for iOS's lists, by list and index (js/languages.js LP): the class names (after a
+  // number the singular, as Turkish has it), the tech names, the decoy and the reports' fillings, the battle
+  // window's templates; laid over iOS's lists when the game has the patch on
+  patchLists: {
+    'Ship Class Names': { 0: 'Keşif Gemisi', 1: 'Dretnot', 2: 'Savaşçı', 3: 'Tanker', 4: 'Koloni Gemisi', 5: 'Uydu', 6: 'Biyolojik', 7: 'Keşif Gemileri', 8: 'Dretnotlar', 9: 'Savaşçılar', 10: 'Tankerler', 11: 'Koloni Gemileri', 12: 'Uydular', 13: 'Biyolojikler' },
+    'Misc Strings': { 1: 'Sahte Gemi', 38: 'Düşmanların', 39: ' müttefiklerinle birlikte' },
+    'sprintf Templates': { 9: '%s öldü', 11: '%d ölü %s', 12: '%s’{deki} muharebeyi gözden geçir (%d)', 14: '%d/%d %s' },
+    'Range Tech Strings': { 6: 'Depoları Ağzına Kadar Doldurmak', 7: 'Füzyon Yığını', 8: 'Manyetohidrodinamik Güç', 9: 'Allotropik Demir', 11: 'Kuantum Enerji Deposu', 12: 'Tekillik', 14: 'Müon Merdiveni', 15: 'Gidiş ve Dönüş', 16: 'Kuark Öğütücü', 17: 'Pulsar Işıması', 19: 'Yıldız Koşumu' },
+    'Speed Tech Strings': { 3: 'Kütleçekim Sapanı', 4: 'Füzyon Boşaltma Motoru', 5: 'Görelilik Motoru', 6: 'Işık Ötesi', 8: 'Yarık Motoru', 9: 'Hawking İtki Sistemi', 10: 'Hiper Yarık Motoru', 11: 'PowerPC™', 12: 'Yarık Ötesi Hiper Motor', 13: 'Hawking Hiper Ötesi Motoru', 14: 'Zaman Bükülmesi', 15: 'Kuantum Sürekliliği', 16: 'Zaten Orada', 17: 'Speedy Gonzalez™', 18: 'Işınlanma', 19: 'Dün Motoru' },
+    'Weapons Tech Strings': { 5: 'Maser', 8: 'Enerji Topu', 9: 'Nükleer Manyetik Rezonans', 10: 'Faz Bozucu', 11: 'Odaklanmış Kuark Işını', 12: 'Sert Piksel', 13: 'Takyon Topu', 14: '+5 Paslanmaz Vorpal', 15: 'Hiperuzay Atımı', 16: 'Delta Parçacık Akımı', 17: 'Nötron Sıkıştırması', 19: 'Galaktik Bozulma', 20: 'Gelişmiş Uzay-Zaman Yok Edimi' },
+    'Shield Tech Strings': { 2: 'Zırhlı Gövde', 3: 'Kütle İtici', 6: 'Enerji Bağlı Zırh', 7: 'Anti-Enerji', 8: 'Kuark Kabuğu', 10: 'Enerji Yutucu', 12: 'Holografik Aldatmaca', 13: 'Durağanlık Titremesi', 18: '+5 Kutsanmış Plaka Zırh' },
+    'Mini Tech Strings': { 1: 'Entegre Çip', 3: 'VLSI', 6: 'Nanoskopik', 7: 'Gelişmiş Nanoskopik', 8: 'Gerçekten İnanılmaz Küçük', 9: 'Sarı Puantiyeli Bikini', 12: 'Kuark', 13: 'Alt-Kuark', 14: 'Mikro-Kuark', 15: 'Nano-Kuark', 16: 'Gelişmiş Nano-Kuark', 18: 'Kuantum Süpersicim', 19: 'Alt-Kuantum Süpersicim' },
+  },
+  patchWords: {
+    // the remake's Send Message groups in iOS's words ("ortak", "en iyi oyun arkadaşı")
+    'Your Allies': 'Müttefiklerin',
+    'Your Buddies': 'En iyi arkadaşların',
+    // iOS's report 85 filled with the English tech kind ("Senin Speed teknolojin"): the patch's tech names
+    Range: 'Menzil', Speed: 'Hız', Weapons: 'Silah', Shields: 'Kalkan', Miniaturization: 'Minyatürleştirme',
   },
   // adapted from official: a line whose English differs a little from one an
   // official translation has (a word, a clause, a number, a name): that
@@ -200,28 +961,37 @@ tr: {
     'You just received %s metal from someone scrapping a fleet over %s.': ['Sana %s metal geldi; %s üzerinde filosunu hurdaya çıkaran birinden.', 'You just received %s metal from someone scrapping a fleet or from a battle over %s.'],
     '%s says , "#!$*@%$&!"': ['%s,"#!$*@%$&!" diyor.', '%s says, “#!$@*$&@•™!”'],
     'You said "!$@*$&@!" to %s.': ['Sen "!$@*$&@!" dedin %sye.', 'You said “#!$@*$&@•™!” to %s.'],
+    // ---- Mac 1.2, DOS 2.0 and Mac 2.0.1 (js/languages.js turkish20) ----
+    '%s has gone nova. All inhabitants were killed.': ['%s novaya gitti. Bütün sakinleri öldü.', '%s has gone nova.'],
+    '%s destroyed your colony at %s.': ['%s, senin %sdeki kolonini mahvetti.', 'The meteor shower destroyed your colony at %s.'],
+    'A meteor shower destroyed your colony at %s.': ['Bir meteor yağmuru, senin %sdeki kolonini mahvetti.', 'The meteor shower destroyed your colony at %s.'],
+    'You have explored %s. Gravity: %s. Temp: %d°. Metal: %s.': ['Sen %syi inceledin.  Yer çekimi: %s.  Sıcaklık: %d°. Metal: %s.', 'You have explored %s. Gravity: %d.%2.2dG. Temp: %s. Metal: %s.'],
+    'You have recovered %s metal from the battle at %s.': ['Sen %s kadar metalı, %sdeki savaşta kazandın.', 'You recovered %s metal from the battle at %s.'],
+    'You sent a message to %s saying you like %s.': ['Sen %sye mesaj gönderip dedin ki, %syi seviyorsun.', 'You told %s that you like %s.'],
+    'You sent a message to %s saying you don’t like %s.': ['Sen %sye mesaj gönderip dedin ki, %syi sevmiyorsun.', 'You told %s that you like %s.'],
+    'You sent a message to %s saying you own %s.': ['Sen %sye mesaj gönderip dedin ki,  %s senin malındır.', 'You told %s that you own %s.'],
   },
   own: {
     // ---- 5.0.5 (and the Palm) ----
     'Click and hold for a second to cancel a fleet\'s movement.': 'Filonun hareketini iptal etmek için ona tıkla ve bir saniye basılı tut.',
     'There\'s a contextual menu in the map window for convenience.': 'Kolaylık olsun diye harita penceresinde bir bağlam menüsü var.',
-    'Hold down the option key and click planets to specify your fleet\'s path more exactly.': 'Filonun yolunu daha kesin belirlemek için option tuşunu basılı tut ve gezeğenlere tıkla.',
+    'Hold down the option key and click planets to specify your fleet\'s path more exactly.': 'Filonun yolunu daha kesin belirlemek için option tuşunu basılı tut ve gezegenlere tıkla.',
     'Use the graph to see how well you\'re doing technology-wise vs. the other players.': 'Teknolojide öteki oyunculara göre ne durumda olduğunu görmek için grafiği kullan.',
     'Abandon Ship? Abandon Ship! All hands abandon ship! Women and children first!': 'Ship’i terk etmek mi? Gemiyi terk edin! Herkes gemiyi terk etsin! Önce kadınlar ve çocuklar!',
     'Year %d. Nothing much happened.': 'Yıl %d. Pek bir şey olmadı.',
     // ---- the Palm (5.0's code) ----
     'To cancel a fleet’s movement, make sure that fleet is selected in the Ship Info window and click the origin planet. You can also use the ‘Cancel Fleet Trip’ menu item in the ‘Ships’ menu.':
-      'Bir filonun hareketini iptal etmek için, o filonun Ship Info penceresinde seçili olduğuna emin ol ve çıkış gezeğenine tıkla. \'Ships\' menüsündeki \'Cancel Fleet Trip\' komutunu da kullanabilirsin.',
+      'Bir filonun hareketini iptal etmek için, o filonun Ship Info penceresinde seçili olduğuna emin ol ve çıkış gezegenine tıkla. \'Ships\' menüsündeki \'Cancel Fleet Trip\' komutunu da kullanabilirsin.',
     'There are menus and menu shortcuts in the Galaxy screen for your convenience.': 'Kolaylık olsun diye Galaksi ekranında menüler ve menü kısayolları var.',
     'The computer will help choose the best path possible for your fleets.': 'Bilgisayar, filoların için mümkün olan en iyi yolu seçmene yardım eder.',
-    'Change the battle attitude of ships in your fleets in the Organize Fleets screen.': 'Filolarındaki gemilerin savaş tutumunu Filoları Hazırla ekranında değiştir.',
+    'Change the battle attitude of ships in your fleets in the Organize Fleets screen.': 'Filolarındaki gemilerin savaş yüksekliğini Organize gemileri ekranında değiştir.',
     'The Enemy and Allies screen can show who your friends and enemies are. It also so shows who is doing the best.': 'Düşmanlar ve Ortaklar ekranı dostlarının ve düşmanlarının kim olduğunu gösterir. En iyi gidenin kim olduğunu da gösterir.',
     'Click the G button to see the Galaxy, click the $ button to see the Spendingscreen and click the H button to see these messages.': 'Galaksiyi görmek için G düğmesine, Harcama ekranı için $ düğmesine, bu mesajları görmek için de H düğmesine tıkla.',
-    'Fleets appear as icons next to your planets. To send a fleet to another planet, select it and then drag it to the new planet.': 'Filolar senin gezeğenlerinin yakınında simge olarak gözükür. Bir filoyu başka bir gezeğene göndermek için onu seç ve yeni gezeğene sürükle.',
+    'Fleets appear as icons next to your planets. To send a fleet to another planet, select it and then drag it to the new planet.': 'Filolar senin gezegenlerinin yakınında simge olarak gözükür. Bir filoyu başka bir gezegene göndermek için onu seç ve yeni gezegene sürükle.',
     'Palm OS version by Christopher Cotton and Steve Orens of Mobilefreon (tm)': 'Palm OS sürümü: Christopher Cotton ve Steve Orens, Mobilefreon (tm)',
-    'Your ship technicians have designed a decoy ship. It\'s really weak, but it looks menacing and can help keep your allies in line!': 'Senin gemi teknisyenlerin bir tuzak gemi tasarladı. Gerçekten zayıf, fakat tehditkâr görünüyor ve ortaklarını hizada tutmana yardım edebilir!',
+    'Your ship technicians have designed a decoy ship. It\'s really weak, but it looks menacing and can help keep your allies in line!': 'Senin gemi teknisyenlerin kandırıcı bir gemi tasarladı. Gerçekten zayıf, fakat tehditkâr görünüyor ve ortaklarını hizada tutmana yardım edebilir!',
     // ---- 4.0.5 (Windows and Mac) and 3.0.1 ----
-    'A dot by a planet means you have ships in orbit there.': 'Bir gezeğenin yanındaki nokta, orada yörüngede gemilerin olduğunu gösterir.',
+    'A dot by a planet means you have ships in orbit there.': 'Bir gezegenin yanındaki nokta, orada yörüngede gemilerin olduğunu gösterir.',
     'Click and Drag from one star to another to move fleets.': 'Filoları hareket ettirmek için bir yıldızdan ötekine tıkla ve sürükle.',
     'Ship savings puts money away for shipbuilding.': 'Gemi tasarrufu, gemi yapımı için para ayırır.',
     // (the credits: iOS's Turkish has them in English)
@@ -242,25 +1012,53 @@ tr: {
     'Sorry, but you have that fleet marked for the scrap heap.  it’s not going anywhere.': 'Üzgünüm, o filoyu hurdaya ayırdın. Hiçbir yere gitmiyor.',
     'You won the game, so you get to name a star.': 'Oyunu kazandın, bu yüzden bir yıldıza isim verebilirsin.',
     'Sorry, there’s already a star named “%s.”  Please pick another name.': 'Üzgünüm, “%s” isimli bir yıldız zaten var. Lütfen başka bir isim seç.',
-    'Do you really want to launch the armageddon device?  It\'ll blow up half of the galaxy!': 'Gerçekten Armageddon aygıtını başlatmak istiyor musun? Galaksinin yarısını havaya uçuracak!',
-    'Do you really want to launch the armageddon device?  Isn\'t life too short as it is?': 'Gerçekten Armageddon aygıtını başlatmak istiyor musun? Hayat zaten yeterince kısa değil mi?',
-    'Do you really want to launch the armageddon device?  I mean, you\'d probably win anyway; why take the chance?': 'Gerçekten Armageddon aygıtını başlatmak istiyor musun? Yani, herhalde nasılsa kazanırsın; ne diye riske giriyorsun?',
-    'Do you really want to launch the armageddon device?  Doing so decreases the difficulty score by half!': 'Gerçekten Armageddon aygıtını başlatmak istiyor musun? Bunu yaparsan oyunun zorluk puanı yarıya iner!',
-    'Do you really want to launch the armageddon device?  Odds are you\'ll blow yourself up!': 'Gerçekten Armageddon aygıtını başlatmak istiyor musun? Büyük ihtimalle kendini de havaya uçurursun!',
+    'Do you really want to launch the armageddon device?  It\'ll blow up half of the galaxy!': 'Gerçekten mahşer günü aletini başlatmak istiyor musun? Galaksinin yarısını havaya uçuracak!',
+    'Do you really want to launch the armageddon device?  Isn\'t life too short as it is?': 'Gerçekten mahşer günü aletini başlatmak istiyor musun? Hayat zaten yeterince kısa değil mi?',
+    'Do you really want to launch the armageddon device?  I mean, you\'d probably win anyway; why take the chance?': 'Gerçekten mahşer günü aletini başlatmak istiyor musun? Yani, herhalde nasılsa kazanırsın; ne diye riske giriyorsun?',
+    'Do you really want to launch the armageddon device?  Doing so decreases the difficulty score by half!': 'Gerçekten mahşer günü aletini başlatmak istiyor musun? Bunu yaparsan oyunun zorluk puanı yarıya iner!',
+    'Do you really want to launch the armageddon device?  Odds are you\'ll blow yourself up!': 'Gerçekten mahşer günü aletini başlatmak istiyor musun? Büyük ihtimalle kendini de havaya uçurursun!',
     'Are you just doing this because you think you\'ll win but it\'s really late and so you want to go to bed?': 'Bunu sadece kazanacağını düşündüğün, ama saat çok geç olduğu ve yatmak istediğin için mi yapıyorsun?',
-    'Aren\'t you sure you really don\'t want to have nothing to do with not launching the armageddon device?': 'Armageddon aygıtını başlatmamakla hiçbir ilgin olmasını gerçekten istemediğinden emin değil misin?',
+    'Aren\'t you sure you really don\'t want to have nothing to do with not launching the armageddon device?': 'Mahşer günü aletini başlatmamakla hiçbir ilgin olmasını gerçekten istemediğinden emin değil misin?',
     'You\'re just doing this \'cause you enjoy the ultimate feeling of power, aren\'t you???': 'Bunu sadece mutlak gücün tadını çıkardığın için yapıyorsun, değil mi???',
     'If you do this, everyone will hate you!  It\'s such a sissy way to try to win, anyway.': 'Bunu yaparsan herkes senden nefret edecek! Zaten bu, kazanmanın çok korkakça bir yolu.',
     'Now look, this is NO laughing matter.  You just might get yourself killed!': 'Bak, bu gülünecek bir şey DEĞİL. Kendini öldürtebilirsin!',
     'I get it.  You\'re losing big time and this is the only way you could possibly win!  That\'s it isn\'t it?': 'Anladım. Fena halde kaybediyorsun ve kazanmanın tek yolu bu! Öyle değil mi?',
-  },
-  patchWords: {
-    // iOS's Misc Strings filler "Ve Müttefikleri " is capitalised and says "and HIS allies"
-    'and your allies ': ' ve müttefiklerin',
+    // ---- Mac 1.2, DOS 2.0 and Mac 2.0.1 (js/languages.js turkish20; iOS's words: "gemi yapımı" H 27, "hücum" R 38, the glued suffixes) ----
+    'Spaceward Ho! Version 2.0.1 by Peter Commons.': 'Spaceward Ho! Sürüm 2.0.1, yazan: Peter Commons.',
+    'Spaceward Ho! Version 1.2 by Peter Commons.': 'Spaceward Ho! Sürüm 1.2, yazan: Peter Commons.',
+    // (iOS's Turkish has its credit line in English, with a stray "!"; the patch's words)
+    'Artwork by Howard Vives.': 'Grafikler: Howard Vives.',
+    'The game has been updated to the year %d.': 'Oyun %d yılına güncellendi.',
+    'You have ships queued at %s but have no money allocated for shipbuilding.': '%sde sırada bekleyen gemilerin var, ama gemi yapımına hiç para ayırmadın.',
+    'Built %s at %s.': '%2$sde %1$s yapıldı.',
+    'You are spending money on shipbuilding at %s but have no ships queued.': '%sde gemi yapımına para harcıyorsun, ama sırada hiç gemi yok.',
+    'You are spending money on shipbuilding at %s but have no metal available.': '%sde gemi yapımına para harcıyorsun, ama kullanabileceğin hiç metal yok.',
+    '%s successfully defended itself against an enemy attack from %s.': '%s, %sden gelen bir düşman hücumuna karşı kendini başarıyla savundu.',
+    'Congratulations! You have just won the game.': 'Tebrikler! Oyunu kazandın.',
+    // the messages received (Turkish has no "he" and "she": one line for both)
+    '%s sends a message saying he likes %s.': '%s, %syi sevdiğini bildiren bir mesaj gönderdi.',
+    '%s sends a message saying he doesn’t like %s.': '%s, %syi sevmediğini bildiren bir mesaj gönderdi.',
+    '%s sends a message saying he owns %s.': '%s, %sye sahip olduğunu bildiren bir mesaj gönderdi.',
+    '%s sends a message saying she likes %s.': '%s, %syi sevdiğini bildiren bir mesaj gönderdi.',
+    '%s sends a message saying she doesn’t like %s.': '%s, %syi sevmediğini bildiren bir mesaj gönderdi.',
+    '%s sends a message saying she owns %s.': '%s, %sye sahip olduğunu bildiren bir mesaj gönderdi.',
+    // Name a Star (Mac 1.2's and 2.0.1's rule, DOS 2.0's "taken") and DOS 2.0's Fix Spending
+    'Star names must be 4 to 7 characters long.': 'Yıldız isimleri 4 ile 7 harf arasında olmalı.',
+    'Sorry, there’s already a star named ‘%s’.  Please pick another name.': 'Üzgünüm, “%s” isimli bir yıldız zaten var. Lütfen başka bir isim seç.',
+    'You are abandoning %s.': '%syi terk ediyorsun.',
   },
   words: {
     // 3.0.1's and 4.0.5's Send Message groups (iOS's "ortak", "en iyi oyun arkadaşı")
     Everyone: 'Herkes', 'Your Allies': 'Ortakların', 'Your Buddies': 'En iyi oyun arkadaşların',
+  },
+  // Mac 1.2's, DOS 2.0's and Mac 2.0.1's own (js/languages.js turkish20): two fillings (the patch's
+  // meteor report, fix 'meteorReport'; a fleet scrapped "at hyperspace", fix 'scrapLimbo'), the battle
+  // window's two lines for a fleet seen to nothing (iOS's Misc Strings 55 "hiç bilgin yok",
+  // "mahvedildi") and Mac 2.0.1's Force End Turn question (iOS's "sıra")
+  win20: {
+    words: { 'A meteor shower': 'Bir meteor yağmuru', hyperspace: 'hiperuzay' },
+    battleLines: { noInfo: 'Hiç bilgin yok.', destroyed: 'Hemen mahvedildin.' },
+    forceEndTurn: '%s, oyunculardan %s tanesi (toplam %s) henüz sırasını bitirmedi.\n\nSırayı gerçekten zorla bitirmek mi istiyorsun, yoksa bitirmelerini mi bekleyeceksin?',
   },
 },
 // =====================================================================
