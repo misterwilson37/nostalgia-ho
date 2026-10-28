@@ -1411,9 +1411,11 @@ function newGame(f, ctx) {
 function page(doc) {
   const a = api();
   doc.body.classList.add('amiga');
-  // the End Turn picture in the game's language: the German one is the Amiga's own (d5000); the English, French,
-  // Turkish and Spanish are drawn into it in its lettering (tools/skins/amiga_endturn.py)
-  Object.defineProperty(TH(), 'endTurnPic', { configurable: true, get: () => P + ({ de: 'd5000', en: 'endturn', fr: 'endturn-fr', tr: 'endturn-tr', es: 'endturn-es' }[lang()] || 'endturn') });
+  // the End Turn picture: the Amiga's own is the German one (d5000, "Zug Ende / Amiga+Z"), which the English
+  // edition (2.1, 1995) also shows, its pictures being the German disk's; the patch (fix 'amigaEndTurnEn') draws an
+  // English one, "Do Turn / Amiga+Z", the English menu's word. French, Turkish and Spanish never had an Amiga
+  // release: the remake's own buttons, drawn into it in its lettering (tools/skins/amiga_endturn.py)
+  Object.defineProperty(TH(), 'endTurnPic', { configurable: true, get: () => P + ({ de: 'd5000', en: HO.fixed(game(), 'amigaEndTurnEn') ? 'endturn' : 'd5000', fr: 'endturn-fr', tr: 'endturn-tr', es: 'endturn-es' }[lang()] || 'd5000') });
   // the screen's title bar and its depth gadget
   const bar = doc.getElementById('menubar');
   bar.append(el('span', { class: 'am-sdepth', 'aria-hidden': 'true' }));

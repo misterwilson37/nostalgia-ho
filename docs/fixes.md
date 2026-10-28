@@ -47,7 +47,7 @@ their entries are below so the list is complete, but their rulesets list no fixe
 | Version | Obvious bug | Quirk or design | Unclear |
 |---|---|---|---|
 | Mac 1.2 | 3 | 8 | 2 |
-| 2.0 | 9 (7 + the Amiga skin's two) | 5 | 3 |
+| 2.0 | 10 (7 + the Amiga skin's three) | 5 | 3 |
 | Mac 2.0.1 | 5 | 5 | 2 |
 | Mac 3.0.1 | 5 | 6 | 3 |
 | 4.0.5 | 11 fixed (+ 3 the remake already plays fixed, + 3 with nothing in the remake to fix) | 4 | 6 |
@@ -226,6 +226,15 @@ The program's own credits read "Version 2.0.1" (string 672), so its patch is 2.0
    ("You send a message saying you like Paul" for a message to Paul about Kansas). Shown so by
    default in the Amiga skin's English. *Fix:* 2.0's sentence, "You sent a message to Paul saying
    you like Kansas." (The German is right and is the same in 2.0 and the Amiga.)
+10. **`amigaEndTurnEn`: the Amiga English's End Turn button.** The Amiga game was released only in
+   German (2.0, 1994); the English 2.1 (build 2.1ge1.05) came from its author much later, with
+   the German pictures: `image16.pff` is the same file on both disks, and the 256-colour
+   `image256.pff` is the German disk 2's, which the English install also uses (`docs/amiga-21.md`,
+   "The author's own discs"). So an English game shows the German button, "Zug Ende / Amiga+Z"
+   (picture d5000), by default in the Amiga skin. *Fix:* an English button, "Do Turn / Amiga+Z", with
+   the word the Amiga English's own menu uses for the command (string 842), drawn in the Amiga's
+   lettering (`tools/skins/amiga_endturn.py`, `sprites/endturn.png`). German is untouched; French,
+   Turkish and Spanish (never released for the Amiga) keep the remake's own buttons.
 
 ### Quirk or design (left as released)
 

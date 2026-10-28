@@ -433,10 +433,13 @@ played in English (`docs/amiga-21.md`, "The Amiga English in the remake"), and t
 own words, so a game in those languages shows them and never German (the skin follows the
 interface's language, `js/ui-lang.js`; with no game and none used yet, the Amiga's German).
 Numbers are written "51.000" in German, Turkish and Spanish, "51 000" in French; temperatures
-are described under "Temperatures" below. The End Turn picture is in the game's language: the
-Amiga's own German one, and English, French, Turkish and Spanish buttons the remake draws into
-it in its lettering (`tools/skins/amiga_endturn.py`, `sprites/endturn*.png`); the Amiga has no
-other (the English 2.1 disk's pictures are the same bytes). `docs/translations.md`, "The
+are described under "Temperatures" below. The End Turn picture: the Amiga's own German one,
+"Zug Ende / Amiga+Z", in German and, as released, in English (the English 2.1, which the author
+put out much later, keeps the German pictures, in 16 and in 256 colours: `docs/amiga-21.md`,
+"The author's own discs"); the patch (fix `amigaEndTurnEn`) shows "Do Turn / Amiga+Z", the Amiga
+English's own word for the command. French, Turkish and Spanish never had an Amiga release:
+their buttons are the remake's own, drawn into the German one in its lettering
+(`tools/skins/amiga_endturn.py`, `sprites/endturn*.png`), and show by default. `docs/translations.md`, "The
 remake's interface".
 
 ## Temperatures

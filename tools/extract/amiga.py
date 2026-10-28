@@ -13,7 +13,7 @@ looks for them anywhere under the folder it is given.)
 
 Writes assets/skins/amiga/: sprites/*.png, sounds/*.wav, strings.json
 (German) and manifest.json, plus sprites/endturn*.png, the German End
-Turn button in English, French, Turkish and Spanish (tools/skins/amiga_endturn.py).
+Turn button drawn in English (the patch's "Do Turn"), French, Turkish and Spanish (tools/skins/amiga_endturn.py).
 
 The Amiga game (German, 1994) is the DOS 2.0 game with the same pictures
 in the same order, so the sprites are written under the DOS skin's names

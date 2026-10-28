@@ -1,8 +1,9 @@
 # Spaceward Ho! 2.1 for the Amiga
 
-What the Amiga's 2.1 changed from 2.0, read from the three disks we have: the German 2.1 of
+What the Amiga's 2.1 changed from 2.0, read from the three disks we first had: the German 2.1 of
 9 January 1995 (disks 1 and 2) and the 6 June 1995 build on a disk 1 repacked by "WT"
-(`[h WT]`), which is **English**. Read in October 2026 with `tools/extract/amiga21.py`
+(`[h WT]`), which is **English**; and, since 28 October 2026, the author's own discs from
+bebbosoft.de (see "The author's own discs"), which settle what the first three left open. Read in October 2026 with `tools/extract/amiga21.py`
 (unpack, hash, strings, window tables), `tools/decompile/AmigaDump.java` (Ghidra: listing and C)
 and `tools/decompile/amiga-fcmp.py` (function-by-function comparison). The method is that of
 `docs/amiga-skin.md`: the program is unpacked by running its own decruncher in a 68000
@@ -33,7 +34,8 @@ emulator, then read with Ghidra 11.4.2 (raw image at 0x100000, A4 = 0x200000).
 - **The `[h WT]` disk is a repack, not a crack.** It holds the author's own build 2.1ge1.05
   (06.06.95), unprotected on disk as before, with the German prefs file removed, an English
   startup, a changelog and an NFO added. Its copy protection is still in the program. Its
-  disk 2 is missing (see "What the WT disk leaves unknown").
+  disk 2 was missing; the author's own discs (see "The author's own discs") show that the
+  English edition has no disk 2 of its own: it uses the German one.
 - **Recommendation: no new version, no new ruleset.** 2.1 would be a text variant of the
   Amiga skin: its English strings, as the Amiga skin's English, in place of falling back to
   the DOS English. See "For the remake".
@@ -46,6 +48,9 @@ emulator, then read with Ghidra 11.4.2 (raw image at 0x100000, A4 = 0x200000).
 | 2.1 German disk 1 | HO!1 19.01.1995 | `ho!` 114,784 B, `2.1ge1.02 (09.01.95 by BebboSoft)`, 19 Jan 1995 | `textge.pff` 17,156 B, 839 strings | |
 | 2.1 German disk 2 | Ho!2 | none | none | `image256.pff` only; identical to 2.0's disk 2 |
 | 2.1 English "[h WT]" disk 1 | HO!1 10.11.1998 | `HO!` 117,480 B, `2.1ge1.05 (06.06.95 by BebboSoft)` | `texte.pff` 16,587 B, 844 strings | every file's date is 10 Nov 1998 (WT's) |
+| bebbosoft.de `HO1.DMS` (German 2.1 disk 1) | HO!1 19.01.1995 | `ho!` 114,784 B, `2.1ge1.02 (09.01.95)`, `e67328bc` (as the German disk above) | `textge.pff` 17,156 B, `dec2401f` (same) | the German 1995 disk without its owner's `THE_HO!.PRF` (a clean, unregistered copy); every other file the same bytes as the German disk 1 above |
+| bebbosoft.de `HO1_NEU.DMS` (both languages) | HO!1 **17.09.2001** (file dates from 1995) | `ho!` 117,480 B, `2.1ge1.05 (06.06.95)`, `474ee182` (**the same bytes as WT's**; the file is dated 9 Jun 1995) | `texte.pff` 17,719 B (German, 844 strings) **and** `texteE.pff` 16,587 B (English, `b9cd4b4a`, the same as WT's) | the author's own disc with the 1.05 build and both languages; see "The author's own discs" |
+| bebbosoft.de `HO2.DMS` (disk 2 for both) | Ho!2 17.05.1994 (FFS) | none | none | `image256.pff` 817,659 B, `130ace42`; **the whole ADF is byte-identical to the German disk 2 above** (MD5 `f66b840e`) |
 
 Both are OFS floppies (880 KB). The zip names: the English one's "1995-06-06" is the program's
 build date; WT's own NFO dates the release 1998-11-10 ("Supplier: WT-PL", "Cracker: -",
@@ -56,7 +61,7 @@ build date; WT's own NFO dates the release 1998-11-10 ("Supplier: WT-PL", "Crack
 | Files | Result |
 |---|---|
 | `image16.pff` 391,093 B (`8134234e`), `sound.pff` 150,561 B (`5ae3553c`), `p16.iff`, `p256.iff`, `fonts/` (HoFont 9, 11, 13, HoBold 11, HoCond 9 and their `.font` files), `libs/` (arp, asl, diskfont, icon, info), `c/`, `Briefspiel.dok` (2,948), `Netzwerk.dok` (2,762), `HO!.inf`, `HO!.info`, `HDInstall`, `DosPatch`, `devs` | **same** |
-| `image256.pff` 817,659 B (`130ace42`), disk 2 | same in 2.0 and the German 2.1; the English disk 2 is missing |
+| `image256.pff` 817,659 B (`130ace42`), disk 2 | same in 2.0, the German 2.1 and the author's `HO2.DMS` (there is no English disk 2: the English edition uses this one) |
 | program | three different builds (`38db19ec`, `e67328bc`, `474ee182`) |
 | text | `texte.pff` (2.0) `4e41e4bf`; `textge.pff` (2.1 German) `dec2401f`; `texte.pff` (2.1 English) `b9cd4b4a` |
 | `.info` icons (`Disk.info`, `.info`, `Briefspiel.dok.info`, `Netzwerk.dok.info`) | differ between 2.0 and 2.1 (icon data, not read); `Disk.info` also differs between the German and English 2.1 |
@@ -176,9 +181,14 @@ English texts are longer or shorter than the German in the same boxes). Differen
 
 ## The pictures, sounds and fonts
 
-Identical (see the table). The English disk repeats `image16.pff`; its disk 2 is missing, but
-the German 2.1's disk 2 is 2.0's, so the English one's almost certainly is too (the install
-script copies `HO!2:image256.pff` unchanged).
+Identical (see the table). The English disk repeats `image16.pff`. Its disk 2 was missing from
+the WT release; the author's own discs show there is none: the English install script
+(`HDInstall_english`) copies `HO!2:image256.pff` from the same Ho!2 disk the German game uses,
+a floppy image byte-identical to the German 2.1's (and 2.0's) disk 2. The AGA pictures are
+therefore the German ones too: the End Turn picture in `image256.pff` (record 240, the same
+index as `image16.pff`'s d5000) is 48x32, 4 planes, and decodes to the same pixels as
+`image16.pff`'s "Zug Ende / Amiga+Z". **The English Amiga, in 16 and in 256 colours, shows the
+German button.**
 
 ## The code
 
@@ -257,11 +267,62 @@ and 2.0's are the DOS 2.0 ones (`docs/dos-findings.md`).
   Protection: None": there is no disk protection to remove. We have no clean copy of 1.05,
   so a patched byte in the program can't be ruled out, but there is no sign of one:
   all differences from the German 1.02 are explained by the changelog or the compiler.
-- **Disk 2 is missing.** That leaves unknown: whether the English disk 2 carries the same
-  `image256.pff` (very likely, it is the same file on the 2.0 and German 2.1 disks, and
-  `HO!_Install` copies it from `HO!2:`); whether WT added anything to it (an intro, a note);
-  and its volume name and date. Nothing in the rules or the English text depends on it.
+- **What the WT disk leaves unknown** (answered in October 2026 by the author's own discs,
+  below). Disk 2 was missing; there is no English disk 2: `image256.pff` is the German disk
+  2's file, byte for byte, and its volume is "Ho!2", 17 May 1994, FFS. What stays unknown
+  from WT's disk alone: whether a clean copy of the program differs by a patched byte
+  (it does not: the author's `HO1_NEU.DMS` holds the same `474ee182`).
   The 256-colour pictures are the DOS ones pixel for pixel, as in 2.0.
+
+## The author's own discs (bebbosoft.de, read 28 October 2026)
+
+Three DMS-packed floppy images from https://bebbosoft.de/games/spacewardho/, put there by the
+author (Stefan "Bebbo" Franke) long after the game's release, uploaded by Jake. Unpacked with
+xDMS 1.3.2 (CRC-checked) to ADF, listed with `xdftool`, texts decoded with `tools/extract/amiga.py`
+(`records`), programs compared by MD5 and unpacked with `tools/extract/amiga-code.py`.
+
+| Disc (file) | DMS dated | Volume | Program | Text | New |
+|---|---|---|---|---|---|
+| `HO1.DMS` (`6da9ddf7`), ADF `443c2e6f` | 20 Jan 1995 | HO!1, 19.01.1995 22:28 (OFS) | `ho!` `e67328bc`: `2.1ge1.02 (09.01.95)` | `textge.pff` `dec2401f`, 839 strings (German) | nothing but what is missing: no `THE_HO!.PRF` (the German disk 1 above has a licence record with a person's name in it), a 30-byte `.info`. Every other file has the same MD5 as the German 2.1 disk 1 |
+| `HO1_NEU.DMS` (`71927b16`), ADF `628bd469` | 17 Sep 2001 | HO!1, 17.09.2001 05:00 (OFS), filled 99.9% | `ho!` `474ee182`: `2.1ge1.05 (06.06.95)`, 117,480 B, file dated 09.06.1995: **the very file of WT's disk** | `texte.pff` `75b49788` 17,719 B, **German, 844 strings**; `texteE.pff` `b9cd4b4a` 16,587 B, **English, 844 strings, the same as WT's** | both languages on one disc; `HDInstall_english` and `s/HO!_Install_eng` (the English install: copies `texteE.pff` as `texte.pff` and says "Installation complete!"); `manual.txt` (1,714 B, German: a table "Seite, Absatz, Wort" of manual positions and words, the form of the copy protection's question); `devs/keymaps/d`; the startup is the German one ("Willkommen zu Spaceward Ho!", `setmap d`); no `DosPatch`, `More`, `Changes.dok` |
+| `HO2.DMS` (`1ac01b47`), ADF `f66b840e` | 17 May 1994 | Ho!2, 17.05.1994 11:47 (FFS) | none | none | **Nothing: the ADF is byte-identical to `de2.adf`, the German 2.1's (and 2.0's) disk 2.** One file, `image256.pff` `130ace42` |
+
+What follows from them:
+
+- **HO2 is not an English disk 2.** There is none. The English edition's install script copies
+  `HO!2:image256.pff` from the German disk 2, so the AGA pictures are the German ones in English
+  too. Its End Turn picture (record 240) is pixel for pixel the 16-colour "Zug Ende / Amiga+Z";
+  so no picture in either file differs between the German and the English edition (the files
+  are the same bytes). **There is no English button in the English Amiga game, in any
+  colour depth.** This is the evidence for the remake's default (the German button in English,
+  as released) and for the patch's "Do Turn" (`amigaEndTurnEn`, the Amiga English's own word,
+  menu string 842).
+- **HO1_NEU is not a newer build.** Its program is the 1.05 of 6 June 1995 (file date 9 June
+  1995), byte for byte the program on WT's disk (`474ee182`): there is no code change after
+  1.05 in these discs, so nothing to compare with `amiga-fcmp.py`. It also settles that WT's disk
+  did not touch the program (the earlier doubt: "a patched byte can't be ruled out").
+- **The text.** The English `texteE.pff` is WT's `texte.pff` (the 844 strings read above). The
+  German `texte.pff` of 1.05 is the 1.02's `textge.pff` with three strings changed (24, 117
+  and 569 now say **"Amiga-Version 2.1"** / "Amiga Version 2.1" where 1.02 and 2.0 said 2.0) and
+  five new ones (838 to 842), which 1.05 reads from the text file in the German too: the
+  German menu bar (string 842, byte for byte the menu that 1.02 has inside the program,
+  so no menu changed), the window title "Spaceward Ho! V2.1 - %s in %s im Jahre %ld"
+  (839; the title the 1.02 program builds in itself, checked in its unpacked data, has no "V2.1"),
+  "Dich" (840), "--mehr--" (841) and "Ein %s (%d/%d) %s" (838), with the empty string 843 left.
+  So the 2.1 German of 2001 says 2.1 and shows "V2.1" in its title bar, where the German
+  released in 1994 and 1995 said "Version 2.0".
+- **Dates.** The English 1.05 build is from June 1995, but nothing of it was released then:
+  the only releases are this disc (September 2001, the author's) and WT's repack (November
+  1998), which is the earliest we can date. The German 2.0 is of 1994, the German 2.1ge1.02 of
+  January 1995. So the Amiga game was released only in German in 1994 and 1995; the English
+  edition is the author's own later work.
+- **For the remake**, nothing changes by default. The German skin plays the German as
+  released in 1994 (2.0, and 1995's 1.02, which says 2.0 as well); the skin's English is the
+  Amiga English's text, which is what the English edition shows (also with "V2.1" in its
+  title). The German 1.05's "2.1" strings (24, 117, 569, 839) are a decision for Jake:
+  the German skin could show "Version 2.1" and the "V2.1" title as the 2001 disc does, but
+  that is a later release than the 1994 German the skin's label ("2.x Amiga (1994-95)") and
+  the DOS 2.0 ruleset are tied to; left as released in 1994/95.
 
 ## For the remake
 
@@ -282,7 +343,8 @@ and 2.0's are the DOS 2.0 ones (`docs/dos-findings.md`).
   the untranslated "%s hängt auf %s fest.", the German protection word table. The
   menu is one string (842) and wants a small parser for the skin's menu.
 - **Version name:** "Amiga 2.1 (English, 1995)" for the text; the German stays "2.0" since
-  the 2.1 German disk still says "Amiga-Version 2.0".
+  the 2.1 German disk of 1995 still says "Amiga-Version 2.0" (the author's 2001 disc, 1.05 with
+  the German text, says 2.1: see "The author's own discs").
 - **DOS saved games:** 1.05 reads and writes DOS 2.0 game files, so the Amiga's records are
   the DOS 2.0 file's, byte-swapped (a good cross-check for the file format of
   `docs/dos-findings.md`, not done here).
@@ -410,12 +472,16 @@ messages 571 to 626 and allowed only the apostrophe.)
 1. **The version label.** Now "2.x Amiga (1994–95)" (`js/skins.js`, and its translation row).
    The German text still says "Version 2.0" and the English "Amiga Version 2.1" as the programs
    do.
-2. **The End Turn picture.** Each language shows its own: the Amiga's German one, and English,
-   French, Turkish and Spanish buttons drawn into it (`tools/skins/amiga_endturn.py`). The real
-   English Amiga showed the German button (the 2.1 English disk's pictures are the German
-   ones, byte for byte); that was never the remake's default for English, so no patch is
-   involved. The English one still reads "End Turn", though the Amiga English's own word for the
-   command is "Do Turn" (menu, string 842): say if the picture should follow it.
+2. **The End Turn picture. Settled (28 October 2026).** The Amiga was released only in German
+   (2.0, 1994); the English 2.1 came much later from the author and keeps the German
+   pictures, in 16 colours (`image16.pff`) and in 256 (`image256.pff`, the German disk 2's file:
+   see "The author's own discs"). So the skin shows the German "Zug Ende / Amiga+Z" in English
+   by default, as released, and in German. The patch (fix `amigaEndTurnEn`, `docs/fixes.md`)
+   shows an English button, "Do Turn / Amiga+Z", the Amiga English's own word for the command
+   (menu string 842), drawn in the Amiga's lettering over the German button's own "Amiga+Z" line
+   (`tools/skins/amiga_endturn.py`, `sprites/endturn.png`). French, Turkish and Spanish never had
+   an Amiga release: their buttons (Fin Tour, Sıran Bitti, Fin del turno) are the remake's own and
+   show by default.
 3. **Temperatures.** Settled from the code (`docs/amiga-skin.md`, "Temperatures"): both Amiga
    languages write °C, truncated, with the last digit of the whole degrees as the "tenths"
    (22 reads "22.2°C"). The Amiga skin's English and German show exactly that everywhere

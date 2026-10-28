@@ -65,10 +65,12 @@ and the translation notice (`docs/translations-notes/`) are not done.
       are the same words and 74 differ. Notes for Jake (version label, End Turn picture, °C,
       unwired lines) in `docs/amiga-21.md`, "The Amiga English in the remake". **Done (October
       2026), the follow-up:** the label is "2.x Amiga (1994–95)"; the End Turn button is drawn
-      per language (Amiga: English, French, Turkish, Spanish beside the German; Mac 1.2: its own
-      French one in French); the temperatures and the sent-message lines are read from the
+      per language (Amiga: French, Turkish, Spanish beside the German, which English shows too,
+      as released, with an English "Do Turn" button in the patch, `amigaEndTurnEn`, since the Amiga
+      English edition keeps the German pictures, October 2026 from the author's discs; Mac 1.2: its
+      own French one in French); the temperatures and the sent-message lines are read from the
       program and shown as it printed them, with two patch fixes (`amigaTenths`,
-      `amigaChatNames`); the skin's German uses the Amiga's own line for the revert question and
+      `amigaChatNames`, then `amigaEndTurnEn`); the skin's German uses the Amiga's own line for the revert question and
       five reports; 5.0.5, the Palm, 3.0.1 and both 4.0.5s show iOS's French and Turkish lines in
       the fill order iOS released them with, the patch (`iosFillings`) filling them by meaning.
       **Not done:** End Turn pictures in French, Turkish and Spanish (and German, where the
