@@ -218,9 +218,10 @@ const FR_CAPS = [[/\bEchelle/g, 'Échelle'], [/\bEclaireur/g, 'Éclaireur'], [/\
   [/\bEvacu/g, 'Évacu'], [/\bEvolu/g, 'Évolu'], [/\bEtat/g, 'État'], [/\bEcran/g, 'Écran'],
   [/\bA (?=(?:cause|propos|partir|bientôt|vous|votre|vos|chaque|nouveau|tout|la |l['’]|plus)\b)/g, 'À '], [/\bA (?=(?:la|l['’]))/g, 'À ']];
 function frTypography(t) {
-  // the game's name and the curse keep their own "!"
+  // the game's name and the curse keep their own "!"; a code reference ("tryEvacuatePlanet: 0x1000941e0",
+  // in the Hoedown items) keeps its colon as it is
   const keep = [];
-  let s = t.replace(/Spaceward Ho!|Ho! Ho!|#!\$@\*\$&@[•¥][™ª]!/g, (m) => { keep.push(m); return '\u0001' + (keep.length - 1) + '\u0002'; });
+  let s = t.replace(/Spaceward Ho!|Ho! Ho!|#!\$@\*\$&@[•¥][™ª]!|\b[A-Za-z_]\w*: 0x[0-9a-fA-F]+/g, (m) => { keep.push(m); return '\u0001' + (keep.length - 1) + '\u0002'; });
   // the quotes: English and straight ones to « », by pairs
   if (/[“”"]/.test(s)) {
     let open = false;
