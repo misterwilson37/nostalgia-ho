@@ -28,8 +28,8 @@ const JOKE_HOPE = 'Dost thou truly wish to abandon Hope? All is not yet lost!';
 const JOKE_SHIP = 'Abandon Ship? Abandon Ship! All hands abandon ship! Women and children first!';
 // Armageddon's two questions (CONFIRMED, DoGalaxyMenu @f3e76, the Armageddon item turned on: one of
 // DITL 3240-3244, then one of DITL 3250-3255, each by RND; turned off asks nothing). Their words, as the
-// DITLs read them; the DITLs' own button words ("Party Pooper", "Abort", "Go For It!" ...) are the box's
-// OK and Cancel here, as everywhere in this remake
+// DITLs read them. The buttons are the DITLs' own (ARMAGEDDON_BUTTONS below): the first question's
+// OK and Cancel, the second's "Party Pooper"/"Abort", "Not Unsure?"/"Unsure?" ...
 const ARMAGEDDON_ASK = [[
   'Do you really want to launch the armageddon device? It’ll blow up half of the galaxy!',
   'Do you really want to launch the armageddon device? Isn’t life too short as it is?',
@@ -44,6 +44,13 @@ const ARMAGEDDON_ASK = [[
   'Now look, this is NO laughing matter. You just might get yourself killed!',
   'I get it. You’re losing big time and this is the only way you could possibly win! That’s it isn’t it?',
 ]];
+// The DITLs' buttons, [item 1, item 2] for each question above, in the same order (the English 3.0.1's resource fork; 3.0.1F's
+// are in js/lang-data.js mac301Fr). The dialog is an Alert (DoGalaxyMenu @f3e76, Trap A985): item 1 hit goes on (the
+// second question, then the device is turned on), item 2 hit (or Esc) turns it down and asks nothing more.
+const ARMAGEDDON_BUTTONS = [
+  [['OK', 'Cancel'], ['OK', 'Cancel'], ['OK', 'Cancel'], ['OK', 'Cancel'], ['OK', 'Cancel']],
+  [['Party Pooper', 'Abort'], ['Not Unsure?', 'Unsure?'], ['Power', 'Cancel'], ['Yeah', 'Abort'], ['Go For It!', 'Maybe Not'], ['That’s It!', 'Never mind']],
+];
 const { RI, clamp, msg, fmt, num, colonies, know, observe, addShipsToStar, TECHS, getDesign, fleetCount, fleetDesigns, fleetMaxRange, isAllied } = E;
 const D = E.RULESETS.dos, O = E.RULESETS.original, W = E.RULESETS['405'];
 const { popU, setPopU, hab } = O;
@@ -2097,6 +2104,7 @@ E.registerRules('301', Object.assign({}, D, {
   // Hope's OK and Cancel); the name compare wasn't re-read
   evacuateJoke: (G, s) => { const nm = E.ownName(G, s.name, 'stars'); return nm === 'Hope' ? JOKE_HOPE : nm === 'Ship' ? JOKE_SHIP : null; },
   armageddonAsk: ARMAGEDDON_ASK,
+  armageddonButtons: ARMAGEDDON_BUTTONS,
   // CONFIRMED (SetMenuItems @f4492): the Galaxy menu's items 9 to 12, "Alliances…", "Give Money/Metal…",
   // "Surrender To…" and "Send Message…", are dimmed while the year is below 2001 (the game's first turn), the
   // 3.0.1 fix of "Alliances and Surrender menu items no longer enabled in 2000". The classic skins dim the

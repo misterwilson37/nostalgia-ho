@@ -2207,11 +2207,12 @@ function modal(title, content, opts) {
 }
 function closeModal() { if (UI.modal) { UI.modal.remove(); UI.modal = null; const c = UI.onClose; UI.onClose = null; if (c) c(); } }
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && UI.modal) closeModal(); });
-function confirmBox(text, yes, kind) {
+// labels: [item 1's, item 2's] of an alert with its own button words (3.0.1's Armageddon questions: item 1 goes on)
+function confirmBox(text, yes, kind, labels) {
   // a skin's own alert for a kind of question ('underfunded': the colonies left short at End Turn): T.alert(kind, text, yes)
   if (kind && T.alert && T.alert(kind, text, yes)) return;
   const w = modal('Are you sure?', el('div', null, text.nodeType ? text : el('p', null, text), el('div', { class: 'btns right' },
-    el('button', { class: 'quiet', onclick: closeModal }, 'Cancel'), el('button', { onclick: () => { closeModal(); yes(); } }, 'OK'))), { cls: 'small alert' });
+    el('button', { class: 'quiet', onclick: closeModal }, labels ? labels[1] : 'Cancel'), el('button', { onclick: () => { closeModal(); yes(); } }, labels ? labels[0] : 'OK'))), { cls: 'small alert' });
 }
 function toast(t) {
   const d = el('div', { class: 'toast', role: 'status' }, t);
@@ -3460,8 +3461,11 @@ function toggleArmageddon() {
   // 4.0.5's two questions, each drawn from its list (rs.armageddonAsk); with
   // Full Hoedown, the later versions ask them too (rs.hoedown.armageddon)
   const hq = HO.rules(G).armageddonAsk || (HO.hoedown(G) && HO.ownRules(G).hoedown.armageddon);
-  const any = (L) => L[Math.floor(Math.random() * L.length)];
-  if (hq) return confirmBox(HO.say(G, any(hq[0])), () => confirmBox(HO.say(G, any(hq[1])), () => { HO.setArmageddon(G, ME, true); save(); toast('The armageddon device is on. It fires when every human player has turned theirs on.'); }));
+  // (rs.armageddonButtons: the DITLs' own button words, the same index as the question; item 1 goes on, item 2 turns it down)
+  const pick = (L) => Math.floor(Math.random() * L.length), btn = HO.rules(G).armageddonButtons;
+  const ask = (n, yes) => { const i = pick(hq[n]); confirmBox(HO.say(G, hq[n][i]), yes, null, btn && btn[n] && btn[n][i]); };
+  const on = () => { HO.setArmageddon(G, ME, true); save(); toast('The armageddon device is on. It fires when every human player has turned theirs on.'); };
+  if (hq) return ask(0, () => ask(1, on));
   confirmBox(HO.say(G, HO.DATA.alerts[3] || 'Are you sure you want to destroy half the galaxy?'), () => { HO.setArmageddon(G, ME, true); save(); toast('The armageddon device is on. It fires when every human player has turned theirs on.'); });
 }
 
@@ -6165,7 +6169,7 @@ window.addEventListener('DOMContentLoaded', () => {
     verOpts, modern, hotSeat, openGameText, Prefs, savePrefs, switchPlayers, forceEndTurn, openBattleList, openFixSpending, lastBattles, playOneTurn, showMessages,
     // (and the windows tools/ui-lang-audit.js opens in every skin and language)
     openPrefs, openAccount, openHall, hasHall, openMasterList, openRanks, openGameCenter, openFleetList, openStarList, openGive, openChat,
-    openSkin, openSounds, openLanguage, openAutoPlay, openDip, openSurrender, openSavedGames, closeScreen, openPatchNotes,
+    toggleArmageddon, openSkin, openSounds, openLanguage, openAutoPlay, openDip, openSurrender, openSavedGames, closeScreen, openPatchNotes,
     classic(name, fn, ...a) { skipSkinWin = name; try { return fn(...a); } finally { skipSkinWin = null; } },
   };
   window.HOAPI = T.api; // (the test tools: tools/ui-lang-audit.js)

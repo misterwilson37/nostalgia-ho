@@ -1517,6 +1517,8 @@ function buildText(lang, rs, o) {
     NS.rule ? { rule: T.text(NS.rule) } : {}, NS.label ? { label: T.text(NS.label) } : {}, NS.hint ? { hint: T.text(NS.hint) } : {});
   if (rs.conquered) out.conquered = T.text(rs.conquered);
   if (rs.armageddonAsk) out.armageddonAsk = rs.armageddonAsk.map(l => l.map(t => T.text(t)));
+  // (3.0.1's DITL buttons: OK and Cancel stay the interface's; the others are the remake's words in tr, de, es, 3.0.1F's own in fr below)
+  if (rs.armageddonButtons && !(lang === 'fr' && F301 && E301 && rs.id === '301')) out.armageddonButtons = rs.armageddonButtons.map(l => l.map(b => b.map(t => (t === 'OK' || t === 'Cancel' ? t : T.text(t)))));
   // Fix Spending's lines (3.0.1: Mac 2.0.1's)
   if (rs.fixSpending && rs.fixSpending.lines) out.fixSpending = Object.assign({}, rs.fixSpending, { lines: rs.fixSpending.lines.map(t => (T.line(t) ? T.text(t) : (T.missing.push(t), t))) });
   // (and with the patch's wording, where it has some: the Turkish case endings)
@@ -1635,9 +1637,13 @@ if (R301) {
     // lines are 3.0.1F's, and the lines it has none for (the remake's engine
     // messages) are iOS's or 1.2F's, adapted, or the remake's; its windows' words
     // are the interface's in a 3.0.1 game in French
-    if (lang === 'fr' && F301 && E301) { out.remake = false; out.officialWindows = windows301(); }
+    if (lang === 'fr' && F301 && E301) {
+      out.remake = false; out.officialWindows = windows301();
+      // Armageddon's questions with 3.0.1F's own buttons (DITL 3240-3244, 3250-3255)
+      out.armageddonButtons = [[3240, 3241, 3242, 3243, 3244], [3250, 3251, 3252, 3253, 3254, 3255]].map(l => l.map(id => F301.DITL[id].filter(it => it[0] === 'button').map(it => lineOf301(it[1]))));
+    }
     return out;
-  }, LANG_KEYS405.concat(['fixSpending', 'officialWindows']));
+  }, LANG_KEYS405.concat(['fixSpending', 'officialWindows', 'armageddonButtons']));
   R301.languages = ['en', 'fr', 'tr', 'de', 'es'];
   R301.lang = Object.assign({}, R301.lang, { fr: make('fr'), tr: make('tr'), de: make('de'), es: make('es') });
 

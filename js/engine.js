@@ -265,7 +265,7 @@ function frPatchText(t) {
 // over a language's text (the keys a translation lays over a ruleset): a string
 // the English ruleset has in the same place is English the interface translates,
 // so is left as it is
-const FR_TEXT_KEYS = ['say', 'hintTexts', 'nameAStar', 'battlePanel', 'battleLines', 'fixSpending', 'conquered', 'armageddonAsk', 'forceEndTurn',
+const FR_TEXT_KEYS = ['say', 'hintTexts', 'nameAStar', 'battlePanel', 'battleLines', 'fixSpending', 'conquered', 'armageddonAsk', 'armageddonButtons', 'forceEndTurn',
   'youWon', 'youLost', 'options', 'exploredList', 'scrapWords'];
 function frDeep(v, base, d) {
   if (d > 6) return v;

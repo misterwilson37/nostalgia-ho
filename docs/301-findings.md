@@ -661,6 +661,12 @@ which the remake cannot show because its game ends at the win; the computers' su
 3.0.1 itself, so the remake already agrees. Looking at `DoGalaxyMenu` for them also showed that 3.0.1 asks
 **Armageddon's two questions** (item 14 turned on: one of DITL 3240-3244, then one of DITL 3250-3255, each drawn by `RND`;
 turned off asks nothing), which the remake had replaced with 5.0.5's single alert: now `rs.armageddonAsk`, in the
-languages (3.0.1F's French). The DITLs' own button words ("Party Pooper", "Abort", "Go For It!") are not shown; the
-box has OK and Cancel.
+languages (3.0.1F's French). **The DITLs' own buttons are shown** (`rs.armageddonButtons`, from the English 3.0.1's
+DITL 3240-3255): the first question's OK and Cancel; the second's "Party Pooper"/"Abort", "Not Unsure?"/"Unsure?",
+"Power"/"Cancel", "Yeah"/"Abort", "Go For It!"/"Maybe Not", "That's It!"/"Never mind"; French 3.0.1F's own
+("Dodo"/"Annuler", "Pas incertain?"/"Incertain?", "Pouvoir ultime", "M'en fiche", "On verra!"/"Comme ça non",
+"C'est bien ça"/"Occupez-vous de vos oignons"); Turkish, German and Spanish are the remake's words
+(`js/lang-remake.js`, marked as its own). What each does (`DoGalaxyMenu @f3e76`: the Alert, Trap A985, returns the
+item hit): item 1, the first button, goes on (the second question, then the device is on); item 2 turns it down
+and nothing more is asked.
 
