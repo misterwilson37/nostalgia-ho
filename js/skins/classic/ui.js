@@ -2440,7 +2440,7 @@ function openBuild(sid) {
   const render = () => {
     body.innerHTML = '';
     const left = el('div', { class: 'blist' });
-    left.append(el('div', { class: 'money' }, `Savings ${money(p.savings)} · Metal ${fmt(p.metal)}`));
+    left.append(el('div', { class: 'money' }, `Savings ${HO.rules(G).buildSavingsPlain ? fmt(p.savings) : money(p.savings)} · Metal ${fmt(p.metal)}`));
     // (the Palm's is a plain check box, rs.allowDebt.box: tFRM 2100's control 0x709, FUN_0004248a)
     if (debtSwitch && AD.box) left.append(el('label', { class: 'chk' },
       el('input', { type: 'checkbox', checked: st.debt ? 'checked' : false, onchange: (e) => { st.debt = e.target.checked; render(); } }), el('span', null, AD.label || 'Allow Debt')));

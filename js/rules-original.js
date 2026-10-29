@@ -2138,7 +2138,7 @@ function bigBattles505(G, p) {
 function milestones505(G, p) {
   let tot = 0; for (const sid of colSlots505(G, p)) tot += popU(G.stars[sid]);
   const f = p.mile505 || (p.mile505 = {});
-  const say = (n, b) => { rep(G, p, 0x473, [p.name, num(G, n * 1000)], { icon: 'm9030', sound: 7019 }); f[b] = true; };
+  const say = (n, b) => { rep(G, p, 0x473, [p.name, num(G, n)], { icon: 'm9030', sound: 7019 }); f[b] = true; };
   if (tot > 1000000 && !f[1]) say(1000000, 1);
   else if (tot > 2500000 && !f[2]) say(2500000, 2);
   if (tot > 5000000 && !f[4]) say(5000000, 4);
