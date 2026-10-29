@@ -2445,7 +2445,7 @@ E.registerRules('405', Object.assign({}, D, {
   timeLimit: TIME_LIMIT_405,
   // CONFIRMED (FUN_0042e5c2, used by the report texts FUN_0046ec5a and the
   // windows' text; Mac 4.0.5's "%d,%.3dK" too): "12,345K" from ten million
-  fmtNum: E.niceNum,
+  fmtNum: E.niceNum, fmtMoney: E.moneyNice, // (FUN_0042e5c2 then "$%s": "$-1,234")
   // no Fix Spending: neither 4.0.5 has the command (no such menu item or string)
   fixSpending: null,
   // the New Game window's Version and Edition menus (engine.js editions)

@@ -201,6 +201,8 @@ const FIXES = W.fixes.filter(f => MAC_SLIPS.includes(f.id)).concat([
 
 // Mac 4.0.5 plays 4.0.5's game (js/rules-405.js), with the differences above
 E.registerRules('mac405', Object.assign({}, W, {
+  // CONFIRMED (DrawIncomeRect @113340: LongToNiceShortString of the interest, STR# 6070.10 "(Int: $%s)")
+  interestRow: (n, cur) => '(Int: ' + cur + E.niceShort(n) + ')',
   // the colour-monitor joke on a black-and-white skin, in p.colorJoke's year (AddEasterEggs @b000c, string 1111; engine.js endTurn)
   colorMonitorBW: { text: 'Your scientists have discovered how to turn your monitor from black and white to color!', icon: 'm9039' },
   // CONFIRMED (DITL 6080 item 15, the option word's bit 8; DrawIconRect

@@ -2040,8 +2040,9 @@ E.registerRules('dos', Object.assign({}, O, {
   // CONFIRMED (WINHO.EXE's number formats "%ld,%.3ld", "%ld,%.3ld,%.3d",
   // "%ld,%.3ldK"; Mac 2.0.1 and 1.2 LongToNiceString @1244a): every number in
   // a report or window is "1,234", "1,234,567", and from ten million "12,345K"
-  // (engine niceNum); a sum is "$" and that. Not 5.0.5's (rules-original).
-  fmtNum: E.niceNum, fmtMoney: null,
+  // (engine niceNum); a sum is "$" and that, "$-1,234" when negative (the sign
+  // is part of the figure: sprintf("$%s", nice), engine moneyNice). Not 5.0.5's (rules-original).
+  fmtNum: E.niceNum, fmtMoney: E.moneyNice,
   label: 'DOS 2.0 (1993)',
   // the New Game window's Version and Edition menus (engine.js editions):
   // the Windows 3.1 program, WINHO.EXE, is a 2.0.1 build (its credits,

@@ -2050,7 +2050,10 @@ E.registerRules('301', Object.assign({}, D, {
   // the middle three. Unlike 1.2's and 2.0's list, with no groups.
   exploredList: Object.assign({}, D.exploredList, { layout: 'mac', sortBy: ['Metal', 'Quality', 'Gravity', 'Owner'], sortLabel: 'Sort By:', sortDefault: 1, quality: (p, k) => O.starRating(p, k) }),
   // CONFIRMED (LongToNiceString @1206c): 2.0's numbers, "12,345K" from ten million (engine niceNum)
-  fmtNum: E.niceNum,
+  // CONFIRMED (DrawIncomeRect @154294, the program's own "(Int: %s)", LongToNiceShortString of the
+  // interest; the manual's picture reads "(Int: 3K)"): the Interest row's text
+  interestRow: (n) => '(Int: ' + E.niceShort(n) + ')',
+  fmtNum: E.niceNum, fmtMoney: E.moneyNice, // (a sum is sprintf("$%s", nice): "$-1,234")
   // the New Game window's Version and Edition menus (engine.js editions)
   family: '3.0', edition: { version: '3.0.1', name: 'Mac', platform: 'Mac', year: 1993 }, skins: ['mac3c', 'mac3'],
   hints: false, // this game had no between-turn tips (4.0.5 and 5.0.5 do)

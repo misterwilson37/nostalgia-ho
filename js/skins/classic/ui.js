@@ -1426,7 +1426,7 @@ function renderPanel() {
   panel.append(el('section', { class: 'box info' },
     row('Savings', panelFig('savings', p.savings, true), p.savings < 0 ? 'neg' : '', 'savings'),
     row('Income', HO.rules(G).interestShort ? HO.sumText(G, tl('%s (Int: $%s)', panelFig('income', pr.income, true), HO.rules(G).interestShort(pr.interest))) : panelFig('income', pr.income, true), pr.income < 0 ? 'neg' : '', 'income'),
-    pr.interest && !HO.rules(G).interestShort ? row(pr.interest > 0 ? 'Interest' : 'Interest owed', money(pr.interest), pr.interest < 0 ? 'neg' : '', 'interest') : null,
+    pr.interest && !HO.rules(G).interestShort ? row(pr.interest > 0 ? 'Interest' : 'Interest owed', HO.rules(G).interestRow && !G.opts.lang ? HO.sumText(G, HO.rules(G).interestRow(pr.interest, curSign())) : money(pr.interest), pr.interest < 0 ? 'neg' : '', 'interest') : null,
     row('Metal', panelFig('metal', p.metal, false), '', 'metal'),
   ));
   // budget bars

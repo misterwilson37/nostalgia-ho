@@ -349,7 +349,8 @@ const rs = Object.assign(base, {
   // CONFIRMED (FUN_0002c510, the CMiscUtilsPalm method +0x68 the report
   // formatter FUN_00027c4c calls): numbers in full with commas, however big,
   // not 5.0.5's "12,345K" (the compact money, FUN_0002c664: shortMoney below).
-  fmtNum: null, fmtMoney: null,
+  // (negative sums, with the currency, in brackets: FUN_0002c510 writes ")", the sign, then "(" reversed: "($1,234)")
+  fmtNum: null, fmtMoney: E.moneyPalmFull,
   // CONFIRMED (October 2026): the compact form is used on screens by size
   // (each caller tests the figure, then calls the method +0x6c, FUN_0002c664,
   // instead of +0x68): the money panel (FUN_00047f54: Metal from 1,000,000

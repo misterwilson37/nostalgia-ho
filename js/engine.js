@@ -1035,6 +1035,28 @@ function money505(n, cur = '$') {
   const body = m >= 10 ? `${m}.${p3(t)}M` : niceNum(a);
   return n < 0 ? `(${cur}${body})` : `${cur}${body}`;
 }
+// - niceShort: LongToNiceShortString (1.2 @1258e, 3.0.1 @121b0, 4.0.5 Mac @1713e6; WINHO.EXE
+//   FUN_1100_0294), the figure beside the totals' changes and the interest, "%d", "%dK", "%dM":
+//   the magnitude plus 500,000 over a million is the millions (so 500,000 reads "1M"), else
+//   plus 500 over a thousand the thousands (999 reads "1K", 499 reads "499"); a negative
+//   number has the sign of the quotient ("-3K"), a zero "0";
+// - moneyNice: a sum in 1.2 to 4.0.5 is sprintf("$%s", the nice number), so the minus sign
+//   belongs to the figure: "$-1,234" (3.0.1 DrawPlanetRect, DrawIncomeRect "$%s"; 4.0.5
+//   FUN_0041e140 DAT_0059c7a0; string 392 / 708 "$%s"), never "-$1,234";
+// - moneyPalmFull: the Palm's own full number (FUN_0002c510, CMiscUtilsPalm +0x68): "1,234,567"
+//   with the currency "$1,234", and a negative sum in brackets, "($1,234)" ("-1,234" with no currency).
+function niceShort(n) {
+  n = Math.trunc(n);
+  const a = Math.abs(n), s = n < 0 ? -1 : 1;
+  const m = Math.trunc((a + 500000) / 1e6) * s, k = Math.trunc((a + 500) / 1000) * s;
+  return m !== 0 ? `${m}M` : k !== 0 ? `${k}K` : String(n);
+}
+const moneyNice = (n, cur = '$') => cur + niceNum(n);
+function moneyPalmFull(n, cur = '$') {
+  n = Math.round(n);
+  const body = Math.abs(n).toLocaleString('en-US');
+  return n < 0 ? `(${cur}${body})` : cur + body;
+}
 // The currency sign, from here alone (HO.currency(G); everything that writes money asks it: the
 // rules' sums (rs.fmtMoney(n, cur), moneyPalm), the skins' panels, bars and windows, and the
 // reports, whose "$1,234" `say` puts in the sign). "$" in every version and language but two cases:
@@ -1940,7 +1962,7 @@ const API = {
   newGame, endTurn, buildShips, unbuildShip, designLimits, designMin, designCost, shipCostNow, canBuildType, findOrCreateDesign, getDesign,
   fleetCount, fleetDesigns, fleetSpeed, fleetMaxRange, fleetHas, fleetKind, fleetLabel, orderMove, orderPath, cancelMove, canReach, canMerge, queueShips, unqueueShip,
   newFleet, addShipsToStar, mergeFleets, splitFleet, scrapFleet, evacuate, colonies, seenG, seenT, maxPop, planetClass, planetIncome,
-  scrapDesign, liveDesigns, isFriend, isAllied, isBuddy, hasColonyAt, designName, namesFile, namesFileAdd, report, setPact, give, surrender, sendChat, sendCanned, deliverCanned, clearCanned, cannedList, cannedSteps, setArmageddon, hostileAt, know, observe, msg, msgAll, humans, starDist, dist, projected, techSum, score, save, load, borrowLimit, fmt, num, niceNum, num505, money505, currency, euroAfter, sumText, prefs: PREFS,
+  scrapDesign, liveDesigns, isFriend, isAllied, isBuddy, hasColonyAt, designName, namesFile, namesFileAdd, report, setPact, give, surrender, sendChat, sendCanned, deliverCanned, clearCanned, cannedList, cannedSteps, setArmageddon, hostileAt, know, observe, msg, msgAll, humans, starDist, dist, projected, techSum, score, save, load, borrowLimit, fmt, num, niceNum, num505, money505, niceShort, moneyNice, moneyPalmFull, currency, euroAfter, sumText, prefs: PREFS,
 };
 if (typeof module !== 'undefined') {
   module.exports = API;
