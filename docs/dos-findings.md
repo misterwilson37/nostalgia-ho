@@ -647,6 +647,54 @@ Stefan Franke's own translation, 1994) differs; the DOS one is used for both rul
   1.2's and 3.0.1's; the length rule stays as it was (the Windows check, behind a jump table,
   wasn't read).
 
+## The panel's numbers: temperature and gravity in every version (October 2026)
+
+What the planet panel (the info area) and the explored-stars list printed, version by version, read from the
+resources and the code (`docs/roadmap.md` 4h; `node tools/temp-check.js` asserts every row; the code is
+`HO.panelFormat`, `HO.panelTemp`, `HO.gravText` in `js/engine.js`). One shape holds in all of them:
+
+- **Temperature.** T is the star's temperature less your home's plus 720, in tenths of a degree Fahrenheit
+  (`0x2d0 - home + t`). °F: `sprintf(fmt, T / 10, |T| mod 10)`, so **a tenth is always shown ("72.0°F")**, and
+  since `T / 10` truncates toward zero the sign is lost between -0.9 and -0.1 ("-0.5" prints "0.5": kept).
+- **Gravity.** r = g × 100 ÷ home g, **truncated** (a 1.38 G star at a 1.37 G home reads "1.00G", 1.36 reads
+  "0.99G"), printed `(r / 100, r mod 100)` with `%d.%2.2d` and the letter G, no space. The remake rounded
+  (`toFixed(2)`); it truncates now.
+- No space before the unit, none before the G; the label ("Temp", "Gravity", the list's columns) is the window's
+  own text, not part of the format.
+
+| Version | Temperature | Gravity | Where read | °C |
+|---|---|---|---|---|
+| 1.2 / 1.2F (Mac) | "%d,%1.1d°C" (STR# 4000.2) | "%d,%2.2dG" (4000.3) | `DrawPlanetRect @c44f6`, `InitStarsList @12072a`; 1.2F's STR# | the only unit: (T − 324) × 5 ÷ 9, truncated (72.0 → 22.0). The English 1.2 never existed: the remake's English and Turkish 1.2 use a point |
+| 2.0 DOS, English | "%d.%1.1d%cF" with 0xa1 (the DOS font's degree) | "%d.%2.2dG" | `DOSHO.EXE` (unpacked) `FUN_3000_…` panel (T / 10, \|T\| mod 10, 0xa1), the gravity `FUN_1000_193c` | none |
+| 2.0 Win 3.1, English | "%d.%1.1d%cF" with 0xb0 | "%d.%2.2dG" | `WINHO.EXE` data 1130:196c (panel, `FUN_1088_1b3f` @1d0e), 1130:16ce (list, `FUN_1070_0033` @04a4) | none |
+| 2.0.1 Mac, English | "%d.%1.1d°F" (a string in the program, not a resource) | "%d.%2.2dG" | `DrawPlanetRect @c436a` | none |
+| 2.0 German (DOS; Mac 2.0.1) | "%d,%1.1d%cC" | "%d,%2.2dG" | `DOSHO.EXE` (German, not packed) file offsets 281145 (list) and 286542 (panel) | whole degrees trunc((F − 32) × 5 ÷ 9), whose last digit is printed again as the tenths: 72 → "22,2°C", 71 → "21,1°C" |
+| 2.0 French (no original) | as 1.2F: "%d,%1.1d°C" | "%d,%2.2dG" | 1.2F's window | as 1.2F |
+| 3.0.1 Mac, English | STR# 4000.2 "%d.%1.1d°F" | 4000.3 "%d.%2.2dG" | `DrawPlanetRect @15491e` | none |
+| 3.0.1F Mac, French | STR# 4000.2 "%d.%1.1d°C" (a point) | 4000.3 "%d.%2.2dG" (a point; its *reports* have the comma) | `js/lang-data.js` `mac301Fr` | 1.2's formula (LIKELY: 3.0.1F's code is not to hand; unsettled by a tenth at most) |
+| 4.0.5 Win | string 1333 "%d.%1.1d°F", 1334 °C | 1335 "%d.%2.2dG" | `SPACEHO.EXE` `FUN_0042f742` (the text), `FUN_0042f6e3` (the arithmetic), `FUN_0048eb07` @48f16a (gravity) | (T − 324) × 5 ÷ 9, with the Preferences box "Temp. in Celsius (not °F)" |
+| 4.0.5 Mac | STR# 6170.3 / .4 | 6170.5 | `CreateTempString @172758`, `CalcDisplayTemp @1726f6` ((396 − home + t) × 5 ÷ 9) | the same 324 |
+| 5.0.5 | STR# 6003.2 "%d.%1.1d°F", .3 °C | 6003.1 "%d.%2.2dG" | `FUN_1009d520` (also the reports and the list), the panel `FUN_100bc070`/`100bc5b0` | **(T − 360) × 5 ÷ 9**: home's 72.0°F reads 20.0°C |
+| Palm 1.0.3/4 | tSTL 6003.1 "%ld.%1ld°F", .2 °C | 6003.0 "%lu.%02luG" | `FUN_000291dc` | (T − 360) × 5 ÷ 9 |
+| iOS 1.2.9 | sprintf Templates 1 "%d.%1.1dºF", 2 "ºC" (º = U+00BA, the masculine ordinal, not the degree sign) | 0 "%d.%2.2dG" | `FUN_100038310`, `StarInfoLayer` | (T − 360) × 5 ÷ 9 (`5T − 1800`, ÷ 9), Preferences "Temp: ºC / ºF" |
+| Android 1.2.8 | the same strings (`en/fr/tr.lproj`) | the same | `CreateTempString() @281688` (the literal pool holds −1800) | (T − 360) × 5 ÷ 9 |
+| Amiga 2.0 and 2.1, both languages | "%d.%1.1d%cC" with C, \|C\| mod 10 | "%d.%2.2dG" (a point in German too) | `FUN_00105278`, the list row @12393a | trunc(trunc(T / 10) − 32) × 5 ÷ 9 with the "tenths" slip: `docs/amiga-skin.md` |
+
+Languages, where the version has none of its own: the version's English format with the language's decimal sign.
+**German** (no original after 2.0): a comma in the temperature and the gravity ("72,0°F", "1,02G"), as DOSHO.EXE;
+**Spanish** (the remake's own, `docs/translations.md`): whole degrees, °C ("22°C", "72°F" if °F is chosen), a comma in
+the gravity; **French**: 1.2F's comma for 1.2 and 2.0, a point for 3.0.1F and 4.0.5 and for iOS's French and every later
+version (iOS's French templates keep the point), °F by default there; **Turkish**: iOS's templates, a point.
+
+The °C/°F preference keeps working (`Prefs.temp`, and the version's own box): a unit the version never showed there is
+written in the version's own format and formula (the 324 lineage for 1.2 to 4.0.5, the 360 one for 5.0.5, the Palm, iOS and
+Android), so °C chosen at home's 72.0°F reads "22.0°C" in 3.0.1 and "20.0°C" in 5.0.5.
+
+**Not changed:** the reports ("You have explored … Temp: 72°") still write whole degrees where the originals wrote a tenth
+(2.0's string 703 "Temp: %d.%1.1d°F", 5.0.5's `FUN_1009d520` too) and, with °C chosen, convert by the exact formula
+rather than the 360 or 324 one (a text-only difference: the panel and the report may differ by a degree or two in
+°C); 4.0.5's Windows string 724 "%d.%1.1dG %d°" (gravity to a tenth and whole degrees) has no use that was found.
+
 ## Changes to the shared code
 
 `js/engine.js` has these optional hooks; the other rulesets' test games are byte for byte

@@ -210,15 +210,17 @@ const rsCelsius = () => !!(G && HO.rules(G).celsius);
 const tempPref = () => (Prefs.temp === 'C' || Prefs.temp === 'F' ? Prefs.temp : null);
 HO.tempPref = tempPref;
 const toC = (f) => rsCelsius() ? HO.celsiusOf(G, f) : Math.round((f - 32) * 5 / 9);
-// °F: as the English versions write it ("72°"), with the unit where the version's own was °C
-// "As the original" is °C where the original showed °C in its planet panel and list (1.2, the French and German 2.0, the
-// French 3.0.1 and 4.0.5, the remake's Spanish: HO.panelFormat), in the version's own format and formula (HO.panelC)
+// The planet panel's and the list's temperature: "As the original" is each version's own format (HO.panelTemp, HO.panelFormat:
+// "72.0°F" with its tenth, °C where the original showed °C there, a comma in German, iOS's "º"), also with a choice of unit
 const degF = (f) => {
-  const u = tempPref();
-  if (u === 'F') return Math.round(f) + (HO.panelFormat(G) ? '°F' : '°');
-  if (u === 'C' || (!u && HO.panelFormat(G))) return HO.panelC(G, f); // (the version's own °C formula where it had one)
+  const u = tempPref(), t = HO.panelTemp(G, f, u || (Prefs.celsius ? 'C' : null)); // (the version's own Celsius box speaks while "As the original")
+  if (t != null) return t;
+  if (u === 'F') return Math.round(f) + '°';
+  if (u === 'C') return HO.celsiusOf(G, f) + '°C'; // (the AI homages)
   return Prefs.celsius ? toC(f) + '°C' : Math.round(f) + '°';
 };
+// the gravity as the panel prints it (HO.gravText: truncated, "1.00G", a comma where the language had one)
+const gravF = (g, homeG) => HO.gravText(G, g, homeG);
 // (a degree already in °C, as a translation writes it, stays as it is; with a choice, HO.say has done it)
 const degText = (t) => tempPref() ? t : Prefs.celsius || rsCelsius() ? t.replace(/(-?\d+)°(?!C)(F)?/g, (m, n) => toC(+n) + '°C') : t;
 // a version's own Celsius box (its Preferences window): ticked, unless the player's choice says otherwise
@@ -1503,7 +1505,7 @@ function planetBox(sid) {
   if (s.owner === ME || k.explored) {
     const src = s.owner === ME ? s : k;
     const gs = src.g / p.homeG, ts = 72 + (src.t - p.homeT);
-    box.append(row('Gravity', gs.toFixed(2) + 'G' + classNote(gs), '', 'gravity'), row('Temp', degF(ts), '', 'temp'), row('Metal', panelFig('planetMetal', src.metal, false), '', 'planetMetal'));
+    box.append(row('Gravity', gravF(src.g, p.homeG) + classNote(gs), '', 'gravity'), row('Temp', degF(ts), '', 'temp'), row('Metal', panelFig('planetMetal', src.metal, false), '', 'planetMetal'));
     if (s.owner === ME) {
       const inc = HO.planetIncome(G, p, s);
       box.append(row('Population', fmt(s.pop * 1e6), '', 'population'), row('Max population', fmt(HO.maxPop(G, p, s) * 1e6), '', 'maxPop'), row('Income', panelFig('planetIncome', inc, true), inc < 0 ? 'neg' : '', 'planetIncome'));
@@ -3544,7 +3546,7 @@ function openStarList() {
   const rows = ks.map(({ s, k }) => {
     const src = s.owner === ME ? s : k;
     const owner = s.owner === ME ? 'You' : k.owner >= 0 && G.players[k.owner] ? G.players[k.owner].name : '';
-    return el('tr', { class: 'click', onclick: () => { UI.sel = s.id; closeModal(); renderPanel(); draw(); } }, el('td', null, s.name), el('td', null, (src.g / p.homeG).toFixed(2) + 'G'),
+    return el('tr', { class: 'click', onclick: () => { UI.sel = s.id; closeModal(); renderPanel(); draw(); } }, el('td', null, s.name), el('td', null, gravF(src.g, p.homeG)),
       el('td', null, degF(72 + (src.t - p.homeT))), el('td', null, fmt(src.metal)), el('td', null, owner), el('td', null, src.pop ? fmt(src.pop * 1e6) : ''));
   });
   modal('Explored stars', table(['Star', 'Gravity', 'Temp', 'Metal', 'Owner', 'Population'], rows), { cls: 'mid' });
@@ -3569,7 +3571,7 @@ function openExploredList() {
   const go = el('button', { disabled: true, onclick: () => { if (pick == null) return; closeModal(); UI.sel = pick; centerOn(pick); renderPanel(); draw(); } }, L.go);
   const rows = list.map(s => {
     const k = rec(s), o = ownerOf(s);
-    const climate = k.explored ? `${degF(72 + (k.t - p.homeT))}  ${(k.g / p.homeG).toFixed(2)}G` : L.noClimate;
+    const climate = k.explored ? `${degF(72 + (k.t - p.homeT))}  ${gravF(k.g, p.homeG)}` : L.noClimate;
     const tr = el('tr', { class: 'click', tabindex: 0, onclick: () => { pick = s.id; go.disabled = false; for (const r of tr.parentNode.children) r.classList.toggle('sel', r === tr); },
       ondblclick: () => { pick = s.id; go.click(); } },
       el('td', null, s.name), el('td', null, climate), el('td', null, k.explored ? fmt(Math.max(0, k.metal || 0)) : ''), el('td', null, o === ME ? L.own : o < 0 ? L.free : L.enemy));
@@ -6159,7 +6161,7 @@ window.addEventListener('DOMContentLoaded', () => {
   document.body.insertAdjacentHTML('afterbegin', PAGE);
   // what a skin's hooks may use (the Amiga skin builds windows of its own with these)
   T.api = {
-    get G() { return G; }, get ME() { return ME; }, UI, IMG, A, el, $, me, money, fmt, degF, toC, degText, panelFig,
+    get G() { return G; }, get ME() { return ME; }, UI, IMG, A, el, $, me, money, fmt, degF, gravF, toC, degText, panelFig,
     toast, modal, closeModal, confirmBox, renderPanel, renderMsg, draw, save, Sound, beep, guard,
     shipPic, shipImgEl, starLook, fleetOrder, curFleet, centerOn, zoomAt, resize, map: () => ({ w: mapW, h: mapH, ready: !!cv }),
     fit() { UI.fitted = false; fit(); draw(); }, clampView,

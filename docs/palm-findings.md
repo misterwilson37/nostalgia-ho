@@ -476,3 +476,9 @@ Talt 2200), tFRM 2500 (`FUN_000745b0`, `FUN_000748d0`, `FUN_00074a6c`, `FUN_0007
 two feedback sliders 0-1,000 at 0 (disabled at 0 or less), amount trunc(have / 1,000) x k, all
 of it at 1,000; amounts in full with commas, "$" for money; "$0"/"0" and the most under each
 slider; Give records whatever the amounts. Built: `rs.giveWindow` ('palm').
+
+## The panel's numbers (CONFIRMED, October 2026)
+
+`FUN_000291dc` (tSTL 6003.1 "%ld.%1ld°F" / .2 "%ld.%1ld°C", with the "Temp in °C not °F" box): T = t − home + 720 in tenths;
+°F is (T ÷ 10, |T| mod 10); °C is (T − 0x168) × 5 ÷ 9 with 0x168 = 360 (72.0°F reads 20.0°C); the gravity is `LDIV(g × 100, home g)`
+printed with tSTL 6003.0 "%lu.%02luG". See `docs/dos-findings.md`, "The panel's numbers".

@@ -917,3 +917,12 @@ nothing yet to act on: Best Buddies (no such report). The remake's own options (
 conveniences, pointer hints) sit under a line headed "Remake options". French and Turkish are
 the app's own (`fr.lproj`, `tr.lproj`) where they exist; "All" in Turkish (the app has
 "Müttefik", ally) and a few more are the remake's own or adapted (`js/ui-text.js`).
+
+## The panel's numbers (CONFIRMED, October 2026)
+
+`StarInfoLayer` writes the temperature with `FUN_100038310(star t, home t, buffer, +0x215 the "Temp:" preference)`: T = t − home +
+720; ºF is `sprintf("%d.%1.1dºF", T / 10, |T| mod 10)` (sprintf Templates 1); ºC (template 2) uses 5 × (T − 360) ÷ 9 (`5T − 1800`,
+the multiplier 0x38e38e39 is ÷ 9) and its last digit: home's 72.0°F reads 20.0ºC. The "º" is U+00BA (the masculine ordinal) in
+every language's template (English, French, Turkish), not the degree sign. The gravity is `(g × 100) / home g` (`sdiv`), then
+`/ 100` and `% 100`, with template 0 "%d.%2.2dG". The French and Turkish templates keep the point. See
+`docs/dos-findings.md`, "The panel's numbers".

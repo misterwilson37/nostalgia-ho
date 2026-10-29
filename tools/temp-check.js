@@ -29,7 +29,7 @@ const reportC = (id, lang) => lang === 'es' || (lang === 'fr' && ['12', 'dos', '
 const HOownLang = (id) => HO.ownLanguage(HO.RULESETS[id]);
 const panelIsC = (id, lang) => id === '12' || reportC(id, lang);
 const fail = (m) => { bad++; console.log('FAIL ' + m); };
-const TOKEN = /(-?\d+(?:[.,]\d+)?)[\s ]?°[\s ]?([CF])?/g;
+const TOKEN = /(-?\d+(?:[.,]\d+)?)[\s ]?[°º][\s ]?([CF])?/g;
 const tokens = (t) => [...String(t).matchAll(TOKEN)].map(m => ({ n: parseFloat(m[1].replace(',', '.')), u: m[2] || 'F', all: m[0] }));
 
 // ---------- the engine ----------
@@ -92,7 +92,7 @@ function engine() {
   const PG = (id, lang) => { const rs = HO.RULESETS[id], o = { seed: 1, rules: id, size: 'small', computers: 1, iq: 'average', shape: 'random' }; if (HO.ownLanguage(rs) !== lang) o.lang = lang; return HO.newGame(o); };
   for (const id of Object.keys(HO.RULESETS)) {
     const rs = HO.RULESETS[id]; if (!rs.languages) continue;
-    for (const lang of HO.languages(rs)) if (!!HO.panelFormat(PG(id, lang)) !== panelIsC(id, lang)) fail(`panel ${id} ${lang}: ${HO.panelFormat(PG(id, lang)) ? 'shows °C' : 'shows °F'}, the original ${panelIsC(id, lang) ? '°C' : '°F'}`);
+    for (const lang of HO.languages(rs)) if (HO.panelFormat(PG(id, lang)).c !== panelIsC(id, lang)) fail(`panel ${id} ${lang}: ${HO.panelFormat(PG(id, lang)).c ? 'shows °C' : 'shows °F'}, the original ${panelIsC(id, lang) ? '°C' : '°F'}`);
   }
   for (const [id, lang, f, want] of [['dos', 'de', 72, '22,2°C'], ['dos', 'de', 71, '21,1°C'], ['dos', 'de', 33, '0,0°C'], ['dos', 'de', 20, '-6,6°C'], ['mac20', 'de', 72, '22,2°C'],
     ['dos', 'fr', 72, '22,0°C'], ['dos', 'fr', 50, '9,7°C'], ['mac20', 'fr', 72, '22,0°C'], ['12', 'fr', 72, '22,0°C'], ['12', 'en', 72, '22.0°C'],
@@ -100,7 +100,52 @@ function engine() {
     const got = HO.panelC(PG(id, lang), f);
     if (got !== want) fail(`panel ${id} ${lang}: ${f}°F is "${got}", expected "${want}"`);
   }
+  panelFormats(PG);
   console.log(`engine: ${texts} reports in ${Object.values(HO.RULESETS).filter(r => r.languages).length} versions checked`);
+}
+
+// The panel's and the list's temperature and gravity in each version's own format, from the sources (docs/dos-findings.md,
+// "The panel's numbers"; docs/roadmap.md 4h). Per version: the format string, with (T / 10, |T| mod 10) for a temperature T in
+// tenths of a degree Fahrenheit, and (r / 100, r mod 100) for the gravity r = g x 100 / home g truncated:
+//   1.2/1.2F    STR# 4000.2 "%d,%1.1d°C", 4000.3 "%d,%2.2dG"          (T - 324) x 5 / 9    (no English 1.2: a point)
+//   2.0 (DOS, Win 3.1, Mac 2.0.1)  "%d.%1.1d%cF", "%d.%2.2dG"          the German "%d,%1.1d%cC", "%d,%2.2dG": whole degrees' last digit
+//   3.0.1       STR# 4000.2 "%d.%1.1d°F", 4000.3 "%d.%2.2dG"; 3.0.1F "%d.%1.1d°C", "%d.%2.2dG"
+//   4.0.5       Win 1333-1335, Mac STR# 6170.3-5: "%d.%1.1d°F", "°C", "%d.%2.2dG"     (T - 324) x 5 / 9
+//   5.0.5, Palm STR# 6003 "%d.%2.2dG", "%d.%1.1d°F", "%d.%1.1d°C"      (T - 360) x 5 / 9
+//   iOS, Android sprintf Templates "%d.%2.2dG", "%d.%1.1dºF", "%d.%1.1dºC" (º U+00BA)   (T - 360) x 5 / 9
+function panelFormats(PG) {
+  // [version, language, as released at home's 72.0°F, in °F, in °C]
+  const T = [
+    ['12', 'en', '22.0°C', '72.0°F', '22.0°C'], ['12', 'fr', '22,0°C', '72,0°F', '22,0°C'], ['12', 'de', '22,0°C', '72,0°F', '22,0°C'], ['12', 'tr', '22.0°C', '72.0°F', '22.0°C'],
+    ['dos', 'en', '72.0°F', '72.0°F', '22.0°C'], ['dos', 'de', '22,2°C', '72,0°F', '22,2°C'], ['dos', 'fr', '22,0°C', '72,0°F', '22,0°C'], ['dos', 'tr', '72.0°F', '72.0°F', '22.0°C'], ['dos', 'es', '22°C', '72°F', '22°C'],
+    ['mac20', 'en', '72.0°F', '72.0°F', '22.0°C'], ['mac20', 'de', '22,2°C', '72,0°F', '22,2°C'], ['mac20', 'fr', '22,0°C', '72,0°F', '22,0°C'],
+    ['301', 'en', '72.0°F', '72.0°F', '22.0°C'], ['301', 'fr', '22.0°C', '72.0°F', '22.0°C'], ['301', 'de', '72,0°F', '72,0°F', '22,0°C'], ['301', 'tr', '72.0°F', '72.0°F', '22.0°C'], ['301', 'es', '22°C', '72°F', '22°C'],
+    ['405', 'en', '72.0°F', '72.0°F', '22.0°C'], ['405', 'fr', '22.0°C', '72.0°F', '22.0°C'], ['mac405', 'en', '72.0°F', '72.0°F', '22.0°C'], ['mac405', 'fr', '22.0°C', '72.0°F', '22.0°C'],
+    ['original', 'en', '72.0°F', '72.0°F', '20.0°C'], ['original', 'fr', '72.0°F', '72.0°F', '20.0°C'], ['original', 'de', '72,0°F', '72,0°F', '20,0°C'], ['original', 'tr', '72.0°F', '72.0°F', '20.0°C'], ['original', 'es', '22°C', '72°F', '22°C'],
+    ['palm', 'en', '72.0°F', '72.0°F', '20.0°C'], ['palm', 'fr', '72.0°F', '72.0°F', '20.0°C'],
+    ['ios', 'en', '72.0ºF', '72.0ºF', '20.0ºC'], ['ios', 'fr', '72.0ºF', '72.0ºF', '20.0ºC'], ['ios', 'tr', '72.0ºF', '72.0ºF', '20.0ºC'], ['ios', 'de', '72,0ºF', '72,0ºF', '20,0ºC'],
+    ['android', 'en', '72.0ºF', '72.0ºF', '20.0ºC'], ['android', 'tr', '72.0ºF', '72.0ºF', '20.0ºC']];
+  for (const [id, lang, own, f, c] of T) {
+    if (!HO.RULESETS[id] || !HO.languages(HO.RULESETS[id]).includes(lang)) { fail(`panel ${id} ${lang}: no such version/language`); continue; }
+    const G = PG(id, lang);
+    for (const [u, want] of [[null, own], ['F', f], ['C', c]]) { const got = HO.panelTemp(G, 72, u); if (got !== want) fail(`panel ${id} ${lang} ${u || 'as released'}: 72°F is "${got}", expected "${want}"`); }
+  }
+  // the tenth is real (T is in tenths), the sign is lost under one degree (T / 10 is 0), the °C by (T - K) x 5 / 9 truncated
+  const E = PG('original', 'en'), D = PG('dos', 'en'), M = PG('12', 'en'), O = PG('ios', 'en');
+  for (const [G, f, u, want] of [[D, 72.5, 'F', '72.5°F'], [D, 101.3, null, '101.3°F'], [D, -0.5, null, '0.5°F'], [D, -5.3, null, '-5.3°F'], [D, 0, null, '0.0°F'], [D, 400, null, '400.0°F'], [D, -200, null, '-200.0°F'],
+    [M, 50, null, '9.7°C'], [M, 72.5, null, '22.2°C'], [M, -200, null, '-129.1°C'], [E, 50, 'C', '7.7°C'], [E, 72.5, 'C', '20.2°C'], [E, 0, 'C', '-20.0°C'], [E, 20, 'C', '-8.8°C'], [O, 99.9, 'C', '35.5ºC']]) {
+    const got = HO.panelTemp(G, f, u); if (got !== want) fail(`panel ${f}°F ${u || 'as released'}: "${got}", expected "${want}"`);
+  }
+  // the gravity: g x 100 / home g truncated, "%d.%2.2dG"; the comma where the language or the version's French had one
+  const GT = [['dos', 'en', '1.00G'], ['dos', 'de', '1,00G'], ['dos', 'fr', '1,00G'], ['dos', 'tr', '1.00G'], ['dos', 'es', '1,00G'], ['mac20', 'de', '1,00G'], ['12', 'en', '1.00G'], ['12', 'fr', '1,00G'],
+    ['301', 'en', '1.00G'], ['301', 'fr', '1.00G'], ['301', 'de', '1,00G'], ['405', 'fr', '1.00G'], ['mac405', 'fr', '1.00G'], ['original', 'en', '1.00G'], ['original', 'fr', '1.00G'], ['palm', 'fr', '1.00G'],
+    ['ios', 'fr', '1.00G'], ['ios', 'tr', '1.00G'], ['android', 'en', '1.00G']];
+  for (const [id, lang, want] of GT) { const got = HO.gravText(PG(id, lang), 1.37, 1.37); if (got !== want) fail(`gravity ${id} ${lang}: home's own is "${got}", expected "${want}"`); }
+  for (const [g, home, want] of [[1.38, 1.37, '1.00G'], [1.36, 1.37, '0.99G'], [0.5, 1.37, '0.36G'], [2, 0.5, '4.00G'], [0.25, 2, '0.12G'], [2.99, 0.25, '11.96G'], [1.05, 1.0, '1.05G'], [0.99, 1.0, '0.99G']]) {
+    const got = HO.gravText(D, g, home); if (got !== want) fail(`gravity ${g}/${home}: "${got}", expected "${want}" (truncated)`);
+  }
+  if (HO.gravText(PG('dos', 'de'), 1.5, 1) !== '1,50G') fail('gravity German 1.5: ' + HO.gravText(PG('dos', 'de'), 1.5, 1));
+  if (HO.gravText(PG('dos', 'de'), 1.5, 1, false) !== '1.50G') fail('gravity with a point (the Amiga)');
 }
 
 // ---------- the page ----------
@@ -113,7 +158,7 @@ async function page() {
   const { chromium } = require('playwright');
   const browser = await chromium.launch();
   // the versions each skin shows, and what a star panel reads as released (no choice)
-  const RUNS = [['classic', '301'], ['classic', 'original'], ['classic', '12'], ['classic', 'palm'], ['amiga', 'dos'], ['amiga', 'dos', 'tr'], ['mac3', '301'], ['mac4', 'mac405'], ['w95', '405'], ['ios', 'ios'], ['dos', 'dos', 'de'], ['dos', 'dos', 'fr'], ['mac2', 'mac20', 'de'], ['mac2', 'mac20', 'fr'], ['classic', '301', 'fr'], ['classic', '12', 'fr']];
+  const RUNS = [['classic', '301'], ['classic', 'original'], ['classic', '12'], ['classic', 'palm'], ['amiga', 'dos'], ['amiga', 'dos', 'tr'], ['mac3', '301'], ['mac4', 'mac405'], ['w95', '405'], ['ios', 'ios'], ['dos', 'dos', 'de'], ['dos', 'dos', 'fr'], ['mac2', 'mac20', 'de'], ['mac2', 'mac20', 'fr'], ['classic', '301', 'fr'], ['classic', '12', 'fr'], ['classic', 'original', 'fr'], ['classic', '301', 'de'], ['classic', 'original', 'es'], ['android', 'android'], ['palm', 'palm'], ['classic', 'dos'], ['mac2', 'mac20'], ['dos', 'dos', 'es']];
   let n = 0;
   for (const [skin, rules, lang] of RUNS) {
     const seen = {};
@@ -141,7 +186,7 @@ async function page() {
         A.UI.sel = me.homeStar; A.renderPanel(); A.draw();
         const panel = document.body.innerText;
         const rep = HO.say(G, `You have explored ${G.stars[me.homeStar].name}. Gravity: 1.00G. Temp: 72°. Metal: 1,000.`);
-        return { panel: (panel.match(/[^\n]*°[^\n]*/g) || []).join(' | '), rep, deg: A.degF(72) };
+        return { panel: (panel.match(/[^\n]*[°º][^\n]*/g) || []).join(' | '), grav: (panel.match(/\d+[.,]\d\dG/g) || []).join(' '), rep, deg: A.degF(72) };
       });
       if (errors.length) fail(`${skin} ${rules} ${pref || 'as the original'}: ${errors.join('; ')}`);
       seen[pref || 'orig'] = got;
@@ -156,6 +201,14 @@ async function page() {
         if (!want && panelTok.some(t => t.u === 'C')) fail(`${skin} ${rules} ${lang || ''}: the panel should show °F as the original: "${got.panel}"`);
       }
       if (u === 'C' && !panelTok.length) fail(`${skin} ${rules} °C: no temperature in the star panel`);
+      // the panel's own format at home (72.0°F, 1.00G) in each version and language, for each choice (HO.panelTemp, HO.gravText)
+      if (skin !== 'amiga') {
+        const PGx = { seed: 1, rules, size: 'small', computers: 1, iq: 'average', shape: 'random' }; if ((lang || 'en') !== HO.ownLanguage(HO.RULESETS[rules])) PGx.lang = lang || 'en'; // (no language chosen: the page's English)
+        const Gx = HO.newGame(PGx), want = HO.panelTemp(Gx, 72, u || null);
+        if (!got.panel.includes(want)) fail(`${skin} ${rules} ${lang || ''} ${u || 'as released'}: the panel reads "${got.panel}", expected "${want}"`);
+        const wantG = HO.gravText(Gx, 1, 1);
+        if (!got.grav.split(' ').includes(wantG)) fail(`${skin} ${rules} ${lang || ''}: the gravity reads "${got.grav}", expected "${wantG}"`);
+      } else if (!/^1\.00G\b/.test(got.grav)) fail(`${skin} ${rules} ${lang || ''}: the Amiga's gravity reads "${got.grav}", expected 1.00G`);
       n++;
       await ctx.close();
     }

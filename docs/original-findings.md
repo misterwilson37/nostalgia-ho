@@ -1463,3 +1463,11 @@ CONFIRMED for the geometry; the remake blends black at 28 % (LIKELY). Palm: `FUN
 The income view's interest figure (`FUN_10098650`, player +0x4c through `FUN_100552e0`, which
 writes it as "$12K" / "$1.23M" style short numbers) sits in STR# 6003 item 8: "(Int: $%s)".
 CONFIRMED (resource fork). Done: `rs.interestShort` (the income row reads "$30,066 (Int: $12K)"; short numbers: `FUN_100552e0` gives "1,234", "12K", "1.23M", "12M", a "-" for a negative one). Neighbours: 4 "(+ $%s)", 5 "(- $%s)", 6 "(+ %s)", 7 "(- %s)".
+
+## The panel's numbers (CONFIRMED, October 2026)
+
+`FUN_1009d520(home, t, dest, celsius)` writes every temperature the panel, the list and the reports show: T = t − home + 720
+tenths; °F: STR# 6003.2 "%d.%1.1d°F" with (T ÷ 10, |T| mod 10); °C (the player's Preferences box, +0x1113): 6003.3 "%d.%1.1d°C"
+with (5 × (T − 0x168) ÷ 9) ÷ 10 and its last digit, **0x168 = 360, not 4.0.5's 324**: home's 72.0°F reads 20.0°C. The panel's
+gravity (`FUN_100bc5b0`) is `(g × 100) ÷ home g` truncated with 6003.1 "%d.%2.2dG". The Palm (`FUN_000291dc`), iOS
+(`FUN_100038310`) and Android (`CreateTempString() @281688`) do the same arithmetic. `docs/dos-findings.md`, "The panel's numbers".

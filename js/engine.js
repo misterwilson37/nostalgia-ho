@@ -573,24 +573,54 @@ function celsiusOf(G, f) {
   const k = cFormula(G), c = (f - 32) * 5 / 9;
   return k === 'real' ? c12Text(f, false) : k === 'slip' ? String(Math.trunc(c)) : String(Math.round(c));
 }
-// The planet panel and the explored-stars list "as the original" (no choice): which versions and languages showed °C
-// there. null: in °F (the version's own Celsius box, where it has one, speaks).
-// - 1.2, in any language: "%d,%1.1d°C" (1.2F; a decimal comma in French);
-// - the French 2.0: 1.2F's window; the German 2.0: DOSHO.EXE's "%d,%1.1d%cC" (docs/dos-findings.md, Languages);
-// - the French 3.0.1 and 4.0.5: 3.0.1F's STR# 4000.2 "%d.%1.1d°C" (a point); the remake's Spanish: °C to the degree,
-//   as its reports (docs/translations.md).
+// The planet panel and the explored-stars list "as the original" (no choice). What each version printed there, from its
+// resources and code (docs/roadmap.md 4h; the per-version table is in docs/dos-findings.md, "The panel's numbers"):
+// - the temperature is T, tenths of a degree Fahrenheit (the star's, less the player's home, plus 720), written
+//   "%d.%1.1d" with (T / 10, |T| mod 10), so a tenth is always shown ("72.0°F") and the sign is lost between -0.9 and -0.1
+//   (T / 10 is 0: "-0.5" reads "0.5"): the 2.0 (WINHO.EXE 1070:04a4 the list, 1088:1d0e the panel; the DOS and the Mac 2.0.1
+//   the same, "%d.%1.1d°F"), 3.0.1 (STR# 4000.2 "%d.%1.1d°F"), 4.0.5 (Win string 1333, Mac STR# 6170.3 "%d.%1.1d°F"), 5.0.5 and the
+//   Palm (STR# 6003.2, tSTL 6003.1 "%ld.%1ld°F"), iOS and Android ("%d.%1.1dºF": a masculine ordinal, U+00BA);
+// - in °C (the version's own Celsius box, or the language's), T is replaced by 5 x (T - K) / 9, truncated, K being 324 in
+//   1.2, 4.0.5 (Win FUN_0042f6e3, Mac CalcDisplayTemp: (396 - home + t) x 5 / 9) and 3.0.1F, and 360 in 5.0.5, the Palm, iOS
+//   and Android (FUN_1009d520, FUN_000291dc, FUN_100038310, CreateTempString: 72.0°F reads 20.0°C); the German 2.0
+//   works whole degrees out instead (DOSHO.EXE, "%d,%1.1d%cC") and writes their last digit again as the tenths;
+// - the gravity is the ratio g x 100 / home g, truncated, written "%d.%2.2d" with (r / 100, r mod 100) and the letter G
+//   (every version, the Amiga's "%d.%2.2dG" too); a decimal comma in the German 2.0 ("%d,%2.2dG", DOSHO.EXE) and 1.2F
+//   (STR# 4000.3 "%d,%2.2dG"; the French 2.0 follows it), a point in 3.0.1F (STR# 4000.3), iOS's French and Turkish.
+// Where a language has no original of its own for a version, the version's English format holds with the language's
+// decimal sign (German and Spanish: a comma; French: 1.2F's and 2.0's), the Spanish in whole degrees.
+// null: not a version of the game (the AI homages): the page's own whole degrees.
 function panelFormat(G) {
   const rs = G && ownRules(G); if (!rs || !rs.languages) return null;
   const lang = (G.opts && G.opts.lang) || ownLanguage(rs);
-  if (rs.celsius || ((isTwo(rs) || isThree(rs)) && lang === 'fr') || (isTwo(rs) && lang === 'de') || lang === 'es') return { comma: lang === 'de' || (lang === 'fr' && !isThree(rs)) };
-  return null;
+  const two = isTwo(rs), three = isThree(rs), de = lang === 'de', fr = lang === 'fr', es = lang === 'es';
+  const frComma = fr && (rs.id === '12' || two); // (1.2F's window, "%d,%1.1d°C" and "%d,%2.2dG"; 3.0.1F's and iOS's French write a point)
+  return {
+    c: !!(rs.celsius || ((two || three) && fr) || (two && de) || es), // the unit as released: °C
+    comma: de || frComma, gcomma: de || frComma || es, // the decimal sign of the temperature, and of the gravity
+    whole: es, // (the remake's Spanish: whole degrees)
+    deg: rs.id === 'ios' || rs.id === 'android' ? '\u00ba' : '\u00b0',
+    k: ['original', 'palm', 'ios', 'android'].includes(rs.id) ? 360 : 324,
+    slip: two && de
+  };
 }
-// the panel's °C for degrees Fahrenheit f (whole or with tenths), by the version's own formula where it had one, else rounded
-function panelC(G, f) {
-  const k = cFormula(G), comma = (panelFormat(G) || {}).comma;
-  if (k === 'real') return c12Text(f, comma) + '°C';
-  if (k === 'slip') { const c = Math.trunc((Math.trunc(Math.round(f * 10) / 10) - 32) * 5 / 9); return c + ',' + (Math.abs(c) % 10) + '°C'; }
-  return Math.round((f - 32) * 5 / 9) + '°C';
+const tenthsText = (t, comma) => Math.trunc(t / 10) + (comma ? ',' : '.') + Math.abs(t % 10);
+// the panel's temperature for degrees Fahrenheit f (with tenths) in unit 'C' or 'F' (null: as released); null if G has no panel format
+function panelTemp(G, f, unit) {
+  const pf = panelFormat(G); if (!pf) return null;
+  const u = unit || (pf.c ? 'C' : 'F'), T = Math.round(f * 10);
+  if (pf.whole) return u === 'C' ? Math.round((f - 32) * 5 / 9) + '\u00b0C' : Math.round(f) + '\u00b0F';
+  if (u === 'F') return tenthsText(T, pf.comma) + pf.deg + 'F';
+  if (pf.slip) { const c = Math.trunc((Math.trunc(T / 10) - 32) * 5 / 9); return c + ',' + (Math.abs(c) % 10) + '\u00b0C'; }
+  return tenthsText(Math.trunc((T - pf.k) * 5 / 9), pf.comma) + pf.deg + 'C';
+}
+const panelC = (G, f) => panelTemp(G, f, 'C');
+// the panel's gravity for a star's g and your home's (hundredths of a G, as floats here); comma: the decimal sign (null: the language's)
+function gravText(G, g, homeG, comma) {
+  const pf = panelFormat(G);
+  if (!pf && comma == null) return (g / homeG).toFixed(2) + 'G';
+  const r = Math.trunc(Math.round(g * 100) * 100 / Math.round(homeG * 100));
+  return Math.trunc(r / 100) + ((comma == null ? pf.gcomma : comma) ? ',' : '.') + String(r % 100).padStart(2, '0') + 'G';
 }
 const TEMP_TOKEN = /(-?\d+(?:[.,]\d+)?)[\s\u00a0]?°[\s\u00a0]?([CF])?/g;
 function tempText(G, src, out) {
@@ -1863,7 +1893,7 @@ const API = {
   DATA, SHIP_TYPES, TYPES: SHIP_TYPES, TECHS,
   BAR_SCALES, barScale, battleGroups, makeBattlePanel,
   registerRules, registerAI, rules, rulesById, aiOf, LANGUAGES, languages, ownLanguage, languageName, languageChoices,
- ownRules, gameName, ownName, setLanguage, frPatchText, windowWords, say, saysIn, trSuffixes, feature, RULESETS, fixes, fixed, TRANSLATIONS_FIX, IOS_FILLINGS_FIX, hoedown, hoedownAll, setHoedown, setHoedownAll, say0, celsiusOf, panelFormat, panelC, c12Text, tempStatic, patchVersion,
+ ownRules, gameName, ownName, setLanguage, frPatchText, windowWords, say, saysIn, trSuffixes, feature, RULESETS, fixes, fixed, TRANSLATIONS_FIX, IOS_FILLINGS_FIX, hoedown, hoedownAll, setHoedown, setHoedownAll, say0, celsiusOf, panelFormat, panelTemp, panelC, gravText, c12Text, tempStatic, patchVersion,
   // [id, name] for the New Game window: the original games' rules by year of
   // release, then version ("2.0 (DOS and Windows 3.1, 1993)"); rulesets that
   // aren't an original game's (the remake's own) come last, by their label

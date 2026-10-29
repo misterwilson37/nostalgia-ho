@@ -151,10 +151,24 @@ and the translation notice (`docs/translations-notes/`) are not done.
         29, 45 ("%d,%1.1d°C"), which the remake showed in °F; 1.2's formula is used (3.0.1F's code isn't to
         hand: LIKELY, unsettled by a tenth at most).
       - The remake's Spanish: whole °C in the panel and list, as its reports.
-      - Unchanged, as released: English and Turkish (°F; the English originals wrote "72.0°F", the remake's
-        whole degrees remain a known simplification), German 3.0.1 and later (no German original), iOS/Android/
+      - Unchanged, as released: English and Turkish are in °F, German 3.0.1 and later (no German original), iOS/Android/
         5.0.5/Palm French (their own Celsius box, °F by default), the Amiga skin (its own °C, tenths slip).
-      - Not done: the panel's gravity decimal comma ("%d,%2.2dG" in the German and 1.2F panels).
+      **Panel and list formats, version by version (October 2026, a second pass).** The English panels showed "72°" where
+      every original wrote a tenth, and the gravity was rounded and had no decimal comma where the German and French had one.
+      Read from the resources and the code of 1.2F, DOS and Win 3.1 2.0, Mac 2.0.1, the German DOS 2.0, 3.0.1 and 3.0.1F,
+      Win and Mac 4.0.5, 5.0.5, the Palm, iOS, Android and the Amiga, the panel and the list now print what each printed
+      (`HO.panelTemp`, `HO.gravText`; the table, with where each was read, is in `docs/dos-findings.md`, "The panel's
+      numbers"):
+      - the temperature is always "%d.%1.1d" of tenths of a degree: "72.0°F" in 2.0, 3.0.1, 4.0.5, 5.0.5 and the Palm,
+        "72.0ºF" in iOS and Android (U+00BA, as their templates), "22,2°C" in the German 2.0, "22,0°C" in 1.2F and the
+        French 2.0, "22.0°C" in 3.0.1F's French; "-0.5" prints "0.5" as the programs do (T / 10 truncates);
+      - the gravity is g × 100 ÷ home g truncated (1.38 at a 1.37 home reads "1.00G", not "1.01G"), "%d.%2.2dG", with a
+        comma in the German 2.0 ("1,02G"), 1.2F and the French 2.0, and in the remake's Spanish; a point in 3.0.1F, iOS's
+        French and Turkish, the Amiga's German;
+      - °C chosen (or the version's own box): the version's own formula, (T − 324) × 5 ÷ 9 up to 4.0.5, **(T − 360) × 5 ÷ 9
+        in 5.0.5, the Palm, iOS and Android** (72.0°F reads 20.0°C there); the German 2.0's whole-degree slip stays;
+      - not done, text only: the exploring reports still print whole degrees (the originals a tenth, "Temp: 72.5°F") and
+        convert °C by the exact formula, so with °C chosen a report in 5.0.5 reads "22°C" where the panel reads "20.0°C".
    i. **Japanese**, far down: there was a Japanese port, but no copy can be found; the remake's
       own Japanese translation is not planned soon.
 5. **Done (October 2026).** A home-screen (apple-touch) icon per skin: `assets/icons/<skin>-touch.png`, 180×180

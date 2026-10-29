@@ -636,3 +636,10 @@ The side-by-side sheet is the session's `amiga-real.png`.
   stay English, as asl.library draws them.
 - Still the remake's: the menus show while the pointer is on the bar (or after a right click or tap there), not
   only while the right button is held.
+
+## The panel's gravity (CONFIRMED, October 2026)
+
+The star panel (`FUN_00105278` @105552), the explored-stars list and the exploring report write the gravity with "%d.%2.2dG"
+(strings data+0xefc and +0x2d28; a **point** in German too), the arguments r / 100 and r mod 100 with r = g × 100 ÷ home g by the
+signed long divide (`bsr 0x106af8`), truncated. The skin prints it so (`HO.gravText(G, g, homeG, false)`), whatever the game's
+language. The temperature is described under "Temperatures" above. `docs/dos-findings.md`, "The panel's numbers", has every version.

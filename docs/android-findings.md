@@ -241,3 +241,9 @@ the check mark records the gift whatever the amounts (sound 5000), the X closes.
 `libApplication.so`, the same names as iOS's; the strings are iOS's (the lists are identical).
 Built: `rs.prefsWindow` ('ios', inherited), see `docs/ios-findings.md`, "The Preferences
 screen".
+
+## The panel's numbers (CONFIRMED, October 2026)
+
+`CreateTempString(short, short, char*, char) @0x281688` is iOS's `FUN_100038310`: T = t + 720 − home; the °F branch prints
+(T / 10, |T| mod 10), the °C branch adds −1800 to 5T (the literal pool at 0x2817c4) and divides by 9: (T − 360) × 5 ÷ 9. The
+templates are iOS's (`en/fr/tr.lproj`, "%d.%1.1dºF" with U+00BA, "%d.%2.2dG"). See `docs/dos-findings.md`, "The panel's numbers".

@@ -670,3 +670,12 @@ DITL 3240-3255): the first question's OK and Cancel; the second's "Party Pooper"
 item hit): item 1, the first button, goes on (the second question, then the device is on); item 2 turns it down
 and nothing more is asked.
 
+
+## The panel's numbers (CONFIRMED, October 2026)
+
+`DrawPlanetRect @15491e`: the temperature is `sprintf(STR# 4000.2 "%d.%1.1d°F", T / 10, |T| mod 10)` with T = star temperature −
+home + 720 in tenths (so "72.0°F"; the sign is lost between −0.9 and −0.1), the gravity `sprintf(4000.3 "%d.%2.2dG", r / 100,
+r mod 100)` with r = `LDIV(g × 100, home g)` truncated. 3.0.1F's STR# 4000.2 is "%d.%1.1d°C" and 4000.3 "%d.%2.2dG" (points; the
+French *reports* 1000.16, 29 and 45 have commas). 3.0.1 English has no °C at all; 3.0.1F's own code is not to hand, so its °C
+formula is taken from 1.2 and 4.0.5, which agree ((T − 324) × 5 ÷ 9): LIKELY, unsettled by a tenth at most.
+`docs/dos-findings.md`, "The panel's numbers", has every version.

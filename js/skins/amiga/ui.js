@@ -498,7 +498,7 @@ function starPanel() {
   if (s.owner === ME) {
     const inc = HO.planetIncome(G, p, s);
     rows.append(kv(w('profit'), cash(inc)), kv(w('pop'), num(s.pop * 1000)), kv(w('temp'), temp(72 + (s.t - p.homeT))),
-      kv(w('grav'), (s.g / p.homeG).toFixed(2) + 'G'), kv(w('metal'), num(s.metal)));
+      kv(w('grav'), HO.gravText(G, s.g, p.homeG, false)), kv(w('metal'), num(s.metal)));
     const bars = colonyBars(G, p, s);
     if (bars.some((b, i) => b >= 0 && (i < 2 || bars[0] >= 0 || bars[1] >= 0))) box.append(starChart(G, p, s));
     else box.append(ordersList(G, p, s));
@@ -506,7 +506,7 @@ function starPanel() {
   } else if (k.explored) {
     const own = k.owner >= 0 && G.players[k.owner];
     rows.append(kv(w('owner'), own ? own.name : w('nobody')), kv(w('pop'), own ? (k.pop ? '~' + num(k.pop * 1000) : '?') : w('empty')),
-      kv(w('temp'), temp(72 + (k.t - p.homeT))), kv(w('grav'), (k.g / p.homeG).toFixed(2) + 'G'), kv(w('metal'), num(k.metal)));
+      kv(w('temp'), temp(72 + (k.t - p.homeT))), kv(w('grav'), HO.gravText(G, k.g, p.homeG, false)), kv(w('metal'), num(k.metal)));
     if (k.seen >= 0) box.append(el('div', { class: 'am-seen' }, `${w('seen')} ${2000 + k.seen * 10}`));
   } else rows.append(el('div', { class: 'am-note' }, k.battleOnly ? w('battleSeen') : w('unexplored')));
   box.addEventListener('contextmenu', (e) => { e.preventDefault(); popup(commands(), e.clientX, e.clientY); });
@@ -1301,7 +1301,7 @@ function openStarListAm() {
   ks.sort((x, y) => grp(x) - grp(y) || x.s.name.localeCompare(y.s.name));
   const row = ({ s, k }) => {
     const src = s.owner === ME ? s : k;
-    return [s.name, temp(72 + (src.t - p.homeT)), (src.g / p.homeG).toFixed(2) + 'G', num(src.metal), w(['stNobody', 'stEnemy', 'stMine'][grp({ s, k })])];
+    return [s.name, temp(72 + (src.t - p.homeT)), HO.gravText(G, src.g, p.homeG, false), num(src.metal), w(['stNobody', 'stEnemy', 'stMine'][grp({ s, k })])];
   };
   const go = (i) => { const o = ks[i]; if (!o) return; a.closeModal(); a.UI.sel = o.s.id; a.UI.selFleet = null; a.centerOn(o.s.id); a.renderPanel(); a.draw(); };
   listWin({ title: w('starList'), size: [456, 182], frame: [16, 8, 424, 142], rows: [20, 10, 398], scroll: [420, 10, 139], items: ks.map(row), pick: go,

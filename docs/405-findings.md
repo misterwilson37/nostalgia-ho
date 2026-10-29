@@ -628,3 +628,12 @@ Money?" / "Metal?" (1145, 1146) clamped to 0..what you have as typed (`FUN_00453
 `FUN_00453c20`); both 0 gives nothing. Mac `DoGiveThingsDlg @103a70`: the same with DLOG 6120,
 45 x 45 cells, `GetCellForPlayer(+100)`, STR# 6140.10. The giver hears in pass 2 only
 (`rs.giftNewsAtEnd`). Built: `rs.giveWindow` ('grid').
+
+## The panel's numbers (CONFIRMED, October 2026)
+
+Windows: strings 1333 "%d.%1.1d°F", 1334 "%d.%1.1d°C", 1335 "%d.%2.2dG"; `FUN_0042f6e3` takes the tenths T = 720 − home + t and,
+with the Preferences box "Temp. in Celsius (not °F)", returns (5T − 1620) ÷ 9 = (T − 324) × 5 ÷ 9; `FUN_0042f742` prints
+(value ÷ 10, |value| mod 10); the gravity `FUN_0048eb07` @48f16a is g × 100 ÷ home g truncated, `(r ÷ 100, r mod 100)`. Mac:
+`CalcDisplayTemp @1726f6` ((396 − home + t) × 5 ÷ 9, 396 = 720 − 324), `CreateTempString @172758` with STR# 6170.3 / .4, the gravity
+`__ldiv(g × 100, home g)` with 6170.5. Windows string 724 "%d.%1.1dG %d°" has no use that was found. See
+`docs/dos-findings.md`, "The panel's numbers".

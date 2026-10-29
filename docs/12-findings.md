@@ -651,3 +651,11 @@ scale.
 
 See `docs/open-questions.md` (the 1.2 entries), and `docs/research-log.md`, section
 "Mac 1.2", for how each question was settled.
+
+## The panel's numbers (October 2026)
+
+`DrawPlanetRect @c44f6` and `InitStarsList @12072a` print the temperature with STR# 4000.2 "%d,%1.1d°C" (tenths of
+(T − 324) × 5 ÷ 9, truncated, T in tenths of °F: home's 72.0 reads 22.0) and the gravity with 4000.3 "%d,%2.2dG", the ratio
+g × 100 ÷ home g truncated (`LDIV`, then `/ 100` and `% 100`). The remake's 1.2 shows exactly that in every language (a
+comma in French, German and Spanish, a point in English and Turkish, which 1.2 never had). See `docs/dos-findings.md`,
+"The panel's numbers", for all the versions.
