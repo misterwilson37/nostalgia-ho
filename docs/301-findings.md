@@ -679,3 +679,10 @@ r mod 100)` with r = `LDIV(g × 100, home g)` truncated. 3.0.1F's STR# 4000.2 is
 French *reports* 1000.16, 29 and 45 have commas). 3.0.1 English has no °C at all; 3.0.1F's own code is not to hand, so its °C
 formula is taken from 1.2 and 4.0.5, which agree ((T − 324) × 5 ÷ 9): LIKELY, unsettled by a tenth at most.
 `docs/dos-findings.md`, "The panel's numbers", has every version.
+
+## The reports' numbers (October 2026)
+
+The exploring report (STR# 1000.29 "…Gravity: %d.%2.2dG. Temp: %d.%1.1d°F. Metal: %s.") is filled by `ExploreStar @a549e` (message 0x405:
+r = `LDIV(g × 100, home g)`, T = t + 720 − home) and printed by `GetReportString` @160b94 with r / 100, r % 100, T ÷ 10 and |T| mod 10:
+"Temp: 72.5°F", the panel's numbers. 3.0.1F's report (1000.29 "%d,%1.1d°C") has a comma where its window (4000.2) has a point; its
+code is not to hand (1.2's formula: LIKELY). `docs/dos-findings.md`, "The reports' numbers".

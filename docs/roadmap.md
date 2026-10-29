@@ -167,8 +167,15 @@ and the translation notice (`docs/translations-notes/`) are not done.
         French and Turkish, the Amiga's German;
       - °C chosen (or the version's own box): the version's own formula, (T − 324) × 5 ÷ 9 up to 4.0.5, **(T − 360) × 5 ÷ 9
         in 5.0.5, the Palm, iOS and Android** (72.0°F reads 20.0°C there); the German 2.0's whole-degree slip stays;
-      - not done, text only: the exploring reports still print whole degrees (the originals a tenth, "Temp: 72.5°F") and
-        convert °C by the exact formula, so with °C chosen a report in 5.0.5 reads "22°C" where the panel reads "20.0°C".
+      **The reports (October 2026, a third pass).** Every report that prints a temperature or a gravity was found in each version
+      and the code that fills it read (`docs/dos-findings.md`, "The reports' numbers": the table of templates, functions and
+      arithmetic per version). All of them print what the panel prints: "Gravity: 1.23G. Temp: 72.5°F" (a tenth, the ratio
+      truncated), in the unit as released or the player's, by the version's own formula (324 up to 4.0.5, 360 in 5.0.5, the Palm, iOS
+      and Android; the German 2.0's slip, settled by its code: the report's formatter takes the same arguments as the panel's),
+      and the version's own Celsius box speaks in the reports as in the panels (`HO.tempUnit`). The volcano report is in every
+      version's files but no version sends it. 3.0.1F's report code is not to hand (the comma its report writes, the point its
+      window writes, and 1.2's formula: LIKELY). `node tools/temp-check.js` asserts every version and language (the reports of
+      games played in the engine, in all three choices, against the table written out in the test from the sources).
    i. **Japanese**, far down: there was a Japanese port, but no copy can be found; the remake's
       own Japanese translation is not planned soon.
 5. **Done (October 2026).** A home-screen (apple-touch) icon per skin: `assets/icons/<skin>-touch.png`, 180×180

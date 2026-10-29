@@ -540,7 +540,7 @@ function trSuffixes(s) {
   s = String(s).replace(/\{\^\}(\s*)(\S)/g, (m, sp, c) => sp + c.toLocaleUpperCase('tr'));
   return s.replace(/([^\s’'{}]*)([’']?)\{(e|de|den|deki|i|in|le)\}/g, (m, w, ap, code) => w + ap + trEnding(w, code));
 }
-function say(G, text) { return sumText(G, tempText(G, text, say0(G, text))); }
+function say(G, text) { return sumText(G, tempText(G, text, reportTemps(G, say0(G, text)))); }
 // ---------- °C or °F: the player's choice (docs/roadmap.md 4h) ----------
 // API.tempPref() is the page's preference, 'C', 'F' or null: null shows each version, language and
 // skin as released (the default), and the rest of this code does nothing then. A choice changes only what
@@ -598,6 +598,7 @@ function panelFormat(G) {
   return {
     c: !!(rs.celsius || ((two || three) && fr) || (two && de) || es), // the unit as released: °C
     comma: de || frComma, gcomma: de || frComma || es, // the decimal sign of the temperature, and of the gravity
+    rcomma: de || (fr && (rs.id === '12' || two || three)), // ... of the temperature in the reports (3.0.1F's "%d,%1.1d°C" has the comma its window lacks)
     whole: es, // (the remake's Spanish: whole degrees)
     deg: rs.id === 'ios' || rs.id === 'android' ? '\u00ba' : '\u00b0',
     k: ['original', 'palm', 'ios', 'android'].includes(rs.id) ? 360 : 324,
@@ -605,27 +606,53 @@ function panelFormat(G) {
   };
 }
 const tenthsText = (t, comma) => Math.trunc(t / 10) + (comma ? ',' : '.') + Math.abs(t % 10);
-// the panel's temperature for degrees Fahrenheit f (with tenths) in unit 'C' or 'F' (null: as released); null if G has no panel format
-function panelTemp(G, f, unit) {
+// the temperature as the version prints it, from T, tenths of a degree Fahrenheit (less the player's home, plus 720), in unit 'C' or 'F'
+// (null: as released); comma: the decimal sign (null: the panel's); null if G has no panel format
+function panelTempT(G, T, unit, comma) {
   const pf = panelFormat(G); if (!pf) return null;
-  const u = unit || (pf.c ? 'C' : 'F'), T = Math.round(f * 10);
-  if (pf.whole) return u === 'C' ? Math.round((f - 32) * 5 / 9) + '\u00b0C' : Math.round(f) + '\u00b0F';
-  if (u === 'F') return tenthsText(T, pf.comma) + pf.deg + 'F';
-  if (pf.slip) { const c = Math.trunc((Math.trunc(T / 10) - 32) * 5 / 9); return c + ',' + (Math.abs(c) % 10) + '\u00b0C'; }
-  return tenthsText(Math.trunc((T - pf.k) * 5 / 9), pf.comma) + pf.deg + 'C';
+  const u = unit || (pf.c ? 'C' : 'F'), cm = comma == null ? pf.comma : comma;
+  if (pf.whole) return u === 'C' ? Math.round((T / 10 - 32) * 5 / 9) + '\u00b0C' : Math.round(T / 10) + '\u00b0F';
+  if (u === 'F') return tenthsText(T, cm) + pf.deg + 'F';
+  if (pf.slip) { const c = Math.trunc((Math.trunc(T / 10) - 32) * 5 / 9); return c + (cm ? ',' : '.') + (Math.abs(c) % 10) + '\u00b0C'; }
+  return tenthsText(Math.trunc((T - pf.k) * 5 / 9), cm) + pf.deg + 'C';
 }
+// the panel's temperature for degrees Fahrenheit f (with tenths) in unit 'C' or 'F' (null: as released); null if G has no panel format
+function panelTemp(G, f, unit) { return panelTempT(G, Math.round(f * 10), unit); }
 const panelC = (G, f) => panelTemp(G, f, 'C');
+// the ratio every version prints (hundredths of a G): g x 100 / home g, both in hundredths, the signed long divide's truncation
+const gravRatio = (g, homeG) => Math.trunc(Math.round(g * 100) * 100 / Math.round(homeG * 100));
 // the panel's gravity for a star's g and your home's (hundredths of a G, as floats here); comma: the decimal sign (null: the language's)
 function gravText(G, g, homeG, comma) {
   const pf = panelFormat(G);
   if (!pf && comma == null) return (g / homeG).toFixed(2) + 'G';
-  const r = Math.trunc(Math.round(g * 100) * 100 / Math.round(homeG * 100));
+  const r = gravRatio(g, homeG);
   return Math.trunc(r / 100) + ((comma == null ? pf.gcomma : comma) ? ',' : '.') + String(r % 100).padStart(2, '0') + 'G';
 }
+// The reports' numbers (docs/dos-findings.md, "The reports' numbers"). An exploring report is written, in the remake's English
+// that the rules keep and the page says again in the game's language (say), with the version's own numbers, whole: the gravity
+// as the ratio r above ("Gravity: 1.00G") and the temperature as a token for T, tenths of a degree Fahrenheit, "72.0°F" ("-0.5°F"
+// keeps the sign the programs lose between -0.9 and -0.1); say writes the token as the version printed it in that language, in the
+// unit as released or the player's (reportTemp), the way its panel does, since every original filled the report and the panel
+// with the same arithmetic.
+const TEMP_NEUTRAL = /(-?)(\d+)\.(\d)\u00b0F/g, HAS_NEUTRAL = /(-?)(\d+)\.(\d)\u00b0F/;
+const tempToken = (T) => (T < 0 ? '-' : '') + Math.trunc(Math.abs(T) / 10) + '.' + (Math.abs(T) % 10) + '\u00b0F';
+const gravToken = (r) => Math.trunc(r / 100) + '.' + String(r % 100).padStart(2, '0') + 'G';
+const tokenTenths = (t) => { const m = /^(-?)(\d+)\.(\d)/.exec(String(t)); return m ? (m[1] ? -1 : 1) * (+m[2] * 10 + +m[3]) : null; };
+// what player p reads of star s: the ratio r and T
+const exploreNums = (p, s) => ({ r: gravRatio(s.g, p.homeG), T: Math.round(s.t * 10) + 720 - Math.round(p.homeT * 10) });
+// the unit the player asked for, or null (as released): the page's choice, else the version's own Celsius box
+const unitPref = () => (API.tempUnit ? API.tempUnit() : API.tempPref && API.tempPref()) || null;
+// a report's temperature token said as the version printed it; unit: the unit a template fixes (a literal °C), the player's choice wins
+function reportTemp(G, token, unit, comma) {
+  const T = tokenTenths(token), pf = panelFormat(G); if (T == null || !pf || !HAS_NEUTRAL.test(String(token))) return null;
+  return panelTempT(G, T, unitPref() || unit || null, comma == null ? pf.rcomma : comma);
+}
+const reportTemps = (G, out) => typeof out === 'string' && out.indexOf('\u00b0F') >= 0 ? out.replace(TEMP_NEUTRAL, (m) => reportTemp(G, m) ?? m) : out;
 const TEMP_TOKEN = /(-?\d+(?:[.,]\d+)?)[\s\u00a0]?°[\s\u00a0]?([CF])?/g;
 function tempText(G, src, out) {
   const u = API.tempPref && API.tempPref();
   if (!u || typeof out !== 'string' || out.indexOf('°') < 0) return out;
+  if (HAS_NEUTRAL.test(src)) return out; // (a report with its tenths: reportTemps has written it in the unit)
   const a = String(src).match(TEMP_TOKEN), b = out.match(TEMP_TOKEN);
   // (a report with one temperature; the hints that give both, "72°F (20°C)", are left alone)
   if (!a || !b || a.length !== 1 || b.length !== 1) return out;
@@ -1140,7 +1167,7 @@ function cannedSteps(o) {
   const base = o.base || 0x40a, groups = o.groups || [['all', 'Everyone']];
   const fill = (G, t, m) => t.replace(/%[sptgnx]/g, (k) => k === '%n' ? who(G, m.from) : k === '%x' ? m.text : k === '%s' ? star(G, m.code - base === 12 ? m.b : m.a)
     : k === '%p' ? who(G, m.a) : k === '%t' ? (groups.find(g => g[0] === m.to) || [0, who(G, m.to)])[1]
-    : `${Math.trunc(m.g / 100)}.${String(m.g % 100).padStart(2, '0')}G and ${Math.trunc(m.t / 10)}.${Math.abs(m.t % 10)}°F`);
+    : `${Math.trunc(m.g / 100)}.${String(m.g % 100).padStart(2, '0')}G and ${tempToken(m.t)}`);
   const S = (label, parts) => ({ label, parts: parts || [] });
   const actions = o.actions || [S('I Want', [['Which Star?', 'nearby']]), S('You Take', [['Which Star?', 'nearby']]), S('I Like', [['Who?', 'players']]), S('I Don’t Like', [['Who?', 'players']]),
     S('I Own', [['Which Star?', 'owned']]), S('I Need Money'), S('I Need Metal'), S('Let’s Attack', [['Which Star?', 'nearby']]), S('Thank You'), S('Sorry'), S('#!$@*$&@•™!'), S('My Stats'),
@@ -1619,8 +1646,10 @@ function exploreMsg(G, p, s) {
   const quality = rules(G).exploreQuality(G, p, s);
   const snd = quality === 'good' ? 6000 : quality === 'mediocre' ? 6002 : 6001;
   const icon = quality === 'good' ? 'm9027' : quality === 'mediocre' ? 'm9028' : 'm9029';
-  const gStr = gs.toFixed(2) + 'G';
-  msg(G, p.id, `You have explored ${s.name}. Gravity: ${gStr}. Temp: ${Math.round(ts)}°. Metal: ${num(G, s.metal)}.`, { icon, sound: snd, star: s.id, explore: quality, temp: ts });
+  // (a version of the game: its own numbers, the ratio truncated and the tenth, say writes them; the AI homages keep whole degrees)
+  const N = panelFormat(G) ? exploreNums(p, s) : null;
+  const gStr = N ? gravToken(N.r) : gs.toFixed(2) + 'G', tStr = N ? tempToken(N.T) : Math.round(ts) + '°';
+  msg(G, p.id, `You have explored ${s.name}. Gravity: ${gStr}. Temp: ${tStr}. Metal: ${num(G, s.metal)}.`, { icon, sound: snd, star: s.id, explore: quality, temp: ts });
 }
 
 // ---------- battles ----------
@@ -1893,7 +1922,7 @@ const API = {
   DATA, SHIP_TYPES, TYPES: SHIP_TYPES, TECHS,
   BAR_SCALES, barScale, battleGroups, makeBattlePanel,
   registerRules, registerAI, rules, rulesById, aiOf, LANGUAGES, languages, ownLanguage, languageName, languageChoices,
- ownRules, gameName, ownName, setLanguage, frPatchText, windowWords, say, saysIn, trSuffixes, feature, RULESETS, fixes, fixed, TRANSLATIONS_FIX, IOS_FILLINGS_FIX, hoedown, hoedownAll, setHoedown, setHoedownAll, say0, celsiusOf, panelFormat, panelTemp, panelC, gravText, c12Text, tempStatic, patchVersion,
+ ownRules, gameName, ownName, setLanguage, frPatchText, windowWords, say, saysIn, trSuffixes, feature, RULESETS, fixes, fixed, TRANSLATIONS_FIX, IOS_FILLINGS_FIX, hoedown, hoedownAll, setHoedown, setHoedownAll, say0, celsiusOf, panelFormat, panelTemp, panelTempT, panelC, gravText, gravRatio, gravToken, tempToken, tokenTenths, exploreNums, reportTemp, unitPref, c12Text, tempStatic, patchVersion,
   // [id, name] for the New Game window: the original games' rules by year of
   // release, then version ("2.0 (DOS and Windows 3.1, 1993)"); rulesets that
   // aren't an original game's (the remake's own) come last, by their label

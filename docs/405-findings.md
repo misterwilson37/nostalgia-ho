@@ -637,3 +637,10 @@ with the Preferences box "Temp. in Celsius (not °F)", returns (5T − 1620) ÷ 
 `CalcDisplayTemp @1726f6` ((396 − home + t) × 5 ÷ 9, 396 = 720 − 324), `CreateTempString @172758` with STR# 6170.3 / .4, the gravity
 `__ldiv(g × 100, home g)` with 6170.5. Windows string 724 "%d.%1.1dG %d°" has no use that was found. See
 `docs/dos-findings.md`, "The panel's numbers".
+
+## The reports' numbers (October 2026)
+
+Windows: `FUN_00439558` sends message 0x408 (yours, string 963) or 0x409 (a buddy's, 964) with r = g × 100 ÷ home g, the star's t and your
+home t; `FUN_0046ec5a` case 0x408 prints r / 100, r % 100 and calls `FUN_0042f742(t, home t)` for "Temp: %.*s", the panel's own routine
+(the Preferences box "Temp. in Celsius (not °F)", (T − 324) × 5 ÷ 9). Mac: `GetReportString` calls `CreateTempString` at three sites. So the
+report reads "Gravity: 1.23G. Temp: 72.5°F" or, in °C, as the panel. `docs/dos-findings.md`, "The reports' numbers".

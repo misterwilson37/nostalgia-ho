@@ -643,3 +643,9 @@ The star panel (`FUN_00105278` @105552), the explored-stars list and the explori
 (strings data+0xefc and +0x2d28; a **point** in German too), the arguments r / 100 and r mod 100 with r = g × 100 ÷ home g by the
 signed long divide (`bsr 0x106af8`), truncated. The skin prints it so (`HO.gravText(G, g, homeG, false)`), whatever the game's
 language. The temperature is described under "Temperatures" above. `docs/dos-findings.md`, "The panel's numbers", has every version.
+
+## The exploring report's numbers (October 2026)
+
+Report 600 is filled like the panel and the list: the temperature in tenths T, then F = trunc(T / 10) − 32 and C = trunc(F × 5 ÷ 9)
+with the "tenths" digit of the whole degrees, "%d.%1.1d°C" (English 600 "%ld.%1.1d°C"); the remake's English report now carries T itself and the
+skin writes it so (`amigaSay`), with the patch's real tenths. `docs/dos-findings.md`, "The reports' numbers".

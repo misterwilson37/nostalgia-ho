@@ -659,3 +659,9 @@ See `docs/open-questions.md` (the 1.2 entries), and `docs/research-log.md`, sect
 g × 100 ÷ home g truncated (`LDIV`, then `/ 100` and `% 100`). The remake's 1.2 shows exactly that in every language (a
 comma in French, German and Spanish, a point in English and Turkish, which 1.2 never had). See `docs/dos-findings.md`,
 "The panel's numbers", for all the versions.
+
+## The reports' numbers (October 2026)
+
+The exploring report (STR# 1000.32 in 1.2F) is filled by `ExploreStar @a3b4c`: the message holds r = `LDIV(g × 100, home g)` and
+C = `LDIV((t + 720 − home − 324) × 5, 9)` in tenths, and `GetReportString` prints C ÷ 10 and |C| mod 10 with "%d,%1.1d°C", the
+panel's own arithmetic (`HO.reportTemp`, a comma in French and German, a point in English and Turkish). `docs/dos-findings.md`, "The reports' numbers".

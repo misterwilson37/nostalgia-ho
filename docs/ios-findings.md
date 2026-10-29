@@ -926,3 +926,9 @@ the multiplier 0x38e38e39 is ÷ 9) and its last digit: home's 72.0°F reads 20.0
 every language's template (English, French, Turkish), not the degree sign. The gravity is `(g × 100) / home g` (`sdiv`), then
 `/ 100` and `% 100`, with template 0 "%d.%2.2dG". The French and Turkish templates keep the point. See
 `docs/dos-findings.md`, "The panel's numbers".
+
+## The reports' numbers (CONFIRMED, October 2026)
+
+The report formatter (cases 0x409 and 0x40a of the message routine) calls `FUN_100038310(star t, home t, buffer, the "Temp:" preference)`,
+the panel's own routine, for "Temp: %s"; the gravity is the message's r. The French report keeps its comma ("Gravité: 1,23G"), its
+temperature the panel's ("72.0ºF", a point). `docs/dos-findings.md`, "The reports' numbers".

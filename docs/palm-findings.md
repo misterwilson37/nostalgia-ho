@@ -482,3 +482,8 @@ slider; Give records whatever the amounts. Built: `rs.giveWindow` ('palm').
 `FUN_000291dc` (tSTL 6003.1 "%ld.%1ld°F" / .2 "%ld.%1ld°C", with the "Temp in °C not °F" box): T = t − home + 720 in tenths;
 °F is (T ÷ 10, |T| mod 10); °C is (T − 0x168) × 5 ÷ 9 with 0x168 = 360 (72.0°F reads 20.0°C); the gravity is `LDIV(g × 100, home g)`
 printed with tSTL 6003.0 "%lu.%02luG". See `docs/dos-findings.md`, "The panel's numbers".
+
+## The reports' numbers (CONFIRMED, October 2026)
+
+Reports 0x409 / 0x40a call `FUN_000291dc(t, home t, buffer, the Celsius box)`, the panel's routine, for "Temp: %s", and print the
+gravity r (g × 100 ÷ home g) as "%lu.%02luG". `docs/dos-findings.md`, "The reports' numbers".

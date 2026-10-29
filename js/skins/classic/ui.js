@@ -209,11 +209,14 @@ function savePrefs() { try { localStorage.setItem('ho5.prefs', JSON.stringify(Ob
 const rsCelsius = () => !!(G && HO.rules(G).celsius);
 const tempPref = () => (Prefs.temp === 'C' || Prefs.temp === 'F' ? Prefs.temp : null);
 HO.tempPref = tempPref;
+// the unit the panels and the reports use (HO.reportTemp): the player's choice, else the version's own Celsius box if ticked, else as released
+const tempUnit = () => tempPref() || (Prefs.celsius ? 'C' : null);
+HO.tempUnit = tempUnit;
 const toC = (f) => rsCelsius() ? HO.celsiusOf(G, f) : Math.round((f - 32) * 5 / 9);
 // The planet panel's and the list's temperature: "As the original" is each version's own format (HO.panelTemp, HO.panelFormat:
 // "72.0°F" with its tenth, °C where the original showed °C there, a comma in German, iOS's "º"), also with a choice of unit
 const degF = (f) => {
-  const u = tempPref(), t = HO.panelTemp(G, f, u || (Prefs.celsius ? 'C' : null)); // (the version's own Celsius box speaks while "As the original")
+  const u = tempPref(), t = HO.panelTemp(G, f, tempUnit()); // (the version's own Celsius box speaks while "As the original")
   if (t != null) return t;
   if (u === 'F') return Math.round(f) + '°';
   if (u === 'C') return HO.celsiusOf(G, f) + '°C'; // (the AI homages)
@@ -222,7 +225,7 @@ const degF = (f) => {
 // the gravity as the panel prints it (HO.gravText: truncated, "1.00G", a comma where the language had one)
 const gravF = (g, homeG) => HO.gravText(G, g, homeG);
 // (a degree already in °C, as a translation writes it, stays as it is; with a choice, HO.say has done it)
-const degText = (t) => tempPref() ? t : Prefs.celsius || rsCelsius() ? t.replace(/(-?\d+)°(?!C)(F)?/g, (m, n) => toC(+n) + '°C') : t;
+const degText = (t) => tempPref() || HO.panelFormat(G) ? t : Prefs.celsius || rsCelsius() ? t.replace(/(-?\d+)°(?!C)(F)?/g, (m, n) => toC(+n) + '°C') : t;
 // a version's own Celsius box (its Preferences window): ticked, unless the player's choice says otherwise
 const ownCelsius = () => tempPref() ? tempPref() === 'C' : !!Prefs.celsius;
 // the box changed: the version's own setting speaks again

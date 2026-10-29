@@ -529,7 +529,7 @@ function msgReactDetermineAllies(C) {
         ai.prefT[e.from] = e.t + (720 - t10(p.homeT));
         if (isAllied(G, p.id, e.from) && RI(G, 1, 10) < 7 && !(ai.told[e.from] & 1)) {
           const hg = g100(p.homeG), ht = t10(p.homeT);
-          say(C, e.from, 0x415, `I like planets that are ${trunc(hg / 100)}.${String(hg % 100).padStart(2, '0')}G and ${trunc(ht / 10)}.${Math.abs(ht % 10)}°F.`, { g: hg, t: ht });
+          say(C, e.from, 0x415, `I like planets that are ${trunc(hg / 100)}.${String(hg % 100).padStart(2, '0')}G and ${ht < 0 ? '-' : ''}${trunc(Math.abs(ht) / 10)}.${Math.abs(ht) % 10}°F.`, { g: hg, t: ht });
           ai.told[e.from] = (ai.told[e.from] || 0) + 1;
         }
         break;

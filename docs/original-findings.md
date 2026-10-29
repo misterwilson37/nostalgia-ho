@@ -1471,3 +1471,9 @@ tenths; °F: STR# 6003.2 "%d.%1.1d°F" with (T ÷ 10, |T| mod 10); °C (the play
 with (5 × (T − 0x168) ÷ 9) ÷ 10 and its last digit, **0x168 = 360, not 4.0.5's 324**: home's 72.0°F reads 20.0°C. The panel's
 gravity (`FUN_100bc5b0`) is `(g × 100) ÷ home g` truncated with 6003.1 "%d.%2.2dG". The Palm (`FUN_000291dc`), iOS
 (`FUN_100038310`) and Android (`CreateTempString() @281688`) do the same arithmetic. `docs/dos-findings.md`, "The panel's numbers".
+
+## The reports' numbers (CONFIRMED, October 2026)
+
+`FUN_10078c80` (a human's exploring: message 0x409, or 0x40a for a best buddy's map) stores r = (g × 100) ÷ home g, the star's t and
+your home t; `FUN_1009c240` (the report text) prints r / 100 and r % 100 and `FUN_1009d520(t, home t, buffer, the Celsius box)` for
+"Temp: %s": the panel's function, so a report in °C uses 360 (home's 72.0°F reads 20.0°C), and it follows the Preferences box. `docs/dos-findings.md`, "The reports' numbers".

@@ -1943,9 +1943,9 @@ function exploreStar(G, p, sid, from) {
   const first = !k.explored;
   observe(G, p, sid);
   if (first && p.human) {
-    const s = G.stars[sid], q = O.exploreQuality(G, p, s), g = E.seenG(p, s).toFixed(2), t = Math.round(E.seenT(p, s));
-    const text = from == null ? `You have explored ${s.name}. Gravity: ${g}G. Temp: ${t}°. Metal: ${num(G, s.metal)}.`
-      : `${G.players[from].name} has explored ${s.name}. Gravity: ${g}G.  Temp: ${t}°.  Metal: ${num(G, s.metal)}.`;
+    const s = G.stars[sid], q = O.exploreQuality(G, p, s), N = E.exploreNums(p, s), g = E.gravToken(N.r), t = E.tempToken(N.T);
+    const text = from == null ? `You have explored ${s.name}. Gravity: ${g}. Temp: ${t}. Metal: ${num(G, s.metal)}.`
+      : `${G.players[from].name} has explored ${s.name}. Gravity: ${g}.  Temp: ${t}.  Metal: ${num(G, s.metal)}.`;
     msg(G, p.id, text, { icon: q === 'good' ? 'm9027' : q === 'mediocre' ? 'm9028' : 'm9029', sound: q === 'good' ? 6000 : q === 'mediocre' ? 6002 : 6001, star: sid, explore: q });
   }
 }

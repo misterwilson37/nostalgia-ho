@@ -281,7 +281,7 @@ offline. The repository includes their output, not the DOS game itself.
 | Arrival messages | only the owner is told, as the fleet moves (before any battle), from the player's own record of the star: "Your fleet of … has arrived at …" only at the last stop, when the record says the star is explored and is your colony or nobody's (and the fleet isn't a colony ship); "… has stopped at … on the way to …" at each stop on a route. No notice to a colony's owner when someone else arrives | CONFIRMED (`FUN_1040_23ed` @1040:24a5-25a2) |
 | Travel | each hop takes ⌈distance ÷ Speed⌉ turns, counted down one a turn; the hop's fuel is spent when the fleet arrives (its length, fleet +0xe, added to the fuel used, +4; Mac 2.0.1 `MoveShips` @a20e2 the same). A new ship joins an idle fleet of its design at the star by its count only, else gets a new fleet with no fuel used | CONFIRMED (`FUN_1068_0a94`, `FUN_1040_23ed`, `FUN_1040_1a2f`, `FUN_1068_0000`; js/rules-dos.js departs20, legFuelArrives) |
 | Exploring sound | by the star's quality 0–20 (`FUN_1020_1a2d`, the computers' own rating): 6000 at 15 or more, 6002 from 1 to 14, 6001 at 0. The quality is 0 only when gravity is over 2.56 times home's (5.0.5 also gives 0 when the gravity ratio is over 2 and the temperature 50 °F off) | CONFIRMED (`FUN_10c0_0c50` @10c0:0c98) |
-| Exploring message | "Gravity: 1.23G. Temp: 72.5°F" to a tenth of a degree; the remake rounds to whole degrees | CONFIRMED (string 703, `FUN_1040_34e9`); the remake DIFFERS (text only) |
+| Exploring message | "Gravity: 1.23G. Temp: 72.5°F" to a tenth of a degree; the remake rounds to whole degrees | CONFIRMED (string 703, `FUN_1040_34e9`); the remake writes it so now (October 2026: "The reports' numbers") |
 | Meteor showers | only from ships scrapped in hyperspace: 50 people (units) killed per unit of metal, no escape into colony ships | CONFIRMED (`FUN_1040_27ee`) |
 
 ### Battles
@@ -594,9 +594,9 @@ the temperature in **degrees Celsius**. The program's two temperature lines (`DO
 file offsets 0x6ad8d and 0x2105e, both "%d,%1.1d%cC") work it out from whole degrees
 Fahrenheit, trunc((F − 32) × 5 ÷ 9) (÷ 10, − 32, × 5, ÷ 9), and print the whole
 degrees' last digit again as the "tenths" (a slip: 22 °C shows as "22,2°C"); the
-exploring report's own arguments weren't read (LIKELY the same). The remake's report writes the
-whole degrees, as it does in English; its planet panel and explored list (`HO.panelC`) write "22,2°C" as the
-program does (these two conversions are the program's only ones; arguments C, |C| mod 10).
+exploring report's formatter (the overlay at file offset 0x75030, case 0x407) does the same with the same arguments
+(C, |C| mod 10: read October 2026, it was LIKELY). The remake's panel, list and report (`HO.panelTemp`) write "22,2°C" as the
+program does.
 
 Slips kept as the German has them: "%Fss Bevölkerungswachstum" ("Menkars …"), 686's
 trailing blanks (dropped), and 74 and 75 swapped ("Sie wurden sofort besiegt." where the
@@ -690,10 +690,43 @@ The °C/°F preference keeps working (`Prefs.temp`, and the version's own box): 
 written in the version's own format and formula (the 324 lineage for 1.2 to 4.0.5, the 360 one for 5.0.5, the Palm, iOS and
 Android), so °C chosen at home's 72.0°F reads "22.0°C" in 3.0.1 and "20.0°C" in 5.0.5.
 
-**Not changed:** the reports ("You have explored … Temp: 72°") still write whole degrees where the originals wrote a tenth
-(2.0's string 703 "Temp: %d.%1.1d°F", 5.0.5's `FUN_1009d520` too) and, with °C chosen, convert by the exact formula
-rather than the 360 or 324 one (a text-only difference: the panel and the report may differ by a degree or two in
-°C); 4.0.5's Windows string 724 "%d.%1.1dG %d°" (gravity to a tenth and whole degrees) has no use that was found.
+## The reports' numbers: temperature and gravity in every report (October 2026)
+
+Every report of the originals that prints a temperature or a gravity was found and the code that fills it read
+(`node tools/temp-check.js` asserts it for every version and language). In every version the report is filled with **the
+panel's own arithmetic**: the message holds r = g × 100 ÷ home g (truncated: the signed long divide) and T = the star's
+temperature less your home's plus 720, tenths of a degree Fahrenheit, and the report formatter prints "%d.%2.2dG" with
+(r / 100, r mod 100) and the temperature the way the panel does. So a report reads "Gravity: 1.23G. Temp: 72.5°F", not
+"Temp: 72°", and with a °C chosen (or the version's own Celsius box) the same formula as the panel's.
+
+| Version | Report template(s) with a temperature or gravity | Filled by | Arithmetic | Remake before → now |
+|---|---|---|---|---|
+| 1.2 / 1.2F (Mac) | STR# 1000.32 "…Gravité: %d,%2.2dG. Température: %d,%1.1d°C…" (no English or other 1.2) | `ExploreStar @a3b4c` (message 0x407: r by `LDIV`, then C = (T + 720 − home − 324) × 5 ÷ 9, `LDIV` by 9); `GetReportString` prints C ÷ 10, \|C\| mod 10 | (T − 324) × 5 ÷ 9 truncated, only °C (home's 72.0 → 22.0) | whole degrees, "Temp: 58°C" → "58,7°C" |
+| 2.0 Windows 3.1 | string 703 "…Gravity: %d.%2.2dG. Temp: %d.%1.1d°F. Metal: %s." | `FUN_1040_34e9` @1040:34e9 (message 0x407: r = `FUN_1000_11ac(g × 100, home g)`, T = star +0x3a + (0x2d0 − home +0x28)); `FUN_10c0_0784` case 0x407 prints r / 100, r % 100, T / 10, \|T\| % 10 | none: °F, T as it is | "Temp: 72°." → "72.5°F" |
+| 2.0 DOS (English) | string 703 (the DOS font's 0xa1 for the degree) | the same code in `DOSHO.EXE` (`FUN_1000_4264` with r / 100, r % 100, T / 10, \|T\| % 10) | as Windows | as Windows |
+| 2.0.1 Mac | STR# 1000 703 | `ExploreStar @a32d8` (T = t + 720 − home, r by `LDIV`); `GetReportString` @1309f0 prints T ÷ 10 (`divs`), \|T\| mod 10 | as Windows | as Windows |
+| 2.0 German (DOS; the remake's Mac 2.0.1 German) | HO.PRS 703 "…Schwerkraft: %d,%2.2dG. Temp: %d,%1.1d°C…" | `DOSHO.EXE` German, the report formatter (the overlay at file offset 0x74e82, case 0x407 at 0x7503b) | **C = trunc((trunc(T / 10) − 32) × 5 ÷ 9), printed as C and \|C\| mod 10**: the panel's slip ("22,2°C"), settled by the code now (it was LIKELY) | "Temp: 22°C" → "22,2°C" |
+| 2.0 French / Turkish / Spanish | 1.2F's 1000.32 (French); iOS's templates (Turkish); the remake's (Spanish) | as the English 2.0's message | French as 1.2F; Turkish the version's °F; Spanish whole °C ("22°C") | as the panel |
+| 3.0.1 Mac | STR# 1000.29 "…Gravity: %d.%2.2dG. Temp: %d.%1.1d°F. Metal: %s." | `ExploreStar @a549e` (message 0x405: r = `LDIV(g × 100, home g)`, T = t + 720 − home); `GetReportString` @160b94: r / 100, r % 100, T ÷ 10, \|T\| mod 10 | none (literal °F) | as 2.0 |
+| 3.0.1F (French) | STR# 1000.29 "…Température: %d,%1.1d°C…" | 3.0.1F's code is not to hand | 1.2's formula, with the comma its report writes and the point its window writes: LIKELY | "Température: 101,4°C" (whole degrees before: 101°C) |
+| 4.0.5 Windows | string 963 / 964 (a buddy's map) "…Gravity: %d.%2.2dG. Temp: %.*s. Metal: %.*s." | `FUN_00439558` (message 0x408/0x409: r = g × 100 ÷ home g, star t, home t); `FUN_0046ec5a` case 0x408 calls `FUN_0042f742(t, home t)`, the panel's own routine, with the "Temp. in Celsius" box | (T − 324) × 5 ÷ 9 in °C | "72°" → "72.0°F" |
+| 4.0.5 Mac | STR# 1000 "Temp: %.*s" (963/964's) | `GetReportString` calls `CreateTempString` (three sites) | as the Windows | as Windows |
+| 5.0.5 | Report Window Templates 33 / 34 "…Gravity: %d.%2.2dG. Temp: %s. Metal: %s." | `FUN_10078c80` (r, t, home t; 0x409 yours, 0x40a a buddy's); `FUN_1009c240` prints r / 100, r % 100 and `FUN_1009d520(t, home t, buf, Celsius box)` | **(T − 360) × 5 ÷ 9** in °C | "Temp: 72°" → "72.0°F"; the report with °C chosen agrees with the panel (20.0°C, not 22°C) |
+| Palm | tSTL 6003 report 33 / 34 "…Gravity: %lu.%02luG. Temp: %s…" | `FUN_000291dc` (the panel's) for 0x409 / 0x40a | (T − 360) × 5 ÷ 9 | as 5.0.5 |
+| iOS, Android | Report Window Templates 33 / 34 | `FUN_100038310` / `CreateTempString` (pair table: the same function) for 0x409 / 0x40a | (T − 360) × 5 ÷ 9; "ºF" | as 5.0.5, "72.0ºF" |
+| Amiga 2.1 | string 600 "…Gravity: %ld.%2.2dG. Temp: %ld.%1.1d°C…" | `FUN_0010ddf6` type 31 (docs/amiga-skin.md) | the German slip, point | now from the message's tenths (was the whole degrees) |
+
+The volcano report ("A volcanic eruption at %s has drastically warmed the temperature to %s!", 1.2F's 1000.16, 3.0.1's 1000.17, 5.0.5's
+Report Window Templates) is in every version's files but **nothing in any of them sends it** (docs/12-findings.md, 301-findings.md,
+original-findings.md): the remake shows none either; the AI homages' own volcano and ice-age reports keep whole degrees (no original
+to match). The canned message "I like planets that are 1.00G and 72.0°F." (3.0.1's STR# 1000, 4.0.5's 0x419, 5.0.5's 0x41a) had its tenth
+already; it is written by the same token now, so a °C choice uses the version's formula. 4.0.5's Windows string 724 "%d.%1.1dG %d°"
+has no use that was found.
+
+In the remake the rules keep one English line (`HO.tempToken`, `HO.gravToken`: "Gravity: 1.23G. Temp: 72.5°F" or "-0.5°F", the sign
+the programs lose) and `HO.say` writes the temperature the way the version and language print it (`HO.reportTemp`: the unit as
+released, the player's choice or the version's own Celsius box, the decimal sign, the slip). The reports follow the same unit as
+the panel and the lists (`HO.tempUnit`).
 
 ## Changes to the shared code
 

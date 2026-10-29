@@ -51,15 +51,19 @@ const PLURAL_DE = { scout: S(372), fighter: S(373), colony: S(374), satellite: S
 const numDE = (t) => t.replace(/,/g, '.');
 // the exploring report (string 703): the German program writes the gravity
 // with a decimal comma and the temperature in degrees Celsius, worked out
-// from whole degrees Fahrenheit: trunc((F - 32) x 5 / 9) (the planet window
-// does the same, DOSHO.EXE "%d,%1.1d%cC"; its "tenths" digit is the whole
-// degrees' last digit again, so the remake leaves it out, as it leaves out
-// the English report's tenths)
-const celsius = (f) => Math.trunc((f - 32) * 5 / 9);
+// from whole degrees Fahrenheit: trunc((F - 32) x 5 / 9), whose last digit it
+// prints again as the "tenths" ("%d,%1.1d°C" with C and |C| mod 10: the
+// report's formatter in DOSHO.EXE, the overlay at file offset 0x75030, reads
+// the message's tenths T, divides by 10, takes 5 x (that - 32) / 9 and prints
+// it and its last digit; docs/dos-findings.md, "The reports' numbers"). The
+// remake's English hands the temperature as a token for T (HO.reportTemp
+// writes it, the slip included, in the unit chosen)
+// the temperature as the rules write it: a token for the tenths ("72.5°F"), or, in a game saved before they did, whole degrees ("72°")
+const tempTok = (t) => (/\.\d°F/.test(t) ? String(t) : E.tempToken(Math.round(parseFloat(String(t).replace(/[^\d.-]/g, '')) * 10)));
 function explored20(a) {
   const [star, g, t, metal] = a;
-  return S(703).replace('%d,%2.2dG', '%s').replace('%d,%1.1d°C', '%s°C')
-    .replace('%s', star).replace('%s', String(g).replace('.', ',')).replace('%s', String(celsius(+String(t).replace(/[.,]/g, ''))))
+  return S(703).replace('%d,%2.2dG', '%s').replace('%d,%1.1d°C', '%s')
+    .replace('%s', star).replace('%s', String(g).replace('.', ',')).replace('%s', tempTok(t))
     .replace('%s', metal);
 }
 // 2.0's reports: the remake's English (2.0's own words) and the string id
@@ -99,7 +103,7 @@ const REPORTS20 = [
   ['%s has just become a profitable colony.', 700],
   ['It’s a baby boom! The population at %s has started growing quickly.', 701],
   ['%s’s population growth rate has slowed.', 702],
-  ['You have explored %s. Gravity: %s. Temp: %d°. Metal: %s.', 703],
+  ['You have explored %s. Gravity: %s. Temp: %s. Metal: %s.', 703],
   ['You have colonized %s.', 704],
   ['You won a battle at %s. You lost %d of your ships. %s lost %d.', 705],
   ['You lost a battle at %s. You lost %d of your ships. %s lost %d.', 706],
@@ -252,9 +256,9 @@ function official301() {
   if (F301 && E301) {
     const f1 = (n) => F301['1000'][n].replace(/%\.\*s/g, '%s'), deg = (t) => +String(t).replace(/[^\d-]/g, '');
     o.unshift(
-      ['You have explored %s. Gravity: %d.%2.2dG. Temp: %s. Metal: %s.', (a) => f1(29).replace('%s', a[0]).replace('%d,%2.2dG', a[1] + ',' + a[2] + 'G').replace('%d,%1.1d°C', E.c12Text(deg(a[3]), true) + '°C').replace('%s', a[4])],
+      ['You have explored %s. Gravity: %d.%2.2dG. Temp: %s. Metal: %s.', (a) => f1(29).replace('%s', a[0]).replace('%d,%2.2dG', a[1] + ',' + a[2] + 'G').replace('%d,%1.1d°C', a[3]).replace('%s', a[4])],
       ['A volcanic eruption at %s has drastically warmed the temperature to %s!', (a) => f1(16).replace('%s', a[0]).replace('%d,%1.1d°C', E.c12Text(deg(a[1]), true) + '°C')],
-      ['%s says, "I like planets that are %d.%2.2dG and %s."', (a) => f1(45).replace('%s', a[0]).replace('%d.%2.2dG', a[1] + '.' + a[2] + 'G').replace('%d.%1.1d°C', E.c12Text(deg(a[3]), false) + '°C')]);
+      ['%s says, "I like planets that are %d.%2.2dG and %s."', (a, G) => f1(45).replace('%s', a[0]).replace('%d.%2.2dG', a[1] + '.' + a[2] + 'G').replace('%d.%1.1d°C', E.reportTemp(G, a[3], 'C', false) ?? E.c12Text(deg(a[3]), false) + '°C')]);
   }
   return (OFFICIAL301 = o);
 }
@@ -331,13 +335,14 @@ const CLASS_FR = { scout: FR(1006, 0), fighter: FR(1006, 1), colony: FR(1006, 2)
 // numbers: 1.2F's LongToNiceString writes "1 234" and "12 345K" ('%d %.3d', '%d %.3dK')
 const numFR = (t) => t.replace(/,/g, ' ');
 // the exploring report (1000.32): the gravity with a decimal comma, the
-// temperature in degrees Celsius to a tenth ("%d,%1.1d°C"), worked out from
-// the English report's whole degrees Fahrenheit by 1.2's own formula (E.c12Text:
-// (T - 324) x 5 / 9 in tenths, truncated)
+// temperature in degrees Celsius to a tenth ("%d,%1.1d°C"), which 1.2's
+// ExploreStar (@a3b4c) works out as (T - 324) x 5 / 9 in tenths, truncated,
+// from the tenths of a degree Fahrenheit T (the English report's token;
+// HO.reportTemp writes it, E.c12Text)
 function explored12(a) {
-  const [star, g, t, metal] = a, f = +String(t).replace(/[.,]/g, '');
+  const [star, g, t, metal] = a;
   return F(703).replace('%s', star).replace('%d,%2.2dG', String(g).replace('.', ','))
-    .replace('%d,%1.1d°C', E.c12Text(f, true) + '°C').replace('%s', metal);
+    .replace('%d,%1.1d°C', tempTok(t)).replace('%s', metal);
 }
 // A report of 2.0's that 1.2F words differently from the English (1000.17
 // leaves out the metal, "Votre flotte de %.*s à %s a été recyclée."): 1.2 shows
@@ -558,7 +563,7 @@ const toC = (t) => { const m = /(-?\d+)/.exec(String(t)); return m ? String(Math
 const CELSIUS = {
   fr: {
     17: (fr) => (a) => fr.replace('%s', a[0]).replace('%d,%1.1d°C', toC(a[1]) + '°C'),
-    50: (fr) => (a) => fr.replace('%s', a[0]).replace('%d.%2.2dG', a[1] + '.' + a[2] + 'G').replace('%d.%1.1d°C', toC(a[3]) + '°C'),
+    50: (fr) => (a, G) => fr.replace('%s', a[0]).replace('%d.%2.2dG', a[1] + '.' + a[2] + 'G').replace('%d.%1.1d°C', E.reportTemp(G, a[3], 'C', false) ?? toC(a[3]) + '°C'),
   },
 };
 function iosLang(lang, rs) {

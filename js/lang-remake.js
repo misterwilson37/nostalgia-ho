@@ -884,7 +884,7 @@ tr: {
     '%s destroyed your colony at %s.': '%s, %s’{deki} kolonini yok etti.',
     'A meteor shower destroyed your colony at %s.': 'Bir meteor yağmuru %s’{deki} kolonini yok etti.',
     // adapted from iOS 33 ("inceledin": examined)
-    'You have explored %s. Gravity: %s. Temp: %d°. Metal: %s.': '%s’{i} keşfettin. Yer çekimi: %s. Sıcaklık: %d°. Metal: %s.',
+    'You have explored %s. Gravity: %s. Temp: %s. Metal: %s.': '%s’{i} keşfettin. Yer çekimi: %s. Sıcaklık: %s. Metal: %s.',
     // adapted from iOS 71 ("metalı", "won" the metal), as its patch
     'You have recovered %s metal from the battle at %s.': '%2$s’{deki} savaştan %1$s metal kurtardın.',
     // adapted from iOS 57 and 59 ("dedin ki", "severim"; 59's "senin malındır" says the star is the other's), as their patch
@@ -965,7 +965,7 @@ tr: {
     '%s has gone nova. All inhabitants were killed.': ['%s novaya gitti. Bütün sakinleri öldü.', '%s has gone nova.'],
     '%s destroyed your colony at %s.': ['%s, senin %sdeki kolonini mahvetti.', 'The meteor shower destroyed your colony at %s.'],
     'A meteor shower destroyed your colony at %s.': ['Bir meteor yağmuru, senin %sdeki kolonini mahvetti.', 'The meteor shower destroyed your colony at %s.'],
-    'You have explored %s. Gravity: %s. Temp: %d°. Metal: %s.': ['Sen %syi inceledin.  Yer çekimi: %s.  Sıcaklık: %d°. Metal: %s.', 'You have explored %s. Gravity: %d.%2.2dG. Temp: %s. Metal: %s.'],
+    'You have explored %s. Gravity: %s. Temp: %s. Metal: %s.': ['Sen %syi inceledin.  Yer çekimi: %s.  Sıcaklık: %s. Metal: %s.', 'You have explored %s. Gravity: %d.%2.2dG. Temp: %s. Metal: %s.'],
     'You have recovered %s metal from the battle at %s.': ['Sen %s kadar metalı, %sdeki savaşta kazandın.', 'You recovered %s metal from the battle at %s.'],
     'You sent a message to %s saying you like %s.': ['Sen %sye mesaj gönderip dedin ki, %syi seviyorsun.', 'You told %s that you like %s.'],
     'You sent a message to %s saying you don’t like %s.': ['Sen %sye mesaj gönderip dedin ki, %syi sevmiyorsun.', 'You told %s that you like %s.'],
@@ -1497,7 +1497,7 @@ es: {
     '%s has just become a profitable colony.': '%s acaba de convertirse en una colonia rentable.',
     'It’s a baby boom! The population at %s has started growing quickly.': '¡Explosión de natalidad! La población de %s ha empezado a crecer deprisa.',
     '%s’s population growth rate has slowed.': 'El crecimiento de la población de %s se ha frenado.',
-    'You have explored %s. Gravity: %s. Temp: %d°. Metal: %s.': 'Has explorado %s. Gravedad: %s. Temp.: %d°. Metal: %s.',
+    'You have explored %s. Gravity: %s. Temp: %s. Metal: %s.': 'Has explorado %s. Gravedad: %s. Temp.: %s. Metal: %s.',
     'You have colonized %s.': 'Has colonizado %s.',
     'You won a battle at %s. You lost %d of your ships. %s lost %d.': 'Has ganado una batalla en %s. Has perdido %d de tus naves. Pérdidas de %s: %d.',
     'You lost a battle at %s. You lost %d of your ships. %s lost %d.': 'Has perdido una batalla en %s. Has perdido %d de tus naves. Pérdidas de %s: %d.',

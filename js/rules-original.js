@@ -2083,7 +2083,7 @@ function buddyMaps505(G, p) {
       if (explored && recYear505(kq) < Y) {
         const was = kq.explored;
         observe(G, q, s.id);
-        if (!was) msg(G, q.id, `${p.name} has explored ${s.name}. Gravity: ${(s.g / q.homeG).toFixed(2)}G. Temp: ${Math.round(72 + s.t - q.homeT)}°. Metal: ${num(G, s.metal)}.`, { icon: 'm9028', star: s.id, explore: exploreQuality(G, q, s), quiet: true });
+        if (!was) msg(G, q.id, `${p.name} has explored ${s.name}. Gravity: ${E.gravToken(E.exploreNums(q, s).r)}. Temp: ${E.tempToken(E.exploreNums(q, s).T)}. Metal: ${num(G, s.metal)}.`, { icon: 'm9028', star: s.id, explore: exploreQuality(G, q, s), quiet: true });
       } else if (fought && !explored && recYear505(kq) < Y && !(kq.by505 >= Y)) {
         Object.assign(kq, JSON.parse(JSON.stringify(k)));
       }

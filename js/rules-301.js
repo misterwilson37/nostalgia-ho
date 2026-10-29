@@ -1477,7 +1477,8 @@ function exploreStar(G, p, sid) {
   observe(G, p, sid);
   if (first && p.human) {
     const s = G.stars[sid], q = O.exploreQuality(G, p, s);
-    msg(G, p.id, `You have explored ${s.name}. Gravity: ${(E.seenG(p, s)).toFixed(2)}G. Temp: ${Math.round(E.seenT(p, s))}°. Metal: ${num(G, s.metal)}.`, { icon: q === 'good' ? 'm9027' : q === 'mediocre' ? 'm9028' : 'm9029', sound: q === 'good' ? 6000 : q === 'mediocre' ? 6002 : 6001, star: sid, explore: q });
+    const N = E.exploreNums(p, s); // (ExploreStar @a549e: g x 100 / home g and the temperature in tenths, which the report writes as "%d.%1.1d°F")
+    msg(G, p.id, `You have explored ${s.name}. Gravity: ${E.gravToken(N.r)}. Temp: ${E.tempToken(N.T)}. Metal: ${num(G, s.metal)}.`, { icon: q === 'good' ? 'm9027' : q === 'mediocre' ? 'm9028' : 'm9029', sound: q === 'good' ? 6000 : q === 'mediocre' ? 6002 : 6001, star: sid, explore: q });
   }
 }
 // CONFIRMED (ColonizeStar @a566a): "You have colonized %s." (1000.31); the new

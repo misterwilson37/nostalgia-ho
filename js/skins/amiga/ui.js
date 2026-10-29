@@ -867,10 +867,10 @@ function amigaSay(G, m) {
   if (t === 'Artwork by Howard Vives.') return w('credit2');
   if (typeof t === 'string') {
     // the exploring report (600): the temperature as the program writes it (amigaC)
-    const x = /^You have explored (.+)\. Gravity: (\d+\.\d\d)G\. Temp: -?\d+°\. Metal: ([\d,]+)\.$/.exec(t);
-    if (x && m.star != null) {
-      const a = api(), F = m.temp != null ? m.temp : HO.seenT(a.me(), G.stars[m.star]);
-      if (lang() === 'en') return `You have explored ${x[1]}. Gravity: ${x[2]}G. Temp: ${temp(F)}. Metal: ${x[3]}.`;
+    const x = /^You have explored (.+)\. Gravity: (\d+\.\d\d)G\. Temp: (-?\d+\.\d)°F\. Metal: ([\d,]+)\.$/.exec(t);
+    if (x) {
+      const F = HO.tokenTenths(x[3]) / 10; // (T, the message's tenths of a degree Fahrenheit, as the program has it)
+      if (lang() === 'en') return `You have explored ${x[1]}. Gravity: ${x[2]}G. Temp: ${temp(F)}. Metal: ${x[4]}.`;
       const out = HO.say(G, t);
       if (lang() === 'de') { const d = /^Sie haben (.+) erforscht\. .*Metall: (.+)\.$/.exec(out); if (d) return `Sie haben ${d[1]} erforscht. Schwerkraft: ${x[2]}G. Temp: ${temp(F)}. Metall: ${d[2]}.`; }
       if (lang() === 'fr' || lang() === 'es') return out.replace(/-?[\d.,]+°[CF]/, temp(F));

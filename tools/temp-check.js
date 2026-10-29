@@ -4,11 +4,11 @@
 // °F for every temperature the game shows (docs/roadmap.md, 4h; HO.tempPref, HO.celsiusOf, js/engine.js
 // tempText; the page's Prefs.temp in js/skins/classic/ui.js).
 //
-// The engine, without a page: for every version and each of its languages, plays a few turns and takes every
-// report with a temperature, then says it as the original does (no choice), in °C and in °F. As the original
-// must be what the translations write; in °C every temperature is a °C one, a version's own °C (the Amiga's,
-// 1.2F's, the German 2.0's, iOS's French) left as it was, an °F one converted by the version's own formula
-// where it had one; in °F no temperature says °C and the number is the report's own whole degrees.
+// The engine, without a page: for every version and each of its languages, plays a game and takes every exploring
+// report (yours and a buddy's), then says it as the original does (no choice), in °C and in °F, and compares it with
+// the report as the program printed it (REPORT_RULES below, written out from the sources: docs/dos-findings.md, "The
+// reports' numbers"): "%d.%2.2dG" of the truncated ratio and the temperature of tenths, the unit as released, the
+// version's formula (324, 360, the German 2.0's slip, the Spanish's whole degrees), the decimal sign, the degree sign.
 // The page, in a browser: every skin and a version it shows, with each choice, reads the star panel and the
 // explored-stars list (the Amiga's included) and the planet's report, which must agree with the choice.
 // Chromium comes from PLAYWRIGHT_BROWSERS_PATH, Playwright from NODE_PATH ($(npm root -g)).
@@ -33,51 +33,90 @@ const TOKEN = /(-?\d+(?:[.,]\d+)?)[\s ]?[°º][\s ]?([CF])?/g;
 const tokens = (t) => [...String(t).matchAll(TOKEN)].map(m => ({ n: parseFloat(m[1].replace(',', '.')), u: m[2] || 'F', all: m[0] }));
 
 // ---------- the engine ----------
+// The reports, version by version and language (docs/dos-findings.md, "The reports' numbers"). Every original filled the exploring
+// report with the panel's arithmetic (2.0: ExploreStar FUN_1040_34e9 / GetReportString case 0x407 in WINHO.EXE, DOSHO.EXE English
+// (the T and the ratio as the message's tenths and r) and the German DOSHO.EXE's overlay at file offset 0x75030 (trunc((trunc(T / 10)
+// - 32) x 5 / 9) and its last digit); Mac 1.2 ExploreStar @a3b4c (T - 324) x 5 / 9; Mac 2.0.1 @a32d8, 3.0.1 @a549e, 4.0.5 Win FUN_00439558 +
+// FUN_0042f742, Mac CreateTempString, 5.0.5 FUN_10078c80 / FUN_1009c240 -> FUN_1009d520, Palm FUN_000291dc, iOS FUN_100038310:
+// the message holds r = g x 100 / home g (truncated) and T = star t + 720 - home t (tenths of a degree Fahrenheit); a report prints
+// "%d.%2.2dG" with r / 100 and r mod 100 and the temperature the way the panel does. This table is written out here, from those
+// sources, not read from engine.js: K (324 or 360: T - K, x 5 / 9, truncated), the unit as released, the German 2.0's slip, the
+// Spanish remake's whole degrees, the decimal sign of the temperature and of the gravity in the report, the degree sign.
+const REPORT_RULES = (id, lang) => {
+  const two = id === 'dos' || id === 'mac20', three = ['301', '405', 'mac405'].includes(id), own = ['original', 'palm', 'ios', 'android'].includes(id);
+  const R = { K: own ? 360 : 324, deg: id === 'ios' || id === 'android' ? 'º' : '°', c: false, slip: false, whole: false, tc: false, gc: false };
+  if (id === '12') R.c = true;
+  if (lang === 'fr') { R.gc = true; if (id === '12' || two || three) { R.c = true; R.tc = true; } }              // 1.2F, 3.0.1F: "%d,%1.1d°C", "%d,%2.2dG"; iOS's French "%d,%2.2dG" with its °F "72.0ºF"
+  if (lang === 'de') { R.gc = true; R.tc = true; if (two) { R.c = true; R.slip = true; } }                          // DOSHO.EXE: "%d,%1.1d°C" (the slip), "%d,%2.2dG"
+  if (lang === 'es') { R.gc = true; R.c = true; R.whole = true; }                                                   // the remake's own Spanish
+  return R;
+};
+const tenthsStr = (T, comma) => Math.trunc(T / 10) + (comma ? ',' : '.') + Math.abs(T % 10);
+const wantTemp = (id, lang, T, unit) => {
+  const R = REPORT_RULES(id, lang), u = unit || (R.c ? 'C' : 'F');
+  if (R.whole) return u === 'C' ? Math.round((T / 10 - 32) * 5 / 9) + '°C' : Math.round(T / 10) + '°F';
+  if (u === 'F') return tenthsStr(T, R.tc) + R.deg + 'F';
+  if (R.slip) { const c = Math.trunc((Math.trunc(T / 10) - 32) * 5 / 9); return c + (R.tc ? ',' : '.') + (Math.abs(c) % 10) + '°C'; }
+  return tenthsStr(Math.trunc((T - R.K) * 5 / 9), R.tc) + R.deg + 'C';
+};
+const wantGrav = (id, lang, r) => Math.trunc(r / 100) + (REPORT_RULES(id, lang).gc ? ',' : '.') + String(r % 100).padStart(2, '0') + 'G';
 function engine() {
   let texts = 0;
   for (const id of Object.keys(HO.RULESETS)) {
     const rs = HO.RULESETS[id];
-    if (!rs.languages) continue; // (the AI homages)
+    if (!rs.languages) continue; // (the AI homages: whole degrees, no original)
     for (const lang of HO.languages(rs)) {
       const o = { seed: 11, rules: id, size: 'small', computers: 3, iq: 'average', shape: 'random', humans: [{ name: 'Ann' }, { name: 'Bob', female: false }], alliances: true, novas: true };
       if (HO.ownLanguage(rs) !== lang) o.lang = lang;
       const G = HO.newGame(o);
       for (const p of HO.humans(G)) p.auto = true;
-      const seen = new Map();
-      for (let i = 0; i < 40 && !G.over; i++) {
+      const seen = [];
+      for (let i = 0; i < 60 && !G.over && seen.length < 40; i++) {
         HO.endTurn(G);
-        for (const p of HO.humans(G)) for (const m of p.inbox || []) if (m.text && m.text.includes('°')) seen.set(m.text, m);
+        for (const p of HO.humans(G)) for (const m of p.inbox || []) if (m.star != null && /has explored|You have explored/.test(m.text) && !seen.some(x => x.m === m)) seen.push({ m, p, early: i < 2 });
       }
-      // a canned message the computers send (I like planets that are 1.00G and 72.0°F.)
-      seen.set('I like planets that are 1.00G and 72.0°F.', {});
-      if (!seen.size) fail(`${id} ${lang}: no report with a temperature`);
-      for (const [text] of seen) {
+      if (!seen.length) fail(`${id} ${lang}: no exploring report`);
+      for (const { m, p, early } of seen) {
         texts++;
-        const src = tokens(text);
-        if (src.length !== 1) continue; // (one temperature in a report, or the text is not checked)
-        const F = src[0].n;
-        HO.tempPref = null; const own = HO.say(G, text);
-        HO.tempPref = () => 'C'; const c = HO.say(G, text);
-        HO.tempPref = () => 'F'; const f = HO.say(G, text);
-        HO.tempPref = null;
-        const ot = tokens(own), ct = tokens(c), ft = tokens(f);
-        const tag = `${id} ${lang} "${text}"`;
-        if (!ot.length) { if (own !== c || own !== f) fail(`${tag}: no temperature in "${own}" but "${c}" / "${f}"`); continue; }
-        if (ct.length !== 1 || ft.length !== 1) { fail(`${tag}: "${c}" / "${f}" lost the temperature`); continue; }
-        // °C: a °C one; the version's own °C untouched; else the plain conversion
-        const wantC = (F - 32) * 5 / 9;
-        if (ct[0].u !== 'C') fail(`${tag}: °C gave "${c}"`);
-        else if (ot[0].u === 'C') { if (c !== own) fail(`${tag}: a °C the version wrote itself was changed: "${own}" -> "${c}"`); }
-        else if (Math.abs(ct[0].n - wantC) > 0.51) fail(`${tag}: °C gave "${c}" for ${F}°F (${wantC.toFixed(2)})`);
-        // °F: no °C left, the report's own whole degrees; an °F one untouched
-        if (ft[0].u !== 'F') fail(`${tag}: °F gave "${f}"`);
-        else if (ot[0].u === 'F') { if (f !== own && !(rs.celsius && ft[0].n === ot[0].n)) fail(`${tag}: an °F the version wrote itself was changed: "${own}" -> "${f}"`); } // (1.2's bare "71°" was shown in °C: it gets its unit)
-        else if (ft[0].n !== F) fail(`${tag}: °F gave "${f}" for ${F}°`);
-        if (own !== HO.say(G, text)) fail(`${tag}: as the original changed`);
-        // as the original: °C in the reports where the original (or its translation) wrote °C, else the bare °F ones
-        if (!text.startsWith('I like planets') && reportC(id, lang) !== (ot[0].u === 'C')) fail(`${tag}: as the original gave "${own}" (expected ${reportC(id, lang) ? '°C' : '°F'})`);
+        const s = G.stars[m.star];
+        // what the program had: r and T, from the game's own numbers (in the first turns, before anything is terraformed; later the token is the truth)
+        const tok = (/Temp: (-?\d+\.\d)°F/.exec(m.text) || [])[1], gm = /Gravity: (\d+)\.(\d\d)G/.exec(m.text);
+        const T = HO.tokenTenths(tok), r = +gm[1] * 100 + +gm[2];
+        const T0 = Math.round(s.t * 10) + 720 - Math.round(p.homeT * 10), r0 = Math.trunc(Math.round(s.g * 100) * 100 / Math.round(p.homeG * 100));
+        if (early && s.owner < 0 && (T !== T0 || r !== r0)) fail(`${id} ${lang} "${m.text}": the star has T ${T0}, r ${r0}`);
+        const tag = `${id} ${lang} "${m.text}"`;
+        for (const u of [null, 'C', 'F']) {
+          HO.tempPref = u ? () => u : null;
+          const out = HO.say(G, m.text);
+          HO.tempPref = null;
+          const wt = wantTemp(id, lang, T, u), wg = wantGrav(id, lang, r);
+          // the report holds the gravity and the temperature as the version prints them, nothing else with a degree sign
+          if (!out.includes(wg)) fail(`${tag} (${u || 'as released'}): gravity is not ${wg}: "${out}"`);
+          if (!out.includes(' ' + wt) && !out.includes(': ' + wt)) fail(`${tag} (${u || 'as released'}): temperature is not ${wt} (T = ${T}): "${out}"`);
+          const n = (out.match(/[°º][CF]/g) || []).length;
+          if (n !== 1) fail(`${tag} (${u || 'as released'}): ${n} temperatures in "${out}"`);
+        }
+      }
+      // the canned message a computer sends ("I like planets that are 1.00G and 72.0°F.", 3.0.1 and later): the same text as the panel's
+      const like = 'I like planets that are 1.00G and 72.0°F.';
+      HO.tempPref = null; const l0 = HO.say(G, like);
+      if (/I like planets/.test(l0) || /Planeten|planètes|gezegen|planetas/.test(l0)) {
+        const wt = wantTemp(id, lang, 720, null), wtc = wantTemp(id, lang, 720, 'C');
+        if (!l0.includes(wt) && !(rs.say && lang !== HO.ownLanguage(rs))) { /* (a version with its own wording of the line: checked by the language tests) */ }
+        HO.tempPref = () => 'C'; const lc = HO.say(G, like); HO.tempPref = null;
+        if (/72\.0°F|72,0°F/.test(lc)) fail(`${id} ${lang}: the canned message in °C still says °F: "${lc}"`);
+        void wtc;
       }
     }
+  }
+  // the sign the programs lose, and the token the engine writes
+  {
+    const G = HO.newGame({ seed: 1, rules: 'dos', size: 'small', computers: 1, iq: 'average', shape: 'random' });
+    for (const [T, tok] of [[720, '72.0°F'], [-5, '-0.5°F'], [5, '0.5°F'], [-352, '-35.2°F'], [0, '0.0°F']]) if (HO.tempToken(T) !== tok) fail(`token ${T}: ${HO.tempToken(T)}`);
+    if (HO.say(G, 'You have explored X. Gravity: 1.00G. Temp: -0.5°F. Metal: 1.') !== 'You have explored X. Gravity: 1.00G. Temp: 0.5°F. Metal: 1.') fail('English -0.5: ' + HO.say(G, 'You have explored X. Gravity: 1.00G. Temp: -0.5°F. Metal: 1.'));
+    HO.tempPref = () => 'C';
+    const c = HO.say(G, 'You have explored X. Gravity: 1.00G. Temp: -0.5°F. Metal: 1.'); HO.tempPref = null;
+    if (c !== 'You have explored X. Gravity: 1.00G. Temp: -18.2°C. Metal: 1.') fail('English -0.5 in °C: ' + c);
   }
   // the version's own °C formula, whole degrees as it shows them
   const G12 = HO.newGame({ seed: 1, rules: '12', size: 'small', computers: 1, iq: 'average', shape: 'random' });
@@ -185,7 +224,7 @@ async function page() {
         const A = HOAPI, G = A.G, me = A.me();
         A.UI.sel = me.homeStar; A.renderPanel(); A.draw();
         const panel = document.body.innerText;
-        const rep = HO.say(G, `You have explored ${G.stars[me.homeStar].name}. Gravity: 1.00G. Temp: 72°. Metal: 1,000.`);
+        const rep = HO.say(G, `You have explored ${G.stars[me.homeStar].name}. Gravity: 1.00G. Temp: 72.0°F. Metal: 1,000.`);
         return { panel: (panel.match(/[^\n]*[°º][^\n]*/g) || []).join(' | '), grav: (panel.match(/\d+[.,]\d\dG/g) || []).join(' '), rep, deg: A.degF(72) };
       });
       if (errors.length) fail(`${skin} ${rules} ${pref || 'as the original'}: ${errors.join('; ')}`);
