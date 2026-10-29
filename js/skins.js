@@ -234,6 +234,12 @@ function applyIcon(id) {
     for (const [n, v] of Object.entries(a)) l.setAttribute(n, v);
     doc.head.appendChild(l);
   }
+  // the home-screen icon (iOS reads the link at "Add to Home Screen"): the skin's own 180 px one on an opaque
+  // background (tools/touch-icons.py); the homages keep index.html's
+  let t = doc.head.querySelector('link[rel="apple-touch-icon"]');
+  if (!t) { t = doc.createElement('link'); t.rel = 'apple-touch-icon'; doc.head.appendChild(t); }
+  t.setAttribute('href', k.icon ? `assets/icons/${k.icon}-touch.png` : 'assets/icons/apple-touch-icon.png');
+  t.setAttribute('sizes', '180x180');
 }
 
 // the sound sets a player may choose: each original's own (one entry for

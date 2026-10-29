@@ -157,8 +157,13 @@ and the translation notice (`docs/translations-notes/`) are not done.
       - Not done: the panel's gravity decimal comma ("%d,%2.2dG" in the German and 1.2F panels).
    i. **Japanese**, far down: there was a Japanese port, but no copy can be found; the remake's
       own Japanese translation is not planned soon.
-5. Last: a home-screen (apple-touch) icon per skin, the icon a phone shows when the site is
-   added to its home screen; today every skin's is the Android one.
+5. **Done (October 2026).** A home-screen (apple-touch) icon per skin: `assets/icons/<skin>-touch.png`, 180×180
+   and opaque (iOS fills transparency with black), the skin's own icon centred on its original system's
+   desktop colour, the pixel art scaled by a whole number with nearest-neighbour (`tools/touch-icons.py`).
+   `applyIcon` (js/skins.js) points the `<link rel="apple-touch-icon">` at it, so "Add to Home Screen" in
+   Safari takes the skin showing; index.html's Android icon stays for before the script runs and for the
+   homages (cozy, gemini). No web app manifest: it would be one file for the whole site, can't follow the
+   skin, and "Add to Home Screen" works without it.
 
 **The translation rule (Jake, October 2026).** A version's translation matches the originals
 as closely as possible, flaws and all: a French player of 2.0 sees the same wording he would

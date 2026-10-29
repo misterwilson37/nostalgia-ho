@@ -41,3 +41,10 @@ amiga      2.0 (German): HO!.info, the program's Workbench icon (the cowboy),
 ios        1.2.9: the app's AppIcon60x60@3x.png (180 px, an Apple CgBI PNG,
            decoded by tools/extract/ios.py); the tab's is it downscaled to 32
            (a painting, not pixel art).
+
+<skin>-touch.png (all but cozy and gemini)
+    The home-screen (apple-touch) icon, 180x180, opaque (iOS fills transparency
+    with black): the icon above on the original system's desktop colour, centred,
+    the pixel art scaled by a whole number (nearest-neighbour). js/skins.js
+    applyIcon points the page's apple-touch-icon link at it. Made by
+    tools/touch-icons.py (Pillow). android-touch.png is apple-touch-icon.png.
