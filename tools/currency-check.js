@@ -8,7 +8,8 @@
 // HO.currency(G) says and with no other: "€" in French in iOS, Android, 5.0.5 and the Palm
 // (js/engine.js, EURO_FRENCH), "$" everywhere else. A "$" in a curse ("#!$@*$&@") does not count.
 // It also checks the engine: the report in each language, and each money format, directly.
-// --patch plays with the unofficial patch on (the sign is the same). Chromium comes from PLAYWRIGHT_BROWSERS_PATH, Playwright from NODE_PATH ($(npm root -g)).
+// --patch plays with the unofficial patch on (the sign is the same). --euro=on|off plays the Palm with its Preferences' "Money in € not $" chosen (on: "€" in
+// every language; off: "$" even in French); the other versions ignore it. Chromium comes from PLAYWRIGHT_BROWSERS_PATH, Playwright from NODE_PATH ($(npm root -g)).
 'use strict';
 const path = require('path'), http = require('http');
 const { spawn } = require('child_process');
@@ -17,7 +18,8 @@ const args = process.argv.slice(2);
 const opt = (k, d) => { const a = args.find(x => x.startsWith('--' + k + '=')); return a ? a.slice(k.length + 3) : d; };
 const HO = require(path.join(root, 'js/engine.js'));
 Object.assign(HO.DATA, require(path.join(root, 'js/data.js')));
-const EURO = (id, lang) => lang === 'fr' && ['ios', 'android', 'original', 'palm'].includes(id);
+const EUROPREF = opt('euro', null);
+const EURO = (id, lang, pref) => id === 'palm' && pref != null ? pref : lang === 'fr' && ['ios', 'android', 'original', 'palm'].includes(id);
 let chromium;
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 const up = (url) => new Promise(res => { const r = http.get(url, (x) => { x.resume(); res(x.statusCode < 500); }); r.on('error', () => res(false)); r.setTimeout(1500, () => { r.destroy(); res(false); }); });
@@ -58,6 +60,22 @@ function engineChecks() {
       }
     }
   }
+  // the Palm's "Money in € not $" (HO.prefs.euro): the sign in every language when chosen, "$" when refused, the
+  // version's own when never chosen; no other version asks it
+  for (const lang of HO.languages(HO.RULESETS.palm)) {
+    for (const [pref, rules] of [[true, 'palm'], [false, 'palm'], [true, 'original'], [true, 'dos']]) {
+      HO.prefs.euro = pref;
+      const o = { seed: 5, rules, size: 'small', computers: 2, iq: 'average', shape: 'random', humans: [{ name: 'Ann' }] };
+      if (HO.ownLanguage(HO.RULESETS[rules]) !== lang && HO.languages(HO.RULESETS[rules]).includes(lang)) o.lang = lang; else if (rules !== 'palm') continue;
+      let G; try { G = HO.newGame(o); } catch (e) { out.push(`${rules} ${lang}: ${e.message}`); continue; }
+      const want = rules === 'palm' ? (pref ? '€' : '$') : EURO(rules, G.opts.lang) ? '€' : '$';
+      if (HO.currency(G) !== want) out.push(`${rules} ${lang} euro=${pref}: HO.currency is ${HO.currency(G)}, expected ${want}`);
+      const s = HO.say(G, 'Joe has just given you $1,234.');
+      if (rules === 'palm' && HO.saysIn(G, 'Joe has just given you $1,234.') | (lang === 'en') && (!s.includes(want) || s.includes(want === '€' ? '$' : '€'))) out.push(`${rules} ${lang} euro=${pref}: "${s}"`);
+      if (rules === 'palm' && pref && HO.rules(G).shortMoney.fn(1234567, HO.currency(G)) !== '€1,234 K') out.push(`${rules} ${lang}: compact ${HO.rules(G).shortMoney.fn(1234567, HO.currency(G))}`);
+    }
+    HO.prefs.euro = null;
+  }
   return out;
 }
 
@@ -76,7 +94,7 @@ function pageText() {
   for (const e of document.querySelectorAll('[title], [aria-label]')) if (visible(e)) { if (e.title) out.push(e.title); const a = e.getAttribute('aria-label'); if (a) out.push(a); }
   return out;
 }
-function wrong(texts, want) {
+function wrong(texts, want, lang) {
   const other = want === '€' ? '$' : '€', res = [];
   // (not money: a curse, the Palm's "$" button named in its help, the Palm's "Money in € not $" preference)
   for (const t of texts) { const s = t.replace(CURSE, ''); if (s.includes(other) && !(s.includes('€') && s.includes('$')) && !(other === '$' && /button|bouton|Taste|düğme|botón/i.test(s)) && !(other === '$' && /^(Need \$|Besoin de \$|Brauche \$|\$ lazım|Necesito \$)$/.test(s))) res.push(s); }
@@ -88,7 +106,7 @@ async function run(browser, url, r) {
   const errors = [], seen = [];
   page.on('pageerror', e => errors.push(e.message));
   page.on('dialog', d => d.accept());
-  await page.addInitScript(([id, l, p]) => { try { if (!sessionStorage.getItem('cur')) { localStorage.clear(); localStorage.setItem('ho5.rules', id); localStorage.setItem('ho5.language', l); localStorage.setItem('ho5.language.at', String(Date.now())); if (p) localStorage.setItem('ho5.patch', '1'); sessionStorage.setItem('cur', '1'); for (const k of ['rules.claude', 'rules.gemini', 'skins.cozy', 'skins.gemini']) localStorage.setItem('ho5.homage.hide.' + k, '1'); } } catch (e) {} }, [r.rules, r.lang, args.includes('--patch')]);
+  await page.addInitScript(([id, l, p, eu]) => { try { if (!sessionStorage.getItem('cur')) { localStorage.clear(); localStorage.setItem('ho5.rules', id); localStorage.setItem('ho5.language', l); localStorage.setItem('ho5.language.at', String(Date.now())); if (p) localStorage.setItem('ho5.patch', '1'); if (eu) localStorage.setItem('ho5.prefs', JSON.stringify({ euroSign: eu === 'on' })); sessionStorage.setItem('cur', '1'); for (const k of ['rules.claude', 'rules.gemini', 'skins.cozy', 'skins.gemini']) localStorage.setItem('ho5.homage.hide.' + k, '1'); } } catch (e) {} }, [r.rules, r.lang, args.includes('--patch'), r.rules === 'palm' ? EUROPREF : null]);
   await page.goto(`${url}?skin=${r.skin}`);
   await page.waitForFunction(() => window.HOAPI && document.querySelector('#titlescreen') && !document.querySelector('#titlescreen').classList.contains('loading'), null, { timeout: 30000 });
   await sleep(300);
@@ -104,7 +122,7 @@ async function run(browser, url, r) {
   await sleep(500);
   const grab = async (where) => { const t = await page.evaluate(pageText); seen.push({ where, t }); };
   const want = await page.evaluate(() => HO.currency(HOAPI.G));
-  if (want !== (EURO(r.rules, r.lang) ? '€' : '$')) errors.push(`HO.currency is ${want}`);
+  if (want !== (EURO(r.rules, r.lang, EUROPREF === 'on' ? true : EUROPREF === 'off' ? false : null) ? '€' : '$')) errors.push(`HO.currency is ${want}`);
   await grab('the game');
   // the player's own colony: its panel and the bars
   await page.evaluate(() => { const a = HOAPI, me = a.me(); const s = me.homeStar; if (a.UI) { a.UI.sel = s; } try { a.centerOn && a.centerOn(s); } catch (e) {} });
@@ -132,7 +150,7 @@ async function run(browser, url, r) {
   const found = [];
   let anyMoney = false;
   for (const { where, t } of seen) {
-    for (const s of wrong(t, want)) found.push(`[${where}] ${s}`);
+    for (const s of wrong(t, want, r.lang)) found.push(`[${where}] ${s}`);
     if (t.some(x => x.includes(want) && /\d/.test(x))) anyMoney = true;
   }
   if (!anyMoney) found.push('no money with the sign was seen at all');

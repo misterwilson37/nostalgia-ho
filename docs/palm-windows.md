@@ -1477,11 +1477,45 @@ form's copies at +0x3c-0x43):
 Built as `rs.prefsWindow` (style `'palm'`; `prefsPalm` in `js/skins/classic/ui.js`): the
 words and the order of the form (Player Sex, Money, Temp, Jump To History, hints, Best
 Buddies Stars, Auto-Zoom, Auto-Off, then Sound with Cancel and OK on the bottom line),
-Cancel leaves everything, OK keeps it. Wired: Player Sex (your hat), Temp, hints, Sound
+Cancel leaves everything, OK keeps it. Wired: Player Sex (your hat), Money in € (October 2026, below), Temp, hints, Sound
 (the remake's sound switch; this skin is silent). Kept as chosen with nothing yet to act
-on: Money in € (the Palm's money figures stay "$"), Jump To History (the remake's
+on: Jump To History (the remake's
 messages come as cards; there is no Message History form to jump to), Show Best Buddies
 Stars (no such report), Enable Auto-Zoom, Disable Auto-Off. The remake's own options (modern
 conveniences, pointer hints) are under a line headed "Remake options". Strings in all five
 languages (`js/ui-text.js`). The form's 156 x 156 frame, pixel positions and the field 3213
 are not reproduced.
+
+### Money in € not $ (+0x2e6), wired (October 2026)
+
+The byte at +0x2e6 of the preferences record (the form's copy at +0x3e, `FUN_00070a86` and
+`FUN_00070d06`; reset to 0 by `FUN_0001727e` and `FUN_000171aa`) is read at nine places, and each
+chooses between the sign string **tSTL 1001 item 46** (`FUN_0002c9f0`, "$", fetched by index 1-based)
+and the single byte **0x80**, which is "€" in Palm OS's character set. Nothing reads the language: the
+Palm was English only, so the preference works the same whatever the text is.
+
+| Where | Address | What it writes |
+|---|---|---|
+| A whole figure with the sign | `FUN_0002c510` (CMiscUtilsPalm +0x68, the reports' and windows' figure) | digits built backwards, then the sign, then "(" for a loss, all reversed: **"$1,234"**, **"($1,234)"**; "€1,234", "(€1,234)". Without the sign flag: "1,234", "-1,234" |
+| A figure with the sign, no loss form | `FUN_0002c8f4` | "$1,234" / "€1,234" |
+| The compact figure | `FUN_0002c664` (+0x6c) | the sign is the first `%s` of tSTL 1001 items 47-54: "€1,234 K", "€12.03 M", "(€12 K)" |
+| The money panel | `FUN_00047f54` (Spending Levels form) | the sign is passed as a `%s` beside the figures |
+| Build Ships | `FUN_00042902` | the sign in the label "Dev/Pro Cost (%s)" (tSTL 1001 item 72): "Dev/Pro Cost (€)" |
+| The map form's spending button | `FUN_00036da4` (control 1403, `0x57b`, empty in the resource) | its label, "$" (0x24) or "€" (0x80) |
+| The Message History form's spending button | `FUN_000687e0` (the same button, `$32` of the form) | the same label |
+
+In every one the sign comes **first with no space** ("$" and "€" alike), so the euro keeps the
+dollar's place, brackets and thousands commas: only the character changes. Not touched by the
+preference: the resource strings that hold a literal "$" (tSTL 1001 items 10 and 45, tSTL 6001.27
+and .40 "Disp. Inc.: $", the help text tSTR 6021.0 "click the $ button"); the code never edits them.
+Where each of those is drawn was not traced, so the remake leaves them alone (the help line in
+particular says "$" as the Palm printed it).
+
+Built: `HO.prefs.euro` (`js/engine.js`), which `HO.currency(G)` reads for the Palm ruleset
+in every language: chosen on, "€"; chosen off, "$"; **never chosen, the language's sign** (the Palm's
+own default, off, is "$" in English; the French the remake gives the Palm comes from iOS's, whose
+money is "€", as `docs/proofread-2026-10.md`, "The currency sign", settled; so a French Palm starts
+with the box ticked and the player can untick it). The classic skin keeps the choice (`Prefs.euroSign`,
+set only when the box is changed) and the Preferences form shows the sign in force. Every place that
+writes money asks `HO.currency(G)`, so the panels, bars, windows and reports follow it
+(`tools/currency-check.js --euro=on|off`).

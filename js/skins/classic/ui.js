@@ -136,10 +136,11 @@ const el = (tag, attrs, ...kids) => {
 const fmt = (n) => { const f = G && HO.rules(G).fmtNum; return f ? f(n) : Math.round(n).toLocaleString('en-US'); };
 // (the sign is the version's and language's: HO.currency(G), "€" in the French of iOS, Android, 5.0.5 and the Palm)
 const curSign = () => HO.currency(G);
-const money = (n) => { const f = G && HO.rules(G).fmtMoney; return f ? f(n, curSign()) : (n < 0 ? '-' : '') + curSign() + fmt(Math.abs(n)); };
+// (HO.sumText puts the sign where the language does: after the figure in the patched French)
+const money = (n) => { const f = G && HO.rules(G).fmtMoney; return HO.sumText(G, f ? f(n, curSign()) : (n < 0 ? '-' : '') + curSign() + fmt(Math.abs(n))); };
 // a panel's figure (rs.shortMoney, the Palm): in full inside the screen's
 // range ([lo, hi)), else the version's compact form
-const panelFig = (key, n, sign) => { const S = G && HO.rules(G).shortMoney, r = S && S.full[key]; return r && !(n >= r[0] && n < r[1]) ? S.fn(n, sign ? curSign() : false) : sign ? money(n) : fmt(n); };
+const panelFig = (key, n, sign) => { const S = G && HO.rules(G).shortMoney, r = S && S.full[key]; return r && !(n >= r[0] && n < r[1]) ? HO.sumText(G, S.fn(n, sign ? curSign() : false)) : sign ? money(n) : fmt(n); };
 
 // ---------- images ----------
 const IMG = {};
@@ -189,8 +190,10 @@ const Prefs = { celsius: false, important: false, review: null, hints: true, aut
   // the Palm's Preferences form (rs.prefsWindow style 'palm', prefsPalm): money
   // in euros, Jump To History, Auto-Zoom, Disable Auto-Off (kept, nothing yet
   // to act on)
-  euro: false, jumpHistory: true, autoZoom: false, autoOff: false };
+  // (euroSign: null until the player chooses; HO.prefs.euro follows it, HO.currency)
+  euroSign: null, jumpHistory: true, autoZoom: false, autoOff: false };
 try { const s = JSON.parse(localStorage.getItem('ho5.prefs') || '{}'); if (s.sound === false) Sound.on = false; if (s.music) Sound.music = true; for (const k in Prefs) if (s[k] != null) Prefs[k] = s[k]; } catch (e) {}
+HO.prefs.euro = Prefs.euroSign;
 // Review Battles: what was chosen, else the version's own default (iOS: on;
 // rs.prefsWindow.defaults), else off
 function prefReview() { const PW = G && HO.rules(G).prefsWindow; return Prefs.review != null ? !!Prefs.review : !!(PW && PW.defaults && PW.defaults.review); }
@@ -1393,7 +1396,7 @@ function renderPanel() {
   const net = pr.net;
   panel.append(el('section', { class: 'box info' },
     row('Savings', panelFig('savings', p.savings, true), p.savings < 0 ? 'neg' : '', 'savings'),
-    row('Income', panelFig('income', pr.income, true) + (HO.rules(G).interestShort ? ` (Int: $${HO.rules(G).interestShort(pr.interest)})` : ''), pr.income < 0 ? 'neg' : '', 'income'),
+    row('Income', HO.rules(G).interestShort ? HO.sumText(G, tl('%s (Int: $%s)', panelFig('income', pr.income, true), HO.rules(G).interestShort(pr.interest))) : panelFig('income', pr.income, true), pr.income < 0 ? 'neg' : '', 'income'),
     pr.interest && !HO.rules(G).interestShort ? row(pr.interest > 0 ? 'Interest' : 'Interest owed', money(pr.interest), pr.interest < 0 ? 'neg' : '', 'interest') : null,
     row('Metal', panelFig('metal', p.metal, false), '', 'metal'),
   ));
@@ -3225,7 +3228,7 @@ function openGiveWindow(W) {
   const amtOf = W.style === 'palm' ? (H, v) => v >= W.steps ? H : v <= 0 ? 0 : Math.trunc(H / W.steps) * v
     : W.style === 'ios' ? (H, v) => Math.trunc(Math.fround(Math.fround(H) * Math.fround(v / 10000))) : (H, v) => v;
   const range = W.style === 'palm' ? () => W.steps : W.style === 'ios' ? () => 10000 : (H) => H;
-  const moneyText = (n) => W.style === 'ios' ? money(n) : curSign() + fmt(n);
+  const moneyText = (n) => W.style === 'ios' ? money(n) : HO.sumText(G, curSign() + fmt(n));
   const mOut = el('output', null, W.style === '505' ? fmt(0) : moneyText(0)), xOut = el('output', null, fmt(0));
   const ms = giveSlider(have > 0 ? range(have) : 0, W.money, (v) => { mAmt = amtOf(have, v); mOut.textContent = W.style === '505' ? fmt(mAmt) : moneyText(mAmt); }, { vertical: W.style === '505' });
   const xs = giveSlider(hasM > 0 ? range(hasM) : 0, W.metal, (v) => { xAmt = amtOf(hasM, v); xOut.textContent = fmt(xAmt); }, { vertical: W.style === '505' });
@@ -3240,7 +3243,7 @@ function openGiveWindow(W) {
     const col = (label, dollar, out, s, top) => el('div', { class: 'givecol' },
       el('div', { class: 'giveamt' }, el('span', null, label), dollar ? el('span', null, curSign()) : null, out),
       el('div', { class: 'givesl' }, s, ticks(), el('div', { class: 'giveends' }, el('span', null, top), el('span', null, '0'))));
-    body = el('div', null, who, el('div', { class: 'givecols' }, col(W.money, true, mOut, ms, curSign() + fmt(p.savings)), col(W.metal, false, xOut, xs, fmt(p.metal))));
+    body = el('div', null, who, el('div', { class: 'givecols' }, col(W.money, true, mOut, ms, HO.sumText(G, curSign() + fmt(p.savings))), col(W.metal, false, xOut, xs, fmt(p.metal))));
   } else {
     // a label and the amount, the slider lying down, its ends under it
     const row = (label, out, s, lo, hi) => el('div', { class: 'giverow2' }, el('div', { class: 'giveamt' }, el('span', null, label), out), s,
@@ -4126,17 +4129,22 @@ function prefsIOS(W) {
 // rs.prefsWindow style 'palm'): Player Sex (a pop-up, Female then Male), Money
 // in € not $, Temp in °C not °F, Jump To History, Give Helpful Hints, Show Best
 // Buddies Stars, Enable Auto-Zoom, Disable Auto-Off, then Sound, Cancel and OK on
-// the bottom line. OK keeps it all. Wired: Sex (your hat), Temp, Hints, Sound
+// the bottom line. OK keeps it all. Wired: Sex (your hat), Money in € (the sign of
+// every sum, HO.currency; FUN_0002c510, FUN_0002c664, FUN_0002c8f4 and the $ button's
+// label, +0x2e6), Temp, Hints, Sound
 // (the remake's sound switch; this skin is silent). Kept with nothing yet to act
-// on: Money in €, Jump To History, Best Buddies Stars, Auto-Zoom, Disable Auto-Off.
+// on: Jump To History, Best Buddies Stars, Auto-Zoom, Disable Auto-Off.
 function prefsPalm(W) {
-  const D = { female: !!me().female, euro: !!Prefs.euro, celsius: !!Prefs.celsius, history: Prefs.jumpHistory !== false, hints: !!Prefs.hints,
+  const D = { female: !!me().female, euro: HO.currency(G) === '€', celsius: !!Prefs.celsius, history: Prefs.jumpHistory !== false, hints: !!Prefs.hints,
     buddies: Prefs.buddyStars !== false, zoom: !!Prefs.autoZoom, autooff: !!Prefs.autoOff, sound: !!Sound.on };
   const chk = (k, label) => el('label', { class: 'chk' }, el('input', { type: 'checkbox', checked: D[k] ? 'checked' : false, onchange: (e) => { D[k] = e.target.checked; } }), el('span', null, label));
+  const euro0 = D.euro;
   const sex = el('select', { 'aria-label': W.sex.replace(/:$/, ''), onchange: (e) => { D.female = e.target.value === '0'; } },
     ...W.sexes.map((t, i) => el('option', { value: String(i), selected: (i === 0) === D.female ? 'selected' : false }, t)));
   const ok = () => {
-    Prefs.euro = D.euro; Prefs.celsius = D.celsius; Prefs.jumpHistory = D.history; Prefs.hints = D.hints; Prefs.buddyStars = D.buddies; Prefs.autoZoom = D.zoom; Prefs.autoOff = D.autooff;
+    // (the sign once chosen; left alone, the version's own: "$", the French of iOS's "€")
+    if (D.euro !== euro0) { Prefs.euroSign = D.euro; HO.prefs.euro = D.euro; }
+    Prefs.celsius = D.celsius; Prefs.jumpHistory = D.history; Prefs.hints = D.hints; Prefs.buddyStars = D.buddies; Prefs.autoZoom = D.zoom; Prefs.autoOff = D.autooff;
     Sound.on = D.sound;
     if (me().female !== D.female) { me().female = D.female; save(); }
     savePrefs(); closeModal(); renderPanel(); draw();

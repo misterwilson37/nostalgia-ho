@@ -301,7 +301,8 @@ function frPatchLayer(o, base, rs) {
 const langRules = (G) => rules(G);
 // the interface's words of an official translation's windows, [[English, translation], ...],
 // for a game in a language whose version has them (3.0.1 in French: 3.0.1F's menus and
-// windows, rs.lang.fr.officialWindows); null otherwise. js/ui-lang.js puts them over
+// windows, rs.lang.fr.officialWindows; 2.0 in French: 1.2F's, then 3.0.1F's; 1.2 in its own French:
+// 1.2F's, rs.ownWindows); null otherwise. js/ui-lang.js puts them over
 // the remake's own words for the same English.
 function windowWords(G) {
   const lang = G && G.opts && G.opts.lang;
@@ -522,7 +523,8 @@ function trSuffixes(s) {
   s = String(s).replace(/\{\^\}(\s*)(\S)/g, (m, sp, c) => sp + c.toLocaleUpperCase('tr'));
   return s.replace(/([^\s’'{}]*)([’']?)\{(e|de|den|deki|i|in|le)\}/g, (m, w, ap, code) => w + ap + trEnding(w, code));
 }
-function say(G, text) {
+function say(G, text) { return sumText(G, say0(G, text)); }
+function say0(G, text) {
   const t = String(text == null ? '' : text), L = sayRules(G);
   if (!L) return t;
   const C = sayOf(L), hit = sayMatch(C.reports, t);
@@ -531,8 +533,7 @@ function say(G, text) {
   const args = hit[1].map((a, i) => { X.ix = i; return sayArgIn(L, C, a, X); });
   let out = typeof hit[0].to === 'function' ? hit[0].to(args, G, hit[1]) : sayFill(hit[0].to, args);
   if (out.indexOf('{') >= 0) out = trSuffixes(out);
-  // (a sum is written "$1,234" in the rules' messages; ahead of a figure only: the curse is "#!$@*$&@")
-  if (out.indexOf('$') >= 0 && currency(G) !== '$') out = out.replace(/\$(?=\d)/g, currency(G));
+  // (a sum is written "$1,234" in the rules' messages: `say` puts in the sign, sumText)
   if (frPatched(G)) out = frFilled(out);
   return L.cap ? out.charAt(0).toUpperCase() + out.slice(1) : out;
 }
@@ -885,15 +886,32 @@ function money505(n, cur = '$') {
 }
 // The currency sign, from here alone (HO.currency(G); everything that writes money asks it: the
 // rules' sums (rs.fmtMoney(n, cur), moneyPalm), the skins' panels, bars and windows, and the
-// reports, whose "$1,234" `say` puts in the sign). "$" in every version and language but one: the
-// iOS game's French counts in euros ("€" in all five of its money strings: Misc Strings 27 and 40,
-// sprintf Templates 3, 4 and 7, written before the figure with no space: "€1,234", "(+ €1,234)",
-// "Rev. Disp.: €…"), and so French is "€" in the versions that carry iOS's French: iOS, Android,
-// 5.0.5 and the Palm, in every mode, patched or not. 1.2F and 3.0.1F say "$" (3.0.1F's reports
-// "galacto-dollar(s)"), as do 4.0.5's French and iOS's Turkish, the German of DOS 2.0 and the
-// Amiga and the remake's Spanish (docs/translations.md, "Numbers and temperatures"). docs/proofread-2026-10.md, U-130.
+// reports, whose "$1,234" `say` puts in the sign). "$" in every version and language but two cases:
+// - the iOS game's French counts in euros ("€" in all five of its money strings: Misc Strings 27 and 40,
+//   sprintf Templates 3, 4 and 7, written before the figure with no space: "€1,234", "(+ €1,234)",
+//   "Rev. Disp.: €…"), and so French is "€" in the versions that carry iOS's French: iOS, Android,
+//   5.0.5 and the Palm, in every mode, patched or not. 1.2F and 3.0.1F say "$" (3.0.1F's reports
+//   "galacto-dollar(s)"), as do 4.0.5's French and iOS's Turkish, the German of DOS 2.0 and the
+//   Amiga and the remake's Spanish (docs/translations.md, "Numbers and temperatures"). docs/proofread-2026-10.md, U-130.
+// - the Palm's own preference "Money in € not $" (prefs +0x2e6, docs/palm-windows.md, "The Preferences
+//   form"): the Palm code writes the sign tSTL 1001 item 46 "$" or, with it on, the byte 0x80 (€) in every
+//   language, before the figure with no space ("€1,234", "(€1,234)"). PREFS.euro (HO.prefs.euro, kept by
+//   the skin from the player's Preferences) is true or false once the player has chosen; null (never
+//   chosen) leaves the version's and language's own sign: "$" as the Palm shipped, "€" in the French
+//   it takes from iOS.
 const EURO_FRENCH = ['ios', 'android', 'original', 'palm'];
-function currency(G) { return G && G.opts && G.opts.lang === 'fr' && EURO_FRENCH.includes(G.rules) ? '€' : '$'; }
+const PREFS = { euro: null };
+function currency(G) {
+  if (G && G.rules === 'palm' && PREFS.euro != null) return PREFS.euro ? '€' : '$';
+  return G && G.opts && G.opts.lang === 'fr' && EURO_FRENCH.includes(G.rules) ? '€' : '$';
+}
+// a sum written with a "$" before the figure, with the version's sign and the patch's placement
+function sumText(G, s) {
+  if (typeof s !== 'string' || (s.indexOf('$') < 0 && s.indexOf('€') < 0)) return s;
+  const c = currency(G);
+  if (c !== '$') s = s.replace(/\$(?=\d)/g, c);
+  return s;
+}
 // a number as the game's version writes it in its reports (rs.fmtNum)
 const num = (G, n) => { const f = G && rules(G).fmtNum; return f ? f(n) : fmt(n); };
 
@@ -1757,7 +1775,7 @@ const API = {
   newGame, endTurn, buildShips, unbuildShip, designLimits, designMin, designCost, shipCostNow, canBuildType, findOrCreateDesign, getDesign,
   fleetCount, fleetDesigns, fleetSpeed, fleetMaxRange, fleetHas, fleetKind, fleetLabel, orderMove, orderPath, cancelMove, canReach, canMerge, queueShips, unqueueShip,
   newFleet, addShipsToStar, mergeFleets, splitFleet, scrapFleet, evacuate, colonies, seenG, seenT, maxPop, planetClass, planetIncome,
-  scrapDesign, liveDesigns, isFriend, isAllied, isBuddy, hasColonyAt, designName, namesFile, namesFileAdd, report, setPact, give, surrender, sendChat, sendCanned, deliverCanned, clearCanned, cannedList, cannedSteps, setArmageddon, hostileAt, know, observe, msg, msgAll, humans, starDist, dist, projected, techSum, score, save, load, borrowLimit, fmt, num, niceNum, num505, money505, currency,
+  scrapDesign, liveDesigns, isFriend, isAllied, isBuddy, hasColonyAt, designName, namesFile, namesFileAdd, report, setPact, give, surrender, sendChat, sendCanned, deliverCanned, clearCanned, cannedList, cannedSteps, setArmageddon, hostileAt, know, observe, msg, msgAll, humans, starDist, dist, projected, techSum, score, save, load, borrowLimit, fmt, num, niceNum, num505, money505, currency, sumText, prefs: PREFS,
 };
 if (typeof module !== 'undefined') {
   module.exports = API;
