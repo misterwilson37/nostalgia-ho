@@ -62,6 +62,9 @@ class Manual:
             blk = blk.strip('\n')
             if not blk.strip(): continue
             if blk.startswith('#!'): continue          # source comment
+            if blk.startswith('!footer') and cur is not None:   # this chapter's own footer line
+                cur['footer'] = blk[7:].strip()
+                continue
             if blk.startswith('==='):
                 parts = [p.strip() for p in blk[3:].strip().split('|')]
                 cur = {'slug': parts[0], 'title': parts[1], 'blocks': []}
@@ -134,7 +137,7 @@ class Manual:
         return '\n'.join(out)
 
     # ---- pages ----
-    def page(self, title, body, prev=None, nxt=None, top=False):
+    def page(self, title, body, prev=None, nxt=None, top=False, footer=None):
         nav = ['<a href="index.html">Contents</a>']
         if prev: nav.append('<a href="%s.html">&larr; Previous</a>' % prev)
         if nxt: nav.append('<a href="%s.html">Next &rarr;</a>' % nxt)
@@ -142,7 +145,7 @@ class Manual:
                 '<meta name="viewport" content="width=device-width, initial-scale=1">\n'
                 '<title>%s</title>\n<link rel="stylesheet" href="style.css">\n</head>\n<body>\n<main>\n'
                 '<nav class="top">%s</nav>\n<h1>%s</h1>\n%s\n<footer>%s</footer>\n</main>\n</body>\n</html>\n'
-                % (re.sub(r'<[^>]+>', '', self.inline(title)), ' '.join(nav), self.inline(title), body, self.meta['footer']))
+                % (re.sub(r'<[^>]+>', '', self.inline(title)), ' '.join(nav), self.inline(title), body, self.inline(footer) if footer else self.meta['footer']))
 
     def build(self, outdir):
         os.makedirs(outdir, exist_ok=True)
@@ -152,6 +155,7 @@ class Manual:
         written = {}
         bodies = {c['slug']: self.render_blocks(c['blocks']) for c in self.chapters}
         titles = {c['slug']: c['title'] for c in self.chapters}
+        feet = {c['slug']: c['footer'] for c in self.chapters if c.get('footer')}
         flat = []
         li = []
         for g in self.meta['contents']:
@@ -171,7 +175,7 @@ class Manual:
         pages = {'index': self.page(self.meta['title'], idx_body, top=True)}
         # need images registered before sizes are final: render index first (front may use images)
         for i, s in enumerate(flat):
-            pages[s] = self.page(titles[s], bodies[s], flat[i-1] if i else None, flat[i+1] if i + 1 < len(flat) else None)
+            pages[s] = self.page(titles[s], bodies[s], flat[i-1] if i else None, flat[i+1] if i + 1 < len(flat) else None, footer=feet.get(s))
         for name, h in pages.items():
             open(os.path.join(outdir, name + '.html'), 'w', encoding='utf-8', newline='\n').write(h)
         # css + images

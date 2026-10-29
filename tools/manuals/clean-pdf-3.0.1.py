@@ -25,7 +25,7 @@ def reference_tokens():
     m = bm.Manual('3.0.1')
     toks = 'Spaceward Ho! 3.0 by Peter Commons Artwork by Howard Vives and Bob van de Walle Sounds by Mark Madeley Designed by Joe Williams and Peter Commons Manual and software \u00a9 Copyright 1991-1993 by Delta Tao Software, Inc. All rights reserved'.split()
     for c in m.chapters:
-        if c['slug'] in ('warranty-registration-survey', 'back-cover'): continue
+        if c['slug'] in ('warranty-registration-survey', 'back-cover', 'last-minute-notes'): continue
         h = m.render_blocks(c['blocks'])
         t = html.unescape(re.sub(r'<[^>]+>', ' ', h))
         toks += [c['title']] if False else c['title'].split()

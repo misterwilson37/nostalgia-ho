@@ -916,7 +916,7 @@ No version bump: wording only.
 
 - Done (October 2026, by the main Claudling): the patch tables are wired, iOS's `BY_PLACE` placeholder order moved to the patch (`iosFillings`), and 3.0.1F routed (with the English 3.0.1 beside it, `mac301En`).
 - **Done (the main Claudling, "The currency sign" below):** Write French money with "€" in iOS, Android, 5.0.5 and the Palm, in every mode (Jake: accuracy; not a mistake, so not the patch's): the currency sign by version and language, where the remake hard-codes "$" ("The remaining audit", the currency).
-- Add 3.0.1's "Last Minute Notes" to its sources ("What Delta Tao said", `docs/fixes.md`).
+- **Done (October 2026):** 3.0.1's "Last Minute Notes" are among its sources (`docs/source-inventory.md`), checked claim by claim in `docs/301-findings.md`, and set as an English manual page.
 
 Integration by the main Claudling: see `HANDOFF-proofread.md` in the bundle.
 

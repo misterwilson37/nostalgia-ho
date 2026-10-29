@@ -826,6 +826,8 @@ remake hasn't got (Mac 1.0-1.1.2, the Mac 4.0). Delta Tao wrote of the Mac line;
 2.0 is the Windows 3.1 / DOS program and its 4.0.5 the Windows 95 one, each the same game as
 the Mac version of its number.
 
+(3.0.1's own release notes, the disk's "Last Minute Notes", are checked the same way in `docs/301-findings.md`, "Last Minute Notes": 31 fixes and 5 known problems; the totals below are the 5.0 manual's only.)
+
 Totals: **31 confirmed, 1 contradicted in part, 13 not checkable** (45 claims). The
 contradiction isn't about a rule: it is an interface feature that Delta Tao's 5.0 list calls
 new but that earlier versions already had in some form. One finding corrected the remake's wording: Delta Tao and 1.2's code agree that colour came

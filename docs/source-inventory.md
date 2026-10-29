@@ -98,6 +98,12 @@ read** (and why it doesn't matter, or what it might hold).
   `PICT` 146, `ICN#` 131, `ics#` 73, `icl4`/`icl8`/`ics4`/`ics8`, `snd ` 21: read (mac3.py);
   `MaTh` 3, `Stup` 1000: read; `CODE` 26: read (Ghidra, `tools/decompile/mac68k.py`);
   `CDEF`, `LDEF`, `WDEF`, `TMPL`, `dctb`, `acur`, `Reqd`, `SH3∆`, `vers`: system resources.
+- `Last Minute Notes` (a text file on the English 3.0.1 disk, `SpacewardHo301.img`; Jake's copy
+  came in the translation handoff as `extras/Last Minute Notes (3.0.1).txt`, 4,965 bytes, signed Joe
+  Williams and Peter Commons): **new** (October 2026), read claim by claim against the ruleset in
+  `docs/301-findings.md`, "Last Minute Notes"; set as a manual page, English only
+  (`assets/manuals/3.0.1/last-minute-notes.html`, linked from the five 3.0.1 manual contents). The same
+  disk's English program and its pairing with the French 3.0.1F are in `docs/proofread-2026-10.md`.
 - `Spaceward Ho! 3.0 Color.img` (an HFS disk) with `Ho! 3.0 Color Picts` (the same as
   `color.rsrc`): `PPMp` 132, `PICT` 30, `icl8` 167, `ics8` 69, `RGN ` 2, `ckid`, `TMPL`: read
   (mac3.py, the mac3c skin).

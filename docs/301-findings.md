@@ -626,3 +626,35 @@ others still in, icon 2000 + face (+500 a woman) and name), the first cell picke
 Much Money?" and "Give How Much Metal?" fields at "0", each put back between 0 and the Ship
 Savings (the metal) at every key; Cancel over Give. Give with both 0 or nothing picked gives
 nothing. Built: `rs.giveWindow` ('grid'), js/skins/classic/ui.js `openGiveWindow`.
+
+## "Last Minute Notes" (Delta Tao's release notes for 3.0.1; added October 2026)
+
+A text file on Jake's English 3.0.1 disk (`SpacewardHo301.img`), signed "Joe Williams and Peter Commons":
+one note on the battle window's black cat and horseshoe, a list of 31 bugs "fixed in Spaceward Ho!
+3.0.1" and five problems "still known to exist". It is in the manual as the last insert, English only
+(`assets/manuals/3.0.1/last-minute-notes.html`, from `tools/manuals/src/3.0.1/content.txt`; the French,
+German, Spanish and Turkish contents link it marked as English). Each claim against the code and the ruleset
+(`js/rules-301.js`, the decompile `SetMenuItems`, `CheckEndGame`, `PlayerILikeBest`):
+
+| The note | The code | The remake |
+|---|---|---|
+| The black cat means bad luck, the horseshoe good luck, adding to or taking from the Weapon Tech | agrees: luck is -1, 0 or +1 Weapons a side a duel (`DoBattleStage`) | agrees ("Luck" above) |
+| Colony ships can't be refilled in Organize Ships | agrees: a fleet whose count changed has its colony ships unloaded unless all were loaded (`OrganizeFleets @133d14`) | agrees |
+| Organize Ships: every fleet inherits the small amount of fuel left of any (never changed) | agrees: every fleet of the design then has the most fuel *used* of them (`OrganizeFleets`) | agrees |
+| Armageddon can't make the last star disappear | agrees: half of the quiet stars, and with fewer than 2 nothing happens (`CheckForArmageddon @a3268`) | agrees (`checkForArmageddon`) |
+| A fleet path won't go through stars you're abandoning | agrees: routes go by your colonies, not ones being abandoned (`DeterminePath @130686`) | agrees |
+| Two surrender bugs fixed (a pending surrender carried over; "you don't die") | the surrender is cleared when processed (`SurrenderIfDesired @a1760`) | agrees: `surrenderTo` is cleared as it is processed (`processSurrenders`) |
+| Colonizing twice in a turn if someone surrendered as your colony ship landed | fixed: the winner colonizes only the stars nobody has taken or has ships at (`DoSurrenders @a482a`) | agrees (`doSurrenders`) |
+| Fix Spending: no division by zero, no overflow with a lot of money | (`FixSpendingBars @d28ca`) | cannot occur: no division by zero, numbers are not 32-bit |
+| Spiral galaxies no longer put two players on the same arm | the galaxy generator is 4.0.5's | one arm a player (`js/rules-405.js` spiral) |
+| "Sit on a planet owned by a non-allied player for one turn before you fight", only partly fixed, "unless we institute a pass 3" | the turn has the two passes the remake's engine has | agrees: the remake plays the same two passes |
+| Alliances and Surrender menu items no longer enabled in 2000 | **more than the note says**: `SetMenuItems @f4492` dims Galaxy items 9 to 12 ("Alliances...", "Give Money/Metal...", "Surrender To...", "Send Message...") while the year is below 2001 (and 9 and 11 when you are out) | **differs, left**: the remake's Galaxy menu keeps Give, Surrender and Send live in the first turn, and "Players and alliances..." also holds Compare Players, which 3.0.1 keeps live. Interface, not wired: a menu entry can't be dimmed yet (`menus` in `js/skins/classic/ui.js` only shows or hides) |
+| With more than 16 players you sometimes name a star every turn after you win | plausible: `CheckEndGame @12085a` asks the galaxy's 16-bit field at +0xe (`(short)` read, then `1 << player`) whether this player has been shown the win, `MarkEndGameDone @121a34` writes it; a player number of 16 or more can't have its own bit | **not reproduced**: the remake names a star once (`G.starNamed`). It would need 16 or more computers before the human's slot. `MarkEndGameDone`'s write was not traced to the bit, so the exact "sometimes" is not settled; left as it is |
+| Computers will not surrender to someone who just surrendered to them | `PlayerILikeBest @95f8a` skips the player a report 0x441 ("%s has just surrendered to %s", addressed to the computer) names (a global set in `DoComputerTurn`) as well as players that are out | **not settled**: `js/ai-301.js` skips players already out, not the one named by 0x441. In the engine's order the computers plan before `processSurrenders`, so a human who surrendered to a computer this turn is still in when it chooses; whether the original's report has been delivered by then wasn't traced. Left |
+| Computers might borrow too much and go into irreversible debt ("Not sure, though") | no claim to check | nothing changed |
+| The end turn button stays for the game administrator until turn 2; Supernovas drawn over the message box; a crash on 68000s after a message about a star; cosmetic bugs in the graph history, password/name and Organize Ships (99+) dialogs; the file-busy close; shorter user names; battle pause; faster path redraw; paths of scrapped fleets; unlimited first-turn zoom; ships arriving at a star you aren't at; stars you couldn't send info about; mining again after a scrapped fleet's metal | interface, multi-player file handling or Mac-program faults | not rules; the remake has no counterpart to break (the scrapped fleet's metal is picked up at once, "Scrapping" above) |
+| Möire and Greg's Buttons (Mac extensions) | | not applicable |
+
+No rules bug was found that needed fixing with evidence: the three differences (the menu dimming, the
+16-player naming, the computers' surrender target) are listed in `docs/open-questions.md`.
+

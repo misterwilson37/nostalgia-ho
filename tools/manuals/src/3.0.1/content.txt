@@ -864,3 +864,63 @@ Works on any Macintosh with 1MB of memory running System 6.0.5 or greater
 - Runs in color on color Macintoshes
 
 © Copyright 1992 by Delta Tao Software, Inc. 760 Harvard Ave., Sunnyvale, CA 94087. Phone: (800) 827-9316, (408) 730-9336, FAX -9337. Minimum 35% post-consumer waste. Pages printed on 100% recycled paper.
+
+=== last-minute-notes | Last Minute Notes
+
+!footer Last Minute Notes -- the text file "Last Minute Notes" on the English Spaceward Ho! 3.0.1 disk (Delta Tao's release notes for 3.0.1), set as a page here; it is not part of the printed manual.
+
+*A text file from the Spaceward Ho! 3.0.1 disk, not part of the printed manual. This page is in English only.*
+
+Some last minute notes for this version:
+
+In the battle dialog, the black cat means that the person receiving it has bad luck. The horseshoe means that had good luck. This has the effect of adding or subtracting from the Weapon Tech.
+
+The following bugs have been fixed in Spaceward Ho! 3.0.1:
+
+- Fixed alliance dialog and radical tech message misspellings.
+- Fixed unimplemented trap error for graph history dialog on a non-color QD machine.
+- Alliances and Surrender menu items are no longer enabled in 2000.
+- Colony ships can't be refilled using organize ships dialog.
+- Armageddon can't cause the last star in the galaxy to disappear.
+- Fix spending no longer tries to divide by zero.
+- Fixed an overflow error in the "Fix Spending" function when you had lots and lots of money.
+- Dragging a fleet path won't go through stars you're currently abandoning.
+- The end turn button will remain visible to the game administrator always until he/she authorizes turn 2.
+- Supernovas don't get drawn over the message box anymore.
+- Fixed crashing bug (usually on 68000s) that followed sometime after sending a message about a star.
+- Fixed cosmetic drawing bug on graph history dialog.
+- The game will no longer be closed from a file busy error during multi-player games.
+- Fixed cosmetic bug in password/name dialog when user doesn't enter name and hits return.
+- Shortened maximum user name length a bit to help avoid cosmetic problems.
+- Fixed the bug where you could colonize a star twice in a turn if some surrendered as your colony ship landed.
+- Sort of fixed bug where you could have a ship parked at a star while someone else thinks it's their colony for one turn. Will still happen on occasion.
+- Fixed bug that caused battles to pause a very long time with the groups shoot together button dechecked.
+- Fixed cosmetic bug with more than 99 ships in organize ships dialog.
+- Fixed bug where you'd find out about ships arriving at a star that you weren't at if someone sent you info about that star in the same turn.
+- Fixed bug that sometimes caused freeze when more than 2 allied players and at least one non-allied player ended up at the same star during one turn.
+- Fixed a couple potential divide by zero bugs in turn update.
+- Sped up updates after dragging a fleet with fleet paths showing - it only updates the part of the screen that might have been changed.
+- The paths of fleets that are scrapped are no longer drawn.
+- Made it so that the maximum zoom size for cluster and spiral galaxies in the first turn is unlimited. I no longer draw twinkly stars when the purple background is showing.
+- Fixed bug that occasionally caused spiral galaxy to put two players on the same arm of the spiral.
+- Fixed bug where there were sometimes stars in a galaxy that you couldn't send info about even if you owned them and/or had a fleet there.
+- Fixed bug where if someone scraps their fleet over your star you need to mine again to get the rotating planet even though you got all of the fleet's metal already.
+- Fixed two surrender-related bugs: if someone surrenders to you the same turn you surrender to someone else, you don't die (which is ok) but you surrender to whoever you surrendered to last time the next turn with having to say so again. Also, computers will not surrender to someone who just surrendered to them.
+- Fixed something that might have allowed the computer players to occasionally borrow too much money on ships and go into irreversible debt. Not sure, though.
+- Fixed bug where although a planet would be fully mined and terraformed, you could still spend money on it.
+
+Problems/Incompatibilities still known to exist:
+
+There is a incompatibility with Möire. It's not our fault. Möire patches copybits incorrectly, assuming that a copybits destination is a pixmap if the topmost bit of rowbytes is set. It should check the top 2 bytes, instead.
+
+Many people have complained about how you can occasionally be sitting on a planet owned by a non-allied player for one turn before you fight. This usually occurs when you land at the star the same time the previous owner of the star surrenders to a third party. This bug has been partially fixed but can't be completely removed unless we institute a pass 3, something we don't want to do.
+
+Some people claimed an incompatibility with Greg's Buttons. This has not been confirmed. Except for occasional cosmetic problems because his buttons aren't the same size as a regular button, everything else seems to work fine.
+
+With more than 16 players in the game, sometimes you get to name a star every turn after you win, not just the first time. This would require a data structure change which is beyond the scope of 3.0.1.
+
+If you organize a set of ships at a planet all with different amounts of fuel left, they all inherit the small amount of fuel any of them have. This hasn't been and will not be changed. If you do this by mistake, revert to your saved game.
+
+Have fun playing the Ho!, and pass the word.
+
+--Joe Williams and Peter Commons

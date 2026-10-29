@@ -227,6 +227,14 @@ Where a browser can't do what the original did, or the remake had to pick.
   turn's purchases.
 - Played as released: an abandoned colony with a colony ship there is settled again at
   once.
+- **From 3.0.1's "Last Minute Notes" (`docs/301-findings.md`, the table at its end)**, three
+  differences left as they are: (1) 3.0.1 dims the Galaxy menu's Alliances, Give Money/Metal,
+  Surrender To and Send Message in the first year (2000; `SetMenuItems @f4492`); the remake keeps them
+  live (its menus can't dim an entry, and "Players and alliances" also holds Compare Players); (2) with
+  16 or more players the original asks for a star's name every turn after you win (the "done" flag is a
+  16-bit field, `CheckEndGame @12085a`); the remake names once; (3) a computer skips, as the player
+  it surrenders to, the one a "has just surrendered to" report names (`PlayerILikeBest @95f8a`); the
+  remake's computers skip only players already out.
 - **French, Turkish and German (the remake's)**: the official lines wherever the English is
   3.0.1's (iOS's, and 1.2F's or the German DOS 2.0's for its 2.0 lines: Name a Star, Fix
   Spending), the remake's for the rest (3.0.1's Name a Star rule of 2 to 7 letters, its
