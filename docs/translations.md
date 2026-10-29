@@ -691,8 +691,13 @@ official French, German, Spanish or Turkish of these exists, and Delta Tao's cha
 translated from their English, with the source line saying so):
 
 - **The version notes** (About this version) and **Patch notes** (and the patch's fixes in New
-  Game): `js/ui-text-notes-<code>.js`, 363 rows each, one per source line of `js/version-notes.js`
-  and of every ruleset's `fixes`, plus the two "fixed in the patch" suffix lines. `node
+  Game): `js/ui-text-notes-<code>.js`, 400 rows each, one per source line of `js/version-notes.js`
+  and of every ruleset's `fixes`, plus the two "fixed in the patch" suffix lines and the 15 **Full
+  Hoedown items** (About this version; `rs.hoedown.items` and `rs.hoedown.all.items` in
+  `js/hoedown.js`; Delta Tao's jokes are quoted in each language's official wording where one
+  exists: iOS's French and Turkish for Kansas, Hope and Valdez, French for Ship, 3.0.1's
+  for the colour monitor; the rest is the remake's own; code references such as `FUN_...`,
+  `@d020a` and `0x...` stay as they are, and French typography leaves them alone). `node
   tools/notes-check.js` fails on a source line with no row, a stale row, a filling that
   differs, an empty or untranslated row, and a language with no notes file; run it after
   editing the notes. English stays the source: the rows are keyed by it. A document shows in
@@ -713,9 +718,7 @@ translated from their English, with the source line saying so):
 
 ## What stays English, and why
 
-- **The Full Hoedown list** (Delta Tao's jokes, in About this version) stays English, with
-  `translate="no"`: the package that translated the other long documents did not cover it.
-  The iOS and Android help pages are their own in French and Turkish, and English with the
+- **The iOS and Android help pages** are their own in French and Turkish, and English with the
   line in German and Spanish. A paragraph added to `js/help.js` without a row shows in English
   with the line, until it has one. A line added to `js/version-notes.js` or to a ruleset's
   `fixes` without a row fails `node tools/notes-check.js`.

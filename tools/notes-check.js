@@ -6,7 +6,8 @@
 //   - a source line with no row: a line of js/version-notes.js (HOVERSIONS;
 //     every string of every version's lists, Delta Tao's change lists and
 //     their source line included), a fix's title or text (rs.fixes of every
-//     ruleset, patched ones too), or one of the notes' two suffix lines
+//     ruleset, patched ones too), a Full Hoedown item (rs.hoedown.items and
+//     rs.hoedown.all.items, js/hoedown.js), or one of the notes' two suffix lines
 //     (NOTE_SUFFIXES, which the About window adds to a quirk its patch fixes);
 //   - a row whose English isn't a source line any more (a stale row: the
 //     notes were edited and the translation wasn't);
@@ -14,7 +15,7 @@
 //   - a translation left empty, or identical to its English where the line
 //     isn't a version label or number (the strings in SAME below).
 // --list prints the lines that fail, in full. Exit code 1 on any failure.
-// Version 1.1.0 (1.1.0: fails when a language has no notes file)
+// Version 1.2.0 (1.2.0: the Full Hoedown items too; 1.1.0: fails when a language has no notes file)
 'use strict';
 const path = require('path'), fs = require('fs'), root = path.join(__dirname, '..');
 const ARGS = process.argv.slice(2);
@@ -22,6 +23,7 @@ const ONLY = (ARGS.find(a => a.startsWith('--lang=')) || '').slice(7) || null, L
 const HO = require(path.join(root, 'js/engine.js'));
 Object.assign(HO.DATA, require(path.join(root, 'js/data.js')));
 for (const f of fs.readdirSync(path.join(root, 'js')).filter(f => /^rules-.*\.js$/.test(f))) require(path.join(root, 'js', f));
+require(path.join(root, 'js/hoedown.js'));
 
 // the two lines js/skins/classic/ui.js adds after a quirk its patch fixes
 const NOTE_SUFFIXES = ['(fixed in this game by the %s patch: see Patch notes)', '(fixed in the %s patch)'];
@@ -37,6 +39,8 @@ const source = new Set(NOTE_SUFFIXES);
   else if (o && typeof o === 'object') for (const k in o) { if (['url', 'show', 'fix'].includes(k) && typeof o[k] !== 'object') continue; walk(o[k]); }
 })(sandbox.HOVERSIONS);
 for (const rs of Object.values(HO.RULESETS)) for (const f of rs.fixes || []) for (const k of ['title', 'text']) if (typeof f[k] === 'string') source.add(f[k]);
+// the Full Hoedown items of About this version (js/hoedown.js)
+for (const rs of Object.values(HO.RULESETS)) if (rs.hoedown) for (const t of [...(rs.hoedown.items || []), ...((rs.hoedown.all || {}).items || [])]) source.add(t);
 
 const COL = { fr: 1, de: 2, tr: 3, es: 4 };
 const files = fs.readdirSync(path.join(root, 'js')).map(f => (f.match(/^ui-text-notes-([a-z]{2})\.js$/) || [])[1]).filter(Boolean).filter(c => !ONLY || c === ONLY);

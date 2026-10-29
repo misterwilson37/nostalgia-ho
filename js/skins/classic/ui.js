@@ -4351,9 +4351,13 @@ const HOEDOWN_ALL_TEXT = 'Every version’s jokes: every joke from every Spacewa
 const hoedownAllOn = () => !!(G && HO.hoedownAll(G));
 function setHoedownAll(on) { if (!G) return; HO.setHoedownAll(G, !!on); save(); renderPanel(); draw(); toast(on ? 'Every version’s jokes are on.' : 'Every version’s jokes are off.'); }
 // the Hoedown items of a ruleset, as a list (and, with "Every version's jokes" on in this game, the other versions' jokes)
-const hoedownList = (rs) => el('ul', { translate: 'no', lang: 'en' }, ...(((rs.hoedown || {}).items || []).concat(hoedownAllOn() && (rs.hoedown.all || {}).items || [])).map(t => el('li', null, t)));
+// (in the game's language: a row for each in js/ui-text-notes-<code>.js, tools/notes-check.js; any line without one
+// keeps the list in English, as docAttrs does for the other long documents)
+const hoedownLines = (rs) => ((rs.hoedown || {}).items || []).concat(hoedownAllOn() && (rs.hoedown.all || {}).items || []);
+const hoedownList = (rs) => el('ul', docAttrs(hoedownLines(rs)), ...hoedownLines(rs).map(t => el('li', null, t)));
 // The long documents (the version notes, the patch's fixes, the Hoedown
-// items and the manuals) are in English: kept out of the
+// items and the manuals) were in English: a document with a line that has
+// no row in the language is still kept out of the
 // translation (translate="no") with a line in the language that says so
 // A document whose every line has a row in the language (js/ui-text-notes-<code>.js,
 // checked by tools/notes-check.js) is shown in it: no line says it's English, and
@@ -4457,7 +4461,7 @@ function openAbout() {
       L.length ? el('ul', docAttrs(base(list)), ...L.map(t => el('li', null, t))) : none ? el('p', { class: 'sub' }, none) : null);
   };
   const noteLines = [N.intro, ...base(N.released), ...base(N.quirks), ...base(N.differs), ...base(N.missing), ...(N.previous !== undefined ? base(N.changes) : []),
-    ...(N.deltaTao ? [...N.deltaTao.text, N.deltaTao.source] : [])].filter(Boolean);
+    ...(N.deltaTao ? [...N.deltaTao.text, N.deltaTao.source] : []), ...(rs.hoedown ? hoedownLines(rs) : [])].filter(Boolean);
   const body = el('div', { class: 'about' },
     el('h3', null, rs.label || id),
     rs.version ? el('p', { class: 'sub' }, `Version ${patched ? patchName(rs) : rs.version} · ${rs.platform} · ${rs.year}`) : null,
