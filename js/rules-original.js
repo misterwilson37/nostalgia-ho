@@ -2734,7 +2734,7 @@ function shipDesc505(d, n, mine) {
   const ws = `(${d.W}/${d.S})`;
   return (n < 1 ? `${d.name} ${ws} ${cls}` : n === 1 ? `one ${d.name} ${ws} ${cls}` : `${n} ${d.name} ${ws} ${cls}s`).slice(0, 39);
 }
-const pop505 = (G, pop) => (E.rules(G).fmtNum || E.fmt)(Math.round(pop * 1e6));
+const pop505 = (G, pop) => (E.rules(G).fmtNum || E.fmt)(E.popNum(G, pop));
 const words505 = {
   ship: (G, d, n, n0, mine) => n === 0 ? (n0 === 1 ? `one dead ${shipDesc505(d, 0, mine)}` : `${n0} dead ${shipDesc505(d, 0, mine)}s`)
     : n !== n0 ? `${n}/${n0} ${shipDesc505(d, 0, mine)}s` : shipDesc505(d, n, mine),
@@ -3026,6 +3026,12 @@ Object.defineProperties(E.RULESETS.original, Object.fromEntries(Object.entries({
   // "12,345K" ("$12,345K" in a report, whose template has the "$"), sums in
   // the panels from ten million "$12.345M", a negative sum "($1,234)" (engine
   // num505, money505)
+  // CONFIRMED (every version's panels and reports print the number the program stores: the manual's
+  // picture of 3.0.1 reads "Pop: 10" for a new colony of 10 colonists and "Income: $-7,501"; DrawPlanetRect
+  // @15491e LongToNiceString of the stored long, no scaling; Mac 5.0.5 FUN_10092300, 4.0.5 FUN_0041e140 the
+  // same): a "Normal" home starts at 500,000, so the people the remake keeps in millions (s.pop) are
+  // written times 1,000 (HO.popNum). The AI homages' own rules write millions.
+  popUnits: 1000,
   fmtNum: E.num505, fmtMoney: E.money505,
   // CONFIRMED (the rank window FUN_1005e2b0, dialog 0x9c, shown once a game
   // when a win brings a new rank): its field 'NAME' takes a star name of up

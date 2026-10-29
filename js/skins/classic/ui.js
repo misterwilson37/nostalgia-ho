@@ -1511,7 +1511,7 @@ function planetBox(sid) {
     box.append(row('Gravity', gravF(src.g, p.homeG) + classNote(gs), '', 'gravity'), row('Temp', degF(ts), '', 'temp'), row('Metal', panelFig('planetMetal', src.metal, false), '', 'planetMetal'));
     if (s.owner === ME) {
       const inc = HO.planetIncome(G, p, s);
-      box.append(row('Population', fmt(s.pop * 1e6), '', 'population'), row('Max population', fmt(HO.maxPop(G, p, s) * 1e6), '', 'maxPop'), row('Income', panelFig('planetIncome', inc, true), inc < 0 ? 'neg' : '', 'planetIncome'));
+      box.append(row('Population', fmt(HO.popNum(G, s.pop)), '', 'population'), row('Max population', fmt(HO.popNum(G, HO.maxPop(G, p, s))), '', 'maxPop'), row('Income', panelFig('planetIncome', inc, true), inc < 0 ? 'neg' : '', 'planetIncome'));
       const terraOK = Math.abs(HO.seenT(p, s) - 72) > 0.5, metalOK = s.metal > 0;
       // in 2.0 and 1.2 a finished part's share is wasted, not passed on, so
       // the bar stays (as in 2.0's planet window) and a note says so
@@ -1543,7 +1543,7 @@ function planetBox(sid) {
         evacuateHere(s) ? el('button', { class: 'quiet', 'data-help': 'evacuate', onclick: () => evacuateClick(sid) }, evacuateLabel(sid, 'Evacuate')) : null,
         HO.rules(G).evacuateToggle && HO.rules(G).evacuateToggle.marked(G, sid) ? el('span', { class: 'note' }, 'Evacuating') : null));
     } else if (k.owner >= 0 && k.owner !== ME) {
-      box.append(row('Population', k.pop ? '~' + fmt(k.pop * 1e6) : '?'));
+      box.append(row('Population', k.pop ? '~' + fmt(HO.popNum(G, k.pop)) : '?'));
     }
   } else box.append(el('p', { class: 'note' }, k.battleOnly ? 'Unexplored, but there has been a battle here.' : 'Unexplored. Send a ship to find out more.'));
   // fleets here
@@ -2751,7 +2751,7 @@ function battleReport(b) {
       else if (ev.k) kills.push(`${ev.si >= 0 ? unit(ev.si) : 'The planet'} destroyed ${unit(ev.ti).replace(/^Your/, 'your')}.`);
     }
     const sh = Object.keys(shots).map(o => `${+o === ME ? 'you' : G.players[o].name} fired ${shots[o]}`).join(', ');
-    const pop = b.popR && b.popR[ri] != null ? ` The colony is down to ${fmt(b.popR[ri] * 1e6)} people.` : '';
+    const pop = b.popR && b.popR[ri] != null ? ` The colony is down to ${fmt(HO.popNum(G, b.popR[ri]))} people.` : '';
     list.append(el('li', null, `${sh ? sh[0].toUpperCase() + sh.slice(1) : 'No shots'}.` + (planetHits ? ` ${planetHits} shot${planetHits === 1 ? '' : 's'} hit the planet.${pop}` : ''), ...kills.map(k => el('div', { class: 'kill' }, k))));
   });
   const sum = b.sides.map(o => `${o === ME ? 'You' : G.players[o].name} lost ${b.lost[o] || 0}`).join('; ') + '.';
@@ -2825,7 +2825,7 @@ function openBattle(bid) {
       x.globalAlpha = pop > 0.01 ? 1 : 0.3;
       x.drawImage(planetBattlePic(), pl.x - 24, pl.y - 24, 48, 48);
       x.globalAlpha = 1;
-      x.fillStyle = T.battleBg ? '#000' : '#ccc'; x.font = '11px Geneva, Verdana, sans-serif'; x.fillText(tl('pop %s', fmt(pop * 1e6)), pl.x, pl.y + 36);
+      x.fillStyle = T.battleBg ? '#000' : '#ccc'; x.font = '11px Geneva, Verdana, sans-serif'; x.fillText(tl('pop %s', fmt(HO.popNum(G, pop))), pl.x, pl.y + 36);
     }
     b.start.forEach((u, i) => {
       if (!alive[i]) return;
@@ -3551,7 +3551,7 @@ function openStarList() {
     const src = s.owner === ME ? s : k;
     const owner = s.owner === ME ? 'You' : k.owner >= 0 && G.players[k.owner] ? G.players[k.owner].name : '';
     return el('tr', { class: 'click', onclick: () => { UI.sel = s.id; closeModal(); renderPanel(); draw(); } }, el('td', null, s.name), el('td', null, degF(72 + (src.t - p.homeT))),
-      el('td', null, gravF(src.g, p.homeG)), el('td', null, fmt(src.metal)), el('td', null, owner), el('td', null, src.pop ? fmt(src.pop * 1e6) : ''));
+      el('td', null, gravF(src.g, p.homeG)), el('td', null, fmt(src.metal)), el('td', null, owner), el('td', null, src.pop ? fmt(HO.popNum(G, src.pop)) : ''));
   });
   modal('Explored stars', table(['Star', 'Temp', 'Gravity', 'Metal', 'Owner', 'Population'], rows), { cls: 'mid' });
 }

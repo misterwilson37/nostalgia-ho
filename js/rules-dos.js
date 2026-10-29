@@ -2007,7 +2007,7 @@ function battlePanel20(opt) {
     return (n < 1 ? `${nm} ${ws} ${cls}` : n === 1 ? `${W.one}${nm} ${ws} ${cls}` : `${n} ${nm} ${ws} ${cls}`).slice(0, 39);
 
   };
-  const pop = (G, x) => { const t = (E.rules(G).fmtNum || fmt)(Math.round(x * 1e6)); return W.num ? W.num(t) : t; };
+  const pop = (G, x) => { const t = (E.rules(G).fmtNum || fmt)(E.popNum(G, x)); return W.num ? W.num(t) : t; };
   return E.makeBattlePanel({
     cols: opt.cols || 'sides', shade: !!opt.shade, pics: (n) => Math.min(n, 1),
     head: (G, b) => W.head(G.stars[b.star].name, b.year),
@@ -2042,6 +2042,7 @@ E.registerRules('dos', Object.assign({}, O, {
   // a report or window is "1,234", "1,234,567", and from ten million "12,345K"
   // (engine niceNum); a sum is "$" and that, "$-1,234" when negative (the sign
   // is part of the figure: sprintf("$%s", nice), engine moneyNice). Not 5.0.5's (rules-original).
+  popUnits: 1000, // (what the panels print: the stored number, 500,000 for a Normal home; see rules-original.js popUnits)
   fmtNum: E.niceNum, fmtMoney: E.moneyNice,
   label: 'DOS 2.0 (1993)',
   // the New Game window's Version and Edition menus (engine.js editions):
