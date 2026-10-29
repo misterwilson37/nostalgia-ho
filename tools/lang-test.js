@@ -173,6 +173,17 @@ function play(id, code) {
   for (const [s, t] of shapes) console.log(`    untranslated: ${s}${s !== t ? `   (${t})` : ''}`);
   for (const [t, out] of left) console.log(`    left in: ${t}  ->  ${out}`);
 }
+// Turkish case endings by how an English name sounds (engine.js trReading; the patch's tokens only)
+function trEndings() {
+  const want = { 'Joe’{den}': 'Joe’dan', 'Joe’{e}': 'Joe’ya', 'Joe’{i}': 'Joe’yu', 'Mike’{den}': 'Mike’tan', 'Mike’{i}': 'Mike’ı', 'Kate’{e}': 'Kate’e', 'Kate’{den}': 'Kate’ten',
+    'Dave’{e}': 'Dave’e', 'Steve’{den}': 'Steve’den', 'Grace’{den}': 'Grace’ten', 'Jack’{e}': 'Jack’e', 'Ann’{den}': 'Ann’den', 'Guy’{i}': 'Guy’ı', 'Hope’{den}': 'Hope’tan',
+    // spelled as read (unchanged): Turkish names keep their aloud final e/h, numbers are read
+    'Lale’{e}': 'Lale’ye', 'Nazife’{den}': 'Nazife’den', 'Sabah’{e}': 'Sabah’a', 'Argot’{e}': 'Argot’a', 'Nancy’{den}': 'Nancy’den', 'Sirius’{den}': 'Sirius’tan', '3’{i}': '3’ü', 'Peter’{e}': 'Peter’e' };
+  const bad = Object.keys(want).filter(k => HO.trSuffixes(k) !== want[k]).map(k => `${k} -> ${HO.trSuffixes(k)} (not ${want[k]})`);
+  if (bad.length) { failed++; console.log(`FAIL Turkish endings: ${bad.join('; ')}`); }
+  else console.log(`ok   Turkish endings: ${Object.keys(want).length} names`);
+}
+if (!COUNT && !ARGS.includes('--adapted') && (!ONLY || ONLY === 'tr')) trEndings();
 if (ARGS.includes('--adapted')) {
   let bad = 0;
   for (const code of ONLY ? [ONLY] : ['fr', 'tr', 'de', 'es']) bad += adaptedList(code);

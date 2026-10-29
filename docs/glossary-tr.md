@@ -147,6 +147,20 @@ default keeps it, as released. The patch's lines write the ending as a token aft
 "Sirius’tan", "Kansas’ta"; a number as it is read, "3’ü", "10’a"; an English name's final
 -y as "i", "Nancy’den"). `{^}` capitalises the letter after it (a line that opens with "bir …").
 
+**By sound, not spelling** (`trReading`, `TR_READ`, `js/engine.js`). The ending follows the last vowel and
+the last sound a Turkish speaker says, and Turkish reads an English name as English says it: "Joe" is
+"Co", so "Joe’dan" (not the spelling's "Joe’den"), "Joe’ya", "Joe’yu". A small table writes the names
+whose spelling misleads as Turkish would spell the sound: the game's own names ("Joe" by a rule for a
+final "-oe"; Ann "en", Dan "den", Pam "pem", Jack "cek", Guy "gay", Mike "mayk", Dave "deyv", Steve "stiv",
+Kate "keyt", Jane "ceyn", Grace "greys", Caryl "keril", Kathy "kesi", Michelle "şel", Claire "kler", and
+the stars Hope "hop" and Pooh "pu") and a few common English names a player may type (Sarah, Hannah,
+Leah, Noah, Rose, Luke, June). Every other name is read as spelled. **No general rule for a silent final
+"e" or "h"**, on purpose: Turkish names say them aloud (Lale’ye, Nazife’den, Sabah’a) and a player's own
+Turkish name must keep its ending; so an English name outside the table that ends in a silent "e"
+("Julie", "Wayne") still gets the spelling's ending. The table is Claude's call (the glossary's policy);
+extend `TR_READ` for a name that reads wrong. Only the patch's tokens reach it: the unpatched game keeps
+iOS's glued endings. `lang-test.js` (`trEndings`) checks 22 names.
+
 ## Where things stand
 
 - Chunk 1 (Concordance): option C, iOS's words in the remake's own Turkish.

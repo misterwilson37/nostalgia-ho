@@ -483,9 +483,25 @@ function trSpoken(w) {
   if (n % 10 === 0) return TR_TENS[(n / 10) % 10];
   return TR_ONES[n % 10];
 }
+// How an English name sounds to a Turkish speaker, for the harmony alone (patch only; docs/glossary-tr.md,
+// "Case endings"): the ending follows the last vowel and the last sound, not the spelling. TR_READ is the
+// names whose spelling misleads, written as Turkish spells the sound: the game's own names ("Joe" is read
+// "Co" and takes "Joe’dan", "Ann" is "En", "Jack" "Cek", "Mike" "Mayk", "Kate" "Keyt", "Grace" "Greys",
+// "Guy" "Gay", "Pooh" "Pu", Hope "Hop") and a few common English names a player may type. The rest are
+// read as spelled, except for a final "-oe" (Joe, Moe, Zoe's kind), which Turkish spelling never has.
+// There is no rule for a silent "e" or "h" in general: Turkish names end in them aloud (Lale, Nazife,
+// Sabah), and a player's Turkish name must keep its own ending.
+const TR_READ = { ann: 'en', dan: 'den', pam: 'pem', jack: 'cek', guy: 'gay', caryl: 'keril', kathy: 'kesi', michelle: 'şel', claire: 'kler',
+  mike: 'mayk', dave: 'deyv', steve: 'stiv', kate: 'keyt', jane: 'ceyn', grace: 'greys', hope: 'hop', pooh: 'pu',
+  sarah: 'sera', hannah: 'hena', leah: 'lia', noah: 'noa', rose: 'roz', luke: 'luk', june: 'cun' };
+function trReading(w) {
+  if (Object.prototype.hasOwnProperty.call(TR_READ, w)) return TR_READ[w];
+  return /(^|[^aeiou])oe$/.test(w) ? w.slice(0, -1) : w;
+}
 function trEnding(word, code) {
   // (an English name's final consonant + "y" is read as "i": Gorby’yi, Nancy’den)
-  const w = trSpoken(String(word)).replace(/[^A-Za-zÇĞİÖŞÜçğıöşüâîûÂÎÛ]+$/, '').replace(/I/g, 'ı').replace(/İ/g, 'i').toLowerCase().replace(/([^aıoueiöüâîû])y$/, '$1i');
+  const spoken = trSpoken(String(word)), plain = spoken.replace(/[^A-Za-zÇĞİÖŞÜçğıöşüâîûÂÎÛ]+$/, '').replace(/I/g, 'ı').replace(/İ/g, 'i').toLowerCase();
+  const w = (spoken === String(word) ? trReading(plain) : plain).replace(/([^aıoueiöüâîû])y$/, '$1i');
   const vs = w.match(/[aıoueiöüâîû]/g), v = vs ? vs[vs.length - 1] : 'e';
   const back = /[aıouâû]/.test(v), round = /[ouöüû]/.test(v);
   const A = back ? 'a' : 'e', I = back ? (round ? 'u' : 'ı') : (round ? 'ü' : 'i');
