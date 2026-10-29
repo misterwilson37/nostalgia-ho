@@ -15,6 +15,17 @@
 // Each item names its source; docs/hoedown.md lists them all, and what was
 // left out because it would change the play.
 //
+// "Every version's jokes" (G.opts.hoedownAll, a second box shown only when
+// Full Hoedown is on; roadmap 4e): every joke of every official release can
+// come up in any official release's game, in the game's language (the
+// version that has the joke says it: hoJokeSay). Today's jokes of other
+// versions, and which could not come (docs/hoedown.md, "Every version's
+// jokes"): Kansas on Evacuate in 3.0.1 and 4.0.5, the colour-monitor joke on a
+// black-and-white screen in every version, Peter's and Howard's planets in
+// the Mac 4.0.5 skins, the Amiga's German names in every game in German.
+// rs.hoedown.all = { items: [text] (the About window's, with "Every version's
+// jokes" on), colorMonitor: { text, icon } }.
+//
 // rs.hoedown = {
 //   items: [text], the list the About window shows ("Full Hoedown");
 //   colorMonitor: { text, icon }, the colour-monitor joke, to each human at
@@ -85,32 +96,88 @@ const SHIP_ITEM = 'Evacuating a star named Ship asks “Abandon Ship? Abandon Sh
 const VALDEZ_ITEM = (odds, src) => `A fleet named Valdez springs a leak every time it refuels at a star (“Oh no! The Valdez has sprung a leak! …”; one time in ${odds} in ${src}; the draw is still made, and the leak still costs nothing).`;
 const PICTURES_ITEM = 'In the Mac 4.0.5 skins, a rich colony (making $30,000 or more) of a player named Peter or Howard shows Peter’s or Howard’s picture (SetPlanetTypesForStar @d020a: the Mac still compares the names, and then shows the plain rich planet; Hoedown puts Windows 4.0.5’s pictures back, the Mac’s own 3115 and 3116).';
 
+// ---- Every version's jokes (rs.hoedown.all) ----
+// Evacuating a star named Kansas, in 3.0.1 and 4.0.5 (whose Evacuate asks the remake's
+// own question): 5.0.5's joke (alert 0x26), the Palm's and iOS's too, with Cancel as on iOS
+// (E.hoedownEvacuate, js/skins/classic/ui.js evacuateClick).
+const KANSAS = 'Dorothy, I guess that means we’re not in Kansas anymore';
+const KANSAS_ALL = 'Evacuating a star named Kansas asks “Dorothy, I guess that means we’re not in Kansas anymore” (5.0.5’s, the Palm version’s and iOS’s joke, which this version never had; there is a Cancel, as on iOS).';
+// The colour-monitor joke (3.0.1 and Mac 4.0.5), in the versions that never sent it, on a
+// black-and-white skin only (the joke makes no sense on a colour screen), once, in a year
+// from 2000 to 5000 drawn from the seed.
+const COLOR = 'Your scientists have discovered how to turn your monitor from black and white to color!';
+const COLOR_ALL = 'On a black-and-white skin, once, in a year from 2000 to 5000: “Your scientists have discovered how to turn your monitor from black and white to color!” (3.0.1’s and the Mac 4.0.5’s joke, which this version never sent).';
+const PICTURES_ALL = 'In the Mac 4.0.5 skins, a rich colony (making $30,000 or more) of a player named Peter or Howard shows Peter’s or Howard’s picture (the Mac 4.0.5’s and Windows 4.0.5’s joke; the picture is the skin’s own).';
+const NAMES_ALL = 'In German, the Amiga 2.0’s own names join the lists, as they do in DOS 2.0 and Mac 2.0.1: 25 stars (Homo, Eimer, Mitropa, Urmel, Bebbo V …), 12 men and 9 women for the computers and 23 ship names. The number of stars and where they are never change.';
+// A joke's English text as the game sends it, and the versions whose tables say it in each
+// language (hoJokeSay): the first with a translation wins (iOS's French and Turkish first,
+// then the remake's German and Spanish, which every version carries alike)
+const JOKES = new Map([
+  [KANSAS, [['original', KANSAS], ['ios', 'Dorothy, I guess that means we\'re not in Kansas anymore!!']]],
+  [COLOR, [['301', COLOR], ['mac405', COLOR]]],
+]);
+E.hoJokeSay = function (G, t) {
+  const donors = JOKES.get(t);
+  if (!donors) return t;
+  const lang = G.opts.lang || E.ownLanguage(E.ownRules(G));
+  if (!lang || lang === 'en') return t;
+  for (const [id, text] of donors) {
+    if (id === G.rules || !R[id] || !E.languages(R[id]).includes(lang)) continue;
+    const out = E.say0({ rules: id, opts: { lang, patch: G.opts.patch }, stars: [], players: [], fleets: [] }, text);
+    if (out !== text) return out;
+  }
+  return t;
+};
+// the Evacuate question of a version whose Evacuate is the remake's own (no toggle), for a
+// star with a joke from another version: the text (said by E.say), or null
+E.hoedownEvacuate = function (G, s) {
+  if (!E.hoedownAll(G) || E.ownRules(G).evacuateToggle || E.ownRules(G).evacuateCommand === false) return null;
+  return String(E.ownName(G, s.name, 'stars')).toLowerCase() === 'kansas' ? KANSAS : null;
+};
+
 const set = (id, h) => { if (R[id]) R[id].hoedown = h; };
+// "Every version's jokes" (rs.hoedown.all): what each version gets of the others' jokes
+const colorAll = { text: COLOR, icon: 'm9039' };
 set('original', {
   items: [KANSAS_ITEM('5.0.5, FUN_10060fac'), SHIP_ITEM, VALDEZ_ITEM(250, '5.0.5, FUN_10077aa0'),
     ARMAGEDDON_ITEM],
   armageddon: ARMAGEDDON,
+  all: { items: [COLOR_ALL, PICTURES_ALL, NAMES_ALL], colorMonitor: colorAll },
 });
 set('palm', {
   items: [VALDEZ_ITEM(250, 'the Palm version, FUN_00055844'), ARMAGEDDON_ITEM],
   armageddon: ARMAGEDDON,
+  all: { items: [COLOR_ALL, PICTURES_ALL, NAMES_ALL], colorMonitor: colorAll },
 });
 for (const id of ['ios', 'android']) set(id, {
   items: [KANSAS_ITEM('iOS 1.2.9 and Android, tryEvacuatePlanet: 0x1000941e0'), SHIP_ITEM, VALDEZ_ITEM(250, '5.0.5 and iOS'),
     ARMAGEDDON_ITEM],
   armageddon: ARMAGEDDON,
+  all: { items: [COLOR_ALL, PICTURES_ALL, NAMES_ALL], colorMonitor: colorAll },
 });
 set('405', {
   items: [VALDEZ_ITEM(100, '4.0.5, FUN_00437ddd')],
+  all: { items: [KANSAS_ALL, COLOR_ALL, PICTURES_ALL, NAMES_ALL], colorMonitor: colorAll },
 });
 set('mac405', {
   items: [VALDEZ_ITEM(100, '4.0.5'),
     PICTURES_ITEM],
   pictures: true,
+  all: { items: [KANSAS_ALL, NAMES_ALL] },
 });
 for (const id of ['dos', 'mac20']) set(id, {
   items: [AMIGA_ITEM],
   extraNames: { de: AMIGA_DE },
+  all: { items: [COLOR_ALL, PICTURES_ALL], colorMonitor: colorAll },
 });
-// (1.2 has none: docs/hoedown.md)
+// 3.0.1 and 1.2 have no joke of their own to turn up (docs/hoedown.md), so Full Hoedown does nothing
+// by itself there; their box is for "Every version's jokes"
+set('301', {
+  items: [],
+  all: { items: [KANSAS_ALL, PICTURES_ALL, NAMES_ALL] },
+});
+set('12', {
+  items: [],
+  all: { items: [COLOR_ALL, PICTURES_ALL, NAMES_ALL], colorMonitor: colorAll },
+});
 })(this);

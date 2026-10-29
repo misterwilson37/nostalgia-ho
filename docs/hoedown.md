@@ -10,6 +10,12 @@ German ones? Why not add them! This would only refer to official releases."
   conveniences (remembered in `localStorage` "ho5.hoedown"), and the Ho menu's **Full
   Hoedown** item, which can turn it on or off in the middle of a game. About this version
   lists what it does for the version (`rs.hoedown.items`).
+- **Every version's jokes** (`G.opts.hoedownAll`, roadmap 4e): a second box under Full Hoedown, shown
+  only while Full Hoedown is checked (New Game; remembered in `localStorage` "ho5.hoedownAll"), and a
+  Ho menu item of the same name, shown only while Full Hoedown is on. It lets every joke of every
+  official release come up in the game being played, in the game's language ("Every version's jokes"
+  below). About this version adds those jokes to its Full Hoedown list while it is on
+  (`rs.hoedown.all.items`). A game saved before the option has no such flag and loads unchanged.
 - **Official releases only.** The rulesets with Hoedown items have `rs.hoedown`
   (`js/hoedown.js`); the AI homages (`claude`, `gemini`) have none, so the box and the menu
   item never show for them and `HO.hoedown(G)` is false. Their own jokes stay with them.
@@ -72,6 +78,48 @@ and the rules see that name (`ownName`), so a design name is drawn again exactly
 would have been. The number of stars and where they are never change. Turning Hoedown
 off, or changing the language, puts the replaced names back.
 
+## Every version's jokes
+
+The second box (`G.opts.hoedownAll`, `HO.hoedownAll(G)`, `HO.setHoedownAll`) adds the jokes the *other*
+official releases have to the version being played. It follows Full Hoedown's principle: the random
+draws are still made (the versions that get a joke from another had no draw for it, so none is added),
+nothing changes the play, and `node tools/test.js <id> --hoedown-all --digest` must print the digest of
+the run without it (checked for every ruleset, plain, `--patch`, and in German and French, October
+2026). The AI homages (`claude`, `gemini`) have no Hoedown, so neither box shows for them.
+
+Every joke is said in the game's language: `HO.say` (engine.js `say0`) first asks the game's own table;
+for a joke the version never had, `HO.hoJokeSay` (js/hoedown.js) asks a version that has it, with the
+game's language and patch (Kansas: 5.0.5, then iOS; the colour-monitor joke: 3.0.1, then Mac 4.0.5), so
+the words are the official ones where there are any (iOS's French "Dorothée, je suppose que nous ne
+sommes plus en Normandie ?" and Turkish; 3.0.1F's French colour-monitor line) and the remake's German,
+Spanish and so on otherwise, exactly as in the version that has the joke.
+
+| Joke | Comes into | How | Source |
+|---|---|---|---|
+| Kansas on Evacuate: "Dorothy, I guess that means we're not in Kansas anymore" | 3.0.1, Windows and Mac 4.0.5 | A star named Kansas (compared as 5.0.5 does, letter case aside) asks the question with a Cancel, as iOS's does, in place of the remake's own question (`HO.hoedownEvacuate`, ui.js `evacuateClick`). The toggle versions (5.0.5, Palm, iOS, Android) already have it with Full Hoedown | 5.0.5 `FUN_10060fac`; iOS `tryEvacuatePlanet:`; Palm `FUN_0003734e` |
+| The colour-monitor joke: "Your scientists have discovered how to turn your monitor from black and white to color!" | every version but 3.0.1 and the Mac 4.0.5 (which send it as released) | Once, to each human, in a year from 2000 to 5000 drawn from the seed, only on a black-and-white skin (`rs.hoedown.all.colorMonitor`, engine.js `endTurn`, the same code as 3.0.1's `rs.colorMonitorBW`): the joke makes no sense on a colour screen | 3.0.1 `AddEasterEggs` @b0004; Mac 4.0.5 @b000c |
+| Peter's and Howard's planets (a colony making $30,000 or more of a player named Peter or Howard) | every version, in the Mac 4.0.5 skins | The Mac 4.0.5 skins show their pictures 3115 and 3116 for a game of any version (js/skins/mac4/ui.js). The `w95` skin has them in the base game already. Before this option the Mac skins showed them under plain Full Hoedown for any version; now plain Full Hoedown shows them only for the Mac 4.0.5's own rules (`rs.hoedown.pictures`), as its list says | Mac @d020a; Windows `FUN_00438f47` |
+| The Amiga 2.0's own German names | every version, in a game in German | The names join the lists as in DOS 2.0 and Mac 2.0.1 (`engine.js` `hoExtras` adds every release's `extraNames` for the language), never changing the number of stars or the game's draws | `assets/skins/amiga/strings.json` |
+
+Full Hoedown itself does nothing in 3.0.1 and 1.2 (they have no random joke of their own); they have
+the box all the same, for this option (About this version says so).
+
+**Left out, because they cannot come without changing the play or the version** (the audit, October
+2026):
+
+- Kansas, Hope and Ship on **Evacuate in 1.2, DOS 2.0 and Mac 2.0.1**: those versions have no Evacuate
+  command (`rs.evacuateCommand` false), and adding one is a rule, not a joke.
+- The **Valdez leak** in 3.0.1, 2.0 and 1.2: they have no tankers (a design or fleet named Valdez is
+  an oil tanker's joke, `docs/301-findings.md`: "No ... tankers"), so there is no fleet to leak, and
+  the leak is tied to the refuelling code of the versions that have tankers. Where a version already
+  has the Valdez (4.0.5, 5.0.5, Palm, iOS, Android) Full Hoedown makes it come every time as before.
+- **Armageddon's two questions** in 1.2 and 2.0: they have no Armageddon device. 5.0.5, the Palm, iOS
+  and Android get 4.0.5's two questions with plain Full Hoedown, as before.
+- Peter's and Howard's planets in the **other skins**: the pictures exist only in the Windows 4.0.5
+  (always shown) and Mac 4.0.5 skins; no other skin has a picture for them.
+- The **Christmas planet** is the date's and is in the `w95` and Mac 4.0.5 skins as released (base game).
+- The reports no code sends (3.0.1's, 5.0.5's) and 1.2's women computers stay left out, below.
+
 ## Looked at and left out
 
 **Would change the play** (not built; for Jake):
@@ -104,4 +152,4 @@ off, or changing the language, puts the replaced names back.
 - The Palm version has no item beyond the Valdez and the Armageddon questions: its Kansas,
   Hope and Ship jokes already come every time, and its own string list wasn't checked for
   the colour-monitor line.
-- 1.2 has none: no random joke, and nothing cut before it.
+- 1.2 has none: no random joke, and nothing cut before it. (3.0.1 has none to turn up either; both get the colour-monitor and other versions' jokes with "Every version's jokes".)

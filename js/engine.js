@@ -365,8 +365,16 @@ function hoRand(G, key) {
   return (h >>> 0) / 4294967296;
 }
 function hoExtras(G) {
-  const x = hoedown(G) && ownRules(G).hoedown.extraNames;
-  return (x && x[G.opts.lang || ownLanguage(ownRules(G))]) || null;
+  if (!hoedown(G)) return null;
+  const lang = G.opts.lang || ownLanguage(ownRules(G)), X = [];
+  const add = (rs) => { const e = rs.hoedown && rs.hoedown.extraNames && rs.hoedown.extraNames[lang]; if (e && !X.includes(e)) X.push(e); };
+  add(ownRules(G));
+  // "Every version's jokes" (G.opts.hoedownAll): the names any official release added in the language
+  if (hoedownAll(G)) for (const id in RULESETS) add(RULESETS[id]);
+  if (X.length < 2) return X[0] || null;
+  const cat = (k) => [].concat(...X.map(e => e[k] || [])).filter((n, i, a) => a.indexOf(n) === i);
+  const ships = {}; for (const e of X) for (const c in (e.ships || {})) ships[c] = (ships[c] || []).concat(e.ships[c].filter(n => !(ships[c] || []).includes(n)));
+  return { stars: cat('stars'), men: cat('men'), women: cat('women'), ships };
 }
 // n, a name drawn from the game's list of its kind (ships: of class cls), or
 // an extra name in its place; key names the draw
@@ -407,6 +415,13 @@ function hoNamesOff(G) {
 function setHoedown(G, on) {
   if (!G || !ownRules(G).hoedown) return;
   if (on) { G.opts.hoedown = true; hoNamesOn(G); } else { hoNamesOff(G); delete G.opts.hoedown; }
+}
+// "Every version's jokes" on or off (G.opts.hoedownAll, only with Hoedown on)
+function setHoedownAll(G, on) {
+  if (!G || !hoedown(G)) return;
+  hoNamesOff(G);
+  if (on) G.opts.hoedownAll = true; else delete G.opts.hoedownAll;
+  hoNamesOn(G);
 }
 // A message in the game's language. Messages are kept in the version's own
 // words (the rules and the skins read them: rules-dos log20, the skins'
@@ -528,9 +543,10 @@ function trSuffixes(s) {
 function say(G, text) { return sumText(G, say0(G, text)); }
 function say0(G, text) {
   const t = String(text == null ? '' : text), L = sayRules(G);
-  if (!L) return t;
+  // (a joke of another version, with "Every version's jokes" on: said in the game's language by the version that has it, hoJokeSay)
+  if (!L) return hoedownAll(G) && API.hoJokeSay ? API.hoJokeSay(G, t) : t;
   const C = sayOf(L), hit = sayMatch(C.reports, t);
-  if (!hit) return t;
+  if (!hit) return hoedownAll(G) && API.hoJokeSay ? API.hoJokeSay(G, t) : t;
   const X = { G, tech: SAY_TECH_SLOT.test(hit[0].from), ix: 0 };
   const args = hit[1].map((a, i) => { X.ix = i; return sayArgIn(L, C, a, X); });
   let out = typeof hit[0].to === 'function' ? hit[0].to(args, G, hit[1]) : sayFill(hit[0].to, args);
@@ -542,7 +558,7 @@ function say0(G, text) {
 // whether a text is one of the language's reports (tools: what isn't translated)
 function saysIn(G, text) {
   const L = sayRules(G);
-  return !!(L && sayMatch(sayOf(L).reports, String(text)));
+  return !!(L && sayMatch(sayOf(L).reports, String(text))) || !!(hoedownAll(G) && API.hoJokeSay && API.hoJokeSay(G, String(text)) !== String(text));
 }
 // every ruleset names its computer players (rs.ai)
 function aiOf(G) {
@@ -581,6 +597,10 @@ function fixed(G, id) { return !!(G && G.opts && G.opts.patch) && fixes(rules(G)
 // is; a joke's random draw is still made and only its result ignored, so a
 // seed plays the same game with Hoedown on or off.
 function hoedown(G) { return !!(G && G.opts && G.opts.hoedown) && !!ownRules(G).hoedown; }
+// "Every version's jokes" (G.opts.hoedownAll, a second box under Full Hoedown): every joke
+// of every official release can come up in any official release's game (js/hoedown.js,
+// docs/hoedown.md); the AI homages have none
+function hoedownAll(G) { return hoedown(G) && !!G.opts.hoedownAll; }
 // the patch's version number: the version's own + ".1" (rs.patchVersion overrides)
 function patchVersion(rs) { return rs ? rs.patchVersion || (rs.version ? rs.version + '.1' : null) : null; }
 
@@ -1371,7 +1391,8 @@ function endTurn(G) {
   // Mac 4.0.5 drew the year (p.colorJoke); 3.0.1's comes from the seed
   // (hoRand), so the game's numbers are untouched.
   // (Not Full Hoedown's: the joke only makes sense on a black-and-white screen.)
-  const jokeText = ownRules(G).colorMonitorBW, bw = jokeText && API.screenBW && API.screenBW();
+  // With "Every version's jokes" it comes in every version (rs.hoedown.all.colorMonitor).
+  const jokeText = ownRules(G).colorMonitorBW || (hoedownAll(G) && ownRules(G).hoedown.all && ownRules(G).hoedown.all.colorMonitor), bw = jokeText && API.screenBW && API.screenBW();
   if (bw && !G.over) for (const p of G.players) {
     const y = p.colorJoke || (20 + Math.floor(hoRand(G, 'colorJoke' + p.id) * 31)) * 100;
     if (p.human && !p.hoColor && y > yearBefore && y <= G.year) { p.hoColor = true; msg(G, p.id, jokeText.text, { icon: jokeText.icon || 'm9039' }); }
@@ -1770,7 +1791,7 @@ const API = {
   DATA, SHIP_TYPES, TYPES: SHIP_TYPES, TECHS,
   BAR_SCALES, barScale, battleGroups, makeBattlePanel,
   registerRules, registerAI, rules, rulesById, aiOf, LANGUAGES, languages, ownLanguage, languageName, languageChoices,
- ownRules, gameName, ownName, setLanguage, frPatchText, windowWords, say, saysIn, trSuffixes, feature, RULESETS, fixes, fixed, TRANSLATIONS_FIX, IOS_FILLINGS_FIX, hoedown, setHoedown, patchVersion,
+ ownRules, gameName, ownName, setLanguage, frPatchText, windowWords, say, saysIn, trSuffixes, feature, RULESETS, fixes, fixed, TRANSLATIONS_FIX, IOS_FILLINGS_FIX, hoedown, hoedownAll, setHoedown, setHoedownAll, say0, patchVersion,
   // [id, name] for the New Game window: the original games' rules by year of
   // release, then version ("2.0 (DOS and Windows 3.1, 1993)"); rulesets that
   // aren't an original game's (the remake's own) come last, by their label

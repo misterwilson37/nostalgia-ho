@@ -82,9 +82,15 @@ and the translation notice (`docs/translations-notes/`) are not done.
       every language a version offers, under the translation rule below.
    d. **Done (October 2026).** **Tidy the 5.0.5 manual's 34 broken links** (the original's own; invisible to players,
       so this is code tidying, not a change anyone sees). Done: `tools/manual-links.js` checks every relative href/src and anchor in assets/manuals; 33 broken per 5.0.5 copy (165 in all) are now 0 (dead Word `filelist.xml`/`editdata.mso` head links removed; `ho5docs.html#16799` now points to `preferences.html`).
-   e. **"Every version's jokes"**, lower: a second box, shown only when Full Hoedown is checked,
-      that lets every joke from every version appear (today Full Hoedown maximizes the jokes
-      of the version being played). Official releases' jokes only, as Full Hoedown.
+   e. **Done (October 2026).** **"Every version's jokes"**: a second box, shown only when Full Hoedown is checked
+      (New Game, and a Ho menu item while Full Hoedown is on), that lets every joke from every official
+      version appear in the game (`G.opts.hoedownAll`; Full Hoedown alone maximizes the jokes of the
+      version being played). Official releases' jokes only, as Full Hoedown, in the game's language
+      (the version that has the joke says it), never changing the play (`node tools/test.js <id>
+      --hoedown-all --digest`). `docs/hoedown.md`, "Every version's jokes", lists what comes into each
+      version (Kansas on Evacuate in 3.0.1 and 4.0.5, the colour-monitor joke on black-and-white skins,
+      Peter's and Howard's planets in the Mac 4.0.5 skins, the Amiga's German names in every German game)
+      and what cannot (no Evacuate in 1.2 and 2.0, no tankers for the Valdez before 4.0.5).
    f. **Done (October 2026).** **Translation corrections into the patch**, under the rule below
       (`docs/proofread-2026-10.md`, `docs/translations.md`, `docs/fixes.md`, "Translations"). The
       proofread of the remake's French, German, Turkish and Spanish (90 changes to the default

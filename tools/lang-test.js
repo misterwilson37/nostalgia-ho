@@ -136,9 +136,10 @@ function play(id, code) {
   const shapes = new Map(), left = new Map();
   for (let seed = 1; seed <= SEEDS; seed++) {
     const o = { seed: 1000 + seed, rules: id, size: seed % 2 ? 'small' : 'medium', computers: 2 + seed % 4, iq: ['average', 'smart', 'dumb'][seed % 3], shape: 'random',
-      alliances: seed % 2 === 0, luck: seed % 3 !== 0, novas: seed % 2 === 1, patch: seed % 3 === 1, hoedown: seed % 4 === 2,
+      alliances: seed % 2 === 0, luck: seed % 3 !== 0, novas: seed % 2 === 1, patch: seed % 3 === 1, hoedown: seed % 4 === 2, hoedownAll: seed % 4 === 2 && seed % 2 === 0,
       humans: [{ name: 'Ann' }, { name: 'Bob', female: false }] };
     if (!own) o.lang = code;
+    HO.screenBW = o.hoedownAll ? () => true : null; // (the colour-monitor joke of "Every version's jokes" comes on a black-and-white screen)
     let G;
     try { G = HO.newGame(o); } catch (e) { failed++; console.log(`FAIL ${id} ${code}: New Game: ${e.message}`); return; }
     for (const p of HO.humans(G)) p.auto = true;

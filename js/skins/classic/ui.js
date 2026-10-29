@@ -238,7 +238,8 @@ const evacuateShown = () => HO.rules(G).evacuateCommand !== false;
 function evacuateClick(sid, tog) {
   const t = tog || HO.rules(G).evacuateToggle, s = G.stars[sid];
   // 3.0.1's and 4.0.5's "Hope" and "Ship" jokes (rs.evacuateJoke) in place of the remake's question
-  const hj = !t && HO.rules(G).evacuateJoke && HO.rules(G).evacuateJoke(G, s);
+  // (and with Full Hoedown's "Every version's jokes", the Kansas joke the other versions have: HO.hoedownEvacuate)
+  const hj = !t && ((HO.rules(G).evacuateJoke && HO.rules(G).evacuateJoke(G, s)) || HO.hoedownEvacuate(G, s));
   if (!t) return confirmBox(hj ? HO.say(G, hj) : `Evacuate ${s.name}? Your colonists will leave; satellites stay.`, () => { HO.evacuate(G, ME, sid); Sound.play(7002); renderPanel(); draw(); save(); });
   const on = !t.marked(G, sid);
   const go = () => { HO.evacuate(G, ME, sid); Sound.play(on ? 7002 : 4000); renderPanel(); draw(); save(); };
@@ -4215,8 +4216,13 @@ function setModern(on) { if (!G) return; G.opts.modern = !!on; save(); renderPan
 const HOEDOWN_TEXT = 'Full Hoedown: Delta Tao’s own jokes at their most, every time (the game plays the same)';
 const hoedownOn = () => !!(G && HO.hoedown(G));
 function setHoedown(on) { if (!G) return; HO.setHoedown(G, !!on); save(); renderPanel(); draw(); toast(on ? 'Full Hoedown is on.' : 'Full Hoedown is off.'); }
-// the Hoedown items of a ruleset, as a list
-const hoedownList = (rs) => el('ul', { translate: 'no', lang: 'en' }, ...((rs.hoedown || {}).items || []).map(t => el('li', null, t)));
+// "Every version's jokes" (G.opts.hoedownAll, under Full Hoedown): every joke of every official
+// release can come up in this game
+const HOEDOWN_ALL_TEXT = 'Every version’s jokes: every joke from every Spaceward Ho! release can come up in this game (the game plays the same)';
+const hoedownAllOn = () => !!(G && HO.hoedownAll(G));
+function setHoedownAll(on) { if (!G) return; HO.setHoedownAll(G, !!on); save(); renderPanel(); draw(); toast(on ? 'Every version’s jokes are on.' : 'Every version’s jokes are off.'); }
+// the Hoedown items of a ruleset, as a list (and, with "Every version's jokes" on in this game, the other versions' jokes)
+const hoedownList = (rs) => el('ul', { translate: 'no', lang: 'en' }, ...(((rs.hoedown || {}).items || []).concat(hoedownAllOn() && (rs.hoedown.all || {}).items || [])).map(t => el('li', null, t)));
 // The long documents (the version notes, the patch's fixes, the Hoedown
 // items and the manuals) are in English: kept out of the
 // translation (translate="no") with a line in the language that says so
@@ -4332,7 +4338,13 @@ function openAbout() {
     N.intro ? el('p', docAttrs([N.intro]), N.intro) : null,
     part('When it came out', N.released, 'released'),
     rs.hoedown ? el('section', { class: 'vnotes' }, el('h4', null, 'Full Hoedown'),
-      el('p', { class: 'sub' }, `${G && HO.hoedown(G) ? 'On in this game' : 'Off in this game'} (New Game and the Ho menu turn it on and off): ${rs.version || rs.id}’s own jokes at their most, and only Delta Tao’s. The game plays the same.`),
+      // (3.0.1 and 1.2 have no joke of their own to turn up: their box is for "Every version's jokes")
+      el('p', { class: 'sub' }, (rs.hoedown.items || []).length
+        ? `${G && HO.hoedown(G) ? 'On in this game' : 'Off in this game'} (New Game and the Ho menu turn it on and off): ${rs.version || rs.id}’s own jokes at their most, and only Delta Tao’s. The game plays the same.`
+        : `${G && HO.hoedown(G) ? 'On in this game' : 'Off in this game'} (New Game and the Ho menu turn it on and off). ${rs.version || rs.id} has no random joke of its own to turn up.`),
+      G && HO.hoedown(G) ? el('p', { class: 'sub' }, hoedownAllOn()
+        ? 'Every version’s jokes are on in this game (New Game and the Ho menu turn them on and off): the other official releases’ jokes come up too, in the game’s language. The game plays the same.'
+        : 'Every version’s jokes are off in this game (New Game and the Ho menu turn them on and off): only the jokes of the version being played come up.') : null,
       hoedownList(rs)) : null,
     part('Known bugs and quirks, played as released', N.quirks, 'quirks', rs.version ? 'None known.' : null),
     part('Where this remake differs', N.differs, 'differs'),
@@ -5624,6 +5636,9 @@ function newGameDialog() {
   // Full Hoedown: only for rules with Hoedown items (never the AI homages')
   const hoBox = el('label', { class: 'chk modern hoedown' }, el('input', { type: 'checkbox', name: 'hoedown', checked: localStorage.getItem('ho5.hoedown') === '1' ? 'checked' : false }),
     el('span', null, HOEDOWN_TEXT));
+  // and, only while Full Hoedown is checked, every release's jokes in this game
+  const hoAllBox = el('label', { class: 'chk modern hoedown hoedown-all' }, el('input', { type: 'checkbox', name: 'hoedownAll', checked: localStorage.getItem('ho5.hoedownAll') === '1' ? 'checked' : false }),
+    el('span', null, HOEDOWN_ALL_TEXT));
   // hot seat: names and hats for players 2..6
   const seats = el('div', { class: 'group seats' });
   for (let i = 2; i <= 6; i++) seats.append(el('label', { 'data-seat': i }, el('span', null, `Player ${i}`),
@@ -5700,6 +5715,7 @@ function newGameDialog() {
     el('label', { class: 'chk modern' }, el('input', { type: 'checkbox', name: 'modern', checked: localStorage.getItem('ho5.modern') === '1' ? 'checked' : false }),
       el('span', null, MODERN_TEXT)),
     hoBox,
+    hoAllBox,
     sounds,
     el('div', { class: 'btns right' },
       // online play (js/cloud.js): several people, each on their own computer
@@ -5787,6 +5803,7 @@ function newGameDialog() {
     // unless it offers the player's), its default names with it (js/ui-lang.js)
     ngLang(langRow.hidden ? (offered ? want : 'en') : langSel.value);
     hoBox.hidden = !(HO.RULESETS[d.rules] || {}).hoedown;
+    hoAllBox.hidden = hoBox.hidden || !d.hoedown;
     // the patch: only for rules that have fixes
     const prs = HO.RULESETS[d.rules], nfx = HO.fixes(prs).length;
     patchBox.hidden = !nfx;
@@ -5824,11 +5841,13 @@ function newGameDialog() {
     const patch = !patchBox.hidden && !!d.patch;
     const hoedown = !hoBox.hidden && !!d.hoedown;
     if (!hoBox.hidden) localStorage.setItem('ho5.hoedown', hoedown ? '1' : '0');
+    const hoedownAll = hoedown && !hoAllBox.hidden && !!d.hoedownAll;
+    if (!hoAllBox.hidden) localStorage.setItem('ho5.hoedownAll', hoedownAll ? '1' : '0');
     if (!patchBox.hidden) localStorage.setItem('ho5.patch', patch ? '1' : '0');
     const snd = sounds.value(); localStorage.setItem('ho5.sounds', snd || '');
     const lang = !langRow.hidden && d.lang ? d.lang : null;
     // hints: the creator's "Give helpful game play hints" preference, which 5.0.5 and the Palm game read for the first messages (rs.welcome)
-    const common = { modern: !!d.modern, ...(patch ? { patch: true } : {}), ...(hoedown ? { hoedown: true } : {}), ...(snd ? { sounds: snd } : {}), ...(lang ? { lang } : {}), hints: !!Prefs.hints, humans, seed: (Math.random() * 2 ** 31) | 0, name: d.name || 'You', galaxy: d.galaxy || 'Milky Way', female: d.female === '1', computers: +d.computers, start: d.start, rules: d.rules, alliances: !!d.alliances, luck: !!d.luck, novas: !!d.novas, ...keptStarsOpt(d.rules), ...keptNamesOpt(d.rules),
+    const common = { modern: !!d.modern, ...(patch ? { patch: true } : {}), ...(hoedown ? { hoedown: true } : {}), ...(hoedownAll ? { hoedownAll: true } : {}), ...(snd ? { sounds: snd } : {}), ...(lang ? { lang } : {}), hints: !!Prefs.hints, humans, seed: (Math.random() * 2 ** 31) | 0, name: d.name || 'You', galaxy: d.galaxy || 'Milky Way', female: d.female === '1', computers: +d.computers, start: d.start, rules: d.rules, alliances: !!d.alliances, luck: !!d.luck, novas: !!d.novas, ...keptStarsOpt(d.rules), ...keptNamesOpt(d.rules),
       ...(+d.timelimit > 0 && !tlRow.hidden ? { timeLimit: +d.timelimit } : {}), ...(d.autoend && !autoEndBox.hidden ? { autoEnd: true } : {}) };
     const k = kindOf(d.rules);
     if (k === 'original') {
@@ -5944,6 +5963,8 @@ function setupMenus() {
     [MODERN_TEXT.replace(/:.*/, ''), () => { if (G) setModern(!modern()); else toast('Modern conveniences are chosen for each game: start or continue one first.'); }, null, () => modern()],
     // (not in an online game: the language and Hoedown are everyone's, chosen at New Game)
     ['Full Hoedown', () => setHoedown(!hoedownOn()), () => !!(G && !G.online && HO.ownRules(G).hoedown), () => hoedownOn()],
+    // (only while Full Hoedown is on)
+    ['Every version’s jokes', () => setHoedownAll(!hoedownAllOn()), () => !!(G && !G.online && HO.ownRules(G).hoedown && hoedownOn()), () => hoedownAllOn()],
     ['-'], ['Suggestion box…', () => openFeedback('idea')]];
   const bar = $('#menubar');
   const menu = (btn, items) => {

@@ -2,11 +2,12 @@
 // --patch plays with the ruleset's unofficial patch on (G.opts.patch: its rs.fixes)
 // --lang=<code> plays in another of the version's languages (G.opts.lang: rs.languages), e.g. 12 --lang=en
 // --hoedown plays with Full Hoedown on (G.opts.hoedown: js/hoedown.js); the game must be the same as without it
+// --hoedown-all adds "Every version's jokes" (G.opts.hoedownAll); the game must be the same too
 // --digest prints, after each game, a digest of its state without the messages and names (the same with --hoedown or without)
 const path = require('path'), root = path.join(__dirname, '..');
 const HO=require(path.join(root, 'js/engine.js'));
 Object.assign(HO.DATA,require(path.join(root, 'js/data.js')));
-const ARGS=process.argv.slice(2), PATCH=ARGS.includes('--patch'), HOEDOWN=ARGS.includes('--hoedown'), DIGEST=ARGS.includes('--digest'), LANG=(ARGS.find(a=>a.startsWith('--lang='))||'').slice(7);
+const ARGS=process.argv.slice(2), PATCH=ARGS.includes('--patch'), HOEDOWN=ARGS.includes('--hoedown')||ARGS.includes('--hoedown-all'), HOALL=ARGS.includes('--hoedown-all'), DIGEST=ARGS.includes('--digest'), LANG=(ARGS.find(a=>a.startsWith('--lang='))||'').slice(7);
 // the ruleset is named, never assumed: an unknown one stops the test
 const RULES=ARGS.filter(a=>!a.startsWith('--'))[0];
 if (!RULES || !HO.RULESETS[RULES]) { console.error(`Usage: node tools/test.js <ruleset> [--patch] [--hoedown] [--digest] [--lang=<code>]; rulesets: ${Object.keys(HO.RULESETS).join(', ')}${RULES ? ` (no "${RULES}")` : ''}`); process.exit(2); }
@@ -16,14 +17,14 @@ function fail(e,seed,G){ console.error(`FAILED: ${RULES}${PATCH?' --patch':''}, 
 // the game's state without what Hoedown or the language may change: messages,
 // names, its own notes, the language's code (G.opts.lang)
 function digest(G){
-  const skip=new Set(['inbox','log','name','text','hoNames','hoColor','hoedown','lang']);
+  const skip=new Set(['inbox','log','name','text','hoNames','hoColor','hoedown','hoedownAll','lang']);
 
   const js=JSON.stringify(G,(k,v)=>skip.has(k)?undefined:v);
   return require('crypto').createHash('sha1').update(js).digest('hex').slice(0,16);
 }
 function run(seed,opts){
   let G=null;
-  try { G=HO.newGame(Object.assign({seed,size:'medium',computers:4,iq:'average',shape:'random',rules:RULES,alliances:true,novas:true},PATCH?{patch:true}:{},HOEDOWN?{hoedown:true}:{},LANG?{lang:LANG}:{},opts||{})); } catch(e){ fail(e,seed,null); }
+  try { G=HO.newGame(Object.assign({seed,size:'medium',computers:4,iq:'average',shape:'random',rules:RULES,alliances:true,novas:true},PATCH?{patch:true}:{},HOEDOWN?{hoedown:true}:{},HOALL?{hoedownAll:true}:{},LANG?{lang:LANG}:{},opts||{})); } catch(e){ fail(e,seed,null); }
   for (const p of HO.humans(G)) { p.auto=true; if (RULES==='claude') p.ai=null; } // humans on autoplay
   let t0=Date.now();
   for(let i=0;i<400 && !G.over;i++){ try { HO.endTurn(G); } catch(e){ fail(e,seed,G); }
