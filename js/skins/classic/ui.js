@@ -603,7 +603,7 @@ function draw0() {
     const a = G.stars[UI.ruler.from], b = G.stars[UI.ruler.to], x2 = sx(b.x), y2 = sy(b.y);
     cx.save(); cx.strokeStyle = '#bfe8ff'; cx.lineWidth = 2; cx.setLineDash([6, 5]);
     cx.beginPath(); cx.moveTo(sx(a.x), sy(a.y)); cx.lineTo(x2, y2); cx.stroke(); cx.setLineDash([]);
-    const label = tl('%s: %s away', b.name, HO.starDist(G, a.id, b.id).toFixed(1));
+    const label = tl('%s: %s away', b.name, HO.plainNum(HO.starDist(G, a.id, b.id)));
     cx.font = mapFont(12); cx.textAlign = 'left';
     const tw = cx.measureText(label).width;
     cx.fillStyle = 'rgba(0,0,0,0.7)'; cx.fillRect(x2 + 12, y2 - 24, tw + 10, 18);
@@ -704,7 +704,7 @@ function draw0() {
       const d = HO.starDist(G, f.star, tgt);
       const turns = Math.ceil(d / HO.fleetSpeed(G, f) - 1e-9);
       const via = !ok && modern() && HO.feature(G, 'waypoints') && !f.sat ? findRoute(f, tgt) : null;
-      const label = ok ? tl(turns === 1 ? '%s away · %s turn' : '%s away · %s turns', d.toFixed(1), turns) : via ? tl(via.length === 2 ? 'Too far to fly straight: will go via %s stop' : 'Too far to fly straight: will go via %s stops', via.length - 1) : tl('Too far: %s away, fuel %s', d.toFixed(1), f.fuel.toFixed(1));
+      const label = ok ? tl(turns === 1 ? '%s away · %s turn' : '%s away · %s turns', HO.plainNum(d), turns) : via ? tl(via.length === 2 ? 'Too far to fly straight: will go via %s stop' : 'Too far to fly straight: will go via %s stops', via.length - 1) : tl('Too far: %s away, fuel %s', HO.plainNum(d), HO.plainNum(f.fuel));
       cx.font = mapFont(12); cx.textAlign = 'left';
       const tw = cx.measureText(label).width;
       cx.fillStyle = 'rgba(0,0,0,0.7)'; cx.fillRect(x2 + 12, y2 - 24, tw + 10, 18);
@@ -1633,7 +1633,7 @@ function fleetRow(f, inbound) {
   if (inbound) status = `arriving in ${Math.ceil((f.dist - f.prog) / HO.fleetSpeed(G, f))} turn(s)`;
   else if (!mine) status = p.name;
   else if (f.sat) status = 'satellites';
-  else status = (f.dest != null ? `→ ${G.stars[f.dest].name}` : 'holding') + ` · fuel ${f.fuel.toFixed(1)}/${HO.fleetMaxRange(G, f)} · speed ${HO.fleetSpeed(G, f)}`;
+  else status = (f.dest != null ? `→ ${G.stars[f.dest].name}` : 'holding') + ` · fuel ${HO.plainNum(f.fuel)}/${HO.fleetMaxRange(G, f)} · speed ${HO.fleetSpeed(G, f)}`;
   if (marked) status = markedLine() + (inbound ? ` · ${status}` : '');
   r.append(el('div', { class: 'ftext' }, el('div', null, parts.join(', ')), el('div', { class: 'sub' }, status)));
   // (3.0.1 scraps satellites as any other fleet: Scrap Current Fleet)
@@ -4108,7 +4108,7 @@ function findRoute(f, tgt) {
 function outOfRange(f, tgt) {
   const d = HO.starDist(G, f.star, tgt), max = HO.fleetMaxRange(G, f), name = G.stars[tgt].name;
   const here = G.stars[f.star], fuelHere = here.owner === ME || (here.owner >= 0 && HO.isAllied(G, here.owner, ME));
-  let t = `${name} is ${d.toFixed(1)} away, but this fleet has only ${f.fuel.toFixed(1)} fuel.`;
+  let t = `${name} is ${HO.plainNum(d)} away, but this fleet has only ${HO.plainNum(f.fuel)} fuel.`;
   if (d <= max && fuelHere) t += ' It will be refuelled here by next turn; try again then.';
   else if (d <= max) t += ' Fleets refuel only at your own (or your allies’) colonies.';
   else if (HO.feature(G, 'waypoints')) t += ` Its full range is ${max}, and fleets refuel only at your own (or your allies’) colonies, so it needs one of your colonies within reach on the way. Settle one, or research more Range.`;
