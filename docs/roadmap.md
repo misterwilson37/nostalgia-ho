@@ -119,10 +119,25 @@ and the translation notice (`docs/translations-notes/`) are not done.
       (March 2012). The remake plays 1.2.8 (built February 2015), so its label stays 2015;
       the first-release date goes in the notes as reported, not confirmed. Then list any other
       missing dates for Jake.
-   h. **A °C/°F preference (lower priority)**: let the player choose the temperature unit in any
-      version (Prefs already has `celsius` for the classic skins), including the Amiga skin,
-      which today writes °C in English, German, French and Spanish as the Amiga does
-      (`docs/amiga-skin.md`, "Temperatures") and °F in Turkish as iOS's Turkish does.
+   h. **Done (October 2026).** **A °C/°F preference**: the player may choose the temperature unit in any
+      version and skin: **As the original** (the default: each version, language and skin as released,
+      the Amiga's truncated °C rules (`docs/amiga-skin.md`, "Temperatures") and iOS's Turkish °F included),
+      **°C** or **°F**. It is `Prefs.temp` (js/skins/classic/ui.js, kept in "ho5.prefs", the browser's, for
+      every game), set in the Ho menu's **Temperatures…** and in the "Remake options" of every
+      Preferences window (the generic window's old "Temperatures in Celsius" box became it: a saved
+      tick counts as °C). The version's own Preferences window, where it has one (5.0.5, Palm, iOS,
+      Android: "Temp in °C not °F"), keeps its box, which still speaks while "As the original" is
+      chosen. It applies everywhere a temperature shows: the planet panel and the explored-stars list
+      (every skin; the Amiga's own panels and list), the exploring reports and the canned "I like planets
+      that are 1.00G and 72.0°F" message in every language (`HO.say`, `tempText` in engine.js), and the
+      manual's hint tips ("the ideal temperature is 72°"). Conversions: °C by the version's own formula
+      where the original had one (1.2 and the French 2.0 to a tenth, the German 2.0 truncated, the Amiga's
+      truncation with its "tenths" digit; `HO.celsiusOf`), else rounded to whole degrees (iOS's
+      French, the remake's Spanish and the English versions); °F is the report's own whole degrees (the Amiga's
+      `trunc(tenths / 10)`), and a unit the version wrote itself is never converted back. `node tools/temp-check.js`
+      checks the engine for every version and language and the page for the skins. Not changed (as released):
+      the German and French 2.0's panels, which the classic skins show in °F as before although the
+      original wrote °C there.
    i. **Japanese**, far down: there was a Japanese port, but no copy can be found; the remake's
       own Japanese translation is not planned soon.
 5. Last: a home-screen (apple-touch) icon per skin, the icon a phone shows when the site is

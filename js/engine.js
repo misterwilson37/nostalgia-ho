@@ -540,7 +540,46 @@ function trSuffixes(s) {
   s = String(s).replace(/\{\^\}(\s*)(\S)/g, (m, sp, c) => sp + c.toLocaleUpperCase('tr'));
   return s.replace(/([^\s’'{}]*)([’']?)\{(e|de|den|deki|i|in|le)\}/g, (m, w, ap, code) => w + ap + trEnding(w, code));
 }
-function say(G, text) { return sumText(G, say0(G, text)); }
+function say(G, text) { return sumText(G, tempText(G, text, say0(G, text))); }
+// ---------- °C or °F: the player's choice (docs/roadmap.md 4h) ----------
+// API.tempPref() is the page's preference, 'C', 'F' or null: null shows each version, language and
+// skin as released (the default), and the rest of this code does nothing then. A choice changes only what
+// the version did not show that way: with 'C', a temperature in °F ("Temp: 72°", Turkish iOS's "72°",
+// "I like planets that are 1.00G and 72.0°F") becomes °C, by the version's own formula where it had one
+// (celsiusOf); with 'F', a temperature a version wrote in °C (the Amiga's, 1.2F's, the German 2.0's, iOS's French,
+// the remake's Spanish) is written again from the report's own whole degrees. A °C the version wrote itself
+// stays when °C is chosen, and an °F stays when °F is.
+// The version's own °C by its formula, for whole degrees Fahrenheit f, as a string: 1.2 (every language) and
+// the French 2.0 (1.2F's window, "%d,%1.1d°C") show a tenth; the German 2.0 truncates ("%d,%1.1d°C" worked
+// out from whole degrees, js/languages.js explored20); every other version rounds (iOS's French, the remake's).
+function celsiusOf(G, f) {
+  const rs = G && ownRules(G), lang = G && rs ? (G.opts && G.opts.lang) || ownLanguage(rs) : null, c = (f - 32) * 5 / 9;
+  const two = rs && (rs.id === 'dos' || rs.id === 'mac20');
+  if (rs && (rs.celsius || (two && lang === 'fr'))) return c.toFixed(1);
+  if (two && lang === 'de') return String(Math.trunc(c));
+  return String(Math.round(c));
+}
+const TEMP_TOKEN = /(-?\d+(?:[.,]\d+)?)[\s\u00a0]?°[\s\u00a0]?([CF])?/g;
+function tempText(G, src, out) {
+  const u = API.tempPref && API.tempPref();
+  if (!u || typeof out !== 'string' || out.indexOf('°') < 0) return out;
+  const a = String(src).match(TEMP_TOKEN), b = out.match(TEMP_TOKEN);
+  // (a report with one temperature; the hints that give both, "72°F (20°C)", are left alone)
+  if (!a || !b || a.length !== 1 || b.length !== 1) return out;
+  TEMP_TOKEN.lastIndex = 0;
+  const sm = /(-?\d+(?:\.\d+)?)[\s\u00a0]?°[\s\u00a0]?([CF])?/.exec(a[0]);
+  if (!sm || sm[2] === 'C') return out;
+  const F = parseFloat(sm[1]), comma = (G.opts && G.opts.lang || ownLanguage(ownRules(G))) === 'fr' || (G.opts && G.opts.lang) === 'de';
+  return out.replace(TEMP_TOKEN, (m, n, unit) => {
+    if (u === 'C') return unit === 'C' ? m : (comma ? celsiusOf(G, F).replace('.', ',') : celsiusOf(G, F)) + '°C';
+    // (°F: a °C written by the version becomes the report's own degrees with the unit; so does the bare "71°" of 1.2, whose reports the page showed in °C)
+    return unit === 'C' || (!unit && ownRules(G).celsius) ? (unit === 'C' ? sm[1] : n) + '°F' : m;
+  });
+}
+// static text that names a temperature in °F ("The ideal temperature is 72°"), for °C
+function tempStatic(G, text) {
+  return API.tempPref && API.tempPref() === 'C' ? String(text).replace(/(-?\d+)°(?![CF])/g, (m, n) => celsiusOf(G, +n) + '°C') : text;
+}
 function say0(G, text) {
   const t = String(text == null ? '' : text), L = sayRules(G);
   // (a joke of another version, with "Every version's jokes" on: said in the game's language by the version that has it, hoJokeSay)
@@ -1791,7 +1830,7 @@ const API = {
   DATA, SHIP_TYPES, TYPES: SHIP_TYPES, TECHS,
   BAR_SCALES, barScale, battleGroups, makeBattlePanel,
   registerRules, registerAI, rules, rulesById, aiOf, LANGUAGES, languages, ownLanguage, languageName, languageChoices,
- ownRules, gameName, ownName, setLanguage, frPatchText, windowWords, say, saysIn, trSuffixes, feature, RULESETS, fixes, fixed, TRANSLATIONS_FIX, IOS_FILLINGS_FIX, hoedown, hoedownAll, setHoedown, setHoedownAll, say0, patchVersion,
+ ownRules, gameName, ownName, setLanguage, frPatchText, windowWords, say, saysIn, trSuffixes, feature, RULESETS, fixes, fixed, TRANSLATIONS_FIX, IOS_FILLINGS_FIX, hoedown, hoedownAll, setHoedown, setHoedownAll, say0, celsiusOf, tempStatic, patchVersion,
   // [id, name] for the New Game window: the original games' rules by year of
   // release, then version ("2.0 (DOS and Windows 3.1, 1993)"); rulesets that
   // aren't an original game's (the remake's own) come last, by their label

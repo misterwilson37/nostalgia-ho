@@ -466,7 +466,9 @@ passes the star's name only, so the real Amiga would print stack leftovers for t
 French follows the French officials (1.2F, 3.0.1F and iOS write °C), Spanish the Amiga's (it has
 no Spanish official), both with the Amiga's arithmetic; Turkish follows iOS's Turkish, which
 fills the English's degrees Fahrenheit ("72°") in, so the Turkish Amiga skin shows °F as before.
-A °C/°F choice for the player is queued (docs/roadmap.md).
+The player's °C/°F choice (docs/roadmap.md 4h: the Ho menu's Temperatures…) works here too: °C is
+this arithmetic in every language (Turkish included, whose default is iOS's °F), °F the program's whole
+degrees, `trunc(tenths / 10)` with the unit ("72°F"); "As the original" is what is described above.
 
 ## The sent messages (strings 615 to 619)
 

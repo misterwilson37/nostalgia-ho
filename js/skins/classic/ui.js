@@ -177,7 +177,7 @@ const Sound = {
   stopTheme() { if (this.theme) this.theme.pause(); },
 };
 // preferences (the original's Preferences window: Celsius, only important messages, review battles, hints)
-const Prefs = { celsius: false, important: false, review: null, hints: true, autoRoute: true, tips: true,
+const Prefs = { celsius: false, temp: null, important: false, review: null, hints: true, autoRoute: true, tips: true,
   // the version's own preferences (rs.options, 1.2 and 2.0): battle speed in
   // ticks a shot (null: the version's default), fully animated battles,
   // event messages shown, the polling time in seconds (null: the default)
@@ -192,19 +192,40 @@ const Prefs = { celsius: false, important: false, review: null, hints: true, aut
   // to act on)
   // (euroSign: null until the player chooses; HO.prefs.euro follows it, HO.currency)
   euroSign: null, jumpHistory: true, autoZoom: false, autoOff: false };
-try { const s = JSON.parse(localStorage.getItem('ho5.prefs') || '{}'); if (s.sound === false) Sound.on = false; if (s.music) Sound.music = true; for (const k in Prefs) if (s[k] != null) Prefs[k] = s[k]; } catch (e) {}
+try { const s = JSON.parse(localStorage.getItem('ho5.prefs') || '{}'); if (s.sound === false) Sound.on = false; if (s.music) Sound.music = true; for (const k in Prefs) if (s[k] != null) Prefs[k] = s[k];
+  // (before the three-way choice there was one box, "Temperatures in Celsius": a player who ticked it chose °C)
+  if (s.temp === undefined && s.celsius) { Prefs.temp = 'C'; Prefs.celsius = false; } } catch (e) {}
+if (Prefs.temp !== 'C' && Prefs.temp !== 'F') Prefs.temp = null;
 HO.prefs.euro = Prefs.euroSign;
 // Review Battles: what was chosen, else the version's own default (iOS: on;
 // rs.prefsWindow.defaults), else off
 function prefReview() { const PW = G && HO.rules(G).prefsWindow; return Prefs.review != null ? !!Prefs.review : !!(PW && PW.defaults && PW.defaults.review); }
 function savePrefs() { try { localStorage.setItem('ho5.prefs', JSON.stringify(Object.assign({ sound: Sound.on, music: Sound.music }, Prefs))); } catch (e) {} }
-// rs.celsius: the version showed temperatures in °C, to a tenth (1.2, the
-// French edition); otherwise °C is the player's preference
+// Temperatures. The player's choice (Prefs.temp: null "As the original", 'C' or 'F'; the Ho menu's
+// Temperatures…, and the Preferences windows) is HO.tempPref, which HO.say, the panels and the lists follow
+// (docs/roadmap.md 4h). "As the original": rs.celsius, the version showed temperatures in °C, to a tenth (1.2,
+// the French edition); otherwise the version's own Preferences window (5.0.5, the Palm, iOS and Android:
+// "Temp in °C not °F", Prefs.celsius) says, °F by default.
 const rsCelsius = () => !!(G && HO.rules(G).celsius);
+const tempPref = () => (Prefs.temp === 'C' || Prefs.temp === 'F' ? Prefs.temp : null);
+HO.tempPref = tempPref;
 const toC = (f) => rsCelsius() ? ((f - 32) * 5 / 9).toFixed(1) : Math.round((f - 32) * 5 / 9);
-const degF = (f) => Prefs.celsius || rsCelsius() ? toC(f) + '°C' : Math.round(f) + '°';
-// (a degree already in °C, as a translation writes it, stays as it is)
-const degText = (t) => Prefs.celsius || rsCelsius() ? t.replace(/(-?\d+)°(?!C)(F)?/g, (m, n) => toC(+n) + '°C') : t;
+// °F: as the English versions write it ("72°"), with the unit where the version's own was °C
+const degF = (f) => {
+  const u = tempPref();
+  if (u === 'F') return Math.round(f) + (rsCelsius() ? '°F' : '°');
+  if (u === 'C') return HO.celsiusOf(G, f) + '°C'; // (the version's own °C formula where it had one)
+  return Prefs.celsius || rsCelsius() ? toC(f) + '°C' : Math.round(f) + '°';
+};
+// (a degree already in °C, as a translation writes it, stays as it is; with a choice, HO.say has done it)
+const degText = (t) => tempPref() ? t : Prefs.celsius || rsCelsius() ? t.replace(/(-?\d+)°(?!C)(F)?/g, (m, n) => toC(+n) + '°C') : t;
+// a version's own Celsius box (its Preferences window): ticked, unless the player's choice says otherwise
+const ownCelsius = () => tempPref() ? tempPref() === 'C' : !!Prefs.celsius;
+// the box changed: the version's own setting speaks again
+// (was: the box as the window opened; the choice may have been changed in the window since)
+const setOwnCelsius = (v, was) => { if (v !== was) { Prefs.celsius = v; Prefs.temp = null; } };
+// the text nodes under a node, with a temperature the player chose °C for (a tip from the manual: "72°")
+const tempDom = (root) => { if (tempPref() !== 'C') return; const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT); for (let n = w.nextNode(); n; n = w.nextNode()) n.data = HO.tempStatic(G, n.data); };
 // rs.options: the version's own Options menu preferences (1.2, 2.0)
 const verOpts = () => (G && HO.rules(G).options) || null;
 const optVal = (O, k) => { const v = Prefs[k]; return v != null && v >= O.min && v <= O.max ? v : O.def; };
@@ -4030,8 +4051,7 @@ function openPrefs() {
   const O = verOpts();
   modal('Preferences', el('div', { class: 'prefs' }, O ? verPrefs(O, box) : null, O ? null : box('important', 'Show only the most important messages'), O ? null : box('review', 'Review battles as they happen'),
     hints ? box('hints', 'Give helpful game play hints') : null,
-    rsCelsius() ? el('label', { class: 'chk' }, el('input', { type: 'checkbox', checked: 'checked', disabled: true }), el('span', null, 'Temperatures in Celsius (this version showed only °C)'))
-      : box('celsius', 'Temperatures in Celsius (not °F)'),
+    tempChoice(),
     G ? el('label', { class: 'chk' }, el('input', { type: 'checkbox', checked: modern() ? 'checked' : false, onchange: (e) => setModern(e.target.checked) }),
       el('span', null, 'Modern conveniences in this game (automatic routes, the map follows the news, battle speed and written reports)')) : null,
     box('tips', 'Explain things when the pointer rests on them (text from the original manual)'),
@@ -4046,8 +4066,9 @@ function openPrefs() {
 // explore (no such report), Vocalize Chat Keywords (no keyword sounds); and
 // AutoSave Each Turn, always on (the browser keeps the game after every move).
 function prefs505(W) {
+  const celsius0 = ownCelsius();
   const D = { showMsgs: Prefs.showMsgs !== false, important: !!Prefs.important, review: !!Prefs.review, hints: !!Prefs.hints, buddyStars: Prefs.buddyStars !== false,
-    speed: Prefs.reviewSpeed != null ? Prefs.reviewSpeed : W.def, female: !!me().female, celsius: !!Prefs.celsius, vocal: Prefs.vocal !== false };
+    speed: Prefs.reviewSpeed != null ? Prefs.reviewSpeed : W.def, female: !!me().female, celsius: ownCelsius(), vocal: Prefs.vocal !== false };
   const chk = (k, label, extra) => el('label', { class: 'chk' }, el('input', { type: 'checkbox', checked: D[k] ? 'checked' : false, ...(extra || {}), onchange: (e) => { D[k] = e.target.checked; if (k === 'showMsgs') sync(); } }), el('span', null, label));
   const imp = chk('important', W.important), rev = chk('review', W.review), hnt = chk('hints', W.hints), bud = chk('buddyStars', W.buddies);
   const sync = () => { for (const l of [imp, rev, hnt, bud]) l.querySelector('input').disabled = !D.showMsgs; };
@@ -4058,7 +4079,7 @@ function prefs505(W) {
   sync();
   const ok = () => {
     Prefs.showMsgs = D.showMsgs; Prefs.important = D.important; Prefs.review = D.review; Prefs.hints = D.hints; Prefs.buddyStars = D.buddyStars;
-    Prefs.reviewSpeed = D.speed === W.def ? null : D.speed; Prefs.celsius = D.celsius; Prefs.vocal = D.vocal;
+    Prefs.reviewSpeed = D.speed === W.def ? null : D.speed; setOwnCelsius(D.celsius, celsius0); Prefs.vocal = D.vocal;
     if (me().female !== D.female) { me().female = D.female; save(); }
     savePrefs(); closeModal(); renderPanel(); draw();
   };
@@ -4066,6 +4087,7 @@ function prefs505(W) {
     el('label', { class: 'chk' }, el('input', { type: 'checkbox', checked: Sound.on ? 'checked' : false, onchange: (e) => { Sound.on = e.target.checked; savePrefs(); } }), el('span', null, 'Sound effects')),
     el('label', { class: 'chk' }, el('input', { type: 'checkbox', checked: modern() ? 'checked' : false, onchange: (e) => setModern(e.target.checked) }), el('span', null, 'Modern conveniences in this game (automatic routes, the map follows the news, battle speed and written reports)')),
     el('label', { class: 'chk' }, el('input', { type: 'checkbox', checked: Prefs.tips ? 'checked' : false, onchange: (e) => { Prefs.tips = e.target.checked; savePrefs(); } }), el('span', null, 'Explain things when the pointer rests on them (text from the original manual)')),
+    tempChoice(),
     autoPlayWhere() === 'prefs' ? prefsAutoPlay() : null];
   modal(W.title, el('div', { class: 'prefs' },
     showBox,
@@ -4078,6 +4100,19 @@ function prefs505(W) {
     el('hr', { class: 'ngline' }),
     el('fieldset', { class: 'opts' }, el('legend', null, 'Remake options'), ...remake)), { cls: 'small' });
 }
+// The temperature unit: "As the original" (each version as released), °C or °F (Prefs.temp, HO.tempPref).
+// A choice shows at once: the panels and lists are drawn again, and the reports say it as they are read.
+function tempChoice() {
+  const s = el('select', { 'aria-label': 'Temperatures', onchange: (e) => { Prefs.temp = e.target.value || null; savePrefs(); if (G) { renderPanel(); draw(); } } },
+    ...[['', 'As the original'], ['C', '°C (Celsius)'], ['F', '°F (Fahrenheit)']].map(([v, t]) => el('option', { value: v, selected: (Prefs.temp || '') === v ? 'selected' : false }, t)));
+  return el('label', { class: 'tempchoice' }, el('span', null, 'Temperatures'), ' ', s);
+}
+function openTemperature() {
+  modal('Temperatures', el('div', { class: 'about' },
+    el('p', null, 'The unit temperatures are shown in, everywhere in the game: the planet panel, the lists and the reports. “As the original” shows each version as it was released (°F in most, °C in 1.2 and the Amiga; the version’s own Preferences window, where it has one, still says °C or °F). The other two always show that unit; where the version had its own way of working out °C, it is used. This is yours, for every game.'),
+    tempChoice(),
+    el('div', { class: 'btns right' }, el('button', { onclick: closeModal }, 'OK'))), { cls: 'mid' });
+}
 // The remake's own options, under the line in each ruleset's Preferences window
 // (`sound`: the window has its own Sound control)
 function remakeOptions(sound) {
@@ -4086,6 +4121,7 @@ function remakeOptions(sound) {
     sound ? null : chk(Sound.on, (e) => { Sound.on = e.target.checked; savePrefs(); }, 'Sound effects'),
     chk(modern(), (e) => setModern(e.target.checked), 'Modern conveniences in this game (automatic routes, the map follows the news, battle speed and written reports)'),
     chk(Prefs.tips, (e) => { Prefs.tips = e.target.checked; savePrefs(); }, 'Explain things when the pointer rests on them (text from the original manual)'),
+    tempChoice(),
     autoPlayWhere() === 'prefs' ? prefsAutoPlay() : null)];
 }
 // iOS 1.2.9's and Android 1.2.8's Preferences screen (PreferencesLayer
@@ -4100,8 +4136,9 @@ function remakeOptions(sound) {
 // remake's sound switch), Gender (your hat), the speed (the battle's pace, 10
 // the remake's). Kept with nothing yet to act on: Best Buddies (no such report).
 function prefsIOS(W) {
+  const D0 = { celsius: ownCelsius() };
   const D = { show: Prefs.showMsgs !== false, important: !!Prefs.important, review: prefReview(), hints: !!Prefs.hints, buddies: Prefs.buddyStars !== false,
-    celsius: !!Prefs.celsius, sound: !!Sound.on, male: !me().female, speed: Prefs.reviewSpeed != null ? Prefs.reviewSpeed : W.def };
+    celsius: ownCelsius(), sound: !!Sound.on, male: !me().female, speed: Prefs.reviewSpeed != null ? Prefs.reviewSpeed : W.def };
   const rows = {}, sync = () => { for (const k of ['important', 'review', 'hints', 'buddies']) rows[k].hidden = !D.show; };
   const row = ([k, label, on, off]) => {
     const txt = el('span', { class: 'choice' }, D[k] ? on : off);
@@ -4117,7 +4154,7 @@ function prefsIOS(W) {
   const speed = el('input', { type: 'range', min: W.range[0], max: W.range[1], step: 1, value: D.speed, 'aria-label': W.speed.replace(/:$/, ''), oninput: (e) => { D.speed = +e.target.value; } });
   const ok = () => {
     Prefs.showMsgs = D.show; Prefs.important = D.important; Prefs.review = D.review; Prefs.hints = D.hints; Prefs.buddyStars = D.buddies;
-    Prefs.celsius = D.celsius; Sound.on = D.sound; Prefs.reviewSpeed = D.speed === W.def ? null : D.speed;
+    setOwnCelsius(D.celsius, D0.celsius); Sound.on = D.sound; Prefs.reviewSpeed = D.speed === W.def ? null : D.speed;
     if (me().female === D.male) { me().female = !D.male; save(); }
     savePrefs(); closeModal(); renderPanel(); draw();
   };
@@ -4136,7 +4173,8 @@ function prefsIOS(W) {
 // (the remake's sound switch; this skin is silent). Kept with nothing yet to act
 // on: Jump To History, Best Buddies Stars, Auto-Zoom, Disable Auto-Off.
 function prefsPalm(W) {
-  const D = { female: !!me().female, euro: HO.currency(G) === '€', celsius: !!Prefs.celsius, history: Prefs.jumpHistory !== false, hints: !!Prefs.hints,
+  const celsius0 = ownCelsius();
+  const D = { female: !!me().female, euro: HO.currency(G) === '€', celsius: ownCelsius(), history: Prefs.jumpHistory !== false, hints: !!Prefs.hints,
     buddies: Prefs.buddyStars !== false, zoom: !!Prefs.autoZoom, autooff: !!Prefs.autoOff, sound: !!Sound.on };
   const chk = (k, label) => el('label', { class: 'chk' }, el('input', { type: 'checkbox', checked: D[k] ? 'checked' : false, onchange: (e) => { D[k] = e.target.checked; } }), el('span', null, label));
   const euro0 = D.euro;
@@ -4145,7 +4183,7 @@ function prefsPalm(W) {
   const ok = () => {
     // (the sign once chosen; left alone, the version's own: "$", the French of iOS's "€")
     if (D.euro !== euro0) { Prefs.euroSign = D.euro; HO.prefs.euro = D.euro; }
-    Prefs.celsius = D.celsius; Prefs.jumpHistory = D.history; Prefs.hints = D.hints; Prefs.buddyStars = D.buddies; Prefs.autoZoom = D.zoom; Prefs.autoOff = D.autooff;
+    setOwnCelsius(D.celsius, celsius0); Prefs.jumpHistory = D.history; Prefs.hints = D.hints; Prefs.buddyStars = D.buddies; Prefs.autoZoom = D.zoom; Prefs.autoOff = D.autooff;
     Sound.on = D.sound;
     if (me().female !== D.female) { me().female = D.female; save(); }
     savePrefs(); closeModal(); renderPanel(); draw();
@@ -5959,7 +5997,7 @@ function setupMenus() {
   // the modern conveniences a player may choose (all of them can change in
   // the middle of a game). Items: [label, fn, feature or null, checked()].
   const ho = [['About this version…', openAbout], ['Patch notes…', openPatchNotes, () => patchOn()], ['Account…', () => openAccount(), () => !!CLOUD], ['-'],
-    ['Skin and OS look…', openSkin], ['Sounds…', () => openSounds()], ['Language…', openLanguage, () => !!(G && !G.online && HO.languages(HO.ownRules(G)).length)],
+    ['Skin and OS look…', openSkin], ['Sounds…', () => openSounds()], ['Language…', openLanguage, () => !!(G && !G.online && HO.languages(HO.ownRules(G)).length)], ['Temperatures…', openTemperature],
     [MODERN_TEXT.replace(/:.*/, ''), () => { if (G) setModern(!modern()); else toast('Modern conveniences are chosen for each game: start or continue one first.'); }, null, () => modern()],
     // (not in an online game: the language and Hoedown are everyone's, chosen at New Game)
     ['Full Hoedown', () => setHoedown(!hoedownOn()), () => !!(G && !G.online && HO.ownRules(G).hoedown), () => hoedownOn()],
@@ -6069,6 +6107,7 @@ function tipShow(target) {
   Tip.el.innerHTML = '';
   put(Tip.el, el('p', null, h[0]), el('small', null, `Adapted from the ${R[k] ? manualFor()[1] : 'Spaceward Ho! 5 manual'}: ${h[1]}`), UIL && UIL.lang !== 'en' && UIL.tr(h[0]) === h[0] ? inEnglish('This help is in English.') : null);
   if (target.dataset.key) Tip.el.append(el('p', { class: 'key' }, target.dataset.key));
+  tempDom(Tip.el); // (°C chosen: a manual's "72°" in °C)
   Tip.el.hidden = false; Tip.at = target;
   target.setAttribute('aria-describedby', 'hotip');
   const r = target.getBoundingClientRect(), w = Math.min(320, window.innerWidth - 16);

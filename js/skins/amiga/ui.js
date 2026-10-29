@@ -231,7 +231,14 @@ const amigaC = (f, fixed) => {
 // °C in English, German, French and Spanish: the Amiga's own text says °C in both its languages, and the French
 // (1.2F, 3.0.1F, iOS) and the Spanish (no official one: the Amiga's) follow; Turkish follows iOS's Turkish, which
 // fills in the English's degrees Fahrenheit (docs/amiga-skin.md, "Temperatures")
-const temp = (f) => (['en', 'de', 'fr', 'es'].includes(lang()) ? amigaC(f, HO.fixed(game(), 'amigaTenths')) : api().degF(f));
+// With the player's choice (HO.tempPref, the Ho menu's Temperatures…): °C is the Amiga's own arithmetic in every language
+// (the Turkish too, whose default is iOS's °F); °F is the program's whole degrees, trunc(tenths / 10), with the unit.
+const pref = () => (HO.tempPref && HO.tempPref()) || null;
+const temp = (f) => {
+  const u = pref();
+  if (u === 'F') return Math.trunc(Math.round(f * 10) / 10) + '°F';
+  return u === 'C' || ['en', 'de', 'fr', 'es'].includes(lang()) ? amigaC(f, HO.fixed(game(), 'amigaTenths')) : api().degF(f);
+};
 
 // ---------- the screen's pixels ----------
 const PIXKEY = 'ho5.amiga.pixels';
@@ -866,7 +873,9 @@ function amigaSay(G, m) {
       if (lang() === 'en') return `You have explored ${x[1]}. Gravity: ${x[2]}G. Temp: ${temp(F)}. Metal: ${x[3]}.`;
       const out = HO.say(G, t);
       if (lang() === 'de') { const d = /^Sie haben (.+) erforscht\. .*Metall: (.+)\.$/.exec(out); if (d) return `Sie haben ${d[1]} erforscht. Schwerkraft: ${x[2]}G. Temp: ${temp(F)}. Metall: ${d[2]}.`; }
-      if (lang() === 'fr' || lang() === 'es') return out.replace(/-?[\d.,]+°C/, temp(F));
+      if (lang() === 'fr' || lang() === 'es') return out.replace(/-?[\d.,]+°[CF]/, temp(F));
+      // (Turkish says iOS's "72°", the Amiga's own °C when °C is chosen; HO.say has already made the unit the choice)
+      if (pref()) return out.replace(/-?[\d.,]+°[CF]?/, temp(F));
       return out;
     }
     if (lang() === 'en') { const r = amigaEnReport(G, t); if (r != null) return r; }
