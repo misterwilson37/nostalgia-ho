@@ -1423,11 +1423,15 @@ function renderPanel() {
   // budget info
   const pr = HO.projected(G, p);
   const net = pr.net;
+  // beside the totals, the change since last turn in the version's words (rs.changes, HO.totalChange: "(up $7K)", "(+ 1,234)"), after the figure
+  const chg = (which) => { const c = HO.totalChange(G, p, which); return c ? [' ', el('span', { class: 'chg' }, HO.sumText(G, tl(c[0], c[1])))] : []; };
   panel.append(el('section', { class: 'box info' },
-    row('Savings', panelFig('savings', p.savings, true), p.savings < 0 ? 'neg' : '', 'savings'),
-    row('Income', HO.rules(G).interestShort ? HO.sumText(G, tl('%s (Int: $%s)', panelFig('income', pr.income, true), HO.rules(G).interestShort(pr.interest))) : panelFig('income', pr.income, true), pr.income < 0 ? 'neg' : '', 'income'),
+    // (5.0.5's income view, the Palm's and iOS's draw the interest "(Int: $12K)" on the Savings line, level with the bars' money: FUN_10098650,
+    // FUN_00047f54, -[IncomeLayer updateData]; the changes on the Metal and Income lines)
+    row('Savings', [HO.rules(G).interestShort ? HO.sumText(G, tl('%s (Int: $%s)', panelFig('savings', p.savings, true), HO.rules(G).interestShort(pr.interest))) : panelFig('savings', p.savings, true), ...chg('money')], p.savings < 0 ? 'neg' : '', 'savings'),
+    row('Income', [panelFig('income', pr.income, true), ...chg('income')], pr.income < 0 ? 'neg' : '', 'income'),
     pr.interest && !HO.rules(G).interestShort ? row(pr.interest > 0 ? 'Interest' : 'Interest owed', HO.rules(G).interestRow && !G.opts.lang ? HO.sumText(G, HO.rules(G).interestRow(pr.interest, curSign())) : money(pr.interest), pr.interest < 0 ? 'neg' : '', 'interest') : null,
-    row('Metal', panelFig('metal', p.metal, false), '', 'metal'),
+    row('Metal', [panelFig('metal', p.metal, false), ...chg('metal')], '', 'metal'),
   ));
   // budget bars
   const ents = budgetEntries();

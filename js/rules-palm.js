@@ -363,6 +363,11 @@ const rs = Object.assign(base, {
   // full. The skin uses it where it has the screen (rs.shortMoney: the
   // money and planet panels).
   shortMoney: { fn: moneyPalm, full: { savings: [0, 1e7], income: [-Infinity, 1e8], metal: [0, 1e6], planetMetal: [-Infinity, 1e6], planetIncome: [-Infinity, 1e7] } },
+  // CONFIRMED (FUN_00047f54 @00048268-00048560, the money panel; the keeping and settling at @00031029, @00031309 and @00033428 are 5.0.5's): the
+  // changes of the turn just processed in brackets, tSTL 6003 items 4-7 ("(+ $%s)" ...). The metal's in full by the method +0x68 (flag 0, no
+  // currency); the income's by +0x68 too, or by the compact +0x6c (FUN_0002c664, flag 0) from a magnitude of 10,000 ("(+ $12.03 K)").
+  changes: { read: (G, p) => ({ metal: p.metal, money: 0, income: p.net505 || 0 }),
+    line: (G, which, v) => { const up = v >= 0, a = Math.abs(v); return which === 'metal' ? [up ? '(+ %s)' : '(- %s)', a.toLocaleString('en-US')] : [up ? '(+ $%s)' : '(- $%s)', a > 9999 ? moneyPalm(a, false) : a.toLocaleString('en-US')]; } },
   // the New Game window's Version and Edition menus (engine.js editions)
   family: '5', edition: { version: '5', name: 'Palm OS', platform: 'Palm OS, version 1.0.4', year: 2003 }, skins: ['palm'],
   // the New Game window lists rulesets by year, then version (engine.js ruleOptions)

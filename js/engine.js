@@ -1097,6 +1097,14 @@ function niceShort(n) {
   return m !== 0 ? `${m}M` : k !== 0 ? `${k}K` : String(n);
 }
 const moneyNice = (n, cur = '$') => cur + niceNum(n);
+// - changeNice: the change beside a total in 1.2 to 4.0.5 (DrawIncomeRect: Mac 1.2 @c3f70, 2.0.1, 3.0.1 @154294; WINHO.EXE
+//   FUN_1088_16e1; Windows 4.0.5 FUN_00489ebe): "(up %s)" / "(down %s)" of the metal's change in full (LongToNiceString), "(up $%s)" /
+//   "(down $%s)" of a sum's change in the short form (LongToNiceShortString: "7K"), the sign of the change choosing the string
+//   (nothing below 0 is "up": a change of 0 reads "(up 0)", "(up $0)") and the figure being the magnitude;
+// - change505: 5.0.5's (FUN_10098650), iOS's and Android's (-[IncomeLayer updateData]): "(+ %s)" / "(- %s)" and "(+ $%s)" / "(- $%s)",
+//   the figure in full by FUN_10055050 with no currency (the same "1,234", "12,345K").
+const changeNice = (which, v) => { const up = v >= 0, a = Math.abs(v); return which === 'metal' ? [up ? '(up %s)' : '(down %s)', niceNum(a)] : [up ? '(up $%s)' : '(down $%s)', niceShort(a)]; };
+const change505 = (which, v) => { const up = v >= 0, a = Math.abs(v); return [which === 'metal' ? (up ? '(+ %s)' : '(- %s)') : (up ? '(+ $%s)' : '(- $%s)'), niceNum(a)]; };
 // a distance or an amount of fuel as the originals print it: whole numbers ("%d": 3.0.1's "Dist %d; Time %d",
 // "Fuel: %d/%d", "Speed: %d"; the rulesets' distances and fuel are whole), a tenth only where a ruleset has one
 const plainNum = (x) => String(Math.round(x * 10) / 10);
@@ -1615,6 +1623,9 @@ function turnStep(G, first, last) {
   }
   // a ruleset may handle surrender, alliances news and who is out itself (rs.processSurrenders, ...)
   if (feature(G, 'surrender')) (rs.processSurrenders || processSurrenders)(G);
+  // rs.changes: the totals as they stand when the player's first pass begins (the originals keep them in
+  // the player's record: EndTurn @a02c8 (Mac 2.0.1, 1.2), @a03f4 (3.0.1), 1040:0038 (WINHO.EXE), FUN_10072a10 (5.0.5))
+  if (rs.changes) for (const p of G.players) p.c0 = rs.changes.read(G, p);
   // rs.economyForAll: the turn's first pass runs for out players too (DOS 2.0)
   for (const p of G.players) if ((p.alive || rs.economyForAll) && !p.surrendered) rs.economy(G, p);
   departures(G);
@@ -1630,11 +1641,26 @@ function turnStep(G, first, last) {
   if (last || rs.checkEveryStep) (rs.checkElimination || checkElimination)(G);
   for (const p of G.players) { p.spentThisTurn = []; if (p.chatThisTurn) p.chatThisTurn = 0; recordHistory(G, p); }
   for (const f of G.fleets) f.newThisTurn = false;
+  // ... and the difference when the second pass has done with the player: what the panel shows all through the next turn
+  if (rs.changes) for (const p of G.players) {
+    const a = p.c0, b = rs.changes.read(G, p);
+    delete p.c0;
+    if (a) p.chg = { metal: b.metal - a.metal, money: b.money - a.money, income: b.income - a.income };
+  }
   G.turn++; G.year += rs.yearsPerTurn;
 }
 
 function colonies(G, pid) { return G.stars.filter(s => s.owner === pid); }
 function projected(G, p) { return rules(G).projected(G, p); }
+// The change since last turn beside a total, as the version writes it: [the template, the figure] ("(up $%s)", "7K"),
+// or null where the version has none (rs.changes: js/rules-dos.js, rules-301.js, rules-405.js, rules-original.js).
+// which: 'metal', 'money' (Total Money, 1.2 to 2.0.1) or 'income'. A game that has not had its first turn, and a save from before
+// the figures were kept, show what the originals show then: the record starts at 0, "(up $0)" and "(up 0)".
+function totalChange(G, p, which) {
+  const c = G && rules(G).changes;
+  if (!c || (which === 'money' && !c.money)) return null;
+  return c.line(G, which, (p.chg && p.chg[which]) || 0);
+}
 
 function departures(G) {
   const rs = rules(G);
@@ -2016,7 +2042,7 @@ const API = {
   newGame, endTurn, buildShips, unbuildShip, designLimits, designMin, designCost, shipCostNow, canBuildType, findOrCreateDesign, getDesign,
   fleetCount, fleetDesigns, fleetSpeed, fleetMaxRange, fleetHas, fleetKind, fleetLabel, orderMove, orderPath, cancelMove, canReach, canMerge, queueShips, unqueueShip,
   newFleet, addShipsToStar, mergeFleets, splitFleet, scrapFleet, evacuate, colonies, seenG, seenT, maxPop, planetClass, planetIncome,
-  scrapDesign, liveDesigns, isFriend, isAllied, isBuddy, hasColonyAt, designName, namesFile, namesFileAdd, report, setPact, give, surrender, sendChat, sendCanned, deliverCanned, clearCanned, cannedList, cannedSteps, setArmageddon, hostileAt, know, observe, msg, msgAll, humans, starDist, dist, projected, techSum, score, save, load, borrowLimit, fmt, num, niceNum, num505, money505, niceShort, moneyNice, moneyPalmFull, plainNum, arrivalYear, popNum, currency, euroAfter, sumText, prefs: PREFS,
+  scrapDesign, liveDesigns, isFriend, isAllied, isBuddy, hasColonyAt, designName, namesFile, namesFileAdd, report, setPact, give, surrender, sendChat, sendCanned, deliverCanned, clearCanned, cannedList, cannedSteps, setArmageddon, hostileAt, know, observe, msg, msgAll, humans, starDist, dist, projected, totalChange, techSum, score, save, load, borrowLimit, fmt, num, niceNum, num505, money505, niceShort, moneyNice, changeNice, change505, moneyPalmFull, plainNum, arrivalYear, popNum, currency, euroAfter, sumText, prefs: PREFS,
 };
 if (typeof module !== 'undefined') {
   module.exports = API;

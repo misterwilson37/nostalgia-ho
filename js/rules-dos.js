@@ -2044,6 +2044,13 @@ E.registerRules('dos', Object.assign({}, O, {
   // is part of the figure: sprintf("$%s", nice), engine moneyNice). Not 5.0.5's (rules-original).
   popUnits: 1000, // (what the panels print: the stored number, 500,000 for a Normal home; see rules-original.js popUnits)
   fmtNum: E.niceNum, fmtMoney: E.moneyNice,
+  // CONFIRMED (Mac 1.2 DrawIncomeRect @c3f70, Mac 2.0.1 EndTurn @a02c8-a0552, WINHO.EXE FUN_1088_16e1 and FUN_1040_0038; the strings 384-393):
+  // the budget window beside Reserve Metal, Total Money and Total Income writes how each changed in the turn just processed, "(up $7K)"
+  // or "(down 889)". When a player's first pass begins the record keeps Total Money (+0), the metal (+0x10) and the Total Income shown
+  // (+8, the profitable colonies' income, plus +0x1c, the interest) in +4, +0x18 and +0xc; when the second pass has done with the player
+  // (the money kept within $0 and $999,999,999) each is replaced by the figure now less the kept one. Start: all three 0, so the first
+  // year reads "(up $0)", "(up $0)" and "(up 0)" (CreatePlayer @1030:1299 clears +4, +0x18; +0xc, +0x1c start 0).
+  changes: { money: true, read: (G, p) => ({ metal: p.metal, money: p.savings, income: (p.oInc || 0) + (p.oInterest || 0) }), line: (G, which, v) => E.changeNice(which, v) },
   label: 'DOS 2.0 (1993)',
   // the New Game window's Version and Edition menus (engine.js editions):
   // the Windows 3.1 program, WINHO.EXE, is a 2.0.1 build (its credits,

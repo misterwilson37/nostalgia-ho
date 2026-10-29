@@ -2053,6 +2053,12 @@ E.registerRules('301', Object.assign({}, D, {
   // CONFIRMED (DrawIncomeRect @154294, the program's own "(Int: %s)", LongToNiceShortString of the
   // interest; the manual's picture reads "(Int: 3K)"): the Interest row's text
   interestRow: (n) => '(Int: ' + E.niceShort(n) + ')',
+  // CONFIRMED (DrawIncomeRect @154294, EndTurn @a03f4 and @a0c8e-a0cb0, ComputeIncomeAndPopulation @a3d30; Windows 4.0.5 FUN_00489ebe,
+  // FUN_004320f8, FUN_00437592): beside Reserve Metal and Total Money (the net, player +8) the changes of the turn just processed. The metal
+  // (+0x1c) is kept in +0x24 when the player's first pass begins and the net (+8) in +0xc when ComputeIncomeAndPopulation starts; at the end
+  // of the second pass (the net kept within $0 and $999,999,999) each is replaced by the figure now less the kept one. Ship Savings
+  // have none. Start: both 0 ("(up 0)", "(up $0)" in the first year).
+  changes: { read: (G, p) => ({ metal: p.metal, money: 0, income: p.net301 || 0 }), line: (G, which, v) => E.changeNice(which, v) },
   // CONFIRMED (SetShipTypeAttrs @1325b2 items 25 and 26; the same in 4.0.5's picture: "Savings: 78,987")
   buildSavingsPlain: true,
   arrivalYear: true, // ("%.*s to arrive at %s in %d.": the year, MakeListFleetsStr @1336e8)

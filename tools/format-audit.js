@@ -80,7 +80,7 @@ const F = [];
 const fam = (id, re, o) => F.push(Object.assign({ id, re }, o));
 // the panels' sums and changes
 fam('sum', /^\$S$|^\$ S$/, { arith: 'sprintf("$%s", nice number): the sign inside the figure, "$-7,501" (3.0.1 DrawPlanetRect, DrawIncomeRect; 4.0.5 FUN_0041e140)', place: 'HO.moneyNice (rs.fmtMoney) in the panel rows (classic ui money())', st: 'fixed', check: 'moneyNice' });
-fam('delta', /^\(\+? ?\$? ?S\)$|^\((up|down|\+|-|- |\+ ) ?\$? ?S\)$|^\((up|down) \$?S\)$/, { arith: 'the totals\' changes: LongToNiceShortString (3.0.1 DrawIncomeRect +0xc, "(down $7K)" in the manual\'s picture; WINHO.EXE FUN_1100_0294); the metal change the nice number', place: 'none: the remake keeps no change since last turn', st: 'notshown', why: 'the remake\'s panel shows the income, not the change in the total since last turn' });
+fam('delta', /^\(\+? ?\$? ?S\)$|^\((up|down|\+|-|- |\+ ) ?\$? ?S\)$|^\((up|down) \$?S\)$/, { arith: 'the totals\' changes since last turn: "(up $7K)" / "(down 889)" (1.2 to 4.0.5: LongToNiceShortString of a sum\'s change, LongToNiceString of the metal\'s; the sign of the change picks the string, 0 is "up"), "(+ $1,234)" / "(- 1,234)" (5.0.5, the Palm, iOS: the figure in full, the Palm\'s compact from 10,000); kept in the player\'s record when the first pass begins and settled when the second pass has done (Mac 1.2 and 2.0.1 EndTurn @a02c8 / @a0534, 3.0.1 @a03f4 / @a0c8e, WINHO.EXE FUN_1040_0038, Windows 4.0.5 FUN_004320f8, 5.0.5 FUN_10072a10, Palm @00031029 / @00031309); 1.2 to 2.0.1 change Total Money, Total Income and the metal, 3.0.1 and later the net income and the metal', place: 'rs.changes (rules-dos / 301 / 405 / original / palm), p.chg, HO.totalChange: the classic panel\'s Savings, Income and Metal lines (the Amiga skin\'s totals)', st: 'matched', check: 'changes' });
 fam('interest', /^\((Int:|interest|intérêt) \$?S\)$/, { arith: '3.0.1 the program\'s own "(Int: %s)", Mac 4.0.5 "(Int: $%s)", both LongToNiceShortString of the interest; 5.0.5 FUN_100552e0; 2.0 and Windows 4.0.5 load "(interest $%s)" and the code read draws no such text (unsettled)', place: 'rs.interestRow (3.0.1, Mac 4.0.5), rs.interestShort (5.0.5): the Interest row', st: 'fixed', check: 'interest' });
 fam('moneyword', /^(\$|\$ S \[\]|Need \$|Disp\. Inc\.: \$)$/, { arith: 'a bare sign or label', place: 'the sign HO.currency(G)', st: 'matched' });
 fam('barlabel', /^(S|\$S)$/, { arith: 'the graphs\' and bars\' figures ("$%s", "%sM", "%sP", "%s"): the nice number', place: 'the budget rows (classic ui money()/fmt())', st: 'matched', check: 'nice' });
@@ -116,7 +116,6 @@ fam('hall', /^D\/D\/D|Rank History|Number in Existence|Expires|IQ: D|Page D|Page
 fam('setup', /Computer Players|computer opponent|Computerplayer|Computer players?: D|Humans: D|Players? D|Player #D|Pass \d|Phase \d|Step \d|Schritt|Creating|Anonymous|Current (Game|Player)|Comp D|Page S|Line S|D Player|D Computer|Pass D|Step D|for Player D|pour Joueur D/i, { arith: 'whole numbers in dialogs and progress lines', place: 'New Game and network dialogs (the remake has none of the progress lines)', st: 'notshown', why: 'processing progress lines and the original network lobby are not drawn; New Game shows its own fields' });
 fam('prefs', /Seconds|ticks|Message Delay|days|Dev\/Pro Cost|In Service|Start: S|^D ?\|$|^\(D\)$|^D of D$|^D K$|\{D\}/, { arith: 'preference values and Palm list cells', place: 'Preferences window; the Palm\'s own lists are not drawn', st: 'notshown', why: 'the Palm\'s list and registration lines have no counterpart in the web skin' });
 fam('compact', /^-?S?D?[.,]?D? ?[KM]$|^\(S ?D[.,]?D? ?[KM]\)$|^(S|-)D([.,]D)? ?[KM]$|SD[.,]?D? [KM]/, { arith: 'the Palm\'s compact figure FUN_0002c664: "M,KKK K", "M.xx M", "K.0u K", "K K"', place: 'moneyPalm (rs.shortMoney) in the Palm panels', st: 'matched', check: 'palm' });
-fam('sign', /^(\(\+ S?\$?S\)|\(- S?\$?S\)|\( S?S\)|\(\+ \$ ?S\)|\(- \$ ?S\)|\(\+ S\)|\(- S\))$/, { arith: 'the change brackets (5.0.5 "(+ $%s)"; Palm "(+ %s%s)")', place: 'rs.interestShort / the income row; the Palm\'s own', st: 'unsettled', why: 'where 5.0.5 and the Palm print their (+ x) / (- x) beside the totals was not traced to a remake row' });
 fam('vol', /volcanic|éruption volcanique/i, { arith: 'the panel\'s temperature', place: 'none: nothing in any version sends the volcano report', st: 'notshown', why: 'no code sends it (docs/dos-findings.md, "The reports\' numbers")' });
 fam('text-only-number', /./, { arith: '', place: '', st: 'unsettled', why: 'no family claims it', fallback: true });
 
@@ -176,6 +175,33 @@ const checks = {
       if (HO.popNum(G, home.pop) !== 500000) fail(`${id}: the Normal home reads ${HO.popNum(G, home.pop)}`);
     }
   },
+  changes() {
+    // the strings and figures of each family against the originals' arithmetic (the engine keeps and settles them: tools/test.js digests ignore p.chg)
+    const L = (id, w, v) => HO.RULESETS[id].changes.line(null, w, v).join('|');
+    for (const id of ['12', 'dos', 'mac20']) {
+      const t = [['metal', 1234, '(up %s)|1,234'], ['metal', -889, '(down %s)|889'], ['money', 0, '(up $%s)|0'], ['money', -7499, '(down $%s)|7K'], ['income', 12345678, '(up $%s)|12M'], ['income', 499, '(up $%s)|499'], ['income', 500, '(up $%s)|1K']];
+      for (const [w, v, want] of t) if (L(id, w, v) !== want) fail(`${id} change ${w} ${v}: ${L(id, w, v)}, the original prints ${want}`);
+      if (!HO.RULESETS[id].changes.money) fail(`${id}: Total Money has a change`);
+    }
+    for (const id of ['301', '405', 'mac405']) {
+      for (const [w, v, want] of [['metal', 12345678, '(up %s)|12,345K'], ['metal', -1, '(down %s)|1'], ['income', -7501, '(down $%s)|8K'], ['income', 0, '(up $%s)|0']]) if (L(id, w, v) !== want) fail(`${id} change ${w} ${v}: ${L(id, w, v)}, the original prints ${want}`);
+      if (HO.RULESETS[id].changes.money) fail(`${id}: Ship Savings have no change`);
+    }
+    for (const id of ['original', 'ios', 'android']) {
+      for (const [w, v, want] of [['metal', 12345678, '(+ %s)|12,345K'], ['metal', -889, '(- %s)|889'], ['income', 1234, '(+ $%s)|1,234'], ['income', -1234567, '(- $%s)|1,234,567'], ['income', 0, '(+ $%s)|0']]) if (L(id, w, v) !== want) fail(`${id} change ${w} ${v}: ${L(id, w, v)}, the original prints ${want}`);
+    }
+    for (const [w, v, want] of [['metal', 12345, '(+ %s)|12,345'], ['income', 9999, '(+ $%s)|9,999'], ['income', 12345, '(+ $%s)|12.03 K'], ['income', -1234567, '(- $%s)|1,234 K']]) if (L('palm', w, v) !== want) fail(`palm change ${w} ${v}: ${L('palm', w, v)}, the original prints ${want}`);
+    // the first year reads 0, as every original does (the record starts at 0), and a turn leaves the difference of the totals
+    for (const id of ['12', 'dos', 'mac20', '301', '405', 'mac405', 'original', 'palm', 'ios', 'android']) {
+      const G = HO.newGame({ seed: 5, rules: id, size: 'small', computers: 2, iq: 'average', shape: 'random', humans: [{ name: 'A' }] });
+      const p = HO.humans(G)[0], rs = HO.RULESETS[id];
+      for (const w of ['metal', 'income']) if (!/\|0$/.test(HO.totalChange(G, p, w).join('|'))) fail(`${id}: the first year's ${w} change is ${HO.totalChange(G, p, w).join('|')}`);
+      if (!!HO.totalChange(G, p, 'money') !== !!rs.changes.money) fail(`${id}: money change`);
+      const a = rs.changes.read(G, p); HO.endTurn(G); const b = rs.changes.read(G, p);
+      if (!p.chg || p.chg.metal !== b.metal - a.metal || p.chg.income !== b.income - a.income || (rs.changes.money && p.chg.money !== b.money - a.money)) fail(`${id}: p.chg after a turn is ${JSON.stringify(p.chg)}, the totals went from ${JSON.stringify(a)} to ${JSON.stringify(b)}`);
+      if (p.c0) fail(`${id}: a turn's kept totals are left in the record`);
+    }
+  },
   temp() { /* tools/temp-check.js asserts every version's panel, list and report (node tools/temp-check.js) */ },
   palm() {
     for (const [n, w] of [[0, '$0'], [1234567, '$1,234 K'], [12345, '$12.03 K'], [12345678, '$12.34 M'], [-12345, '($12.03 K)']]) {
@@ -218,6 +244,9 @@ const PLACES = [
   ['js/skins/classic/ui.js', /interestRow/, 'the Interest row hook'],
   ['js/engine.js', /function niceShort/, 'HO.niceShort'],
   ['js/engine.js', /const moneyNice/, 'HO.moneyNice'],
+  ['js/engine.js', /function totalChange/, 'HO.totalChange'],
+  ['js/skins/classic/ui.js', /HO\.totalChange\(G, p, which\)/, 'the panel prints the changes'],
+  ['js/skins/amiga/ui.js', /p\.chg/, 'the Amiga totals print the changes'],
 ];
 for (const [f, re, what] of PLACES) if (!re.test(src(f))) fail(`${f}: ${what} is missing`);
 // no population is written times 1e6 in a panel of the game rulesets, no fuel or distance with toFixed
@@ -307,7 +336,9 @@ Evidence: the decompiles named in each row, and the originals' own pictures in t
 - **5.0.5's population milestone** wrote "1000,000K" (the units times 1,000 twice): the message argument is 1,000,000 ("Your population now exceeds 1,000,000!"). Found by this audit's report check.
 - **4.0.5's buddy report** (string 964, two spaces after each sentence) was shown in English in every other language; the report line matcher accepts one or two spaces after a sentence now, so the official French and Turkish and the remake's German and Spanish lines are shown.
 
-Left as it was, with the reason: the changes since last turn "(up $N)" / "(down $N)" beside the totals (the remake keeps no figure for them); the ranking sentences ("Tied for %dth", "%s in income with $%s.") and the You Won / You Lost year lines of the rankings window (the classic skin has none; the Amiga skin draws its own); where 5.0.5 and the Palm print "(+ $%s)" and "(- $%s)" (not traced to a row); 2.0 Windows, DOS and Mac 2.0.1's Build window (the Mac 2.0.1 shares 1.2's code, not read); the Palm's own list cells.
+- **The totals' changes since last turn** ("(up $7K)", "(down 889)", "(+ $1,234)", "(- 889)") are kept and shown now. Every original keeps three figures in the player's record when his first pass of the turn begins and settles them when the second pass has done with him (the money within $0 and $999,999,999 first): the totals as they stand, then the difference. 1.2, 2.0 (WINHO.EXE, DOS) and Mac 2.0.1 change Total Money (+0), Total Income (+8 plus the interest, +0x1c) and the metal (+0x10), the three lines of the budget window (Mac 1.2 DrawIncomeRect @c3f70, 2.0.1 EndTurn @a02c8-a0552, FUN_1088_16e1, FUN_1040_0038); 3.0.1 and both 4.0.5 change the net (+8, "Total Money") and the metal (EndTurn @a03f4 and @a0c8e, ComputeIncomeAndPopulation @a3d30, Windows FUN_004320f8, FUN_00437592, FUN_00489ebe; Ship Savings show their interest instead); 5.0.5, the Palm, iOS and Android the net (+0x40 / +0x42 / +0x48) and the metal (FUN_10072a10, FUN_10077200, FUN_10098650; the Palm's FUN_00047f54 with the compact figure from 10,000; iOS -[IncomeLayer updateData] 0x100009200). A sum's change is written by LongToNiceShortString in 1.2 to 4.0.5 ("7K", 500,000 reads "1M") and the metal's by LongToNiceString; the sign of the change picks "up" or "down" (zero is "up": a new game reads "(up $0)" and "(up 0)", and so does a save from before the figures were kept). \`rs.changes\`, \`HO.totalChange\`, the player's \`chg\`; the classic panel's Savings, Income and Metal lines and the Amiga skin's totals. French: 1.2F's and 3.0.1F's "(+ $%s)", German: DOS 2.0's "+ $%s", Turkish iOS's. 5.0.5's, the Palm's and iOS's income view draws the interest "(Int: $%s)" on the Savings line (it was on the Income line).
+
+Left as it was, with the reason: the ranking sentences ("Tied for %dth", "%s in income with $%s.") and the You Won / You Lost year lines of the rankings window (the classic skin has none; the Amiga skin draws its own); 2.0 Windows, DOS and Mac 2.0.1's Build window (the Mac 2.0.1 shares 1.2's code, not read); the Palm's own list cells.
 
 ## Every string, version by version
 `;

@@ -192,9 +192,13 @@ and the translation notice (`docs/translations-notes/`) are not done.
       writes the document). Fixed from the originals' code and pictures: a negative sum "$-7,501" (1.2 to 4.0.5) and
       "($7,501)" (Palm), populations as stored (a thousandth of what the panels wrote: "Pop: 10"), the interest
       "(Int: 3K)", whole fuel and distances, the arrival year, the Build window's Savings without "$", 5.0.5's
-      population milestone, 4.0.5's two-space buddy report in the other languages. Left, with reasons in
-      `docs/formats.md`: the totals' changes "(up $N)", the ranking sentences, 5.0.5's and the Palm's "(+ $%s)"
-      brackets, Windows and Mac 2.0.1's Build window and interest, the Amiga windows' arithmetic (re-read).
+      population milestone, 4.0.5's two-space buddy report in the other languages. **The totals' changes done
+      (October 2026):** every original from 1.2 to iOS keeps Total Money / the net, the income and the metal when a
+      player's first pass begins and writes the differences when the second pass is done ("(up $7K)", "(down 889)",
+      "(+ $1,234)"): `rs.changes`, the player's `chg`, `HO.totalChange`, the classic panel and the Amiga totals (they
+      were kept in the browser's storage), each version's strings and arithmetic in `docs/formats.md`. Left, with
+      reasons in `docs/formats.md`: the ranking sentences, Windows and Mac 2.0.1's Build window and interest, the
+      Amiga windows' arithmetic (re-read).
    i. **Japanese**, far down: there was a Japanese port, but no copy can be found; the remake's
       own Japanese translation is not planned soon.
 5. **Done (October 2026).** A home-screen (apple-touch) icon per skin: `assets/icons/<skin>-touch.png`, 180×180

@@ -2448,6 +2448,10 @@ E.registerRules('405', Object.assign({}, D, {
   buildSavingsPlain: true, // (the manual's picture of the Build window reads "Savings: 78,987", "Metal: 89,419")
   arrivalYear: true, // (strings 1351, 1352 "... to arrive in %d.": the year)
   fmtNum: E.niceNum, fmtMoney: E.moneyNice, // (FUN_0042e5c2 then "$%s": "$-1,234")
+  // CONFIRMED (Windows FUN_00489ebe draws, FUN_004320f8 @0043257c and @0043324e and FUN_00437592 @00437728 keep and settle them; Mac 4.0.5 EndTurn
+  // @c042a, @c0c08, @c0c14 and @c3a90: the same code as 3.0.1's): the changes of the turn just processed beside Metal and the net (player +8),
+  // strings 704-707 / STR# 6070.5-8, "(up $%s)" ... as 3.0.1 (js/rules-301.js, `changes`). Start: both 0.
+  changes: { read: (G, p) => ({ metal: p.metal, money: 0, income: p.net301 || 0 }), line: (G, which, v) => E.changeNice(which, v) },
   // no Fix Spending: neither 4.0.5 has the command (no such menu item or string)
   fixSpending: null,
   // the New Game window's Version and Edition menus (engine.js editions)

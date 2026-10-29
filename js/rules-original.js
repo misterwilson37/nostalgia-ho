@@ -2874,6 +2874,11 @@ const TIME_LIMIT_505 = {
 };
 E.registerRules('original', {
   label: 'Original (decompiled from 5.0.5)',
+  // CONFIRMED (FUN_10098650, the income view, draws; FUN_10072a10 keeps the metal in +0x60 when the player's first pass begins and settles
+  // +0x60 and +0x44 after the clamps; FUN_10077200 keeps the net, +0x40, in +0x44 when it works the income out; the Palm FUN_00047f54 and
+  // @00031029/@00031309/@00033428, iOS -[IncomeLayer updateData] 0x100009200 and the keeping at 0x10002df98): beside Metal and the net income
+  // the changes of the turn just processed, STR# 6003.4-7 "(+ $%s)", "(- $%s)", "(+ %s)", "(- %s)". Start: both 0.
+  changes: { read: (G, p) => ({ metal: p.metal, money: 0, income: p.net505 || 0 }), line: (G, which, v) => E.change505(which, v) },
   timeLimit: TIME_LIMIT_505,
   // the New Game window's Version and Edition menus (engine.js editions)
   family: '5', edition: { version: '5.0.5', name: 'Mac', platform: 'Mac OS 8.6, 9 and X', year: 2003 }, skins: ['classic'],

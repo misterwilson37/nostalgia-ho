@@ -600,23 +600,11 @@ function visibleAt(G, ME, sid) { return G.stars[sid].owner === ME || G.fleets.so
 // "(+ $ 22K)": what the last turn's processing changed (ho!, the end of turn,
 // FUN_00119f18 and its caller: before a player's turn is worked out the
 // metal, money and profit are kept, and afterwards the difference is the
-// change shown all through the next turn). The skin keeps those figures in
-// localStorage for each game and player as the turn is played (T.beforeTurn).
+// change shown all through the next turn). The game keeps those figures in the
+// player's record as the turn is processed (rs.changes of the DOS 2.0 rules,
+// HO.totalChange; p.chg), the same three as WINHO.EXE's and Mac 2.0.1's.
 function totalsNow(G, p) { return { m: p.metal, s: p.savings, p: HO.projected(G, p).income }; }
-const totalsKey = (G, p) => 'ho5.amiga.totals.' + (G.opts.seed || 0) + '.' + p.id;
-function beforeTurn(G) {
-  for (const p of G.players) if (p.human) LS.set(totalsKey(G, p), JSON.stringify({ snapAt: G.turn, snap: totalsNow(G, p) }));
-}
-function totalsDelta(G, p) {
-  let rec = null; try { rec = JSON.parse(LS.get(totalsKey(G, p)) || 'null'); } catch (e) { rec = null; }
-  if (!rec) return { m: 0, s: 0, p: 0 };
-  if (rec.turn !== G.turn) {
-    const now = totalsNow(G, p);
-    rec = { turn: G.turn, d: rec.snap && rec.snapAt === G.turn - 1 ? { m: now.m - rec.snap.m, s: now.s - rec.snap.s, p: now.p - rec.snap.p } : { m: 0, s: 0, p: 0 } };
-    LS.set(totalsKey(G, p), JSON.stringify(rec));
-  }
-  return rec.d || { m: 0, s: 0, p: 0 };
-}
+function totalsDelta(G, p) { const c = p.chg || {}; return { m: c.metal || 0, s: c.money || 0, p: c.income || 0 }; }
 function totals() {
   const a = api(), G = a.G, p = a.me(), now = totalsNow(G, p), d = totalsDelta(G, p);
   const line = (k, v, dv, money) => el('div', { class: 'am-trow' }, el('b', { class: 'am-tk' }, k), el('b', { class: 'am-tv' }, v), el('span', { class: 'am-td' }, signed(dv, money)));
@@ -1886,7 +1874,7 @@ window.HOTHEME_OVER = {
   mapPixel: () => [PX.x, PX.y],
   mapFont: () => '16px HoFont11, sans-serif',
   planetPx: (s) => [9, 16, 16, 32][zoomIdx(s)],
-  drawStar, markerAt, allyAt, ownRings: true, zoomTo, beforeTurn, afterDraw: syncMapBars, fitView,
+  drawStar, markerAt, allyAt, ownRings: true, zoomTo, afterDraw: syncMapBars, fitView,
   techBars: 'vertical', barGrid: false,
   panel, afterMsg, window: skinWindow, newGame, menus, lookOptions, page, title,
   menuName: (k) => (WORDS[k] ? W(k) : k), // the menus' names (menus above), in the language

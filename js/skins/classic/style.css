@@ -29,6 +29,7 @@ button { font: inherit; }
 .kv { display: flex; justify-content: space-between; gap: 8px; padding: 1px 0; }
 .kv b { font-weight: bold; font-variant-numeric: tabular-nums; }
 .kv.neg b { color: var(--neg); }
+.kv .chg { font-weight: normal; font-size: 12px; white-space: nowrap; }
 .info .kv:first-child b { font-size: 14px; }
 .barrow { display: grid; grid-template-columns: var(--blabel, 82px) minmax(40px, 1fr) var(--bval, 70px); align-items: center; gap: 6px; margin: 3px 0; }
 .barrow.hl .blabel { font-weight: bold; }

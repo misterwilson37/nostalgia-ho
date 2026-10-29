@@ -9,21 +9,21 @@ Statuses: **matched** (the remake prints it with the original's arithmetic), **f
 | Version | Strings | Matched | Fixed | Not shown | Unsettled |
 |---|--:|--:|--:|--:|--:|
 | 1.2F (Mac, French) | 36 | 36 | 0 | 0 | 0 |
-| 2.0 Windows 3.1 (English) | 30 | 18 | 3 | 9 | 0 |
-| 2.0 DOS (English) | 34 | 22 | 3 | 9 | 0 |
+| 2.0 Windows 3.1 (English) | 30 | 20 | 3 | 7 | 0 |
+| 2.0 DOS (English) | 34 | 24 | 3 | 7 | 0 |
 | 2.0 DOS (German) | 30 | 30 | 0 | 0 | 0 |
-| 2.0.1 Mac (English) | 30 | 18 | 3 | 9 | 0 |
-| 3.0.1 Mac (English) | 57 | 36 | 12 | 9 | 0 |
+| 2.0.1 Mac (English) | 30 | 20 | 3 | 7 | 0 |
+| 3.0.1 Mac (English) | 57 | 38 | 12 | 7 | 0 |
 | 3.0.1F Mac (French) | 42 | 42 | 0 | 0 | 0 |
-| 4.0.5 Windows 95 | 73 | 47 | 14 | 12 | 0 |
-| 4.0.5 Mac | 69 | 47 | 14 | 8 | 0 |
-| 5.0.5 Mac OS X | 52 | 43 | 7 | 2 | 0 |
+| 4.0.5 Windows 95 | 73 | 49 | 14 | 10 | 0 |
+| 4.0.5 Mac | 69 | 49 | 14 | 6 | 0 |
+| 5.0.5 Mac OS X | 52 | 45 | 7 | 0 | 0 |
 | Palm OS 1.0.4 | 74 | 62 | 8 | 4 | 0 |
-| iOS 1.2.9 / Android 1.2.8 (English) | 57 | 47 | 7 | 2 | 1 |
+| iOS 1.2.9 / Android 1.2.8 (English) | 57 | 49 | 7 | 0 | 1 |
 | iOS (French) | 39 | 39 | 0 | 0 | 0 |
 | iOS (Turkish) | 43 | 43 | 0 | 0 | 0 |
-| Amiga 2.0 / 2.1 (English text file) | 45 | 25 | 8 | 8 | 4 |
-| **All** | 711 | 555 | 79 | 72 | 5 |
+| Amiga 2.0 / 2.1 (English text file) | 45 | 27 | 8 | 6 | 4 |
+| **All** | 711 | 573 | 79 | 54 | 5 |
 
 Android 1.2.8 has the iOS game's strings (`en/fr/tr.lproj`); its row is iOS's.
 
@@ -32,7 +32,7 @@ Android 1.2.8 has the iOS game's strings (`en/fr/tr.lproj`); its row is iOS's.
 | Family | Arithmetic in the original | The remake's place | Status | Versions and strings |
 |---|---|---|---|---|
 | sum | sprintf("$%s", nice number): the sign inside the figure, "$-7,501" (3.0.1 DrawPlanetRect, DrawIncomeRect; 4.0.5 FUN_0041e140) | HO.moneyNice (rs.fmtMoney) in the panel rows (classic ui money()) | fixed | 2.0 Windows 3.1 (English) (1); 2.0 DOS (English) (1); 2.0.1 Mac (English) (1); 3.0.1 Mac (English) (3); 4.0.5 Windows 95 (3); 4.0.5 Mac (3); Amiga 2.0 / 2.1 (English text file) (2) |
-| delta | the totals' changes: LongToNiceShortString (3.0.1 DrawIncomeRect +0xc, "(down $7K)" in the manual's picture; WINHO.EXE FUN_1100_0294); the metal change the nice number | none: the remake keeps no change since last turn | notshown: the remake's panel shows the income, not the change in the total since last turn | 2.0 Windows 3.1 (English) (2); 2.0 DOS (English) (2); 2.0.1 Mac (English) (2); 3.0.1 Mac (English) (2); 4.0.5 Windows 95 (2); 4.0.5 Mac (2); 5.0.5 Mac OS X (2); iOS 1.2.9 / Android 1.2.8 (English) (2); Amiga 2.0 / 2.1 (English text file) (2) |
+| delta | the totals' changes since last turn: "(up $7K)" / "(down 889)" (1.2 to 4.0.5: LongToNiceShortString of a sum's change, LongToNiceString of the metal's; the sign of the change picks the string, 0 is "up"), "(+ $1,234)" / "(- 1,234)" (5.0.5, the Palm, iOS: the figure in full, the Palm's compact from 10,000); kept in the player's record when the first pass begins and settled when the second pass has done (Mac 1.2 and 2.0.1 EndTurn @a02c8 / @a0534, 3.0.1 @a03f4 / @a0c8e, WINHO.EXE FUN_1040_0038, Windows 4.0.5 FUN_004320f8, 5.0.5 FUN_10072a10, Palm @00031029 / @00031309); 1.2 to 2.0.1 change Total Money, Total Income and the metal, 3.0.1 and later the net income and the metal | rs.changes (rules-dos / 301 / 405 / original / palm), p.chg, HO.totalChange: the classic panel's Savings, Income and Metal lines (the Amiga skin's totals) | matched | 2.0 Windows 3.1 (English) (2); 2.0 DOS (English) (2); 2.0.1 Mac (English) (2); 3.0.1 Mac (English) (2); 4.0.5 Windows 95 (2); 4.0.5 Mac (2); 5.0.5 Mac OS X (2); iOS 1.2.9 / Android 1.2.8 (English) (2); Amiga 2.0 / 2.1 (English text file) (2) |
 | interest | 3.0.1 the program's own "(Int: %s)", Mac 4.0.5 "(Int: $%s)", both LongToNiceShortString of the interest; 5.0.5 FUN_100552e0; 2.0 and Windows 4.0.5 load "(interest $%s)" and the code read draws no such text (unsettled) | rs.interestRow (3.0.1, Mac 4.0.5), rs.interestShort (5.0.5): the Interest row | fixed | 2.0 Windows 3.1 (English) (1); 2.0 DOS (English) (1); 2.0.1 Mac (English) (1); 3.0.1 Mac (English) (1); 4.0.5 Windows 95 (1); 4.0.5 Mac (1); 5.0.5 Mac OS X (1); iOS 1.2.9 / Android 1.2.8 (English) (1) |
 | temp | tenths of a degree: (T / 10, /T/ mod 10); the unit and formula of each version | HO.panelTemp / HO.tempToken / HO.reportTemp (tools/temp-check.js) | matched | 2.0 Windows 3.1 (English) (2); 2.0 DOS (English) (2); 2.0.1 Mac (English) (2); 3.0.1 Mac (English) (4); 4.0.5 Windows 95 (2); 4.0.5 Mac (3); 5.0.5 Mac OS X (2); Palm OS 1.0.4 (2); iOS 1.2.9 / Android 1.2.8 (English) (2); Amiga 2.0 / 2.1 (English text file) (1) |
 | grav | r = g x 100 / home g truncated, "%d.%2.2dG" | HO.gravText / HO.gravToken (tools/temp-check.js) | matched | 3.0.1 Mac (English) (1); 4.0.5 Windows 95 (5); 4.0.5 Mac (4); 5.0.5 Mac OS X (4); Palm OS 1.0.4 (5); iOS 1.2.9 / Android 1.2.8 (English) (4) |
@@ -75,7 +75,9 @@ Evidence: the decompiles named in each row, and the originals' own pictures in t
 - **5.0.5's population milestone** wrote "1000,000K" (the units times 1,000 twice): the message argument is 1,000,000 ("Your population now exceeds 1,000,000!"). Found by this audit's report check.
 - **4.0.5's buddy report** (string 964, two spaces after each sentence) was shown in English in every other language; the report line matcher accepts one or two spaces after a sentence now, so the official French and Turkish and the remake's German and Spanish lines are shown.
 
-Left as it was, with the reason: the changes since last turn "(up $N)" / "(down $N)" beside the totals (the remake keeps no figure for them); the ranking sentences ("Tied for %dth", "%s in income with $%s.") and the You Won / You Lost year lines of the rankings window (the classic skin has none; the Amiga skin draws its own); where 5.0.5 and the Palm print "(+ $%s)" and "(- $%s)" (not traced to a row); 2.0 Windows, DOS and Mac 2.0.1's Build window (the Mac 2.0.1 shares 1.2's code, not read); the Palm's own list cells.
+- **The totals' changes since last turn** ("(up $7K)", "(down 889)", "(+ $1,234)", "(- 889)") are kept and shown now. Every original keeps three figures in the player's record when his first pass of the turn begins and settles them when the second pass has done with him (the money within $0 and $999,999,999 first): the totals as they stand, then the difference. 1.2, 2.0 (WINHO.EXE, DOS) and Mac 2.0.1 change Total Money (+0), Total Income (+8 plus the interest, +0x1c) and the metal (+0x10), the three lines of the budget window (Mac 1.2 DrawIncomeRect @c3f70, 2.0.1 EndTurn @a02c8-a0552, FUN_1088_16e1, FUN_1040_0038); 3.0.1 and both 4.0.5 change the net (+8, "Total Money") and the metal (EndTurn @a03f4 and @a0c8e, ComputeIncomeAndPopulation @a3d30, Windows FUN_004320f8, FUN_00437592, FUN_00489ebe; Ship Savings show their interest instead); 5.0.5, the Palm, iOS and Android the net (+0x40 / +0x42 / +0x48) and the metal (FUN_10072a10, FUN_10077200, FUN_10098650; the Palm's FUN_00047f54 with the compact figure from 10,000; iOS -[IncomeLayer updateData] 0x100009200). A sum's change is written by LongToNiceShortString in 1.2 to 4.0.5 ("7K", 500,000 reads "1M") and the metal's by LongToNiceString; the sign of the change picks "up" or "down" (zero is "up": a new game reads "(up $0)" and "(up 0)", and so does a save from before the figures were kept). `rs.changes`, `HO.totalChange`, the player's `chg`; the classic panel's Savings, Income and Metal lines and the Amiga skin's totals. French: 1.2F's and 3.0.1F's "(+ $%s)", German: DOS 2.0's "+ $%s", Turkish iOS's. 5.0.5's, the Palm's and iOS's income view draws the interest "(Int: $%s)" on the Savings line (it was on the Income line).
+
+Left as it was, with the reason: the ranking sentences ("Tied for %dth", "%s in income with $%s.") and the You Won / You Lost year lines of the rankings window (the classic skin has none; the Amiga skin draws its own); 2.0 Windows, DOS and Mac 2.0.1's Build window (the Mac 2.0.1 shares 1.2's code, not read); the Palm's own list cells.
 
 ## Every string, version by version
 ### 1.2F (Mac, French)
@@ -134,8 +136,8 @@ Left as it was, with the reason: the changes since last turn "(up $N)" / "(down 
 | Your rankings among the %d remaining players in %d: | 161 | rank | notshown |
 | You won the game in %d. | 162 | rank | notshown |
 | You were eliminated in %d. | 163 | rank | notshown |
-| (up $%s) | 388 | delta | notshown |
-| (down $%s) | 389 | delta | notshown |
+| (up $%s) | 388 | delta | matched |
+| (down $%s) | 389 | delta | matched |
 | $%s | 392 | sum | fixed |
 | (interest $%s) | 393 | interest | fixed |
 | Your Range Technology has reached level %d. | 674 | techlevel | matched |
@@ -169,8 +171,8 @@ Left as it was, with the reason: the changes since last turn "(up $N)" / "(down 
 | Your rankings among the %d remaining players in %d: | 161 | rank | notshown |
 | You won the game in %d. | 162 | rank | notshown |
 | You were eliminated in %d. | 163 | rank | notshown |
-| (up $%Fs) | 388 | delta | notshown |
-| (down $%Fs) | 389 | delta | notshown |
+| (up $%Fs) | 388 | delta | matched |
+| (down $%Fs) | 389 | delta | matched |
 | $%Fs | 392 | sum | fixed |
 | (interest $%Fs) | 393 | interest | fixed |
 | Your Range Technology has reached level %d. | 674 | techlevel | matched |
@@ -247,8 +249,8 @@ Left as it was, with the reason: the changes since last turn "(up $N)" / "(down 
 | You have recovered %s metal from the battle at %s. | STR#1000.52 | metal | matched |
 | %s metal has fallen onto %s from your recent battle. | STR#1000.53 | metal | matched |
 | Oh no! %s people were killed when a heavy meteor shower hit %s. | STR#1000.54 | people | fixed |
-| (up $%s) | STR#1005.5 | delta | notshown |
-| (down $%s) | STR#1005.6 | delta | notshown |
+| (up $%s) | STR#1005.5 | delta | matched |
+| (down $%s) | STR#1005.6 | delta | matched |
 | $%s | STR#1005.9 | sum | fixed |
 | (interest $%s) | STR#1005.10 | interest | fixed |
 | %.*s in income with $%.*s. | STR#1020.7 | rank | notshown |
@@ -293,8 +295,8 @@ Left as it was, with the reason: the changes since last turn "(up $N)" / "(down 
 | You just gave %.*s %s metal. | STR#1000.88 | metal | matched |
 | Your mining consortium has just been able to extract an additional %d metal from every planet you have. | STR#1000.93 | metal | matched |
 | You just received %s metal from someone scrapping a fleet over %s. | STR#1000.115 | metal | matched |
-| (up $%s) | STR#1005.5 | delta | notshown |
-| (down $%s) | STR#1005.6 | delta | notshown |
+| (up $%s) | STR#1005.5 | delta | matched |
+| (down $%s) | STR#1005.6 | delta | matched |
 | $%s | STR#1005.9 | sum | fixed |
 | (interest $%s) | STR#1005.10 | interest | fixed |
 | $%s | STR#1011.10 | sum | fixed |
@@ -380,8 +382,8 @@ Left as it was, with the reason: the changes since last turn "(up $N)" / "(down 
 | Sorry, you turn can't be saved.  Although you are in the year %d, the game has already been updated to %d. | 505 | year | matched |
 | $%s | 656 | sum | fixed |
 | $%s | 658 | sum | fixed |
-| (up $%s) | 704 | delta | notshown |
-| (down $%s) | 705 | delta | notshown |
+| (up $%s) | 704 | delta | matched |
+| (down $%s) | 705 | delta | matched |
 | $%s | 708 | sum | fixed |
 | (interest $%s) | 709 | interest | fixed |
 | %d.%1.1dG %d° | 724 | grav | matched |
@@ -493,8 +495,8 @@ Left as it was, with the reason: the changes since last turn "(up $N)" / "(down 
 | You now have %.*s Miniaturization Technology (%d). | STR#6040.142 | techlevel | matched |
 | %.*s surrenders to you, giving you $%.*s. | STR#6040.143 | gift | matched |
 | %.*s surrenders to you, giving you %.*s metal. | STR#6040.144 | metal | matched |
-| (up $%s) | STR#6070.5 | delta | notshown |
-| (down $%s) | STR#6070.6 | delta | notshown |
+| (up $%s) | STR#6070.5 | delta | matched |
+| (down $%s) | STR#6070.6 | delta | matched |
 | $%s | STR#6070.9 | sum | fixed |
 | (Int: $%s) | STR#6070.10 | interest | fixed |
 | %d.%1.1d, %d° | STR#6070.25 | temp | matched |
@@ -531,8 +533,8 @@ Left as it was, with the reason: the changes since last turn "(up $N)" / "(down 
 | %d.%2.2dG | STR#6003.1 | grav | matched |
 | %d.%1.1d°F | STR#6003.2 | temp | matched |
 | %d.%1.1d°C | STR#6003.3 | temp | matched |
-| (+ $%s) | STR#6003.4 | delta | notshown |
-| (- $%s) | STR#6003.5 | delta | notshown |
+| (+ $%s) | STR#6003.4 | delta | matched |
+| (- $%s) | STR#6003.5 | delta | matched |
 | (Int: $%s) | STR#6003.8 | interest | fixed |
 | %s in %s in %d | STR#6003.9 | battle | matched |
 | %s killed | STR#6003.10 | people | fixed |
@@ -703,8 +705,8 @@ Left as it was, with the reason: the changes since last turn "(up $N)" / "(down 
 | %d.%2.2dG | sprintf Templates.1 | grav | matched |
 | %d.%1.1dºF | sprintf Templates.2 | temp | matched |
 | %d.%1.1dºC | sprintf Templates.3 | temp | matched |
-| (+ $%s) | sprintf Templates.4 | delta | notshown |
-| (- $%s) | sprintf Templates.5 | delta | notshown |
+| (+ $%s) | sprintf Templates.4 | delta | matched |
+| (- $%s) | sprintf Templates.5 | delta | matched |
 | (Int: $%s) | sprintf Templates.8 | interest | fixed |
 | %s in %s in %d | sprintf Templates.9 | battle | matched |
 | %s killed | sprintf Templates.10 | people | fixed |
@@ -819,8 +821,8 @@ Left as it was, with the reason: the changes since last turn "(up $N)" / "(down 
 | String | Id | Family | Status |
 |---|---|---|---|
 | The game has already passed to year %s!\ you cannot save the turn of year %s ! | 43 | year | matched |
-| (+ $ %s) | 90 | delta | notshown |
-| (- $ %s) | 91 | delta | notshown |
+| (+ $ %s) | 90 | delta | matched |
+| (- $ %s) | 91 | delta | matched |
 | $ %s | 94 | sum | fixed |
 | Info date: %lu | 538 | infodate | matched |
 | $ %s | 539 | sum | fixed |
