@@ -4318,7 +4318,7 @@ function openAbout() {
       chk[key] ? el('p', { class: 'note' }, 'Still being checked: this version’s notes aren’t finished yet.') : null,
       L.length ? el('ul', docAttrs(base(list)), ...L.map(t => el('li', null, t))) : none ? el('p', { class: 'sub' }, none) : null);
   };
-  const noteLines = [N.intro, ...base(N.quirks), ...base(N.differs), ...base(N.missing), ...(N.previous !== undefined ? base(N.changes) : []),
+  const noteLines = [N.intro, ...base(N.released), ...base(N.quirks), ...base(N.differs), ...base(N.missing), ...(N.previous !== undefined ? base(N.changes) : []),
     ...(N.deltaTao ? [...N.deltaTao.text, N.deltaTao.source] : [])].filter(Boolean);
   const body = el('div', { class: 'about' },
     el('h3', null, rs.label || id),
@@ -4327,6 +4327,7 @@ function openAbout() {
     patched ? el('p', { class: 'note' }, `This game has the ${pv} patch on: the remake’s own fixes for ${rs.version}’s obvious bugs, not an official release. The Ho menu’s Patch notes say what each one fixes.`) : null,
     inEnglish(null, noteLines),
     N.intro ? el('p', docAttrs([N.intro]), N.intro) : null,
+    part('When it came out', N.released, 'released'),
     rs.hoedown ? el('section', { class: 'vnotes' }, el('h4', null, 'Full Hoedown'),
       el('p', { class: 'sub' }, `${G && HO.hoedown(G) ? 'On in this game' : 'Off in this game'} (New Game and the Ho menu turn it on and off): ${rs.version || rs.id}’s own jokes at their most, and only Delta Tao’s. The game plays the same.`),
       hoedownList(rs)) : null,

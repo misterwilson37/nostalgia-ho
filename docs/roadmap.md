@@ -100,7 +100,15 @@ and the translation notice (`docs/translations-notes/`) are not done.
       languages for the two new fixes. **Not audited yet** (another Claude may do it): the German
       adaptations of the DOS 2.0 text, 1.2F's French adaptations, the interface's other adapted
       rows (`~iOS`, `~1.2F`, `~DOS 2.0`, `~Amiga`); and 3.0.1F has no manual (none on the disc).
-   g. **Version notes:** Android was first released by Ariton in spring 2013 (March 2013,
+   g. **Done (October 2026).** **Version notes:** the About window's new "When it came out" section
+      (`released` in `js/version-notes.js`, in French, German, Spanish and Turkish), each line marked
+      Sure, Reported or Sources disagree: 1.0 born on the Macintosh in 1990 (the 5.0 manual's "Why
+      Chapter", `assets/manuals/5.0.5/why.html`); 3.0 reviewed in Dragon #196 (August 1993); Windows 4.0
+      kept at 1996 with the 1997 report noted; **5.0.5's reported 8 July 2003 contradicted by our own copy**
+      (its program and Info.plist are dated 9 April 2003, its help files 14 February 2003); iOS first released
+      29 March 2012 (`releaseDate`; 1.2.9 itself built in 2017 or later); Android first released by Ariton in
+      spring 2013 (reported), 1.2.8 built 16 February 2015; Amiga 2.0 built 7 June 1994, 2.1 English
+      2.1ge1.05 of 6 June 1995. No label changed. Was: Android was first released by Ariton in spring 2013 (March 2013,
       per Gemini; 1.1 widely listed from 13 April 2013), about a year after the iOS port
       (March 2012). The remake plays 1.2.8 (built February 2015), so its label stays 2015;
       the first-release date goes in the notes as reported, not confirmed. Then list any other

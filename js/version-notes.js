@@ -6,6 +6,8 @@
 // and quirks included; these lists say what that means.
 //
 // - intro: a sentence or two on what the version is;
+// - released: when it first came out, each line marked by how sure it is (Sure, Reported,
+//   Sources disagree), only what we have;
 // - quirks: its known bugs and quirks, which the remake plays as released
 //   (docs/research-log.md, "Settled, worth confirming");
 // - differs: where the remake differs from it (docs/open-questions.md,
@@ -107,6 +109,9 @@ const HOTSEAT = 'Several people play on one computer and take turns. The origina
 root.HOVERSIONS = {
   '12': {
     intro: 'The French edition of the Mac game, a cut-down pre-release of 2.0. Every routine of its program has been read, and every rule comes from its own code.',
+    released: [
+      'Sure: version 1.0 was born on the Macintosh in 1990 (Delta Tao, “The Why Chapter” of the 5.0 manual).',
+    ],
     quirks: [
       { text: 'A colony wiped out by a meteor shower gets a blank report.', fix: 'meteorReport' },
       { text: 'A fleet marked for scrapping while in hyperspace is reported at a stray character, read from before the start of the star list (the letter of an unused home slot’s star number).', fix: 'scrapLimbo' },
@@ -136,6 +141,10 @@ root.HOVERSIONS = {
   },
   dos: {
     intro: 'The game 1.2 was a pre-release of: the Windows 3.1 edition came first, and the DOS edition is a port of it with the same art, sounds and rules. Every routine of the Windows program has been read.',
+    released: [
+      'Sure: the Amiga’s 2.0 was built on 7 June 1994 and exists in German only (the date is in the program’s version string).',
+      'Sure: the Amiga’s 2.1 came later; its English edition is the author’s own build 2.1ge1.05 of 6 June 1995.',
+    ],
     previous: '1.2',
     quirks: [
       { text: 'Organize Ships gives every fleet of the design at the star the average fuel used, but counts at most 11 fleets, so with 12 or more fleets the average comes out too high.', fix: 'orgFuelCount' },
@@ -178,6 +187,9 @@ root.HOVERSIONS = {
   },
   '301': {
     intro: 'A colour and black-and-white Mac version (colour came with 2.0): 2.0’s game with the money model, alliances, Radical tech and novas of the later versions. Every routine of its program has been read, and every rule comes from its own code.',
+    released: [
+      'Reported: 3.0 was reviewed in Dragon magazine #196 (August 1993), so it was out by the summer of 1993. The exact day isn’t known.',
+    ],
     previous: '2.0',
     quirks: [
       { text: 'In 2010, on Spiral and Cluster maps, the computers skip their first turn.', fix: 'skip2010' },
@@ -228,6 +240,9 @@ root.HOVERSIONS = {
   },
   '405': {
     intro: 'The Windows 95 edition, which plays across platforms with the Mac 4.0.5: 3.0.1’s game with Dreadnoughts, Tankers, Biologicals and decoys, Radical tech as a hand of cards, and best buddies. Every routine of its program has been read, and every rule comes from its own code.',
+    released: [
+      'Sources disagree: this remake dates the Windows 4.0 edition 1996, from its own files; some sources say New World Computing released it in 1997. The remake keeps 1996.',
+    ],
     previous: '3.0.1',
     quirks: [
       'Whether stars ever turn red depends on a setting the New Game code never sets; the remake lets them.',
@@ -375,6 +390,9 @@ root.HOVERSIONS = {
   },
   original: {
     intro: 'The last Mac version, for Mac OS 9 and X. Every routine of its program has been read, and every rule comes from its own code.',
+    released: [
+      'Reported, but our files disagree: Delta Tao’s changelog is said to date 5.0.5 to 8 July 2003, yet the remake’s own copy has its program dated 9 April 2003 (its help files 14 February 2003), so 5.0.5 was out by April. The date isn’t settled.',
+    ],
     previous: '4.0.5',
     quirks: [
       { text: 'Interest you can’t pay comes out of Ship Savings, however deep in debt: the global warming the game has a message for never happens.', fix: 'globalWarming' },
@@ -475,6 +493,9 @@ root.HOVERSIONS = {
   },
   ios: {
     intro: 'A port of the Mac 5.0 to the iPhone and iPad by Ariton (first released in 2012; this is version 1.2.9, from 2017 or later): the 5.0 game recompiled, the same rules with the same quirks, keeping the Mac’s 220 stars and 16 player slots. Every rule routine of its program has been read beside its 5.0.5 twin; what is new is the touch interface around it.',
+    released: [
+      'Sure: first released on 29 March 2012 (the release date stored in the app); this version, 1.2.9, was built in 2017 or later.',
+    ],
     previous: '5.0.5 (Mac)',
     quirks: [
       { text: 'Interest you can’t pay comes out of Ship Savings, however deep in debt: the global warming the game has a message for never happens.', fix: 'globalWarming' },
@@ -525,6 +546,10 @@ root.HOVERSIONS = {
   },
   android: {
     intro: 'The iPhone and iPad game recompiled for Android by Ariton (version 1.2.8, built in February 2015, from the Amazon Appstore): the same source as iOS 1.2.9, so it plays exactly like it. Only the platform differs.',
+    released: [
+      'Reported: first released by Ariton in spring 2013 (March 2013 is reported; 1.1 is widely listed from 13 April 2013), which these files don’t confirm.',
+      'Sure: the version played here, 1.2.8, was built on 16 February 2015.',
+    ],
     previous: 'iOS 1.2.9',
     quirks: [],
     differs: [
