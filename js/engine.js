@@ -440,7 +440,8 @@ const sayCache = new WeakMap();
 function sayList(list) {
   const esc = (t) => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   return (list || []).map(([from, to]) => ({ to, len: from.length, from: String(from),
-    re: new RegExp('^' + String(from).split(SAY_ARG).map((x, j) => j % 2 ? (x === '%%' ? '%' : /[du]$/.test(x) ? '(-?[\\d,.]+)' : '([\\s\\S]*?)') : esc(x)).join('') + '$') }))
+    re: new RegExp('^' + String(from).split(SAY_ARG).map((x, j) => j % 2 ? (x === '%%' ? '%' : /[du]$/.test(x) ? '(-?[\\d,.]+)' : '([\\s\\S]*?)') : esc(x).replace(/([.!?:]) +/g, '$1 {1,2}')).join('') + '$') }))
+    // (a sentence's end is one space or two: 4.0.5's buddy report, string 964, has two where the line it says has one)
     .sort((a, b) => b.len - a.len);
 }
 function sayFill(to, args) {
