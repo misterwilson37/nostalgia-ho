@@ -254,9 +254,12 @@ function official301() {
 // than one French in the windows takes the one most of them have (none when
 // they tie); one the French program left in English is not here (the
 // interface's own French stands).
-let WINDOWS301 = null;
-function windows301() {
-  if (WINDOWS301) return WINDOWS301;
+// The pairs of a French program's windows with the English program's of the same numbering: each
+// DITL's static text, buttons, check boxes and radio buttons, each MENU's title and items (a menu whose
+// two programs differ in length is paired by `menuMap`, [[English index, French index], ...] by id),
+// each DLOG's and CNTL's title. A word that stands for more than one French takes the one most of them
+// have (none when they tie); one the French program left in English is not here.
+function windowPairs(E, F, menuMap) {
   const seen = new Map();
   const add = (en, fr) => {
     en = lineOf301(String(en).replace(/\t.*$/, '')); fr = lineOf301(String(fr).replace(/\t.*$/, ''));
@@ -264,14 +267,19 @@ function windows301() {
     if (!seen.has(en)) seen.set(en, new Map());
     seen.get(en).set(fr, (seen.get(en).get(fr) || 0) + 1);
   };
-  if (F301 && E301) {
-    for (const [id, items] of Object.entries(E301.DITL)) {
-      const f = F301.DITL[id];
+  if (F && E) {
+    for (const [id, items] of Object.entries(E.DITL)) {
+      const f = F.DITL[id];
       if (!f || f.length !== items.length) continue;
-      items.forEach((it, i) => { if (['text', 'button', 'check', 'radio'].includes(it[0]) && typeof it[1] === 'string' && typeof f[i][1] === 'string') add(it[1], f[i][1]); });
+      items.forEach((it, i) => { if (f[i][0] === it[0] && ['text', 'button', 'check', 'radio'].includes(it[0]) && typeof it[1] === 'string' && typeof f[i][1] === 'string') add(it[1], f[i][1]); });
     }
-    for (const id of Object.keys(E301.MENU)) if (F301.MENU[id] && F301.MENU[id].length === E301.MENU[id].length) E301.MENU[id].forEach((en, i) => add(en, F301.MENU[id][i]));
-    for (const k of ['DLOG', 'CNTL']) for (const id of Object.keys(E301[k])) if (F301[k][id] != null) add(E301[k][id], F301[k][id]);
+    for (const id of Object.keys(E.MENU)) {
+      const m = F.MENU[id], e = E.MENU[id];
+      if (!m) continue;
+      if (m.length === e.length) e.forEach((en, i) => add(en, m[i]));
+      else if (menuMap && menuMap[id]) for (const [i, j] of menuMap[id]) add(e[i], m[j]);
+    }
+    for (const k of ['DLOG', 'CNTL']) for (const id of Object.keys(E[k])) if (F[k][id] != null) add(E[k][id], F[k][id]);
   }
   const out = [];
   for (const [en, m] of seen) {
@@ -279,7 +287,33 @@ function windows301() {
     if (r.length > 1 && r[0][1] === r[1][1]) continue;
     out.push([en, r[0][0]]);
   }
-  return (WINDOWS301 = out);
+  return out;
+}
+// 3.0.1F's windows' words for the interface (js/ui-lang.js, HOUI.set's words):
+// English 3.0.1's menu items and titles, window titles, buttons, check boxes and labels, each with the
+// French of the same place.
+let WINDOWS301 = null;
+function windows301() { return WINDOWS301 || (WINDOWS301 = windowPairs(E301, F301)); }
+// 1.2F's windows' words, paired with the English Mac 2.0.1's (the same numbering; every window both have
+// has the same items), for 1.2 itself and for 2.0's French (rule 4: the earliest official wording for what
+// the versions share). Three menus differ in length: 2.0.1 added the printing items, Switch Players, Force
+// Turn Update, Auto Play, the polling and battle speed, Compare Players and Send Message to the File,
+// Options and Galaxy menus, which 1.2F's hasn't, so they are paired by the items they share (read off the
+// two menus, docs/translations.md).
+const E20W = HOLANG.mac20En, F12W = FR12 && FR12.DITL ? FR12 : null;
+const MENU12 = { 129: [[0, 0], [1, 1], [2, 2], [3, 3], [4, 4], [5, 5], [6, 6], [7, 7], [9, 8], [13, 9]],
+  131: [[0, 0], [6, 1], [7, 2], [8, 3], [9, 4], [10, 5], [11, 6]],
+  133: [[0, 0], [2, 1], [4, 2], [5, 3], [6, 4], [7, 5], [8, 6]] };
+let WINDOWS12 = null;
+// (the About item says 2.0 in the English Mac 2.0.1 and 1.2 in 1.2F's French: each version keeps its own number)
+function windows12() { return WINDOWS12 || (WINDOWS12 = windowPairs(E20W, F12W, MENU12).map(([en, fr]) => (/\b1\.2\b/.test(fr) ? [en.replace(/\b2\.0\b/g, '1.2'), fr] : [en, fr]))); }
+// 2.0's French windows: 1.2F's, then 3.0.1F's for the English only 3.0.1 has (Mac 2.0's windows that
+// 1.2 hadn't: the same English in 3.0.1, rule 4)
+let WINDOWS20 = null;
+function windows20() {
+  if (WINDOWS20) return WINDOWS20;
+  const o = windows12().map(([en, fr]) => (/\b1\.2\b/.test(fr) ? [en.replace(/\b1\.2\b/g, '2.0'), fr.replace(/\b1\.2\b/g, '2.0')] : [en, fr])), have = new Set(o.map(p => p[0]));
+  return (WINDOWS20 = o.concat(windows301().filter(p => !have.has(p[0]))));
 }
 const F = (id) => { const t = FR12['1000'][id - 672]; if (t == null) throw new Error('1.2F report ' + id + ' missing'); return t.replace(/%\.\*s/g, '%s'); };
 const FR = (n, i) => FR12[String(n)][i].replace(/%\.\*s/g, '%s');
@@ -395,6 +429,9 @@ function french20Own(rs, own) {
       note: 'Une consultation fréquente vous prévient plus vite des mises à jour du tour, mais peut ralentir l\'ordinateur.' }) } : {}),
     exploredList: Object.assign({}, rs.exploredList, R12 ? { title: R12.exploredList.title, go: R12.exploredList.go, noClimate: R12.exploredList.noClimate, own: R12.exploredList.own, free: R12.exploredList.free, enemy: R12.exploredList.enemy } : {}),
     battlePanel: own.battlePanel20(Object.assign({ dots: '…', cols: 'mac', shade: true }, { words: BATTLE_FR })),
+    // 1.2F's menus and windows for what 2.0 shares with 1.2, 3.0.1F's for the rest (rule 4: the earliest
+    // official wording; HO.windowWords, and the title screens of the 2.0 skins)
+    get officialWindows() { return F12W ? windows20() : null; },
     ...(rs.forceEndTurn ? { forceEndTurn: Object.assign({}, rs.forceEndTurn, {
       ask: '%s, %s des %s joueurs n\'ont pas encore fini leur tour.\n\nVoulez-vous vraiment forcer la fin du tour, ou préférez-vous attendre qu\'ils aient fini?' }) } : {}),
     say: sayFr(true),
@@ -420,6 +457,9 @@ for (const rs of [DOS, MAC20]) {
 // 2.0's (docs/12-findings.md, "English").
 if (R12) {
   R12.say = sayFr(false);
+  // its own windows' words (1.2F's menus, windows and buttons) over the interface's French for the same English
+  // (HO.windowWords: a 1.2 game in its own French; the mac12 skin's title screen in French)
+  Object.defineProperty(R12, 'ownWindows', { enumerable: false, configurable: true, get: () => (F12W ? windows12() : null) });
   R12.battlePanel = DOS.battlePanel20({ dots: '…', cols: 'mac', shade: true, words: BATTLE_FR });
   R12.battleLines = { noInfo: FR(1030, 10), destroyed: FR(1030, 11) };
   R12.fixSpending = Object.assign({}, R12.fixSpending, { lines: FIX_FR });

@@ -432,7 +432,7 @@ No hints (3.0.1 had none; its STR# 3100 is iOS's French hints word for word).
 3.0.1F is also French 3.0.1's **windows**: a 3.0.1 game in French puts the menus' items
 and titles, window titles, buttons and labels of the French program over the remake's
 interface words for the same English (`rs.lang.fr.officialWindows`, 261 English-to-French
-pairs from `MENU`, `DITL`, `DLOG` and `CNTL`; `HO.windowWords(G)`, `HOUI.set`'s third argument; since October 2026 also a 4.0.5 game in French, for what it shares with 3.0.1, rule 4, and the title screen of a 3.0.1 or 4.0.5 skin: "Fenêtre" for Window, "Panthéon" for Hall Of Fame, "Zoom avant". A word the French
+pairs from `MENU`, `DITL`, `DLOG` and `CNTL`; `HO.windowWords(G)`, `HOUI.set`'s third argument; since October 2026 also a 4.0.5 game in French, for what it shares with 3.0.1, rule 4, and the title screen of a 3.0.1 or 4.0.5 skin; **2.0 in French and 1.2 in its own French take 1.2F's menus and windows the same way**, 303 and 131 pairs from `HOLANG.mac12Fr` and the English Mac 2.0.1's, 2.0 with 3.0.1F's for the English only 3.0.1 has, "Nouveau", "Fin du Tour", "Planètes explorées…", "Fenêtres"; the 2.0 skins' and mac12's title screens too): "Fenêtre" for Window, "Panthéon" for Hall Of Fame, "Zoom avant". A word the French
 program left in English ("Name", "Density") or translates two ways (Cancel, Annuler and
 Cancel) is not in it: the interface's own French stands. No manual is on the disc.
 

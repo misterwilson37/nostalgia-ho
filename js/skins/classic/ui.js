@@ -4249,11 +4249,14 @@ const gameLang = (g) => (g && ((g.opts && g.opts.lang) || HO.ownLanguage(HO.ownR
 const titleLang = () => UIL.pref.get() || 'en';
 // (a game with the patch on shows the corrected wording of the official French and Turkish: HO.fixed, js/ui-text.js rows' seventh element;
 // 3.0.1 and 4.0.5 in French show 3.0.1F's menus and windows: HO.windowWords; with no game, the
-// title screen of a 3.0.1 or 4.0.5 skin shows them too, its New Game is 3.0.1F's: Jake, October 2026)
-const TITLE_RULES = { mac3: '301', mac3c: '301', mac4: 'mac405', mac4c: 'mac405', w95: '405' };
+// title screen of a 3.0.1 or 4.0.5 skin shows them too, its New Game is 3.0.1F's: Jake, October 2026;
+// 2.0 and 1.2 show 1.2F's, 2.0 with 3.0.1F's for what only 3.0.1 has)
+const TITLE_RULES = { mac3: '301', mac3c: '301', mac4: 'mac405', mac4c: 'mac405', w95: '405', mac2: 'mac20', mac2c: 'mac20', dos: 'dos', mac12: '12' };
 function titleWindows(lang) {
   const id = window.HOSKINS && TITLE_RULES[HOSKINS.current], rs = id && HO.RULESETS[id];
-  return (rs && rs.lang && rs.lang[lang] && rs.lang[lang].officialWindows) || null;
+  if (!rs) return null;
+  if (HO.ownLanguage(rs) === lang) return rs.ownWindows || null;   // (1.2's own French)
+  return (rs.lang && rs.lang[lang] && rs.lang[lang].officialWindows) || null;
 }
 function syncLang() { const l = G ? gameLang(G) : titleLang(); UIL.set(l, !!G && HO.fixed(G, 'translations'), G ? HO.windowWords(G) : titleWindows(l)); }
 // the player chooses a language (the title screen's Language): the whole

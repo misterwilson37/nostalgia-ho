@@ -305,8 +305,10 @@ const langRules = (G) => rules(G);
 // 1.2F's, rs.ownWindows); null otherwise. js/ui-lang.js puts them over
 // the remake's own words for the same English.
 function windowWords(G) {
-  const lang = G && G.opts && G.opts.lang;
-  return lang ? langRules(G).officialWindows || null : null;
+  const lang = G && G.opts && G.opts.lang, rs = G && ownRules(G);
+  if (lang && rs && lang !== ownLanguage(rs)) return langRules(G).officialWindows || null;
+  // the version's own language (1.2F's French: its own windows, rs.ownWindows)
+  return rs && ownLanguage(rs) === 'fr' && (!lang || lang === 'fr') && rs.ownWindows || null;
 }
 function ownRules(G) { return RULESETS[G.rules] || rulesById(G.rules); }
 // name lists by kind: stars, men, women, ships (every class's)
