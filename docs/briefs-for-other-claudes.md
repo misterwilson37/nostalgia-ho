@@ -25,7 +25,10 @@ German button with other words drawn in).
 
 **The rule:** each language shows its own button, unless an original release showed
 another language (then the original's as default, with a patch fix, like the Amiga
-English's `amigaEndTurnEn`). The German DOS 2.0 has its own German button: use it.
+English's `amigaEndTurnEn`). The German DOS 2.0 has its own German button, "Zug Ende /
+Strg+T", now in the repo: `assets/skins/dos/sprites/d5000-de.png` and its pressed state
+`d5001-de.png` (from Jake's German floppy, `tools/extract/dos_de_buttons.py`). Use them as
+the DOS skin's German default, and as the model for the other languages' lettering.
 French follows 1.2F's "Fin Tour" (`assets/skins/mac12/`) where the skin's lettering
 allows. Turkish and Spanish are the remake's own (wording: the iOS Turkish's and the
 remake's Spanish word for End Turn in `js/ui-text.js`).
