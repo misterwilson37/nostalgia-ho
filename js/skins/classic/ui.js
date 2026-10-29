@@ -1618,6 +1618,13 @@ function fleetOrder(list) {
   return list.slice().sort((a, b) => k(a) - k(b) || 0);
 }
 function classNote(gs) { const c = HO.planetClass(G, gs); return c === 'inhospitable' ? ' · never profitable' : c === 'semi' ? ' · barely habitable' : ''; }
+// when a fleet in transit arrives: in the years the versions that wrote it say it so (3.0.1 "to arrive in 2150",
+// 1.2F "Prévision: 2150", 4.0.5; rs.arrivalYear), else in turns, the remake's words (the other versions never said)
+function arrivesText(f, short) {
+  const turns = Math.ceil((f.dist - f.prog) / HO.fleetSpeed(G, f));
+  if (HO.rules(G).arrivalYear) return short ? String(HO.arrivalYear(G, turns)) : `arriving in ${HO.arrivalYear(G, turns)}`;
+  return short ? `${turns} turn(s)` : `arriving in ${turns} turn(s)`;
+}
 function fleetRow(f, inbound) {
   const mine = f.owner === ME;
   const p = G.players[f.owner];
@@ -1630,7 +1637,7 @@ function fleetRow(f, inbound) {
   r.append(pics);
   const parts = Object.keys(f.ships).map(k => { const d = HO.getDesign(G, f.owner, +k); return `${f.ships[k]} ${f.ships[k] === 1 ? d.name : d.name}`; });
   let status = '';
-  if (inbound) status = `arriving in ${Math.ceil((f.dist - f.prog) / HO.fleetSpeed(G, f))} turn(s)`;
+  if (inbound) status = arrivesText(f);
   else if (!mine) status = p.name;
   else if (f.sat) status = 'satellites';
   else status = (f.dest != null ? `→ ${G.stars[f.dest].name}` : 'holding') + ` · fuel ${HO.plainNum(f.fuel)}/${HO.fleetMaxRange(G, f)} · speed ${HO.fleetSpeed(G, f)}`;
@@ -3482,7 +3489,7 @@ function openFleetList() {
   const mine = fleetOrder(G.fleets.filter(f => f.owner === ME));
   const rows = mine.map(f => {
     const where = f.star != null ? G.stars[f.star].name : `${G.stars[f.from].name} → ${G.stars[f.to].name}`;
-    const go = f.dest != null ? G.stars[f.dest].name + (f.path && f.path.length ? ' → …' : '') : f.to != null ? `${Math.ceil((f.dist - f.prog) / HO.fleetSpeed(G, f))} turn(s)` : '';
+    const go = f.dest != null ? G.stars[f.dest].name + (f.path && f.path.length ? ' → …' : '') : f.to != null ? arrivesText(f, true) : '';
     return el('tr', { class: 'click' + (f.scrap301 ? ' scrap' : ''), title: f.scrap301 ? markedLine() : null, onclick: () => { UI.selFleet = f.id; UI.sel = f.star != null ? f.star : f.to; closeModal(); renderPanel(); draw(); } },
       el('td', null, HO.fleetLabel(G, f)), el('td', null, where), el('td', null, f.scrap301 ? 'to be scrapped' : go), el('td', null, f.sat ? '' : `${Math.floor(f.fuel)}/${HO.fleetMaxRange(G, f)}`));
   });

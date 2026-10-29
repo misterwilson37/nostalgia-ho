@@ -339,6 +339,7 @@ function organized12(G, f, merged, nf, orders) {
 
 // 1.2 plays 2.0's turn (js/rules-dos.js), with the differences above
 E.registerRules('12', Object.assign({}, D, {
+  arrivalYear: true, // (InitFleetsList @1123a0: "Prévision: %d" is the year plus Time x 10)
   // the bars' ticks (DrawHBarControl @c091e): ten, 2 pixels high, on the heading strip's rule, following the scale; nothing through the bars
   barGrid: { n: 10, tick: 2, line: false, above: true },
   // the battle window's words are the Mac's (rules-dos battlePanel20: no

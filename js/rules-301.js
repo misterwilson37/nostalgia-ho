@@ -2053,6 +2053,7 @@ E.registerRules('301', Object.assign({}, D, {
   // CONFIRMED (DrawIncomeRect @154294, the program's own "(Int: %s)", LongToNiceShortString of the
   // interest; the manual's picture reads "(Int: 3K)"): the Interest row's text
   interestRow: (n) => '(Int: ' + E.niceShort(n) + ')',
+  arrivalYear: true, // ("%.*s to arrive at %s in %d.": the year, MakeListFleetsStr @1336e8)
   fmtNum: E.niceNum, fmtMoney: E.moneyNice, // (a sum is sprintf("$%s", nice): "$-1,234")
   // the New Game window's Version and Edition menus (engine.js editions)
   family: '3.0', edition: { version: '3.0.1', name: 'Mac', platform: 'Mac', year: 1993 }, skins: ['mac3c', 'mac3'],

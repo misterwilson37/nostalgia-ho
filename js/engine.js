@@ -1058,6 +1058,9 @@ const plainNum = (x) => String(Math.round(x * 10) / 10);
 // a population as the version prints it: the stored number (units: 500,000 for a Normal home, "Pop: 10" for a new colony,
 // rs.popUnits 1,000 per million kept in s.pop); the homages' own rules count whole people (millions x 1e6)
 const popNum = (G, pop) => Math.round(pop * ((G && rules(G).popUnits) || 1e6));
+// the year a fleet arrives, as 3.0.1 says it ("%.*s to arrive at %s in %d.", MakeListFleetsStr @1336e8: the
+// galaxy's year plus Time x 10; 1.2F "Prévision: %d", Windows 4.0.5 strings 1351 and 1352, Mac 4.0.5 STR# 6170.21-22)
+const arrivalYear = (G, turns) => G.year + turns * (rules(G).yearsPerTurn || 10);
 function moneyPalmFull(n, cur = '$') {
   n = Math.round(n);
   const body = Math.abs(n).toLocaleString('en-US');
@@ -1968,7 +1971,7 @@ const API = {
   newGame, endTurn, buildShips, unbuildShip, designLimits, designMin, designCost, shipCostNow, canBuildType, findOrCreateDesign, getDesign,
   fleetCount, fleetDesigns, fleetSpeed, fleetMaxRange, fleetHas, fleetKind, fleetLabel, orderMove, orderPath, cancelMove, canReach, canMerge, queueShips, unqueueShip,
   newFleet, addShipsToStar, mergeFleets, splitFleet, scrapFleet, evacuate, colonies, seenG, seenT, maxPop, planetClass, planetIncome,
-  scrapDesign, liveDesigns, isFriend, isAllied, isBuddy, hasColonyAt, designName, namesFile, namesFileAdd, report, setPact, give, surrender, sendChat, sendCanned, deliverCanned, clearCanned, cannedList, cannedSteps, setArmageddon, hostileAt, know, observe, msg, msgAll, humans, starDist, dist, projected, techSum, score, save, load, borrowLimit, fmt, num, niceNum, num505, money505, niceShort, moneyNice, moneyPalmFull, plainNum, popNum, currency, euroAfter, sumText, prefs: PREFS,
+  scrapDesign, liveDesigns, isFriend, isAllied, isBuddy, hasColonyAt, designName, namesFile, namesFileAdd, report, setPact, give, surrender, sendChat, sendCanned, deliverCanned, clearCanned, cannedList, cannedSteps, setArmageddon, hostileAt, know, observe, msg, msgAll, humans, starDist, dist, projected, techSum, score, save, load, borrowLimit, fmt, num, niceNum, num505, money505, niceShort, moneyNice, moneyPalmFull, plainNum, arrivalYear, popNum, currency, euroAfter, sumText, prefs: PREFS,
 };
 if (typeof module !== 'undefined') {
   module.exports = API;
