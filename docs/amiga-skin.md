@@ -649,3 +649,7 @@ language. The temperature is described under "Temperatures" above. `docs/dos-fin
 Report 600 is filled like the panel and the list: the temperature in tenths T, then F = trunc(T / 10) − 32 and C = trunc(F × 5 ÷ 9)
 with the "tenths" digit of the whole degrees, "%d.%1.1d°C" (English 600 "%ld.%1.1d°C"); the remake's English report now carries T itself and the
 skin writes it so (`amigaSay`), with the patch's real tenths. `docs/dos-findings.md`, "The reports' numbers".
+
+## The explored-stars list's columns (October 2026)
+
+The row function @12393a builds one string: the name padded to 10 characters (`FUN_00123844`, in pixels: the font's width times 10, with 8-pixel and thinner space glyphs), the temperature piece padded to 8, the gravity piece to 9, the metal piece to 9, the whole padded to 40 (or "Kein Klima" in place of the three), then the status. So the columns are 80, 64, 72 and 72 pixels and the status begins at 320; the skin had the gravity 60 wide. `docs/dos-findings.md`, "The explored-stars lists".

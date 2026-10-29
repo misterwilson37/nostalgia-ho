@@ -176,6 +176,15 @@ and the translation notice (`docs/translations-notes/`) are not done.
       version's files but no version sends it. 3.0.1F's report code is not to hand (the comma its report writes, the point its
       window writes, and 1.2's formula: LIKELY). `node tools/temp-check.js` asserts every version and language (the reports of
       games played in the engine, in all three choices, against the table written out in the test from the sources).
+      **The explored-stars lists (October 2026).** The originals draw the temperature and the gravity as separate fields (temperature
+      first); the remake's list for 1.2 and 2.0 joined them with two spaces and showed 3.0.1, 4.0.5 and 5.0.5 in 2.0's order and, for 5.0.5, a
+      table of its own. Read in each version (`docs/dos-findings.md`, "The explored-stars lists": `InitStarsList` and `LDEF 1000`,
+      `FUN_1070_0033`, `MakeOneListedStar`, `FUN_004540a8`, `LExplStarsDataBrowser`, the Amiga's row function @12393a), the list is now: the
+      Mac games and the Windows 4.0.5 five fields in columns of 100, 75, 75, 75 and 75 pixels (the "No Climate Info." field 150 + 35 + 40),
+      the Windows 3.1 and DOS 2.0 one fixed-pitch line padded to the version's columns, 3.0.1 and 4.0.5 with their Sort By menu (Metal,
+      Quality, Gravity, Owner) and their own order, 5.0.5 the Data Browser with the headings Star, Name, Quality, Temp, Gravity, Metal and
+      Info Date, the Amiga's columns of 10, 8, 9 and 9 characters; kept in proportion at a phone's width. Not read: the alignment of a
+      Windows 4.0.5 row, the sorts 4.0.5 and 5.0.5 open with (LIKELY Quality), the owner colour order of the Owner sort.
    i. **Japanese**, far down: there was a Japanese port, but no copy can be found; the remake's
       own Japanese translation is not planned soon.
 5. **Done (October 2026).** A home-screen (apple-touch) icon per skin: `assets/icons/<skin>-touch.png`, 180×180

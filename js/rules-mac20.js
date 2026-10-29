@@ -90,6 +90,8 @@ const FIXES = D.fixes.filter(f => f.id !== 'orgFuelCount' && f.id !== 'attack16'
 
 // Mac 2.0.1 plays 2.0's turn (js/rules-dos.js), with the differences above
 E.registerRules('mac20', Object.assign({}, D, {
+  // Mac 2.0.1's Explored Planets list (InitStarsList @120136): five fields in pixel columns (js/rules-12.js, rules-dos.js exploredList)
+  exploredList: Object.assign({}, D.exploredList, { layout: 'mac' }),
   // the Ships menu's item (STR# 1010.9-10) and the panel's line (DrawSelectedFleetInfo)
   scrapWords: Object.assign({}, D.scrapWords, { fleet: ['Scrap Current Fleet', 'Don’t Scrap Current Fleet'], marked: 'Fleet to be scrapped for metal.' }),
   // report 1016 for a fleet scrapped in hyperspace: "star -1" read big-endian

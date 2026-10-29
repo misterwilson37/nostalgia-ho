@@ -2043,6 +2043,12 @@ const STAR_NAMES = D.starNames.concat(['Hope']);
 
 E.registerRules('301', Object.assign({}, D, {
   label: 'Mac 3.0.1 (1993)',
+  // CONFIRMED (ListExploredStars @140004, InitStarsList @140192, MakeOneListedStar @14073e; DITL/CNTL/MENU 6040): the stars whose
+  // record has a date from 2000 on (explored or seen owned) and that have not gone nova, in the order of their names, then
+  // swap-sorted by the Sort By menu (Metal, Quality, Gravity, Owner), Quality when the window opens; a row is five fields in
+  // pixel columns (100, 75, 75, 75, 75): name, temperature, gravity, metal, Own / Explored / Enemy, or "No Climate Info." over
+  // the middle three. Unlike 1.2's and 2.0's list, with no groups.
+  exploredList: Object.assign({}, D.exploredList, { layout: 'mac', sortBy: ['Metal', 'Quality', 'Gravity', 'Owner'], sortLabel: 'Sort By:', sortDefault: 1, quality: (p, k) => O.starRating(p, k) }),
   // CONFIRMED (LongToNiceString @1206c): 2.0's numbers, "12,345K" from ten million (engine niceNum)
   fmtNum: E.niceNum,
   // the New Game window's Version and Edition menus (engine.js editions)

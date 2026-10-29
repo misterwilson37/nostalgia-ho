@@ -187,6 +187,46 @@ function panelFormats(PG) {
   if (HO.gravText(PG('dos', 'de'), 1.5, 1, false) !== '1.50G') fail('gravity with a point (the Amiga)');
 }
 
+// ---------- the explored-stars list ----------
+const TEMPLIKE = /^-?\d+(?:[.,]\d+)?\s?[°º][CF]$/, GRAVLIKE = /^\d+[.,]\d\dG$/;
+function lists(skin, rules, lang, L) {
+  const tag = `${skin} ${rules} ${lang} list`;
+  if (!L.rows.length) { fail(`${tag}: no rows`); return; }
+  let climate = 0;
+  if (skin === 'amiga') {
+    for (const r of L.rows) { if (r.kids.length !== 5 || !TEMPLIKE.test(r.kids[1]) || !GRAVLIKE.test(r.kids[2])) fail(`${tag}: the Amiga's row is not name, temperature, gravity, metal, status: ${JSON.stringify(r.kids)}`); else climate++; }
+  } else if (L.layout === 'mac') {
+    for (const r of L.rows) {
+      if (r.kids.length !== 5) { fail(`${tag}: a row has ${r.kids.length} fields: ${JSON.stringify(r.kids)}`); continue; }
+      if (TEMPLIKE.test(r.kids[1])) { climate++; if (!GRAVLIKE.test(r.kids[2])) fail(`${tag}: the gravity is not its own field: ${JSON.stringify(r.kids)}`); }
+      else if (r.kids[2] !== '' || r.kids[3] !== '') fail(`${tag}: a star with no climate has more than the one field: ${JSON.stringify(r.kids)}`);
+    }
+  } else if (L.layout === 'text') {
+    const c = skin === 'dos' ? L.cols.dos : L.cols.win;
+    for (const r of L.rows) {
+      const t = r.text;
+      // the fields begin where the padding says: the temperature at the first column, the gravity at the next, the metal at the third, the status at the fourth
+      const m = /^(\S.*?)\s*?(-?\d+(?:[.,]\d)?[°º][CF])\s+(\d+[.,]\d\dG)\s+([\d.,]+)\s+(\S.*)$/.exec(t);
+      if (!m) { if (!/^\S.*\s\S/.test(t)) fail(`${tag}: a row: "${t}"`); continue; }
+      climate++;
+      // each part is padded with spaces to its column and appended: it begins at the column, or straight after the part before if that ran past it
+      const iT = t.indexOf(m[2]), iG = t.indexOf(m[3], iT + m[2].length), iM = t.indexOf(m[4], iG + m[3].length), iS = t.indexOf(m[5], iM + m[4].length);
+      if (m[1].length < c[0] && iT !== c[0]) fail(`${tag}: the temperature begins at ${iT}, not ${c[0]}: "${t}"`);
+      if (iG !== Math.max(c[1], iT + m[2].length)) fail(`${tag}: the gravity begins at ${iG}, not ${Math.max(c[1], iT + m[2].length)}: "${t}"`);
+      if (iM !== Math.max(c[2], iG + m[3].length)) fail(`${tag}: the metal begins at ${iM}, not ${Math.max(c[2], iG + m[3].length)}: "${t}"`);
+      if (iS !== Math.max(c[3], iM + m[4].length)) fail(`${tag}: the status begins at ${iS}, not ${Math.max(c[3], iM + m[4].length)}: "${t}"`);
+    }
+  } else if (L.layout === '505') {
+    if (L.heads.length !== 7) fail(`${tag}: ${L.heads.length} headings: ${JSON.stringify(L.heads)}`);
+    for (const r of L.rows) { if (r.kids.length !== 7 || !TEMPLIKE.test(r.kids[3]) || !GRAVLIKE.test(r.kids[4])) fail(`${tag}: a row is not star, name, quality, temperature, gravity, metal, info date: ${JSON.stringify(r.kids)}`); else climate++; }
+  } else {
+    if (L.heads.length < 5 || L.heads.indexOf(L.heads.find(h => /^Temp|^Isı|^Temp\./.test(h))) > L.heads.indexOf(L.heads.find(h => /Gravit|Schwer|Yer|Gravedad/.test(h)))) fail(`${tag}: the table's headings: ${JSON.stringify(L.heads)}`);
+    for (const r of L.rows) if (r.kids.length) { if (TEMPLIKE.test(r.kids[1]) && GRAVLIKE.test(r.kids[2])) climate++; }
+  }
+  if (!climate) fail(`${tag}: no row with a temperature and a gravity`);
+  if (L.sortBy !== L.sort) fail(`${tag}: the Sort By menu ${L.sort ? 'is' : 'is not'} there`);
+}
+
 // ---------- the page ----------
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 const up = (url) => new Promise(res => { const r = http.get(url, (x) => { x.resume(); res(x.statusCode < 500); }); r.on('error', () => res(false)); r.setTimeout(1500, () => { r.destroy(); res(false); }); });
@@ -227,6 +267,24 @@ async function page() {
         const rep = HO.say(G, `You have explored ${G.stars[me.homeStar].name}. Gravity: 1.00G. Temp: 72.0°F. Metal: 1,000.`);
         return { panel: (panel.match(/[^\n]*[°º][^\n]*/g) || []).join(' | '), grav: (panel.match(/\d+[.,]\d\dG/g) || []).join(' '), rep, deg: A.degF(72) };
       });
+      // the explored-stars list as the version drew it (docs/dos-findings.md, "The explored-stars lists"): the temperature and the gravity
+      // are separate fields, the temperature first, in the version's own columns
+      if (!pref) lists(skin, rules, lang || '', await pg.evaluate(() => {
+        const A = HOAPI, G = A.G, me = A.me();
+        G.stars.slice(0, 16).forEach(s => HO.observe(G, me, s.id));
+        A.openStarList();
+        const L = HO.rules(G).exploredList;
+        const text = (r) => r.textContent.replace(/\u00a0/g, ' ');
+        return { layout: L ? L.layout || 'mac' : 'generic', cols: L && L.cols || null, sortBy: !!(L && L.sortBy), skin: window.HOSKINS ? HOSKINS.current : '',
+          rows: [...document.querySelectorAll('.exrow:not(.exhead), .am-lrw, .ptable tr')].map(r => ({ kids: [...r.children].map(text), text: text(r) })),
+          heads: [...document.querySelectorAll('.exhead .exh, .ptable th')].map(text), sort: !!document.querySelector('.exsort select') };
+      }));
+      await pg.evaluate(() => HOAPI.closeModal());
+      // a version's own Celsius box (Preferences: 5.0.5, the Palm, iOS, Android) speaks in the reports as in the panel
+      if (!pref && HO.RULESETS[rules].prefsWindow && HO.RULESETS[rules].prefsWindow.celsius) {
+        const r = await pg.evaluate(() => { const A = HOAPI; A.Prefs.celsius = true; const t = HO.say(A.G, 'You have explored X. Gravity: 1.00G. Temp: 72.0°F. Metal: 1.'), d = A.degF(72); A.Prefs.celsius = false; return { t, d }; });
+        if (!/[°º]C/.test(r.d) || !r.t.includes(r.d)) fail(`${skin} ${rules} ${lang || ''}: with the version's own Celsius box ticked the panel reads "${r.d}" and the report "${r.t}"`);
+      }
       if (errors.length) fail(`${skin} ${rules} ${pref || 'as the original'}: ${errors.join('; ')}`);
       seen[pref || 'orig'] = got;
       const u = pref;

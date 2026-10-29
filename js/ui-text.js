@@ -1200,6 +1200,13 @@ root.HOUI.add([
 ['Own', 'Contrôlée', 'Eigener', 'Kendi', 'Propia', { fr: '1.2F', de: 'DOS 2.0' }],
 ['Explored', 'Explorée', 'Erforscht', 'Keşfedildi', 'Explorada', { fr: '1.2F', de: 'DOS 2.0' }],
 ['Enemy', 'Ennemie', 'Gegner', 'Düşman', 'Enemiga', { fr: '1.2F', de: 'DOS 2.0', tr: 'iOS' }],
+// 3.0.1's and 4.0.5's Sort By menu (MENU 6040: Metal, Quality, Gravity, Owner; 3.0.1F's "Qualité") and 5.0.5's Explored Stars browser (Star,
+// Name, Quality, Temp, Gravity, Metal, Info Date; the German DOS 2.0's planet window has "Info Datum")
+['Sort By:', 'Trier par :', 'Sortieren nach:', 'Sıralama:', 'Ordenar por:'],
+['Quality', 'Qualité', 'Qualität', 'Kalite', 'Calidad', { fr: '3.0.1F' }],
+['Info Date', 'Date des infos', 'Infodatum', 'Bilgi Tarihi', 'Fecha de los datos', { de: 'DOS 2.0' }],
+['Current', 'Actuel', 'Aktuell', 'Güncel', 'Actual'],
+['Explored Stars', 'Étoiles explorées', 'Erforschte Sterne', 'Keşfedilen Yıldızlar', 'Estrellas exploradas'],
 // ---------- the Send Message windows of 2.0, 3.0.1 and 4.0.5 (rs.cannedChat) ----------
 ['Send Message To Who?', 'Envoyer un message à qui ?', 'An wen senden?', 'Mesaj Kime Gönderilsin?', '¿A quién enviar el mensaje?', { de: 'DOS 2.0' }],
 ['Send Message To Whom?', 'Envoyer un message à qui ?', 'An wen senden?', 'Mesaj Kime Gönderilsin?', '¿A quién enviar el mensaje?', { de: 'DOS 2.0' }],

@@ -2437,6 +2437,11 @@ const TIME_LIMIT_405 = {
 };
 E.registerRules('405', Object.assign({}, D, {
   label: 'Windows 95 4.0.5 (1996)',
+  // CONFIRMED (Windows FUN_004540a8 / FUN_0045470f, the dialog 356 "List of All Explored Stars:" with the Sort By box; Mac ListExploredStars,
+  // InitStarsList @1001a2, MakeOneListedStar; MENU 6040): 3.0.1's list again (js/rules-301.js): Sort By Metal, Quality, Gravity or
+  // Owner over the names, five fields in pixel columns. The sort the window opens with is the Preferences' (Windows +0xc2, Mac +0x8e),
+  // kept from one opening to the next (sortKeep; 3.0.1 sets Quality at every opening): Quality here at first, its default was not found.
+  exploredList: Object.assign({}, D.exploredList, { layout: 'mac', sortBy: ['Metal', 'Quality', 'Gravity', 'Owner'], sortLabel: 'Sort By:', sortDefault: 1, sortKeep: true, quality: (p, k) => O.starRating(p, k) }),
   timeLimit: TIME_LIMIT_405,
   // CONFIRMED (FUN_0042e5c2, used by the report texts FUN_0046ec5a and the
   // windows' text; Mac 4.0.5's "%d,%.3dK" too): "12,345K" from ten million

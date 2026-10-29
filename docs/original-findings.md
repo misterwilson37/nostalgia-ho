@@ -1477,3 +1477,7 @@ gravity (`FUN_100bc5b0`) is `(g × 100) ÷ home g` truncated with 6003.1 "%d.%2.
 `FUN_10078c80` (a human's exploring: message 0x409, or 0x40a for a best buddy's map) stores r = (g × 100) ÷ home g, the star's t and
 your home t; `FUN_1009c240` (the report text) prints r / 100 and r % 100 and `FUN_1009d520(t, home t, buffer, the Celsius box)` for
 "Temp: %s": the panel's function, so a report in °C uses 360 (home's 72.0°F reads 20.0°C), and it follows the Preferences box. `docs/dos-findings.md`, "The reports' numbers".
+
+## The Explored Stars window (CONFIRMED, October 2026)
+
+PPob 145 (640 x 360, "Explored Stars") holds an `LExplStarsDataBrowser` (`FUN_100bba70`-`FUN_100bcd30`, 28 routines): `FUN_100bbbd0` adds seven columns with the headings **Star** (property 0x2717, a custom column that draws the planet's picture, `FUN_100bc5b0`), **Name** (0x2711), **Quality** (0x2712, the rating `FUN_10072100` times 0.5 in "%2.1f"), **Temp** (0x2713, `FUN_1009d520`), **Gravity** (0x2714, "%d.%2.2dG"), **Metal** (0x2715) and **Info Date** (0x2716: the year of your record, or "Current"); the rows are 50 pixels high; `FUN_100bbf50` adds the stars whose record has a date from 2000 on; a heading sorts by its column (the saved property and direction, +0x2c0 and +0x2c4, were not read for their first value). OK is the only button. `docs/dos-findings.md`, "The explored-stars lists".

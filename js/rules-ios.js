@@ -280,6 +280,7 @@ const battlePanelIn = (tr) => E.makeBattlePanel({
 });
 const battlePanelIOS = battlePanelIn(null);
 const rs = Object.assign(base, {
+  exploredList: null, // (iOS had no list of explored stars: the page's own, js/skins/classic/ui.js openStarList)
   label: 'iOS 1.2.9 (2012)',
   barLocked: barLockedIOS, battlePanel: battlePanelIOS, battlePanelIn,
   // the New Game window's Version and Edition menus (engine.js editions)

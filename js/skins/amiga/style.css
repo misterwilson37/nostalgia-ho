@@ -640,7 +640,8 @@ html.amiga .am-lrws { position: absolute; overflow: hidden; }
 html.amiga .am-lrw { height: calc(20 * var(--v)); padding: calc(4 * var(--v)) calc(4 * var(--u)) 0; box-sizing: border-box; white-space: nowrap; overflow: hidden; cursor: pointer; display: flex; }
 html.amiga .am-lrw.sel { background: linear-gradient(var(--am-red) 0 calc(18 * var(--v)), transparent 0); color: #fff; }
 html.amiga .am-lrw > span:nth-child(1) { width: calc(80 * var(--u)); } html.amiga .am-lrw > span:nth-child(2) { width: calc(64 * var(--u)); }
-html.amiga .am-lrw > span:nth-child(3) { width: calc(60 * var(--u)); } html.amiga .am-lrw > span:nth-child(4) { width: calc(72 * var(--u)); }
+/* the star list's row (FUN_0012393a): the name padded to 10 characters of 8 pixels, the temperature to 8, the gravity to 9, the metal to 9, the whole to 40 (the status at 320) */
+html.amiga .am-lrw > span:nth-child(3) { width: calc(72 * var(--u)); } html.amiga .am-lrw > span:nth-child(4) { width: calc(104 * var(--u)); }
 html.amiga .am-listwin .am-prop { position: absolute; }
 html.amiga .am-listwin .am-lrws, html.amiga .am-listwin .am-prop, html.amiga .am-plist2 .am-plrows { pointer-events: auto; z-index: 1; }
 

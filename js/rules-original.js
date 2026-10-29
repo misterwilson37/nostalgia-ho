@@ -2905,7 +2905,13 @@ E.registerRules('original', {
   // computers above Dumb never pay development costs (FUN_10086830, FUN_100852d0)
   paysPrototype: (G, p) => p.human || !p.ai || p.ai.iq < 2,
   canBuild: (G, p, type) => type === 'bio' ? !!p.hasBio : type === 'decoy' ? !!p.hasDecoy : true,
-  borrowLimit, projected, economy, afterMovement, refuel, settle, canColonize, exploreQuality, battle: battle505,
+  // CONFIRMED (LExplStarsDataBrowser, FUN_100bba70-FUN_100bcd30; PPob 145 "Explored Stars"): a Data Browser of the stars you have explored
+  // (record date from 2000 on), with the headings Star (the planet's picture, drawn by FUN_100bc5b0), Name, Quality (the rating
+  // FUN_10072100 x 0.5, "%2.1f"), Temp, Gravity (FUN_1009d520 and "%d.%2.2dG", the panel's), Metal and Info Date (the year of your
+  // record, or Current); a heading sorts by its column; there is no Go To Star, only OK. Which column it opens sorted by, and the
+  // direction, is the Preferences' (+0x2c0, +0x2c4), whose first value was not found: Quality, best first (LIKELY).
+  exploredList: { layout: '505', title: 'Explored Stars', go: '', noClimate: '', own: '', free: '', enemy: '', quality: (p, k) => starRating(p, k) },
+  borrowLimit, projected, economy, afterMovement, refuel, settle, canColonize, exploreQuality, starRating, battle: battle505,
   observe: observeHook, scrapReturn, scrapInSpace, randomEvents, fleetArrives,
 });
 // 5.0.5's own hooks. They are not enumerable, so the rulesets built on this

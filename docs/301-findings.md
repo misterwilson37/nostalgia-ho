@@ -686,3 +686,7 @@ The exploring report (STR# 1000.29 "…Gravity: %d.%2.2dG. Temp: %d.%1.1d°F. Me
 r = `LDIV(g × 100, home g)`, T = t + 720 − home) and printed by `GetReportString` @160b94 with r / 100, r % 100, T ÷ 10 and |T| mod 10:
 "Temp: 72.5°F", the panel's numbers. 3.0.1F's report (1000.29 "%d,%1.1d°C") has a comma where its window (4000.2) has a point; its
 code is not to hand (1.2's formula: LIKELY). `docs/dos-findings.md`, "The reports' numbers".
+
+## The Explored Planets list (CONFIRMED, October 2026)
+
+`ListExploredStars @140004` opens the window (the Sort By menu, MENU 6040 "Metal, Quality, Gravity, Owner", set to 2 = Quality), `InitStarsList @140192` collects the stars whose record has a date from 2000 on (explored, or seen owned) and that have not gone nova, sorts them by name and then by the menu (a jump table of four swap sorts: Metal and Quality best first, Gravity lowest first, Owner by colour), and `MakeOneListedStar @14073e` makes a row of five fields (name 100 pixels, temperature 75, gravity 75, metal 75, Own / Explored / Enemy; "No Climate Info." 150 + 35 + 40 for a star never explored). `docs/dos-findings.md`, "The explored-stars lists".

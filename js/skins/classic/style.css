@@ -172,6 +172,28 @@ h3.scaleflip { cursor: pointer; }
 #routebar { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; align-items: center; padding: 6px 10px; z-index: 5; }
 
 .ptable.list td, .ptable.list th { padding: 3px 6px; text-align: left; }
+/* the explored-stars list as each original drew it (ui.js openExploredList): 'mac' five columns of 100, 75, 75, 75 and 75 pixels (kept in
+   proportion at a phone's width), 'text' a fixed-pitch line, '505' the Data Browser with headings */
+.exlist { border: 1px solid var(--edge); max-height: 52vh; max-height: 52dvh; overflow: auto; font-size: 13px; line-height: 1.25; }
+.exlist .exrow { cursor: pointer; min-height: 20px; }
+.exlist .exrow.sel, .exlist .exrow:focus-visible { background: Highlight; color: HighlightText; outline: none; }
+.exmac .exrow { display: grid; grid-template-columns: 100fr 75fr 75fr 75fr 75fr; align-items: center; }
+.exmac .exrow.noclimate { grid-template-columns: 100fr 150fr 35fr 40fr 75fr; }
+.exmac .exrow > span { padding: 1px 3px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.extext .exrow { padding: 1px 4px; font-family: ui-monospace, Menlo, Consolas, "Courier New", monospace; font-size: 12px; white-space: pre; }
+.extext .exline { white-space: pre; }
+.ex505 .exrow { display: grid; grid-template-columns: 60fr 100fr 60fr 80fr 65fr 65fr 75fr; align-items: center; min-height: 44px; }
+.ex505 .exrow.exhead { position: sticky; top: 0; min-height: 22px; background: var(--plat, Canvas); border-bottom: 1px solid var(--edge); z-index: 1; cursor: default; }
+.ex505 .exrow > .exc { padding: 1px 3px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ex505 .exrow:not(.exhead):nth-child(odd) { background: rgba(128,128,128,.12); }
+.ex505 .exh { font-weight: bold; padding: 2px 3px; display: flex; gap: 3px; justify-content: space-between; align-items: center; cursor: pointer; white-space: nowrap; overflow: hidden; min-width: 0; border-right: 1px solid var(--edge); }
+.ex505 .exh:last-child { border-right: 0; }
+.ex505 .exh > span:first-child { overflow: hidden; text-overflow: ellipsis; }
+.ex505 .exh:not([tabindex]) { cursor: default; color: var(--sub); }
+.ex505 .exh .arrow { font-size: 9px; }
+.ex505 .exstar { display: block; width: 40px; height: 40px; image-rendering: pixelated; }
+.exsort { display: flex; align-items: center; gap: 6px; margin-right: auto; }
+@media (max-width: 480px) { .extext .exrow { font-size: 10px; } .exlist { font-size: 12px; } .ex505 .exrow { grid-template-columns: 34px 1.5fr .9fr 1.2fr 1fr 1.1fr 1.1fr; min-height: 38px; } .ex505 .exstar { width: 32px; height: 32px; } .ex505 .exh { font-size: 10px; padding: 2px 2px; gap: 1px; } .ex505 .exh .arrow { display: none; } .ex505 .exrow > .exc { padding: 1px 2px; } }
 .ptable tr.click { cursor: pointer; }
 .ptable tr.click:hover { background: #fff7d6; }
 .prefs { display: grid; gap: 8px; }

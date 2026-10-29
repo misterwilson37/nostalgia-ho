@@ -728,6 +728,32 @@ the programs lose) and `HO.say` writes the temperature the way the version and l
 released, the player's choice or the version's own Celsius box, the decimal sign, the slip). The reports follow the same unit as
 the panel and the lists (`HO.tempUnit`).
 
+## The explored-stars lists: columns, order and headings in every version (October 2026)
+
+The page shows these (`openExploredList` in `js/skins/classic/ui.js`, every skin built on it; the Amiga's own window is `openStarListAm`;
+`node tools/temp-check.js` asserts the fields, their order and the columns for every skin and version). Each original draws a row as **separate fields**: name, temperature, gravity, metal, then Own / Explored /
+Enemy. None writes the temperature and gravity as one text with two spaces between (the remake did). Temperature first, then gravity, in
+every version.
+
+| Version | Where read | Row | Headings | Order |
+|---|---|---|---|---|
+| 1.2 (Mac) | `InitStarsList @120136` fills five fields, `LDEF 1000` (426 bytes: `StringWidth` against the field's width, `DrawString` or `TruncString`, at x = the fields' widths so far) draws them | name 100 px, temperature 75, gravity 75, metal 75, status 75; left-aligned, cut at the column; "No Climate Info." (STR# 1020) is one field 150 px wide, then two empty ones of 35 and 40, so the status is at 325 px either way | none: the window's line "Répertoire des planètes explorées:" (DITL 6040) | nobody's stars by quality, other players' by name and then quality, yours by name (swap sorts) |
+| 2.0.1 (Mac) | the same code (`ListExploredStars`, `InitStarsList @120136`) and `LDEF 1000` | as 1.2 | none | as 1.2 |
+| 2.0 Windows 3.1 | `FUN_1070_0033` @1070:0033: a list box in the system fixed font, one text line a row: name padded to 8 letters, the temperature to 18, the gravity to 28, the metal to 37 (`FUN_1070_0000`: spaces until `LSTRLEN` reaches the number), then the status; "No Climate Info." in place of the three | one fixed-pitch line (`layout: 'text'`) | none ("List of All Explored Stars:", dialog 17) | as 2.0's `FUN_1020_1a2d` sorts |
+| 2.0 DOS | the same function in `DOSHO.EXE` (the DOS font, `FUN_adba_0000` pads) with 11, 23, 32 and 42 | one fixed-pitch line | none | as Windows |
+| 3.0.1 (Mac) | `ListExploredStars @140004`, `InitStarsList @140192`, `MakeOneListedStar @14073e` (the same five fields: 100, 75, 75, 75, 75, "No Climate Info." 150 + 35 + 40) | as 1.2 | none; **Sort By** menu (MENU 6040: Metal, Quality, Gravity, Owner), set to Quality (2) when the window opens | the stars with a record from 2000 on, explored or seen owned, not gone nova, by name (a swap sort on `strcmp`), then swap-sorted by the menu: Metal and Quality best first, Gravity lowest first, Owner by the owner's colour (unowned last); a star not explored last |
+| 4.0.5 Windows | `FUN_004540a8` (the filter, the name sort and the four sorts of the Sort By box, `+0xc2`), `FUN_0045470f` (the row record: the same five fields), dialog 356 "List of All Explored Stars:" with "Sort By:" and "Go To Star" | as 3.0.1 (the alignment of a Windows row was not read: the Mac's, LIKELY) | none | as 3.0.1; the sort the window opens with is the Preferences' (`+0xc2`), whose first value was not found: Quality (3.0.1's) |
+| 4.0.5 Mac | `ListExploredStars`, `InitStarsList @1001a2`, `MakeOneListedStar` (`docs/405-windows.md`: DITL 6040) | as 3.0.1 | none; Sort By (`+0x8e` of the preferences) | as 3.0.1 |
+| 5.0.5 | `LExplStarsDataBrowser` (`FUN_100bba70`-`FUN_100bcd30`): `FUN_100bbbd0` adds the columns, `FUN_100bc070` the cells, `FUN_100bc5b0` draws the picture; `FUN_100bbf50` adds the stars with a record from 2000 on; PPob 145, 640 x 360 | Star (the planet's picture), Name, Quality, Temp, Gravity, Metal, Info Date: widths 60, 50-100, 60, 60-80, 60-65, 60-65 and 50-75, rows 50 px high; Quality is the rating `FUN_10072100` times 0.5 in "%2.1f" (-0.5 for none), Temp is `FUN_1009d520` (the panel's, with the Celsius box), Gravity "%d.%2.2dG", Metal `FUN_100552e0`'s thousands, Info Date the year of your record or "Current" | **Star, Name, Quality, Temp, Gravity, Metal, Info Date** (strings in the program's data, read), a click sorts by the column | the saved sort (`+0x2c0`, `+0x2c4`), first value not found: Quality, best first (LIKELY); OK only, no Go To Star |
+| Amiga 2.1 | the row function @12393a (`FUN_001239ac`, `FUN_00123294`): one string, name padded to 10 characters, the temperature piece to 8, the gravity to 9, the metal to 9 (`FUN_00123844`, `FUN_001238ae`: in pixels, spaces of 8 and thinner ones), the whole to 40, then the status | name 80 px, temperature 64, gravity 72, metal 72, status at 320 | none | nobody's, other players', yours |
+| Palm, iOS, Android | no list of explored stars was found in the program (docs/palm-findings.md, ios-findings.md, coverage-*.md name none) | the remake's own table (the Galaxy menu's "List explored stars…"), temperature before gravity as in every original | the remake's own | by name |
+
+Changed in the remake: 1.2, 2.0 (every platform), 3.0.1 and 4.0.5 show the five fields in the pixel columns (Mac, Windows 4.0.5) or the fixed-pitch
+line (2.0 Windows, DOS: `rs.exploredList.cols`); 3.0.1 and 4.0.5 have the Sort By menu and their own order (they had 2.0's list before);
+5.0.5 has the headed table (it had the remake's six-column table with Population and Owner, which no original has); the Amiga's gravity column is
+72 px wide (60 before). Not changed: the Windows 4.0.5 row's alignment, the sort 4.0.5 and 5.0.5 open with, the owner's colour order (the
+remake's players have no colour number: the order of their numbers stands in), which the originals' lists took from the player table.
+
 ## Changes to the shared code
 
 `js/engine.js` has these optional hooks; the other rulesets' test games are byte for byte

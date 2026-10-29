@@ -665,3 +665,7 @@ comma in French, German and Spanish, a point in English and Turkish, which 1.2 n
 The exploring report (STR# 1000.32 in 1.2F) is filled by `ExploreStar @a3b4c`: the message holds r = `LDIV(g × 100, home g)` and
 C = `LDIV((t + 720 − home − 324) × 5, 9)` in tenths, and `GetReportString` prints C ÷ 10 and |C| mod 10 with "%d,%1.1d°C", the
 panel's own arithmetic (`HO.reportTemp`, a comma in French and German, a point in English and Turkish). `docs/dos-findings.md`, "The reports' numbers".
+
+## The Explored Planets list (CONFIRMED, October 2026)
+
+`InitStarsList @120136` builds a row of five fields (name 100 pixels, temperature 75, gravity 75, metal 75, status 75; "No Climate Info." 150 + 35 + 40 for a star with no climate: STR# 1020) in the cell data of `LDEF 1000` (426 bytes: each field is drawn left-aligned at the sum of the widths before it, cut with `TruncString` when wider than its column), the temperature from STR# 4000.2 and the gravity from 4000.3. The order is 2.0's (three groups). Mac 2.0.1 is the same code. `docs/dos-findings.md`, "The explored-stars lists".

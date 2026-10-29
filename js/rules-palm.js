@@ -329,6 +329,7 @@ function pileMove(G, f, did, to) {
   return to;
 }
 const rs = Object.assign(base, {
+  exploredList: null, // (the Palm had no list of explored stars: the page's own, js/skins/classic/ui.js openStarList)
   label: 'Palm OS 5 (2003)',
   // the bar charts: 5.0.5's log scale (FUN_00049e32 builds the table with
   // 77.0, 32.11, 2.302 and 10.0 in the Palm's soft float; FUN_00049db4 a

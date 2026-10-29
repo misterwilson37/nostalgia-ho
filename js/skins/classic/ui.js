@@ -3544,44 +3544,110 @@ function openBattleList() {
 function openStarList() {
   if (skinWindow('stars')) return;
   if (HO.rules(G).exploredList) return openExploredList();
+  // (the Palm, iOS and Android had no such list: the remake's own, in the order of every original's rows, temperature before gravity)
   const p = me();
   const ks = G.stars.map(s => ({ s, k: HO.know(G, p, s.id) })).filter(o => o.k.explored);
   const rows = ks.map(({ s, k }) => {
     const src = s.owner === ME ? s : k;
     const owner = s.owner === ME ? 'You' : k.owner >= 0 && G.players[k.owner] ? G.players[k.owner].name : '';
-    return el('tr', { class: 'click', onclick: () => { UI.sel = s.id; closeModal(); renderPanel(); draw(); } }, el('td', null, s.name), el('td', null, gravF(src.g, p.homeG)),
-      el('td', null, degF(72 + (src.t - p.homeT))), el('td', null, fmt(src.metal)), el('td', null, owner), el('td', null, src.pop ? fmt(src.pop * 1e6) : ''));
+    return el('tr', { class: 'click', onclick: () => { UI.sel = s.id; closeModal(); renderPanel(); draw(); } }, el('td', null, s.name), el('td', null, degF(72 + (src.t - p.homeT))),
+      el('td', null, gravF(src.g, p.homeG)), el('td', null, fmt(src.metal)), el('td', null, owner), el('td', null, src.pop ? fmt(src.pop * 1e6) : ''));
   });
-  modal('Explored stars', table(['Star', 'Gravity', 'Temp', 'Metal', 'Owner', 'Population'], rows), { cls: 'mid' });
+  modal('Explored stars', table(['Star', 'Temp', 'Gravity', 'Metal', 'Owner', 'Population'], rows), { cls: 'mid' });
 }
-// The version's own Explored Planets window (rs.exploredList, 1.2 and 2.0:
-// ListExploredStars, LISTSTARSDLGPROC): the stars your record has explored
-// or seen owned, nobody's by quality, then other players' by name and then
-// by quality, then yours by name (the original's swap sorts); each row the
-// name, the climate, the metal and Own, Explored or Enemy; Go To Star
+// The version's own Explored Planets window (rs.exploredList; 1.2, 2.0, 3.0.1, 4.0.5: ListExploredStars, LISTSTARSDLGPROC; 5.0.5's
+// LExplStarsDataBrowser). The stars your record has explored or seen owned; the order is the version's (below); a row is as the
+// version drew it (docs/dos-findings.md, "The explored-stars lists"):
+// - layout 'mac' (the Mac games, and the Windows 4.0.5 whose rows are the same records): five fields in columns of pixels, 100, 75, 75,
+//   75 and 75, each text left-aligned and cut at its column: name, temperature, gravity, metal, Own / Explored / Enemy; a star with no
+//   climate has "No Climate Info." over the middle three (150 + 35 + 40 wide); no headings, the window's line says what the list is;
+// - layout 'text' (the Windows 3.1 and DOS 2.0): a line of text in a fixed-pitch font, each part padded with spaces to a column
+//   (rs.exploredList.cols: where the temperature, gravity, metal and Own / Explored / Enemy begin), no headings;
+// - layout '505': a Data Browser with headings, Star (the picture), Name, Quality, Temp, Gravity, Metal and Info Date, which a click on
+//   a heading sorts by.
+// Order: 1.2 and 2.0 (rs.exploredList.quality only): the stars nobody owns by quality, the other players' by name and then quality, yours
+// by name (the originals' swap sorts); 3.0.1 and 4.0.5 (sortBy): all by name, then swap-sorted by the Sort By menu (Metal, Quality, Gravity
+// or Owner), Quality when the window opens.
+let exploredSort = null; // (the Sort By choice, kept while the page is open)
+let exploredSort505 = { col: 'quality', dir: -1 };
 function openExploredList() {
-  const L = HO.rules(G).exploredList, p = me();
-  const rec = (s) => s.owner === ME ? { explored: true, owner: ME, g: s.g, t: s.t, metal: s.metal } : HO.know(G, p, s.id);
+  const R = HO.rules(G), L = R.exploredList, p = me();
+  const rec = (s) => s.owner === ME ? { explored: true, owner: ME, g: s.g, t: s.t, metal: s.metal, seen: G.turn } : HO.know(G, p, s.id);
   const seen = G.stars.filter(s => { const k = rec(s); return k.explored || k.owner >= 0; });
   const ownerOf = (s) => rec(s).owner;
-  const free = seen.filter(s => ownerOf(s) < 0), other = seen.filter(s => ownerOf(s) >= 0 && ownerOf(s) !== ME), mine = seen.filter(s => ownerOf(s) === ME);
   const q = (s) => { const k = rec(s); return k.explored ? L.quality(p, k) : 0; };
   // the original's sort: for each place, swap in any later one that should go first
   const swapSort = (a, before) => { for (let i = 0; i < a.length - 1; i++) for (let j = i + 1; j < a.length; j++) if (before(a[j], a[i])) { const t = a[i]; a[i] = a[j]; a[j] = t; } return a; };
   const byQ = (x, y) => q(x) > q(y), byName = (x, y) => x.name < y.name;
-  const list = swapSort(free, byQ).concat(swapSort(swapSort(other, byName), byQ), swapSort(mine, byName));
+  let mode = L.sortKeep && exploredSort != null && L.sortBy && exploredSort < L.sortBy.length ? exploredSort : L.sortDefault; // (3.0.1 sets Quality at each opening; 4.0.5 keeps the choice)
+  const order = () => {
+    if (!L.sortBy) {
+      const free = seen.filter(s => ownerOf(s) < 0), other = seen.filter(s => ownerOf(s) >= 0 && ownerOf(s) !== ME), mine = seen.filter(s => ownerOf(s) === ME);
+      return swapSort(free, byQ).concat(swapSort(swapSort(other, byName), byQ), swapSort(mine, byName));
+    }
+    // (3.0.1's InitStarsList @140192, 4.0.5's FUN_004540a8: not the stars gone nova; by name, then by the menu's choice, the unexplored last)
+    const a = swapSort(seen.filter(s => !s.nova), byName), ex = (s) => !!rec(s).explored;
+    const val = [(s) => ex(s) ? Math.max(0, rec(s).metal || 0) : -1, (s) => ex(s) ? q(s) : -1, (s) => ex(s) ? Math.round(rec(s).g * 100) : 0x7fff, (s) => ownerOf(s) < 0 ? 0x15 : ownerOf(s)][mode];
+    return swapSort(a, mode === 2 || mode === 3 ? (x, y) => val(x) < val(y) : (x, y) => val(x) > val(y));
+  };
+  let list = order();
   let pick = null;
+  const climate = (s) => { const k = rec(s); return k.explored ? { t: degF(72 + (k.t - p.homeT)), g: gravF(k.g, p.homeG), m: fmt(Math.max(0, k.metal || 0)) } : null; };
+  const status = (s) => { const o = ownerOf(s); return o === ME ? L.own : o < 0 ? L.free : L.enemy; };
+  const rowsBox = el('div', { class: 'exlist ex' + (L.layout || 'mac'), role: 'listbox', 'aria-label': L.title.replace(/:$/, '') });
+  const dosSkin = window.HOSKINS && HOSKINS.current === 'dos';
+  const cols = L.layout === 'text' && L.cols ? (dosSkin ? L.cols.dos : L.cols.win) : null;
+  const padTo = (t, n) => t + ' '.repeat(Math.max(0, n - t.length));
+  const info = (s) => { // 5.0.5's Info Date: the year of your information, or Current
+    const k = rec(s), yr = G.year - 10 * Math.max(0, G.turn - (k.seen != null ? k.seen : G.turn));
+    return k.seen == null || k.seen >= G.turn ? 'Current' : String(yr);
+  };
   const go = el('button', { disabled: true, onclick: () => { if (pick == null) return; closeModal(); UI.sel = pick; centerOn(pick); renderPanel(); draw(); } }, L.go);
-  const rows = list.map(s => {
-    const k = rec(s), o = ownerOf(s);
-    const climate = k.explored ? `${degF(72 + (k.t - p.homeT))}  ${gravF(k.g, p.homeG)}` : L.noClimate;
-    const tr = el('tr', { class: 'click', tabindex: 0, onclick: () => { pick = s.id; go.disabled = false; for (const r of tr.parentNode.children) r.classList.toggle('sel', r === tr); },
-      ondblclick: () => { pick = s.id; go.click(); } },
-      el('td', null, s.name), el('td', null, climate), el('td', null, k.explored ? fmt(Math.max(0, k.metal || 0)) : ''), el('td', null, o === ME ? L.own : o < 0 ? L.free : L.enemy));
-    return tr;
-  });
-  modal(L.title.replace(/:$/, ''), el('div', null, el('p', { class: 'sub' }, L.title), el('table', { class: 'ptable list' }, el('tbody', null, ...rows)),
-    el('div', { class: 'btns right' }, go, el('button', { onclick: closeModal }, 'OK'))), { cls: 'mid' });
+  const select = (s, tr) => { pick = s.id; go.disabled = false; for (const r of rowsBox.querySelectorAll('.exrow')) r.classList.toggle('sel', r === tr); };
+  const draw505 = () => {
+    const C = { quality: (s) => q(s), temp: (s) => (rec(s).explored ? rec(s).t - p.homeT : 1e9), gravity: (s) => (rec(s).explored ? rec(s).g : 1e9), metal: (s) => (rec(s).explored ? rec(s).metal || 0 : -1),
+      name: (s) => s.name, info: (s) => (rec(s).seen != null ? rec(s).seen : G.turn) };
+    const key = C[exploredSort505.col] || C.quality;
+    // (FUN_100bbf50 adds only the stars with a record from 2000 on)
+    list = seen.filter(s => rec(s).explored).sort((x, y) => { const a = key(x), b = key(y); return (a < b ? -1 : a > b ? 1 : 0) * exploredSort505.dir || (x.name < y.name ? -1 : 1); });
+    rowsBox.replaceChildren();
+    const heads = [['star', 'Star'], ['name', 'Name'], ['quality', 'Quality'], ['temp', 'Temp'], ['gravity', 'Gravity'], ['metal', 'Metal'], ['info', 'Info Date']];
+    const sortBy = (id) => { exploredSort505 = exploredSort505.col === id ? { col: id, dir: -exploredSort505.dir } : { col: id, dir: id === 'name' || id === 'temp' || id === 'gravity' ? 1 : -1 }; draw505(); };
+    rowsBox.append(el('div', { class: 'exrow exhead', role: 'row' }, ...heads.map(([id, t]) => el('div', { class: 'exh' + (exploredSort505.col === id ? ' on' : ''), role: 'columnheader', tabindex: id === 'star' ? null : 0,
+      'aria-sort': exploredSort505.col === id ? (exploredSort505.dir > 0 ? 'ascending' : 'descending') : null,
+      onclick: id === 'star' ? null : () => sortBy(id), onkeydown: id === 'star' ? null : (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); sortBy(id); } } },
+      el('span', null, t), exploredSort505.col === id ? el('span', { class: 'arrow', 'aria-hidden': 'true' }, exploredSort505.dir > 0 ? '\u25b2' : '\u25bc') : null))));
+    for (const s of list) {
+      const c = climate(s), k = rec(s), look = starLook(s.id), im = look.pic || IMG[look.base];
+      const cv = el('canvas', { class: 'exstar', width: 40, height: 40, 'aria-hidden': 'true' });
+      if (im) { const cx = cv.getContext('2d'); cx.drawImage(im, 4, 4, 32, 32); const hat = look.hat && IMG[look.hat]; if (hat) cx.drawImage(hat, 0, 0, 40, 40 * hat.height / hat.width); }
+      rowsBox.append(el('div', { class: 'exrow', role: 'option', tabindex: 0, onclick: () => { UI.sel = s.id; closeModal(); renderPanel(); draw(); } },
+        el('span', { class: 'exc star' }, cv), el('span', { class: 'exc' }, s.name), el('span', { class: 'exc' }, k.explored ? (L.quality(p, k) / 2).toFixed(1) : ''), el('span', { class: 'exc' }, c ? c.t : ''),
+        el('span', { class: 'exc' }, c ? c.g : ''), el('span', { class: 'exc' }, c ? c.m : ''), el('span', { class: 'exc' }, info(s))));
+    }
+  };
+  const draw1 = () => {
+    if (L.layout === '505') return draw505();
+    rowsBox.replaceChildren();
+    for (const s of list) {
+      const c = climate(s), tr = el('div', { class: 'exrow' + (c ? '' : ' noclimate'), role: 'option', tabindex: 0, onclick: () => select(s, tr), ondblclick: () => { select(s, tr); go.click(); } });
+      if (cols) {
+        let line = padTo(s.name, cols[0]);
+        if (c) line = padTo(padTo(padTo(line + c.t, cols[1]) + c.g, cols[2]) + c.m, cols[3]); else line = padTo(line + tl(L.noClimate), cols[3]); // (a line of one piece of text: its words are said in the language here)
+        tr.append(el('span', { class: 'exline' }, line + tl(status(s))));
+      } else tr.append(el('span', null, s.name), c ? el('span', null, c.t) : el('span', { class: 'exnone' }, L.noClimate), ...(c ? [el('span', null, c.g), el('span', null, c.m)] : [el('span'), el('span')]), el('span', null, status(s)));
+      rowsBox.append(tr);
+    }
+  };
+  draw1();
+  const sortBox = L.sortBy ? el('label', { class: 'exsort' }, el('span', null, L.sortLabel),
+    el('select', { onchange: (e) => { mode = +e.target.value; if (L.sortKeep) exploredSort = mode; list = order(); pick = null; go.disabled = true; draw1(); } }, ...L.sortBy.map((t, i) => el('option', { value: i, selected: i === mode ? 'selected' : false }, t)))) : null;
+  if (L.layout === '505') {
+    modal('Explored Stars', el('div', null, rowsBox, el('div', { class: 'btns right' }, el('button', { onclick: closeModal }, 'OK'))), { cls: 'mid' });
+    return;
+  }
+  modal(L.title.replace(/:$/, ''), el('div', null, el('p', { class: 'sub' }, L.title), rowsBox,
+    el('div', { class: 'btns right' }, ...(sortBox ? [sortBox] : []), go, el('button', { onclick: closeModal }, 'OK'))), { cls: 'mid' });
 }
 // the computer plays this one turn for you (the Game menu's "Auto-play this
 // turn"; iOS's Play One Turn)

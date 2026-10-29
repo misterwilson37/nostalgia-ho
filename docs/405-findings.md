@@ -644,3 +644,7 @@ Windows: `FUN_00439558` sends message 0x408 (yours, string 963) or 0x409 (a budd
 home t; `FUN_0046ec5a` case 0x408 prints r / 100, r % 100 and calls `FUN_0042f742(t, home t)` for "Temp: %.*s", the panel's own routine
 (the Preferences box "Temp. in Celsius (not °F)", (T − 324) × 5 ÷ 9). Mac: `GetReportString` calls `CreateTempString` at three sites. So the
 report reads "Gravity: 1.23G. Temp: 72.5°F" or, in °C, as the panel. `docs/dos-findings.md`, "The reports' numbers".
+
+## The Explored Stars list (October 2026)
+
+Windows: dialog 356 "List of All Explored Stars:" with "Sort By:" (combo box 1132) and "Go To Star"; `FUN_004540a8` collects the stars with a record from 2000 on, sorts them by name and by the box's four sorts (0 metal, 1 quality, 2 gravity, 3 owner), `FUN_0045470f` makes the row record (the same five fields as the Mac's: 100, 75, 75, 75 and 75, "No Climate Info." 150 + 35 + 40). Mac: `ListExploredStars`, `InitStarsList @1001a2`, `MakeOneListedStar`, the popup's value kept in the preferences (+0x8e). What the Windows row's draw routine does with the fields was not read (the Mac's: left-aligned, LIKELY). `docs/dos-findings.md`, "The explored-stars lists".

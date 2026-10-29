@@ -2155,8 +2155,12 @@ E.registerRules('dos', Object.assign({}, O, {
   // then by quality, then your own by name, each sort a swap sort; a row is
   // the name, the climate ("No Climate Info." when not explored), the metal
   // and Own, Explored or Enemy. Go To Star selects and centres the star.
+  // How the original draws a row (docs/dos-findings.md, "The explored-stars lists"): layout 'text', a line of text in a fixed-pitch
+  // font, each part padded with spaces to where the next begins: the Windows 3.1 game's FUN_1070_0033 pads the name to 8 letters
+  // (FUN_1070_0000), the temperature to 18, the gravity to 28, the metal to 37 ("No Climate Info." too), then Own, Explored or
+  // Enemy; DOSHO.EXE's the same with 11, 23, 32 and 42. The Mac games' lists (layout 'mac') are columns of pixels (rules-12.js).
   exploredList: { title: 'List of All Explored Stars:', go: 'Go To Star', noClimate: 'No Climate Info.', own: 'Own', free: 'Explored', enemy: 'Enemy',
-    quality: (p, k) => starQuality(p, k) },
+    quality: (p, k) => starQuality(p, k), layout: 'text', cols: { win: [8, 18, 28, 37], dos: [11, 23, 32, 42] } },
   welcome: WELCOME,
   SKILLS, WPNRAT, setupPlayer, defaultDesigns, afterSetup: afterSetup20, computerSetup, makeGalaxy, distance, SHAPES,
   designCost, designLimits, designMin, aiSpec, paysPrototype, fleetFor, route: route20,
