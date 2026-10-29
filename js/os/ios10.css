@@ -118,3 +118,7 @@ html .yard .tm input[type=range] { background: linear-gradient(90deg, var(--tint
 ::-webkit-scrollbar-thumb { background: rgba(0,0,0,.35); border-radius: 3px; }
 ::-webkit-scrollbar-corner { background: transparent; }
 ::-webkit-scrollbar-button { display: none; }
+/* Firefox ignores ::-webkit-scrollbar, so there the bars above would be its own: this is the
+   nearest it can draw, the colours only (the see-through dark thumb). Chromium
+   drops the bars above if it sees scrollbar-color at all, so only Firefox is let in. */
+@supports (-moz-appearance: none) { html, html * { scrollbar-width: thin; scrollbar-color: rgba(0,0,0,.35) transparent; } }

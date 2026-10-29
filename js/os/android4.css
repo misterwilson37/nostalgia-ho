@@ -134,3 +134,22 @@ html .yard .tm input[type=range] { background: linear-gradient(90deg, var(--tint
 ::-webkit-scrollbar-thumb { background: rgba(160,160,160,.6); border-radius: 0; }
 ::-webkit-scrollbar-corner { background: transparent; }
 ::-webkit-scrollbar-button { display: none; }
+/* Firefox ignores ::-webkit-scrollbar, so there the bars above would be its own: this is the
+   nearest it can draw, the colours only (the thin grey fast-scroll thumb). Chromium
+   drops the bars above if it sees scrollbar-color at all, so only Firefox is let in. */
+@supports (-moz-appearance: none) { html, html * { scrollbar-width: thin; scrollbar-color: rgba(160,160,160,.6) transparent; } }
+/* the game's own light surfaces (the message card, the clock, the tips) keep
+   dark words. The classic, DOS, Windows 95, Mac and Palm skins draw the card and
+   the clock cream, white or silver and leave their words to the page's --ink,
+   which this look makes white: white words on a light ground. Every skin draws
+   the tip cream, so it too was white on cream. Black is the fallback; where the
+   browser has relative colours, a dark --ink (Cozy's brown) is kept as it is and
+   only a light one is turned to black. The iOS, Android, Gemini and Amiga cards
+   and clocks set their own words or sit on a dark ground, and are not touched. */
+html .card, html .clock, html .tip { color: #000; color: lch(from var(--ink) calc(l * clamp(0, (50 - l) * 1000, 1)) c h); }
+/* (main Claudling, from the leftovers' notes) the skins' dark red headings and
+   warnings (--hat, --neg) on the look's near-black panels: mixed toward the words'
+   colour, as the modern looks do in their dark blocks; a dark --ink (Cozy) keeps
+   them dark */
+html .box h3, html .frow.enemy .ftext div:first-child, html #handover h2 { color: color-mix(in srgb, var(--hat) 60%, var(--ink)); }
+html .kv.neg b, html .warn, html .breport .kill { color: color-mix(in srgb, var(--neg) 60%, var(--ink)); }

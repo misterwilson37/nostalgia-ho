@@ -80,6 +80,10 @@ html .yard .tm input[type=range] { background: linear-gradient(90deg, transparen
 ::-webkit-scrollbar-button:single-button:vertical:increment { background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='7' height='4'><path fill='%23000' d='M0 0h7L3.5 4z'/></svg>"); background-repeat: no-repeat; background-position: center; }
 ::-webkit-scrollbar-button:single-button:horizontal:decrement { background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='4' height='7'><path fill='%23000' d='M4 0v7L0 3.5z'/></svg>"); background-repeat: no-repeat; background-position: center; }
 ::-webkit-scrollbar-button:single-button:horizontal:increment { background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='4' height='7'><path fill='%23000' d='M0 0v7L4 3.5z'/></svg>"); background-repeat: no-repeat; background-position: center; }
+/* Firefox ignores ::-webkit-scrollbar, so there the bars above would be its own: this is the
+   nearest it can draw, the colours only (the black thumb on white). Chromium
+   drops the bars above if it sees scrollbar-color at all, so only Firefox is let in. */
+@supports (-moz-appearance: none) { html, html * { scrollbar-width: thin; scrollbar-color: #000000 #ffffff; } }
 html input[type=radio] {
   -webkit-appearance: none; appearance: none; width: 11px; height: 11px; margin: 0 3px 0 0; padding: 0; flex: none; vertical-align: middle; cursor: pointer;
   border: 1px solid #000; border-radius: 50%; background: #fff;

@@ -36,8 +36,8 @@ body { font-size: 12px; }
   background: radial-gradient(circle at 50% 28%, rgba(255,255,255,.95) 0 2px, transparent 3.5px), radial-gradient(circle at 50% 75%, #ff9e8a, #e2443a 60%, #b8241b); }
 .close:hover { background: radial-gradient(circle at 50% 28%, rgba(255,255,255,.95) 0 2px, transparent 3.5px), radial-gradient(circle at 50% 75%, #ff9e8a, #e2443a 60%, #b8241b);
   box-shadow: inset 0 0 0 3.5px transparent; }
-/* the yellow and green lights, beside the red close one */
-.wtitle::before { content: ''; position: absolute; left: 29px; top: 4px; width: 35px; height: 13px; pointer-events: none;
+/* the yellow and green lights, beside the red close one (only on a window that has one: the title screen's splash window has none, and the lights sat over its words) */
+.wtitle:has(> .close)::before { content: ''; position: absolute; left: 29px; top: 4px; width: 35px; height: 13px; pointer-events: none;
   background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='35' height='13'><defs><radialGradient id='y' cx='.5' cy='.75' r='.7'><stop offset='0' stop-color='%23ffe9a0'/><stop offset='.6' stop-color='%23f2b232'/><stop offset='1' stop-color='%23c0861a'/></radialGradient><radialGradient id='g' cx='.5' cy='.75' r='.7'><stop offset='0' stop-color='%23c4f59c'/><stop offset='.6' stop-color='%2368c13f'/><stop offset='1' stop-color='%233c8a1e'/></radialGradient></defs><circle cx='6.5' cy='6.5' r='6' fill='url(%23y)' stroke='%23a7781c'/><circle cx='28.5' cy='6.5' r='6' fill='url(%23g)' stroke='%23408a24'/><ellipse cx='6.5' cy='3.6' rx='3.6' ry='2' fill='white' opacity='.85'/><ellipse cx='28.5' cy='3.6' rx='3.6' ry='2' fill='white' opacity='.85'/></svg>") no-repeat; }
 .wbody { padding: 14px; }
 .box, .designer { background: rgba(0,0,0,.035); border: 1px solid rgba(0,0,0,.16); border-radius: 6px; box-shadow: inset 0 1px 0 rgba(255,255,255,.7); }
@@ -106,3 +106,7 @@ html .yard .tm input[type=range] { background: linear-gradient(90deg, #5a9ae8 0 
 ::-webkit-scrollbar-thumb:horizontal { background: var(--blue); }
 ::-webkit-scrollbar-corner { background: #ececec; }
 ::-webkit-scrollbar-button { display: none; }
+/* Firefox ignores ::-webkit-scrollbar, so there the bars above would be its own: this is the
+   nearest it can draw, the colours only (Aqua's blue thumb on the silver track). Chromium
+   drops the bars above if it sees scrollbar-color at all, so only Firefox is let in. */
+@supports (-moz-appearance: none) { html, html * { scrollbar-width: auto; scrollbar-color: #6db1f3 #ececec; } }

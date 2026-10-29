@@ -93,3 +93,7 @@ html input[type=radio]:checked { background: radial-gradient(circle, #000 0 2px,
 ::-webkit-scrollbar-button:single-button:vertical:increment { background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='7' height='4'><path fill='%23000' d='M0 0h7L3.5 4z'/></svg>"); background-repeat: no-repeat; background-position: center; }
 ::-webkit-scrollbar-button:single-button:horizontal:decrement { background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='4' height='7'><path fill='%23000' d='M4 0v7L0 3.5z'/></svg>"); background-repeat: no-repeat; background-position: center; }
 ::-webkit-scrollbar-button:single-button:horizontal:increment { background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='4' height='7'><path fill='%23000' d='M0 0v7L4 3.5z'/></svg>"); background-repeat: no-repeat; background-position: center; }
+/* Firefox ignores ::-webkit-scrollbar, so there the bars above would be its own: this is the
+   nearest it can draw, the colours only (silver thumb on the light dither (its two colours blended)). Chromium
+   drops the bars above if it sees scrollbar-color at all, so only Firefox is let in. */
+@supports (-moz-appearance: none) { html, html * { scrollbar-width: auto; scrollbar-color: #c0c0c0 #dfdfdf; } }

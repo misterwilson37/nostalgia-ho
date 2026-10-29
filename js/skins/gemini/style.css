@@ -259,6 +259,11 @@ input[type="text"]:focus, input[type="number"]:focus, select:focus {
 ::-webkit-scrollbar-thumb:hover {
     background: rgba(56, 189, 248, 0.6);
 }
+/* Firefox draws no ::-webkit-scrollbar: the nearest it can (the guard keeps
+   Chromium on the rules above, which scrollbar-color would switch off) */
+@supports (-moz-appearance: none) {
+    html, html * { scrollbar-width: thin; scrollbar-color: rgba(56, 189, 248, 0.3) rgba(15, 23, 42, 0.9); }
+}
 /* Added on integration (main Claudling): the OS looks load before this file and
    some give the default button an id-level rule (Mac OS X's blue #tnew), which
    outranked the console buttons above; and Aqua's yellow and green lights sat on

@@ -98,6 +98,10 @@ button:not(.mbtn):not(.close):not(.tbtn):not(.clock):not([role=menuitem]) {
 ::-webkit-scrollbar-button:single-button:vertical:increment { background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='7' height='4'><path fill='%23000' d='M0 0h7L3.5 4z'/></svg>"); background-repeat: no-repeat; background-position: center; }
 ::-webkit-scrollbar-button:single-button:horizontal:decrement { background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='4' height='7'><path fill='%23000' d='M4 0v7L0 3.5z'/></svg>"); background-repeat: no-repeat; background-position: center; }
 ::-webkit-scrollbar-button:single-button:horizontal:increment { background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='4' height='7'><path fill='%23000' d='M0 0v7L4 3.5z'/></svg>"); background-repeat: no-repeat; background-position: center; }
+/* Firefox ignores ::-webkit-scrollbar, so there the bars above would be its own: this is the
+   nearest it can draw, the colours only (white thumb on the black and white dither (blended to grey)). Chromium
+   drops the bars above if it sees scrollbar-color at all, so only Firefox is let in. */
+@supports (-moz-appearance: none) { html, html * { scrollbar-width: auto; scrollbar-color: #ffffff #808080; } }
 
 /* ---------- the floating windows (the Mac 4.0.5 skins' Window menu): a windoid, System 7's thin title bar
    (11 pixels, fine horizontal stripes, a small close box at the left), a black frame and a one-pixel shadow ---------- */
