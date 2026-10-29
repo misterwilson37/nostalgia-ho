@@ -227,14 +227,18 @@ Where a browser can't do what the original did, or the remake had to pick.
   turn's purchases.
 - Played as released: an abandoned colony with a colony ship there is settled again at
   once.
-- **From 3.0.1's "Last Minute Notes" (`docs/301-findings.md`, the table at its end)**, three
-  differences left as they are: (1) 3.0.1 dims the Galaxy menu's Alliances, Give Money/Metal,
-  Surrender To and Send Message in the first year (2000; `SetMenuItems @f4492`); the remake keeps them
-  live (its menus can't dim an entry, and "Players and alliances" also holds Compare Players); (2) with
-  16 or more players the original asks for a star's name every turn after you win (the "done" flag is a
-  16-bit field, `CheckEndGame @12085a`); the remake names once; (3) a computer skips, as the player
-  it surrenders to, the one a "has just surrendered to" report names (`PlayerILikeBest @95f8a`); the
-  remake's computers skip only players already out.
+- **From 3.0.1's "Last Minute Notes" (`docs/301-findings.md`, the table at its end)**, settled from the decompile
+  (October 2026): (1) 3.0.1 dims the Galaxy menu's Alliances, Give Money/Metal, Surrender To and Send Message in the
+  first year (2000; `SetMenuItems @f4492`): **built** (`rs.menuDimmed`): the four entries are dimmed in 2000, "Players and
+  alliances" being the Alliances entry and "Players and history" (Compare Players) staying live with its Ally boxes off;
+  the "out" and "no alliances" dimming of the same routine is not built (the remake hides those commands); (2) with 16 or
+  more players the original asks for a star's name, and writes a Hall entry, every turn after you win (the "done" flag is a
+  16-bit field, `CheckEndGame @12085a`, `MarkEndGameDone @121a34`): **true, not reproduced**: the remake's game ends at the
+  win (a win is final here; the original went on), so there is no later turn to ask in and it names once, as the original
+  does the first time; (3) a computer skips, as the player it surrenders to, the one a "has just surrendered to" report
+  names (`PlayerILikeBest @95f8a`): **dead code in 3.0.1 itself** (the exclusion is cleared before `ComputeStatus` runs
+  and set after it), so the remake, which skips only players out, agrees. Also found: 3.0.1 asks Armageddon's two
+  questions, now built (`rs.armageddonAsk`); its button words are not shown.
 - **French, Turkish and German (the remake's)**: the official lines wherever the English is
   3.0.1's (iOS's, and 1.2F's or the German DOS 2.0's for its 2.0 lines: Name a Star, Fix
   Spending), the remake's for the rest (3.0.1's Name a Star rule of 2 to 7 letters, its

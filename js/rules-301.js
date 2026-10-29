@@ -26,6 +26,24 @@
 const E = typeof module !== 'undefined' ? require('./engine.js') : root.HO;
 const JOKE_HOPE = 'Dost thou truly wish to abandon Hope? All is not yet lost!';
 const JOKE_SHIP = 'Abandon Ship? Abandon Ship! All hands abandon ship! Women and children first!';
+// Armageddon's two questions (CONFIRMED, DoGalaxyMenu @f3e76, the Armageddon item turned on: one of
+// DITL 3240-3244, then one of DITL 3250-3255, each by RND; turned off asks nothing). Their words, as the
+// DITLs read them; the DITLs' own button words ("Party Pooper", "Abort", "Go For It!" ...) are the box's
+// OK and Cancel here, as everywhere in this remake
+const ARMAGEDDON_ASK = [[
+  'Do you really want to launch the armageddon device? It’ll blow up half of the galaxy!',
+  'Do you really want to launch the armageddon device? Isn’t life too short as it is?',
+  'Do you really want to launch the armageddon device? I mean, you’d probably win anyway; why take the chance?',
+  'Do you really want to launch the armageddon device? Doing so decreases the difficulty score by half!',
+  'Do you really want to launch the armageddon device? Odds are you’ll blow yourself up!',
+], [
+  'Are you just doing this because you think you’ll win but it’s really late and so you want to go to bed?',
+  'Aren’t you sure you really don’t want to have nothing to do with not launching the armageddon device?',
+  'You’re just doing this ’cause you enjoy the ultimate feeling of power, aren’t you???',
+  'If you do this, everyone will hate you! It’s such a sissy way to try to win, anyway.',
+  'Now look, this is NO laughing matter. You just might get yourself killed!',
+  'I get it. You’re losing big time and this is the only way you could possibly win! That’s it isn’t it?',
+]];
 const { RI, clamp, msg, fmt, num, colonies, know, observe, addShipsToStar, TECHS, getDesign, fleetCount, fleetDesigns, fleetMaxRange, isAllied } = E;
 const D = E.RULESETS.dos, O = E.RULESETS.original, W = E.RULESETS['405'];
 const { popU, setPopU, hab } = O;
@@ -2078,6 +2096,12 @@ E.registerRules('301', Object.assign({}, D, {
   // words (Ship's has line breaks and the buttons "Jump Ship" / "Don't Jump";
   // Hope's OK and Cancel); the name compare wasn't re-read
   evacuateJoke: (G, s) => { const nm = E.ownName(G, s.name, 'stars'); return nm === 'Hope' ? JOKE_HOPE : nm === 'Ship' ? JOKE_SHIP : null; },
+  armageddonAsk: ARMAGEDDON_ASK,
+  // CONFIRMED (SetMenuItems @f4492): the Galaxy menu's items 9 to 12, "Alliances…", "Give Money/Metal…",
+  // "Surrender To…" and "Send Message…", are dimmed while the year is below 2001 (the game's first turn), the
+  // 3.0.1 fix of "Alliances and Surrender menu items no longer enabled in 2000". The classic skins dim the
+  // matching entries (js/skins/classic/ui.js menuDim); "Compare Players…" and the rest stay live.
+  menuDimmed: { before: 2001, items: ['alliances', 'give', 'surrender', 'chat'] },
   bestBuddies: false,      // no best buddies (see above)
   canBuild: (G, p, type) => TYPES4.includes(type),
   starNames: STAR_NAMES,

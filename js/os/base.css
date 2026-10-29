@@ -24,6 +24,8 @@ body { font: 12px/1.4 var(--ui); }
 .dropdown.open { display: block; }
 .dropdown button { display: block; width: 100%; text-align: left; background: none; border: 0; padding: 4px 16px; cursor: pointer; color: var(--ink); }
 .dropdown button:hover, .dropdown button:focus-visible { background: var(--hi); color: #fff; outline: none; }
+/* a command the version dims (rs.menuDimmed: 3.0.1's first year) */
+.dropdown button:disabled, .dropdown button:disabled:hover, .dropdown button:disabled:focus-visible { background: none; color: #8a8a8a; cursor: default; }
 .dropdown hr { border: 0; border-top: 1px solid #bbb; margin: 3px 0; }
 #panel { background: var(--plat); border-right: 1px solid #444; }
 .box { background: var(--plat2); border: 1px solid var(--edge); border-top-color: #fff; border-left-color: #fff; padding: 7px 8px; margin-bottom: 8px; }

@@ -335,7 +335,7 @@ dragging a fleet): the remake has its own windows for them, and the rule behind 
 | `MsgReactDetermineAllies` @9537e | feelings from last turn's reports and messages; alliances | RULE, implemented | js/ai-301.js msgReactDetermineAllies |
 | `ModifyAlliances` @95dc8 | change one feeling, the others the opposite way by a sixth | RULE, implemented | js/ai-301.js modifyAlliances |
 | `SendAMessage` @95f14 | a computer sends a canned message (at most 10 a turn) | RULE, implemented | js/ai-301.js say |
-| `PlayerILikeBest` @95f8a | the player a computer likes best (whom it surrenders to) | RULE, implemented | js/ai-301.js computeStatus |
+| `PlayerILikeBest` @95f8a | the player a computer likes best (whom it surrenders to); skips itself and players out (its "surrendered to me" exclusion is cleared before it runs, `DoComputerTurn`) | RULE, implemented | js/ai-301.js computeStatus |
 | `AddActionToList` @96024 | add an action, at most 50, by priority | RULE, implemented | js/ai-301.js addAction |
 | `CountActions` @96110 | count actions of a kind | RULE, implemented | js/ai-301.js countActions |
 | `FillInStarStatus` @9623e | a computer's classes of every star, threats, faded estimates | RULE, implemented | js/ai-301.js fillInStarStatus |
@@ -503,11 +503,11 @@ dragging a fleet): the remake has its own windows for them, and the rule behind 
 | `DoEditMenu` @f3d22 | Edit menu | NOT A RULE | interface |
 | `DoOptionsMenu` @f3d68 | Options menu | NOT A RULE | interface |
 | `DoShipsMenu` @f3e02 | Ships menu | NOT A RULE | interface |
-| `DoGalaxyMenu` @f3e76 | Galaxy menu: Abandon (a toggle: net and share adjusted, given up at End Turn; confirmations, two of them jokes for "Hope" and "Ship"), and the other Galaxy windows | RULE, implemented | js/rules-301.js evacuate301 (the Evacuate button) |
+| `DoGalaxyMenu` @f3e76 | Galaxy menu: Abandon (a toggle: net and share adjusted, given up at End Turn; confirmations, two of them jokes for "Hope" and "Ship"), Armageddon (turned on: two questions, DITL 3240-3244 then 3250-3255, each drawn by RND; built, `rs.armageddonAsk`), and the other Galaxy windows | RULE, implemented | js/rules-301.js evacuate301 (the Evacuate button) |
 | `DipIntoSavings` @f41cc | Dip Into Savings: an amount from Ship Savings, up to the borrowing limit, into this turn's money | RULE, implemented | js/rules-301.js dipAndInterest |
 | `DoWindowMenu` @f43a4 | Windows menu | NOT A RULE | interface |
 | `MatchFlagsToWindows` @f444c | window menu marks | NOT A RULE | interface |
-| `SetMenuItems` @f4492 | enable menu items | NOT A RULE | interface |
+| `SetMenuItems` @f4492 | enable menu items; the Galaxy menu's Alliances, Give, Surrender and Send Message are dimmed in 2000 | NOT A RULE (interface), built | js/skins/classic/ui.js `menuDim`, `rs.menuDimmed` |
 | `ResetWindows` @f4b9a | tidy windows | NOT A RULE | interface |
 | `SetWindowLocations` @f4cc8 | window positions | NOT A RULE | interface |
 | `SaveWindowLocations` @f4fbc | window positions | NOT A RULE | interface |
@@ -584,7 +584,7 @@ dragging a fleet): the remake has its own windows for them, and the rule behind 
 | `PerformEndTurn` @1216e8 | run EndTurn once per 10 years of the turn | RULE, implemented | js/engine.js endTurn (yearsPerTurn steps) |
 | `ChangeAutoPlay` @1217ea | switch a player to or from auto play (state 3) | RULE, implemented | js/engine.js auto play (p.auto) |
 | `MarkAllPlayersDone` @12190e | Force End Turn: every player counted as done | NOT A RULE | network play |
-| `MarkEndGameDone` @121a34 | note that the game-over news was shown | NOT A RULE | interface |
+| `MarkEndGameDone` @121a34 | note that the game-over news was shown (a 16-bit field: from player 16 up the bit is never set, so the original names a star again every turn after a win) | NOT A RULE | interface; not reproduced, the remake's game ends at the win (docs/301-findings.md) |
 | `CheckDirtySave` @121b52 | ask to save | NOT A RULE | interface |
 | `RegisterOrCreatePlayer` @121c20 | join with name and password | RULE, implemented | js/engine.js newGame humans (hot seat; passwords not kept) |
 | `DoPasswordDlg` @121cdc | password box | NOT A RULE | interface |

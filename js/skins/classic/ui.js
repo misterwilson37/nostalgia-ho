@@ -3098,7 +3098,8 @@ function openPlayers() {
       else if (they) status = 'Offers to ally';
       else if (we) status = 'You offered to ally';
     }
-    const chk = (kind, on) => el('input', { type: 'checkbox', checked: on ? 'checked' : false, 'aria-label': (kind === 'ally' ? 'Ally with ' : 'Best buddies with ') + p.name,
+    // (3.0.1's first year: the Alliances command is dimmed, so the pact boxes stay as they are; Compare Players is this window without them)
+    const chk = (kind, on) => el('input', { type: 'checkbox', checked: on ? 'checked' : false, disabled: menuDim('alliances') ? 'disabled' : false, 'aria-label': (kind === 'ally' ? 'Ally with ' : 'Best buddies with ') + p.name,
       onchange: (e) => { HO.setPact(G, ME, p.id, kind, e.target.checked); save(); closeModal(); openPlayers(); } });
     tb.append(el('tr', { class: p.alive ? '' : 'dead' }, el('td', null, el('img', { src: A.img[face], alt: '', class: 'face' })), el('td', null, p.human ? p.name + ' (you)' : p.name), el('td', null, String(seen)), el('td', null, status),
       pacts ? el('td', null, p.id === ME || !p.alive ? '' : chk('ally', (mine.allies || []).includes(p.id))) : null,
@@ -3154,6 +3155,7 @@ function giveSlider(max, label, onval, o) {
   return s;
 }
 function openGive() {
+  if (menuDim('give')) return;
   const W = G && HO.rules(G).giveWindow;
   if (W) { openGiveWindow(W); return; }
   if (!others().length) { toast(HO.say(G, HO.DATA.alerts[6] || 'There is no one else to give anything to.')); return; }
@@ -3349,6 +3351,7 @@ function openCanned(C) {
   modal(C.title, f, { cls: 'mid' });
 }
 function openChat() {
+  if (menuDim('chat')) return;
   if (HO.rules(G).cannedChat) { openCanned(HO.rules(G).cannedChat); return; }
   if (!others().length) { toast(HO.say(G, HO.DATA.alerts[6] || 'There is no one else to send something to.')); return; }
   const lines = ['Thank You!', 'Sorry!', '#!$@*$&@•™!', 'I need money.', 'I need metal.', 'I like you.', 'I hate you.', 'Let’s be allies.'];
@@ -3414,6 +3417,7 @@ function openDip() {
   modal('Dip into savings', f, { cls: 'small' });
 }
 function openSurrender() {
+  if (menuDim('surrender')) return;
   const p = me();
   // 5.0.5's Surrender (PPob 147, FUN_1005d5a0): every player in the menu,
   // yourself and those out greyed, then "No One"; picked: the one you are
@@ -4243,6 +4247,9 @@ function prefsAutoPlay() {
 // leaves the command out. Left out: the command shows with its feature.
 const COMMAND_FLAGS = { surrender: 'surrenderCommand', chat: 'chatCommand' };
 const commandShown = (feat) => !!G && HO.feature(G, feat) && HO.rules(G)[COMMAND_FLAGS[feat]] !== false;
+// rs.menuDimmed { before, items }: Galaxy commands the version dims in its first year ('alliances', 'give',
+// 'surrender', 'chat'; 3.0.1's SetMenuItems), shown dimmed and not opened
+const menuDim = (k) => { const D = G && HO.rules(G).menuDimmed; return !!(D && G.year < D.before && D.items.includes(k)); };
 // ----- the Ho menu: this version, skin, sounds, modern conveniences -----
 // Each version plays as it was released; the conveniences a player may add
 // are choices here, and can be changed in the middle of a game.
@@ -5979,14 +5986,14 @@ function setupMenus() {
       [() => scrapWords('fleet')[G && curFleet() && curFleet().scrap301 ? 1 : 0], () => { if (!G || G.over) return; const f = curFleet(); if (f) toggleScrapFleet(f); else toast('Select one of your fleets first.'); }, () => marksScrap()],
       [() => (G && organizeName()), () => { if (G && UI.sel != null) openOrganize(UI.sel); }, () => !!organizeStyle()],
       ['Scrap ship types…', () => G && openScrapTypes()], ['Next fleet', nextFleet]],
-    Galaxy: [['Players and alliances…', () => G && openPlayers()], ['List explored stars…', () => G && openStarList()],
-      ['Give money or metal…', () => G && !G.over && openGive(), 'gifts'],
-      ['Send a message…', () => G && !G.over && openChat(), () => commandShown('chat')],
+    Galaxy: [['Players and alliances…', () => G && openPlayers(), null, null, () => menuDim('alliances')], ['List explored stars…', () => G && openStarList()],
+      ['Give money or metal…', () => G && !G.over && openGive(), 'gifts', null, () => menuDim('give')],
+      ['Send a message…', () => G && !G.over && openChat(), () => commandShown('chat'), null, () => menuDim('chat')],
       ['Dip into savings…', () => G && !G.over && openDip(), 'dip'],
       ['Fix spending', () => G && !G.over && openFixSpending(), () => !!(G && HO.rules(G).fixSpending)],
       ['Report window…', () => openReports(), () => !!(verOpts() || {}).reports || (!!(G && (HO.rules(G).prefsWindow || {}).show) && Prefs.showMsgs === false)],
       ['-'],
-      [() => (G && me().surrenderTo != null ? 'Take back surrender' : 'Surrender…'), () => G && !G.over && openSurrender(), () => commandShown('surrender')],
+      [() => (G && me().surrenderTo != null ? 'Take back surrender' : 'Surrender…'), () => G && !G.over && openSurrender(), () => commandShown('surrender'), null, () => menuDim('surrender')],
       [() => (G && me().armageddon ? 'Turn off the armageddon device' : 'Armageddon device…'), () => G && !G.over && toggleArmageddon(), 'armageddon'],
       ['Radical research…', () => openRadicalHand(), () => !!(G && (HO.rules(G).radicalHand || {}).menu)],
       ['Force end turn…', () => forceEndTurn(), () => !!(G && HO.rules(G).forceEndTurn && hotSeat())]],
