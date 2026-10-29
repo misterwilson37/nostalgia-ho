@@ -8,7 +8,8 @@
 // HO.currency(G) says and with no other: "€" in French in iOS, Android, 5.0.5 and the Palm
 // (js/engine.js, EURO_FRENCH), "$" everywhere else. A "$" in a curse ("#!$@*$&@") does not count.
 // It also checks the engine: the report in each language, and each money format, directly.
-// --patch plays with the unofficial patch on (the sign is the same). --euro=on|off plays the Palm with its Preferences' "Money in € not $" chosen (on: "€" in
+// --patch plays with the unofficial patch on (the sign is the same, but in French it comes after the figure:
+// "1 234 €", "12,345 M€", never "€1"). --euro=on|off plays the Palm with its Preferences' "Money in € not $" chosen (on: "€" in
 // every language; off: "$" even in French); the other versions ignore it. Chromium comes from PLAYWRIGHT_BROWSERS_PATH, Playwright from NODE_PATH ($(npm root -g)).
 'use strict';
 const path = require('path'), http = require('http');
@@ -76,6 +77,17 @@ function engineChecks() {
     }
     HO.prefs.euro = null;
   }
+  // the patched French: the sign after the figure, as the French write it ("1 234 €", "12,345 M€"), never "€1"
+  for (const id of ['ios', 'android', 'original', 'palm']) {
+    const o = { seed: 5, rules: id, lang: 'fr', patch: true, size: 'small', computers: 2, iq: 'average', shape: 'random', humans: [{ name: 'Ann' }] };
+    const G = HO.newGame(o), R = HO.rules(G), W = (x) => x.replace(/\u00a0/g, '_');
+    if (HO.currency(G) !== '€') { out.push(`${id} fr patch: HO.currency is ${HO.currency(G)}`); continue; }
+    const want = [['$1,234', '1_234_€'], ['($1,234)', '(1_234_€)'], ['$12.345M', '12,345_M€'], ['$5', '5_€'], ['$123,456', '123_456_€']];
+    for (const [a, b] of want) { const got = W(HO.sumText(G, a)); if (got !== b) out.push(`${id} fr patch: sumText(${a}) = ${got}, expected ${b}`); }
+    for (const t of MONEY_TEXTS('Joe')) { const s = HO.say(G, t); if (/€\s?\d/.test(s) || !/\d\u00a0€/.test(s) && !/\d\u00a0[KM]€/.test(s)) out.push(`${id} fr patch: "${t}" -> "${s}"`); }
+    if (R.fmtMoney) for (const n of [5, 1234, -1234, 12345678]) { const s = W(HO.sumText(G, R.fmtMoney(n, '€'))); if (/€\d/.test(s) || !/€/.test(s)) out.push(`${id} fr patch: fmtMoney(${n}) = ${s}`); }
+    if (R.shortMoney) for (const n of [5, 1234, 123456, 1234567, 12345678, -12345678]) { const s = W(HO.sumText(G, R.shortMoney.fn(n, '€'))); if (/€\s?\d/.test(s) || !/€/.test(s)) out.push(`${id} fr patch: shortMoney(${n}) = ${s}`); }
+  }
   return out;
 }
 
@@ -96,6 +108,8 @@ function pageText() {
 }
 function wrong(texts, want, lang) {
   const other = want === '€' ? '$' : '€', res = [];
+  // (patched French: the euro after the figure, "1 234 €", never "€1,234")
+  if (want === '€' && args.includes('--patch') && lang === 'fr') for (const t of texts) if (/€\s?\d/.test(t)) res.push('sign before the figure: ' + t);
   // (not money: a curse, the Palm's "$" button named in its help, the Palm's "Money in € not $" preference)
   for (const t of texts) { const s = t.replace(CURSE, ''); if (s.includes(other) && !(s.includes('€') && s.includes('$')) && !(other === '$' && /button|bouton|Taste|düğme|botón/i.test(s)) && !(other === '$' && /^(Need \$|Besoin de \$|Brauche \$|\$ lazım|Necesito \$)$/.test(s))) res.push(s); }
   return res;

@@ -563,7 +563,7 @@ function fixes(rs) { return (rs && rs.fixes) || []; }
 // 1.2, 2.0 and 2.0.1, whose Turkish is the remake's in iOS's words (js/languages.js turkish20)
 // and whose French is 1.2F's (1.2's own, rs.ownFix; 2.0's, french20's fix).
 const TRANSLATIONS_FIX = { id: 'translations', title: 'The French and Turkish wording is put right',
-  text: 'The official French (Mac 1.2’s, the French Mac 3.0.1’s and the iOS game’s) and the iOS game’s Turkish have slips: a word left in English, a filling lost, a sentence that says something else, a name run into its ending, a word misspelled. The patch shows the corrected wording, in the game’s reports and tips and in the remake’s menus and windows; in French also French typography and better ship names (Chasseur, Cuirassé, Ravitailleur). It matters only when the game is played in French or Turkish.' };
+  text: 'The official French (Mac 1.2’s, the French Mac 3.0.1’s and the iOS game’s) and the iOS game’s Turkish have slips: a word left in English, a filling lost, a sentence that says something else, a name run into its ending, a word misspelled. The patch shows the corrected wording, in the game’s reports and tips and in the remake’s menus and windows; in French also French typography, better ship names (Chasseur, Cuirassé, Ravitailleur) and, where French money is in euros (iOS, Android, 5.0.5, the Palm), the sign after the figure (“1 234 €”, not iOS’s “€1,234”). It matters only when the game is played in French or Turkish.' };
 // The iOS lines that fill a report's blanks in another order than the English sentence's (French "You won a
 // battle", Turkish "colony destroyed", "survived an attack", the supernova's shock wave), as the shipped
 // games filled them: a word where a number goes. The versions that carry those exact iOS lines (3.0.1, 4.0.5,
@@ -905,12 +905,23 @@ function currency(G) {
   if (G && G.rules === 'palm' && PREFS.euro != null) return PREFS.euro ? '€' : '$';
   return G && G.opts && G.opts.lang === 'fr' && EURO_FRENCH.includes(G.rules) ? '€' : '$';
 }
+// The sign's place in the patched French (the translations fix): iOS wrote "€1,234", sign first and no
+// space, as released; the patch writes it the French way, after the figure: "1 234 €", "12,345 M€"
+// (a no-break space between thousands, as frFilled does, and before the sign; a decimal comma). A
+// K or M stays with the sign ("1 234 K€", "12,03 K€"). `s` holds sums written with the sign first.
+function euroAfter(G, s) {
+  if (typeof s !== 'string' || s.indexOf('€') < 0 || currency(G) !== '€' || !frPatched(G)) return s;
+  return s.replace(/€(\d+(?:[,\u00a0]\d{3})*)(\.\d+)?(?: ?([KM])\b)?/g, (m, a, dec, suf) => {
+    const n = a.replace(/,/g, NB) + (dec ? ',' + dec.slice(1) : '');
+    return n + NB + (suf || '') + '€';
+  });
+}
 // a sum written with a "$" before the figure, with the version's sign and the patch's placement
 function sumText(G, s) {
   if (typeof s !== 'string' || (s.indexOf('$') < 0 && s.indexOf('€') < 0)) return s;
   const c = currency(G);
   if (c !== '$') s = s.replace(/\$(?=\d)/g, c);
-  return s;
+  return euroAfter(G, s);
 }
 // a number as the game's version writes it in its reports (rs.fmtNum)
 const num = (G, n) => { const f = G && rules(G).fmtNum; return f ? f(n) : fmt(n); };
@@ -1775,7 +1786,7 @@ const API = {
   newGame, endTurn, buildShips, unbuildShip, designLimits, designMin, designCost, shipCostNow, canBuildType, findOrCreateDesign, getDesign,
   fleetCount, fleetDesigns, fleetSpeed, fleetMaxRange, fleetHas, fleetKind, fleetLabel, orderMove, orderPath, cancelMove, canReach, canMerge, queueShips, unqueueShip,
   newFleet, addShipsToStar, mergeFleets, splitFleet, scrapFleet, evacuate, colonies, seenG, seenT, maxPop, planetClass, planetIncome,
-  scrapDesign, liveDesigns, isFriend, isAllied, isBuddy, hasColonyAt, designName, namesFile, namesFileAdd, report, setPact, give, surrender, sendChat, sendCanned, deliverCanned, clearCanned, cannedList, cannedSteps, setArmageddon, hostileAt, know, observe, msg, msgAll, humans, starDist, dist, projected, techSum, score, save, load, borrowLimit, fmt, num, niceNum, num505, money505, currency, sumText, prefs: PREFS,
+  scrapDesign, liveDesigns, isFriend, isAllied, isBuddy, hasColonyAt, designName, namesFile, namesFileAdd, report, setPact, give, surrender, sendChat, sendCanned, deliverCanned, clearCanned, cannedList, cannedSteps, setArmageddon, hostileAt, know, observe, msg, msgAll, humans, starDist, dist, projected, techSum, score, save, load, borrowLimit, fmt, num, niceNum, num505, money505, currency, euroAfter, sumText, prefs: PREFS,
 };
 if (typeof module !== 'undefined') {
   module.exports = API;

@@ -432,7 +432,7 @@ No hints (3.0.1 had none; its STR# 3100 is iOS's French hints word for word).
 3.0.1F is also French 3.0.1's **windows**: a 3.0.1 game in French puts the menus' items
 and titles, window titles, buttons and labels of the French program over the remake's
 interface words for the same English (`rs.lang.fr.officialWindows`, 261 English-to-French
-pairs from `MENU`, `DITL`, `DLOG` and `CNTL`; `HO.windowWords(G)`, `HOUI.set`'s third argument; since October 2026 also a 4.0.5 game in French, for what it shares with 3.0.1, rule 4, and the title screen of a 3.0.1 or 4.0.5 skin): "Fenêtre" for Window, "Panthéon" for Hall Of Fame, "Zoom avant". A word the French
+pairs from `MENU`, `DITL`, `DLOG` and `CNTL`; `HO.windowWords(G)`, `HOUI.set`'s third argument; since October 2026 also a 4.0.5 game in French, for what it shares with 3.0.1, rule 4, and the title screen of a 3.0.1 or 4.0.5 skin: "Fenêtre" for Window, "Panthéon" for Hall Of Fame, "Zoom avant". A word the French
 program left in English ("Name", "Density") or translates two ways (Cancel, Annuler and
 Cancel) is not in it: the interface's own French stands. No manual is on the disc.
 
@@ -526,7 +526,7 @@ hasn't got. Classes are capitalised, as both officials do, and "one" agrees with
 "un Explorador", "una Nave colonia", "una Cisterna", "una Bionave".
 
 **Numbers and temperatures.** "1.234" and "12.345K", as the German; "$" stays (the iOS
-French's "€" isn't followed: the West's dollar is part of the joke). (The currency sign is `HO.currency(G)`: "€" only in French in iOS, Android, 5.0.5 and the
+French's "€" isn't followed: the West's dollar is part of the joke). (The currency sign is `HO.currency(G)`, its place in the patched French `HO.euroAfter`, "1 234 €": "€" only in French in iOS, Android, 5.0.5 and the
 Palm, as iOS's French has it; Spanish, German and Turkish, and the French of 1.2 to 4.0.5, "$".) Temperatures are in
 °C, as the French and German officials give them: where the English fills in its
 Fahrenheit "72°" (the exploring reports, the volcano, "I like planets that are…"), the

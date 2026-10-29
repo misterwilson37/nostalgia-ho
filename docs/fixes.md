@@ -82,7 +82,9 @@ language update in the patch, never the default. So the patch carries them, in t
   (3.0.1F's window words) and, over every French line the patch shows, `engine.js` `frPatchText`:
   French typography, accents on capitals, the official texts' spelling slips and the patch's ship
   names (Chasseur, Cuirassé, Ravitailleur), in the game and in the interface. 1.2's own French takes
-  it as `rs.ownFix`. Only in a French or Turkish game.
+  it as `rs.ownFix`. Where French money is in euros (iOS, Android, 5.0.5, the Palm: `HO.currency`), the patch
+  writes the sign after the figure, "1 234 €" and "12,345 M€" (`engine.js` `euroAfter`), where the default
+  keeps iOS's "€1,234". Only in a French or Turkish game.
 - **`iosFillings`** (iOS and Android with their own wording; 3.0.1, 4.0.5 on Windows and Mac, 5.0.5
   and the Palm with the shared one, `engine.js` `IOS_FILLINGS_FIX`): "Four French and Turkish reports
   put a word where a number goes". The app filled a translated report's blanks in the English
