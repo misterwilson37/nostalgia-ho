@@ -891,7 +891,7 @@ Settled:
 - Spanish quotation marks: “ ” for the game's text, « » for the interface (Gemini: a good distinction); kept.
 - The hover help: proofread, and read by Gemini.
 - iOS's placeholder order (`BY_PLACE`): Jake, iOS as released, the patch fixing it; done by the main Claudling (`iosFillings`).
-- The French currency: Jake, "€" wherever the original showed it, not patched (above).
+- The French currency: Jake, "€" wherever the original showed it, not patched (above). **Done** ("The currency sign" below).
 
 ## Checks
 
@@ -915,7 +915,7 @@ No version bump: wording only.
 ## Next
 
 - Done (October 2026, by the main Claudling): the patch tables are wired, iOS's `BY_PLACE` placeholder order moved to the patch (`iosFillings`), and 3.0.1F routed (with the English 3.0.1 beside it, `mac301En`).
-- Write French money with "€" in iOS, Android, 5.0.5 and the Palm, in every mode (Jake: accuracy; not a mistake, so not the patch's): the currency sign by version and language, where the remake hard-codes "$" ("The remaining audit", the currency).
+- **Done (the main Claudling, "The currency sign" below):** Write French money with "€" in iOS, Android, 5.0.5 and the Palm, in every mode (Jake: accuracy; not a mistake, so not the patch's): the currency sign by version and language, where the remake hard-codes "$" ("The remaining audit", the currency).
 - Add 3.0.1's "Last Minute Notes" to its sources ("What Delta Tao said", `docs/fixes.md`).
 
 Integration by the main Claudling: see `HANDOFF-proofread.md` in the bundle.
@@ -927,3 +927,18 @@ Integration by the main Claudling: see `HANDOFF-proofread.md` in the bundle.
 ## Turkish endings by sound (the main Claudling)
 
 Done in the patch's `trEnding` (`js/engine.js`): the open item "Joe gets ’den where Turkish says Joe’dan". A name is first read by sound (`trReading`: a table `TR_READ` of the game's own names and a few English ones, and a rule for a final "-oe"), then fitted by vowel and consonant harmony as before; details and the reasoning for having no general silent-"e" rule in `docs/glossary-tr.md`, "Case endings". The unpatched game is untouched (its endings are iOS's glued ones).
+
+## The currency sign (the main Claudling)
+
+One place now decides it: `HO.currency(G)` (`js/engine.js`, `EURO_FRENCH`). **"€" in French in iOS, Android, 5.0.5 and the Palm, in every mode (patched or not); "$" in everything else**: 1.2F, 2.0, 3.0.1F and 4.0.5's French, iOS's Turkish, the German of DOS 2.0 and the Amiga, the Spanish (`docs/translations.md`, "Numbers and temperatures": the dollar stays), and English. Where money is written:
+
+- The rules' sums: `rs.fmtMoney(n, cur)` (`money505`, 5.0.5, iOS, Android) and the Palm's compact `moneyPalm(n, cur)` (`rs.shortMoney`) take the sign; the budget bars' locked-colony text (`barLocked505`) and iOS's Dip text (`rules-ios.js`) ask `E.currency(G)`.
+- The reports: the rules write "$1,234" and `say` puts the sign in (a "$" before a figure only; a curse "#!$@*$&@" has none), as iOS's formatter writes it (Misc Strings 27, "€").
+- The skins: the classic skin's `money`, `panelFig` (panels, budget and tech bars, the planet's income, Give, Fix Spending and Dip windows) and the Give window's `$`; every other skin draws through them. The Amiga skin's own "$ " stays (its rules are DOS 2.0, "$" in every language).
+- The interface rows: "(Int: €%s)" (U-130, 5.0.5's) is iOS's own row; the 5.0.5 version note "Sums from ten million are written “$12.345M”" reads “€12.345M” in French (`js/ui-text-notes-fr.js`); "Need $" is 4.0.5's button (French "$"), and the Palm's "Money in € not $" and "the $ button" name the sign itself and stay.
+
+**iOS's format, matched exactly** (its strings, `HOLANG.ios.fr`): the sign comes before the figure with no space, "(+ €%s)", "(- €%s)", "(Int: €%s)", "Rev. Disp.: €" (Misc Strings 27 and 40, sprintf Templates 3, 4 and 7), and the figure is the game's own formatter's, as in English ("€1,234", "(€1,234)" for a loss, "€12.345M" from ten million): iOS's French strings carry no separator of their own, so the thousands comma stays. The French patch's typography (a narrow space for a thousands comma) works as before.
+
+**The Palm's euro preference** ("Money in € not $", `Prefs.euro`) is still not wired in English: its placement in the Palm's English wasn't traced, so the English Palm keeps "$" (it stays as the kept, unused setting it was).
+
+**Checks.** `tools/currency-check.js` (new): the engine for every ruleset and language (the sign, every money format, the reports), and the page in every skin, in French, Turkish and English (the main screen, a home star's panel and bars, reports with money, the windows): "all 46 runs ok" (14 French runs and the patched French of the classic, Palm, iOS and Android skins too); the French runs of iOS, Android, 5.0.5 and the Palm show no "$" where money shows, and 1.2 to 4.0.5 French and every other language no "€". `lang-test.js`, `ui-lang-audit.js`, `test.js --patch --lang=fr` (iOS, 5.0.5, Palm) as before.

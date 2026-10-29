@@ -526,7 +526,8 @@ hasn't got. Classes are capitalised, as both officials do, and "one" agrees with
 "un Explorador", "una Nave colonia", "una Cisterna", "una Bionave".
 
 **Numbers and temperatures.** "1.234" and "12.345K", as the German; "$" stays (the iOS
-French's "€" isn't followed: the West's dollar is part of the joke). Temperatures are in
+French's "€" isn't followed: the West's dollar is part of the joke). (The currency sign is `HO.currency(G)`: "€" only in French in iOS, Android, 5.0.5 and the
+Palm, as iOS's French has it; Spanish, German and Turkish, and the French of 1.2 to 4.0.5, "$".) Temperatures are in
 °C, as the French and German officials give them: where the English fills in its
 Fahrenheit "72°" (the exploring reports, the volcano, "I like planets that are…"), the
 Spanish shows it converted, to the degree, as iOS's French does ("Temp.: 22°C"); the

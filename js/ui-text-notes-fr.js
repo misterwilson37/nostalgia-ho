@@ -251,7 +251,7 @@ root.HOUI.add([
 ['Colonies are listed by income, and the poorest are paid first.', 'Les colonies sont classées par revenu, et les plus pauvres sont payées en premier.', null, null, null],
 ['Master points and 25 ranks, with a limit on how far one win takes you.', 'Master points et 25 rangs, avec une limite à la distance qu’une victoire peut vous faire parcourir.', null, null, null],
 ['A new rank lets you name a star (up to 11 letters) for your next galaxies, five a galaxy.', 'Un nouveau rang vous permet de nommer une étoile (jusqu’à 11 lettres) pour vos prochaines galaxies, cinq par galaxie.', null, null, null],
-['Sums from ten million are written “$12.345M” in the panels.', 'Les sommes à partir de dix millions s’écrivent “$12.345M” dans les panneaux.', null, null, null],
+['Sums from ten million are written “$12.345M” in the panels.', 'Les sommes à partir de dix millions s’écrivent “€12.345M” dans les panneaux.', null, null, null],
 ['A port of the Mac 5.0 to Palm handhelds: the 5.0 game recompiled, the same rules with the same quirks. Every routine of its program has been read, and every rule comes from its own code.', 'Un portage de la Mac 5.0 sur les ordinateurs de poche Palm : le jeu 5.0 recompilé, les mêmes règles avec les mêmes bizarreries. Chaque routine de son programme a été lue, et chaque règle vient de son propre code.', null, null, null],
 ['5.0.5 (Mac)', '5.0.5 (Mac)', null, null, null],
 ['When every side in a battle is beaten, its debris is lost.', 'Quand tous les camps d’une bataille sont battus, ses débris sont perdus.', null, null, null],

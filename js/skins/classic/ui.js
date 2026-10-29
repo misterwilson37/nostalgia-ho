@@ -134,10 +134,12 @@ const el = (tag, attrs, ...kids) => {
 // numbers and sums as the game's version writes them (rs.fmtNum, rs.fmtMoney:
 // 5.0.5's "12,345K" and "$12.345M", 1.2 to 4.0.5's "12,345K"); left out, in full
 const fmt = (n) => { const f = G && HO.rules(G).fmtNum; return f ? f(n) : Math.round(n).toLocaleString('en-US'); };
-const money = (n) => { const f = G && HO.rules(G).fmtMoney; return f ? f(n) : (n < 0 ? '-$' : '$') + fmt(Math.abs(n)); };
+// (the sign is the version's and language's: HO.currency(G), "€" in the French of iOS, Android, 5.0.5 and the Palm)
+const curSign = () => HO.currency(G);
+const money = (n) => { const f = G && HO.rules(G).fmtMoney; return f ? f(n, curSign()) : (n < 0 ? '-' : '') + curSign() + fmt(Math.abs(n)); };
 // a panel's figure (rs.shortMoney, the Palm): in full inside the screen's
 // range ([lo, hi)), else the version's compact form
-const panelFig = (key, n, cur) => { const S = G && HO.rules(G).shortMoney, r = S && S.full[key]; return r && !(n >= r[0] && n < r[1]) ? S.fn(n, cur) : cur ? money(n) : fmt(n); };
+const panelFig = (key, n, sign) => { const S = G && HO.rules(G).shortMoney, r = S && S.full[key]; return r && !(n >= r[0] && n < r[1]) ? S.fn(n, sign ? curSign() : false) : sign ? money(n) : fmt(n); };
 
 // ---------- images ----------
 const IMG = {};
@@ -3223,7 +3225,7 @@ function openGiveWindow(W) {
   const amtOf = W.style === 'palm' ? (H, v) => v >= W.steps ? H : v <= 0 ? 0 : Math.trunc(H / W.steps) * v
     : W.style === 'ios' ? (H, v) => Math.trunc(Math.fround(Math.fround(H) * Math.fround(v / 10000))) : (H, v) => v;
   const range = W.style === 'palm' ? () => W.steps : W.style === 'ios' ? () => 10000 : (H) => H;
-  const moneyText = (n) => W.style === 'ios' ? money(n) : '$' + fmt(n);
+  const moneyText = (n) => W.style === 'ios' ? money(n) : curSign() + fmt(n);
   const mOut = el('output', null, W.style === '505' ? fmt(0) : moneyText(0)), xOut = el('output', null, fmt(0));
   const ms = giveSlider(have > 0 ? range(have) : 0, W.money, (v) => { mAmt = amtOf(have, v); mOut.textContent = W.style === '505' ? fmt(mAmt) : moneyText(mAmt); }, { vertical: W.style === '505' });
   const xs = giveSlider(hasM > 0 ? range(hasM) : 0, W.metal, (v) => { xAmt = amtOf(hasM, v); xOut.textContent = fmt(xAmt); }, { vertical: W.style === '505' });
@@ -3236,9 +3238,9 @@ function openGiveWindow(W) {
     // top and 0 at the foot, the 11 tick marks beside it
     const ticks = () => el('div', { class: 'giveticks', 'aria-hidden': 'true' }, ...Array.from({ length: W.ticks || 11 }, () => el('i')));
     const col = (label, dollar, out, s, top) => el('div', { class: 'givecol' },
-      el('div', { class: 'giveamt' }, el('span', null, label), dollar ? el('span', null, '$') : null, out),
+      el('div', { class: 'giveamt' }, el('span', null, label), dollar ? el('span', null, curSign()) : null, out),
       el('div', { class: 'givesl' }, s, ticks(), el('div', { class: 'giveends' }, el('span', null, top), el('span', null, '0'))));
-    body = el('div', null, who, el('div', { class: 'givecols' }, col(W.money, true, mOut, ms, '$' + fmt(p.savings)), col(W.metal, false, xOut, xs, fmt(p.metal))));
+    body = el('div', null, who, el('div', { class: 'givecols' }, col(W.money, true, mOut, ms, curSign() + fmt(p.savings)), col(W.metal, false, xOut, xs, fmt(p.metal))));
   } else {
     // a label and the amount, the slider lying down, its ends under it
     const row = (label, out, s, lo, hi) => el('div', { class: 'giverow2' }, el('div', { class: 'giveamt' }, el('span', null, label), out), s,

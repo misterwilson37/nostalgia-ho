@@ -2702,7 +2702,7 @@ function dragShare505(G, p, key, pm) {
 // evacuating or finished colony (GiveBarPercent), and Savings while dipping.
 // A technology bar locks only below 0, which the remake's never are.
 function barLocked505(G, p, slot) {
-  const R = E.rules(G), num = R.fmtNum || E.fmt, cash = R.fmtMoney || ((n) => '$' + E.fmt(n));
+  const R = E.rules(G), num = R.fmtNum || E.fmt, cash = (n) => (R.fmtMoney || ((x, c) => c + E.fmt(x)))(n, E.currency(G));
   if (slot === 'savings') return (p.dip || 0) > 0 ? { text: `-${p.dip}% (${num(trunc((p.savings || 0) * p.dip / 100))})`, dip: true } : null;
   if (typeof slot !== 'number' && !/^\d+$/.test(slot)) return null;
   const s = G.stars[+slot]; if (!s) return null;

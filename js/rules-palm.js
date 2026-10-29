@@ -25,9 +25,10 @@ const O = E.RULESETS.original;
 // in brackets with the currency, "-" without. The currency is tSTL 1001
 // item 46 "$" (the euro option, prefs +0x2e6, makes it 0x80).
 function moneyPalm(n, cur = true) {
+  // (cur: the currency's sign, or true for "$"; false for none: HO.currency(G))
   n = Math.trunc(n); const neg = n < 0, a = Math.abs(n), M = Math.trunc(a / 1e6), K = Math.trunc((a % 1e6) / 1000), u = a % 1000;
-  const c = cur ? '$' : '', p2 = (x) => String(x).padStart(2, '0'), p3 = (x) => String(x).padStart(3, '0');
-  if (a === 0) return cur ? '$0' : '0';
+  const c = cur ? (typeof cur === 'string' ? cur : '$') : '', p2 = (x) => String(x).padStart(2, '0'), p3 = (x) => String(x).padStart(3, '0');
+  if (a === 0) return cur ? c + '0' : '0';
   const t = M >= 1 && M <= 9 ? `${M},${p3(K)} K` : M >= 10 ? `${M}.${p2(Math.trunc(K / 10))} M` : K < 100 ? `${K}.${p2(Math.trunc(u / 100))} K` : `${K} K`;
   return neg ? (cur ? `(${c}${t})` : '-' + t) : c + t;
 }

@@ -256,7 +256,7 @@ const gameCenter = {
 function barLockedIOS(G, p, slot) {
   const r = O.barLocked(G, p, slot);
   if (!r) return null;
-  if (r.dip) return { text: `-${p.dip}% (${E.money505(trunc((p.savings || 0) * p.dip / 100))})`, silent: true };
+  if (r.dip) return { text: `-${p.dip}% (${E.money505(trunc((p.savings || 0) * p.dip / 100), E.currency(G))})`, silent: true };
   return Object.assign({}, r, { silent: true });
 }
 // CONFIRMED (-[BattleStageLayer setup:] 0x100095004, addBattleDescription
