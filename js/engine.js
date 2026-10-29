@@ -421,7 +421,7 @@ const SAY_ARG = /(%(?:\d+\$)?(?:\.\*)?[-0-9.]*l?[sdu]|%%)/;
 const sayCache = new WeakMap();
 function sayList(list) {
   const esc = (t) => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  return (list || []).map(([from, to]) => ({ to, len: from.length,
+  return (list || []).map(([from, to]) => ({ to, len: from.length, from: String(from),
     re: new RegExp('^' + String(from).split(SAY_ARG).map((x, j) => j % 2 ? (x === '%%' ? '%' : /[du]$/.test(x) ? '(-?[\\d,.]+)' : '([\\s\\S]*?)') : esc(x)).join('') + '$') }))
     .sort((a, b) => b.len - a.len);
 }
@@ -435,10 +435,26 @@ function sayOf(L) {
   return c;
 }
 function sayMatch(list, t) { for (const c of list) { const m = c.re.exec(t); if (m) return [c, m.slice(1)]; } return null; }
-function sayArgIn(L, C, a) {
+// What a filling is. Names (stars, players, ships' designs, fleets) are never translated: no
+// original puts a star's name in another language than the list's, so a star named Quark stays
+// "Quark" and is not the tech called Quark. A filling is a name when it is one in this game (N,
+// made when first asked); the one place a tech's name is filled in (the "... Technology (%d)" and
+// "technology just jumped" reports' first blank) is a word whatever the game's names are.
+function sayNames(G) {
+  const N = new Set();
+  const add = (n) => { if (n) N.add(String(n)); };
+  for (const s of G.stars || []) add(s.name);
+  for (const p of G.players || []) { add(p.name); for (const d of p.designs || []) add(d.name); }
+  for (const f of G.fleets || []) add(f.name);
+  return N;
+}
+const SAY_TECH_SLOT = /Technology \(|technology just jumped/;
+function sayArgIn(L, C, a, X) {
+  if (X && !X.word && !(X.tech && X.ix === 0)) { if (!X.N) X.N = sayNames(X.G); if (X.N.has(a)) return a; }
   if (L.words && Object.prototype.hasOwnProperty.call(L.words, a)) return L.words[a];
   const hit = sayMatch(C.args, a);
-  if (hit) return typeof hit[0].to === 'function' ? hit[0].to(hit[1]) : sayFill(hit[0].to, hit[1].map(x => sayArgIn(L, C, x)));
+  // (what an argument line like "one %s" holds is a word: a class)
+  if (hit) return typeof hit[0].to === 'function' ? hit[0].to(hit[1]) : sayFill(hit[0].to, hit[1].map(x => sayArgIn(L, C, x, X && { word: true })));
   return L.num && /^-?\$?[\d,]+(\.\d+)?K?$/.test(a) ? L.num(a) : a;
 }
 function sayRules(G) {
@@ -495,7 +511,8 @@ function say(G, text) {
   if (!L) return t;
   const C = sayOf(L), hit = sayMatch(C.reports, t);
   if (!hit) return t;
-  const args = hit[1].map(a => sayArgIn(L, C, a));
+  const X = { G, tech: SAY_TECH_SLOT.test(hit[0].from), ix: 0 };
+  const args = hit[1].map((a, i) => { X.ix = i; return sayArgIn(L, C, a, X); });
   let out = typeof hit[0].to === 'function' ? hit[0].to(args, G, hit[1]) : sayFill(hit[0].to, args);
   if (out.indexOf('{') >= 0) out = trSuffixes(out);
   if (frPatched(G)) out = frFilled(out);

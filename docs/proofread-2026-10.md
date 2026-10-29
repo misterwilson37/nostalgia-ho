@@ -699,7 +699,7 @@ By Claude, working name **Cedilla**. Jake's rule, restated for this chunk: **the
 
 **Checks.** `lang-test.js --seeds=2` on all ten rulesets with languages (and again on 3.0.1, 4.0.5, Mac 4.0.5, 5.0.5, the Palm and iOS after the last change): all ok; `--adapted` ok; `notes-check.js` ok; `ui-lang-audit.js --lang=tr` all 25 runs ok (five timed out under load on a first pass and were clean on rerun), `--lang=fr` on ios and classic ok; the French, German and Spanish rows identical to before; patched games read in iOS, 5.0.5, the Palm, 4.0.5 and 3.0.1 with no token, placeholder or "undefined" left.
 
-**Found, not fixed (the main Claudling's):** a star named Quark shows as the tech name ("Kuramsal Zerre", the patch's "Kuark"): `sayArgIn` (`js/engine.js`) looks every filling up in `say.words`, star names included, in both modes and every language whose words have a tech named like a star.
+**Found, then fixed (the main Claudling's, "Names are not words" below):** a star named Quark showed as the tech name ("Kuramsal Zerre", the patch's "Kuark"): `sayArgIn` (`js/engine.js`) looked every filling up in `say.words`, star names included, in both modes and every language whose words have a tech named like a star.
 
 ## Turkish for 1.2 and 2.0 (chunk 4)
 
@@ -919,3 +919,7 @@ No version bump: wording only.
 - Add 3.0.1's "Last Minute Notes" to its sources ("What Delta Tao said", `docs/fixes.md`).
 
 Integration by the main Claudling: see `HANDOFF-proofread.md` in the bundle.
+
+## Names are not words (the main Claudling)
+
+`say` (`js/engine.js`) fills a report's blanks and looked each filling up in the language's `say.words` (tech names, the classes, "Your enemies"), so a star, a player or a design named like a tech ("Quark", "Maser", "Hyperspace", "Scout", "Speed") read as the word in the language: "Kuramsal Zerreden çıkan enerjiye bakılırsa…", "Hyperespace" for a star called Hyperspace. No original translates a name (the name lists are the language's own, and a name is filled in as it is), so the default and the patch alike now keep one. `sayArgIn` asks `sayNames(G)` (every star, player, design and fleet name of the game, made when first asked): a filling that is one is a name and stays; the one blank that takes a tech's name ("You now have %s … Technology (%d)." and "Your %s technology just jumped to …", found by their English) is a word whatever the names are; what an argument line holds ("one %s", the class) is a word. Nothing else changes: the same seeds give the same reports word for word (`lang-test.js`, every ruleset and language, all ok). `tools/lang-test.js` checks it on every ruleset and language (`namesNotWords`): a star and a player named Quark, Maser, Hyperspace, Singularity, Scout, Fighter or Speed stay as they are in the "energy emanating" and battle reports (fr, tr, de, es), while the tech slot still translates; it fails with the old code.

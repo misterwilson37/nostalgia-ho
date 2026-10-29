@@ -106,6 +106,31 @@ function listsOk(id, rs, code) {
 
   if (bad.length) { failed++; console.log(`FAIL ${id} ${code}: lists: ${bad.join('; ')}`); }
 }
+// A name is never a word (engine.js sayNames): a star or a player named like a tech (Quark,
+// Maser...) keeps its name in a report, while a tech's own name in "You now have X Shield
+// Technology (3)." is still put in the language.
+function namesNotWords(id, rs, code) {
+  const own = HO.ownLanguage(rs) === code, L = own ? rs.say : rs.lang[code] && rs.lang[code].say;
+  if (!L || !L.words) return;
+  const W = ['Quark', 'Maser', 'Hyperspace', 'Singularity', 'Scout', 'Fighter', 'Speed'].filter(w => L.words[w] && L.words[w] !== w && !String(L.words[w]).includes(w));
+  if (!W.length) return;
+  const o = { seed: 7, rules: id, size: 'small', computers: 2, iq: 'average', shape: 'random', humans: [{ name: 'Ann' }, { name: 'Bob', female: false }] };
+  if (!own) o.lang = code;
+  const G = HO.newGame(o);
+  const bad = [];
+  const star = (t) => HO.say(G, t);
+  for (const w of W) {
+    G.stars[0].name = w; G.players[2].name = w;
+    const t1 = `The amount of energy emanating from ${w} suggests a big battle just took place.`;
+    if (HO.saysIn(G, t1) && star(t1).includes(L.words[w])) bad.push(`star ${w}: ${star(t1)}`);
+    const t2 = `You won a battle at ${w}. You lost 2 of your ships. ${w} lost 3.`;
+    if (HO.saysIn(G, t2) && star(t2).includes(L.words[w])) bad.push(`battle ${w}: ${star(t2)}`);
+  }
+  G.stars[0].name = 'Quark';
+  const t3 = 'You now have Quark Shield Technology (3).';
+  if (L.words.Quark && HO.saysIn(G, t3) && star(t3).includes('Quark') && !String(L.words.Quark).includes('Quark')) bad.push(`tech slot not translated: ${star(t3)}`);
+  if (bad.length) { failed++; console.log(`FAIL ${id} ${code}: names taken for words: ${bad.join('; ')}`); }
+}
 function play(id, code) {
   const rs = HO.RULESETS[id], own = HO.ownLanguage(rs) === code;
   const shapes = new Map(), left = new Map();
@@ -159,6 +184,7 @@ for (const id of all) {
   for (const code of langsOf(rs)) {
     if (COUNT) { const n = counts(rs, code); console.log(`${id} ${code}${rs.lang && rs.lang[code] && rs.lang[code].remake ? ' (remake)' : ''}: reports ${n.official} official, ${n.adapted} adapted, ${n.remake} the remake's${n.hints != null ? `; hints ${n.hints - n.hintsRemake - n.hintsAdapted} official, ${n.hintsAdapted} adapted, ${n.hintsRemake} the remake's` : ''}`); continue; }
     listsOk(id, rs, code);
+    namesNotWords(id, rs, code);
     play(id, code);
   }
 }
