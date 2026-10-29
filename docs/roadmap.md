@@ -135,9 +135,26 @@ and the translation notice (`docs/translations-notes/`) are not done.
       truncation with its "tenths" digit; `HO.celsiusOf`), else rounded to whole degrees (iOS's
       French, the remake's Spanish and the English versions); °F is the report's own whole degrees (the Amiga's
       `trunc(tenths / 10)`), and a unit the version wrote itself is never converted back. `node tools/temp-check.js`
-      checks the engine for every version and language and the page for the skins. Not changed (as released):
-      the German and French 2.0's panels, which the classic skins show in °F as before although the
-      original wrote °C there.
+      checks the engine for every version and language and the page for the skins.
+      **Resolved (October 2026): the defaults now show what each original showed** (`HO.panelFormat`,
+      `HO.panelC`; `tools/temp-check.js` asserts them). Checked against the sources, panel, list and reports:
+      - 1.2 (every language): "%d,%1.1d°C" (1.2F STR# 4000.2; a comma in French). 1.2's code works out
+        (T − 324) × 5 ÷ 9 in tenths, truncated (ExploreStar @a3c10, DrawPlanetRect @c44f6, InitStarsList
+        @12072a): a planet at home's 72.0°F reads 22.0°C, 50.0°F 9.7°C. The old default (22.2, 10.0) was the
+        exact conversion and is corrected, in the reports too (`E.c12Text`).
+      - French 2.0 (DOS, Mac 2.0.1): 1.2F's window and formula, with a comma (the translation rule).
+      - German 2.0 (DOS, Mac 2.0.1): DOSHO.EXE's "%d,%1.1d%cC" (0x2105e the planet window, 0x6ad8d the list):
+        trunc((F − 32) × 5 ÷ 9), with the whole degrees' last digit as the tenths ("22,2°C", "−6,6°C"). The
+        exploring report's own arguments are not in that code (only these two conversions exist in the
+        program), so it keeps whole truncated degrees (LIKELY the same slip).
+      - French 3.0.1 and 4.0.5: 3.0.1F's STR# 4000.2 "%d.%1.1d°C" (panel, a point) and its reports 1000.16,
+        29, 45 ("%d,%1.1d°C"), which the remake showed in °F; 1.2's formula is used (3.0.1F's code isn't to
+        hand: LIKELY, unsettled by a tenth at most).
+      - The remake's Spanish: whole °C in the panel and list, as its reports.
+      - Unchanged, as released: English and Turkish (°F; the English originals wrote "72.0°F", the remake's
+        whole degrees remain a known simplification), German 3.0.1 and later (no German original), iOS/Android/
+        5.0.5/Palm French (their own Celsius box, °F by default), the Amiga skin (its own °C, tenths slip).
+      - Not done: the panel's gravity decimal comma ("%d,%2.2dG" in the German and 1.2F panels).
    i. **Japanese**, far down: there was a Japanese port, but no copy can be found; the remake's
       own Japanese translation is not planned soon.
 5. Last: a home-screen (apple-touch) icon per skin, the icon a phone shows when the site is

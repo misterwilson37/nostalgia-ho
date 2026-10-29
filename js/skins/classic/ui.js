@@ -209,13 +209,15 @@ function savePrefs() { try { localStorage.setItem('ho5.prefs', JSON.stringify(Ob
 const rsCelsius = () => !!(G && HO.rules(G).celsius);
 const tempPref = () => (Prefs.temp === 'C' || Prefs.temp === 'F' ? Prefs.temp : null);
 HO.tempPref = tempPref;
-const toC = (f) => rsCelsius() ? ((f - 32) * 5 / 9).toFixed(1) : Math.round((f - 32) * 5 / 9);
+const toC = (f) => rsCelsius() ? HO.celsiusOf(G, f) : Math.round((f - 32) * 5 / 9);
 // °F: as the English versions write it ("72°"), with the unit where the version's own was °C
+// "As the original" is °C where the original showed °C in its planet panel and list (1.2, the French and German 2.0, the
+// French 3.0.1 and 4.0.5, the remake's Spanish: HO.panelFormat), in the version's own format and formula (HO.panelC)
 const degF = (f) => {
   const u = tempPref();
-  if (u === 'F') return Math.round(f) + (rsCelsius() ? '°F' : '°');
-  if (u === 'C') return HO.celsiusOf(G, f) + '°C'; // (the version's own °C formula where it had one)
-  return Prefs.celsius || rsCelsius() ? toC(f) + '°C' : Math.round(f) + '°';
+  if (u === 'F') return Math.round(f) + (HO.panelFormat(G) ? '°F' : '°');
+  if (u === 'C' || (!u && HO.panelFormat(G))) return HO.panelC(G, f); // (the version's own °C formula where it had one)
+  return Prefs.celsius ? toC(f) + '°C' : Math.round(f) + '°';
 };
 // (a degree already in °C, as a translation writes it, stays as it is; with a choice, HO.say has done it)
 const degText = (t) => tempPref() ? t : Prefs.celsius || rsCelsius() ? t.replace(/(-?\d+)°(?!C)(F)?/g, (m, n) => toC(+n) + '°C') : t;

@@ -594,8 +594,9 @@ the temperature in **degrees Celsius**. The program's two temperature lines (`DO
 file offsets 0x6ad8d and 0x2105e, both "%d,%1.1d%cC") work it out from whole degrees
 Fahrenheit, trunc((F − 32) × 5 ÷ 9) (÷ 10, − 32, × 5, ÷ 9), and print the whole
 degrees' last digit again as the "tenths" (a slip: 22 °C shows as "22,2°C"); the
-exploring report's own arguments weren't read (LIKELY the same). The remake writes the
-whole degrees, as it does in English.
+exploring report's own arguments weren't read (LIKELY the same). The remake's report writes the
+whole degrees, as it does in English; its planet panel and explored list (`HO.panelC`) write "22,2°C" as the
+program does (these two conversions are the program's only ones; arguments C, |C| mod 10).
 
 Slips kept as the German has them: "%Fss Bevölkerungswachstum" ("Menkars …"), 686's
 trailing blanks (dropped), and 74 and 75 swapped ("Sie wurden sofort besiegt." where the

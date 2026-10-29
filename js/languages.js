@@ -246,6 +246,16 @@ function official301() {
       });
     }
   }
+  // the temperatures 3.0.1F writes in °C ("%d,%1.1d°C"; the canned message's "%d.%1.1d°C"), where the engine's English line
+  // has the whole degrees Fahrenheit: by 1.2's formula (E.c12Text; 3.0.1F's code isn't to hand, LIKELY the same), first
+  // in the list so they win over iOS's "Temp: %s"
+  if (F301 && E301) {
+    const f1 = (n) => F301['1000'][n].replace(/%\.\*s/g, '%s'), deg = (t) => +String(t).replace(/[^\d-]/g, '');
+    o.unshift(
+      ['You have explored %s. Gravity: %d.%2.2dG. Temp: %s. Metal: %s.', (a) => f1(29).replace('%s', a[0]).replace('%d,%2.2dG', a[1] + ',' + a[2] + 'G').replace('%d,%1.1d°C', E.c12Text(deg(a[3]), true) + '°C').replace('%s', a[4])],
+      ['A volcanic eruption at %s has drastically warmed the temperature to %s!', (a) => f1(16).replace('%s', a[0]).replace('%d,%1.1d°C', E.c12Text(deg(a[1]), true) + '°C')],
+      ['%s says, "I like planets that are %d.%2.2dG and %s."', (a) => f1(45).replace('%s', a[0]).replace('%d.%2.2dG', a[1] + '.' + a[2] + 'G').replace('%d.%1.1d°C', E.c12Text(deg(a[3]), false) + '°C')]);
+  }
   return (OFFICIAL301 = o);
 }
 // 3.0.1F's windows' words for the interface (js/ui-lang.js, HOUI.set's words):
@@ -322,11 +332,12 @@ const CLASS_FR = { scout: FR(1006, 0), fighter: FR(1006, 1), colony: FR(1006, 2)
 const numFR = (t) => t.replace(/,/g, ' ');
 // the exploring report (1000.32): the gravity with a decimal comma, the
 // temperature in degrees Celsius to a tenth ("%d,%1.1d°C"), worked out from
-// the English report's whole degrees Fahrenheit, as 1.2's window does
+// the English report's whole degrees Fahrenheit by 1.2's own formula (E.c12Text:
+// (T - 324) x 5 / 9 in tenths, truncated)
 function explored12(a) {
   const [star, g, t, metal] = a, f = +String(t).replace(/[.,]/g, '');
   return F(703).replace('%s', star).replace('%d,%2.2dG', String(g).replace('.', ','))
-    .replace('%d,%1.1d°C', ((f - 32) * 5 / 9).toFixed(1).replace('.', ',') + '°C').replace('%s', metal);
+    .replace('%d,%1.1d°C', E.c12Text(f, true) + '°C').replace('%s', metal);
 }
 // A report of 2.0's that 1.2F words differently from the English (1000.17
 // leaves out the metal, "Votre flotte de %.*s à %s a été recyclée."): 1.2 shows

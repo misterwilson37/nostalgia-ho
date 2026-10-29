@@ -549,15 +549,48 @@ function say(G, text) { return sumText(G, tempText(G, text, say0(G, text))); }
 // (celsiusOf); with 'F', a temperature a version wrote in °C (the Amiga's, 1.2F's, the German 2.0's, iOS's French,
 // the remake's Spanish) is written again from the report's own whole degrees. A °C the version wrote itself
 // stays when °C is chosen, and an °F stays when °F is.
-// The version's own °C by its formula, for whole degrees Fahrenheit f, as a string: 1.2 (every language) and
-// the French 2.0 (1.2F's window, "%d,%1.1d°C") show a tenth; the German 2.0 truncates ("%d,%1.1d°C" worked
-// out from whole degrees, js/languages.js explored20); every other version rounds (iOS's French, the remake's).
+// The version's own °C by its formula, for whole degrees Fahrenheit f, as a string:
+// - 1.2 (every language) and the French 2.0 and 3.0.1 (1.2F's window, "%d,%1.1d°C"; 3.0.1F's STR# 4000.2 "%d.%1.1d°C"):
+//   1.2's code (ExploreStar @a3c10, DrawPlanetRect @c44f6, InitStarsList @12072a: docs/12-findings.md) takes tenths of °F
+//   T, works out (T - 324) x 5 / 9 (324, not 320: a planet at home's 72.0 shows 22.0, 50.0 shows 9.7), truncated toward
+//   zero, and prints it as "%d,%1.1d" with the whole and the last digit of |tenths| (c12Text); the French 2.0 follows
+//   1.2F (the translation rule), 3.0.1F is the same publisher's port (LIKELY: its code isn't to hand);
+// - the German 2.0 truncates ("%d,%1.1d°C" worked out from whole degrees, js/languages.js explored20), and the panel
+//   and the list print the whole degrees' last digit as the tenths (DOSHO.EXE 0x2105e, 0x6ad8d);
+// - every other version rounds (iOS's French, the remake's).
+const c12Tenths = (f) => Math.trunc((Math.round(f * 10) - 324) * 5 / 9);
+const c12Text = (f, comma) => { const t = c12Tenths(f); return Math.trunc(t / 10) + (comma ? ',' : '.') + Math.abs(t % 10); };
+const isTwo = (rs) => !!rs && (rs.id === 'dos' || rs.id === 'mac20');
+const isThree = (rs) => !!rs && (rs.id === '301' || rs.id === '405' || rs.id === 'mac405');
+// which of those formulas the version and language of G use
+function cFormula(G) {
+  const rs = G && ownRules(G), lang = rs ? (G.opts && G.opts.lang) || ownLanguage(rs) : null;
+  if (rs && (rs.celsius || ((isTwo(rs) || isThree(rs)) && lang === 'fr'))) return 'real';
+  if (isTwo(rs) && lang === 'de') return 'slip';
+  return 'whole';
+}
 function celsiusOf(G, f) {
-  const rs = G && ownRules(G), lang = G && rs ? (G.opts && G.opts.lang) || ownLanguage(rs) : null, c = (f - 32) * 5 / 9;
-  const two = rs && (rs.id === 'dos' || rs.id === 'mac20');
-  if (rs && (rs.celsius || (two && lang === 'fr'))) return c.toFixed(1);
-  if (two && lang === 'de') return String(Math.trunc(c));
-  return String(Math.round(c));
+  const k = cFormula(G), c = (f - 32) * 5 / 9;
+  return k === 'real' ? c12Text(f, false) : k === 'slip' ? String(Math.trunc(c)) : String(Math.round(c));
+}
+// The planet panel and the explored-stars list "as the original" (no choice): which versions and languages showed °C
+// there. null: in °F (the version's own Celsius box, where it has one, speaks).
+// - 1.2, in any language: "%d,%1.1d°C" (1.2F; a decimal comma in French);
+// - the French 2.0: 1.2F's window; the German 2.0: DOSHO.EXE's "%d,%1.1d%cC" (docs/dos-findings.md, Languages);
+// - the French 3.0.1 and 4.0.5: 3.0.1F's STR# 4000.2 "%d.%1.1d°C" (a point); the remake's Spanish: °C to the degree,
+//   as its reports (docs/translations.md).
+function panelFormat(G) {
+  const rs = G && ownRules(G); if (!rs || !rs.languages) return null;
+  const lang = (G.opts && G.opts.lang) || ownLanguage(rs);
+  if (rs.celsius || ((isTwo(rs) || isThree(rs)) && lang === 'fr') || (isTwo(rs) && lang === 'de') || lang === 'es') return { comma: lang === 'de' || (lang === 'fr' && !isThree(rs)) };
+  return null;
+}
+// the panel's °C for degrees Fahrenheit f (whole or with tenths), by the version's own formula where it had one, else rounded
+function panelC(G, f) {
+  const k = cFormula(G), comma = (panelFormat(G) || {}).comma;
+  if (k === 'real') return c12Text(f, comma) + '°C';
+  if (k === 'slip') { const c = Math.trunc((Math.trunc(Math.round(f * 10) / 10) - 32) * 5 / 9); return c + ',' + (Math.abs(c) % 10) + '°C'; }
+  return Math.round((f - 32) * 5 / 9) + '°C';
 }
 const TEMP_TOKEN = /(-?\d+(?:[.,]\d+)?)[\s\u00a0]?°[\s\u00a0]?([CF])?/g;
 function tempText(G, src, out) {
@@ -1830,7 +1863,7 @@ const API = {
   DATA, SHIP_TYPES, TYPES: SHIP_TYPES, TECHS,
   BAR_SCALES, barScale, battleGroups, makeBattlePanel,
   registerRules, registerAI, rules, rulesById, aiOf, LANGUAGES, languages, ownLanguage, languageName, languageChoices,
- ownRules, gameName, ownName, setLanguage, frPatchText, windowWords, say, saysIn, trSuffixes, feature, RULESETS, fixes, fixed, TRANSLATIONS_FIX, IOS_FILLINGS_FIX, hoedown, hoedownAll, setHoedown, setHoedownAll, say0, celsiusOf, tempStatic, patchVersion,
+ ownRules, gameName, ownName, setLanguage, frPatchText, windowWords, say, saysIn, trSuffixes, feature, RULESETS, fixes, fixed, TRANSLATIONS_FIX, IOS_FILLINGS_FIX, hoedown, hoedownAll, setHoedown, setHoedownAll, say0, celsiusOf, panelFormat, panelC, c12Text, tempStatic, patchVersion,
   // [id, name] for the New Game window: the original games' rules by year of
   // release, then version ("2.0 (DOS and Windows 3.1, 1993)"); rulesets that
   // aren't an original game's (the remake's own) come last, by their label

@@ -21,6 +21,13 @@ const opt = (k, d) => { const a = args.find(x => x.startsWith('--' + k + '=')); 
 const HO = require(path.join(root, 'js/engine.js'));
 Object.assign(HO.DATA, require(path.join(root, 'js/data.js')));
 let bad = 0;
+// What each version and language showed, from the sources (docs/roadmap.md 4h; docs/dos-findings.md "Languages", docs/12-findings.md,
+// STR# 1000 and 4000 of 1.2F and 3.0.1F, the German 2.0's DOSHO.EXE): in the reports, °C in 1.2's French and German (and the
+// remake's Spanish), the French 2.0, 3.0.1 and 4.0.5 (1.2F's and 3.0.1F's own reports), the German 2.0; the planet panel and
+// explored list the same, and in 1.2 in every language (rs.celsius; its English and Turkish reports say a bare "N°" the page puts in °C)
+const reportC = (id, lang) => lang === 'es' || (lang === 'fr' && ['12', 'dos', 'mac20', '301', '405', 'mac405'].includes(id)) || (lang === 'de' && ['12', 'dos', 'mac20'].includes(id));
+const HOownLang = (id) => HO.ownLanguage(HO.RULESETS[id]);
+const panelIsC = (id, lang) => id === '12' || reportC(id, lang);
 const fail = (m) => { bad++; console.log('FAIL ' + m); };
 const TOKEN = /(-?\d+(?:[.,]\d+)?)[\s ]?°[\s ]?([CF])?/g;
 const tokens = (t) => [...String(t).matchAll(TOKEN)].map(m => ({ n: parseFloat(m[1].replace(',', '.')), u: m[2] || 'F', all: m[0] }));
@@ -67,6 +74,8 @@ function engine() {
         else if (ot[0].u === 'F') { if (f !== own && !(rs.celsius && ft[0].n === ot[0].n)) fail(`${tag}: an °F the version wrote itself was changed: "${own}" -> "${f}"`); } // (1.2's bare "71°" was shown in °C: it gets its unit)
         else if (ft[0].n !== F) fail(`${tag}: °F gave "${f}" for ${F}°`);
         if (own !== HO.say(G, text)) fail(`${tag}: as the original changed`);
+        // as the original: °C in the reports where the original (or its translation) wrote °C, else the bare °F ones
+        if (!text.startsWith('I like planets') && reportC(id, lang) !== (ot[0].u === 'C')) fail(`${tag}: as the original gave "${own}" (expected ${reportC(id, lang) ? '°C' : '°F'})`);
       }
     }
   }
@@ -74,10 +83,22 @@ function engine() {
   const G12 = HO.newGame({ seed: 1, rules: '12', size: 'small', computers: 1, iq: 'average', shape: 'random' });
   const Gde = HO.newGame({ seed: 1, rules: 'dos', lang: 'de', size: 'small', computers: 1, iq: 'average', shape: 'random' });
   const Gen = HO.newGame({ seed: 1, rules: 'original', size: 'small', computers: 1, iq: 'average', shape: 'random' });
-  for (const [G, f, want, name] of [[G12, 72, '22.2', '1.2'], [G12, 50, '10.0', '1.2'], [Gde, 71, '21', 'DOS 2.0 in German (truncated)'], [Gde, 33, '0', 'DOS 2.0 in German (truncated)'],
+  for (const [G, f, want, name] of [[G12, 72, '22.0', '1.2 ((T - 324) x 5 / 9)'], [G12, 50, '9.7', '1.2 ((T - 324) x 5 / 9)'], [Gde, 71, '21', 'DOS 2.0 in German (truncated)'], [Gde, 33, '0', 'DOS 2.0 in German (truncated)'],
     [Gde, 20, '-6', 'DOS 2.0 in German (truncated toward zero)'], [Gen, 71, '22', '5.0.5 (rounded)'], [Gen, 33, '1', '5.0.5 (rounded)'], [Gen, 20, '-7', '5.0.5 (rounded)']]) {
     const got = HO.celsiusOf(G, f);
     if (got !== want) fail(`celsiusOf ${name}: ${f}°F is ${got}, expected ${want}`);
+  }
+  // the panel and the list as released (HO.panelFormat), and the text they write
+  const PG = (id, lang) => { const rs = HO.RULESETS[id], o = { seed: 1, rules: id, size: 'small', computers: 1, iq: 'average', shape: 'random' }; if (HO.ownLanguage(rs) !== lang) o.lang = lang; return HO.newGame(o); };
+  for (const id of Object.keys(HO.RULESETS)) {
+    const rs = HO.RULESETS[id]; if (!rs.languages) continue;
+    for (const lang of HO.languages(rs)) if (!!HO.panelFormat(PG(id, lang)) !== panelIsC(id, lang)) fail(`panel ${id} ${lang}: ${HO.panelFormat(PG(id, lang)) ? 'shows °C' : 'shows °F'}, the original ${panelIsC(id, lang) ? '°C' : '°F'}`);
+  }
+  for (const [id, lang, f, want] of [['dos', 'de', 72, '22,2°C'], ['dos', 'de', 71, '21,1°C'], ['dos', 'de', 33, '0,0°C'], ['dos', 'de', 20, '-6,6°C'], ['mac20', 'de', 72, '22,2°C'],
+    ['dos', 'fr', 72, '22,0°C'], ['dos', 'fr', 50, '9,7°C'], ['mac20', 'fr', 72, '22,0°C'], ['12', 'fr', 72, '22,0°C'], ['12', 'en', 72, '22.0°C'],
+    ['301', 'fr', 72, '22.0°C'], ['405', 'fr', 72, '22.0°C'], ['mac405', 'fr', 215, '101.4°C'], ['dos', 'es', 72, '22°C'], ['original', 'es', 71, '22°C']]) {
+    const got = HO.panelC(PG(id, lang), f);
+    if (got !== want) fail(`panel ${id} ${lang}: ${f}°F is "${got}", expected "${want}"`);
   }
   console.log(`engine: ${texts} reports in ${Object.values(HO.RULESETS).filter(r => r.languages).length} versions checked`);
 }
@@ -92,7 +113,7 @@ async function page() {
   const { chromium } = require('playwright');
   const browser = await chromium.launch();
   // the versions each skin shows, and what a star panel reads as released (no choice)
-  const RUNS = [['classic', '301'], ['classic', 'original'], ['classic', '12'], ['classic', 'palm'], ['amiga', 'dos'], ['amiga', 'dos', 'tr'], ['mac3', '301'], ['mac4', 'mac405'], ['w95', '405'], ['ios', 'ios'], ['dos', 'dos', 'de']];
+  const RUNS = [['classic', '301'], ['classic', 'original'], ['classic', '12'], ['classic', 'palm'], ['amiga', 'dos'], ['amiga', 'dos', 'tr'], ['mac3', '301'], ['mac4', 'mac405'], ['w95', '405'], ['ios', 'ios'], ['dos', 'dos', 'de'], ['dos', 'dos', 'fr'], ['mac2', 'mac20', 'de'], ['mac2', 'mac20', 'fr'], ['classic', '301', 'fr'], ['classic', '12', 'fr']];
   let n = 0;
   for (const [skin, rules, lang] of RUNS) {
     const seen = {};
@@ -128,6 +149,12 @@ async function page() {
       const panelTok = tokens(got.panel), repTok = tokens(got.rep);
       if (u === 'C' && ![...panelTok, ...repTok].every(t => t.u === 'C')) fail(`${skin} ${rules} °C: "${got.panel}" / "${got.rep}"`);
       if (u === 'F' && [...panelTok, ...repTok].some(t => t.u === 'C')) fail(`${skin} ${rules} °F: "${got.panel}" / "${got.rep}"`);
+      // as the original (no choice): the panel says what the source did (panelIsC), in the version's own format
+      if (!u && skin !== 'amiga') { // (the Amiga skin's own panels are the Amiga's °C: docs/amiga-skin.md)
+        const want = panelIsC(rules, lang || HOownLang(rules));
+        if (want && !(panelTok.length && panelTok.every(t => t.u === 'C'))) fail(`${skin} ${rules} ${lang || ''}: the panel should show °C as the original: "${got.panel}"`);
+        if (!want && panelTok.some(t => t.u === 'C')) fail(`${skin} ${rules} ${lang || ''}: the panel should show °F as the original: "${got.panel}"`);
+      }
       if (u === 'C' && !panelTok.length) fail(`${skin} ${rules} °C: no temperature in the star panel`);
       n++;
       await ctx.close();
