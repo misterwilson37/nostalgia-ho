@@ -106,7 +106,8 @@ function fill(t, args) {
 // the French patch (HO.fixed(G, 'translations') in a French game): the patch's
 // typography and words over the interface's French too (HO.frPatchText), and its
 // corrections of 3.0.1F's window words (HOLANG_REMAKE.fr.patchWindows)
-const frP = (x, lang) => (curPatch && lang === 'fr' && typeof x === 'string' && root.HO && root.HO.frPatchText ? root.HO.frPatchText(x) : x);
+// (German too, chunk 6: HO.dePatchText, the spelling, the quotation marks and the slips of the official German)
+const frP = (x, lang) => (curPatch && typeof x === 'string' && root.HO ? (lang === 'fr' && root.HO.frPatchText ? root.HO.frPatchText(x) : lang === 'de' && root.HO.dePatchText ? root.HO.dePatchText(x) : x) : x);
 function patchWindow(en, lang) {
   if (!curPatch) return null;
   const W = root.HOLANG_REMAKE && root.HOLANG_REMAKE[lang] && root.HOLANG_REMAKE[lang].patchWindows;

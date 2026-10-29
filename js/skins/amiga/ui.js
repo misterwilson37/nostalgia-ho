@@ -170,7 +170,11 @@ const LIDX = { de: 0, en: 1, fr: 2, tr: 3, es: 4 };
 if (window.HOUI) for (const l in LIDX) if (l !== 'en') HOUI.own(l, [].concat(...Object.values(WORDS).map(e => [e[LIDX[l]]]), ...ABOUT.map(e => [e[LIDX[l]]])));
 const lang = () => (window.HOUI ? HOUI.lang : (game() && game().opts && game().opts.lang) || 'en');
 const de = () => lang() === 'de';
-const pick = (e) => (e ? (e[LIDX[lang()]] != null ? e[LIDX[lang()]] : e[1]) : '');
+// (with the patch on in German, the spelling, quotation marks and slips of the Amiga's own German put right: HO.dePatchText)
+const pick = (e) => {
+  const x = e ? (e[LIDX[lang()]] != null ? e[LIDX[lang()]] : e[1]) : '';
+  return de() && window.HOUI && HOUI.patch && window.HO && HO.dePatchText ? HO.dePatchText(x) : x;
+};
 const w = (k, ...v) => { const e = WORDS[k]; let s = e ? pick(e) : k; v.forEach((x, i) => { s = s.split('%' + (i + 1)).join(x); }); return s; };
 // a word of WORDS in a part of the page built once (the Startup window, the
 // title bar): kept in step with the language (relabel)
@@ -987,7 +991,8 @@ function amWin(title, body, cls, opts) {
   const win = a.modal(title, body, Object.assign({ cls: 'am-win ' + cls }, opts || {}));
   return win;
 }
-const btn = (label, fn, cls) => el('button', { type: 'button', class: 'am-btn' + (cls ? ' ' + cls : ''), onclick: fn }, label);
+// (a label of nine letters or more, the patch's German "Abbrechen" for the Amiga's "Abbruch", gets the wider button its window gives it: am-long)
+const btn = (label, fn, cls) => el('button', { type: 'button', class: 'am-btn' + (String(label).length > 8 ? ' am-long' : '') + (cls ? ' ' + cls : ''), onclick: fn }, label);
 const frame = (cls, ...kids) => el('div', { class: 'am-frame ' + (cls || '') }, ...kids);
 function shipCanvas(d, owner) {
   const a = api(), c = a.shipPic(d, owner);

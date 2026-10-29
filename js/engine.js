@@ -158,17 +158,19 @@ function inLanguage(rs, lang, patch) {
   if (!m) langCache.set(rs, m = {});
   const key = patch && over.fix ? (lang || '') + '+patch' : lang;
   if (m[key]) return m[key];
-  let o = over, fixedFr = false;
+  let o = over, fixedTr = false;
   if (key !== lang) for (const id of Object.keys(over.fix)) {
     if (!fixes(rs).some(f => f.id === id)) continue;
     const p = over.fix[id];
     const s0 = o.say || rs.say || {};
     o = Object.assign({}, o, p, p.say ? { say: Object.assign({}, s0, p.say, { reports: (p.say.reports || []).concat(s0.reports || []), words: Object.assign({}, s0.words, p.say.words) }) } : {});
-    if (id === 'translations') fixedFr = true;
+    if (id === 'translations') fixedTr = true;
   }
   // the French patch's typography and words over all its text (frPatchText): the
   // language's own, or the version's own French (1.2F)
-  if (fixedFr && (lang || ownLanguage(rs)) === 'fr') o = frPatchLayer(o, lang ? rs : (rs.lang && rs.lang.en) || {}, rs);
+  if (fixedTr && (lang || ownLanguage(rs)) === 'fr') o = frPatchLayer(o, lang ? rs : (rs.lang && rs.lang.en) || {}, rs);
+  // (German too: the spelling, the quotation marks and the slips of the official German, dePatchText)
+  else if (fixedTr && lang === 'de') o = dePatchLayer(o, rs, rs);
   // the ruleset with the language's words over it; its own properties all kept
   // as they are, the ones it hides from the rulesets built on it too (5.0.5's
   // turn505 ..., rules-original), so the language plays the same game
@@ -262,40 +264,81 @@ function frPatchText(t) {
   for (const [re, to] of FR_CAPS) s = s.replace(re, to);
   return frTypography(s);
 }
+// ---------- the German patch's text (fix 'translations', German) ----------
+// The patch is the best German it can be (Jake, October 2026; chunk 6), so over every
+// German line it shows, official (the DOS 2.0's, the Amiga's) or the remake's, and the
+// interface's German (js/ui-lang.js, the Amiga skin's own words): the spelling now in
+// use ("daß" -> "dass", "haßt" -> "hasst", "zuviel" -> "zu viel"; the 1994 texts are in the
+// spelling of their day, and the remake's own German already is today's), the official
+// texts' slips ("Zug Ende", "Technik Ausgaben", "Baby Boom": compounds written as two
+// words; "Schilder", signs, for Schilde, shields; "Weite", width, for Reichweite;
+// "Abbruch" for the button Abbrechen; "Buchstaben" for the Zeichen a star's name takes)
+// and German quotation marks („ “) where the official texts have `x', 'x' or
+// "x". The ship names and the star names are left alone (not text, names).
+// Each rule is idempotent.
+// a whole word (\b does not know ß)
+const deW = (w) => new RegExp('(?<![\\p{L}])' + w + '(?![\\p{L}])', 'gu');
+const DE_SPELL = [
+  [deW('da\u00df'), 'dass'], [deW('Da\u00df'), 'Dass'], [deW('ha\u00dft'), 'hasst'], [deW('Ha\u00df'), 'Hass'],
+  [deW('mu\u00df(te|ten|t)?'), 'muss$1'], [deW('l\u00e4\u00dft'), 'l\u00e4sst'], [deW('wu\u00dft(e|en)'), 'wusst$1'], [deW('gewu\u00dft'), 'gewusst'],
+  [deW('Pa\u00dfw([o\u00f6])rt(e|er|es)?'), 'Passw$1rt$2'], [deW('bi\u00dfchen'), 'bisschen'],
+  [deW('([Zz])uviel'), '$1u viel'], [deW('([Zz])uwenig'), '$1u wenig'],
+  [deW('Zug Ende'), 'Zugende'], [deW('Technik Ausgaben'), 'Technikausgaben'], [deW('Baby Boom'), 'Babyboom'],
+  [deW('Schilder'), 'Schilde'], [deW('Weite'), 'Reichweite'], [/^Abbruch$/, 'Abbrechen'],
+  [/\(4 - 7 Buchstaben\)/g, '(4 bis 7 Zeichen)'], [deW('bis 7 Buchstaben'), 'bis 7 Zeichen'],
+];
+function deTypography(t) {
+  return t
+    // `x' and 'x' round a filling, \"x\" and \u201cx\u201d: the German quotation marks
+    .replace(/`([^`'\n]*)'/g, '\u201e$1\u201c').replace(/'(%(?:\d+\$)?[sd])'/g, '\u201e$1\u201c')
+    .replace(/\u201c([^\u201c\u201d\u201e\n]*)\u201d/g, '\u201e$1\u201c').replace(/\"([^\"\n]*)\"/g, '\u201e$1\u201c')
+    // one space between words
+    .replace(/(\S) {2,}(?=\S)/g, '$1 ');
+}
+function dePatchText(t) {
+  if (typeof t !== 'string' || !/[\p{L}]/u.test(t)) return t;
+  let s = t;
+  for (const [re, to] of DE_SPELL) s = s.replace(re, to);
+  return deTypography(s);
+}
 // over a language's text (the keys a translation lays over a ruleset): a string
 // the English ruleset has in the same place is English the interface translates,
 // so is left as it is
 const FR_TEXT_KEYS = ['say', 'hintTexts', 'nameAStar', 'battlePanel', 'battleLines', 'fixSpending', 'conquered', 'armageddonAsk', 'armageddonButtons', 'forceEndTurn',
   'youWon', 'youLost', 'options', 'exploredList', 'scrapWords'];
-function frDeep(v, base, d) {
+function patchDeep(fn, v, base, d) {
   if (d > 6) return v;
-  if (typeof v === 'string') return v === base ? v : frPatchText(v);
-  if (typeof v === 'function') return function (...a) { return frDeep(v.apply(this, a), undefined, 0); };
-  if (Array.isArray(v)) return v.map((x, i) => frDeep(x, Array.isArray(base) ? base[i] : undefined, d + 1));
+  if (typeof v === 'string') return v === base ? v : fn(v);
+  if (typeof v === 'function') return function (...a) { return patchDeep(fn, v.apply(this, a), undefined, 0); };
+  if (Array.isArray(v)) return v.map((x, i) => patchDeep(fn, x, Array.isArray(base) ? base[i] : undefined, d + 1));
   if (v && typeof v === 'object' && Object.getPrototypeOf(v) === Object.prototype) {
     const o = {};
-    for (const k of Object.keys(v)) o[k] = frDeep(v[k], base && typeof base === 'object' ? base[k] : undefined, d + 1);
+    for (const k of Object.keys(v)) o[k] = patchDeep(fn, v[k], base && typeof base === 'object' ? base[k] : undefined, d + 1);
     return o;
   }
   return v;
 }
-function frPatchLayer(o, base, rs) {
+// a language's text with the patch's text function over it (French: frPatchText; German: dePatchText)
+function patchLayer(fn, o, base, rs) {
   const out = Object.assign({}, o);
   for (const k of FR_TEXT_KEYS) {
     const v = k in o ? o[k] : (o === rs ? undefined : rs[k]);
     if (v == null) continue;
     if (k === 'say') {
       const sy = Object.assign({}, v);
-      // [English, French, ...]: the French only; a filling's words (English -> French; the
-      // patch's own for a word French and English share, "Tanker")
-      if (Array.isArray(sy.reports)) sy.reports = sy.reports.map(r => (Array.isArray(r) && r[1] !== r[0] ? [r[0], frDeep(r[1], undefined, 0)].concat(r.slice(2)) : r));
-      if (Array.isArray(sy.args)) sy.args = sy.args.map(r => [r[0], frDeep(r[1], undefined, 0)].concat(r.slice(2)));
-      if (sy.words) { const w = {}; for (const [a, b] of Object.entries(sy.words)) w[a] = frDeep(b, undefined, 0); sy.words = w; }
+      // [English, translation, ...]: the translation only; a filling's words (English -> translation; the
+      // patch's own for a word the language and English share, "Tanker")
+      if (Array.isArray(sy.reports)) sy.reports = sy.reports.map(r => (Array.isArray(r) && r[1] !== r[0] ? [r[0], patchDeep(fn, r[1], undefined, 0)].concat(r.slice(2)) : r));
+      if (Array.isArray(sy.args)) sy.args = sy.args.map(r => [r[0], patchDeep(fn, r[1], undefined, 0)].concat(r.slice(2)));
+      if (sy.words) { const w = {}; for (const [a, b] of Object.entries(sy.words)) w[a] = patchDeep(fn, b, undefined, 0); sy.words = w; }
       out.say = sy;
-    } else out[k] = frDeep(v, base ? base[k] : undefined, 0);
+    } else out[k] = patchDeep(fn, v, base ? base[k] : undefined, 0);
   }
   return out;
 }
+const frDeep = (v, base, d) => patchDeep(frPatchText, v, base, d);
+const frPatchLayer = (o, base, rs) => patchLayer(frPatchText, o, base, rs);
+const dePatchLayer = (o, base, rs) => patchLayer(dePatchText, o, base, rs);
 
 // the game's ruleset in the version's own language
 const langRules = (G) => rules(G);
@@ -704,14 +747,14 @@ function feature(G, name) { return !!(rules(G).features || {})[name]; }
 // fix. A saved game without G.opts.patch plays the version as released.
 // (A ruleset built with Object.assign over another must set its own fixes.)
 function fixes(rs) { return (rs && rs.fixes) || []; }
-// The patch's corrections of the French and Turkish translations (js/languages.js
+// The patch's corrections of the French, German and Turkish translations (js/languages.js
 // builds them, rs.lang.fr.fix.translations; the interface's are js/ui-text.js, a
 // row's seventh element). Listed by every version that takes its French and
 // Turkish from the iOS game's (3.0.1, 4.0.5, 5.0.5, the Palm, iOS and Android), and by
 // 1.2, 2.0 and 2.0.1, whose Turkish is the remake's in iOS's words (js/languages.js turkish20)
 // and whose French is 1.2F's (1.2's own, rs.ownFix; 2.0's, french20's fix).
-const TRANSLATIONS_FIX = { id: 'translations', title: 'The French and Turkish wording is put right',
-  text: 'The official French (Mac 1.2’s, the French Mac 3.0.1’s and the iOS game’s) and the iOS game’s Turkish have slips: a word left in English, a filling lost, a sentence that says something else, a name run into its ending, a word misspelled. The patch shows the corrected wording, in the game’s reports and tips and in the remake’s menus and windows; in French also French typography, better ship names (Chasseur, Cuirassé, Ravitailleur) and, where French money is in euros (iOS, Android, 5.0.5, the Palm), the sign after the figure (“1 234 €”, not iOS’s “€1,234”). It matters only when the game is played in French or Turkish.' };
+const TRANSLATIONS_FIX = { id: 'translations', title: 'The French, German and Turkish wording is put right',
+  text: 'The official French (Mac 1.2’s, the French Mac 3.0.1’s and the iOS game’s), the official German (the DOS 2.0’s and the Amiga’s) and the iOS game’s Turkish have slips: a word left in English, a filling lost, a sentence that says something else, a name run into its ending, a word misspelled. The patch shows the corrected wording, in the game’s reports and tips and in the remake’s menus and windows; in French also French typography, better ship names (Chasseur, Cuirassé, Ravitailleur) and, where French money is in euros (iOS, Android, 5.0.5, the Palm), the sign after the figure (“1 234 €”, not iOS’s “€1,234”); in German today’s spelling (dass, hasst, zu viel) and German quotation marks. It matters only when the game is played in French, German or Turkish.' };
 // The iOS lines that fill a report's blanks in another order than the English sentence's (French "You won a
 // battle", Turkish "colony destroyed", "survived an attack", the supernova's shock wave), as the shipped
 // games filled them: a word where a number goes. The versions that carry those exact iOS lines (3.0.1, 4.0.5,
@@ -1954,7 +1997,7 @@ const API = {
   DATA, SHIP_TYPES, TYPES: SHIP_TYPES, TECHS,
   BAR_SCALES, barScale, battleGroups, makeBattlePanel,
   registerRules, registerAI, rules, rulesById, aiOf, LANGUAGES, languages, ownLanguage, languageName, languageChoices,
- ownRules, gameName, ownName, setLanguage, frPatchText, windowWords, say, saysIn, trSuffixes, feature, RULESETS, fixes, fixed, TRANSLATIONS_FIX, IOS_FILLINGS_FIX, hoedown, hoedownAll, setHoedown, setHoedownAll, say0, celsiusOf, panelFormat, panelTemp, panelTempT, panelC, gravText, gravRatio, gravToken, tempToken, tokenTenths, exploreNums, reportTemp, unitPref, c12Text, tempStatic, patchVersion,
+ ownRules, gameName, ownName, setLanguage, frPatchText, dePatchText, windowWords, say, saysIn, trSuffixes, feature, RULESETS, fixes, fixed, TRANSLATIONS_FIX, IOS_FILLINGS_FIX, hoedown, hoedownAll, setHoedown, setHoedownAll, say0, celsiusOf, panelFormat, panelTemp, panelTempT, panelC, gravText, gravRatio, gravToken, tempToken, tokenTenths, exploreNums, reportTemp, unitPref, c12Text, tempStatic, patchVersion,
   // [id, name] for the New Game window: the original games' rules by year of
   // release, then version ("2.0 (DOS and Windows 3.1, 1993)"); rulesets that
   // aren't an original game's (the remake's own) come last, by their label

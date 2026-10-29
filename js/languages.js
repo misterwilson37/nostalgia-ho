@@ -199,11 +199,33 @@ function german(rs, own) {
     fix: { deBattleLines: { battleLines: { noInfo: S(75), destroyed: S(74) } } },
   };
 }
+// The patch's German for the DOS 2.0's lines (fix 'translations'; chunk 6): each report by its
+// English (REPORTS20), Name a Star and Fix Spending; engine.js dePatchLayer puts the spelling, the
+// quotation marks and the slips of the whole text over all of it, so the fix is always made. Read
+// when the game is played: the patch's tables are defined further on.
+function deFix20(out, rs) {
+  const rep = [];
+  for (const r of out.say.reports) { if (typeof r[1] !== 'string') continue; const p = patchOfficial('de', r[0]); if (p != null && !rep.some(x => x[0] === r[0])) rep.push([r[0], p]); }
+  const part = {};
+  if (rep.length) part.say = { reports: rep };
+  const NS = rs.nameAStar, ON = out.nameAStar;
+  if (NS && ON) {
+    const ks = ['text', 'taken', 'rule', 'label', 'hint'].filter(k => typeof NS[k] === 'string' && patchOfficial('de', NS[k]) != null);
+    if (ks.length) part.nameAStar = Object.assign({}, ON, ...ks.map(k => ({ [k]: patchOfficial('de', NS[k]) })));
+  }
+  return { translations: part };
+}
+function withDeFix(out, rs) {
+  const base = out.fix || {};
+  let fx;
+  Object.defineProperty(out, 'fix', { enumerable: true, configurable: true, get: () => fx || (fx = Object.assign({}, base, deFix20(out, rs))) });
+  return out;
+}
 const DOS = E.RULESETS.dos, MAC20 = E.RULESETS.mac20;
 for (const rs of [DOS, MAC20]) {
   if (!rs) continue;
   rs.languages = ['en', 'de'];
-  rs.lang = Object.assign({}, rs.lang, { de: german(rs, DOS) });
+  rs.lang = Object.assign({}, rs.lang, { de: withDeFix(german(rs, DOS), rs) });
 }
 
 // =====================================================================
@@ -508,6 +530,7 @@ if (R12) {
   // the two lines the German table has swapped, in their places (2.0's patch fix 'deBattleLines')
   DE12.battleLines = { noInfo: S(75), destroyed: S(74) };
   delete DE12.fix;
+  withDeFix(DE12, EN12);
 
   // the You Lost alert in English (Mac 2.0.1's), which the interface puts in German (js/ui-text.js)
   DE12.youLost = EN12.youLost;
@@ -783,13 +806,13 @@ function patchFix(lang, T, reports, hints, words, hintTexts, extra) {
     Object.assign(part, rest);
     if (es) part.say = Object.assign({}, part.say, es, { words: Object.assign({}, es.words, (part.say || {}).words) });
   }
-  // (French always: the patch's typography and words go over all of it, engine.js frPatchLayer)
+  // (French and German always: the patch's typography, spelling and words go over all of it, engine.js frPatchLayer, dePatchLayer)
   const places = placesFix(lang, reports);
-  if (!(Object.keys(part).length || lang === 'fr') && !places) return undefined;
+  if (!(Object.keys(part).length || lang === 'fr' || lang === 'de') && !places) return undefined;
   // (the fillings first: the translations' own corrected lines, which carry their own places, go over them)
   const fix = {};
   if (places) fix.iosFillings = places;
-  if (Object.keys(part).length || lang === 'fr') fix.translations = part;
+  if (Object.keys(part).length || lang === 'fr' || lang === 'de') fix.translations = part;
   return fix;
 }
 // official: [[English, translation], ...], the nearest first

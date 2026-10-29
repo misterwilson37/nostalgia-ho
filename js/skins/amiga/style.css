@@ -789,6 +789,9 @@ html.amiga .am-enname { top: calc(46 * var(--v)); } html.amiga .am-enpass { top:
 html.amiga .am-enbtns { left: 0; top: calc(145 * var(--v)); width: 100%; height: calc(20 * var(--v)); }
 html.amiga .am-enbtns .am-btn { top: 0; width: calc(63 * var(--u)); }
 html.amiga .am-enbtns .am-btn:nth-child(1) { left: calc(12 * var(--u)); } html.amiga .am-enbtns .am-btn:nth-child(2) { left: calc(87 * var(--u)); } html.amiga .am-enbtns .am-btn:nth-child(3) { left: calc(161 * var(--u)); }
+/* (the patch's German "Abbrechen", wider than "Abbruch": the three buttons shift left, the third takes the room) */
+html.amiga .am-enbtns .am-btn.am-long { left: calc(148 * var(--u)); width: calc(76 * var(--u)); }
+html.amiga .am-enbtns:has(.am-long) .am-btn:nth-child(1) { left: calc(6 * var(--u)); } html.amiga .am-enbtns:has(.am-long) .am-btn:nth-child(2) { left: calc(76 * var(--u)); }
 /* Topaz-like (tools/amiga-topaz.py): the requester's system font */
 @font-face { font-family: "Topaz"; font-weight: 400; font-display: block; src: url("../../../assets/fonts/Topaz.woff2") format("woff2"); }
 @font-face { font-family: "TopazTall"; font-weight: 400; font-display: block; src: url("../../../assets/fonts/TopazTall.woff2") format("woff2"); }

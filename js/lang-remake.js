@@ -1080,6 +1080,25 @@ tr: {
 // =====================================================================
 de: {
   over: {},
+  // the patch's corrections (G.opts.patch), as fr's and tr's: English -> the corrected translation,
+  // for the official German's slips (the DOS 2.0's and the Amiga's: chunk 6, Claude) wherever the
+  // version shows the line, official or the remake's own that keeps its wording. Every German line
+  // the patch shows also gets dePatchText's spelling (daß, haßt, zuviel ...), quotation marks and
+  // compounds (js/engine.js).
+  patch: {
+    // DOS 681 (and the remake's lines that follow it): "besiegt" is "defeats", said of a colony that
+    // was destroyed, and of a meteor shower that cannot defeat anything: "zerstört"
+    '%s destroyed your colony at %s.': '%s zerstört Ihre Kolonie auf %s.',
+    'A meteor shower destroyed your colony at %s.': 'Ein Meteoritenschauer zerstört Ihre Kolonie auf %s.',
+    'The meteor shower destroyed your colony at %s.': 'Der Meteoritenschauer zerstört Ihre Kolonie auf %s.',
+    '%s destroyed your colony at %s. You %slost %d of your ships. %s lost %d. You lost %s people.': '%s zerstört Ihre Kolonie auf %s. Sie%s verlieren %d Schiffe. %s verliert %d. Sie verlieren %s Leute.',
+    '%s destroyed your colony at %s.  You lost %s of your ships. %s lost %s.  You lost %s people.': '%s zerstört Ihre Kolonie auf %s. Sie verlieren %d Schiffe. %s verliert %d. Sie verlieren %s Leute.',
+    // DOS 685: the apposition to the object takes its case ("einen Planeten, der")
+    'Warning: you are terraforming %s, a planet that will never become profitable.': 'Achtung: Sie terraformen %s, einen Planeten, der niemals Profit abwerfen wird.',
+    // DOS 702: "%Fss" adds an s to the name, which is wrong after s, ß, x, z ("Marss", "Alexs");
+    // the sentence without a genitive
+    '%s’s population growth rate has slowed.': 'Das Bevölkerungswachstum auf %s verlangsamt sich.',
+  },
   // adapted from official: a line whose English differs a little from one an
   // official translation has (a word, a clause, a number, a name): that
   // translation, edited as little as the difference needs. [the translation,

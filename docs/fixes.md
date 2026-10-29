@@ -62,15 +62,15 @@ version's slips that are in its own code, without the other edition's.
 
 ---
 
-## Translations (the French and Turkish wording)
+## Translations (the French, German and Turkish wording)
 
 Jake's rule (October 2026, `docs/roadmap.md`, "The translation rule"): a version plays its
 official translation as released, slips and all, and the remake's own translations follow the
 originals as closely as possible; every correction of official wording is an optional
 language update in the patch, never the default. So the patch carries them, in two fixes:
 
-- **`translations`** (Mac 1.2, DOS 2.0, Mac 2.0.1, Mac 3.0.1, Windows and Mac 4.0.5, 5.0.5, Palm, iOS, Android): "The French
-  and Turkish wording is put right". The tables are `js/lang-remake.js` `fr.patch`, `tr.patch`
+- **`translations`** (Mac 1.2, DOS 2.0, Mac 2.0.1, Mac 3.0.1, Windows and Mac 4.0.5, 5.0.5, Palm, iOS, Android): "The French,
+  German and Turkish wording is put right" (German: `de.patch`, `engine.js` `dePatchText`). The tables are `js/lang-remake.js` `fr.patch`, `tr.patch`
   (English line to corrected line, each with its reason as a comment) and `tr.patchWords` (a
   filling); `js/languages.js` lays them over the language as `rs.lang[code].fix.translations`
   (reports, hints, words) wherever a version shows that line, and `engine.js` `inLanguage`

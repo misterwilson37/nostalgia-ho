@@ -839,6 +839,59 @@ every version in its own language, French, Turkish, German and Spanish, identica
 German and Spanish identical, Turkish but for the tech kind. Patched French games read in 1.2, 2.0,
 3.0.1, 4.0.5, 5.0.5, the Palm and iOS: no placeholder, "undefined" or English quote left.
 
+## The patch for the official German (chunk 6)
+
+By Claude (Sonnet), working name **Umlaut**. The patch now puts right the official German, the DOS 2.0's
+and the Amiga's, in every version that shows it (Jake, October 2026: the unpatched game stays exactly as
+released, "even if it's wrong"; the patch is as clean and accurate as possible, spelling included).
+**The unpatched game is unchanged**: German reports, hints, Name a Star, Fix Spending, words and battle
+lines are byte-identical to the previous bundle in all ten versions that offer German, and French, Turkish
+and Spanish are identical with the patch on and off (`dump` comparison of every report and window text).
+
+**Gemini's nine German points** are real slips, but the remake shows none of them: they are in DOS strings
+627, 629, 631, 1027, 1032, 3060, 3280 and Amiga 53 and 661, which no version loads. Nothing to patch.
+
+**What was read:** every DOS German line the remake shows (the reports, names, battle window, classes,
+Name a Star, Fix Spending, Force End Turn) and the 179 interface rows sourced from the DOS 2.0 or the Amiga.
+
+**Whole lines** (`js/lang-remake.js` `de.patch`, by English, wherever a version shows the line):
+"besiegt" (defeats) for a colony destroyed, and for a meteor shower, becomes "zerstört" (five lines);
+"ein Planet, der" becomes "einen Planeten, der" (DOS 685, the apposition takes its case); DOS 702's
+"%Fss Bevölkerungswachstum" (wrong after s, x, z: "Marss") becomes "Das Bevölkerungswachstum auf %s ...".
+
+**Text rules over all German the patch shows** (`js/engine.js` `dePatchText`, idempotent; names untouched):
+- today's spelling: daß, haßt, muß, läßt, Paßwort, zuviel, zuwenig (the 1994 texts are in the spelling of
+  their day; the remake's own German already uses today's);
+- compounds written as two words: Zug Ende, Technik Ausgaben, Baby Boom;
+- Schilder (signs) for Schilde (shields); Weite (width) for Reichweite, also in the remake's own sentences
+  that carry DOS's word (option C); Abbruch for the button Abbrechen; "(4 - 7 Buchstaben)" and "2 bis 7
+  Buchstaben" for a star's name become Zeichen (it takes any character);
+- German quotation marks: `x' and '%s' (the DOS) and "x" and “x” become „x“.
+
+**Code.** `js/engine.js`: the French layer's helpers are now `patchDeep`/`patchLayer` (take the text
+function); `inLanguage` lays `dePatchLayer` over a German language when the patch is on; `dePatchText`,
+`HO.dePatchText`; the fix's title and text name German. `js/languages.js`: `deFix20`/`withDeFix` (DOS 2.0,
+Mac 2.0.1 and 1.2's German, read lazily); `patchFix` always makes a German fix. `js/ui-lang.js`: `frP` also
+puts German through `dePatchText`. `js/skins/amiga/ui.js`: the skin's own German words (which bypass the
+interface table) go through it with the patch on. `js/ui-text-notes-{de,fr,tr,es}.js`: the fix's new text.
+
+**Folded in on 29 October.** Chunk 6's diff was made on 28 October and applied by hand over the
+code as it then was (the French money in euros, the temperatures, the formats, "Every version's jokes",
+the iOS fillings fix): the fix's text now says everything it does (French, German and Turkish, the euro
+placement included), with its four notes rows to match. The unpatched game is unchanged (a dump of every
+version's German, French, Turkish and Spanish text, patch off, is identical before and after; patch on,
+French, Turkish and Spanish are too). `tools/notes-check.js` already covered German; it now also
+covers the Full Hoedown items, which the About window shows in the game's language
+(`docs/translations.md`). The French typography leaves a code reference ("tryEvacuatePlanet: 0x1000941e0")
+alone: no no-break space before its colon.
+
+**Not touched (a call for later):** "Schließen" for Quit (Amiga), "Licht" for Sparse, "Schiffbau" beside
+"Schiffsbau": understandable and not wrong.
+
+**Checks.** `lang-test.js --seeds=2` and `--adapted` on the ten rulesets: ok. `notes-check.js`: ok.
+`test.js <ruleset> --patch --lang=de` (dos, 3.0.1, original, iOS): plays to the end. `ui-lang-audit.js
+--lang=de`, all 16 skins one at a time: ok. 15 interface cells change with the patch (reviewed).
+
 ## The plan from here (chunks)
 
 Jake's policy (October 2026): the default preserves every official translation as released, and carries its words for game things into the remake's own text (option C); the patch is the best possible text everywhere, the official translations' own lines included, and each correction shows in every version that shows the line. The work is too big for one conversation, so it goes in chunks; each leaves the repo consistent and the tests passing.
@@ -847,7 +900,7 @@ Jake's policy (October 2026): the default preserves every official translation a
 2. **Done: option C, French** ("Option C, French (chunk 2)"; `docs/glossary-fr.md`), by rule 4's chain (1.2F, 3.0.1F, iOS): a French glossary as the Turkish one, applied to the remake's own French; where the chain picks different words for different versions, a list for the main Claudling (the interface is shared by every version: `HO.windowWords` already lays 3.0.1F's window words over a 3.0.1 game, and may be the way to do the rest).
 3. **Done: the patch for iOS's Turkish itself** ("The patch for iOS's Turkish (chunk 3)"): every iOS line, label and name, `tr.patch` and the new `tr.patchLists`, with the code that lays the lists over the language.
 4. **Done (chunk 5): the patch for the official French**: iOS's, 1.2F's and 3.0.1F's ("The patch for the official French (chunk 5)").
-5. **The patch for the official German**: the DOS 2.0's and the Amiga's.
+5. **Done (chunk 6): the patch for the official German**: the DOS 2.0's and the Amiga's ("The patch for the official German (chunk 6)").
 6. Spanish has no official translation: nothing to carry, nothing to patch.
 7. **Done (chunk 4): Turkish for Mac 1.2, DOS 2.0 and Mac 2.0.1** ("Turkish for 1.2 and 2.0 (chunk 4)"), which had none. They share 60 report lines, 35 of which already have Turkish (iOS's lines, or the remake's from 3.0.1); 25 are new, with the versions' window words and battle window. Built as their Spanish and German are, in the glossary's words; the patch's entries and `trSuffixes` reach them as they are.
 
