@@ -14,8 +14,6 @@ the version notes, patch notes and all four manuals in French, German, Spanish a
 (`docs/translations.md`), plus the DOS 2.0 and Mac 3.0 manuals as web pages; the Full Hoedown list
 and the translation notice (`docs/translations-notes/`) are not done.
 
-**In progress:** the Amiga skin from Jake's real-Amiga captures.
-
 **Next, in Jake's order (October 2026):**
 1. Spaceward Ho! 2.1 for the Amiga: **studied** (October 2026), `docs/amiga-21.md`. The German
    2.1 (both disks) and the 1995-06-06 English disk 1 ("[h WT]", a repack, not a crack) play
@@ -67,7 +65,8 @@ and the translation notice (`docs/translations-notes/`) are not done.
       2026), the follow-up:** the label is "2.x Amiga (1994–95)"; the End Turn button is drawn
       per language (Amiga: French, Turkish, Spanish beside the German, which English shows too,
       as released, with an English "Do Turn" button in the patch, `amigaEndTurnEn`, since the Amiga
-      English edition keeps the German pictures, October 2026 from the author's discs; Mac 1.2: its
+      English edition keeps the German pictures, October 2026 from the author's discs; the German
+      stays 2.0's text, "Version 2.0", as Jake decided: 2.1 is the English update; Mac 1.2: its
       own French one in French); the temperatures and the sent-message lines are read from the
       program and shown as it printed them, with two patch fixes (`amigaTenths`,
       `amigaChatNames`, then `amigaEndTurnEn`); the skin's German uses the Amiga's own line for the revert question and
