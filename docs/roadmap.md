@@ -173,8 +173,8 @@ and the translation notice (`docs/translations-notes/`) are not done.
       truncated), in the unit as released or the player's, by the version's own formula (324 up to 4.0.5, 360 in 5.0.5, the Palm, iOS
       and Android; the German 2.0's slip, settled by its code: the report's formatter takes the same arguments as the panel's),
       and the version's own Celsius box speaks in the reports as in the panels (`HO.tempUnit`). The volcano report is in every
-      version's files but no version sends it. 3.0.1F's report code is not to hand (the comma its report writes, the point its
-      window writes, and 1.2's formula: LIKELY). `node tools/temp-check.js` asserts every version and language (the reports of
+      version's files but no version sends it. 3.0.1F's report code was read (the comma its report writes, the point its
+      window writes, and 1.2's formula: CONFIRMED, `docs/301fr-findings.md`). `node tools/temp-check.js` asserts every version and language (the reports of
       games played in the engine, in all three choices, against the table written out in the test from the sources).
       **The explored-stars lists (October 2026).** The originals draw the temperature and the gravity as separate fields (temperature
       first); the remake's list for 1.2 and 2.0 joined them with two spaces and showed 3.0.1, 4.0.5 and 5.0.5 in 2.0's order and, for 5.0.5, a

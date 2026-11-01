@@ -2075,7 +2075,7 @@ E.registerRules('301', Object.assign({}, D, {
   fmtNum: E.niceNum, fmtMoney: E.moneyNice, // (a sum is sprintf("$%s", nice): "$-1,234")
   // the New Game window's Version and Edition menus (engine.js editions)
   family: '3.0', edition: { version: '3.0.1', name: 'Mac', platform: 'Mac', year: 1993 }, skins: ['mac3c', 'mac3'],
-  hints: false, // this game had no between-turn tips (4.0.5 and 5.0.5 do)
+  hints: false, // this game had no between-turn tips (4.0.5 and 5.0.5 do); the French 3.0.1F's STR# 3100 hints and ICN# 3170 are dead data too (nothing makes a type 29 report: docs/301fr-findings.md)
   // the New Game window lists rulesets by year, then version (engine.js ruleOptions)
   version: '3.0.1', platform: 'Mac', year: 1993,
   // the unofficial 3.0.1.1 patch (engine.js fixed; docs/fixes.md, "3.0.1"):

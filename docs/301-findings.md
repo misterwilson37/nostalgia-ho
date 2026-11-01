@@ -676,17 +676,25 @@ and nothing more is asked.
 `DrawPlanetRect @15491e`: the temperature is `sprintf(STR# 4000.2 "%d.%1.1d°F", T / 10, |T| mod 10)` with T = star temperature −
 home + 720 in tenths (so "72.0°F"; the sign is lost between −0.9 and −0.1), the gravity `sprintf(4000.3 "%d.%2.2dG", r / 100,
 r mod 100)` with r = `LDIV(g × 100, home g)` truncated. 3.0.1F's STR# 4000.2 is "%d.%1.1d°C" and 4000.3 "%d.%2.2dG" (points; the
-French *reports* 1000.16, 29 and 45 have commas). 3.0.1 English has no °C at all; 3.0.1F's own code is not to hand, so its °C
-formula is taken from 1.2 and 4.0.5, which agree ((T − 324) × 5 ÷ 9): LIKELY, unsettled by a tenth at most.
+French *reports* 1000.16, 29 and 45 have commas). 3.0.1 English has no °C at all; 3.0.1F's own code (read in November 2026, `docs/301fr-findings.md`, "What else differs") computes (T − 324) × 5 ÷ 9
+in `DrawPlanetRect @154bae` (T = t + 720 − home, tenths, `LDIV` by 9, truncated toward zero; printed with T ÷ 10 and |T| mod 10): CONFIRMED, as 1.2's and 4.0.5's.
 `docs/dos-findings.md`, "The panel's numbers", has every version.
 
 ## The reports' numbers (October 2026)
 
 The exploring report (STR# 1000.29 "…Gravity: %d.%2.2dG. Temp: %d.%1.1d°F. Metal: %s.") is filled by `ExploreStar @a549e` (message 0x405:
 r = `LDIV(g × 100, home g)`, T = t + 720 − home) and printed by `GetReportString` @160b94 with r / 100, r % 100, T ÷ 10 and |T| mod 10:
-"Temp: 72.5°F", the panel's numbers. 3.0.1F's report (1000.29 "%d,%1.1d°C") has a comma where its window (4000.2) has a point; its
-code is not to hand (1.2's formula: LIKELY). `docs/dos-findings.md`, "The reports' numbers".
+"Temp: 72.5°F", the panel's numbers. 3.0.1F's report (1000.29 "%d,%1.1d°C") has a comma where its window (4000.2) has a point; the
+same arithmetic fills it in 3.0.1F (`ExploreStar @a5556`, `GetReportString @1612bc`): CONFIRMED. `docs/dos-findings.md`, "The reports' numbers".
 
 ## The Explored Planets list (CONFIRMED, October 2026)
 
 `ListExploredStars @140004` opens the window (the Sort By menu, MENU 6040 "Metal, Quality, Gravity, Owner", set to 2 = Quality), `InitStarsList @140192` collects the stars whose record has a date from 2000 on (explored, or seen owned) and that have not gone nova, sorts them by name and then by the menu (a jump table of four swap sorts: Metal and Quality best first, Gravity lowest first, Owner by colour), and `MakeOneListedStar @14073e` makes a row of five fields (name 100 pixels, temperature 75, gravity 75, metal 75, Own / Explored / Enemy; "No Climate Info." 150 + 35 + 40 for a star never explored). `docs/dos-findings.md`, "The explored-stars lists".
+
+## The French 3.0.1F (November 2026)
+
+Its code was read too: `docs/301fr-findings.md`. The hints (`STR#` 3100, `ICN#` 3170) that only the French program has are dead data (the
+report window can draw a type 29 report from them, `GetReportString @1607e8` / `GetIconID @161394`, but nothing in the program makes one);
+its temperatures are Celsius by (T − 324) × 5 ÷ 9 (five routines); it has a licence-stamp scheme (`PICT` 4010). The English 3.0.1's rules
+here are unchanged. The English fork was not at hand for that reading, so a routine-by-routine comparison of the two programs is open
+(`docs/301fr-findings.md`, "What else differs").

@@ -599,7 +599,8 @@ function say(G, text) { return sumText(G, tempText(G, text, reportTemps(G, say0(
 //   1.2's code (ExploreStar @a3c10, DrawPlanetRect @c44f6, InitStarsList @12072a: docs/12-findings.md) takes tenths of °F
 //   T, works out (T - 324) x 5 / 9 (324, not 320: a planet at home's 72.0 shows 22.0, 50.0 shows 9.7), truncated toward
 //   zero, and prints it as "%d,%1.1d" with the whole and the last digit of |tenths| (c12Text); the French 2.0 follows
-//   1.2F (the translation rule), 3.0.1F is the same publisher's port (LIKELY: its code isn't to hand);
+//   1.2F (the translation rule), 3.0.1F is the same publisher's port (CONFIRMED in its own code: DrawPlanetRect @154bae,
+//   ExploreStar @a5556, GetReportString @1612bc, MakeOneListedStar @1407ea, docs/301fr-findings.md);
 // - the German 2.0 truncates ("%d,%1.1d°C" worked out from whole degrees, js/languages.js explored20), and the panel
 //   and the list print the whole degrees' last digit as the tenths (DOSHO.EXE 0x2105e, 0x6ad8d);
 // - every other version rounds (iOS's French, the remake's).

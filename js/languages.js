@@ -273,7 +273,7 @@ function official301() {
     }
   }
   // the temperatures 3.0.1F writes in °C ("%d,%1.1d°C"; the canned message's "%d.%1.1d°C"), where the engine's English line
-  // has the whole degrees Fahrenheit: by 1.2's formula (E.c12Text; 3.0.1F's code isn't to hand, LIKELY the same), first
+  // has the whole degrees Fahrenheit: by 1.2's formula (E.c12Text; 3.0.1F's own code does the same, docs/301fr-findings.md), first
   // in the list so they win over iOS's "Temp: %s"
   if (F301 && E301) {
     const f1 = (n) => F301['1000'][n].replace(/%\.\*s/g, '%s'), deg = (t) => +String(t).replace(/[^\d-]/g, '');
