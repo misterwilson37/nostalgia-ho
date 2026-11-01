@@ -27,6 +27,8 @@ window.HOMAC2 = {
   // its sounds: SOUNDS.mac2 (mac2c) in js/skins.js: the thirteen of 1.2
   battleBg: '#fff', // the big ship pictures are drawn on white (PPMp too)
   endTurnPic: PIC(5500), // "End Turn ⌘T", 52x33 (pressed: 5501); colour: PICT 5000
+  // a game in another language shows that language's button, drawn in the same lettering (tools/skins/endturn_langs.py; no original Mac 2.0.1 had one)
+  endTurnPics: { de: PIC('5500-de'), fr: PIC('5500-fr'), tr: PIC('5500-tr'), es: PIC('5500-es') },
   endTurnKey: '⌘T', // File menu: End Turn ⌘T
   // The title: 2.0's start-up window (DLOG 1201, procID 3, altDBoxProc;
   // colour DLOG 1200): the splash (PICT 1003, colour 1002: "2.0", the

@@ -81,7 +81,8 @@ window.HOTHEME_OVER = {
   cascadeReports: v12 || v2,
   // "End Turn ⌘T"; 1.2's own says "Fin Tour" (p5500), which a French game shows; the English one (endturn, 3.0.1's) any other language
   endTurnPic: P + (v12 ? 'endturn' : 'p5500'),
-  endTurnPics: v12 ? { fr: P + 'p5500' } : undefined,
+  // 3.0.1 (and its colour skin): the other languages' buttons, drawn in its lettering (tools/skins/endturn_langs.py), French from 1.2F's "Fin Tour"
+  endTurnPics: v12 ? { fr: P + 'p5500' } : { de: P + 'p5500-de', fr: P + 'p5500-fr', tr: P + 'p5500-tr', es: P + 'p5500-es' },
   // Ship pictures: engine, hull and nose side by side, as in the DOS game,
   // but 40x40 parts (2600 + the DOS part number less 100), shown twice the size.
   shipPic(d, IMG) {

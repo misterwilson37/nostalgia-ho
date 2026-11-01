@@ -132,7 +132,8 @@ window.HOTHEME = {
   // ring. (The game draws nothing for fleets in flight; this remake keeps
   // the icon on them so they can still be picked out.)
   marker: (f, mine) => (mine && !f.sat ? P + 's3114' : null),
-  endTurnPic: P + 'd5000',
+  endTurnPic: P + 'd5000', // English; the other languages' own: German is the German DOS 2.0's (d5000-de), the rest drawn in its lettering (tools/skins/endturn_langs.py)
+  endTurnPics: { de: P + 'd5000-de', fr: P + 'd5000-fr', tr: P + 'd5000-tr', es: P + 'd5000-es' },
   battlePlanet: P + 'i1004', // the planet in a battle: the DOS game's own plain planet (as the Mac skins built on this one)
   // stand-ins: an ally's halo over the planet (3.0.1's), the rank pictures
   allyPic: (IMG, small) => { const n = small ? 'p507' : 'p506', k = fillNames(n).map(x => P + x).find(x => IMG[x]); return k ? IMG[k] : null; }, // (always a stand-in: a skin's own is made see-through round the halo)
