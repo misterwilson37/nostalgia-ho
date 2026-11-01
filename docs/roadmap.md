@@ -103,9 +103,9 @@ and the translation notice (`docs/translations-notes/`) are not done.
       **3.0.1F**, the official French 3.0.1 (Jake's disc), replaced the remake's French for
       3.0.1, windows included, and is the nearest official source for 4.0.5's French (then iOS's);
       its Ship joke replaced `fr.own`'s. Counts in `docs/translations.md`. Menu notes in four
-      languages for the two new fixes. **Not audited yet** (another Claude may do it): the German
-      adaptations of the DOS 2.0 text, 1.2F's French adaptations, the interface's other adapted
-      rows (`~iOS`, `~1.2F`, `~DOS 2.0`, `~Amiga`); and 3.0.1F has no manual (none on the disc).
+      languages for the two new fixes. **Audited since** (round four, and again independently in round five,
+      `docs/proofread-2026-10.md`): the German adaptations of the DOS 2.0 text, 1.2F's French adaptations,
+      the interface's adapted rows (`~iOS`, `~1.2F`, `~DOS 2.0`, `~Amiga`); 3.0.1F still has no manual (none on the disc).
    g. **Done (October 2026).** **Version notes:** the About window's new "When it came out" section
       (`released` in `js/version-notes.js`, in French, German, Spanish and Turkish), each line marked
       Sure, Reported or Sources disagree: 1.0 born on the Macintosh in 1990 (the 5.0 manual's "Why

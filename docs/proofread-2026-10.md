@@ -998,3 +998,58 @@ One place now decides it: `HO.currency(G)` (`js/engine.js`, `EURO_FRENCH`). **"�
 **The Palm's euro preference** ("Money in € not $") is wired now (October 2026): `docs/palm-windows.md`, "Money in € not $ (+0x2e6), wired". The Palm writes its sign first with no space, "€1,234" and "(€1,234)", in every language; `HO.prefs.euro` decides for the Palm ruleset, and a French Palm that never chose starts with the French's "€" (above).
 
 **Checks.** `tools/currency-check.js` (new): the engine for every ruleset and language (the sign, every money format, the reports), and the page in every skin, in French, Turkish and English (the main screen, a home star's panel and bars, reports with money, the windows): "all 46 runs ok" (14 French runs and the patched French of the classic, Palm, iOS and Android skins too); the French runs of iOS, Android, 5.0.5 and the Palm show no "$" where money shows, and 1.2 to 4.0.5 French and every other language no "€". `lang-test.js`, `ui-lang-audit.js`, `test.js --patch --lang=fr` (iOS, 5.0.5, Palm) as before.
+
+## An independent re-audit of the adaptations (round five, October 2026)
+
+By Claude, from the brief "Audit the remaining adapted translations". The brief and the roadmap still said these were
+unaudited; round four above had done them, so this is a second, independent pass over the same three groups, to
+confirm it and catch what it missed. Method: `node tools/lang-test.js --adapted` lists the game-text adaptations; for
+each, the official source line's translation was found (the official lists, the iOS lists, 1.2F/3.0.1F, the
+DOS 2.0 German by id, the Amiga's strings) and set beside the English, the adapted default and the English it was
+adapted for. A difference is an *adaptation* if the English needs it (a filling, a version number, a clause, a word
+the English changed, casing that follows the English) and a *deviation* if not.
+
+**Read:** 21 French and 28 German game-text adaptations (the German count was 22 in round four); 19 `~DOS 2.0`,
+27 `~Amiga`, 4 `~1.2F`, 1 `~3.0.1F`, 65 French and 52 Turkish `~iOS` interface cells (168 in all). The 40 Turkish
+game-text adaptations (iOS's, checked in earlier chunks) were not read again.
+
+**Result: round four stands.** Every German game-text adaptation, and every `~DOS 2.0`, `~Amiga` and `~1.2F` row, is the
+official wording with only the English's change ("Version 2.0.1" to "4.0.5", "verlassen" to "räumen", the allies
+filling, a dropped clause, "Nom de la nouvelle galaxie:" to "Nom de la galaxie"). Official quirks are kept
+("besiegt", "Meteoritenschauer", "1 Schiffe", "belles petites planètes", "tirez là"). The battle lines' `%s` ("Sie%s
+gewinnen") reads "Sie und Ihre Verbündeten gewinnen" with the allies filling. Eight small deviations were found
+in rows round four had not touched, and changed (the default goes back to the official, what it showed before is the patch's); four more are noted below:
+
+| Row | Language | English | Default now (official) | With the patch | Why |
+|---|---|---|---|---|---|
+| interface | French | Review battle… | Revoir bataille… | Revoir une bataille… | iOS's "Revoir batailles" is without an article; the sibling rows ("Review Battle…", "Review battle") already say "Revoir bataille"; the article was the remake's |
+| interface | French | Your assembly lines are full. | Vos chaines d’assemblage sont pleines. | Vos chaînes d’assemblage sont pleines. | iOS: "chaines", the circumflex missing (Alert Strings 15) |
+| interface | Turkish | Your assembly lines are full. | Senin üretim tezgahların dolu. | Üretim hatların dolu. (unchanged) | iOS's "senin" had been dropped; the English has "Your" |
+| interface | French | Congratulations! You have achieved the rank of: | Félicitations ! Vous avez atteint le rang de: | …le rang de : | iOS: "rang de: %s", no space before the colon; the space is a correction |
+| interface | Turkish | the same | Tebrikler! Senin eriştiğin derece: | (no patch) | iOS's "Senin" had been dropped |
+| interface | French | Master Points: | Master Points: | Master Points : | iOS: "Master Points: %u", no space |
+| hint | French | Option-drag in Organize Fleets to split up ship piles. | …groupes de vaisseaux | « Organiser Flottes »… vaisseaux. (the patch's existing modern wording) | The official hint has no final full stop |
+| password | German | Password | Paßwort | Passwort | The Amiga's own 1994 spelling is the default (Jake: the original is the original); the modern spelling is the patch's |
+
+**The rule (Jake, October 2026):** the default is the original, as released, with only what the English needs; the patch is the best a modern
+translation can do. Both halves were applied to this pass's rows: each patch wording above is the modern correct form (the Turkish rank line,
+which had no patch, now says "Tebrikler! Ulaştığın derece:" for iOS's stilted "Senin eriştiğin derece:"), and the German "Passwort" question
+below is settled the same way.
+
+**Left as they are, noted:**
+- **German 4.0.5 "Artwork by … Bob Van de Walle."** The English of 4.0.5 has the capital W; the German says "walle", as 3.0.1's English does. The
+  adaptation table matches English without case (`HO.langNormEn`), so one entry serves both. Showing "Walle" in
+  4.0.5 only needs case-aware matching (or a patch entry), a code change, not a wording one.
+- **German "Paßwort"** is now the default (the Amiga's spelling), "Passwort" the patch's (as `dePatchText` already modernizes the game text's "daß", "muß", "Paßwort", above); a scan of the Amiga's and the DOS 2.0's strings against the interface's German
+  found no other official old spelling ("daß", "muß", …) modernized in a default.
+- **"Revoir bataille" in two other rows** ("Review Battle…", "Review battle"): the same article question as the first row above, never patched.
+- **German "Queue ships at %s"**  has the same words as "Build ships at %s": the German has no word for queueing; no official line to follow.
+- **Rows marked `~iOS`, `~1.2F` or `~DOS 2.0` with no official counterpart** at all ("Auto-Play This Turn", "Give to", "Money (you
+  have %s)", "Computer home systems", "Population"): remake wording; their marks are loose, harmless.
+- **"Organize fleets…" (French)**: the source says "vaisseaux" for the English "ships" and the row's English says
+  fleets, so "Répartir flottes…" is the English's change.
+
+**Checks.** `node tools/lang-test.js --adapted` ok; `--seeds=2` for every ruleset and language ok; `node tools/notes-check.js` ok;
+`node tools/ui-lang-audit.js dos mac3 mac4 w95 ios amiga --lang=fr|tr|de`: all 36 runs ok (a subset of the skins, one language at a time: the changed rows are
+shared by every skin; the full all-skins run was not finished); `node tools/test.js original --patch --lang=fr|de|tr`: the same game in all three.
+
