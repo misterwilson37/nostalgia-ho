@@ -151,5 +151,10 @@ html .card, html .clock, html .tip { color: #000; color: lch(from var(--ink) cal
    warnings (--hat, --neg) on the look's near-black panels: mixed toward the words'
    colour, as the modern looks do in their dark blocks; a dark --ink (Cozy) keeps
    them dark */
-html .box h3, html .frow.enemy .ftext div:first-child, html #handover h2 { color: color-mix(in srgb, var(--hat) 60%, var(--ink)); }
+html .box h3, html .frow.enemy .ftext div:first-child, html #handover h2 { color: color-mix(in srgb, var(--hat) 40%, var(--ink)); }
+/* links and the Help window's page follow the look's dark surfaces (the contrast scan: default blue links on near-black, grey words on the Help page's light yellow) */
+html a:link, html a:visited { color: var(--hi); }
+html .help { background: var(--plat2); color: var(--ink); }
+html .help .sub { color: var(--sub); }
+html .win .help .tip, html .win .help .tip.sub { color: #1f1f1f; }
 html .kv.neg b, html .warn, html .breport .kill { color: color-mix(in srgb, var(--neg) 60%, var(--ink)); }

@@ -10,7 +10,8 @@
 .box, .designer { border-color: #fff #000 #000 #fff; }
 #menubar { background: #fff; }
 #menubar .logo { color: #0055aa; }
-.mbtn:hover, .mbtn:focus-visible, .dropdown button:hover, .dropdown button:focus-visible { background: #6688bb; color: #fff; }
+.mbtn:hover, .mbtn:focus-visible, .dropdown button:hover, .dropdown button:focus-visible { background: #46689a; color: #fff; }
+a:link { color: #0000b0; } a:visited { color: #50008a; }
 button:not(.mbtn):not(.close):not(.tbtn):not(.clock):not([role=menuitem]) {
   background: #aaaaaa; border-color: #fff #000 #000 #fff; box-shadow: none;
 }

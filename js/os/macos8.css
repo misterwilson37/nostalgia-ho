@@ -6,6 +6,8 @@
    slider with a pointed thumb and grey scroll bars. The classic (5.0.5)
    skin's default look; the Mac 4.0.5 skins' second. */
 @import url("base.css");
+/* the headings take the player's hat colour; on Platinum's grey the default red read 4.1:1 (the contrast scan) */
+html .box h3 { color: lch(from var(--hat) min(l, 36) c h); }
 html select, html input[type=text], html input[type=number], html input:not([type]) {
   font: inherit; color: #000; border: 1px solid; border-color: #777 #fff #fff #777; border-radius: 0; background-color: #fff;
   box-shadow: inset 1px 1px 0 #333;

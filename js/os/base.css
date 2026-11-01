@@ -10,7 +10,7 @@
    This file is the classic skin's own chrome as it was before looks were
    split out; every look starts from it. */
 :root {
-  --plat: #dedede; --plat2: #cfcfcf; --edge: #8e8e8e; --ink: #1d1b22; --sub: #5d5a66;
+  --plat: #dedede; --plat2: #cfcfcf; --edge: #8e8e8e; --ink: #1d1b22; --sub: #57545f;
   --hi: #2f4fb8;
   --ui: Geneva, "Lucida Grande", Verdana, sans-serif;
 }

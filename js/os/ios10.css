@@ -11,9 +11,9 @@
    CSS. The iOS skin's default look. */
 @import url("base.css");
 :root {
-  --plat: #efeff4; --plat2: #ffffff; --edge: #c8c7cc; --ink: #000; --sub: #8e8e93; --hi: #007aff;
+  --plat: #efeff4; --plat2: #ffffff; --edge: #c8c7cc; --ink: #000; --sub: #69696d; --hi: #0066d5;
   --ui: -apple-system, "SF Pro Text", "SF UI Text", system-ui, "Helvetica Neue", Helvetica, Arial, sans-serif;
-  --tint: #007aff; --green: #4cd964; --hair: rgba(0,0,0,.2);
+  --tint: #0066d5; --green: #4cd964; --hair: rgba(0,0,0,.2);
 }
 body { font-size: 13px; -webkit-font-smoothing: antialiased; }
 /* the bar at the top: a translucent navigation bar with its hairline */
@@ -21,7 +21,7 @@ body { font-size: 13px; -webkit-font-smoothing: antialiased; }
 #menubar .logo { font: 600 16px var(--ui); color: #000; letter-spacing: 0; }
 #menubar .logo:hover, #menubar .logo:focus-visible { color: var(--tint); background: none; }
 .mbtn { font: 15px var(--ui); color: var(--tint); border-radius: 6px; padding: 3px 8px; }
-.mbtn:hover, .mbtn:focus-visible, .mbtn[aria-expanded=true] { background: none; color: #66aaff; }
+.mbtn:hover, .mbtn:focus-visible, .mbtn[aria-expanded=true] { background: none; color: #004a99; }
 #title { color: #000; font: 600 13px var(--ui); }
 /* the menus: action sheets, a rounded group of centred blue items */
 .dropdown { top: 32px; min-width: 260px; background: rgba(248,248,248,.97); border: 0; border-radius: 13px; padding: 0; overflow: hidden;
@@ -122,3 +122,11 @@ html .yard .tm input[type=range] { background: linear-gradient(90deg, var(--tint
    nearest it can draw, the colours only (the see-through dark thumb). Chromium
    drops the bars above if it sees scrollbar-color at all, so only Firefox is let in. */
 @supports (-moz-appearance: none) { html, html * { scrollbar-width: thin; scrollbar-color: rgba(0,0,0,.35) transparent; } }
+/* the iOS skin's dark dialog: its small words keep the skin's lavender (not the look's --sub), the white Options pill takes dark words,
+   and a Help tip (light yellow) dark ones (the contrast scan) */
+html.skin-ios .win:not(.alert) .newgame legend, html.skin-ios .win:not(.alert) .newgame small, html.skin-ios .win:not(.alert) .newgame output,
+html.skin-ios .win:not(.alert) .newgame summary, html.skin-ios .win:not(.alert) .newgame .rating > span { color: #a9bce8; }
+html.skin-ios .win:not(.alert) .newgame .opts label span { color: #3a3a3c; }
+html.skin-ios .win:not(.alert) .help .tip.sub { color: #3a3a3c; }
+
+html.skin-ios .win a:link, html.skin-ios .win a:visited { color: #9cc3ff; } /* the default blue link on the skin's dark navy dialog read 1.7:1 */

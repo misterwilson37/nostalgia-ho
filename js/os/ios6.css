@@ -13,7 +13,7 @@
   --plat: #c5ccd4; --plat2: #fff; --edge: #acb3bb; --ink: #000; --sub: #4c566c; --hi: #2a68c8;
   --ui: "Helvetica Neue", Helvetica, Arial, sans-serif;
   --pin: repeating-linear-gradient(90deg, #c5ccd4 0 5px, #cbd2d8 5px 7px);
-  --navbar: linear-gradient(#b0bccd 0%, #889bb3 50%, #8195af 51%, #6d84a2 100%);
+  --navbar: linear-gradient(#8296b2 0%, #607794 50%, #5a7190 51%, #4b6283 100%);
   --barbtn: linear-gradient(#8fa3bf 0%, #6b84a6 50%, #5e7a9f 51%, #4a6c9b 100%);
   --gloss: linear-gradient(#fff 0%, #f3f3f3 50%, #e8e8e8 51%, #e0e0e0 100%);
   --blue: linear-gradient(#5aa2f8 0%, #2b7de1 50%, #1a6bd4 51%, #1e72dc 100%);
@@ -26,7 +26,7 @@ body { font-size: 13px; }
 .mbtn { font: bold 12px var(--ui); color: #fff; text-shadow: 0 -1px 0 rgba(0,0,0,.5); padding: 4px 9px; border-radius: 5px;
   background: var(--barbtn); border: 1px solid #375073; box-shadow: inset 0 1px 0 rgba(255,255,255,.3), 0 1px 0 rgba(255,255,255,.25); }
 .mbtn:hover, .mbtn:focus-visible, .mbtn[aria-expanded=true] { background: linear-gradient(#5c7396, #3d5a85); color: #fff; }
-#title { color: #fff; font: bold 13px var(--ui); text-shadow: 0 -1px 0 rgba(0,0,0,.5); }
+html #menubar #title { color: #fff; font: bold 13px var(--ui); text-shadow: 0 -1px 0 rgba(0,0,0,.5); }
 /* the menus: an action sheet, white glossy buttons on smoky black */
 .dropdown { top: 32px; min-width: 260px; background: linear-gradient(rgba(40,48,62,.94), rgba(10,14,22,.96)); border: 1px solid #000; border-radius: 8px; padding: 8px 10px;
   box-shadow: 0 6px 22px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.25); }
@@ -136,3 +136,12 @@ html .yard .tm input[type=range] { background: linear-gradient(90deg, #2a68c8 0 
    nearest it can draw, the colours only (the see-through dark thumb). Chromium
    drops the bars above if it sees scrollbar-color at all, so only Firefox is let in. */
 @supports (-moz-appearance: none) { html, html * { scrollbar-width: thin; scrollbar-color: rgba(0,0,0,.45) transparent; } }
+/* the iOS skin's dark dialog: its small words keep the skin's lavender (not the look's --sub), the white Options pill takes dark words,
+   and a Help tip (light yellow) dark ones (the contrast scan) */
+html.skin-ios .win:not(.alert) .newgame legend, html.skin-ios .win:not(.alert) .newgame small, html.skin-ios .win:not(.alert) .newgame output,
+html.skin-ios .win:not(.alert) .newgame summary, html.skin-ios .win:not(.alert) .newgame .rating > span { color: #a9bce8; }
+html.skin-ios .win:not(.alert) .newgame .opts label span { color: #3a3a3c; }
+html.skin-ios .win:not(.alert) .help .tip.sub { color: #3a3a3c; }
+
+html.skin-ios #menubar .mbtn:not(.logo) { color: #fff; } /* the skin's pale blue read 4.0:1 on the title bar */
+html.skin-ios .win a:link, html.skin-ios .win a:visited { color: #9cc3ff; } /* the default blue link on the skin's dark navy dialog read 1.7:1 */

@@ -20,6 +20,11 @@ body, html {
     text-shadow: none !important;
 }
 
+/* The skin's panels are dark under every OS look, so the words' colours are the skin's, not the look's: a look's own
+   --ink and --sub (dark on the light looks) sat on them unreadable (the contrast scan, docs/contrast-2026-10.md).
+   Loaded after the look, so this beats the look's :root. */
+:root { --ink: #e2e8f0; --sub: #94a3b8; }
+
 /* 
  * 2. Primary Layout: Menubar, Map, Panel, Scrim 
  */
@@ -102,6 +107,11 @@ fieldset {
     padding: 4px 8px !important;
     text-shadow: 0 0 8px rgba(56, 189, 248, 0.4) !important;
 }
+
+/* a look draws its title text on a light plate in its own colour; Gemini's title bar is dark with sky-blue words */
+.wtitle span { color: inherit !important; background: transparent !important; text-shadow: inherit !important; }
+a:link, a:visited { color: #7dd3fc !important; }
+.help .tip { background: rgba(56, 189, 248, 0.1) !important; color: #e2e8f0 !important; }
 
 b, strong, .val, .bval, td[align="right"], td:last-child, .right, .num, .budget, .cost, .tech, .savings {
     color: #facc15 !important;

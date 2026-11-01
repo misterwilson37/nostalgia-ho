@@ -14,12 +14,12 @@
    looks (Cozy, Gemini); no original ran in a browser. */
 @import url("base.css");
 :root {
-  --plat: #f2f2f5; --plat2: rgba(255,255,255,.78); --edge: rgba(0,0,0,.12); --ink: rgba(0,0,0,.88); --sub: rgba(0,0,0,.52); --hi: #007aff;
+  --plat: #f2f2f5; --plat2: rgba(255,255,255,.78); --edge: rgba(0,0,0,.12); --ink: rgba(0,0,0,.88); --sub: rgba(0,0,0,.62); --hi: #0059c1;
   --ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, "Helvetica Neue", "Segoe UI", Roboto, Arial, sans-serif;
-  --sf-text: rgba(0,0,0,.88); --sf-text2: rgba(0,0,0,.52);
-  --sf-glass: rgba(255,255,255,.62); --sf-glass-strong: rgba(250,250,252,.86); --sf-rim: rgba(255,255,255,.9); --sf-win: rgba(252,252,253,.96);
+  --sf-text: var(--ink); --sf-text2: var(--sub);
+  --sf-glass: rgba(255,255,255,.88); --sf-glass-strong: rgba(250,250,252,.86); --sf-rim: rgba(255,255,255,.9); --sf-win: rgba(252,252,253,.96);
   --sf-btn: rgba(255,255,255,.9); --sf-btn-active: rgba(0,0,0,.08); --sf-line: rgba(0,0,0,.1);
-  --sf-accent: #007aff; --sf-accent-active: #0062cc; --sf-on-accent: #ffffff; --sf-ring: rgba(0,122,255,.45);
+  --sf-accent: #0059c1; --sf-accent-active: #004aa0; --sf-on-accent: #ffffff; --sf-ring: rgba(0,122,255,.45);
   --sf-hover: rgba(0,0,0,.06); --sf-field: #ffffff; --sf-field-edge: rgba(0,0,0,.14); --sf-track: rgba(0,0,0,.16);
   --sf-shadow: 0 10px 30px rgba(0,0,0,.18), 0 0 0 .5px rgba(0,0,0,.12); --sf-win-shadow: 0 22px 60px rgba(0,0,0,.35), 0 0 0 .5px rgba(0,0,0,.18);
   --sf-btn-shadow: 0 1px 2px rgba(0,0,0,.12), 0 0 0 .5px rgba(0,0,0,.12), inset 0 1px 0 rgba(255,255,255,.8);
@@ -29,11 +29,11 @@
 }
 @media (prefers-color-scheme: dark) {
   :root {
-    --sf-text: rgba(255,255,255,.9); --sf-text2: rgba(255,255,255,.55);
+    --sf-text: var(--ink); --sf-text2: var(--sub);
     --plat: #1e1e20; --plat2: rgba(255,255,255,.06); --edge: rgba(255,255,255,.14); --ink: rgba(255,255,255,.9); --sub: rgba(255,255,255,.55); --hi: #0a84ff;
     --sf-glass: rgba(40,40,44,.6); --sf-glass-strong: rgba(44,44,48,.88); --sf-rim: rgba(255,255,255,.18); --sf-win: rgba(36,36,40,.97);
     --sf-btn: rgba(255,255,255,.12); --sf-btn-active: rgba(255,255,255,.22); --sf-line: rgba(255,255,255,.12);
-    --sf-accent: #0a84ff; --sf-accent-active: #409cff; --sf-on-accent: #ffffff; --sf-ring: rgba(10,132,255,.55);
+    --sf-accent: #0a5fcf; --sf-accent-active: #1766d9; --sf-on-accent: #ffffff; --sf-ring: rgba(10,132,255,.55);
     --sf-hover: rgba(255,255,255,.08); --sf-field: rgba(255,255,255,.07); --sf-field-edge: rgba(255,255,255,.16); --sf-track: rgba(255,255,255,.18);
     --sf-shadow: 0 10px 30px rgba(0,0,0,.5), 0 0 0 .5px rgba(255,255,255,.12); --sf-win-shadow: 0 22px 60px rgba(0,0,0,.6), 0 0 0 .5px rgba(255,255,255,.16);
     --sf-btn-shadow: 0 1px 2px rgba(0,0,0,.3), 0 0 0 .5px rgba(255,255,255,.12), inset 0 1px 0 rgba(255,255,255,.12);
@@ -48,7 +48,7 @@ body { font-size: 13px; }
 #menubar .logo { font: 600 14px var(--ui); color: var(--sf-text); letter-spacing: 0; border-radius: 999px; padding: 5px 12px; }
 #menubar .logo:hover, #menubar .logo:focus-visible { color: var(--sf-text); background: var(--sf-hover); }
 .mbtn { font: 13px var(--ui); color: var(--sf-text); border-radius: 999px; padding: 6px 12px; }
-.mbtn:hover, .mbtn:focus-visible, .mbtn[aria-expanded=true] { background: var(--sf-hover); color: var(--sf-text); }
+.mbtn:hover, .mbtn:focus-visible, .mbtn[aria-expanded=true] { background: var(--sf-hover); }
 .mbtn:focus-visible { outline: 3px solid var(--sf-ring); outline-offset: 0; }
 #title { color: var(--sf-text2); font: 13px var(--ui); }
 /* the menus: glass, the chosen item a blue pill */
@@ -135,7 +135,7 @@ html .yard .tm input[type=range] { background: linear-gradient(90deg, var(--sf-a
 .tm .tml { color: #248a3d; } .tm .tmr { color: #c93400; }
 @media (prefers-color-scheme: dark) { .tm .tml { color: #30d158; } .tm .tmr { color: #ff9f0a; } }
 .newgame .opts { border: .5px solid var(--sf-line); border-radius: 12px; background: var(--plat2); }
-a:link, a:visited { color: var(--sf-accent); }
+a:link, a:visited { color: color-mix(in srgb, var(--hi) 78%, var(--ink)); }
 /* scroll bars: thin overlay ones (standard properties) */
 html, html * { scrollbar-width: thin; scrollbar-color: rgba(128,128,128,.55) transparent; }
 /* dark: the game's own light surfaces keep dark words; the skin's reds are
@@ -149,3 +149,7 @@ html, html * { scrollbar-width: thin; scrollbar-color: rgba(128,128,128,.55) tra
   html .ptable th { border-bottom-color: var(--sf-line); }
   html .tskin select { color: var(--sf-text); }
 }
+
+/* the headings take the player's hat colour; on the dark panels the usual dark hat read 1.6 to 2.4:1 (the contrast scan): mixed toward --ink,
+   which is light on a dark look and dark on a skin that sets its own (Cozy) */
+@media (prefers-color-scheme: dark) { html .box h3 { color: color-mix(in srgb, var(--hat) 25%, var(--ink)); } }
