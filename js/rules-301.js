@@ -1643,7 +1643,7 @@ function dragShare(G, p, key, pm) {
 function barLocked301(G, p, slot) {
   if (typeof slot !== 'number' && !/^\d+$/.test(slot)) return null;
   const sid = +slot, s = G.stars[sid]; if (!s) return null;
-  const text = s.done301 && !s.abandon301 ? '$' + E.niceNum(s.oInc || 0) : null, refuse = locked301(G, sid);
+  const text = s.done301 && !s.abandon301 ? '$' + E.num(G, s.oInc || 0) : null, refuse = locked301(G, sid);
   return refuse || text ? { text, free: !refuse } : null;
 }
 // CONFIRMED (DecolonizeStar @a5ac0; 2.0's FUN_1040_38c0): a colony given up:
@@ -2058,7 +2058,7 @@ E.registerRules('301', Object.assign({}, D, {
   // (+0x1c) is kept in +0x24 when the player's first pass begins and the net (+8) in +0xc when ComputeIncomeAndPopulation starts; at the end
   // of the second pass (the net kept within $0 and $999,999,999) each is replaced by the figure now less the kept one. Ship Savings
   // have none. Start: both 0 ("(up 0)", "(up $0)" in the first year).
-  changes: { read: (G, p) => ({ metal: p.metal, money: 0, income: p.net301 || 0 }), line: (G, which, v) => E.changeNice(which, v) },
+  changes: { read: (G, p) => ({ metal: p.metal, money: 0, income: p.net301 || 0 }), line: (G, which, v) => E.changeNice(which, v, (n) => E.num(G, n)) },
   // CONFIRMED (ComparePlayers @140952 and its item proc @140b54, SaveComparisonInfoOne and Two @a65bc, @a663c, CalcShipPower @1354bc, DLOG/DITL 6050,
   // DITL 6100, STR# 1008 and 1020): the Compare Players window (Galaxy menu, cmd-Y) as 2.0.1's, 478 x 292, with a picture of its own on each row
   // (ICN# 3110, 3162, 3150, 4011, then 3100 to 3104: Income, Metal, Planets, Ships, the techs) and no "You won" line (only .5, .18 and .20 are

@@ -93,6 +93,14 @@ read** (and why it doesn't matter, or what it might hold).
 
 ## 3.0.1 (Mac, 1993)
 
+- `SpacewardHo301.img` (Jake's disk image, 1,048,576 bytes, MD5 `565e0c4869714a6366c54b4d7c2924db`,
+  SHA-1 `fedef60f781341b0d576e094df1aad33905f2962`; HFS volume "Spaceward Ho! 3.0.1", saved May 2020): the
+  program (type `APPL`, creator `SH3∆`, fork 762,786 bytes, MD5 `682c5a3516421432280ab60109e7a306`, created
+  4 January 1993, modified 15 March 1993, `vers` "3.0.1"), "Last Minute Notes" (4,963 bytes) and the volume's
+  own settings files. Checked November 2026 to be the build the rules were read from (all 574 named routines at
+  the addresses of `docs/coverage-301.md`: `docs/301-findings.md`, "Which build"). The French 3.0.1
+  (`Spaceward3_FR.sit`, fork 788,904 bytes, 1 December 1993, `vers` "3.0.1" region 1) was compared with it
+  routine by routine: `docs/301fr-findings.md`.
 - `app.rsrc` (the program's fork): `DITL` 96, `DLOG` 43, `ALRT` 52, `CNTL` 19, `STR#` 29,
   `MENU` 10: read (`docs/301-findings.md`, `js/rules-301.js`; `tools/extract/mac3.py`);
   `PICT` 146, `ICN#` 131, `ics#` 73, `icl4`/`icl8`/`ics4`/`ics8`, `snd ` 21: read (mac3.py);

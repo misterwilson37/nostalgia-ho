@@ -1682,6 +1682,16 @@ if (R301) {
   }, LANG_KEYS405.concat(['fixSpending', 'officialWindows', 'armageddonButtons']));
   R301.languages = ['en', 'fr', 'tr', 'de', 'es'];
   R301.lang = Object.assign({}, R301.lang, { fr: make('fr'), tr: make('tr'), de: make('de'), es: make('es') });
+  // 3.0.1F is a release of its own, not only a translation: its code differs from the English
+  // 3.0.1's where it counts (docs/301fr-findings.md, "What else differs"). The French copy is
+  // Upgrade Editions' two-human edition: CreateGalaxy @f02a6 (humans that may join = the
+  // smaller of 2 and 20 minus the computers), CreateNewPlayer @1220e0 (a third human gets
+  // ALRT 3370, "this version of Spaceward Ho! is limited to 2 human players", where the English
+  // says the galaxy is full) and ReadGalaxyInfo @12065a (a file with more than 2 humans is
+  // refused with the same box). Its numbers are written with a space between thousands
+  // (LongToNiceString @1247e: "%d %.3d", "%d %.3dK"), not the English comma. Only in French
+  // (rs.lang.fr.releaseRules, js/engine.js).
+  if (F301 && E301) Object.defineProperty(R301.lang.fr, 'releaseRules', { value: { maxHumans: 2, fmtNum: E.niceNumSp, fmtMoney: E.moneyNiceSp }, enumerable: true, configurable: true });
 
 }
 

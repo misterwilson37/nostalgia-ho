@@ -146,46 +146,111 @@ So the remake's 3.0.1 keeps `hints: false` in French and English alike, and the 
 the game: showing them would be an invention, not the program's behaviour. (The 40 hints are still
 of use as the official French for the later versions' hints, which have them, e.g. iOS.)
 
-## What else differs in the French program's code (beyond strings)
+## What else differs in the French program's code (read against the English, November 2026)
 
-The English 3.0.1's fork (`app.rsrc`) and its decompile were not in the working area when this was
-read (neither is in the repository), so the two programs' code could not be compared instruction
-by instruction. What was done instead: the English routines' addresses and sizes in
-`docs/coverage-301.md` (642 routines) against the French program's (590 named, 574 in common):
-**91 routines differ in size** (most of the other named routines in common are the same size; the English list
-also has unnamed library stubs). Read in the French code, and settled:
+Both programs were laid out by `tools/decompile/mac68k.py` (segment *n* at *n* x 0x10000) and
+compared routine by routine with the English 3.0.1's from `SpacewardHo301.img` (the same build
+the English rules were read from: `docs/301-findings.md`, "Which build"). The comparison is
+instruction by instruction, with the numbers that move when a program is relinked taken out:
+jump-table numbers (a call is compared by the routine it reaches), branch targets (compared as
+the instruction they reach), PC-relative and A5-relative addresses (the 409 A5 globals both
+programs use pair one to one, in every routine compared), and the literal pools after each
+routine (only text differs there). Immediates, field offsets, conditions and arithmetic are
+compared as they stand. **574 routines have the same name in both** (the French has 16 more,
+below).
 
-1. **Temperatures are shown in Celsius, by the formula of 1.2F and 4.0.5: CONFIRMED.** Five routines
-   compute `(t + 720 - home - 324) x 5 / 9` (`move.l #$2d0 ... sub.l #$144 ... x5 ... LDIV(., 9)`, in
-   tenths, truncated toward zero) where the English 3.0.1 keeps `t + 720 - home` in degrees
-   Fahrenheit: `DrawPlanetRect @154bae` (the planet panel, "%d.%1.1d°C": T / 10 and |T| mod 10),
-   `ExploreStar @a5556` (the exploring report's number, message 0x405), `GetReportString @1612bc`
-   (the exploring report's text, 1000.29, with the gravity r / 100 and r mod 100 beside it),
-   `MakeOneListedStar @1407ea` (a row of the Explored Planets list) and `MsgReactDetermineAllies
-   @95722` (a computer's remembered liking of a player's "I like planets that are ..." message, in
-   °C tenths; nothing reads that field afterwards, in either language, so it shows nowhere). The
-   gravity is the English's (g x 100 / home g, hundredths). Before this was read it was LIKELY;
-   the remake's French 3.0.1 already did exactly this (`js/engine.js` `cFormula`/`panelFormat`,
-   `k: 324`). Those five routines are 24-30 bytes longer than the English's, as the added arithmetic would make them.
-2. **A licensing scheme (Upgrade Editions' personalised copy), no game rule.** New in the French
-   program: `LicenseMasterApp @c015e`, `InsertMasterDisk @c0262`, `LicenseThisApp @c037a`,
-   `CreateLicensePict @c06a4`, `AddLicensePict @c07c6`, `SetNamedVolume @c00e0` and the
-   `_ResolveFileAlias`/`_GetAliasInfo` helpers (the English has only a 34-byte `GetLicensePict @c0004`
-   and `IsVolumeLocked`, `GetLicenseStrings`). `GetLicensePict @c0004` (called by `DoAppleMenu` and
-   `DoStartupFileStuff`) returns at once when `PICT` 4010 is in the program; otherwise it asks for
-   the master disk and writes the licence stamp as `PICT` 4010 into the copy. The stamp is the
-   owner's name and address, so it is not reproduced; it changes nothing in a game.
-3. **The Reports window has more**: `GetReportString` (+382 bytes), `GetIconID` (+344) and
-   `DetermineFocusStar` (+126) are longer: the type 29 case above, the Celsius figure, and a
-   different order of the cases (the exploring report's text is made at @1612bc, near the end of the
-   French routine, where the English's is at @160b94, near its start). A different layout, so the French was
-   not built from the very same object files; not by itself a difference in what the game does.
-4. **Small size differences with no cause found yet (the English code is needed)**: `SpendTechMoney` +18,
-   `DoOneBattle` +24, `DoBattleStage` -100, `CreateGalaxy` +26, `ReadGalaxyInfo` +38, `EndTurn` -12,
-   `ColonizeStar` / `DecolonizeStar` -14, `BuildDesignShips` -12, `DoComputerTurn` -10, `AddToHall`
-   -14, `FollowStarNameClick` -28, `SetCellsToNearbyStars` / `SetCellsToKnownStars` -20,
-   `MakeFleetDescription` +20, `SetMenuItems` +10 and a score of routines within 2-8 bytes. Most
-   of the small ones are the compiler's (a different layout moves a branch's size), but a rule change
-   among them cannot be excluded without the English code. **Unsettled; each is to be read against the
-   English routine when the English fork is available.** Until then the French game plays the
-   remake's 3.0.1 rules, whose documented behaviour was read from the English program.
+| Class | Routines | What it means |
+|---|---:|---|
+| Identical | 468 | the same instructions after the numbers above |
+| Code generation only | 58 | the same program, built differently (below) |
+| Runtime and library | 26 | MPW's C library, start-up and file glue; no game |
+| Localisation | 19 | strings, text layout, the Celsius figure, licensing, the Reports window |
+| **Behaviour** | **3** | the two-human edition and the old-file check (below) |
+| Only in French | 16 | licensing and alias glue (below), `memchr`, `memcpy`, `memcmp`, `PLStrCmp`, trap helpers |
+
+Of the 574, **93 differ in size** (the first pass listed 91 by comparing the two routine lists): 48 are code generation,
+24 library, 19 localisation, 2 behaviour (`CreateGalaxy`, `ReadGalaxyInfo`; the third behaviour
+routine, `CreateNewPlayer`, is the same size).
+
+**Code generation (58).** The French was built with another compiler build or options: it
+drops the English's register copies (`move.l d1,d0` after computing in `d1`;
+`movea.l a1,a0`), saves fewer address registers (`a2` unused), keeps 16-bit values in 16-bit
+registers (`ext.w` after `swap`, `tst.b` or `tst.w` where the English tests the long, `sub.w`
+where it has `sub.l`), and writes a condition as `sle.b / neg.b / beq`. 39 of the 58 are the same
+instructions once register names, register copies and register lists are ignored; the other 19
+were read hunk by hunk (the value ranges make each pair equal: a remainder of 100 or 2 or 5 fits a
+word; `LMOD` and `ULMOD` by 0xffff on a positive number). `SpendTechMoney` (18 bytes longer in French) is `100 - (money mod 100)` done in 16 bits, plus a test of a local that is
+`clr.w`'d just before (`bne` never taken) in front of the tech-level report: the guard of the training
+version's "Si vous aviez eu la version réelle..." line (STR# 1000.116, whose sound case
+`PlayAnnounceSound` has too), switched off in this build. `EndTurn` (-12), `ColonizeStar` /
+`DecolonizeStar` (-14: the English keeps a pointer on the stack across `BlockMove`), `BuildDesignShips`
+(-12), `DoBattleStage` (-100: the same), `DoComputerTurn` (-10), `AddToHall` (-14), `FollowStarNameClick`
+(-28), `SetCellsToNearbyStars` and `SetCellsToKnownStars` (-20) and the rest are of this class: no
+rule differs.
+
+**Behaviour (3 routines, 2 differences).**
+
+1. **The French copy is a two-human edition (Upgrade Editions'): CONFIRMED.**
+   - `CreateGalaxy @f0004` (hunk @f02a6; English hunk @f02a8): the game header's byte +1, the number of humans that may
+     still join, is `min(2, 20 - computers)` in French and `20 - computers` in English.
+   - `CreateNewPlayer @122010` (hunk @1220e0): the English refuses a human when the humans joined (header +2) reach
+     that number (`StandardAlert(3)`, STR# 4001.3, "this galaxy is already full. No more players can
+     join"). The French does not read byte +1 at all; it refuses the third human, when header +2 is 2,
+     with the toolbox `Alert(3370)` (ALRT/DITL 3370: "Désolé, mais cette version de Spaceward Ho! est
+     limitée à 2 Joueurs Humains." and "Contactez Upgrade Editions si vous souhaitez acquérir une
+     extension à 20 Joueurs Humains."). The English has the same ALRT/DITL 3370 ("Sorry, but this version of Spaceward Ho!
+     is for up to two human players. Contact us to get the upgraded 20 player version, if you'd like.")
+     and never shows it, as 1.2's (`docs/12-findings.md`).
+   - `ReadGalaxyInfo @12045c` (hunk @12065a): after the version checks, the French refuses (the same alert, the file
+     closed) a galaxy whose header +2 is more than 2; the English has no such check.
+   - Computers are not limited: 0 to 19 as in English. With 19 computers the French check still lets a
+     second human join (byte +1 is not read), 21 players; what the program does with 21 was not read and
+     the remake keeps 20 players in all.
+   - In the remake: `rs.lang.fr.releaseRules.maxHumans = 2` for the 3.0.1 ruleset (`js/languages.js`),
+     laid over the ruleset when a game is in French, with or without the patch (`js/engine.js`
+     `inLanguage`, `rulesIn`). New Game offers 1 or 2 people on this computer (and online seats) in
+     French; `newGame` keeps the first two humans of a French game. English and every other language
+     are untouched (`node tools/test.js 301 --digest` is the same).
+   - **The patch does not lift the cap.** It is a product limit (the box says the 20-player extension is
+     bought from Upgrade Editions), not a mistake in the program; whether the patch should lift it is for Jake.
+2. **`ReadGalaxyInfo @12045c`, hunk @120484: the old-file check.** The English refuses a file whose first four bytes
+   are `FMS∂` or `SH2∂` (0xb6 is MacRoman ∂) (STR# 4001.4, "can't read galaxy files created with versions 1.0 - 2.0.1"); the French
+   `FMR∂` or `SH2∂`. File format only: the remake reads no original files.
+
+**Localisation (19).** Strings, layout and tables that follow the language:
+
+| Routine | What differs |
+|---|---|
+| `DrawPlanetRect @154bae`, `ExploreStar @a5556`, `GetReportString @1612bc`, `MakeOneListedStar @1407ea`, `MsgReactDetermineAllies @95722` | the Celsius figure `(t + 720 - home - 324) x 5 / 9` (STR# 4000.3 "%d.%1.1d°C"); settled above and already in the remake (`cFormula`) |
+| `LongToNiceString @1247e` | thousands are separated by a plain space, not a comma: "%d %.3d", "%d %.3d %.3d", "%d %.3dK" (the English "%d,%.3d"). **Now in the remake's French by default** (`rs.lang.fr.releaseRules.fmtNum`, `engine.js niceNumSp`; the patch makes the space a no-break one, `frFilled`) |
+| `InitHOFList @144c76` | the Hall of Fame's date: the same "%d/%d/%d" with the arguments in another order, day / month / year in French (`DateTimeRec` day, month, year pushed 3rd-2nd-1st), month / day / year in English |
+| `MakeFleetDescription @130fa0` | the formats of a fleet's line: French "%d %.*ss %.*s (%d/%d)", "%P %.*s %.*s (%d/%d)" (the %P is "un", STR# 4000.42, which only the French has) and "%.*s %.*s (%d/%d)"; English "%d %.*s (%d/%d) %.*ss", "one %.*s (%d/%d) %.*s" and "%.*s (%d/%d) %.*s": the plural-s word moves from the end to after the count |
+| `DrawOneGroup @e2702`, `DoOneBattle @e0a8a` | the battle window's lines (the French passes the group's count to `MakeFleetDescription`, the English passes 0 and prints the count itself) and its text in size 12 (`TextSize(12)` around the strings, a `LineTo` offset of 12 where the English has 10) |
+| `RecalcFleetsAtNewStar @15078c` | two list rows' formats come from STR# 4000.43 and .44 (the English has them as literals, "%P’s ships" and "%P’s %P"). **The French resource has only 42 strings**, so `GetIndString` (@111a2: clears the string, copies only an index in range) leaves both formats empty and those rows are empty strings. Display only; not reproduced in the remake (listed below) |
+| `SetButtonStates @132bf0` | "Scrap All" / "Don't Scrap" from STR# 1020.22-23 ("Recycler tous", "Ne pas recycler") |
+| `SetMenuItems @f44a4` | the same enables; when no game is open the French also dims File item 9 ("Forcer la fin du tour...", the English "Force Turn Update"), which the English leaves as it was |
+| `LoadDrawPicture @134c76`, `LoadDrawColorIcon @12aca` | a missing colour picture or icon falls back to the black-and-white one (the English draws nothing / erases) |
+| `GetReportString @1607e8`, `GetIconID @161394`, `DetermineFocusStar @161fce`, `PlayAnnounceSound @161844` | the Reports window: type 29 (the dead hint), the training report (code 0x45b, STR# 1000.116, which plays sound 2001), and the cases in a compare chain instead of a jump table. `PlayAnnounceSound` was compared case by case: the 115 shared report types play the same sounds. The icon and focus-star cases are display and were not compared one by one; nothing makes either extra report |
+| `GetLicensePict @c0004`, `GetLicenseStrings @c0464` | the licensing (below); "Spaceward Ho! 3.0F2" in the serial line |
+
+The text of every other table (STR#, DITL, MENU) is what `tools/extract/languages.py --mac301` already
+reads; the code's literal pools differ only in these strings (checked pool by pool).
+
+**Licensing, no game rule.** The French has `LicenseMasterApp @c015e`, `InsertMasterDisk @c0262`,
+`LicenseThisApp @c037a`, `CreateLicensePict @c06a4`, `AddLicensePict @c07c6`, `SetNamedVolume @c00e0`
+and the alias helpers (`_ResolveFileAlias`, `_GetAliasInfo`, `ResolveFolderAliases`), so a copy
+written for its owner (`PICT` 4010, a licence stamp with a person's name and address: not a game
+picture, not extracted, not quoted) can be personalised from a master disk. `GetLicensePict @c0004`
+calls them in the French and is a stub in the English; it changes nothing in a game.
+
+**Runtime and library (26)** are MPW's C library and start-up (`_doprnt`, `fwrite`, `_fsOpen` with the
+alias resolving, `main`'s Gestalt tests, `_RTInit`, `signal`, `abs`, ...): different build, no game.
+
+**What was left:** the first pass listed `GetReportString` +382 / `GetIconID` +344 /
+`DetermineFocusStar` +126 as unexplained: they are the Reports window's chain of cases (above) plus the
+Celsius arithmetic and the dead type 29; none plays. Nothing else in the 91 changes what a game does.
+
+**Open for Jake:** (1) whether the patch lifts the two-human cap; (2) the empty rows of
+`RecalcFleetsAtNewStar` in French (the remake's fleet list shows its own rows; not
+reproduced); (3) the Hall of Fame's date order, the battle window's size-12 text and the "un" fleet
+lines are shown by the mac3 skin in the English form.

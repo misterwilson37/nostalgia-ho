@@ -13,6 +13,20 @@ dialog. Every routine of the program is listed in `docs/coverage-301.md`; the qu
 the code leaves open are in `docs/open-questions.md`, and what changed from 2.0 in
 `docs/evolution.md`.
 
+**Which build (checked November 2026).** The program is the one on Jake's disk image
+`SpacewardHo301.img` (1,048,576 bytes, HFS volume "Spaceward Ho! 3.0.1", MD5
+`565e0c4869714a6366c54b4d7c2924db`; the image itself was saved in May 2020): the file "Spaceward Ho! 3.0.1",
+type `APPL`, creator `SH3∆`, resource fork 762,786 bytes (MD5 `682c5a3516421432280ab60109e7a306`),
+created 4 January 1993 and modified 15 March 1993, `vers` 1 "3.0.1, Copyright Delta Tao Software,
+1990-3" and `vers` 2 "Spaceward Ho! Version 3.0.1", 25 `CODE` segments. The disk's other file is "Last Minute
+Notes" (type `TEXT`, 4,963 bytes, 16 March 1993; the 4,965 bytes of Jake's copy of the notes in the
+translation handoff differ by two; not investigated). Every one of the 574 named routines
+that `tools/decompile/mac68k.py` lays out from this fork is at the address `docs/coverage-301.md`
+gives it, which is the layout all the addresses in this file were read in: **it is the same build.**
+The French 3.0.1 (3.0.1F) was compared against it routine by routine: its code is the same
+program but for the strings, the compiler's output, a two-human limit and a licensing scheme
+(`docs/301fr-findings.md`, "What else differs"). Nothing in the English rules below is changed by that.
+
 Every rule is labelled:
 
 - **CONFIRMED**: read in the decompiled 3.0.1 code (or its resources), cited by

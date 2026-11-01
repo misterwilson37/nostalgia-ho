@@ -113,6 +113,14 @@ function rules(G) {
 // (ownRules, gameName, ownName). A game's language is G.opts.lang (none: the
 // version's own, ownLanguage). LANGUAGES names each code in its own language.
 //
+// The one exception is a language the version SHIPPED in as a release of its own,
+// whose program differs from the English in more than words (3.0.1F, the French
+// Mac 3.0.1 of Upgrade Editions: docs/301fr-findings.md). Such a language lists
+// those differences in rs.lang[code].releaseRules, { property: value } laid over the
+// ruleset (rules(G), rulesIn) when the game is in that language, whatever the patch
+// says, and only there: the version's own language and every other language are
+// untouched. 3.0.1F: maxHumans 2 (the French copy is the two-human edition).
+//
 // A language the version never shipped in is the remake's own translation
 // (rs.lang[code].remake, js/languages.js): languageName marks it, in that
 // language, wherever a language is offered (docs/translations.md).
@@ -176,7 +184,15 @@ function inLanguage(rs, lang, patch) {
   // turn505 ..., rules-original), so the language plays the same game
   const r = Object.defineProperties({}, Object.getOwnPropertyDescriptors(rs));
   for (const k of Object.keys(o)) Object.defineProperty(r, k, { value: o[k], enumerable: true, writable: true, configurable: true });
+  // the rules of a release of its own (rs.lang[code].releaseRules): over the ruleset
+  if (lang && o.releaseRules) for (const k of Object.keys(o.releaseRules)) Object.defineProperty(r, k, { value: o.releaseRules[k], enumerable: true, writable: true, configurable: true });
   return m[key] = r;
+}
+// the ruleset of a version in a language, as rules(G) gives a game in it (no patch): the New
+// Game window asks for it to read what the language's release allows (rs.maxHumans)
+function rulesIn(id, lang) {
+  const rs = rulesById(id);
+  return lang ? inLanguage(rs, lang, false) : rs;
 }
 // ---------- the French patch's text (fix 'translations', French) ----------
 // The patch is the best French it can be (Jake, October 2026), so over every
@@ -251,7 +267,7 @@ function frTypography(t) {
 // ("15,181") the French no-break space
 const FR_DE = /(^|[^\p{L}])([dD])e (?=[AEIOUYÉÈÊÀÂÎÔaeiouyéèêàâîôœ])/gu;
 function frFilled(t) {
-  return String(t).replace(FR_DE, "$1$2'").replace(/(\d),(?=\d{3}(?!\d))/g, '$1' + NB).replace(/(\d),(?=\d{3}(?!\d))/g, '$1' + NB);
+  return String(t).replace(FR_DE, "$1$2'").replace(/(\d)[, ](?=\d{3}(?!\d))/g, '$1' + NB).replace(/(\d)[, ](?=\d{3}(?!\d))/g, '$1' + NB);
 }
 function frPatched(G) {
   if (!G || !G.opts || !G.opts.patch) return false;
@@ -1098,13 +1114,17 @@ function niceShort(n) {
   return m !== 0 ? `${m}M` : k !== 0 ? `${k}K` : String(n);
 }
 const moneyNice = (n, cur = '$') => cur + niceNum(n);
+// 3.0.1F's LongToNiceString @1247e: the same formats with a space where the English has the comma
+// ("%d %.3d", "%d %.3d %.3d", "%d %.3dK": a plain space; the patch's French makes it a no-break one, frFilled)
+const niceNumSp = (n) => niceNum(n).replace(/,/g, ' ');
+const moneyNiceSp = (n, cur = '$') => cur + niceNumSp(n);
 // - changeNice: the change beside a total in 1.2 to 4.0.5 (DrawIncomeRect: Mac 1.2 @c3f70, 2.0.1, 3.0.1 @154294; WINHO.EXE
 //   FUN_1088_16e1; Windows 4.0.5 FUN_00489ebe): "(up %s)" / "(down %s)" of the metal's change in full (LongToNiceString), "(up $%s)" /
 //   "(down $%s)" of a sum's change in the short form (LongToNiceShortString: "7K"), the sign of the change choosing the string
 //   (nothing below 0 is "up": a change of 0 reads "(up 0)", "(up $0)") and the figure being the magnitude;
 // - change505: 5.0.5's (FUN_10098650), iOS's and Android's (-[IncomeLayer updateData]): "(+ %s)" / "(- %s)" and "(+ $%s)" / "(- $%s)",
 //   the figure in full by FUN_10055050 with no currency (the same "1,234", "12,345K").
-const changeNice = (which, v) => { const up = v >= 0, a = Math.abs(v); return which === 'metal' ? [up ? '(up %s)' : '(down %s)', niceNum(a)] : [up ? '(up $%s)' : '(down $%s)', niceShort(a)]; };
+const changeNice = (which, v, f = niceNum) => { const up = v >= 0, a = Math.abs(v); return which === 'metal' ? [up ? '(up %s)' : '(down %s)', f(a)] : [up ? '(up $%s)' : '(down $%s)', niceShort(a)]; };
 const change505 = (which, v) => { const up = v >= 0, a = Math.abs(v); return [which === 'metal' ? (up ? '(+ %s)' : '(- %s)') : (up ? '(+ $%s)' : '(- $%s)'), niceNum(a)]; };
 // a distance or an amount of fuel as the originals print it: whole numbers ("%d": 3.0.1's "Dist %d; Time %d",
 // "Fuel: %d/%d", "Speed: %d"; the rulesets' distances and fuel are whole), a tenth only where a ruleset has one
@@ -1429,7 +1449,8 @@ function newGame(opts) {
   // a ruleset whose original game had no New Game choices fixes them here
   if (rs.fixOptions) rs.fixOptions(opts);
   // opts.humans: [{ name, female }] for a hot-seat game; else one human from opts.name / opts.female
-  const H = Array.isArray(opts.humans) && opts.humans.length ? opts.humans.slice(0, 8) : [{ name: opts.name, female: opts.female }];
+  // (rs.maxHumans: the most people a version lets play, in this language: 3.0.1F's two)
+  const H = Array.isArray(opts.humans) && opts.humans.length ? opts.humans.slice(0, Math.min(8, rs.maxHumans || 8)) : [{ name: opts.name, female: opts.female }];
   const nHum = H.length;
   const nComp = clamp(opts.computers | 0, nHum > 1 ? 0 : 1, (rs.maxPlayers || 16) - nHum); // 4.0.5: up to 20 players
   const nPlayers = nComp + nHum;
@@ -2062,7 +2083,7 @@ function makeBattlePanel(cfg) {
 const API = {
   DATA, SHIP_TYPES, TYPES: SHIP_TYPES, TECHS,
   BAR_SCALES, barScale, battleGroups, makeBattlePanel,
-  registerRules, registerAI, rules, rulesById, aiOf, LANGUAGES, languages, ownLanguage, languageName, languageChoices,
+  registerRules, registerAI, rules, rulesById, rulesIn, aiOf, LANGUAGES, languages, ownLanguage, languageName, languageChoices,
  ownRules, gameName, ownName, setLanguage, frPatchText, dePatchText, windowWords, say, saysIn, trSuffixes, feature, RULESETS, fixes, fixed, TRANSLATIONS_FIX, IOS_FILLINGS_FIX, hoedown, hoedownAll, setHoedown, setHoedownAll, say0, celsiusOf, panelFormat, panelTemp, panelTempT, panelC, gravText, gravRatio, gravToken, tempToken, tokenTenths, exploreNums, reportTemp, unitPref, c12Text, tempStatic, patchVersion,
   // [id, name] for the New Game window: the original games' rules by year of
   // release, then version ("2.0 (DOS and Windows 3.1, 1993)"); rulesets that
@@ -2081,7 +2102,7 @@ const API = {
   newGame, endTurn, buildShips, unbuildShip, designLimits, designMin, designCost, shipCostNow, canBuildType, findOrCreateDesign, getDesign,
   fleetCount, fleetDesigns, fleetSpeed, fleetMaxRange, fleetHas, fleetKind, fleetLabel, orderMove, orderPath, cancelMove, canReach, canMerge, queueShips, unqueueShip,
   newFleet, addShipsToStar, mergeFleets, splitFleet, scrapFleet, evacuate, colonies, seenG, seenT, maxPop, planetClass, planetIncome,
-  scrapDesign, liveDesigns, isFriend, isAllied, isBuddy, hasColonyAt, designName, namesFile, namesFileAdd, report, setPact, give, surrender, sendChat, sendCanned, deliverCanned, clearCanned, cannedList, cannedSteps, setArmageddon, hostileAt, know, observe, msg, msgAll, humans, starDist, dist, projected, totalChange, compareTable, compareInfo, shipStrength, techSum, score, save, load, borrowLimit, fmt, num, niceNum, num505, money505, niceShort, moneyNice, changeNice, change505, moneyPalmFull, plainNum, arrivalYear, popNum, currency, euroAfter, sumText, prefs: PREFS,
+  scrapDesign, liveDesigns, isFriend, isAllied, isBuddy, hasColonyAt, designName, namesFile, namesFileAdd, report, setPact, give, surrender, sendChat, sendCanned, deliverCanned, clearCanned, cannedList, cannedSteps, setArmageddon, hostileAt, know, observe, msg, msgAll, humans, starDist, dist, projected, totalChange, compareTable, compareInfo, shipStrength, techSum, score, save, load, borrowLimit, fmt, num, niceNum, niceNumSp, num505, money505, niceShort, moneyNice, moneyNiceSp, changeNice, change505, moneyPalmFull, plainNum, arrivalYear, popNum, currency, euroAfter, sumText, prefs: PREFS,
 };
 if (typeof module !== 'undefined') {
   module.exports = API;

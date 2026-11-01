@@ -5421,7 +5421,7 @@ function hostOnline(options) {
   withAccount(() => {
     let r;
     try { r = options(); } catch (e) { showBug(e, 'Play online'); return; }
-    const { d, o } = r, rs = HO.RULESETS[o.rules] || {};
+    const { d, o } = r, rs = HO.RULESETS[o.rules] ? HO.rulesIn(o.rules, o.lang || null) : {};
     if ((rs.maxHumans || 6) < 2) { toast(`${editionLabel(o.rules)} is for one player: online play needs a version several people can play.`); return; }
     // the page's own look stays its own; the seed is drawn when the game starts
     for (const k of ['sounds', 'os', 'humans']) delete o[k];
@@ -5446,7 +5446,7 @@ function openLobby(id) {
     ONL.card = c;
     if (c.status !== 'lobby') { closeModal(); openOnlineGame(id); return; }
     const host = c.host === uid, link = `${location.origin}${location.pathname}?join=${c.code}`;
-    const rs = HO.RULESETS[c.rules] || {}, maxSeats = Math.min(8, rs.maxHumans || 6);
+    const rs = HO.RULESETS[c.rules] ? HO.rulesIn(c.rules, (c.opts && c.opts.lang) || null) : {}, maxSeats = Math.min(8, rs.maxHumans || 6);
     const seatSel = el('select', { 'aria-label': 'Seats', disabled: host ? false : 'disabled', onchange: (e) => CLOUD.games.settle(id, { nSeats: +e.target.value }).catch(er => toast(CLOUD.errorText(er))) },
       ...[...Array(maxSeats - 1).keys()].map(i => i + 2).filter(n => n >= c.members.length).map(n => el('option', { value: String(n), selected: n === c.nSeats ? 'selected' : false }, String(n))));
     const names = c.members.map((u, i) => el('li', null, `${i + 1}. ${((c.names || {})[u] || {}).name || 'Player'}${u === c.host ? ' (host)' : ''}${u === uid ? ' (you)' : ''}`));
@@ -5982,8 +5982,10 @@ function newGameDialog() {
     // the IQ in steps (iOS: 50, 60, … 200)
     const iq = f.querySelector('input[name=o_iq]'), step = String(ngr.iqStep || 1);
     if (iq.step !== step) { iq.step = step; iq.value = String(Math.round(+iq.value / +step) * +step); iq.nextElementSibling.textContent = iq.value; }
-    // how many people may play on this computer (iOS: one)
-    const hsel = f.querySelector('select[name=humans]'), maxH = ngr.maxHumans || 6;
+    // how many people may play on this computer (iOS: one; the French 3.0.1: two,
+    // rs.lang.fr.releaseRules), in the language chosen
+    const lang0 = HO.languages(ngr).length ? (langSel.dataset.rules === d.rules ? langSel.value : (titleLang() === 'en' || HO.languages(ngr).includes(titleLang()) ? titleLang() : 'en')) : null;
+    const hsel = f.querySelector('select[name=humans]'), maxH = HO.rulesIn(d.rules, lang0).maxHumans || 6;
     for (const o of hsel.options) o.hidden = +o.value > maxH;
     if (+hsel.value > maxH) hsel.value = String(maxH);
     hsel.closest('label').hidden = maxH < 2;
@@ -6055,7 +6057,7 @@ function newGameDialog() {
     localStorage.setItem('ho5.name', d.name); localStorage.setItem('ho5.rules', d.rules);
     if (d.computers === 'any') d.computers = String(1 + Math.floor(Math.random() * 8));
     const ngr = HO.RULESETS[d.rules] || {};
-    const nh = Math.min(+d.humans || 1, ngr.maxHumans || 6);
+    const nh = Math.min(+d.humans || 1, HO.rulesIn(d.rules, !langRow.hidden && d.lang ? d.lang : null).maxHumans || 6);
     if (ngr.optionBoxes === false) { d.alliances = d.luck = d.novas = 'on'; } // no boxes: all on
     const humans = nh > 1 ? [{ name: d.name || 'Player 1', female: d.female === '1' }] : null;
     for (let i = 2; i <= nh; i++) { humans.push({ name: d['h' + i] || 'Player ' + i, female: d['hf' + i] === '1' }); localStorage.setItem('ho5.name' + i, d['h' + i] || ''); }
