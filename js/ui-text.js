@@ -206,7 +206,7 @@ root.HOUI.add([
 ['%s (seen %s)', '%s (vu en %s)', '%s (gesehen %s)', '%s (%s yılında görüldü)', '%s (visto en %s)'],
 ['Gravity', 'Gravité', 'Schwerkraft', 'Yerçekimi', 'Gravedad', { fr: '~iOS', tr: '~iOS' }, { tr: 'Yer çekimi' }],
 ['Temp', 'Temp', 'Temp.', 'Isı', 'Temp.', { fr: 'iOS', de: 'DOS 2.0', tr: 'iOS' }, { tr: 'Sıcaklık' }],
-['Population', 'Population', 'Bevölkerung', 'Nüfus', 'Población', { tr: '~iOS' }],
+['Population', 'Population', 'Bevölkerung', 'Nüfus', 'Población', { fr: '3.0.1F', tr: '~iOS' }],
 ['Max population', 'Population max.', 'Max. Bevölkerung', 'En fazla nüfus', 'Población máx.'],
 ['%s · never profitable', '%s · jamais rentable', '%s · nie gewinnbringend', '%s · asla kâr getirmez', '%s · nunca rentable'],
 ['%s · barely habitable', '%s · à peine habitable', '%s · kaum bewohnbar', '%s · zar zor yaşanır', '%s · apenas habitable'],
@@ -462,7 +462,7 @@ root.HOUI.add([
 ['There is no one else to send something to.', 'Il n’y a personne d’autre à qui envoyer quelque chose.', 'Es gibt niemanden sonst, dem man etwas senden könnte.', 'Bir şey gönderecek başka kimse yok.', 'No hay nadie más a quien enviar nada.', { fr: '~iOS', tr: '~iOS' }],
 ['Sorry, but you may only give 3 gifts per turn.', 'Désolé, mais vous ne pouvez donner plus de 3 cadeaux par tour.', 'Tut mir leid, aber Sie dürfen nur 3 Geschenke pro Zug machen.', 'Üzgünüm, her seferinde sadece 3 hediye verebilirsin.', 'Lo siento, pero solo puedes hacer 3 regalos por turno.', I, { tr: 'Üzgünüm, her sırada yalnızca 3 hediye verebilirsin.' }],
 ['You don’t have that much to give.', 'Vous n’avez pas autant à donner.', 'So viel haben Sie nicht zu geben.', 'Verecek o kadar şeyin yok.', 'No tienes tanto para dar.'],
-['Give to', 'Donner à', 'Geben an', 'Kime', 'Dar a', { fr: '~iOS' }],
+['Give to', 'Donner à', 'Geben an', 'Kime', 'Dar a', { fr: '~3.0.1F' }],
 ['Money (you have %s)', 'Argent (vous avez %s)', 'Geld (Sie haben %s)', 'Para (%s paran var)', 'Dinero (tienes %s)', { fr: '~iOS', tr: '~iOS' }],
 ['Metal (you have %s)', 'Métal (vous avez %s)', 'Metall (Sie haben %s)', 'Metâl (%s metâlin var)', 'Metal (tienes %s)', null, { tr: 'Metal (%s metalin var)' }],
 ['Gifts arrive at the end of the turn. You can give three a turn.', 'Les cadeaux arrivent à la fin du tour. Vous pouvez en faire trois par tour.', 'Geschenke kommen am Ende des Zuges an. Sie können drei pro Zug machen.', 'Hediyeler sıra sonunda ulaşır. Her sırada üç hediye verebilirsin.', 'Los regalos llegan al final del turno. Puedes hacer tres por turno.'],
@@ -812,7 +812,7 @@ root.HOUI.add([
 // ---------- Saved Games, Game Center (iOS, Android) ----------
 ['Saved Games', 'Jeux sauvegardés', 'Gespeicherte Spiele', 'Oyunlar Kaydet', 'Partidas guardadas', { fr: 'iOS', tr: 'iOS' }, {tr: 'Kayıtlı Oyunlar'}],
 ['Saved games', 'Jeux sauvegardés', 'Gespeicherte Spiele', 'Oyunlar Kaydet', 'Partidas guardadas', { fr: 'iOS', tr: 'iOS' }, { tr: 'Kayıtlı oyunlar' }],
-['There’s no room left in this browser for another saved game. Delete one in Saved Games.', 'Il n’y a plus de place dans ce navigateur pour une autre partie. Effacez-en une dans Jeux sauvegardés.', 'In diesem Browser ist kein Platz mehr für ein weiteres Spiel. Löschen Sie eines unter Gespeicherte Spiele.', 'Bu tarayıcıda başka bir kayıtlı oyun için yer kalmadı. Oyunlar Kaydet’ten birini sil.', 'No queda sitio en este navegador para otra partida. Borra una en Partidas guardadas.', { fr: '~iOS', tr: '~iOS' }, { tr: 'Bu tarayıcıda başka bir kayıtlı oyun için yer kalmadı. Kayıtlı Oyunlar’dan birini sil.' }],
+['There’s no room left in this browser for another saved game. Delete one in Saved Games.', 'Il n’y a plus de place dans ce navigateur pour une autre partie. Effacez-en une dans Jeux sauvegardés.', 'In diesem Browser ist kein Platz mehr für ein weiteres Spiel. Löschen Sie eines unter Gespeicherte Spiele.', 'Bu tarayıcıda başka bir kayıtlı oyun için yer kalmadı. Oyunlar Kaydet’ten birini sil.', 'No queda sitio en este navegador para otra partida. Borra una en Partidas guardadas.', null, { tr: 'Bu tarayıcıda başka bir kayıtlı oyun için yer kalmadı. Kayıtlı Oyunlar’dan birini sil.' }],
 ['That file isn’t a saved game this remake can read.', 'Ce fichier n’est pas une partie sauvegardée que ce remake peut lire.', 'Diese Datei ist kein Spielstand, den dieses Remake lesen kann.', 'Bu dosya, bu yeniden yapımın okuyabileceği bir kayıtlı oyun değil.', 'Ese archivo no es una partida guardada que este remake pueda leer.'],
 ['Delete the game in %s (%s)?', 'Effacer la partie de %s (%s) ?', 'Das Spiel in %s (%s) löschen?', '%s içindeki oyun (%s) silinsin mi?', '¿Borrar la partida de %s (%s)?'],
 ['%s · year %s', '%s · année %s', '%s · Jahr %s', '%s · yıl %s', '%s · año %s'],
@@ -1171,7 +1171,7 @@ root.HOUI.add([
 ['Sorry', 'Désolé', 'Tut mir leid', 'Özür dilerim', 'Lo siento'],
 // ---------- 1.2's and 2.0's Options menu and Explored Planets list (rs.options, rs.exploredList) ----------
 // 5.0.5's Preferences window (rs.prefsWindow; js/skins/classic/ui.js prefs505)
-['But Only The Most Important Ones', 'Mais seulement les plus importants', 'Aber nur die wichtigsten', 'Ama Yalnızca En Önemlileri', 'Pero solo los más importantes', { fr: '~iOS', tr: '~iOS' }],
+['But Only The Most Important Ones', 'Mais seulement les plus importants', 'Aber nur die wichtigsten', 'Ama Yalnızca En Önemlileri', 'Pero solo los más importantes'],
 ['Review Battles', 'Revoir batailles', 'Kämpfe ansehen', 'Muhabereleri terar gözden geçir', 'Revisar las batallas', { fr: 'iOS', tr: 'iOS' }, {tr: 'Muharebeleri Gözden Geçir', fr: 'Revoir les batailles'}],
 ['Give Helpful Game Play Hints', 'Donner des conseils utiles', 'Hilfreiche Spieltipps geben', 'Oyuna yardımci kısa bilgiler ver', 'Dar consejos útiles para jugar', I, { tr: 'Oyun İçin Yardımcı İpuçları Ver' }],
 ['Tell You About Stars Best Buddies Explore', 'Vous dire quelles étoiles vos meilleurs amis explorent', 'Ihnen sagen, welche Sterne Ihre besten Kumpel erforschen', 'En iyi ortakların inceledikleri yıldızları söyle', 'Decirte qué estrellas exploran tus mejores amigos', { tr: 'iOS' }, { tr: 'En İyi Arkadaşlarının Keşfettiği Yıldızları Söyle' }],

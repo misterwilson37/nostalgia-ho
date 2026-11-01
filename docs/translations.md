@@ -652,10 +652,10 @@ element (option C: `docs/glossary-tr.md`), Spanish "tú" and the glossary above.
 
 | Language | Strings | Official | Adapted | The remake's |
 |---|---|---|---|---|
-| French | 1,653 | 169 | 71 | 1,413 |
-| German | 1,653 | 135 | 52 | 1,466 |
-| Turkish | 1,653 | 150 | 53 | 1,450 |
-| Spanish | 1,653 | 0 | 0 | 1,653 |
+| French | 1,728 | 188 | 75 | 1,465 |
+| German | 1,728 | 148 | 57 | 1,523 |
+| Turkish | 1,728 | 154 | 55 | 1,519 |
+| Spanish | 1,728 | 0 | 0 | 1,728 |
 
 (Every row of the table, the hover help and the version and patch notes included; the
 earlier count, 1,181, was of the interface's rows alone and is not comparable. 3.0.1F's

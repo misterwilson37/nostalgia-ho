@@ -1046,8 +1046,16 @@ below is settled the same way.
   found no other official old spelling ("daß", "muß", …) modernized in a default.
 - **"Revoir bataille" in the three Review-battle rows** ("Review battle…", "Review Battle…", "Review battle"; done, November 2026): the default is the official wording, no article: 3.0.1F's menu "Revoir bataille à <étoile>…" (1.2F's "Revoir bataille de <étoile>…", iOS's "Revoir batailles"), so the rows are marked `~3.0.1F` (adapted from that line, the star left out), not `~iOS`. The patch's best French: "Revoir une bataille…" for the two menu rows (they open a list), "Revoir la bataille" for the report card's button (it is that battle).
 - **German "Queue ships at %s"**  has the same words as "Build ships at %s": the German has no word for queueing; no official line to follow.
-- **Rows marked `~iOS`, `~1.2F` or `~DOS 2.0` with no official counterpart** at all ("Auto-Play This Turn", "Give to", "Money (you
-  have %s)", "Computer home systems", "Population"): remake wording; their marks are loose, harmless.
+- **Rows marked `~iOS`, `~1.2F`, `~DOS 2.0` or `~Amiga` with no official counterpart** (done, November 2026): every `~` mark was checked
+  against the official texts (iOS's Misc, Alert, Help and sprintf strings, 1.2F's and 3.0.1F's lists and windows, the German DOS 2.0's strings,
+  the Amiga's strings and menu words). Most have a counterpart for the same thing in other words, so `~` (adapted) is true:
+  "Auto-Play This Turn" (iOS "Play One Turn"), "Money (you have %s)" (iOS "Money:"), "Computer home systems" (iOS "Their Home System"),
+  "Galaxy density" / "Years per turn" (iOS "Density", "Years / Turn"), "Computer IQ" (iOS "IQ %@"), "Population" in Turkish (iOS "%s Nüfus").
+  Changed: **"Give to"** (French) is 3.0.1F's "Donner à:" (DITL 6120), now `~3.0.1F`; **"Population"** (French) is 3.0.1F's label (DITL 502) word for
+  word, now `3.0.1F`; **"There's no room left in this browser…"** (French, Turkish) and **"But Only The Most Important Ones"** (French, Turkish)
+  have no official line (the iOS words in them are only "Saved Games"), so their marks are gone and they count as the remake's own.
+  The count (`node tools/ui-lang-audit.js --count`): French 188 official, 75 adapted, 1,465 the remake's; German 148 / 57 / 1,523; Turkish 154 / 55 / 1,519
+  (`docs/translations.md`).
 - **"Organize fleets…" (French)**: the source says "vaisseaux" for the English "ships" and the row's English says
   fleets, so "Répartir flottes…" is the English's change.
 
