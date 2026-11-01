@@ -347,6 +347,15 @@ Organize Fleets takes the least fuel used, `OrganizeFleets` @1137e6) and `attack
    empty and every such row is an empty line. By default a French game shows the rows empty.
    *Fix:* the rows read in French: the owner, then the fleet as the battle window words it
    ("Claude : un Eclaireur Eagle (1/1)", `rs.lang.fr.fix.frFleetRows`).
+8. **`frTwoHumans`: the French edition takes two people** (a sales limit, lifted as a
+   convenience; November 2026, from the French disc). The French 3.0.1 is Upgrade Editions'
+   two-human edition: `CreateGalaxy @f02a6` allows the smaller of 2 and 20 minus the computers,
+   `CreateNewPlayer @1220e0` refuses a third human with ALRT 3370 ("limitée à 2 Joueurs Humains",
+   the 20-player extension to be bought from the publisher) and `ReadGalaxyInfo @12065a` refuses a
+   galaxy file with more. The English program has the same box and never shows it. By default a
+   French game keeps the limit and its box. *Fix:* a French game takes as many people as the English
+   3.0.1 does (20 minus the computers in the program; the remake's New Game, online lobby and saved
+   games take up to the New Game window's count), `rs.lang.fr.fix.frTwoHumans`.
 
 ### Quirk or design (left as released)
 

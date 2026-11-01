@@ -435,7 +435,7 @@ French shows (the mac3 and mac3c skins and the others): the Hall of Fame list's 
 in 3.0.1F's words (its classes, STR# 1006, and the count-first fleet lines "4 Croiseurs Serpent (8/7)", "un Transport
 Mother (6/6)", with STR# 4000.42's "un"; the groups lost "3 Eclaireurs Sonde (1/1) détruit(s)"), the Ship Types
 window's "Recycler tous", and the rows of other players' ships at a star empty (the French resource lacks the two formats;
-the patch writes them, fix `frFleetRows`). The French-only rules (two humans, spaces between thousands) are in the same place.
+the patch writes them, fix `frFleetRows`). The French-only rules (two humans, spaces between thousands) are in the same place; the two-human limit is refused with the program's own box (ALRT 3370, in French whatever the page's language), and the patch lifts it (fix `frTwoHumans`).
 
 3.0.1F is also French 3.0.1's **windows**: a 3.0.1 game in French puts the menus' items
 and titles, window titles, buttons and labels of the French program over the remake's

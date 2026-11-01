@@ -208,11 +208,18 @@ rule differs.
      the remake keeps 20 players in all.
    - In the remake: `rs.lang.fr.releaseRules.maxHumans = 2` for the 3.0.1 ruleset (`js/languages.js`),
      laid over the ruleset when a game is in French, with or without the patch (`js/engine.js`
-     `inLanguage`, `rulesIn`). New Game offers 1 or 2 people on this computer (and online seats) in
-     French; `newGame` keeps the first two humans of a French game. English and every other language
+     `inLanguage`, `rulesIn`). New Game takes 1 or 2 people on this computer (and online seats) in
+     French, 3 or more get the program's box (below); `newGame` keeps the first two humans of a French game. English and every other language
      are untouched (`node tools/test.js 301 --digest` is the same).
-   - **The patch does not lift the cap.** It is a product limit (the box says the 20-player extension is
-     bought from Upgrade Editions), not a mistake in the program; whether the patch should lift it is for Jake.
+   - **The patch lifts the cap** (fix `frTwoHumans`, `docs/fixes.md`; Jake, November 2026). It is a product limit (the box says
+     the 20-player extension is bought from Upgrade Editions), not a mistake in the program, so by default the remake keeps it
+     and the patch removes it: with the patch a French game takes as many people as the English 3.0.1 does in the remake (at
+     New Game, online seats, a saved game). **By default** a third person is refused with the program's own box, ALRT/DITL
+     3370, in **French whatever the page's language** (it is the French program's box): choosing 3 or more people in New Game
+     gives it and sets the choice back to 2 (`rs.lang.fr.releaseRules.limitAlert`, `alertOver` in the classic skins'
+     `ui.js`: "Désolé, mais cette version de Spaceward Ho! est limitée à 2 Joueurs Humains." / "Contactez Upgrade Editions
+     si vous souhaitez acquérir une extension à 20 Joueurs Humains." and the publisher's telephone line the DITL ends with, an OK
+     button); a saved game with more than two people is refused with the same words (`ReadGalaxyInfo @12065a`: `HO.load`).
 2. **`ReadGalaxyInfo @12045c`, hunk @120484: the old-file check.** The English refuses a file whose first four bytes
    are `FMS∂` or `SH2∂` (0xb6 is MacRoman ∂) (STR# 4001.4, "can't read galaxy files created with versions 1.0 - 2.0.1"); the French
    `FMR∂` or `SH2∂`. File format only: the remake reads no original files.

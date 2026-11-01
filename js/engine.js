@@ -121,8 +121,8 @@ function rules(G) {
 // says, and only there: the version's own language and every other language are
 // untouched. 3.0.1F: maxHumans 2 (the French copy is the two-human edition), the Hall of Fame's
 // date in day / month / year, its fleet rows at a star empty, its battle window's words.
-// The patch's fixes of those rules are rs.lang[code].fix[id].releaseRules (frFleetRows), added to
-// them when the patch is on.
+// The patch's fixes of those rules are rs.lang[code].fix[id].releaseRules (frTwoHumans,
+// frFleetRows), added to them when the patch is on.
 //
 // A language the version never shipped in is the remake's own translation
 // (rs.lang[code].remake, js/languages.js): languageName marks it, in that
@@ -194,10 +194,11 @@ function inLanguage(rs, lang, patch) {
   return m[key] = r;
 }
 // the ruleset of a version in a language, as rules(G) gives a game in it (no patch): the New
-// Game window asks for it to read what the language's release allows (rs.maxHumans)
-function rulesIn(id, lang) {
+// Game window asks for it to read what the language's release allows (rs.maxHumans), with the
+// patch on or off (the patch's fixes of the release's own rules: fix frTwoHumans lifts the cap)
+function rulesIn(id, lang, patch) {
   const rs = rulesById(id);
-  return lang ? inLanguage(rs, lang, false) : rs;
+  return lang ? inLanguage(rs, lang, !!patch) : rs;
 }
 // ---------- the French patch's text (fix 'translations', French) ----------
 // The patch is the best French it can be (Jake, October 2026), so over every
@@ -1969,6 +1970,10 @@ function load(str) {
     const e = new Error(`This saved game is played with the "${G.rules}" rules, which this version of the remake doesn't have.`);
     e.hoSave = true; throw e;
   }
+  // a release with a limit of its own refuses a saved game with more people than it allows, with its own box (3.0.1F's
+  // ReadGalaxyInfo @12065a: ALRT 3370, "limitée à 2 Joueurs Humains"); the patch (fix frTwoHumans) lifts the limit
+  const rsL = rules(G);
+  if (rsL.maxHumans && rsL.limitAlert && humans(G).length > rsL.maxHumans) { const e = new Error(rsL.limitAlert.join('\n')); e.hoSave = true; throw e; }
   return G;
 }
 

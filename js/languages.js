@@ -1710,6 +1710,7 @@ if (R301) {
       out.battlePanel = DOS.battlePanel20({ dots: '…', cols: 'mac', shade: true, nameUp: 2, words: BATTLE_301F });
       // the patch's fixes of 3.0.1F's own rules, added to rs.lang.fr.releaseRules when the patch is on (engine.js inLanguage)
       out.fix = Object.assign({}, out.fix, {
+        frTwoHumans: { releaseRules: { maxHumans: null } },
         frFleetRows: { releaseRules: { otherFleetRow: otherFleetRow301F } },
       });
     }
@@ -1727,8 +1728,10 @@ if (R301) {
   // (LongToNiceString @1247e: "%d %.3d", "%d %.3dK"), not the English comma. Only in French
   // (rs.lang.fr.releaseRules, js/engine.js).
   // hofDate 'dmy': the Hall of Fame list's date (InitHOFList @144c76); otherFleetRow: the rows that list other players' fleets at a
-  // star, which come out empty (RecalcFleetsAtNewStar @15078c)
-  if (F301 && E301) Object.defineProperty(R301.lang.fr, 'releaseRules', { value: { maxHumans: 2, fmtNum: E.niceNumSp, fmtMoney: E.moneyNiceSp, hofDate: 'dmy', otherFleetRow: () => '' }, enumerable: true, configurable: true });
+  // star, which come out empty (RecalcFleetsAtNewStar @15078c); limitAlert: ALRT/DITL 3370's two lines, which CreateNewPlayer and
+  // ReadGalaxyInfo show when a third human would join or a file has more than two (French whatever the page's language)
+  if (F301 && E301) Object.defineProperty(R301.lang.fr, 'releaseRules', { value: { maxHumans: 2, fmtNum: E.niceNumSp, fmtMoney: E.moneyNiceSp, hofDate: 'dmy', otherFleetRow: () => '',
+    limitAlert: F301.DITL[3370].filter(it => it[0] === 'text').map(it => it[1]) }, enumerable: true, configurable: true });
 
 }
 

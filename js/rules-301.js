@@ -2100,6 +2100,8 @@ E.registerRules('301', Object.assign({}, D, {
     { id: 'endTurnFr', title: 'The French End Turn button, in colour, is in French',
       text: 'The French 3.0.1’s colour file (“Ho! 3.0 CPicts”) has the English End Turn button, untranslated, so a French game in colour shows “End Turn” (the black-and-white program’s own button says “Fin Tour”). The patch shows a “Fin Tour” button, drawn in the same lettering. It matters only in the colour skin, in French.' },
     // (fix partials: rs.lang.fr.fix in js/languages.js; they apply to a French game only, as endTurnFr does to the colour skin's)
+    { id: 'frTwoHumans', title: 'The French edition’s two-player limit is lifted',
+      text: 'The French 3.0.1 (Upgrade Editions, 1993) was sold as a two-human edition: a third person to join was refused with a box that said this version is limited to 2 human players and to contact the publisher for a 20-player extension. It was the edition’s sales limit, not a mistake in the program. The patch lifts it: a French game takes as many people as the English 3.0.1 does, at New Game, in a saved game and online. It matters only in French.' },
     { id: 'frFleetRows', title: 'The French list of other players’ ships at a star is filled in',
       text: 'The French 3.0.1 builds the rows that list other players’ ships at a star (“Zorg’s ships”, “Zorg’s 3 Scouts …”) from two lines of a resource list, STR# 4000.43 and .44, which the French program does not have. The program then prints nothing, so a French game shows blank rows where the English shows the names and ships. The patch writes them in French: the owner, then the fleet as the battle window words it.' },
   ].concat(E.TRANSLATIONS_FIX, E.IOS_FILLINGS_FIX),
