@@ -712,3 +712,52 @@ report window can draw a type 29 report from them, `GetReportString @1607e8` / `
 its temperatures are Celsius by (T − 324) × 5 ÷ 9 (five routines); it has a licence-stamp scheme (`PICT` 4010). The English 3.0.1's rules
 here are unchanged. The English fork was not at hand for that reading, so a routine-by-routine comparison of the two programs is open
 (`docs/301fr-findings.md`, "What else differs").
+
+## Fleet descriptions (CONFIRMED, November 2026)
+
+Every place in 3.0.1 that names a fleet or a group of ships writes it with **one function**, `MakeFleetDescription` (English
+`@130fb6`, French `@130fa0`), called with the fleet's design record and the fleet's own ship count, and filling a Pascal string
+(cut at 40 characters, `cmpi.b #$28`). The callers (found by scanning every routine of both programs for the call; the English and
+French call sites are identical but for registers):
+
+| Caller | What it writes | Count given |
+|---|---|---|
+| `MoveShips @a26ac` (4 calls) | the reports "Your fleet of %.*s disappeared through a wormhole in space and is lost." (STR# 1000.20, code 0x3fb), "Your fleet of %.*s has arrived at %s." (.22, 0x3fd), "Your fleet of %.*s has stopped at %s on the way to %s." (.23, 0x3fe), and the note kept for the star's owner, "%.*s's fleet of %.*s has arrived at %s." (.24) | the fleet's count (word +0) |
+| `CheckFleetDestination @a2b8e` | "Your %.*s can no longer reach %s." (.21, 0x3fc) | the fleet's count |
+| `ScrapFleetsAndTypes @a194e` | "Your fleet of %.*s at %s has been scrapped for %s metal." (.18) | the fleet's count |
+| `DrawOneFleet @155516` | the row of a fleet in "Ships here": the description alone, drawn at the left of a row 10 pixels tall (in a condensed face when it is too wide for the row) | the fleet's count |
+| `RecalcFleetsAtNewStar @15078c` | another player's fleet at the star (not in hyperspace): the English literal "%P's %P", the owner's name and the description (the French resource has no such string: an empty row, `docs/301fr-findings.md`) | the fleet's count |
+| `MakeListFleetsStr @1336e8` | a line of List All Fleets: the description, then STR# 4000.24 to .27 ("%.*s stationed at %s.", "%.*s leaving %s for %s to arrive in %d.", "%.*s to arrive at %s in %d.", "%.*s marooned at %s.") | the fleet's count |
+| `InitShipTypesList @131e9a` | a cell of the Ship Types window's list: the description of the design, with a count from a per-design word array (A5-0x452; not traced further) | that count |
+| `DrawOneGroup @e274e` | a group of the battle window (done before, `docs/301fr-findings.md`) | the ships left (the French: the count lost for a group that is gone; the English 0) |
+| `MakeResultMessages @e2ea2` (4 calls) | **nothing visible**: the description of the largest group lost is made into the global buffer and the next call of `AddNewMessage` (which copies 42 bytes from a pointer it is given) is given a 6-byte record instead | (never printed) |
+
+The formats: English "%d %.*s (%d/%d) %.*ss" (count, design name, weapons, shields, class, "s"), "one %.*s (%d/%d) %.*s" for one ship,
+"%.*s (%d/%d) %.*s" for a count of 0 or less; French "%d %.*ss %.*s (%d/%d)" (count, class and "s", name, stats), "%P %.*s %.*s (%d/%d)"
+with %P the STR# 4000.42 "un" for one, "%.*s %.*s (%d/%d)" for none. The class is STR# 1006 (English Scout, Fighter, Colony Ship,
+Satellite; French Eclaireur, Croiseur, Transport, Satellite). A fleet holds one design, so a fleet's description is one group's.
+
+**In the remake.** `rs.fleetDesc` (`fleetDesc301`, js/rules-301.js) is the rules' English description, `E.fleetLabel` calls it for any
+ruleset that has one, and `E.fleetText` is the same as the screen shows it: in the game's language, by the language's `say.fleet`
+(js/languages.js `fleetSay`), which puts the parts in the order and words of the same language's battle window group lines (the
+French by default 3.0.1F's own, `BATTLE_301F`; with the patch on the iOS class names the patch's battle window uses; German, Turkish and
+Spanish the nearest official source's: the German DOS 2.0's "Ein %s (%d/%d) %s", iOS's classes, the remake's Spanish). A report's blank
+and the rows of "Ships here" and of the fleet list use it; the English reports now read "Your fleet of 3 Columbus (1/1) Scouts has
+arrived at Vega." and "Your one Columbus (1/1) Scout can no longer reach Vega.", the French "Votre flotte de 3 Eclaireurs Columbus
+(1/1) est arrivée à Vega." and "Une flotte de Claude (3 Eclaireurs Columbus (1/1)) vient d'arriver à Vega."; the English rows of other
+players' fleets "Claude's 3 Columbus (1/1) Scouts" (`otherFleetRow301`). In the sentence of a German report the "Ein" is "ein" (as the
+remake's German 2.0 reports have it), at the start of a row "Ein". The cap is 40 characters: in English at the label, in another
+language after it (`describe20`'s cap). **Not drawn as the original draws it**: the Ship Types window (the remake's Scrap ship types
+window keeps its own columns: name, class, ships), the List All Fleets lines (the remake's table keeps its columns, the first is the
+description), and the row's pictures and status line (the remake's own); only the description in them is the original's.
+
+**The other versions** (1.2F, 2.0 DOS / Windows / Mac 2.0.1, 4.0.5 Windows and Mac, 5.0.5, Palm, iOS, Android, Amiga): their
+programs are not in this container (only the English and French 3.0.1 disk images were), so which of their reports and rows use a
+description and how was **not read in this pass** and their fleets are written as before ("3 Scouts", "one Scout"). What the earlier
+findings already record of them: Mac 1.2F and 2.0.1 have `MakeFleetDescription` @110e28 and the battle window uses it (class first in
+the French, `docs/12-findings.md`); the DOS program's battle formats are "%d %s (%d/%d) %ss", "one %s (%d/%d) %s", "%s (%d/%d) %s"
+(`docs/dos-findings.md`); 4.0.5 has `MakeFleetDescription` @f0c26 (Mac) and the Windows formats at 0x59c48c, and
+`CalcBiggestAndNumTypes` "for a report's fleet description" (`docs/405-findings.md`), which suggests the reports of 2.0 and 4.0.5 name
+the largest design and the number of designs and are not the same as 3.0.1's; none of this was traced to a report. Left for a pass with
+those programs.
+

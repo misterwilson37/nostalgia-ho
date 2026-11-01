@@ -608,7 +608,7 @@ dragging a fleet): the remake has its own windows for them, and the rule behind 
 | `CalcFleetsAtAllStars` @1303e2 | the map's satellite counts and first fleet at each star | NOT A RULE | display |
 | `DeterminePath` @130686 | route through your colonies: depth first, at most 42/Range hops, under 3x direct, later ties win | RULE, implemented | js/rules-301.js path301 |
 | `GiveFleetPath` @130dc0 | store a route in a fleet (and its group): legs, turns | RULE, implemented | js/rules-301.js givePath, route |
-| `MakeFleetDescription` @130fb6 | "N <design>" text | NOT A RULE | interface |
+| `MakeFleetDescription` @130fb6 | a fleet's description "N <design> (W/S) <Class>s" in reports and rows | NOT A RULE, implemented | js/rules-301.js fleetDesc301, js/languages.js fleetSay (docs/301-findings.md, "Fleet descriptions") |
 | `BuildDesignShips` @131150 | Ship Types window: buy, scrap a design (a flag; undone if built this turn), new design | RULE, implemented | js/engine.js buildShips with js/rules-301.js flagScrapDesign |
 | `ListTypeTechSBResponse` @131d18 | scroll bar response in a window | NOT A RULE | interface |
 | `InitShipTypesList` @131e9a | designs list | NOT A RULE | interface |

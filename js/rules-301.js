@@ -64,6 +64,31 @@ const MAX_DESIGNS = 20; // CONFIRMED (DITL 3280: "only 20 ship types at one time
 const TYPES4 = ['scout', 'fighter', 'colony', 'satellite']; // CONFIRMED (STR# 1006, CalcShipCosts @134de6); class numbers 0-3
 const CLASS = { scout: 0, fighter: 1, colony: 2, satellite: 3 };
 
+// CONFIRMED (MakeFleetDescription @130fb6 in the English program, @130fa0 in the French; docs/301fr-findings.md, "Fleet descriptions"):
+// every place that names a fleet prints the design's own description, never the generic "3 Scouts": the fleet reports (MoveShips:
+// arrived, stopped, lost in a wormhole, and the other player's fleet arriving; ScrapFleetsAndTypes; CheckFleetDestination: "Your %.*s
+// can no longer reach %s."), the rows of "Ships here" (DrawOneFleet; RecalcFleetsAtNewStar for other players' fleets) and the lines of
+// List All Fleets (MakeListFleetsStr), always with the fleet's own count; the English formats are "%d %.*s (%d/%d) %.*ss" (the count,
+// the design's name, its weapons and shields, the class and an "s"), "one %.*s (%d/%d) %.*s" for one ship, and (never reached by a
+// fleet, which has a ship at least) "%.*s (%d/%d) %.*s"; the Pascal result is cut at 40 characters. The class is STR# 1006 (Scout,
+// Fighter, Colony Ship, Satellite). A fleet holds one design. The rules write it in English; a language's say.fleet
+// (js/languages.js) puts it into the language's own order and words, and cuts it at 40 there; MakeResultMessages makes the
+// description too but never prints it.
+function fleetDesc301(G, f, d, n) {
+  const T = E.TYPES[d.type];
+  const t = n === 1 ? `one ${d.name} (${d.W}/${d.S}) ${T.name}` : `${n} ${d.name} (${d.W}/${d.S}) ${T.name}s`;
+  const lang = G.opts && G.opts.lang;
+  return !lang || lang === 'en' ? t.slice(0, 40) : t;
+}
+// the row that lists another player's fleet at a star (RecalcFleetsAtNewStar @15078c): the English program's literal "%P’s %P", the
+// owner and the fleet's description. In the other languages the row is the interface's own (the French program's is empty, below)
+function otherFleetRow301(G, f) {
+  const lang = G.opts && G.opts.lang;
+  if (lang && lang !== 'en') return null;
+  const P = G.players[f.owner];
+  return `${P ? P.name : ''}’s ${E.fleetLabel(G, f)}`.slice(0, 63);
+}
+
 // ---------- player setup (CreatePlayer @f26a0) ----------
 // CONFIRMED: Skill Level from the Join dialog (DITL 4010): Total Money (player
 // +0) and metal (+0x1c) by skill; the home colony's income (slot +6) and
@@ -2047,6 +2072,7 @@ const STAR_NAMES = D.starNames.concat(['Hope']);
 
 E.registerRules('301', Object.assign({}, D, {
   label: 'Mac 3.0.1 (1993)',
+  fleetDesc: fleetDesc301, otherFleetRow: otherFleetRow301,
   // CONFIRMED (ListExploredStars @140004, InitStarsList @140192, MakeOneListedStar @14073e; DITL/CNTL/MENU 6040): the stars whose
   // record has a date from 2000 on (explored or seen owned) and that have not gone nova, in the order of their names, then
   // swap-sorted by the Sort By menu (Metal, Quality, Gravity, Owner), Quality when the window opens; a row is five fields in

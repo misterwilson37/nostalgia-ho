@@ -14,7 +14,9 @@ Statuses: **matched** (the remake prints it with the original's arithmetic), **f
 | 2.0 DOS (German) | 30 | 30 | 0 | 0 | 0 |
 | 2.0.1 Mac (English) | 30 | 23 | 3 | 4 | 0 |
 | 3.0.1 Mac (English) | 57 | 40 | 12 | 5 | 0 |
+| 3.0.1 Mac (English), formats in the program | 3 | 3 | 0 | 0 | 0 |
 | 3.0.1F Mac (French) | 42 | 42 | 0 | 0 | 0 |
+| 3.0.1F Mac (French), formats in the program | 3 | 3 | 0 | 0 | 0 |
 | 4.0.5 Windows 95 | 73 | 51 | 14 | 8 | 0 |
 | 4.0.5 Mac | 69 | 51 | 14 | 4 | 0 |
 | 5.0.5 Mac OS X | 52 | 45 | 7 | 0 | 0 |
@@ -23,7 +25,7 @@ Statuses: **matched** (the remake prints it with the original's arithmetic), **f
 | iOS (French) | 39 | 39 | 0 | 0 | 0 |
 | iOS (Turkish) | 43 | 43 | 0 | 0 | 0 |
 | Amiga 2.0 / 2.1 (English text file) | 45 | 27 | 8 | 6 | 4 |
-| **All** | 711 | 588 | 79 | 39 | 5 |
+| **All** | 717 | 594 | 79 | 39 | 5 |
 
 Android 1.2.8 has the iOS game's strings (`en/fr/tr.lproj`); its row is iOS's.
 
@@ -44,6 +46,7 @@ Android 1.2.8 has the iOS game's strings (`en/fr/tr.lproj`); its row is iOS's.
 | done | "%d%% Done": percent of the first queued ship paid | classic ui yardBox "N% paid for" | matched | 3.0.1 Mac (English) (1); iOS 1.2.9 / Android 1.2.8 (English) (1); Amiga 2.0 / 2.1 (English text file) (1) |
 | techlevel | "%d" the new level; "You now have %s Technology (%d)" the level the name is of | rules-*.js tech reports (msg "Your X Technology has reached level N") | matched | 2.0 Windows 3.1 (English) (5); 2.0 DOS (English) (5); 2.0.1 Mac (English) (5); 3.0.1 Mac (English) (6); 4.0.5 Windows 95 (11); 4.0.5 Mac (11); 5.0.5 Mac OS X (11); Palm OS 1.0.4 (11); iOS 1.2.9 / Android 1.2.8 (English) (11); Amiga 2.0 / 2.1 (English text file) (5) |
 | year | "%d": the year, plain | rules-*.js "Year N." reports; the title bar | matched | 2.0 Windows 3.1 (English) (1); 2.0 DOS (English) (3); 2.0.1 Mac (English) (1); 3.0.1 Mac (English) (2); 4.0.5 Windows 95 (4); 4.0.5 Mac (4); 5.0.5 Mac OS X (1); Palm OS 1.0.4 (1); iOS 1.2.9 / Android 1.2.8 (English) (1); Amiga 2.0 / 2.1 (English text file) (7) |
+| fleetdesc | MakeFleetDescription @130fb6: the fleet's count, the design's name, "(weapons/shields)", the class and an "s" from two ships; "one" for one; cut at 40 characters; used by the fleet reports, the "Ships here" rows (DrawOneFleet, RecalcFleetsAtNewStar) and List All Fleets (MakeListFleetsStr) | rs.fleetDesc (rules-301.js fleetDesc301), HO.fleetLabel / HO.fleetText; the classic ui fleetRow and fleet list | matched | 3.0.1 Mac (English), formats in the program (3) |
 | battle | whole counts; "(%d/%d)" the weapons and shields; people killed the nice number | rules-*.js battle reports and the battle window (classic ui openBattle, rs.battlePanel) | matched | 2.0 Windows 3.1 (English) (6); 2.0 DOS (English) (6); 2.0.1 Mac (English) (6); 3.0.1 Mac (English) (9); 4.0.5 Windows 95 (9); 4.0.5 Mac (9); 5.0.5 Mac OS X (10); Palm OS 1.0.4 (14); iOS 1.2.9 / Android 1.2.8 (English) (11); Amiga 2.0 / 2.1 (English text file) (4) |
 | people | the stored population number through the nice number: "You lost 500,000 people" | rules-*.js reports num(G, units); HO.popNum in the panels and battle windows | fixed | 2.0 Windows 3.1 (English) (1); 2.0 DOS (English) (1); 2.0.1 Mac (English) (1); 3.0.1 Mac (English) (3); 4.0.5 Windows 95 (5); 4.0.5 Mac (5); 5.0.5 Mac OS X (6); Palm OS 1.0.4 (8); iOS 1.2.9 / Android 1.2.8 (English) (6); Amiga 2.0 / 2.1 (English text file) (1) |
 | metal | the nice number ("%s metal") | rules-*.js reports num(G, n) | matched | 2.0 Windows 3.1 (English) (4); 2.0 DOS (English) (6); 2.0.1 Mac (English) (4); 3.0.1 Mac (English) (8); 4.0.5 Windows 95 (10); 4.0.5 Mac (10); 5.0.5 Mac OS X (10); Palm OS 1.0.4 (10); iOS 1.2.9 / Android 1.2.8 (English) (11); Amiga 2.0 / 2.1 (English text file) (4) |
@@ -62,7 +65,7 @@ Android 1.2.8 has the iOS game's strings (`en/fr/tr.lproj`); its row is iOS's.
 | prefs | preference values and Palm list cells | Preferences window; the Palm's own lists are not drawn | notshown: the Palm's list and registration lines have no counterpart in the web skin | Palm OS 1.0.4 (4) |
 | compact | the Palm's compact figure FUN_0002c664: "M,KKK K", "M.xx M", "K.0u K", "K K" | moneyPalm (rs.shortMoney) in the Palm panels | matched | Palm OS 1.0.4 (15) |
 | vol | the panel's temperature | none: nothing in any version sends the volcano report | notshown: no code sends it (docs/dos-findings.md, "The reports' numbers") | Amiga 2.0 / 2.1 (English text file) (1) |
-| foreign | the English line's figure; thousands and decimal signs by the language (L.num) | rs.lang[lang].say (js/languages.js), tools/lang-test.js | matched | 1.2F (Mac, French) (36); 2.0 DOS (German) (30); 3.0.1F Mac (French) (42); iOS (French) (39); iOS (Turkish) (43) |
+| foreign | the English line's figure; thousands and decimal signs by the language (L.num) | rs.lang[lang].say (js/languages.js), tools/lang-test.js | matched | 1.2F (Mac, French) (36); 2.0 DOS (German) (30); 3.0.1F Mac (French) (42); 3.0.1F Mac (French), formats in the program (3); iOS (French) (39); iOS (Turkish) (43) |
 
 ## What the audit found and changed (October 2026)
 
@@ -330,6 +333,14 @@ Left as it was, with the reason: 2.0 Windows, DOS and Mac 2.0.1's Build window (
 | %s dead | STR#4000.32 | people | fixed |
 | Sorry, your turn can’t be saved. Although you are in the year ^0, the game has already been updated to ^1… | STR#4001.7 | year | matched |
 
+### 3.0.1 Mac (English), formats in the program
+
+| String | Id | Family | Status |
+|---|---|---|---|
+| %d %.*s (%d/%d) %.*ss | MakeFleetDescription.count | fleetdesc | matched |
+| one %.*s (%d/%d) %.*s | MakeFleetDescription.one | fleetdesc | matched |
+| %.*s (%d/%d) %.*s | MakeFleetDescription.none | fleetdesc | matched |
+
 ### 3.0.1F Mac (French)
 
 | String | Id | Family | Status |
@@ -376,6 +387,14 @@ Left as it was, with the reason: 2.0 Windows, DOS and Mac 2.0.1's Build window (
 | $%s (D) | 4000.28 | foreign | matched |
 | $%s (P) | 4000.29 | foreign | matched |
 | %d%% finition | 4000.30 | foreign | matched |
+
+### 3.0.1F Mac (French), formats in the program
+
+| String | Id | Family | Status |
+|---|---|---|---|
+| %d %.*ss %.*s (%d/%d) | MakeFleetDescription.count | foreign | matched |
+| %P %.*s %.*s (%d/%d) | MakeFleetDescription.one | foreign | matched |
+| %.*s %.*s (%d/%d) | MakeFleetDescription.none | foreign | matched |
 
 ### 4.0.5 Windows 95
 

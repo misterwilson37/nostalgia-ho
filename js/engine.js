@@ -536,6 +536,8 @@ function sayNames(G) {
 const SAY_TECH_SLOT = /Technology \(|technology just jumped/;
 function sayArgIn(L, C, a, X) {
   if (X && !X.word && !(X.tech && X.ix === 0)) { if (!X.N) X.N = sayNames(X.G); if (X.N.has(a)) return a; }
+  // (a fleet's description, "3 Columbus (1/1) Scouts": the language's own order and class words, say.fleet)
+  if (L.fleet && X && !X.word) { const r = L.fleet(a, true); if (r != null) return r; }
   if (L.words && Object.prototype.hasOwnProperty.call(L.words, a)) return L.words[a];
   const hit = sayMatch(C.args, a);
   // (what an argument line like "one %s" holds is a word: a class)
@@ -1009,11 +1011,23 @@ function isAllied(G, a, b) { return a === b || (feature(G, 'alliances') && wants
 function isBuddy(G, a, b) { return a === b || (isAllied(G, a, b) && wants(G, a, b, 'buddies') && wants(G, b, a, 'buddies')); }
 function isFriend(G, a, b) { return isAllied(G, a, b); }
 function hasColonyAt(G, pid, sid) { return G.stars[sid].owner === pid; }
+// How a fleet is written in a report and in the fleet rows. A version that describes its fleets with the design's name and
+// stats (rs.fleetDesc(G, f), in the rules' English: 3.0.1's MakeFleetDescription, "3 Columbus (1/1) Scouts") says so; the
+// others keep the remake's own "3 Scouts" / "one Scout".
 function fleetLabel(G, f) {
   const n = fleetCount(f);
   const ds = fleetDesigns(G, f);
+  const rs = rules(G);
+  if (rs.fleetDesc && ds.length === 1) return rs.fleetDesc(G, f, ds[0], n);
   if (ds.length === 1) { const T = SHIP_TYPES[ds[0].type]; return n === 1 ? `one ${T.name}` : `${n} ${T.plural}`; }
   return `${n} ships`;
+}
+// The same, as the screen shows it: in the game's language where the version has the description's words (the language's
+// say.fleet puts the English label into the language's order and class names), else as fleetLabel.
+function fleetText(G, f) {
+  const t = fleetLabel(G, f);
+  const L = rules(G).fleetDesc ? sayRules(G) : null;
+  return L && L.fleet ? (L.fleet(t) ?? t) : t;
 }
 
 // ---------- knowledge ----------
@@ -2111,7 +2125,7 @@ const API = {
   // randomness and helpers for rulesets and AIs
   R, RI, pick, shuffle, gauss, clamp,
   newGame, endTurn, buildShips, unbuildShip, designLimits, designMin, designCost, shipCostNow, canBuildType, findOrCreateDesign, getDesign,
-  fleetCount, fleetDesigns, fleetSpeed, fleetMaxRange, fleetHas, fleetKind, fleetLabel, orderMove, orderPath, cancelMove, canReach, canMerge, queueShips, unqueueShip,
+  fleetCount, fleetDesigns, fleetSpeed, fleetMaxRange, fleetHas, fleetKind, fleetLabel, fleetText, orderMove, orderPath, cancelMove, canReach, canMerge, queueShips, unqueueShip,
   newFleet, addShipsToStar, mergeFleets, splitFleet, scrapFleet, evacuate, colonies, seenG, seenT, maxPop, planetClass, planetIncome,
   scrapDesign, liveDesigns, isFriend, isAllied, isBuddy, hasColonyAt, designName, namesFile, namesFileAdd, report, setPact, give, surrender, sendChat, sendCanned, deliverCanned, clearCanned, cannedList, cannedSteps, setArmageddon, hostileAt, know, observe, msg, msgAll, humans, starDist, dist, projected, totalChange, compareTable, compareInfo, shipStrength, techSum, score, save, load, borrowLimit, fmt, num, niceNum, niceNumSp, num505, money505, niceShort, moneyNice, moneyNiceSp, changeNice, change505, moneyPalmFull, plainNum, arrivalYear, popNum, currency, euroAfter, sumText, prefs: PREFS,
 };

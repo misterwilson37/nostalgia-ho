@@ -44,7 +44,9 @@ const VERSIONS = {
   dosDe:    { label: '2.0 DOS (German)', lang: 'de' },
   mac201:   { label: '2.0.1 Mac (English)' },
   mac301:   { label: '3.0.1 Mac (English)' },
+  mac301Code: { label: '3.0.1 Mac (English), formats in the program' },
   mac301Fr: { label: '3.0.1F Mac (French)', lang: 'fr' },
+  mac301FrCode: { label: '3.0.1F Mac (French), formats in the program', lang: 'fr' },
   w95:      { label: '4.0.5 Windows 95' },
   mac405:   { label: '4.0.5 Mac' },
   os505:    { label: '5.0.5 Mac OS X' },
@@ -68,9 +70,13 @@ const strings = {};
   strings.mac12 = Object.assign({}, strings.mac12);
   strings.mac301Fr = {}; for (const k of ['1000', '1005', '1011', '1020', '1030', '4000', '4001']) if (LD.mac301Fr[k]) Object.assign(strings.mac301Fr, flat({ [k]: LD.mac301Fr[k] }, any));
   strings.iosFr = flat(LD.ios.fr, any); strings.iosTr = flat(LD.ios.tr, any);
+  // the formats the 3.0.1 programs hold as literals in MakeFleetDescription (English @130fb6, French @130fa0: read from the code, tools in
+  // docs/301fr-findings.md "Fleet descriptions"); every report, row and list line that names a fleet prints one of them
+  strings.mac301Code = { 'MakeFleetDescription.count': '%d %.*s (%d/%d) %.*ss', 'MakeFleetDescription.one': 'one %.*s (%d/%d) %.*s', 'MakeFleetDescription.none': '%.*s (%d/%d) %.*s' };
+  strings.mac301FrCode = { 'MakeFleetDescription.count': '%d %.*ss %.*s (%d/%d)', 'MakeFleetDescription.one': '%P %.*s %.*s (%d/%d)', 'MakeFleetDescription.none': '%.*s %.*s (%d/%d)' };
 }
 // 1.2F's own STR# (the French strings are the 1.2 file's: the Mac 1.2 resource list)
-const FOREIGN = new Set(['dosDe', 'mac301Fr', 'iosFr', 'iosTr']);
+const FOREIGN = new Set(['dosDe', 'mac301Fr', 'mac301FrCode', 'iosFr', 'iosTr']);
 const canon = (t) => String(t).replace(/%[-0-9.]*l?[dui]/g, 'D').replace(/%[-0-9.*]*l?[sFP]s?|%\.\*s|%Fs|%@|%\d|\^\d/g, 'S').replace(/\s+/g, ' ').trim();
 const numeric = (t) => NUMCONV.test(t) || /\$ ?%/.test(t);
 
@@ -99,6 +105,7 @@ fam('done', /^D%+ (Done|finition|ready|fertig|hecho|fini)|^D% ?%?1?|^%?1% fertig
 // reports (the numbers inside the sentence)
 fam('techlevel', /Technology has reached [Ll]evel D|Tech has reached Level D|Technology just jumped to D|Technology \(D\)|technology just jumped to D|(Range|Speed|Weapon|Shield|Mini)Tech has reached|(Distance|Vitesse|Armes|Boucliers|Miniaturisation).*niveau D|Terraforming Technology/, { arith: '"%d" the new level; "You now have %s Technology (%d)" the level the name is of', place: 'rules-*.js tech reports (msg "Your X Technology has reached level N")', st: 'matched', check: 'report' });
 fam('year', /already passed to year|^Year D[.:]?$|^Processing Year D|^(Now we are in year|Game is in year:|Your .* year) D|the year D|the year S|year D|Current Year|Vous venez d'entrer|Turn D$/, { arith: '"%d": the year, plain', place: 'rules-*.js "Year N." reports; the title bar', st: 'matched', check: 'report' });
+fam('fleetdesc', /^(D S|one S|S) \(D\/D\) S$/, { only: ['mac301Code'], arith: 'MakeFleetDescription @130fb6: the fleet\'s count, the design\'s name, "(weapons/shields)", the class and an "s" from two ships; "one" for one; cut at 40 characters; used by the fleet reports, the "Ships here" rows (DrawOneFleet, RecalcFleetsAtNewStar) and List All Fleets (MakeListFleetsStr)', place: 'rs.fleetDesc (rules-301.js fleetDesc301), HO.fleetLabel / HO.fleetText; the classic ui fleetRow and fleet list', st: 'matched', check: 'fleetdesc' });
 fam('battle', /(won|lost|survived|destroyed).*D of your ships|perdu D de vos|gagné la bataille|S lost D\b|dead S|Round D|Rounds? \(D\)|D dead|D S destroyed|Review Battle|at S in D:|S in S in D|D\/D S|S\/S$|One S \(D\/D\)|\[S\] \(D\/D\) S|lost D ships|^S lost|Summary of battle|Battle Date/, { arith: 'whole counts; "(%d/%d)" the weapons and shields; people killed the nice number', place: 'rules-*.js battle reports and the battle window (classic ui openBattle, rs.battlePanel)', st: 'matched', check: 'report' });
 fam('people', /S people|People|people were|S dead|S killed|S of S People|and S people|dead S$/, { arith: 'the stored population number through the nice number: "You lost 500,000 people"', place: 'rules-*.js reports num(G, units); HO.popNum in the panels and battle windows', st: 'fixed', check: 'pop' });
 fam('metal', /S metal|metal from|S units of metal|Metal: S/i, { arith: 'the nice number ("%s metal")', place: 'rules-*.js reports num(G, n)', st: 'matched', check: 'nice' });
@@ -146,6 +153,31 @@ const checks = {
     if (HO.RULESETS['301'].interestRow(3100) !== '(Int: 3K)') fail('3.0.1 interest row');
     if (HO.RULESETS.mac405.interestRow(3100, '$') !== '(Int: $3K)') fail('Mac 4.0.5 interest row');
     if (HO.RULESETS.original.interestShort(12345) !== '12K' || HO.RULESETS.original.interestShort(1234567) !== '1.23M') fail('5.0.5 interest');
+  },
+  fleetdesc() {
+    // 3.0.1: a fleet is described by MakeFleetDescription's formats (English "%d %.*s (%d/%d) %.*ss", "one %.*s (%d/%d) %.*s"; French
+    // "%d %.*ss %.*s (%d/%d)", "%P %.*s %.*s (%d/%d)", %P the STR# 4000.42 "un"), cut at 40, in the reports and the rows
+    const mk = (lang) => HO.newGame(Object.assign({ seed: 5, size: 'small', computers: 1, iq: 'average', shape: 'random', rules: '301' }, lang ? { lang } : {}));
+    const cut = (t) => t.slice(0, 40);
+    const cls = { scout: 'Scout', fighter: 'Fighter', colony: 'Colony Ship', satellite: 'Satellite' };
+    const fr = LD.mac301Fr;
+    const clsFr = { scout: fr['1006'][0], fighter: fr['1006'][1], colony: fr['1006'][2], satellite: fr['1006'][3] }, un = fr['4000'][41];
+    for (const lang of [null, 'fr']) {
+      const G = mk(lang), p = G.players[0], home = G.stars.find(x => x.owner === 0);
+      for (const d of p.designs) {
+        if (!clsFr[d.type]) continue;
+        for (const n of [1, 2, 7, 12]) {
+          const f = { owner: 0, star: home.id, ships: { [d.id]: n }, fuel: 0 };
+          const want = lang ? cut(n === 1 ? `${un} ${clsFr[d.type]} ${d.name} (${d.W}/${d.S})` : `${n} ${clsFr[d.type]}s ${d.name} (${d.W}/${d.S})`)
+            : cut(n === 1 ? `one ${d.name} (${d.W}/${d.S}) ${cls[d.type]}` : `${n} ${d.name} (${d.W}/${d.S}) ${cls[d.type]}s`);
+          const got = HO.fleetText(G, f);
+          if (got !== want) fail(`3.0.1${lang ? 'F' : ''}: a fleet of ${n} ${d.type} is "${got}", MakeFleetDescription prints "${want}"`);
+          // a report puts it in the sentence as it is ("Your fleet of %.*s has arrived at %s.")
+          const rep = HO.say(G, `Your fleet of ${HO.fleetLabel(G, f)} has arrived at Vega.`);
+          if (!rep.includes(want) && !(lang && rep.includes(want.replace(/^un /, '')))) fail(`3.0.1${lang ? 'F' : ''}: the arrival report "${rep}" lacks "${want}"`);
+        }
+      }
+    }
   },
   plain() {
     for (const [x, w] of [[6, '6'], [9, '9'], [5.5, '5.5'], [0, '0']]) if (HO.plainNum(x) !== w) fail(`plainNum(${x}) is ${HO.plainNum(x)}`);
@@ -268,6 +300,9 @@ const PLACES = [
   ['js/skins/classic/ui.js', /HO\.popNum\(G, s\.pop\)/, 'the planet panel prints HO.popNum'],
   ['js/skins/classic/ui.js', /HO\.plainNum\(f\.fuel\)/, 'the fleet rows print HO.plainNum'],
   ['js/skins/classic/ui.js', /function arrivesText/, 'arrivesText'],
+  ['js/rules-301.js', /function fleetDesc301/, 'the 3.0.1 fleet description'],
+  ['js/languages.js', /function fleetSay/, 'the languages\' fleet descriptions'],
+  ['js/skins/classic/ui.js', /HO\.fleetText\(G, f\)/, 'the fleet rows print the version\'s description'],
   ['js/skins/classic/ui.js', /interestRow/, 'the Interest row hook'],
   ['js/engine.js', /function niceShort/, 'HO.niceShort'],
   ['js/engine.js', /const moneyNice/, 'HO.moneyNice'],

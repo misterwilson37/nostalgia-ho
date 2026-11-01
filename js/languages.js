@@ -1530,6 +1530,23 @@ function patchedWindows(T, rs, out, extra) {
 }
 // a version's language from its own list of lines (o.lines), hints and
 // windows; o.nearest '20' when 2.0's official text is the nearest (3.0.1)
+// A fleet's description in the language (3.0.1's MakeFleetDescription: rs.fleetDesc writes it in the rules' English, "3 Columbus
+// (1/1) Scouts", "one Columbus (1/1) Scout"; the language's say.fleet, used for a report's blank and a fleet row, puts the same
+// parts in its order and class words, the words of its battle window's group lines: W, as the window is made), cut at 40
+// characters, the Pascal string's cap
+const FLEET_EN = /^(one|\d+) (.*) \((-?\d+)\/(-?\d+)\) (Scout|Fighter|Colony Ship|Satellite)s?$/;
+const FLEET_TYPE = { Scout: 'scout', Fighter: 'fighter', 'Colony Ship': 'colony', Satellite: 'satellite' };
+function fleetSay(W) {
+  const describe = DOS.describe20({ words: W }, 40);
+  // (inSentence: a report's blank. The German window's "Ein Columbus (1/1) Späher" opens with a capital, and so does a row; in a
+  // sentence the remake's German has always written "ein", as the German 2.0's reports do: W.one lower-cased there)
+  return (label, inSentence) => {
+    const m = FLEET_EN.exec(String(label));
+    if (!m) return null;
+    const n = m[1] === 'one' ? 1 : +m[1], t = describe({ type: FLEET_TYPE[m[5]], name: m[2], W: +m[3], S: +m[4] }, n, true);
+    return inSentence && n === 1 && !W.desc && W.one && W.one !== W.one.toLowerCase() && t.startsWith(W.one) ? W.one.toLowerCase() + t.slice(W.one.length) : t;
+  };
+}
 function buildText(lang, rs, o) {
   const T = translator(lang, officialFor(lang, o.nearest));
   const reports = [];
@@ -1561,6 +1578,11 @@ function buildText(lang, rs, o) {
   if (extra && out.fixSpending && rs.fixSpending.lines.some(t => T.fix(t) != null)) extra.fixSpending = Object.assign({}, out.fixSpending, { lines: rs.fixSpending.lines.map((t, i) => T.fix(t) ?? out.fixSpending.lines[i]) });
   out.battlePanel = o.battlePanel ? o.battlePanel(words20(lang)) : rs.battlePanel;
   if (extra && o.battlePanel) extra.battlePanel = o.battlePanel(words20(lang, true));
+  // (the fleet descriptions of a report and a row, in the words of the battle window's group lines)
+  if (o.fleet) {
+    out.say.fleet = fleetSay(words20(lang));
+    if (extra && extra.say) extra.say = Object.assign({}, extra.say, { fleet: fleetSay(words20(lang, true)) });
+  }
   extra = patchedWindows(T, rs, out, extra);
   out.fix = patchFix(lang, T, reports, hints, words, hintTexts, extra);
   out.missing = T.missing.slice();
@@ -1690,11 +1712,10 @@ if (R301) {
   // the fleet as the battle window words it
   function otherFleetRow301F(G, f) {
     const P = G.players[f.owner];
-    const parts = Object.keys(f.ships).filter(k => f.ships[k] > 0).map(k => { const d = E.getDesign(G, f.owner, +k); return BATTLE_301F.desc(d.name, `(${d.W}/${d.S})`, BATTLE_301F.cls(d.type, f.ships[k]), f.ships[k]); });
-    return `${P ? P.name : ''}\u00a0: ${parts.join(', ')}`.slice(0, 63);
+    return `${P ? P.name : ''}\u00a0: ${E.fleetText(G, f)}`.slice(0, 63);
   }
   const make = (lang) => lazyLang(() => {
-    const out = buildText(lang, R301, { lines, nearest: '301', battlePanel: (w) => w ? DOS.battlePanel20({ dots: '…', cols: 'mac', shade: true, words: w }) : R301.battlePanel });
+    const out = buildText(lang, R301, { lines, nearest: '301', fleet: true, battlePanel: (w) => w ? DOS.battlePanel20({ dots: '…', cols: 'mac', shade: true, words: w }) : R301.battlePanel });
     // 3.0.1's French is the official one, 3.0.1F's (not the remake's beside it): its
     // lines are 3.0.1F's, and the lines it has none for (the remake's engine
     // messages) are iOS's or 1.2F's, adapted, or the remake's; its windows' words
@@ -1708,6 +1729,8 @@ if (R301) {
       // its battle window in its own words and fleet lines (MakeFleetDescription @130fa0, DrawOneGroup @e2702), the names over the
       // columns two pixels higher (DoOneBattle @e0a8a: 12 above the picture's bottom, the English's 10)
       out.battlePanel = DOS.battlePanel20({ dots: '…', cols: 'mac', shade: true, nameUp: 2, words: BATTLE_301F });
+      // and the fleets of its reports and rows in the same words (the same function, MakeFleetDescription, in the callers' arguments)
+      out.say = Object.assign({}, out.say, { fleet: fleetSay(BATTLE_301F) });
       // the patch's fixes of 3.0.1F's own rules, added to rs.lang.fr.releaseRules when the patch is on (engine.js inLanguage)
       out.fix = Object.assign({}, out.fix, {
         frTwoHumans: { releaseRules: { maxHumans: null } },

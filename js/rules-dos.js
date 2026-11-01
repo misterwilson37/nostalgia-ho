@@ -1996,17 +1996,22 @@ const WORDS20 = {
   cls: (type, n) => (E.TYPES[type] || { name: '' }).name + (n > 1 ? 's' : ''),
   one: 'one ', dead: (n0, desc) => `${n0} dead ${desc}${n0 === 1 ? '' : 's'}`, deadPeople: (x) => `${x} dead`,
 };
-function battlePanel20(opt) {
+// A ship group's words, MakeFleetDescription's: (d, n, mine) => text, cut at `cap` characters (the battle window's lines: 39);
+// the fleet reports and rows of 3.0.1 use the same function (rs.fleetDesc, js/languages.js say.fleet: 40, the Pascal string's cap)
+function describe20(opt, cap) {
   const W = opt.words || WORDS20;
   const cut = (s, n) => n ? String(s).slice(0, n) : String(s);
-  const desc = (d, n, mine) => {
+  return (d, n, mine) => {
     const t = d.type === 'decoy' && !mine ? 'fighter' : d.type;
     const cls = W === WORDS20 ? cut((E.TYPES[t] || { name: '' }).name, opt.cls) + (n > 1 ? 's' : '') : cut(W.cls(t, n), opt.cls), nm = cut(d.name, opt.name), ws = `(${d.W}/${d.S})`;
     // (W.desc: a language's own order, 1.2F's "1 Eclaireur Sonde (1/1)")
-    if (W.desc) return W.desc(nm, ws, cls, n).slice(0, 39);
-    return (n < 1 ? `${nm} ${ws} ${cls}` : n === 1 ? `${W.one}${nm} ${ws} ${cls}` : `${n} ${nm} ${ws} ${cls}`).slice(0, 39);
-
+    if (W.desc) return W.desc(nm, ws, cls, n).slice(0, cap);
+    return (n < 1 ? `${nm} ${ws} ${cls}` : n === 1 ? `${W.one}${nm} ${ws} ${cls}` : `${n} ${nm} ${ws} ${cls}`).slice(0, cap);
   };
+}
+function battlePanel20(opt) {
+  const W = opt.words || WORDS20;
+  const desc = describe20(opt, 39);
   const pop = (G, x) => { const t = (E.rules(G).fmtNum || fmt)(E.popNum(G, x)); return W.num ? W.num(t) : t; };
   return E.makeBattlePanel({
     cols: opt.cols || 'sides', shade: !!opt.shade, pics: (n) => Math.min(n, 1), nameUp: opt.nameUp,
@@ -2212,7 +2217,7 @@ E.registerRules('dos', Object.assign({}, O, {
   // internals, for the Mac 1.2 ruleset built on this one (js/rules-12.js)
   shareOf, colonyMoney, shipyard, removeColony, isqrt, wpn, battleOnly: battle, base12, bars20, setBars20,
   // the battle window in another language (js/languages.js)
-  battlePanel20,
+  battlePanel20, describe20,
   // not in 2.0 (CONFIRMED: no text or code for them)
   difficulty: undefined, masterPoints: undefined,
   // the unofficial 2.0.1 patch (engine.js fixed; docs/fixes.md): each fix is

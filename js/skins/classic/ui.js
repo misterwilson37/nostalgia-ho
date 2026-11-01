@@ -1640,14 +1640,15 @@ function fleetRow(f, inbound) {
   ds.slice(0, 3).forEach(d => pics.append(shipImgEl(d, 18)));
   // another player's fleet where the version words the row itself (rs.otherFleetRow: 3.0.1F's rows, which come out
   // empty because its program lacks the lines, RecalcFleetsAtNewStar; the patch's French fills them): that one line
-  if (!mine && !inbound && HO.rules(G).otherFleetRow) {
-    const t = HO.rules(G).otherFleetRow(G, f);
-    if (t) r.append(pics);
-    r.append(el('div', { class: 'ftext' }, el('div', null, t || '\u00a0')));
+  const orow = !mine && !inbound && HO.rules(G).otherFleetRow ? HO.rules(G).otherFleetRow(G, f) : null;
+  if (orow != null) {
+    if (orow) r.append(pics);
+    r.append(el('div', { class: 'ftext' }, el('div', null, orow || '\u00a0')));
     return r;
   }
   r.append(pics);
-  const parts = Object.keys(f.ships).map(k => { const d = HO.getDesign(G, f.owner, +k); return `${f.ships[k]} ${f.ships[k] === 1 ? d.name : d.name}`; });
+  // (a version that describes its fleets with the design's name and stats, rs.fleetDesc: that description, in the game's language)
+  const parts = HO.rules(G).fleetDesc && ds.length === 1 ? [HO.fleetText(G, f)] : Object.keys(f.ships).map(k => { const d = HO.getDesign(G, f.owner, +k); return `${f.ships[k]} ${f.ships[k] === 1 ? d.name : d.name}`; });
   let status = '';
   if (inbound) status = arrivesText(f);
   else if (!mine) status = p.name;
@@ -3602,7 +3603,7 @@ function openFleetList() {
     const where = f.star != null ? G.stars[f.star].name : `${G.stars[f.from].name} → ${G.stars[f.to].name}`;
     const go = f.dest != null ? G.stars[f.dest].name + (f.path && f.path.length ? ' → …' : '') : f.to != null ? arrivesText(f, true) : '';
     return el('tr', { class: 'click' + (f.scrap301 ? ' scrap' : ''), title: f.scrap301 ? markedLine() : null, onclick: () => { UI.selFleet = f.id; UI.sel = f.star != null ? f.star : f.to; closeModal(); renderPanel(); draw(); } },
-      el('td', null, HO.fleetLabel(G, f)), el('td', null, where), el('td', null, f.scrap301 ? 'to be scrapped' : go), el('td', null, f.sat ? '' : `${Math.floor(f.fuel)}/${HO.fleetMaxRange(G, f)}`));
+      el('td', null, HO.rules(G).fleetDesc ? HO.fleetText(G, f) : HO.fleetLabel(G, f)), el('td', null, where), el('td', null, f.scrap301 ? 'to be scrapped' : go), el('td', null, f.sat ? '' : `${Math.floor(f.fuel)}/${HO.fleetMaxRange(G, f)}`));
   });
   // 5.0.5's List All Fleets (PPob 166): its title and its line under the list
   const W = winWords('fleets');
