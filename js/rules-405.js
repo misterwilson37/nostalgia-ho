@@ -2452,6 +2452,17 @@ E.registerRules('405', Object.assign({}, D, {
   // @c042a, @c0c08, @c0c14 and @c3a90: the same code as 3.0.1's): the changes of the turn just processed beside Metal and the net (player +8),
   // strings 704-707 / STR# 6070.5-8, "(up $%s)" ... as 3.0.1 (js/rules-301.js, `changes`). Start: both 0.
   changes: { read: (G, p) => ({ metal: p.metal, money: 0, income: p.net301 || 0 }), line: (G, which, v) => E.changeNice(which, v) },
+  // CONFIRMED (Windows FUN_0045490f opens, FUN_00454afc draws, FUN_00455366 gives each row's figure; the dialogs 352 and 353; strings 733-744, 754, 756, 758;
+  // Mac 4.0.5 ComparePlayers @10078c, GetComparisonValue @1009b2, DRAWCPBARGRAPH @100a3e): 3.0.1's window, its figures worked out when it opens (Income +0,
+  // Metal +0x1c, Planets +0x28, Ships the strength of the fleets, the technologies +0x34; -1 for a player who is out) with no "You won" line. The year 2000
+  // says "Sorry no comparisons until the year 2010."; out, "You were eliminated in %d." with the galaxy's year for state 1, else the year kept.
+  // Windows: dialog 352 is 343 x 218 dialog units (MS Sans Serif 8: 1.5 x 1.625 pixels), the chart item (6, 15) 329 x 175 deflated by (2, 4)
+  // (FUN_004182b9), the axes at +50 and -14 as the Mac's.
+  compare: { stored: false, won: false, own: false, style: 'mac', units: [1.5, 1.625], deflate: [2, 4],
+    layout: { w: 343, h: 218, title: [5, 4, 195, 8], chart: [6, 15, 329, 175], skills: [197, 196, 50, 14], ok: [259, 196, 50, 14] },
+    texts: { none: 'Sorry no comparisons until the year 2010.', out: 'You were eliminated in %d.', ranks: 'Your ranking among the %d remaining players in %d.' },
+    skillsLayout: { w: 304, h: 176, title: [4, 5, 133, 8], list: [4, 15, 290, 138], label: [3, 160, 69, 8], iq: [75, 160, 78, 8], ok: [253, 157, 38, 14] }, // (dialog 353)
+    values: (G, p) => [p.tm || 0, p.metal, E.colonies(G, p.id).length, E.shipStrength(G, p), p.tech.range, p.tech.speed, p.tech.weapons, p.tech.shields, p.tech.mini] },
   // no Fix Spending: neither 4.0.5 has the command (no such menu item or string)
   fixSpending: null,
   // the New Game window's Version and Edition menus (engine.js editions)

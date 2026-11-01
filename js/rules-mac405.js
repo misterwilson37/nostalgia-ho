@@ -201,6 +201,13 @@ const FIXES = W.fixes.filter(f => MAC_SLIPS.includes(f.id)).concat([
 
 // Mac 4.0.5 plays 4.0.5's game (js/rules-405.js), with the differences above
 E.registerRules('mac405', Object.assign({}, W, {
+  // CONFIRMED (ComparePlayers @10078c, GetComparisonValue @1009b2, DLOG/DITL 6050 "Compare Players" 478 x 292, STR# 6140.5, .7, .9): the Mac's own
+  // window for 4.0.5's Compare Players, laid out as 3.0.1's; the year 2000 says "Sorry, no comparisons in the year 2000." (STR# 6140.5, though the first
+  // comparison is in 2010), a player out "You were elminated in %d." (.9, misspelt) with the galaxy's year for state 1, else the year kept
+  compare: Object.assign({}, W.compare, { units: [1, 1], deflate: null,
+    layout: { w: 478, h: 292, title: [13, 2, 454, 19], chart: [13, 26, 455, 225], skills: [290, 260, 87, 20], ok: [400, 260, 58, 20] },
+    texts: { none: 'Sorry, no comparisons in the year 2000.', out: 'You were elminated in %d.', ranks: 'Your rankings among the %d remaining players in %d:' },
+    skillsLayout: { w: 377, h: 294, title: [13, 2, 286, 20], list: [13, 26, 350, 226], label: [13, 260, 155, 19], iq: [169, 260, 97, 20], ok: [277, 262, 82, 20] } }), // (DITL 6100)
   // CONFIRMED (DrawIncomeRect @113340: LongToNiceShortString of the interest, STR# 6070.10 "(Int: $%s)")
   interestRow: (n, cur) => '(Int: ' + cur + E.niceShort(n) + ')',
   // the colour-monitor joke on a black-and-white skin, in p.colorJoke's year (AddEasterEggs @b000c, string 1111; engine.js endTurn)

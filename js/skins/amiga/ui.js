@@ -1317,7 +1317,7 @@ function skinWindow(name, ...args) {
   if (!game()) return false;
   if (name === 'build') return openShipyard(args[0]);
   if (name === 'types') return openTypes();
-  if (name === 'players') return openCompare();
+  if (name === 'players' || name === 'compare') return openCompare();
   if (name === 'split') return openSplitter(args[0]);
   if (name === 'fleets') return openFleetListAm();
   if (name === 'stars') return openStarListAm();
@@ -1874,7 +1874,7 @@ window.HOTHEME_OVER = {
   mapPixel: () => [PX.x, PX.y],
   mapFont: () => '16px HoFont11, sans-serif',
   planetPx: (s) => [9, 16, 16, 32][zoomIdx(s)],
-  drawStar, markerAt, allyAt, ownRings: true, zoomTo, afterDraw: syncMapBars, fitView,
+  drawStar, markerAt, allyAt, ownRings: true, zoomTo, compareMenu: false, afterDraw: syncMapBars, fitView,
   techBars: 'vertical', barGrid: false,
   panel, afterMsg, window: skinWindow, newGame, menus, lookOptions, page, title,
   menuName: (k) => (WORDS[k] ? W(k) : k), // the menus' names (menus above), in the language

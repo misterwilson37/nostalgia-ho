@@ -29,6 +29,17 @@ button { font: inherit; }
 .kv { display: flex; justify-content: space-between; gap: 8px; padding: 1px 0; }
 .kv b { font-weight: bold; font-variant-numeric: tabular-nums; }
 .kv.neg b { color: var(--neg); }
+/* Compare Players and Show Skills: a dialog's items placed where its resource puts them (openCompare) */
+.win.compare { width: max-content; max-width: calc(100vw - 24px); }
+.win.compare .wbody { padding: 0; overflow: auto; }
+.origdlg { position: relative; margin: 0 auto; max-width: none; }
+.origdlg > * { position: absolute; box-sizing: border-box; margin: 0; }
+.origdlg > canvas { left: 0; top: 0; max-width: none; }
+.origdlg .cmptitle { display: flex; align-items: center; white-space: nowrap; overflow: visible; line-height: 1.15; }
+.origdlg .skillist { overflow-y: auto; border: 1px solid currentColor; padding: 2px 0; background: transparent; }
+.origdlg .skillrow { display: flex; padding: 1px 6px; }
+.origdlg .skillrow span:first-child { flex: 0 0 55%; }
+.origdlg > button { padding: 0; white-space: nowrap; }
 .kv .chg { font-weight: normal; font-size: 12px; white-space: nowrap; }
 .info .kv:first-child b { font-size: 14px; }
 .barrow { display: grid; grid-template-columns: var(--blabel, 82px) minmax(40px, 1fr) var(--bval, 70px); align-items: center; gap: 6px; margin: 3px 0; }

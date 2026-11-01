@@ -2051,6 +2051,20 @@ E.registerRules('dos', Object.assign({}, O, {
   // (the money kept within $0 and $999,999,999) each is replaced by the figure now less the kept one. Start: all three 0, so the first
   // year reads "(up $0)", "(up $0)" and "(up 0)" (CreatePlayer @1030:1299 clears +4, +0x18; +0xc, +0x1c start 0).
   changes: { money: true, read: (G, p) => ({ metal: p.metal, money: p.savings, income: (p.oInc || 0) + (p.oInterest || 0) }), line: (G, which, v) => E.changeNice(which, v) },
+  // CONFIRMED (WINHO.EXE COMPAREPLAYERSDLGPROC @1070:0745 and the dialog 10 of its resources; Mac 2.0.1 ComparePlayers @1208d4, DLOG/DITL 6050): the
+  // Compare Players window, from 2010 (Galaxy menu, Ctrl+Y). Its nine rows are Income (the Total Income, +8 and the interest +0x1c), Metal (+0x10),
+  // Planets (the colonies), Ships (CalcShipPower: the strength of every fleet) and the five technologies (the progress / 100); the table is saved
+  // when each player's second pass ends (FUN_1040_0038; -1 for a player who is out). Your own colony's picture is the icon on every row (the icon
+  // number in the galaxy's record + 1000), at the row's column and the place its figure ranks (HO.compareInfo). In 2000 the title says "Sorry, no
+  // comparisons until the year 2010." and no chart is drawn; the same when you have won ("You won the game in %d.", the galaxy +0xe being you) or are
+  // out (state 4 or 5: "You were eliminated in %d.", the galaxy's year for state 5, else the year kept). Show Skills lists every player's skill and the
+  // computers' intelligence (dialog 16). Dialog 10 in dialog units of the System font (2 pixels each way): 267 x 159, the chart at (38, 17) 215 x 112
+  // with its axes on the item's left and bottom edges, the labels outside.
+  compare: { stored: true, won: true, own: true, style: 'win', units: [2, 2],
+    layout: { w: 267, h: 159, title: [13, 4, 233, 8], chart: [38, 17, 215, 112], skills: [130, 139, 52, 14], ok: [205, 139, 52, 14] },
+    texts: { none: 'Sorry, no comparisons until the year 2010.', won: 'You won the game in %d.', out: 'You were eliminated in %d.', ranks: 'Your rankings among the %d remaining players in %d:' },
+    skillsLayout: { w: 226, h: 170, title: [15, 3, 135, 8], list: [15, 16, 195, 129], label: [16, 150, 75, 8], iq: [93, 150, 28, 8], ok: [155, 150, 53, 14] },
+    values: (G, p) => [(p.oInc || 0) + (p.oInterest || 0), p.metal, E.colonies(G, p.id).length, E.shipStrength(G, p), p.tech.range, p.tech.speed, p.tech.weapons, p.tech.shields, p.tech.mini] },
   label: 'DOS 2.0 (1993)',
   // the New Game window's Version and Edition menus (engine.js editions):
   // the Windows 3.1 program, WINHO.EXE, is a 2.0.1 build (its credits,

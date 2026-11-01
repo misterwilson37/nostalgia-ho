@@ -1647,6 +1647,15 @@ function turnStep(G, first, last) {
     delete p.c0;
     if (a) p.chg = { metal: b.metal - a.metal, money: b.money - a.money, income: b.income - a.income };
   }
+  // Compare Players (rs.compare): the table of nine figures a player's second pass leaves (SaveComparisonInfoOne and Two @a65bc and @a663c,
+  // WINHO.EXE FUN_1040_0038: -1 for a player who is out), kept where the version keeps it (2.0, 2.0.1 and 3.0.1; 4.0.5 works the figures out when the
+  // window opens), and the year a player went out or the game was won: the galaxy's year as the turn leaves it
+  if (rs.compare) {
+    const yr = G.year + rs.yearsPerTurn;
+    if (rs.compare.stored) { G.cmp = {}; for (const p of G.players) G.cmp[p.id] = p.alive ? rs.compare.values(G, p) : Array(9).fill(-1); }
+    for (const p of G.players) if (!p.alive && p.outYear == null) p.outYear = yr;
+    if (G.over && G.winYear == null) G.winYear = yr;
+  }
   G.turn++; G.year += rs.yearsPerTurn;
 }
 
@@ -1660,6 +1669,35 @@ function totalChange(G, p, which) {
   const c = G && rules(G).changes;
   if (!c || (which === 'money' && !c.money)) return null;
   return c.line(G, which, (p.chg && p.chg[which]) || 0);
+}
+
+// ---------- Compare Players (rs.compare: 2.0, Mac 2.0.1, 3.0.1, 4.0.5) ----------
+// The window ranks you in nine rows: Income, Metal, Planets, Ships (the strength of all your ships, CalcShipPower with no star and no class
+// asked for), then the five technologies. For each row every other player counts 10 against you if his figure is more than yours and 5 if it is
+// equal (the loop of ComparePlayers @1208d4, @140952, COMPAREPLAYERSDLGPROC @1070:0a7f, FUN_00454afc), the sum is your place on the row, 0 the
+// best, 10 for every one that beats you; a player who is out has -1 in every row. The row's icon is put that sum / 10 of the way down.
+function compareTable(G) {
+  const c = rules(G).compare;
+  return G.players.map(p => !p.alive || p.surrendered ? Array(9).fill(-1) : c.stored && G.cmp && G.cmp[p.id] ? G.cmp[p.id] : c.values(G, p));
+}
+// what the window shows for a player (me): kind 'none' (no comparison in the first year), 'won' (2.0 and Mac 2.0.1 say so when you have won),
+// 'out' (you are out: the year kept by the turn that put you out), else 'ranks' with the count of players still in, the year and the nine places
+function compareInfo(G, me) {
+  const c = rules(G).compare, p = G.players[me];
+  const info = { year: G.year, n: G.players.filter(q => q.alive && !q.surrendered).length, scores: null };
+  if (G.year === 2000) { info.kind = 'none'; return info; }
+  if (c.won && G.over && G.winner === me) { info.kind = 'won'; info.year = G.winYear != null ? G.winYear : G.year; return info; }
+  if (!p.alive || p.surrendered) { info.kind = 'out'; info.year = p.outYear != null ? p.outYear : G.year; return info; }
+  const t = compareTable(G);
+  info.kind = 'ranks';
+  info.scores = t[me].map((v, k) => { let sc = 0; t.forEach((row, q) => { if (q !== me) sc += v < row[k] ? 10 : v === row[k] ? 5 : 0; }); return sc; });
+  return info;
+}
+// the strength of a player's ships: each fleet's ships times their design's rating (rs.shipPower), as CalcShipPower sums them
+function shipStrength(G, p) {
+  const rs = rules(G); let n = 0;
+  for (const f of G.fleets) if (f.owner === p.id) for (const k in f.ships) { const d = getDesign(G, p.id, +k); if (d) n += f.ships[k] * rs.shipPower(G, d); }
+  return n;
 }
 
 function departures(G) {
@@ -2042,7 +2080,7 @@ const API = {
   newGame, endTurn, buildShips, unbuildShip, designLimits, designMin, designCost, shipCostNow, canBuildType, findOrCreateDesign, getDesign,
   fleetCount, fleetDesigns, fleetSpeed, fleetMaxRange, fleetHas, fleetKind, fleetLabel, orderMove, orderPath, cancelMove, canReach, canMerge, queueShips, unqueueShip,
   newFleet, addShipsToStar, mergeFleets, splitFleet, scrapFleet, evacuate, colonies, seenG, seenT, maxPop, planetClass, planetIncome,
-  scrapDesign, liveDesigns, isFriend, isAllied, isBuddy, hasColonyAt, designName, namesFile, namesFileAdd, report, setPact, give, surrender, sendChat, sendCanned, deliverCanned, clearCanned, cannedList, cannedSteps, setArmageddon, hostileAt, know, observe, msg, msgAll, humans, starDist, dist, projected, totalChange, techSum, score, save, load, borrowLimit, fmt, num, niceNum, num505, money505, niceShort, moneyNice, changeNice, change505, moneyPalmFull, plainNum, arrivalYear, popNum, currency, euroAfter, sumText, prefs: PREFS,
+  scrapDesign, liveDesigns, isFriend, isAllied, isBuddy, hasColonyAt, designName, namesFile, namesFileAdd, report, setPact, give, surrender, sendChat, sendCanned, deliverCanned, clearCanned, cannedList, cannedSteps, setArmageddon, hostileAt, know, observe, msg, msgAll, humans, starDist, dist, projected, totalChange, compareTable, compareInfo, shipStrength, techSum, score, save, load, borrowLimit, fmt, num, niceNum, num505, money505, niceShort, moneyNice, changeNice, change505, moneyPalmFull, plainNum, arrivalYear, popNum, currency, euroAfter, sumText, prefs: PREFS,
 };
 if (typeof module !== 'undefined') {
   module.exports = API;

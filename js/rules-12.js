@@ -361,6 +361,8 @@ E.registerRules('12', Object.assign({}, D, {
   // (player +0xea0, read by EndTurn @a0004 and cleared by CreatePlayer @e16a4),
   // and the menus (MENU 128-134) have no Send Message or Compare Players item
   features: Object.assign({}, D.features, { arrivalNotices: false, skills: false, chat: false }),
+  // (1.2 has no Compare Players command: docs/coverage-12.md, MENU 128-134)
+  compare: null,
   fixedOptions: FIXED, fixOptions,
   // CONFIRMED (ExploreStar @a3b4c): 1.2F shows temperatures in °C, to a tenth
   // (the skin's Celsius preference does this)

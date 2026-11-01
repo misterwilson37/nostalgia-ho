@@ -2059,6 +2059,16 @@ E.registerRules('301', Object.assign({}, D, {
   // of the second pass (the net kept within $0 and $999,999,999) each is replaced by the figure now less the kept one. Ship Savings
   // have none. Start: both 0 ("(up 0)", "(up $0)" in the first year).
   changes: { read: (G, p) => ({ metal: p.metal, money: 0, income: p.net301 || 0 }), line: (G, which, v) => E.changeNice(which, v) },
+  // CONFIRMED (ComparePlayers @140952 and its item proc @140b54, SaveComparisonInfoOne and Two @a65bc, @a663c, CalcShipPower @1354bc, DLOG/DITL 6050,
+  // DITL 6100, STR# 1008 and 1020): the Compare Players window (Galaxy menu, cmd-Y) as 2.0.1's, 478 x 292, with a picture of its own on each row
+  // (ICN# 3110, 3162, 3150, 4011, then 3100 to 3104: Income, Metal, Planets, Ships, the techs) and no "You won" line (only .5, .18 and .20 are
+  // loaded). The table is saved when each player's second pass ends: Income is Total Money (+0, the profitable colonies' income), Metal +0x1c,
+  // Planets +0x28 (the colonies), Ships the strength of all the fleets, the technologies +0x34.
+  compare: { stored: true, won: false, own: false, style: 'mac', units: [1, 1],
+    layout: { w: 478, h: 292, title: [13, 2, 454, 19], chart: [13, 26, 455, 225], skills: [290, 260, 87, 20], ok: [400, 260, 58, 20] },
+    texts: { none: 'Sorry, no comparisons until the year 2010.', out: 'You were elminated in %d.', ranks: 'Your rankings among the %d remaining players in %d:' },
+    skillsLayout: { w: 377, h: 294, title: [13, 2, 286, 20], list: [13, 26, 350, 226], label: [13, 260, 155, 19], iq: [169, 260, 97, 20], ok: [277, 262, 82, 20] }, // (DLOG/DITL 6100)
+    values: (G, p) => [p.tm || 0, p.metal, E.colonies(G, p.id).length, E.shipStrength(G, p), p.tech.range, p.tech.speed, p.tech.weapons, p.tech.shields, p.tech.mini] },
   // CONFIRMED (SetShipTypeAttrs @1325b2 items 25 and 26; the same in 4.0.5's picture: "Savings: 78,987")
   buildSavingsPlain: true,
   arrivalYear: true, // ("%.*s to arrive at %s in %d.": the year, MakeListFleetsStr @1336e8)

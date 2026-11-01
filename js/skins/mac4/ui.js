@@ -405,7 +405,7 @@ window.HOMAC4 = {
     Ships: [['Build Ships…', 'Ships/Build ships at selected colony…'], '-',
       ['List All Fleets…', 'Ships/List all fleets…'], ['Next Fleet', 'Ships/Next fleet'], [null, 'Ships/#3'], ['Scrap Ship Types…', 'Ships/Scrap ship types…'], '-',
       ['Review Battle…', 'Ships/Review battle…']],
-    Galaxy: [['Compare Players…', 'Game/Players and history'], ['List All Explored Stars…', 'Galaxy/List explored stars…'], '-',
+    Galaxy: [['Compare Players…', 'Galaxy/Compare players…'], ['Graph History…', 'Game/Players and history'], ['List All Explored Stars…', 'Galaxy/List explored stars…'], '-',
       ['Dip Into Savings…', 'Galaxy/Dip into savings…'], '-',
       ['Alliances…', 'Galaxy/Players and alliances…'], ['Give Money/Metal…', 'Galaxy/Give money or metal…'], [null, 'Galaxy/#6'], ['Send Message…', 'Galaxy/Send a message…'], '-',
       [null, 'Galaxy/#7']], // Surrender To…, Armageddon

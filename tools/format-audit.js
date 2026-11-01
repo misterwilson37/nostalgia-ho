@@ -108,7 +108,9 @@ fam('explore', /explor|Gravity: D|Gravité: D/i, { arith: 'the panel\'s own temp
 fam('chatnum', /gravity.*temperature|planets that are D|G and|%s says, "I like planets/i, { arith: 'the panel\'s gravity and temperature', place: 'HO.tempToken / HO.gravToken in the canned message', st: 'matched', check: 'temp' });
 fam('iosfleet', /^Fleet D$/, { arith: '"Fleet %d"', place: 'the iOS skin names a fleet by its ships', st: 'unsettled', why: 'iOS\'s fleet title was not traced to a remake row' });
 fam('amigaui', /^of S \(D\)$|^\$ S \[%c\]$|galaxy with D humans|^Spaceward Ho! V2\.1 - S in S at D$/, { arith: 'the Amiga program\'s own window lines', place: 'js/skins/amiga/ui.js', st: 'unsettled', why: 'the Amiga windows are drawn by the Amiga skin; their arithmetic was read in docs/amiga-skin.md, not re-read here' });
-fam('rank', /You were elim|You were elminated|You won the game in D|won the game in year|You won the game in S|remaining players|Tied for|^D?th$|rankings? among|Rank|rank of|in income with|tech with a level|Classement|classement|^D\.?$|^Tied|S in S tech|S en/i, { arith: '"Tied for %dth", "%s in income with $%s.", "%s in %s tech with a level of %d."', place: 'none: the remake lists players in its own Players window without a ranking sentence', st: 'notshown', why: 'no Compare Players window with ranking sentences in the classic skin (the Amiga skin\'s Spielervergleich draws its own)' });
+fam('rankwon', /^You won the game in D\.$/, { only: ['mac301', 'mac405', 'w95'], arith: '"You won the game in %d.": 3.0.1 ComparePlayers @140952 loads STR# 1020.5, .18 and .20 only; 4.0.5 (Windows FUN_0045490f, Mac ComparePlayers @10078c) loads 754, 756, 758 / 6140.5, .7, .9', place: 'none: the window has no such line in these versions', st: 'notshown', why: 'no code of the version loads it (only 2.0 and Mac 2.0.1 say "You won the game in %d." when you are the winner)' });
+fam('ranksent', /Tied for|^D?th$|^Tied|in income with|tech with a level|S in S tech|^S en |en revenus avec/i, { arith: '"Tied for %dth", "%dth", "%s in income with $%s.", "%s in %s tech with a level of %d.": the resource lists of 2.0, Mac 2.0.1 and 3.0.1 (Windows 148-163, STR# 1020.5-.20)', place: 'none: no version\'s code loads these', st: 'notshown', why: 'no code of any version loads them: WINHO.EXE COMPAREPLAYERSDLGPROC loads 148, 161, 162, 163 and 80-91; Mac 2.0.1 ComparePlayers @1208d4 and 3.0.1 @140952 STR# 1020.5, .18-.20 and 1008; 4.0.5 strings 733-744, 754, 756, 758 / STR# 6140.5, .7, .9; the places are shown by the icons\' heights, not in words' });
+fam('rank', /You were elim|You were elminated|You won the game in|won the game in year|remaining players|rankings? among|Classement|classement|^D\.?$/i, { arith: 'the Compare Players window\'s title: "Your rankings among the %d remaining players in %d:" (the count of players still in, the galaxy\'s year), "You won the game in %d." (2.0 and Mac 2.0.1: the winner\'s year), "You were eliminated in %d." (the galaxy\'s year when you have just gone out, else the year kept)', place: 'HO.compareInfo and the classic skin\'s openCompare (rs.compare.texts)', st: 'matched', check: 'compare' });
 fam('winlose', /You lost the game|You lost the game|won the game in|éliminé|gagné en|Game difficulty rating|difficulty|master points|Master Points|Players?,? .*BB|Congratulations!.*won/i, { arith: '"%d" the year, difficulty rating plain, master points through the nice number (5.0.5 "%s")', place: 'rules-*.js You Won / You Lost reports and windows (classic ui openYouWon)', st: 'matched', check: 'report' });
 fam('buildcost', /^\$S \([DP]\)$/, { arith: 'the ship types\' development and production cost: "$%s" the nice number', place: 'the Build window\'s costs (classic ui openBuild money())', st: 'matched', check: 'nice' });
 fam('mfc', /Please enter (an integer|a number) between|^Page D|Pages D|^Linked/, { arith: 'the MFC library\'s own messages', place: 'none', st: 'notshown', why: 'Windows library text, not the game\'s' });
@@ -202,6 +204,31 @@ const checks = {
       if (p.c0) fail(`${id}: a turn's kept totals are left in the record`);
     }
   },
+  compare() {
+    // the window's rule: 10 against you for every player with more than you, 5 for an equal one; -1 for a player who is out; the year 2000 draws nothing
+    const G = HO.newGame({ seed: 5, rules: 'dos', size: 'small', computers: 3, iq: 'average', shape: 'random', humans: [{ name: 'A' }] });
+    if (HO.compareInfo(G, 0).kind !== 'none') fail('compare: the first year shows a chart');
+    G.year = 2010; G.cmp = {};
+    const t = [[5, 1, 3, 9, 2, 2, 2, 2, 2], [7, 1, 4, 0, 2, 3, 2, 2, 2], [5, 9, 3, 9, 1, 1, 1, 1, 1], [0, 0, 0, 0, 0, 0, 0, 0, 0]];
+    G.players.forEach((p, i) => { G.cmp[p.id] = t[i] || Array(9).fill(-1); });
+    const info = HO.compareInfo(G, 0);
+    const calc = t[0].map((v, k) => [t[1], t[2], t[3]].reduce((a, r) => a + (v < r[k] ? 10 : v === r[k] ? 5 : 0), 0));
+    if (info.kind !== 'ranks' || JSON.stringify(info.scores) !== JSON.stringify(calc)) fail(`compare: ${JSON.stringify(info.scores)}, the original's loop gives ${JSON.stringify(calc)}`);
+    G.players[2].alive = false; G.cmp[2] = Array(9).fill(-1);
+    if (HO.compareInfo(G, 0).n !== G.players.filter(p => p.alive).length) fail('compare: the remaining players');
+    G.players[0].alive = false; G.players[0].outYear = 2030;
+    if (HO.compareInfo(G, 0).kind !== 'out' || HO.compareInfo(G, 0).year !== 2030) fail('compare: out');
+    // each version's texts (the originals' strings) are in the interface table
+    global.window = global.window || global;
+    require(path.join(root, 'js/ui-lang.js')); require(path.join(root, 'js/ui-text.js'));
+    const known = new Set(HOUI.rows().map(r => r[0]));
+    for (const id of ['dos', 'mac20', '301', '405', 'mac405']) {
+      const c = HO.RULESETS[id].compare;
+      for (const k of Object.keys(c.texts)) if (!known.has(c.texts[k])) fail(`compare ${id}: "${c.texts[k]}" is not in js/ui-text.js`);
+      if (!!c.won !== (id === 'dos' || id === 'mac20')) fail(`compare ${id}: the "You won" line`);
+    }
+    for (const id of ['12', 'original', 'palm', 'ios', 'android', 'claude', 'gemini']) if (HO.RULESETS[id].compare) fail(`compare: ${id} has no Compare Players`);
+  },
   temp() { /* tools/temp-check.js asserts every version's panel, list and report (node tools/temp-check.js) */ },
   palm() {
     for (const [n, w] of [[0, '$0'], [1234567, '$1,234 K'], [12345, '$12.03 K'], [12345678, '$12.34 M'], [-12345, '($12.03 K)']]) {
@@ -245,6 +272,8 @@ const PLACES = [
   ['js/engine.js', /function niceShort/, 'HO.niceShort'],
   ['js/engine.js', /const moneyNice/, 'HO.moneyNice'],
   ['js/engine.js', /function totalChange/, 'HO.totalChange'],
+  ['js/engine.js', /function compareInfo/, 'HO.compareInfo'],
+  ['js/skins/classic/ui.js', /function openCompare/, 'openCompare'],
   ['js/skins/classic/ui.js', /HO\.totalChange\(G, p, which\)/, 'the panel prints the changes'],
   ['js/skins/amiga/ui.js', /p\.chg/, 'the Amiga totals print the changes'],
 ];
@@ -264,7 +293,7 @@ for (const v of Object.keys(VERSIONS)) {
   for (const [id, text] of Object.entries(strings[v] || {})) {
     if (!numeric(text) && !SNUM.test(text.replace(/%\.\*s|%Fs/g, '%s'))) continue;
     const c = canon(text);
-    let f = FOREIGN.has(v) || VERSIONS[v].own ? null : F.find(x => !x.fallback && x.re.test(c));
+    let f = FOREIGN.has(v) || VERSIONS[v].own ? null : F.find(x => !x.fallback && x.re.test(c) && (!x.only || x.only.includes(v)));
     if (FOREIGN.has(v) || VERSIONS[v].own) f = foreignFam;
     if (!f) { f = F[F.length - 1]; fail(`${VERSIONS[v].label} ${id}: "${text.slice(0, 90)}" has no family (canon "${c.slice(0, 80)}")`); }
     counts[v].total++; counts[v][f.st] = (counts[v][f.st] || 0) + 1;
@@ -338,7 +367,8 @@ Evidence: the decompiles named in each row, and the originals' own pictures in t
 
 - **The totals' changes since last turn** ("(up $7K)", "(down 889)", "(+ $1,234)", "(- 889)") are kept and shown now. Every original keeps three figures in the player's record when his first pass of the turn begins and settles them when the second pass has done with him (the money within $0 and $999,999,999 first): the totals as they stand, then the difference. 1.2, 2.0 (WINHO.EXE, DOS) and Mac 2.0.1 change Total Money (+0), Total Income (+8 plus the interest, +0x1c) and the metal (+0x10), the three lines of the budget window (Mac 1.2 DrawIncomeRect @c3f70, 2.0.1 EndTurn @a02c8-a0552, FUN_1088_16e1, FUN_1040_0038); 3.0.1 and both 4.0.5 change the net (+8, "Total Money") and the metal (EndTurn @a03f4 and @a0c8e, ComputeIncomeAndPopulation @a3d30, Windows FUN_004320f8, FUN_00437592, FUN_00489ebe; Ship Savings show their interest instead); 5.0.5, the Palm, iOS and Android the net (+0x40 / +0x42 / +0x48) and the metal (FUN_10072a10, FUN_10077200, FUN_10098650; the Palm's FUN_00047f54 with the compact figure from 10,000; iOS -[IncomeLayer updateData] 0x100009200). A sum's change is written by LongToNiceShortString in 1.2 to 4.0.5 ("7K", 500,000 reads "1M") and the metal's by LongToNiceString; the sign of the change picks "up" or "down" (zero is "up": a new game reads "(up $0)" and "(up 0)", and so does a save from before the figures were kept). \`rs.changes\`, \`HO.totalChange\`, the player's \`chg\`; the classic panel's Savings, Income and Metal lines and the Amiga skin's totals. French: 1.2F's and 3.0.1F's "(+ $%s)", German: DOS 2.0's "+ $%s", Turkish iOS's. 5.0.5's, the Palm's and iOS's income view draws the interest "(Int: $%s)" on the Savings line (it was on the Income line).
 
-Left as it was, with the reason: the ranking sentences ("Tied for %dth", "%s in income with $%s.") and the You Won / You Lost year lines of the rankings window (the classic skin has none; the Amiga skin draws its own); 2.0 Windows, DOS and Mac 2.0.1's Build window (the Mac 2.0.1 shares 1.2's code, not read); the Palm's own list cells.
+- **The ranking sentences are shown where the originals showed them: in the Compare Players window.** "Your rankings among the %d remaining players in %d:", "You won the game in %d." and "You were eliminated in %d." (misspelt "elminated" in every Mac version) are that window's title; the other strings of the resource lists, "Tied for %dth", "%dth", "1st" to "3rd", "%s in income with $%s." and "%s in %s tech with a level of %d.", are loaded by no code of any version (WINHO.EXE COMPAREPLAYERSDLGPROC @1070:0745 loads strings 148, 161, 162, 163 and 80 to 91; Mac 2.0.1 ComparePlayers @1208d4 and 3.0.1 @140952 STR# 1020.5, .18, .19 (2.0.1 only) and .20 and STR# 1008; Windows 4.0.5 FUN_0045490f and FUN_00454afc strings 733 to 744, 754, 756 and 758; Mac 4.0.5 ComparePlayers @10078c STR# 6140.5, .7 and .9), so no version printed a place in words: the window ranks you by icons. What it does (2.0 Windows and DOS, Mac 2.0.1, 3.0.1, Windows and Mac 4.0.5; 1.2, 5.0.5, the Palm and iOS have none): nine rows, Income, Metal, Planets, Ships and the five technologies; for each, every other player counts 10 against you if his figure is more than yours and 5 if equal (0 is first; a player who is out has -1), and the row's icon is put that sum / 10 of the way down the axis from Best (16 below the top) through Average to Worst (16 above the bottom), the distance between the icons of neighbouring places being (the axis' height - 32) / (the players left - 1). 2.0 and Mac 2.0.1 draw your own colony's picture on every row, 3.0.1 and 4.0.5 a picture of each row; 2.0 and 3.0.1 keep the table when each player's second pass ends, 4.0.5 works it out as the window opens. No chart in the year 2000 ("Sorry, no comparisons until the year 2010." in 2.0, 2.0.1 and 3.0.1, "Sorry no comparisons until the year 2010." in Windows 4.0.5, "Sorry, no comparisons in the year 2000." in Mac 4.0.5), none when you have won (2.0 and Mac 2.0.1: "You won the game in %d.") or are out. Show Skills lists every player's skill level and the computers' intelligence. Built from the DLOG/DITL 6050 and 6100 of the Mac versions and the Windows dialogs 10 and 16 (3.1) and 352 and 353 (95): \`rs.compare\`, \`G.cmp\`, \`HO.compareInfo\`, the classic skin's \`openCompare\`, first in the Galaxy menu. French: 3.0.1F's STR# 1020, 1008, 1007 and 1009; German: DOS 2.0's strings 148, 161 to 163, 80 to 91, 96 to 100 and 16 to 18. No ordinals are needed in any language: no version has an ordinal on screen.
+Left as it was, with the reason: 2.0 Windows, DOS and Mac 2.0.1's Build window (the Mac 2.0.1 shares 1.2's code, not read); the Palm's own list cells; the Income line of 1.2 to 2.0.1 (the originals draw Total Income with the interest in it, the panel lists Income and Interest apart).
 
 ## Every string, version by version
 `;

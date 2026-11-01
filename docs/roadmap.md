@@ -196,9 +196,14 @@ and the translation notice (`docs/translations-notes/`) are not done.
       (October 2026):** every original from 1.2 to iOS keeps Total Money / the net, the income and the metal when a
       player's first pass begins and writes the differences when the second pass is done ("(up $7K)", "(down 889)",
       "(+ $1,234)"): `rs.changes`, the player's `chg`, `HO.totalChange`, the classic panel and the Amiga totals (they
-      were kept in the browser's storage), each version's strings and arithmetic in `docs/formats.md`. Left, with
-      reasons in `docs/formats.md`: the ranking sentences, Windows and Mac 2.0.1's Build window and interest, the
-      Amiga windows' arithmetic (re-read).
+      were kept in the browser's storage), each version's strings and arithmetic in `docs/formats.md`. **The ranking
+      sentences done (November 2026):** no version prints a place in words ("Tied for %dth", "%s in income with $%s."
+      are in the resources of 2.0 to 3.0.1 and loaded by no code); the sentences that are shown are the title of
+      the **Compare Players window** (Galaxy menu), which the remake did not have: built for 2.0 (Windows 3.1 /
+      DOS), Mac 2.0.1, 3.0.1 and both 4.0.5 from their dialogs and item procedures, with Show Skills: `rs.compare`,
+      `G.cmp`, `HO.compareInfo`, `openCompare`. Left, with reasons in `docs/formats.md`: Windows and Mac 2.0.1's
+      Build window and interest, the Amiga windows' arithmetic (re-read), the 1.2 to 2.0.1 Income line (the
+      originals draw Total Income with the interest in it).
    i. **Japanese**, far down: there was a Japanese port, but no copy can be found; the remake's
       own Japanese translation is not planned soon.
 5. **Done (October 2026).** A home-screen (apple-touch) icon per skin: `assets/icons/<skin>-touch.png`, 180×180

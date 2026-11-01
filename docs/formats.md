@@ -9,21 +9,21 @@ Statuses: **matched** (the remake prints it with the original's arithmetic), **f
 | Version | Strings | Matched | Fixed | Not shown | Unsettled |
 |---|--:|--:|--:|--:|--:|
 | 1.2F (Mac, French) | 36 | 36 | 0 | 0 | 0 |
-| 2.0 Windows 3.1 (English) | 30 | 20 | 3 | 7 | 0 |
-| 2.0 DOS (English) | 34 | 24 | 3 | 7 | 0 |
+| 2.0 Windows 3.1 (English) | 30 | 23 | 3 | 4 | 0 |
+| 2.0 DOS (English) | 34 | 27 | 3 | 4 | 0 |
 | 2.0 DOS (German) | 30 | 30 | 0 | 0 | 0 |
-| 2.0.1 Mac (English) | 30 | 20 | 3 | 7 | 0 |
-| 3.0.1 Mac (English) | 57 | 38 | 12 | 7 | 0 |
+| 2.0.1 Mac (English) | 30 | 23 | 3 | 4 | 0 |
+| 3.0.1 Mac (English) | 57 | 40 | 12 | 5 | 0 |
 | 3.0.1F Mac (French) | 42 | 42 | 0 | 0 | 0 |
-| 4.0.5 Windows 95 | 73 | 49 | 14 | 10 | 0 |
-| 4.0.5 Mac | 69 | 49 | 14 | 6 | 0 |
+| 4.0.5 Windows 95 | 73 | 51 | 14 | 8 | 0 |
+| 4.0.5 Mac | 69 | 51 | 14 | 4 | 0 |
 | 5.0.5 Mac OS X | 52 | 45 | 7 | 0 | 0 |
 | Palm OS 1.0.4 | 74 | 62 | 8 | 4 | 0 |
 | iOS 1.2.9 / Android 1.2.8 (English) | 57 | 49 | 7 | 0 | 1 |
 | iOS (French) | 39 | 39 | 0 | 0 | 0 |
 | iOS (Turkish) | 43 | 43 | 0 | 0 | 0 |
 | Amiga 2.0 / 2.1 (English text file) | 45 | 27 | 8 | 6 | 4 |
-| **All** | 711 | 573 | 79 | 54 | 5 |
+| **All** | 711 | 588 | 79 | 39 | 5 |
 
 Android 1.2.8 has the iOS game's strings (`en/fr/tr.lproj`); its row is iOS's.
 
@@ -51,7 +51,9 @@ Android 1.2.8 has the iOS game's strings (`en/fr/tr.lproj`); its row is iOS's.
 | milestone | the nice number of 1, 2.5, 5, 10, 20 million units | rules-405.js / rules-original.js (Congratulations ...) | matched | 4.0.5 Windows 95 (1); 4.0.5 Mac (1); 5.0.5 Mac OS X (1); Palm OS 1.0.4 (1); iOS 1.2.9 / Android 1.2.8 (English) (1) |
 | iosfleet | "Fleet %d" | the iOS skin names a fleet by its ships | unsettled: iOS's fleet title was not traced to a remake row | iOS 1.2.9 / Android 1.2.8 (English) (1) |
 | amigaui | the Amiga program's own window lines | js/skins/amiga/ui.js | unsettled: the Amiga windows are drawn by the Amiga skin; their arithmetic was read in docs/amiga-skin.md, not re-read here | Amiga 2.0 / 2.1 (English text file) (4) |
-| rank | "Tied for %dth", "%s in income with $%s.", "%s in %s tech with a level of %d." | none: the remake lists players in its own Players window without a ranking sentence | notshown: no Compare Players window with ranking sentences in the classic skin (the Amiga skin's Spielervergleich draws its own) | 2.0 Windows 3.1 (English) (5); 2.0 DOS (English) (5); 2.0.1 Mac (English) (5); 3.0.1 Mac (English) (5); 4.0.5 Windows 95 (3); 4.0.5 Mac (3) |
+| rankwon | "You won the game in %d.": 3.0.1 ComparePlayers @140952 loads STR# 1020.5, .18 and .20 only; 4.0.5 (Windows FUN_0045490f, Mac ComparePlayers @10078c) loads 754, 756, 758 / 6140.5, .7, .9 | none: the window has no such line in these versions | notshown: no code of the version loads it (only 2.0 and Mac 2.0.1 say "You won the game in %d." when you are the winner) | 3.0.1 Mac (English) (1); 4.0.5 Windows 95 (1); 4.0.5 Mac (1) |
+| ranksent | "Tied for %dth", "%dth", "%s in income with $%s.", "%s in %s tech with a level of %d.": the resource lists of 2.0, Mac 2.0.1 and 3.0.1 (Windows 148-163, STR# 1020.5-.20) | none: no version's code loads these | notshown: no code of any version loads them: WINHO.EXE COMPAREPLAYERSDLGPROC loads 148, 161, 162, 163 and 80-91; Mac 2.0.1 ComparePlayers @1208d4 and 3.0.1 @140952 STR# 1020.5, .18-.20 and 1008; 4.0.5 strings 733-744, 754, 756, 758 / STR# 6140.5, .7, .9; the places are shown by the icons' heights, not in words | 2.0 Windows 3.1 (English) (2); 2.0 DOS (English) (2); 2.0.1 Mac (English) (2); 3.0.1 Mac (English) (2) |
+| rank | the Compare Players window's title: "Your rankings among the %d remaining players in %d:" (the count of players still in, the galaxy's year), "You won the game in %d." (2.0 and Mac 2.0.1: the winner's year), "You were eliminated in %d." (the galaxy's year when you have just gone out, else the year kept) | HO.compareInfo and the classic skin's openCompare (rs.compare.texts) | matched | 2.0 Windows 3.1 (English) (3); 2.0 DOS (English) (3); 2.0.1 Mac (English) (3); 3.0.1 Mac (English) (2); 4.0.5 Windows 95 (2); 4.0.5 Mac (2) |
 | winlose | "%d" the year, difficulty rating plain, master points through the nice number (5.0.5 "%s") | rules-*.js You Won / You Lost reports and windows (classic ui openYouWon) | matched | 4.0.5 Windows 95 (1); 4.0.5 Mac (1); 5.0.5 Mac OS X (1); Palm OS 1.0.4 (1); iOS 1.2.9 / Android 1.2.8 (English) (3) |
 | buildcost | the ship types' development and production cost: "$%s" the nice number | the Build window's costs (classic ui openBuild money()) | matched | 3.0.1 Mac (English) (2) |
 | mfc | the MFC library's own messages | none | notshown: Windows library text, not the game's | 4.0.5 Windows 95 (4) |
@@ -77,7 +79,8 @@ Evidence: the decompiles named in each row, and the originals' own pictures in t
 
 - **The totals' changes since last turn** ("(up $7K)", "(down 889)", "(+ $1,234)", "(- 889)") are kept and shown now. Every original keeps three figures in the player's record when his first pass of the turn begins and settles them when the second pass has done with him (the money within $0 and $999,999,999 first): the totals as they stand, then the difference. 1.2, 2.0 (WINHO.EXE, DOS) and Mac 2.0.1 change Total Money (+0), Total Income (+8 plus the interest, +0x1c) and the metal (+0x10), the three lines of the budget window (Mac 1.2 DrawIncomeRect @c3f70, 2.0.1 EndTurn @a02c8-a0552, FUN_1088_16e1, FUN_1040_0038); 3.0.1 and both 4.0.5 change the net (+8, "Total Money") and the metal (EndTurn @a03f4 and @a0c8e, ComputeIncomeAndPopulation @a3d30, Windows FUN_004320f8, FUN_00437592, FUN_00489ebe; Ship Savings show their interest instead); 5.0.5, the Palm, iOS and Android the net (+0x40 / +0x42 / +0x48) and the metal (FUN_10072a10, FUN_10077200, FUN_10098650; the Palm's FUN_00047f54 with the compact figure from 10,000; iOS -[IncomeLayer updateData] 0x100009200). A sum's change is written by LongToNiceShortString in 1.2 to 4.0.5 ("7K", 500,000 reads "1M") and the metal's by LongToNiceString; the sign of the change picks "up" or "down" (zero is "up": a new game reads "(up $0)" and "(up 0)", and so does a save from before the figures were kept). `rs.changes`, `HO.totalChange`, the player's `chg`; the classic panel's Savings, Income and Metal lines and the Amiga skin's totals. French: 1.2F's and 3.0.1F's "(+ $%s)", German: DOS 2.0's "+ $%s", Turkish iOS's. 5.0.5's, the Palm's and iOS's income view draws the interest "(Int: $%s)" on the Savings line (it was on the Income line).
 
-Left as it was, with the reason: the ranking sentences ("Tied for %dth", "%s in income with $%s.") and the You Won / You Lost year lines of the rankings window (the classic skin has none; the Amiga skin draws its own); 2.0 Windows, DOS and Mac 2.0.1's Build window (the Mac 2.0.1 shares 1.2's code, not read); the Palm's own list cells.
+- **The ranking sentences are shown where the originals showed them: in the Compare Players window.** "Your rankings among the %d remaining players in %d:", "You won the game in %d." and "You were eliminated in %d." (misspelt "elminated" in every Mac version) are that window's title; the other strings of the resource lists, "Tied for %dth", "%dth", "1st" to "3rd", "%s in income with $%s." and "%s in %s tech with a level of %d.", are loaded by no code of any version (WINHO.EXE COMPAREPLAYERSDLGPROC @1070:0745 loads strings 148, 161, 162, 163 and 80 to 91; Mac 2.0.1 ComparePlayers @1208d4 and 3.0.1 @140952 STR# 1020.5, .18, .19 (2.0.1 only) and .20 and STR# 1008; Windows 4.0.5 FUN_0045490f and FUN_00454afc strings 733 to 744, 754, 756 and 758; Mac 4.0.5 ComparePlayers @10078c STR# 6140.5, .7 and .9), so no version printed a place in words: the window ranks you by icons. What it does (2.0 Windows and DOS, Mac 2.0.1, 3.0.1, Windows and Mac 4.0.5; 1.2, 5.0.5, the Palm and iOS have none): nine rows, Income, Metal, Planets, Ships and the five technologies; for each, every other player counts 10 against you if his figure is more than yours and 5 if equal (0 is first; a player who is out has -1), and the row's icon is put that sum / 10 of the way down the axis from Best (16 below the top) through Average to Worst (16 above the bottom), the distance between the icons of neighbouring places being (the axis' height - 32) / (the players left - 1). 2.0 and Mac 2.0.1 draw your own colony's picture on every row, 3.0.1 and 4.0.5 a picture of each row; 2.0 and 3.0.1 keep the table when each player's second pass ends, 4.0.5 works it out as the window opens. No chart in the year 2000 ("Sorry, no comparisons until the year 2010." in 2.0, 2.0.1 and 3.0.1, "Sorry no comparisons until the year 2010." in Windows 4.0.5, "Sorry, no comparisons in the year 2000." in Mac 4.0.5), none when you have won (2.0 and Mac 2.0.1: "You won the game in %d.") or are out. Show Skills lists every player's skill level and the computers' intelligence. Built from the DLOG/DITL 6050 and 6100 of the Mac versions and the Windows dialogs 10 and 16 (3.1) and 352 and 353 (95): `rs.compare`, `G.cmp`, `HO.compareInfo`, the classic skin's `openCompare`, first in the Galaxy menu. French: 3.0.1F's STR# 1020, 1008, 1007 and 1009; German: DOS 2.0's strings 148, 161 to 163, 80 to 91, 96 to 100 and 16 to 18. No ordinals are needed in any language: no version has an ordinal on screen.
+Left as it was, with the reason: 2.0 Windows, DOS and Mac 2.0.1's Build window (the Mac 2.0.1 shares 1.2's code, not read); the Palm's own list cells; the Income line of 1.2 to 2.0.1 (the originals draw Total Income with the interest in it, the panel lists Income and Interest apart).
 
 ## Every string, version by version
 ### 1.2F (Mac, French)
@@ -131,11 +134,11 @@ Left as it was, with the reason: the ranking sentences ("Tied for %dth", "%s in 
 | %d dead %ss | 65 | battle | matched |
 | at %s in %d: | 67 | battle | matched |
 | Round %d | 68 | battle | matched |
-| %s in income with $%s. | 150 | rank | notshown |
-| %s in %s tech with a level of %d. | 151 | rank | notshown |
-| Your rankings among the %d remaining players in %d: | 161 | rank | notshown |
-| You won the game in %d. | 162 | rank | notshown |
-| You were eliminated in %d. | 163 | rank | notshown |
+| %s in income with $%s. | 150 | ranksent | notshown |
+| %s in %s tech with a level of %d. | 151 | ranksent | notshown |
+| Your rankings among the %d remaining players in %d: | 161 | rank | matched |
+| You won the game in %d. | 162 | rank | matched |
+| You were eliminated in %d. | 163 | rank | matched |
 | (up $%s) | 388 | delta | matched |
 | (down $%s) | 389 | delta | matched |
 | $%s | 392 | sum | fixed |
@@ -166,11 +169,11 @@ Left as it was, with the reason: the ranking sentences ("Tied for %dth", "%s in 
 | %d dead %Fss | 65 | battle | matched |
 | at %Fs in %d: | 67 | battle | matched |
 | Round %d | 68 | battle | matched |
-| %Fs in income with $%Fs. | 150 | rank | notshown |
-| %Fs in %Fs tech with a level of %d. | 151 | rank | notshown |
-| Your rankings among the %d remaining players in %d: | 161 | rank | notshown |
-| You won the game in %d. | 162 | rank | notshown |
-| You were eliminated in %d. | 163 | rank | notshown |
+| %Fs in income with $%Fs. | 150 | ranksent | notshown |
+| %Fs in %Fs tech with a level of %d. | 151 | ranksent | notshown |
+| Your rankings among the %d remaining players in %d: | 161 | rank | matched |
+| You won the game in %d. | 162 | rank | matched |
+| You were eliminated in %d. | 163 | rank | matched |
 | (up $%Fs) | 388 | delta | matched |
 | (down $%Fs) | 389 | delta | matched |
 | $%Fs | 392 | sum | fixed |
@@ -253,11 +256,11 @@ Left as it was, with the reason: the ranking sentences ("Tied for %dth", "%s in 
 | (down $%s) | STR#1005.6 | delta | matched |
 | $%s | STR#1005.9 | sum | fixed |
 | (interest $%s) | STR#1005.10 | interest | fixed |
-| %.*s in income with $%.*s. | STR#1020.7 | rank | notshown |
-| %.*s in %.*s tech with a level of %d. | STR#1020.8 | rank | notshown |
-| Your rankings among the %d remaining players in %d: | STR#1020.18 | rank | notshown |
-| You won the game in %d. | STR#1020.19 | rank | notshown |
-| You were elminated in %d. | STR#1020.20 | rank | notshown |
+| %.*s in income with $%.*s. | STR#1020.7 | ranksent | notshown |
+| %.*s in %.*s tech with a level of %d. | STR#1020.8 | ranksent | notshown |
+| Your rankings among the %d remaining players in %d: | STR#1020.18 | rank | matched |
+| You won the game in %d. | STR#1020.19 | rank | matched |
+| You were elminated in %d. | STR#1020.20 | rank | matched |
 | %d dead %.*s | STR#1030.1 | battle | matched |
 | %d dead %.*ss | STR#1030.2 | battle | matched |
 | at %s in %d: | STR#1030.4 | battle | matched |
@@ -301,11 +304,11 @@ Left as it was, with the reason: the ranking sentences ("Tied for %dth", "%s in 
 | (interest $%s) | STR#1005.10 | interest | fixed |
 | $%s | STR#1011.10 | sum | fixed |
 | $%s | STR#1011.12 | sum | fixed |
-| %.*s in income with $%.*s. | STR#1020.7 | rank | notshown |
-| %.*s in %.*s tech with a level of %d. | STR#1020.8 | rank | notshown |
-| Your rankings among the %d remaining players in %d: | STR#1020.18 | rank | notshown |
-| You won the game in %d. | STR#1020.19 | rank | notshown |
-| You were elminated in %d. | STR#1020.20 | rank | notshown |
+| %.*s in income with $%.*s. | STR#1020.7 | ranksent | notshown |
+| %.*s in %.*s tech with a level of %d. | STR#1020.8 | ranksent | notshown |
+| Your rankings among the %d remaining players in %d: | STR#1020.18 | rank | matched |
+| You won the game in %d. | STR#1020.19 | rankwon | notshown |
+| You were elminated in %d. | STR#1020.20 | rank | matched |
 | %d dead %.*s | STR#1030.1 | battle | matched |
 | %d dead %.*ss | STR#1030.2 | battle | matched |
 | at %s in %d: | STR#1030.4 | battle | matched |
@@ -387,9 +390,9 @@ Left as it was, with the reason: the ranking sentences ("Tied for %dth", "%s in 
 | $%s | 708 | sum | fixed |
 | (interest $%s) | 709 | interest | fixed |
 | %d.%1.1dG %d° | 724 | grav | matched |
-| Your ranking among the %d remaining players in %d. | 756 | rank | notshown |
-| You won the game in %d. | 757 | rank | notshown |
-| You were eliminated in %d. | 758 | rank | notshown |
+| Your ranking among the %d remaining players in %d. | 756 | rank | matched |
+| You won the game in %d. | 757 | rankwon | notshown |
+| You were eliminated in %d. | 758 | rank | matched |
 | Processing Year %d... | 768 | year | matched |
 | Your Range Technology has reached level %d. | 934 | techlevel | matched |
 | Your Speed Technology has reached level %d. | 935 | techlevel | matched |
@@ -502,9 +505,9 @@ Left as it was, with the reason: the ranking sentences ("Tied for %dth", "%s in 
 | %d.%1.1d, %d° | STR#6070.25 | temp | matched |
 | $%s | STR#6130.11 | sum | fixed |
 | $%s | STR#6130.13 | sum | fixed |
-| Your rankings among the %d remaining players in %d: | STR#6140.7 | rank | notshown |
-| You won the game in %d. | STR#6140.8 | rank | notshown |
-| You were elminated in %d. | STR#6140.9 | rank | notshown |
+| Your rankings among the %d remaining players in %d: | STR#6140.7 | rank | matched |
+| You won the game in %d. | STR#6140.8 | rankwon | notshown |
+| You were elminated in %d. | STR#6140.9 | rank | matched |
 | %d dead %.*s | STR#6150.1 | battle | matched |
 | %d dead %.*ss | STR#6150.2 | battle | matched |
 | at %s in %d: | STR#6150.4 | battle | matched |

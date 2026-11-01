@@ -90,6 +90,13 @@ const FIXES = D.fixes.filter(f => f.id !== 'orgFuelCount' && f.id !== 'attack16'
 
 // Mac 2.0.1 plays 2.0's turn (js/rules-dos.js), with the differences above
 E.registerRules('mac20', Object.assign({}, D, {
+  // CONFIRMED (ComparePlayers @1208d4 and its item proc @120b0a, DLOG/DITL 6050, DITL 6100, STR# 1008 and 1020): the Windows 2.0 code on the Mac. The
+  // dialog is 486 x 296; the chart item (13, 26) 455 x 225 holds the axes 50 pixels in from its left and 14 from its bottom, with the labels inside; the
+  // titles are STR# 1020.5, .18, .19, .20 (".20" is misspelt "elminated"); every row's icon is your own colony's, 1000 + the player's icon number.
+  compare: Object.assign({}, D.compare, { style: 'mac', units: [1, 1],
+    layout: { w: 486, h: 296, title: [13, 2, 454, 19], chart: [13, 26, 455, 225], skills: [243, 264, 87, 20], ok: [364, 264, 82, 20] },
+    texts: Object.assign({}, D.compare.texts, { out: 'You were elminated in %d.' }),
+    skillsLayout: { w: 377, h: 294, title: [13, 2, 286, 20], list: [13, 26, 350, 226], label: [13, 260, 155, 19], iq: [169, 260, 97, 20], ok: [277, 262, 82, 20] } }), // (DLOG/DITL 6100 "List Player Skills")
   // Mac 2.0.1's Explored Planets list (InitStarsList @120136): five fields in pixel columns (js/rules-12.js, rules-dos.js exploredList)
   exploredList: Object.assign({}, D.exploredList, { layout: 'mac' }),
   // the Ships menu's item (STR# 1010.9-10) and the panel's line (DrawSelectedFleetInfo)

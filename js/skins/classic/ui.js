@@ -3142,6 +3142,92 @@ function openPlayers() {
   };
   plot('pop', '#ffd166'); plot('inc', '#7fd0ff'); plot('tech', '#7be37b');
 }
+// ----- Compare Players (rs.compare: 2.0, Mac 2.0.1, 3.0.1, 4.0.5) -----
+// The version's own window: the dialog's items where its resource puts them (rs.compare.layout, in dialog units times rs.compare.units: ComparePlayers'
+// DLOG/DITL 6050, Windows dialogs 10 and 352), the chart drawn as the originals' item procedures draw it (js/engine.js HO.compareInfo says where each row's
+// icon goes). Windows 3.1's chart (style 'win') has its axes on the edges of its item and the labels outside; the Mac's and Windows 95's (style 'mac') 50
+// pixels in from the left and 14 from the bottom, with the labels inside.
+const CMP_EN = ['Income', 'Metal', 'Planets', 'Ships', 'Range', 'Speed', 'Weapons', 'Shields', 'Mini', 'Best', 'Average', 'Worst'];
+const CMP_ICONS = [3110, 3162, 3150, 4011, 3100, 3101, 3102, 3103, 3104];
+// the rows' and the axis' words, in the official wording where the game's language has it (French: 3.0.1F's STR# 1008, for every version that has the window;
+// German: DOS 2.0's strings 80 to 91), else the table's
+function compareWords() {
+  const L = window.HOLANG, lang = (G.opts && G.opts.lang) || HO.ownLanguage(HO.ownRules(G));
+  if (L && lang === 'fr' && L.mac301Fr && L.mac301Fr['1008'] && L.mac301Fr['1008'].length >= 12) return L.mac301Fr['1008'];
+  if (L && lang === 'de' && L.dosDe && L.dosDe.s) { const a = []; for (let i = 80; i <= 91; i++) a.push(L.dosDe.s[i]); if (a.every(Boolean)) return a; }
+  return null;
+}
+// a dialog's items placed in pixels: items [[rect in dialog units, node], ...]
+function origDialog(w, h, units, items, cls) {
+  const box = el('div', { class: 'origdlg ' + (cls || ''), style: `width:${Math.round(w * units[0])}px;height:${Math.round(h * units[1])}px` });
+  for (const [r, node] of items) {
+    node.style.left = Math.round(r[0] * units[0]) + 'px'; node.style.top = Math.round(r[1] * units[1]) + 'px';
+    node.style.width = Math.round(r[2] * units[0]) + 'px'; node.style.height = Math.round(r[3] * units[1]) + 'px';
+    box.append(node);
+  }
+  return box;
+}
+const skinPic = (name) => { const k = (T.prefix || '') + name; return IMG[k] && IMG[k].complete && IMG[k].naturalWidth ? IMG[k] : null; };
+function openCompare() {
+  if (skinWindow('compare')) return;
+  const C = G && HO.rules(G).compare;
+  if (!C) return;
+  const me0 = me(), info = HO.compareInfo(G, ME), L = C.layout, U = C.units, words = compareWords();
+  const word = (i) => (words ? words[i] : tl(CMP_EN[i]));
+  const title = info.kind === 'none' ? tl(C.texts.none) : info.kind === 'won' ? tl(C.texts.won, info.year) : info.kind === 'out' ? tl(C.texts.out, info.year) : tl(C.texts.ranks, info.n, info.year);
+  const W = Math.round(L.w * U[0]), H = Math.round(L.h * U[1]);
+  const skills = el('button', { type: 'button', onclick: () => { closeModal(); openSkills(); } }, tl('Show Skills'));
+  const ok = el('button', { type: 'button', class: 'default', onclick: closeModal }, tl('OK'));
+  const cv = el('canvas', { class: 'cmpchart', 'aria-label': title, role: 'img' });
+  const box = origDialog(L.w, L.h, U, [[L.title, el('div', { class: 'cmptitle' }, title)], [L.ok, ok], [L.skills, skills]], 'cmpwin'); // (OK is item 1, the one Return takes)
+  box.prepend(cv);
+  const win = modal('', box, { cls: 'compare', label: tl('Compare Players…') });
+  if (info.kind !== 'ranks') return;
+  // the chart, as the item procedure draws it (Mac @140b54, @120b0a; Windows @1070:09ad, FUN_00454afc)
+  const dpr = Math.max(1, window.devicePixelRatio || 1), cs = getComputedStyle(win);
+  cv.width = W * dpr; cv.height = H * dpr; cv.style.width = W + 'px'; cv.style.height = H + 'px';
+  const x = cv.getContext('2d');
+  x.setTransform(dpr, 0, 0, dpr, 0, 0); x.imageSmoothingEnabled = false;
+  const fg = cs.color || '#000', fam = cs.fontFamily || 'sans-serif', px = C.style === 'mac' ? 9 : 11;
+  x.strokeStyle = x.fillStyle = fg; x.font = `${px}px ${fam}`; x.lineWidth = 1;
+  const c = L.chart; let left = Math.round(c[0] * U[0]), top = Math.round(c[1] * U[1]), right = Math.round((c[0] + c[2]) * U[0]), bottom = Math.round((c[1] + c[3]) * U[1]);
+  if (C.deflate) { left += C.deflate[0]; right -= C.deflate[0]; top += C.deflate[1]; bottom -= C.deflate[1]; }
+  const mac = C.style === 'mac', x0 = mac ? left + 50 : left, y0 = mac ? bottom - 14 : bottom, n = info.n;
+  const unit = n >= 2 ? Math.trunc((y0 - top - 32) / (n - 1)) : Math.trunc((y0 - top) / 2) - 16, step = Math.trunc((right - x0) / 10);
+  const line = (a, b, c2, d) => { x.beginPath(); x.moveTo(a + 0.5, b + 0.5); x.lineTo(c2 + 0.5, d + 0.5); x.stroke(); };
+  line(x0, top, x0, y0); line(x0, y0, right, y0);
+  // the axis: Best 16 below the top, Average halfway, Worst 16 above the bottom; each a 2-pixel tick and its word to the left
+  const side = (y, t) => { line(x0 - 1, y, x0 + 1, y); x.textAlign = 'right'; x.fillText(t, x0 - 3, y + 4); };
+  side(top + 16, word(9)); side(Math.trunc((top + y0) / 2), word(10)); side(y0 - 16, word(11));
+  // the rows along the bottom, each under a tick, then the icons
+  x.textAlign = 'center';
+  for (let k = 1; k < 10; k++) { const xx = x0 + step * k; line(xx, y0 - 1, xx, y0 + 1); x.fillText(word(k - 1), xx, y0 + (mac ? 10 : 12)); }
+  for (let k = 0; k < 9; k++) {
+    const ix = x0 + step * (k + 1) - 16, iy = top + Math.trunc(unit * info.scores[k] / 10);
+    const im = C.own ? (IMG['white0_' + (me0.female ? 1 : 0)] || skinPic(me0.female ? 'i1500' : 'i1000')) : (skinPic('i' + CMP_ICONS[k]) || skinPic('b' + CMP_ICONS[k]));
+    if (im && im.complete && im.naturalWidth) x.drawImage(im, ix, iy, 32, 32);
+    else x.strokeRect(ix + 8.5, iy + 8.5, 15, 15);
+  }
+}
+// Show Skills: every player's skill level, and the computers' intelligence (ListPlayerSkills @122164: InitSkillsList; Windows dialogs 16 and 353)
+function openSkills() {
+  const C = G && HO.rules(G).compare;
+  if (!C) return;
+  const SKK = ['novice', 'beginner', 'normal', 'advanced', 'expert'], IQK = ['dumb', 'average', 'smart', 'diabolical'];
+  const SK = ['Novice', 'Beginner', 'Normal', 'Advanced', 'Expert'], IQ = ['Dumb', 'Average', 'Smart', 'Diabolical'];
+  // the official names where the game's language has them: 3.0.1F's STR# 1007 and 1009 (French), DOS 2.0's strings 96 to 100 and 16 to 18 (German)
+  const L = window.HOLANG, lang = (G.opts && G.opts.lang) || HO.ownLanguage(HO.ownRules(G));
+  const off = L && lang === 'fr' && L.mac301Fr ? { sk: L.mac301Fr['1007'], iq: L.mac301Fr['1009'] }
+    : L && lang === 'de' && L.dosDe && L.dosDe.s ? { sk: [96, 97, 98, 99, 100].map(i => L.dosDe.s[i]), iq: [16, 17, 18].map(i => L.dosDe.s[i]) } : null;
+  const skillName = (k) => { const i = SKK.indexOf(k) < 0 ? 2 : SKK.indexOf(k); return off && off.sk && off.sk[i] ? off.sk[i] : tl(SK[i]); };
+  const iqi = Math.max(0, IQK.indexOf((G.opts && G.opts.iq) || 'average')), iq = off && off.iq && off.iq[iqi] ? off.iq[iqi] : tl(IQ[iqi]);
+  const list = el('div', { class: 'skillist', role: 'list' }, ...G.players.map(q => el('div', { class: 'skillrow', role: 'listitem' }, el('span', { translate: 'no' }, q.name), el('span', { translate: 'no' }, skillName(q.skill)))));
+  const S = C.skillsLayout, U = C.units;
+  const box = origDialog(S.w, S.h, U, [[S.title, el('div', { class: 'cmptitle' }, tl('List of all players and their skill levels:'))], [S.list, list],
+    [S.label, el('div', { class: 'cmptitle' }, tl('Computer Intelligence:'))], [S.iq, el('div', { class: 'cmptitle', translate: 'no' }, iq)],
+    [S.ok, el('button', { type: 'button', class: 'default', onclick: closeModal }, tl('OK'))]], 'cmpwin skills');
+  modal('', box, { cls: 'compare', label: tl('List of all players and their skill levels:') });
+}
 const others = () => G.players.filter(p => p.id !== 0 && p.alive && !p.surrendered);
 function playerSelect(name) { return el('select', { name }, ...others().map(p => el('option', { value: p.id }, p.name))); }
 // the version's own Give window (rs.giveWindow; js/engine.js give, which
@@ -6078,7 +6164,8 @@ function setupMenus() {
       [() => scrapWords('fleet')[G && curFleet() && curFleet().scrap301 ? 1 : 0], () => { if (!G || G.over) return; const f = curFleet(); if (f) toggleScrapFleet(f); else toast('Select one of your fleets first.'); }, () => marksScrap()],
       [() => (G && organizeName()), () => { if (G && UI.sel != null) openOrganize(UI.sel); }, () => !!organizeStyle()],
       ['Scrap ship types…', () => G && openScrapTypes()], ['Next fleet', nextFleet]],
-    Galaxy: [['Players and alliances…', () => G && openPlayers(), null, null, () => menuDim('alliances')], ['List explored stars…', () => G && openStarList()],
+    Galaxy: [['Compare players…', () => G && openCompare(), () => !!(G && HO.rules(G).compare) && T.compareMenu !== false],
+      ['Players and alliances…', () => G && openPlayers(), null, null, () => menuDim('alliances')], ['List explored stars…', () => G && openStarList()],
       ['Give money or metal…', () => G && !G.over && openGive(), 'gifts', null, () => menuDim('give')],
       ['Send a message…', () => G && !G.over && openChat(), () => commandShown('chat'), null, () => menuDim('chat')],
       ['Dip into savings…', () => G && !G.over && openDip(), 'dip'],
@@ -6249,7 +6336,7 @@ window.addEventListener('DOMContentLoaded', () => {
     toast, modal, closeModal, confirmBox, renderPanel, renderMsg, draw, save, Sound, beep, guard,
     shipPic, shipImgEl, starLook, fleetOrder, curFleet, centerOn, zoomAt, resize, map: () => ({ w: mapW, h: mapH, ready: !!cv }),
     fit() { UI.fitted = false; fit(); draw(); }, clampView,
-    openBuild, openSplit, openOrganize, organizeStyle, openPlayers, openScrapTypes, openBattle, lastBattles, battleName, openReports, openAbout, openHelp,
+    openBuild, openSplit, openOrganize, organizeStyle, openPlayers, openCompare, openSkills, openScrapTypes, openBattle, lastBattles, battleName, openReports, openAbout, openHelp,
     openRadicalHand, showRank, openWinWindows, openYouWon, openYouLost, // (the originals' own windows, for the tests)
     newGameDialog, titleScreen, hideTitle, continueChecked, importGame, doEndTurn, flipBarScale, marksScrap, scrapWords, toggleScrapFleet,
     verOpts, modern, hotSeat, openGameText, Prefs, savePrefs, switchPlayers, forceEndTurn, openBattleList, openFixSpending, lastBattles, playOneTurn, showMessages,

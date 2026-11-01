@@ -177,7 +177,7 @@ async function audit(browser, url, run) {
   }
   // the windows
   const WINDOWS = [
-    ['Build Ships', 'api.openBuild(api.me().homeStar)'], ['Players', 'api.openPlayers()'], ['Preferences', 'api.openPrefs()'],
+    ['Build Ships', 'api.openBuild(api.me().homeStar)'], ['Players', 'api.openPlayers()'], ['Compare players', 'HO.rules(api.G).compare && api.openCompare()'], ['Show skills', 'HO.rules(api.G).compare && api.openSkills()'], ['Preferences', 'api.openPrefs()'],
     ['About', 'api.openAbout()'], ['How to play', 'api.openHelp()'], ['Account', 'api.openAccount()'], ['All fleets', 'api.openFleetList()'],
     ['Explored stars', 'api.openStarList()'], ['Ship types', 'api.openScrapTypes()'], ['Give', 'api.openGive()'], ['Send a message', 'api.openChat()'],
     ['Skin and OS look', 'api.openSkin()'], ['Sounds', 'api.openSounds()'], ['Language', 'api.openLanguage()'], ['Auto play', 'api.openAutoPlay()'],
