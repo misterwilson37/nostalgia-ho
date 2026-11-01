@@ -2093,6 +2093,8 @@ E.registerRules('301', Object.assign({}, D, {
       text: 'When the computers sent old ships home, the program passed the fleet’s place in a list where the route finder wants its Range. It made no difference to play (the colony is always within reach); the patch passes the Range.' },
     { id: 'star0', title: 'A finished colony at the first star is locked like any other',
       text: 'The test that stops you dragging the budget bar of a finished colony looked at the star’s number instead of what the budget slot is, so a finished colony at the first star of the list could still have its bar dragged. The patch locks it like any other.' },
+    { id: 'endTurnFr', title: 'The French End Turn button, in colour, is in French',
+      text: 'The French 3.0.1’s colour file (“Ho! 3.0 CPicts”) has the English End Turn button, untranslated, so a French game in colour shows “End Turn” (the black-and-white program’s own button says “Fin Tour”). The patch shows a “Fin Tour” button, drawn in the same lettering. It matters only in the colour skin, in French.' },
   ].concat(E.TRANSLATIONS_FIX, E.IOS_FILLINGS_FIX),
   ai: '301',               // its own computer players (js/ai-301.js)
   // CONFIRMED (InitHLogBarAmts @d091c, GetHPercBarAmt @d0a30, DrawHBarControl

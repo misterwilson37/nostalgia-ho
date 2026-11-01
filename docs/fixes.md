@@ -49,7 +49,7 @@ their entries are below so the list is complete, but their rulesets list no fixe
 | Mac 1.2 | 3 | 8 | 2 |
 | 2.0 | 10 (7 + the Amiga skin's three) | 5 | 3 |
 | Mac 2.0.1 | 5 | 5 | 2 |
-| Mac 3.0.1 | 5 | 6 | 3 |
+| Mac 3.0.1 | 6 | 6 | 3 |
 | 4.0.5 | 11 fixed (+ 3 the remake already plays fixed, + 3 with nothing in the remake to fix) | 4 | 6 |
 | Mac 4.0.5 | 7 fixed (+ 3 the remake already plays fixed, + 1 with nothing in the remake to fix) | 4 | 6 |
 | 5.0.5 | 2 | 7 | 6 |
@@ -331,6 +331,14 @@ Organize Fleets takes the least fuel used, `OrganizeFleets` @1137e6) and `attack
    (`DrawHBarControl @d0a7c`) tests ≥ 0, so the colony shows its income but can still be
    dragged. The remake had refused it at every star; it now plays the slip as released.
    *Fix:* locked like any other (`dragShare`, `locked301` in `js/rules-301.js`).
+6. **`endTurnFr`: the French End Turn button in colour is English** (found November 2026, from
+   the French disc). The French 3.0.1's program has its own black-and-white button, PICT 5500
+   "Fin Tour" (1.2F's picture), but its colour file ("Ho! 3.0 CPicts") has the English
+   colour End Turn (PICT 5000/5001) untranslated, which a colour Mac shows instead. So a French
+   game in the colour skin shows "End Turn" by default. *Fix:* a "Fin Tour" button in the
+   colour skin too, drawn in its lettering (`tools/skins/endturn_langs.py`,
+   `assets/skins/mac3c/sprites/p5500-fr-patch.png`). The black-and-white skin shows the
+   program's own either way.
 
 ### Quirk or design (left as released)
 

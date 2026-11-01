@@ -672,11 +672,15 @@ English, never German. The skin starts in English, like every other; German is t
 player's choice (the title screen's Language, or New Game's for 2.0). The End Turn picture is in the game's language in the Amiga skin
 (the German one is the game's, the English, French, Turkish and Spanish are drawn into it) and in
 Mac 1.2's (its own French one in French), and in the DOS 2.0, Mac 2.0.1 and Mac 3.0.1 skins (black and
-white and colour): the German DOS 2.0's own button ("Zug Ende / Strg+T", `d5000-de`, from its HOCOLOR.PRS,
+white and colour). **The French Mac 3.0.1's own** (`docs/301fr-findings.md`, "The End Turn button"): the
+black-and-white skin's French button is the program's own PICT 5500, "Fin Tour" (1.2F's picture,
+`mac3/sprites/p5500-fr`, `tools/extract/mac3_fr.py`), not drawn; its colour file has the English button
+untranslated, so the colour skin's French shows "End Turn" by default, and the patch (fix `endTurnFr`,
+`docs/fixes.md`) the drawn "Fin Tour" (`mac3c/sprites/p5500-fr-patch`). The rest: the German DOS 2.0's own button ("Zug Ende / Strg+T", `d5000-de`, from its HOCOLOR.PRS,
 `tools/extract/dos_de_buttons.py`) in the DOS skin's German; every other language's, and the German in the Mac
 skins, drawn into the skin's English one in its own lettering (`tools/skins/endturn_langs.py`: the letters
 copied from the originals' pictures where they have them, S, B, a, t, l and the Turkish dotless i drawn to match;
-French "Fin Tour" as 1.2F's, German "Zug Ende", Turkish "Sıran Bitti", Spanish "Fin del turno", the remake's
+French "Fin Tour" as 1.2F's (Mac 2.0.1, DOS 2.0 and the Mac 3.0.1 colour patch), German "Zug Ende", Turkish "Sıran Bitti", Spanish "Fin del turno", the remake's
 table's). Spanish is set on two lines and loses its key line (the words don't fit one); the other
 languages keep the skin's key line ("Ctrl+T", "⌘T"). The other skins' buttons (Windows, Mac 4.0.5, 5.0.5, the Palm, iOS, Android,
 1.2's other languages) have the originals' English only, shown in every language.
@@ -737,9 +741,9 @@ translated from their English, with the source line saying so):
 - **The numbers' forms**: a version writes its sums and counts its own way ("12,345K",
   "1.00G") in every language, as the rules have them.
 - **5.0.5's network and registration alerts** in German (never shown by the remake).
-- **The pictures**: words drawn in the art (1.2F's "Fin Tour", the title pictures, the
+- **The pictures**: words drawn in the art (1.2F's "Fin Tour", the French 3.0.1's own "Fin Tour", the title pictures, the
   Amiga's German End Turn picture, Mac 1.2's French one, the German DOS 2.0's End Turn picture, and the
-  remake's own in the DOS 2.0, Mac 2.0.1 and Mac 3.0.1 skins).
+  remake's own in the DOS 2.0, Mac 2.0.1 and Mac 3.0.1 skins, the French 3.0.1 colour patch's).
 
 ## Choices worth checking
 

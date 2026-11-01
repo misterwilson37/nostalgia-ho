@@ -78,6 +78,31 @@ patch's. So:
 5. `docs/translations.md` (Method, Counts, the 3.0.1 and 4.0.5 sections) and
    `node tools/lang-test.js --count` change with it.
 
+## The End Turn button, and the other pictures
+
+Unpacked with `unar` (1.10, from apt; the files come out as AppleDouble `.rsrc`, which
+`tools/extract/mac3.py` reads) and compared picture by picture with the English 3.0.1's
+(`tools/extract/mac3_fr.py`, which also writes the button):
+
+- **The program's own button is French.** PICT 5500 (and 5501, pressed) read "Fin Tour",
+  52x31 (54x33 pressed), pixel for pixel Mac 1.2F's p5500 / p5501. So the black-and-white skin
+  (`mac3`) shows it in French by default (`mac3/sprites/p5500-fr`, replacing the drawn one of
+  `endturn-langs`, which stays where no official exists: Mac 2.0.1, DOS 2.0).
+- **The colour file's is not.** "Ho! 3.0 CPicts" PICT 5000 / 5001 (the colour End Turn, which a
+  colour Mac shows instead of 5500) are the English "End Turn", unchanged, so a French game in the
+  colour skin (`mac3c`) shows "End Turn" by default; the patch (fix `endTurnFr`, `docs/fixes.md`)
+  shows the drawn "Fin Tour" (`mac3c/sprites/p5500-fr-patch`, `tools/skins/endturn_langs.py`).
+- **Every other picture** (PICT 146 in each program; colour file `PICT` 30, `PPMp` 132, `icl8`
+  167, `ics8` 69) is the English's, pixel for pixel, except: PICT 4010, only in the French
+  program (202 bytes of drawing ops, a licence stamp with the copy's owner, address and serial
+  number: not a game picture, not extracted, not quoted here); PICT 3550, only in the
+  English program; and in the icons, `ICN#` 3010 (and its `icl8`: the French has the figure with
+  its mouth open where the English has a steaming pile), 3170 (a question mark, the hints' icon;
+  only in the French), and 3151, 3152 and 9993 (only in the English). No skin shows 3010, 3151,
+  3152 or 9993 in 3.0.1, and the remake's 3.0.1 shows no hints (`hints: false`, as in English; the
+  French program has the 3100 list and 3170's icon, but nothing in it was run, so whether it
+  shows them is not known), so none of these changes what a game shows.
+
 ## Manual
 
 There's no manual on the disc. If one turns up (printed, or a scan), it would be the only

@@ -20,6 +20,12 @@ copied from it, found by segmenting the pictures' columns):
 As a check, the font re-draws each skin's English "End Turn" and must match the
 picture pixel for pixel (see check_font).
 
+The French Mac 3.0.1 has its own button (black and white, PICT 5500: "Fin Tour", the same
+picture as 1.2F's), copied by tools/extract/mac3_fr.py into mac3's p5500-fr, which this
+script leaves alone. Its colour file's End Turn is the English one, so the colour skin shows
+"End Turn" in French by default, and the patch (fix endTurnFr, rules-301) the button drawn
+here, mac3c's p5500-fr-patch.
+
 What each language shows:
   - DOS 2.0:      de = the German DOS 2.0's own button (d5000-de, "Zug Ende / Strg+T",
                   copied, not drawn); fr, tr, es = the English button with the top words
@@ -230,8 +236,12 @@ def main():
             name = f'{stem}-{lang}'
             if skin == 'dos' and lang == 'de':
                 im = load(os.path.join(d, 'sprites', name + '.png'))  # the original's, not drawn
+            elif skin == 'mac3' and lang == 'fr':
+                im = load(os.path.join(d, 'sprites', name + '.png'))  # the French 3.0.1's own (tools/extract/mac3_fr.py)
             else:
                 im = end_turn(base, font, lang, ink)
+                if skin == 'mac3c' and lang == 'fr':  # shown by the patch only: the French colour file's End Turn is the English one
+                    name += '-patch'
                 im.save(os.path.join(d, 'sprites', name + '.png'), optimize=True)
             names.append(name)
             row.append((skin + ' ' + lang, im))
