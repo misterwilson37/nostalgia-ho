@@ -28,8 +28,70 @@ TRAPS = {  # a few traps worth naming when reading game logic; others are named 
     0xA01E: 'NewPtr', 0xA01F: 'DisposPtr', 0xA022: 'NewHandle', 0xA023: 'DisposHandle', 0xA024: 'SetHandleSize',
     0xA025: 'GetHandleSize', 0xA029: 'HLock', 0xA02A: 'HUnlock', 0xA064: 'MoveHHi', 0xA9A0: 'GetResource',
     0xA9A3: 'ReleaseResource', 0xA975: 'TickCount', 0xA873: 'SetPort', 0xA874: 'GetPort', 0xA884: 'DrawString',
-    0xA893: 'LineTo', 0xA891: 'MoveTo', 0xA8A1: 'FrameRect', 0xA8A2: 'PaintRect', 0xA8A3: 'EraseRect',
+    0xA891: 'LineTo', 0xA893: 'MoveTo', 0xA8A1: 'FrameRect', 0xA8A2: 'PaintRect', 0xA8A3: 'EraseRect',
 }
+
+# More Toolbox traps, named from Inside Macintosh (Traps.h numbering). The first version of this
+# table had LineTo and MoveTo the wrong way round (A893 is MoveTo, A891 LineTo).
+_MORE = '''
+A850 InitCursor A851 SetCursor A852 HideCursor A853 ShowCursor A855 ShieldCursor A856 ObscureCursor
+A860 WaitNextEvent A862 ForeColor A863 BackColor A870 LocalToGlobal A871 GlobalToLocal A878 SetOrigin
+A879 SetClip A87A GetClip A87B ClipRect A87C BackPat A883 DrawChar A885 DrawText A886 TextWidth
+A887 TextFont A888 TextFace A889 TextMode A88A TextSize A88B GetFontInfo A88C StringWidth A88D CharWidth
+A890 StdLine A892 Line A894 Move A896 HidePen A897 ShowPen A898 GetPenState A899 SetPenState A89A GetPen
+A89B PenSize A89C PenMode A89D PenPat A89E PenNormal A8A0 StdRect A8A4 InvertRect A8A5 FillRect
+A8A6 EqualRect A8A7 SetRect A8A8 OffsetRect A8A9 InsetRect A8AA SectRect A8AB UnionRect A8AC Pt2Rect
+A8AD PtInRect A8AE EmptyRect A8B0 FrameRoundRect A8B1 PaintRoundRect A8B2 EraseRoundRect A8B3 InvertRoundRect
+A8B4 FillRoundRect A8B7 FrameOval A8B8 PaintOval A8B9 EraseOval A8BA InvertOval A8BB FillOval
+A8BE FrameArc A8BF PaintArc A8C6 FramePoly A8C7 PaintPoly A8CB OpenPoly A8CC ClosePoly A8CD KillPoly
+A8D8 NewRgn A8D9 DisposeRgn A8DA OpenRgn A8DB CloseRgn A8DC CopyRgn A8DD SetEmptyRgn A8DE SetRectRgn
+A8DF RectRgn A8E0 OffsetRgn A8E1 InsetRgn A8E2 EmptyRgn A8E3 EqualRgn A8E4 SectRgn A8E5 UnionRgn
+A8E6 DiffRgn A8E7 XorRgn A8E8 PtInRgn A8E9 RectInRgn A8EC CopyBits A8EF ScrollRect A8F3 OpenPicture
+A8F4 ClosePicture A8F5 KillPicture A8F6 DrawPicture
+A8D1 StdRgn A8D2 FrameRgn A8D3 PaintRgn A8D4 EraseRgn A8D5 InvertRgn A8D6 FillRgn
+A904 DrawGrowIcon A906 NewString A908 ShowHide A909 CalcVis A910 GetWMgrPort A911 CheckUpdate A912 InitWindows
+A913 NewWindow A914 DisposeWindow A915 ShowWindow A916 HideWindow A917 GetWRefCon A918 SetWRefCon
+A919 GetWTitle A91A SetWTitle A91B MoveWindow A91C HiliteWindow A91D SizeWindow A91E TrackGoAway
+A91F SelectWindow A920 BringToFront A921 SendBehind A922 BeginUpdate A923 EndUpdate A924 FrontWindow
+A925 DragWindow A927 InvalRgn A928 InvalRect A929 ValidRgn A92A ValidRect A92B GrowWindow A92C FindWindow
+A92D CloseWindow A930 InitMenus A931 NewMenu A932 DisposeMenu A933 AppendMenu A934 ClearMenuBar
+A935 InsertMenu A936 DeleteMenu A937 DrawMenuBar A938 HiliteMenu A939 EnableItem A93A DisableItem
+A93B GetMenuBar A93C SetMenuBar A93D MenuSelect A93E MenuKey A945 CheckItem A946 GetItem A947 SetItem
+A948 CalcMenuSize A949 GetMHandle A94C FlashMenuBar A94D AddResMenu A94E PinRect A950 CountMItems
+A953 UpdateControls A954 NewControl A955 DisposeControl A956 KillControls A957 ShowControl A958 HideControl
+A959 MoveControl A95A GetCRefCon A95B SetCRefCon A95C SizeControl A95D HiliteControl A95E GetCTitle
+A95F SetCTitle A960 GetCtlValue A961 GetCtlMin A962 GetCtlMax A963 SetCtlValue A964 SetCtlMin A965 SetCtlMax
+A966 TestControl A967 DragControl A968 TrackControl A969 DrawControls A96C FindControl A96D Draw1Control
+A970 GetNextEvent A971 EventAvail A972 GetMouse A973 StillDown A974 Button A976 GetKeys A977 WaitMouseUp
+A978 UpdtDialog A97B InitDialogs A97C GetNewDialog A97D NewDialog A97E SelIText A97F IsDialogEvent
+A980 DialogSelect A981 DrawDialog A982 CloseDialog A983 DisposDialog A984 FindDItem A985 Alert
+A986 StopAlert A987 NoteAlert A988 CautionAlert A98B ParamText A98C ErrorSound A98D GetDItem
+A98E SetDItem A98F SetIText A990 GetIText A991 ModalDialog A997 OpenResFile A998 UseResFile
+A999 UpdateResFile A99A CloseResFile A99B SetResLoad A99C CountResources A99D GetIndResource
+A9A0 GetResource A9A1 GetNamedResource A9A2 LoadResource A9A5 SizeRsrc A9A6 GetResAttrs A9A7 SetResAttrs
+A9AA ChangedResource A9AB AddResource A9AD RmveResource A9AF ResError A9B0 WriteResource A9B1 CreateResFile
+A9B8 GetPattern A9B9 GetCursor A9BA GetString A9BB GetIcon A9BC GetPicture A9BD GetNewWindow
+A9BE GetNewControl A9BF GetMenu A9C0 GetNewMBar A9C8 SysBeep A9C9 SysError A994 CurResFile
+A9E0 Munger A9E1 HandToHand A9E3 PtrToHand A9E4 HandAndHand A9E7 Pack0_ListMgr A9E9 Pack2_DiskInit A9EA Pack3_StdFile
+A81F Get1Resource A820 Get1NamedResource A827 HideDItem A828 ShowDItem A83A ZoomWindow A83B TrackBox
+AA14 RGBForeColor AA15 RGBBackColor AA18 GetCTable AA29 GetNextDevice AA2A GetMainDevice AA27 GetMaxDevice
+AA45 NewCWindow AA46 GetNewCWindow
+A049 HPurge A04A HNoPurge A85F BitClr A86E InitGraf A03C CompareString A01C FreeMem A01D MaxMem
+A9A4 HomeResFile A9B3 SystemClick A9B6 OpenDeskAcc A9B7 CloseDeskAcc A9C1 UniqueID A9C2 SystemEdit
+A9C4 OpenRFPerm A9CC TEInit A8D0 UnpackBits A8EA SetStdProcs A8EB StdBits
+'''
+for _p in _MORE.split():
+    pass
+_t = _MORE.split()
+for _i in range(0, len(_t), 2):
+    TRAPS.setdefault(int(_t[_i], 16), _t[_i + 1])
+TRAPS.update({
+    # OS traps (word with the flag bits stripped)
+    0xA000: 'Open', 0xA001: 'Close', 0xA002: 'Read', 0xA003: 'Write', 0xA004: 'Control', 0xA005: 'Status',
+    0xA007: 'GetVolInfo', 0xA008: 'Create', 0xA009: 'Delete', 0xA00A: 'OpenRF', 0xA00B: 'Rename',
+    0xA00C: 'GetFileInfo', 0xA00D: 'SetFileInfo', 0xA011: 'GetEOF', 0xA012: 'SetEOF', 0xA013: 'FlushVol',
+    0xA014: 'GetVol', 0xA015: 'SetVol', 0xA018: 'GetFPos', 0xA032: 'FlushEvents', 0xA044: 'SetFPos',
+})
 
 _DIV = bytes.fromhex('41fa000a327c00024ef092fe')
 RUNTIME = [
