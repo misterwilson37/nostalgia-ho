@@ -1,0 +1,34 @@
+/* Spaceward Ho! — OS look "Netscape Communicator 4" (1.0.0): the browser of
+   1997-98 on Windows 95, successor to Navigator 3. Built on the Navigator 3
+   look (js/os/netscape.css, itself on js/os/win95.css), whose Location field,
+   throbber and status bar it keeps, with Communicator's own parts: a taller,
+   flatter toolbar (its buttons flat until the pointer is over them) with the
+   ridged tab at its left end where Communicator's toolbars could be
+   folded, the Location field with its page icon, and, at the right end of
+   the status bar, the component bar (four small icons: browser, mailbox,
+   discussions, composer, drawn here as the remake's own pictures, not
+   Netscape's). The throbber is the remake's ringed planet; no logos, all CSS
+   and inline SVG. */
+@import url("netscape.css");
+#menubar { height: 50px; padding: 0 6px 0 4px; gap: 1px; border-left: 8px ridge #dcdcdc; background: #c0c0c0; box-shadow: inset 0 -1px 0 #fff; }
+/* the toolbar's buttons: flat until the pointer is over them, raised then, sunk while their menu is open */
+#menubar .logo, .mbtn { background: transparent; border: 1px solid transparent; box-shadow: none; padding: 7px 10px; }
+#menubar .logo:hover, #menubar .logo:focus-visible, .mbtn:hover, .mbtn:focus-visible { background: transparent; color: #000; border-color: #fff #808080 #808080 #fff; }
+.mbtn[aria-expanded=true], .mbtn:active, #menubar .logo:active { border-color: #808080 #fff #fff #808080; box-shadow: none; padding: 8px 9px 6px 11px; }
+.dropdown { top: 42px; }
+/* the Location field, with the page's icon at its left end */
+html #title { height: 24px; line-height: 20px; padding: 0 6px 0 25px; border-color: #808080 #fff #fff #808080;
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='16'><path d='M1.5 .5h7l4 4v11h-11z' fill='%23fff' stroke='%23000'/><path d='M8.5 .5v4h4' fill='none' stroke='%23000'/><path d='M3.5 8h7M3.5 10.5h7M3.5 13h5' stroke='%23808080'/></svg>") 5px 3px / 14px 16px no-repeat, #fff; }
+/* a flatter throbber box */
+#menubar::after { box-shadow: inset 1px 1px 0 #fff, inset -1px -1px 0 #808080; }
+/* the status bar: the key at the left, "Document: Done", and the component bar at the right end */
+html:not(.amiga) #app::after {
+  content: 'Document: Done'; display: block; height: 24px; line-height: 22px; padding: 0 124px 0 30px; overflow: hidden; white-space: nowrap;
+  font: 12px var(--ui); color: #000;
+  background:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='108' height='20'><rect x='.5' y='.5' width='107' height='19' fill='%23c0c0c0' stroke='%23808080'/><path d='M.5 19.5V.5h107' fill='none' stroke='%23fff'/><path d='M4 3v14M6 3v14' stroke='%23fff'/><path d='M5 3v14M7 3v14' stroke='%23808080'/><rect x='14' y='5' width='14' height='10' fill='%23fff' stroke='%23000080'/><rect x='14' y='5' width='14' height='3' fill='%23000080'/><rect x='38' y='6' width='14' height='9' fill='%23fff' stroke='%23000'/><path d='M38 6l7 5 7-5' fill='none' stroke='%23000'/><rect x='62' y='4' width='11' height='7' fill='%23fff' stroke='%23000'/><rect x='67' y='9' width='11' height='7' fill='%23ffff80' stroke='%23000'/><rect x='88' y='4' width='10' height='12' fill='%23fff' stroke='%23000'/><path d='M91 8h4M91 11h4' stroke='%23808080'/><path d='M98 15l6-9' stroke='%23800000' stroke-width='2'/></svg>") right 4px center / 108px 20px no-repeat,
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='12'><circle cx='4.5' cy='6' r='3' fill='none' stroke='%23404040' stroke-width='1.6'/><path d='M7 6h8M12 6v3M15 6v3' stroke='%23404040' stroke-width='1.6' fill='none'/></svg>") 8px center / 16px 12px no-repeat,
+    #c0c0c0;
+  border-top: 1px solid #fff; box-shadow: inset 0 1px 0 #808080, 0 -1px 0 #808080;
+}
+@media (max-width: 760px) { html:not(.amiga) #app::after { display: none; } }

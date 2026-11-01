@@ -1,0 +1,36 @@
+/* Spaceward Ho! — OS look "Safari 1.0" (1.0.0): Apple's browser as it first
+   shipped, in Mac OS X 10.2 and 10.3 (2003): light only. Built on the Aqua
+   look (js/os/macosx.css: pinstripes, the traffic lights, the gel buttons
+   with the blue default), with Safari's brushed-metal window frame, a
+   single tall toolbar in the same fine horizontal streaks, the toolbar's
+   buttons as metal buttons, a pill-shaped address field with the page's
+   title centred in it, and a pill-shaped search field beside it (words
+   only, no maker's mark). All CSS and inline SVG; no logos. */
+@import url("macosx.css");
+:root {
+  --metal: repeating-linear-gradient(rgba(255,255,255,.22) 0 1px, rgba(0,0,0,.035) 1px 2px), linear-gradient(#dedede 0%, #c6c6c6 49%, #babab9 50%, #cbcbcb 100%);
+}
+#menubar { height: 44px; padding: 0 10px; gap: 6px; background: var(--metal); border-bottom: 1px solid #6e6e6e;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.85), 0 1px 0 rgba(255,255,255,.4); }
+#menubar .logo { color: #1c1c1c; text-shadow: 0 1px 0 rgba(255,255,255,.6); }
+#menubar .logo:hover, #menubar .logo:focus-visible { color: #1c1c1c; background: none; }
+.wtitle { background: var(--metal); }
+/* the toolbar's buttons: brushed-metal buttons, sunk while their menu is open */
+.mbtn { font: 12px var(--ui); color: #1a1a1a; padding: 3px 11px; border: 1px solid #707070; border-radius: 5px;
+  background: linear-gradient(#fafafa, #d6d6d6 50%, #c8c8c8 51%, #e0e0e0); box-shadow: 0 1px 0 rgba(255,255,255,.7), inset 0 1px 0 #fff; text-shadow: 0 1px 0 rgba(255,255,255,.6); }
+.mbtn:hover, .mbtn:focus-visible { color: #000; background: linear-gradient(#ffffff, #e2e2e2 50%, #d2d2d2 51%, #ececec); }
+.mbtn[aria-expanded=true], .mbtn:active { color: #000; background: linear-gradient(#a8a8a8, #c6c6c6); box-shadow: inset 0 2px 3px rgba(0,0,0,.45); }
+.dropdown { top: 36px; }
+/* the address field: a pill with the page's title centred in it */
+html #title { order: 2; flex: 1 1 auto; min-width: 80px; height: 26px; line-height: 24px; padding: 0 14px; text-align: center; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+  font: 12px/24px var(--ui); color: #000; background: #fff; border: 1px solid #6e6e6e; border-radius: 13px; box-shadow: inset 0 2px 3px rgba(0,0,0,.3); }
+/* the search field beside it: a pill with a magnifying glass */
+#menubar::after { content: 'Search'; order: 3; flex: none; width: 150px; height: 26px; line-height: 24px; padding: 0 12px 0 32px; box-sizing: border-box; overflow: hidden;
+  font: 12px/24px var(--ui); color: #6b6b6b; border: 1px solid #6e6e6e; border-radius: 13px; box-shadow: inset 0 2px 3px rgba(0,0,0,.3);
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14'><circle cx='5.5' cy='5.5' r='4' fill='none' stroke='%23707070' stroke-width='1.6'/><path d='M8.6 8.6l4 4' stroke='%23707070' stroke-width='2' stroke-linecap='round'/></svg>") 11px 50% / 14px 14px no-repeat, #fff; }
+/* a skin that paints its menu words for a dark bar (the iPhone's and Android's pale blue and green, Cozy's cream) must not keep
+   them on the metal one: this outranks theirs */
+html:root:root #menubar .mbtn, html:root:root #menubar .logo { color: #1a1a1a; }
+html:root:root #menubar .mbtn:hover, html:root:root #menubar .mbtn:focus-visible, html:root:root #menubar .mbtn[aria-expanded=true], html:root:root #menubar .mbtn:active { color: #000; }
+a:link { color: #0033cc; } a:visited { color: #551a8b; }
+@media (max-width: 760px) { #menubar::after { display: none; } }

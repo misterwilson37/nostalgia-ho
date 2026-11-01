@@ -1,0 +1,50 @@
+/* Spaceward Ho! — OS look "System 7.5" (1.0.0): the colour Macintosh of
+   1994-96, Mac OS 7.5 to 7.6, built on the black-and-white System 7 look
+   (js/os/system7.css, whose dialogs, menus and form controls it keeps). What
+   7.5 added in colour: grey 3-D surfaces (#dddddd, light edge top and left,
+   dark edge bottom and right), raised buttons, title bars with fine grey
+   pinstripes on a grey plate, scroll bars with a grey-blue dithered track
+   and a raised thumb, and a purple-blue highlight in the menus. Built on
+   System 7's own look, all CSS and inline SVG. */
+@import url("system7.css");
+:root {
+  --plat: #dddddd; --plat2: #eeeeee; --edge: #000; --ink: #000; --sub: #333; --hi: #333399;
+  --bevel: inset 1px 1px 0 #fff, inset -1px -1px 0 #888;
+}
+#panel { background: var(--plat); border-right: 1px solid #000; box-shadow: inset -1px 0 0 #888; }
+.box, .designer { background: var(--plat2); border: 1px solid #888; box-shadow: inset 1px 1px 0 #fff, 1px 1px 0 #fff; }
+#menubar { background: var(--plat); border-bottom: 1px solid #000; box-shadow: inset 0 1px 0 #fff, inset 0 -1px 0 #888; }
+.mbtn:hover, .mbtn:focus-visible, .dropdown button:hover, .dropdown button:focus-visible { background: var(--hi); color: #fff; }
+.dropdown { background: var(--plat); box-shadow: inset 1px 1px 0 #fff, 1px 1px 0 #000; }
+/* raised 3-D buttons; pressed ones sink and go dark grey, not black */
+button:not(.mbtn):not(.close):not(.tbtn):not(.clock):not([role=menuitem]) {
+  background: var(--plat); color: #000; border: 1px solid #000; box-shadow: var(--bevel), inset -2px -2px 0 #aaa;
+}
+button:not(.mbtn):not(.close):not(.tbtn):not(.clock):not([role=menuitem]):active { background: #aaa; color: #000; border-color: #000; box-shadow: inset 1px 1px 0 #555; }
+.tbtn { background: var(--plat); box-shadow: var(--bevel); }
+.tbtn.on { background: #aaa; color: #000; border-color: #000; box-shadow: inset 1px 1px 0 #555; }
+.track { background: #fff; border: 1px solid #000; box-shadow: inset 1px 1px 0 #888; }
+/* windows: a grey 3-D frame, pinstripes on a grey plate for the title */
+.win { background: var(--plat); box-shadow: inset 1px 1px 0 #fff, inset -1px -1px 0 #888, 2px 2px 0 #000; }
+.wtitle { background: repeating-linear-gradient(#fff 0 1px, #999 1px 2px) 0 4px / 100% calc(100% - 8px) no-repeat, var(--plat); border-bottom: 1px solid #000; }
+.wtitle span { background: var(--plat); }
+.close { background: var(--plat); box-shadow: var(--bevel); }
+.close:active { background: #aaa; }
+html select, html .newgame select { background-color: var(--plat); box-shadow: 1px 1px 0 #000, inset 1px 1px 0 #fff; }
+html input[type=range], html .tm input[type=range], html .newgame .slider input[type=range] { background: #fff; box-shadow: inset 1px 1px 0 #888; }
+html input[type=range]::-webkit-slider-thumb, html .tm input[type=range]::-webkit-slider-thumb { background: var(--plat); box-shadow: var(--bevel); }
+html input[type=range]::-moz-range-thumb, html .tm input[type=range]::-moz-range-thumb { background: var(--plat); box-shadow: var(--bevel); }
+/* scroll bars: a grey-blue dithered track, a raised thumb with grip lines, raised arrow buttons */
+::-webkit-scrollbar-track { background: repeating-linear-gradient(45deg, #b4b4d4 0 1px, #e6e6f6 1px 2px); border-left: 1px solid #000; }
+::-webkit-scrollbar-thumb {
+  background: repeating-linear-gradient(0deg, transparent 0 3px, #999 3px 4px) 3px 3px / calc(100% - 6px) calc(100% - 6px) no-repeat, var(--plat);
+  border: 1px solid #000; box-shadow: var(--bevel);
+}
+::-webkit-scrollbar-corner { background: var(--plat); }
+::-webkit-scrollbar-button:single-button { background-color: var(--plat); box-shadow: var(--bevel); }
+@supports (-moz-appearance: none) { html, html * { scrollbar-width: auto; scrollbar-color: #dddddd #c8c8e4; } }
+/* the floating windows: the same pinstripes and 3-D frame */
+.mwin { background: var(--plat); box-shadow: inset 1px 1px 0 #fff, 1px 1px 0 #000, 2px 2px 0 #000; }
+.mwbar { background: repeating-linear-gradient(#fff 0 1px, #999 1px 2px) 0 2px / 100% 7px no-repeat, var(--plat); }
+.mwbar .mwclose { background: var(--plat) !important; }
+.mwgrow { background: linear-gradient(135deg, transparent 0 50%, #555 50% 58%, transparent 58% 70%, #555 70% 78%, transparent 78%); }
