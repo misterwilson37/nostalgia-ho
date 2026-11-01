@@ -2062,7 +2062,7 @@ E.registerRules('301', Object.assign({}, D, {
   // (+0x1c) is kept in +0x24 when the player's first pass begins and the net (+8) in +0xc when ComputeIncomeAndPopulation starts; at the end
   // of the second pass (the net kept within $0 and $999,999,999) each is replaced by the figure now less the kept one. Ship Savings
   // have none. Start: both 0 ("(up 0)", "(up $0)" in the first year).
-  changes: { read: (G, p) => ({ metal: p.metal, money: 0, income: p.net301 || 0 }), line: (G, which, v) => E.changeNice(which, v, (n) => E.num(G, n)) },
+  changes: { read: (G, p) => ({ metal: p.metal, money: 0, income: p.net301 || 0 }), line: (G, which, v) => E.changeNice(which, v, (n) => G ? E.num(G, n) : E.niceNum(n)) },
   // CONFIRMED (ComparePlayers @140952 and its item proc @140b54, SaveComparisonInfoOne and Two @a65bc, @a663c, CalcShipPower @1354bc, DLOG/DITL 6050,
   // DITL 6100, STR# 1008 and 1020): the Compare Players window (Galaxy menu, cmd-Y) as 2.0.1's, 478 x 292, with a picture of its own on each row
   // (ICN# 3110, 3162, 3150, 4011, then 3100 to 3104: Income, Metal, Planets, Ships, the techs) and no "You won" line (only .5, .18 and .20 are
