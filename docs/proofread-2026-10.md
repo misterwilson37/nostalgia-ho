@@ -1044,7 +1044,7 @@ below is settled the same way.
   the official ones borrowed from another version alike, so the German 4.0.5 on Windows says "Walle" and every other version "walle".
 - **German "Paßwort"** is now the default (the Amiga's spelling), "Passwort" the patch's (as `dePatchText` already modernizes the game text's "daß", "muß", "Paßwort", above); a scan of the Amiga's and the DOS 2.0's strings against the interface's German
   found no other official old spelling ("daß", "muß", …) modernized in a default.
-- **"Revoir bataille" in two other rows** ("Review Battle…", "Review battle"): the same article question as the first row above, never patched.
+- **"Revoir bataille" in the three Review-battle rows** ("Review battle…", "Review Battle…", "Review battle"; done, November 2026): the default is the official wording, no article: 3.0.1F's menu "Revoir bataille à <étoile>…" (1.2F's "Revoir bataille de <étoile>…", iOS's "Revoir batailles"), so the rows are marked `~3.0.1F` (adapted from that line, the star left out), not `~iOS`. The patch's best French: "Revoir une bataille…" for the two menu rows (they open a list), "Revoir la bataille" for the report card's button (it is that battle).
 - **German "Queue ships at %s"**  has the same words as "Build ships at %s": the German has no word for queueing; no official line to follow.
 - **Rows marked `~iOS`, `~1.2F` or `~DOS 2.0` with no official counterpart** at all ("Auto-Play This Turn", "Give to", "Money (you
   have %s)", "Computer home systems", "Population"): remake wording; their marks are loose, harmless.
