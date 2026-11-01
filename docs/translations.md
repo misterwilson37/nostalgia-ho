@@ -745,6 +745,10 @@ translated from their English, with the source line saying so):
   Amiga's German End Turn picture, Mac 1.2's French one, the German DOS 2.0's End Turn picture, and the
   remake's own in the DOS 2.0, Mac 2.0.1 and Mac 3.0.1 skins, the French 3.0.1 colour patch's).
 
+**Bob Van de Walle's name** is written as each version's own English writes it: "Walle" in Windows 4.0.5's report (and About box),
+"walle" in 3.0.1, Mac 4.0.5, 5.0.5, the Palm, iOS and Android. Matching ignores case, so a translation takes the case of the English
+line it stands for (`nameCase` in `js/languages.js`), in every language and whether the line is official, adapted or the remake's own.
+
 ## Choices worth checking
 
 **The rule (Jake, October 2026; `docs/proofread-2026-10.md`, "The patch table"):** an

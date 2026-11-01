@@ -1037,9 +1037,11 @@ which had no patch, now says "Tebrikler! Ulaştığın derece:" for iOS's stilte
 below is settled the same way.
 
 **Left as they are, noted:**
-- **German 4.0.5 "Artwork by … Bob Van de Walle."** The English of 4.0.5 has the capital W; the German says "walle", as 3.0.1's English does. The
-  adaptation table matches English without case (`HO.langNormEn`), so one entry serves both. Showing "Walle" in
-  4.0.5 only needs case-aware matching (or a patch entry), a code change, not a wording one.
+- **"Artwork by … Bob Van de Walle." in 4.0.5** (done, November 2026): each version's own English writes the name its way
+  (Windows 4.0.5, the report and the About box: "Walle"; 3.0.1, Mac 4.0.5, 5.0.5, the Palm, iOS, Android: "walle"). The
+  adaptation table matches English without case (`HO.langNormEn`), so one entry served both; now a translation takes the
+  case of the English line it translates (`nameCase`, `js/languages.js`), the German's, Spanish's and Turkish's own lines and
+  the official ones borrowed from another version alike, so the German 4.0.5 on Windows says "Walle" and every other version "walle".
 - **German "Paßwort"** is now the default (the Amiga's spelling), "Passwort" the patch's (as `dePatchText` already modernizes the game text's "daß", "muß", "Paßwort", above); a scan of the Amiga's and the DOS 2.0's strings against the interface's German
   found no other official old spelling ("daß", "muß", …) modernized in a default.
 - **"Revoir bataille" in two other rows** ("Review Battle…", "Review battle"): the same article question as the first row above, never patched.

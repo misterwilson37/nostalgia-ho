@@ -815,6 +815,14 @@ function patchFix(lang, T, reports, hints, words, hintTexts, extra) {
   if (Object.keys(part).length || lang === 'fr' || lang === 'de') fix.translations = part;
   return fix;
 }
+// Bob Van de Walle's name is written as each version's own English writes it (Windows 4.0.5 "Walle";
+// 3.0.1, Mac 4.0.5, 5.0.5, the Palm, iOS and Android "walle"): a translation takes the case of the line it
+// translates, as the matching ignores case (an official line borrowed from another version too: the name is
+// the version's credit, not a translation).
+function nameCase(en, to) {
+  const m = typeof en === 'string' && /Van de ([Ww])alle/.exec(en);
+  return m && typeof to === 'string' ? to.replace(/Van de [Ww]alle/g, 'Van de ' + m[1] + 'alle') : to;
+}
 // official: [[English, translation], ...], the nearest first
 function translator(lang, official) {
   const R = RMK[lang] || {}, map = new Map(), over = new Map(), own = new Map(), adapted = new Map(), patch = patchTable(lang);
@@ -831,10 +839,10 @@ function translator(lang, official) {
     const k0 = normEn(en);
     for (const k of [k0, alias.get(k0)]) {
       if (k == null) continue;
-      if (over.has(k)) { const [e0, to] = over.get(k); return [matchDollar(en, e0, to), 'remake']; }
-      if (map.has(k)) { const [e0, to] = map.get(k); return [addDollar(en, e0, to)]; }
-      if (adapted.has(k)) { const [e0, to, src] = adapted.get(k); return [matchDollar(en, e0, to), 'adapted', src]; }
-      if (own.has(k)) { const [e0, to] = own.get(k); return [matchDollar(en, e0, to), 'remake']; }
+      if (over.has(k)) { const [e0, to] = over.get(k); return [nameCase(en, matchDollar(en, e0, to)), 'remake']; }
+      if (map.has(k)) { const [e0, to] = map.get(k); return [nameCase(en, addDollar(en, e0, to))]; }
+      if (adapted.has(k)) { const [e0, to, src] = adapted.get(k); return [nameCase(en, matchDollar(en, e0, to)), 'adapted', src]; }
+      if (own.has(k)) { const [e0, to] = own.get(k); return [nameCase(en, matchDollar(en, e0, to)), 'remake']; }
     }
     return null;
   };
@@ -849,7 +857,7 @@ function translator(lang, official) {
     const k0 = normEn(en);
     for (const k of [k0, alias.get(k0)]) {
       const p = k != null && patch.get(k);
-      if (p) return matchDollar(en, p[0], p[1]);
+      if (p) return nameCase(en, matchDollar(en, p[0], p[1]));
     }
     return null;
   };
