@@ -1667,6 +1667,32 @@ const R301 = E.RULESETS['301'];
 if (R301) {
   const welcome = (rs) => (typeof rs.welcome === 'function' ? welcomeLines(rs) : (rs.welcome || []).map(x => x[0]));
   const lines = () => TEXT301.concat(engineLines(), welcome(R301), (E.DATA.reports || []).slice(38, 69), R301.colorMonitorBW ? [R301.colorMonitorBW.text] : []);
+  // 3.0.1F's battle window and fleet lines, from its own STR# (1006 the classes, 1030 the window, 4000.42 "un") and the formats of
+  // MakeFleetDescription @130fa0: "%d %.*ss %.*s (%d/%d)" (the count, the class and an "s", the design's name, its
+  // weapons and shields), "%P %.*s %.*s (%d/%d)" (%P is STR# 4000.42, "un") for one, "%.*s %.*s (%d/%d)" with no count.
+  // DrawOneGroup @e2702 gives it the count of ships left, and for a group that is gone the count lost (the English gives
+  // 0 and prints the count itself: "%d dead %.*s"), so "3 Eclaireurs Sonde (1/1) détruit(s)", "un Eclaireur Sonde (1/1) détruit(s)".
+  const S301 = (n, i) => F301[String(n)][i].replace(/%\.\*s/g, '%s');
+  const UN301 = F301 ? F301['4000'][41] : '';
+  const CLASS301 = F301 ? { scout: S301(1006, 0), fighter: S301(1006, 1), colony: S301(1006, 2), satellite: S301(1006, 3) } : {};
+  const BATTLE_301F = !(F301 && E301) ? null : {
+    head: (star, year) => [S301(1030, 2), S301(1030, 3).replace('%s', star).replace('%d', year)],
+    won: [S301(1030, 5), S301(1030, 6)], lost: [S301(1030, 7), S301(1030, 8).replace(/…$/, '')],
+    cls: (type, n) => (CLASS301[type] || '') + (n > 1 ? 's' : ''),
+    desc: (nm, ws, cls, n) => n < 1 ? `${cls} ${nm} ${ws}` : n === 1 ? `${UN301} ${cls} ${nm} ${ws}` : `${n} ${cls} ${nm} ${ws}`,
+    deadCount: true,
+    dead: (n0, desc) => S301(1030, 0).replace('%s', desc),
+    deadPeople: (x) => S301(4000, 31).replace('%s', x),
+  };
+  // the row that lists another player's fleet at a star (RecalcFleetsAtNewStar @15078c): "%P’s %P" from STR# 4000.44, which the
+  // French resource (42 strings) does not have, so GetIndString (@111a2) leaves the format empty and the row is empty (the
+  // English has the literal "%P’s %P", the owner and the fleet's description). The patch's row (fix frFleetRows): the owner, then
+  // the fleet as the battle window words it
+  function otherFleetRow301F(G, f) {
+    const P = G.players[f.owner];
+    const parts = Object.keys(f.ships).filter(k => f.ships[k] > 0).map(k => { const d = E.getDesign(G, f.owner, +k); return BATTLE_301F.desc(d.name, `(${d.W}/${d.S})`, BATTLE_301F.cls(d.type, f.ships[k]), f.ships[k]); });
+    return `${P ? P.name : ''}\u00a0: ${parts.join(', ')}`.slice(0, 63);
+  }
   const make = (lang) => lazyLang(() => {
     const out = buildText(lang, R301, { lines, nearest: '301', battlePanel: (w) => w ? DOS.battlePanel20({ dots: '…', cols: 'mac', shade: true, words: w }) : R301.battlePanel });
     // 3.0.1's French is the official one, 3.0.1F's (not the remake's beside it): its
@@ -1674,9 +1700,18 @@ if (R301) {
     // messages) are iOS's or 1.2F's, adapted, or the remake's; its windows' words
     // are the interface's in a 3.0.1 game in French
     if (lang === 'fr' && F301 && E301) {
-      out.remake = false; out.officialWindows = windows301();
+      // (and the Ship Types window's button 7, "Scrap All" / "Don't Scrap", which the English program has as literals and the French
+      // reads from STR# 1020.22-23, SetButtonStates @132bf0: "Recycler tous", "Ne pas recycler")
+      out.remake = false; out.officialWindows = windows301().concat([['Scrap All', F301['1020'][21]], ['Don’t Scrap', F301['1020'][22]]].filter(p => !windows301().some(q => q[0] === p[0])));
       // Armageddon's questions with 3.0.1F's own buttons (DITL 3240-3244, 3250-3255)
       out.armageddonButtons = [[3240, 3241, 3242, 3243, 3244], [3250, 3251, 3252, 3253, 3254, 3255]].map(l => l.map(id => F301.DITL[id].filter(it => it[0] === 'button').map(it => lineOf301(it[1]))));
+      // its battle window in its own words and fleet lines (MakeFleetDescription @130fa0, DrawOneGroup @e2702), the names over the
+      // columns two pixels higher (DoOneBattle @e0a8a: 12 above the picture's bottom, the English's 10)
+      out.battlePanel = DOS.battlePanel20({ dots: '…', cols: 'mac', shade: true, nameUp: 2, words: BATTLE_301F });
+      // the patch's fixes of 3.0.1F's own rules, added to rs.lang.fr.releaseRules when the patch is on (engine.js inLanguage)
+      out.fix = Object.assign({}, out.fix, {
+        frFleetRows: { releaseRules: { otherFleetRow: otherFleetRow301F } },
+      });
     }
     return out;
   }, LANG_KEYS405.concat(['fixSpending', 'officialWindows', 'armageddonButtons']));
@@ -1691,7 +1726,9 @@ if (R301) {
   // refused with the same box). Its numbers are written with a space between thousands
   // (LongToNiceString @1247e: "%d %.3d", "%d %.3dK"), not the English comma. Only in French
   // (rs.lang.fr.releaseRules, js/engine.js).
-  if (F301 && E301) Object.defineProperty(R301.lang.fr, 'releaseRules', { value: { maxHumans: 2, fmtNum: E.niceNumSp, fmtMoney: E.moneyNiceSp }, enumerable: true, configurable: true });
+  // hofDate 'dmy': the Hall of Fame list's date (InitHOFList @144c76); otherFleetRow: the rows that list other players' fleets at a
+  // star, which come out empty (RecalcFleetsAtNewStar @15078c)
+  if (F301 && E301) Object.defineProperty(R301.lang.fr, 'releaseRules', { value: { maxHumans: 2, fmtNum: E.niceNumSp, fmtMoney: E.moneyNiceSp, hofDate: 'dmy', otherFleetRow: () => '' }, enumerable: true, configurable: true });
 
 }
 

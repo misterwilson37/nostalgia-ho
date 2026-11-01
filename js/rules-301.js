@@ -2025,7 +2025,11 @@ const hall301 = {
     list.unshift(e); if (list.length > 25) list.length = 25;
     return T;
   },
-  date: (t) => { const d = new Date(t * 1000); return `${d.getMonth() + 1}/${d.getDate()}/${d.getFullYear()}`; },
+  // (InitHOFList @144c76: "%d/%d/%d", the list's date. The English program pushes the year, the day and the month, so it
+  // reads month/day/year; the French pushes the year, the month and the day: day/month/year (rs.lang.fr.releaseRules
+  // hofDate 'dmy', which the list passes the game for). The Details window's date (doDetailsDlg @144f34, @14516a) is
+  // month/day/year in both programs: it is called with no game.)
+  date: (t, G) => { const d = new Date(t * 1000), dmy = G && E.rules(G).hofDate === 'dmy'; return dmy ? `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}` : `${d.getMonth() + 1}/${d.getDate()}/${d.getFullYear()}`; },
   words: { fame: 'Hall Of Fame', shame: 'Hall Of Shame', fameTitle: 'Hall Of Fame', shameTitle: 'Hall of Shame', heads: ['Name', 'When', 'Difficulty'],
     win: 'Summary of Game Victory', loss: 'Summary of Game Loss', playAgain: 'Play Again' },
   summary: (G, e, shame) => [[shame ? 'Loser:' : 'Winner:', e.name], ['Date:', hall301.date(e.time)], ['Difficulty:', String(e.difficulty)],
@@ -2095,6 +2099,9 @@ E.registerRules('301', Object.assign({}, D, {
       text: 'The test that stops you dragging the budget bar of a finished colony looked at the star’s number instead of what the budget slot is, so a finished colony at the first star of the list could still have its bar dragged. The patch locks it like any other.' },
     { id: 'endTurnFr', title: 'The French End Turn button, in colour, is in French',
       text: 'The French 3.0.1’s colour file (“Ho! 3.0 CPicts”) has the English End Turn button, untranslated, so a French game in colour shows “End Turn” (the black-and-white program’s own button says “Fin Tour”). The patch shows a “Fin Tour” button, drawn in the same lettering. It matters only in the colour skin, in French.' },
+    // (fix partials: rs.lang.fr.fix in js/languages.js; they apply to a French game only, as endTurnFr does to the colour skin's)
+    { id: 'frFleetRows', title: 'The French list of other players’ ships at a star is filled in',
+      text: 'The French 3.0.1 builds the rows that list other players’ ships at a star (“Zorg’s ships”, “Zorg’s 3 Scouts …”) from two lines of a resource list, STR# 4000.43 and .44, which the French program does not have. The program then prints nothing, so a French game shows blank rows where the English shows the names and ships. The patch writes them in French: the owner, then the fleet as the battle window words it.' },
   ].concat(E.TRANSLATIONS_FIX, E.IOS_FILLINGS_FIX),
   ai: '301',               // its own computer players (js/ai-301.js)
   // CONFIRMED (InitHLogBarAmts @d091c, GetHPercBarAmt @d0a30, DrawHBarControl

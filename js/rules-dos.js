@@ -2009,10 +2009,11 @@ function battlePanel20(opt) {
   };
   const pop = (G, x) => { const t = (E.rules(G).fmtNum || fmt)(E.popNum(G, x)); return W.num ? W.num(t) : t; };
   return E.makeBattlePanel({
-    cols: opt.cols || 'sides', shade: !!opt.shade, pics: (n) => Math.min(n, 1),
+    cols: opt.cols || 'sides', shade: !!opt.shade, pics: (n) => Math.min(n, 1), nameUp: opt.nameUp,
     head: (G, b) => W.head(G.stars[b.star].name, b.year),
     end: (G, b, won) => won ? W.won.slice() : [W.lost[0], W.lost[1] + opt.dots],
-    ship: (G, d, n, n0, mine) => n < 1 ? W.dead(n0, desc(d, 0, mine)) : desc(d, n, mine),
+    // (W.deadCount: the description is given the count lost, 3.0.1F's DrawOneGroup, not 0)
+    ship: (G, d, n, n0, mine) => n < 1 ? W.dead(n0, desc(d, W.deadCount ? n0 : 0, mine)) : desc(d, n, mine),
     planet: (G, x, x0) => x <= 0.0005 ? W.deadPeople(pop(G, x0)) : pop(G, x),
   });
 }

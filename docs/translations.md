@@ -429,6 +429,14 @@ gifts, the free-text message), taken from iOS's French or 1.2F's, four adapted f
 and one the remake's own ("Year %d. Nothing much happened."). Its fr.own Ship joke is gone.
 No hints (3.0.1 had none; its STR# 3100 is iOS's French hints word for word).
 
+**3.0.1F's code, not only its text** (`docs/301fr-findings.md`, "What else differs"): a French 3.0.1 game also
+plays the French program's own display differences, in `rs.lang.fr.releaseRules` (`js/languages.js`) wherever 3.0.1
+French shows (the mac3 and mac3c skins and the others): the Hall of Fame list's date day / month / year, the battle window
+in 3.0.1F's words (its classes, STR# 1006, and the count-first fleet lines "4 Croiseurs Serpent (8/7)", "un Transport
+Mother (6/6)", with STR# 4000.42's "un"; the groups lost "3 Eclaireurs Sonde (1/1) détruit(s)"), the Ship Types
+window's "Recycler tous", and the rows of other players' ships at a star empty (the French resource lacks the two formats;
+the patch writes them, fix `frFleetRows`). The French-only rules (two humans, spaces between thousands) are in the same place.
+
 3.0.1F is also French 3.0.1's **windows**: a 3.0.1 game in French puts the menus' items
 and titles, window titles, buttons and labels of the French program over the remake's
 interface words for the same English (`rs.lang.fr.officialWindows`, 261 English-to-French

@@ -1638,6 +1638,14 @@ function fleetRow(f, inbound) {
   const r = el('div', { class: 'frow' + (sel ? ' sel' : '') + (mine ? '' : ' enemy') + (marked ? ' scrap' : ''), 'data-fleet': f.id, 'data-inbound': inbound ? '1' : null, onclick: () => { UI.selFleet = f.id; renderPanel(); draw(); } });
   const pics = el('div', { class: 'fpics' });
   ds.slice(0, 3).forEach(d => pics.append(shipImgEl(d, 18)));
+  // another player's fleet where the version words the row itself (rs.otherFleetRow: 3.0.1F's rows, which come out
+  // empty because its program lacks the lines, RecalcFleetsAtNewStar; the patch's French fills them): that one line
+  if (!mine && !inbound && HO.rules(G).otherFleetRow) {
+    const t = HO.rules(G).otherFleetRow(G, f);
+    if (t) r.append(pics);
+    r.append(el('div', { class: 'ftext' }, el('div', null, t || '\u00a0')));
+    return r;
+  }
   r.append(pics);
   const parts = Object.keys(f.ships).map(k => { const d = HO.getDesign(G, f.owner, +k); return `${f.ships[k]} ${f.ships[k] === 1 ? d.name : d.name}`; });
   let status = '';
@@ -2941,7 +2949,7 @@ function openBattlePanel(b) {
     P.head.forEach((t, i) => { x.font = (i ? '' : 'bold ') + '13px ' + font; x.fillText(tl(t), W / 2, 20 + i * 18); });
     if (!P.owner) { // the remake's own: each column headed with its side's name (the version drew none)
       x.font = '12px ' + font; x.fillStyle = sub;
-      [P.leftSide ?? b.sides[0], b.sides.find(o => o !== (P.leftSide ?? b.sides[0]))].forEach((o, ci) => { if (o == null) return; x.fillText(o === ME ? tl('You') : (G.players[o] || {}).name || '', ci * (W / 2) + W / 4 + (ci ? 20 : 0), headH - 6); });
+      [P.leftSide ?? b.sides[0], b.sides.find(o => o !== (P.leftSide ?? b.sides[0]))].forEach((o, ci) => { if (o == null) return; x.fillText(o === ME ? tl('You') : (G.players[o] || {}).name || '', ci * (W / 2) + W / 4 + (ci ? 20 : 0), headH - 6 - (P.nameUp | 0)); });
     }
     if (!L) { x.strokeStyle = dark ? '#000' : 'rgba(200,210,255,.25)'; x.beginPath(); x.moveTo(W / 2 + 10, headH - 2); x.lineTo(W / 2 + 10, H - 40); x.stroke(); }
     P.cols.forEach((col, ci) => col.forEach((g, k) => {

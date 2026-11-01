@@ -339,6 +339,14 @@ Organize Fleets takes the least fuel used, `OrganizeFleets` @1137e6) and `attack
    colour skin too, drawn in its lettering (`tools/skins/endturn_langs.py`,
    `assets/skins/mac3c/sprites/p5500-fr-patch.png`). The black-and-white skin shows the
    program's own either way.
+7. **`frFleetRows`: the French list of other players' ships at a star is empty** (found
+   November 2026, from the French disc). `RecalcFleetsAtNewStar @15078c` writes a row for each
+   fleet of another player at the star ("Zorg's 3 Scouts ...", `MakeFleetDescription` after the
+   owner) from two formats, STR# 4000.43 and .44 in the French program (the English has them
+   as literals). The French resource has 42 strings, so `GetIndString` leaves both formats
+   empty and every such row is an empty line. By default a French game shows the rows empty.
+   *Fix:* the rows read in French: the owner, then the fleet as the battle window words it
+   ("Claude : un Eclaireur Eagle (1/1)", `rs.lang.fr.fix.frFleetRows`).
 
 ### Quirk or design (left as released)
 

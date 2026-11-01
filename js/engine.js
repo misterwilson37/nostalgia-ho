@@ -119,7 +119,10 @@ function rules(G) {
 // those differences in rs.lang[code].releaseRules, { property: value } laid over the
 // ruleset (rules(G), rulesIn) when the game is in that language, whatever the patch
 // says, and only there: the version's own language and every other language are
-// untouched. 3.0.1F: maxHumans 2 (the French copy is the two-human edition).
+// untouched. 3.0.1F: maxHumans 2 (the French copy is the two-human edition), the Hall of Fame's
+// date in day / month / year, its fleet rows at a star empty, its battle window's words.
+// The patch's fixes of those rules are rs.lang[code].fix[id].releaseRules (frFleetRows), added to
+// them when the patch is on.
 //
 // A language the version never shipped in is the remake's own translation
 // (rs.lang[code].remake, js/languages.js): languageName marks it, in that
@@ -170,8 +173,10 @@ function inLanguage(rs, lang, patch) {
   if (key !== lang) for (const id of Object.keys(over.fix)) {
     if (!fixes(rs).some(f => f.id === id)) continue;
     const p = over.fix[id];
-    const s0 = o.say || rs.say || {};
+    const s0 = o.say || rs.say || {}, rr0 = o.releaseRules;
     o = Object.assign({}, o, p, p.say ? { say: Object.assign({}, s0, p.say, { reports: (p.say.reports || []).concat(s0.reports || []), words: Object.assign({}, s0.words, p.say.words) }) } : {});
+    // (a fix of a release's own rules, rs.lang[code].releaseRules, adds to them; it does not replace them)
+    if (p.releaseRules) o.releaseRules = Object.assign({}, rr0, p.releaseRules);
     if (id === 'translations') fixedTr = true;
   }
   // the French patch's typography and words over all its text (frPatchText): the
@@ -2022,7 +2027,8 @@ function battleGroups(G, b, byStance) {
 // column's x to 25, 5 in 4.0.5, when the first side's player is the viewer and
 // to 300 otherwise, each side's groups drawn at its own x) or 'viewer' (the viewer's side and its allies left: 5.0.5,
 // iOS, the Palm); byStance; head(G, b) and end(G, b, won) the window's own
-// lines; ship(G, d, n, n0, mine) and planet(G, pop, pop0) a group's words;
+// lines; ship(G, d, n, n0, mine) and planet(G, pop, pop0) a group's words; nameUp: how many
+// pixels higher the remake's own heading over each column (its side's name) is drawn (3.0.1F: 2);
 // owner ('pill': the owner's name on the group, 'luck': and the side's luck
 // as + or −, the Palm's "+%s"); luck (a mark for the side's luck, 5.0.5 and
 // iOS); pics(n) how many pictures a group of n ships shows; shade (the Mac
@@ -2076,7 +2082,7 @@ function makeBattlePanel(cfg) {
       if (cfg.owner === 'luck' && b.luck) { const l = b.luck[g.o] | 0; r.owner = (l > 0 ? '+' : l < 0 ? '-' : '') + r.owner; }
       cols[left(g.o) ? 0 : 1].push(r);
     }
-    return { cols, layout: cfg.layout || null, leftSide: v0, head: cfg.head ? cfg.head(G, b) : [], end: cfg.end && state.over ? cfg.end(G, b, state.won) : null, owner: cfg.owner || null, luck: cfg.luck === true };
+    return { cols, layout: cfg.layout || null, nameUp: cfg.nameUp | 0, leftSide: v0, head: cfg.head ? cfg.head(G, b) : [], end: cfg.end && state.over ? cfg.end(G, b, state.won) : null, owner: cfg.owner || null, luck: cfg.luck === true };
   };
 }
 
