@@ -944,7 +944,7 @@ formatters, linked to `tools/format-audit.js`), 8 `notShown` (Game Center's sync
 (`--open`): the game's own interface classes (MapLayer, BuildSingleShipDialog, OrganizeFleetsLayer, HoBarLayer, ShipNode, BarMenuItem, TurnMessageLayer,
 PreferencesLayer, NewGameScene, GiveDialogLayer and the rest), whose windows have not yet been read routine by routine against the remake.
 
-**Fixed.** The totals box (`-[IncomeLayer init] 0x100008e00`) lists Income, Savings, Metal, in that order, labelled "Income:", "Savings:", "Metal:"
+**Fixed.** The totals box (`-[IncomeLayer init] 0x100008e00`) lists Metal, Savings, Income from the top (cocos2d's y runs up and the labels sit at y 4, one line up and two lines up; the app's own help_money.png shows it; an earlier note here had the order the wrong way round), labelled "Income:", "Savings:", "Metal:"
 (Misc Strings 26, 24, 23; "Revenu:", "Économies:", "Métal:" in the French lproj, "Gelir:", "Birikim:", "Metâl:" in the Turkish); the remake showed
 Savings, Income, Metal with no colons. `rs.panelInfo` in `js/rules-ios.js` (Android copies it).
 
