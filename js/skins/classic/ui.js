@@ -1592,8 +1592,12 @@ function planetBox(sid) {
     }
   } else box.append(el('p', { class: 'note' }, PW('noInfo') ? PW('noInfo') : k.battleOnly ? 'Unexplored, but there has been a battle here.' : 'Unexplored. Send a ship to find out more.'));
   // fleets here
-  const here = G.fleets.filter(f => f.star === sid && f.to == null && (f.owner === ME || visibleTo(sid)));
-  const inbound = G.fleets.filter(f => f.owner === ME && f.to === sid);
+  // (T.ownPanel with rs.planetInfo, 1.2's RecalcFleetsAtNewStar @c6550: the box lists your own fleets at the star only, and the first is
+  // the selected one when the selection is elsewhere)
+  const own12 = !!(PI && T.ownPanel);
+  const here = G.fleets.filter(f => f.star === sid && f.to == null && (f.owner === ME || (!own12 && visibleTo(sid))));
+  const inbound = own12 ? [] : G.fleets.filter(f => f.owner === ME && f.to === sid);
+  if (own12 && here.length && !here.some(f => f.id === UI.selFleet)) UI.selFleet = fleetOrder(here)[0].id;
   if (here.length || inbound.length) {
     const fl = el('div', { class: 'fleets' }, el('h4', null, 'Ships here'));
     for (const f of fleetOrder(here)) fl.append(fleetRow(f));

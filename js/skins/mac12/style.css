@@ -21,3 +21,5 @@
 .piles12 .pile.new { border-style: dashed; }
 .piles12 .ship.sel { outline: 2px solid; }
 .reports li img.ricon { vertical-align: middle; margin-right: 6px; image-rendering: pixelated; }
+/* DrawHBarControl and DrawVBarControl draw no amounts beside the bars */
+#panel .barrow .bval { visibility: hidden; }
