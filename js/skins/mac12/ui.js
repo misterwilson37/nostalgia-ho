@@ -733,6 +733,14 @@ function panel12(panel, B) {
   const tb = techBox12();
   panel.innerHTML = '';
   panel.append(pb, fb, ib, low, tb);
+  // (the budget bars go down to the map window's foot, 136 of its pixels under the totals, and scroll; CenterOnStarBar @c5c26
+  // scrolls them to the selected colony's row)
+  if (B.budget) {
+    const k = (panel.clientWidth || 226) / 226, bx = B.budget;
+    bx.style.maxHeight = Math.round(136 * k) + 'px'; bx.style.overflowY = 'auto'; bx.style.position = 'relative';
+    const r = bx.querySelector('.barrow.hl');
+    if (r && (r.offsetTop < bx.scrollTop || r.offsetTop + r.offsetHeight > bx.scrollTop + bx.clientHeight)) bx.scrollTop = Math.max(0, r.offsetTop - bx.clientHeight / 2);
+  }
 }
 
 // ---------- the battle window (DoOneBattle @d07d0, DLOG 7010: 445 x 310, black; drawn at twice the size) ----------
