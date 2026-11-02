@@ -1926,7 +1926,9 @@ function scrapDesign(G, pid, did) {
     if (!fleetCount(f)) G.fleets.splice(G.fleets.indexOf(f), 1);
   }
   d.scrapped = true;
-  msg(G, pid, report(21, d.name, n, num(G, metal)), { icon: 'm9014', quiet: true });
+  // (rs.scrapTypeReport: a version's own words, 1.2's STR# 1000.18 / Mac 2.0.1's "…has been scrapped…")
+  const STR = rules(G).scrapTypeReport;
+  msg(G, pid, STR ? STR(d.name, n, num(G, metal)) : report(21, d.name, n, num(G, metal)), { icon: 'm9014', quiet: true });
   return metal;
 }
 function liveDesigns(p) { return p.designs.filter(d => !d.scrapped).length; }

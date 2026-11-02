@@ -90,6 +90,7 @@ const REPORTS20 = [
   ['Your fleet of %s at %s has been scrapped for %s metal.', 688],
   ['Your “%s” ship type has been dismantled. %d of this type scrapped for %s metal.', 689],
   ['Your `%s\' ship type has been scrapped. %d of this type scrapped for %s metal.', 689],
+  ['Your “%s” ship type has been scrapped. %d of this type scrapped for %s metal.', 689], // (Mac 2.0.1's words: 1.2's English)
   ['You have ships queued at %s but have no money allocated for shipbuilding.', 690],
   ['Built %s at %s.', 691],
   ['Your fleet of %s disappeared through a wormhole in space and is lost.', 692],

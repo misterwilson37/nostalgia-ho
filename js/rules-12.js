@@ -404,6 +404,8 @@ E.registerRules('12', Object.assign({}, D, {
   // CONFIRMED (AddNewMessage @131052: 50 records of 50 bytes at +0x4d4; at 50 it moves the last 40 down by 10): the report window keeps 50 reports
   reportHistory: 50,
   sysBeep: true, // (PlayAnnounceSound's default: SysBeep; the classic skin's beep())
+  // CONFIRMED (ScrapFleetsAndTypes: STR# 1000.18; Mac 2.0.1's English "Your “%.*s” ship type has been scrapped. %d of this type scrapped for %s metal.")
+  scrapTypeReport: (name, n, m) => `Your “${name}” ship type has been scrapped. ${n} of this type scrapped for ${m} metal.`,
   battleFaces: true, // (DoOneBattle @d07d0, DrawX @d27de: the sides' faces and names, the X over a side wiped out)
   battleSounds: true, // CONFIRMED (HaveGroupShoot @d1746): see shotSnd in the classic skin
   // CONFIRMED (DrawIncomeRect @c3f70; LoadMiscStrings @1502c6 puts STR# 1005.1-4 at A5-0x448, -0x45c, -0x470, -0x484): the three totals
