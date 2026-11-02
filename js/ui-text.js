@@ -1209,6 +1209,7 @@ root.HOUI.add([
 ['Enable Auto-Zoom', 'Activer le zoom automatique', 'Autozoom einschalten', 'Otomatik yakınlaştırmayı aç', 'Activar el zoom automático'],
 ['Disable Auto-Off', 'Désactiver l’extinction automatique', 'Automatisches Ausschalten sperren', 'Otomatik kapanmayı devre dışı bırak', 'Desactivar el apagado automático'],
 ['Show Event Messages', 'Afficher les messages d’événements', 'Ereignismeldungen zeigen', 'Olay mesajlarını göster', 'Mostrar los mensajes de sucesos', { fr: 'iOS', tr: 'iOS' }],
+['Pop', 'Pop', 'Bev.', 'Nüf.', 'Pob.', { fr: '1.2F' }],
 ['Review Announced Battles', 'Revoir les batailles annoncées', 'Gemeldete Kämpfe zeigen', 'Bildirilen muhabereleri gözden geçir', 'Revisar las batallas anunciadas', null, { tr: 'Bildirilen savaşları gözden geçir' }],
 ['Report Window', 'Fenêtre Rapports', 'Berichtsfenster', 'Rapor Penceresi', 'Ventana de informes', { fr: '1.2F' }],
 ['Set Battle Speed…', 'Vitesse des batailles…', 'Kampfgeschwindigkeit…', 'Muhabere Hızı…', 'Velocidad de las batallas…', { fr: '1.2F' }, { tr: 'Savaş Hızı…' }],

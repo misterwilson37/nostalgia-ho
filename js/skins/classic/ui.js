@@ -1420,7 +1420,7 @@ function renderPanel() {
   const scroll = panel.scrollTop;
   panel.innerHTML = '';
   // (a version's own title line, rs.windowTitle[language]: 1.2's SetupPlayerWindows @10080a sprintf's STR# 4000.2, "%.*s en %.*s en %d")
-  const WT = HO.rules(G).windowTitle, wt = WT && (WT[(G.opts && G.opts.lang) || HO.ownLanguage(HO.ownRules(G))] || WT.en);
+  const WT = HO.rules(G).windowTitle, wt = WT && WT[(G.opts && G.opts.lang) || HO.ownLanguage(HO.ownRules(G))];
   $('#title').textContent = wt ? wt.replace('%s', () => p.name).replace('%s', () => G.opts.galaxy || (WT.galaxy || 'Milky Way')).replace('%d', () => G.year) + titleTag() : `${p.name} in ${G.opts.galaxy || 'Milky Way'} in ${G.year}${titleTag()}`;
   // budget info
   const pr = HO.projected(G, p);
@@ -1429,7 +1429,7 @@ function renderPanel() {
   const chg = (which) => { const c = HO.totalChange(G, p, which); return c ? [' ', el('span', { class: 'chg' }, HO.sumText(G, tl(c[0], c[1])))] : []; };
   // (rs.panelInfo: a version's own order and words for the three totals; 1.2's DrawIncomeRect draws the metal reserve first, then the
   // total money and the total income, each with its own label, STR# 1005.4, .2 and .3)
-  const PI = HO.rules(G).panelInfo, piw = PI && PI.words && (PI.words[G.opts.lang || HO.ownLanguage(HO.ownRules(G)) || 'en'] || PI.words.en) || {};
+  const PI = HO.rules(G).panelInfo, piw = PI && PI.words && PI.words[G.opts.lang || HO.ownLanguage(HO.ownRules(G)) || 'en'] || {};
   const IR = {}, ri = (k, label, ...rest) => { IR[k] = row(piw[k] || label, ...rest); return IR[k]; };
   const infoOrder = (PI && PI.order) || ['savings', 'income', 'interest', 'metal'];
   const infoRows = [
@@ -1511,7 +1511,7 @@ function row(k, v, cls, help) { return el('div', { class: 'kv ' + (cls || ''), '
 // a version's own words for the planet box (rs.planetInfo[language][key]; 1.2's STR# 1005, the English DOS 2.0's strings 396 and 403-405)
 function PW(key, dflt) {
   const I = G && HO.rules(G).planetInfo;
-  const w = I && (I[(G.opts && G.opts.lang) || HO.ownLanguage(HO.ownRules(G))] || I.en);
+  const w = I && I[(G.opts && G.opts.lang) || HO.ownLanguage(HO.ownRules(G))];
   return (w && w[key]) || dflt;
 }
 function planetBox(sid) {
@@ -1523,13 +1523,25 @@ function planetBox(sid) {
   if (look.hat) pic.append(el('img', { src: A.img[look.hat], class: 'phat', alt: '' }));
   const ownerName = s.owner === ME ? 'You' : k.explored && k.owner >= 0 && k.owner !== ME ? G.players[k.owner].name : k.explored ? 'No one' : 'Unknown';
   box.append(el('div', { class: 'phead' }, pic, el('div', null, el('h3', null, s.name), el('div', { class: 'sub' }, ownerName + (k.explored && s.owner !== ME && k.seen >= 0 && k.seen < G.turn ? ` (seen ${2000 + k.seen * 10})` : '')))));
+  // (rs.planetInfo, 1.2's DrawPlanetRect: "Contrôle:" the owner ("Néant" when nobody) and "Date info:" the year, as rows)
+  const PI = HO.rules(G).planetInfo && PW('pop') ? HO.rules(G).planetInfo : null;
+  if (PI && s.owner !== ME && k.explored) {
+    box.append(row(PW('owner', 'Owner'), s.owner === ME ? p.name : k.owner >= 0 ? G.players[k.owner].name : PW('noOne', 'No One'), '', 'owner'),
+      row(PW('infoDate', 'Info Date'), String(s.owner === ME ? G.year : 2000 + Math.max(0, k.seen) * 10), '', 'infodate'));
+  }
   if (s.owner === ME || k.explored) {
     const src = s.owner === ME ? s : k;
     const gs = src.g / p.homeG, ts = 72 + (src.t - p.homeT);
-    box.append(row('Gravity', gravF(src.g, p.homeG) + classNote(gs), '', 'gravity'), row('Temp', degF(ts), '', 'temp'), row('Metal', panelFig('planetMetal', src.metal, false), '', 'planetMetal'));
+    // (1.2's order, DrawPlanetRect: yours: Revenu, Pop, Temp, Gravité, Métal; another's: Contrôle, Date info, Pop, Temp, Gravité, Métal)
+    const own12 = PI && s.owner === ME, inc0 = own12 ? HO.planetIncome(G, p, s) : 0;
+    if (own12) box.append(row(PW('income', 'Income'), panelFig('planetIncome', inc0, true), inc0 < 0 ? 'neg' : '', 'planetIncome'), row(PW('pop', 'Population'), fmt(HO.popNum(G, s.pop)), '', 'population'));
+    else if (PI) box.append(row(PW('pop', 'Population'), PW(k.owner >= 0 ? 'popUnknown' : 'popNone', k.owner >= 0 ? 'Unknown' : 'Uninhabited'), '', 'population'));
+    box.append(row('Temp', degF(ts), '', 'temp'), row('Gravity', gravF(src.g, p.homeG) + classNote(gs), '', 'gravity'), row('Metal', panelFig('planetMetal', src.metal, false), '', 'planetMetal'));
     if (s.owner === ME) {
       const inc = HO.planetIncome(G, p, s);
-      box.append(row(PW('pop', 'Population'), fmt(HO.popNum(G, s.pop)), '', 'population'), row('Max population', fmt(HO.popNum(G, HO.maxPop(G, p, s))), '', 'maxPop'), row('Income', panelFig('planetIncome', inc, true), inc < 0 ? 'neg' : '', 'planetIncome'));
+      if (!own12) box.append(row(PW('pop', 'Population'), fmt(HO.popNum(G, s.pop)), '', 'population'));
+      box.append(row('Max population', fmt(HO.popNum(G, HO.maxPop(G, p, s))), '', 'maxPop'));
+      if (!own12) box.append(row('Income', panelFig('planetIncome', inc, true), inc < 0 ? 'neg' : '', 'planetIncome'));
       const terraOK = Math.abs(HO.seenT(p, s) - 72) > 0.5, metalOK = s.metal > 0;
       // in 2.0 and 1.2 a finished part's share is wasted, not passed on, so
       // the bar stays (as in 2.0's planet window) and a note says so
@@ -1560,14 +1572,10 @@ function planetBox(sid) {
         el('button', { onclick: () => openBuild(sid), 'data-help': 'build' }, HO.feature(G, 'buildQueue') ? 'Queue ships…' : 'Build ships…'),
         evacuateHere(s) ? el('button', { class: 'quiet', 'data-help': 'evacuate', onclick: () => evacuateClick(sid) }, evacuateLabel(sid, 'Evacuate')) : null,
         HO.rules(G).evacuateToggle && HO.rules(G).evacuateToggle.marked(G, sid) ? el('span', { class: 'note' }, 'Evacuating') : null));
-    } else if (HO.rules(G).planetInfo) {
-      // 1.2's DrawPlanetRect @c4334: a planet seen but not yours shows "Pop:" with "Inhabitée" when nobody owns it and "Inconnue" when
-      // someone does (the population of another player's colony is never shown); the remake's "~pop" guess is its own
-      box.append(row(PW('pop', 'Population'), PW(k.owner >= 0 ? 'popUnknown' : 'popNone', k.owner >= 0 ? 'Unknown' : 'Uninhabited'), '', 'population'));
-    } else if (k.owner >= 0 && k.owner !== ME) {
+    } else if (k.owner >= 0 && !PI && k.owner !== ME) {
       box.append(row('Population', k.pop ? '~' + fmt(HO.popNum(G, k.pop)) : '?'));
     }
-  } else box.append(el('p', { class: 'note' }, HO.rules(G).planetInfo ? PW('noInfo', 'Unexplored. Send a ship to find out more.') : k.battleOnly ? 'Unexplored, but there has been a battle here.' : 'Unexplored. Send a ship to find out more.'));
+  } else box.append(el('p', { class: 'note' }, PW('noInfo') ? PW('noInfo') : k.battleOnly ? 'Unexplored, but there has been a battle here.' : 'Unexplored. Send a ship to find out more.'));
   // fleets here
   const here = G.fleets.filter(f => f.star === sid && f.to == null && (f.owner === ME || visibleTo(sid)));
   const inbound = G.fleets.filter(f => f.owner === ME && f.to === sid);
@@ -1586,7 +1594,9 @@ function planetBox(sid) {
       organizeStyle() ? el('button', { class: 'quiet', onclick: () => openOrganize(sid) }, organizeName()) : null));
     else if (mine.length && organizeStyle()) box.append(el('div', { class: 'btns' }, el('button', { class: 'quiet', onclick: () => openOrganize(sid) }, organizeName())));
   }
+  else if (PI && PW('noFleets')) { const n = el('p', { class: 'note' }); n.append(document.createTextNode(PW('noFleets'))); n.setAttribute('translate', 'no'); box.append(n); }
   const bs = lastBattles(sid);
+  if (PI && bs.length && PW('battleDate')) box.append(row(PW('battleDate'), String(bs[bs.length - 1].year), '', 'battle'));
   if (bs.length) box.append(el('div', { class: 'btns' }, ...bs.map(b => el('button', { class: 'quiet', onclick: () => openBattle(b.id) }, `Review ${battleName(b)}`))));
   return box;
 }
@@ -1673,7 +1683,10 @@ function fleetRow(f, inbound) {
   else if (f.sat) status = 'satellites';
   else status = (f.dest != null ? `→ ${G.stars[f.dest].name}` : 'holding') + ` · fuel ${HO.plainNum(f.fuel)}/${HO.fleetMaxRange(G, f)} · speed ${HO.fleetSpeed(G, f)}`;
   if (marked) status = markedLine() + (inbound ? ` · ${status}` : '');
-  r.append(el('div', { class: 'ftext' }, el('div', null, parts.join(', ')), el('div', { class: 'sub' }, status)));
+  // (rs.fleetInfo: 1.2 draws a fleet's row as its description alone, and the lines of DrawSelectedFleetInfo under the one selected)
+  const info = HO.rules(G).fleetInfo && /^(en|fr)$/.test((G.opts && G.opts.lang) || HO.ownLanguage(HO.ownRules(G))) ? HO.rules(G).fleetInfo : null;
+  if (info && mine) { r.append(el('div', { class: 'ftext' }, el('div', null, parts.join(', ')), ...(sel ? info(G, f).map(t => { const d = el('div', { class: 'sub' }); d.append(document.createTextNode(t)); d.setAttribute('translate', 'no'); return d; }) : []))); }
+  else r.append(el('div', { class: 'ftext' }, el('div', null, parts.join(', ')), el('div', { class: 'sub' }, status)));
   // (3.0.1 scraps satellites as any other fleet: Scrap Current Fleet)
   if (sel && mine && !inbound && f.sat && marksScrap())
     r.append(el('div', { class: 'facts' }, el('button', { class: 'quiet', onclick: (e) => { e.stopPropagation(); toggleScrapFleet(f); } }, scrapWords('fleet')[marked ? 1 : 0])));
@@ -1694,7 +1707,7 @@ function fleetRow(f, inbound) {
   else if (sel && mine && inbound && HO.rules(G).scrapInSpace) {
     r.append(el('div', { class: 'facts' }, el('button', { class: 'quiet', onclick: (e) => { e.stopPropagation(); confirmBox('Dismantle this fleet in hyperspace? Its metal will rain down on its destination as a meteor shower.', () => { HO.scrapFleet(G, f); Sound.play(7003); UI.selFleet = null; renderPanel(); draw(); save(); }); } }, 'Dismantle in hyperspace')));
   }
-  if (mine && f.path && f.path.length) r.querySelector('.sub').append(' · then ' + f.path.map(x => G.stars[x].name).join(' → '));
+  if (mine && f.path && f.path.length && !(info && mine)) r.querySelector('.sub').append(' · then ' + f.path.map(x => G.stars[x].name).join(' → '));
   return r;
 }
 // multi-star route: click stars in order, then Done
@@ -1808,7 +1821,10 @@ function renderMsg0() {
     // rs.messageEvacuate (the Palm's Message History): a message about one of your colonies has an Evacuate button
     const ME2 = HO.rules(G).messageEvacuate;
     if (ME2 && m.star != null && !G.over && G.stars[m.star].owner === ME) extra.append(el('button', { class: 'quiet', style: 'float:right', onclick: (e) => { e.stopPropagation(); evacuateClick(m.star, ME2); renderMsg(); } }, ME2.words[ME2.marked(G, m.star) ? 1 : 0]));
-    body.append(extra, el('div', { class: 'count' }, `${UI.msgIdx + 1} of ${UI.inbox.length} · click to continue`));
+    // (rs.bubbleMore: 1.2's DrawAnnounceBubble writes "Suite…" (STR# 4000.22; Mac 2.0.1 "more…") only while more reports follow)
+    const BM = HO.rules(G).bubbleMore, bm = BM && BM[(G.opts && G.opts.lang) || HO.ownLanguage(HO.ownRules(G))];
+    if (bm) { const c = el('div', { class: 'count' }); if (UI.msgIdx + 1 < UI.inbox.length) { c.append(document.createTextNode(bm)); c.setAttribute('translate', 'no'); } body.append(extra, c); }
+    else body.append(extra, el('div', { class: 'count' }, `${UI.msgIdx + 1} of ${UI.inbox.length} · click to continue`));
     card.append(body);
     const next0 = () => { if (m.star != null) { UI.sel = m.star; renderPanel(); } UI.msgIdx++; Sound.play(7001); renderMsg(); draw(); };
     // the winner's report has opened the version's win windows as it came up (below); a Next that finds them still pending opens them
@@ -2257,7 +2273,7 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && UI.modal
 // a version's own alert box (rs.alertWords[key][lang]: the program's ALRT/DITL, by the game's language: [text, ...buttons], 1.2's)
 function alertWords(key) {
   const A = G && HO.rules(G).alertWords, w = A && A[key];
-  return w ? w[(G.opts && G.opts.lang) || HO.ownLanguage(HO.ownRules(G))] || w.en : null;
+  return w ? w[(G.opts && G.opts.lang) || HO.ownLanguage(HO.ownRules(G))] || null : null;
 }
 function confirmBox(text, yes, kind, labels) {
   // a skin's own alert for a kind of question ('underfunded': the colonies left short at End Turn): T.alert(kind, text, yes)
@@ -2829,6 +2845,10 @@ function pileShots(round, e, VB) {
   if (!VB.full) while (round[e + evs.length] && round[e + evs.length].si === round[e].si) evs.push(round[e + evs.length]);
   return evs;
 }
+// the sound of a shot: a version that picks it by the damage (rs.battleSounds: 1.2's HaveGroupShoot @d1746, snd 3000 / 3001 / 3002 by
+// 10 x damage / the ship's hit points, 3002 for a hit on a colony and 3003 when it is wiped out; the rules put it in the event as snd)
+// plays that; the others keep the remake's own scheme
+function shotSnd(ev, dflt) { return HO.rules(G).battleSounds && ev.snd ? ev.snd : dflt; }
 function openBattle(bid) {
   const b = G.battles.find(x => x.id === bid);
   if (!b) { const aw = alertWords('battleGone'); if (aw) alertOver(aw, (G.opts && G.opts.lang) || HO.ownLanguage(HO.ownRules(G))); else toast('The record of that battle is no longer available.'); return; }
@@ -2915,8 +2935,8 @@ function openBattle(bid) {
     const shots = evs.map((ev, j) => {
       const a = center(ev.si), q = e + j;
       let t;
-      if (ev.p) { t = { x: pl.x, y: pl.y }; if (!j) Sound.play(3000); }
-      else { t = center(ev.ti); if (ev.k) { alive[ev.ti] = false; if (!j) Sound.play(q % 3 === 0 ? 3003 : 3002); } else if (!j && q % 4 === 0) Sound.play(3000 + (q % 2)); }
+      if (ev.p) { t = { x: pl.x, y: pl.y }; if (!j) Sound.play(shotSnd(ev, 3000)); }
+      else { t = center(ev.ti); if (ev.k) { alive[ev.ti] = false; if (!j) Sound.play(shotSnd(ev, q % 3 === 0 ? 3003 : 3002)); } else if (!j && (HO.rules(G).battleSounds || q % 4 === 0)) Sound.play(shotSnd(ev, 3000 + (q % 2))); }
       return { x1: a.x, y1: a.y, x2: t.x, y2: t.y, a: ev.a };
     });
     drawAll(shots);
@@ -3046,8 +3066,8 @@ function openBattlePanel(b) {
     let t;
     const shots = evs.map((ev, j) => {
       const a = center(ev.si), q = e + j;
-      if (ev.p) { t = center(-1); if (!j) Sound.play(3000); }
-      else { t = center(ev.ti); if (ev.f != null) hurt[ev.ti] = { n: ++seq, f: ev.f }; if (ev.k) { alive[ev.ti] = false; if (!j) Sound.play(q % 3 === 0 ? 3003 : 3002); } else if (!j && q % 4 === 0) Sound.play(3000 + (q % 2)); }
+      if (ev.p) { t = center(-1); if (!j) Sound.play(shotSnd(ev, 3000)); }
+      else { t = center(ev.ti); if (ev.f != null) hurt[ev.ti] = { n: ++seq, f: ev.f }; if (ev.k) { alive[ev.ti] = false; if (!j) Sound.play(shotSnd(ev, q % 3 === 0 ? 3003 : 3002)); } else if (!j && (HO.rules(G).battleSounds || q % 4 === 0)) Sound.play(shotSnd(ev, 3000 + (q % 2))); }
       return { x1: a.x, y1: a.y, x2: t.x, y2: t.y, a: ev.a };
     });
     drawAll(shots);
@@ -4424,6 +4444,7 @@ function prefsPalm(W) {
 // The version's own Options menu items (rs.options, 1.2 and 2.0), in its
 // words: Show Event Messages, Review Announced Battles, the battle speed
 // (Fast to Slow, fully animated battles) and 2.0's polling time
+const spendLabel = () => { const w = G && HO.rules(G).spendWarnings; return w && w[(G.opts && G.opts.lang) || HO.ownLanguage(HO.ownRules(G))]; };
 function verPrefs(O, box) {
   const slider = (C, k, extra) => {
     const out = el('span', { class: 'note' });
@@ -4439,7 +4460,7 @@ function verPrefs(O, box) {
     O.showMessages ? box('showMsgs', O.showMessages) : null,
     O.reviewBattles ? box('review', O.reviewBattles) : null,
     // (1.2's Options "Alerter sur dépenses", setup +0x4c: the warnings of BuildNewShips about money with no ships queued or no metal)
-    O.spendWarnings && G ? el('label', { class: 'chk' }, el('input', { type: 'checkbox', checked: G.opts.overspendWarnings !== false ? 'checked' : false, onchange: (e) => { G.opts.overspendWarnings = e.target.checked; save(); } }), el('span', null, O.spendWarnings)) : null,
+    spendLabel() && G ? el('label', { class: 'chk' }, el('input', { type: 'checkbox', checked: G.opts.overspendWarnings !== false ? 'checked' : false, onchange: (e) => { G.opts.overspendWarnings = e.target.checked; save(); } }), el('span', null, spendLabel())) : null,
     O.battleSpeed ? slider(O.battleSpeed, 'battleSpeed') : null,
     O.poll ? slider(O.poll, 'poll', 'Kept as the original had it; the remake has no players on other machines, so nothing polls.') : null);
 }

@@ -50,6 +50,34 @@ function shipsDesc12(G, d, n) {
 }
 function fleetDesc12(G, f, d, n) { return shipsDesc12(G, d, n); }
 
+// ---------- the selected fleet's lines (DrawSelectedFleetInfo @c4f7e) ----------
+// CONFIRMED: STR# 4000.12-21 (French) and Mac 2.0.1's literals in its DrawSelectedFleetInfo (the English): stationary "Stationed at: <star>",
+// moving "Departing to: <star> (Dist %d; Time %d)" or, on a route, "Going to <end> (D %d; T %d) via <next>"; then "Fuel: %d/%d" and "Speed: %d";
+// a colony ship "Full" (colonists aboard) or "Empty", any other fleet "Scrap: <metal>"; a fleet marked for scrapping only its own line.
+const FLEET_WORDS = {
+  fr: { orbit: 'En orbite à:', dep: 'Départ pour:', direct: '%s (Dist %d; Temps %d)', via: 'Allant à %s (D %d; T %d) via %s', fuel: 'Fuel: %d/%d', speed: 'Vitesse: %d', full: 'Plein', empty: 'Vide', scrap: 'Recycl.: %s', marked: 'En recyclage.' },
+  en: { orbit: 'Stationed at:', dep: 'Departing to:', direct: '%s (Dist %d; Time %d)', via: 'Going to %s (D %d; T %d) via %s', fuel: 'Fuel: %d/%d', speed: 'Speed: %d', full: 'Full', empty: 'Empty', scrap: 'Scrap: %s', marked: 'Fleet to be scrapped for metal.' },
+};
+function fleetInfo12(G, f) {
+  const W = FLEET_WORDS[(G.opts && G.opts.lang) || 'fr'];
+  const fill = (t, ...a) => { let i = 0; return t.replace(/%[sd]/g, () => String(a[i++])); };
+  if (f.scrap301) return [W.marked];
+  const out = [], star = (i) => G.stars[i].name, sp = E.fleetSpeed(G, f);
+  const hops = [f.star != null ? f.star : f.from].concat(f.dest != null ? [f.dest] : [], f.path || []);
+  if (f.dest == null && f.to == null) out.push(W.orbit + ' ' + star(f.star));
+  else {
+    let dist = 0, time = 0;
+    for (let i = 0; i + 1 < hops.length; i++) { const d = E.starDist(G, hops[i], hops[i + 1]); dist += d; time += Math.ceil(d / sp - 1e-9); }
+    const end = hops[hops.length - 1], next = f.dest != null ? f.dest : f.to;
+    out.push(end === next ? W.dep + ' ' + fill(W.direct, star(end), Math.round(dist), time) : fill(W.via, star(end), Math.round(dist), time, star(next)));
+  }
+  out.push(fill(W.fuel, Math.round(f.fuel), E.fleetMaxRange(G, f)), fill(W.speed, sp));
+  const ds = E.fleetDesigns(G, f), col = ds.some(d => d.type === 'colony');
+  if (col) out.push(f.colonists > 0 ? W.full : W.empty);
+  else { let m = 0; const rate = E.rules(G).scrapReturn(G, G.players[f.owner]); for (const k in f.ships) m += E.designCost(G, E.getDesign(G, f.owner, +k)).metal * f.ships[k] * rate; out.push(fill(W.scrap, E.niceNum ? (E.rules(G).fmtNum || E.niceNum)(Math.round(m)) : Math.round(m))); }
+  return out;
+}
+
 // ---------- setup (NewGame @100004, CreateGalaxy @e0004, CreateNewPlayer @101972) ----------
 // CONFIRMED: 1.2F has no New Game window. NewGame only asks for a file name;
 // CreateGalaxy copies the style, density, size, computer skill and number of
@@ -365,9 +393,10 @@ E.registerRules('12', Object.assign({}, D, {
   // them switches to the log scale, 'Stup' 1000 +0x2a = 0; log Technology bars)
   battlePanel: D.battlePanelMac,
   label: 'Mac 1.2 (1992)',
-  fleetDesc: fleetDesc12, shipsDesc: shipsDesc12, fleetListNoSatellites: true,
+  fleetDesc: fleetDesc12, shipsDesc: shipsDesc12, fleetInfo: fleetInfo12, fleetListNoSatellites: true,
   // CONFIRMED (AddNewMessage @131052: 50 records of 50 bytes at +0x4d4; at 50 it moves the last 40 down by 10): the report window keeps 50 reports
   reportHistory: 50,
+  battleSounds: true, // CONFIRMED (HaveGroupShoot @d1746): see shotSnd in the classic skin
   // CONFIRMED (DrawIncomeRect @c3f70; LoadMiscStrings @1502c6 puts STR# 1005.1-4 at A5-0x448, -0x45c, -0x470, -0x484): the three totals
   // are drawn metal first ("Réserve métal:", the plain number), then the money ("Fortune totale:", "$%s") and the income ("Revenu total:",
   // "$%s", the colonies' income and the interest in it), each label bold and right-aligned, the changes after the figure. The year is not
@@ -384,10 +413,12 @@ E.registerRules('12', Object.assign({}, D, {
   // CONFIRMED (DrawPlanetRect @c4334: STR# 1005.13 "Pop:", .20 "Pas d'information sur cette planète.", .21 "Inhabitée", .22 "Inconnue"; the English
   // is DOS 2.0's strings 396 and 403-405, the Mac 2.0.1's routine being the same)
   planetInfo: {
-    fr: { pop: 'Pop', noInfo: 'Pas d\'information sur cette planète.', popNone: 'Inhabitée', popUnknown: 'Inconnue' },
-    en: { pop: 'Pop', noInfo: 'You have no information about this planet.', popNone: 'Uninhabited', popUnknown: 'Unknown' } },
+    fr: { income: 'Revenu', pop: 'Pop', noInfo: 'Pas d\'information sur cette planète.', popNone: 'Inhabitée', popUnknown: 'Inconnue', owner: 'Contrôle', noOne: 'Néant', infoDate: 'Date info', battleDate: 'Bataille', noFleets: 'Pas de vaisseau sur cette planète.' },
+    en: { income: 'Income', pop: 'Pop', noInfo: 'You have no information about this planet.', popNone: 'Uninhabited', popUnknown: 'Unknown', owner: 'Owner', noOne: 'No One', infoDate: 'Info Date', battleDate: 'Battle Date', noFleets: 'There are no fleets at this planet.' } },
   // CONFIRMED (SetupPlayerWindows @10080a: SetWTitle with STR# 4000.2 "%.*s en %.*s en %d": the player, the galaxy, the year)
   windowTitle: { fr: '%s en %s en %d', en: '%s in %s in %d', galaxy: 'Voie Lactée' },
+  spendWarnings: { fr: 'Alerter sur dépenses', en: 'Give Overspending Warnings' }, // the Options item (MENU 131.5), in the program's two languages only
+  bubbleMore: { fr: 'Suite…', en: 'more…' }, // CONFIRMED (DrawAnnounceBubble @131134: STR# 4000.22; Mac 2.0.1's literal "more…")
   panelInfo: { order: ['metal', 'savings', 'income', 'interest'], words: {
     fr: { savings: 'Fortune totale', income: 'Revenu total', interest: 'Intérêt', metal: 'Réserve métal' },
     en: { savings: 'Total Money', income: 'Total Income', interest: 'Interest', metal: 'Reserve Metal' } } },
@@ -451,7 +482,7 @@ E.registerRules('12', Object.assign({}, D, {
   // list (rules-dos exploredList) with its French words (DITL 6040, STR# 1020)
   options: {
     battleSpeed: { min: 10, max: 60, def: 30, menu: 'Vitesse des batailles…', title: 'Vitesse des batailles:', fast: 'Rapide', slow: 'Lente', full: 'Animation complète' },
-    showMessages: 'Montrer messages', reviewBattles: 'Voir batailles', spendWarnings: 'Alerter sur dépenses', reports: 'Fenêtre Rapports',
+    showMessages: 'Montrer messages', reviewBattles: 'Voir batailles', reports: 'Fenêtre Rapports',
   },
   // the Ship Types window's check box (DITL 6000 item 17; Mac 2.0.1's "Scrap This Type")
   // (STR# 1010.9-10 and 4000.12: the Ships menu's item and the panel's line for a marked fleet)
@@ -484,7 +515,7 @@ E.registerRules('12', Object.assign({}, D, {
         taken: 'Sorry, there’s already a star named  “%s.” Please pick another name.' },
       // Mac 2.0.1's English for the same windows (MENU 131, DITL 4040, 6040, STR# 1020)
       options: { battleSpeed: { min: 10, max: 60, def: 30, menu: 'Set Battle Speed…', title: 'Battle Speed:', fast: 'Fast', slow: 'Slow', full: 'Fully Animated Battles' },
-        showMessages: 'Show Event Messages', reviewBattles: 'Review Announced Battles', spendWarnings: 'Give Overspending Warnings', reports: 'Report Window' },
+        showMessages: 'Show Event Messages', reviewBattles: 'Review Announced Battles', reports: 'Report Window' },
       exploredList: Object.assign({}, D.exploredList, { layout: 'mac' }), scrapWords: Object.assign({}, D.scrapWords, { fleet: ['Scrap Current Fleet', 'Don’t Scrap Current Fleet'] }) }, // (Mac 2.0.1's)
   },
   ai: '12',                // 1.2's own computer players (js/ai-12.js)

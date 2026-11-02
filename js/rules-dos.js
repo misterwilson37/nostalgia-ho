@@ -668,12 +668,13 @@ function battle(G, sid, hooks) {
             const base = (RI(G, 0, 20) + u.W * 5 + 10) * wpn(u.W + 25 - t.S);
             if (t.planet) {
               const d = Math.min(t.hp, base * 4); t.hp -= d; if (t.hp <= 0) { t.hp = 0; t.n = 0; }
-              if (ev.length < 80) ev.push({ a: u.o, si: id(si), p: 1 });
+              if (ev.length < 80) ev.push({ a: u.o, si: id(si), p: 1, snd: t.hp <= 0 ? 3003 : 3002 });
             } else {
-              t.dmg += Math.max(1, trunc(base / 6));
+              const hit = Math.max(1, trunc(base / 6)), ratio = trunc(hit * 10 / t.hp); // (the sound's ratio: Mac 1.2 HaveGroupShoot @d19ce)
+              t.dmg += hit;
               let k2 = 0, ti = t.idx[Math.max(0, t.n - 1)];
               if (t.dmg >= t.hp) { t.dmg = 0; t.n--; debris += t.debris; k2 = 1; } // no carry-over
-              if (ev.length < 80) ev.push({ a: u.o, si: id(si), t: t.o, k: k2, ti: id(ti), f: k2 ? 0 : t.dmg / t.hp });
+              if (ev.length < 80) ev.push({ a: u.o, si: id(si), t: t.o, k: k2, ti: id(ti), f: k2 ? 0 : t.dmg / t.hp, snd: ratio < 2 ? 3000 : ratio < 5 ? 3001 : 3002 });
             }
           }
         }
