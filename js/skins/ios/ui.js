@@ -253,13 +253,14 @@ function sideOpen() { return document.documentElement.classList.contains('ios-si
 // an iPhone's buttons show IPhoneCombinedInfoContainer (totals and technology), StarsListContainer (the budget bars: the colonies),
 // PlayerListContainer; pressing the one that shows closes it.
 let cont = 'info';
-const CBTN = { dollar: 'info', planet: 'stars', enemy: 'players' };
+const CBTN = { dollar: 'info', news: 'history', planet: 'stars', enemy: 'players' };
 function setCont(name) {
-  if (SCREEN.pad || name === 'info' && !CBTN.x) { if (SCREEN.pad) { setSide(!sideOpen()); return; } }
+  // (the iPad's two containers: the combined one the dollar button shows and the history the news button does; each button closes the one it shows)
   if (sideOpen() && cont === name) { setSide(false); return; }
   cont = name; document.documentElement.dataset.iosc = name; setSide(true);
-  for (const b of document.querySelectorAll('.ios-col .ios-btn')) { const c = CBTN[b.dataset.ios]; b.classList.toggle('on', !!c && c === name); }
+  const a = A(); if (name === 'history' && a && a.G) a.renderPanel(); // (the history list is built while it shows)
 }
+function colButtons(open) { for (const b of document.querySelectorAll('.ios-col .ios-btn')) { const c = CBTN[b.dataset.ios]; b.classList.toggle('on', !!open && !!c && c === cont); b.setAttribute('aria-pressed', open && c === cont ? 'true' : 'false'); } }
 function sideLayout() {
   // -[MapLayer setBoundsForSidebar] 0x10000db54: the map's pan rectangle starts at the sidebar's width + 8 (iPad) or + 4 (iPhone)
   // (a80 x 10 from the top and bottom); the page keeps the map beside the sidebar when there is room for it
@@ -269,8 +270,7 @@ function sideLayout() {
 function setSide(open, quiet) {
   const de = document.documentElement;
   de.classList.toggle('ios-side', !!open);
-  if (sideBtn) { sideBtn.classList.toggle('on', !!open && (SCREEN.pad || cont === 'info')); sideBtn.setAttribute('aria-pressed', open ? 'true' : 'false'); }
-  if (!open) for (const b of document.querySelectorAll('.ios-col .ios-btn')) b.classList.remove('on');
+  colButtons(open);
   sideLayout();
   if (!quiet && A() && A().G && A().fit) setTimeout(() => A().fit(), 220); // the map refits beside the sidebar (setBoundsForSidebar)
 }
@@ -282,7 +282,7 @@ function buildColumn(app) {
   // -[MainGameScene init]: the column's items in order, each a CCMenuItemToggle of button-<name>.png (the second state tinted 0x7d7d7d)
   const items = [
     ['dollar', 'Information', () => setCont('info')],                  // toggleInfo: the totals and bars sidebar
-    ['news', 'Reports', go(a => a.openReports())],                    // toggleHistory: the message history container
+    ['news', 'Reports', () => setCont('history')],                    // toggleHistory: the message history container (MessageHistoryNode)
     ['planet', 'Stars', () => setCont('stars')],                       // toggleStars (iPhone): StarsListContainer, the colonies' budget bars
     ['enemy', 'Players', () => setCont('players')],                    // togglePlayers (iPhone): PlayerListContainer
   ].filter(i => !SCREEN.pad || i[0] === 'dollar' || i[0] === 'news');
@@ -337,9 +337,10 @@ function buildScreen(doc) {
   fdx.addEventListener('click', (e) => { e.stopPropagation(); setFleets(false); });
   fdEl.append(fdx);
   const pan = doc.getElementById('panel'); if (pan) { const rc = () => requestAnimationFrame(() => { recolor(pan.querySelector('.ios-bars-tech')); recolor(pan.querySelector('.ios-bars-budget')); }); pan.addEventListener('pointermove', rc); pan.addEventListener('pointerup', rc); pan.addEventListener('keyup', rc); }
-  const ui = UIEl('div', 'ios-ui', null, hudEl, pbEl, fdEl, turnEl);
+  amEl = UIEl('div', 'ios-am', { hidden: '', role: 'menu', 'aria-label': 'Menu' });
+  const ui = UIEl('div', 'ios-ui', null, hudEl, pbEl, fdEl, turnEl, amEl);
   app.append(ui); ui.id = 'ios-ui';
-  doc.addEventListener('click', (e) => { if (gearOpen && !e.target.closest('#menubar') && !e.target.closest('.ios-gear')) setGear(false); });
+  doc.addEventListener('click', (e) => { if (gearOpen && !e.target.closest('#menubar') && !e.target.closest('.ios-gear') && !e.target.closest('.ios-am')) setGear(false); else if (!gearOpen && document.documentElement.classList.contains('ios-menus') && !e.target.closest('#menubar') && !e.target.closest('.ios-gear') && !e.target.closest('.ios-amx')) { document.documentElement.classList.remove('ios-menus'); if (gearBtn) gearBtn.classList.remove('on'); } });
   // End Turn is the classic page's clock; it sits left of the gear (-[TurnMessageLayer init]: the menu's items in a row, padding a80)
   const msg = doc.getElementById('msg'); if (msg) app.append(msg);
 }
@@ -367,7 +368,52 @@ function placeButtons() {
   pbEl.style.setProperty('--px', x + 'px'); pbEl.style.setProperty('--py', y + 'px'); pbEl.style.setProperty('--pk', (k * SCREEN.u) + 'px');
   if (fdEl) fdEl.hidden = !fleetsOpen || pad || !pbShown;
 }
-function setGear(o) { gearOpen = o; document.documentElement.classList.toggle('ios-menus', o); if (gearBtn) gearBtn.classList.toggle('on', o); }
+// The gear (-[TurnMessageLayer init]'s additionalMenu, AdditionalMenu 0x100093824): a navy bordered list of CCMenuItemFonts (Arial 24 on an iPhone, 28 on an iPad, white),
+// in this order: Dip Into Savings (Misc Strings 116), Auto Play (118), Armageddon (117), Give Money/Metal (115), Scrap Ship Types (114, enabled while the player has a ship type:
+// updateMenus 0x100093ec0), Main Menu (120), Preferences (122). An iPhone's are a grid of rows of 1, 2, 1, 1 and 2 items with 10 points between; an iPad's one column 8 apart,
+// the box the column and 4 x a80 by 2 x a80 more; an iPad's sits at (winW - 44, 44 + 2 a80) anchored (1, 0), an iPhone's anchored (0, 0.5) at the middle of the screen. A tap
+// hides it (makeHidden: scale in y to 0 in 0.1 s) and does the item: the screens are the app's (AutoPlayLayer, GiveDialogLayer, DipIntoSavingsDialogLayer, ArmageddonLayer,
+// ScrapShipTypesLayer, PreferencesLayer) where the remake has built them as such, else the remake's own windows; Main Menu saves the game and goes to the title.
+let amEl;
+const AM_ITEMS = [
+  ['Dip Into Savings', 'dip', (a) => a.openDip(), (a) => HO.feature(a.G, 'dip')],
+  ['Auto Play', 'auto', (a) => a.openAutoPlay(), () => true],
+  ['Armageddon', 'arm', (a) => a.toggleArmageddon(), (a) => HO.feature(a.G, 'armageddon')],
+  ['Give Money/Metal', 'give', (a) => a.openGive(), (a) => HO.feature(a.G, 'gifts')],
+  ['Scrap Ship Types', 'scrap', (a) => a.openScrapTypes(), (a) => a.me().designs.some(d => !d.scrapped)],
+  ['Main Menu', 'main', (a) => a.quitToTitle(), () => true],
+  ['Preferences', 'prefs', (a) => a.openPrefs(), () => true],
+];
+const AM_NAMES = { fr: { dip: "Puiser dans l'épargne", auto: 'Auto Play', arm: 'Armageddon', give: "Donner de l'argent / métal", scrap: 'Types de vaisseaux à recycler', main: 'Menu principal', prefs: 'Préférences' },
+  tr: { dip: 'Tasarruftan Harca', auto: 'Otomatik Oyna', arm: 'Armageddon (en büyük savaş)', give: 'Para/Metal Ver', scrap: 'Çöpe Atılacak Gemiler', main: 'Esas Program', prefs: 'Tercihler' } };
+function buildAdditionalMenu() {
+  const a = A(), G = a && a.G;
+  if (!amEl) return;
+  amEl.replaceChildren();
+  if (!G) return;
+  const L = AM_NAMES[uiLang()], rows = SCREEN.pad ? AM_ITEMS.map(i => [i]) : [[0], [1, 2], [3], [4], [5, 6]].map(r => r.map(k => AM_ITEMS[k]));
+  for (const r of rows) {
+    const row = UIEl('div', 'ios-amr');
+    for (const [name, key, fn, ok] of r) {
+      const on = !!ok(a), b = UIEl('button', 'ios-ami' + (on ? '' : ' off'), { type: 'button', 'aria-disabled': on ? null : 'true' }, UIEl('span', null, L ? { translate: 'no' } : null, L ? L[key] : name));
+      b.addEventListener('click', (e) => { e.stopPropagation(); if (!on) return; setGear(false); const x = A(); if (x && x.G && (!x.G.over || key === 'main' || key === 'prefs')) try { fn(x); } catch (er) { console.error(er); } });
+      row.append(b);
+    }
+    amEl.append(row);
+  }
+  // a ruleset the app has no screen for keeps the page's menus in one more item
+  if (!/^(ios|android)$/.test(G.rules || '')) {
+    const b = UIEl('button', 'ios-ami ios-amx', { type: 'button' }, 'More menus…');
+    b.addEventListener('click', (e) => { e.stopPropagation(); setGear(false); document.documentElement.classList.add('ios-menus'); gearOpen = true; if (gearBtn) gearBtn.classList.add('on'); });
+    amEl.append(UIEl('div', 'ios-amr', null, b));
+  }
+}
+function setGear(o) {
+  gearOpen = !!o; document.documentElement.classList.remove('ios-menus');
+  if (gearOpen) buildAdditionalMenu();
+  if (amEl) { amEl.hidden = !gearOpen; amEl.classList.toggle('open', gearOpen); }
+  if (gearBtn) gearBtn.classList.toggle('on', gearOpen);
+}
 // The terraform / mine slider (CCSliderDeluxe "tmb1": slider-tmb1-left and -right, the thumb; the delegate -[PlanetInfoLayer
 // valueChanged:tag:] 0x1000b38d0 sets the colony's share)
 let tmStar = null;
@@ -695,6 +741,45 @@ function playersList() {
   list.append(more);
   return list;
 }
+// The news screen (HistoryContainer / MessageHistoryNode: a CCInertialMenu of MessageNodes, one for each report the player has been sent, 80 at most): the
+// navy bordered container's list, the newest first from the top (alignItemsVerticallyWithPadding: 0, bottom to top, the first report at the bottom, the list held
+// to the top of its rectangle 2 points in), each item the width of the container and as tall as its report needs: a non end-turn MessageNode (update: 0x100013064) sizes
+// itself to max(text + 2 a80, picture + 2 a80), the picture 30 from the left with its top a80 down, the text from x 60 (the width less 64 wide), no message_bar behind it;
+// a year report is only its digits (29 x 1.5 high); a tap does the report's action (-[MessageNode doReportAction:game:]: select the star, review a battle...).
+function historySection() {
+  const a = A(), G = a && a.G, sec = UIEl('section', 'ios-hist', { 'data-c': 'history', 'aria-label': 'Reports' });
+  if (!G || !(sideOpen() && cont === 'history')) return sec;
+  const me = a.me(), ms = (HO.rules(G).reportHistory ? (me.reportLog || []) : []).concat(me.inbox || []);
+  const H = SCREEN.row * 3, s0 = Math.floor(Math.fround(H / 6)), gap = SCREEN.gap;
+  const pt = (n) => `calc(${n} * var(--pt))`;
+  const list = UIEl('div', 'ios-hlist');
+  for (let i = ms.length - 1; i >= 0; i--) {
+    const m = ms[i], txt = a.degText(HO.say(G, m.text)), ym = /^Year (\d+):?$/.exec(String(m.text || '')), lv = /^Your (?:Range|Speed|Weapons|Shield|Miniaturization) Technology has reached level (\d+)\.$/.exec(String(m.text || ''));
+    const it = UIEl('div', 'ios-hitem', { role: 'button', tabindex: '0' });
+    if (ym) {
+      it.style.height = pt(29 * 1.5);
+      const dg = UIEl('span', 'ios-digits ios-hdigits', { 'aria-hidden': 'true' });
+      for (const ch of ym[1]) dg.append(UIEl('i', null, { style: `--d:${ch}` }));
+      it.append(dg);
+    } else {
+      const lines = wrapLines(txt, s0, SCREEN.W - 64), wid = Math.max(1, ...lines.map(l => textW(l, s0))), th = lines.length * s0 * 1.15;
+      const ic = a.msgIconEl(m), hasIcon = !!(ic && ic.src);
+      it.style.height = pt(Math.max(th + 2 * gap, (hasIcon ? 40 : 0) + 2 * gap));
+      if (hasIcon) { ic.className = 'ricon'; it.append(ic); }
+      if (lv) it.append(UIEl('span', 'ios-lvl ios-hlvl', { 'aria-hidden': 'true' }, lv[1]));
+      const p = UIEl('p', null, null, txt);
+      p.style.width = pt(Math.ceil(wid) + 1); p.style.height = pt(th); p.style.fontSize = pt(s0 - 1); p.style.lineHeight = pt((s0 - 1) * 1.15);
+      it.append(p);
+    }
+    const act = () => { const x = A(); if (x && x.G) { x.reportAction(m); } };
+    it.addEventListener('click', (e) => { e.stopPropagation(); act(); });
+    it.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); act(); } });
+    list.append(it);
+  }
+  sec.append(list);
+  if (!ms.length) list.append(UIEl('p', 'ios-hnone', null, 'No reports this turn.'));
+  return sec;
+}
 // the sidebar (-[IncomeLayer init]: the totals box W x 2.5 rows, three labels a line apart, the figure beside the label, the change at the right)
 function sidebar(box, parts) {
   const info = parts.info, rows = [];
@@ -718,7 +803,7 @@ function sidebar(box, parts) {
   box.replaceChildren(income, parts.tech, parts.budget, ...(parts.planet && !appRules ? [parts.planet] : []));
   for (const r of parts.budget.querySelectorAll('.blabel')) { const row = r.closest('.barrow'); if (row && row._k && row._k.star != null) { r.style.cursor = 'pointer'; r.onclick = () => { const a = A(); if (a && a.G) { a.UI.sel = row._k.star; a.centerOn(row._k.star); a.renderPanel(); a.draw(); } }; } } // PlayerPlanetsLayer pressed: selects the star and scrolls the map to it
   placeGrid(parts.tech); placeGrid(parts.budget);
-  box.append(playersList());
+  box.append(playersList(), historySection());
   hud();
 }
 // -[TurnMessageLayer init] 0x10001c4e8: End Turn (button-empty, "End Turn" 18) and the gear are one menu at the bottom right and stay there while the

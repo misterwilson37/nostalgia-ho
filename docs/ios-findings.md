@@ -1072,3 +1072,25 @@ over the picture's middle. The turn layer's bar is an "end-turn" message (`setIs
 message history's items are not, and fit their text). "more..." (Misc 30) is Arial 18 x 0.6 on an iPhone (the globals `GraphicDefines setup` writes), 24 x 0.6 on an iPad, anchor (1, 0) at
 (width - a80 / 2 - 8, a80 / 2 + 1). Not done: the picture is the remake's own per report, not the app's choice by report number (a planet drawn from the star's figures for 1033 and 1034, a hat for 200-216).
 
+**The news screen (built: `historySection`, `rs.reportHistory` 80).** `FUN_10003b028` appends each report to the player's list (+0x15e count, 0x30 byte records from +0x160): at 80 it drops the oldest
+10 first (the remake's `p.reportLog`, `rs.reportHistory: 80`). `-[HistoryContainer initWithWidth:height:button:]` 0x1000b1340 is an `InformationContainer` (navy `BackgroundBorderNode`) holding a
+`MessageHistoryNode`: a `CCInertialMenu` of `MessageNode`s, one `CCMenuItem` for each report (`adjustChildren:with:` makes as many as there are reports), aligned bottom to top
+(`alignItemsVerticallyWithPadding:` is `...bottomToTop:1`), so the oldest report is lowest; `fixPosition`'s clamp keeps the list's top at the top of its rectangle (0, 2, W, H - 4) when the list is not taller than the
+rectangle, so the newest report shows first. A history item is a non end-turn `MessageNode`: it has no `message_bar` behind it (that is the turn layer's menu item sprite) and sizes itself to
+max(text + 2 a80, picture + 2 a80) (the year report: 29 x 1.5). A tap runs `doReportAction:game:` (selects and zooms to the star, reviews the battle, opens the radical research or the You Won / Lost screen,
+shows the supernova or Armageddon). The button `news` swaps this container with the information container (the iPad has these two).
+
+**The gear (built: `buildAdditionalMenu`).** `-[AdditionalMenu init]` 0x100093824: seven `CCMenuItemFont`s (Arial 24 on an iPhone, 28 on an iPad), Misc Strings 116 "Dip Into Savings"
+(`DipIntoSavingsDialogLayer`), 118 "Auto Play" (`AutoPlayLayer`), 117 "Armageddon" (`ArmageddonLayer`), 115 "Give Money/Metal" (`GiveDialogLayer`), 114 "Scrap Ship Types" (`ScrapShipTypesLayer`, tag 5001,
+enabled while the player's ship type list is not empty: `updateMenus` 0x100093ec0), 120 "Main Menu" (saves, hides the map, goes to the `WelcomeScene`), 122 "Preferences" (`PreferencesLayer`). An iPhone's are
+a grid of rows of 1, 2, 1, 1, 2 (10 points between), an iPad's one column 8 apart; the box is a navy `BackgroundBorderNode`. `allFleets` and `giveFeedback` exist but are not in the list. Not worked out: where an
+iPhone's box sits about its grid (the code sizes it as the menu + 50 x 70 and positions it at (0, 50) of a node anchored (0, 0.5) at the middle of the screen; the remake centres the box on that point).
+
+### Remake-only controls to restyle (Jake, November 2026; roadmap "Display audit")
+
+After the app's own screens are done, features other rulesets have that the iOS and Android apps had no screen for are to be shown in the app's visual language (its sprites, Arial type, dialog
+and bar style, touch behaviour). Today they are the classic page's controls: the build queue (star box and Build window), merging fleets, battle reviews and the battle list, the Players window (give,
+surrender, send a message, alliance table) reached by "Players and history...", the Reports window of the other rulesets, the Compare window, the explored-stars and fleets lists, Fix spending, Force end turn
+and switch players (hot seat), the page's menus behind the gear's "More menus..." (for rulesets other than iOS and Android), Hall of Fame / Shame and the master point lists, the star box under the bars
+(rulesets other than iOS and Android), and the remake's confirm and toast boxes.
+

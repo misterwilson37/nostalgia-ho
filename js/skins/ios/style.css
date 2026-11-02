@@ -170,7 +170,7 @@ html.skin-ios .fleets { border-top-color: #2a3a9a; }
 
 /* an iPhone's containers (-[MainGameScene toggleInfo] and the rest): one at a time, from 21 points below the top (InformationContainer adjustHeightBy) */
 html.skin-ios.ios-phone #panel { top: calc(21 * var(--pt)); }
-html.skin-ios.ios-phone:not([data-iosc=info]) #panel > [data-c=info], html.skin-ios.ios-phone:not([data-iosc=stars]) #panel > [data-c=stars], html.skin-ios.ios-phone:not([data-iosc=players]) #panel > [data-c=players] { display: none; }
+html.skin-ios.ios-phone:not([data-iosc=info]) #panel > [data-c=info], html.skin-ios.ios-phone:not([data-iosc=stars]) #panel > [data-c=stars], html.skin-ios.ios-phone:not([data-iosc=players]) #panel > [data-c=players] , html.skin-ios.ios-phone:not([data-iosc=history]) #panel > [data-c=history], html.skin-ios.ios-pad:not([data-iosc=history]) #panel > [data-c=history], html.skin-ios.ios-pad[data-iosc=history] #panel > :not([data-c=history]) { display: none; }
 html.skin-ios .ios-pl { position: absolute; white-space: nowrap; line-height: 1.15; color: #000; pointer-events: none; }
 html.skin-ios .ios-pname { left: calc(26 * var(--pt)); }
 html.skin-ios .ios-piq { left: calc((var(--W) / 3 + 64 - 0.3 * var(--W)) * var(--pt)); }
@@ -198,3 +198,26 @@ html.skin-ios .card.year .icon, html.skin-ios .card.year .bigicon, html.skin-ios
 html.skin-ios .ios-digits { position: absolute; left: calc((var(--W) / 2 - 19) * var(--pt)); top: calc((var(--row) * 3 / 2 - 15) * var(--pt)); transform: translate(-50%, -50%); display: flex; pointer-events: none; }
 html.skin-ios .ios-digits i { display: block; width: calc(26 * var(--pt)); height: calc(29 * var(--pt)); background: url("../../../assets/skins/ios/sprites/digits_atlas.png") calc(var(--d) * -26 * var(--pt)) 0 / calc(260 * var(--pt)) calc(29 * var(--pt)) no-repeat; }
 html.skin-ios .ios-lvl { position: absolute; left: calc((30 - 19) * var(--pt)); top: calc((var(--row) * 3 - 0.75 * (var(--row) * 3 - var(--gap)) + 20 - 15) * var(--pt)); transform: translateX(-50%); font: calc(30 * var(--pt)) / 1.15 var(--appfont, Arial, Helvetica, sans-serif); color: #f00; pointer-events: none; z-index: 2; }
+
+/* the news screen (HistoryContainer, MessageHistoryNode): the reports, newest first, no bar behind them */
+html.skin-ios .ios-hist { box-sizing: border-box; min-height: 100%; background: #181c5a; box-shadow: inset 0 0 0 calc(3 * var(--pt)) #393cd6, inset 0 0 0 calc(1 * var(--pt)) #181c5a; padding: calc(2 * var(--pt)) 0; color: #fff; }
+html.skin-ios .ios-hitem { position: relative; width: 100%; cursor: pointer; color: #fff; font: calc(var(--mfs) * var(--pt)) / 1.15 var(--appfont, Arial, Helvetica, sans-serif); }
+html.skin-ios .ios-hitem:hover, html.skin-ios .ios-hitem:focus-visible { background: rgba(255,255,255,.08); outline: 0; }
+html.skin-ios .ios-hitem img.ricon { position: absolute; left: calc(10 * var(--pt)); top: calc(var(--gap) * var(--pt)); width: calc(40 * var(--pt)); height: calc(40 * var(--pt)); image-rendering: auto; }
+html.skin-ios .ios-hitem p { position: absolute; left: calc(60 * var(--pt)); top: 50%; transform: translateY(-50%); margin: 0; color: #fff; white-space: normal; }
+html.skin-ios .ios-lvl.ios-hlvl { left: calc(30 * var(--pt)); top: calc((var(--gap) + 20) * var(--pt)); }
+html.skin-ios .ios-digits.ios-hdigits { left: 50%; top: 50%; }
+html.skin-ios .ios-hnone { margin: calc(8 * var(--pt)); color: #9fb2e0; font-size: calc(var(--fs) * var(--pt)); }
+
+/* the gear's list (AdditionalMenu): navy, the blue line, white Arial; an iPad's a column at the bottom right, an iPhone's rows of 1, 2, 1, 1, 2 about the middle (anchor (0, 0.5)) */
+html.skin-ios .ios-am { position: fixed; z-index: 30; box-sizing: border-box; background: #181c5a; box-shadow: inset 0 0 0 calc(3 * var(--pt)) #393cd6, inset 0 0 0 calc(1 * var(--pt)) #181c5a; padding: calc(35 * var(--pt)) calc(25 * var(--pt)); display: flex; flex-direction: column; align-items: center; gap: calc(10 * var(--pt)); color: #fff; font: calc(24 * var(--pt)) / 1.15 var(--appfont, Arial, Helvetica, sans-serif); transform-origin: 50% 100%; animation: ios-amin .1s linear; }
+html.skin-ios .ios-am[hidden] { display: none; }
+html.skin-ios.ios-pad .ios-am { right: calc(44 * var(--pt)); bottom: calc((44 + var(--gap) * 2) * var(--pt)); padding: calc(var(--gap) * var(--pt)) calc(var(--gap) * 2 * var(--pt)); gap: calc(8 * var(--pt)); font-size: calc(28 * var(--pt)); }
+html.skin-ios.ios-phone .ios-am { left: 50%; top: 50%; transform: translateY(-50%); transform-origin: 50% 50%; max-height: 100vh; overflow: auto; }
+@keyframes ios-amin { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+html.skin-ios.ios-phone .ios-am { animation-name: ios-amin-p; }
+@keyframes ios-amin-p { from { transform: translateY(-50%) scaleY(0); } to { transform: translateY(-50%) scaleY(1); } }
+html.skin-ios .ios-amr { display: flex; gap: calc(10 * var(--pt)); justify-content: center; }
+html.skin-ios .ios-ami { appearance: none; border: 0 !important; border-radius: 0 !important; background: none !important; padding: 0 !important; min-width: 0; min-height: 0; color: #fff !important; font: inherit; cursor: pointer; white-space: nowrap; }
+html.skin-ios .ios-ami.off { color: #7e7e7e !important; cursor: default; }
+html.skin-ios .ios-ami:not(.off):hover, html.skin-ios .ios-ami:not(.off):focus-visible { color: #ff0 !important; outline: 0; }

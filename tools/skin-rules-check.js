@@ -71,16 +71,28 @@ const SKINS_CHECK = {
       if (!(await page.evaluate(() => { const b = document.querySelector('.ios-pb-add'); return b && !b.hidden && !document.querySelector('.ios-pb').hidden; }))) f.push('no add button about your colony');
       else { await page.evaluate(() => document.querySelector('.ios-pb-add').click()); await sleep(250); if (!(await q('.win'))) f.push('the add button opened no window'); await page.keyboard.press('Escape'); await page.evaluate(() => { const c = document.querySelector('.win .close'); if (c) c.click(); }); await sleep(150); }
     }
-    for (const [sel, what] of [['[data-ios=news]', 'the news button'], ['.ios-graph', 'the graph control']]) {
-      await page.evaluate((s) => { const e = document.querySelector(s); if (e) e.click(); }, sel); await sleep(300);
-      const w = await q('.win, .scrim'); if (!w) f.push(what + ' opened no window');
+    // the news button shows the message history in the sidebar; the graph control opens a window
+    await page.evaluate(() => { const e = document.querySelector('[data-ios=news]'); if (e) e.click(); }); await sleep(300);
+    if (!(await q('#panel .ios-hist')) || !(await page.evaluate(() => document.documentElement.classList.contains('ios-side') && document.documentElement.dataset.iosc === 'history'))) f.push('the news button did not show the message history');
+    else if (!(await q('#panel .ios-hist .ios-hitem')) && !(await q('#panel .ios-hist .ios-hnone'))) f.push('the message history lists nothing');
+    await page.evaluate(() => { const e = document.querySelector('[data-ios=news]'); if (e) e.click(); }); await sleep(250);
+    {
+      await page.evaluate(() => { const e = document.querySelector('.ios-graph'); if (e) e.click(); }); await sleep(300);
+      const w = await q('.win, .scrim'); if (!w) f.push('the graph control opened no window');
       await page.keyboard.press('Escape'); await page.evaluate(() => { for (const c of document.querySelectorAll('.win .close')) c.click(); }); await sleep(150);
     }
-    // the gear: the menus
+    // the gear: the app's own list (AdditionalMenu: seven items), and for a ruleset the app has no screens for, one more that opens the page's menus
     await page.evaluate(() => { const g = document.querySelector('.ios-gear'); if (g && getComputedStyle(g).display !== 'none') g.click(); }); await sleep(250);
-    const menus = await page.evaluate(() => [...document.querySelectorAll('#menubar .mbtn')].map(b => b.textContent.trim()).filter(Boolean));
-    if (menus.length < 3) f.push('the gear opens too few menus: ' + JSON.stringify(menus));
-    await page.evaluate(() => { const g = document.querySelector('.ios-gear'); if (g) g.click(); });
+    const items = await page.evaluate(() => [...document.querySelectorAll('.ios-am .ios-ami')].map(b => b.textContent.trim()));
+    if (items.length < 7) f.push('the gear lists too few items: ' + JSON.stringify(items));
+    else if (items.slice(0, 7).join('|') !== (ctx.fr ? items.slice(0, 7).join('|') : 'Dip Into Savings|Auto Play|Armageddon|Give Money/Metal|Scrap Ship Types|Main Menu|Preferences')) f.push('the gear\'s items are not the app\'s, in order: ' + JSON.stringify(items));
+    if (items.length > 7) {
+      await page.evaluate(() => { const b = document.querySelector('.ios-amx'); if (b) b.click(); }); await sleep(250);
+      const menus = await page.evaluate(() => [...document.querySelectorAll('#menubar .mbtn')].map(b => b.textContent.trim()).filter(Boolean));
+      if (menus.length < 3) f.push('the gear\'s More menus opens too few menus: ' + JSON.stringify(menus));
+    }
+    await page.evaluate(() => { const g = document.querySelector('.ios-gear'); if (g) g.click(); }); await sleep(100);
+    await page.evaluate(() => { const g = document.querySelector('.ios-gear'); if (g && document.querySelector('.ios-am:not([hidden])')) g.click(); });
     // alliances: the pact words in the players list
     if (st.alli) { await page.evaluate(() => { const b = document.querySelector('[data-ios=enemy]'); if (b) b.click(); }); await sleep(250); if (!(await q('#panel .ios-pact'))) f.push('the ruleset has alliances but the players list has no pact button'); }
     // the Players window (the rest of each row's words) opens

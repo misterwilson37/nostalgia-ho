@@ -6323,10 +6323,11 @@ function save(urgent) {
 }
 
 // ---------- menus ----------
+function quitToTitle() { save(); Sound.play(7002); G = null; renderPanel(); draw(); $('#panel').innerHTML = ''; $('#msg').innerHTML = ''; titleScreen(); }
 function setupMenus() {
   const menus = {
     Game: [['New game…', newGameDialog], [() => (G && HO.rules(G).switchPlayers) || 'End turn and switch players', () => switchPlayers(), () => !!(G && HO.rules(G).switchPlayers && hotSeat())], ['Players and history', () => G && openPlayers()], ['Auto-play this turn', () => playOneTurn()], ['Auto play…', () => G && !G.over && (hotSeat() || G.online ? toast('Auto play is for one-player games.') : openAutoPlay())], ['Online game…', () => openOnlineInfo(), () => !!(G && G.online)], ['Preferences…', openPrefs], ['Saved games…', () => openSavedGames(), () => !!(screensOf(rulesId()) || {}).savedGames], ['Account saves…', () => openAccountSaves(), () => !!CLOUD], ['Export this game…', () => exportGame(), () => !!G], ['Import a game…', () => importGame()], ['Rank history…', openRanks, () => !G || hasRanks(G)], [() => ((HO.RULESETS[rulesId()] || {}).gameCenter || {}).menu || 'Rank and Game Center…', openGameCenter, () => !!(HO.RULESETS[rulesId()] || {}).gameCenter],
-      ['Master Point List…', () => openMasterList(), () => hasHall(G) && HO.rules(G).hall.master !== false], ['Hall of Fame…', () => openHall('fame'), () => hasHall(G)], ['Hall of Shame…', () => openHall('shame'), () => hasHall(G)], ['-'], ['Quit to title', () => { save(); Sound.play(7002); G = null; renderPanel(); draw(); $('#panel').innerHTML = ''; $('#msg').innerHTML = ''; titleScreen(); }]],
+      ['Master Point List…', () => openMasterList(), () => hasHall(G) && HO.rules(G).hall.master !== false], ['Hall of Fame…', () => openHall('fame'), () => hasHall(G)], ['Hall of Shame…', () => openHall('shame'), () => hasHall(G)], ['-'], ['Quit to title', quitToTitle]],
     Ships: [['Build ships at selected colony…', () => { if (G && UI.sel != null && G.stars[UI.sel].owner === ME) openBuild(UI.sel); else toast('Select one of your colonies first.'); }], ['Review battle…', () => G && openBattleList()], ['List all fleets…', () => G && openFleetList()],
       [() => scrapWords('fleet')[G && curFleet() && curFleet().scrap301 ? 1 : 0], () => { if (!G || G.over) return; const f = curFleet(); if (f) toggleScrapFleet(f); else toast('Select one of your fleets first.'); }, () => marksScrap()],
       [() => (G && organizeName()), () => { if (G && UI.sel != null) openOrganize(UI.sel); }, () => !!organizeStyle()],
@@ -6506,7 +6507,7 @@ window.addEventListener('DOMContentLoaded', () => {
     fit() { UI.fitted = false; fit(); draw(); }, clampView,
     openBuild, openSplit, openOrganize, organizeStyle, openPlayers, openCompare, openSkills, openScrapTypes, openBattle, lastBattles, battleName, openReports, openAbout, openHelp,
     openRadicalHand, showRank, openWinWindows, openYouWon, openYouLost, // (the originals' own windows, for the tests)
-    evacuateClick, evacuateHere, // (the iOS skin's evacuate button beside the selected colony's bar)
+    quitToTitle, evacuateClick, evacuateHere, // (the iOS skin's evacuate button beside the selected colony's bar)
     newGameDialog, titleScreen, hideTitle, continueChecked, importGame, doEndTurn, flipBarScale, marksScrap, scrapWords, toggleScrapFleet,
     verOpts, modern, hotSeat, openGameText, Prefs, savePrefs, switchPlayers, forceEndTurn, openBattleList, openFixSpending, lastBattles, playOneTurn, showMessages,
     // (and the windows tools/ui-lang-audit.js opens in every skin and language)

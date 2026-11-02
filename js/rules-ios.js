@@ -387,6 +387,9 @@ const rs = Object.assign(base, {
   radicalHand: Object.assign({}, O.radicalHand, { words: { title: 'Radical Research', keep: 'Don\'t Cancel Any Programs', ok: 'OK', pic: 'm9010' } }),
   // (its other windows are its own: not 5.0.5's words, You Won window or rank after it)
   windowWords: null, rankAfterWin: false,
+  // CONFIRMED (FUN_10003b028 0x10003b028, the message list of each player, player +0x15e count and +0x160 the 0x30 byte records): the list holds 80 reports
+  // and, when it is full, drops the oldest 10 before it adds one; the news screen (MessageHistoryNode) lists them all (engine.js p.reportLog)
+  reportHistory: 80,
   // CONFIRMED (report 0x436, +[EndGameLayer youWon] 0x1bb9fc / iOS 0x10009cd18
   // by name and size, setup: 0x10009cd90): the same dialog as You Lost, with
   // Misc Strings 109 "Congratulations! You have conquered the galaxy!",
