@@ -5,6 +5,18 @@ Delta Tao, in `docs/open-questions.md`, "Unfinished").
 
 ## The queue (kept complete; Jake's order, October 2026)
 
+**Display audit (November 2026; 1.2 done, the other versions next).** The rules of each version were read from its
+decompile; its display side (every window, list, report, menu, label, picture and sound the program puts in front of the
+player) was only catalogued. The method, reusable for every version: decompile the whole program and save it (the private
+repo's `decompiled/<version>/`, with `tools/decompile/split-dump.py`); give EVERY routine one row in `docs/display/<version>.json`
+(what it shows, the remake's place, and `matched` / `fixed` / `notShown` / `internal`; `open` fails); read the display routines
+with a symbolic trace (stack arguments put back; `audit/<version>/` in the private repo), compare them with the remake rendered in
+its own language and in English, and fix each mismatch from the evidence (patch-only for clear bugs). `node tools/display-audit.js
+<version>` checks the table (every routine has a row, every row a reason, none open; `--gaps` lists the mismatches found and not
+fixed); numbers stay in `tools/format-audit.js`, which the rows link. 1.2: `docs/display/12.json`, `docs/12-findings.md` "Display audit".
+Order for the other versions (Jake): newest first, then backwards: iOS 1.2.9 and Android 1.2.8, then 5.0.5 and the Palm, then
+Windows and Mac 4.0.5, then 3.0.1 (English and French), then 2.0 (DOS, Windows 3.1, Mac 2.0.1), then the Amiga.
+
 **Done (October 2026):** 5.0.5's Preferences in its own words; iOS's and Android's own
 Preferences screen; the Palm's own Preferences form; 4.0.5's radical window closing itself
 after 5 minutes; You Won in every version; You Lost; Give Money/Metal; Mac 4.0.5's floating

@@ -16,6 +16,9 @@ stubs). Addresses are in that layout, as in `docs/12-findings.md`.
 | Not a rule (runtime, library, files, windows, drawing, menus, dialogs, sound) | 434 |
 | Unread | 0 |
 
+The display side is audited routine by routine in `docs/display/12.json` (`node tools/display-audit.js 12`): its rows are the same 548
+routines, so "Not a rule" here is no longer "unread" there.
+
 ## How each routine was read
 
 - **Rules** (the Computer, EndTurn, Battles segments, the galaxy and player set-up in

@@ -420,7 +420,7 @@ Spending) and the rest, read by `tools/extract/languages.py --mac12` into
 French). The battle window's fleets are 1.2F's own order, the class first
 (`MakeFleetDescription`: "%d %.*ss %.*s (%d/%d)", "1 %.*s %.*s (%d/%d)", and with no count
 for the ships lost, "%.*s détruit(s)"); a report's numbers are written "1 234" (the
-program's "%d %.3d", "%d %.3dK"; LIKELY what `LongToNiceString` uses for them); the
+program's "%d %.3d", "%d %.3dK"; CONFIRMED: what `LongToNiceString @1244a` writes, a plain space, in the panels too: see "Display audit"); the
 exploring report has the temperature in °C to a tenth. 1.2F says less than 2.0's English
 in two lines: 1000.17 ("Votre flotte de %.*s à %s a été recyclée.") has no metal, and
 1030.0's ships lost ("%.*s détruit(s)") no count; they are shown as they are.
@@ -669,3 +669,31 @@ panel's own arithmetic (`HO.reportTemp`, a comma in French and German, a point i
 ## The Explored Planets list (CONFIRMED, October 2026)
 
 `InitStarsList @120136` builds a row of five fields (name 100 pixels, temperature 75, gravity 75, metal 75, status 75; "No Climate Info." 150 + 35 + 40 for a star with no climate: STR# 1020) in the cell data of `LDEF 1000` (426 bytes: each field is drawn left-aligned at the sum of the widths before it, cut with `TruncString` when wider than its column), the temperature from STR# 4000.2 and the gravity from 4000.3. The order is 2.0's (three groups). Mac 2.0.1 is the same code. `docs/dos-findings.md`, "The explored-stars lists".
+
+## Display audit (November 2026)
+
+The whole program was decompiled and saved (private repo, `decompiled/mac-1.2F/`: asm and C per routine, index; `HOW.md`), every one of
+the 548 routines has a row in `docs/display/12.json` (`node tools/display-audit.js 12`), and the display routines were read with a
+symbolic trace and compared with the remake in French and English. Found and fixed (each row names its commit):
+
+- **`LongToNiceString @1244a` writes a plain space between thousands** ("%d %.3d", "%d %.3dK"), so 1.2F's panels, bars and lists read
+  "$30 000", not "$30,000" (the remake had only the reports in French spacing). Base rules `niceNumSp` / `moneyNiceSp`; the English 1.2
+  (Mac 2.0.1's) keeps the comma (`rs.lang.en.releaseRules`). tools/format-audit.js asserts both.
+- **Fleets are named by `MakeFleetDescription` in the reports and rows** (built, arrived, stopped, lost, scrapped, can no longer reach;
+  the fleet row and list): "3 Eclaireurs Silence (1/1)", "1 Transport Essor (2/2)"; English "3 Weasel (1/1) Scouts". `rs.fleetDesc`,
+  `rs.shipsDesc`. (Callers: `docs/301-findings.md` left this for the other versions.)
+- **The totals box** (`DrawIncomeRect @c3f70`) lists the metal first, then the money and the income, as "Réserve métal:", "Fortune
+  totale:", "Revenu total:" (English DOS 2.0's "Reserve Metal:", "Total Money:", "Total Income:"). `rs.panelInfo`.
+- **The planet box** (`DrawPlanetRect @c4334`): "Pas d'information sur cette planète." for a star never seen; "Pop: Inhabitée" /
+  "Inconnue" for planets that are not yours (the remake guessed "~pop" for another player's colony, which 1.2 never shows). `rs.planetInfo`.
+- **The window title** is STR# 4000.2 "%s en %s en %d" ("Jake en Voie Lactée en 2000"). `rs.windowTitle`.
+- **The report window keeps the last 50 reports of all years** (`AddNewMessage @131052` drops the oldest 10 at 50) and opens on the
+  current year. `rs.reportHistory`, `p.reportLog` (left out of tools/test.js's digest; the digests are unchanged).
+- **The End Turn warning** is ALRT 5060 ("Attention, vous n'investissez pas assez ... Qu'elles meurent! / Annuler"; English "Let ’em Die");
+  the lost-battle record is ALRT 3310; Options has "Alerter sur dépenses" ("Give Overspending Warnings"). `rs.alertWords`.
+- **A new colony plays snd 2000** (the skin had no file for the id the rules asked); the **fleet list leaves out satellites**.
+
+Mismatches found and **not fixed** are rows with `"gap": true` (`node tools/display-audit.js 12 --gaps`): among them the battle sounds
+(the original picks snd 3000/3001/3002 by 10 x damage / hit points; the remake by shot number), the fleet info lines ("Plein/Vide",
+Dist/Temps), the Existing Designs window's costs and levels and Rename, Build Ships' own words and layout, the roster strip, the
+menus' dimming and dynamic words, the progress window and "Suite…" in the bubble. Rows still `open` are listed by `--open`.

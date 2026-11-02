@@ -206,3 +206,12 @@ It takes about two minutes: 756 routines, 606 of them named, 35 that don't decom
 decompiles badly: read the disassembly, where extended constants are loaded as three
 moves (`move.l #$4002a000` … is 10.0). `docs/405-findings.md` and `docs/coverage-405.md`
 cite the Mac routines by name and address in this layout.
+
+## Where the sources and decompiles live
+
+The originals, what is unpacked from them and their decompiles are in the private repo `nostalgia-ho-sources`, not here (they are
+Delta Tao's): `originals/<version>/`, `extracted/<version>/` (resource forks as files, `SOURCE.md`), `decompiled/<version>/` (per-segment
+disassembly `asm/`, per-routine C `c/`, `index.tsv`, `all.c`, `HOW.md` with the exact commands) and `audit/<version>/` (the display
+audit's working tables and scripts). `tools/decompile/split-dump.py` makes the saved layout from a `mac68k.py` + `Mac68k.java` run.
+1.2F is done (548 routines, the same list as `docs/coverage-12.md`). `tools/display-audit.js <version>` reads the routine list from
+`docs/coverage-<version>.md` and, when the private repo is beside this one (or HO_SOURCES is set), from `decompiled/<version>/index.tsv`.
