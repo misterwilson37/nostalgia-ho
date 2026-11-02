@@ -5060,6 +5060,7 @@ function openSavedGames(id) {
 }
 function openHelpScreen() {
   const [url, name] = manualFor();
+  if (skinWindow('help', url)) return;
   screen((screensOf(rulesId()) || {}).help || 'Help', el('div', { class: 'shelpbox' }, manualEnglish() ? inEnglish('This help is in English.') : null, el('iframe', { class: 'shelp', src: url, title: name })), { cls: 'helpscreen', back: 'Done' });
 }
 // Game Center's own windows (iOS: GKLeaderboardViewController,

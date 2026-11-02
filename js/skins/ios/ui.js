@@ -1443,6 +1443,39 @@ function openPrefsIOS(P) {
   L.scrim.append(ro);
   return L;
 }
+// -[WebViewDialog initDialog] 0x1000b92b0, setupResource: 0x1000b94a8, webView:shouldStartLoadWithRequest:navigationType: 0x1000b9618, backButtonPressed 0x1000b9784 (WelcomeScene doHelp 0x10001e0e0 hands it
+// help_index_iphone, or help_index on an iPad): a dialog as big as the screen (scale 1), the message "Spaceward Ho Help" (a literal, in English), the mini close button, and a UIWebView (black, not opaque) 24 points
+// narrower than the dialog (12 each side), from 68 under the top to 28 above the bottom (the frame's height is the dialog's less 96, its centre 20 under the middle). Links: a page that is not a file (a web address,
+// mail) is opened outside the app; "closeme.html" closes the help; the rest load in place. Back (backButtonPressed): on the index page it closes, else the web view goes back. The page is the help's own HTML
+// (assets/skins/ios/help, help-fr, help-tr: the game's language), in a frame; the browser's own back button (Escape closes)
+function openHelpIOS(url) {
+  const gd = BGD(), { k } = dlgGeom(), cw = Math.trunc(SCREEN.winW / k), ch = Math.trunc(SCREEN.winH / k);
+  if (!SCREEN.pad) url = url.replace(/help_index\.html$/, 'help_index_iphone.html');
+  const L = dialogLayer(cw, ch, k, 'Spaceward Ho Help', () => {});
+  const close = () => { fr.remove(); L.scrim.remove(); document.removeEventListener('keydown', esc, true); };
+  const esc = (e) => { if (e.key === 'Escape') { e.stopPropagation(); close(); } };
+  document.addEventListener('keydown', esc, true);
+  const msg = UIEl('div', 'ios-omsg', { style: `width:${bpt(cw - gd.a80 * 4)};font-size:${bpt(SCREEN.pad ? 24 : 18)}` });
+  msg.textContent = 'Spaceward Ho Help'; msg.setAttribute('translate', 'no');
+  L.dlg.append(put(msg, cw / 2, ch - gd.a80 * 4, 0.5, 1));
+  const x = UIEl('button', 'ios-gx', { type: 'button', 'aria-label': 'Close' }, pic('button-x'));
+  x.addEventListener('click', (e) => { e.stopPropagation(); close(); });
+  L.dlg.append(x);
+  const fr = UIEl('iframe', 'ios-help', { src: url, title: 'Spaceward Ho Help', style: `left:${bpt(12)};top:${bpt(68)};width:${bpt(cw - 24)};height:${bpt(ch - 96)}` });
+  L.dlg.append(fr);
+  fr.addEventListener('load', () => {
+    let d; try { d = fr.contentDocument; } catch (e) { return; }
+    if (!d) return;
+    d.addEventListener('click', (e) => {
+      const an = e.target.closest && e.target.closest('a[href]'); if (!an) return;
+      const href = an.getAttribute('href');
+      if (/closeme\.html$/.test(href)) { e.preventDefault(); close(); }
+      else if (/^[a-z][a-z0-9+.-]*:/i.test(href) && !/^file:/i.test(href)) { e.preventDefault(); window.open(an.href, '_blank', 'noopener'); }
+    });
+  });
+  pushScrim(L.scrim);
+  return L;
+}
 // -[AutoPlayLayer initDialog] 0x100096584, valueChanged:tag: 0x100097aa0, showPlayOneTurn 0x100097ddc / showJustEndTurns 0x10009801c / showPlayForMe 0x10009822c, togglePlayOneTurn 0x1000978ec, toggleEndMyTurns
 // 0x1000979fc, toggleAutoPlay 0x10009795c, doClose: 0x100097870 (positions read in the assembly; a88 = 6, 8 on an iPad; H the dialog's height; y up). The message Misc 118. The state slider (tag 3, 40 a88 wide) is centred at
 // H - trunc(6.875 a88 + trunc(3.75 a88)) (63): up to 33 per cent of it is "Play One Turn" (Misc 119, or 184 "Already Played One Turn" when the computer has played this turn, when the check goes too), 34 to 67
@@ -2132,6 +2165,7 @@ window.HOTHEME = {
     if (appRules && name === 'auto') { openAutoPlayIOS(); return true; }
     if (appRules && name === 'armageddon') { openArmageddonIOS(); return true; }
     if (appRules && name === 'types') { openScrapIOS(); return true; }
+    if (appRules && name === 'help') { openHelpIOS(x[0]); return true; }
     if (appRules && name === 'prefs') { openPrefsIOS(x[0]); return true; }
     if (name === 'organize') { if (x[0] == null || HO.rules(a.G).organizeFleets !== 'ios') return false; return openOrganizeIOS(x[0]); }
     return false;

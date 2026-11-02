@@ -330,3 +330,4 @@ html.skin-ios .ios-sctx { display: flex; flex-direction: column; align-items: ce
 html.skin-ios .ios-sccross { position: absolute; inset: 0; width: 100%; height: 100%; display: none; pointer-events: none; }
 html.skin-ios .ios-scitem.scrapped .ios-sccross { display: block; }
 html.skin-ios .ios-bremake { position: fixed; left: 50%; bottom: calc(6px); transform: translateX(-50%); font-size: 13px; text-decoration: underline; opacity: .85; z-index: 41; }
+html.skin-ios .ios-help { position: absolute; box-sizing: border-box; border: 0; background: #000; color-scheme: dark; }
