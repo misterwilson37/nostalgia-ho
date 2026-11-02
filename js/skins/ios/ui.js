@@ -1549,7 +1549,8 @@ const starItem = (text, hat, size, onClick, scale) => {
 // The three buttons are the page's own #tnew, #tcont and #thelp (their handlers kept), put in the scene; the page's other controls (importing a game, the skin and language pickers, the account, the credits) are the
 // remake's and sit in a panel behind a small "Remake options" button (the app has none of them).
 function buildWelcome(ts) {
-  let root = ts.querySelector('.ios-welcome'); if (root) root.remove();
+  let root = ts.querySelector('.ios-welcome');
+  if (root) { const tb = ts.querySelector('.tbtns'); if (tb) for (const id of ['thelp', 'tcont', 'tnew']) { const b = root.querySelector('#' + id); if (b) tb.prepend(b); } root.remove(); } // (the page's buttons go back before the scene is built again)
   root = UIEl('div', 'ios-sg ios-welcome');
   const B = sceneBase(root, 200), { gd, a80, W, H, s, stripW } = B, fsz = SCREEN.pad ? 19 : 14;
   const guy = pic('hoguy_0', 'ios-wguy'); guy.style.cssText = 'position:absolute;pointer-events:none';
