@@ -58,7 +58,7 @@ function menuLayout() {
       it('Sound', () => { A().Sound.on = !A().Sound.on; A().savePrefs(); }, { ghost: noGame, checked: () => A().Sound.on })],
     Ships: [
       it('List Ship Types…', () => A().openScrapTypes(), { ghost: () => noGame() || !A().me().designs.some(d => !d.scrapped) }),
-      it('Create New Ship Type…', () => A().openCreateType && A().openCreateType(), { ghost: noGame, key: 'K' }),
+      it('Create New Ship Type…', () => createType(), { ghost: noGame, key: 'K' }),
       '-',
       it('List All Fleets…', () => A().openFleetList(), { ghost: noGame, key: 'L' }),
       // (1010.7 / .8: the selected fleet's ships to organize)
@@ -90,7 +90,192 @@ function menuLayout() {
   };
 }
 
+
+// ---------- the windows (in English as Mac 2.0.1 words them; in French the interface puts 1.2F's DITL words) ----------
+const lang = () => (G() && G().opts && G().opts.lang) || 'fr';
+const own = () => lang() === 'en' || lang() === 'fr';
+const CLASS_FR = { scout: 'Eclaireur', fighter: 'Croiseur', colony: 'Transport', satellite: 'Satellite' };
+const cls = (t) => (lang() === 'fr' ? CLASS_FR[t] : (H().TYPES[t] || { name: t }).name);
+const nice = (n) => (H().rules(G()).fmtNum || H().niceNum)(Math.round(n));
+const fill = (t, ...a) => { let i = 0; return t.replace(/%(\.\*)?[sd]/g, () => String(a[i++])).replace(/%%/g, '%'); };
+// a text the interface must not translate (the program's own words, already in the language, or names)
+const raw = (tag, t, attrs) => { const e = A().el(tag, attrs || null); e.append(document.createTextNode(t)); e.setAttribute('translate', 'no'); return e; };
+// MakeFleetDescription with no count (the lists of designs): "Columbus (1/1) Scout" / "Eclaireur Columbus (1/1)"
+const desc0 = (d) => (lang() === 'fr' ? `${cls(d.type)} ${d.name} (${d.W}/${d.S})` : `${d.name} (${d.W}/${d.S}) ${cls(d.type)}`).slice(0, 40);
+const descN = (d, n) => (lang() === 'fr' ? (n === 1 ? `1 ${cls(d.type)} ${d.name} (${d.W}/${d.S})` : `${n} ${cls(d.type)}s ${d.name} (${d.W}/${d.S})`) : H().rules(G()).shipsDesc(G(), d, n)).slice(0, 40);
+const say = (t) => H().say(G(), t);
+const shipCount = (did) => G().fleets.filter(f => f.owner === A().ME).reduce((a, f) => a + (f.ships[did] || 0), 0);
+function win(body, cls2) { A().modal('', body, { cls: 'mid mac12 ' + (cls2 || ''), label: 'Spaceward Ho!' }); }
+const btn = (t, fn, o) => A().el('button', Object.assign({ onclick: fn }, o || {}), t);
+
+// DLOG 6000 "List Ship Types…" (ListShipTypes @110fc0, InitShipTypesList, SetShipTypeAttrs @11153c, doRenameTypeDialog @11170e)
+function shipTypes(selId) {
+  const a = A(), el = a.el, p = a.me(), rs = H().rules(G());
+  const ds = p.designs.filter(d => !d.scrapped);
+  if (!ds.length) return true;
+  let cur = ds.find(d => d.id === selId) || ds[ds.length - 1];
+  const list = el('div', { class: 'lb', role: 'listbox' }), info = el('div', { class: 'tinfo' });
+  const show = () => {
+    list.innerHTML = '';
+    for (const d of ds.slice().reverse()) list.append(raw('div', desc0(d), { class: 'li' + (d === cur ? ' sel' : ''), role: 'option', onclick: () => { cur = d; show(); } }));
+    const c = H().designCost(G(), cur);
+    info.innerHTML = '';
+    const pic = a.shipImgEl(cur, 48);
+    const r = (label, v) => el('div', { class: 'kv' }, el('span', null, label), raw('b', String(v)));
+    info.append(pic, r('Name:', cur.name), r('Class:', cls(cur.type)), r('Development Cost:', '$' + nice(c.protoTotal != null ? c.protoTotal : c.money + (c.proto || 0))),
+      r('Production Cost:', '$' + nice(c.money)), r(lang() === 'fr' ? raw('span', 'Coût en métal:') : 'Metal Cost:', nice(c.metal)),
+      r('Range', cur.R), r('Speed', cur.V), r('Weapons', cur.W), r('Shields', cur.S), r('Mini', cur.M),
+      r('# Built:', nice(cur.built || 0)), r('#Existing:', nice(shipCount(cur.id))),
+      el('label', { class: 'chk' }, el('input', { type: 'checkbox', checked: cur.scrap301 ? 'checked' : false, onchange: () => { rs.flagScrapDesign(G(), p, cur, 'command'); a.save(); show(); } }), el('span', null, 'Scrap This Type')),
+      el('div', { class: 'btns' }, btn('Rename', () => renameType(cur))));
+  };
+  show();
+  win(el('div', { class: 'types12' }, list, info, el('div', { class: 'btns right' }, btn('OK', () => a.closeModal()))));
+  return true;
+}
+// DLOG 6090: a type's new name, 15 letters at most (a beep past them), "Name It" draws one from the list
+function renameType(d) {
+  const a = A(), el = a.el;
+  const inp = el('input', { maxlength: 15, value: d.name, 'aria-label': 'New Ship Name', onkeydown: (e) => { if (e.key.length === 1 && inp.value.length >= 15 && inp.selectionStart === inp.selectionEnd) { a.beep && a.beep(); } } });
+  inp.setAttribute('translate', 'no');
+  win(el('div', null, el('p', null, 'Type your new ship name or click on “Name It” for a suggestion:'), inp,
+    el('div', { class: 'btns' }, btn('Name It', () => { inp.value = H().designName(G(), a.me(), d.type); }), btn('Cancel', () => shipTypes(d.id), { class: 'quiet' }),
+      btn('OK', () => { const n = inp.value.trim(); if (n) { d.name = n.slice(0, 15); a.save(); a.renderPanel(); } shipTypes(d.id); }))), 'small');
+}
+
+// DLOG 6030 "List All Fleets…" (ListAllFleets @1120dc, InitFleetsList @1123a0): every fleet of yours but satellites, one line each
+// (STR# 4000.24-27 / Mac 2.0.1's literals), the fleets that are stuck last; "Go To Fleet" selects it (ALRT 3290 in hyperspace)
+const FLEET_LINES = {
+  en: { at: '%s stationed at %s.', leave: '%s leaving %s for %s to arrive in %d.', fly: '%s to arrive at %s in %d.', stuck: '%s marooned at %s.',
+    hyper: 'Sorry, but that fleet is currently in hyperspace and can’t be contacted until it arrives at its next location.' },
+  fr: { at: '%s en orbite à %s.', leave: '%s quittant %s pour %s. Prévision: %d.', fly: '%s arrivant à %s en %d.', stuck: '%s en panne sèche à %s.',
+    hyper: 'Désolé, mais cette flotte est actuellement en hyperespace et ne pourra être contactée qu\'arrivée à destination.' },
+};
+function stuck(f) {
+  if (f.star == null || G().stars[f.star].owner === A().ME) return false;
+  return !G().stars.some(s => s.id !== f.star && H().starDist(G(), f.star, s.id) <= f.fuel + 1e-9);
+}
+function fleetsStatus() {
+  const a = A(), el = a.el, W = FLEET_LINES[lang()], g = G();
+  const fs = g.fleets.filter(f => f.owner === a.ME && !f.sat);
+  const order = fs.filter(f => !stuck(f)).concat(fs.filter(stuck));
+  const turns = (f) => Math.ceil((f.dist - (f.prog || 0)) / H().fleetSpeed(g, f) - 1e-9);
+  const line = (f) => {
+    const d = H().fleetText(g, f), st = (i) => g.stars[i].name;
+    if (stuck(f)) return fill(W.stuck, d, st(f.star));
+    if (f.to != null) return fill(W.fly, d, st(f.to), H().arrivalYear(g, turns(f)));
+    if (f.dest != null) return fill(W.leave, d, st(f.star), st(f.dest), H().arrivalYear(g, Math.ceil(H().starDist(g, f.star, f.dest) / H().fleetSpeed(g, f) - 1e-9)));
+    return fill(W.at, d, st(f.star));
+  };
+  let cur = null;
+  const list = el('div', { class: 'lb', role: 'listbox' });
+  const show = () => { list.innerHTML = ''; for (const f of order) list.append(raw('div', line(f), { class: 'li' + (f === cur ? ' sel' : ''), role: 'option', onclick: () => { cur = f; show(); }, ondblclick: go })); };
+  function go() {
+    if (!cur) return;
+    if (cur.to != null) { alertBox([W.hyper]); return; }
+    a.UI.selFleet = cur.id; a.UI.sel = cur.star; a.closeModal(); a.centerOn(cur.star); a.renderPanel(); a.draw();
+  }
+  show();
+  win(el('div', null, el('p', null, 'List of All Fleets:'), list, el('div', { class: 'btns right' }, btn('Go To Fleet', go, { class: 'quiet' }), btn('OK', () => a.closeModal()))));
+  return true;
+}
+// an alert over what is open (the dialog stays under it), in the program's words; its picture 3020 is the skin's
+function alertBox(paras) { const b = A().alertOver(paras, lang()); if (b) b.setAttribute('translate', 'no'); }
+
+// DLOG 6020 "Build Ships at …" (BuildShips @112946): "Shipbuilding Queue at:" the star; "Available Types" (the designs);
+// "In The Queue:" (each line MakeFleetDescription of the design and its count); for the type picked, "$%s (D)" its development and
+// "$%s (P)" its production cost (STR# 4000.28-29), and "%d%% Done" of the first ship queued (4000.30). A double click on a type adds one
+// (AddTypeToQueue: a beep when it can't), on a queued line takes one off (RemoveTypeFromQueue). OK keeps the queue, Cancel puts it back.
+const DONE = { en: '%d%% Done', fr: '%d%% finition' };
+function buildShips(sid) {
+  const a = A(), el = a.el, g = G(), p = a.me(), s = g.stars[sid];
+  if (!s || s.owner !== a.ME) return false;
+  const before = JSON.stringify(s.queue || []);
+  const ds = p.designs.filter(d => !d.scrapped).reverse(); // (InitBuildShipsTypesList: every type, the newest first)
+  let pick = ds[0] || null;
+  const types = el('div', { class: 'lb', role: 'listbox' }), queue = el('div', { class: 'lb', role: 'listbox' });
+  const dev = raw('span', ''), pro = raw('span', ''), done = raw('span', '');
+  const show = () => {
+    types.innerHTML = ''; queue.innerHTML = '';
+    for (const d of ds) types.append(raw('div', desc0(d), { class: 'li' + (d === pick ? ' sel' : ''), role: 'option', onclick: () => { pick = d; show(); }, ondblclick: () => add(d) }));
+    (s.queue || []).forEach((it, i) => { const d = H().getDesign(g, a.ME, it.did); if (d) queue.append(raw('div', descN(d, it.n), { class: 'li', role: 'option', ondblclick: () => { H().unqueueShip(g, a.ME, sid, i); show(); } })); });
+    const c = pick ? H().designCost(g, pick) : null;
+    dev.textContent = c ? fill('$%s (D)', nice(c.protoTotal != null ? c.protoTotal : c.money)) : '';
+    pro.textContent = c ? fill('$%s (P)', nice(c.money)) : '';
+    const pr = (s.queue || []).length ? H().rules(g).yardProgress(g, p, s) : null;
+    done.textContent = pr ? fill(DONE[lang()], pr.pct) : '';
+  };
+  const add = (d) => { if (d.scrap301 || !H().canBuildType(g, p, d.type) || !H().queueShips(g, a.ME, sid, d.id, 1)) { if (a.beep) a.beep(); } show(); };
+  show();
+  win(el('div', { class: 'build12' },
+    el('div', { class: 'kv' }, el('span', null, 'Shipbuilding Queue at:'), raw('b', s.name)),
+    el('div', { class: 'cols' }, el('div', null, el('p', null, 'In The Queue:'), queue, dev, ' ', pro, el('br'), done), el('div', null, el('p', null, 'Available Types'), types)),
+    el('div', { class: 'btns right' }, btn('Cancel', () => { s.queue = JSON.parse(before); a.closeModal(); a.renderPanel(); }, { class: 'quiet' }), btn('OK', () => { a.closeModal(); a.save(); a.renderPanel(); }))));
+  return true;
+}
+
+// DLOG 6010 "Create New Ship Type…" ⌘K (CreateShipType @111866): ALRT 3280 first when there are 20 types; "Name of New Ship Type:" (15
+// letters, "Name It For Me"), the class menu (MENU 6015), five sliders each "%d/%d" (its level / the most), "Dev. Cost:", "Prod. Cost:",
+// "Metal Cost:"; "Create" asks ALRT 3040 until a name is given and ALRT 3050 until a slider has been moved
+const ALERT_TYPES = {
+  en: { full: ['Sorry, but Spaceward Ho! allows you to have only 20 ship types at one time. ', 'If you would like to create another ship type, scrap an old type by checking the “Scrap” box for it in the “List Ship Types…” Dialog.', 'The ship will be scrapped during the turn update and you can create a new type next turn…'],
+    name: ['Please name your new ship type.'], tech: ['Please set your new ship type’s tech levels.'] },
+  fr: { full: ['Désolé, mais Spaceward Ho! vous autorise seulement 20 modèles de vaisseaux simultanés. ', 'Pour créer ce nouveau modèle, recyclez-en d\'abord un ancien en cochant la case correspondante de la boîte de dialogue.', 'Ce modèle sera détruit lors de la mise à jour du tour, et vous pourrez en créer un autre au prochain tour.'],
+    name: ['Merci de baptiser votre nouveau modèle de vaisseau.'], tech: ['Merci d\'affecter un minimum technologique à votre nouveau modèle.'] },
+};
+function createType() {
+  const a = A(), el = a.el, g = G(), p = a.me(), W = ALERT_TYPES[lang()];
+  if (p.designs.filter(d => !d.scrapped).length >= (H().rules(g).maxDesigns || 20)) { alertBox(W.full); return; }
+  const types = ['scout', 'fighter', 'colony', 'satellite'];
+  const st = { type: 'scout', R: 0, V: 0, W: 0, S: 0, M: 0, name: '' };
+  let named = false, moved = false;
+  const box = el('div', { class: 'create12' });
+  const name = el('input', { maxlength: 15, value: '', 'aria-label': 'Name of New Ship Type:', oninput: () => { st.name = name.value.trim(); named = !!st.name; },
+    onkeydown: (e) => { if (e.key.length === 1 && name.value.length >= 15 && name.selectionStart === name.selectionEnd && a.beep) a.beep(); } });
+  name.setAttribute('translate', 'no');
+  const sel = el('select', { 'aria-label': 'Class', onchange: () => { st.type = sel.value; render(); } }, ...types.map(t => raw('option', cls(t), { value: t })));
+  const sliders = el('div'), costs = el('div');
+  const render = () => {
+    const L = H().designLimits(g, p, st.type);
+    sliders.innerHTML = '';
+    for (const [k, lab] of [['R', 'Range'], ['V', 'Speed'], ['W', 'Weapons'], ['S', 'Shields'], ['M', 'Mini']]) {
+      const min = k === 'R' && st.type === 'satellite' ? 0 : H().designMin(g, k, st.type), max = k === 'R' && st.type === 'satellite' ? 0 : Math.max(min, L[k] || min);
+      st[k] = Math.max(min, Math.min(max, st[k]));
+      const out = raw('b', `${st[k]}/${max}`);
+      sliders.append(el('label', { class: 'slide' }, el('span', null, lab), el('input', { type: 'range', min, max, value: st[k], disabled: max <= min,
+        oninput: (e) => { st[k] = +e.target.value; moved = true; out.textContent = `${st[k]}/${max}`; showCost(); } }), out));
+    }
+    showCost();
+  };
+  const showCost = () => {
+    const c = H().designCost(g, st);
+    costs.innerHTML = '';
+    costs.append(el('div', { class: 'kv' }, el('span', null, 'Dev. Cost:'), raw('b', '$' + nice(c.protoTotal != null ? c.protoTotal : c.money))),
+      el('div', { class: 'kv' }, el('span', null, 'Prod. Cost:'), raw('b', '$' + nice(c.money))),
+      el('div', { class: 'kv' }, lang() === 'fr' ? raw('span', 'CT Métal:') : el('span', null, 'Metal Cost:'), raw('b', nice(c.metal))));
+  };
+  render();
+  box.append(el('p', null, 'Name of New Ship Type:'), name, sel, sliders, costs,
+    el('div', { class: 'btns' }, btn('Name It For Me', () => { st.name = H().designName(g, p, st.type); name.value = st.name; named = true; }, { class: 'quiet' }),
+      btn('Cancel', () => a.closeModal(), { class: 'quiet' }),
+      btn('Create', () => {
+        if (!named || !st.name) { alertBox(W.name); return; }
+        if (!moved) { alertBox(W.tech); return; }
+        H().findOrCreateDesign(g, p, { type: st.type, R: st.R, V: st.V, W: st.W, S: st.S, M: st.M, name: st.name });
+        a.closeModal(); a.save(); a.renderPanel();
+      })));
+  win(box);
+}
+
 window.HOMAC12 = {
+  // the program's own windows, in English and French (another language keeps the remake's)
+  window(name, ...x) {
+    if (!G() || !own()) return false;
+    if (name === 'types') return shipTypes();
+    if (name === 'fleets') return fleetsStatus();
+    if (name === 'build') return buildShips(x[0]);
+    return false;
+  },
   // the remake's commands that 1.2 has no menu item for (Import, Export, the Halls, Auto play, Players ...) go to the Ho! menu
   menus(M, ho) {
     ITEMS = {};
