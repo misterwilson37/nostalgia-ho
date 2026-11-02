@@ -305,7 +305,7 @@ html.skin-ios .ios-oc { position: absolute; left: 0; bottom: 0; width: 0; height
 html.skin-ios .ios-ocol { position: absolute; box-sizing: border-box; cursor: pointer; }
 html.skin-ios .ios-ocol.t { outline: calc(1 * var(--pt)) solid #393cd6; outline-offset: calc(-1 * var(--pt)); }
 html.skin-ios .ios-ocol.t.press { outline-color: #f00; }
-html.skin-ios .ios-ostack { position: absolute; left: 0; top: 0; display: flex; flex-direction: column-reverse; align-items: center; width: max-content; }
+html.skin-ios .ios-ostack { position: absolute; left: 0; top: 0; display: flex; flex-direction: column; align-items: center; } /* alignItemsVerticallyWithPadding: a80 bottomToTop: NO (updateData: 0x1000c0f38, w2 = 0): the first item, the name, is at the top; the menu hangs from the rectangle's top (setPosition: 0x10001f3c4) */
 html.skin-ios .ios-on { position: static; text-align: center; }
 html.skin-ios .ios-bitem.act { outline: calc(1 * var(--pt)) solid #393cd6; outline-offset: calc(-1 * var(--pt)); }
 html.skin-ios .ios-oadj { position: absolute; display: flex; }

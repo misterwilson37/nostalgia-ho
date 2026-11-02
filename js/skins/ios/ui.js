@@ -998,6 +998,8 @@ function fleetItems(box) {
   for (const r of [...box.querySelectorAll('.frow')]) {
     const f = G.fleets.find(x => String(x.id) === r.getAttribute('data-fleet'));
     if (!f || f.sat || r.getAttribute('data-inbound')) { r.remove(); continue; } // (the app's list is the fleets at the star; satellites have their own menu)
+    // FUN_100035dd4 / FUN_100035fa8: your own fleets, then those of a player who is allied with you both ways (FUN_10003a0ec) and is also your best buddy both ways (FUN_10003a148) or whose fleet is at one of your colonies
+    if (f.owner !== a.ME && !(HO.isAllied(G, a.ME, f.owner) && (HO.isBuddy(G, a.ME, f.owner) || (G.stars[f.star] && G.stars[f.star].owner === a.ME)))) { r.remove(); continue; }
     const it = fleetItem(G, f, a); if (!it) continue;
     for (const c of [...r.children]) if (!c.classList.contains('facts')) c.remove();
     r.prepend(it); r.classList.add('ios-frow');
@@ -1264,6 +1266,19 @@ function updateShipTypes(flow) {
 }
 
 // -[BuildSingleShipDialog initDialog] 0x1000b4d60, layout 0x1000b5e14
+// +[DialogLayerSprite message:closeButton:cancelButton:] 0x1000bc9dc (FUN_10008ecb0 calls it with the check button on and the cross off): a dialog (dlgGeom), the message (addMessage: 0x1000bcad0:
+// Arial 18, 24 on an iPad, centred, in a box (width - 4 a80) x (height - 8 a80) about the dialog's middle, so the text's top is 4 a80 under the top), the check button at (width - 4 a80, a80), anchored right bottom
+function appMessage(text) {
+  const { cw, ch, k } = dlgGeom(), gd = BGD(), pad = SCREEN.pad;
+  const L = dialogLayer(cw, ch, k, 'Message', () => L.scrim.remove());
+  const msg = UIEl('div', 'ios-omsg', { style: `width:${bpt(cw - gd.a80 * 4)};font-size:${bpt(pad ? 24 : 18)}` });
+  msg.textContent = text;
+  const bk = UIEl('button', 'ios-bcheck', { type: 'button', 'aria-label': 'OK' }, pic('button-check'));
+  bk.addEventListener('click', (e) => { e.stopPropagation(); L.scrim.remove(); });
+  L.dlg.append(put(msg, cw / 2, ch - gd.a80 * 4, 0.5, 1), put(UIEl('div', 'ios-bbtns', null, bk), cw - gd.a80 * 4, gd.a80, 1, 0));
+  pushScrim(L.scrim);
+  return L.scrim;
+}
 function openSingleShip(flow, cls, index) {
   const a = A(), G = a.G, p = a.me(), sid = flow.sid, gd = BGD();
   if (flow.single) { flow.single.remove(); flow.scrims = flow.scrims.filter(x => x !== flow.single); flow.single = null; }
@@ -1456,7 +1471,7 @@ function openSingleShip(flow, cls, index) {
     if (n < 1) return;
     let d = shipRec();
     if (!d) {
-      if (designsOf(p).length >= (HO.rules(G).maxDesigns || 24)) { close(); const al = HO.say(G, HO.DATA.alerts[15]); a.alertOver([al]); return; } // Alert Strings 16
+      if (designsOf(p).length >= (HO.rules(G).maxDesigns || 24)) { appMessage(HO.say(G, HO.DATA.alerts[15])); return; } // Alert Strings 16: buildShips 0x1000b7630 shows it (FUN_10008ecb0: +[DialogLayerSprite message:closeButton:cancelButton:] with the check button) and returns, the dialog staying
       const sp = specOf(); sp.name = (name.value || '').trim().slice(0, 15) || autoName(classOf(sp.type));
       d = HO.findOrCreateDesign(G, p, sp);
     }
@@ -1503,7 +1518,7 @@ function openOrganizeIOS(sid) {
   let org = { scrim: L.scrim };
   const done = (keyToShow) => {
     S.sel = null; S.scrapping = false;
-    if (keyToShow) { const i = cols().findIndex(c => c.key === keyToShow); if (i >= 0 && (i < S.first || i >= S.first + 4)) S.first = Math.max(0, i - 3); }
+    if (keyToShow) { const i = cols().findIndex(c => c.key === keyToShow); if (i >= 0 && (i < S.first || i >= S.first + 4)) S.first = i; } // (updateData: 0x1000c0f38: a column that is off the screen becomes the first one showing, then kept within the last four)
     a.save(); a.renderPanel(); a.draw(); render();
   };
   const move = (c) => { // move:from:to: 0x1000c27e0: the whole pile; the engine's split and merge give the fleet that takes it the fuel, "bought" and colonists rules
@@ -1556,7 +1571,7 @@ function openOrganizeIOS(sid) {
     all.forEach((c, i) => {
       const target = S.scrapping ? !!c.f : S.sel ? canTake(c) : false;
       const col = UIEl('div', 'ios-ocol' + (target ? ' t' : ''), { style: `left:${bpt(gd.a80 * 2 + i * pitch)};bottom:${bpt(ry)};width:${bpt(nodeW)};height:${bpt(rh)}` });
-      const stack = UIEl('div', 'ios-ostack', { style: `gap:${bpt(gd.a80)}` });
+      const stack = UIEl('div', 'ios-ostack', { style: `gap:${bpt(gd.a80)};width:${bpt(nodeW)}` });
       const nm = UIEl('span', 'ios-bt ios-on'); nm.style.fontSize = bpt(16);
       nm.textContent = c.f ? (c.f.scrap301 && a.marksScrap() ? 'Scrapped' : `Fleet ${Math.max(0, mine.indexOf(c.f))}`) : `Fleet ${mine.length + all.slice(0, i).filter(z => z.empty).length}`; // the sprintf template 37, "Fleet %d", with the fleet's number
       stack.append(nm);
@@ -1581,9 +1596,26 @@ function openOrganizeIOS(sid) {
         }
       }
       col.append(stack);
-      col.addEventListener('click', () => tapCol(c));
-      col.addEventListener('pointerdown', () => { if (target) col.classList.add('press'); });
-      for (const ev of ['pointerleave', 'pointerup']) col.addEventListener(ev, () => col.classList.remove('press'));
+      // CCMenuAdvanced ccTouchMoved: 0x10001f7cc: a drag of 30 points or more slides a menu taller than its rectangle (setPosition: 0x10001f3c4 keeps its top at the rectangle's top or higher, its bottom at the rectangle's bottom or lower)
+      let slid = 0;
+      if (!S.sel) {
+        let d2 = null;
+        col.addEventListener('pointerdown', (e) => { d2 = { y: e.clientY, len: 0, last: e.clientY, slid: false }; });
+        col.addEventListener('pointermove', (e) => { if (!d2) return; const s = dlg.getBoundingClientRect().width / W; d2.len += Math.abs(e.clientY - d2.last) / s; d2.last = e.clientY; if (d2.len >= 30) { d2.slid = true; slid = Math.max(0, Math.min(slid + (d2.y - e.clientY) / s, Math.max(0, stack.getBoundingClientRect().height / s - rh))); d2.y = e.clientY; stack.style.transform = `translateY(${bpt(-slid)})`; } });
+        col.addEventListener('pointerup', () => { d2 = null; });
+        col.addEventListener('click', (e) => { if (S.scrapping) tapCol(c); });
+      } else if (target) {
+        // OrganizerFleetFleetsContainer (a swallowing targeted delegate while a pile is chosen): ccTouchBegan: 0x1000a5e08 takes a touch that begins in a column that can take the pile and outlines it red;
+        // ccTouchMoved: updateSelectedFleet: 0x1000a5e80 follows the finger (a column under it, or none); ccTouchEnded: calls the block with the one under the finger: move:from:to: 0x1000c27e0 (nothing for none)
+        col.addEventListener('pointerdown', (e) => {
+          e.preventDefault(); try { col.setPointerCapture(e.pointerId); } catch (er) {} col.classList.add('press');
+          const cs = [...cont.querySelectorAll('.ios-ocol.t')], at = (ev) => cs.find(z => { const r = z.getBoundingClientRect(); return ev.clientX >= r.left && ev.clientX < r.right && ev.clientY >= r.top && ev.clientY < r.bottom; });
+          const mv = (ev) => { const z = at(ev); for (const o of cs) o.classList.toggle('press', o === z); };
+          const up = (ev) => { col.removeEventListener('pointermove', mv); col.removeEventListener('pointerup', up); col.removeEventListener('pointercancel', up); const z = at(ev); for (const o of cs) o.classList.remove('press'); if (z && z._c) tapCol(z._c); };
+          col.addEventListener('pointermove', mv); col.addEventListener('pointerup', up); col.addEventListener('pointercancel', up);
+        });
+        col._c = c;
+      }
       cont.append(col);
     });
     // MenuAdjusters (0x100011868): adjuster_left and adjuster_right, 4 apart, scale 0.7 (items 0.5 on an iPhone, 1 on an iPad), top right with 2 a80
