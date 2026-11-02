@@ -452,6 +452,13 @@ document.addEventListener('keydown', (e) => {
 }, true);
 
 window.HOMAC12 = {
+  // (the Edit menu's French title is 1.2F's "Edition", which the interface would take for its English word "Edition": written as it is)
+  menuName(name) {
+    if (name !== 'Edit') return name;
+    const sp = document.createElement('span'), set = () => { sp.textContent = window.HOUI && HOUI.t ? HOUI.t('Edit') : 'Edit'; };
+    sp.setAttribute('translate', 'no'); set(); if (window.HOUI && HOUI.onChange) HOUI.onChange(set);
+    return sp;
+  },
   // (NewGame @100004: the status window "Ecriture nouveau fichier Jeu..." (STR# 4000.1; Mac 2.0.1 "Writing New Game File...") while the
   // galaxy file is written, its bar moving once a player)
   beforeFirstTurn(go) {
