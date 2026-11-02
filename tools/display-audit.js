@@ -20,7 +20,7 @@
 //   { r: routine, a: address (hex, as in the coverage doc), seg, shows, remake: ["file:function", ...], status,
 //     how | reason, fix, formats: ["family", ...] }
 // The tool fails when
-//   - a routine of the version has no row (the list is the coverage doc's table, docs/coverage-<version>.md, and, when the
+//   - a routine of the version has no row (the list is the coverage doc's table (or, with "routineList" in the JSON, that file), docs/coverage-<version>.md, and, when the
 //     private sources repo is beside this one (or HO_SOURCES is set), the decompile's index.tsv there as well), or a row
 //     names no routine of it, or a routine has two rows;
 //   - a row has no status or no reason ("how" for matched, "fix" for fixed, "reason" otherwise);
@@ -40,11 +40,16 @@ let bad = 0;
 const fail = (m) => { bad++; console.log('FAIL ' + m); };
 
 // ---------- the version's routines ----------
-const cov = fs.readFileSync(path.join(root, D.routines), 'utf8');
 const routines = new Map(); // "name@addr" -> true
-for (const l of cov.split('\n')) {
-  const m = /^\| `(\S+)` @ ?([0-9a-f]+) \|/.exec(l);
-  if (m) routines.set(m[1] + '@' + m[2].replace(/^0+/, ''), m[1]);
+if (D.routineList) {
+  // a program too big for a table in its coverage doc (iOS: 5,044 routines): the list is a file, "segment<TAB>address<TAB>size<TAB>name" per line
+  for (const l of fs.readFileSync(path.join(root, D.routineList), 'utf8').split('\n').slice(1)) { const f = l.split('\t'); if (f.length > 3) routines.set(f[3] + '@' + f[1].replace(/^0+/, ''), f[3]); }
+} else {
+  const cov = fs.readFileSync(path.join(root, D.routines), 'utf8');
+  for (const l of cov.split('\n')) {
+    const m = /^\| `(\S+)` @ ?([0-9a-f]+) \|/.exec(l);
+    if (m) routines.set(m[1] + '@' + m[2].replace(/^0+/, ''), m[1]);
+  }
 }
 const SRC = process.env.HO_SOURCES || path.join(root, '..', 'nostalgia-ho-sources');
 const idx = path.join(SRC, 'decompiled', D.decompile || '', 'index.tsv');
@@ -53,8 +58,8 @@ if (D.decompile && fs.existsSync(idx)) {
   fromIndex = true;
   const list = new Map();
   for (const l of fs.readFileSync(idx, 'utf8').split('\n').slice(1)) { const f = l.split('\t'); if (f.length > 3) list.set(f[3] + '@' + f[1].replace(/^0+/, ''), 1); }
-  for (const k of list.keys()) if (!routines.has(k)) fail(`${k} is in the decompile's index but not in ${D.routines}`);
-  for (const k of routines.keys()) if (!list.has(k)) fail(`${k} is in ${D.routines} but not in the decompile's index`);
+  for (const k of list.keys()) if (!routines.has(k)) fail(`${k} is in the decompile's index but not in ${D.routineList || D.routines}`);
+  for (const k of routines.keys()) if (!list.has(k)) fail(`${k} is in ${D.routineList || D.routines} but not in the decompile's index`);
 }
 
 // ---------- the rows ----------
