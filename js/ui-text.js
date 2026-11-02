@@ -60,6 +60,7 @@ root.HOUI.add([
 ['End turn and switch players', 'Finir le tour et changer de joueur', 'Zug Ende & Spielerwechsel', 'Sırayı bitir ve oyuncu değiştir', 'Terminar el turno y cambiar de jugador', { de: 'Amiga' }],
 ['End Turn and Switch Players', 'Finir le tour et changer de joueur', 'Zug Ende & Spielerwechsel', 'Sırayı Bitir ve Oyuncu Değiştir', 'Terminar el turno y cambiar de jugador', { de: 'Amiga' }],
 ['Players and history', 'Joueurs et historique', 'Spieler und Verlauf', 'Oyuncular ve tarihçe', 'Jugadores e historial'],
+['Players and history…', 'Joueurs et historique…', 'Spieler und Verlauf…', 'Oyuncular ve tarihçe…', 'Jugadores e historial…'],
 ['Auto-play this turn', 'Jouer ce tour automatiquement', 'Diesen Zug automatisch spielen', 'Bu sırayı otomatik oyna', 'Jugar este turno automáticamente'],
 ['Auto play…', 'Jeu automatique…', 'Autospiel…', 'Otomatik oyna…', 'Juego automático…', { fr: '3.0.1F', de: '~Amiga', tr: '~iOS' }],
 ['Auto play is for one-player games.', 'Le Jeu automatique est réservé aux parties à un joueur.', 'Autospiel gibt es nur in Spielen mit einem Spieler.', 'Otomatik Oyna yalnızca tek oyunculu oyunlar içindir.', 'El juego automático es solo para partidas de un jugador.', null, { tr: 'Otomatik oyun yalnızca tek oyunculu oyunlar içindir.' }],
