@@ -247,8 +247,19 @@ const UIEl = (tag, cls, attrs, ...kids) => {
   return e;
 };
 const A = () => window.HOAPI;
-let pbEl, fdEl, fdList, fleetsOpen = false, hudEl, hudRow, hudL, hudR, colEl, turnEl, gearBtn, tmEl, tmFill, tmThumb, sideBtn, gearOpen = false;
+let gnEl, gnCv, pbEl, fdEl, fdList, fleetsOpen = false, hudEl, hudRow, hudL, hudR, colEl, turnEl, gearBtn, tmEl, tmFill, tmThumb, sideBtn, gearOpen = false;
 function sideOpen() { return document.documentElement.classList.contains('ios-side'); }
+// -[MainGameScene toggleNodes:] 0x10000bf5c: one container at a time. An iPad has the one (CombinedInfoContainer: totals, technology, budget bars and players);
+// an iPhone's buttons show IPhoneCombinedInfoContainer (totals and technology), StarsListContainer (the budget bars: the colonies),
+// PlayerListContainer; pressing the one that shows closes it.
+let cont = 'info';
+const CBTN = { dollar: 'info', planet: 'stars', enemy: 'players' };
+function setCont(name) {
+  if (SCREEN.pad || name === 'info' && !CBTN.x) { if (SCREEN.pad) { setSide(!sideOpen()); return; } }
+  if (sideOpen() && cont === name) { setSide(false); return; }
+  cont = name; document.documentElement.dataset.iosc = name; setSide(true);
+  for (const b of document.querySelectorAll('.ios-col .ios-btn')) { const c = CBTN[b.dataset.ios]; b.classList.toggle('on', !!c && c === name); }
+}
 function sideLayout() {
   // -[MapLayer setBoundsForSidebar] 0x10000db54: the map's pan rectangle starts at the sidebar's width + 8 (iPad) or + 4 (iPhone)
   // (a80 x 10 from the top and bottom); the page keeps the map beside the sidebar when there is room for it
@@ -258,7 +269,8 @@ function sideLayout() {
 function setSide(open, quiet) {
   const de = document.documentElement;
   de.classList.toggle('ios-side', !!open);
-  if (sideBtn) { sideBtn.classList.toggle('on', !!open); sideBtn.setAttribute('aria-pressed', open ? 'true' : 'false'); }
+  if (sideBtn) { sideBtn.classList.toggle('on', !!open && (SCREEN.pad || cont === 'info')); sideBtn.setAttribute('aria-pressed', open ? 'true' : 'false'); }
+  if (!open) for (const b of document.querySelectorAll('.ios-col .ios-btn')) b.classList.remove('on');
   sideLayout();
   if (!quiet && A() && A().G && A().fit) setTimeout(() => A().fit(), 220); // the map refits beside the sidebar (setBoundsForSidebar)
 }
@@ -269,10 +281,10 @@ function buildColumn(app) {
   for (const o of app.querySelectorAll('.ios-col, .ios-graph')) o.remove();
   // -[MainGameScene init]: the column's items in order, each a CCMenuItemToggle of button-<name>.png (the second state tinted 0x7d7d7d)
   const items = [
-    ['dollar', 'Information', () => setSide(!sideOpen())],            // toggleInfo: the totals and bars sidebar
+    ['dollar', 'Information', () => setCont('info')],                  // toggleInfo: the totals and bars sidebar
     ['news', 'Reports', go(a => a.openReports())],                    // toggleHistory: the message history container
-    ['planet', 'Stars', go(a => a.openStarList())],                   // toggleStars (iPhone): the explored stars list
-    ['enemy', 'Players', go(a => a.openPlayers())],                   // togglePlayers (iPhone): the players list
+    ['planet', 'Stars', () => setCont('stars')],                       // toggleStars (iPhone): StarsListContainer, the colonies' budget bars
+    ['enemy', 'Players', () => setCont('players')],                    // togglePlayers (iPhone): PlayerListContainer
   ].filter(i => !SCREEN.pad || i[0] === 'dollar' || i[0] === 'news');
   // the iPad's menu has the first two only (-[MainGameScene init]): its stars (the colonies' bars, PlayerPlanetsLayer) and players
   // (PlayerListLayer) lists are in its combined container (-[CombinedInfoContainer initWithWidth:height:button:] 0x1000b0e44), the sidebar
@@ -283,10 +295,19 @@ function buildColumn(app) {
     if (n === 'dollar') sideBtn = b;
     colEl.append(b);
   }
-  // -[MainGameScene init] (iPhone): button-graph at the top right opens the history graphs (HistoryGraphDialogLayer)
-  const graph = UIEl('button', 'ios-btn ios-graph', { type: 'button', 'aria-label': 'Graphs', title: 'Graphs' }, pic('button-graph'));
-  graph.addEventListener('click', go(a => a.openCompare()));
-  app.append(colEl, graph);
+  // -[MainGameScene init]: an iPhone has button-graph at the top right (it opens the history graphs: HistoryGraphDialogLayer); an iPad a window shade
+  // (graphs-window-shade, 200 x 24) at the top right that rolls a GraphNode (200 x 100, the fill 0xe1cccccc, the line 0xffd63c39) down from under it, open at the start
+  if (!SCREEN.pad) {
+    const graph = UIEl('button', 'ios-btn ios-graph', { type: 'button', 'aria-label': 'Graphs', title: 'Graphs' }, pic('button-graph'));
+    graph.addEventListener('click', go(a => a.openCompare()));
+    app.append(colEl, graph);
+  } else {
+    const shade = UIEl('button', 'ios-shade ios-graph', { type: 'button', 'aria-label': 'Graphs', title: 'Graphs', 'aria-pressed': 'true' }, pic('graphs-window-shade'));
+    gnEl = UIEl('div', 'ios-gnode', { role: 'img', 'aria-label': 'History graphs' }, gnCv = UIEl('canvas', null, { width: 196, height: 96 }));
+    shade.addEventListener('click', (e) => { e.stopPropagation(); const open = gnEl.classList.toggle('shut') === false; shade.setAttribute('aria-pressed', open ? 'true' : 'false'); shade.firstChild.src = HOTHEME.dir + 'sprites/graphs-window-shade' + (open ? '' : '-selected') + '.png'; });
+    gnEl.addEventListener('click', go(a => a.openCompare()));
+    app.append(colEl, shade, gnEl);
+  }
 }
 // what each button of the column does here (the app's toggles, the remake's windows for the screens not yet rebuilt)
 function buildScreen(doc) {
@@ -488,14 +509,29 @@ function recolor(box) {
 // rest of the row are PlayerMenuItem's, step 5): the hat is GraphicsHoMap smallPlayerHat: "player_list_%d_%@" (16 for you, else the player's hat; f when the
 // byte at +0x2c is 0)
 function playersList() {
-  const a = A(), G = a && a.G, list = UIEl('section', 'ios-plist', { 'aria-label': 'Players' });
+  const a = A(), G = a && a.G, list = UIEl('section', 'ios-plist', { 'aria-label': 'Players', 'data-c': 'players' });
   if (!G) return list;
+  const me = G.players[a.ME], pacts = HO.feature(G, 'alliances'), buddies = pacts && HO.rules(G).bestBuddies !== false;
   for (const p of G.players) {
     const hat = pic('player_list_' + (p.human ? 16 : p.face) + '_' + (p.female ? 'f' : 'm'), 'ios-phat');
-    if (!p.alive && !p.human) list.append(UIEl('div', 'ios-prow dead', null, hat, UIEl('span', null, null, p.name), pic('player_list_eliminated', 'ios-pelim')));
-    else list.append(UIEl('div', 'ios-prow', null, hat, UIEl('span', null, null, p.name)));
+    const row = UIEl('div', 'ios-prow' + (p.alive || p.human ? '' : ' dead'), null, hat, UIEl('span', 'ios-pname', null, p.name));
+    if (!p.alive && !p.human) row.append(pic('player_list_eliminated', 'ios-pelim'));
+    if (pacts && p.id !== a.ME && p.alive) {
+      // the pact word (-[PlayerMenuItem update:] 0x1000a2224, Misc Strings 175-183 by the toggle's state)
+      const mine = (me.allies || []).includes(p.id), they = (p.allies || []).includes(a.ME), mb = (me.buddies || []).includes(p.id), tb = (p.buddies || []).includes(a.ME);
+      const word = HO.isBuddy(G, a.ME, p.id) ? 'Buddies' : mb && !tb && HO.isAllied(G, a.ME, p.id) ? 'Buddy?' : tb && !mb && HO.isAllied(G, a.ME, p.id) ? 'Buddy!' : HO.isAllied(G, a.ME, p.id) ? 'Allies' : mine ? 'Ally?' : they ? 'Ally!' : 'Enemy';
+      const bt = UIEl('button', 'ios-pact', { type: 'button', title: p.name }, word);
+      bt.addEventListener('click', (e) => { e.stopPropagation(); const x = A(); if (!x || !x.G) return;
+        // the toggle (PlayerMenuItemToggle toggle 0x10009e34c): enemy, ally, best buddy, back to enemy
+        if (!mine) HO.setPact(G, a.ME, p.id, 'ally', true); else if (buddies && !mb) HO.setPact(G, a.ME, p.id, 'buddy', true); else { HO.setPact(G, a.ME, p.id, 'buddy', false); HO.setPact(G, a.ME, p.id, 'ally', false); }
+        x.save(); x.renderPanel(); });
+      row.append(bt);
+    }
+    list.append(row);
   }
-  list.addEventListener('click', () => { const x = A(); if (x && x.G) x.openPlayers(); });
+  const more = UIEl('button', 'ios-pmore', { type: 'button' }, 'Players and history…');
+  more.addEventListener('click', () => { const x = A(); if (x && x.G) x.openPlayers(); });
+  list.append(more);
   return list;
 }
 // the sidebar (-[IncomeLayer init]: the totals box W x 2.5 rows, three labels a line apart, the figure beside the label, the change at the right)
@@ -516,9 +552,12 @@ function sidebar(box, parts) {
   if (fdList) { fdList.replaceChildren(); if (fl) { const h = fl.querySelector('h4'); if (h) h.remove(); fdList.append(fl); } }
   // CombinedInfoContainer 0x1000b0e44: the totals, the technology bars (TechLayer), the budget bars (PlayerPlanetsLayer), the players
   styleBars(parts.tech, 'tech', parts); styleBars(parts.budget, 'budget', parts);
+  income.dataset.c = 'info'; parts.tech.dataset.c = 'info'; parts.budget.dataset.c = 'stars';
+  if (parts.planet && !appRules) parts.planet.dataset.c = 'stars';
   box.replaceChildren(income, parts.tech, parts.budget, ...(parts.planet && !appRules ? [parts.planet] : []));
+  for (const r of parts.budget.querySelectorAll('.blabel')) { const row = r.closest('.barrow'); if (row && row._k && row._k.star != null) { r.style.cursor = 'pointer'; r.onclick = () => { const a = A(); if (a && a.G) { a.UI.sel = row._k.star; a.centerOn(row._k.star); a.renderPanel(); a.draw(); } }; } } // PlayerPlanetsLayer pressed: selects the star and scrolls the map to it
   placeGrid(parts.tech); placeGrid(parts.budget);
-  if (SCREEN.pad) box.append(playersList());
+  box.append(playersList());
   hud();
 }
 // -[TurnMessageLayer init] 0x10001c4e8: End Turn (button-empty, "End Turn" 18) and the gear are one menu at the bottom right and stay there while the
@@ -527,6 +566,19 @@ function sidebar(box, parts) {
 // BarMenuItem width x 3 rows; the picture's middle is 30 across and its top at 0.75 x (height - a80); the text starts at 60, vertically centred, its
 // type floor(height / 6) - 1; "more..." (Misc 30, 0.6 x 24) at the bottom right while more reports follow (-[TurnMessageLayer updateMessageState]
 // 0x10001cde0: shown while the current one is not the last).
+// GraphNode's graph (HistoryGraphNode draw: not read): the remake's history of your population, income and tech
+function drawGraph() {
+  const a = A(); if (!gnCv || !a || !a.G) return;
+  const x = gnCv.getContext('2d'), h = a.me().hist || [];
+  x.clearRect(0, 0, 196, 96);
+  if (h.length < 2) return;
+  for (const [key, col] of [['pop', '#c8960a'], ['inc', '#2a5fd0'], ['tech', '#1a9a2a']]) {
+    const max = Math.max(...h.map(e => e[key]), 1);
+    x.strokeStyle = col; x.lineWidth = 2; x.beginPath();
+    h.forEach((e, i) => { const px = 4 + i / (h.length - 1) * 188, py = 92 - e[key] / max * 86; i ? x.lineTo(px, py) : x.moveTo(px, py); });
+    x.stroke();
+  }
+}
 function afterMsg(box, ctx) {
   const clock = box.querySelector('.clock'), card = box.querySelector('.card');
   box.classList.toggle('ios-clockbox', !!clock && !card);
@@ -541,13 +593,13 @@ function afterMsg(box, ctx) {
       b.addEventListener('click', (e) => { e.stopPropagation(); const x = A(); if (x && x.G) x.doEndTurn(); });
       turnEl.insertBefore(b, gearBtn);
     }
-    if (clock && !card) turnEl.prepend(box); else if (box.parentNode === turnEl) document.getElementById('app').append(box);
+    if (box.parentNode !== turnEl) turnEl.prepend(box); // the message bar is the first item of the bottom right menu: [bar] [End Turn] [gear] (-[TurnMessageLayer init])
   }
   if (card) {
     const cnt = card.querySelector('.count');
     if (cnt) { cnt.textContent = ctx && ctx.inbox && ctx.idx + 1 < ctx.inbox.length ? 'more...' : ''; cnt.setAttribute('translate', 'yes'); }
   }
-  hud();
+  hud(); drawGraph();
 }
 
 window.HOTHEME = {
