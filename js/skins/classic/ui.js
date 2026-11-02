@@ -3008,7 +3008,7 @@ function openBattlePanel(b) {
   // layout: two columns, two groups a row in each; a cell is 180 wide
   // (5.0.5, P.layout 'pile505': each column one stack, pile505Layout)
   const dark = !!T.battleBg;
-  const headH = 12 + P.head.length * 18 + (P.owner ? 0 : 18);
+  const headH = 12 + P.head.length * 18 + (P.owner ? 0 : rs.battleFaces ? 40 : 18);
   const L = P.layout === 'pile505' ? pile505Layout(P) : null;
   const W = L ? L.W : 760, CW = 180, RH = 70;
   const rows = Math.max(1, ...P.cols.map(c => Math.ceil(c.length / 2)));
@@ -3023,8 +3023,10 @@ function openBattlePanel(b) {
       ...[['0.5', 'Slow'], ['1', 'Normal'], ['3', 'Fast'], ['0', 'Skip to the end']].map(([v, t]) => el('option', { value: v, selected: v === '1' ? 'selected' : false }, t)));
     body.append(el('div', { class: 'bctl' }, el('label', null, 'Speed ', sp)), battleReport(b));
   }
+  // (rs.battleFaces, 1.2's DLOG 7010: no title, one button, "Skip", which ends the shooting, and closes the window once it is over)
+  if (rs.battleFaces && !modern()) body.append(el('div', { class: 'btns right' }, el('button', { onclick: () => { if (over) closeModal(); else finish(); } }, 'Skip')));
   b._stop = false;
-  modal(`Battle at ${G.stars[b.star].name}, ${b.year}` + (b.duel != null ? `, duel ${b.duel + 1}` : ''), body, { cls: 'wide', onClose: () => { b._stop = true; } });
+  modal(rs.battleFaces ? '' : `Battle at ${G.stars[b.star].name}, ${b.year}` + (b.duel != null ? `, duel ${b.duel + 1}` : ''), body, { cls: 'wide', label: 'Summary of battle', onClose: () => { b._stop = true; } });
   const x = c.getContext('2d');
   const font = T.battleFont || 'Geneva, Verdana, sans-serif', ink = dark ? '#000' : '#e8e8f0', sub = dark ? '#000' : '#b9bdd6';
   // each group's cell; each ship's place is its group's
@@ -3038,7 +3040,19 @@ function openBattlePanel(b) {
     if (!dark) for (let i = 0; i < 70; i++) { x.fillStyle = 'rgba(200,210,255,.35)'; x.fillRect((i * 97) % W, (i * 53) % H, 1, 1); }
     x.textAlign = 'center'; x.fillStyle = ink;
     P.head.forEach((t, i) => { x.font = (i ? '' : 'bold ') + '13px ' + font; x.fillText(tl(t), W / 2, 20 + i * 18); });
-    if (!P.owner) { // the remake's own: each column headed with its side's name (the version drew none)
+    if (!P.owner && rs.battleFaces) { // 1.2's DoOneBattle @d07d0: each side's face (32 x 32) and name over its column; at the end a big X
+      // (DrawX @d27de, pen 2 x 2) over the face of each side that has nothing left
+      x.font = '12px ' + font; x.fillStyle = ink;
+      const st = state(), sides = [P.leftSide ?? b.sides[0], b.sides.find(o => o !== (P.leftSide ?? b.sides[0]))];
+      sides.forEach((o, ci) => {
+        if (o == null) return;
+        const pl = G.players[o] || {}, im = IMG[o === ME ? 'white0_0' : 'bad' + (pl.face || 0) + '_0'], cx = ci * (W / 2) + W / 4 + (ci ? 20 : 0);
+        if (im && im.complete && im.naturalWidth) x.drawImage(im, cx - 16 - 60, headH - 34, 32, 32);
+        x.textAlign = 'left'; x.fillText(pl.name || '', cx - 40, headH - 14); x.textAlign = 'center';
+        const left = b.start.some((u, i) => st.alive[i] && u.o === o) || (b.planetOwner === o && st.pop > 0.0005);
+        if (st.over && !left) { x.strokeStyle = ink; x.lineWidth = 2; x.beginPath(); x.moveTo(cx - 76, headH - 34); x.lineTo(cx - 44, headH - 2); x.moveTo(cx - 76, headH - 2); x.lineTo(cx - 44, headH - 34); x.stroke(); x.lineWidth = 1; }
+      });
+    } else if (!P.owner) { // the remake's own: each column headed with its side's name (the version drew none)
       x.font = '12px ' + font; x.fillStyle = sub;
       [P.leftSide ?? b.sides[0], b.sides.find(o => o !== (P.leftSide ?? b.sides[0]))].forEach((o, ci) => { if (o == null) return; x.fillText(o === ME ? tl('You') : (G.players[o] || {}).name || '', ci * (W / 2) + W / 4 + (ci ? 20 : 0), headH - 6 - (P.nameUp | 0)); });
     }
@@ -3088,7 +3102,7 @@ function openBattlePanel(b) {
     if (b._stop) return;
     if (r >= b.rounds.length) {
       over = true; drawAll();
-      status.textContent = battleOver(b, b.sides);
+      status.textContent = rs.battleFaces ? '' : battleOver(b, b.sides);
       return;
     }
     const ev = b.rounds[r][e];
