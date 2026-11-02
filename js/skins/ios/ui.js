@@ -805,7 +805,7 @@ function sidebar(box, parts) {
   // A ruleset that is not iOS's or Android's has features the app had no screen for (the build queue, merging, battle reviews): its box stays below the bars.
   const G = A() && A().G, appRules = !!G && /^(ios|android)$/.test(G.rules || '');
   const fl = appRules && parts.planet && parts.planet.querySelector('.fleets');
-  if (fdList) { fdList.replaceChildren(); if (fl) { const h = fl.querySelector('h4'); if (h) h.remove(); fdList.append(fl); } }
+  if (fdList) { fdList.replaceChildren(); if (fl) { const h = fl.querySelector('h4'); if (h) h.remove(); fleetItems(fl); fdList.append(fl); } }
   // CombinedInfoContainer 0x1000b0e44: the totals, the technology bars (TechLayer), the budget bars (PlayerPlanetsLayer), the players
   styleBars(parts.tech, 'tech', parts); styleBars(parts.budget, 'budget', parts);
   income.dataset.c = 'info'; parts.tech.dataset.c = 'info'; parts.budget.dataset.c = 'stars';
@@ -961,6 +961,47 @@ function reportPicture(m) {
     return { el: box, kind: 'hat' };
   }
   return null;
+}
+
+// -[FleetMenuItem initWithTarget:selector:] 0x1000c3f70 and updateData:player:isMe:star:fleetNumber: 0x1000c40e0 (the arguments of its formats read in the disassembly), listed by
+// -[FleetMovementMenu updateSelected] 0x1000c8ed0: a row is the fleet's strongest pile as a ShipNode scaled to the row's width / 210 (the Fleets dialog's menu is 100 wide), the
+// name (Arial 32 at the scale that fits the row: matchParentWidth: 0x100016e28, at most 1) and "Fuel: %d" (Arial 18 at 0.5), centred, nothing between them, the rows 8 (2 a80) apart.
+// The name is the fleet's strongest pile (the record's power x its count; the first on a tie) as FUN_100035be4 words it: "1 Sco (4/2)" for one ship, "5 Fig (3/3)s" for more
+// (the class's name cut to three letters, the weapons and the shields), a "+" after it when the fleet has more than one pile; the colour is red when the fleet is marked to be
+// scrapped, else with no orders white (yellow when it was bought this turn), with orders (31, 183, 20) when it holds a Colony Ship and (187, 255, 255) when not (the bytes at
+// 0x100149601 and 0x100149637). "Fuel" is the least range of its piles less the fuel used (FUN_100035580 less FUN_100035634: +0x7a).
+const FLEET_CLASS = ['Scout', 'Dreadnought', 'Fighter', 'Tanker', 'Colony Ship', 'Satellite', 'Biological', 'Decoy'];
+function fleetItem(G, f, a) {
+  const piles = Object.keys(f.ships).map(k => ({ d: HO.getDesign(G, f.owner, +k), n: f.ships[k] })).filter(x => x.d && x.n > 0);
+  if (!piles.length) return null;
+  const pw = (x) => HO.designCost(G, x.d).att * x.n;
+  let best = piles[0]; for (const x of piles) if (pw(x) > pw(best)) best = x;
+  const cls = FLEET_CLASS[Math.max(0, ['scout', 'dread', 'fighter', 'tanker', 'colony', 'satellite', 'bio', 'decoy'].indexOf(best.d.type))].slice(0, 3);
+  let name = best.n === 1 ? `1 ${cls} (${best.d.W}/${best.d.S})` : `${best.n} ${cls} (${best.d.W}/${best.d.S})s`;
+  if (piles.length > 1) name += '+';
+  const mine = f.owner === a.ME;
+  let color = '#fff';
+  if (mine && f.scrap301) color = 'rgb(255,0,0)';
+  else if (mine && f.dest != null) color = piles.some(x => x.d.type === 'colony') ? 'rgb(31,183,20)' : 'rgb(187,255,255)';
+  else if (mine && f.newThisTurn) color = 'rgb(255,255,0)';
+  const W = 100, cv = a.IMG && HOTHEME.shipPic(best.d, a.IMG), ks = W / 210;
+  const box = UIEl('div', 'ios-fi');
+  if (cv) { cv.className = 'ios-fis'; cv.style.width = `calc(${cv.width * ks} * var(--pt))`; cv.style.height = `calc(${cv.height * ks} * var(--pt))`; box.append(cv); }
+  const sc = Math.min(1, W / Math.max(1, textW(name, 32)));
+  const nl = UIEl('span', 'ios-fin', { style: `font-size:calc(${32 * sc} * var(--pt));color:${color}` }); nl.textContent = name; nl.setAttribute('translate', 'no');
+  const fl = UIEl('span', 'ios-fif', { style: 'font-size:calc(9 * var(--pt))' }); fl.textContent = `Fuel: ${HO.plainNum(f.fuel)}`; fl.setAttribute('translate', 'yes');
+  box.append(nl, fl);
+  return box;
+}
+function fleetItems(box) {
+  const a = A(), G = a && a.G; if (!G || !box) return;
+  for (const r of [...box.querySelectorAll('.frow')]) {
+    const f = G.fleets.find(x => String(x.id) === r.getAttribute('data-fleet'));
+    if (!f || f.sat || r.getAttribute('data-inbound')) { r.remove(); continue; } // (the app's list is the fleets at the star; satellites have their own menu)
+    const it = fleetItem(G, f, a); if (!it) continue;
+    for (const c of [...r.children]) if (!c.classList.contains('facts')) c.remove();
+    r.prepend(it); r.classList.add('ios-frow');
+  }
 }
 function afterMsg(box, ctx) {
   const clock = box.querySelector('.clock'), card = box.querySelector('.card');
