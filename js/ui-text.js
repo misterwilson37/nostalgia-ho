@@ -549,6 +549,7 @@ root.HOUI.add([
 ['Click through the messages every', 'Cliquez sur les messages toutes les', 'Die Meldungen weiterklicken alle', 'Mesajlara bas her', 'Pasar los mensajes cada', { fr: '~iOS', tr: '~iOS' }, {tr: 'Mesajları şu aralıkla geç:'}],
 ['seconds', 'secondes', 'Sekunden', 'saniye', 'segundos', I],
 ['Play One Turn', 'Jouer un tour', 'Einen Zug spielen', 'Bir Kere Oyna', 'Jugar un turno', I, { tr: 'Bir Sıra Oyna' }],
+['more...', 'plus ...', 'mehr ...', 'daha…', 'más...', { fr: 'iOS', tr: 'iOS' }],
 ['STOP', 'Stop', 'STOP', 'Dur', 'PARAR', I],
 ['Aggressiveness', 'Agressivité', 'Angriffslust', 'Saldırganlık', 'Agresividad'],
 ['Friendly', 'Amical', 'Freundlich', 'Dostca', 'Amistoso', I, { tr: 'Dostça' }],

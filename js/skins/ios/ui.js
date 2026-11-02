@@ -407,11 +407,32 @@ function sidebar(box, parts) {
   if (SCREEN.pad) box.append(playersList());
   hud();
 }
+// -[TurnMessageLayer init] 0x10001c4e8: End Turn (button-empty, "End Turn" 18) and the gear are one menu at the bottom right and stay there while the
+// report bar (MessageNode, the layer's messageMenuItem) shows at the bottom left; the remake's page draws a report OR the clock in #msg, so while a
+// report shows the skin keeps an End Turn button of its own (it calls the same doEndTurn). -[MessageNode update:] 0x100013064: the bar is
+// BarMenuItem width x 3 rows; the picture's middle is 30 across and its top at 0.75 x (height - a80); the text starts at 60, vertically centred, its
+// type floor(height / 6) - 1; "more..." (Misc 30, 0.6 x 24) at the bottom right while more reports follow (-[TurnMessageLayer updateMessageState]
+// 0x10001cde0: shown while the current one is not the last).
 function afterMsg(box, ctx) {
   const clock = box.querySelector('.clock'), card = box.querySelector('.card');
   box.classList.toggle('ios-clockbox', !!clock && !card);
   if (clock) { const f = clock.querySelector('.face'); if (f) f.remove(); }
-  if (turnEl) { if (clock && !card) turnEl.prepend(box); else if (box.parentNode === turnEl) document.getElementById('app').append(box); }
+  const lbl = clock && !clock.querySelector('.ios-endt') ? (clock.textContent || '').trim() : null;
+  if (clock && !clock.classList.contains('pic')) { clock.textContent = ''; clock.append(UIEl('span', 'ios-endt', null, clock.id === 'autostop' ? 'STOP' : 'End Turn')); clock.setAttribute('translate', 'yes'); }
+  if (turnEl) {
+    const old = turnEl.querySelector('.ios-end'); if (old) old.remove();
+    const a = A();
+    if (card && !card.classList.contains('end') && !card.classList.contains('waiting') && !card.classList.contains('hand') && a && a.G && !a.G.over) {
+      const b = UIEl('button', 'ios-end', { type: 'button', 'aria-label': 'End turn' }, UIEl('span', 'ios-endt', null, 'End Turn'));
+      b.addEventListener('click', (e) => { e.stopPropagation(); const x = A(); if (x && x.G) x.doEndTurn(); });
+      turnEl.insertBefore(b, gearBtn);
+    }
+    if (clock && !card) turnEl.prepend(box); else if (box.parentNode === turnEl) document.getElementById('app').append(box);
+  }
+  if (card) {
+    const cnt = card.querySelector('.count');
+    if (cnt) { cnt.textContent = ctx && ctx.inbox && ctx.idx + 1 < ctx.inbox.length ? 'more...' : ''; cnt.setAttribute('translate', 'yes'); }
+  }
   hud();
 }
 

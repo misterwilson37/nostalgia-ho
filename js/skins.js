@@ -115,7 +115,8 @@ const SOUNDS = {
   // iOS 1.2.9 (2017): 5.0.5's recordings as MP3s (assets/skins/ios/manifest.json
   // "soundFormat"), named by 5.0.5's numbers; 7006 (ship built) is near silent,
   // as in the app; 7008-7011 aren't in its "Sounds" list
-  ios: { name: '1.2.9 (iPhone and iPad, 2017)', year: 2017, dir: 'assets/skins/ios/' },
+  // End Turn plays the Sounds list's item 15, "ahem" (7000): +[SimpleServer endTurn] 0x10008ff3c (the app has no "New Turn" call)
+  ios: { name: '1.2.9 (iPhone and iPad, 2017)', year: 2017, dir: 'assets/skins/ios/', map: { 11111: 7000 } },
   // Android 1.2.8 (2015): the iOS game's pictures and sounds, unchanged
   android: { name: '1.2.8 (Android, 2015)', year: 2015, dir: 'assets/skins/ios/', same: 'ios' },
 };
