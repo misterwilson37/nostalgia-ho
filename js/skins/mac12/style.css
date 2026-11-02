@@ -12,3 +12,6 @@
 .mac12 .lb .li.sel { background: #000; color: #fff; }
 .mac12 .build12 .cols { display: flex; gap: 12px; } .mac12 .build12 .cols > div { flex: 1; }
 .mac12 .types12 { display: flex; gap: 12px; flex-wrap: wrap; } .mac12 .types12 .lb { flex: 1; min-width: 180px; } .mac12 .types12 .tinfo { flex: 1; min-width: 200px; }
+
+.strip12 { display: flex; justify-content: space-between; font-weight: normal; font-size: 11px; }
+.mintick { position: absolute; top: -3px; bottom: -3px; width: 1px; background: currentColor; }

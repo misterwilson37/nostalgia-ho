@@ -306,9 +306,46 @@ function turnProgress(g, go) {
   setTimeout(step, 40);
 }
 
+// the budget and technology boxes as 1.2 draws them: the budget bars' heading strip (DrawHBarControl @c091e: "0%" at the left, "100%"
+// at the right, STR# 1001.6 and .10, and the scale's word "Lin" / "Log", 1005.24 / .23; English Mac 2.0.1 "Linear" / "Log"), the slots
+// "Tech" and "Epargne" (1005.25, .26), a colony's name in italics when its share is under what pays its loss and underlined when it is
+// the selected star, a tick at that least share; the technology window's "Technologie" / "Niveaux actuels" (1001.11-12; English
+// "Tech Spending", "Current Levels:") over the five bars
+const BAR_WORDS = { fr: { lin: 'Lin', log: 'Log', tech: 'Tech', sav: 'Epargne', head: 'Technologie', levels: 'Niveaux actuels' },
+  en: { lin: 'Linear', log: 'Log', tech: 'Tech', sav: 'Savings', head: 'Tech Spending', levels: 'Current Levels:' } };
+function bars(panel, B) {
+  const a = A(), el = a.el, g = G(), W = BAR_WORDS[lang()], rs = H().rules(g), p = a.me();
+  if (B.budget) {
+    const h = B.budget.querySelector('h3');
+    if (h) {
+      const sc = a.budgetScale();
+      h.textContent = ''; h.classList.add('strip12');
+      h.append(raw('span', '0%'), raw('span', sc.id === 'log' ? W.log : W.lin), raw('span', '100%'));
+    }
+    const rows = B.budget.querySelectorAll('.barrow'), low = new Set((rs.underfunded ? rs.underfunded(g, p) : []).map(s => s.id));
+    (B.ents || []).forEach((e, i) => {
+      const r = rows[i]; if (!r) return;
+      const lab = r.querySelector('.blabel');
+      if (lab && e.key === 'tech') { lab.textContent = W.tech; lab.setAttribute('translate', 'no'); }
+      if (lab && e.key === 'savings') { lab.textContent = W.sav; lab.setAttribute('translate', 'no'); }
+      if (e.star != null && lab) {
+        lab.style.fontStyle = low.has(e.star) ? 'italic' : '';
+        lab.style.textDecoration = a.UI.sel === e.star ? 'underline' : '';
+        lab.style.fontWeight = 'normal';
+        const min = rs.minShare ? rs.minShare(g, p, e.star) : 0, tr = r.querySelector('.track');
+        if (min > 0 && tr) { tr.style.position = 'relative'; tr.append(el('div', { class: 'mintick', style: `left:${(a.budgetScale().toX(min) * 100).toFixed(1)}%` })); }
+      }
+    });
+  }
+  if (B.tech) {
+    const h = B.tech.querySelector('h3');
+    if (h) { h.textContent = W.head; h.setAttribute('translate', 'no'); h.after(raw('p', W.levels, { class: 'sub' })); }
+  }
+}
+
 window.HOMAC12 = {
   turnProgress(g, go) { if (!own()) return go(); turnProgress(g, go); },
-  panel(panel) { if (own()) roster(panel); },
+  panel(panel, B) { if (own()) { bars(panel, B || {}); roster(panel); } },
   // the program's own windows, in English and French (another language keeps the remake's)
   window(name, ...x) {
     if (!G() || !own()) return false;
