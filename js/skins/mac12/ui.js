@@ -94,7 +94,7 @@ function menuLayout() {
       it('Zoom Out', () => { const m = A().map(); A().zoomAt(m.w / 2, m.h / 2, 1 / 1.3); }, { ghost: () => noGame() || atZoom(0), key: '-' }),
       '-',
       // (dimmed while announcements are still to be read: SetMenuItems' message count)
-      it('Fix Spending', () => A().openFixSpending(), { ghost: () => noGame() || A().UI.msgIdx < (A().UI.inbox || []).length, key: 'F' })],
+      it('Fix Spending', () => fixStep(), { ghost: () => noGame() || A().UI.msgIdx < (A().UI.inbox || []).length, key: 'F' })],
     Window: [
       it('Tech Spending Window', () => { const t = document.querySelector('#panel .box.tech, #panel section:nth-of-type(3)'); if (t) t.scrollIntoView({ block: 'nearest' }); }, { ghost: noGame, key: '1' }),
       it('Report Window', () => A().openReports(), { ghost: noGame, key: '2' }),
@@ -450,6 +450,25 @@ document.addEventListener('keydown', (e) => {
   const st = g.stars.find(x => x.name.toLowerCase().startsWith(typed.s));
   if (st) { a.UI.sel = st.id; a.centerOn(st.id); a.renderPanel(); a.draw(); }
 }, true);
+
+// Correction dépenses ⌘F (FixSpendingBars @c1fb0, FixNextSpendingBar @c1b48): one step at a time, its line in the announcement bubble
+// (DrawAnnounceBubble: the report picture 3110, the line, "Suite…" while slots are left to look at); a click on the bubble, or ⌘F
+// again, takes the next step; when none is left the bubble goes and the End Turn button is back
+const FIX = { cur: null, n: 0 };
+function fixStep() {
+  const a = A(), g = G(), FS = H().rules(g).fixSpending;
+  if (!FS) return;
+  const r = FS.next(g, a.me(), FIX.cur == null ? -1 : FIX.cur);
+  FIX.cur = r.cur; a.renderPanel(); a.save();
+  const box = document.querySelector('#msg');
+  if (r.text == null || !box) { FIX.cur = null; a.renderMsg(); return; }
+  const el = a.el, im = a.IMG[(window.HOTHEME && HOTHEME.prefix || 'dos:') + 'i3110'] || a.IMG['m9024'];
+  const slots = 2 + H().colonies(g, a.ME).length, more = FIX.cur < slots - 1;
+  box.innerHTML = '';
+  const card = el('div', { class: 'card', tabindex: 0, role: 'button', onclick: fixStep });
+  card.append(im ? el('img', { src: im.src, alt: '', class: 'micon' }) : el('span'), el('div', { class: 'mtext' }, raw('p', r.text.indexOf('{') >= 0 ? H().trSuffixes(r.text) : r.text), more ? raw('div', H().rules(g).bubbleMore[lang()] || '', { class: 'count' }) : null));
+  box.append(card);
+}
 
 window.HOMAC12 = {
   // (the Edit menu's French title is 1.2F's "Edition", which the interface would take for its English word "Edition": written as it is)
