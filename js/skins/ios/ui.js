@@ -1614,6 +1614,195 @@ function openOrganizeIOS(sid) {
   render();
   return true;
 }
+// ---------------------------------------------------------------------------
+// The battle screen (BattleStageLayer 0x1000949b4-0x100096238, BattleShipNode 0x10009c18c-0x10009ccfc, and the rule core's CBattleStagePhone / CBattleStage, whose
+// routines in the zeroed page 0x10008d000 were read from the Android build, the same program: CBattleStagePhone::DrawGroup 0x251a4c, FinishDrawing 0x251b8c,
+// IsSpecialShip 0x251be0, DrawShot 0x251e0c, BattleWait 0x251d4c, ReviewPhoneBattle 0x251978; CBattleStage::DoOneBattle 0x22702c, CalculateGroups 0x228528,
+// CreateGroupsForPlayer 0x229300, CreateOneGroup 0x229544, CalcShipPileDimensions 0x229774, GetNumDrawnShips 0x229718, HaveGroupShoot 0x228970).
+// A DialogLayerSprite (the Build dialog's: 480 x 320 on an iPhone, an iPad's width x 1.2 and height min(groups + 32 a80, 0.9 of the screen's)), the mini close button (while the
+// shots go it skips to the end, afterwards it closes), the heading (Arial 16, 4 a80 under the top), "Round %d" (Arial 16, 2 a80 over the bottom), the explosion sprite (added
+// first, so under the groups), and the groups: a plain node centred 64 under the top when its height + a80 is no more than (the layer's height - 20) less 85 (an iPad's 100),
+// else a CCLayerPanZoom viewport (a80, 20, width - 2 a80, height - 85) the groups scroll in. Each BattleShipNode is 0.4 of the groups' width wide, the ShipNode on top,
+// the label (Arial 16, scaled to the width) a80 under it, the hat and the dead-ship sprite at the ship's middle, the luck icon at the node's outer edge; its top is the record's
+// short at +0x30 under the groups' top, the viewer's side (and his allies) anchored (0, 1) at x 2 a80, the others (1, 1) at the width less 2 a80 with the ship mirrored.
+// The groups' places: a column keeps one running y: each player (the viewer, then his allies in the list's order; on the other side the first player with a colony, then the
+// rest) adds 5 when y is over 0, his colony (if any) is a group 62 x 62 that takes 72 + 20, then each of his ship types from the last, the offensive, defensive, then plain group of
+// it, takes the pile's height + 32 (the ShipNode's own height when it is a special picture, else 40 (dreadnought 100, tanker 44, colony ship 56) + 2n - 2 for the n = round(count^0.68)
+// (1 to 30) pictures the group would have drawn), and the groups' height is the taller column's.
+const BATTLE_PILE = { dread: 100, tanker: 44, colony: 56 };
+const battleDrawn = (c) => c < 2 ? 1 : clamp(Math.trunc(Math.pow(c, 0.68) + 0.5), 1, 30);
+let battleWin = null;
+function closeBattleIOS() { if (battleWin) { battleWin.closed = true; clearTimeout(battleWin.timer); battleWin.scrim.remove(); battleWin = null; } }
+function openBattleIOS(b, k) {
+  const a = A(), G = a.G, rs = HO.rules(G), ME = a.ME, gd = BGD(), tl = k.tl, Prefs = a.Prefs;
+  closeBuildFlow(); closeGraphs(); closeBattleIOS();
+  const viewer = b.sides.includes(ME) ? ME : (b.sides.find(o => HO.isAllied(G, ME, o)) ?? b.sides[0]); // DoOneBattle 0x22702c: you, else the first of your allies, else the first
+  const alive = b.start.map(() => true), hurt = []; let seq = 0, pop = b.pop0, over = false;
+  const state = () => ({ alive, hurt, pop, over, won: false });
+  const aliveEnd = b.start.map(() => true); let popEnd = b.pop0;
+  b.rounds.forEach((r, i) => { for (const ev of r) if (ev.k && !ev.p) aliveEnd[ev.ti] = false; if (b.popR && b.popR[i] != null) popEnd = b.popR[i]; });
+  const surv = (o) => b.start.some((u, i) => u.o === o && aliveEnd[i]) || (b.planetOwner === o && popEnd > 0.0005); // the mask at +0x1c of the record
+  const nRounds = b.rounds.filter(r => r.length).length;
+  const hideMode = nRounds === 1 && !surv(viewer); // DoOneBattle 0x227154 (no shots) and DrawGroup (the other side is not drawn)
+  const friend = (o) => o === viewer || HO.isAllied(G, o, viewer);
+  let P = rs.battlePanel(G, b, state(), viewer);
+  // the groups, in the rule core's order, each with its running y
+  const flat = [], cols = [[], []], totals = [0, 0], key = (g) => g.planet ? 'p' + g.o : 'u' + g.units[0];
+  let dreadIn = false;
+  const shipOf = (g) => g.planet ? null : HO.getDesign(G, g.o, g.did);
+  const picOf = (g) => { const d = shipOf(g); return d && a.IMG ? HOTHEME.shipPic(d, a.IMG) : null; };
+  P.cols.forEach((col, ci) => {
+    const sideOf = (o) => ci === 0 ? (o === viewer ? -1 : b.sides.indexOf(o)) : (o === b.planetOwner && b.pop0 > 0 ? -1 : b.sides.indexOf(o));
+    const ord = col.slice().sort((p, q) => sideOf(p.o) - sideOf(q.o) || (q.planet ? 1 : 0) - (p.planet ? 1 : 0) || (q.did - p.did) || ('odn'.indexOf(P0st(p)) - 'odn'.indexOf(P0st(q))));
+    let y = 0, last = null;
+    for (const g of ord) {
+      if (g.o !== last) { if (y >= 1) y += 5; last = g.o; }
+      g.y = y; g.key = key(g); g.side = ci; g.pic = picOf(g);
+      const d = shipOf(g);
+      if (d && d.type === 'dread') dreadIn = true;
+      if (g.planet) y += 92;
+      else { const base = d && g.pic && special(d) ? g.pic.height : (BATTLE_PILE[d && d.type] || 40); y += base + 2 * battleDrawn(g.n0) - 2 + 32; }
+      cols[ci].push(g); flat.push(g);
+    }
+    totals[ci] = y;
+  });
+  function P0st(g) { const u = b.start[g.units[0]]; return u && u.st || 'n'; }
+  const total = Math.max(totals[0], totals[1]);
+  const tagOf = new Map(); flat.forEach((g, i) => { g.tag = i; for (const u of g.units) tagOf.set(u, i); });
+  // the layer
+  let cw, ch, kk;
+  const dg = dlgGeom(); kk = dg.k;
+  if (!SCREEN.pad) { cw = 480; ch = 320; } else { cw = dg.cw * 1.2; ch = Math.min(total + gd.a80 * 32, SCREEN.winH * 0.9); }
+  const finishNow = () => { if (S.done) closeBattleIOS(); else { S.skip = true; } };
+  const L = dialogLayer(cw, ch, kk, 'Battle', finishNow);
+  const S = battleWin = { scrim: L.scrim, closed: false, skip: false, done: false, timer: 0 };
+  const dlg = L.dlg;
+  const x = UIEl('button', 'ios-gx', { type: 'button', 'aria-label': 'Close' }, pic('button-x'));
+  x.addEventListener('click', (e) => { e.stopPropagation(); finishNow(); });
+  dlg.append(x);
+  const LH = (size) => size * 1.15;
+  const desc = bLabel(tl(P.head[0] || ''), 16, cw / 2, ch - 4 * gd.a80, 0.5, 1, '#fff');
+  const roundL = bLabel('', 16, cw / 2, 2 * gd.a80, 0.5, 0, '#fff');
+  const expl = UIEl('div', 'ios-bexp'); expl.style.cssText = `position:absolute;display:none;width:${bpt(200)};height:${bpt(60)};background:url("${HOTHEME.dir}sprites/HoExplosions.png") 0 0 / ${bpt(400)} ${bpt(300)} no-repeat`;
+  dlg.append(desc, roundL, expl);
+  // the groups' parent
+  const Wg = cw - 2 * gd.a80, pan = total + gd.a80 > (ch - 20) - (SCREEN.pad ? 100 : 85);
+  const nodeW = Wg * 0.4;
+  const holder = UIEl('div', 'ios-bgroups'), box = UIEl('div', 'ios-bgbox');
+  let vh = 0, off = 0, ch2 = total + (pan ? gd.a80 : 0);
+  holder.style.cssText = `position:absolute;left:${bpt(gd.a80)};width:${bpt(Wg)}`;
+  box.style.cssText = `position:absolute;left:0;top:0;width:${bpt(Wg)};height:${bpt(ch2)}`;
+  if (pan) { vh = ch - (SCREEN.pad ? 100 : 85); holder.style.bottom = bpt(20); holder.style.height = bpt(vh); holder.style.overflow = 'hidden'; }
+  else { holder.style.top = bpt(64); holder.style.height = bpt(total); }
+  holder.append(box); dlg.append(holder);
+  const setOff = (v) => { off = clamp(v, Math.min(0, vh - ch2), 0); box.style.top = bpt(off); };
+  if (pan) { // CCLayerPanZoom (targeted, no rubber band): a drag or the wheel moves the groups
+    let drag = null;
+    holder.addEventListener('pointerdown', (e) => { drag = { y: e.clientY, off }; holder.setPointerCapture(e.pointerId); });
+    holder.addEventListener('pointermove', (e) => { if (drag) { const s = dlg.getBoundingClientRect().width / cw; setOff(drag.off + (e.clientY - drag.y) / s); } });
+    holder.addEventListener('pointerup', () => { drag = null; }); holder.addEventListener('pointercancel', () => { drag = null; });
+    holder.addEventListener('wheel', (e) => { e.preventDefault(); const s = dlg.getBoundingClientRect().width / cw; setOff(off - e.deltaY / s); }, { passive: false });
+  }
+  // BattleShipNode update:player:myPlayer: 0x10009c3f0
+  for (const g of flat) {
+    const n = UIEl('div', 'ios-bsn'), shipH = g.planet ? 62 : g.pic ? g.pic.height : 40, shipW = g.planet ? 62 : g.pic ? g.pic.width : 120;
+    n.style.cssText = `position:absolute;top:${bpt(g.y)};width:${bpt(nodeW)};height:${bpt(gd.a80 + shipH + LH(16))};left:${bpt(g.side === 0 ? 2 * gd.a80 : Wg - 2 * gd.a80 - nodeW)}`;
+    const cv = document.createElement('canvas'); cv.width = Math.ceil(shipW); cv.height = Math.ceil(shipH);
+    cv.style.cssText = `position:absolute;top:0;left:${bpt((nodeW - shipW) / 2)};width:${bpt(shipW)};height:${bpt(shipH)}${g.side ? ';transform:scaleX(-1)' : ''}`;
+    const lab = UIEl('span', 'ios-bt'); lab.style.cssText = `position:absolute;white-space:nowrap;top:${bpt(shipH + gd.a80)};left:50%;transform-origin:50% 0;font-size:${bpt(16)}`;
+    const q = G.players[g.o] || {}, hn = g.o === viewer ? `player_0_${q.female ? 'f' : 'm'}` : `enemy_${q.face || 0}_${q.female ? 'f' : 'm'}`; // HatNode updateMyPlayer:star: (star -1: row 0) / update:game:halo: (no halo)
+    const hat = pic(hn); hat.style.cssText = `position:absolute;width:${bpt(50)};height:${bpt(50)};left:${bpt(nodeW / 2 - 25)};top:${bpt(shipH / 2 - 25)}`;
+    const dead = pic('deadship'); dead.style.cssText = `position:absolute;width:${bpt(50)};height:${bpt(50)};left:${bpt(nodeW / 2 - 25)};top:${bpt(shipH / 2 - 25)};display:none`;
+    n.append(cv, lab, hat, dead);
+    const lk = b.luck ? (b.luck[g.o] | 0) : 0;
+    if (lk) { const ic = pic('report_icon-' + (lk > 0 ? 17 : 18)); ic.style.cssText = `position:absolute;width:${bpt(40)};height:${bpt(39)};top:${bpt(shipH / 2 - 19.5)};${g.side === 0 ? 'left:0' : 'right:0'}`; n.append(ic); }
+    g.el = { n, cv, lab, dead }; box.append(n);
+  }
+  const paint = (g, r) => { // the ShipNode: the parts, and over them the damage bar when the group's front ship is hurt
+    const c = g.el.cv, cx = c.getContext('2d'); cx.clearRect(0, 0, c.width, c.height);
+    if (g.planet) { const im = a.IMG[HOTHEME.battlePlanet]; if (im) cx.drawImage(im, 0, 0, c.width, c.height); }
+    else if (g.pic) { cx.drawImage(g.pic, 0, 0); if (r.dmg > 0) HOTHEME.battleDamage(cx, r.dmg, { x: c.width / 2, y: c.height / 2 }, c.width, c.height, false); }
+    else { cx.fillStyle = '#888'; cx.fillRect(0, c.height / 2 - 8, c.width, 16); }
+    const text = tl(r.text), lw = textW(text, 16), sc = lw > nodeW ? nodeW / lw : 1;
+    g.el.lab.textContent = text; g.el.lab.style.transform = `translateX(-50%) scale(${sc})`;
+    g.el.dead.style.display = r.n === 0 ? '' : 'none';
+    g.el.n.style.display = hideMode && !friend(g.o) ? 'none' : '';
+  };
+  const refresh = () => { P = rs.battlePanel(G, b, state(), viewer); const by = new Map(); for (const col of P.cols) for (const r of col) by.set(key(r), r); for (const g of flat) { const r = by.get(g.key); if (r) paint(g, r); } };
+  // shots
+  const lz = document.createElement('canvas'); lz.width = cw * 2; lz.height = ch * 2; lz.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;pointer-events:none';
+  dlg.append(lz);
+  const centre = (tag) => {
+    const g = flat[tag]; if (!g) return { x: cw / 2, y: ch / 2 };
+    const r = g.el.cv.getBoundingClientRect(), d = dlg.getBoundingClientRect(), s = d.width / cw;
+    return { x: (r.left + r.width / 2 - d.left) / s, y: (r.top + r.height / 2 - d.top) / s };
+  };
+  const wEff = (ev) => { // the record's +0xc: the ship's weapons level + the side's luck (+1 offensive, -2 defensive), 1 at least; the colour is its hue (fireShot: (w - 1) x 4000 of 65535)
+    const u = ev.si >= 0 ? b.start[ev.si] : null, d = u ? HO.getDesign(G, u.o, u.did) : null;
+    const w = Math.max(1, ((d && d.W) || 1) + (b.luck ? (b.luck[u ? u.o : b.planetOwner] | 0) : 0) + (u && u.st === 'o' ? 1 : u && u.st === 'd' ? -2 : 0));
+    return hsb((((w - 1) * 4000) % 65535) / 65535, 1, 1);
+  };
+  let beam = null;
+  const laser = (p0, p1, dur, col) => { // +[CCMotionStreak streakWithFade: 0.4 minSeg: 1 width: 6 length: 5 color:] moved to the target in speed / 60 s
+    const cx = lz.getContext('2d'), t0 = performance.now(), trail = [], my = beam = {};
+    const tick = () => {
+      if (S.closed || beam !== my) return;
+      const t = (performance.now() - t0) / 1000, f = dur > 0 ? Math.min(1, t / dur) : 1;
+      trail.push({ x: p0.x + (p1.x - p0.x) * f, y: p0.y + (p1.y - p0.y) * f, t });
+      cx.clearRect(0, 0, lz.width, lz.height);
+      for (let i = 1; i < trail.length; i++) {
+        const age = (t - trail[i].t) / 0.4; if (age >= 1) continue;
+        cx.strokeStyle = `rgba(${col[0]},${col[1]},${col[2]},${1 - age})`; cx.lineWidth = 12 * (1 - age) + 1;
+        cx.beginPath(); cx.moveTo(trail[i - 1].x * 2, trail[i - 1].y * 2); cx.lineTo(trail[i].x * 2, trail[i].y * 2); cx.stroke();
+      }
+      if (t < dur + 0.5) requestAnimationFrame(tick); else cx.clearRect(0, 0, lz.width, lz.height);
+    };
+    tick();
+  };
+  const speedTicks = () => Math.max(0, 30 - (Prefs.reviewSpeed != null ? Prefs.reviewSpeed : rs.prefsWindow ? rs.prefsWindow.def : 10)); // Preferences +0x220 (default 20); the slider is (30 - it) / 30
+  const explode = (tag, sp) => { // explosion: 0x100095e80: ten 200 x 60 frames, speed / 300 s each, then hidden
+    const c = centre(tag); expl.style.left = bpt(c.x); expl.style.bottom = bpt(ch - c.y); expl.style.transform = 'translate(-50%, 50%)'; expl.style.display = '';
+    let i = 0; const step = () => { if (S.closed) return; if (i >= 10) { expl.style.display = 'none'; return; } expl.style.backgroundPosition = `${bpt(i >= 5 ? -200 : 0)} ${bpt(-(i % 5) * 60)}`; i++; setTimeout(step, Math.max(0, sp / 300 * 1000)); };
+    step();
+  };
+  const play = (ev, kill) => { if (kill) a.Sound.play(k.shotSnd(ev, 3003)); else if (ev.p) a.Sound.play(k.shotSnd(ev, 3002)); else a.Sound.play(k.shotSnd(ev, 3000)); };
+  let r = 0, e = 0;
+  const apply = (ev) => {
+    if (ev.p) return;
+    const f = ev.f != null ? ev.f : ev.hf; if (f != null) hurt[ev.ti] = { n: ++seq, f };
+    if (ev.k) alive[ev.ti] = false;
+  };
+  const afterReview = () => { // 0x100095770 (the strings are Misc Strings 53-58: you / your best buddy won, lost, or has no information)
+    over = true; S.done = true; refresh();
+    const me = viewer === ME, won = surv(viewer), oneRound = dreadIn || nRounds === 1; // the record's +0x1a: one round, or a dreadnought group made by CreateOneGroup
+    const text = won ? (me ? 'Congratulations! You won the battle.' : 'Cool! Your best buddy won this battle.') : oneRound ? (me ? 'You have no information about the battle; your fleet was destroyed too quickly.' : 'Your buddy was destroyed too fast and has no information about this battle.') : (me ? 'Unfortunately, you lost the battle.' : 'Darn. Your best buddy lost this battle.');
+    const t = tl(text), avail = cw - 2 * gd.a80, tw = textW(t, 16), size = tw > avail ? 16 * avail / tw : 16, top = ch - 4 * gd.a80 - LH(16) - gd.a80;
+    dlg.append(bLabel(t, size, cw / 2, top, 0.5, 1, '#fff'));
+    const ic = pic('report_icon-' + (won ? 36 : 37)); ic.style.cssText = `position:absolute;width:${bpt(40)};height:${bpt(39)};left:${bpt(cw / 2 - 20)};top:${bpt(ch - top + gd.a80 + LH(size) - 0)}`;
+    ic.style.top = bpt(ch - top + LH(size) + gd.a80); dlg.append(ic);
+  };
+  const next = () => {
+    if (S.closed) return;
+    if (r >= b.rounds.length) { afterReview(); return; }
+    const rd = b.rounds[r];
+    if (e === 0 && rd.length) roundL.textContent = tl('Round %s', r + 1);
+    if (e >= rd.length) { if (b.popR && b.popR[r] != null) pop = b.popR[r]; r++; e = 0; refresh(); next(); return; }
+    const ev = rd[e++];
+    if (S.skip || hideMode) { apply(ev); next(); return; }
+    const sp = speedTicks(), from = centre(ev.si < 0 ? flat.findIndex(g => g.planet && g.o === b.planetOwner) : tagOf.get(ev.si)), toTag = ev.p ? flat.findIndex(g => g.planet && g.o === b.planetOwner) : tagOf.get(ev.ti), to = centre(toTag);
+    laser(from, to, sp / 60, wEff(ev));
+    S.timer = setTimeout(() => { // DrawShot sleeps speed / 300 x 12 s; then the target is redrawn, a kill explodes (sound 5, Ship Dead)
+      if (S.closed) return;
+      apply(ev); play(ev, ev.k); refresh();
+      if (ev.k) explode(toTag, sp);
+      S.timer = setTimeout(next, 0);
+    }, sp * 40);
+  };
+  pushScrim(L.scrim);
+  refresh();
+  S.timer = setTimeout(next, 300);
+  return true;
+}
 // FUN_100035be4: "1 Sco (4/2)", "5 Fig (3/3)s" (see fleetItem)
 function fleetPileText(d, n) { const cls = FLEET_CLASS[Math.max(0, ['scout', 'dread', 'fighter', 'tanker', 'colony', 'satellite', 'bio', 'decoy'].indexOf(d.type))].slice(0, 3); return n === 1 ? `1 ${cls} (${d.W}/${d.S})` : `${n} ${cls} (${d.W}/${d.S})s`; }
 
@@ -1663,6 +1852,7 @@ window.HOTHEME = {
   },
   battleDead(cx, at) { const im = A().IMG[P + 'deadship']; if (im && im.width) cx.drawImage(im, at.x - im.width / 4, at.y - im.height / 4, im.width / 2, im.height / 2); },
   shipPic(d, IMG) { return shipPic(d, IMG, false); }, // (the app's ShipNode has no rust: ship-rust is in the sheet but no code names it)
+  battleWindow(b, k) { return openBattleIOS(b, k); }, // the Battle screen (BattleStageLayer; openBattleIOS)
   // the app's own windows in this skin: Build (BuildShipsDialog, ShipClassMenu, ShipMenuItem, BuildSingleShipDialog); a ruleset whose ships are queued (DOS 2.0) keeps the remake's window
   window(name, ...x) {
     const a = A(); if (!a || !a.G) return false;

@@ -2439,7 +2439,7 @@ function battleAt505(G, sid, pass) {
             t.dmg += dmg;
             let killed = 0; const ti = t.units[t.start - t.n] != null ? t.units[t.start - t.n] : t.units[0];
             if (t.hp <= t.dmg) { carry = t.dmg - t.hp; t.dmg = 0; t.n--; debris += t.debris; killed = 1; }
-            if (ev.length < 80) ev.push({ a: g.owner, si, t: t.owner, k: killed, ti });
+            if (ev.length < 80) ev.push({ a: g.owner, si, t: t.owner, k: killed, ti, hf: killed ? 0 : t.dmg / t.hp }); // (hf: display only, the target's damage as a fraction of its hit points after the shot: the iOS battle screen's damage bar)
           }
         }
       }
