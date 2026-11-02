@@ -251,3 +251,39 @@ html.skin-ios .ios-rhat img.h { position: absolute; left: 0; top: 0; width: 100%
 html.skin-ios .ios-rhat img.o { position: absolute; left: 50%; bottom: calc(50% + 17 * var(--pt)); width: calc(46 * var(--pt)); height: calc(17 * var(--pt)); transform: translate(-50%, 50%); }
 html.skin-ios .ios-hitem .ios-hrpic.ios-rplanet { position: absolute; left: calc(10 * var(--pt)); top: calc(var(--gap) * var(--pt)); width: calc(40 * var(--pt)); height: calc(40 * var(--pt)); }
 html.skin-ios .ios-hitem .ios-hrpic.ios-rhat { position: absolute; display: block; left: calc(5 * var(--pt)); top: calc((var(--gap) - 25) * var(--pt)); width: calc(50 * var(--pt)); height: calc(50 * var(--pt)); }
+
+/* the Build flow (BuildShipsDialog, ShipClassMenu, ShipMenuItem, BuildSingleShipDialog), in the dialog's own points */
+html.skin-ios .ios-bt { position: absolute; white-space: nowrap; color: #fff; font: calc(14 * var(--pt)) / 1.15 var(--appfont, Arial, Helvetica, sans-serif); }
+html.skin-ios .ios-bplanet { width: calc(40 * var(--pt)); height: calc(40 * var(--pt)); }
+html.skin-ios .ios-bcol { position: absolute; bottom: 0; }
+html.skin-ios .ios-bcol.bord::before, html.skin-ios .ios-bcol.bord::after { content: ""; position: absolute; bottom: 0; width: 0; height: var(--bl, 0); border-left: calc(1 * var(--pt)) solid #393cd6; }
+html.skin-ios .ios-bcol.bord::before { left: 0; } html.skin-ios .ios-bcol.bord::after { right: 0; }
+html.skin-ios .ios-bline { display: none; }
+html.skin-ios .ios-bbtn { position: absolute; box-sizing: border-box; appearance: none; margin: 0; padding: 0 !important; color: #fff !important; background: none !important; border: calc(5 * var(--pt)) solid transparent !important; border-image: url("../../../assets/skins/ios/sprites/button-text.png") 10 fill / calc(5 * var(--pt)) stretch !important; border-radius: 0 !important; box-shadow: none !important; display: flex; align-items: center; justify-content: center; font-family: var(--appfont, Arial, Helvetica, sans-serif); line-height: 1; white-space: nowrap; cursor: pointer; min-height: 0; min-width: 0; }
+html.skin-ios .ios-bmenu { position: absolute; left: 0; bottom: 0; overflow-x: hidden; overflow-y: auto; display: flex; flex-direction: column-reverse; align-items: flex-start; scrollbar-width: none; overscroll-behavior: contain; touch-action: pan-y; }
+html.skin-ios .ios-bmenu::-webkit-scrollbar { display: none; }
+html.skin-ios .ios-bmin { display: flex; flex-direction: column-reverse; align-items: center; flex: none; }
+html.skin-ios .ios-bitem { appearance: none; border: 0 !important; border-radius: 0 !important; background: none !important; padding: 0 !important; margin: 0; min-width: 0; min-height: 0; display: flex; flex-direction: column; align-items: center; gap: calc(2 * var(--pt)); cursor: pointer; flex: none; box-shadow: none !important; }
+html.skin-ios .ios-bitem:active { opacity: .588; }
+html.skin-ios .ios-bin { position: static; line-height: 1.15; }
+html.skin-ios .ios-bship, html.skin-ios .ios-bshipc { display: block; image-rendering: auto; }
+/* CCSliderDeluxe (slider-m5): 19 points high; the pieces left and right of the thumb are scale9 sprites (left cap 8) */
+html.skin-ios .ios-sl { position: relative; height: calc(19 * var(--pt)); flex: none; touch-action: none; cursor: pointer; }
+html.skin-ios .ios-sll, html.skin-ios .ios-slr { position: absolute; top: 0; height: 100%; box-sizing: border-box; border: 0 solid transparent; border-width: 0 calc(8 * var(--pt)); }
+html.skin-ios .ios-sll { left: 0; border-image: url("../../../assets/skins/ios/sprites/slider-m5-left.png") 0 16 0 16 fill / 0 calc(8 * var(--pt)) 0 calc(8 * var(--pt)) stretch; }
+html.skin-ios .ios-slr { right: 0; border-image: url("../../../assets/skins/ios/sprites/slider-m5-right.png") 0 16 0 16 fill / 0 calc(8 * var(--pt)) 0 calc(8 * var(--pt)) stretch; }
+html.skin-ios .ios-slt { position: absolute; top: 50%; width: calc(28.5 * var(--pt)); height: calc(29 * var(--pt)); margin: calc(-14.5 * var(--pt)) 0 0 calc(-14.25 * var(--pt)); background: url("../../../assets/skins/ios/sprites/slider-m5-thumb.png") 0 0 / 100% 100%; }
+html.skin-ios .ios-slt.sel { filter: brightness(.65); }
+html.skin-ios .ios-slt.nan { display: none; }
+html.skin-ios .ios-sla { position: relative; flex: none; }
+html.skin-ios .ios-sla-b { appearance: none; border: 0 !important; border-radius: 0 !important; background: none !important; padding: 0 !important; margin: 0; min-width: 0; min-height: 0; line-height: 0; width: calc(12 * var(--pt)); height: calc(18 * var(--pt)); cursor: pointer; box-shadow: none !important; }
+html.skin-ios .ios-sla-b img { width: 100%; height: 100%; display: block; }
+html.skin-ios .ios-bsl { white-space: nowrap; }
+html.skin-ios .ios-bnbg { position: absolute; background: #5a1c18; }
+html.skin-ios .ios-bnbg i { position: absolute; inset: calc(1 * var(--pt)); border: calc(2 * var(--pt)) solid #fff; }
+html.skin-ios .ios-bname { position: absolute; box-sizing: border-box; appearance: none; background: transparent !important; border: 0 !important; outline: 0; box-shadow: none !important; color: #fff !important; text-align: center; padding: 0 !important; margin: 0; font-family: var(--appfont, Arial, Helvetica, sans-serif); border-radius: 0 !important; }
+html.skin-ios .ios-bwarn { position: absolute; color: #f00; text-align: center; line-height: 1.15; font-family: var(--appfont, Arial, Helvetica, sans-serif); }
+html.skin-ios .ios-bwarnt { transform: scale(.9); transform-origin: 50% 0; }
+html.skin-ios .ios-bbtns { position: absolute; display: flex; flex-direction: row; }
+html.skin-ios .ios-bcancel, html.skin-ios .ios-bcheck { appearance: none; border: 0 !important; border-radius: 0 !important; background: none !important; padding: 0 !important; margin: 0; min-width: 0; min-height: 0; line-height: 0; width: calc(44 * var(--pt)); height: calc(44 * var(--pt)); cursor: pointer; box-shadow: none !important; }
+html.skin-ios .ios-bcancel img, html.skin-ios .ios-bcheck img { width: 100%; height: 100%; display: block; }

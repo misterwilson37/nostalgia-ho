@@ -1053,6 +1053,380 @@ function colonyHat(look, c) {
   else { row = q < 6 ? 2 : 1; if (q <= 1 && !((s.oInc || 0) > 0)) row = 3; }
   return Object.assign({}, look, { hat: sp != null ? 'spgood' + sp : 'white' + row + '_' + f, hatTint: s.abandon301 ? 125 : 0 });
 }
+// ---------------------------------------------------------------------------
+// The Build flow (docs/ios-findings.md, "Build flow"; BuildShipsDialog 0x1000b3b58, ShipClassMenu 0x1000b447c, ShipMenuItem 0x100011c4c,
+// BuildSingleShipDialog 0x1000b4d60, on DialogLayerSprite 0x1000bc294; the numbers are from the disassembly with
+// tools/floats.py in the private repo, GraphicDefines +[setup] 0x100008548 for the iPhone's and iPad's). It draws in the dialog's own points
+// (y up, as cocos2d does): put() places a node by its anchor point.
+const BGD = () => SCREEN.pad ? { a80: 8, a88: 8, f: 18, fi: 20 } : { a80: 4, a88: 6, f: 14, fi: 18 }; // GraphicDefines 0x100148a80, a88, 1001489e8, 1001489f0
+const bpt = (v) => `calc(${v} * var(--pt))`;
+function put(e, x, y, ax, ay) {
+  e.style.position = 'absolute'; e.style.left = bpt(x); e.style.bottom = bpt(y);
+  e.style.transform = `translate(${-(ax || 0) * 100}%, ${(ay || 0) * 100}%)`;
+  return e;
+}
+const BFONT = (size, extra) => `font:${bpt(size)}/1.15 var(--appfont,Arial,Helvetica,sans-serif);${extra || ''}`;
+// -[DialogLayerSprite init] 0x1000bc294: 480 x 320 on an iPhone, an iPad's min(winW, 620) x min(winH, 400); scaled by min(winW / w, winH / h) (an iPad's 0.8 of each)
+function dlgGeom() {
+  const W = SCREEN.winW, H = SCREEN.winH;
+  if (!SCREEN.pad) return { cw: 480, ch: 320, k: Math.min(W / 480, H / 320) };
+  const cw = Math.min(W, 620), ch = Math.min(H, 400);
+  return { cw, ch, k: Math.min(W * 0.8 / cw, H * 0.8 / ch) };
+}
+// the layer: scrim (swallows touches; a touch that begins and ends outside the dialog is a cancel: ccTouchBegan/Ended 0x1000bce5c, 0x1000bcf0c), nine-patch, content
+function dialogLayer(cw, ch, k, label, onCancel) {
+  const bg = UIEl('div', 'ios-gbg');
+  const dlg = UIEl('div', 'ios-gdlg ios-bdlg', { role: 'dialog', 'aria-label': label, style: `width:${bpt(cw)};height:${bpt(ch)};transform:translate(-50%,-50%) scale(${k})` }, bg);
+  const scrim = UIEl('div', 'ios-gscrim', null, dlg);
+  let began = false;
+  scrim.addEventListener('pointerdown', (e) => { began = e.target === scrim; e.stopPropagation(); });
+  scrim.addEventListener('pointerup', (e) => { if (began && e.target === scrim && onCancel) onCancel(); began = false; e.stopPropagation(); });
+  scrim.addEventListener('click', (e) => e.stopPropagation());
+  return { scrim, dlg };
+}
+function bLabel(text, size, x, y, ax, ay, color) {
+  const e = UIEl('span', 'ios-bt'); e.textContent = text; e.style.fontSize = bpt(size); if (color) e.style.color = color;
+  return put(e, x, y, ax, ay);
+}
+// +[Button buttonWithText:size:fontName:fontSize:block:] 0x1000b9d10: button-text.png as a nine-patch (capInsets 5, 5, 34, 5 of 44 x 15 points), the label white, the type
+// shrunk (minimum 6) until the text fits the width less 16
+function textButton(text, w, h, size, fn) {
+  let s = size; while (s > 6 && textW(text, s) > w - 16) s -= 1;
+  const b = UIEl('button', 'ios-bbtn', { type: 'button', style: `width:${bpt(w)};height:${bpt(h)};font-size:${bpt(s)}` });
+  b.textContent = text; b.addEventListener('click', (e) => { e.stopPropagation(); fn(); });
+  return b;
+}
+// CCSliderDeluxe (0x1000aef50..0x1000afb7c): 19 points high, slider-m5 (left and right scale9 pieces of 216 x 19, the thumb 28.5 x 29); the thumb runs from 14.25
+// to width - 11.25; a touch anywhere on it puts the thumb at the finger (clamped), a drag follows; the value is the fraction
+function ccSlider(width, onFrac) {
+  const L = UIEl('i', 'ios-sll'), R = UIEl('i', 'ios-slr'), T = UIEl('i', 'ios-slt');
+  const el = UIEl('div', 'ios-sl', { style: `width:${bpt(width)}` }, L, R, T);
+  const mn = 14.25, mx = width - 11.25;
+  const api = { el, width, set(f0) { // -[CCSliderDeluxe setValue:] 0x1000af4e8 (a NaN, the 0 / 0 of a slider with nothing to choose, is kept: the thumb has no place)
+    const f = f0 !== f0 ? NaN : f0 > 0 ? Math.min(1, f0) : 0;
+    const x = mn + (f === f ? f : 0) * (mx - mn);
+    L.style.width = bpt(x); R.style.width = bpt(width - x); T.style.left = bpt(x); T.classList.toggle('nan', f !== f);
+    api.f = f;
+  }, f: 0 };
+  const at = (e) => { const r = el.getBoundingClientRect(), pts = (e.clientX - r.left) / (r.width / width); return Math.min(Math.max(pts, mn), mx); };
+  let down = false;
+  const move = (e) => { const x = at(e), f = (x - mn) / (mx - mn); api.set(f); onFrac(f); };
+  el.addEventListener('pointerdown', (e) => { if (el.classList.contains('off')) return; down = true; el.setPointerCapture(e.pointerId); T.classList.add('sel'); move(e); e.stopPropagation(); });
+  el.addEventListener('pointermove', (e) => { if (down) move(e); });
+  const up = () => { down = false; T.classList.remove('sel'); };
+  el.addEventListener('pointerup', up); el.addEventListener('pointercancel', up);
+  api.set(0);
+  return api;
+}
+// SliderArray (0x1000afb98): [left arrow] [slider] [right arrow] [label] 4 apart, the label the value or its word; value min..max
+// (valueChanged:tag: 0x1000b03b0 truncates min + (max - min) x fraction), setValue: clamps and moves the thumb to it
+function sliderArray(o) {
+  const gd = BGD(), pad = gd.a80, lw = textW('0', gd.f);
+  const arrows = o.arrows !== false;
+  const sl = ccSlider(o.width, (f) => { let v = Math.trunc(S.min + (S.max - S.min) * f); v = Math.min(Math.max(v, S.min), S.max); S.value = v; S.show(); o.change && o.change(); });
+  const lab = UIEl('span', 'ios-bt ios-bsl'); lab.style.fontSize = bpt(gd.f);
+  const total = (arrows ? 24 : 0) + o.width + lw + pad * (arrows ? 3 : 1);
+  const el = UIEl('div', 'ios-sla', { style: `width:${bpt(total)};height:${bpt(19)}` });
+  let x = 0;
+  const addAt = (n, w, h, cls) => { n.style.position = 'absolute'; n.style.left = bpt(x); n.style.top = '50%'; n.style.transform = 'translateY(-50%)'; el.append(n); x += w + pad; return n; };
+  let la = null, ra = null;
+  if (arrows) {
+    la = UIEl('button', 'ios-sla-b', { type: 'button', 'aria-label': 'Less' }, pic('arrow-left')); addAt(la, 12, 18);
+  }
+  addAt(sl.el, o.width, 19);
+  if (arrows) { ra = UIEl('button', 'ios-sla-b', { type: 'button', 'aria-label': 'More' }, pic('arrow-right')); addAt(ra, 12, 18); }
+  lab.style.position = 'absolute'; lab.style.left = bpt(x + lw / 2); lab.style.top = '50%'; lab.style.transform = 'translate(-50%,-50%)'; el.append(lab);
+  const S = { el, min: 0, max: 0, value: 0, sl, lab, la, ra, words: o.words || null,
+    show() { lab.textContent = S.words && S.value < S.words.length ? S.words[S.value] : String(S.value); },
+    // -[SliderArray setValue:] 0x1000b0568 and updateSlider 0x1000b0314
+    setValue(v) { S.value = Math.min(Math.max(v, S.min), S.max); S.show(); sl.set((S.value - S.min) / (S.max - S.min)); },
+    maxed() { return S.value === S.max; },
+    enable(on) { const d = on ? '' : 'hidden'; sl.el.style.visibility = d; if (la) la.style.visibility = d; if (ra) ra.style.visibility = d; }, // enableTech:enabled: 0x1000b73d0
+  };
+  if (la) la.addEventListener('click', (e) => { e.stopPropagation(); if (S.value !== 0) { S.setValue(S.value - 1); o.change && o.change(); } }); // FUN_1000aff64
+  if (ra) ra.addEventListener('click', (e) => { e.stopPropagation(); S.setValue(S.value + 1); o.change && o.change(); }); // FUN_1000b0030
+  S.setValue(0);
+  return S;
+}
+
+const ShipClass = ['scout', 'dread', 'fighter', 'tanker', 'colony', 'satellite', 'bio', 'decoy'];
+const classOf = (t) => ShipClass.indexOf(t);
+const CLASS_NAMES = ['Scout', 'Dreadnought', 'Fighter', 'Tanker', 'Colony Ship', 'Satellite', 'Biological', 'Decoy']; // Ship Class Names 0-6 (the decoy is the remake's own)
+const bnum = (n, dollar) => { const a = A(), sh = HO.rules(a.G).interestShort; return n < 100000 && n > -100000 ? (dollar ? a.money(n) : a.fmt(n)) : (n < 0 ? '-' : '') + (dollar ? '$' : '') + (sh ? sh(Math.abs(n)) : a.fmt(Math.abs(n))); };
+const designsOf = (p) => p.designs.filter(d => !d.scrapped);
+function aliveOf(G, me, d) { let n = 0; for (const f of G.fleets) if (f.owner === me && f.ships && f.ships[d.id]) n += f.ships[d.id]; return n; }
+function pushScrim(scrim) { document.getElementById('app').append(scrim); }
+let buildFlow = null;
+function closeBuildFlow() { if (buildFlow) { for (const s of buildFlow.scrims.slice().reverse()) s.remove(); buildFlow = null; } }
+
+// -[BuildShipsDialog initDialog] 0x1000b3b58: the layer takes the whole screen (an iPhone) or 0.8 of the width by the height the most ships of one class need
+// at 100 points each (within 0.5 and 0.8 of the screen's); the mini close button; the star's PlanetNode at (120, height - 25) and its name 24 further (4 + 20) at
+// 16 points; a ShipClassMenu column for each class (six, seven with a Biological), (width - 8 a80) / columns wide and height - 50 high, in a node at (4 a80, 0)
+function openBuildFlow(sid) {
+  const a = A(), G = a.G, p = a.me(), s = G.stars[sid];
+  closeBuildFlow();
+  const { cw, ch, k } = dlgGeom(), gd = BGD();
+  const classes = [0, 1, 2, 3, 4, 5]; if (designsOf(p).some(d => d.type === 'bio')) classes.push(6); // hasBiological 0x1000b3ad8
+  if (designsOf(p).some(d => d.type === 'decoy') || (HO.canBuildType(G, p, 'decoy') && p.hasDecoy)) classes.push(7); // (the remake's own column for a ruleset's decoy: iOS has none)
+  let W, H, K = k;
+  if (!SCREEN.pad) { W = Math.trunc(SCREEN.winW / k); H = Math.trunc(SCREEN.winH / k); }
+  else {
+    const counts = {}; let most = 0; for (const d of designsOf(p)) { counts[d.type] = (counts[d.type] || 0) + 1; most = Math.max(most, counts[d.type]); } // maxCountSingleType 0x1000b4098
+    const hh = Math.min(Math.max(most * 100 * k, SCREEN.winH * 0.5), SCREEN.winH * 0.8);
+    W = Math.trunc(SCREEN.winW * 0.8 / k); H = Math.trunc(hh / k);
+  }
+  const L = dialogLayer(W, H, K, 'Build ships', closeBuildFlow);
+  const flow = buildFlow = { scrims: [L.scrim], sid, dlg: L.dlg, W, H, cols: {}, shown: 0, single: null };
+  const x = UIEl('button', 'ios-gx', { type: 'button', 'aria-label': 'Close' }, pic('button-x')); // enableMiniCloseButton
+  x.addEventListener('click', (e) => { e.stopPropagation(); closeBuildFlow(); });
+  L.dlg.append(x);
+  const pc = a.IMG && planetPic(a.IMG, p, s), pcv = UIEl('canvas', 'ios-bplanet');
+  if (pc) { pcv.width = pc.width; pcv.height = pc.height; pcv.getContext('2d').drawImage(pc, 0, 0); }
+  L.dlg.append(put(pcv, 120, H - 25, 0.5, 0.5));
+  L.dlg.append(bLabel(s.name, 16, gd.a80 + 20 + 120, H - 25, 0, 0.5, '#fff'));
+  const colW = (W + gd.a80 * -8) / classes.length, colH = H - 50;
+  classes.forEach((c, i) => {
+    const col = UIEl('div', 'ios-bcol' + (i && i < classes.length - 1 ? ' bord' : ''), { style: `left:${bpt(gd.a80 * 4 + i * colW)};width:${bpt(colW)};height:${bpt(colH)}` });
+    const bw = Math.trunc(colW) - gd.a80, bh = gd.f * 2, bsz = SCREEN.pad ? gd.f : gd.f - 4;
+    const t = textButton(CLASS_NAMES[c], bw, bh, bsz, () => openSingleShip(flow, c, -1)); // designNewShip: the title button
+    put(t, colW / 2, colH - gd.a88, 0.5, 1);
+    col.style.setProperty('--bl', bpt(colH - bh)); // ShipClassMenu draw 0x1000b49f8: the inner columns' edges, 1 point, 0x393cd6, up to the title button's top less its height
+    const menu = UIEl('div', 'ios-bmenu', { style: `width:${bpt(colW)};height:${bpt(colH - (bh + gd.a88 * 2))}` });
+    const inner = UIEl('div', 'ios-bmin', { style: `gap:${bpt(gd.a88)}` }); menu.append(inner);
+    col.append(menu, t); L.dlg.append(col);
+    flow.cols[c] = inner;
+  });
+  pushScrim(L.scrim);
+  updateShipTypes(flow);
+  return true;
+}
+// -[BuildShipsDialog updateShipTypes:] 0x1000b4164 and -[ShipClassMenu addShip:index:] 0x1000b4884: every type of the player's in its class's column, the first at the bottom
+// (alignItemsVerticallyWithPadding:bottomToTop: with a88 between); a type added since scales in over 0.4 s
+function updateShipTypes(flow) {
+  const a = A(), p = a.me(), gd = BGD(), ds = designsOf(p);
+  for (const c in flow.cols) flow.cols[c].textContent = '';
+  const colW = (flow.W + gd.a80 * -8) / Object.keys(flow.cols).length;
+  const grew = flow.shown && ds.length > flow.shown;
+  ds.forEach((d, i) => {
+    const inner = flow.cols[classOf(d.type)]; if (!inner) return;
+    const name = `${d.name} (${d.W}/${d.S})`, maxW = colW - gd.a80;
+    const cv = a.IMG && HOTHEME.shipPic(d, a.IMG), sw = cv ? cv.width : 0, lw = textW(name, gd.f);
+    const ss = sw && maxW <= sw ? maxW / sw : 1, ls = maxW <= lw ? maxW / lw : 1; // -[ShipMenuItem setMaxWidth:] 0x100011e80
+    const it = UIEl('button', 'ios-bitem', { type: 'button', style: `width:${bpt(Math.max(sw * ss, lw * ls))}` });
+    if (cv) { cv.classList.add('ios-bship'); cv.style.width = bpt(cv.width * ss); cv.style.height = bpt(cv.height * ss); it.append(cv); }
+    const lb = UIEl('span', 'ios-bt ios-bin'); lb.textContent = name; lb.style.fontSize = bpt(gd.f * ls); it.append(lb);
+    it.addEventListener('click', (e) => { e.stopPropagation(); openSingleShip(flow, classOf(d.type), i); }); // shipSelected: -> setShip:
+    inner.append(it);
+    if (grew && i === ds.length - 1) it.animate([{ transform: 'scale(0)' }, { transform: 'scale(1)' }], { duration: 400 });
+  });
+  flow.shown = ds.length;
+}
+
+// -[BuildSingleShipDialog initDialog] 0x1000b4d60, layout 0x1000b5e14
+function openSingleShip(flow, cls, index) {
+  const a = A(), G = a.G, p = a.me(), sid = flow.sid, gd = BGD();
+  if (flow.single) { flow.single.remove(); flow.scrims = flow.scrims.filter(x => x !== flow.single); flow.single = null; }
+  const { cw: W, ch: H, k } = dlgGeom();
+  const close = () => { if (flow.single) { flow.single.remove(); flow.scrims = flow.scrims.filter(x => x !== flow.single); flow.single = null; } };
+  const L = dialogLayer(W, H, k, 'Build', close), dlg = L.dlg;
+  flow.single = L.scrim; flow.scrims.push(L.scrim);
+  const hw = (W - 40) / 2, xc = hw / 2 + W / 2, step = SCREEN.pad ? gd.a80 * 4 : gd.a88 * 5, r = gd.a88 * 3;
+  let selected = -1; // mSelected: the index into the player's types, -1 for a type not yet made
+  let cur = { type: ShipClass[cls], R: 0, V: 0, W: 0, S: 0, M: 0 };
+  const lv = () => ({ R: p.tech.range, V: p.tech.speed, W: p.tech.weapons, S: p.tech.shields, M: p.tech.mini });
+  // the name: a BackgroundBorderNode 0x100093738 (fill 0xff5a1c18, a white border 2 points wide drawn 2 in) and a CCTextField (centred text, Arial 18) over it
+  const nw = hw - 20, nameY = H - 16 - gd.a88;
+  const nbg = UIEl('div', 'ios-bnbg', { style: `width:${bpt(nw)};height:${bpt(32)}` }, UIEl('i'));
+  dlg.append(put(nbg, xc, nameY, 0.5, 1));
+  const name = UIEl('input', 'ios-bname', { type: 'text', maxlength: '15', spellcheck: 'false', autocomplete: 'off', 'aria-label': 'Ship name', style: `width:${bpt(nw)};height:${bpt(32)};font-size:${bpt(gd.fi)}` });
+  name.setAttribute('translate', 'no');
+  dlg.append(put(name, xc, nameY - 5, 0.5, 1));
+  let shipEl = null;
+  const inSvc = bLabel('', gd.f, xc, nameY - 5 - 32 - 90, 0.5, 1, '#fff'); dlg.append(inSvc);
+  // five technologies: the label at x 20, the SliderArray's right edge at width / 2 - 10, 30 apart (an iPad's 32)
+  const labs = ['Range', 'Speed', 'Weapons', 'Shields', 'Mini'], maxLab = Math.max(...labs.map(t => textW(t, gd.f)));
+  const dummy = 24 + 0 + textW('0', gd.f) + gd.a80 * 3;
+  const sw = hw - maxLab - dummy - 20;
+  const T = labs.map((t, i) => {
+    const y = H - 30 - i * step;
+    dlg.append(bLabel(t, gd.f, 20, y, 0, 0.5, '#fff'));
+    const S = sliderArray({ width: sw, change: () => techAdjusted() });
+    S.min = (i === 0 || i === 4) ? 0 : 1; S.max = [p.tech.range, p.tech.speed, p.tech.weapons, p.tech.shields, p.tech.mini][i]; S.setValue(S.max); // adjustControlsForPlayer 0x1000b745c
+    dlg.append(put(S.el, W / 2 - 10, y, 1, 0.5));
+    return S;
+  });
+  // the costs: ValueWithLabel rows (the label at x 20 / width / 2, the value right at width / 2 - 10 / width - 20)
+  const Y0 = nameY - 5 - 32 - 90 - step * 1.5, Y = [Y0, Y0 - r, Y0 - 2 * r, Y0 - 3 * r, Y0 - 4 * r, Y0 - 6 * r];
+  const row = (text, col, y) => {
+    const lx = col === 1 ? 20 : W / 2, vx = col === 1 ? W / 2 - 10 : W - 20;
+    const lab = bLabel(text, gd.f, lx, y, 0, 0.5, '#fff'), val = bLabel('', gd.f, vx, y, 1, 0.5, '#fff');
+    dlg.append(lab, val); return { lab, val, show(on) { lab.style.display = val.style.display = on ? '' : 'none'; } };
+  };
+  const dev = row('Dev Cost', 1, Y[0]), pro = row('Pro Cost', 1, Y[1]), tot = row('Total Cost', 2, Y[1]), met = row('Metal Cost', 1, Y[2]), totM = row('Total Metal', 2, Y[2]),
+    mon = row('Savings:', 1, Y[3]), metL = row('Metal:', 2, Y[3]);
+  // Allow Debt: a two-word slider of 60 points, no arrows, at "No"
+  dlg.append(bLabel('Allow Debt', gd.f, 20, Y[4], 0, 0.5, '#fff'));
+  const debt = sliderArray({ width: 60, arrows: false, words: ['No', 'Yes'], change: () => { updateDebt(); } }); debt.min = 0; debt.max = 1; debt.setValue(0);
+  dlg.append(put(debt.el, W / 2 - 10, Y[4], 1, 0.5));
+  const nl = bLabel('# To Build', gd.f, 20, Y[5], 0, 0.5, '#fff'); dlg.append(nl);
+  const bs = sliderArray({ width: (W - 40) / 2 * 0.5 * 1.25, change: () => updateCosts() });
+  dlg.append(put(bs.el, gd.a80 + textW('# To Build', gd.f) + 20, Y[5], 0, 0.5));
+  const warnT = UIEl('div', 'ios-bwarnt'), warn = UIEl('div', 'ios-bwarn', { style: `width:${bpt(222.222)};font-size:${bpt(gd.f)}` }, warnT); dlg.append(put(warn, xc, nameY - 5 - 32 - 90 - 20, 0.5, 1)); warn.style.display = 'none';
+  // the buttons: the cancel cross and the check, 4 apart, at (width - 4 a80, a80), anchored right bottom (enableCloseButton:cancelButton: 0x1000bca44, setContentSize: 0x1000bcc94)
+  const bx = UIEl('button', 'ios-bcancel', { type: 'button', 'aria-label': 'Cancel' }, pic('button-x')), bk = UIEl('button', 'ios-bcheck', { type: 'button', 'aria-label': 'Build' }, pic('button-check'));
+  bx.addEventListener('click', (e) => { e.stopPropagation(); close(); });
+  bk.addEventListener('click', (e) => { e.stopPropagation(); buildNow(); });
+  const bm = UIEl('div', 'ios-bbtns', { style: `gap:${bpt(gd.a80)}` }, bx, bk); dlg.append(put(bm, W - gd.a80 * 4, gd.a80, 1, 0));
+
+  // ---- the logic (BuildSingleShipDialog) ----
+  const specOf = () => ({ type: cur.type, R: T[0].value, V: T[1].value, W: T[2].value, S: T[3].value, M: T[4].value });
+  const shipRec = () => selected >= 0 ? designsOf(p)[selected] : null;
+  // the record's costs (FUN_100037124): the first ship's whole price, the next ones', the metal
+  function costs() {
+    const d = shipRec(), spec = d || specOf(), c = HO.designCost(G, spec);
+    const probe = d || Object.assign({}, spec, { built: 0, free: false, id: -1 });
+    const first = HO.shipCostNow(G, p, probe);
+    return { dev: first.money, pro: c.money, metal: c.metal, built: d ? d.built : 0, alive: d ? aliveOf(G, a.ME, d) : 0 };
+  }
+  function drawShip() {
+    if (shipEl) shipEl.remove();
+    const cv = a.IMG && HOTHEME.shipPic(shipRec() || specOf(), a.IMG);
+    if (cv) { cv.className = 'ios-bshipc'; cv.style.width = bpt(cv.width); cv.style.height = bpt(cv.height); dlg.append(put(cv, xc, nameY - 5 - 32, 0.5, 1)); } // ShipNode ship, anchor (0.5, 1)
+    shipEl = cv;
+  }
+  // -[BuildSingleShipDialog flashRed:] 0x1000b77f8: a CCTintTo to (255, 0, 0) over 1 s, then (255, 175, 175) over 0.2 s, for ever
+  const flashing = new Map();
+  function flash(r) {
+    if (flashing.has(r.val)) return;
+    const lead = r.val.animate([{ color: '#fff' }, { color: '#f00', offset: 1 / 1.2 }, { color: '#ffafaf' }], { duration: 1200, fill: 'forwards' });
+    const anims = [lead]; flashing.set(r.val, anims);
+    lead.onfinish = () => { if (flashing.get(r.val) === anims) anims.push(r.val.animate([{ color: '#ffafaf' }, { color: '#f00', offset: 1 / 1.2 }, { color: '#ffafaf' }], { duration: 1200, iterations: Infinity })); };
+  }
+  function calm(r) { const an = flashing.get(r.val); if (an) { an.forEach(x => x.cancel()); flashing.delete(r.val); } r.val.style.color = '#fff'; }
+  // -[BuildSingleShipDialog determineCapacity] 0x1000b6a08
+  function determineCapacity() {
+    const c = costs(), d = shipRec();
+    let avail = p.savings; if (debt.value) avail = p.savings - HO.borrowLimit(G, p);
+    let first = 0;
+    if (c.built === 0) { avail -= c.dev; first = avail > 0 ? 1 : 0; avail = Math.max(0, avail); }
+    const money = c.pro !== 0 ? Math.trunc(avail / c.pro) + first : first;
+    const metalN = c.metal === 0 ? 9999 : Math.trunc(p.metal / c.metal);
+    let n = Math.max(0, Math.min(money, metalN));
+    n = Math.min(n, colonyRoom());
+    if (d && d.scrap301) n = 0;
+    bs.max = n; bs.min = 0;
+    let v = bs.value;
+    if (v <= n) v = (n < 1 || v !== 0) ? v : 1; else v = n;
+    bs.setValue(v);
+    if (bs.value === 0) {
+      bk.style.visibility = 'hidden';
+      if (metalN !== 0) calm(met); else flash(met);
+      if (money === 0) { flash(pro); flash(dev); } else { calm(pro); calm(dev); }
+    } else { bk.style.visibility = ''; calm(met); calm(pro); calm(dev); }
+    return c;
+  }
+  // how many more ships the colony can take (the colony record's [0xc] less [0x10]): the ruleset's yardRoom, counted by trying
+  function colonyRoom() {
+    const rs = HO.rules(G), st = G.stars[sid];
+    if (!rs.yardRoom) return 9999;
+    const probe = Object.assign({}, specOf(), { id: -1, built: 1, free: false });
+    const mark = p.spentThisTurn.length; let n = 0;
+    while (n < 9999 && rs.yardRoom(G, p, st, probe)) { p.spentThisTurn.push({ did: -1, sid, money: 0, metal: 0 }); n++; }
+    p.spentThisTurn.length = mark;
+    return n;
+  }
+  // -[BuildSingleShipDialog updateCosts] 0x1000b6704
+  function updateCosts() {
+    const c = costs(), n = bs.value, spec = shipRec() || specOf();
+    const money = n < 1 ? 0 : c.built === 0 ? c.dev + c.pro * (n - 1) : c.pro * n, metal = c.metal * Math.max(0, n);
+    const many = n >= 10 && (cur.type === 'scout' || cur.type === 'tanker');
+    bs.lab.style.color = many ? '#f00' : '#fff';
+    warn.style.display = many ? '' : 'none';
+    if (many) warnT.textContent = HO.say(G, HO.DATA.alerts[cur.type === 'scout' ? 35 : 36]);
+    tot.val.textContent = bnum(money, true); totM.val.textContent = bnum(metal, false);
+    mon.val.textContent = bnum(p.savings - money, true); metL.val.textContent = bnum(p.metal - metal, false);
+  }
+  function updateDebt() { determineCapacity(); updateCosts(); }
+  // -[BuildSingleShipDialog updateExtraShipData] 0x1000b64b8
+  function updateExtra() {
+    const c = costs();
+    dev.val.textContent = bnum(c.dev, true); dev.show(c.built === 0);
+    pro.val.textContent = bnum(c.pro, true); met.val.textContent = bnum(c.metal, false);
+    inSvc.textContent = `${a.fmt(c.alive)}/${a.fmt(c.built)} In Service`;
+    determineCapacity(); updateCosts();
+  }
+  function fromControls() { const sp = specOf(); Object.assign(cur, sp); cur.name = name.value; drawShip(); }
+  // -[BuildSingleShipDialog adjustControlsFor:] 0x1000b70f4: first each slider whose thumb is off the left end is shown and the others hidden (enableTech:enabled: on the
+  // CCSliderDeluxe's 0-1 value), then the limits from the player's levels: range up to the level (+3 for a scout, -1 for a tanker), speed (-1 for a tanker), weapons and
+  // shields (-1 for a scout), minimum 1 but for the range (0) and the mini; a slider that was at its top, or above the new top (the range: or 0) goes to it; a satellite
+  // has no range or speed (0, hidden); a biological has none of the five
+  function adjustFor(c) {
+    cur.type = ShipClass[c];
+    if (c === 7) { // (the remake's decoy: the ruleset's own limits)
+      const Lm = HO.designLimits(G, p, 'decoy'); [Lm.R, Lm.V, Lm.W, Lm.S, Lm.M].forEach((mx, i) => { T[i].max = mx; T[i].setValue(mx); T[i].enable(true); }); return;
+    }
+    T.forEach((S) => S.enable(S.sl.f > 0));
+    const lvl = lv();
+    let m = lvl.R + (c === 0 ? 3 : c === 3 ? -1 : 0), was = T[0].maxed(); T[0].max = m;
+    if (c === 5) { T[0].setValue(0); T[0].enable(false); }
+    else if (was || T[0].value > m || T[0].value === 0) T[0].setValue(m);
+    m = lvl.V - (c === 3 ? 1 : 0); was = T[1].maxed(); T[1].max = m; T[1].min = 1;
+    if (c === 5 || was || T[1].value > m) T[1].setValue(m);
+    [2, 3].forEach((i) => { const mm = (i === 2 ? lvl.W : lvl.S) - (c === 0 ? 1 : 0), w = T[i].maxed(); T[i].max = mm; T[i].min = 1; if (w || T[i].value > mm) T[i].setValue(mm); });
+    if (c === 6) T.forEach(S => S.enable(false));
+  }
+  function autoName(c) { return HO.designName(G, p, ShipClass[c]); }
+  // -[BuildSingleShipDialog handleTechAdjusted] 0x1000b6408
+  function matching() { const ds = designsOf(p), sp = specOf(); return ds.findIndex(d => d.type === sp.type && d.R === sp.R && d.V === sp.V && d.W === sp.W && d.S === sp.S && d.M === sp.M); }
+  function techAdjusted() {
+    const was = selected;
+    fromControls(); selected = matching(); updateExtra();
+    if (selected !== was) {
+      if (selected >= 0) setShip(selected);
+      else if (was >= 0) { name.value = autoName(classOf(cur.type)); fromControls(); }
+    }
+  }
+  // -[BuildSingleShipDialog setShip:] 0x1000b6d98
+  function setShip(i) {
+    const ds = designsOf(p), d = ds[i]; if (!d) return;
+    selected = i; adjustFor(classOf(d.type));
+    [d.R, d.V, d.W, d.S, d.M].forEach((v, j) => T[j].setValue(v));
+    if (name.value !== d.name) name.value = d.name;
+    updateExtra(); fromControls();
+  }
+  // -[BuildSingleShipDialog setShipClass:] 0x1000b6ef4
+  function setClass(c) {
+    if (c === 6) { const ds = designsOf(p); for (let i = ds.length - 1; i >= 0; i--) if (ds[i].type === 'bio') return setShip(i); c = 0; }
+    selected = -1; adjustFor(c); name.value = autoName(c); techAdjusted();
+  }
+  // -[BuildSingleShipDialog textFieldDidReturn:] 0x1000b795c: a new name takes (15 letters); an empty one puts the old back
+  const commit = () => {
+    const d = shipRec();
+    if (!name.value.trim()) { name.value = d ? d.name : cur.name || autoName(classOf(cur.type)); return; }
+    name.value = name.value.slice(0, 15);
+    if (d) { d.name = name.value; updateShipTypes(flow); a.save(); }
+    cur.name = name.value;
+  };
+  name.addEventListener('keydown', (e) => { e.stopPropagation(); if (e.key === 'Enter') { name.blur(); } });
+  name.addEventListener('change', commit); name.addEventListener('blur', commit);
+  // -[BuildSingleShipDialog buildShips] 0x1000b7630
+  function buildNow() {
+    const n = bs.value;
+    if (n < 1) return;
+    let d = shipRec();
+    if (!d) {
+      if (designsOf(p).length >= (HO.rules(G).maxDesigns || 24)) { close(); const al = HO.say(G, HO.DATA.alerts[15]); a.alertOver([al]); return; } // Alert Strings 16
+      const sp = specOf(); sp.name = (name.value || '').trim().slice(0, 15) || autoName(classOf(sp.type));
+      d = HO.findOrCreateDesign(G, p, sp);
+    }
+    for (let i = 0; i < n; i++) if (!HO.buildShips(G, a.ME, sid, d.id, 1)) break;
+    close(); a.save(); a.renderPanel(); a.draw(); updateShipTypes(flow);
+  }
+  pushScrim(L.scrim);
+  if (index >= 0) setShip(index); else setClass(cls);
+  return true;
+}
+
 window.HOTHEME = {
   dir: 'assets/skins/ios/',
   prefix: P,
@@ -1089,6 +1463,12 @@ window.HOTHEME = {
     return pic ? { base: look.base, pic, hat: look.hat } : look;
   },
   shipPic(d, IMG) { return shipPic(d, IMG, false); }, // (the app's ShipNode has no rust: ship-rust is in the sheet but no code names it)
+  // the app's own windows in this skin: Build (BuildShipsDialog, ShipClassMenu, ShipMenuItem, BuildSingleShipDialog); a ruleset whose ships are queued (DOS 2.0) keeps the remake's window
+  window(name, ...x) {
+    const a = A(); if (!a || !a.G) return false;
+    if (name === 'build') { const s = a.G.stars[x[0]]; if (!s || s.owner !== a.ME || HO.feature(a.G, 'buildQueue')) return false; return openBuildFlow(x[0]); }
+    return false;
+  },
   // the title: the app's welcome screen, its name down the side and the
   // cowboy planet (hoguy_0-19) twirling his six-gun
   title(frame, IMG, Sound) {
