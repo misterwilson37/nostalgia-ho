@@ -1397,6 +1397,52 @@ function openScrapIOS() {
     } });
   return L;
 }
+// -[PreferencesLayer initDialog] 0x1000a6a4c, setupPreferenceXPosition:yPosition:label:tag:choiceLabel: 0x1000a7b3c, valueChanged:tag: 0x1000a799c, the toggles 0x1000a75dc-0x1000a7940, doClose: 0x1000a74c8
+// (the numbers read in the assembly; H the dialog's height, y up). The message Misc 82. Eight rows, the first (Event Messages, 195) with its centre H - 60 (H - 90 on an iPad), each next 32.5 (19 + 2.25 a88) lower; a row is
+// the title (Arial 14, anchored at its left, middle) at x 4 a88 (Messages, Battles, Hints and Best Buddies at 5.5 a88), a switch (a CCSliderDeluxe 10 a88 wide, anchored at its left) at x 24 a88, and the words of its
+// state (Arial 14) 20 right of the switch. A switch is on at 50 or over of its 100 (the thumb is left where the finger lets go), the words follow (Show / Hide ...); Event Messages on Hide hides the switches and words
+// of the four rows under it (the titles are plain labels no field holds, and stay). "Review Battle Speed:" (Misc 97, Arial 14) centred at (60 a88, the Hints row's y), the slider (28 a88 wide, scale 0.125 a88, anchored at its
+// bottom middle) 6 a88 under that, Slow (98) and Fast (99) (Arial 11, anchored at their bottom middles) 20 under it, 30 inside the ends of its unscaled width; its value is 30 - delay, the delay (int)(30 - 30 x value).
+// The check keeps all of it, the cross nothing. The remake's own options are in a separate window (a browser has no use for the others), reached by a small button under the dialog.
+function openPrefsIOS(P) {
+  const { D, W } = P, a = A();
+  const pad = SCREEN.pad;
+  const L = appDialog({ message: miscS(82), label: miscS(82),
+    build(dlg, cw, ch, gd) {
+      const a88 = gd.a88, rowsDef = [['show', 195, 186, 187, 0], ['important', 196, 188, 189, 1], ['review', 197, 190, 154, 1], ['hints', 198, 105, 104, 1], ['buddies', 149, 105, 104, 1], ['celsius', 14, 192, 191, 0], ['sound', 199, 105, 104, 0], ['male', 200, 193, 194, 0]];
+      let y = ch - (pad ? 90 : 60); const pos = {}, under = [];
+      for (const [k, t, on, off, ind] of rowsDef) {
+        if (k !== 'show') y -= 19 + a88 * 2.25;
+        pos[k] = y;
+        const title = dlabel(miscS(t), 14, a88 * 4 + (ind ? a88 * 1.5 : 0), y, 0, 0.5);
+        const words = dlabel('', 14, a88 * 24 + a88 * 10 + 20, y, 0, 0.5);
+        const sw = ccSlider(a88 * 10, (f) => { D[k] = Math.fround(f * 100) >= 50; D_sync(); });
+        sw.set(D[k] ? 1 : 0);
+        dlg.append(title, put(sw.el, a88 * 24, y, 0, 0.5), words);
+        if (ind) under.push(sw.el, words);
+        const upd = () => { words.textContent = miscS(D[k] ? on : off); };
+        sw.upd = upd; pos[k + '_sw'] = sw;
+      }
+      function D_sync() {
+        for (const k of ['show', 'important', 'review', 'hints', 'buddies', 'celsius', 'sound', 'male']) pos[k + '_sw'].upd();
+        for (const e of under) e.style.visibility = D.show ? '' : 'hidden';
+      }
+      D_sync();
+      const hy = pos.hints, sx = a88 * 60, sw2 = a88 * 28;
+      dlg.append(dlabel(miscS(97), 14, sx, hy, 0.5, 0.5));
+      const sp = ccSlider(sw2, (f) => { const delay = Math.trunc(Math.fround(30 - Math.fround(Math.fround(f) * 30))); D.speed = 30 - delay; });
+      sp.set(D.speed / 30);
+      const spEl = put(sp.el, sx, hy - a88 * 6, 0.5, 0); spEl.style.transform += ` scale(${a88 * 0.125})`; spEl.style.transformOrigin = '50% 100%';
+      dlg.append(spEl);
+      dlg.append(dlabel(miscS(98), 11, sx - sw2 / 2 + 30, hy - a88 * 6 - 20, 0.5, 0), dlabel(miscS(99), 11, sx + sw2 / 2 - 30, hy - a88 * 6 - 20, 0.5, 0));
+    },
+    ok() { P.ok(); } });
+  // the remake's own options (a browser's: sound effects of its own, modern conveniences, tips): not in the app, so a small plain button outside the dialog
+  const ro = UIEl('button', 'ios-bmi ios-bremake', { type: 'button' }); ro.textContent = 'Remake options…'; ro.setAttribute('translate', 'yes');
+  ro.addEventListener('click', (e) => { e.stopPropagation(); P.options(); });
+  L.scrim.append(ro);
+  return L;
+}
 // -[AutoPlayLayer initDialog] 0x100096584, valueChanged:tag: 0x100097aa0, showPlayOneTurn 0x100097ddc / showJustEndTurns 0x10009801c / showPlayForMe 0x10009822c, togglePlayOneTurn 0x1000978ec, toggleEndMyTurns
 // 0x1000979fc, toggleAutoPlay 0x10009795c, doClose: 0x100097870 (positions read in the assembly; a88 = 6, 8 on an iPad; H the dialog's height; y up). The message Misc 118. The state slider (tag 3, 40 a88 wide) is centred at
 // H - trunc(6.875 a88 + trunc(3.75 a88)) (63): up to 33 per cent of it is "Play One Turn" (Misc 119, or 184 "Already Played One Turn" when the computer has played this turn, when the check goes too), 34 to 67
@@ -2086,6 +2132,7 @@ window.HOTHEME = {
     if (appRules && name === 'auto') { openAutoPlayIOS(); return true; }
     if (appRules && name === 'armageddon') { openArmageddonIOS(); return true; }
     if (appRules && name === 'types') { openScrapIOS(); return true; }
+    if (appRules && name === 'prefs') { openPrefsIOS(x[0]); return true; }
     if (name === 'organize') { if (x[0] == null || HO.rules(a.G).organizeFleets !== 'ios') return false; return openOrganizeIOS(x[0]); }
     return false;
   },

@@ -4479,6 +4479,8 @@ function prefsIOS(W) {
     if (me().female === D.male) { me().female = !D.male; save(); }
     savePrefs(); closeModal(); renderPanel(); draw();
   };
+  // the iOS skin's own window (PreferencesLayer): the switches in D, the check calls ok; the remake's own options are a separate window
+  if (skinWindow('prefs', { D, W, ok, options: () => modal('Remake options', el('div', { class: 'prefs' }, ...remakeOptions(true)), { cls: 'small' }) })) return;
   modal(W.title, el('div', { class: 'prefs prefs-ios' }, ...list,
     el('div', { class: 'speedrow' }, el('span', null, W.speed), el('div', { class: 'slider' }, el('span', null, W.slow), speed, el('span', null, W.fast))),
     el('div', { class: 'btns right' }, pb(noBtn, W.cancel, { type: 'button', class: noBtn ? 'picbtn' : 'quiet', onclick: closeModal }), pb(okBtn, W.ok, { type: 'button', onclick: ok })),
