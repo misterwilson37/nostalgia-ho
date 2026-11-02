@@ -1515,6 +1515,11 @@ function PW(key, dflt) {
   const w = I && I[(G.opts && G.opts.lang) || HO.ownLanguage(HO.ownRules(G))];
   return (w && w[key]) || dflt;
 }
+// the same as a text node the interface leaves alone when it is the version's own word (sp: a space after it, or before when before)
+function PWn(key, dflt, sp, before) {
+  const w = PW(key); if (!w) return before ? (sp || '') + dflt : dflt + (sp || '');
+  return document.createTextNode(before ? (sp || '') + w : w + (sp || ''));
+}
 function planetBox(sid) {
   const p = me(), s = G.stars[sid], k = HO.know(G, p, sid);
   const look = starLook(sid);
@@ -1541,7 +1546,7 @@ function planetBox(sid) {
     if (s.owner === ME) {
       const inc = HO.planetIncome(G, p, s);
       if (!own12) box.append(row(PW('pop', 'Population'), fmt(HO.popNum(G, s.pop)), '', 'population'));
-      box.append(row('Max population', fmt(HO.popNum(G, HO.maxPop(G, p, s))), '', 'maxPop'));
+      if (!PI) box.append(row('Max population', fmt(HO.popNum(G, HO.maxPop(G, p, s))), '', 'maxPop'));
       if (!own12) box.append(row('Income', panelFig('planetIncome', inc, true), inc < 0 ? 'neg' : '', 'planetIncome'));
       const terraOK = Math.abs(HO.seenT(p, s) - 72) > 0.5, metalOK = s.metal > 0;
       // in 2.0 and 1.2 a finished part's share is wasted, not passed on, so
@@ -1564,12 +1569,13 @@ function planetBox(sid) {
           waste.hidden = !waste.textContent;
         };
         show();
-        box.append(el('div', { class: 'tm', 'data-help': 'terraMine' }, el('span', { class: 'tml' }, 'Terraform ', lt), inp, el('span', { class: 'tmr' }, rt, ' Mine')));
-        box.append(waste);
-      } else if (wasted) box.append(el('p', { class: 'note' }, 'Fully terraformed and mined out. Money spent here on terraforming or mining is wasted.'));
+        box.append(el('div', { class: 'tm', 'data-help': 'terraMine' }, el('span', { class: 'tml' }, PWn('terra', 'Terraform', ' '), lt), inp, el('span', { class: 'tmr' }, rt, PWn('mine', 'Mine', ' ', true))));
+        if (!PI) box.append(waste);
+      } else if (PI) { /* (1.2 draws no note: the bars, or the queue) */ } else if (wasted) box.append(el('p', { class: 'note' }, 'Fully terraformed and mined out. Money spent here on terraforming or mining is wasted.'));
       else box.append(el('p', { class: 'note' }, !terraOK && !metalOK ? 'Fully terraformed and mined out. Its budget goes to savings.' : !terraOK ? 'Fully terraformed; its budget goes to mining.' : 'No metal left; its budget goes to terraforming.'));
       if (HO.feature(G, 'buildQueue')) box.append(yardBox(s));
-      box.append(el('div', { class: 'btns' },
+      // (1.2 has no button here: Build Ships is a double click on the colony or the Ships menu's "Build Ships at …")
+      if (!PI) box.append(el('div', { class: 'btns' },
         el('button', { onclick: () => openBuild(sid), 'data-help': 'build' }, HO.feature(G, 'buildQueue') ? 'Queue ships…' : 'Build ships…'),
         evacuateHere(s) ? el('button', { class: 'quiet', 'data-help': 'evacuate', onclick: () => evacuateClick(sid) }, evacuateLabel(sid, 'Evacuate')) : null,
         HO.rules(G).evacuateToggle && HO.rules(G).evacuateToggle.marked(G, sid) ? el('span', { class: 'note' }, 'Evacuating') : null));
@@ -2460,7 +2466,7 @@ function yardBox(s) {
   const inp = el('input', { type: 'range', min: 0, max: 100, value: Math.round((s.ship || 0) * 100), 'aria-label': 'Share of this colony’s money for shipbuilding',
     oninput: (ev) => { s.ship = ev.target.value / 100; ev.target.style.setProperty('--split', ev.target.value + '%'); ev.target.nextSibling.textContent = ev.target.value + '%'; }, onchange: save });
   inp.style.setProperty('--split', Math.round((s.ship || 0) * 100) + '%');
-  box.append(el('div', { class: 'tm' }, el('span', null, 'Shipbuilding'), inp,
+  box.append(el('div', { class: 'tm' }, el('span', null, PWn('prod', 'Shipbuilding')), inp,
     el('span', null, Math.round((s.ship || 0) * 100) + '%')));
   const q = s.queue || [];
   // (rs.planetInfo: 1.2's "En cours:" and a line per queued design, MakeFleetDescription with its count, or "Néant.")
