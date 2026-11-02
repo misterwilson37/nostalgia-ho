@@ -321,6 +321,7 @@ button[data-help] { cursor: pointer; }
 /* the Ho menu: the skin's "Ho!" at the top left opens it */
 .dropdown button.check::before { content: '✓'; display: inline-block; width: 12px; margin-left: -12px; visibility: hidden; }
 .dropdown button.check.on::before { visibility: visible; }
+.dropdown .mkey { float: right; margin-left: 2em; }
 /* Choose sounds (New Game and the Ho menu's Sounds window) */
 .newgame .soundpick { grid-column: 1 / -1; display: grid; gap: 6px; }
 .newgame .soundpick label.soundset { grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 8px; }

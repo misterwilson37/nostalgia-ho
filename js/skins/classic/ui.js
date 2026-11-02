@@ -199,7 +199,8 @@ if (Prefs.temp !== 'C' && Prefs.temp !== 'F') Prefs.temp = null;
 HO.prefs.euro = Prefs.euroSign;
 // Review Battles: what was chosen, else the version's own default (iOS: on;
 // rs.prefsWindow.defaults), else off
-function prefReview() { const PW = G && HO.rules(G).prefsWindow; return Prefs.review != null ? !!Prefs.review : !!(PW && PW.defaults && PW.defaults.review); }
+// (rs.options.reviewDefault: 1.2's 'Stup' 1000 +0x46, Voir batailles on)
+function prefReview() { const PW = G && HO.rules(G).prefsWindow, O = G && HO.rules(G).options; return Prefs.review != null ? !!Prefs.review : !!((PW && PW.defaults && PW.defaults.review) || (O && O.reviewDefault)); }
 function savePrefs() { try { localStorage.setItem('ho5.prefs', JSON.stringify(Object.assign({ sound: Sound.on, music: Sound.music }, Prefs))); } catch (e) {} }
 // Temperatures. The player's choice (Prefs.temp: null "As the original", 'C' or 'F'; the Ho menu's
 // Temperatures…, and the Preferences windows) is HO.tempPref, which HO.say, the panels and the lists follow
@@ -4291,7 +4292,7 @@ function autoRoute(f, tgt) {
 function openPrefs() {
   const PW = G && HO.rules(G).prefsWindow;
   if (PW) return PW.style === 'ios' ? prefsIOS(PW) : PW.style === 'palm' ? prefsPalm(PW) : prefs505(PW);
-  const box = (k, label) => el('label', { class: 'chk' }, el('input', { type: 'checkbox', checked: Prefs[k] ? 'checked' : false, onchange: (e) => { Prefs[k] = e.target.checked; savePrefs(); renderPanel(); } }), el('span', null, label));
+  const box = (k, label) => el('label', { class: 'chk' }, el('input', { type: 'checkbox', checked: (k === 'review' ? prefReview() : Prefs[k]) ? 'checked' : false, onchange: (e) => { Prefs[k] = e.target.checked; savePrefs(); renderPanel(); } }), el('span', null, label));
   // hints: only for a version that had them (rs.hints false: none between
   // turns); °C: fixed on for a version that showed only °C (rs.celsius)
   const hints = !G || HO.rules(G).hints !== false;
@@ -6285,7 +6286,8 @@ function setupMenus() {
       document.querySelectorAll('.dropdown.open').forEach(d => { d.classList.remove('open'); d.previousElementSibling.setAttribute('aria-expanded', 'false'); });
       if (open) return;
       dd.innerHTML = '';
-      for (const [label, fn, feat, checked, ghosted] of items) {
+      // key: a skin's item's key equivalent, drawn at the right ("⌘K": 1.2's and 2.0.1's MENU resources)
+      for (const [label, fn, feat, checked, ghosted, key] of items) {
         if (label === '-') { dd.append(el('hr')); continue; }
         // feat: a feature the rules must have (HO.feature), or a function that says whether to show the item
         if (feat && !(typeof feat === 'function' ? feat() : G && HO.feature(G, feat))) continue;
@@ -6295,7 +6297,7 @@ function setupMenus() {
         // ghosted(): a skin's item that shows but can't be chosen now (the Amiga's dotted ones)
         const off = ghosted ? !!ghosted() : false;
         dd.append(el('button', { role: 'menuitem', 'aria-label': checked ? `${text}: ${on ? 'on' : 'off'}` : null, class: checked ? 'check' + (on ? ' on' : '') : null, disabled: off ? 'disabled' : false,
-          onclick: () => { dd.classList.remove('open'); btn.setAttribute('aria-expanded', 'false'); fn(); } }, text));
+          onclick: () => { dd.classList.remove('open'); btn.setAttribute('aria-expanded', 'false'); fn(); } }, text, key ? el('span', { class: 'mkey', 'aria-hidden': 'true', translate: 'no' }, '⌘' + key) : null));
       }
       dd.classList.add('open'); btn.setAttribute('aria-expanded', 'true');
       // a menu near the right edge opens leftward so it stays on screen
@@ -6418,7 +6420,7 @@ window.addEventListener('DOMContentLoaded', () => {
   // what a skin's hooks may use (the Amiga skin builds windows of its own with these)
   T.api = {
     get G() { return G; }, get ME() { return ME; }, UI, IMG, A, el, $, me, money, fmt, degF, gravF, toC, degText, panelFig,
-    toast, modal, closeModal, confirmBox, renderPanel, renderMsg, draw, save, Sound, beep, guard,
+    toast, modal, closeModal, confirmBox, renderPanel, prefReview, renderMsg, draw, save, Sound, beep, guard,
     shipPic, shipImgEl, starLook, fleetOrder, curFleet, centerOn, zoomAt, resize, map: () => ({ w: mapW, h: mapH, ready: !!cv }),
     fit() { UI.fitted = false; fit(); draw(); }, clampView,
     openBuild, openSplit, openOrganize, organizeStyle, openPlayers, openCompare, openSkills, openScrapTypes, openBattle, lastBattles, battleName, openReports, openAbout, openHelp,

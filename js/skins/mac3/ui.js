@@ -156,7 +156,7 @@ window.HOTHEME_OVER = {
     const l = doc.querySelector('#menubar .logo'); if (l) l.textContent = 'Ho! 3.0.1';
   },
 };
-if (v12) { delete window.HOTHEME_OVER.starLook; delete window.HOTHEME_OVER.messageLook; } // 1.2 has only the DOS game's icons (and stand-ins: js/skins/dos)
+if (v12) { delete window.HOTHEME_OVER.starLook; delete window.HOTHEME_OVER.messageLook; if (window.HOMAC12) Object.assign(window.HOTHEME_OVER, window.HOMAC12); } // 1.2 has only the DOS game's icons (and stand-ins: js/skins/dos)
 // js/skins/mac2 (2.0.1, 1992): 1.2's icons, which are the DOS game's, so the DOS
 // skin's planets and report pictures, and 2.0's own pictures, sounds and hooks
 if (v2) { delete window.HOTHEME_OVER.starLook; delete window.HOTHEME_OVER.messageLook; Object.assign(window.HOTHEME_OVER, window.HOMAC2); }

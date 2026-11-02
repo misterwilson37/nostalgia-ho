@@ -262,6 +262,13 @@ root.HOUI.add([
 ['Scrap', 'Recycler', 'Verschrotten', 'Çöp', 'Desguazar', { de: 'DOS 2.0', tr: 'iOS' }, { tr: 'Hurdaya çıkar' }],
 ['Scrap this fleet for %s% of its metal?', 'Recycler cette flotte pour %s % de son métal ?', 'Diese Flotte für %s% ihres Metalls verschrotten?', 'Bu filo metâlinin %%s karşılığında hurdaya çıkarılsın mı?', '¿Desguazar esta flota por el %s% de su metal?'],
 ['Scrapped for %s metal.', 'Recyclée pour %s unités de métal.', 'Für %s Metall verschrottet.', '%s metâl karşılığında hurdaya çıkarıldı.', 'Desguazada por %s de metal.'],
+// 1.2's and 2.0.1's Ships menu items as SetMenuItems words them (STR# 1010.3-8: 1.2F's French, Mac 2.0.1's English)
+['Organize Ships…', 'Répartir vaisseaux…', 'Schiffe organisieren…', 'Gemileri düzenle…', 'Organizar naves…', { fr: '1.2F' }],
+['No ships to organize…', 'Pas de vaisseaux à répartir…', 'Keine Schiffe zu organisieren…', 'Düzenlenecek gemi yok…', 'No hay naves que organizar…', { fr: '1.2F', de: '~DOS 2.0' }],
+['Build Ships at %s…', 'Production de vaisseaux à %s…', 'Schiffsbau auf %s…', '%s gemi yapımı…', 'Construir naves en %s…', { fr: '1.2F', de: '~DOS 2.0' }],
+['Can’t Build Ships Here…', 'Production impossible ici…', 'Hier kein Schiffsbau…', 'Burada gemi yapılamaz…', 'Aquí no se pueden construir naves…', { fr: '1.2F' }],
+['Review Battle at %s…', 'Revoir bataille à %s…', 'Kampf bei %s ansehen…', '%s muharebesini gözden geçir…', 'Revisar la batalla de %s…', { fr: '1.2F' }],
+['No Battles here…', 'Pas de bataille ici…', 'Hier keine Kämpfe…', 'Burada muharebe yok…', 'Aquí no hay batallas…', { fr: '1.2F' }],
 ['Scrap Current Fleet', 'Recycler la flotte actuelle', 'Verschrotten', 'Filoyu Parçala', 'Desguazar la flota actual', { fr: '~iOS', de: 'DOS 2.0', tr: '~iOS' }],
 ['Don’t Scrap Current Fleet', 'Ne pas recycler la flotte actuelle', 'Nicht verschrotten', 'Filoyu Parçalama', 'No desguazar la flota actual', { fr: '~iOS', de: 'DOS 2.0', tr: '~iOS' }],
 ["Don't Scrap Current Fleet", 'Ne pas recycler la flotte actuelle', 'Nicht verschrotten', 'Filoyu Parçalama', 'No desguazar la flota actual', { fr: '~iOS', de: 'DOS 2.0', tr: '~iOS' }],

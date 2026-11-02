@@ -482,6 +482,7 @@ E.registerRules('12', Object.assign({}, D, {
   // list (rules-dos exploredList) with its French words (DITL 6040, STR# 1020)
   options: {
     battleSpeed: { min: 10, max: 60, def: 30, menu: 'Vitesse des batailles…', title: 'Vitesse des batailles:', fast: 'Rapide', slow: 'Lente', full: 'Animation complète' },
+    reviewDefault: true, // ('Stup' 1000 +0x46 = 1: Voir batailles on)
     showMessages: 'Montrer messages', reviewBattles: 'Voir batailles', reports: 'Fenêtre Rapports',
   },
   // the Ship Types window's check box (DITL 6000 item 17; Mac 2.0.1's "Scrap This Type")
