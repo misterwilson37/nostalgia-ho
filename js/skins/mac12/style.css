@@ -16,3 +16,7 @@
 .strip12 { display: flex; justify-content: space-between; font-weight: normal; font-size: 11px; }
 .mintick { position: absolute; top: -3px; bottom: -3px; width: 1px; background: currentColor; }
 .about12 { display: flex; flex-direction: column; align-items: center; cursor: pointer; } .about12 img { image-rendering: pixelated; display: block; }
+.piles12 { display: flex; gap: 6px; min-height: 120px; overflow-x: auto; border: 1px solid; padding: 4px; }
+.piles12 .pile { min-width: 34px; border: 1px dotted; display: flex; flex-direction: column; gap: 2px; padding: 2px; }
+.piles12 .pile.new { border-style: dashed; }
+.piles12 .ship.sel { outline: 2px solid; }

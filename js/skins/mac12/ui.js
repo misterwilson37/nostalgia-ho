@@ -62,7 +62,7 @@ function menuLayout() {
       '-',
       it('List All Fleets…', () => A().openFleetList(), { ghost: noGame, key: 'L' }),
       // (1010.7 / .8: the selected fleet's ships to organize)
-      it(() => (selFleet() && selFleet().star != null ? 'Organize Ships…' : 'No ships to organize…'), () => { const f = selFleet(); if (f && f.star != null) A().openOrganize(f.star); },
+      it(() => (selFleet() && selFleet().star != null ? 'Organize Ships…' : 'No ships to organize…'), () => { const f = selFleet(); if (f && f.star != null && f.to == null) organize(f); },
         { ghost: () => noGame() || !(selFleet() && selFleet().star != null) }),
       // (1010.3 / .4: the selected star, yours)
       it(() => (mine() ? `Build Ships at ${selStar().name}…` : 'Can’t Build Ships Here…'), () => { if (mine()) A().openBuild(selStar().id); },
@@ -348,6 +348,66 @@ function aboutBox() {
   const a = A(), el = a.el, im = a.IMG['dos:p1001'], pl = a.IMG['dos:p4010'];
   const body = el('div', { class: 'about12', onclick: () => a.closeModal() }, im ? el('img', { src: im.src, alt: 'Spaceward Ho!' }) : null, pl ? el('img', { src: pl.src, alt: '' }) : null);
   a.modal('', body, { cls: 'mac12 about', label: 'About Spaceward Ho! 1.2…' });
+}
+
+// DLOG 6060 "Organize “<type>” Fleets…" (OrganizeFleets @113896): the fleets of the selected fleet's design at the star as piles of ship
+// pictures; "To Organize Fleets:", "• Click and drag fleets into desired number of piles", "• Shift-Click selects an entire pile";
+// "Group All" (one pile), "Divide All" (a pile per ship); OK makes the piles the fleets (the first fleets keep their records and orders,
+// a new pile is a new fleet: rs.organized), Cancel leaves them
+function organize(f0) {
+  const a = A(), el = a.el, g = G(), did = +Object.keys(f0.ships)[0], d = H().getDesign(g, a.ME, did);
+  const fleets = g.fleets.filter(f => f.owner === a.ME && f.star === f0.star && f.to == null && Object.keys(f.ships).length === 1 && +Object.keys(f.ships)[0] === did);
+  const piles = fleets.map(f => ({ f, n: f.ships[did] }));
+  let sel = null; // { pile, all }
+  const box = el('div', { class: 'piles12' });
+  const show = () => {
+    box.innerHTML = '';
+    piles.forEach((p, i) => {
+      if (!p.n && !p.f) return;
+      const col = el('div', { class: 'pile', ondragover: (e) => e.preventDefault(), ondrop: (e) => { e.preventDefault(); moveTo(i); }, onclick: (e) => { if (sel && sel.pile !== i && e.target === col) moveTo(i); } });
+      for (let k = 0; k < p.n; k++) {
+        const sh = el('div', { class: 'ship' + (sel && sel.pile === i && (sel.all || k === p.n - 1) ? ' sel' : ''), draggable: 'true',
+          onclick: (e) => { e.stopPropagation(); if (sel && sel.pile !== i) { moveTo(i); return; } sel = { pile: i, all: e.shiftKey }; show(); },
+          ondragstart: (e) => { sel = { pile: i, all: e.shiftKey || (sel && sel.pile === i && sel.all) }; try { e.dataTransfer.setData('text/plain', 'ship'); } catch (x) {} } },
+          a.shipImgEl(d, 24));
+        col.append(sh);
+      }
+      box.append(col);
+    });
+    box.append(el('div', { class: 'pile new', ondragover: (e) => e.preventDefault(), ondrop: (e) => { e.preventDefault(); moveTo(-1); }, onclick: () => { if (sel) moveTo(-1); } }));
+  };
+  const moveTo = (i) => {
+    if (!sel) return;
+    const from = piles[sel.pile], n = sel.all ? from.n : 1;
+    if (i === -1) { piles.push({ f: null, n: 0 }); i = piles.length - 1; }
+    if (i === sel.pile) { sel = null; show(); return; }
+    from.n -= n; piles[i].n += n; sel = null; show();
+  };
+  show();
+  const apply = () => {
+    // the piles that stay with a fleet, the ships to hand out, then the new piles
+    const temps = [];
+    for (const p of piles) if (p.f && p.n < p.f.ships[did]) {
+      if (p.n === 0) temps.push(p.f); else { const t = H().splitFleet(g, p.f, { [did]: p.f.ships[did] - p.n }); if (t) temps.push(t); }
+    }
+    const take = (need) => { // a fleet of exactly `need` ships from the temps
+      let got = null;
+      while (need > 0 && temps.length) {
+        let t = temps[0];
+        if (t.ships[did] > need) t = H().splitFleet(g, t, { [did]: need }); else temps.shift();
+        need -= t.ships[did];
+        if (got) H().mergeFleets(g, got, t); else got = t;
+      }
+      return got;
+    };
+    for (const p of piles) if (p.f && p.n > (p.f.ships[did] || 0)) { const t = take(p.n - p.f.ships[did]); if (t) H().mergeFleets(g, p.f, t); }
+    for (const p of piles) if (!p.f && p.n > 0) take(p.n);
+    a.closeModal(); a.save(); a.renderPanel(); a.draw();
+  };
+  win(el('div', null, el('p', null, 'To Organize Fleets:'), el('p', { class: 'sub' }, '• Click and drag fleets into desired number of piles'), el('p', { class: 'sub' }, '• Shift-Click selects an entire pile'), box,
+    el('div', { class: 'btns' }, btn('Group All', () => { const t = piles.reduce((x, p) => x + p.n, 0); piles.forEach((p, i) => { p.n = i ? 0 : t; }); sel = null; show(); }, { class: 'quiet' }),
+      btn('Divide All', () => { const t = piles.reduce((x, p) => x + p.n, 0); piles.forEach(p => { p.n = 0; }); for (let k = 0; k < t; k++) { if (k < piles.length) piles[k].n = 1; else piles.push({ f: null, n: 1 }); } sel = null; show(); }, { class: 'quiet' }),
+      btn('Cancel', () => a.closeModal(), { class: 'quiet' }), btn('OK', apply))));
 }
 
 window.HOMAC12 = {
