@@ -414,6 +414,9 @@ E.registerRules('12', Object.assign({}, D, {
   // CONFIRMED (the program's alerts, DITL 5060 and 3310: GiveSpendingWarning @102498 asks it at End Turn when a colony's share is under what
   // covers its loss; ReviewBattle @d26e6 shows 3310 when the battle's record is gone); the English is Mac 2.0.1's DITL 5060 and 3310.
   // [the text, the buttons...]
+  // CONFIRMED (GiveSpendingWarning @102498): the End Turn question is asked when a colony's share is under its least, ComputeMinPercent
+  // (2.0's minShare: what pays its loss out of the money, 0 when the money is under $1,000 or under the loss)
+  underfunded: (G, p) => E.colonies(G, p.id).filter(s => D.minShare(G, p, s.id) > D.keyPm(p, s.id)),
   alertWords: {
     // (FollowPathDrag @c69d6: ALRT 3330, once a session; ALRT 3300)
     fuel: { fr: ['Désolé, mais cette flotte ne dispose pas d\'assez de carburant pour atteindre cette destination.', 'Soit dit en passant, il suffisait d\'observer l\'absence de flèche aux extrémités du trajet...'],

@@ -2198,7 +2198,7 @@ E.registerRules('dos', Object.assign({}, O, {
   // the turn: pass 1 for every player (economy20), the fleets move, the
   // battles, then pass 2 for every player (pass2_20, run in the refuel slot)
   economy: economy20, economyForAll: true, afterMovement: null, refuel: pass2_20,
-  disposable, projected: projected20, underfunded: underfunded20, minShare: minShare20, settle, battle: battle20, randomEvents,
+  disposable, projected: projected20, underfunded: underfunded20, minShare: minShare20, keyPm, settle, battle: battle20, randomEvents,
   fleetArrives: fleetArrives20, arrivalSays: () => false, // the arrival messages are fleetArrives20's
   departs: departs20, legFuelArrives,     // a leg's fuel spent on arrival (above)
   planetIncome, incomeU, research, yardProgress, yardRefund: yardRefund20,
