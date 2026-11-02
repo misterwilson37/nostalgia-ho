@@ -1059,3 +1059,16 @@ side times the target. The page's `planetTarget()` is the same formula; `HOVIEW(
   the alliance; best buddies 0 asks, 1 withdraws. The game's option 0x10 (humans start allied) would lock best buddies at [2]; the iOS New Game never sets it.
 - Words: the app's French and Turkish (fr.lproj / tr.lproj) where the game is in those, else English put in the language by `js/ui-text.js`.
 
+**Bars: the highlight and the evacuate button (built, `styleBars`).** `-[PlayerPlanetsLayer updateSelectedStar]` 0x10000b890 sets `-[BarMenuItem setHighlighted:]` on the bar of the colony whose star is the
+player's selected star (not a touched bar). A highlighted bar draws a 1 point line in the name's colour under the name (`-[BarMenuItem draw]` 0x100010c50: from the name's left edge to its right edge, labelW,
+1 point up from the row's bottom) and carries `button-evacuate` (88 pixels at scale 0.7, anchor (0, 0.5), at (a80, row / 2)); its block is `+[AdditionalMenu tryEvacuateCurrentSelectedPlanet]`, i.e.
+`tryEvacuatePlanet:` for the selected star: marking asks (the Kansas / Hope / "Do you really want to evacuate %s?" questions, `rs.evacuateToggle`), unmarking does not; the mark is
+`reallyToggleEvacuate:player:` 0x1000940c0 (Sounds item 17 marking, 6 unmarking). The remake's button calls the page's `evacuateClick` for that star.
+
+**The report bar (built, `afterMsg`).** `-[MessageNode update:]` 0x100013064: the year report (1012, "Year %d:") has no picture (`FUN_100038788` gives -1) and no text: `addDigits:` puts the year in a
+`CCLabelAtlas` of `digits_atlas.png` (26 x 29 points a digit, from '0') centred on the bar. Any other text is a label left at x 60 with its middle on the bar's, in a box the size the text takes
+constrained to (bar width - 64) x (the bar's height), measured at type floor(height / 6) and drawn at one point less, wrapped by words; the five technology reports (1003-1007) put the level in red Arial 30
+over the picture's middle. The turn layer's bar is an "end-turn" message (`setIsEndTurnMessage:` 1 in `-[TurnMessageLayer init]`): its picture hangs 0.75 x (height - a80) and the bar is never resized (the
+message history's items are not, and fit their text). "more..." (Misc 30) is Arial 18 x 0.6 on an iPhone (the globals `GraphicDefines setup` writes), 24 x 0.6 on an iPad, anchor (1, 0) at
+(width - a80 / 2 - 8, a80 / 2 + 1). Not done: the picture is the remake's own per report, not the app's choice by report number (a planet drawn from the star's figures for 1033 and 1034, a hat for 200-216).
+

@@ -6506,6 +6506,7 @@ window.addEventListener('DOMContentLoaded', () => {
     fit() { UI.fitted = false; fit(); draw(); }, clampView,
     openBuild, openSplit, openOrganize, organizeStyle, openPlayers, openCompare, openSkills, openScrapTypes, openBattle, lastBattles, battleName, openReports, openAbout, openHelp,
     openRadicalHand, showRank, openWinWindows, openYouWon, openYouLost, // (the originals' own windows, for the tests)
+    evacuateClick, evacuateHere, // (the iOS skin's evacuate button beside the selected colony's bar)
     newGameDialog, titleScreen, hideTitle, continueChecked, importGame, doEndTurn, flipBarScale, marksScrap, scrapWords, toggleScrapFleet,
     verOpts, modern, hotSeat, openGameText, Prefs, savePrefs, switchPlayers, forceEndTurn, openBattleList, openFixSpending, lastBattles, playOneTurn, showMessages,
     // (and the windows tools/ui-lang-audit.js opens in every skin and language)

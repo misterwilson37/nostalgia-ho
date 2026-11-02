@@ -236,7 +236,7 @@ function screenSize() {
   Object.assign(SCREEN, { pad, u, winW, winH, W, row, font: Math.floor(Math.fround(row * 0.7)), labelW: Math.ceil(Math.fround(W * 0.45)), gap: pad ? 8 : 4 });
   const de = document.documentElement, st = de.style;
   st.setProperty('--u', u + 'px'); st.setProperty('--W', W); st.setProperty('--row', row);
-  st.setProperty('--fs', String(SCREEN.font)); st.setProperty('--labw', String(SCREEN.labelW)); { const g = barGeom(); st.setProperty('--bo', String(g.barOffset)); st.setProperty('--bw', String(g.mw)); } st.setProperty('--gap', String(SCREEN.gap));
+  st.setProperty('--fs', String(SCREEN.font)); st.setProperty('--more', pad ? '24' : '18'); st.setProperty('--mfs', String(Math.floor(Math.fround(row * 3 / 6)) - 1)); st.setProperty('--labw', String(SCREEN.labelW)); { const g = barGeom(); st.setProperty('--bo', String(g.barOffset)); st.setProperty('--bw', String(g.mw)); } st.setProperty('--gap', String(SCREEN.gap));
   de.classList.toggle('ios-pad', pad); de.classList.toggle('ios-phone', !pad);
   sideLayout();
 }
@@ -480,6 +480,17 @@ function styleBars(box, kind, parts) {
       nc = ev ? [125, 125, 125] : HO.planetIncome(G, p, s) < 0 ? (colonyRatio(G, p, s) <= 256 ? [221, 8, 6] : [124, 115, 0]) : [31, 183, 212];
     }
     if (lab) lab.style.color = rgb(nc);
+    // -[PlayerPlanetsLayer updateSelectedStar] 0x10000b890 highlights the bar of the colony on the selected star (-[BarMenuItem setHighlighted:] 0x100010d7c):
+    // -[BarMenuItem draw] 0x100010c50 draws a 1 point line in the name's colour under the name (at 1 point from the bottom of the row, as wide as the name),
+    // and button-evacuate (88 pixels at scale 0.7, left at a80, centred on the row) joins the row: its block calls +[AdditionalMenu tryEvacuateCurrentSelectedPlanet]
+    if (row._k.kind === 'col' && row._k.star != null && a.UI.sel === row._k.star && G.stars[row._k.star].owner === a.ME) {
+      if (lab) { const t = lab.textContent; lab.textContent = ''; lab.append(UIEl('span', 'nm', null, t)); lab.classList.add('hi'); }
+      if (a.evacuateHere && a.evacuateHere(G.stars[row._k.star])) {
+        const b = UIEl('button', 'ios-evac', { type: 'button', 'aria-label': 'Evacuate', title: 'Evacuate' }, pic('button-evacuate'));
+        b.addEventListener('click', (e) => { e.stopPropagation(); const x = A(); if (x && x.G && x.UI.sel === row._k.star) x.evacuateClick(row._k.star); });
+        row.append(b);
+      }
+    }
     const lt = row.querySelector('.locktext'); if (lt) lt.style.color = rgb(nc);
     if (tr) { tr.querySelectorAll('.grid').forEach(o => o.remove()); }
   });
@@ -597,6 +608,29 @@ function fitSize(text, size, w) {
   if (!fitCx) { try { fitCx = document.createElement('canvas').getContext('2d'); } catch (e) { return size; } }
   const fam = getComputedStyle(document.documentElement).getPropertyValue('--appfont') || 'Arial, Helvetica, sans-serif';
   for (;;) { fitCx.font = `${size}px ${fam}`; if (fitCx.measureText(text).width <= w || size <= 6) return size; size -= 1; }
+}
+function textW(text, size) {
+  if (!fitCx) { try { fitCx = document.createElement('canvas').getContext('2d'); } catch (e) { return text.length * size * 0.5; } }
+  const fam = getComputedStyle(document.documentElement).getPropertyValue('--appfont') || 'Arial, Helvetica, sans-serif';
+  fitCx.font = `${size}px ${fam}`; return fitCx.measureText(text).width;
+}
+// UIKit's word wrap (sizeWithFont:constrainedToSize: with the word-wrap line break mode): the words as far as they fit, a word wider than the box broken by letters
+function wrapLines(text, size, maxW) {
+  const out = [];
+  for (const para of String(text).split('\n')) {
+    let line = '';
+    for (const word of para.split(' ')) {
+      const t = line ? line + ' ' + word : word;
+      if (textW(t, size) <= maxW) { line = t; continue; }
+      if (line) { out.push(line); line = ''; }
+      if (textW(word, size) <= maxW) { line = word; continue; }
+      let c = '';
+      for (const ch of word) { if (c && textW(c + ch, size) > maxW) { out.push(c); c = ''; } c += ch; }
+      line = c;
+    }
+    out.push(line);
+  }
+  return out;
 }
 function playersList() {
   const a = A(), G = a && a.G, list = UIEl('section', 'ios-plist', { 'aria-label': 'Players', 'data-c': 'players' });
@@ -723,6 +757,30 @@ function afterMsg(box, ctx) {
     if (box.parentNode !== turnEl) turnEl.prepend(box); // the message bar is the first item of the bottom right menu: [bar] [End Turn] [gear] (-[TurnMessageLayer init])
   }
   if (card) {
+    const m = ctx && ctx.inbox && ctx.inbox[ctx.idx], ym = m && /^Year (\d+):?$/.exec(String(m.text || ''));
+    card.classList.remove('year');
+    if (ym) {
+      // report 1012 "Year %d:" has no picture (FUN_100038788) and no text: -[MessageNode addDigits:] 0x100012f44 puts the year in a CCLabelAtlas of digits_atlas.png
+      // (26 x 29 points a digit, from '0'), centred on the bar (-[MessageNode update:] 0x100013064 at 0x100013418)
+      card.classList.add('year');
+      const dg = UIEl('span', 'ios-digits', { 'aria-hidden': 'true' });
+      for (const ch of ym[1]) dg.append(UIEl('i', null, { style: `--d:${ch}` }));
+      card.append(dg);
+    } else {
+      // the five technology reports (1003-1007, "Your Range Technology has reached level %d." ...): the level in red Arial 30, centred at x 30, its top at the
+      // picture's middle (update: 0x100013064 at 0x100013318: setColor 0xff, anchor (0.5, 1), the picture's top less half its height)
+      const lv = m && /^Your (?:Range|Speed|Weapons|Shield|Miniaturization) Technology has reached level (\d+)\.$/.exec(String(m.text || ''));
+      if (lv) card.append(UIEl('span', 'ios-lvl', { 'aria-hidden': 'true' }, lv[1]));
+      // the text (update: 0x100013064 at 0x10001345c): a label from x 60, its box the size the text takes constrained to the bar's width less 64 (60 and 4)
+      // and its height, measured at type floor(height / 6) and drawn a point smaller, left aligned, wrapped by words, its middle on the bar's
+      const p = card.querySelector('.mtext p');
+      if (p) {
+        const H = SCREEN.row * 3, s0 = Math.floor(Math.fround(H / 6)), lines = wrapLines(p.textContent, s0, SCREEN.W - 64);
+        const wid = Math.max(1, ...lines.map(l => textW(l, s0)));
+        p.style.width = `calc(${Math.ceil(wid) + 1} * var(--pt))`; p.style.height = `calc(${lines.length * s0 * 1.15} * var(--pt))`;
+        p.style.fontSize = `calc(${s0 - 1} * var(--pt))`; p.style.lineHeight = `calc(${(s0 - 1) * 1.15} * var(--pt))`;
+      }
+    }
     const cnt = card.querySelector('.count');
     if (cnt) { cnt.textContent = ctx && ctx.inbox && ctx.idx + 1 < ctx.inbox.length ? 'more...' : ''; cnt.setAttribute('translate', 'yes'); }
   }

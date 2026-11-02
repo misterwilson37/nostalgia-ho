@@ -96,12 +96,12 @@ html.skin-ios .frow.enemy .ftext div:first-child { color: #ff7a7a; }
 html.skin-ios .shippic { image-rendering: auto; }
 /* the report bar (MessageNode update: 0x100013064): message_bar.png as a nine-patch (CCScale9Sprite caps 15 15 10 10, opacity 0xf0), BarMenuItem width x 3 rows;
    the picture centred 30 from the left, its top 0.75 x (height - a80) up; the text from 60, centred, type floor(height / 6) - 1; "more..." at the bottom right */
-html.skin-ios .card { position: relative; box-sizing: border-box; width: calc(var(--W) * var(--pt)); height: calc(var(--row) * 3 * var(--pt)); background: none; color: #fff; border: 0; border-image: url("../../../assets/skins/ios/sprites/message_bar.png") 30 30 38 38 fill / calc(15 * var(--pt)) calc(15 * var(--pt)) calc(19 * var(--pt)) calc(19 * var(--pt)) stretch; border-style: solid; border-width: calc(15 * var(--pt)) calc(15 * var(--pt)) calc(19 * var(--pt)) calc(19 * var(--pt)); box-shadow: none; opacity: .94; padding: 0; margin: 0; font: calc((var(--bar-h) / 6 - 1) * var(--pt)) / 1.15 var(--appfont, Arial, Helvetica, sans-serif); display: block; --bar-h: calc(var(--row) * 3); cursor: pointer; overflow: visible; }
+html.skin-ios .card { position: relative; box-sizing: border-box; width: calc(var(--W) * var(--pt)); height: calc(var(--row) * 3 * var(--pt)); background: none; color: #fff; border: 0; border-image: url("../../../assets/skins/ios/sprites/message_bar.png") 30 30 38 38 fill / calc(15 * var(--pt)) calc(15 * var(--pt)) calc(19 * var(--pt)) calc(19 * var(--pt)) stretch; border-style: solid; border-width: calc(15 * var(--pt)) calc(15 * var(--pt)) calc(19 * var(--pt)) calc(19 * var(--pt)); box-shadow: none; opacity: .94; padding: 0; margin: 0; font: calc(var(--mfs) * var(--pt)) / 1.15 var(--appfont, Arial, Helvetica, sans-serif); display: block; --bar-h: calc(var(--row) * 3); cursor: pointer; overflow: visible; }
 html.skin-ios .card .icon, html.skin-ios .card .bigicon, html.skin-ios .card .jpg { position: absolute; width: calc(40 * var(--pt)); height: auto; left: calc((30 - 20 - 19) * var(--pt)); bottom: calc((0.75 * (var(--row) * 3 - var(--gap)) - 40 - 15) * var(--pt)); image-rendering: auto; }
-html.skin-ios .card .mtext { position: absolute; left: calc((60 - 19) * var(--pt)); right: calc(0px); top: calc(-15 * var(--pt)); bottom: calc(-19 * var(--pt)); display: flex; flex-direction: column; justify-content: center; overflow: hidden; padding-right: calc(var(--gap) * 2 * var(--pt)); }
+html.skin-ios .card .mtext { position: absolute; left: calc((60 - 19) * var(--pt)); right: calc(-11 * var(--pt)); top: calc(-15 * var(--pt)); bottom: calc(-19 * var(--pt)); display: flex; flex-direction: column; justify-content: center; align-items: flex-start; overflow: visible; padding-right: 0; }
 html.skin-ios .card .mtext p { margin: 0; }
 html.skin-ios .card .mbtns:empty { display: none; }
-html.skin-ios .card .count { position: absolute; right: calc((var(--gap) * .5 + 8 - 19) * var(--pt)); bottom: calc((var(--gap) * .5 + 1 - 15) * var(--pt)); font-size: calc(24 * .6 * var(--pt)); color: #fff; }
+html.skin-ios .card .count { position: absolute; right: calc((var(--gap) * .5 + 4) * var(--pt)); bottom: calc((var(--gap) * .5 + 1) * var(--pt)); font-size: calc(var(--more) * .6 * var(--pt)); line-height: 1.15; color: #fff; }
 html.skin-ios .card.end, html.skin-ios .card.waiting, html.skin-ios .card.hand { width: auto; height: auto; }
 html.skin-ios .count { color: #9fb2e0; }
 html.skin-ios .count { color: #9fb2e0; }
@@ -184,3 +184,17 @@ html.skin-ios .ios-shade img { width: 100%; height: 100%; display: block; }
 html.skin-ios .ios-gnode { position: fixed; right: 0; top: calc(24 * var(--pt)); z-index: 6; width: calc(200 * var(--pt)); height: calc(100 * var(--pt)); box-sizing: border-box; background: rgba(204,204,204,.88); box-shadow: inset 0 0 0 calc(3 * var(--pt)) #393cd6, inset 0 0 0 calc(1 * var(--pt)) rgba(204,204,204,.88); transform-origin: 50% 0; transition: transform .1s; cursor: pointer; padding: calc(2 * var(--pt)); }
 html.skin-ios .ios-gnode.shut { transform: scaleY(0); }
 html.skin-ios .ios-gnode canvas { width: 100%; height: 100%; display: block; }
+
+/* the highlighted colony's bar (BarMenuItem setHighlighted: / draw): a 1 point line under the name in its colour, and button-evacuate (88 px at 0.7) at a80 */
+html.skin-ios .ios-bars .blabel.hi { overflow: visible; }
+html.skin-ios .ios-bars .blabel .nm { position: relative; display: inline-block; height: 100%; }
+html.skin-ios .ios-bars .blabel.hi .nm::after { content: ""; position: absolute; left: 0; right: 0; bottom: calc(.5 * var(--pt)); height: calc(1 * var(--pt)); background: currentColor; }
+html.skin-ios .ios-bars .ios-evac { position: absolute; left: calc(var(--gap) * var(--pt)); top: calc((var(--row) - 30.8) / 2 * var(--pt)); width: calc(30.8 * var(--pt)); height: calc(30.8 * var(--pt)); padding: 0 !important; border: 0 !important; border-radius: 0 !important; background: none !important; min-width: 0; min-height: 0; cursor: pointer; z-index: 3; line-height: 0; }
+html.skin-ios .ios-bars .ios-evac img { width: 100%; height: 100%; display: block; pointer-events: none; }
+html.skin-ios .ios-bars .ios-evac:active img { filter: brightness(.49); }
+
+/* the year report: digits_atlas.png (26 x 29 points a digit) centred on the bar */
+html.skin-ios .card.year .icon, html.skin-ios .card.year .bigicon, html.skin-ios .card.year .mtext p { display: none; }
+html.skin-ios .ios-digits { position: absolute; left: calc((var(--W) / 2 - 19) * var(--pt)); top: calc((var(--row) * 3 / 2 - 15) * var(--pt)); transform: translate(-50%, -50%); display: flex; pointer-events: none; }
+html.skin-ios .ios-digits i { display: block; width: calc(26 * var(--pt)); height: calc(29 * var(--pt)); background: url("../../../assets/skins/ios/sprites/digits_atlas.png") calc(var(--d) * -26 * var(--pt)) 0 / calc(260 * var(--pt)) calc(29 * var(--pt)) no-repeat; }
+html.skin-ios .ios-lvl { position: absolute; left: calc((30 - 19) * var(--pt)); top: calc((var(--row) * 3 - 0.75 * (var(--row) * 3 - var(--gap)) + 20 - 15) * var(--pt)); transform: translateX(-50%); font: calc(30 * var(--pt)) / 1.15 var(--appfont, Arial, Helvetica, sans-serif); color: #f00; pointer-events: none; z-index: 2; }
