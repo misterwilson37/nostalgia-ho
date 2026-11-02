@@ -236,7 +236,7 @@ function screenSize() {
   Object.assign(SCREEN, { pad, u, winW, winH, W, row, font: Math.floor(Math.fround(row * 0.7)), labelW: Math.ceil(Math.fround(W * 0.45)), gap: pad ? 8 : 4 });
   const de = document.documentElement, st = de.style;
   st.setProperty('--u', u + 'px'); st.setProperty('--W', W); st.setProperty('--row', row);
-  st.setProperty('--fs', String(SCREEN.font)); st.setProperty('--labw', String(SCREEN.labelW)); st.setProperty('--gap', String(SCREEN.gap));
+  st.setProperty('--fs', String(SCREEN.font)); st.setProperty('--labw', String(SCREEN.labelW)); { const g = barGeom(); st.setProperty('--bo', String(g.barOffset)); st.setProperty('--bw', String(g.mw)); } st.setProperty('--gap', String(SCREEN.gap));
   de.classList.toggle('ios-pad', pad); de.classList.toggle('ios-phone', !pad);
   sideLayout();
 }
@@ -315,6 +315,7 @@ function buildScreen(doc) {
   const fdx = UIEl('button', 'ios-fdx', { type: 'button', 'aria-label': 'Close' }, pic('button-x'));
   fdx.addEventListener('click', (e) => { e.stopPropagation(); setFleets(false); });
   fdEl.append(fdx);
+  const pan = doc.getElementById('panel'); if (pan) { const rc = () => requestAnimationFrame(() => { recolor(pan.querySelector('.ios-bars-tech')); recolor(pan.querySelector('.ios-bars-budget')); }); pan.addEventListener('pointermove', rc); pan.addEventListener('pointerup', rc); pan.addEventListener('keyup', rc); }
   const ui = UIEl('div', 'ios-ui', null, hudEl, pbEl, fdEl, turnEl);
   app.append(ui); ui.id = 'ios-ui';
   doc.addEventListener('click', (e) => { if (gearOpen && !e.target.closest('#menubar') && !e.target.closest('.ios-gear')) setGear(false); });
@@ -413,6 +414,76 @@ function hud() {
   hudEl.style.setProperty('--hudk', '1');
   const wdt = hudEl.offsetWidth; hudEl.style.setProperty('--hudk', String(wdt > window.innerWidth - 8 ? Math.max(0.4, (window.innerWidth - 8) / wdt) : 1));
 }
+// ---- the bars: -[HoBarLayer initWithWidth:height:inertial:] 0x100009a74, -[BarMenuItem initWithTarget:selector:] 0x1000106c4 and the rest ----
+// A layer W wide on a BackgroundBorderNode; the items (a row high, 1 point between) from the top; in each the name right-aligned at labelW, the bar
+// sprite (tech_bar_white, half the row high) from barOffset = labelW + 8 + 1, its length on the log scale (getHPercBarAmt: over mBarWidth = W - barOffset - a80
+// pixels), the value text over the start of the bar; vertical lines (0, 0, 170), 1 point, at barOffset - 1 and at the values 100 ... 1000 (HoBarLayer draw).
+// Colours: the technology bars' hue = ((-15 v - 1) mod 65536) / 65535 (v per mille; TechLayer getBarColor:), Tech's ((-20 v - 1) ...), Savings blends
+// (255, 133, 18) to (255, 85, 0) by v, a colony's by its state (PlayerPlanetsLayer getBarColor:withVal: 0x10000b644): terraforming done (0, 0, 212); mined
+// out (31, 183, 20) or, when its gravity is over 2.56 times home's, (221, 8, 6); both to do, blue blended with that by the shares; names by
+// getBarStringColor: 0x10000b560: Savings and Tech (226, 226, 226) (Savings (221, 8, 6) while dipping), a colony losing money (221, 8, 6) or, far from home's
+// gravity, (124, 115, 0), one earning (31, 183, 212), one being evacuated (125, 125, 125).
+function hsb(h, sat, br) {
+  const i = Math.floor(h * 6) % 6, f = h * 6 - Math.floor(h * 6), q = br * (1 - sat), r = br * (1 - f * sat), t = br * (1 - (1 - f) * sat);
+  const [R, G, B] = [[br, t, q], [r, br, q], [q, br, t], [q, r, br], [t, q, br], [br, q, r]][i];
+  return [R, G, B].map(x => Math.floor(x * 255));
+}
+const rgb = (c) => `rgb(${c[0]},${c[1]},${c[2]})`;
+const GRAYN = [226, 226, 226];
+function barGeom() { const barOffset = SCREEN.labelW + 8 + 1, mw = trunc(SCREEN.W - barOffset - SCREEN.gap); return { barOffset, mw }; }
+function hpercTable(mw) { const t = []; for (let i = 0; i < mw; i++) t.push(trunc((Math.exp(i * 77 / mw / 32.11 + 2.302) - 10) * 10)); t[mw] = 1000; return t; }
+function hperc(t, mw, v) { for (let i = 1; i <= mw; i++) if (t[i] > v) return i - 1; return mw; }
+function placeGrid(box) {
+  if (!box) return;
+  for (const o of box.querySelectorAll('.ios-gl')) o.remove();
+  const { barOffset, mw } = barGeom(), tb = hpercTable(mw), xs = [barOffset - 1];
+  for (let v = 100; v <= 1000; v += 100) xs.push(barOffset + hperc(tb, mw, v));
+  for (const x of xs) box.append(UIEl('i', 'ios-gl', { style: `left:calc(${x} * var(--pt))` }));
+}
+function colonyRatio(G, p, s) { const a = Math.round(s.g * 100), b = Math.round(p.homeG * 100), lo = Math.min(a, b), hi = Math.max(a, b); return lo ? trunc(hi * 100 / lo) : 0; }
+function styleBars(box, kind, parts) {
+  const a = A(), G = a && a.G; if (!box || !G) return;
+  box.classList.add('ios-bars', 'ios-bars-' + kind);
+  const hd = box.querySelector('h3'); if (hd && !hd.classList.contains('scaleflip')) hd.remove();
+  const rows = [...box.querySelectorAll('.barrow')], p = a.me();
+  rows.forEach((row, j) => {
+    for (const o of row.querySelectorAll('.bval, .grid')) o.remove();
+    const tr = row.querySelector('.track'), fl = row.querySelector('.fill'), lab = row.querySelector('.blabel');
+    row._k = kind === 'tech' ? { kind: 'tech' } : (() => { const e = parts.ents && parts.ents[j]; return e ? { kind: e.key === 'tech' ? 'btech' : e.key === 'savings' ? 'sav' : 'col', star: e.star } : { kind: 'col' }; })();
+    row.style.setProperty('--ord', kind === 'budget' && row._k.kind === 'btech' ? 1 : kind === 'budget' && row._k.kind === 'sav' ? 0 : 2 + j);
+    // the name's colour (getBarStringColor:)
+    let nc = GRAYN;
+    if (row._k.kind === 'sav') nc = row.querySelector('.locktext') ? [221, 8, 6] : GRAYN;
+    else if (row._k.kind === 'col' && row._k.star != null) {
+      const s = G.stars[row._k.star], ev = HO.rules(G).evacuateToggle && HO.rules(G).evacuateToggle.marked(G, s.id);
+      nc = ev ? [125, 125, 125] : HO.planetIncome(G, p, s) < 0 ? (colonyRatio(G, p, s) <= 256 ? [221, 8, 6] : [124, 115, 0]) : [31, 183, 212];
+    }
+    if (lab) lab.style.color = rgb(nc);
+    const lt = row.querySelector('.locktext'); if (lt) lt.style.color = rgb(nc);
+    if (tr) { tr.querySelectorAll('.grid').forEach(o => o.remove()); }
+  });
+  recolor(box);
+}
+// the bars' colours from their present values (the page keeps a share, a fraction of 1, in track._v)
+function recolor(box) {
+  const a = A(), G = a && a.G; if (!box || !G) return;
+  const p = a.me();
+  for (const row of box.querySelectorAll('.barrow')) {
+    const tr = row.querySelector('.track'), fl = row.querySelector('.fill'), k = row._k; if (!tr || !fl || !k) continue;
+    const v = Math.max(0, Math.min(1000, Math.round((tr._v || 0) * 1000)));
+    let c;
+    if (k.kind === 'tech') c = hsb((((-15 * v - 1) & 0xffff)) / 65535, 1, 1);
+    else if (k.kind === 'btech') c = hsb((((-20 * v - 1) & 0xffff)) / 65535, 1, 1);
+    else if (k.kind === 'sav') c = [255, trunc((85 * v + 133 * (1000 - v)) / 1000), trunc((18 * (1000 - v)) / 1000)];
+    else {
+      const s = G.stars[k.star], terraOK = Math.abs(HO.seenT(p, s) - 72) > 0.5, mineOK = s.metal > 0;
+      const X = colonyRatio(G, p, s) <= 256 ? [31, 183, 20] : [221, 8, 6], tm = Math.round((s.terra == null ? 0.5 : s.terra) * 1000);
+      if (!terraOK) c = [0, 0, 212]; else if (!mineOK) c = X;
+      else c = [0, 1, 2].map(i => trunc(([0, 0, 212][i] * (1000 - tm) + X[i] * tm) / 1000));
+    }
+    fl.style.background = rgb(c);
+  }
+}
 // the iPad's players list, at the bottom of the combined container (PlayerListLayer: the hat, the name; the pact words and the
 // rest of the row are PlayerMenuItem's, step 5): the hat is GraphicsHoMap smallPlayerHat: "player_list_%d_%@" (16 for you, else the player's hat; f when the
 // byte at +0x2c is 0)
@@ -438,10 +509,15 @@ function sidebar(box, parts) {
     rows.push(UIEl('div', 'ios-inrow' + (kv.classList.contains('neg') ? ' neg' : ''), { 'data-help': kv.getAttribute('data-help') }, UIEl('span', 'l', null, lab), UIEl('span', 'v', null, val), UIEl('span', 'c', null, change)));
   }
   const income = UIEl('section', 'ios-income', null, ...rows);
-  // the app's sidebar has no star box (the star's figures are the HUD strip, its commands the round buttons): its fleets go in the dialog
-  const fl = parts.planet && parts.planet.querySelector('.fleets');
+  // the app's sidebar has no star box (the star's figures are the HUD strip, its commands the round buttons): its fleets go in the dialog.
+  // A ruleset that is not iOS's or Android's has features the app had no screen for (the build queue, merging, battle reviews): its box stays below the bars.
+  const G = A() && A().G, appRules = !!G && /^(ios|android)$/.test(G.rules || '');
+  const fl = appRules && parts.planet && parts.planet.querySelector('.fleets');
   if (fdList) { fdList.replaceChildren(); if (fl) { const h = fl.querySelector('h4'); if (h) h.remove(); fdList.append(fl); } }
-  box.replaceChildren(income, parts.budget, parts.tech);
+  // CombinedInfoContainer 0x1000b0e44: the totals, the technology bars (TechLayer), the budget bars (PlayerPlanetsLayer), the players
+  styleBars(parts.tech, 'tech', parts); styleBars(parts.budget, 'budget', parts);
+  box.replaceChildren(income, parts.tech, parts.budget, ...(parts.planet && !appRules ? [parts.planet] : []));
+  placeGrid(parts.tech); placeGrid(parts.budget);
   if (SCREEN.pad) box.append(playersList());
   hud();
 }
