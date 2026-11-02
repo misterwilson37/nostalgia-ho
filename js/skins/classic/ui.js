@@ -655,7 +655,10 @@ function draw0() {
     if (own !== 'all' && !own && (T.mapNames ? T.mapNames(UI.view.s) : UI.view.s > 18)) {
       cx.font = mapFont(Math.max(9, Math.min(12, UI.view.s / 3.6)));
       cx.textAlign = 'center'; cx.fillStyle = s.owner === ME ? '#fff6d0' : '#9aa3c7';
+      // (T.mapNameStyle(cx, scale): a skin's own lettering for the names; 1.2's condensed face at its second zoom)
+      if (T.mapNameStyle) T.mapNameStyle(cx, UI.view.s);
       cx.fillText(s.name, x, y + ps / 2 + 11);
+      cx.letterSpacing = '0px';
     }
     drawDots(s, x, y, ps);
   }

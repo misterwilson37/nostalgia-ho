@@ -471,6 +471,166 @@ function fixStep() {
   box.append(card);
 }
 
+// ---------- the map window's boxes as 1.2 draws them (MapWinProc; the rects from the program's initial data: planet 0,0-226,68,
+// fleets 0,70-226,132, totals 0,132-226,166, then the players' icons 0-67 and the budget bars 79-214 down to the foot; the
+// Tech Spending window, 228 x 80, sits under the map window's left: Stup 1000 +0xa). Drawn in the window's font, Geneva 9,
+// at the panel's width (226 pixels to it), as canvases: the planet box (DrawPlanetRect @c4334), the totals (DrawIncomeRect
+// @c3f70) and the technology window (UpdateTechWin @1400f0); the vertical bars are DrawVBarControl @c0164 and DoVBarClick
+// @c0446: an axis 50 high with ten ticks (linear for a colony, the log table for the technologies), bars 18 wide 27 apart
+// on a base line, each name centred under its bar (the technologies' every other one 10 lower), a finished part's bar empty
+// and a click on it the system beep; a drag sets the share and spreads the rest over the others in proportion. ----------
+const G9 = '9px Geneva, Verdana, sans-serif', G9B = 'bold 9px Geneva, Verdana, sans-serif', SYS12 = '12px Chicago, Charcoal, Geneva, sans-serif';
+function qdCanvas(w, h, label) { // a box drawn at twice its pixels, as wide as the panel
+  const c = A().el('canvas', { class: 'qd12', width: w * 2, height: h * 2, role: 'img', 'aria-label': label || '' });
+  c.style.aspectRatio = w + ' / ' + h;
+  const x = c.getContext('2d'); x.setTransform(2, 0, 0, 2, 0, 0); x.fillStyle = '#fff'; x.fillRect(0, 0, w, h);
+  x.textBaseline = 'alphabetic'; x.fillStyle = '#000'; x.strokeStyle = '#000'; x.lineWidth = 1;
+  const api = {
+    c, x,
+    text(t, h0, v, font, o) { x.font = font || G9; x.letterSpacing = o && o.cond ? '-1px' : '0px'; x.fillStyle = '#000'; const w0 = x.measureText(t).width; const at = o && o.right != null ? o.right - w0 : o && o.center != null ? o.center - Math.trunc(w0 / 2) : h0; x.fillText(t, at, v); x.letterSpacing = '0px'; return w0; },
+    width(t, font) { x.font = font || G9; return x.measureText(t).width; },
+    hline(h0, h1, v) { x.fillStyle = '#000'; x.fillRect(h0, v, h1 - h0, 1); },
+    vline(h0, v0, v1) { x.fillStyle = '#000'; x.fillRect(h0, v0, 1, v1 - v0); },
+    rect(l, t, r, b, col) { x.fillStyle = col; x.fillRect(l, t, r - l, b - t); },
+    // pointer position in the box's pixels
+    at(ev) { const r = c.getBoundingClientRect(); return { h: (ev.clientX - r.left) * w / r.width, v: (ev.clientY - r.top) * h / r.height }; },
+  };
+  return api;
+}
+// DrawVBarControl(x, y, values per mille (-1: finished), kind 1 colony / 2 technologies, names)
+function vbars(q, x0, y0, vals, kind, names, toPix) {
+  const d5 = y0 + 50;
+  q.vline(x0, y0, d5 + 1);
+  if (kind === 2) for (let v = 100; v <= 1000; v += 100) q.hline(x0 - 2, x0, d5 - toPix(v));
+  else for (let i = 1; i <= 10; i++) q.hline(x0 - 2, x0, d5 - Math.trunc(50 * i / 10));
+  let d4 = x0;
+  vals.forEach((v, i) => {
+    q.hline(d4, d4 + 27, d5 + 1); d4 += 9;
+    const hpx = v <= 0 ? 0 : kind === 2 ? toPix(v) : Math.trunc(50 * v / 1000);
+    q.rect(d4, d5 - hpx, d4 + 18, d5, '#000'); q.rect(d4, y0, d4 + 18, d5 - hpx, '#fff');
+    const w = q.width(names[i]);
+    q.text(names[i], d4 + Math.trunc((18 - w) / 2), d5 + 10 + (kind === 2 ? 10 * (i % 2) : 0));
+    d4 += 18;
+  });
+  q.hline(d4, d4 + 9, d5 + 1);
+}
+// which bar a point is on, and its value from the height (DoVBarClick)
+function vbarHit(x0, y0, n, pt) { const i = Math.floor((pt.h - x0 - 9) / 27), off = (pt.h - x0 - 9) - 27 * i; return i >= 0 && i < n && off >= 0 && off < 18 && pt.v >= y0 - 2 && pt.v <= y0 + 52 ? i : -1; }
+// the share set on one bar, the rest spread over the others that are not finished, in proportion (equally when they are all 0)
+function spread(vals, i, nv) {
+  const out = vals.slice(); out[i] = Math.max(0, Math.min(1000, Math.round(nv)));
+  const others = vals.map((v, j) => (j !== i && v >= 0 ? j : -1)).filter(j => j >= 0), tot = others.reduce((a, j) => a + vals[j], 0), rest = 1000 - out[i];
+  others.forEach(j => { out[j] = tot > 0 ? Math.round(rest * vals[j] / tot) : Math.round(rest / others.length); });
+  if (!others.length) out[i] = 1000;
+  return out;
+}
+function dragBars(q, x0, y0, getVals, kind, set, fromPix) {
+  q.c.style.touchAction = 'none';
+  q.c.addEventListener('pointerdown', (ev) => {
+    const i = vbarHit(x0, y0, getVals().length, q.at(ev)); if (i < 0) return;
+    ev.preventDefault();
+    if (getVals()[i] < 0) { A().beep(); return; } // (a finished part: PlaySound(-1))
+    const start = getVals();
+    const move = (e) => { const pt = q.at(e), px = Math.max(0, Math.min(50, y0 + 50 - pt.v)); set(spread(start, i, kind === 2 ? fromPix(px) : px * 1000 / 50), false); };
+    const up = (e) => { window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); move(e); set(null, true); };
+    window.addEventListener('pointermove', move); window.addEventListener('pointerup', up); move(ev);
+  });
+}
+// a colony's three bars per mille from the remake's shares (the production share; terraforming's part of the rest), -1 when finished
+function colonyBars(s, p) {
+  const tf = Math.abs(H().seenT(p, s) - 72) <= 0.5, mf = !(s.metal > 0), ship = s.ship || 0, rest = 1 - ship, t = s.terra || 0;
+  return [tf ? -1 : Math.round(1000 * rest * (mf ? 1 : t)), mf ? -1 : Math.round(1000 * rest * (tf ? 1 : 1 - t)), Math.round(1000 * ship)];
+}
+function setColonyBars(s, v) {
+  const terra = Math.max(0, v[0]), mine = Math.max(0, v[1]);
+  s.ship = Math.max(0, v[2]) / 1000;
+  if (terra + mine > 0) s.terra = terra / (terra + mine);
+}
+const kvText = (box, key) => { const r = box && box.querySelector(`.kv[data-help="${key}"]`); if (!r) return null; const b = r.querySelector('b'); return { label: r.querySelector('span').textContent, value: b ? Array.from(b.childNodes).filter(n => !(n.classList && n.classList.contains('chg'))).map(n => n.textContent).join('').trim() : '', chg: (b && b.querySelector('.chg') || {}).textContent || '' }; };
+function planetBox12(old) {
+  const a = A(), g = G(), p = a.me(), s = a.UI.sel != null ? g.stars[a.UI.sel] : null, rs = H().rules(g), W = (rs.planetInfo || {})[lang()] || {};
+  const q = qdCanvas(226, 68, s ? s.name : '');
+  const box = a.el('section', { class: 'box planet12' }, q.c);
+  if (s) {
+    q.text(s.name, 0, 11, SYS12, { center: 43 });
+    const R = (k) => kvText(old, k);
+    const note = old && old.querySelector('p.note');
+    if (s.owner !== a.ME && R('temp') == null) q.text(W.noInfo || (note && note.textContent) || '', 3, 22);
+    else {
+      const L = (t, v) => q.text(t, 0, v, G9, { right: 40 });
+      const own = s.owner === a.ME;
+      if (own) { const r = R('planetIncome'); if (r) { q.text(r.label, 5, 22); q.text(r.value, 45, 22); } }
+      else {
+        const o = R('owner'), d = R('infodate');
+        if (o) { L(o.label, 22); q.text(o.value, 45, 22); }
+        if (d) { q.text(d.label, 100, 22); q.text(d.value, 155, 22); }
+        const bt = R('battle'); if (bt) { q.text(bt.label, 100, 32); q.text(bt.value, 155, 32); }
+      }
+      [['population', 32], ['temp', 42], ['gravity', 52], ['planetMetal', 62]].forEach(([k, v]) => { const r = R(k); if (r) { L(r.label, v); q.text(r.value, 45, v); } });
+      if (own) {
+        const vals = colonyBars(s, p);
+        if (vals[0] >= 0 || vals[1] >= 0) {
+          const draw = () => { q.rect(90, 0, 225, 66, '#fff'); vbars(q, 100, 2, colonyBars(s, p), 1, [W.terra || 'Terra', W.mine || 'Mine', W.prod || 'Prod']); };
+          draw();
+          dragBars(q, 100, 2, () => colonyBars(s, p), 1, (v, end) => { if (v) { setColonyBars(s, v); draw(); } if (end) { a.save(); a.renderPanel(); } });
+        } else { // (both parts finished: the queue in place of the bars, "En cours:" and up to three MakeFleetDescription lines, or "Néant.")
+          q.text(W.queued || 'En cours:', 100, 10);
+          const lines = (s.queue || []).map(it => { const d = H().getDesign(g, a.ME, it.did); return d && rs.shipsText ? rs.shipsText(g, d, it.n) : null; }).filter(Boolean).slice(0, 3);
+          if (!lines.length) q.text(W.none || 'Néant.', 103, 22);
+          lines.forEach((t, i) => { const cond = q.width(t) > 226 - 103; q.text(t, 103, 22 + 10 * i, G9, { cond }); });
+        }
+      }
+    }
+    // (DrawPlanetRect: a double rule along the foot and a rule down the right)
+  }
+  q.hline(0, 226, 65); q.hline(0, 226, 67); q.vline(225, 0, 68);
+  // (a double click on your colony opens Build Ships, as on the map: ClickInPlanetRect)
+  if (s && s.owner === a.ME) q.c.addEventListener('dblclick', () => a.openBuild(s.id));
+  return box;
+}
+function incomeBox12(old) {
+  const a = A(), q = qdCanvas(226, 34, 'Totals');
+  const rows = old ? Array.from(old.querySelectorAll('.kv')) : [];
+  rows.slice(0, 3).forEach((r, i) => {
+    const t = kvText(old, r.getAttribute('data-help')) || { label: r.querySelector('span').textContent, value: '', chg: '' }, v = 10 + 10 * i;
+    q.text(t.label, 0, v, G9B, { right: 87 }); q.text(t.value, 90, v, G9B); if (t.chg) q.text(t.chg, 0, v, G9, { right: 225 });
+  });
+  q.hline(0, 226, 32); q.vline(225, 0, 34);
+  return a.el('section', { class: 'box info12' }, q.c);
+}
+const TECH12 = ['range', 'speed', 'weapons', 'shields', 'mini'];
+const TECH_NAMES12 = { fr: ['Distance', 'Vitesse', 'Armes', 'Boucliers', 'Mini'], en: ['Range', 'Speed', 'Weapons', 'Shields', 'Mini'] };
+function techBox12() {
+  const a = A(), g = G(), p = a.me(), W = BAR_WORDS[lang()], names = TECH_NAMES12[lang()];
+  const q = qdCanvas(228, 80, W.head), sc = H().barScale(g, 'tech');
+  const toPix = (v) => Math.trunc(50 * sc.toX(v)), fromPix = (px) => sc.toValue(px / 50);
+  const vals = () => { const t = TECH12.reduce((s, k) => s + (p.talloc[k] || 0), 0) || 1; return TECH12.map(k => Math.round(1000 * (p.talloc[k] || 0) / t)); };
+  const draw = () => {
+    q.rect(0, 0, 228, 80, '#fff');
+    q.text(W.head, 3, 10); q.text(W.levels, 3, 25);
+    TECH12.forEach((k, i) => { q.text(names[i], 5, 35 + 10 * i); q.text(String(p.tech[k]), 50, 35 + 10 * i); });
+    vbars(q, 80, 15, vals(), 2, names, toPix);
+  };
+  draw();
+  dragBars(q, 80, 15, vals, 2, (v, end) => { if (v) { TECH12.forEach((k, i) => { p.talloc[k] = v[i] / 1000; }); draw(); } if (end) { a.save(); a.renderPanel(); } }, fromPix);
+  return a.el('section', { class: 'box tech12', 'aria-label': W.head }, q.c);
+}
+function panel12(panel, B) {
+  const a = A(), el = a.el;
+  bars(panel, B);
+  const old = B.planet;
+  const pb = planetBox12(old);
+  // the fleets box (DrawFleetRect): the planet box's fleet lines, in a box of their own under it
+  const fb = el('section', { class: 'box fleets12' });
+  if (old) old.querySelectorAll(':scope > .fleets, :scope > p.note:last-of-type, :scope > .btns').forEach(n => { if (!n.matches('p.note') || !old.querySelector('.kv[data-help="temp"]') || n === old.querySelector(':scope > p.note:last-of-type')) fb.append(n); });
+  const ib = incomeBox12(B.info);
+  const rost = el('div', { class: 'rost12' }); roster(rost);
+  const low = el('div', { class: 'low12' }, rost, B.budget);
+  const tb = techBox12();
+  panel.innerHTML = '';
+  panel.append(pb, fb, ib, low, tb);
+}
+
 // ---------- the battle window (DoOneBattle @d07d0, DLOG 7010: 445 x 310, black; drawn at twice the size) ----------
 // Everything here is read in the decompile (docs/display/12.json rows DoOneBattle, DrawAllGroups, DrawOneGroup, HaveGroupShoot,
 // DrawLaserBlast, DrawExplosion, DrawX, CalcBattleStars, DrawBattleStars, DrawShipPicture): the black-and-white program's drawing.
@@ -693,6 +853,8 @@ window.HOMAC12 = {
   zoomTo: (s, f) => (own() ? zoomTo(s, f) : Math.max(12, Math.min(140, s * f))),
   fitView(v, c) { if (!own()) return; const st = c.G.stars[c.sel != null ? c.sel : c.G.players[c.ME].homeStar]; v.s = ZOOMS[3]; if (st) { v.ox = c.mapW / 2 - st.x * v.s; v.oy = c.mapH / 2 - st.y * v.s; } },
   mapNames: (s) => (own() ? zoomIdx(s) > 0 : s > 18),
+  // (DrawOneBWStarSubProc @c38ce: at the second zoom the names are drawn condensed, TextFace 0x20: a pixel less between letters)
+  mapNameStyle(cx, s) { cx.letterSpacing = own() && zoomIdx(s) === 1 ? '-1px' : '0px'; },
   drawStar(cx, i) { if (!own() || zoomIdx(i.view.s) > 0) return false; cx.fillStyle = '#fff'; cx.beginPath(); cx.arc(i.x, i.y, 2.5, 0, Math.PI * 2); cx.fill(); return 'all'; },
   lettersPickStars: true,
   // (the planet box without the remake's own additions: classic ui planetBox)
@@ -711,7 +873,7 @@ window.HOMAC12 = {
     };
     next();
   },
-  panel(panel, B) { if (own()) { bars(panel, B || {}); roster(panel); } },
+  panel(panel, B) { if (own()) panel12(panel, B || {}); },
   // the program's own windows, in English and French (another language keeps the remake's)
   window(name, ...x) {
     if (!G() || !own()) return false;
