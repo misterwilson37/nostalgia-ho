@@ -30,6 +30,7 @@ for (let n = 0; n <= 50; n++) images['m' + (9000 + n)] = 'report_icon-' + n;
 // player_<row>_<m|f>; another player's, enemy_<hat>_<m|f> (16 hats)
 for (let row = 0; row < 4; row++) for (const f of [0, 1]) images['white' + row + '_' + f] = `player_${row}_${f ? 'f' : 'm'}`;
 for (let n = 0; n < 16; n++) for (const f of [0, 1]) images['bad' + n + '_' + f] = `enemy_${n}_${f ? 'f' : 'm'}`;
+for (let n = -1; n <= 8; n++) images['spgood' + n] = 'special_good_' + n; // the holiday hats (HatNode specialGoodStar)
 // fleet markers: fleet_dots_<self|self_unfueld|self_old|others>_<class>_<count>,
 // the classic skin's four sets of your own (plain, not fully fuelled, old,
 // both) and everyone else's; the app has no "old and unfuelled" set, so that
@@ -1009,6 +1010,49 @@ function afterMsg(box, ctx) {
   hud(); drawGraph();
 }
 
+// A colony's hat (-[HatNode updateMyPlayer:star:] 0x100091bc8, read in the disassembly; the page's own hat by pay and planet class is not the app's):
+// q is the star's quality for the player (FUN_10003bf18, 0 to 20, -1 for one not explored): its gravity's ratio to his home's (the larger over the smaller, in per cent, over 256 is 0) and
+// its temperature's distance from his home's (tenths of a degree; over 200 per cent with 500 or more is 0) give a x b / 527 + 2 where a = 100 - (ratio / 10 - 10) x (ratio / 10 - 9) (at least 23)
+// and b = 100 - (distance / 330 + 1) x (distance / 330) (at least 40), one more (to 20) when the star holds over 10,000 metal. The hat is player_<row>_<m|f>: row 0 for a star not explored
+// or q 16 and over, 1 for q 6 to 15, 2 for q 2 to 5, and for q 0 and 1 row 3 unless the colony pays (its income over 0) and then 2. A colony marked for evacuation has its hat tinted
+// (125, 125, 125). On a good star (q 16 or more) the hat is special_good_<n> on certain days (specialGoodStar 0x100091db0: the device's date)
+function starQuality(p, k) {
+  if (!k || !k.explored || k.g == null) return -1;
+  const g = Math.round(k.g * 100), hg = Math.round(p.homeG * 100), t = Math.round(k.t * 10), ht = Math.round(p.homeT * 10);
+  const hi = Math.max(g, hg), lo = Math.min(g, hg), ratio = lo !== 0 ? trunc(hi * 100 / lo) : 0, dT = Math.abs(ht - t);
+  let q = 0;
+  if (ratio <= 256 && (ratio < 201 || dT < 501)) {
+    let a = 100 - (trunc(ratio / 10) - 10) * (trunc(ratio / 10) - 9); if (!(a > 22)) a = 23;
+    let b = 100 - (trunc(dT / 330) + 1) * (trunc(dT / 330)); if (!(b > 39)) b = 40;
+    q = trunc(b * a / 527) + 2;
+  }
+  return (k.metal || 0) < 10001 ? q : Math.min(q + 1, 20);
+}
+function specialDay(d) {
+  const wd = d.getDay() + 1, m = d.getMonth() + 1, day = d.getDate(), y = d.getFullYear();
+  if (wd === 5 && m === 11 && day >= 22 && day <= 28) return -1; // Thanksgiving
+  if (m === 9 && day === 22) return 6;
+  if (m === 7 && day === 9) return 7;
+  if (m === 11 && day === 15) return 5;
+  if (m === 12 && day === 25) return 1;
+  if (m === 10 && day === 31) return 0;
+  if (m === 3 && day === 17) return 3;
+  if (m === 7 && day === 29) return 8;
+  const on = (list) => list.some(([mm, dd, yy]) => m === mm && day === dd && y === yy);
+  if (on([[4, 8, 2012], [3, 31, 2013], [4, 20, 2014], [4, 5, 2015], [3, 27, 2016], [4, 16, 2017], [4, 1, 2018], [4, 21, 2019], [4, 12, 2020], [4, 4, 2021], [4, 17, 2022]])) return 2; // Easter
+  if (on([[12, 16, 2014], [12, 8, 2012], [11, 27, 2013], [12, 6, 2015], [12, 24, 2016], [12, 12, 2017], [12, 2, 2018], [12, 22, 2019], [12, 10, 2020]])) return 4; // Hanukkah
+  return null;
+}
+function colonyHat(look, c) {
+  const { G, p, s } = c;
+  if (!look.hat || s.owner !== p.id || !/^white\d_\d$/.test(look.hat)) return look;
+  const q = starQuality(p, c.k || HO.know(G, p, s.id)), f = p.female ? 1 : 0;
+  let row = 0, sp = null;
+  if (q === -1) row = 0;
+  else if (q >= 16) { row = 0; sp = specialDay(new Date()); }
+  else { row = q < 6 ? 2 : 1; if (q <= 1 && !((s.oInc || 0) > 0)) row = 3; }
+  return Object.assign({}, look, { hat: sp != null ? 'spgood' + sp : 'white' + row + '_' + f, hatTint: s.abandon301 ? 125 : 0 });
+}
 window.HOTHEME = {
   dir: 'assets/skins/ios/',
   prefix: P,
@@ -1029,7 +1073,7 @@ window.HOTHEME = {
   // going2 under 91, else going3; a star gone supernova shows supernovaed
   // (-[StarNode supernova:] 0x10001ac78) after the explosion (novaLook
   // below). Planets: planetPic.
-  starLook(look, c) { return dusted(HOTHEME.starLook0(look, c), look, c); },
+  starLook(look, c) { const l2 = colonyHat(look, c), r = dusted(HOTHEME.starLook0(l2, c), l2, c); if (l2.hatTint && r) r.hatTint = l2.hatTint; return r; },
   starLook0(look, { G, p, s, k, IMG, redraw }) {
     const b = look.base, B = (n) => ({ base: P + n, hat: look.hat });
     if (b === 'unknown' || b === 'soon') {

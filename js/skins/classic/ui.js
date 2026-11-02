@@ -633,7 +633,7 @@ function draw0() {
       cx.strokeStyle = T.satRing || (sats.some(f => f.owner === ME) ? 'rgba(120,230,255,0.9)' : 'rgba(255,120,200,0.9)');
       cx.lineWidth = 1.5; cx.beginPath(); cx.ellipse(x, y, ps * 0.62, ps * 0.62, 0, 0, Math.PI * 2); cx.stroke();
     }
-    if (own !== 'all' && look.hat && IMG[look.hat]) { const h = ps * 1.18; cx.drawImage(IMG[look.hat], x - h / 2, y - h * 0.62, h, h * (IMG[look.hat].height / IMG[look.hat].width)); }
+    if (own !== 'all' && look.hat && IMG[look.hat]) { const h = ps * 1.18; if (look.hatTint) cx.filter = `brightness(${look.hatTint / 255})`; cx.drawImage(IMG[look.hat], x - h / 2, y - h * 0.62, h, h * (IMG[look.hat].height / IMG[look.hat].width)); if (look.hatTint) cx.filter = 'none'; } // (look.hatTint: a skin's own, the hat's colour as a share of white)
     // an ally's planet: a halo over it, yellow (haloAlly) or, for a best
     // buddy, cyan (haloBuddy). GUESS: where 5.0.5 puts it isn't decompiled;
     // this is where the halos sit in 3.0.1's and 4.0's ally pictures (p506,
@@ -1538,7 +1538,7 @@ function planetBox(sid) {
   const box = el('section', { class: 'box planet' });
   const pic = el('div', { class: 'ppic' });
   pic.append(el('img', { src: look.pic ? look.pic.toDataURL() : A.img[look.base], alt: '' }));
-  if (look.hat) pic.append(el('img', { src: A.img[look.hat], class: 'phat', alt: '' }));
+  if (look.hat) pic.append(el('img', { src: A.img[look.hat], class: 'phat', alt: '', style: look.hatTint ? `filter:brightness(${look.hatTint / 255})` : null }));
   const ownerName = s.owner === ME ? 'You' : k.explored && k.owner >= 0 && k.owner !== ME ? G.players[k.owner].name : k.explored ? 'No one' : 'Unknown';
   box.append(el('div', { class: 'phead' }, pic, el('div', null, el('h3', null, s.name), (HO.rules(G).planetInfo && PW('pop')) ? null : el('div', { class: 'sub' }, ownerName + (k.explored && s.owner !== ME && k.seen >= 0 && k.seen < G.turn ? ` (seen ${2000 + k.seen * 10})` : '')))));
   // (rs.planetInfo, 1.2's DrawPlanetRect: "Contrôle:" the owner ("Néant" when nobody) and "Date info:" the year, as rows)
