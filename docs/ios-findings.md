@@ -939,7 +939,7 @@ temperature the panel's ("72.0ºF", a point). `docs/dos-findings.md`, "The repor
 `docs/display/ios-routines.tsv`, from the private repo's `decompiled/ios-1.2.9/index.tsv`; the decompile and its method are in that repo's
 `HOW.md`). Settled: 4,502 `internal` (cocos2d, CocosDenshion, TouchJSON, FontLabel, Game Kit helpers and the finger-tip overlay by class; accessors,
 `dealloc`, import stubs, block helpers and pure computations by script over the decompile, each row's reason says which; the 293 rule-core routines
-that call no message and name no string; file, archive and string-list plumbing), 20 `matched` (the number, fleet-description, temperature and report
+that call no message and name no string; file, archive and string-list plumbing), 21 `matched` (the number, fleet-description, temperature and report
 formatters, linked to `tools/format-audit.js`), 8 `notShown` (Game Center's synchronisation), 1 `fixed`. **512 rows are still open**
 (`--open`): the game's own interface classes (MapLayer, BuildSingleShipDialog, OrganizeFleetsLayer, HoBarLayer, ShipNode, BarMenuItem, TurnMessageLayer,
 PreferencesLayer, NewGameScene, GiveDialogLayer and the rest), whose windows have not yet been read routine by routine against the remake.
