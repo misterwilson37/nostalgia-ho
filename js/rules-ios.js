@@ -273,7 +273,7 @@ function barLockedIOS(G, p, slot) {
 // (tr: the window's words in another language, js/languages.js: the head
 // and a text's own translation)
 const battlePanelIn = (tr) => E.makeBattlePanel({
-  cols: 'viewer', byStance: true, luck: true, pics: (n) => Math.min(n, 1),
+  cols: 'viewer', byStance: true, luck: true, damage: true, pics: (n) => Math.min(n, 1),
   head: (G, b) => [tr ? tr.head(G.stars[b.star].name, b.year) : `Review Battle at ${G.stars[b.star].name} in ${b.year}`],
   ship: (G, d, n, n0, mine) => tr ? tr.text(O.battlePanelWords.ship(G, d, n, n0, mine)) : O.battlePanelWords.ship(G, d, n, n0, mine),
   planet: (G, pop, pop0) => tr ? tr.text(O.battlePanelWords.planet(G, pop, pop0)) : O.battlePanelWords.planet(G, pop, pop0),

@@ -770,8 +770,7 @@ didn't show the ships. In iOS 1.2.9:
 
 What changed in play: nothing in the rules. The mouse now drags the bars on the log
 scale (before: linear), the bars are always drawn on it, and locked bars refuse the
-drag in the interface as well as in the rules. Not read: the damage shading's exact look
-(not drawn). The first drawing methods of CBattleStagePhone, in the encrypted page, are
+drag in the interface as well as in the rules. The damage bar is read since ("Battle screen" below). The first drawing methods of CBattleStagePhone, in the encrypted page, are
 read below from the Android build.
 
 ### CBattleStagePhone, read from the Android 1.2.8 build
@@ -1199,3 +1198,11 @@ rectangle by its `setPosition:` clamp 0x10001f3c4) of the name (`CCMenuItemFont`
 (addCurrentShipInfo) and the four buttons (addExtraButtons) are `Button buttonWithString:size:block:` 90 x 30; the first row hidden until a pile is selected, scale 0.85 on an iPhone, 56 (iPad 80) and 16 up. The correction of the Build pass: `itemWithShip:target:selector:` and `itemWithShip:number:target:selector:` set displayClass 1, only
 the Build screen's calls pass 0. The outlines (`OrganizerFleetFleetsContainer draw` 0x1000a5a90) are 1 point, blue (0x393cd6) round every column that can take the pile, red for the one under the finger.
 Not settled: the place of the column contents in the rectangle (the clamp's comparisons were not all read; built hanging from the top, name at the bottom of the stack), the numbering of "Fleet %d" (the index, 0 for the first, as the loop's register has it), and `OrganizerFleetFleetsContainer` activateAllBut:block:, deactivateAll, ccTouchBegan:, updateSelectedFleet:, addSelfTargetedDelegate.
+
+### Battle screen (November 2026; partly built: `battleDamage`, `battleDead` in `js/skins/ios/ui.js`, `damage` in `rules-ios.js`' panel)
+
+**Built.** `-[ShipNode init]` 0x1000186a8, `setDamage:` 0x1000179f4, `draw` 0x100017980: the damage bar is `tech_bar_white` tinted (255, 0, 0) at opacity 60 of 255, anchored (1, 0.5) at (width, height / 2) of the ship node, x scaled to the damage fraction of the node's width,
+y to its height, visited over the ship's parts only when the damage is over 0; the battle panel draws it over the group's ship (the front ship's damage over its points, record +0x18 over +0x10: the remake's `hurt`) and the dead-ship sprite (`deadship`) over a group with nothing left.
+**Read, not built** (the rows keep it in their notes): `-[BattleShipNode update:player:myPlayer:]` 0x10009c3f0 (a node 0.4 of the parent's width, the ship on top, the label a80 under it, the hat and the dead-ship sprite at the ship's middle, the luck icon at the hat, side 0 anchored left at 2 a80 and the other mirrored right), `addBattleDescription` 0x1000949f4
+(the heading, Arial 16, 4 a80 under the top), `addShipGroups` 0x100094b64 (a plain node, or a CCLayerPanZoom when the groups' height + a80 is more than the layer's less 20 less 100 (85), panning within (a80, 20)), `drawGroup:` and `drawAllGroups`. The groups' vertical places are a short in each 0x34-byte record that the rule core's layout
+sets (not read): the remake keeps its own cells, so the battle screen is not settled. The laser (`fireShot:` 0x100095aec), the explosion (`explosion:` 0x100095e80 and `addExposion`), `updateRound:` and `afterReview:` were not read.

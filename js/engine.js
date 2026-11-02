@@ -2105,6 +2105,11 @@ function makeBattlePanel(cfg) {
           for (const i of g.units) { const h = state.hurt && state.hurt[i]; if (h && h.n > q && alive[i] !== false) { q = h.n; f = h.f; } }
           r.dmg = n === 0 ? 1 : Math.max(0, Math.min(1, f)); r.st = g.st; r.type = d.type; r.pics0 = cfg.pics(n0);
         }
+        if (cfg.damage) { // iOS (-[BattleShipNode update:player:myPlayer:] 0x10009c3f0): ShipNode setDamage: the front ship's damage as a fraction; a group with no ship left has none (its dead-ship picture shows)
+          let f = 0, q = -1;
+          for (const i of g.units) { const h = state.hurt && state.hurt[i]; if (h && h.n > q && alive[i] !== false) { q = h.n; f = h.f; } }
+          r.dmg = n === 0 ? 0 : Math.max(0, Math.min(1, f));
+        }
         if (cfg.shade) {
           const sat = d.type === 'satellite';
           let f = 0, q = -1;

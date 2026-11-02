@@ -3084,6 +3084,9 @@ function openBattlePanel(b) {
           x.save(); x.translate(px, py); if (ci) x.scale(-1, 1); x.drawImage(im, -im.width * sc / 2, -im.height * sc / 2, im.width * sc, im.height * sc); x.restore();
         }
         x.globalAlpha = 1;
+        // (a skin's own damage bar and dead-ship picture over the ship: iOS's ShipNode setDamage: and the deadship sprite)
+        if (T.battleDamage && g.dmg > 0) T.battleDamage(x, g.dmg, at, im.width * sc, im.height * sc, !!ci);
+        if (T.battleDead && !g.n) T.battleDead(x, at);
         if (g.shade && g.shade[1] > g.shade[0]) { // 1.2 to 4.0.5: the cell's damage shading (a gray PaintRect in patOr)
           x.fillStyle = 'rgba(128,128,128,.55)'; x.fillRect(at.x - 30 + 60 * g.shade[0], at.y - 20, 60 * (g.shade[1] - g.shade[0]), 40);
         }

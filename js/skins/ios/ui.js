@@ -1652,6 +1652,16 @@ window.HOTHEME = {
     const pic = planetPic(IMG, p, src);
     return pic ? { base: look.base, pic, hat: look.hat } : look;
   },
+  // -[ShipNode setDamage:] 0x1000179f4 and init 0x1000186a8: the sprite tech_bar_white tinted red (255, 0, 0) at opacity 60 of 255, anchored (1, 0.5) at (width, height / 2), its x scaled to the damage
+  // fraction of the node's width and its y to the node's height, drawn over the ship's parts (draw 0x100017980: only when the damage is over 0); BattleShipNode's dead-ship sprite (deadship, 100 x 100 px) over the ship's middle
+  battleDamage(cx, dmg, at, w, h, mirror) {
+    const im = A().IMG[P + 'tech_bar_white']; if (!im || !im.width) return;
+    const bw = w * Math.min(1, dmg), t = document.createElement('canvas'); t.width = Math.max(1, Math.ceil(bw)); t.height = Math.max(1, Math.ceil(h));
+    const tx = t.getContext('2d'); tx.drawImage(im, 0, 0, t.width, t.height); tx.globalCompositeOperation = 'multiply'; tx.fillStyle = '#f00'; tx.fillRect(0, 0, t.width, t.height);
+    tx.globalCompositeOperation = 'destination-in'; tx.drawImage(im, 0, 0, t.width, t.height);
+    cx.save(); cx.globalAlpha = 60 / 255; cx.drawImage(t, mirror ? at.x - w / 2 : at.x + w / 2 - bw, at.y - h / 2, bw, h); cx.restore();
+  },
+  battleDead(cx, at) { const im = A().IMG[P + 'deadship']; if (im && im.width) cx.drawImage(im, at.x - im.width / 4, at.y - im.height / 4, im.width / 2, im.height / 2); },
   shipPic(d, IMG) { return shipPic(d, IMG, false); }, // (the app's ShipNode has no rust: ship-rust is in the sheet but no code names it)
   // the app's own windows in this skin: Build (BuildShipsDialog, ShipClassMenu, ShipMenuItem, BuildSingleShipDialog); a ruleset whose ships are queued (DOS 2.0) keeps the remake's window
   window(name, ...x) {
