@@ -1855,7 +1855,7 @@ function renderMsg0() {
     if (bm) { const c = el('div', { class: 'count' }); if (UI.msgIdx + 1 < UI.inbox.length) { c.append(document.createTextNode(bm)); c.setAttribute('translate', 'no'); } body.append(extra, c); }
     else body.append(extra, el('div', { class: 'count' }, `${UI.msgIdx + 1} of ${UI.inbox.length} · click to continue`));
     card.append(body);
-    const next0 = () => { if (m.star != null) { UI.sel = m.star; renderPanel(); } UI.msgIdx++; Sound.play(7001); renderMsg(); draw(); };
+    const next0 = () => { if (m.star != null) { UI.sel = m.star; renderPanel(); } UI.msgIdx++; if (!T.quietNext) Sound.play(7001); renderMsg(); draw(); };
     // the winner's report has opened the version's win windows as it came up (below); a Next that finds them still pending opens them
     const next = () => winReport(m) && winPending() ? openWinWindows(next0) : next0();
     card.addEventListener('click', guard(next));
@@ -2347,7 +2347,7 @@ window.HOBUGS = window.HOBUGS || [];
 window.HOBATTLE = (bid) => { if (G) openBattle(bid); };
 // what the map shows, for the test tools (read only): its scale and offset,
 // the selected star and fleet, a finger's ruler and drag
-window.HOVIEW = () => ({ view: Object.assign({}, UI.view), sel: UI.sel, selFleet: UI.selFleet, ruler: UI.ruler && Object.assign({}, UI.ruler), drag: !!UI.drag, path: UI.drag && UI.lastPath ? Object.assign({}, UI.lastPath) : null, barScale: G ? { budget: HO.barScale(G, 'budget', barPick()).id, tech: HO.barScale(G, 'tech').id } : null, mapW, mapH, fit: fitScale(), zoom: zoomRange(), modal: !!UI.modal });
+window.HOVIEW = () => ({ view: Object.assign({}, UI.view), sel: UI.sel, selFleet: UI.selFleet, ruler: UI.ruler && Object.assign({}, UI.ruler), drag: !!UI.drag, path: UI.drag && UI.lastPath ? Object.assign({}, UI.lastPath) : null, barScale: G ? { budget: HO.barScale(G, 'budget', barPick()).id, tech: HO.barScale(G, 'tech').id } : null, mapW, mapH, fit: fitScale(), zoom: zoomRange(), target: G && mapW ? planetTarget() : 1, modal: !!UI.modal });
 function guard(fn, where) {
   if (typeof fn !== 'function' || fn.hoGuarded) return fn;
   const g = function (...a) { try { return fn.apply(this, a); } catch (e) { showBug(e, where); } };

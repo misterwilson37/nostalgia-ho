@@ -357,9 +357,9 @@ function placeButtons() {
   const own = s.owner === a.ME && a.G.players[a.ME].alive !== false;
   const ships = a.G.fleets.some(f => f.owner === a.ME && f.star === sel && f.to == null);
   const r = cv.getBoundingClientRect(), x = r.left + v.view.ox + s.x * v.view.s, y = r.top + v.view.oy + s.y * v.view.s;
-  // the app's box is 46 points about the planet at scale 1 and its scale follows the planet's (MapLayer setScale:); the remake draws its planets at
-  // planetPx (js/skins/classic/ui.js), a planet about 1.15 x that across, so the box is that wide here: the buttons hug the planet as the app's do
-  const k = Math.max(18, Math.min(52, v.view.s * 0.9)) * 1.15 / 46 / SCREEN.u, pad = SCREEN.pad;
+  // -[MapLayer setScale:] 0x10000e590: the box's scale is the planet scale times the map's, i.e. the planets' on-screen scale (HOVIEW().target:
+  // 2.0 iPhone / 3.0 iPad zoomed in, a line from 0.2 / 0.6 below), the box 46 points a side about the star (map points are CSS pixels here)
+  const k = (v.target || 1) / SCREEN.u, pad = SCREEN.pad;
   const show = (cls, on) => { const b = pbEl.querySelector('.ios-pb-' + cls); if (b) b.hidden = !on || (cls === 'move' && pad); };
   show('add', own); show('move', ships); show('organize', ships);
   pbShown = own || ships;
@@ -613,6 +613,7 @@ window.HOTHEME = {
   battlePlanet: P + 'ship-planet',
   battleBg: null,
   endTurnKey: null,
+  quietNext: true, // -[TurnMessageLayer clickMessage] plays no sound: a dismissed report is silent here
   // Stars (-[StarNode updateFor:withStar:withGame:] 0x10001af5c): an
   // unexplored star is planet-question, or planet-x when no owner is known
   // and a battle was seen there, or planet-exclamation when it is the end of
