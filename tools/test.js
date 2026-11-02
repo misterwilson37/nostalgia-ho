@@ -17,7 +17,7 @@ function fail(e,seed,G){ console.error(`FAILED: ${RULES}${PATCH?' --patch':''}, 
 // the game's state without what Hoedown or the language may change: messages,
 // names, its own notes, the language's code (G.opts.lang)
 function digest(G){
-  const skip=new Set(['inbox','log','name','text','hoNames','hoColor','hoedown','hoedownAll','lang','chg','c0','cmp','outYear','winYear','reportLog','snd','dm','grp','php','hx','hf','pw']);
+  const skip=new Set(['inbox','log','name','text','hoNames','hoColor','hoedown','hoedownAll','lang','chg','c0','cmp','outYear','winYear','reportLog','snd','sn','dm','grp','php','hx','hf','pw']);
 
   const js=JSON.stringify(G,(k,v)=>skip.has(k)?undefined:v);
   return require('crypto').createHash('sha1').update(js).digest('hex').slice(0,16);

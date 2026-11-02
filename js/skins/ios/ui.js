@@ -739,7 +739,7 @@ function playersList() {
     if (num >= 2) {
       const w = appWord('pact', num), bt = UIEl('button', 'ios-pact', { type: 'button', title: p.name }, UIEl('span', null, w.no ? { translate: 'no' } : null, w.text));
       bt.style.fontSize = pt(fs * 0.9);
-      if (tg.items.length > 1) bt.addEventListener('click', (e) => { e.stopPropagation(); const x = A(); if (!x || !x.G) return; pactToggled(G, me, p, pm, buddies, (tg.cur + 1) % tg.items.length); x.save(); x.renderPanel(); });
+      if (tg.items.length > 1) bt.addEventListener('click', (e) => { e.stopPropagation(); const x = A(); if (!x || !x.G || document.getElementById('autostop')) return; /* MenuDisabledDuringAutoplay 0x1000aa33c: the list's menu refuses touches while auto play runs (Prefs +8); only PlayerListLayer 0x10009d410 makes one */ pactToggled(G, me, p, pm, buddies, (tg.cur + 1) % tg.items.length); x.save(); x.renderPanel(); });
       else bt.classList.add('lone');
       row.append(bt);
     }
@@ -1399,7 +1399,7 @@ function openScrapIOS() {
     } });
   return L;
 }
-// FUN_100038438 0x100038438 (read in full): report number -> Sounds item. The Sounds list's items are the files 2000, 2001, 3000-3003, 4000, 4001, 5000-5003, 6000-6002 (items 0-14), 7000-7007 (15-22),
+// FUN_100038438 0x100038438 (read in full): report number -> Sounds item. The Sounds list (en.lproj/objectdictionary.plist, items 0-40, mapped to the files by NAME: tools/extract/ios.py SOUND_NUMBERS; item 39 is "Screeem!" = 8000, item 40 "New Turn" = 11111) has the files 2000, 2001, 3000-3003, 4000, 4001, 5000-5003, 6000-6002 (items 0-14), 7000-7007 (15-22),
 // 7012-7027 (23-38), then 8000 (39): the evacuate marks (items 17 and 6 = 7002 and 4000), the drag tick (16 = 7001), the end turn "ahem" (15 = 7000) and the eliminated player's two sounds (item 1, 32) fix the order
 const TAP_FILE = [2000, 2001, 3000, 3001, 3002, 3003, 4000, 4001, 5000, 5001, 5002, 5003, 6000, 6001, 6002, 7000, 7001, 7002, 7003, 7004, 7005, 7006, 7007, 7012, 7013, 7014, 7015, 7016, 7017, 7018, 7019, 7020, 7021, 7022, 7023, 7024, 7025, 7026, 7027, 8000];
 const TAP_TABLE = (() => {
@@ -1505,7 +1505,7 @@ function openHelpIOS(url) {
 // H - trunc(6.875 a88 + trunc(3.75 a88)) (63): up to 33 per cent of it is "Play One Turn" (Misc 119, or 184 "Already Played One Turn" when the computer has played this turn, when the check goes too), 34 to 67
 // "Just End My Turns Only" (134), 68 and over "Computer Play For Me" (133); the state's label (Arial a18) hangs from 3.5 a88 under the slider, centred. The Friendly (124) - Aggressive (125) slider (tag 2, 30 a88 wide)
 // at (W / 4, H - trunc(18 a88 + trunc(3.75 a88))) and the No Defense (126) - Dig In (127) slider (tag 1) at (3 W / 4, the same), the end words (Arial a38) hanging 10 under the sliders' bottoms from their ends; values
-// (int)(value x 100), set from the preferences (aggressiveness +0x219, defensiveness +0x21a; first 50 and 50). The toggle (a CCMenuItemFont in Arial at 0.75 of the font size the gear's init left, a30) of "Do NOT
+// (int)(value x 100), set from the preferences (aggressiveness +0x219, defensiveness +0x21a; first 50 and 50). The toggle (a CCMenuItemFont in Arial at 0.75 of the class's global font size: a30 from the gear's init, 16 once Organize Fleets was opened in this game) of "Do NOT
 // Turn Off When Something Interesting Happens" (135) / "Do Turn Off ..." (136), centred at H - trunc(30 a88 + trunc(3.75 a88)), index from +0x21b (first 1). The seconds slider (tag 4, 15 a88 wide, value
 // seconds / 10, seconds from +0x21e, first 4) at (27 a88, trunc(3.125 a88 + trunc(3.75 a88))) with "0" (128) and "10" (129) under its ends, "Click through the" (130) and "messages every" (131) right-aligned
 // 10 left of it (7.5 and 3.75 above and below its middle), the number (Arial a18) 10 right of it and "seconds" (132, Arial 16) 10 further. Just End My Turns shows the toggle and the seconds; Computer Play For Me
@@ -1535,7 +1535,7 @@ function openAutoPlayIOS() {
       dlg.append(put(offSl.el, ox, yDef, 0.5, 0.5), put(defSl.el, dx, yDef, 0.5, 0.5));
       lab('fr', miscS(124), gd.a38, ox - hw, ey, 0, 1); lab('ag', miscS(125), gd.a38, ox + hw, ey, 1, 1);
       lab('nd', miscS(126), gd.a38, dx - hw, ey, 0, 1); lab('di', miscS(127), gd.a38, dx + hw, ey, 1, 1);
-      const stop = UIEl('button', 'ios-bmi ios-bstop', { type: 'button', style: `font-size:${bpt(gd.a30 * 0.75)}` });
+      const stop = UIEl('button', 'ios-bmi ios-bstop', { type: 'button', style: `font-size:${bpt((ccFontG === G ? 16 : gd.a30) * 0.75)}` });
       const stopText = () => { stop.textContent = miscS(V.stop ? 136 : 135); };
       stop.addEventListener('click', (e) => { e.stopPropagation(); V.stop = V.stop ? 0 : 1; stopText(); });
       stopText(); els.stop = stop; dlg.append(put(stop, W / 2, yStop, 0.5, 0.5));
@@ -1783,8 +1783,10 @@ function plainButton(text, w, h, size, fn) {
   b.textContent = text; b.addEventListener('click', (e) => { e.stopPropagation(); fn(); });
   return b;
 }
+let ccFontG = null; // +[CCMenuItemFont setFontSize:] is one global: the gear's init (-[AdditionalMenu init] 0x100093824) sets a30 (24, 28 on an iPad) when the game's screen is built; opening Organize Fleets (addExtraButtons / updateData 0x1000c0520: 16) changes it for good
 function openOrganizeIOS(sid) {
   const a = A(), G = a.G, gd = BGD(), pad = SCREEN.pad;
+  ccFontG = G;
   closeBuildFlow(); closeGraphs();
   let W, H, k = 1;
   if (!pad) ({ cw: W, ch: H, k } = dlgGeom()); else { W = SCREEN.winW * 0.8; H = SCREEN.winH * 0.7; }
@@ -2093,7 +2095,10 @@ function openBattleIOS(b, k) {
     let i = 0; const step = () => { if (S.closed) return; if (i >= 10) { expl.style.display = 'none'; return; } expl.style.backgroundPosition = `${bpt(i >= 5 ? -200 : 0)} ${bpt(-(i % 5) * 60)}`; i++; setTimeout(step, Math.max(0, sp / 300 * 1000)); };
     step();
   };
-  const play = (ev, kill) => { if (kill) a.Sound.play(k.shotSnd(ev, 3003)); else if (ev.p) a.Sound.play(k.shotSnd(ev, 3002)); else a.Sound.play(k.shotSnd(ev, 3000)); };
+  // HaveGroupShoot 0x228970 plays one Sounds item per volley (the event that carries `sn`: 5 a ship or the group gone, 4 hard, 3 medium, 2 soft; the items' files are TAP_FILE's, by the list's names); the rulesets
+  // whose events carry none (the others) keep the classic page's pick
+  const snRec = b.rounds && b.rounds.some(r => r.some(e => e.sn != null));
+  const play = (ev, kill) => { if (snRec) { if (ev.sn != null) a.Sound.play(TAP_FILE[ev.sn]); return; } if (kill) a.Sound.play(k.shotSnd(ev, 3003)); else if (ev.p) a.Sound.play(k.shotSnd(ev, 3002)); else a.Sound.play(k.shotSnd(ev, 3000)); };
   let r = 0, e = 0;
   const apply = (ev) => {
     if (ev.p) return;

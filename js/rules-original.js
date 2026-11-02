@@ -2424,7 +2424,7 @@ function battleAt505(G, sid, pass) {
     for (let lvl = maxInit; lvl >= 0; lvl--) {
       for (const g of groups) {
         if (g.init !== lvl) continue;
-        let carry = 0;
+        let carry = 0, cum = 0; // (cum: the volley's damage so far, display only: the iOS app's sound, HaveGroupShoot below)
         for (let i = 0; i < g.n0; i++) for (let j = 0; j < g.shots; j++) {
           if (!g.tgt || !(g.tgt.n > 0)) g.tgt = pickTarget(g);
           const t = g.tgt; if (!t) continue;
@@ -2433,13 +2433,18 @@ function battleAt505(G, sid, pass) {
             let dmg = base * 4; if (carry > 0) { dmg += carry; carry = 0; }
             dmg = Math.min(dmg, t.hp); t.hp -= dmg;
             if (t.hp <= 0) { t.hp = 0; t.n = 0; }
-            if (ev.length < 80) ev.push({ a: g.owner, si, p: 1 });
+            // (sn: display only, the Sounds item the iOS app plays: CBattleStage::HaveGroupShoot 0x228970 plays one sound per volley, after its last shot or when the group is gone: 5 when
+            // the group is gone, else 4 at a colony)
+            const last = i === g.n0 - 1 && j === g.shots - 1, sn = t.n === 0 ? 5 : 4;
+            if (ev.length < 80) ev.push(last || t.n === 0 ? { a: g.owner, si, p: 1, sn } : { a: g.owner, si, p: 1 });
           } else {
             let dmg = Math.max(1, trunc(base / 6)); if (carry > 0) { dmg += carry; carry = 0; }
-            t.dmg += dmg;
+            t.dmg += dmg; cum += dmg;
             let killed = 0; const ti = t.units[t.start - t.n] != null ? t.units[t.start - t.n] : t.units[0];
             if (t.hp <= t.dmg) { carry = t.dmg - t.hp; t.dmg = 0; t.n--; debris += t.debris; killed = 1; }
-            if (ev.length < 80) ev.push({ a: g.owner, si, t: t.owner, k: killed, ti, hf: killed ? 0 : t.dmg / t.hp }); // (hf: display only, the target's damage as a fraction of its hit points after the shot: the iOS battle screen's damage bar)
+            // (sn: the app's sound, see above: 5 when a ship died or the group is gone, else by the volley's damage x 10 over a ship's hit points: over 4 hard (4), 2 to 4 medium (3), under 2 soft (2))
+            const last = i === g.n0 - 1 && j === g.shots - 1, q = trunc(cum * 10 / t.hp), sn = killed || t.n === 0 ? 5 : q > 4 ? 4 : q < 2 ? 2 : 3;
+            if (ev.length < 80) ev.push({ a: g.owner, si, t: t.owner, k: killed, ti, hf: killed ? 0 : t.dmg / t.hp, ...(last || t.n === 0 ? { sn } : {}) }); // (hf: display only, the target's damage as a fraction of its hit points after the shot: the iOS battle screen's damage bar)
           }
         }
       }
