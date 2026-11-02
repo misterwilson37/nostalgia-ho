@@ -3398,6 +3398,7 @@ function giveSlider(max, label, onval, o) {
 }
 function openGive() {
   if (menuDim('give')) return;
+  if (skinWindow('give')) return;
   const W = G && HO.rules(G).giveWindow;
   if (W) { openGiveWindow(W); return; }
   if (!others().length) { toast(HO.say(G, HO.DATA.alerts[6] || 'There is no one else to give anything to.')); return; }

@@ -1336,6 +1336,41 @@ function openDipIOS() {
     } });
   return L;
 }
+// -[GiveDialogLayer initDialog] 0x1000a8678, +give 0x1000a8568, valueChanged:tag: 0x1000a9140, generatePlayerToggle 0x1000a92b4, doClose: 0x1000a8ff4 (the layout from tools/floats.py and the assembly; y up, a88 6 on an iPhone, 8 on an iPad):
+// the message Misc Strings 75 with the check and the cross; label A (Misc 76, Arial 16) anchored (1, 0.5) at (18.75 a88, H - 12 a88) (centerTopInParent: the padding is of the top edge), the player toggle (a CCMenuItemToggle of
+// CCMenuItemFonts, Arial, one for each other player who is out of the game no longer: tap for the next; it starts at the last one given to, else the first) centred at (27 a88, A's y); label B (Misc 77) 8 a88 under A and label C
+// (Misc 23) 8 a88 under B, the same x; under each a CCSliderDeluxe (41.6 a88 wide, 19 high, anchored at its bottom left) at (25 a88, label y - 2 a88), with the value 0 (Arial a38) 2 a88 inside its left end and its most (the money formatted
+// with its sign, the metal as a number) 2 a88 inside the right end, 2 a88 under it; and over its middle, a30 above its top, the amount (Arial a58, money at tag 1: the player's money x the slider's value as an int, metal at tag 2). The check
+// gives (the app records the gift and takes the money and metal: it counts toward the three a turn even when empty), sound 8; with three gifts already made Alert Strings 6 is shown instead, with nobody to give to Alert Strings 7.
+function openGiveIOS() {
+  const a = A(), G = a.G, p = a.me(), out = (q) => !q.alive || q.surrendered;
+  if ((p.giftsThisTurn || 0) >= 3) { appMessage(alertS(6)); return true; }
+  const can = G.players.filter(q => q.id !== a.ME && !out(q));
+  if (!can.length) { appMessage(alertS(7)); return true; }
+  let pick = Math.max(0, can.findIndex(q => q.id === p.giveTo)), mAmt = 0, xAmt = 0;
+  const have = Math.max(0, p.savings), hasM = Math.max(0, p.metal);
+  const L = appDialog({ message: miscS(75), label: miscS(75),
+    build(dlg, cw, ch, gd) {
+      const a88 = gd.a88, yA = ch - 12 * a88, yB = yA - 8 * a88, yC = yB - 8 * a88, sw = a88 * 41.6, sx = a88 * 25, SH = 19;
+      dlg.append(dlabel(miscS(76), 16, a88 * 18.75, yA, 1, 0.5), dlabel(miscS(77), 16, a88 * 18.75, yB, 1, 0.5), dlabel(miscS(23), 16, a88 * 18.75, yC, 1, 0.5));
+      const tg = UIEl('button', 'ios-gtoggle', { type: 'button', translate: 'no', style: `font-size:${bpt(ccFontG === G ? 16 : gd.a30)}` }); tg.textContent = can[pick].name;
+      tg.addEventListener('click', (e) => { e.stopPropagation(); pick = (pick + 1) % can.length; tg.textContent = can[pick].name; });
+      dlg.append(put(tg, a88 * 27, yA, 0.5, 0.5));
+      const row = (y, have0, tag, text, maxText, set) => {
+        const sy = y - 2 * a88, lab = dlabel(text, gd.a58, sx + sw / 2, sy + SH + gd.a30, 0.5, 0.5);
+        const sl = ccSlider(sw, (f) => { set(Math.trunc(Math.fround(Math.fround(have0) * Math.fround(f))), lab); }); sl.set(0);
+        dlg.append(put(sl.el, sx, sy, 0, 0), lab, dlabel(text0(tag), gd.a38, sx + 2 * a88, sy - 2 * a88, 0.5, 0.5), dlabel(maxText, gd.a38, sx + sw - 2 * a88, sy - 2 * a88, 0.5, 0.5));
+      };
+      const text0 = (tag) => tag === 1 ? bnum(0, true) : '0';
+      row(yB, have, 1, bnum(0, true), bnum(have, true), (v, lab) => { mAmt = v; lab.textContent = bnum(v, true); });
+      row(yC, hasM, 2, '0', bnum(hasM, false), (v, lab) => { xAmt = v; lab.textContent = bnum(v, false); });
+    },
+    ok() {
+      const to = can[pick].id, r = HO.give(G, a.ME, to, mAmt, xAmt);
+      if (r === 'ok') { p.giveTo = to; a.Sound.play(TAP_FILE[8]); a.renderPanel(); a.save(); }
+    } });
+  return true;
+}
 // -[ArmageddonLayer setup] 0x1000a4acc, toggleArmageddon 0x1000a4f30, doClose: 0x1000a4fcc, reallyArmageddon 0x1000a5230 / cancelArmageddon 0x1000a5274: the message Misc Strings 102; Misc 103 (Arial a58) in a
 // box (width - 80) x (height - 200), left aligned, its top 8.75 a88 under the top, centred; a CCMenuItemToggle of armageddon_off / armageddon_on (110 points square, each item scaled 0.125 a88 = 0.75) in a menu
 // at (6.25 a88, 8.75 a88) anchored at its bottom left; to its right (menu left + width + 5 a88) and centred on its height, Misc 104 "Off" / 105 "On" (Arial a18). Choosing the check with a changed choice asks
@@ -2396,6 +2431,7 @@ window.HOTHEME = {
     if (name === 'build') { const s = a.G.stars[x[0]]; if (!s || s.owner !== a.ME || HO.feature(a.G, 'buildQueue')) return false; return openBuildFlow(x[0]); }
     const appRules = /^(ios|android)$/.test(a.G.rules || '');
     if (appRules && name === 'dip') { openDipIOS(); return true; }
+    if (appRules && name === 'give') return openGiveIOS();
     if (appRules && name === 'auto') { openAutoPlayIOS(); return true; }
     if (appRules && name === 'armageddon') { openArmageddonIOS(); return true; }
     if (appRules && name === 'types') { openScrapIOS(); return true; }

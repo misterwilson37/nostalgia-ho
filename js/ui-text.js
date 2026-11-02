@@ -1386,5 +1386,8 @@ root.HOUI.add([
 ['Game over date: %u', 'Game Over le: %u', 'Spielende: %u', 'Oyunun bittiği tarih: %u', 'Fin de la partida: %u', I],
 // Saved Games: too many
 ['Too Many Saved Games. You should delete some.', 'Il ya trop de jeux sauvegardés. S\'il vous plaît supprimer certains.', 'Zu viele gespeicherte Spiele. Sie sollten einige löschen.', 'Çok Oyun Kaydedildi, Bir Kısmını Sil.', 'Demasiadas partidas guardadas. Deberías borrar algunas.', I],
+// the welcome scene's version label (WelcomeScene init 0x10001dad0: a literal format in the app, not in any language's list; the same in every language)
+['Spaceward Ho: Version 1.2.9 (811605)', 'Spaceward Ho: Version 1.2.9 (811605)', 'Spaceward Ho: Version 1.2.9 (811605)', 'Spaceward Ho: Version 1.2.9 (811605)', 'Spaceward Ho: Version 1.2.9 (811605)', I],
+['Spaceward Ho: Version 1.2.8 (811597)', 'Spaceward Ho: Version 1.2.8 (811597)', 'Spaceward Ho: Version 1.2.8 (811597)', 'Spaceward Ho: Version 1.2.8 (811597)', 'Spaceward Ho: Version 1.2.8 (811597)', I],
 ]);
 })(typeof window !== 'undefined' ? window : globalThis);

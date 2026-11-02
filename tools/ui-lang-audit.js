@@ -199,7 +199,7 @@ async function audit(browser, url, run) {
   if (/^(ios|android)$/.test(run.rules)) {
     const close = async () => { for (let i = 0; i < 3; i++) await page.keyboard.press('Escape'); await page.evaluate(() => { document.querySelectorAll('.ios-gscrim, .ios-gm').forEach(x => x.remove()); }); await sleep(60); };
     const IOSW = [
-      ['iOS Dip Into Savings', "HOTHEME.window('dip')"], ['iOS Auto Play', "HOTHEME.window('auto')"], ['iOS Armageddon', "HOTHEME.window('armageddon')"],
+      ['iOS Dip Into Savings', "HOTHEME.window('dip')"], ['iOS Auto Play', "HOTHEME.window('auto')"], ['iOS Armageddon', "HOTHEME.window('armageddon')"], ['iOS Give', "HOTHEME.window('give')"],
       ['iOS Scrap Ship Types', "HOTHEME.window('types')"], ['iOS Evacuate', 'api.evacuateClick(api.me().homeStar)'], // (Preferences is opened above, by the page's own Preferences)
 
       ['iOS Help', "HOTHEME.window('help', 'assets/skins/ios/help/help_index.html')"], ['iOS Build', "HOTHEME.window('build', api.me().homeStar)"],

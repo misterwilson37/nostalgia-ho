@@ -375,3 +375,5 @@ html.skin-ios .ios-cc.dn img:first-child { filter: brightness(.49); }
 html.skin-ios .ios-cc.hl > img + img { position: absolute; inset: 0; display: none; }
 html.skin-ios .ios-cc.hl.dn > img + img { display: block; }
 html.skin-ios .ios-cc.hl.dn img:first-child { filter: none; }
+html.skin-ios .ios-gtoggle { appearance: none; border: 0 !important; background: none !important; padding: 0 !important; color: #fff !important; cursor: pointer; white-space: nowrap; font-family: var(--appfont, Arial, Helvetica, sans-serif); }
+html.skin-ios #titlescreen.ios-wel[hidden], html.skin-ios .ios-ropt[hidden] { display: none; }
