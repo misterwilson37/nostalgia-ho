@@ -613,6 +613,10 @@ root.HOUI.add([
 ['Once started, you will continue to dip each turn until cancelled.', 'Un fois choisi, vous aller continuer à puiser dans l\'épargne jusqu\'a annulation.', 'Einmal begonnen, zapfen Sie jeden Zug weiter an, bis Sie es abbrechen.', 'Bir kere başlayınca, kullanmaya devam edeceksin, ta ki iptal edilinceye kadar.', 'Una vez empezado, seguirás tirando de los ahorros cada turno hasta que lo canceles.', I, { tr: 'Bir kez başlayınca, iptal edilene kadar her sırada kullanmaya devam edeceksin.' }],
 ['Who would you like to surrender to?', 'À qui voulez-vous vous rendre ?', 'Wem möchten Sie sich ergeben?', 'Kime teslim olmak istersin?', '¿Ante quién quieres rendirte?'],
 ['No One', 'Personne', 'Niemand', 'Hiç Kimse', 'Nadie', I],
+// (the main screen's HUD strip, -[PlanetInfoLayer updateData]: sprintf Templates 21 and 22, Misc Strings 42; the iOS French and Turkish lproj's own)
+['%s Pop', '%s Pop', '%s Einw.', '%s Nüfus', '%s Pob.', I],
+['%s Metal', '%s Métal', '%s Metall', '%s Metal', '%s Metal', I],
+['Unexplored', 'Inexploré', 'Unerforscht', 'Keşfedilmemiş', 'Sin explorar', I],
 ['Scrap Ship Types', 'Types de vaisseaux à recycler', 'Schiffstypen verschrotten', 'Çöpe Atılacak Gemiler', 'Desguazar tipos de nave', I, { tr: 'Gemi Tiplerini Hurdaya Çıkar' }],
 ['Select the ship types you would like to scrap.', 'Sélectionnez les types de vaisseaux que vous voulez recycler.', 'Wählen Sie die Schiffstypen, die Sie verschrotten möchten.', 'Çürük gemileri seç.', 'Elige los tipos de nave que quieres desguazar.', { fr: '~iOS', tr: '~iOS' }, { tr: 'Hurdaya çıkarmak istediğin gemi tiplerini seç.' }],
 ['If any ships of that type exist, they will be scrapped at their current location during the next turn update.', 'Les vaisseaux de ce type qui existent seront recyclés là où ils se trouvent lors du prochain tour.', 'Gibt es Schiffe dieses Typs, werden sie beim nächsten Zug dort verschrottet, wo sie gerade sind.', 'O tipte gemi varsa, bir sonraki sırada bulundukları yerde hurdaya çıkarılır.', 'Si existen naves de ese tipo, se desguazarán donde estén en la próxima actualización del turno.'],

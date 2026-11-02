@@ -41,14 +41,14 @@ html.skin-ios.ios-phone .ios-col { right: 0; top: 50%; transform: translateY(-50
 html.skin-ios.ios-pad .ios-col { left: 0; bottom: 0; flex-direction: row; gap: calc(2 * var(--pt)); }
 html.skin-ios .ios-graph { position: fixed; right: 0; top: 0; z-index: 7; }
 /* the HUD strip: top centre, 3 points from the top; its height the type + 4 */
-html.skin-ios .ios-hud { position: fixed; left: 50%; top: calc(3 * var(--pt)); transform: translateX(-50%); height: calc((var(--fs) + 4) * var(--pt)); max-width: 100vw; }
+html.skin-ios .ios-hud { position: fixed; left: 50%; top: calc(3 * var(--pt)); transform: translateX(-50%) scale(var(--hudk, 1)); transform-origin: 50% 0; height: calc((var(--fs) + 4) * var(--pt)); max-width: 100vw; }
 html.skin-ios .ios-hud[hidden] { display: none; }
 html.skin-ios .ios-hrow { position: relative; display: flex; align-items: center; gap: calc(var(--gap) * var(--pt)); height: 100%; padding: 0 calc(5 * var(--pt)); font: calc(var(--fs) * var(--pt)) / 1 var(--appfont, Arial, Helvetica, sans-serif); color: #00ff00; white-space: nowrap; z-index: 1; }
 html.skin-ios .ios-hl, html.skin-ios .ios-hr { position: absolute; top: 0; height: 100%; width: calc(50% + 5 * var(--pt)); border-style: solid; border-width: calc(5 * var(--pt)) calc(8 * var(--pt)); border-image: url("../../../assets/skins/ios/sprites/HUD-left.png") 10 16 fill / calc(5 * var(--pt)) calc(8 * var(--pt)) stretch; }
 html.skin-ios .ios-hl { left: calc(-5 * var(--pt)); border-image-source: url("../../../assets/skins/ios/sprites/HUD-left.png"); }
 html.skin-ios .ios-hr { right: calc(-5 * var(--pt)); border-image-source: url("../../../assets/skins/ios/sprites/HUD-right.png"); }
 /* the terraform / mine slider tmb1: 216 x 19 points at 0.8, the left part drawn to the value, the thumb on it */
-html.skin-ios .ios-tm { position: relative; flex: none; width: calc(216 * .8 * var(--pt)); height: calc(19 * .8 * var(--pt)); touch-action: none; cursor: pointer; outline-offset: 2px; }
+html.skin-ios .ios-tm { position: relative; flex: none; margin: 0 calc(14 * .8 * var(--pt)); width: calc(216 * .8 * var(--pt)); height: calc(19 * .8 * var(--pt)); touch-action: none; cursor: pointer; outline-offset: 2px; }
 html.skin-ios .ios-tmL { position: absolute; inset: 0; background: url("../../../assets/skins/ios/sprites/slider-tmb1-right.png") 0 0 / 100% 100%; }
 html.skin-ios .ios-tmL::before { content: ""; position: absolute; inset: 0; width: calc(var(--v, 0) * 100%); background: url("../../../assets/skins/ios/sprites/slider-tmb1-left.png") 0 0 / calc(100% / max(var(--v, 0), .001)) 100%; background-size: calc(216 * .8 * var(--pt)) 100%; }
 html.skin-ios .ios-tmT { position: absolute; top: 50%; left: calc(var(--v, 0) * 100%); width: calc(28.5 * .8 * var(--pt)); height: calc(29 * .8 * var(--pt)); margin: calc(-14.5 * .8 * var(--pt)) 0 0 calc(-14.25 * .8 * var(--pt)); background: url("../../../assets/skins/ios/sprites/slider-tmb1-thumb.png") 0 0 / 100% 100%; }

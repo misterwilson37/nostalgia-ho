@@ -332,7 +332,7 @@ function tmDrag(el) {
 function hudLabels(a) {
   const G = a.G, p = a.me(), sel = a.UI.sel; if (sel == null) return null;
   const s = G.stars[sel], k = HO.know(G, p, sel);
-  const word = (en) => (window.HOUI && HOUI.tr ? HOUI.tr(en) : en);
+  const word = (en) => en; // (the page's interface translator writes them in the game's language: ui-text.js '%s Pop', '%s Metal', 'Unexplored', 'No One')
   const out = [];
   // the figures: under 100,000 in full, from there in the short form (vtable +0xe0 and +0xe8, FUN_10003cd4c and FUN_10003cfec)
   const sh = HO.rules(G).interestShort, big = (n, dollar) => n < 100000 ? (dollar ? a.money(n) : a.fmt(n)) : (dollar ? '$' : '') + (sh ? sh(n) : a.fmt(n));
@@ -370,6 +370,9 @@ function hud() {
     }
   }
   hudEl.hidden = false;
+  // a window narrower than the strip (a portrait phone) shrinks it to fit
+  hudEl.style.setProperty('--hudk', '1');
+  const wdt = hudEl.offsetWidth; hudEl.style.setProperty('--hudk', String(wdt > window.innerWidth - 8 ? Math.max(0.4, (window.innerWidth - 8) / wdt) : 1));
 }
 // the sidebar (-[IncomeLayer init]: the totals box W x 2.5 rows, three labels a line apart, the figure beside the label, the change at the right)
 function sidebar(box, parts) {
@@ -458,7 +461,7 @@ window.HOTHEME = {
   afterDraw: () => hud(),
   page(doc) {
     buildScreen(doc); screenSize();
-    window.addEventListener('resize', () => { const was = SCREEN.pad; screenSize(); if (was !== SCREEN.pad) buildColumn(doc.getElementById('app')); });
+    window.addEventListener('resize', () => { const was = SCREEN.pad; screenSize(); hudKey = ''; hud(); if (was !== SCREEN.pad) buildColumn(doc.getElementById('app')); });
     setSide(sideWanted != null ? sideWanted : SCREEN.pad, true);
     const c = doc.querySelector('#titlescreen .credit');
     if (c) c.textContent = 'With the art and sounds of Spaceward Ho! 1.2.9 for iPhone and iPad (Ariton Technologies, 2017). Art by Howard Vives and Bob Van de walle.';
