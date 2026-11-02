@@ -1514,7 +1514,7 @@ function openOrganizeIOS(sid) {
     return (HO.getDesign(G, f.owner, S.sel.did).type === 'bio') === allBio(c.f);
   };
   const L = dialogLayer(W, H, k, 'Organize fleets', () => closeIt()), dlg = L.dlg; dlg.style.overflow = 'hidden'; // visit 0x1000c0c30: glScissor to the layer's box
-  const closeIt = () => { L.scrim.remove(); org = null; S.empties = []; a.renderPanel(); a.draw(); a.save(); };
+  const closeIt = () => { if (S.unwatch) S.unwatch(); L.scrim.remove(); org = null; S.empties = []; a.renderPanel(); a.draw(); a.save(); };
   let org = { scrim: L.scrim };
   const done = (keyToShow) => {
     S.sel = null; S.scrapping = false;
@@ -1561,6 +1561,14 @@ function openOrganizeIOS(sid) {
   const msg = UIEl('div', 'ios-omsg', { style: `width:${bpt(W - gd.a80 * 4)};font-size:${bpt(pad ? 24 : 18)}` });
   const cont = UIEl('div', 'ios-oc'), adj = UIEl('div', 'ios-oadj'), info = UIEl('div', 'ios-oinfo'), btns = UIEl('div', 'ios-obtns', { style: `gap:${bpt(gd.a80 * 2)};transform:translateX(-50%) scale(${pad ? 1 : 0.85})` });
   dlg.append(cont, x, put(msg, W / 2, H - gd.a80 * 4, 0.5, 1), adj, info, btns);
+  // RepeatingSpriteMenuItem (0x100011af0 selected: every 0.1 s a total of the time held grows; update: 0x100011bb4: while it is over 0.15 s the item is activated again and 0.15 s taken off; unselected: stops):
+  // the arrows repeat while held, and the lift activates once more (CCMenu ccTouchEnded: activates the item)
+  { let rep = null;
+    const stop = () => { if (rep) { clearInterval(rep.t); rep = null; } };
+    adj.addEventListener('pointerdown', (e) => { const b = e.target.closest('.ios-oad'); if (!b) return; e.preventDefault(); stop(); const dir = b.dataset.dir; rep = { dir, total: 0, t: setInterval(() => { rep.total += 0.1; while (rep.total > 0.15) { rep.total -= 0.15; if (adj._fns[dir]) adj._fns[dir](); } }, 100) }; });
+    const up = (e) => { if (!rep) return; const dir = rep.dir; stop(); if (e.type === 'pointerup') { const el = document.elementFromPoint(e.clientX, e.clientY), b = el && el.closest && el.closest('.ios-oad'); if (b && b.dataset.dir === dir && adj._fns[dir]) adj._fns[dir](); } };
+    window.addEventListener('pointerup', up); window.addEventListener('pointercancel', up); S.unwatch = () => { stop(); window.removeEventListener('pointerup', up); window.removeEventListener('pointercancel', up); };
+    adj.addEventListener('pointerleave', stop); }
   const render = () => {
     const all = cols();
     if (S.sel && !selFleet()) S.sel = null;
@@ -1620,7 +1628,7 @@ function openOrganizeIOS(sid) {
     });
     // MenuAdjusters (0x100011868): adjuster_left and adjuster_right, 4 apart, scale 0.7 (items 0.5 on an iPhone, 1 on an iPad), top right with 2 a80
     adj.textContent = ''; adj.style.display = all.length > 4 ? '' : 'none';
-    const mk = (nm, fn, dis) => { const b = UIEl('button', 'ios-oad', { type: 'button', 'aria-label': nm === 'left' ? 'Earlier fleets' : 'Later fleets', style: `width:${bpt(34 * (pad ? 1 : 0.5) * 0.7)};height:${bpt(34 * (pad ? 1 : 0.5) * 0.7)}` }, pic('adjuster_' + nm)); b.addEventListener('click', (e) => { e.stopPropagation(); fn(); }); return b; };
+    const mk = (nm, fn, dis) => { const b = UIEl('button', 'ios-oad', { type: 'button', 'aria-label': nm === 'left' ? 'Earlier fleets' : 'Later fleets', style: `width:${bpt(34 * (pad ? 1 : 0.5) * 0.7)};height:${bpt(34 * (pad ? 1 : 0.5) * 0.7)}` }, pic('adjuster_' + nm)); b.dataset.dir = nm; b.addEventListener('click', (e) => { e.stopPropagation(); e.preventDefault(); }); adj._fns = adj._fns || {}; adj._fns[nm] = fn; return b; };
     adj.style.right = bpt(gd.a80 * 2); adj.style.top = bpt(gd.a80 * 2); adj.style.gap = bpt(gd.a80 * 0.7);
     adj.append(mk('left', () => { if (S.first > 0) { S.first--; render(); } }), mk('right', () => { if (S.first < all.length - 4) { S.first++; render(); } }));
     // the selected pile's settings (addCurrentShipInfo 0x1000bffd0, updateCurrentShipInfo 0x1000c090c)
