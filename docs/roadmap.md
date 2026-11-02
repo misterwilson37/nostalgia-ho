@@ -5,7 +5,7 @@ Delta Tao, in `docs/open-questions.md`, "Unfinished").
 
 ## The queue (kept complete; Jake's order, October 2026)
 
-**Display audit (November 2026; 1.2 done, iOS/Android begun: `docs/display/ios.json`, 512 of 5,044 rows open, see `docs/ios-findings.md` "Display audit"; the other versions next).** The rules of each version were read from its
+**Display audit (November 2026; 1.2 done, iOS/Android begun: `docs/display/ios.json`, 466 of 5,044 rows open, see `docs/ios-findings.md` "Display audit"; the other versions next).** The rules of each version were read from its
 decompile; its display side (every window, list, report, menu, label, picture and sound the program puts in front of the
 player) was only catalogued. The method, reusable for every version: decompile the whole program and save it (the private
 repo's `decompiled/<version>/`, with `tools/decompile/split-dump.py`); give EVERY routine one row in `docs/display/<version>.json`
