@@ -1279,7 +1279,9 @@ const fillT = (t, ...v) => t.replace(/%(?:l|h)?[dus@]/g, () => String(v.shift())
 function appDialog(o) {
   const { cw, ch, k } = dlgGeom(), gd = BGD(), pad = SCREEN.pad;
   const L = dialogLayer(cw, ch, k, o.label || o.message || 'Dialog', () => L.close());
-  L.close = () => L.scrim.remove();
+  const esc = (e) => { if (e.key === 'Escape') { e.stopPropagation(); L.close(); } }; // (the browser's Escape stands for Android's Back: the app has no keyboard)
+  L.close = () => { L.scrim.remove(); document.removeEventListener('keydown', esc, true); };
+  document.addEventListener('keydown', esc, true);
   if (o.message != null) {
     const msg = UIEl('div', 'ios-omsg', { style: `width:${bpt(cw - gd.a80 * 4)};font-size:${bpt(pad ? 24 : 18)}` });
     msg.textContent = o.message;

@@ -1204,6 +1204,9 @@ root.HOUI.add([
 ['AutoSave Each Turn', 'Sauvegarde automatique à chaque tour', 'Jeden Zug automatisch speichern', 'Her Sırada Otomatik Kaydet', 'Guardar automáticamente cada turno'],
 ['Sound', 'Son', 'Klang', 'Ses', 'Sonido'],
 ['Vocalize Chat Keywords', 'Prononcer les mots-clés du chat', 'Schlüsselwörter im Chat sprechen', 'Sohbet Anahtar Kelimelerini Seslendir', 'Pronunciar las palabras clave del chat'],
+['Select the ship types to scrap', 'Sélectionnez les types de vaisseaux à recycler', 'Wählen Sie die Schiffstypen zum Verschrotten', 'Çürük gemileri seç', 'Elige los tipos de nave que quieres desechar', I],
+['Number in Existence: %d', 'Nombre dans l\'Existence: %d', 'Anzahl vorhanden: %d', 'Varolma numaras: %d', 'Cantidad existente: %d', I],
+['Remake options…', 'Options du remake…', 'Optionen des Remakes…', 'Yeniden yapım seçenekleri…', 'Opciones del remake…'],
 ['Remake options', 'Options du remake', 'Optionen des Remakes', 'Yeniden yapım seçenekleri', 'Opciones del remake'],
 ['Sound effects', 'Effets sonores', 'Klangeffekte', 'Ses efektleri', 'Efectos de sonido'],
 // iOS 1.2.9's and Android 1.2.8's Preferences screen (rs.prefsWindow style 'ios'; Misc Strings 14, 97, 149, 186-200) and the Palm's (style 'palm', tFRM 3200)
