@@ -1101,7 +1101,7 @@ function colonyHat(look, c) {
 // BuildSingleShipDialog 0x1000b4d60, on DialogLayerSprite 0x1000bc294; the numbers are from the disassembly with
 // tools/floats.py in the private repo, GraphicDefines +[setup] 0x100008548 for the iPhone's and iPad's). It draws in the dialog's own points
 // (y up, as cocos2d does): put() places a node by its anchor point.
-const BGD = () => SCREEN.pad ? { a80: 8, a88: 8, f: 18, fi: 20 } : { a80: 4, a88: 6, f: 14, fi: 18 }; // GraphicDefines 0x100148a80, a88, 1001489e8, 1001489f0
+const BGD = () => SCREEN.pad ? { a80: 8, a88: 8, f: 18, fi: 20, a18: 24, a30: 28, a38: 12, a58: 24 } : { a80: 4, a88: 6, f: 14, fi: 18, a18: 18, a30: 24, a38: 10, a58: 16 }; // GraphicDefines 0x100148a80, a88, 1001489e8, 1001489f0
 const bpt = (v) => `calc(${v} * var(--pt))`;
 function put(e, x, y, ax, ay) {
   e.style.position = 'absolute'; e.style.left = bpt(x); e.style.bottom = bpt(y);
@@ -1266,18 +1266,202 @@ function updateShipTypes(flow) {
 }
 
 // -[BuildSingleShipDialog initDialog] 0x1000b4d60, layout 0x1000b5e14
-// +[DialogLayerSprite message:closeButton:cancelButton:] 0x1000bc9dc (FUN_10008ecb0 calls it with the check button on and the cross off): a dialog (dlgGeom), the message (addMessage: 0x1000bcad0:
-// Arial 18, 24 on an iPad, centred, in a box (width - 4 a80) x (height - 8 a80) about the dialog's middle, so the text's top is 4 a80 under the top), the check button at (width - 4 a80, a80), anchored right bottom
-function appMessage(text) {
+// The app's strings (its own lists, in the game's language: fr.lproj / tr.lproj): Misc Strings are read by index (FUN_10008e4c8: objectAtIndex), Alert Strings and sprintf
+// Templates by number less one (FUN_10008ecfc and the strings object's +0x60 method: objectAtIndex n - 1)
+const IOSTR = (list, i) => { const L = window.HOLANG && window.HOLANG.ios, l = L && (L[uiLang()] || L.en), t = l && (l[list] || (L.en || {})[list]); return t && t[i] != null ? t[i] : ''; };
+const miscS = (i) => IOSTR('Misc Strings', i), alertS = (n) => IOSTR('Alert Strings', n - 1), tmplS = (n) => IOSTR('sprintf Templates', n - 1);
+const fillT = (t, ...v) => t.replace(/%(?:l|h)?[dus@]/g, () => String(v.shift())).replace(/%%/g, '%');
+// +[DialogLayerSprite message:closeButton:cancelButton:] 0x1000bc9dc and DialogLayerSprite init 0x1000bc294 (FUN_10008ecb0 calls it with the check button on and the cross off): a dialog (dlgGeom), the message
+// (addMessage: 0x1000bcad0: Arial 18, 24 on an iPad, centred, in a box (width - 4 a80) x (height - 8 a80) about the dialog's middle, so the text's top is 4 a80 under the top), the check and
+// cancel buttons in a menu aligned horizontally (a80 apart) at (width - 4 a80, a80), anchored right bottom (enableCloseButton:cancelButton: 0x1000bca44 hides one and leaves its place).
+// A touch outside the dialog is its cancel (doCancel 0x1000bcda8 -> doClose: YES).
+//   o.message  the message text (addMessage:), o.ok  the check's work (doClose: NO), o.build(dlg, cw, ch, gd)  the subclass's own nodes, o.cross / o.check  false hides that button
+function appDialog(o) {
   const { cw, ch, k } = dlgGeom(), gd = BGD(), pad = SCREEN.pad;
-  const L = dialogLayer(cw, ch, k, 'Message', () => L.scrim.remove());
-  const msg = UIEl('div', 'ios-omsg', { style: `width:${bpt(cw - gd.a80 * 4)};font-size:${bpt(pad ? 24 : 18)}` });
-  msg.textContent = text;
-  const bk = UIEl('button', 'ios-bcheck', { type: 'button', 'aria-label': 'OK' }, pic('button-check'));
-  bk.addEventListener('click', (e) => { e.stopPropagation(); L.scrim.remove(); });
-  L.dlg.append(put(msg, cw / 2, ch - gd.a80 * 4, 0.5, 1), put(UIEl('div', 'ios-bbtns', null, bk), cw - gd.a80 * 4, gd.a80, 1, 0));
+  const L = dialogLayer(cw, ch, k, o.label || o.message || 'Dialog', () => L.close());
+  L.close = () => L.scrim.remove();
+  if (o.message != null) {
+    const msg = UIEl('div', 'ios-omsg', { style: `width:${bpt(cw - gd.a80 * 4)};font-size:${bpt(pad ? 24 : 18)}` });
+    msg.textContent = o.message;
+    L.dlg.append(put(msg, cw / 2, ch - gd.a80 * 4, 0.5, 1));
+    L.msg = msg;
+  }
+  const bx = UIEl('button', 'ios-bcancel', { type: 'button', 'aria-label': 'Cancel' }, pic('button-x')), bk = UIEl('button', 'ios-bcheck', { type: 'button', 'aria-label': 'OK' }, pic('button-check'));
+  bx.addEventListener('click', (e) => { e.stopPropagation(); L.close(); });
+  bk.addEventListener('click', (e) => { e.stopPropagation(); L.close(); if (o.ok) o.ok(); });
+  if (o.cross === false) bx.style.visibility = 'hidden';
+  L.bx = bx; L.bk = bk; L.gd = gd; L.cw = cw; L.ch = ch;
+  if (o.build) o.build(L.dlg, cw, ch, gd, L);
+  L.dlg.append(put(UIEl('div', 'ios-bbtns', { style: `gap:${bpt(gd.a80)}` }, bx, bk), cw - gd.a80 * 4, gd.a80, 1, 0));
   pushScrim(L.scrim);
+  return L;
+}
+// a message with the check button only (FUN_10008ecb0), or with the cross as well when it asks (message:closeButton:YES cancelButton:YES + setOkBlock:)
+function appMessage(text, onOk) {
+  const L = appDialog({ message: text, ok: onOk, cross: !!onOk });
   return L.scrim;
+}
+// a touch label: the text white, at (x, y) by its anchor, in the dialog's points (CCLabelTTF, Arial)
+const dlabel = (text, size, x, y, ax, ay) => bLabel(text, size, x, y, ax, ay, '#fff');
+// the app's number the way a CCLabelTTF is sized
+const labelW = (text, size) => textW(String(text), size);
+// -[DipIntoSavingsDialogLayer initDialog] 0x1000a7d74, valueChanged:tag: 0x1000a8438, doClose: 0x1000a8354 (layout read with tools/floats.py and the assembly): the message Misc Strings 78; Misc 79 and 80
+// (Arial a58 = 16, 24 on an iPad) centred, their tops 10 a88 and 13.75 a88 under the top; Misc 81 (a38 = 10, 12) 18.75 a88 under the top; a CCSliderDeluxe 50 a88 wide (the slider:enableScale: is
+// 300 on an iPhone) centred with its bottom 17.5 a88 up, set to percent / 30; the percent ("%ld%%", sprintf Template 27, Arial a18) centred 24 (a30) above its top; "0%", "15%", "30%" (a38) centred
+// 2 a88 inside each end and 12 (2 a88) under its bottom. The slider's value is (int)(value x 30); the check keeps it (0 to 100) in the player (+0x5c); above 0 the Savings bar is given up (the ruleset's dipSet)
+function openDipIOS() {
+  const a = A(), G = a.G, p = a.me(), rs = HO.rules(G);
+  let percent = p.dip || 0;
+  const L = appDialog({ message: miscS(78), label: miscS(78),
+    build(dlg, cw, ch, gd) {
+      const q1 = dlabel(miscS(79), gd.a58, cw / 2, ch - gd.a88 * 10, 0.5, 1), q2 = dlabel(miscS(80), gd.a58, cw / 2, ch - gd.a88 * 13.75, 0.5, 1);
+      const note = dlabel(miscS(81), gd.a38, cw / 2, ch - gd.a88 * 18.75, 0.5, 1);
+      const sw = gd.a88 * 50, sy = gd.a88 * 17.5;
+      const pctText = (v) => fillT(tmplS(27), v);
+      const pl = dlabel(pctText(percent), gd.a18, cw / 2, sy + 19 + gd.a30, 0.5, 0.5);
+      const sl = ccSlider(sw, (f) => { percent = Math.trunc(Math.fround(Math.fround(f) * 30)); pl.textContent = pctText(percent); });
+      sl.set(percent / 30);
+      dlg.append(q1, q2, note, put(sl.el, cw / 2, sy, 0.5, 0), pl);
+      const inset = sw / 2 - gd.a88 * 2, ly = sy - gd.a88 * 2;
+      dlg.append(dlabel(pctText(0), gd.a38, cw / 2 - inset, ly, 0.5, 0.5), dlabel(pctText(15), gd.a38, cw / 2, ly, 0.5, 0.5), dlabel(pctText(30), gd.a38, cw / 2 + inset, ly, 0.5, 0.5));
+    },
+    ok() {
+      const v = percent > 100 ? 100 : percent < 0 ? 0 : percent;
+      if ((p.dip || 0) !== v) { if (rs.dipSet) rs.dipSet(G, p, v); else p.dip = v; a.renderPanel(); a.draw(); a.save(); }
+    } });
+  return L;
+}
+// -[ArmageddonLayer setup] 0x1000a4acc, toggleArmageddon 0x1000a4f30, doClose: 0x1000a4fcc, reallyArmageddon 0x1000a5230 / cancelArmageddon 0x1000a5274: the message Misc Strings 102; Misc 103 (Arial a58) in a
+// box (width - 80) x (height - 200), left aligned, its top 8.75 a88 under the top, centred; a CCMenuItemToggle of armageddon_off / armageddon_on (110 points square, each item scaled 0.125 a88 = 0.75) in a menu
+// at (6.25 a88, 8.75 a88) anchored at its bottom left; to its right (menu left + width + 5 a88) and centred on its height, Misc 104 "Off" / 105 "On" (Arial a18). Choosing the check with a changed choice asks
+// first (a message with the check and the cross; the layer has closed): Alert Strings 4 for turning it on, 5 for turning it off (the check calls reallyArmageddon / cancelArmageddon: both set the player's
+// flag, +0x1118, to the choice); with the choice unchanged nothing is asked
+function openArmageddonIOS() {
+  const a = A(), G = a.G;
+  let wants = !!a.me().armageddon;
+  const L = appDialog({ message: miscS(102), label: miscS(102),
+    build(dlg, cw, ch, gd) {
+      const desc = UIEl('div', 'ios-bt ios-bwrap', { style: `width:${bpt(cw - 80)};font-size:${bpt(gd.a58)};text-align:left` }); desc.textContent = miscS(103);
+      dlg.append(put(desc, cw / 2, ch - gd.a88 * 8.75, 0.5, 1));
+      const mx = gd.a88 * 6.25, my = gd.a88 * 8.75, sz = 110, ks = gd.a88 * 0.125;
+      const img = UIEl('button', 'ios-bmi ios-barm', { type: 'button', 'aria-label': miscS(102), style: `width:${bpt(sz)};height:${bpt(sz)}` });
+      const word = dlabel(miscS(wants ? 105 : 104), gd.a18, mx + sz + gd.a88 * 5, my + sz / 2, 0, 0.5);
+      const show = () => { img.replaceChildren(pic(wants ? 'armageddon_on' : 'armageddon_off')); img.firstChild.style.cssText = `width:${bpt(sz * ks)};height:${bpt(sz * ks)}`; word.textContent = miscS(wants ? 105 : 104); };
+      img.addEventListener('click', (e) => { e.stopPropagation(); wants = !wants; show(); });
+      show();
+      dlg.append(put(img, mx, my, 0, 0), word);
+    },
+    ok() {
+      if (wants === !!a.me().armageddon) return;
+      const apply = () => { HO.setArmageddon(G, a.ME, wants); a.renderPanel(); a.draw(); a.save(); };
+      appMessage(alertS(wants ? 4 : 5), apply);
+    } });
+  return L;
+}
+// -[ScrapShipTypesLayer initDialog] 0x1000a3b40, addShipMenu:player: 0x1000a3d8c, doClose: 0x1000a3e84, shipSelected: 0x1000a3e48; ScrapShipMenuItem init 0x1000a404c, draw 0x1000a4338: the message Misc Strings 106; a
+// scrolling list (CCMenuAdvanced) from 10 a88 under the top to 10 a88 above the bottom, its items 15 apart from the top; each item scaled 0.8: the ship's picture (ShipNode) and, 4 further (a80) and centred
+// on it, two Arial 16 lines 4 apart: the type's name and "Number in Existence: %d" (sprintf Template 26); a tap flips the item's scrapped mark, drawn as a red (221, 8, 6) cross over the item (GL lines one pixel
+// wide from corner to corner). The check writes the marks to the ship types (the remake's mark: flagScrapDesign, kept to the end of the turn)
+function openScrapIOS() {
+  const a = A(), G = a.G, p = a.me(), rs = HO.rules(G);
+  const types = p.designs.filter(d => !d.scrapped);
+  const count = {}; for (const f of G.fleets) if (f.owner === a.ME) for (const k in f.ships) count[k] = (count[k] || 0) + f.ships[k];
+  const want = new Map(types.map(d => [d.id, !!d.scrap301]));
+  const L = appDialog({ message: miscS(106), label: miscS(106),
+    build(dlg, cw, ch, gd) {
+      const list = UIEl('div', 'ios-scl', { style: `top:${bpt(gd.a88 * 10)};bottom:${bpt(gd.a88 * 10)}` });
+      for (const d of types) {
+        const cv = a.IMG && HOTHEME.shipPic(d, a.IMG), sw = cv ? cv.width : 0, sh = cv ? cv.height : 0;
+        const t1 = d.name, t2 = fillT(tmplS(26), count[d.id] || 0), tw = Math.max(labelW(t1, 16), labelW(t2, 16));
+        const w = sw + gd.a80 + tw, h = Math.max(sh, 16 * 1.15 * 2 + gd.a80);
+        const item = UIEl('button', 'ios-scitem', { type: 'button', style: `width:${bpt(w * 0.8)};height:${bpt(h * 0.8)}` });
+        const inner = UIEl('div', 'ios-scin', { style: `width:${bpt(w)};height:${bpt(h)};transform:scale(0.8)` });
+        if (cv) { cv.style.cssText = `width:${bpt(sw)};height:${bpt(sh)};flex:none`; inner.append(cv); }
+        const tx = UIEl('div', 'ios-sctx', { style: `margin-left:${bpt(gd.a80)}` }, UIEl('span', null, { translate: 'no' }), UIEl('span'));
+        tx.children[0].textContent = t1; tx.children[1].textContent = t2; tx.style.gap = bpt(gd.a80);
+        inner.append(tx);
+        const cross = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        cross.setAttribute('class', 'ios-sccross'); cross.setAttribute('viewBox', `0 0 ${w} ${h}`); cross.setAttribute('preserveAspectRatio', 'none');
+        cross.innerHTML = `<path d="M0 0L${w} ${h}M0 ${h}L${w} 0" stroke="rgb(221,8,6)" stroke-width="1" fill="none" vector-effect="non-scaling-stroke"/>`;
+        inner.append(cross);
+        const mark = () => { item.classList.toggle('scrapped', want.get(d.id)); };
+        item.addEventListener('click', (e) => { e.stopPropagation(); want.set(d.id, !want.get(d.id)); mark(); });
+        mark();
+        item.append(inner); list.append(item);
+      }
+      dlg.append(list);
+    },
+    ok() {
+      for (const d of types) if (want.get(d.id) !== !!d.scrap301) rs.flagScrapDesign(G, p, d, 'command');
+      a.renderPanel(); a.draw(); a.save();
+    } });
+  return L;
+}
+// -[AutoPlayLayer initDialog] 0x100096584, valueChanged:tag: 0x100097aa0, showPlayOneTurn 0x100097ddc / showJustEndTurns 0x10009801c / showPlayForMe 0x10009822c, togglePlayOneTurn 0x1000978ec, toggleEndMyTurns
+// 0x1000979fc, toggleAutoPlay 0x10009795c, doClose: 0x100097870 (positions read in the assembly; a88 = 6, 8 on an iPad; H the dialog's height; y up). The message Misc 118. The state slider (tag 3, 40 a88 wide) is centred at
+// H - trunc(6.875 a88 + trunc(3.75 a88)) (63): up to 33 per cent of it is "Play One Turn" (Misc 119, or 184 "Already Played One Turn" when the computer has played this turn, when the check goes too), 34 to 67
+// "Just End My Turns Only" (134), 68 and over "Computer Play For Me" (133); the state's label (Arial a18) hangs from 3.5 a88 under the slider, centred. The Friendly (124) - Aggressive (125) slider (tag 2, 30 a88 wide)
+// at (W / 4, H - trunc(18 a88 + trunc(3.75 a88))) and the No Defense (126) - Dig In (127) slider (tag 1) at (3 W / 4, the same), the end words (Arial a38) hanging 10 under the sliders' bottoms from their ends; values
+// (int)(value x 100), set from the preferences (aggressiveness +0x219, defensiveness +0x21a; first 50 and 50). The toggle (a CCMenuItemFont in Arial at 0.75 of the font size the gear's init left, a30) of "Do NOT
+// Turn Off When Something Interesting Happens" (135) / "Do Turn Off ..." (136), centred at H - trunc(30 a88 + trunc(3.75 a88)), index from +0x21b (first 1). The seconds slider (tag 4, 15 a88 wide, value
+// seconds / 10, seconds from +0x21e, first 4) at (27 a88, trunc(3.125 a88 + trunc(3.75 a88))) with "0" (128) and "10" (129) under its ends, "Click through the" (130) and "messages every" (131) right-aligned
+// 10 left of it (7.5 and 3.75 above and below its middle), the number (Arial a18) 10 right of it and "seconds" (132, Arial 16) 10 further. Just End My Turns shows the toggle and the seconds; Computer Play For Me
+// all. The check: Play One Turn has the computer plan this turn (the orders, the turn not ended); the others save the choices, set auto play on and start it (the computer plays, or only ends turns; the
+// seconds between messages; the toggle's choice stops it on something interesting). The browser keeps the toggle and the seconds in 'ho.ios.auto'
+let playedOne = null;
+function readAuto() { try { const v = JSON.parse(localStorage.getItem('ho.ios.auto')); if (v && typeof v.every === 'number') return v; } catch (e) {} return { stop: 1, every: 4 }; }
+function openAutoPlayIOS() {
+  const a = A(), G = a.G, p = a.me(), rs = HO.rules(G), auto = readAuto();
+  const cur = rs.autoPlaySettings ? rs.autoPlaySettings(G, p) : { aggr: 50, colDef: 50 };
+  const V = { aggr: cur.aggr, def: cur.colDef, stop: auto.stop ? 1 : 0, secs: auto.every };
+  let state = 1;
+  const played = () => !!playedOne && playedOne.G === G && playedOne.turn === G.turn && playedOne.me === a.ME;
+  const pct = (f) => Math.trunc(Math.fround(Math.fround(f) * 100));
+  const L = appDialog({ message: miscS(118), label: miscS(118),
+    build(dlg, cw, ch, gd, Lr) {
+      const a88 = gd.a88, t375 = Math.trunc(a88 * 3.75), W = cw, H = ch;
+      const yState = H - Math.trunc(a88 * 6.875 + t375), yDef = H - Math.trunc(a88 * 18 + t375), yStop = H - Math.trunc(a88 * 30 + t375), yRev = Math.trunc(a88 * 3.125 + t375);
+      const sh = 19, els = {};
+      const lab = (key, text, size, x, y, ax, ay) => { els[key] = dlabel(text, size, x, y, ax, ay); dlg.append(els[key]); return els[key]; };
+      const stateSl = ccSlider(a88 * 40, (f) => { const v = pct(f); setState(v <= 33 ? 1 : v < 68 ? 2 : 3); });
+      stateSl.set(0); dlg.append(put(stateSl.el, W / 2, yState, 0.5, 0.5));
+      for (const [k, t] of [['p1', miscS(119)], ['pd', miscS(184)], ['je', miscS(134)], ['cp', miscS(133)]]) lab(k, t, gd.a18, W / 2, yState - a88 * 3.5, 0.5, 1);
+      const offSl = ccSlider(a88 * 30, (f) => { V.aggr = pct(f); }), defSl = ccSlider(a88 * 30, (f) => { V.def = pct(f); });
+      offSl.set(V.aggr / 100); defSl.set(V.def / 100);
+      const ox = W * 0.25, dx = W * 0.25 * 3, ey = yDef - sh / 2 - 10, hw = a88 * 15;
+      dlg.append(put(offSl.el, ox, yDef, 0.5, 0.5), put(defSl.el, dx, yDef, 0.5, 0.5));
+      lab('fr', miscS(124), gd.a38, ox - hw, ey, 0, 1); lab('ag', miscS(125), gd.a38, ox + hw, ey, 1, 1);
+      lab('nd', miscS(126), gd.a38, dx - hw, ey, 0, 1); lab('di', miscS(127), gd.a38, dx + hw, ey, 1, 1);
+      const stop = UIEl('button', 'ios-bmi ios-bstop', { type: 'button', style: `font-size:${bpt(gd.a30 * 0.75)}` });
+      const stopText = () => { stop.textContent = miscS(V.stop ? 136 : 135); };
+      stop.addEventListener('click', (e) => { e.stopPropagation(); V.stop = V.stop ? 0 : 1; stopText(); });
+      stopText(); els.stop = stop; dlg.append(put(stop, W / 2, yStop, 0.5, 0.5));
+      const rw = a88 * 15, rx = a88 * 27;
+      const revSl = ccSlider(rw, (f) => { V.secs = Math.trunc(Math.fround(Math.fround(f) * 10)); num.textContent = String(V.secs); });
+      revSl.set(V.secs / 10); dlg.append(put(revSl.el, rx, yRev, 0.5, 0.5)); els.rev = revSl.el;
+      lab('z', miscS(128), gd.a38, rx - rw / 2, yRev - sh / 2 - 10, 0.5, 1); lab('t', miscS(129), gd.a38, rx + rw / 2, yRev - sh / 2 - 10, 0.5, 1);
+      lab('ct', miscS(130), gd.a38, rx - rw / 2 - 10, yRev + a88 * 1.25, 1, 0.5); lab('me', miscS(131), gd.a38, rx - rw / 2 - 10, yRev - a88 * 0.625, 1, 0.5);
+      const num = lab('n', String(V.secs), gd.a18, rx + rw / 2 + 10, yRev, 0, 0.5);
+      lab('s', miscS(132), 16, rx + rw / 2 + 10 + labelW(String(V.secs), gd.a18) + 10, yRev, 0, 0.5);
+      const gone = ['fr', 'ag', 'nd', 'di'];
+      const all = { play: [offSl.el, defSl.el, ...gone.map(k => els[k]), stop, revSl.el, ...['z', 't', 'ct', 'me', 'n', 's'].map(k => els[k])] };
+      const show = (list, on) => { for (const e of list) e.style.visibility = on ? '' : 'hidden'; };
+      const end = [stop, revSl.el, ...['z', 't', 'ct', 'me', 'n', 's'].map(k => els[k])];
+      function setState(s) {
+        state = s;
+        show([els.p1], s === 1 && !played()); show([els.pd], s === 1 && played()); show([els.je], s === 2); show([els.cp], s === 3);
+        show([offSl.el, defSl.el, ...gone.map(k => els[k])], s === 3); show(end, s >= 2);
+        Lr.bk.style.visibility = s === 1 && played() ? 'hidden' : '';
+      }
+      setState(1);
+    },
+    ok() {
+      if (state === 1) { if (played()) return; HO.aiOf(G).turn(G, p); playedOne = { G, turn: G.turn, me: a.ME }; a.renderPanel(); a.draw(); a.save(); return; }
+      try { localStorage.setItem('ho.ios.auto', JSON.stringify({ stop: V.stop, every: V.secs })); } catch (e) {}
+      if (state === 3 && rs.autoPlaySettings) { rs.autoPlaySettings(G, p, { aggr: V.aggr, colDef: V.def }); a.save(); }
+      a.runAutoPlay({ turns: Infinity, computer: state === 3, won: !!V.stop, lost: !!V.stop, news: !!V.stop, every: V.secs, stopButton: true });
+    } });
+  return L;
 }
 function openSingleShip(flow, cls, index) {
   const a = A(), G = a.G, p = a.me(), sid = flow.sid, gd = BGD();
@@ -1897,8 +2081,18 @@ window.HOTHEME = {
   window(name, ...x) {
     const a = A(); if (!a || !a.G) return false;
     if (name === 'build') { const s = a.G.stars[x[0]]; if (!s || s.owner !== a.ME || HO.feature(a.G, 'buildQueue')) return false; return openBuildFlow(x[0]); }
+    const appRules = /^(ios|android)$/.test(a.G.rules || '');
+    if (appRules && name === 'dip') { openDipIOS(); return true; }
+    if (appRules && name === 'auto') { openAutoPlayIOS(); return true; }
+    if (appRules && name === 'armageddon') { openArmageddonIOS(); return true; }
+    if (appRules && name === 'types') { openScrapIOS(); return true; }
     if (name === 'organize') { if (x[0] == null || HO.rules(a.G).organizeFleets !== 'ios') return false; return openOrganizeIOS(x[0]); }
     return false;
+  },
+  // the app's message box for a question (+[DialogLayerSprite message:closeButton:cancelButton:] with setOkBlock:): the Evacuate question, with the check and the cross
+  alert(kind, text, yes) {
+    const a = A(); if (kind !== 'evacuate' || !a || !a.G || !/^(ios|android)$/.test(a.G.rules || '')) return false;
+    appMessage(text, yes); return true;
   },
   // the title: the app's welcome screen, its name down the side and the
   // cowboy planet (hoguy_0-19) twirling his six-gun

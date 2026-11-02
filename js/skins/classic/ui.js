@@ -273,7 +273,7 @@ function evacuateClick(sid, tog) {
   const on = !t.marked(G, sid);
   const go = () => { HO.evacuate(G, ME, sid); Sound.play(on ? 7002 : 4000); renderPanel(); draw(); save(); };
   const a = on ? t.ask(G, me(), sid) : null;
-  if (!a) go(); else if (a.notice) { toast(HO.say(G, a.text)); go(); } else confirmBox(HO.say(G, a.text), go);
+  if (!a) go(); else if (a.notice) { toast(HO.say(G, a.text)); go(); } else confirmBox(HO.say(G, a.text), go, 'evacuate');
 }
 const evacuateLabel = (sid, plain) => { const t = HO.rules(G).evacuateToggle; return t ? t.words[t.marked(G, sid) ? 1 : 0] : plain; };
 const evacuateHere = (s) => evacuateShown() && (HO.rules(G).evacuateToggle || s.id !== me().homeStar || HO.colonies(G, ME).length > 1);
@@ -3635,6 +3635,7 @@ function openFixSpending() {
 // the version's own words for a window (rs.windowWords, 5.0.5: its PPobs)
 const winWords = (k) => (G && (HO.rules(G).windowWords || {})[k]) || null;
 function openDip() {
+  if (skinWindow('dip')) return;
   const p = me();
   // 5.0.5's Dip Into Savings (PPob 157): the question, a slider standing up,
   // 30% at the top, the note, Cancel and OK
@@ -3695,6 +3696,7 @@ function openSurrender() {
   modal('Surrender', f, { cls: 'mid' });
 }
 function toggleArmageddon() {
+  if (skinWindow('armageddon')) return;
   const p = me();
   if (p.armageddon) { HO.setArmageddon(G, ME, false); toast(HO.say(G, HO.DATA.alerts[4] || 'Whew!')); save(); return; }
   // 4.0.5's two questions, each drawn from its list (rs.armageddonAsk); with
@@ -3894,6 +3896,7 @@ function playOneTurn() {
 }
 // Auto Play: keep ending turns until something interesting happens
 function openAutoPlay() {
+  if (skinWindow('auto')) return;
   if (HO.rules(G).autoPlayWindow === 'ios') return openAutoPlayIOS();
   if (HO.rules(G).autoPlayWindow === '505') return openAutoPlay505();
   const f = el('form', { class: 'newgame', onsubmit: (e) => {
@@ -6516,7 +6519,7 @@ window.addEventListener('DOMContentLoaded', () => {
     verOpts, modern, hotSeat, openGameText, Prefs, savePrefs, switchPlayers, forceEndTurn, openBattleList, openFixSpending, lastBattles, playOneTurn, showMessages,
     // (and the windows tools/ui-lang-audit.js opens in every skin and language)
     openPrefs, openAccount, openHall, hasHall, openMasterList, openRanks, openGameCenter, openFleetList, openStarList, openGive, openChat,
-    toggleArmageddon, openSkin, openSounds, openLanguage, openAutoPlay, openDip, openSurrender, openSavedGames, closeScreen, openPatchNotes,
+    toggleArmageddon, openSkin, openSounds, openLanguage, openAutoPlay, runAutoPlay, openDip, openSurrender, openSavedGames, closeScreen, openPatchNotes,
     classic(name, fn, ...a) { skipSkinWin = name; try { return fn(...a); } finally { skipSkinWin = null; } },
   };
   window.HOAPI = T.api; // (the test tools: tools/ui-lang-audit.js)
