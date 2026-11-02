@@ -422,7 +422,7 @@ function shipyard(G, p, s, M, shipMoney) { // shipMoney: 2.0's per-mille share o
       break;
     }
   }
-  for (const did in built) { const d = getDesign(G, p.id, +did), n = built[did]; msg(G, p.id, `Built ${n === 1 ? 'one' : n} ${d.name} at ${s.name}.`, { icon: 'm9003', star: s.id, quiet: true }); }
+  for (const did in built) { const d = getDesign(G, p.id, +did), n = built[did]; msg(G, p.id, `Built ${E.rules(G).shipsDesc ? E.rules(G).shipsDesc(G, d, n) : `${n === 1 ? 'one' : n} ${d.name}`} at ${s.name}.`, { icon: 'm9003', star: s.id, quiet: true }); }
   const limit = Math.max(500, trunc(Math.max(0, p.savings) / 100));
   if (S > limit) {
     if (q.length) msg(G, p.id, `You are spending money on shipbuilding at ${s.name} but have no metal available.`, { icon: 'm9020', star: s.id, quiet: true });

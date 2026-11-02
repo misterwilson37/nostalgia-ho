@@ -1419,20 +1419,28 @@ function renderPanel() {
   const panel = $('#panel');
   const scroll = panel.scrollTop;
   panel.innerHTML = '';
-  $('#title').textContent = `${p.name} in ${G.opts.galaxy || 'Milky Way'} in ${G.year}${titleTag()}`;
+  // (a version's own title line, rs.windowTitle[language]: 1.2's SetupPlayerWindows @10080a sprintf's STR# 4000.2, "%.*s en %.*s en %d")
+  const WT = HO.rules(G).windowTitle, wt = WT && (WT[(G.opts && G.opts.lang) || HO.ownLanguage(HO.ownRules(G))] || WT.en);
+  $('#title').textContent = wt ? wt.replace('%s', () => p.name).replace('%s', () => G.opts.galaxy || (WT.galaxy || 'Milky Way')).replace('%d', () => G.year) + titleTag() : `${p.name} in ${G.opts.galaxy || 'Milky Way'} in ${G.year}${titleTag()}`;
   // budget info
   const pr = HO.projected(G, p);
   const net = pr.net;
   // beside the totals, the change since last turn in the version's words (rs.changes, HO.totalChange: "(up $7K)", "(+ 1,234)"), after the figure
   const chg = (which) => { const c = HO.totalChange(G, p, which); return c ? [' ', el('span', { class: 'chg' }, HO.sumText(G, tl(c[0], c[1])))] : []; };
-  panel.append(el('section', { class: 'box info' },
+  // (rs.panelInfo: a version's own order and words for the three totals; 1.2's DrawIncomeRect draws the metal reserve first, then the
+  // total money and the total income, each with its own label, STR# 1005.4, .2 and .3)
+  const PI = HO.rules(G).panelInfo, piw = PI && PI.words && (PI.words[G.opts.lang || HO.ownLanguage(HO.ownRules(G)) || 'en'] || PI.words.en) || {};
+  const IR = {}, ri = (k, label, ...rest) => { IR[k] = row(piw[k] || label, ...rest); return IR[k]; };
+  const infoOrder = (PI && PI.order) || ['savings', 'income', 'interest', 'metal'];
+  const infoRows = [
     // (5.0.5's income view, the Palm's and iOS's draw the interest "(Int: $12K)" on the Savings line, level with the bars' money: FUN_10098650,
     // FUN_00047f54, -[IncomeLayer updateData]; the changes on the Metal and Income lines)
-    row('Savings', [HO.rules(G).interestShort ? HO.sumText(G, tl('%s (Int: $%s)', panelFig('savings', p.savings, true), HO.rules(G).interestShort(pr.interest))) : panelFig('savings', p.savings, true), ...chg('money')], p.savings < 0 ? 'neg' : '', 'savings'),
-    row('Income', [panelFig('income', pr.income, true), ...chg('income')], pr.income < 0 ? 'neg' : '', 'income'),
-    pr.interest && !HO.rules(G).interestShort ? row(pr.interest > 0 ? 'Interest' : 'Interest owed', HO.rules(G).interestRow && !G.opts.lang ? HO.sumText(G, HO.rules(G).interestRow(pr.interest, curSign())) : money(pr.interest), pr.interest < 0 ? 'neg' : '', 'interest') : null,
-    row('Metal', [panelFig('metal', p.metal, false), ...chg('metal')], '', 'metal'),
-  ));
+    ri('savings', 'Savings', [HO.rules(G).interestShort ? HO.sumText(G, tl('%s (Int: $%s)', panelFig('savings', p.savings, true), HO.rules(G).interestShort(pr.interest))) : panelFig('savings', p.savings, true), ...chg('money')], p.savings < 0 ? 'neg' : '', 'savings'),
+    ri('income', 'Income', [panelFig('income', pr.income, true), ...chg('income')], pr.income < 0 ? 'neg' : '', 'income'),
+    pr.interest && !HO.rules(G).interestShort ? ri('interest', pr.interest > 0 ? 'Interest' : 'Interest owed', HO.rules(G).interestRow && !G.opts.lang ? HO.sumText(G, HO.rules(G).interestRow(pr.interest, curSign())) : money(pr.interest), pr.interest < 0 ? 'neg' : '', 'interest') : null,
+    ri('metal', 'Metal', [panelFig('metal', p.metal, false), ...chg('metal')], '', 'metal'),
+  ].filter(Boolean);
+  panel.append(el('section', { class: 'box info' }, ...infoOrder.map(k => IR[k]).filter(Boolean)));
   // budget bars
   const ents = budgetEntries();
   const spendable = Math.max(0, net);
@@ -1500,6 +1508,12 @@ function fitBars(box) {
   box.style.setProperty('--bval', Math.max(70, Math.ceil(vw) + 1) + 'px');
 }
 function row(k, v, cls, help) { return el('div', { class: 'kv ' + (cls || ''), 'data-help': help || null }, el('span', null, k), el('b', null, v)); }
+// a version's own words for the planet box (rs.planetInfo[language][key]; 1.2's STR# 1005, the English DOS 2.0's strings 396 and 403-405)
+function PW(key, dflt) {
+  const I = G && HO.rules(G).planetInfo;
+  const w = I && (I[(G.opts && G.opts.lang) || HO.ownLanguage(HO.ownRules(G))] || I.en);
+  return (w && w[key]) || dflt;
+}
 function planetBox(sid) {
   const p = me(), s = G.stars[sid], k = HO.know(G, p, sid);
   const look = starLook(sid);
@@ -1515,7 +1529,7 @@ function planetBox(sid) {
     box.append(row('Gravity', gravF(src.g, p.homeG) + classNote(gs), '', 'gravity'), row('Temp', degF(ts), '', 'temp'), row('Metal', panelFig('planetMetal', src.metal, false), '', 'planetMetal'));
     if (s.owner === ME) {
       const inc = HO.planetIncome(G, p, s);
-      box.append(row('Population', fmt(HO.popNum(G, s.pop)), '', 'population'), row('Max population', fmt(HO.popNum(G, HO.maxPop(G, p, s))), '', 'maxPop'), row('Income', panelFig('planetIncome', inc, true), inc < 0 ? 'neg' : '', 'planetIncome'));
+      box.append(row(PW('pop', 'Population'), fmt(HO.popNum(G, s.pop)), '', 'population'), row('Max population', fmt(HO.popNum(G, HO.maxPop(G, p, s))), '', 'maxPop'), row('Income', panelFig('planetIncome', inc, true), inc < 0 ? 'neg' : '', 'planetIncome'));
       const terraOK = Math.abs(HO.seenT(p, s) - 72) > 0.5, metalOK = s.metal > 0;
       // in 2.0 and 1.2 a finished part's share is wasted, not passed on, so
       // the bar stays (as in 2.0's planet window) and a note says so
@@ -1546,10 +1560,14 @@ function planetBox(sid) {
         el('button', { onclick: () => openBuild(sid), 'data-help': 'build' }, HO.feature(G, 'buildQueue') ? 'Queue ships…' : 'Build ships…'),
         evacuateHere(s) ? el('button', { class: 'quiet', 'data-help': 'evacuate', onclick: () => evacuateClick(sid) }, evacuateLabel(sid, 'Evacuate')) : null,
         HO.rules(G).evacuateToggle && HO.rules(G).evacuateToggle.marked(G, sid) ? el('span', { class: 'note' }, 'Evacuating') : null));
+    } else if (HO.rules(G).planetInfo) {
+      // 1.2's DrawPlanetRect @c4334: a planet seen but not yours shows "Pop:" with "Inhabitée" when nobody owns it and "Inconnue" when
+      // someone does (the population of another player's colony is never shown); the remake's "~pop" guess is its own
+      box.append(row(PW('pop', 'Population'), PW(k.owner >= 0 ? 'popUnknown' : 'popNone', k.owner >= 0 ? 'Unknown' : 'Uninhabited'), '', 'population'));
     } else if (k.owner >= 0 && k.owner !== ME) {
       box.append(row('Population', k.pop ? '~' + fmt(HO.popNum(G, k.pop)) : '?'));
     }
-  } else box.append(el('p', { class: 'note' }, k.battleOnly ? 'Unexplored, but there has been a battle here.' : 'Unexplored. Send a ship to find out more.'));
+  } else box.append(el('p', { class: 'note' }, HO.rules(G).planetInfo ? PW('noInfo', 'Unexplored. Send a ship to find out more.') : k.battleOnly ? 'Unexplored, but there has been a battle here.' : 'Unexplored. Send a ship to find out more.'));
   // fleets here
   const here = G.fleets.filter(f => f.star === sid && f.to == null && (f.owner === ME || visibleTo(sid)));
   const inbound = G.fleets.filter(f => f.owner === ME && f.to === sid);
@@ -2082,6 +2100,9 @@ function doEndTurn(confirmed) {
   if (!G || G.over) return;
   if (confirmed !== true && HO.feature(G, 'buildQueue')) {
     const rs = HO.rules(G), starved = rs.underfunded ? rs.underfunded(G, me()) : HO.colonies(G, ME).filter(s => s.id !== me().homeStar && !(me().budget.col[s.id] > 0));
+    // 1.2's ALRT 5060 (GiveSpendingWarning @102498): one question for all of them, its own words and buttons
+    const aw = starved.length ? alertWords('spend') : null;
+    if (aw) { confirmBox(aw[0], () => doEndTurn(true), 'underfunded', [aw[1], aw[2]]); return; }
     if (starved.length && rs.underfunded) { confirmBox(`${starved.map(s => s.name).join(', ')} ${starved.length === 1 ? 'isn’t' : 'aren’t'} getting enough money to cover ${starved.length === 1 ? 'its' : 'their'} losses. Ending the turn will cost colonists, and a colony left with none is abandoned. Go ahead?`, () => doEndTurn(true), 'underfunded'); return; }
     if (starved.length) { confirmBox(`You aren’t spending any money on ${starved.map(s => s.name).join(', ')}. Ending the turn will abandon ${starved.length === 1 ? 'it' : 'them'}. Go ahead?`, () => doEndTurn(true), 'underfunded'); return; }
   }
@@ -2233,6 +2254,11 @@ function modal(title, content, opts) {
 function closeModal() { if (UI.modal) { UI.modal.remove(); UI.modal = null; const c = UI.onClose; UI.onClose = null; if (c) c(); } }
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && UI.modal) closeModal(); });
 // labels: [item 1's, item 2's] of an alert with its own button words (3.0.1's Armageddon questions: item 1 goes on)
+// a version's own alert box (rs.alertWords[key][lang]: the program's ALRT/DITL, by the game's language: [text, ...buttons], 1.2's)
+function alertWords(key) {
+  const A = G && HO.rules(G).alertWords, w = A && A[key];
+  return w ? w[(G.opts && G.opts.lang) || HO.ownLanguage(HO.ownRules(G))] || w.en : null;
+}
 function confirmBox(text, yes, kind, labels) {
   // a skin's own alert for a kind of question ('underfunded': the colonies left short at End Turn): T.alert(kind, text, yes)
   if (kind && T.alert && T.alert(kind, text, yes)) return;
@@ -2805,7 +2831,7 @@ function pileShots(round, e, VB) {
 }
 function openBattle(bid) {
   const b = G.battles.find(x => x.id === bid);
-  if (!b) { toast('The record of that battle is no longer available.'); return; }
+  if (!b) { const aw = alertWords('battleGone'); if (aw) alertOver(aw, (G.opts && G.opts.lang) || HO.ownLanguage(HO.ownRules(G))); else toast('The record of that battle is no longer available.'); return; }
   if (HO.rules(G).battlePanel) { openBattlePanel(b); return; }
   const c = el('canvas', { class: 'bcv', width: 760, height: 380 });
   const status = el('p', { class: 'sub' }, '');
@@ -3598,7 +3624,8 @@ function table(head, rows) {
 }
 function openFleetList() {
   if (skinWindow('fleets')) return;
-  const mine = fleetOrder(G.fleets.filter(f => f.owner === ME));
+  // (1.2's InitFleetsList @1123a0 skips every fleet whose design is class 3, a satellite, in all three of its passes)
+  const mine = fleetOrder(G.fleets.filter(f => f.owner === ME && !(HO.rules(G).fleetListNoSatellites && f.sat)));
   const rows = mine.map(f => {
     const where = f.star != null ? G.stars[f.star].name : `${G.stars[f.from].name} → ${G.stars[f.to].name}`;
     const go = f.dest != null ? G.stars[f.dest].name + (f.path && f.path.length ? ' → …' : '') : f.to != null ? arrivesText(f, true) : '';

@@ -34,6 +34,22 @@
 const E = typeof module !== 'undefined' ? require('./engine.js') : root.HO;
 const D = E.RULESETS.dos;
 
+// ---------- how 1.2F names a fleet (MakeFleetDescription @110e28) ----------
+// CONFIRMED (the disassembly, docs/12-findings.md "Display audit"): every place that names ships writes the design's own description
+// with the count it is given: the reports "Construction de %.*s à %s." (BuildNewShips @a1406), "Vos vaisseaux ... ont été recyclés" /
+// "Votre flotte de %.*s ... recyclée" (ScrapFleetsAndTypes), arrived, stopped and lost in a wormhole (MoveShips @a20ee: three calls),
+// "ne peut plus atteindre" (CheckFleetDestination), the rows of DrawPlanetRect (the queue, "En cours:"), DrawOneFleet and the lists
+// (InitFleetsList, InitShipTypesList, InitBuildShipsTypesList). The French formats are "%d %.*ss %.*s (%d/%d)" (the count, the class and
+// an "s", the name, weapons/shields), "1 %.*s %.*s (%d/%d)" for one and "%.*s %.*s (%d/%d)" for none; the class is STR# 1006; the result
+// is cut at 40 characters. The rules write it in English (DOS 2.0's "%d %s (%d/%d) %ss", "one %s (%d/%d) %s", the nearest official English,
+// which the Mac 2.0.1 program shares: this routine); js/languages.js sayFr puts it into 1.2F's order and words.
+function shipsDesc12(G, d, n) {
+  const T = E.TYPES[d.type];
+  const t = n === 1 ? `one ${d.name} (${d.W}/${d.S}) ${T.name}` : `${n} ${d.name} (${d.W}/${d.S}) ${T.name}s`;
+  return G && G.opts && G.opts.lang === 'en' ? t.slice(0, 40) : t;
+}
+function fleetDesc12(G, f, d, n) { return shipsDesc12(G, d, n); }
+
 // ---------- setup (NewGame @100004, CreateGalaxy @e0004, CreateNewPlayer @101972) ----------
 // CONFIRMED: 1.2F has no New Game window. NewGame only asks for a file name;
 // CreateGalaxy copies the style, density, size, computer skill and number of
@@ -349,6 +365,33 @@ E.registerRules('12', Object.assign({}, D, {
   // them switches to the log scale, 'Stup' 1000 +0x2a = 0; log Technology bars)
   battlePanel: D.battlePanelMac,
   label: 'Mac 1.2 (1992)',
+  fleetDesc: fleetDesc12, shipsDesc: shipsDesc12, fleetListNoSatellites: true,
+  // CONFIRMED (DrawIncomeRect @c3f70; LoadMiscStrings @1502c6 puts STR# 1005.1-4 at A5-0x448, -0x45c, -0x470, -0x484): the three totals
+  // are drawn metal first ("Réserve métal:", the plain number), then the money ("Fortune totale:", "$%s") and the income ("Revenu total:",
+  // "$%s", the colonies' income and the interest in it), each label bold and right-aligned, the changes after the figure. The year is not
+  // in this box ("Année:" 1005.1 is drawn by no routine of this segment). The English is DOS 2.0's strings 384-387, the nearest official
+  // English (the Mac 2.0.1 program shares this routine): "Total Money:", "Total Income:", "Reserve Metal:".
+  // CONFIRMED (the program's alerts, DITL 5060 and 3310: GiveSpendingWarning @102498 asks it at End Turn when a colony's share is under what
+  // covers its loss; ReviewBattle @d26e6 shows 3310 when the battle's record is gone); the English is Mac 2.0.1's DITL 5060 and 3310.
+  // [the text, the buttons...]
+  alertWords: {
+    spend: { fr: ['Attention, vous n\'investissez pas assez pour soutenir vos colonies. Voulez-vous vraiment les abandonner?', 'Qu\'elles meurent!', 'Annuler'],
+      en: ['Warning! You are not spending enough money to support some of your colonies. Do you really want to abandon them?', 'Let ’em Die', 'Cancel'] },
+    battleGone: { fr: ['Désolé mais il n\'y a plus d\'informations disponibles sur cette bataille.', 'Les rapports de batailles de plus de 500 ans ne sont pas conservés.'],
+      en: ['Sorry, but the battle information on that battle is no longer available.', 'Battle reports that are more that 500 years old are automatically deleted to keep the game file size small.'] } },
+  // CONFIRMED (DrawPlanetRect @c4334: STR# 1005.13 "Pop:", .20 "Pas d'information sur cette planète.", .21 "Inhabitée", .22 "Inconnue"; the English
+  // is DOS 2.0's strings 396 and 403-405, the Mac 2.0.1's routine being the same)
+  planetInfo: {
+    fr: { pop: 'Pop', noInfo: 'Pas d\'information sur cette planète.', popNone: 'Inhabitée', popUnknown: 'Inconnue' },
+    en: { pop: 'Pop', noInfo: 'You have no information about this planet.', popNone: 'Uninhabited', popUnknown: 'Unknown' } },
+  // CONFIRMED (SetupPlayerWindows @10080a: SetWTitle with STR# 4000.2 "%.*s en %.*s en %d": the player, the galaxy, the year)
+  windowTitle: { fr: '%s en %s en %d', en: '%s in %s in %d', galaxy: 'Voie Lactée' },
+  panelInfo: { order: ['metal', 'savings', 'income', 'interest'], words: {
+    fr: { savings: 'Fortune totale', income: 'Revenu total', interest: 'Intérêt', metal: 'Réserve métal' },
+    en: { savings: 'Total Money', income: 'Total Income', interest: 'Interest', metal: 'Reserve Metal' } } },
+  // CONFIRMED (LongToNiceString @1244a: "%d %.3dK", "%d %.3d %.3d", "%d %.3d", "%d": a plain space between thousands, the French
+  // program's; every panel, bar and list figure is made by it, and the reports' too). The English 1.2 (Mac 2.0.1's words) has its comma (lang.en)
+  fmtNum: E.niceNumSp, fmtMoney: E.moneyNiceSp,
   // the New Game window's Version and Edition menus (engine.js editions)
   family: '1.2', edition: { version: '1.2', name: 'Mac (French)', platform: 'Mac, French edition by Upgrade Editions', year: 1992 }, skins: ['mac12'],
   hints: false, // this game had no between-turn tips (4.0.5 and 5.0.5 do)
@@ -429,7 +472,7 @@ E.registerRules('12', Object.assign({}, D, {
   languages: ['en', 'fr'],
   ownLanguage: 'fr',
   lang: {
-    en: { maleNames: D.maleNames, femaleNames: D.femaleNames, shipNames: D.shipNames,
+    en: { releaseRules: { fmtNum: E.niceNum, fmtMoney: E.moneyNice }, maleNames: D.maleNames, femaleNames: D.femaleNames, shipNames: D.shipNames,
       // Mac 2.0.1's ALRT 5050 (rules-mac20)
       youLost: { text: 'Unfortunately, you have been eliminated from the game…', ok: 'Oh, well…', title: '', align: 'center' },
       youWon: { text: 'Congratulations! You have conquered the galaxy!', ok: 'OK', title: '', align: 'center' },

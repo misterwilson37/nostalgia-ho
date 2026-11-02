@@ -142,8 +142,12 @@ const checks = {
   moneyNice() {
     for (const id of ['12', 'dos', 'mac20', '301', '405', 'mac405']) {
       const r = HO.RULESETS[id];
-      for (const [n, w] of [[-7501, '$-7,501'], [30000, '$30,000'], [0, '$0'], [12345678, '$12,345K']]) if (r.fmtMoney(n, '$') !== w) fail(`${id} money ${n}: ${r.fmtMoney(n, '$')}, the original prints ${w}`);
+      // (1.2F's own program writes a plain space between thousands, LongToNiceString @1244a "%d %.3d": its French; its English, the
+      // Mac 2.0.1's, has the comma (rs.lang.en.releaseRules))
+      const sp = id === '12';
+      for (const [n, w] of [[-7501, '$-7,501'], [30000, '$30,000'], [0, '$0'], [12345678, '$12,345K']]) { const want = sp ? w.replace(/,/g, ' ') : w; if (r.fmtMoney(n, '$') !== want) fail(`${id} money ${n}: ${r.fmtMoney(n, '$')}, the original prints ${want}`); }
     }
+    { const r = HO.RULESETS['12'].lang.en.releaseRules; for (const [n, w] of [[-7501, '$-7,501'], [30000, '$30,000'], [12345678, '$12,345K']]) if (r.fmtMoney(n, '$') !== w) fail(`12 (English) money ${n}: ${r.fmtMoney(n, '$')}, want ${w}`); }
     for (const id of ['original', 'ios', 'android']) if (HO.RULESETS[id].fmtMoney(-7501, '$') !== '($7,501)' || HO.RULESETS[id].fmtMoney(12345678, '$') !== '$12.345M') fail(`${id} money format`);
     if (HO.RULESETS.palm.fmtMoney(-7501, '$') !== '($7,501)' || HO.RULESETS.palm.fmtMoney(1234567, '$') !== '$1,234,567') fail('palm full money format');
   },

@@ -1,5 +1,5 @@
 // The display audit: every routine of a program, one row, and what the program puts in front of the player.
-//   node tools/display-audit.js <version> [--list] [--open] [--summary]
+//   node tools/display-audit.js <version> [--list] [--open] [--gaps]
 //
 // A program's routines are not all rules. Some draw, write text, build a string the player reads, show a window, alert,
 // menu, list or report, play a sound, set a cursor, enable or dim a menu item. The rules were read from each decompile;
@@ -12,6 +12,9 @@
 //   internal  the routine is purely internal (runtime, arithmetic, files, rules): it shows nothing; "reason" says how that
 //             was checked
 //   open      not yet done: the tool FAILS while any row is open
+// A row may also carry "gap": true. That is a mismatch found by the audit that was NOT fixed (the remake shows something else, or
+// less, than the original, and the reason says what and why); it is counted and listed with --gaps. "diff" on a matched or fixed row
+// names a difference that was kept on purpose (the remake's own layout or wording, said plainly).
 //
 // The data is docs/display/<version>.json: { version, program, routines: "<coverage doc>", rows: [ ... ] }, a row:
 //   { r: routine, a: address (hex, as in the coverage doc), seg, shows, remake: ["file:function", ...], status,
@@ -29,7 +32,7 @@ const fs = require('fs'), path = require('path');
 const root = path.join(__dirname, '..');
 const args = process.argv.slice(2);
 const ver = args.find(a => !a.startsWith('--'));
-if (!ver) { console.error('Usage: node tools/display-audit.js <version> [--list] [--open] [--summary]   (docs/display/<version>.json)'); process.exit(2); }
+if (!ver) { console.error('Usage: node tools/display-audit.js <version> [--list] [--open] [--gaps]   (docs/display/<version>.json)'); process.exit(2); }
 const file = path.join(root, 'docs/display', ver + '.json');
 if (!fs.existsSync(file)) { console.error('no ' + path.relative(root, file)); process.exit(2); }
 const D = JSON.parse(fs.readFileSync(file, 'utf8'));
@@ -88,11 +91,13 @@ for (const row of D.rows) {
 }
 for (const k of routines.keys()) if (!seen.has(k)) fail(`${k}: no row`);
 
-if (args.includes('--list') || args.includes('--open')) {
-  for (const row of D.rows) if (args.includes('--list') || row.status === 'open') console.log(`${row.status.padEnd(8)} ${row.seg || ''} ${row.r} @${row.a}${row.shows ? ' - ' + row.shows.slice(0, 100) : ''}`);
+if (args.includes('--list') || args.includes('--open') || args.includes('--gaps')) {
+  for (const row of D.rows) if (args.includes('--list') || (args.includes('--gaps') ? row.gap : row.status === 'open')) console.log(`${row.status.padEnd(8)} ${row.seg || ''} ${row.r} @${row.a}${row.shows ? ' - ' + row.shows.slice(0, 100) : ''}`);
 }
 const total = D.rows.length;
 console.log(`display audit ${ver} (${D.program}): ${routines.size} routines${fromIndex ? ' (also checked against the decompile index)' : ''}, ${total} rows: ` +
   ['matched', 'fixed', 'notShown', 'internal', 'open'].map(s => `${counts[s] || 0} ${s}`).join(', '));
+const gaps = D.rows.filter(r => r.gap).length;
+console.log(`${gaps} gap(s) (mismatches found and not fixed: node tools/display-audit.js ${ver} --gaps), ${D.rows.filter(r => r.diff).length} row(s) with a kept difference`);
 console.log(bad ? `${bad} problem(s)` : 'ok');
 process.exit(bad ? 1 : 0);

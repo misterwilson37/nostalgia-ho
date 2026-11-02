@@ -376,6 +376,8 @@ function sayFr(v20) {
   const own = (id) => id === 703 ? [explored12] : v20 && id === 672 ? [F(672).replace('1.2', '2.0.1'), 'adapted', 'Spaceward Ho! Version 1.2 by Peter Commons.'] : [(v20 && FR20_IOS[id]) || F(id)];
   return {
     cap: true, num: numFR,
+    // 1.2F's own MakeFleetDescription (rs.fleetDesc, rules-12.js): the class first, "3 Eclaireurs Sonde (1/1)", "1 Eclaireur Sonde (1/1)"
+    ...(v20 ? {} : { fleet: fleetSay(BATTLE_FR) }),
     reports: REPORTS20.concat(CHAT20).map(([en, id]) => [en, ...own(id)])
       // 1.2's own credit line (1000.1)
       .concat([['Spaceward Ho! Version 1.2 by Peter Commons.', F(672)]])
