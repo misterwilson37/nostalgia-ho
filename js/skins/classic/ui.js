@@ -3000,6 +3000,8 @@ function openBattle(bid) {
 // (T.battleBg: its own background, black words; T.battleFont). The modern
 // conveniences' speed control and account are kept.
 function openBattlePanel(b) {
+  // a skin's own battle window, drawn as its version draws it (T.battleWindow: the Mac 1.2 skin's, DoOneBattle @d07d0)
+  if (T.battleWindow && !modern()) { T.battleWindow(b, { verBattle, shotSnd, tl }); return; }
   const rs = HO.rules(G), viewer = b.sides.includes(ME) ? ME : b.sides[0];
   const alive = b.start.map(() => true), hurt = [];
   let seq = 0;

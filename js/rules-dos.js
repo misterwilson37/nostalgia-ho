@@ -636,6 +636,9 @@ function battle(G, sid, hooks) {
       R.n0 = { [A]: R.start.filter(u => u.o === A).length, [D]: R.start.filter(u => u.o === D).length };
     }
     const id = (i) => map && i >= 0 ? map.get(i) : i;
+    // (grp, display only: each side's groups as the fight cut them, a group's ship numbers or -1 for the colony; the Mac 1.2 skin's
+    // battle window draws them as DoOneBattle @d07d0 does, one row a group)
+    if (!R.grp) R.grp = side.map(U => U.map(u => (u.planet ? -1 : u.idx.map(id))));
     const tgt = [null, null];
     const up = (U) => U.some(u => u.n > 0);
     const maxInit = Math.max(0, ...side[0].concat(side[1]).map(u => u.init));
@@ -668,13 +671,14 @@ function battle(G, sid, hooks) {
             const base = (RI(G, 0, 20) + u.W * 5 + 10) * wpn(u.W + 25 - t.S);
             if (t.planet) {
               const d = Math.min(t.hp, base * 4); t.hp -= d; if (t.hp <= 0) { t.hp = 0; t.n = 0; }
-              if (ev.length < 80) ev.push({ a: u.o, si: id(si), p: 1, snd: t.hp <= 0 ? 3003 : 3002 });
+              t.dm = (t.dm || 0) + d; // (dm, display only: the damage the target has taken, which 1.2's DrawExplosion @d40f8 places its hit picture by)
+              if (ev.length < 80) ev.push({ a: u.o, si: id(si), p: 1, snd: t.hp <= 0 ? 3003 : 3002, dm: t.dm, php: t.hp });
             } else {
               const hit = Math.max(1, trunc(base / 6)), ratio = trunc(hit * 10 / t.hp); // (the sound's ratio: Mac 1.2 HaveGroupShoot @d19ce)
               t.dmg += hit;
               let k2 = 0, ti = t.idx[Math.max(0, t.n - 1)];
               if (t.dmg >= t.hp) { t.dmg = 0; t.n--; debris += t.debris; k2 = 1; } // no carry-over
-              if (ev.length < 80) ev.push({ a: u.o, si: id(si), t: t.o, k: k2, ti: id(ti), f: k2 ? 0 : t.dmg / t.hp, snd: ratio < 2 ? 3000 : ratio < 5 ? 3001 : 3002 });
+              if (ev.length < 80) ev.push({ a: u.o, si: id(si), t: t.o, k: k2, ti: id(ti), f: k2 ? 0 : t.dmg / t.hp, snd: ratio < 2 ? 3000 : ratio < 5 ? 3001 : 3002, dm: t.dmg });
             }
           }
         }

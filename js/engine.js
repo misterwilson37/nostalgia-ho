@@ -2106,7 +2106,9 @@ function makeBattlePanel(cfg) {
       if (cfg.owner === 'luck' && b.luck) { const l = b.luck[g.o] | 0; r.owner = (l > 0 ? '+' : l < 0 ? '-' : '') + r.owner; }
       cols[left(g.o) ? 0 : 1].push(r);
     }
-    return { cols, layout: cfg.layout || null, nameUp: cfg.nameUp | 0, leftSide: v0, head: cfg.head ? cfg.head(G, b) : [], end: cfg.end && state.over ? cfg.end(G, b, state.won) : null, owner: cfg.owner || null, luck: cfg.luck === true };
+    return { cols, layout: cfg.layout || null, nameUp: cfg.nameUp | 0, leftSide: v0,
+      // (a group's words for a skin that cuts the groups itself: the Mac 1.2 skin, the record's grp)
+      shipWords: (d, n, n0, mine) => cfg.ship(G, d, n, n0, mine), planetWords: (pop) => cfg.planet(G, pop, b.pop0), head: cfg.head ? cfg.head(G, b) : [], end: cfg.end && state.over ? cfg.end(G, b, state.won) : null, owner: cfg.owner || null, luck: cfg.luck === true };
   };
 }
 
