@@ -1775,8 +1775,8 @@ function linesIOS(rs) {
 }
 for (const rs of [E.RULESETS.ios, E.RULESETS.android]) {
   if (!rs) continue;
-  const de = lazyLang(() => build505('de', rs, { lines: linesIOS(rs), hints: () => rs.hintTexts }), LANG_KEYS);
-  const es = lazyLang(() => build505('es', rs, { lines: linesIOS(rs), hints: () => rs.hintTexts }), LANG_KEYS);
+  const de = lazyLang(() => build505('de', rs, { lines: linesIOS(rs), hints: () => rs.hintTexts, battlePanel: (pt) => rs.battlePanelIn(pt) }), LANG_KEYS);
+  const es = lazyLang(() => build505('es', rs, { lines: linesIOS(rs), hints: () => rs.hintTexts, battlePanel: (pt) => rs.battlePanelIn(pt) }), LANG_KEYS);
   rs.languages = rs.languages.concat(['de', 'es']);
   rs.lang = Object.assign({}, rs.lang, { de, es });
 }

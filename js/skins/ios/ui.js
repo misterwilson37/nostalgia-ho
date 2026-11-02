@@ -1605,15 +1605,15 @@ function openSingleShip(flow, cls, index) {
     const lab = bLabel(text, gd.f, lx, y, 0, 0.5, '#fff'), val = bLabel('', gd.f, vx, y, 1, 0.5, '#fff');
     dlg.append(lab, val); return { lab, val, show(on) { lab.style.display = val.style.display = on ? '' : 'none'; } };
   };
-  const dev = row('Dev Cost', 1, Y[0]), pro = row('Pro Cost', 1, Y[1]), tot = row('Total Cost', 2, Y[1]), met = row('Metal Cost', 1, Y[2]), totM = row('Total Metal', 2, Y[2]),
-    mon = row('Savings:', 1, Y[3]), metL = row('Metal:', 2, Y[3]);
+  const dev = row(miscS(62), 1, Y[0]), pro = row(miscS(63), 1, Y[1]), tot = row(miscS(60), 2, Y[1]), met = row(miscS(64), 1, Y[2]), totM = row(miscS(61), 2, Y[2]),
+    mon = row(miscS(24), 1, Y[3]), metL = row(miscS(23), 2, Y[3]);
   // Allow Debt: a two-word slider of 60 points, no arrows, at "No"
-  dlg.append(bLabel('Allow Debt', gd.f, 20, Y[4], 0, 0.5, '#fff'));
-  const debt = sliderArray({ width: 60, arrows: false, words: ['No', 'Yes'], change: () => { updateDebt(); } }); debt.min = 0; debt.max = 1; debt.setValue(0);
+  dlg.append(bLabel(miscS(158), gd.f, 20, Y[4], 0, 0.5, '#fff'));
+  const debt = sliderArray({ width: 60, arrows: false, words: [miscS(159), miscS(160)], change: () => { updateDebt(); } }); debt.min = 0; debt.max = 1; debt.setValue(0);
   dlg.append(put(debt.el, W / 2 - 10, Y[4], 1, 0.5));
-  const nl = bLabel('# To Build', gd.f, 20, Y[5], 0, 0.5, '#fff'); dlg.append(nl);
+  const nl = bLabel(miscS(157), gd.f, 20, Y[5], 0, 0.5, '#fff'); dlg.append(nl);
   const bs = sliderArray({ width: (W - 40) / 2 * 0.5 * 1.25, change: () => updateCosts() });
-  dlg.append(put(bs.el, gd.a80 + textW('# To Build', gd.f) + 20, Y[5], 0, 0.5));
+  dlg.append(put(bs.el, gd.a80 + textW(miscS(157), gd.f) + 20, Y[5], 0, 0.5));
   const warnT = UIEl('div', 'ios-bwarnt'), warn = UIEl('div', 'ios-bwarn', { style: `width:${bpt(222.222)};font-size:${bpt(gd.f)}` }, warnT); dlg.append(put(warn, xc, nameY - 5 - 32 - 90 - 20, 0.5, 1)); warn.style.display = 'none';
   // the buttons: the cancel cross and the check, 4 apart, at (width - 4 a80, a80), anchored right bottom (enableCloseButton:cancelButton: 0x1000bca44, setContentSize: 0x1000bcc94)
   const bx = UIEl('button', 'ios-bcancel', { type: 'button', 'aria-label': 'Cancel' }, pic('button-x')), bk = UIEl('button', 'ios-bcheck', { type: 'button', 'aria-label': 'Build' }, pic('button-check'));
@@ -1695,7 +1695,7 @@ function openSingleShip(flow, cls, index) {
     const c = costs();
     dev.val.textContent = bnum(c.dev, true); dev.show(c.built === 0);
     pro.val.textContent = bnum(c.pro, true); met.val.textContent = bnum(c.metal, false);
-    inSvc.textContent = `${a.fmt(c.alive)}/${a.fmt(c.built)} In Service`;
+    inSvc.textContent = `${a.fmt(c.alive)}/${a.fmt(c.built)} ${(window.HOUI ? HOUI.tr(miscS(66)) : miscS(66))}`; // ("%s/%s %s" with Misc Strings 66)
     determineCapacity(); updateCosts();
   }
   function fromControls() { const sp = specOf(); Object.assign(cur, sp); cur.name = name.value; drawShip(); }
@@ -2108,7 +2108,7 @@ function openBattleIOS(b, k) {
   const afterReview = () => { // 0x100095770 (the strings are Misc Strings 53-58: you / your best buddy won, lost, or has no information)
     over = true; S.done = true; refresh();
     const me = viewer === ME, won = surv(viewer), oneRound = dreadIn || nRounds === 1; // the record's +0x1a: one round, or a dreadnought group made by CreateOneGroup
-    const text = won ? (me ? 'Congratulations! You won the battle.' : 'Cool! Your best buddy won this battle.') : oneRound ? (me ? 'You have no information about the battle; your fleet was destroyed too quickly.' : 'Your buddy was destroyed too fast and has no information about this battle.') : (me ? 'Unfortunately, you lost the battle.' : 'Darn. Your best buddy lost this battle.');
+    const text = miscS(won ? (me ? 53 : 56) : oneRound ? (me ? 55 : 58) : (me ? 54 : 57)); // (the app's own list, in the game's language)
     const t = tl(text), avail = cw - 2 * gd.a80, tw = textW(t, 16), size = tw > avail ? 16 * avail / tw : 16, top = ch - 4 * gd.a80 - LH(16) - gd.a80;
     dlg.append(bLabel(t, size, cw / 2, top, 0.5, 1, '#fff'));
     const ic = pic('report_icon-' + (won ? 36 : 37)); ic.style.cssText = `position:absolute;width:${bpt(40)};height:${bpt(39)};left:${bpt(cw / 2 - 20)};top:${bpt(ch - top + gd.a80 + LH(size) - 0)}`;

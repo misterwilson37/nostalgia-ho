@@ -194,6 +194,38 @@ async function audit(browser, url, run) {
     await page.evaluate(() => { const a = HOAPI; a.closeModal(); if (a.closeScreen) a.closeScreen(); document.querySelectorAll('.scrim').forEach(s => s.remove()); });
     await sleep(60);
   }
+  // the iOS and Android skins' own windows (js/skins/ios/ui.js: the app's dialogs and screens, which the page's windows above do not open): each opened through the skin's hooks or
+  // its buttons, so a string with no row in this language shows up here (the run fails on it)
+  if (/^(ios|android)$/.test(run.rules)) {
+    const close = async () => { for (let i = 0; i < 3; i++) await page.keyboard.press('Escape'); await page.evaluate(() => { document.querySelectorAll('.ios-gscrim, .ios-gm').forEach(x => x.remove()); }); await sleep(60); };
+    const IOSW = [
+      ['iOS Dip Into Savings', "HOTHEME.window('dip')"], ['iOS Auto Play', "HOTHEME.window('auto')"], ['iOS Armageddon', "HOTHEME.window('armageddon')"],
+      ['iOS Scrap Ship Types', "HOTHEME.window('types')"], ['iOS Evacuate', 'api.evacuateClick(api.me().homeStar)'], // (Preferences is opened above, by the page's own Preferences)
+
+      ['iOS Help', "HOTHEME.window('help', 'assets/skins/ios/help/help_index.html')"], ['iOS Build', "HOTHEME.window('build', api.me().homeStar)"],
+      ['iOS Organize Fleets', "HOTHEME.window('organize', api.me().homeStar)"],
+    ];
+    const run1 = async (name, code, then) => {
+      try {
+        await page.evaluate((c) => new Function('api', 'return ' + c)(HOAPI), code); await sleep(250);
+        if (then) await then();
+        await grab(name);
+      } catch (e) { errors.push(`${name}: ${e.message.split('\n')[0]}`); }
+      await close();
+    };
+    for (const [name, code] of IOSW) await run1(name, code);
+    // Build: a ship type's single-ship dialog; the selected star's commands; the sidebar's lists, news and graphs; the gear's list
+    await run1('iOS Build (a ship)', "HOTHEME.window('build', api.me().homeStar)", async () => { await page.locator('.ios-bitem').first().click({ force: true }); await sleep(250); });
+    for (const n of ['dollar', 'news', 'planet', 'enemy', 'graph']) {
+      await run1('iOS ' + n + ' button', 'null', async () => { const b = page.locator(`[data-ios=${n}]`).first(); if (await b.count()) { await b.click({ force: true }); await sleep(450); } });
+    }
+    await run1('iOS gear', 'null', async () => { await page.locator('.ios-gear').first().click({ force: true }); await sleep(300); });
+    // a battle: the computers play until one is on record, then its review (BattleStageLayer) from the first round to the end
+    try {
+      const bid = await page.evaluate(() => { const G = HOAPI.G; for (let i = 0; i < 90 && !G.battles.length && !G.over; i++) HO.endTurn(G); return G.battles.length ? G.battles[0].id : null; });
+      if (bid != null) { await run1('iOS battle', `HOBATTLE(${bid})`, async () => { await sleep(1500); }); await sleep(100); await grab('iOS battle (later)'); await close(); } else errors.push('iOS battle: no battle in 90 turns');
+    } catch (e) { errors.push('iOS battle: ' + e.message.split('\n')[0]); }
+  }
   const names = new Set(await page.evaluate(pageNames));
   await ctx.close();
   // ---- the checks ----
@@ -245,6 +277,27 @@ async function audit(browser, url, run) {
       for (const f of r.found) { const k = run.lang + '|' + f.kind + '|' + f.s; const again = seenKey.has(k); seenKey.add(k); console.log(`   ${f.kind}${again ? ' (again)' : ''} [${f.where}]: ${f.s}${f.why ? '  <- ' + f.why : ''}`); }
       for (const e of r.errors) console.log('   error: ' + e);
       if (n) bad++;
+    }
+    // the iOS and Android skins read the app's own lists by index (miscS / alertS / tmplS in js/skins/ios/ui.js): every index the code names, whatever window or state shows it, must
+    // have its wording in each language: fr and tr the app's own (lang-data), de and es a row of the table (a string with no letters is the same everywhere)
+    if (SKINS.some(k => /^(ios|android)$/.test(k)) && !ONLY) {
+      const src = require('fs').readFileSync(path.join(root, 'js/skins/ios/ui.js'), 'utf8'), LI = HOLANG.ios;
+      const lists = { miscS: ['Misc Strings', 0], alertS: ['Alert Strings', -1], tmplS: ['sprintf Templates', -1] }, missing = [];
+      for (const fn in lists) {
+        const [list, off] = lists[fn], nums = new Set(), re = new RegExp(fn + '\\(([^()]*(?:\\([^()]*\\)[^()]*)*)\\)', 'g');
+        for (let m; (m = re.exec(src));) for (const n of m[1].match(/\b\d+\b/g) || []) nums.add(+n);
+        for (const n of [...nums].sort((a, b) => a - b)) {
+          const en = ((LI.en[list] || [])[n + off] || '').trim();
+          if (!en || !/[A-Za-z]{4,}/.test(en)) continue;
+          for (const l of ['fr', 'tr', 'de', 'es']) {
+            const x = l === 'fr' || l === 'tr' ? ((LI[l][list] || [])[n + off] || '').trim() : '';
+            if (l === 'fr' || l === 'tr' ? !x || (x === en && !HOUI.known(en, l)) : !HOUI.known(en, l)) missing.push(`${l} ${fn}(${n}): ${en.slice(0, 90)}`);
+          }
+        }
+      }
+      console.log(`== the app's strings by index (js/skins/ios/ui.js): ${missing.length ? missing.length + ' finding(s)' : 'ok'}`);
+      for (const m of missing) console.log('   no wording: ' + m);
+      if (missing.length) bad++;
     }
   } finally {
     await browser.close();
