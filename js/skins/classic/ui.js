@@ -1523,7 +1523,7 @@ function planetBox(sid) {
   pic.append(el('img', { src: look.pic ? look.pic.toDataURL() : A.img[look.base], alt: '' }));
   if (look.hat) pic.append(el('img', { src: A.img[look.hat], class: 'phat', alt: '' }));
   const ownerName = s.owner === ME ? 'You' : k.explored && k.owner >= 0 && k.owner !== ME ? G.players[k.owner].name : k.explored ? 'No one' : 'Unknown';
-  box.append(el('div', { class: 'phead' }, pic, el('div', null, el('h3', null, s.name), el('div', { class: 'sub' }, ownerName + (k.explored && s.owner !== ME && k.seen >= 0 && k.seen < G.turn ? ` (seen ${2000 + k.seen * 10})` : '')))));
+  box.append(el('div', { class: 'phead' }, pic, el('div', null, el('h3', null, s.name), (HO.rules(G).planetInfo && PW('pop')) ? null : el('div', { class: 'sub' }, ownerName + (k.explored && s.owner !== ME && k.seen >= 0 && k.seen < G.turn ? ` (seen ${2000 + k.seen * 10})` : '')))));
   // (rs.planetInfo, 1.2's DrawPlanetRect: "Contrôle:" the owner ("Néant" when nobody) and "Date info:" the year, as rows)
   const PI = HO.rules(G).planetInfo && PW('pop') ? HO.rules(G).planetInfo : null;
   if (PI && s.owner !== ME && k.explored) {
@@ -1537,7 +1537,7 @@ function planetBox(sid) {
     const own12 = PI && s.owner === ME, inc0 = own12 ? HO.planetIncome(G, p, s) : 0;
     if (own12) box.append(row(PW('income', 'Income'), panelFig('planetIncome', inc0, true), inc0 < 0 ? 'neg' : '', 'planetIncome'), row(PW('pop', 'Population'), fmt(HO.popNum(G, s.pop)), '', 'population'));
     else if (PI) box.append(row(PW('pop', 'Population'), PW(k.owner >= 0 ? 'popUnknown' : 'popNone', k.owner >= 0 ? 'Unknown' : 'Uninhabited'), '', 'population'));
-    box.append(row('Temp', degF(ts), '', 'temp'), row('Gravity', gravF(src.g, p.homeG) + classNote(gs), '', 'gravity'), row('Metal', panelFig('planetMetal', src.metal, false), '', 'planetMetal'));
+    box.append(row(PW('temp', 'Temp'), degF(ts), '', 'temp'), row(PW('grav', 'Gravity'), gravF(src.g, p.homeG) + (PI ? '' : classNote(gs)), '', 'gravity'), row(PW('metal', 'Metal'), panelFig('planetMetal', src.metal, false), '', 'planetMetal'));
     if (s.owner === ME) {
       const inc = HO.planetIncome(G, p, s);
       if (!own12) box.append(row(PW('pop', 'Population'), fmt(HO.popNum(G, s.pop)), '', 'population'));
@@ -2454,6 +2454,13 @@ function yardBox(s) {
   box.append(el('div', { class: 'tm' }, el('span', null, 'Shipbuilding'), inp,
     el('span', null, Math.round((s.ship || 0) * 100) + '%')));
   const q = s.queue || [];
+  // (rs.planetInfo: 1.2's "En cours:" and a line per queued design, MakeFleetDescription with its count, or "Néant.")
+  if (PW('queued') && HO.rules(G).shipsText) {
+    const lines = q.map(it => { const d = HO.getDesign(G, ME, it.did); return d ? HO.rules(G).shipsText(G, d, it.n) : null; }).filter(Boolean);
+    box.append(el('div', { class: 'kv' }, el('span', null, PW('queued')), el('b')));
+    for (const t of lines.length ? lines : [PW('none')]) { const e = el('p', { class: 'sub' }); e.append(document.createTextNode(t)); e.setAttribute('translate', 'no'); box.append(e); }
+    return box;
+  }
   if (q.length) {
     const pr = HO.rules(G).yardProgress(G, p, s);
     box.append(el('p', { class: 'sub' }, 'Queued: ' + q.map(it => { const d = HO.getDesign(G, ME, it.did); return d ? `${it.n} ${d.name}` : ''; }).join(', ') + (pr ? ` · first one ${pr.pct}% paid for` : '')));
@@ -6130,7 +6137,10 @@ function newGameDialog() {
   const ngLang = (l) => {
     const was = UIL.lang;
     if (!UIL.set(l)) return;
-    for (const [inp, def] of defNames) if (inp && (inp.value === def || inp.value === UIL.tr(def, was))) inp.value = UIL.tr(def);
+    // (a version's own default galaxy name in its own language: 1.2F's STR# 1002.7 "Voie Lactée", rs.galaxyNames)
+    const rsel = f.querySelector('select[name=rules]'), GN = rsel && HO.RULESETS[rsel.value] && HO.RULESETS[rsel.value].galaxyNames;
+    const own = (def, L) => (def === 'Milky Way' && GN && GN[L]) || UIL.tr(def, L);
+    for (const [inp, def] of defNames) if (inp && (inp.value === def || inp.value === UIL.tr(def, was) || inp.value === own(def, was))) inp.value = own(def, l);
     // the editions' names are made in the language (editionLabel): again in the new one
     for (const o of edSel.options) o.textContent = editionLabel(o.value);
   };

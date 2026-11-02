@@ -49,6 +49,13 @@ function shipsDesc12(G, d, n) {
   return G && G.opts && G.opts.lang === 'en' ? t.slice(0, 40) : t;
 }
 function fleetDesc12(G, f, d, n) { return shipsDesc12(G, d, n); }
+// the same as the screen shows it in the game's language (the queue lines of the planet box: DrawPlanetRect's "En cours:")
+const CLASS12_FR = { scout: 'Eclaireur', fighter: 'Croiseur', colony: 'Transport', satellite: 'Satellite' };
+function shipsText12(G, d, n) {
+  if (((G.opts && G.opts.lang) || 'fr') !== 'fr') return shipsDesc12(G, d, n).slice(0, 40);
+  const c = CLASS12_FR[d.type] || d.type;
+  return (n === 1 ? `1 ${c} ${d.name} (${d.W}/${d.S})` : `${n} ${c}s ${d.name} (${d.W}/${d.S})`).slice(0, 40);
+}
 
 // ---------- the selected fleet's lines (DrawSelectedFleetInfo @c4f7e) ----------
 // CONFIRMED: STR# 4000.12-21 (French) and Mac 2.0.1's literals in its DrawSelectedFleetInfo (the English): stationary "Stationed at: <star>",
@@ -393,7 +400,7 @@ E.registerRules('12', Object.assign({}, D, {
   // them switches to the log scale, 'Stup' 1000 +0x2a = 0; log Technology bars)
   battlePanel: D.battlePanelMac,
   label: 'Mac 1.2 (1992)',
-  fleetDesc: fleetDesc12, shipsDesc: shipsDesc12, fleetInfo: fleetInfo12, fleetListNoSatellites: true,
+  fleetDesc: fleetDesc12, shipsDesc: shipsDesc12, shipsText: shipsText12, fleetInfo: fleetInfo12, fleetListNoSatellites: true,
   // CONFIRMED (AddNewMessage @131052: 50 records of 50 bytes at +0x4d4; at 50 it moves the last 40 down by 10): the report window keeps 50 reports
   reportHistory: 50,
   battleSounds: true, // CONFIRMED (HaveGroupShoot @d1746): see shotSnd in the classic skin
@@ -413,15 +420,16 @@ E.registerRules('12', Object.assign({}, D, {
   // CONFIRMED (DrawPlanetRect @c4334: STR# 1005.13 "Pop:", .20 "Pas d'information sur cette planète.", .21 "Inhabitée", .22 "Inconnue"; the English
   // is DOS 2.0's strings 396 and 403-405, the Mac 2.0.1's routine being the same)
   planetInfo: {
-    fr: { income: 'Revenu', pop: 'Pop', noInfo: 'Pas d\'information sur cette planète.', popNone: 'Inhabitée', popUnknown: 'Inconnue', owner: 'Contrôle', noOne: 'Néant', infoDate: 'Date info', battleDate: 'Bataille', noFleets: 'Pas de vaisseau sur cette planète.' },
-    en: { income: 'Income', pop: 'Pop', noInfo: 'You have no information about this planet.', popNone: 'Uninhabited', popUnknown: 'Unknown', owner: 'Owner', noOne: 'No One', infoDate: 'Info Date', battleDate: 'Battle Date', noFleets: 'There are no fleets at this planet.' } },
+    fr: { temp: 'Temp:', grav: 'Gravité:', metal: 'Métal:', income: 'Revenu:', pop: 'Pop:', noInfo: 'Pas d\'information sur cette planète.', popNone: 'Inhabitée', popUnknown: 'Inconnue', owner: 'Contrôle:', noOne: 'Néant', queued: 'En cours:', none: 'Néant.', infoDate: 'Date info:', battleDate: 'Bataille:', noFleets: 'Pas de vaisseau sur cette planète.' },
+    en: { temp: 'Temp:', grav: 'Gravity:', metal: 'Metal:', income: 'Income:', pop: 'Pop:', noInfo: 'You have no information about this planet.', popNone: 'Uninhabited', popUnknown: 'Unknown', owner: 'Owner:', noOne: 'No One', queued: 'Ships Queued:', none: 'None.', infoDate: 'Info Date:', battleDate: 'Battle Date:', noFleets: 'There are no fleets at this planet.' } },
   // CONFIRMED (SetupPlayerWindows @10080a: SetWTitle with STR# 4000.2 "%.*s en %.*s en %d": the player, the galaxy, the year)
   windowTitle: { fr: '%s en %s en %d', en: '%s in %s in %d', galaxy: 'Voie Lactée' },
   spendWarnings: { fr: 'Alerter sur dépenses', en: 'Give Overspending Warnings' }, // the Options item (MENU 131.5), in the program's two languages only
+  galaxyNames: { fr: 'Voie Lactée' }, // CONFIRMED (STR# 1002.7, NewGame's default file name)
   bubbleMore: { fr: 'Suite…', en: 'more…' }, // CONFIRMED (DrawAnnounceBubble @131134: STR# 4000.22; Mac 2.0.1's literal "more…")
   panelInfo: { order: ['metal', 'savings', 'income', 'interest'], words: {
-    fr: { savings: 'Fortune totale', income: 'Revenu total', interest: 'Intérêt', metal: 'Réserve métal' },
-    en: { savings: 'Total Money', income: 'Total Income', interest: 'Interest', metal: 'Reserve Metal' } } },
+    fr: { savings: 'Fortune totale:', income: 'Revenu total:', interest: 'Intérêt', metal: 'Réserve métal:' },
+    en: { savings: 'Total Money:', income: 'Total Income:', interest: 'Interest', metal: 'Reserve Metal:' } } },
   // CONFIRMED (LongToNiceString @1244a: "%d %.3dK", "%d %.3d %.3d", "%d %.3d", "%d": a plain space between thousands, the French
   // program's; every panel, bar and list figure is made by it, and the reports' too). The English 1.2 (Mac 2.0.1's words) has its comma (lang.en)
   fmtNum: E.niceNumSp, fmtMoney: E.moneyNiceSp,

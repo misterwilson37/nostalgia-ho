@@ -267,7 +267,24 @@ function createType() {
   win(box);
 }
 
+// the players' strip at the foot of the map window (DrawIconRect @c5452): each player's face (your own planet for you), the name, a cross
+// over a player who is out, and a check mark by a player who has ended the turn
+function roster(panel) {
+  const a = A(), el = a.el, g = G();
+  if (!g) return;
+  const box = el('section', { class: 'box roster12', 'aria-label': 'Players' });
+  for (const p of g.players) {
+    const key = p.id === a.ME ? 'white0_0' : 'bad' + (p.face || 0) + '_0', im = a.IMG[key];
+    const done = !p.human || (g.done || []).includes(p.id);
+    box.append(el('div', { class: 'rrow' + (p.alive ? '' : ' out') },
+      im ? el('img', { src: im.src, alt: '', width: 16, height: 16 }) : el('span'), raw('span', p.name, { class: 'rname' }),
+      done && p.alive ? raw('span', '✓', { class: 'rdone', 'aria-label': 'done' }) : null));
+  }
+  panel.append(box);
+}
+
 window.HOMAC12 = {
+  panel(panel) { if (own()) roster(panel); },
   // the program's own windows, in English and French (another language keeps the remake's)
   window(name, ...x) {
     if (!G() || !own()) return false;

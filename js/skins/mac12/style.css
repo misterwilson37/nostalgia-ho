@@ -1,3 +1,14 @@
 /* Spaceward Ho! — Mac 1.2 skin: the Mac 3.0.1 black-and-white look. */
 @import url("../mac3/style.css");
 #tframe { width: min(383px, 86vw); }
+
+/* 1.2's players' strip (DrawIconRect): face, name, a cross over a player who is out, a check mark for a turn ended */
+.roster12 .rrow { display: flex; align-items: center; gap: 6px; font-size: 12px; position: relative; }
+.roster12 .rrow.out img { opacity: .35; }
+.roster12 .rrow.out::after { content: '✕'; position: absolute; left: 2px; top: -2px; font-weight: bold; }
+.roster12 .rdone { margin-left: auto; }
+.mac12 .lb { border: 1px solid; min-height: 6em; max-height: 14em; overflow: auto; margin: 4px 0; }
+.mac12 .lb .li { padding: 1px 4px; cursor: default; }
+.mac12 .lb .li.sel { background: #000; color: #fff; }
+.mac12 .build12 .cols { display: flex; gap: 12px; } .mac12 .build12 .cols > div { flex: 1; }
+.mac12 .types12 { display: flex; gap: 12px; flex-wrap: wrap; } .mac12 .types12 .lb { flex: 1; min-width: 180px; } .mac12 .types12 .tinfo { flex: 1; min-width: 200px; }
