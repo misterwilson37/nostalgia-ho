@@ -414,6 +414,11 @@ E.registerRules('12', Object.assign({}, D, {
   // covers its loss; ReviewBattle @d26e6 shows 3310 when the battle's record is gone); the English is Mac 2.0.1's DITL 5060 and 3310.
   // [the text, the buttons...]
   alertWords: {
+    // (FollowPathDrag @c69d6: ALRT 3330, once a session; ALRT 3300)
+    fuel: { fr: ['Désolé, mais cette flotte ne dispose pas d\'assez de carburant pour atteindre cette destination.', 'Soit dit en passant, il suffisait d\'observer l\'absence de flèche aux extrémités du trajet...'],
+      en: ['Sorry, but that fleet doesn’t have enough fuel to reach the selected destination. ', 'You can tell this because there are no arrows on either end of the dragged line.'] },
+    emptyColony: { fr: ['Il n\'y a pas de colons sur ce Transport.', 'Si vous confirmez votre départ, ceux qui ont débarqué seront récupérés et vous abandonnerez cette planète.\nOu alors attendez un tour...'],
+      en: ['There are no colonists aboard that colony ship.', 'To refill it, you must either wait one turn or abandon the colony.'] },
     spend: { fr: ['Attention, vous n\'investissez pas assez pour soutenir vos colonies. Voulez-vous vraiment les abandonner?', 'Qu\'elles meurent!', 'Annuler'],
       en: ['Warning! You are not spending enough money to support some of your colonies. Do you really want to abandon them?', 'Let ’em Die', 'Cancel'] },
     battleGone: { fr: ['Désolé mais il n\'y a plus d\'informations disponibles sur cette bataille.', 'Les rapports de batailles de plus de 500 ans ne sont pas conservés.'],

@@ -900,8 +900,15 @@ function onUp(e) {
   }
   if (scrapBlocks(f) && tgt != null && tgt !== f.star) { toast(scrapWords('heap')); HO.cancelMove(G, f); Sound.play(4000); } // (FollowPathDrag @1516d8-151702: the alert, no path, sound 4000)
   else if (tgt == null || tgt === f.star) { if (f.dest != null) { HO.cancelMove(G, f); Sound.play(4000); } }
-  else if (HO.orderMove(G, f, tgt)) Sound.play(4001);
+  else if (HO.orderMove(G, f, tgt)) {
+    Sound.play(4001);
+    // (1.2's FollowPathDrag @c69d6: an empty colony ship sent away from your colony to a star not yours: ALRT 3300)
+    const aw = alertWords('emptyColony'), from = G.stars[f.star];
+    if (aw && from && from.owner === ME && G.stars[tgt].owner !== ME && !(f.colonists > 0) && HO.fleetDesigns(G, f).some(d => d.type === 'colony')) alertOver(aw, (G.opts && G.opts.lang) || HO.ownLanguage(HO.ownRules(G)));
+  }
   else if (autoRoute(f, tgt)) Sound.play(4001);
+  // (1.2: ALRT 3330 the first time in a session, FollowPathDrag's flag at A5-0x34a; no sound)
+  else if (alertWords('fuel')) { if (!UI.fuelOnce) { UI.fuelOnce = true; alertOver(alertWords('fuel'), (G.opts && G.opts.lang) || HO.ownLanguage(HO.ownRules(G))); } }
   else { Sound.play(7016); if (HO.rules(G).fuelAlert === '505') fuelAlert(HO.say(G, HO.DATA.alerts[29]), 'ho5.fuelAlert505'); else toast(outOfRange(f, tgt)); }
   UI.hover = null; draw(); renderPanel(); save();
 }
