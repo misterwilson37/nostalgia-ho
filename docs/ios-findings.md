@@ -960,3 +960,12 @@ Best buddy). Rebuilding these windows as the app draws them, from `HoBarLayer`, 
 **Strings.** Of the 161 string constants the open routines use that the remake's text does not contain, all but two are picture and sprite names, notification names, file names or
 log lines; the two a player reads are the help window's title "Spaceward Ho Help" (`-[WebViewDialog initDialog]`) and the Saved Games button "Email game"
 (`-[SavedGameScene emailGame]`), whose rows stay open.
+
+**The player list row, read for the rebuild (`-[PlayerMenuItem initWithWidth:...]` 0x1000a20c8, `update` 0x1000a2224).** A row is the width the list gives it by
+1.5 x `BarMenuItem` height; the hat (`GraphicsHoMap smallPlayerHat:`, sprite frame "player_list_N") at x 14, vertically centred; an "eliminated" sprite
+over it when the player is out; the name in Arial (`labelFitToSize`, black, anchored left at x 26, a third of the row wide); then a second label at
+width/3 + 64: for a computer you have not met enough, the System Names word for his IQ with "IQ" ("%@ %lu IQ" or "%@ %lu IQ %@"), and once you hold
+his information (or the year is 2000 or later) his gravity and temperature ("%ld.%2.2ldG %@" with the temperature by the preference); the happy and sad
+faces (`player_list_happy`, `player_list_sad`) 20 further right; and last a label at three quarters of the width with the pact word by the toggle state:
+2 "Buddies" (Misc 175), 3 "Only Ally" (183), 4 "Buddy!" (176), 5 "Buddy?" (177), 6 "Allies" (180), 7 "Declare War" (179), 8 "Ally!" (181), 9 "Ally?" (182),
+10 "Enemy" (178). The remake's Players window (a table with switches) shows none of this layout; it is the first thing to rebuild in the players group.
