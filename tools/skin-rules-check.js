@@ -1,4 +1,4 @@
-// Does a skin work for every ruleset?   node tools/skin-rules-check.js [--skin=ios,android] [--rules=12,dos,...] [--turns=3] [--url=http://localhost:8000/] [--shots=dir]
+// Does a skin work for every ruleset?   node tools/skin-rules-check.js [--skin=ios,android] [--rules=12,dos,...] [--turns=3] [--sizes=phone,pad] [--url=http://localhost:8000/] [--shots=dir]
 //
 // A skin is a look; a player may play any version's rules in it (the New Game window
 // offers the skins for every ruleset). For each skin and each of the 12 rulesets this
@@ -49,6 +49,8 @@ const SKINS_CHECK = {
     await need('.ios-gear', 'the gear'); await need('#panel .ios-income', 'the totals box');
     if (!(await page.evaluate(() => !!document.querySelector('.ios-turn .clock, .ios-turn .ios-end, .ios-turn #autostop')))) f.push('no End Turn button in the bottom right menu');
     // the sidebar's bars: open every container
+    // (an iPad opens the sidebar at the start, toggleInfo: close it first so the click below opens it)
+    if (pad && await page.evaluate(() => document.documentElement.classList.contains('ios-side'))) { await page.click('[data-ios=dollar]').catch(() => {}); await sleep(250); }
     for (const n of pad ? ['dollar'] : ['dollar', 'planet', 'enemy']) {
       await page.click(`[data-ios=${n}]`).catch(() => {}); await sleep(250);
       const o = await page.evaluate(() => document.documentElement.classList.contains('ios-side'));
@@ -98,7 +100,7 @@ async function main() {
   }
   const browser = await chromium.launch();
   let bad = 0;
-  const SIZES = [['phone', 844, 390], ['pad', 1024, 768]];
+  const SIZES = [['phone', 844, 390], ['pad', 1024, 768]].filter(z => !opt('sizes', '') || opt('sizes', '').split(',').includes(z[0]));
   for (const skin of SKINS) for (const rules of RULES) for (const [sn, w, h] of SIZES) {
     const ctx = await browser.newContext({ viewport: { width: w, height: h }, hasTouch: w < 600 });
     const page = await ctx.newPage();
