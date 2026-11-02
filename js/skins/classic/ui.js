@@ -629,11 +629,11 @@ function draw0() {
     if (im) { const z = ps * (look.scale || 1); cx.drawImage(im, x - z / 2, y - z / 2, z, z); }
     // satellites ring
     const sats = G.fleets.filter(f => f.star === s.id && f.sat && (f.owner === ME || visibleTo(s.id)));
-    if (sats.length && !(own && T.ownRings)) { // (T.ownRings: drawStar drew them)
+    if (sats.length && own !== 'all' && !(own && T.ownRings)) { // (T.ownRings: drawStar drew them)
       cx.strokeStyle = T.satRing || (sats.some(f => f.owner === ME) ? 'rgba(120,230,255,0.9)' : 'rgba(255,120,200,0.9)');
       cx.lineWidth = 1.5; cx.beginPath(); cx.ellipse(x, y, ps * 0.62, ps * 0.62, 0, 0, Math.PI * 2); cx.stroke();
     }
-    if (look.hat && IMG[look.hat]) { const h = ps * 1.18; cx.drawImage(IMG[look.hat], x - h / 2, y - h * 0.62, h, h * (IMG[look.hat].height / IMG[look.hat].width)); }
+    if (own !== 'all' && look.hat && IMG[look.hat]) { const h = ps * 1.18; cx.drawImage(IMG[look.hat], x - h / 2, y - h * 0.62, h, h * (IMG[look.hat].height / IMG[look.hat].width)); }
     // an ally's planet: a halo over it, yellow (haloAlly) or, for a best
     // buddy, cyan (haloBuddy). GUESS: where 5.0.5 puts it isn't decompiled;
     // this is where the halos sit in 3.0.1's and 4.0's ally pictures (p506,
@@ -651,7 +651,8 @@ function draw0() {
       else if (halo && !(T.allyAt && !box)) cx.drawImage(halo, x - ps * 0.6, y - ps * 0.85, ps * 1.2, ps * 0.46);
     }
     // name
-    if (!own && UI.view.s > 18) {
+    // (T.mapNames(scale): a skin's own rule for when the names show; 1.2: from its second zoom on)
+    if (own !== 'all' && !own && (T.mapNames ? T.mapNames(UI.view.s) : UI.view.s > 18)) {
       cx.font = mapFont(Math.max(9, Math.min(12, UI.view.s / 3.6)));
       cx.textAlign = 'center'; cx.fillStyle = s.owner === ME ? '#fff6d0' : '#9aa3c7';
       cx.fillText(s.name, x, y + ps / 2 + 11);
@@ -4520,6 +4521,14 @@ function verPrefs(O, box) {
 // The Report Window (rs.options.reports, 1.2 and 2.0): this turn's reports,
 // where they are when Show Event Messages is off; clicking one goes to its
 // star, or reviews its battle
+// a report's picture as the bubble shows it (1.2's report window draws it beside each row: DrawMessage @130652)
+function msgIconEl(m) {
+  const look = originalLook(m);
+  let icon = look ? look.icon : m.icon;
+  if (T.messageLook) { const t = T.messageLook(m, { icon, sound: null }, { G, ME, starLook }); if (t) icon = t.icon; }
+  const im = icon && IMG[icon];
+  return im && im.src ? el('img', { src: im.src, alt: '', width: 32, height: 32, class: 'ricon' }) : el('span');
+}
 function openReports() {
   if (!G) return;
   const O = verOpts() || {};
@@ -4532,7 +4541,7 @@ function openReports() {
     if (lostReport(m)) { openYouLost(); return; }
     if (m.battle) { openBattle(m.battle); return; }
     if (m.star != null) { UI.sel = m.star; centerOn(m.star); renderPanel(); draw(); }
-  } }, degText(HO.say(G, m.text))));
+  } }, ...(HO.rules(G).reportHistory ? [msgIconEl(m)] : []), degText(HO.say(G, m.text))));
   modal(O.reports || 'Reports', ms.length ? el('ul', { class: 'reports' }, ...rows) : el('p', null, 'No reports this turn.'), { cls: 'mid' });
   if (old.length) { const now = document.querySelector('ul.reports li[data-now]'); if (now && now.scrollIntoView) now.scrollIntoView({ block: 'start' }); }
 }

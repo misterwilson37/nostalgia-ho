@@ -30,6 +30,19 @@ const run = (k) => () => { const it = ITEMS[k]; if (it) it[1](); };
 const it = (label, fn, o) => [label, fn, (o && o.shown) || null, (o && o.checked) || null, (o && o.ghost) || null, (o && o.key) || null];
 const noGame = () => !G();
 
+// the map's four zooms (MapWinProc, the setup's +0x26: 6, 9, 12 and 17 pixels to two light years' unit, 17 to start; Zoom + / Zoom -
+// step them and are dimmed at the ends); at the smallest a star is a dot, with no picture and no name (DrawOneBWStarSubProc @c38ce:
+// PaintOval), names from the second on
+const LY = 2, ZOOMS = [6, 9, 12, 17].map(z => z * LY);
+const zoomIdx = (s) => { let b = 0; ZOOMS.forEach((z, i) => { if (Math.abs(Math.log(z / s)) < Math.abs(Math.log(ZOOMS[b] / s))) b = i; }); return b; };
+function zoomTo(s, f) {
+  const cur = zoomIdx(s);
+  let i = zoomIdx(s * f);
+  if (i === cur && Math.abs(Math.log(f)) >= 0.13) i = cur + (f > 1 ? 1 : -1);
+  return ZOOMS[Math.max(0, Math.min(ZOOMS.length - 1, i))];
+}
+const atZoom = (k) => { const a = A(); return !!a && zoomIdx(a.UI.view.s) === k; };
+
 // The menus, as 1.2's MENU resources 128-134 have them (SetMenuItems @e29aa: what is dimmed, the words that
 // change with the selection, the check marks). The Apple menu is the skin's "Ho! 1.2" menu.
 function menuLayout() {
@@ -77,8 +90,8 @@ function menuLayout() {
     Galaxy: [
       it('List All Explored Stars…', () => A().openStarList(), { ghost: noGame }),
       '-',
-      it('Zoom In', () => { const m = A().map(); A().zoomAt(m.w / 2, m.h / 2, 1.3); }, { ghost: noGame, key: '=' }),
-      it('Zoom Out', () => { const m = A().map(); A().zoomAt(m.w / 2, m.h / 2, 1 / 1.3); }, { ghost: noGame, key: '-' }),
+      it('Zoom In', () => { const m = A().map(); A().zoomAt(m.w / 2, m.h / 2, 1.3); }, { ghost: () => noGame() || atZoom(3), key: '=' }),
+      it('Zoom Out', () => { const m = A().map(); A().zoomAt(m.w / 2, m.h / 2, 1 / 1.3); }, { ghost: () => noGame() || atZoom(0), key: '-' }),
       '-',
       // (dimmed while announcements are still to be read: SetMenuItems' message count)
       it('Fix Spending', () => A().openFixSpending(), { ghost: () => noGame() || A().UI.msgIdx < (A().UI.inbox || []).length, key: 'F' })],
@@ -439,6 +452,10 @@ document.addEventListener('keydown', (e) => {
 }, true);
 
 window.HOMAC12 = {
+  zoomTo: (s, f) => (own() ? zoomTo(s, f) : Math.max(12, Math.min(140, s * f))),
+  fitView(v, c) { if (!own()) return; const st = c.G.stars[c.sel != null ? c.sel : c.G.players[c.ME].homeStar]; v.s = ZOOMS[3]; if (st) { v.ox = c.mapW / 2 - st.x * v.s; v.oy = c.mapH / 2 - st.y * v.s; } },
+  mapNames: (s) => (own() ? zoomIdx(s) > 0 : s > 18),
+  drawStar(cx, i) { if (!own() || zoomIdx(i.view.s) > 0) return false; cx.fillStyle = '#fff'; cx.beginPath(); cx.arc(i.x, i.y, 2.5, 0, Math.PI * 2); cx.fill(); return 'all'; },
   lettersPickStars: true,
   // (the planet box without the remake's own additions: classic ui planetBox)
   ownPanel: true,
