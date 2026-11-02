@@ -299,13 +299,13 @@ function buildColumn(app) {
   // (graphs-window-shade, 200 x 24) at the top right that rolls a GraphNode (200 x 100, the fill 0xe1cccccc, the line 0xffd63c39) down from under it, open at the start
   if (!SCREEN.pad) {
     const graph = UIEl('button', 'ios-btn ios-graph', { type: 'button', 'aria-label': 'Graphs', title: 'Graphs' }, pic('button-graph'));
-    graph.addEventListener('click', go(a => a.openCompare()));
+    graph.addEventListener('click', go(a => openGraphs()));
     app.append(colEl, graph);
   } else {
     const shade = UIEl('button', 'ios-shade ios-graph', { type: 'button', 'aria-label': 'Graphs', title: 'Graphs', 'aria-pressed': 'true' }, pic('graphs-window-shade'));
-    gnEl = UIEl('div', 'ios-gnode', { role: 'img', 'aria-label': 'History graphs' }, gnCv = UIEl('canvas', null, { width: 196, height: 96 }));
+    gnEl = UIEl('div', 'ios-gnode', { role: 'img', 'aria-label': 'History graphs' }, gnCv = UIEl('canvas', null, { width: 200, height: 100 }));
     shade.addEventListener('click', (e) => { e.stopPropagation(); const open = gnEl.classList.toggle('shut') === false; shade.setAttribute('aria-pressed', open ? 'true' : 'false'); shade.firstChild.src = HOTHEME.dir + 'sprites/graphs-window-shade' + (open ? '' : '-selected') + '.png'; });
-    gnEl.addEventListener('click', go(a => a.openCompare()));
+    gnEl.addEventListener('click', go(a => openGraphs()));
     app.append(colEl, shade, gnEl);
   }
 }
@@ -606,12 +606,12 @@ function homeLevel(G, p) {
   const i = START_ORDER.indexOf(st);
   return i < 0 ? 0 : i + 1;
 }
-// the order (-[PlayerListLayer updateData]): the exchange sort, alive by savings, then those out by when they went out
+// the order (-[PlayerListLayer updateData]): the exchange sort, alive by income (player +0x40, the remake's lastGross: the figure the handover adds to savings), then those out by when they went out
 function listOrder(G) {
   const ids = G.players.map(p => p.id), out = (p) => (p.alive ? 0 : (p.outYear505 || p.outYear || 1));
   for (let i = 0; i < ids.length - 1; i++) for (let j = i + 1; j < ids.length; j++) {
     const A = G.players[ids[i]], B = G.players[ids[j]], a = out(A), b = out(B);
-    const swap = a === 0 ? (b === 0 && (A.savings || 0) < (B.savings || 0)) : (b === 0 || a < b);
+    const swap = a === 0 ? (b === 0 && (A.lastGross || 0) < (B.lastGross || 0)) : (b === 0 || a < b);
     if (swap) { const t = ids[i]; ids[i] = ids[j]; ids[j] = t; }
   }
   return ids;
@@ -812,18 +812,91 @@ function sidebar(box, parts) {
 // BarMenuItem width x 3 rows; the picture's middle is 30 across and its top at 0.75 x (height - a80); the text starts at 60, vertically centred, its
 // type floor(height / 6) - 1; "more..." (Misc 30, 0.6 x 24) at the bottom right while more reports follow (-[TurnMessageLayer updateMessageState]
 // 0x10001cde0: shown while the current one is not the last).
-// GraphNode's graph (HistoryGraphNode draw: not read): the remake's history of your population, income and tech
-function drawGraph() {
-  const a = A(); if (!gnCv || !a || !a.G) return;
-  const x = gnCv.getContext('2d'), h = a.me().hist || [];
-  x.clearRect(0, 0, 196, 96);
-  if (h.length < 2) return;
-  for (const [key, col] of [['pop', '#c8960a'], ['inc', '#2a5fd0'], ['tech', '#1a9a2a']]) {
-    const max = Math.max(...h.map(e => e[key]), 1);
-    x.strokeStyle = col; x.lineWidth = 2; x.beginPath();
-    h.forEach((e, i) => { const px = 4 + i / (h.length - 1) * 188, py = 92 - e[key] / max * 86; i ? x.lineTo(px, py) : x.moveTo(px, py); });
-    x.stroke();
+// The history graphs (HistoryGraphNode refreshData 0x1000ab658; the iPad's shade is a GraphNode 200 x 100, the iPhone's button-graph and a tap on the shade open a
+// HistoryGraphDialogLayer): ten series from the player's history records (a record each turn: the year, then 0 income, 1 metal, 2 savings, 3 ships, 4 rank in 100, and
+// 5-9 how far ahead of the others in each of the five technologies, in 100), each a line of its own colour; series 0-3 are scaled to a maximum that starts at 100,000, 100,000,
+// 1,000,000 and 10,000 and grows by as much until the largest record fits, 4-9 to 100. Drawn in a rectangle inside margins (a small graph: left 0, right 0, bottom 20, top 2; a big
+// one, over 200 wide: 70, 20, 75, 10); white axes along the bottom (and, big, the left), the ticks and the scale as the code draws them; the small graph's years run over 1,000
+// from the first record (then the last 100 turns), the big one's over every record. The icons beneath are the series' pictures; a big one's are buttons that show and hide a series
+// (kept in the preferences for both graphs; only the first series shows at first). A small graph is on a 0xe1cccccc fill (204, 204, 204 at 225) with no line; with fewer than two
+// records "No Graph Information Available" (Misc Strings 47) is written in white in the middle.
+const GCOL = [[0, 170, 40], [255, 255, 255], [105, 250, 105], [137, 22, 185], [212, 212, 87], [0, 0, 230], [250, 152, 0], [255, 0, 255], [0, 250, 250], [250, 0, 0]];
+const GMAX0 = [100000, 100000, 1000000, 10000, 100], GSTEP = [100000, 100000, 1000000, 10000, 0];
+function graphFlags() { try { const f = JSON.parse(localStorage.getItem('ho.ios.graphs')); if (Array.isArray(f) && f.length === 10) return f; } catch (e) {} return [true, false, false, false, false, false, false, false, false, false]; }
+function setGraphFlags(f) { try { localStorage.setItem('ho.ios.graphs', JSON.stringify(f)); } catch (e) {} }
+function graphVals(h) { const x = h.hx || {}; return [h.inc, x.met, x.sav, h.ships, x.rk].concat(x.tr || [null, null, null, null, null]); }
+function paintGraph(cv, w, h, big, redraw) {
+  const a = A(); if (!cv || !a || !a.G) return;
+  const dpr = Math.max(1, Math.min(3, (window.devicePixelRatio || 1) * SCREEN.u)), c = cv.getContext('2d');
+  cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr);
+  c.setTransform(dpr, 0, 0, -dpr, 0, h * dpr); // y runs up, as cocos2d's
+  const rec = (a.me().hist || []).filter(r => r), flags = graphFlags();
+  const L = big ? 70 : 0, R = big ? 20 : 0, B = big ? 75 : 20, T = big ? 10 : 2, gW = w - R - L, gH = h - B - T, x0 = L, y0 = B;
+  const fam = getComputedStyle(document.documentElement).getPropertyValue('--appfont') || 'Arial, Helvetica, sans-serif';
+  const text = (t, x, y, size, col, ax, ay) => { // (x, y in the node's y-up points; ax, ay the anchor)
+    c.save(); c.translate(x, y); c.scale(1, -1); c.font = `${size}px ${fam}`; c.fillStyle = col; c.textAlign = ax === 1 ? 'right' : ax === 0.5 ? 'center' : 'left'; c.textBaseline = ay === 0.5 ? 'middle' : 'alphabetic'; c.fillText(t, 0, ay === 0.5 ? 0 : 0); c.restore();
+  };
+  const line = (x1, y1, x2, y2) => { c.moveTo(x1, y1); c.lineTo(x2, y2); };
+  c.clearRect(0, 0, w, h);
+  if (!big) { c.fillStyle = 'rgba(204,204,204,0.882)'; c.fillRect(0, 0, w, h); }
+  c.lineWidth = 1; c.strokeStyle = '#fff';
+  c.beginPath();
+  for (let k = 1; k <= 10; k++) { const y = gH / 10 * k, len = (k % 2 ? 1 : 3) + (big ? 2 : 0); line(0, y, len, y); }
+  for (let k = 1; k <= 10; k++) { const x = gW / 10 * k; line(x, 0, x, big ? 3 : 1); }
+  c.stroke();
+  c.beginPath(); if (big) line(x0, y0, x0, y0 + gH); line(x0, y0, x0 + gW, y0); c.stroke();
+  if (rec.length < 2) { text('No Graph Information Available', w / 2, h / 2, SCREEN.pad ? 12 : 10, '#fff', 0.5, 0.5); return; }
+  const first = rec[0].y, last = rec[rec.length - 1].y;
+  let xMin = first, xMax = last + 10;
+  if (!big) { if (xMax - xMin > 1000) xMin = last - 990; else xMax = xMin + 1000; }
+  const sc = Math.trunc(gW * 100 / (big ? xMax - xMin : 1000)), px = (yr) => Math.trunc(x0 + Math.trunc((yr - xMin) * sc / 100));
+  const max = GMAX0.slice();
+  for (const r of rec) { const v = graphVals(r); for (let s = 0; s < 4; s++) while (v[s] != null && max[s] < v[s]) max[s] += GSTEP[s]; }
+  const money = (n, d) => (d ? '$' : '') + (HO.rules(A().G).interestShort ? HO.rules(A().G).interestShort(n) : A().fmt(n));
+  if (big) {
+    text(String(xMin), px(xMin), y0 - 12, 16, '#fff', 0.5, 0.5); text(String(xMax), x0 + gW, y0 - 12, 16, '#fff', 0.5, 0.5);
+    for (let s = 0; s < 4; s++) if (flags[s]) text(money(max[s], s === 0 || s === 2), x0 - 5, y0 + gH - 50 - s * 22, 12, rgb(GCOL[s]), 1, 0.5);
   }
+  for (let s = 0; s < 10; s++) {
+    if (!flags[s]) continue;
+    c.strokeStyle = rgb(GCOL[s]); c.beginPath();
+    let prev = null;
+    for (const r of rec) {
+      if (r.y < xMin || r.y > xMax) continue;
+      const v = graphVals(r)[s]; if (v == null) { prev = null; continue; }
+      const x = px(r.y), y = Math.trunc(y0 + Math.trunc((s < 5 ? gH / max[s] * v : v * gH / 100)));
+      if (prev) line(prev[0], prev[1], x, y); prev = [x, y];
+    }
+    c.stroke();
+  }
+  if (!big) { // the legend: the series' pictures (0990N, 32 x 14) scaled to (20 - 0.4) / 32, from (2, 2) edge to edge; the ones not shown are dimmed
+    const k = (20 - 0.4) / 32;
+    for (let s = 0; s < 10; s++) {
+      const im = A().IMG && A().IMG[P + '0990' + s]; if (!im || !im.width) { if (redraw) setTimeout(redraw, 300); continue; }
+      c.save(); c.globalAlpha = flags[s] ? 1 : 0.35; c.translate(2 + s * 32 * k, 2); c.scale(1, -1); c.drawImage(im, 0, -14 * k, 32 * k, 14 * k); c.restore();
+    }
+  }
+}
+function drawGraph() { if (gnCv && !gnEl.classList.contains('shut')) paintGraph(gnCv, 200, 100, false, drawGraph); }
+// -[HistoryGraphDialogLayer initDialog] 0x1000b89a0: the big graph in a dialog, the ten series' buttons beneath it (icon N, selected or not; scale 0.9, 5 apart on an iPad, 1 on an iPhone)
+let gdEl = null;
+function openGraphs() {
+  const a = A(); if (!a || !a.G) return;
+  if (gdEl) { gdEl.remove(); gdEl = null; return; }
+  const cv = UIEl('canvas', 'ios-gcv'), bar = UIEl('div', 'ios-gbar');
+  const flags = graphFlags(), W = Math.max(300, SCREEN.winW - 2 * 16), H = Math.max(200, SCREEN.winH - 2 * 16);
+  const paint = () => paintGraph(cv, W - 16, H - 16, true);
+  for (let s = 0; s < 10; s++) {
+    const b = UIEl('button', 'ios-gic', { type: 'button', 'aria-pressed': flags[s] ? 'true' : 'false', 'aria-label': 'Series ' + (s + 1) }, pic('icon' + s + (flags[s] ? '-selected' : '-not-selected')));
+    b.addEventListener('click', () => { const f = graphFlags(); f[s] = !f[s]; setGraphFlags(f); b.setAttribute('aria-pressed', f[s] ? 'true' : 'false'); b.firstChild.src = HOTHEME.dir + 'sprites/icon' + s + (f[s] ? '-selected' : '-not-selected') + '.png'; paint(); drawGraph(); });
+    bar.append(b);
+  }
+  const x = UIEl('button', 'ios-gx', { type: 'button', 'aria-label': 'Close' }, pic('button-x'));
+  x.addEventListener('click', () => { gdEl.remove(); gdEl = null; });
+  gdEl = UIEl('div', 'ios-gdlg win', { role: 'dialog', 'aria-label': 'Graphs', style: `width:calc(${W} * var(--pt));height:calc(${H} * var(--pt))` }, cv, bar, x);
+  document.getElementById('app').append(gdEl);
+  paint(); setTimeout(paint, 300);
+  document.addEventListener('keydown', function esc(e) { if (e.key === 'Escape' && gdEl) { gdEl.remove(); gdEl = null; } if (!gdEl) document.removeEventListener('keydown', esc); });
 }
 function afterMsg(box, ctx) {
   const clock = box.querySelector('.clock'), card = box.querySelector('.card');

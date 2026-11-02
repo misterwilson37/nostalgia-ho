@@ -1094,3 +1094,11 @@ surrender, send a message, alliance table) reached by "Players and history...", 
 and switch players (hot seat), the page's menus behind the gear's "More menus..." (for rulesets other than iOS and Android), Hall of Fame / Shame and the master point lists, the star box under the bars
 (rulesets other than iOS and Android), and the remake's confirm and toast boxes.
 
+**The history graphs (built: `paintGraph`, `openGraphs`; engine `recordHistory` keeps `hx`).** Correction to the main-screen note: the iPad's `GraphNode` fill 0xe1cccccc has no line (`HistoryGraphNode init` hands the fill on as both
+colours). `-[HistoryGraphNode refreshData]` 0x1000ab658 draws ten series from the player's history records (0x2c bytes: year, income, metal, savings, ships, rank, then the standing in each of the five technologies, the
+last six in 100 as `FUN_1000346bc` works them out) with the colours at 0x1000d6520 (income green (0, 170, 40), metal white, savings (105, 250, 105), ships (137, 22, 185), rank (212, 212, 87), the technologies (0, 0, 230),
+(250, 152, 0), (255, 0, 255), (0, 250, 250), (250, 0, 0)); the first four are scaled to maxima that start at 100,000, 100,000, 1,000,000 and 10,000 and grow by as much (`updateMaximums`). Margins: small left 0, right 0, bottom
+20, top 2; big (width over 200) 70, 20, 75, 10. White ticks and axes; the small graph's years span 1,000 from the first record (then the last 100 turns), the big graph's all of them. Only the first series shows at first;
+the big graph's ten buttons (`icon<N>-selected`, scale 0.9) show and hide series and the choice is kept for both graphs. The remake had only population, colonies, ships, tech and income per turn: it now also keeps metal,
+savings, rank and the technology standings (`p.hist[].hx`, skipped by the test digest). Not drawn: the hats of players who are out.
+

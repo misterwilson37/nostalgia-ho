@@ -1972,7 +1972,18 @@ function checkElimination(G) {
 function recordHistory(G, p) {
   const cols = colonies(G, p.id);
   let ships = 0; for (const f of G.fleets) if (f.owner === p.id) ships += fleetCount(f);
-  p.hist.push({ y: G.year, pop: Math.round(cols.reduce((a, s) => a + s.pop, 0)), cols: cols.length, ships, tech: techSum(p) + p.tech.mini, inc: Math.round(p.lastGross) });
+  // hx: the rest of what the iOS app's history record keeps (FUN_1000346bc 0x1000346bc): metal, savings, the player's rank (a share of 100: 100 / (players - 1) for each
+  // player left behind on income, those who are out counting as behind) and, for each of the five technologies, how far ahead of the players still in he is
+  // (10 for each below him, 5 for each level with him, of 10 for each rival)
+  const out = (q) => !q.alive, n = G.players.length, tl = ['range', 'speed', 'weapons', 'shields', 'mini'];
+  let rk = 50;
+  if (n >= 2) { const st = Math.floor(100 / (n - 1)); rk = 100 - (n - 1) * st; if (p.alive) for (const q of G.players) if (q !== p && (out(q) || (q.lastGross || 0) < (p.lastGross || 0))) rk += st; }
+  const tr = tl.map(t => {
+    if (!p.alive) return 0;
+    let sum = 0, cnt = 0; for (const q of G.players) if (q.alive) { cnt++; if (q !== p) { const a = (q.tech || {})[t] || 0, b = (p.tech || {})[t] || 0; sum += a === b ? 5 : a < b ? 10 : 0; } }
+    return cnt < 2 ? (n < 2 ? 50 : 100) : Math.trunc(sum * 100 / (10 * (cnt - 1)));
+  });
+  p.hist.push({ y: G.year, pop: Math.round(cols.reduce((a, s) => a + s.pop, 0)), cols: cols.length, ships, tech: techSum(p) + p.tech.mini, inc: Math.round(p.lastGross), hx: { met: Math.round(p.metal), sav: Math.round(p.savings), rk, tr } });
   if (p.hist.length > 400) p.hist.shift();
 }
 function score(G, p) {
