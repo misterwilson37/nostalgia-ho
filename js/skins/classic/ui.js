@@ -2174,7 +2174,8 @@ function doEndTurn(confirmed) {
   // keep selection valid
   if (UI.selFleet != null && !G.fleets.some(f => f.id === UI.selFleet)) UI.selFleet = null;
   renderPanel(); draw();
-  showMessages();
+  // T.afterTurn(go): a skin's own windows between the turn and its reports (1.2: the battles to review, DoBattleStage), then go
+  if (T.afterTurn) T.afterTurn(() => showMessages()); else showMessages();
 }
 function addTurnNotes(p) {
   p.inbox = p.inbox || [];

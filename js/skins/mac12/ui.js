@@ -455,6 +455,7 @@ document.addEventListener('keydown', (e) => {
 // (DrawAnnounceBubble: the report picture 3110, the line, "Suite…" while slots are left to look at); a click on the bubble, or ⌘F
 // again, takes the next step; when none is left the bubble goes and the End Turn button is back
 const FIX = { cur: null, n: 0 };
+let LASTB = 0;
 function fixStep() {
   const a = A(), g = G(), FS = H().rules(g).fixSpending;
   if (!FS) return;
@@ -495,7 +496,20 @@ window.HOMAC12 = {
   lettersPickStars: true,
   // (the planet box without the remake's own additions: classic ui planetBox)
   ownPanel: true,
-  turnProgress(g, go) { if (!own()) return go(); turnProgress(g, go); },
+  turnProgress(g, go) { LASTB = g.battles.length; if (!own()) return go(); turnProgress(g, go); },
+  // (DoBattleStage @d0004: with Voir batailles on, the battles you were in are shown during the update, before the reports)
+  afterTurn(go) {
+    const a = A(), g = G();
+    if (!own() || !a.prefReview()) return go();
+    const list = g.battles.slice(LASTB).filter(b => b.sides.includes(a.ME));
+    for (const m of a.me().inbox || []) if (m.battle && list.some(b => b.id === m.battle)) m._reviewed = true;
+    const next = () => {
+      const b = list.shift(); if (!b) return go();
+      a.openBattle(b.id);
+      const wait = setInterval(() => { if (!document.querySelector('.scrim')) { clearInterval(wait); next(); } }, 200);
+    };
+    next();
+  },
   panel(panel, B) { if (own()) { bars(panel, B || {}); roster(panel); } },
   // the program's own windows, in English and French (another language keeps the remake's)
   window(name, ...x) {
