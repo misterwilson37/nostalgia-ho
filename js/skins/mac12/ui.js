@@ -452,6 +452,16 @@ document.addEventListener('keydown', (e) => {
 }, true);
 
 window.HOMAC12 = {
+  // (NewGame @100004: the status window "Ecriture nouveau fichier Jeu..." (STR# 4000.1; Mac 2.0.1 "Writing New Game File...") while the
+  // galaxy file is written, its bar moving once a player)
+  beforeFirstTurn(go) {
+    if (!own()) return false;
+    const a = A(), el = a.el, n = G().players.length, txt = lang() === 'fr' ? 'Ecriture nouveau fichier Jeu...' : 'Writing New Game File...';
+    const bar = el('progress', { max: n, value: 0 });
+    a.modal('', el('div', { class: 'status12' }, raw('p', txt), bar), { cls: 'small mac12', label: txt });
+    let i = 0; const step = () => { if (++i > n) { a.closeModal(); go(); return; } bar.value = i; setTimeout(step, 60); }; setTimeout(step, 60);
+    return true;
+  },
   zoomTo: (s, f) => (own() ? zoomTo(s, f) : Math.max(12, Math.min(140, s * f))),
   fitView(v, c) { if (!own()) return; const st = c.G.stars[c.sel != null ? c.sel : c.G.players[c.ME].homeStar]; v.s = ZOOMS[3]; if (st) { v.ox = c.mapW / 2 - st.x * v.s; v.oy = c.mapH / 2 - st.y * v.s; } },
   mapNames: (s) => (own() ? zoomIdx(s) > 0 : s > 18),
