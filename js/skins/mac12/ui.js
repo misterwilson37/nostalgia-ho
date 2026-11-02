@@ -332,6 +332,8 @@ function bars(panel, B) {
         lab.style.fontStyle = low.has(e.star) ? 'italic' : '';
         lab.style.textDecoration = a.UI.sel === e.star ? 'underline' : '';
         lab.style.fontWeight = 'normal';
+        // (FollowStarNameClick @c2388: a click on a colony's name selects it and brings the map to it)
+        lab.style.cursor = 'pointer'; lab.onclick = (ev) => { ev.stopPropagation(); a.UI.sel = e.star; a.centerOn(e.star); a.renderPanel(); a.draw(); };
         const min = rs.minShare ? rs.minShare(g, p, e.star) : 0, tr = r.querySelector('.track');
         if (min > 0 && tr) { tr.style.position = 'relative'; tr.append(el('div', { class: 'mintick', style: `left:${(a.budgetScale().toX(min) * 100).toFixed(1)}%` })); }
       }
@@ -410,7 +412,34 @@ function organize(f0) {
       btn('Cancel', () => a.closeModal(), { class: 'quiet' }), btn('OK', apply))));
 }
 
+// keys on the map (KeyTheHo): letters pick a star by the first letters of its name (KeyPlanet @c6252: what was typed within a second, six
+// letters at most, a beep past them), Tab the next fleet of yours at the selected star (TabThroughFleets @c68c2); End Turn is ⌘T
+const typed = { s: '', t: 0 };
+document.addEventListener('keydown', (e) => {
+  const a = A(), g = G();
+  if (!a || !g || !own() || a.UI.modal || document.querySelector('.scrim') || e.metaKey || e.ctrlKey || e.altKey || /^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName)) return;
+  if (e.key === 'Tab') {
+    const s = selStar(); if (!s) return;
+    e.preventDefault(); e.stopImmediatePropagation();
+    const fs = a.fleetOrder(g.fleets.filter(f => f.owner === a.ME && f.star === s.id && f.to == null));
+    if (!fs.length) return;
+    const i = fs.findIndex(f => f.id === a.UI.selFleet);
+    a.UI.selFleet = fs[(i + 1) % fs.length].id; a.renderPanel(); a.draw();
+    return;
+  }
+  if (!/^[A-Za-z]$/.test(e.key)) return;
+  e.preventDefault(); e.stopImmediatePropagation();
+  const now = Date.now();
+  if (now - typed.t > 1000) typed.s = '';
+  typed.t = now;
+  if (typed.s.length >= 6) { if (a.beep) a.beep(); return; }
+  typed.s += e.key.toLowerCase();
+  const st = g.stars.find(x => x.name.toLowerCase().startsWith(typed.s));
+  if (st) { a.UI.sel = st.id; a.centerOn(st.id); a.renderPanel(); a.draw(); }
+}, true);
+
 window.HOMAC12 = {
+  lettersPickStars: true,
   // (the planet box without the remake's own additions: classic ui planetBox)
   ownPanel: true,
   turnProgress(g, go) { if (!own()) return go(); turnProgress(g, go); },

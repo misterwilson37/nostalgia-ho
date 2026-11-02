@@ -1593,13 +1593,13 @@ function planetBox(sid) {
     box.append(fl);
     const mine = fleetOrder(here.filter(f => f.owner === ME && !f.sat));
     const mergeable = mine.some((a, i) => mine.some((b, j) => j > i && HO.canMerge(G, a, b)));
-    if (mergeable) box.append(el('div', { class: 'btns' }, el('button', { class: 'quiet', onclick: () => {
+    if (mergeable && !T.ownPanel) box.append(el('div', { class: 'btns' }, el('button', { class: 'quiet', onclick: () => {
       // merge each fleet into the first one it may join (one ship type per fleet under the DOS rules)
       for (let i = 0; i < mine.length; i++) for (let j = i + 1; j < mine.length; j++)
         if (G.fleets.includes(mine[i]) && G.fleets.includes(mine[j]) && HO.canMerge(G, mine[i], mine[j])) HO.mergeFleets(G, mine[i], mine[j]);
       UI.selFleet = mine[0].id; renderPanel(); draw(); save(); } }, HO.feature(G, 'singleTypeFleets') ? 'Merge fleets of the same type' : 'Merge all fleets here'),
       organizeStyle() ? el('button', { class: 'quiet', onclick: () => openOrganize(sid) }, organizeName()) : null));
-    else if (mine.length && organizeStyle()) box.append(el('div', { class: 'btns' }, el('button', { class: 'quiet', onclick: () => openOrganize(sid) }, organizeName())));
+    else if (mine.length && organizeStyle() && !T.ownPanel) box.append(el('div', { class: 'btns' }, el('button', { class: 'quiet', onclick: () => openOrganize(sid) }, organizeName())));
   }
   else if (PI && PW('noFleets')) { const n = el('p', { class: 'note' }); n.append(document.createTextNode(PW('noFleets'))); n.setAttribute('translate', 'no'); box.append(n); }
   const bs = lastBattles(sid);
@@ -1700,12 +1700,13 @@ function fleetRow(f, inbound) {
   if (sel && mine && !inbound && !f.sat) {
     const acts = el('div', { class: 'facts' });
     if (f.dest != null) acts.append(el('button', { class: 'quiet', onclick: (e) => { e.stopPropagation(); HO.cancelMove(G, f); Sound.play(4000); renderPanel(); draw(); } }, 'Stay here'));
-    if (HO.fleetCount(f) > 1) acts.append(el('button', { class: 'quiet', onclick: (e) => { e.stopPropagation(); openSplit(f); } }, 'Split…'));
-    if (HO.feature(G, 'waypoints')) acts.append(el('button', { class: 'quiet', 'data-help': 'route', onclick: (e) => { e.stopPropagation(); startRoute(f); } }, 'Plan route…'));
+    // (T.ownPanel, the Mac 1.2 skin: splitting is its Organize Fleets window, a route its drag, scrapping its Ships menu)
+    if (HO.fleetCount(f) > 1 && !T.ownPanel) acts.append(el('button', { class: 'quiet', onclick: (e) => { e.stopPropagation(); openSplit(f); } }, 'Split…'));
+    if (HO.feature(G, 'waypoints') && !T.ownPanel) acts.append(el('button', { class: 'quiet', 'data-help': 'route', onclick: (e) => { e.stopPropagation(); startRoute(f); } }, 'Plan route…'));
     if (HO.feature(G, 'stances')) acts.append(el('select', { 'aria-label': 'Battle stance', onclick: (e) => e.stopPropagation(), onchange: (e) => { f.stance = e.target.value; save(); } },
       ...[['normal', 'Normal'], ['offensive', 'Offensive'], ['defensive', 'Defensive']].map(([v, t]) => el('option', { value: v, selected: (f.stance || 'normal') === v ? 'selected' : false }, t))));
     if (HO.feature(G, 'lateArrival')) acts.append(el('label', { class: 'chk', onclick: (e) => e.stopPropagation() }, el('input', { type: 'checkbox', checked: f.delayed ? 'checked' : false, onchange: (e) => { f.delayed = e.target.checked; save(); } }), el('span', null, 'Arrive late')));
-    if (marksScrap()) acts.append(el('button', { class: 'quiet', onclick: (e) => { e.stopPropagation(); toggleScrapFleet(f); } }, scrapWords('fleet')[marked ? 1 : 0]));
+    if (marksScrap() && !T.ownPanel) acts.append(el('button', { class: 'quiet', onclick: (e) => { e.stopPropagation(); toggleScrapFleet(f); } }, scrapWords('fleet')[marked ? 1 : 0]));
     else acts.append(el('button', { class: 'quiet', onclick: (e) => { e.stopPropagation(); confirmBox(`Scrap this fleet for ${Math.round(HO.TYPES ? 75 : 75)}% of its metal?`, () => { const m = HO.scrapFleet(G, f); Sound.play(7003); toast(`Scrapped for ${fmt(m)} metal.`); UI.selFleet = null; renderPanel(); draw(); save(); }); } }, 'Scrap'));
     r.append(acts);
   }
@@ -6381,7 +6382,7 @@ function nextFleet() {
 // End Turn from the keyboard: T. The originals used ⌘T (Mac), Ctrl+T (DOS,
 // Windows) or Amiga+Z; a browser keeps Ctrl+T and ⌘T for a new tab, so plain
 // T is the key here (Ctrl/⌘+T is tried too, where the browser lets it through).
-const END_KEY = () => `Keyboard: T${T.endTurnKey ? ` (in the original: ${T.endTurnKey}${/T$/.test(T.endTurnKey) ? ', which a browser keeps for opening a new tab' : ''})` : ''}`;
+const END_KEY = () => T.lettersPickStars ? 'Keyboard: ⌘T or Ctrl+T, which a browser may keep for opening a new tab (here the letters pick a star, as in the original)' : `Keyboard: T${T.endTurnKey ? ` (in the original: ${T.endTurnKey}${/T$/.test(T.endTurnKey) ? ', which a browser keeps for opening a new tab' : ''})` : ''}`;
 document.addEventListener('keydown', guard((e) => {
   if (UI.modal || !G) return;
   if (e.key === 'Tab' && e.target === document.body) { e.preventDefault(); nextFleet(); }
