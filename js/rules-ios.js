@@ -290,6 +290,13 @@ const rs = Object.assign(base, {
   ai: 'original',           // the computers: 5.0.5's (0x1000239e0 = FUN_10081cc0, every step paired)
   turn505: true,            // the 5.0.5 turn (0x10002dca8 = FUN_10072a10)
   fixOptions, evacuateToggle, msgText, autoPlaySettings, gameCenter,
+  // CONFIRMED (-[IncomeLayer init] 0x100008e00 puts the Income line on top, Savings below it and Metal last, each with its label from Misc
+  // Strings 26, 24 and 23 (setupLabelByID: 0x1a, 0x18, 0x17): "Income:", "Savings:", "Metal:"; en, fr and tr .lproj; the savings line carries the
+  // interest and the others their changes, below)
+  panelInfo: { order: ['income', 'savings', 'metal'], words: {
+    en: { income: 'Income:', savings: 'Savings:', metal: 'Metal:' },
+    fr: { income: 'Revenu:', savings: 'Économies:', metal: 'Métal:' },
+    tr: { income: 'Gelir:', savings: 'Birikim:', metal: 'Metâl:' } } },
   // CONFIRMED (SavedGameData, sub_100098b1c: a folder per game, named by its
   // creation time; the Saved Games screen, 0x10009ba08; -[WelcomeScene ...]:
   // the title's buttons; help_index.html; DDGameKitHelper showLeaderboard,
