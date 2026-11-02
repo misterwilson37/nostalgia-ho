@@ -1389,5 +1389,9 @@ root.HOUI.add([
 // the welcome scene's version label (WelcomeScene init 0x10001dad0: a literal format in the app, not in any language's list; the same in every language)
 ['Spaceward Ho: Version 1.2.9 (811605)', 'Spaceward Ho: Version 1.2.9 (811605)', 'Spaceward Ho: Version 1.2.9 (811605)', 'Spaceward Ho: Version 1.2.9 (811605)', 'Spaceward Ho: Version 1.2.9 (811605)', I],
 ['Spaceward Ho: Version 1.2.8 (811597)', 'Spaceward Ho: Version 1.2.8 (811597)', 'Spaceward Ho: Version 1.2.8 (811597)', 'Spaceward Ho: Version 1.2.8 (811597)', 'Spaceward Ho: Version 1.2.8 (811597)', I],
+// the iOS welcome scene's rank node and the Give dialog's empty-list alert (seventh pass)
+['Sorry, but there is no one else alive to give or send something to.', 'Désolé, mais il n\'y a personne de vivant à qui donner ou envoyer quelque chose.', 'Leider ist niemand sonst mehr da, dem Sie etwas geben oder schicken können.', 'Üzgünüm,  bir şey verecek veya gönderilece başka canlı kimse kalmadı.', 'Lo siento, pero no queda nadie más a quien dar o enviar algo.', I],
+['Rank: %s', 'Rang: %s', 'Rang: %s', 'Derece: %s', 'Rango: %s', I],
+['Master Points: %u', 'Master Points: %u', 'Meisterpunkte: %u', 'Usta derece: %u', 'Puntos maestros: %u', I],
 ]);
 })(typeof window !== 'undefined' ? window : globalThis);
