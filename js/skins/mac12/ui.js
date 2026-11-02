@@ -63,7 +63,7 @@ function menuLayout() {
     Edit: [it('Undo', () => {}, { ghost: () => true, key: 'Z' }), '-', it('Cut', () => {}, { ghost: () => true, key: 'X' }), it('Copy', () => {}, { ghost: () => true, key: 'C' }),
       it('Paste', () => {}, { ghost: () => true, key: 'V' }), it('Clear', () => {}, { ghost: () => true })],
     Options: [
-      it('Set Battle Speed…', () => A().openPrefs(), { ghost: noGame }),
+      it('Set Battle Speed…', () => battleSpeed12(), { ghost: noGame }),
       '-',
       it('Show Event Messages', () => { P().showMsgs = P().showMsgs === false; A().savePrefs(); }, { ghost: noGame, checked: () => P().showMsgs !== false }),
       it('Review Announced Battles', () => { P().review = !A().prefReview(); A().savePrefs(); }, { ghost: noGame, checked: () => A().prefReview() }),
@@ -469,6 +469,43 @@ function fixStep() {
   const card = el('div', { class: 'card', tabindex: 0, role: 'button', onclick: fixStep });
   card.append(im ? el('img', { src: im.src, alt: '', class: 'micon' }) : el('span'), el('div', { class: 'mtext' }, raw('p', r.text.indexOf('{') >= 0 ? H().trSuffixes(r.text) : r.text), more ? raw('div', H().rules(g).bubbleMore[lang()] || '', { class: 'count' }) : null));
   box.append(card);
+}
+
+// DLOG 4040 "Vitesse des batailles…" (doBattleSpeedDialog @120c48: 265 x 168; DITL 4040: "Vitesse des batailles:" at (26, 13),
+// "Rapide" (27, 46), the slider CNTL 4040 (84, 46, 214, 62; 10 to 60 ticks a shot), "Lente" (215, 46), the value's text at 295,
+// outside the window, "Animation complète" (26, 74), OK (186, 116, 244, 136)); Stup +0x4e and +0x48
+function battleSpeed12() {
+  const a = A(), el = a.el, P = a.Prefs, O = (H().rules(G()).options || {}).battleSpeed || { min: 10, max: 60, def: 30 };
+  if (!own()) return a.openPrefs();
+  const fr = lang() === 'fr', W = fr ? ['Vitesse des batailles:', 'Rapide', 'Lente', 'Animation complète', 'OK'] : ['Battle Speed:', 'Fast', 'Slow', 'Fully Animated Battles', 'OK'];
+  const v = P.battleSpeed != null && P.battleSpeed >= O.min && P.battleSpeed <= O.max ? P.battleSpeed : O.def;
+  const at = (l, t, w, h) => `position:absolute;left:${l}px;top:${t}px;width:${w}px;height:${h}px`;
+  const sl = el('input', { type: 'range', min: O.min, max: O.max, value: v, style: at(84, 46, 130, 16), 'aria-label': W[0] });
+  const cb = el('input', { type: 'checkbox', checked: P.fullAnim !== false ? 'checked' : false });
+  const ok = () => { P.battleSpeed = +sl.value; P.fullAnim = cb.checked; a.savePrefs(); a.closeModal(); };
+  const box = el('div', { class: 'bs12', style: 'position:relative;width:265px;height:168px' },
+    raw('span', W[0], { style: at(26, 13, 155, 17) }), raw('span', W[1], { style: at(27, 46, 57, 14) }), sl, raw('span', W[2], { style: at(215, 46, 45, 16) }),
+    el('label', { style: at(26, 74, 216, 18) + ';display:flex;align-items:center;gap:4px' }, cb, raw('span', W[3])),
+    el('button', { onclick: ok, style: at(186, 116, 58, 20) + ';min-width:0;padding:0' }, raw('span', W[4])));
+  a.modal('', box, { cls: 'mac12 bs12w', label: W[0] });
+}
+
+// DLOG 4050 (NameAStar @120a04: a dialog box with no title, 281 x 217; DITL 4050: the two lines at (9, 6) and (9, 45), the
+// "(Si vous ne voulez pas…)" line at (9, 82), a picture item for PICT 3000 at (10, 118), which 1.2F's file hasn't got (its colour
+// pictures were in a file of their own; only 3500 and up are here), so nothing, "Nouveau nom d'étoile:" at (95, 119), the field
+// (97, 144, 187, 160) and OK (196, 179, 254, 199); no Cancel)
+function nameStarLayout(f, o) {
+  if (!own()) return false;
+  const a = A(), el = a.el, NS = o.NS, at = (l, t, w, h) => `position:absolute;left:${l}px;top:${t}px;width:${w}px;height:${h}px`;
+  o.inp.setAttribute('style', at(97, 144, 90, 16) + ';box-sizing:border-box;padding:0 2px');
+  o.err.setAttribute('style', at(97, 162, 180, 14) + ';margin:0;font-size:10px');
+  f.innerHTML = '';
+  f.setAttribute('style', 'position:relative;width:281px;height:217px');
+  f.append(raw('p', NS.text, { style: at(9, 6, 265, 35) + ';margin:0' }), raw('p', NS.rule || '', { style: at(9, 45, 263, 34) + ';margin:0' }),
+    raw('p', NS.hint || '', { style: at(9, 82, 263, 34) + ';margin:0' }),
+    raw('span', NS.label || '', { style: at(95, 119, 150, 16) }), o.inp, o.err,
+    el('button', { type: 'submit', style: at(196, 179, 58, 20) + ';min-width:0;padding:0' }, raw('span', NS.ok || 'OK')));
+  return true;
 }
 
 // ---------- a route line (StarLine @c70c4, MakeArrowRegion @12da0) ----------
@@ -898,6 +935,14 @@ function battleWindow(b, k) {
   })();
 }
 
+// (ClickInReportWindow @1304f8: the report clicked is inverted while the button is down and at least 5 ticks, then acted on)
+document.addEventListener('click', (ev) => {
+  const li = ev.target && ev.target.closest && ev.target.closest('ul.reports li');
+  if (!li || li.dataset.inv12 === 'go' || !G() || !own()) return;
+  ev.stopImmediatePropagation(); ev.preventDefault();
+  li.classList.add('inv12');
+  setTimeout(() => { li.classList.remove('inv12'); li.dataset.inv12 = 'go'; li.click(); delete li.dataset.inv12; }, 5000 / 60);
+}, true);
 window.HOMAC12 = {
   battleWindow,
   // (the Edit menu's French title is 1.2F's "Edition", which the interface would take for its English word "Edition": written as it is)
@@ -925,6 +970,7 @@ window.HOMAC12 = {
   // (FollowPathDrag @c69d6: PickStar under the pointer, a line only to a star)
   dragRoute(cx, d) { if (!own()) return false; if (!d.star) return true; return starLine(cx, { x1: d.x1, y1: d.y1, x2: d.x2, y2: d.y2, ok: d.ok, round: d.round, turns: d.turns }); },
   routeLine(cx, d) { if (!own()) return false; return starLine(cx, { x1: d.x1, y1: d.y1, x2: d.x2, y2: d.y2, ok: true, round: d.round, turns: d.turns }); },
+  nameStarLayout,
   mapNameStyle(cx, s) { cx.letterSpacing = own() && zoomIdx(s) === 1 ? '-1px' : '0px'; },
   drawStar(cx, i) { if (!own() || zoomIdx(i.view.s) > 0) return false; cx.fillStyle = '#fff'; cx.beginPath(); cx.arc(i.x, i.y, 2.5, 0, Math.PI * 2); cx.fill(); return 'all'; },
   lettersPickStars: true,

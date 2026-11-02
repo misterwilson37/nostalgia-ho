@@ -4292,6 +4292,8 @@ function openNameStar(done, cancelled) {
     finish();
   } }, el('p', null, NS.text), NS.rule ? el('p', null, NS.rule) : null, el('label', null, el('span', null, NS.label || 'Star name'), inp), NS.hint ? el('p', { class: 'note' }, NS.hint) : null, err,
     el('div', { class: 'btns right' }, el('button', { type: 'button', class: 'quiet', onclick: () => { if (cancelled) cancelled(); finish(); } }, NS.cancel || 'Cancel'), el('button', { type: 'submit' }, NS.ok || 'OK')));
+  // (T.nameStarLayout(form, { NS, inp, err }): a skin lays the window out as its version's dialog, in the same form; true: no title)
+  if (T.nameStarLayout && T.nameStarLayout(f, { NS, inp, err })) { modal('', f, { cls: 'small', sticky: true, label: NS.title || 'Name a Star' }); return; }
   modal(NS.title || 'Name a Star', f, { cls: 'small', sticky: true });
 }
 // Force End Turn (rs.forceEndTurn, Mac 2.0.1): with several players, marks

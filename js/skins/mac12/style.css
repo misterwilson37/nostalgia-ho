@@ -35,3 +35,14 @@
 #panel .low12 .rost12 { flex: 0 0 30%; }
 #panel .low12 .rost12 .box { margin: 0; }
 #panel .low12 > .box { flex: 1 1 auto; min-width: 0; margin: 0; }
+/* a report clicked, inverted for 5 ticks (ClickInReportWindow) */
+ul.reports li.inv12 { filter: invert(1); background: #fff; }
+/* "Planètes explorées…" (DLOG 6040, a dialog box with no title, 486 x 296; DITL 6040: the text at (13, 2), the list 455 x 226 at
+   (13, 26) with its five fields 100, 75, 75, 75 and 75 wide (InitStarsList, LDEF 1000), "Rejoindre planète" and OK at the foot) */
+.win:has(.exlist.exmac) { width: 486px; max-width: calc(100vw - 16px); }
+.win:has(.exlist.exmac) .wtitle { display: none; }
+.win:has(.exlist.exmac) .wbody > div > p.sub { margin: 2px 13px 4px; }
+.exlist.exmac { width: 455px; max-width: 100%; height: 226px; overflow-y: auto; margin: 0 13px; box-sizing: border-box; }
+.exlist.exmac .exrow { display: flex; }
+.exlist.exmac .exrow > span { flex: 0 0 75px; text-align: left; white-space: nowrap; overflow: hidden; }
+.exlist.exmac .exrow > span:first-child { flex-basis: 100px; }
