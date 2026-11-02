@@ -14,6 +14,10 @@ with a symbolic trace (stack arguments put back; `audit/<version>/` in the priva
 its own language and in English, and fix each mismatch from the evidence (patch-only for clear bugs). `node tools/display-audit.js
 <version>` checks the table (every routine has a row, every row a reason, none open; `--gaps` lists the mismatches found and not
 fixed); numbers stay in `tools/format-audit.js`, which the rows link. 1.2: `docs/display/12.json`, `docs/12-findings.md` "Display audit".
+The standard (Jake): in the version's own skin its windows' contents, wording, order, layout, dimming, animation and sounds are the
+original's, read from the code and the DITLs; the outer frame is the OS look; only what a browser can't do (file dialogs, printing,
+another program's file) stays a kept difference, with its reason. Rects a program keeps in its initial globals come from its packed
+A5 world (Mac 68k: the %A5Init segment; `audit/mac-1.2F/tools/a5world.py` in the private repo).
 Order for the other versions (Jake): newest first, then backwards: iOS 1.2.9 and Android 1.2.8, then 5.0.5 and the Palm, then
 Windows and Mac 4.0.5, then 3.0.1 (English and French), then 2.0 (DOS, Windows 3.1, Mac 2.0.1), then the Amiga.
 

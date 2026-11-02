@@ -693,7 +693,17 @@ symbolic trace and compared with the remake in French and English. Found and fix
   the lost-battle record is ALRT 3310; Options has "Alerter sur dépenses" ("Give Overspending Warnings"). `rs.alertWords`.
 - **A new colony plays snd 2000** (the skin had no file for the id the rules asked); the **fleet list leaves out satellites**.
 
-Mismatches found and **not fixed** are rows with `"gap": true` (`node tools/display-audit.js 12 --gaps`): among them the battle sounds
-(the original picks snd 3000/3001/3002 by 10 x damage / hit points; the remake by shot number), the fleet info lines ("Plein/Vide",
-Dist/Temps), the Existing Designs window's costs and levels and Rename, Build Ships' own words and layout, the roster strip, the
-menus' dimming and dynamic words, the progress window and "Suite…" in the bubble. Rows still `open` are listed by `--open`.
+- **In its own skin (Mac 1.2), the windows are the program's**: the menus (MENU 128-134, their dimming and changing words), the
+  battle window as `DoOneBattle` draws it (445 x 310, white on black with its 35 stars, one column of at most five groups a side
+  cut as the fight cut them, the 40 x 40 ship parts, Geneva 9 words condensed when wide, the moving bolt of `DrawLaserBlast`, the hit
+  pictures and rings of `DrawExplosion`, the sounds by 10 x damage / hit points, the no-information case of `DrawAllGroups`), the map
+  window's boxes at the program's rects (unpacked from the %A5Init segment's A5 world: planet, fleets, totals, players beside the
+  budget bars), the vertical bars of `DrawVBarControl` with a finished part's empty bar that beeps and the queue in their place once
+  terraforming and mining are done, the Tech Spending and Report windows under the map window, route lines as `StarLine` and
+  `MakeArrowRegion` make them, the names condensed at the second zoom, the turn's status window, the battles shown before the
+  reports (`DoBattleStage`), Correction dépenses in the bubble, DLOG 4040 / 4050 / 6040 laid out as their DITLs, a report clicked
+  inverted for 5 ticks. A marked fleet keeps its fuel, speed and scrap lines (`DrawSelectedFleetInfo @c5024`).
+
+Every row is settled: none `open`, none with `"gap": true` (`node tools/display-audit.js 12`). Two differences are kept, each with
+its reason in its row: New Game asks for the file name in the remake's New Game window (a browser has no Mac file dialog), and the
+multi-player file's polling (`PollNextTurn`) is the remake's own hot seat.
