@@ -343,6 +343,13 @@ function bars(panel, B) {
   }
 }
 
+// the Apple menu's "About Spaceward Ho! 1.2…" (DoAppleMenu @e2604: DLOG 1101, PICT 1001 over PICT 4010; a click closes it, WaitForInput)
+function aboutBox() {
+  const a = A(), el = a.el, im = a.IMG['dos:p1001'], pl = a.IMG['dos:p4010'];
+  const body = el('div', { class: 'about12', onclick: () => a.closeModal() }, im ? el('img', { src: im.src, alt: 'Spaceward Ho!' }) : null, pl ? el('img', { src: pl.src, alt: '' }) : null);
+  a.modal('', body, { cls: 'mac12 about', label: 'About Spaceward Ho! 1.2…' });
+}
+
 window.HOMAC12 = {
   // (the planet box without the remake's own additions: classic ui planetBox)
   ownPanel: true,
@@ -365,6 +372,7 @@ window.HOMAC12 = {
     const extra = [];
     for (const k in M) { for (const x of M[k]) if (x[0] !== '-' && !(typeof x[0] === 'string' && own.has(x[0]))) extra.push(x); M[k].length = 0; }
     // (View's sound and music, Help's How to play and the manual stay reachable)
+    ho.unshift(['About Spaceward Ho! 1.2…', aboutBox], ['-']);
     if (extra.length) ho.push(['-'], ...extra.filter(x => !(typeof x[0] === 'function' && /scrap|organize|organi/i.test(String(x[0]())))));
   },
   get menuLayout() { return menuLayout(); },

@@ -15,3 +15,4 @@
 
 .strip12 { display: flex; justify-content: space-between; font-weight: normal; font-size: 11px; }
 .mintick { position: absolute; top: -3px; bottom: -3px; width: 1px; background: currentColor; }
+.about12 { display: flex; flex-direction: column; align-items: center; cursor: pointer; } .about12 img { image-rendering: pixelated; display: block; }
