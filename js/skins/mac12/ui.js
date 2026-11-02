@@ -471,6 +471,38 @@ function fixStep() {
   box.append(card);
 }
 
+// ---------- a route line (StarLine @c70c4, MakeArrowRegion @12da0) ----------
+// A region from star centre to star centre, 2 pixels wide, with an open arrow head at an end the fleet can reach (the far
+// end when it can get there, the near one too when it can come back): the tip on the centre, the barbs 13 pixels out and 9
+// back, 11 out and 11 back on the inside; painted white (PaintRgn after ForeColor 30), in qd.gray when the fleet can't
+// reach; the turns in white on a black box at the middle (left at the midpoint, 11 high, the number 3 in and 2 up). Drawn
+// at the map's pixel size (two of the page's to one of the program's).
+function starLine(cx, d) {
+  const k = LY, dx = d.x2 - d.x1, dy = d.y2 - d.y1, len = Math.hypot(dx, dy);
+  if (len < 1) return true;
+  const ux = dx / len, uy = dy / len, nx = -uy, ny = ux, mx = (d.x1 + d.x2) / 2, my = (d.y1 + d.y2) / 2, L = len / 2 / k, w = 1;
+  const pts = [[w, L - w], [w, -L + w]];
+  if (d.ok) pts.push([w + 10, -L + 12 - w], [w + 12, -L + 10 - w], [0, -L], [-w - 12, -L + 10 - w], [-w - 10, -L + 12 - w]);
+  pts.push([-w, -L + w], [-w, L - w]);
+  if (d.ok && d.round) pts.push([-w - 10, L - 12 + w], [-w - 12, L - 10 + w], [0, L], [w + 12, L - 10 + w], [w + 10, L - 12 + w]);
+  cx.save();
+  cx.beginPath();
+  pts.forEach(([h, v], i) => { const X = mx + k * (h * nx - v * ux), Y = my + k * (h * ny - v * uy); if (i) cx.lineTo(X, Y); else cx.moveTo(X, Y); });
+  cx.closePath();
+  if (d.ok) cx.fillStyle = '#fff';
+  else { const p = document.createElement('canvas'); p.width = 2 * k; p.height = 2 * k; const q = p.getContext('2d'); q.fillStyle = '#fff'; q.fillRect(0, 0, k, k); q.fillRect(k, k, k, k); cx.fillStyle = cx.createPattern(p, 'repeat'); }
+  cx.fill();
+  if (d.turns != null) {
+    const t = String(d.turns);
+    cx.font = (9 * k) + 'px Geneva, Verdana, sans-serif'; cx.textAlign = 'left'; cx.textBaseline = 'alphabetic';
+    const tw = cx.measureText(t).width;
+    cx.fillStyle = '#000'; cx.fillRect(mx, my - 11 * k, tw + 4 * k, 11 * k);
+    cx.fillStyle = '#fff'; cx.fillText(t, mx + 3 * k, my - 2 * k);
+  }
+  cx.restore();
+  return true;
+}
+
 // ---------- the map window's boxes as 1.2 draws them (MapWinProc; the rects from the program's initial data: planet 0,0-226,68,
 // fleets 0,70-226,132, totals 0,132-226,166, then the players' icons 0-67 and the budget bars 79-214 down to the foot; the
 // Tech Spending window, 228 x 80, sits under the map window's left: Stup 1000 +0xa). Drawn in the window's font, Geneva 9,
@@ -588,6 +620,43 @@ function planetBox12(old) {
   if (s && s.owner === a.ME) q.c.addEventListener('dblclick', () => a.openBuild(s.id));
   return box;
 }
+// the fleets box (DrawFleetRect @c4c6c, DrawSelectedFleetInfo @c4f7e, DrawOneFleet @c4e3a): 226 x 62; the selected fleet's two
+// lines at the top (its place or orders at 3, the star or the trip at 70; then fuel at 3, speed at 70 and "Recycl." or "Plein" /
+// "Vide" at 125), a rule at 18 over the rows, your fleets at the star four rows of 10 (MakeFleetDescription at 3, bold when it has
+// orders, condensed when wider than the row, the selected one inverted) with the scroll bar at the right, or "Pas de vaisseau sur
+// cette planète." (4000.11); a double rule along the foot and a rule down the right.
+let FLEET_TOP = 0;
+function fleetBox12() {
+  const a = A(), g = G(), rs = H().rules(g), s = a.UI.sel != null ? g.stars[a.UI.sel] : null, W = (rs.planetInfo || {})[lang()] || {};
+  const q = qdCanvas(226, 62, 'Fleets');
+  const here = s ? a.fleetOrder(g.fleets.filter(f => f.star === s.id && f.to == null && f.owner === a.ME)) : [];
+  const sel = here.find(f => f.id === a.UI.selFleet);
+  FLEET_TOP = Math.max(0, Math.min(FLEET_TOP, here.length - 4));
+  if (sel) {
+    const L = rs.fleetInfo ? rs.fleetInfo(g, sel) : [];
+    const first = L[0] || '', m = /^(.*?:) (.*)$/.exec(first);
+    if (m && !sel.scrap301 && !/ via /.test(first)) { q.text(m[1], 3, 6); q.text(m[2], 70, 6); } else q.text(first, 3, 6);
+    if (L[1]) q.text(L[1], 3, 16); if (L[2]) q.text(L[2], 70, 16); if (L[3]) q.text(L[3], 125, 16);
+  }
+  q.hline(0, 214, 18);
+  if (!here.length) q.text(W.noFleets || '', 3, 28);
+  here.slice(FLEET_TOP, FLEET_TOP + 4).forEach((f, i) => {
+    const top = 19 + 10 * i, ds = H().fleetDesigns(g, f), d = ds[0], n = H().fleetCount ? H().fleetCount(f) : Object.values(f.ships).reduce((x, y) => x + y, 0);
+    const t = d && rs.shipsText ? rs.shipsText(g, d, n) : '';
+    const font = f.dest != null ? G9B : G9, cond = q.width(t, font) > 214 - 3;
+    q.text(t, 3, top + 8, font, { cond });
+    if (f.id === a.UI.selFleet) { q.x.globalCompositeOperation = 'difference'; q.rect(0, top, 214, top + 10, '#fff'); q.x.globalCompositeOperation = 'source-over'; }
+  });
+  // the scroll bar (an OS control: drawn plainly), 12 wide, from the rule to the foot
+  q.x.strokeStyle = '#000'; q.x.strokeRect(214.5, 18.5, 11, 41); if (here.length > 4) { const h = Math.max(6, 41 * 4 / here.length), y = 18.5 + (41 - h) * FLEET_TOP / (here.length - 4); q.rect(215, y, 225, y + h, '#888'); }
+  q.hline(0, 226, 59); q.hline(0, 226, 61); q.vline(225, 0, 62);
+  q.c.addEventListener('click', (ev) => { // ClickInFleetRect @c67d0: a row selects its fleet
+    const pt = q.at(ev); if (pt.h >= 214 || pt.v < 19) return;
+    const f = here[FLEET_TOP + Math.floor((pt.v - 19) / 10)]; if (f) { a.UI.selFleet = f.id; a.renderPanel(); a.draw(); }
+  });
+  q.c.addEventListener('wheel', (ev) => { if (here.length <= 4) return; ev.preventDefault(); FLEET_TOP += ev.deltaY > 0 ? 1 : -1; a.renderPanel(); }, { passive: false });
+  return a.el('section', { class: 'box fleets12' }, q.c);
+}
 function incomeBox12(old) {
   const a = A(), q = qdCanvas(226, 34, 'Totals');
   const rows = old ? Array.from(old.querySelectorAll('.kv')) : [];
@@ -620,9 +689,7 @@ function panel12(panel, B) {
   bars(panel, B);
   const old = B.planet;
   const pb = planetBox12(old);
-  // the fleets box (DrawFleetRect): the planet box's fleet lines, in a box of their own under it
-  const fb = el('section', { class: 'box fleets12' });
-  if (old) old.querySelectorAll(':scope > .fleets, :scope > p.note:last-of-type, :scope > .btns').forEach(n => { if (!n.matches('p.note') || !old.querySelector('.kv[data-help="temp"]') || n === old.querySelector(':scope > p.note:last-of-type')) fb.append(n); });
+  const fb = fleetBox12();
   const ib = incomeBox12(B.info);
   const rost = el('div', { class: 'rost12' }); roster(rost);
   const low = el('div', { class: 'low12' }, rost, B.budget);
@@ -854,6 +921,10 @@ window.HOMAC12 = {
   fitView(v, c) { if (!own()) return; const st = c.G.stars[c.sel != null ? c.sel : c.G.players[c.ME].homeStar]; v.s = ZOOMS[3]; if (st) { v.ox = c.mapW / 2 - st.x * v.s; v.oy = c.mapH / 2 - st.y * v.s; } },
   mapNames: (s) => (own() ? zoomIdx(s) > 0 : s > 18),
   // (DrawOneBWStarSubProc @c38ce: at the second zoom the names are drawn condensed, TextFace 0x20: a pixel less between letters)
+  // (StarLine: the line while a fleet is dragged, and a fleet's orders)
+  // (FollowPathDrag @c69d6: PickStar under the pointer, a line only to a star)
+  dragRoute(cx, d) { if (!own()) return false; if (!d.star) return true; return starLine(cx, { x1: d.x1, y1: d.y1, x2: d.x2, y2: d.y2, ok: d.ok, round: d.round, turns: d.turns }); },
+  routeLine(cx, d) { if (!own()) return false; return starLine(cx, { x1: d.x1, y1: d.y1, x2: d.x2, y2: d.y2, ok: true, round: d.round, turns: d.turns }); },
   mapNameStyle(cx, s) { cx.letterSpacing = own() && zoomIdx(s) === 1 ? '-1px' : '0px'; },
   drawStar(cx, i) { if (!own() || zoomIdx(i.view.s) > 0) return false; cx.fillStyle = '#fff'; cx.beginPath(); cx.arc(i.x, i.y, 2.5, 0, Math.PI * 2); cx.fill(); return 'all'; },
   lettersPickStars: true,

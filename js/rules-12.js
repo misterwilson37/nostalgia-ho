@@ -60,7 +60,8 @@ function shipsText12(G, d, n) {
 // ---------- the selected fleet's lines (DrawSelectedFleetInfo @c4f7e) ----------
 // CONFIRMED: STR# 4000.12-21 (French) and Mac 2.0.1's literals in its DrawSelectedFleetInfo (the English): stationary "Stationed at: <star>",
 // moving "Departing to: <star> (Dist %d; Time %d)" or, on a route, "Going to <end> (D %d; T %d) via <next>"; then "Fuel: %d/%d" and "Speed: %d";
-// a colony ship "Full" (colonists aboard) or "Empty", any other fleet "Scrap: <metal>"; a fleet marked for scrapping only its own line.
+// a colony ship "Full" (colonists aboard) or "Empty", any other fleet "Scrap: <metal>"; a fleet marked for scrapping its own line ("En
+// recyclage.", 4000.12) in place of the first, the others as for any fleet (@c5024-c504e: the marked line, then on to @c51f0's).
 const FLEET_WORDS = {
   fr: { orbit: 'En orbite à:', dep: 'Départ pour:', direct: '%s (Dist %d; Temps %d)', via: 'Allant à %s (D %d; T %d) via %s', fuel: 'Fuel: %d/%d', speed: 'Vitesse: %d', full: 'Plein', empty: 'Vide', scrap: 'Recycl.: %s', marked: 'En recyclage.' },
   en: { orbit: 'Stationed at:', dep: 'Departing to:', direct: '%s (Dist %d; Time %d)', via: 'Going to %s (D %d; T %d) via %s', fuel: 'Fuel: %d/%d', speed: 'Speed: %d', full: 'Full', empty: 'Empty', scrap: 'Scrap: %s', marked: 'Fleet to be scrapped for metal.' },
@@ -68,10 +69,10 @@ const FLEET_WORDS = {
 function fleetInfo12(G, f) {
   const W = FLEET_WORDS[(G.opts && G.opts.lang) || 'fr'];
   const fill = (t, ...a) => { let i = 0; return t.replace(/%[sd]/g, () => String(a[i++])); };
-  if (f.scrap301) return [W.marked];
   const out = [], star = (i) => G.stars[i].name, sp = E.fleetSpeed(G, f);
   const hops = [f.star != null ? f.star : f.from].concat(f.dest != null ? [f.dest] : [], f.path || []);
-  if (f.dest == null && f.to == null) out.push(W.orbit + ' ' + star(f.star));
+  if (f.scrap301) out.push(W.marked);
+  else if (f.dest == null && f.to == null) out.push(W.orbit + ' ' + star(f.star));
   else {
     let dist = 0, time = 0;
     for (let i = 0; i + 1 < hops.length; i++) { const d = E.starDist(G, hops[i], hops[i + 1]); dist += d; time += Math.ceil(d / sp - 1e-9); }

@@ -688,8 +688,7 @@ function draw0() {
     // (the Amiga's double white line, its turns and its open chevrons)
     if (T.dragRoute) {
       const inReach = tgt != null && tgt !== f.star;
-      T.dragRoute(cx, { x1: sx(a.x), y1: sy(a.y), x2, y2, ok: inReach && ok, turns: inReach ? Math.ceil(HO.starDist(G, f.star, tgt) / HO.fleetSpeed(G, f) - 1e-9) : null, round: inReach && ok && round });
-      return;
+      if (T.dragRoute(cx, { x1: sx(a.x), y1: sy(a.y), x2, y2, ok: inReach && ok, turns: inReach ? Math.ceil(HO.starDist(G, f.star, tgt) / HO.fleetSpeed(G, f) - 1e-9) : null, round: inReach && ok && round, star: inReach }) !== false) return;
     }
     cx.save();
     // too far, but a route through your colonies exists (modern): show it
@@ -834,6 +833,8 @@ function drawDots(s, x, y, ps) {
 }
 function drawRoute(a, b, speed, color, frac, round) {
   const x1 = sx(a.x), y1 = sy(a.y), x2 = sx(b.x), y2 = sy(b.y);
+  // (T.routeLine(cx, { x1, y1, x2, y2, round, color, turns }): a skin's own line for a fleet's orders; true: drawn)
+  if (T.routeLine && T.routeLine(cx, { x1, y1, x2, y2, round: !!round, color, turns: a.id != null && b.id != null && speed ? Math.ceil(HO.starDist(G, a.id, b.id) / speed - 1e-9) : null })) return;
   cx.strokeStyle = color; cx.lineWidth = 1.6; cx.globalAlpha = 0.85;
   cx.beginPath(); cx.moveTo(x1, y1); cx.lineTo(x2, y2); cx.stroke();
   arrowHead(x1, y1, x2, y2, color);

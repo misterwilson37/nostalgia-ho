@@ -30,7 +30,7 @@
 .bw12w .bw12b { position: absolute; left: calc(193 / 445 * 100%); top: calc(273 / 310 * 100%); width: calc(58 / 445 * 100%); height: calc(20 / 310 * 100%); min-width: 0; padding: 0; }
 /* the map window's boxes as 1.2 draws them (planet, fleets, totals, players | budget, the Tech Spending window): canvases the panel's width */
 #panel canvas.qd12 { display: block; width: 100%; height: auto; image-rendering: pixelated; }
-#panel .box.planet12, #panel .box.info12, #panel .box.tech12 { padding: 0; }
+#panel .box.planet12, #panel .box.fleets12, #panel .box.info12, #panel .box.tech12 { padding: 0; }
 #panel .low12 { display: flex; gap: 0; align-items: flex-start; }
 #panel .low12 .rost12 { flex: 0 0 30%; }
 #panel .low12 .rost12 .box { margin: 0; }
