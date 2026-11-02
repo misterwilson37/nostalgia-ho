@@ -939,8 +939,8 @@ temperature the panel's ("72.0ºF", a point). `docs/dos-findings.md`, "The repor
 `docs/display/ios-routines.tsv`, from the private repo's `decompiled/ios-1.2.9/index.tsv`; the decompile and its method are in that repo's
 `HOW.md`). Settled: 4,502 `internal` (cocos2d, CocosDenshion, TouchJSON, FontLabel, Game Kit helpers and the finger-tip overlay by class; accessors,
 `dealloc`, import stubs, block helpers and pure computations by script over the decompile, each row's reason says which; the 293 rule-core routines
-that call no message and name no string; file, archive and string-list plumbing), 10 `matched` (the number, fleet-description, temperature and report
-formatters, linked to `tools/format-audit.js`), 8 `notShown` (Game Center's synchronisation), 1 `fixed`. **523 rows are still open**
+that call no message and name no string; file, archive and string-list plumbing), 20 `matched` (the number, fleet-description, temperature and report
+formatters, linked to `tools/format-audit.js`), 8 `notShown` (Game Center's synchronisation), 1 `fixed`. **512 rows are still open**
 (`--open`): the game's own interface classes (MapLayer, BuildSingleShipDialog, OrganizeFleetsLayer, HoBarLayer, ShipNode, BarMenuItem, TurnMessageLayer,
 PreferencesLayer, NewGameScene, GiveDialogLayer and the rest), whose windows have not yet been read routine by routine against the remake.
 
@@ -969,3 +969,49 @@ his information (or the year is 2000 or later) his gravity and temperature ("%ld
 faces (`player_list_happy`, `player_list_sad`) 20 further right; and last a label at three quarters of the width with the pact word by the toggle state:
 2 "Buddies" (Misc 175), 3 "Only Ally" (183), 4 "Buddy!" (176), 5 "Buddy?" (177), 6 "Allies" (180), 7 "Declare War" (179), 8 "Ally!" (181), 9 "Ally?" (182),
 10 "Enemy" (178). The remake's Players window (a table with switches) shows none of this layout; it is the first thing to rebuild in the players group.
+
+## Main screen (November 2026; built in `js/skins/ios/ui.js` and `style.css`)
+
+Read from the decompile (`-[MainGameScene init]` 0x10000c734, `menuWithName:selector:` 0x10000c5e4, `toggleInfo/History/Stars/Players` 0x10000c11c-0x10000c4c8,
+`toggleNodes:` 0x10000bf5c, `-[PlanetInfoLayer init]` 0x1000b2a64 and `updateData` 0x1000b2df4, `-[IncomeLayer init]` 0x100008e00 and `updateData` 0x100009200,
+`-[TurnMessageLayer init]` 0x10001c4e8, `+[BarMenuItem calculate]` 0x1000104ec, `-[MapLayer setBoundsForSidebar]` 0x10000db54, `+[GraphicDefines setup]`
+0x100008548). Ghidra loses the float arguments of `objc_msgSend`, so every number below was read from the disassembly (`llvm-objdump`, the literal pools and the
+`__data` globals, which a small script in the private repo's scratch reads: the iPad's values are the globals' initial contents, `setup` overwrites them for an
+iPhone). The app has no portrait layout: it is landscape only, laid out from `winSize`; the two device classes are `GraphicDefines setup`'s (the idiom).
+
+**Units.** Points of the device's screen: an iPhone is 568 x 320 (480 x 320 on the 3.5-inch ones), an iPad 1024 x 768; the art is Retina (@2x, -hd), drawn at half size.
+The remake draws in the same points: CSS `--u` pixels to the point, `--u` = the window's height over 320 (iPhone) or 768 (iPad), so the screen scales to any desktop
+window; a window whose short side is under 600 CSS pixels is an iPhone, else an iPad (the idiom is not a thing a page has; the Android skin's tablet test is the same
+approximation); a portrait phone is `--u` = width / 360.
+
+| Element | iPhone | iPad | Source |
+|---|---|---|---|
+| Sidebar width W | trunc(winW x 0.45), at least 220 (255 at 568) | trunc(winW x 0.3), at least 220 (307 at 1024) | `BarMenuItem calculate`: x 0.45 / 0.3 by the idiom |
+| A row, the type | trunc(W x 0.08) (20), the type 0.7 of it (14) | 24, 16.8 | same: 0.08, 0.7 |
+| Gap `a80` | 4 | 8 | `GraphicDefines` globals |
+| Button column | `button-dollar`, `-news`, `-planet`, `-enemy`, 44 x 44, a vertical menu, padding 0, anchor (1, 0.5) at (winW, winH / 2): the right edge, centred; top to bottom in that order | the first two only (`dollar`, `news`), a horizontal menu, padding 2, anchor (0, 0) at (0, 0): the bottom left | `MainGameScene init` (the menu's items, the idiom branch) |
+| An item | a CCMenuItemToggle of two sprites: normal / pressed = the picture tinted 0x7d7d7d; the second state (the container is open) the tinted one | same | `menuWithName:selector:` |
+| `dollar` | toggles the combined information container (the totals, the budget and technology bars) | same, the app opens it at the start (`toggleInfo` is the last call of the iPad's init) | `toggleInfo` |
+| `news` | toggles the message history container | same | `toggleHistory` |
+| `planet`, `enemy` | toggle the stars list and the players list (each its own container) | none: the lists are inside the iPad's combined container | `toggleStars`, `togglePlayers` (on the iPad they only set the map's bounds) |
+| Containers | one of the four at a time (`toggleNodes:` removes the shown one by scaling x to 0 and puts the new one in by scaling x 0 -> 1, both 0.2 s); the map's pan bounds start at W + a80 with the sidebar, at a80 x 10 without | same | `toggleNodes:`, `scaleZeroThenRemove:`, `setBoundsForSidebar` |
+| Graphs | `button-graph` at the top right (anchor (1,1) at (winW, winH)), opens the history graphs dialog | a window shade (`graphs_window_shade`, a GraphNode) at the top right, open at the start | `MainGameScene init` |
+| HUD strip | `PlanetInfoLayer`: anchor (0.5, 1) at (winW / 2, winH - 3); height = type + 4 (18); a row of the visible labels padded by a80, `HUD-left` and `HUD-right` (CCSpriteScale9, caps 8 and 5) each (row width / 2 + 10) wide behind it, the left at x - 5, the right ending at the row + 5; Arial, type size as above, green 0x00ff00 | same, type 16.8 | `PlanetInfoLayer init`, `updateData` |
+| HUD labels, in order | info year ("%d", the year the planet was seen, only when its record is old), owner (or "No One"), income, population ("%s Pop"), temperature (the unit by the preference), gravity ("%d.%2.2dG"), metal ("%s Metal"), "Unexplored" (Misc 42) alone for a star never explored; your colony: income ($), population, temperature, gravity, metal; another's: [year, owner] when its record is old, else owner, population; then temperature, gravity, metal. Figures under 100,000 in full, from there the short form (vtable +0xe0 `FUN_10003cd4c`, +0xe8 `FUN_10003cfec`: "12K", "1.23M") | same | `updateData` |
+| HUD slider | `CCSliderDeluxe` "tmb1" (`slider-tmb1-left`, `-right`, `-thumb`), scale 0.8, centred in the strip, only on your colony that has both terraforming and mining left; the value is the colony's terraform share; dragging sets it | same | `PlanetInfoLayer init`, `valueChanged:tag:` |
+| Totals box (`IncomeLayer`) | top left of the sidebar, W wide, 2.5 rows high; three lines L = 2.5 rows / 3 - 2 apart, at y 4, 4 + L, 4 + 2 L (y runs up, so **Metal on top, Savings, Income at the bottom**: the app's `help_money.png` shows it); the label right-aligned at x = labelW x 0.6 (labelW = trunc(W x 0.45)), the figure left at x + 5, the change right at W - 5; type trunc((L - 2) x 0.9); labels "Metal:", "Savings:", "Income:" (Misc 23, 24, 26); changes "(+ $216)" / "(- $216)" (income, templates 4 and 5), "(+ 0)" / "(- 0)" (metal, 6 and 7), and on the Savings line the interest "(Int: $11K)" (template 8, the short form) | same, rows 24 | `IncomeLayer init`, `updateData` |
+| Report bar | `MessageNode` at the bottom left of the turn layer (0, 0); the box is `message_bar.png` as a CCScale9Sprite (caps 15, 15, 10, 10), opacity 0xf0; the picture is `report_icon-N` | same | `TurnMessageLayer init` |
+| End Turn | `button-empty` (pressed tinted 0x7d7d7d), the label "End Turn" (Misc 137) Arial 18 fitted to the button, centred; "STOP" (Misc 138, 15) while the computer's turns run | same | `TurnMessageLayer init` |
+| Gear | `button-gear` beside End Turn (a row, padding a80, anchor (1, 0): the bottom right); opens the additional menus: a list above the row (iPad) or centred (iPhone) | same | `TurnMessageLayer init` |
+| Touch on the map | the app's own gestures: "Touch controls" above (CCLayerPanZoom: drag, pinch, tap to select, double tap to build, drag from a fleet to send) | same | |
+
+**Built (skin `ios`, and `android`, which loads the same file).** The page's `#panel` is the sidebar (a toggle, 0.2 s scale in x), the map fills the window beside it (the map's width
+moves by W + a80 where there is room: the remake's stand-in for the pan bounds), the column, the graph button, the HUD (live from the selected star), the slider (works: it sets
+the colony's share), the totals box rebuilt as `IncomeLayer` draws it, the report card on `message_bar`, End Turn on `button-empty`, the gear (the page's menus as a strip above the
+buttons). Android is the same screen without Game Center; its Back key closes the sidebar.
+
+**Open (opens the remake's window, not the app's screen).** `news` -> the Reports window, `planet` -> the star list, `enemy` -> the players window, `graph` -> the compare window, the
+gear -> the remake's menus (the app's AdditionalMenu list); the sidebar under the totals is the remake's budget and technology boxes (`HoBarLayer`) and the selected star's box (the
+app draws the star's commands as three round buttons around the star, `button-move`, `-organize`, `-add`: not built); the iPad's graph shade; the message bar's exact size and
+the order of the report picture and text (`MessageNode`, not read); the colours of the totals' text and background (`BackgroundBorderNode` 0xff5a1c18 / 0xffd63c39, unread); the
+sounds of the buttons (none read); on the iPad the stars and players buttons are kept (the app has none) so the lists stay reachable until its combined container is rebuilt.
