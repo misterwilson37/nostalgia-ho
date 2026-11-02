@@ -354,3 +354,24 @@ html.skin-ios .ios-sgb i { position: absolute; inset: calc(1 * var(--pt)); borde
 html.skin-ios .ios-sgy { position: absolute; display: flex; transform-origin: 0 50%; pointer-events: none; }
 html.skin-ios .ios-sgy i { display: block; width: calc(26 * var(--pt)); height: calc(29 * var(--pt)); background: url("../../../assets/skins/ios/sprites/digits_atlas.png") calc(var(--d) * -26 * var(--pt)) 0 / calc(260 * var(--pt)) calc(29 * var(--pt)) no-repeat; }
 html.skin-ios .ios-sgline { position: absolute; white-space: nowrap; color: #fff; }
+
+/* the welcome scene (WelcomeScene, BaseHoScene chrome) */
+html.skin-ios #titlescreen.ios-wel { padding: 0; display: block; overflow: hidden; }
+html.skin-ios .ios-welcome { position: absolute; inset: 0; background: #000; color: #fff; overflow: hidden; font-family: var(--appfont, Arial, Helvetica, sans-serif); }
+html.skin-ios .ios-welcome > img { position: absolute; }
+html.skin-ios #titlescreen.ios-wel .tcard { position: fixed; left: -9999px; top: 0; max-height: 90vh; overflow: auto; padding: 16px; background: rgba(0, 0, 0, .94); border-radius: 8px; z-index: 6; }
+html.skin-ios #titlescreen.ios-wel.ios-ropen .tcard { left: 12px; top: 40px; }
+html.skin-ios #titlescreen.ios-wel .tcard h1, html.skin-ios #titlescreen.ios-wel .tcard .ver, html.skin-ios #titlescreen.ios-wel .tcard .by, html.skin-ios #titlescreen.ios-wel .tsplash { display: none; }
+html.skin-ios .ios-ropt { position: fixed; left: 8px; top: 8px; z-index: 7; font: 11px var(--ui, sans-serif); opacity: .55; color: #fff; background: #222; border: 1px solid #555; border-radius: 4px; padding: 2px 6px; }
+html.skin-ios .ios-ropt:hover, html.skin-ios .ios-ropt:focus { opacity: 1; }
+html.skin-ios .ios-smb { appearance: none; position: relative; flex: none; border: 0 !important; border-radius: 0 !important; box-shadow: none !important; padding: 0 0 0 calc(80 * var(--k) * var(--pt)) !important; height: calc(80 * var(--k) * var(--pt)); margin: 0; text-align: left;
+  background: var(--big) no-repeat left center / calc(80 * var(--k) * var(--pt)) calc(80 * var(--k) * var(--pt)) !important; color: #fff !important; cursor: pointer; white-space: nowrap;
+  font: calc(var(--fs) * var(--k) * var(--pt)) / calc(80 * var(--k) * var(--pt)) var(--appfont, Arial, Helvetica, sans-serif); }
+html.skin-ios .ios-smb.hat::before { content: ''; position: absolute; left: calc(-5 * var(--k) * var(--pt)); bottom: calc(18 * var(--k) * var(--pt)); width: calc(88 * var(--k) * var(--pt)); height: calc(80 * var(--k) * var(--pt)); background: var(--hat) no-repeat 0 0 / 100% 100%; }
+html.skin-ios .ios-smb[hidden] { display: block !important; opacity: .392; pointer-events: none; }
+html.skin-ios .ios-cc { appearance: none; position: relative; border: 0 !important; border-radius: 0 !important; box-shadow: none !important; padding: 0 !important; background: none !important; cursor: pointer; display: block; }
+html.skin-ios .ios-cc img { display: block; }
+html.skin-ios .ios-cc.dn img:first-child { filter: brightness(.49); }
+html.skin-ios .ios-cc.hl > img + img { position: absolute; inset: 0; display: none; }
+html.skin-ios .ios-cc.hl.dn > img + img { display: block; }
+html.skin-ios .ios-cc.hl.dn img:first-child { filter: none; }

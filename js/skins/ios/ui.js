@@ -13,6 +13,9 @@
 // (style.css). A finger gets the app's gestures in every skin (ui.js, "touch").
 (function () {
 'use strict';
+// A line of Arial in the app is what UIFont gives the system Arial (CCLabelTTF's contentSize is read from the label at run time; the app has no font file and no constant for it):
+// the font's own table (hhea ascender 1854 + descender 434 + line gap 67, over 2048 units) = 1.1499 of the size; the device's value is not in the app, so this is the font's, not a reading of the program.
+const ARIAL_LINE = 2355 / 2048;
 const P = 'ios:';
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 const trunc = Math.trunc;
@@ -771,14 +774,14 @@ function historySection() {
       for (const ch of ym[1]) dg.append(UIEl('i', null, { style: `--d:${ch}` }));
       it.append(dg);
     } else {
-      const lines = wrapLines(txt, s0, SCREEN.W - 64), wid = Math.max(1, ...lines.map(l => textW(l, s0))), th = lines.length * s0 * 1.15;
+      const lines = wrapLines(txt, s0, SCREEN.W - 64), wid = Math.max(1, ...lines.map(l => textW(l, s0))), th = lines.length * s0 * ARIAL_LINE;
       const rp = reportPicture(m), ic = rp ? null : a.msgIconEl(m), hasIcon = !!(ic && ic.src);
       it.style.height = pt(Math.max(th + 2 * gap, (hasIcon ? 40 : 0) + 2 * gap)); // (a planet or a hat does not count in the height: only the report icon is the size the node takes)
       if (hasIcon) { ic.className = 'ricon'; it.append(ic); }
       if (rp) { rp.el.classList.add('ios-hrpic'); it.append(rp.el); }
       if (lv) it.append(UIEl('span', 'ios-lvl ios-hlvl', { 'aria-hidden': 'true' }, lv[1]));
       const p = UIEl('p', null, null, txt);
-      p.style.width = pt(Math.ceil(wid) + 1); p.style.height = pt(th); p.style.fontSize = pt(s0 - 1); p.style.lineHeight = pt((s0 - 1) * 1.15);
+      p.style.width = pt(Math.ceil(wid) + 1); p.style.height = pt(th); p.style.fontSize = pt(s0 - 1); p.style.lineHeight = pt((s0 - 1) * ARIAL_LINE);
       it.append(p);
     }
     const act = () => { const x = A(); if (x && x.G) { x.reportAction(m); } };
@@ -1042,8 +1045,8 @@ function afterMsg(box, ctx) {
       if (p) {
         const H = SCREEN.row * 3, s0 = Math.floor(Math.fround(H / 6)), lines = wrapLines(p.textContent, s0, SCREEN.W - 64);
         const wid = Math.max(1, ...lines.map(l => textW(l, s0)));
-        p.style.width = `calc(${Math.ceil(wid) + 1} * var(--pt))`; p.style.height = `calc(${lines.length * s0 * 1.15} * var(--pt))`;
-        p.style.fontSize = `calc(${s0 - 1} * var(--pt))`; p.style.lineHeight = `calc(${(s0 - 1) * 1.15} * var(--pt))`;
+        p.style.width = `calc(${Math.ceil(wid) + 1} * var(--pt))`; p.style.height = `calc(${lines.length * s0 * ARIAL_LINE} * var(--pt))`;
+        p.style.fontSize = `calc(${s0 - 1} * var(--pt))`; p.style.lineHeight = `calc(${(s0 - 1) * ARIAL_LINE} * var(--pt))`;
       }
     }
     { const old = card.querySelector('.icon, .bigicon, .jpg'), rp = m && reportPicture(m); if (rp) { if (old) old.remove(); card.append(rp.el); } }
@@ -1108,7 +1111,7 @@ function put(e, x, y, ax, ay) {
   e.style.transform = `translate(${-(ax || 0) * 100}%, ${(ay || 0) * 100}%)`;
   return e;
 }
-const BFONT = (size, extra) => `font:${bpt(size)}/1.15 var(--appfont,Arial,Helvetica,sans-serif);${extra || ''}`;
+const BFONT = (size, extra) => `font:${bpt(size)}/${ARIAL_LINE} var(--appfont,Arial,Helvetica,sans-serif);${extra || ''}`;
 // -[DialogLayerSprite init] 0x1000bc294: 480 x 320 on an iPhone, an iPad's min(winW, 620) x min(winH, 400); scaled by min(winW / w, winH / h) (an iPad's 0.8 of each)
 function dlgGeom() {
   const W = SCREEN.winW, H = SCREEN.winH;
@@ -1375,7 +1378,7 @@ function openScrapIOS() {
       for (const d of types) {
         const cv = a.IMG && HOTHEME.shipPic(d, a.IMG), sw = cv ? cv.width : 0, sh = cv ? cv.height : 0;
         const t1 = d.name, t2 = fillT(tmplS(26), count[d.id] || 0), tw = Math.max(labelW(t1, 16), labelW(t2, 16));
-        const w = sw + gd.a80 + tw, h = Math.max(sh, 16 * 1.15 * 2 + gd.a80);
+        const w = sw + gd.a80 + tw, h = Math.max(sh, 16 * ARIAL_LINE * 2 + gd.a80);
         const item = UIEl('button', 'ios-scitem', { type: 'button', style: `width:${bpt(w * 0.8)};height:${bpt(h * 0.8)}` });
         const inner = UIEl('div', 'ios-scin', { style: `width:${bpt(w)};height:${bpt(h)};transform:scale(0.8)` });
         if (cv) { cv.style.cssText = `width:${bpt(sw)};height:${bpt(sh)};flex:none`; inner.append(cv); }
@@ -1429,7 +1432,7 @@ function tapItem(id, m, a) {
 // (W - strip / 2, H - 2 a80); under it the "too many" label (171, Arial a38, white; shown over 20 games); the list is a CCInertialMenu of the first 20 games (SavedGameData loadSavedGames),
 // 10 ... a80 apart from the top, in the rectangle from the bottom of the menu + 4 a80 up to 2 a80 under that label, the strip's width. A StarMenuItem is the picture big_button (80 x 80) with
 // its label (Arial a20: 14, 19) right of it (the item as wide as both and as high as the picture), the default one with bighat_button 5 left and 18 up of the picture's corner. A game's item
-// is 75 a80 x (16 a80 on an iPhone, 13.75 a80) on a black BackgroundBorderNode: the mini galaxy (50 x 55 a80/4, left, vertically centred: NOT drawn here, MiniGalaxy's particles are unread), the
+// is 75 a80 x (16 a80 on an iPhone, 13.75 a80) on a black BackgroundBorderNode: the mini galaxy (50 x 55 a80/4, left, vertically centred: NOT drawn here, MiniGalaxyNode, below), the
 // year in digits_atlas (scale a80 / 8), and from x = 2.5 a80 + 12.5 a80 + the digits' width, four lines of Arial a50 (9; 16), white, fitted: sprintf Templates 32 "%u Player, %@ Home %@
 // BB - difficulty: %u", 33 "Last Played: %@", 34 "Started: %@", 35 "Game over date: %u" (when the game is over); the dates by SORelativeDateTransformer ("3 days ago", the largest unit that
 // is not 0: years, months, weeks, days, hours, minutes, seconds; "now"). Tapping a game opens it, in Delete mode (the Delete item) removes it at once (no question: deleteGame), and
@@ -1449,27 +1452,113 @@ function relDate(then, now) { // -[SORelativeDateTransformer transformedValue:] 
   for (let i = 0; i < 7; i++) if (c[i]) { const n = c[i]; return (neg ? R.future : R.ago).replace('%d', n).replace('%@', R.u[i][n > 1 ? 1 : 0]); }
   return R.now;
 }
-function openSavedIOS(c) {
-  const gd = BGD(), a80 = gd.a80, W = SCREEN.winW, H = SCREEN.winH, s = H / 768, m = 4 * s, stripW = 774 * s, pad = SCREEN.pad;
-  const root = UIEl('div', 'hoscreen ios-sg', { role: 'dialog', 'aria-modal': 'true', 'aria-label': miscS(142) });
+// BaseHoScene addTitleAndFadedBox: 0x100007238 (read in the disassembly): the white strip (774 s wide, H - 2 m high, anchor (1, 0.5) at (W - m, H / 2)), the dark box 0xff1d0609 = (9, 6, 29) of 766 s x (p3 + 20) s (anchor (1, 0) at (W - 2 m, 2 m)),
+// the sprite blend_sprite (scale s, anchor (1, 0) at (W - 2 m, p3 s)) and the name sprite (scale min(1, 0.7 s 768 / 600), anchor (0.5, 1) at ((W - 766 s) / 2, H - 2 a80)); p3 is 580 for the Saved Games scene and 200 for the welcome scene
+function sceneBase(root, p3) {
+  const gd = BGD(), a80 = gd.a80, W = SCREEN.winW, H = SCREEN.winH, s = H / 768, m = 4 * s, stripW = 774 * s;
   const add = (e) => { root.append(e); return e; };
   const box = (cls, l, b, w, h) => { const e = UIEl('div', cls); e.style.cssText = `position:absolute;left:${bpt(l)};bottom:${bpt(b)};width:${bpt(w)};height:${bpt(h)}`; return add(e); };
   box('ios-sgw', W - m - stripW, m, stripW, H - 2 * m);
-  box('ios-sgd', W - 2 * m - 766 * s, 2 * m, 766 * s, 600 * s);
-  { const im = pic('blend_sprite'); im.style.cssText = `position:absolute;width:${bpt(766 * s)};height:${bpt(160 * s)};right:${bpt(2 * m)};bottom:${bpt(580 * s)}`; add(im); }
+  box('ios-sgd', W - 2 * m - 766 * s, 2 * m, 766 * s, (p3 + 20) * s);
+  { const im = pic('blend_sprite'); im.style.cssText = `position:absolute;width:${bpt(766 * s)};height:${bpt(160 * s)};right:${bpt(2 * m)};bottom:${bpt(p3 * s)}`; add(im); }
   const nameS = Math.min(1, H * 0.7 / 600), hoName = pic('spacewardho_name');
   hoName.style.cssText = `width:${bpt(118 * nameS)};height:${bpt(592 * nameS)};touch-action:none`; hoName.className = 'ios-sgname';
   add(put(hoName, (W - 766 * s) / 2, H - 2 * a80, 0.5, 1));
-  // a StarMenuItem: the picture, the label at its right end
-  const starItem = (text, hat, size, onClick, scale) => {
-    const sc = scale || 1, b = UIEl('button', 'ios-smi', { type: 'button' });
-    b.style.cssText = `height:${bpt(80 * sc)}`;
-    const g = pic('big_button'); g.style.cssText = `width:${bpt(80 * sc)};height:${bpt(80 * sc)}`; b.append(g);
-    if (hat) { const h = pic('bighat_button'); h.style.cssText = `position:absolute;left:${bpt(-5 * sc)};bottom:${bpt(18 * sc)};width:${bpt(88 * sc)};height:${bpt(80 * sc)}`; b.append(h); }
-    const t = UIEl('span', 'ios-smt', { style: `font-size:${bpt(size * sc)}` }); t.textContent = text; b.append(t);
-    if (onClick) b.addEventListener('click', (e) => { e.stopPropagation(); onClick(); });
-    return b;
-  };
+  return { gd, a80, W, H, s, m, stripW, hoName };
+}
+// the picture at its own size in points (a sprite file is drawn at its size)
+function picPt(name, cls) { const im = pic(name, cls), f = () => { im.style.width = bpt(im.naturalWidth); im.style.height = bpt(im.naturalHeight); }; if (im.complete && im.naturalWidth) f(); else im.addEventListener('load', f); return im; }
+const rulesNow = () => { let r = null; try { r = localStorage.getItem('ho5.rules'); } catch (e) {} return r && HO.RULESETS[r] ? r : (HO.defaultRules ? HO.defaultRules() : HO.newestRules()); };
+// BaseHoScene's other parts (addTitleAndFadedBox 0x100007238, updateScore 0x100007b3c, facebook 0x100007e54, twitter 0x100007eec), every scene that has the strip:
+// bottom of the area left of the strip, centred on it ((W - strip) / 2), a80 up: the buttons button_leaderboards and button_achievements (scale a68 = 1, a80 apart; pressed: the same picture at 0x7d7d7d), over them (2 a80 above) the rank node
+// (hidden until the player has master points: Rank: %s and Master Points: %u, templates 24 and 25, Arial a38, 16 on an iPad, centred, a80 between), and top right of that area ((W - strip) - a80, H - a80, anchor (1, 1)) the
+// facebook and twitter buttons (a80 apart, the highlighted picture when pressed): Facebook opens fb://profile/550108308395194 if the device can, else http://facebook.com/AritonGames; Twitter http://twitter.com/aritongames.
+// The buttons call showLeaderboard and showAchievements of Game Center; a browser cannot sign in to it, so they open the remake's own lists, kept in the browser (and the points are the browser's). The Android build has no Game Center (its screens have no buttons or rank).
+function sceneChrome(root, B) {
+  const { a80, W, stripW } = B, pad = SCREEN.pad, rid = rulesNow(), RS = HO.RULESETS[rid] || {}, gcOn = !!((RS.screens || {}).gameCenterButtons && RS.gameCenter && RS.gameCenter.leaderboards.length);
+  const press = (b, hl) => { b.addEventListener('pointerdown', () => b.classList.add('dn')); for (const ev of ['pointerup', 'pointerleave', 'pointercancel']) b.addEventListener(ev, () => b.classList.remove('dn')); return b; };
+  const btn = (n, label0, fn, hl) => { const label = window.HOUI ? HOUI.tr(label0) : label0, b = UIEl('button', 'ios-cc' + (hl ? ' hl' : ''), { type: 'button', 'aria-label': label, title: label }, picPt(n)); if (hl) b.append(picPt(hl)); b.addEventListener('click', (e) => { e.stopPropagation(); fn(); }); return press(b); };
+  const gc = (word) => () => { const t = [...document.querySelectorAll('#titlescreen .tscreen')].find(x => x.textContent === word); if (t) t.click(); };
+  if (gcOn) {
+    const col = UIEl('div', 'ios-ccl'); col.style.cssText = `position:absolute;left:${bpt((W - stripW) / 2)};bottom:${bpt(a80)};transform:translateX(-50%);display:flex;flex-direction:column-reverse;align-items:center;gap:${bpt(2 * a80)}`;
+    const row = UIEl('div', 'ios-ccr'); row.style.cssText = `display:flex;gap:${bpt(a80)}`;
+    row.append(btn('button-leaderboards', 'Leaderboards', gc('Leaderboards')), btn('button-achievements', 'Achievements', gc('Achievements')));
+    const rank = UIEl('div', 'ios-ccrank'); rank.style.cssText = `display:none;flex-direction:column;align-items:center;gap:${bpt(a80)};color:#fff;font-size:${bpt(pad ? 16 : BGD().a38)};line-height:${bpt(Math.ceil((pad ? 16 : BGD().a38) * ARIAL_LINE))};white-space:nowrap`;
+    let pts = 0; try { pts = (JSON.parse(localStorage.getItem(RS.gameCenter.key)) || {}).master_points | 0; } catch (e) {}
+    if (pts) {
+      const R = (HO.DATA.ranks || []).map(r => r[1]); let i = 0; while (i + 1 < R.length && pts >= R[i + 1]) i++;
+      const t1 = UIEl('span'), t2 = UIEl('span'); t1.textContent = fillT(tmplS(24), (HO.DATA.ranks[i] || [''])[0]); t2.textContent = fillT(tmplS(25), pts);
+      rank.append(t1, t2); rank.style.display = 'flex';
+    }
+    col.append(row, rank); root.append(col);
+  }
+  const sc = UIEl('div', 'ios-ccs'); sc.style.cssText = `position:absolute;right:${bpt(stripW + a80)};top:${bpt(a80)};display:flex;flex-direction:column;align-items:flex-end;gap:${bpt(a80)}`;
+  sc.append(btn('facebook', 'Facebook', () => window.open('http://facebook.com/AritonGames', '_blank', 'noopener'), 'facebook-highlighted'), btn('twitter', 'Twitter', () => window.open('http://twitter.com/aritongames', '_blank', 'noopener'), 'twitter-highlighted'));
+  root.append(sc);
+}
+// a StarMenuItem: the picture, the label at its right end
+const starItem = (text, hat, size, onClick, scale) => {
+  const sc = scale || 1, b = UIEl('button', 'ios-smi', { type: 'button' });
+  b.style.cssText = `height:${bpt(80 * sc)}`;
+  const g = pic('big_button'); g.style.cssText = `width:${bpt(80 * sc)};height:${bpt(80 * sc)}`; b.append(g);
+  if (hat) { const h = pic('bighat_button'); h.style.cssText = `position:absolute;left:${bpt(-5 * sc)};bottom:${bpt(18 * sc)};width:${bpt(88 * sc)};height:${bpt(80 * sc)}`; b.append(h); }
+  const t = UIEl('span', 'ios-smt', { style: `font-size:${bpt(size * sc)}` }); t.textContent = text; b.append(t);
+  if (onClick) b.addEventListener('click', (e) => { e.stopPropagation(); onClick(); });
+  return b;
+};
+
+// -[WelcomeScene init] 0x10001dad0 (read in the disassembly): the scene's base with p3 = 200 (sceneBase), the HoGuy sprite (hoguy_0-19, the first frame) at (W - strip / 2, 0.7 H) scaled 2 s x the content scale factor
+// (CCDirector's: 2 on a Retina screen, which the -hd art is for), the StarMenuItems New Game (Misc 70, the default one, with the hat), Continue (71, disabled with no saved game: opacity 100 of 255) and Help (72), all
+// at the scale that makes the first's width a quarter of the strip, spaced (strip - their widths) / 5 (also at both ends), in a menu anchored (0.5, 0) at (W - strip / 2, 100 s); the version label (Arial a38, white,
+// "Spaceward Ho: Version %@ (%@)" with CFBundleShortVersionString and CFBundleVersion: 1.2.9 (811605); the Android build's own are 1.2.8 (811597)) anchored (1, 0) at (W - 3 a80, 3 a80); and the base scene's other parts (sceneChrome).
+// The three buttons are the page's own #tnew, #tcont and #thelp (their handlers kept), put in the scene; the page's other controls (importing a game, the skin and language pickers, the account, the credits) are the
+// remake's and sit in a panel behind a small "Remake options" button (the app has none of them).
+function buildWelcome(ts) {
+  let root = ts.querySelector('.ios-welcome'); if (root) root.remove();
+  root = UIEl('div', 'ios-sg ios-welcome');
+  const B = sceneBase(root, 200), { gd, a80, W, H, s, stripW } = B, fsz = SCREEN.pad ? 19 : 14;
+  const guy = pic('hoguy_0', 'ios-wguy'); guy.style.cssText = 'position:absolute;pointer-events:none';
+  const gk = 2 * s * 2, setGuy = () => { guy.style.width = bpt(guy.naturalWidth / 2 * gk); guy.style.height = bpt(guy.naturalHeight / 2 * gk); };
+  if (guy.complete && guy.naturalWidth) setGuy(); else guy.addEventListener('load', setGuy);
+  root.append(put(guy, W - stripW / 2, 0.7 * H, 0.5, 0.5));
+  const btns = [['tnew', 70, true], ['tcont', 71, false], ['thelp', 72, false]].map(([id, n, def]) => ({ b: document.getElementById(id), t: miscS(n), def })).filter(x => x.b);
+  const wid = (x) => 80 + textW(x.t, fsz), k = (stripW / 4) / wid(btns[0]), sum = btns.reduce((a, x) => a + wid(x) * k, 0), gap = (stripW - sum) / 5;
+  const menu = UIEl('div', 'ios-wmenu'); menu.style.cssText = `position:absolute;left:${bpt(W - stripW / 2)};bottom:${bpt(100 * s)};transform:translateX(-50%);display:flex;align-items:flex-start;gap:${bpt(gap)};padding:0 ${bpt(gap)}`;
+  for (const x of btns) {
+    x.b.textContent = x.t; x.b.className = 'ios-smb' + (x.def ? ' hat' : ''); x.b.removeAttribute('style');
+    x.b.style.cssText = `--k:${k};--fs:${fsz};--big:url(${new URL(HOTHEME.dir + 'sprites/big_button.png', location.href).href});--hat:url(${new URL(HOTHEME.dir + 'sprites/bighat_button.png', location.href).href})`;
+    menu.append(x.b);
+  }
+  root.append(menu);
+  const ver = /android/.test(rulesNow()) ? '1.2.8 (811597)' : '1.2.9 (811605)', vl = UIEl('div', 'ios-wver'); vl.textContent = `Spaceward Ho: Version ${ver.split(' ')[0]} ${ver.split(' ')[1]}`;
+  vl.style.cssText = `font-size:${bpt(gd.a38)};color:#fff;white-space:nowrap`; root.append(put(vl, W - 3 * a80, 3 * a80, 1, 0));
+  sceneChrome(root, B);
+  let ro = ts.querySelector('.ios-ropt');
+  if (!ro) { ro = UIEl('button', 'ios-ropt', { type: 'button' }); ro.textContent = 'Remake options\u2026'; ro.setAttribute('translate', 'yes'); ro.addEventListener('click', () => ts.classList.toggle('ios-ropen')); ts.append(ro); }
+  ts.classList.remove('ios-ropen'); ts.classList.add('ios-wel');
+  ts.prepend(root);
+  return guy;
+}
+// -[MiniGalaxyNode updateGalaxy:extra:] 0x10001d6fc and draw 0x10001d938 (the Saved Games item's picture; MiniGalaxy / MiniGalaxyParticle, the particle classes, have no caller): content size 12.5 a80 x the item's height,
+// anchor (0, 0.5) at (a80, height / 2); each star is a point at ((w - size k) / 2 + k (x10 / 10), (h - size k) / 2 + k (y10 / 10)) (the integer tenths, divided by 10 as integers; y up), size the game's short +0x222 (the galaxy's extent in the units of x10 / 10: a map unit is 2 of them, so 2 x G.W; the remake's reading of the field, not seen set) and k = w / 93 + (w / 245 - w / 93) x (size - w / 93) / 214 (the constants 93, 245 and 214, as the code has them); drawn white, smooth, GL point size 2.0 (device pixels)
+function miniGalaxy(it, g, w, h, itemH, a80) {
+  let G = null; try { G = HO.load(g.data); } catch (e) { return; }
+  if (!G || !G.stars) return;
+  const size = Math.round(2 * G.W), k0 = w / 93, k = k0 + ((w / 245 - k0) * (size - k0)) / 214;
+  const dpr = window.devicePixelRatio || 1, cv = UIEl('canvas', 'ios-sgmg', { 'aria-hidden': 'true' });
+  cv.width = Math.max(1, Math.round(w * dpr)); cv.height = Math.max(1, Math.round(h * dpr));
+  cv.style.cssText = `position:absolute;left:${bpt(a80)};bottom:${bpt((itemH - h) / 2)};width:${bpt(w)};height:${bpt(h)}`;
+  const x = cv.getContext('2d'); x.fillStyle = '#fff';
+  for (const st of G.stars) {
+    const px = (w - size * k) * 0.5 + k * Math.trunc(Math.trunc(st.x10) / 10), py = (h - size * k) * 0.5 + k * Math.trunc(Math.trunc(st.y10) / 10);
+    x.beginPath(); x.arc(px * dpr, (h - py) * dpr, 1, 0, 6.2832); x.fill(); // a 2 pixel point (the radius 1 pixel)
+  }
+  it.append(cv);
+}
+function openSavedIOS(c) {
+  const root = UIEl('div', 'hoscreen ios-sg', { role: 'dialog', 'aria-modal': 'true', 'aria-label': miscS(142) });
+  const B = sceneBase(root, 580), { gd, a80, W, H, s, m, stripW, hoName } = B, pad = SCREEN.pad;
+  const add = (e) => { root.append(e); return e; };
   const fsz = pad ? 19 : 14;
   const back = starItem(miscS(140), true, fsz, () => { close(); c.back(); }); back.classList.add('sback');
   let delMode = false, emailMode = false;
@@ -1478,10 +1567,10 @@ function openSavedIOS(c) {
   menu.append(back, del); add(menu);
   const menuH = 80;
   const title = UIEl('div', 'ios-sgt', { style: `font-size:${bpt(gd.a18 === 24 ? 48 : 24)}` }); title.textContent = miscS(142);
-  const tx = W - stripW / 2, ty = H - 2 * a80, th = Math.ceil((pad ? 48 : 24) * 1.15);
+  const tx = W - stripW / 2, ty = H - 2 * a80, th = Math.ceil((pad ? 48 : 24) * ARIAL_LINE);
   add(put(title, tx, ty, 0.5, 1));
   const many = UIEl('div', 'ios-sgt ios-sgmany', { style: `font-size:${bpt(gd.a38)}` }); many.textContent = miscS(171);
-  const lh = Math.ceil(gd.a38 * 1.15), my = ty - th - 2 * a80 - lh / 2; // centerBelow:padding: 2 a80
+  const lh = Math.ceil(gd.a38 * ARIAL_LINE), my = ty - th - 2 * a80 - lh / 2; // centerBelow:padding: 2 a80
   add(put(many, tx, my, 0.5, 0.5));
   const y0 = menuH + a80 * 4 + a80, rectH = Math.max(40, (my - lh) - y0 - 2 * a80);
   const list = UIEl('div', 'ios-sgl'); list.style.cssText = `position:absolute;left:${bpt(W - stripW)};bottom:${bpt(y0)};width:${bpt(stripW)};height:${bpt(rectH)};gap:${bpt(a80)}`; add(list);
@@ -1497,6 +1586,7 @@ function openSavedIOS(c) {
     const yr = UIEl('span', 'ios-sgy', { 'aria-hidden': 'true', style: `transform:translateY(50%) scale(${a80 / 8})` }), ys = String(g.year);
     for (const ch of ys) yr.append(UIEl('i', null, { style: `--d:${ch}` }));
     const mgw = 12.5 * a80, yx = a80 + mgw + a80, ylw = ys.length * 26 * a80 / 8;
+    miniGalaxy(it, g, mgw, 13.75 * a80, itemH, a80);
     yr.style.cssText += `;left:${bpt(yx)};bottom:${bpt(itemH / 2)}`; it.append(yr);
     const X = 2.5 * a80 + mgw + ylw, tw = itemW - X, sz = pad ? 16 : 9;
     let info = null; try { const G = HO.load(g.data); info = { n: G.players.length, home: homeLevel(G, G.players.find(q => q.human) || G.players[0]), bb: !!(G.opts && G.opts.buddies), diff: HO.rules(G).difficulty ? HO.rules(G).difficulty(Object.assign({}, G.opts, { armageddons: G.armageddons || 0 })) : 0 }; } catch (e) { /* (a game this page cannot read) */ }
@@ -1508,7 +1598,7 @@ function openSavedIOS(c) {
     lines.forEach((t, i) => {
       const z = i === 0 ? fit(t, tw, sz) : sz, e = UIEl('span', 'ios-sgline', { style: `font-size:${bpt(z)}` }); e.textContent = t;
       e.style.cssText += `;left:${bpt(X)};bottom:${bpt(y)};transform:translateY(100%)`; it.append(e);
-      y -= (i === 0 ? sz + 2 : Math.ceil(sz * 1.15)) + 2;
+      y -= (i === 0 ? sz + 2 : Math.ceil(sz * ARIAL_LINE)) + 2;
     });
     const sm = starItem('', false, fsz, null, 0.5); sm.className = 'ios-smi ios-sgx'; sm.style.cssText += `;position:absolute;right:${bpt(a80)};bottom:${bpt(itemH * 0.5)};transform:translateY(50%)`; sm.hidden = true; sm.tabIndex = -1; it.append(sm);
     const act = () => {
@@ -1530,6 +1620,7 @@ function openSavedIOS(c) {
   hoName.addEventListener('pointerdown', (e) => { t0 = Date.now(); e.preventDefault(); });
   hoName.addEventListener('pointerup', () => { if (t0 && Date.now() - t0 > 3000) { delMode = false; emailMode = true; refresh(); } t0 = 0; });
   const close = () => { c.close(); };
+  sceneChrome(root, B);
   c.mount(root);
   return true;
 }
@@ -2121,7 +2212,7 @@ function openBattleIOS(b, k) {
   const x = UIEl('button', 'ios-gx', { type: 'button', 'aria-label': 'Close' }, pic('button-x'));
   x.addEventListener('click', (e) => { e.stopPropagation(); finishNow(); });
   dlg.append(x);
-  const LH = (size) => size * 1.15;
+  const LH = (size) => size * ARIAL_LINE;
   const desc = bLabel(tl(P.head[0] || ''), 16, cw / 2, ch - 4 * gd.a80, 0.5, 1, '#fff');
   const roundL = bLabel('', 16, cw / 2, 2 * gd.a80, 0.5, 0, '#fff');
   const expl = UIEl('div', 'ios-bexp'); expl.style.cssText = `position:absolute;display:none;width:${bpt(200)};height:${bpt(60)};background:url("${HOTHEME.dir}sprites/HoExplosions.png") 0 0 / ${bpt(400)} ${bpt(300)} no-repeat`;
@@ -2329,27 +2420,21 @@ window.HOTHEME = {
   // the title: the app's welcome screen, its name down the side and the
   // cowboy planet (hoguy_0-19) twirling his six-gun
   title(frame, IMG, Sound) {
-    const name = IMG[P + 'spacewardho_name'], guy = (n) => IMG[P + 'hoguy_' + n];
-    if (!name || !name.width || !guy(0) || !guy(0).width) return false;
-    frame.width = 400; frame.height = 300;
-    const x = frame.getContext('2d');
-    const paint = (n) => {
-      x.fillStyle = '#000'; x.fillRect(0, 0, 400, 300);
-      x.drawImage(name, 8, 4, name.width * 292 / name.height, 292);
-      x.fillStyle = '#fff'; x.fillRect(84, 20, 300, 260);
-      const g = guy(n); if (g) x.drawImage(g, 84 + (300 - g.width * 1.25) / 2, 20 + (260 - g.height * 1.25) / 2, g.width * 1.25, g.height * 1.25);
-    };
-    paint(0);
-    const ts = document.getElementById('titlescreen'), gen = frame._gen = (frame._gen || 0) + 1;
+    const guyOk = IMG[P + 'hoguy_0'] && IMG[P + 'hoguy_0'].width;
+    if (!guyOk || !IMG[P + 'spacewardho_name'] || !IMG[P + 'spacewardho_name'].width) return false;
+    const ts = document.getElementById('titlescreen'); if (!ts) return false;
+    const gen = frame._gen = (frame._gen || 0) + 1, guy = buildWelcome(ts);
     let i = 0;
     const tick = () => {
-      if (!ts || ts.hidden || frame._gen !== gen) return;
-      paint(i % 20); if (i % 20 === 10) Sound.play(7023);
+      if (!ts || ts.hidden || frame._gen !== gen) { if (frame._ho) frame._ho.pause(); return; }
+      guy.src = HOTHEME.dir + 'sprites/hoguy_' + (i % 20) + '.png'; if (i % 20 === 10) Sound.play(7023);
       i++;
-      if (i > 60) { paint(0); Sound.play(7022); i = 0; setTimeout(tick, 4000); return; }
+      if (i > 60) { guy.src = HOTHEME.dir + 'sprites/hoguy_0.png'; Sound.play(7022); i = 0; setTimeout(tick, 4000); return; }
       setTimeout(tick, 110);
     };
     setTimeout(tick, 900);
+    // onEnterTransitionDidFinish 0x10001e008: ho.mp3 once (not looped) when Sound (Preferences +0x217) is on
+    setTimeout(() => { if (Sound.music && !ts.hidden && frame._gen === gen) { try { const a = frame._ho || (frame._ho = new Audio(HOTHEME.dir + 'sounds/ho.mp3')); a.currentTime = 0; a.play().catch(() => {}); } catch (e) {} } }, 900);
     return true;
   },
   panel: sidebar, afterMsg,
