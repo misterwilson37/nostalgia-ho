@@ -3094,6 +3094,14 @@ function openBattlePanel(b) {
     for (const sh of [].concat(shot || [])) {
       x.strokeStyle = dark ? '#000' : sh.a === viewer ? '#ffe066' : '#ff6fb5'; x.lineWidth = 2;
       x.beginPath(); x.moveTo(sh.x1, sh.y1); x.lineTo(sh.x2, sh.y2); x.stroke();
+      // (rs.battleFaces: 1.2's DrawExplosion @d40f8: a hit puts one of the small explosion icons, ics# 12000-12003, at a random place on
+      // the target; a colony wiped out (snd 3003) a burst of circles)
+      if (rs.battleFaces) {
+        const im = IMG[(T.prefix || '') + 's' + (12000 + ((sh.x2 * 7 + sh.y2 * 13 + (sh.q || 0)) & 3))];
+        const ox = (((sh.q || 0) * 37) % 21) - 10, oy = (((sh.q || 0) * 53) % 21) - 10;
+        if (im && im.complete && im.naturalWidth) x.drawImage(im, sh.x2 - 8 + ox, sh.y2 - 8 + oy, 16, 16);
+        if (sh.snd === 3003) { x.lineWidth = 1; for (let r = 6; r <= 30; r += 6) { x.beginPath(); x.arc(sh.x2, sh.y2, r, 0, Math.PI * 2); x.stroke(); } }
+      }
     }
   };
   const center = (i) => i < 0 ? (planetAt || { x: W / 2, y: H / 2 }) : (where.get(i) || { x: W / 2, y: H / 2 });
@@ -3113,7 +3121,7 @@ function openBattlePanel(b) {
       const a = center(ev.si), q = e + j;
       if (ev.p) { t = center(-1); if (!j) Sound.play(shotSnd(ev, 3000)); }
       else { t = center(ev.ti); if (ev.f != null) hurt[ev.ti] = { n: ++seq, f: ev.f }; if (ev.k) { alive[ev.ti] = false; if (!j) Sound.play(shotSnd(ev, q % 3 === 0 ? 3003 : 3002)); } else if (!j && (HO.rules(G).battleSounds || q % 4 === 0)) Sound.play(shotSnd(ev, 3000 + (q % 2))); }
-      return { x1: a.x, y1: a.y, x2: t.x, y2: t.y, a: ev.a };
+      return { x1: a.x, y1: a.y, x2: t.x, y2: t.y, a: ev.a, snd: ev.snd, q };
     });
     drawAll(shots);
     if (VB.full && ev.k && !ev.p) x.drawImage(IMG.debris, 0, 0, 288, 138, t.x - 30, t.y - 18, 60, 36);
