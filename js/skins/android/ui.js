@@ -37,12 +37,8 @@ window.HOTHEME_VARIANT = function (T) {
 function backKey(doc) {
   const de = doc.documentElement;
   const $ = (s) => doc.querySelector(s);
-  // the side panel: Back hides it; a small tab at the edge brings it back
-  const tab = doc.createElement('button');
-  tab.id = 'paneltab'; tab.type = 'button'; tab.textContent = '‹'; tab.setAttribute('aria-label', 'Show the side panel'); tab.hidden = true;
-  tab.addEventListener('click', () => setPanel(true));
-  doc.body.append(tab);
-  function setPanel(show) { de.classList.toggle('android-nopanel', !show); tab.hidden = show; }
+  // the sidebar (the iOS skin's main screen: the totals and bars, opened by the dollar button): Back closes it
+  // (its button, the column's first, opens it again; no tab at the edge is needed)
   function exitDialog() {
     const mk = (tag, cls, text, attrs) => { const e = doc.createElement(tag); if (cls) e.className = cls; if (text) e.textContent = text; for (const k in attrs || {}) e.setAttribute(k, attrs[k]); return e; };
     const done = () => back.remove();
@@ -69,7 +65,7 @@ function backKey(doc) {
     else if (dd) { dd.classList.remove('open'); if (dd.previousElementSibling) dd.previousElementSibling.setAttribute('aria-expanded', 'false'); } // the commands menu
     else if (sm) used = false; // the star menu has its own Escape (classic/ui.js)
     else if (title && !title.hidden) exitDialog(); // the title: (the help was a window, closed above) Exit?
-    else if (!de.classList.contains('android-nopanel') && $('#panel') && $('#panel').offsetParent) setPanel(false); // the side panel
+    else if (window.HOIOS && HOIOS.sideOpen()) HOIOS.side(false); // the sidebar
     else used = false;
     if (used) { e.preventDefault(); e.stopImmediatePropagation(); }
   }, true);

@@ -206,6 +206,193 @@ function shipPic(d, IMG, rusty) {
   return c;
 }
 
+
+// ---------------------------------------------------------------------------
+// The main screen (docs/ios-findings.md, "Main screen"; -[MainGameScene init]
+// 0x10000c734, -[PlanetInfoLayer init] 0x1000b2a64 and updateData 0x1000b2df4,
+// -[IncomeLayer init] 0x100008e00, -[TurnMessageLayer init] 0x10001c4e8,
+// +[BarMenuItem calculate] 0x1000104ec, -[MapLayer setBoundsForSidebar]
+// 0x10000db54). The app draws it in points of the device's own screen: this
+// builds it in the same points (CSS --u pixels to the point), the map filling
+// the window, the app's button column at the right (an iPhone) or row at the
+// bottom left (an iPad), the HUD strip at the top, the totals box in the
+// sidebar at the left, the report bar at the bottom left and End Turn with its
+// gear at the bottom right. What the app opens from them in a screen of its
+// own and the remake hasn't rebuilt yet opens the remake's window.
+const SCREEN = { pad: false, u: 1, winW: 568, winH: 320, W: 255, row: 20, font: 14, gap: 4 };
+const HOIOS = window.HOIOS = { sideOpen: () => false, side: () => {} };
+let sideWanted = null; // the sidebar's state: the iPad opens it at the start (toggleInfo), the iPhone doesn't
+function screenSize() {
+  const vw = Math.max(1, window.innerWidth), vh = Math.max(1, window.innerHeight);
+  // +[GraphicDefines setup]: the idiom picks the iPad's numbers or the iPhone's; a window has no idiom, so a
+  // window whose short side is 600 CSS pixels or more is the iPad (the Android skin's approximation too)
+  const pad = Math.min(vw, vh) >= 600, portrait = vh > vw * 1.1;
+  const u = pad ? Math.max(0.6, Math.min(vh / 768, vw / 800)) : portrait ? vw / 360 : Math.min(vh / 320, vw / 480);
+  const winW = vw / u, winH = vh / u;
+  // +[BarMenuItem calculate]: the sidebar is 0.3 (iPad) or 0.45 (iPhone) of the width, at least 220; a row 0.08 of that, the type 0.7 of a row
+  const W = Math.max(220, trunc(winW * (pad ? 0.3 : 0.45))), row = trunc(W * 0.08);
+  Object.assign(SCREEN, { pad, u, winW, winH, W, row, font: row * 0.7, gap: pad ? 8 : 4 });
+  const de = document.documentElement, st = de.style;
+  st.setProperty('--u', u + 'px'); st.setProperty('--W', W); st.setProperty('--row', row);
+  st.setProperty('--fs', String(row * 0.7)); st.setProperty('--gap', String(SCREEN.gap));
+  de.classList.toggle('ios-pad', pad); de.classList.toggle('ios-phone', !pad);
+  sideLayout();
+}
+const UIEl = (tag, cls, attrs, ...kids) => {
+  const e = document.createElement(tag); if (cls) e.className = cls;
+  for (const k in attrs || {}) if (attrs[k] != null) e.setAttribute(k, attrs[k]);
+  for (const c of kids) if (c != null) e.append(c);
+  return e;
+};
+const A = () => window.HOAPI;
+let hudEl, hudRow, hudL, hudR, colEl, turnEl, gearBtn, tmEl, tmFill, tmThumb, sideBtn, gearOpen = false;
+function sideOpen() { return document.documentElement.classList.contains('ios-side'); }
+function sideLayout() {
+  // -[MapLayer setBoundsForSidebar] 0x10000db54: the map's pan rectangle starts at the sidebar's width + 8 (iPad) or + 4 (iPhone)
+  // (a80 x 10 from the top and bottom); the page keeps the map beside the sidebar when there is room for it
+  const de = document.documentElement, room = SCREEN.winW - SCREEN.W - SCREEN.gap >= 300;
+  de.style.setProperty('--mapx', (sideOpen() && room ? (SCREEN.W + SCREEN.gap) * SCREEN.u : 0) + 'px');
+}
+function setSide(open, quiet) {
+  const de = document.documentElement;
+  de.classList.toggle('ios-side', !!open);
+  if (sideBtn) { sideBtn.classList.toggle('on', !!open); sideBtn.setAttribute('aria-pressed', open ? 'true' : 'false'); }
+  sideLayout();
+  if (!quiet && A() && A().G && A().fit) setTimeout(() => A().fit(), 220); // the map refits beside the sidebar (setBoundsForSidebar)
+}
+HOIOS.sideOpen = sideOpen; HOIOS.side = (o) => setSide(o);
+function pic(name, cls) { const im = new Image(); im.src = HOTHEME.dir + 'sprites/' + name + '.png'; im.alt = ''; im.draggable = false; if (cls) im.className = cls; return im; }
+function buildColumn(app) {
+  const go = (fn) => () => { const a = A(); if (!a || !a.G) return; try { fn(a); } catch (e) { console.error(e); } };
+  for (const o of app.querySelectorAll('.ios-col, .ios-graph')) o.remove();
+  // -[MainGameScene init]: the column's items in order, each a CCMenuItemToggle of button-<name>.png (the second state tinted 0x7d7d7d)
+  const items = [
+    ['dollar', 'Information', () => setSide(!sideOpen())],            // toggleInfo: the totals and bars sidebar
+    ['news', 'Reports', go(a => a.openReports())],                    // toggleHistory: the message history container
+    ['planet', 'Stars', go(a => a.openStarList())],                   // toggleStars (iPhone): the explored stars list
+    ['enemy', 'Players', go(a => a.openPlayers())],                   // togglePlayers (iPhone): the players list
+  ]; // (the iPad's menu has the first two only; its stars and players lists are in the combined container, not rebuilt: kept difference, the buttons stay so the lists stay reachable)
+  colEl = UIEl('div', 'ios-col', { role: 'toolbar', 'aria-label': 'Main buttons' });
+  for (const [n, name, fn] of items) {
+    const b = UIEl('button', 'ios-btn', { type: 'button', 'data-ios': n, 'aria-label': name, title: name }, pic('button-' + n));
+    b.addEventListener('click', (e) => { e.stopPropagation(); fn(); });
+    if (n === 'dollar') sideBtn = b;
+    colEl.append(b);
+  }
+  // -[MainGameScene init] (iPhone): button-graph at the top right opens the history graphs (HistoryGraphDialogLayer)
+  const graph = UIEl('button', 'ios-btn ios-graph', { type: 'button', 'aria-label': 'Graphs', title: 'Graphs' }, pic('button-graph'));
+  graph.addEventListener('click', go(a => a.openCompare()));
+  app.append(colEl, graph);
+}
+// what each button of the column does here (the app's toggles, the remake's windows for the screens not yet rebuilt)
+function buildScreen(doc) {
+  const app = doc.getElementById('app'); if (!app) return;
+  const go = (fn) => () => { const a = A(); if (!a || !a.G) return; try { fn(a); } catch (e) { console.error(e); } };
+  buildColumn(app);
+  // -[PlanetInfoLayer init]: the HUD strip: HUD-left and HUD-right (CCSpriteScale9, caps 8 and 5), the labels between
+  hudL = UIEl('div', 'ios-hl'); hudR = UIEl('div', 'ios-hr'); hudRow = UIEl('div', 'ios-hrow');
+  tmFill = UIEl('div', 'ios-tmL'); tmThumb = UIEl('div', 'ios-tmT');
+  tmEl = UIEl('div', 'ios-tm', { role: 'slider', 'aria-label': 'Terraform and mine', 'aria-valuemin': '0', 'aria-valuemax': '100' }, tmFill, tmThumb);
+  hudEl = UIEl('div', 'ios-hud', { 'aria-live': 'polite' }, hudL, hudR, hudRow);
+  hudEl.hidden = true;
+  tmDrag(tmEl);
+  // -[TurnMessageLayer init]: End Turn (the report bar's own place is #msg) and, beside it, the gear (additional menus)
+  gearBtn = UIEl('button', 'ios-btn ios-gear', { type: 'button', 'aria-label': 'Menu', 'aria-haspopup': 'true', title: 'Menu' }, pic('button-gear'));
+  gearBtn.addEventListener('click', (e) => { e.stopPropagation(); setGear(!gearOpen); });
+  turnEl = UIEl('div', 'ios-turn', null, gearBtn);
+  const ui = UIEl('div', 'ios-ui', null, hudEl, turnEl);
+  app.append(ui); ui.id = 'ios-ui';
+  doc.addEventListener('click', (e) => { if (gearOpen && !e.target.closest('#menubar') && !e.target.closest('.ios-gear')) setGear(false); });
+  // End Turn is the classic page's clock; it sits left of the gear (-[TurnMessageLayer init]: the menu's items in a row, padding a80)
+  const msg = doc.getElementById('msg'); if (msg) app.append(msg);
+}
+function setGear(o) { gearOpen = o; document.documentElement.classList.toggle('ios-menus', o); if (gearBtn) gearBtn.classList.toggle('on', o); }
+// The terraform / mine slider (CCSliderDeluxe "tmb1": slider-tmb1-left and -right, the thumb; the delegate -[PlanetInfoLayer
+// valueChanged:tag:] 0x1000b38d0 sets the colony's share)
+let tmStar = null;
+function tmDrag(el) {
+  const set = (e) => {
+    const a = A(); if (!a || !a.G || tmStar == null) return;
+    const r = el.getBoundingClientRect(), v = clamp((e.clientX - r.left) / Math.max(1, r.width), 0, 1);
+    const s = a.G.stars[tmStar]; if (!s || s.owner !== a.ME) return;
+    s.terra = Math.round(v * 100) / 100; hud();
+  };
+  el.addEventListener('pointerdown', (e) => { e.stopPropagation(); el.setPointerCapture(e.pointerId); el._drag = true; set(e); });
+  el.addEventListener('pointermove', (e) => { if (el._drag) set(e); });
+  const end = () => { if (el._drag) { el._drag = false; const a = A(); if (a) { a.save(); a.renderPanel(); } } };
+  el.addEventListener('pointerup', end); el.addEventListener('pointercancel', end);
+  el.addEventListener('keydown', (e) => {
+    const a = A(); if (!a || !a.G || tmStar == null) return; const s = a.G.stars[tmStar]; if (!s || s.owner !== a.ME) return;
+    const d = e.key === 'ArrowLeft' ? -0.05 : e.key === 'ArrowRight' ? 0.05 : 0; if (!d) return;
+    e.preventDefault(); s.terra = clamp(Math.round((s.terra + d) * 100) / 100, 0, 1); hud(); a.save();
+  });
+  el.tabIndex = 0;
+}
+// -[PlanetInfoLayer updateData] 0x1000b2df4: the selected star's figures in a row of green labels
+function hudLabels(a) {
+  const G = a.G, p = a.me(), sel = a.UI.sel; if (sel == null) return null;
+  const s = G.stars[sel], k = HO.know(G, p, sel);
+  const word = (en) => (window.HOUI && HOUI.tr ? HOUI.tr(en) : en);
+  const out = [];
+  // the figures: under 100,000 in full, from there in the short form (vtable +0xe0 and +0xe8, FUN_10003cd4c and FUN_10003cfec)
+  const sh = HO.rules(G).interestShort, big = (n, dollar) => n < 100000 ? (dollar ? a.money(n) : a.fmt(n)) : (dollar ? '$' : '') + (sh ? sh(n) : a.fmt(n));
+  if (s.owner === a.ME) {
+    const gs = 72 + (s.t - p.homeT);
+    out.push(big(HO.planetIncome(G, p, s), true), big(HO.popNum(G, s.pop)) + ' ' + word('Pop'), a.degF(gs), a.gravF(s.g, p.homeG), a.fmt(s.metal) + ' ' + word('Metal'));
+    return { labels: out, tm: sel };
+  }
+  if (!k.explored) return { labels: [word('Unexplored')], tm: null };
+  const owner = k.owner >= 0 ? G.players[k.owner].name : word('No One');
+  const stale = k.owner < 0 || !(k.seen >= G.turn) || !k.pop;
+  if (stale) out.push(String(2000 + Math.max(0, k.seen) * 10), owner);
+  else out.push(owner, big(HO.popNum(G, k.pop)) + ' ' + word('Pop'));
+  out.push(a.degF(72 + (k.t - p.homeT)), a.gravF(k.g, p.homeG), a.fmt(k.metal) + ' ' + word('Metal'));
+  return { labels: out, tm: null };
+}
+let hudKey = '';
+function hud() {
+  const a = A(); if (!a || !a.G || !hudEl) return;
+  const r = hudLabels(a);
+  if (!r) { hudEl.hidden = true; hudKey = ''; return; }
+  const key = JSON.stringify([r, r.tm != null && a.G.stars[r.tm].terra]);
+  if (key === hudKey && !hudEl.hidden) return;
+  hudKey = key;
+  hudRow.replaceChildren();
+  for (const t of r.labels) hudRow.append(UIEl('span', 'ios-hl-t', null, t));
+  tmStar = null;
+  if (r.tm != null) {
+    const s = a.G.stars[r.tm], p = a.me();
+    // the bar is drawn only where the colony has both terraforming and mining to do (StarInfoLayer shouldDrawTMBar:player:)
+    if (Math.abs(HO.seenT(p, s) - 72) > 0.5 && s.metal > 0) {
+      tmStar = r.tm; const v = clamp(s.terra, 0, 1);
+      tmEl.style.setProperty('--v', v); tmEl.setAttribute('aria-valuenow', String(Math.round(v * 100)));
+      hudRow.append(tmEl);
+    }
+  }
+  hudEl.hidden = false;
+}
+// the sidebar (-[IncomeLayer init]: the totals box W x 2.5 rows, three labels a line apart, the figure beside the label, the change at the right)
+function sidebar(box, parts) {
+  const info = parts.info, rows = [];
+  if (info) for (const kv of info.querySelectorAll('.kv')) {
+    const lab = kv.firstChild && kv.firstChild.textContent, b = kv.lastChild, chg = b && b.querySelector('.chg');
+    let val = '', change = chg ? chg.textContent : '';
+    if (b) { const c = b.cloneNode(true); const cc = c.querySelector('.chg'); if (cc) cc.remove(); val = c.textContent.trim(); }
+    const m = /^(.*?)\s*(\(Int: .*\))$/.exec(val); if (m) { val = m[1]; change = m[2]; } // the savings line carries the interest ("(Int: $11K)")
+    rows.push(UIEl('div', 'ios-inrow' + (kv.classList.contains('neg') ? ' neg' : ''), { 'data-help': kv.getAttribute('data-help') }, UIEl('span', 'l', null, lab), UIEl('span', 'v', null, val), UIEl('span', 'c', null, change)));
+  }
+  const income = UIEl('section', 'ios-income', null, ...rows);
+  box.replaceChildren(income, parts.budget, parts.tech, ...(parts.planet ? [parts.planet] : []));
+  hud();
+}
+function afterMsg(box, ctx) {
+  const clock = box.querySelector('.clock'), card = box.querySelector('.card');
+  box.classList.toggle('ios-clockbox', !!clock && !card);
+  if (clock) { const f = clock.querySelector('.face'); if (f) f.remove(); }
+  if (turnEl) { if (clock && !card) turnEl.prepend(box); else if (box.parentNode === turnEl) document.getElementById('app').append(box); }
+  hud();
+}
+
 window.HOTHEME = {
   dir: 'assets/skins/ios/',
   prefix: P,
@@ -267,7 +454,12 @@ window.HOTHEME = {
     setTimeout(tick, 900);
     return true;
   },
+  panel: sidebar, afterMsg,
+  afterDraw: () => hud(),
   page(doc) {
+    buildScreen(doc); screenSize();
+    window.addEventListener('resize', () => { const was = SCREEN.pad; screenSize(); if (was !== SCREEN.pad) buildColumn(doc.getElementById('app')); });
+    setSide(sideWanted != null ? sideWanted : SCREEN.pad, true);
     const c = doc.querySelector('#titlescreen .credit');
     if (c) c.textContent = 'With the art and sounds of Spaceward Ho! 1.2.9 for iPhone and iPad (Ariton Technologies, 2017). Art by Howard Vives and Bob Van de walle.';
     const l = doc.querySelector('#menubar .logo'); if (l) l.textContent = 'Ho!';

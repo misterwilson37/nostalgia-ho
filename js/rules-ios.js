@@ -336,8 +336,11 @@ const rs = Object.assign(base, {
   // CONFIRMED (0x1000323a4-0x1000323e0, sub_100021108 0x1000211f4): a big battle sets the star's dust to 20
   // (the skin draws it, js/skins/ios/ui.js dusted); the rules keep the step of the last one (G.dust505).
   starDust: true,
-  // 5.0.5's own: its mouse-drag fuel alert and its short interest figure (iOS has its alert's own words, touch)
-  fuelAlert: null, interestShort: null,
+  // 5.0.5's own: its mouse-drag fuel alert (iOS has its alert's own words, touch). The short interest figure beside the savings,
+  // "(Int: $11K)", is iOS's own too, and the same one (CONFIRMED: -[IncomeLayer updateData] 0x100009200 calls the formatter at +0xe8 of
+  // the app's vtable 0x1000fddb0, FUN_10003cfec, with the interest, +0x54 of the player; its cases are 5.0.5's: 1.00M to 9.99M
+  // "%ld.%2.2ldM", 10M and over "%ldM", 10,000 to 999,999 "%ldK", 1,000 to 9,999 "%ld,%.3ld"; so the ruleset keeps 5.0.5's interestShort)
+  fuelAlert: null,
   // CONFIRMED (OrganizeFleetsLayer, 0x1000bfe20-0x1000c2f14;
   // OrganizerFleetFleetsContainer, 0x1000a5328-0x1000a6018): the Organize
   // Fleets window, opened by a double tap on the fleet list: tap a pile, then
