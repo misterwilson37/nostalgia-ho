@@ -1807,7 +1807,12 @@ function renderMsg0() {
     const look = originalLook(m);
     let sound = look ? look.sound : m.sound, icon = look ? look.icon : m.icon;
     if (T.messageLook) { const t = T.messageLook(m, { icon, sound }, { G, ME, starLook }); if (t) { icon = t.icon; if (ownSounds()) sound = t.sound; } }
-    if (sound) Sound.play(sound);
+    // (rs.sysBeep: 1.2's PlayAnnounceSound @130f08 beeps (SysBeep) for every report without a sound of its own, but the credits and
+    // the battle results, which are silent)
+    const credit = HO.rules(G).sysBeep && (HO.rules(G).welcome || []).some(w => w[0] === m.text);
+    if (credit || (HO.rules(G).sysBeep && (m.battle || m.won != null))) { /* silent */ }
+    else if (HO.rules(G).sysBeep && !(sound && A.snd[sound])) beep();
+    else if (sound) Sound.play(sound);
     if (prefReview() && m.battle && !m._reviewed) { m._reviewed = true; setTimeout(() => openBattle(m.battle), 50); }
     const card = el('div', { class: 'card', tabindex: 0, role: 'button', 'aria-label': 'Next message' });
     const big = m.big || (m.jpg != null ? 'jpg' : null);
@@ -2115,7 +2120,7 @@ function openMasterList() {
 }
 function doEndTurn(confirmed) {
   if (!G || G.over) return;
-  if (confirmed !== true && HO.feature(G, 'buildQueue')) {
+  if (confirmed !== true && confirmed !== 'progress' && HO.feature(G, 'buildQueue')) {
     const rs = HO.rules(G), starved = rs.underfunded ? rs.underfunded(G, me()) : HO.colonies(G, ME).filter(s => s.id !== me().homeStar && !(me().budget.col[s.id] > 0));
     // 1.2's ALRT 5060 (GiveSpendingWarning @102498): one question for all of them, its own words and buttons
     const aw = starved.length ? alertWords('spend') : null;
@@ -2127,6 +2132,8 @@ function doEndTurn(confirmed) {
   timeAtEnd(me());
   // online: the orders go; the turn is played when everyone's are in (online play, below)
   if (G.online) { onlineEndTurn(); return; }
+  // T.turnProgress(G, go): a skin's own status window while the turn is worked out (1.2's DLOG 7000), then go on
+  if (T.turnProgress && confirmed !== 'progress' && !hotSeatPending()) { T.turnProgress(G, () => doEndTurn('progress')); return; }
   // the game as it was: put back if the turn throws (playTurn)
   const before = HO.save(G);
   // hot seat: the turn goes to the next human; the year moves on after the last one
@@ -2167,6 +2174,8 @@ function addTurnNotes(p) {
 // so nobody sees anyone else's planets. Humans who are out of the game
 // get one last turn to read the news.
 // (an online game's humans are each on their own computer: not hot seat)
+// (hot seat: the turn is only worked out when the last human ends it)
+function hotSeatPending() { if (!hotSeat()) return false; const done = (G.done || []).concat([ME]); return seatOrder().some(p => !done.includes(p.id)); }
 function hotSeat() { return !!G && !G.online && HO.humans(G).length > 1; }
 function seatOrder() {
   return HO.humans(G).filter(p => (p.alive && !p.auto) || (!p.alive && !p.sawEnd && (p.inbox || []).length));

@@ -283,7 +283,31 @@ function roster(panel) {
   panel.append(box);
 }
 
+// the status window while the turn is worked out (EndTurn @a0004, OpenStatusDialog: DLOG 7000, its text and progress bar; STR# 1040)
+const PASSES = {
+  en: ['Processing Turn...', 'Pass 1 for Player %d...', 'Battle Stage...', 'Pass 2 for Player %d...', 'Writing Game File...'],
+  fr: ['Calcul du tour...', 'Phase 1 pour Joueur %d...', 'Phase des batailles...', 'Phase 2 pour Joueur %d...', 'Ecriture fichier Jeu...'],
+};
+function turnProgress(g, go) {
+  const a = A(), el = a.el, W = PASSES[lang()], n = g.players.length;
+  const steps = [W[0]];
+  for (let i = 1; i <= n; i++) steps.push(fill(W[1], i));
+  steps.push(W[2]);
+  for (let i = 1; i <= n; i++) steps.push(fill(W[3], i));
+  steps.push(W[4]);
+  const txt = raw('p', steps[0]), bar = el('progress', { max: steps.length, value: 0 });
+  a.modal('', el('div', { class: 'status12' }, txt, bar), { cls: 'small mac12', label: steps[0] });
+  let i = 0;
+  const step = () => {
+    if (++i >= steps.length) { a.closeModal(); go(); return; }
+    txt.textContent = steps[i]; bar.value = i;
+    setTimeout(step, 40);
+  };
+  setTimeout(step, 40);
+}
+
 window.HOMAC12 = {
+  turnProgress(g, go) { if (!own()) return go(); turnProgress(g, go); },
   panel(panel) { if (own()) roster(panel); },
   // the program's own windows, in English and French (another language keeps the remake's)
   window(name, ...x) {
