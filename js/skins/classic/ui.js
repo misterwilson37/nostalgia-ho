@@ -1546,7 +1546,7 @@ function planetBox(sid) {
     if (s.owner === ME) {
       const inc = HO.planetIncome(G, p, s);
       if (!own12) box.append(row(PW('pop', 'Population'), fmt(HO.popNum(G, s.pop)), '', 'population'));
-      if (!PI) box.append(row('Max population', fmt(HO.popNum(G, HO.maxPop(G, p, s))), '', 'maxPop'));
+      if (!(PI && T.ownPanel)) box.append(row('Max population', fmt(HO.popNum(G, HO.maxPop(G, p, s))), '', 'maxPop'));
       if (!own12) box.append(row('Income', panelFig('planetIncome', inc, true), inc < 0 ? 'neg' : '', 'planetIncome'));
       const terraOK = Math.abs(HO.seenT(p, s) - 72) > 0.5, metalOK = s.metal > 0;
       // in 2.0 and 1.2 a finished part's share is wasted, not passed on, so
@@ -1570,12 +1570,12 @@ function planetBox(sid) {
         };
         show();
         box.append(el('div', { class: 'tm', 'data-help': 'terraMine' }, el('span', { class: 'tml' }, PWn('terra', 'Terraform', ' '), lt), inp, el('span', { class: 'tmr' }, rt, PWn('mine', 'Mine', ' ', true))));
-        if (!PI) box.append(waste);
-      } else if (PI) { /* (1.2 draws no note: the bars, or the queue) */ } else if (wasted) box.append(el('p', { class: 'note' }, 'Fully terraformed and mined out. Money spent here on terraforming or mining is wasted.'));
+        if (!(PI && T.ownPanel)) box.append(waste);
+      } else if (PI && T.ownPanel) { /* (1.2 draws no note: the bars, or the queue) */ } else if (wasted) box.append(el('p', { class: 'note' }, 'Fully terraformed and mined out. Money spent here on terraforming or mining is wasted.'));
       else box.append(el('p', { class: 'note' }, !terraOK && !metalOK ? 'Fully terraformed and mined out. Its budget goes to savings.' : !terraOK ? 'Fully terraformed; its budget goes to mining.' : 'No metal left; its budget goes to terraforming.'));
       if (HO.feature(G, 'buildQueue')) box.append(yardBox(s));
       // (1.2 has no button here: Build Ships is a double click on the colony or the Ships menu's "Build Ships at …")
-      if (!PI) box.append(el('div', { class: 'btns' },
+      if (!(PI && T.ownPanel)) box.append(el('div', { class: 'btns' },
         el('button', { onclick: () => openBuild(sid), 'data-help': 'build' }, HO.feature(G, 'buildQueue') ? 'Queue ships…' : 'Build ships…'),
         evacuateHere(s) ? el('button', { class: 'quiet', 'data-help': 'evacuate', onclick: () => evacuateClick(sid) }, evacuateLabel(sid, 'Evacuate')) : null,
         HO.rules(G).evacuateToggle && HO.rules(G).evacuateToggle.marked(G, sid) ? el('span', { class: 'note' }, 'Evacuating') : null));

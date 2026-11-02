@@ -344,6 +344,8 @@ function bars(panel, B) {
 }
 
 window.HOMAC12 = {
+  // (the planet box without the remake's own additions: classic ui planetBox)
+  ownPanel: true,
   turnProgress(g, go) { if (!own()) return go(); turnProgress(g, go); },
   panel(panel, B) { if (own()) { bars(panel, B || {}); roster(panel); } },
   // the program's own windows, in English and French (another language keeps the remake's)
