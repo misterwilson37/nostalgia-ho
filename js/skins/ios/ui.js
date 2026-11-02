@@ -2473,6 +2473,22 @@ window.HOTHEME = {
     setTimeout(() => { if (Sound.music && !ts.hidden && frame._gen === gen) { try { const a = frame._ho || (frame._ho = new Audio(HOTHEME.dir + 'sounds/ho.mp3')); a.currentTime = 0; a.play().catch(() => {}); } catch (e) {} } }, 900);
     return true;
   },
+  // -[MapLayer init] 0x10000d50c (read with floats.py and the decompile): the map's content size is the galaxy's extent (CGame short +0x222) x 40 points each way, a CCLayerPanZoom in mode 0 with maxScale 1.5 (2.0 on an iPad)
+  // and minScale = the scale that makes the content cover the bounds (the larger of bounds / content in each direction), rubberEffectRatio 0: the map never leaves its bounds (the screen without the sidebar). The
+  // remake's view.s is pixels for one of its map units, which is 2 x 40 points x the scale (the extent counts the other map unit, 0.5 of this one: G.W = extent / 2, taken so, not seen set).
+  zoomTo(s, f) { const k = 80 * SCREEN.u, a = A(), G = a && a.G, m = a && a.map && a.map(); const lo = G && m ? Math.max(m.w / G.W, m.h / G.H) : 12; return Math.max(lo, Math.min(k * (SCREEN.pad ? 2 : 1.5), s * f)); },
+  // -[MapLayer onEnter] 0x10000ff44: the layer's scale is set to 0.5 (0.7 on an iPad: 0x1000cef8c) and zoomTo: the player's star (myPlayerState's, else his first fleet's) follows, in 0.2 s (0x1000cef84), putting it in the middle
+  fitView(v, { G, ME, mapW, mapH, sel }) {
+    const p = G.players[ME], id = sel != null ? sel : p && p.homeStar, st = id != null ? G.stars[id] : null;
+    v.s = 80 * SCREEN.u * (SCREEN.pad ? 0.7 : 0.5);
+    v.ox = st ? mapW / 2 - st.x * v.s : 0; v.oy = st ? mapH / 2 - st.y * v.s : 0;
+    HOTHEME.clampView(v, { G, mapW, mapH });
+  },
+  clampView(v, { G, mapW, mapH }) {
+    const lo = Math.max(mapW / G.W, mapH / G.H), hi = 80 * SCREEN.u * (SCREEN.pad ? 2 : 1.5);
+    v.s = Math.max(lo, Math.min(hi, v.s));
+    v.ox = Math.min(0, Math.max(mapW - G.W * v.s, v.ox)); v.oy = Math.min(0, Math.max(mapH - G.H * v.s, v.oy));
+  },
   panel: sidebar, afterMsg,
   afterDraw: () => { hud(); placeButtons(); },
   page(doc) {

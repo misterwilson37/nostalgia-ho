@@ -984,6 +984,7 @@ const zoomRange = () => { const lo = Math.min(fitScale(), UI.view.s), hi = Math.
 // when it is wider than the map it covers it, else it stays inside it
 function clampView() {
   if (!G) return;
+  if (T.clampView) { T.clampView(UI.view, { G, mapW, mapH }); return; } // a skin's own pan rectangle (the iOS app's)
   const v = UI.view, ax = (o, len, view) => len <= view ? Math.min(Math.max(o, 0), view - len) : Math.min(0, Math.max(o, view - len));
   v.ox = ax(v.ox - 30, G.W * v.s + 60, mapW) + 30;
   v.oy = ax(v.oy - 30, G.H * v.s + 60, mapH) + 30;
