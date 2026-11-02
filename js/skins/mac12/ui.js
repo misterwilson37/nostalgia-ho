@@ -471,10 +471,11 @@ function fixStep() {
   box.append(card);
 }
 
-// ---------- the battle window (DoOneBattle @d07d0, DLOG 7010: 445 x 300, black; drawn at twice the size) ----------
+// ---------- the battle window (DoOneBattle @d07d0, DLOG 7010: 445 x 310, black; drawn at twice the size) ----------
 // Everything here is read in the decompile (docs/display/12.json rows DoOneBattle, DrawAllGroups, DrawOneGroup, HaveGroupShoot,
 // DrawLaserBlast, DrawExplosion, DrawX, CalcBattleStars, DrawBattleStars, DrawShipPicture): the black-and-white program's drawing.
-// The window is white on black (ForeColor 30, BackColor 33; DrawBattleStars' 35 white points at random, h 10-435, v 35-290);
+// The window (DLOG 7010, the black-and-white one; 7011, the colour one, is 300 high and black by its dctb) is white on black
+// (ForeColor 30, BackColor 33, the content erased; DrawBattleStars' 35 white points at random, h 10-435, v 35-290);
 // "Résumé de la bataille" (STR# 1030.3) at (155, 13) and "à %s en %d:" at (155, 29) in the system font; each side's face
 // (ICN#: yours 1000, +500 for a woman; another's 2000 + face, +500) at (x, 2), 32 x 32, its player's name at (x + 35, 24); x is
 // 25 for the viewer's side and 300 for the other. A side's groups (CalculateGroups: at most five, a design cut into groups of
@@ -495,7 +496,7 @@ function fixStep() {
 const SYS = '12px Chicago, Charcoal, Geneva, sans-serif', GEN9 = '9px Geneva, Verdana, sans-serif';
 function battleWindow(b, k) {
   const a = A(), g = G(), rs = H().rules(g), el = a.el, IMG = a.IMG, ME = a.ME;
-  const fr = lang() === 'fr', W = 445, Hh = 300, S = 2, TICK = 1000 / 60;
+  const fr = lang() === 'fr', W = 445, Hh = 310, S = 2, TICK = 1000 / 60;
   const pic = (n) => { const im = IMG['dos:' + n]; return im && im.complete && im.naturalWidth ? im : null; };
   const VB = k.verBattle(), speed = Math.max(1, Math.round(30 * VB.f));
   // the state as the shots go
