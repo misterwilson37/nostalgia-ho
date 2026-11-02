@@ -4438,6 +4438,8 @@ function verPrefs(O, box) {
   return el('div', null,
     O.showMessages ? box('showMsgs', O.showMessages) : null,
     O.reviewBattles ? box('review', O.reviewBattles) : null,
+    // (1.2's Options "Alerter sur dépenses", setup +0x4c: the warnings of BuildNewShips about money with no ships queued or no metal)
+    O.spendWarnings && G ? el('label', { class: 'chk' }, el('input', { type: 'checkbox', checked: G.opts.overspendWarnings !== false ? 'checked' : false, onchange: (e) => { G.opts.overspendWarnings = e.target.checked; save(); } }), el('span', null, O.spendWarnings)) : null,
     O.battleSpeed ? slider(O.battleSpeed, 'battleSpeed') : null,
     O.poll ? slider(O.poll, 'poll', 'Kept as the original had it; the remake has no players on other machines, so nothing polls.') : null);
 }

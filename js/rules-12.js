@@ -451,7 +451,7 @@ E.registerRules('12', Object.assign({}, D, {
   // list (rules-dos exploredList) with its French words (DITL 6040, STR# 1020)
   options: {
     battleSpeed: { min: 10, max: 60, def: 30, menu: 'Vitesse des batailles…', title: 'Vitesse des batailles:', fast: 'Rapide', slow: 'Lente', full: 'Animation complète' },
-    showMessages: 'Montrer messages', reviewBattles: 'Voir batailles', reports: 'Fenêtre Rapports',
+    showMessages: 'Montrer messages', reviewBattles: 'Voir batailles', spendWarnings: 'Alerter sur dépenses', reports: 'Fenêtre Rapports',
   },
   // the Ship Types window's check box (DITL 6000 item 17; Mac 2.0.1's "Scrap This Type")
   // (STR# 1010.9-10 and 4000.12: the Ships menu's item and the panel's line for a marked fleet)
@@ -484,7 +484,7 @@ E.registerRules('12', Object.assign({}, D, {
         taken: 'Sorry, there’s already a star named  “%s.” Please pick another name.' },
       // Mac 2.0.1's English for the same windows (MENU 131, DITL 4040, 6040, STR# 1020)
       options: { battleSpeed: { min: 10, max: 60, def: 30, menu: 'Set Battle Speed…', title: 'Battle Speed:', fast: 'Fast', slow: 'Slow', full: 'Fully Animated Battles' },
-        showMessages: 'Show Event Messages', reviewBattles: 'Review Announced Battles', reports: 'Report Window' },
+        showMessages: 'Show Event Messages', reviewBattles: 'Review Announced Battles', spendWarnings: 'Give Overspending Warnings', reports: 'Report Window' },
       exploredList: Object.assign({}, D.exploredList, { layout: 'mac' }), scrapWords: Object.assign({}, D.scrapWords, { fleet: ['Scrap Current Fleet', 'Don’t Scrap Current Fleet'] }) }, // (Mac 2.0.1's)
   },
   ai: '12',                // 1.2's own computer players (js/ai-12.js)

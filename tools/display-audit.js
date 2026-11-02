@@ -61,7 +61,7 @@ if (D.decompile && fs.existsSync(idx)) {
 const STATUS = new Set(['matched', 'fixed', 'notShown', 'internal', 'open']);
 const seen = new Map();
 const formatSrc = fs.readFileSync(path.join(root, 'tools/format-audit.js'), 'utf8');
-const familyIds = new Set([...formatSrc.matchAll(/\bfam\('([^']+)'/g)].map(m => m[1]));
+const familyIds = new Set([...formatSrc.matchAll(/\bfam\('([^']+)'/g)].map(m => m[1]).concat(['foreign']));
 const fileCache = {};
 const text = (f) => fileCache[f] === undefined ? (fileCache[f] = fs.existsSync(path.join(root, f)) ? fs.readFileSync(path.join(root, f), 'utf8') : null) : fileCache[f];
 const counts = {};
@@ -75,7 +75,8 @@ for (const row of D.rows) {
   counts[row.status] = (counts[row.status] || 0) + 1;
   if (row.status === 'open') { fail(`${id}: still open`); continue; }
   const why = row.status === 'matched' ? row.how : row.status === 'fixed' ? row.fix : row.reason;
-  if (!why || String(why).trim().length < 8) fail(`${id}: ${row.status} needs ${row.status === 'matched' ? 'a "how"' : row.status === 'fixed' ? 'a "fix" (the commit)' : 'a "reason"'}`);
+  if (row.status === 'fixed') { if (!/^[0-9a-f]{7,40}( \/ [0-9a-f]{7,40})*$/.test(String(row.fix || ''))) fail(`${id}: fixed needs a "fix": the commit hash (or hashes joined by " / ")`); }
+  else if (!why || String(why).trim().length < 8) fail(`${id}: ${row.status} needs ${row.status === 'matched' ? 'a "how"' : 'a "reason"'}`);
   if (row.status === 'fixed' && !(row.how && row.how.length > 8)) fail(`${id}: fixed needs a "how" too (what was different and how it was verified after)`);
   if (row.status !== 'internal' && !(row.shows && row.shows.length > 8)) fail(`${id}: ${row.status} needs "shows": what the routine puts in front of the player`);
   if (row.status === 'matched' || row.status === 'fixed') {
