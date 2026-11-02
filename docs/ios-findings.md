@@ -957,5 +957,6 @@ known, an eliminated mark, a happy or sad face and an ally toggle, where the rem
 Best buddy). Rebuilding these windows as the app draws them, from `HoBarLayer`, `PlanetInfoLayer`, `StarInfoLayer`, `PlayerMenuItem`,
 `BuildSingleShipDialog`, `OrganizeFleetsLayer`, `TurnMessageLayer` and `MainGameScene`, is the work that remains; those rows carry a `note`.
 
-**Strings.** Of the 161 string constants the open routines use that the remake's text does not contain, none is a word the player reads: they are
-picture and sprite names, notification names, file names and log lines.
+**Strings.** Of the 161 string constants the open routines use that the remake's text does not contain, all but two are picture and sprite names, notification names, file names or
+log lines; the two a player reads are the help window's title "Spaceward Ho Help" (`-[WebViewDialog initDialog]`) and the Saved Games button "Email game"
+(`-[SavedGameScene emailGame]`), whose rows stay open.
