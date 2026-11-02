@@ -357,9 +357,9 @@ function placeButtons() {
   const own = s.owner === a.ME && a.G.players[a.ME].alive !== false;
   const ships = a.G.fleets.some(f => f.owner === a.ME && f.star === sel && f.to == null);
   const r = cv.getBoundingClientRect(), x = r.left + v.view.ox + s.x * v.view.s, y = r.top + v.view.oy + s.y * v.view.s;
-  const pad = SCREEN.pad, k0 = v.view.s / 40, lo = Math.min(v.fit, v.view.s) / 40;
-  let thr = pad ? 1.7 : 1.0; if (lo >= thr) thr = lo + 0.1;
-  const k = k0 >= thr ? (pad ? 3 : 2) : (pad ? 0.6 : 0.2) + (pad ? 2.4 : 1.8) / (thr - lo) * (k0 - lo);
+  // the app's box is 46 points about the planet at scale 1 and its scale follows the planet's (MapLayer setScale:); the remake draws its planets at
+  // planetPx (js/skins/classic/ui.js), a planet about 1.15 x that across, so the box is that wide here: the buttons hug the planet as the app's do
+  const k = Math.max(18, Math.min(52, v.view.s * 0.9)) * 1.15 / 46 / SCREEN.u, pad = SCREEN.pad;
   const show = (cls, on) => { const b = pbEl.querySelector('.ios-pb-' + cls); if (b) b.hidden = !on || (cls === 'move' && pad); };
   show('add', own); show('move', ships); show('organize', ships);
   pbShown = own || ships;
