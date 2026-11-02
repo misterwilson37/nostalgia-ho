@@ -2585,7 +2585,7 @@ function aftermath505(G, sid, B) {
         est.e1e = 0; est.e22 = strOf(x.o, -1);
       } else {
         const face = one >= 0 ? (G.players[one].human ? 'white0_' + (G.players[one].female ? 1 : 0) : 'bad' + G.players[one].face + '_' + (G.players[one].female ? 1 : 0)) : 'm9025';
-        msg(G, p.id, `You ${myAllies}lost a battle at ${s.name}. You ${myAllies}lost ${lost} of your ships. ${eName} lost ${theirs}.`, { icon: face, star: sid, battle: rec.id, won: false });
+        msg(G, p.id, `You ${myAllies}lost a battle at ${s.name}. You ${myAllies}lost ${lost} of your ships. ${eName} lost ${theirs}.`, { icon: face, star: sid, battle: rec.id, won: false, who: one >= 0 ? one : undefined });
         const pp = trunc((eS + 2) * (eW + 2) * trunc((ePop + 2499) / 2500) * (eW + 2) / 570);
         est.e16 = strOf(x.o, -1) + pp + 1;
         const war = () => strOf(x.o, 'dread') + strOf(x.o, 'fighter') + strOf(x.o, 'scout');

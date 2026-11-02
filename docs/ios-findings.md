@@ -1070,7 +1070,7 @@ player's selected star (not a touched bar). A highlighted bar draws a 1 point li
 constrained to (bar width - 64) x (the bar's height), measured at type floor(height / 6) and drawn at one point less, wrapped by words; the five technology reports (1003-1007) put the level in red Arial 30
 over the picture's middle. The turn layer's bar is an "end-turn" message (`setIsEndTurnMessage:` 1 in `-[TurnMessageLayer init]`): its picture hangs 0.75 x (height - a80) and the bar is never resized (the
 message history's items are not, and fit their text). "more..." (Misc 30) is Arial 18 x 0.6 on an iPhone (the globals `GraphicDefines setup` writes), 24 x 0.6 on an iPad, anchor (1, 0) at
-(width - a80 / 2 - 8, a80 / 2 + 1). Not done: the picture is the remake's own per report, not the app's choice by report number (a planet drawn from the star's figures for 1033 and 1034, a hat for 200-216).
+(width - a80 / 2 - 8, a80 / 2 + 1). (The picture by report number: see the fourth pass.)
 
 **The news screen (built: `historySection`, `rs.reportHistory` 80).** `FUN_10003b028` appends each report to the player's list (+0x15e count, 0x30 byte records from +0x160): at 80 it drops the oldest
 10 first (the remake's `p.reportLog`, `rs.reportHistory: 80`). `-[HistoryContainer initWithWidth:height:button:]` 0x1000b1340 is an `InformationContainer` (navy `BackgroundBorderNode`) holding a
@@ -1083,8 +1083,7 @@ shows the supernova or Armageddon). The button `news` swaps this container with 
 **The gear (built: `buildAdditionalMenu`).** `-[AdditionalMenu init]` 0x100093824: seven `CCMenuItemFont`s (Arial 24 on an iPhone, 28 on an iPad), Misc Strings 116 "Dip Into Savings"
 (`DipIntoSavingsDialogLayer`), 118 "Auto Play" (`AutoPlayLayer`), 117 "Armageddon" (`ArmageddonLayer`), 115 "Give Money/Metal" (`GiveDialogLayer`), 114 "Scrap Ship Types" (`ScrapShipTypesLayer`, tag 5001,
 enabled while the player's ship type list is not empty: `updateMenus` 0x100093ec0), 120 "Main Menu" (saves, hides the map, goes to the `WelcomeScene`), 122 "Preferences" (`PreferencesLayer`). An iPhone's are
-a grid of rows of 1, 2, 1, 1, 2 (10 points between), an iPad's one column 8 apart; the box is a navy `BackgroundBorderNode`. `allFleets` and `giveFeedback` exist but are not in the list. Not worked out: where an
-iPhone's box sits about its grid (the code sizes it as the menu + 50 x 70 and positions it at (0, 50) of a node anchored (0, 0.5) at the middle of the screen; the remake centres the box on that point).
+a grid of rows of 1, 2, 1, 1, 2 (10 points between), an iPad's one column 8 apart; the box is a navy `BackgroundBorderNode`. `allFleets` and `giveFeedback` exist but are not in the list. (Where an iPhone's box sits: see the fourth pass.)
 
 ### Remake-only controls to restyle (Jake, November 2026; roadmap "Display audit")
 
@@ -1098,7 +1097,56 @@ and switch players (hot seat), the page's menus behind the gear's "More menus...
 colours). `-[HistoryGraphNode refreshData]` 0x1000ab658 draws ten series from the player's history records (0x2c bytes: year, income, metal, savings, ships, rank, then the standing in each of the five technologies, the
 last six in 100 as `FUN_1000346bc` works them out) with the colours at 0x1000d6520 (income green (0, 170, 40), metal white, savings (105, 250, 105), ships (137, 22, 185), rank (212, 212, 87), the technologies (0, 0, 230),
 (250, 152, 0), (255, 0, 255), (0, 250, 250), (250, 0, 0)); the first four are scaled to maxima that start at 100,000, 100,000, 1,000,000 and 10,000 and grow by as much (`updateMaximums`). Margins: small left 0, right 0, bottom
-20, top 2; big (width over 200) 70, 20, 75, 10. White ticks and axes; the small graph's years span 1,000 from the first record (then the last 100 turns), the big graph's all of them. Only the first series shows at first;
+20, top 2; big (width over 200) 70, 20, 75, 10. White ticks and axes; the small graph's years span 1,000 from the first record (then the last 100 turns), the big graph's all of them. Only the first series shows at first (corrected in the fourth pass: series 0, 2, 7 and 8);
 the big graph's ten buttons (`icon<N>-selected`, scale 0.9) show and hide series and the choice is kept for both graphs. The remake had only population, colonies, ships, tech and income per turn: it now also keeps metal,
-savings, rank and the technology standings (`p.hist[].hx`, skipped by the test digest). Not drawn: the hats of players who are out.
+savings, rank and the technology standings (`p.hist[].hx`, skipped by the test digest). (The hats of players who are out: see the fourth pass.)
 
+
+### Main screen, fourth pass (November 2026)
+
+The last pass's guesses, read from the code (the disassembly, since Ghidra drops the floating-point arguments).
+
+**The iPhone's gear box (`-[AdditionalMenu init]` 0x100093824, `-[TurnMessageLayer init]` 0x10001c4e8 at 0x10001cd68, `-[CCMenu initWithItems:vaList:]` 0x100054c58, `-[CCMenu alignItemsInColumns:vaList:withPadding:]` 0x100055e90,
+`+[GraphicDefines setup]`: on an iPhone a80 = 4, a88 = 6, a38 = 10, a30 = 24).** The node is anchored (0, 0.5) at the middle of the screen and is (winW / 2 + 24 a80) x (winH / 2) (the menu's content size is the
+screen's). The box (a `BackgroundBorderNode`, a layer whose `setIsRelativeAnchorPoint:` the init sets, so it is centred on its position) is the node + (50, 70) and sits at the node's (0, 50): centred across the screen with its middle
+winH / 4 + 50 above the bottom (130 of 320). The menu (a `CCMenu`, anchor 0.5, relative) is put at (winW / 2, winH / 2 + 50) of the node, which puts its origin on the box's middle; `alignItemsInColumns` spreads the columns of a row over
+the screen's width: the two items of a 2-column row are at +- (winW + 40) / 6 from the middle, and each row is its tallest item + 2 x 10 high (10 the padding given). `makeVisible` / `makeHidden` scale it in and out in y over 0.1 s (0.2 x 0.5)
+about the node's middle. Built so (`style.css` `.ios-am` on a phone; a ruleset that is not iOS's or Android's has one more item and the box grows to take it).
+
+**The graphs.** The legend's pictures (`0990N`) are one picture for both states; `-[HistoryGraphNode updateMiniIcons]` 0x1000ac788 tints a series that shows (199, 199, 199) and one that does not (255, 255, 255) (the table at
+0x1001495f8): the remake dimmed the hidden ones, a guess, and now tints the shown ones. The series choice is a pair of ten flag bytes in the preferences object (+0x1fc: the small graph's, +0x206: the big one's), written together by
+`toggleIcons:` 0x1000ab540, which then calls the object's vtable +0x18 (`FUN_10008f698`, the archive to `ho.prefs`): so the app keeps it across launches (the remake: the browser's storage) and its defaults, from the constructor
+0x10003dbd8, are series 0, 2, 7 and 8 (income, savings and two of the technologies; the earlier note had only the first). `GraphNode` (the iPad's shade): `makeVisible` takes touches (a targeted delegate, swallowing) and scales it in y
+from 0 over 0.1 s, `makeHidden` removes them and scales it to 0 then hides; `ccTouchBegan:` takes a touch inside the whole 200 x 100; a tap opens the dialog (`ccTouchEnded:`).
+`HistoryGraphDialogLayer` is a `DialogLayerSprite` (0x1000bc294): a layer 480 x 320 on an iPhone (an iPad's min(winW, 620) x min(winH, 400)) scaled by min(winW / 480, winH / 320) (an iPad's 0.8 of each), its background
+`dialog-background.png` as a nine-patch (capInsets 40, 40, 325, 239 of a 405 x 319 picture: 40 points all round), a mini close button (`button-x` at scale 0.5, its top left at (12, height - 14)), the graph (width - 2 a88) x (height - a88)
+at (a88, 0) (a88 6 on an iPhone, 8 on an iPad) with its buttons at its bottom (anchor (0.5, 0), at (width / 2, 4), scale 0.9). A touch that begins and ends outside the dialog closes it (`ccTouchBegan:` / `ccTouchEnded:`). The big graph is
+drawn straight on the dialog: the fill and border colours are handed to a `BackgroundBorderNode` only for a small graph (`initWithBackground:...` 0x1000aa444). The hats of the players who are out (a big graph's): one hat per player
+(`GraphicsHoMap smallPlayerHat:`, with the eliminated sprite its child at (0, 0), that is on the hat's lower left corner) tagged 0x32 + the player, hidden; `refreshData` shows those whose +0x3c is not 0, the earliest first, at the year's
+place on the years' axis and ten under the top less k x height / (players - 1) (half the height for one player), under the lines and axes (added first).
+
+**The players list.** A tap on your own row or a dead player's row runs `-[PlayerMenuItemToggle toggle]` all the same: on your own it sets your best-buddy bit toward yourself, on a dead ex-ally or ex-buddy it sets or clears your bits
+toward him, and on one who was never allied it asks him for an alliance (+0x1114): nothing the row shows (its word is none), so the remake does nothing.
+
+**The report's picture by number (`-[MessageNode update:]`, `FUN_100038788`).** The table from report number (1000 + the page's own report index) to picture is the page's table but for two: 1033 and 1034 ("You have explored ..." / "... has
+explored ...") are a `PlanetNode` (40 x 40, `planet_N` scaled 1/3, the temperature and metal overlays as the star's) from the figures in the report, and 1037 (a battle lost) is the `HatNode` of the player the report names (the enemy hat,
+50 points wide; `halo1` allied or `halo2` best buddies at (0, 17) over it when he is allied with you), `report_icon-25` when it names no one; 1085 (a technology's jump) is picture 39 + the technology. A planet or a hat does not count in the
+height of a history item (only the icon does). Built: `reportPicture` in `ui.js` (the page's report numbering is the app's).
+
+**Ships (`ShipNode`, 0x100017980-0x1000188b0; built: `shipPic`, `special` in `ui.js`).** A ship type (the app's 0x3c byte record: class +0, the five levels as shorts from +4 in the order range, speed, weapons, shield, miniaturization, the name at +0x2c)
+is a node of sprites by frame name: the weapon `ship-weapon-<weapons - 1>`, the engine `ship-engine-<range + speed - 8>`, the middle `ship-middle-<shield - 1>` (each kept to 0-29), `ship-colony-middle` for class 4 and
+`ship-tanker-middle` for class 3, laid left to right with no gap (engine, middle, weapon) about the node's middle, the node the middle's width + 80 (points) by its height; a satellite (class 5) `ship-satellite-<weapons - 1>`;
+a dreadnought (class 1) `ship-dreadnaught-middle` with three weapons at (72, -28), (72, 25), (85, -3) and three engines at (-71, -25), (-71, 28), (-84, 0) (points, y up, from the middle's middle; the node 211 x 88; the
+remake's old numbers put the outer pairs 3 points low); a special single picture where the levels say so (`buildSpecialShip` 0x100017fa0: the remake's `special` was right, but for the decoy, which the code does not name).
+The app has no rust: `ship-rust` is in the sprite sheet and no code names it, so the iOS skin no longer rusts a design. A node can carry damage: the sprite `tech_bar_white` tinted red at opacity 60, anchored (1, 0.5) at
+(width, height / 2), x scaled to the damage fraction of the width and y to the node's height, drawn over the parts (`draw` 0x100017980, `setDamage:` 0x1000179f4): the battle's ships (BattleShipNode) use it, not yet compared.
+
+**Read and not built (the Build dialog and the fleet rows).** `-[BuildSingleShipDialog initDialog]` 0x1000b4d60 and the rest: a DialogLayerSprite (480 x 320 on an iPhone, as the graph dialog) holding the ship's name in a `CCTextField` (field size
+((width - 40) / 2 - 20) x 64, Arial 18 on an iPhone) over a `BackgroundBorderNode` (the same width x 32), a `ShipNode`, five technology labels (Misc Strings 3-7) with five `SliderArray` sliders, the costs as `ValueWithLabel`s (Misc
+Strings 60 total cost, 61 total metal, 62 development cost, 63 production cost, 64 metal cost, 24 and 23 the money and metal left), a line of the form "%s/%s %@" with two figures and Misc 66 ("In Service") (`updateExtraShipData` 0x1000b64b8), "# To Build" (Misc 157) with a slider whose
+maximum `determineCapacity` 0x1000b6a08 sets (the ship cost from the money, less the allowed debt when the debt slider is on, the metal cost from the metal, 9999 for a ship that needs none, no more than the colony can still take; the
+Build check hides at 0 and the unaffordable cost labels flash red/pink: `flashRed:` 0x1000b77f8, a `CCTintTo` (255, 0, 0) and (255, 175, 175) repeated), "Allow Debt" (158) with a two-word slider ("No", "Yes": 159, 160), and two warnings
+(Alert Strings 36 and 37, "Are you sure you want to build that many scout ships?" / "... tankers?": ten or more scouts, ten or more tankers), the sliders' limits from the player's levels (`adjustControlsFor:` 0x1000b70f4: range up to the player's level (+3 for a scout, -1 for a tanker...) and so on), a ship matching a
+type already in the player's list of 24 selects it (`matchingShipTypeIndex`), else a new type is made at Build (Alert Strings 16, "Sorry, but your assembly lines are full ...", past 24). The dialog the Build button opens is `BuildShipsDialog` (`initDialog` 0x1000b3b58: a layer scaled to the screen (an iPhone's the whole screen, an iPad's 0.8 of the width and as tall as the most ships of one class need at 100 points each, within 0.5 to 0.8 of the height), the selected star's `PlanetNode` and name at the top, and a `ShipClassMenu` column for each of the six classes, seven with a Biological type, each listing the player's types of that class as `ShipMenuItem`s (`updateShipTypes:` 0x1000b4164: a new type scales in over 0.2 s)); a tap on a type or on a column's design button (`designNewShip`, `shipSelected:` in `ShipClassMenu`) opens the `BuildSingleShipDialog`, and the rows of
+`FleetMenuItem` (`updateData:player:isMe:star:fleetNumber:` 0x1000c40e0: a `ShipNode` scaled to the row's width / 210, the fleet's name coloured by its state, "Fuel: %d" under it) belong to `FleetMovementDialog`. None of
+this is built in the iOS skin (the page's own Build and Fleets windows serve), and the rows stay open with what was read in their notes.

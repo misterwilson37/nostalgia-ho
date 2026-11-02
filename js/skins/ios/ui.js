@@ -180,11 +180,13 @@ function shipPic(d, IMG, rusty) {
   else {
     const eng = part('engine', (d.R || 0) + (d.V || 0) - 8), nose = part('weapon', d.W - 1);
     if (d.type === 'dread') {
-      ops.push([im('ship-dreadnaught-middle'), -130, -88]);
-      for (const [x, y] of [[104, -84], [104, 22], [130, -34]]) ops.push([nose, x, y]);
-      for (const [x, y] of [[-182, -90], [-182, 16], [-208, -40]]) ops.push([eng, x, y]);
+      // -[ShipNode buildDreadnought] 0x1000183e0 (the parts' centres in points, y up, about the middle's: weapons (72, -28), (72, 25), (85, -3), engines (-71, -25), (-71, 28), (-84, 0); then updateContentSize: 211 x 88 moves every child by half of it): in these
+      // Retina pixels (y down) the 80-pixel parts' top lefts are
+      ops.push([im('ship-dreadnaught-middle'), -131, -88]);
+      for (const [x, y] of [[104, 16], [104, -90], [130, -34]]) ops.push([nose, x, y]);
+      for (const [x, y] of [[-182, 10], [-182, -96], [-208, -40]]) ops.push([eng, x, y]);
     } else {
-      const body = d.type === 'colony' ? [im('ship-colony-middle'), -70, -56] : d.type === 'tanker' ? [im('ship-tanker-middle'), -64, -44] : [part('middle', d.S - 1), -40, -40];
+      const body = d.type === 'colony' ? [im('ship-colony-middle'), -70, -56] : d.type === 'tanker' ? [im('ship-tanker-middle'), -65, -44] : [part('middle', d.S - 1), -40, -40];
       const l = body[1], r = body[1] + (body[0] ? body[0].width : 80);
       ops.push(body, [nose, r, -40], [eng, l - 80, -40]);
     }
@@ -235,7 +237,7 @@ function screenSize() {
   const W = Math.max(220, Math.ceil(Math.fround(winW * (pad ? 0.3 : 0.45)))), row = Math.ceil(Math.fround(W * 0.08));
   Object.assign(SCREEN, { pad, u, winW, winH, W, row, font: Math.floor(Math.fround(row * 0.7)), labelW: Math.ceil(Math.fround(W * 0.45)), gap: pad ? 8 : 4 });
   const de = document.documentElement, st = de.style;
-  st.setProperty('--u', u + 'px'); st.setProperty('--W', W); st.setProperty('--row', row);
+  st.setProperty('--u', u + 'px'); st.setProperty('--ww', String(winW)); st.setProperty('--wh', String(winH)); st.setProperty('--W', W); st.setProperty('--row', row);
   st.setProperty('--fs', String(SCREEN.font)); st.setProperty('--more', pad ? '24' : '18'); st.setProperty('--mfs', String(Math.floor(Math.fround(row * 3 / 6)) - 1)); st.setProperty('--labw', String(SCREEN.labelW)); { const g = barGeom(); st.setProperty('--bo', String(g.barOffset)); st.setProperty('--bw', String(g.mw)); } st.setProperty('--gap', String(SCREEN.gap));
   de.classList.toggle('ios-pad', pad); de.classList.toggle('ios-phone', !pad);
   sideLayout();
@@ -393,7 +395,7 @@ function buildAdditionalMenu() {
   if (!G) return;
   const L = AM_NAMES[uiLang()], rows = SCREEN.pad ? AM_ITEMS.map(i => [i]) : [[0], [1, 2], [3], [4], [5, 6]].map(r => r.map(k => AM_ITEMS[k]));
   for (const r of rows) {
-    const row = UIEl('div', 'ios-amr');
+    const row = UIEl('div', 'ios-amr' + (r.length === 2 ? ' two' : ''));
     for (const [name, key, fn, ok] of r) {
       const on = !!ok(a), b = UIEl('button', 'ios-ami' + (on ? '' : ' off'), { type: 'button', 'aria-disabled': on ? null : 'true' }, UIEl('span', null, L ? { translate: 'no' } : null, L ? L[key] : name));
       b.addEventListener('click', (e) => { e.stopPropagation(); if (!on) return; setGear(false); const x = A(); if (x && x.G && (!x.G.over || key === 'main' || key === 'prefs')) try { fn(x); } catch (er) { console.error(er); } });
@@ -401,6 +403,7 @@ function buildAdditionalMenu() {
     }
     amEl.append(row);
   }
+  amEl.classList.toggle('xtra', !/^(ios|android)$/.test(G.rules || ''));
   // a ruleset the app has no screen for keeps the page's menus in one more item
   if (!/^(ios|android)$/.test(G.rules || '')) {
     const b = UIEl('button', 'ios-ami ios-amx', { type: 'button' }, 'More menus…');
@@ -411,7 +414,12 @@ function buildAdditionalMenu() {
 function setGear(o) {
   gearOpen = !!o; document.documentElement.classList.remove('ios-menus');
   if (gearOpen) buildAdditionalMenu();
-  if (amEl) { amEl.hidden = !gearOpen; amEl.classList.toggle('open', gearOpen); }
+  // -[AdditionalMenu makeHidden] 0x1000945e8: a scale to 0 in y over 0.1 s, then hidden
+  if (amEl) {
+    clearTimeout(amEl._t); amEl.classList.toggle('open', gearOpen);
+    if (gearOpen) { amEl.classList.remove('closing'); amEl.hidden = false; }
+    else if (!amEl.hidden && !amEl.classList.contains('closing')) { amEl.classList.add('closing'); amEl._t = setTimeout(() => { amEl.hidden = true; amEl.classList.remove('closing'); }, 100); }
+  }
   if (gearBtn) gearBtn.classList.toggle('on', gearOpen);
 }
 // The terraform / mine slider (CCSliderDeluxe "tmb1": slider-tmb1-left and -right, the thumb; the delegate -[PlanetInfoLayer
@@ -693,7 +701,7 @@ function playersList() {
   for (const id of listOrder(G)) {
     const p = G.players[id], out = !p.alive, tg = pacts ? pactToggle(G, me, p, pm, buddies) : { items: [p.id === me.id ? 1 : 11], cur: 0 };
     const row = UIEl('div', 'ios-prow', null);
-    const hat = pic('player_list_' + (p.human ? 16 : p.face) + '_' + (p.female ? 'f' : 'm'), 'ios-phat');
+    const hat = pic(hatName(p), 'ios-phat');
     row.append(hat);
     if (out) row.append(pic('player_list_eliminated', 'ios-phat ios-pelim'));
     // the name
@@ -763,9 +771,10 @@ function historySection() {
       it.append(dg);
     } else {
       const lines = wrapLines(txt, s0, SCREEN.W - 64), wid = Math.max(1, ...lines.map(l => textW(l, s0))), th = lines.length * s0 * 1.15;
-      const ic = a.msgIconEl(m), hasIcon = !!(ic && ic.src);
-      it.style.height = pt(Math.max(th + 2 * gap, (hasIcon ? 40 : 0) + 2 * gap));
+      const rp = reportPicture(m), ic = rp ? null : a.msgIconEl(m), hasIcon = !!(ic && ic.src);
+      it.style.height = pt(Math.max(th + 2 * gap, (hasIcon ? 40 : 0) + 2 * gap)); // (a planet or a hat does not count in the height: only the report icon is the size the node takes)
       if (hasIcon) { ic.className = 'ricon'; it.append(ic); }
+      if (rp) { rp.el.classList.add('ios-hrpic'); it.append(rp.el); }
       if (lv) it.append(UIEl('span', 'ios-lvl ios-hlvl', { 'aria-hidden': 'true' }, lv[1]));
       const p = UIEl('p', null, null, txt);
       p.style.width = pt(Math.ceil(wid) + 1); p.style.height = pt(th); p.style.fontSize = pt(s0 - 1); p.style.lineHeight = pt((s0 - 1) * 1.15);
@@ -822,8 +831,16 @@ function sidebar(box, parts) {
 // records "No Graph Information Available" (Misc Strings 47) is written in white in the middle.
 const GCOL = [[0, 170, 40], [255, 255, 255], [105, 250, 105], [137, 22, 185], [212, 212, 87], [0, 0, 230], [250, 152, 0], [255, 0, 255], [0, 250, 250], [250, 0, 0]];
 const GMAX0 = [100000, 100000, 1000000, 10000, 100], GSTEP = [100000, 100000, 1000000, 10000, 0];
-function graphFlags() { try { const f = JSON.parse(localStorage.getItem('ho.ios.graphs')); if (Array.isArray(f) && f.length === 10) return f; } catch (e) {} return [true, false, false, false, false, false, false, false, false, false]; }
+function graphFlags() { try { const f = JSON.parse(localStorage.getItem('ho.ios.graphs')); if (Array.isArray(f) && f.length === 10) return f; } catch (e) {} return [true, false, true, false, false, false, false, true, true, false]; } // (CPrefs defaults 0x10003dbd8: bytes +0x1fc, +0x1fe, +0x203, +0x204 set; saved with the preferences by -[HistoryGraphNode toggleIcons:] through CPrefsPhone's save, 'ho.prefs')
 function setGraphFlags(f) { try { localStorage.setItem('ho.ios.graphs', JSON.stringify(f)); } catch (e) {} }
+// the hats of the players who are out, a big graph's (-[HistoryGraphNode initWithBackground:...] 0x1000aa444 makes one per player, GraphicsHoMap smallPlayerHat: with the eliminated sprite its child at (0, 0), tag 0x32 + the
+// player, hidden; -[HistoryGraphNode refreshData] 0x1000ab658 shows those whose player went out (player +0x3c, the year), the earliest first, at x = the year's place on the years' axis, y = ten under the graph's top less
+// k (graph height / (players - 1)) for the k-th, or half the height for a one-player game; a hat is 20 points (40 pixels at 2 x); it hangs under the lines and the axes (added first, same z))
+const hatImgs = {};
+function hatImg(name, redraw) { let im = hatImgs[name]; if (!im) { im = hatImgs[name] = new Image(); im.onload = () => { if (redraw) redraw(); }; im.src = HOTHEME.dir + 'sprites/' + name + '.png'; } return im.complete && im.naturalWidth ? im : null; }
+function hatName(p) { const a = A(); return 'player_list_' + (a && p.id === a.ME ? 16 : p.face) + '_' + (p.female ? 'f' : 'm'); } // (+[GraphicsHoMap smallPlayerHat:] 0x100008734: the current player's is hat 16, another's his hat byte +0x95; "f" when his +0x2c is 0)
+// the legend's tint: -[HistoryGraphNode updateMiniIcons] 0x1000ac788 / createMiniIcon: 0x1000ab1b4: a series that shows (selected index 1) has setColor (199, 199, 199) (bytes +0xf of the table at 0x1001495f8), one that does not (index 0) (255, 255, 255): both items are the same picture 0990N
+function tinted(im, k) { const t = document.createElement('canvas'); t.width = im.width; t.height = im.height; const x = t.getContext('2d'); x.drawImage(im, 0, 0); x.globalCompositeOperation = 'multiply'; x.fillStyle = `rgb(${k},${k},${k})`; x.fillRect(0, 0, t.width, t.height); x.globalCompositeOperation = 'destination-in'; x.drawImage(im, 0, 0); return t; }
 function graphVals(h) { const x = h.hx || {}; return [h.inc, x.met, x.sav, h.ships, x.rk].concat(x.tr || [null, null, null, null, null]); }
 function paintGraph(cv, w, h, big, redraw) {
   const a = A(); if (!cv || !a || !a.G) return;
@@ -839,6 +856,17 @@ function paintGraph(cv, w, h, big, redraw) {
   const line = (x1, y1, x2, y2) => { c.moveTo(x1, y1); c.lineTo(x2, y2); };
   c.clearRect(0, 0, w, h);
   if (!big) { c.fillStyle = 'rgba(204,204,204,0.882)'; c.fillRect(0, 0, w, h); }
+  if (big && rec.length >= 2) { // the hats (under the axes and the lines)
+    const xMin = rec[0].y, xMax = rec[rec.length - 1].y + 10, sc = Math.trunc(gW * 100 / (xMax - xMin)), G = a.G, n = G.players.length;
+    const out = []; // (player, year), the earliest first; a later one with the same year after
+    for (const p of G.players) { if (p.alive) continue; const yr = p.outYear505 || p.outYear || 1; let i = 0; while (i < out.length && !(yr < out[i][1])) i++; out.splice(i, 0, [p, yr]); }
+    out.forEach(([p, yr], k) => {
+      const hx = Math.trunc(x0 + Math.trunc((yr - xMin) * sc / 100)), hy = Math.trunc(y0 + gH - 10 - (n === 1 ? gH * 0.5 : k * (gH / (n - 1)))), im = hatImg(hatName(p), redraw), el = hatImg('player_list_eliminated', redraw);
+      if (!im) return;
+      c.save(); c.translate(hx, hy); c.scale(1, -1); c.drawImage(im, -10, -10, 20, 20); c.restore();
+      if (el) { c.save(); c.translate(hx - 10, hy - 10); c.scale(1, -1); c.drawImage(el, -10, -10, 20, 20); c.restore(); }
+    });
+  }
   c.lineWidth = 1; c.strokeStyle = '#fff';
   c.beginPath();
   for (let k = 1; k <= 10; k++) { const y = gH / 10 * k, len = (k % 2 ? 1 : 3) + (big ? 2 : 0); line(0, y, len, y); }
@@ -869,34 +897,69 @@ function paintGraph(cv, w, h, big, redraw) {
     }
     c.stroke();
   }
-  if (!big) { // the legend: the series' pictures (0990N, 32 x 14) scaled to (20 - 0.4) / 32, from (2, 2) edge to edge; the ones not shown are dimmed
+  if (!big) { // the legend: the series' pictures (0990N, 32 x 14) scaled to (20 - 0.4) / 32, from (2, 2) edge to edge; the ones that show are tinted (199, 199, 199), the others are as drawn
     const k = (20 - 0.4) / 32;
     for (let s = 0; s < 10; s++) {
       const im = A().IMG && A().IMG[P + '0990' + s]; if (!im || !im.width) { if (redraw) setTimeout(redraw, 300); continue; }
-      c.save(); c.globalAlpha = flags[s] ? 1 : 0.35; c.translate(2 + s * 32 * k, 2); c.scale(1, -1); c.drawImage(im, 0, -14 * k, 32 * k, 14 * k); c.restore();
+      c.save(); c.translate(2 + s * 32 * k, 2); c.scale(1, -1); c.drawImage(flags[s] ? tinted(im, 199) : im, 0, -14 * k, 32 * k, 14 * k); c.restore();
     }
   }
 }
 function drawGraph() { if (gnCv && !gnEl.classList.contains('shut')) paintGraph(gnCv, 200, 100, false, drawGraph); }
-// -[HistoryGraphDialogLayer initDialog] 0x1000b89a0: the big graph in a dialog, the ten series' buttons beneath it (icon N, selected or not; scale 0.9, 5 apart on an iPad, 1 on an iPhone)
+// -[HistoryGraphDialogLayer initDialog] 0x1000b89a0 on -[DialogLayerSprite init] 0x1000bc294 (read in the disassembly): the dialog is a layer anchored at the middle of the screen, 480 x 320 on an iPhone, min(winW, 620) x min(winH, 400) on an iPad, scaled by
+// min(winW / its width, winH / its height) (an iPad's: 0.8 of each); its background is dialog-background.png as a nine-patch (capInsets 40, 40, 325, 239: 40 points all round of a 405 x 319 picture); the graph is a big HistoryGraphNode
+// (width - 2 a88) x (height - a88) (a88 6 on an iPhone, 8 on an iPad) at (a88, 0), the ten series' buttons in it (anchor (0.5, 0), at (width / 2, 4), scale 0.9, 5 apart on an iPad, 1 on an iPhone); the mini close button (button-x, scale 0.5,
+// 44 points) has its top left at (12, height - 14); a touch that begins and ends outside the dialog closes it (-[DialogLayerSprite ccTouchBegan:withEvent:] 0x1000bce5c, ccTouchEnded: 0x1000bcf0c), one that begins inside does not
 let gdEl = null;
+function closeGraphs() { if (gdEl) { gdEl.remove(); gdEl = null; } }
 function openGraphs() {
   const a = A(); if (!a || !a.G) return;
-  if (gdEl) { gdEl.remove(); gdEl = null; return; }
+  if (gdEl) { closeGraphs(); return; }
+  const pad = SCREEN.pad, a88 = pad ? 8 : 6, cw = pad ? Math.min(SCREEN.winW, 620) : 480, ch = pad ? Math.min(SCREEN.winH, 400) : 320;
+  const k = pad ? Math.min(SCREEN.winW * 0.8 / cw, SCREEN.winH * 0.8 / ch) : Math.min(SCREEN.winW / cw, SCREEN.winH / ch);
+  const gw = cw - 2 * a88, gh = ch - a88;
   const cv = UIEl('canvas', 'ios-gcv'), bar = UIEl('div', 'ios-gbar');
-  const flags = graphFlags(), W = Math.max(300, SCREEN.winW - 2 * 16), H = Math.max(200, SCREEN.winH - 2 * 16);
-  const paint = () => paintGraph(cv, W - 16, H - 16, true);
+  const flags = graphFlags();
+  const paint = () => paintGraph(cv, gw, gh, true, paint);
   for (let s = 0; s < 10; s++) {
     const b = UIEl('button', 'ios-gic', { type: 'button', 'aria-pressed': flags[s] ? 'true' : 'false', 'aria-label': 'Series ' + (s + 1) }, pic('icon' + s + (flags[s] ? '-selected' : '-not-selected')));
     b.addEventListener('click', () => { const f = graphFlags(); f[s] = !f[s]; setGraphFlags(f); b.setAttribute('aria-pressed', f[s] ? 'true' : 'false'); b.firstChild.src = HOTHEME.dir + 'sprites/icon' + s + (f[s] ? '-selected' : '-not-selected') + '.png'; paint(); drawGraph(); });
     bar.append(b);
   }
   const x = UIEl('button', 'ios-gx', { type: 'button', 'aria-label': 'Close' }, pic('button-x'));
-  x.addEventListener('click', () => { gdEl.remove(); gdEl = null; });
-  gdEl = UIEl('div', 'ios-gdlg win', { role: 'dialog', 'aria-label': 'Graphs', style: `width:calc(${W} * var(--pt));height:calc(${H} * var(--pt))` }, cv, bar, x);
+  x.addEventListener('click', closeGraphs);
+  const graph = UIEl('div', 'ios-ggraph', { style: `left:calc(${a88} * var(--pt));bottom:0;width:calc(${gw} * var(--pt));height:calc(${gh} * var(--pt))` }, cv, bar);
+  const dlg = UIEl('div', 'ios-gdlg', { role: 'dialog', 'aria-label': 'Graphs', style: `width:calc(${cw} * var(--pt));height:calc(${ch} * var(--pt));transform:translate(-50%,-50%) scale(${k})` }, UIEl('div', 'ios-gbg'), graph, x);
+  let began = false; // (the layer swallows every touch: this is it)
+  gdEl = UIEl('div', 'ios-gscrim', null, dlg);
+  gdEl.addEventListener('pointerdown', (e) => { began = e.target === gdEl; e.stopPropagation(); });
+  gdEl.addEventListener('pointerup', (e) => { if (began && e.target === gdEl) closeGraphs(); began = false; e.stopPropagation(); });
+  gdEl.addEventListener('click', (e) => e.stopPropagation());
   document.getElementById('app').append(gdEl);
   paint(); setTimeout(paint, 300);
-  document.addEventListener('keydown', function esc(e) { if (e.key === 'Escape' && gdEl) { gdEl.remove(); gdEl = null; } if (!gdEl) document.removeEventListener('keydown', esc); });
+  document.addEventListener('keydown', function esc(e) { if (e.key === 'Escape' && gdEl) closeGraphs(); if (!gdEl) document.removeEventListener('keydown', esc); });
+}
+// The report's picture by its number (-[MessageNode update:] 0x100013064, FUN_100038788: the table from report number to picture is the page's own 5.0.5 table but for two: 1033 and 1034 ("You have explored ..." and
+// "... has explored ...") are drawn as a PlanetNode, a 40 x 40 box with the planet (planet_N scaled 1/3 over its temperature and metal: -[PlanetNode update:temp:metal:] 0x100090e58, the page's planetPic) from the star's figures
+// ((msg + 8) the gravity kind, its temperature less your home's + 720, its metal); and 1037 (a battle lost) is the HatNode of the player the report names (guy:game: 0x100091928: the enemy hat frame of his hat and sex, 50 points wide, and
+// halo1 (allied) or halo2 (best buddy) at (0, 17) over it when he is allied with the player), or report_icon-25 when it names no one. The planet's top and the picture's top are at the same place (30, 0.75 x (height - a80) up),
+// the hat's middle is there.
+function reportPicture(m) {
+  const a = A(); if (!a || !a.G || !m || !a.msgReportNo) return null;
+  const G = a.G, no = a.msgReportNo(m), me = a.me();
+  if ((no === 1033 || no === 1034) && m.star != null) {
+    const k = HO.know(G, me, m.star), src = k && k.g != null ? k : null; if (!src) return null;
+    const c = planetPic(a.IMG, me, src); if (!c) return null;
+    const el = document.createElement('canvas'); el.width = c.width; el.height = c.height; el.getContext('2d').drawImage(c, 0, 0);
+    el.className = 'ios-rpic ios-rplanet'; return { el, kind: 'planet' };
+  }
+  if (no === 1037 && m.who != null && G.players[m.who]) {
+    const q = G.players[m.who], box = UIEl('span', 'ios-rpic ios-rhat');
+    box.append(pic(`enemy_${q.face || 0}_${q.female ? 'f' : 'm'}`, 'h'));
+    if (HO.isAllied(G, a.ME, q.id)) box.append(pic(HO.isBuddy(G, a.ME, q.id) ? 'halo2' : 'halo1', 'o')); // (FUN_10003a0ec: allied, FUN_10003a148: best buddies)
+    return { el: box, kind: 'hat' };
+  }
+  return null;
 }
 function afterMsg(box, ctx) {
   const clock = box.querySelector('.clock'), card = box.querySelector('.card');
@@ -939,6 +1002,7 @@ function afterMsg(box, ctx) {
         p.style.fontSize = `calc(${s0 - 1} * var(--pt))`; p.style.lineHeight = `calc(${(s0 - 1) * 1.15} * var(--pt))`;
       }
     }
+    { const old = card.querySelector('.icon, .bigicon, .jpg'), rp = m && reportPicture(m); if (rp) { if (old) old.remove(); card.append(rp.el); } }
     const cnt = card.querySelector('.count');
     if (cnt) { cnt.textContent = ctx && ctx.inbox && ctx.idx + 1 < ctx.inbox.length ? 'more...' : ''; cnt.setAttribute('translate', 'yes'); }
   }
@@ -980,7 +1044,7 @@ window.HOTHEME = {
     const pic = planetPic(IMG, p, src);
     return pic ? { base: look.base, pic, hat: look.hat } : look;
   },
-  shipPic(d, IMG, rusty) { return shipPic(d, IMG, rusty); },
+  shipPic(d, IMG) { return shipPic(d, IMG, false); }, // (the app's ShipNode has no rust: ship-rust is in the sheet but no code names it)
   // the title: the app's welcome screen, its name down the side and the
   // cowboy planet (hoguy_0-19) twirling his six-gun
   title(frame, IMG, Sound) {

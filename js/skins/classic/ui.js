@@ -6503,7 +6503,7 @@ window.addEventListener('DOMContentLoaded', () => {
   T.api = {
     get G() { return G; }, get ME() { return ME; }, UI, IMG, A, el, $, me, money, fmt, degF, gravF, toC, degText, panelFig,
     toast, modal, closeModal, confirmBox, alertOver, renderPanel, prefReview, budgetScale: () => HO.barScale(G, 'budget', barPick()), flipBarScale, renderMsg, draw, save, Sound, beep, guard,
-    shipPic, shipImgEl, starLook, fleetOrder, reportAction, msgIconEl, curFleet, centerOn, zoomAt, resize, map: () => ({ w: mapW, h: mapH, ready: !!cv }),
+    shipPic, shipImgEl, starLook, fleetOrder, reportAction, msgIconEl, msgReportNo: (m) => { const l = originalLook(m); return l ? l.id : null; }, curFleet, centerOn, zoomAt, resize, map: () => ({ w: mapW, h: mapH, ready: !!cv }),
     fit() { UI.fitted = false; fit(); draw(); }, clampView,
     openBuild, openSplit, openOrganize, organizeStyle, openPlayers, openCompare, openSkills, openScrapTypes, openBattle, lastBattles, battleName, openReports, openAbout, openHelp,
     openRadicalHand, showRank, openWinWindows, openYouWon, openYouLost, // (the originals' own windows, for the tests)
