@@ -97,7 +97,7 @@ function menuLayout() {
       it('Fix Spending', () => fixStep(), { ghost: () => noGame() || A().UI.msgIdx < (A().UI.inbox || []).length, key: 'F' })],
     Window: [
       it('Tech Spending Window', () => { const t = document.querySelector('#panel .box.tech, #panel section:nth-of-type(3)'); if (t) t.scrollIntoView({ block: 'nearest' }); }, { ghost: noGame, key: '1' }),
-      it('Report Window', () => A().openReports(), { ghost: noGame, key: '2' }),
+      it('Report Window', () => { const r = own() && document.querySelector('#panel .rep12box'); if (r) { r.scrollIntoView({ block: 'nearest' }); const li = r.querySelector('li[data-now]') || r.querySelector('li'); if (li) li.focus(); } else A().openReports(); }, { ghost: noGame, key: '2' }),
       '-',
       it('Clean Up Windows', () => {}, { ghost: () => true })],
   };
@@ -721,6 +721,28 @@ function techBox12() {
   dragBars(q, 80, 15, vals, 2, (v, end) => { if (v) { TECH12.forEach((k, i) => { p.talloc[k] = v[i] / 1000; }); draw(); } if (end) { a.save(); a.renderPanel(); } }, fromPix);
   return a.el('section', { class: 'box tech12', 'aria-label': W.head }, q.c);
 }
+// the Report Window (CreateReportWin @1300b8: 250 x 96 under the map window, Stup +0x12, beside the Tech Spending window;
+// UpdateReportWin @130370, DrawMessage @130652): the last 50 reports, 32 a row, each its icon (GetIconID) at the row's left and its
+// sentence in a text box from 35, wrapped; opened at the current year's first (ScrollReportToCurrentDate); a click on one is
+// ClickInReportWindow's (inverted 5 ticks, then its star and DoMessageAction). Here under the Tech Spending window.
+const REP12 = { key: null, top: null };
+function reportsBox12() {
+  const a = A(), el = a.el, g = G(), p = a.me(), rs = H().rules(g);
+  const old = rs.reportHistory ? (p.reportLog || []) : [], ms = old.concat(p.inbox || []);
+  const list = el('ul', { class: 'reports rep12', 'aria-label': 'Report Window' });
+  ms.forEach((m, i) => {
+    const li = el('li', { class: 'click', tabindex: 0, 'data-now': i === old.length ? '1' : null, onclick: () => a.reportAction(m) }, a.msgIconEl(m));
+    const t = el('span', { class: 'rt' }); t.append(a.degText(H().say(g, m.text))); li.append(t);
+    list.append(li);
+  });
+  const box = el('section', { class: 'box rep12box' }, list);
+  // (kept where the player scrolled it while the reports are the same; a new turn opens it at the current year's first)
+  const key = g.turn + ':' + ms.length;
+  setTimeout(() => { if (REP12.key === key && REP12.top != null) list.scrollTop = REP12.top; else { const now = list.querySelector('li[data-now]'); if (now) list.scrollTop = now.offsetTop - list.offsetTop; } REP12.key = key; }, 0);
+  list.addEventListener('scroll', () => { REP12.top = list.scrollTop; });
+  return box;
+}
+
 function panel12(panel, B) {
   const a = A(), el = a.el;
   bars(panel, B);
@@ -732,7 +754,7 @@ function panel12(panel, B) {
   const low = el('div', { class: 'low12' }, rost, B.budget);
   const tb = techBox12();
   panel.innerHTML = '';
-  panel.append(pb, fb, ib, low, tb);
+  panel.append(pb, fb, ib, low, tb, reportsBox12());
   // (the budget bars go down to the map window's foot, 136 of its pixels under the totals, and scroll; CenterOnStarBar @c5c26
   // scrolls them to the selected colony's row)
   if (B.budget) {

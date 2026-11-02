@@ -46,3 +46,9 @@ ul.reports li.inv12 { filter: invert(1); background: #fff; }
 .exlist.exmac .exrow { display: flex; }
 .exlist.exmac .exrow > span { flex: 0 0 75px; text-align: left; white-space: nowrap; overflow: hidden; }
 .exlist.exmac .exrow > span:first-child { flex-basis: 100px; }
+/* the Report Window under the Tech Spending window: 96 of its pixels high, 32 a report, the icon then the sentence from 35 */
+#panel .rep12box { padding: 0; }
+#panel ul.rep12 { list-style: none; margin: 0; padding: 0; height: calc(96 / 226 * (290px - 18px)); overflow-y: auto; position: relative; font: 10px/1.1 Geneva, Verdana, sans-serif; }
+#panel ul.rep12 li { display: flex; align-items: flex-start; gap: 4px; min-height: 36px; padding: 0; border: 0; }
+#panel ul.rep12 li img { width: 32px; height: 32px; flex: none; }
+#panel ul.rep12 li .rt { padding-top: 1px; }

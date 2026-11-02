@@ -4542,6 +4542,14 @@ function msgIconEl(m) {
   const im = icon && IMG[icon];
   return im && im.src ? el('img', { src: im.src, alt: '', width: 32, height: 32, class: 'ricon' }) : el('span');
 }
+// what a report does when it is picked from the list (1.2's ClickInReportWindow: its star selected and centred, DoMessageAction)
+function reportAction(m) {
+  if (winReport(m) && winPending()) { openWinWindows(() => renderMsg()); return; }
+  if (winReport(m) && youWonWords()) { openYouWon(); return; }
+  if (lostReport(m)) { openYouLost(); return; }
+  if (m.battle) { openBattle(m.battle); return; }
+  if (m.star != null) { UI.sel = m.star; centerOn(m.star); renderPanel(); draw(); }
+}
 function openReports() {
   if (!G) return;
   const O = verOpts() || {};
@@ -4549,11 +4557,7 @@ function openReports() {
   const old = HO.rules(G).reportHistory ? (me().reportLog || []) : [], ms = old.concat(me().inbox || []);
   const rows = ms.map((m, i) => el('li', { class: 'click', 'data-now': i === old.length ? '1' : null, tabindex: 0, onclick: () => {
     closeModal();
-    if (winReport(m) && winPending()) { openWinWindows(() => renderMsg()); return; }
-    if (winReport(m) && youWonWords()) { openYouWon(); return; }
-    if (lostReport(m)) { openYouLost(); return; }
-    if (m.battle) { openBattle(m.battle); return; }
-    if (m.star != null) { UI.sel = m.star; centerOn(m.star); renderPanel(); draw(); }
+    reportAction(m);
   } }, ...(HO.rules(G).reportHistory ? [msgIconEl(m)] : []), degText(HO.say(G, m.text))));
   modal(O.reports || 'Reports', ms.length ? el('ul', { class: 'reports' }, ...rows) : el('p', null, 'No reports this turn.'), { cls: 'mid' });
   if (old.length) { const now = document.querySelector('ul.reports li[data-now]'); if (now && now.scrollIntoView) now.scrollIntoView({ block: 'start' }); }
@@ -6498,7 +6502,7 @@ window.addEventListener('DOMContentLoaded', () => {
   T.api = {
     get G() { return G; }, get ME() { return ME; }, UI, IMG, A, el, $, me, money, fmt, degF, gravF, toC, degText, panelFig,
     toast, modal, closeModal, confirmBox, alertOver, renderPanel, prefReview, budgetScale: () => HO.barScale(G, 'budget', barPick()), flipBarScale, renderMsg, draw, save, Sound, beep, guard,
-    shipPic, shipImgEl, starLook, fleetOrder, curFleet, centerOn, zoomAt, resize, map: () => ({ w: mapW, h: mapH, ready: !!cv }),
+    shipPic, shipImgEl, starLook, fleetOrder, reportAction, msgIconEl, curFleet, centerOn, zoomAt, resize, map: () => ({ w: mapW, h: mapH, ready: !!cv }),
     fit() { UI.fitted = false; fit(); draw(); }, clampView,
     openBuild, openSplit, openOrganize, organizeStyle, openPlayers, openCompare, openSkills, openScrapTypes, openBattle, lastBattles, battleName, openReports, openAbout, openHelp,
     openRadicalHand, showRank, openWinWindows, openYouWon, openYouLost, // (the originals' own windows, for the tests)
