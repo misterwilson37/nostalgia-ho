@@ -1375,5 +1375,16 @@ root.HOUI.add([
 ['Already Played One Turn', 'Déjà Joué Un Tour', 'Einen Zug bereits gespielt', 'Bir kere oynadı', 'Ya has jugado un turno', I],
 ['Are you sure you want to destroy half the galaxy? Millions of innocent lives will be lost!!', 'Etes-vous sûr de vouloir détruire la moitié de la galaxie ? Des millions de vies innocentes seront perdues !', 'Sind Sie sicher, dass Sie die halbe Galaxis zerstören wollen? Millionen unschuldiger Leben gehen verloren!!', 'Galaksinin yarısını yok etmek istediğinden emin misin?  Milyonlarca masumun hayatı yok olacak!!', '¿Seguro que quieres destruir la mitad de la galaxia? ¡¡Se perderán millones de vidas inocentes!!', I],
 ['Whew! It\'s good to see that that clearer heads have prevailed!', 'Ouf! C\'est bon de voir que les chefs les plus clairvoyants l\'ont emporté !', 'Puh! Schön, dass die klareren Köpfe sich durchgesetzt haben!', 'Vay anasını! İyi ki serin kanlılıkla düşünenler var!', '¡Uf! ¡Qué bien que se hayan impuesto las cabezas más frías!', I],
+// ---------- the iOS app's Saved Games scene: the literals the app writes in English in every language ----------
+['w/', 'w/', 'mit', 'w/', 'con'],
+['w/o', 'w/o', 'ohne', 'w/o', 'sin'],
+['Email', 'Email', 'E-Mail', 'Email', 'Correo'],
+// the Saved Games scene's lines (sprintf Templates 32-35)
+['%u Player, %@ Home %@ BB - difficulty: %u', '%u lecteur, %@ Home %@ BB - difficulté: %u', '%u Spieler, Heimat: %@, %@ BB - Schwierigkeit: %u', '%u Oyuncu, %@ Evde%@ BB - zorluğu: %u', '%u jugador(es), hogar %@, %@ BB - dificultad: %u', I],
+['Last Played: %@', 'Joué le%@', 'Zuletzt gespielt: %@', 'En son oynadığın zaman: %@', 'Última partida: %@', I],
+['Started: %@', 'Démarré: %@', 'Begonnen: %@', 'Başladığın zaman: %@', 'Iniciada: %@', I],
+['Game over date: %u', 'Game Over le: %u', 'Spielende: %u', 'Oyunun bittiği tarih: %u', 'Fin de la partida: %u', I],
+// Saved Games: too many
+['Too Many Saved Games. You should delete some.', 'Il ya trop de jeux sauvegardés. S\'il vous plaît supprimer certains.', 'Zu viele gespeicherte Spiele. Sie sollten einige löschen.', 'Çok Oyun Kaydedildi, Bir Kısmını Sil.', 'Demasiadas partidas guardadas. Deberías borrar algunas.', I],
 ]);
 })(typeof window !== 'undefined' ? window : globalThis);

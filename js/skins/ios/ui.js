@@ -1421,6 +1421,118 @@ function tapItem(id, m, a) {
   if (id === 0x432) { const who = a.G.players.find(q => String(m.text || '').startsWith(q.name + ' ')); return who && HO.isBuddy(a.G, a.ME, who.id) ? 1 : 0x20; }
   return 16;
 }
+// ---- the Saved Games scene (SavedGameScene init 0x10009aabc, BaseHoScene addTitleAndFadedBox: 0x100007238, SavedGameMenuItem initFromGame 0x100099cbc, StarMenuItem initFromString 0x100012a5c) ----
+// Read in the disassembly (tools/floats.py and the instructions: Ghidra loses the arguments). H and W the window in points, s = H / 768, m = 4 s. addTitleAndFadedBox: a white strip
+// (774 s wide, H - 2 m high, anchor (1, 0.5) at (W - m, H / 2)), a box 0xff1d0609 = (9, 6, 29) of 766 x 600 scaled by s (anchor (1, 0) at (W - 2 m, 2 m)), over its top the sprite blend_sprite
+// (scaled by s, anchor (1, 0) at (W - 2 m, 580 s)), and the name sprite (spacewardho_name, scale min(1, 0.7 H / 600), anchor (0.5, 1) at ((W - 766 s) / 2, H - 2 a80)). Back (Misc 140, the
+// default item with the hat) and Delete (141) are StarMenuItems in a menu anchored (1, 0) at (W - 10 a80, a80) with 20 a80 between; the title (142, Arial a48, black, anchor (0.5, 1)) at
+// (W - strip / 2, H - 2 a80); under it the "too many" label (171, Arial a38, white; shown over 20 games); the list is a CCInertialMenu of the first 20 games (SavedGameData loadSavedGames),
+// 10 ... a80 apart from the top, in the rectangle from the bottom of the menu + 4 a80 up to 2 a80 under that label, the strip's width. A StarMenuItem is the picture big_button (80 x 80) with
+// its label (Arial a20: 14, 19) right of it (the item as wide as both and as high as the picture), the default one with bighat_button 5 left and 18 up of the picture's corner. A game's item
+// is 75 a80 x (16 a80 on an iPhone, 13.75 a80) on a black BackgroundBorderNode: the mini galaxy (50 x 55 a80/4, left, vertically centred: NOT drawn here, MiniGalaxy's particles are unread), the
+// year in digits_atlas (scale a80 / 8), and from x = 2.5 a80 + 12.5 a80 + the digits' width, four lines of Arial a50 (9; 16), white, fitted: sprintf Templates 32 "%u Player, %@ Home %@
+// BB - difficulty: %u", 33 "Last Played: %@", 34 "Started: %@", 35 "Game over date: %u" (when the game is over); the dates by SORelativeDateTransformer ("3 days ago", the largest unit that
+// is not 0: years, months, weeks, days, hours, minutes, seconds; "now"). Tapping a game opens it, in Delete mode (the Delete item) removes it at once (no question: deleteGame), and
+// when the last is gone the welcome screen returns; touching the name sprite for over 3 seconds shows "Email" on each (showEmail): the app mails the file; the browser's is the export file
+const REL_UNITS = { en: { ago: '%d %@ ago', future: 'in %d %@', now: 'now', u: [['year', 'years'], ['month', 'months'], ['week', 'weeks'], ['day', 'days'], ['hour', 'hours'], ['minute', 'minutes'], ['second', 'seconds']] },
+  fr: { ago: 'il y a %d %@', future: 'dans %d %@', now: 'maintenant', u: [['an', 'ans'], ['mois', 'mois'], ['semaine', 'semaines'], ['jour', 'jours'], ['heure', 'heures'], ['minute', 'minutes'], ['seconde', 'secondes']] },
+  de: { ago: 'vor %d %@', future: 'in %d %@', now: 'jetzt', u: [['Jahr', 'Jahren'], ['Monat', 'Monaten'], ['Woche', 'Wochen'], ['Tag', 'Tagen'], ['Stunde', 'Stunden'], ['Minute', 'Minuten'], ['Sekunde', 'Sekunden']] },
+  es: { ago: 'hace %d %@', future: 'dentro de %d %@', now: 'ahora', u: [['año', 'años'], ['mes', 'meses'], ['semana', 'semanas'], ['día', 'días'], ['hora', 'horas'], ['minuto', 'minutos'], ['segundo', 'segundos']] } };
+function relDate(then, now) { // -[SORelativeDateTransformer transformedValue:] 0x10009bde0 (the bundle has English and French only: Turkish shows English; German and Spanish are the remake's)
+  const R = REL_UNITS[uiLang()] || REL_UNITS.en, neg = then > now, a = neg ? new Date(now) : new Date(then), b = neg ? new Date(then) : new Date(now);
+  const c = [0, 0, 0, 0, 0, 0, 0]; // years, months, weeks, days, hours, minutes, seconds, as NSCalendar's components:fromDate:toDate:
+  let t = new Date(a);
+  const step = (f, add) => { let n = 0; for (;;) { const x = new Date(t); add(x, 1); if (x > b) break; t = x; n++; if (n > 100000) break; } return n; };
+  c[0] = step(0, (d, n) => d.setFullYear(d.getFullYear() + n)); c[1] = step(0, (d, n) => d.setMonth(d.getMonth() + n));
+  c[2] = step(0, (d, n) => d.setDate(d.getDate() + 7 * n)); c[3] = step(0, (d, n) => d.setDate(d.getDate() + n));
+  c[4] = step(0, (d, n) => d.setHours(d.getHours() + n)); c[5] = step(0, (d, n) => d.setMinutes(d.getMinutes() + n)); c[6] = Math.floor((b - t) / 1000);
+  for (let i = 0; i < 7; i++) if (c[i]) { const n = c[i]; return (neg ? R.future : R.ago).replace('%d', n).replace('%@', R.u[i][n > 1 ? 1 : 0]); }
+  return R.now;
+}
+function openSavedIOS(c) {
+  const gd = BGD(), a80 = gd.a80, W = SCREEN.winW, H = SCREEN.winH, s = H / 768, m = 4 * s, stripW = 774 * s, pad = SCREEN.pad;
+  const root = UIEl('div', 'hoscreen ios-sg', { role: 'dialog', 'aria-modal': 'true', 'aria-label': miscS(142) });
+  const add = (e) => { root.append(e); return e; };
+  const box = (cls, l, b, w, h) => { const e = UIEl('div', cls); e.style.cssText = `position:absolute;left:${bpt(l)};bottom:${bpt(b)};width:${bpt(w)};height:${bpt(h)}`; return add(e); };
+  box('ios-sgw', W - m - stripW, m, stripW, H - 2 * m);
+  box('ios-sgd', W - 2 * m - 766 * s, 2 * m, 766 * s, 600 * s);
+  { const im = pic('blend_sprite'); im.style.cssText = `position:absolute;width:${bpt(766 * s)};height:${bpt(160 * s)};right:${bpt(2 * m)};bottom:${bpt(580 * s)}`; add(im); }
+  const nameS = Math.min(1, H * 0.7 / 600), hoName = pic('spacewardho_name');
+  hoName.style.cssText = `width:${bpt(118 * nameS)};height:${bpt(592 * nameS)};touch-action:none`; hoName.className = 'ios-sgname';
+  add(put(hoName, (W - 766 * s) / 2, H - 2 * a80, 0.5, 1));
+  // a StarMenuItem: the picture, the label at its right end
+  const starItem = (text, hat, size, onClick, scale) => {
+    const sc = scale || 1, b = UIEl('button', 'ios-smi', { type: 'button' });
+    b.style.cssText = `height:${bpt(80 * sc)}`;
+    const g = pic('big_button'); g.style.cssText = `width:${bpt(80 * sc)};height:${bpt(80 * sc)}`; b.append(g);
+    if (hat) { const h = pic('bighat_button'); h.style.cssText = `position:absolute;left:${bpt(-5 * sc)};bottom:${bpt(18 * sc)};width:${bpt(88 * sc)};height:${bpt(80 * sc)}`; b.append(h); }
+    const t = UIEl('span', 'ios-smt', { style: `font-size:${bpt(size * sc)}` }); t.textContent = text; b.append(t);
+    if (onClick) b.addEventListener('click', (e) => { e.stopPropagation(); onClick(); });
+    return b;
+  };
+  const fsz = pad ? 19 : 14;
+  const back = starItem(miscS(140), true, fsz, () => { close(); c.back(); }); back.classList.add('sback');
+  let delMode = false, emailMode = false;
+  const del = starItem(miscS(141), false, fsz, () => { delMode = !delMode; emailMode = false; refresh(); });
+  const menu = UIEl('div', 'ios-sgm'); menu.style.cssText = `position:absolute;right:${bpt(10 * a80)};bottom:${bpt(a80)};display:flex;gap:${bpt(20 * a80)};align-items:flex-end`;
+  menu.append(back, del); add(menu);
+  const menuH = 80;
+  const title = UIEl('div', 'ios-sgt', { style: `font-size:${bpt(gd.a18 === 24 ? 48 : 24)}` }); title.textContent = miscS(142);
+  const tx = W - stripW / 2, ty = H - 2 * a80, th = Math.ceil((pad ? 48 : 24) * 1.15);
+  add(put(title, tx, ty, 0.5, 1));
+  const many = UIEl('div', 'ios-sgt ios-sgmany', { style: `font-size:${bpt(gd.a38)}` }); many.textContent = miscS(171);
+  const lh = Math.ceil(gd.a38 * 1.15), my = ty - th - 2 * a80 - lh / 2; // centerBelow:padding: 2 a80
+  add(put(many, tx, my, 0.5, 0.5));
+  const y0 = menuH + a80 * 4 + a80, rectH = Math.max(40, (my - lh) - y0 - 2 * a80);
+  const list = UIEl('div', 'ios-sgl'); list.style.cssText = `position:absolute;left:${bpt(W - stripW)};bottom:${bpt(y0)};width:${bpt(stripW)};height:${bpt(rectH)};gap:${bpt(a80)}`; add(list);
+  const itemH = (a80 > 4 ? 13.75 : 16) * a80, itemW = 75 * a80, now = Date.now();
+  const sys = (i) => { const w = appWord('sys', i); return w.no ? w.text : (window.HOUI ? HOUI.tr(w.text) : w.text); };
+  const T = (x) => (window.HOUI ? HOUI.tr(x) : x);
+  const items = [];
+  const games = c.list.slice(0, 20);
+  const fit = (text, w, size) => { let z = size; while (z > 6 && textW(text, z) > w) z -= 1; return z; };
+  const build = (g) => {
+    const it = UIEl('div', 'ios-sgi'); it.style.cssText = `width:${bpt(itemW)};height:${bpt(itemH)}`; it.tabIndex = 0; it.setAttribute('role', 'button');
+    it.append(UIEl('i', 'ios-sgb', null, UIEl('i')));
+    const yr = UIEl('span', 'ios-sgy', { 'aria-hidden': 'true', style: `transform:translateY(50%) scale(${a80 / 8})` }), ys = String(g.year);
+    for (const ch of ys) yr.append(UIEl('i', null, { style: `--d:${ch}` }));
+    const mgw = 12.5 * a80, yx = a80 + mgw + a80, ylw = ys.length * 26 * a80 / 8;
+    yr.style.cssText += `;left:${bpt(yx)};bottom:${bpt(itemH / 2)}`; it.append(yr);
+    const X = 2.5 * a80 + mgw + ylw, tw = itemW - X, sz = pad ? 16 : 9;
+    let info = null; try { const G = HO.load(g.data); info = { n: G.players.length, home: homeLevel(G, G.players.find(q => q.human) || G.players[0]), bb: !!(G.opts && G.opts.buddies), diff: HO.rules(G).difficulty ? HO.rules(G).difficulty(Object.assign({}, G.opts, { armageddons: G.armageddons || 0 })) : 0 }; } catch (e) { /* (a game this page cannot read) */ }
+    const lines = [];
+    if (info) lines.push(fillT(T(tmplS(32)), info.n, info.home ? sys(info.home - 1) : '', T(info.bb ? 'w/' : 'w/o'), info.diff));
+    lines.push(fillT(T(tmplS(33)), relDate(g.when, now)), fillT(T(tmplS(34)), relDate(g.id, now)));
+    if (g.over && g.year >= 2000) lines.push(fillT(T(tmplS(35)), g.year));
+    let y = itemH - a80;
+    lines.forEach((t, i) => {
+      const z = i === 0 ? fit(t, tw, sz) : sz, e = UIEl('span', 'ios-sgline', { style: `font-size:${bpt(z)}` }); e.textContent = t;
+      e.style.cssText += `;left:${bpt(X)};bottom:${bpt(y)};transform:translateY(100%)`; it.append(e);
+      y -= (i === 0 ? sz + 2 : Math.ceil(sz * 1.15)) + 2;
+    });
+    const sm = starItem('', false, fsz, null, 0.5); sm.className = 'ios-smi ios-sgx'; sm.style.cssText += `;position:absolute;right:${bpt(a80)};bottom:${bpt(itemH * 0.5)};transform:translateY(50%)`; sm.hidden = true; sm.tabIndex = -1; it.append(sm);
+    const act = () => {
+      if (delMode) { c.del(g); it.remove(); items.splice(items.findIndex(x => x.it === it), 1); if (!items.length) { close(); c.back(); return; } many.hidden = c.count() < 21; return; }
+      if (emailMode) { c.download(g); return; }
+      close(); c.open(g);
+    };
+    it.addEventListener('click', act); it.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); act(); } });
+    items.push({ it, sm }); list.append(it);
+  };
+  games.forEach(build);
+  many.hidden = c.count() < 21;
+  const refresh = () => {
+    for (const x of items) { x.sm.hidden = !(delMode || emailMode); const t = x.sm.querySelector('.ios-smt'); if (t) t.textContent = delMode ? miscS(141) : T('Email'); }
+    del.classList.toggle('on', delMode);
+  };
+  // touching the name for over 3 seconds (ccTouchBegan / ccTouchEnded: touchInHoName)
+  let t0 = 0;
+  hoName.addEventListener('pointerdown', (e) => { t0 = Date.now(); e.preventDefault(); });
+  hoName.addEventListener('pointerup', () => { if (t0 && Date.now() - t0 > 3000) { delMode = false; emailMode = true; refresh(); } t0 = 0; });
+  const close = () => { c.close(); };
+  c.mount(root);
+  return true;
+}
 // -[PreferencesLayer initDialog] 0x1000a6a4c, setupPreferenceXPosition:yPosition:label:tag:choiceLabel: 0x1000a7b3c, valueChanged:tag: 0x1000a799c, the toggles 0x1000a75dc-0x1000a7940, doClose: 0x1000a74c8
 // (the numbers read in the assembly; H the dialog's height, y up). The message Misc 82. Eight rows, the first (Event Messages, 195) with its centre H - 60 (H - 90 on an iPad), each next 32.5 (19 + 2.25 a88) lower; a row is
 // the title (Arial 14, anchored at its left, middle) at x 4 a88 (Messages, Battles, Hints and Best Buddies at 5.5 a88), a switch (a CCSliderDeluxe 10 a88 wide, anchored at its left) at x 24 a88, and the words of its
@@ -2188,6 +2300,7 @@ window.HOTHEME = {
   battleWindow(b, k) { return openBattleIOS(b, k); }, // the Battle screen (BattleStageLayer; openBattleIOS)
   // the app's own windows in this skin: Build (BuildShipsDialog, ShipClassMenu, ShipMenuItem, BuildSingleShipDialog); a ruleset whose ships are queued (DOS 2.0) keeps the remake's window
   window(name, ...x) {
+    if (name === 'saved') return /^(ios|android)$/.test((x[0] || {}).id || '') ? openSavedIOS(x[0]) : false; // (from the title: no game yet)
     const a = A(); if (!a || !a.G) return false;
     if (name === 'build') { const s = a.G.stars[x[0]]; if (!s || s.owner !== a.ME || HO.feature(a.G, 'buildQueue')) return false; return openBuildFlow(x[0]); }
     const appRules = /^(ios|android)$/.test(a.G.rules || '');

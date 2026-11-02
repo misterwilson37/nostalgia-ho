@@ -5049,6 +5049,10 @@ function openSavedGames(id) {
     try { localStorage.setItem(gamesKey(id), JSON.stringify(savedGames(id).filter(x => x.id !== g.id))); } catch (e) {}
     openSavedGames(id);
   });
+  // the iOS and Android apps' own scene (SavedGameScene): the skin draws it, the page keeps the games
+  if (skinWindow('saved', { id, list: L, open, download, count: () => savedGames(id).length, back: () => { closeScreen(); maybeSaveOffer(); },
+    del: (g) => { try { localStorage.setItem(gamesKey(id), JSON.stringify(savedGames(id).filter(x => x.id !== g.id))); } catch (e) {} },
+    mount: (sc) => { closeScreen(); document.body.append(sc); UI.screen = sc; }, close: closeScreen })) { maybeSaveOffer(); return; }
   const rows = L.map(g => el('li', { class: 'sgame' },
     el('button', { class: 'sopen', onclick: () => open(g) }, el('b', null, g.galaxy), el('span', null, `${g.player} · ${g.over ? 'over in' : 'year'} ${g.year}`), el('small', null, new Date(g.when).toLocaleString())),
     el('button', { class: 'quiet', onclick: () => download(g), title: 'The app e-mailed a game; here it is saved as a file you can open again.' }, 'Download'),
