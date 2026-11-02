@@ -229,12 +229,14 @@ function screenSize() {
   const pad = Math.min(vw, vh) >= 600, portrait = vh > vw * 1.1;
   const u = pad ? Math.max(0.6, Math.min(vh / 768, vw / 800)) : portrait ? vw / 360 : Math.min(vh / 320, vw / 480);
   const winW = vw / u, winH = vh / u;
-  // +[BarMenuItem calculate]: the sidebar is 0.3 (iPad) or 0.45 (iPhone) of the width, at least 220; a row 0.08 of that, the type 0.7 of a row
-  const W = Math.max(220, trunc(winW * (pad ? 0.3 : 0.45))), row = trunc(W * 0.08);
-  Object.assign(SCREEN, { pad, u, winW, winH, W, row, font: row * 0.7, gap: pad ? 8 : 4 });
+  // +[BarMenuItem calculate] 0x1000104ec (the disassembly: frintp = round up, frintm = round down; the decompile's (int) casts are wrong):
+  // the sidebar is ceil(winW x 0.3 iPad / 0.45 iPhone), at least 220; a row ceil(W x 0.08); the label column ceil(W x 0.45);
+  // the type floor(row x 0.7); the bars start at labelW + 8 + 1 (barOffset: spacing is the constant 8)
+  const W = Math.max(220, Math.ceil(Math.fround(winW * (pad ? 0.3 : 0.45)))), row = Math.ceil(Math.fround(W * 0.08));
+  Object.assign(SCREEN, { pad, u, winW, winH, W, row, font: Math.floor(Math.fround(row * 0.7)), labelW: Math.ceil(Math.fround(W * 0.45)), gap: pad ? 8 : 4 });
   const de = document.documentElement, st = de.style;
   st.setProperty('--u', u + 'px'); st.setProperty('--W', W); st.setProperty('--row', row);
-  st.setProperty('--fs', String(row * 0.7)); st.setProperty('--gap', String(SCREEN.gap));
+  st.setProperty('--fs', String(SCREEN.font)); st.setProperty('--labw', String(SCREEN.labelW)); st.setProperty('--gap', String(SCREEN.gap));
   de.classList.toggle('ios-pad', pad); de.classList.toggle('ios-phone', !pad);
   sideLayout();
 }
@@ -271,7 +273,9 @@ function buildColumn(app) {
     ['news', 'Reports', go(a => a.openReports())],                    // toggleHistory: the message history container
     ['planet', 'Stars', go(a => a.openStarList())],                   // toggleStars (iPhone): the explored stars list
     ['enemy', 'Players', go(a => a.openPlayers())],                   // togglePlayers (iPhone): the players list
-  ]; // (the iPad's menu has the first two only; its stars and players lists are in the combined container, not rebuilt: kept difference, the buttons stay so the lists stay reachable)
+  ].filter(i => !SCREEN.pad || i[0] === 'dollar' || i[0] === 'news');
+  // the iPad's menu has the first two only (-[MainGameScene init]): its stars (the colonies' bars, PlayerPlanetsLayer) and players
+  // (PlayerListLayer) lists are in its combined container (-[CombinedInfoContainer initWithWidth:height:button:] 0x1000b0e44), the sidebar
   colEl = UIEl('div', 'ios-col', { role: 'toolbar', 'aria-label': 'Main buttons' });
   for (const [n, name, fn] of items) {
     const b = UIEl('button', 'ios-btn', { type: 'button', 'data-ios': n, 'aria-label': name, title: name }, pic('button-' + n));
@@ -374,6 +378,20 @@ function hud() {
   hudEl.style.setProperty('--hudk', '1');
   const wdt = hudEl.offsetWidth; hudEl.style.setProperty('--hudk', String(wdt > window.innerWidth - 8 ? Math.max(0.4, (window.innerWidth - 8) / wdt) : 1));
 }
+// the iPad's players list, at the bottom of the combined container (PlayerListLayer: the hat, the name; the pact words and the
+// rest of the row are PlayerMenuItem's, step 5): the hat is GraphicsHoMap smallPlayerHat: "player_list_%d_%@" (16 for you, else the player's hat; f when the
+// byte at +0x2c is 0)
+function playersList() {
+  const a = A(), G = a && a.G, list = UIEl('section', 'ios-plist', { 'aria-label': 'Players' });
+  if (!G) return list;
+  for (const p of G.players) {
+    const hat = pic('player_list_' + (p.human ? 16 : p.face) + '_' + (p.female ? 'f' : 'm'), 'ios-phat');
+    if (!p.alive && !p.human) list.append(UIEl('div', 'ios-prow dead', null, hat, UIEl('span', null, null, p.name), pic('player_list_eliminated', 'ios-pelim')));
+    else list.append(UIEl('div', 'ios-prow', null, hat, UIEl('span', null, null, p.name)));
+  }
+  list.addEventListener('click', () => { const x = A(); if (x && x.G) x.openPlayers(); });
+  return list;
+}
 // the sidebar (-[IncomeLayer init]: the totals box W x 2.5 rows, three labels a line apart, the figure beside the label, the change at the right)
 function sidebar(box, parts) {
   const info = parts.info, rows = [];
@@ -386,6 +404,7 @@ function sidebar(box, parts) {
   }
   const income = UIEl('section', 'ios-income', null, ...rows);
   box.replaceChildren(income, parts.budget, parts.tech, ...(parts.planet ? [parts.planet] : []));
+  if (SCREEN.pad) box.append(playersList());
   hud();
 }
 function afterMsg(box, ctx) {
@@ -460,7 +479,7 @@ window.HOTHEME = {
   panel: sidebar, afterMsg,
   afterDraw: () => hud(),
   page(doc) {
-    buildScreen(doc); screenSize();
+    screenSize(); buildScreen(doc);
     window.addEventListener('resize', () => { const was = SCREEN.pad; screenSize(); hudKey = ''; hud(); if (was !== SCREEN.pad) buildColumn(doc.getElementById('app')); });
     setSide(sideWanted != null ? sideWanted : SCREEN.pad, true);
     const c = doc.querySelector('#titlescreen .credit');

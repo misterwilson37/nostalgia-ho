@@ -57,7 +57,7 @@ html.skin-ios #panel { position: absolute; left: 0; top: 0; bottom: 0; width: ca
 html.skin-ios.ios-pad #panel { bottom: calc(44 * var(--pt)); }
 html.skin-ios.ios-side #panel { transform: scaleX(1); visibility: visible; transition: transform .2s; }
 html.skin-ios #panel > .box:not(.ios-income-box) { margin: calc(4 * var(--pt)); }
-html.skin-ios .ios-income { position: relative; height: calc(var(--row) * 2.5 * var(--pt)); background: linear-gradient(#0a0c55, #05062e); border-bottom: 2px solid var(--rim); color: #fff; font: calc((var(--row) * 2.5 / 3 - 4) * .9 * var(--pt)) / 1 var(--appfont, Arial, Helvetica, sans-serif); }
+html.skin-ios .ios-income { position: relative; height: calc(var(--row) * 2.5 * var(--pt)); background: #181c5a; box-shadow: inset 0 0 0 calc(3 * var(--pt)) #393cd6, inset 0 0 0 calc(1 * var(--pt)) #181c5a; color: #fff; font: calc((var(--row) * 2.5 / 3 - 4) * .9 * var(--pt)) / 1 var(--appfont, Arial, Helvetica, sans-serif); }
 /* the three labels sit at y 4, 4 + L and 4 + 2 L from the box's bottom (L = 2.5 rows / 3 - 2; cocos2d's y runs up), Income lowest */
 html.skin-ios .ios-inrow { position: absolute; left: 0; right: 0; bottom: calc((4 + var(--k, 0) * (var(--row) * 2.5 / 3 - 2)) * var(--pt)); height: 1em; white-space: nowrap; }
 html.skin-ios .ios-inrow:nth-child(1) { --k: 2; }
@@ -75,7 +75,8 @@ html.skin-ios .clock, html.skin-ios .clock.pic { width: calc(44 * var(--pt)); he
 html.skin-ios .clock:hover { background-color: transparent; }
 html.skin-ios .clock:active { filter: brightness(.49); }
 html.skin-ios .clock .timeleft { display: none; }
-html.skin-ios .box { background: linear-gradient(#0a0c55, #05062e); border: 2px solid var(--rim); border-radius: 12px; box-shadow: inset 0 0 6px rgba(79,184,242,.35); color: #e8ecff; padding: 7px 9px; }
+/* BackgroundBorderNode: the fill 0xff5a1c18 and the line 0xffd63c39 read as bytes r g b a (0x18 0x1c 0x5a, 0x39 0x3c 0xd6): navy and blue; a 2 point line 2 points in (-[BackgroundBorderNode draw] 0x100093738) */
+html.skin-ios .box { background: #181c5a; border: 0; border-radius: 0; box-shadow: inset 0 0 0 3px #393cd6, inset 0 0 0 1px #181c5a; color: #e8ecff; padding: 7px 9px; }
 html.skin-ios .box h3 { color: #fff; font: 600 14px var(--ui); }
 html.skin-ios .box h4 { color: #bcd2ff; }
 html.skin-ios .planet h3 { color: var(--hat); font-size: 16px; }
@@ -120,3 +121,9 @@ html.skin-ios .tsplash .wtitle { display: none; }
 html.skin-ios .tsplash { background: #000; border: 2px solid var(--rim); border-radius: 14px; overflow: hidden; }
 html.skin-ios .credit { color: #8090c0; }
 
+
+/* the iPad's players list at the foot of the sidebar (PlayerListLayer) */
+html.skin-ios .ios-plist { margin: calc(4 * var(--pt)); cursor: pointer; color: #fff; font: calc(var(--fs) * var(--pt)) var(--appfont, Arial, Helvetica, sans-serif); }
+html.skin-ios .ios-prow { display: flex; align-items: center; height: calc(var(--row) * 1.5 * var(--pt)); position: relative; }
+html.skin-ios .ios-phat { height: 100%; width: auto; margin-right: calc(4 * var(--pt)); }
+html.skin-ios .ios-pelim { position: absolute; left: 0; height: 100%; }
