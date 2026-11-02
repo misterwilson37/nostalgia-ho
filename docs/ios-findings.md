@@ -961,14 +961,9 @@ Best buddy). Rebuilding these windows as the app draws them, from `HoBarLayer`, 
 log lines; the two a player reads are the help window's title "Spaceward Ho Help" (`-[WebViewDialog initDialog]`) and the Saved Games button "Email game"
 (`-[SavedGameScene emailGame]`), whose rows stay open.
 
-**The player list row, read for the rebuild (`-[PlayerMenuItem initWithWidth:...]` 0x1000a20c8, `update` 0x1000a2224).** A row is the width the list gives it by
-1.5 x `BarMenuItem` height; the hat (`GraphicsHoMap smallPlayerHat:`, sprite frame "player_list_N") at x 14, vertically centred; an "eliminated" sprite
-over it when the player is out; the name in Arial (`labelFitToSize`, black, anchored left at x 26, a third of the row wide); then a second label at
-width/3 + 64: for a computer you have not met enough, the System Names word for his IQ with "IQ" ("%@ %lu IQ" or "%@ %lu IQ %@"), and once you hold
-his information (or the year is 2000 or later) his gravity and temperature ("%ld.%2.2ldG %@" with the temperature by the preference); the happy and sad
-faces (`player_list_happy`, `player_list_sad`) 20 further right; and last a label at three quarters of the width with the pact word by the toggle state:
-2 "Buddies" (Misc 175), 3 "Only Ally" (183), 4 "Buddy!" (176), 5 "Buddy?" (177), 6 "Allies" (180), 7 "Declare War" (179), 8 "Ally!" (181), 9 "Ally?" (182),
-10 "Enemy" (178). The remake's Players window (a table with switches) shows none of this layout; it is the first thing to rebuild in the players group.
+**The player list row (`-[PlayerMenuItem update]` 0x1000a2224, CONFIRMED and built: "Players list" in the third pass below).** An earlier version of this note
+read the second label as the computer's IQ word and the pact words' states by guess; both are corrected there: the word is the player's home system
+(System Names, "Outpost" to "Abundant"), the IQ is the game's one number, and every pact word comes from the toggle number the row's item carries.
 
 ## Main screen (November 2026; built in `js/skins/ios/ui.js` and `style.css`)
 
@@ -1032,3 +1027,35 @@ Corrections to the table above, read in the disassembly (`/tmp` scripts: the pri
 **Built.** All of the above in `js/skins/ios/ui.js` and `style.css` (Android loads the same file). `tools/skin-rules-check.js` plays every ruleset in the skins and checks these pieces.
 
 **Open (rows stay open, with notes).** `news` and `graph` open the remake's Reports and Compare windows (MessageHistoryNode and HistoryGraphDialogLayer not built); the gear opens the page's menus (AdditionalMenu's list not built); the players list row shows the hat, the name and the pact word only (the IQ / gravity words, the happy and sad faces, the toggle's states are `PlayerMenuItem`'s, the pact words by state are a guess); the fleets dialog lists the page's fleet rows (FleetMovementMenu's ship pictures not built); the bar highlight and `button-evacuate`; the year digits (`MessageNode addDigits:`); the message text's wrap width.
+
+### Main screen, third pass (November 2026)
+
+**Silence and the round buttons.** `-[TurnMessageLayer clickMessage]` plays nothing, so the iOS and Android skins now play nothing when a report is dismissed (`HOTHEME.quietNext`;
+the classic page's Next Message 7001 stays in the other skins). `-[MapLayer setScale:]` 0x10000e590 (read in the disassembly: the iPad flag at 0x100148a78; 1.7 at 0x1000cef98, 0.1
+at 0xcefa0, 2.4 / 1.8 at 0xcefc0, 0.6 / 0.2 at 0xcefd0) sets the planet scale = target / map scale, the target 2.0 (iPhone) or 3.0 (iPad) once the map scale reaches 1.0 or 1.7
+(minScale + 0.1 if minScale is that or more), below it a line from 0.2 / 0.6; `-[PlanetButtons updateScale:planetScale:]` hands that to the buttons' box, so on screen the box is 46 points a
+side times the target. The page's `planetTarget()` is the same formula; `HOVIEW().target` gives it to the skin.
+
+**Players list (built: `playersList`, `pactToggle`, `pactToggled`, `listOrder` in `js/skins/ios/ui.js`).** Read from `-[PlayerListLayer updateData]` 0x10009d7c0, `-[PlayerMenuItem update]`
+0x1000a2224 (the constants at 0x1000cef58 0.9, cef60 0.6, cf080 0.8), `+[PlayerMenuItemToggle menuWithWidth:...]` 0x10009dda0, `-[PlayerMenuItemToggle toggle]` 0x10009e34c and
+`+[CCLabelTTF labelFitToSizeWithString:...]` 0x100017864:
+
+- The list is a white `BackgroundBorderNode` (0xffffffff, the blue line) as wide as the container, n rows of 1.5 bar rows + 8 high (an iPad's, over a quarter of the screen's height, is
+  floor(quarter / row) rows less a third of a row, and scrolls). Order: players still in by savings (player +0x40, the richest first), then those out by when they went out (+0x3c, the
+  latest first), an exchange sort.
+- A row, from its left and bottom (H = 1.5 rows): the hat at (14, H/2) with the eliminated sprite over it for a player out; the name, black Arial of the bar's type size, left at (26, H/2) in a
+  box W/3 wide (type a point smaller until it fits, to 6); a second line, Arial ceil(0.8 x type), left in a box 0.6 W wide centred at (W/3 + 64, H/4 - 4); the happy or sad face at (W/3 + 84, H/2);
+  the pact word, Arial 0.9 x type, centred at (0.75 W, H/2).
+- The second line is "System Names word + IQ": player +0x2d is the player's home system level (1-7: Outpost, Barren, Backward, Normal, Advanced, Thriving, Abundant), the number is the
+  game's IQ (game +0x69, 50-200), the same for every row. The last `game +0x64` players are the computers (the humans come first, as in the remake). A computer: "Advanced 125 IQ"
+  ("%@ %lu IQ"). A human: the word alone, until he is your best buddy or the year is 2000 or later (the game starts at 2000, so always), then "%@ %lu IQ %@" with "%ld.%2.2ldG %@" (his home
+  gravity against yours, his home temperature against yours in the preference's unit): your own row reads "Normal 100 IQ 1.00G 72.0ºF".
+- The faces: happy when he asks you for a best buddy (or an alliance) and you have not asked for it back; sad when you ask him and he does not.
+- The pact word by the item's toggle number (Misc Strings): 1 (you) and 11 (a player out) none; 2 "Buddies" (175), 3 "Only Ally" (183), 4 "Buddy!" (176), 5 "Buddy?" (177), 6 "Allies" (180),
+  7 "Declare War" (179), 8 "Ally!" (181), 9 "Ally?" (182), 10 "Enemy" (178). Each row is a toggle of items by the game's masks (game +0x1d0 allies and +0x1f0 best buddies, both sides'
+  bits; they are copied from the players' masks, +0x1114 and +0x1116, when a turn begins: the remake's `G.pactPrev`): best buddies [2, 3]; allied [4 if he asks for it too else 5, 6, 7];
+  not allied [8 if he asks for it else 9, 10]. The item showing: the first when your own best-buddy (allied: or alliance) bit is set, "Allies" when only your alliance is, else the last.
+  A tap steps to the next item and `toggle` sets or clears your bit: not allied 0 asks, 1 withdraws; allied 0 asks for best buddies, 1 withdraws them (else asks for the alliance), 2 withdraws
+  the alliance; best buddies 0 asks, 1 withdraws. The game's option 0x10 (humans start allied) would lock best buddies at [2]; the iOS New Game never sets it.
+- Words: the app's French and Turkish (fr.lproj / tr.lproj) where the game is in those, else English put in the language by `js/ui-text.js`.
+

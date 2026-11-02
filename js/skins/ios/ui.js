@@ -505,29 +505,156 @@ function recolor(box) {
     fl.style.background = rgb(c);
   }
 }
-// the iPad's players list, at the bottom of the combined container (PlayerListLayer: the hat, the name; the pact words and the
-// rest of the row are PlayerMenuItem's, step 5): the hat is GraphicsHoMap smallPlayerHat: "player_list_%d_%@" (16 for you, else the player's hat; f when the
-// byte at +0x2c is 0)
+// The players list (PlayerListLayer / PlayerListContainer; the rows are PlayerMenuItem, the toggle PlayerMenuItemToggle). CONFIRMED, read in the disassembly.
+// -[PlayerListLayer updateData] 0x10009d7c0 puts the players in order: those still in by their savings (player +0x40), the richest first, then those who are out
+// by the time they went out (+0x3c), the latest first (an exchange sort, i before j, swapping when the first is smaller); a row is 1.5 x the bar row high and
+// the list as wide as the container, a white BackgroundBorderNode (0xffffffff, the blue line). -[PlayerMenuItem update] 0x1000a2224 draws a row, in points from
+// its left and bottom (H = 1.5 rows): the hat (GraphicsHoMap smallPlayerHat:) at (14, H/2), the "eliminated" sprite over it when the player is out; the
+// name, black Arial of the bar's type size, left at (26, H/2) in a box W/3 wide (labelFitToSize shrinks the type a point at a time, to 6, till it fits);
+// a second line, black Arial ceil(0.8 x the type), in a box 0.6 W wide centred on (W/3 + 64, H/4 - 4): for a computer "%@ %lu IQ" (the home system's
+// System Names word, the game's IQ), for a human, once he is your best buddy or the year is 2000 or later, "%@ %lu IQ %@" with "%ld.%2.2ldG %@" (his home
+// gravity against yours and his home temperature against yours, the temperature unit by the preference), before that the word alone; the happy or sad face
+// (player_list_happy / _sad) at (W/3 + 84, H/2); and the pact word, black Arial 0.9 x the type, centred at (0.75 W, H/2), Misc Strings 175-183 by the item's
+// toggle number (below), nothing for toggles 1 and 11.
+// +[PlayerMenuItemToggle menuWithWidth:...] 0x10009dda0 builds each row as a CCMenuItemToggle whose items are PlayerMenuItems of one toggle number each, by
+// the game's masks (FUN_10003a0ec allied, FUN_10003a148 best buddies: both sides' bit; the game's masks are the players' as they stood when the last turn
+// began, so a pact asked for this turn shows from the next: the remake's G.pactPrev) and the player's own (+0x1114 allies, +0x1116 best buddies, which
+// the pact lists hold here): you, or a player who is out: [1], [11] (no word); best buddies: [2 "Buddies", 3 "Only Ally"]; allied: [4 "Buddy!" if he asks
+// for it too else 5 "Buddy?", 6 "Allies", 7 "Declare War"]; not allied: [8 "Ally!" if he asks for it else 9 "Ally?", 10 "Enemy"]; the item showing is
+// "Buddies"/"Buddy"/"Ally" when your own bit is set (the first), "Allies" (the second) when only your alliance is, else the last. A tap steps to the next
+// item (cocos2d) and -[PlayerMenuItemToggle toggle] 0x10009e34c sets or clears your bit for that item (below). The locked "Buddies" alone (the
+// game's option 0x10, humans start allied) is never set by the iOS New Game.
+// -[PlayerMenuItem update] 0x1000a2224 draws the happy face for a player who asks for a pact (best buddy, else alliance) you have not asked for back, the
+// sad one when you ask and he does not (updateData).
+const START_ORDER = ['outpost', 'barren', 'backward', 'normal', 'advanced', 'thriving', 'abundant'];
+const APPWORDS = { // the app's own lists (fr.lproj / tr.lproj objectdictionary.plist): Misc Strings 175-183, System Names
+  fr: { pact: { 2: 'Copains', 3: 'Tout Allié', 4: 'Copain!', 5: 'Copain?', 6: 'Alliés', 7: 'Déclarer la guerre', 8: 'Allié!', 9: 'Allié?', 10: 'Ennemi' }, sys: ['Avant-poste', 'Stérile', 'Arriéré', 'Normal', 'Avancé', 'Prospère', 'Abondant'] },
+  tr: { pact: { 2: 'Arkadaşlar', 3: 'Sadece Müttefik', 4: 'Arkadaş!', 5: 'Arkadaş?', 6: 'Müttefikler', 7: 'Savaş İlan Et', 8: 'Müttefik!', 9: 'Müttefik?', 10: 'Düşman' }, sys: ['Nöbet Bölge', 'Verimsiz', 'Geri Kalmış', 'Normal', 'Gelişmiş', 'İlerleyen', 'Bol'] },
+};
+const PACTWORD = { 2: 'Buddies', 3: 'Only Ally', 4: 'Buddy!', 5: 'Buddy?', 6: 'Allies', 7: 'Declare War', 8: 'Ally!', 9: 'Ally?', 10: 'Enemy' };
+const SYSWORD = ['Outpost', 'Barren', 'Backward', 'Normal', 'Advanced', 'Thriving', 'Abundant'];
+const uiLang = () => (window.HOUI && window.HOUI.lang) || 'en';
+// a label's words: the app's own French or Turkish (left as they are), else English for the page's translator (ui-text.js)
+function appWord(kind, i) {
+  const l = APPWORDS[uiLang()];
+  if (l) return { text: kind === 'pact' ? l.pact[i] : l.sys[i], no: true };
+  return { text: kind === 'pact' ? PACTWORD[i] : SYSWORD[i], no: false };
+}
+// the player's home system (player +0x2d, 1-7, the System Names index + 1): the start the player chose, a computer's the one its setup gave it
+function homeLevel(G, p) {
+  const o = G.opts || {}, rs = HO.rules(G), hum = G.players.filter(q => q.human).length;
+  let st;
+  if (p.human) st = o.start;
+  else { const cs = rs.computerSetup ? rs.computerSetup(G, o, p.id - hum, G.players.length - hum) : null; st = cs ? cs.start : o.cstart; }
+  const i = START_ORDER.indexOf(st);
+  return i < 0 ? 0 : i + 1;
+}
+// the order (-[PlayerListLayer updateData]): the exchange sort, alive by savings, then those out by when they went out
+function listOrder(G) {
+  const ids = G.players.map(p => p.id), out = (p) => (p.alive ? 0 : (p.outYear505 || p.outYear || 1));
+  for (let i = 0; i < ids.length - 1; i++) for (let j = i + 1; j < ids.length; j++) {
+    const A = G.players[ids[i]], B = G.players[ids[j]], a = out(A), b = out(B);
+    const swap = a === 0 ? (b === 0 && (A.savings || 0) < (B.savings || 0)) : (b === 0 || a < b);
+    if (swap) { const t = ids[i]; ids[i] = ids[j]; ids[j] = t; }
+  }
+  return ids;
+}
+// the pacts as the game holds them (the masks at the last turn's start: G.pactPrev; a ruleset that keeps none has them as they stand)
+function pactMasks(G) {
+  const prev = G.pactPrev, has = (a, b, k) => prev ? !!(prev[a] && prev[a][k] && prev[a][k].includes(b)) : false;
+  const allied = (a, b) => a === b || (prev ? has(a, b, 'allies') && has(b, a, 'allies') : HO.isAllied(G, a, b));
+  const buddy = (a, b) => a === b || (allied(a, b) && (prev ? has(a, b, 'buddies') && has(b, a, 'buddies') : HO.isBuddy(G, a, b)));
+  return { allied, buddy };
+}
+// the row's toggle: { items: [toggle numbers], cur }; (me, other) for the signed-in player and a row's player
+function pactToggle(G, me, p, pm, buddies) {
+  if (p.id === me.id || !p.alive) return { items: [p.id === me.id ? 1 : 11], cur: 0 };
+  const has = (q, k, x) => (q[k] || []).includes(x);
+  const myAlly = has(me, 'allies', p.id), myBud = has(me, 'buddies', p.id), hisAlly = has(p, 'allies', me.id), hisBud = has(p, 'buddies', me.id);
+  if (pm.buddy(me.id, p.id)) return { items: [2, 3], cur: myBud ? 0 : 1 };
+  if (pm.allied(me.id, p.id)) return buddies ? { items: [hisBud ? 4 : 5, 6, 7], cur: myBud ? 0 : myAlly ? 1 : 2 } : { items: [6, 7], cur: myAlly ? 0 : 1 };
+  return { items: [hisAlly ? 8 : 9, 10], cur: myAlly ? 0 : 1 };
+}
+// -[PlayerMenuItemToggle toggle] 0x10009e34c: idx is the item the tap stepped to
+function pactToggled(G, me, p, pm, buddies, idx) {
+  const has = (q, k, x) => (q[k] || []).includes(x);
+  const set = (k, on) => { const l = (me[k] || []).filter(x => x !== p.id); if (on) l.push(p.id); me[k] = l; };
+  const myAlly = has(me, 'allies', p.id), myBud = has(me, 'buddies', p.id);
+  if (p.id === me.id) return;
+  if (pm.buddy(me.id, p.id)) { if (idx === 1) { if (myBud) set('buddies', false); } else if (idx === 0) { if (!myBud) set('buddies', true); } return; }
+  if (pm.allied(me.id, p.id)) {
+    if (!buddies) { if (idx === 1 && myAlly) set('allies', false); else if (idx === 0 && !myAlly) set('allies', true); return; }
+    if (idx === 0) { if (!myBud) set('buddies', true); }
+    else if (idx === 2) { if (myAlly) set('allies', false); }
+    else if (idx === 1) { if (myBud) set('buddies', false); else if (!myAlly) set('allies', true); }
+    return;
+  }
+  if (idx === 0) { if (!myAlly) set('allies', true); } else if (idx === 1 && myAlly) set('allies', false);
+}
+// labelFitToSize (+[CCLabelTTF labelFitToSizeWithString:dimensions:alignment:fontName:fontSize:] 0x100017864): the type a point smaller until the text is as narrow as the box, to 6
+let fitCx = null;
+function fitSize(text, size, w) {
+  if (!fitCx) { try { fitCx = document.createElement('canvas').getContext('2d'); } catch (e) { return size; } }
+  const fam = getComputedStyle(document.documentElement).getPropertyValue('--appfont') || 'Arial, Helvetica, sans-serif';
+  for (;;) { fitCx.font = `${size}px ${fam}`; if (fitCx.measureText(text).width <= w || size <= 6) return size; size -= 1; }
+}
 function playersList() {
   const a = A(), G = a && a.G, list = UIEl('section', 'ios-plist', { 'aria-label': 'Players', 'data-c': 'players' });
   if (!G) return list;
-  const me = G.players[a.ME], pacts = HO.feature(G, 'alliances'), buddies = pacts && HO.rules(G).bestBuddies !== false;
-  for (const p of G.players) {
+  const me = G.players[a.ME], pacts = HO.feature(G, 'alliances'), buddies = pacts && HO.rules(G).bestBuddies !== false, pm = pactMasks(G);
+  const Wd = SCREEN.W, H = SCREEN.row * 1.5, fs = SCREEN.font, iqSize = Math.ceil(Math.fround(fs * 0.8)), iq = G.opts && typeof G.opts.iqNum === 'number' ? G.opts.iqNum : null;
+  const pt = (n) => `calc(${n} * var(--pt))`;
+  const sys = SYSWORD.map((_, i) => appWord('sys', i)), box = UIEl('div', 'ios-pbox');
+  list.append(box);
+  // -[PlayerListLayer initWithWidth:anchorPoint:position:] 0x10009d410: the list is n rows + 8 high; an iPad's, when that is over a quarter of the screen's
+  // height, is the whole rows that fit in that quarter less a third of a row, and scrolls
+  { const full = G.players.length * H + 8, lim = SCREEN.winH * 0.25;
+    if (SCREEN.pad && full > lim) { box.style.height = pt(Math.floor(Math.fround(lim / H)) * H - H / 3); box.classList.add('scroll'); } }
+  for (const id of listOrder(G)) {
+    const p = G.players[id], out = !p.alive, tg = pacts ? pactToggle(G, me, p, pm, buddies) : { items: [p.id === me.id ? 1 : 11], cur: 0 };
+    const row = UIEl('div', 'ios-prow', null);
     const hat = pic('player_list_' + (p.human ? 16 : p.face) + '_' + (p.female ? 'f' : 'm'), 'ios-phat');
-    const row = UIEl('div', 'ios-prow' + (p.alive || p.human ? '' : ' dead'), null, hat, UIEl('span', 'ios-pname', null, p.name));
-    if (!p.alive && !p.human) row.append(pic('player_list_eliminated', 'ios-pelim'));
-    if (pacts && p.id !== a.ME && p.alive) {
-      // the pact word (-[PlayerMenuItem update:] 0x1000a2224, Misc Strings 175-183 by the toggle's state)
-      const mine = (me.allies || []).includes(p.id), they = (p.allies || []).includes(a.ME), mb = (me.buddies || []).includes(p.id), tb = (p.buddies || []).includes(a.ME);
-      const word = HO.isBuddy(G, a.ME, p.id) ? 'Buddies' : mb && !tb && HO.isAllied(G, a.ME, p.id) ? 'Buddy?' : tb && !mb && HO.isAllied(G, a.ME, p.id) ? 'Buddy!' : HO.isAllied(G, a.ME, p.id) ? 'Allies' : mine ? 'Ally?' : they ? 'Ally!' : 'Enemy';
-      const bt = UIEl('button', 'ios-pact', { type: 'button', title: p.name }, word);
-      bt.addEventListener('click', (e) => { e.stopPropagation(); const x = A(); if (!x || !x.G) return;
-        // the toggle (PlayerMenuItemToggle toggle 0x10009e34c): enemy, ally, best buddy, back to enemy
-        if (!mine) HO.setPact(G, a.ME, p.id, 'ally', true); else if (buddies && !mb) HO.setPact(G, a.ME, p.id, 'buddy', true); else { HO.setPact(G, a.ME, p.id, 'buddy', false); HO.setPact(G, a.ME, p.id, 'ally', false); }
-        x.save(); x.renderPanel(); });
+    row.append(hat);
+    if (out) row.append(pic('player_list_eliminated', 'ios-phat ios-pelim'));
+    // the name
+    const nm = UIEl('span', 'ios-pl ios-pname', { translate: 'no' }, p.name);
+    nm.style.fontSize = pt(fitSize(p.name, fs, Wd / 3)); nm.style.top = pt(H / 2 - (fs + 4) / 2); row.append(nm);
+    // the second line
+    const lv = homeLevel(G, p), word = lv ? sys[lv - 1] : null;
+    const hum = p.human;
+    let line = null;
+    if (!hum) line = iq != null ? [word, `${iq} IQ`] : [word];
+    else if (pm.buddy(me.id, p.id) || G.year >= 2000) {
+      const g = HO.gravText(G, p.homeG, me.homeG), t = a.degF ? a.degF(72 + (p.homeT - me.homeT)) : '';
+      line = iq != null ? [word, `${iq} IQ`, `${g} ${t}`] : [word, `${g} ${t}`];
+    } else line = [word];
+    if (line && line.some(x => x != null && x !== '')) {
+      const el = UIEl('span', 'ios-pl ios-piq', null);
+      const parts = line.filter(x => x != null && x !== '');
+      let size = iqSize;
+      const flat = parts.map(x => (typeof x === 'string' ? x : x.text)).join(' ');
+      size = fitSize(flat, iqSize, Wd * 0.6);
+      parts.forEach((x, i) => { if (i) el.append(' '); if (typeof x === 'string') el.append(UIEl('span', null, { translate: 'no' }, x)); else el.append(UIEl('span', null, x.no ? { translate: 'no' } : null, x.text)); }); // ("%lu IQ" and the figures are the app's literals, not in its string lists)
+      el.style.fontSize = pt(size); el.style.top = pt(H * 0.75 + 4 - (iqSize + 4) / 2); row.append(el);
+    }
+    // the faces
+    if (pacts && !out && p.id !== me.id) {
+      const has = (q, k, x) => (q[k] || []).includes(x);
+      const hisB = has(p, 'buddies', me.id), hisA = has(p, 'allies', me.id), myB = has(me, 'buddies', p.id), myA = has(me, 'allies', p.id);
+      const happy = (hisB && !myB) || (hisA && !myA), sad = (!hisB && myB) || (!hisA && myA);
+      if (happy) row.append(pic('player_list_happy', 'ios-phat ios-pface'));
+      if (sad) row.append(pic('player_list_sad', 'ios-phat ios-pface'));
+    }
+    // the pact word and the toggle
+    const num = tg.items[tg.cur];
+    if (num >= 2) {
+      const w = appWord('pact', num), bt = UIEl('button', 'ios-pact', { type: 'button', title: p.name }, UIEl('span', null, w.no ? { translate: 'no' } : null, w.text));
+      bt.style.fontSize = pt(fs * 0.9);
+      if (tg.items.length > 1) bt.addEventListener('click', (e) => { e.stopPropagation(); const x = A(); if (!x || !x.G) return; pactToggled(G, me, p, pm, buddies, (tg.cur + 1) % tg.items.length); x.save(); x.renderPanel(); });
+      else bt.classList.add('lone');
       row.append(bt);
     }
-    list.append(row);
+    box.append(row);
   }
   const more = UIEl('button', 'ios-pmore', { type: 'button' }, 'Players and history…');
   more.addEventListener('click', () => { const x = A(); if (x && x.G) x.openPlayers(); });
