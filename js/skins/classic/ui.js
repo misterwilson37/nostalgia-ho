@@ -2680,6 +2680,7 @@ const pileStance = (f, did) => f.dstance && f.dstance[did] != null ? f.dstance[d
 function openOrganize(sid) {
   const style = organizeStyle();
   if (!style || sid == null) return;
+  if (style === 'ios' && skinWindow('organize', sid)) return;
   const ios = style === 'ios';
   // the Palm (rs.pileMove): a whole pile at a time, to any other fleet or to
   // "Empty Fleet", always there at the end of the list

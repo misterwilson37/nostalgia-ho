@@ -1468,6 +1468,155 @@ function openSingleShip(flow, cls, index) {
   return true;
 }
 
+
+// -[OrganizeFleetsLayer initDialog] 0x1000bfe20 and the routines it calls (addCurrentShipInfo 0x1000bffd0, addLeftRight 0x1000c0440, addExtraButtons 0x1000c0520, updateData: 0x1000c0f38,
+// updateFleetContainerPosition 0x1000c0d0c, moveContainer: 0x1000c0e00), on DialogLayerSprite (480 x 320 on an iPhone; an iPad's 0.8 x 0.7 of the screen, scale 1): the message
+// (Arial 18, centred, its top 16 under the top), a column for each fleet of yours at the star but the Satellites (84 wide on an iPhone, 160 on an iPad; a column's rectangle at
+// x 2 a80 + n (width + 2 a80), y 95 (iPad 115), height - 137 (iPad - 190), the contents hanging from its top, bottom-up: the fleet's name "Fleet n" (n its number in your fleets) or "Scrapped"
+// (Arial 16), "Fuel: n" (Arial 9), one ShipMenuItem for each of its piles); the Scrap / Group / Split / New Fleet buttons (90 x 30, scale 0.85) 16 up from the bottom, the selected pile's
+// "Selected Ship:  Delayed Arrival" and "Attitude" buttons 56 up (80 on an iPad), hidden until a pile is selected; the arrows at the top right (more than four columns) slide the row by one
+// column's width in 0.2 s. The rules are the page's own (the engine's split and merge), as the earlier notes read them.
+function plainButton(text, w, h, size, fn) {
+  const b = UIEl('button', 'ios-bbtn ios-bpl', { type: 'button', style: `width:${bpt(w)};height:${bpt(h)};font-size:${bpt(size)}` });
+  b.textContent = text; b.addEventListener('click', (e) => { e.stopPropagation(); fn(); });
+  return b;
+}
+function openOrganizeIOS(sid) {
+  const a = A(), G = a.G, gd = BGD(), pad = SCREEN.pad;
+  closeBuildFlow(); closeGraphs();
+  let W, H, k = 1;
+  if (!pad) ({ cw: W, ch: H, k } = dlgGeom()); else { W = SCREEN.winW * 0.8; H = SCREEN.winH * 0.7; }
+  const nodeW = pad ? 160 : 84, pitch = nodeW + gd.a80 * 2, ry = pad ? 115 : 95, rh = H - (pad ? 190 : 137), top = ry + rh;
+  const S = { sel: null, first: 0, empties: [], scrapping: false, nextEmpty: 1 };
+  const allBio = (f) => { const ds = HO.fleetDesigns(G, f); return ds.length > 0 && ds.every(d => d.type === 'bio'); };
+  const fleets = () => a.fleetOrder(G.fleets.filter(f => f.owner === a.ME && f.star === sid && f.to == null && !f.sat && HO.fleetCount(f) > 0));
+  const cols = () => [...fleets().map(f => ({ key: 'f' + f.id, f })), ...S.empties.map(e => ({ key: 'e' + e, empty: e }))];
+  const selFleet = () => S.sel && G.fleets.find(f => f.id === S.sel.fid && f.ships[S.sel.did] > 0);
+  const canTake = (c) => { // OrganizerFleetFleetsContainer startWith:ship:block: 0x1000a5478
+    const f = selFleet(); if (!f) return false;
+    if (c.empty) return true;
+    if (c.f === f) return false;
+    return (HO.getDesign(G, f.owner, S.sel.did).type === 'bio') === allBio(c.f);
+  };
+  const L = dialogLayer(W, H, k, 'Organize fleets', () => closeIt()), dlg = L.dlg; dlg.style.overflow = 'hidden'; // visit 0x1000c0c30: glScissor to the layer's box
+  const closeIt = () => { L.scrim.remove(); org = null; S.empties = []; a.renderPanel(); a.draw(); a.save(); };
+  let org = { scrim: L.scrim };
+  const done = (keyToShow) => {
+    S.sel = null; S.scrapping = false;
+    if (keyToShow) { const i = cols().findIndex(c => c.key === keyToShow); if (i >= 0 && (i < S.first || i >= S.first + 4)) S.first = Math.max(0, i - 3); }
+    a.save(); a.renderPanel(); a.draw(); render();
+  };
+  const move = (c) => { // move:from:to: 0x1000c27e0: the whole pile; the engine's split and merge give the fleet that takes it the fuel, "bought" and colonists rules
+    const f = selFleet(); if (!f || !canTake(c)) return;
+    const nf = HO.splitFleet(G, f, { [S.sel.did]: f.ships[S.sel.did] }); if (!nf) return;
+    if (c.f) HO.mergeFleets(G, c.f, nf); else S.empties = S.empties.filter(e => e !== c.empty);
+    done(c.f ? 'f' + c.f.id : 'f' + nf.id);
+  };
+  const group = () => { // groupClick 0x1000c1a84
+    const fl = fleets(), pick = selFleet();
+    for (const bio of [false, true]) {
+      const same = fl.filter(f => allBio(f) === bio), tgt = pick && allBio(pick) === bio ? pick : same[0];
+      for (const f of same) if (f !== tgt && G.fleets.includes(f) && G.fleets.includes(tgt) && HO.canMerge(G, tgt, f)) HO.mergeFleets(G, tgt, f);
+    }
+    S.empties = []; done();
+  };
+  const split = () => { // splitClick 0x1000c1e4c
+    const f = selFleet(); if (!f) return;
+    const n = f.ships[S.sel.did]; let nf = null;
+    if (n > 1) nf = HO.splitFleet(G, f, { [S.sel.did]: n >> 1 });
+    else for (const kk of Object.keys(f.ships).filter(x => f.ships[x] > 0).slice(1)) nf = HO.splitFleet(G, f, { [kk]: f.ships[kk] }) || nf;
+    done(nf && 'f' + nf.id);
+  };
+  const newFleet = () => { // newFleetClick 0x1000c232c
+    const f = selFleet();
+    if (f) { const nf = HO.splitFleet(G, f, { [S.sel.did]: f.ships[S.sel.did] }); done(nf && 'f' + nf.id); return; }
+    const e = S.nextEmpty++; S.empties.push(e); done('e' + e);
+  };
+  const scrapAt = (c) => { // scrapFleet: 0x1000c17e0
+    if (!c.f) return;
+    const was = !!c.f.scrap301; HO.rules(G).flagScrap(G, c.f, 'command');
+    if (!was) a.Sound.play(7003);
+    if (!G.fleets.includes(c.f)) a.toast('Purchase undone.');
+    done();
+  };
+  const stanceOf = (f, did) => f.dstance && f.dstance[did] != null ? f.dstance[did] : (f.delayed ? 1 : 0) | (f.stance === 'defensive' ? 2 : f.stance === 'offensive' ? 4 : 0);
+  const setStance = (bits) => { const f = selFleet(); if (!f) return; f.dstance = Object.assign({}, f.dstance, { [S.sel.did]: bits }); a.save(); render(); };
+  const tapCol = (c) => { if (S.scrapping) { scrapAt(c); return; } if (S.sel && canTake(c)) move(c); };
+  const x = UIEl('button', 'ios-gx', { type: 'button', 'aria-label': 'Close' }, pic('button-x')); x.addEventListener('click', (e) => { e.stopPropagation(); closeIt(); });
+  const msg = UIEl('div', 'ios-omsg', { style: `width:${bpt(W - gd.a80 * 4)};font-size:${bpt(pad ? 24 : 18)}` });
+  const cont = UIEl('div', 'ios-oc'), adj = UIEl('div', 'ios-oadj'), info = UIEl('div', 'ios-oinfo'), btns = UIEl('div', 'ios-obtns', { style: `gap:${bpt(gd.a80 * 2)};transform:translateX(-50%) scale(${pad ? 1 : 0.85})` });
+  dlg.append(cont, x, put(msg, W / 2, H - gd.a80 * 4, 0.5, 1), adj, info, btns);
+  const render = () => {
+    const all = cols();
+    if (S.sel && !selFleet()) S.sel = null;
+    S.first = Math.max(0, Math.min(S.first, all.length - 4));
+    msg.textContent = S.scrapping ? 'Fleets will be scrapped at turn end' : 'Tap the ship you wish to move';
+    cont.textContent = ''; cont.style.transform = `translateX(${bpt(-S.first * nodeW)})`;
+    const mine = G.fleets.filter(f => f.owner === a.ME);
+    all.forEach((c, i) => {
+      const target = S.scrapping ? !!c.f : S.sel ? canTake(c) : false;
+      const col = UIEl('div', 'ios-ocol' + (target ? ' t' : ''), { style: `left:${bpt(gd.a80 * 2 + i * pitch)};bottom:${bpt(ry)};width:${bpt(nodeW)};height:${bpt(rh)}` });
+      const stack = UIEl('div', 'ios-ostack', { style: `gap:${bpt(gd.a80)}` });
+      const nm = UIEl('span', 'ios-bt ios-on'); nm.style.fontSize = bpt(16);
+      nm.textContent = c.f ? (c.f.scrap301 && a.marksScrap() ? 'Scrapped' : `Fleet ${Math.max(0, mine.indexOf(c.f))}`) : `Fleet ${mine.length + all.slice(0, i).filter(z => z.empty).length}`; // the sprintf template 37, "Fleet %d", with the fleet's number
+      stack.append(nm);
+      if (c.f) {
+        const fu = UIEl('span', 'ios-bt ios-on'); fu.style.fontSize = bpt(9); fu.textContent = `Fuel: ${HO.plainNum(c.f.fuel)}`; stack.append(fu);
+        for (const key of Object.keys(c.f.ships)) {
+          const n = c.f.ships[key]; if (!(n > 0)) continue;
+          const d = HO.getDesign(G, c.f.owner, +key), on = S.sel && S.sel.fid === c.f.id && S.sel.did === +key;
+          const text = fleetPileText(d, n), cv = a.IMG && HOTHEME.shipPic(d, a.IMG), sw = cv ? cv.width : 0, lw = textW(text, gd.f);
+          const ss = sw && nodeW <= sw ? nodeW / sw : 1, ls = nodeW <= lw ? nodeW / lw : 1;
+          const it = UIEl('button', 'ios-bitem' + (on ? ' act' : ''), { type: 'button', 'aria-pressed': on ? 'true' : 'false', style: `width:${bpt(Math.max(sw * ss, lw * ls))}` });
+          if (cv) { cv.classList.add('ios-bship'); cv.style.width = bpt(cv.width * ss); cv.style.height = bpt(cv.height * ss); it.append(cv); }
+          const lb = UIEl('span', 'ios-bt ios-bin'); lb.textContent = text; lb.style.fontSize = bpt(gd.f * ls); lb.setAttribute('translate', 'no'); it.append(lb);
+          if (on) it.animate([{ opacity: 1 }, { opacity: 80 / 255, offset: 0.5 }, { opacity: 1 }], { duration: 600, iterations: Infinity }); // ShipMenuItem highlight 0x100012354: CCFadeTo 0.3 s to 80 and back
+          it.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (S.scrapping) { scrapAt(c); return; }
+            if (S.sel && S.sel.fid !== c.f.id) { tapCol(c); return; }
+            S.sel = on ? null : { fid: c.f.id, did: +key }; render();
+          });
+          stack.append(it);
+        }
+      }
+      col.append(stack);
+      col.addEventListener('click', () => tapCol(c));
+      col.addEventListener('pointerdown', () => { if (target) col.classList.add('press'); });
+      for (const ev of ['pointerleave', 'pointerup']) col.addEventListener(ev, () => col.classList.remove('press'));
+      cont.append(col);
+    });
+    // MenuAdjusters (0x100011868): adjuster_left and adjuster_right, 4 apart, scale 0.7 (items 0.5 on an iPhone, 1 on an iPad), top right with 2 a80
+    adj.textContent = ''; adj.style.display = all.length > 4 ? '' : 'none';
+    const mk = (nm, fn, dis) => { const b = UIEl('button', 'ios-oad', { type: 'button', 'aria-label': nm === 'left' ? 'Earlier fleets' : 'Later fleets', style: `width:${bpt(34 * (pad ? 1 : 0.5) * 0.7)};height:${bpt(34 * (pad ? 1 : 0.5) * 0.7)}` }, pic('adjuster_' + nm)); b.addEventListener('click', (e) => { e.stopPropagation(); fn(); }); return b; };
+    adj.style.right = bpt(gd.a80 * 2); adj.style.top = bpt(gd.a80 * 2); adj.style.gap = bpt(gd.a80 * 0.7);
+    adj.append(mk('left', () => { if (S.first > 0) { S.first--; render(); } }), mk('right', () => { if (S.first < all.length - 4) { S.first++; render(); } }));
+    // the selected pile's settings (addCurrentShipInfo 0x1000bffd0, updateCurrentShipInfo 0x1000c090c)
+    const f = selFleet(); info.textContent = ''; info.style.display = f ? '' : 'none';
+    info.style.bottom = bpt(pad ? 80 : 56); info.style.transform = `translateX(-50%) scale(${pad ? 1 : 0.85})`; info.style.gap = bpt(gd.a80);
+    if (f) {
+      const bits = stanceOf(f, S.sel.did), att = bits & 4 ? 'Aggressive' : bits & 2 ? 'Defensive' : 'Normal';
+      const l1 = UIEl('span', 'ios-bt ios-oil'), l2 = UIEl('span', 'ios-bt ios-oil'); l1.textContent = 'Selected Ship:  Delayed Arrival'; l2.textContent = 'Attitude'; l1.style.fontSize = bpt(gd.f); l2.style.fontSize = bpt(gd.f);
+      info.append(l1, plainButton(bits & 1 ? 'Yes' : 'No', 90, 30, gd.f, () => setStance(bits ^ 1)), l2, plainButton(att, 90, 30, gd.f, () => setStance(bits & 4 ? (bits & ~4) | 2 : bits & 2 ? bits & ~2 : bits | 4)));
+    }
+    btns.textContent = '';
+    if (a.marksScrap()) btns.append(plainButton('Scrap', 90, 30, 16, () => { S.scrapping = !S.scrapping; S.sel = null; render(); }));
+    btns.append(plainButton('Group', 90, 30, 16, group), plainButton('Split', 90, 30, 16, split), plainButton('New Fleet', 90, 30, 16, newFleet));
+    btns.style.bottom = bpt(gd.a80 * 4);
+  };
+  // UIPinchGestureRecognizer (pinching: 0x1000c2ae0): spread to Split, pinch to Group
+  const pins = new Map(); let d0 = 0, d1 = 0;
+  L.scrim.addEventListener('pointerdown', (e) => { if (e.pointerType !== 'touch') return; pins.set(e.pointerId, [e.clientX, e.clientY]); if (pins.size === 2) { const [p, q] = [...pins.values()]; d0 = d1 = Math.hypot(p[0] - q[0], p[1] - q[1]); } });
+  L.scrim.addEventListener('pointermove', (e) => { if (!pins.has(e.pointerId)) return; pins.set(e.pointerId, [e.clientX, e.clientY]); if (pins.size === 2) { const [p, q] = [...pins.values()]; d1 = Math.hypot(p[0] - q[0], p[1] - q[1]); } });
+  const pinEnd = (e) => { if (!pins.has(e.pointerId)) return; const two = pins.size === 2; pins.delete(e.pointerId); if (!two || !d0) return; const r = d1 / d0; d0 = 0; if (r > 1.1) split(); else if (r < 0.9) group(); };
+  L.scrim.addEventListener('pointerup', pinEnd); L.scrim.addEventListener('pointercancel', pinEnd);
+  pushScrim(L.scrim);
+  render();
+  return true;
+}
+// FUN_100035be4: "1 Sco (4/2)", "5 Fig (3/3)s" (see fleetItem)
+function fleetPileText(d, n) { const cls = FLEET_CLASS[Math.max(0, ['scout', 'dread', 'fighter', 'tanker', 'colony', 'satellite', 'bio', 'decoy'].indexOf(d.type))].slice(0, 3); return n === 1 ? `1 ${cls} (${d.W}/${d.S})` : `${n} ${cls} (${d.W}/${d.S})s`; }
+
 window.HOTHEME = {
   dir: 'assets/skins/ios/',
   prefix: P,
@@ -1508,6 +1657,7 @@ window.HOTHEME = {
   window(name, ...x) {
     const a = A(); if (!a || !a.G) return false;
     if (name === 'build') { const s = a.G.stars[x[0]]; if (!s || s.owner !== a.ME || HO.feature(a.G, 'buildQueue')) return false; return openBuildFlow(x[0]); }
+    if (name === 'organize') { if (x[0] == null || HO.rules(a.G).organizeFleets !== 'ios') return false; return openOrganizeIOS(x[0]); }
     return false;
   },
   // the title: the app's welcome screen, its name down the side and the
