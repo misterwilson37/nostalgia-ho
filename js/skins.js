@@ -83,7 +83,8 @@ const SOUNDS = {
   // the Amiga game has the DOS game's sounds, some of them resampled
   amiga: { name: '2.x Amiga (1994–95)', year: 1994, dir: 'assets/skins/amiga/', map: DOS_MAP },
   // 1.2 has thirteen sounds: good and bad news, battle, exploring, end of turn
-  mac12: { name: '1.2 (Mac, French, 1992)', year: 1992, dir: 'assets/skins/mac12/', map: { 11111: 7000 } },
+  // (7018, "You have colonized": PlayAnnounceSound @130f08 gives a new colony snd 2000, the tech level's and the new year's, with no other sound for it)
+  mac12: { name: '1.2 (Mac, French, 1992)', year: 1992, dir: 'assets/skins/mac12/', map: { 11111: 7000, 7018: 2000 } },
   // 2.0.1 has the same thirteen sounds as 1.2 (the same files); no click
   mac2: { name: '2.0.1 (Mac, 1992)', year: 1992, dir: 'assets/skins/mac2/', map: { 11111: 7000 } },
   mac2c: { name: '2.0.1 (Mac, 1992)', year: 1992, dir: 'assets/skins/mac2c/', map: { 11111: 7000 }, same: 'mac2' },

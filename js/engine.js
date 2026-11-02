@@ -1632,6 +1632,9 @@ function during(what, fn) {
 }
 function endTurn(G) {
   if (G.over) return;
+  // a version whose report window keeps the past reports (rs.reportHistory: 1.2's AddNewMessage @131052 holds 50, and when it is full
+  // drops the oldest 10 before it adds one), p.reportLog: what the turn that is ending told each human, to scroll back through
+  if (rules(G).reportHistory) for (const p of G.players) if (!p.ai) { const h = p.reportLog || (p.reportLog = []); for (const m of p.inbox || []) { if (h.length >= rules(G).reportHistory) h.splice(0, 10); h.push(m); } }
   for (const p of G.players) p.inbox = [];
   const yearBefore = G.year;
   // "Years per turn" (Original rules): one End Turn runs several 10-year

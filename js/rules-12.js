@@ -366,6 +366,8 @@ E.registerRules('12', Object.assign({}, D, {
   battlePanel: D.battlePanelMac,
   label: 'Mac 1.2 (1992)',
   fleetDesc: fleetDesc12, shipsDesc: shipsDesc12, fleetListNoSatellites: true,
+  // CONFIRMED (AddNewMessage @131052: 50 records of 50 bytes at +0x4d4; at 50 it moves the last 40 down by 10): the report window keeps 50 reports
+  reportHistory: 50,
   // CONFIRMED (DrawIncomeRect @c3f70; LoadMiscStrings @1502c6 puts STR# 1005.1-4 at A5-0x448, -0x45c, -0x470, -0x484): the three totals
   // are drawn metal first ("Réserve métal:", the plain number), then the money ("Fortune totale:", "$%s") and the income ("Revenu total:",
   // "$%s", the colonies' income and the interest in it), each label bold and right-aligned, the changes after the figure. The year is not

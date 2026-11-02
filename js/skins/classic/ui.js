@@ -4446,8 +4446,10 @@ function verPrefs(O, box) {
 // star, or reviews its battle
 function openReports() {
   if (!G) return;
-  const O = verOpts() || {}, ms = me().inbox || [];
-  const rows = ms.map(m => el('li', { class: 'click', tabindex: 0, onclick: () => {
+  const O = verOpts() || {};
+  // (rs.reportHistory: 1.2's report window lists the last 50 reports of all the years, scrolled to the current year's first)
+  const old = HO.rules(G).reportHistory ? (me().reportLog || []) : [], ms = old.concat(me().inbox || []);
+  const rows = ms.map((m, i) => el('li', { class: 'click', 'data-now': i === old.length ? '1' : null, tabindex: 0, onclick: () => {
     closeModal();
     if (winReport(m) && winPending()) { openWinWindows(() => renderMsg()); return; }
     if (winReport(m) && youWonWords()) { openYouWon(); return; }
@@ -4456,6 +4458,7 @@ function openReports() {
     if (m.star != null) { UI.sel = m.star; centerOn(m.star); renderPanel(); draw(); }
   } }, degText(HO.say(G, m.text))));
   modal(O.reports || 'Reports', ms.length ? el('ul', { class: 'reports' }, ...rows) : el('p', null, 'No reports this turn.'), { cls: 'mid' });
+  if (old.length) { const now = document.querySelector('ul.reports li[data-now]'); if (now && now.scrollIntoView) now.scrollIntoView({ block: 'start' }); }
 }
 // 5.0.5's Preferences hold the auto play settings (FUN_1005ec40)
 function prefsAutoPlay() {
