@@ -247,7 +247,7 @@ const UIEl = (tag, cls, attrs, ...kids) => {
   return e;
 };
 const A = () => window.HOAPI;
-let hudEl, hudRow, hudL, hudR, colEl, turnEl, gearBtn, tmEl, tmFill, tmThumb, sideBtn, gearOpen = false;
+let pbEl, fdEl, fdList, fleetsOpen = false, hudEl, hudRow, hudL, hudR, colEl, turnEl, gearBtn, tmEl, tmFill, tmThumb, sideBtn, gearOpen = false;
 function sideOpen() { return document.documentElement.classList.contains('ios-side'); }
 function sideLayout() {
   // -[MapLayer setBoundsForSidebar] 0x10000db54: the map's pan rectangle starts at the sidebar's width + 8 (iPad) or + 4 (iPhone)
@@ -304,11 +304,46 @@ function buildScreen(doc) {
   gearBtn = UIEl('button', 'ios-btn ios-gear', { type: 'button', 'aria-label': 'Menu', 'aria-haspopup': 'true', title: 'Menu' }, pic('button-gear'));
   gearBtn.addEventListener('click', (e) => { e.stopPropagation(); setGear(!gearOpen); });
   turnEl = UIEl('div', 'ios-turn', null, gearBtn);
-  const ui = UIEl('div', 'ios-ui', null, hudEl, turnEl);
+  // -[PlanetButtons setupButtons] 0x1000c3928: round buttons around the selected star (add, move, organize); -[FleetMovementDialog init] (an iPhone's list of fleets)
+  pbEl = UIEl('div', 'ios-pb', { hidden: '' });
+  for (const [n, name, fn] of [['move', 'Fleets', () => setFleets(!fleetsOpen)], ['organize', 'Organize fleets', go(a => a.openOrganize(a.UI.sel))], ['add', 'Build ships', go(a => a.openBuild(a.UI.sel))]]) {
+    const b = UIEl('button', 'ios-pbb ios-pb-' + n, { type: 'button', 'aria-label': name, title: name }, pic('button-' + n));
+    b.addEventListener('click', (e) => { e.stopPropagation(); fn(); });
+    pbEl.append(b);
+  }
+  fdEl = UIEl('div', 'ios-fd', { hidden: '', role: 'dialog', 'aria-label': 'Fleets' }, UIEl('div', 'ios-fdbg'), UIEl('div', 'ios-fdt', null, 'Fleets'), fdList = UIEl('div', 'ios-fdl'));
+  const fdx = UIEl('button', 'ios-fdx', { type: 'button', 'aria-label': 'Close' }, pic('button-x'));
+  fdx.addEventListener('click', (e) => { e.stopPropagation(); setFleets(false); });
+  fdEl.append(fdx);
+  const ui = UIEl('div', 'ios-ui', null, hudEl, pbEl, fdEl, turnEl);
   app.append(ui); ui.id = 'ios-ui';
   doc.addEventListener('click', (e) => { if (gearOpen && !e.target.closest('#menubar') && !e.target.closest('.ios-gear')) setGear(false); });
   // End Turn is the classic page's clock; it sits left of the gear (-[TurnMessageLayer init]: the menu's items in a row, padding a80)
   const msg = doc.getElementById('msg'); if (msg) app.append(msg);
+}
+// -[MainGameScene toggleFleetMovement] 0x10000d074: the move button adds or removes the dialog (an iPhone's: the iPad has no move button)
+function setFleets(o) { fleetsOpen = !!o; if (fdEl) fdEl.hidden = !fleetsOpen || SCREEN.pad || !pbShown; document.documentElement.classList.toggle('ios-fleets', fleetsOpen); }
+// -[PlanetButtons updatePlanet:where:] 0x1000c3c6c: add shows for your own colony, move and organize while you have a fleet at the star; all hide while a
+// fleet is dragged (fleetDragging:). -[MapLayer setScale:] 0x10000e590: the buttons' scale is the planet's on-screen scale (the page's planetTarget: 2, or 3 on an iPad,
+// when zoomed in); they sit at the star (container 46 x 46 about the star: add's corner at (+23, +23), move's right edge at (-23, +23), organize's middle at (0, +35)).
+let pbShown = false;
+function placeButtons() {
+  const a = A(); if (!a || !a.G || !pbEl || !window.HOVIEW) return;
+  const v = window.HOVIEW(), sel = a.UI.sel, cv = document.getElementById('map');
+  const s = sel != null ? a.G.stars[sel] : null;
+  if (!s || !cv || a.G.over || v.path || !v.view) { pbEl.hidden = true; pbShown = false; if (fdEl) fdEl.hidden = true; return; }
+  const own = s.owner === a.ME && a.G.players[a.ME].alive !== false;
+  const ships = a.G.fleets.some(f => f.owner === a.ME && f.star === sel && f.to == null);
+  const r = cv.getBoundingClientRect(), x = r.left + v.view.ox + s.x * v.view.s, y = r.top + v.view.oy + s.y * v.view.s;
+  const pad = SCREEN.pad, k0 = v.view.s / 40, lo = Math.min(v.fit, v.view.s) / 40;
+  let thr = pad ? 1.7 : 1.0; if (lo >= thr) thr = lo + 0.1;
+  const k = k0 >= thr ? (pad ? 3 : 2) : (pad ? 0.6 : 0.2) + (pad ? 2.4 : 1.8) / (thr - lo) * (k0 - lo);
+  const show = (cls, on) => { const b = pbEl.querySelector('.ios-pb-' + cls); if (b) b.hidden = !on || (cls === 'move' && pad); };
+  show('add', own); show('move', ships); show('organize', ships);
+  pbShown = own || ships;
+  pbEl.hidden = !pbShown;
+  pbEl.style.setProperty('--px', x + 'px'); pbEl.style.setProperty('--py', y + 'px'); pbEl.style.setProperty('--pk', (k * SCREEN.u) + 'px');
+  if (fdEl) fdEl.hidden = !fleetsOpen || pad || !pbShown;
 }
 function setGear(o) { gearOpen = o; document.documentElement.classList.toggle('ios-menus', o); if (gearBtn) gearBtn.classList.toggle('on', o); }
 // The terraform / mine slider (CCSliderDeluxe "tmb1": slider-tmb1-left and -right, the thumb; the delegate -[PlanetInfoLayer
@@ -403,7 +438,10 @@ function sidebar(box, parts) {
     rows.push(UIEl('div', 'ios-inrow' + (kv.classList.contains('neg') ? ' neg' : ''), { 'data-help': kv.getAttribute('data-help') }, UIEl('span', 'l', null, lab), UIEl('span', 'v', null, val), UIEl('span', 'c', null, change)));
   }
   const income = UIEl('section', 'ios-income', null, ...rows);
-  box.replaceChildren(income, parts.budget, parts.tech, ...(parts.planet ? [parts.planet] : []));
+  // the app's sidebar has no star box (the star's figures are the HUD strip, its commands the round buttons): its fleets go in the dialog
+  const fl = parts.planet && parts.planet.querySelector('.fleets');
+  if (fdList) { fdList.replaceChildren(); if (fl) { const h = fl.querySelector('h4'); if (h) h.remove(); fdList.append(fl); } }
+  box.replaceChildren(income, parts.budget, parts.tech);
   if (SCREEN.pad) box.append(playersList());
   hud();
 }
@@ -498,7 +536,7 @@ window.HOTHEME = {
     return true;
   },
   panel: sidebar, afterMsg,
-  afterDraw: () => hud(),
+  afterDraw: () => { hud(); placeButtons(); },
   page(doc) {
     screenSize(); buildScreen(doc);
     window.addEventListener('resize', () => { const was = SCREEN.pad; screenSize(); hudKey = ''; hud(); if (was !== SCREEN.pad) buildColumn(doc.getElementById('app')); });

@@ -138,3 +138,22 @@ html.skin-ios .ios-plist { margin: calc(4 * var(--pt)); cursor: pointer; color: 
 html.skin-ios .ios-prow { display: flex; align-items: center; height: calc(var(--row) * 1.5 * var(--pt)); position: relative; }
 html.skin-ios .ios-phat { height: 100%; width: auto; margin-right: calc(4 * var(--pt)); }
 html.skin-ios .ios-pelim { position: absolute; left: 0; height: 100%; }
+
+/* the round buttons about the selected star (PlanetButtons): 44 point pictures at scale 0.6 x the planet's scale k (--pk px per point) */
+html.skin-ios .ios-pb { position: fixed; left: 0; top: 0; width: 0; height: 0; z-index: 6; pointer-events: none; }
+html.skin-ios .ios-pb[hidden], html.skin-ios .ios-pbb[hidden] { display: none; }
+html.skin-ios .ios-pbb { min-width: 0; min-height: 0; position: absolute; appearance: none; border: 0; padding: 0; background: none; cursor: pointer; pointer-events: auto; width: calc(26.4 * var(--pk)); height: calc(26.4 * var(--pk)); line-height: 0; -webkit-tap-highlight-color: transparent; }
+html.skin-ios .ios-pbb img { width: 100%; height: 100%; display: block; pointer-events: none; }
+html.skin-ios .ios-pbb:active img { filter: brightness(.49); }
+html.skin-ios .ios-pb-add { left: calc(var(--px) + 23 * var(--pk)); top: calc(var(--py) - 49.4 * var(--pk)); }
+html.skin-ios .ios-pb-move { left: calc(var(--px) - 49.4 * var(--pk)); top: calc(var(--py) - 49.4 * var(--pk)); }
+html.skin-ios .ios-pb-organize { left: calc(var(--px) - 13.2 * var(--pk)); top: calc(var(--py) - 61.4 * var(--pk)); }
+/* FleetMovementDialog (an iPhone's): 100 + 2 a80 by 192 points, anchored (1, 0.5) at (winW - 50, winH / 2); fleet-background.png as a nine-patch (caps 10), opacity 0xb4;
+   "Fleets" 12 centred at the top, button-x at 0.3 at the top left */
+html.skin-ios .ios-fd { position: fixed; right: calc(50 * var(--pt)); top: 50%; transform: translateY(-50%); width: calc((100 + var(--gap) * 2) * var(--pt)); height: calc(192 * var(--pt)); z-index: 5; color: #fff; font: calc(12 * var(--pt)) Arial, Helvetica, sans-serif; box-sizing: border-box; }
+html.skin-ios .ios-fd[hidden] { display: none; }
+html.skin-ios .ios-fdbg { position: absolute; inset: 0; opacity: .706; border: calc(10 * var(--pt)) solid transparent; border-image: url("../../../assets/skins/ios/sprites/fleet-background.png") 20 fill / calc(10 * var(--pt)) stretch; }
+html.skin-ios .ios-fdt { position: absolute; left: 0; right: 0; top: calc(4 * var(--pt)); text-align: center; }
+html.skin-ios .ios-fdx { position: absolute; left: calc(4 * var(--pt)); top: calc(4 * var(--pt)); width: calc(44 * .3 * var(--pt)); height: calc(44 * .3 * var(--pt)); appearance: none; border: 0; padding: 0; background: none; cursor: pointer; line-height: 0; }
+html.skin-ios .ios-fdx img { width: 100%; height: 100%; }
+html.skin-ios .ios-fdl { position: absolute; left: calc(var(--gap) * var(--pt)); right: calc(var(--gap) * var(--pt)); top: calc(24 * var(--pt)); bottom: calc(var(--gap) * var(--pt)); overflow-y: auto; font-size: calc(12 * var(--pt)); }
