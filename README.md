@@ -2,10 +2,10 @@
 
 A personal remake of Delta Tao's *Spaceward Ho!* 5.0.5 that runs in a browser, with the
 1993 DOS version (2.0) and the 1996 Windows 95 version (4.0.5) as extra rulesets and skins,
-the Mac editions of 2.0.1 (1992) and 4.0.5 (1996) as rulesets of their own,
+the Mac editions of 2.0.1 (1992) and 4.0.5 (1997) as rulesets of their own,
 an Amiga skin from the 1994 German Amiga version of 2.0, and skins from the Mac versions 1.2
-(1992, black and white), 2.0.1 (1992), 3.0.1 (1993) and 4.0.5 (1996), the last three both in
-black and white and in colour, and an iOS skin from the 2012 iPhone and iPad version (1.2.9).
+(1992, black and white), 2.0.1 (1992), 3.0.1 (1993) and 4.0.5 (1997), the last three both in
+black and white and in colour, and an iOS skin from the 2017 iPhone and iPad version (1.2.9).
 
 ## Playing / publishing
 
@@ -121,11 +121,11 @@ what differs (the Mac 2.0.1 on the DOS and Windows 2.0, the Mac 4.0.5 on the Win
 | 2.0 | Mac | 2.0.1 | 1992 | `mac20` | mac2c, mac2 |
 | 2.0 | DOS and Windows 3.1 | 2.0.1 | 1993 | `dos` | dos, amiga |
 | 3.0 | Mac | 3.0.1 | 1993 | `301` | mac3c, mac3 |
-| 4.0 | Mac | 4.0.5 | 1996 | `mac405` | mac4c, mac4 |
+| 4.0 | Mac | 4.0.5 | 1997 | `mac405` | mac4c, mac4 |
 | 4.0 | Windows 95 | 4.0.5 | 1996 | `405` | w95 |
 | 5 | Mac | 5.0.5 | 2003 | `original` | classic |
 | 5 | Palm OS | 5 | 2003 | `palm` | palm |
-| 5 | iOS | 1.2.9 | 2012 | `ios` | ios |
+| 5 | iOS | 1.2.9 | 2017 | `ios` | ios |
 | 5 | Android | 1.2.8 | 2015 | `android` | android |
 | remake | The remake's own rules | Claude | 2026 | `claude` | classic |
 
@@ -495,7 +495,7 @@ Optional ruleset flags the skin reads (each is documented where it is read):
   Game choices, one person, no Surrender or Send Message, Evacuate's questions, its
   hints, star names, Allow Debt, Auto Play window, report wording and Game Center
   records (`docs/ios-findings.md`)
-- `js/rules-mac405.js`: the "Mac 4.0.5" rules (Spaceward Ho! 4.0.5 for the Mac, 1996): the
+- `js/rules-mac405.js`: the "Mac 4.0.5" rules (Spaceward Ho! 4.0.5 for the Mac, 1997): the
   Windows 95 4.0.5 rules with what the Mac program does differently (Tankers as targets,
   tech level and ship names, the computers' names, the Hall of Fame's ranks;
   `docs/405-findings.md`, "Mac 4.0.5 differs")

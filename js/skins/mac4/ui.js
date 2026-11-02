@@ -1,6 +1,6 @@
 // Spaceward Ho! web remake — the Mac 4.0.5 skin (see js/skins.js)
 //
-// Spaceward Ho! 4.0.5 for the Macintosh (Delta Tao, 1996) in black and
+// Spaceward Ho! 4.0.5 for the Macintosh (Delta Tao, 1997) in black and
 // white: the program's own 1-bit pictures and its sounds
 // (tools/extract/mac4.py writes them to assets/skins/mac4). The colour
 // skin (js/skins/mac4c) is this one with the pictures of its "Ho! 4.0
@@ -425,7 +425,7 @@ window.HOMAC4 = {
   },
   page(doc) {
     const c = doc.querySelector('#titlescreen .credit');
-    if (c) c.textContent = 'With the art and sounds of Spaceward Ho! 4.0.5 for the Macintosh (Delta Tao, 1996): written by Peter Commons, art by Howard Vives and Bob Van de walle, sounds by Mark Madeley and Guy Vardaman.';
+    if (c) c.textContent = 'With the art and sounds of Spaceward Ho! 4.0.5 for the Macintosh (Delta Tao, 1997): written by Peter Commons, art by Howard Vives and Bob Van de walle, sounds by Mark Madeley and Guy Vardaman.';
     const l = doc.querySelector('#menubar .logo'); if (l) l.textContent = 'Ho! 4.0.5';
     // the start-up window's buttons (DITL 1200): Open Game, New Game
     const n = doc.querySelector('#tnew'), o = doc.querySelector('#tcont');

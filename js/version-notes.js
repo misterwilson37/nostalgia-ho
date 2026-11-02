@@ -6,7 +6,7 @@
 // and quirks included; these lists say what that means.
 //
 // - intro: a sentence or two on what the version is;
-// - released: when it first came out, each line marked by how sure it is (Sure, Reported,
+// - released: when it first came out, each line marked by how sure it is (Sure, Probably, Reported,
 //   Sources disagree), only what we have;
 // - quirks: its known bugs and quirks, which the remake plays as released
 //   (docs/research-log.md, "Settled, worth confirming");
@@ -111,6 +111,8 @@ root.HOVERSIONS = {
     intro: 'The French edition of the Mac game, a cut-down pre-release of 2.0. Every routine of its program has been read, and every rule comes from its own code.',
     released: [
       'Sure: version 1.0 was born on the Macintosh in 1990 (Delta Tao, “The Why Chapter” of the 5.0 manual).',
+      'Probably: version 1.0 went on sale in late 1990 or early 1991 (TidBITS #56 of 8 April 1991 reviews it), and 1.1.2 was finished in the summer of 1991 (Changing Path #1).',
+      'Probably: the French edition was on sale by the autumn of 1992 (Changing Path #3 says Spaceward Ho! is “now available in French” from Upgrade Editions, Paris, without naming a version). The program played here calls itself a development version of 2.0; its file is dated 14 April 1993.',
     ],
     quirks: [
       { text: 'A colony wiped out by a meteor shower gets a blank report.', fix: 'meteorReport' },
@@ -142,6 +144,8 @@ root.HOVERSIONS = {
   dos: {
     intro: 'The game 1.2 was a pre-release of: the Windows 3.1 edition came first, and the DOS edition is a port of it with the same art, sounds and rules. Every routine of the Windows program has been read.',
     released: [
+      'Probably: the Windows 3.1 edition came out in late 1992: its files are dated 4 November to 1 December 1992, Computer Gaming World’s December 1992 holiday guide and a full-page New World Computing advertisement list “Spaceward, Ho! for Windows”, and a dealer listed it with a price in January 1993.',
+      'Probably: the DOS edition followed in early 1993: the files on its disk are dated 30 January 1993 (the German DOS disk, 18 February 1993), a dealer’s February 1993 list shows it only as “’93”, and the March 1993 list prices it.',
       'Sure: the Amiga’s 2.0 was built on 7 June 1994 and exists in German only (the date is in the program’s version string).',
       'Sure: the Amiga’s 2.1 came later; its English edition is the author’s own build 2.1ge1.05 of 6 June 1995.',
     ],
@@ -188,7 +192,8 @@ root.HOVERSIONS = {
   '301': {
     intro: 'A colour and black-and-white Mac version (colour came with 2.0): 2.0’s game with the money model, alliances, Radical tech and novas of the later versions. Every routine of its program has been read, and every rule comes from its own code.',
     released: [
-      'Reported: 3.0 was reviewed in Dragon magazine #196 (August 1993), so it was out by the summer of 1993. The exact day isn’t known.',
+      'Sure: 3.0 shipped in January 1993 at the Macworld Expo in San Francisco (Changing Path #4, May 1993: “right on time”).',
+      'Probably: 3.0.1 was out by May or June 1993 (Macworld’s August 1993 star ratings give “3.01” as the current version).',
     ],
     previous: '2.0',
     quirks: [
@@ -241,7 +246,8 @@ root.HOVERSIONS = {
   '405': {
     intro: 'The Windows 95 edition, which plays across platforms with the Mac 4.0.5: 3.0.1’s game with Dreadnoughts, Tankers, Biologicals and decoys, Radical tech as a hand of cards, and best buddies. Every routine of its program has been read, and every rule comes from its own code.',
     released: [
-      'Sources disagree: this remake dates the Windows 4.0 edition 1996, from its own files; some sources say New World Computing released it in 1997. The remake keeps 1996.',
+      'Probably: this Windows 95 edition came out in the autumn of 1996: its program file is dated 13 September 1996, and New World Computing’s own post of 29 October 1996 says it “released Spaceward Ho! IV for Windows 95 recently”.',
+      'Sure: it did not come out in 1995: it was promised for April 1995 and then for the fourth quarter of 1995, and Computer Gaming World still counted it among unreleased games in January 1996; the dealer lists that carry it from 1995 were pre-listings.',
     ],
     previous: '3.0.1',
     quirks: [
@@ -297,6 +303,10 @@ root.HOVERSIONS = {
   },
   mac20: {
     intro: 'Delta Tao’s own Mac build of 2.0.1, the version the DOS and Windows 3.1 edition ports: the same rules, routine for routine, with a few differences in its code. Every rule routine of the Mac program has been read with its own names.',
+    released: [
+      'Probably: 2.0 came out in January 1992 (Changing Path #2 planned it for that month’s Macworld Expo in San Francisco; Macworld’s April 1992 advertisements sell “2.0”).',
+      'Probably: 2.0.1 was out by May or June 1992 (Macworld reviewed “Spaceward Ho 2.0.1” in August 1992, and its reviews follow a release by two or three months).',
+    ],
     previous: '1.2',
     quirks: [
       'Organize Ships gives every fleet of the design at the star the least fuel used among them, and leaves their orders alone (as 1.2).',
@@ -336,6 +346,10 @@ root.HOVERSIONS = {
   },
   mac405: {
     intro: 'The Mac edition of 4.0.5, a fat application for 68k and PowerPC Macs, which plays across platforms with the Windows 95 edition: the same program compiled for the Mac, routine for routine, with a few differences in its code. Every rule routine has been read with its own names.',
+    released: [
+      'Probably: 4.0 came out in February 1995 (Changing Path #7, January 1995, had it “really, really close”; Computer Gaming World’s February 1995 preview gave February as the target).',
+      'Sure: 4.0.3 dates from November 1995 and 4.0.5 from March 1997 (the dates stored in their updaters, good to a day); this 4.0.5 is therefore from March 1997.',
+    ],
     previous: '3.0.1',
     quirks: [
       'Whether stars ever turn red depends on a setting the New Game code never sets; the remake lets them.',
@@ -391,7 +405,8 @@ root.HOVERSIONS = {
   original: {
     intro: 'The last Mac version, for Mac OS 9 and X. Every routine of its program has been read, and every rule comes from its own code.',
     released: [
-      'Reported, but our files disagree: Delta Tao’s changelog is said to date 5.0.5 to 8 July 2003, yet the remake’s own copy has its program dated 9 April 2003 (its help files 14 February 2003), so 5.0.5 was out by April. The date isn’t settled.',
+      'Sure: Delta Tao announced 5.0 in December 2002 (Macworld, 12 December 2002: the demo was ready to download, the CD would follow “after Christmas”).',
+      'Sure: 5.0.4 was built on 8 February 2003 and this 5.0.5 on 8 to 9 April 2003 (the dates stored in the program files, good to a day).',
     ],
     previous: '4.0.5',
     quirks: [
@@ -446,6 +461,9 @@ root.HOVERSIONS = {
   },
   palm: {
     intro: 'A port of the Mac 5.0 to Palm handhelds: the 5.0 game recompiled, the same rules with the same quirks. Every routine of its program has been read, and every rule comes from its own code.',
+    released: [
+      'Probably: the Palm port (by MobileFreon) came out in the summer of 2003: its 1.0.1 demo shows a rank history dated 7 August 2003, and its read-me is stamped 11 September 2003 for 1.0.4.',
+    ],
     previous: '5.0.5 (Mac)',
     quirks: [
       { text: 'Interest you can’t pay comes out of Ship Savings, however deep in debt: the global warming the game has a message for never happens.', fix: 'globalWarming' },
@@ -492,9 +510,10 @@ root.HOVERSIONS = {
     ],
   },
   ios: {
-    intro: 'A port of the Mac 5.0 to the iPhone and iPad by Ariton (first released in 2012; this is version 1.2.9, from 2017 or later): the 5.0 game recompiled, the same rules with the same quirks, keeping the Mac’s 220 stars and 16 player slots. Every rule routine of its program has been read beside its 5.0.5 twin; what is new is the touch interface around it.',
+    intro: 'A port of the Mac 5.0 to the iPhone and iPad by Ariton (first released in 2012; this is version 1.2.9, from August 2017): the 5.0 game recompiled, the same rules with the same quirks, keeping the Mac’s 220 stars and 16 player slots. Every rule routine of its program has been read beside its 5.0.5 twin; what is new is the touch interface around it.',
     released: [
-      'Sure: first released on 29 March 2012 (the release date stored in the app); this version, 1.2.9, was built in 2017 or later.',
+      'Sure: first released on 29 March 2012, for the iPad only (the release date stored in the app; the App Store’s version history agrees). The iPhone and iPod came with 1.1 on 12 December 2012.',
+      'Sure: this version, 1.2.9, came out on 31 August 2017 (the App Store’s version history: 64-bit, with a fix for games deleted by mistake after 8 August).',
     ],
     previous: '5.0.5 (Mac)',
     quirks: [
@@ -547,7 +566,7 @@ root.HOVERSIONS = {
   android: {
     intro: 'The iPhone and iPad game recompiled for Android by Ariton (version 1.2.8, built in February 2015, from the Amazon Appstore): the same source as iOS 1.2.9, so it plays exactly like it. Only the platform differs.',
     released: [
-      'Reported: first released by Ariton in spring 2013 (March 2013 is reported; 1.1 is widely listed from 13 April 2013), which these files don’t confirm.',
+      'Probably: first released by Ariton in March 2013: its developer wrote on 25 March 2013 that it was “now available for Android”, and Amazon gives 26 March 2013 as the date its Kindle Fire version was first listed.',
       'Sure: the version played here, 1.2.8, was built on 16 February 2015.',
     ],
     previous: 'iOS 1.2.9',

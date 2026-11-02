@@ -9,7 +9,7 @@ fix. Any answer helps, even "I don't remember". Thank you!
 ## The versions
 
 - **Android**: Spaceward Ho! 1.2.8 for Android (2015), the iOS game built for Android.
-- **iOS**: Spaceward Ho! 1.2.9 for iPhone and iPad (2012), a port of 5.0.
+- **iOS**: Spaceward Ho! 1.2.9 for iPhone and iPad (2017), a port of 5.0.
 - **Palm**: Spaceward Ho! 5 for Palm OS, version 1.0.4 (2003, by MobileFreon), a port of 5.0.
 - **5.0.5**: the Mac version 5.0.5 (2003).
 - **4.0.5**: Windows 95 4.0.5 (1996), and the Mac 4.0.5 built from the same code.

@@ -4,8 +4,8 @@ This is a running list for future creative work: what each skin still borrows fr
 another skin, or leaves silent, because its source game has no picture or sound for it.
 Update it when a skin gains or loses art.
 
-The versions came in this order: **2.0** (Windows 3.1 1992, DOS 1993), **4.0.5** (Mac and
-Windows 95, 1996), **5.0.5** (Mac). Each later version added features, and with them new
+The versions came in this order: **2.0** (Windows 3.1 1992, DOS 1993), **4.0.5** (Windows 95 1996,
+Mac 1997), **5.0.5** (Mac). Each later version added features, and with them new
 pictures and sounds, so an earlier version's skin is naturally missing the art for things
 that hadn't been invented yet. A feature a later version dropped means the later skin
 needs an entry here too.
@@ -369,7 +369,7 @@ same names). Both use the DOS skin's code, so they are missing what the DOS skin
 
 ## mac4, mac4c (Mac 4.0.5, black and white and colour)
 
-Spaceward Ho! 4.0.5 for the Macintosh (Delta Tao, 1996), the program the Windows 95 4.0.5 was
+Spaceward Ho! 4.0.5 for the Macintosh (Delta Tao, 1997), the program the Windows 95 4.0.5 was
 ported from. Like 3.0.1 it has black-and-white pictures of its own and reads colour ones from a
 second file, "Ho! 4.0 Color Picts", so there are two skins: **mac4**
 ([`assets/skins/mac4/`](../assets/skins/mac4/sprites/), 418 pictures) and **mac4c**

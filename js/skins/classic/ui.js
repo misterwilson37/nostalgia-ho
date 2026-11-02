@@ -936,7 +936,7 @@ function onDbl(e) {
 // ---------- touch: iOS 1.2.9's gestures, in every skin ----------
 // Whenever a finger is used (a pointer event's pointerType 'touch'), the map,
 // the fleet lists, the budget bars and the scrolling lists do what the iOS
-// game (Spaceward Ho! 1.2.9 for iPhone and iPad, 2012) does with a finger,
+// game (Spaceward Ho! 1.2.9 for iPhone and iPad, 2017) does with a finger,
 // whatever the skin; a mouse and a pen keep the remake's own behaviour, so a
 // hybrid laptop has both. Every number is the iOS game's (docs/ios-findings.md,
 // "Touch controls"); distances are in points, a CSS pixel here. A gesture

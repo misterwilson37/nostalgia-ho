@@ -30,8 +30,8 @@ A fallback only keeps the game playable: the question stays open and stays on th
 
 The versions, in order: Mac 1.2 (1992; a pre-release of 2.0), DOS / Windows 3.1 2.0
 (1993, with its Mac 2.0.1 edition of 1992), Mac 3.0.1 (1993), Windows 95 4.0.5 (1996,
-with its Mac 4.0.5 edition), Mac 5.0.5 (2003), Palm 5 (2003, a port of 5.0) and iOS
-1.2.9 (2012, a port of 5.0). An
+with its Mac 4.0.5 edition, 1997), Mac 5.0.5 (2003), Palm 5 (2003, a port of 5.0) and iOS
+1.2.9 (2017, a port of 5.0). An
 edition's questions are in its version's section.
 
 ## Legend
@@ -1071,7 +1071,7 @@ These are what the Palm code does and what the remake now does; they look like s
 
 ---
 
-## iOS 1.2.9 (2012)
+## iOS 1.2.9 (2017)
 
 The C++ rule core of the iOS program (0x100020614-0x10003e7b4, 291 routines) was read
 beside its 5.0.5 twins (`docs/coverage-ios.md`), and the interface routines that change

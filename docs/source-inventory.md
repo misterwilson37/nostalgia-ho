@@ -43,7 +43,7 @@ read** (and why it doesn't matter, or what it might hold).
   (`assets/explore/`).
 - `Spaceward Ho Help Book/`: read (`js/help.js`, the manual).
 
-## 4.0.5 and 4.0.1 (Mac, 1996)
+## 4.0.5 and 4.0.1 (Mac, 1997)
 
 - `Spaceward Ho! 4.0.5.fork` / `.rsrc` (the same fork, raw and AppleDouble):
   - `DLOG` 50, `DITL` 90, `ALRT` 39: read in part before (`docs/405-findings.md` cites DITL
@@ -171,7 +171,7 @@ read** (and why it doesn't matter, or what it might hold).
 - `Release Notes.txt`, `License.txt`, `How To Play.url`: read (`docs/palm-findings.md`).
   1.0.3 differs from 1.0.4 in code and three demo strings (tSTL 6001.26-28) and the credit.
 
-## iOS 1.2.9 (2012) and Android 1.2.8 (2015)
+## iOS 1.2.9 (2017) and Android 1.2.8 (2015)
 
 - iOS `SpacewardHo.app`: the program (Mach-O, read: `docs/ios-findings.md`,
   `docs/coverage-ios.md`); `en/fr/tr.lproj/objectdictionary.plist` (every string list,

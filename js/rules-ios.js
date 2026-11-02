@@ -281,12 +281,12 @@ const battlePanelIn = (tr) => E.makeBattlePanel({
 const battlePanelIOS = battlePanelIn(null);
 const rs = Object.assign(base, {
   exploredList: null, // (iOS had no list of explored stars: the page's own, js/skins/classic/ui.js openStarList)
-  label: 'iOS 1.2.9 (2012)',
+  label: 'iOS 1.2.9 (2017)',
   barLocked: barLockedIOS, battlePanel: battlePanelIOS, battlePanelIn,
   // the New Game window's Version and Edition menus (engine.js editions)
-  family: '5', edition: { version: '1.2.9', name: 'iOS', platform: 'iPhone and iPad', year: 2012 }, skins: ['ios'],
+  family: '5', edition: { version: '1.2.9', name: 'iOS', platform: 'iPhone and iPad', year: 2017 }, skins: ['ios'],
   // the New Game window lists rulesets by year, then version (engine.js ruleOptions)
-  version: '1.2.9', platform: 'iPhone and iPad', year: 2012,
+  version: '1.2.9', platform: 'iPhone and iPad', year: 2017,
   ai: 'original',           // the computers: 5.0.5's (0x1000239e0 = FUN_10081cc0, every step paired)
   turn505: true,            // the 5.0.5 turn (0x10002dca8 = FUN_10072a10)
   fixOptions, evacuateToggle, msgText, autoPlaySettings, gameCenter,

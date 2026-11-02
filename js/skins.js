@@ -98,8 +98,8 @@ const SOUNDS = {
   // its files is also m<number> for the skin's own report sounds, since its
   // numbers mean other things than 5.0.5's (its 7013 is the biological
   // eating, its 7019 "Very good!")
-  mac4: { name: '4.0.5 (Mac, 1996)', year: 1996, dir: 'assets/skins/mac4/', map: MAC4_MAP },
-  mac4c: { name: '4.0.5 (Mac, 1996)', year: 1996, dir: 'assets/skins/mac4c/', map: MAC4_MAP, same: 'mac4' },
+  mac4: { name: '4.0.5 (Mac, 1997)', year: 1997, dir: 'assets/skins/mac4/', map: MAC4_MAP },
+  mac4c: { name: '4.0.5 (Mac, 1997)', year: 1997, dir: 'assets/skins/mac4c/', map: MAC4_MAP, same: 'mac4' },
   // 4.0.5 names its sounds (FUN_0046fe1b and the callers of FUN_0042f8bf)
   w95: { name: '4.0.5 (Windows 95, 1996)', year: 1996, dir: 'assets/skins/w95/', map: {
     2000: 'burst', 2001: 'shucks', // good / bad news
@@ -112,10 +112,10 @@ const SOUNDS = {
     7020: 'shucks', 7021: 'wow', 8000: 'explode', 128: 'hyahh', 11111: null, 7022: null, 7023: null,
   } },
   palm: null, // the Palm game had no sampled sounds
-  // iOS 1.2.9 (2012): 5.0.5's recordings as MP3s (assets/skins/ios/manifest.json
+  // iOS 1.2.9 (2017): 5.0.5's recordings as MP3s (assets/skins/ios/manifest.json
   // "soundFormat"), named by 5.0.5's numbers; 7006 (ship built) is near silent,
   // as in the app; 7008-7011 aren't in its "Sounds" list
-  ios: { name: '1.2.9 (iPhone and iPad, 2012)', year: 2012, dir: 'assets/skins/ios/' },
+  ios: { name: '1.2.9 (iPhone and iPad, 2017)', year: 2017, dir: 'assets/skins/ios/' },
   // Android 1.2.8 (2015): the iOS game's pictures and sounds, unchanged
   android: { name: '1.2.8 (Android, 2015)', year: 2015, dir: 'assets/skins/ios/', same: 'ios' },
 };
@@ -161,12 +161,12 @@ const SKINS = [
   { id: 'mac2c', version: '2.0.1', platform: 'Mac, colour', year: 1992, os: ['system7', 'system6'], icon: 'mac2c' },
   { id: 'mac3', bw: true, version: '3.0.1', platform: 'Mac, black and white', year: 1993, os: ['system7', 'system75'], icon: 'mac3' },
   { id: 'mac3c', version: '3.0.1', platform: 'Mac, colour', year: 1993, os: ['system7', 'system75'], icon: 'mac3c' },
-  { id: 'mac4', bw: true, version: '4.0.5', platform: 'Mac, black and white', year: 1996, os: ['system7', 'macos8', 'netscapemac', 'system75', 'netscapemac75'], icon: 'mac4' },
-  { id: 'mac4c', version: '4.0.5', platform: 'Mac, colour', year: 1996, os: ['system7', 'macos8', 'netscapemac', 'system75', 'netscapemac75'], icon: 'mac4c' },
+  { id: 'mac4', bw: true, version: '4.0.5', platform: 'Mac, black and white', year: 1997, os: ['system7', 'macos8', 'netscapemac', 'system75', 'netscapemac75'], icon: 'mac4' },
+  { id: 'mac4c', version: '4.0.5', platform: 'Mac, colour', year: 1997, os: ['system7', 'macos8', 'netscapemac', 'system75', 'netscapemac75'], icon: 'mac4c' },
   { id: 'w95', version: '4.0.5', platform: 'Windows 95', year: 1996, os: ['win95', 'netscape', 'communicator'], icon: 'w95' },
   { id: 'palm', version: '5', platform: 'Palm OS, version 1.0.4', year: 2003, os: ['palmos'], icon: 'palm' },
   // 1.2.9 was built with the iOS 10.3 SDK (2017); iOS 6 is the 2012 launch's system
-  { id: 'ios', version: '1.2.9', platform: 'iPhone and iPad', year: 2012, os: ['ios10', 'ios6'], icon: 'ios' },
+  { id: 'ios', version: '1.2.9', platform: 'iPhone and iPad', year: 2017, os: ['ios10', 'ios6'], icon: 'ios' },
   { id: 'android', version: '1.2.8', platform: 'Android', year: 2015, os: ['fireos', 'android4'], icon: 'android' },
   { id: 'cozy', version: 'Cozy western', platform: 'by Claude', year: 2026, homage: true, os: ['macos8', 'macos9', 'macosx', 'firefox', 'safari', 'edge', 'safari1', 'firefox1'] },
   { id: 'gemini', version: 'Tactical console', platform: 'by Gemini', year: 2026, homage: true, os: ['macosx', 'macos9', 'win95', 'macos8', 'system7', 'win31', 'firefox', 'safari', 'edge', 'safari1', 'firefox1'] },

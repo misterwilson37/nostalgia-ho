@@ -13,10 +13,10 @@ files and coverage files cited); anything not read in the code is marked INFERRE
 | 2.0 | 1993 | DOS and Windows 3.1 | `js/rules-dos.js` |
 | 3.0.1 | 1993 | Mac (68k), in colour and black and white | `js/rules-301.js` |
 | 4.0.5 | 1996 | Windows 95 | `js/rules-405.js` |
-| 4.0.5 | 1996 | Mac (68k and PowerPC) | `js/rules-mac405.js` |
+| 4.0.5 | 1997 | Mac (68k and PowerPC) | `js/rules-mac405.js` |
 | 5.0.5 | 2003 | Mac OS 9 / X (PowerPC) | `js/rules-original.js` |
 | 5 for Palm OS | 2003 | Palm (68k), a port of 5.0 | `js/rules-palm.js` |
-| 1.2.9 for iOS | 2012 (1.2.9: 2017 or later) | iPhone and iPad (arm64), a port of 5.0 | `js/rules-ios.js` |
+| 1.2.9 for iOS | 2012 (1.2.9: 31 August 2017) | iPhone and iPad (arm64), a port of 5.0 | `js/rules-ios.js` |
 | 1.2.8 for Android | 2015 (build of 16 February) | Android 4.0 and later (ARM), the iOS game built with Apportable | `js/rules-android.js` |
 
 ### Versions and editions
@@ -33,11 +33,11 @@ plays each edition it has read as its own ruleset, grouped by version (`rs.famil
 | 2.0 | Mac | 2.0.1 | 1992 | `mac20` |
 | 2.0 | DOS and Windows 3.1 | 2.0.1 (Windows), its DOS port | 1993 | `dos` |
 | 3.0 | Mac | 3.0.1 | 1993 | `301` |
-| 4.0 | Mac | 4.0.5 | 1996 | `mac405` |
+| 4.0 | Mac | 4.0.5 | 1997 | `mac405` |
 | 4.0 | Windows 95 | 4.0.5 | 1996 | `405` |
 | 5 | Mac | 5.0.5 | 2003 | `original` |
 | 5 | Palm OS | 5 (1.0.4) | 2003 | `palm` |
-| 5 | iOS | 1.2.9 | 2012 | `ios` |
+| 5 | iOS | 1.2.9 | 2017 | `ios` |
 | 5 | Android | 1.2.8 | 2015 | `android` |
 
 The Amiga 2.0 (German, 1994) is the DOS game's rules with its own art, so it is a skin of
@@ -455,7 +455,7 @@ which unlock options.
 
 ### The Mac 4.0.5 edition
 
-The Mac 4.0.5 (1996, a fat application for 68k and PowerPC Macs; `js/rules-mac405.js`) is
+The Mac 4.0.5 (1997, a fat application for 68k and PowerPC Macs; `js/rules-mac405.js`) is
 the Windows program's code compiled for the Mac, routine for routine, with the same
 records, constants and most of the same slips (`docs/405-findings.md`, "Read against the
 Mac 4.0.5"). Where its code differs ("Mac 4.0.5 differs"):
@@ -708,7 +708,7 @@ once the game exists), the New Game
 Wizard, Preferences (sound, Celsius, hints, best buddies' stars, auto-zoom), Auto Play,
 Find A Star, and system sounds instead of the Mac's. No network play.
 
-## iOS 1.2.9 (2012)
+## iOS 1.2.9 (2017)
 
 Delta Tao's own list of what changed in 5 (quoted at the top of "Mac 5.0.5" above) covers
 this port too; Ariton's port has no list of its own.

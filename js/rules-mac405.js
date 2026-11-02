@@ -1,6 +1,6 @@
 // Spaceward Ho! web remake — the "Mac 4.0.5" ruleset.
 //
-// Spaceward Ho! 4.0.5 for the Macintosh (Delta Tao, 1996; a fat application,
+// Spaceward Ho! 4.0.5 for the Macintosh (Delta Tao, 1997; a fat application,
 // 68k and PowerPC) plays across platforms with the Windows 95 4.0.5 the "405"
 // ruleset plays (js/rules-405.js). Its 68k code was decompiled with its
 // MacsBug names (docs/405-findings.md, "Read against the Mac 4.0.5"): it is
@@ -244,11 +244,11 @@ E.registerRules('mac405', Object.assign({}, W, {
       'You told %t that you need metal.', 'You told %t, “Let’s attack %s.”', 'You told %t, “Thank You!”', 'You told %t, “Sorry!”', 'You said “#!$@*$&@•™!” to %t.', 'You told %t what gravity and temperature you prefer.',
       'You told %t you saw %p at %s.', 'You told %t all about %s.', '', 'Your message to %t: %x'],
   }),
-  label: 'Mac 4.0.5 (1996)',
+  label: 'Mac 4.0.5 (1997)',
   // the New Game window's Version and Edition menus (engine.js editions)
-  family: '4.0', edition: { version: '4.0.5', name: 'Mac', platform: 'Mac, System 7 (68k and PowerPC)', year: 1996 }, skins: ['mac4c', 'mac4'],
+  family: '4.0', edition: { version: '4.0.5', name: 'Mac', platform: 'Mac, System 7 (68k and PowerPC)', year: 1997 }, skins: ['mac4c', 'mac4'],
   // the New Game window lists rulesets by year, then version (engine.js ruleOptions)
-  version: '4.0.5', platform: 'Mac', year: 1996,
+  version: '4.0.5', platform: 'Mac', year: 1997,
   // CONFIRMED (PickTarget @61f86-61fee): Colony Ships (class 4), then
   // Tankers (class 3), then Satellites (class 5), then from a random start
   tankerTarget: true,
