@@ -1397,6 +1397,28 @@ function openScrapIOS() {
     } });
   return L;
 }
+// FUN_100038438 0x100038438 (read in full): report number -> Sounds item. The Sounds list's items are the files 2000, 2001, 3000-3003, 4000, 4001, 5000-5003, 6000-6002 (items 0-14), 7000-7007 (15-22),
+// 7012-7027 (23-38), then 8000 (39): the evacuate marks (items 17 and 6 = 7002 and 4000), the drag tick (16 = 7001), the end turn "ahem" (15 = 7000) and the eliminated player's two sounds (item 1, 32) fix the order
+const TAP_FILE = [2000, 2001, 3000, 3001, 3002, 3003, 4000, 4001, 5000, 5001, 5002, 5003, 6000, 6001, 6002, 7000, 7001, 7002, 7003, 7004, 7005, 7006, 7007, 7012, 7013, 7014, 7015, 7016, 7017, 7018, 7019, 7020, 7021, 7022, 7023, 7024, 7025, 7026, 7027, 8000];
+const TAP_TABLE = (() => {
+  const t = {}, set = (item, ...ids) => { for (const i of ids) t[i] = item; };
+  set(0, 0x3eb, 0x3ec, 0x3ed, 0x3ee, 0x3ef, 0x3f0, 0x406, 0x43d, 0x450, 0x451, 0x45c, 0x45d, 0x45e, 0x45f, 0x460, 0x461, 0x462, 0x463, 0x464, 0x465, 0x469, 0x472);
+  set(1, 0x3f3, 0x433, 0x434, 0x444, 0x44a, 0x452, 0x453, 0x46f);
+  set(4, 0x3f5); set(0x1f, 0x3fd, 0x43e, 0x440, 0x442, 0x446, 0x448, 0x468, 0x46a, 0x46b, 0x46c, 0x474); set(0x18, 0x402, 0x403); set(0x1d, 0x40b);
+  set(null, 0x40c, 0x40d, 0x40e, 0x47f);
+  set(10, 0x417, 0x427); set(11, 0x418, 0x428); set(9, 0x419, 0x429, 0x47e); set(0x1b, 0x41d, 0x42d); set(5, 0x431, 0x438, 0x43c);
+  set(0x20, 0x435, 0x436); set(0x1c, 0x443, 0x449); set(0x1a, 0x44c, 0x44d, 0x44e, 0x44f, 0x47b, 0x47c, 0x47d); set(0x27, 0x46d, 0x470); set(0x19, 0x471, 0x482, 0x485, 0x486); set(0x1e, 0x473);
+  return t;
+})();
+function tapItem(id, m, a) {
+  if (id in TAP_TABLE) return TAP_TABLE[id];
+  if (id === 0x409 || id === 0x40a) { // FUN_10003befc: the star's quality for the player
+    const p = a.me(), q = m.star != null ? starQuality(p, HO.know(a.G, p, m.star)) : -1;
+    return q < 15 ? (q === 0 ? 13 : 14) : 12;
+  }
+  if (id === 0x432) { const who = a.G.players.find(q => String(m.text || '').startsWith(q.name + ' ')); return who && HO.isBuddy(a.G, a.ME, who.id) ? 1 : 0x20; }
+  return 16;
+}
 // -[PreferencesLayer initDialog] 0x1000a6a4c, setupPreferenceXPosition:yPosition:label:tag:choiceLabel: 0x1000a7b3c, valueChanged:tag: 0x1000a799c, the toggles 0x1000a75dc-0x1000a7940, doClose: 0x1000a74c8
 // (the numbers read in the assembly; H the dialog's height, y up). The message Misc 82. Eight rows, the first (Event Messages, 195) with its centre H - 60 (H - 90 on an iPad), each next 32.5 (19 + 2.25 a88) lower; a row is
 // the title (Arial 14, anchored at its left, middle) at x 4 a88 (Messages, Battles, Hints and Best Buddies at 5.5 a88), a switch (a CCSliderDeluxe 10 a88 wide, anchored at its left) at x 24 a88, and the words of its
@@ -2042,7 +2064,8 @@ function openBattleIOS(b, k) {
   };
   const wEff = (ev) => { // the record's +0xc: the ship's weapons level + the side's luck (+1 offensive, -2 defensive), 1 at least; the colour is its hue (fireShot: (w - 1) x 4000 of 65535)
     const u = ev.si >= 0 ? b.start[ev.si] : null, d = u ? HO.getDesign(G, u.o, u.did) : null;
-    const w = Math.max(1, ((d && d.W) || 1) + (b.luck ? (b.luck[u ? u.o : b.planetOwner] | 0) : 0) + (u && u.st === 'o' ? 1 : u && u.st === 'd' ? -2 : 0));
+    // a colony's shot (CreateGroupsForPlayer 0x229300): the record's +0x14, the owner's Weapons level (DoBattleStage 0x226b2c copies it from the player), and the side's luck, 1 at least: the ruleset keeps it (rec.pw)
+    const w = !u && b.pw != null ? b.pw : Math.max(1, ((d && d.W) || 1) + (b.luck ? (b.luck[u ? u.o : b.planetOwner] | 0) : 0) + (u && u.st === 'o' ? 1 : u && u.st === 'd' ? -2 : 0));
     return hsb((((w - 1) * 4000) % 65535) / 65535, 1, 1);
   };
   let beam = null;
@@ -2169,6 +2192,14 @@ window.HOTHEME = {
     if (appRules && name === 'prefs') { openPrefsIOS(x[0]); return true; }
     if (name === 'organize') { if (x[0] == null || HO.rules(a.G).organizeFleets !== 'ios') return false; return openOrganizeIOS(x[0]); }
     return false;
+  },
+  // the report-tap sounds (-[MessageNode doReportAction:game:] 0x1000137cc calls FUN_100038438 with the report's number, its first short): the Sounds item (the app's list, "%@.wav") by report number;
+  // reports 1036-1038 and 1151 (0x40c-0x40e, 0x47f) are silent; the explored reports (0x409, 0x40a) by the star's quality (0 bad, under 15 mediocre, else good); 0x432 (a player eliminated) by whether he
+  // was your best buddy. A number the table doesn't name plays item 16 "Next Message"
+  reportTap(m, id, ctx) {
+    const a = A(); if (!a || !a.G || !/^(ios|android)$/.test(a.G.rules || '') || id == null) return;
+    const item = tapItem(id, m, a);
+    if (item != null) a.Sound.play(TAP_FILE[item]);
   },
   // the app's message box for a question (+[DialogLayerSprite message:closeButton:cancelButton:] with setOkBlock:): the Evacuate question, with the check and the cross
   alert(kind, text, yes) {

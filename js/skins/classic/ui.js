@@ -4553,6 +4553,7 @@ function msgIconEl(m) {
 }
 // what a report does when it is picked from the list (1.2's ClickInReportWindow: its star selected and centred, DoMessageAction)
 function reportAction(m) {
+  if (T.reportTap) { const lk = originalLook(m); T.reportTap(m, lk ? lk.id : null); }
   if (winReport(m) && winPending()) { openWinWindows(() => renderMsg()); return; }
   if (winReport(m) && youWonWords()) { openYouWon(); return; }
   if (lostReport(m)) { openYouLost(); return; }

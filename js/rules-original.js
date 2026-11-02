@@ -2378,7 +2378,7 @@ function battleAt505(G, sid, pass) {
   for (const x of ordered) {
     if (x.pop > 0) {
       const g = { owner: x.o, side: x, planet: true, n: 1, n0: 1, init: 0, W: Math.max(1, x.W + x.luck), S: x.S, hp: x.pop, shots: trunc((x.pop + 199999) / 200000), tgt: null, units: [] };
-      groups.push(g); planet = g; rec.planetOwner = x.o;
+      groups.push(g); planet = g; rec.planetOwner = x.o; rec.pw = g.W; // (display only: the colony's shot level, luck included: the iOS laser's colour)
     }
     const P = G.players[x.o], ds = P.designs.filter(d => !d.scrapped && x.cnt[d.id]);
     for (let i = ds.length - 1; i >= 0; i--) {
