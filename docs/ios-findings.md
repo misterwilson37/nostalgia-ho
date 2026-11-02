@@ -932,3 +932,30 @@ every language's template (English, French, Turkish), not the degree sign. The g
 The report formatter (cases 0x409 and 0x40a of the message routine) calls `FUN_100038310(star t, home t, buffer, the "Temp:" preference)`,
 the panel's own routine, for "Temp: %s"; the gravity is the message's r. The French report keeps its comma ("Gravité: 1,23G"), its
 temperature the panel's ("72.0ºF", a point). `docs/dos-findings.md`, "The reports' numbers".
+
+## Display audit (November 2026, begun; not finished)
+
+**State.** Every one of the 5,044 routines has a row in `docs/display/ios.json` (`node tools/display-audit.js ios`; the routine list is
+`docs/display/ios-routines.tsv`, from the private repo's `decompiled/ios-1.2.9/index.tsv`; the decompile and its method are in that repo's
+`HOW.md`). Settled: 4,502 `internal` (cocos2d, CocosDenshion, TouchJSON, FontLabel, Game Kit helpers and the finger-tip overlay by class; accessors,
+`dealloc`, import stubs, block helpers and pure computations by script over the decompile, each row's reason says which; the 293 rule-core routines
+that call no message and name no string; file, archive and string-list plumbing), 10 `matched` (the number, fleet-description, temperature and report
+formatters, linked to `tools/format-audit.js`), 8 `notShown` (Game Center's synchronisation), 1 `fixed`. **523 rows are still open**
+(`--open`): the game's own interface classes (MapLayer, BuildSingleShipDialog, OrganizeFleetsLayer, HoBarLayer, ShipNode, BarMenuItem, TurnMessageLayer,
+PreferencesLayer, NewGameScene, GiveDialogLayer and the rest), whose windows have not yet been read routine by routine against the remake.
+
+**Fixed.** The totals box (`-[IncomeLayer init] 0x100008e00`) lists Income, Savings, Metal, in that order, labelled "Income:", "Savings:", "Metal:"
+(Misc Strings 26, 24, 23; "Revenu:", "Économies:", "Métal:" in the French lproj, "Gelir:", "Birikim:", "Metâl:" in the Turkish); the remake showed
+Savings, Income, Metal with no colons. `rs.panelInfo` in `js/rules-ios.js` (Android copies it).
+
+**Found and not fixed (structure).** In its own skin the iOS game's windows are cocos2d layers, not the classic page, and the remake's `ios` skin is
+the classic page with the app's pictures and sounds. From the decompile: the planet readout is a HUD strip (`HUD-left.png`, `HUD-right.png`, labels
+for owner, income, population, temperature, gravity and metal, "no information" Misc 0x2a, and the terraform/mine slider `tmb1`); the main screen is the
+map with a column of picture buttons (`button-dollar`, `button-news`, `button-planet`, `button-enemy`, `button-graph`) and a graphs window shade; each
+row of the player list is the hat, the name, the IQ words ("%@ %lu IQ %@", the seven IQ names) or the gravity and temperature ("%ld.%2.2ldG %@") once
+known, an eliminated mark, a happy or sad face and an ally toggle, where the remake's Players window is a table (Player, Colonies seen, Status, Ally,
+Best buddy). Rebuilding these windows as the app draws them, from `HoBarLayer`, `PlanetInfoLayer`, `StarInfoLayer`, `PlayerMenuItem`,
+`BuildSingleShipDialog`, `OrganizeFleetsLayer`, `TurnMessageLayer` and `MainGameScene`, is the work that remains; those rows carry a `note`.
+
+**Strings.** Of the 161 string constants the open routines use that the remake's text does not contain, none is a word the player reads: they are
+picture and sprite names, notification names, file names and log lines.

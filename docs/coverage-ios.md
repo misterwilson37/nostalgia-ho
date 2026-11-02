@@ -322,3 +322,12 @@ them holds a game rule, they only call the routines above.
 | 0x10008e000-0x10008f0ff | CBattleStagePhone's drawing; CMiscUtilsPhone: the string lists from objectdictionary.plist (`0x10008e11c`), sounds by index (`0x10008e2dc`), the date |
 | 0x10008f100-0x100090aff | CPrefsPhone (`ho.prefs`, the master points via Game Center, the named stars), SimpleServer |
 | 0x100090b00-0x1000ccebf | the dialogs (Dip, Give, Armageddon, Radical Research, Scrap Ship Types, Build Ships, Organize Fleets, Auto Play, Preferences, Rank, End Game), saved games, CCLayerPanZoom, CCSlider, CCControl, GameCenterUtils, DDGameKitHelper, GKAchievementHandler, DSFingerTip, SORelativeDateTransformer, the help web view |
+
+## Display audit (November 2026)
+
+The whole program was decompiled again and saved (private repo, `decompiled/ios-1.2.9/`: `index.tsv`, `methods.tsv`, one C file per routine, the
+disassembly, `HOW.md`): 5,044 routines (this doc's count), 4,706 function starts, 4,076 Objective-C methods from the class metadata
+(3,710 instance, 366 class), the rule core 0x100020614-0x10003e7b4 holding 293 routines by Ghidra's starts (291 in the table above, by hand-counted
+band edges). `docs/display/ios-routines.tsv` is the list of every routine and `docs/display/ios.json` has one row each
+(`node tools/display-audit.js ios`; `--open` lists the rows still open). The same table covers Android 1.2.8 (below). The audit's state is in
+`docs/ios-findings.md`, "Display audit".

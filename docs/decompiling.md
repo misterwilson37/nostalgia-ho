@@ -215,3 +215,10 @@ disassembly `asm/`, per-routine C `c/`, `index.tsv`, `all.c`, `HOW.md` with the 
 audit's working tables and scripts). `tools/decompile/split-dump.py` makes the saved layout from a `mac68k.py` + `Mac68k.java` run.
 1.2F is done (548 routines, the same list as `docs/coverage-12.md`). `tools/display-audit.js <version>` reads the routine list from
 `docs/coverage-<version>.md` and, when the private repo is beside this one (or HO_SOURCES is set), from `decompiled/<version>/index.tsv`.
+
+## iOS (arm64 Mach-O, Objective-C)
+
+`tools/decompile/objc.py` lists the Objective-C methods from the class metadata (instance and class methods, categories) as address, name, type
+encoding; `NameDump.java` (Ghidra headless, AARCH64:LE:64:v8A) names each function from that list and decompiles all of them to one C file;
+`split-objc.py` splits it into one file per routine with `index.tsv`. A FairPlay-encrypted page (`LC_ENCRYPTION_INFO_64`) is zeroed in the copy given to
+Ghidra. The commands and counts are in the private repo's `decompiled/ios-1.2.9/HOW.md`. About four minutes for 5,044 routines.

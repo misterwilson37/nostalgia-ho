@@ -252,3 +252,11 @@ templates are iOS's (`en/fr/tr.lproj`, "%d.%1.1dºF" with U+00BA, "%d.%2.2dG"). 
 
 `CreateTempString()` @0x281688 has six callers (the panel and the report formatter, as iOS's `FUN_100038310`: `calls_diff` pairs them); the report
 prints the same "Temp: %s". `docs/dos-findings.md`, "The reports' numbers".
+
+## Display audit: Android is iOS recompiled (November 2026)
+
+Confirmed again for the display audit (`decompiled/android-1.2.8/README.md` in the private repo): `lib/armeabi/libApplication.so` names 350 of the
+iOS program's 355 Objective-C classes and 2,455 of its 2,540 selectors; everything missing is Game Center (DDGameKitHelper, GKAchievementHandler,
+GKAchievementNotification, DDGameKitHelperDelegate) or a selector of three letters or fewer below the string tool's minimum. Every game class is there,
+with the same C++ type encodings, and the assets are the iOS bundle's. So the Android game's routines are iOS's, and `docs/display/ios.json` is the
+table for both; the only Android difference is that Game Center's rows do not apply (its leaderboards and achievements do not exist there).
