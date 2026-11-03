@@ -601,7 +601,8 @@ function draw0() {
     if (f) { let a = G.stars[f.star]; for (const sid of UI.route.stops) { const b = G.stars[sid]; drawRoute(a, b, HO.fleetSpeed(G, f), '#ffffff', 0); a = b; } }
   }
   // a finger dragged from the selected star: a distance ruler (iOS StarNode)
-  if (UI.ruler && G.stars[UI.ruler.from] && G.stars[UI.ruler.to]) {
+  if (UI.ruler && T.fleetPath === 'ios' && G.stars[UI.ruler.from] && G.stars[UI.ruler.to]) iosLegs(G.stars[UI.ruler.from], [UI.ruler.to], true, null); // (the app's ruler is the route line: StarNode ccTouchMoved: -> updateFleetPath:fleet: -1)
+  else if (UI.ruler && G.stars[UI.ruler.from] && G.stars[UI.ruler.to]) {
     const a = G.stars[UI.ruler.from], b = G.stars[UI.ruler.to], x2 = sx(b.x), y2 = sy(b.y);
     cx.save(); cx.strokeStyle = '#bfe8ff'; cx.lineWidth = 2; cx.setLineDash([6, 5]);
     cx.beginPath(); cx.moveTo(sx(a.x), sy(a.y)); cx.lineTo(x2, y2); cx.stroke(); cx.setLineDash([]);
@@ -741,12 +742,14 @@ function iosFleetPath(f, tgt) {
     path = rs.route ? rs.route(G, f, tgt) : modern() && HO.feature(G, 'waypoints') && !f.sat ? findRoute(f, tgt) : null;
     if (!path || !path.length) { path = [tgt]; ok = false; }
   }
+  iosLegs(G.stars[f.star], path, ok, ok && f.star !== UI.sel ? dotStart(f, -1, [sx(G.stars[f.star].x), sy(G.stars[f.star].y)], UI.view.s / 40) : null);
+  UI.lastPath = { fleet: f.id, to: tgt, stops: path.slice(), ok }; // for the test tools (HOVIEW)
+}
+// the legs of a route, 2 wide, white (red when it can't be flown), each labelled (the route's start: a star, the first leg's start moved when given)
+function iosLegs(a, path, ok, start) {
   cx.save();
   cx.lineWidth = 2; cx.strokeStyle = ok ? '#ffffff' : '#ff0000';
   const legs = [];
-  let a = G.stars[f.star];
-  // (the first leg of a route that can be flown starts at the fleet's dot, unless its star is the selected one: updateFleetPath:fleet: 0x10000f190)
-  let start = ok && f.star !== UI.sel ? dotStart(f, -1, [sx(a.x), sy(a.y)], UI.view.s / 40) : null;
   for (const sid of path) {
     const b = G.stars[sid];
     cx.beginPath(); cx.moveTo(start ? start[0] : sx(a.x), start ? start[1] : sy(a.y)); cx.lineTo(sx(b.x), sy(b.y)); cx.stroke();
@@ -767,7 +770,6 @@ function iosFleetPath(f, tgt) {
     cx.fillText(String(Math.round(HO.starDist(G, p.id, q.id))), lx, ly);
   }
   cx.restore();
-  UI.lastPath = { fleet: f.id, to: tgt, stops: path.slice(), ok }; // for the test tools (HOVIEW)
 }
 function visibleTo(sid) {
   if (G.stars[sid].owner === ME) return true;
