@@ -254,7 +254,7 @@ const UIEl = (tag, cls, attrs, ...kids) => {
   return e;
 };
 const A = () => window.HOAPI;
-let gnEl, gnCv, pbEl, fdEl, fdList, fleetsOpen = false, hudEl, hudRow, hudL, hudR, colEl, turnEl, gearBtn, tmEl, tmFill, tmThumb, sideBtn, gearOpen = false;
+let siEl, siTmEl, gnEl, gnCv, pbEl, fdEl, fdList, fleetsOpen = false, hudEl, hudRow, hudL, hudR, colEl, turnEl, gearBtn, tmEl, tmFill, tmThumb, sideBtn, gearOpen = false;
 function sideOpen() { return document.documentElement.classList.contains('ios-side'); }
 // -[MainGameScene toggleNodes:] 0x10000bf5c: one container at a time. An iPad has the one (CombinedInfoContainer: totals, technology, budget bars and players);
 // an iPhone's buttons show IPhoneCombinedInfoContainer (totals and technology), StarsListContainer (the budget bars: the colonies),
@@ -334,6 +334,9 @@ function buildScreen(doc) {
   hudEl = UIEl('div', 'ios-hud', { 'aria-live': 'polite' }, hudL, hudR, hudRow);
   hudEl.hidden = true;
   tmDrag(tmEl);
+  siEl = UIEl('div', 'ios-si', { hidden: '', 'aria-live': 'polite' });
+  siTmEl = UIEl('div', 'ios-sitm', { role: 'slider', 'aria-label': 'Terraform and mine', 'aria-orientation': 'vertical', 'aria-valuemin': '0', 'aria-valuemax': '100' }, UIEl('div', 'ios-tmL'), UIEl('div', 'ios-tmT'));
+  tmDrag(siTmEl, true);
   // -[TurnMessageLayer init]: End Turn (the report bar's own place is #msg) and, beside it, the gear (additional menus)
   gearBtn = UIEl('button', 'ios-btn ios-gear', { type: 'button', 'aria-label': 'Menu', 'aria-haspopup': 'true', title: 'Menu' }, pic('button-gear'));
   gearBtn.addEventListener('click', (e) => { e.stopPropagation(); setGear(!gearOpen); });
@@ -351,7 +354,7 @@ function buildScreen(doc) {
   fdEl.append(fdx);
   const pan = doc.getElementById('panel'); if (pan) { const rc = () => requestAnimationFrame(() => { recolor(pan.querySelector('.ios-bars-tech')); recolor(pan.querySelector('.ios-bars-budget')); }); pan.addEventListener('pointermove', rc); pan.addEventListener('pointerup', rc); pan.addEventListener('keyup', rc); }
   amEl = UIEl('div', 'ios-am', { hidden: '', role: 'menu', 'aria-label': 'Menu' });
-  const ui = UIEl('div', 'ios-ui', null, hudEl, pbEl, fdEl, turnEl, amEl);
+  const ui = UIEl('div', 'ios-ui', null, hudEl, siEl, pbEl, fdEl, turnEl, amEl);
   app.append(ui); ui.id = 'ios-ui';
   doc.addEventListener('click', (e) => { if (gearOpen && !e.target.closest('#menubar') && !e.target.closest('.ios-gear') && !e.target.closest('.ios-am')) setGear(false); else if (!gearOpen && document.documentElement.classList.contains('ios-menus') && !e.target.closest('#menubar') && !e.target.closest('.ios-gear') && !e.target.closest('.ios-amx')) { document.documentElement.classList.remove('ios-menus'); if (gearBtn) gearBtn.classList.remove('on'); } });
   // End Turn is the classic page's clock; it sits left of the gear (-[TurnMessageLayer init]: the menu's items in a row, padding a80)
@@ -406,7 +409,7 @@ const AM_ITEMS = [
   ['Armageddon', 'arm', (a) => a.toggleArmageddon(), (a) => HO.feature(a.G, 'armageddon')],
   ['Give Money/Metal', 'give', (a) => a.openGive(), (a) => HO.feature(a.G, 'gifts')],
   ['Scrap Ship Types', 'scrap', (a) => a.openScrapTypes(), (a) => a.me().designs.some(d => !d.scrapped)],
-  ['Main Menu', 'main', (a) => a.quitToTitle(), () => true],
+  ['Main Menu', 'main', (a) => { slideBack = true; a.quitToTitle(); }, () => true], // (-[AdditionalMenu mainMenu] 0x10009450c: saves, then WelcomeScene fromScene:forward: NO, the slide back, CCTransitionSlideInL)
   ['Preferences', 'prefs', (a) => a.openPrefs(), () => true],
 ];
 const AM_NAMES = { fr: { dip: "Puiser dans l'épargne", auto: 'Auto Play', arm: 'Armageddon', give: "Donner de l'argent / métal", scrap: 'Types de vaisseaux à recycler', main: 'Menu principal', prefs: 'Préférences' },
@@ -448,12 +451,13 @@ function setGear(o) {
 // The terraform / mine slider (CCSliderDeluxe "tmb1": slider-tmb1-left and -right, the thumb; the delegate -[PlanetInfoLayer
 // valueChanged:tag:] 0x1000b38d0 sets the colony's share)
 let tmStar = null;
-function tmDrag(el) {
+function tmDrag(el, vertical) {
   const set = (e) => {
     const a = A(); if (!a || !a.G || tmStar == null) return;
-    const r = el.getBoundingClientRect(), v = clamp((e.clientX - r.left) / Math.max(1, r.width), 0, 1);
+    // (the iPad's StarInfoLayer slider is turned 90 degrees, its left end at the top)
+    const r = el.getBoundingClientRect(), v = clamp(vertical ? (e.clientY - r.top) / Math.max(1, r.height) : (e.clientX - r.left) / Math.max(1, r.width), 0, 1);
     const s = a.G.stars[tmStar]; if (!s || s.owner !== a.ME) return;
-    s.terra = Math.round(v * 100) / 100; hud();
+    s.terra = Math.round(v * 100) / 100; hud(); starInfo();
   };
   el.addEventListener('pointerdown', (e) => { e.stopPropagation(); el.setPointerCapture(e.pointerId); el._drag = true; set(e); });
   el.addEventListener('pointermove', (e) => { if (el._drag) set(e); });
@@ -462,7 +466,7 @@ function tmDrag(el) {
   el.addEventListener('keydown', (e) => {
     const a = A(); if (!a || !a.G || tmStar == null) return; const s = a.G.stars[tmStar]; if (!s || s.owner !== a.ME) return;
     const d = e.key === 'ArrowLeft' ? -0.05 : e.key === 'ArrowRight' ? 0.05 : 0; if (!d) return;
-    e.preventDefault(); s.terra = clamp(Math.round((s.terra + d) * 100) / 100, 0, 1); hud(); a.save();
+    e.preventDefault(); s.terra = clamp(Math.round((s.terra + d) * 100) / 100, 0, 1); hud(); starInfo(); a.save();
   });
   el.tabIndex = 0;
 }
@@ -487,9 +491,68 @@ function hudLabels(a) {
   out.push(a.degF(72 + (k.t - p.homeT)), a.gravF(k.g, p.homeG), a.fmt(k.metal) + ' ' + word('Metal'));
   return { labels: out, tm: null };
 }
+// The iPad's star information (-[StarInfoLayer init] 0x1000188c0, updateData 0x100019480, setScale: 0x1000193e8, addLabel:offset:tag: 0x100019134; the iPhone has the HUD strip above): a
+// panel on the map beside the selected star, starinfo_tm (120 x 75 points, with the terraform / mine slider) or starinfo_without_tm (101 x 75) at opacity 195, scaled by the planets' scale
+// but at most 2 (MapLayer setScale: 0x10000e590). Its top is 10 units under the star, the star 1 unit right of the anchor, the anchor (0.8, 1) when the star has fleets at it (the iPad's
+// fleets list is at its right), else (0.5, 1). The green Arial labels: the name (24 x 0.4, centred, 60 up); a caption right-aligned to 5 left of the middle and its value left-aligned from 5
+// right of it (18 x 0.5), the rows at 50 (Income / Info), 40 (Population, or the owner), 30 (temperature), 20 (gravity), 10 (metal): the tags shown depend on what the player knows (updateData).
+// Unexplored: the name and Misc string 42 (18 x 0.667 at 60, wrapped in 200). Yours: income, population, temperature, gravity, metal, and the slider (shouldDrawTMBar:player:); known and
+// inhabited this turn: the owner (at 50), population, temperature, gravity, metal; else the year of the report, the owner (or Misc 43), temperature, gravity, metal.
+const SI = { tm: [120, 75], plain: [101, 75], rows: { income: [50, 0x1a], info: [50, 0x2d], pop: [40, 0xb], owner: [40, 0x2c], temp: [30, 0xe], grav: [20, 0x2e], metal: [10, 0x17] } };
+function starInfoData(a) {
+  const G = a.G, p = a.me(), sel = a.UI.sel; if (sel == null) return null;
+  const s = G.stars[sel], k = HO.know(G, p, sel);
+  const sh = HO.rules(G).interestShort, big = (n, dollar) => n < 100000 ? (dollar ? a.money(n) : a.fmt(n)) : (dollar ? '$' : '') + (sh ? sh(n) : a.fmt(n));
+  if (s.owner === a.ME) {
+    const gs = 72 + (s.t - p.homeT), both = Math.abs(HO.seenT(p, s) - 72) > 0.5 && s.metal > 0;
+    return { name: s.name, tm: both ? sel : null, v: { income: big(HO.planetIncome(G, p, s), true), pop: big(HO.popNum(G, s.pop)), temp: a.degF(gs), grav: a.gravF(s.g, p.homeG), metal: a.fmt(s.metal) } };
+  }
+  if (!k.explored) return { name: s.name, none: true, v: {} };
+  const owner = k.owner >= 0 ? G.players[k.owner].name : miscS(43);
+  const stale = k.owner < 0 || !(k.seen >= G.turn) || !k.pop;
+  const v = { temp: a.degF(72 + (k.t - p.homeT)), grav: a.gravF(k.g, p.homeG), metal: a.fmt(k.metal) };
+  if (stale) { v.info = String(2000 + Math.max(0, k.seen) * 10); v.owner = owner; } else { v.owner = owner; v.pop = big(HO.popNum(G, k.pop)); }
+  return { name: s.name, tm: null, v, ownerRow: stale ? 40 : 50 };
+}
+let siKey = '';
+function starInfo() {
+  const a = A(); if (!siEl) return;
+  const d = a && a.G && SCREEN.pad && !a.G.over && window.HOVIEW ? starInfoData(a) : null, vw = d && window.HOVIEW();
+  if (!d || !vw || !vw.view || vw.path) { siEl.hidden = true; tmStar = SCREEN.pad ? null : tmStar; return; }
+  const cv = document.getElementById('map'), sel = a.UI.sel, st = a.G.stars[sel]; if (!cv) { siEl.hidden = true; return; }
+  const r = cv.getBoundingClientRect(), x = r.left + vw.view.ox + st.x * vw.view.s, y = r.top + vw.view.oy + st.y * vw.view.s;
+  const u = Math.min(vw.target || 1, 2 * SCREEN.u);
+  const seen = a.G.fleets.some(f => f.star === sel && f.to == null && !f.sat && (f.owner === a.ME || st.owner === a.ME || a.G.fleets.some(g => g.owner === a.ME && g.star === sel && g.to == null)));
+  const W = d.tm != null ? SI.tm[0] : SI.plain[0], H = SI.tm[1], ax = seen ? 0.8 : 0.5;
+  const key = JSON.stringify([d, st.terra, a.G.over]);
+  if (key !== siKey || siEl.hidden) {
+    siKey = key; siEl.replaceChildren();
+    const put = (node, x0, y0, w, h, cls) => { node.className = (cls || '') + ' ios-sic'; node.style.cssText += `;left:calc(${x0} * var(--sk));bottom:calc(${y0} * var(--sk));width:calc(${w} * var(--sk));height:calc(${h} * var(--sk))`; siEl.append(node); return node; };
+    const bg = pic(d.tm != null ? 'starinfo_tm' : 'starinfo_without_tm'); bg.style.cssText = 'opacity:' + (0xc3 / 255); put(bg, 0, 0, W, H, 'ios-sibg');
+    const name = UIEl('span', 'ios-sil ios-sinm', null, d.name); put(name, W / 2 - 40, 60, 80, 11.2, '');
+    if (d.none) {
+      const t = UIEl('span', 'ios-sil ios-sino', null, miscS(0x2a)); put(t, W / 2 - 8 - 66.7, 60 - 333, 133.4, 333, '');
+    } else {
+      const rowsToShow = d.v.income != null ? ['income', 'pop', 'temp', 'grav', 'metal'] : ['info' in d.v ? 'info' : null, 'pop' in d.v ? 'pop' : null, 'owner', 'temp', 'grav', 'metal'].filter(Boolean);
+      for (const key2 of rowsToShow) {
+        const [y0, id] = SI.rows[key2], yy = key2 === 'owner' ? d.ownerRow : y0;
+        put(UIEl('span', 'ios-sil ios-sicap', null, miscS(id)), W / 2 - 5 - 42.5, yy, 42.5, 10, '');
+        put(UIEl('span', 'ios-sil ios-sival', null, d.v[key2]), W / 2 + 5, yy, 42.5, 10, '');
+      }
+      if (d.tm != null) siEl.append(siTmEl);
+    }
+    siEl.dataset.tm = d.tm != null ? '1' : '';
+  }
+  if (d.tm != null) { const v = clamp(st.terra, 0, 1); siTmEl.style.setProperty('--v', v); siTmEl.setAttribute('aria-valuenow', String(Math.round(v * 100))); tmStar = d.tm; } else if (SCREEN.pad) tmStar = null;
+  siEl.hidden = false;
+  siEl.style.setProperty('--sk', u + 'px'); siEl.style.setProperty('--sa', SCREEN.pad ? '8' : '4');
+  siEl.style.width = (W * u) + 'px'; siEl.style.height = (H * u) + 'px';
+  siEl.style.left = (x - u - ax * W * u) + 'px'; siEl.style.top = (y + 10 * u) + 'px';
+}
 let hudKey = '';
 function hud() {
   const a = A(); if (!a || !a.G || !hudEl) return;
+  if (SCREEN.pad) { hudEl.hidden = true; hudKey = ''; return; } // (-[MainGameScene init]: the HUD strip, PlanetInfoLayer, is an iPhone's; an iPad has StarInfoLayer, starInfo below)
   const r = hudLabels(a);
   if (!r) { hudEl.hidden = true; hudKey = ''; return; }
   const key = JSON.stringify([r, r.tm != null && a.G.stars[r.tm].terra]);
@@ -2601,7 +2664,7 @@ window.HOTHEME = {
     v.ox = ax(r.x0, r.x1, G.W * v.s, v.ox); v.oy = ax(r.y0, r.y1, G.H * v.s, v.oy);
   },
   panel: sidebar, afterMsg,
-  afterDraw: () => { hud(); placeButtons(); },
+  afterDraw: () => { hud(); starInfo(); placeButtons(); },
   // the orders of your fleets as the app draws them (green or cyan, a dash a turn) and its dots at a star (StarNode drawOneFleet:
   // 0x10001b8ec: non-satellites at (35, 15 - 14 row) up to three rows, "..." at (30, -27); satellites at (-25, 13 - 14 row), dots 22 apart)
   appPaths: true, reportSelects: true, mouseAsTouch: true, // a mouse does what a finger does (the app has no other way)

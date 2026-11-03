@@ -387,3 +387,18 @@ html.skin-ios .ios-slide-l { animation: ios-slide-l .5s cubic-bezier(.33, .66, .
 html.skin-ios .ios-sgl, html.skin-ios .ios-fdl { touch-action: none; }
 /* an iPad's fleets list: the map's FleetMovementPlanetNode, beside the selected star (fleetNode in ui.js) */
 html.skin-ios .ios-fd.ios-fdnode { right: auto; transform: none; }
+
+/* the iPad's star information (starInfo in ui.js: -[StarInfoLayer init] 0x1000188c0): units are the layer's points, --sk pixels each */
+html.skin-ios .ios-si { position: fixed; z-index: 5; pointer-events: none; font-family: var(--appfont, Arial, Helvetica, sans-serif); color: #00ff00; }
+html.skin-ios .ios-si[hidden], html.fleetdrag.skin-ios .ios-si { display: none; }
+html.skin-ios .ios-sic { position: absolute; display: block; }
+html.skin-ios .ios-sibg { image-rendering: auto; }
+html.skin-ios .ios-sil { white-space: nowrap; line-height: calc(10 * var(--sk)); font-size: calc(9 * var(--sk)); overflow: visible; }
+html.skin-ios .ios-sinm { text-align: center; font-size: calc(9.6 * var(--sk)); line-height: calc(11.2 * var(--sk)); }
+html.skin-ios .ios-sino { text-align: center; white-space: normal; font-size: calc(10.67 * var(--sk)); line-height: calc(12 * var(--sk)); }
+html.skin-ios .ios-sicap { text-align: right; }
+html.skin-ios .ios-sival { text-align: left; }
+html.skin-ios .ios-sitm { position: absolute; left: calc(var(--sa) * 1.75 * var(--sk)); bottom: calc((75 / 2) * var(--sk)); width: calc(55 * var(--sk)); height: calc(9.5 * var(--sk)); transform: translate(-50%, 50%) rotate(90deg); transform-origin: 50% 50%; pointer-events: auto; touch-action: none; cursor: pointer; }
+html.skin-ios .ios-sitm .ios-tmL { position: absolute; inset: 0; background: url("../../../assets/skins/ios/sprites/slider-tmb1-right.png") 0 0 / 100% 100%; }
+html.skin-ios .ios-sitm .ios-tmL::before { content: ""; position: absolute; inset: 0; width: calc(var(--v, 0) * 100%); background: url("../../../assets/skins/ios/sprites/slider-tmb1-left.png") 0 0 / calc(100% / max(var(--v, 0), .001)) 100%; }
+html.skin-ios .ios-sitm .ios-tmT { position: absolute; top: 50%; left: calc(var(--v, 0) * 100%); width: calc(14.25 * var(--sk)); height: calc(14.5 * var(--sk)); margin: calc(-7.25 * var(--sk)) 0 0 calc(-7.125 * var(--sk)); background: url("../../../assets/skins/ios/sprites/slider-tmb1-thumb.png") 0 0 / 100% 100%; }
