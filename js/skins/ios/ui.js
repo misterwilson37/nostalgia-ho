@@ -1489,7 +1489,10 @@ function relDate(then, now) { // -[SORelativeDateTransformer transformedValue:] 
 }
 // BaseHoScene addTitleAndFadedBox: 0x100007238 (read in the disassembly): the white strip (774 s wide, H - 2 m high, anchor (1, 0.5) at (W - m, H / 2)), the dark box 0xff1d0609 = (9, 6, 29) of 766 s x (p3 + 20) s (anchor (1, 0) at (W - 2 m, 2 m)),
 // the sprite blend_sprite (scale s, anchor (1, 0) at (W - 2 m, p3 s)) and the name sprite (scale min(1, 0.7 s 768 / 600), anchor (0.5, 1) at ((W - 766 s) / 2, H - 2 a80)); p3 is 580 for the Saved Games scene and 200 for the welcome scene
-function sceneBase(root, p3) {
+// +[BaseHoScene fromScene:forward:] 0x100007180: CCTransition SlideInR (forward) or SlideInL (back), 0.5 s (0x3f000000), the new scene sliding in over the old one with an ease-out of rate 2 (1 - (1 - t)^2; the style sheet's ios-slide-r / ios-slide-l)
+let slideBack = false; // set where the app goes back to the Welcome scene (goBack), read when the Welcome scene is built
+function sceneBase(root, p3, slide) {
+  if (slide) { root.classList.add('ios-slide-' + slide); root.addEventListener('animationend', () => root.classList.remove('ios-slide-' + slide), { once: true }); }
   const gd = BGD(), a80 = gd.a80, W = SCREEN.winW, H = SCREEN.winH, s = H / 768, m = 4 * s, stripW = 774 * s;
   const add = (e) => { root.append(e); return e; };
   const box = (cls, l, b, w, h) => { const e = UIEl('div', cls); e.style.cssText = `position:absolute;left:${bpt(l)};bottom:${bpt(b)};width:${bpt(w)};height:${bpt(h)}`; return add(e); };
@@ -1552,7 +1555,8 @@ function buildWelcome(ts) {
   let root = ts.querySelector('.ios-welcome');
   if (root) { const tb = ts.querySelector('.tbtns'); if (tb) for (const id of ['thelp', 'tcont', 'tnew']) { const b = root.querySelector('#' + id); if (b) tb.prepend(b); } root.remove(); } // (the page's buttons go back before the scene is built again)
   root = UIEl('div', 'ios-sg ios-welcome');
-  const B = sceneBase(root, 200), { gd, a80, W, H, s, stripW } = B, fsz = SCREEN.pad ? 19 : 14;
+  const wslide = slideBack; slideBack = false;
+  const B = sceneBase(root, 200, wslide ? 'l' : null), { gd, a80, W, H, s, stripW } = B, fsz = SCREEN.pad ? 19 : 14;
   const guy = pic('hoguy_0', 'ios-wguy'); guy.style.cssText = 'position:absolute;pointer-events:none';
   const csf = (window.devicePixelRatio || 1) > 1 ? 2 : 1, gk = 2 * s * csf, setGuy = () => { guy.style.width = bpt(guy.naturalWidth / 2 * gk); guy.style.height = bpt(guy.naturalHeight / 2 * gk); };
   if (guy.complete && guy.naturalWidth) setGuy(); else guy.addEventListener('load', setGuy);
@@ -1593,10 +1597,10 @@ function miniGalaxy(it, g, w, h, itemH, a80) {
 }
 function openSavedIOS(c) {
   const root = UIEl('div', 'hoscreen ios-sg', { role: 'dialog', 'aria-modal': 'true', 'aria-label': miscS(142) });
-  const B = sceneBase(root, 580), { gd, a80, W, H, s, m, stripW, hoName } = B, pad = SCREEN.pad;
+  const B = sceneBase(root, 580, 'r'), { gd, a80, W, H, s, m, stripW, hoName } = B, pad = SCREEN.pad;
   const add = (e) => { root.append(e); return e; };
   const fsz = pad ? 19 : 14;
-  const back = starItem(miscS(140), true, fsz, () => { close(); c.back(); }); back.classList.add('sback');
+  const back = starItem(miscS(140), true, fsz, () => { close(); slideBack = true; c.back(); }); back.classList.add('sback');
   let delMode = false, emailMode = false;
   const del = starItem(miscS(141), false, fsz, () => { delMode = !delMode; emailMode = false; refresh(); });
   const menu = UIEl('div', 'ios-sgm'); menu.style.cssText = `position:absolute;right:${bpt(10 * a80)};bottom:${bpt(a80)};display:flex;gap:${bpt(20 * a80)};align-items:flex-end`;
@@ -1638,7 +1642,7 @@ function openSavedIOS(c) {
     });
     const sm = starItem('', false, fsz, null, 0.5); sm.className = 'ios-smi ios-sgx'; sm.style.cssText += `;position:absolute;right:${bpt(a80)};bottom:${bpt(itemH * 0.5)};transform:translateY(50%)`; sm.hidden = true; sm.tabIndex = -1; it.append(sm);
     const act = () => {
-      if (delMode) { c.del(g); it.remove(); items.splice(items.findIndex(x => x.it === it), 1); if (!items.length) { close(); c.back(); return; } many.hidden = c.count() < 21; return; }
+      if (delMode) { c.del(g); it.remove(); items.splice(items.findIndex(x => x.it === it), 1); if (!items.length) { close(); slideBack = true; c.back(); return; } many.hidden = c.count() < 21; return; }
       if (emailMode) { c.download(g); return; }
       close(); c.open(g);
     };
@@ -2535,14 +2539,19 @@ window.HOTHEME = {
   zoomTo(s, f) { const k = 80 * SCREEN.u, a = A(), G = a && a.G, m = a && a.map && a.map(); const lo = G && m ? Math.max(m.w / G.W, m.h / G.H) : 12; return Math.max(lo, Math.min(k * (SCREEN.pad ? 2 : 1.5), s * f)); },
   // -[MapLayer onEnter] 0x10000ff44: the layer's scale is set to 0.5 (0.7 on an iPad: 0x1000cef8c) and zoomTo: the player's star (myPlayerState's, else his first fleet's) follows, in 0.2 s (0x1000cef84), putting it in the middle
   // revealRect:duration: 0x1000a1a80 stops the layer's move action and runs a CCMoveTo of the given duration (0.2 s): the view slides from where it stands (the scale is set at once).
-  // Not settled: the position the layer has when onEnter runs (taken here as the galaxy's middle), and whether a star whose centring lies outside the pan rectangle makes zoomTo: skip the move (the remake clamps it).
+  // Settled (ninth pass). The layer's position when onEnter runs: -[MapLayer init] 0x10000d50c sets the anchor (0.5, 0.5) and the position winSize / 2, so the galaxy's middle is at the window's middle (the start here).
+  // -[MapLayer zoomTo:withDuration:] 0x10000e0dc, read from the instructions (fcmp / fccmp chain 0x10000e29c-0x10000e2c0): X = (star.x - anchor.x x contentSize.w) x scale, Y likewise, the star's offset from the galaxy's middle in pixels; the move is SKIPPED when
+  // pan.x - pos.x <= X <= pan.x + pan.w - pos.x and pan.y - pos.y <= Y <= pan.y + pan.h - pos.y (the star already shows in the pan rectangle), and revealRect (50 x 50 at the star) runs otherwise. An earlier note read this the other way round.
   fitView(v, { G, ME, mapW, mapH, sel, redraw }) {
     const p = G.players[ME], fl = G.fleets.find(f => f.owner === ME && f.star != null), id = p && p.homeStar != null ? p.homeStar : fl ? fl.star : null, st = id != null ? G.stars[id] : null; // myPlayerState's star, else the first fleet's
     v.s = 80 * SCREEN.u * (SCREEN.pad ? 0.7 : 0.5);
-    const to = { s: v.s, ox: st ? mapW / 2 - st.x * v.s : 0, oy: st ? mapH / 2 - st.y * v.s : 0 };
-    HOTHEME.clampView(to, { G, mapW, mapH });
-    if (!redraw || !st) { Object.assign(v, to); return; }
     const from = { s: v.s, ox: (mapW - G.W * v.s) / 2, oy: (mapH - G.H * v.s) / 2 }; HOTHEME.clampView(from, { G, mapW, mapH });
+    const to = { s: from.s, ox: st ? mapW / 2 - st.x * from.s : 0, oy: st ? mapH / 2 - st.y * from.s : 0 };
+    HOTHEME.clampView(to, { G, mapW, mapH });
+    const sx = st ? from.ox + st.x * from.s : 0, sy = st ? from.oy + st.y * from.s : 0, showing = st && sx >= 0 && sx <= mapW && sy >= 0 && sy <= mapH; // the star's place in the view as it starts
+    v.s = from.s;
+    if (!st || showing) { Object.assign(v, from); return; }
+    if (!redraw) { Object.assign(v, to); return; }
     v.ox = from.ox; v.oy = from.oy;
     const t0 = performance.now();
     const step = (now) => { const u = Math.min(1, (now - t0) / 200); v.ox = from.ox + (to.ox - from.ox) * u; v.oy = from.oy + (to.oy - from.oy) * u; redraw(); if (u < 1 && v.s === to.s) requestAnimationFrame(step); };
@@ -2558,6 +2567,8 @@ window.HOTHEME = {
   page(doc) {
     screenSize(); buildScreen(doc);
     window.addEventListener('resize', () => { const was = SCREEN.pad; screenSize(); hudKey = ''; hud(); if (was !== SCREEN.pad) buildColumn(doc.getElementById('app')); });
+    // -[AppDelegate applicationWillResignActive:] 0x100006ef0: the director pauses and the game is saved (saveGame); a page going to the background is the same moment
+    document.addEventListener('visibilitychange', () => { const a = A(); if (document.visibilityState === 'hidden' && a && a.G && !a.G.over) { try { a.save(); } catch (e) {} } });
     setSide(sideWanted != null ? sideWanted : SCREEN.pad, true);
     const c = doc.querySelector('#titlescreen .credit');
     if (c) c.textContent = 'With the art and sounds of Spaceward Ho! 1.2.9 for iPhone and iPad (Ariton Technologies, 2017). Art by Howard Vives and Bob Van de walle.';

@@ -377,3 +377,9 @@ html.skin-ios .ios-cc.hl.dn > img + img { display: block; }
 html.skin-ios .ios-cc.hl.dn img:first-child { filter: none; }
 html.skin-ios .ios-gtoggle { appearance: none; border: 0 !important; background: none !important; padding: 0 !important; color: #fff !important; cursor: pointer; white-space: nowrap; font-family: var(--appfont, Arial, Helvetica, sans-serif); }
 html.skin-ios #titlescreen.ios-wel[hidden], html.skin-ios .ios-ropt[hidden] { display: none; }
+
+/* +[BaseHoScene fromScene:forward:] 0x100007180: the next scene slides in over the old one, 0.5 s, ease-out rate 2 */
+@keyframes ios-slide-r { from { transform: translateX(100%); } to { transform: none; } }
+@keyframes ios-slide-l { from { transform: translateX(-100%); } to { transform: none; } }
+html.skin-ios .ios-slide-r { animation: ios-slide-r .5s cubic-bezier(.33, .66, .66, 1); }
+html.skin-ios .ios-slide-l { animation: ios-slide-l .5s cubic-bezier(.33, .66, .66, 1); }
