@@ -2604,7 +2604,7 @@ window.HOTHEME = {
   afterDraw: () => { hud(); placeButtons(); },
   // the orders of your fleets as the app draws them (green or cyan, a dash a turn) and its dots at a star (StarNode drawOneFleet:
   // 0x10001b8ec: non-satellites at (35, 15 - 14 row) up to three rows, "..." at (30, -27); satellites at (-25, 13 - 14 row), dots 22 apart)
-  appPaths: true, reportSelects: true,
+  appPaths: true, reportSelects: true, mouseAsTouch: true, // a mouse does what a finger does (the app has no other way)
   dotLayout: { x: 35, y0: 15, dy: -14, step: 22, satX: -25, satY0: 13, dotX: 30, dotY: -27 },
   page(doc) {
     screenSize(); buildScreen(doc);

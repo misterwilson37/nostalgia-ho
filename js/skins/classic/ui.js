@@ -481,7 +481,7 @@ function setupMap() {
   new ResizeObserver(resize).observe(cv.parentElement);
   // a finger (pointerType 'touch') gets iOS 1.2.9's gestures (Touch.map*,
   // below); a mouse and a pen keep these, so a hybrid laptop has both
-  cv.addEventListener('pointerdown', guard((e) => isTouch(e) ? Touch.mapDown(e) : onDown(e))); // guard(): an exception shows the bug report window
+  cv.addEventListener('pointerdown', guard((e) => { if (T.mouseAsTouch && e.pointerType === 'mouse' && e.button !== 0) return; isTouch(e) ? Touch.mapDown(e) : onDown(e); })); // guard(): an exception shows the bug report window
   cv.addEventListener('pointermove', guard((e) => isTouch(e) ? Touch.mapMove(e) : onMove(e)));
   cv.addEventListener('pointerup', guard((e) => isTouch(e) ? Touch.mapUp(e) : onUp(e)));
   cv.addEventListener('pointercancel', guard((e) => { if (isTouch(e)) Touch.mapCancel(e); else { UI.drag = null; draw(); } }));
@@ -1028,9 +1028,12 @@ function onDbl(e) {
 // whose command the ruleset hasn't got is skipped (the satellite's long hold
 // needs rs.flagScrap). The long press that explains a control (hover help,
 // below) is kept, and given up when the finger moves.
-const isTouch = (e) => !!e && e.pointerType === 'touch';
+// T.mouseAsTouch (the iOS and Android skins): a mouse (its main button) does what a finger does, the same drags, throws and holds; the wheel still zooms
+const isTouch = (e) => !!e && (e.pointerType === 'touch' || (e.pointerType === 'mouse' && !!T.mouseAsTouch && (e.type !== 'pointerdown' || e.button === 0)));
 let lastPointer = 'mouse'; // the last pointer pressed anywhere: a double click or a context menu made by a finger is ignored
-document.addEventListener('pointerdown', (e) => { lastPointer = e.pointerType || 'mouse'; }, true);
+document.addEventListener('pointerdown', (e) => { lastPointer = isTouch(e) ? 'touch' : (e.pointerType || 'mouse'); }, true);
+// a mouse drag on a list or a fleet is not a text selection
+document.addEventListener('selectstart', (e) => { if (T.mouseAsTouch && (List.t && List.t.mode || Touch.mode)) e.preventDefault(); }, true);
 const TOUCH = {
   TAP: 15,          // a lift after less than this much movement is a tap (CCLayerPanZoom maxTouchDistanceToClick)
   FAR: 5,           // a step from the selected star longer than this is a drag ("moved far", StarNode); here also the whole way
