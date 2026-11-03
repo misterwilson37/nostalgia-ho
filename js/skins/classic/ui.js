@@ -581,7 +581,8 @@ function draw0() {
   cx.imageSmoothingEnabled = ps < 40;
   UI.dots = [];
   // routes of my fleets
-  for (const f of T.routes === false ? [] : G.fleets) { // (T.routes false: the Amiga draws a route only while it is dragged)
+  if (T.appPaths) appFleetPaths();
+  for (const f of T.routes === false || T.appPaths ? [] : G.fleets) { // (T.routes false: the Amiga draws a route only while it is dragged)
     if (f.owner !== ME) continue;
     if (f.to != null) {
       const a = G.stars[f.from], b = G.stars[f.to];
@@ -663,7 +664,7 @@ function draw0() {
     drawDots(s, x, y, ps);
   }
   // in-transit dots
-  for (const f of G.fleets) {
+  for (const f of T.dotLayout ? [] : G.fleets) { // (the app has no dot for a fleet on the way)
     if (f.owner !== ME || f.to == null) continue;
     const a = G.stars[f.from], b = G.stars[f.to], t = Math.min(1, f.prog / f.dist);
     const x = sx(a.x + (b.x - a.x) * t), y = sy(a.y + (b.y - a.y) * t);
@@ -729,7 +730,7 @@ function draw0() {
 // 220/255, to the side of the leg's middle). Over the fleet's own star or
 // empty space there is none (the fleet's orders are drawn). Two remake
 // choices: the route finder's "under 3 light years" (no line on iOS) is
-// drawn as one white leg, and the labels keep one size whatever the zoom.
+// drawn as one white leg.
 function iosFleetPath(f, tgt) {
   UI.lastPath = null;
   if (!f || tgt == null || tgt === f.star || f.star == null) return;
@@ -744,19 +745,24 @@ function iosFleetPath(f, tgt) {
   cx.lineWidth = 2; cx.strokeStyle = ok ? '#ffffff' : '#ff0000';
   const legs = [];
   let a = G.stars[f.star];
+  // (the first leg of a route that can be flown starts at the fleet's dot, unless its star is the selected one: updateFleetPath:fleet: 0x10000f190)
+  let start = ok && f.star !== UI.sel ? dotStart(f, -1, [sx(a.x), sy(a.y)], UI.view.s / 40) : null;
   for (const sid of path) {
     const b = G.stars[sid];
-    cx.beginPath(); cx.moveTo(sx(a.x), sy(a.y)); cx.lineTo(sx(b.x), sy(b.y)); cx.stroke();
-    legs.push([a, b]); a = b;
+    cx.beginPath(); cx.moveTo(start ? start[0] : sx(a.x), start ? start[1] : sy(a.y)); cx.lineTo(sx(b.x), sy(b.y)); cx.stroke();
+    legs.push([a, b, start]); a = b; start = null;
   }
-  const disc = IMG[(T.prefix || '') + 'supernovaed'];
-  cx.font = mapFont(14, 'Arial, Helvetica, sans-serif'); cx.textAlign = 'center'; cx.textBaseline = 'middle';
-  for (const [p, q] of legs) {
-    const x1 = sx(p.x), y1 = sy(p.y), x2 = sx(q.x), y2 = sy(q.y);
-    const lx = (x1 + x2) / 2 + ((x2 - x1) * (y2 - y1) <= 0 ? 10 : -22), ly = (y1 + y2) / 2 + 10;
+  // the label: Arial 16 and its disc (the 80-point supernovaed picture, 220/255) at the planets' scale (planetTarget()), the label's
+  // middle at the leg's middle + (10, -10) or (-22, -10) (the map's units, k pixels each; cocos2d's y runs up), the disc 2 units right and below it
+  const disc = IMG[(T.prefix || '') + 'supernovaed'], k = UI.view.s / 40, tg = planetTarget();
+  cx.font = mapFont(16 * tg, 'Arial, Helvetica, sans-serif'); cx.textAlign = 'center'; cx.textBaseline = 'middle';
+  for (const [p, q, st] of legs) {
+    const x1 = st ? st[0] : sx(p.x), y1 = st ? st[1] : sy(p.y), x2 = sx(q.x), y2 = sy(q.y);
+    const lx = (x1 + x2) / 2 + ((x2 - x1) * (y2 - y1) <= 0 ? 10 : -22) * k, ly = (y1 + y2) / 2 + 10 * k;
     cx.globalAlpha = 220 / 255;
-    if (disc && disc.width) cx.drawImage(disc, lx + 2 - 13, ly + 2 - 13, 26, 26);
-    else { cx.fillStyle = '#000'; cx.beginPath(); cx.arc(lx + 2, ly + 2, 12, 0, Math.PI * 2); cx.fill(); }
+    const dw = (disc && disc.width ? disc.width / 2 : 40) * tg;
+    if (disc && disc.width) cx.drawImage(disc, lx + 2 * k - dw / 2, ly + 2 * k - dw / 2, dw, dw);
+    else { cx.fillStyle = '#000'; cx.beginPath(); cx.arc(lx + 2 * k, ly + 2 * k, dw / 4, 0, Math.PI * 2); cx.fill(); }
     cx.globalAlpha = 1; cx.fillStyle = '#fff';
     cx.fillText(String(Math.round(HO.starDist(G, p.id, q.id))), lx, ly);
   }
@@ -808,6 +814,7 @@ function drawMarkers(f, dx, dy, w, dir) {
 function drawDots(s, x, y, ps) {
   const here = G.fleets.filter(f => f.star === s.id && f.to == null && (f.owner === ME || visibleTo(s.id)));
   if (!here.length) return;
+  if (T.dotLayout) return drawDotsApp(s, x, y, here);
   const w = Math.max(13, Math.min(18, ps * 0.36));
   let ri = 0, li = 0;
   for (const f of here) {
@@ -830,6 +837,84 @@ function drawDots(s, x, y, ps) {
     if (f.dest != null && mine) { cx.fillStyle = '#ffe066'; cx.fillRect(box.x + box.w - 4, dy, 4, 4); }
     UI.dots.push({ x: box.x, y: dy, w: box.w, h: w, f: f.id, star: s.id, mine, sat: f.sat });
   }
+}
+// The app's fleet dots at a star (T.dotLayout; -[StarNode drawFleetsAtStar:] 0x10001b6c8, drawOneFleetWithPlayer:
+// 0x10001b8ec, drawFleetDotsWithPlayer: 0x10001b9c8, drawFleetDotDotDotWithIndex: 0x10001b53c, and FUN_100035fa8 for
+// their order): your own fleets first (in the fleet list's order), then the other players' that you see, by player; the
+// ones that are not satellites (the first three) in a column right of the star, each at (L.x, L.y0 + L.dy x row) in the
+// star's own units (the planets' scale, planetTarget(), makes them points), the satellites' in a column at its left
+// (L.satX, L.satY0); one dot picture per design, L.step apart, running outward; a "..." (fleet_dots_dotdot) at
+// (L.dotX, L.dotY) when either has more than three. On a tablet the selected star's own fleets are in the fleet
+// dialog (FleetMovementPlanetNode), not drawn: only the "..." and only for satellites.
+function drawDotsApp(s, x, y, here) {
+  const L = T.dotLayout, t = planetTarget(), rank = (f) => (f.owner === ME ? -1 : f.owner);
+  const order = here.map((f, i) => [f, i]).sort((a, b) => rank(a[0]) - rank(b[0]) || a[1] - b[1]).map(a => a[0]);
+  const sats = order.filter(f => f.sat), norm = order.filter(f => !f.sat);
+  const hide = isTablet() && UI.sel === s.id;
+  const one = (f, i, sat) => {
+    const ims = fleetMarkers(f).filter(Boolean);
+    let ox = x + (sat ? L.satX : L.x) * t; const oy = y - ((sat ? L.satY0 : L.y0) + L.dy * i) * t;
+    let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
+    for (const im of ims) {
+      const w = im.width / 2 * t, h = im.height / 2 * t;
+      cx.drawImage(im, ox - w / 2, oy - h / 2, w, h);
+      x0 = Math.min(x0, ox - w / 2); x1 = Math.max(x1, ox + w / 2); y0 = Math.min(y0, oy - h / 2); y1 = Math.max(y1, oy + h / 2);
+      ox += (sat ? -L.step : L.step) * t;
+    }
+    if (ims.length) UI.dots.push({ x: x0, y: y0, w: x1 - x0, h: y1 - y0, f: f.id, star: s.id, mine: f.owner === ME, sat: f.sat });
+  };
+  sats.slice(0, 3).forEach((f, i) => one(f, i, true));
+  if (!hide) norm.slice(0, 3).forEach((f, i) => one(f, i, false));
+  const more = hide ? sats.length > 3 : sats.length > 3 || norm.length > 3, dd = IMG.dotdot;
+  if (more && dd) { const w = dd.width / 2 * t, h = dd.height / 2 * t; cx.drawImage(dd, x + L.dotX * t - w / 2, y - L.dotY * t - h / 2, w, h); }
+}
+// The orders of your fleets (T.appPaths; -[MapLayer updateFleetPaths] 0x10000ee58, doFleetRec:fleet:paths: 0x10000ebc8,
+// addDashedVertices:from:to:travelTime:travelLeft:numSolids: 0x10000f77c, drawFleetPaths 0x10000e93c): for each of your
+// fleets with ships, orders and no scrap mark, a dashed line from where its dots are (the star, moved by
+// calcFleetInitialStarOffset 0x10000eb5c to the fleet's dot, unless the star is the selected one) to each star of its
+// orders in turn, 2 wide, one dash per turn of each leg (the turns of the leg's length at the fleet's speed), a dash
+// from its slot's start 4 map units in to 4 map units short of its end, the first and last slot without that gap at the
+// leg's ends; for a fleet on the way only the dashes of the turns left. Green (31, 183, 20) when the fleet has a colony
+// ship, else cyan (187, 255, 255). The map's units are 40 to a galaxy unit (UI.view.s / 40 of them to a pixel).
+// -[MapLayer calcFleetInitialStarOffset:fleet:current:player:] 0x10000eb5c: a line starts at the fleet's dot, not the star: (35, 15 - 14 row)
+// map units from it (cocos2d's y up), the row counting your earlier fleets at the star that are not satellites, at most 3 (30, -27 then);
+// from the selected star it starts at the star's middle
+function dotStart(f, fi, a, k) {
+  const idx = Math.min(3, G.fleets.slice(0, fi < 0 ? G.fleets.indexOf(f) : fi).filter(g => g.owner === ME && g.star === f.star && g.to == null && !g.sat).length);
+  return [a[0] + (idx === 3 ? 30 : 35) * k, a[1] - (15 - 14 * idx) * k];
+}
+const PATH_GREEN = 'rgb(31,183,20)', PATH_CYAN = 'rgb(187,255,255)';
+function appFleetPaths() {
+  const k = UI.view.s / 40, pt = (a) => [sx(a.x), sy(a.y)];
+  const sel = UI.sel;
+  cx.save(); cx.lineWidth = 2; cx.lineCap = 'butt';
+  G.fleets.forEach((f, fi) => {
+    if (f.owner !== ME || f.scrap301 || f.sat) return;
+    const stops = f.to != null ? [f.to].concat(f.path || []) : f.dest != null ? [f.dest].concat(f.path || []) : null;
+    if (!stops) return;
+    if (!Object.values(f.ships || {}).some(n => n > 0)) return;
+    const colony = HO.fleetDesigns(G, f).some(d => d.type === 'colony');
+    cx.strokeStyle = colony ? PATH_GREEN : PATH_CYAN;
+    const speed = HO.fleetSpeed(G, f) || 1;
+    let from = f.to != null ? G.stars[f.from] : G.stars[f.star], a = pt(from);
+    if (f.to == null && f.star !== sel) a = dotStart(f, fi, a, k);
+    let prev = from;
+    stops.forEach((sid, i) => {
+      const to = G.stars[sid], b = pt(to);
+      const d = HO.starDist(G, prev.id, sid), T = Math.max(1, Math.ceil(d / speed - 1e-9));
+      let left = T;
+      if (i === 0 && f.to != null) left = Math.max(0, Math.min(T, Math.ceil((f.dist - f.prog) / speed - 1e-9)));
+      const len = Math.hypot(b[0] - a[0], b[1] - a[1]) / k, g = (len | 0) ? Math.trunc(40000 / (len | 0)) / 10000 : 0;
+      cx.beginPath();
+      for (let j = T - left; j < T; j++) {
+        const f0 = j / T + (j >= 1 ? g : 0), f1 = (j + 1) / T - (j < T - 1 ? g : 0);
+        cx.moveTo(a[0] + (b[0] - a[0]) * f0, a[1] + (b[1] - a[1]) * f0); cx.lineTo(a[0] + (b[0] - a[0]) * f1, a[1] + (b[1] - a[1]) * f1);
+      }
+      cx.stroke();
+      a = b; prev = to;
+    });
+  });
+  cx.restore();
 }
 function drawRoute(a, b, speed, color, frac, round) {
   const x1 = sx(a.x), y1 = sy(a.y), x2 = sx(b.x), y2 = sy(b.y);
@@ -4556,6 +4641,8 @@ function msgIconEl(m) {
 // what a report does when it is picked from the list (1.2's ClickInReportWindow: its star selected and centred, DoMessageAction)
 function reportAction(m) {
   if (T.reportTap) { const lk = originalLook(m); T.reportTap(m, lk ? lk.id : null); }
+  // (T.reportSelects, -[MessageNode doReportAction:game:] 0x1000137cc: a report with a star selects and shows it first, a battle's too)
+  if (T.reportSelects && m.star != null && G.stars[m.star]) { UI.sel = m.star; UI.selFleet = null; centerOn(m.star); renderPanel(); draw(); }
   if (winReport(m) && winPending()) { openWinWindows(() => renderMsg()); return; }
   if (winReport(m) && youWonWords()) { openYouWon(); return; }
   if (lostReport(m)) { openYouLost(); return; }

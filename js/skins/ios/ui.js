@@ -24,6 +24,7 @@ const images = {
   p3030: 'Game_You_Won', p3040: 'Game_You_Lost', // the end of the game
   haloAlly: 'halo1', // an ally's colony (StarNode's halo)
   haloBuddy: 'halo2', // a best buddy's (the cyan one)
+  dotdot: 'fleet_dots_dotdot', // StarNode's "..." for more than three fleets
 };
 // the report pictures: 5.0.5's message pictures 9000-9050 redrawn at 80 x 80
 // (+[MessageNode reportIcon:] builds "report_icon-%ld")
@@ -2601,6 +2602,10 @@ window.HOTHEME = {
   },
   panel: sidebar, afterMsg,
   afterDraw: () => { hud(); placeButtons(); },
+  // the orders of your fleets as the app draws them (green or cyan, a dash a turn) and its dots at a star (StarNode drawOneFleet:
+  // 0x10001b8ec: non-satellites at (35, 15 - 14 row) up to three rows, "..." at (30, -27); satellites at (-25, 13 - 14 row), dots 22 apart)
+  appPaths: true, reportSelects: true,
+  dotLayout: { x: 35, y0: 15, dy: -14, step: 22, satX: -25, satY0: 13, dotX: 30, dotY: -27 },
   page(doc) {
     screenSize(); buildScreen(doc);
     window.addEventListener('resize', () => { const was = SCREEN.pad; screenSize(); hudKey = ''; hud(); if (was !== SCREEN.pad) buildColumn(doc.getElementById('app')); });
