@@ -2220,7 +2220,8 @@ function openBattleIOS(b, k) {
   const shipOf = (g) => g.planet ? null : HO.getDesign(G, g.o, g.did);
   const picOf = (g) => { const d = shipOf(g); return d && a.IMG ? HOTHEME.shipPic(d, a.IMG) : null; };
   P.cols.forEach((col, ci) => {
-    const sideOf = (o) => ci === 0 ? (o === viewer ? -1 : b.sides.indexOf(o)) : (o === b.planetOwner && b.pop0 > 0 ? -1 : b.sides.indexOf(o));
+    // CalculateGroups 0x228528: the viewer first, then his allies in the order of the records, which DoBattleStage 0x226804 makes by player number (a loop over the participants' mask, upward); on the other side the first with a colony, then the rest by player number
+    const sideOf = (o) => ci === 0 ? (o === viewer ? -1 : o) : (o === b.planetOwner && b.pop0 > 0 ? -1 : o);
     const ord = col.slice().sort((p, q) => sideOf(p.o) - sideOf(q.o) || (q.planet ? 1 : 0) - (p.planet ? 1 : 0) || (q.did - p.did) || ('odn'.indexOf(P0st(p)) - 'odn'.indexOf(P0st(q))));
     let y = 0, last = null;
     for (const g of ord) {
