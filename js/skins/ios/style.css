@@ -383,3 +383,5 @@ html.skin-ios #titlescreen.ios-wel[hidden], html.skin-ios .ios-ropt[hidden] { di
 @keyframes ios-slide-l { from { transform: translateX(-100%); } to { transform: none; } }
 html.skin-ios .ios-slide-r { animation: ios-slide-r .5s cubic-bezier(.33, .66, .66, 1); }
 html.skin-ios .ios-slide-l { animation: ios-slide-l .5s cubic-bezier(.33, .66, .66, 1); }
+/* the app's lists slide by finger and keep their motion (inertialLists in ui.js) */
+html.skin-ios .ios-sgl, html.skin-ios .ios-fdl, html.skin-ios .ios-pbox.scroll, html.skin-ios #panel { touch-action: none; }

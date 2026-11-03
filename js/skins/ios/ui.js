@@ -273,6 +273,57 @@ function sideLayout() {
   const de = document.documentElement, room = SCREEN.winW - SCREEN.W - SCREEN.gap >= 300;
   de.style.setProperty('--mapx', (sideOpen() && room ? (SCREEN.W + SCREEN.gap) * SCREEN.u : 0) + 'px');
 }
+// The app's lists (the saved games, the news, the players, the stars' bars, the fleet rows) are CCInertialMenus (a CCMenuAdvanced and an InertialScroller), read from the decompile:
+// CCMenuAdvanced init 0x10001e684 sets minimumTouchLengthToSlide 30; ccTouchMoved 0x10001f7cc adds each move's length to the touch's and, once it reaches 30, unselects the item and moves the menu by that move's delta (setPosition: clamped by
+// fixPosition to the boundary rect); InertialScroller touchMoved 0x1000a9a68 keeps the last 6 touches (location, previous, time); touchEnded 0x1000a9c0c adds the last move, drops the touches more than 0.2 s older than the end (0x1000d64f0),
+// and when the path left is longer than 5 moves the menu by (the sum of the deltas) x (0.5 / the time from the first kept to the last, 5 when it is 0), each clamped to half the menu's content size, in 3 s with CCEaseExponentialOut (1 - 2^(-10 t));
+// touchBegan 0x1000a9a10 stops a move still running. The lists here scroll the same way (the wheel and the keyboard keep the browser's own).
+const INERTIAL = '.ios-sgl, .ios-fdl, .ios-pbox.scroll, #panel';
+function inertialLists(doc) {
+  let ds = null, fling = null;
+  const stop = () => { if (fling) { cancelAnimationFrame(fling.raf); fling = null; } };
+  doc.addEventListener('pointerdown', (e) => {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    let el = e.target.closest && e.target.closest(INERTIAL);
+    while (el && el.scrollHeight <= el.clientHeight + 1) el = el.parentElement && el.parentElement.closest(INERTIAL);
+    if (!el || e.target.closest('input, select, textarea, button.ios-sl, .ios-slider')) return;
+    stop();
+    ds = { el, id: e.pointerId, x: e.clientX, y: e.clientY, len: 0, sliding: false, trail: [] };
+  }, true);
+  const note = (e) => { // one move: its delta, the touches kept (at most 6)
+    const dx = e.clientX - ds.x, dy = e.clientY - ds.y; ds.x = e.clientX; ds.y = e.clientY;
+    ds.trail.push({ dx, dy, t: e.timeStamp / 1000 }); if (ds.trail.length > 5) ds.trail.shift();
+    return [dx, dy];
+  };
+  doc.addEventListener('pointermove', (e) => {
+    if (!ds || e.pointerId !== ds.id) return;
+    const [dx, dy] = note(e), u = SCREEN.u;
+    ds.len += Math.hypot(dx, dy) / u;
+    if (ds.len >= 30) { ds.sliding = true; ds.el.scrollTop -= dy; }
+  }, true);
+  const end = (e) => {
+    if (!ds || e.pointerId !== ds.id) return;
+    const d = ds; ds = null;
+    if (!d.sliding) return;
+    const swallow = (ev) => { ev.stopPropagation(); ev.preventDefault(); }; // the slide unselected the item: no tap
+    window.addEventListener('click', swallow, { capture: true, once: true }); setTimeout(() => window.removeEventListener('click', swallow, true), 0);
+    const u = SCREEN.u, now = e.timeStamp / 1000, keep = d.trail.filter(k => now - k.t <= 0.2);
+    let path = 0, sy = 0; for (const k of keep) { path += Math.hypot(k.dx, k.dy) / u; sy += k.dy / u; }
+    if (!(path > 5) || !keep.length) return;
+    const dt = keep[keep.length - 1].t - keep[0].t, k = dt === 0 ? 5 : 0.5 / dt, half = d.el.scrollHeight / u / 2;
+    const go = Math.max(-half, Math.min(half, sy * k)) * u, from = d.el.scrollTop, t0 = performance.now();
+    const f = fling = { raf: 0 };
+    const step = (n) => { if (fling !== f) return; const t = Math.min(1, (n - t0) / 3000); d.el.scrollTop = from - go * (t >= 1 ? 1 : 1 - Math.pow(2, -10 * t)); if (t < 1) f.raf = requestAnimationFrame(step); else fling = null; };
+    f.raf = requestAnimationFrame(step);
+  };
+  doc.addEventListener('pointerup', end, true); doc.addEventListener('pointercancel', end, true);
+}
+// the pan rectangle in the map canvas's pixels (see HOTHEME.clampView)
+function panRect(mapW, mapH, side) {
+  const u = SCREEN.u, m = 10 * SCREEN.gap * u, mapx = parseFloat(document.documentElement.style.getPropertyValue('--mapx')) || 0, open = side == null ? sideOpen() : side;
+  return { x0: open ? (SCREEN.W + SCREEN.gap) * u - mapx : m, x1: mapW - m, y0: m, y1: mapH - m };
+}
+function panMinScale(G, mapW, mapH) { const r = panRect(mapW, mapH, true); return Math.max(1e-6, Math.max((r.x1 - r.x0) / G.W, (r.y1 - r.y0) / G.H)); }
 function setSide(open, quiet) {
   const de = document.documentElement;
   de.classList.toggle('ios-side', !!open);
@@ -2536,7 +2587,7 @@ window.HOTHEME = {
   // -[MapLayer init] 0x10000d50c (read with floats.py and the decompile): the map's content size is the galaxy's extent (CGame short +0x222) x 40 points each way, a CCLayerPanZoom in mode 0 with maxScale 1.5 (2.0 on an iPad)
   // and minScale = the scale that makes the content cover the bounds (the larger of bounds / content in each direction), rubberEffectRatio 0: the map never leaves its bounds (the screen without the sidebar). The
   // remake's view.s is pixels for one of its map units, which is 2 x 40 points x the scale (the extent counts the other map unit, 0.5 of this one: G.W = extent / 2, taken so, not seen set).
-  zoomTo(s, f) { const k = 80 * SCREEN.u, a = A(), G = a && a.G, m = a && a.map && a.map(); const lo = G && m ? Math.max(m.w / G.W, m.h / G.H) : 12; return Math.max(lo, Math.min(k * (SCREEN.pad ? 2 : 1.5), s * f)); },
+  zoomTo(s, f) { const k = 80 * SCREEN.u, a = A(), G = a && a.G, m = a && a.map && a.map(); const lo = G && m ? panMinScale(G, m.w, m.h) : 12; return Math.max(lo, Math.min(k * (SCREEN.pad ? 2 : 1.5), s * f)); },
   // -[MapLayer onEnter] 0x10000ff44: the layer's scale is set to 0.5 (0.7 on an iPad: 0x1000cef8c) and zoomTo: the player's star (myPlayerState's, else his first fleet's) follows, in 0.2 s (0x1000cef84), putting it in the middle
   // revealRect:duration: 0x1000a1a80 stops the layer's move action and runs a CCMoveTo of the given duration (0.2 s): the view slides from where it stands (the scale is set at once).
   // Settled (ninth pass). The layer's position when onEnter runs: -[MapLayer init] 0x10000d50c sets the anchor (0.5, 0.5) and the position winSize / 2, so the galaxy's middle is at the window's middle (the start here).
@@ -2545,10 +2596,10 @@ window.HOTHEME = {
   fitView(v, { G, ME, mapW, mapH, sel, redraw }) {
     const p = G.players[ME], fl = G.fleets.find(f => f.owner === ME && f.star != null), id = p && p.homeStar != null ? p.homeStar : fl ? fl.star : null, st = id != null ? G.stars[id] : null; // myPlayerState's star, else the first fleet's
     v.s = 80 * SCREEN.u * (SCREEN.pad ? 0.7 : 0.5);
-    const from = { s: v.s, ox: (mapW - G.W * v.s) / 2, oy: (mapH - G.H * v.s) / 2 }; HOTHEME.clampView(from, { G, mapW, mapH });
-    const to = { s: from.s, ox: st ? mapW / 2 - st.x * from.s : 0, oy: st ? mapH / 2 - st.y * from.s : 0 };
+    const r = panRect(mapW, mapH), from = { s: v.s, ox: (mapW - G.W * v.s) / 2, oy: (mapH - G.H * v.s) / 2 }; HOTHEME.clampView(from, { G, mapW, mapH });
+    const to = { s: from.s, ox: st ? (r.x0 + r.x1) / 2 - st.x * from.s : 0, oy: st ? (r.y0 + r.y1) / 2 - st.y * from.s : 0 };
     HOTHEME.clampView(to, { G, mapW, mapH });
-    const sx = st ? from.ox + st.x * from.s : 0, sy = st ? from.oy + st.y * from.s : 0, showing = st && sx >= 0 && sx <= mapW && sy >= 0 && sy <= mapH; // the star's place in the view as it starts
+    const sx = st ? from.ox + st.x * from.s : 0, sy = st ? from.oy + st.y * from.s : 0, showing = st && sx >= r.x0 && sx <= r.x1 && sy >= r.y0 && sy <= r.y1; // the star's place in the view as it starts
     v.s = from.s;
     if (!st || showing) { Object.assign(v, from); return; }
     if (!redraw) { Object.assign(v, to); return; }
@@ -2557,15 +2608,19 @@ window.HOTHEME = {
     const step = (now) => { const u = Math.min(1, (now - t0) / 200); v.ox = from.ox + (to.ox - from.ox) * u; v.oy = from.oy + (to.oy - from.oy) * u; redraw(); if (u < 1 && v.s === to.s) requestAnimationFrame(step); };
     requestAnimationFrame(step);
   },
+  // The pan rectangle (-[MapLayer setBoundsForSidebar] 0x10000db54, setBoundsWithoutSidebar 0x10000dbec): with the sidebar it starts at the sidebar's width + a80 and is winW - (that) - 10 a80 wide, 10 a80 from the top and
+  // the bottom; without it, 10 a80 from every edge. The galaxy covers the rectangle and is kept inside it (the map's picture fills the window, so margins of 10 a80 show beyond the galaxy's edge).
+  // minScale (set once in init 0x10000d50c, from the sidebar's rectangle) is the larger of rectangle / content in each direction; a galaxy smaller than the rectangle is centred in it (0x10000dbec).
   clampView(v, { G, mapW, mapH }) {
-    const lo = Math.max(mapW / G.W, mapH / G.H), hi = 80 * SCREEN.u * (SCREEN.pad ? 2 : 1.5);
-    v.s = Math.max(lo, Math.min(hi, v.s));
-    v.ox = Math.min(0, Math.max(mapW - G.W * v.s, v.ox)); v.oy = Math.min(0, Math.max(mapH - G.H * v.s, v.oy));
+    const r = panRect(mapW, mapH), hi = 80 * SCREEN.u * (SCREEN.pad ? 2 : 1.5);
+    v.s = Math.max(panMinScale(G, mapW, mapH), Math.min(hi, v.s));
+    const ax = (lo, hi2, size, o) => size <= hi2 - lo ? (lo + hi2 - size) / 2 : Math.min(lo, Math.max(hi2 - size, o));
+    v.ox = ax(r.x0, r.x1, G.W * v.s, v.ox); v.oy = ax(r.y0, r.y1, G.H * v.s, v.oy);
   },
   panel: sidebar, afterMsg,
   afterDraw: () => { hud(); placeButtons(); },
   page(doc) {
-    screenSize(); buildScreen(doc);
+    screenSize(); buildScreen(doc); inertialLists(doc);
     window.addEventListener('resize', () => { const was = SCREEN.pad; screenSize(); hudKey = ''; hud(); if (was !== SCREEN.pad) buildColumn(doc.getElementById('app')); });
     // -[AppDelegate applicationWillResignActive:] 0x100006ef0: the director pauses and the game is saved (saveGame); a page going to the background is the same moment
     document.addEventListener('visibilitychange', () => { const a = A(); if (document.visibilityState === 'hidden' && a && a.G && !a.G.over) { try { a.save(); } catch (e) {} } });
