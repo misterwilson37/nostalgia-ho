@@ -1213,6 +1213,8 @@ root.HOUI.add([
 ['Event Messages', 'Msgs d’événement', 'Ereignismeldungen', 'Olaylarla ilgili mesajlar', 'Mensajes de sucesos', I],
 ['Messages', 'Messages', 'Meldungen', 'Mesajlar', 'Mensajes', I],
 ['Battles', 'Batailles', 'Kämpfe', 'Muhabereler', 'Batallas', I, { tr: 'Muharebeler' }],
+['Income:', 'Revenu:', 'Einkommen:', 'Gelir:', 'Ingresos:'],
+['Grav:', 'Grav.:', 'Schwerkr.:', 'Yerç.:', 'Grav.:'],
 ['Temp:', 'Temp:', 'Temp.:', 'Isı:', 'Temp.:', I, { tr: 'Sıcaklık:' }],
 ['Gender', 'Sexe', 'Geschlecht', 'Cinsiyet', 'Sexo', { fr: 'iOS', tr: '~iOS' }],
 ['Review Battle Speed:', 'Vitesse de revue de batailles:', 'Kampfansicht-Tempo:', 'Muhabere hızını gözden geçir:', 'Velocidad de revisión de batallas:', { fr: 'iOS', tr: '~iOS' }, { fr: 'Vitesse de revue des batailles :', tr: 'Muharebe İnceleme Hızı:' }],

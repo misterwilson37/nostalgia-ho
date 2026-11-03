@@ -6,7 +6,7 @@
 // Turn, the report cards), and at the main screen checks that
 //   - nothing threw (page errors, the skin's "[HO bug]" console line);
 //   - the skin's own pieces exist where the skin has them (iOS and Android: the button
-//     column or the iPad's row, the HUD strip over a selected star, the sidebar's totals,
+//     column or the iPad's row, the HUD strip (an iPad's star information) over a selected star, the sidebar's totals,
 //     technology bars and budget bars, the players list, the report bar or End Turn,
 //     the gear, the round buttons about a colony) and each button does something;
 //   - every feature the ruleset has is still reachable: the menus (the gear's strip)
@@ -67,7 +67,8 @@ const SKINS_CHECK = {
     await sleep(300);
     if (st.sel == null) f.push('no colony of yours to select');
     else {
-      if (!(await page.evaluate(() => { const h = document.querySelector('.ios-hud'); return h && !h.hidden && h.textContent.length > 3; }))) f.push('no HUD strip over your colony');
+      // (an iPhone's HUD strip, PlanetInfoLayer; an iPad's star information beside the star, StarInfoLayer)
+      if (!(await page.evaluate((pad) => { const h = document.querySelector(pad ? '.ios-si' : '.ios-hud'); return h && !h.hidden && h.textContent.length > 3; }, pad))) f.push(pad ? 'no star information beside your colony' : 'no HUD strip over your colony');
       if (!(await page.evaluate(() => { const b = document.querySelector('.ios-pb-add'); return b && !b.hidden && !document.querySelector('.ios-pb').hidden; }))) f.push('no add button about your colony');
       else { await page.evaluate(() => document.querySelector('.ios-pb-add').click()); await sleep(250); if (!(await q('.win'))) f.push('the add button opened no window'); await page.keyboard.press('Escape'); await page.evaluate(() => { const c = document.querySelector('.win .close'); if (c) c.click(); }); await sleep(150); }
     }

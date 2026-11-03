@@ -544,15 +544,16 @@ function starInfo() {
     siKey = key; siEl.replaceChildren();
     const put = (node, x0, y0, w, h, cls) => { node.className = (cls || '') + ' ios-sic'; node.style.cssText += `;left:calc(${x0} * var(--sk));bottom:calc(${y0} * var(--sk));width:calc(${w} * var(--sk));height:calc(${h} * var(--sk))`; siEl.append(node); return node; };
     const bg = pic(d.tm != null ? 'starinfo_tm' : 'starinfo_without_tm'); bg.style.cssText = 'opacity:' + (0xc3 / 255); put(bg, 0, 0, W, H, 'ios-sibg');
-    const name = UIEl('span', 'ios-sil ios-sinm', null, d.name); put(name, W / 2 - 40, 60, 80, 11.2, '');
+    const own = !!(window.HOLANG && window.HOLANG.ios && window.HOLANG.ios[uiLang()]), tn = own ? { translate: 'no' } : null; // (the app's own words where it has the language; else the page's translation)
+    const name = UIEl('span', 'ios-sil ios-sinm', { translate: 'no' }, d.name); put(name, W / 2 - 40, 60, 80, 11.2, '');
     if (d.none) {
-      const t = UIEl('span', 'ios-sil ios-sino', null, miscS(0x2a)); put(t, W / 2 - 8 - 66.7, 60 - 333, 133.4, 333, '');
+      const t = UIEl('span', 'ios-sil ios-sino', tn, miscS(0x2a)); put(t, W / 2 - 8 - 66.7, 60 - 333, 133.4, 333, '');
     } else {
       const rowsToShow = d.v.income != null ? ['income', 'pop', 'temp', 'grav', 'metal'] : ['info' in d.v ? 'info' : null, 'pop' in d.v ? 'pop' : null, 'owner', 'temp', 'grav', 'metal'].filter(Boolean);
       for (const key2 of rowsToShow) {
         const [y0, id] = SI.rows[key2], yy = key2 === 'owner' ? d.ownerRow : y0;
-        put(UIEl('span', 'ios-sil ios-sicap', null, miscS(id)), W / 2 - 5 - 42.5, yy, 42.5, 10, '');
-        put(UIEl('span', 'ios-sil ios-sival', null, d.v[key2]), W / 2 + 5, yy, 42.5, 10, '');
+        put(UIEl('span', 'ios-sil ios-sicap', tn, miscS(id)), W / 2 - 5 - 42.5, yy, 42.5, 10, '');
+        put(UIEl('span', 'ios-sil ios-sival', { translate: 'no' }, d.v[key2]), W / 2 + 5, yy, 42.5, 10, '');
       }
       if (d.tm != null) siEl.append(siTmEl);
     }
