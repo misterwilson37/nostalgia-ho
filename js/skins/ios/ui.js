@@ -13,6 +13,21 @@
 // (style.css). A finger gets the app's gestures in every skin (ui.js, "touch").
 (function () {
 'use strict';
+// -[ArmageddonAnimate init] 0x1000a6838 (0.8 s), startWithTarget: 0x1000a6874 (the layer's position kept), update: 0x1000a6958: each time trunc(13 x t) changes the layer is put at its
+// first position + (arc4random % 5 - 2.5, arc4random % 5 - 2.5), so about 13 jumps of up to 2.5 points in 0.8 s; nothing puts it back, so it stays where the last jump left it.
+let shaking = false;
+function shakeMap(a) {
+  if (shaking || !a.UI || !a.UI.view) return;
+  shaking = true;
+  const v = a.UI.view, o = { x: v.ox, y: v.oy }, t0 = performance.now();
+  let cur = 0;
+  const step = () => {
+    const t = Math.min(1, (performance.now() - t0) / 800), n = Math.trunc(t * 13);
+    if (n !== cur) { cur = n; v.ox = o.x + (Math.floor(Math.random() * 5) - 2.5) * SCREEN.u; v.oy = o.y + (Math.floor(Math.random() * 5) - 2.5) * SCREEN.u; a.draw(); }
+    if (t < 1) requestAnimationFrame(step); else shaking = false;
+  };
+  requestAnimationFrame(step);
+}
 // A line of Arial in the app is what UIFont gives the system Arial (CCLabelTTF's contentSize is read from the label at run time; the app has no font file and no constant for it):
 // the font's own table (hhea ascender 1854 + descender 434 + line gap 67, over 2048 units) = 1.1499 of the size; the device's value is not in the app, so this is the font's, not a reading of the program.
 const ARIAL_LINE = 2355 / 2048;
@@ -2561,6 +2576,7 @@ window.HOTHEME = {
   // was your best buddy. A number the table doesn't name plays item 16 "Next Message"
   reportTap(m, id, ctx) {
     const a = A(); if (!a || !a.G || !/^(ios|android)$/.test(a.G.rules || '') || id == null) return;
+    if (id === 0x46d) shakeMap(a); // -[MessageNode doReportAction:game:] 0x1000137cc: the Armageddon report runs -[MapLayer displayArmageddon]
     const item = tapItem(id, m, a);
     if (item != null) a.Sound.play(TAP_FILE[item]);
   },
