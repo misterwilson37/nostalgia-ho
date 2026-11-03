@@ -506,7 +506,7 @@ function fit() {
   const s = Math.min((mapW - pad * 2) / G.W, (mapH - pad * 2 - 30) / G.H);
   UI.view = { s, ox: (mapW - G.W * s) / 2, oy: (mapH - 30 - G.H * s) / 2 + 4 };
   // T.fitView(view, ctx): a skin's own first view (the Amiga's zoom, on your home)
-  if (T.fitView) T.fitView(UI.view, { G, ME, mapW, mapH, sel: UI.sel });
+  if (T.fitView) T.fitView(UI.view, { G, ME, mapW, mapH, sel: UI.sel, redraw: draw });
   UI.fitted = true;
 }
 // right-click on a star: the commands that apply to it (5.0.5 had a

@@ -1543,7 +1543,7 @@ const starItem = (text, hat, size, onClick, scale) => {
 };
 
 // -[WelcomeScene init] 0x10001dad0 (read in the disassembly): the scene's base with p3 = 200 (sceneBase), the HoGuy sprite (hoguy_0-19, the first frame) at (W - strip / 2, 0.7 H) scaled 2 s x the content scale factor
-// (CCDirector's: 2 on a Retina screen, which the -hd art is for), the StarMenuItems New Game (Misc 70, the default one, with the hat), Continue (71, disabled with no saved game: opacity 100 of 255) and Help (72), all
+// (CCDirector's: enableRetinaDisplay 0x100077a78, called at launch, sets 2 unless UIScreen's scale is 1, here the page's devicePixelRatio; the guy's scale is (H / 768) x 2 x it, read from the code), the StarMenuItems New Game (Misc 70, the default one, with the hat), Continue (71, disabled with no saved game: opacity 100 of 255) and Help (72), all
 // at the scale that makes the first's width a quarter of the strip, spaced (strip - their widths) / 5 (also at both ends), in a menu anchored (0.5, 0) at (W - strip / 2, 100 s); the version label (Arial a38, white,
 // "Spaceward Ho: Version %@ (%@)" with CFBundleShortVersionString and CFBundleVersion: 1.2.9 (811605); the Android build's own are 1.2.8 (811597)) anchored (1, 0) at (W - 3 a80, 3 a80); and the base scene's other parts (sceneChrome).
 // The three buttons are the page's own #tnew, #tcont and #thelp (their handlers kept), put in the scene; the page's other controls (importing a game, the skin and language pickers, the account, the credits) are the
@@ -1554,7 +1554,7 @@ function buildWelcome(ts) {
   root = UIEl('div', 'ios-sg ios-welcome');
   const B = sceneBase(root, 200), { gd, a80, W, H, s, stripW } = B, fsz = SCREEN.pad ? 19 : 14;
   const guy = pic('hoguy_0', 'ios-wguy'); guy.style.cssText = 'position:absolute;pointer-events:none';
-  const gk = 2 * s * 2, setGuy = () => { guy.style.width = bpt(guy.naturalWidth / 2 * gk); guy.style.height = bpt(guy.naturalHeight / 2 * gk); };
+  const csf = (window.devicePixelRatio || 1) > 1 ? 2 : 1, gk = 2 * s * csf, setGuy = () => { guy.style.width = bpt(guy.naturalWidth / 2 * gk); guy.style.height = bpt(guy.naturalHeight / 2 * gk); };
   if (guy.complete && guy.naturalWidth) setGuy(); else guy.addEventListener('load', setGuy);
   root.append(put(guy, W - stripW / 2, 0.7 * H, 0.5, 0.5));
   const btns = [['tnew', 70, true], ['tcont', 71, false], ['thelp', 72, false]].map(([id, n, def]) => ({ b: document.getElementById(id), t: miscS(n), def })).filter(x => x.b);
@@ -2461,15 +2461,56 @@ window.HOTHEME = {
     if (!guyOk || !IMG[P + 'spacewardho_name'] || !IMG[P + 'spacewardho_name'].width) return false;
     const ts = document.getElementById('titlescreen'); if (!ts) return false;
     const gen = frame._gen = (frame._gen || 0) + 1, guy = buildWelcome(ts);
-    let i = 0;
-    const tick = () => {
-      if (!ts || ts.hidden || frame._gen !== gen) { if (frame._ho) frame._ho.pause(); return; }
-      guy.src = HOTHEME.dir + 'sprites/hoguy_' + (i % 20) + '.png'; if (i % 20 === 10) Sound.play(7023);
-      i++;
-      if (i > 60) { guy.src = HOTHEME.dir + 'sprites/hoguy_0.png'; Sound.play(7022); i = 0; setTimeout(tick, 4000); return; }
-      setTimeout(tick, 110);
+    // -[HoGuy update:] 0x1000112f8 (decoded as written): scheduled every frame; nextTime counts down by the frame time and a state change happens when it goes below 0. Rand(a, b) is the
+    // game object's routine at vtable +0x30 (inclusive), the sounds are Sounds items 0x21, 0x22, 0x23 (7022, 7023, 7024: vtable +0x20); onEnter 0x1000111bc: state 1, frame 0, goingUp 1, nothing tapped yet.
+    const R = (a, b) => a + Math.floor(Math.random() * (b - a + 1)), snd = (n) => Sound.play(TAP_FILE[n]);
+    const g = { state: 1, tapsToGo: 0, frame: 0, alreadyTapped: 0, goingUp: 1, tapUp: 0, twirlUp: 0, loopsToGo: 0, next: 0 };
+    const show = () => { guy.src = HOTHEME.dir + 'sprites/hoguy_' + g.frame + '.png'; };
+    const wait = () => { g.next = R(60, 90) / 60; };
+    const update = (dt) => {
+      g.next -= dt;
+      if (g.next >= 0) return;
+      const slow = () => { g.next = 0.1; };
+      switch (g.state) {
+        case 1:
+          if (!g.alreadyTapped && R(1, 3) !== 3) { g.alreadyTapped = 1; g.state = 2; g.tapsToGo = R(8, 12); g.tapUp = 1; g.next += 1.0; g.frame = 18; }
+          else { g.state = 3; g.next = 0.1; g.frame = 1; }
+          break;
+        case 2:
+          if (g.tapUp) { if (++g.frame === 20) { g.frame = 19; g.tapUp = 0; snd(35); } slow(); }
+          else if (--g.frame !== 17) slow();
+          else if (--g.tapsToGo === 0) { g.state = 1; g.frame = 18; g.next = R(90, 120) / 60; }
+          else { g.tapUp = 1; g.frame = 19; g.next = 0.6; }
+          break;
+        case 3: if (++g.frame === 4) { g.state = 4; wait(); } else slow(); break;
+        case 4: g.state = 5; g.next = 0.1; g.frame = 5; break;
+        case 5: if (++g.frame === 8) { g.state = 6; wait(); } else slow(); break;
+        case 6: g.state = 7; snd(34); g.twirlUp = R(0, 1); g.frame = g.twirlUp ? 9 : 16; g.loopsToGo = R(1, 4); slow(); break;
+        case 7: {
+          let reset = 0;
+          if (!g.twirlUp) { if (--g.frame === 8) { if (g.loopsToGo) { snd(34); g.loopsToGo--; g.frame = 17; } else reset = 1; } }
+          else if (++g.frame === 17) { if (!g.loopsToGo) reset = 1; else { snd(34); g.loopsToGo--; g.frame = 8; } }
+          if (!reset) slow();
+          else if (g.goingUp) { g.goingUp = 0; g.state = 6; wait(); }
+          else { g.state = 8; g.frame = 8; wait(); }
+          break;
+        }
+        case 8: {
+          const f = g.frame--;
+          if (f === 5) { snd(33); g.next = R(15, 30) / 60; }
+          else if (f !== 1) slow();
+          else { g.state = 1; g.alreadyTapped = 0; g.goingUp = 1; wait(); }
+          break;
+        }
+      }
     };
-    setTimeout(tick, 900);
+    let last = 0;
+    const tick = (now) => {
+      if (!ts || ts.hidden || frame._gen !== gen) { if (frame._ho) frame._ho.pause(); return; }
+      update(last ? Math.min(0.1, (now - last) / 1000) : 0); last = now; show();
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
     // onEnterTransitionDidFinish 0x10001e008: ho.mp3 once (not looped) when Sound (Preferences +0x217) is on
     setTimeout(() => { if (Sound.music && !ts.hidden && frame._gen === gen) { try { const a = frame._ho || (frame._ho = new Audio(HOTHEME.dir + 'sounds/ho.mp3')); a.currentTime = 0; a.play().catch(() => {}); } catch (e) {} } }, 900);
     return true;
@@ -2479,11 +2520,19 @@ window.HOTHEME = {
   // remake's view.s is pixels for one of its map units, which is 2 x 40 points x the scale (the extent counts the other map unit, 0.5 of this one: G.W = extent / 2, taken so, not seen set).
   zoomTo(s, f) { const k = 80 * SCREEN.u, a = A(), G = a && a.G, m = a && a.map && a.map(); const lo = G && m ? Math.max(m.w / G.W, m.h / G.H) : 12; return Math.max(lo, Math.min(k * (SCREEN.pad ? 2 : 1.5), s * f)); },
   // -[MapLayer onEnter] 0x10000ff44: the layer's scale is set to 0.5 (0.7 on an iPad: 0x1000cef8c) and zoomTo: the player's star (myPlayerState's, else his first fleet's) follows, in 0.2 s (0x1000cef84), putting it in the middle
-  fitView(v, { G, ME, mapW, mapH, sel }) {
-    const p = G.players[ME], id = sel != null ? sel : p && p.homeStar, st = id != null ? G.stars[id] : null;
+  // revealRect:duration: 0x1000a1a80 stops the layer's move action and runs a CCMoveTo of the given duration (0.2 s): the view slides from where it stands (the scale is set at once).
+  // Not settled: the position the layer has when onEnter runs (taken here as the galaxy's middle), and whether a star whose centring lies outside the pan rectangle makes zoomTo: skip the move (the remake clamps it).
+  fitView(v, { G, ME, mapW, mapH, sel, redraw }) {
+    const p = G.players[ME], fl = G.fleets.find(f => f.owner === ME && f.star != null), id = p && p.homeStar != null ? p.homeStar : fl ? fl.star : null, st = id != null ? G.stars[id] : null; // myPlayerState's star, else the first fleet's
     v.s = 80 * SCREEN.u * (SCREEN.pad ? 0.7 : 0.5);
-    v.ox = st ? mapW / 2 - st.x * v.s : 0; v.oy = st ? mapH / 2 - st.y * v.s : 0;
-    HOTHEME.clampView(v, { G, mapW, mapH });
+    const to = { s: v.s, ox: st ? mapW / 2 - st.x * v.s : 0, oy: st ? mapH / 2 - st.y * v.s : 0 };
+    HOTHEME.clampView(to, { G, mapW, mapH });
+    if (!redraw || !st) { Object.assign(v, to); return; }
+    const from = { ox: (mapW - G.W * v.s) / 2, oy: (mapH - G.H * v.s) / 2 }; HOTHEME.clampView(from = Object.assign({ s: v.s }, from), { G, mapW, mapH });
+    v.ox = from.ox; v.oy = from.oy;
+    const t0 = performance.now();
+    const step = (now) => { const u = Math.min(1, (now - t0) / 200); v.ox = from.ox + (to.ox - from.ox) * u; v.oy = from.oy + (to.oy - from.oy) * u; redraw(); if (u < 1 && v.s === to.s) requestAnimationFrame(step); };
+    requestAnimationFrame(step);
   },
   clampView(v, { G, mapW, mapH }) {
     const lo = Math.max(mapW / G.W, mapH / G.H), hi = 80 * SCREEN.u * (SCREEN.pad ? 2 : 1.5);
