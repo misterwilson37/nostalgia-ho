@@ -273,51 +273,6 @@ function sideLayout() {
   const de = document.documentElement, room = SCREEN.winW - SCREEN.W - SCREEN.gap >= 300;
   de.style.setProperty('--mapx', (sideOpen() && room ? (SCREEN.W + SCREEN.gap) * SCREEN.u : 0) + 'px');
 }
-// The app's lists (the saved games, the news, the players, the stars' bars, the fleet rows) are CCInertialMenus (a CCMenuAdvanced and an InertialScroller), read from the decompile:
-// CCMenuAdvanced init 0x10001e684 sets minimumTouchLengthToSlide 30; ccTouchMoved 0x10001f7cc adds each move's length to the touch's and, once it reaches 30, unselects the item and moves the menu by that move's delta (setPosition: clamped by
-// fixPosition to the boundary rect); InertialScroller touchMoved 0x1000a9a68 keeps the last 6 touches (location, previous, time); touchEnded 0x1000a9c0c adds the last move, drops the touches more than 0.2 s older than the end (0x1000d64f0),
-// and when the path left is longer than 5 moves the menu by (the sum of the deltas) x (0.5 / the time from the first kept to the last, 5 when it is 0), each clamped to half the menu's content size, in 3 s with CCEaseExponentialOut (1 - 2^(-10 t));
-// touchBegan 0x1000a9a10 stops a move still running. The lists here scroll the same way (the wheel and the keyboard keep the browser's own).
-const INERTIAL = '.ios-sgl, .ios-fdl, .ios-pbox.scroll, #panel';
-function inertialLists(doc) {
-  let ds = null, fling = null;
-  const stop = () => { if (fling) { cancelAnimationFrame(fling.raf); fling = null; } };
-  doc.addEventListener('pointerdown', (e) => {
-    if (e.pointerType === 'mouse' && e.button !== 0) return;
-    let el = e.target.closest && e.target.closest(INERTIAL);
-    while (el && el.scrollHeight <= el.clientHeight + 1) el = el.parentElement && el.parentElement.closest(INERTIAL);
-    if (!el || e.target.closest('input, select, textarea, button.ios-sl, .ios-slider')) return;
-    stop();
-    ds = { el, id: e.pointerId, x: e.clientX, y: e.clientY, len: 0, sliding: false, trail: [] };
-  }, true);
-  const note = (e) => { // one move: its delta, the touches kept (at most 6)
-    const dx = e.clientX - ds.x, dy = e.clientY - ds.y; ds.x = e.clientX; ds.y = e.clientY;
-    ds.trail.push({ dx, dy, t: e.timeStamp / 1000 }); if (ds.trail.length > 5) ds.trail.shift();
-    return [dx, dy];
-  };
-  doc.addEventListener('pointermove', (e) => {
-    if (!ds || e.pointerId !== ds.id) return;
-    const [dx, dy] = note(e), u = SCREEN.u;
-    ds.len += Math.hypot(dx, dy) / u;
-    if (ds.len >= 30) { ds.sliding = true; ds.el.scrollTop -= dy; }
-  }, true);
-  const end = (e) => {
-    if (!ds || e.pointerId !== ds.id) return;
-    const d = ds; ds = null;
-    if (!d.sliding) return;
-    const swallow = (ev) => { ev.stopPropagation(); ev.preventDefault(); }; // the slide unselected the item: no tap
-    window.addEventListener('click', swallow, { capture: true, once: true }); setTimeout(() => window.removeEventListener('click', swallow, true), 0);
-    const u = SCREEN.u, now = e.timeStamp / 1000, keep = d.trail.filter(k => now - k.t <= 0.2);
-    let path = 0, sy = 0; for (const k of keep) { path += Math.hypot(k.dx, k.dy) / u; sy += k.dy / u; }
-    if (!(path > 5) || !keep.length) return;
-    const dt = keep[keep.length - 1].t - keep[0].t, k = dt === 0 ? 5 : 0.5 / dt, half = d.el.scrollHeight / u / 2;
-    const go = Math.max(-half, Math.min(half, sy * k)) * u, from = d.el.scrollTop, t0 = performance.now();
-    const f = fling = { raf: 0 };
-    const step = (n) => { if (fling !== f) return; const t = Math.min(1, (n - t0) / 3000); d.el.scrollTop = from - go * (t >= 1 ? 1 : 1 - Math.pow(2, -10 * t)); if (t < 1) f.raf = requestAnimationFrame(step); else fling = null; };
-    f.raf = requestAnimationFrame(step);
-  };
-  doc.addEventListener('pointerup', end, true); doc.addEventListener('pointercancel', end, true);
-}
 // the pan rectangle in the map canvas's pixels (see HOTHEME.clampView)
 function panRect(mapW, mapH, side) {
   const u = SCREEN.u, m = 10 * SCREEN.gap * u, mapx = parseFloat(document.documentElement.style.getPropertyValue('--mapx')) || 0, open = side == null ? sideOpen() : side;
@@ -423,7 +378,19 @@ function placeButtons() {
   pbShown = own || ships;
   pbEl.hidden = !pbShown;
   pbEl.style.setProperty('--px', x + 'px'); pbEl.style.setProperty('--py', y + 'px'); pbEl.style.setProperty('--pk', (k * SCREEN.u) + 'px');
-  if (fdEl) fdEl.hidden = !fleetsOpen || pad || !pbShown;
+  if (fdEl) fdEl.hidden = pad ? !fleetNode(x, y, v.target || 1) : (!fleetsOpen || !pbShown);
+}
+// An iPad's fleets list is the map's own FleetMovementPlanetNode (showPlanetNode is the iPad flag: -[MapLayer init] 0x10000d50c adds it, an iPhone has the move button's dialog): a FleetMovementDialog anchored (0, 1) at the star's
+// place + (40, 20) x its scale, which is the planets' scale but not above 1.5 on the screen (-[MapLayer setScale:] 0x10000e590); updateData: 0x1000cb2fc makes it visible when the menu has rows and sizes it
+// min(menu width + 2 a80, 120) x min(menu height + 2 a80, 250) (0x1000cb3b8-0x1000cb404); the dialog's menu sits in the boundary rect (a80, a80, width + 1, height - 2 a80 - (the close button's height x its scale + 4)): setContentSize: 0x1000c3618.
+function fleetNode(x, y, target) {
+  const rows = fdList && fdList.querySelector('.frow'); fdEl.classList.toggle('ios-fdnode', !!rows);
+  if (!rows) { fdEl.style.cssText = ''; return false; }
+  const nk = Math.min(target, 1.5 * SCREEN.u), gap = SCREEN.gap, fl = fdList.firstElementChild;
+  fdEl.hidden = false; fdEl.style.setProperty('--pt', nk + 'px'); fdEl.style.left = (x + 40 * nk) + 'px'; fdEl.style.top = (y - 20 * nk) + 'px';
+  const menuH = fl ? fl.getBoundingClientRect().height / nk : 0;
+  fdEl.style.width = (Math.min(100 + 2 * gap, 120) * nk) + 'px'; fdEl.style.height = (Math.min(menuH + 2 * gap, 250) * nk) + 'px';
+  return true;
 }
 // The gear (-[TurnMessageLayer init]'s additionalMenu, AdditionalMenu 0x100093824): a navy bordered list of CCMenuItemFonts (Arial 24 on an iPhone, 28 on an iPad, white),
 // in this order: Dip Into Savings (Misc Strings 116), Auto Play (118), Armageddon (117), Give Money/Metal (115), Scrap Ship Types (114, enabled while the player has a ship type:
@@ -1025,11 +992,24 @@ function reportPicture(m) {
 // scrapped, else with no orders white (yellow when it was bought this turn), with orders (31, 183, 20) when it holds a Colony Ship and (187, 255, 255) when not (the bytes at
 // 0x100149601 and 0x100149637). "Fuel" is the least range of its piles less the fuel used (FUN_100035580 less FUN_100035634: +0x7a).
 const FLEET_CLASS = ['Scout', 'Dreadnought', 'Fighter', 'Tanker', 'Colony Ship', 'Satellite', 'Biological', 'Decoy'];
-function fleetItem(G, f, a) {
+function fleetPiles(G, f) {
   const piles = Object.keys(f.ships).map(k => ({ d: HO.getDesign(G, f.owner, +k), n: f.ships[k] })).filter(x => x.d && x.n > 0);
   if (!piles.length) return null;
   const pw = (x) => HO.designCost(G, x.d).att * x.n;
   let best = piles[0]; for (const x of piles) if (pw(x) > pw(best)) best = x;
+  return { piles, best };
+}
+// the ship dragged out of the fleets list (-[FleetMovementMenu initWithItems:vaList:] 0x1000c8e28: a ShipNode at scale 0.4, updated with the pressed row's strongest pile at ccTouchBegan 0x1000c9808;
+// updateFleetPath: 0x1000c90d0 puts its middle at the finger's x and its height x 0.4 above the finger)
+function dragShip(f) {
+  const a = A(), G = a && a.G, P = G && fleetPiles(G, f), cv = P && a.IMG && HOTHEME.shipPic(P.best.d, a.IMG);
+  if (!cv) return null;
+  cv.className = 'touchdrag'; cv.style.width = (cv.width * 0.4 * SCREEN.u) + 'px'; cv.style.height = (cv.height * 0.4 * SCREEN.u) + 'px'; cv.style.filter = 'none';
+  return cv;
+}
+function fleetItem(G, f, a) {
+  const P = fleetPiles(G, f); if (!P) return null;
+  const { piles, best } = P;
   const cls = FLEET_CLASS[Math.max(0, ['scout', 'dread', 'fighter', 'tanker', 'colony', 'satellite', 'bio', 'decoy'].indexOf(best.d.type))].slice(0, 3);
   let name = best.n === 1 ? `1 ${cls} (${best.d.W}/${best.d.S})` : `${best.n} ${cls} (${best.d.W}/${best.d.S})s`;
   if (piles.length > 1) name += '+';
@@ -2453,6 +2433,8 @@ window.HOTHEME = {
   // its sounds are 5.0.5's recordings as MP3s: SOUNDS.ios in js/skins.js
   images,
   select: P + 'ring', // the green ring round the selected star
+  dragShip, // the ship carried out of the fleets list
+  flingLists: true, // the app's lists are CCInertialMenus (the saved games, the news, the players, the stars' bars, the fleets: InertialScroller touchEnded 0x1000a9c0c): the classic page's fling (js/skins/classic/ui.js List) carries each on
   fleetPath: 'ios', // a dragged fleet's route line (js/skins/classic/ui.js iosFleetPath)
   satRing: 'rgba(200,215,235,0.85)', // the satellites' grey oval (fleet_sat_oval), as a ring
   battlePlanet: P + 'ship-planet',
@@ -2620,7 +2602,7 @@ window.HOTHEME = {
   panel: sidebar, afterMsg,
   afterDraw: () => { hud(); placeButtons(); },
   page(doc) {
-    screenSize(); buildScreen(doc); inertialLists(doc);
+    screenSize(); buildScreen(doc);
     window.addEventListener('resize', () => { const was = SCREEN.pad; screenSize(); hudKey = ''; hud(); if (was !== SCREEN.pad) buildColumn(doc.getElementById('app')); });
     // -[AppDelegate applicationWillResignActive:] 0x100006ef0: the director pauses and the game is saved (saveGame); a page going to the background is the same moment
     document.addEventListener('visibilitychange', () => { const a = A(); if (document.visibilityState === 'hidden' && a && a.G && !a.G.over) { try { a.save(); } catch (e) {} } });

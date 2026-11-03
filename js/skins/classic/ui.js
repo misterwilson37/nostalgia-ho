@@ -1145,7 +1145,7 @@ const Touch = {
 // (FleetMovementMenu); a double tap on the list opens the fleet's Split (the
 // remake's Organize Fleets); holding one of your satellites for 0.5 s marks it
 // for scrapping or unmarks it (SatelliteMenu), with a ruleset that marks.
-const SLIDERS = '#panel, .wbody, .dropdown, .lb, .starmenu';
+const SLIDERS = '#panel, .wbody, .dropdown, .lb, .starmenu, .ios-sgl, .ios-fdl';
 const List = { t: null };
 document.addEventListener('pointerdown', guard((e) => {
   if (!isTouch(e) || !e.isPrimary) return;
@@ -1183,7 +1183,7 @@ const listEnd = guard((e) => {
   List.t = null; clearTimeout(t.hold);
   if (t.mode === 'drag') { List.drop(e.type === 'pointerup' ? e : null); List.noClick(); return; }
   if (t.mode === 'held') { List.noClick(); return; }
-  if (t.mode === 'slide') { List.noClick(); if (e.type === 'pointerup') { if (t.fleets) List.fling(t); else List.spin(t); } return; }
+  if (t.mode === 'slide') { List.noClick(); if (e.type === 'pointerup') { if (t.fleets || T.flingLists) List.fling(t); else List.spin(t); } return; }
   // a double tap on the fleets at a star (tapCount 2 in FleetMovementMenu):
   // Organize Fleets (+[OrganizeFleetsLayer dialog]) with a ruleset that has
   // it, else that fleet's Split
@@ -1234,7 +1234,7 @@ Object.assign(List, {
   pickUp(t, x, y) {
     t.mode = 'drag'; tipHide();
     const d = HO.fleetDesigns(G, t.f)[0];
-    t.sprite = d ? shipImgEl(d, 30, t.f.owner) : el('span');
+    t.sprite = (T.dragShip && T.dragShip(t.f)) || (d ? shipImgEl(d, 30, t.f.owner) : el('span'));
     t.sprite.classList.add('touchdrag');
     document.body.append(t.sprite);
     UI.selFleet = t.f.id; UI.sel = t.f.star;
@@ -1250,7 +1250,7 @@ Object.assign(List, {
   // every new star other than the fleet's own (updateFleetPath:)
   dragTo(x, y) {
     const t = this.t; if (!t || !UI.drag) return;
-    t.sprite.style.left = x + 'px'; t.sprite.style.top = (y - (t.sprite.offsetHeight || 30) - 8) + 'px';
+    t.sprite.style.left = x + 'px'; t.sprite.style.top = (T.dragShip ? y - 1.5 * (t.sprite.offsetHeight || 30) : y - (t.sprite.offsetHeight || 30) - 8) + 'px'; // (the app's ship: its middle one height above the finger)
     const r = cv.getBoundingClientRect(), px = (x - r.left) / mapPx()[0], py = (y - r.top) / mapPx()[1];
     const inMap = px >= 0 && py >= 0 && px <= mapW && py <= mapH;
     const s = inMap ? pickStar(px, py) : null;
