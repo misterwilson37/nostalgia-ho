@@ -2312,19 +2312,32 @@ function openBattleIOS(b, k) {
     return hsb((((w - 1) * 4000) % 65535) / 65535, 1, 1);
   };
   let beam = null;
-  const laser = (p0, p1, dur, col) => { // +[CCMotionStreak streakWithFade: 0.4 minSeg: 1 width: 6 length: 5 color:] moved to the target in speed / 60 s
-    const cx = lz.getContext('2d'), t0 = performance.now(), trail = [], my = beam = {};
+  // fireShot: 0x100095aec makes +[CCMotionStreak streakWithFade: 0.4 minSeg: 1 width: CSF x 6 length: 5 image: laser.png color: the hue] and moves it to the target in speed / 60 s (CCMoveTo). update: 0x100058b2c
+  // adds a point (CCRibbon addPointAt:width: 0x100062c84) whenever the node has moved more than minSeg from the last one; CCRibbonSegment draw 0x1000638a8 draws a triangle strip of the points, the strip's
+  // texture is laser.png across its width, the vertex colour the ribbon's colour with the alpha 255 - 255 x age / fade (a point is dropped once its age passes the fade), blended SRC_ALPHA, ONE_MINUS_SRC_ALPHA
+  // (0x302, 0x303: CCRibbon init). The width is in pixels (the page's canvas is 2 pixels to the point: CSF 2).
+  const laserTex = (() => { const im = new Image(); im.src = HOTHEME.dir + 'sprites/laser.png'; return im; })();
+  const laser = (p0, p1, dur, col) => {
+    const cx = lz.getContext('2d'), t0 = performance.now(), pts = [], my = beam = {}, FADE = 0.4, MINSEG = 1, WIDTH = 12, K = 2;
+    let last = null, tint = null;
+    const tinted = () => { if (tint || !laserTex.complete || !laserTex.naturalWidth) return tint; const c = document.createElement('canvas'); c.width = laserTex.naturalWidth; c.height = laserTex.naturalHeight; const x = c.getContext('2d'); x.fillStyle = `rgb(${col[0]},${col[1]},${col[2]})`; x.fillRect(0, 0, c.width, c.height); x.globalCompositeOperation = 'destination-in'; x.drawImage(laserTex, 0, 0); return (tint = c); };
     const tick = () => {
       if (S.closed || beam !== my) return;
       const t = (performance.now() - t0) / 1000, f = dur > 0 ? Math.min(1, t / dur) : 1;
-      trail.push({ x: p0.x + (p1.x - p0.x) * f, y: p0.y + (p1.y - p0.y) * f, t });
+      const cur = { x: (p0.x + (p1.x - p0.x) * f) * K, y: (p0.y + (p1.y - p0.y) * f) * K, t };
+      if (!last) { last = cur; } else if (Math.hypot(cur.x - last.x, cur.y - last.y) > MINSEG * K) { pts.push({ a: last, b: cur }); last = cur; }
       cx.clearRect(0, 0, lz.width, lz.height);
-      for (let i = 1; i < trail.length; i++) {
-        const age = (t - trail[i].t) / 0.4; if (age >= 1) continue;
-        cx.strokeStyle = `rgba(${col[0]},${col[1]},${col[2]},${1 - age})`; cx.lineWidth = 12 * (1 - age) + 1;
-        cx.beginPath(); cx.moveTo(trail[i - 1].x * 2, trail[i - 1].y * 2); cx.lineTo(trail[i].x * 2, trail[i].y * 2); cx.stroke();
+      const tx = tinted();
+      for (let i = pts.length - 1; i >= 0; i--) {
+        const { a, b } = pts[i], fa = 1 - (t - a.t) / FADE, fb = 1 - (t - b.t) / FADE;
+        if (fa <= 0 && fb <= 0) { pts.splice(0, i + 1); break; }
+        if (!tx) continue;
+        const dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy), nx = -dy / d, ny = dx / d;
+        cx.save(); cx.globalAlpha = Math.max(0, Math.min(1, (fa + fb) / 2));
+        cx.setTransform(nx * WIDTH / tx.width, ny * WIDTH / tx.width, dx / tx.height, dy / tx.height, a.x - nx * WIDTH / 2, a.y - ny * WIDTH / 2);
+        cx.drawImage(tx, 0, 0); cx.restore();
       }
-      if (t < dur + 0.5) requestAnimationFrame(tick); else cx.clearRect(0, 0, lz.width, lz.height);
+      if (t < dur + FADE + 0.1) requestAnimationFrame(tick); else cx.clearRect(0, 0, lz.width, lz.height);
     };
     tick();
   };
@@ -2528,7 +2541,7 @@ window.HOTHEME = {
     const to = { s: v.s, ox: st ? mapW / 2 - st.x * v.s : 0, oy: st ? mapH / 2 - st.y * v.s : 0 };
     HOTHEME.clampView(to, { G, mapW, mapH });
     if (!redraw || !st) { Object.assign(v, to); return; }
-    const from = { ox: (mapW - G.W * v.s) / 2, oy: (mapH - G.H * v.s) / 2 }; HOTHEME.clampView(from = Object.assign({ s: v.s }, from), { G, mapW, mapH });
+    const from = { s: v.s, ox: (mapW - G.W * v.s) / 2, oy: (mapH - G.H * v.s) / 2 }; HOTHEME.clampView(from, { G, mapW, mapH });
     v.ox = from.ox; v.oy = from.oy;
     const t0 = performance.now();
     const step = (now) => { const u = Math.min(1, (now - t0) / 200); v.ox = from.ox + (to.ox - from.ox) * u; v.oy = from.oy + (to.oy - from.oy) * u; redraw(); if (u < 1 && v.s === to.s) requestAnimationFrame(step); };
