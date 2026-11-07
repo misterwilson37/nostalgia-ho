@@ -79,9 +79,11 @@ function add(rows) {
     const fixed = r[6] && typeof r[6] === 'object' ? r[6] : null;
     OTHER.forEach((l, i) => {
       const t = r[i + 1];
-      if (typeof t !== 'string') return;
-      MAP[l].set(en, t);
       const tp = fixed && typeof fixed[l] === 'string' ? fixed[l] : null;
+      // a word a version's own edition left in English (no translation was published) has no text of its own here, only the patch's: the game as published
+      // keeps the English, the patched game puts it in the language (null in the row's place, the patched word in its last element)
+      if (typeof t !== 'string') { if (tp != null) MAPP[l].set(en, tp); return; }
+      MAP[l].set(en, t);
       if (tp != null) MAPP[l].set(en, tp);
       // a pattern whose words are only fillings and punctuation ("%s: %s")
       // fills a template (HOUI.t) but never takes a string apart: it would

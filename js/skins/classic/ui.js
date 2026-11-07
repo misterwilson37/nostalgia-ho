@@ -2082,6 +2082,7 @@ function showRank(i, then) {
   modal(inRank && NS.title || 'New rank', body, { cls: 'mid' });
 }
 function openRanks() {
+  if (skinWindow('ranks')) return; // (a skin's own Rank history: the 1.2 skin's list box)
   const pr = profile(), cur = rankOf(pr.points), R = HO.DATA.ranks || [];
   const body = el('div', { class: 'rank' },
     el('img', { src: A.jpg[cur], alt: '' }),
@@ -2403,6 +2404,7 @@ function alertWords(key) {
 function confirmBox(text, yes, kind, labels) {
   // a skin's own alert for a kind of question ('underfunded': the colonies left short at End Turn): T.alert(kind, text, yes)
   if (kind && T.alert && T.alert(kind, text, yes)) return;
+  if (!kind && T.confirm && T.confirm(text, yes, labels)) return; // (a skin's own question box for the plain "Are you sure?")
   const w = modal('Are you sure?', el('div', null, text.nodeType ? text : el('p', null, text), el('div', { class: 'btns right' },
     el('button', { class: 'quiet', onclick: closeModal }, labels ? labels[1] : 'Cancel'), el('button', { onclick: () => { closeModal(); yes(); } }, labels ? labels[0] : 'OK'))), { cls: 'small alert' });
 }
@@ -3489,7 +3491,7 @@ function giveSlider(max, label, onval, o) {
 }
 function openGive() {
   if (menuDim('give')) return;
-  if (skinWindow('give')) return;
+  if (skinWindow('give')) return; // (a skin's own: the 1.2 skin's, which also does the gift limit and the nobody-to-give-to cases)
   const W = G && HO.rules(G).giveWindow;
   if (W) { openGiveWindow(W); return; }
   if (!others().length) { toast(HO.say(G, HO.DATA.alerts[6] || 'There is no one else to give anything to.')); return; }
@@ -3686,6 +3688,7 @@ function openCanned(C) {
 }
 function openChat() {
   if (menuDim('chat')) return;
+  if (skinWindow('chat')) return;
   if (HO.rules(G).cannedChat) { openCanned(HO.rules(G).cannedChat); return; }
   if (!others().length) { toast(HO.say(G, HO.DATA.alerts[6] || 'There is no one else to send something to.')); return; }
   const lines = ['Thank You!', 'Sorry!', '#!$@*$&@•™!', 'I need money.', 'I need metal.', 'I like you.', 'I hate you.', 'Let’s be allies.'];
@@ -3753,6 +3756,7 @@ function openDip() {
 }
 function openSurrender() {
   if (menuDim('surrender')) return;
+  if (skinWindow('surrender')) return;
   const p = me();
   // 5.0.5's Surrender (PPob 147, FUN_1005d5a0): every player in the menu,
   // yourself and those out greyed, then "No One"; picked: the one you are
@@ -3988,7 +3992,7 @@ function playOneTurn() {
 }
 // Auto Play: keep ending turns until something interesting happens
 function openAutoPlay() {
-  if (skinWindow('auto')) return;
+  if (skinWindow('auto') || skinWindow('autoplay')) return; // (a skin's own: the iOS skin's 'auto', the 1.2 skin's 'autoplay')
   if (HO.rules(G).autoPlayWindow === 'ios') return openAutoPlayIOS();
   if (HO.rules(G).autoPlayWindow === '505') return openAutoPlay505();
   const f = el('form', { class: 'newgame', onsubmit: (e) => {
@@ -4157,6 +4161,7 @@ function openRadicalHand() {
   const RH = G && HO.rules(G).radicalHand; if (!RH || G.over) return;
   const cards = RH.cards(G, me());
   if (!cards.length || (RH.full && cards.length < RH.full)) { toast(cards.length ? 'Your radical researchers have fewer than four projects: none can be cancelled.' : 'Your radical researchers have no projects yet.'); return; }
+  if (skinWindow('radical')) return; // (a skin's own: the 1.2 skin's list box)
   const W = RH.words;
   if (!W) {
     let sel = -1;
@@ -6616,12 +6621,13 @@ window.addEventListener('DOMContentLoaded', () => {
     fit() { UI.fitted = false; fit(); draw(); }, clampView,
     openBuild, openSplit, openOrganize, organizeStyle, openPlayers, openCompare, openSkills, openScrapTypes, openBattle, lastBattles, battleName, openReports, openAbout, openHelp,
     openRadicalHand, showRank, openWinWindows, openYouWon, openYouLost, // (the originals' own windows, for the tests)
-    quitToTitle, evacuateClick, evacuateHere, // (the iOS skin's evacuate button beside the selected colony's bar)
+    quitToTitle, evacuateClick, evacuateHere, evacuateLabel, evacuateShown, // (the iOS skin's evacuate button beside the selected colony's bar)
     newGameDialog, titleScreen, hideTitle, continueChecked, importGame, doEndTurn, flipBarScale, marksScrap, scrapWords, toggleScrapFleet,
     verOpts, modern, hotSeat, openGameText, Prefs, savePrefs, switchPlayers, forceEndTurn, openBattleList, openFixSpending, lastBattles, playOneTurn, showMessages,
     // (and the windows tools/ui-lang-audit.js opens in every skin and language)
-    openPrefs, openAccount, openHall, hasHall, openMasterList, openRanks, openGameCenter, openFleetList, openStarList, openGive, openChat,
-    toggleArmageddon, openSkin, openSounds, openLanguage, openAutoPlay, runAutoPlay, openDip, openSurrender, openSavedGames, closeScreen, openPatchNotes,
+    openPrefs, openAccount, openHall, hasHall, openMasterList, openRanks, profile, rankOf, // (profile, rankOf: the rank window a skin draws itself)
+    openGameCenter, openFleetList, openStarList, openGive, openChat, winWords, others, menuDim, chatLimitToast, openNameStar, findRoute, autoRoute, runAutoPlay, autoPlaySliders, autoPlayWhere, openAutoPlaySettings, // (what a skin's own Give, Message, Dip and Surrender windows need)
+    toggleArmageddon, openSkin, openSounds, openLanguage, openAutoPlay, openDip, openSurrender, openSavedGames, closeScreen, openPatchNotes,
     classic(name, fn, ...a) { skipSkinWin = name; try { return fn(...a); } finally { skipSkinWin = null; } },
   };
   window.HOAPI = T.api; // (the test tools: tools/ui-lang-audit.js)

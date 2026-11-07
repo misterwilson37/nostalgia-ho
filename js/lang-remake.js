@@ -1098,6 +1098,10 @@ de: {
     // DOS 702: "%Fss" adds an s to the name, which is wrong after s, ß, x, z ("Marss", "Alexs");
     // the sentence without a genitive
     '%s’s population growth rate has slowed.': 'Das Bevölkerungswachstum auf %s verlangsamt sich.',
+    // the name-a-star window's rule and hint, which the German DOS 2.0 and Mac 2.0.1 never translated (only its heading and label): as published they stay English; the patched game has them in German,
+    // in the words the remake's German already uses for the same lines in the other versions
+    'Star names must be 4 to 7 characters long.': 'Sternnamen müssen 4 bis 7 Buchstaben lang sein.',
+    '(If you’d rather not name a star, click “OK” with the name blank.)': '(Wenn Sie keinen Stern benennen möchten, klicken Sie einfach mit leerem Namen auf „OK“.)',
   },
   // adapted from official: a line whose English differs a little from one an
   // official translation has (a word, a clause, a number, a name): that

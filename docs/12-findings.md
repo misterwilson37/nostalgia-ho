@@ -707,3 +707,354 @@ symbolic trace and compared with the remake in French and English. Found and fix
 Every row is settled: none `open`, none with `"gap": true` (`node tools/display-audit.js 12`). Two differences are kept, each with
 its reason in its row: New Game asks for the file name in the remake's New Game window (a browser has no Mac file dialog), and the
 multi-player file's polling (`PollNextTurn`) is the remake's own hot seat.
+## Remake-only controls (November 2026)
+
+*Brief: `docs/brief-restyle.md`. Step 1, the list. Nothing here is designed yet.* Played with a later ruleset's rules, the 1.2 skin
+shows 1.2's own screens for everything 1.2 had (the display audit) and **falls back to the classic page's controls** for what a later
+version added. This is the list of those, from playing every ruleset in the skin.
+
+**How the list was made.** `node tools/skin-rules-check.js --skin=mac12 --inventory` plays each of the 12 rulesets in the skin (three
+turns, one colony selected), opens every command in the Ho! 1.2 menu (where `menus()` in `js/skins/mac12/ui.js` puts every command 1.2
+has no menu item for) and records what each opens: a window of the skin's own (class `mac12`) or the classic page's (no such class).
+A classic window is a **fallback and fails the check**, so the check is red now and goes green as controls are built. Items marked
+*read* below were found in the code, not yet by playing; each is checked when it is built.
+
+### What falls back, and in which rulesets
+
+Rulesets: 12 = 1.2, dos = DOS 2.0, 301 = 3.0.1, 405 = 4.0.5, orig = 5.0.5, palm = Palm, clm = Claude, m20 = Mac 2.0.1, m405 =
+Windows/Mac 4.0.5, gem = Gemini, ios/and = iOS and Android. A command shows only in the rulesets that have the feature.
+
+| Command (Ho! 1.2 menu) | Opens (classic) | Rulesets |
+|---|---|---|
+| Players and history; Players and alliances… | Players: the list, history, and the alliance, best-buddy and surrender controls | the first in all; the second in all but ios, and |
+| Give money or metal… | Give Money/Metal | 301, 405, orig, palm, clm, m405, gem |
+| Send a message… | Send Message | all but 12, ios, and |
+| Dip into savings… | Dip Into Savings | 301, 405, orig, palm, m405 |
+| Surrender… | Surrender (and "Take back surrender") | 301, 405, orig, palm, clm, m405, gem |
+| Armageddon device… | an "Are you sure?" alert | 301, 405, orig, palm, m405 |
+| Radical research… | Radical Research | orig, palm |
+| Compare players… | Compare Players | dos, 301, 405, m20, m405 |
+| Hall of Fame…, Hall of Shame… | Hall of Fame / Shame | 301, 405, m405 |
+| Master Point List… | Master Point List | 405, m405 |
+| Rank history… | Rank history | orig, palm |
+| Group fleets… | Group Fleets (1.2 has its own Organize Ships…, which is not touched) | orig |
+| Organize fleets… | Organize Fleets (the Palm's) | palm |
+| Preferences… | Preferences | all |
+| Auto play… | Auto Play | all |
+
+### Not reached by a menu item (found by playing 5.0.5 and 1.2, or by reading the code)
+
+- **Create New Ship Type… offered four classes** whatever the ruleset. 5.0.5 lets you build **Tankers and Dreadnoughts**, and
+  **Biologicals** and **Decoys** once the player has them (`canBuildType`). The art was already there
+  (`assets/skins/mac12/sprites/fill/`: `mac4-p2263`, `mac4-p2261`, the Tanker's body `mac4-p2758` outlined).
+- **French names for those classes were missing** (`CLASS_FR` had 1.2's four), so a Tanker or Dreadnought listed as "undefined ...". 1.2F
+  and 3.0.1F have no words for them; iOS's are the nearest official (`docs/glossary-fr.md`).
+- **Build Ships queued ships that were never built, in every ruleset but 1.2's and DOS 2.0's.** *Found by testing, not on the brief's
+  list.* The skin's Build window always queued (`HO.queueShips`, 1.2's way); only a ruleset with `buildQueue` builds a queue. In 5.0.5 two
+  ships queued, two turns passed, 0 ships and the queue still full, no money spent. Later rulesets buy ships at once.
+- **The players' strip showed no pacts** and opened nothing.
+- **Battle stance and Arrive late were unreachable.** The classic fleet row has them (a select and a check box); this skin's own panel has no
+  such row. Six rulesets have them. *Found by comparing the features the classic UI acts on with those the skin acts on* (`waypoints`,
+  `yearsPerTurn`, `stances`, `singleTypeFleets`, `lateArrival`: `waypoints` is the map drag and `yearsPerTurn` only changes the number of hints;
+  `singleTypeFleets` is DOS 2.0's alone and was not looked at).
+- **Evacuate was unreachable.** Classic offers it on the planet panel, in the map's right-click menu and on a Palm message; this skin has none of
+  the three, and 1.2 itself had no command (`evacuateCommand: false`), so a 3.0.1 or later game could not give up a colony.
+- **The Tech Spending box had 1.2's five techs,** so 5.0.5's sixth, Radical research, could not be given any of the budget in this skin.
+- **Colour pictures in a black-and-white skin:** the Radical Research window's picture beside each program (5.0.5's `m9010`) and the Master
+  Point List's rank picture (Windows 4.0.5's).
+- **Checked and found nothing to build:** novas on the map and in reports (1.2-look stars, `fill/` art; `skin-holes` finds 0 classic
+  pictures in 5.0.5, 4.0.5, 3.0.1 and 1.2 rules), a debt (the Totals box prints `Savings ($42,000)`, as classic does), an armed Armageddon
+  device (classic shows only the menu item's changed words, "Turn off the armageddon device", and the Ho! menu does that).
+
+### The remake's own windows, listed for Jake's call (decided: restyle them too)
+
+**Skin and OS look…, Sounds…, Language…, Temperatures…** are the remake's own conveniences, not game features. Jake said to restyle them
+too: they are dressed (below). Menu items that only toggle need no window and are already in the 1.2 menu: Modern conveniences, Full
+Hoedown, Every version's jokes (shown while Full Hoedown is on), Turn sound on / off, Turn theme music on / off, Fit galaxy. **Left as they
+are:** New game, Quit, About, Account, Import, Export, Suggestion box and the manuals, (the full-screen **Saved Games** page, the iOS and Android
+rulesets' "Saved games…" and 1.2's own Open…, was first left too and was then restyled in CSS: see "Windows dressed, not rebuilt").
+
+### What was built (November 2026)
+
+Every item is **the remake's own** (there is no original to match). `remake12` marks each in the page, `native12` those built in `ui.js`,
+`css12` a later version's own window dressed by `style.css`. See `HANDOFF.md` of the package for where each look came from.
+
+| Control | Rulesets | How |
+|---|---|---|
+| Players window (pacts, best buddies, status, history, Surrender) | every ruleset (in 1.2's own rules only from the Ho! menu) | `native12`, `playersWindow` |
+| The players' strip: a ring for an ally, a double ring for a best buddy; a click opens the Players window | later rulesets only | `native12` |
+| Create New Ship Type: Tanker, Dreadnought, Biological, Decoy (the ruleset's `canBuildType`) | later rulesets | `native12` |
+| Build Ships buying at once, with a refund, rs.manyShips and rs.allowDebt | rulesets without `buildQueue` | `native12`, `buyShips` |
+| The sixth research bar, Radical | rulesets with Radical research | 1.2's vertical bars, narrower |
+| Give, Message, Dip, Surrender, Armageddon's question, Radical Research, Rank history, Group / Organize Fleets, Compare, the Halls, Master Points, Preferences, Auto Play, Skin and OS look, Sounds, Language, Temperatures | each its ruleset's | `css12` (the window's own code, 1.2's content look) |
+| Colour pictures in those windows in 1 bit | | Radical: the skin's stand-ins; Halls: Atkinson dither at display |
+| Rank history: the rank's 1-bit picture in a frame, the ranks in a list box (own rank in inverse, earned ones starred), the wins in a second list | 5.0.5, Palm | `native12`, `ranksWindow`; needs the hook `skinWindow('ranks')` and `profile`, `rankOf` in `T.api` (classic `ui.js`) |
+| Give Money/Metal, Send Message, Dip Into Savings, Surrender, Radical Research, Auto Play | the rulesets that have each | `native12`: `give12`, `chat12`, `dip12`, `surrender12`, `radical12`, `autoplay12`; hooks `skinWindow(...)` in classic `ui.js`, the helpers a skin needs added to `T.api` |
+| Only the important messages, hints, best buddies' stars (Preferences, the 1.2 way) | rulesets whose Preferences window has them | `native12`: check-marked items in the Options menu (`prefItems12`), the ruleset's own words |
+| The fleet box's rows and the selected fleet's lines; the planet and fleet words | every ruleset but 1.2 | borrowed from 1.2's own routines (`RS12`, `langView`, `planetWords`); mixed fleets: the engine's label |
+| Battle stance (Normal, Offensive, Defensive) and Arrive late, on the selected fleet | rulesets with `stances` / `lateArrival`: 5.0.5, Palm, iOS, Android, Claude, Gemini | `native12`: check-marked items at the foot of the Ships menu (`fleetOrders12`), dimmed unless a fleet of yours on the ground is selected; absent from 1.2's own menu; the words are the table's (iOS's, the Palm's) |
+| Evacuate planet (5.0.5's "Evacuate Planet" / "Don't Evacuate Planet" mark, 3.0.1 and 4.0.5's confirmation) | rulesets with `evacuateCommand` (3.0.1 on; not 1.2 or DOS 2.0) | `native12`: an item at the foot of the Galaxy menu on the selected colony of yours; the classic code's own `evacuateClick`, so each version's words, jokes and rules hold |
+| The transient message (toast) and the hover tip in System 6's black and white; the full-screen Saved Games page as a System 6 window | all | CSS only |
+
+`menus()` puts each remake command in the Ho! 1.2 menu. "Group fleets…" (5.0.5) and "Organize fleets…" (Palm) are the commands in it that
+are strings; 1.2's own Organize Ships… (a function label) is the one `menus()` filters out, since the Ships menu has it. They are meant to be
+there: it is how those two commands stay reachable.
+
+### Found on the way
+
+- **`lang()` said French for an English game.** It read `G.opts.lang`, unset in a game played in a ruleset's own language (5.0.5's is
+  English), so a 5.0.5 game showed French in the Tech box and the class menu though the menus were English. Fixed: the fallback is
+  `HO.ownLanguage(HO.ownRules(G))`. 1.2's rules (own language French) are unchanged; no exception for a game wrong at launch has been needed.
+- **`descN` (the list of ships bought) needed `rs.shipsDesc`,** which only 1.2's family has; any later ruleset threw an error the first
+  time a ship was bought. Fixed (found while testing the new Build window).
+- **The remake's windows were dressing 1.2's own.** The first version tagged every classic window `remake12 css12`, so under 1.2's own rules
+  the explored-stars list and the like took the remake's content look (Geneva 12, 9-pixel notes, pixelated images). The display audit checks
+  words and data, not CSS, and did not see it. Now nothing is tagged under 1.2's rules except what the remake's own commands open (the Ho!
+  menu's items tag their windows when they open them); `tools/skin-rules-check.js --skin=mac12` fails a remake command whose window is not.
+- **The Players window offered Surrender where the ruleset has none:** iOS and Android have the `surrender` rule but `surrenderCommand: false`
+  (no command, no menu item). Found by reading; the harness now checks the button against the command.
+- **The Tech box's second row of names is cut at the box's foot** with five bars too: the original probe showed it before any change. Not
+  touched.
+
+### Update, round 3: most of those windows were then rebuilt (November 2026)
+
+Jake asked for everything that could be in 1.2's own widgets to be. **The table below was written before that and is partly out of date;** this is
+what is true now. Widgets (`ui.js`): `vbar12` (1.2's vertical bar: an axis with ticks, a black bar rising from a base line, dragged or moved by the
+keys), `list12` (a list box, the chosen row in inverse, as 1.2's own lists), `ask12` (the plain "Are you sure?" as 1.2's title-less alert; under 1.2's
+own rules the classic box stays). **Rebuilt as the skin's own windows (`native12`), each calling the engine as the classic window did and keeping each
+ruleset's words, limits and forms:** Give Money/Metal (one window for the face grid, 5.0.5's sliders, the Palm's steps, iOS's tap), Send Message (all
+three forms), Dip Into Savings, Surrender, Radical Research, Auto Play (all three forms), and the Armageddon and Surrender questions. **Preferences, the
+1.2 way:** 1.2 kept its settings as check-marked Options menu items, so the preferences a later ruleset adds (only the important messages, the
+between-turn hints, the stars your best buddies explore) are Options items too, in the ruleset's own words, only where its Preferences window has them
+(1.2's and DOS 2.0's Options menu are as they were); the Preferences window itself stays the version's own, dressed.
+**Not rebuilt, because they already are 1.2's widgets in the version's own arrangement:** Skin and OS look, Sounds, Language, Temperatures (a paragraph,
+popup menus and check boxes, as 1.2's Create New Ship Type has); the Halls, Master Points and Compare (list boxes with the row in inverse). The Group
+fleets (5.0.5) and Organize fleets (Palm) windows are piles of ship pictures like 1.2's own Organize Ships, and stay the classic code's, dressed.
+
+**Found while doing it (all of the one kind: the skin assuming a routine only 1.2's ruleset has):**
+- **The fleet box was blank in every ruleset but 1.2's.** Its rows use `rs.shipsText` and the selected fleet's lines `rs.fleetInfo`; `shipsText`,
+  `fleetInfo`, `shipsDesc` and `planetInfo` exist only in rules-12 (checked in the live rulesets, not by reading, since several inherit). So from DOS
+  2.0 to Gemini the box showed empty rows and no fuel, speed or destination. Now a ruleset without them gets 1.2's own routines through a view of the
+  game in the player's language (they read `G.opts.lang` and say French when it is unset), or the engine's label ("3 Scouts", "6 ships").
+- **A mixed fleet** (5.0.5 and later may hold Scouts, Fighters and Tankers together; 1.2's rule is one design) opened an empty Organize Ships window;
+  it now opens the classic organizer, whose piles are a design in a fleet.
+- **Scrap This Type** called `flagScrapDesign`, which Gemini lacks: it scraps at once after the question, as the classic window does there.
+- **The skin's own battle window** (`bw12m`, 1.2's animation) was tagged as the remake's and so got its content CSS; it is excluded now.
+- `battlePanel` is missing in Claude and Gemini; the skin's battle uses it only where it exists (the others use the classic written battle), so the
+  fallback written for it is not reachable. Not staged: I could not make a battle happen in those two.
+
+### Windows dressed, not rebuilt: a note for later (November 2026)
+
+After the first package Jake asked for the noticeable ones to be rebuilt in a 1.2 layout and the rest noted. Each window below was looked at
+full size beside a native 1.2 dialog (Create New Ship Type, List Ship Types, the battle speed window). **Rebuilt: Rank history only** (it
+was a ruled table with centred paragraphs, a web page's; now a 1.2 list box, `ranksWindow`). The others already read as System 6 dialogs
+through the OS look, and are **later versions' own windows, kept with their own rules**, so a rebuild would change a few pixels of layout and
+carry the risk of dropping a version's behaviour. What a rebuild would do, and where it would pay:
+
+| Window | Variants it carries (a rebuild must keep each) | What a rebuild would change | Worth it? |
+|---|---|---|---|
+| Preferences | `prefs505` (PPob 139), `prefsIOS`, `prefsPalm`, the generic form (`verPrefs`); needs `Prefs`, `savePrefs`, `ownCelsius`, `setOwnCelsius`, `modern`, `setModern` exposed in `T.api` | order and spacing; the remake's options below the line could be a 1.2-style group | Low: it is already the real 5.0.5 dialog; four variants make it the costliest |
+| Auto Play | 5.0.5, iOS, generic (`openAutoPlay505`, `openAutoPlayIOS`, `prefsAutoPlay`) | none visible: group box, radio dots, thin slider rails already match | No |
+| Give Money/Metal | `rs.giveWindow` per version (3.0.1 grid, 4.0.5, 5.0.5 sliders, iOS, Palm), recipient list, canned amounts | none visible: the bar sliders with ticks are 1.2's own idiom | No |
+| Dip Into Savings, Surrender, Send Message | `rs.dipSet`, 5.0.5 `dip505`, iOS/Palm forms; `cannedChat` | none visible | No |
+| Radical Research | `radicalHand.words`, timeout (4.0.5), keep-choice (5.0.5, Palm, iOS) | the radio rows could be a 1.2 list box with its picture; the 1-bit picture is done | Low |
+| Compare Players, Hall of Fame / Shame, Master Point List | 4.0.5's own windows (`rs.hall`, `hallListBox`, dialog 386) | none: they are already list-box windows | No |
+| Group fleets (5.0.5), Organize fleets (Palm) | version organizers, scrap marking | 1.2 has its own Organize Ships (kept, in the Ships menu) | Low |
+| Skin and OS look, Sounds, Language, Temperatures | the remake's own, no version behind them | a pixel-font canvas or 1.2 popup menus in place of the `<select>` boxes | Low |
+| Saved Games (full screen) | the iOS/Android rulesets and 1.2's Open… | **Done in CSS** (`html .hoscreen` in `style.css`): a window on the grey desktop with a striped title bar (Back where a close box would be), a list box whose row under the pointer is inverted, Mac buttons. What 1.2's own Open dialog showed is not in the repo's findings, so this is the remake's own look. The page's code is the classic's, unchanged | Done; a hand-made System 6 file dialog would be the next step, if wanted |
+
+**Also restyled (CSS only, in `style.css`):** the transient message ("toast", a dark pill in the classic page) is System 6's white box with a
+hard shadow, and the hover tip's pale yellow is white. Both are the remake's own.
+
+**What rebuilding any of them would need first:** the window's hook in the classic code (`skinWindow('name')`, as 'players' and 'ranks' have;
+Give, Dip, Surrender, Preferences and the rest have none yet) and its helpers added to `T.api`.
+
+### The menu sweep and the harness (how the above were found)
+
+`tools/skin-menu-sweep.js` opens every command of every menu in each ruleset, at the start of a game and after eight turns, and reports a page
+error, the game's own bug-report window, and a window that will not close. It found **no crash** in any of the twelve rulesets after the fixes
+above (it found 1.2's explored-stars window "stuck": a title-less 1.2 dialog whose close box is hidden and which Escape closes, not a bug). It
+cannot find a control that is not there (Build never building, no Evacuate): those came from comparing the classic code's features, buttons and
+context menu with the skin's.
+
+`tools/skin-playthrough.js` plays a seeded game in each ruleset, for a number of turns, doing what a player does: buys or queues ships through the Build
+window, sends fleets, drags the budget bars with the mouse, creates designs, opens windows, toggles Options items, ends the turn and answers what comes up.
+It reports a page error, the bug window, a window that will not close, a blank box in the panel, a fleet box that draws nothing for fleets that are there, a
+purchase that changes nothing (money not spent, ships not there, a queue not longer: unless the player could not afford it, or 1.2's queue has every slot
+taken, which are the rules), and a turn that does not advance. It is the check the menu sweep cannot be: the Build and fleet-box bugs were in the panel and
+the windows, not the menus. Mutation-tested (Build always queueing; the fleet-box fallback removed): both are reported. All twelve rulesets, 20 turns,
+seed 7, and several 30-turn games on other seeds, are clean. It does not drag on the map itself (it orders with `HO.orderMove`), force a battle, or save and
+reload.
+
+`tools/skin-rules-check.js --skin=mac12` fails on: a Ho! menu command whose window is none of 1.2's own, `remake12` or `css12`; Battle stance,
+Arrive late and Evacuate missing from the menus of a ruleset that has them, or present in one that has not (1.2's menus are as they were); the
+Players window's Surrender button against the ruleset's Surrender command. What it cannot tell is whether a window *looks* right: each was
+looked at.
+
+### A long 3.0.1 game (November 2026): what was seen, for the next iteration
+
+3.0.1 had been the one ruleset whose Give and Send Message were never opened, because it dims `alliances`, `give`, `surrender` and `chat` while the year is before
+2001 (`rs.menuDimmed`) and a game starts in 2000. **One End Turn lifts it** (the first turn goes to 2010). So that was the test setup, not a gap.
+- **40 turns (year 2000 to 2400, seed 41, `tools/skin-playthrough.js`): no problem** of any kind: no error, no stuck window, no blank box, every purchase real.
+  At the end: 41 stars, 4 players all alive, 1 battle, 0 captures. A 3.0.1 game does not end by itself in 40 turns; **the play-through does not colonize or fight on
+  purpose** (it sends fleets at random), so its "4 of 41 stars mine" says nothing about how the game plays.
+- **After two turns every dimmed command opens as the skin's own window and works, checked against the game's state:** Give (3.0.1's words, "Give Stuff To:",
+  "Give How Much Money?"; $1,500 given, savings 40,360 to 38,860, gifts this turn 0 to 1), Send Message (its stepped form: "Send Message To Who?", "Saying What?
+  I Want / You Take ...", "Which Star?"; sent), Players (an Ally column only, 3.0.1 has no best buddies; ticking it set the pact and the status read "You offered to
+  ally"; the Surrender button is there, 3.0.1 has the command), Surrender (the generic form; the take-back question: Cancel keeps it, OK clears it), Dip Into Savings
+  (generic: to 100% in steps of 5), Armageddon (the question, then on). Compare Players ("Your rankings among the 4 remaining players in 2020") and the Halls open as
+  the version's own windows, dressed.
+- **Not covered, worth doing next:** a 3.0.1 game played *to its end* (a win or an elimination: the You Won / You Lost windows were looked at directly, never reached by
+  play, and the "name a star" and rank windows after a win); **colonizing** on purpose (send colony ships to unowned stars and see them settle, the colony's panel,
+  the budget bars of a new colony); a real fight (the skin's own battle window reached by play, not staged); and the same long game in 4.0.5 and 5.0.5 (3.0.1 was
+  the only one given 40 turns). `tools/skin-playthrough.js` could be taught to colonize and to attack: that is the single best next addition.
+
+### Playing to the end, colonizing, and a window that could not be closed (November 2026)
+
+**Found by playing a win to its end: the "name a star" window could not be closed without naming a star** (1.2 and every ruleset that asks the winner for a star:
+DOS 2.0, 3.0.1, 4.0.5, Mac 2.0.1, Mac 4.0.5). 1.2's own dialog (DLOG 4050) has no Cancel and says "click OK with the name blank"; the skin laid it out that way
+(`nameStarLayout`) but the classic form ignores a blank name and relied on the Cancel button the layout removes, so after winning the game was stuck on it. A
+blank OK now presses that Cancel's own handler (the decline, with its "no longer asking" record). The harness opens the window (`HOAPI.openNameStar`) and fails if a
+blank OK does not close it; mutation-tested.
+
+**`tools/skin-endgame.js`** plays a game to its end through the real End Turn, for each ruleset, a win and a loss, and drives every window and card the interface
+offers (the eliminations, "Congratulations!", the name-a-star window, the Palm's and iOS's "New rank" windows, the Hall of Shame offer, the end card), then presses
+"New game" and checks it gives a fresh game. All twelve rulesets, both ways: no problem (after the fix). It sets the situation up in the game's state, because each
+ruleset keeps its own idea of who is out: 5.0.5 relies on `alive`; 4.0.5 caches a player's colony slots in `slots301` (emptying the planets alone left them counted
+as colonies); 4.0.5 and Mac 4.0.5 do **not** end the game for an eliminated player (it plays on, the clock still works), which is how that version plays. **Not
+staged: an alliance win**, which needs the computers to agree to ally (they answer "I hate Jake"); forcing it would bypass the engine's own rule.
+
+**Colonizing by play** (a colony ship bought through the Build window, sent to the nearest unowned star in range, turns ended until it settled, the new colony's
+panel looked at and its shipbuilding bar dragged by the mouse): 1.2, 3.0.1, 4.0.5, 5.0.5, the Palm, Mac 4.0.5, Gemini and iOS: it settles (stars 1 to 2), the panel is
+not blank, the bar moves (share 0.877 then 0.36). **Not run:** DOS 2.0, Mac 2.0.1, Claude, Android.
+
+**1.2's planet box with nothing left to buy** (72 degrees and no metal, so terraforming and mining are both finished): it draws the shipbuilding queue ("En cours:"
+or "Néant.") in place of the bars, so there is no bar to drag. That is 1.2's own display, kept; it looked like a bug to a check that expected a bar to move.
+
+**The play-through tool's own faults, fixed:** its "drag a budget bar" action began below the bars and moved nothing for a while, so it was not testing what it said; it
+now drags inside the bars and fails if the shipbuilding bar does not change (except when 1.2 shows the queue, above, or the share is already 100%). It also reported
+three false alarms of the kind "a purchase changed nothing", each a rule of the game: a design the player cannot afford, iOS's and the Palm's Allow Debt floor of $0, and
+1.2's queue with every slot taken. It now prints a one-line summary at the end of each game (year, stars, ships, battles).
+
+**Still not done:** a fight reached by playing (the skin's own battle window has been opened on battles made by planting an enemy fleet and ending the turn, in 5.0.5,
+4.0.5 and DOS 2.0, with Modern conveniences off); 4.0.5 and 5.0.5 played as long as 3.0.1 was (40 turns); saving and reloading; the alliance win; the three colonizing
+gaps above.
+
+### Modern conveniences does not change the game (November 2026)
+
+The New Game / Preferences option "Modern conveniences: automatic routes, the map follows the news, battle speed and written battle reports (not in the original games)".
+- **Nothing outside the interface reads it.** A search of every file outside the skins finds it only in `online.js` (listed as a *local* look option, with the OS look and
+  sounds, not shared game state) and in two comments in `rules-12.js` and `rules-dos.js` ("no Evacuate button, even with modern conveniences on": it adds no ability).
+  In the interface it does three things: draws and uses a hop route through your colonies for an order that is too far (`findRoute`, `autoRoute`); centres the map on a
+  report you click; shows a battle as a written report with a speed menu (Slow, Normal, Fast, Skip to the end) instead of the animation.
+- **`tools/skin-modern-compare.js`**: the same game three times (Modern on, on again, off; the seed fixed by a fixed random sequence at the moment the game is made), a
+  passive player, a fingerprint of the whole game after every turn. 3.0.1, a small dense galaxy, three strong computers: the passive player is eliminated at turn 69
+  (year 2690), the lose window ("Unfortunately, you have been eliminated from the game…", "Oh, well…") and the end card appear, identically with the setting on and off; **all
+  69 turns identical in all three runs** (planets, money, metal, ships, tech, battles and captures of all four players). On and on matching proves the game repeats.
+- **`tools/skin-route-compare.js`**: with the setting on, one order sends a fleet along a route through your colonies; off, the direct order is refused and each hop is
+  ordered by hand at once. The fleet **arrives on the same turn** (Claude 4 turns, Gemini 6). Only Claude and Gemini lack their own routing rule (`rs.route`, asked of the live
+  rulesets); in every other ruleset the game routes the fleet itself, with or without the setting, so the setting changes nothing there.
+- **A game the player WINS, with fighting, the same on and off (`tools/skin-modern-win-compare.js`).** Setup, chosen with the user: the smallest and densest galaxy (5.0.5: size 0,
+  density 0 = dense, hex shape: 19 stars, each 4 from its neighbours, inside a fleet's range of 6), the fewest computer players (one, then two) at the dumbest level (strength 50),
+  my start Abundant, theirs an Outpost. A scripted player decides everything from the game's state (research in weapons and shields, a fighter design, settle stepping stones toward
+  the enemy by a path search, send a wave only with 30 ships and twice the enemy's), so the same game gets the same orders. Seed 8 (one computer): **won at turn 9**, one battle, one
+  capture. Seed 5 (two computers): **won at turn 30**, 7 battles, 3 captures. Each game played three times (Modern on, on again, off): **every turn identical**
+  (each player's planets, money, metal, ships, tech, and the battle and capture counts), and the scripted player's decisions identical. With "Review Announced Battles" on the battle
+  is displayed, and the two presentations differ as designed: on, the written battle with its speed menu ("Slow, Normal, Fast, Skip to the end" and a "Written report" expander);
+  off, the skin's own full-screen battle ending "413,478 killed" and an OK button. The win screen is the same: "You conquered the galaxy.", "You won…", "New game", "Tell us how it went".
+- **Finding a galaxy the player can win in is the hard part** (`tools/skin-find-galaxy.js`): in 5.0.5's default grid the stars are 7 apart and a new ship goes 6, so no ship can reach any
+  other star; of 600 random 3.0.1 galaxies only 6 connected the two sides; the hex shape at density 0 (dense) is connected in every seed tried. A scripted player that cannot cross the gap
+  can only draw (an early attempt built 36 fighters it could never send). Version by version the New Game window has different controls (3.0.1's `m_size` ..., 4.0.5's `w_size` ...,
+  5.0.5's `o_size` 0 to 100 and `o_iq` 50 to 200): the ones for the other versions are ignored.
+- **Still not compared:** the same on a longer game (many turns, many battles); the other rulesets (the scripted player and the galaxy finder are written for 5.0.5's controls and
+  3.0.1's/4.0.5's are set but unscanned).
+
+### Screens: an inventory (November 2026)
+
+Until now there was no list of every window and screen the game can open. The shared interface code has about fifty `open...` functions. **Seen and exercised in the 1.2 skin**
+(by the menu sweep, the harness, and hand-driven tests): Build, Give, Message, Dip, Surrender, Radical, the three Auto Plays, Players, Rank history, name-a-star,
+You Won / You Lost, both battle windows, Group fleets, the fleet and star lists, Scrap types, Compare, the Halls, Master Points, Preferences, Skin / Sounds / Language /
+Temperatures, Saved Games and its account dialog. **Opened for the first time on this round** (`tools/skin-screens.js`): About this version, Help ("How to play"),
+Reports, Account, Split fleet (5.0.5 and iOS); Compare's **Show Skills** (4.0.5: "List of all players and their skill levels"); iOS's Help and Game Center screens;
+and, after a natural 5.0.5 win, the end card's **"You won…"** ("Congratulations! You have conquered the galaxy!" with the 1-bit conqueror) and **"Tell us how it went"**
+(the feedback window). All look right except two, which are now adapted: **iOS's and Android's Help screen** is an iframe of the version's manual, a dark page with a
+colour screenshot in a window too short to read; **iOS's Game Center** had iOS blue tabs, orange stars and grey icons. Now: the window has room, the manual page is restyled
+black on white when it loads (the page is same-origin) and its screenshots dithered to 1 bit (`manuals`, `ditherImg` in `ui.js`), and Game Center's controls are black and
+white (`style.css`). Under 1.2's own rules the Help window is 1.2's, untouched.
+**The four that opened nothing at first all needed a set-up, and now all work** (`tools/skin-screens-flows.js`, and the battle list through the won-game tool): **Patch notes**
+needs a game started with the Patch option in a version that has fixes (4.0.5: 13, 5.0.5: 4): the Ho! menu's "Patch notes…" opens "4.0.5.1 patch notes (unofficial)" and "5.0.5.1 …" with the
+fix lists. **Game text** is not a window but the loader behind Import a game… and Account saves ▸ Open: Export this game… asks for an optional password and downloads
+`Milky Way 2020.hogame` (85 KB); importing that file from the title opens it ("The imported game is open.", same year, turn and ruleset). **The Hall's Details** (`openHallSummary`) opens as
+"Summary of Game Victory" (winner, date, difficulty, humans, computers, allies, computer intelligence) from a real entry. **The battle list** ("Review battle": star, year, against, lost
+you / them) opens from a game in which the player fought, in the 1.2 look, and a row opens the battle: the written report with Modern conveniences on, the skin's own battle window off.
+Online play (Join, Lobby, My online games, Account saves) was tested against a fake Firebase (see "Online play in the 1.2 skin").
+**Still not seen:** nothing from the inventory except what needs the real Firebase.  About, Help, Reports and Split were looked at in all twelve rulesets (`tools/skin-screens.js`): every one opens, dressed in the skin's look, with no errors. The win and lose screens: lose reached by play in 3.0.1, win by play in 5.0.5 (with both end-card buttons), the rest of the twelve rulesets with the
+situation staged (`tools/skin-endgame.js`).
+
+### Online play in the 1.2 skin (November 2026)
+
+The online screens (Account, Account saves, My online games, Join with a code, the Lobby, the online game's own window) are shared code (`js/skins/classic/ui.js`, `js/online.js`,
+`js/cloud.js`) and are the remake's own: 1.2 had none. The question was whether they work in the 1.2 skin as they do in 5.0.5's.
+- **Reached the same way:** the title's Sign in (and "Account: Guest" once in), New Game's "My online games…" and "Play online…", the Ho! menu's Account… and Account saves…, Export and
+  Import; the same Account window (Google, email and password, Create account, Forgot password, Play as a guest); and offline each fails soft the same way (checked in the 1.2 skin and the
+  classic skin, 5.0.5 and 1.2 rules).
+- **The real emulators cannot run in a sandbox** (they are downloaded from Google's servers on first use), so `tools/online-fake.js` is a fake Firebase (Auth and Firestore, in memory, no
+  `firestore.rules`) served in place of `js/vendor/firebase.js` and shared by every browser window of a test. `tools/skin-online-check.js` uses it with only the controls every skin shares.
+  **Results, in the 1.2 skin:** (saves) a guest signs in from the title, End Turn uploads the game, Account saves lists it with Open / Download / Delete; (two) 2 players, 4.0.5, 9 turns, a page
+  reloaded in the middle of a turn (Continue opens the game again): the same game state in both browsers after every turn, and each turn's orders give the page's own game; (three) 3 players,
+  5.0.5, 8 turns, a player sitting a turn out (the host's "End turn for…"), a resignation, 9 to 13 battles: the same state in all three browsers after every turn. My online games lists the game.
+  Mutation-tested (the Account saves item removed: reported).
+- **Looks:** the lobby (code, seat list, Copy link, Start the game), the Join form and My online games are System 6 dialogs. Two leftovers fixed: the lobby's link was blue (now black,
+  underlined) and the title's account button was a grey web pill (now a System 6 button).
+- **Not shown:** real Firebase (the fake applies no security rules, and its Google sign-in is a fixed fake account; a real popup, real network failures and real rules were not exercised);
+  `tools/online-test.js` against the emulators (it is written for the classic skin's page: its menus, panel and bar controls), which a machine that can run the emulators should still run;
+  the shared Hall of Fame online (the Everyone view) and the shared star names; hosting with the 1.2 rules (no 1.2 game was played online); Android's and iOS's version of the lobby.
+
+### The full regression battery on the final code (November 2026)
+
+Run once more after the last changes (the online stylesheet, the iOS Help and Game Center screens, the new tools), in chunks. **All passing:** `skin-rules-check.js --skin=mac12`, all 12
+rulesets; the same harness for the iOS skin and the DOS skin, all 12 rulesets each (the shared-code check); `display-audit.js 12` (0 gaps); `skin-holes.js` (0 classic pictures borrowed);
+`human-play.js` (12 of 12); `skin-menu-sweep.js` (12 rulesets, turns 0 and 8, 0 problems); `skin-endgame.js` (12 rulesets, a win and a loss each); `skin-online-check.js mac12` (saves,
+two players with a mid-turn reload, three players with a skipped turn and a resignation: the same state in every browser after every turn); `ui-lang-audit.js` (every skin, 72 runs);
+`skin-playthrough.js` (12 rulesets, 20 turns, seed 7, 0 problems). **Notes on running it:** clear a stale web server first (`kill $(ps aux | grep "[h]ttp.server" | awk '{print $2}')`: a
+crashed run leaves one holding the port, and a later tool then hangs or fails); keep each command under 300 s (three or four rulesets per call; a "page closed" failure at the end of a
+long run is the time limit, not a bug; rerun that case alone); never `pkill -f` with a pattern that appears in the command itself. **Still not run:** `tools/online-test.js` against the
+real Firebase emulators (they cannot be downloaded in a sandbox); `bundle.py` and `doc-sprites.py`; sounds by ear.
+
+### The language rule, and what the language pass found (November 2026)
+
+**The rule (Jake's, standing):** the game as published plays as published every time, and the patch makes it the best version of itself. For translation: a version with **no French edition of its own
+takes the nearest published French edition's words**: the French iOS for the 5.0.5 family (5.0.5, Palm, iOS, Android), and where iOS has no such word, 3.0.1F, then 1.2F. A word stays English **only if
+it stayed English in the original** (the French iOS keeps "Temp:", "Auto Play" and "Tanker" in English, so ours do). **The patched game (HO.fixed 'translations') uses the best translation regardless**
+(the patch's typography and wording: `HOLANG_REMAKE.<lang>.patch`, `.patchWindows`, and now a row's patched variant in `js/ui-text.js`).
+
+**Found by opening about 25 windows in all five languages in every ruleset** (`tools/skin-lang-screens.js`, `tools/skin-lang-end.js`):
+- **Seven window words** were English in the French of every version without 3.0.1F's windows (5.0.5, Palm, iOS, Android, 4.0.5, Mac 4.0.5), though the French editions had them: the Scrap Ship Types window's
+  "Class:" (1.2F "Classe:"), "Development Cost:" (1.2F "Coût de développement:"), "Rename" (1.2F "Renommer"), "# Built:" (3.0.1F "Construits:"), "#Existing:" (3.0.1F "Existants:"), and the fleet list's
+  "List of All Fleets:" (3.0.1F "Statut des flottes:") and "Go To Fleet" (3.0.1F "Rejoindre flotte"). Now rows in `js/ui-text.js` with the official French, source-tagged (`1.2F`, `3.0.1F`), and the patch's
+  typography as the patched variant (a space before a colon). A French 3.0.1 game still gets 3.0.1F's own words from its windows (`js/ui-lang.js`: a version's window words come first); 1.2, DOS 2.0 and Mac 2.0.1 keep their own official words.
+- **`js/ui-lang.js` `add()`** now lets a row carry only a patched translation (null in the unpatched place), for a word with no published translation that the patched game should still put in the language. (A first
+  attempt in `patchWindows` did nothing: that map only corrects a word the version's own French already had.)
+- **A bug in this skin's Rank history window:** every earned rank was shown as "★ City Slicker", the star and the name in one string, which is in no table, so every earned rank stayed English in every language.
+  The star and the name are now separate pieces.
+- **Not gaps:** cognates and loan words (Mini, Population, Messages, Points, Ranger, Desperado, Metal, Name, Start), names and dates ("Windows 95 4.0.5 (1996)", ship names), and strings the French iOS itself left in English.
+- German, Turkish and Spanish: nothing untranslated in any ruleset except the same-word cognates above. The Claude and Gemini rulesets offer English only.
+- The end of a game (win, lose, end card, "You won…", feedback) in all five languages, 3.0.1 and 5.0.5: nothing identical to English.
+- **Not covered:** the end of a game in the other rulesets and with the patch on; Patch notes, the Hall detail and the online screens in other languages.
+
+**Menus, every ruleset, every language (`tools/skin-lang-menus.js`), unpatched and patched:** the only English left is words the language shares ("Options", "Normal", "Offensive"). One real forgotten
+item was found and fixed, in this skin: the Options menu's iOS and Android item "Messages: Only Important" was built from iOS's two words *before* translation, so it was English in every language though both
+words are in the table ("Seulement Important" is the French iOS's own); the two words are now translated apart and joined (`tr12` in `prefItems12`). The same slip as the Rank window's star: **a string made by joining
+words in code is in no table; translate the pieces, then join.** No existing translation was changed (the seven French rows above are official words from 1.2F and 3.0.1F).
+
+**End of a game, the online screens and the Halls, in every language (this round, `tools/skin-lang-end.js`, `tools/skin-lang-online.js`):** the end of a game (win, lose, end card, "You won…", feedback) in
+1.2, DOS 2.0, 3.0.1, 4.0.5, 5.0.5, Palm, iOS, Android, Mac 2.0.1 and Mac 4.0.5; the online screens (Account, the lobby, the Join form, My online games); the Hall of Fame window: nothing forgotten in English.
+**One gap, by the rule, fixed in the patch only:** the German DOS 2.0 and Mac 2.0.1 never translated the name-a-star window's rule line ("Star names must be 4 to 7 characters long.") and hint ("click OK with
+the name blank"), only its heading and label. As published they stay English; the patched game now has them in German (`js/lang-remake.js`, the German `patch` map, in the German the remake already uses for
+the "2 to 7" version of the same lines). **Not checked in other languages:** the Hall detail window ("Summary of Game Victory"; the Halls themselves are), Patch notes (plain text), the end of a game in the patched
+games other than DOS 2.0.
+
+### Final verification (6 November 2026)
+Every check in `START-HERE.md`'s verification record was run on exactly the code in the package (the six changed code files are byte-identical to the working repo), and the package was laid over the original
+upload and smoke-tested there. The last re-runs after the final edits (the Rank window's star, the iOS "Messages: Only Important" menu item, the German patch lines): `skin-endgame`, `skin-playthrough`, `skin-online-check`,
+the harness for the 1.2, iOS and DOS skins, the menu sweep, and the language audit: all pass.

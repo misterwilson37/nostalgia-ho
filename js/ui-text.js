@@ -465,6 +465,10 @@ root.HOUI.add([
 ['An alliance starts when both sides tick it. Allies don’t fight each other, refuel at each other’s colonies, and win together if every survivor is allied.', 'Une alliance commence quand les deux côtés la cochent. Les alliés ne se combattent pas, font le plein dans les colonies l’un de l’autre et gagnent ensemble si tous les survivants sont alliés.', 'Ein Bündnis gilt, wenn beide Seiten es ankreuzen. Verbündete bekämpfen sich nicht, tanken in den Kolonien des anderen und gewinnen gemeinsam, wenn alle Überlebenden verbündet sind.', 'Ortaklık iki taraf da işaretleyince başlar. Ortaklar birbiriyle savaşmaz, birbirlerinin kolonilerinde yakıt alır ve hayatta kalan herkes ortaksa birlikte kazanır.', 'Una alianza empieza cuando los dos lados la marcan. Los aliados no luchan entre sí, repostan en las colonias del otro y ganan juntos si todos los supervivientes son aliados.', null, { tr: 'İttifak iki taraf da işaretleyince başlar. Müttefikler birbiriyle savaşmaz, birbirlerinin kolonilerinde yakıt alır ve hayatta kalan herkes müttefikse birlikte kazanır.' }],
 ['Your history', 'Votre historique', 'Ihr Verlauf', 'Tarihçen', 'Tu historial'],
 ['Gold: total population. Blue: income. Green: tech.', 'Or : population totale. Bleu : revenu. Vert : technologie.', 'Gold: Gesamtbevölkerung. Blau: Einkommen. Grün: Technik.', 'Altın: toplam nüfus. Mavi: gelir. Yeşil: teknoloji.', 'Oro: población total. Azul: ingresos. Verde: tecnología.'],
+['Solid: total population. Dashed: income. Dotted: tech.', 'Plein : population totale. Tirets : revenu. Pointillés : technologie.', 'Durchgezogen: Gesamtbevölkerung. Gestrichelt: Einkommen. Gepunktet: Technik.', 'Düz: toplam nüfus. Kesikli: gelir. Noktalı: teknoloji.', 'Continua: población total. Discontinua: ingresos. Punteada: tecnología.'], // (the 1.2 skin's Players window, in 1 bit: the remake's own)
+['Ships Bought Here', 'Vaisseaux achetés ici', 'Hier gekaufte Schiffe', 'Buradan alınan gemiler', 'Naves compradas aquí'], // (the 1.2 skin's Build window in a ruleset that buys ships at once: the remake's own)
+['Build ships at', 'En production à:', 'Schiffbau auf', 'Gemi yapımı:', 'Construir naves en', { fr: '1.2F' }], // (1.2F's "En production à:", DLOG 6020; the 1.2 skin's Build window in a ruleset that buys ships at once: the remake's own)
+['Available Types', 'Modèles disponibles:', 'Verfügbare Typen', 'Kullanılabilir tipler', 'Tipos disponibles', { fr: '1.2F' }], // (1.2F's "Modèles disponibles:", the same window)
 // ---------- Give, Send a message, Dip, Surrender, Armageddon ----------
 ['There is no one else to give anything to.', 'Il n’y a personne d’autre à qui donner quoi que ce soit.', 'Es gibt niemanden sonst, dem man etwas geben könnte.', 'Bir şey verecek başka kimse yok.', 'No hay nadie más a quien dar nada.', { fr: '~iOS', tr: '~iOS' }],
 ['There is no one else to send something to.', 'Il n’y a personne d’autre à qui envoyer quelque chose.', 'Es gibt niemanden sonst, dem man etwas senden könnte.', 'Bir şey gönderecek başka kimse yok.', 'No hay nadie más a quien enviar nada.', { fr: '~iOS', tr: '~iOS' }],
@@ -1395,5 +1399,16 @@ root.HOUI.add([
 ['Sorry, but there is no one else alive to give or send something to.', 'Désolé, mais il n\'y a personne de vivant à qui donner ou envoyer quelque chose.', 'Leider ist niemand sonst mehr da, dem Sie etwas geben oder schicken können.', 'Üzgünüm,  bir şey verecek veya gönderilece başka canlı kimse kalmadı.', 'Lo siento, pero no queda nadie más a quien dar o enviar algo.', I],
 ['Rank: %s', 'Rang: %s', 'Rang: %s', 'Derece: %s', 'Rango: %s', I],
 ['Master Points: %u', 'Master Points: %u', 'Meisterpunkte: %u', 'Usta derece: %u', 'Puntos maestros: %u', I],
+// The French for words the later versions' windows have and no French edition of THEIR OWN published (5.0.5, Palm, Android, 4.0.5 and the rest have no French, and the French iOS has no
+// such windows): the nearest published French edition's word, in the order the French iOS (for the 5.0.5 family), 3.0.1F, 1.2F; a word stays English only if it stayed English in them.
+// 3.0.1F's windows have "# Built:", "#Existing:", "List of All Fleets:" and "Go To Fleet"; 1.2F has "Class:", "Development Cost:" and "Rename" (a French 3.0.1 game already shows 3.0.1F's own
+// where its window has them: js/ui-lang.js, the version's window words come first). The patched game's wording is the patch's, in its typography (the space before a colon).
+["Class:", "Classe:", null, null, null, { fr: '1.2F' }, { fr: 'Classe :' }],
+["Development Cost:", "Coût de développement:", null, null, null, { fr: '1.2F' }, { fr: 'Coût de développement :' }],
+["Rename", "Renommer", null, null, null, { fr: '1.2F' }, { fr: 'Renommer' }],
+["# Built:", "Construits:", null, null, null, { fr: '3.0.1F' }, { fr: 'Construits :' }],
+["#Existing:", "Existants:", null, null, null, { fr: '3.0.1F' }, { fr: 'Existants :' }],
+["List of All Fleets:", "Statut des flottes:", null, null, null, { fr: '3.0.1F' }, { fr: 'Statut des flottes :' }],
+["Go To Fleet", "Rejoindre flotte", null, null, null, { fr: '3.0.1F' }, { fr: 'Rejoindre flotte' }],
 ]);
 })(typeof window !== 'undefined' ? window : globalThis);

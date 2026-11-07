@@ -52,3 +52,155 @@ ul.reports li.inv12 { filter: invert(1); background: #fff; }
 #panel ul.rep12 li { display: flex; align-items: flex-start; gap: 4px; min-height: 36px; padding: 0; border: 0; }
 #panel ul.rep12 li img { width: 32px; height: 32px; flex: none; }
 #panel ul.rep12 li .rt { padding-top: 1px; }
+
+/* ====================================================================================================================
+   REMAKE-ONLY CONTROLS (docs/12-findings.md): the remake's own, in 1.2's look. .remake12 marks them all; .native12 is built in ui.js,
+   .css12 is a later version's own window (the classic code's) dressed here. The window's frame, title bar and buttons come from the
+   OS look (System 6 or 7), which the player chooses; this is the window's CONTENT: black on white, Geneva, no colour, no round corners.
+   ==================================================================================================================== */
+.win.remake12 { --r12-font: 12px Geneva, Verdana, sans-serif; }
+.win.remake12 .wbody, .win.remake12 .wbody label, .win.remake12 .wbody p, .win.remake12 .wbody td, .win.remake12 .wbody th, .win.remake12 .wbody select, .win.remake12 .wbody input {
+  font: var(--r12-font); color: #000; }
+.win.remake12 .wbody { background: #fff; }
+.win.remake12 h3, .win.remake12 h4 { font: bold 12px Chicago, Geneva, sans-serif; margin: 6px 0 2px; color: #000; text-transform: none; letter-spacing: 0; }
+.win.remake12 .sub, .win.remake12 .note, .win.remake12 .fine { font: 9px Geneva, Verdana, sans-serif; color: #000; opacity: 1; margin: 4px 0; }
+.win.remake12 .wbody table, .win.remake12 .wbody th, .win.remake12 .wbody td { border-color: #000; background: transparent; color: #000; }
+.win.remake12 .wbody th { font: bold 12px Chicago, Geneva, sans-serif; border-bottom: 1px solid #000; text-align: left; }
+.win.remake12 .wbody tr.me td { font-weight: bold; }
+.win.remake12 canvas { image-rendering: pixelated; filter: grayscale(1) contrast(1.4); }
+.win.remake12 img { image-rendering: pixelated; }
+
+/* the Players window: a list in a box, a heading line, 1.2's check boxes */
+.players12 { min-width: 420px; }
+.pl12.lb { max-height: none; margin: 0 0 4px; }
+.pl12 .prow { display: grid; grid-template-columns: 20px minmax(70px, 1.2fr) 70px minmax(110px, 1.6fr); gap: 0 6px; align-items: center; padding: 1px 4px; min-height: 20px; }
+.pl12 .prow.pacts { grid-template-columns: 20px minmax(70px, 1.2fr) 70px minmax(110px, 1.6fr) 36px; }
+.pl12 .prow.pacts.buddies { grid-template-columns: 20px minmax(70px, 1.2fr) 70px minmax(110px, 1.6fr) 36px 62px; }
+.pl12 .prow.head { font: bold 12px Chicago, Geneva, sans-serif; border-bottom: 1px solid #000; position: sticky; top: 0; background: #fff; }
+.pl12 .prow.out { opacity: .5; text-decoration: line-through; }
+.pl12 .prow img { display: block; }
+.pl12 .prow input[type=checkbox] { margin: 0; }
+.players12 .cap { font: bold 12px Chicago, Geneva, sans-serif; margin: 8px 0 2px; }
+.players12 canvas.qd12 { width: 100%; max-width: 600px; display: block; border: 0; }
+.players12 .btns { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+.players12 .btns .fill { flex: 1; }
+
+/* the players' strip, in a later ruleset: it opens the Players window (the remake's own), and an ally wears 1.2's halo picture */
+#panel .roster12.rclick { cursor: pointer; }
+#panel .roster12.rclick:focus-visible { outline: 1px dotted #000; outline-offset: -2px; }
+/* an ally's ring (the remake's own, 1 bit: the idea of 3.0.1's halo, whose picture is only the top of a planet's ring); double for a best buddy */
+.roster12 .rface { display: inline-block; flex: none; box-sizing: border-box; width: 20px; height: 20px; margin: -2px; padding: 1px; border: 1px solid #000; border-radius: 50%; line-height: 0; }
+.roster12 .rface.buddy { border: 3px double #000; padding: 0; }
+.roster12 .rface img { display: block; margin: 0 auto; border-radius: 50%; }
+
+/* Rank history (the 5.0.5 window, dressed): the rank's picture is kept small so the list of ranks shows */
+.win.css12 .rank img { max-height: 170px; width: auto; max-width: 100%; display: block; margin: 0 auto; }
+
+/* Build Ships in a ruleset that buys at once (the remake's own): 1.2's two lists, the money and metal under them */
+.buy12 .funds12 { margin: 4px 0; } .buy12 .funds12 b { font-weight: bold; }
+.buy12 .li.dim12 { opacity: .5; }
+.buy12 .li:focus-visible { outline: 1px dotted #000; outline-offset: -2px; }
+.buy12 .fine { min-height: 1.2em; font-weight: bold; }
+
+/* the Rank history (the remake's own): picture in a frame, name and points beside it, the ranks in a list box */
+.ranks12 { min-width: 440px; }
+.ranks12 .rktop { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 6px; }
+.ranks12 .rkpic { display: block; flex: none; border: 1px solid #000; background: #000; image-rendering: pixelated; height: auto; }
+.ranks12 .rkinfo { display: flex; flex-direction: column; gap: 3px; }
+.ranks12 .rkinfo b { font: bold 12px Chicago, Geneva, sans-serif; }
+.rk12.lb { height: 250px; max-height: 250px; overflow-y: auto; margin: 0 0 4px; }
+.rk12.lb.wins { height: 96px; max-height: 96px; }
+.rk12 .prow { display: grid; grid-template-columns: minmax(120px, 1.1fr) 70px minmax(150px, 2fr); gap: 0 8px; padding: 0 4px; min-height: 18px; align-items: center; }
+.rk12.wins .prow { grid-template-columns: 1.4fr 60px 80px 70px; }
+.rk12 .prow.head { position: sticky; top: 0; background: #fff; font: bold 12px Chicago, Geneva, sans-serif; border-bottom: 1px solid #000; }
+.rk12 .prow.sel { background: #000; color: #fff; }
+.ranks12 .btns { display: flex; align-items: center; margin-top: 8px; } .ranks12 .btns .fill { flex: 1; }
+
+/* the transient messages a later ruleset's controls give ("Your radical researchers have no projects yet."): not the classic page's dark
+   pill but System 6's box, white with a black border and a hard shadow (the remake's own: 1.2 told these by a dialog or its message strip) */
+.toast { background: #fff; color: #000; border: 1px solid #000; border-radius: 0; box-shadow: 2px 2px 0 #000; padding: 5px 12px; font: 12px Geneva, Verdana, sans-serif; }
+/* the hover tip ("Explain things when the pointer rests on them", the remake's own): black on white, a hard shadow, no colour */
+.tip { background: #fff; color: #000; border: 1px solid #000; border-radius: 0; box-shadow: 2px 2px 0 #000; font-family: Geneva, Verdana, sans-serif; }
+
+/* The full-screen pages (Saved Games, 1.2's own Open…; the iOS and Android rulesets' Saved games…) in System 6's manner, the remake's own: a
+   window on the grey desktop, its striped title bar (the Back button where a close box would be), a list box with the row under the pointer
+   inverted, Mac buttons. The page's own code is the classic's (screen(), openSavedGames); only its look is here. */
+html .hoscreen { background-color: #888; background-image: repeating-conic-gradient(#000 0 25%, #fff 0 50%); background-size: 2px 2px; align-items: center; justify-content: center; color: #000; font: 12px Geneva, Verdana, sans-serif; }
+html .hoscreen .sbar { width: min(560px, 94vw); max-width: none; box-sizing: border-box; display: flex; align-items: center; gap: 0; padding: 0 6px; height: 20px; margin: 0; background: repeating-linear-gradient(#000 0 1px, #fff 1px 3px); border: 1px solid #000; border-bottom: 0; }
+html .hoscreen .sbar h2 { flex: 1; margin: 0 6px; padding: 0 8px; font: bold 12px Chicago, Geneva, sans-serif; background: #fff; text-align: center; color: #000; line-height: 16px; }
+html .hoscreen .sbar .sback { justify-self: auto; font: bold 12px Chicago, Geneva, sans-serif; color: #000; background: #fff !important; border: 1px solid #000 !important; border-radius: 6px; padding: 0 8px; line-height: 14px; }
+html .hoscreen .sbar > span:last-child { width: 40px; }
+html .hoscreen .sbody { flex: none; width: min(560px, 94vw); max-width: none; box-sizing: border-box; margin: 0; padding: 12px; max-height: 62vh; background: #fff; border: 1px solid #000; box-shadow: 2px 2px 0 #000; }
+html .hoscreen .slist { background: #fff; border: 1px solid #000; border-radius: 0; margin: 0 0 10px; }
+html .hoscreen .slist li { border-top: 0; padding: 2px 6px; gap: 8px; }
+html .hoscreen .slist li:hover { background: #000; color: #fff; }
+html .hoscreen .slist li:hover .sopen, html .hoscreen .slist li:hover small, html .hoscreen .slist li:hover .sopen span { color: #fff; }
+html .hoscreen .slist .sopen { flex-direction: row; align-items: baseline; gap: 10px; }
+html .hoscreen .slist small, html .hoscreen .slist .sopen span { color: #000; font-size: 9px; }
+html .hoscreen .sub { color: #000; font-size: 9px; }
+html .hoscreen button.quiet, html .hoscreen .btns button { font: bold 12px Chicago, Geneva, sans-serif; color: #000; background: #fff; border: 1px solid #000; border-radius: 6px; box-shadow: none; padding: 1px 12px; margin-right: 6px; }
+html .hoscreen .slist li:hover button.quiet { color: #000; }
+
+/* ---- 1.2's widgets for the remake's windows (ui.js: vbar12, list12, ask12) and the windows built of them ---- */
+canvas.vbar12 { width: 51px; display: block; image-rendering: pixelated; cursor: ns-resize; filter: none; }
+canvas.vbar12:focus-visible { outline: 1px dotted #000; outline-offset: 2px; }
+.list12.lb { min-height: 5em; max-height: 12em; margin: 2px 0 6px; }
+.list12 .li { display: flex; align-items: center; gap: 6px; padding: 1px 6px; min-height: 18px; cursor: default; }
+.list12 .li:focus-visible { outline: 1px dotted #000; outline-offset: -2px; }
+.list12 .li.sel { background: #000; color: #fff; }
+.list12 .li.sel img { filter: invert(1); }
+.list12 .li.dim12 { opacity: .45; }
+.list12 .li.rule12 { min-height: 0; padding: 0; border-top: 1px solid #000; margin: 2px 0; }
+.cap12 { font: bold 12px Chicago, Geneva, sans-serif; margin: 2px 0 4px; }
+.ends12 { display: flex; justify-content: space-between; width: 51px; font: 9px Geneva, Verdana, sans-serif; }
+.give12cols { display: flex; gap: 18px; align-items: flex-start; }
+.give12cols > div:first-child { flex: 1; min-width: 150px; }
+.givecol12 { display: flex; flex-direction: column; align-items: center; min-width: 96px; }
+.givecol12 .ends12 { width: 60px; }
+.fig12 { width: 82px; text-align: right; margin-top: 4px; }
+.give12 .btns, .dip12 .btns, .surr12 .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; }
+.dip12row { display: flex; gap: 16px; align-items: flex-start; }
+.dip12row > p { flex: 1; margin: 0; }
+.dip12bar { display: flex; gap: 6px; align-items: stretch; }
+.marks12 { display: flex; flex-direction: column; justify-content: space-between; font: 9px Geneva, Verdana, sans-serif; padding: 0 0 4px; }
+.surr12 > p { margin: 0 0 6px; }
+.win.ask12w .wbody p { margin: 0 0 10px; }
+
+.chat12cols { display: flex; gap: 14px; } .chat12cols > div { flex: 1; min-width: 140px; }
+.chat12 .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; }
+.chat12part { display: flex; gap: 8px; align-items: center; margin: 4px 0; } .chat12part > span { min-width: 90px; font: 12px Geneva, Verdana, sans-serif; }
+.chat12own { flex: 1; }
+.chat12 .list12.lb { min-height: 9em; max-height: 9em; }
+
+.rad12 > p { margin: 0 0 6px; max-width: 420px; }
+.rad12 .list12.lb { max-height: none; }
+.rad12 .list12 .li:not(.rule12) { min-height: 40px; }
+.rad12 .list12 .li:not(.rule12):not(:has(img)) { min-height: 22px; }
+.rad12 .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; }
+
+.ap12 { min-width: 420px; }
+.ap12 .list12.lb { min-height: 0; max-height: none; }
+.ap12mode .li { min-height: 20px; }
+.ap12 .apsettings { margin: 4px 0 8px; padding-left: 14px; }
+.ap12 .slide { display: flex; gap: 8px; align-items: center; margin: 6px 0; }
+.ap12 .slide input[type=range] { flex: 1; }
+.ap12 .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px; }
+.ap12turns { width: 72px; }
+.ap12 .chk { display: flex; align-items: center; gap: 6px; margin: 3px 0; }
+.ap12 .cap12 { margin-top: 8px; }
+
+/* iOS's and Android's own screens in 1-bit: the Help page (an iframe; its content is restyled by ui.js when it loads) gets a window to fill, and Game Center's iOS blue,
+   orange and greys become black and white (the remake's own: these screens belong to those versions, not to 1.2) */
+html .hoscreen.helpscreen .sbody { height: 62vh; padding: 0; }
+html .hoscreen .shelp { height: 100%; min-height: 0; background: #fff; }
+html .hoscreen .segmented { border: 1px solid #000; border-radius: 0; }
+html .hoscreen .segmented button { background: #fff; color: #000; border-left: 1px solid #000; border-radius: 0; font: bold 12px Chicago, Geneva, sans-serif; }
+html .hoscreen .segmented button:first-child { border-left: 0; }
+html .hoscreen .segmented button.on { background: #000 !important; color: #fff !important; }
+html .hoscreen .gcicon, html .hoscreen .gcach.done .gcicon { color: #000; font-size: 18px; }
+html .hoscreen .gcrank, html .hoscreen .gcpct, html .hoscreen .gcscore { color: #000; }
+html .hoscreen .gch { font: bold 12px Chicago, Geneva, sans-serif; margin: 6px 0; }
+
+/* the online parts (the remake's own: 1.2 had none): the account button on the title screen as a System 6 button, and the lobby's link in black */
+html #tacct { opacity: 1 !important; background: #fff !important; color: #000 !important; border: 1px solid #000 !important; border-radius: 6px !important; box-shadow: none !important; font: bold 12px Chicago, Geneva, sans-serif !important; padding: 1px 12px !important; }
+html .win a { color: #000; text-decoration: underline; }

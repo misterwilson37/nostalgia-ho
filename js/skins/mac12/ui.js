@@ -45,6 +45,39 @@ const atZoom = (k) => { const a = A(); return !!a && zoomIdx(a.UI.view.s) === k;
 
 // The menus, as 1.2's MENU resources 128-134 have them (SetMenuItems @e29aa: what is dimmed, the words that
 // change with the selection, the check marks). The Apple menu is the skin's "Ho! 1.2" menu.
+// A later ruleset's fleet orders, the remake's own (1.2 had none; the classic fleet row has them as a select and a check box, and this skin's
+// own panel has no such row): Battle stance (5.0.5, the Palm, iOS, Android, Claude, Gemini) and Arrive late, as check-marked items at the foot
+// of the Ships menu, on the selected fleet of yours that is on the ground, dimmed otherwise, as 1.2's Organize Ships and Scrap Current Fleet are.
+// 1.2's own rules have neither feature, so its Ships menu is as it was. The words are the table's (js/ui-text.js: iOS's and the Palm's).
+// A later ruleset's preferences as 1.2 keeps its own, check-marked items in the Options menu (1.2 had no Preferences window): only the most
+// important messages, the between-turn hints, the stars your best buddies explore, in the words of the ruleset's own Preferences window
+// (rs.prefsWindow: 5.0.5's, the Palm's, iOS's rows) or the generic ones; each only where the ruleset's Preferences window has it, dimmed while
+// "Show Event Messages" is off (as 5.0.5's window disables them), and none under 1.2's own rules. The Preferences window stays: the rest of it
+// (the player's sex, °C, the Palm's choices) is there.
+const tr12 = (x) => (window.HOUI && HOUI.tr ? HOUI.tr(x) : x);
+function prefItems12() {
+  const rs = () => H().rules(G()), W = () => (G() && rs().prefsWindow) || null;
+  const row = (k) => { const w = W(); return w && w.rows ? (w.rows.find(r => r[0] === k) || [])[1] : null; };
+  // (iOS words its row "Messages", "Only Important")
+  const spec = {
+    important: { word: () => { const w = W(); if (!w) return 'Show only the most important messages'; if (w.important) return w.important; const r = (w.rows || []).find(x => x[0] === 'important'); return r ? `${tr12(r[1])}: ${tr12(r[2])}` : null; /* (the two words apart: joined, "Messages: Only Important" is in no table and stayed English in every language) */ }, avail: () => !W() ? !rs().options : !!(W().important || row('important')), get: () => !!A().Prefs.important, set: (v) => { A().Prefs.important = v; } },
+    hints: { word: () => { const w = W(); return !w ? 'Give helpful game play hints' : w.hints || row('hints'); }, avail: () => !W() ? rs().hints !== false : !!(W().hints || row('hints')), get: () => !!A().Prefs.hints, set: (v) => { A().Prefs.hints = v; } },
+    buddies: { word: () => { const w = W(); return w && (w.buddies || row('buddies')); }, avail: () => !!W() && !!(W().buddies || row('buddies')), get: () => A().Prefs.buddyStars !== false, set: (v) => { A().Prefs.buddyStars = v; } },
+  };
+  return Object.entries(spec).map(([k, d]) => it(() => d.word() || k, () => { d.set(!d.get()); A().savePrefs(); A().renderPanel(); },
+    { shown: () => !!G() && !own12Rules() && !!d.avail(), ghost: () => noGame() || (!!W() && A().Prefs.showMsgs === false), checked: d.get }));
+}
+function fleetOrders12() {
+  // (the menus are laid out once, before any game: the items are always in the list and each says by `shown` whether its ruleset has the
+  // feature when the menu is opened; the dimmed "Battle stance" is the heading, as a separator cannot be hidden)
+  const has = (k) => () => !!G() && H().feature(G(), k);
+  const f = () => { const x = selFleet(); return x && x.owner === A().ME && !x.sat && x.star != null && x.to == null ? x : null; };
+  return [
+    it('Battle stance', () => {}, { shown: has('stances'), ghost: () => true }),
+    ...[['normal', 'Normal'], ['offensive', 'Offensive'], ['defensive', 'Defensive']].map(([v, t]) => it(t, () => { const x = f(); if (x) { x.stance = v; A().save(); } },
+      { shown: has('stances'), ghost: () => !f(), checked: () => !!f() && (f().stance || 'normal') === v })),
+    it('Arrive late', () => { const x = f(); if (x) { x.delayed = !x.delayed; A().save(); } }, { shown: has('lateArrival'), ghost: () => !f(), checked: () => !!f() && !!f().delayed })];
+}
 function menuLayout() {
   const P = () => A().Prefs;
   return {
@@ -68,7 +101,8 @@ function menuLayout() {
       it('Show Event Messages', () => { P().showMsgs = P().showMsgs === false; A().savePrefs(); }, { ghost: noGame, checked: () => P().showMsgs !== false }),
       it('Review Announced Battles', () => { P().review = !A().prefReview(); A().savePrefs(); }, { ghost: noGame, checked: () => A().prefReview() }),
       it('Give Overspending Warnings', () => { const g = G(); g.opts.overspendWarnings = g.opts.overspendWarnings === false; A().save(); }, { ghost: noGame, checked: () => !!G() && G().opts.overspendWarnings !== false }),
-      it('Sound', () => { A().Sound.on = !A().Sound.on; A().savePrefs(); }, { ghost: noGame, checked: () => A().Sound.on })],
+      it('Sound', () => { A().Sound.on = !A().Sound.on; A().savePrefs(); }, { ghost: noGame, checked: () => A().Sound.on }),
+      ...prefItems12()],
     Ships: [
       it('List Ship Types…', () => A().openScrapTypes(), { ghost: () => noGame() || !A().me().designs.some(d => !d.scrapped) }),
       it('Create New Ship Type…', () => createType(), { ghost: noGame, key: 'K' }),
@@ -86,7 +120,8 @@ function menuLayout() {
       '-',
       // (1010.5 / .6: a battle seen at the selected star)
       it(() => (lastBattle() ? `Review Battle at ${selStar().name}…` : 'No Battles here…'), () => { const b = lastBattle(); if (b) A().openBattle(b.id); },
-        { ghost: () => noGame() || !lastBattle(), key: 'R' })],
+        { ghost: () => noGame() || !lastBattle(), key: 'R' }),
+      ...fleetOrders12()],
     Galaxy: [
       it('List All Explored Stars…', () => A().openStarList(), { ghost: noGame }),
       '-',
@@ -94,7 +129,12 @@ function menuLayout() {
       it('Zoom Out', () => { const m = A().map(); A().zoomAt(m.w / 2, m.h / 2, 1 / 1.3); }, { ghost: () => noGame() || atZoom(0), key: '-' }),
       '-',
       // (dimmed while announcements are still to be read: SetMenuItems' message count)
-      it('Fix Spending', () => fixStep(), { ghost: () => noGame() || A().UI.msgIdx < (A().UI.inbox || []).length, key: 'F' })],
+      it('Fix Spending', () => fixStep(), { ghost: () => noGame() || A().UI.msgIdx < (A().UI.inbox || []).length, key: 'F' }),
+      // the remake's own: a later ruleset's Evacuate (3.0.1 on; 1.2 and DOS 2.0 had none, rs.evacuateCommand false), on the selected colony of yours,
+      // in the ruleset's own words ("Evacuate Planet" / "Don't Evacuate Planet" in 5.0.5, which marks the colony instead). Not on the planet's
+      // box: this skin's own is 1.2's, which has no such button, and a context menu would need a right click
+      it(() => (mine() && A().evacuateLabel ? A().evacuateLabel(selStar().id, 'Evacuate planet…') : 'Evacuate planet…'), () => { if (mine()) A().evacuateClick(selStar().id); },
+        { shown: () => !!G() && A().evacuateShown(), ghost: () => noGame() || !mine() || !A().evacuateHere(selStar()) })],
     Window: [
       it('Tech Spending Window', () => { const t = document.querySelector('#panel .box.tech, #panel section:nth-of-type(3)'); if (t) t.scrollIntoView({ block: 'nearest' }); }, { ghost: noGame, key: '1' }),
       it('Report Window', () => { const r = own() && document.querySelector('#panel .rep12box'); if (r) { r.scrollIntoView({ block: 'nearest' }); const li = r.querySelector('li[data-now]') || r.querySelector('li'); if (li) li.focus(); } else A().openReports(); }, { ghost: noGame, key: '2' }),
@@ -105,9 +145,14 @@ function menuLayout() {
 
 
 // ---------- the windows (in English as Mac 2.0.1 words them; in French the interface puts 1.2F's DITL words) ----------
-const lang = () => (G() && G().opts && G().opts.lang) || 'fr';
+// the game's language: the one chosen at New Game, else the ruleset's own (1.2's is French, 5.0.5's English). Only a game with its language
+// unset in a later ruleset used to read French here (docs/12-findings.md, "Remake-only controls"); 1.2's own rules are as before.
+const lang = () => (G() && G().opts && G().opts.lang) || (G() && H().ownLanguage && H().ownRules ? H().ownLanguage(H().ownRules(G())) : null) || 'fr';
 const own = () => lang() === 'en' || lang() === 'fr';
-const CLASS_FR = { scout: 'Eclaireur', fighter: 'Croiseur', colony: 'Transport', satellite: 'Satellite' };
+// 1.2F's four classes; the later ones are not in 1.2F or 3.0.1F, so iOS's French (docs/glossary-fr.md): Epouvante, Tanker, Biologique, Leurre
+const CLASS_FR = { scout: 'Eclaireur', fighter: 'Croiseur', colony: 'Transport', satellite: 'Satellite', dread: 'Epouvante', tanker: 'Tanker', bio: 'Biologique', decoy: 'Leurre' };
+// the classes a ruleset lets you build, 1.2's four first (MENU 6015), then the later ones in the order the classic Build window lists them
+const CLASSES = () => ['scout', 'fighter', 'colony', 'satellite', 'tanker', 'dread', 'bio', 'decoy'].filter(t => H().canBuildType(G(), A().me(), t));
 const cls = (t) => (lang() === 'fr' ? CLASS_FR[t] : (H().TYPES[t] || { name: t }).name);
 const nice = (n) => (H().rules(G()).fmtNum || H().niceNum)(Math.round(n));
 const fill = (t, ...a) => { let i = 0; return t.replace(/%(\.\*)?[sd]/g, () => String(a[i++])).replace(/%%/g, '%'); };
@@ -115,7 +160,8 @@ const fill = (t, ...a) => { let i = 0; return t.replace(/%(\.\*)?[sd]/g, () => S
 const raw = (tag, t, attrs) => { const e = A().el(tag, attrs || null); e.append(document.createTextNode(t)); e.setAttribute('translate', 'no'); return e; };
 // MakeFleetDescription with no count (the lists of designs): "Columbus (1/1) Scout" / "Eclaireur Columbus (1/1)"
 const desc0 = (d) => (lang() === 'fr' ? `${cls(d.type)} ${d.name} (${d.W}/${d.S})` : `${d.name} (${d.W}/${d.S}) ${cls(d.type)}`).slice(0, 40);
-const descN = (d, n) => (lang() === 'fr' ? (n === 1 ? `1 ${cls(d.type)} ${d.name} (${d.W}/${d.S})` : `${n} ${cls(d.type)}s ${d.name} (${d.W}/${d.S})`) : H().rules(G()).shipsDesc(G(), d, n)).slice(0, 40);
+// (a ruleset without shipsDesc, a later one: the same English form, 1.2's shipsDesc12)
+const descN = (d, n) => (lang() === 'fr' ? (n === 1 ? `1 ${cls(d.type)} ${d.name} (${d.W}/${d.S})` : `${n} ${cls(d.type)}s ${d.name} (${d.W}/${d.S})`) : (H().rules(G()).shipsDesc ? H().rules(G()).shipsDesc(G(), d, n) : n === 1 ? `one ${d.name} (${d.W}/${d.S}) ${cls(d.type)}` : `${n} ${d.name} (${d.W}/${d.S}) ${cls(d.type)}s`)).slice(0, 40);
 const say = (t) => H().say(G(), t);
 const shipCount = (did) => G().fleets.filter(f => f.owner === A().ME).reduce((a, f) => a + (f.ships[did] || 0), 0);
 function win(body, cls2) { A().modal('', body, { cls: 'mid mac12 ' + (cls2 || ''), label: 'Spaceward Ho!' }); }
@@ -139,7 +185,9 @@ function shipTypes(selId) {
       r('Production Cost:', '$' + nice(c.money)), r(lang() === 'fr' ? raw('span', 'Coût en métal:') : 'Metal Cost:', nice(c.metal)),
       r('Range', cur.R), r('Speed', cur.V), r('Weapons', cur.W), r('Shields', cur.S), r('Mini', cur.M),
       r('# Built:', nice(cur.built || 0)), r('#Existing:', nice(shipCount(cur.id))),
-      el('label', { class: 'chk' }, el('input', { type: 'checkbox', checked: cur.scrap301 ? 'checked' : false, onchange: () => { rs.flagScrapDesign(G(), p, cur, 'command'); a.save(); show(); } }), el('span', null, 'Scrap This Type')),
+      el('label', { class: 'chk' }, el('input', { type: 'checkbox', checked: cur.scrap301 ? 'checked' : false, onchange: (e) => { if (rs.flagScrapDesign) { rs.flagScrapDesign(G(), p, cur, 'command'); a.save(); show(); return; }
+          // (a ruleset that marks nothing, Gemini: scrapped at once, after the question the classic window asks)
+          e.target.checked = false; const n = shipCount(cur.id); a.confirmBox(`Scrap this ship type and all ${n} existing ship${n === 1 ? '' : 's'} of it?`, () => { const m = H().scrapDesign(G(), a.ME, cur.id); a.Sound.play(7003); a.toast(`Scrapped 1 type for ${a.fmt(m)} metal.`); a.renderPanel(); a.draw(); a.save(); show(); }); } }), el('span', null, 'Scrap This Type')),
       el('div', { class: 'btns' }, btn('Rename', () => renameType(cur))));
   };
   show();
@@ -203,6 +251,7 @@ const DONE = { en: '%d%% Done', fr: '%d%% finition' };
 function buildShips(sid) {
   const a = A(), el = a.el, g = G(), p = a.me(), s = g.stars[sid];
   if (!s || s.owner !== a.ME) return false;
+  if (!H().feature(g, 'buildQueue')) return buyShips(sid); // (a later ruleset buys ships at once, as its own window does; only 1.2's and DOS 2.0's queue)
   const before = JSON.stringify(s.queue || []);
   const ds = p.designs.filter(d => !d.scrapped).reverse(); // (InitBuildShipsTypesList: every type, the newest first)
   let pick = ds[0] || null;
@@ -227,6 +276,345 @@ function buildShips(sid) {
   return true;
 }
 
+// The remake's own, in 1.2's window: Build Ships in a ruleset that buys ships at once (3.0.1, 4.0.5, 5.0.5, the Palm, iOS ...: 1.2 and DOS 2.0
+// queue them, above, and a ship queued here would never be built). The same two lists as 1.2's: "Available Types" (a double click buys one,
+// at its price, in money and metal) and what was bought here (a double click gives one back: HO.unbuildShip refunds it). The ruleset's own
+// rules hold: its prices (HO.shipCostNow), its borrowing limit, rs.manyShips (5.0.5: ten Scouts or Tankers ask first, Alert Strings 35 and 36;
+// iOS: the same words under the types), rs.allowDebt (iOS, the Palm: a check box that lets purchases go below $0).
+let BUY12 = null;
+function buyShips(sid) {
+  const a = A(), el = a.el, g = G(), p = a.me(), s = g.stars[sid], rs = H().rules(g);
+  const c0 = BUY12 && BUY12.carry && BUY12.sid === sid ? BUY12 : { sid, session: {}, asked: {}, debt: !!(rs.allowDebt && rs.allowDebt.on) };
+  c0.carry = false; BUY12 = c0;
+  const AD = rs.allowDebt, MS = rs.manyShips, session = c0.session, asked = c0.asked;
+  const ds = p.designs.filter(d => !d.scrapped && CLASSES().includes(d.type)).reverse();
+  let pick = ds.find(d => !d.scrap301) || ds[0] || null;
+  const types = el('div', { class: 'lb', role: 'listbox' }), bought = el('div', { class: 'lb', role: 'listbox' });
+  const dev = raw('span', ''), pro = raw('span', ''), funds = el('div', { class: 'funds12' }), warn = el('div', { class: 'fine' });
+  const floor = () => (AD && !c0.debt ? 0 : H().borrowLimit(g, p));
+  const affordable = (d) => { const c = H().shipCostNow(g, p, d); return p.savings - c.money >= floor() && p.metal >= c.metal; };
+  const manyText = (d) => (d.type === 'scout' ? H().DATA.alerts[35] : d.type === 'tanker' ? H().DATA.alerts[36] : null);
+  const show = () => {
+    types.innerHTML = ''; bought.innerHTML = '';
+    for (const d of ds) types.append(raw('div', desc0(d), { class: 'li' + (d === pick ? ' sel' : '') + (d.scrap301 && !rs.queueMarked ? ' dim12' : ''), role: 'option', 'aria-selected': d === pick ? 'true' : 'false', tabindex: 0, onclick: () => { pick = d; show(); }, ondblclick: () => add(d), onkeydown: (e) => { if (e.key === 'Enter') { e.preventDefault(); add(d); } } }));
+    for (const d of ds) if (session[d.id] > 0) bought.append(raw('div', descN(d, session[d.id]), { class: 'li', role: 'option', tabindex: 0, ondblclick: () => take(d), onkeydown: (e) => { if (e.key === 'Enter' || e.key === 'Delete') { e.preventDefault(); take(d); } } }));
+    const c = pick ? H().shipCostNow(g, p, pick) : null;
+    dev.textContent = c && c.proto ? fill('$%s (D)', nice(c.proto)) : '';
+    pro.textContent = c ? fill('$%s (P)', nice(c.money)) : '';
+    funds.textContent = ''; funds.append(el('span', null, 'Savings'), raw('b', ' ' + (rs.buildSavingsPlain ? a.fmt(p.savings) : a.money(p.savings))), ' · ', el('span', null, 'Metal'), raw('b', ' ' + nice(p.metal)));
+    warn.textContent = MS && MS.how === 'warn' && pick && manyText(pick) && (session[pick.id] || 0) >= MS.at ? H().say(g, manyText(pick)) : '';
+  };
+  const done = () => { a.renderPanel(); a.draw(); show(); };
+  const buy = (d) => { if (H().buildShips(g, a.ME, sid, d.id, 1)) session[d.id] = (session[d.id] || 0) + 1; else if (a.beep) a.beep(); done(); };
+  const add = (d) => {
+    if (d.scrap301 && !rs.queueMarked) { if (a.beep) a.beep(); return; } // (a type marked for scrapping can't be bought)
+    if (AD && !affordable(d)) { if (a.beep) a.beep(); return; }
+    if (MS && MS.how === 'ask' && manyText(d) && (session[d.id] || 0) + 1 >= MS.at && !asked[d.id]) {
+      c0.carry = true; // (the question is a window of its own; the purchases so far stay)
+      a.confirmBox(H().say(g, manyText(d)), () => { asked[d.id] = true; c0.carry = true; buy(d); buyShips(sid); }, null);
+      return;
+    }
+    buy(d);
+  };
+  const take = (d) => { if (session[d.id] > 0 && H().unbuildShip(g, a.ME, sid, d.id)) { session[d.id]--; done(); } else if (a.beep) a.beep(); };
+  show();
+  const debt = AD ? el('label', { class: 'chk' }, el('input', { type: 'checkbox', checked: c0.debt ? 'checked' : false, onchange: (e) => { c0.debt = e.target.checked; show(); } }), el('span', null, AD.label || 'Allow Debt')) : null;
+  rwin('', el('div', { class: 'build12 buy12' },
+    el('div', { class: 'kv' }, el('span', null, 'Build ships at'), raw('b', s.name)),
+    el('div', { class: 'cols' }, el('div', null, el('p', null, 'Ships Bought Here'), bought, dev, ' ', pro), el('div', null, el('p', null, 'Available Types'), types)),
+    funds, debt, warn,
+    el('div', { class: 'btns right' }, btn('OK', () => { BUY12 = null; a.closeModal(); a.save(); a.renderPanel(); a.draw(); }))), 'buy12w', { sticky: false, onClose: () => { if (!(BUY12 && BUY12.carry)) BUY12 = null; a.save(); } });
+  return true;
+}
+
+// The Rank history (5.0.5 and the Palm: ranks by master points), the remake's own in 1.2's manner: the rank's 1-bit picture in a frame with
+// its name and the points beside it, the ranks as a list box (the player's own rank selected in inverse, as 1.2's lists select, the ranks
+// earned starred), and what the wins were below. What the classic window shows, in a list box not a ruled table.
+function ranksWindow() {
+  const a = A(), el = a.el, R = H().DATA.ranks || [];
+  if (!R.length || !a.profile) return false;
+  const pr = a.profile(), cur = a.rankOf(pr.points), fmt = a.fmt;
+  const row = (cls, ...c) => el('div', { class: 'prow ' + cls }, ...c.map(x => (x && x.nodeType ? x : el('span', null, x))));
+  const ranks = el('div', { class: 'rk12 lb', role: 'listbox', 'aria-label': 'Rank' });
+  ranks.append(row('head', 'Rank', 'Points', 'Unlocks'));
+  R.forEach((r, i) => ranks.append(row(i === cur ? 'sel' : '', el('span', null, i <= cur ? '★ ' : '', r[0]), fmt(r[1]), r[2] || ''))); // (the star and the name apart: joined, "★ City Slicker" is in no table, and every earned rank stayed English in every language)
+  const wins = pr.games && pr.games.length ? el('div', null, el('p', { class: 'cap' }, 'Wins'),
+    el('div', { class: 'rk12 wins lb' }, row('head', 'Date', 'Year', 'Difficulty', 'Points'),
+      ...pr.games.slice(-30).reverse().map(g => row('', g.date, String(g.year), String(g.difficulty), fmt(g.points))))) : null;
+  const pic = el('img', { class: 'rkpic', src: a.A.jpg[cur], alt: '', width: 160 });
+  const top = el('div', { class: 'rktop' }, pic, el('div', { class: 'rkinfo' }, raw('b', R[cur][0]), el('div', null, `Total master points: ${fmt(pr.points)}`),
+    el('p', { class: 'fine' }, 'You earn master points by winning games with the 5.0.5 or Palm OS 5 rules. The harder the game, the more points.')));
+  setTimeout(() => { const s = ranks.querySelector('.prow.sel'); if (s && s.scrollIntoView) s.scrollIntoView({ block: 'nearest' }); }, 0);
+  rwin('Rank history', el('div', { class: 'ranks12' }, top, ranks, wins, el('div', { class: 'btns' }, el('span', { class: 'fill' }), btn('OK', () => a.closeModal()))), 'ranks12w');
+  return true;
+}
+
+// ======================================================================================================================================
+// 1.2's WIDGETS for the remake's windows (the remake's own windows, in 1.2's look): a vertical bar as 1.2 draws its bars, a list box with the
+// chosen row in inverse (as 1.2's own lists), and the question box. Every window below calls the engine as the classic window does.
+// ======================================================================================================================================
+// A vertical bar as DrawVBarControl draws one (the Tech Spending bars): an axis with ticks, a base line, a black bar rising from it. Dragged, or
+// moved by the keys (Up/Down, PageUp/PageDown by a tenth, Home, End): o { max, value, h (50 as 1.2's), ticks (10), label, text(v), onchange(v) }
+function vbar12(o) {
+  const H0 = o.h || 50, W0 = 34, max = Math.max(0, o.max | 0), ticks = o.ticks || 10;
+  const q = qdCanvas(W0, H0 + 4, o.label), c = q.c; let v = Math.max(0, Math.min(max, o.value | 0));
+  c.classList.add('vbar12'); c.tabIndex = max > 0 ? 0 : -1; c.setAttribute('role', 'slider'); c.style.touchAction = 'none';
+  c.setAttribute('aria-valuemin', '0'); c.setAttribute('aria-valuemax', String(max)); if (o.label) c.setAttribute('aria-label', o.label);
+  const draw = () => {
+    q.rect(0, 0, W0, H0 + 4, '#fff');
+    q.vline(8, 1, H0 + 2); for (let i = 0; i <= ticks; i++) q.hline(5, 8, H0 + 1 - Math.round(H0 * i / ticks));
+    q.hline(8, 32, H0 + 1);
+    const px = max > 0 ? Math.round(H0 * v / max) : 0; if (px > 0) q.rect(12, H0 + 1 - px, 30, H0 + 1, '#000');
+    c.setAttribute('aria-valuenow', String(v)); c.setAttribute('aria-valuetext', o.text ? o.text(v) : String(v));
+  };
+  const step = o.step || 1; // (a bar that moves in steps: the generic Dip's 5%)
+  const set = (n, fire) => { n = Math.max(0, Math.min(max, Math.round(Math.round(n / step) * step))); if (n === v) return; v = n; draw(); if (fire !== false && o.onchange) o.onchange(v); };
+  const fromY = (ev) => { const pt = q.at(ev); return max * (H0 + 1 - pt.v) / H0; };
+  c.addEventListener('pointerdown', (ev) => { if (!max) { A().beep(); return; } ev.preventDefault(); c.focus(); const move = (e) => set(fromY(e)); const up = () => { window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); }; window.addEventListener('pointermove', move); window.addEventListener('pointerup', up); move(ev); });
+  c.addEventListener('keydown', (e) => { const st = Math.max(step, Math.round(max / H0)), d = { ArrowUp: st, ArrowRight: st, ArrowDown: -st, ArrowLeft: -st, PageUp: Math.max(step, Math.round(max / 10)), PageDown: -Math.max(step, Math.round(max / 10)) }[e.key]; if (d != null) { e.preventDefault(); set(v + d); } else if (e.key === 'Home') { e.preventDefault(); set(0); } else if (e.key === 'End') { e.preventDefault(); set(max); } });
+  draw();
+  return { el: c, get: () => v, set };
+}
+// A list box, the chosen row in inverse: items [{ id, label, pic, disabled }] (a null item is a rule between rows); o { value, label, onpick, ondbl }
+function list12(items, o) {
+  const a = A(), el = a.el, box = el('div', { class: 'lb list12', role: 'listbox', 'aria-label': (o && o.label) || '' }); let cur = o ? o.value : null; const rows = [];
+  const mark = () => { for (const r of rows) { const on = r.id === cur; r.row.classList.toggle('sel', on); r.row.setAttribute('aria-selected', on ? 'true' : 'false'); r.row.tabIndex = on || (cur == null && r === rows.find(x => !x.disabled)) ? 0 : -1; } };
+  const pick = (id) => { cur = id; mark(); if (o && o.onpick) o.onpick(id); };
+  for (const it of items) {
+    if (!it) { box.append(el('div', { class: 'li rule12', role: 'separator' })); continue; }
+    const row = el('div', { class: 'li' + (it.disabled ? ' dim12' : ''), role: 'option', 'aria-disabled': it.disabled ? 'true' : null, onclick: () => { if (!it.disabled) pick(it.id); }, ondblclick: () => { if (!it.disabled && o && o.ondbl) o.ondbl(it.id); } },
+      it.pic ? el('img', { src: it.pic, alt: '', width: it.picSize || 16, height: it.picSize || 16 }) : null, typeof it.label === 'string' ? raw('span', it.label) : it.label);
+    rows.push({ id: it.id, row, disabled: !!it.disabled }); box.append(row);
+  }
+  box.addEventListener('keydown', (e) => {
+    const live = rows.filter(r => !r.disabled), i = live.findIndex(r => r.id === cur), d = { ArrowDown: 1, ArrowUp: -1 }[e.key];
+    if (d != null && live.length) { e.preventDefault(); const n = live[Math.max(0, Math.min(live.length - 1, (i < 0 ? (d > 0 ? -1 : live.length) : i) + d))]; pick(n.id); n.row.focus(); }
+    else if (e.key === 'Enter' && cur != null && o && o.ondbl) { e.preventDefault(); o.ondbl(cur); }
+  });
+  mark();
+  return { el: box, get: () => cur, set: (id) => { cur = id; mark(); } };
+}
+// the question box (the plain "Are you sure?" of a later ruleset's commands: Armageddon, Evacuate, Surrender ...): 1.2's alert, no title, the
+// default button ringed; under 1.2's own rules the classic box stays, as 1.2's own questions are not this skin's to restyle
+function ask12(text, yes, labels) {
+  if (!G() || own12Rules()) return false;
+  const a = A(), el = a.el;
+  rwin('', el('div', null, text && text.nodeType ? text : el('p', { style: 'white-space: pre-line' }, text),
+    el('div', { class: 'btns right' }, btn(labels ? labels[1] : 'Cancel', () => a.closeModal(), { class: 'quiet' }), btn(labels ? labels[0] : 'OK', () => { a.closeModal(); yes(); }))), 'ask12w');
+  return true;
+}
+
+// Give Money/Metal, one window for every ruleset that has gifts (3.0.1's face grid, 4.0.5's, 5.0.5's two upright sliders, the Palm's and iOS's
+// steps): the players to give to as a list, the two amounts as 1.2's bars, each with its figure to type. HO.give as the classic window calls it;
+// each ruleset's own words (rs.giveWindow), its limit of three a turn, the Palm's steps and iOS's tenth-thousandths of what you have.
+function give12() {
+  const a = A(), el = a.el, g = G(), p = a.me(), ME = a.ME, W = H().rules(g).giveWindow || {}, out = (q) => !q.alive || q.surrendered;
+  const lim = () => a.toast(H().say(g, W.limit || H().DATA.alerts[5] || 'Sorry, but you may only give 3 gifts per turn.'));
+  if (H().rules(g).giveWindow && (p.giftsThisTurn || 0) >= 3) { lim(); return true; } // (the other rulesets' limit comes back from HO.give)
+  const order = W.order ? W.order(g) : g.players, can = order.filter(q => q.id !== ME && (W.style ? !out(q) : !!a.others().find(o => o.id === q.id)));
+  if (W.style !== 'grid' && !can.length) { a.toast(H().say(g, W.none || H().DATA.alerts[6] || 'There is no one else to give anything to.')); return true; }
+  const last = W.remember ? p[W.remember] : null, first = can.some(q => q.id === last) ? last : can.length ? can[0].id : null;
+  const have = Math.max(0, Math.floor(p.savings)), hasM = Math.max(0, Math.floor(p.metal));
+  // (what a bar's position means: the amount itself; the Palm's: a number of steps; iOS's: tenth-thousandths of what you have)
+  const amtOf = W.style === 'palm' ? (Hh, n) => n >= W.steps ? Hh : n <= 0 ? 0 : Math.trunc(Hh / W.steps) * n : W.style === 'ios' ? (Hh, n) => Math.trunc(Math.fround(Math.fround(Hh) * Math.fround(n / 10000))) : (Hh, n) => n;
+  const range = (Hh) => Hh <= 0 ? 0 : W.style === 'palm' ? W.steps : W.style === 'ios' ? 10000 : Hh;
+  let mAmt = 0, xAmt = 0;
+  const face = (q) => a.IMG[q.human ? 'white0_' + (q.female ? 1 : 0) : 'bad' + q.face + '_' + (q.female ? 1 : 0)];
+  const who = list12(can.map(q => ({ id: q.id, label: q.name, pic: face(q) && face(q).src })), { value: first, label: W.to || W.recipient || 'Give to' });
+  const col = (label, Hh, key) => {
+    const fig = el('input', { type: 'text', inputmode: 'numeric', size: 8, autocomplete: 'off', value: '0', 'aria-label': label, class: 'fig12' });
+    const bar = vbar12({ max: range(Hh), value: 0, h: 80, label, text: (n) => String(amtOf(Hh, n)), onchange: (n) => { const m = amtOf(Hh, n); if (key === 'm') mAmt = m; else xAmt = m; fig.value = a.fmt(m); } });
+    fig.addEventListener('input', () => { const n = Math.max(0, Math.min(Hh, parseInt(fig.value.replace(/\D/g, ''), 10) || 0)); if (key === 'm') mAmt = n; else xAmt = n; const r = range(Hh); bar.set(Hh > 0 && r > 0 ? n * r / Hh : 0, false); });
+    fig.addEventListener('blur', () => { fig.value = a.fmt(key === 'm' ? mAmt : xAmt); });
+    return el('div', { class: 'givecol12' }, el('div', { class: 'cap12' }, label), bar.el, el('div', { class: 'ends12' }, el('span', null, a.fmt(Hh)), el('span', null, '0')), fig);
+  };
+  const submit = () => {
+    const to = who.get(); if (to == null || (W.style === 'grid' && !(mAmt > 0 || xAmt > 0))) { a.closeModal(); return; }
+    const r = H().give(g, ME, to, mAmt, xAmt);
+    if (r === 'limit') { lim(); return; }
+    if (r === 'short') { a.toast('You don’t have that much to give.'); return; }
+    if (r !== 'ok') return;
+    if (W.remember) p[W.remember] = to;
+    a.Sound.play(5000); a.closeModal(); a.renderPanel(); a.save();
+  };
+  rwin(W.title || 'Give money or metal', el('div', { class: 'give12' },
+    el('div', { class: 'give12cols' }, el('div', null, el('p', { class: 'cap12' }, W.to || W.recipient || 'Give to'), who.el),
+      col(W.money || 'Money:', have, 'm'), col(W.metal || 'Metal:', hasM, 'x')),
+    el('div', { class: 'btns right' }, btn(W.cancel || 'Cancel', () => a.closeModal(), { class: 'quiet' }), btn(W.ok || 'Give', submit))), 'give12w');
+  return true;
+}
+
+// Send Message: to whom and what to say, two lists side by side as 1.2's Build window has its two. The ruleset's own forms (rs.cannedChat: 5.0.5's
+// and the Palm's "popup", 2.0's, 3.0.1's and 4.0.5's "steps" with what the line needs under the lists: a star, a player, a line of text), or the
+// generic form (a few lines or your own words). HO.sendCanned / HO.sendChat as the classic window calls them; the limit per turn, the words.
+function chat12() {
+  const a = A(), el = a.el, g = G(), ME = a.ME, C = H().rules(g).cannedChat, val = (v) => /^\d+$/.test(String(v)) ? +v : v;
+  const sent = (r) => { if (r === 'limit') { a.chatLimitToast(); return false; } if (r !== 'ok') return false; a.Sound.play(5000); a.closeModal(); a.save(); return true; };
+  const none = () => a.toast(H().say(g, H().DATA.alerts[6] || 'There is no one else to send something to.'));
+  const lists = (toItems, sayItems, toVal) => { const to = list12(toItems, { value: toVal, label: 'To whom' }), say = list12(sayItems, { value: sayItems[0].id, label: 'Say what' }); return { to, say }; };
+  const two = (c1, l1, c2, l2) => el('div', { class: 'chat12cols' }, el('div', null, el('p', { class: 'cap12' }, c1), l1.el), el('div', null, el('p', { class: 'cap12' }, c2), l2.el));
+  if (C) {
+    const tos = C.to(g, ME), ok = tos.filter(o => !o[2]);
+    if (!ok.length) { none(); return true; }
+    const toItems = tos.map(o => ({ id: String(o[0]), label: o[1], disabled: !!o[2] }));
+    if (C.style === 'popup') {
+      const cur = C.remember && ok.some(o => o[0] === a.me().chatTo) ? a.me().chatTo : ok[0][0];
+      const L = lists(toItems, C.lines.map((l, i) => ({ id: i, label: l })), String(cur));
+      rwin(C.title, el('div', { class: 'chat12' }, two(C.prompts[0], L.to, C.prompts[1], L.say),
+        el('div', { class: 'btns right' }, btn(C.buttons[0], () => a.closeModal(), { class: 'quiet' }), btn(C.buttons[1], a.guard(() => {
+          const t = val(L.to.get()); if (C.remember) a.me().chatTo = t; sent(H().sendCanned(g, ME, C.make(g, ME, t, +L.say.get())));
+        })))), 'chat12w');
+      return true;
+    }
+    // "steps" (2.0, 3.0.1, 4.0.5): what the line needs is chosen under the lists, one popup each (a star, a player, "About What?" then "Which One?", a line of text)
+    const L = lists(toItems, C.actions.map((x, i) => ({ id: i, label: x.label })), String(ok[0][0]));
+    const more = el('div', { class: 'chat12more' }); let parts = [];
+    const sel = (name, opts) => el('select', { name, 'aria-label': name }, ...opts.map(o => el('option', { value: String(o[0]), disabled: o[2] ? 'disabled' : false }, o[1])));
+    const build = () => {
+      more.textContent = ''; parts = []; let kind = null;
+      for (const [prompt, k, opts] of C.actions[+L.say.get()].parts) {
+        let c;
+        if (k === 'text') c = el('input', { name: prompt, maxlength: opts || 24, 'aria-label': prompt });
+        else if (k === 'about') { c = sel(prompt, opts.map((o, i) => [i, o[0]])); c.addEventListener('change', a.guard(() => which())); kind = opts; }
+        else c = sel(prompt, C.list(g, ME, k === 'which' ? kind[0][1] : k, a.UI.sel));
+        c.dataset.kind = k; parts.push(c); more.append(el('label', { class: 'chat12part' }, el('span', null, prompt.replace('\n', ' ')), c));
+      }
+    };
+    const which = () => { // (2.0's "Which One?" follows its "About What?")
+      const ab = parts.find(x => x.dataset.kind === 'about'), w = parts.find(x => x.dataset.kind === 'which'); if (!ab || !w) return;
+      const opts = C.actions[+L.say.get()].parts.find(x => x[1] === 'about')[2];
+      const n = sel(w.name, C.list(g, ME, opts[+ab.value][1], a.UI.sel)); n.dataset.kind = 'which'; w.replaceWith(n); parts[parts.indexOf(w)] = n;
+    };
+    L.say.el.addEventListener('click', a.guard(() => { build(); which(); }));
+    L.say.el.addEventListener('keyup', a.guard(() => { build(); which(); }));
+    build(); which();
+    rwin(C.title, el('div', { class: 'chat12' }, two(C.prompts[0].replace('\n', ' '), L.to, C.prompts[1], L.say), more,
+      el('div', { class: 'btns right' }, btn('Cancel', () => a.closeModal(), { class: 'quiet' }), btn('Send', a.guard(() => {
+        if (parts.some(x => x.dataset.kind !== 'text' && x.value === '')) return;
+        const v = parts.map(x => x.dataset.kind === 'text' ? null : val(x.value)), t = parts.find(x => x.dataset.kind === 'text'); if (t) v.text = t.value;
+        sent(H().sendCanned(g, ME, C.make(g, ME, val(L.to.get()), +L.say.get(), v)));
+      })))), 'chat12w');
+    return true;
+  }
+  const others = a.others();
+  if (!others.length) { none(); return true; }
+  const lines = ['Thank You!', 'Sorry!', '#!$@*$&@•™!', 'I need money.', 'I need metal.', 'I like you.', 'I hate you.', 'Let’s be allies.'];
+  const L = lists(others.map(q => ({ id: String(q.id), label: q.name })), lines.map((l, i) => ({ id: i, label: l })), String(others[0].id));
+  const own = el('input', { name: 'custom', maxlength: 80, 'aria-label': 'Or type your own', class: 'chat12own' });
+  rwin('Send a message', el('div', { class: 'chat12' }, two('Send to', L.to, 'Say', L.say), el('label', { class: 'chat12part' }, el('span', null, 'Or type your own'), own),
+    el('div', { class: 'btns right' }, btn('Cancel', () => a.closeModal(), { class: 'quiet' }), btn('Send', () => { const text = own.value.trim() || lines[+L.say.get()]; const r = H().sendChat(g, ME, +L.to.get(), text); if (r === 'limit') { a.chatLimitToast(); return; } /* (HO.sendChat says nothing on success) */ a.Sound.play(5000); a.closeModal(); a.save(); }))), 'chat12w');
+  return true;
+}
+
+// Radical Research (4.0.5, 5.0.5, the Palm, iOS): the programs your radical researchers are working on, as a list with each one's picture; the
+// one picked is cancelled by OK. The ruleset's own forms (rs.radicalHand.words: its prompt, the picture beside each program, "keep" as the last
+// choice and picked at first in 5.0.5, the Palm and iOS, none picked in 4.0.5; 4.0.5's five minutes, after which the window answers OK as it
+// stands), or the plain one (a "Cancel Project" button beside OK). RH.discard as the classic window calls it.
+function radical12() {
+  const a = A(), el = a.el, g = G(), p = a.me(), RH = H().rules(g).radicalHand;
+  if (!RH || g.over) return true;
+  const cards = RH.cards(g, p);
+  if (!cards.length || (RH.full && cards.length < RH.full)) { a.toast(cards.length ? 'Your radical researchers have fewer than four projects: none can be cancelled.' : 'Your radical researchers have no projects yet.'); return true; }
+  const W = RH.words, pre = (window.HOTHEME && HOTHEME.prefix) || 'dos:';
+  const pic = W && W.pic ? (a.IMG[pre + 'fill/classic-' + W.pic] || a.IMG[W.pic]) : null; // (the skin's 1-bit stand-in for the colour picture)
+  if (!W) {
+    let sel = null;
+    const list = list12(cards.map((c, i) => ({ id: i, label: H().say(g, c.text) })), { label: 'Radical Research', onpick: (i) => { sel = i; go.disabled = false; } });
+    const go = btn('Cancel Project', () => { if (sel == null) return; RH.discard(g, p, cards[sel].id); a.save(); a.closeModal(); a.Sound.play(7002); a.toast('That project has been cancelled.'); }, { disabled: true });
+    rwin('Radical Research', el('div', { class: 'rad12' }, el('p', null, 'Your radical researchers are working on these projects. You may cancel one; another takes its place after the next discovery.'), list.el,
+      el('div', { class: 'btns right' }, go, btn('OK', () => a.closeModal()))), 'rad12w');
+    return true;
+  }
+  const items = cards.map((c, i) => ({ id: String(i), label: H().say(g, c.text), pic: pic && pic.src, picSize: 36 }));
+  if (W.keep) items.push(null, { id: 'keep', label: W.keep });
+  let timer = null;
+  const list = list12(items, { value: W.keep ? 'keep' : null, label: W.prompt || 'Radical Research', onpick: () => a.Sound.play(7001) });
+  const done = () => { clearTimeout(timer); const v = list.get(); a.closeModal(); if (v == null || v === 'keep') return; RH.discard(g, p, cards[+v].id); a.save(); a.Sound.play(7002); };
+  rwin(W.title || '', el('div', { class: 'rad12' }, W.prompt ? el('p', null, W.prompt) : null, list.el, el('div', { class: 'btns right' }, btn(W.ok || 'OK', done))), 'rad12w', { onClose: () => clearTimeout(timer) });
+  if (RH.timeout) timer = setTimeout(() => { if (a.UI.modal && a.UI.modal.contains(list.el)) done(); }, RH.timeout * 1000);
+  return true;
+}
+
+// Auto Play: the computer plays your turns until something interesting happens. 1.2 had none; the later versions' windows are three (5.0.5's
+// with its "Auto Play" box, iOS's with Play One Turn and a STOP button, the generic one with a number of turns and what to stop for), here in one
+// layout of 1.2's: the way to play as a two-row list, the computer's settings as 1.2's sliders (the classic code's own, autoPlaySliders), the
+// check boxes, "Click through messages every" as a slider. runAutoPlay as the classic window calls it; the settings kept as it keeps them.
+function autoplay12() {
+  const a = A(), el = a.el, g = G(), rs = H().rules(g), kind = rs.autoPlayWindow === 'ios' ? 'ios' : rs.autoPlayWindow === '505' ? '505' : 'generic', where = a.autoPlayWhere();
+  const D = Object.assign(kind === '505' ? { on: true, computer: true } : {}, rs.autoPlayDefaults || { stop: true, every: 4 }, kind === '505' ? (a.Prefs.auto505 || {}) : {});
+  const chk = (name, label, on, o) => { const i = el('input', Object.assign({ type: 'checkbox', name, checked: on ? 'checked' : false }, o || {})); return { i, el: el('label', { class: 'chk' }, i, el('span', null, label)) }; };
+  const modeWords = kind === '505' ? ['Have Computer Play For Me', 'Just End My Turns'] : kind === 'ios' ? ['Computer Play For Me', 'Just End My Turns Only'] : ['Have the computer play for me', 'Just end my turns'];
+  const mode = list12([{ id: 'computer', label: modeWords[0] }, { id: 'end', label: modeWords[1] }], { value: kind === '505' ? (D.computer ? 'computer' : 'end') : 'computer', label: 'Play', onpick: () => sync() });
+  mode.el.classList.add('ap12mode');
+  let sl = null;
+  const showSl = kind === '505' || where === 'autoplay';
+  if (showSl) sl = a.autoPlaySliders();
+  const on = kind === '505' ? chk('on', 'Auto Play', D.on) : null, stop = kind !== 'generic' ? chk('stop', 'Turn Off When Something Interesting Happens', D.stop !== false) : null;
+  const secs = el('b', null, String(D.every || 0));
+  const every = el('input', { type: 'range', name: 'every', min: 0, max: 10, value: D.every || 0, 'aria-label': 'Seconds', oninput: (e) => { secs.textContent = e.target.value; } });
+  const turns = kind === 'generic' ? el('input', { type: 'number', name: 'turns', min: 1, max: 500, value: 20, class: 'ap12turns', 'aria-label': 'For up to this many turns' }) : null;
+  const gen = kind === 'generic' ? { won: chk('won', 'Battles I win', true), lost: chk('lost', 'Battles I lose', true), news: chk('news', 'Colonies, tech levels and other news', true) } : null;
+  const sync = () => { if (sl) for (const i of sl.box.querySelectorAll('input')) i.disabled = kind === '505' && mode.get() !== 'computer'; };
+  const go = (start) => {
+    if (sl) sl.apply();
+    if (kind === '505') { const o = { on: on.i.checked, computer: mode.get() === 'computer', stop: stop.i.checked, every: +every.value || 0 }; a.Prefs.auto505 = o; a.savePrefs(); a.closeModal(); if (o.on) a.runAutoPlay({ turns: Infinity, computer: o.computer, won: o.stop, lost: o.stop, news: o.stop, every: o.every, stopButton: true }); return; }
+    a.closeModal();
+    if (kind === 'ios') { const s = stop.i.checked; a.runAutoPlay({ turns: Infinity, computer: mode.get() === 'computer', won: s, lost: s, news: s, every: +every.value || 0, stopButton: true }); return; }
+    a.runAutoPlay({ turns: +turns.value || 10, computer: mode.get() === 'computer', won: gen.won.i.checked, lost: gen.lost.i.checked, news: gen.news.i.checked });
+  };
+  const btns = el('div', { class: 'btns right' });
+  if (where === 'config') btns.append(btn('Config…', () => { a.closeModal(); a.openAutoPlaySettings(a.openAutoPlay); }, { class: 'quiet' }));
+  if (kind === 'ios') btns.append(btn('Play One Turn', () => { if (sl) sl.apply(); a.closeModal(); a.playOneTurn(); }, { class: 'quiet' }));
+  if (kind === '505') btns.append(btn('Cancel', () => a.closeModal(), { class: 'quiet' }));
+  btns.append(btn(kind === '505' ? 'OK' : 'Start', () => go()));
+  rwin(kind === '505' ? 'Auto Play' : 'Auto play', el('div', { class: 'ap12' },
+    on ? on.el : null, el('p', { class: 'cap12' }, 'Play'), mode.el, sl ? sl.box : null,
+    gen ? el('div', null, el('p', { class: 'cap12' }, 'Stop when something interesting happens'), gen.won.el, gen.lost.el, gen.news.el) : null,
+    stop ? el('div', null, stop.el, kind === '505' ? el('p', { class: 'fine' }, 'Battles, colonizations, tech level changes, etc.') : null) : null,
+    kind !== 'generic' ? el('label', { class: 'slide ap12every' }, el('span', null, kind === '505' ? 'Click through messages every:' : 'Click through the messages every'), every, el('output', null, secs, ' ', 'Seconds')) : null,
+    turns ? el('label', { class: 'chat12part' }, el('span', null, 'For up to this many turns'), turns) : null, btns), 'ap12w');
+  sync();
+  return true;
+}
+
+// Dip Into Savings (3.0.1 on): the question, one bar (the share of the savings that goes into the budget each turn), what it is now, Cancel, OK.
+// The ruleset's own words (rs.windowWords.dip: 5.0.5's PPob 157) and its maximum (rs.dipMax), as the classic window has them.
+function dip12() {
+  const a = A(), el = a.el, g = G(), p = a.me(), rs = H().rules(g), W = a.winWords('dip'), max = rs.dipMax || 100;
+  const now = raw('b', (p.dip || 0) + '%');
+  const bar = vbar12({ max, value: p.dip || 0, h: 60, ticks: Math.min(10, max), step: rs.dipMax ? 1 : 5, label: W ? W.title : 'Dip into savings', text: (n) => n + '%', onchange: (n) => { now.textContent = n + '%'; } });
+  const marks = W && W.marks ? W.marks : [max + '%', Math.round(max / 2) + '%', '0%'];
+  const ok = () => { const v = bar.get(); if (rs.dipSet) rs.dipSet(g, p, v); else p.dip = v; a.closeModal(); a.renderPanel(); a.save(); };
+  rwin(W ? W.title : 'Dip into savings', el('div', { class: 'dip12' },
+    el('div', { class: 'dip12row' }, el('p', null, W ? W.text : 'Each turn, move this share of your savings into the budget'),
+      el('div', { class: 'dip12bar' }, bar.el, el('div', { class: 'marks12' }, ...marks.map(m => el('span', null, m))))),
+    el('p', { class: 'fine' }, W ? W.note : 'Once started, you will continue to dip each turn until cancelled.', ' ', now),
+    el('div', { class: 'btns right' }, btn(W ? W.cancel : 'Cancel', () => a.closeModal(), { class: 'quiet' }), btn(W ? W.ok : 'OK', ok))), 'dip12w');
+  return true;
+}
+
+// Surrender (3.0.1 on): who to surrender to, a list; yourself and those out dimmed, then "No One". The questions and the words as the classic window's
+// (rs.windowWords.surrender: 5.0.5's PPob 147: OK the first time asks Alert 1, Cancel while surrendering takes it back, Alert 2).
+function surrender12() {
+  const a = A(), el = a.el, g = G(), p = a.me(), ME = a.ME, W = a.winWords('surrender');
+  const set = (to) => { H().surrender(g, ME, to); a.save(); a.renderPanel(); };
+  if (W) {
+    const cur = p.surrenderTo;
+    const list = list12([...g.players.map(q => ({ id: q.id, label: q.name, disabled: q.id === ME || !q.alive || q.surrendered })), null, { id: -1, label: W.noOne }], { value: cur == null || cur === -1 ? -1 : cur, label: W.text });
+    rwin(W.title, el('div', { class: 'surr12' }, el('p', null, W.text), list.el,
+      el('div', { class: 'btns right' },
+        btn(W.cancel, () => { a.closeModal(); if (cur != null) { set(null); a.toast(H().say(g, H().DATA.alerts[2] || 'You are no longer surrendering to anyone.')); } }, { class: 'quiet' }),
+        btn(W.ok, () => { const to = list.get(); a.closeModal(); if (cur == null) a.confirmBox(H().say(g, H().DATA.alerts[1] || 'Do you really want to surrender?'), () => set(to)); else if (to !== cur) set(to); }))), 'surr12w');
+    return true;
+  }
+  if (p.surrenderTo != null) { a.confirmBox('You are surrendering at the end of this turn. Take it back?', () => { H().surrender(g, ME, null); a.save(); }); return true; }
+  const list = list12([...a.others().map(q => ({ id: q.id, label: q.name })), { id: -1, label: 'No one' }], { value: a.others().length ? a.others()[0].id : -1, label: 'Surrender to' });
+  rwin('Surrender', el('div', { class: 'surr12' }, el('p', null, H().say(g, H().DATA.alerts[1] || 'Do you really want to surrender?')), el('p', { class: 'cap12' }, 'Surrender to'), list.el,
+    el('p', { class: 'fine' }, 'Your fleets are dismantled. Whoever you surrender to gets your savings, your metal, and your planets.'),
+    el('div', { class: 'btns right' }, btn('Cancel', () => a.closeModal(), { class: 'quiet' }), btn('Surrender', () => { H().surrender(g, ME, list.get()); a.closeModal(); a.save(); a.toast('You will surrender at the end of this turn.'); }))), 'surr12w');
+  return true;
+}
+
 // DLOG 6010 "Create New Ship Type…" ⌘K (CreateShipType @111866): ALRT 3280 first when there are 20 types; "Name of New Ship Type:" (15
 // letters, "Name It For Me"), the class menu (MENU 6015), five sliders each "%d/%d" (its level / the most), "Dev. Cost:", "Prod. Cost:",
 // "Metal Cost:"; "Create" asks ALRT 3040 until a name is given and ALRT 3050 until a slider has been moved
@@ -239,7 +627,7 @@ const ALERT_TYPES = {
 function createType() {
   const a = A(), el = a.el, g = G(), p = a.me(), W = ALERT_TYPES[lang()];
   if (p.designs.filter(d => !d.scrapped).length >= (H().rules(g).maxDesigns || 20)) { alertBox(W.full); return; }
-  const types = ['scout', 'fighter', 'colony', 'satellite'];
+  const types = CLASSES();
   const st = { type: 'scout', R: 0, V: 0, W: 0, S: 0, M: 0, name: '' };
   let named = false, moved = false;
   const box = el('div', { class: 'create12' });
@@ -285,14 +673,22 @@ function createType() {
 function roster(panel) {
   const a = A(), el = a.el, g = G();
   if (!g) return;
+  const later = H().rules(g).id !== '12'; // 1.2's own rules: the strip is as 1.2 draws it
   const box = el('section', { class: 'box roster12', 'aria-label': 'Players' });
   for (const p of g.players) {
     const key = p.id === a.ME ? 'white0_0' : 'bad' + (p.face || 0) + '_0', im = a.IMG[key];
     const done = !p.human || (g.done || []).includes(p.id);
+    // (the remake's own: a later ruleset's pacts, a ring round the face, double for a best buddy: the idea of 3.0.1's halo drawn in 1 bit,
+    // as the halo's picture is only the top of a planet's ring; 1.2's own rules show none)
+    const bud = later && p.id !== a.ME && p.alive && H().isBuddy(g, a.ME, p.id), ally = bud || (later && p.id !== a.ME && p.alive && H().isAllied(g, a.ME, p.id));
+    const face0 = im ? el('img', { src: im.src, alt: '', width: 16, height: 16 }) : el('span');
+    const face = ally ? el('span', { class: 'rface remake12 ' + (bud ? 'buddy' : 'ally'), title: bud ? 'Your best buddy' : 'Your ally' }, face0) : face0;
     box.append(el('div', { class: 'rrow' + (p.alive ? '' : ' out') },
-      im ? el('img', { src: im.src, alt: '', width: 16, height: 16 }) : el('span'), raw('span', p.name, { class: 'rname' }),
+      face, raw('span', p.name, { class: 'rname' }),
       done && p.alive ? raw('span', '✓', { class: 'rdone', 'aria-label': 'done' }) : null));
   }
+  // (the remake's own: in a later ruleset the strip opens the Players window, where the pacts are; no right click)
+  if (later) { box.classList.add('remake12', 'rclick'); box.setAttribute('role', 'button'); box.tabIndex = 0; box.title = 'Players'; box.addEventListener('click', () => a.openPlayers()); box.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); a.openPlayers(); } }); }
   panel.append(box);
 }
 
@@ -370,6 +766,9 @@ function aboutBox() {
 // "Group All" (one pile), "Divide All" (a pile per ship); OK makes the piles the fleets (the first fleets keep their records and orders,
 // a new pile is a new fleet: rs.organized), Cancel leaves them
 function organize(f0) {
+  // a fleet of more than one design (5.0.5's can be): this window moves ships of one design between single-design fleets (1.2's rule), so the classic
+  // organizer, whose piles are a design in a fleet, does it
+  if (Object.keys(f0.ships).length > 1 && A().organizeStyle && A().organizeStyle()) { A().openOrganize(f0.star); return; }
   const a = A(), el = a.el, g = G(), did = +Object.keys(f0.ships)[0], d = H().getDesign(g, a.ME, did);
   const fleets = g.fleets.filter(f => f.owner === a.ME && f.star === f0.star && f.to == null && Object.keys(f.ships).length === 1 && +Object.keys(f.ships)[0] === did);
   const piles = fleets.map(f => ({ f, n: f.ships[did] }));
@@ -499,6 +898,11 @@ function nameStarLayout(f, o) {
   const a = A(), el = a.el, NS = o.NS, at = (l, t, w, h) => `position:absolute;left:${l}px;top:${t}px;width:${w}px;height:${h}px`;
   o.inp.setAttribute('style', at(97, 144, 90, 16) + ';box-sizing:border-box;padding:0 2px');
   o.err.setAttribute('style', at(97, 162, 180, 14) + ';margin:0;font-size:10px');
+  // 1.2's dialog has no Cancel (its hint says: OK with the name blank, to name no star), but the classic form ignores a blank name and relies on its Cancel
+  // button, which is removed below: the form was never dismissable without a name (found by playing a win to its end). A blank OK presses that Cancel's own
+  // handler, as the classic window's Cancel does (the "no longer asking" record included).
+  const decline = f.querySelector('button[type=button]');
+  f.addEventListener('submit', (e) => { if (!o.inp.value.trim() && decline) { e.preventDefault(); e.stopImmediatePropagation(); decline.click(); } }, true);
   f.innerHTML = '';
   f.setAttribute('style', 'position:relative;width:281px;height:217px');
   f.append(raw('p', NS.text, { style: at(9, 6, 265, 35) + ';margin:0' }), raw('p', NS.rule || '', { style: at(9, 45, 263, 34) + ';margin:0' }),
@@ -567,24 +971,25 @@ function qdCanvas(w, h, label) { // a box drawn at twice its pixels, as wide as 
   return api;
 }
 // DrawVBarControl(x, y, values per mille (-1: finished), kind 1 colony / 2 technologies, names)
-function vbars(q, x0, y0, vals, kind, names, toPix) {
+function vbars(q, x0, y0, vals, kind, names, toPix, geo) {
+  const BW = (geo && geo.b) || 18, GP = (geo && geo.g) || 9; // (a bar 18 wide with 9 before it, as DrawVBarControl; narrower for the remake's sixth)
   const d5 = y0 + 50;
   q.vline(x0, y0, d5 + 1);
   if (kind === 2) for (let v = 100; v <= 1000; v += 100) q.hline(x0 - 2, x0, d5 - toPix(v));
   else for (let i = 1; i <= 10; i++) q.hline(x0 - 2, x0, d5 - Math.trunc(50 * i / 10));
   let d4 = x0;
   vals.forEach((v, i) => {
-    q.hline(d4, d4 + 27, d5 + 1); d4 += 9;
+    q.hline(d4, d4 + GP + BW, d5 + 1); d4 += GP;
     const hpx = v <= 0 ? 0 : kind === 2 ? toPix(v) : Math.trunc(50 * v / 1000);
-    q.rect(d4, d5 - hpx, d4 + 18, d5, '#000'); q.rect(d4, y0, d4 + 18, d5 - hpx, '#fff');
+    q.rect(d4, d5 - hpx, d4 + BW, d5, '#000'); q.rect(d4, y0, d4 + BW, d5 - hpx, '#fff');
     const w = q.width(names[i]);
-    q.text(names[i], d4 + Math.trunc((18 - w) / 2), d5 + 10 + (kind === 2 ? 10 * (i % 2) : 0));
-    d4 += 18;
+    q.text(names[i], d4 + Math.trunc((BW - w) / 2), d5 + 10 + (kind === 2 ? 10 * (i % 2) : 0));
+    d4 += BW;
   });
-  q.hline(d4, d4 + 9, d5 + 1);
+  q.hline(d4, d4 + GP, d5 + 1);
 }
 // which bar a point is on, and its value from the height (DoVBarClick)
-function vbarHit(x0, y0, n, pt) { const i = Math.floor((pt.h - x0 - 9) / 27), off = (pt.h - x0 - 9) - 27 * i; return i >= 0 && i < n && off >= 0 && off < 18 && pt.v >= y0 - 2 && pt.v <= y0 + 52 ? i : -1; }
+function vbarHit(x0, y0, n, pt, geo) { const BW = (geo && geo.b) || 18, GP = (geo && geo.g) || 9, i = Math.floor((pt.h - x0 - GP) / (GP + BW)), off = (pt.h - x0 - GP) - (GP + BW) * i; return i >= 0 && i < n && off >= 0 && off < BW && pt.v >= y0 - 2 && pt.v <= y0 + 52 ? i : -1; }
 // the share set on one bar, the rest spread over the others that are not finished, in proportion (equally when they are all 0)
 function spread(vals, i, nv) {
   const out = vals.slice(); out[i] = Math.max(0, Math.min(1000, Math.round(nv)));
@@ -593,10 +998,10 @@ function spread(vals, i, nv) {
   if (!others.length) out[i] = 1000;
   return out;
 }
-function dragBars(q, x0, y0, getVals, kind, set, fromPix) {
+function dragBars(q, x0, y0, getVals, kind, set, fromPix, geo) {
   q.c.style.touchAction = 'none';
   q.c.addEventListener('pointerdown', (ev) => {
-    const i = vbarHit(x0, y0, getVals().length, q.at(ev)); if (i < 0) return;
+    const i = vbarHit(x0, y0, getVals().length, q.at(ev), geo); if (i < 0) return;
     ev.preventDefault();
     if (getVals()[i] < 0) { A().beep(); return; } // (a finished part: PlaySound(-1))
     const start = getVals();
@@ -617,7 +1022,7 @@ function setColonyBars(s, v) {
 }
 const kvText = (box, key) => { const r = box && box.querySelector(`.kv[data-help="${key}"]`); if (!r) return null; const b = r.querySelector('b'); return { label: r.querySelector('span').textContent, value: b ? Array.from(b.childNodes).filter(n => !(n.classList && n.classList.contains('chg'))).map(n => n.textContent).join('').trim() : '', chg: (b && b.querySelector('.chg') || {}).textContent || '' }; };
 function planetBox12(old) {
-  const a = A(), g = G(), p = a.me(), s = a.UI.sel != null ? g.stars[a.UI.sel] : null, rs = H().rules(g), W = (rs.planetInfo || {})[lang()] || {};
+  const a = A(), g = G(), p = a.me(), s = a.UI.sel != null ? g.stars[a.UI.sel] : null, rs = H().rules(g), W = planetWords(g);
   const q = qdCanvas(226, 68, s ? s.name : '');
   const box = a.el('section', { class: 'box planet12' }, q.c);
   if (s) {
@@ -663,14 +1068,21 @@ function planetBox12(old) {
 // orders, condensed when wider than the row, the selected one inverted) with the scroll bar at the right, or "Pas de vaisseau sur
 // cette planète." (4000.11); a double rule along the foot and a rule down the right.
 let FLEET_TOP = 0;
+// 1.2's own routines for what only its ruleset defines (the fleet rows and the selected fleet's lines, the panels' words, the battle panel), lent to a
+// later ruleset: shipsText, fleetInfo, planetInfo and battlePanel exist only in rules-12, so in every other ruleset the fleet box was blank and the
+// planet box had no words. They read G.opts.lang and say French when it is unset (a ruleset played in its own language), so they are handed the game as
+// the player's language sees it: a view of it, not a change to it.
+const RS12 = () => (H().RULESETS || {})['12'] || null;
+const langView = (g) => Object.assign(Object.create(g), { opts: Object.assign({}, g.opts, { lang: lang() }) });
+const planetWords = (g) => { const rs = H().rules(g), r12 = RS12(); return ((rs.planetInfo || (r12 && r12.planetInfo)) || {})[lang()] || {}; };
 function fleetBox12() {
-  const a = A(), g = G(), rs = H().rules(g), s = a.UI.sel != null ? g.stars[a.UI.sel] : null, W = (rs.planetInfo || {})[lang()] || {};
+  const a = A(), g = G(), rs = H().rules(g), s = a.UI.sel != null ? g.stars[a.UI.sel] : null, W = planetWords(g), r12 = RS12();
   const q = qdCanvas(226, 62, 'Fleets');
   const here = s ? a.fleetOrder(g.fleets.filter(f => f.star === s.id && f.to == null && f.owner === a.ME)) : [];
   const sel = here.find(f => f.id === a.UI.selFleet);
   FLEET_TOP = Math.max(0, Math.min(FLEET_TOP, here.length - 4));
   if (sel) {
-    const L = rs.fleetInfo ? rs.fleetInfo(g, sel) : [];
+    const L = rs.fleetInfo ? rs.fleetInfo(g, sel) : r12 ? r12.fleetInfo(langView(g), sel) : [];
     const first = L[0] || '', m = /^(.*?:) (.*)$/.exec(first);
     if (m && !sel.scrap301 && !/ via /.test(first)) { q.text(m[1], 3, 6); q.text(m[2], 70, 6); } else q.text(first, 3, 6);
     if (L[1]) q.text(L[1], 3, 16); if (L[2]) q.text(L[2], 70, 16); if (L[3]) q.text(L[3], 125, 16);
@@ -679,7 +1091,8 @@ function fleetBox12() {
   if (!here.length) q.text(W.noFleets || '', 3, 28);
   here.slice(FLEET_TOP, FLEET_TOP + 4).forEach((f, i) => {
     const top = 19 + 10 * i, ds = H().fleetDesigns(g, f), d = ds[0], n = H().fleetCount ? H().fleetCount(f) : Object.values(f.ships).reduce((x, y) => x + y, 0);
-    const t = d && rs.shipsText ? rs.shipsText(g, d, n) : '';
+    // (a ruleset without shipsText: 1.2's line for a fleet of one design; the engine's own label, "6 ships", for a mixed fleet)
+    const t = rs.shipsText ? (d ? rs.shipsText(g, d, n) : '') : ds.length === 1 && r12 ? r12.shipsText(langView(g), d, n) : H().fleetLabel(g, f);
     const font = f.dest != null ? G9B : G9, cond = q.width(t, font) > 214 - 3;
     q.text(t, 3, top + 8, font, { cond });
     if (f.id === a.UI.selFleet) { q.x.globalCompositeOperation = 'difference'; q.rect(0, top, 214, top + 10, '#fff'); q.x.globalCompositeOperation = 'source-over'; }
@@ -706,19 +1119,26 @@ function incomeBox12(old) {
 }
 const TECH12 = ['range', 'speed', 'weapons', 'shields', 'mini'];
 const TECH_NAMES12 = { fr: ['Distance', 'Vitesse', 'Armes', 'Boucliers', 'Mini'], en: ['Range', 'Speed', 'Weapons', 'Shields', 'Mini'] };
+// (the remake's own, in 1.2's drawing: a later ruleset's sixth bar, Radical research (5.0.5 and the Palm; 1.2's rules have none: noRadical).
+// "Radical" is the word of every version that has it, French included; the bar is one more of the same vertical bars, and the box a little
+// same size, the bars 14 wide with 8 before them (not 18 and 9) so the six fit where the five did; the levels are the five's, Radical has none)
 function techBox12() {
-  const a = A(), g = G(), p = a.me(), W = BAR_WORDS[lang()], names = TECH_NAMES12[lang()];
-  const q = qdCanvas(228, 80, W.head), sc = H().barScale(g, 'tech');
+  const a = A(), g = G(), p = a.me(), W = BAR_WORDS[lang()], names0 = TECH_NAMES12[lang()];
+  const rad = !H().feature(g, 'noRadical') && H().TECHS.includes('radical');
+  const keys = rad ? TECH12.concat('radical') : TECH12, names = rad ? names0.concat('Radical') : names0;
+  const bw = 228, x0 = 80, geo = rad ? { b: 14, g: 8 } : null;
+  const q = qdCanvas(bw, 80, W.head), sc = H().barScale(g, 'tech');
   const toPix = (v) => Math.trunc(50 * sc.toX(v)), fromPix = (px) => sc.toValue(px / 50);
-  const vals = () => { const t = TECH12.reduce((s, k) => s + (p.talloc[k] || 0), 0) || 1; return TECH12.map(k => Math.round(1000 * (p.talloc[k] || 0) / t)); };
+  const vals = () => { const t = keys.reduce((s, k) => s + (p.talloc[k] || 0), 0) || 1; return keys.map(k => Math.round(1000 * (p.talloc[k] || 0) / t)); };
   const draw = () => {
-    q.rect(0, 0, 228, 80, '#fff');
+    q.rect(0, 0, bw, 80, '#fff');
     q.text(W.head, 3, 10); q.text(W.levels, 3, 25);
     TECH12.forEach((k, i) => { q.text(names[i], 5, 35 + 10 * i); q.text(String(p.tech[k]), 50, 35 + 10 * i); });
-    vbars(q, 80, 15, vals(), 2, names, toPix);
+    vbars(q, x0, 15, vals(), 2, names, toPix, geo);
   };
   draw();
-  dragBars(q, 80, 15, vals, 2, (v, end) => { if (v) { TECH12.forEach((k, i) => { p.talloc[k] = v[i] / 1000; }); draw(); } if (end) { a.save(); a.renderPanel(); } }, fromPix);
+  dragBars(q, x0, 15, vals, 2, (v, end) => { if (v) { keys.forEach((k, i) => { p.talloc[k] = v[i] / 1000; }); draw(); } if (end) { a.save(); a.renderPanel(); } }, fromPix, geo);
+  if (rad) q.c.classList.add('remake12');
   return a.el('section', { class: 'box tech12', 'aria-label': W.head }, q.c);
 }
 // the Report Window (CreateReportWin @1300b8: 250 x 96 under the map window, Stup +0x12, beside the Tech Spending window;
@@ -796,7 +1216,7 @@ function battleWindow(b, k) {
   // the state as the shots go
   const alive = b.start.map(() => true), hurt = []; let seq = 0, pop = b.pop0;
   const st = () => ({ alive, hurt, pop, over: false, won: false });
-  const P0 = rs.battlePanel(g, b, st(), ME);
+  const P0 = (rs.battlePanel || RS12().battlePanel)(rs.battlePanel ? g : langView(g), b, st(), ME);
   const leftSide = P0.leftSide, rightSide = b.sides.find(o => o !== leftSide);
   // the final result (a dry run of the record)
   const fAlive = b.start.map(() => true); let fPop = b.pop0;
@@ -931,7 +1351,7 @@ function battleWindow(b, k) {
       const left = b.start.some((u, i) => alive[i] && u.o === o) || (b.planetOwner === o && pop > 0.0005);
       if (!left) { const h = colX[ci]; x.strokeStyle = '#fff'; x.lineWidth = 2; x.beginPath(); x.moveTo(h + 1, 3); x.lineTo(h + 33, 35); x.moveTo(h + 1, 35); x.lineTo(h + 33, 3); x.stroke(); }
     });
-    const P = rs.battlePanel(g, b, { alive, hurt, pop, over: true, won }, ME);
+    const P = (rs.battlePanel || RS12().battlePanel)(rs.battlePanel ? g : langView(g), b, { alive, hurt, pop, over: true, won }, ME);
     (P.end || []).forEach((t, i) => text(t, 155, i ? 150 : 135));
     const im = pic(won ? 'p3500' : 'p3510'); if (im) x.drawImage(im, 180, 175, 74, 64);
     setBtn(fr ? 'Bien' : 'OK');
@@ -973,6 +1393,117 @@ document.addEventListener('click', (ev) => {
   li.classList.add('inv12');
   setTimeout(() => { li.classList.remove('inv12'); li.dataset.inv12 = 'go'; li.click(); delete li.dataset.inv12; }, 5000 / 60);
 }, true);
+// ======================================================================================================================================
+// REMAKE-ONLY CONTROLS (docs/12-findings.md, "Remake-only controls"; docs/brief-restyle.md). 1.2 had none of these: they are the
+// REMAKE'S OWN, drawn in 1.2's look (black on white, Geneva, the System 6 window, 1.2's bars and halo) and marked so:
+//   remake12   every window or control of this section, however it is drawn
+//   native12   built here, in 1.2's own manner (a window's own code)
+//   css12      a later version's own window (rs.giveWindow, rs.windowWords ...) kept as it is and dressed in 1.2's look by style.css
+// Their words are 1.2F's where it has them, then 3.0.1F's, then iOS's, else the remake's (js/ui-text.js, each row marked).
+// ======================================================================================================================================
+const rwin = (title, body, cls, o) => A().modal(title, body, Object.assign({ cls: 'mid mac12 remake12 native12 ' + (cls || ''), label: title }, o || {}));
+// the later rulesets' own windows (not 1.2's) are dressed by style.css: a window that is not one of this skin's own gets the class
+// a later version's window may carry a colour picture of its own (5.0.5's Radical Research: a picture beside each program, named in
+// rs.radicalHand.words.pic); the skin has 1-bit stand-ins for them (assets/skins/mac12/sprites/fill, docs/mac12-fill), 1.2's order
+function standIns(w) {
+  if (!G()) return; // (a window before any game: the New Game window)
+  const pic = ((H().rules(G()) || {}).radicalHand || {}).words; const name = pic && pic.pic; if (!name) return;
+  const pre = (window.HOTHEME && HOTHEME.prefix) || 'dos:', k = pre + 'fill/classic-' + name, im = A().IMG[k];
+  if (im) w.querySelectorAll('img.radpic').forEach((i) => { i.src = im.src; });
+}
+// A colour picture a later version's window shows (the Halls' rank picture, Windows 4.0.5's) is drawn in 1 bit, with the Mac's own dither
+// (Atkinson's: an eighth of the error to six neighbours), as tools/skins/fill_art.py does for the stand-ins; done once, when it loads
+function ditherImg(im) {
+  if (im.dataset.dith12) return; im.dataset.dith12 = '1';
+  const go = () => {
+    try {
+      const w = im.naturalWidth, h = im.naturalHeight; if (!w || !h) return;
+      const c = document.createElement('canvas'); c.width = w; c.height = h; const x = c.getContext('2d'); x.drawImage(im, 0, 0);
+      const d = x.getImageData(0, 0, w, h), g = new Float32Array(w * h);
+      for (let i = 0; i < w * h; i++) { const a = d.data[4 * i + 3] / 255; g[i] = (0.299 * d.data[4 * i] + 0.587 * d.data[4 * i + 1] + 0.114 * d.data[4 * i + 2]) * a + 255 * (1 - a); }
+      const near = [[1, 0], [2, 0], [-1, 1], [0, 1], [1, 1], [0, 2]];
+      for (let y = 0; y < h; y++) for (let xx = 0; xx < w; xx++) {
+        const i = y * w + xx, old = g[i], nv = old < 128 ? 0 : 255, err = (old - nv) / 8; g[i] = nv;
+        for (const [dx, dy] of near) { const X = xx + dx, Y = y + dy; if (X >= 0 && X < w && Y < h) g[Y * w + X] += err; }
+      }
+      for (let i = 0; i < w * h; i++) { d.data[4 * i] = d.data[4 * i + 1] = d.data[4 * i + 2] = g[i]; d.data[4 * i + 3] = 255; }
+      x.putImageData(d, 0, 0); im.src = c.toDataURL('image/png');
+    } catch (e) { /* (a picture the page may not read back: left as it is) */ }
+  };
+  if (im.complete && im.naturalWidth) go(); else im.addEventListener('load', go, { once: true });
+}
+// 1.2's own rules are being played: the windows the classic code opens are 1.2's (the explored stars, the battle list ...) and must show as 1.2
+// showed them, so style.css's content rules for the remake's windows (.remake12) must not reach them
+const own12Rules = () => !!(G() && H().rules(G()).id === '12');
+// the windows a remake command has just opened (a Ho! menu item) are the remake's own, whatever the ruleset
+function tagRemakeWindows() {
+  document.querySelectorAll('.scrim .win').forEach((w) => { if (!w.classList.contains('mac12') && !w.classList.contains('remake12') && !/\bbw12/.test(w.className)) { w.classList.add('remake12', 'css12'); standIns(w); } });
+}
+function dressLaterWindows() {
+  const dress = (n) => { if (n.nodeType !== 1 || own12Rules()) return; // (under 1.2's own rules a classic window is 1.2's own, drawn as it was: left alone; the remake's commands tag theirs, tagRemakeWindows)
+    for (const w of (n.matches && n.matches('.win') ? [n] : n.querySelectorAll ? n.querySelectorAll('.win') : [])) if (!w.classList.contains('mac12') && !w.classList.contains('remake12') && !/\bbw12/.test(w.className)) { w.classList.add('remake12', 'css12'); standIns(w); } };
+  // (the scrim that holds a window is added to the body: watch the page, not the body, which may not exist yet when this loads)
+  const pics = (n) => { if (n.nodeType !== 1) return; const l = n.matches && n.matches('.hpic img') ? [n] : n.querySelectorAll ? n.querySelectorAll('.hpic img') : []; for (const i of l) if (i.closest('.css12')) ditherImg(i); };
+  // The iOS and Android rulesets' Help screen shows the version's manual in an iframe: a dark page with a colour screenshot. In 1.2's black on white, and its picture
+  // in 1 bit (same-origin, so the page can be restyled once it has loaded)
+  const MANUAL_CSS = 'html, body { background: #fff !important; color: #000 !important; font: 12px/1.4 Geneva, Verdana, sans-serif !important; } body * { background: transparent !important; color: #000 !important; border-color: #000 !important; text-shadow: none !important; box-shadow: none !important; } h1, h2, h3 { font-family: Chicago, Geneva, sans-serif !important; } a { text-decoration: underline; } img { image-rendering: pixelated; } hr { border-color: #000 !important; }';
+  const manuals = (n) => { if (n.nodeType !== 1) return; const l = n.matches && n.matches('iframe.shelp') ? [n] : n.querySelectorAll ? n.querySelectorAll('iframe.shelp') : []; for (const f of l) { if (f.dataset.h12) continue; f.dataset.h12 = '1'; const go = () => { try { const d = f.contentDocument; if (!d || !d.head) return; const st = d.createElement('style'); st.textContent = MANUAL_CSS; d.head.appendChild(st); for (const im of d.images) ditherImg(im); } catch (e) { /* (a page that cannot be read: left as it is) */ } }; f.addEventListener('load', go); } };
+  new MutationObserver((ms) => { for (const m of ms) for (const n of m.addedNodes) { dress(n); pics(n); manuals(n); } }).observe(document.documentElement, { childList: true, subtree: true });
+}
+dressLaterWindows();
+
+// The Players window (the remake's own: 1.2 has no such window): who is in the game, the pacts and the history, in 1.2's manner:
+// a bordered list with a heading line, 1.2's check boxes, the history drawn as the Tech Spending window draws, 1 bit, and its buttons.
+// The same rules as the classic window's (HO.setPact, HO.score, HO.isAllied ...); a pact still starts when both sides have ticked it.
+const HIST12 = [['pop', []], ['inc', [4, 3]], ['tech', [1, 3]]]; // solid, dashed, dotted
+function playersWindow() {
+  const a = A(), el = a.el, g = G(), me = a.me(), ME = a.ME, rs = H().rules(g);
+  const pacts = H().feature(g, 'alliances'), buddies = pacts && rs.bestBuddies !== false;
+  const dim = () => { const m = ITEMS['Players and alliances…']; return !!(m && m[4] && m[4]()); }; // (a version dims some commands in its first year, rs.menuDimmed: the pact boxes are dimmed then, as the classic window's are)
+  const rows = g.players.map(p => ({ p, sc: H().score(g, p) })).sort((x, y) => y.sc - x.sc);
+  const list = el('div', { class: 'pl12 lb', role: 'table', 'aria-label': 'Players' });
+  const cols = (...c) => el('div', { class: 'prow' + (pacts ? ' pacts' : '') + (buddies ? ' buddies' : '') }, ...c);
+  list.append(cols(el('span'), el('span', null, 'Player'), el('span', null, 'Colonies seen'), el('span', null, 'Status'), pacts ? el('span', null, 'Ally') : null, buddies ? el('span', null, 'Best buddy') : null));
+  list.firstChild.classList.add('head');
+  for (const { p } of rows) {
+    const im = a.IMG[p.human ? 'white0_' + (p.female ? 1 : 0) : 'bad' + p.face + '_' + (p.female ? 1 : 0)];
+    const seen = p.human ? H().colonies(g, ME).length : g.stars.filter(s => { const k = H().know(g, me, s.id); return k.explored && k.owner === p.id; }).length;
+    let status = p.surrendered ? 'Surrendered' : p.alive ? 'In the game' : 'Eliminated';
+    if (pacts && p.id !== ME && p.alive) {
+      const they = (p.allies || []).includes(ME), we = (me.allies || []).includes(p.id);
+      if (H().isBuddy(g, ME, p.id)) status = 'Your best buddy';
+      else if (H().isAllied(g, ME, p.id)) status = 'Your ally' + (buddies && (p.buddies || []).includes(ME) ? ' (offers best buddies)' : '');
+      else if (they) status = 'Offers to ally';
+      else if (we) status = 'You offered to ally';
+    }
+    const chk = (kind, on) => el('input', { type: 'checkbox', checked: on ? 'checked' : false, disabled: dim() ? 'disabled' : false, 'aria-label': (kind === 'ally' ? 'Ally with ' : 'Best buddies with ') + p.name,
+      onchange: (e) => { H().setPact(g, ME, p.id, kind, e.target.checked); a.save(); a.renderPanel(); playersWindow(); } });
+    const can = p.id !== ME && p.alive;
+    list.append(cols(im ? el('img', { src: im.src, alt: '', width: 16, height: 16 }) : el('span'), raw('span', p.human ? p.name + ' (you)' : p.name, { class: 'pname' }), el('span', null, String(seen)), el('span', null, status),
+      pacts ? el('span', null, can ? chk('ally', (me.allies || []).includes(p.id)) : '') : null, buddies ? el('span', null, can ? chk('buddy', (me.buddies || []).includes(p.id)) : '') : null));
+    if (!p.alive) list.lastChild.classList.add('out');
+  }
+  const note = pacts ? el('p', { class: 'fine' }, buddies ? 'An alliance or best-buddy pact starts when both sides tick it. Allies don’t fight each other, refuel at each other’s colonies, and win together if every survivor is allied. Best buddies also share what they explore.'
+    : 'An alliance starts when both sides tick it. Allies don’t fight each other, refuel at each other’s colonies, and win together if every survivor is allied.') : null;
+  // the history: three lines in 1 bit (solid, dashed, dotted), each scaled to its own greatest, in a box with an axis at its foot
+  const W = 300, Hh = 84, q = qdCanvas(W, Hh, 'Your history'), x = q.x, h = me.hist || [];
+  q.hline(0, W, Hh - 1); q.vline(0, 0, Hh); q.hline(0, W, 0); q.vline(W - 1, 0, Hh);
+  HIST12.forEach(([key, dash]) => {
+    if (h.length < 2) return;
+    const max = Math.max(...h.map(e => e[key]), 1);
+    x.setLineDash(dash); x.lineWidth = 1; x.beginPath();
+    h.forEach((e, i) => { const px = 6 + Math.round(i / (h.length - 1) * (W - 12)) + .5, py = Hh - 6 - Math.round(e[key] / max * (Hh - 14)) + .5; if (i) x.lineTo(px, py); else x.moveTo(px, py); });
+    x.stroke(); x.setLineDash([]);
+  });
+  const legend = el('p', { class: 'fine' }, 'Solid: total population. Dashed: income. Dotted: tech.');
+  const btns = el('div', { class: 'btns' });
+  // (rs.surrenderCommand false: iOS and Android have the rule but no command, so no button here either, as the Galaxy menu has none)
+  if (H().feature(g, 'surrender') && rs.surrenderCommand !== false) btns.append(btn(me.surrenderTo != null ? 'Take back surrender' : 'Surrender…', () => { a.closeModal(); a.openSurrender(); }, { class: 'quiet' }));
+  btns.append(el('span', { class: 'fill' }), btn('OK', () => a.closeModal()));
+  rwin('Players', el('div', { class: 'players12' }, list, note, el('p', { class: 'cap' }, 'Your history'), q.c, legend, btns), 'players12w');
+  return true;
+}
+
 window.HOMAC12 = {
   battleWindow,
   // (the Edit menu's French title is 1.2F's "Edition", which the interface would take for its English word "Edition": written as it is)
@@ -1022,7 +1553,16 @@ window.HOMAC12 = {
   },
   panel(panel, B) { if (own()) panel12(panel, B || {}); },
   // the program's own windows, in English and French (another language keeps the remake's)
+  confirm: (text, yes, labels) => ask12(text, yes, labels),
   window(name, ...x) {
+    if (G() && name === 'players') return playersWindow();
+    if (G() && name === 'ranks') return ranksWindow();
+    if (G() && name === 'give') return give12();
+    if (G() && name === 'chat') return chat12();
+    if (G() && name === 'radical') return radical12();
+    if (G() && name === 'autoplay') return autoplay12();
+    if (G() && name === 'dip') return dip12();
+    if (G() && name === 'surrender') return surrender12();
     if (!G() || !own()) return false;
     if (name === 'types') return shipTypes();
     if (name === 'fleets') return fleetsStatus();
@@ -1039,7 +1579,11 @@ window.HOMAC12 = {
     for (const k in M) { for (const x of M[k]) if (x[0] !== '-' && !(typeof x[0] === 'string' && own.has(x[0]))) extra.push(x); M[k].length = 0; }
     // (View's sound and music, Help's How to play and the manual stay reachable)
     ho.unshift(['About Spaceward Ho! 1.2…', aboutBox], ['-']);
-    if (extra.length) ho.push(['-'], ...extra.filter(x => !(typeof x[0] === 'function' && /scrap|organize|organi/i.test(String(x[0]())))));
+    // (each command is the remake's own: a window it opens is tagged at once, which is what keeps 1.2's own windows out of the remake's look;
+    // the Ho! menu's own items too: Skin and OS look, Sounds, Language, Temperatures)
+    const tagged = (x) => { const f = x[1], y = x.slice(); y[1] = (...a) => { const r = f(...a); tagRemakeWindows(); return r; }; return y; };
+    for (let i = 0; i < ho.length; i++) if (ho[i][0] !== '-' && typeof ho[i][1] === 'function') ho[i] = tagged(ho[i]);
+    if (extra.length) ho.push(['-'], ...extra.filter(x => !(typeof x[0] === 'function' && /scrap|organize|organi/i.test(String(x[0]())))).map(tagged));
   },
   get menuLayout() { return menuLayout(); },
 };

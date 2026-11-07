@@ -104,6 +104,99 @@ const SKINS_CHECK = {
 };
 SKINS_CHECK.android = SKINS_CHECK.ios;
 
+// The Mac 1.2 skin (docs/brief-restyle.md). Its menus are 1.2's own; every command the remake has that 1.2 hadn't goes in the
+// "Ho! 1.2" menu (js/skins/mac12/ui.js, menus()). This opens each of them and sees what it shows: a window of the skin's own
+// (class "mac12": 1.2's own; "remake12": the remake's own control in 1.2's look, built in ui.js (native12) or a later version's window
+// dressed by style.css (css12)) or the classic page's (none of those), which is a FALLBACK and fails the check.
+// --inventory prints every command with what it opened, for docs/12-findings.md ("Remake-only controls").
+// Not game features: the remake's own infrastructure (New game, Quit, Import ...) is listed but not opened or failed.
+const INFRA = /^(new game|quit to title|import|export|account|about |patch notes|suggestion box|how to play|manual|spaceward ho|auto-play this turn)/i;
+const INVENTORY = [];
+SKINS_CHECK.mac12 = async function (page, ctx) {
+  const f = [];
+  const sel = await page.evaluate(() => { const a = window.HOAPI; const s = a.G.stars.find(x => x.owner === a.ME); if (s) { a.UI.sel = s.id; a.centerOn(s.id); a.renderPanel(); a.draw(); } return s && s.id; });
+  await sleep(300);
+  if (sel == null) { f.push('no colony of yours to select'); return f; }
+  // (a full-screen page, the remake's file handling: Saved Games; closeScreen is its Back)
+  const closeAll = async () => { await page.evaluate(() => { if (window.HOAPI && HOAPI.closeScreen && document.querySelector('.hoscreen')) HOAPI.closeScreen(); }); await sleep(100); for (let i = 0; i < 4 && await page.locator('.scrim').count(); i++) { const x = page.locator('.scrim .close'); if (await x.count()) await x.last().click().catch(() => {}); else await page.keyboard.press('Escape'); await sleep(100); if (await page.locator('.scrim').count()) { await page.keyboard.press('Escape'); await sleep(100); } } };
+  // (a click on the page shuts any menu left open, so the click on the logo opens it rather than shutting it)
+  const openMenu = async () => { await closeAll(); await page.evaluate(() => document.body.click()); await page.locator('#menubar .mbtn.logo').click(); await sleep(150); };
+  await openMenu();
+  const labels = await page.evaluate(() => [...document.querySelectorAll('#menubar .dropdown.open [role=menuitem]')].map(b => ({ t: b.textContent.replace(/⌘.*/, '').trim(), off: b.disabled, check: b.classList.contains('check') })));
+  await closeAll(); await page.keyboard.press('Escape');
+  if (!labels.length) f.push('the Ho! 1.2 menu is empty');
+  // (a window is told by its element: the ones already there, the title screen's among them, are not what a command opened)
+  const wins = () => page.evaluate(() => { document.querySelectorAll('.win').forEach((w) => { if (!w.__seen) w.__seen = 0; }); return [...document.querySelectorAll('.scrim .win')].map(w => ({ own: w.classList.contains('mac12') || w.classList.contains('remake12'), native: w.classList.contains('native12'), dressed: w.classList.contains('css12'), cls: w.className, title: (w.querySelector('.wtitle span') || {}).textContent || w.getAttribute('aria-label') || '' })); });
+  for (const { t, off, check } of labels) {
+    const row = { rules: ctx.rules, command: t, kind: '' };
+    if (off) row.kind = 'ghosted';
+    else if (INFRA.test(t)) row.kind = 'infrastructure';
+    else if (check) row.kind = 'toggle (a check mark in the menu)';
+    else {
+      await openMenu();
+      const hit = await page.evaluate((label) => { const b = [...document.querySelectorAll('#menubar .dropdown.open [role=menuitem]')].find(x => x.textContent.replace(/⌘.*/, '').trim() === label); if (b) b.click(); return !!b; }, t);
+      await sleep(300);
+      if (!hit) { row.kind = 'not in the menu now'; }
+      else {
+        const shown = await wins();
+        const toast = await page.evaluate(() => { const e = document.querySelector('.toast'); return e ? e.textContent : ''; });
+        const screen = await page.evaluate(() => { const e = document.querySelector('.hoscreen'); return e ? (e.getAttribute('aria-label') || 'screen') : ''; });
+        if (screen) { row.kind = 'screen (the remake\'s file handling, left as it is)'; row.window = screen; }
+        else if (!shown.length) row.kind = toast ? 'toast' : 'nothing (a command)';
+        else { const w = shown[shown.length - 1]; row.kind = w.native ? 'native' : w.dressed ? 'dressed' : w.own ? 'mac12' : 'CLASSIC'; row.window = w.title; row.cls = w.cls; }
+      }
+      await closeAll();
+    }
+    INVENTORY.push(row);
+    if (row.kind === 'CLASSIC') f.push(`falls back to the classic page: "${t}" opens "${row.window}" (${row.cls})`);
+  }
+  // The remake's commands that sit in 1.2's own menus, not the Ho! menu: a later ruleset's fleet orders (Ships: Battle stance, Normal, Offensive,
+  // Defensive, Arrive late) and Evacuate (Galaxy). They must be there where the ruleset has the feature, and NOT in 1.2's own menus (1.2 and
+  // DOS 2.0 have neither): the menus are laid out once, before any game, so each item says by itself whether to show.
+  const feat = await page.evaluate(() => { const g = HOAPI.G; return { stances: !!HO.feature(g, 'stances'), late: !!HO.feature(g, 'lateArrival'), evac: HO.rules(g).evacuateCommand !== false }; });
+  const labelsOf = async (m) => { await page.evaluate(() => document.body.click()); await page.locator('#menubar .mbtn').nth(m).click(); await sleep(150); const l = await page.evaluate(() => [...document.querySelectorAll('#menubar .dropdown.open [role=menuitem]')].map(x => x.textContent.replace(/⌘.*/, '').trim())); await page.evaluate(() => document.body.click()); return l; };
+  const ships = await labelsOf(4), galaxy = await labelsOf(5);
+  const has = (l, re) => l.some(x => re.test(x));
+  const expect = (what, l, re, want) => { if (has(l, re) !== want) f.push(`${what} ${want ? 'is missing from' : 'shows in'} the menu though the ruleset ${want ? 'has' : 'lacks'} it`); };
+  expect('Battle stance', ships, /^(Battle stance|Attitude au combat)/, feat.stances);
+  expect('Arrive late', ships, /^(Arrive late|Arriver en retard)/, feat.late);
+  // the Players window's Surrender button follows the Galaxy menu's Surrender command (iOS and Android: the rule but no command)
+  await closeAll();
+  const sur = await page.evaluate(() => { const g = HOAPI.G; HOAPI.openPlayers(); const w = document.querySelector('.scrim .players12'); const btn = w ? [...w.querySelectorAll('.btns button')].some(b => /(Surrender|Take back|Se rendre|Annuler la reddition)/i.test(b.textContent)) : null; return { btn, want: !!HO.feature(g, 'surrender') && HO.rules(g).surrenderCommand !== false, win: !!w }; });
+  if (!sur.win) f.push('the Players window did not open as the skin\'s own'); else if (sur.btn !== sur.want) f.push(`the Players window ${sur.btn ? 'shows' : 'lacks'} a Surrender button though the ruleset ${sur.want ? 'has' : 'has no'} Surrender command`);
+  await closeAll();
+  // 1.2's own windows must show as 1.2 showed them: under its own rules the explored-stars list (the classic code's, 1.2's dialog) is not dressed
+  // in the remake's content look (the class remake12, css12)
+  if (ctx.rules === '12') {
+    const own = await page.evaluate(async () => { HOAPI.openStarList(); await new Promise(r => setTimeout(r, 80)); /* (the page tags a window in a microtask after it opens) */ const w = document.querySelector('.scrim .win'); return w ? w.className : null; });
+    if (!own) f.push('1.2\'s explored-stars window did not open'); else if (/remake12|css12/.test(own)) f.push(`1.2's own explored-stars window is dressed as the remake's (${own})`);
+    await closeAll();
+  }
+  // The rebuilt windows stay native: each of these commands opens the skin's own window (native12), not the classic one dressed (css12), where the ruleset has it.
+  for (const r of INVENTORY.filter(x => x.rules === ctx.rules && /^(Give money|Send a message|Dip into|Surrender|Auto play|Players and|Rank history)/i.test(x.command)))
+    if (r.kind === 'dressed') f.push(`"${r.command}" opens a dressed classic window; it was rebuilt as the skin's own`);
+  // The fleet box draws something for a ruleset that buys ships at once (shipsText and fleetInfo exist only in 1.2's ruleset; the box was blank in every other):
+  // two fleets of two designs, none selected, and dark pixels in the rows' part of the box
+  const fb = await page.evaluate(() => {
+    const a = HOAPI, g = a.G, p = a.me(); if (HO.feature(g, 'buildQueue')) return { skip: true };
+    const st = g.stars.find(x => x.owner === a.ME); p.savings = 300000; p.metal = 60000;
+    const ds = p.designs.filter(d => !d.scrapped).slice(0, 2); for (const d of ds) HO.buildShips(g, a.ME, st.id, d.id, 2);
+    a.UI.sel = st.id; a.UI.selFleet = null; a.renderPanel();
+    const c = document.querySelector('#panel .fleets12 canvas'); if (!c) return { none: true };
+    const x = c.getContext('2d'), w = c.width, h = c.height, d2 = x.getImageData(0, Math.round(h * 20 / 62), Math.round(w * 214 / 226), Math.round(h * 38 / 62)).data;
+    let dark = 0; for (let i = 0; i < d2.length; i += 4) if (d2[i] < 100) dark++;
+    return { dark, fleets: g.fleets.filter(f => f.owner === a.ME && f.star === st.id).length };
+  });
+  if (!fb.skip) { if (fb.none) f.push('the fleet box is not on the panel'); else if (fb.fleets > 0 && fb.dark < 60) f.push(`the fleet box draws nothing for ${fb.fleets} fleet(s) here (${fb.dark} dark pixels)`); }
+  // The window a winner names a star in has, in 1.2's layout, no Cancel: a blank name with OK must close it (the classic form ignored a blank name, so the
+  // window could never be left without naming a star: found by playing a win to its end)
+  const ns = await page.evaluate(async () => { const g = HOAPI.G; if (!HO.rules(g).nameAStar) return { none: true }; HOAPI.openNameStar(); await new Promise(r => setTimeout(r, 200)); const w = document.querySelector('.scrim .win'); if (!w) return { noWindow: true }; const cancel = w.querySelector('button[type=button]:not(.close)'); if (cancel) return { hasCancel: true }; const ok = w.querySelector('button[type=submit]'); ok.click(); await new Promise(r => setTimeout(r, 250)); return { closed: !document.querySelector('.scrim .win') }; });
+  if (!ns.none && !ns.noWindow && !ns.hasCancel && !ns.closed) f.push('the name-a-star window cannot be closed with a blank name (OK does nothing, and there is no Cancel)');
+  await closeAll();
+  expect('Evacuate', galaxy, /(Evacuat|Évacuer|Don.t Evacuate|Ne pas évacuer)/i, feat.evac);
+  return f;
+};
+
 async function main() {
   let server = null;
   if (!(await up(URL0))) {
@@ -139,7 +232,8 @@ async function main() {
       if (rules !== '12') await form.locator('select[name=computers]').selectOption('3').catch(() => {});
       await form.locator('button[type=submit]').click();
       await sleep(700);
-      const skinNow = await page.evaluate(() => document.documentElement.classList.contains('skin-ios'));
+      // (iOS and Android mark the page with a class; the Mac skins are told by HOSKINS)
+      const skinNow = await page.evaluate((sk) => sk === 'ios' || sk === 'android' ? document.documentElement.classList.contains('skin-ios') : !!(window.HOSKINS && HOSKINS.current === sk), skin);
       if (!skinNow) { fails.push('the page is not in the ' + skin + ' skin'); }
       // a few turns: End Turn, read the cards
       for (let i = 0; i < TURNS; i++) {
@@ -151,7 +245,7 @@ async function main() {
       let k = 0; while (k++ < 40 && await page.locator('.card:not(.end):not(.waiting)').count()) { if (await page.locator('.scrim').count()) { await page.keyboard.press('Escape'); await sleep(100); continue; } await page.locator('.card').first().click().catch(() => {}); await sleep(50); }
       if (SKINS_CHECK[skin] && skinNow) fails.push(...await SKINS_CHECK[skin](page, { w, h, rules }));
       if (SHOTS) { await page.screenshot({ path: path.join(SHOTS, `rules-${skin}-${rules}-${sn}.png`) }).catch(() => {}); }
-    } catch (e) { fails.push('threw: ' + String(e.message).split('\n')[0]); }
+    } catch (e) { fails.push('threw: ' + String(e.message).split('\n').slice(0, process.env.HO_VERBOSE ? 20 : 1).join(' | ')); }
     fails.push(...errors.map(e => 'page error: ' + e));
     console.log(`${fails.length ? 'FAIL' : 'ok  '} ${skin} ${rules} ${sn}${fails.length ? '\n   - ' + fails.join('\n   - ') : ''}`);
     if (fails.length) bad++;
@@ -159,6 +253,7 @@ async function main() {
   }
   await browser.close();
   if (server) server.kill();
+  if (opt('inventory', '') !== '' || args.includes('--inventory')) for (const r of INVENTORY) console.log(`inventory\t${r.rules}\t${r.command}\t${r.kind}\t${r.window || ''}`);
   console.log(bad ? `${bad} failing` : 'every ruleset works in every skin checked');
   process.exit(bad ? 1 : 0);
 }
