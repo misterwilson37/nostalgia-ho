@@ -1413,6 +1413,13 @@ function appDialog(o) {
   return L;
 }
 // a message with the check button only (FUN_10008ecb0), or with the cross as well when it asks (message:closeButton:YES cancelButton:YES + setOkBlock:)
+// The notice before a button opens an outside site (the remake's own: the app opens Facebook and Twitter at once, `facebook` 0x100007e54, `twitter` 0x100007eec): the app's own message dialog, the check to continue (it opens the site), the cross to cancel
+function leaveNotice(site, url) {
+  const msg = site === 'Facebook' ? 'You are leaving Spaceward Ho! for Facebook. Continue?' : site === 'Twitter' ? 'You are leaving Spaceward Ho! for Twitter. Continue?' : 'You are leaving Spaceward Ho! for another website. Continue?';
+  const sc = appMessage(window.HOUI ? HOUI.tr(msg) : msg, () => { window.open(url, '_blank', 'noopener'); });
+  sc.classList.add('ios-gtop'); document.body.append(sc); // (above the title page, which covers the game's window)
+  return sc;
+}
 function appMessage(text, onOk) {
   const L = appDialog({ message: text, ok: onOk, cross: !!onOk });
   return L.scrim;
@@ -1642,7 +1649,7 @@ function sceneChrome(root, B) {
     col.append(row, rank); root.append(col);
   }
   const sc = UIEl('div', 'ios-ccs'); sc.style.cssText = `position:absolute;right:${bpt(stripW + a80)};top:${bpt(a80)};display:flex;flex-direction:column;align-items:flex-end;gap:${bpt(a80)}`;
-  sc.append(btn('facebook', 'Facebook', () => window.open('http://facebook.com/AritonGames', '_blank', 'noopener'), 'facebook-highlighted'), btn('twitter', 'Twitter', () => window.open('http://twitter.com/aritongames', '_blank', 'noopener'), 'twitter-highlighted'));
+  sc.append(btn('facebook', 'Facebook', () => leaveNotice('Facebook', 'http://facebook.com/AritonGames'), 'facebook-highlighted'), btn('twitter', 'Twitter', () => leaveNotice('Twitter', 'http://twitter.com/aritongames'), 'twitter-highlighted'));
   root.append(sc);
 }
 // a StarMenuItem: the picture, the label at its right end
@@ -1865,7 +1872,7 @@ function openHelpIOS(url) {
       const an = e.target.closest && e.target.closest('a[href]'); if (!an) return;
       const href = an.getAttribute('href');
       if (/closeme\.html$/.test(href)) { e.preventDefault(); close(); }
-      else if (/^[a-z][a-z0-9+.-]*:/i.test(href) && !/^file:/i.test(href)) { e.preventDefault(); window.open(an.href, '_blank', 'noopener'); }
+      else if (/^[a-z][a-z0-9+.-]*:/i.test(href) && !/^file:/i.test(href)) { e.preventDefault(); leaveNotice('', an.href); }
     });
   });
   pushScrim(L.scrim);
@@ -2581,6 +2588,7 @@ window.HOTHEME = {
     const appRules = /^(ios|android)$/.test(a.G.rules || '');
     if (appRules && name === 'dip') { openDipIOS(); return true; }
     if (appRules && name === 'give') return openGiveIOS();
+    if (appRules && name === 'leave') { leaveNotice(x[0] || '', 'about:blank'); return true; }
     if (appRules && name === 'auto') { openAutoPlayIOS(); return true; }
     if (appRules && name === 'armageddon') { openArmageddonIOS(); return true; }
     if (appRules && name === 'types') { openScrapIOS(); return true; }

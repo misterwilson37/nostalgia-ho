@@ -233,6 +233,7 @@ html.skin-ios .ios-ami:not(.off):hover, html.skin-ios .ios-ami:not(.off):focus-v
 
 /* the graphs dialog (HistoryGraphDialogLayer) */
 html.skin-ios .ios-gscrim { position: fixed; inset: 0; z-index: 40; }
+html.skin-ios .ios-gscrim.ios-gtop { z-index: 90; }
 html.skin-ios .ios-gdlg { position: absolute; left: 50%; top: 50%; }
 html.skin-ios .ios-gbg { position: absolute; inset: 0; box-sizing: border-box; border-style: solid; border-width: calc(40 * var(--pt)); border-image: url("../../../assets/skins/ios/sprites/dialog-background.png") 80 fill / calc(40 * var(--pt)) stretch; }
 html.skin-ios .ios-ggraph { position: absolute; }
