@@ -356,17 +356,25 @@ html.skin-ios .ios-sgy i { display: block; width: calc(26 * var(--pt)); height: 
 html.skin-ios .ios-sgline { position: absolute; white-space: nowrap; color: #fff; }
 
 /* the welcome scene (WelcomeScene, BaseHoScene chrome) */
-html.skin-ios #titlescreen.ios-wel { padding: 0; display: block; overflow: hidden; }
-html.skin-ios .ios-welcome { position: absolute; inset: 0; background: #000; color: #fff; overflow: hidden; font-family: var(--appfont, Arial, Helvetica, sans-serif); }
+html.skin-ios #titlescreen.ios-wel { display: flex; flex-direction: column; align-items: center; justify-content: safe center; gap: 20px; padding: 12px 12px 28px; overflow: auto; }
+html.skin-ios #titlescreen.ios-wel.ios-wide { flex-direction: row; gap: 48px; padding: 24px 48px; }
+/* the remake's frame around the app's welcome scene: a phone's or an iPad's shape, the scene scaled to fit */
+html.skin-ios .ios-frame { flex: none; position: relative; padding: var(--bz, 16px); background: #17171a; border: 2px solid #4a4a52; box-shadow: 0 0 0 1px #000, 0 8px 40px rgba(0, 0, 0, .8), inset 0 0 0 1px #2c2c32; }
+html.skin-ios .ios-frame.phone { border-radius: 38px; }
+html.skin-ios .ios-frame.pad { border-radius: 26px; }
+html.skin-ios .ios-fscr { position: relative; overflow: hidden; background: #000; border-radius: 6px; }
+html.skin-ios .ios-welcome { background: #000; color: #fff; overflow: hidden; font-family: var(--appfont, Arial, Helvetica, sans-serif); }
 html.skin-ios .ios-welcome > img { position: absolute; }
-html.skin-ios #titlescreen.ios-wel .tcard { position: fixed; left: -9999px; top: 0; max-height: 90vh; overflow: auto; padding: 16px; background: rgba(0, 0, 0, .94); border-radius: 8px; z-index: 6; }
-html.skin-ios #titlescreen.ios-wel.ios-ropen .tcard { left: 12px; top: 40px; }
-html.skin-ios #titlescreen.ios-wel .tcard h1, html.skin-ios #titlescreen.ios-wel .tcard .ver, html.skin-ios #titlescreen.ios-wel .tcard .by, html.skin-ios #titlescreen.ios-wel .tsplash { display: none; }
-html.skin-ios .ios-ropt { position: fixed; left: 8px; top: 8px; z-index: 7; font: 11px var(--ui, sans-serif); opacity: .55; color: #fff; background: #222; border: 1px solid #555; border-radius: 4px; padding: 2px 6px; }
-html.skin-ios .ios-ropt:hover, html.skin-ios .ios-ropt:focus { opacity: 1; }
+html.skin-ios #titlescreen.ios-wel .tcard { position: static; flex: 1 1 340px; max-width: 440px; width: 100%; text-align: center; }
+html.skin-ios #titlescreen.ios-wel.ios-wide .tcard { text-align: left; }
+html.skin-ios #titlescreen.ios-wel .tcard h1 { font-size: clamp(34px, 5vw, 60px); }
+html.skin-ios #titlescreen.ios-wel.ios-wide .tcard .tbtns { justify-content: flex-start; }
+html.skin-ios #titlescreen.ios-wel .tcard .tsplash { display: none; }
+html.skin-ios #titlescreen.ios-wel .tcard .credit, html.skin-ios #titlescreen.ios-wel .tcard .madeby { margin-inline: 0; }
+html.skin-ios #titlescreen.ios-wel:not(.ios-wide) .tcard .credit, html.skin-ios #titlescreen.ios-wel:not(.ios-wide) .tcard .madeby { margin-inline: auto; }
 html.skin-ios .ios-smb { appearance: none; position: relative; flex: none; border: 0 !important; border-radius: 0 !important; box-shadow: none !important; padding: 0 0 0 calc(80 * var(--k) * var(--pt)) !important; height: calc(80 * var(--k) * var(--pt)); margin: 0; text-align: left;
   background: var(--big) no-repeat left center / calc(80 * var(--k) * var(--pt)) calc(80 * var(--k) * var(--pt)) !important; color: #fff !important; cursor: pointer; white-space: nowrap;
-  font: calc(var(--fs) * var(--k) * var(--pt)) / calc(80 * var(--k) * var(--pt)) var(--appfont, Arial, Helvetica, sans-serif); }
+  font: calc(var(--fs) * var(--k) * var(--pt)) / calc(80 * var(--k) * var(--pt)) var(--appfont, Arial, Helvetica, sans-serif) !important; } /* (important: the page's button rule is more specific) */
 html.skin-ios .ios-smb.hat::before { content: ''; position: absolute; left: calc(-5 * var(--k) * var(--pt)); bottom: calc(18 * var(--k) * var(--pt)); width: calc(88 * var(--k) * var(--pt)); height: calc(80 * var(--k) * var(--pt)); background: var(--hat) no-repeat 0 0 / 100% 100%; }
 html.skin-ios .ios-smb[hidden] { display: block !important; opacity: .392; pointer-events: none; }
 html.skin-ios .ios-cc { appearance: none; position: relative; border: 0 !important; border-radius: 0 !important; box-shadow: none !important; padding: 0 !important; background: none !important; cursor: pointer; display: block; }
@@ -376,7 +384,7 @@ html.skin-ios .ios-cc.hl > img + img { position: absolute; inset: 0; display: no
 html.skin-ios .ios-cc.hl.dn > img + img { display: block; }
 html.skin-ios .ios-cc.hl.dn img:first-child { filter: none; }
 html.skin-ios .ios-gtoggle { appearance: none; border: 0 !important; background: none !important; padding: 0 !important; color: #fff !important; cursor: pointer; white-space: nowrap; font-family: var(--appfont, Arial, Helvetica, sans-serif); }
-html.skin-ios #titlescreen.ios-wel[hidden], html.skin-ios .ios-ropt[hidden] { display: none; }
+html.skin-ios #titlescreen.ios-wel[hidden] { display: none; }
 
 /* +[BaseHoScene fromScene:forward:] 0x100007180: the next scene slides in over the old one, 0.5 s, ease-out rate 2 */
 @keyframes ios-slide-r { from { transform: translateX(100%); } to { transform: none; } }

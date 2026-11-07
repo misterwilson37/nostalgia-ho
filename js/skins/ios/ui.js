@@ -1663,11 +1663,19 @@ const starItem = (text, hat, size, onClick, scale) => {
 // The three buttons are the page's own #tnew, #tcont and #thelp (their handlers kept), put in the scene; the page's other controls (importing a game, the skin and language pickers, the account, the credits) are the
 // remake's and sit in a panel behind a small "Remake options" button (the app has none of them).
 function buildWelcome(ts) {
-  let root = ts.querySelector('.ios-welcome');
-  if (root) { const tb = ts.querySelector('.tbtns'); if (tb) for (const id of ['thelp', 'tcont', 'tnew']) { const b = root.querySelector('#' + id); if (b) tb.prepend(b); } root.remove(); } // (the page's buttons go back before the scene is built again)
-  root = UIEl('div', 'ios-sg ios-welcome');
+  let fr = ts.querySelector('.ios-frame');
+  if (fr) { const tb = ts.querySelector('.tbtns'); if (tb) for (const id of ['thelp', 'tcont', 'tnew']) { const b = fr.querySelector('#' + id); if (b) tb.prepend(b); } fr.remove(); } // (the page's buttons go back before the scene is built again)
+  const root = UIEl('div', 'ios-sg ios-welcome');
   const wslide = slideBack; slideBack = false;
+  // The scene is built at the app's own window size (an iPad's 1024 x 768 or an iPhone's 568 x 320 points: the device the window would be) and shown FRAMED on the title page, scaled to fit,
+  // beside the remake's credits and options; a game starting hides the title and the game's screen takes the whole window. The frame is the remake's (the app has none).
+  const dw = SCREEN.pad ? 1024 : 568, dh = SCREEN.pad ? 768 : 320, keep = [SCREEN.winW, SCREEN.winH];
+  SCREEN.winW = dw; SCREEN.winH = dh;
+  try { return buildWelcomeIn(ts, root, wslide, dw, dh); } finally { SCREEN.winW = keep[0]; SCREEN.winH = keep[1]; }
+}
+function buildWelcomeIn(ts, root, wslide, dw, dh) {
   const B = sceneBase(root, 200, wslide ? 'l' : null), { gd, a80, W, H, s, stripW } = B, fsz = SCREEN.pad ? 19 : 14;
+  root.style.cssText = `--pt:1px;position:absolute;left:0;top:0;width:${dw}px;height:${dh}px;transform-origin:0 0`;
   const guy = pic('hoguy_0', 'ios-wguy'); guy.style.cssText = 'position:absolute;pointer-events:none';
   const csf = (window.devicePixelRatio || 1) > 1 ? 2 : 1, gk = 2 * s * csf, setGuy = () => { guy.style.width = bpt(guy.naturalWidth / 2 * gk); guy.style.height = bpt(guy.naturalHeight / 2 * gk); };
   if (guy.complete && guy.naturalWidth) setGuy(); else guy.addEventListener('load', setGuy);
@@ -1684,11 +1692,20 @@ function buildWelcome(ts) {
   const ver = /android/.test(rulesNow()) ? '1.2.8 (811597)' : '1.2.9 (811605)', vl = UIEl('div', 'ios-wver'); vl.textContent = `Spaceward Ho: Version ${ver.split(' ')[0]} ${ver.split(' ')[1]}`;
   vl.style.cssText = `font-size:${bpt(gd.a38)};color:#fff;white-space:nowrap`; root.append(put(vl, W - 3 * a80, 3 * a80, 1, 0));
   sceneChrome(root, B);
-  let ro = ts.querySelector('.ios-ropt');
-  if (!ro) { ro = UIEl('button', 'ios-ropt', { type: 'button' }); ro.textContent = 'Remake options\u2026'; ro.setAttribute('translate', 'yes'); ro.addEventListener('click', () => ts.classList.toggle('ios-ropen')); ts.append(ro); }
-  ts.classList.remove('ios-ropen'); ts.classList.add('ios-wel');
-  ts.prepend(root);
-  return guy;
+  const inner = UIEl('div', 'ios-fscr', null, root), fr = UIEl('div', 'ios-frame' + (SCREEN.pad ? ' pad' : ' phone'), null, inner);
+  const fit = () => {
+    const vw = window.innerWidth, vh = window.innerHeight, wide = vw >= 900 && vw > vh * 1.05, bz = SCREEN.pad ? 22 : 16;
+    const k0 = wide ? Math.min((vw - 96 - 380 - 2 * bz) / dw, (vh - 48 - 2 * bz) / dh) : (vw - 24 - 2 * bz) / dw, kk = Math.max(0.2, Math.min(k0, wide ? 2 : 1.6));
+    ts.classList.toggle('ios-wide', wide);
+    fr.style.setProperty('--bz', bz + 'px'); fr.style.setProperty('--fk', String(kk));
+    inner.style.width = dw * kk + 'px'; inner.style.height = dh * kk + 'px'; root.style.transform = `scale(${kk})`;
+  };
+  fit();
+  if (!ts._iosFit) { ts._iosFit = true; window.addEventListener('resize', () => { if (!ts.hidden && ts._iosFitFn) ts._iosFitFn(); }); }
+  ts._iosFitFn = fit;
+  ts.classList.add('ios-wel');
+  ts.prepend(fr);
+  return root.querySelector('.ios-wguy');
 }
 // -[MiniGalaxyNode updateGalaxy:extra:] 0x10001d6fc and draw 0x10001d938 (the Saved Games item's picture; MiniGalaxy / MiniGalaxyParticle, the particle classes, have no caller): content size 12.5 a80 x the item's height,
 // anchor (0, 0.5) at (a80, height / 2); each star is a point at ((w - size k) / 2 + k (x10 / 10), (h - size k) / 2 + k (y10 / 10)) (the integer tenths, divided by 10 as integers; y up), size the game's short +0x222 (the galaxy's extent in the units of x10 / 10: a map unit is 2 of them, so 2 x G.W; the remake's reading of the field, not seen set) and k = w / 93 + (w / 245 - w / 93) x (size - w / 93) / 214 (the constants 93, 245 and 214, as the code has them); drawn white, smooth, GL point size 2.0 (device pixels)
