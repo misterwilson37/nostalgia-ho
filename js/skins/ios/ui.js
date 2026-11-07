@@ -41,6 +41,8 @@ const images = {
   haloBuddy: 'halo2', // a best buddy's (the cyan one)
   dotdot: 'fleet_dots_dotdot', // StarNode's "..." for more than three fleets
 };
+// StarNode's satellite ovals (initWithStar:at: 0x10001a4d8): three pairs, each a back (added before the planet) and a front (after the hat), at (4, 0), scale 0.5; drawOneFleetWithPlayer 0x10001b8ec shows pair i for the satellite row i (0 to 2)
+for (let i = 0; i < 3; i++) { images['satOval' + i] = 'fleet_sat_oval_' + i; images['satOvalBack' + i] = 'fleet_sat_oval_back_' + i; }
 // the report pictures: 5.0.5's message pictures 9000-9050 redrawn at 80 x 80
 // (+[MessageNode reportIcon:] builds "report_icon-%ld")
 for (let n = 0; n <= 50; n++) images['m' + (9000 + n)] = 'report_icon-' + n;
@@ -66,8 +68,8 @@ for (let set = 0; set < 5; set++) for (let t = 0; t < 7; t++) for (let b = 0; b 
 // x 1.5 / 255 opacity; under 650 "ice_cover%d" with T / 130, held to 0-4
 // (so the coldest planets have ice_cover0); with 100 metal or more
 // "boulder_0%d", 5 less one for each of 1,000, 2,500, 5,000 and 10,000
-// reached (100-999 boulder_05, 10,000 or more boulder_01). Each cover is cut
-// to the planet's shape (the app scales them to the planet's size). Drawn at
+// reached (100-999 boulder_05, 10,000 or more boulder_01). Each cover is scaled
+// by the planet class's constant, as the app does (planetPic). Drawn at
 // 120 pixels (the 240 pixel Retina art at half size).
 const SIZE = 120;
 const cache = {};
@@ -156,17 +158,16 @@ function planetPic(IMG, p, src) {
   const c = document.createElement('canvas'); c.width = c.height = SIZE;
   const x = c.getContext('2d');
   x.drawImage(base, 0, 0, SIZE, SIZE);
-  const over = (im, alpha) => {
+  // each cover is a sprite centred in the planet's 40 point box: the ice and the boulders at the core's scale x the class's constant (0.99, 0.93, 0.876, 0.831, 0.77, 0.73 for classes 1 to 6: pool 0x1000d6408 ... 0x1000d63e0; class 0, the 252 per cent and over, the core's scale alone),
+  // the hot cover at the constant itself (0x1000d63d8 ... 0x1000d63c4, the same figures) and, for class 0 only, at the core's scale 1/3 (the code's default case leaves the core's scale in the register): drawn about the middle, not cut to the planet
+  const KC = [1, 0.99, 0.93, 0.876, 0.831, 0.77, 0.73], over = (im, alpha, k) => {
     if (!im || !im.width) return;
-    const t = document.createElement('canvas'); t.width = t.height = SIZE;
-    const tx = t.getContext('2d');
-    tx.globalAlpha = alpha; tx.drawImage(im, 0, 0, SIZE, SIZE); tx.globalAlpha = 1;
-    tx.globalCompositeOperation = 'destination-in'; tx.drawImage(base, 0, 0, SIZE, SIZE);
-    x.drawImage(t, 0, 0);
+    const z = SIZE * k;
+    x.globalAlpha = alpha; x.drawImage(im, (SIZE - z) / 2, (SIZE - z) / 2, z, z); x.globalAlpha = 1;
   };
-  if (rock) over(IMG[P + 'boulder_0' + rock], 1);
-  if (hot) over(IMG[P + 'hot_cover'], hot);
-  if (ice >= 0) over(IMG[P + 'ice_cover' + ice], 1);
+  if (rock) over(IMG[P + 'boulder_0' + rock], 1, KC[r]);
+  if (hot) over(IMG[P + 'hot_cover'], hot, r ? KC[r] : 1 / 3);
+  if (ice >= 0) over(IMG[P + 'ice_cover' + ice], 1, KC[r]);
   return (cache[key] = c);
 }
 
@@ -2540,7 +2541,7 @@ window.HOTHEME = {
   dragShip, // the ship carried out of the fleets list
   flingLists: true, // the app's lists are CCInertialMenus (the saved games, the news, the players, the stars' bars, the fleets: InertialScroller touchEnded 0x1000a9c0c): the classic page's fling (js/skins/classic/ui.js List) carries each on
   fleetPath: 'ios', // a dragged fleet's route line (js/skins/classic/ui.js iosFleetPath)
-  satRing: 'rgba(200,215,235,0.85)', // the satellites' grey oval (fleet_sat_oval), as a ring
+  satOvals: { x: 4, scale: 0.5 }, // the satellites' ovals (fleet_sat_oval_N, fleet_sat_oval_back_N: StarNode initWithStar:at: 0x10001a4d8, drawOneFleetWithPlayer 0x10001b8ec)
   battlePlanet: P + 'ship-planet',
   battleBg: null,
   endTurnKey: null,

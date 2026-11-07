@@ -627,15 +627,19 @@ function draw0() {
       g.addColorStop(0, 'rgba(255,240,170,0.75)'); g.addColorStop(1, 'rgba(255,200,80,0)');
       cx.fillStyle = g; cx.beginPath(); cx.arc(x, y, ps * 0.95, 0, Math.PI * 2); cx.fill();
     }
+    const sats = G.fleets.filter(f => f.star === s.id && f.sat && (f.owner === ME || visibleTo(s.id)));
+    // T.satOvals: the app's ovals, pair i for the star's satellite row i (three at most): the back one behind the planet, the front one over its hat
+    const ovN = T.satOvals && own !== 'all' ? Math.min(3, sats.length) : 0, ovals = (front) => { const t = planetTarget(); for (let i = 0; i < ovN; i++) { const o = IMG['satOval' + (front ? '' : 'Back') + i]; if (!o) continue; const w = o.width / 2 * T.satOvals.scale * t, h = o.height / 2 * T.satOvals.scale * t; cx.drawImage(o, x + T.satOvals.x * t - w / 2, y - h / 2, w, h); } };
+    ovals(false);
     const im = !own && (look.pic || IMG[look.base]);
     if (im) { const z = ps * (look.scale || 1); cx.drawImage(im, x - z / 2, y - z / 2, z, z); }
     // satellites ring
-    const sats = G.fleets.filter(f => f.star === s.id && f.sat && (f.owner === ME || visibleTo(s.id)));
-    if (sats.length && own !== 'all' && !(own && T.ownRings)) { // (T.ownRings: drawStar drew them)
+    if (sats.length && own !== 'all' && !T.satOvals && !(own && T.ownRings)) { // (T.ownRings: drawStar drew them)
       cx.strokeStyle = T.satRing || (sats.some(f => f.owner === ME) ? 'rgba(120,230,255,0.9)' : 'rgba(255,120,200,0.9)');
       cx.lineWidth = 1.5; cx.beginPath(); cx.ellipse(x, y, ps * 0.62, ps * 0.62, 0, 0, Math.PI * 2); cx.stroke();
     }
     if (own !== 'all' && look.hat && IMG[look.hat]) { const h = ps * 1.18; if (look.hatTint) cx.filter = `brightness(${look.hatTint / 255})`; cx.drawImage(IMG[look.hat], x - h / 2, y - h * 0.62, h, h * (IMG[look.hat].height / IMG[look.hat].width)); if (look.hatTint) cx.filter = 'none'; } // (look.hatTint: a skin's own, the hat's colour as a share of white)
+    ovals(true);
     // an ally's planet: a halo over it, yellow (haloAlly) or, for a best
     // buddy, cyan (haloBuddy). GUESS: where 5.0.5 puts it isn't decompiled;
     // this is where the halos sit in 3.0.1's and 4.0's ally pictures (p506,
