@@ -621,7 +621,7 @@ function draw0() {
     // name its own way (true: done); the rings, hats and fleets follow
     const own = T.drawStar && T.drawStar(cx, { s, x, y, ps, look, sel: UI.sel === s.id, IMG, view: UI.view, G, ME });
     const selPic = !own && T.select && (ps < 24 && T.selectSmall ? IMG[T.selectSmall] : IMG[T.select]);
-    if (UI.sel === s.id && selPic) { const r = ps * 0.85; cx.drawImage(selPic, x - r, y - r, r * 2, r * 2); }
+    if (UI.sel === s.id && selPic) { const r = ps * 0.85 * (T.selectScale ? Math.max(0.001, T.selectScale()) : 1); cx.drawImage(selPic, x - r, y - r, r * 2, r * 2); }
     else if (!own && UI.sel === s.id) {
       const g = cx.createRadialGradient(x, y, ps * 0.3, x, y, ps * 0.95);
       g.addColorStop(0, 'rgba(255,240,170,0.75)'); g.addColorStop(1, 'rgba(255,200,80,0)');
@@ -658,7 +658,9 @@ function draw0() {
     }
     // name
     // (T.mapNames(scale): a skin's own rule for when the names show; 1.2: from its second zoom on)
-    if (own !== 'all' && !own && (T.mapNames ? T.mapNames(UI.view.s) : UI.view.s > 18)) {
+    // (T.mapName(cx, info): a skin's own star name, drawn or not by itself; true: done)
+    if (own !== 'all' && !own && T.mapName && T.mapName(cx, { s, x, y, ps, look, sel: UI.sel === s.id, ME })) { /* the skin drew it */ }
+    else if (own !== 'all' && !own && (T.mapNames ? T.mapNames(UI.view.s) : UI.view.s > 18)) {
       cx.font = mapFont(Math.max(9, Math.min(12, UI.view.s / 3.6)));
       cx.textAlign = 'center'; cx.fillStyle = s.owner === ME ? '#fff6d0' : '#9aa3c7';
       // (T.mapNameStyle(cx, scale): a skin's own lettering for the names; 1.2's condensed face at its second zoom)

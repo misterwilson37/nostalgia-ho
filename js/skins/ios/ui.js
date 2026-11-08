@@ -104,7 +104,7 @@ function novaLook(G, p, s, k, IMG, redraw) {
   if (age === 0) {
     const key = (G.opts && G.opts.seed) + ':' + s.id + ':' + n;
     const now = (typeof performance !== 'undefined' ? performance : Date).now();
-    if (novaStart[key] == null) novaStart[key] = now;
+    if (novaStart[key] == null) { novaStart[key] = now; const ap = A(); if (ap && ap.UI && ap.G === G && G.players[ap.ME] && G.players[ap.ME].alive !== false) ap.UI.sel = null; } // (-[MapLayer displaySupernova:] 0x10000e368: then selectPlanet: -1 zoom: YES, while you are in the game)
     const t = (now - novaStart[key]) / 1000;
     if (t < 3) {
       if (redraw && !novaTimer) novaTimer = setTimeout(() => { novaTimer = 0; redraw(); }, 150 - ((t * 1000) % 150) + 1);
@@ -410,6 +410,29 @@ function satMenu(a, s, x, y, k) {
     it.addEventListener('pointerleave', (e) => up(e, false)); it.addEventListener('pointercancel', (e) => up(e, false));
     satEl.append(it);
   }
+}
+// The selected star's ring (-[MapLayer updateSelectedStar] 0x10000fac4, read in the assembly): its scale starts at 0 and a CCRepeatForever of ScaleTo 1.0 in 0.4 s, a 0.2 s pause, ScaleTo 0.2 in 0.7 s runs on it
+// (restarted at each selection); the classic page draws the ring at this factor of its size, redrawn every 40 ms while a star is selected.
+let ringSel = null, ringT0 = 0;
+function ringScale() {
+  const a = A(), sel = a && a.UI ? a.UI.sel : null, now = performance.now();
+  if (ringSel !== sel) { ringSel = sel; ringT0 = now; }
+  let t = (now - ringT0) / 1000; const first = t < 0.4;
+  if (first) return t / 0.4;
+  t = (t - 0.4) % 1.3;
+  if (t < 0.2) return 1;
+  if (t < 0.9) return 1 - 0.8 * ((t - 0.2) / 0.7);
+  return 0.2 + 0.8 * ((t - 0.9) / 0.4);
+}
+// The star's name (-[StarNode initWithStar:at:] 0x10001a4d8, selectedStar:num: 0x10001ae04; the numbers with floats.py): a CCLabelTTF, Arial 18 (24 on an iPad: GraphicDefines a18) scaled 0.6, white, at (0, -28) of the
+// star's node, so centred 28 x the planets' scale under the star; the selected star's is green (0x00ff00) on an iPhone and hidden on an iPad (its info box holds the name); a blown star's name is hidden (supernova:).
+function starName(cx, o) {
+  const v = window.HOVIEW && window.HOVIEW(), k = v && v.target; if (!k) return true;
+  if (/^supernovaed/.test(String(o.look && o.look.base || '').replace(P, ''))) return true;
+  if (o.sel && SCREEN.pad) return true;
+  cx.save(); cx.font = `${BGD().a18 * 0.6 * k}px Arial, Helvetica, sans-serif`; cx.textAlign = 'center'; cx.textBaseline = 'middle'; cx.fillStyle = o.sel ? '#00ff00' : '#ffffff';
+  cx.fillText(o.s.name, o.x, o.y + 28 * k); cx.restore();
+  return true;
 }
 function placeButtons() {
   const a = A(); if (!a || !a.G || !pbEl || !window.HOVIEW) return;
@@ -2846,6 +2869,8 @@ window.HOTHEME = {
   // its sounds are 5.0.5's recordings as MP3s: SOUNDS.ios in js/skins.js
   images,
   select: P + 'ring', // the green ring round the selected star
+  selectScale: ringScale,
+  mapName: starName,
   dragShip, // the ship carried out of the fleets list
   flingLists: true, // the app's lists are CCInertialMenus (the saved games, the news, the players, the stars' bars, the fleets: InertialScroller touchEnded 0x1000a9c0c): the classic page's fling (js/skins/classic/ui.js List) carries each on
   fleetPath: 'ios', // a dragged fleet's route line (js/skins/classic/ui.js iosFleetPath)
@@ -3029,6 +3054,7 @@ window.HOTHEME = {
     window.addEventListener('resize', () => { const was = SCREEN.pad; screenSize(); hudKey = ''; hud(); if (was !== SCREEN.pad) buildColumn(doc.getElementById('app')); });
     // -[AppDelegate applicationWillResignActive:] 0x100006ef0: the director pauses and the game is saved (saveGame); a page going to the background is the same moment
     document.addEventListener('visibilitychange', () => { const a = A(); if (document.visibilityState === 'hidden' && a && a.G && !a.G.over) { try { a.save(); } catch (e) {} } });
+    setInterval(() => { const a = A(); if (a && a.G && !a.G.over && a.UI && a.UI.sel != null && !document.hidden && document.documentElement.classList.contains('skin-ios')) a.draw(); }, 40);
     window.addEventListener('resize', turnWatch); window.addEventListener('orientationchange', turnWatch); turnWatch();
     setSide(sideWanted != null ? sideWanted : SCREEN.pad, true);
     const c = doc.querySelector('#titlescreen .credit');
