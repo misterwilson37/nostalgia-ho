@@ -238,11 +238,11 @@ async function main() {
       // a few turns: End Turn, read the cards
       for (let i = 0; i < TURNS; i++) {
         let n = 0;
-        while (n++ < 60 && await page.locator('.card:not(.end):not(.waiting)').count()) { if (await page.locator('.scrim').count()) { const x = page.locator('.scrim .close'); if (await x.count()) await x.first().click().catch(() => {}); else await page.keyboard.press('Escape'); await sleep(120); continue; } await page.locator('.card').first().click().catch(() => {}); await sleep(60); }
+        while (n++ < 60 && await page.locator('.card:not(.end):not(.waiting)').count()) { if (await page.locator('.scrim, .ios-gscrim').count()) { const x = page.locator('.scrim .close'); if (await x.count()) await x.first().click().catch(() => {}); else await page.keyboard.press('Escape'); await sleep(120); continue; } await page.locator('.card').first().click().catch(() => {}); await sleep(60); }
         const c = page.locator('.clock'); if (await c.count()) { await c.first().click().catch(() => {}); await sleep(700); }
-        let m = 0; while (m++ < 10 && await page.locator('.scrim').count()) { const x = page.locator('.scrim .close'); if (await x.count()) await x.first().click().catch(() => {}); else await page.keyboard.press('Escape'); await sleep(150); }
+        let m = 0; while (m++ < 10 && await page.locator('.scrim, .ios-gscrim').count()) { const x = page.locator('.scrim .close'); if (await x.count()) await x.first().click().catch(() => {}); else await page.keyboard.press('Escape'); await sleep(150); }
       }
-      let k = 0; while (k++ < 40 && await page.locator('.card:not(.end):not(.waiting)').count()) { if (await page.locator('.scrim').count()) { await page.keyboard.press('Escape'); await sleep(100); continue; } await page.locator('.card').first().click().catch(() => {}); await sleep(50); }
+      let k = 0; while (k++ < 40 && await page.locator('.card:not(.end):not(.waiting)').count()) { if (await page.locator('.scrim, .ios-gscrim').count()) { await page.keyboard.press('Escape'); await sleep(100); continue; } await page.locator('.card').first().click().catch(() => {}); await sleep(50); }
       if (SKINS_CHECK[skin] && skinNow) fails.push(...await SKINS_CHECK[skin](page, { w, h, rules }));
       if (SHOTS) { await page.screenshot({ path: path.join(SHOTS, `rules-${skin}-${rules}-${sn}.png`) }).catch(() => {}); }
     } catch (e) { fails.push('threw: ' + String(e.message).split('\n').slice(0, process.env.HO_VERBOSE ? 20 : 1).join(' | ')); }
