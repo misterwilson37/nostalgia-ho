@@ -214,6 +214,10 @@ async function audit(browser, url, run) {
       await close();
     };
     for (const [name, code] of IOSW) await run1(name, code);
+    // the turn-your-device notice, at a portrait phone size (the remake's own)
+    await page.setViewportSize({ width: 390, height: 844 }); await sleep(150);
+    await run1('iOS Turn notice (portrait phone)', "HOTHEME.window('turn')");
+    await page.setViewportSize({ width: 1280, height: 860 }); await sleep(150);
     // Build: a ship type's single-ship dialog; the selected star's commands; the sidebar's lists, news and graphs; the gear's list
     await run1('iOS Build (a ship)', "HOTHEME.window('build', api.me().homeStar)", async () => { await page.locator('.ios-bitem').first().click({ force: true }); await sleep(250); });
     for (const n of ['dollar', 'news', 'planet', 'enemy', 'graph']) {

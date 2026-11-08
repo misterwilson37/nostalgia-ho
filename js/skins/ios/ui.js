@@ -1421,6 +1421,29 @@ function leaveNotice(site, url) {
   sc.classList.add('ios-gtop'); document.body.append(sc); // (above the title page, which covers the game's window)
   return sc;
 }
+// The turn-your-device notice (the remake's own: the app forced landscape; a browser cannot, so on a phone held upright it asks, in the app's own message dialog, with a way to another version).
+// Shown when a touch screen is narrow and taller than wide (an iPad and any desktop window never get it); gone when the device is turned (resize / orientation change).
+let turnSc = null, turnDone = false;
+function turnAsk(force) {
+  const T = (x) => (window.HOUI ? HOUI.tr(x) : x);
+  if (turnSc) return turnSc;
+  const vw = window.innerWidth, vh = window.innerHeight, cw = 300, ch = 190, k = Math.min(vw * 0.92 / cw, 1.5);
+  const L = dialogLayer(cw, ch, k, T('Spaceward Ho! is played with the device held sideways. Please turn it, or choose another version of the game.'), null);
+  const msg = UIEl('div', 'ios-omsg', { style: `width:${bpt(cw - 16)};font-size:${bpt(16)}` });
+  msg.textContent = T('Spaceward Ho! is played with the device held sideways. Please turn it, or choose another version of the game.');
+  L.dlg.append(put(msg, cw / 2, ch - 16, 0.5, 1));
+  const b = textButton(T('Change version'), 150, 36, 16, () => { turnDone = true; turnOff(); if (A() && A().openSkin) A().openSkin(); });
+  L.dlg.append(put(b, cw / 2, 14, 0.5, 0));
+  L.scrim.classList.add('ios-gtop', 'ios-turn'); document.body.append(L.scrim); turnSc = L.scrim;
+  if (force) turnSc.dataset.forced = '1';
+  return turnSc;
+}
+function turnOff() { if (turnSc) { turnSc.remove(); turnSc = null; } }
+function turnWatch() {
+  const portrait = window.innerWidth < window.innerHeight && window.innerWidth <= 500 && !!(window.matchMedia && matchMedia('(pointer: coarse)').matches);
+  if (!portrait) { turnDone = false; if (turnSc && !turnSc.dataset.forced) turnOff(); return; }
+  if (!turnDone) turnAsk(false);
+}
 function appMessage(text, onOk) {
   const L = appDialog({ message: text, ok: onOk, cross: !!onOk });
   return L.scrim;
@@ -2583,6 +2606,7 @@ window.HOTHEME = {
   battleWindow(b, k) { return openBattleIOS(b, k); }, // the Battle screen (BattleStageLayer; openBattleIOS)
   // the app's own windows in this skin: Build (BuildShipsDialog, ShipClassMenu, ShipMenuItem, BuildSingleShipDialog); a ruleset whose ships are queued (DOS 2.0) keeps the remake's window
   window(name, ...x) {
+    if (name === 'turn') { turnAsk(true); return true; }
     if (name === 'saved') return /^(ios|android)$/.test((x[0] || {}).id || '') ? openSavedIOS(x[0]) : false; // (from the title: no game yet)
     const a = A(); if (!a || !a.G) return false;
     if (name === 'build') { const s = a.G.stars[x[0]]; if (!s || s.owner !== a.ME || HO.feature(a.G, 'buildQueue')) return false; return openBuildFlow(x[0]); }
@@ -2717,6 +2741,7 @@ window.HOTHEME = {
     window.addEventListener('resize', () => { const was = SCREEN.pad; screenSize(); hudKey = ''; hud(); if (was !== SCREEN.pad) buildColumn(doc.getElementById('app')); });
     // -[AppDelegate applicationWillResignActive:] 0x100006ef0: the director pauses and the game is saved (saveGame); a page going to the background is the same moment
     document.addEventListener('visibilitychange', () => { const a = A(); if (document.visibilityState === 'hidden' && a && a.G && !a.G.over) { try { a.save(); } catch (e) {} } });
+    window.addEventListener('resize', turnWatch); window.addEventListener('orientationchange', turnWatch); turnWatch();
     setSide(sideWanted != null ? sideWanted : SCREEN.pad, true);
     const c = doc.querySelector('#titlescreen .credit');
     if (c) c.textContent = 'With the art and sounds of Spaceward Ho! 1.2.9 for iPhone and iPad (Ariton Technologies, 2017). Art by Howard Vives and Bob Van de walle.';
