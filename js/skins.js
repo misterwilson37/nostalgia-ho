@@ -162,8 +162,8 @@ const SKINS = [
   { id: 'mac2c', version: '2.0.1', platform: 'Mac, colour', year: 1992, os: ['system7', 'system6'], icon: 'mac2c' },
   { id: 'mac3', bw: true, version: '3.0.1', platform: 'Mac, black and white', year: 1993, os: ['system7', 'system75'], icon: 'mac3' },
   { id: 'mac3c', version: '3.0.1', platform: 'Mac, colour', year: 1993, os: ['system7', 'system75'], icon: 'mac3c' },
-  { id: 'mac4', bw: true, version: '4.0.5', platform: 'Mac, black and white', year: 1997, os: ['system7', 'macos8', 'netscapemac', 'system75', 'netscapemac75'], icon: 'mac4' },
-  { id: 'mac4c', version: '4.0.5', platform: 'Mac, colour', year: 1997, os: ['system7', 'macos8', 'netscapemac', 'system75', 'netscapemac75'], icon: 'mac4c' },
+  { id: 'mac4', bw: true, version: '4.0.5', platform: 'Mac, black and white', year: 1997, os: ['system7', 'system75', 'macos8', 'netscapemac', 'netscapemac75'], icon: 'mac4' },
+  { id: 'mac4c', version: '4.0.5', platform: 'Mac, colour', year: 1997, os: ['system75', 'macos8', 'netscapemac75', 'system7', 'netscapemac'], icon: 'mac4c' },
   { id: 'w95', version: '4.0.5', platform: 'Windows 95', year: 1996, os: ['win95', 'netscape', 'communicator'], icon: 'w95' },
   { id: 'palm', version: '5', platform: 'Palm OS, version 1.0.4', year: 2003, os: ['palmos'], icon: 'palm' },
   // 1.2.9 was built with the iOS 10.3 SDK (2017); iOS 6 is the 2012 launch's system

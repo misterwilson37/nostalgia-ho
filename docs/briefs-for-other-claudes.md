@@ -111,3 +111,15 @@ The browser-looks package's "Ideas for later" (`docs/browser-looks/HANDOFF.md`):
 
 Same format as `browser-looks-1.0.0`: CSS only, `js/os/<id>.css`, each importing its
 base, light and dark where the browser had them.
+
+---
+
+## 6. An Android 5–6 (Material) look
+
+The Android skin's build is from 2015, but its looks are 2012's (Android 4) and Fire OS.
+Add Material as an option; the default stays Android 4, because the app's own dialogs
+stayed Holo. The full brief is `docs/brief-android5-look.md`.
+
+## 7. The iOS/Android skin's remake-only controls
+
+The full brief is `docs/brief-restyle-ios.md`.
