@@ -2065,6 +2065,8 @@ function showRank(i, then) {
   // alert, and the window stays); OK blank or Cancel names none. Its words:
   // NS.title, the ability or NS.allEarned, NS.cancel and NS.ok
   const NS = G && HO.rules(G).nameAStar, inRank = NS && NS.when === 'rank' && NS.inRank;
+  // (a skin's own rank window, with the star field in it: T.window('rank', rank, then, helpers))
+  if (NS && skinWindow('rank', i, then, { NS, jpg: A.jpg[i], taken: (n) => starTaken(NS, G.rules, n), keep: (n) => { keepStar(NS, G.rules, n); toast(`“${n}” will be among the stars of your next galaxies.`); } })) return;
   const body = el('div', { class: 'rank' },
     el('img', { src: A.jpg[i], alt: '' }),
     el('p', null, 'Congratulations! You have achieved the rank of:'), el('h3', null, R[0]));

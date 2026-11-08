@@ -430,3 +430,6 @@ html.skin-ios .ios-ngown input[type=checkbox] { width: calc(16 * var(--pt)); hei
 html.skin-ios .ios-radm { position: absolute; }
 html.skin-ios .ios-radi { position: absolute; left: 0; cursor: pointer; }
 html.skin-ios .ios-radi img { display: block; }
+html.skin-ios .ios-rkbd { background: #5a1c18; border: 1px solid #fff; box-sizing: border-box; }
+html.skin-ios .ios-rkin { background: transparent !important; color: #fff !important; border: 0 !important; outline: none; padding: 0 !important; margin: 0; font-family: var(--appfont, Arial, Helvetica, sans-serif); }
+html.skin-ios .ios-rkpic { display: block; pointer-events: none; }

@@ -1413,7 +1413,7 @@ function appDialog(o) {
   }
   const bx = UIEl('button', 'ios-bcancel', { type: 'button', 'aria-label': 'Cancel' }, pic('button-x')), bk = UIEl('button', 'ios-bcheck', { type: 'button', 'aria-label': 'OK' }, pic('button-check'));
   bx.addEventListener('click', (e) => { e.stopPropagation(); L.close(); });
-  bk.addEventListener('click', (e) => { e.stopPropagation(); L.close(); if (o.ok) o.ok(); });
+  bk.addEventListener('click', (e) => { e.stopPropagation(); if (o.guard && o.guard() === false) return; L.close(); if (o.ok) o.ok(); });
   if (o.cross === false) bx.style.visibility = 'hidden';
   L.bx = bx; L.bk = bk; L.gd = gd; L.cw = cw; L.ch = ch;
   if (o.build) o.build(L.dlg, cw, ch, gd, L);
@@ -1674,6 +1674,31 @@ function openRadicalIOS() {
   L.scrim.classList.add('ios-gtop'); document.body.append(L.scrim);
   return true;
 }
+// -[RankLevelDialogLayer initDialog] 0x1000b8b78 and doClose: 0x1000b90ec (read in the decompile, floats.py and the assembly): the message Misc Strings 73, the check and the cross; the rank's sentence (template 23 with the rank's
+// name, Arial a58 = 16, 24 on an iPad) centred, its top 10 a80 under the top; Misc 74 centred under it; a text field (CCTextField 250 x 32, Arial a58, white; at most 11 letters) centred under that, over a border node (254 x 34, 0x5a1c18
+// with a white border, 2 left and 1 under the field); the rank's picture (NN.jpg, 540 x 405) at a88 x 0.125 x 0.45 at (10, 10). The check: an empty name keeps none and closes; a name the game has already (alert) stays open; else it is kept.
+function openRankIOS(i, then, h) {
+  const R = HO.DATA.ranks[i], NS = h.NS, pad = SCREEN.pad;
+  let inp = null, closed = false;
+  const fin = () => { if (!closed) { closed = true; if (then) then(); } };
+  const L = appDialog({ message: miscS(73), label: miscS(73),
+    guard: () => { const n = inp.value.trim().slice(0, 11); if (n && h.taken(n)) { const sc = appMessage(NS.taken.replace('%s', n)); sc.classList.add('ios-gtop'); document.body.append(sc); inp.select(); return false; } if (n) h.keep(n); return true; },
+    build(dlg, cw, ch, gd) {
+      const fs = gd.a58, lh = Math.ceil(fs * ARIAL_LINE), a88 = gd.a88;
+      const y1 = ch - gd.a80 * 10, y2 = y1 - lh, y3 = y2 - lh;
+      dlg.append(bLabel(fillT(tmplS(23), R[0]), fs, cw / 2, y1, 0.5, 1, '#fff'), bLabel(miscS(74).replace(/\s+$/, ''), fs, cw / 2, y2, 0.5, 1, '#fff'));
+      const bd = UIEl('div', 'ios-rkbd'); bd.style.cssText = `width:${bpt(254)};height:${bpt(34)}`; dlg.append(put(bd, cw / 2 - 125 - 2, y3 - 32 - 1, 0, 0));
+      inp = UIEl('input', 'ios-rkin', { type: 'text', maxlength: '11', autocomplete: 'off', 'aria-label': tr0('Star name'), style: `width:${bpt(250)};height:${bpt(32)};font-size:${bpt(fs)}` });
+      dlg.append(put(inp, cw / 2 - 125, y3 - 32, 0, 0));
+      const im = UIEl('img', 'ios-rkpic', { src: h.jpg || '', alt: '' }), k = a88 * 0.125 * 0.45;
+      im.style.cssText = `width:${bpt(540 * k)};height:${bpt(405 * k)}`; dlg.append(put(im, 10, 10, 0, 0));
+    } });
+  const close0 = L.close; L.close = () => { close0(); fin(); };
+  L.scrim.classList.add('ios-gtop'); document.body.append(L.scrim);
+  setTimeout(() => { if (inp) inp.focus(); }, 50);
+  return true;
+}
+const tr0 = (x) => (window.HOUI ? HOUI.tr(x) : x);
 function appMessage(text, onOk) {
   const L = appDialog({ message: text, ok: onOk, cross: !!onOk });
   return L.scrim;
@@ -2837,6 +2862,7 @@ window.HOTHEME = {
   // the app's own windows in this skin: Build (BuildShipsDialog, ShipClassMenu, ShipMenuItem, BuildSingleShipDialog); a ruleset whose ships are queued (DOS 2.0) keeps the remake's window
   window(name, ...x) {
     if (name === 'radical') { const a0 = A(); return !!(a0 && a0.G && /^(ios|android)$/.test(a0.G.rules || '') && openRadicalIOS()); }
+    if (name === 'rank') return !!(/^(ios|android)$/.test((A().G || {}).rules || '') && (x[2] || {}).NS && openRankIOS(x[0], x[1], x[2]));
     if (name === 'turn') { turnAsk(true); return true; }
     if (name === 'saved') return /^(ios|android)$/.test((x[0] || {}).id || '') ? openSavedIOS(x[0]) : false; // (from the title: no game yet)
     const a = A(); if (!a || !a.G) return false;
