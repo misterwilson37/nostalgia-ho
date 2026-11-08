@@ -1260,6 +1260,12 @@ root.HOUI.add([
 // the Mac 1.2 skin's own menus and windows (Mac 2.0.1's English; 1.2F's French, MENU 128-134 and its DITLs)
 ['Edit', 'Edition', 'Bearbeiten', 'Düzen', 'Edición', { fr: '1.2F' }],
 ['About Spaceward Ho! 1.2…', 'A propos de Spaceward Ho! 1.2…', 'Über Spaceward Ho! 1.2…', 'Spaceward Ho! 1.2 hakkında…', 'Acerca de Spaceward Ho! 1.2…', { fr: '1.2F' }],
+['About Spaceward Ho! 2.0…', 'A propos de Spaceward Ho! 2.0…', 'Über Spaceward Ho! 2.0…', 'Spaceward Ho! 2.0 hakkında…', 'Acerca de Spaceward Ho! 2.0…'],
+['End Turn & Switch Players', 'Finir le tour et changer de joueur', 'Zug Ende & Spielerwechsel', 'Sırayı Bitir ve Oyuncu Değiştir', 'Terminar el turno y cambiar de jugador'],
+['Page Setup…', 'Mise en page…', 'Seite einrichten…', 'Sayfa Yapısı…', 'Configurar página…'],
+['Print Map…', 'Imprimer la carte…', 'Karte drucken…', 'Haritayı Yazdır…', 'Imprimir el mapa…'],
+['Force Turn Update…', 'Forcer la mise à jour du tour…', 'Zugaktualisierung erzwingen…', 'Tur Güncellemesini Zorla…', 'Forzar la actualización del turno…'],
+['I’ll Update Turns', 'Je mets à jour les tours', 'Ich aktualisiere die Züge', 'Turları Ben Güncellerim', 'Yo actualizo los turnos'],
 ['Open…', 'Ouvrir…', 'Öffnen…', 'Aç…', 'Abrir…', { fr: '1.2F' }],
 ['Save…', 'Enregistrer…', 'Sichern…', 'Kaydet…', 'Guardar…', { fr: '1.2F' }],
 ['Revert To Saved…', 'Ouvrir Précédent…', 'Letzte Version…', 'Kaydedilene dön…', 'Volver a lo guardado…', { fr: '1.2F' }],
