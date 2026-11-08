@@ -1641,6 +1641,39 @@ function newGameIOS(f) {
   f.addEventListener('change', (e) => { if (!e.isTrusted) return; pull(); }); // (the remake's own window changed a field)
   const iv = setInterval(() => { if (!scrim.isConnected) { root.remove(); clearInterval(iv); } }, 200);
 }
+// -[RadicalResearchLayer initDialog] 0x1000a33ec, radioSelect: 0x1000a37f0, toggleResearch: 0x1000a3790, getSelected 0x1000a3920, doClose: 0x1000a3a60, isResearchAvailable 0x1000a337c and -[RadicalResearchMenuItem
+// initWithIndex:isCancel:withMessage:withTarget:withSelector:] 0x1000a4628 (read in the decompile, floats.py and the assembly): shown when the hand holds four programs (the first four set bits of +0x1120). The message is Misc Strings 107, the check
+// only; a vertical menu (anchored (0, 0) at (3.75 a80, 3.75 a80), 10 less on an iPhone; the padding 1.25 a88 on an iPad, none on an iPhone, the first item at the top) of an item for each of the four programs and a fifth, Misc 108 ("Don't Cancel
+// Any Programs", the cancel item, picked at first). An item is 300 x 50: a picture (report_icon-10, picked report_icon-11; the cancel item's radical_on, picked radical_off) anchored (1, 0.5) at (12 a80 - 4, 25) (18 a80 - 4 on an iPad), its
+// word (Arial 16, white, in a box 300 x 25) anchored (0, 0.5) at (12 a80 + 4, 25). A touch picks the item (the others unpicked) with sound 16; the check cancels the picked program (its bit is taken out of the hand) unless it is the fifth.
+function openRadicalIOS() {
+  const a = A(), G = a.G, RH = HO.rules(G).radicalHand; if (!RH) return false;
+  const cards = RH.cards(G, a.me()).slice(0, 4), pad = SCREEN.pad;
+  let sel = 4; const items = [];
+  const L = appDialog({ message: miscS(107), label: miscS(107), cross: false,
+    ok: () => { if (sel < cards.length) { RH.discard(G, a.me(), cards[sel].id); a.save(); } },
+    build(dlg, cw, ch, gd) {
+      const a80 = gd.a80, padV = pad ? gd.a88 * 1.25 : 0, n = cards.length + 1, h = n * 50 + (n - 1) * padV;
+      const menu = UIEl('div', 'ios-radm'); menu.style.cssText = `width:${bpt(300)};height:${bpt(h)}`;
+      put(menu, a80 * 3.75, a80 * 3.75 - (pad ? 0 : 10), 0, 0);
+      const bx = (pad ? 18 : 12) * a80;
+      for (let i = 0; i <= cards.length; i++) {
+        const cancel = i === cards.length, it = UIEl('div', 'ios-radi', { style: `top:${bpt(i * (50 + padV))};width:${bpt(300)};height:${bpt(50)}`, role: 'radio' });
+        const im = pic(cancel ? 'radical_on' : 'report_icon-10'), imS = pic(cancel ? 'radical_off' : 'report_icon-11');
+        for (const x of [im, imS]) { x.style.cssText = `position:absolute;right:${bpt(300 - (bx - 4))};top:50%;transform:translateY(-50%)`; it.append(x); }
+        const word = UIEl('span', 'ios-bt', { style: `left:${bpt(bx + 4)};top:50%;transform:translateY(-50%);font-size:${bpt(16)};white-space:normal;width:${bpt(300)}` });
+        word.textContent = cancel ? miscS(108) : HO.say(G, cards[i].text); it.append(word);
+        const show = () => { const on = sel === i; imS.style.display = on ? '' : 'none'; im.style.display = on ? 'none' : ''; it.setAttribute('aria-checked', on ? 'true' : 'false'); };
+        it.show = show; items.push(it);
+        it.addEventListener('click', (e) => { e.stopPropagation(); sel = i; for (const x of items) x.show(); a.Sound.play(TAP_FILE[16]); });
+        menu.append(it);
+      }
+      for (const x of items) x.show();
+      dlg.append(menu);
+    } });
+  L.scrim.classList.add('ios-gtop'); document.body.append(L.scrim);
+  return true;
+}
 function appMessage(text, onOk) {
   const L = appDialog({ message: text, ok: onOk, cross: !!onOk });
   return L.scrim;
@@ -2803,6 +2836,7 @@ window.HOTHEME = {
   battleWindow(b, k) { return openBattleIOS(b, k); }, // the Battle screen (BattleStageLayer; openBattleIOS)
   // the app's own windows in this skin: Build (BuildShipsDialog, ShipClassMenu, ShipMenuItem, BuildSingleShipDialog); a ruleset whose ships are queued (DOS 2.0) keeps the remake's window
   window(name, ...x) {
+    if (name === 'radical') { const a0 = A(); return !!(a0 && a0.G && /^(ios|android)$/.test(a0.G.rules || '') && openRadicalIOS()); }
     if (name === 'turn') { turnAsk(true); return true; }
     if (name === 'saved') return /^(ios|android)$/.test((x[0] || {}).id || '') ? openSavedIOS(x[0]) : false; // (from the title: no game yet)
     const a = A(); if (!a || !a.G) return false;

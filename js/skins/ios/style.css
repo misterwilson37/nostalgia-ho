@@ -427,3 +427,6 @@ html.skin-ios .ios-ngown input:not([type=checkbox]), html.skin-ios .ios-ngown se
 html.skin-ios .ios-ngown .group:has([name=o_iq]), html.skin-ios .ios-ngown .buddyrow, html.skin-ios .ios-ngown label:has([name=computers]) { display: none; }
 html.skin-ios .ios-ngown hr { border: 0; border-top: 1px solid #666; }
 html.skin-ios .ios-ngown input[type=checkbox] { width: calc(16 * var(--pt)); height: calc(16 * var(--pt)); flex: none; }
+html.skin-ios .ios-radm { position: absolute; }
+html.skin-ios .ios-radi { position: absolute; left: 0; cursor: pointer; }
+html.skin-ios .ios-radi img { display: block; }
