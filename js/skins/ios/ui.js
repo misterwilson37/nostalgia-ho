@@ -1495,18 +1495,22 @@ function leaveNotice(site, url) {
 }
 // The turn-your-device notice (the remake's own: the app forced landscape; a browser cannot, so on a phone held upright it asks, in the app's own message dialog, with a way to another version).
 // Shown when a touch screen is narrow and taller than wide (an iPad and any desktop window never get it); gone when the device is turned (resize / orientation change).
+const PORTRAIT_SKINS = ['palm', 'classic', 'cozy'];
 let turnSc = null, turnDone = false;
 function turnAsk(force) {
   const T = (x) => (window.HOUI ? HOUI.tr(x) : x);
   if (turnSc) return turnSc;
-  const vw = window.innerWidth, vh = window.innerHeight, cw = 300, ch = 190, k = Math.min(vw * 0.92 / cw, 1.5);
+  const vw = window.innerWidth, vh = window.innerHeight, cw = 300, list = (window.HOSKINS && HOSKINS.list || []).filter(k => PORTRAIT_SKINS.includes(k.id)), ch = 110 + list.length * 44, k = Math.min(vw * 0.92 / cw, 1.5);
   const L = dialogLayer(cw, ch, k, T('Spaceward Ho! is played with the device held sideways. Please turn it, or choose another version of the game.'), null);
   const msg = UIEl('div', 'ios-omsg', { style: `width:${bpt(cw - 16)};font-size:${bpt(16)}` });
-  msg.textContent = T('Spaceward Ho! is played with the device held sideways. Please turn it, or choose another version of the game.');
+  msg.textContent = T(list.length ? 'Spaceward Ho! is played with the device held sideways. Please turn it, or choose another version of the game.' : 'Spaceward Ho! is played with the device held sideways. Please turn it.');
   L.dlg.append(put(msg, cw / 2, ch - 16, 0.5, 1));
-  const b = textButton(T('Change version'), 150, 36, 16, () => { turnDone = true; turnOff(); if (A() && A().openSkin) A().openSkin(); });
-  L.dlg.append(put(b, cw / 2, 14, 0.5, 0));
-  L.scrim.classList.add('ios-gtop', 'ios-turn'); document.body.append(L.scrim); turnSc = L.scrim;
+  // (only the skins checked to work held upright on a phone, 390 x 844: Palm OS, Classic and Cozy, each with the map over the panels)
+  list.forEach((sk, n) => {
+    const b = textButton(sk.name, 200, 36, 16, () => { turnDone = true; turnOff(); const h = window.HOSKINS, a = A(); if (a && a.G) h.switchTo(sk.id); else h.preview(sk.id); });
+    L.dlg.append(put(b, cw / 2, 12 + (list.length - 1 - n) * 44, 0.5, 0));
+  });
+  L.scrim.classList.add('ios-gtop', 'ios-rotate'); document.body.append(L.scrim); turnSc = L.scrim;
   if (force) turnSc.dataset.forced = '1';
   return turnSc;
 }
@@ -1545,6 +1549,7 @@ function newGameIOS(f) {
   const SHAPE_L = { fr: ['Cercle', 'Spirale', 'Grappe', 'Anneau', 'Grille', 'Au hasard', 'Hexagonal'], tr: ['Daire', 'Spiral', 'Salkım', 'Halka', 'Kareleme', 'Random', 'Altı'] };
   const shapeW = (i) => SHAPE_L[uiLang()] ? SHAPE_L[uiLang()][i] : tr(['Circle', 'Spiral', 'Cluster', 'Ring', 'Grid', 'Random', 'Hex'][i]);
   const root = UIEl('div', 'hoscreen ios-sg ios-ng', { role: 'dialog', 'aria-modal': 'true', 'aria-label': tr('Create galaxy') });
+  if (own) root.setAttribute('translate', 'no'); // (the app's own words in its own languages)
   const add = (e) => { root.append(e); return e; };
   const lab = (text, size, x, y, ax, ay) => add(bLabel(text, size, x, y, ax, ay, '#fff'));
   const fire = (n) => { n.dispatchEvent(new Event('input', { bubbles: true })); n.dispatchEvent(new Event('change', { bubbles: true })); };
@@ -1750,7 +1755,7 @@ function openRankIOS(i, then, h) {
     build(dlg, cw, ch, gd) {
       const fs = gd.a58, lh = Math.ceil(fs * ARIAL_LINE), a88 = gd.a88;
       const y1 = ch - gd.a80 * 10, y2 = y1 - lh, y3 = y2 - lh;
-      dlg.append(bLabel(fillT(tmplS(23), R[0]), fs, cw / 2, y1, 0.5, 1, '#fff'), bLabel(miscS(74).replace(/\s+$/, ''), fs, cw / 2, y2, 0.5, 1, '#fff'));
+      dlg.append(bLabel(fillT(own0() ? tmplS(23) : tr0(tmplS(23)), R[0]), fs, cw / 2, y1, 0.5, 1, '#fff'), bLabel(own0() ? miscS(74).replace(/\s+$/, '') : tr0(miscS(74).replace(/\s+$/, '')), fs, cw / 2, y2, 0.5, 1, '#fff'));
       const bd = UIEl('div', 'ios-rkbd'); bd.style.cssText = `width:${bpt(254)};height:${bpt(34)}`; dlg.append(put(bd, cw / 2 - 125 - 2, y3 - 32 - 1, 0, 0));
       inp = UIEl('input', 'ios-rkin', { type: 'text', maxlength: '11', autocomplete: 'off', 'aria-label': tr0('Star name'), style: `width:${bpt(250)};height:${bpt(32)};font-size:${bpt(fs)}` });
       dlg.append(put(inp, cw / 2 - 125, y3 - 32, 0, 0));
@@ -1762,6 +1767,7 @@ function openRankIOS(i, then, h) {
   setTimeout(() => { if (inp) inp.focus(); }, 50);
   return true;
 }
+const own0 = () => /^(fr|tr)$/.test(uiLang());
 const tr0 = (x) => (window.HOUI ? HOUI.tr(x) : x);
 function appMessage(text, onOk) {
   const L = appDialog({ message: text, ok: onOk, cross: !!onOk });
