@@ -154,7 +154,8 @@ async function audit(browser, url, run) {
   await grab('title screen');
   // New Game: the version, its language, this skin
   await page.evaluate(() => HOAPI.newGameDialog());
-  await page.waitForSelector('form.newgame');
+  await page.waitForSelector('form.newgame', { state: 'attached' });
+  if (await page.locator('.ios-ng').count()) { await sleep(300); await grab('New Game screen (the app\'s own)'); await page.evaluate(() => { const b = document.querySelector('.ios-ng .ios-bbtn'); if (b) b.click(); }); await sleep(300); } // (iOS and Android: the app\'s own New Game screen, then the remake\'s own options, which hold the form)
   await page.evaluate(([r, l, s]) => {
     const f = document.querySelector('form.newgame'), set = (n, v) => { const e = f.querySelector(`select[name=${n}]`); if (e && [...e.options].some(o => o.value === v)) { e.value = v; e.dispatchEvent(new Event('change', { bubbles: true })); } };
     set('rules', r); set('lang', l); set('skin', s);

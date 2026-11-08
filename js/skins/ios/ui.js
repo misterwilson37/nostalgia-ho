@@ -434,6 +434,16 @@ function starName(cx, o) {
   cx.fillText(o.s.name, o.x, o.y + 28 * k); cx.restore();
   return true;
 }
+// -[PlayerPlanetsLayer selectAndScrollTo:] 0x10000ba74 and onEnter 0x10000bce0 (read in the decompile and floats.py): the bar of the selected colony is highlighted and the list is moved (CCMoveTo, CCEaseSineInOut, 0.33 s)
+// so that bar is in the middle of the layer; done at the game's start (onEnter: the player's own star) and when a bar is touched. The remake's list is the sidebar's scroller.
+let scrolledTo = null;
+function scrollToBar(row, star) {
+  if (scrolledTo === star) return; scrolledTo = star;
+  const pan = document.getElementById('panel'); if (!pan || pan.scrollHeight <= pan.clientHeight + 2) return;
+  const y0 = pan.scrollTop, r = row.getBoundingClientRect(), pr = pan.getBoundingClientRect(), to = Math.max(0, y0 + (r.top + r.height / 2) - (pr.top + pr.height / 2)), t0 = performance.now();
+  const step = (now) => { const f = Math.min(1, (now - t0) / 330); pan.scrollTop = y0 + (to - y0) * (0.5 - Math.cos(Math.PI * f) / 2); if (f < 1) requestAnimationFrame(step); };
+  requestAnimationFrame(step);
+}
 function placeButtons() {
   const a = A(); if (!a || !a.G || !pbEl || !window.HOVIEW) return;
   const v = window.HOVIEW(), sel = a.UI.sel, cv = document.getElementById('map');
@@ -695,6 +705,7 @@ function styleBars(box, kind, parts) {
     // and button-evacuate (88 pixels at scale 0.7, left at a80, centred on the row) joins the row: its block calls +[AdditionalMenu tryEvacuateCurrentSelectedPlanet]
     if (row._k.kind === 'col' && row._k.star != null && a.UI.sel === row._k.star && G.stars[row._k.star].owner === a.ME) {
       if (lab) { const t = lab.textContent; lab.textContent = ''; lab.append(UIEl('span', 'nm', null, t)); lab.classList.add('hi'); }
+      scrollToBar(row, row._k.star);
       if (a.evacuateHere && a.evacuateHere(G.stars[row._k.star])) {
         const b = UIEl('button', 'ios-evac', { type: 'button', 'aria-label': 'Evacuate', title: 'Evacuate' }, pic('button-evacuate'));
         b.addEventListener('click', (e) => { e.stopPropagation(); const x = A(); if (x && x.G && x.UI.sel === row._k.star) x.evacuateClick(row._k.star); });
