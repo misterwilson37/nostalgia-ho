@@ -18,7 +18,7 @@ The standard (Jake): in the version's own skin its windows' contents, wording, o
 original's, read from the code and the DITLs; the outer frame is the OS look; only what a browser can't do (file dialogs, printing,
 another program's file) stays a kept difference, with its reason. Rects a program keeps in its initial globals come from its packed
 A5 world (Mac 68k: the %A5Init segment; `audit/mac-1.2F/tools/a5world.py` in the private repo).
-Later (Jake, November 2026): remake-only controls in each skin's own look, after the skin's own screens are done. Features other rulesets have that a version's app had no screen for (for iOS and Android: `docs/ios-findings.md` "Remake-only controls to restyle") are to be presented in that app's visual language (its sprites, fonts, dialog style, touch behaviour), so they look native to the skin while serving the earlier version's needs.
+Later (Jake, November 2026): remake-only controls in each skin's own look, after the skin's own screens are done. Features other rulesets have that a version's app had no screen for (for iOS and Android: `docs/ios-findings.md` "Remake-only controls to restyle") are to be presented in that app's visual language (its sprites, fonts, dialog style, touch behaviour), so they look native to the skin while serving the earlier version's needs. The shared tracker is `docs/remake-controls.md`: a version audit that finds a feature the remake lacks adds a row there.
 Order for the other versions (Jake): newest first, then backwards: iOS 1.2.9 and Android 1.2.8, then 5.0.5 and the Palm, then
 Windows and Mac 4.0.5, then 3.0.1 (English and French), then 2.0 (DOS, Windows 3.1, Mac 2.0.1), then the Amiga.
 
