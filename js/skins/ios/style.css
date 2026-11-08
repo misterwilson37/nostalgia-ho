@@ -411,3 +411,19 @@ html.skin-ios .ios-sitm { position: absolute; left: calc(var(--sa) * 1.75 * var(
 html.skin-ios .ios-sitm .ios-tmL { position: absolute; inset: 0; background: url("../../../assets/skins/ios/sprites/slider-tmb1-right.png") 0 0 / 100% 100%; }
 html.skin-ios .ios-sitm .ios-tmL::before { content: ""; position: absolute; inset: 0; width: calc(var(--v, 0) * 100%); background: url("../../../assets/skins/ios/sprites/slider-tmb1-left.png") 0 0 / calc(100% / max(var(--v, 0), .001)) 100%; }
 html.skin-ios .ios-sitm .ios-tmT { position: absolute; top: 50%; left: calc(var(--v, 0) * 100%); width: calc(14.25 * var(--sk)); height: calc(14.5 * var(--sk)); margin: calc(-7.25 * var(--sk)) 0 0 calc(-7.125 * var(--sk)); background: url("../../../assets/skins/ios/sprites/slider-tmb1-thumb.png") 0 0 / 100% 100%; }
+
+/* the New Game scene (newGameIOS): the app's own screen, dark gray, in place of the remake's New Game window */
+html.skin-ios .ios-ng { background: #1e1e1e; z-index: 70; }
+html.skin-ios .ios-ngscrim { display: none !important; }
+html.skin-ios .ios-ngpile, html.skin-ios .ios-ngbar { position: absolute; }
+html.skin-ios .ios-ngcard { position: absolute; transform-origin: 50% 100%; }
+html.skin-ios .ios-ngcard > img, html.skin-ios .ios-ngcard > canvas { position: absolute; left: 0; top: 0; width: 100%; height: 100%; pointer-events: none; }
+html.skin-ios .ios-ngbar { touch-action: none; cursor: pointer; }
+html.skin-ios .ios-ngbar > img { display: block; }
+html.skin-ios .ios-ngown { overflow: auto; color: #fff; font: calc(14 * var(--pt)) / 1.25 var(--appfont, Arial, Helvetica, sans-serif); }
+html.skin-ios .ios-ngown form { display: block; }
+html.skin-ios .ios-ngown label { display: flex; align-items: center; justify-content: space-between; gap: calc(8 * var(--pt)); margin: calc(3 * var(--pt)) 0; }
+html.skin-ios .ios-ngown input:not([type=checkbox]), html.skin-ios .ios-ngown select, html.skin-ios .ios-ngown button { font: inherit; color: #000; background: #fff; border: 1px solid #888; border-radius: 0; padding: 1px 4px; }
+html.skin-ios .ios-ngown .group:has([name=o_iq]), html.skin-ios .ios-ngown .buddyrow, html.skin-ios .ios-ngown label:has([name=computers]) { display: none; }
+html.skin-ios .ios-ngown hr { border: 0; border-top: 1px solid #666; }
+html.skin-ios .ios-ngown input[type=checkbox] { width: calc(16 * var(--pt)); height: calc(16 * var(--pt)); flex: none; }

@@ -1279,10 +1279,10 @@ function ccSlider(width, onFrac) {
 // SliderArray (0x1000afb98): [left arrow] [slider] [right arrow] [label] 4 apart, the label the value or its word; value min..max
 // (valueChanged:tag: 0x1000b03b0 truncates min + (max - min) x fraction), setValue: clamps and moves the thumb to it
 function sliderArray(o) {
-  const gd = BGD(), pad = gd.a80, lw = textW('0', gd.f);
+  const gd = BGD(), pad = o.pad != null ? o.pad : gd.a80, fz = o.font || gd.f, lw = o.lw != null ? o.lw : textW('0', fz);
   const arrows = o.arrows !== false;
   const sl = ccSlider(o.width, (f) => { let v = Math.trunc(S.min + (S.max - S.min) * f); v = Math.min(Math.max(v, S.min), S.max); S.value = v; S.show(); o.change && o.change(); });
-  const lab = UIEl('span', 'ios-bt ios-bsl'); lab.style.fontSize = bpt(gd.f);
+  const lab = UIEl('span', 'ios-bt ios-bsl'); lab.style.fontSize = bpt(fz);
   const total = (arrows ? 24 : 0) + o.width + lw + pad * (arrows ? 3 : 1);
   const el = UIEl('div', 'ios-sla', { style: `width:${bpt(total)};height:${bpt(19)}` });
   let x = 0;
@@ -1294,8 +1294,15 @@ function sliderArray(o) {
   addAt(sl.el, o.width, 19);
   if (arrows) { ra = UIEl('button', 'ios-sla-b', { type: 'button', 'aria-label': 'More' }, pic('arrow-right')); addAt(ra, 12, 18); }
   lab.style.position = 'absolute'; lab.style.left = bpt(x + lw / 2); lab.style.top = '50%'; lab.style.transform = 'translate(-50%,-50%)'; el.append(lab);
-  const S = { el, min: 0, max: 0, value: 0, sl, lab, la, ra, words: o.words || null,
-    show() { lab.textContent = S.words && S.value < S.words.length ? S.words[S.value] : String(S.value); },
+  const S = { el, total, raC: arrows ? 12 + pad + o.width + pad + 6 : 0, min: 0, max: 0, value: 0, sl, lab, la, ra, words: o.words || null,
+    // updateStrings: 0x1000b01dc (the word for the value, else the number; the display format, "Total %@", filled with it)
+    fmt: o.fmt || null,
+    show() { const w = S.words && S.value < S.words.length ? S.words[S.value] : String(S.value); lab.textContent = S.fmt ? S.fmt.replace('%@', w) : w; },
+    // setStrings: 0x1000b04c8 (the words are the values: 0 to count - 1), setStringValue: 0x1000b05e8 (the place of the number's text, else 0), getStringValue: 0x1000b0674 (the number of the word)
+    setStrings(a) { S.words = a; S.min = 0; S.max = a.length - 1; },
+    setStringValue(n) { const i = S.words.indexOf(String(n)); S.setValue(i < 0 ? 0 : i); },
+    getStringValue() { return S.value < S.words.length ? (parseInt(S.words[S.value], 10) || 0) : 0; },
+    labelAt(x) { lab.style.left = bpt(x); },
     // -[SliderArray setValue:] 0x1000b0568 and updateSlider 0x1000b0314
     setValue(v) { S.value = Math.min(Math.max(v, S.min), S.max); S.show(); sl.set((S.value - S.min) / (S.max - S.min)); },
     maxed() { return S.value === S.max; },
@@ -1303,6 +1310,7 @@ function sliderArray(o) {
   };
   if (la) la.addEventListener('click', (e) => { e.stopPropagation(); if (S.value !== 0) { S.setValue(S.value - 1); o.change && o.change(); } }); // FUN_1000aff64
   if (ra) ra.addEventListener('click', (e) => { e.stopPropagation(); S.setValue(S.value + 1); o.change && o.change(); }); // FUN_1000b0030
+  if (o.words) S.setStrings(o.words);
   S.setValue(0);
   return S;
 }
@@ -1443,6 +1451,195 @@ function turnWatch() {
   const portrait = window.innerWidth < window.innerHeight && window.innerWidth <= 500 && !!(window.matchMedia && matchMedia('(pointer: coarse)').matches);
   if (!portrait) { turnDone = false; if (turnSc && !turnSc.dataset.forced) turnOff(); return; }
   if (!turnDone) turnAsk(false);
+}
+// -[NewGameScene newGameOptions] 0x100013e80, layoutScreen 0x100015298, fromCreationInfo 0x100015dcc, updateCreationInfo 0x100015fa0, updateGalaxy 0x100016264, startGame: 0x100016524, animateGalaxy 0x100013bb0, addLabel / addSlider
+// 0x1000167f0-0x1000169fc (read in the decompile, the numbers with tools/floats.py and the assembly; y up; a = a80 (4, 8 on an iPad), a90 = 0.5 (1 on an iPad), W x H the window): the app's own New Game screen, a dark
+// 0x1e1e1e layer; it replaces the remake's New Game window in this skin, and the window's form stays the model (the screen sets its fields and Start submits it), so a ruleset's other options stay in it, reached by the
+// button under the left column (the remake's own: the app has none of them, and it opens them in the app's dialog).
+// Sizes: elementHeight E = (int)((H - 80 a90 - 3 a) / 19), largeElementHeight 1.6 E, spacing E; labels Arial E (Bad Guys and Difficulty 1.6 E), white. Menu: Back (Misc 140) and Start (144, the default), StarMenuItems of
+// Arial 24 scaled to 1.5 x 1.6 E high, 3 a apart, anchored (1, 0) at (W - 3 a, a). Slider widths: 125 (200 on an iPad) for the computers, IQ and galaxy shape, 100 (180) the player's home system, 100 (200) the bad guys', 60 (100) years.
+// Left: the galaxy cards (GalaxyPanel.png, 454 x 374 points, one for each of the seven shapes, anchor (0.5, 0) at (random 0-49, random 0-(a - 1)), turned by random 0-4.9 degrees (minus for the even ones), scaled to H / 2.6 high; the
+// pile's box 1.2 times the first card, anchored (0, 1) at (W / 4 - a, H)): the shape's word (Arial 36) 36 under the card's top, and the galaxy (MiniGalaxy, a square of the rest of the card's height less a, in the card's middle) on the one
+// in front; the shape slider (arrows, no word) anchored (0.5, 1) at (W / 4 + 2 a, H - the pile's height - 2 a). Right, from the top, each row E + spacing under the last: Density (Misc 152) at x = a + W / 2 and its slider (density_slider_small, scale a90)
+// at 3 W / 4 - a; Size (151) and its slider (galaxy_size_slider); Years / Turn (148) and its SliderArray (10, 20, 30, 50); then LH + spacing lower "Bad Guys" (146) centred at 0.75 W + a; the computers ("Total %@", 1-8), the IQ ("IQ %@",
+// 50-200 by 10), each with its word centred between its right arrow and the window's right edge; Best Buddies (149) with a two-word slider (On, Off; 50 wide, no arrows, 2 a apart) a label's width to its right; Their Home System (147)
+// and, under it, the system names and "Based On I.Q.". Left, level with those last two: Your Home System (145) and its SliderArray (the seven system names, the word centred between its arrow and W / 2). At the bottom: "Difficulty: " (150)
+// right-anchored at W / 3 and its number at W / 3 + 20, both 2 E high. Every slider changes only the creation info and the galaxy (updateGalaxy); the shape slider slides the new card out (0.2 s, a quarter of W sideways, 30 up, odd cards to
+// the right), and back, then in front (animateGalaxy, FUN_100013db8). MiniGalaxy (CCParticleGalaxy, 0x1000b2060-0x1000b2388): one particle for each star of a galaxy made with the creation info, at the star's place
+// ((m - size k) / 2 + k (x10 / 10) as the Saved Games item has it, m the square's side), 10 +- 3 points, white, alpha 1 to 0.8, living 4 +- 4 s and then taking the next star in a shuffled order, additive.
+const NG_SHAPES = ['circle', 'spiral', 'cluster', 'ring', 'grid', 'random', 'hex'];
+function newGameIOS(f) {
+  const win = f.closest('.win'), scrim = win && win.closest('.scrim');
+  const fld = (n) => f.querySelector(`[name="${n}"]`);
+  if (!win || !scrim || !fld('o_iq') || !/^(ios|android)$/.test((fld('rules') || {}).value || '')) return;
+  scrim.classList.add('ios-ngscrim');
+  const gd = BGD(), a = gd.a80, pad = SCREEN.pad, W = SCREEN.winW, H = SCREEN.winH, a90 = pad ? 1 : 0.5;
+  const E = trunc((H - 80 * a90 - a * 3) / 19), LH = E * 1.6, SP = E, step = E + SP;
+  const tr = (x) => (window.HOUI ? HOUI.tr(x) : x), own = /^(fr|tr)$/.test(uiLang());
+  const mt = (n) => (own ? miscS(n) : tr(miscS(n))), tm = (n) => (own ? tmplS(n) : tr(tmplS(n)));
+  const sysW = (i) => i === 7 ? (uiLang() === 'fr' ? 'Basé sur le QI' : uiLang() === 'tr' ? 'Zekaya Dayanan' : tr('Based On I.Q.')) : (() => { const w = appWord('sys', i); return w.no ? w.text : tr(w.text); })();
+  const SHAPE_L = { fr: ['Cercle', 'Spirale', 'Grappe', 'Anneau', 'Grille', 'Au hasard', 'Hexagonal'], tr: ['Daire', 'Spiral', 'Salkım', 'Halka', 'Kareleme', 'Random', 'Altı'] };
+  const shapeW = (i) => SHAPE_L[uiLang()] ? SHAPE_L[uiLang()][i] : tr(['Circle', 'Spiral', 'Cluster', 'Ring', 'Grid', 'Random', 'Hex'][i]);
+  const root = UIEl('div', 'hoscreen ios-sg ios-ng', { role: 'dialog', 'aria-modal': 'true', 'aria-label': tr('Create galaxy') });
+  const add = (e) => { root.append(e); return e; };
+  const lab = (text, size, x, y, ax, ay) => add(bLabel(text, size, x, y, ax, ay, '#fff'));
+  const fire = (n) => { n.dispatchEvent(new Event('input', { bubbles: true })); n.dispatchEvent(new Event('change', { bubbles: true })); };
+  const sw = pad ? 200 : 125, X0 = a + W / 2, X3 = 0.75 * W - a;
+  const mk = (o) => sliderArray(Object.assign({ font: E, lw: textW('000', E) }, o));
+  // ---- the sliders and the form ----
+  const iq = fld('o_iq'), iqStep = +iq.step || 10, iqVals = []; for (let v = +iq.min || 50; v <= (+iq.max || 200); v += iqStep) iqVals.push(String(v));
+  const YEARS = ['10', '20', '30', '50'], sysWords = [0, 1, 2, 3, 4, 5, 6].map(sysW), sysWords8 = [0, 1, 2, 3, 4, 5, 6, 7].map(sysW);
+  const SYS = ['outpost', 'barren', 'backward', 'normal', 'advanced', 'thriving', 'abundant'];
+  const sh = mk({ width: sw, words: NG_SHAPES.map(() => ' '), lw: textW(' ', E), change: () => shapePicked() });
+  const home = mk({ width: pad ? 180 : 100, words: sysWords, change: () => galaxyChanged() });
+  const comp = mk({ width: sw, words: ['1', '2', '3', '4', '5', '6', '7', '8'], fmt: tm(0x1c), change: () => galaxyChanged() });
+  const iqS = mk({ width: sw, words: iqVals, fmt: tm(0x1d), change: () => galaxyChanged() });
+  const yrs = mk({ width: pad ? 100 : 60, words: YEARS, change: () => galaxyChanged() });
+  const their = mk({ width: pad ? 200 : 100, words: sysWords8, change: () => galaxyChanged() });
+  const buddy = mk({ width: 50, arrows: false, pad: 2 * a, words: [mt(0x69), mt(0x68)], lw: textW(mt(0x69), E), change: () => galaxyChanged() });
+  // CCSlider (size 234 x 38 points, density 234 x 19, the thumb 28.5 x 29; the thumb runs from 14.25 to the width less 14.25), scaled by a90
+  const barSlider = (bg, bh, onFrac) => {
+    const k = a90, el = UIEl('div', 'ios-ngbar', { style: `width:${bpt(234 * k)};height:${bpt(bh * k)}` }), im = pic(bg), th = pic('slider-m5-thumb');
+    im.style.cssText = 'position:absolute;left:0;top:0;width:100%;height:100%'; th.style.cssText = `position:absolute;top:50%;width:${bpt(28.5 * k)};height:${bpt(29 * k)};transform:translate(-50%,-50%)`;
+    el.append(im, th);
+    const api = { el, f: 0, set(v) { api.f = Math.min(1, Math.max(0, v)); th.style.left = bpt((14.25 + api.f * (234 - 28.5)) * k); } };
+    const at = (e) => { const r = el.getBoundingClientRect(), x = (e.clientX - r.left) / (r.width / 234); return Math.min(1, Math.max(0, (x - 14.25) / (234 - 28.5))); };
+    let down = false;
+    el.addEventListener('pointerdown', (e) => { down = true; el.setPointerCapture(e.pointerId); api.set(at(e)); onFrac(); e.stopPropagation(); });
+    el.addEventListener('pointermove', (e) => { if (down) { api.set(at(e)); onFrac(); } });
+    for (const ev of ['pointerup', 'pointercancel']) el.addEventListener(ev, () => { down = false; });
+    api.set(0); return api;
+  };
+  const size = barSlider('galaxy_size_slider', 38, () => galaxyChanged()), dens = barSlider('density_slider_small', 19, () => galaxyChanged());
+  // ---- the cards ----
+  const CW = 454, CH = 374, cs = (H / 2.6) / CH, labH = Math.ceil(36 * ARIAL_LINE), mm = (CH - 36) - labH - a;
+  const pile = add(UIEl('div', 'ios-ngpile'));
+  const pw = CW * 1.2 * cs, ph = CH * 1.2 * cs;
+  pile.style.cssText = `width:${bpt(pw)};height:${bpt(ph)}`; put(pile, W / 4 - a, H, 0, 1);
+  const cards = [], base = [];
+  for (let i = 0; i < 7; i++) {
+    const px = Math.floor(Math.random() * 50), py = Math.floor(Math.random() * a), rot = (Math.floor(Math.random() * 50) / 10) * (i % 2 ? 1 : -1);
+    const c = UIEl('div', 'ios-ngcard', { 'data-tag': String(i + 1) });
+    c.style.cssText = `left:${bpt(px)};bottom:${bpt(py)};width:${bpt(CW)};height:${bpt(CH)}`;
+    base[i] = `translateX(-50%) scale(${cs}) rotate(${rot}deg)`; c.style.transform = base[i];
+    const im = pic('GalaxyPanel'); c.append(im);
+    const l = bLabel(shapeW(i), 36, CW / 2, CH - 36, 0.5, 1, '#fff'); c.append(l);
+    const cv = UIEl('canvas', 'ios-ngmini'); c.append(cv);
+    cards.push({ c, cv, parts: [], i }); pile.append(c);
+  }
+  // MiniGalaxy
+  let top = null;
+  const upx = () => (root.getBoundingClientRect().width || W) / W;
+  const fireImg = pic('fire');
+  const drawMini = (cd) => {
+    const cv = cd.cv, ppt = upx() * (window.devicePixelRatio || 1), wpx = Math.max(1, Math.round(CW * cs * ppt)), hpx = Math.max(1, Math.round(CH * cs * ppt));
+    if (cv.width !== wpx || cv.height !== hpx) { cv.width = wpx; cv.height = hpx; }
+    const x = cv.getContext('2d'), k = wpx / CW;
+    x.setTransform(1, 0, 0, 1, 0, 0); x.clearRect(0, 0, wpx, hpx); x.setTransform(k, 0, 0, k, 0, 0); x.globalCompositeOperation = 'lighter';
+    if (!fireImg.complete || !fireImg.naturalWidth) return;
+    for (const p of cd.parts) { if (p.life <= 0) continue; const s = p.size / cs; x.globalAlpha = p.alpha; x.drawImage(fireImg, p.x - s / 2, CH - p.y - s / 2, s, s); }
+  };
+  const rnd = () => Math.random() * 2 - 1;
+  const initParticle = (cd, p) => {
+    const st = cd.stars; if (!st.length) { p.life = 0; return; }
+    if (cd.number >= st.length) cd.number = 0;
+    const s = st[cd.number++];
+    p.x = (CW / 2 - mm / 2) + s[0]; p.y = (CH / 2 - mm / 2) + s[1];
+    p.life = Math.max(0, 4 + 4 * rnd()); p.size = Math.max(0, 10 + 3 * rnd()); p.t = 0; p.alpha = 1; p.total = p.life;
+  };
+  const updateGalaxyOf = (cd) => { // -[MiniGalaxy updateGalaxy:extra:] 0x1000b2388
+    let G = null;
+    try {
+      const nr = +fld('computers').value || 4;
+      G = HO.newGame({ rules: fld('rules').value, seed: (Math.random() * 2 ** 31) | 0, name: 'You', galaxy: 'x', female: false, computers: nr, start: fld('start').value, iqNum: +fld('o_iq').value, cstart: fld('o_cstart').value,
+        shape: NG_SHAPES[sh.value], size: +fld('o_size').value, density: +fld('o_density').value, buddies: !!fld('buddies').checked, yearsPerTurn: +fld('o_years').value, alliances: true, luck: true, novas: true, humans: null, hints: false });
+    } catch (e) { G = null; }
+    cd.stars = []; cd.parts = []; cd.number = 0;
+    if (!G || !G.stars) return;
+    const sz = Math.round(2 * G.W), k0 = mm / 93, k = k0 + ((mm / 245 - k0) * (sz - k0)) / 214;
+    for (const st of G.stars) cd.stars.push([(mm - sz * k) * 0.5 + k * Math.trunc(Math.trunc(st.x10) / 10), (mm - sz * k) * 0.5 + k * Math.trunc(Math.trunc(st.y10) / 10)]);
+    for (let i = cd.stars.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [cd.stars[i], cd.stars[j]] = [cd.stars[j], cd.stars[i]]; }
+    for (let i = 0; i < cd.stars.length; i++) { const p = {}; initParticle(cd, p); cd.parts.push(p); }
+  };
+  let last = 0;
+  const frame = (now) => {
+    if (!root.isConnected) return;
+    const dt = Math.min(0.1, last ? (now - last) / 1000 : 0); last = now;
+    if (top) {
+      for (const p of top.parts) {
+        p.life -= dt;
+        if (p.life <= 0) initParticle(top, p); else p.alpha = 1 - 0.2 * (1 - p.life / p.total);
+      }
+      drawMini(top);
+    }
+    requestAnimationFrame(frame);
+  };
+  // ---- the form <-> the sliders ----
+  const diff = f.querySelector('.rating b');
+  const label0x11 = lab('0', LH, W / 3 + 20, 2 * E, 0, 0.5), label0x10 = lab(mt(150).replace(/\s+$/, ''), LH, W / 3, 2 * E, 1, 0.5);
+  const push = () => { // updateCreationInfo 0x100015fa0
+    const set = (n, v) => { const x = fld(n); if (x) x.value = String(v); };
+    set('o_shape', NG_SHAPES[sh.value]); set('computers', comp.value + 1); set('o_iq', iqVals[iqS.value]); set('o_years', YEARS[yrs.value]);
+    set('o_size', Math.trunc(size.f * 100)); set('o_density', Math.trunc(dens.f * 100));
+    set('start', SYS[home.value]); set('o_cstart', their.value >= 7 ? 'iq' : SYS[their.value]);
+    fld('buddies').checked = buddy.value === 0;
+    fire(iq);
+    label0x11.textContent = diff ? diff.textContent : '0';
+  };
+  const pull = () => { // fromCreationInfo 0x100015dcc
+    sh.setValue(Math.max(0, NG_SHAPES.indexOf(fld('o_shape').value)));
+    comp.setValue(Math.min(7, Math.max(0, (+fld('computers').value || 4) - 1)));
+    iqS.setStringValue(fld('o_iq').value); yrs.setStringValue(fld('o_years').value);
+    size.set((+fld('o_size').value || 0) / 100); dens.set((+fld('o_density').value || 0) / 100);
+    home.setValue(Math.max(0, SYS.indexOf(fld('start').value))); their.setValue(fld('o_cstart').value === 'iq' ? 7 : Math.max(0, SYS.indexOf(fld('o_cstart').value)));
+    buddy.setValue(fld('buddies').checked ? 0 : 1);
+    label0x11.textContent = diff ? diff.textContent : '0';
+  };
+  const galaxyChanged = () => { push(); if (top) updateGalaxyOf(top); }; // updateGalaxy 0x100016264
+  const bringUp = (cd) => { pile.append(cd.c); top = cd; }; // FUN_100013db8
+  const shapePicked = () => { // animateGalaxy 0x100013bb0
+    const cd = cards[sh.value]; if (cd === top && cd.c === pile.lastChild) { return; }
+    push(); updateGalaxyOf(cd); top = cd;
+    const dx = (((cd.i + 1) & 1) ? 1 : -1) * W * 0.25;
+    const an = cd.c.animate([{ transform: base[cd.i] }, { transform: `translate(${bpt(dx)}, ${bpt(-30)}) ${base[cd.i]}`, offset: 0.5 }, { transform: base[cd.i] }], { duration: 400 });
+    an.onfinish = () => bringUp(cd);
+  };
+  // ---- the layout (layoutScreen 0x100015298) ----
+  const cardsH = ph, yShape = H - cardsH - 2 * a;
+  add(put(sh.el, W / 4 + 2 * a - sh.total / 2, yShape, 0, 1));
+  let y = H - E;
+  lab(mt(152), E, X0, y, 0, 0.5); add(put(dens.el, X3, y, 0, 0.5));
+  y -= step; lab(mt(151), E, X0, y, 0, 0.5); add(put(size.el, X3, y, 0, 0.5));
+  y -= step; lab(mt(148), E, X0, y, 0, 0.5); add(put(yrs.el, X3, y, 0, 0.5));
+  y -= LH + SP; lab(mt(146), LH, a + 0.75 * W, y, 0.5, 0.5);
+  const wide = (S, xm, yy) => { add(put(S.el, X0, yy, 0, 0.5)); S.labelAt(S.raC + ((xm - S.raC - X0) * 0.5)); };
+  y -= step; wide(comp, W, y);
+  y -= step; wide(iqS, W, y);
+  y -= step; { lab(mt(149), E, X0, y, 0, 0.5); const lw = textW(mt(149), E); add(put(buddy.el, a + X0 + lw, y, 0, 0.5)); }
+  y -= step; lab(mt(147), E, X0, y, 0, 0.5); lab(mt(145), E, 3 * a, y, 0, 0.5);
+  y -= step; wide(their, W, y);
+  { add(put(home.el, 3 * a, y, 0, 0.5)); home.labelAt(home.raC + ((W * 0.5 - home.raC - 3 * a) * 0.5)); }
+  // ---- the menu ----
+  const fsz = 24, k = (LH * 1.5) / 80;
+  const back = starItem(mt(140), false, fsz, () => { const x = win.querySelector('.close'); if (x) x.click(); }, k), start = starItem(mt(144), true, fsz, () => { if (f.requestSubmit) f.requestSubmit(); else f.dispatchEvent(new Event('submit', { cancelable: true })); }, k);
+  const menu = UIEl('div', 'ios-ngmenu'); menu.style.cssText = `display:flex;gap:${bpt(3 * a)};align-items:flex-end`; menu.append(back, start); add(put(menu, W - 3 * a, a, 1, 0));
+  // ---- the remake's own options (the app has none of them): the window's form in the app's dialog ----
+  const body = win.querySelector('.wbody');
+  const ownBtn = textButton(tr("The remake's own options"), Math.min(W / 3 - 4 * a, 24 * a), 4 * a, gd.a38, () => openOwn());
+  add(put(ownBtn, 3 * a, a, 0, 0));
+  const openOwn = () => {
+    const L = appDialog({ message: null, label: tr("The remake's own options"), cross: false,
+      build(dlg, cw, ch) { const sc = UIEl('div', 'ios-ngown'); sc.style.cssText = `position:absolute;left:${bpt(a * 2)};right:${bpt(a * 2)};top:${bpt(a * 2)};bottom:${bpt(a * 10)}`; sc.append(f); dlg.append(sc); } });
+    const close0 = L.close; L.close = () => { body.append(f); close0(); pull(); };
+    document.body.append(L.scrim); L.scrim.classList.add('ios-gtop');
+  };
+  // ---- start ----
+  pull(); push();
+  document.body.append(root);
+  const m = cards[sh.value]; bringUp(m); updateGalaxyOf(m);
+  requestAnimationFrame(frame);
+  f.addEventListener('change', (e) => { if (!e.isTrusted) return; pull(); }); // (the remake's own window changed a field)
+  const iv = setInterval(() => { if (!scrim.isConnected) { root.remove(); clearInterval(iv); } }, 200);
 }
 function appMessage(text, onOk) {
   const L = appDialog({ message: text, ok: onOk, cross: !!onOk });
@@ -2730,6 +2927,7 @@ window.HOTHEME = {
     const ax = (lo, hi2, size, o) => size <= hi2 - lo ? (lo + hi2 - size) / 2 : Math.min(lo, Math.max(hi2 - size, o));
     v.ox = ax(r.x0, r.x1, G.W * v.s, v.ox); v.oy = ax(r.y0, r.y1, G.H * v.s, v.oy);
   },
+  newGame: newGameIOS,
   panel: sidebar, afterMsg,
   afterDraw: () => { hud(); starInfo(); placeButtons(); },
   // the orders of your fleets as the app draws them (green or cyan, a dash a turn) and its dots at a star (StarNode drawOneFleet:
