@@ -50,22 +50,6 @@ window.HOMAC2 = {
   // (layoutMenus in js/skins/classic/ui.js). 2.0's Edit menu and Window menu
   // (Tech Spending Window, Report Window) have nothing the remake does, so
   // they are left out; its Zoom In and Zoom Out are in the Galaxy menu.
-  menuLayout: {
-    File: [['New…', 'Game/New game…'],
-      ['Import a Game…', 'Game/Import a game…'], ['Export This Game…', 'Game/Export this game…'], '-',
-      ['End Turn', endTurn], ['Force End Turn…', 'Galaxy/Force end turn…'], '-',
-      ['Quit', 'Game/Quit to title']],
-    Options: [['Auto Play…', 'Game/Auto play…'], ['Auto-Play This Turn', 'Game/Auto-play this turn'], '-',
-      ['Preferences…', 'Game/Preferences…'], [null, 'View/#4'], [null, 'View/#5'], '-', // Sound
-      ['Master Point List…', 'Game/Master Point List…'], ['Hall of Fame…', 'Game/Hall of Fame…'], ['Hall of Shame…', 'Game/Hall of Shame…'], ['Rank History…', 'Game/Rank history…']],
-    Ships: [['List Ship Types…', 'Ships/Scrap ship types…'], '-',
-      ['List All Fleets…', 'Ships/List all fleets…'], ['Next Fleet', 'Ships/Next fleet'], ['Build Ships…', 'Ships/Build ships at selected colony…'], [null, 'Ships/#3'], '-',
-      ['Review Battle…', 'Ships/Review battle…']],
-    Galaxy: [['Compare Players…', 'Galaxy/Compare players…'], ['List All Explored Stars…', 'Galaxy/List explored stars…'], ['Send Message…', 'Galaxy/Send a message…'], '-',
-      ['Zoom In', 'View/Zoom in'], ['Zoom Out', 'View/Zoom out'], ['Fit Galaxy', 'View/Fit galaxy'], ['Fix Spending', 'Galaxy/Fix spending'], '-',
-      ['Alliances…', 'Galaxy/Players and alliances…'], ['Give Money/Metal…', 'Galaxy/Give money or metal…'], ['Dip Into Savings…', 'Galaxy/Dip into savings…'], [null, 'Galaxy/#6'], [null, 'Galaxy/#7']],
-    Help: [['How to Play', 'Help/How to play'], [null, 'Help/#1']],
-  },
   page(doc) {
     const c = doc.querySelector('#titlescreen .credit');
     if (c) c.textContent = 'With the art and sounds of Spaceward Ho! 2.0.1 for the Macintosh (Delta Tao Software, 1992): written by Peter Commons, art by Howard Vives.';
@@ -80,5 +64,5 @@ window.HOMAC2 = {
     if (b && w) w.append(b);
   },
 };
-if (!window.HOSKINS_INLINE) document.write('<script src="js/skins/mac3/ui.js' + (window.HO_BUILD || '') + '"><\/script>');
+if (!window.HOSKINS_INLINE) document.write('<script src="js/skins/mac12/ui.js' + (window.HO_BUILD || '') + '"><\/script>');
 })();

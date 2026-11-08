@@ -12,9 +12,10 @@
 // "English"); in French the interface puts them in 1.2F's own words (its
 // MENU, DITL and STR# lines, paired with 2.0.1's: js/languages.js windows12,
 // and the rows of js/ui-text.js marked 1.2F).
-window.HOMAC_VERSION = '1.2';
+window.HOMAC_VERSION = window.HOMAC2 ? '2.0.1' : '1.2'; // (the Mac 2.0.1 skins, js/skins/mac2, load this file: 2.0.1 is 1.2's program with additions)
 (function () {
 'use strict';
+const V2 = window.HOMAC_VERSION === '2.0.1';
 const A = () => window.HOAPI;
 const G = () => A() && A().G;
 const H = () => window.HO;
@@ -78,7 +79,29 @@ function fleetOrders12() {
       { shown: has('stances'), ghost: () => !f(), checked: () => !!f() && (f().stance || 'normal') === v })),
     it('Arrive late', () => { const x = f(); if (x) { x.delayed = !x.delayed; A().save(); } }, { shown: has('lateArrival'), ghost: () => !f(), checked: () => !!f() && !!f().delayed })];
 }
-function menuLayout() {
+function menuLayout() { const M = menuLayout12(); return V2 ? menuLayout20(M) : M; }
+// Mac 2.0.1's menus: MENU 129 (File), 131 (Options) and 133 (Galaxy) as that program has them (the rest are 1.2's, in the same words), from the resource fork
+// (audit/mac-2.0.1/tools/menu.py in the private repo). What the remake has no command for is there and dimmed (printing: a browser has no Mac Page Setup or
+// Print Map; the network polling), and a command it has only in a hot-seat game is dimmed otherwise.
+function menuLayout20(M) {
+  const pick = (L, name) => L.find(x => x !== '-' && x[0] === name);
+  const cmd = (re) => () => { const k = Object.keys(ITEMS).find(n => re.test(n)); if (k) ITEMS[k][1](); };
+  const has = (re) => () => { const k = Object.keys(ITEMS).find(n => re.test(n)); return !!k && (!ITEMS[k][2] || !!ITEMS[k][2]()); };
+  const no = (f) => () => noGame() || !f();
+  const gone = () => true;
+  const F = M.File, O = M.Options, Gx = M.Galaxy;
+  const speed = pick(O, 'Set Battle Speed…'), shows = pick(O, 'Show Event Messages'), review = pick(O, 'Review Announced Battles'), warn = pick(O, 'Give Overspending Warnings'), snd = pick(O, 'Sound');
+  const extra = O.filter(x => x !== '-' && ![speed, shows, review, warn, snd].includes(x));
+  M.File = [pick(F, 'New…'), pick(F, 'Open…'), pick(F, 'Save…'), pick(F, 'Revert To Saved…'), pick(F, 'Close…'), '-', pick(F, 'End Turn'),
+    it('End Turn & Switch Players', cmd(/switch players/i), { ghost: no(has(/switch players/i)) }), '-',
+    it('Page Setup…', () => {}, { ghost: gone }), it('Print Map…', () => {}, { ghost: gone, key: 'P' }), '-', pick(F, 'Quit')];
+  M.Options = [it('Force Turn Update…', cmd(/force end turn/i), { ghost: no(has(/force end turn/i)) }), it('Auto Play…', cmd(/^auto play/i), { ghost: no(has(/^auto play/i)) }),
+    it('I’ll Update Turns', () => {}, { ghost: gone }), '-', it('Set Polling Time…', () => {}, { ghost: gone }), speed, '-', shows, review, warn, snd, ...extra];
+  M.Galaxy = [it('Compare Players…', cmd(/^compare players/i), { ghost: no(has(/^compare players/i)) }), pick(Gx, 'List All Explored Stars…'), it('Send Message…', cmd(/^send a message/i), { ghost: no(has(/^send a message/i)) }), '-',
+    ...Gx.slice(Gx.findIndex(x => x !== '-' && x[0] === 'Zoom In'))];
+  return M;
+}
+function menuLayout12() {
   const P = () => A().Prefs;
   return {
     File: [
@@ -758,7 +781,7 @@ function bars(panel, B) {
 function aboutBox() {
   const a = A(), el = a.el, im = a.IMG['dos:p1001'], pl = a.IMG['dos:p4010'];
   const body = el('div', { class: 'about12', onclick: () => a.closeModal() }, im ? el('img', { src: im.src, alt: 'Spaceward Ho!' }) : null, pl ? el('img', { src: pl.src, alt: '' }) : null);
-  a.modal('', body, { cls: 'mac12 about', label: 'About Spaceward Ho! 1.2…' });
+  a.modal('', body, { cls: 'mac12 about', label: V2 ? 'About Spaceward Ho! 2.0…' : 'About Spaceward Ho! 1.2…' });
 }
 
 // DLOG 6060 "Organize “<type>” Fleets…" (OrganizeFleets @113896): the fleets of the selected fleet's design at the star as piles of ship
@@ -960,7 +983,7 @@ function qdCanvas(w, h, label) { // a box drawn at twice its pixels, as wide as 
   x.textBaseline = 'alphabetic'; x.fillStyle = '#000'; x.strokeStyle = '#000'; x.lineWidth = 1;
   const api = {
     c, x,
-    text(t, h0, v, font, o) { x.font = font || G9; x.letterSpacing = o && o.cond ? '-1px' : '0px'; x.fillStyle = '#000'; const w0 = x.measureText(t).width; const at = o && o.right != null ? o.right - w0 : o && o.center != null ? o.center - Math.trunc(w0 / 2) : h0; x.fillText(t, at, v); x.letterSpacing = '0px'; return w0; },
+    text(t, h0, v, font, o) { c.dataset.t = (c.dataset.t ? c.dataset.t + '\n' : '') + t; /* (what the box says, for a reader or a test: the canvas has no text of its own) */ x.font = font || G9; x.letterSpacing = o && o.cond ? '-1px' : '0px'; x.fillStyle = '#000'; const w0 = x.measureText(t).width; const at = o && o.right != null ? o.right - w0 : o && o.center != null ? o.center - Math.trunc(w0 / 2) : h0; x.fillText(t, at, v); x.letterSpacing = '0px'; return w0; },
     width(t, font) { x.font = font || G9; return x.measureText(t).width; },
     hline(h0, h1, v) { x.fillStyle = '#000'; x.fillRect(h0, v, h1 - h0, 1); },
     vline(h0, v0, v1) { x.fillStyle = '#000'; x.fillRect(h0, v0, 1, v1 - v0); },
@@ -1434,7 +1457,7 @@ function ditherImg(im) {
 }
 // 1.2's own rules are being played: the windows the classic code opens are 1.2's (the explored stars, the battle list ...) and must show as 1.2
 // showed them, so style.css's content rules for the remake's windows (.remake12) must not reach them
-const own12Rules = () => !!(G() && H().rules(G()).id === '12');
+const own12Rules = () => !!(G() && H().rules(G()).id === (V2 ? 'mac20' : '12'));
 // the windows a remake command has just opened (a Ho! menu item) are the remake's own, whatever the ruleset
 function tagRemakeWindows() {
   document.querySelectorAll('.scrim .win').forEach((w) => { if (!w.classList.contains('mac12') && !w.classList.contains('remake12') && !/\bbw12/.test(w.className)) { w.classList.add('remake12', 'css12'); standIns(w); } });
@@ -1574,16 +1597,16 @@ window.HOMAC12 = {
     ITEMS = {};
     for (const k in M) for (const x of M[k]) if (x[0] !== '-' && typeof x[0] === 'string') ITEMS[x[0]] = x;
     const own = new Set(['New game…', 'Quit to title', 'Build ships at selected colony…', 'Review battle…', 'List all fleets…', 'Scrap ship types…', 'Next fleet',
-      'List explored stars…', 'Fix spending', 'Report window…', 'Zoom in', 'Zoom out']);
+      'List explored stars…', 'Fix spending', 'Report window…', 'Zoom in', 'Zoom out', ...(V2 ? ['Compare players…', 'Send a message…', 'Force end turn…', 'Auto play…', 'End turn and switch players'] : [])]);
     const extra = [];
     for (const k in M) { for (const x of M[k]) if (x[0] !== '-' && !(typeof x[0] === 'string' && own.has(x[0]))) extra.push(x); M[k].length = 0; }
     // (View's sound and music, Help's How to play and the manual stay reachable)
-    ho.unshift(['About Spaceward Ho! 1.2…', aboutBox], ['-']);
+    ho.unshift([V2 ? 'About Spaceward Ho! 2.0…' : 'About Spaceward Ho! 1.2…', aboutBox], ['-']);
     // (each command is the remake's own: a window it opens is tagged at once, which is what keeps 1.2's own windows out of the remake's look;
     // the Ho! menu's own items too: Skin and OS look, Sounds, Language, Temperatures)
     const tagged = (x) => { const f = x[1], y = x.slice(); y[1] = (...a) => { const r = f(...a); tagRemakeWindows(); return r; }; return y; };
     for (let i = 0; i < ho.length; i++) if (ho[i][0] !== '-' && typeof ho[i][1] === 'function') ho[i] = tagged(ho[i]);
-    if (extra.length) ho.push(['-'], ...extra.filter(x => !(typeof x[0] === 'function' && /scrap|organize|organi/i.test(String(x[0]())))).map(tagged));
+    if (extra.length) ho.push(['-'], ...extra.filter(x => !(typeof x[0] === 'function' && /scrap|organize|organi|switch players/i.test(String(x[0]())))).map(tagged));
   },
   get menuLayout() { return menuLayout(); },
 };

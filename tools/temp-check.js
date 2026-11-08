@@ -263,7 +263,7 @@ async function page() {
       const got = await pg.evaluate(() => {
         const A = HOAPI, G = A.G, me = A.me();
         A.UI.sel = me.homeStar; A.renderPanel(); A.draw();
-        const panel = document.body.innerText;
+        const panel = document.body.innerText + '\n' + [...document.querySelectorAll('canvas.qd12')].map(c => c.dataset.t || '').join('\n'); // (the 1.2-style skins draw their boxes on canvases: canvas.qd12 keeps what it says in data-t)
         const rep = HO.say(G, `You have explored ${G.stars[me.homeStar].name}. Gravity: 1.00G. Temp: 72.0°F. Metal: 1,000.`);
         return { panel: (panel.match(/[^\n]*[°º][^\n]*/g) || []).join(' | '), grav: (panel.match(/\d+[.,]\d\dG/g) || []).join(' '), rep, deg: A.degF(72) };
       });

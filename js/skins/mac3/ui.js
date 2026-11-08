@@ -159,7 +159,7 @@ window.HOTHEME_OVER = {
 if (v12) { delete window.HOTHEME_OVER.starLook; delete window.HOTHEME_OVER.messageLook; if (window.HOMAC12) Object.assign(window.HOTHEME_OVER, window.HOMAC12); } // 1.2 has only the DOS game's icons (and stand-ins: js/skins/dos)
 // js/skins/mac2 (2.0.1, 1992): 1.2's icons, which are the DOS game's, so the DOS
 // skin's planets and report pictures, and 2.0's own pictures, sounds and hooks
-if (v2) { delete window.HOTHEME_OVER.starLook; delete window.HOTHEME_OVER.messageLook; Object.assign(window.HOTHEME_OVER, window.HOMAC2); }
+if (v2) { delete window.HOTHEME_OVER.starLook; delete window.HOTHEME_OVER.messageLook; if (window.HOMAC12) Object.assign(window.HOTHEME_OVER, window.HOMAC12); Object.assign(window.HOTHEME_OVER, window.HOMAC2); } // (mac12/ui.js has loaded first: 2.0.1's windows are 1.2's, with what 2.0.1 added)
 // js/skins/mac4 (4.0.5, 1996): this skin with 4.0's own pictures, sounds and hooks
 if (window.HOMAC4) Object.assign(window.HOTHEME_OVER, window.HOMAC4);
 if (!window.HOSKINS_INLINE) document.write('<script src="js/skins/dos/ui.js' + (window.HO_BUILD || '') + '"><\/script>');
