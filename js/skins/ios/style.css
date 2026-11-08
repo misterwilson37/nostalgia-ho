@@ -433,3 +433,9 @@ html.skin-ios .ios-radi img { display: block; }
 html.skin-ios .ios-rkbd { background: #5a1c18; border: 1px solid #fff; box-sizing: border-box; }
 html.skin-ios .ios-rkin { background: transparent !important; color: #fff !important; border: 0 !important; outline: none; padding: 0 !important; margin: 0; font-family: var(--appfont, Arial, Helvetica, sans-serif); }
 html.skin-ios .ios-rkpic { display: block; pointer-events: none; }
+/* the satellites' menu (satMenu): a black quad (alpha 175 of 255) at the star's upper left, the names in Arial 16 */
+html.skin-ios .ios-sat { position: fixed; z-index: 7; transform: translate(-100%, -100%); display: flex; flex-direction: column; gap: calc(5 * var(--pt)); background: rgba(0, 0, 0, .686); padding: 0; }
+html.skin-ios .ios-sat[hidden] { display: none; }
+html.skin-ios .ios-sati { appearance: none; border: 0 !important; border-radius: 0 !important; background: none !important; padding: 0 !important; margin: 0; box-shadow: none !important; color: #fff; text-align: left; white-space: nowrap; cursor: pointer; font: calc(16 * var(--pt)) / 1.15 var(--appfont, Arial, Helvetica, sans-serif); transform-origin: 0 50%; }
+html.skin-ios .ios-sati.red { color: #dd0806; }
+html.skin-ios .ios-sati.dn { transform: scale(1.1); background: rgba(255, 255, 255, .196) !important; }

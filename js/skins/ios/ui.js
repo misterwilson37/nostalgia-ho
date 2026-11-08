@@ -382,17 +382,47 @@ function setFleets(o) { fleetsOpen = !!o; if (fdEl) fdEl.hidden = !fleetsOpen ||
 // fleet is dragged (fleetDragging:). -[MapLayer setScale:] 0x10000e590: the buttons' scale is the planet's on-screen scale (the page's planetTarget: 2, or 3 on an iPad,
 // when zoomed in); they sit at the star (container 46 x 46 about the star: add's corner at (+23, +23), move's right edge at (-23, +23), organize's middle at (0, +35)).
 let pbShown = false;
+// -[SatelliteMenu updateSelected] 0x1000a2b50, setScale: 0x1000a3118, draw 0x1000a3010, ccTouchBegan: 0x1000a3288, satelliteSelected: 0x1000a31bc, colorSatellite:menuItem: 0x1000a2f98 and -[SatelliteMenuItem selected] 0x100016c00,
+// setScrapped: 0x100016dc0, FUN_100016cd8 (read in the decompile, floats.py and the assembly; y up): for the selected star, a menu of your satellites there (an item for each: its name, Arial 16, white; red 0xdd0806 when
+// marked to be scrapped), the items 5 apart in a column (the first at the top, left-aligned), anchored (1, 1) at the star's place + (-40, 30) x the planets' scale, over a black quad (alpha 0xaf of 255) the size of the menu. A touch on an item
+// (zoomed to 1.1, white at alpha 50 of 255 behind it: MenuLabelBackgroundColor draw 0x10009647c, set to 0x32ffffff by updateSelected) held for half a second turns it red with the Scrap Fleet sound (index 18; again: white); on release over it, when the touch lasted over half a second, the satellite's scrap mark flips for real (a short tap does nothing).
+let satEl = null, satKey = '';
+function satMenu(a, s, x, y, k) {
+  const ui = document.getElementById('ios-ui');
+  const sats = s && a.G.players[a.ME] && a.G.players[a.ME].alive !== false ? a.G.fleets.filter(f => f.owner === a.ME && f.star === s.id && f.sat && HO.fleetCount(f) > 0) : [];
+  if (!sats.length || !ui) { if (satEl) satEl.hidden = true; return; }
+  if (!satEl) { satEl = UIEl('div', 'ios-sat', { role: 'menu', 'aria-label': 'Satellites' }); ui.append(satEl); }
+  const nameOf = (f) => { const p = a.G.players[a.ME], id = Object.keys(f.ships || {}).find(i => f.ships[i] > 0), d = p.designs.find(q => String(q.id) === String(id)); return d ? d.name : 'Satellite'; };
+  const key = sats.map(f => f.id + ':' + (f.scrap301 ? 1 : 0) + ':' + nameOf(f)).join('|') + '@' + s.id;
+  satEl.hidden = false;
+  satEl.style.setProperty('--pt', k + 'px');
+  satEl.style.left = (x - 40 * k) + 'px'; satEl.style.top = (y - 30 * k) + 'px';
+  if (key === satKey) return;
+  satKey = key; satEl.replaceChildren();
+  let t0 = 0;
+  satEl.onpointerdown = () => { t0 = Date.now(); };
+  for (const f of sats) {
+    const it = UIEl('button', 'ios-sati', { type: 'button', role: 'menuitem' }); it.textContent = nameOf(f); it.classList.toggle('red', !!f.scrap301);
+    let timer = 0;
+    it.addEventListener('pointerdown', (e) => { e.stopPropagation(); it.classList.add('dn'); clearTimeout(timer); timer = setTimeout(() => { it.classList.toggle('red'); if (it.classList.contains('red')) a.Sound.play(TAP_FILE[18]); }, 500); });
+    const up = (e, ok) => { it.classList.remove('dn'); clearTimeout(timer); if (ok && Date.now() - t0 > 500) { HO.rules(a.G).flagScrap(a.G, f, 'command'); a.save(); satKey = ''; a.draw(); } };
+    it.addEventListener('pointerup', (e) => { e.stopPropagation(); up(e, true); });
+    it.addEventListener('pointerleave', (e) => up(e, false)); it.addEventListener('pointercancel', (e) => up(e, false));
+    satEl.append(it);
+  }
+}
 function placeButtons() {
   const a = A(); if (!a || !a.G || !pbEl || !window.HOVIEW) return;
   const v = window.HOVIEW(), sel = a.UI.sel, cv = document.getElementById('map');
   const s = sel != null ? a.G.stars[sel] : null;
-  if (!s || !cv || a.G.over || v.path || !v.view) { pbEl.hidden = true; pbShown = false; if (fdEl) fdEl.hidden = true; return; }
+  if (!s || !cv || a.G.over || v.path || !v.view) { if (satEl) satEl.hidden = true; pbEl.hidden = true; pbShown = false; if (fdEl) fdEl.hidden = true; return; }
   const own = s.owner === a.ME && a.G.players[a.ME].alive !== false;
   const ships = a.G.fleets.some(f => f.owner === a.ME && f.star === sel && f.to == null);
   const r = cv.getBoundingClientRect(), x = r.left + v.view.ox + s.x * v.view.s, y = r.top + v.view.oy + s.y * v.view.s;
   // -[MapLayer setScale:] 0x10000e590: the box's scale is the planet scale times the map's, i.e. the planets' on-screen scale (HOVIEW().target:
   // 2.0 iPhone / 3.0 iPad zoomed in, a line from 0.2 / 0.6 below), the box 46 points a side about the star (map points are CSS pixels here)
   const k = (v.target || 1) / SCREEN.u, pad = SCREEN.pad;
+  satMenu(a, s, x, y, v.target || 1);
   const show = (cls, on) => { const b = pbEl.querySelector('.ios-pb-' + cls); if (b) b.hidden = !on || (cls === 'move' && pad); };
   show('add', own); show('move', ships); show('organize', ships);
   pbShown = own || ships;
@@ -2799,7 +2829,7 @@ function openBattleIOS(b, k) {
       if (S.closed) return;
       apply(ev); play(ev, ev.k); refresh();
       if (ev.k) explode(toTag, sp);
-      S.timer = setTimeout(next, 0);
+      S.timer = setTimeout(next, ev.k ? sp * 40 : 0); // (FUN_10008e01c 0x10008e01c: after an explosion the game's thread sleeps delay / 300 x 12 s too)
     }, sp * 40);
   };
   pushScrim(L.scrim);
