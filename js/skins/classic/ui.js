@@ -1433,7 +1433,7 @@ function bar(label, val, max, onSet, opts) {
   }));
   track.addEventListener('pointermove', guard((ev) => {
     if (!track._drag) return;
-    if (isTouch(ev) && !opts.vertical) { const r = track.parentElement.getBoundingClientRect(); if (ev.clientY < r.top || ev.clientY > r.bottom) return; }
+    if (isTouch(ev) && !opts.vertical) { const r = track.parentElement.getBoundingClientRect(), sl = document.documentElement.classList.contains('skin-ios') ? r.height : 0; if (ev.clientY < r.top - sl || ev.clientY > r.bottom + sl) return; } // the iOS box of a dragged bar is one bar height taller each way (BarMenuItem isTouched:begin: 0x100010ec0)
     set(ev);
   }));
   track.addEventListener('pointerup', guard((ev) => { if (!track._drag) return; track._drag = false; onSet(null, true); }));

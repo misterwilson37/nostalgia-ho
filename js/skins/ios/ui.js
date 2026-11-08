@@ -682,7 +682,31 @@ function placeGrid(box) {
   for (const x of xs) box.append(UIEl('i', 'ios-gl', { style: `left:calc(${x} * var(--pt))` }));
 }
 function colonyRatio(G, p, s) { const a = Math.round(s.g * 100), b = Math.round(p.homeG * 100), lo = Math.min(a, b), hi = Math.max(a, b); return lo ? trunc(hi * 100 / lo) : 0; }
+// -[HoBarLayer whichBarTouched:bar:] 0x10000a33c / -[BarMenuItem isTouched:begin:] 0x100010ec0: a touch that begins is tried on each bar in turn, and the first whose box
+// (the bar item's rectangle, 20 points wider) holds it takes it, at its offset along the bar. The page's bars take a touch only on the track, so a touch in the 20 points
+// beyond the bar (or on the name) is handed to the track of that row as a pointer down at the same place; the track then sets the value and keeps the drag.
+let barsHitOn = false;
+function barsHit() {
+  if (barsHitOn) return; barsHitOn = true;
+  document.addEventListener('pointerdown', (ev) => {
+    if (ev.defaultPrevented || ev.button > 0 || !document.documentElement.classList.contains('skin-ios')) return;
+    const t = ev.target; if (!t || !t.closest || t.closest('.track,button,a,input,select,textarea,dialog,[role=dialog],.ios-gscrim,.ios-evac')) return;
+    const pt = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--pt')) || 1;
+    for (const box of document.querySelectorAll('.ios-bars')) {
+      const b = box.getBoundingClientRect(); if (ev.clientY < b.top || ev.clientY > b.bottom) continue;
+      for (const row of box.querySelectorAll('.barrow')) {
+        const r = row.getBoundingClientRect(), tr = row.querySelector('.track'); if (!tr || !r.width) continue;
+        const tb = tr.getBoundingClientRect(), right = tb.right + 20 * pt;
+        if (ev.clientX >= r.left && ev.clientX <= right && ev.clientY >= r.top && ev.clientY <= r.bottom) {
+          tr.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, cancelable: true, pointerId: ev.pointerId, pointerType: ev.pointerType, isPrimary: ev.isPrimary, button: 0, buttons: ev.buttons, clientX: ev.clientX, clientY: ev.clientY }));
+          return;
+        }
+      }
+    }
+  }, true);
+}
 function styleBars(box, kind, parts) {
+  barsHit();
   const a = A(), G = a && a.G; if (!box || !G) return;
   box.classList.add('ios-bars', 'ios-bars-' + kind);
   const hd = box.querySelector('h3'); if (hd && !hd.classList.contains('scaleflip')) hd.remove();
@@ -1559,7 +1583,7 @@ function newGameIOS(f) {
   const iq = fld('o_iq'), iqStep = +iq.step || 10, iqVals = []; for (let v = +iq.min || 50; v <= (+iq.max || 200); v += iqStep) iqVals.push(String(v));
   const YEARS = ['10', '20', '30', '50'], sysWords = [0, 1, 2, 3, 4, 5, 6].map(sysW), sysWords8 = [0, 1, 2, 3, 4, 5, 6, 7].map(sysW);
   const SYS = ['outpost', 'barren', 'backward', 'normal', 'advanced', 'thriving', 'abundant'];
-  const sh = mk({ width: sw, words: NG_SHAPES.map(() => ' '), lw: textW(' ', E), change: () => shapePicked() });
+  const sh = mk({ width: sw, words: NG_SHAPES.map(() => ''), lw: textW('', E), change: () => shapePicked() });
   const home = mk({ width: pad ? 180 : 100, words: sysWords, change: () => galaxyChanged() });
   const comp = mk({ width: sw, words: ['1', '2', '3', '4', '5', '6', '7', '8'], fmt: tm(0x1c), change: () => galaxyChanged() });
   const iqS = mk({ width: sw, words: iqVals, fmt: tm(0x1d), change: () => galaxyChanged() });
