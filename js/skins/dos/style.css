@@ -31,3 +31,16 @@
 .clock.pic { padding: 0; background: none; border: 0; box-shadow: none; }
 .clock.pic img { display: block; width: 102px; height: auto; image-rendering: pixelated; }
 .clock.pic:active img { transform: translate(1px, 1px); }
+/* The DOS program's menu bar and menus are set in its screen font (the VGA 8x14 font of HO.PRS, tools/extract/dosfont.py): grey bar, black text, the
+   first letter of each menu red, a green bar on the item under the pointer, a diamond for a checked item (screenshot of the running program). */
+@font-face { font-family: "DOS Bios"; src: url("../../../assets/skins/dos/fonts/bios8x14.ttf") format("truetype"); font-display: block; }
+html.os-dos #menubar { background: #aaa; border-bottom: 0; }
+html.os-dos #menubar .mbtn, html.os-dos .dropdown button { font: 14px/14px "DOS Bios", monospace; color: #000; border-radius: 0; font-synthesis: none; -webkit-font-smoothing: none; }
+html.os-dos #menubar .menu > .mbtn::first-letter { color: #a00000; }
+html.os-dos #menubar .mbtn:hover, html.os-dos #menubar .mbtn:focus-visible, html.os-dos .dropdown button:hover:not(:disabled), html.os-dos .dropdown button:focus-visible { background: #00aa00; color: #000; }
+html.os-dos .dropdown { background: #aaa; border: 2px solid #000; box-shadow: none; padding: 2px 0; }
+html.os-dos .dropdown button { padding: 1px 8px 1px 18px; }
+html.os-dos .dropdown button:disabled { color: #666; }
+html.os-dos .dropdown button.check.on::before { content: "\2666"; position: absolute; margin-left: -14px; }
+html.os-dos .dropdown hr { border: 0; border-top: 1px solid #000; margin: 3px 0; }
+html.os-dos .dropdown .mkey { margin-left: 16px; }
