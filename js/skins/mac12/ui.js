@@ -930,6 +930,67 @@ function autoPlay20() {
   return true;
 }
 
+// A list of cells as the program draws them (LDEF 1001 @ the resource fork; InitMessageLists @121c4c, SetCellsToPlayers / Actions / ObjTypes): a grid of 45 x 45 cells, each an
+// icon 32 x 32 (ICN#, at the cell's centre less (16, 21)) with its name under it (a 13 pixel strip, Geneva 9, centred, condensed when too wide), the picked cell inverted;
+// no scroll bars. cells: [{ icon: 'dos:i3000', name, id, off }]
+function cells20(cols, rows, cells, o) {
+  const a = A(), el = a.el, W = 45, box = el('div', { class: 'cl20', role: 'listbox', style: `position:relative;width:${cols * W}px;height:${rows * W}px;border:0` });
+  let sel = o && o.sel != null ? o.sel : null;
+  const draw = () => {
+    box.textContent = '';
+    cells.forEach((c, i) => {
+      const x = (i % cols) * W, y = Math.floor(i / cols) * W, im = c.icon && a.IMG[c.icon];
+      const d = el('div', { class: 'c20' + (sel === i ? ' sel' : '') + (c.off ? ' off' : ''), role: 'option', 'aria-selected': sel === i ? 'true' : 'false', tabindex: c.off ? -1 : 0, style: `position:absolute;left:${x}px;top:${y}px;width:${W}px;height:${W}px`, onclick: () => { if (c.off || !o || !o.pick) return; sel = i; draw(); o.pick(c, i); } },
+        im ? el('img', { src: im.src, alt: '', style: 'position:absolute;left:6px;top:1px;width:32px;height:32px;image-rendering:pixelated' }) : null,
+        raw('span', c.name, { class: 'n20', style: 'position:absolute;left:0;right:0;top:33px;height:13px;line-height:13px;text-align:center;white-space:nowrap;overflow:hidden' }));
+      box.append(d);
+    });
+  };
+  draw();
+  return { el: box, set(c, s2) { cells = c; sel = s2 == null ? null : s2; draw(); } };
+}
+// DLOG 6070 "Send Message" (SendMessage @120f42, DITL 6070, STR# 3000-3002): "Send Message:" at (7, 6), the prompt of the step at (7, 154) (STR# 3002: "Send Message To Who?", "Saying What?",
+// "About What?", "Which One?"), the left list (item 4, one column of four cells, 47 x 182 at (33, 81)) holding what has been chosen (labelled "To:" at (47, 44) and "Content:" at (85, 15)),
+// the right list (item 5, five columns of four cells, 227 x 182 at (33, 154)) the choices of this step: the other players (their hats), "I Like" / "I Don’t Like" / "I Own" (ICN# 3000-3002),
+// "Planet" / "Player" (ICN# 3010, 3011; "I Own" has only the planet), then the stars or the players. Send (default, dimmed until all four are chosen) and Cancel at (227, 318) and (228, 241);
+// a chosen cell on the left takes the message back to its step. The lines the choices make are the ruleset's (rs.cannedChat: report codes $40c-$410).
+function chat20() {
+  const a = A(), el = a.el, g = G(), ME = a.ME, C = H().rules(g).cannedChat;
+  const tos = C.to(g, ME), ok = tos.filter(o => !o[2]);
+  if (!ok.length) { a.toast(H().say(g, H().DATA.alerts[6] || 'There is no one else to send something to.')); return true; }
+  const PR = ['Send Message To Who?', 'Saying What?', 'About What?', 'Which One?'];
+  const hat = (q) => 'dos:i' + (q.id === ME ? (q.female ? 1500 : 1000) : (q.female ? 2500 : 2000) + ((q.face || 0) % 20));
+  const pl = (id) => g.players[+id];
+  let step = 0; const ch = [null, null, null, null]; // each: { id, name, icon, i }
+  const prompt = raw('span', PR[0], { class: 'dt20', style: at20([7, 154, 24, 355]) });
+  const left = cells20(1, 4, [], {}), right = cells20(5, 4, [], {});
+  const send = a.el('button', { type: 'button', class: 'ok20', disabled: 'disabled', style: at20([227, 318, 247, 376]) + ';min-width:0;padding:0', onclick: a.guard(() => {
+    const r = H().sendCanned(g, ME, C.make(g, ME, isNaN(+ch[0].id) ? ch[0].id : +ch[0].id, ch[1].i, [ch[2].i, isNaN(+ch[3].id) ? ch[3].id : +ch[3].id]));
+    if (r === 'limit') { a.chatLimitToast(); return; } if (r !== 'ok') return; a.Sound.play(5000); a.closeModal(); a.save();
+  }) }, raw('span', 'Send'));
+  const choices = () => {
+    if (step === 0) return tos.map(o => ({ id: String(o[0]), name: o[1], icon: pl(o[0]) ? hat(pl(o[0])) : null, off: !!o[2] }));
+    if (step === 1) return C.actions.map((x, i) => ({ id: i, i, name: x.label, icon: 'dos:i' + (3000 + i) }));
+    if (step === 2) return C.actions[ch[1].i].parts[0][2].map((o, i) => ({ id: i, i, name: o[0], icon: 'dos:i' + (3010 + i), kind: o[1] }));
+    const kind = ch[2].kind; return C.list(g, ME, kind, a.UI.sel).map(o => ({ id: String(o[0]), name: o[1], icon: kind === 'players' && pl(o[0]) ? hat(pl(o[0])) : null, off: !!o[2] }));
+  };
+  const refresh = () => {
+    prompt.textContent = PR[Math.min(step, 3)];
+    left.set(ch.map(c => c ? { name: c.name, icon: c.icon } : { name: '' }), null);
+    right.set(step > 3 ? [] : choices(), null);
+    right.el.querySelectorAll('.c20').forEach((d, i) => { const c = step > 3 ? null : choices()[i]; if (c) d.onclick = () => { if (c.off) return; ch[step] = { id: c.id, i: c.i, name: c.name, icon: c.icon, kind: c.kind }; step = ch[1] && ch[1].i === 2 && step === 1 ? 2 : step + 1; if (step === 2 && ch[1].i === 2) { /* "I Own": the planet is the one choice */ } refresh(); }; });
+    left.el.querySelectorAll('.c20').forEach((d, i) => { d.onclick = () => { if (!ch[i]) return; for (let k = i; k < 4; k++) ch[k] = null; step = i; refresh(); }; });
+    if (step > 3) send.removeAttribute('disabled'); else send.setAttribute('disabled', 'disabled');
+  };
+  const frame = (r) => a.el('div', { style: at20([r[0] - 1, r[1] - 1, r[2] + 1, r[3] + 1]) + ';border:1px solid #000;box-sizing:border-box' });
+  const put = (n, r) => { n.setAttribute('style', (n.getAttribute('style') || '') + ';' + at20(r)); return n; };
+  refresh();
+  a.modal('', dlog20(392, 261, txt20('Send Message:', [7, 6, 25, 137]), prompt, txt20('To:', [47, 44, 63, 74]), txt20('Content:', [85, 15, 101, 74]), frame([33, 81, 215, 128]), frame([33, 154, 215, 381]),
+    put(left.el, [34, 82, 214, 127]), put(right.el, [34, 155, 214, 380]), send,
+    a.el('button', { type: 'button', class: 'ok20', style: at20([228, 241, 248, 299]) + ';min-width:0;padding:0', onclick: () => a.closeModal() }, raw('span', 'Cancel'))), { cls: 'mac12 dl20w', label: 'Send Message' });
+  return true;
+}
+
 // DLOG 4040 "Vitesse des batailles…" (doBattleSpeedDialog @120c48: 265 x 168; DITL 4040: "Vitesse des batailles:" at (26, 13),
 // "Rapide" (27, 46), the slider CNTL 4040 (84, 46, 214, 62; 10 to 60 ticks a shot), "Lente" (215, 46), the value's text at 295,
 // outside the window, "Animation complète" (26, 74), OK (186, 116, 244, 136)); Stup +0x4e and +0x48
@@ -1634,7 +1695,7 @@ window.HOMAC12 = {
     if (G() && name === 'players') return playersWindow();
     if (G() && name === 'ranks') return ranksWindow();
     if (G() && name === 'give') return give12();
-    if (G() && name === 'chat') return chat12();
+    if (G() && name === 'chat') return V2 && H().rules(G()).cannedChat && H().rules(G()).cannedChat.style === 'steps' ? chat20() : chat12();
     if (G() && name === 'radical') return radical12();
     if (G() && name === 'autoplay') return V2 ? autoPlay20() : autoplay12();
     if (G() && name === 'dip') return dip12();

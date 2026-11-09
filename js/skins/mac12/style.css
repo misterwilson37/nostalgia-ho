@@ -209,3 +209,8 @@ html .win a { color: #000; text-decoration: underline; }
 .dl20 { font: 12px/1.2 Geneva, Verdana, sans-serif; color: #000; background: #fff; }
 .dl20 .dt20 { display: block; overflow: hidden; }
 .dl20 input[type=range] { margin: 0; }
+.cl20 .c20 { cursor: default; font: 9px Geneva, Verdana, sans-serif; }
+.cl20 .c20.sel { background: #000; color: #fff; }
+.cl20 .c20.sel img { filter: invert(1); }
+.cl20 .c20.off { opacity: .45; }
+.cl20 .n20 { font-size: 9px; letter-spacing: -.2px; }
