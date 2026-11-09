@@ -504,6 +504,8 @@ panel (FleetMovementMenu, a CCInertialMenu built on CCMenuAdvanced).
   (`-[CCMenu tapCount]` `0x100056364` asks the touch); how quick and how close two taps
   must be is the system's, not in the game.
 
+Remake note (November 2026, Jake's report): with a ruleset other than iOS's and Android's the fleets were only in the classic star box under the bars (cut off by the window), so a fleet could not be dragged out of an app-style list. The skin now also builds the app's Fleets dialog for those rulesets (an iPad's beside the selected star, an iPhone's from the move button) from a copy of that box's list; the same pick-up, route line and drop. A fleet in flight is drawn with no dot (the app has none) but its remaining dashes start where the dashes of the turns left start; a fleet at a star shows its dot at (35, 15 - 14 row) x the planets' scale and its order line starts at (35, ...) map units, which is `routeFromDot` in the patch (docs/fixes.md). The dots are 22-pixel pictures: they are smoothed now (GL_LINEAR, cocos2d's default), not stepped.
+
 ### Organize Fleets (OrganizeFleetsLayer)
 
 The window for one star's fleets (`-[OrganizeFleetsLayer initDialog]` `0x1000bfe20`:

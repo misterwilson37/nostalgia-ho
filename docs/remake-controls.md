@@ -42,8 +42,14 @@ the app's own nor one of these controls**.
 | Radical Research | `radical` | those with a radical hand | the app's Radical screen | |
 | Temperatures | `temps` | all (in a game) | the name to tap: As the original, °C, °F | |
 | The toast and the hot-seat cover | (CSS) | all | the app's navy and blue box colours; the dialog's nine-patch and the text button | |
+| Fleets dialog (drag to send) | `data-fleetrow="remake"` on the rows | every ruleset but iOS and Android (they have the app's own) | the app's FleetMovementPlanetNode (an iPad's, beside the selected star) and the move button's FleetMovementDialog (an iPhone's) with the app's rows (`fleetItem`), built from a copy of the star box's fleet list: **a fleet is sent by dragging its row out of the dialog onto a star** (`FleetMovementMenu`, `0x1000c9808`; the page's pointer handlers read the rows' `data-fleet`: the picked-up ship, the route line, the drop, the alert), by mouse as by touch | the page's |
+| Star box (Ships here, Merge, Group, Split, Plan route, stance, Arrive late) | (CSS, `#panel .box.planet`) | every ruleset but iOS and Android | the star's box stays under the bars (the app has none: these are the remake's); its plain buttons take the app's text-button picture (`button-text.png`); Build ships and Evacuate Planet are not drawn there (the round "+" button and the bar's `button-evacuate` do them) | the page's |
+| Plan route bar | (CSS, `#routebar`) | rulesets with waypoints | the same text buttons, above the round buttons (`z-index` 8 against the buttons' 6); End Turn takes a plan still open as Done would (`finishRoute`, `doEndTurn`) | the page's |
+| Interface size | `size` (a select in Remake options) | every ruleset, in the iOS and Android skins only, with modern conveniences on | the share of the window the interface takes (50% to 150%): the screen in points is that share of the window, so the sidebar, rows, type and dialogs follow it, and the map's labels; kept in this browser (`localStorage` `ho5.ios.size`), not in the game | `Interface size` (en fr de tr es) |
 
 ## Known gaps
+- **Interface size:** only the iOS and Android skins (`T.interfaceSize`). The other skins draw in their own fixed frames (the Mac and DOS skins in the original's pixels, units set in other agents' files) and have no scale to give; browser zoom works there.
+- **Star info popup and Fleets dialog** keep the planets' scale (the app's), so at a small interface size they are relatively large.
 - **Not rebuilt:** Temperatures from the title screen (no game: the classic window, dressed); the hot-seat "switch player" has only the cover, restyled (the page's `#handover`).
 - **Master Point List:** the picture beside it (Windows 4.0.5's) is left out.
 - **Group Fleets, Radical Research:** reuse the app's screens; 4.0.5's radical window waited five minutes and answered itself (`radicalHand.timeout`): not carried.

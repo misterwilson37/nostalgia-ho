@@ -245,13 +245,22 @@ function shipPic(d, IMG, rusty) {
 const SCREEN = { pad: false, u: 1, winW: 568, winH: 320, W: 255, row: 20, font: 14, gap: 4 };
 const HOIOS = window.HOIOS = { sideOpen: () => false, side: () => {} };
 let sideWanted = null; // the sidebar's state: the iPad opens it at the start (toggleInfo), the iPhone doesn't
+// the viewer's interface size, kept in localStorage (a per-viewer convenience: every read and write guarded); in effect only with the game's modern conveniences on
+const SIZE_KEY = 'ho5.ios.size', SIZES = [0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.15, 1.3, 1.5];
+function sizeStored() { try { const v = parseFloat(localStorage.getItem(SIZE_KEY)); if (v >= 0.4 && v <= 2) return v; } catch (e) {} return 1; }
+function sizeF() { const a = window.HOAPI; return a && a.G && a.G.opts && a.G.opts.modern ? sizeStored() : 1; }
+function sizeSet(v) { try { if (v === 1) localStorage.removeItem(SIZE_KEY); else localStorage.setItem(SIZE_KEY, String(v)); } catch (e) {} sizeApply(); }
+let sizeShown = 1;
+function sizeApply() { const f = sizeF(); if (f === sizeShown) return; sizeShown = f; screenSize(); window.dispatchEvent(new Event('resize')); const a = window.HOAPI; if (a && a.G) { try { a.renderPanel(); a.draw(); } catch (e) {} } }
 function screenSize() {
   const vw = Math.max(1, window.innerWidth), vh = Math.max(1, window.innerHeight);
   // +[GraphicDefines setup]: the idiom picks the iPad's numbers or the iPhone's; a window has no idiom, so a
   // window whose short side is 600 CSS pixels or more is the iPad (the Android skin's approximation too)
   const pad = Math.min(vw, vh) >= 600, portrait = vh > vw * 1.1;
   const u = pad ? Math.max(0.6, Math.min(vh / 768, vw / 800)) : portrait ? vw / 360 : Math.min(vh / 320, vw / 480);
-  const winW = vw / u, winH = vh / u;
+  // The interface size (modern conveniences, remake option): the app lays its windows out in proportion to the screen in points (the sidebar 0.3 of its width, a row 0.08 of that, a dialog 0.8), so a bigger
+  // window only made the whole interface bigger. The size takes the share F of the window as the screen in points, so the sidebar, rows, type and dialogs are F of what they were; the map keeps the window.
+  const F = sizeF(), winW = vw / u * F, winH = vh / u * F;
   // +[BarMenuItem calculate] 0x1000104ec (the disassembly: frintp = round up, frintm = round down; the decompile's (int) casts are wrong):
   // the sidebar is ceil(winW x 0.3 iPad / 0.45 iPhone), at least 220; a row ceil(W x 0.08); the label column ceil(W x 0.45);
   // the type floor(row x 0.7); the bars start at labelW + 8 + 1 (barOffset: spacing is the constant 8)
@@ -426,11 +435,30 @@ function ringScale() {
 }
 // The star's name (-[StarNode initWithStar:at:] 0x10001a4d8, selectedStar:num: 0x10001ae04; the numbers with floats.py): a CCLabelTTF, Arial 18 (24 on an iPad: GraphicDefines a18) scaled 0.6, white, at (0, -28) of the
 // star's node, so centred 28 x the planets' scale under the star; the selected star's is green (0x00ff00) on an iPhone and hidden on an iPad (its info box holds the name); a blown star's name is hidden (supernova:).
+// The panels over the map (the star information, the graphs, the HUD strip, the Fleets dialog) are translucent (opacity 195, 0xb4), so a name under one showed through it, as large as the panel's own text on a big
+// window. With a ruleset that is not iOS's or Android's, or with the patch's 'hudOverNames' (rs.fixes, docs/fixes.md), the names are cut where such a panel is, so the panel hides them (the layers' order is
+// the app's: the map's StarNodes under the HUD's layers).
+let hudRc = [], hudRcT = 0;
+function hudRects(cv) {
+  const now = performance.now();
+  if (now - hudRcT > 30) {
+    hudRcT = now; hudRc = [];
+    for (const e of document.querySelectorAll('.ios-si:not([hidden]), .ios-gnode:not(.shut), .ios-shade, .ios-hud:not([hidden]), .ios-fd:not([hidden]), .ios-sat:not([hidden])')) { const r = e.getBoundingClientRect(); if (r.width > 1 && r.height > 1) hudRc.push(r); }
+  }
+  return hudRc;
+}
 function starName(cx, o) {
   const v = window.HOVIEW && window.HOVIEW(), k = v && v.target; if (!k) return true;
   if (/^supernovaed/.test(String(o.look && o.look.base || '').replace(P, ''))) return true;
   if (o.sel && SCREEN.pad) return true;
-  cx.save(); cx.font = `${BGD().a18 * 0.6 * k}px Arial, Helvetica, sans-serif`; cx.textAlign = 'center'; cx.textBaseline = 'middle'; cx.fillStyle = o.sel ? '#00ff00' : '#ffffff';
+  cx.save();
+  { const a = A(), G = a && a.G, cvs = document.getElementById('map');
+    if (G && cvs && v.mapW && (!/^(ios|android)$/.test(G.rules || '') || HO.fixed(G, 'hudOverNames'))) {
+      const rc = hudRects(cvs), cr = cvs.getBoundingClientRect(), f = v.mapW / (cr.width || 1);
+      if (rc.length) { cx.beginPath(); cx.rect(-1e5, -1e5, 2e5, 2e5); for (const r of rc) cx.rect((r.left - cr.left) * f, (r.top - cr.top) * f, r.width * f, r.height * f); cx.clip('evenodd'); }
+    }
+  }
+  cx.font = `${BGD().a18 * 0.6 * k * sizeF()}px Arial, Helvetica, sans-serif`; cx.textAlign = 'center'; cx.textBaseline = 'middle'; cx.fillStyle = o.sel ? '#00ff00' : '#ffffff';
   cx.fillText(o.s.name, o.x, o.y + 28 * k); cx.restore();
   return true;
 }
@@ -994,8 +1022,10 @@ function sidebar(box, parts) {
   // the app's sidebar has no star box (the star's figures are the HUD strip, its commands the round buttons): its fleets go in the dialog.
   // A ruleset that is not iOS's or Android's has features the app had no screen for (the build queue, merging, battle reviews): its box stays below the bars.
   const G = A() && A().G, appRules = !!G && /^(ios|android)$/.test(G.rules || '');
-  const fl = appRules && parts.planet && parts.planet.querySelector('.fleets');
-  if (fdList) { fdList.replaceChildren(); if (fl) { const h = fl.querySelector('h4'); if (h) h.remove(); fleetItems(fl); fdList.append(fl); } }
+  // Another ruleset keeps its star box (with what it adds: inbound fleets, merging, plan route), and the app's fleet dialog is made as well from a copy of its list (the remake's own addition,
+  // docs/remake-controls.md "Fleets dialog": the fleets are sent by dragging a row out of the dialog onto a star, which only the app's dialog does; the page's pointer handlers read the rows' data-fleet).
+  const fl0 = parts.planet && parts.planet.querySelector('.fleets'), fl = appRules ? fl0 : fl0 && fl0.cloneNode(true);
+  if (fdList) { fdList.replaceChildren(); if (fl) { const h = fl.querySelector('h4'); if (h) h.remove(); fleetItems(fl); if (!appRules) for (const r of fl.querySelectorAll('.frow')) { r.setAttribute('data-fleetrow', 'remake'); r.addEventListener('click', () => { const x = A(); if (x && x.UI) { x.UI.selFleet = +r.dataset.fleet; x.renderPanel(); x.draw(); } }); } fdList.append(fl); } }
   // CombinedInfoContainer 0x1000b0e44: the totals, the technology bars (TechLayer), the budget bars (PlayerPlanetsLayer), the players
   styleBars(parts.tech, 'tech', parts); styleBars(parts.budget, 'budget', parts);
   income.dataset.c = 'info'; parts.tech.dataset.c = 'info'; parts.budget.dataset.c = 'stars';
@@ -1324,6 +1354,8 @@ function dialogLayer(cw, ch, k, label, onCancel) {
   const bg = UIEl('div', 'ios-gbg');
   const dlg = UIEl('div', 'ios-gdlg ios-bdlg', { role: 'dialog', 'aria-label': label, style: `width:${bpt(cw)};height:${bpt(ch)};transform:translate(-50%,-50%) scale(${k})` }, bg);
   const scrim = UIEl('div', 'ios-gscrim', null, dlg);
+  // a question opened from one of the page's windows (Account saves: Delete) is above it, not behind: the page's window is a child of the body at z-index 50, and #app, where the dialogs go, is one layer under it
+  if (document.querySelector('.scrim .win')) { scrim.style.zIndex = '95'; queueMicrotask(() => { if (scrim.isConnected && scrim.parentElement !== document.body) document.body.append(scrim); }); }
   let began = false;
   scrim.addEventListener('pointerdown', (e) => { began = e.target === scrim; e.stopPropagation(); });
   scrim.addEventListener('pointerup', (e) => { if (began && e.target === scrim && onCancel) onCancel(); began = false; e.stopPropagation(); });
@@ -3510,6 +3542,7 @@ window.HOTHEME = {
   select: P + 'ring', // the green ring round the selected star
   selectScale: ringScale,
   mapName: starName,
+  interfaceSize: { values: SIZES, get: sizeStored, set: sizeSet }, // the remake's option under modern conveniences (remakeOptions in js/skins/classic/ui.js)
   dragShip, // the ship carried out of the fleets list
   flingLists: true, // the app's lists are CCInertialMenus (the saved games, the news, the players, the stars' bars, the fleets: InertialScroller touchEnded 0x1000a9c0c): the classic page's fling (js/skins/classic/ui.js List) carries each on
   fleetPath: 'ios', // a dragged fleet's route line (js/skins/classic/ui.js iosFleetPath)
@@ -3614,7 +3647,8 @@ window.HOTHEME = {
     const map = { 3110: 'icon0-selected', 3162: 'icon1-selected', 3150: 'planet_0', 4011: 'icon3-selected', 3100: 'icon5-selected', 3101: 'icon6-selected', 3102: 'icon7-selected', 3103: 'icon8-selected', 3104: 'icon9-selected' }, im = IMG[P + map[m[1]]];
     return im && im.complete && im.naturalWidth ? im : null;
   },
-  dress(win) { if (!dressNext) return; win.classList.add('ios-remake'); win.setAttribute('data-remake', 'dressed:' + dressNext); dressNext = null; },
+  // (the remake's own online windows are dressed too, in every ruleset: the account has no screen in the app)
+  dress(win, title) { const own = /^(Account|Account saves)$/.test(title || ''); if (!dressNext && !own) return; win.classList.add('ios-remake'); win.setAttribute('data-remake', 'dressed:' + (dressNext || String(title).toLowerCase().replace(/\s+/g, ''))); dressNext = null; },
   // the remake's own plain "Are you sure?" box for a ruleset the app has no question for: the app's message box with the check and the cross (the button words of a ruleset's own alert are not shown)
   confirm(text, yes, labels) {
     const a = A(); if (!a || !a.G || /^(ios|android)$/.test(a.G.rules || '') || typeof text !== 'string') return false;
@@ -3730,7 +3764,7 @@ window.HOTHEME = {
     window.addEventListener('resize', () => { const was = SCREEN.pad; screenSize(); hudKey = ''; hud(); if (was !== SCREEN.pad) buildColumn(doc.getElementById('app')); });
     // -[AppDelegate applicationWillResignActive:] 0x100006ef0: the director pauses and the game is saved (saveGame); a page going to the background is the same moment
     document.addEventListener('visibilitychange', () => { const a = A(); if (document.visibilityState === 'hidden' && a && a.G && !a.G.over) { try { a.save(); } catch (e) {} } });
-    setInterval(() => { const a = A(); if (a && a.G && !a.G.over && a.UI && a.UI.sel != null && !document.hidden && document.documentElement.classList.contains('skin-ios')) a.draw(); }, 40);
+    setInterval(() => { const a = A(); if (a && a.G && !a.G.over && a.UI && a.UI.sel != null && !document.hidden && document.documentElement.classList.contains('skin-ios')) a.draw(); if (document.documentElement.classList.contains('skin-ios')) sizeApply(); }, 40);
     window.addEventListener('resize', turnWatch); window.addEventListener('orientationchange', turnWatch); turnWatch();
     setSide(sideWanted != null ? sideWanted : SCREEN.pad, true);
     const c = doc.querySelector('#titlescreen .credit');

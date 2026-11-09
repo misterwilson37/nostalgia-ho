@@ -720,6 +720,7 @@ root.HOUI.add([
 ['Temperatures in Celsius (this version showed only °C)', 'Températures en degrés Celsius (cette version n’affichait que des °C)', 'Temperaturen in Celsius (diese Version zeigte nur °C)', 'Sıcaklıklar Celsius (bu sürüm yalnızca °C gösterirdi)', 'Temperaturas en grados Celsius (esta versión solo mostraba °C)'],
 ['Temperatures…', 'Températures…', 'Temperaturen…', 'Sıcaklıklar…', 'Temperaturas…'],
 ['Temperatures', 'Températures', 'Temperaturen', 'Sıcaklıklar', 'Temperaturas'],
+['Interface size', 'Taille de l’interface', 'Größe der Oberfläche', 'Arayüz boyutu', 'Tamaño de la interfaz'],
 ['As the original', 'Comme l’original', 'Wie im Original', 'Özgün oyundaki gibi', 'Como el original'],
 ['°C (Celsius)', '°C (Celsius)', '°C (Celsius)', '°C (Celsius)', '°C (Celsius)'],
 ['°F (Fahrenheit)', '°F (Fahrenheit)', '°F (Fahrenheit)', '°F (Fahrenheit)', '°F (Fahrenheit)'],

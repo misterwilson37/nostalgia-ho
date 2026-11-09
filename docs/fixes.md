@@ -52,7 +52,7 @@ their entries are below so the list is complete, but their rulesets list no fixe
 | Mac 3.0.1 | 6 | 6 | 3 |
 | 4.0.5 | 11 fixed (+ 3 the remake already plays fixed, + 3 with nothing in the remake to fix) | 4 | 6 |
 | Mac 4.0.5 | 7 fixed (+ 3 the remake already plays fixed, + 1 with nothing in the remake to fix) | 4 | 6 |
-| 5.0.5 | 2 | 7 | 6 |
+| 5.0.5 | 4 | 7 | 6 |
 | Palm | 2 (+ 5.0.5's 2) | 5 (+ 5.0.5's) | 2 (+ 5.0.5's) |
 
 Palm's code is 5.0.5's recompiled, with the same slips; its own entries are counted, and
@@ -565,6 +565,24 @@ running out). **Obvious, with nothing in the remake to fix**: the cheating mark
 2. **`scrapRange`: Tanker and obsolete-ship retirement passes the fleet's number as its
    Range** (`FUN_100870a0`, r8 at 0x10087228). *Fix:* the Range (`js/ai-original.js`
    `scrapOldShips`).
+3. **`routeFromDot`: a fleet's orders line starts beside the star, not at its dot (the iOS and
+   Android look only, so in 5.0.5 only with the remake's iOS or Android skin; also in the iOS and
+   Android rules and the Palm's).** In the iOS app `-[MapLayer calcFleetInitialStarOffset:fleet:current:player:]`
+   `0x10000eb5c` gives the line's start as (35, 15 - 14 x row) *map units* from the star (its second
+   call from `doFleetRec:fleet:paths:` `0x10000ebc8` adds it to the star's point unscaled), while the
+   dots themselves are children of the StarNode, drawn in its own units, which the planets' scale
+   (`-[MapLayer setScale:]` `0x10000e590`: target / map scale, 3 on an iPad once zoomed in) multiplies. Whenever the
+   planets are not drawn at the map's scale (a 4K window, the zoomed-in map) the line starts away from
+   the dot it belongs to (Jake's screenshot: the cyan line ends 80 pixels from its fleet's dot). The unpatched
+   game keeps the app's offset (`dotStart` in `js/skins/classic/ui.js`); the patch scales it by the planets'
+   on-screen scale (`planetTarget()`) as the dots are.
+4. **`hudOverNames`: the star names show through the iOS and Android look's panels (the
+   look only).** The star information (`starinfo_tm`, opacity 195), the graphs and the Fleets dialog
+   (`fleet-background`, 0xb4) are translucent in the app, so a StarNode's name under one is seen
+   through it, and at a large window the names are as big as the panels' own type. The unpatched
+   game does as the app does; the patch cuts the names where such a panel is (`starName` in
+   `js/skins/ios/ui.js`). With any ruleset other than iOS and Android the names are always cut:
+   they have no app original to match.
 
 ### Quirk or design (left as released)
 

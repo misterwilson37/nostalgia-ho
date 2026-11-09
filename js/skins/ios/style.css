@@ -504,3 +504,15 @@ html.skin-ios .ios-rtab.wrap .ios-rcell { white-space: normal; overflow: visible
 html.skin-ios .ios-rchart { position: absolute; }
 html.skin-ios .ios-rrowsplit { display: flex; align-items: center; gap: calc(8 * var(--pt)); }
 html.skin-ios .ios-rslot { flex: none; }
+
+/* THE REMAKE'S OWN (docs/remake-controls.md, "Star box and Plan route"): with a ruleset that is not iOS's or Android's the star's box (its ships here, merging, grouping) stays under the bars; its plain
+   buttons and the Plan route bar take the app's text-button picture (button-text.png, as textButton in ui.js), and Build ships and Evacuate, which the round "+" button and the bar's own
+   button-evacuate already do, are not drawn twice. The route bar is above the round buttons (they are z-index 6 in .ios-ui; the page's bar was 5 and they drew over it). */
+html.skin-ios #panel .box.planet .btns > button[data-help="build"], html.skin-ios #panel .box.planet .btns > button[data-help="evacuate"] { display: none; }
+html.skin-ios #panel .box.planet button, html.skin-ios #routebar button { box-sizing: border-box; appearance: none; margin: 0 !important; padding: calc(2 * var(--pt)) calc(5 * var(--pt)) !important; color: #fff !important; background: none !important; border: calc(5 * var(--pt)) solid transparent !important; border-image: url("../../../assets/skins/ios/sprites/button-text.png") 10 fill / calc(5 * var(--pt)) stretch !important; border-radius: 0 !important; box-shadow: none !important; font: calc(11 * var(--pt)) var(--appfont, Arial, Helvetica, sans-serif) !important; line-height: 1.1; cursor: pointer; min-height: 0; }
+html.skin-ios #routebar { z-index: 8; }
+/* THE REMAKE'S OWN online windows (Account, Account saves: tagged by `dress` in ui.js): their type follows the interface's scale (--pt), as their buttons do, so a big window does not leave small type beside big buttons */
+html.skin-ios .win.ios-remake[data-remake^="dressed"] { font-size: calc(14 * var(--pt)); }
+html.skin-ios .win.ios-remake[data-remake^="dressed"] .wtitle span { font-size: calc(16 * var(--pt)); }
+html.skin-ios .win.ios-remake[data-remake^="dressed"] small, html.skin-ios .win.ios-remake[data-remake^="dressed"] .sub { font-size: calc(11 * var(--pt)); }
+html.skin-ios .win.ios-remake[data-remake^="dressed"] { width: calc(520 * var(--pt)); max-width: 94vw; }

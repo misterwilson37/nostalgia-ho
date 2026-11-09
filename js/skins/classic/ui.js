@@ -859,6 +859,8 @@ function drawDotsApp(s, x, y, here) {
   const order = here.map((f, i) => [f, i]).sort((a, b) => rank(a[0]) - rank(b[0]) || a[1] - b[1]).map(a => a[0]);
   const sats = order.filter(f => f.sat), norm = order.filter(f => !f.sat);
   const hide = isTablet() && UI.sel === s.id;
+  // the dots are 22-pixel pictures drawn at 11 x the planets' scale: smoothed (the app's textures are filtered, GL_LINEAR by cocos2d's default), not the page's nearest-neighbour step for big planets
+  cx.save(); cx.imageSmoothingEnabled = true; cx.imageSmoothingQuality = 'high';
   const one = (f, i, sat) => {
     const ims = fleetMarkers(f).filter(Boolean);
     let ox = x + (sat ? L.satX : L.x) * t; const oy = y - ((sat ? L.satY0 : L.y0) + L.dy * i) * t;
@@ -875,6 +877,7 @@ function drawDotsApp(s, x, y, here) {
   if (!hide) norm.slice(0, 3).forEach((f, i) => one(f, i, false));
   const more = hide ? sats.length > 3 : sats.length > 3 || norm.length > 3, dd = IMG.dotdot;
   if (more && dd) { const w = dd.width / 2 * t, h = dd.height / 2 * t; cx.drawImage(dd, x + L.dotX * t - w / 2, y - L.dotY * t - h / 2, w, h); }
+  cx.restore();
 }
 // The orders of your fleets (T.appPaths; -[MapLayer updateFleetPaths] 0x10000ee58, doFleetRec:fleet:paths: 0x10000ebc8,
 // addDashedVertices:from:to:travelTime:travelLeft:numSolids: 0x10000f77c, drawFleetPaths 0x10000e93c): for each of your
@@ -887,7 +890,10 @@ function drawDotsApp(s, x, y, here) {
 // -[MapLayer calcFleetInitialStarOffset:fleet:current:player:] 0x10000eb5c: a line starts at the fleet's dot, not the star: (35, 15 - 14 row)
 // map units from it (cocos2d's y up), the row counting your earlier fleets at the star that are not satellites, at most 3 (30, -27 then);
 // from the selected star it starts at the star's middle
+// (the patch, rs.fixes 'routeFromDot': the app gives the offset in map units but draws the dots in the star's own units, the planets' scale, so with the planets scaled the line starts beside the star
+// and not at the dot; the patch scales the offset by the planets' on-screen scale as the dots are)
 function dotStart(f, fi, a, k) {
+  if (HO.fixed(G, 'routeFromDot')) k = planetTarget();
   const idx = Math.min(3, G.fleets.slice(0, fi < 0 ? G.fleets.indexOf(f) : fi).filter(g => g.owner === ME && g.star === f.star && g.to == null && !g.sat).length);
   return [a[0] + (idx === 3 ? 30 : 35) * k, a[1] - (15 - 14 * idx) * k];
 }
@@ -1838,6 +1844,14 @@ function startRoute(f) {
   toast('Click the stars to visit in order, then press Done.');
   renderRouteBar();
 }
+// Done: the stops chosen become the fleet's orders. End Turn does the same for a route still being planned (the remake's own Plan route is not the original's: that is Option-click on a Mac and
+// ends with the click, so a plan left open when the turn ends is not dropped on the floor).
+function finishRoute() {
+  if (!UI.route) return;
+  const f = G.fleets.find(x => x.id === UI.route.fleet);
+  if (f && UI.route.stops.length && HO.orderPath(G, f, UI.route.stops)) Sound.play(4001); else if (UI.route.stops.length) toast('The first stop is out of range.');
+  UI.route = null; renderRouteBar(); renderPanel(); draw(); save();
+}
 function renderRouteBar() {
   let bar = $('#routebar');
   if (!UI.route) { if (bar) bar.remove(); return; }
@@ -1845,7 +1859,7 @@ function renderRouteBar() {
   const f = G.fleets.find(x => x.id === UI.route.fleet);
   bar.innerHTML = '';
   bar.append(el('span', null, 'Route: ' + (UI.route.stops.length ? UI.route.stops.map(x => G.stars[x].name).join(' → ') : 'click stars…')),
-    el('button', { onclick: () => { if (f && UI.route.stops.length && HO.orderPath(G, f, UI.route.stops)) Sound.play(4001); else if (UI.route.stops.length) toast('The first stop is out of range.'); UI.route = null; renderRouteBar(); renderPanel(); draw(); save(); } }, 'Done'),
+    el('button', { onclick: () => finishRoute() }, 'Done'),
     el('button', { class: 'quiet', onclick: () => { UI.route = null; renderRouteBar(); draw(); } }, 'Cancel'));
 }
 
@@ -2246,6 +2260,7 @@ function openMasterList() {
 }
 function doEndTurn(confirmed) {
   if (!G || G.over) return;
+  if (UI.route) finishRoute();
   if (confirmed !== true && confirmed !== 'progress' && HO.feature(G, 'buildQueue')) {
     const rs = HO.rules(G), starved = rs.underfunded ? rs.underfunded(G, me()) : HO.colonies(G, ME).filter(s => s.id !== me().homeStar && !(me().budget.col[s.id] > 0));
     // 1.2's ALRT 5060 (GiveSpendingWarning @102498): one question for all of them, its own words and buttons
@@ -4571,6 +4586,15 @@ function openTemperature() {
     tempChoice(),
     el('div', { class: 'btns right' }, el('button', { onclick: closeModal }, 'OK'))), { cls: 'mid' });
 }
+// Interface size (a modern convenience of a skin that scales to the window, T.interfaceSize: the iOS and Android skins): the share of the window the interface takes, kept for this viewer in the browser;
+// shown, and in effect, only with the game's modern conveniences on
+function sizeChoice() {
+  const S = T.interfaceSize; if (!S || !modern()) return null;
+  const cur = S.get(), vals = S.values.includes(cur) ? S.values : S.values.concat(cur).sort((a, b) => a - b);
+  const s = el('select', { 'aria-label': 'Interface size', 'data-remake': 'size', onchange: (e) => { S.set(parseFloat(e.target.value)); } },
+    ...vals.map(v => el('option', { value: String(v), selected: v === cur ? 'selected' : false }, `${Math.round(v * 100)}%`)));
+  return el('label', { class: 'tempchoice' }, el('span', null, 'Interface size'), ' ', s);
+}
 // The remake's own options, under the line in each ruleset's Preferences window
 // (`sound`: the window has its own Sound control)
 function remakeOptions(sound) {
@@ -4578,6 +4602,7 @@ function remakeOptions(sound) {
   return [el('hr', { class: 'ngline' }), el('fieldset', { class: 'opts' }, el('legend', null, 'Remake options'),
     sound ? null : chk(Sound.on, (e) => { Sound.on = e.target.checked; savePrefs(); }, 'Sound effects'),
     chk(modern(), (e) => setModern(e.target.checked), 'Modern conveniences in this game (automatic routes, the map follows the news, battle speed and written reports)'),
+    sizeChoice(),
     chk(Prefs.tips, (e) => { Prefs.tips = e.target.checked; savePrefs(); }, 'Explain things when the pointer rests on them (text from the original manual)'),
     tempChoice(),
     autoPlayWhere() === 'prefs' ? prefsAutoPlay() : null)];
