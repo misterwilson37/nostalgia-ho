@@ -4558,6 +4558,7 @@ function prefs505(W) {
   const remake = [
     el('label', { class: 'chk' }, el('input', { type: 'checkbox', checked: Sound.on ? 'checked' : false, onchange: (e) => { Sound.on = e.target.checked; savePrefs(); } }), el('span', null, 'Sound effects')),
     el('label', { class: 'chk' }, el('input', { type: 'checkbox', checked: modern() ? 'checked' : false, onchange: (e) => setModern(e.target.checked) }), el('span', null, 'Modern conveniences in this game (automatic routes, the map follows the news, battle speed and written reports)')),
+    sizeChoice(), // (Interface size: the iOS and Android skins, with modern conveniences on)
     el('label', { class: 'chk' }, el('input', { type: 'checkbox', checked: Prefs.tips ? 'checked' : false, onchange: (e) => { Prefs.tips = e.target.checked; savePrefs(); } }), el('span', null, 'Explain things when the pointer rests on them (text from the original manual)')),
     tempChoice(),
     autoPlayWhere() === 'prefs' ? prefsAutoPlay() : null];
@@ -6503,7 +6504,14 @@ function save(urgent) {
 }
 
 // ---------- menus ----------
-function quitToTitle() { save(); Sound.play(7002); G = null; renderPanel(); draw(); $('#panel').innerHTML = ''; $('#msg').innerHTML = ''; titleScreen(); }
+// Leaving a game for the title screen (every skin's Quit / Main Menu / Close / Exit). The originals left at once (the
+// iOS app's AdditionalMenu mainMenu 0x10009450c saves and goes); with modern conveniences on (Jake, November 2026)
+// it asks first, so a stray click doesn't throw the player out. The game is saved either way.
+function quitToTitle() {
+  if (G && modern() && !G.over) return confirmBox('Leave this game for the title screen? It is saved: Continue or Saved Games brings it back.', quitToTitleNow);
+  quitToTitleNow();
+}
+function quitToTitleNow() { save(); Sound.play(7002); G = null; renderPanel(); draw(); $('#panel').innerHTML = ''; $('#msg').innerHTML = ''; titleScreen(); }
 function setupMenus() {
   const menus = {
     Game: [['New game…', newGameDialog], [() => (G && HO.rules(G).switchPlayers) || 'End turn and switch players', () => switchPlayers(), () => !!(G && HO.rules(G).switchPlayers && hotSeat())], ['Players and history', () => G && openPlayers()], ['Auto-play this turn', () => playOneTurn()], ['Auto play…', () => G && !G.over && (hotSeat() || G.online ? toast('Auto play is for one-player games.') : openAutoPlay())], ['Online game…', () => openOnlineInfo(), () => !!(G && G.online)], ['Preferences…', openPrefs], ['Saved games…', () => openSavedGames(), () => !!(screensOf(rulesId()) || {}).savedGames], ['Account saves…', () => openAccountSaves(), () => !!CLOUD], ['Export this game…', () => exportGame(), () => !!G], ['Import a game…', () => importGame()], ['Rank history…', openRanks, () => !G || hasRanks(G)], [() => ((HO.RULESETS[rulesId()] || {}).gameCenter || {}).menu || 'Rank and Game Center…', openGameCenter, () => !!(HO.RULESETS[rulesId()] || {}).gameCenter],

@@ -325,6 +325,7 @@ root.HOUI.add([
 // ---------- dialogs ----------
 ['Close', 'Fermer', 'Schließen', 'Kapat', 'Cerrar', I],
 ['Are you sure?', 'Êtes-vous sûr ?', 'Sind Sie sicher?', 'Emin misin?', '¿Estás seguro?'],
+['Leave this game for the title screen? It is saved: Continue or Saved Games brings it back.', 'Quitter cette partie pour l’écran titre ? Elle est enregistrée : Continuer ou Jeux sauvegardés la reprend.', 'Dieses Spiel verlassen und zum Titelbild gehen? Es ist gespeichert: Weiterspielen oder Gespeicherte Spiele holt es zurück.', 'Bu oyundan çıkıp başlık ekranına dönülsün mü? Oyun kaydedildi: Devam veya Kayıtlı Oyunlar onu geri getirir.', '¿Salir de esta partida a la pantalla de título? Está guardada: Continuar o Partidas guardadas la recuperan.'],
 ['Yes', 'Oui', 'Ja', 'Evet', 'Sí', { fr: 'iOS', de: 'DOS 2.0', tr: 'iOS' }],
 ['No', 'Non', 'Nein', 'Hayir', 'No', { fr: 'iOS', de: 'DOS 2.0', tr: 'iOS' }, {tr: 'Hayır'}],
 ['Back', 'Retour', 'Zurück', 'Geri', 'Atrás', I],
