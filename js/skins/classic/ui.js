@@ -1569,7 +1569,7 @@ function renderPanel() {
     bb.append(bar(e.label, e.get(), 1, (f, end) => {
       if (f != null && own) { if (!start) start = JSON.stringify(p.budget); dragBudget(p, e.key, f, start); }
       else if (f != null) setShare(ents, i, f);
-      if (f != null) { ents.forEach((x, j) => { const r = bb.querySelectorAll('.barrow')[j]; if (r) { r.querySelector('.track')._v = x.get(); setFill(r.querySelector('.fill'), x.get(), bsc); r.querySelector('.bval').textContent = money(x.get() * spendable); } }); }
+      if (f != null) { ents.forEach((x, j) => { const r = bb.querySelectorAll('.barrow')[j]; if (r) { r.querySelector('.track')._v = x.get(); setFill(r.querySelector('.fill'), x.get(), bsc); const v = r.querySelector('.bval'); if (v) v.textContent = money(x.get() * spendable); } }); } // (a skin's own bar rows may have no .bval: the iOS skin's)
       if (end) { start = null; renderPanel(); save(); }
     }, { scale: bsc, grid: rsB.barGrid && T.barGrid !== false && (!rsB.barGrid.above || i === 0) ? rsB.barGrid : null, locked: rsB.barLocked ? rsB.barLocked(G, p, e.key) : null, right: money(amt), cls: e.key === 'tech' ? 'tech' : e.key === 'savings' ? 'sav' : 'col', rowCls: (s && UI.sel === s.id ? 'hl' : '') + (s && HO.planetIncome(G, p, s) < 0 ? ' loss' : ''), help: e.key === 'tech' ? 'tech' : e.key === 'savings' ? 'savingsBar' : 'colonyBar' }));
   });
