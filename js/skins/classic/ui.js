@@ -1930,7 +1930,7 @@ function renderMsg0() {
     // (rs.sysBeep: 1.2's PlayAnnounceSound @130f08 beeps (SysBeep) for every report without a sound of its own, but the credits and
     // the battle results, which are silent)
     const sysBeep = HO.rules(G).sysBeep || !!(T.sysBeep && T.sysBeep(G)); // (a skin may be the program's: Mac 2.0.1's PlayAnnounceSound beeps, its skins say so)
-    const credit = sysBeep && (HO.rules(G).welcome || []).some(w => w[0] === m.text);
+    const wl = HO.rules(G).welcome, credit = sysBeep && Array.isArray(wl) && wl.some(w => w[0] === m.text);
     if (credit || (sysBeep && (m.battle || m.won != null))) { /* silent */ }
     else if (sysBeep && !(sound && A.snd[sound])) beep();
     else if (sound) Sound.play(sound);

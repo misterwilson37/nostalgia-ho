@@ -942,9 +942,11 @@ function battleSpeed12() {
   const sl = el('input', { type: 'range', min: O.min, max: O.max, value: v, style: at(84, 46, 130, 16), 'aria-label': W[0] });
   const cb = el('input', { type: 'checkbox', checked: P.fullAnim !== false ? 'checked' : false });
   const ok = () => { P.battleSpeed = +sl.value; P.fullAnim = cb.checked; a.savePrefs(); a.closeModal(); };
+  // (2.0.1's DITL 4040 has the same size and its own rectangles: the title (13, 13, 95 x 18), Fast (27, 47), the slider CNTL 4040 (59, 47, 130 x 16), Slow (191, 47), the check box (27, 74))
+  if (V2) sl.setAttribute('style', at(59, 47, 130, 16));
   const box = el('div', { class: 'bs12', style: 'position:relative;width:265px;height:168px' },
-    raw('span', W[0], { style: at(26, 13, 155, 17) }), raw('span', W[1], { style: at(27, 46, 57, 14) }), sl, raw('span', W[2], { style: at(215, 46, 45, 16) }),
-    el('label', { style: at(26, 74, 216, 18) + ';display:flex;align-items:center;gap:4px' }, cb, raw('span', W[3])),
+    raw('span', W[0], { style: V2 ? at(13, 13, 95, 18) : at(26, 13, 155, 17) }), raw('span', W[1], { style: V2 ? at(27, 47, 32, 16) : at(27, 46, 57, 14) }), sl, raw('span', W[2], { style: V2 ? at(191, 47, 45, 16) : at(215, 46, 45, 16) }),
+    el('label', { style: (V2 ? at(27, 74, 216, 18) : at(26, 74, 216, 18)) + ';display:flex;align-items:center;gap:4px' }, cb, raw('span', W[3])),
     el('button', { onclick: ok, style: at(186, 116, 58, 20) + ';min-width:0;padding:0' }, raw('span', W[4])));
   a.modal('', box, { cls: 'mac12 bs12w', label: W[0] });
 }
@@ -1586,9 +1588,9 @@ window.HOMAC12 = {
   // Mac 2.0.1's PlayAnnounceSound @130eb0 (the jump table of 1000 + 0 to $39): 2000 for the technology levels (1002-1006), the new year (1010) and 1028, 1032, 1054,
   // 1057; 2001 for 1009, 1055, 1056; 3002 for 1011; none for 1000, 1001, 1033-1035; the system beep for every other report (1.2's table also had 1020, a fleet lost in a
   // wormhole, and 1059 at 2001)
-  sysBeep: () => V2,
+  sysBeep: (g) => V2 && !!g && H().rules(g).id === 'mac20',
   messageLook(m, cur) {
-    if (!V2) return null;
+    if (!V2 || !G() || H().rules(G()).id !== 'mac20') return null;
     const R = H().REPORTS20 || [];
     const t = String(m.text || '');
     if (!HOMAC_RE20) HOMAC_RE20 = R.map((x, i) => ({ i, re: new RegExp('^' + x.split(/(%(?:\.\*|\d*\.?\d*)?[sd]|%%)/).map((y, j) => j % 2 ? (y === '%%' ? '%' : '.*?') : y.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('')), len: x.length })).filter(o => o.len > 8).sort((a, b) => b.len - a.len);
