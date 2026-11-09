@@ -214,3 +214,5 @@ html .win a { color: #000; text-decoration: underline; }
 .cl20 .c20.sel img { filter: invert(1); }
 .cl20 .c20.off { opacity: .45; }
 .cl20 .n20 { font-size: 9px; letter-spacing: -.2px; }
+.cg20 .dl20 { margin: 0 auto; }
+.cg20more { margin-top: 8px; }

@@ -96,7 +96,8 @@ function menuLayout20(M) {
   M.File = [pick(F, 'New…'), pick(F, 'Open…'), pick(F, 'Save…'), pick(F, 'Revert To Saved…'), pick(F, 'Close…'), '-', pick(F, 'End Turn'),
     it('End Turn & Switch Players', cmd(/switch players/i), { ghost: no(has(/switch players/i)) }), '-',
     it('Page Setup…', () => {}, { ghost: gone }), it('Print Map…', () => {}, { ghost: gone, key: 'P' }), '-', pick(F, 'Quit')];
-  M.Options = [it('Force Turn Update…', cmd(/force end turn/i), { ghost: no(has(/force end turn/i)) }), it('Auto Play…', cmd(/^auto play/i), { ghost: no(has(/^auto play/i)) }),
+  M.Options = [// (SetMenuItems @e2f2e: Force Turn Update needs the player whose number is the game header's +6 word, the number of computers, so the first human, and two humans; Auto Play a player still in the game: mode below 4)
+    it('Force Turn Update…', cmd(/force end turn/i), { ghost: () => noGame() || !has(/force end turn/i)() || A().ME !== G().players.findIndex(p => p.human) }), it('Auto Play…', cmd(/^auto play/i), { ghost: () => noGame() || !has(/^auto play/i)() || !(A().me().alive && !A().me().surrendered) }),
     it('I’ll Update Turns', () => {}, { ghost: gone }), '-', it('Set Polling Time…', () => pollingTime20(), { ghost: noGame }), speed, '-', shows, review, warn, snd, ...extra];
   M.Galaxy = [it('Compare Players…', cmd(/^compare players/i), { ghost: no(has(/^compare players/i)) }), pick(Gx, 'List All Explored Stars…'), it('Send Message…', cmd(/^send a message/i), { ghost: () => noGame() || !has(/^send a message/i)() || G().year <= 2000 }) /* (SetMenuItems @e2f2e: item 3 is dimmed while the year is 2000 or less) */, '-',
     ...Gx.slice(Gx.findIndex(x => x !== '-' && x[0] === 'Zoom In'))];
@@ -938,6 +939,7 @@ function cells20(cols, rows, cells, o) {
   let sel = o && o.sel != null ? o.sel : null;
   const draw = () => {
     box.textContent = '';
+    setTimeout(() => fitNames(), 0);
     cells.forEach((c, i) => {
       const x = (i % cols) * W, y = Math.floor(i / cols) * W, im = c.icon && a.IMG[c.icon];
       const d = el('div', { class: 'c20' + (sel === i ? ' sel' : '') + (c.off ? ' off' : ''), role: 'option', 'aria-selected': sel === i ? 'true' : 'false', tabindex: c.off ? -1 : 0, style: `position:absolute;left:${x}px;top:${y}px;width:${W}px;height:${W}px`, onclick: () => { if (c.off || !o || !o.pick) return; sel = i; draw(); o.pick(c, i); } },
@@ -946,7 +948,8 @@ function cells20(cols, rows, cells, o) {
       box.append(d);
     });
   };
-  draw();
+  const fitNames = () => { for (const n of box.querySelectorAll('.n20')) { n.style.transform = ''; const w = n.scrollWidth; if (w > W) { n.style.overflow = 'visible'; n.style.transform = `scaleX(${(W - 1) / w})`; } } };
+  draw(); fitNames(); setTimeout(fitNames, 0);
   return { el: box, set(c, s2) { cells = c; sel = s2 == null ? null : s2; draw(); } };
 }
 // DLOG 6070 "Send Message" (SendMessage @120f42, DITL 6070, STR# 3000-3002): "Send Message:" at (7, 6), the prompt of the step at (7, 154) (STR# 3002: "Send Message To Who?", "Saying What?",
@@ -988,6 +991,55 @@ function chat20() {
   a.modal('', dlog20(392, 261, txt20('Send Message:', [7, 6, 25, 137]), prompt, txt20('To:', [47, 44, 63, 74]), txt20('Content:', [85, 15, 101, 74]), frame([33, 81, 215, 128]), frame([33, 154, 215, 381]),
     put(left.el, [34, 82, 214, 127]), put(right.el, [34, 155, 214, 380]), send,
     a.el('button', { type: 'button', class: 'ok20', style: at20([228, 241, 248, 299]) + ';min-width:0;padding:0', onclick: () => a.closeModal() }, raw('span', 'Cancel'))), { cls: 'mac12 dl20w', label: 'Send Message' });
+  return true;
+}
+
+// DLOG 6080 "Create New Galaxy" (CreateGalaxyDlg @e03dc, InitCreateGalaxyLists @e06e8, DITL 6080, 460 x 273): four lists of one row of 45 x 45 picture cells (the ICN# 3020-3024 shapes, 3050-3051
+// densities, 3030-3032 computer intelligence, 3040-3044 sizes: each cell's name is its icon's resource name), the number of computers on a slider from 0 to 19 with its number at (234, 13),
+// Create (225, 351) and Cancel (225, 273). It sits over the New Game window's own fields, which it sets (the form stays the model; the version, language, skin, names and
+// skill, which the original asked in its Identify and Join dialogs, are under "More…": the remake's own).
+function createGalaxy20(f, ctx) {
+  const a = A(), el = a.el, win = f.closest('.win'); if (!win) return;
+  const field = (n) => f.querySelector(`[name="${n}"]`), fire = (n) => n.dispatchEvent(new Event('change', { bubbles: true }));
+  const LISTS = [
+    { sel: 'd_shape', rect: [52, 221, 99, 448], icons: [3020, 3021, 3022, 3023, 3024], names: ['Circle', 'Random', 'Ring', 'Spiral', 'Grid'], label: ['Galaxy Style:', [26, 221, 46, 356]] },
+    { sel: 'd_density', rect: [52, 13, 99, 105], icons: [3050, 3051], names: ['Dense', 'Sparse'], label: ['Galaxy Density:', [26, 13, 49, 153]] },
+    { sel: 'd_iq', rect: [143, 13, 190, 150], icons: [3030, 3031, 3032], names: ['Dumb', 'Average', 'Smart'], label: ['Computer Intelligence:', [117, 13, 135, 193]] },
+    { sel: 'd_size', rect: [143, 221, 190, 448], icons: [3040, 3041, 3042, 3043, 3044], names: ['Small', 'Medium', 'Large', 'Extra Large', 'Humongous'], label: ['Galaxy Size:', [117, 221, 136, 343]] }];
+  const comp = field('computers'), parts = [];
+  const frame = (r) => el('div', { style: at20([r[0] - 1, r[1] - 1, r[2] + 1, r[3] + 1]) + ';border:1px solid #000;box-sizing:border-box' });
+  const lists = LISTS.map((L) => {
+    const sel = field(L.sel); if (!sel) return null;
+    const vals = [...sel.options].map(o => o.value), cl = () => cells20(L.icons.length, 1, L.icons.map((n, i) => ({ icon: 'dos:i' + n, name: L.names[i], id: vals[i] })), { sel: Math.max(0, vals.indexOf(sel.value)),
+      pick: (c) => { sel.value = c.id; fire(sel); } }), w = cl();
+    w.el.setAttribute('style', w.el.getAttribute('style') + ';' + at20([L.rect[0] + 1, L.rect[1] + 1, L.rect[2] - 1, L.rect[3] - 1]));
+    parts.push(frame(L.rect), txt20(L.label[0], L.label[1]), w.el); return w;
+  });
+  const num = raw('span', comp ? comp.value : '', { class: 'dt20', style: at20([234, 13, 250, 38]) + ';text-align:right' });
+  const sl = el('input', { type: 'range', min: 0, max: 19, value: comp && /^\d+$/.test(comp.value) ? comp.value : 4, style: at20([234, 39, 250, 169]), 'aria-label': 'Number of Computer Players',
+    oninput: (e) => { if (comp) { comp.value = e.target.value; fire(comp); } num.textContent = e.target.value; } });
+  if (comp && !/^\d+$/.test(comp.value)) num.textContent = comp.value;
+  let opened = false;
+  const moreBtn = el('button', { type: 'button', class: 'ok20', style: 'position:absolute;left:13px;top:254px;min-width:0;padding:0 6px;height:20px', onclick: () => { opened = !opened; dress(); } }, raw('span', 'More… (the remake’s own)'));
+  const box = dlog20(460, 273, txt20('Create New Galaxy', [0, 143, 19, 284]), ...parts, txt20('Number of Computer Players:', [208, 13, 228, 216]), num, sl,
+    el('button', { type: 'button', class: 'ok20', style: at20([225, 351, 245, 409]) + ';min-width:0;padding:0', onclick: () => f.requestSubmit() }, raw('span', 'Create')),
+    el('button', { type: 'button', class: 'ok20', style: at20([225, 273, 245, 331]) + ';min-width:0;padding:0', onclick: () => a.closeModal() }, raw('span', 'Cancel')), moreBtn);
+  const holder = el('div', { class: 'cg20' }, box);
+  const rest = [...f.childNodes]; f.prepend(holder);
+  // (the version, language and skin choices stay where they are: they are the remake's own and the skin's rules checks use them)
+  const keep = (n) => n.classList && (n.classList.contains('picks') || n.classList.contains('langnote'));
+  const rs = field('rules'), dress = () => { const on = !rs || rs.value === 'mac20'; box.style.display = on ? '' : 'none'; moreBtn.style.display = on ? '' : 'none'; for (const n of rest) if (n.style && !keep(n)) n.style.display = on && !opened ? 'none' : ''; };
+  if (rs) rs.addEventListener('change', dress); dress();
+}
+
+// ALRT / DITL 3210 (ForceEndTurn @122382, 335 x 210): PICT 3020 at (117, 13), the two paragraphs at (13, 13) and (52, 13), "Wait" at (143, 117) and "Force End" (default) at (143, 222);
+// the words are the ruleset's (rs.forceEndTurn.ask, the paragraphs split at the blank line). The second alert (3220, "the file was busy") has no cause in a page.
+function forceEnd20(text, go) {
+  const a = A(), el = a.el, im = a.IMG['dos:p3020'], [p1, p2] = String(text).split('\n\n');
+  const pic = im ? el('img', { src: im.src, alt: '', style: at20([117, 13, 191, 87]) + ';image-rendering:pixelated' }) : null;
+  a.modal('', dlog20(335, 210, pic, raw('span', p1, { class: 'dt20', style: at20([13, 13, 46, 327]) }), raw('span', p2 || '', { class: 'dt20', style: at20([52, 13, 92, 328]) }),
+    el('button', { type: 'button', class: 'ok20', style: at20([143, 117, 163, 194]) + ';min-width:0;padding:0', onclick: () => a.closeModal() }, raw('span', 'Wait')),
+    el('button', { type: 'button', class: 'ok20 def20', style: at20([143, 222, 163, 299]) + ';min-width:0;padding:0', onclick: () => { a.closeModal(); go(); } }, raw('span', 'Force End'))), { cls: 'mac12 dl20w', label: 'Force End Turn' });
   return true;
 }
 
@@ -1660,6 +1712,8 @@ window.HOMAC12 = {
     const snd = [1002, 1003, 1004, 1005, 1006, 1010, 1028, 1032, 1054, 1057].includes(code) ? 2000 : [1009, 1055, 1056].includes(code) ? 2001 : code === 1011 ? 3002 : null;
     return { icon: cur.icon, sound: snd };
   },
+  // (the New Game window, for 2.0.1's own rules: its Create New Galaxy dialog over the form)
+  newGame(f, ctx) { if (V2) createGalaxy20(f, ctx); },
   zoomTo: (s, f) => (own() ? zoomTo(s, f) : Math.max(12, Math.min(140, s * f))),
   fitView(v, c) { if (!own()) return; const st = c.G.stars[c.sel != null ? c.sel : c.G.players[c.ME].homeStar]; v.s = ZOOMS[3]; if (st) { v.ox = c.mapW / 2 - st.x * v.s; v.oy = c.mapH / 2 - st.y * v.s; } },
   mapNames: (s) => (own() ? zoomIdx(s) > 0 : s > 18),
@@ -1695,6 +1749,7 @@ window.HOMAC12 = {
     if (G() && name === 'players') return playersWindow();
     if (G() && name === 'ranks') return ranksWindow();
     if (G() && name === 'give') return give12();
+    if (G() && name === 'forceend' && V2 && H().rules(G()).id === 'mac20') return forceEnd20(x[0], x[1]);
     if (G() && name === 'chat') return V2 && H().rules(G()).cannedChat && H().rules(G()).cannedChat.style === 'steps' ? chat20() : chat12();
     if (G() && name === 'radical') return radical12();
     if (G() && name === 'autoplay') return V2 ? autoPlay20() : autoplay12();
