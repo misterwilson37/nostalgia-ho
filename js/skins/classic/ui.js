@@ -2407,6 +2407,19 @@ function modal(title, content, opts) {
 }
 function closeModal() { if (UI.modal) { UI.modal.remove(); UI.modal = null; const c = UI.onClose; UI.onClose = null; if (c) c(); } }
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && UI.modal) closeModal(); });
+// Modern conveniences (Jake, November 2026): Escape closes any window, in every skin. A skin's own window that ignores
+// Escape (the iOS app's Build screens, which had no keyboard) is closed by its own close or Cancel button, so it tidies
+// up as it would on a click. Nothing is done for a window with no such button (one that needs an answer, such as
+// naming a star), or when the game is unpatched-style (modern conveniences off). Runs last (window, bubbling): a
+// window that already handled Escape stopped it.
+const ESC_CLOSE = '.close, .ios-gx, [data-esc-close], button.cancel, [aria-label="Close"]';
+let escTop = null;
+window.addEventListener('keydown', (e) => { escTop = e.key === 'Escape' ? [...document.querySelectorAll('.scrim, .ios-gscrim')].pop() || null : null; }, true); // (.ios-gscrim: the iOS app's own dialogs)
+window.addEventListener('keydown', (e) => {
+  if (e.key !== 'Escape' || !modern() || !escTop || !escTop.isConnected) return;
+  const b = [...escTop.querySelectorAll(ESC_CLOSE)].filter(x => !x.disabled && x.offsetParent !== null).pop();
+  if (b) { e.preventDefault(); b.click(); }
+});
 // labels: [item 1's, item 2's] of an alert with its own button words (3.0.1's Armageddon questions: item 1 goes on)
 // a version's own alert box (rs.alertWords[key][lang]: the program's ALRT/DITL, by the game's language: [text, ...buttons], 1.2's)
 function alertWords(key) {

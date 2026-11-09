@@ -4,6 +4,9 @@ One change is left optional. It is not needed for the remake-only controls and i
 
 ## `3-escape-closes-build-dialog.patch` (js/skins/ios/ui.js, 6 lines)
 
+**Decided (Jake, November 2026): a modern convenience, in every skin.** Not applied as this patch. Instead `js/skins/classic/ui.js` has one shared Escape handler: with modern conveniences on, Escape closes the top window of any skin through its own close or Cancel button. With them off, the app's Build screens ignore Escape as before.
+
+
 **What:** the app's Build screens (the ship classes, and the Build-a-ship screen over them) do not react to Escape. `Escape` closes every other dialog in the skin, and the Android skin maps its Back key to it, so on a
 keyboard or an Android back gesture you cannot leave Build except by the little X. (The tests close it by its `ios-gx` button for that reason.)
 
