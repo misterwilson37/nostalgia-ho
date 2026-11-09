@@ -271,6 +271,7 @@ function screenSize() {
   st.setProperty('--fs', String(SCREEN.font)); st.setProperty('--more', pad ? '24' : '18'); st.setProperty('--mfs', String(Math.floor(Math.fround(row * 3 / 6)) - 1)); st.setProperty('--labw', String(SCREEN.labelW)); { const g = barGeom(); st.setProperty('--bo', String(g.barOffset)); st.setProperty('--bw', String(g.mw)); } st.setProperty('--gap', String(SCREEN.gap));
   de.classList.toggle('ios-pad', pad); de.classList.toggle('ios-phone', !pad);
   sideLayout();
+  for (const p of document.querySelectorAll('#msg .card:not(.year) .mtext p')) fitMsgText(p);
 }
 const UIEl = (tag, cls, attrs, ...kids) => {
   const e = document.createElement(tag); if (cls) e.className = cls;
@@ -1238,7 +1239,18 @@ function fleetItems(box) {
     r.prepend(it); r.classList.add('ios-frow');
   }
 }
+// the report bar's text (update: 0x100013064 at 0x10001345c): a label from x 60, its box the size the text takes constrained to the bar's width less 64 (60 and 4)
+// and its height, measured at type floor(height / 6) and drawn a point smaller, left aligned, wrapped by words, its middle on the bar's. Refitted whenever
+// the screen's size in points changes (a resize, or the interface size of modern conveniences), so the text keeps the bar's scale.
+function fitMsgText(p) {
+  if (!p) return;
+  const H = SCREEN.row * 3, s0 = Math.floor(Math.fround(H / 6)), lines = wrapLines(p.textContent, s0, SCREEN.W - 64);
+  const wid = Math.max(1, ...lines.map(l => textW(l, s0)));
+  p.style.width = `calc(${Math.ceil(wid) + 1} * var(--pt))`; p.style.height = `calc(${lines.length * s0 * ARIAL_LINE} * var(--pt))`;
+  p.style.fontSize = `calc(${s0 - 1} * var(--pt))`; p.style.lineHeight = `calc(${(s0 - 1) * ARIAL_LINE} * var(--pt))`;
+}
 function afterMsg(box, ctx) {
+  sizeApply(); // (a game just started or loaded: its modern conveniences decide the interface size before anything is measured)
   const clock = box.querySelector('.clock'), card = box.querySelector('.card');
   box.classList.toggle('ios-clockbox', !!clock && !card);
   if (clock) { const f = clock.querySelector('.face'); if (f) f.remove(); }
@@ -1271,13 +1283,7 @@ function afterMsg(box, ctx) {
       if (lv) card.append(UIEl('span', 'ios-lvl', { 'aria-hidden': 'true' }, lv[1]));
       // the text (update: 0x100013064 at 0x10001345c): a label from x 60, its box the size the text takes constrained to the bar's width less 64 (60 and 4)
       // and its height, measured at type floor(height / 6) and drawn a point smaller, left aligned, wrapped by words, its middle on the bar's
-      const p = card.querySelector('.mtext p');
-      if (p) {
-        const H = SCREEN.row * 3, s0 = Math.floor(Math.fround(H / 6)), lines = wrapLines(p.textContent, s0, SCREEN.W - 64);
-        const wid = Math.max(1, ...lines.map(l => textW(l, s0)));
-        p.style.width = `calc(${Math.ceil(wid) + 1} * var(--pt))`; p.style.height = `calc(${lines.length * s0 * ARIAL_LINE} * var(--pt))`;
-        p.style.fontSize = `calc(${s0 - 1} * var(--pt))`; p.style.lineHeight = `calc(${(s0 - 1) * ARIAL_LINE} * var(--pt))`;
-      }
+      fitMsgText(card.querySelector('.mtext p'));
     }
     { const old = card.querySelector('.icon, .bigicon, .jpg'), rp = m && reportPicture(m); if (rp) { if (old) old.remove(); card.append(rp.el); } }
     const cnt = card.querySelector('.count');
