@@ -305,7 +305,7 @@ root.HOVERSIONS = {
     intro: 'Delta Tao’s own Mac build of 2.0.1, the version the DOS and Windows 3.1 edition ports: the same rules, routine for routine, with a few differences in its code. Every rule routine of the Mac program has been read with its own names.',
     released: [
       'Probably: 2.0 came out in January 1992 (Changing Path #2 planned it for that month’s Macworld Expo in San Francisco; Macworld’s April 1992 advertisements sell “2.0”).',
-      'Probably: 2.0.1 was out by May or June 1992 (Macworld reviewed “Spaceward Ho 2.0.1” in August 1992, and its reviews follow a release by two or three months).',
+      'Probably: 2.0.1 was finished on 21 January 1992, eleven days after 2.0’s release notes (a 2.0.1 floppy dates its program and its “2.0.1 Changes” that day, and a draft of the note in its Trash two days earlier); Macworld reviewed “Spaceward Ho 2.0.1” in August 1992.',
     ],
     previous: '1.2',
     quirks: [
