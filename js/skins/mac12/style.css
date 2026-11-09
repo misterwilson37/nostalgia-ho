@@ -216,3 +216,5 @@ html .win a { color: #000; text-decoration: underline; }
 .cl20 .n20 { font-size: 9px; letter-spacing: -.2px; }
 .cg20 .dl20 { margin: 0 auto; }
 .cg20more { margin-top: 8px; }
+.win.dl20w { max-width: none; width: max-content; }
+.win.dl20w .wbody { max-width: none; overflow: visible; }

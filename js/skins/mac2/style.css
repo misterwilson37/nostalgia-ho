@@ -2,7 +2,7 @@
    page, with 2.0.1's art. Its windows, menus and
    controls are the "System 6" OS look (js/os/system6.css), drawn as 2.0.1's
    resources draw them; the start-up window is 2.0.1's own. */
-@import url("../mac3/style.css");
+@import url("../mac12/style.css"); /* (2.0.1 is 1.2 with additions: the 1.2 skin's panels and windows, js/skins/mac12, which imports the 3.0.1 skin) */
 
 /* ---------- 2.0.1's art ---------- */
 #tframe { width: min(304px, 86vw); }

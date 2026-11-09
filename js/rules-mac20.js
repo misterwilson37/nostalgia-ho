@@ -112,6 +112,11 @@ E.registerRules('mac20', Object.assign({}, D, {
   battlePanel: D.battlePanelMac,
   // doPollingTimeDialog @1227b4: the slider is set to 1 to 30 seconds (SetCtlMax $1e; CNTL 4060 says 15, the code changes it)
   options: Object.assign({}, D.options, { poll: Object.assign({}, D.options.poll, { max: 30 }) }),
+  // CONFIRMED (DrawPlanetRect, DrawFleetRect, DrawSelectedFleetInfo: the literals 'Owner:', 'No One', 'Info Date:', 'Battle Date:', 'Ships Queued:', 'None.', 'There are no fleets at this planet.' and the A5 world's 'Pop:', 'Temp:', 'Gravity:', 'Metal:', 'Income:'): 1.2's English
+  planetInfo: { en: R12.planetInfo.en },
+  // CONFIRMED (the program's strings, the A5 world's text list: 'Current Year:', 'Total Money:', 'Total Income:', 'Reserve Metal:', '(up $%s)', '(interest $%s)', 'Income:', 'Pop:', 'Temp:', 'Gravity:', 'Metal:', 'Terra', 'Mine', 'Ship', 'You have no
+  // information about this planet.', 'Uninhabited', 'Unknown'; DrawIncomeRect lists the metal first, then the money, the income and the interest: 1.2's, in 2.0.1's English)
+  panelInfo: { order: ['metal', 'savings', 'income', 'interest'], words: { en: { savings: 'Total Money:', income: 'Total Income:', interest: 'Interest', metal: 'Reserve Metal:' } } },
   label: 'Mac 2.0.1 (1992)',
   // the New Game window's Version and Edition menus (engine.js editions)
   family: '2.0', edition: { version: '2.0.1', name: 'Mac', platform: 'Mac, System 6 and 7', year: 1992 }, skins: ['mac2c', 'mac2'],
