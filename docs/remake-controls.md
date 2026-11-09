@@ -1,64 +1,52 @@
-# Remake-only controls: one list for every skin
+# Remake-only controls in the iOS and Android skins
 
-Any ruleset can be played in any skin. Where a skin's original had no screen for a
-feature, the skin needs a control of its own, in its own look and marked as the remake's
-(Jake's rule; `docs/roadmap.md`, "Display audit"). This file tracks which features need
-one and which skins have built them, so the version audits and the restyle jobs don't
-lose track of each other.
+*Brief: `docs/brief-restyle-ios.md`. Skin: `js/skins/ios/ui.js` (Android loads it). Branch `claude/kind-davinci-ziq9bk`. Hand-off: `docs/ios-remake-controls/HANDOFF.md`.*
 
-## The rules for keeping it
+Any ruleset can be played in the iOS or Android skin. The apps had screens for their own rules only. A feature another ruleset has, and the apps never had, is shown in the app's own look: its
+`DialogLayerSprite` (`appDialog`), the check and cross, Arial in white, the name to tap, `CCSliderDeluxe`, the Scrap Ship Types scroller, its text buttons, its sounds and its touch behaviour.
+**Every control below is THE REMAKE'S OWN: there is no original to match.** In the page each carries `data-remake="<key>"` and the class `ios-remake` (`remakeOwn()` in `ui.js`). They are reached only
+with a ruleset other than iOS and Android (`window()` in `ui.js` checks `appRules`): with those rules the skin shows exactly what it showed before (`tools/skin-remake-ios-lists.js` asserts that no
+remake-only dialog opens for them).
 
-- **A version audit that finds a new feature adds a row.** That covers any of these:
-  - a window the remake has no control for at all;
-  - a new option in an existing window;
-  - a window that shows more than the remake's control does.
-- Name the feature, the rulesets that have it, and where it was found (the audit's row).
-- A window that only exists in that version's own skin (2.0.1's Create Galaxy *look*, for
-  example) is that skin's business, not a row here, unless the feature behind it is new.
-- **A restyle job marks its skin's column** when it builds a control: `built`, `own` where the
-  skin's original had the screen, or `not needed`.
-- The automatic check is the safety net. `node tools/skin-rules-check.js --skin=<id>
-  --inventory` opens every command and fails on any classic-page window. Today it does
-  this for mac12; the iOS restyle job should add the same for ios and android. Then a
-  feature added later turns that skin's check red until it has a control.
+All of them are **native**: built in `ui.js` from the app's own pieces, the engine doing the work. Nothing is left dressed except one case: Temperatures opened from the title screen, with no game
+(`dress()` in the theme, `DRESSED` in `ui.js`). The shared piece is `listDialog()`: the app's dialog with a head line (a touch on a head sorts where the list sorts), the Scrap Ship Types list's scroller of
+rows (a row outlined in the app's blue, 0x393cd6, while chosen), buttons of the app's text-button sprite at the bottom left and the check at the right.
 
-## The table
+`node tools/skin-rules-check.js --skin=ios --inventory` (and `--skin=android`) opens every command of the page menus ("More menus..." in the gear) in each ruleset and **fails on any window that is neither
+the app's own nor one of these controls**.
 
-Columns are the skins whose restyle has started. Blank means a classic fallback.
-Rulesets use the short names of `docs/12-findings.md`, "Remake-only controls".
+## The controls
 
-| Feature | Rulesets | Found in | mac12 | ios / android |
+| Control | Key | Rulesets | Look comes from | Words |
 |---|---|---|---|---|
-| Players: alliances, best buddies, surrender | 301, 405, orig, palm, clm, m405, gem | 12 list | built | |
-| Give Money/Metal | 301, 405, orig, palm, clm, m405, gem | 12 list | built | |
-| Send Message | all but 12, ios, and | 12 list | built | |
-| Dip Into Savings and debt | 301, 405, orig, palm, m405 | 12 list | built | |
-| Armageddon | 301, 405, orig, palm, m405 | 12 list | built | |
-| Radical Research | orig, palm | 12 list | built | own |
-| Compare Players | dos, 301, 405, m20, m405 | 12 list | built | |
-| Hall of Fame / Shame | 301, 405, m405 | 12 list | built | |
-| Master Point List | 405, m405 | 12 list | built | |
-| Rank history | orig, palm | 12 list | built | own |
-| Group / Organize Fleets (Palm) | orig, palm | 12 list | built | |
-| Preferences | all | 12 list | built | own |
-| Auto Play | all | 12 list | built | own |
-| Tankers, Dreadnoughts, Biologicals, Decoys in Build | orig, palm, (405) | 12 list | built | |
-| Novas and their reports | see 12-findings | 12 list | not needed (the skin's pictures cover them) | |
-| Build queue, merging fleets | most | ios list | own | |
-| Battle reviews, battle list | most | ios list | own | |
-| Reports window (other rulesets) | most | ios list | own | |
-| Explored stars, fleets lists | most | ios list | own | |
-| Fix spending | see ios-findings | ios list | | |
-| Force end turn, switch players (hot seat) | most | ios list | | |
-| Confirm and toast boxes | all | ios list | built | |
+| Give Money/Metal | `give` | 5.0.5, Palm, 3.0.1, 4.0.5, Mac 4.0.5; DOS, Claude, Gemini with a default | the app's Give screen layout, on the ruleset's limits (3 a turn, the Palm's steps, who is listed, 4.0.5's "nothing to give just closes") | `rs.giveWindow`; the app's Misc 75 as title when it has none |
+| Send Message | `chat` | all that have it: who and what (5.0.5, Palm), the eight lines (Claude, Gemini), columns of questions (2.0, 3.0.1, 4.0.5) | the Give layout's name to tap; the Scrap list's scroller for the lines; the Build screen's name box for a line of text | `rs.cannedChat` |
+| Surrender | `surrender` | 5.0.5, Palm, Claude, Gemini, 3.0.1, 4.0.5 | the name to tap with "No One"; the cross takes a surrender back (5.0.5's Cancel) | `windowWords.surrender` |
+| Fix Spending | `fixspending` | 1.2, 2.0, 3.0.1 | the app's message dialog: the line is the message, the check takes the next step, the cross leaves | the ruleset's lines |
+| Dip Into Savings, Armageddon, Scrap Ship Types | `dip` `armageddon` `scraptypes` | those with the command | the app's own screens on the ruleset's limits; Armageddon's questions in the app's message box with the version's button words; a ruleset that scraps at once asks first | `windowWords`, `armageddonAsk`, `armageddonButtons`, Alert 3 / 4, Misc 106 |
+| Players and alliances | `players` | all | the app's hat, name and pact button (the sidebar's `pactToggle` / `pactToggled`: one control, one set of data); History opens the app's graph | the classic window's status words |
+| Build ships, queue-style | `queue` | 1.2, DOS 2.0, Mac 2.0.1 | the app's Build screens: no Allow Debt, # To Build to 99, savings unchanged (nothing is paid at queue time), the colony's queue at the top right | the app's |
+| The plain "Are you sure?" box | `confirm` | all | the app's message box with the check and the cross; a ruleset's own button words on text buttons | the page's question |
+| Force End Turn | `confirm` | Mac 2.0.1 (hot seat) | the same box with "Wait" and "Force End Turn" | the version's |
+| All Fleets | `fleets` | all | `listDialog`: a touch selects the fleet | `windowWords.fleets` (5.0.5) |
+| Review battle | `battles` | all | `listDialog`: a touch opens the report | |
+| Explored Stars | `stars` | all | `listDialog`: 5.0.5's sortable list with the star's picture; the Mac and DOS lists (choose a row, Go To Star, Sort By); the Palm's and the iOS rules' own | `rs.exploredList` |
+| Rank history | `ranks` | 5.0.5, Palm | `listDialog` with the Wins button | |
+| Hall of Fame / Shame, Summary | `hall`, `hallsummary` | 3.0.1, 4.0.5, Mac 4.0.5 | `listDialog`; This computer / Everyone and Newest / Best where online play is on; Details, Play Again | `rs.hall.words` |
+| Master Point List | `master` | 4.0.5, Mac 4.0.5 | `listDialog` (the picture beside it is left out) | |
+| Report Window | `reports` | all | `listDialog`, lines that wrap; 1.2's history with the report's icon, scrolled to this year | `verOpts().reports` |
+| Compare Players, Show Skills | `compare`, `skills` | 3.0.1, 4.0.5, DOS, Mac | the chart drawn in the app's dialog with the app's graph series pictures as the marks; the skills as a `listDialog` | `rs.compare` |
+| Split fleet | `split` | rulesets without Group Fleets | a slider for each kind of ship | |
+| Group Fleets | `group` | 5.0.5, Palm | the app's Organize Fleets screen (the engine's split and merge) | |
+| Auto Play | `auto` | all | the app's Auto Play screen for rulesets with `autoPlaySettings`; the remake's own form (who plays, a slider for turns, what stops it) for 1.2, 2.0, Claude, Gemini | |
+| Radical Research | `radical` | those with a radical hand | the app's Radical screen | |
+| Temperatures | `temps` | all (in a game) | the name to tap: As the original, °C, °F | |
+| The toast and the hot-seat cover | (CSS) | all | the app's navy and blue box colours; the dialog's nine-patch and the text button | |
 
-*Seeded November 2026 from `docs/12-findings.md` and `docs/ios-findings.md` ("Remake-only
-controls"). The mac12 column follows `docs/mac12-remake-controls/HANDOFF.md`; check it
-against that file when the iOS package lands.*
+## Known gaps
+- **Not rebuilt:** Temperatures from the title screen (no game: the classic window, dressed); the hot-seat "switch player" has only the cover, restyled (the page's `#handover`).
+- **Master Point List:** the picture beside it (Windows 4.0.5's) is left out.
+- **Group Fleets, Radical Research:** reuse the app's screens; 4.0.5's radical window waited five minutes and answered itself (`radicalHand.timeout`): not carried.
+- **Not checked:** sounds by ear, a real touch device, browsers other than Chromium.
 
-## Found by the version audits
-
-- **Mac 2.0.1** (`docs/mac201-findings.md`). 2.0.1's own windows still missing from its
-  skin: Create Galaxy, Compare Players, Send Message, the skills list, Auto Play, polling
-  time, New Player. As far as is known, these features already have classic controls, so
-  they are rows above or skin work, not new rows. Confirm when the audit finishes.
+Not remake controls (left as they are, `docs/ios-findings.md`): New game, Quit, Import / Export, Account, About, manuals, Sounds, Language, Skin.

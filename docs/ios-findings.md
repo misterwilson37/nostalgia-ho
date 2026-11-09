@@ -1086,6 +1086,16 @@ a grid of rows of 1, 2, 1, 1, 2 (10 points between), an iPad's one column 8 apar
 
 ### Remake-only controls to restyle (Jake, November 2026; roadmap "Display audit")
 
+**The list, as found by playing every ruleset in the skin** (`node tools/skin-rules-check.js --skin=ios --inventory`, which opens every command of the page menus the gear's
+"More menus..." shows and fails on a classic-page window; `docs/remake-controls.md` is the table: each control, its kind, its look, its words). What the apps never had and other rulesets have:
+
+- **Rebuilt in the app's own look (native; `data-remake="<key>"`), all of them:** Give Money/Metal (`give`); Send Message in its three shapes (`chat`); Surrender (`surrender`); Fix Spending (`fixspending`); Dip, Armageddon and
+  Scrap Ship Types on the app's own screens (`dip`, `armageddon`, `scraptypes`); Players with the app's pact button (`players`); the queue-style Build window (`queue`); the plain question box and Force End Turn (`confirm`);
+  the lists, one primitive `listDialog` (`fleets`, `battles`, `stars` in its three layouts, `ranks`, `hall` and `hallsummary`, `master`, `reports`); Compare Players with its chart, Show Skills (`compare`, `skills`); Split fleet
+  (`split`); Group Fleets, Auto Play and Radical Research on the app's screens, Auto Play's own form for the rulesets without settings (`group`, `auto`, `radical`); Temperatures (`temps`); and the toast and the hot-seat cover in CSS.
+- **Not rebuilt:** Temperatures from the title screen (no game open: the classic window, dressed); the hot-seat cover's player switch (the page's own, restyled); the Master Point List's picture; 4.0.5's radical window timeout.
+- **Not remake controls:** with the iOS and Android rules none of this opens: the app's own screens are shown (`window()` checks `appRules`); the display audit stays 0 open, 0 gaps.
+
 After the app's own screens are done, features other rulesets have that the iOS and Android apps had no screen for are to be shown in the app's visual language (its sprites, Arial type, dialog
 and bar style, touch behaviour). Today they are the classic page's controls: the build queue (star box and Build window), merging fleets, battle reviews and the battle list, the Players window (give,
 surrender, send a message, alliance table) reached by "Players and history...", the Reports window of the other rulesets, the Compare window, the explored-stars and fleets lists, Fix spending, Force end turn

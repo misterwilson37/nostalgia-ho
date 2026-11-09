@@ -2160,6 +2160,7 @@ const hallHeads = (names, cols) => el('div', { class: 'lbhead', style: `--cols: 
 // with no entries) opens the Summary of the selected game.
 function openHall(kind, at, everyone) {
   if (!hasHall(G)) return;
+  if (skinWindow('hall', kind, at, everyone)) return;
   const H = HO.rules(G).hall, local = hallTables(G)[kind === 'shame' ? 'shame' : 'fame'], W = H.words || {};
   // hall.words (3.0.1): the version's own titles and heads; hall.again: Play Again's New Game options
   const title = (kind === 'shame' ? W.shame : W.fame) || (kind === 'shame' ? 'Hall of Shame' : 'Hall of Fame'), cols = '92fr 117fr 71fr';
@@ -2226,6 +2227,7 @@ function openHallSummary(e, kind, back) {
 // nothing is drawn for it).
 function openMasterList() {
   if (!hasHall(G)) return;
+  if (skinWindow('master')) return;
   const H = HO.rules(G).hall, L = hallTables(G).master.list, cols = '6fr 136fr 136fr 101fr';
   const pic = el('div', { class: 'hpic master' });
   const show = (pts) => {
@@ -2395,6 +2397,7 @@ function modal(title, content, opts) {
   const win = el('div', { class: 'win ' + (opts.cls || '') + (title ? '' : ' notitle'), role: 'dialog', 'aria-modal': 'true', 'aria-label': title || opts.label || null },
     el('div', { class: 'wtitle' }, el('button', { class: 'close', 'aria-label': 'Close', onclick: closeModal }), el('span', null, title)),
     el('div', { class: 'wbody' }, content));
+  if (T.dress) T.dress(win, title); // (a skin's tag for the window it just named through skinWindow(): the iOS skin's dressed windows)
   const back = el('div', { class: 'scrim', onclick: (e) => { if (e.target === back && !opts.sticky) closeModal(); } }, win);
   document.body.append(back);
   UI.modal = back; UI.onClose = opts.onClose;
@@ -2782,6 +2785,7 @@ function openOrganize(sid) {
   const style = organizeStyle();
   if (!style || sid == null) return;
   if (style === 'ios' && skinWindow('organize', sid)) return;
+  if (style !== 'ios' && skinWindow('group', sid)) return; // (a skin's tag for the Group / Organize Fleets window that opens next)
   const ios = style === 'ios';
   // the Palm (rs.pileMove): a whole pile at a time, to any other fleet or to
   // "Empty Fleet", always there at the end of the list
@@ -3405,7 +3409,7 @@ function origDialog(w, h, units, items, cls) {
   }
   return box;
 }
-const skinPic = (name) => { const k = (T.prefix || '') + name; return IMG[k] && IMG[k].complete && IMG[k].naturalWidth ? IMG[k] : null; };
+const skinPic = (name) => { const k = (T.prefix || '') + name; return IMG[k] && IMG[k].complete && IMG[k].naturalWidth ? IMG[k] : (T.skinPic ? T.skinPic(name) : null); }; // (a skin's own picture for a name it does not load: Compare Players' row icons)
 function openCompare() {
   if (skinWindow('compare')) return;
   const C = G && HO.rules(G).compare;
@@ -3451,6 +3455,7 @@ function openCompare() {
 function openSkills() {
   const C = G && HO.rules(G).compare;
   if (!C) return;
+  if (skinWindow('skills')) return;
   const SKK = ['novice', 'beginner', 'normal', 'advanced', 'expert'], IQK = ['dumb', 'average', 'smart', 'diabolical'];
   const SK = ['Novice', 'Beginner', 'Normal', 'Advanced', 'Expert'], IQ = ['Dumb', 'Average', 'Smart', 'Diabolical'];
   // the official names where the game's language has them: 3.0.1F's STR# 1007 and 1009 (French), DOS 2.0's strings 96 to 100 and 16 to 18 (German)
@@ -3721,6 +3726,7 @@ function openChat() {
 // with each step (rules-dos fixSpending20, rules-301 fixSpending301).
 function openFixSpending() {
   const FS = HO.rules(G).fixSpending; if (!FS) return;
+  if (skinWindow('fixspending')) return; // (a skin's own: the iOS skin's, in the app's dialog)
   let cur = -1;
   const line = el('p', { class: 'fixline', role: 'status' });
   const next = el('button', { onclick: () => step() }, 'Next');
@@ -3880,6 +3886,7 @@ function openBattleList() {
   if (!bs.length) { toast('No battles yet.'); return; }
   const rows = bs.map(b => el('tr', { class: 'click', onclick: () => { closeModal(); openBattle(b.id); } }, el('td', null, G.stars[b.star].name + (b.duel != null ? ` (duel ${b.duel + 1})` : '')), el('td', null, String(b.year)),
     el('td', null, b.sides.filter(o => o !== ME).map(o => G.players[o].name).join(', ')), el('td', null, `${b.lost[ME] || 0} / ${b.sides.filter(o => o !== ME).reduce((a, o) => a + (b.lost[o] || 0), 0)}`)));
+  if (skinWindow('battles')) return;
   modal('Review battle', table(['Star', 'Year', 'Against', 'Lost (you / them)'], rows), { cls: 'mid' });
 }
 function openStarList() {
@@ -4416,6 +4423,7 @@ function forceEndTurn() {
   const all = seatOrder(), left = all.filter(p => p.id !== ME && !(G.done || []).includes(p.id));
   if (!left.length) { doEndTurn(); return; }
   const t = FE.ask.replace('%s', me().name).replace('%s', String(left.length)).replace('%s', String(all.length));
+  if (skinWindow('forceend', t, () => { G.done = all.map(p => p.id).filter(i => i !== ME); doEndTurn(); })) return;
   const w = modal('Force End Turn', el('div', null, ...t.split('\n\n').map(x => el('p', null, x)), el('div', { class: 'btns right' },
     el('button', { class: 'quiet', onclick: closeModal }, 'Wait'),
     el('button', { onclick: () => { closeModal(); G.done = all.map(p => p.id).filter(i => i !== ME); doEndTurn(); } }, 'Force End Turn'))), { cls: 'small' });
@@ -4534,6 +4542,7 @@ function tempChoice() {
   return el('label', { class: 'tempchoice' }, el('span', null, 'Temperatures'), ' ', s);
 }
 function openTemperature() {
+  if (skinWindow('temps')) return;
   modal('Temperatures', el('div', { class: 'about' },
     el('p', null, 'The unit temperatures are shown in, everywhere in the game: the planet panel, the lists and the reports. “As the original” shows each version as it was released (°F in most, °C in 1.2 and the Amiga; the version’s own Preferences window, where it has one, still says °C or °F). The other two always show that unit; where the version had its own way of working out °C, it is used. This is yours, for every game.'),
     tempChoice(),
@@ -4669,6 +4678,7 @@ function reportAction(m) {
 }
 function openReports() {
   if (!G) return;
+  if (skinWindow('reports')) return;
   const O = verOpts() || {};
   // (rs.reportHistory: 1.2's report window lists the last 50 reports of all the years, scrolled to the current year's first)
   const old = HO.rules(G).reportHistory ? (me().reportLog || []) : [], ms = old.concat(me().inbox || []);
@@ -6634,6 +6644,7 @@ window.addEventListener('DOMContentLoaded', () => {
     verOpts, modern, hotSeat, openGameText, Prefs, savePrefs, switchPlayers, forceEndTurn, openBattleList, openFixSpending, lastBattles, playOneTurn, showMessages,
     // (and the windows tools/ui-lang-audit.js opens in every skin and language)
     openPrefs, openAccount, openHall, hasHall, openMasterList, openRanks, profile, rankOf, // (profile, rankOf: the rank window a skin draws itself)
+    arrivesText, markedLine, hallTables, playAgain, openTemperature, compareWords, tl, CMP_EN, CMP_ICONS, openSkillsList: () => openSkills(), hasCloud: () => !!CLOUD, cloudHall: (kind, order) => CLOUD.hallTop(G.rules, kind, order), cloudError: (e) => CLOUD.errorText(e), cloudUser: () => cloudUser(), // (what the iOS skin's own fleet list, Hall and Master Point List need)
     openGameCenter, openFleetList, openStarList, openGive, openChat, winWords, others, menuDim, chatLimitToast, openNameStar, findRoute, autoRoute, runAutoPlay, autoPlaySliders, autoPlayWhere, openAutoPlaySettings, // (what a skin's own Give, Message, Dip and Surrender windows need)
     toggleArmageddon, openSkin, openSounds, openLanguage, openAutoPlay, openDip, openSurrender, openSavedGames, closeScreen, openPatchNotes,
     classic(name, fn, ...a) { skipSkinWin = name; try { return fn(...a); } finally { skipSkinWin = null; } },

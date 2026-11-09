@@ -1,0 +1,47 @@
+--- a/js/skins/classic/ui.js
++++ b/js/skins/classic/ui.js
+@@ -3406,7 +3406,7 @@
+   }
+   return box;
+ }
+-const skinPic = (name) => { const k = (T.prefix || '') + name; return IMG[k] && IMG[k].complete && IMG[k].naturalWidth ? IMG[k] : null; };
++const skinPic = (name) => { const k = (T.prefix || '') + name; return IMG[k] && IMG[k].complete && IMG[k].naturalWidth ? IMG[k] : (T.skinPic ? T.skinPic(name) : null); }; // (a skin's own picture for a name it does not load: Compare Players' row icons)
+ function openCompare() {
+   if (skinWindow('compare')) return;
+   const C = G && HO.rules(G).compare;
+--- a/js/skins/ios/ui.js
++++ b/js/skins/ios/ui.js
+@@ -2231,14 +2231,6 @@
+   remakeOwn(L, 'players');
+   return true;
+ }
+-// Compare Players' rows have icons of the originals' own (the Mac's i3110 ...), which this skin does not load (the chart drew boxes). THE REMAKE'S OWN choice: the app's graph series
+-// pictures, the same rows the app's graph legend names (income, metal, ships and the five technologies: icon0, 1, 3, 5-9) and the planet for Planets. They are put under the keys the chart
+-// looks for (`skinPic`, js/skins/classic/ui.js), as the window opens.
+-function compareIcons() {
+-  const a = A(), IMG = a && a.IMG; if (!IMG) return;
+-  const map = { 3110: 'icon0-selected', 3162: 'icon1-selected', 3150: 'planet_0', 4011: 'icon3-selected', 3100: 'icon5-selected', 3101: 'icon6-selected', 3102: 'icon7-selected', 3103: 'icon8-selected', 3104: 'icon9-selected' };
+-  for (const id in map) { const im = IMG[P + map[id]]; if (im && im.complete && im.naturalWidth) IMG[P + 'i' + id] = im; }
+-}
+ // The remake's own question box: the app's message box with the check and the cross; a ruleset's own button words (labels: [go on, turn down], 3.0.1's Armageddon questions) are the app's text
+ // buttons in their place
+ function confirmRemake(text, yes, labels) {
+@@ -3327,11 +3319,17 @@
+     if (item != null) a.Sound.play(TAP_FILE[item]);
+   },
+   // the app's message box for a question (+[DialogLayerSprite message:closeButton:cancelButton:] with setOkBlock:): the Evacuate question, with the check and the cross
++  // Compare Players' rows have icons of the originals' own (the Mac's i3110 ...), which this skin does not load (the chart drew boxes). THE REMAKE'S OWN choice: the app's graph series pictures, the
++  // same rows the app's graph legend names (income, metal, ships and the five technologies: icon0, 1, 3, 5-9) and the planet for Planets (js/skins/classic/ui.js skinPic asks the theme for a name it lacks)
++  skinPic(name) {
++    const a = A(), IMG = a && a.IMG, m = /^[ib](\d+)$/.exec(name); if (!IMG || !m || !a.G || /^(ios|android)$/.test(a.G.rules || '')) return null;
++    const map = { 3110: 'icon0-selected', 3162: 'icon1-selected', 3150: 'planet_0', 4011: 'icon3-selected', 3100: 'icon5-selected', 3101: 'icon6-selected', 3102: 'icon7-selected', 3103: 'icon8-selected', 3104: 'icon9-selected' }, im = IMG[P + map[m[1]]];
++    return im && im.complete && im.naturalWidth ? im : null;
++  },
+   // the page's tag for a window it opens next (see DRESSED)
+   dress(win, title) {
+     const a = A(), by = !dressNext && a && a.G && !/^(ios|android)$/.test(a.G.rules || '') && DRESS_TITLES.includes(title) ? title : null; // (windows the page opens with no skinWindow() call: by their English title)
+     if (!dressNext && !by) return;
+-    if (dressNext === 'compare') compareIcons();
+     win.classList.add('ios-remake'); win.setAttribute('data-remake', 'dressed:' + (dressNext || by)); dressNext = null;
+   },
+   // the remake's own plain "Are you sure?" box for a ruleset the app has no question for: the app's message box with the check and the cross (the button words of a ruleset's own alert are not shown)

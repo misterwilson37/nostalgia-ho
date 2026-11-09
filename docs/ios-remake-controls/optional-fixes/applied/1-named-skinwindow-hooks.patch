@@ -1,0 +1,84 @@
+--- a/js/skins/classic/ui.js
++++ b/js/skins/classic/ui.js
+@@ -2160,6 +2160,7 @@
+ // with no entries) opens the Summary of the selected game.
+ function openHall(kind, at, everyone) {
+   if (!hasHall(G)) return;
++  if (skinWindow('hall')) return;
+   const H = HO.rules(G).hall, local = hallTables(G)[kind === 'shame' ? 'shame' : 'fame'], W = H.words || {};
+   // hall.words (3.0.1): the version's own titles and heads; hall.again: Play Again's New Game options
+   const title = (kind === 'shame' ? W.shame : W.fame) || (kind === 'shame' ? 'Hall of Shame' : 'Hall of Fame'), cols = '92fr 117fr 71fr';
+@@ -2226,6 +2227,7 @@
+ // nothing is drawn for it).
+ function openMasterList() {
+   if (!hasHall(G)) return;
++  if (skinWindow('master')) return;
+   const H = HO.rules(G).hall, L = hallTables(G).master.list, cols = '6fr 136fr 136fr 101fr';
+   const pic = el('div', { class: 'hpic master' });
+   const show = (pts) => {
+@@ -2783,6 +2785,7 @@
+   const style = organizeStyle();
+   if (!style || sid == null) return;
+   if (style === 'ios' && skinWindow('organize', sid)) return;
++  if (style !== 'ios' && skinWindow('group')) return; // (a skin's tag for the Group / Organize Fleets window that opens next)
+   const ios = style === 'ios';
+   // the Palm (rs.pileMove): a whole pile at a time, to any other fleet or to
+   // "Empty Fleet", always there at the end of the list
+@@ -3882,6 +3885,7 @@
+   if (!bs.length) { toast('No battles yet.'); return; }
+   const rows = bs.map(b => el('tr', { class: 'click', onclick: () => { closeModal(); openBattle(b.id); } }, el('td', null, G.stars[b.star].name + (b.duel != null ? ` (duel ${b.duel + 1})` : '')), el('td', null, String(b.year)),
+     el('td', null, b.sides.filter(o => o !== ME).map(o => G.players[o].name).join(', ')), el('td', null, `${b.lost[ME] || 0} / ${b.sides.filter(o => o !== ME).reduce((a, o) => a + (b.lost[o] || 0), 0)}`)));
++  if (skinWindow('battles')) return;
+   modal('Review battle', table(['Star', 'Year', 'Against', 'Lost (you / them)'], rows), { cls: 'mid' });
+ }
+ function openStarList() {
+@@ -4418,6 +4422,7 @@
+   const all = seatOrder(), left = all.filter(p => p.id !== ME && !(G.done || []).includes(p.id));
+   if (!left.length) { doEndTurn(); return; }
+   const t = FE.ask.replace('%s', me().name).replace('%s', String(left.length)).replace('%s', String(all.length));
++  if (skinWindow('forceend')) return;
+   const w = modal('Force End Turn', el('div', null, ...t.split('\n\n').map(x => el('p', null, x)), el('div', { class: 'btns right' },
+     el('button', { class: 'quiet', onclick: closeModal }, 'Wait'),
+     el('button', { onclick: () => { closeModal(); G.done = all.map(p => p.id).filter(i => i !== ME); doEndTurn(); } }, 'Force End Turn'))), { cls: 'small' });
+@@ -4536,6 +4541,7 @@
+   return el('label', { class: 'tempchoice' }, el('span', null, 'Temperatures'), ' ', s);
+ }
+ function openTemperature() {
++  if (skinWindow('temps')) return;
+   modal('Temperatures', el('div', { class: 'about' },
+     el('p', null, 'The unit temperatures are shown in, everywhere in the game: the planet panel, the lists and the reports. “As the original” shows each version as it was released (°F in most, °C in 1.2 and the Amiga; the version’s own Preferences window, where it has one, still says °C or °F). The other two always show that unit; where the version had its own way of working out °C, it is used. This is yours, for every game.'),
+     tempChoice(),
+@@ -4671,6 +4677,7 @@
+ }
+ function openReports() {
+   if (!G) return;
++  if (skinWindow('reports')) return;
+   const O = verOpts() || {};
+   // (rs.reportHistory: 1.2's report window lists the last 50 reports of all the years, scrolled to the current year's first)
+   const old = HO.rules(G).reportHistory ? (me().reportLog || []) : [], ms = old.concat(me().inbox || []);
+--- a/js/skins/ios/ui.js
++++ b/js/skins/ios/ui.js
+@@ -1946,8 +1946,7 @@
+ const rtr = (x) => (window.HOUI ? HOUI.tr(x) : x);
+ // the classic windows the skin dresses rather than rebuilds (a list of rows the page builds, in the page's own words and code): `window()` names the one about to open, the page's
+ // modal() calls `dress` with it (the hook is js/skins/classic/ui.js, modal()), and the CSS (.win.ios-remake) draws it in the app's dialog look
+-const DRESSED = ['compare', 'fleets', 'stars', 'ranks', 'auto', 'radical', 'hall', 'master', 'temps', 'reports', 'group', 'split'];
+-const DRESS_TITLES = ['Group Fleets', 'Temperatures', 'Reports', 'Report Window', 'Hall of Fame', 'Hall of Shame', 'Hall Of Fame', 'Hall Of Shame', 'Master Point List', 'Organize Fleets', 'Review battle', 'Force End Turn'];
++const DRESSED = ['compare', 'fleets', 'stars', 'ranks', 'auto', 'radical', 'hall', 'master', 'temps', 'reports', 'group', 'split', 'battles', 'forceend'];
+ let dressNext = null;
+ function remakeOwn(L, key) { L.dlg.classList.add('ios-remake'); L.dlg.setAttribute('data-remake', key); L.scrim.setAttribute('data-remake', key); return L; }
+ // a label that is kept inside the room it has (a ruleset's own words are longer than the app's "Recipient:")
+@@ -3328,12 +3327,7 @@
+   },
+   // the app's message box for a question (+[DialogLayerSprite message:closeButton:cancelButton:] with setOkBlock:): the Evacuate question, with the check and the cross
+   // the page's tag for a window it opens next (see DRESSED)
+-  dress(win, title) {
+-    const a = A(), by = !dressNext && a && a.G && !/^(ios|android)$/.test(a.G.rules || '') && DRESS_TITLES.includes(title) ? title : null; // (windows the page opens with no skinWindow() call: by their English title)
+-    if (!dressNext && !by) return;
+-    if (dressNext === 'compare') compareIcons();
+-    win.classList.add('ios-remake'); win.setAttribute('data-remake', 'dressed:' + (dressNext || by)); dressNext = null;
+-  },
++  dress(win) { if (!dressNext) return; win.classList.add('ios-remake'); win.setAttribute('data-remake', 'dressed:' + dressNext); dressNext = null; },
+   // the remake's own plain "Are you sure?" box for a ruleset the app has no question for: the app's message box with the check and the cross (the button words of a ruleset's own alert are not shown)
+   confirm(text, yes, labels) {
+     const a = A(); if (!a || !a.G || /^(ios|android)$/.test(a.G.rules || '') || typeof text !== 'string') return false;

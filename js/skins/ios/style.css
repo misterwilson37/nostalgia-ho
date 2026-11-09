@@ -439,3 +439,68 @@ html.skin-ios .ios-sat[hidden] { display: none; }
 html.skin-ios .ios-sati { appearance: none; border: 0 !important; border-radius: 0 !important; background: none !important; padding: 0 !important; margin: 0; box-shadow: none !important; color: #fff; text-align: left; white-space: nowrap; cursor: pointer; font: calc(16 * var(--pt)) / 1.15 var(--appfont, Arial, Helvetica, sans-serif); transform-origin: 0 50%; }
 html.skin-ios .ios-sati.red { color: #dd0806; }
 html.skin-ios .ios-sati.dn { transform: scale(1.1); background: rgba(255, 255, 255, .196) !important; }
+
+/* Remake-only controls (docs/brief-restyle-ios.md): a list to choose a line from in the app's dialog style. The app has no such list; it is the Scrap Ship Types list's scroller
+   (.ios-scl) with a row outlined in the app's blue (0x393cd6, the outline Organize Fleets draws round a column) while chosen. THE REMAKE'S OWN. */
+html.skin-ios .ios-rlist { align-items: stretch; }
+html.skin-ios .ios-ritem { appearance: none; flex: none; box-sizing: border-box; margin: 0; padding: calc(3 * var(--pt)) calc(8 * var(--pt)) !important; min-width: 0; min-height: 0; box-shadow: none !important; background: rgba(0, 0, 0, 0.15) !important; color: #fff !important; border: calc(1 * var(--pt)) solid transparent !important; border-radius: 0 !important; text-align: left; cursor: pointer; font-family: var(--appfont, Arial, Helvetica, sans-serif); font-weight: 400 !important; line-height: 1.15; }
+html.skin-ios .ios-ritem.on { border-color: #393cd6 !important; background: rgba(57, 60, 214, 0.35) !important; }
+html.skin-ios .ios-ritem:active { opacity: 0.59; }
+
+/* Players (native, THE REMAKE'S OWN): a row is a hat, the name over a smaller line, and the app's text button at the right */
+html.skin-ios .ios-rrow { display: flex; align-items: center; gap: calc(8 * var(--pt)); cursor: default; }
+html.skin-ios .ios-rrow.out { opacity: 0.55; }
+html.skin-ios .ios-rhat { flex: none; }
+html.skin-ios .ios-rtx { flex: 1; min-width: 0; display: flex; flex-direction: column; text-align: left; }
+html.skin-ios .ios-rname { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+html.skin-ios .ios-rsub { opacity: 0.8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* a classic window the skin dresses (DRESSED in ui.js; THE REMAKE'S OWN look): the app's type, the app's blue (0x393cd6) between rows, the pressed state of a touched row (150 / 255) */
+html.skin-ios .win.ios-remake, html.skin-ios .win.ios-remake .wbody, html.skin-ios .win.ios-remake table { font-family: var(--appfont, Arial, Helvetica, sans-serif); }
+html.skin-ios .win.ios-remake .wtitle span { font-weight: 400; }
+html.skin-ios .win.ios-remake table.ptable th { font-weight: 400; opacity: 0.75; }
+html.skin-ios .win.ios-remake table.ptable td, html.skin-ios .win.ios-remake table.ptable th { border-color: #393cd6; }
+html.skin-ios .win.ios-remake tr.click { cursor: pointer; }
+html.skin-ios .win.ios-remake tr.click:active { opacity: 0.59; }
+/* Send Message, columns of questions (THE REMAKE'S OWN): a label over each choice, the text field in the Build screen's name-box colours (fill 0xff5a1c18, a white border 2 points) */
+html.skin-ios .ios-rsteps { align-items: stretch; }
+html.skin-ios .ios-rcol { display: flex; flex-direction: column; align-items: flex-start; gap: calc(2 * var(--pt)); }
+html.skin-ios .ios-rlab { position: static; }
+html.skin-ios .ios-rtext { box-sizing: border-box; width: calc(200 * var(--pt)); height: calc(32 * var(--pt)); background: #5a1c18 !important; color: #fff !important; border: calc(2 * var(--pt)) solid #fff !important; outline: 0; padding: 0 calc(6 * var(--pt)) !important; font-family: var(--appfont, Arial, Helvetica, sans-serif); border-radius: 0 !important; }
+html.skin-ios .ios-rnone { position: static; }
+/* the dressed windows' buttons and close box in the app's own sprites (THE REMAKE'S OWN look on the page's windows): button-text.png as a nine-patch, button-x.png for the close box */
+html.skin-ios .win.ios-remake button:not(.close):not(.picbtn):not(.givetoggle) { appearance: none; box-sizing: border-box; min-width: calc(60 * var(--pt)); min-height: calc(28 * var(--pt)); padding: 0 calc(10 * var(--pt)) !important; color: #fff !important; background: none !important; border: calc(5 * var(--pt)) solid transparent !important; border-image: url("../../../assets/skins/ios/sprites/button-text.png") 10 fill / calc(5 * var(--pt)) stretch !important; border-radius: 0 !important; box-shadow: none !important; font-family: var(--appfont, Arial, Helvetica, sans-serif); font-weight: 400 !important; font-size: calc(14 * var(--pt)); cursor: pointer; }
+html.skin-ios .win.ios-remake button:not(.close):not(.picbtn):active { opacity: 0.59; }
+html.skin-ios .win.ios-remake button:disabled { opacity: 0.45; }
+html.skin-ios .win.ios-remake .wtitle .close { width: calc(28 * var(--pt)); height: calc(28 * var(--pt)); border: 0 !important; border-radius: 0 !important; background: url("../../../assets/skins/ios/sprites/button-x.png") center / contain no-repeat !important; box-shadow: none !important; }
+html.skin-ios .win.ios-remake .wtitle .close::before, html.skin-ios .win.ios-remake .wtitle .close::after { content: none !important; }
+html.skin-ios .win.ios-remake select { background-color: #5a1c18; color: #fff; border: calc(2 * var(--pt)) solid #fff; border-radius: 0; font-family: var(--appfont, Arial, Helvetica, sans-serif); }
+
+html.skin-ios .win.ios-remake .cmptitle { color: #fff; }
+/* Compare Players has no title bar (the chart carries its own title at the top left): the close box floats at the top right, and the body does not scroll (focusing its Show Skills button scrolled the title out of sight) */
+html.skin-ios .win.ios-remake.compare { position: relative; }
+html.skin-ios .win.ios-remake.compare .wtitle { position: absolute; right: calc(6 * var(--pt)); top: calc(6 * var(--pt)); z-index: 3; }
+html.skin-ios .win.ios-remake.compare .wbody { overflow: visible; }
+
+/* The remake's own toast (a line that says what happened) and the hot-seat cover between players (the apps have neither: one player a device). THE REMAKE'S OWN, in the app's
+   BackgroundBorderNode colours (fill 0xff5a1c18 as r g b a bytes: 0x18 0x1c 0x5a; line 0x39 0x3c 0xd6; a 2 point line) and Arial; the cover's card is the dialog's nine-patch and its button the text button's */
+html.skin-ios .toast { background: #181c5a; border: 2px solid #393cd6; border-radius: 0; color: #fff; font-family: var(--appfont, Arial, Helvetica, sans-serif); padding: 6px 14px; }
+html.skin-ios #handover .card.hand { background: none; box-shadow: none; box-sizing: border-box; border: 40px solid transparent; border-image: url("../../../assets/skins/ios/sprites/dialog-background.png") 80 fill / 40px stretch; padding: 0 12px; color: #fff; font-family: var(--appfont, Arial, Helvetica, sans-serif); gap: 10px; }
+html.skin-ios #handover h2 { font: 24px var(--appfont, Arial, Helvetica, sans-serif); color: #fff; }
+html.skin-ios #handover p { color: #fff; font-family: var(--appfont, Arial, Helvetica, sans-serif); }
+html.skin-ios #handover button { appearance: none; box-sizing: border-box; min-width: 120px; min-height: 30px; padding: 0 12px !important; color: #fff !important; background: none !important; border: 5px solid transparent !important; border-image: url("../../../assets/skins/ios/sprites/button-text.png") 10 fill / 5px stretch !important; border-radius: 0 !important; box-shadow: none !important; font: 16px var(--appfont, Arial, Helvetica, sans-serif); cursor: pointer; }
+html.skin-ios #handover button:active { opacity: 0.59; }
+
+/* The remake's lists, rebuilt (`listDialog` in ui.js; THE REMAKE'S OWN): rows are flex lines of cells, the head line small over them, a row outlined in the app's blue while chosen */
+html.skin-ios .ios-rtab { display: flex; align-items: center; gap: calc(6 * var(--pt)); text-align: left; cursor: pointer; }
+html.skin-ios .ios-rcell { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+html.skin-ios .ios-rhead { position: absolute; cursor: default; opacity: 0.8; color: #fff; }
+html.skin-ios .ios-rh.on { text-decoration: underline; }
+html.skin-ios .ios-rtab.noclimate { opacity: 0.7; }
+html.skin-ios .ios-rtab.scrap { opacity: 0.6; }
+html.skin-ios .ios-rnote { color: #fff; text-align: center; }
+html.skin-ios .ios-rstar { width: calc(24 * var(--pt)); height: calc(24 * var(--pt)); flex: none; }
+html.skin-ios .ios-bbtn:disabled { opacity: 0.45; }
+html.skin-ios .ios-rtab.wrap .ios-rcell { white-space: normal; overflow: visible; }
+html.skin-ios .ios-rchart { position: absolute; }
+html.skin-ios .ios-rrowsplit { display: flex; align-items: center; gap: calc(8 * var(--pt)); }
+html.skin-ios .ios-rslot { flex: none; }

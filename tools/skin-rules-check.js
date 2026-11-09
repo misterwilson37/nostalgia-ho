@@ -37,6 +37,7 @@ const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 const up = (u) => new Promise(r => { http.get(u, (res) => { res.resume(); r(res.statusCode < 500); }).on('error', () => r(false)); });
 
 // per-skin checks: run in the page with the game started; return an array of failure strings
+const INVENTORY = [];
 const SKINS_CHECK = {
   async ios(page, ctx) {
     const f = [];
@@ -102,6 +103,62 @@ const SKINS_CHECK = {
     return f;
   },
 };
+// The iOS and Android skins' INVENTORY (docs/brief-restyle-ios.md; docs/remake-controls.md): every command of the page's menus, which the gear's "More menus..." opens for a
+// ruleset the app has no screens for, opened one by one. What it opens is told by its element: the app's own dialog (.ios-gdlg: kind 'app'), a remake-only control in the
+// app's look (.ios-remake[data-remake]: 'native', or a classic window the skin dresses, .win.ios-remake: 'dressed'), or the classic page's window (none of those: CLASSIC), which
+// is a FALLBACK and fails the check. With the iOS or Android rules there are no page menus, so nothing is inventoried (the app's own screens are the display audit's).
+// --inventory prints each command and what it opened.
+const IOS_INFRA = /^(new game|quit to title|import|export|account|about |patch notes|suggestion box|how to play|manual|spaceward ho|auto-play this turn|saved games|open|save|revert|skin and os|language|sounds|preferences|help)/i;
+async function iosInventory(page, ctx) {
+  const f = [];
+  if (/^(ios|android)$/.test(ctx.rules)) return f;
+  const sel = await page.evaluate(() => { const a = window.HOAPI; const s = a.G.stars.find(x => x.owner === a.ME); if (s) { a.UI.sel = s.id; a.centerOn(s.id); a.renderPanel(); a.draw(); } return s && s.id; });
+  await sleep(250); if (sel == null) return f;
+  const closeAll = async () => { for (let i = 0; i < 6 && await page.locator('.scrim, .ios-gscrim, .ios-gdlg').count(); i++) { await page.keyboard.press('Escape'); await sleep(120); const x = page.locator('.scrim .close'); if (await page.locator('.scrim').count() && await x.count()) await x.last().click().catch(() => {}); await page.evaluate(() => { const c = document.querySelector('.ios-gdlg .ios-gx, .ios-gdlg .ios-bcancel'); if (c) c.click(); }); await sleep(80); } };
+  const more = async () => { // the gear's last item opens the page's menus (the bar is shown while it is)
+    await closeAll(); await page.evaluate(() => document.body.click());
+    if (await page.locator('#menubar .mbtn:visible').count() >= 3) return true;
+    await page.evaluate(() => { const g = document.querySelector('.ios-gear'); if (g && getComputedStyle(g).display !== 'none') g.click(); }); await sleep(200);
+    const ok = await page.evaluate(() => { const b = document.querySelector('.ios-amx'); if (b) { b.click(); return true; } return false; }); await sleep(250);
+    return ok;
+  };
+  if (!await more()) { f.push('inventory: the gear has no More menus'); return f; }
+  const names = await page.evaluate(() => [...document.querySelectorAll('#menubar .mbtn')].map(b => b.textContent.trim()));
+  if (process.env.HO_VERBOSE) console.log('inventory menus', JSON.stringify(names));
+  const classify = () => page.evaluate(() => {
+    const w = [...document.querySelectorAll('.scrim .win')].pop(), app = document.querySelector('.ios-gdlg'), rm = document.querySelector('.ios-remake[data-remake]');
+    const toast = (document.querySelector('.toast') || {}).textContent || '', screen = (document.querySelector('.hoscreen') || document.createElement('i')).getAttribute('aria-label');
+    if (rm) { const k = rm.getAttribute('data-remake'); return { kind: /^dressed:/.test(k) ? 'dressed' : 'native', window: k }; }
+    if (w && w.classList.contains('ios-remake')) return { kind: 'dressed', window: (w.querySelector('.wtitle span') || {}).textContent || '' };
+    if (w) return { kind: 'CLASSIC', window: (w.querySelector('.wtitle span') || {}).textContent || w.getAttribute('aria-label') || '', cls: w.className };
+    if (app) return { kind: 'app', window: app.getAttribute('aria-label') || '' };
+    if (screen) return { kind: 'screen (the remake\'s file handling, left as it is)', window: screen };
+    return { kind: toast ? 'toast' : 'nothing (a command)', window: '' };
+  });
+  const pop = async (m) => { await more(); await page.evaluate((i) => { const b = document.querySelectorAll('#menubar .mbtn')[i]; if (b) { if (b.getAttribute('aria-expanded') === 'true') { b.click(); } b.click(); } }, m); await sleep(150); };
+  for (let m = 0; m < names.length; m++) {
+    await pop(m);
+    const labels = await page.evaluate((i) => [...document.querySelectorAll('#menubar .dropdown')[i].querySelectorAll('[role=menuitem]')].map(b => ({ t: b.textContent.replace(/⌘.*/, '').trim(), off: b.disabled, check: b.classList.contains('check') })), m);
+    if (process.env.HO_VERBOSE) console.log('  menu', names[m], labels.length);
+    for (const { t, off, check } of labels) {
+      const row = { rules: ctx.rules, command: names[m] + ' > ' + t, kind: '' };
+      if (!t) continue;
+      if (off) row.kind = 'ghosted'; else if (IOS_INFRA.test(t)) row.kind = 'infrastructure'; else if (check) row.kind = 'toggle (a check mark in the menu)';
+      else {
+        await pop(m);
+        const hit = await page.evaluate(([i, label]) => { const b = [...document.querySelectorAll('#menubar .dropdown')[i].querySelectorAll('[role=menuitem]')].find(x => x.textContent.replace(/⌘.*/, '').trim() === label); if (b) b.click(); return !!b; }, [m, t]);
+        await sleep(300);
+        if (!hit) row.kind = 'not in the menu now'; else { Object.assign(row, await classify()); }
+        await closeAll();
+      }
+      INVENTORY.push(row);
+      if (row.kind === 'CLASSIC') f.push(`falls back to the classic page: "${row.command}" opens "${row.window}"`);
+    }
+  }
+  await page.evaluate(() => document.body.click());
+  return f;
+}
+SKINS_CHECK.ios.inventory = iosInventory;
 SKINS_CHECK.android = SKINS_CHECK.ios;
 
 // The Mac 1.2 skin (docs/brief-restyle.md). Its menus are 1.2's own; every command the remake has that 1.2 hadn't goes in the
@@ -111,7 +168,6 @@ SKINS_CHECK.android = SKINS_CHECK.ios;
 // --inventory prints every command with what it opened, for docs/12-findings.md ("Remake-only controls").
 // Not game features: the remake's own infrastructure (New game, Quit, Import ...) is listed but not opened or failed.
 const INFRA = /^(new game|quit to title|import|export|account|about |patch notes|suggestion box|how to play|manual|spaceward ho|auto-play this turn)/i;
-const INVENTORY = [];
 SKINS_CHECK.mac12 = async function (page, ctx) {
   const f = [];
   const sel = await page.evaluate(() => { const a = window.HOAPI; const s = a.G.stars.find(x => x.owner === a.ME); if (s) { a.UI.sel = s.id; a.centerOn(s.id); a.renderPanel(); a.draw(); } return s && s.id; });
@@ -244,6 +300,7 @@ async function main() {
       }
       let k = 0; while (k++ < 40 && await page.locator('.card:not(.end):not(.waiting)').count()) { if (await page.locator('.scrim, .ios-gscrim').count()) { await page.keyboard.press('Escape'); await sleep(100); continue; } await page.locator('.card').first().click().catch(() => {}); await sleep(50); }
       if (SKINS_CHECK[skin] && skinNow) fails.push(...await SKINS_CHECK[skin](page, { w, h, rules }));
+      if (skinNow && (skin === 'ios' || skin === 'android') && !opt('no-inventory', '') && !args.includes('--no-inventory')) fails.push(...await iosInventory(page, { w, h, rules }));
       if (SHOTS) { await page.screenshot({ path: path.join(SHOTS, `rules-${skin}-${rules}-${sn}.png`) }).catch(() => {}); }
     } catch (e) { fails.push('threw: ' + String(e.message).split('\n').slice(0, process.env.HO_VERBOSE ? 20 : 1).join(' | ')); }
     fails.push(...errors.map(e => 'page error: ' + e));

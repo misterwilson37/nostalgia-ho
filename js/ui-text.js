@@ -1432,5 +1432,15 @@ root.HOUI.add([
 ["#Existing:", "Existants:", null, null, null, { fr: '3.0.1F' }, { fr: 'Existants :' }],
 ["List of All Fleets:", "Statut des flottes:", null, null, null, { fr: '3.0.1F' }, { fr: 'Statut des flottes :' }],
 ["Go To Fleet", "Rejoindre flotte", null, null, null, { fr: '3.0.1F' }, { fr: 'Rejoindre flotte' }],
+// ---------- the iOS and Android skins' remake-only controls (docs/remake-controls.md): the remake's own words, no source ----------
+['you', 'vous', 'Sie', 'sen', 'tú'],
+['History', 'Historique', 'Verlauf', 'Tarihçe', 'Historial'],
+['Money', 'Argent', 'Geld', 'Para', 'Dinero'],
+['Queued:', 'En attente :', 'In der Warteschlange:', 'Sırada:', 'En cola:'],
+['Scrap this ship type and all its ships?', 'Mettre au rebut ce type de vaisseau et tous ses vaisseaux ?', 'Diesen Schiffstyp und alle seine Schiffe verschrotten?', 'Bu gemi türü ve tüm gemileri hurdaya çıkarılsın mı?', '¿Desguazar este tipo de nave y todas sus naves?'],
+['Scrap these ship types and all their ships?', 'Mettre au rebut ces types de vaisseaux et tous leurs vaisseaux ?', 'Diese Schiffstypen und alle ihre Schiffe verschrotten?', 'Bu gemi türleri ve tüm gemileri hurdaya çıkarılsın mı?', '¿Desguazar estos tipos de nave y todas sus naves?'],
+['Nobody yet.', 'Personne pour l’instant.', 'Noch niemand.', 'Henüz kimse yok.', 'Todavía nadie.'],
+['Ranks', 'Grades', 'Ränge', 'Rütbeler', 'Rangos'],
+['Total master points:', 'Total des points de maître :', 'Meisterpunkte insgesamt:', 'Toplam usta puanı:', 'Total de puntos de maestría:'],
 ]);
 })(typeof window !== 'undefined' ? window : globalThis);

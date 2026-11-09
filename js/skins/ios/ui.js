@@ -1438,6 +1438,11 @@ function openBuildFlow(sid) {
   if (pc) { pcv.width = pc.width; pcv.height = pc.height; pcv.getContext('2d').drawImage(pc, 0, 0); }
   L.dlg.append(put(pcv, 120, H - 25, 0.5, 0.5));
   L.dlg.append(bLabel(s.name, 16, gd.a80 + 20 + 120, H - 25, 0, 0.5, '#fff'));
+  if (HO.feature(G, 'buildQueue')) { // DOS 2.0, 1.2 and Mac 2.0.1 queue ships and pay for them over the turns: THE REMAKE'S OWN use of the app's Build screen; the colony's queue is told in the top right
+    L.dlg.classList.add('ios-remake'); L.dlg.setAttribute('data-remake', 'queue'); L.scrim.setAttribute('data-remake', 'queue');
+    const q = (s.queue || []).map(it => { const d = HO.getDesign(G, a.ME, it.did); return d ? `${it.n} ${d.name}` : ''; }).filter(Boolean).join(', ');
+    const ql = bLabel((q ? rtr('Queued:') + ' ' + q : rtr('Nothing queued.')), 12, W - 12 - 28, H - 25, 1, 0.5, '#fff'); ql.style.maxWidth = bpt(W - 330); ql.style.overflow = 'hidden'; ql.style.textOverflow = 'ellipsis'; L.dlg.append(ql);
+  }
   const colW = (W + gd.a80 * -8) / classes.length, colH = H - 50;
   classes.forEach((c, i) => {
     const col = UIEl('div', 'ios-bcol' + (i && i < classes.length - 1 ? ' bord' : ''), { style: `left:${bpt(gd.a80 * 4 + i * colW)};width:${bpt(colW)};height:${bpt(colH)}` });
@@ -1765,7 +1770,7 @@ function openRadicalIOS() {
       dlg.append(menu);
     } });
   L.scrim.classList.add('ios-gtop'); document.body.append(L.scrim);
-  return true;
+  return L;
 }
 // -[RankLevelDialogLayer initDialog] 0x1000b8b78 and doClose: 0x1000b90ec (read in the decompile, floats.py and the assembly): the message Misc Strings 73, the check and the cross; the rank's sentence (template 23 with the rank's
 // name, Arial a58 = 16, 24 on an iPad) centred, its top 10 a80 under the top; Misc 74 centred under it; a text field (CCTextField 250 x 32, Arial a58, white; at most 11 letters) centred under that, over a border node (254 x 34, 0x5a1c18
@@ -1867,7 +1872,7 @@ function openGiveIOS() {
 // at (6.25 a88, 8.75 a88) anchored at its bottom left; to its right (menu left + width + 5 a88) and centred on its height, Misc 104 "Off" / 105 "On" (Arial a18). Choosing the check with a changed choice asks
 // first (a message with the check and the cross; the layer has closed): Alert Strings 4 for turning it on, 5 for turning it off (the check calls reallyArmageddon / cancelArmageddon: both set the player's
 // flag, +0x1118, to the choice); with the choice unchanged nothing is asked
-function openArmageddonIOS() {
+function openArmageddonIOS(own) { // (own: a ruleset other than the app's decides what the check does; see openArmageddonRemake)
   const a = A(), G = a.G;
   let wants = !!a.me().armageddon;
   const L = appDialog({ message: miscS(102), label: miscS(102),
@@ -1884,6 +1889,7 @@ function openArmageddonIOS() {
     },
     ok() {
       if (wants === !!a.me().armageddon) return;
+      if (own) { own(wants); return; }
       const apply = () => { HO.setArmageddon(G, a.ME, wants); a.renderPanel(); a.draw(); a.save(); };
       appMessage(alertS(wants ? 4 : 5), apply);
     } });
@@ -1893,7 +1899,7 @@ function openArmageddonIOS() {
 // scrolling list (CCMenuAdvanced) from 10 a88 under the top to 10 a88 above the bottom, its items 15 apart from the top; each item scaled 0.8: the ship's picture (ShipNode) and, 4 further (a80) and centred
 // on it, two Arial 16 lines 4 apart: the type's name and "Number in Existence: %d" (sprintf Template 26); a tap flips the item's scrapped mark, drawn as a red (221, 8, 6) cross over the item (GL lines one pixel
 // wide from corner to corner). The check writes the marks to the ship types (the remake's mark: flagScrapDesign, kept to the end of the turn)
-function openScrapIOS() {
+function openScrapIOS(own) { // (own: a ruleset other than the app's; see openScrapRemake)
   const a = A(), G = a.G, p = a.me(), rs = HO.rules(G);
   const types = p.designs.filter(d => !d.scrapped);
   const count = {}; for (const f of G.fleets) if (f.owner === a.ME) for (const k in f.ships) count[k] = (count[k] || 0) + f.ships[k];
@@ -1923,10 +1929,591 @@ function openScrapIOS() {
       dlg.append(list);
     },
     ok() {
+      if (own) { own(types.filter(d => want.get(d.id)), count); return; }
       for (const d of types) if (want.get(d.id) !== !!d.scrap301) rs.flagScrapDesign(G, p, d, 'command');
       a.renderPanel(); a.draw(); a.save();
     } });
   return L;
+}
+// ---------------------------------------------------------------------------
+// REMAKE-ONLY CONTROLS (docs/brief-restyle-ios.md; docs/ios-findings.md, "Remake-only controls to restyle").
+// What a ruleset other than iOS and Android has and the iOS and Android apps never had, drawn as the app draws its dialogs: the DialogLayerSprite
+// (`appDialog`), the check and cross, Arial in white, the name to tap (a CCMenuItemToggle), CCSliderDeluxe sliders, the scrolling list of the Scrap
+// Ship Types screen. THEY ARE THE REMAKE'S OWN: the app has no original (the page marks each with `data-remake` and the class `ios-remake`).
+// Never reached with the iOS or Android rules (`window()` checks): those keep the app's own screens as they are. The words are the ruleset's own
+// (its giveWindow, cannedChat and windowWords), through the interface language table; the app's own words where a ruleset has none.
+// ---------------------------------------------------------------------------
+const rtr = (x) => (window.HOUI ? HOUI.tr(x) : x);
+// the classic windows the skin dresses rather than rebuilds (a list of rows the page builds, in the page's own words and code): `window()` names the one about to open, the page's
+// modal() calls `dress` with it (the hook is js/skins/classic/ui.js, modal()), and the CSS (.win.ios-remake) draws it in the app's dialog look
+const DRESSED = ['temps'];
+let dressNext = null;
+function remakeOwn(L, key) { dressNext = null; L.dlg.classList.add('ios-remake'); L.dlg.setAttribute('data-remake', key); L.scrim.setAttribute('data-remake', key); return L; }
+// a label that is kept inside the room it has (a ruleset's own words are longer than the app's "Recipient:")
+// (one line while it fits; else it is wrapped in the room, right-aligned against the sliders, as the app's Give wraps nothing because its words are short)
+function fitLabel(text, size, room, x, y, ax, ay) {
+  if (textW(text, size) <= room) return dlabel(text, size, x, y, ax, ay);
+  const e = UIEl('span', 'ios-bt ios-bwrap', { style: `width:${bpt(room)};font-size:${bpt(size)};text-align:right;color:#fff` }); e.textContent = text;
+  return put(e, x, y, ax, ay);
+}
+// the name to tap: each tap goes to the next of the items (the app's player toggle, `generatePlayerToggle` 0x1000a92b4)
+function nameToggle(gd, items, pick, onPick, size) {
+  const tg = UIEl('button', 'ios-gtoggle', { type: 'button', translate: 'no', style: `font-size:${bpt(size || gd.a58)}` });
+  const show = () => { tg.textContent = items[pick].name; };
+  tg.addEventListener('click', (e) => { e.stopPropagation(); pick = (pick + 1) % items.length; show(); onPick(pick); });
+  show();
+  return tg;
+}
+// a list to choose one line from: the Scrap Ship Types list's scroller, a row outlined in the app's blue (0x393cd6, as Organize Fleets outlines) while chosen
+function chooseList(gd, lines, pick, onPick, top, bottom, side) {
+  const list = UIEl('div', 'ios-scl ios-rlist', { role: 'listbox', style: `top:${bpt(top)};bottom:${bpt(bottom)};left:${bpt(side)};right:${bpt(side)};gap:${bpt(gd.a80)}` });
+  const rows = lines.map((t, i) => {
+    const r = UIEl('button', 'ios-ritem', { type: 'button', role: 'option', style: `font-size:${bpt(gd.a58)}` }); r.textContent = t;
+    r.addEventListener('click', (e) => { e.stopPropagation(); pick = i; mark(); onPick(i); });
+    list.append(r); return r;
+  });
+  const mark = () => rows.forEach((r, i) => { r.classList.toggle('on', i === pick); r.setAttribute('aria-selected', i === pick ? 'true' : 'false'); });
+  mark();
+  return list;
+}
+// Give Money/Metal for a ruleset with its own give window (5.0.5, the Palm, 3.0.1, 4.0.5 and Mac 4.0.5's grid), or none (DOS 2.0, Claude, Gemini): the app's Give screen
+// (openGiveIOS' layout) with the ruleset's limits (3 gifts a turn, the Palm's steps, who is listed and in what order) and words (rs.giveWindow). The classic window's amounts:
+// the Palm moves in rs.giveWindow.steps and takes the whole stock at the top, the rest one unit at a time (the app's slider is a fraction of 10,000)
+function openGiveRemake() {
+  const a = A(), G = a.G, p = a.me(), rs = HO.rules(G), out = (q) => !q.alive || q.surrendered;
+  const W = rs.giveWindow || { style: '505', title: 'Give money or metal', recipient: 'Give to', money: 'Money', metal: 'Metal' };
+  const say = (x, d) => HO.say(G, x || d);
+  if ((p.giftsThisTurn || 0) >= 3) { appMessage(say(W.limit || HO.DATA.alerts[5], 'Sorry, but you may only give 3 gifts per turn.')); return true; }
+  const can = (W.order ? W.order(G) : G.players).filter(q => q.id !== a.ME && !out(q));
+  if (!can.length) { appMessage(say(W.none || HO.DATA.alerts[6], 'Sorry, but there is no one else alive to give or send something to.')); return true; }
+  let pick = Math.max(0, can.findIndex(q => q.id === (W.remember ? p[W.remember] : null))), mAmt = 0, xAmt = 0;
+  const have = Math.max(0, p.savings), hasM = Math.max(0, p.metal), palm = W.style === 'palm';
+  const range = (H) => palm ? W.steps : H, amtOf = (H, v) => palm ? (v >= W.steps ? H : v <= 0 ? 0 : Math.trunc(H / W.steps) * v) : v;
+  const title = rtr(W.title || miscS(75)), who = rtr(W.recipient || W.to); // (3.0.1's and 4.0.5's window has no title and calls the recipient's list "Give Stuff To:": the app's own title stands in)
+  const L = appDialog({ message: title, label: title,
+    build(dlg, cw, ch, gd) {
+      const a88 = gd.a88, yA = ch - 12 * a88, yB = yA - 8 * a88, yC = yB - 8 * a88, sw = a88 * 41.6, sx = a88 * 25, SH = 19, room = a88 * 18.75 - gd.a80;
+      dlg.append(fitLabel(who, 16, room, a88 * 18.75, yA, 1, 0.5), fitLabel(rtr(W.money), 16, room, a88 * 18.75, yB, 1, 0.5), fitLabel(rtr(W.metal), 16, room, a88 * 18.75, yC, 1, 0.5));
+      dlg.append(put(nameToggle(gd, can, pick, (i) => { pick = i; }), a88 * 27, yA, 0.5, 0.5));
+      const row = (y, H, zero, maxText, set) => {
+        const sy = y - 2 * a88, lab = dlabel(zero, gd.a58, sx + sw / 2, sy + SH + gd.a30, 0.5, 0.5);
+        const sl = ccSlider(sw, (f) => set(amtOf(H, Math.round(Math.fround(f) * range(H))), lab)); sl.set(0);
+        if (H <= 0) sl.el.classList.add('off');
+        dlg.append(put(sl.el, sx, sy, 0, 0), lab, dlabel(zero, gd.a38, sx + 2 * a88, sy - 2 * a88, 0.5, 0.5), dlabel(maxText, gd.a38, sx + sw - 2 * a88, sy - 2 * a88, 0.5, 0.5));
+      };
+      row(yB, have, bnum(0, true), bnum(have, true), (v, lab) => { mAmt = v; lab.textContent = bnum(v, true); });
+      row(yC, hasM, '0', bnum(hasM, false), (v, lab) => { xAmt = v; lab.textContent = bnum(v, false); });
+    },
+    ok() {
+      if (W.style === 'grid' && !(mAmt > 0 || xAmt > 0)) return; // (that window with nothing to give just closes)
+      const to = can[pick].id, r = HO.give(G, a.ME, to, mAmt, xAmt);
+      if (r === 'limit') { appMessage(say(W.limit || HO.DATA.alerts[5], 'Sorry, but you may only give 3 gifts per turn.')); return; }
+      if (r === 'ok') { if (W.remember) p[W.remember] = to; a.Sound.play(TAP_FILE[8]); a.renderPanel(); a.save(); }
+    } });
+  remakeOwn(L, 'give');
+  return true;
+}
+// Send a message, for the rulesets whose window is a choice of who and what (rs.cannedChat style 'popup': 5.0.5 and the Palm) and those that have the plain eight lines
+// (HO.sendChat). 2.0's, 3.0.1's and 4.0.5's columns of questions (style 'steps') stay the classic window's (listed in the HANDOFF).
+function openChatRemake() {
+  const a = A(), G = a.G, rs = HO.rules(G), C = rs.cannedChat, me = a.me();
+  if (C && C.style !== 'popup') return openChatStepsRemake(C);
+  const none = HO.DATA.alerts[6] || 'There is no one else to send something to.';
+  let tos, lines, prompts, title;
+  if (C) {
+    tos = C.to(G, a.ME).filter(o => !o[2]).map(o => ({ id: o[0], name: o[1] })); lines = C.lines.slice(); prompts = C.prompts; title = C.title;
+  } else {
+    tos = a.others().map(q => ({ id: q.id, name: q.name })); lines = ['Thank You!', 'Sorry!', '#!$@*$&@•™!', 'I need money.', 'I need metal.', 'I like you.', 'I hate you.', 'Let’s be allies.']; prompts = ['Send to', 'Say']; title = 'Send a message';
+  }
+  if (!tos.length) { appMessage(HO.say(G, none)); return true; }
+  let pick = Math.max(0, tos.findIndex(o => C && C.remember && o.id === me.chatTo)), say = 0;
+  const L = appDialog({ message: rtr(title), label: rtr(title),
+    build(dlg, cw, ch, gd) {
+      const a88 = gd.a88, yA = ch - 12 * a88, yB = yA - 8 * a88, room = a88 * 18.75 - gd.a80;
+      dlg.append(fitLabel(rtr(String(prompts[0]).replace('\n', ' ')), 16, room, a88 * 18.75, yA, 1, 0.5), put(nameToggle(gd, tos, pick, (i) => { pick = i; }), a88 * 27, yA, 0.5, 0.5));
+      dlg.append(fitLabel(rtr(String(prompts[1]).replace('\n', ' ')), 16, room, a88 * 18.75, yB, 1, 0.5));
+      dlg.append(chooseList(gd, lines.map(rtr), 0, (i) => { say = i; }, ch - yB + gd.a88 * 3, 44 + gd.a80 * 3, a88 * 21));
+    },
+    ok() {
+      const to = tos[pick].id, r = C ? HO.sendCanned(G, a.ME, C.make(G, a.ME, to, say)) : HO.sendChat(G, a.ME, to, lines[say]);
+      if (r === 'limit') { const n = typeof rs.chatLimit === 'function' ? rs.chatLimit(G) : rs.chatLimit; appMessage(n === 10 || n == null ? 'Sorry, you can only send ten messages per turn.' : `You have sent the ${n} messages you may send this turn.`); return; }
+      if (C ? r !== 'ok' : false) return; // (a canned message that was not sent)
+      if (C && C.remember) me.chatTo = to;
+      a.Sound.play(TAP_FILE[8]); a.save();
+    } });
+  remakeOwn(L, 'chat');
+  return true;
+}
+// Send Message of 2.0, 3.0.1 and 4.0.5 (rs.cannedChat 'steps'): the original filled columns one after another, to whom, saying what, then what the message needs (a star, a player, a line of
+// text, or 2.0's "About What?" and "Which One?"). One scrolling page in the app's dialog: a name to tap for each choice, the lines in the chosen-row list, a text field in the Build screen's
+// name box for a line of text; what the message still needs is asked as the chosen line changes. The check sends it (nothing is sent while a choice has nothing to choose from).
+function openChatStepsRemake(C) {
+  const a = A(), G = a.G, me = a.me(), tos = C.to(G, a.ME).filter(o => !o[2]).map(o => ({ id: o[0], name: o[1] }));
+  if (!tos.length) { appMessage(HO.say(G, HO.DATA.alerts[6] || 'There is no one else to send something to.')); return true; }
+  const title = rtr(C.title || 'Send a message'), val = (v) => /^\d+$/.test(String(v)) ? +v : v;
+  let to = 0, say = 0, about = 0, vals = [], text = '';
+  const L = appDialog({ message: title, label: title,
+    build(dlg, cw, ch, gd) {
+      const page = UIEl('div', 'ios-scl ios-rlist ios-rsteps', { style: `top:${bpt(gd.a88 * 7)};bottom:${bpt(44 + gd.a80 * 3)};left:${bpt(gd.a88 * 3)};right:${bpt(gd.a88 * 3)};gap:${bpt(gd.a80 * 2)}` });
+      const label = (s) => { const e = UIEl('div', 'ios-bt ios-rlab', { style: `font-size:${bpt(gd.a58)}` }); e.textContent = rtr(String(s).replace('\n', ' ')); return e; };
+      const rowOf = (s, node) => UIEl('div', 'ios-rcol', null, label(s), node);
+      const toggle = (items, cur, set) => nameToggle(gd, items, cur, set, gd.a58);
+      const parts = UIEl('div', 'ios-rcol');
+      const build = () => {
+        parts.replaceChildren(); vals = [];
+        let kind = null, aboutBox = null;
+        for (const [prompt, k, opts] of C.actions[say].parts) {
+          if (k === 'text') { const inp = UIEl('input', 'ios-rtext', { type: 'text', maxlength: String(opts || 24), autocomplete: 'off', spellcheck: 'false', 'aria-label': rtr(prompt), style: `font-size:${bpt(gd.a58)}` }); inp.addEventListener('input', () => { text = inp.value; }); text = ''; parts.append(rowOf(prompt, inp)); vals.push({ k, get: () => null }); }
+          else if (k === 'about') { kind = opts; const items = opts.map((o, i) => ({ id: i, name: o[0] })); about = 0; parts.append(rowOf(prompt, toggle(items, 0, (i) => { about = i; refreshWhich(); }))); vals.push({ k, get: () => about }); }
+          else if (k === 'which') { const holder = UIEl('span'); parts.append(rowOf(prompt, holder)); const slot = { k, holder, kind, pick: 0, items: [] }; vals.push({ k, slot, get: () => (slot.items[slot.pick] || {}).id }); aboutBox = slot; }
+          else { const items = C.list(G, a.ME, k, a.UI.sel).map(o => ({ id: o[0], name: o[1] })); const slot = { pick: 0, items }; parts.append(rowOf(prompt, items.length ? toggle(items, 0, (i) => { slot.pick = i; }) : UIEl('span', 'ios-bt ios-rnone', null, '–'))); vals.push({ k, get: () => (items[slot.pick] || {}).id }); }
+        }
+        function refreshWhich() {
+          const w = vals.find(x => x.k === 'which'); if (!w) return;
+          const s = w.slot; s.items = C.list(G, a.ME, s.kind[about][1], a.UI.sel).map(o => ({ id: o[0], name: o[1] })); s.pick = 0;
+          s.holder.replaceChildren(s.items.length ? toggle(s.items, 0, (i) => { s.pick = i; }) : UIEl('span', 'ios-bt ios-rnone', null, '–'));
+        }
+        refreshWhich();
+      };
+      page.append(rowOf(C.prompts[0], toggle(tos, 0, (i) => { to = i; })));
+      page.append(rowOf(C.prompts[1], chooseList(gd, C.actions.map(x => rtr(x.label)), 0, (i) => { say = i; build(); }, 0, 0, 0)));
+      page.lastChild.lastChild.style.cssText = `position:static;max-height:${bpt(gd.a88 * 14)};overflow-y:auto;display:flex;flex-direction:column;gap:${bpt(gd.a80)}`;
+      page.append(parts); dlg.append(page); build();
+    },
+    ok() {
+      const v = vals.map(x => x.k === 'text' ? null : val(x.get()));
+      if (vals.some((x, i) => x.k !== 'text' && (v[i] === undefined || v[i] === ''))) { appMessage(HO.say(G, HO.DATA.alerts[6] || 'There is nothing to choose for that message.')); return; }
+      if (vals.some(x => x.k === 'text')) v.text = text;
+      const r = HO.sendCanned(G, a.ME, C.make(G, a.ME, val(tos[to].id), say, v));
+      if (r === 'limit') { const n = typeof HO.rules(G).chatLimit === 'function' ? HO.rules(G).chatLimit(G) : HO.rules(G).chatLimit; appMessage(n === 10 || n == null ? 'Sorry, you can only send ten messages per turn.' : `You have sent the ${n} messages you may send this turn.`); return; }
+      if (r === 'ok') { a.Sound.play(TAP_FILE[8]); a.save(); }
+    } });
+  remakeOwn(L, 'chat');
+  return true;
+}
+// Surrender: 5.0.5's and the Palm's window (rs.windowWords.surrender: who to surrender to, or No One; the check the first time asks Alert 2 first; the cross while surrendering
+// takes it back) and the other rulesets' (a name to tap, then the question). The commands are not the app's (its rules have none: surrenderCommand false).
+function openSurrenderRemake() {
+  const a = A(), G = a.G, p = a.me(), rs = HO.rules(G), W = a.winWords('surrender'), cur = p.surrenderTo, say = (i, d) => HO.say(G, HO.DATA.alerts[i] || d);
+  const set = (to) => { HO.surrender(G, a.ME, to); a.save(); a.renderPanel(); };
+  if (!W && cur != null) { appMessage(rtr('You are surrendering at the end of this turn. Take it back?'), () => { HO.surrender(G, a.ME, null); a.save(); }); return true; }
+  const can = G.players.filter(q => q.id !== a.ME && q.alive && !q.surrendered);
+  if (!W && !can.length) { appMessage(say(6, 'There is no one else to send something to.')); return true; }
+  const noOne = W ? W.noOne : 'No one', items = can.map(q => ({ id: q.id, name: q.name })).concat([{ id: -1, name: rtr(noOne) }]);
+  let pick = cur != null && cur !== -1 ? Math.max(0, items.findIndex(o => o.id === cur)) : items.length - 1;
+  const text = W ? W.text : say(1, 'Do you really want to surrender?');
+  const L = appDialog({ message: rtr(W ? W.title : 'Surrender'), label: rtr(W ? W.title : 'Surrender'), cross: true,
+    build(dlg, cw, ch, gd) {
+      const q = UIEl('div', 'ios-bt ios-bwrap', { style: `width:${bpt(cw - 80)};font-size:${bpt(gd.a58)};white-space:normal;text-align:center` }); q.textContent = rtr(text);
+      dlg.append(put(q, cw / 2, ch - gd.a88 * 12, 0.5, 1));
+      dlg.append(put(nameToggle(gd, items, pick, (i) => { pick = i; }, gd.a30), cw / 2, ch - gd.a88 * 30, 0.5, 0.5));
+      if (!W) { const n = UIEl('div', 'ios-bt ios-bwrap', { style: `width:${bpt(cw - 80)};font-size:${bpt(gd.a38 + 2)};white-space:normal;text-align:center` }); n.textContent = rtr('Your fleets are dismantled. Whoever you surrender to gets your savings, your metal, and your planets.'); dlg.append(put(n, cw / 2, gd.a80 * 4 + 44, 0.5, 0)); }
+    },
+    ok() {
+      const to = items[pick].id;
+      if (W) { if (cur == null) appMessage(say(1, 'Do you really want to surrender?'), () => set(to)); else if (to !== cur) set(to); return; }
+      if (to === -1) return; // (no one: nothing to do)
+      set(to); a.toast(rtr('You will surrender at the end of this turn.'));
+    } });
+  if (W && cur != null) L.bx.addEventListener('click', (e) => { e.stopImmediatePropagation(); L.close(); set(null); a.toast(say(2, 'You are no longer surrendering to anyone.')); }, true); // (Cancel while surrendering takes it back)
+  remakeOwn(L, 'surrender');
+  return true;
+}
+// Fix Spending (rs.fixSpending: 1.2, 2.0, 3.0.1): the original put each step's line in the map window's bubble and a click on it took the next step. Here the line is the dialog's
+// message, the check takes the next step (the bubble's click) and the cross leaves it (the classic window's Done)
+function openFixRemake() {
+  const a = A(), G = a.G, FS = HO.rules(G).fixSpending; if (!FS) return false;
+  let cur = -1, L = null;
+  const step = () => {
+    const r = FS.next(G, a.me(), cur); cur = r.cur; a.renderPanel(); a.save();
+    if (r.text == null) { if (L) L.close(); return; }
+    if (L) L.msg.textContent = r.text.indexOf('{') >= 0 ? HO.trSuffixes(r.text) : r.text;
+  };
+  L = appDialog({ message: '', label: rtr('Fix Spending'), cross: true, guard() { step(); return false; } });
+  remakeOwn(L, 'fixspending');
+  step();
+  return true;
+}
+// Dip Into Savings for a ruleset with the command (5.0.5, the Palm, 3.0.1, 4.0.5, Mac 4.0.5, DOS, Claude, Gemini): the app's Dip screen (openDipIOS' layout: the question, the slider
+// with its three marks, the percent over it) on the ruleset's own range (rs.dipMax: 5.0.5's 30, else 0 to 100 in fives) and words (rs.windowWords.dip: its question, note and marks)
+function openDipRemake() {
+  const a = A(), G = a.G, p = a.me(), rs = HO.rules(G), W = a.winWords('dip'), max = rs.dipMax || 100, stp = rs.dipMax ? 1 : 5;
+  let percent = p.dip || 0;
+  const title = rtr(W ? W.title : miscS(78));
+  const L = appDialog({ message: title, label: title,
+    build(dlg, cw, ch, gd) {
+      const q = UIEl('div', 'ios-bt ios-bwrap', { style: `width:${bpt(cw - 80)};font-size:${bpt(gd.a58)};text-align:center` }); q.textContent = rtr(W ? W.text : 'Each turn, move this share of your savings into the budget');
+      dlg.append(put(q, cw / 2, ch - gd.a88 * 10, 0.5, 1));
+      if (W && W.note) { const n = UIEl('div', 'ios-bt ios-bwrap', { style: `width:${bpt(cw - 80)};font-size:${bpt(gd.a38)};text-align:center` }); n.textContent = rtr(W.note); dlg.append(put(n, cw / 2, ch - gd.a88 * 18.75, 0.5, 1)); }
+      const sw = gd.a88 * 50, sy = gd.a88 * 17.5, pctText = (v) => v + '%', pl = dlabel(pctText(percent), gd.a18, cw / 2, sy + 19 + gd.a30, 0.5, 0.5);
+      const sl = ccSlider(sw, (f) => { percent = Math.min(max, Math.round(Math.fround(f) * max / stp) * stp); pl.textContent = pctText(percent); }); sl.set(percent / max);
+      dlg.append(put(sl.el, cw / 2, sy, 0.5, 0), pl);
+      const inset = sw / 2 - gd.a88 * 2, ly = sy - gd.a88 * 2, marks = W && W.marks && W.marks.length === 3 ? W.marks.map(rtr) : [pctText(0), pctText(Math.round(max / 2)), pctText(max)];
+      if (parseFloat(marks[0]) > parseFloat(marks[2])) marks.reverse(); // (5.0.5's marks run from the top of its standing slider down; this one lies down, 0 at the left)
+      dlg.append(dlabel(marks[0], gd.a38, cw / 2 - inset, ly, 0.5, 0.5), dlabel(marks[1], gd.a38, cw / 2, ly, 0.5, 0.5), dlabel(marks[2], gd.a38, cw / 2 + inset, ly, 0.5, 0.5));
+    },
+    ok() { const v = Math.max(0, Math.min(max, percent)); if (rs.dipSet) rs.dipSet(G, p, v); else p.dip = v; a.renderPanel(); a.draw(); a.save(); } });
+  remakeOwn(L, 'dip');
+  return true;
+}
+// The Armageddon device for a ruleset with it: the app's screen (the picture to tap, On / Off) and the check; turning it on asks the ruleset's own question or two (rs.armageddonAsk,
+// Full Hoedown's, else Alert 3) in the app's message box, turning it off says the ruleset's "Whew!" (the classic window's order and words)
+function openArmageddonRemake() {
+  const a = A(), G = a.G, rs = HO.rules(G);
+  const on = () => { HO.setArmageddon(G, a.ME, true); a.save(); a.toast(rtr('The armageddon device is on. It fires when every human player has turned theirs on.')); };
+  const hq = rs.armageddonAsk || (HO.hoedown(G) && HO.ownRules(G).hoedown && HO.ownRules(G).hoedown.armageddon);
+  const L = openArmageddonIOS((wants) => {
+    if (!wants) { HO.setArmageddon(G, a.ME, false); a.toast(HO.say(G, HO.DATA.alerts[4] || 'Whew!')); a.save(); a.renderPanel(); return; }
+    const btn = rs.armageddonButtons, ask = (n, yes) => { const i = Math.floor(Math.random() * hq[n].length); confirmRemake(HO.say(G, hq[n][i]), yes, btn && btn[n] && btn[n][i]); }; // (rs.armageddonButtons: the originals' own button words, as the classic window shows them)
+    if (hq) ask(0, () => ask(1, on)); else appMessage(HO.say(G, HO.DATA.alerts[3] || 'Are you sure you want to destroy half the galaxy?'), on);
+  });
+  remakeOwn(L, 'armageddon');
+  return true;
+}
+// Scrap Ship Types for a ruleset with the command: the app's screen (the list of types, a tap puts a red cross on one). A ruleset that marks types for the end of the turn
+// (rs.flagScrapDesign: 5.0.5, 3.0.1, 4.0.5 ...) takes the marks as the app does; one that scraps at once (the Palm, Gemini, Claude) asks first, as the classic window's
+// button does, and scraps the checked types and the ships of them
+function openScrapRemake() {
+  const a = A(), G = a.G, rs = HO.rules(G);
+  const L = openScrapIOS(rs.flagScrapDesign ? (ds) => {
+    for (const d of a.me().designs.filter(d => !d.scrapped)) if (!!ds.includes(d) !== !!d.scrap301) rs.flagScrapDesign(G, a.me(), d, 'command');
+    a.renderPanel(); a.draw(); a.save();
+  } : (ds, count) => {
+    if (!ds.length) return;
+    appMessage(rtr(ds.length === 1 ? 'Scrap this ship type and all its ships?' : 'Scrap these ship types and all their ships?'), () => {
+      let m = 0; for (const d of ds) m += HO.scrapDesign(G, a.ME, d.id);
+      a.Sound.play(7003); a.toast(`Scrapped ${ds.length} type${ds.length === 1 ? '' : 's'} for ${a.fmt(m)} metal.`);
+      if (a.UI.selFleet != null && !G.fleets.some(f => f.id === a.UI.selFleet)) a.UI.selFleet = null;
+      a.renderPanel(); a.draw(); a.save();
+    });
+  });
+  remakeOwn(L, 'scraptypes');
+  return true;
+}
+// Players (Players and history / Players and alliances; every ruleset with the window): the app's dialog with a row for each player: the hat as the app's players list draws it,
+// the name, the colonies seen and the status in the classic window's words, and the app's pact button (`pactToggle` / `pactToggled`: the same control, the same words and the same
+// data as the sidebar's players list, so the two always agree). The history graph is the app's own (the History button opens it). 3.0.1's first year dims the pact buttons
+// (the Alliances command is dimmed: the window shows the players only).
+function openPlayersRemake() {
+  const a = A(), G = a.G, me = a.me(), pacts = HO.feature(G, 'alliances'), buddies = pacts && HO.rules(G).bestBuddies !== false, dim = a.menuDim('alliances');
+  const title = rtr('Players');
+  const L = appDialog({ message: title, label: title, cross: false,
+    build(dlg, cw, ch, gd) {
+      const list = UIEl('div', 'ios-scl ios-rlist ios-rplayers', { style: `top:${bpt(gd.a88 * 7)};bottom:${bpt(44 + gd.a80 * 3)};left:${bpt(gd.a88 * 3)};right:${bpt(gd.a88 * 3)};gap:${bpt(gd.a80)}` });
+      const status = (p) => {
+        let s = p.surrendered ? 'Surrendered' : p.alive ? 'In the game' : 'Eliminated';
+        if (pacts && p.id !== a.ME && p.alive) {
+          const they = (p.allies || []).includes(a.ME), we = (me.allies || []).includes(p.id);
+          if (HO.isBuddy(G, a.ME, p.id)) s = 'Your best buddy'; else if (HO.isAllied(G, a.ME, p.id)) s = 'Your ally'; else if (they) s = 'Offers to ally'; else if (we) s = 'You offered to ally';
+        }
+        return rtr(s);
+      };
+      const draw = () => {
+        const pm = pactMasks(G); list.replaceChildren();
+        for (const id of listOrder(G)) {
+          const p = G.players[id], seen = p.human ? HO.colonies(G, a.ME).length : G.stars.filter(s => { const k = HO.know(G, me, s.id); return k.explored && k.owner === p.id; }).length;
+          const row = UIEl('div', 'ios-ritem ios-rrow' + (p.alive ? '' : ' out'), { style: `font-size:${bpt(gd.a58)}` });
+          row.append(picPt(hatName(p), 'ios-rhat'));
+          const tx = UIEl('div', 'ios-rtx'); tx.append(UIEl('span', 'ios-rname', { translate: 'no' }, p.id === a.ME ? `${p.name} (${rtr('you')})` : p.name), UIEl('span', 'ios-rsub', { style: `font-size:${bpt(gd.a58 * 0.75)}` }, `${rtr('Colonies seen')}: ${seen} · ${status(p)}`));
+          row.append(tx);
+          if (pacts && !dim && p.alive && p.id !== a.ME) {
+            const tg = pactToggle(G, me, p, pm, buddies), w = appWord('pact', tg.items[tg.cur]), words = tg.items.map(i => appWord('pact', i).text), wide = Math.max(...words.map(x => textW(x, 14))) + 24;
+            const bt = textButton(w.text, Math.max(70, wide), 28, 14, () => { pactToggled(G, me, p, pm, buddies, (tg.cur + 1) % tg.items.length); a.save(); a.renderPanel(); draw(); });
+            bt.classList.add('ios-bpl'); if (w.no) bt.setAttribute('translate', 'no'); row.append(bt);
+          }
+          list.append(row);
+        }
+      };
+      draw(); dlg.append(list);
+      dlg.append(put(textButton(rtr('History'), 90, 30, 14, () => { L.close(); openGraphs(); }), gd.a80 * 4, gd.a80 + 7, 0, 0));
+    } });
+  remakeOwn(L, 'players');
+  return true;
+}
+// The remake's own question box: the app's message box with the check and the cross; a ruleset's own button words (labels: [go on, turn down], 3.0.1's Armageddon questions) are the app's text
+// buttons in their place
+function confirmRemake(text, yes, labels) {
+  if (!labels) { const sc = appMessage(text, yes); sc.setAttribute('data-remake', 'confirm'); const d = sc.querySelector('.ios-gdlg'); if (d) d.classList.add('ios-remake'); return sc; }
+  const L = appDialog({ message: text, label: text, build(dlg, cw, ch, gd, L0) {
+    L0.bx.style.display = L0.bk.style.display = 'none';
+    const no = textButton(labels[1], 130, 34, 16, () => L0.close()), ok = textButton(labels[0], 130, 34, 16, () => { L0.close(); yes(); });
+    dlg.append(put(no, cw / 2 - 140, gd.a80 * 4, 0, 0), put(ok, cw / 2 + 10, gd.a80 * 4, 0, 0));
+  } });
+  remakeOwn(L, 'confirm'); return L.scrim;
+}
+// ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// The remake's lists, rebuilt in the app's look (THE REMAKE'S OWN: the apps have none of them). One primitive, `listDialog`: the app's dialog with a head line (a touch on a head sorts, where the list
+// sorts), the Scrap Ship Types list's scroller of rows (a row outlined in the app's blue while chosen), buttons of the app's text-button sprite at the bottom left and the check at the right.
+// ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+function listDialog(o) {
+  const ctl = { rows: [], btn: {} };
+  const L = appDialog({ message: o.title, label: o.title, cross: !!o.cross, ok: o.ok || null,
+    build(dlg, cw, ch, gd, L0) {
+      const side = gd.a88 * 3, noteH = o.note ? gd.a88 * 4.5 : 0, top = gd.a88 * 6.5 + noteH, headH = o.heads ? gd.a88 * 4 : 0, bottom = 44 + gd.a80 * 3, fs = gd.a58 * (o.heads && o.heads.length > 4 ? 0.72 : 1), widths = o.widths || (o.heads || []).map(() => 1);
+      const cell = (c, i, cls) => { const s = UIEl('span', 'ios-rcell ' + (cls || ''), { style: `flex:${widths[i] || 1}`, translate: o.data && o.data.includes(i) ? 'no' : null }); if (c && c.nodeType) s.append(c); else s.textContent = c == null ? '' : String(c); return s; };
+      if (o.note) { const n = UIEl('div', 'ios-bt ios-bwrap ios-rnote', { style: `width:${bpt(cw - 2 * side)};font-size:${bpt(gd.a58 * 0.8)}` }); n.textContent = o.note; dlg.append(put(n, cw / 2, ch - gd.a88 * 6, 0.5, 1)); }
+      if (o.heads) {
+        const hr = UIEl('div', 'ios-rtab ios-rhead', { style: `top:${bpt(top)};left:${bpt(side + 2)};right:${bpt(side + 2)};font-size:${bpt(fs * 0.8)}` });
+        o.heads.forEach((h, i) => { const s = cell(h, i, 'ios-rh' + (o.sortCol === i ? ' on' : '')); if (o.sort) { s.setAttribute('role', 'columnheader'); s.addEventListener('click', (e) => { e.stopPropagation(); o.sort(i); }); } hr.append(s); });
+        dlg.append(hr);
+      }
+      const list = UIEl('div', 'ios-scl ios-rlist', { role: 'listbox', style: `top:${bpt(top + headH)};bottom:${bpt(bottom)};left:${bpt(side)};right:${bpt(side)};gap:${bpt(gd.a80)}` });
+      let pick = -1;
+      ctl.setRows = (rows) => {
+        ctl.rows = rows; pick = -1; list.replaceChildren();
+        rows.forEach((r, i) => {
+          const e = UIEl('div', 'ios-ritem ios-rtab ' + (o.wrap ? 'wrap ' : '') + (r.cls || ''), { role: 'option', style: `font-size:${bpt(fs)}` });
+          r.cells.forEach((c, j) => e.append(cell(c, j)));
+          e.addEventListener('click', (ev) => { ev.stopPropagation(); if (o.select && pick !== i) { pick = i; [...list.children].forEach((x, j) => x.classList.toggle('on', j === i)); o.select(i, r); return; } if (r.tap) r.tap(i, r); }); // (a list that chooses: the first touch chooses, a second on the same row acts)
+          list.append(e);
+        });
+        if (!rows.length && o.empty) { const n = UIEl('div', 'ios-bt ios-rnote', { style: `font-size:${bpt(fs)};position:static` }); n.textContent = o.empty; list.append(n); }
+      };
+      ctl.list = list; ctl.setRows(o.rows || []);
+      dlg.append(list);
+      let x = gd.a80 * 4;
+      for (const b of o.buttons || []) { const w = Math.max(70, textW(b.label, 14) + 26), bt = textButton(b.label, w, 30, 14, () => { if (!bt.disabled) b.fn(ctl, L0); }); bt.disabled = !!b.disabled; ctl.btn[b.key || b.label] = bt; dlg.append(put(bt, x, gd.a80 + 7, 0, 0)); x += w + gd.a80 * 2; }
+    } });
+  remakeOwn(L, o.key);
+  ctl.L = L; ctl.close = () => L.close();
+  return ctl;
+}
+const rkey = (G) => /^(ios|android)$/.test((G && G.rules) || '');
+// All Fleets (rs.windowWords.fleets: 5.0.5's title and its line): a tap on a fleet selects it and closes the list
+function openFleetsRemake() {
+  const a = A(), G = a.G, rs = HO.rules(G), W = a.winWords('fleets');
+  const mine = a.fleetOrder(G.fleets.filter(f => f.owner === a.ME && !(rs.fleetListNoSatellites && f.sat)));
+  const c = listDialog({ key: 'fleets', title: rtr(W ? W.title : 'All your fleets'), heads: ['Fleet', 'Where', 'Going to', 'Fuel'].map(rtr), widths: [3, 2.4, 2.4, 1], data: [0, 1, 2], note: W && W.note ? W.note : null, empty: rtr('You have no fleets.'),
+    rows: mine.map(f => {
+      const where = f.star != null ? G.stars[f.star].name : `${G.stars[f.from].name} → ${G.stars[f.to].name}`;
+      const go = f.dest != null ? G.stars[f.dest].name + (f.path && f.path.length ? ' → …' : '') : f.to != null ? a.arrivesText(f, true) : '';
+      return { cells: [rs.fleetDesc ? HO.fleetText(G, f) : HO.fleetLabel(G, f), where, f.scrap301 ? rtr('to be scrapped') : go, f.sat ? '' : `${Math.floor(f.fuel)}/${HO.fleetMaxRange(G, f)}`], cls: f.scrap301 ? 'scrap' : '',
+        tap: () => { a.UI.selFleet = f.id; a.UI.sel = f.star != null ? f.star : f.to; c.close(); a.renderPanel(); a.draw(); } };
+    }) });
+  return true;
+}
+// Review battle: the battles you were in, newest first; a tap opens the report
+function openBattlesRemake() {
+  const a = A(), G = a.G, bs = G.battles.filter(b => b.sides.includes(a.ME)).reverse();
+  const c = listDialog({ key: 'battles', title: rtr('Review battle'), heads: ['Star', 'Year', 'Against', 'Lost (you / them)'].map(rtr), widths: [2.4, 1, 2.4, 2], data: [0, 2],
+    rows: bs.map(b => ({ cells: [G.stars[b.star].name + (b.duel != null ? ` (duel ${b.duel + 1})` : ''), String(b.year), b.sides.filter(o => o !== a.ME).map(o => G.players[o].name).join(', '), `${b.lost[a.ME] || 0} / ${b.sides.filter(o => o !== a.ME).reduce((n, o) => n + (b.lost[o] || 0), 0)}`], tap: () => { c.close(); a.openBattle(b.id); } })) });
+  return true;
+}
+// The explored stars: 5.0.5's list (a head sorts; Star, Name, Quality, Temp, Gravity, Metal, Info Date), the Mac and DOS lists (rs.exploredList: a row to choose, Go To Star, and Sort By where the version has it), and
+// the remake's own for the Palm and the iOS rules (no original). The order, the quality and the climate are the classic window's.
+let exSort = null, exSort505 = { col: 'quality', dir: -1 };
+function openStarsRemake() {
+  const a = A(), G = a.G, R = HO.rules(G), L = R.exploredList, p = a.me(), go = (id) => { a.UI.sel = id; a.centerOn(id); a.renderPanel(); a.draw(); };
+  const rec = (s) => s.owner === a.ME ? { explored: true, owner: a.ME, g: s.g, t: s.t, metal: s.metal, seen: G.turn } : HO.know(G, p, s.id);
+  const seen = G.stars.filter(s => { const k = rec(s); return k.explored || k.owner >= 0; });
+  const climate = (s) => { const k = rec(s); return k.explored ? { t: a.degF(72 + (k.t - p.homeT)), g: a.gravF(k.g, p.homeG), m: a.fmt(Math.max(0, k.metal || 0)) } : null; };
+  if (!L) { // (the Palm and the iOS rules: no list in the originals)
+    const ks = G.stars.map(s => ({ s, k: HO.know(G, p, s.id) })).filter(o => o.k.explored);
+    let c0; c0 = listDialog({ key: 'stars', title: rtr('Explored stars'), heads: ['Star', 'Temp', 'Gravity', 'Metal', 'Owner', 'Population'].map(rtr), widths: [2, 1.4, 1.4, 1.4, 1.8, 1.6], data: [0, 4],
+      rows: ks.map(({ s, k }) => { const src = s.owner === a.ME ? s : k; return { cells: [s.name, a.degF(72 + (src.t - p.homeT)), a.gravF(src.g, p.homeG), a.fmt(src.metal), s.owner === a.ME ? rtr('You') : k.owner >= 0 && G.players[k.owner] ? G.players[k.owner].name : '', src.pop ? a.fmt(HO.popNum(G, src.pop)) : ''], tap: () => { c0.close(); go(s.id); } }; }) });
+    return true;
+  }
+  const ownerOf = (s) => rec(s).owner, q = (s) => { const k = rec(s); return k.explored ? L.quality(p, k) : 0; };
+  const swapSort = (arr, before) => { for (let i = 0; i < arr.length - 1; i++) for (let j = i + 1; j < arr.length; j++) if (before(arr[j], arr[i])) { const t = arr[i]; arr[i] = arr[j]; arr[j] = t; } return arr; };
+  const byQ = (x, y) => q(x) > q(y), byName = (x, y) => x.name < y.name;
+  const info = (s) => { const k = rec(s), yr = G.year - 10 * Math.max(0, G.turn - (k.seen != null ? k.seen : G.turn)); return k.seen == null || k.seen >= G.turn ? rtr('Current') : String(yr); };
+  if (L.layout === '505') {
+    const heads = [['star', 'Star'], ['name', 'Name'], ['quality', 'Quality'], ['temp', 'Temp'], ['gravity', 'Gravity'], ['metal', 'Metal'], ['info', 'Info Date']];
+    const C = { quality: (s) => q(s), temp: (s) => (rec(s).explored ? rec(s).t - p.homeT : 1e9), gravity: (s) => (rec(s).explored ? rec(s).g : 1e9), metal: (s) => (rec(s).explored ? rec(s).metal || 0 : -1), name: (s) => s.name, info: (s) => (rec(s).seen != null ? rec(s).seen : G.turn) };
+    let ctl;
+    const rows = () => {
+      const key = C[exSort505.col] || C.quality;
+      return seen.filter(s => rec(s).explored).sort((x, y) => { const u = key(x), v = key(y); return (u < v ? -1 : u > v ? 1 : 0) * exSort505.dir || (x.name < y.name ? -1 : 1); }).map(s => {
+        const c = climate(s), k = rec(s), look = a.starLook(s.id), im = look.pic || a.IMG[look.base], cv = UIEl('canvas', 'ios-rstar', { width: 40, height: 40, 'aria-hidden': 'true' });
+        if (im) { const cx = cv.getContext('2d'); cx.drawImage(im, 4, 4, 32, 32); const hat = look.hat && a.IMG[look.hat]; if (hat) cx.drawImage(hat, 0, 0, 40, 40 * hat.height / hat.width); }
+        return { cells: [cv, s.name, k.explored ? (L.quality(p, k) / 2).toFixed(1) : '', c ? c.t : '', c ? c.g : '', c ? c.m : '', info(s)], tap: () => { ctl.close(); go(s.id); } };
+      });
+    };
+    const sortBy = (i) => { const id = heads[i][0]; if (id === 'star') return; exSort505 = exSort505.col === id ? { col: id, dir: -exSort505.dir } : { col: id, dir: id === 'name' || id === 'temp' || id === 'gravity' ? 1 : -1 }; ctl.setRows(rows()); };
+    ctl = listDialog({ key: 'stars', title: rtr('Explored Stars'), heads: heads.map(h => rtr(h[1])), widths: [1, 2.2, 1.2, 1.2, 1.2, 1.2, 1.4], data: [1], sort: sortBy, sortCol: heads.findIndex(h => h[0] === exSort505.col), rows: rows() });
+    return true;
+  }
+  // the Mac and DOS lists: its own order (free, other players', yours; or Sort By), a row to choose, Go To Star
+  let mode = L.sortKeep && exSort != null && L.sortBy && exSort < L.sortBy.length ? exSort : L.sortDefault, pick = null, ctl;
+  const order = () => {
+    if (!L.sortBy) { const free = seen.filter(s => ownerOf(s) < 0), other = seen.filter(s => ownerOf(s) >= 0 && ownerOf(s) !== a.ME), mine = seen.filter(s => ownerOf(s) === a.ME); return swapSort(free, byQ).concat(swapSort(swapSort(other, byName), byQ), swapSort(mine, byName)); }
+    const arr = swapSort(seen.filter(s => !s.nova), byName), ex = (s) => !!rec(s).explored;
+    const val = [(s) => ex(s) ? Math.max(0, rec(s).metal || 0) : -1, (s) => ex(s) ? q(s) : -1, (s) => ex(s) ? Math.round(rec(s).g * 100) : 0x7fff, (s) => ownerOf(s) < 0 ? 0x15 : ownerOf(s)][mode];
+    return swapSort(arr, mode === 2 || mode === 3 ? (x, y) => val(x) < val(y) : (x, y) => val(x) > val(y));
+  };
+  const status = (s) => { const o = ownerOf(s); return rtr(o === a.ME ? L.own : o < 0 ? L.free : L.enemy); };
+  const rows = () => order().map(s => { const c = climate(s); return { cells: [s.name, c ? c.t : rtr(L.noClimate), c ? c.g : '', c ? c.m : '', status(s)], cls: c ? '' : 'noclimate', id: s.id }; });
+  const data = rows();
+  const wire = (rs) => rs.map((r, i) => Object.assign(r, { tap: () => { if (pick === r.id) { ctl.close(); go(r.id); } } }));
+  const btns = [{ key: 'go', label: rtr(L.go), disabled: true, fn: () => { if (pick != null) { ctl.close(); go(pick); } } }];
+  if (L.sortBy) btns.push({ key: 'sort', label: `${rtr(L.sortLabel)} ${rtr(L.sortBy[mode])}`, fn: (c) => { mode = (mode + 1) % L.sortBy.length; if (L.sortKeep) exSort = mode; pick = null; c.btn.go.disabled = true; c.btn.sort.firstChild ? 0 : 0; c.btn.sort.textContent = `${rtr(L.sortLabel)} ${rtr(L.sortBy[mode])}`; c.setRows(wire(rows())); } });
+  ctl = listDialog({ key: 'stars', title: rtr(L.title.replace(/:$/, '')), note: rtr(L.title), heads: ['Star', 'Temp', 'Gravity', 'Metal', 'Owner'].map(rtr), widths: [2, 1.6, 1.3, 1.3, 1.6], data: [0], select: (i, r) => { pick = r.id; ctl.btn.go.disabled = false; }, tapTwice: true, buttons: btns, rows: wire(data) });
+  return true;
+}
+// Rank history (5.0.5 and the Palm: master points): the ranks, each with its points and what it unlocks, your own starred; the Wins button swaps in your last thirty wins
+function openRanksRemake() {
+  const a = A(), pr = a.profile(), cur = a.rankOf(pr.points), R = HO.DATA.ranks || [];
+  let wins = false;
+  const ranks = () => R.map((r, i) => ({ cells: [(i <= cur ? '★ ' : '') + r[0], a.fmt(r[1]), r[2] || ''], cls: i === cur ? 'on' : '' }));
+  const winRows = () => pr.games.slice(-30).reverse().map(g => ({ cells: [g.date, String(g.year), String(g.difficulty), a.fmt(g.points)] }));
+  const c = listDialog({ key: 'ranks', title: rtr('Rank history'), note: `${R[cur][0]} · ${rtr('Total master points:')} ${a.fmt(pr.points)}`, heads: ['Rank', 'Points', 'Unlocks'].map(rtr), widths: [2.4, 1.2, 3], rows: ranks(),
+    buttons: pr.games.length ? [{ key: 'wins', label: rtr('Wins'), fn: (cc) => { wins = !wins; cc.btn.wins.textContent = rtr(wins ? 'Ranks' : 'Wins'); cc.setRows(wins ? winRows() : ranks()); } }] : [] });
+  return true;
+}
+// The Hall of Fame and the Hall of Shame of the versions that keep one (rs.hall: 3.0.1, 4.0.5), this computer's: Details opens the Summary, Play Again (3.0.1) starts the same galaxy. With online play
+// ("Everyone", js/cloud.js) the classic window stays, dressed.
+function openHallRemake(kind, at, everyone0) {
+  const a = A(), G = a.G, H = HO.rules(G).hall, shame = kind === 'shame', W = H.words || {}, cloud = a.hasCloud();
+  const title = (shame ? W.shame : W.fame) || (shame ? 'Hall of Shame' : 'Hall of Fame');
+  let everyone = !!(everyone0 && cloud), list = everyone ? [] : a.hallTables(G)[shame ? 'shame' : 'fame'], sel = Math.min(at | 0, Math.max(0, list.length - 1)), ctl;
+  const cells = (e) => [e.name + (e.mine ? ' (' + rtr('you') + ')' : ''), H.date(e.time, G), String(e.difficulty)];
+  const reopen = () => openHallRemake(kind, everyone ? 0 : sel, everyone);
+  const fill = () => { // (this computer's: at once; everyone's: from the shared Hall, as the classic window loads it)
+    ctl.btn.details.disabled = ctl.btn.again ? (ctl.btn.again.disabled = true) : true;
+    if (!everyone) { list = a.hallTables(G)[shame ? 'shame' : 'fame']; ctl.setRows(list.map(e => ({ cells: cells(e) }))); ctl.btn.details.disabled = !list.length; if (ctl.btn.again) ctl.btn.again.disabled = !list.length; return; }
+    ctl.setRows([{ cells: [rtr('Loading the Hall everyone shares…'), '', ''], cls: 'noclimate' }]);
+    a.cloudHall(kind, a.UI.hallOrder === 'top' ? 'top' : 'new').then((rows) => { list = rows; ctl.setRows(rows.length ? rows.map(e => ({ cells: cells(e) })) : [{ cells: [rtr('Nobody is in it yet.'), '', ''], cls: 'noclimate' }]); ctl.btn.details.disabled = !rows.length; },
+      (e) => { list = []; ctl.setRows([{ cells: [a.cloudError(e), '', ''], cls: 'noclimate' }]); });
+  };
+  const btns = [{ key: 'details', label: rtr('Details'), disabled: true, fn: (cc) => { if (!list[sel]) return; cc.close(); openHallSummaryRemake(list[sel], kind, reopen); } }];
+  if (H.again) btns.push({ key: 'again', label: rtr(W.playAgain || 'Play Again'), disabled: true, fn: (cc) => { const o = !everyone && list[sel] && H.again(list[sel]); if (o) { cc.close(); a.playAgain(o); } } });
+  if (cloud) { // (online: this computer's Hall, as the version kept it, or the one everyone shares, newest or best)
+    btns.push({ key: 'where', label: rtr(everyone ? 'This computer' : 'Everyone'), fn: (cc) => { everyone = !everyone; sel = 0; cc.btn.where.textContent = rtr(everyone ? 'This computer' : 'Everyone'); if (cc.btn.order) cc.btn.order.style.display = everyone ? '' : 'none'; fill(); } });
+    btns.push({ key: 'order', label: rtr(a.UI.hallOrder === 'top' ? 'Best' : 'Newest'), fn: (cc) => { a.UI.hallOrder = a.UI.hallOrder === 'top' ? 'new' : 'top'; cc.btn.order.textContent = rtr(a.UI.hallOrder === 'top' ? 'Best' : 'Newest'); fill(); } });
+  }
+  ctl = listDialog({ key: 'hall', title: rtr((shame ? W.shameTitle : W.fameTitle) || title), heads: (W.heads || ['Name', 'When', 'Difficulty']).map(rtr), widths: [2.4, 2.4, 1.4], data: [0], select: (i) => { sel = i; }, buttons: btns, rows: [] });
+  if (ctl.btn.order) ctl.btn.order.style.display = everyone ? '' : 'none';
+  fill(); if (!everyone && list.length) { ctl.btn.details.disabled = false; }
+  return true;
+}
+// The Summary of Game Victory / Defeat (the classic window's rows, or the version's own: hall.summary); the check goes back to the Hall
+function openHallSummaryRemake(e, kind, back) {
+  const a = A(), G = a.G, H = HO.rules(G).hall, N = H.names, shame = kind === 'shame', W = H.words || {};
+  const heading = (shame ? W.loss : W.win) || (shame ? 'Summary of Game Defeat' : 'Summary of Game Victory');
+  const rows = H.summary ? H.summary(G, e, shame) : [[shame ? (H.loser ? H.loser(G) : 'Loser') : 'Winner:', e.name], ['Date:', H.date(e.time, G)], ['Difficulty:', String(e.difficulty)], ['# Humans:', String(e.humans)], ['# of Computers:', String(e.computers)], ['# Allies:', String(e.allies)],
+    ['Computer Intelligence:', N.iq[e.iq] || ''], ['Game Date:', String(e.year)], ['Galaxy Size:', [N.size[e.size], N.density[e.density], N.shape[e.shape]].filter(Boolean).join(', ')], ['Player Skill:', N.skill[e.skill] || ''], ['Armageddons:', String(e.armageddons)]];
+  listDialog({ key: 'hallsummary', title: rtr(heading), widths: [3, 4], data: [1], ok: back, rows: rows.map(r => ({ cells: [rtr(r[0]), r.slice(1).join(' ')] })) });
+  return true;
+}
+// The Master Point List (3.0.1, 4.0.5): the players who have won, their points and rank (the picture beside it is left out)
+function openMasterRemake() {
+  const a = A(), G = a.G, H = HO.rules(G).hall, L = a.hallTables(G).master.list;
+  if (typeof H.rank !== 'function') return false; // (3.0.1 keeps no Master Point List)
+  listDialog({ key: 'master', title: rtr('Master Points:'), heads: ['Name', 'Points', 'Rank'].map(rtr), widths: [3, 1.4, 3], data: [0], empty: rtr('Nobody yet.'), rows: L.map(r => ({ cells: [r.name, String(r.points), H.rank(r.points, G)] })) });
+  return true;
+}
+// The Report Window (the page's: 5.0.5's, 4.0.5's ...; 1.2 keeps the last 50 of all the years, scrolled to this year's first): each report is a line, a touch does what the report offers (goes to the star, opens the battle)
+function openReportsRemake() {
+  const a = A(), G = a.G, me = a.me(), O = a.verOpts() || {}, hist = HO.rules(G).reportHistory, old = hist ? (me.reportLog || []) : [], ms = old.concat(me.inbox || []);
+  const c = listDialog({ key: 'reports', title: rtr(O.reports || 'Reports'), wrap: true, widths: hist ? [0.6, 6] : [1], empty: rtr('No reports this turn.'),
+    rows: ms.map(m => ({ cells: [hist ? a.msgIconEl(m) : null, a.degText(HO.say(G, m.text))].filter(x => x !== null), tap: () => { c.close(); a.reportAction(m); } })) });
+  if (old.length && c.list.children[old.length]) c.list.children[old.length].scrollIntoView({ block: 'start' });
+  return true;
+}
+// Force End Turn (hot seat, 3.0.1 and 4.0.5): the question in the app's message box; its two buttons say the version's words
+function openForceEndRemake(text, yes) {
+  confirmRemake(text.replace(/\n\n/g, ' '), yes, [rtr('Force End Turn'), rtr('Wait')]);
+  return true;
+}
+// Temperatures: the unit shown everywhere (the originals' own, or °C or °F): the name to tap, the check keeps it
+function openTemperaturesRemake() {
+  const a = A(), words = [['', 'As the original'], ['C', '°C (Celsius)'], ['F', '°F (Fahrenheit)']], items = words.map(([v, w]) => ({ id: v, name: rtr(w) }));
+  let pick = Math.max(0, words.findIndex(w => w[0] === (a.Prefs.temp || ''))), L0;
+  const L = appDialog({ message: rtr('Temperatures'), label: rtr('Temperatures'), cross: true,
+    build(dlg, cw, ch, gd) { dlg.append(fitLabel(rtr('Temperatures'), 16, gd.a88 * 18.75 - gd.a80, gd.a88 * 18.75, ch - gd.a88 * 12, 1, 0.5), put(nameToggle(gd, items, pick, (i) => { pick = i; }), gd.a88 * 27, ch - gd.a88 * 12, 0.5, 0.5)); },
+    ok() { a.Prefs.temp = words[pick][0] || null; a.savePrefs(); if (a.G) { a.renderPanel(); a.draw(); } } });
+  remakeOwn(L, 'temps');
+  return true;
+}
+// Group Fleets of 5.0.5 and the Palm (rs.organizeFleets '505', 'palm'): the app's Organize Fleets screen (the engine's splitFleet and mergeFleets, the ruleset's canMerge; the same piles, the same touches)
+function openGroupRemake(sid) {
+  const L = openOrganizeIOS(sid); if (!L) return false;
+  remakeOwn(L, 'group'); return true;
+}
+// Auto Play: a ruleset with auto play settings (rs.autoPlaySettings: 5.0.5, the Palm, 3.0.1, 4.0.5, Mac 4.0.5) takes the app's screen; the others (1.2, 2.0, Claude, Gemini) the remake's own: a name to tap for who plays,
+// a slider for how many turns, and what stops it (the classic form's choices)
+function openAutoPlayRemake() {
+  const a = A(), G = a.G, rs = HO.rules(G);
+  if (rs.autoPlaySettings) { const L = openAutoPlayIOS(); remakeOwn(L, 'auto'); return true; }
+  let mode = 0, turns = 20; const stop = { won: 1, lost: 1, news: 1 };
+  const modes = [{ id: 0, name: rtr('Have the computer play for me') }, { id: 1, name: rtr('Just end my turns') }], onoff = [{ id: 1, name: rtr('On') }, { id: 0, name: rtr('Off') }];
+  const L = appDialog({ message: rtr('Auto play'), label: rtr('Auto play'), cross: true,
+    build(dlg, cw, ch, gd) {
+      const page = UIEl('div', 'ios-scl ios-rlist ios-rsteps', { style: `top:${bpt(gd.a88 * 7)};bottom:${bpt(44 + gd.a80 * 3)};left:${bpt(gd.a88 * 3)};right:${bpt(gd.a88 * 3)};gap:${bpt(gd.a80 * 2)}` });
+      const lab = (s) => { const e = UIEl('div', 'ios-bt ios-rlab', { style: `font-size:${bpt(gd.a58)}` }); e.textContent = rtr(s); return e; };
+      const col = (s, node) => UIEl('div', 'ios-rcol', null, lab(s), node);
+      const n = UIEl('span', 'ios-bt ios-rlab', { style: `font-size:${bpt(gd.a58)}` }); n.textContent = String(turns);
+      const sw = gd.a88 * 40, box = UIEl('div', 'ios-rslot', { style: `position:relative;width:${bpt(sw)};height:${bpt(30)}` });
+      const sl = ccSlider(sw, (f) => { turns = 1 + Math.round(Math.fround(f) * 99); n.textContent = String(turns); }); sl.set((turns - 1) / 99); box.append(put(sl.el, 0, 4, 0, 0));
+      page.append(col('Play', nameToggle(gd, modes, 0, (i) => { mode = i; }, gd.a58)), col('For up to this many turns', UIEl('div', 'ios-rcol', null, box, n)));
+      page.append(lab('Stop when something interesting happens'));
+      for (const [k, s] of [['won', 'Battles I win'], ['lost', 'Battles I lose'], ['news', 'Colonies, tech levels and other news']]) page.append(col(s, nameToggle(gd, onoff, 0, (i) => { stop[k] = onoff[i].id; }, gd.a58)));
+      dlg.append(page);
+    },
+    ok() { a.runAutoPlay({ turns, computer: mode === 0, won: !!stop.won, lost: !!stop.lost, news: !!stop.news }); } });
+  remakeOwn(L, 'auto'); return true;
+}
+// Split fleet (every ruleset without Group Fleets): each kind of ship in the fleet with a slider of how many go into the new fleet, the app's sliders and the check
+function openSplitRemake(f) {
+  const a = A(), G = a.G, take = {}, ks = Object.keys(f.ships);
+  const L = appDialog({ message: rtr('Split fleet'), label: rtr('Split fleet'), cross: true,
+    build(dlg, cw, ch, gd) {
+      const page = UIEl('div', 'ios-scl ios-rlist ios-rsteps', { style: `top:${bpt(gd.a88 * 7)};bottom:${bpt(44 + gd.a80 * 3)};left:${bpt(gd.a88 * 3)};right:${bpt(gd.a88 * 3)};gap:${bpt(gd.a80 * 2)}` });
+      const note = UIEl('div', 'ios-bt ios-rlab', { style: `font-size:${bpt(gd.a58 * 0.85)}` }); note.textContent = rtr('Choose ships to move into a new fleet.'); page.append(note);
+      for (const key of ks) {
+        const d = HO.getDesign(G, f.owner, +key); take[key] = 0;
+        const n = UIEl('span', 'ios-bt ios-rlab', { style: `font-size:${bpt(gd.a58)}` }); n.textContent = '0';
+        const sw = gd.a88 * 30, box = UIEl('div', 'ios-rslot', { style: `position:relative;width:${bpt(sw)};height:${bpt(30)}` });
+        const sl = ccSlider(sw, (v) => { take[key] = Math.round(Math.fround(v) * f.ships[key]); n.textContent = String(take[key]); }); sl.set(0); box.append(put(sl.el, 0, 4, 0, 0));
+        const name = UIEl('span', 'ios-bt ios-rlab', { style: `font-size:${bpt(gd.a58)}`, translate: 'no' }); name.textContent = `${d.name} (${f.ships[key]})`;
+        page.append(UIEl('div', 'ios-rrowsplit', null, a.shipImgEl(d, 22, f.owner), name, box, n));
+      }
+      dlg.append(page);
+    },
+    ok() { const nf = HO.splitFleet(G, f, take); if (nf) a.UI.selFleet = nf.id; a.renderPanel(); a.draw(); a.save(); } });
+  remakeOwn(L, 'split'); return true;
+}
+// Show Skills (Compare Players' list of every player's skill and the computers' intelligence): the classic window's words, the languages' own names where a version has them
+function openSkillsRemake() {
+  const a = A(), G = a.G, L0 = window.HOLANG, lang = (G.opts && G.opts.lang) || HO.ownLanguage(HO.ownRules(G));
+  const SKK = ['novice', 'beginner', 'normal', 'advanced', 'expert'], IQK = ['dumb', 'average', 'smart', 'diabolical'], SK = ['Novice', 'Beginner', 'Normal', 'Advanced', 'Expert'], IQ = ['Dumb', 'Average', 'Smart', 'Diabolical'];
+  const off = L0 && lang === 'fr' && L0.mac301Fr ? { sk: L0.mac301Fr['1007'], iq: L0.mac301Fr['1009'] } : L0 && lang === 'de' && L0.dosDe && L0.dosDe.s ? { sk: [96, 97, 98, 99, 100].map(i => L0.dosDe.s[i]), iq: [16, 17, 18].map(i => L0.dosDe.s[i]) } : null;
+  const skillName = (k) => { const i = SKK.indexOf(k) < 0 ? 2 : SKK.indexOf(k); return off && off.sk && off.sk[i] ? off.sk[i] : a.tl(SK[i]); };
+  const iqi = Math.max(0, IQK.indexOf((G.opts && G.opts.iq) || 'average')), iq = off && off.iq && off.iq[iqi] ? off.iq[iqi] : a.tl(IQ[iqi]);
+  listDialog({ key: 'skills', title: rtr('List of all players and their skill levels:'), note: `${a.tl('Computer Intelligence:')} ${iq}`, widths: [3, 2], data: [0, 1], ok: () => a.openCompare(), cross: true, rows: G.players.map(q => ({ cells: [q.name, skillName(q.skill)] })) });
+  return true;
+}
+// Compare Players: the chart of how you rank in each of nine ways (Best, Average, Worst, one mark for each way: the app's graph series pictures), drawn as the page draws it, in the app's dialog; Show Skills
+// is the remake's own list of the players' skills. Its title is the dialog's message; before the year it is allowed, or once you have won or are out, only the message
+function openCompareRemake() {
+  const a = A(), G = a.G, C = HO.rules(G).compare; if (!C) return false;
+  const info = HO.compareInfo(G, a.ME), words = a.compareWords(), word = (i) => (words ? words[i] : a.tl(a.CMP_EN[i]));
+  const title = info.kind === 'none' ? a.tl(C.texts.none) : info.kind === 'won' ? a.tl(C.texts.won, info.year) : info.kind === 'out' ? a.tl(C.texts.out, info.year) : a.tl(C.texts.ranks, info.n, info.year);
+  const L = appDialog({ message: title, label: title, cross: false,
+    build(dlg, cw, ch, gd, Lr) {
+      dlg.append(put(textButton(rtr('Show Skills'), 120, 30, 14, () => { Lr.close(); a.openSkillsList(); }), gd.a80 * 4, gd.a80 + 7, 0, 0));
+      if (info.kind !== 'ranks') return;
+      const side = gd.a88 * 3, top = gd.a88 * 8, bottom = 44 + gd.a80 * 3, W = Math.round(cw - 2 * side), H = Math.round(ch - top - bottom), dpr = Math.max(1, window.devicePixelRatio || 1);
+      const cv = UIEl('canvas', 'ios-rchart', { role: 'img', 'aria-label': title, style: `left:${bpt(side)};top:${bpt(top)};width:${bpt(W)};height:${bpt(H)}` });
+      // canvas pixels: bpt() is the page's point in CSS pixels; the drawing is in CSS pixels
+      const px = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--u')) || 1, w = Math.round(W * px), h = Math.round(H * px); cv.width = w * dpr; cv.height = h * dpr;
+      const x = cv.getContext('2d'); x.setTransform(dpr, 0, 0, dpr, 0, 0); x.imageSmoothingEnabled = false;
+      const fs = Math.max(9, Math.round(11 * px * (SCREEN.pad ? 1.1 : 0.8))); x.strokeStyle = x.fillStyle = '#fff'; x.font = `${fs}px Arial, Helvetica, sans-serif`; x.lineWidth = 1;
+      const x0 = Math.round(fs * 5), y0 = h - fs - 4, n = info.n, tp = 2, right = w - 2, unit = n >= 2 ? Math.trunc((y0 - tp - 32) / (n - 1)) : Math.trunc((y0 - tp) / 2) - 16, step = Math.trunc((right - x0) / 10);
+      const line = (p, q, r, s) => { x.beginPath(); x.moveTo(p + 0.5, q + 0.5); x.lineTo(r + 0.5, s + 0.5); x.stroke(); };
+      line(x0, tp, x0, y0); line(x0, y0, right, y0);
+      const side2 = (y, s) => { line(x0 - 1, y, x0 + 1, y); x.textAlign = 'right'; x.fillText(s, x0 - 3, y + 4); };
+      side2(tp + 16, word(9)); side2(Math.trunc((tp + y0) / 2), word(10)); side2(y0 - 16, word(11));
+      x.textAlign = 'center';
+      for (let i = 1; i < 10; i++) { const xx = x0 + step * i; line(xx, y0 - 1, xx, y0 + 1); x.fillText(word(i - 1), xx, y0 + fs); }
+      for (let i = 0; i < 9; i++) {
+        const ix = x0 + step * (i + 1) - 16, iy = tp + Math.trunc(unit * info.scores[i] / 10), im = window.HOTHEME && HOTHEME.skinPic ? HOTHEME.skinPic('i' + a.CMP_ICONS[i]) : null;
+        if (im && im.complete && im.naturalWidth) x.drawImage(im, ix, iy, 32, 32); else x.strokeRect(ix + 8.5, iy + 8.5, 15, 15);
+      }
+      dlg.append(cv);
+    } });
+  remakeOwn(L, 'compare');
+  return true;
 }
 // FUN_100038438 0x100038438 (read in full): report number -> Sounds item. The Sounds list (en.lproj/objectdictionary.plist, items 0-40, mapped to the files by NAME: tools/extract/ios.py SOUND_NUMBERS; item 39 is "Screeem!" = 8000, item 40 "New Turn" = 11111) has the files 2000, 2001, 3000-3003, 4000, 4001, 5000-5003, 6000-6002 (items 0-14), 7000-7007 (15-22),
 // 7012-7027 (23-38), then 8000 (39): the evacuate marks (items 17 and 6 = 7002 and 4000), the drag tick (16 = 7001), the end turn "ahem" (15 = 7000) and the eliminated player's two sounds (item 1, 32) fix the order
@@ -2318,7 +2905,7 @@ function openAutoPlayIOS() {
   return L;
 }
 function openSingleShip(flow, cls, index) {
-  const a = A(), G = a.G, p = a.me(), sid = flow.sid, gd = BGD();
+  const a = A(), G = a.G, p = a.me(), sid = flow.sid, gd = BGD(), queueMode = !!HO.feature(G, 'buildQueue') && !/^(ios|android)$/.test(G.rules || '');
   if (flow.single) { flow.single.remove(); flow.scrims = flow.scrims.filter(x => x !== flow.single); flow.single = null; }
   const { cw: W, ch: H, k } = dlgGeom();
   const close = () => { if (flow.single) { flow.single.remove(); flow.scrims = flow.scrims.filter(x => x !== flow.single); flow.single = null; } };
@@ -2359,9 +2946,10 @@ function openSingleShip(flow, cls, index) {
   const dev = row(miscS(62), 1, Y[0]), pro = row(miscS(63), 1, Y[1]), tot = row(miscS(60), 2, Y[1]), met = row(miscS(64), 1, Y[2]), totM = row(miscS(61), 2, Y[2]),
     mon = row(miscS(24), 1, Y[3]), metL = row(miscS(23), 2, Y[3]);
   // Allow Debt: a two-word slider of 60 points, no arrows, at "No"
-  dlg.append(bLabel(miscS(158), gd.f, 20, Y[4], 0, 0.5, '#fff'));
+  const debtLab = bLabel(miscS(158), gd.f, 20, Y[4], 0, 0.5, '#fff'); dlg.append(debtLab);
   const debt = sliderArray({ width: 60, arrows: false, words: [miscS(159), miscS(160)], change: () => { updateDebt(); } }); debt.min = 0; debt.max = 1; debt.setValue(0);
   dlg.append(put(debt.el, W / 2 - 10, Y[4], 1, 0.5));
+  if (queueMode) { debtLab.style.display = debt.el.style.display = 'none'; L.dlg.classList.add('ios-remake'); L.dlg.setAttribute('data-remake', 'queue'); } // (a queued ship is paid for over the turns: nothing to borrow now)
   const nl = bLabel(miscS(157), gd.f, 20, Y[5], 0, 0.5, '#fff'); dlg.append(nl);
   const bs = sliderArray({ width: (W - 40) / 2 * 0.5 * 1.25, change: () => updateCosts() });
   dlg.append(put(bs.el, gd.a80 + textW(miscS(157), gd.f) + 20, Y[5], 0, 0.5));
@@ -2400,6 +2988,12 @@ function openSingleShip(flow, cls, index) {
   // -[BuildSingleShipDialog determineCapacity] 0x1000b6a08
   function determineCapacity() {
     const c = costs(), d = shipRec();
+    if (queueMode) { // the queue takes any number (99 here) while its slots allow: rs.queueSlots (a kind of ship each), rs.queueMergeAny (1.2, 2.0: a design already queued takes more), rs.queueMarked
+      const rs = HO.rules(G), sq = G.stars[sid].queue || [], inQ = d && (rs.queueMergeAny ? sq.some(q => q.did === d.id) : sq.length && sq[sq.length - 1].did === d.id);
+      const n = (rs.queueSlots && sq.length >= rs.queueSlots && !inQ) || (d && d.scrap301 && !rs.queueMarked) ? 0 : 99;
+      bs.max = n; bs.min = 0; let v = bs.value; v = v <= n ? ((n < 1 || v !== 0) ? v : 1) : n; bs.setValue(v);
+      bk.style.visibility = bs.value === 0 ? 'hidden' : ''; calm(met); calm(pro); calm(dev); return c;
+    }
     let avail = p.savings; if (debt.value) avail = p.savings - HO.borrowLimit(G, p);
     let first = 0;
     if (c.built === 0) { avail -= c.dev; first = avail > 0 ? 1 : 0; avail = Math.max(0, avail); }
@@ -2438,7 +3032,7 @@ function openSingleShip(flow, cls, index) {
     warn.style.display = many ? '' : 'none';
     if (many) warnT.textContent = HO.say(G, HO.DATA.alerts[cur.type === 'scout' ? 35 : 36]);
     tot.val.textContent = bnum(money, true); totM.val.textContent = bnum(metal, false);
-    mon.val.textContent = bnum(p.savings - money, true); metL.val.textContent = bnum(p.metal - metal, false);
+    mon.val.textContent = bnum(p.savings - (queueMode ? 0 : money), true); metL.val.textContent = bnum(p.metal - (queueMode ? 0 : metal), false);
   }
   function updateDebt() { determineCapacity(); updateCosts(); }
   // -[BuildSingleShipDialog updateExtraShipData] 0x1000b64b8
@@ -2512,6 +3106,10 @@ function openSingleShip(flow, cls, index) {
       if (designsOf(p).length >= (HO.rules(G).maxDesigns || 24)) { appMessage(HO.say(G, HO.DATA.alerts[15])); return; } // Alert Strings 16: buildShips 0x1000b7630 shows it (FUN_10008ecb0: +[DialogLayerSprite message:closeButton:cancelButton:] with the check button) and returns, the dialog staying
       const sp = specOf(); sp.name = (name.value || '').trim().slice(0, 15) || autoName(classOf(sp.type));
       d = HO.findOrCreateDesign(G, p, sp);
+    }
+    if (queueMode) { // queued, not bought: DOS 2.0's yard pays for them from the colony's shipbuilding share
+      if (!HO.queueShips(G, a.ME, sid, d.id, n)) { appMessage(rtr(`${G.stars[sid].name}’s queue is full: it holds ${HO.rules(G).queueSlots} kinds of ship.`)); return; }
+      a.Sound.play(7006); close(); a.save(); a.renderPanel(); a.draw(); updateShipTypes(flow); return;
     }
     for (let i = 0; i < n; i++) if (!HO.buildShips(G, a.ME, sid, d.id, 1)) break;
     close(); a.save(); a.renderPanel(); a.draw(); updateShipTypes(flow);
@@ -2692,7 +3290,7 @@ function openOrganizeIOS(sid) {
   L.scrim.addEventListener('pointerup', pinEnd); L.scrim.addEventListener('pointercancel', pinEnd);
   pushScrim(L.scrim);
   render();
-  return true;
+  return L;
 }
 // ---------------------------------------------------------------------------
 // The battle screen (BattleStageLayer 0x1000949b4-0x100096238, BattleShipNode 0x10009c18c-0x10009ccfc, and the rule core's CBattleStagePhone / CBattleStage, whose
@@ -2957,15 +3555,38 @@ window.HOTHEME = {
   battleWindow(b, k) { return openBattleIOS(b, k); }, // the Battle screen (BattleStageLayer; openBattleIOS)
   // the app's own windows in this skin: Build (BuildShipsDialog, ShipClassMenu, ShipMenuItem, BuildSingleShipDialog); a ruleset whose ships are queued (DOS 2.0) keeps the remake's window
   window(name, ...x) {
-    if (name === 'radical') { const a0 = A(); return !!(a0 && a0.G && /^(ios|android)$/.test(a0.G.rules || '') && openRadicalIOS()); }
+    if (DRESSED.includes(name)) { const a1 = A(); if (a1 && a1.G && !/^(ios|android)$/.test(a1.G.rules || '')) { dressNext = name; setTimeout(() => { dressNext = null; }, 0); } } // (a classic window the skin dresses: `dress` below tags the window that opens next)
+    if (name === 'radical') { const a0 = A(); if (!(a0 && a0.G)) return false; const Lr = openRadicalIOS(); if (!Lr) return false; if (!/^(ios|android)$/.test(a0.G.rules || '')) remakeOwn(Lr, 'radical'); return true; } // (the app's own screen for the iOS rules; the remake's own use of it for another ruleset with a radical hand)
     if (name === 'rank') return !!(/^(ios|android)$/.test((A().G || {}).rules || '') && (x[2] || {}).NS && openRankIOS(x[0], x[1], x[2]));
     if (name === 'turn') { turnAsk(true); return true; }
     if (name === 'saved') return /^(ios|android)$/.test((x[0] || {}).id || '') ? openSavedIOS(x[0]) : false; // (from the title: no game yet)
     const a = A(); if (!a || !a.G) return false;
-    if (name === 'build') { const s = a.G.stars[x[0]]; if (!s || s.owner !== a.ME || HO.feature(a.G, 'buildQueue')) return false; return openBuildFlow(x[0]); }
+    if (name === 'build') { const s = a.G.stars[x[0]]; if (!s || s.owner !== a.ME) return false; return openBuildFlow(x[0]); }
     const appRules = /^(ios|android)$/.test(a.G.rules || '');
     if (appRules && name === 'dip') { openDipIOS(); return true; }
     if (appRules && name === 'give') return openGiveIOS();
+    if (!appRules && name === 'players') return openPlayersRemake();
+    if (!appRules && name === 'fleets') return openFleetsRemake();
+    if (!appRules && name === 'battles') return openBattlesRemake();
+    if (!appRules && name === 'stars') return openStarsRemake();
+    if (!appRules && name === 'ranks') return openRanksRemake();
+    if (!appRules && name === 'hall') return openHallRemake(x[0], x[1], x[2]);
+    if (!appRules && name === 'master') return openMasterRemake();
+    if (!appRules && name === 'group') return x[0] != null && openGroupRemake(x[0]);
+    if (!appRules && name === 'auto') return openAutoPlayRemake();
+    if (!appRules && name === 'split') return openSplitRemake(x[0]);
+    if (!appRules && name === 'skills') return openSkillsRemake();
+    if (!appRules && name === 'compare') return openCompareRemake();
+    if (!appRules && name === 'reports') return openReportsRemake();
+    if (!appRules && name === 'forceend') return openForceEndRemake(x[0], x[1]);
+    if (!appRules && name === 'temps' && A().G) return openTemperaturesRemake();
+    if (!appRules && name === 'give') return openGiveRemake(); // (the remake-only controls: a ruleset's own give, message, surrender and fix spending in the app's look; docs/brief-restyle-ios.md)
+    if (!appRules && name === 'chat') return openChatRemake();
+    if (!appRules && name === 'surrender') return openSurrenderRemake();
+    if (!appRules && name === 'fixspending') return openFixRemake();
+    if (!appRules && name === 'dip') return openDipRemake();
+    if (!appRules && name === 'armageddon') return openArmageddonRemake();
+    if (!appRules && name === 'types') return openScrapRemake();
     if (appRules && name === 'leave') { leaveNotice(x[0] || '', 'about:blank'); return true; }
     if (appRules && name === 'auto') { openAutoPlayIOS(); return true; }
     if (appRules && name === 'armageddon') { openArmageddonIOS(); return true; }
@@ -2985,6 +3606,20 @@ window.HOTHEME = {
     if (item != null) a.Sound.play(TAP_FILE[item]);
   },
   // the app's message box for a question (+[DialogLayerSprite message:closeButton:cancelButton:] with setOkBlock:): the Evacuate question, with the check and the cross
+  // the page's tag for a window it opens next (see DRESSED)
+  // Compare Players' rows have icons of the originals' own (the Mac's i3110 ...), which this skin does not load (the chart drew boxes). THE REMAKE'S OWN choice: the app's graph series pictures, the
+  // same rows the app's graph legend names (income, metal, ships and the five technologies: icon0, 1, 3, 5-9) and the planet for Planets (js/skins/classic/ui.js skinPic asks the theme for a name it lacks)
+  skinPic(name) {
+    const a = A(), IMG = a && a.IMG, m = /^[ib](\d+)$/.exec(name); if (!IMG || !m || !a.G || /^(ios|android)$/.test(a.G.rules || '')) return null;
+    const map = { 3110: 'icon0-selected', 3162: 'icon1-selected', 3150: 'planet_0', 4011: 'icon3-selected', 3100: 'icon5-selected', 3101: 'icon6-selected', 3102: 'icon7-selected', 3103: 'icon8-selected', 3104: 'icon9-selected' }, im = IMG[P + map[m[1]]];
+    return im && im.complete && im.naturalWidth ? im : null;
+  },
+  dress(win) { if (!dressNext) return; win.classList.add('ios-remake'); win.setAttribute('data-remake', 'dressed:' + dressNext); dressNext = null; },
+  // the remake's own plain "Are you sure?" box for a ruleset the app has no question for: the app's message box with the check and the cross (the button words of a ruleset's own alert are not shown)
+  confirm(text, yes, labels) {
+    const a = A(); if (!a || !a.G || /^(ios|android)$/.test(a.G.rules || '') || typeof text !== 'string') return false;
+    confirmRemake(text, yes, labels); return true;
+  },
   alert(kind, text, yes) {
     const a = A(); if (kind !== 'evacuate' || !a || !a.G || !/^(ios|android)$/.test(a.G.rules || '')) return false;
     appMessage(text, yes); return true;

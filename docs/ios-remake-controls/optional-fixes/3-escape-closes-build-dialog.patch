@@ -1,0 +1,15 @@
+--- a/js/skins/ios/ui.js
++++ b/js/skins/ios/ui.js
+@@ -1411,6 +1411,12 @@
+ function aliveOf(G, me, d) { let n = 0; for (const f of G.fleets) if (f.owner === me && f.ships && f.ships[d.id]) n += f.ships[d.id]; return n; }
+ function pushScrim(scrim) { document.getElementById('app').append(scrim); }
+ let buildFlow = null;
++// Escape (the Back key of Android, see js/skins/android/ui.js) closes the top Build dialog: the app's own Build screens ignored it, so a keyboard could not leave them
++document.addEventListener('keydown', (e) => {
++  if (e.key !== 'Escape' || !buildFlow) return;
++  e.stopPropagation();
++  if (buildFlow.single) { buildFlow.single.remove(); buildFlow.scrims = buildFlow.scrims.filter(x => x !== buildFlow.single); buildFlow.single = null; } else closeBuildFlow();
++}, true);
+ function closeBuildFlow() { if (buildFlow) { for (const s of buildFlow.scrims.slice().reverse()) s.remove(); buildFlow = null; } }
+ 
+ // -[BuildShipsDialog initDialog] 0x1000b3b58: the layer takes the whole screen (an iPhone) or 0.8 of the width by the height the most ships of one class need

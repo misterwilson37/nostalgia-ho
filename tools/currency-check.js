@@ -125,7 +125,7 @@ async function run(browser, url, r) {
   await page.waitForFunction(() => window.HOAPI && document.querySelector('#titlescreen') && !document.querySelector('#titlescreen').classList.contains('loading'), null, { timeout: 30000 });
   await sleep(300);
   await page.evaluate(() => HOAPI.newGameDialog());
-  await page.waitForSelector('form.newgame');
+  await page.waitForSelector('form.newgame', { state: 'attached' }); // (the iOS and Android skins draw their own New Game screen: the form is there, hidden)
   await page.evaluate(([id, l, s]) => {
     const f = document.querySelector('form.newgame'), set = (n, v) => { const e = f.querySelector(`select[name=${n}]`); if (e && [...e.options].some(o => o.value === v)) { e.value = v; e.dispatchEvent(new Event('change', { bubbles: true })); } };
     set('rules', id); set('lang', l); set('skin', s);
