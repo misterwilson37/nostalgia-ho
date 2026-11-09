@@ -123,3 +123,13 @@ stayed Holo. The full brief is `docs/brief-android5-look.md`.
 ## 7. The iOS/Android skin's remake-only controls
 
 The full brief is `docs/brief-restyle-ios.md`.
+
+---
+
+## 8. Finish the real-play test and fix what it finds
+
+`docs/brief-real-play.md`.
+
+## 9. Interface size as a true zoom (iOS and Android skins)
+
+`docs/brief-interface-zoom.md`.
