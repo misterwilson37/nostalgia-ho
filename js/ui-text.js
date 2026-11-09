@@ -1442,5 +1442,12 @@ root.HOUI.add([
 ['Nobody yet.', 'Personne pour l’instant.', 'Noch niemand.', 'Henüz kimse yok.', 'Todavía nadie.'],
 ['Ranks', 'Grades', 'Ränge', 'Rütbeler', 'Rangos'],
 ['Total master points:', 'Total des points de maître :', 'Meisterpunkte insgesamt:', 'Toplam usta puanı:', 'Total de puntos de maestría:'],
+// the DOS 2.0 skin's menu bar (js/skins/dos/ui.js, menuLayoutDos): the program's own English words, ours in the others
+['About Ho!…', 'À propos de Ho !…', 'Über Ho!…', 'Ho! hakkında…', 'Acerca de Ho!…'],
+['Open Game…', 'Ouvrir une partie…', 'Spiel öffnen…', 'Oyun aç…', 'Abrir partida…'],
+['Save Game', 'Enregistrer la partie', 'Spiel sichern', 'Oyunu kaydet', 'Guardar partida'],
+['Revert To Saved', 'Revenir à la version enregistrée', 'Zur gesicherten Version', 'Kaydedilene dön', 'Volver a lo guardado'],
+['Force Turn Update', 'Forcer la mise à jour du tour', 'Zugaktualisierung erzwingen', 'Tur güncellemesini zorla', 'Forzar la actualización del turno'],
+['Exit', 'Quitter', 'Beenden', 'Çıkış', 'Salir'],
 ]);
 })(typeof window !== 'undefined' ? window : globalThis);

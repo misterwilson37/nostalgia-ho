@@ -242,6 +242,14 @@ window.HOTHEME = {
     parts.forEach((im, i) => im === body ? x.drawImage(im, i * 81 + 0.5, -2, 80, 80) : x.drawImage(im, i * 81, 0)); // (a 40x40 body twice the size)
     return c;
   },
+  // The menu bar of the DOS program (File, Options, Ships, Galaxy, Window; the Windows program adds Help): the items and their order as the running
+  // program shows them (screenshots v20dos-orig-menus.png in the audit; Windows' MENU 1 in docs/win20-findings.md). A command the remake has under
+  // another name is laid out here under the original's; what a browser has no use for (Save Game, Revert: the remake saves every change; the polling
+  // of a network game; I'll Update Turns) shows dimmed as in the original when nothing is to save. The remake's own commands (Preferences, Account saves,
+  // Export, Import, Review battle, Next fleet ...) follow at the end of the last menu, as every layout does (docs/remake-controls.md).
+  // The original writes "..." and its key equivalents as "[Ctrl+S]" (T.keyName).
+  get menuLayout() { return menuLayoutDos(); },
+  keyName(k) { return /^Ctrl/.test(k) ? '[' + k + ']' : '⌘' + k; },
   // the DOS title screen: the two halves of its credits picture
   title(frame, IMG, Sound) {
     const top = IMG[P + 'd998'], bot = IMG[P + 'd999'];
@@ -260,6 +268,53 @@ window.HOTHEME = {
     const l = doc.querySelector('#menubar .logo'); if (l) l.textContent = 'Ho! 2.0';
   },
 };
+
+// ---- the menu bar (see menuLayout in HOTHEME) ----
+function menuLayoutDos() {
+  const A = () => window.HOAPI, G = () => A() && A().G, H = () => window.HO;
+  const noGame = () => !G(), off = () => true;
+  const it = (label, fn, o) => { o = o || {}; return [label, fn, o.shown || null, o.checked || null, o.ghost || null, o.key || null]; };
+  const rs = () => (G() ? H().rules(G()) : {});
+  const star = () => (G() && A().UI.sel != null ? G().stars[A().UI.sel] : null);
+  const mine = () => !!star() && star().owner === A().ME;
+  const win = (window.HOSKINS && HOSKINS.os) || '';
+  const M = {
+    File: [
+      it('About Ho!…', () => A().openAbout()), '-',
+      ['New Game…', 'Game/New game…'],
+      it('Open Game…', () => A().openSavedGames()),
+      it('Save Game', () => {}, { ghost: off, key: 'Ctrl+S' }),
+      it('Revert To Saved', () => {}, { ghost: off }),
+      it('Close', () => A().quitToTitle(), { ghost: noGame, key: 'Ctrl+W' }), '-',
+      it('End Turn', () => { const b = document.querySelector('#msg .clock'); if (b) b.click(); else if (G()) A().doEndTurn(); }, { ghost: noGame, key: 'Ctrl+T' }),
+      ['End Turn & Switch Players', 'Game/#1'], '-',
+      it('Exit', () => A().quitToTitle())],
+    Options: [
+      it('Force Turn Update', () => A().forceEndTurn(), { ghost: () => noGame() || !rs().forceEndTurn || !A().hotSeat() }),
+      ['Auto Play…', 'Game/Auto play…'],
+      it('I’ll Update Turns', () => {}, { ghost: off }), '-',
+      it('Set Polling Time…', () => {}, { ghost: off }),
+      ['Set Battle Speed…', 'Game/Preferences…'], '-',
+      it('Show Event Messages', () => { const P = A().Prefs; P.showMsgs = P.showMsgs === false; A().savePrefs(); }, { ghost: noGame, checked: () => A().Prefs.showMsgs !== false }),
+      it('Review Announced Battles', () => { A().Prefs.review = !A().prefReview(); A().savePrefs(); }, { ghost: noGame, checked: () => A().prefReview() }),
+      it('Give Overspending Warnings', () => { const g = G(); g.opts.overspendWarnings = g.opts.overspendWarnings === false; A().save(); }, { ghost: noGame, checked: () => !!G() && G().opts.overspendWarnings !== false }),
+      it('Sound', () => { A().Sound.on = !A().Sound.on; A().savePrefs(); }, { checked: () => A().Sound.on })],
+    Ships: [
+      ['List Ship Types…', 'Ships/Scrap ship types…'],
+      it('Create New Ship Type…', () => { if (mine()) A().openBuild(star().id); }, { ghost: () => noGame() || !mine() }), '-',
+      ['List All Fleets…', 'Ships/List all fleets…'],
+      ['Organize Ships…', 'Ships/#4'],
+      it(() => (mine() ? A().tl('Build Ships at %s…', star().name) : A().tl('Can’t Build Ships Here…')), () => { if (mine()) A().openBuild(star().id); }, { ghost: () => noGame() || !mine() }),
+      ['Scrap Current Fleet', 'Ships/#3'], '-',
+      [null, 'Ships/Review battle…']],
+    Galaxy: [
+      ['Compare Players…', 'Galaxy/Compare players…'], ['List All Explored Stars…', 'Galaxy/List explored stars…'], ['Send Message…', 'Galaxy/Send a message…'], '-',
+      ['Zoom In', 'View/Zoom in'], ['Zoom Out', 'View/Zoom out'], '-', ['Fix Spending', 'Galaxy/Fix spending']],
+    Window: [['Reports', 'Galaxy/Report window…']]
+  };
+  if (win === 'win31') M.Help = [['How to play', 'Help/How to play']];
+  return M;
+}
 // enemy faces: the Mac skin's 16 hats become the DOS game's planet faces
 function faces() {
   const o = {};

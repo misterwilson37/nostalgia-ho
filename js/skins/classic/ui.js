@@ -2436,6 +2436,7 @@ function confirmBox(text, yes, kind, labels) {
 // an alert of the program's own over what is open (the New Game window stays), in the language it is written in (lang: a French
 // edition's box is French whatever the page's language): its paragraphs and an OK
 function alertOver(paras, lang) {
+  if (T.alertBox) { const b = T.alertBox(paras, lang); if (b) return b; } // (a skin may draw an alert of its program at the program's rectangles: the Mac 2.0.1 skins)
   const done = () => { back.remove(); };
   const ok = el('button', { onclick: done }, 'OK');
   const back = el('div', { class: 'scrim', onclick: (e) => { if (e.target === back) done(); }, onkeydown: (e) => { if (e.key === 'Escape') { e.stopPropagation(); done(); } } },
@@ -6525,7 +6526,7 @@ function setupMenus() {
         // ghosted(): a skin's item that shows but can't be chosen now (the Amiga's dotted ones)
         const off = ghosted ? !!ghosted() : false;
         dd.append(el('button', { role: 'menuitem', 'aria-label': checked ? `${text}: ${on ? 'on' : 'off'}` : null, class: checked ? 'check' + (on ? ' on' : '') : null, disabled: off ? 'disabled' : false,
-          onclick: () => { dd.classList.remove('open'); btn.setAttribute('aria-expanded', 'false'); fn(); } }, text, key ? el('span', { class: 'mkey', 'aria-hidden': 'true', translate: 'no' }, '⌘' + key) : null));
+          onclick: () => { dd.classList.remove('open'); btn.setAttribute('aria-expanded', 'false'); fn(); } }, text, key ? el('span', { class: 'mkey', 'aria-hidden': 'true', translate: 'no' }, T.keyName ? T.keyName(key) : '⌘' + key) : null));
       }
       dd.classList.add('open'); btn.setAttribute('aria-expanded', 'true');
       // a menu near the right edge opens leftward so it stays on screen
