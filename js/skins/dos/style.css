@@ -44,3 +44,67 @@ html.os-dos .dropdown button:disabled { color: #666; }
 html.os-dos .dropdown button.check.on::before { content: "\2666"; position: absolute; margin-left: -14px; }
 html.os-dos .dropdown hr { border: 0; border-top: 1px solid #000; margin: 3px 0; }
 html.os-dos .dropdown .mkey { margin-left: 16px; }
+
+/* ---- the original's screen: a 640 x 476 frame in the unit --u (js/skins/dos/ui.js, "The original's screen") ---- */
+@font-face { font-family: "DOS Geneva 9"; src: url("../../../assets/skins/dos/fonts/geneva9.ttf") format("truetype"); font-display: block; }
+@font-face { font-family: "DOS Geneva 9 Bold"; src: url("../../../assets/skins/dos/fonts/geneva9bold.ttf") format("truetype"); font-display: block; }
+@font-face { font-family: "DOS Chicago 12"; src: url("../../../assets/skins/dos/fonts/chicago12.ttf") format("truetype"); font-display: block; }
+html.dosframe { --u: 1; --du: calc(1px * var(--u)); }
+html.dosframe body { background: #000; }
+html.dosframe #app { position: fixed; display: block; left: 50%; top: 50%; width: calc(640 * var(--du)); height: calc(476 * var(--du)); margin-left: calc(-320 * var(--du)); margin-top: calc(-238 * var(--du)); background: #000; overflow: visible; }
+html.dosframe #menubar { position: absolute; left: 0; top: 0; width: 100%; height: calc(28 * var(--du)); display: block; background: #aaa; padding: 0; gap: 0; border: 0; }
+html.dosframe #menubar #title { position: absolute; left: 0; top: 0; width: 100%; height: calc(15 * var(--du)); margin: 0; background: #009a9a; color: #000; text-align: center; font: calc(14 * var(--du))/calc(15 * var(--du)) "DOS Bios", monospace; overflow: hidden; }
+html.dosframe #menubar #title::before { content: "Spaceward Ho! - "; }
+html.dosframe #menubar #title:empty::before { content: "Spaceward Ho!"; }
+html.dosframe #menubar .menu { display: inline-block; position: relative; vertical-align: top; }
+html.dosframe #menubar { padding-top: calc(15 * var(--du)); padding-left: calc(16 * var(--du)); white-space: nowrap; }
+html.dosframe #menubar > .menu:first-child { position: absolute; right: 0; top: calc(15 * var(--du)); }
+html.dosframe #menubar .mbtn { font-size: calc(14 * var(--du)); line-height: calc(13 * var(--du)); height: calc(13 * var(--du)); padding: 0 calc(8 * var(--du)); }
+html.dosframe .dropdown { position: absolute; top: calc(13 * var(--du)); }
+html.dosframe .dropdown button { font-size: calc(14 * var(--du)); line-height: calc(14 * var(--du)); }
+html.dosframe #main { position: absolute; display: block; left: 0; top: calc(28 * var(--du)); width: 100%; height: calc(448 * var(--du)); }
+html.dosframe #panel { position: absolute; left: 0; top: 0; width: calc(240 * var(--du)); height: 100%; padding: 0; background: #fff; border: 0; overflow: hidden; color: #000; }
+html.dosframe #panel canvas.dq { display: block; image-rendering: pixelated; }
+html.dosframe #mapwrap { position: absolute; left: calc(240 * var(--du)); top: 0; right: 0; bottom: 0; background: #000; }
+html.dosframe #msg { left: calc(4 * var(--du)); top: calc(4 * var(--du)); bottom: auto; }
+/* the players and budget box, 240 x 169: the roster 88 wide, the bars from 88 (the rule at 146, the bars 77 long) */
+html.dosframe #panel .doslow { position: relative; width: 100%; height: calc(169 * var(--du)); background: #fff; border-bottom: calc(1 * var(--du)) solid #000; overflow: hidden; font: calc(12 * var(--du)) "DOS Geneva 9", sans-serif; }
+html.dosframe .dosroster { position: absolute; left: 0; top: calc(2 * var(--du)); width: calc(86 * var(--du)); }
+html.dosframe .dosroster .rrow { display: flex; align-items: center; gap: calc(6 * var(--du)); height: calc(18 * var(--du)); padding-left: calc(8 * var(--du)); }
+html.dosframe .dosroster img { width: calc(16 * var(--du)); height: calc(16 * var(--du)); image-rendering: pixelated; }
+html.dosframe .dosroster .rrow.out { opacity: .4; }
+html.dosframe .dosroster .rdone { margin-left: auto; padding-right: calc(4 * var(--du)); }
+html.dosframe #panel .dosbudget { position: absolute; left: calc(88 * var(--du)); top: 0; width: calc(152 * var(--du)); height: 100%; margin: 0; padding: 0; background: none; border: 0; box-shadow: none; }
+html.dosframe #panel .dosbudget::before { content: ""; position: absolute; left: calc(58 * var(--du)); top: calc(14 * var(--du)); bottom: 0; width: calc(1 * var(--du)); background: #000; }
+html.dosframe #panel .dosbudget h3.dosstrip { display: flex; justify-content: space-between; margin: 0 calc(8 * var(--du)) 0 calc(59 * var(--du)); height: calc(14 * var(--du)); width: calc(78 * var(--du)); font: calc(12 * var(--du))/calc(12 * var(--du)) "DOS Geneva 9", sans-serif; color: #000; cursor: pointer; }
+html.dosframe #panel .dosbudget .barrow { display: grid; grid-template-columns: calc(56 * var(--du)) calc(78 * var(--du)); height: calc(14 * var(--du)); margin: 0; padding: 0; align-items: center; }
+html.dosframe #panel .dosbudget .blabel { text-align: right; padding-right: calc(2 * var(--du)); font: calc(12 * var(--du))/calc(12 * var(--du)) "DOS Geneva 9", sans-serif; color: #000; white-space: nowrap; overflow: hidden; font-weight: normal; }
+html.dosframe #panel .dosbudget .track { height: calc(9 * var(--du)); margin-left: calc(3 * var(--du)); background: none; border: 0; border-radius: 0; box-shadow: none; }
+html.dosframe #panel .dosbudget .fill, html.dosframe #panel .dosbudget .fill.tbar { background: #00ba00; height: 100%; }
+html.dosframe #panel .dosbudget .fill.tech, html.dosframe #panel .dosbudget .fill.sav { background: #000; }
+html.dosframe #panel .dosbudget .bval { display: none; }
+html.dosframe .clock.pic img { width: calc(51 * var(--du)); }
+html.dosframe #msg .clock.pic { padding: 0; }
+
+/* the program's dialogs (dDialog in ui.js): a 5-pixel frame, white inside, the screen font */
+.win.dosw { background: none; border: 0; box-shadow: none; outline: 0; padding: 0; width: auto; max-width: none; }
+.win.dosw .wtitle { display: none; }
+.win.dosw .wbody { padding: 0; overflow: visible; }
+.dd { position: relative; background: #fff; box-shadow: inset 0 0 0 calc(1 * var(--du)) #000, inset 0 0 0 calc(2 * var(--du)) #aaa, inset 0 0 0 calc(4 * var(--du)) #555, inset 0 0 0 calc(5 * var(--du)) #000; font: calc(14 * var(--du))/calc(14 * var(--du)) "DOS Bios", monospace; color: #000; -webkit-font-smoothing: none; }
+.dd-t { white-space: pre; line-height: calc(14 * var(--du)); }
+.dd .hot { color: #a00000; }
+.dd .hotu { text-decoration: underline; }
+.dd-title { background: #aaa; text-align: center; line-height: calc(17 * var(--du)); border-bottom: calc(1 * var(--du)) solid #000; }
+.dd-pic { image-rendering: pixelated; }
+.dd-btn { background: #aaa; color: #000; border: calc(1 * var(--du)) solid #000; border-radius: 0; box-shadow: inset calc(1 * var(--du)) calc(1 * var(--du)) 0 #fff, inset calc(-2 * var(--du)) calc(-2 * var(--du)) 0 #555; font: inherit; font-weight: normal; padding: 0; min-width: 0; text-shadow: none; }
+.dd-btn:active { box-shadow: inset calc(1 * var(--du)) calc(1 * var(--du)) 0 #555; }
+.dd-btn.def { outline: calc(2 * var(--du)) solid #000; outline-offset: calc(-1 * var(--du)); }
+.dd-slider { background: #aaa; border: calc(1 * var(--du)) solid #000; box-sizing: border-box; cursor: pointer; }
+.dd-slider .arr { position: absolute; top: 0; bottom: 0; width: calc(15 * var(--du)); background: #aaa; box-shadow: inset calc(1 * var(--du)) calc(1 * var(--du)) 0 #fff, inset calc(-1 * var(--du)) calc(-1 * var(--du)) 0 #555; }
+.dd-slider .arr.l { left: 0; } .dd-slider .arr.r { right: 0; }
+.dd-slider .arr::after { content: ""; position: absolute; top: calc(3 * var(--du)); border: calc(4 * var(--du)) solid transparent; }
+.dd-slider .arr.l::after { left: calc(2 * var(--du)); border-right-color: #000; border-left-width: 0; }
+.dd-slider .arr.r::after { right: calc(2 * var(--du)); border-left-color: #000; border-right-width: 0; }
+.dd-slider .thumb { position: absolute; top: 0; bottom: 0; width: calc(8 * var(--du)); background: #aaa; box-shadow: inset calc(1 * var(--du)) calc(1 * var(--du)) 0 #fff, inset calc(-1 * var(--du)) calc(-1 * var(--du)) 0 #555; }
+.dd-slider:focus-visible, .dd-t:focus-visible { outline: 1px dotted #000; }
+.scrim:has(.win.dosw) { background: transparent; }

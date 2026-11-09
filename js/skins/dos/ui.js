@@ -249,6 +249,10 @@ window.HOTHEME = {
   // Export, Import, Review battle, Next fleet ...) follow at the end of the last menu, as every layout does (docs/remake-controls.md).
   // The original writes "..." and its key equivalents as "[Ctrl+S]" (T.keyName).
   get menuLayout() { return menuLayoutDos(); },
+  panel(panel, B) { panelDos(panel, B); },
+  mapPixel() { return frameOn() ? [U, U] : null; },
+  mapFont(n) { return frameOn() ? "12px 'DOS Geneva 9'" : null; },
+  window(name) { if (!frameOn() || !window.HOAPI.G) return false; if (name === 'autoplay') return autoPlayDos(); return false; },
   keyName(k) { return /^Ctrl/.test(k) ? '[' + k + ']' : '⌘' + k; },
   // the DOS title screen: the two halves of its credits picture
   title(frame, IMG, Sound) {
@@ -266,6 +270,7 @@ window.HOTHEME = {
     const c = doc.querySelector('#titlescreen .credit');
     if (c) c.textContent = 'With the art and sounds of Spaceward Ho! 2.0 for DOS (New World Computing, 1993). DOS programming by Ed Murphy.';
     const l = doc.querySelector('#menubar .logo'); if (l) l.textContent = 'Ho! 2.0';
+    frameSetup(doc.documentElement);
   },
 };
 
@@ -280,7 +285,7 @@ function menuLayoutDos() {
   const win = (window.HOSKINS && HOSKINS.os) || '';
   const M = {
     File: [
-      it('About Ho!…', () => A().openAbout()), '-',
+      it('About Ho!…', () => (frameOn() ? aboutDos() : A().openAbout())), '-',
       ['New Game…', 'Game/New game…'],
       it('Open Game…', () => A().openSavedGames()),
       it('Save Game', () => {}, { ghost: off, key: 'Ctrl+S' }),
@@ -294,7 +299,7 @@ function menuLayoutDos() {
       ['Auto Play…', 'Game/Auto play…'],
       it('I’ll Update Turns', () => {}, { ghost: off }), '-',
       it('Set Polling Time…', () => {}, { ghost: off }),
-      ['Set Battle Speed…', 'Game/Preferences…'], '-',
+      it('Set Battle Speed…', () => (frameOn() ? battleSpeedDos() : A().openPrefs()), { ghost: noGame }), '-',
       it('Show Event Messages', () => { const P = A().Prefs; P.showMsgs = P.showMsgs === false; A().savePrefs(); }, { ghost: noGame, checked: () => A().Prefs.showMsgs !== false }),
       it('Review Announced Battles', () => { A().Prefs.review = !A().prefReview(); A().savePrefs(); }, { ghost: noGame, checked: () => A().prefReview() }),
       it('Give Overspending Warnings', () => { const g = G(); g.opts.overspendWarnings = g.opts.overspendWarnings === false; A().save(); }, { ghost: noGame, checked: () => !!G() && G().opts.overspendWarnings !== false }),
@@ -314,6 +319,304 @@ function menuLayoutDos() {
   };
   if (win === 'win31') M.Help = [['How to play', 'Help/How to play']];
   return M;
+}
+
+// ======== The original's screen: a 640 x 476 frame in a unit u (docs/dos20-findings.md, "Rebuilding the dos skin") ========
+// Measured on the running program (DOSBox, screenshots v20dos-orig-*.png): the window is 640 x 476, a 15-row teal title bar, a 13-row grey menu bar,
+// then the left column 240 wide (planet 74, fleets 79, totals 43, players and budget bars 169, Tech Spending 83 rows) and the map. Every length below is in
+// the program's pixels; the page's unit u (CSS pixels per program pixel, --u) fits the frame to the window. The map is drawn in those pixels
+// (T.mapPixel, as the Amiga skin does). Only under the "DOS" OS look (html.os-dos): the Windows look keeps the classic page.
+let U = 1;
+const frameOn = () => document.documentElement.classList.contains('os-dos');
+function setUnit() {
+  const de = document.documentElement, u0 = Math.min(window.innerWidth / 640, window.innerHeight / 476);
+  U = u0 >= 1 ? Math.floor(u0 * 2) / 2 : Math.max(0.4, u0);
+  de.style.setProperty('--u', String(U));
+}
+const F9 = "12px 'DOS Geneva 9'", F9B = "12px 'DOS Geneva 9 Bold'", C12 = "15px 'DOS Chicago 12'";
+let fontsReady = false;
+function loadFonts() {
+  if (fontsReady || !document.fonts) return;
+  Promise.all(["12px 'DOS Geneva 9'", "12px 'DOS Geneva 9 Bold'", "15px 'DOS Chicago 12'"].map(f => document.fonts.load(f))).then(() => {
+    fontsReady = true; const a = window.HOAPI; if (a && a.G && frameOn()) a.renderPanel();
+  }, () => {});
+}
+// a box drawn in the program's pixels (w x h of them), as wide as w units
+function dq(w, h, label) {
+  const a = window.HOAPI, dpr = window.devicePixelRatio || 1;
+  const c = a.el('canvas', { class: 'dq', width: Math.round(w * U * dpr), height: Math.round(h * U * dpr), role: 'img', 'aria-label': label || '' });
+  c.style.width = `calc(${w} * var(--u))`; c.style.height = `calc(${h} * var(--u))`;
+  const x = c.getContext('2d'); x.setTransform(U * dpr, 0, 0, U * dpr, 0, 0); x.fillStyle = '#fff'; x.fillRect(0, 0, w, h);
+  x.textBaseline = 'alphabetic'; x.imageSmoothingEnabled = false;
+  const api = {
+    c, x, w, h,
+    // y: the baseline; o.right / o.center: the text ends / is centred at that x
+    text(t, px, y, font, o) {
+      o = o || {}; c.dataset.t = (c.dataset.t ? c.dataset.t + '\n' : '') + t;
+      x.font = font || F9; x.fillStyle = o.color || '#000'; x.textAlign = o.right != null ? 'right' : o.center != null ? 'center' : 'left';
+      x.fillText(t, o.right != null ? o.right : o.center != null ? o.center : px, y);
+    },
+    width(t, font) { x.font = font || F9; return x.measureText(t).width; },
+    hline(x0, x1, y) { x.fillStyle = '#000'; x.fillRect(x0, y, x1 - x0, 1); },
+    vline(x0, y0, y1) { x.fillStyle = '#000'; x.fillRect(x0, y0, 1, y1 - y0); },
+    rect(l, t, r, b, col) { x.fillStyle = col; x.fillRect(l, t, r - l, b - t); },
+    at(ev) { const r = c.getBoundingClientRect(); return { h: (ev.clientX - r.left) * w / r.width, v: (ev.clientY - r.top) * h / r.height }; },
+  };
+  return api;
+}
+const RS12 = () => (window.HO.RULESETS || {})['12'] || null;
+const enView = (g) => Object.assign(Object.create(g), { opts: Object.assign({}, g.opts, { lang: 'en' }) });
+const PWORDS = () => ((RS12() || {}).planetInfo || {}).en || {};
+const kvText = (box, key) => { const r = box && box.querySelector(`.kv[data-help="${key}"]`); if (!r) return null; const b = r.querySelector('b'); return { label: r.querySelector('span').textContent, value: b ? Array.from(b.childNodes).filter(n => !(n.classList && n.classList.contains('chg'))).map(n => n.textContent).join('').trim() : '', chg: (r.querySelector('.chg') || {}).textContent || '' }; };
+// DrawVBarControl: the bars of a colony (kind 1) and of the technologies (kind 2): a rule up the left with ticks, each bar 18 wide with 9 before it
+function vbars(q, x0, y0, vals, kind, names, toPix, colors) {
+  const d5 = y0 + 50; q.vline(x0, y0, d5 + 1);
+  if (kind === 2) for (let v = 100; v <= 1000; v += 100) q.hline(x0 - 2, x0, d5 - toPix(v)); else for (let i = 1; i <= 10; i++) q.hline(x0 - 2, x0, d5 - Math.trunc(50 * i / 10));
+  let d4 = x0;
+  vals.forEach((v, i) => {
+    q.hline(d4, d4 + 27, d5 + 1); d4 += 9;
+    const hpx = v <= 0 ? 0 : kind === 2 ? toPix(v) : Math.trunc(50 * v / 1000);
+    q.rect(d4, d5 - hpx, d4 + 18, d5, colors[i % colors.length]);
+    q.text(names[i], d4 + Math.trunc((18 - q.width(names[i])) / 2), d5 + 11 + (kind === 2 ? 8 * (i % 2) : 0));
+    d4 += 18;
+  });
+  q.hline(d4, d4 + 9, d5 + 1);
+}
+function vbarHit(x0, y0, n, pt) { const i = Math.floor((pt.h - x0 - 9) / 27), off = (pt.h - x0 - 9) - 27 * i; return i >= 0 && i < n && off >= 0 && off < 18 && pt.v >= y0 - 2 && pt.v <= y0 + 52 ? i : -1; }
+function spread(vals, i, nv) {
+  const out = vals.slice(); out[i] = Math.max(0, Math.min(1000, Math.round(nv)));
+  const others = vals.map((v, j) => (j !== i && v >= 0 ? j : -1)).filter(j => j >= 0), tot = others.reduce((a, j) => a + vals[j], 0), rest = 1000 - out[i];
+  others.forEach(j => { out[j] = tot > 0 ? Math.round(rest * vals[j] / tot) : Math.round(rest / others.length); });
+  if (!others.length) out[i] = 1000;
+  return out;
+}
+function dragBars(q, x0, y0, getVals, kind, set, fromPix) {
+  q.c.style.touchAction = 'none';
+  q.c.addEventListener('pointerdown', (ev) => {
+    const i = vbarHit(x0, y0, getVals().length, q.at(ev)); if (i < 0) return;
+    ev.preventDefault(); if (getVals()[i] < 0) { window.HOAPI.beep(); return; }
+    const start = getVals();
+    const move = (e) => { const pt = q.at(e), px = Math.max(0, Math.min(50, y0 + 50 - pt.v)); set(spread(start, i, kind === 2 ? fromPix(px) : px * 1000 / 50), false); };
+    const up = (e) => { window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); move(e); set(null, true); };
+    window.addEventListener('pointermove', move); window.addEventListener('pointerup', up); move(ev);
+  });
+}
+function colonyBars(s, p) {
+  const H = window.HO, tf = Math.abs(H.seenT(p, s) - 72) <= 0.5, mf = !(s.metal > 0), ship = s.ship || 0, rest = 1 - ship, t = s.terra || 0;
+  return [tf ? -1 : Math.round(1000 * rest * (mf ? 1 : t)), mf ? -1 : Math.round(1000 * rest * (tf ? 1 : 1 - t)), Math.round(1000 * ship)];
+}
+function setColonyBars(s, v) { const terra = Math.max(0, v[0]), mine = Math.max(0, v[1]); s.ship = Math.max(0, v[2]) / 1000; if (terra + mine > 0) s.terra = terra / (terra + mine); }
+const BARC = ['#3000cf', '#3000cf', '#cf00ff']; // terraform and mine blue, ships magenta; the technologies' #6500cf
+// DrawPlanetRect: 240 x 74
+function planetBoxDos(old) {
+  const a = window.HOAPI, H = window.HO, g = a.G, p = a.me(), s = a.UI.sel != null ? g.stars[a.UI.sel] : null, W = PWORDS();
+  const q = dq(240, 74, s ? s.name : '');
+  if (s) {
+    q.text(s.name, 0, 14, C12, { center: 48 });
+    const R = (k) => kvText(old, k), L = (t, y) => q.text(t, 0, y, F9, { right: 40 });
+    if (s.owner !== a.ME && R('temp') == null) q.text(W.noInfo || '', 3, 28, F9);
+    else {
+      const own = s.owner === a.ME;
+      if (own) { const r = R('planetIncome'); if (r) { L(W.income || 'Income:', 28); q.text(r.value, 45, 28); } }
+      else {
+        const o = R('owner'), d = R('infodate');
+        if (o) { L((W.owner || 'Owner:'), 28); q.text(o.value, 45, 28); }
+        if (d) { q.text((W.infoDate || 'Info Date:'), 100, 28); q.text(d.value, 160, 28); }
+        const bt = R('battle'); if (bt) { q.text('Battle Date:', 100, 40); q.text(bt.value, 160, 40); }
+      }
+      [['population', 38, W.pop || 'Pop:'], ['temp', 48, W.temp || 'Temp:'], ['gravity', 58, W.grav || 'Gravity:'], ['planetMetal', 68, W.metal || 'Metal:']].forEach(([k, y, lab]) => { const r = R(k); if (r) { L(lab, y); q.text(r.value, 45, y); } });
+      if (own) {
+        const vals = colonyBars(s, p), names = [W.terra || 'Terra', W.mine || 'Mine', W.prod || 'Ship'];
+        if (vals[0] >= 0 || vals[1] >= 0) {
+          const draw = () => { q.rect(90, 0, 238, 70, '#fff'); vbars(q, 100, 2, colonyBars(s, p), 1, names, null, BARC); };
+          draw(); dragBars(q, 100, 2, () => colonyBars(s, p), 1, (v, end) => { if (v) { setColonyBars(s, v); draw(); } if (end) { a.save(); a.renderPanel(); } });
+        } else {
+          q.text(W.queued || 'Ships Queued:', 100, 14);
+          const rs = H.rules(g), lines = (s.queue || []).map(it => { const d = H.getDesign(g, a.ME, it.did); return d && rs.shipsText ? rs.shipsText(g, d, it.n) : (d ? it.n + ' ' + d.name : null); }).filter(Boolean).slice(0, 3);
+          if (!lines.length) q.text(W.none || 'None.', 103, 26);
+          lines.forEach((t, i) => q.text(t, 103, 26 + 12 * i));
+        }
+      }
+    }
+  }
+  q.hline(0, 240, 71); q.hline(0, 240, 73);
+  if (s && s.owner === a.ME) q.c.addEventListener('dblclick', () => a.openBuild(s.id));
+  return q.c;
+}
+// DrawFleetRect: 240 x 79
+let FLEET_TOP = 0;
+function fleetBoxDos() {
+  const a = window.HOAPI, H = window.HO, g = a.G, rs = H.rules(g), s = a.UI.sel != null ? g.stars[a.UI.sel] : null, W = PWORDS(), r12 = RS12();
+  const q = dq(240, 79, 'Fleets');
+  const here = s ? a.fleetOrder(g.fleets.filter(f => f.star === s.id && f.to == null && f.owner === a.ME)) : [];
+  const sel = here.find(f => f.id === a.UI.selFleet);
+  FLEET_TOP = Math.max(0, Math.min(FLEET_TOP, here.length - 4));
+  if (sel && r12) {
+    const L = (rs.fleetInfo || r12.fleetInfo)(enView(g), sel), first = L[0] || '', m = /^(.*?:) (.*)$/.exec(first);
+    if (m && !sel.scrap301 && !/ via /.test(first)) { q.text(m[1], 3, 11); q.text(m[2], 70, 11); } else q.text(first, 3, 11);
+    if (L[1]) q.text(L[1], 3, 23); if (L[2]) q.text(L[2], 70, 23); if (L[3]) q.text(L[3], 127, 23);
+  }
+  if (!here.length) q.text(W.noFleets || 'There are no fleets at this planet.', 3, 36);
+  here.slice(FLEET_TOP, FLEET_TOP + 4).forEach((f, i) => {
+    const top = 25 + 12 * i, ds = H.fleetDesigns(g, f), d = ds[0], n = H.fleetCount ? H.fleetCount(f) : Object.values(f.ships).reduce((x, y) => x + y, 0);
+    const t = rs.shipsText ? (d ? rs.shipsText(g, d, n) : '') : ds.length === 1 && r12 ? r12.shipsText(enView(g), d, n) : H.fleetLabel(g, f);
+    const sl = f.id === a.UI.selFleet;
+    if (sl) q.rect(0, top, 230, top + 12, '#000');
+    q.text(t, 3, top + 10, f.dest != null ? F9B : F9, { color: sl ? '#fff' : '#000' });
+  });
+  q.rect(232, 25, 240, 73, '#aaa'); q.x.strokeStyle = '#000'; q.x.lineWidth = 1; q.x.strokeRect(232.5, 25.5, 7, 47);
+  if (here.length > 4) { const hh = Math.max(6, 45 * 4 / here.length), y = 26 + (45 - hh) * FLEET_TOP / (here.length - 4); q.rect(233, y, 239, y + hh, '#555'); }
+  q.hline(0, 240, 78);
+  q.c.addEventListener('click', (ev) => { const pt = q.at(ev); if (pt.v < 25 || pt.v > 73) return;
+    if (pt.h >= 232) { if (here.length > 4) { FLEET_TOP += pt.v < 49 ? -1 : 1; a.renderPanel(); } return; }
+    const f = here[FLEET_TOP + Math.floor((pt.v - 25) / 12)]; if (f) { a.UI.selFleet = f.id; a.renderPanel(); a.draw(); } });
+  q.c.addEventListener('wheel', (ev) => { if (here.length <= 4) return; ev.preventDefault(); FLEET_TOP += ev.deltaY > 0 ? 1 : -1; a.renderPanel(); }, { passive: false });
+  return q.c;
+}
+// the totals: 240 x 43
+function totalsBoxDos(info) {
+  const q = dq(240, 43, 'Totals'), P = (RS12() || {}).panelInfo || { order: ['metal', 'savings', 'income'], words: { en: { metal: 'Reserve Metal:', savings: 'Total Money:', income: 'Total Income:' } } };
+  const keyOf = { metal: 'metal', savings: 'savings', income: 'income' };
+  P.order.filter(k => k !== 'interest').forEach((k, i) => {
+    const row = info && Array.from(info.querySelectorAll('.kv')).find(r => (r.getAttribute('data-help') || '') .toLowerCase().includes(keyOf[k]));
+    const t = row ? kvText(info, row.getAttribute('data-help')) : null; if (!t) return;
+    const y = 13 + 12 * i;
+    q.text(P.words.en[k], 0, y, F9B, { right: 91 }); q.text(t.value, 95, y, F9B); if (t.chg) q.text(t.chg, 0, y, F9, { right: 236 });
+  });
+  q.hline(0, 240, 42);
+  return q.c;
+}
+const TECHK = ['range', 'speed', 'weapons', 'shields', 'mini'], TECHN = ['Range', 'Speed', 'Weapons', 'Shields', 'Mini'];
+function techBoxDos() {
+  const a = window.HOAPI, H = window.HO, g = a.G, p = a.me();
+  const rad = !H.feature(g, 'noRadical') && H.TECHS.includes('radical');
+  const keys = rad ? TECHK.concat('radical') : TECHK, names = rad ? TECHN.concat('Radical') : TECHN;
+  const q = dq(240, 83, 'Tech Spending'), sc = H.barScale(g, 'tech');
+  const toPix = (v) => Math.trunc(50 * sc.toX(v)), fromPix = (px) => sc.toValue(px / 50);
+  const vals = () => { const t = keys.reduce((s, k) => s + (p.talloc[k] || 0), 0) || 1; return keys.map(k => Math.round(1000 * (p.talloc[k] || 0) / t)); };
+  const draw = () => {
+    q.rect(0, 0, 240, 83, '#fff');
+    q.text('Tech  Spending', 80, 11, F9B); q.text('Current Levels:', 3, 24);
+    TECHK.forEach((k, i) => { q.text(TECHN[i], 5, 36 + 11 * i); q.text(String(p.tech[k]), 54, 36 + 11 * i); });
+    vbars(q, 80, 13, vals(), 2, names, toPix, ['#6500cf']);
+  };
+  draw();
+  dragBars(q, 80, 13, vals, 2, (v, end) => { if (v) { keys.forEach((k, i) => { p.talloc[k] = v[i] / 1000; }); draw(); } if (end) { a.save(); a.renderPanel(); } }, fromPix);
+  return q.c;
+}
+function rosterDos() {
+  const a = window.HOAPI, g = a.G, box = a.el('div', { class: 'dosroster' });
+  for (const p of g.players.filter(x => x.human)) {
+    const im = a.IMG[p.id === a.ME ? 'white0_0' : 'bad' + (p.face || 0) + '_0'], done = !p.human || (g.done || []).includes(p.id);
+    const row = a.el('div', { class: 'rrow' + (p.alive ? '' : ' out') }, im ? a.el('img', { src: im.src, alt: '', width: 16, height: 16 }) : a.el('span'), a.el('span', { class: 'rname', translate: 'no' }, p.name), done && p.alive ? a.el('span', { class: 'rdone', translate: 'no' }, '✓') : null);
+    box.append(row);
+  }
+  return box;
+}
+function panelDos(panel, B) {
+  if (!frameOn() || !window.HOAPI || !window.HOAPI.G) return;
+  const a = window.HOAPI; loadFonts();
+  const low = a.el('div', { class: 'doslow' }, rosterDos());
+  if (B.budget) {
+    const bx = B.budget, h = bx.querySelector('h3'), sc = a.budgetScale();
+    if (h) { h.textContent = ''; h.classList.add('dosstrip'); ['0%', sc.id === 'log' ? 'Log' : 'Linear', '100%'].forEach(t => h.append(a.el('span', { translate: 'no' }, t))); }
+    const rows = bx.querySelectorAll('.barrow');
+    (B.ents || []).forEach((e, i) => {
+      const r = rows[i], lab = r && r.querySelector('.blabel'); if (!lab) return;
+      if (e.key === 'tech') { lab.textContent = 'Tech'; lab.setAttribute('translate', 'no'); } else if (e.key === 'savings') { lab.textContent = 'Savings'; lab.setAttribute('translate', 'no'); }
+      if (e.star != null) { lab.style.textDecoration = a.UI.sel === e.star ? 'underline' : ''; lab.style.cursor = 'pointer'; lab.onclick = (ev) => { ev.stopPropagation(); a.UI.sel = e.star; a.centerOn(e.star); a.renderPanel(); a.draw(); }; }
+    });
+    { const rr = Array.from(bx.querySelectorAll('.barrow')), ti = (B.ents || []).findIndex(e => e.key === 'tech'), si = (B.ents || []).findIndex(e => e.key === 'savings'); if (ti >= 0 && si >= 0 && rr[ti] && rr[si] && ti < si) rr[ti].before(rr[si]); }
+    bx.classList.add('dosbudget'); low.append(bx);
+  }
+  panel.innerHTML = '';
+  panel.append(planetBoxDos(B.planet), fleetBoxDos(), totalsBoxDos(B.info), low, techBoxDos());
+}
+function frameSetup(de) {
+  const sync = () => { de.classList.toggle('dosframe', frameOn()); setUnit(); };
+  sync(); window.addEventListener('resize', () => { const u0 = U; setUnit(); if (u0 !== U && window.HOAPI && window.HOAPI.G && frameOn()) { window.HOAPI.renderPanel(); window.dispatchEvent(new Event('hoframe')); } });
+  new MutationObserver(sync).observe(de, { attributes: true, attributeFilter: ['class'] });
+  loadFonts();
+}
+
+// ======== The original's own windows (docs/dos20-findings.md; geometry measured on the running program, v20dos-orig-*.png) ========
+// A dialog is a box with a five-pixel frame (black, light grey, dark grey twice, black), white inside, its text in the screen font (the VGA 8x14), the hot
+// letter of a control red, a button grey with a black edge. Every rectangle below is in the program's pixels from the dialog's outer corner, in the unit --u.
+const du = (n) => `calc(${n} * var(--du))`;
+function dAt(e, l, t, w, h) { e.style.position = 'absolute'; e.style.left = du(l); e.style.top = du(t); if (w != null) e.style.width = du(w); if (h != null) e.style.height = du(h); return e; }
+function dText(txt, l, t, o) {
+  const a = window.HOAPI, e = a.el('span', { class: 'dd-t' + (o && o.cls ? ' ' + o.cls : ''), translate: 'no' });
+  const w = String(txt), hot = o && o.hot != null ? o.hot : -1;
+  if (hot >= 0) { e.append(w.slice(0, hot)); const h = a.el('span', { class: 'hot' }, w[hot]); e.append(h, w.slice(hot + 1)); } else e.textContent = w;
+  dAt(e, l, t, o && o.w, 14); if (o && o.color) e.style.color = o.color; return e;
+}
+function dButton(txt, l, t, w, h, fn, o) {
+  const a = window.HOAPI, b = a.el('button', { type: 'button', class: 'dd-btn' + (o && o.def ? ' def' : ''), onclick: fn });
+  const hot = o && o.hot != null ? o.hot : -1, sp = a.el('span', { translate: 'no' });
+  if (hot >= 0) { sp.append(txt.slice(0, hot), a.el('span', { class: 'hotu' }, txt[hot]), txt.slice(hot + 1)); } else sp.textContent = txt;
+  b.append(sp); return dAt(b, l, t, w, h);
+}
+// a scroll-bar slider (the control the program calls a scroll bar: an arrow at each end, a small thumb): min..max, value; the arrows step by one, a click on the track by a tenth
+function dSlider(l, t, w, h, min, max, val, onChange, label) {
+  const a = window.HOAPI, box = a.el('div', { class: 'dd-slider', role: 'slider', tabindex: 0, 'aria-label': label || '', 'aria-valuemin': min, 'aria-valuemax': max });
+  const lb = a.el('span', { class: 'arr l' }), rb = a.el('span', { class: 'arr r' }), th = a.el('span', { class: 'thumb' });
+  box.append(lb, th, rb); dAt(box, l, t, w, h);
+  let v = val;
+  const place = () => { box.setAttribute('aria-valuenow', v); const run = w - 2 * 16 - 8; th.style.left = du(16 + Math.round((v - min) / (max - min) * run)); };
+  const set = (nv) => { v = Math.max(min, Math.min(max, Math.round(nv))); place(); onChange(v); };
+  const frac = (ev) => { const r = box.getBoundingClientRect(), x = (ev.clientX - r.left) / r.width * w; return (x - 16 - 4) / (w - 2 * 16 - 8); };
+  box.addEventListener('pointerdown', (ev) => {
+    ev.preventDefault(); const x = (ev.clientX - box.getBoundingClientRect().left) / box.getBoundingClientRect().width * w;
+    if (x < 16) { set(v - 1); return; } if (x > w - 16) { set(v + 1); return; }
+    box.setPointerCapture(ev.pointerId); const mv = (e) => set(min + Math.max(0, Math.min(1, frac(e))) * (max - min)); mv(ev);
+    const up = () => { box.removeEventListener('pointermove', mv); box.removeEventListener('pointerup', up); }; box.addEventListener('pointermove', mv); box.addEventListener('pointerup', up);
+  });
+  box.addEventListener('keydown', (e) => { if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') { e.preventDefault(); set(v - 1); } else if (e.key === 'ArrowRight' || e.key === 'ArrowUp') { e.preventDefault(); set(v + 1); } });
+  place(); return box;
+}
+function dDialog(w, h, title, kids, label) {
+  const a = window.HOAPI, d = a.el('div', { class: 'dd', role: 'dialog', 'aria-label': label || title || '' });
+  d.style.width = du(w); d.style.height = du(h);
+  if (title) d.append(dAt(a.el('div', { class: 'dd-title', translate: 'no' }, title), 5, 5, w - 10, 17));
+  kids.forEach(k => k && d.append(k));
+  a.modal('', d, { cls: 'dosw', label: label || title || 'Spaceward Ho!' });
+  return d;
+}
+const tx = (t) => (window.HOAPI && window.HOAPI.tl ? window.HOAPI.tl(t) : t);
+// Options, Set Battle Speed: 280 x 182 (DITL of Windows template 8; "Fully Animated Battles" is the DOS program's own check box)
+function battleSpeedDos() {
+  const a = window.HOAPI, H = window.HO, g = a.G, P = a.Prefs, O = (g && H.rules(g).options || {}).battleSpeed || { min: 10, max: 60, def: 30 };
+  let v = P.battleSpeed != null && P.battleSpeed >= O.min && P.battleSpeed <= O.max ? P.battleSpeed : O.def, full = P.fullAnim !== false;
+  const cb = dText(full ? '[x] Fully Animated Battles' : '[ ] Fully Animated Battles', 16, 98, { hot: 4 }); cb.style.cursor = 'pointer'; cb.setAttribute('role', 'checkbox'); cb.tabIndex = 0;
+  const flip = () => { full = !full; cb.textContent = ''; const t = (full ? '[x] ' : '[ ] ') + 'Fully Animated Battles'; cb.append(t.slice(0, 4), a.el('span', { class: 'hot' }, 'F'), t.slice(5)); cb.setAttribute('aria-checked', String(full)); };
+  cb.setAttribute('aria-checked', String(full)); cb.addEventListener('click', flip); cb.addEventListener('keydown', (e) => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); flip(); } });
+  flip(); flip();
+  dDialog(280, 182, null, [dText(tx('Battle Speed:'), 16, 42), dText(tx('Fast'), 16, 70), dSlider(64, 70, 144, 14, O.min, O.max, v, (n) => { v = n; }, 'Battle Speed'), dText(tx('Slow'), 208, 70), cb,
+    dButton('OK', 177, 127, 70, 26, () => { P.battleSpeed = v; P.fullAnim = full; a.savePrefs(); a.closeModal(); }, { hot: 0, def: true })], 'Battle Speed');
+  return true;
+}
+// Options, Auto Play: 376 x 266
+function autoPlayDos() {
+  const a = window.HOAPI, P = a.Prefs; let secs = P.autoSecs != null ? P.autoSecs : 2, mode = 2;
+  const words = ['Have computer play for me.', 'Just mark me done every turn.', 'I’ll play my own turns, thank you.'], hots = [0, 0, 0], tops = [70, 84, 98], rows = [];
+  const draw = () => rows.forEach((r, i) => { r.textContent = ''; const t = (mode === i ? '(•) ' : '( ) ') + tx(words[i]); r.append(t.slice(0, 4), a.el('span', { class: 'hot' }, t[4]), t.slice(5)); r.setAttribute('aria-checked', String(mode === i)); });
+  words.forEach((w, i) => { const r = dText('', 32, tops[i], i === 0 ? { color: '#6a6aff' } : null); r.setAttribute('role', 'radio'); r.tabIndex = 0; r.style.cursor = 'pointer'; r.addEventListener('click', () => { mode = i; draw(); }); r.addEventListener('keydown', (e) => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); mode = i; draw(); } }); rows.push(r); });
+  draw();
+  const num = dText(String(secs), 32, 168);
+  dDialog(376, 266, null, [dText(tx('Auto Play:'), 24, 42), ...rows, dText(tx('Under auto play, event messages'), 32, 126), dText(tx('should disappear after:'), 32, 140), num, dText(tx('Seconds'), 64, 168),
+    dSlider(128, 168, 144, 14, 0, 15, secs, (n) => { secs = n; num.textContent = String(n); }, 'Seconds'),
+    dButton('OK', 248, 210, 71, 27, () => { P.autoSecs = secs; a.savePrefs(); a.closeModal(); if (mode < 2) a.runAutoPlay({ turns: Infinity, computer: mode === 0, won: false, lost: false, news: false, every: secs }); }, { hot: 0, def: true })], 'Auto Play');
+  return true;
+}
+// File, About Ho!: 392 x 364: a title bar, the credits picture, the licence lines, OK
+function aboutDos() {
+  const a = window.HOAPI, IMG = a.IMG, top = IMG['dos:d998'], bot = IMG['dos:d999'];
+  const c = a.el('canvas', { class: 'dd-pic', width: 383, height: 236, role: 'img', 'aria-label': 'Spaceward Ho! 2.0: credits' });
+  const x = c.getContext('2d'); x.fillStyle = '#000'; x.fillRect(0, 0, 383, 113); x.fillStyle = '#fff'; x.fillRect(0, 113, 383, 123); if (top) x.drawImage(top, 0, 0); if (bot) x.drawImage(bot, 0, 113);
+  dAt(c, 4, 28, 383, 236);
+  const who = a.me() ? a.me().name : '';
+  dDialog(392, 364, 'About Spaceward Ho!', [c, dText('Licensed to:', 8, 266), dText(who, 112, 266), dText('Spaceward Ho! Version 2.0', 112, 294), dButton('OK', 152, 322, 71, 28, () => a.closeModal(), { hot: 0, def: true })], 'About Spaceward Ho!');
+  return true;
 }
 // enemy faces: the Mac skin's 16 hats become the DOS game's planet faces
 function faces() {
