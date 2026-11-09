@@ -968,7 +968,7 @@ const ok20 = (t, r, fn) => A().el('button', { type: 'button', class: 'ok20', onc
 // DLOG 4060 (doPollingTimeDialog @1227b4, DITL 4060, CNTL 4060: the setup +0x3e in ticks / 60 as seconds, 1 to 30 (SetCtlMin 1, SetCtlMax $1e), the number
 // in the text at (56, 99); OK only, no Cancel: the value is kept when the slider is let go and OK is pressed)
 function pollingTime20() {
-  const a = A(), P = a.Prefs, O = H().rules(G()).options.poll, v0 = P.poll != null ? P.poll : O.def;
+  const a = A(), P = a.Prefs, O = (H().rules(G()).options || {}).poll || H().rulesById('mac20').options.poll, v0 = P.poll != null ? P.poll : O.def; // (another ruleset in the 2.0.1 skin: 2.0.1's own setting)
   const num = raw('span', String(v0), { class: 'dt20', style: at20([56, 99, 72, 124]) + ';text-align:right' });
   const sl = a.el('input', { type: 'range', min: 1, max: 30, value: v0, style: at20([39, 58, 55, 188]), 'aria-label': 'Polling Time', oninput: (e) => { num.textContent = e.target.value; } });
   a.modal('', dlog20(263, 194, txt20('Polling Time:', [13, 13, 33, 168]), txt20('Fast', [39, 26, 55, 58]), sl, txt20('Slow', [39, 190, 55, 235]), num, txt20('Seconds', [56, 125, 72, 200]),
