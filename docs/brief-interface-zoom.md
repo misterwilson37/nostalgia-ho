@@ -18,7 +18,9 @@ So everything drawn at fixed point sizes stays full size at 60%:
 - the round planet buttons;
 - some fonts.
 
-At 60% the report picture hangs below its bar, and the buttons dwarf it. Screenshot: run the skin with
+At 60% the report picture hangs below its bar, and the buttons dwarf it. Organize Fleets is worse: its dialog shrinks but the "Selected Ship: Delayed Arrival / Attitude" row and the
+buttons don't, so they overlap the fleets' columns and their ship pictures (Jake's screenshot, 9 November 2026). Expect
+the same in every app dialog built from point constants (Build, Organize, Radical, the remake's own lists). Screenshot: run the skin with
 `localStorage['ho5.ios.size'] = '0.6'` and modern conveniences on.
 
 ## The job
