@@ -26,11 +26,14 @@ menus: MENU 129, 131 and 133 as the fork has them (File with Revert To Saved, En
 Update, Auto Play, I'll Update Turns, Set Polling Time; Galaxy with Compare Players and Send Message) and the Edit menu, dimmed. What the remake
 cannot do is there and dimmed: Page Setup and Print Map (a browser has no Mac print dialogs), I'll Update Turns and Set Polling Time (the network game).
 
-## Open (102 rows)
+## Since then (second pass)
 
-`node tools/display-audit.js mac201 --open` lists them. The windows the 2.0.1 program added still show the classic page's windows (marked the remake's own) or
-nothing; each is a row to read from the decompile: `CreateGalaxyDlg`, `ComparePlayers` / `DRAWCPBARGRAPH`, `SendMessage`, `ListPlayerSkills`,
-`doAutoPlayDialog`, `doPollingTimeDialog`, `DoNewPlayerDlg`, `ForceEndTurn`, the printing routines. Of the changed routines, found so far without a
-display change: `LongToNiceString` (the string data only: "%d,%.3d", the comma the 1.2 audit already gave English), `DrawPlanetRect` (degrees: 1.2F's
-Celsius, 2.0.1's Fahrenheit, STR# 4000 texts held as literals), `DoFileMenu` / `DoGalaxyMenu` (the new menu items' cases); one real change
-read but not yet carried into the table: `PlayAnnounceSound` has a different table of report codes (`cmpi #$39` against 1.2's `#$3b`).
+- **Settled (to 26 open, 5 gaps).** A trap-and-constant comparison with 1.2 (`audit/mac-2.0.1/tools/sig2.py`, private) settled the changed routines whose Toolbox calls and constants are 1.2's; what differs there is
+  text sources (1.2F's STR# 4000 lines are literals in 2.0.1) and record offsets. The star-drawing routines' difference is the **nova state**: 1.2 skips or paints as dead a star whose record value is -100 or -1000
+  (written by `CheckForSupernova @a2640`); 2.0.1 has no such routine (docs/dos-findings.md: "2.0.1's EndTurn segment is 1.2F's without the novas"), so nothing writes it and the tests are gone.
+  `STR# 1003` is the same 190 names, in the same order, as the Mac 2.0.1 ruleset's.
+- **Windows built from 2.0.1's resources** (mac2 / mac2c, `js/skins/mac12/ui.js`): Polling Time (DLOG 4060), Auto Play (4020), Battle Speed at 2.0.1's rectangles (4040), and **Send Message** (DLOG 6070): the cell lists of
+  LDEF 1001 (a 45 x 45 cell, the 32 x 32 ICN# at the cell's centre less (16, 21), the name in Geneva 9 under it, a chosen cell inverted), one column of four cells on the left and five by four on the right,
+  with the four prompts of STR# 3002, the icons ICN# 3000-3002 and 3010-3011, and Send dimmed until all four steps are chosen. The stars' cells (`SetCellsToNearbyStars`, `SetCellsToOwnedStars`) are listed by name only (gap).
+- **Not built:** Compare Players (DLOG 6050) with its bar graph (`DRAWCPBARGRAPH`), Show Skills, the Create Galaxy dialog (DLOG 6080: four lists of pictures ICN# 3020-3051 and a size slider), the Identify / Join dialogs
+  (4000, 4010). They stay the classic page's windows (docs/remake-controls.md); their rows stay open.
