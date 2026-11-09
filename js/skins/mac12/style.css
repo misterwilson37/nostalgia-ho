@@ -204,3 +204,8 @@ html .hoscreen .gch { font: bold 12px Chicago, Geneva, sans-serif; margin: 6px 0
 /* the online parts (the remake's own: 1.2 had none): the account button on the title screen as a System 6 button, and the lobby's link in black */
 html #tacct { opacity: 1 !important; background: #fff !important; color: #000 !important; border: 1px solid #000 !important; border-radius: 6px !important; box-shadow: none !important; font: bold 12px Chicago, Geneva, sans-serif !important; padding: 1px 12px !important; }
 html .win a { color: #000; text-decoration: underline; }
+
+/* ---- Mac 2.0.1's own dialogs (mac12/ui.js: dlog20): items at their DITL rectangles, Chicago-less system look as the other 1.2 dialogs ---- */
+.dl20 { font: 12px/1.2 Geneva, Verdana, sans-serif; color: #000; background: #fff; }
+.dl20 .dt20 { display: block; overflow: hidden; }
+.dl20 input[type=range] { margin: 0; }

@@ -16,6 +16,7 @@ window.HOMAC_VERSION = window.HOMAC2 ? '2.0.1' : '1.2'; // (the Mac 2.0.1 skins,
 (function () {
 'use strict';
 const V2 = window.HOMAC_VERSION === '2.0.1';
+let HOMAC_RE20 = null;
 const A = () => window.HOAPI;
 const G = () => A() && A().G;
 const H = () => window.HO;
@@ -96,8 +97,8 @@ function menuLayout20(M) {
     it('End Turn & Switch Players', cmd(/switch players/i), { ghost: no(has(/switch players/i)) }), '-',
     it('Page Setup…', () => {}, { ghost: gone }), it('Print Map…', () => {}, { ghost: gone, key: 'P' }), '-', pick(F, 'Quit')];
   M.Options = [it('Force Turn Update…', cmd(/force end turn/i), { ghost: no(has(/force end turn/i)) }), it('Auto Play…', cmd(/^auto play/i), { ghost: no(has(/^auto play/i)) }),
-    it('I’ll Update Turns', () => {}, { ghost: gone }), '-', it('Set Polling Time…', () => {}, { ghost: gone }), speed, '-', shows, review, warn, snd, ...extra];
-  M.Galaxy = [it('Compare Players…', cmd(/^compare players/i), { ghost: no(has(/^compare players/i)) }), pick(Gx, 'List All Explored Stars…'), it('Send Message…', cmd(/^send a message/i), { ghost: no(has(/^send a message/i)) }), '-',
+    it('I’ll Update Turns', () => {}, { ghost: gone }), '-', it('Set Polling Time…', () => pollingTime20(), { ghost: noGame }), speed, '-', shows, review, warn, snd, ...extra];
+  M.Galaxy = [it('Compare Players…', cmd(/^compare players/i), { ghost: no(has(/^compare players/i)) }), pick(Gx, 'List All Explored Stars…'), it('Send Message…', cmd(/^send a message/i), { ghost: () => noGame() || !has(/^send a message/i)() || G().year <= 2000 }) /* (SetMenuItems @e2f2e: item 3 is dimmed while the year is 2000 or less) */, '-',
     ...Gx.slice(Gx.findIndex(x => x !== '-' && x[0] === 'Zoom In'))];
   return M;
 }
@@ -893,6 +894,42 @@ function fixStep() {
   box.append(card);
 }
 
+// ---------- Mac 2.0.1's own dialogs (the DLOGs it added; read in audit/mac-2.0.1 of the private repo) ----------
+// a dialog's item at its DITL rectangle (top, left, bottom, right), in the DLOG's pixels
+const at20 = (r) => `position:absolute;left:${r[1]}px;top:${r[0]}px;width:${r[3] - r[1]}px;height:${r[2] - r[0]}px`;
+const dlog20 = (w, h, ...items) => A().el('div', { class: 'dl20', style: `position:relative;width:${w}px;height:${h}px` }, ...items);
+const txt20 = (t, r) => raw('span', t, { class: 'dt20', style: at20(r) });
+const ok20 = (t, r, fn) => A().el('button', { type: 'button', class: 'ok20', onclick: fn, style: at20(r) + ';min-width:0;padding:0' }, raw('span', t));
+// DLOG 4060 (doPollingTimeDialog @1227b4, DITL 4060, CNTL 4060: the setup +0x3e in ticks / 60 as seconds, 1 to 30 (SetCtlMin 1, SetCtlMax $1e), the number
+// in the text at (56, 99); OK only, no Cancel: the value is kept when the slider is let go and OK is pressed)
+function pollingTime20() {
+  const a = A(), P = a.Prefs, O = H().rules(G()).options.poll, v0 = P.poll != null ? P.poll : O.def;
+  const num = raw('span', String(v0), { class: 'dt20', style: at20([56, 99, 72, 124]) + ';text-align:right' });
+  const sl = a.el('input', { type: 'range', min: 1, max: 30, value: v0, style: at20([39, 58, 55, 188]), 'aria-label': 'Polling Time', oninput: (e) => { num.textContent = e.target.value; } });
+  a.modal('', dlog20(263, 194, txt20('Polling Time:', [13, 13, 33, 168]), txt20('Fast', [39, 26, 55, 58]), sl, txt20('Slow', [39, 190, 55, 235]), num, txt20('Seconds', [56, 125, 72, 200]),
+    txt20('A fast polling time will let you know about turn updates more quickly but may slow down the computer.', [78, 13, 142, 250]),
+    ok20('OK', [147, 173, 167, 231], () => { P.poll = +sl.value; a.savePrefs(); a.closeModal(); })), { cls: 'mac12 dl20w', label: 'Polling Time' });
+  return true;
+}
+// DLOG 4020 (doAutoPlayDialog @12243c, DITL 4020, CNTL 4020): three radio buttons (the player's mode: 2 "Have computer play for me", 3 "Just mark me done every turn",
+// else "I'll play my own turns, thank you."), the seconds an event message stays (setup +0x40 in ticks / 60, 0 to 15); OK only. The remake plays the turns itself, in
+// the page, until the Auto Play window or another one is opened (the original sets the player's mode in the game file, which another machine's update acts on:
+// its alerts 3200 "the file was busy" and 3240 "your current turn has already been marked done" have nothing to say here)
+function autoPlay20() {
+  const a = A(), P = a.Prefs, secs0 = P.autoSecs != null ? P.autoSecs : 2;
+  const words = ['Have computer play for me.', 'Just mark me done every turn.', 'I’ll play my own turns, thank you.'], rects = [[39, 12, 57, 236], [65, 12, 82, 275], [90, 12, 109, 300]];
+  let mode = 2;
+  const radios = words.map((w, i) => { const r = a.el('input', { type: 'radio', name: 'ap20', checked: i === 2 ? 'checked' : false, onchange: () => { mode = i; } }); return a.el('label', { style: at20(rects[i]) + ';display:flex;align-items:center;gap:4px' }, r, raw('span', w)); });
+  const num = raw('span', String(secs0), { class: 'dt20', style: at20([164, 13, 180, 34]) });
+  const sl = a.el('input', { type: 'range', min: 0, max: 15, value: secs0, style: at20([164, 104, 180, 234]), 'aria-label': 'Seconds', oninput: (e) => { num.textContent = e.target.value; } });
+  a.modal('', dlog20(314, 241, txt20('Auto Play:', [13, 13, 29, 88]), ...radios, txt20('Under auto play, event messages disappear after:', [121, 13, 153, 245]), num, txt20('Seconds', [164, 39, 180, 95]), sl,
+    ok20('OK', [205, 235, 225, 293], () => {
+      P.autoSecs = +sl.value; a.savePrefs(); a.closeModal();
+      if (mode < 2) a.runAutoPlay({ turns: Infinity, computer: mode === 0, won: false, lost: false, news: false, every: P.autoSecs });
+    })), { cls: 'mac12 dl20w', label: 'Auto Play' });
+  return true;
+}
+
 // DLOG 4040 "Vitesse des batailles…" (doBattleSpeedDialog @120c48: 265 x 168; DITL 4040: "Vitesse des batailles:" at (26, 13),
 // "Rapide" (27, 46), the slider CNTL 4040 (84, 46, 214, 62; 10 to 60 ticks a shot), "Lente" (215, 46), the value's text at 295,
 // outside the window, "Animation complète" (26, 74), OK (186, 116, 244, 136)); Stup +0x4e and +0x48
@@ -1546,6 +1583,20 @@ window.HOMAC12 = {
     let i = 0; const step = () => { if (++i > n) { a.closeModal(); go(); return; } bar.value = i; setTimeout(step, 60); }; setTimeout(step, 60);
     return true;
   },
+  // Mac 2.0.1's PlayAnnounceSound @130eb0 (the jump table of 1000 + 0 to $39): 2000 for the technology levels (1002-1006), the new year (1010) and 1028, 1032, 1054,
+  // 1057; 2001 for 1009, 1055, 1056; 3002 for 1011; none for 1000, 1001, 1033-1035; the system beep for every other report (1.2's table also had 1020, a fleet lost in a
+  // wormhole, and 1059 at 2001)
+  sysBeep: () => V2,
+  messageLook(m, cur) {
+    if (!V2) return null;
+    const R = H().REPORTS20 || [];
+    const t = String(m.text || '');
+    if (!HOMAC_RE20) HOMAC_RE20 = R.map((x, i) => ({ i, re: new RegExp('^' + x.split(/(%(?:\.\*|\d*\.?\d*)?[sd]|%%)/).map((y, j) => j % 2 ? (y === '%%' ? '%' : '.*?') : y.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('')), len: x.length })).filter(o => o.len > 8).sort((a, b) => b.len - a.len);
+    const hit = HOMAC_RE20.find(o => o.re.test(t));
+    const code = hit ? 1000 + hit.i : 9999;
+    const snd = [1002, 1003, 1004, 1005, 1006, 1010, 1028, 1032, 1054, 1057].includes(code) ? 2000 : [1009, 1055, 1056].includes(code) ? 2001 : code === 1011 ? 3002 : null;
+    return { icon: cur.icon, sound: snd };
+  },
   zoomTo: (s, f) => (own() ? zoomTo(s, f) : Math.max(12, Math.min(140, s * f))),
   fitView(v, c) { if (!own()) return; const st = c.G.stars[c.sel != null ? c.sel : c.G.players[c.ME].homeStar]; v.s = ZOOMS[3]; if (st) { v.ox = c.mapW / 2 - st.x * v.s; v.oy = c.mapH / 2 - st.y * v.s; } },
   mapNames: (s) => (own() ? zoomIdx(s) > 0 : s > 18),
@@ -1583,7 +1634,7 @@ window.HOMAC12 = {
     if (G() && name === 'give') return give12();
     if (G() && name === 'chat') return chat12();
     if (G() && name === 'radical') return radical12();
-    if (G() && name === 'autoplay') return autoplay12();
+    if (G() && name === 'autoplay') return V2 ? autoPlay20() : autoplay12();
     if (G() && name === 'dip') return dip12();
     if (G() && name === 'surrender') return surrender12();
     if (!G() || !own()) return false;

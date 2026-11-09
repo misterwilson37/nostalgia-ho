@@ -110,6 +110,8 @@ E.registerRules('mac20', Object.assign({}, D, {
   // cut names, "…"); the bars are 2.0's (linear budget bars a click above
   // them switches to the log scale, 'Stup' 1000 +0x2a = 0; log Technology bars)
   battlePanel: D.battlePanelMac,
+  // doPollingTimeDialog @1227b4: the slider is set to 1 to 30 seconds (SetCtlMax $1e; CNTL 4060 says 15, the code changes it)
+  options: Object.assign({}, D.options, { poll: Object.assign({}, D.options.poll, { max: 30 }) }),
   label: 'Mac 2.0.1 (1992)',
   // the New Game window's Version and Edition menus (engine.js editions)
   family: '2.0', edition: { version: '2.0.1', name: 'Mac', platform: 'Mac, System 6 and 7', year: 1992 }, skins: ['mac2c', 'mac2'],

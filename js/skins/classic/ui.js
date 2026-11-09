@@ -1929,9 +1929,10 @@ function renderMsg0() {
     if (T.messageLook) { const t = T.messageLook(m, { icon, sound }, { G, ME, starLook }); if (t) { icon = t.icon; if (ownSounds()) sound = t.sound; } }
     // (rs.sysBeep: 1.2's PlayAnnounceSound @130f08 beeps (SysBeep) for every report without a sound of its own, but the credits and
     // the battle results, which are silent)
-    const credit = HO.rules(G).sysBeep && (HO.rules(G).welcome || []).some(w => w[0] === m.text);
-    if (credit || (HO.rules(G).sysBeep && (m.battle || m.won != null))) { /* silent */ }
-    else if (HO.rules(G).sysBeep && !(sound && A.snd[sound])) beep();
+    const sysBeep = HO.rules(G).sysBeep || !!(T.sysBeep && T.sysBeep(G)); // (a skin may be the program's: Mac 2.0.1's PlayAnnounceSound beeps, its skins say so)
+    const credit = sysBeep && (HO.rules(G).welcome || []).some(w => w[0] === m.text);
+    if (credit || (sysBeep && (m.battle || m.won != null))) { /* silent */ }
+    else if (sysBeep && !(sound && A.snd[sound])) beep();
     else if (sound) Sound.play(sound);
     if (prefReview() && m.battle && !m._reviewed) { m._reviewed = true; setTimeout(() => openBattle(m.battle), 50); }
     const card = el('div', { class: 'card', tabindex: 0, role: 'button', 'aria-label': 'Next message' });
