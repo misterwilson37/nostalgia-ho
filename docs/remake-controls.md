@@ -50,3 +50,17 @@ the app's own nor one of these controls**.
 - **Not checked:** sounds by ear, a real touch device, browsers other than Chromium.
 
 Not remake controls (left as they are, `docs/ios-findings.md`): New game, Quit, Import / Export, Account, About, manuals, Sounds, Language, Skin.
+
+# Remake-only controls in the Mac 2.0.1 skins (mac2, mac2c)
+
+*Found by the Mac 2.0.1 display audit (`docs/display/mac201.json`, `docs/mac201-findings.md`). The skin is the 1.2 skin's windows (`js/skins/mac12/ui.js`, `HOMAC_VERSION` 2.0.1) with 2.0.1's menus and added dialogs.*
+
+| Feature of 2.0.1 | What the remake has | Where |
+|---|---|---|
+| Page Setup…, Print Map… (the Mac Print Manager: style and job dialogs, the map printed on pages) | **Nothing.** Both items are in the File menu, dimmed. A print style sheet for the map would be the remake's own addition. | `menuLayout20` |
+| I'll Update Turns (a player's machine takes the turn update; the game file is shared between machines) | **Nothing** (no game file shared between machines); the item is dimmed. | `menuLayout20` |
+| Set Polling Time… (how often a machine looks at the shared file) | The dialog and its value (1 to 30 seconds, default 8) as the original's; nothing polls. | `pollingTime20` |
+| Auto Play… (the player's mode kept in the game file: computer plays, just mark me done, my own turns) | The dialog as the original's; the choice runs the remake's auto play in the page until a window opens, instead of a mode kept in the game. | `autoPlay20` |
+| Create Galaxy dialog (DLOG 6080: lists of pictures for the style, density, intelligence and number of computers, a size slider) | The remake's own New Game window (selects and a size slider), the same for every version; not 2.0.1's. | classic `newGameDialog` |
+| Compare Players (DLOG 6050, a bar graph over the players, Show Skills), Send Message (DLOG 6070, two lists of cells), Show Skills | The classic page's windows (the remake's own look, marked), working with 2.0's rules. | `rs.compare`, `rs.cannedChat` |
+| Please Identify Yourself / Join dialogs (DLOG 4000, 4010, 4030: name, password, skill, sex; the licence personalization) | The hot-seat names in the New Game window; no passwords, no licence. | classic `newGameDialog` |
