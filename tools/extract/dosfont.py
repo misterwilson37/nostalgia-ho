@@ -30,7 +30,8 @@ for c in range(256):
                 x0, y0 = x * U, (11 - y) * U  # baseline under row 10 (ascent 11, descent 3)
                 pen.moveTo((x0, y0)); pen.lineTo((x0, y0 + U)); pen.lineTo((x0 + U, y0 + U)); pen.lineTo((x0 + U, y0)); pen.closePath()
     glyphs[names[c]] = pen.glyph(); metrics[names[c]] = (800, 0)
-    if c >= 32 and c != 127: cmap[c] = names[c]
+    if 32 <= c < 127: cmap[c] = names[c]
+    elif c >= 128: cmap[ord(bytes([c]).decode('cp437'))] = names[c]  # the VGA ROM font is code page 437 (the German build's ä ö ü ß come from it)
 cmap[0x2666] = names[4]  # the check diamond of the menus (character 4 of the screen font)
 fb.setupCharacterMap(cmap)
 fb.setupGlyf(glyphs); fb.setupHorizontalMetrics(metrics)

@@ -252,7 +252,8 @@ window.HOTHEME = {
   panel(panel, B) { panelDos(panel, B); },
   mapPixel() { return frameOn() ? [U, U] : null; },
   mapFont(n) { return frameOn() ? "12px 'DOS Geneva 9'" : null; },
-  window(name) { if (!frameOn() || !window.HOAPI.G) return false; if (name === 'autoplay') return autoPlayDos(); return false; },
+  window(name) { if (!frameOn() || !window.HOAPI.G) return false; if (name === 'autoplay') return autoPlayDos(); if (name === 'fleets') return fleetsDos(); if (name === 'stars') return starsDos(); return false; },
+  newGame(f) { createGalaxyDos(f); },
   keyName(k) { return /^Ctrl/.test(k) ? '[' + k + ']' : '⌘' + k; },
   // the DOS title screen: the two halves of its credits picture
   title(frame, IMG, Sound) {
@@ -364,9 +365,25 @@ function dq(w, h, label) {
   };
   return api;
 }
+
+// the panels' words in the two languages the program has: English, and the German build's own (HO.PRS strings 385-409, 666, 667; the data pool: "Besitz:", "Info Datum: %u",
+// "Auftragsliste:", "Keine Flotten auf diesem Planeten.", "Stationiert auf: %Fs", "Tank: %d/%d" ...); another language gets the English panel
+const DOSW = {
+  en: { income: 'Income:', pop: 'Pop:', temp: 'Temp:', grav: 'Gravity:', metal: 'Metal:', terra: 'Terra', mine: 'Mine', ship: 'Ship', owner: 'Owner:', info: 'Info Date:', battle: 'Battle Date:', queued: 'Ships Queued:', none: 'None.',
+    noInfo: 'You have no information about this planet.', noFleets: 'There are no fleets at this planet.', totals: ['Reserve Metal:', 'Total Money:', 'Total Income:'], head: 'Tech  Spending', levels: 'Current Levels:',
+    tech: ['Range', 'Speed', 'Weapons', 'Shields', 'Mini'], lin: 'Linear', log: 'Log', techBar: 'Tech', sav: 'Savings' },
+  de: { income: 'Profit:', pop: 'Bev.:', temp: 'Temp.:', grav: 'Gravit.:', metal: 'Metall:', terra: 'Terra', mine: 'Met.', ship: 'Schf.', owner: 'Besitz:', info: 'Info Datum:', battle: 'Kampf Datum:', queued: 'Auftragsliste:', none: 'Keine.',
+    noInfo: 'Sie haben keine Info über diesen Planeten.', noFleets: 'Keine Flotten auf diesem Planeten.', totals: ['Metall übrig:', 'Geld total:', 'Profit total:'], head: 'Tech Ausgaben', levels: 'Akt. Stufen:',
+    tech: ['Weite', 'Tempo', 'Waffen', 'Schilder', 'Mini'], lin: 'Linear', log: 'Log', techBar: 'Tech', sav: 'Sparen' } };
+const wl = () => { const a = window.HOAPI; return a && a.G && a.G.opts && a.G.opts.lang === 'de' ? 'de' : 'en'; };
+const WD = () => DOSW[wl()];
+// the fleet lines the program builds (English, from the ruleset's own text) in the German build's formats
+const DE_FLEET = [[/^Stationed at: (.*)$/, 'Stationiert auf: $1'], [/^Departing to: (.*?) \(Dist (\d+); Time (\d+)\)$/, 'Zielort: $1 (Entf. $2; Dauer $3)'], [/^Going to (.*?) \(D (\d+); T (\d+)\) via (.*)$/, 'Unterwegs nach $1 (E $2; D $3) via $4'],
+  [/^Fuel: (.*)$/, 'Tank: $1'], [/^Speed: (.*)$/, 'Tempo: $1'], [/^Full$/, 'Voll'], [/^Empty$/, 'Leer'], [/^Scrap: (.*)$/, 'Schrott: $1'], [/^Fleet to be scrapped for metal\.$/, 'Flotte zum Verschrotten.']];
+const fl = (t) => { if (wl() !== 'de') return t; for (const [re, to] of DE_FLEET) if (re.test(t)) return t.replace(re, to); return t; };
 const RS12 = () => (window.HO.RULESETS || {})['12'] || null;
 const enView = (g) => Object.assign(Object.create(g), { opts: Object.assign({}, g.opts, { lang: 'en' }) });
-const PWORDS = () => ((RS12() || {}).planetInfo || {}).en || {};
+const PWORDS = () => { const w = WD(); return { income: w.income, pop: w.pop, temp: w.temp, grav: w.grav, metal: w.metal, terra: w.terra, mine: w.mine, prod: w.ship, owner: w.owner, infoDate: w.info, queued: w.queued, none: w.none, noInfo: w.noInfo, noFleets: w.noFleets }; };
 const kvText = (box, key) => { const r = box && box.querySelector(`.kv[data-help="${key}"]`); if (!r) return null; const b = r.querySelector('b'); return { label: r.querySelector('span').textContent, value: b ? Array.from(b.childNodes).filter(n => !(n.classList && n.classList.contains('chg'))).map(n => n.textContent).join('').trim() : '', chg: (r.querySelector('.chg') || {}).textContent || '' }; };
 // DrawVBarControl: the bars of a colony (kind 1) and of the technologies (kind 2): a rule up the left with ticks, each bar 18 wide with 9 before it
 function vbars(q, x0, y0, vals, kind, names, toPix, colors) {
@@ -422,7 +439,7 @@ function planetBoxDos(old) {
         const o = R('owner'), d = R('infodate');
         if (o) { L((W.owner || 'Owner:'), 28); q.text(o.value, 45, 28); }
         if (d) { q.text((W.infoDate || 'Info Date:'), 100, 28); q.text(d.value, 160, 28); }
-        const bt = R('battle'); if (bt) { q.text('Battle Date:', 100, 40); q.text(bt.value, 160, 40); }
+        const bt = R('battle'); if (bt) { q.text(WD().battle, 100, 40); q.text(bt.value, 160, 40); }
       }
       [['population', 38, W.pop || 'Pop:'], ['temp', 48, W.temp || 'Temp:'], ['gravity', 58, W.grav || 'Gravity:'], ['planetMetal', 68, W.metal || 'Metal:']].forEach(([k, y, lab]) => { const r = R(k); if (r) { L(lab, y); q.text(r.value, 45, y); } });
       if (own) {
@@ -453,8 +470,8 @@ function fleetBoxDos() {
   FLEET_TOP = Math.max(0, Math.min(FLEET_TOP, here.length - 4));
   if (sel && r12) {
     const L = (rs.fleetInfo || r12.fleetInfo)(enView(g), sel), first = L[0] || '', m = /^(.*?:) (.*)$/.exec(first);
-    if (m && !sel.scrap301 && !/ via /.test(first)) { q.text(m[1], 3, 11); q.text(m[2], 70, 11); } else q.text(first, 3, 11);
-    if (L[1]) q.text(L[1], 3, 23); if (L[2]) q.text(L[2], 70, 23); if (L[3]) q.text(L[3], 127, 23);
+    if (m && !sel.scrap301 && !/ via /.test(first)) { q.text(fl(m[1] + ' x').replace(/ x$/, ''), 3, 11); q.text(m[2], 70, 11); } else q.text(fl(first), 3, 11);
+    if (L[1]) q.text(fl(L[1]), 3, 23); if (L[2]) q.text(fl(L[2]), 70, 23); if (L[3]) q.text(fl(L[3]), 127, 23);
   }
   if (!here.length) q.text(W.noFleets || 'There are no fleets at this planet.', 3, 36);
   here.slice(FLEET_TOP, FLEET_TOP + 4).forEach((f, i) => {
@@ -481,7 +498,7 @@ function totalsBoxDos(info) {
     const row = info && Array.from(info.querySelectorAll('.kv')).find(r => (r.getAttribute('data-help') || '') .toLowerCase().includes(keyOf[k]));
     const t = row ? kvText(info, row.getAttribute('data-help')) : null; if (!t) return;
     const y = 13 + 12 * i;
-    q.text(P.words.en[k], 0, y, F9B, { right: 91 }); q.text(t.value, 95, y, F9B); if (t.chg) q.text(t.chg, 0, y, F9, { right: 236 });
+    q.text(WD().totals[['metal', 'savings', 'income'].indexOf(k)], 0, y, F9B, { right: 91 }); q.text(t.value, 95, y, F9B); if (t.chg) q.text(t.chg, 0, y, F9, { right: 236 });
   });
   q.hline(0, 240, 42);
   return q.c;
@@ -490,14 +507,14 @@ const TECHK = ['range', 'speed', 'weapons', 'shields', 'mini'], TECHN = ['Range'
 function techBoxDos() {
   const a = window.HOAPI, H = window.HO, g = a.G, p = a.me();
   const rad = !H.feature(g, 'noRadical') && H.TECHS.includes('radical');
-  const keys = rad ? TECHK.concat('radical') : TECHK, names = rad ? TECHN.concat('Radical') : TECHN;
+  const keys = rad ? TECHK.concat('radical') : TECHK, names = rad ? WD().tech.concat('Radical') : WD().tech;
   const q = dq(240, 83, 'Tech Spending'), sc = H.barScale(g, 'tech');
   const toPix = (v) => Math.trunc(50 * sc.toX(v)), fromPix = (px) => sc.toValue(px / 50);
   const vals = () => { const t = keys.reduce((s, k) => s + (p.talloc[k] || 0), 0) || 1; return keys.map(k => Math.round(1000 * (p.talloc[k] || 0) / t)); };
   const draw = () => {
     q.rect(0, 0, 240, 83, '#fff');
-    q.text('Tech  Spending', 80, 11, F9B); q.text('Current Levels:', 3, 24);
-    TECHK.forEach((k, i) => { q.text(TECHN[i], 5, 36 + 11 * i); q.text(String(p.tech[k]), 54, 36 + 11 * i); });
+    q.text(WD().head, 80, 11, F9B); q.text(WD().levels, 3, 24);
+    TECHK.forEach((k, i) => { q.text(WD().tech[i], 5, 36 + 11 * i); q.text(String(p.tech[k]), 54, 36 + 11 * i); });
     vbars(q, 80, 13, vals(), 2, names, toPix, ['#6500cf']);
   };
   draw();
@@ -519,11 +536,11 @@ function panelDos(panel, B) {
   const low = a.el('div', { class: 'doslow' }, rosterDos());
   if (B.budget) {
     const bx = B.budget, h = bx.querySelector('h3'), sc = a.budgetScale();
-    if (h) { h.textContent = ''; h.classList.add('dosstrip'); ['0%', sc.id === 'log' ? 'Log' : 'Linear', '100%'].forEach(t => h.append(a.el('span', { translate: 'no' }, t))); }
+    if (h) { h.textContent = ''; h.classList.add('dosstrip'); ['0%', sc.id === 'log' ? WD().log : WD().lin, '100%'].forEach(t => h.append(a.el('span', { translate: 'no' }, t))); }
     const rows = bx.querySelectorAll('.barrow');
     (B.ents || []).forEach((e, i) => {
       const r = rows[i], lab = r && r.querySelector('.blabel'); if (!lab) return;
-      if (e.key === 'tech') { lab.textContent = 'Tech'; lab.setAttribute('translate', 'no'); } else if (e.key === 'savings') { lab.textContent = 'Savings'; lab.setAttribute('translate', 'no'); }
+      if (e.key === 'tech') { lab.textContent = WD().techBar; lab.setAttribute('translate', 'no'); } else if (e.key === 'savings') { lab.textContent = WD().sav; lab.setAttribute('translate', 'no'); }
       if (e.star != null) { lab.style.textDecoration = a.UI.sel === e.star ? 'underline' : ''; lab.style.cursor = 'pointer'; lab.onclick = (ev) => { ev.stopPropagation(); a.UI.sel = e.star; a.centerOn(e.star); a.renderPanel(); a.draw(); }; }
     });
     { const rr = Array.from(bx.querySelectorAll('.barrow')), ti = (B.ents || []).findIndex(e => e.key === 'tech'), si = (B.ents || []).findIndex(e => e.key === 'savings'); if (ti >= 0 && si >= 0 && rr[ti] && rr[si] && ti < si) rr[ti].before(rr[si]); }
@@ -617,6 +634,88 @@ function aboutDos() {
   const who = a.me() ? a.me().name : '';
   dDialog(392, 364, 'About Spaceward Ho!', [c, dText('Licensed to:', 8, 266), dText(who, 112, 266), dText('Spaceward Ho! Version 2.0', 112, 294), dButton('OK', 152, 322, 71, 28, () => a.closeModal(), { hot: 0, def: true })], 'About Spaceward Ho!');
   return true;
+}
+
+// the list windows (List of All Fleets: 544 x 322, List of All Explored Stars: 528 x 322): the title line, a list box (double rule) from (19, 47), rows of 14, the picked row
+// black with white text, two buttons at the foot
+function dListBox(w, h, onPick) {
+  const a = window.HOAPI, box = a.el('div', { class: 'dd-list', role: 'listbox', tabindex: 0 });
+  dAt(box, 19, 47, w, h); return box;
+}
+function fleetsDos() {
+  const a = window.HOAPI, H = window.HO, g = a.G, W = { at: '%s stationed at %s.', leave: '%s leaving %s for %s to arrive in %d.', fly: '%s to arrive at %s in %d.', stuck: '%s marooned at %s.',
+    hyper: 'Sorry, but that fleet is currently in hyperspace and can’t be contacted until it arrives at its next location.' };
+  const fill = (t, ...v) => { let i = 0; return t.replace(/%[sd]/g, () => String(v[i++])); };
+  const stuck = (f) => f.star != null && g.stars[f.star].owner !== a.ME && !g.stars.some(s => s.id !== f.star && H.starDist(g, f.star, s.id) <= f.fuel + 1e-9);
+  const fs = g.fleets.filter(f => f.owner === a.ME && !f.sat), order = fs.filter(f => !stuck(f)).concat(fs.filter(stuck));
+  const turns = (f) => Math.ceil((f.dist - (f.prog || 0)) / H.fleetSpeed(g, f) - 1e-9);
+  const line = (f) => {
+    const d = H.fleetText(g, f), st = (i) => g.stars[i].name;
+    if (stuck(f)) return fill(W.stuck, d, st(f.star));
+    if (f.to != null) return fill(W.fly, d, st(f.to), H.arrivalYear(g, turns(f)));
+    if (f.dest != null) return fill(W.leave, d, st(f.star), st(f.dest), H.arrivalYear(g, Math.ceil(H.starDist(g, f.star, f.dest) / H.fleetSpeed(g, f) - 1e-9)));
+    return fill(W.at, d, st(f.star));
+  };
+  let cur = order[0] || null;
+  const box = dListBox(505, 214);
+  const show = () => { box.textContent = ''; order.forEach(f => { const r = a.el('div', { class: 'dd-row' + (f === cur ? ' sel' : ''), role: 'option', 'aria-selected': String(f === cur), translate: 'no', onclick: () => { cur = f; show(); }, ondblclick: go }, line(f)); box.append(r); }); };
+  function go() {
+    if (!cur) return;
+    if (cur.to != null) { a.alertOver([W.hyper], 'en'); return; }
+    a.UI.selFleet = cur.id; a.UI.sel = cur.star; a.closeModal(); a.centerOn(cur.star); a.renderPanel(); a.draw();
+  }
+  show();
+  dDialog(544, 322, null, [dText(tx('List of All Fleets:'), 16, 26), box, dButton('Go To Fleet', 112, 280, 111, 27, go, { hot: 0 }), dButton('OK', 328, 280, 72, 27, () => a.closeModal(), { hot: 0, def: true })], 'List of All Fleets');
+  return true;
+}
+function starsDos() { // the classic window, set as the program's (its list is already the program's fixed-pitch text, columns from the ruleset)
+  setTimeout(() => { const w = document.querySelector('.scrim .win'); if (w && w.querySelector('.exlist')) { w.classList.add('dosx'); const r = w.querySelector('.exrow'); if (r) r.click(); } }, 0); // (the first row is picked on opening, as the program shows it)
+  return false;
+}
+
+// New Game, the program's Create New Galaxy window (536 x 280; the remake's own choices stay in the form behind "More…")
+function createGalaxyDos(f) {
+  if (!frameOn()) return;
+  const a = window.HOAPI, el = a.el, win = f.closest('.win'); if (!win) return;
+  const field = (n) => f.querySelector(`[name="${n}"]`), fire = (n) => n.dispatchEvent(new Event('change', { bubbles: true }));
+  const LISTS = [
+    { sel: 'd_density', box: [19, 35, 122, 71], label: 'Galaxy Density', xs: [24, 80], y: 42, icons: [3050, 3051], names: ['Dense', 'Sparse'] },
+    { sel: 'd_shape', box: [228, 35, 289, 71], label: 'Galaxy Style', xs: [232, 288, 344, 400, 456], y: 42, icons: [3020, 3021, 3022, 3023, 3024], names: ['Circle', 'Random', 'Ring', 'Spiral', 'Grid'] },
+    { sel: 'd_iq', box: [19, 133, 186, 71], label: 'Computer Intelligence', xs: [24, 80, 143], y: 140, icons: [3030, 3031, 3032], names: ['Dumb', 'Average', 'Smart'] },
+    { sel: 'd_size', box: [228, 133, 289, 71], label: 'Galaxy Size', xs: [232, 288, 344, 400, 456], y: 140, icons: [3040, 3041, 3042, 3043, 3044], names: ['Small', 'Medium', 'Large', 'Extra Large', 'Humongous'] }];
+  const kids = [], rest = [...f.childNodes];
+  LISTS.forEach((L) => {
+    const sel = field(L.sel); if (!sel) return;
+    const dflt = { d_density: ['dense', 'dense'], d_shape: ['ring', 'random'], d_iq: ['average', 'dumb'], d_size: ['medium', 'small'] }[L.sel]; // (the form's untouched choice becomes the program's own: Dense, Random, Dumb, Small)
+    if (dflt && sel.value === dflt[0] && [...sel.options].some(o => o.value === dflt[1])) sel.value = dflt[1];
+    const vals = [...sel.options].map(o => o.value), frame = dAt(el('div', { class: 'dd-gbox' }), L.box[0], L.box[1], L.box[2], L.box[3]);
+    kids.push(frame, dAt(el('span', { class: 'dd-gtitle', translate: 'no' }, tx(L.label)), L.box[0] + 5, L.box[1] - 7, null, 14));
+    const cells = L.icons.map((n, i) => {
+      const im = a.IMG['dos:i' + n], c = dAt(el('div', { class: 'dd-cell', role: 'option', tabindex: 0 }), L.xs[i], L.y, 56, 56);
+      if (im) c.append(dAt(el('img', { src: im.src, alt: '', style: 'image-rendering:pixelated' }), 12, 7, 32, 32));
+      c.append(dAt(el('span', { class: 'dd-cn', translate: 'no' }, tx(L.names[i])), 0, 43, 56, 14));
+      const pick = () => { sel.value = vals[i]; fire(sel); paint(); };
+      c.addEventListener('click', pick); c.addEventListener('keydown', (e) => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); pick(); } });
+      kids.push(c); return c;
+    });
+    const paint = () => cells.forEach((c, i) => { c.classList.toggle('sel', sel.value === vals[i]); c.setAttribute('aria-selected', String(sel.value === vals[i])); });
+    paint(); sel.addEventListener('change', paint);
+  });
+  const comp = field('computers');
+  if (comp && comp.value === '4') comp.value = '1'; // (the program opens with one computer player)
+  const num = dText(comp ? comp.value : '', 24, 238);
+  kids.push(dAt(el('div', { class: 'dd-gbox' }), 19, 230, 200, 30), dAt(el('span', { class: 'dd-gtitle', translate: 'no' }, tx('Number of Computer Players')), 24, 223, null, 14), num,
+    dSlider(48, 238, 176, 13, 0, 19, comp && /^\d+$/.test(comp.value) ? +comp.value : 4, (n) => { if (comp) { comp.value = String(n); fire(comp); } num.textContent = String(n); }, 'Number of Computer Players'),
+    dButton('Cancel', 272, 224, 71, 26, () => a.closeModal(), { hot: 0 }), dButton('Create', 401, 225, 70, 26, () => f.requestSubmit(), { hot: 1, def: true }));
+  let opened = false;
+  const more = el('button', { type: 'button', class: 'dd-more', onclick: () => { opened = !opened; dress(); } }, tx('Remake options…'));
+  dAt(more, 19, 264, 230, 14); kids.push(more);
+  const box = el('div', { class: 'dd', role: 'group', 'aria-label': 'Create New Galaxy' }); box.style.width = du(536); box.style.height = du(280);
+  box.append(dAt(el('div', { class: 'dd-title', translate: 'no' }, tx('Create New Galaxy')), 5, 5, 526, 17), ...kids);
+  const holder = el('div', { class: 'cg-dos' }, box); f.prepend(holder);
+  const keep = (n) => n.classList && (n.classList.contains('picks') || n.classList.contains('langnote') || n.classList.contains('btns'));
+  const rs = field('rules'), dress = () => { const on = !rs || rs.value === 'dos'; box.style.display = on ? '' : 'none'; win.classList.toggle('dosw', on && !opened); for (const n of rest) if (n.style && !keep(n)) n.style.display = on && !opened ? 'none' : ''; };
+  if (rs) rs.addEventListener('change', dress); dress();
 }
 // enemy faces: the Mac skin's 16 hats become the DOS game's planet faces
 function faces() {
