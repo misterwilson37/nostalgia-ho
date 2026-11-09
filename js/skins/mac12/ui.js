@@ -219,6 +219,40 @@ function shipTypes(selId) {
   win(el('div', { class: 'types12' }, list, info, el('div', { class: 'btns right' }, btn('OK', () => a.closeModal()))));
   return true;
 }
+// DLOG 6000 "List Ship Types" (ListShipTypes @111b0c; 430 x 301, DITL 6000): the list of types at (3, 3, 137 x 214), the ship picture at (3, 149, 243 x 76), then the lines at their rectangles: Name (87), Class (107),
+// Development / Production / Metal Cost (127, 147, 167) with their values at x 279, Range, Speed, Weapons (195, 215, 235; x 188 and 258) and Shields, Mini (195, 215; x 298 and 358), # Built and #Existing
+// (226, 246; x 14 and 94), the Scrap This Type check box (90, 272), Rename (253, 271) and OK (343, 271).
+function shipTypes20(selId) {
+  const a = A(), el = a.el, p = a.me(), rs = H().rules(G());
+  const ds = p.designs.filter(d => !d.scrapped);
+  if (!ds.length) return true;
+  let cur = ds.find(d => d.id === selId) || ds[ds.length - 1];
+  const list = el('div', { class: 'lb', role: 'listbox', style: at20([3, 3, 217, 140]) + ';overflow-y:auto;border:1px solid #000;box-sizing:border-box' }), pane = el('div', { style: 'position:absolute;left:0;top:0;width:430px;height:301px' });
+  const T = (t, r, right) => raw('span', String(t), { class: 'dt20', style: at20(r) + (right ? ';text-align:right' : '') });
+  const show = () => {
+    list.innerHTML = '';
+    for (const d of ds.slice().reverse()) list.append(raw('div', desc0(d), { class: 'li' + (d === cur ? ' sel' : ''), role: 'option', onclick: () => { cur = d; show(); } }));
+    const c = H().designCost(G(), cur);
+    pane.innerHTML = '';
+    const pic = a.shipImgEl(cur, 76); pic.setAttribute('style', (pic.getAttribute('style') || '') + ';height:76px;width:auto;max-width:100%;display:block');
+    const pbox = el('div', { style: at20([3, 149, 79, 392]) + ';display:flex;justify-content:center;overflow:hidden' }, pic);
+    pane.append(pbox, T('Name:', [87, 149, 103, 205]), T(cur.name, [87, 279, 103, 421]), T('Class:', [107, 149, 123, 204]), T(cls(cur.type), [107, 279, 123, 417]),
+      T('Development Cost:', [127, 149, 143, 277]), T('$' + nice(c.protoTotal != null ? c.protoTotal : c.money + (c.proto || 0)), [127, 279, 143, 383]), T('Production Cost:', [147, 149, 163, 277]), T('$' + nice(c.money), [147, 279, 163, 383]),
+      T('Metal Cost:', [167, 149, 183, 277]), T(nice(c.metal), [167, 279, 183, 383]),
+      T('Range', [195, 188, 211, 235]), T(cur.R, [195, 258, 211, 278]), T('Speed', [215, 188, 231, 235]), T(cur.V, [215, 258, 231, 279]), T('Weapons', [235, 188, 251, 254]), T(cur.W, [235, 258, 251, 280]),
+      T('Shields', [195, 298, 211, 352]), T(cur.S, [195, 358, 211, 382]), T('Mini', [215, 298, 231, 352]), T(cur.M, [215, 358, 231, 384]),
+      T('# Built:', [226, 14, 242, 86]), T(nice(cur.built || 0), [226, 94, 242, 133]), T('#Existing:', [246, 14, 262, 87]), T(nice(shipCount(cur.id)), [246, 94, 262, 133]),
+      put20(CHK, [272, 90, 290, 224]));
+  };
+  const CHK = el('label', { class: 'chk' }, el('input', { type: 'checkbox', checked: cur.scrap301 ? 'checked' : false, onchange: (e) => { if (rs.flagScrapDesign) { rs.flagScrapDesign(G(), p, cur, 'command'); a.save(); show(); return; }
+          // (a ruleset that marks nothing, Gemini: scrapped at once, after the question the classic window asks)
+          e.target.checked = false; const n = shipCount(cur.id); a.confirmBox(`Scrap this ship type and all ${n} existing ship${n === 1 ? '' : 's'} of it?`, () => { const m = H().scrapDesign(G(), a.ME, cur.id); a.Sound.play(7003); a.toast(`Scrapped 1 type for ${a.fmt(m)} metal.`); a.renderPanel(); a.draw(); a.save(); show(); }); } }), el('span', null, 'Scrap This Type'));
+  show();
+  a.modal('', dlog20(430, 301, list, pane, put20(el('button', { type: 'button', class: 'ok20', onclick: () => renameType(cur) }, raw('span', 'Rename')), [271, 253, 291, 311]),
+    put20(el('button', { type: 'button', class: 'ok20', onclick: () => a.closeModal() }, raw('span', 'OK')), [271, 343, 291, 401])), { cls: 'mac12 dl20w', label: 'List Ship Types' });
+  return true;
+}
+const put20 = (n, r) => { n.setAttribute('style', (n.getAttribute('style') || '') + ';' + at20(r) + ';min-width:0;padding:0'); return n; };
 // DLOG 6090: a type's new name, 15 letters at most (a beep past them), "Name It" draws one from the list
 function renameType(d) {
   const a = A(), el = a.el;
@@ -266,7 +300,29 @@ function fleetsStatus() {
   return true;
 }
 // an alert over what is open (the dialog stays under it), in the program's words; its picture 3020 is the skin's
-function alertBox(paras) { const b = A().alertOver(paras, lang()); if (b) b.setAttribute('translate', 'no'); }
+// Mac 2.0.1's alerts (ALRT size and DITL: text, picture and button rectangles, from the resource fork; made by audit/mac-2.0.1 of the private repo): an alert is drawn at those rectangles,
+// the words being the paragraphs the page gives (the same lines) in the order of the DITL's text items
+const ALERTS20 = {"128":[432,160,[["b",[123,312,143,402],"OK"],["t",[13,84,45,406],"Sorry ^0 requires the follow things to be able to run:"],["t",[58,110,74,380],"• ^1 CPU or better"],["t",[74,110,90,380],"• System Software ^2 or later"],["t",[90,110,106,380],"• ^3"]]],"2000":[230,172,[["b",[143,91,163,220],"Return To Finder"],["t",[26,26,128,224],"Sorry, but this is a development version of Spaceward Ho! 2.0 that's past it's prime. To get a newer copy, call Delta Tao Software, Inc. at (408) 730-9336."]]],"2010":[282,200,[["b",[169,156,189,253],"Play in B/W"],["p",[117,26,191,100],3010],["t",[13,13,48,279],"Sorry, but Spaceward Ho! 2.0 requires 32-bit Color Quickdraw to run in color."],["t",[52,13,106,278],"You can obtain Color Quickdraw from any Apple dealer for a nominal charge."]]],"3000":[240,228,[["b",[195,169,215,227],"OK"],["t",[39,26,71,227],"^0"],["t",[117,26,149,226],"File: ^1"],["t",[78,26,110,227],"Error Type: ^2"],["t",[156,26,172,225],"Error Code: ^3"],["t",[13,91,29,166],"File Error"]]],"3001":[237,210,[["b",[182,169,202,227],"OK"],["t",[39,26,71,227],"^0"],["t",[78,26,110,227],"Error Type: ^2"],["t",[117,26,133,225],"Error Code: ^3"],["t",[13,78,30,200],"Memory Error"],["t",[143,26,175,226],"Please quit Spaceward Ho! and start again."]]],"3010":[235,159,[["b",[130,169,150,227],"OK"],["p",[78,13,152,87],3020],["t",[13,13,65,229],"Sorry, but that is not the correct password for “^0”. Please try again."]]],"3020":[240,149,[["b",[117,169,137,227],"OK"],["t",[13,13,48,236],"Sorry, but this galaxy is already full. No more players can join."],["p",[65,13,139,87],3020]]],"3030":[232,180,[["b",[143,156,163,214],"OK"],["p",[91,26,165,100],3010],["t",[13,26,77,223],"Sorry, but Spaceward Ho! 2.0 can't read galaxy files created with versions 1.0 - 1.1.2."]]],"3040":[218,150,[["b",[110,150,130,208],"OK"],["t",[10,10,49,212],"Please name your new ship type."],["p",[60,10,134,84],3020]]],"3050":[218,150,[["b",[110,150,130,208],"OK"],["t",[10,10,49,212],"Please set your new ship type’s tech levels."],["p",[60,10,134,84],3020]]],"3060":[301,206,[["b",[162,207,182,265],"OK"],["t",[13,13,80,290],"Sorry, but the name you just typed in doesn’t match any of those in this game. And since the game has  progressed past the year 2000, it’s too late to join…"],["p",[120,17,194,91],3020],["t",[92,13,112,284],"Maybe you typed your name in wrong?"]]],"3070":[335,210,[["b",[143,223,163,292],"Continue"],["b",[143,117,163,186],"Wait"],["p",[117,13,191,87],3020],["t",[13,13,46,327],"^0, all of the ^1 currently registered players have finished their first turn. "],["t",[52,13,92,328],"Should we continue with the game, or wait for more human players to join?"]]],"3080":[240,200,[["b",[156,169,176,227],"OK"],["p",[104,26,178,100],3020],["t",[13,26,98,232],"All currently registered players have ended their first turn. We’re waiting for the game administrator to give his okay to continue…"]]],"3090":[236,132,[["t",[10,14,74,223],"^0’s Star System “^1” has had a revolution, and is now under your control."],["b",[100,157,120,215],"OK"]]],"3100":[236,132,[["t",[10,14,74,223],"^0 has offerred ^1 units of metal for ^2 dollars."],["b",[100,157,120,215],"OK"]]],"3110":[236,132,[["t",[10,14,74,223],"You have found an additional ^0 units of metal on ^0."],["b",[100,157,120,215],"OK"]]],"3120":[236,132,[["t",[10,14,74,223],"Your fleet of ^0 ^1 unexpectedly disappeared in hyperspace on their way to ^2."],["b",[100,157,120,215],"OK"]]],"3130":[236,132,[["t",[10,14,74,223],"^0 has gone nova.  Everything there has been destroyed."],["b",[100,157,120,215],"OK"]]],"3140":[236,132,[["t",[10,14,74,223],"Your Terraforming Technology has reached level ^0."],["b",[100,157,120,215],"OK"]]],"3150":[236,132,[["t",[10,14,74,223],"^0 has turned all his planets over to your control.  "],["b",[100,157,120,215],"OK"]]],"3160":[236,132,[["t",[10,14,74,223],"You have destroyed the Star System ^0, previously owned by ^1."],["b",[100,157,120,215],"OK"]]],"3170":[236,132,[["t",[10,14,74,223],"You have stolen ^0 Technology from ^1.  Your Tech level is now ^2."],["b",[100,157,120,215],"OK"]]],"3180":[233,177,[["b",[143,143,163,210],"OK"],["t",[13,13,84,224],"Sorry, your turn can’t be saved. Although you are in the year ^0, the game has already been updated to ^1…"],["p",[91,13,165,87],3020]]],"3190":[237,161,[["b",[104,156,124,214],"OK"],["p",[65,26,139,100],3020],["t",[13,26,66,224],"The game has been updated to the year ^0. Click “OK” to go to the next turn…"]]],"3200":[234,185,[["b",[143,156,163,214],"OK"],["t",[13,13,93,232],"Sorry, but the file was busy and your new auto play setting was not changed. Please try again shortly."],["p",[104,13,178,87],3020]]],"3210":[335,210,[["b",[143,222,163,299],"Force End"],["b",[143,117,163,194],"Wait"],["p",[117,13,191,87],3020],["t",[13,13,46,327],"^0, ^1 of the ^2 players haven’t finished their turn yet. "],["t",[52,13,92,328],"Do you really want to force an end of turn, or do you want to wait for them to finish?"]]],"3220":[238,201,[["b",[154,156,174,214],"OK"],["p",[102,26,176,100],3020],["t",[13,26,84,230],"Sorry, but the file way busy and the turn could not be marked “done”. Please try again in a moment."]]],"3230":[286,190,[["b",[145,188,165,257],"Continue"],["b",[145,110,165,168],"Wait"],["p",[99,13,173,87],3020],["t",[13,13,52,268],"^0, do you want to play alone, or wait for more humans to join?"],["t",[64,13,84,264],"(Computer Opponents: ^1)"]]],"3240":[230,182,[["b",[125,156,145,214],"OK"],["t",[13,13,80,220],"Auto play has been turned off, but your current turn has already been marked “done.” Update may occur at any time."],["p",[86,13,160,87],3020]]],"3250":[216,137,[["b",[78,143,98,201],"OK"],["t",[13,26,45,211],"Please unlock this disk and try again."],["p",[52,26,126,100],3020]]],"3260":[228,159,[["b",[117,156,137,214],"OK"],["t",[13,13,65,222],"Please enter both your name and a company name or address."],["p",[65,13,139,87],3020]]],"3270":[227,184,[["b",[156,156,176,214],"OK"],["t",[13,13,102,223],"The game has been updated to the next turn. You made some changes since ending your turn that you didn’t save. These changes have now been lost."],["p",[104,13,178,87],3020]]],"3280":[329,258,[["b",[208,182,228,240],"OK"],["p",[182,26,256,100],3020],["t",[13,26,49,320],"Sorry, but Spaceward Ho! allows you to have only 20 ship types at one time. "],["t",[52,26,119,320],"If you would like to create another ship type, scrap an old type by checking the “Scrap” box for it in the “List Ship Types…” Dialog."],["t",[130,26,178,325],"The ship will be scrapped during the turn update and you can create a new type next turn…"]]],"3290":[231,174,[["b",[143,156,163,214],"OK"],["t",[13,13,81,227],"Sorry, but that fleet is currently in hyperspace and can’t be contacted until it arrives at its next location."],["p",[91,13,165,87],3020]]],"3300":[240,200,[["b",[156,156,176,214],"OK"],["t",[13,13,46,223],"There are no colonists aboard that colony ship."],["p",[117,26,191,100],3020],["t",[56,14,106,223],"To refill it, you must either wait one turn or abandon the colony."]]],"3310":[259,249,[["b",[192,156,212,214],"OK"],["t",[14,13,68,252],"Sorry, but the battle information on that battle is no longer available."],["p",[140,13,214,87],3020],["t",[70,13,134,251],"Battle reports that are more that 500 years old are automatically deleted to keep the game file size small."]]],"3320":[235,192,[["b",[156,156,176,214],"OK"],["t",[13,13,98,224],"Sorry, but the game file was busy, and the battle information could not be read for this battle. Please try again in a moment."],["p",[104,13,178,87],3020]]],"3330":[240,200,[["b",[171,156,191,214],"OK"],["p",[119,13,193,87],3020],["t",[13,13,61,234],"Sorry, but that fleet doesn’t have enough fuel to reach the selected destination. "],["t",[67,13,117,234],"You can tell this because there are no arrows on either end of the dragged line."]]],"3340":[240,200,[["b",[156,169,176,227],"OK"],["p",[104,26,178,100],3020],["t",[13,26,82,228],"Sorry, there’s already a star named  “^0.” Please pick another name."]]],"5000":[325,140,[["b",[104,247,124,305],"Save"],["b",[104,26,124,98],"Don't Save"],["b",[104,156,124,214],"Cancel"],["t",[13,78,86,306],"^0, do you want to save the changes you've made before closing the current game?"]]],"5010":[240,200,[["b",[156,156,176,214],"OK"],["p",[117,13,191,87],3020],["t",[13,13,107,230],"^0^1^2^3"]]],"5020":[325,140,[["b",[104,247,124,305],"Save"],["b",[104,78,124,150],"Don't Save"],["b",[200,200,220,258],"Cancel"],["t",[13,78,86,306],"^0, do you want to save the changes you've made before updating the turn?"]]],"5030":[305,234,[["b",[195,234,215,292],"OK"],["t",[13,13,99,297],"Oops! Something kinda funny has happened in TheHo 2.0. Please write down the following problem with as much information as you can on what you think led up to it. Then let us know. Thanks."],["t",[104,13,185,295],"^0^1^2^3"]]],"5040":[227,249,[["b",[216,91,236,149],"OK"],["t",[13,13,49,215],"Congratulations! You have conquered the galaxy!"],["p",[52,39,203,188],3030]]],"5041":[227,249,[["b",[216,91,236,149],"OK"],["t",[13,13,49,215],"Congratulations! You have conquered the galaxy!"],["p",[52,39,203,188],3530]]],"5050":[235,244,[["b",[212,78,232,149],"Oh, well…"],["p",[52,39,203,188],3040],["t",[13,13,47,222],"Unfortunately, you have been eliminated from the game…"]]],"5051":[235,244,[["b",[212,78,232,149],"Oh, well…"],["p",[52,39,204,188],3540],["t",[13,13,47,222],"Unfortunately, you have been eliminated from the game…"]]],"5060":[282,177,[["b",[143,193,163,272],"Let ’em Die"],["b",[143,104,163,181],"Cancel"],["p",[91,13,165,87],3020],["t",[13,13,83,263],"Warning! You are not spending enough money to support some of your colonies. Do you really want to abandon them?"]]],"5070":[232,153,[["b",[104,156,124,214],"OK"],["t",[13,13,64,224],"Sorry, but the file was busy. Please try again in a few seconds."],["p",[65,13,139,87],3020]]],"5080":[262,153,[["b",[104,182,124,240],"Revert"],["b",[104,117,124,175],"Cancel"],["p",[65,13,139,87],3020],["t",[13,13,62,254],"Do you really want to revert to the saved version of the game? All changes will be lost…"]]],"5090":[228,191,[["b",[143,143,163,201],"OK"],["p",[104,13,178,87],3020],["t",[13,13,72,219],"Sorry, but this game was created with a newer version of Spaceward Ho! "]]]};
+function alert20(paras) {
+  const norm = (t) => String(t).replace(/[‘’“”]/g, "'").replace(/\s+/g, ' ').replace(/\^\d|%[sd]/g, '').trim();
+  const p0 = norm(paras[0]); if (p0.length < 8) return null;
+  const common = (x) => { let i = 0; while (i < x.length && i < p0.length && x[i] === p0[i]) i++; return i; };
+  let id = null, best = 17;
+  for (const k of Object.keys(ALERTS20)) { const t = ALERTS20[k][2].find(x => x[0] === 't'); const c = t ? common(norm(t[2])) : 0; if (c > best) { best = c; id = k; } }
+  if (!id) return null;
+  const [w, h, items] = ALERTS20[id], a = A(), el = a.el; let ti = 0;
+  const done = () => back.remove();
+  const kids = items.map(it => {
+    if (it[0] === 't') return raw('span', paras[ti] != null && items.filter(x => x[0] === 't').length === paras.length ? paras[ti++] : (ti++, it[2]), { class: 'dt20', style: at20(it[1]) + ';white-space:pre-line' });
+    if (it[0] === 'p') { const im = a.IMG['dos:p' + it[2]]; return im ? el('img', { src: im.src, alt: '', style: at20(it[1]) + ';image-rendering:pixelated' }) : null; }
+    return el('button', { type: 'button', class: 'ok20', style: at20(it[1]) + ';min-width:0;padding:0', onclick: done }, raw('span', it[2]));
+  });
+  const back = el('div', { class: 'scrim', onclick: (e) => { if (e.target === back) done(); }, onkeydown: (e) => { if (e.key === 'Escape') { e.stopPropagation(); done(); } } },
+    el('div', { class: 'win small alert notitle mac12 dl20w', role: 'alertdialog', 'aria-modal': 'true', 'aria-label': paras[0] }, dlog20(w, h, ...kids)));
+  document.body.append(back); const b = back.querySelector('button'); if (b) b.focus();
+  return back;
+}
+function alertBox(paras) { const b = (V2 && alert20(paras)) || A().alertOver(paras, lang()); if (b) b.setAttribute('translate', 'no'); }
 
 // DLOG 6020 "Build Ships at …" (BuildShips @112946): "Shipbuilding Queue at:" the star; "Available Types" (the designs);
 // "In The Queue:" (each line MakeFleetDescription of the design and its count); for the type picked, "$%s (D)" its development and
@@ -843,6 +899,14 @@ function organize(f0) {
     for (const p of piles) if (!p.f && p.n > 0) take(p.n);
     a.closeModal(); a.save(); a.renderPanel(); a.draw();
   };
+  if (V2) { // DLOG 6060 (439 x 285, DITL 6060): the heading (0, 13), the two lines (18, 16) and (35, 16), the piles (56, 12, 405 x 180), the buttons at y 249: Group All (45), Divide All (131), Cancel (232), OK (340)
+    const b2 = (t, fn, r) => put20(el('button', { type: 'button', class: 'ok20', onclick: fn }, raw('span', t)), r);
+    const grp = () => { const t = piles.reduce((x, p) => x + p.n, 0); piles.forEach((p, i) => { p.n = i ? 0 : t; }); sel = null; show(); };
+    const dvd = () => { const t = piles.reduce((x, p) => x + p.n, 0); piles.forEach(p => { p.n = 0; }); for (let k = 0; k < t; k++) { if (k < piles.length) piles[k].n = 1; else piles.push({ f: null, n: 1 }); } sel = null; show(); };
+    a.modal('', dlog20(439, 285, txt20('To Organize Fleets:', [0, 13, 16, 142]), txt20('• Click and drag fleets into desired number of piles', [18, 16, 35, 363]), txt20('• Shift-Click selects an entire pile', [35, 16, 51, 362]),
+      put20(box, [56, 12, 236, 417]), b2('Group All', grp, [249, 45, 269, 110]), b2('Divide All', dvd, [249, 131, 269, 196]), b2('Cancel', () => a.closeModal(), [249, 232, 269, 297]), b2('OK', apply, [249, 340, 269, 412])), { cls: 'mac12 dl20w', label: 'Organize Fleets' });
+    return;
+  }
   win(el('div', null, el('p', null, 'To Organize Fleets:'), el('p', { class: 'sub' }, '• Click and drag fleets into desired number of piles'), el('p', { class: 'sub' }, '• Shift-Click selects an entire pile'), box,
     el('div', { class: 'btns' }, btn('Group All', () => { const t = piles.reduce((x, p) => x + p.n, 0); piles.forEach((p, i) => { p.n = i ? 0 : t; }); sel = null; show(); }, { class: 'quiet' }),
       btn('Divide All', () => { const t = piles.reduce((x, p) => x + p.n, 0); piles.forEach(p => { p.n = 0; }); for (let k = 0; k < t; k++) { if (k < piles.length) piles[k].n = 1; else piles.push({ f: null, n: 1 }); } sel = null; show(); }, { class: 'quiet' }),
@@ -1027,7 +1091,7 @@ function createGalaxy20(f, ctx) {
   const holder = el('div', { class: 'cg20' }, box);
   const rest = [...f.childNodes]; f.prepend(holder);
   // (the version, language and skin choices stay where they are: they are the remake's own and the skin's rules checks use them)
-  const keep = (n) => n.classList && (n.classList.contains('picks') || n.classList.contains('langnote'));
+  const keep = (n) => n.classList && (n.classList.contains('picks') || n.classList.contains('langnote') || n.classList.contains('btns'));
   const rs = field('rules'), dress = () => { const on = !rs || rs.value === 'mac20'; box.style.display = on ? '' : 'none'; moreBtn.style.display = on ? '' : 'none'; for (const n of rest) if (n.style && !keep(n)) n.style.display = on && !opened ? 'none' : ''; };
   if (rs) rs.addEventListener('change', dress); dress();
 }
@@ -1680,6 +1744,7 @@ function playersWindow() {
 }
 
 window.HOMAC12 = {
+  alertBox: (paras) => { const b = V2 && G() && own12Rules() ? alert20(paras) : null; if (b) b.setAttribute('translate', 'no'); return b; },
   battleWindow,
   // (the Edit menu's French title is 1.2F's "Edition", which the interface would take for its English word "Edition": written as it is)
   menuName(name) {
@@ -1756,7 +1821,7 @@ window.HOMAC12 = {
     if (G() && name === 'dip') return dip12();
     if (G() && name === 'surrender') return surrender12();
     if (!G() || !own()) return false;
-    if (name === 'types') return shipTypes();
+    if (name === 'types') return V2 ? shipTypes20() : shipTypes();
     if (name === 'fleets') return fleetsStatus();
     if (name === 'build') return buildShips(x[0]);
     return false;

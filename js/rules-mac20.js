@@ -98,7 +98,7 @@ E.registerRules('mac20', Object.assign({}, D, {
     texts: Object.assign({}, D.compare.texts, { out: 'You were elminated in %d.' }),
     skillsLayout: { w: 377, h: 294, title: [13, 2, 286, 20], list: [13, 26, 350, 226], label: [13, 260, 155, 19], iq: [169, 260, 97, 20], ok: [277, 262, 82, 20] } }), // (DLOG/DITL 6100 "List Player Skills")
   // Mac 2.0.1's Explored Planets list (InitStarsList @120136): five fields in pixel columns (js/rules-12.js, rules-dos.js exploredList)
-  exploredList: Object.assign({}, D.exploredList, { layout: 'mac' }),
+  exploredList: Object.assign({}, D.exploredList, { layout: 'mac', dlg: { w: 486, h: 296, title: [13, 2, 178, 21], list: [13, 26, 455, 226], go: [260, 264, 82, 20], ok: [364, 264, 82, 20] } }), // (DLOG / DITL 6040)
   // the Ships menu's item (STR# 1010.9-10) and the panel's line (DrawSelectedFleetInfo)
   scrapWords: Object.assign({}, D.scrapWords, { fleet: ['Scrap Current Fleet', 'Don’t Scrap Current Fleet'], marked: 'Fleet to be scrapped for metal.' }),
   // report 1016 for a fleet scrapped in hyperspace: "star -1" read big-endian

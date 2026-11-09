@@ -522,3 +522,4 @@ html.fleetdrag #panel .planet > .btns, html.fleetdrag.fleetdrag-pad #panel .plan
 .pwquote { margin: 4px 0 8px; padding: 4px 0 4px 10px; border-left: 3px solid var(--sub, #888); }
 .pwquote small, .pwask .note, .pwexport .note[role=alert] { color: var(--sub); }
 .pwexport .pwfields[hidden] { display: none; }
+.origdlg .xlistbox { overflow-y: auto; border: 1px solid currentColor; padding: 0; }

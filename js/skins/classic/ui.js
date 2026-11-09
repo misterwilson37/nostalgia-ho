@@ -4009,6 +4009,14 @@ function openExploredList() {
     modal('Explored Stars', el('div', null, rowsBox, el('div', { class: 'btns right' }, el('button', { onclick: closeModal }, 'OK'))), { cls: 'mid' });
     return;
   }
+  // L.dlg: the window's own rectangles (a DITL: Mac 2.0.1's 6040, 486 x 296: the heading, the list, Go To Star, OK), as Compare Players is laid out
+  if (L.dlg && !sortBox) {
+    const D = L.dlg, ok = el('button', { type: 'button', class: 'default', onclick: closeModal }, 'OK');
+    rowsBox.classList.add('xlistbox');
+    const box = origDialog(D.w, D.h, [1, 1], [[D.title, el('div', { class: 'cmptitle' }, L.title)], [D.list, rowsBox], [D.go, go], [D.ok, ok]], 'cmpwin xlist');
+    modal('', box, { cls: 'compare', label: L.title.replace(/:$/, '') });
+    return;
+  }
   modal(L.title.replace(/:$/, ''), el('div', null, el('p', { class: 'sub' }, L.title), rowsBox,
     el('div', { class: 'btns right' }, ...(sortBox ? [sortBox] : []), go, el('button', { onclick: closeModal }, 'OK'))), { cls: 'mid' });
 }
