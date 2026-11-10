@@ -71,3 +71,19 @@ Not remake controls (left as they are, `docs/ios-findings.md`): New game, Quit, 
 | Compare Players (DLOG 6050, a bar graph over the players, Show Skills), Show Skills (DLOG 6100) | The classic page's windows, which are already drawn at 2.0.1's DITL rectangles and read from `DRAWCPBARGRAPH`; the 2.0.1 skin leaves them as they are. Send Message (DLOG 6070) is built as 2.0.1's own (`chat20`; the stars' cell pictures are the one gap). | `openCompare`, `openSkills`, `chat20` |
 | Please Identify Yourself / Join dialogs (DLOG 4000, 4010: name, password, skill, sex), the licence personalization (4030) | **Nothing** (a game file shared between machines and a registered owner do not exist here): not shown; the name, sex and skill are in the New Game window's "More…". | classic `newGameDialog` |
 | DOS 2.0 / Windows 3.1 skin: Auto Play (three choices and a seconds slider), Set Battle Speed (with "Fully Animated Battles"), Set Polling Time, I'll Update Turns, Force Turn Update | Shown in the original's menu bar (dimmed where the remake has no network polling or nothing to do); the remake's own windows open for those it has. | **Open:** the original's own dialogs (Windows templates 6, 8, 26) are not built in the dos skin yet. |
+
+## DOS 2.0 skin (`js/skins/dos`, the DOS OS look): features the 2.0 program had no screen for
+
+The dos skin is the 2.0 program's own screen (docs/dos20-findings.md, "Rebuilding the dos skin"). Features of later rulesets that it can show (any ruleset can be played in it) have no DOS window; each is the remake's own, listed here with how it is shown. Done = drawn in DOS 2.0's look (its frame, fonts, colours, buttons); Classic = the classic skin's window inside the DOS frame, not yet restyled.
+
+| Control | Rulesets | In the dos skin | Status |
+|---|---|---|---|
+| Radical research, the sixth Tech Spending bar | 5.0.5, Palm | one more of the program's vertical bars, 14 wide with 8 before it (as mac12 fits it), in the Tech Spending box (`techBoxDos`) | Done |
+| Give Money / Metal | 3.0.1 and later, DOS and Claude with a default | the classic window (`Galaxy` menu, after the program's items) | Classic |
+| Players and alliances, Players and history | 3.0.1 and later | the classic window (the end of the last menu) | Classic |
+| Surrender, Armageddon device, Evacuate, Dip into savings | later rulesets | the classic windows and menu items at the end of the Window menu | Classic |
+| Hall of Fame, Hall of Shame, Master Point List, Account, Export and Import | the remake's own | the classic windows; the Ho! menu keeps the remake's skin, sound and language choices at the bar's right end | Classic |
+| Preferences (modern conveniences, hints, battle review) | later rulesets | the classic window; the program's Set Battle Speed and Auto Play are its own windows | Classic |
+| Review Battle, Organize Ships, Fix Spending's alert, battle window, Send Message, message cards | all | classic windows and cards (the program lists reports in its Reports window, which is built; the turn's cards are kept as the remake's flow) | Classic |
+| The remake options of New Game (version, edition, language, skin, patch, online play) | the remake's own | behind "Remake options…" under the program's Create New Galaxy window | Done |
+
