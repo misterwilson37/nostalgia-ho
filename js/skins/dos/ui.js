@@ -472,7 +472,8 @@ function fleetBoxDos() {
   const a = window.HOAPI, H = window.HO, g = a.G, rs = H.rules(g), s = a.UI.sel != null ? g.stars[a.UI.sel] : null, W = PWORDS(), r12 = RS12();
   const q = dq(240, 79, 'Fleets');
   const here = s ? a.fleetOrder(g.fleets.filter(f => f.star === s.id && f.to == null && f.owner === a.ME)) : [];
-  const sel = here.find(f => f.id === a.UI.selFleet);
+  let sel = here.find(f => f.id === a.UI.selFleet);
+  if (!sel && here.length) { sel = here[0]; a.UI.selFleet = sel.id; } // (the program has the first fleet of the star picked)
   FLEET_TOP = Math.max(0, Math.min(FLEET_TOP, here.length - 4));
   if (sel && r12) {
     const L = (rs.fleetInfo || r12.fleetInfo)(enView(g), sel), first = L[0] || '', m = /^(.*?:) (.*)$/.exec(first);
