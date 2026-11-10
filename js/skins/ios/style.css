@@ -516,3 +516,7 @@ html.skin-ios .win.ios-remake[data-remake^="dressed"] { font-size: calc(14 * var
 html.skin-ios .win.ios-remake[data-remake^="dressed"] .wtitle span { font-size: calc(16 * var(--pt)); }
 html.skin-ios .win.ios-remake[data-remake^="dressed"] small, html.skin-ios .win.ios-remake[data-remake^="dressed"] .sub { font-size: calc(11 * var(--pt)); }
 html.skin-ios .win.ios-remake[data-remake^="dressed"] { width: calc(520 * var(--pt)); max-width: 94vw; }
+/* the remake's own "name a star" form (a rank won with another ruleset's rules; js/skins/classic/ui.js): everything in the app's dialog is centred, so the
+   field is too (Jake, November 2026; no original to follow: the app's own rank dialog, openRankIOS, centres its field) */
+html.skin-ios .namestar > label { display: flex; flex-direction: column; align-items: center; justify-self: center; text-align: center; }
+html.skin-ios .namestar > label input[name=star] { text-align: center; }
