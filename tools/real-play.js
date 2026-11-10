@@ -189,7 +189,12 @@ async function playRun(browser, job, outDir, idx) {
       // (a card says "click to continue": tap that line when it has one; the middle of a card can be a button of its own, such as "Review battle", which opens a window)
       let cont = null; if (card) for (const sel of ['.card:not(.end):not(.waiting) .count', '.card:not(.end):not(.waiting) .icon, .card:not(.end):not(.waiting) img', '.card:not(.end):not(.waiting) p']) { cont = await aim(sel, { what: 'card continue point', soft: true }); if (cont) break; }
       // (a report with a button of its own, "Radical projects…", "Review battle": the middle of the card is that button and a tap there opens its window, which this loop then closed, tapped again, and so on to the end of the 60 rounds)
-      if (card) { const t = cont || card; await ptr.tap(t.x, t.y); await sleep(70); continue; }
+      if (card && cont) { await ptr.tap(cont.x, cont.y); await sleep(70); continue; }
+      if (card) { // (no continue line: a point of the card off its own buttons)
+        // a person taps the card where it is not one of its own buttons (the iOS skin's "Radical projects…" opens a dialog, and a touch within about a finger's width of a button is taken as a press of it)
+        const pt = await ev(([x, y, w, h]) => { for (const [fx, fy] of [[0, 0], [-0.42, 0], [0.42, 0], [0, -0.38], [0, 0.38], [-0.42, -0.35], [0.42, 0.35], [0.42, -0.35], [-0.42, 0.35]]) { const px = x + fx * w, py = y + fy * h, e = document.elementFromPoint(px, py); if (e && e.closest('.card, #msg') && !e.closest('button') && ![...document.querySelectorAll('#msg button, .card button')].some(b => { const r = b.getBoundingClientRect(); return px > r.left - 24 && px < r.right + 24 && py > r.top - 24 && py < r.bottom + 24; })) return [px, py]; } return [x, y]; }, [card.x, card.y, card.w, card.h]);
+        await ptr.tap(pt[0], pt[1]); await sleep(70); continue;
+      }
       break;
     }
   };
@@ -240,10 +245,10 @@ async function playRun(browser, job, outDir, idx) {
     const starPoint = async (id) => G(async (id) => { document.getElementById('map').scrollIntoView({ block: 'center', inline: 'nearest' }); const v = HOVIEW(), c = document.getElementById('map').getBoundingClientRect(), s = HOAPI.G.stars[id], kx = c.width / v.mapW, ky = c.height / v.mapH; return { x: c.left + (v.view.ox + s.x * v.view.s) * kx, y: c.top + (v.view.oy + s.y * v.view.s) * ky }; }, id);
     // is a map point reachable: inside the window, and the map canvas is what is there
     const mapHit = (x, y) => G(([x, y]) => { if (x < 2 || y < 2 || x > innerWidth - 2 || y > innerHeight - 2) return 'off-screen'; const h = document.elementFromPoint(x, y); if (h && h.id === 'map') return ''; return 'covered by ' + window.__rp.desc(h); }, [x, y]);
-    const clickStar = async (id, what) => {
+    const clickStar = async (id, what, soft) => {
       const p = await starPoint(id); let m = await mapHit(p.x, p.y);
       if (m === 'off-screen') { await G((id) => { HOAPI.centerOn(id); HOAPI.draw(); }, id); await sleep(150); const q = await starPoint(id); p.x = q.x; p.y = q.y; m = await mapHit(p.x, p.y); } // (a person pans the map)
-      if (m) { fail(`${what}: the star at ${Math.round(p.x)},${Math.round(p.y)} is ${m}`); return false; }
+      if (m) { (soft ? warn : fail)(`${what}: the star at ${Math.round(p.x)},${Math.round(p.y)} is ${m}${soft ? ' (a person picks another star)' : ''}`); return false; }
       await ptr.tap(p.x, p.y); await sleep(250); return true;
     };
     await step('select-colony', async () => {
@@ -398,7 +403,7 @@ async function playRun(browser, job, outDir, idx) {
       let sel = await G(() => HOAPI.UI.selFleet); if (sel !== f.id) { warn(`clicking the fleet's row selected fleet ${sel}, not ${f.id}`); await G((id) => { HOAPI.UI.selFleet = id; HOAPI.renderPanel(); HOAPI.draw(); }, f.id); }
       if (!await press('#panel button, .ios-pb button, .ios-fd button, .ios-fdl button, .win button', { re: /plan route|route/i, soft: true, what: 'Plan route button', wait: 300 })) { note(info.waypoints ? 'this skin offers no Plan route button' : 'no Plan route in this ruleset'); return; }
       const cand = await G((fid) => { const G = HOAPI.G, f = G.fleets.find(x => x.id === fid); return G.stars.filter(s => s.id !== f.star && HO.starDist(G, f.star, s.id) <= HO.fleetMaxRange(G, f)).sort((x, y) => HO.starDist(G, f.star, x.id) - HO.starDist(G, f.star, y.id)).slice(0, 10).map(s => s.id); }, f.id);
-      let stops = 0; for (const id of cand) { if (stops >= 2) break; if (await clickStar(id, 'route stop')) stops++; }
+      let stops = 0; for (const id of cand) { if (stops >= 2) break; if (await clickStar(id, 'route stop', true)) stops++; }
       await shot('route-planned'); const r = await G(() => HOAPI.UI.route ? { n: HOAPI.UI.route.stops.length } : null);
       if (!r) { warn('Plan route did not start a route plan (no HOAPI.UI.route)'); return; }
       if (!r.n) { fail('clicking stars while planning a route added no stops'); return; }
@@ -461,9 +466,14 @@ async function playRun(browser, job, outDir, idx) {
       const openPrefs = async () => { await mark(); let how = await menuOpen(/^preferences/i, null); if (!(await dialogs()).length && (await ev(() => !!document.querySelector('.ios-am.open')) || await press('.ios-gear', { soft: true, what: 'gear', wait: 350 }))) await press('.ios-am .ios-ami', { re: /^preferences/i, soft: true, what: 'Preferences', wait: 350 }); return (await dialogs()).length > 0; };
       if (!await openPrefs()) { warn('no Preferences window found to check'); return; }
       const modernBox = async () => ev(() => { const l = window.__rp.dialogs(), d = l[l.length - 1]; const c = [...d.querySelectorAll('label.chk')].find(x => /Modern conveniences/i.test(x.textContent)); if (!c) return null; const i = c.querySelector('input'); i.setAttribute('data-rp-modern', '1'); i.scrollIntoView({ block: 'center' }); /* (the window's body scrolls, as a person scrolls it; at 844 x 390 the option is under the fold) */ return i.checked; });
+      // iOS and Android: Preferences is the app's own dialog; the remake's options are behind its "Remake options…" button
+      if (await modernBox() === null && await ev(() => !!document.querySelector('.ios-bremake'))) await press('.ios-bremake', { what: 'Remake options…', soft: true, wait: 450 });
       let on = await modernBox();
       if (on === null) { fail('Preferences has no "Modern conveniences" option'); await shot('prefs'); await closeAll('prefs'); return; }
-      if (!on) { await press('[data-rp-modern]', { what: 'Modern conveniences checkbox', wait: 300 }); await closeAll('prefs'); if (!await openPrefs()) return; }
+      if (!on) {
+        await press('[data-rp-modern]', { what: 'Modern conveniences checkbox', wait: 300 }); await closeAll('prefs'); if (!await openPrefs()) return;
+        if (await modernBox() === null && await ev(() => !!document.querySelector('.ios-bremake'))) await press('.ios-bremake', { what: 'Remake options…', soft: true, wait: 450 });
+      }
       await ev(() => document.querySelectorAll('[data-rp-modern]').forEach(e => e.removeAttribute('data-rp-modern')));
       const txt = await ev(() => { const l = window.__rp.dialogs(), d = l[l.length - 1]; return d.textContent + ' ' + [...d.querySelectorAll('[aria-label]')].map(e => e.getAttribute('aria-label')).join(' '); });
       await shot('prefs-modern-on');

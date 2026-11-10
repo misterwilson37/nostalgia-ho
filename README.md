@@ -221,6 +221,11 @@ changed in the middle of a game from the **Ho menu** (the skin's "Ho!" at the to
 - **Modern conveniences** (`G.opts.modern`, also in New Game and Preferences): automatic
   routes, the map following the news, battle speed and written battle reports. They never
   add or remove a ruleset's commands: those (Evacuate, for one) follow the rules only.
+  Where a version limits the ships a colony builds in a turn (`rs.yardRoom`: one for each
+  thousand people, 4.0.5's and 5.0.5's, so the Mac 4.0.5's, iOS's, Android's and the Palm's),
+  the Build window says so: a line with the limit and what is left (`HO.yardLeft`), the +
+  dimmed when there is no room, and, with "Explain things…" on, a tip of the remake's own
+  (`data-tiptext`). The rules are unchanged: the purchase was refused anyway.
 - **Full Hoedown** (`G.opts.hoedown`, also in New Game below the line, remembered in
   `localStorage` "ho5.hoedown"; Jake's name for it): Delta Tao's own humour at its most.
   A joke that came one time in three comes every time (its random draw is still made and

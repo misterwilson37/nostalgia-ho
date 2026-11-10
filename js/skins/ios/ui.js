@@ -242,7 +242,12 @@ function shipPic(d, IMG, rusty) {
 // sidebar at the left, the report bar at the bottom left and End Turn with its
 // gear at the bottom right. What the app opens from them in a screen of its
 // own and the remake hasn't rebuilt yet opens the remake's window.
-const SCREEN = { pad: false, u: 1, winW: 568, winH: 320, W: 255, row: 20, font: 14, gap: 4 };
+// u: CSS pixels to a point, the zoom included (u0 x the Interface size); u0: the same at 100%, what the window alone makes it; winW, winH: the LAYOUT's screen in points,
+// vw / u0, the same at every Interface size (the sidebar, a row, a dialog are shares of it); the window itself in points is realW(), realH() (it shrinks as the interface grows)
+const SCREEN = { pad: false, u: 1, u0: 1, winW: 568, winH: 320, W: 255, row: 20, font: 14, gap: 4 };
+const realW = () => Math.max(1, window.innerWidth) / SCREEN.u, realH = () => Math.max(1, window.innerHeight) / SCREEN.u;
+// the screen a dialog is laid out in: the layout's, but never more than the window (a zoom past 100% would make it overflow)
+const dlgW = () => Math.min(SCREEN.winW, realW()), dlgH = () => Math.min(SCREEN.winH, realH());
 const HOIOS = window.HOIOS = { sideOpen: () => false, side: () => {} };
 let sideWanted = null; // the sidebar's state: the iPad opens it at the start (toggleInfo), the iPhone doesn't
 // the viewer's interface size, kept in localStorage (a per-viewer convenience: every read and write guarded); in effect only with the game's modern conveniences on
@@ -257,17 +262,20 @@ function screenSize() {
   // +[GraphicDefines setup]: the idiom picks the iPad's numbers or the iPhone's; a window has no idiom, so a
   // window whose short side is 600 CSS pixels or more is the iPad (the Android skin's approximation too)
   const pad = Math.min(vw, vh) >= 600, portrait = vh > vw * 1.1;
-  const u = pad ? Math.max(0.6, Math.min(vh / 768, vw / 800)) : portrait ? vw / 360 : Math.min(vh / 320, vw / 480);
+  const u0 = pad ? Math.max(0.6, Math.min(vh / 768, vw / 800)) : portrait ? vw / 360 : Math.min(vh / 320, vw / 480);
   // The interface size (modern conveniences, remake option): the app lays its windows out in proportion to the screen in points (the sidebar 0.3 of its width, a row 0.08 of that, a dialog 0.8), so a bigger
-  // window only made the whole interface bigger. The size takes the share F of the window as the screen in points, so the sidebar, rows, type and dialogs are F of what they were; the map keeps the window.
-  const F = sizeF(), winW = vw / u * F, winH = vh / u * F;
+  // window only made the whole interface bigger. The size is a true zoom: the layout keeps the screen in points the window makes at 100% (winW, winH: so every point size, and the shares of the screen, are
+  // what they are at 100%) and the point itself is F of its size (u = u0 x F, --pt), so everything drawn in points (the pictures, the borders, the buttons, the type, the dialogs) is F of what it was together; the map keeps the window.
+  // A phone's right-hand stack (the graphs button, the four round buttons, the End Turn row: 44 + 4 x 44 + 44 points, and 6 spare) is as tall as the window allows, so past what fits it would run over itself:
+  // the interface grows no further than the window's height lets it (never below 100%, where nothing changes)
+  const F = Math.min(sizeF(), pad ? Infinity : Math.max(1, vh / (u0 * 270))), u = u0 * F, winW = vw / u0, winH = vh / u0;
   // +[BarMenuItem calculate] 0x1000104ec (the disassembly: frintp = round up, frintm = round down; the decompile's (int) casts are wrong):
   // the sidebar is ceil(winW x 0.3 iPad / 0.45 iPhone), at least 220; a row ceil(W x 0.08); the label column ceil(W x 0.45);
   // the type floor(row x 0.7); the bars start at labelW + 8 + 1 (barOffset: spacing is the constant 8)
   const W = Math.max(220, Math.ceil(Math.fround(winW * (pad ? 0.3 : 0.45)))), row = Math.ceil(Math.fround(W * 0.08));
-  Object.assign(SCREEN, { pad, u, winW, winH, W, row, font: Math.floor(Math.fround(row * 0.7)), labelW: Math.ceil(Math.fround(W * 0.45)), gap: pad ? 8 : 4 });
+  Object.assign(SCREEN, { pad, u, u0, winW, winH, W, row, font: Math.floor(Math.fround(row * 0.7)), labelW: Math.ceil(Math.fround(W * 0.45)), gap: pad ? 8 : 4 });
   const de = document.documentElement, st = de.style;
-  st.setProperty('--u', u + 'px'); st.setProperty('--ww', String(winW)); st.setProperty('--wh', String(winH)); st.setProperty('--W', W); st.setProperty('--row', row);
+  st.setProperty('--u', u + 'px'); st.setProperty('--zf', String(F)); /* (--zf: the Interface size in effect, for what CSS draws in pixels rather than points) */ st.setProperty('--ww', String(winW)); st.setProperty('--wh', String(winH)); st.setProperty('--W', W); st.setProperty('--row', row);
   st.setProperty('--fs', String(SCREEN.font)); st.setProperty('--more', pad ? '24' : '18'); st.setProperty('--mfs', String(Math.floor(Math.fround(row * 3 / 6)) - 1)); st.setProperty('--labw', String(SCREEN.labelW)); { const g = barGeom(); st.setProperty('--bo', String(g.barOffset)); st.setProperty('--bw', String(g.mw)); } st.setProperty('--gap', String(SCREEN.gap));
   de.classList.toggle('ios-pad', pad); de.classList.toggle('ios-phone', !pad);
   sideLayout();
@@ -297,12 +305,12 @@ function colButtons(open) { for (const b of document.querySelectorAll('.ios-col 
 function sideLayout() {
   // -[MapLayer setBoundsForSidebar] 0x10000db54: the map's pan rectangle starts at the sidebar's width + 8 (iPad) or + 4 (iPhone)
   // (a80 x 10 from the top and bottom); the page keeps the map beside the sidebar when there is room for it
-  const de = document.documentElement, room = SCREEN.winW - SCREEN.W - SCREEN.gap >= 300;
+  const de = document.documentElement, room = realW() - SCREEN.W - SCREEN.gap >= 300; // (in the window's own points: a smaller interface leaves more room)
   de.style.setProperty('--mapx', (sideOpen() && room ? (SCREEN.W + SCREEN.gap) * SCREEN.u : 0) + 'px');
 }
 // the pan rectangle in the map canvas's pixels (see HOTHEME.clampView)
 function panRect(mapW, mapH, side) {
-  const u = SCREEN.u, m = 10 * SCREEN.gap * u, mapx = parseFloat(document.documentElement.style.getPropertyValue('--mapx')) || 0, open = side == null ? sideOpen() : side;
+  const u = SCREEN.u, m = 10 * SCREEN.gap * SCREEN.u0, mapx = parseFloat(document.documentElement.style.getPropertyValue('--mapx')) || 0, open = side == null ? sideOpen() : side;
   return { x0: open ? (SCREEN.W + SCREEN.gap) * u - mapx : m, x1: mapW - m, y0: m, y1: mapH - m };
 }
 function panMinScale(G, mapW, mapH) { const r = panRect(mapW, mapH, true); return Math.max(1e-6, Math.max((r.x1 - r.x0) / G.W, (r.y1 - r.y0) / G.H)); }
@@ -397,7 +405,7 @@ let pbShown = false;
 // marked to be scrapped), the items 5 apart in a column (the first at the top, left-aligned), anchored (1, 1) at the star's place + (-40, 30) x the planets' scale, over a black quad (alpha 0xaf of 255) the size of the menu. A touch on an item
 // (zoomed to 1.1, white at alpha 50 of 255 behind it: MenuLabelBackgroundColor draw 0x10009647c, set to 0x32ffffff by updateSelected) held for half a second turns it red with the Scrap Fleet sound (index 18; again: white); on release over it, when the touch lasted over half a second, the satellite's scrap mark flips for real (a short tap does nothing).
 let satEl = null, satKey = '';
-function satMenu(a, s, x, y, k) {
+function satMenu(a, s, x, y, k, ku) { // (k: its size's planet scale, ku: the unit of the place it hangs at about the planet)
   const ui = document.getElementById('ios-ui');
   const sats = s && a.G.players[a.ME] && a.G.players[a.ME].alive !== false ? a.G.fleets.filter(f => f.owner === a.ME && f.star === s.id && f.sat && HO.fleetCount(f) > 0) : [];
   if (!sats.length || !ui) { if (satEl) satEl.hidden = true; return; }
@@ -405,8 +413,8 @@ function satMenu(a, s, x, y, k) {
   const nameOf = (f) => { const p = a.G.players[a.ME], id = Object.keys(f.ships || {}).find(i => f.ships[i] > 0), d = p.designs.find(q => String(q.id) === String(id)); return d ? d.name : 'Satellite'; };
   const key = sats.map(f => f.id + ':' + (f.scrap301 ? 1 : 0) + ':' + nameOf(f)).join('|') + '@' + s.id;
   satEl.hidden = false;
-  satEl.style.setProperty('--pt', k + 'px');
-  satEl.style.left = (x - 40 * k) + 'px'; satEl.style.top = (y - 30 * k) + 'px';
+  satEl.style.setProperty('--pt', (k * SCREEN.u / SCREEN.u0) + 'px'); // (the menu hangs by its corner at the planet's scale; its size is the Interface size on that)
+  satEl.style.left = (x - 40 * ku) + 'px'; satEl.style.top = (y - 30 * ku) + 'px';
   if (key === satKey) return;
   satKey = key; satEl.replaceChildren();
   let t0 = 0;
@@ -484,24 +492,35 @@ function placeButtons() {
   // -[MapLayer setScale:] 0x10000e590: the box's scale is the planet scale times the map's, i.e. the planets' on-screen scale (HOVIEW().target:
   // 2.0 iPhone / 3.0 iPad zoomed in, a line from 0.2 / 0.6 below), the box 46 points a side about the star (map points are CSS pixels here)
   const k = (v.target || 1) / SCREEN.u, pad = SCREEN.pad;
-  satMenu(a, s, x, y, v.target || 1);
+  satMenu(a, s, x, y, v.target || 1, v.unit || v.target || 1);
   const show = (cls, on) => { const b = pbEl.querySelector('.ios-pb-' + cls); if (b) b.hidden = !on || (cls === 'move' && pad); };
   show('add', own); show('move', ships); show('organize', ships);
   pbShown = own || ships;
   pbEl.hidden = !pbShown;
-  pbEl.style.setProperty('--px', x + 'px'); pbEl.style.setProperty('--py', y + 'px'); pbEl.style.setProperty('--pk', (k * SCREEN.u) + 'px');
-  if (fdEl) fdEl.hidden = pad ? !fleetNode(x, y, v.target || 1) : (!fleetsOpen || !pbShown);
+  { // the buttons hang above and beside the planet; a colony near an edge of the window would have them off the screen, out of reach: the cluster slides back in, only then
+    const pu = v.unit || v.target || 1, pk = v.target || 1, sz = 26.4 * pk * (SCREEN.u / SCREEN.u0), moveOn = ships && !pad;
+    const minX = moveOn ? x - 23 * pu - sz : x - sz / 2, maxX = x + (own ? 23 * pu + sz : sz / 2), minY = y - (ships ? 35 * pu : 23 * pu) - sz, m = 6;
+    const dx = minX < m ? m - minX : maxX > innerWidth - m ? innerWidth - m - maxX : 0, dy = minY < m ? m - minY : 0;
+    pbEl.style.setProperty('--pdx', dx + 'px'); pbEl.style.setProperty('--pdy', dy + 'px');
+  }
+  pbEl.style.setProperty('--px', x + 'px'); pbEl.style.setProperty('--py', y + 'px'); pbEl.style.setProperty('--pk', (k * SCREEN.u) + 'px'); pbEl.style.setProperty('--pu', (v.unit || v.target || 1) + 'px'); // (--pk: the buttons' size; --pu: where they sit about the planet, the page's unit of it: HOVIEW().unit)
+  if (fdEl) fdEl.hidden = pad ? !fleetNode(x, y, v.target || 1, v.unit || v.target || 1) : (!fleetsOpen || !pbShown);
 }
 // An iPad's fleets list is the map's own FleetMovementPlanetNode (showPlanetNode is the iPad flag: -[MapLayer init] 0x10000d50c adds it, an iPhone has the move button's dialog): a FleetMovementDialog anchored (0, 1) at the star's
 // place + (40, 20) x its scale, which is the planets' scale but not above 1.5 on the screen (-[MapLayer setScale:] 0x10000e590); updateData: 0x1000cb2fc makes it visible when the menu has rows and sizes it
 // min(menu width + 2 a80, 120) x min(menu height + 2 a80, 250) (0x1000cb3b8-0x1000cb404); the dialog's menu sits in the boundary rect (a80, a80, width + 1, height - 2 a80 - (the close button's height x its scale + 4)): setContentSize: 0x1000c3618.
-function fleetNode(x, y, target) {
+function fleetNode(x, y, target, unit) {
   const rows = fdList && fdList.querySelector('.frow'); fdEl.classList.toggle('ios-fdnode', !!rows);
   if (!rows) { fdEl.style.cssText = ''; return false; }
-  const nk = Math.min(target, 1.5 * SCREEN.u), gap = SCREEN.gap, fl = fdList.firstElementChild;
-  fdEl.hidden = false; fdEl.style.setProperty('--pt', nk + 'px'); fdEl.style.left = (x + 40 * nk) + 'px'; fdEl.style.top = (y - 20 * nk) + 'px';
-  const menuH = fl ? fl.getBoundingClientRect().height / nk : 0;
-  fdEl.style.width = (Math.min(100 + 2 * gap, 120) * nk) + 'px'; fdEl.style.height = (Math.min(menuH + 2 * gap, 250) * nk) + 'px';
+  const nk = Math.min(target, 1.5 * SCREEN.u0), nko = Math.min(unit, 1.5 * SCREEN.u0), nz = nk * (SCREEN.u / SCREEN.u0), gap = SCREEN.gap, fl = fdList.firstElementChild; // (nk: the planets' scale, at most 1.5 of the unzoomed point, where the node sits; nz: its own size, the Interface size on that)
+  fdEl.hidden = false; fdEl.style.setProperty('--pt', nz + 'px'); fdEl.style.left = (x + 40 * nko) + 'px'; fdEl.style.top = (y - 20 * nko) + 'px';
+  const menuH = fl ? fl.getBoundingClientRect().height / nz : 0;
+  fdEl.style.width = (Math.min(100 + 2 * gap, 120) * nz) + 'px'; fdEl.style.height = (Math.min(menuH + 2 * gap, 250) * nz) + 'px';
+  { const a = A(), G = a && a.G; // the patch (rs.fixes 'fleetsBoxFits'; always with a ruleset that is not iOS's or Android's): the box is as tall as the whole list, the title strip over it and the gap under it
+    if (G && (!/^(ios|android)$/.test(G.rules || '') || HO.fixed(G, 'fleetsBoxFits'))) {
+      const kept = fdList.style.bottom; fdList.style.bottom = 'auto'; const content = fdList.offsetHeight / nz; fdList.style.bottom = kept; // (the list let to take the height of its content, then put back)
+      fdEl.style.height = (Math.min(gap + 44 * 0.3 + 4 + content + gap, 250) * nz) + 'px';
+    } }
   return true;
 }
 // The gear (-[TurnMessageLayer init]'s additionalMenu, AdditionalMenu 0x100093824): a navy bordered list of CCMenuItemFonts (Arial 24 on an iPhone, 28 on an iPad, white),
@@ -629,7 +648,7 @@ function starInfo() {
   if (!d || !vw || !vw.view || vw.path) { siEl.hidden = true; tmStar = SCREEN.pad ? null : tmStar; return; }
   const cv = document.getElementById('map'), sel = a.UI.sel, st = a.G.stars[sel]; if (!cv) { siEl.hidden = true; return; }
   const r = cv.getBoundingClientRect(), x = r.left + vw.view.ox + st.x * vw.view.s, y = r.top + vw.view.oy + st.y * vw.view.s;
-  const u = Math.min(vw.target || 1, 2 * SCREEN.u);
+  const u = Math.min(vw.target || 1, 2 * SCREEN.u0) * (SCREEN.u / SCREEN.u0); // (the planets' scale, at most 2 of the unzoomed point, then the Interface size)
   const seen = a.G.fleets.some(f => f.star === sel && f.to == null && !f.sat && (f.owner === a.ME || st.owner === a.ME || a.G.fleets.some(g => g.owner === a.ME && g.star === sel && g.to == null)));
   const W = d.tm != null ? SI.tm[0] : SI.plain[0], H = SI.tm[1], ax = seen ? 0.8 : 0.5;
   const key = JSON.stringify([d, st.terra, a.G.over]);
@@ -1137,8 +1156,8 @@ function closeGraphs() { if (gdEl) { gdEl.remove(); gdEl = null; } }
 function openGraphs() {
   const a = A(); if (!a || !a.G) return;
   if (gdEl) { closeGraphs(); return; }
-  const pad = SCREEN.pad, a88 = pad ? 8 : 6, cw = pad ? Math.min(SCREEN.winW, 620) : 480, ch = pad ? Math.min(SCREEN.winH, 400) : 320;
-  const k = pad ? Math.min(SCREEN.winW * 0.8 / cw, SCREEN.winH * 0.8 / ch) : Math.min(SCREEN.winW / cw, SCREEN.winH / ch);
+  const pad = SCREEN.pad, a88 = pad ? 8 : 6, cw = pad ? Math.min(dlgW(), 620) : 480, ch = pad ? Math.min(dlgH(), 400) : 320;
+  const k = pad ? Math.min(dlgW() * 0.8 / cw, dlgH() * 0.8 / ch) : Math.min(dlgW() / cw, dlgH() / ch);
   const gw = cw - 2 * a88, gh = ch - a88;
   const cv = UIEl('canvas', 'ios-gcv'), bar = UIEl('div', 'ios-gbar');
   const flags = graphFlags();
@@ -1350,7 +1369,7 @@ function put(e, x, y, ax, ay) {
 const BFONT = (size, extra) => `font:${bpt(size)}/${ARIAL_LINE} var(--appfont,Arial,Helvetica,sans-serif);${extra || ''}`;
 // -[DialogLayerSprite init] 0x1000bc294: 480 x 320 on an iPhone, an iPad's min(winW, 620) x min(winH, 400); scaled by min(winW / w, winH / h) (an iPad's 0.8 of each)
 function dlgGeom() {
-  const W = SCREEN.winW, H = SCREEN.winH;
+  const W = dlgW(), H = dlgH();
   if (!SCREEN.pad) return { cw: 480, ch: 320, k: Math.min(W / 480, H / 320) };
   const cw = Math.min(W, 620), ch = Math.min(H, 400);
   return { cw, ch, k: Math.min(W * 0.8 / cw, H * 0.8 / ch) };
@@ -1461,11 +1480,11 @@ function openBuildFlow(sid) {
   const classes = [0, 1, 2, 3, 4, 5]; if (designsOf(p).some(d => d.type === 'bio')) classes.push(6); // hasBiological 0x1000b3ad8
   if (designsOf(p).some(d => d.type === 'decoy') || (HO.canBuildType(G, p, 'decoy') && p.hasDecoy)) classes.push(7); // (the remake's own column for a ruleset's decoy: iOS has none)
   let W, H, K = k;
-  if (!SCREEN.pad) { W = Math.trunc(SCREEN.winW / k); H = Math.trunc(SCREEN.winH / k); }
+  if (!SCREEN.pad) { W = Math.trunc(dlgW() / k); H = Math.trunc(dlgH() / k); }
   else {
     const counts = {}; let most = 0; for (const d of designsOf(p)) { counts[d.type] = (counts[d.type] || 0) + 1; most = Math.max(most, counts[d.type]); } // maxCountSingleType 0x1000b4098
-    const hh = Math.min(Math.max(most * 100 * k, SCREEN.winH * 0.5), SCREEN.winH * 0.8);
-    W = Math.trunc(SCREEN.winW * 0.8 / k); H = Math.trunc(hh / k);
+    const hh = Math.min(Math.max(most * 100 * k, dlgH() * 0.5), dlgH() * 0.8);
+    W = Math.trunc(dlgW() * 0.8 / k); H = Math.trunc(hh / k);
   }
   const L = dialogLayer(W, H, K, 'Build ships', closeBuildFlow);
   const flow = buildFlow = { scrims: [L.scrim], sid, dlg: L.dlg, W, H, cols: {}, shown: 0, single: null };
@@ -1796,7 +1815,8 @@ function openRadicalIOS() {
       for (let i = 0; i <= cards.length; i++) {
         const cancel = i === cards.length, it = UIEl('div', 'ios-radi', { style: `top:${bpt(i * (50 + padV))};width:${bpt(300)};height:${bpt(50)}`, role: 'radio' });
         const im = pic(cancel ? 'radical_on' : 'report_icon-10'), imS = pic(cancel ? 'radical_off' : 'report_icon-11');
-        for (const x of [im, imS]) { x.style.cssText = `position:absolute;right:${bpt(300 - (bx - 4))};top:50%;transform:translateY(-50%)`; it.append(x); }
+        // (the app's pictures at their size in points: the files are the @2x ones, 80 x 78, 80 x 80 and 68 x 68 pixels, so half that in points; unsized they were drawn at 80 CSS pixels whatever the scale, and overflowed a phone's 50 point rows)
+        for (const [x, w, h] of [[im, cancel ? 34 : 40, cancel ? 34 : 39], [imS, cancel ? 34 : 40, cancel ? 34 : 40]]) { x.style.cssText = `position:absolute;right:${bpt(300 - (bx - 4))};top:50%;transform:translateY(-50%);width:${bpt(w)};height:${bpt(h)}`; it.append(x); }
         const word = UIEl('span', 'ios-bt', { style: `left:${bpt(bx + 4)};top:50%;transform:translateY(-50%);font-size:${bpt(16)};white-space:normal;width:${bpt(300)}` });
         word.textContent = cancel ? miscS(108) : HO.say(G, cards[i].text); it.append(word);
         const show = () => { const on = sel === i; imS.style.display = on ? '' : 'none'; im.style.display = on ? 'none' : ''; it.setAttribute('aria-checked', on ? 'true' : 'false'); };
@@ -2849,7 +2869,7 @@ function openPrefsIOS(P) {
 // mail) is opened outside the app; "closeme.html" closes the help; the rest load in place. Back (backButtonPressed): on the index page it closes, else the web view goes back. The page is the help's own HTML
 // (assets/skins/ios/help, help-fr, help-tr: the game's language), in a frame; the browser's own back button (Escape closes)
 function openHelpIOS(url) {
-  const gd = BGD(), { k } = dlgGeom(), cw = Math.trunc(SCREEN.winW / k), ch = Math.trunc(SCREEN.winH / k);
+  const gd = BGD(), { k } = dlgGeom(), cw = Math.trunc(dlgW() / k), ch = Math.trunc(dlgH() / k);
   if (!SCREEN.pad) url = url.replace(/help_index\.html$/, 'help_index_iphone.html');
   const L = dialogLayer(cw, ch, k, 'Spaceward Ho Help', () => {});
   const close = () => { fr.remove(); L.scrim.remove(); document.removeEventListener('keydown', esc, true); };
@@ -2991,6 +3011,8 @@ function openSingleShip(flow, cls, index) {
   const nl = bLabel(miscS(157), gd.f, 20, Y[5], 0, 0.5, '#fff'); dlg.append(nl);
   const bs = sliderArray({ width: (W - 40) / 2 * 0.5 * 1.25, change: () => updateCosts() });
   dlg.append(put(bs.el, gd.a80 + textW(miscS(157), gd.f) + 20, Y[5], 0, 0.5));
+  // modern conveniences: the ruleset's limit on the ships built at a colony in a turn (one for each thousand people) is said when it is what holds the count back (the app only stops the slider)
+  const popEl = UIEl('div', 'ios-bpop', { style: `width:${bpt(W * 0.4)};font-size:${bpt(Math.max(7, gd.f - 6))}` }); popEl.style.display = 'none'; dlg.append(put(popEl, W * 0.55, Y[4] - 8, 0, 0.5)); // (right of Allow Debt, which is empty: up to three lines in any language)
   const warnT = UIEl('div', 'ios-bwarnt'), warn = UIEl('div', 'ios-bwarn', { style: `width:${bpt(222.222)};font-size:${bpt(gd.f)}` }, warnT); dlg.append(put(warn, xc, nameY - 5 - 32 - 90 - 20, 0.5, 1)); warn.style.display = 'none';
   // the buttons: the cancel cross and the check, 4 apart, at (width - 4 a80, a80), anchored right bottom (enableCloseButton:cancelButton: 0x1000bca44, setContentSize: 0x1000bcc94)
   const bx = UIEl('button', 'ios-bcancel', { type: 'button', 'aria-label': 'Cancel' }, pic('button-x')), bk = UIEl('button', 'ios-bcheck', { type: 'button', 'aria-label': 'Build' }, pic('button-check'));
@@ -3038,7 +3060,10 @@ function openSingleShip(flow, cls, index) {
     const money = c.pro !== 0 ? Math.trunc(avail / c.pro) + first : first;
     const metalN = c.metal === 0 ? 9999 : Math.trunc(p.metal / c.metal);
     let n = Math.max(0, Math.min(money, metalN));
-    n = Math.min(n, colonyRoom());
+    const lim = n, room = colonyRoom(); n = Math.min(n, room);
+    { const yl = G.opts && G.opts.modern ? HO.yardLeft(G, p, G.stars[sid]) : null, show = !!yl && yl.left <= lim;
+      popEl.style.display = show ? '' : 'none';
+      if (show) { const t = HOUI.t('Population limit: a colony builds one ship a turn for each thousand people. This colony: %s thousand, %s bought this turn, %s more allowed.', yl.limit, yl.built, yl.left); popEl.textContent = HOUI.t('Population limit: %s thousand people, %s bought this turn, %s more allowed.', yl.limit, yl.built, yl.left); popEl.dataset.tiptext = t; } }
     if (d && d.scrap301) n = 0;
     bs.max = n; bs.min = 0;
     let v = bs.value;
@@ -3176,7 +3201,7 @@ function openOrganizeIOS(sid) {
   ccFontG = G;
   closeBuildFlow(); closeGraphs();
   let W, H, k = 1;
-  if (!pad) ({ cw: W, ch: H, k } = dlgGeom()); else { W = SCREEN.winW * 0.8; H = SCREEN.winH * 0.7; }
+  if (!pad) ({ cw: W, ch: H, k } = dlgGeom()); else { W = dlgW() * 0.8; H = dlgH() * 0.7; }
   const nodeW = pad ? 160 : 84, pitch = nodeW + gd.a80 * 2, ry = pad ? 115 : 95, rh = H - (pad ? 190 : 137), top = ry + rh;
   const S = { sel: null, first: 0, empties: [], scrapping: false, nextEmpty: 1 };
   const allBio = (f) => { const ds = HO.fleetDesigns(G, f); return ds.length > 0 && ds.every(d => d.type === 'bio'); };
@@ -3389,7 +3414,7 @@ function openBattleIOS(b, k) {
   // the layer
   let cw, ch, kk;
   const dg = dlgGeom(); kk = dg.k;
-  if (!SCREEN.pad) { cw = 480; ch = 320; } else { cw = dg.cw * 1.2; ch = Math.min(total + gd.a80 * 32, SCREEN.winH * 0.9); }
+  if (!SCREEN.pad) { cw = 480; ch = 320; } else { cw = dg.cw * 1.2; ch = Math.min(total + gd.a80 * 32, dlgH() * 0.9); }
   const finishNow = () => { if (S.done) closeBattleIOS(); else { S.skip = true; } };
   const L = dialogLayer(cw, ch, kk, 'Battle', finishNow);
   const S = battleWin = { scrim: L.scrim, closed: false, skip: false, done: false, timer: 0 };
@@ -3540,6 +3565,41 @@ function openBattleIOS(b, k) {
 // FUN_100035be4: "1 Sco (4/2)", "5 Fig (3/3)s" (see fleetItem)
 function fleetPileText(d, n) { const cls = FLEET_CLASS[Math.max(0, ['scout', 'dread', 'fighter', 'tanker', 'colony', 'satellite', 'bio', 'decoy'].indexOf(d.type))].slice(0, 3); return n === 1 ? `1 ${cls} (${d.W}/${d.S})` : `${n} ${cls} (${d.W}/${d.S})s`; }
 
+// The fleets' dots as shapes (the patch, rs.fixes 'vectorDots'; always with a ruleset that is not iOS's or Android's). The app's dots are 22 x 22 pixel pictures, which a large window
+// shows as blocks. Each class is one simple shape: the Scout a diamond with a hollow, the Dreadnought a square, the Fighter a diamond, the Tanker an oval, the Colony Ship a circle, the
+// Satellite a ring, the Biological a fish (head to the left, a fin above and below, a forked tail), drawn in the bounding box of the sprite of that fleet's size and set, and filled with the
+// colours of that sprite, row by row, as a vertical gradient: so the sets keep their colours (yours blue; not fully fuelled, a navy line and a dull lower part; old, paler; the others' purple to
+// magenta). DOT_GEO, from the sprites by tools/skins/dot_shapes.py: { <set>_<class>_<size>: b: [x0, y0, x1, y1] in the picture's pixels, g: [[0..1, colour], ...], th: a ring's thickness }.
+const DOT_GEO = {"others_0_0":{"b":[6,6,16,16],"g":[[0.1,"#0000ff"],[0.3,"#5600ff"],[0.5,"#4200ff"],[0.7,"#fc88ff"],[0.9,"#0000ff"]]},"others_0_1":{"b":[6,6,16,16],"g":[[0.1,"#0000ff"],[0.3,"#5600ff"],[0.5,"#4200ff"],[0.7,"#f458ff"],[0.9,"#0000ff"]]},"others_0_2":{"b":[6,6,16,16],"g":[[0.1,"#0000ff"],[0.3,"#5600ff"],[0.5,"#4200ff"],[0.7,"#f458ff"],[0.9,"#0000ff"]]},"others_0_3":{"b":[6,6,16,16],"g":[[0.1,"#0000ff"],[0.3,"#5600ff"],[0.5,"#4200ff"],[0.7,"#f458ff"],[0.9,"#0000ff"]]},"others_1_0":{"b":[2,2,20,20],"g":[[0.056,"#7030de"],[0.167,"#9816d6"],[0.278,"#a521ed"],[0.389,"#ae3dd6"],[0.5,"#e068e2"],[0.611,"#ffa0ff"],[0.722,"#e168e2"],[0.833,"#ffa1ff"],[0.944,"#77a6ff"]]},"others_1_1":{"b":[0,0,22,22],"g":[[0.045,"#4400ff"],[0.136,"#8b22de"],[0.227,"#582ded"],[0.318,"#8a22de"],[0.409,"#961bf0"],[0.5,"#9f41de"],[0.591,"#d975e8"],[0.682,"#f1a7ff"],[0.773,"#d976e8"],[0.864,"#f1a7ff"],[0.955,"#77a6ff"]]},"others_1_2":{"b":[0,0,22,22],"g":[[0.045,"#4400ff"],[0.136,"#8b22de"],[0.227,"#582ded"],[0.318,"#8a22de"],[0.409,"#961bf0"],[0.5,"#9f41de"],[0.591,"#d975e8"],[0.682,"#f1a7ff"],[0.773,"#d976e8"],[0.864,"#f1a7ff"],[0.955,"#77a6ff"]]},"others_1_3":{"b":[0,0,22,22],"g":[[0.045,"#4400ff"],[0.136,"#8b22de"],[0.227,"#582ded"],[0.318,"#8a22de"],[0.409,"#961bf0"],[0.5,"#9f41de"],[0.591,"#d975e8"],[0.682,"#f1a7ff"],[0.773,"#d976e8"],[0.864,"#f1a7ff"],[0.955,"#77a6ff"]]},"others_2_0":{"b":[6,6,16,16],"g":[[0.1,"#0000ff"],[0.3,"#5600ff"],[0.5,"#5300ff"],[0.7,"#f458ff"],[0.9,"#0000ff"]]},"others_2_1":{"b":[4,4,18,18],"g":[[0.071,"#0000ff"],[0.214,"#891aff"],[0.357,"#7200ff"],[0.5,"#7913ff"],[0.643,"#ba35ff"],[0.786,"#ffb0ff"],[0.929,"#ff4cff"]]},"others_2_2":{"b":[2,2,20,20],"g":[[0.056,"#1100ff"],[0.167,"#6e00ff"],[0.278,"#6a0dff"],[0.389,"#7000ff"],[0.5,"#5911ff"],[0.611,"#6804e4"],[0.722,"#ff8fff"],[0.833,"#eb66ff"],[0.944,"#1100ff"]]},"others_2_3":{"b":[0,0,22,22],"g":[[0.045,"#1100ff"],[0.136,"#7c00ff"],[0.227,"#6b19ff"],[0.318,"#4f05ff"],[0.409,"#5608ff"],[0.5,"#7b18ff"],[0.591,"#6211ef"],[0.682,"#ab2eff"],[0.773,"#cf96ff"],[0.864,"#882eff"],[0.955,"#1100ff"]]},"others_3_0":{"b":[2,6,20,16],"g":[[0.1,"#5500ff"],[0.3,"#5a37ff"],[0.5,"#901acb"],[0.7,"#bba2ff"],[0.9,"#77a7ff"]]},"others_3_1":{"b":[0,6,22,16],"g":[[0.1,"#5500ff"],[0.3,"#8f1de1"],[0.5,"#961ed6"],[0.7,"#d975e8"],[0.9,"#77a7ff"]]},"others_3_2":{"b":[0,6,22,16],"g":[[0.1,"#5500ff"],[0.3,"#8f1de1"],[0.5,"#961ed6"],[0.7,"#d975e8"],[0.9,"#77a7ff"]]},"others_3_3":{"b":[0,6,22,16],"g":[[0.1,"#5500ff"],[0.3,"#8f1de1"],[0.5,"#961ed6"],[0.7,"#d975e8"],[0.9,"#77a7ff"]]},"others_4_0":{"b":[2,2,20,20],"g":[[0.056,"#5500ff"],[0.167,"#5a37ff"],[0.278,"#770cff"],[0.389,"#802bd8"],[0.5,"#901bcb"],[0.611,"#d575e5"],[0.722,"#ffc0ff"],[0.833,"#bba0ff"],[0.944,"#77a7ff"]]},"others_4_1":{"b":[0,0,22,22],"g":[[0.045,"#4000ff"],[0.136,"#5900ff"],[0.227,"#5d0dff"],[0.318,"#582ded"],[0.409,"#8715e1"],[0.5,"#9e1de5"],[0.591,"#d975e8"],[0.682,"#e6a7ff"],[0.773,"#ffb2ff"],[0.955,"#77a6ff"]]},"others_4_2":{"b":[0,0,22,22],"g":[[0.045,"#4000ff"],[0.136,"#5900ff"],[0.227,"#5d0dff"],[0.318,"#551aed"],[0.409,"#961bf0"],[0.5,"#9d1de5"],[0.591,"#d975e8"],[0.682,"#e6a7ff"],[0.773,"#ffb2ff"],[0.955,"#77a6ff"]]},"others_4_3":{"b":[0,0,22,22],"g":[[0.045,"#4000ff"],[0.136,"#5900ff"],[0.227,"#5d0dff"],[0.318,"#551aed"],[0.409,"#961bf0"],[0.5,"#9d1de5"],[0.591,"#d975e8"],[0.682,"#e6a7ff"],[0.773,"#ffb2ff"],[0.955,"#77a6ff"]]},"others_5_0":{"b":[4,4,18,18],"g":[[0.071,"#3337ff"],[0.214,"#1100ff"],[0.357,"#1100ff"],[0.5,"#77a6ff"],[0.643,"#1100ff"],[0.786,"#4453ff"],[0.929,"#556eff"]],"th":1.65},"others_5_1":{"b":[4,4,18,18],"g":[[0.071,"#1100ff"],[0.214,"#4f03ff"],[0.357,"#6002ff"],[0.5,"#af31ff"],[0.643,"#5e7dff"],[0.786,"#4e63ff"],[0.929,"#8807ff"]],"th":3.35},"others_5_2":{"b":[2,2,20,20],"g":[[0.056,"#4000ff"],[0.167,"#5900ff"],[0.278,"#6d1cff"],[0.389,"#833ce1"],[0.5,"#a978ff"],[0.611,"#a884ff"],[0.722,"#cf82d0"],[0.944,"#77a6ff"]],"th":3.18},"others_5_3":{"b":[0,0,22,22],"g":[[0.045,"#4000ff"],[0.136,"#5900ff"],[0.227,"#4e00ff"],[0.318,"#4c2cff"],[0.409,"#7523ff"],[0.5,"#8927e1"],[0.591,"#a05ec5"],[0.682,"#d29aff"],[0.773,"#ffaeff"],[0.955,"#77a6ff"]],"th":3.26},"others_6_0":{"b":[4,4,18,16],"g":[[0.083,"#7700ff"],[0.25,"#7829ff"],[0.417,"#4818ff"],[0.583,"#a495ff"],[0.75,"#99b6ff"],[0.917,"#ffe1ff"]]},"others_6_1":{"b":[4,4,18,18],"g":[[0.071,"#6200ff"],[0.214,"#5721ff"],[0.357,"#5b37ff"],[0.5,"#7a1c7a"],[0.643,"#af6ce3"],[0.786,"#d2a7ff"],[0.929,"#77a8ff"]]},"others_6_2":{"b":[2,2,20,20],"g":[[0.056,"#3d00ff"],[0.167,"#6c18ff"],[0.278,"#6a38ff"],[0.389,"#5646de"],[0.5,"#841dda"],[0.611,"#c96bf0"],[0.722,"#eeaaff"],[0.833,"#77a7ff"],[0.944,"#77a6ff"]]},"others_6_3":{"b":[0,0,22,22],"g":[[0.045,"#4b00ff"],[0.136,"#5d00ff"],[0.227,"#7b14ff"],[0.318,"#5a30ff"],[0.409,"#613ae7"],[0.5,"#9028de"],[0.591,"#bd58e8"],[0.682,"#e09fff"],[0.864,"#77a6ff"],[0.955,"#77a7ff"]]},"self_0_0":{"b":[6,6,16,16],"g":[[0.1,"#0855d0"],[0.3,"#2676ff"],[0.5,"#1c6ae7"],[0.7,"#76c4ff"],[0.9,"#0851d4"]]},"self_0_1":{"b":[6,6,16,16],"g":[[0.1,"#0855d0"],[0.3,"#2676ff"],[0.5,"#1c6ae7"],[0.7,"#63b2ff"],[0.9,"#0855d4"]]},"self_0_2":{"b":[6,6,16,16],"g":[[0.1,"#0855d0"],[0.3,"#2676ff"],[0.5,"#1c6ae7"],[0.7,"#63b2ff"],[0.9,"#0855d4"]]},"self_0_3":{"b":[6,6,16,16],"g":[[0.1,"#0855d0"],[0.3,"#2676ff"],[0.5,"#1c6ae7"],[0.7,"#63b2ff"],[0.9,"#0855d4"]]},"self_1_0":{"b":[2,2,20,20],"g":[[0.056,"#5190e2"],[0.167,"#568ed0"],[0.278,"#5688cc"],[0.389,"#64a6dc"],[0.5,"#80b8f2"],[0.611,"#8fccfb"],[0.722,"#81b8f2"],[0.833,"#8fccfb"],[0.944,"#40bdfd"]]},"self_1_1":{"b":[0,0,22,22],"g":[[0.045,"#226ae6"],[0.136,"#4c8bcf"],[0.227,"#418bdd"],[0.318,"#4c8bcf"],[0.409,"#4e7fc7"],[0.5,"#58a3df"],[0.591,"#7abcf4"],[0.682,"#88cefc"],[0.773,"#7abcf4"],[0.864,"#88cefc"],[0.955,"#42bcfc"]]},"self_1_2":{"b":[0,0,22,22],"g":[[0.045,"#226ae6"],[0.136,"#4c8bcf"],[0.227,"#418bdd"],[0.318,"#4c8bcf"],[0.409,"#4e7fc7"],[0.5,"#58a3df"],[0.591,"#7abcf4"],[0.682,"#88cefc"],[0.773,"#7abcf4"],[0.864,"#88cefc"],[0.955,"#42bcfc"]]},"self_1_3":{"b":[0,0,22,22],"g":[[0.045,"#226ae6"],[0.136,"#4c8bcf"],[0.227,"#418bdd"],[0.318,"#4c8bcf"],[0.409,"#4e7fc7"],[0.5,"#58a3df"],[0.591,"#7abcf4"],[0.682,"#88cefc"],[0.773,"#7abcf4"],[0.864,"#88cefc"],[0.955,"#42bcfc"]]},"self_2_0":{"b":[6,6,16,16],"g":[[0.1,"#0855d0"],[0.3,"#2676ff"],[0.5,"#236ddf"],[0.7,"#63b2ff"],[0.9,"#0855d9"]]},"self_2_1":{"b":[4,4,18,18],"g":[[0.071,"#0044aa"],[0.214,"#3988ff"],[0.357,"#3079f1"],[0.5,"#3480f5"],[0.643,"#529fff"],[0.786,"#82d2ff"],[0.929,"#66aeff"]]},"self_2_2":{"b":[2,2,20,20],"g":[[0.056,"#115eff"],[0.167,"#3c8bff"],[0.278,"#2c7fff"],[0.389,"#3078ec"],[0.5,"#2a7bff"],[0.611,"#4895ff"],[0.722,"#79c6ff"],[0.833,"#6db8fb"],[0.944,"#115eff"]]},"self_2_3":{"b":[0,0,22,22],"g":[[0.045,"#1160ff"],[0.136,"#3484ff"],[0.227,"#3282ff"],[0.318,"#2575ff"],[0.409,"#2874f8"],[0.5,"#3681f2"],[0.591,"#3d8cff"],[0.682,"#59a3fe"],[0.773,"#77c7ff"],[0.864,"#408aff"],[0.955,"#0f60ff"]]},"self_3_0":{"b":[2,6,20,16],"g":[[0.1,"#2870dd"],[0.3,"#2e92e8"],[0.5,"#5488ce"],[0.7,"#8ce2fe"],[0.9,"#33ccff"]]},"self_3_1":{"b":[0,6,22,16],"g":[[0.1,"#4f80d6"],[0.3,"#5083ca"],[0.5,"#578dd0"],[0.7,"#7abcf4"],[0.9,"#44b9fc"]]},"self_3_2":{"b":[0,6,22,16],"g":[[0.1,"#4f80d6"],[0.3,"#5083ca"],[0.5,"#578dd0"],[0.7,"#7abcf4"],[0.9,"#44b9fc"]]},"self_3_3":{"b":[0,6,22,16],"g":[[0.1,"#4f80d6"],[0.3,"#5083ca"],[0.5,"#578dd0"],[0.7,"#7abcf4"],[0.9,"#44b9fc"]]},"self_4_0":{"b":[2,2,20,20],"g":[[0.056,"#4f80d6"],[0.167,"#2e92e8"],[0.278,"#4c80c3"],[0.389,"#4b86cd"],[0.5,"#5489cc"],[0.611,"#7bbff5"],[0.722,"#96d6fc"],[0.833,"#8ce2ff"],[0.944,"#33ccff"]]},"self_4_1":{"b":[0,0,22,22],"g":[[0.045,"#2061d6"],[0.136,"#2e72d1"],[0.227,"#2c80dd"],[0.318,"#418add"],[0.409,"#4a7ec7"],[0.5,"#538ace"],[0.591,"#7abbf4"],[0.682,"#80cefc"],[0.773,"#93d4fa"],[0.864,"#a6e0fd"],[0.955,"#44bafc"]]},"self_4_2":{"b":[0,0,22,22],"g":[[0.045,"#2061d6"],[0.136,"#2e72d1"],[0.227,"#2c80dd"],[0.318,"#4083d8"],[0.409,"#4d7fc7"],[0.5,"#5389ce"],[0.591,"#79bcf4"],[0.682,"#81cefc"],[0.773,"#92d4fa"],[0.864,"#a6e1fd"],[0.955,"#44b9fc"]]},"self_4_3":{"b":[0,0,22,22],"g":[[0.045,"#2061d6"],[0.136,"#2e72d1"],[0.227,"#2c80dd"],[0.318,"#4083d8"],[0.409,"#4d7fc7"],[0.5,"#5389ce"],[0.591,"#79bcf4"],[0.682,"#81cefc"],[0.773,"#92d4fa"],[0.864,"#a6e1fd"],[0.955,"#44b9fc"]]},"self_5_0":{"b":[4,4,18,18],"g":[[0.071,"#1c85ff"],[0.214,"#115eff"],[0.357,"#115eff"],[0.5,"#33ccff"],[0.643,"#1162ff"],[0.786,"#2297ff"],[0.929,"#28a9ff"]],"th":1.65},"self_5_1":{"b":[4,4,18,18],"g":[[0.071,"#1160ff"],[0.214,"#2472ff"],[0.357,"#2877ff"],[0.5,"#45a6ff"],[0.643,"#2ab1ff"],[0.786,"#25a2ff"],[0.929,"#3687ff"]],"th":3.35},"self_5_2":{"b":[2,2,20,20],"g":[[0.056,"#2061d6"],[0.167,"#2e72d1"],[0.278,"#2f7eca"],[0.389,"#5697eb"],[0.5,"#5aa6e6"],[0.611,"#5fa8e4"],[0.722,"#7bbff2"],[0.833,"#a6e1fd"],[0.944,"#44b9fc"]],"th":4.54},"self_5_3":{"b":[0,0,22,22],"g":[[0.045,"#2061d6"],[0.136,"#2e72d1"],[0.227,"#2573dd"],[0.318,"#3e7de3"],[0.409,"#3d69bf"],[0.5,"#4c85d0"],[0.591,"#5bb9f1"],[0.682,"#64c8ff"],[0.773,"#83c9fb"],[0.864,"#a5e0fd"],[0.955,"#44bafc"]],"th":4.32},"self_6_0":{"b":[4,4,18,16],"g":[[0.083,"#315eb2"],[0.25,"#328ce2"],[0.417,"#216ed4"],[0.583,"#51b2fb"],[0.75,"#54d2ff"],[0.917,"#b7e1ff"]]},"self_6_1":{"b":[4,4,18,18],"g":[[0.071,"#2a6abc"],[0.214,"#278ae0"],[0.357,"#2f8ddd"],[0.5,"#69a6e0"],[0.643,"#6cb3ec"],[0.786,"#6dc1fe"],[0.929,"#33ccff"]]},"self_6_2":{"b":[2,2,20,20],"g":[[0.056,"#1f59cc"],[0.167,"#338ad4"],[0.278,"#328cdb"],[0.389,"#52a8e0"],[0.5,"#4787cb"],[0.611,"#72b3ef"],[0.722,"#8acffb"],[0.833,"#44bafc"],[0.944,"#32cdff"]]},"self_6_3":{"b":[0,0,22,22],"g":[[0.045,"#2461cc"],[0.136,"#3070cd"],[0.227,"#378cd1"],[0.318,"#2e88d9"],[0.409,"#559de0"],[0.5,"#5998d4"],[0.591,"#6faaf0"],[0.682,"#82c6f6"],[0.773,"#a6e0fd"],[0.864,"#44b9fc"],[0.955,"#32cdff"]]},"self_old_0_0":{"b":[6,6,16,16],"g":[[0.1,"#1a6ed9"],[0.3,"#4580e3"],[0.5,"#2e82ea"],[0.7,"#8bc5e3"],[0.9,"#1e6edd"]]},"self_old_0_1":{"b":[6,6,16,16],"g":[[0.1,"#1a6ed9"],[0.3,"#457ee3"],[0.5,"#3778d4"],[0.7,"#6ec5ff"],[0.9,"#1a6edd"]]},"self_old_0_2":{"b":[6,6,16,16],"g":[[0.1,"#484484"],[0.3,"#4480e3"],[0.5,"#446cbf"],[0.7,"#7eb7e3"],[0.9,"#484488"]]},"self_old_0_3":{"b":[6,6,16,16],"g":[[0.1,"#1a6ed9"],[0.3,"#368eff"],[0.5,"#2e82ea"],[0.7,"#6ec5ff"],[0.9,"#1a6edd"]]},"self_old_1_0":{"b":[2,2,20,20],"g":[[0.056,"#5ca7e6"],[0.167,"#6d99c1"],[0.278,"#6b95bf"],[0.389,"#7aaecc"],[0.5,"#91c0e1"],[0.611,"#a0d1e6"],[0.722,"#91c0e2"],[0.833,"#a0d0e6"],[0.944,"#57c5eb"]]},"self_old_1_1":{"b":[0,0,22,22],"g":[[0.045,"#3f76cd"],[0.136,"#6199c4"],[0.227,"#5a95cb"],[0.318,"#6694bb"],[0.409,"#668bb6"],[0.5,"#6dadd2"],[0.591,"#8ec1e0"],[0.682,"#9bd0e2"],[0.773,"#8ec1df"],[0.864,"#97d5eb"],[0.955,"#5ac2e7"]]},"self_old_1_2":{"b":[0,0,22,22],"g":[[0.045,"#3184ea"],[0.136,"#6695bc"],[0.227,"#5b95ca"],[0.318,"#6199c4"],[0.409,"#628fbe"],[0.5,"#71a9c9"],[0.591,"#8ec1df"],[0.682,"#97d5eb"],[0.773,"#8ac5e8"],[0.864,"#9bd1e2"],[0.955,"#5ac1e7"]]},"self_old_1_3":{"b":[0,0,22,22],"g":[[0.045,"#466ebf"],[0.136,"#6695bb"],[0.227,"#5a95ca"],[0.318,"#629ac4"],[0.409,"#658ab7"],[0.5,"#71aac9"],[0.591,"#8ec1df"],[0.682,"#96d5eb"],[0.773,"#8ec2e0"],[0.864,"#9cd0e3"],[0.955,"#5ac2e7"]]},"self_old_2_0":{"b":[6,6,16,16],"g":[[0.1,"#484484"],[0.3,"#4480e3"],[0.5,"#4674c1"],[0.7,"#7db7e3"],[0.9,"#484488"]]},"self_old_2_1":{"b":[4,4,18,18],"g":[[0.071,"#403359"],[0.214,"#5690e3"],[0.357,"#5080d0"],[0.5,"#508bde"],[0.643,"#64abef"],[0.786,"#99d2e3"],[0.929,"#6ebfff"]]},"self_old_2_2":{"b":[2,2,20,20],"g":[[0.056,"#4c4caa"],[0.167,"#5993e3"],[0.278,"#4f85dd"],[0.389,"#4b84d6"],[0.5,"#4882e3"],[0.611,"#619de7"],[0.722,"#91c5dd"],[0.833,"#84bce1"],[0.944,"#514caa"]]},"self_old_2_3":{"b":[0,0,22,22],"g":[[0.045,"#646cd4"],[0.136,"#6295ea"],[0.227,"#5e8ee3"],[0.318,"#4b85ea"],[0.409,"#4c81e0"],[0.5,"#528ddc"],[0.591,"#5b9bef"],[0.682,"#7aadea"],[0.773,"#95d2f1"],[0.864,"#6c99ea"],[0.955,"#4c84ff"]]},"self_old_3_0":{"b":[0,6,22,16],"g":[[0.1,"#aec1db"],[0.3,"#8abfe3"],[0.5,"#84a6c4"],[0.7,"#bde9e8"],[0.9,"#b2e6e7"]]},"self_old_3_1":{"b":[0,6,22,16],"g":[[0.1,"#95a9cd"],[0.3,"#698eba"],[0.5,"#6d97bf"],[0.7,"#8ec1df"],[0.9,"#8ecee6"]]},"self_old_3_2":{"b":[0,6,22,16],"g":[[0.1,"#90abce"],[0.3,"#688eb9"],[0.5,"#6e97bf"],[0.7,"#8ac6e7"],[0.9,"#87cee6"]]},"self_old_3_3":{"b":[0,6,22,16],"g":[[0.1,"#8fafd9"],[0.3,"#698fb9"],[0.5,"#699bc7"],[0.7,"#8dc1df"],[0.9,"#88d4f2"]]},"self_old_4_0":{"b":[2,2,20,20],"g":[[0.056,"#6874c1"],[0.167,"#3e89d5"],[0.278,"#6377af"],[0.389,"#627aba"],[0.5,"#6e82be"],[0.611,"#96c2f2"],[0.722,"#c4e8fb"],[0.833,"#96e2ff"],[0.944,"#56ddff"]]},"self_old_4_1":{"b":[0,0,22,22],"g":[[0.045,"#2947b8"],[0.136,"#3c5bb2"],[0.227,"#376ec4"],[0.318,"#547dc8"],[0.409,"#6374b5"],[0.5,"#6d83bf"],[0.591,"#96c1f1"],[0.682,"#a7ddfb"],[0.773,"#c1e1f9"],[0.864,"#c4d8fb"],[0.955,"#57c4fc"]]},"self_old_4_2":{"b":[0,0,22,22],"g":[[0.045,"#2947b8"],[0.136,"#3c5bb2"],[0.227,"#376ec4"],[0.318,"#5376c3"],[0.409,"#6675b6"],[0.5,"#6d82bf"],[0.591,"#96c1f1"],[0.682,"#a7ddfb"],[0.773,"#c1e1f9"],[0.864,"#c4d8fb"],[0.955,"#57c4fc"]]},"self_old_4_3":{"b":[0,0,22,22],"g":[[0.045,"#2947b8"],[0.136,"#3c5bb2"],[0.227,"#376ec4"],[0.318,"#5376c3"],[0.409,"#6675b6"],[0.5,"#6d82bf"],[0.591,"#96c1f1"],[0.682,"#a7ddfb"],[0.773,"#c1e1f9"],[0.864,"#c4d8fb"],[0.955,"#57c4fc"]]},"self_old_5_0":{"b":[4,4,18,18],"g":[[0.071,"#2c99ff"],[0.214,"#2277ff"],[0.357,"#2277ff"],[0.5,"#55c8d4"],[0.643,"#2277ff"],[0.786,"#31aaff"],[0.929,"#45ade3"]],"th":1.65},"self_old_5_1":{"b":[4,4,18,18],"g":[[0.071,"#3069e3"],[0.214,"#3c81ee"],[0.357,"#4384ea"],[0.5,"#68a6d4"],[0.643,"#44b9ea"],[0.786,"#3dacee"],[0.929,"#558ee3"]],"th":3.35},"self_old_5_2":{"b":[2,2,20,20],"g":[[0.056,"#3872ca"],[0.167,"#4484cb"],[0.278,"#4590c2"],[0.389,"#62acee"],[0.5,"#6eaed2"],[0.611,"#80a8bd"],[0.722,"#89c7e6"],[0.833,"#b4dde6"],[0.944,"#58c2ed"]],"th":4.54},"self_old_5_3":{"b":[0,0,22,22],"g":[[0.045,"#3872ca"],[0.136,"#4484cb"],[0.227,"#3c84d3"],[0.318,"#4a94e6"],[0.409,"#5679b0"],[0.5,"#6e87ad"],[0.591,"#72bfde"],[0.682,"#6ed9ff"],[0.773,"#8fd1ee"],[0.864,"#aee3f2"],[0.955,"#58c4ec"]],"th":4.32},"self_old_6_0":{"b":[4,4,18,16],"g":[[0.083,"#407bbb"],[0.25,"#4b97d1"],[0.417,"#3d7ac0"],[0.583,"#6cb7e1"],[0.75,"#60e1ff"],[0.917,"#bbeeff"]]},"self_old_6_1":{"b":[4,4,18,18],"g":[[0.071,"#4876a9"],[0.214,"#3f97d4"],[0.357,"#4c96c8"],[0.5,"#82a9c9"],[0.643,"#7dbee1"],[0.786,"#80c8ea"],[0.929,"#57c8d4"]]},"self_old_6_2":{"b":[2,2,20,20],"g":[[0.056,"#3d66b5"],[0.167,"#4b98c8"],[0.278,"#4e96c7"],[0.389,"#67afcf"],[0.5,"#638fb5"],[0.611,"#86bbdf"],[0.722,"#9bd3e6"],[0.833,"#62bbdb"],[0.944,"#4ecfe3"]]},"self_old_6_3":{"b":[0,0,22,22],"g":[[0.045,"#3e71bd"],[0.136,"#4882c5"],[0.227,"#5491bb"],[0.318,"#4895c8"],[0.409,"#6ea3cb"],[0.5,"#70a0c3"],[0.591,"#80b4e3"],[0.682,"#92cde7"],[0.773,"#b4dce6"],[0.864,"#58c3ed"],[0.955,"#4ecfe3"]]},"self_unfueld_0_0":{"b":[6,6,16,16],"g":[[0.1,"#22aafb"],[0.3,"#33bcff"],[0.5,"#000077"],[0.7,"#a4b5c6"],[0.9,"#5966aa"]]},"self_unfueld_0_1":{"b":[6,6,16,16],"g":[[0.1,"#22aafb"],[0.3,"#33bcff"],[0.5,"#000077"],[0.7,"#99abc6"],[0.9,"#5966aa"]]},"self_unfueld_0_2":{"b":[6,6,16,16],"g":[[0.1,"#22aafb"],[0.3,"#33bcff"],[0.5,"#000077"],[0.7,"#99abc6"],[0.9,"#5966aa"]]},"self_unfueld_0_3":{"b":[6,6,16,16],"g":[[0.1,"#22aafb"],[0.3,"#33bcff"],[0.5,"#000077"],[0.7,"#99abc6"],[0.9,"#5966aa"]]},"self_unfueld_1_0":{"b":[2,2,20,20],"g":[[0.056,"#47c8fc"],[0.167,"#4cc8f9"],[0.278,"#4bc5f5"],[0.389,"#52d3fb"],[0.5,"#000077"],[0.611,"#b5bac4"],[0.722,"#abacbe"],[0.833,"#b5bbc4"],[0.944,"#81b0c5"]]},"self_unfueld_1_1":{"b":[0,0,22,22],"g":[[0.045,"#2fb5fd"],[0.136,"#47c7f7"],[0.227,"#40c6fa"],[0.318,"#46c6f7"],[0.409,"#47c1f3"],[0.5,"#000077"],[0.591,"#a7b0c0"],[0.682,"#b0bbc4"],[0.773,"#a7b0c0"],[0.864,"#b0bcc4"],[0.955,"#82afc5"]]},"self_unfueld_1_2":{"b":[0,0,22,22],"g":[[0.045,"#2fb5fd"],[0.136,"#47c7f7"],[0.227,"#40c6fa"],[0.318,"#46c6f7"],[0.409,"#47c1f3"],[0.5,"#000077"],[0.591,"#a7b0c0"],[0.682,"#b0bbc4"],[0.773,"#a7b0c0"],[0.864,"#b0bcc4"],[0.955,"#82afc5"]]},"self_unfueld_1_3":{"b":[0,0,22,22],"g":[[0.045,"#2fb5fd"],[0.136,"#47c7f7"],[0.227,"#40c6fa"],[0.318,"#46c6f7"],[0.409,"#47c1f3"],[0.5,"#000077"],[0.591,"#a7b0c0"],[0.682,"#b0bbc4"],[0.773,"#a7b0c0"],[0.864,"#b0bcc4"],[0.955,"#82afc5"]]},"self_unfueld_2_0":{"b":[6,6,16,16],"g":[[0.1,"#22aafb"],[0.3,"#33bcff"],[0.5,"#000077"],[0.7,"#99abc6"],[0.9,"#5966aa"]]},"self_unfueld_2_1":{"b":[4,4,18,18],"g":[[0.071,"#22a2e6"],[0.214,"#3dc5ff"],[0.357,"#37befc"],[0.5,"#000077"],[0.643,"#8c9cc7"],[0.786,"#abbfc6"],[0.929,"#99aac8"]]},"self_unfueld_2_2":{"b":[2,2,20,20],"g":[[0.056,"#26aeff"],[0.167,"#3ec6ff"],[0.278,"#36c0ff"],[0.389,"#38bdfa"],[0.5,"#000077"],[0.611,"#8597c7"],[0.722,"#a7b7c7"],[0.833,"#9fb0c4"],[0.944,"#6277c8"]]},"self_unfueld_2_3":{"b":[0,0,22,22],"g":[[0.045,"#6abfff"],[0.136,"#5acaff"],[0.227,"#4fc8ff"],[0.318,"#42c0ff"],[0.409,"#40befd"],[0.5,"#000077"],[0.591,"#8b99cc"],[0.682,"#a2accd"],[0.773,"#bbc7d0"],[0.864,"#a0a7d4"],[0.955,"#9fa2e3"]]},"self_unfueld_3_0":{"b":[0,6,22,16],"g":[[0.1,"#71e1fe"],[0.3,"#5dddfc"],[0.5,"#000077"],[0.7,"#cfd1c6"],[0.9,"#c5cec7"]]},"self_unfueld_3_1":{"b":[0,6,22,16],"g":[[0.1,"#60d3fb"],[0.3,"#49c2f5"],[0.5,"#000077"],[0.7,"#a7b0c0"],[0.9,"#a6bcc5"]]},"self_unfueld_3_2":{"b":[0,6,22,16],"g":[[0.1,"#60d3fb"],[0.3,"#49c2f5"],[0.5,"#000077"],[0.7,"#a7b0c0"],[0.9,"#a6bcc5"]]},"self_unfueld_3_3":{"b":[0,6,22,16],"g":[[0.1,"#60d3fb"],[0.3,"#49c2f5"],[0.5,"#000077"],[0.7,"#a7b0c0"],[0.9,"#a6bcc5"]]},"self_unfueld_4_0":{"b":[2,2,20,20],"g":[[0.056,"#5b8bd5"],[0.167,"#379cdc"],[0.278,"#578fcc"],[0.389,"#5690d0"],[0.5,"#000077"],[0.611,"#a8b1c0"],[0.722,"#b9c1c4"],[0.833,"#b4cac7"],[0.944,"#77bbc6"]]},"self_unfueld_4_1":{"b":[0,0,22,22],"g":[[0.045,"#2561c7"],[0.136,"#3370c2"],[0.227,"#3182d3"],[0.318,"#498fd6"],[0.409,"#578ccf"],[0.5,"#000077"],[0.591,"#a7afc0"],[0.682,"#abbcc4"],[0.773,"#b8bfc3"],[0.864,"#c3c9c5"],[0.955,"#85adc5"]]},"self_unfueld_4_2":{"b":[0,0,22,22],"g":[[0.045,"#2561c7"],[0.136,"#3370c2"],[0.227,"#3182d3"],[0.318,"#498bd3"],[0.409,"#588dcf"],[0.5,"#000077"],[0.591,"#a7afc0"],[0.682,"#aabcc4"],[0.773,"#b8bfc4"],[0.864,"#c3c8c5"],[0.955,"#84aec4"]]},"self_unfueld_4_3":{"b":[0,0,22,22],"g":[[0.045,"#2561c7"],[0.136,"#3370c2"],[0.227,"#3182d3"],[0.318,"#498bd3"],[0.409,"#588dcf"],[0.5,"#000077"],[0.591,"#a7afc0"],[0.682,"#aabcc4"],[0.773,"#b8bfc4"],[0.864,"#c3c8c5"],[0.955,"#84aec4"]]},"self_unfueld_5_0":{"b":[4,4,18,18],"g":[[0.071,"#2dc2ff"],[0.214,"#26aeff"],[0.357,"#26aeff"],[0.5,"#37eaff"],[0.643,"#33a6ff"],[0.786,"#3ecaff"],[0.929,"#41d6ff"]],"th":1.65},"self_unfueld_5_1":{"b":[4,4,18,18],"g":[[0.071,"#28b0ff"],[0.214,"#31b9ff"],[0.357,"#34bcff"],[0.5,"#42d4ff"],[0.643,"#43dcff"],[0.786,"#40d1ff"],[0.929,"#4cc1ff"]],"th":3.35},"self_unfueld_5_2":{"b":[2,2,20,20],"g":[[0.056,"#2fb1f6"],[0.167,"#37baf5"],[0.278,"#36c1f4"],[0.389,"#4bcbfe"],[0.5,"#4bd4f6"],[0.611,"#67d7f3"],[0.722,"#78e5ff"],[0.833,"#95f1ff"],[0.944,"#54e2ff"]],"th":4.54},"self_unfueld_5_3":{"b":[0,0,22,22],"g":[[0.045,"#2fb1f6"],[0.136,"#37baf5"],[0.227,"#32bafa"],[0.318,"#3fc0fa"],[0.409,"#3eb6ed"],[0.5,"#000077"],[0.591,"#66dfff"],[0.682,"#6bedff"],[0.773,"#7decff"],[0.864,"#95f1ff"],[0.955,"#54e2ff"]],"th":4.32},"self_unfueld_6_0":{"b":[4,4,18,16],"g":[[0.083,"#37b0ec"],[0.25,"#37c8fa"],[0.417,"#30b8f3"],[0.583,"#000077"],[0.75,"#8cbfc7"],[0.917,"#d0c8c8"]]},"self_unfueld_6_1":{"b":[4,4,18,18],"g":[[0.071,"#36b7f2"],[0.214,"#31c6fb"],[0.357,"#37c7f8"],[0.5,"#000077"],[0.643,"#9da9ba"],[0.786,"#9eb4c6"],[0.929,"#77bbc6"]]},"self_unfueld_6_2":{"b":[2,2,20,20],"g":[[0.056,"#2dabf2"],[0.167,"#3ac6fb"],[0.278,"#38c8f7"],[0.389,"#49d5fb"],[0.5,"#000077"],[0.611,"#a1a9bc"],[0.722,"#b2bcc4"],[0.833,"#83adc5"],[0.944,"#77bbc6"]]},"self_unfueld_6_3":{"b":[0,0,22,22],"g":[[0.045,"#30b0f4"],[0.136,"#38b9f4"],[0.227,"#3bc7fa"],[0.318,"#36c6f8"],[0.409,"#4acffa"],[0.5,"#000077"],[0.591,"#a0a4bd"],[0.682,"#acb6c0"],[0.773,"#c4c8c5"],[0.864,"#84adc5"],[0.955,"#77bbc6"]]}};
+function dotPath(cls, d) {
+  const [x0, y0, x1, y1] = d.b, w = x1 - x0, h = y1 - y0, cx = (x0 + x1) / 2, cy = (y0 + y1) / 2, p = new Path2D();
+  const diamond = () => { p.moveTo(cx, y0); p.lineTo(x1, cy); p.lineTo(cx, y1); p.lineTo(x0, cy); p.closePath(); };
+  const ell = (rx, ry) => { p.moveTo(cx + rx, cy); p.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2); };
+  const U = (u) => x0 + u * w, V = (v) => y0 + v * h;
+  switch (cls) {
+    case 0: diamond(); p.moveTo(cx + 1.1, cy); p.arc(cx, cy, 1.1, 0, Math.PI * 2, true); break; // a diamond with a hollow
+    case 1: p.rect(x0, y0, w, h); break;                                                          // a square
+    case 2: diamond(); break;                                                                     // a diamond
+    case 3: case 4: ell(w / 2, h / 2); break;                                                     // an oval, a circle
+    case 5: { const t = d.th || 2; ell(w / 2, h / 2); p.moveTo(cx + w / 2 - t, cy); p.ellipse(cx, cy, w / 2 - t, h / 2 - t, 0, 0, Math.PI * 2, true); break; } // a ring
+    case 6:                                                                                       // a fish; its three parts are wound the same way, or the non-zero rule would cancel where they overlap
+      p.moveTo(U(0.02), V(0.50)); p.bezierCurveTo(U(0.10), V(0.22), U(0.36), V(0.18), U(0.62), V(0.36)); p.lineTo(U(0.80), V(0.40)); p.lineTo(U(1.0), V(0.12)); p.lineTo(U(0.92), V(0.52)); p.lineTo(U(1.0), V(0.92)); p.lineTo(U(0.80), V(0.62));
+      p.lineTo(U(0.62), V(0.68)); p.bezierCurveTo(U(0.36), V(0.84), U(0.10), V(0.78), U(0.02), V(0.50)); p.closePath();
+      p.moveTo(U(0.24), V(0.36)); p.lineTo(U(0.46), V(0.0)); p.lineTo(U(0.64), V(0.44)); p.closePath();
+      p.moveTo(U(0.60), V(0.58)); p.lineTo(U(0.44), V(1.0)); p.lineTo(U(0.28), V(0.62)); p.closePath(); break;
+  }
+  return p;
+}
+// draws the dot of the picture im (a fleet_dots_<set>_<class>_<size> sprite) with the top left of its 22 x 22 box at (x, y), s canvas pixels to a picture pixel; false for any other picture
+function dotShape(ctx, im, x, y, s) {
+  if (/fleet_dots_dotdot\.png/.test(im && im.src || '')) { ctx.save(); ctx.translate(x, y); ctx.scale(s, s); ctx.fillStyle = '#1fb7d4'; for (const x0 of [2, 10, 18]) ctx.fillRect(x0, 2, 4, 4); ctx.restore(); return true; } // (the "..." of more fleets: three 4 x 4 squares of one colour in a 24 x 8 picture)
+  const m = /fleet_dots_(.+_(\d)_\d)\.png/.exec(im && im.src || ''), d = m && DOT_GEO[m[1]]; if (!d) return false;
+  ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
+  const g = ctx.createLinearGradient(0, d.b[1], 0, d.b[3]); for (const [pos, c] of d.g) g.addColorStop(Math.min(1, Math.max(0, pos)), c);
+  ctx.fillStyle = g; ctx.fill(dotPath(+m[2], d), +m[2] === 6 ? 'nonzero' : 'evenodd');
+  if (+m[2] === 6) { const [x0, y0, x1, y1] = d.b, w = x1 - x0, h = y1 - y0; ctx.fillStyle = d.g.reduce((a, b) => (parseInt(b[1].slice(1), 16) < parseInt(a[1].slice(1), 16) ? b : a))[1]; ctx.beginPath(); ctx.arc(x0 + 0.20 * w, y0 + 0.44 * h, Math.max(0.9, 0.06 * w), 0, Math.PI * 2); ctx.fill(); } // the fish's eye
+  ctx.restore(); return true;
+}
 window.HOTHEME = {
   dir: 'assets/skins/ios/',
   prefix: P,
@@ -3552,6 +3612,7 @@ window.HOTHEME = {
   dragShip, // the ship carried out of the fleets list
   flingLists: true, // the app's lists are CCInertialMenus (the saved games, the news, the players, the stars' bars, the fleets: InertialScroller touchEnded 0x1000a9c0c): the classic page's fling (js/skins/classic/ui.js List) carries each on
   fleetPath: 'ios', // a dragged fleet's route line (js/skins/classic/ui.js iosFleetPath)
+  vectorDot: dotShape, // the fleets' dots as shapes (the patch 'vectorDots', js/skins/classic/ui.js drawDotsApp)
   satOvals: { x: 4, scale: 0.5 }, // the satellites' ovals (fleet_sat_oval_N, fleet_sat_oval_back_N: StarNode initWithStar:at: 0x10001a4d8, drawOneFleetWithPlayer 0x10001b8ec)
   battlePlanet: P + 'ship-planet',
   battleBg: null,
@@ -3728,7 +3789,7 @@ window.HOTHEME = {
   // -[MapLayer init] 0x10000d50c (read with floats.py and the decompile): the map's content size is the galaxy's extent (CGame short +0x222) x 40 points each way, a CCLayerPanZoom in mode 0 with maxScale 1.5 (2.0 on an iPad)
   // and minScale = the scale that makes the content cover the bounds (the larger of bounds / content in each direction), rubberEffectRatio 0: the map never leaves its bounds (the screen without the sidebar). The
   // remake's view.s is pixels for one of its map units, which is 2 x 40 points x the scale (the extent counts the other map unit, 0.5 of this one: G.W = extent / 2, taken so, not seen set).
-  zoomTo(s, f) { const k = 80 * SCREEN.u, a = A(), G = a && a.G, m = a && a.map && a.map(); const lo = G && m ? panMinScale(G, m.w, m.h) : 12; return Math.max(lo, Math.min(k * (SCREEN.pad ? 2 : 1.5), s * f)); },
+  zoomTo(s, f) { const k = 80 * SCREEN.u0, a = A(), G = a && a.G, m = a && a.map && a.map(); const lo = G && m ? panMinScale(G, m.w, m.h) : 12; return Math.max(lo, Math.min(k * (SCREEN.pad ? 2 : 1.5), s * f)); },
   // -[MapLayer onEnter] 0x10000ff44: the layer's scale is set to 0.5 (0.7 on an iPad: 0x1000cef8c) and zoomTo: the player's star (myPlayerState's, else his first fleet's) follows, in 0.2 s (0x1000cef84), putting it in the middle
   // revealRect:duration: 0x1000a1a80 stops the layer's move action and runs a CCMoveTo of the given duration (0.2 s): the view slides from where it stands (the scale is set at once).
   // Settled (ninth pass). The layer's position when onEnter runs: -[MapLayer init] 0x10000d50c sets the anchor (0.5, 0.5) and the position winSize / 2, so the galaxy's middle is at the window's middle (the start here).
@@ -3736,7 +3797,7 @@ window.HOTHEME = {
   // pan.x - pos.x <= X <= pan.x + pan.w - pos.x and pan.y - pos.y <= Y <= pan.y + pan.h - pos.y (the star already shows in the pan rectangle), and revealRect (50 x 50 at the star) runs otherwise. An earlier note read this the other way round.
   fitView(v, { G, ME, mapW, mapH, sel, redraw }) {
     const p = G.players[ME], fl = G.fleets.find(f => f.owner === ME && f.star != null), id = p && p.homeStar != null ? p.homeStar : fl ? fl.star : null, st = id != null ? G.stars[id] : null; // myPlayerState's star, else the first fleet's
-    v.s = 80 * SCREEN.u * (SCREEN.pad ? 0.7 : 0.5);
+    v.s = 80 * SCREEN.u0 * (SCREEN.pad ? 0.7 : 0.5);
     const r = panRect(mapW, mapH), from = { s: v.s, ox: (mapW - G.W * v.s) / 2, oy: (mapH - G.H * v.s) / 2 }; HOTHEME.clampView(from, { G, mapW, mapH });
     const to = { s: from.s, ox: st ? (r.x0 + r.x1) / 2 - st.x * from.s : 0, oy: st ? (r.y0 + r.y1) / 2 - st.y * from.s : 0 };
     HOTHEME.clampView(to, { G, mapW, mapH });
@@ -3753,7 +3814,7 @@ window.HOTHEME = {
   // the bottom; without it, 10 a80 from every edge. The galaxy covers the rectangle and is kept inside it (the map's picture fills the window, so margins of 10 a80 show beyond the galaxy's edge).
   // minScale (set once in init 0x10000d50c, from the sidebar's rectangle) is the larger of rectangle / content in each direction; a galaxy smaller than the rectangle is centred in it (0x10000dbec).
   clampView(v, { G, mapW, mapH }) {
-    const r = panRect(mapW, mapH), hi = 80 * SCREEN.u * (SCREEN.pad ? 2 : 1.5);
+    const r = panRect(mapW, mapH), hi = 80 * SCREEN.u0 * (SCREEN.pad ? 2 : 1.5);
     v.s = Math.max(panMinScale(G, mapW, mapH), Math.min(hi, v.s));
     const ax = (lo, hi2, size, o) => size <= hi2 - lo ? (lo + hi2 - size) / 2 : Math.min(lo, Math.max(hi2 - size, o));
     v.ox = ax(r.x0, r.x1, G.W * v.s, v.ox); v.oy = ax(r.y0, r.y1, G.H * v.s, v.oy);

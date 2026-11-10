@@ -52,7 +52,7 @@ their entries are below so the list is complete, but their rulesets list no fixe
 | Mac 3.0.1 | 6 | 6 | 3 |
 | 4.0.5 | 11 fixed (+ 3 the remake already plays fixed, + 3 with nothing in the remake to fix) | 4 | 6 |
 | Mac 4.0.5 | 7 fixed (+ 3 the remake already plays fixed, + 1 with nothing in the remake to fix) | 4 | 6 |
-| 5.0.5 | 4 | 7 | 6 |
+| 5.0.5 | 7 | 7 | 6 |
 | Palm | 2 (+ 5.0.5's 2) | 5 (+ 5.0.5's) | 2 (+ 5.0.5's) |
 
 Palm's code is 5.0.5's recompiled, with the same slips; its own entries are counted, and
@@ -583,6 +583,37 @@ running out). **Obvious, with nothing in the remake to fix**: the cheating mark
    game does as the app does; the patch cuts the names where such a panel is (`starName` in
    `js/skins/ios/ui.js`). With any ruleset other than iOS and Android the names are always cut:
    they have no app original to match.
+5. **`planetUnits`: the satellites' rings, the fleets' dots and the round buttons float away from the planet
+   (the iOS and Android look only).** The app lays them out in the StarNode's points, which the planets' scale
+   (`planetTarget()`, 2 on an iPhone, 3 on an iPad) multiplies, beside a planet that is 40 points across, so about
+   120 pixels. The remake draws the planet at `planetPx()`, 52 pixels at most, but kept the app's units, so on
+   Jake's screen (November 2026) a ring was about 190 pixels wide round a 52 pixel planet, the dots sat 105 pixels
+   from its middle and the round buttons floated a hand's width off (`satOvals`, `drawDotsApp`, `dotStart` in
+   `js/skins/classic/ui.js`; the round buttons and the satellite and Fleets boxes' places in `js/skins/ios/ui.js`).
+   The unpatched game keeps the app's units; the patch uses the planet's own, `planetPx() / 40` a point
+   (`markUnit()`), for their places, and for the rings' and dots' pictures, a dot never smaller than its own 22
+   pixels. The buttons' and boxes' *sizes* stay the interface's (Interface size zooms them). With any ruleset
+   other than iOS and Android it is always on: they have no app original to match.
+6. **`fleetsBoxFits`: the Fleets box beside a star cuts off its last fleet (the iOS and Android look only).**
+   `-[FleetMovementDialog updateData]` `0x1000cb2fc` sizes the dialog min(the menu's height + 2 a80, 250) high and
+   puts its menu in a rectangle that is shorter than the dialog by the close button's height and 4
+   (`setContentSize:` `0x1000c3618`); the remake measured the first child of the list for the menu's height, which is
+   about 12 points less than the list's own (the picture and the two lines), and put the list under the title, so
+   with one fleet "1 Col (2/2)" and its Fuel line were cut at the bottom (Jake's screenshot, November 2026; `fleetNode`
+   in `js/skins/ios/ui.js`). The unpatched game keeps that size, which I could not check against the app's own numbers beyond the code above; the
+   patch sizes the box to the whole list (the title strip, the content, the bottom gap), at most 250 points, and the
+   list scrolls only past that. With any ruleset other than iOS and Android it is always on.
+7. **`vectorDots`: the fleets' dots are blocky pictures (the iOS and Android look only).** The app draws a fleet's
+   dot as one of 112 pictures of 22 by 22 pixels (`fleet_dots_<set>_<class>_<size>`: yours, not fully fuelled, old,
+   others' x 7 classes x 4 fleet sizes), which a large window shows as blocks (Jake, November 2026: "the orbiting
+   ships look terrible"). The unpatched game draws the pictures. The patch draws each class as the simple shape it is
+   (Scout a diamond with a hollow, Dreadnought a square, Fighter a diamond, Tanker an oval, Colony Ship a circle,
+   Satellite a ring, Biological a fish with its head to the left: the fish's direction is the remake's guess), in the
+   box of the picture of that size, filled with that picture's own colours row by row as a vertical gradient, so
+   the four sets keep their colours. `DOT_GEO` and `dotShape` in `js/skins/ios/ui.js`, made by
+   `tools/skins/dot_shapes.py`; `drawDotsApp` in `js/skins/classic/ui.js`. What the shapes leave out is the pictures'
+   dithering (the old set's speckle) and the Dreadnought's notched edge. With any ruleset other than iOS and Android
+   it is always on. The "..." of more fleets is three squares, as its picture is, drawn crisp.
 
 ### Quirk or design (left as released)
 

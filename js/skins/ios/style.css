@@ -137,12 +137,13 @@ html.skin-ios .ios-pface { left: calc((var(--W) / 3 + 74) * var(--pt)); }
 /* the round buttons about the selected star (PlanetButtons): 44 point pictures at scale 0.6 x the planet's scale k (--pk px per point) */
 html.skin-ios .ios-pb { position: fixed; left: 0; top: 0; width: 0; height: 0; z-index: 6; pointer-events: none; }
 html.skin-ios .ios-pb[hidden], html.skin-ios .ios-pbb[hidden] { display: none; }
-html.skin-ios .ios-pbb { min-width: 0; min-height: 0; position: absolute; appearance: none; border: 0 !important; border-radius: 0 !important; padding: 0 !important; background: none !important; cursor: pointer; pointer-events: auto; width: calc(26.4 * var(--pk)); height: calc(26.4 * var(--pk)); line-height: 0; -webkit-tap-highlight-color: transparent; }
+html.skin-ios .ios-pbb { min-width: 0; min-height: 0; position: absolute; appearance: none; border: 0 !important; border-radius: 0 !important; padding: 0 !important; background: none !important; cursor: pointer; pointer-events: auto; width: calc(26.4 * var(--pk) * var(--zf, 1)); height: calc(26.4 * var(--pk) * var(--zf, 1)); line-height: 0; -webkit-tap-highlight-color: transparent; }
 html.skin-ios .ios-pbb img { width: 100%; height: 100%; display: block; pointer-events: none; }
 html.skin-ios .ios-pbb:active img { filter: brightness(.49); }
-html.skin-ios .ios-pb-add { left: calc(var(--px) + 23 * var(--pk)); top: calc(var(--py) - 49.4 * var(--pk)); }
-html.skin-ios .ios-pb-move { left: calc(var(--px) - 49.4 * var(--pk)); top: calc(var(--py) - 49.4 * var(--pk)); }
-html.skin-ios .ios-pb-organize { left: calc(var(--px) - 13.2 * var(--pk)); top: calc(var(--py) - 61.4 * var(--pk)); }
+/* --zf: the Interface size; the buttons stay where the planet's scale puts their near edge and shrink away from the planet */
+html.skin-ios .ios-pb-add { left: calc(var(--px) + var(--pdx, 0px) + 23 * var(--pu, var(--pk))); top: calc(var(--py) + var(--pdy, 0px) - 23 * var(--pu, var(--pk)) - 26.4 * var(--pk) * var(--zf, 1)); }
+html.skin-ios .ios-pb-move { left: calc(var(--px) + var(--pdx, 0px) - 23 * var(--pu, var(--pk)) - 26.4 * var(--pk) * var(--zf, 1)); top: calc(var(--py) + var(--pdy, 0px) - 23 * var(--pu, var(--pk)) - 26.4 * var(--pk) * var(--zf, 1)); }
+html.skin-ios .ios-pb-organize { left: calc(var(--px) + var(--pdx, 0px) - 13.2 * var(--pk) * var(--zf, 1)); top: calc(var(--py) + var(--pdy, 0px) - 35 * var(--pu, var(--pk)) - 26.4 * var(--pk) * var(--zf, 1)); }
 /* FleetMovementDialog (an iPhone's): 100 + 2 a80 by 192 points, anchored (1, 0.5) at (winW - 50, winH / 2); fleet-background.png as a nine-patch (caps 10), opacity 0xb4;
    "Fleets" 12 centred at the top, button-x at 0.3 at the top left */
 html.skin-ios .ios-fd { position: fixed; right: calc(50 * var(--pt)); top: 50%; transform: translateY(-50%); width: calc((100 + var(--gap) * 2) * var(--pt)); height: calc(192 * var(--pt)); z-index: 5; color: #fff; font: calc(12 * var(--pt)) Arial, Helvetica, sans-serif; box-sizing: border-box; }
@@ -162,7 +163,7 @@ html.skin-ios .ios-bars .blabel { position: absolute; left: 0; top: 0; width: ca
 html.skin-ios .ios-bars .track { position: absolute; left: calc(var(--bo) * var(--pt)); top: 0; width: calc(var(--bw) * var(--pt)); height: 100%; background: none; border: 0; border-radius: 0; box-shadow: none; cursor: pointer; }
 html.skin-ios .ios-bars .fill { position: absolute; left: 0; top: 25%; height: 50%; border-radius: 0; background: #f00; }
 html.skin-ios .ios-bars .track.locked { cursor: default; }
-html.skin-ios .ios-bars .locktext { position: absolute; left: 0; top: 0; line-height: calc(var(--row) * var(--pt)); font-size: calc(var(--fs) * var(--pt)); white-space: nowrap; pointer-events: none; }
+html.skin-ios .ios-bars .locktext { position: absolute; left: 0; top: 0; transform: none; /* (the classic rule centres it with top: 50% and translateY(-50%); with top: 0 that lifted a locked colony's income half a row, into the clip) */ line-height: calc(var(--row) * var(--pt)); font-size: calc(var(--fs) * var(--pt)); white-space: nowrap; pointer-events: none; }
 html.skin-ios .ios-bars .barrow { z-index: 1; }
 html.skin-ios .ios-gl { z-index: 0; position: absolute; top: calc(3 * var(--pt)); bottom: calc(3 * var(--pt)); width: calc(1 * var(--pt)); background: #0000aa; pointer-events: none; }
 html.skin-ios .ios-bars .warn { margin: 0 calc(4 * var(--pt)); }
@@ -176,7 +177,7 @@ html.skin-ios .ios-pname { left: calc(26 * var(--pt)); }
 html.skin-ios .ios-piq { left: calc((var(--W) / 3 + 64 - 0.3 * var(--W)) * var(--pt)); }
 html.skin-ios .ios-pact { font-weight: normal; position: absolute; left: calc(0.75 * var(--W) * var(--pt)); top: 50%; transform: translate(-50%, -50%); white-space: nowrap; line-height: 1.15; color: #000 !important; appearance: none; border: 0 !important; border-radius: 0 !important; background: none !important; padding: 0 !important; min-width: 0; min-height: 0; font-family: inherit; cursor: pointer; }
 html.skin-ios .ios-pact.lone { cursor: default; }
-html.skin-ios .ios-pmore { color: #9fb2e0 !important; appearance: none; border: 0 !important; background: none !important; color: #9fb2e0; font: inherit; padding: calc(4 * var(--pt)) !important; cursor: pointer; }
+html.skin-ios .ios-pmore { color: #9fb2e0 !important; appearance: none; border: 0 !important; background: none !important; color: #9fb2e0; font: inherit; padding: calc(4 * var(--pt)) !important; cursor: pointer; font-size: calc(15px * var(--zf, 1)) !important; /* (the classic page's button rule makes it 15 CSS pixels, which it has always been; the Interface size zooms that) */ }
 
 /* the iPad's graphs window shade (graphs-window-shade 200 x 24) and its GraphNode (200 x 100) */
 html.skin-ios .ios-shade { position: fixed; right: 0; top: 0; z-index: 7; appearance: none; border: 0 !important; border-radius: 0 !important; padding: 0 !important; background: none !important; width: calc(200 * var(--pt)); height: calc(24 * var(--pt)); line-height: 0; cursor: pointer; }
@@ -283,6 +284,7 @@ html.skin-ios .ios-bsl { white-space: nowrap; }
 html.skin-ios .ios-bnbg { position: absolute; background: #5a1c18; }
 html.skin-ios .ios-bnbg i { position: absolute; inset: calc(1 * var(--pt)); border: calc(2 * var(--pt)) solid #fff; }
 html.skin-ios .ios-bname { position: absolute; box-sizing: border-box; appearance: none; background: transparent !important; border: 0 !important; outline: 0; box-shadow: none !important; color: #fff !important; text-align: center; padding: 0 !important; margin: 0; font-family: var(--appfont, Arial, Helvetica, sans-serif); border-radius: 0 !important; }
+html.skin-ios .ios-bpop { color: #cfe1ff; line-height: 1.15; font-family: var(--appfont, Arial, Helvetica, sans-serif); text-align: left; pointer-events: auto; cursor: help; }
 html.skin-ios .ios-bwarn { position: absolute; color: #f00; text-align: center; line-height: 1.15; font-family: var(--appfont, Arial, Helvetica, sans-serif); }
 html.skin-ios .ios-bwarnt { transform: scale(.9); transform-origin: 50% 0; }
 html.skin-ios .ios-bbtns { position: absolute; display: flex; flex-direction: row; }
@@ -330,7 +332,7 @@ html.skin-ios .ios-scin { position: absolute; left: 0; top: 0; transform-origin:
 html.skin-ios .ios-sctx { display: flex; flex-direction: column; align-items: center; }
 html.skin-ios .ios-sccross { position: absolute; inset: 0; width: 100%; height: 100%; display: none; pointer-events: none; }
 html.skin-ios .ios-scitem.scrapped .ios-sccross { display: block; }
-html.skin-ios .ios-bremake { position: fixed; left: 50%; bottom: calc(6px); transform: translateX(-50%); font-size: 13px; text-decoration: underline; opacity: .85; z-index: 41; }
+html.skin-ios .ios-bremake { position: fixed; left: 50%; bottom: calc(6px * var(--zf, 1)); transform: translateX(-50%); font-size: calc(13px * var(--zf, 1)); text-decoration: underline; opacity: .85; z-index: 41; }
 html.skin-ios .ios-help { position: absolute; box-sizing: border-box; border: 0; background: #000; color-scheme: dark; }
 
 /* the Saved Games scene (openSavedIOS): black, the app's white strip and dark box on the right */

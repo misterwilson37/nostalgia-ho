@@ -298,6 +298,10 @@ root.HOUI.add([
 ['Done', 'Fait', 'Fertig', 'Tamam', 'Hecho', I, { fr: 'Terminé' }],
 ['Cancel', 'Annuler', 'Abbruch', 'İptal', 'Cancelar', { fr: 'iOS', de: 'DOS 2.0', tr: 'iOS' }],
 ['OK', 'OK', 'OK', 'Tamam', 'Aceptar', { fr: 'iOS', de: 'DOS 2.0', tr: 'iOS' }],
+// the modern conveniences' notes about a colony's yard (the ruleset's limit: one ship a turn for each thousand people)
+['Population limit: a colony builds one ship a turn for each thousand people. This colony: %s thousand, %s bought this turn, %s more allowed.', 'Limite de population : une colonie construit un vaisseau par tour pour mille habitants. Cette colonie : %s mille, %s achetés ce tour, %s de plus permis.', 'Bevölkerungsgrenze: Eine Kolonie baut pro Zug ein Schiff je tausend Einwohner. Diese Kolonie: %s Tausend, %s in diesem Zug gekauft, %s weitere erlaubt.', 'Nüfus sınırı: Bir koloni, her bin kişi için sıra başına bir gemi yapar. Bu koloni: %s bin, bu sırada %s alındı, %s tane daha yapılabilir.', 'Límite de población: una colonia construye una nave por turno por cada mil habitantes. Esta colonia: %s mil, %s compradas este turno, %s más permitidas.'],
+['Population limit: %s thousand people, %s bought this turn, %s more allowed.', 'Limite de population : %s mille habitants, %s achetés ce tour, %s de plus permis.', 'Bevölkerungsgrenze: %s Tausend Einwohner, %s in diesem Zug gekauft, %s weitere erlaubt.', 'Nüfus sınırı: %s bin kişi, bu sırada %s alındı, %s tane daha yapılabilir.', 'Límite de población: %s mil habitantes, %s compradas este turno, %s más permitidas.'],
+['A note from the remake', 'Une note du remake', 'Ein Hinweis des Remakes', 'Yeniden yapımdan bir not', 'Una nota del remake'],
 // the map's labels
 ['%s: %s away', '%s : à %s', '%s: %s entfernt', '%s: %s uzakta', '%s: a %s'],
 ['%s away · %s turn', 'à %s · %s tour', '%s entfernt · %s Zug', '%s uzakta · %s sıra', 'a %s · %s turno'],

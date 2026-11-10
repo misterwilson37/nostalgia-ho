@@ -629,7 +629,7 @@ function draw0() {
     }
     const sats = G.fleets.filter(f => f.star === s.id && f.sat && (f.owner === ME || visibleTo(s.id)));
     // T.satOvals: the app's ovals, pair i for the star's satellite row i (three at most): the back one behind the planet, the front one over its hat
-    const ovN = T.satOvals && own !== 'all' ? Math.min(3, sats.length) : 0, ovals = (front) => { const t = planetTarget(); for (let i = 0; i < ovN; i++) { const o = IMG['satOval' + (front ? '' : 'Back') + i]; if (!o) continue; const w = o.width / 2 * T.satOvals.scale * t, h = o.height / 2 * T.satOvals.scale * t; cx.drawImage(o, x + T.satOvals.x * t - w / 2, y - h / 2, w, h); } };
+    const ovN = T.satOvals && own !== 'all' ? Math.min(3, sats.length) : 0, ovals = (front) => { const t = markUnit(); for (let i = 0; i < ovN; i++) { const o = IMG['satOval' + (front ? '' : 'Back') + i]; if (!o) continue; const w = o.width / 2 * T.satOvals.scale * t, h = o.height / 2 * T.satOvals.scale * t; cx.drawImage(o, x + T.satOvals.x * t - w / 2, y - h / 2, w, h); } };
     ovals(false);
     const im = !own && (look.pic || IMG[look.base]);
     if (im) { const z = ps * (look.scale || 1); cx.drawImage(im, x - z / 2, y - z / 2, z, z); }
@@ -855,7 +855,7 @@ function drawDots(s, x, y, ps) {
 // (L.dotX, L.dotY) when either has more than three. On a tablet the selected star's own fleets are in the fleet
 // dialog (FleetMovementPlanetNode), not drawn: only the "..." and only for satellites.
 function drawDotsApp(s, x, y, here) {
-  const L = T.dotLayout, t = planetTarget(), rank = (f) => (f.owner === ME ? -1 : f.owner);
+  const L = T.dotLayout, t = markUnit(), ts = dotUnit(), rank = (f) => (f.owner === ME ? -1 : f.owner); // (t: where, ts: how big)
   const order = here.map((f, i) => [f, i]).sort((a, b) => rank(a[0]) - rank(b[0]) || a[1] - b[1]).map(a => a[0]);
   const sats = order.filter(f => f.sat), norm = order.filter(f => !f.sat);
   const hide = isTablet() && UI.sel === s.id;
@@ -866,8 +866,8 @@ function drawDotsApp(s, x, y, here) {
     let ox = x + (sat ? L.satX : L.x) * t; const oy = y - ((sat ? L.satY0 : L.y0) + L.dy * i) * t;
     let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
     for (const im of ims) {
-      const w = im.width / 2 * t, h = im.height / 2 * t;
-      cx.drawImage(im, ox - w / 2, oy - h / 2, w, h);
+      const w = im.width / 2 * ts, h = im.height / 2 * ts;
+      if (!(vectorsOn() && T.vectorDot(cx, im, ox - w / 2, oy - h / 2, w / im.width))) cx.drawImage(im, ox - w / 2, oy - h / 2, w, h); // (the same box either way: what a tap picks does not move)
       x0 = Math.min(x0, ox - w / 2); x1 = Math.max(x1, ox + w / 2); y0 = Math.min(y0, oy - h / 2); y1 = Math.max(y1, oy + h / 2);
       ox += (sat ? -L.step : L.step) * t;
     }
@@ -876,7 +876,7 @@ function drawDotsApp(s, x, y, here) {
   sats.slice(0, 3).forEach((f, i) => one(f, i, true));
   if (!hide) norm.slice(0, 3).forEach((f, i) => one(f, i, false));
   const more = hide ? sats.length > 3 : sats.length > 3 || norm.length > 3, dd = IMG.dotdot;
-  if (more && dd) { const w = dd.width / 2 * t, h = dd.height / 2 * t; cx.drawImage(dd, x + L.dotX * t - w / 2, y - L.dotY * t - h / 2, w, h); }
+  if (more && dd) { const w = dd.width / 2 * ts, h = dd.height / 2 * ts; if (!(vectorsOn() && T.vectorDot(cx, dd, x + L.dotX * t - w / 2, y - L.dotY * t - h / 2, w / dd.width))) cx.drawImage(dd, x + L.dotX * t - w / 2, y - L.dotY * t - h / 2, w, h); }
   cx.restore();
 }
 // The orders of your fleets (T.appPaths; -[MapLayer updateFleetPaths] 0x10000ee58, doFleetRec:fleet:paths: 0x10000ebc8,
@@ -893,7 +893,7 @@ function drawDotsApp(s, x, y, here) {
 // (the patch, rs.fixes 'routeFromDot': the app gives the offset in map units but draws the dots in the star's own units, the planets' scale, so with the planets scaled the line starts beside the star
 // and not at the dot; the patch scales the offset by the planets' on-screen scale as the dots are)
 function dotStart(f, fi, a, k) {
-  if (HO.fixed(G, 'routeFromDot')) k = planetTarget();
+  if (HO.fixed(G, 'routeFromDot')) k = markUnit();
   const idx = Math.min(3, G.fleets.slice(0, fi < 0 ? G.fleets.indexOf(f) : fi).filter(g => g.owner === ME && g.star === f.star && g.to == null && !g.sat).length);
   return [a[0] + (idx === 3 ? 30 : 35) * k, a[1] - (15 - 14 * idx) * k];
 }
@@ -1080,6 +1080,17 @@ function planetTarget() {
   if (lo >= thr) thr = lo + 0.1;
   return s >= thr ? (pad ? 3 : 2) : (pad ? 0.6 : 0.2) + (pad ? 2.4 : 1.8) / (thr - lo) * (s - lo);
 }
+// What hangs off a planet (the satellite ovals, the fleets' dots, the orders line's start, the round buttons' places) is laid out in the app's points of the
+// StarNode, which the planets' scale (planetTarget()) multiplies: 40 points of planet, so about 120 pixels at 3. This page draws the planet itself at planetPx(),
+// 52 pixels at most, so with the app's units those things sit far from it (the satellites' ovals three and a half times its width, the dots 105 pixels away).
+// The patch (rs.fixes 'planetUnits'; always with a ruleset that is not iOS's or Android's, which have no app original to match) lays them out in the planet's own
+// units, planetPx() / 40 a point. markUnit() is the unit of their places and pictures; dotUnit() the unit of a dot's picture, which is never drawn smaller than
+// its own 22 pixels (11 points: at the page's pixel size a smaller dot is mush).
+const unitsOn = () => !!G && (!/^(ios|android)$/.test(G.rules || '') || HO.fixed(G, 'planetUnits'));
+const markUnit = () => unitsOn() ? planetPx() / 40 : planetTarget();
+// the fleets' dots drawn as shapes, not as the app's 22 x 22 pixel pictures (rs.fixes 'vectorDots', the skin's T.vectorDot; always with a ruleset that is not iOS's or Android's)
+const vectorsOn = () => !!T.vectorDot && !!G && (!/^(ios|android)$/.test(G.rules || '') || HO.fixed(G, 'vectorDots'));
+const dotUnit = () => unitsOn() ? Math.max(planetPx() / 40, 2) : planetTarget();
 const fitScale = () => G && mapW ? Math.min((mapW - 60) / G.W, (mapH - 90) / G.H) : UI.view.s;
 const zoomRange = () => { const lo = Math.min(fitScale(), UI.view.s), hi = Math.max(40 * (isTablet() ? 2 : 1.5), lo); return [lo, hi]; };
 // no rubber band: the galaxy (with the fit's margin) never leaves the map:
@@ -2481,7 +2492,7 @@ window.HOBUGS = window.HOBUGS || [];
 window.HOBATTLE = (bid) => { if (G) openBattle(bid); };
 // what the map shows, for the test tools (read only): its scale and offset,
 // the selected star and fleet, a finger's ruler and drag
-window.HOVIEW = () => ({ view: Object.assign({}, UI.view), sel: UI.sel, selFleet: UI.selFleet, ruler: UI.ruler && Object.assign({}, UI.ruler), drag: !!UI.drag, path: UI.drag && UI.lastPath ? Object.assign({}, UI.lastPath) : null, barScale: G ? { budget: HO.barScale(G, 'budget', barPick()).id, tech: HO.barScale(G, 'tech').id } : null, mapW, mapH, fit: fitScale(), zoom: zoomRange(), target: G && mapW ? planetTarget() : 1, modal: !!UI.modal });
+window.HOVIEW = () => ({ view: Object.assign({}, UI.view), sel: UI.sel, selFleet: UI.selFleet, ruler: UI.ruler && Object.assign({}, UI.ruler), drag: !!UI.drag, path: UI.drag && UI.lastPath ? Object.assign({}, UI.lastPath) : null, barScale: G ? { budget: HO.barScale(G, 'budget', barPick()).id, tech: HO.barScale(G, 'tech').id } : null, mapW, mapH, fit: fitScale(), zoom: zoomRange(), target: G && mapW ? planetTarget() : 1, unit: G && mapW ? markUnit() : 1, modal: !!UI.modal });
 function guard(fn, where) {
   if (typeof fn !== 'function' || fn.hoGuarded) return fn;
   const g = function (...a) { try { return fn.apply(this, a); } catch (e) { showBug(e, where); } };
@@ -2690,6 +2701,10 @@ function openBuild(sid) {
     else if (debtSwitch) left.append(el('label', { class: 'chk switchrow' }, el('span', null, AD.label || 'Allow Debt'),
       el('input', { type: 'checkbox', class: 'switch', role: 'switch', 'aria-label': AD.label || 'Allow Debt', checked: st.debt ? 'checked' : false, onchange: (e) => { st.debt = e.target.checked; render(); } }),
       el('small', { class: 'switchword' }, (AD.words || ['No', 'Yes'])[st.debt ? 1 : 0])));
+    // modern conveniences: a ruleset with a limit on the ships built at a colony in a turn (4.0.5, 5.0.5 and what is built on them: one for each thousand people) says so,
+    // and the + says no instead of doing nothing (the games only beeped or stopped the slider)
+    const yl = modern() && !queue ? HO.yardLeft(G, p, s) : null;
+    if (yl) { const txt = tl('Population limit: a colony builds one ship a turn for each thousand people. This colony: %s thousand, %s bought this turn, %s more allowed.', yl.limit, yl.built, yl.left); left.append(el('p', { class: 'note', 'data-tiptext': txt }, txt)); }
     const designs = p.designs.filter(d => !d.scrapped && types.includes(d.type));
     const builtHere = (did) => queue ? (s.queue || []).filter(it => it.did === did).reduce((a, it) => a + it.n, 0) : p.spentThisTurn.filter(e => e.sid === sid && e.did === did).length;
     if (queue) left.append(el('p', { class: 'note' }, 'Ships you add here are queued. They are built as this colony’s shipbuilding money pays for them' + ((s.ship || 0) > 0 ? '.' : ' — give it a Shipbuilding share in the planet panel.')));
@@ -2697,7 +2712,7 @@ function openBuild(sid) {
       const c = HO.shipCostNow(G, p, d);
       const n = builtHere(d.id);
       const slots = HO.rules(G).queueSlots, sq = s.queue || [];
-      const can = (!d.scrap301 || !!HO.rules(G).queueMarked) && (queue ? !(slots && sq.length >= slots && sq[sq.length - 1].did !== d.id) : affordable(c));
+      const can = (!d.scrap301 || !!HO.rules(G).queueMarked) && (queue ? !(slots && sq.length >= slots && sq[sq.length - 1].did !== d.id) : affordable(c) && (!yl || yl.left > 0));
       left.append(el('div', { class: 'drow' + (d.scrap301 ? ' scrap' : '') },
         shipImgEl(d, 26),
         el('div', { class: 'dtext' }, el('b', null, d.name), el('div', { class: 'sub' }, `${HO.TYPES[d.type].name} · R${d.type === 'satellite' ? 0 : d.R} Sp${d.V} W${d.W} Sh${d.S} M${d.M}`),
@@ -4526,6 +4541,7 @@ function openPrefs() {
     tempChoice(),
     G ? el('label', { class: 'chk' }, el('input', { type: 'checkbox', checked: modern() ? 'checked' : false, onchange: (e) => setModern(e.target.checked) }),
       el('span', null, 'Modern conveniences in this game (automatic routes, the map follows the news, battle speed and written reports)')) : null,
+    sizeChoice(), // (Interface size: the iOS and Android skins, with modern conveniences on; this window had left it out)
     box('tips', 'Explain things when the pointer rests on them (text from the original manual)'),
     autoPlayWhere() === 'prefs' ? prefsAutoPlay() : null), { cls: 'small' });
 }
@@ -6644,12 +6660,12 @@ document.addEventListener('keydown', guard((e) => {
 // keyboard focus, or on a long press on a touch screen.
 const Tip = { el: null, timer: 0, at: null };
 function tipShow(target) {
-  const k = target.dataset.help, R = (window.HOHELP_RULES || {})[rulesId()] || {};
-  const h = R[k] || (window.HOHELP || {})[k];
+  const k = target.dataset.help, R = (window.HOHELP_RULES || {})[rulesId()] || {}, own = target.dataset.tiptext; // (own: a remake note, in the words it was made in)
+  const h = own ? [own, null] : R[k] || (window.HOHELP || {})[k];
   if (!h || !Prefs.tips) return;
   if (!Tip.el) { Tip.el = el('div', { class: 'tip', role: 'tooltip', id: 'hotip' }); document.body.append(Tip.el); }
   Tip.el.innerHTML = '';
-  put(Tip.el, el('p', null, h[0]), el('small', null, `Adapted from the ${R[k] ? manualFor()[1] : 'Spaceward Ho! 5 manual'}: ${h[1]}`), UIL && UIL.lang !== 'en' && UIL.tr(h[0]) === h[0] ? inEnglish('This help is in English.') : null);
+  put(Tip.el, el('p', null, h[0]), el('small', null, own ? tl('A note from the remake') : `Adapted from the ${R[k] ? manualFor()[1] : 'Spaceward Ho! 5 manual'}: ${h[1]}`), !own && UIL && UIL.lang !== 'en' && UIL.tr(h[0]) === h[0] ? inEnglish('This help is in English.') : null);
   if (target.dataset.key) Tip.el.append(el('p', { class: 'key' }, target.dataset.key));
   tempDom(Tip.el); // (°C chosen: a manual's "72°" in °C)
   Tip.el.hidden = false; Tip.at = target;
@@ -6669,7 +6685,7 @@ function tipHide() {
 }
 document.addEventListener('pointerover', (e) => {
   if (e.pointerType === 'touch') return;
-  const t = e.target.closest && e.target.closest('[data-help]');
+  const t = e.target.closest && e.target.closest('[data-help], [data-tiptext]');
   if (!t) { if (Tip.at) tipHide(); return; }
   if (t === Tip.at) return;
   tipHide(); Tip.timer = setTimeout(() => tipShow(t), 450);
@@ -6677,11 +6693,11 @@ document.addEventListener('pointerover', (e) => {
 document.addEventListener('pointerdown', (e) => {
   tipHide();
   if (e.pointerType !== 'touch') return;
-  const t = e.target.closest && e.target.closest('[data-help]');
+  const t = e.target.closest && e.target.closest('[data-help], [data-tiptext]');
   if (t) Tip.timer = setTimeout(() => tipShow(t), 550); // long press
 });
 document.addEventListener('pointerup', (e) => { if (e.pointerType === 'touch' && !Tip.at) clearTimeout(Tip.timer); });
-document.addEventListener('focusin', (e) => { const t = e.target.closest && e.target.closest('[data-help]'); if (t) tipShow(t); });
+document.addEventListener('focusin', (e) => { const t = e.target.closest && e.target.closest('[data-help], [data-tiptext]'); if (t) tipShow(t); });
 document.addEventListener('focusout', tipHide);
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape') tipHide(); });
 

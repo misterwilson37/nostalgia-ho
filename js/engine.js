@@ -856,6 +856,16 @@ function shipCostNow(G, p, d) {
 function borrowLimit(G, p) { return rules(G).borrowLimit(G, p); }
 
 // build `n` ships of design d at star sid. Returns number built.
+// How many more ships a colony may be given this turn, for a ruleset with a limit on ships built at a colony in a turn (rs.yardRoom: 4.0.5's and 5.0.5's,
+// so the iOS, Android and Palm rules': one for each thousand people). { built: bought at this colony this turn, left: more allowed, limit: built + left },
+// or null where there is no limit. Counted by trying, as the games' own windows do, so it follows the ruleset's own rule.
+function yardLeft(G, p, star) {
+  const rs = rules(G); if (!rs.yardRoom || !star) return null;
+  const st = p.spentThisTurn || (p.spentThisTurn = []), mark = st.length, built = st.filter(e => e.sid === star.id).length, probe = { id: -1, built: 1, free: false };
+  let n = 0; while (n < 9999 && rs.yardRoom(G, p, star, probe)) { st.push({ did: -1, sid: star.id, money: 0, metal: 0 }); n++; }
+  st.length = mark;
+  return { built, left: n, limit: built + n };
+}
 function buildShips(G, pid, sid, did, n) {
   const p = G.players[pid];
   const d = getDesign(G, pid, did);
@@ -2147,7 +2157,7 @@ const API = {
   newestRules: () => Object.values(RULESETS).filter(r => r.year).sort((a, b) => b.year - a.year || String(b.version).localeCompare(String(a.version), 'en', { numeric: true }))[0].id,
   // randomness and helpers for rulesets and AIs
   R, RI, pick, shuffle, gauss, clamp,
-  newGame, endTurn, buildShips, unbuildShip, designLimits, designMin, designCost, shipCostNow, canBuildType, findOrCreateDesign, getDesign,
+  newGame, endTurn, buildShips, yardLeft, unbuildShip, designLimits, designMin, designCost, shipCostNow, canBuildType, findOrCreateDesign, getDesign,
   fleetCount, fleetDesigns, fleetSpeed, fleetMaxRange, fleetHas, fleetKind, fleetLabel, fleetText, orderMove, orderPath, cancelMove, canReach, canMerge, queueShips, unqueueShip,
   newFleet, addShipsToStar, mergeFleets, splitFleet, scrapFleet, evacuate, colonies, seenG, seenT, maxPop, planetClass, planetIncome,
   scrapDesign, liveDesigns, isFriend, isAllied, isBuddy, hasColonyAt, designName, namesFile, namesFileAdd, report, setPact, give, surrender, sendChat, sendCanned, deliverCanned, clearCanned, cannedList, cannedSteps, setArmageddon, hostileAt, know, observe, msg, msgAll, humans, starDist, dist, projected, totalChange, compareTable, compareInfo, shipStrength, techSum, score, save, load, borrowLimit, fmt, num, niceNum, niceNumSp, num505, money505, niceShort, moneyNice, moneyNiceSp, changeNice, change505, moneyPalmFull, plainNum, arrivalYear, popNum, currency, euroAfter, sumText, prefs: PREFS,
