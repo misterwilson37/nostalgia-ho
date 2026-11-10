@@ -294,7 +294,7 @@ async function playRun(browser, job, outDir, idx) {
       const top = await checkTop('Build window'); await shot('build-open'); await checkText('Build window');
       // buy or queue: the first "+" / item, then a confirm if there is one
       let did = false;
-      for (const [sel, re] of [['.win button, .ios-gdlg button, .ios-remake button', /^\+$|^add$|^buy$/i], ['.ios-gdlg .ios-bitem, .ios-remake .ios-bitem', null], ['.win .li, .win li', 'dbl'], ['.win .drow, .win tr', null]]) {
+      for (const [sel, re] of [['.win button, .ios-gdlg button, .ios-remake button', /^\+$|^add$|^buy$/i], ['.ios-gdlg .ios-bitem, .ios-remake .ios-bitem', null], ['.win .li, .win li', 'dbl'], ['.win .drow, .win tr', null], ['.win .dd-type', null]]) {
         if (re === 'dbl') { const a = await aim(sel, { soft: true, what: 'ship type in the list', nth: 99 }); if (!a) continue; await ptr.tap(a.x, a.y); await sleep(150); await ptr.dbl(a.x, a.y); await sleep(300); did = true; break; } // (a list: double-click a type to queue it)
         const a = await aim(sel, { re, soft: true, what: 'add a ship' }); if (!a) continue;
         await ptr.tap(a.x, a.y); await sleep(200); did = true;

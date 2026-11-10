@@ -252,7 +252,7 @@ window.HOTHEME = {
   panel(panel, B) { panelDos(panel, B); },
   mapPixel() { return frameOn() ? [U, U] : null; },
   mapFont(n) { return frameOn() ? "12px 'DOS Geneva 9'" : null; },
-  window(name) { if (!frameOn() || !window.HOAPI.G) return false; if (name === 'autoplay') return autoPlayDos(); if (name === 'fleets') return fleetsDos(); if (name === 'stars') return starsDos(); return false; },
+  window(name) { if (!frameOn() || !window.HOAPI.G) return false; if (name === 'autoplay') return autoPlayDos(); if (name === 'fleets') return fleetsDos(); if (name === 'types') return shipTypesDos(arguments[1]); if (name === 'build') return buildDos(arguments[1]); if (name === 'stars') return starsDos(); if (name === 'compare') return compareDos(); if (name === 'reports') return reportsDos(); return false; },
   newGame(f) { createGalaxyDos(f); },
   keyName(k) { return /^Ctrl/.test(k) ? '[' + k + ']' : '⌘' + k; },
   // the DOS title screen: the two halves of its credits picture
@@ -307,7 +307,7 @@ function menuLayoutDos() {
       it('Sound', () => { A().Sound.on = !A().Sound.on; A().savePrefs(); }, { checked: () => A().Sound.on })],
     Ships: [
       ['List Ship Types…', 'Ships/Scrap ship types…'],
-      it('Create New Ship Type…', () => { if (mine()) A().openBuild(star().id); }, { ghost: () => noGame() || !mine() }), '-',
+      it('Create New Ship Type…', () => (frameOn() ? newTypeDos() : A().openBuild(star().id)), { ghost: () => noGame() || (!frameOn() && !mine()) }), '-',
       ['List All Fleets…', 'Ships/List all fleets…'],
       ['Organize Ships…', 'Ships/#4'],
       it(() => (mine() ? A().tl('Build Ships at %s…', star().name) : A().tl('Can’t Build Ships Here…')), () => { if (mine()) A().openBuild(star().id); }, { ghost: () => noGame() || !mine() }),
@@ -380,26 +380,29 @@ const WD = () => DOSW[wl()];
 // the fleet lines the program builds (English, from the ruleset's own text) in the German build's formats
 const DE_FLEET = [[/^Stationed at: (.*)$/, 'Stationiert auf: $1'], [/^Departing to: (.*?) \(Dist (\d+); Time (\d+)\)$/, 'Zielort: $1 (Entf. $2; Dauer $3)'], [/^Going to (.*?) \(D (\d+); T (\d+)\) via (.*)$/, 'Unterwegs nach $1 (E $2; D $3) via $4'],
   [/^Fuel: (.*)$/, 'Tank: $1'], [/^Speed: (.*)$/, 'Tempo: $1'], [/^Full$/, 'Voll'], [/^Empty$/, 'Leer'], [/^Scrap: (.*)$/, 'Schrott: $1'], [/^Fleet to be scrapped for metal\.$/, 'Flotte zum Verschrotten.']];
+// the German build's fleet row (data pool: "Ein %Fs (%d/%d) %Fs", "%d %Fs (%d/%d) %Fs") with its class names (strings 368-371)
+const DE_CLASS = { scout: 'Späher', fighter: 'Kampfschiff', colony: 'Kolonieschiff', satellite: 'Satellit' };
+const deRow = (d, n) => `${n === 1 ? 'Ein' : n} ${d.name} (${d.W}/${d.S}) ${DE_CLASS[d.type] || d.type}`;
 const fl = (t) => { if (wl() !== 'de') return t; for (const [re, to] of DE_FLEET) if (re.test(t)) return t.replace(re, to); return t; };
 const RS12 = () => (window.HO.RULESETS || {})['12'] || null;
 const enView = (g) => Object.assign(Object.create(g), { opts: Object.assign({}, g.opts, { lang: 'en' }) });
 const PWORDS = () => { const w = WD(); return { income: w.income, pop: w.pop, temp: w.temp, grav: w.grav, metal: w.metal, terra: w.terra, mine: w.mine, prod: w.ship, owner: w.owner, infoDate: w.info, queued: w.queued, none: w.none, noInfo: w.noInfo, noFleets: w.noFleets }; };
 const kvText = (box, key) => { const r = box && box.querySelector(`.kv[data-help="${key}"]`); if (!r) return null; const b = r.querySelector('b'); return { label: r.querySelector('span').textContent, value: b ? Array.from(b.childNodes).filter(n => !(n.classList && n.classList.contains('chg'))).map(n => n.textContent).join('').trim() : '', chg: (r.querySelector('.chg') || {}).textContent || '' }; };
 // DrawVBarControl: the bars of a colony (kind 1) and of the technologies (kind 2): a rule up the left with ticks, each bar 18 wide with 9 before it
-function vbars(q, x0, y0, vals, kind, names, toPix, colors) {
-  const d5 = y0 + 50; q.vline(x0, y0, d5 + 1);
+function vbars(q, x0, y0, vals, kind, names, toPix, colors, geo) {
+  const BW = (geo && geo.b) || 18, GP = (geo && geo.g) || 9, d5 = y0 + 50; q.vline(x0, y0, d5 + 1);
   if (kind === 2) for (let v = 100; v <= 1000; v += 100) q.hline(x0 - 2, x0, d5 - toPix(v)); else for (let i = 1; i <= 10; i++) q.hline(x0 - 2, x0, d5 - Math.trunc(50 * i / 10));
   let d4 = x0;
   vals.forEach((v, i) => {
-    q.hline(d4, d4 + 27, d5 + 1); d4 += 9;
+    q.hline(d4, d4 + GP + BW, d5 + 1); d4 += GP;
     const hpx = v <= 0 ? 0 : kind === 2 ? toPix(v) : Math.trunc(50 * v / 1000);
-    q.rect(d4, d5 - hpx, d4 + 18, d5, colors[i % colors.length]);
-    q.text(names[i], d4 + Math.trunc((18 - q.width(names[i])) / 2), d5 + 11 + (kind === 2 ? 8 * (i % 2) : 0));
-    d4 += 18;
+    q.rect(d4, d5 - hpx, d4 + BW, d5, colors[i % colors.length]);
+    q.text(names[i], d4 + Math.trunc((BW - q.width(names[i])) / 2), d5 + 11 + (kind === 2 ? 8 * (i % 2) : 0));
+    d4 += BW;
   });
-  q.hline(d4, d4 + 9, d5 + 1);
+  q.hline(d4, d4 + GP, d5 + 1);
 }
-function vbarHit(x0, y0, n, pt) { const i = Math.floor((pt.h - x0 - 9) / 27), off = (pt.h - x0 - 9) - 27 * i; return i >= 0 && i < n && off >= 0 && off < 18 && pt.v >= y0 - 2 && pt.v <= y0 + 52 ? i : -1; }
+function vbarHit(x0, y0, n, pt, geo) { const BW = (geo && geo.b) || 18, GP = (geo && geo.g) || 9, i = Math.floor((pt.h - x0 - GP) / (GP + BW)), off = (pt.h - x0 - GP) - (GP + BW) * i; return i >= 0 && i < n && off >= 0 && off < BW && pt.v >= y0 - 2 && pt.v <= y0 + 52 ? i : -1; }
 function spread(vals, i, nv) {
   const out = vals.slice(); out[i] = Math.max(0, Math.min(1000, Math.round(nv)));
   const others = vals.map((v, j) => (j !== i && v >= 0 ? j : -1)).filter(j => j >= 0), tot = others.reduce((a, j) => a + vals[j], 0), rest = 1000 - out[i];
@@ -407,10 +410,10 @@ function spread(vals, i, nv) {
   if (!others.length) out[i] = 1000;
   return out;
 }
-function dragBars(q, x0, y0, getVals, kind, set, fromPix) {
+function dragBars(q, x0, y0, getVals, kind, set, fromPix, geo) {
   q.c.style.touchAction = 'none';
   q.c.addEventListener('pointerdown', (ev) => {
-    const i = vbarHit(x0, y0, getVals().length, q.at(ev)); if (i < 0) return;
+    const i = vbarHit(x0, y0, getVals().length, q.at(ev), geo); if (i < 0) return;
     ev.preventDefault(); if (getVals()[i] < 0) { window.HOAPI.beep(); return; }
     const start = getVals();
     const move = (e) => { const pt = q.at(e), px = Math.max(0, Math.min(50, y0 + 50 - pt.v)); set(spread(start, i, kind === 2 ? fromPix(px) : px * 1000 / 50), false); };
@@ -476,7 +479,7 @@ function fleetBoxDos() {
   if (!here.length) q.text(W.noFleets || 'There are no fleets at this planet.', 3, 36);
   here.slice(FLEET_TOP, FLEET_TOP + 4).forEach((f, i) => {
     const top = 25 + 12 * i, ds = H.fleetDesigns(g, f), d = ds[0], n = H.fleetCount ? H.fleetCount(f) : Object.values(f.ships).reduce((x, y) => x + y, 0);
-    const t = rs.shipsText ? (d ? rs.shipsText(g, d, n) : '') : ds.length === 1 && r12 ? r12.shipsText(enView(g), d, n) : H.fleetLabel(g, f);
+    const t = wl() === 'de' && d ? deRow(d, n) : rs.shipsText ? (d ? rs.shipsText(g, d, n) : '') : ds.length === 1 && r12 ? r12.shipsText(enView(g), d, n) : H.fleetLabel(g, f);
     const sl = f.id === a.UI.selFleet;
     if (sl) q.rect(0, top, 230, top + 12, '#000');
     q.text(t, 3, top + 10, f.dest != null ? F9B : F9, { color: sl ? '#fff' : '#000' });
@@ -515,10 +518,10 @@ function techBoxDos() {
     q.rect(0, 0, 240, 83, '#fff');
     q.text(WD().head, 80, 11, F9B); q.text(WD().levels, 3, 24);
     TECHK.forEach((k, i) => { q.text(WD().tech[i], 5, 36 + 11 * i); q.text(String(p.tech[k]), 54, 36 + 11 * i); });
-    vbars(q, 80, 13, vals(), 2, names, toPix, ['#6500cf']);
+    vbars(q, 80, 13, vals(), 2, names, toPix, ['#6500cf'], rad ? { b: 14, g: 8 } : null);
   };
   draw();
-  dragBars(q, 80, 13, vals, 2, (v, end) => { if (v) { keys.forEach((k, i) => { p.talloc[k] = v[i] / 1000; }); draw(); } if (end) { a.save(); a.renderPanel(); } }, fromPix);
+  dragBars(q, 80, 13, vals, 2, (v, end) => { if (v) { keys.forEach((k, i) => { p.talloc[k] = v[i] / 1000; }); draw(); } if (end) { a.save(); a.renderPanel(); } }, fromPix, rad ? { b: 14, g: 8 } : null);
   return q.c;
 }
 function rosterDos() {
@@ -529,6 +532,26 @@ function rosterDos() {
     box.append(row);
   }
   return box;
+}
+
+// a vertical scroll bar of the program's window library: 8 wide, an arrow box at each end, a thumb (the program draws one beside the players and one beside the budget bars)
+function vScroll(target, l, t, h) {
+  const a = window.HOAPI, bar = a.el('div', { class: 'dd-vs', 'aria-hidden': 'true' }), up = a.el('span', { class: 'a u' }), dn = a.el('span', { class: 'a d' }), th = a.el('span', { class: 'th' });
+  bar.append(up, th, dn); bar.style.left = du(l); bar.style.top = du(t); bar.style.height = du(h);
+  const trk = h - 18, upd = () => {
+    const tot = target.scrollHeight, vis = target.clientHeight, max = Math.max(0, tot - vis), k = vis ? tot / vis : 1, th0 = Math.max(8, Math.min(trk, Math.round(trk / Math.max(1, k))));
+    th.style.height = du(th0); th.style.top = du(9 + (max ? Math.round(target.scrollTop / max * (trk - th0)) : 0));
+  };
+  const step = (d) => { target.scrollTop += d; upd(); };
+  up.addEventListener('pointerdown', (e) => { e.preventDefault(); step(-14); }); dn.addEventListener('pointerdown', (e) => { e.preventDefault(); step(14); });
+  bar.addEventListener('pointerdown', (e) => { if (e.target !== bar) return; const r = bar.getBoundingClientRect(); step((e.clientY - r.top) / r.height * h < th.offsetTop / (r.height / h) ? -target.clientHeight : target.clientHeight); });
+  th.addEventListener('pointerdown', (e) => {
+    e.preventDefault(); const y0 = e.clientY, s0 = target.scrollTop, r = bar.getBoundingClientRect(), k = r.height / h;
+    const mv = (ev) => { const max = Math.max(1, target.scrollHeight - target.clientHeight), span = Math.max(1, trk - th.offsetHeight / k); target.scrollTop = s0 + (ev.clientY - y0) / k / span * max; upd(); };
+    const upf = () => { window.removeEventListener('pointermove', mv); window.removeEventListener('pointerup', upf); }; window.addEventListener('pointermove', mv); window.addEventListener('pointerup', upf);
+  });
+  target.addEventListener('scroll', upd); target.addEventListener('wheel', (e) => { if (target.scrollHeight > target.clientHeight) { e.preventDefault(); step(e.deltaY > 0 ? 14 : -14); } }, { passive: false });
+  setTimeout(upd, 0); return bar;
 }
 function panelDos(panel, B) {
   if (!frameOn() || !window.HOAPI || !window.HOAPI.G) return;
@@ -544,8 +567,10 @@ function panelDos(panel, B) {
       if (e.star != null) { lab.style.textDecoration = a.UI.sel === e.star ? 'underline' : ''; lab.style.cursor = 'pointer'; lab.onclick = (ev) => { ev.stopPropagation(); a.UI.sel = e.star; a.centerOn(e.star); a.renderPanel(); a.draw(); }; }
     });
     { const rr = Array.from(bx.querySelectorAll('.barrow')), ti = (B.ents || []).findIndex(e => e.key === 'tech'), si = (B.ents || []).findIndex(e => e.key === 'savings'); if (ti >= 0 && si >= 0 && rr[ti] && rr[si] && ti < si) rr[ti].before(rr[si]); }
-    bx.classList.add('dosbudget'); low.append(bx);
+    bx.classList.add('dosbudget'); low.append(bx); setTimeout(() => { const r = bx.querySelector('.barrow:has(.blabel[style*=underline])'); if (r && r.offsetTop + r.offsetHeight > bx.clientHeight) bx.scrollTop = r.offsetTop - 28; }, 0);
   }
+  low.append(vScroll(low.querySelector('.dosroster'), 80, 0, 169));
+  if (B.budget) low.append(vScroll(B.budget, 232, 0, 169));
   panel.innerHTML = '';
   panel.append(planetBoxDos(B.planet), fleetBoxDos(), totalsBoxDos(B.info), low, techBoxDos());
 }
@@ -638,19 +663,19 @@ function aboutDos() {
 
 // the list windows (List of All Fleets: 544 x 322, List of All Explored Stars: 528 x 322): the title line, a list box (double rule) from (19, 47), rows of 14, the picked row
 // black with white text, two buttons at the foot
-function dListBox(w, h, onPick) {
+function dListBox(w, h, x, y) {
   const a = window.HOAPI, box = a.el('div', { class: 'dd-list', role: 'listbox', tabindex: 0 });
-  dAt(box, 19, 47, w, h); return box;
+  dAt(box, x == null ? 19 : x, y == null ? 47 : y, w, h); return box;
 }
 function fleetsDos() {
-  const a = window.HOAPI, H = window.HO, g = a.G, W = { at: '%s stationed at %s.', leave: '%s leaving %s for %s to arrive in %d.', fly: '%s to arrive at %s in %d.', stuck: '%s marooned at %s.',
-    hyper: 'Sorry, but that fleet is currently in hyperspace and can’t be contacted until it arrives at its next location.' };
+  const a = window.HOAPI, H = window.HO, g = a.G, W = Object.assign({ at: '%s stationed at %s.', leave: '%s leaving %s for %s to arrive in %d.', fly: '%s to arrive at %s in %d.', stuck: '%s marooned at %s.',
+    hyper: 'Sorry, but that fleet is currently in hyperspace and can’t be contacted until it arrives at its next location.' }, wl() === 'de' ? { at: '%s stationiert auf %s.', leave: '%s fliegt von %s nach %s. Ankunft: %d.', fly: '%s fliegt nach %s. Ankunft: %d.', stuck: '%s hängt auf %s fest.' } : {});
   const fill = (t, ...v) => { let i = 0; return t.replace(/%[sd]/g, () => String(v[i++])); };
   const stuck = (f) => f.star != null && g.stars[f.star].owner !== a.ME && !g.stars.some(s => s.id !== f.star && H.starDist(g, f.star, s.id) <= f.fuel + 1e-9);
   const fs = g.fleets.filter(f => f.owner === a.ME && !f.sat), order = fs.filter(f => !stuck(f)).concat(fs.filter(stuck));
   const turns = (f) => Math.ceil((f.dist - (f.prog || 0)) / H.fleetSpeed(g, f) - 1e-9);
   const line = (f) => {
-    const d = H.fleetText(g, f), st = (i) => g.stars[i].name;
+    const d = wl() === 'de' && f.ships ? (() => { const ds = H.fleetDesigns(g, f); return ds.length === 1 ? deRow(ds[0], H.fleetCount ? H.fleetCount(f) : 1) : H.fleetText(g, f); })() : H.fleetText(g, f), st = (i) => g.stars[i].name;
     if (stuck(f)) return fill(W.stuck, d, st(f.star));
     if (f.to != null) return fill(W.fly, d, st(f.to), H.arrivalYear(g, turns(f)));
     if (f.dest != null) return fill(W.leave, d, st(f.star), st(f.dest), H.arrivalYear(g, Math.ceil(H.starDist(g, f.star, f.dest) / H.fleetSpeed(g, f) - 1e-9)));
@@ -716,6 +741,133 @@ function createGalaxyDos(f) {
   const keep = (n) => n.classList && (n.classList.contains('picks') || n.classList.contains('langnote') || n.classList.contains('btns'));
   const rs = field('rules'), dress = () => { const on = !rs || rs.value === 'dos'; box.style.display = on ? '' : 'none'; win.classList.toggle('dosw', on && !opened); for (const n of rest) if (n.style && !keep(n)) n.style.display = on && !opened ? 'none' : ''; };
   if (rs) rs.addEventListener('change', dress); dress();
+}
+
+// ---- Ships: List Ship Types (496 x 350), Create New Ship Type (512 x 280), Build Ships / the shipbuilding queue (496 x 336) ----
+function dField(l, t, w, h, val, max, onInput, label) {
+  const a = window.HOAPI, i = a.el('input', { type: 'text', class: 'dd-field', maxlength: max, value: val || '', 'aria-label': label || '', spellcheck: 'false', autocomplete: 'off' });
+  i.addEventListener('input', () => onInput(i.value)); return dAt(i, l, t, w, h);
+}
+const className = (d) => (wl() === 'de' ? DE_CLASS[d.type] : window.HO.TYPES[d.type].name) || d.type;
+const caption = (d) => `${d.name} (${d.W}/${d.S}) ${className(d)}`;
+const nf = (n) => (window.HO.rules(window.HOAPI.G).fmtNum || window.HO.niceNum)(Math.round(n));
+function shipPicEl(d, h) { const e = window.HOAPI.shipImgEl(d, h); e.style.width = 'auto'; e.style.imageRendering = 'pixelated'; return e; }
+function renameDos(d, back) {
+  const a = window.HOAPI; let v = d.name;
+  const f = dField(24, 52, 200, 14, v, 15, (x) => { v = x; }, 'New Ship Name');
+  dDialog(320, 150, null, [dText(tx('Type your new ship name or click on “Name It” for a suggestion:'), 16, 12, { w: 290 }), f,
+    dButton('Name It', 16, 100, 90, 27, () => { v = window.HO.designName(a.G, a.me(), d.type); f.value = v; }, { hot: 0 }), dButton('Cancel', 118, 100, 90, 27, back, { hot: 0 }),
+    dButton('OK', 220, 100, 80, 27, () => { const n = v.trim(); if (n) { d.name = n.slice(0, 15); a.save(); a.renderPanel(); } back(); }, { hot: 0, def: true })], 'Rename');
+}
+function shipTypesDos(selId) {
+  const a = window.HOAPI, H = window.HO, g = a.G, p = a.me(), rs = H.rules(g);
+  const ds = p.designs.filter(d => !d.scrapped).reverse(); if (!ds.length) return false;
+  let cur = ds.find(d => d.id === selId) || ds[0];
+  const box = dListBox(138, 224, 15, 28), kids = [dText(tx('Ship Types:'), 24, 14), box], pane = [];
+  const shipCount = (did) => g.fleets.filter(f => f.owner === a.ME).reduce((n, f) => n + (f.ships[did] || 0), 0);
+  const draw = () => {
+    box.textContent = ''; box.style.padding = '0';
+    ds.forEach(d => { const it = a.el('div', { class: 'dd-type' + (d === cur ? ' sel' : ''), role: 'option', 'aria-selected': String(d === cur), onclick: () => { cur = d; draw(); } }, shipPicEl(d, 40), a.el('span', { class: 'cap', translate: 'no' }, caption(d))); box.append(it); });
+    pane.splice(0).forEach(n => n.remove());
+    const c = H.designCost(g, cur), T = (t, l, y) => { const e = dText(String(t), l, y); pane.push(e); dlg.append(e); return e; };
+    const pic = shipPicEl(cur, 76); dAt(pic, 235, 33); pane.push(pic); dlg.append(pic);
+    T(tx('Name:'), 232, 112); T(cur.name, 376, 112); T(tx('Class:'), 232, 126); T(className(cur), 376, 126);
+    T(tx('Development Cost:'), 232, 140); T('$' + nf(c.protoTotal != null ? c.protoTotal : c.money + (c.proto || 0)), 376, 140); T(tx('Production Cost:'), 232, 154); T('$' + nf(c.money), 376, 154); T(tx('Metal Cost:'), 232, 168); T(nf(c.metal), 376, 168);
+    T(tx('Range') + ':', 232, 196); T(String(cur.R), 288, 196); T(tx('Speed') + ':', 232, 210); T(String(cur.V), 288, 210); T(tx('Weapons') + ':', 232, 224); T(String(cur.W), 304, 224); T(tx('Shields') + ':', 376, 196); T(String(cur.S), 440, 196); T(tx('Mini') + ':', 376, 210); T(String(cur.M), 440, 210);
+    T('# Built:', 24, 265); T(nf(cur.built || 0), 120, 265); T('# Existing:', 24, 279); T(nf(shipCount(cur.id)), 120, 279);
+    const on = !!cur.scrap301, ck = dText((on ? '[x] ' : '[ ] ') + 'Scrap This Type', 24, 308, { hot: 4 }); ck.style.cursor = 'pointer'; ck.setAttribute('role', 'checkbox'); ck.setAttribute('aria-checked', String(on)); ck.tabIndex = 0;
+    ck.textContent = ''; ck.append((on ? '[x] ' : '[ ] ') + 'S'.slice(0, 0), a.el('span', { class: 'hot' }, 'S'), 'crap This Type');
+    const flip = () => { if (rs.flagScrapDesign) { rs.flagScrapDesign(g, p, cur, 'command'); a.save(); draw(); } else { const n = shipCount(cur.id); a.confirmBox(`Scrap this ship type and all ${n} existing ship${n === 1 ? '' : 's'} of it?`, () => { H.scrapDesign(g, a.ME, cur.id); a.closeModal(); a.renderPanel(); a.draw(); }); } };
+    ck.addEventListener('click', flip); ck.addEventListener('keydown', (e) => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); flip(); } }); pane.push(ck); dlg.append(ck);
+  };
+  kids.push(dButton('Rename', 264, 280, 72, 27, () => { a.closeModal(); renameDos(cur, () => { a.closeModal(); shipTypesDos(cur.id); }); }, { hot: 0 }), dButton('OK', 368, 280, 72, 27, () => a.closeModal(), { hot: 0, def: true }));
+  const dlg = dDialog(496, 350, null, kids, 'List Ship Types'); box.parentNode === dlg && dlg.append(vScroll(box, 143, 28, 224));
+  draw(); return true;
+}
+function newTypeDos() {
+  const a = window.HOAPI, H = window.HO, g = a.G, p = a.me(), rs = H.rules(g);
+  const types = ['scout', 'fighter', 'colony', 'satellite', 'tanker', 'dread', 'bio', 'decoy'].filter(t => H.canBuildType(g, p, t));
+  const st = { type: types[0], name: '' }; const sl = {};
+  const KEYS = ['R', 'V', 'W', 'S', 'M'], LAB = ['Range:', 'Speed:', 'Weapons:', 'Shields:', 'Mini:'];
+  const dyn = []; let dlg, ok, nameF;
+  const limits = () => { const L = H.designLimits(g, p, st.type); for (const k of KEYS) { const lo = H.designMin(g, k, st.type); if (st[k] == null || st._t !== st.type) st[k] = L[k]; st[k] = Math.max(lo, Math.min(Math.max(lo, L[k] || lo), st[k])); } st._t = st.type; return L; };
+  const draw = () => {
+    dyn.splice(0).forEach(n => n.remove()); const L = limits(), add = (e) => { dyn.push(e); dlg.append(e); return e; };
+    const spec = { type: st.type, R: st.type === 'satellite' ? 0 : st.R, V: st.V, W: st.W, S: st.S, M: st.M };
+    add(dAt(shipPicEl(spec, 66), 252, 15));
+    KEYS.forEach((k, i) => {
+      const min = H.designMin(g, k, st.type), max = Math.max(min, L[k] || min), y = 98 + 28 * i; if (k === 'R' && st.type === 'satellite') return;
+      add(dText(tx(LAB[i].slice(0, -1)) + ':', 16, y)); add(dText(`${st[k]} / ${max}`, 88, y));
+      add(dSlider(137, y, 103, 13, min, max, st[k], (n) => { st[k] = n; draw(); }, LAB[i].slice(0, -1)));
+    });
+    const c = H.designCost(g, spec);
+    add(dText(tx('Dev. Cost:'), 272, 181)); add(dText('$' + nf(c.protoTotal != null ? c.protoTotal : c.money + (c.proto || 0)), 375, 181)); add(dText(tx('Prod. Cost:'), 272, 195)); add(dText('$' + nf(c.money), 375, 195)); add(dText(tx('Metal Cost:'), 272, 209)); add(dText(nf(c.metal), 382, 209));
+    ok.disabled = !st.name.trim(); ok.classList.toggle('off', ok.disabled);
+  };
+  const cls = dAt(a.el('div', { class: 'dd-list', role: 'listbox', 'aria-label': 'Class' }), 355, 105, 105, 70); cls.style.padding = du(0);
+  const paintCls = () => { cls.textContent = ''; types.slice(0, 4).forEach((t, i) => { const r = a.el('div', { class: 'dd-row' + (st.type === t ? ' sel' : ''), role: 'option', onclick: () => { st.type = t; paintCls(); draw(); } }, H.TYPES[t].name); r.style.padding = '0 ' + du(5); cls.append(r); }); };
+  nameF = dField(16, 56, 160, 14, '', 15, (v) => { st.name = v; ok.disabled = !v.trim(); ok.classList.toggle('off', ok.disabled); }, 'Name of Ship Type');
+  ok = dButton('OK', 392, 238, 71, 27, () => {
+    const lim = rs.maxDesigns, spec = { type: st.type, R: st.type === 'satellite' ? 0 : st.R, V: st.V, W: st.W, S: st.S, M: st.M, name: st.name.trim() };
+    if (lim && H.liveDesigns(p) >= lim) { a.alertOver([H.say(g, H.DATA.alerts[15] || 'Your assembly lines are full.')], 'en'); return; }
+    H.findOrCreateDesign(g, p, spec); a.save(); a.closeModal(); a.renderPanel();
+  }, { hot: 0, def: true });
+  dlg = dDialog(512, 280, null, [dText(tx('Name of Ship Type:'), 16, 41, { hot: 13 }), nameF, dText(tx('Class:'), 296, 112, { hot: 1 }), cls,
+    dButton('Name It For Me', 64, 238, 136, 27, () => { st.name = H.designName(g, p, st.type); nameF.value = st.name; ok.disabled = false; ok.classList.remove('off'); }, { hot: 0 }), dButton('Cancel', 272, 238, 71, 27, () => a.closeModal(), { hot: 0 }), ok], 'Create New Ship Type');
+  paintCls(); draw(); return true;
+}
+function buildDos(sid) {
+  const a = window.HOAPI, H = window.HO, g = a.G, p = a.me(), s = g.stars[sid], rs = H.rules(g);
+  if (!H.feature(g, 'buildQueue') || s.owner !== a.ME) return false;
+  const slots = rs.queueSlots || 3;
+  let q = (s.queue || []).map(x => ({ did: x.did, n: x.n })), sel = 0;
+  const types = ['scout', 'fighter', 'colony', 'satellite', 'tanker', 'dread', 'bio', 'decoy'].filter(t => H.canBuildType(g, p, t));
+  const designs = () => p.designs.filter(d => !d.scrapped && types.includes(d.type)).reverse();
+  const top = dAt(a.el('div', { class: 'dd-gbox dd-qtop' }), 48, 42, 248, 83), cells = [0, 1, 2].map(i => { const c = dAt(a.el('div', { class: 'dd-qcell', role: 'option', tabindex: 0 }), 152, [154, 210, 265][i], 120, i === 2 ? 56 : 56); return c; });
+  const lst = dAt(a.el('div', { class: 'dd-list dd-types', role: 'listbox', 'aria-label': 'Available Types' }), 311, 42, 130, 224);
+  const dsg = (id) => p.designs.find(d => d.id === id);
+  const add = (d) => { const e = q.find(x => x.did === d.id); if (e) e.n++; else if (q.length < slots) q.push({ did: d.id, n: 1 }); else { a.toast(`${s.name}’s queue is full: it holds ${slots} kinds of ship.`); return; } draw(); };
+  const draw = () => {
+    top.textContent = ''; sel = Math.min(sel, Math.max(0, q.length - 1));
+    cells.forEach((c, i) => { c.textContent = ''; const it = q[i]; c.classList.toggle('sel', i === sel && !!it); c.setAttribute('aria-selected', String(i === sel && !!it)); if (!it) return; const d = dsg(it.did); if (!d) return;
+      c.append(dAt(shipPicEl(d, 28), 4, 4), dAt(a.el('span', { class: 'cap', translate: 'no' }, `${it.n} ${d.name}`), 4, 36, 112, 14)); });
+    const it = q[sel], d = it && dsg(it.did);
+    if (d) { const pr = rs.yardProgress ? rs.yardProgress(g, p, s) : null, c = H.shipCostNow(g, p, d);
+      top.append(dAt(shipPicEl(d, 40), 8, 8), dAt(a.el('span', { class: 'dd-t', translate: 'no' }, '$' + nf(c.money)), 140, 14, 100, 14), dAt(a.el('span', { class: 'dd-t', translate: 'no' }, (sel === 0 && pr ? pr.pct : 0) + '% Done'), 140, 34, 100, 14), dAt(a.el('span', { class: 'cap', translate: 'no' }, caption(d)), 8, 56, 232, 14)); }
+  };
+  const fill = () => { lst.textContent = ''; designs().forEach(d => { const it = a.el('div', { class: 'dd-type', role: 'option', tabindex: 0, 'aria-label': caption(d), onclick: () => add(d), onkeydown: (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); add(d); } } }, shipPicEl(d, 40), a.el('span', { class: 'cap', translate: 'no' }, caption(d))); lst.append(it); }); };
+  cells.forEach((c, i) => { c.addEventListener('click', () => { if (q[i]) { sel = i; draw(); } }); c.addEventListener('dblclick', () => { if (q[i] && --q[i].n <= 0) q.splice(i, 1); draw(); });
+    c.addEventListener('keydown', (e) => { if (q[i] && (e.key === 'Delete' || e.key === 'Backspace')) { e.preventDefault(); if (--q[i].n <= 0) q.splice(i, 1); draw(); } }); });
+  const commit = () => { const cur = () => (s.queue || []).slice();
+    // take away what is no longer wanted (last first), then add what was
+    for (let i = cur().length - 1; i >= 0; i--) { const w = q.find(x => x.did === cur()[i].did); let have = cur()[i].n, want = w ? w.n : 0; while (have-- > want) H.unqueueShip(g, a.ME, sid, i); }
+    for (const w of q) { const have = ((s.queue || []).find(x => x.did === w.did) || { n: 0 }).n; if (w.n > have) H.queueShips(g, a.ME, sid, w.did, w.n - have); }
+    a.save(); a.renderPanel(); a.draw(); };
+  const dlg = dDialog(496, 336, null, [dText('Shipbuilding queue at ' + s.name, 16, 14), top, dText(tx('In The Queue:'), 49, 154, { hot: 7 }), ...cells, dText(tx('Available Types'), 312, 28), lst,
+    dButton('Cancel', 305, 295, 70, 26, () => a.closeModal(), { hot: 0 }), dButton('OK', 385, 295, 70, 26, () => { commit(); a.closeModal(); }, { hot: 0, def: true })], 'Shipbuilding queue');
+  dlg.append(vScroll(lst, 432, 42, 224)); fill(); draw(); return true;
+}
+
+// Galaxy, Compare Players: 536 x 308. Before 2010 it is the sentence, a dimmed Show Skills and OK; the chart of later years is the classic window (kept difference)
+function compareDos() {
+  const a = window.HOAPI, H = window.HO, g = a.G, C = H.rules(g).compare; if (!C) return false;
+  const info = H.compareInfo(g, a.ME); if (info.kind !== 'none') return false;
+  dDialog(536, 308, null, [dText(a.tl(C.texts.none), 23, 14), dButton('Show Skills', 120, 267, 111, 27, () => {}, { hot: 0 }), dButton('OK', 345, 267, 70, 27, () => a.closeModal(), { hot: 0, def: true })], 'Compare Players');
+  const b = document.querySelector('.dd-btn'); if (b) { b.disabled = true; b.classList.add('off'); }
+  return true;
+}
+
+// Window, Reports: the program's report window, 321 x 125, a title bar and the reports, each its picture and its sentence, a scroll bar
+function reportsDos() {
+  const a = window.HOAPI, H = window.HO, g = a.G, p = a.me(), rs = H.rules(g);
+  const old = rs.reportHistory ? (p.reportLog || []) : [], ms = old.concat(p.inbox || []);
+  const box = dListBox(307, 99, 5, 21); box.classList.add('dd-reports'); box.style.padding = '0';
+  if (!ms.length) box.append(a.el('div', { class: 'dd-rep' }, a.el('span', { class: 'cap' }, tx('No reports this turn.'))));
+  ms.forEach((m, i) => { const t = a.el('span', { class: 'cap', translate: 'no' }); t.append(a.degText(H.say(g, m.text)));
+    box.append(a.el('div', { class: 'dd-rep', 'data-now': i === old.length ? '1' : null, tabindex: 0, role: 'option', onclick: () => { a.closeModal(); a.reportAction(m); } }, a.msgIconEl(m), t)); });
+  const d = dDialog(321, 125, 'Reports', [box], 'Reports'); d.append(vScroll(box, 305, 21, 99));
+  const now = box.querySelector('[data-now]'); if (now) box.scrollTop = now.offsetTop - box.offsetTop;
+  return true;
 }
 // enemy faces: the Mac skin's 16 hats become the DOS game's planet faces
 function faces() {

@@ -139,3 +139,39 @@ html.dosframe #msg .clock.pic { padding: 0; }
 .scrim:has(.win.dosw .cg-dos) { background: #000; }
 .win.dosw:has(.cg-dos) .picks, .win.dosw:has(.cg-dos) .picks label, .win.dosw:has(.cg-dos) .langnote { color: #ccc; }
 .win.dosw:has(.cg-dos) { display: flex; flex-direction: column; align-items: center; }
+
+/* the window library's vertical scroll bar: 8 wide, grey, black arrows, a thumb */
+.dd-vs { position: absolute; width: calc(8 * var(--du)); background: #aaa; border: calc(1 * var(--du)) solid #000; box-sizing: border-box; z-index: 2; }
+.dd-vs .a { position: absolute; left: 0; right: 0; height: calc(9 * var(--du)); background: #aaa; cursor: pointer; }
+.dd-vs .a.u { top: 0; } .dd-vs .a.d { bottom: 0; }
+.dd-vs .a::after { content: ""; position: absolute; left: calc(1 * var(--du)); border: calc(3 * var(--du)) solid transparent; }
+.dd-vs .a.u::after { top: calc(1 * var(--du)); border-bottom-color: #000; border-top-width: 0; }
+.dd-vs .a.d::after { bottom: calc(1 * var(--du)); border-top-color: #000; border-bottom-width: 0; }
+.dd-vs .th { position: absolute; left: 0; right: 0; background: #ddd; box-shadow: inset calc(1 * var(--du)) calc(1 * var(--du)) 0 #fff, inset calc(-1 * var(--du)) calc(-1 * var(--du)) 0 #555; cursor: pointer; }
+html.dosframe #panel .dosbudget { overflow: hidden; }
+html.dosframe #panel .dosbudget .grid { display: none; }
+html.dosframe #panel .dosbudget h3.dosstrip { position: relative; border-bottom: calc(1 * var(--du)) solid #000; }
+html.dosframe #panel .dosbudget h3.dosstrip::after { content: ""; position: absolute; left: 0; bottom: calc(-1 * var(--du)); width: 100%; height: calc(4 * var(--du)); background: repeating-linear-gradient(to right, #000 0, #000 calc(1 * var(--du)), transparent calc(1 * var(--du)), transparent calc(7.7 * var(--du))); }
+
+.dd-field { box-sizing: border-box; background: #aaa; border: 0; border-radius: 0; box-shadow: none; padding: 0 calc(1 * var(--du)); font: inherit; color: #000; outline: 0; caret-color: #a00000; }
+.dd-field:focus { background: #aaa; }
+.dd-btn.off, .dd-btn:disabled { color: #777; text-shadow: calc(1 * var(--du)) calc(1 * var(--du)) 0 #fff; }
+.dd-type { display: block; height: calc(56 * var(--du)); text-align: center; cursor: pointer; padding-top: calc(2 * var(--du)); box-sizing: border-box; }
+.dd-type img { display: block; margin: 0 auto; height: calc(40 * var(--du)); width: auto; image-rendering: pixelated; }
+.dd-type .cap, .dd-qcell .cap, .dd-qtop .cap { display: block; font: calc(12 * var(--du))/calc(14 * var(--du)) "DOS Geneva 9", sans-serif; white-space: nowrap; overflow: hidden; }
+.dd-type.sel { background: #000; color: #fff; }
+.dd-types { padding: 0; }
+.dd-qtop { background: #fff; }
+.dd-qcell { background: #fff; border: calc(1 * var(--du)) solid #000; box-sizing: border-box; border-top-width: calc(2 * var(--du)); cursor: pointer; }
+.dd-qcell.sel { background: #000; color: #fff; }
+.dd-qcell.sel .cap { color: #fff; }
+
+.dd-rep { display: flex; align-items: center; gap: calc(8 * var(--du)); min-height: calc(36 * var(--du)); padding: calc(2 * var(--du)) calc(4 * var(--du)); cursor: pointer; }
+.dd-rep img { width: calc(32 * var(--du)); height: calc(32 * var(--du)); flex: none; image-rendering: pixelated; }
+.dd-rep .cap { font: calc(12 * var(--du))/calc(14 * var(--du)) "DOS Geneva 9", sans-serif; }
+.dd-reports { padding: 0; }
+
+/* the reports' cards: the End Turn button keeps the map's top-left corner, a card sits under it, never wider than the map */
+html.dosframe #msg { display: flex; flex-direction: column; align-items: flex-start; gap: calc(4 * var(--du)); max-width: calc(380 * var(--du)); }
+html.dosframe #msg .clock { order: -1; flex: none; }
+html.dosframe #msg .card { max-width: 100%; }

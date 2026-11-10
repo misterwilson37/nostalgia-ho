@@ -9,8 +9,9 @@ draws its panels in). The format, worked out from the records and checked agains
     glyph x positions are the table's plus `dx`.
     Geneva_9 and Geneva_9BC (the bold): strike at byte 564 of the record, 14 rows of 134 bytes, dx 0, 12 glyph rows (ascent 10, descent 2);
     Chicago_12: strike at byte 660, 16 rows of 172 bytes, dx 1, 15 glyph rows (ascent 12, descent 3).
-    (The other records are not read. Geneva_9B, the wide bold the program's money lines use (screenshot v20dos-bold-compare.png: about 1.2 times the regular's width), has a strike
-    layout not yet found, so geneva9bold.ttf is the regular smeared one pixel with a pixel more advance: a kept difference, said in docs/dos20-findings.md.)
+    Geneva_9B (the wide bold of the money lines): strike at byte 674, 13 rows of 158 bytes, dx 0, 12 glyph rows after the header row (found by searching the record for the
+    bitmap of the R photographed from the running program: one hit, at stride 158).
+    (The other records are not read.)
 
     python3 tools/extract/dospfn.py <folder with HO.PRS>      (needs fontTools: pip install fonttools)
 
@@ -28,7 +29,7 @@ while p + 28 <= len(d):
 OUT = os.path.join(ROOT, 'assets', 'skins', 'dos', 'fonts'); os.makedirs(OUT, exist_ok=True)
 FONTS = [  # record, file, family, strike start, rows, stride, dx, first drawn row, glyph rows, ascent
     ('Geneva_9', 'geneva9.ttf', 'DOS Geneva 9', 564, 14, 134, 0, 2, 12, 10),
-    ('Geneva_9', 'geneva9bold.ttf', 'DOS Geneva 9 Bold', 564, 14, 134, 0, 2, 12, 10, 1),  # SYNTHETIC bold: see the note above
+    ('Geneva_9B', 'geneva9bold.ttf', 'DOS Geneva 9 Bold', 674, 13, 158, 0, 1, 12, 10),
     ('Chicago_12', 'chicago12.ttf', 'DOS Chicago 12', 660, 16, 172, 1, 1, 15, 12)]
 for rec, fn, fam, S, rows, stride, dx, r0, gr, asc, *bold in FONTS:
     bold = bool(bold)
