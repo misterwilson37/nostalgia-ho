@@ -489,6 +489,7 @@ function fleetBoxDos() {
     q.text(t, 3, top + 10, f.dest != null ? F9B : F9, { color: sl ? '#fff' : '#000' });
   });
   q.rect(232, 25, 240, 73, '#aaa'); q.x.strokeStyle = '#000'; q.x.lineWidth = 1; q.x.strokeRect(232.5, 25.5, 7, 47);
+  q.x.fillStyle = '#000'; q.x.beginPath(); q.x.moveTo(233, 33); q.x.lineTo(239, 33); q.x.lineTo(236, 28); q.x.fill(); q.x.beginPath(); q.x.moveTo(233, 65); q.x.lineTo(239, 65); q.x.lineTo(236, 70); q.x.fill();
   if (here.length > 4) { const hh = Math.max(6, 45 * 4 / here.length), y = 26 + (45 - hh) * FLEET_TOP / (here.length - 4); q.rect(233, y, 239, y + hh, '#555'); }
   q.hline(0, 240, 78);
   q.c.addEventListener('click', (ev) => { const pt = q.at(ev); if (pt.v < 25 || pt.v > 73) return;
@@ -898,8 +899,8 @@ function compareDos() {
     for (let k = 0; k < 9; k++) { const ix = Math.round(x0 + step * (k + 1)) - 16, iy = top + Math.trunc(unit * info.scores[k] / 10); if (im && im.width) x.drawImage(im, ix, iy, 32, 32); }
     kids.push(cv);
   }
-  const sk = dButton('Show Skills', 120, 267, 111, 27, () => { a.closeModal(); a.openSkills(); }, { hot: 0 });
-  kids.push(sk, dButton('OK', 345, 267, 70, 27, () => a.closeModal(), { hot: 0, def: true }));
+  const sk = dButton('Show Skills', 120, 267, 111, 27, () => { a.closeModal(); a.openSkills(); }, { hot: 0, def: info.kind === 'ranks' });
+  kids.push(sk, dButton('OK', 345, 267, 70, 27, () => a.closeModal(), { hot: 0, def: info.kind !== 'ranks' }));
   dDialog(536, 308, null, kids, 'Compare Players');
   if (info.kind === 'none') { sk.disabled = true; sk.classList.add('off'); }
   return true;
@@ -946,7 +947,7 @@ function organizeDos(sid) {
   const grp = () => { const t = piles.reduce((x, p) => x + p.n, 0); piles.forEach((p, i) => { p.n = i ? 0 : t; }); sel = null; show(); };
   const dvd = () => { const t = piles.reduce((x, p) => x + p.n, 0); piles.forEach(p => { p.n = 0; }); for (let k = 0; k < t; k++) { if (k < piles.length) piles[k].n = 1; else piles.push({ f: null, n: 1 }); } sel = null; show(); };
   dDialog(457, 323, null, [dText(tx('To Organize Fleets:'), 24, 14), dText('♦ ' + tx('Click and drag fleets into desired number of piles'), 24, 28), dText('♦ ' + tx('Shift-Click selects an entire pile'), 24, 42), box,
-    dButton('Group All', 33, 281, 94, 25, grp, { hot: 0, def: true }), dButton('Divide All', 145, 281, 102, 25, dvd, { hot: 0 }), dButton('Cancel', 272, 281, 71, 25, () => a.closeModal(), { hot: 0 }), dButton('OK', 361, 281, 70, 25, apply, { hot: 0 })], 'Organize Fleets');
+    dButton('Group All', 33, 281, 94, 25, grp, { hot: 0 }), dButton('Divide All', 145, 281, 102, 25, dvd, { hot: 0 }), dButton('Cancel', 272, 281, 71, 25, () => a.closeModal(), { hot: 0 }), dButton('OK', 361, 281, 70, 25, apply, { hot: 0 })], 'Organize Fleets');
   show(); return true;
 }
 
@@ -955,7 +956,7 @@ function dCells(l, t, w, h, cols, cw, chh) {
   const a = window.HOAPI, box = a.el('div', { class: 'dd-list dd-cells', role: 'listbox' }); box.style.padding = '0'; dAt(box, l, t, w, h);
   return { el: box, set(cells) {
     box.textContent = '';
-    cells.forEach((c, i) => { const d = dAt(a.el('div', { class: 'dd-cell2' + (c.off ? ' off' : ''), role: 'option', tabindex: c.off ? -1 : 0 }), (i % cols) * cw + 2, Math.floor(i / cols) * chh + 3, cw - 2, chh - 3);
+    cells.forEach((c, i) => { const d = dAt(a.el('div', { class: 'dd-cell2' + (c.icon ? ' has' : '') + (c.off ? ' off' : ''), role: 'option', tabindex: c.off ? -1 : 0 }), (i % cols) * cw + 2, Math.floor(i / cols) * chh + 3, cw - 2, chh - 3);
       const im = c.icon && a.IMG[c.icon]; if (im) d.append(dAt(a.el('img', { src: im.src, alt: '' }), (cw - 2 - 32) / 2, 4, 32, 32));
       d.append(dAt(a.el('span', { class: 'cap', translate: 'no' }, c.name || ''), 0, 38, cw - 2, 14)); if (c.pick) { d.addEventListener('click', c.pick); d.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); c.pick(); } }); } box.append(d); });
   } };

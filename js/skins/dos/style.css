@@ -198,3 +198,15 @@ html.dosframe .dosroster .rdone { margin-left: 0; padding: 0; position: absolute
 .dd-cell2.off { opacity: .4; cursor: default; }
 .dd-cell2 .cap { font: calc(12 * var(--du))/calc(14 * var(--du)) "DOS Geneva 9", sans-serif; text-align: center; white-space: nowrap; overflow: hidden; }
 .dd-cell2:focus-visible { outline: 1px dotted #000; }
+
+.dd-btn:focus { outline: none; }
+.dd-btn:focus-visible { outline: calc(1 * var(--du)) dotted #000; outline-offset: calc(-4 * var(--du)); }
+.dd-btn.def:focus-visible { outline: calc(2 * var(--du)) solid #000; outline-offset: calc(-1 * var(--du)); }
+.dd-cell2 { box-sizing: border-box; }
+.dd-cell2.has { border: calc(1 * var(--du)) solid #000; }
+/* the program's button: grey #aaa face, a black outline, white top-left edge, dark #555 bottom-right (the OS look's own button rules are more specific, hence !important) */
+.dd .dd-btn { background: #aaa !important; border: calc(1 * var(--du)) solid #000 !important; border-radius: 0 !important; box-shadow: inset calc(1 * var(--du)) calc(1 * var(--du)) 0 #fff, inset calc(-2 * var(--du)) calc(-2 * var(--du)) 0 #555 !important; font-weight: normal !important; color: #000 !important; text-shadow: calc(1 * var(--du)) 0 0 #000 !important; }
+.dd .dd-btn:active { box-shadow: inset calc(1 * var(--du)) calc(1 * var(--du)) 0 #555 !important; }
+.dd .dd-btn.def { border-width: calc(2 * var(--du)) !important; }
+.dd .dd-btn.off, .dd .dd-btn:disabled { color: #777 !important; text-shadow: calc(1 * var(--du)) calc(1 * var(--du)) 0 #fff !important; }
+.dd .dd-btn { font: calc(14 * var(--du))/calc(14 * var(--du)) "DOS Bios", monospace !important; -webkit-font-smoothing: none; }
