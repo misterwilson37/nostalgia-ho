@@ -1,5 +1,7 @@
 # Mac 2.0.1: the display audit (November 2026, begun)
 
+**Provided by PC Games Vault (pcgamesvault.com) and digitized by Britt Dodd.** (Jake, November 2026: credit for everything that came, or could have come, from the Mac 2.0.1 disks, including copies of the same files from elsewhere.)
+
 *The rules of 2.0.1 are in `docs/dos-findings.md` ("Mac 2.0.1 differs") and `js/rules-mac20.js`. This is its display side.*
 
 ## What was made

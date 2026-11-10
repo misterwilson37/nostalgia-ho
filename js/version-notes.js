@@ -302,6 +302,7 @@ root.HOVERSIONS = {
     ],
   },
   mac20: {
+    credit: 'Provided by PC Games Vault (pcgamesvault.com) and digitized by Britt Dodd.', // (the Mac 2.0.1 disks: the program, its art, sounds, notes and everything read from them)
     intro: 'Delta Tao’s own Mac build of 2.0.1, the version the DOS and Windows 3.1 edition ports: the same rules, routine for routine, with a few differences in its code. Every rule routine of the Mac program has been read with its own names.',
     released: [
       'Probably: 2.0 came out in January 1992 (Changing Path #2 planned it for that month’s Macworld Expo in San Francisco; Macworld’s April 1992 advertisements sell “2.0”).',

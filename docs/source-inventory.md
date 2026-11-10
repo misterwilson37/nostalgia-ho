@@ -118,6 +118,8 @@ read** (and why it doesn't matter, or what it might hold).
 
 ## 2.0.1 (Mac, 1992)
 
+**Provided by PC Games Vault (pcgamesvault.com) and digitized by Britt Dodd.** (Jake, November 2026: credit for everything that came, or could have come, from the Mac 2.0.1 disks, including copies of the same files from elsewhere.)
+
 - `Spaceward Ho v2.01 - Disk 1 - Program.dc42` (DiskCopy 4.2): the program (`Spaceward
   Ho! 2.0.1`, the same fork as `Spaceward_Ho!_2.0.1.rsrc`: `DITL` 78, `DLOG` 26, `ALRT` 51,
   `CNTL` 14, `STR#` 25, `MENU` 8, `PICT` 241, `CODE` 23, `MaTh` 3, `Stup`), TeachText 1.2,

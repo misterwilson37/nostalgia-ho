@@ -4889,6 +4889,7 @@ function openAbout() {
     patched ? el('p', { class: 'note' }, `This game has the ${pv} patch on: the remake’s own fixes for ${rs.version}’s obvious bugs, not an official release. The Ho menu’s Patch notes say what each one fixes.`) : null,
     inEnglish(null, noteLines),
     N.intro ? el('p', docAttrs([N.intro]), N.intro) : null,
+    N.credit ? el('p', { class: 'sub credit-src' }, N.credit) : null, // (where this version's originals came from, Jake's credit)
     part('When it came out', N.released, 'released'),
     rs.hoedown ? el('section', { class: 'vnotes' }, el('h4', null, 'Full Hoedown'),
       // (3.0.1 and 1.2 have no joke of their own to turn up: their box is for "Every version's jokes")
