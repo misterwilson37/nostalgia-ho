@@ -186,7 +186,9 @@ async function playRun(browser, job, outDir, idx) {
         if (/unexpected happened|HO bug/i.test(lbl)) fail(`the game's own bug window appeared: ${lbl}`);
         if (!await closeAll(what + ' dialog')) break; continue;
       }
-      if (card) { await ptr.tap(card.x, card.y); await sleep(70); continue; }
+      // (a card says "click to continue": tap that line when it has one; the middle of a card can be a button of its own, such as "Review battle", which opens a window)
+      const cont = card && await aim('.card:not(.end):not(.waiting) .count', { what: 'card continue line', soft: true });
+      if (card) { const t = cont || card; await ptr.tap(t.x, t.y); await sleep(70); continue; }
       break;
     }
   };
@@ -506,12 +508,12 @@ async function contact(browser, results, outDir) {
   const css = 'body{background:#111;color:#ddd;font:12px/1.3 sans-serif;margin:8px}h2{font-size:14px;margin:14px 0 4px;color:#fc6}h2.f{color:#f66}h2.ok{color:#8d8}.row{display:flex;flex-wrap:wrap;gap:6px}.c{width:300px}.c img{width:300px;display:block;border:1px solid #444;background:#000}.c div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.fl{color:#f88;white-space:normal!important;font-size:11px}.wn{color:#da6;white-space:normal!important;font-size:11px}';
   const head = results.map(r => `<h2 class="${r.status.startsWith('FAIL') ? 'f' : 'ok'}">${esc(r.tag)} - ${esc(r.status)}</h2>` + (r.fails.length ? `<div class="fl">${r.fails.map(esc).join('<br>')}</div>` : '') + (r.warns.length ? `<div class="wn">${r.warns.slice(0, 6).map(esc).join('<br>')}</div>` : '') + `<div class="row">${r.shots.map(s => `<div class="c"><a href="${s.f}"><img loading="lazy" src="${s.f}"></a><div>${esc(r.job.skin + ' / ' + r.job.rules + ' / ' + r.job.size + ' / ' + s.name)}</div></div>`).join('')}</div>`).join('\n');
   fs.writeFileSync(path.join(outDir, 'contact.html'), `<!doctype html><meta charset=utf-8><title>real-play contact sheet</title><style>${css}</style><h1>real-play contact sheet</h1>${head}`);
-  // PNG pages of 24 shots (6 x 4), each captioned
+  // PNG pages of 24 shots (6 x 4), each captioned (the pictures are inlined as data: page.setContent runs on about:blank, which may not load file: pictures, and the sheet came out as grey boxes)
   const all = []; for (const r of results) for (const s of r.shots) all.push({ r, s });
   const per = 24; let page = null; const ctx = await browser.newContext({ viewport: { width: 2400, height: 1500 } }); page = await ctx.newPage();
   const pages = Math.ceil(all.length / per);
   for (let p = 0; p < pages; p++) {
-    const cells = all.slice(p * per, (p + 1) * per).map(({ r, s }) => `<div class="g${r.status.startsWith('FAIL') ? ' bad' : ''}"><img src="file://${path.join(outDir, s.f)}"><div>${esc(r.job.skin + ' / ' + r.job.rules + ' / ' + r.job.size)}</div><div>${esc(s.name)}</div></div>`).join('');
+    const cells = all.slice(p * per, (p + 1) * per).map(({ r, s }) => `<div class="g${r.status.startsWith('FAIL') ? ' bad' : ''}"><img src="data:image/jpeg;base64,${fs.readFileSync(path.join(outDir, s.f)).toString('base64')}"><div>${esc(r.job.skin + ' / ' + r.job.rules + ' / ' + r.job.size)}</div><div>${esc(s.name)}</div></div>`).join('');
     await page.setContent(`<!doctype html><style>body{margin:0;background:#111;color:#eee;font:15px sans-serif}.w{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;padding:8px}.g{background:#222;padding:4px;overflow:hidden}.g.bad{outline:2px solid #f55}img{width:100%;height:210px;object-fit:contain;background:#000;display:block}.g div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}</style><div class="w">${cells}</div>`);
     await page.waitForFunction(() => [...document.images].every(i => i.complete)).catch(() => {}); await sleep(100);
     await page.screenshot({ path: path.join(outDir, `contact-${String(p + 1).padStart(2, '0')}.png`), fullPage: true });
