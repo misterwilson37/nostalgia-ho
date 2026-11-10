@@ -254,7 +254,7 @@ window.HOTHEME = {
   mapBg: document.documentElement.classList.contains('os-dos') ? '#000' : undefined, // (the program's map is plain black)
   bgStars: document.documentElement.classList.contains('os-dos') ? false : undefined,
   mapFont(n) { return frameOn() ? "12px 'DOS Geneva 9'" : null; },
-  window(name) { if (!frameOn() || !window.HOAPI.G) return false; if (name === 'autoplay') return autoPlayDos(); if (name === 'fleets') return fleetsDos(); if (name === 'types') return shipTypesDos(arguments[1]); if (name === 'build') return buildDos(arguments[1]); if (name === 'stars') return starsDos(); if (name === 'compare') return compareDos(); if (name === 'reports') return reportsDos(); if (name === 'group') return organizeDos(arguments[1]); return false; },
+  window(name) { if (!frameOn() || !window.HOAPI.G) return false; if (name === 'autoplay') return autoPlayDos(); if (name === 'fleets') return fleetsDos(); if (name === 'types') return shipTypesDos(arguments[1]); if (name === 'build') return buildDos(arguments[1]); if (name === 'stars') return starsDos(); if (name === 'compare') return compareDos(); if (name === 'reports') return reportsDos(); if (name === 'group') return organizeDos(arguments[1]); if (name === 'chat') return chatDos(); return false; },
   newGame(f) { createGalaxyDos(f); },
   keyName(k) { return '[' + k + ']'; },
   // the DOS title screen: the two halves of its credits picture
@@ -947,6 +947,46 @@ function organizeDos(sid) {
   dDialog(457, 323, null, [dText(tx('To Organize Fleets:'), 24, 14), dText('♦ ' + tx('Click and drag fleets into desired number of piles'), 24, 28), dText('♦ ' + tx('Shift-Click selects an entire pile'), 24, 42), box,
     dButton('Group All', 33, 281, 94, 25, grp, { hot: 0, def: true }), dButton('Divide All', 145, 281, 102, 25, dvd, { hot: 0 }), dButton('Cancel', 272, 281, 71, 25, () => a.closeModal(), { hot: 0 }), dButton('OK', 361, 281, 70, 25, apply, { hot: 0 })], 'Organize Fleets');
   show(); return true;
+}
+
+// Galaxy, Send Message: 417 x 337 (the program's four-step window: who, saying what, about what, which one; the left list holds what is chosen, the right the choices)
+function dCells(l, t, w, h, cols, cw, chh) {
+  const a = window.HOAPI, box = a.el('div', { class: 'dd-list dd-cells', role: 'listbox' }); box.style.padding = '0'; dAt(box, l, t, w, h);
+  return { el: box, set(cells) {
+    box.textContent = '';
+    cells.forEach((c, i) => { const d = dAt(a.el('div', { class: 'dd-cell2' + (c.off ? ' off' : ''), role: 'option', tabindex: c.off ? -1 : 0 }), (i % cols) * cw + 2, Math.floor(i / cols) * chh + 3, cw - 2, chh - 3);
+      const im = c.icon && a.IMG[c.icon]; if (im) d.append(dAt(a.el('img', { src: im.src, alt: '' }), (cw - 2 - 32) / 2, 4, 32, 32));
+      d.append(dAt(a.el('span', { class: 'cap', translate: 'no' }, c.name || ''), 0, 38, cw - 2, 14)); if (c.pick) { d.addEventListener('click', c.pick); d.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); c.pick(); } }); } box.append(d); });
+  } };
+}
+function chatDos() {
+  const a = window.HOAPI, H = window.HO, g = a.G, ME = a.ME, C = H.rules(g).cannedChat; if (!C) return false;
+  const tos = C.to(g, ME), ok = tos.filter(o => !o[2]);
+  if (!ok.length) { a.toast(H.say(g, H.DATA.alerts[6] || 'There is no one else to send something to.')); return true; }
+  const PR = ['Send Message To Who?', 'Saying What?', 'About What?', 'Which One?'];
+  const hat = (q) => 'dos:i' + (q.id === ME ? (q.female ? 1500 : 1000) : (q.female ? 2500 : 2000) + ((q.face || 0) % 20));
+  const pl = (id) => g.players[+id];
+  let step = 0; const ch = [null, null, null, null];
+  const prompt = dText(tx(PR[0]), 151, 14);
+  const left = dCells(75, 35, 58, 238, 1, 58, 59), right = dCells(148, 35, 248, 238, 5, 50, 59);
+  const send = dButton('Send', 288, 294, 71, 27, () => {
+    const r = H.sendCanned(g, ME, C.make(g, ME, isNaN(+ch[0].id) ? ch[0].id : +ch[0].id, ch[1].i, [ch[2].i, isNaN(+ch[3].id) ? ch[3].id : +ch[3].id]));
+    if (r === 'limit') { a.chatLimitToast(); return; } if (r !== 'ok') return; a.Sound.play(5000); a.closeModal(); a.save();
+  }, { hot: 0 });
+  const choices = () => {
+    if (step === 0) return tos.map(o => ({ id: String(o[0]), name: o[1], icon: pl(o[0]) ? hat(pl(o[0])) : null, off: !!o[2] }));
+    if (step === 1) return C.actions.map((x, i) => ({ id: i, i, name: x.label, icon: 'dos:i' + (3000 + i) }));
+    if (step === 2) return C.actions[ch[1].i].parts[0][2].map((o, i) => ({ id: i, i, name: o[0], icon: 'dos:i' + (3010 + i), kind: o[1] }));
+    const kind = ch[2].kind; return C.list(g, ME, kind, a.UI.sel).map(o => ({ id: String(o[0]), name: o[1], icon: kind === 'players' && pl(o[0]) ? hat(pl(o[0])) : null, off: !!o[2] }));
+  };
+  const refresh = () => {
+    prompt.textContent = tx(PR[Math.min(step, 3)]);
+    left.set(ch.map((c, i) => c ? { name: c.name, icon: c.icon, pick: () => { for (let k = i; k < 4; k++) ch[k] = null; step = i; refresh(); } } : { name: '' }));
+    right.set(step > 3 ? [] : choices().map(c => Object.assign(c, { pick: c.off ? null : () => { ch[step] = { id: c.id, i: c.i, name: c.name, icon: c.icon, kind: c.kind }; step = ch[1] && ch[1].i === 2 && step === 1 ? 2 : step + 1; refresh(); } })));
+    send.disabled = !(step > 3); send.classList.toggle('off', send.disabled);
+  };
+  dDialog(417, 337, null, [dText(tx('Send Message:'), 7, 14), prompt, dText(tx('To:'), 49, 41), dText(tx('Content:'), 7, 97), left.el, right.el, dButton('Cancel', 184, 294, 71, 27, () => a.closeModal(), { hot: 0 }), send], 'Send Message');
+  refresh(); return true;
 }
 // enemy faces: the Mac skin's 16 hats become the DOS game's planet faces
 function faces() {

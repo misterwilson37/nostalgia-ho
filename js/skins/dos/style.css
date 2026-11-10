@@ -192,3 +192,9 @@ html.dosframe .dosroster .rdone { margin-left: 0; padding: 0; position: absolute
 .dd-pile img { height: calc(40 * var(--du)); width: auto; image-rendering: pixelated; }
 .dd-pile.sel { outline: calc(1 * var(--du)) dotted #000; outline-offset: calc(-3 * var(--du)); }
 .dd-piles { padding: 0; }
+
+.dd-cells { overflow: hidden; }
+.dd-cell2 { cursor: pointer; }
+.dd-cell2.off { opacity: .4; cursor: default; }
+.dd-cell2 .cap { font: calc(12 * var(--du))/calc(14 * var(--du)) "DOS Geneva 9", sans-serif; text-align: center; white-space: nowrap; overflow: hidden; }
+.dd-cell2:focus-visible { outline: 1px dotted #000; }
