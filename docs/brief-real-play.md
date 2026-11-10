@@ -46,6 +46,25 @@ The first `--quick` run had 141 runs: 47 ok, 27 ok with warnings, 67 FAIL. The m
 Many of these are probably the tool's own mistakes: a skin that sends fleets differently, or a menu it couldn't find.
 Some are real.
 
+## Update (10 November 2026): start from a fresh run
+
+The failure list above is out of date. Since it was written:
+- the DOS skin passes all 48 runs (another agent is still finishing that skin);
+- the Interface-zoom package fixed several of the tool's own mistakes:
+  - message cards tapped on their own buttons;
+  - the iOS Preferences' "Remake options…" button never pressed;
+  - route planning onto a covered star.
+
+So **first run the tool afresh** on the current branch (`--quick`, then the full matrix) and triage what it reports *now*.
+
+**Leave `js/skins/dos/` alone:** another agent is working there. Pull before each commit and add only your own paths.
+
+Known open items, from `docs/interface-zoom/HANDOFF.md`, with the iOS or Android skin playing other versions' rules:
+- menus running off the top of a sideways phone;
+- fleet drags that leave no destination;
+- a planned route lost at End Turn;
+- a fleet's dot covered by the HUD strip.
+
 ## The job
 
 1. **Triage every failure.** For each one, decide whether it's real or the tool's mistake.
