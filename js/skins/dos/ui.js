@@ -254,6 +254,9 @@ window.HOTHEME = {
   mapBg: document.documentElement.classList.contains('os-dos') ? '#000' : undefined, // (the program's map is plain black)
   bgStars: document.documentElement.classList.contains('os-dos') ? false : undefined,
   mapFont(n) { return frameOn() ? "12px 'DOS Geneva 9'" : null; },
+  alertBox(paras) { return frameOn() ? alertDos(paras, [{ label: 'OK', def: true }]) : null; },
+  confirm(text, yes, labels) { return frameOn() ? !!alertDos([typeof text === 'string' ? text : (text.textContent || '')], [{ label: labels ? labels[0] : 'OK', def: true, fn: yes }, { label: labels ? labels[1] : 'Cancel' }]) : false; },
+  alert(kind, text, yes) { return frameOn() ? !!alertDos([typeof text === 'string' ? text : (text.textContent || '')], [{ label: 'OK', def: true, fn: yes }, { label: 'Cancel' }]) : false; },
   window(name) { if (!frameOn() || !window.HOAPI.G) return false; if (name === 'autoplay') return autoPlayDos(); if (name === 'fleets') return fleetsDos(); if (name === 'types') return shipTypesDos(arguments[1]); if (name === 'build') return buildDos(arguments[1]); if (name === 'stars') return starsDos(); if (name === 'compare') return compareDos(); if (name === 'reports') return reportsDos(); if (name === 'group') return organizeDos(arguments[1]); if (name === 'chat') return chatDos(); return false; },
   newGame(f) { createGalaxyDos(f); },
   keyName(k) { return '[' + k + ']'; },
@@ -899,11 +902,47 @@ function compareDos() {
     for (let k = 0; k < 9; k++) { const ix = Math.round(x0 + step * (k + 1)) - 16, iy = top + Math.trunc(unit * info.scores[k] / 10); if (im && im.width) x.drawImage(im, ix, iy, 32, 32); }
     kids.push(cv);
   }
-  const sk = dButton('Show Skills', 120, 267, 111, 27, () => { a.closeModal(); a.openSkills(); }, { hot: 0, def: info.kind === 'ranks' });
+  const sk = dButton('Show Skills', 120, 267, 111, 27, () => skillsDos(dlg), { hot: 0, def: info.kind === 'ranks' });
   kids.push(sk, dButton('OK', 345, 267, 70, 27, () => a.closeModal(), { hot: 0, def: info.kind !== 'ranks' }));
-  dDialog(536, 308, null, kids, 'Compare Players');
+  const dlg = dDialog(536, 308, null, kids, 'Compare Players');
   if (info.kind === 'none') { sk.disabled = true; sk.classList.add('off'); }
   return true;
+}
+// Show Skills: a second window over the chart (432 x 308 at 56 right of the chart's left edge; the chart stays under it), the list of players with their skill, the Computer Intelligence, OK
+function skillsDos(under) {
+  const a = window.HOAPI, H = window.HO, g = a.G, L = window.HOLANG, lang = (g.opts && g.opts.lang) || H.ownLanguage(H.ownRules(g));
+  const SKK = ['novice', 'beginner', 'normal', 'advanced', 'expert'], IQK = ['dumb', 'average', 'smart', 'diabolical'], SK = ['Novice', 'Beginner', 'Normal', 'Advanced', 'Expert'], IQ = ['Dumb', 'Average', 'Smart', 'Diabolical'];
+  const off = L && lang === 'de' && L.dosDe && L.dosDe.s ? { sk: [96, 97, 98, 99, 100].map(i => L.dosDe.s[i]), iq: [16, 17, 18].map(i => L.dosDe.s[i]) } : null;
+  const skillName = (k) => { const i = SKK.indexOf(k) < 0 ? 2 : SKK.indexOf(k); return off && off.sk && off.sk[i] ? off.sk[i] : tx(SK[i]); };
+  const iqi = Math.max(0, IQK.indexOf((g.opts && g.opts.iq) || 'average')), iq = off && off.iq && off.iq[iqi] ? off.iq[iqi] : tx(IQ[iqi]);
+  const d = a.el('div', { class: 'dd dd-over', role: 'dialog', 'aria-label': tx('List of all players and their skill levels:') });
+  d.style.width = du(432); d.style.height = du(308); dAt(d, 56, 0);
+  const box = dListBox(397, 213, 18, 33); let cur = 0;
+  const show = () => { box.textContent = ''; g.players.forEach((q, i) => box.append(a.el('div', { class: 'dd-row dd-skill' + (i === cur ? ' sel' : ''), role: 'option', 'aria-selected': String(i === cur), translate: 'no', onclick: () => { cur = i; show(); } },
+    a.el('span', { class: 'n' }, q.name), a.el('span', { class: 'k' }, skillName(q.skill))))); };
+  show();
+  const ok = dButton('OK', 328, 266, 71, 27, () => d.remove(), { hot: 0 });
+  d.append(dText(tx('List of all players and their skill levels:'), 22, 14, { hot: lang === 'en' || !lang ? 0 : -1 }), box, dText(tx('Computer Intelligence:') + ' ' + iq, 22, 266), ok);
+  under.append(d); ok.focus();
+  d.addEventListener('keydown', (e) => { if (e.key === 'Escape') { e.stopPropagation(); e.preventDefault(); d.remove(); } }, true);
+  return d;
+}
+// The program's alert box (captured: the fuel alert, 352 x 210): the text in the screen font from 24 right and 13 down (40 characters a line, a blank line between paragraphs),
+// the mascot (d3520) under it at 23 / 6 below the text, the buttons beside it at 23 below the picture's top; the box is 19 under the picture, and sits 7 above the screen's middle.
+// Kept difference: only the fuel alert was captured, so the picture and the button words of other alerts, and the box's height for other lengths, follow the same rule.
+function alertDos(paras, btns) {
+  const a = window.HOAPI, wrap = (t) => { const out = []; String(t).split('\n').forEach(par => { let line = ''; par.split(' ').forEach(w => { if (line && (line + ' ' + w).length > 40) { out.push(line); line = w; } else line = line ? line + ' ' + w : w; }); out.push(line); }); return out; };
+  const lines = []; paras.forEach((t, i) => { if (i) lines.push(''); wrap(t).forEach(l => lines.push(l)); });
+  const pic = 13 + 14 * lines.length + 6, h = pic + 74 + 19, d = a.el('div', { class: 'dd dd-alert', role: 'alertdialog', 'aria-modal': 'true', 'aria-label': paras[0] });
+  d.style.width = du(352); d.style.height = du(h);
+  const done = () => back.remove();
+  lines.forEach((l, i) => l && d.append(dText(l, 23, 13 + 14 * i)));
+  const im = a.IMG['dos:d3520']; if (im) { const c = a.el('canvas', { class: 'dd-pic', 'aria-hidden': 'true' }); c.width = 74; c.height = 74; c.getContext('2d').drawImage(im, 0, 0); dAt(c, 22, pic, 74, 74); c.style.imageRendering = 'pixelated'; d.append(c); }
+  const n = btns.length, bw = 72, gap = 16, x0 = Math.round(176 - (n - 1) * (bw + gap) / 2);
+  btns.forEach((b, i) => d.append(dButton(b.label, x0 + i * (bw + gap), pic + 23, bw, 28, () => { done(); if (b.fn) b.fn(); }, { hot: 0, def: b.def })));
+  const back = a.el('div', { class: 'scrim dd-alertscrim', onkeydown: (e) => { if (e.key === 'Escape') { e.stopPropagation(); done(); } } }, a.el('div', { class: 'dd-alertpos' }, d));
+  document.body.append(back); const f = d.querySelector('.dd-btn.def') || d.querySelector('.dd-btn'); if (f) f.focus();
+  return back;
 }
 // Window, Reports: the program's report window, 321 x 125, a title bar and the reports, each its picture and its sentence, a scroll bar
 function reportsDos() {

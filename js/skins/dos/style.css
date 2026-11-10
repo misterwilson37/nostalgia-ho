@@ -210,3 +210,13 @@ html.dosframe .dosroster .rdone { margin-left: 0; padding: 0; position: absolute
 .dd .dd-btn.def { border-width: calc(2 * var(--du)) !important; }
 .dd .dd-btn.off, .dd .dd-btn:disabled { color: #777 !important; text-shadow: calc(1 * var(--du)) calc(1 * var(--du)) 0 #fff !important; }
 .dd .dd-btn { font: calc(14 * var(--du))/calc(14 * var(--du)) "DOS Bios", monospace !important; -webkit-font-smoothing: none; }
+
+/* Show Skills: the second window over the chart; the player's name and the skill in a second column (measured: 160 apart) */
+.dd-over { z-index: 5; }
+.dd-skill { display: flex; padding-left: calc(1 * var(--du)); } .dd-skill .n { width: calc(159 * var(--du)); } .dd-skill .k { flex: 1; }
+.dd-list .dd-skill { margin: 0 calc(3 * var(--du)) 0 calc(3 * var(--du)); }
+
+/* the program's alert box over the frame (the scrim carries no dimming; the box sits 7 pixels above the middle) */
+.dd-alertscrim { background: transparent; display: flex; align-items: center; justify-content: center; }
+.dd-alertpos { transform: translateY(calc(-7 * var(--du))); }
+.dd-alert .dd-t { white-space: pre; }
