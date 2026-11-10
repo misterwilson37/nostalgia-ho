@@ -902,6 +902,18 @@ function compareDos() {
   if (info.kind === 'none') { sk.disabled = true; sk.classList.add('off'); }
   return true;
 }
+// Window, Reports: the program's report window, 321 x 125, a title bar and the reports, each its picture and its sentence, a scroll bar
+function reportsDos() {
+  const a = window.HOAPI, H = window.HO, g = a.G, p = a.me(), rs = H.rules(g);
+  const old = rs.reportHistory ? (p.reportLog || []) : [], ms = old.concat(p.inbox || []);
+  const box = dListBox(307, 99, 5, 21); box.classList.add('dd-reports'); box.style.padding = '0';
+  if (!ms.length) box.append(a.el('div', { class: 'dd-rep' }, a.el('span', { class: 'cap' }, tx('No reports this turn.'))));
+  ms.forEach((m, i) => { const t = a.el('span', { class: 'cap', translate: 'no' }); t.append(a.degText(H.say(g, m.text)));
+    box.append(a.el('div', { class: 'dd-rep', 'data-now': i === old.length ? '1' : null, tabindex: 0, role: 'option', onclick: () => { a.closeModal(); a.reportAction(m); } }, a.msgIconEl(m), t)); });
+  const d = dDialog(321, 125, 'Reports', [box], 'Reports'); d.append(vScroll(box, 305, 21, 99));
+  const now = box.querySelector('[data-now]'); if (now) box.scrollTop = now.offsetTop - box.offsetTop;
+  return true;
+}
 // enemy faces: the Mac skin's 16 hats become the DOS game's planet faces
 function faces() {
   const o = {};
