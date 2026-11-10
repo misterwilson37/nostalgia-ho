@@ -256,7 +256,7 @@ window.HOTHEME = {
   mapFont(n) { return frameOn() ? "12px 'DOS Geneva 9'" : null; },
   window(name) { if (!frameOn() || !window.HOAPI.G) return false; if (name === 'autoplay') return autoPlayDos(); if (name === 'fleets') return fleetsDos(); if (name === 'types') return shipTypesDos(arguments[1]); if (name === 'build') return buildDos(arguments[1]); if (name === 'stars') return starsDos(); if (name === 'compare') return compareDos(); if (name === 'reports') return reportsDos(); return false; },
   newGame(f) { createGalaxyDos(f); },
-  keyName(k) { return /^Ctrl/.test(k) ? '[' + k + ']' : '⌘' + k; },
+  keyName(k) { return '[' + k + ']'; },
   // the DOS title screen: the two halves of its credits picture
   title(frame, IMG, Sound) {
     const top = IMG[P + 'd998'], bot = IMG[P + 'd999'];
@@ -316,8 +316,9 @@ function menuLayoutDos() {
       ['Scrap Current Fleet', 'Ships/#3'], '-',
       [null, 'Ships/Review battle…']],
     Galaxy: [
-      ['Compare Players…', 'Galaxy/Compare players…'], ['List All Explored Stars…', 'Galaxy/List explored stars…'], ['Send Message…', 'Galaxy/Send a message…'], '-',
-      ['Zoom In', 'View/Zoom in'], ['Zoom Out', 'View/Zoom out'], '-', ['Fix Spending', 'Galaxy/Fix spending']],
+      it('Compare Players…', () => A().openCompare(), { shown: () => !!G() && !!rs().compare, key: 'Ctrl+Y' }), ['List All Explored Stars…', 'Galaxy/List explored stars…'], ['Send Message…', 'Galaxy/Send a message…'], '-',
+      it('Zoom In', () => { const m = A().map(); A().zoomAt(m.w / 2, m.h / 2, 1.3); }, { ghost: noGame, key: '+' }), it('Zoom Out', () => { const m = A().map(); A().zoomAt(m.w / 2, m.h / 2, 1 / 1.3); }, { ghost: noGame, key: '-' }), '-',
+      it('Fix Spending', () => A().openFixSpending(), { shown: () => !!G() && !!rs().fixSpending, ghost: noGame, key: 'Ctrl+F' })],
     Window: [['Reports', 'Galaxy/Report window…']]
   };
   if (win === 'win31') M.Help = [['How to play', 'Help/How to play']];
@@ -528,9 +529,10 @@ function techBoxDos() {
 }
 function rosterDos() {
   const a = window.HOAPI, g = a.G, box = a.el('div', { class: 'dosroster' });
-  for (const p of g.players.filter(x => x.human)) {
+  for (const p of g.players.filter(x => x.human || g.turn > 0)) {
     const im = a.IMG[p.id === a.ME ? 'white0_0' : 'bad' + (p.face || 0) + '_0'], done = !p.human || (g.done || []).includes(p.id);
-    const row = a.el('div', { class: 'rrow' + (p.alive ? '' : ' out') }, im ? a.el('img', { src: im.src, alt: '', width: 16, height: 16 }) : a.el('span'), a.el('span', { class: 'rname', translate: 'no' }, p.name), done && p.alive ? a.el('span', { class: 'rdone', translate: 'no' }, '✓') : null);
+    const row = a.el('div', { class: 'rrow' + (p.alive ? '' : ' out') }, im ? a.el('img', { src: im.src, alt: '', width: 16, height: 16 }) : a.el('span'), a.el('span', { class: 'rname', translate: 'no' }, p.name));
+    if (g.turn > 0 && p.alive && done) row.prepend(a.el('span', { class: 'rdone', translate: 'no' }, '\u2713'));
     box.append(row);
   }
   return box;
@@ -712,7 +714,7 @@ function fleetsDos() {
     a.UI.selFleet = cur.id; a.UI.sel = cur.star; a.closeModal(); a.centerOn(cur.star); a.renderPanel(); a.draw();
   }
   show();
-  dDialog(544, 322, null, [dText(tx('List of All Fleets:'), 16, 26), box, dButton('Go To Fleet', 112, 280, 111, 27, go, { hot: 0 }), dButton('OK', 328, 280, 72, 27, () => a.closeModal(), { hot: 0, def: true })], 'List of All Fleets');
+  dDialog(544, 322, null, [dText(tx('List of All Fleets:'), 16, 26), box, dButton('Go To Fleet', 112, 280, 111, 27, go, { hot: 0 }), dButton('OK', 328, 280, 72, 27, () => a.closeModal(), { hot: 0 })], 'List of All Fleets');
   return true;
 }
 function starsDos() { // the classic window, set as the program's (its list is already the program's fixed-pitch text, columns from the ruleset)
@@ -748,6 +750,7 @@ function createGalaxyDos(f) {
     const paint = () => cells.forEach((c, i) => { c.classList.toggle('sel', sel.value === vals[i]); c.setAttribute('aria-selected', String(sel.value === vals[i])); });
     paint(); sel.addEventListener('change', paint);
   });
+  const gal = field('galaxy'); if (gal && gal.value === 'Milky Way') gal.value = 'MilkyWay'; // (the program's default galaxy file is MilkyWay.Ho!, its window title "<player> in MilkyWay in 2000")
   const comp = field('computers');
   if (comp && comp.value === '4') comp.value = '1'; // (the program opens with one computer player)
   const num = dText(comp ? comp.value : '', 24, 238);
@@ -779,7 +782,7 @@ function renameDos(d, back) {
   const f = dField(24, 52, 200, 14, v, 15, (x) => { v = x; }, 'New Ship Name');
   dDialog(320, 150, null, [dText(tx('Type your new ship name or click on “Name It” for a suggestion:'), 16, 12, { w: 290 }), f,
     dButton('Name It', 16, 100, 90, 27, () => { v = window.HO.designName(a.G, a.me(), d.type); f.value = v; }, { hot: 0 }), dButton('Cancel', 118, 100, 90, 27, back, { hot: 0 }),
-    dButton('OK', 220, 100, 80, 27, () => { const n = v.trim(); if (n) { d.name = n.slice(0, 15); a.save(); a.renderPanel(); } back(); }, { hot: 0, def: true })], 'Rename');
+    dButton('OK', 220, 100, 80, 27, () => { const n = v.trim(); if (n) { d.name = n.slice(0, 15); a.save(); a.renderPanel(); } back(); }, { hot: 0 })], 'Rename');
 }
 function shipTypesDos(selId) {
   const a = window.HOAPI, H = window.HO, g = a.G, p = a.me(), rs = H.rules(g);
@@ -802,7 +805,7 @@ function shipTypesDos(selId) {
     const flip = () => { if (rs.flagScrapDesign) { rs.flagScrapDesign(g, p, cur, 'command'); a.save(); draw(); } else { const n = shipCount(cur.id); a.confirmBox(`Scrap this ship type and all ${n} existing ship${n === 1 ? '' : 's'} of it?`, () => { H.scrapDesign(g, a.ME, cur.id); a.closeModal(); a.renderPanel(); a.draw(); }); } };
     ck.addEventListener('click', flip); ck.addEventListener('keydown', (e) => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); flip(); } }); pane.push(ck); dlg.append(ck);
   };
-  kids.push(dButton('Rename', 264, 280, 72, 27, () => { a.closeModal(); renameDos(cur, () => { a.closeModal(); shipTypesDos(cur.id); }); }, { hot: 0 }), dButton('OK', 368, 280, 72, 27, () => a.closeModal(), { hot: 0, def: true }));
+  kids.push(dButton('Rename', 264, 280, 72, 27, () => { a.closeModal(); renameDos(cur, () => { a.closeModal(); shipTypesDos(cur.id); }); }, { hot: 0 }), dButton('OK', 368, 280, 72, 27, () => a.closeModal(), { hot: 0 }));
   const dlg = dDialog(496, 350, null, kids, 'List Ship Types'); box.parentNode === dlg && dlg.append(vScroll(box, 143, 28, 224));
   draw(); return true;
 }
@@ -833,7 +836,7 @@ function newTypeDos() {
     const lim = rs.maxDesigns, spec = { type: st.type, R: st.type === 'satellite' ? 0 : st.R, V: st.V, W: st.W, S: st.S, M: st.M, name: st.name.trim() };
     if (lim && H.liveDesigns(p) >= lim) { a.alertOver([H.say(g, H.DATA.alerts[15] || 'Your assembly lines are full.')], 'en'); return; }
     H.findOrCreateDesign(g, p, spec); a.save(); a.closeModal(); a.renderPanel();
-  }, { hot: 0, def: true });
+  }, { hot: 0 });
   dlg = dDialog(512, 280, null, [dText(tx('Name of Ship Type:'), 16, 41, { hot: 13 }), nameF, dText(tx('Class:'), 296, 112, { hot: 1 }), cls,
     dButton('Name It For Me', 64, 238, 136, 27, () => { st.name = H.designName(g, p, st.type); nameF.value = st.name; ok.disabled = false; ok.classList.remove('off'); }, { hot: 0 }), dButton('Cancel', 272, 238, 71, 27, () => a.closeModal(), { hot: 0 }), ok], 'Create New Ship Type');
   paintCls(); draw(); return true;
@@ -866,29 +869,37 @@ function buildDos(sid) {
     for (const w of q) { const have = ((s.queue || []).find(x => x.did === w.did) || { n: 0 }).n; if (w.n > have) H.queueShips(g, a.ME, sid, w.did, w.n - have); }
     a.save(); a.renderPanel(); a.draw(); };
   const dlg = dDialog(496, 336, null, [dText('Shipbuilding queue at ' + s.name, 16, 14), top, dText(tx('In The Queue:'), 49, 154, { hot: 7 }), ...cells, dText(tx('Available Types'), 312, 28), lst,
-    dButton('Cancel', 305, 295, 70, 26, () => a.closeModal(), { hot: 0 }), dButton('OK', 385, 295, 70, 26, () => { commit(); a.closeModal(); }, { hot: 0, def: true })], 'Shipbuilding queue');
+    dButton('Cancel', 305, 295, 70, 26, () => a.closeModal(), { hot: 0 }), dButton('OK', 385, 295, 70, 26, () => { commit(); a.closeModal(); }, { hot: 0 })], 'Shipbuilding queue');
   dlg.append(vScroll(lst, 432, 42, 224)); fill(); draw(); return true;
 }
 
 // Galaxy, Compare Players: 536 x 308. Before 2010 it is the sentence, a dimmed Show Skills and OK; the chart of later years is the classic window (kept difference)
 function compareDos() {
   const a = window.HOAPI, H = window.HO, g = a.G, C = H.rules(g).compare; if (!C) return false;
-  const info = H.compareInfo(g, a.ME); if (info.kind !== 'none') return false;
-  dDialog(536, 308, null, [dText(a.tl(C.texts.none), 23, 14), dButton('Show Skills', 120, 267, 111, 27, () => {}, { hot: 0 }), dButton('OK', 345, 267, 70, 27, () => a.closeModal(), { hot: 0, def: true })], 'Compare Players');
-  const b = document.querySelector('.dd-btn'); if (b) { b.disabled = true; b.classList.add('off'); }
-  return true;
-}
-
-// Window, Reports: the program's report window, 321 x 125, a title bar and the reports, each its picture and its sentence, a scroll bar
-function reportsDos() {
-  const a = window.HOAPI, H = window.HO, g = a.G, p = a.me(), rs = H.rules(g);
-  const old = rs.reportHistory ? (p.reportLog || []) : [], ms = old.concat(p.inbox || []);
-  const box = dListBox(307, 99, 5, 21); box.classList.add('dd-reports'); box.style.padding = '0';
-  if (!ms.length) box.append(a.el('div', { class: 'dd-rep' }, a.el('span', { class: 'cap' }, tx('No reports this turn.'))));
-  ms.forEach((m, i) => { const t = a.el('span', { class: 'cap', translate: 'no' }); t.append(a.degText(H.say(g, m.text)));
-    box.append(a.el('div', { class: 'dd-rep', 'data-now': i === old.length ? '1' : null, tabindex: 0, role: 'option', onclick: () => { a.closeModal(); a.reportAction(m); } }, a.msgIconEl(m), t)); });
-  const d = dDialog(321, 125, 'Reports', [box], 'Reports'); d.append(vScroll(box, 305, 21, 99));
-  const now = box.querySelector('[data-now]'); if (now) box.scrollTop = now.offsetTop - box.offsetTop;
+  const info = H.compareInfo(g, a.ME), me = a.me();
+  const title = info.kind === 'none' ? a.tl(C.texts.none) : info.kind === 'won' ? a.tl(C.texts.won, info.year) : info.kind === 'out' ? a.tl(C.texts.out, info.year) : a.tl(C.texts.ranks, info.n, info.year);
+  const kids = [dText(title, 23, 14)];
+  if (info.kind === 'ranks') {
+    // the chart of Compare Players (536 x 308; measured: the axes at x 80 and y 238, Best 16 under the top (42), Worst 16 above the axis, nine columns 43.2 apart)
+    const cv = a.el('canvas', { class: 'dd-pic', 'aria-label': title, role: 'img' }); const dpr = window.devicePixelRatio || 1;
+    cv.width = Math.round(536 * U * dpr); cv.height = Math.round(308 * U * dpr); dAt(cv, 0, 0, 536, 308); cv.style.pointerEvents = 'none';
+    const x = cv.getContext('2d'); x.setTransform(U * dpr, 0, 0, U * dpr, 0, 0); x.imageSmoothingEnabled = false; x.strokeStyle = x.fillStyle = '#000'; x.font = "12px 'DOS Geneva 9'"; x.lineWidth = 1;
+    const words = a.compareWords && a.compareWords(), word = (i) => (words ? words[i] : a.tl(a.CMP_EN[i]));
+    const x0 = 80, top = 42, y0 = 238, right = 512, n = info.n, unit = n >= 2 ? Math.trunc((y0 - top - 32) / (n - 1)) : Math.trunc((y0 - top) / 2) - 16, step = (right - x0) / 10;
+    const ln = (p1, q1, p2, q2) => { x.beginPath(); x.moveTo(p1 + .5, q1 + .5); x.lineTo(p2 + .5, q2 + .5); x.stroke(); };
+    ln(x0, top, x0, y0); ln(x0, y0, right, y0);
+    const side = (y, t) => { ln(x0 - 1, y, x0 + 1, y); x.textAlign = 'right'; x.fillText(t, x0 - 6, y + 4); };
+    side(top + 16, word(9)); side(Math.trunc((top + y0) / 2), word(10)); side(y0 - 16, word(11));
+    x.textAlign = 'center';
+    for (let k = 1; k < 10; k++) { const xx = Math.round(x0 + step * k); ln(xx, y0 - 1, xx, y0 + 1); x.fillText(word(k - 1), xx, y0 + 12); }
+    const im = a.IMG['white0_' + (me.female ? 1 : 0)] || a.IMG['dos:i' + (me.female ? 1500 : 1000)];
+    for (let k = 0; k < 9; k++) { const ix = Math.round(x0 + step * (k + 1)) - 16, iy = top + Math.trunc(unit * info.scores[k] / 10); if (im && im.width) x.drawImage(im, ix, iy, 32, 32); }
+    kids.push(cv);
+  }
+  const sk = dButton('Show Skills', 120, 267, 111, 27, () => { a.closeModal(); a.openSkills(); }, { hot: 0 });
+  kids.push(sk, dButton('OK', 345, 267, 70, 27, () => a.closeModal(), { hot: 0, def: true }));
+  dDialog(536, 308, null, kids, 'Compare Players');
+  if (info.kind === 'none') { sk.disabled = true; sk.classList.add('off'); }
   return true;
 }
 // enemy faces: the Mac skin's 16 hats become the DOS game's planet faces

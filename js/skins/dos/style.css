@@ -178,3 +178,11 @@ html.dosframe #msg .card { position: absolute; left: calc(4 * var(--du)); bottom
 
 /* the program's window frame: five pixels, light on the top and left, dark at the bottom and right (an 11 x 11 picture cut in nine, drawn over the box) */
 .dd::before, .win.dosx::before { content: ""; position: absolute; inset: 0; border: calc(5 * var(--du)) solid transparent; border-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAALCAYAAACprHcmAAAATUlEQVR4nJWRSwoAMQhDn2XO6CHjIWcWA6WlP5udkOgjGvCS1AMg6Wh0998MEBHHQMkiVIxW7QVJ3bzabDcY04YGjF0zW+YsxlTGxQc/EWISHVFeWAgAAAAASUVORK5CYII=") 5; image-rendering: pixelated; pointer-events: none; z-index: 3; }
+
+/* the report bubble (DrawAnnounceBubble): a white box with a black frame at the map's foot, the picture, the sentence in Geneva 9, "--more--" while more follow */
+html.dosframe #msg .card { width: calc(185 * var(--du)); min-height: calc(79 * var(--du)); background: #fff; color: #000; border: calc(2 * var(--du)) solid #000; border-radius: 0; box-shadow: none; padding: calc(8 * var(--du)) calc(6 * var(--du)); display: flex; gap: calc(8 * var(--du)); align-items: flex-start; font: calc(12 * var(--du))/calc(14 * var(--du)) "DOS Geneva 9", sans-serif; left: calc(4 * var(--du)); bottom: calc(4 * var(--du)); max-width: calc(185 * var(--du)); }
+html.dosframe #msg .card .icon, html.dosframe #msg .card .bigicon { width: calc(32 * var(--du)); height: calc(32 * var(--du)); flex: none; image-rendering: pixelated; }
+html.dosframe #msg .card .mtext p { margin: 0; font: inherit; }
+html.dosframe #msg .card .count { font: calc(14 * var(--du))/calc(14 * var(--du)) "DOS Bios", monospace; color: #000; margin-top: calc(6 * var(--du)); }
+html.dosframe #msg .card .mbtns { margin-top: calc(4 * var(--du)); }
+html.dosframe .dosroster .rdone { margin-left: 0; padding: 0; position: absolute; left: calc(1 * var(--du)); }

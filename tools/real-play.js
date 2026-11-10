@@ -187,7 +187,8 @@ async function playRun(browser, job, outDir, idx) {
         if (!await closeAll(what + ' dialog')) break; continue;
       }
       // (a card says "click to continue": tap that line when it has one; the middle of a card can be a button of its own, such as "Review battle", which opens a window)
-      const cont = card && await aim('.card:not(.end):not(.waiting) .count', { what: 'card continue line', soft: true });
+      let cont = null; if (card) for (const sel of ['.card:not(.end):not(.waiting) .count', '.card:not(.end):not(.waiting) .icon, .card:not(.end):not(.waiting) img', '.card:not(.end):not(.waiting) p']) { cont = await aim(sel, { what: 'card continue point', soft: true }); if (cont) break; }
+      // (a report with a button of its own, "Radical projects…", "Review battle": the middle of the card is that button and a tap there opens its window, which this loop then closed, tapped again, and so on to the end of the 60 rounds)
       if (card) { const t = cont || card; await ptr.tap(t.x, t.y); await sleep(70); continue; }
       break;
     }

@@ -2196,6 +2196,7 @@ E.registerRules('dos', Object.assign({}, O, {
   exploredList: { title: 'List of All Explored Stars:', go: 'Go To Star', noClimate: 'No Climate Info.', own: 'Own', free: 'Explored', enemy: 'Enemy',
     quality: (p, k) => starQuality(p, k), layout: 'text', cols: { win: [8, 18, 28, 37], dos: [11, 23, 32, 42] } },
   welcome: WELCOME,
+  bubbleMore: { en: "--more--", de: "--mehr--" }, // CONFIRMED (the DOS pool: "--more--" in the English DOSHO.EXE, "--mehr--" in the German one; the report bubble shows it while more reports follow)
   SKILLS, WPNRAT, setupPlayer, defaultDesigns, afterSetup: afterSetup20, computerSetup, makeGalaxy, distance, SHAPES,
   designCost, designLimits, designMin, aiSpec, paysPrototype, fleetFor, route: route20,
   borrowLimit: () => 0,                   // CONFIRMED: no borrowing in 2.0 (money is clamped at 0)
