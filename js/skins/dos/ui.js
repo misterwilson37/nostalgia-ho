@@ -251,6 +251,8 @@ window.HOTHEME = {
   get menuLayout() { return menuLayoutDos(); },
   panel(panel, B) { panelDos(panel, B); },
   mapPixel() { return frameOn() ? [U, U] : null; },
+  mapBg: document.documentElement.classList.contains('os-dos') ? '#000' : undefined, // (the program's map is plain black)
+  bgStars: document.documentElement.classList.contains('os-dos') ? false : undefined,
   mapFont(n) { return frameOn() ? "12px 'DOS Geneva 9'" : null; },
   window(name) { if (!frameOn() || !window.HOAPI.G) return false; if (name === 'autoplay') return autoPlayDos(); if (name === 'fleets') return fleetsDos(); if (name === 'types') return shipTypesDos(arguments[1]); if (name === 'build') return buildDos(arguments[1]); if (name === 'stars') return starsDos(); if (name === 'compare') return compareDos(); if (name === 'reports') return reportsDos(); return false; },
   newGame(f) { createGalaxyDos(f); },
