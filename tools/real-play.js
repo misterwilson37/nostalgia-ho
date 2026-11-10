@@ -460,7 +460,7 @@ async function playRun(browser, job, outDir, idx) {
       await closeAll('before prefs');
       const openPrefs = async () => { await mark(); let how = await menuOpen(/^preferences/i, null); if (!(await dialogs()).length && (await ev(() => !!document.querySelector('.ios-am.open')) || await press('.ios-gear', { soft: true, what: 'gear', wait: 350 }))) await press('.ios-am .ios-ami', { re: /^preferences/i, soft: true, what: 'Preferences', wait: 350 }); return (await dialogs()).length > 0; };
       if (!await openPrefs()) { warn('no Preferences window found to check'); return; }
-      const modernBox = async () => ev(() => { const l = window.__rp.dialogs(), d = l[l.length - 1]; const c = [...d.querySelectorAll('label.chk')].find(x => /Modern conveniences/i.test(x.textContent)); if (!c) return null; const i = c.querySelector('input'); i.setAttribute('data-rp-modern', '1'); return i.checked; });
+      const modernBox = async () => ev(() => { const l = window.__rp.dialogs(), d = l[l.length - 1]; const c = [...d.querySelectorAll('label.chk')].find(x => /Modern conveniences/i.test(x.textContent)); if (!c) return null; const i = c.querySelector('input'); i.setAttribute('data-rp-modern', '1'); i.scrollIntoView({ block: 'center' }); /* (the window's body scrolls, as a person scrolls it; at 844 x 390 the option is under the fold) */ return i.checked; });
       let on = await modernBox();
       if (on === null) { fail('Preferences has no "Modern conveniences" option'); await shot('prefs'); await closeAll('prefs'); return; }
       if (!on) { await press('[data-rp-modern]', { what: 'Modern conveniences checkbox', wait: 300 }); await closeAll('prefs'); if (!await openPrefs()) return; }

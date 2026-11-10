@@ -86,4 +86,4 @@ The dos skin is the 2.0 program's own screen (docs/dos20-findings.md, "Rebuildin
 | Preferences (modern conveniences, hints, battle review) | later rulesets | the classic window; the program's Set Battle Speed and Auto Play are its own windows | Classic |
 | Review Battle, Organize Ships, Fix Spending's alert, battle window, Send Message, message cards | all | classic windows and cards (the program lists reports in its Reports window, which is built; the turn's cards are kept as the remake's flow) | Classic |
 | The remake options of New Game (version, edition, language, skin, patch, online play) | the remake's own | behind "Remake options…" under the program's Create New Galaxy window | Done |
-
+| Organize Ships… (the DOS 2.0 / Windows 3.1 command: the fleets of one design at a star as piles; ORGFLEETSDLGPROC @10e8:2a7b, the rule `organized20` was already in `js/rules-dos.js`) | DOS 2.0 | **The program's own, which the remake's dos ruleset lacked altogether** (`organizeStyle()` is false there, so no classic window offered it): the Ships menu item opens the program's window (`organizeDos`), click or drag a ship to another pile, Shift-click a whole pile | Done |

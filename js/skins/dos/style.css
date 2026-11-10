@@ -186,3 +186,9 @@ html.dosframe #msg .card .mtext p { margin: 0; font: inherit; }
 html.dosframe #msg .card .count { font: calc(14 * var(--du))/calc(14 * var(--du)) "DOS Bios", monospace; color: #000; margin-top: calc(6 * var(--du)); }
 html.dosframe #msg .card .mbtns { margin-top: calc(4 * var(--du)); }
 html.dosframe .dosroster .rdone { margin-left: 0; padding: 0; position: absolute; left: calc(1 * var(--du)); }
+
+.dd-pile { display: flex; align-items: center; gap: calc(8 * var(--du)); height: calc(45 * var(--du)); padding-left: calc(14 * var(--du)); cursor: pointer; box-sizing: border-box; }
+.dd-pile .n { width: calc(16 * var(--du)); }
+.dd-pile img { height: calc(40 * var(--du)); width: auto; image-rendering: pixelated; }
+.dd-pile.sel { outline: calc(1 * var(--du)) dotted #000; outline-offset: calc(-3 * var(--du)); }
+.dd-piles { padding: 0; }

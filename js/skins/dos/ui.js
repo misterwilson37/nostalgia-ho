@@ -254,7 +254,7 @@ window.HOTHEME = {
   mapBg: document.documentElement.classList.contains('os-dos') ? '#000' : undefined, // (the program's map is plain black)
   bgStars: document.documentElement.classList.contains('os-dos') ? false : undefined,
   mapFont(n) { return frameOn() ? "12px 'DOS Geneva 9'" : null; },
-  window(name) { if (!frameOn() || !window.HOAPI.G) return false; if (name === 'autoplay') return autoPlayDos(); if (name === 'fleets') return fleetsDos(); if (name === 'types') return shipTypesDos(arguments[1]); if (name === 'build') return buildDos(arguments[1]); if (name === 'stars') return starsDos(); if (name === 'compare') return compareDos(); if (name === 'reports') return reportsDos(); return false; },
+  window(name) { if (!frameOn() || !window.HOAPI.G) return false; if (name === 'autoplay') return autoPlayDos(); if (name === 'fleets') return fleetsDos(); if (name === 'types') return shipTypesDos(arguments[1]); if (name === 'build') return buildDos(arguments[1]); if (name === 'stars') return starsDos(); if (name === 'compare') return compareDos(); if (name === 'reports') return reportsDos(); if (name === 'group') return organizeDos(arguments[1]); return false; },
   newGame(f) { createGalaxyDos(f); },
   keyName(k) { return '[' + k + ']'; },
   // the DOS title screen: the two halves of its credits picture
@@ -311,7 +311,7 @@ function menuLayoutDos() {
       ['List Ship Types…', 'Ships/Scrap ship types…'],
       it('Create New Ship Type…', () => (frameOn() ? newTypeDos() : A().openBuild(star().id)), { ghost: () => noGame() || (!frameOn() && !mine()) }), '-',
       ['List All Fleets…', 'Ships/List all fleets…'],
-      ['Organize Ships…', 'Ships/#4'],
+      it('Organize Ships…', () => { const f = A().curFleet && A().curFleet(); if (f && f.star != null) organizeDos(f.star); }, { ghost: () => { const f = noGame() ? null : A().curFleet && A().curFleet(); return !f || f.star == null || f.to != null || Object.keys(f.ships).length !== 1; } }),
       it(() => (mine() ? A().tl('Build Ships at %s…', star().name) : A().tl('Can’t Build Ships Here…')), () => { if (mine()) A().openBuild(star().id); }, { ghost: () => noGame() || !mine() }),
       ['Scrap Current Fleet', 'Ships/#3'], '-',
       [null, 'Ships/Review battle…']],
@@ -750,6 +750,7 @@ function createGalaxyDos(f) {
     const paint = () => cells.forEach((c, i) => { c.classList.toggle('sel', sel.value === vals[i]); c.setAttribute('aria-selected', String(sel.value === vals[i])); });
     paint(); sel.addEventListener('change', paint);
   });
+  const sk = field('d_skill'); if (sk && sk.value === 'normal') sk.value = 'novice'; // (the program's New Player Registration opens on Novice)
   const gal = field('galaxy'); if (gal && gal.value === 'Milky Way') gal.value = 'MilkyWay'; // (the program's default galaxy file is MilkyWay.Ho!, its window title "<player> in MilkyWay in 2000")
   const comp = field('computers');
   if (comp && comp.value === '4') comp.value = '1'; // (the program opens with one computer player)
@@ -913,6 +914,39 @@ function reportsDos() {
   const d = dDialog(321, 125, 'Reports', [box], 'Reports'); d.append(vScroll(box, 305, 21, 99));
   const now = box.querySelector('[data-now]'); if (now) box.scrollTop = now.offsetTop - box.offsetTop;
   return true;
+}
+
+// Ships, Organize Ships: 457 x 323 (the program's Organize Fleets window: the fleets of one design at the star as piles; click a pile, then another to move a ship, Shift-click moves the whole pile)
+function organizeDos(sid) {
+  const a = window.HOAPI, H = window.HO, g = a.G, f0 = (a.curFleet && a.curFleet()) || g.fleets.find(f => f.owner === a.ME && f.star === sid && f.to == null && !f.sat);
+  if (!f0 || f0.star !== sid || Object.keys(f0.ships).length !== 1) return false;
+  const did = +Object.keys(f0.ships)[0], d = H.getDesign(g, a.ME, did);
+  const fleets = g.fleets.filter(f => f.owner === a.ME && f.star === sid && f.to == null && Object.keys(f.ships).length === 1 && +Object.keys(f.ships)[0] === did);
+  const piles = fleets.map(f => ({ f, n: f.ships[did] })); let sel = null;
+  const box = dListBox(416, 195, 20, 64); box.classList.add('dd-piles'); box.style.padding = '0';
+  const moveTo = (i) => { if (!sel) return; const from = piles[sel.pile], n = sel.all ? from.n : 1; if (i === -1) { piles.push({ f: null, n: 0 }); i = piles.length - 1; } if (i === sel.pile) { sel = null; show(); return; } from.n -= n; piles[i].n += n; sel = null; show(); };
+  function show() {
+    box.textContent = '';
+    piles.forEach((p, i) => { if (!p.n && !p.f) return;
+      const row = a.el('div', { class: 'dd-pile' + (sel && sel.pile === i ? ' sel' : ''), role: 'option', tabindex: 0, draggable: p.n ? 'true' : null, onclick: (e) => { if (sel && sel.pile !== i) { moveTo(i); return; } if (p.n) { sel = { pile: i, all: e.shiftKey }; show(); } },
+        ondragstart: (e) => { sel = { pile: i, all: e.shiftKey }; try { e.dataTransfer.setData('text/plain', 'ship'); } catch (x) {} }, ondragover: (e) => e.preventDefault(), ondrop: (e) => { e.preventDefault(); moveTo(i); } },
+        a.el('span', { class: 'n', translate: 'no' }, p.n ? String(p.n) : ''), p.n ? shipPicEl(d, 40) : a.el('span'));
+      box.append(row); });
+    box.append(a.el('div', { class: 'dd-pile new', 'aria-label': 'New pile', onclick: () => { if (sel) moveTo(-1); }, ondragover: (e) => e.preventDefault(), ondrop: (e) => { e.preventDefault(); moveTo(-1); } }));
+  }
+  const apply = () => {
+    const temps = [];
+    for (const p of piles) if (p.f && p.n < p.f.ships[did]) { if (p.n === 0) temps.push(p.f); else { const t = H.splitFleet(g, p.f, { [did]: p.f.ships[did] - p.n }); if (t) temps.push(t); } }
+    const take = (need) => { let got = null; while (need > 0 && temps.length) { let t = temps[0]; if (t.ships[did] > need) t = H.splitFleet(g, t, { [did]: need }); else temps.shift(); need -= t.ships[did]; if (got) H.mergeFleets(g, got, t); else got = t; } return got; };
+    for (const p of piles) if (p.f && p.n > (p.f.ships[did] || 0)) { const t = take(p.n - p.f.ships[did]); if (t) H.mergeFleets(g, p.f, t); }
+    for (const p of piles) if (!p.f && p.n > 0) take(p.n);
+    a.closeModal(); a.save(); a.renderPanel(); a.draw();
+  };
+  const grp = () => { const t = piles.reduce((x, p) => x + p.n, 0); piles.forEach((p, i) => { p.n = i ? 0 : t; }); sel = null; show(); };
+  const dvd = () => { const t = piles.reduce((x, p) => x + p.n, 0); piles.forEach(p => { p.n = 0; }); for (let k = 0; k < t; k++) { if (k < piles.length) piles[k].n = 1; else piles.push({ f: null, n: 1 }); } sel = null; show(); };
+  dDialog(457, 323, null, [dText(tx('To Organize Fleets:'), 24, 14), dText('♦ ' + tx('Click and drag fleets into desired number of piles'), 24, 28), dText('♦ ' + tx('Shift-Click selects an entire pile'), 24, 42), box,
+    dButton('Group All', 33, 281, 94, 25, grp, { hot: 0, def: true }), dButton('Divide All', 145, 281, 102, 25, dvd, { hot: 0 }), dButton('Cancel', 272, 281, 71, 25, () => a.closeModal(), { hot: 0 }), dButton('OK', 361, 281, 70, 25, apply, { hot: 0 })], 'Organize Fleets');
+  show(); return true;
 }
 // enemy faces: the Mac skin's 16 hats become the DOS game's planet faces
 function faces() {
