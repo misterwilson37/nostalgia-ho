@@ -1151,6 +1151,7 @@ function starsDos() { // the classic window, set as the program's (its list is a
 // New Game, the program's Create New Galaxy window (536 x 280; the remake's own choices stay in the form behind "More…")
 function createGalaxyDos(f) {
   if (!frameOn()) return;
+  if (winOn() && window.HOWIN31 && window.HOWIN31.newGame && window.HOWIN31.newGame(f)) return; // (the Windows program's New Game sequence: js/skins/dos/win31/dialogs.js)
   const a = window.HOAPI, el = a.el, win = f.closest('.win'); if (!win) return;
   const field = (n) => f.querySelector(`[name="${n}"]`), fire = (n) => n.dispatchEvent(new Event('change', { bubbles: true }));
   const LISTS = [

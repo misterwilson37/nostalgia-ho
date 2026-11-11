@@ -101,4 +101,96 @@ W.startup = function (o) {
     onKey: (e) => { if (e.key === 'Escape') { o.close(); return true; } return false; },
   });
 };
+// The New Game sequence (File, New Game…; the Startup window's New Game), as the Windows program runs it, in the remake's New game window (whose form keeps the
+// choices: js/skins/classic/ui.js; the dos skin's T.newGame hands it here under the win31 look):
+// #11 CREATEGALAXY: the four rows of picture buttons (owner-drawn: the DOS skin's icons 3020-3050, the same pictures, 32 x 32 at the middle 3 down, the name
+// under them, the chosen one on green: 0, 170, 85 in 16 colours, 0, 130, 0 in 256), their black frames, the number of computer players (scroll bar 0-19 and its
+// number), Cancel, Create. Its horizontal dialog unit is the program's own, 9.87 pixels per 4 (measured: the window is 617 wide, the frames at 42, 286, 599,
+// win20-orig-vga16-newgalaxy.png; the vertical is the System font's 16 per 8).
+// #25 PLAYERENTRY: "Please Identify Yourself:", Player Name (an edit field: the combo box is CBS_SIMPLE, as tall as its field), Player Password (not a password
+// field in the program: the letters show), Cancel, OK (dimmed until a name is typed, captured), Info... (dimmed in a new game, captured).
+// #21 NEWPLAYER: "Your Name:" and the name, "Password:" and the password, Skill Level (Novice ... Expert; it opens on Novice), Sex (Male, Female), the picture
+// 3520, Cancel, Join. Join starts the game with those choices (the form's name, d_skill and female). THE REMAKE'S: the password is not kept (the remake has
+// none); the New game window's other choices (the ruleset, the look ...) stay under "Remake options…", as in the DOS look.
+const CG = [
+  { sel: 'd_density', ids: [100, 101], icons: [3050, 3051], names: ['Dense', 'Sparse'] },
+  { sel: 'd_shape', ids: [200, 201, 202, 203, 204], icons: [3020, 3021, 3022, 3023, 3024], names: ['Circle', 'Random', 'Ring', 'Spiral', 'Grid'] },
+  { sel: 'd_iq', ids: [300, 301, 302], icons: [3030, 3031, 3032], names: ['Dumb', 'Average', 'Smart'] },
+  { sel: 'd_size', ids: [400, 401, 402, 403, 404], icons: [3040, 3041, 3042, 3043, 3044], names: ['Small', 'Medium', 'Large', 'Extra Large', 'Humongous'] }];
+W.newGame = function (f) {
+  const a = root.HOAPI, el = a.el, win = f.closest('.win'); if (!win || !W.templates) return false;
+  const field = (n) => f.querySelector(`[name="${n}"]`), fire = (n) => n.dispatchEvent(new Event('change', { bubbles: true })), tl = (t) => (a.tl ? a.tl(t) : t);
+  // (the form's untouched choices become the program's own: Dense, Random, Dumb, Small, Novice, MilkyWay, one computer player: as the DOS look)
+  for (const [n, from, to] of [['d_density', 'dense', 'dense'], ['d_shape', 'ring', 'random'], ['d_iq', 'average', 'dumb'], ['d_size', 'medium', 'small'], ['d_skill', 'normal', 'novice'], ['computers', '4', '1']]) {
+    const e = field(n); if (e && e.value === from && [...e.options].some(o => o.value === to)) e.value = to;
+  }
+  const gal = field('galaxy'); if (gal && gal.value === 'Milky Way') gal.value = 'MilkyWay';
+  const holder = el('div', { class: 'cg-dos w31-newgame' }), rest = [...f.childNodes];
+  let opened = false, step = null;
+  const more = el('button', { type: 'button', class: 'dd-more', onclick: () => { opened = !opened; dress(); } }, tl('Remake options…'));
+  const put = (dlg) => { holder.textContent = ''; holder.append(dlg.el, more); step = dlg; dlg.focus(); };
+  const keep = (n) => n.classList && (n.classList.contains('picks') || n.classList.contains('langnote') || n.classList.contains('btns'));
+  const rs = field('rules');
+  const dress = () => { const on = !rs || rs.value === 'dos'; holder.style.display = on ? '' : 'none'; win.classList.toggle('dosw', on && !opened); // (the DOS look's frame for its own Create New Galaxy: style.css .win.dosw:has(.cg-dos))
+    for (const n of rest) if (n.style && !keep(n)) n.style.display = on && !opened ? 'none' : ''; };
+  const green = () => (document.documentElement.classList.contains('w31-256') ? '#008200' : '#00aa55');
+  function create() {
+    const comp = field('computers'), n0 = comp && /^\d+$/.test(comp.value) ? +comp.value : 1;
+    const pics = {}, painters = {};
+    CG.forEach((G) => G.ids.forEach((id, i) => {
+      painters[id] = (x, w, h) => {
+        const sel = field(G.sel), on = !!sel && sel.value === [...sel.options].map(o => o.value)[i], im = a.IMG['dos:i' + G.icons[i]];
+        x.fillStyle = on ? green() : '#fff'; x.fillRect(0, 0, w, h);
+        if (im && im.width) x.drawImage(im, Math.floor((w - 32) / 2), 3);
+        x.fillStyle = '#000'; x.font = "11px 'MS Sans Serif', 'Microsoft Sans Serif', Arial, sans-serif"; x.textAlign = 'center'; x.textBaseline = 'alphabetic'; x.fillText(tl(G.names[i]), w / 2, 47);
+      };
+      pics[id] = painters[id];
+    }));
+    const dlg = W.build(11, {
+      title: 'Create New Galaxy', label: 'Create New Galaxy', baseX: 9.87, close: () => a.closeModal(),
+      text: { 501: String(n0), '#19': 'Galaxy Density:', '#20': 'Galaxy Style:', '#21': 'Computer Intelligence:', '#22': 'Galaxy Size:', '#23': 'Number of Computer Players:', 2: 'Cancel', 1: 'Create' },
+      pics, scroll: { 500: { min: 0, max: 19, pos: n0 } },
+      on: { 500: (n, d) => { if (comp) { comp.value = String(n); fire(comp); } const t = d.get('501'); if (t) t.textContent = String(n); }, 2: () => a.closeModal(), 1: () => put(entry()) },
+    });
+    CG.forEach((G) => G.ids.forEach((id, i) => {
+      const c = dlg.get(String(id)); if (!c) return;
+      c.tabIndex = 0; c.setAttribute('role', 'radio'); c.setAttribute('aria-label', tl(G.names[i])); c.style.cursor = 'pointer';
+      const pick = () => { const sel = field(G.sel); if (!sel) return; sel.value = [...sel.options].map(o => o.value)[i]; fire(sel); G.ids.forEach((j) => { const cj = dlg.get(String(j)); if (cj) painters[j](cj.getContext('2d'), cj.width, cj.height); }); };
+      c.addEventListener('click', pick); c.addEventListener('keydown', (e) => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); pick(); } });
+    }));
+    return dlg;
+  }
+  function entry() {
+    const nm = field('name');
+    const dlg = W.build(25, {
+      title: 'Spaceward Ho! Player Entry', label: 'Spaceward Ho! Player Entry', close: () => a.closeModal(),
+      text: { '#5': 'Please Identify Yourself:', '#6': 'Player Password:', '#7': 'Player Name:', 100: '', 101: '', 2: 'Cancel', 1: 'OK', 102: 'Info...' },
+      on: { 100: (v, d) => { const b = d.get('1'); if (b) b.disabled = !String(v).trim(); }, 2: () => a.closeModal(), 1: (_, d) => { const v = String(d.value(100) || '').trim(); if (!v) return; if (nm) nm.value = v; put(register(v, String(d.value(101) || ''))); } },
+    });
+    const ok = dlg.get('1'), info = dlg.get('102'); if (ok) ok.disabled = true; if (info) info.disabled = true;
+    setTimeout(() => { const e = dlg.get('100'); if (e) e.focus(); }, 0);
+    return dlg;
+  }
+  function register(name, pw) {
+    const sk = field('d_skill'), fem = field('female'), skills = ['novice', 'beginner', 'normal', 'advanced', 'expert'], img = a.IMG['dos:d3520'];
+    let skill = sk && skills.includes(sk.value) ? sk.value : 'novice', female = !!fem && fem.value === '1';
+    const radios = (d) => { skills.forEach((k, i) => { const r = d.get(String(200 + i)); if (r && r.w31) r.w31.set(k === skill); }); [300, 301].forEach((id, i) => { const r = d.get(String(id)); if (r && r.w31) r.w31.set(i === (female ? 1 : 0)); }); };
+    const on = { 2: () => a.closeModal(), 1: () => { if (sk) { sk.value = skill; fire(sk); } if (fem) { fem.value = female ? '1' : '0'; fire(fem); } f.requestSubmit(); } };
+    skills.forEach((k, i) => { on[200 + i] = (_, d) => { skill = k; radios(d); }; });
+    on[300] = (_, d) => { female = false; radios(d); }; on[301] = (_, d) => { female = true; radios(d); };
+    const dlg = W.build(21, {
+      title: 'Spaceward Ho! New Player Registration', label: 'Spaceward Ho! New Player Registration', close: () => a.closeModal(),
+      text: { '#0': 'Your Name:', 100: name, '#2': 'Password:', 101: pw, '#4': 'Skill Level:', '#5': 'Sex:', 200: 'Novice', 201: 'Beginner', 202: 'Normal', 203: 'Advanced', 204: 'Expert', 300: 'Male', 301: 'Female', 2: 'Cancel', 1: 'Join' },
+      pics: { 999: (x, w, h) => { x.fillStyle = '#fff'; x.fillRect(0, 0, w, h); if (img && img.width) x.drawImage(img, 17, 23); } },
+      on,
+    });
+    radios(dlg);
+    return dlg;
+  }
+  f.prepend(holder); put(create());
+  if (rs) rs.addEventListener('change', dress); dress();
+  // (Return in a step is its default button, Escape its Cancel: the form's own submit is not the program's)
+  holder.addEventListener('keydown', (e) => { if (e.key === 'Enter') e.stopPropagation(); });
+  return true;
+};
 })(typeof window !== 'undefined' ? window : globalThis);

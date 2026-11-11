@@ -19,7 +19,8 @@
 const W = root.HOWIN31 = root.HOWIN31 || {};
 W.base = { x: 8, y: 16 };
 const mulDiv = (a, b, c) => Math.floor((a * b + c / 2) / c);
-const dx = (n) => mulDiv(n, W.base.x, 4), dy = (n) => mulDiv(n, W.base.y, 8);
+let BX = 8; // (the horizontal base unit of the dialog being built: the System font's 8, or a dialog's own, o.baseX: Create New Galaxy's, measured)
+const dx = (n) => mulDiv(n, BX, 4), dy = (n) => mulDiv(n, W.base.y, 8);
 const U = (n) => `calc(${n} * var(--wu))`;
 W.px = (r) => [dx(r[0]), dy(r[1]), dx(r[2]), dy(r[3])];
 
@@ -187,6 +188,11 @@ function control(it, n, o, dlg) {
     draw();
   } else if (kind === 'hscroll' || kind === 'vscroll') {
     e = scrollBar(r, (o.scroll && o.scroll[key]) || { min: 0, max: 0, pos: 0 }, fire, kind === 'vscroll');
+  } else if (kind === 'combo' && (st & 3) === 1) {
+    // (CBS_SIMPLE: an edit field with its list always under it; Player Entry's is as tall as the field, so the field alone shows: captured)
+    e = at(mk('input', 'w31c w31edit bd'), ...r); e.type = 'text'; e.value = txt; e.addEventListener('input', () => fire(e.value));
+  } else if (kind === 'blackframe') {
+    e = at(mk('div', 'w31c'), ...r); e.style.border = U(1) + ' solid #000'; e.style.pointerEvents = 'none'; // (drawn over the controls it frames, as Windows paints it; it takes no clicks)
   } else if (kind === 'combo') {
     // (a drop-down list: the field and its 17-pixel button; the list opens below)
     e = at(mk('select', 'w31c w31edit bd'), r[0], r[1], r[2], 24);
@@ -224,7 +230,7 @@ W.open = function (id, o) {
 W.build = function (id, o) {
   o = o || {};
   const t = W.templates[id], a = root.HOAPI; if (!t || !a) return null;
-  style();
+  style(); BX = o.baseX || W.base.x;
   const cap = !!(t.style & WS_CAPTION) && (t.style & WS_CAPTION) === WS_CAPTION, cw = dx(t.w), ch = dy(t.h);
   const top = cap ? FR.capTop : FR.top, ow = cw + 2 * FR.side, oh = ch + top + FR.bottom;
   const d = mk('div', 'w31d'); d.setAttribute('translate', 'yes');
