@@ -1,6 +1,6 @@
 # Windows 3.1 2.0: the display audit (November 2026, begun)
 
-**Progress (Windows dialogs):** foundation done (emulator `emulators/dosbox-win31`, renderer `js/skins/dos/win31/`); built 2 of 33 (About, Battle Speed); chunk 1 under way: Part A (the main window, one scale) done, the build cost line fixed (DOS), Game Info built (13, and in the DOS look); next: the other Start dialogs (below, "The chunk plan").
+**Progress (Windows dialogs):** foundation done (emulator `emulators/dosbox-win31`, renderer `js/skins/dos/win31/`); chunk 1 done: the main window on the 640 x 480 screen at one scale, and 8 of 33 dialogs built (About, Battle Speed; Create New Galaxy, File Open, GameInfo, New Player Registration, Player Entry, Startup); Game Info also in the DOS look, the DOS look's build cost line "(D)" / "(P)"; next: chunk 2 (Licence, Register: not started), then chunk 3, Ships (below, "The chunk plan").
 
 *The same game as DOS 2.0 and Mac 2.0.1 (`docs/dos-findings.md`); this is what WINHO.EXE puts in front of the player.*
 
@@ -103,8 +103,9 @@ capture except the text, the thumb (another value) and three pixels at each end 
 **The renderer covers** static text (left, centre, right, wrapping or not), owner-painted statics (a canvas the dialog paints), push and default push buttons,
 check boxes, radio buttons, group boxes, edit fields, list boxes, horizontal and vertical scroll bars, a combo box (a drop-down list), hidden and disabled
 controls, Return as IDOK, a scale of 1 or 2 CSS pixels per Windows pixel (less on a small phone). **Checked against captures:** frame, caption, static, push
-button, default button (Startup's Open Game), check box, horizontal scroll bar. **Built, not yet checked:** radio, group box, edit, list box, vertical scroll
-bar, combo box (their first chunk captures and fixes them). **Cannot yet:** the System font; the bevel's stepped ends; focus rectangles as Windows draws
+button, default button (Startup's Open Game), check box, horizontal scroll bar; in chunk 1 radio, edit, list box, black frame (the
+bold words fixed). **Built, not yet checked:** group box, vertical scroll bar, drop-down combo box (their first chunk captures and fixes them). (Since chunk 1 the
+scale is the screen's, the frame unit --u, not 1 or 2.) **Cannot yet:** the System font; the bevel's stepped ends; focus rectangles as Windows draws
 them; icons (STATIC SS_ICON); owner-drawn buttons (Create New Galaxy's pictures, the queue's ship cells) beyond a canvas the dialog paints itself; the
 dialog's own position (the remake centres it; the program puts Battle Speed at (152, 141) on the screen); the 256-colour palette's pale captions; tab order
 and mnemonics beyond the browser's; the Help menu's About shows only when the look is chosen before the page loads (the skin builds its menus once).
@@ -142,6 +143,43 @@ widths). Not done: the Help menu only when the look is chosen before the page lo
 
 **real-play** (`--skin=dos --rules=dos --os=win31`): before, 0 of 2 runs passed at phone-l and desktop (menus covered by the Organize Fleets and battle
 windows, the fleet drag at phone-l); now phone-l, pad, desktop and 4k pass, as the dos look does.
+
+## Chunk 1: the Start dialogs (November 2026)
+
+**Captured** (private `audit/win-2.0/captures/win20-orig-vga16-*.png`, new): File Open (`fileopen-empty`, `fileopen-new`: the same window names a new galaxy,
+`fileopen`: a saved file, `fileopen-sel`: chosen), Player Entry (`playerentry-name`: OK enabled by a name, Info... dimmed in a new game; `playerentry-open`: Info...
+enabled when opening a game), GameInfo (`gameinfo`), Build Ships (`build-dev`, `build-prod`: the cost line). Delete MILKYWAY.HO! after (done).
+
+**Built** (`js/skins/dos/win31/dialogs.js`; looked at beside the captures at one Windows pixel per CSS pixel):
+- **32 STARTUP** on the title page, in the DOS look's frame there (`ui.js` startupDos hands over): picture 1002 (the DOS skin's d1002: HOCOLOR's 1000-series
+  pictures 1002, 3500-3550, 500, 501, 5030 are byte-for-byte the DOS ones; End Turn 5000/5001 differ only in a few colours), the licence lines, Open Game / New Game /
+  Cancel, the logo (d9999) centred in control 500 (measured: 6, 1 in).
+- **12 FILEOPEN** for File, Open Game… and Startup's Open Game: the remake's saved games (its slots for the ruleset and the game in progress) named
+  `<galaxy>.ho!`; no folders (Directories empty, the directory "this browser").
+- **11 CREATEGALAXY, 25 PLAYERENTRY, 21 NEWPLAYER**: the New Game sequence inside the remake's New game window (`ui.js` createGalaxyDos hands over; the
+  form keeps the choices; "Remake options…" shows the rest as in the DOS look). **Create New Galaxy's horizontal dialog unit is not the System font's**: the
+  window is 617 wide for 246 units and its frames sit at 42, 286, 599 (9.87 pixels per 4 units; the vertical is 16 per 8 as everywhere): built with that unit.
+  Its picture buttons: the DOS icons 3020-3050 at the middle, 3 down, the name under them (baseline 47), the chosen one green (0,170,85; 256 colours 0,130,0).
+  Player Entry's name is a CBS_SIMPLE combo box (drawn as its field), its password field is not ES_PASSWORD (the letters show), OK is dimmed until a name is typed.
+- **13 GAMEINFO** (and the DOS look's GameInfoDlgBox) from the Window menu: the sentence as GAMEINFODLGPROC builds it ("This is a %s, %s, %s galaxy with %d %s
+  and %s.\n\nThe current year is %d.": size, density, style; "human(s)"; "N <intelligence> computer player(s)" or "no computer players"), the humans listed,
+  picture 3520 at 17, 23 in its control (measured).
+
+**List box and edit field checked** on the File Open capture: rows 16 apart, the chosen row navy across the list, the words in the bold System font (the
+renderer drew lists and fields in normal weight: fixed). The renderer also gained: a picture in any control (Startup's logo frame), black frames, CBS_SIMPLE
+combo boxes, a per-dialog horizontal unit (`baseX`), `HOWIN31.build` (a dialog held in the page).
+
+**The Build Ships cost line** (DOS `FUN_b000_be04` / `b9f6`; Windows BLDSHIP draws the same): "$cost (D)" while no ship of the type has been built
+(the development cost: a new Fighter type "$4,000 (D)"), "$cost (P)" after (the production cost: the starting Scout "$1,960 (P)"). The DOS look's queue pane writes
+it now (`ui.js` buildDos); chunk 3's BLDSHIP writes it below the picture at the left, "n% Done" at the right.
+
+**Not done:** 14 LICENSEE and 28 REGISTER (chunk 2); the dialogs' own positions (centred; the program's are not the template's plain offsets: File Open at 8, 66,
+Battle Speed 152, 141, GameInfo over Player Entry); a double click on a GameInfo name (fills Player Entry's name in the program); the remake's New game form
+opens on its own default look (DOS) rather than the one in use, as before.
+
+**Cost** (for chunks 3-5): Part A (the main window) was most of this session; after it, a template dialog with a capture took 15-30 minutes (GameInfo,
+File Open, Startup), the three-window New Game sequence about an hour (the owner-drawn cells and Create New Galaxy's own dialog unit had to be measured).
+Captures in the running program cost about 2 minutes each with `w31.py` (keys work where the cursor finder does not: over a picture).
 
 ### The chunk plan (the other 31, about five a session)
 
