@@ -1271,6 +1271,9 @@ root.HOUI.add([
 // the Windows 2.0's About box (its Help menu's item and the window's title, the licence line; js/skins/dos/win31/dialogs.js)
 ['About Spaceward Ho!', 'A propos de Spaceward Ho!', 'Über Spaceward Ho!', 'Spaceward Ho! hakkında', 'Acerca de Spaceward Ho!'],
 ['Licensed to:', 'Licence accordée à :', 'Lizenziert für:', 'Lisans sahibi:', 'Con licencia para:'],
+['Windows 3.1 colours', 'Couleurs de Windows 3.1', 'Farben von Windows 3.1', 'Windows 3.1 renkleri', 'Colores de Windows 3.1'],
+['16 colours (VGA)', '16 couleurs (VGA)', '16 Farben (VGA)', '16 renk (VGA)', '16 colores (VGA)'],
+['256 colours', '256 couleurs', '256 Farben', '256 renk', '256 colores'],
 ['Spaceward Ho! Startup', 'Spaceward Ho! Démarrage', 'Spaceward Ho! Start', 'Spaceward Ho! Başlangıç', 'Spaceward Ho! Inicio'],
 ['Closing Game...', 'Fermeture de la partie...', 'Schließe Spiel...', 'Oyun kapatılıyor...', 'Cerrando la partida...', { de: 'DOS 2.0' }],
 ['Spaceward Ho! Version 2.0', 'Spaceward Ho! version 2.0', 'Spaceward Ho! Version 2.0', 'Spaceward Ho! Sürüm 2.0', 'Spaceward Ho! versión 2.0'],

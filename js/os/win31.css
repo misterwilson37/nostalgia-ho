@@ -6,14 +6,21 @@
    rounded black corners. The DOS skin's second look. */
 @import url("dos.css");
 :root { --ui: "MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif; }
+/* The display: 16 colours (VGA, Windows' own driver: what Windows 3.1 shipped with, the default) or 256 colours (html.w31-256: the look's option, the DOS
+   skin's lookOptions). Captured on the running Windows program (docs/win20-findings.md; private audit/win-2.0/captures/win20-orig-{vga16,s3-256}-*.png):
+   in 256 colours the game's palette takes the system colours, so the active title bar and the modal frames are pale blue (166, 203, 243 through the
+   DAC: the 256-colour palette's #a6caf0) with black words, and the application workspace is #a4a0a0 (162, 162, 166); the 3-D greys stay. The values
+   are Windows' own (navy #000080 shows as 0, 0, 170 through the VGA DAC). js/skins/dos/win31/dialog.js draws its dialogs in these. */
+:root { --w31cap: #000080; --w31captext: #fff; --w31face: #c0c0c0; --w31shade: #808080; --w31work: #c0c0c0; }
+html.w31-256 { --w31cap: #a6caf0; --w31captext: #000; --w31work: #a4a0a0; }
 #menubar, .mbtn, .dropdown button, #menubar .logo { font-weight: bold; }
 #menubar { border-bottom: 1px solid #000; }
 .win { border: 4px solid #c0c0c0; outline: 1px solid #000; box-shadow: inset 0 0 0 1px #000; }
-.wtitle { background: #000080; border-bottom: 1px solid #000; height: 20px; padding: 0; gap: 0; }
-.wtitle span { color: #fff; font-weight: bold; }
+.wtitle { background: var(--w31cap); border-bottom: 1px solid #000; height: 20px; padding: 0; gap: 0; }
+.wtitle span { color: var(--w31captext); font-weight: bold; }
 /* the control-menu box: a grey square with its bar */
 .close { width: 19px; height: 19px; flex: none; border: 0; border-right: 1px solid #000; border-radius: 0;
-  background: linear-gradient(#fff, #fff) center / 11px 3px no-repeat, linear-gradient(#000, #000) 5px 9px / 11px 3px no-repeat, #c0c0c0; }
+  background: linear-gradient(#fff, #fff) center / 11px 3px no-repeat, linear-gradient(#000, #000) 5px 9px / 11px 3px no-repeat, var(--w31face); }
 /* minimize and maximize */
 .wtitle::after { content: ''; flex: none; width: 38px; height: 19px; border-left: 1px solid #000;
   background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='38' height='19'><g fill='%23c0c0c0'><rect width='18' height='19'/><rect x='19' width='19' height='19'/></g><path d='M0 18.5h38M18.5 0v19M1 17V1h16M20 17V1h17' fill='none' stroke='%23808080'/><path d='M1 1h16M1 1v16M20 1h17M20 1v16' fill='none' stroke='white'/><path d='M5 7h8L9 11z'/><path d='M24 11h9L28.5 6.5z'/></svg>") no-repeat; }

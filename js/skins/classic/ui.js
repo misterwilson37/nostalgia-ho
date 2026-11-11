@@ -4602,6 +4602,7 @@ function openPrefs() {
     G ? el('label', { class: 'chk' }, el('input', { type: 'checkbox', checked: modern() ? 'checked' : false, onchange: (e) => setModern(e.target.checked) }),
       el('span', null, 'Modern conveniences in this game (automatic routes, the map follows the news, battle speed and written reports)')) : null,
     sizeChoice(), // (Interface size: the iOS and Android skins, with modern conveniences on; this window had left it out)
+    lookOptions('prefs'), // (a skin's look options: the DOS skin's Windows 3.1 colours)
     box('tips', 'Explain things when the pointer rests on them (text from the original manual)'),
     autoPlayWhere() === 'prefs' ? prefsAutoPlay() : null), { cls: 'small' });
 }
@@ -4635,6 +4636,7 @@ function prefs505(W) {
     el('label', { class: 'chk' }, el('input', { type: 'checkbox', checked: Sound.on ? 'checked' : false, onchange: (e) => { Sound.on = e.target.checked; savePrefs(); } }), el('span', null, 'Sound effects')),
     el('label', { class: 'chk' }, el('input', { type: 'checkbox', checked: modern() ? 'checked' : false, onchange: (e) => setModern(e.target.checked) }), el('span', null, 'Modern conveniences in this game (automatic routes, the map follows the news, battle speed and written reports)')),
     sizeChoice(), // (Interface size: the iOS and Android skins, with modern conveniences on)
+    lookOptions('prefs'),
     el('label', { class: 'chk' }, el('input', { type: 'checkbox', checked: Prefs.tips ? 'checked' : false, onchange: (e) => { Prefs.tips = e.target.checked; savePrefs(); } }), el('span', null, 'Explain things when the pointer rests on them (text from the original manual)')),
     tempChoice(),
     autoPlayWhere() === 'prefs' ? prefsAutoPlay() : null];
@@ -4680,6 +4682,7 @@ function remakeOptions(sound) {
     sound ? null : chk(Sound.on, (e) => { Sound.on = e.target.checked; savePrefs(); }, 'Sound effects'),
     chk(modern(), (e) => setModern(e.target.checked), 'Modern conveniences in this game (automatic routes, the map follows the news, battle speed and written reports)'),
     sizeChoice(),
+    lookOptions('prefs'),
     chk(Prefs.tips, (e) => { Prefs.tips = e.target.checked; savePrefs(); }, 'Explain things when the pointer rests on them (text from the original manual)'),
     tempChoice(),
     autoPlayWhere() === 'prefs' ? prefsAutoPlay() : null)];
@@ -5122,7 +5125,7 @@ function skinOSPickers(rulesId) {
   return { skinSel, osSel, forEdition };
 }
 // T.lookOptions(where): a skin's own look options ('title', 'newgame',
-// 'skinos'), kept with the Skin and OS look pickers, never with the rules
+// 'skinos', 'prefs': the Preferences window), kept with the Skin and OS look pickers, never with the rules
 // (the Amiga's tall or square pixels); they take effect at once
 const lookOptions = (where) => (T.lookOptions && T.lookOptions(where)) || null;
 // the title screen's Skin and OS look pop-ups: a skin reloads the page in it,

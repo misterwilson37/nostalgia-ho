@@ -27,18 +27,22 @@ const WS_CAPTION = 0xC00000, WS_BORDER = 0x800000, WS_VISIBLE = 0x10000000, WS_D
 // the window frame (measured): side, top without a title, top with one (black 1, navy 3, white 1, caption 18, black 1), bottom
 const FR = { side: 5, top: 5, capTop: 24, bottom: 5, cap: 18 };
 
-// Windows 3.1's colours (the default scheme; the captures show them through DOSBox's VGA DAC, e.g. navy as 0,0,170)
+// Windows 3.1's colours (the default scheme; the captures show them through DOSBox's VGA DAC, e.g. navy as 0,0,170), as CSS variables that js/os/win31.css
+// sets too: 16 colours (VGA) by default, 256 colours with html.w31-256 (the look's option: the active caption and the modal frame pale blue, its words
+// black, as captured); a list's chosen row is the highlight colour, which stays navy (no 256-colour list was captured)
 // (B: the push button's selector, with the class repeated to outrank the looks' rule for every button, js/os/dos.css and win31.css;
 // the buttons also carry .quiet, which those rules' heavier variant leaves alone)
 const B = 'html .w31d button.w31b.w31b.w31b.w31b';
 const CSS = `
+:root { --w31cap: #000080; --w31captext: #fff; --w31face: #c0c0c0; --w31shade: #808080; --w31hi: #000080; }
+html.w31-256 { --w31cap: #a6caf0; --w31captext: #000; }
 .win.w31dlg { background: none; border: 0; box-shadow: none; outline: 0; padding: 0; width: auto; max-width: none; min-width: 0; }
 .win.w31dlg .wtitle { display: none; }
 .win.w31dlg .wbody { padding: 0; overflow: visible; }
-.w31d { --w31cap: #000080; --w31face: #c0c0c0; --w31shade: #808080; position: relative; box-sizing: border-box; background: var(--w31cap); border: ${U(1)} solid #000;
+.w31d { position: relative; box-sizing: border-box; background: var(--w31cap); border: ${U(1)} solid #000;
   color: #000; font: bold ${U(13)}/${U(16)} "MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif; text-align: left; -webkit-font-smoothing: none; user-select: none; }
 .w31d * { box-sizing: border-box; }
-.w31d .w31cap { position: absolute; background: var(--w31cap); border: ${U(1)} solid #fff; border-bottom: 0; box-shadow: inset 0 ${U(-1)} 0 #000; color: #fff; text-align: center; white-space: nowrap; overflow: hidden; }
+.w31d .w31cap { position: absolute; background: var(--w31cap); border: ${U(1)} solid #fff; border-bottom: 0; box-shadow: inset 0 ${U(-1)} 0 #000; color: var(--w31captext); text-align: center; white-space: nowrap; overflow: hidden; }
 .w31d .w31cap .t { position: absolute; left: ${U(19)}; right: 0; top: ${U(1)}; line-height: ${U(16)}; }
 .w31d .w31sys { position: absolute; left: 0; top: 0; width: ${U(19)}; height: ${U(18)}; background: var(--w31face); border-right: ${U(1)} solid #000; }
 .w31d .w31sys::before { content: ""; position: absolute; left: ${U(2)}; top: ${U(7)}; width: ${U(13)}; height: ${U(3)}; background: #fff; border: ${U(1)} solid #000; box-shadow: ${U(1)} ${U(1)} 0 var(--w31shade); }
@@ -67,7 +71,7 @@ ${B}:focus-visible span, html .w31d .w31chk:focus-visible span.t { outline: ${U(
 .w31d .w31edit.bd { border: ${U(1)} solid #000; }
 .w31d .w31list { background: #fff; border: ${U(1)} solid #000; overflow: hidden auto; font-weight: normal; }
 .w31d .w31list .row { height: ${U(16)}; padding: 0 ${U(2)}; white-space: pre; overflow: hidden; cursor: pointer; }
-.w31d .w31list .row.sel { background: var(--w31cap); color: #fff; }
+.w31d .w31list .row.sel { background: var(--w31hi); color: #fff; }
 .w31d .w31sb { background: var(--w31face); border: ${U(1)} solid #000; cursor: pointer; touch-action: none; }
 .w31d .w31sb .part { position: absolute; background: var(--w31face); box-shadow: inset ${U(-2)} ${U(-2)} 0 var(--w31shade), inset ${U(1)} ${U(1)} 0 #fff; } /* (the shade over the light at the corners: measured) */
 .w31d .w31sb .sep { position: absolute; background: #000; }

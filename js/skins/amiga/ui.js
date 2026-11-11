@@ -1621,7 +1621,8 @@ function amigaAlert(kind, text, yes) {
   const a = api();
   // Optionen > Warnungen ausgeben, off: the program doesn't warn, the turn just goes on
   if (!warningsOn()) { yes(); return true; }
-  alertWindow(w('colonyWarn'), [[w('ok'), () => { a.closeModal(); yes(); }], [w('cancel'), () => a.closeModal(), true]]);
+  const win = alertWindow(w('colonyWarn'), [[w('ok'), () => { a.closeModal(); yes(); }], [w('cancel'), () => a.closeModal(), true]]);
+  const bs = win.querySelectorAll('.am-abtn2 button'); a.markYesNo(win, bs[0], bs[1]); // (the typed yes or no of modern conveniences: js/skins/classic/ui.js markYesNo)
   void text;
   return true;
 }
@@ -1855,6 +1856,7 @@ function menus(M, ho) {
 }
 // the pixels, with the Skin and OS look pickers
 function lookOptions(where) {
+  if (where === 'prefs') return null; // (kept with the Skin and OS look pickers only)
   const s = el('select', { class: 'am-pixsel', name: where === 'newgame' ? null : 'pixels', 'aria-label': w('pixels') },
     el('option', { value: 'tall' }, w('tall')), el('option', { value: 'square' }, w('square')));
   s.value = pixMode();

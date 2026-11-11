@@ -289,6 +289,7 @@ window.HOTHEME = {
     startupDos();
     return true;
   },
+  lookOptions(where) { return w31Colours(where); },
   page(doc) {
     const c = doc.querySelector('#titlescreen .credit');
     if (c) c.textContent = 'With the art and sounds of Spaceward Ho! 2.0 for DOS (New World Computing, 1993). DOS programming by Ed Murphy.';
@@ -296,6 +297,33 @@ window.HOTHEME = {
     frameSetup(doc.documentElement);
   },
 };
+
+// ---- the Windows 3.1 look's display: 16 colours (VGA, the default: what Windows 3.1 shipped with) or 256 colours (docs/win20-findings.md; the colours are
+// CSS variables in js/os/win31.css and js/skins/dos/win31/dialog.js, switched by html.w31-256). Kept in the browser as the Amiga skin keeps its pixels
+// (localStorage "ho5.dos.colors"), offered with the Skin and OS look pickers (T.lookOptions: the title screen while the look is Windows 3.1, Skin and OS look…)
+// and in Preferences; it takes effect at once.
+const W31KEY = 'ho5.dos.colors';
+const w31Mode = () => { try { return localStorage.getItem(W31KEY) === '256' ? '256' : '16'; } catch (e) { return '16'; } };
+function setW31Mode(m) {
+  try { if (m === '256') localStorage.setItem(W31KEY, '256'); else localStorage.removeItem(W31KEY); } catch (e) { /* not kept */ }
+  document.documentElement.classList.toggle('w31-256', m === '256');
+  for (const s of document.querySelectorAll('select.w31-colsel')) s.value = m;
+}
+document.documentElement.classList.toggle('w31-256', w31Mode() === '256');
+function w31Colours(where) {
+  const a = window.HOAPI, el = a ? a.el : null; if (!el) return null;
+  const s = el('select', { class: 'w31-colsel', name: where === 'newgame' ? null : 'w31colors', 'aria-label': 'Windows 3.1 colours' },
+    el('option', { value: '16' }, '16 colours (VGA)'), el('option', { value: '256' }, '256 colours'));
+  s.value = w31Mode();
+  s.addEventListener('change', (e) => { e.stopPropagation(); setW31Mode(s.value); });
+  const row = el('label', { class: where === 'prefs' ? 'w31-colrow' : 'tskin w31-colrow' }, el('span', null, 'Windows 3.1 colours'), ' ', s);
+  // (on the title screen only while the look is Windows 3.1; in Skin and OS look… and Preferences always, as the look may be chosen there)
+  if (where === 'title' || where === 'newgame') {
+    const sync = () => { row.hidden = !document.documentElement.classList.contains('os-win31'); };
+    sync(); new MutationObserver(sync).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+  }
+  return row;
+}
 
 // ---- the menu bar (see menuLayout in HOTHEME) ----
 function menuLayoutDos() {
