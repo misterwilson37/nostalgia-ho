@@ -1,6 +1,6 @@
 # Windows 3.1 2.0: the display audit (November 2026, begun)
 
-**Progress (Windows dialogs):** foundation done (emulator `emulators/dosbox-win31`, renderer `js/skins/dos/win31/`); built 2 of 33 (About, Battle Speed); chunk 1 under way: Part A (the main window, one scale) done; next: the Start dialogs (below, "The chunk plan").
+**Progress (Windows dialogs):** foundation done (emulator `emulators/dosbox-win31`, renderer `js/skins/dos/win31/`); built 2 of 33 (About, Battle Speed); chunk 1 under way: Part A (the main window, one scale) done, the build cost line fixed (DOS), Game Info built (13, and in the DOS look); next: the other Start dialogs (below, "The chunk plan").
 
 *The same game as DOS 2.0 and Mac 2.0.1 (`docs/dos-findings.md`); this is what WINHO.EXE puts in front of the player.*
 
