@@ -1743,6 +1743,185 @@ function playersWindow() {
   return true;
 }
 
+// ---------- the map window's scroll bars (MapWinProc) ----------
+// The map window has a vertical and a horizontal scroll bar (CreateMapWin @c2704: two NewControl, procID 16, the standard scroll bar, 16 pixels
+// thick, at the window's right edge and foot) and the grow box between them. The bars' value is the galaxy cell at the window's top left, in whole
+// cells: GrowMapWin @c29c0 sets each bar's range from the zoom (the setup's +0x26: 6, 9, 12 or 17 pixels to a cell) and the window's size:
+// cells in view = pane pixels / zoom (the pane: from x 226 to the bar, from the top to the bar), maximum = the galaxy's size - the cells in view (0
+// when the window shows the whole galaxy, and then the bar is inactive), the page = 3/4 of the cells in view (SetCRefCon), the value clamped
+// to the new maximum. So the window shows a scrolled part of the galaxy at every zoom, with cell 0 at the pane's top left when the whole galaxy
+// fits. InitDelta @c56d4: the arrows scroll 1 cell, a page click the page; ScrollMapWindow @c5746 (a part held repeats, every 6 ticks, ContentClick's
+// CONTROLPROC @118cc) sets the value and, when it changed, ScrollMapResponse @c588c scrolls the pane by the difference x zoom pixels (ScrollRect) and
+// draws the rest; ThumbMapWindow @c5804: the thumb is dragged as an outline and the map moves when it is let go. Zoom In and Zoom Out (@120900,
+// @120980) set the zoom, GrowMapWin, then CenterOnStar(the selected star, 0, force 1); CenterOnStar @c5a0c puts the star in the middle
+// (value = its cell - (galaxy size - (max - 1)) / 2) unless it is already inside the pane's margins (40 pixels, 85 at the foot).
+// ActivateMapWindow @c3012 / DeactivateMapWindow @c30a4: HiliteControl 0 / 255 on the bars: an inactive bar is drawn empty.
+const BAR12 = 16; // a bar's thickness in the program's pixels (the map is drawn at one CSS pixel to one; a cell is the zoom's 6, 9, 12 or 17 of them, which is half the view's scale: the remake's unit is two cells)
+const cellsOf = (g) => [Math.round(g.W * 2), Math.round(g.H * 2)];
+const MB = { H: 0, V: 0, maxH: 0, maxV: 0, pgH: 0, pgV: 0, s: 0, shown: null, centerSel: false, press: null, ghost: null, drag: null, key: '', wrap: null, v: null, h: null, corner: null };
+const barsOn = () => own();
+const mapView = () => { const a = A(); return a && a.UI.view; };
+const mapSize = () => { const a = A(), m = a && a.map(); return m ? [m.w, m.h] : [0, 0]; };
+function barMetrics(s, mapW, mapH, g) {
+  const z = s / 2, [cw, ch] = cellsOf(g), visH = Math.max(1, Math.floor(mapW / z + 1e-6)), visV = Math.max(1, Math.floor(mapH / z + 1e-6)); // (the cells in view: pane pixels / zoom)
+  MB.maxH = visH < cw ? cw - visH : 0; MB.maxV = visV < ch ? ch - visV : 0;
+  MB.pgH = Math.trunc(visH * 3 / 4); MB.pgV = Math.trunc(visV * 3 / 4);
+}
+const cellOf = (v) => [(0.25 * v.s - v.ox) / (v.s / 2), (0.25 * v.s - v.oy) / (v.s / 2)]; // the cell at the top left (a star's middle is half a cell in)
+const putCell = (v, H, V) => { v.ox = (0.5 - H) * (v.s / 2); v.oy = (0.5 - V) * (v.s / 2); };
+const clampCell = (H, V) => [Math.max(0, Math.min(MB.maxH, H)), Math.max(0, Math.min(MB.maxV, V))];
+// CenterOnStar @c5a0c: the cell that puts the star in the middle
+function centerCells(st, g) { const [cw, ch] = cellsOf(g); return clampCell(Math.round(st.x * 2) - Math.trunc((cw - (MB.maxH - 1)) / 2), Math.round(st.y * 2) - Math.trunc((ch - (MB.maxV - 1)) / 2)); }
+function syncMapView(v, c) {
+  if (!barsOn()) return;
+  v.s = ZOOMS[zoomIdx(v.s)];
+  barMetrics(v.s, c.mapW, c.mapH, c.G);
+  let [H, V] = cellOf(v);
+  if (MB.s && MB.s !== v.s && MB.centerSel && c.sel != null && c.G.stars[c.sel]) [H, V] = centerCells(c.G.stars[c.sel], c.G); // (Zoom In / Zoom Out: CenterOnStar, forced)
+  else if (!c.live) { H = Math.round(H); V = Math.round(V); } // (whole cells; while a drag or a throw is on, the map follows it and settles at its end)
+  [H, V] = clampCell(H, V);
+  putCell(v, H, V);
+  MB.H = H; MB.V = V; MB.s = v.s; MB.centerSel = false;
+}
+function centerOnStar12(v, sid, c) {
+  if (!barsOn()) return false;
+  const st = c.G.stars[sid]; if (!st) return false;
+  v.s = ZOOMS[zoomIdx(v.s)]; barMetrics(v.s, c.mapW, c.mapH, c.G);
+  const [H, V] = cellOf(v), z = v.s / 2, px = (st.x * 2 - H) * z - 6, py = (st.y * 2 - V) * z - 7;
+  if (px > 40 && px < c.mapW - 40 && py > 40 && py < c.mapH - 85) return true; // (already in view: CenterOnStar leaves the map)
+  const [h2, v2] = centerCells(st, c.G); putCell(v, h2, v2); return true;
+}
+let BAR_TILE = null;
+const barTile = () => BAR_TILE || (() => { const t = document.createElement('canvas'); t.width = t.height = 2; const x = t.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, 2, 2); x.fillStyle = '#000'; x.fillRect(0, 0, 1, 1); x.fillRect(1, 1, 1, 1); return (BAR_TILE = t); })();
+// one bar, drawn as the standard scroll bar of System 6 and 7 in black and white: a frame, an arrow box at each end (a black arrow, inverted while
+// it is held), a grey page area (the 50% pattern), the thumb a white square with a frame; inactive (no room to scroll, or a dialog is up): an empty bar
+function paintBar(b, vertical, L, o) {
+  const k = Math.max(1, Math.round(window.devicePixelRatio || 1)), cw = vertical ? BAR12 : L, ch = vertical ? L : BAR12, c = b.c;
+  if (c.width !== cw * k || c.height !== ch * k) { c.width = cw * k; c.height = ch * k; }
+  c.style.width = cw + 'px'; c.style.height = ch + 'px';
+  const x = c.getContext('2d'); x.setTransform(k, 0, 0, k, 0, 0); x.imageSmoothingEnabled = false;
+  // (a, b, w, h): a across the bar, b along it
+  const R = (a, p, w, h, col) => { x.fillStyle = col; if (vertical) x.fillRect(a, p, w, h); else x.fillRect(p, a, h, w); };
+  R(0, 0, BAR12, L, '#000'); R(1, 1, BAR12 - 2, L - 2, '#fff');
+  if (!o.active) return;
+  const pat = x.createPattern(barTile(), 'repeat'); x.fillStyle = pat;
+  if (vertical) x.fillRect(1, 16, 14, L - 32); else x.fillRect(16, 1, L - 32, 14);
+  R(1, 15, BAR12 - 2, 1, '#000'); R(1, L - 16, BAR12 - 2, 1, '#000');
+  // the arrows: a 7 x 4 triangle (js/os/system7.css has the same) in each box
+  const arrow = (end, dir, inv) => {
+    const p0 = end ? L - 15 : 1; // the box: 14 along, between the frame and the divider
+    if (inv) R(1, p0, BAR12 - 2, 14, '#000');
+    for (let r = 0; r < 4; r++) { const w = dir < 0 ? 1 + 2 * r : 7 - 2 * r; R(7 - (w - 1) / 2, p0 + 5 + r, w, 1, inv ? '#fff' : '#000'); }
+  };
+  arrow(0, -1, o.press === 'lo'); arrow(1, 1, o.press === 'hi');
+  // the thumb
+  const T = L - 46;
+  if (T >= 0) {
+    const t = 15 + Math.round(T * Math.max(0, Math.min(1, o.value / o.max)));
+    R(0, t, BAR12, 16, '#000'); R(1, t + 1, BAR12 - 2, 14, '#fff');
+    if (o.ghost != null) { // the outline that is dragged (the map moves when it is let go)
+      for (let i = 0; i < 16; i++) for (let j = 0; j < 16; j++) if ((i === 0 || j === 0 || i === 15 || j === 15) && (i + j) % 2 === 0) R(i, o.ghost + j, 1, 1, '#000');
+    }
+  }
+}
+function ensureBars() {
+  if (MB.wrap && MB.wrap.isConnected) return true;
+  const a = A(), host = document.getElementById('mapwrap'); if (!a || !host) return false;
+  const mk = (vertical) => {
+    const c = a.el('canvas', { class: 'cv12' }), bar = a.el('div', { class: 'mapbar12 ' + (vertical ? 'v' : 'h'), role: 'scrollbar', tabindex: 0, 'aria-orientation': vertical ? 'vertical' : 'horizontal', 'aria-controls': 'map', 'aria-label': tr12(vertical ? 'Map vertical scroll bar' : 'Map horizontal scroll bar') }, c);
+    return { vertical, c, el: bar, L: 0 };
+  };
+  MB.v = mk(true); MB.h = mk(false);
+  MB.corner = a.el('div', { class: 'mapcorner12', 'aria-hidden': 'true' });
+  host.append(MB.v.el, MB.h.el, MB.corner); MB.wrap = host;
+  for (const b of [MB.v, MB.h]) wireBar(b);
+  return true;
+}
+const barVals = (b) => (b.vertical ? { value: MB.V, max: MB.maxV, page: MB.pgV } : { value: MB.H, max: MB.maxH, page: MB.pgH });
+const barActive = (b) => barVals(b).max > 0 && !document.querySelector('.scrim');
+function setCells(H, V) { const a = A(), v = mapView(); if (!v) return; const [h2, v2] = clampCell(H, V); putCell(v, h2, v2); a.draw(); }
+function scrollBy12(b, d) { // ScrollMapWindow @c5746: the value moves, and the map only when it changed
+  const cur = Math.round(b.vertical ? MB.V : MB.H), nv = Math.max(0, Math.min(barVals(b).max, cur + d));
+  if (nv === cur) return false;
+  if (b.vertical) setCells(MB.H, nv); else setCells(nv, MB.V);
+  return true;
+}
+// where along the bar a pointer is, in the program's pixels, and the part it is on (FindControl)
+function barPos(b, e) { const r = b.c.getBoundingClientRect(), L = b.L; return ((b.vertical ? e.clientY - r.top : e.clientX - r.left) / (b.vertical ? r.height : r.width)) * L; }
+function barPart(b, p) {
+  const { value, max } = barVals(b), L = b.L;
+  if (p < 16) return 'lo'; if (p >= L - 16) return 'hi';
+  const T = L - 46, t = 15 + Math.round(T * value / max);
+  if (T >= 0 && p >= t && p < t + 16) return 'thumb';
+  return p < t ? 'pagelo' : 'pagehi';
+}
+function wireBar(b) {
+  const el = b.el;
+  el.style.touchAction = 'none';
+  el.addEventListener('pointerdown', (e) => {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    e.preventDefault(); el.focus({ preventScroll: true });
+    if (!barActive(b)) return; // (an inactive bar answers no click: FindControl finds no part)
+    try { el.setPointerCapture(e.pointerId); } catch (x) {}
+    const p = barPos(b, e), part = barPart(b, p), { value, max } = barVals(b);
+    if (part === 'thumb') { MB.drag = { b, p0: p, t0: 15 + Math.round((b.L - 46) * value / max), id: e.pointerId }; MB.ghost = { b, t: MB.drag.t0 }; updateBars(); return; }
+    const st = { b, part, id: e.pointerId, p, timer: 0 };
+    MB.press = st;
+    const tick = () => { // CONTROLPROC @118cc: the first call at once, then every 6 ticks (100 ms), while the pointer is still in the part
+      if (MB.press !== st) return;
+      if (barPart(b, st.p) === part) {
+        const g = barVals(b), d = part === 'lo' ? -1 : part === 'hi' ? 1 : part === 'pagelo' ? -g.page : g.page; // InitDelta @c56d4
+        scrollBy12(b, d);
+      }
+      updateBars(); st.timer = setTimeout(tick, 100);
+    };
+    tick();
+  });
+  el.addEventListener('pointermove', (e) => {
+    if (MB.press && MB.press.b === b && MB.press.id === e.pointerId) { MB.press.p = barPos(b, e); updateBars(); }
+    else if (MB.drag && MB.drag.b === b && MB.drag.id === e.pointerId) {
+      const g = MB.drag, T = b.L - 46; g.t = Math.max(15, Math.min(15 + T, g.t0 + barPos(b, e) - g.p0)); MB.ghost = { b, t: g.t }; updateBars();
+    }
+  });
+  const up = (e) => {
+    if (MB.press && MB.press.b === b && MB.press.id === e.pointerId) { clearTimeout(MB.press.timer); MB.press = null; updateBars(); }
+    else if (MB.drag && MB.drag.b === b && MB.drag.id === e.pointerId) { // ThumbMapWindow @c5804: the map moves when the thumb is let go, if the value changed
+      const g = MB.drag, T = b.L - 46, { max } = barVals(b); MB.drag = null; MB.ghost = null;
+      const nv = e.type === 'pointercancel' ? null : Math.round(Math.max(0, Math.min(1, T > 0 ? (g.t - 15) / T : 0)) * max);
+      if (nv != null && nv !== Math.round(b.vertical ? MB.V : MB.H)) { if (b.vertical) setCells(MB.H, nv); else setCells(nv, MB.V); } else updateBars();
+    }
+  };
+  el.addEventListener('pointerup', up); el.addEventListener('pointercancel', up);
+  // from the keyboard (the remake's): arrows scroll a cell, Page Up and Page Down a page
+  el.addEventListener('keydown', (e) => {
+    const k = e.key, g = barVals(b); if (!barActive(b)) return;
+    const d = { ArrowUp: b.vertical && -1, ArrowLeft: !b.vertical && -1, ArrowDown: b.vertical && 1, ArrowRight: !b.vertical && 1, PageUp: -g.page, PageDown: g.page }[k];
+    if (d) { e.preventDefault(); scrollBy12(b, d); }
+  });
+}
+function updateBars() {
+  const a = A(); if (!a || !ensureBars()) return;
+  const on = barsOn(), g = G();
+  document.documentElement.classList.toggle('bars12', on);
+  if (on !== MB.shown) { MB.shown = on; if (g) a.UI.fitted = false; a.resize(); return; }
+  for (const b of [MB.v, MB.h]) b.el.style.display = MB.corner.style.display = on && g ? '' : 'none';
+  if (!on || !g) return;
+  const [w, h] = mapSize();
+  MB.v.L = Math.max(34, Math.round(h)); MB.h.L = Math.max(34, Math.round(w));
+  for (const b of [MB.v, MB.h]) {
+    const vals = barVals(b), act = barActive(b), press = MB.press && MB.press.b === b && barPart(b, MB.press.p) === MB.press.part && /^(lo|hi)$/.test(MB.press.part) ? MB.press.part : null;
+    const ghost = MB.ghost && MB.ghost.b === b ? MB.ghost.t : null;
+    const key = [b.L, vals.value, vals.max, act, press, ghost, window.devicePixelRatio].join();
+    b.el.setAttribute('aria-valuemin', '0'); b.el.setAttribute('aria-valuemax', String(vals.max)); b.el.setAttribute('aria-valuenow', String(Math.round(vals.value)));
+    b.el.setAttribute('aria-disabled', act ? 'false' : 'true');
+    if (b.key !== key) { b.key = key; paintBar(b, b.vertical, b.L, { active: act, value: vals.value, max: Math.max(1, vals.max), press, ghost }); }
+  }
+  MB.v.el.style.height = MB.v.L + 'px'; MB.h.el.style.width = MB.h.L + 'px';
+  MB.v.el.dataset.value = String(MB.V); MB.h.el.dataset.value = String(MB.H);
+}
+// a dialog opening or closing activates or deactivates the map window (DeactivateMapWindow @c30a4 / ActivateMapWindow @c3012)
+new MutationObserver(() => { if (MB.wrap) updateBars(); }).observe(document.body, { childList: true });
+
 window.HOMAC12 = {
   alertBox: (paras) => { const b = V2 && G() && own12Rules() ? alert20(paras) : null; if (b) b.setAttribute('translate', 'no'); return b; },
   battleWindow,
@@ -1780,7 +1959,12 @@ window.HOMAC12 = {
   // (the New Game window, for 2.0.1's own rules: its Create New Galaxy dialog over the form)
   newGame(f, ctx) { if (V2) createGalaxy20(f, ctx); },
   zoomTo: (s, f) => (own() ? zoomTo(s, f) : Math.max(12, Math.min(140, s * f))),
-  fitView(v, c) { if (!own()) return; const st = c.G.stars[c.sel != null ? c.sel : c.G.players[c.ME].homeStar]; v.s = ZOOMS[3]; if (st) { v.ox = c.mapW / 2 - st.x * v.s; v.oy = c.mapH / 2 - st.y * v.s; } },
+  // the map window's scroll bars and the whole-cell scrolling they give (above); dragging the map with a mouse and the wheel are modern conveniences
+  mapInset: () => (barsOn() ? [BAR12, BAR12] : [0, 0]),
+  modernPan: () => barsOn(),
+  syncView: syncMapView, afterDraw: updateBars, centerOnStar: centerOnStar12,
+  zoomed: (i) => { if (barsOn() && i.menu) MB.centerSel = true; },
+  fitView(v, c) { if (!own()) return; const st = c.G.stars[c.sel != null ? c.sel : c.G.players[c.ME].homeStar]; v.s = ZOOMS[3]; if (st) { barMetrics(v.s, c.mapW, c.mapH, c.G); const [H, V] = centerCells(st, c.G); putCell(v, H, V); } },
   mapNames: (s) => (own() ? zoomIdx(s) > 0 : s > 18),
   // (DrawOneBWStarSubProc @c38ce: at the second zoom the names are drawn condensed, TextFace 0x20: a pixel less between letters)
   // (StarLine: the line while a fleet is dragged, and a fleet's orders)

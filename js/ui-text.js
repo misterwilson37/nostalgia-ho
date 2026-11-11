@@ -1456,5 +1456,8 @@ root.HOUI.add([
 ['Revert To Saved', 'Revenir à la version enregistrée', 'Zur gesicherten Version', 'Kaydedilene dön', 'Volver a lo guardado'],
 ['Force Turn Update', 'Forcer la mise à jour du tour', 'Zugaktualisierung erzwingen', 'Tur güncellemesini zorla', 'Forzar la actualización del turno'],
 ['Exit', 'Quitter', 'Beenden', 'Çıkış', 'Salir'],
+// ---------- the Mac 1.2 and 2.0.1 skins' map window scroll bars (MapWinProc; their accessible names: the bars themselves have no words) ----------
+['Map vertical scroll bar', 'Barre de défilement vertical de la carte', 'Vertikale Bildlaufleiste der Karte', 'Haritanın dikey kaydırma çubuğu', 'Barra de desplazamiento vertical del mapa'],
+['Map horizontal scroll bar', 'Barre de défilement horizontal de la carte', 'Horizontale Bildlaufleiste der Karte', 'Haritanın yatay kaydırma çubuğu', 'Barra de desplazamiento horizontal del mapa'],
 ]);
 })(typeof window !== 'undefined' ? window : globalThis);

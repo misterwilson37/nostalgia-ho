@@ -475,6 +475,7 @@ const mapPx = () => (T.mapPixel && T.mapPixel()) || [1, 1];
 const ox = (e) => e.offsetX / mapPx()[0], oy = (e) => e.offsetY / mapPx()[1];
 // the map's type (T.mapFont(px): a skin's own font for its names and labels)
 const mapFont = (n, fam) => (T.mapFont && T.mapFont(n)) || `${n}px ${fam || 'Geneva, Verdana, sans-serif'}`;
+const noMousePan = () => !!(T.modernPan && T.modernPan() && !modern());
 function setupMap() {
   cv = $('#map'); cx = cv.getContext('2d');
   for (let i = 0; i < 260; i++) bgStars.push({ x: Math.random(), y: Math.random(), b: Math.random() });
@@ -487,16 +488,20 @@ function setupMap() {
   cv.addEventListener('pointercancel', guard((e) => { if (isTouch(e)) Touch.mapCancel(e); else { UI.drag = null; draw(); } }));
   cv.addEventListener('dblclick', guard((e) => { if (lastPointer !== 'touch') onDbl(e); })); // iOS: a double tap on the map does nothing
   cv.addEventListener('contextmenu', guard((e) => { if (!G) return; e.preventDefault(); if (lastPointer === 'touch') return; const s = starAt(ox(e), oy(e)); if (s != null) starMenu(s, e.clientX, e.clientY); }));
-  cv.addEventListener('wheel', guard((e) => { e.preventDefault(); zoomAt(ox(e), oy(e), e.deltaY < 0 ? 1.15 : 1 / 1.15); }), { passive: false });
+  // T.modernPan(): the skin's map is scrolled by its scroll bars (the Mac 1.2 / 2.0.1 skins); dragging it with a mouse and zooming by the wheel are then
+  // modern conveniences (1.2, 1992, had neither), a finger always drags (and pinches)
+  cv.addEventListener('wheel', guard((e) => { e.preventDefault(); if (noMousePan()) return; zoomAt(ox(e), oy(e), e.deltaY < 0 ? 1.15 : 1 / 1.15); }), { passive: false });
   resize();
 }
 function resize() {
   const r = cv.parentElement.getBoundingClientRect();
   dpr = window.devicePixelRatio || 1;
   const [kx, ky] = mapPx();
-  mapW = r.width / kx; mapH = r.height / ky;
-  cv.width = Math.round(r.width * dpr); cv.height = Math.round(r.height * dpr);
-  cv.style.width = r.width + 'px'; cv.style.height = r.height + 'px';
+  // T.mapInset(): [right, bottom] CSS pixels of the map's box that the skin keeps for itself (the Mac skins' scroll bars)
+  const ins = (T.mapInset && T.mapInset()) || [0, 0], rw = Math.max(1, r.width - ins[0]), rh = Math.max(1, r.height - ins[1]);
+  mapW = rw / kx; mapH = rh / ky;
+  cv.width = Math.round(rw * dpr); cv.height = Math.round(rh * dpr);
+  cv.style.width = rw + 'px'; cv.style.height = rh + 'px';
   if (G && !UI.fitted) fit();
   draw();
 }
@@ -538,6 +543,7 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeStarM
 // bring a star to the middle of the map (zooming in a little if the map is far out)
 function centerOn(sid) {
   const s = G.stars[sid]; if (!s || !UI.view) return;
+  if (T.centerOnStar && T.centerOnStar(UI.view, sid, { G, mapW, mapH })) return; // (a skin with scroll bars: CenterOnStar's own rule)
   const x = sx(s.x), y = sy(s.y);
   if (x > mapW * 0.2 && x < mapW * 0.8 && y > mapH * 0.2 && y < mapH * 0.8) return; // already in view
   UI.view.ox += mapW / 2 - x; UI.view.oy += mapH / 2 - y;
@@ -549,6 +555,7 @@ function zoomAt(px, py, f) {
   const ns = T.zoomTo ? T.zoomTo(v.s, f) : Math.max(12, Math.min(140, v.s * f));
   const wx = (px - v.ox) / v.s, wy = (py - v.oy) / v.s;
   v.s = ns; v.ox = px - wx * ns; v.oy = py - wy * ns;
+  if (T.zoomed) T.zoomed({ px, py, mapW, mapH, sel: UI.sel, menu: px === mapW / 2 && py === mapH / 2 });
   draw();
 }
 const sx = (x) => UI.view.ox + x * UI.view.s;
@@ -573,6 +580,8 @@ function draw() {
 }
 function draw0() {
   if (!cx) return;
+  // T.syncView(view, ctx): a skin that scrolls the map its own way (the Mac skins: whole cells, between the scroll bars' limits) settles the view first
+  if (T.syncView && G && UI.view) T.syncView(UI.view, { G, mapW, mapH, sel: UI.sel, live: !!(UI.drag && UI.drag.pan && UI.drag.moved) || !!Touch.mode || !!Touch.fling });
   cx.setTransform(dpr * mapPx()[0], 0, 0, dpr * mapPx()[1], 0, 0);
   cx.fillStyle = T.mapBg || '#04030c'; cx.fillRect(0, 0, mapW, mapH);
   if (T.bgStars !== false) for (const b of bgStars) { cx.fillStyle = `rgba(200,210,255,${0.15 + b.b * 0.5})`; cx.fillRect(b.x * mapW, b.y * mapH, b.b > 0.9 ? 2 : 1, b.b > 0.9 ? 2 : 1); }
@@ -973,7 +982,7 @@ function onMove(e) {
   const px = ox(e), py = oy(e);
   const d = UI.drag;
   if (!d) { const s = starAt(px, py); cv.style.cursor = dotAt(px, py) ? 'grab' : s != null ? 'pointer' : 'default'; return; }
-  if (Math.hypot(px - d.sx, py - d.sy) > 4) d.moved = true;
+  if (Math.hypot(px - d.sx, py - d.sy) > 4 && !(d.pan && noMousePan())) d.moved = true; // (a click that wobbles still selects)
   d.x = px; d.y = py;
   if (d.pan) { if (d.moved) { UI.view.ox = d.ox + (px - d.sx); UI.view.oy = d.oy + (py - d.sy); draw(); } return; }
   const h = starAt(px, py);
@@ -993,6 +1002,7 @@ function onUp(e) {
   if (d.pan) {
     if (!d.moved && UI.route) { routeStop(starAt(px, py)); return; }
     if (!d.moved) { const s = starAt(px, py); UI.sel = s; UI.selFleet = null; renderPanel(); draw(); }
+    else if (T.syncView) draw(); // (a skin that scrolls in whole cells settles the view now)
     return;
   }
   const f = G.fleets.find(f => f.id === d.fleet);
@@ -1208,7 +1218,7 @@ const Touch = {
     this.mode = null;
     if (mode === 'pan') {
       if (this.dist < TOUCH.TAP) this.mapTap(x, y, tapCount(x, y, 'map'));
-      else { this.lastTap = null; this.throw(); } // a touch that moved breaks a run of taps (UIKit's tapCount)
+      else { this.lastTap = null; this.throw(); if (!this.fling && T.syncView) draw(); } // a touch that moved breaks a run of taps (UIKit's tapCount)
     } else if (mode === 'star') {
       if (UI.ruler) { UI.ruler = null; draw(); }
       if (this.far) { this.lastTap = null; return; }
@@ -1246,6 +1256,7 @@ const Touch = {
       UI.view.ox += mx * (f - done); UI.view.oy += my * (f - done); done = f;
       clampView(); draw();
       this.fling = t < 1 ? requestAnimationFrame(step) : 0;
+      if (!this.fling && T.syncView) draw();
     };
     this.fling = requestAnimationFrame(step);
   },
