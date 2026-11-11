@@ -245,3 +245,13 @@ html.os-dos .dropdown button:hover .mhot, html.os-dos .dropdown button:focus-vis
 .dd-type .cap.cond, .dd-qcell .cap.cond, .dd-qtop .cap.cond { letter-spacing: calc(-1 * var(--du)); }
 /* F10, the boss key (bossKey in ui.js): the text screen with its DOS prompt */
 .dd-boss { position: fixed; inset: 0; z-index: 1000; background: #000; color: #aaa; font: calc(14 * var(--du))/calc(16 * var(--du)) "DOS Bios", monospace; white-space: pre; padding: 0; outline: 0; -webkit-font-smoothing: none; }
+
+/* the Startup window, framed on the title page (startupDos in ui.js): the remake's frame round the program's window, which sits on the program's black screen */
+#titlescreen.dd-wel:not([hidden]) { display: flex; flex-direction: column; align-items: center; justify-content: safe center; gap: 20px; padding: 12px 12px 28px; }
+#titlescreen.dd-wel.dd-wide { flex-direction: row; align-items: safe center; gap: 48px; padding: 16px 48px; }
+@media (max-width: 899px) { #titlescreen.dd-wel.dd-wide { gap: 16px; padding: 8px 12px; } }
+#titlescreen.dd-wel .tcard { flex: 0 1 auto; max-width: 440px; }
+.dd-startframe { flex: none; padding: 14px; background: #000; border: 2px solid #555; box-shadow: 0 0 0 1px #000, 0 8px 40px rgba(0, 0, 0, .8), inset 0 0 0 1px #222; }
+.dd-startscr { position: relative; }
+.dd-startup { position: relative; }
+.dd-startup .dd-t { overflow: hidden; }

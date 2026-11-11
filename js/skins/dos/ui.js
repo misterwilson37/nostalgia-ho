@@ -286,6 +286,7 @@ window.HOTHEME = {
     x.fillStyle = '#fff'; x.fillRect(0, 113, 383, 123); // the lower half is drawn on white
     x.drawImage(top, 0, 0); x.drawImage(bot, 0, 113);
     Sound.play(2000);
+    startupDos();
     return true;
   },
   page(doc) {
@@ -924,7 +925,10 @@ function touchFleets() {
   }, true);
 }
 function frameSetup(de) {
-  const sync = () => { de.classList.toggle('dosframe', frameOn()); setUnit(); };
+  const sync = () => {
+    const was = de.classList.contains('dosframe'); de.classList.toggle('dosframe', frameOn()); setUnit();
+    const ts = document.getElementById('titlescreen'); if (was !== frameOn() && ts && !ts.hidden && window.HOAPI && window.HOAPI.IMG) startupDos(); // (the look changed on the title page: the Startup window comes or goes)
+  };
   sync(); window.addEventListener('load', touchFleets); touchFleets(); window.addEventListener('resize', () => { const u0 = U; setUnit(); if (u0 !== U && window.HOAPI && window.HOAPI.G && frameOn()) { window.HOAPI.renderPanel(); window.dispatchEvent(new Event('hoframe')); } });
   new MutationObserver(sync).observe(de, { attributes: true, attributeFilter: ['class'] });
   loadFonts(); hotMenus(); dosKeys(); bossKey(); condenseCaps();
@@ -1315,6 +1319,59 @@ function closingGameDos(go) {
   d.setAttribute('aria-busy', 'true'); d.setAttribute('aria-live', 'polite');
   setTimeout(() => { if (d.isConnected) a.closeModal(); go(); }, 1000);
   return true;
+}
+// The Startup window: StartupDlgBox (40 x 29 cells, 320 x 406, title "Spaceward Ho! Startup"), made by FUN_b000_4130 when the program starts (captured,
+// v20dos-orig-startup.png, measured): item 999, the picture 1002 (304 x 200), painted by the window procedure; "Licensed to:" at
+// cell 0, 15 (the picture is painted from 8, 19, on black, and shows below the title bar from row 29: its rows 10 to 199, measured by the "2.0"); item 100 at cell 13, 15, three lines (the licensee's name, the organisation, "Spaceward Ho! Version 2.0"); "(C) 1993 New World Computing, Inc." at
+// cell 2, 19; the buttons " ~Open Game " (101, the default), " ~New Game " (102) and " ~Cancel " (2) on row 21 (cells 2, 15 and 27; 11, 10 and 8 wide); item 500
+// (cell 0, 24, 38 x 3) the New World Computing logo 9999 (268 x 48) centred in it. The German build's template (read in its DOSHO.EXE): the title "Spaceward Ho!",
+// "Lizenz:" (7 cells) and item 100 at cell 8, 15, " ~Spiel öffnen ", " ~Neues Spiel ", "~Abbruch " in the same cells; shown when the page is in German. A word longer
+// than its button (the German "Spiel öffnen", the remake's translations) is drawn narrower to fit.
+// THE REMAKE'S OWN: it is shown FRAMED on the title page beside the remake's credits and options (as the iOS skin shows the app's title scene), at a size that
+// fits; its buttons go through the remake's own commands: Open Game the Saved Games list, New Game the New Game window, Cancel closes it (the program's Cancel
+// leaves the empty screen; the title page stays here). The licensee is the name last typed at New Game. Only in the DOS look.
+function startupDos() {
+  const a = window.HOAPI, ts = document.getElementById('titlescreen'); if (!a || !ts) return;
+  const old = ts.querySelector('.dd-startframe'); if (old) old.remove();
+  ts.classList.remove('dd-wel', 'dd-wide');
+  if (!frameOn()) return;
+  const de = !!(window.HOUI && window.HOUI.lang === 'de'), W = de ? { title: 'Spaceward Ho!', lic: 'Lizenz:', at: 8, open: 'Spiel öffnen', neu: 'Neues Spiel', cancel: 'Abbruch' }
+    : { title: tx('Spaceward Ho! Startup'), lic: tx('Licensed to:'), at: 13, open: tx('Open Game'), neu: tx('New Game'), cancel: tx('Cancel') };
+  const d = a.el('div', { class: 'dd dd-startup', role: 'dialog', 'aria-label': W.title });
+  d.style.width = du(320); d.style.height = du(406);
+  d.append(dAt(a.el('div', { class: 'dd-title', translate: 'no' }, W.title), 5, 5, 310, 17));
+  const pic = (name, l, t, label, top, bg) => { const im = a.IMG[P + name]; if (!im || !im.width) return null; const c = a.el('canvas', { class: 'dd-pic', role: label ? 'img' : null, 'aria-label': label || null, 'aria-hidden': label ? null : 'true' }); const y0 = top || 0; c.width = im.width; c.height = im.height - y0; const x = c.getContext('2d'); if (bg) { x.fillStyle = bg; x.fillRect(0, 0, c.width, c.height); } x.drawImage(im, 0, -y0); return dAt(c, l, t, c.width, c.height); };
+  let who = ''; try { who = localStorage.getItem('ho5.name') || ''; } catch (e) {}
+  const [lx, ly] = cell(W.at, 15);
+  // (a word wider than its place, in program pixels, is drawn narrower: measured once laid out, again when the window is fitted)
+  const narrow = [], fitB = (e, px) => { const sp = e.matches('.dd-btn') ? e.querySelector('span') : e; narrow.push([sp, px]); return e; };
+  const doNarrow = () => { const k = d.getBoundingClientRect().width / 320; if (!k) return; for (const [sp, px] of narrow) { sp.style.display = 'inline-block'; sp.style.transform = ''; sp.style.transformOrigin = sp.parentNode.matches('.dd-btn') ? '50% 50%' : '0 50%'; sp.style.margin = ''; const w = sp.getBoundingClientRect().width; if (w > px * k) { sp.style.transform = `scaleX(${(px * k / w).toFixed(3)})`; if (sp.parentNode.matches('.dd-btn')) sp.style.margin = `0 ${(-(w - px * k) / 2).toFixed(2)}px`; } } };
+  const close = () => { fr.remove(); ts.classList.remove('dd-wel', 'dd-wide'); };
+  const lic = tplText([W.lic], 0, 15)[0]; fitB(lic, 8 * W.at - 4);
+  [pic('d1002', 8, 29, 'Spaceward Ho! 2.0', 10, '#000'), lic, dText(who, lx, ly, { w: 304 - lx + 8 }), dText(tx('Spaceward Ho! Version 2.0'), lx, ly + 28),
+    ...tplText(['(C) 1993 New World Computing, Inc.'], 2, 19),
+    fitB(tplButton(W.open, 2, 21, 11, () => a.openSavedGames(), { hot: 0, def: true }), 8 * 11 - 8),
+    fitB(tplButton(W.neu, 15, 21, 10, () => { const b = document.getElementById('tnew'); if (b) b.click(); }, { hot: 0 }), 8 * 10 - 8),
+    fitB(tplButton(W.cancel, 27, 21, 8, close, { hot: 0 }), 8 * 8 - 8),
+    pic('d9999', 8 + (304 - 268) / 2, 350 + Math.round((42 - 48) / 2), 'New World Computing, Inc.')].forEach(e => e && d.append(e));
+  // (the window's own keys while it has the keyboard: Return the default button, the red letters their buttons, Escape its Cancel)
+  d.addEventListener('keydown', (e) => {
+    if (e.ctrlKey || e.altKey || e.metaKey) return;
+    const bs = [...d.querySelectorAll('.dd-btn')], k = e.key.toLowerCase(), hit = e.key === 'Escape' ? bs[2] : e.key === 'Enter' && !bs.includes(document.activeElement) ? bs[0] : bs.find(b => b.textContent.trim()[0].toLowerCase() === k);
+    if (hit) { e.preventDefault(); hit.click(); }
+  });
+  const inner = a.el('div', { class: 'dd-startscr' }, d), fr = a.el('div', { class: 'dd-startframe' }, inner);
+  const fit = () => {
+    if (!fr.isConnected) return;
+    const vw = window.innerWidth, vh = window.innerHeight, wide = vw >= 640 && vw > vh * 1.05, bz = vw < 900 ? 8 : 14, side = vw < 900 ? 24 + 24 : 96;
+    const k0 = wide ? Math.min((vw - side - 420 - 2 * bz) / 320, (vh - 32 - 2 * bz) / 406) : Math.min((vw - 24 - 2 * bz) / 320, (vh * 0.8 - 2 * bz) / 406);
+    const k = Math.max(0.4, Math.min(k0, 2)), kk = k >= 1 ? Math.floor(k * 4) / 4 : k;
+    ts.classList.toggle('dd-wide', wide); fr.style.setProperty('--du', kk + 'px'); fr.style.padding = bz + 'px';
+    doNarrow(); if (document.fonts && document.fonts.ready) document.fonts.ready.then(doNarrow);
+  };
+  ts.classList.add('dd-wel'); ts.prepend(fr); fit();
+  if (!ts._ddFit) { ts._ddFit = true; window.addEventListener('resize', () => { const f = ts.querySelector('.dd-startframe'); if (f && f._fit) f._fit(); }); }
+  fr._fit = fit;
 }
 // Name a Star: NameStarBox (49 x 16 cells, 392 x 224), the window procedure FUN_a000_fa92: its words (cell 1, 1, six lines: the sentence, the rule and the hint, a blank
 // line between), picture 3500 painted in item 999 (cell 1, 8, 10 x 5), "New Star Name:" at cell 12, 9, the edit field (item 100, cell 27, 9, 8 wide, at most 7 letters:
