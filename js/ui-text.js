@@ -1285,6 +1285,12 @@ root.HOUI.add([
 ['%d %s computer players', '%d joueurs ordinateur (%s)', '%d Computerspieler (%s)', '%d bilgisayar oyuncusu (%s)', '%d jugadores del ordenador (%s)'],
 ['This is a %s, %s, %s galaxy with %d %s and %s.\n\nThe current year is %d.', 'Voici une galaxie %s, %s, %s avec %d %s et %s.\n\nL’année en cours est %d.', 'Dies ist eine Galaxie (%s, %s, %s) mit %d %s und %s.\n\nDas aktuelle Jahr ist %d.', 'Bu galaksi %s, %s, %s; %d %s ve %s var.\n\nŞu anki yıl %d.', 'Esta es una galaxia %s, %s, %s con %d %s y %s.\n\nEl año actual es %d.'],
 ['This game contains a\n%s, %s, %s\ngalaxy with %d %s and\n%s.\n\nThe current year is %d.', 'Cette partie contient une\ngalaxie %s, %s, %s\navec %d %s et\n%s.\n\nL’année en cours est %d.', 'Dieses Spiel enthält eine\nGalaxie (%s, %s, %s)\nmit %d %s und\n%s.\n\nDas aktuelle Jahr ist %d.', 'Bu oyunda\n%s, %s, %s bir\ngalaksi; %d %s ve\n%s var.\n\nŞu anki yıl %d.', 'Esta partida contiene una\ngalaxia %s, %s, %s\ncon %d %s y\n%s.\n\nEl año actual es %d.'],
+// the Windows File Open window (template 12; js/skins/dos/win31/dialogs.js fileOpen): its words, and the remake's "folder"
+['File name of galaxy to open:', 'Nom de fichier de la galaxie à ouvrir :', 'Dateiname der zu öffnenden Galaxie:', 'Açılacak galaksinin dosya adı:', 'Nombre del archivo de la galaxia que abrir:'],
+['Files', 'Fichiers', 'Dateien', 'Dosyalar', 'Archivos'],
+['Directories', 'Répertoires', 'Verzeichnisse', 'Dizinler', 'Directorios'],
+['Directory:', 'Répertoire :', 'Verzeichnis:', 'Dizin:', 'Directorio:'],
+['this browser', 'ce navigateur', 'dieser Browser', 'bu tarayıcı', 'este navegador'],
 ['Spaceward Ho! Startup', 'Spaceward Ho! Démarrage', 'Spaceward Ho! Start', 'Spaceward Ho! Başlangıç', 'Spaceward Ho! Inicio'],
 ['Closing Game...', 'Fermeture de la partie...', 'Schließe Spiel...', 'Oyun kapatılıyor...', 'Cerrando la partida...', { de: 'DOS 2.0' }],
 ['Spaceward Ho! Version 2.0', 'Spaceward Ho! version 2.0', 'Spaceward Ho! Version 2.0', 'Spaceward Ho! Sürüm 2.0', 'Spaceward Ho! versión 2.0'],

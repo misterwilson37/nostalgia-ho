@@ -49,4 +49,37 @@ D.gameInfo = function () {
     on: { 1: (_, dlg) => dlg.close() },
   });
 };
+// #12 FILEOPEN (File, Open Game…; the Startup window's Open Game): the program's file window (FUN_1058_017e: "File name of galaxy to open:", the filter "*.HO!"
+// selected in the edit field, "Directory:" and the folder, the Files and Directories lists, OK and Cancel; captured, win20-orig-vga16-fileopen*.png). A file
+// chosen in the list goes into the field; OK or a double click opens it. THE REMAKE'S: the files are the remake's saved games (the page's slots for the ruleset,
+// o.list from js/skins/classic/ui.js openSavedGames, and the game in progress), each named as the program names its files, "<galaxy>.ho!"; a browser has no
+// folders or drives, so the Directories list is empty and the directory is the browser.
+D.fileOpen = function (o) {
+  const a = root.HOAPI; o = o || {};
+  const files = [], seen = {};
+  const nm = (gal, year) => { let n = String(gal || 'Milky Way').replace(/\s+/g, '') + '.ho!'; if (seen[n.toLowerCase()]) n = n.replace(/\.ho!$/, '-' + year + '.ho!'); seen[n.toLowerCase()] = 1; return n.toLowerCase(); };
+  if (a.G) files.push({ name: nm(a.G.opts && a.G.opts.galaxy, a.G.year), go: () => true });
+  else { let raw = null; try { raw = localStorage.getItem('ho5.save'); } catch (e) {} if (raw) { let g = null; try { g = root.HO.load(raw); } catch (e) {} if (g) files.push({ name: nm(g.opts && g.opts.galaxy, g.year), go: () => { const b = document.getElementById('tcont'); if (b) b.click(); return true; } }); } }
+  for (const g of o.list || []) files.push({ name: nm(g.galaxy, g.year), go: () => { o.open(g); return true; } });
+  let sel = -1;
+  const openIt = (dlg) => {
+    const want = String(dlg.value(16) || '').trim().toLowerCase(), f = sel >= 0 ? files[sel] : files.find(x => x.name === want);
+    if (!f) { if (a.beep) a.beep(); return; }
+    dlg.close(); f.go();
+  };
+  const dlg = W.open(12, {
+    label: 'File name of galaxy to open:',
+    text: { 15: 'File name of galaxy to open:', '#6': 'Directories', '#7': 'Files', '#8': 'Directory:', 17: a.tl ? a.tl('this browser') : 'this browser', 16: '*.HO!', 1: 'OK', 2: 'Cancel' },
+    lists: { 18: { items: files.map(f => f.name), sel: -1 }, 19: { items: [], sel: -1 } },
+    on: {
+      18: (i, d) => { sel = i; const e = d.get('16'); if (e && files[i]) e.value = files[i].name; },
+      16: () => { sel = -1; },
+      1: (_, d) => openIt(d), 2: (_, d) => d.close(),
+    },
+  });
+  if (!dlg) return false;
+  const ed = dlg.get('16'); if (ed) { ed.focus(); ed.select(); }
+  const lb = dlg.get('18'); if (lb) lb.addEventListener('dblclick', () => { if (sel >= 0) openIt(dlg); });
+  return true;
+};
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -67,9 +67,10 @@ ${B}:focus-visible span, html .w31d .w31chk:focus-visible span.t { outline: ${U(
 .w31d .w31chk .t { position: absolute; left: ${U(19)}; white-space: pre; }
 .w31d .w31grp { border: ${U(1)} solid #000; }
 .w31d .w31grp .t { position: absolute; left: ${U(8)}; top: ${U(-9)}; padding: 0 ${U(2)}; background: #fff; white-space: pre; line-height: ${U(16)}; }
-.w31d .w31edit { background: #fff; font: inherit; font-weight: normal; color: #000; padding: 0 ${U(2)}; margin: 0; border: 0; border-radius: 0; outline: none; }
+.w31d .w31edit { background: #fff; font: inherit; font-weight: bold; color: #000; padding: 0 ${U(2)}; margin: 0; border: 0; border-radius: 0; outline: none; }
 .w31d .w31edit.bd { border: ${U(1)} solid #000; }
-.w31d .w31list { background: #fff; border: ${U(1)} solid #000; overflow: hidden auto; font-weight: normal; }
+/* (the edit fields and lists in the System font, bold, as the dialog's other words: measured on the File Open window, win20-orig-vga16-fileopen-sel.png) */
+.w31d .w31list { background: #fff; border: ${U(1)} solid #000; overflow: hidden auto; font-weight: bold; }
 .w31d .w31list .row { height: ${U(16)}; padding: 0 ${U(2)}; white-space: pre; overflow: hidden; cursor: pointer; }
 .w31d .w31list .row.sel { background: var(--w31hi); color: #fff; }
 .w31d .w31sb { background: var(--w31face); border: ${U(1)} solid #000; cursor: pointer; touch-action: none; }
