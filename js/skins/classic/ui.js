@@ -1778,7 +1778,9 @@ const scrapBlocks = (f) => !!(f && f.scrap301 && marksScrap() && !HO.rules(G).sc
 // Scrap Current Fleet (ScrapCurrentFleet @133a24): sound 7003 when the mark
 // was off; a fleet bought this turn is given back instead (it is gone)
 // (rs.scrapSound false: 2.0 marks in silence, FUN_10f0_0000, Mac ScrapCurrentFleet)
+function scrapFleetNow(f) { confirmBox(`Scrap this fleet for ${Math.round(HO.TYPES ? 75 : 75)}% of its metal?`, () => { const m = HO.scrapFleet(G, f); Sound.play(7003); toast(`Scrapped for ${fmt(m)} metal.`); UI.selFleet = null; renderPanel(); draw(); save(); }); }
 function toggleScrapFleet(f) {
+  if (!marksScrap()) return scrapFleetNow(f); // (a ruleset that scraps at once, Gemini's: a skin's own Scrap Current Fleet command calls this too)
   const was = !!f.scrap301;
   HO.rules(G).flagScrap(G, f, 'command');
   if (!was && HO.rules(G).scrapSound !== false) Sound.play(7003);
@@ -1848,7 +1850,7 @@ function fleetRow(f, inbound) {
       ...[['normal', 'Normal'], ['offensive', 'Offensive'], ['defensive', 'Defensive']].map(([v, t]) => el('option', { value: v, selected: (f.stance || 'normal') === v ? 'selected' : false }, t))));
     if (HO.feature(G, 'lateArrival')) acts.append(el('label', { class: 'chk', onclick: (e) => e.stopPropagation() }, el('input', { type: 'checkbox', checked: f.delayed ? 'checked' : false, onchange: (e) => { f.delayed = e.target.checked; save(); } }), el('span', null, 'Arrive late')));
     if (marksScrap() && !T.ownPanel) acts.append(el('button', { class: 'quiet', onclick: (e) => { e.stopPropagation(); toggleScrapFleet(f); } }, scrapWords('fleet')[marked ? 1 : 0]));
-    else acts.append(el('button', { class: 'quiet', onclick: (e) => { e.stopPropagation(); confirmBox(`Scrap this fleet for ${Math.round(HO.TYPES ? 75 : 75)}% of its metal?`, () => { const m = HO.scrapFleet(G, f); Sound.play(7003); toast(`Scrapped for ${fmt(m)} metal.`); UI.selFleet = null; renderPanel(); draw(); save(); }); } }, 'Scrap'));
+    else acts.append(el('button', { class: 'quiet', onclick: (e) => { e.stopPropagation(); scrapFleetNow(f); } }, 'Scrap'));
     r.append(acts);
   }
   if (sel && mine && inbound && marksScrap()) // marked in hyperspace: its metal falls on the next star at End Turn
