@@ -1424,6 +1424,24 @@ function startupDos() {
   const old = ts.querySelector('.dd-startframe'); if (old) old.remove();
   ts.classList.remove('dd-wel', 'dd-wide');
   if (!frameOn()) return;
+  // (the Windows look: the Windows program's Startup window, template 32, js/skins/dos/win31/dialogs.js HOWIN31.startup, in the same frame)
+  if (winOn() && window.HOWIN31 && window.HOWIN31.startup && window.HOWIN31.templates) {
+    const close = () => { fr.remove(); ts.classList.remove('dd-wel', 'dd-wide'); };
+    const dlg = window.HOWIN31.startup({ close, wu: 1 }); if (!dlg) return;
+    dlg.el.setAttribute('role', 'dialog'); dlg.el.setAttribute('aria-label', tx('Spaceward Ho! Startup'));
+    const fr = a.el('div', { class: 'dd-startframe w31-startframe' }, a.el('div', { class: 'dd-startscr' }, dlg.el));
+    const fit = () => {
+      if (!fr.isConnected) return;
+      const vw = window.innerWidth, vh = window.innerHeight, wide = vw >= 640 && vw > vh * 1.05, bz = vw < 900 ? 8 : 14, side = vw < 900 ? 24 + 24 : 96, OW = 314, OH = 407;
+      const k0 = wide ? Math.min((vw - side - 420 - 2 * bz) / OW, (vh - 32 - 2 * bz) / OH) : Math.min((vw - 24 - 2 * bz) / OW, (vh * 0.8 - 2 * bz) / OH);
+      const k = Math.max(0.4, Math.min(k0, 2)), kk = k >= 1 ? Math.floor(k * 4) / 4 : k;
+      ts.classList.toggle('dd-wide', wide); dlg.el.style.setProperty('--wu', kk + 'px'); fr.style.padding = bz + 'px';
+    };
+    ts.classList.add('dd-wel'); ts.prepend(fr); fit();
+    if (!ts._ddFit) { ts._ddFit = true; window.addEventListener('resize', () => { const f = ts.querySelector('.dd-startframe'); if (f && f._fit) f._fit(); }); }
+    fr._fit = fit;
+    return;
+  }
   const de = !!(window.HOUI && window.HOUI.lang === 'de'), W = de ? { title: 'Spaceward Ho!', lic: 'Lizenz:', at: 8, open: 'Spiel öffnen', neu: 'Neues Spiel', cancel: 'Abbruch' }
     : { title: tx('Spaceward Ho! Startup'), lic: tx('Licensed to:'), at: 13, open: tx('Open Game'), neu: tx('New Game'), cancel: tx('Cancel') };
   const d = a.el('div', { class: 'dd dd-startup', role: 'dialog', 'aria-label': W.title });

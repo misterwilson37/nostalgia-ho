@@ -82,4 +82,23 @@ D.fileOpen = function (o) {
   const lb = dlg.get('18'); if (lb) lb.addEventListener('dblclick', () => { if (sel >= 0) openIt(dlg); });
   return true;
 };
+// #32 STARTUP, on the title page (js/skins/dos/ui.js startupDos puts it in the title page's frame, as the DOS look's Startup window): HOCOLOR's 1002 (the DOS
+// skin's d1002, the same picture) in control 999, at 0, -2 in the client, clipped by it; "Licensed to:" and the licence lines (the remake: the player's name and "Spaceward Ho!
+// Version 2.0", as About); "Copyright 1992 New World Computing, Inc."; Open Game (default), New Game, Cancel; the New World Computing logo (the DOS skin's
+// d9999, the same picture) centred in control 500 (measured on win20-orig-vga16-startup.png). Returns the dialog (HOWIN31.build) for the page to hold.
+W.startup = function (o) {
+  const a = root.HOAPI, img = a.IMG['dos:d1002'], logo = a.IMG['dos:d9999'];
+  let who = ''; try { who = localStorage.getItem('ho5.name') || ''; } catch (e) {}
+  return W.build(32, {
+    title: 'Spaceward Ho! Startup', label: 'Spaceward Ho! Startup', wu: o.wu, close: o.close,
+    text: { '#5': 'Licensed to:', 100: who + '\n\n' + (a.tl ? a.tl('Spaceward Ho! Version 2.0') : 'Spaceward Ho! Version 2.0'), '#7': 'Copyright 1992 New World Computing, Inc.', 101: 'Open Game', 102: 'New Game', 2: 'Cancel' },
+    pics: {
+      999: (x, w, h) => { x.fillStyle = '#000'; x.fillRect(0, 0, w, h); if (img && img.width) x.drawImage(img, 0, 0); }, // (on black, as the program shows it: the picture's own background)
+      500: (x, w, h) => { x.fillStyle = '#fff'; x.fillRect(0, 0, w, h); if (logo && logo.width) x.drawImage(logo, Math.floor((w - logo.width) / 2), Math.floor((h - logo.height) / 2)); },
+    },
+    picLabel: { 999: 'Spaceward Ho! 2.0', 500: 'New World Computing, Inc.' },
+    on: { 101: () => a.openSavedGames(), 102: () => { const b = document.getElementById('tnew'); if (b) b.click(); }, 2: () => o.close() },
+    onKey: (e) => { if (e.key === 'Escape') { o.close(); return true; } return false; },
+  });
+};
 })(typeof window !== 'undefined' ? window : globalThis);

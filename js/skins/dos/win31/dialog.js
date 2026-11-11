@@ -149,7 +149,7 @@ function control(it, n, o, dlg) {
   const txt = o.text && o.text[key] != null ? String(o.text[key]) : '';
   const fire = (v) => { const f = o.on && o.on[key]; if (f) f(v, dlg); };
   let e;
-  if ((kind === 'static' || kind === 'bitmap' || kind === 'owner') && o.pics && o.pics[key]) {
+  if (o.pics && o.pics[key]) { // (an owner-painted static, or a frame the program paints a picture into: Startup's logo, control 500)
     e = at(mk('canvas', 'w31c w31pic'), r[0], r[1], r[2], r[3]); e.width = r[2]; e.height = r[3]; e.setAttribute('role', 'img');
     if (o.picLabel && o.picLabel[key]) e.setAttribute('aria-label', o.picLabel[key]);
     o.pics[key](e.getContext('2d'), r[2], r[3]);
@@ -212,20 +212,29 @@ function scale(ow, oh) {
 }
 
 W.has = (id) => !!(W.templates && W.templates[id]);
+// HOWIN31.build(id, o): the dialog's element and its handle without opening it (for a window that lives in the page, as the Startup window on the title page);
+// o.wu: its scale in CSS pixels per Windows pixel (else the screen's). HOWIN31.open(id, o): built and opened in the remake's modal layer.
 W.open = function (id, o) {
+  const dlg = W.build(id, o), a = root.HOAPI; if (!dlg) return null;
+  o = o || {};
+  a.modal('', dlg.el, { cls: 'w31dlg', label: o.label || o.title || 'Spaceward Ho!', sticky: true, onClose: o.onClose });
+  dlg.focus();
+  return dlg;
+};
+W.build = function (id, o) {
   o = o || {};
   const t = W.templates[id], a = root.HOAPI; if (!t || !a) return null;
   style();
   const cap = !!(t.style & WS_CAPTION) && (t.style & WS_CAPTION) === WS_CAPTION, cw = dx(t.w), ch = dy(t.h);
   const top = cap ? FR.capTop : FR.top, ow = cw + 2 * FR.side, oh = ch + top + FR.bottom;
   const d = mk('div', 'w31d'); d.setAttribute('translate', 'yes');
-  d.style.setProperty('--wu', scale(ow, oh) + 'px'); d.style.width = U(ow); d.style.height = U(oh);
+  d.style.setProperty('--wu', (o.wu || scale(ow, oh)) + 'px'); d.style.width = U(ow); d.style.height = U(oh);
   if (cap) {
     const c = at(mk('div', 'w31cap'), FR.side - 1, FR.top - 2, cw, FR.cap + 2);
     c.append(mk('span', 'w31sys'), mk('span', 't', o.title || '')); d.append(c);
   }
   const client = at(mk('div', 'w31client'), FR.side - 1, top - 1, cw, ch); d.append(client);
-  const dlg = { el: d, id, get: (k) => client.querySelector(`[data-w31="${k}"]`), value: (k) => { const e = dlg.get(k); return e && e.w31 ? e.w31.value : e && 'value' in e ? e.value : null; }, close: () => a.closeModal() };
+  const dlg = { el: d, id, get: (k) => client.querySelector(`[data-w31="${k}"]`), value: (k) => { const e = dlg.get(k); return e && e.w31 ? e.w31.value : e && 'value' in e ? e.value : null; }, close: () => (o.close ? o.close() : a.closeModal()) };
   t.items.forEach((it, n) => client.append(control(it, n, o, dlg)));
   // the keyboard: Return is IDOK (the button with id 1, or the default push button), as in Windows
   d.addEventListener('keydown', (e) => {
@@ -233,9 +242,7 @@ W.open = function (id, o) {
     if (e.key === 'Enter' && !(e.target && e.target.tagName === 'BUTTON')) { const b = client.querySelector('button.w31b.def') || dlg.get('1'); if (b) { e.preventDefault(); b.click(); } }
   });
   if (o.closeOnClick) d.addEventListener('click', () => dlg.close());
-  a.modal('', d, { cls: 'w31dlg', label: o.label || o.title || 'Spaceward Ho!', sticky: true, onClose: o.onClose });
-  const f = client.querySelector('button.w31b.def') || client.querySelector('button.w31b, .w31chk, .w31sb, input, .w31list');
-  if (f) f.focus(); else { d.tabIndex = -1; d.focus(); }
+  dlg.focus = () => { const f = client.querySelector('button.w31b.def') || client.querySelector('button.w31b, .w31chk, .w31sb, input, .w31list'); if (f) f.focus(); else { d.tabIndex = -1; d.focus(); } };
   return dlg;
 };
 W.dialogs = W.dialogs || {};
