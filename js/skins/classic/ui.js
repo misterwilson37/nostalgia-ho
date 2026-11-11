@@ -6588,7 +6588,15 @@ function quitToTitle() {
   if (G && modern() && !G.over) return confirmBox('Leave this game for the title screen? It is saved: Continue or Saved Games brings it back.', quitToTitleNow);
   quitToTitleNow();
 }
-function quitToTitleNow() { save(); Sound.play(7002); G = null; renderPanel(); draw(); $('#panel').innerHTML = ''; $('#msg').innerHTML = ''; titleScreen(); }
+// (a skin may show its program's own box while the game is saved and closed: T.closingGame(go) shows it and calls go when it is gone, the DOS
+// look's "Closing Game..." for about a second; never on page unload, which does not come here)
+let closing = false;
+function quitToTitleNow() {
+  if (closing) return;
+  const go = () => { closing = false; if (!G) return; save(); Sound.play(7002); G = null; renderPanel(); draw(); $('#panel').innerHTML = ''; $('#msg').innerHTML = ''; titleScreen(); };
+  if (G && T.closingGame) { save(); closing = true; if (T.closingGame(go)) return; closing = false; }
+  go();
+}
 function setupMenus() {
   const menus = {
     Game: [['New game…', newGameDialog], [() => (G && HO.rules(G).switchPlayers) || 'End turn and switch players', () => switchPlayers(), () => !!(G && HO.rules(G).switchPlayers && hotSeat())], ['Players and history', () => G && openPlayers()], ['Auto-play this turn', () => playOneTurn()], ['Auto play…', () => G && !G.over && (hotSeat() || G.online ? toast('Auto play is for one-player games.') : openAutoPlay())], ['Online game…', () => openOnlineInfo(), () => !!(G && G.online)], ['Preferences…', openPrefs], ['Saved games…', () => openSavedGames(), () => !!(screensOf(rulesId()) || {}).savedGames], ['Account saves…', () => openAccountSaves(), () => !!CLOUD], ['Export this game…', () => exportGame(), () => !!G], ['Import a game…', () => importGame()], ['Rank history…', openRanks, () => !G || hasRanks(G)], [() => ((HO.RULESETS[rulesId()] || {}).gameCenter || {}).menu || 'Rank and Game Center…', openGameCenter, () => !!(HO.RULESETS[rulesId()] || {}).gameCenter],

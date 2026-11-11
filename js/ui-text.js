@@ -1271,6 +1271,7 @@ root.HOUI.add([
 // the Windows 2.0's About box (its Help menu's item and the window's title, the licence line; js/skins/dos/win31/dialogs.js)
 ['About Spaceward Ho!', 'A propos de Spaceward Ho!', 'Über Spaceward Ho!', 'Spaceward Ho! hakkında', 'Acerca de Spaceward Ho!'],
 ['Licensed to:', 'Licence accordée à :', 'Lizenziert für:', 'Lisans sahibi:', 'Con licencia para:'],
+['Closing Game...', 'Fermeture de la partie...', 'Schließe Spiel...', 'Oyun kapatılıyor...', 'Cerrando la partida...', { de: 'DOS 2.0' }],
 ['Spaceward Ho! Version 2.0', 'Spaceward Ho! version 2.0', 'Spaceward Ho! Version 2.0', 'Spaceward Ho! Sürüm 2.0', 'Spaceward Ho! versión 2.0'],
 ['End Turn & Switch Players', 'Finir le tour et changer de joueur', 'Zug Ende & Spielerwechsel', 'Sırayı Bitir ve Oyuncu Değiştir', 'Terminar el turno y cambiar de jugador'],
 ['Page Setup…', 'Mise en page…', 'Seite einrichten…', 'Sayfa Yapısı…', 'Configurar página…'],

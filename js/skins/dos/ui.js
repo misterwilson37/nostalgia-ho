@@ -268,6 +268,7 @@ window.HOTHEME = {
   alertBox(paras) { return frameOn() ? alertDos(paras, [{ label: 'OK', def: true }]) : null; },
   youWonLayout(kind, Y, done) { return frameOn() ? youWonDos(kind, Y, done) : false; },
   nameStarLayout(f, o) { return frameOn() ? nameStarDos(f, o) : false; },
+  closingGame(go) { return frameOn() ? closingGameDos(go) : false; },
   // (a question whose caller asks for the program's Yes/No box: labels ['Yes', 'No'], the remake's own words before they are put in the page's language, or labels.yesNo)
   confirm(text, yes, labels) { return frameOn() ? !!alertDos([typeof text === 'string' ? text : (text.textContent || '')], [{ label: labels ? tx(labels[0]) : 'OK', def: true, fn: yes }, { label: labels ? tx(labels[1]) : 'Cancel' }], { yesNo: !!labels && (!!labels.yesNo || (labels[0] === 'Yes' && labels[1] === 'No')) }) : false; },
   alert(kind, text, yes) { return frameOn() ? !!alertDos([typeof text === 'string' ? text : (text.textContent || '')], [{ label: 'OK', def: true, fn: yes }, { label: 'Cancel' }]) : false; },
@@ -1304,6 +1305,16 @@ function youWonDos(kind, Y, done) {
   [tplPic(won ? 'd5040' : 'd5050', 0, 0, 19, 11), ...tplText(lines, 1, 11), ok].forEach(k => k && d.append(k));
   placeDos(a.modal('', d, { cls: 'dosw', sticky: true, label: lines.join(' '), onClose: done }), 168, 14 * h);
   ok.focus(); return true;
+}
+// Closing Game: CloseGameDlgBox (22 x 8 cells, 176 x 112, no title bar), shown by FUN_a000_a3e4 (File, Close; Exit) while it writes the game file (FUN_3000_3fc0)
+// and closed when that is done; its one item, "Closing Game..." (the German build's "Schließe Spiel..."), a line of words at cell 4, 2. The remake saves in a moment,
+// so the box stays about a second (no button: nothing to press) and then the title page comes, for Close, Exit and the quit question alike.
+function closingGameDos(go) {
+  const a = window.HOAPI;
+  const de = wl() === 'de', d = dDialog(176, 112, null, tplText([de ? 'Schließe Spiel...' : tx('Closing Game...')], de ? 1 : 4, 2), 'Closing Game...'); // (the German build's template: its words at cell 1, 2)
+  d.setAttribute('aria-busy', 'true'); d.setAttribute('aria-live', 'polite');
+  setTimeout(() => { if (d.isConnected) a.closeModal(); go(); }, 1000);
+  return true;
 }
 // Name a Star: NameStarBox (49 x 16 cells, 392 x 224), the window procedure FUN_a000_fa92: its words (cell 1, 1, six lines: the sentence, the rule and the hint, a blank
 // line between), picture 3500 painted in item 999 (cell 1, 8, 10 x 5), "New Star Name:" at cell 12, 9, the edit field (item 100, cell 27, 9, 8 wide, at most 7 letters:
