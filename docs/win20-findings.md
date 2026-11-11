@@ -1,6 +1,6 @@
 # Windows 3.1 2.0: the display audit (November 2026, begun)
 
-**Progress (Windows dialogs):** foundation done (emulator `emulators/dosbox-win31`, renderer `js/skins/dos/win31/`); built 2 of 33 (About, Battle Speed); next: chunk 1, Start (below, "The chunk plan").
+**Progress (Windows dialogs):** foundation done (emulator `emulators/dosbox-win31`, renderer `js/skins/dos/win31/`); built 2 of 33 (About, Battle Speed); chunk 1 under way: Part A (the main window, one scale) done; next: the Start dialogs (below, "The chunk plan").
 
 *The same game as DOS 2.0 and Mac 2.0.1 (`docs/dos-findings.md`); this is what WINHO.EXE puts in front of the player.*
 
@@ -117,6 +117,31 @@ skin's, reused: its `*Dos` functions already draw most of the pictures and rows)
 `--os=win31` (new option; it also opens About and Battle Speed from the menus and closes them): both dialogs open, are looked at and close at phone-l and
 desktop; the win31 look's other failures (menus covered by the Organize Fleets and battle "Skip" windows, a fleet drag at phone-l) were there before this
 (the same run on the previous commit fails more).
+
+## The main window (chunk 1, part A, November 2026)
+
+**Measured** on `win20-orig-{vga16,s3-256}-main.png` and read in the decompile (the Window menu's Clean Up Windows routine, which also places the windows at the
+start, from the screen size and SM_CYCAPTION, SM_CXFRAME, SM_CYFRAME): on the 640 x 480 screen the main window is 0, 0 to 640, 356 (480 - 96 - caption - 2 frames);
+Tech Spending 0, 356, 228 x 120 (a one-pixel frame); Reports 382, 356 to 640, 480 (a sizing frame); the desktop between them (16 colours #c0c0c0, 256 the workspace grey).
+The main window: a sizing frame of four, an 18-row caption (control-menu box, title, minimize and maximize), the 18-row menu bar (WINHO's MENU 1), its client 632 x 310 at
+4, 42: the panes 240 wide, their last column black (planet 89 rows, fleets 90, totals 46, players and budget 85) and the map 375 x 293 with Windows' scroll bars
+(17 across, 15-pixel boxes and thumb at 17 + (L - 49) * v / max), the corner white. **The Windows build's panes are the DOS program's** (the same bar charts at the same
+places: rule, ticks every 5, bars 18 wide 9 apart) **in another font**: MS Sans Serif 8 (capitals 8, lines 14 apart) and the planet's name in the bold System font, so
+the rows are 14 apart where DOS has 10 or 12, the fleet list's rows 14 (the chosen one 15 high), the scroll bars Windows'; the ticks one pixel; the bar names 12 below
+the bars and the technologies' second row 14 lower. In 16 colours the bars are 0,0,170 (terraform, mine), 170,85,170 (ships, technologies) and the budget's 0,170,85;
+in 256 the DOS colours (the budget's 48,207,0). The End Turn picture sits at 3, 2 in the map.
+
+**Built** (`js/skins/dos/ui.js`, `js/skins/dos/win31/frame.js`): with the win31 look the DOS skin's frame is on (`frameOn` is the dos or the win31 look; `winOn` the
+win31 one) in the Windows layout: the panes drawn by the DOS skin's functions with the Windows geometry (tables PGEO, FGEO and the Windows branches), the map's
+scroll bars and the panes' bars Windows' (`wBar`), Tech Spending and Reports as their own windows (Reports lists the turn's reports, as the DOS Reports window
+does; a click acts on one). The window last pressed on has the active caption; the remake starts with the main one active (the capture had Reports active, the
+last window the program opened). **One scale:** the frame's unit --u fits the 640 x 480 screen to the browser window; the template dialogs (dialog.js) open
+at the same unit, as the DOS skin's own windows already do; a dialog no longer dims the screen. Stand-in font: Arial at 11 px, narrowed to 92 % (MS Sans Serif's
+widths). Not done: the Help menu only when the look is chosen before the page loads (as before); the logo menu where Windows has Help; the dialogs are centred
+(the program puts Battle Speed at 152, 141); the remake's own windows (Preferences ...) keep their CSS size.
+
+**real-play** (`--skin=dos --rules=dos --os=win31`): before, 0 of 2 runs passed at phone-l and desktop (menus covered by the Organize Fleets and battle
+windows, the fleet drag at phone-l); now phone-l, pad, desktop and 4k pass, as the dos look does.
 
 ### The chunk plan (the other 31, about five a session)
 

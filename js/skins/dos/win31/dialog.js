@@ -201,8 +201,11 @@ function control(it, n, o, dlg) {
   return e;
 }
 
-// the scale: whole Windows pixels where the screen has room (2 on a large screen), else what fits
+// the scale: the screen's (the DOS skin's frame unit --u, js/skins/dos/ui.js setUnit: the 640 x 480 screen fitted to the window), so every window opens at
+// one scale; without the frame, whole Windows pixels where the screen has room (2 on a large screen), else what fits
 function scale(ow, oh) {
+  const de = document.documentElement, fu = de.classList.contains('dosframe') ? parseFloat(getComputedStyle(de).getPropertyValue('--u')) : 0;
+  if (fu > 0) return fu;
   const fit = Math.min((root.innerWidth - 8) / ow, (root.innerHeight - 8) / oh);
   return fit >= 2 ? 2 : fit >= 1 ? 1 : Math.max(0.5, fit);
 }

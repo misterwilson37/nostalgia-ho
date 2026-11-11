@@ -254,7 +254,7 @@ window.HOTHEME = {
   panel(panel, B) { panelDos(panel, B); },
   mapPixel() { return frameOn() ? [U, U] : null; },
   battleWindow(b, k) { battleDos(b, k); },
-  mapInset() { return frameOn() ? [8 * U, 14 * U] : [0, 0] ; },
+  mapInset() { return winOn() ? [17 * U, 17 * U] : frameOn() ? [8 * U, 14 * U] : [0, 0] ; }, // (the Windows program's scroll bars are 17 pixels)
   modernPan() { return frameOn(); },
   planetPx(s) { return frameOn() ? Math.round(s * 12 / 17) : Math.max(18, Math.min(52, s * 0.9)); }, // (measured: a star's ball is about 24 pixels at the zoom of 17 and 15 at 12)
   zoomTo(s, f) { return frameOn() ? dzoomTo(s, f) : Math.max(12, Math.min(140, s * f)); },
@@ -262,9 +262,9 @@ window.HOTHEME = {
   centerOnStar(v, sid, c) { return dCenterOn(v, sid, c); },
   fitView(v, c) { dMapFit(v, c); },
   afterDraw() { dBars(); },
-  mapBg: document.documentElement.classList.contains('os-dos') ? '#000' : undefined, // (the program's map is plain black)
-  bgStars: document.documentElement.classList.contains('os-dos') ? false : undefined,
-  mapFont(n) { return frameOn() ? "12px 'DOS Geneva 9'" : null; },
+  mapBg: /\bos-(dos|win31)\b/.test(document.documentElement.className) ? '#000' : undefined, // (the program's map is plain black, in DOS and in Windows)
+  bgStars: /\bos-(dos|win31)\b/.test(document.documentElement.className) ? false : undefined,
+  mapFont(n) { return winOn() ? '11px ' + WSANS : frameOn() ? "12px 'DOS Geneva 9'" : null; },
   alertBox(paras) { return frameOn() ? alertDos(paras, [{ label: 'OK', def: true }]) : null; },
   youWonLayout(kind, Y, done) { return frameOn() ? youWonDos(kind, Y, done) : false; },
   nameStarLayout(f, o) { return frameOn() ? nameStarDos(f, o) : false; },
@@ -308,6 +308,7 @@ function setW31Mode(m) {
   try { if (m === '256') localStorage.setItem(W31KEY, '256'); else localStorage.removeItem(W31KEY); } catch (e) { /* not kept */ }
   document.documentElement.classList.toggle('w31-256', m === '256');
   for (const s of document.querySelectorAll('select.w31-colsel')) s.value = m;
+  const a = window.HOAPI; if (a && a.G && winOn()) a.renderPanel(); // (the panes' bars take the display's colours)
 }
 document.documentElement.classList.toggle('w31-256', w31Mode() === '256');
 function w31Colours(where) {
@@ -597,6 +598,7 @@ function dBox(q, x, y, w, h) {
 const dGlyph = (q, x, y, rows) => rows.forEach(([r, c0, c1]) => q.rect(x + c0, y + r, x + c1 + 1, y + r + 1, '#000'));
 function dPaintBar(b, o) {
   const q = b.q, L = b.L, v = b.vertical;
+  if (b.win) { wBar(q, 0, 0, L, v, o.max > 0 ? o.value / o.max : null, o.press); return; }
   q.rect(0, 0, v ? 7 : L, v ? L : 13, '#000');
   const full = o.max > 0 ? o.value / o.max : 1;
   if (v) {
@@ -615,12 +617,30 @@ function dPaintBar(b, o) {
     q.x.globalCompositeOperation = 'difference'; q.rect(r[0] + 1, r[1] + 1, r[0] + r[2] - 1, r[1] + r[3] - 1, '#fff'); q.x.globalCompositeOperation = 'source-over';
   }
 }
+// The Windows program's scroll bars (Windows 3.1's, measured on win20-orig-vga16-main.png): 17 pixels across with their black edges, a 15 x 15 box at each end
+// and a 15 x 15 thumb (white top and left, two rows of shade at the bottom and right), each with its black line, the track the button face; the thumb at
+// 17 + (L - 49) * value / max. The arrows, as rows of [row, first, last] in the box:
+const WARROW = { u: [[4, 7, 7], [5, 6, 8], [6, 5, 9], [7, 4, 10], [8, 6, 8], [9, 6, 8], [10, 6, 8]], d: [[4, 6, 8], [5, 6, 8], [6, 6, 8], [7, 4, 10], [8, 5, 9], [9, 6, 8], [10, 7, 7]],
+  l: [[4, 7, 7], [5, 6, 7], [6, 5, 10], [7, 4, 10], [8, 5, 10], [9, 6, 7], [10, 7, 7]], r: [[4, 7, 7], [5, 7, 8], [6, 4, 9], [7, 4, 10], [8, 4, 9], [9, 7, 8], [10, 7, 7]] };
+function wBox(q, x, y, glyph) {
+  q.rect(x, y, x + 15, y + 15, '#c0c0c0'); q.rect(x, y, x + 14, y + 1, '#fff'); q.rect(x, y + 1, x + 1, y + 14, '#fff');
+  q.rect(x + 13, y + 1, x + 15, y + 15, '#808080'); q.rect(x + 1, y + 13, x + 15, y + 15, '#808080'); q.rect(x, y + 14, x + 1, y + 15, '#808080'); q.rect(x + 14, y, x + 15, y + 1, '#808080');
+  if (glyph) dGlyph(q, x, y, glyph);
+}
+function wBar(q, x, y, L, vertical, frac, press) {
+  const r = (a, b, c, d, col) => (vertical ? q.rect(x + a, y + b, x + c, y + d, col) : q.rect(x + b, y + a, x + d, y + c, col));
+  r(0, 0, 17, L, '#000'); r(1, 17, 16, L - 17, '#c0c0c0');
+  const box = (o, g) => { if (vertical) wBox(q, x + 1, y + o, g); else wBox(q, x + o, y + 1, g); };
+  box(1, vertical ? WARROW.u : WARROW.l); box(L - 16, vertical ? WARROW.d : WARROW.r);
+  if (frac != null) { const t = 17 + Math.round((L - 49) * Math.max(0, Math.min(1, frac))); r(1, t - 1, 16, t, '#000'); box(t); r(1, t + 15, 16, t + 16, '#000'); }
+  if (press) { const o = press === 'lo' ? 1 : L - 16; q.x.globalCompositeOperation = 'difference'; if (vertical) q.rect(x + 1, y + o, x + 16, y + o + 15, '#fff'); else q.rect(x + o, y + 1, x + o + 15, y + 16, '#fff'); q.x.globalCompositeOperation = 'source-over'; }
+}
 const dVals = (b) => (b.vertical ? { value: DB.V, max: DB.maxV, page: DB.pgV } : { value: DB.H, max: DB.maxH, page: DB.pgH });
 const dActive = (b) => dVals(b).max > 0 && !document.querySelector('.scrim');
 function dSetCells(H, V) { const a = window.HOAPI, v = a.UI.view; if (!v) return; const [h2, v2] = dClamp(H, V); dPut(v, h2, v2); a.draw(); }
 function dScrollBy(b, d) { const cur = Math.round(b.vertical ? DB.V : DB.H), nv = Math.max(0, Math.min(dVals(b).max, cur + d)); if (nv === cur) return false; if (b.vertical) dSetCells(DB.H, nv); else dSetCells(nv, DB.V); return true; }
 function dPart(b, p) {
-  const { value, max } = dVals(b), L = b.L, e = b.vertical ? 14 : 8, th = b.vertical ? 13 : 7;
+  const { value, max } = dVals(b), L = b.L, e = b.e, th = b.th;
   if (p < e) return 'lo'; if (p >= L - e) return 'hi';
   const T = L - 2 * e - th, t = e + Math.round(T * value / max);
   if (T >= 0 && p >= t && p < t + th) return 'thumb';
@@ -633,7 +653,7 @@ function dWire(b) {
     if (e.pointerType === 'mouse' && e.button !== 0) return;
     e.preventDefault(); el.focus({ preventScroll: true }); if (!dActive(b)) return;
     try { el.setPointerCapture(e.pointerId); } catch (x) {}
-    const p = pos(e), part = dPart(b, p), { value, max } = dVals(b), e0 = b.vertical ? 14 : 8, th = b.vertical ? 13 : 7;
+    const p = pos(e), part = dPart(b, p), { value, max } = dVals(b), e0 = b.e, th = b.th;
     if (part === 'thumb') { DB.drag = { b, p0: p, t0: e0 + (b.L - 2 * e0 - th) * value / max, id: e.pointerId }; return; }
     const st = { b, part, id: e.pointerId, p, timer: 0 }; DB.press = st;
     const tick = () => { if (DB.press !== st) return; if (dPart(b, st.p) === part) { const g = dVals(b); dScrollBy(b, part === 'lo' ? -1 : part === 'hi' ? 1 : part === 'pagelo' ? -g.page : g.page); } dBars(); st.timer = setTimeout(tick, 100); };
@@ -642,7 +662,7 @@ function dWire(b) {
   el.addEventListener('pointermove', (e) => {
     if (DB.press && DB.press.b === b && DB.press.id === e.pointerId) { DB.press.p = pos(e); dBars(); }
     else if (DB.drag && DB.drag.b === b && DB.drag.id === e.pointerId) { // (the thumb: the map follows it a cell at a time)
-      const g = DB.drag, e0 = b.vertical ? 14 : 8, T = b.L - 2 * e0 - (b.vertical ? 13 : 7), t = Math.max(e0, Math.min(e0 + T, g.t0 + pos(e) - g.p0)), max = dVals(b).max;
+      const g = DB.drag, e0 = b.e, T = b.L - 2 * e0 - b.th, t = Math.max(e0, Math.min(e0 + T, g.t0 + pos(e) - g.p0)), max = dVals(b).max;
       const nv = Math.round(T > 0 ? (t - e0) / T * max : 0); if (nv !== Math.round(b.vertical ? DB.V : DB.H)) { if (b.vertical) dSetCells(DB.H, nv); else dSetCells(nv, DB.V); }
     }
   });
@@ -655,13 +675,16 @@ function dWire(b) {
   });
 }
 function dEnsureBars() {
-  if (DB.wrap && DB.wrap.isConnected) return true;
+  const win = winOn();
+  if (DB.wrap && DB.wrap.isConnected && DB.win === win) return true;
+  if (DB.v) { DB.v.el.remove(); DB.h.el.remove(); }
   const a = window.HOAPI, host = document.getElementById('mapwrap'); if (!a || !host) return false;
+  // (the Windows program's: Windows' bars, 17 across, the vertical 293 long, the horizontal 375 (measured); the arrow boxes and the thumb 17 and 15 along: wBar)
   const mk = (vertical) => {
-    const L = vertical ? 433 : 391, q = dq(vertical ? 7 : L, vertical ? L : 13, vertical ? 'Vertical scroll bar' : 'Horizontal scroll bar'), el = a.el('div', { class: 'dosbar ' + (vertical ? 'v' : 'h'), role: 'scrollbar', tabindex: 0, 'aria-orientation': vertical ? 'vertical' : 'horizontal', 'aria-controls': 'map', 'aria-label': vertical ? 'Map, up and down' : 'Map, left and right' }, q.c);
-    q.c.removeAttribute('role'); q.c.setAttribute('aria-hidden', 'true'); return { vertical, q, el, L, key: '' };
+    const L = win ? (vertical ? 293 : 375) : vertical ? 433 : 391, T = win ? 17 : vertical ? 7 : 13, q = dq(vertical ? T : L, vertical ? L : T, vertical ? 'Vertical scroll bar' : 'Horizontal scroll bar'), el = a.el('div', { class: 'dosbar ' + (vertical ? 'v' : 'h'), role: 'scrollbar', tabindex: 0, 'aria-orientation': vertical ? 'vertical' : 'horizontal', 'aria-controls': 'map', 'aria-label': vertical ? 'Map, up and down' : 'Map, left and right' }, q.c);
+    q.c.removeAttribute('role'); q.c.setAttribute('aria-hidden', 'true'); return { vertical, q, el, L, key: '', win, e: win ? 17 : vertical ? 14 : 8, th: win ? 15 : vertical ? 13 : 7 };
   };
-  DB.v = mk(true); DB.h = mk(false); host.append(DB.v.el, DB.h.el); DB.wrap = host; [DB.v, DB.h].forEach(dWire); return true;
+  DB.v = mk(true); DB.h = mk(false); host.append(DB.v.el, DB.h.el); DB.wrap = host; DB.win = win; [DB.v, DB.h].forEach(dWire); return true;
 }
 function dBars() {
   const a = window.HOAPI; if (!a || !frameOn() || !a.G || !dEnsureBars()) { if (DB.v) { DB.v.el.style.display = DB.h.el.style.display = 'none'; } return; }
@@ -678,15 +701,21 @@ function dMapFit(v, c) { if (!frameOn()) return; const st = c.G.stars[c.sel != n
 // Measured on the running program (DOSBox, screenshots v20dos-orig-*.png): the window is 640 x 476, a 15-row teal title bar, a 13-row grey menu bar,
 // then the left column 240 wide (planet 74, fleets 79, totals 43, players and budget bars 169, Tech Spending 83 rows) and the map. Every length below is in
 // the program's pixels; the page's unit u (CSS pixels per program pixel, --u) fits the frame to the window. The map is drawn in those pixels
-// (T.mapPixel, as the Amiga skin does). Only under the "DOS" OS look (html.os-dos): the Windows look keeps the classic page.
+// (T.mapPixel, as the Amiga skin does). Under the "DOS" OS look (html.os-dos) and, as the Windows program lays it out, under "Windows 3.1"
+// (html.os-win31: the 640 x 480 screen with WINHO.EXE's main window, its Tech Spending and Reports windows; winOn below and js/skins/dos/win31/frame.css).
 let U = 1;
-const frameOn = () => document.documentElement.classList.contains('os-dos');
+const winOn = () => document.documentElement.classList.contains('os-win31');
+const frameOn = () => document.documentElement.classList.contains('os-dos') || winOn();
 function setUnit() {
-  const de = document.documentElement, u0 = Math.min(window.innerWidth / 640, window.innerHeight / 476);
+  const de = document.documentElement, u0 = Math.min(window.innerWidth / 640, window.innerHeight / (winOn() ? 480 : 476));
   U = u0 >= 1 ? Math.floor(u0 * 2) / 2 : Math.max(0.4, u0);
   de.style.setProperty('--u', String(U));
 }
 const F9 = "12px 'DOS Geneva 9'", F9B = "12px 'DOS Geneva 9 Bold'", C12 = "15px 'DOS Chicago 12'";
+// the Windows program's panels are in MS Sans Serif 8 (measured: capitals 8 pixels, lines 14 apart) and the planet's name in the bold System font
+// (capitals 10); neither font is in the repo, so the look's MS Sans Serif / Arial at those sizes (docs/win20-findings.md)
+const WSANS = "'MS Sans Serif', 'Microsoft Sans Serif', Arial, sans-serif", WFONT = { [F9]: '11px ' + WSANS, [F9B]: 'bold 11px ' + WSANS, [C12]: 'bold 14px ' + WSANS };
+const wf = (f) => (winOn() && WFONT[f]) || f, WK = 0.92;
 let fontsReady = false;
 function loadFonts() {
   if (fontsReady || !document.fonts) return;
@@ -706,10 +735,12 @@ function dq(w, h, label) {
     // y: the baseline; o.right / o.center: the text ends / is centred at that x
     text(t, px, y, font, o) {
       o = o || {}; c.dataset.t = (c.dataset.t ? c.dataset.t + '\n' : '') + t;
-      x.font = font || F9; x.fillStyle = o.color || '#000'; x.textAlign = o.right != null ? 'right' : o.center != null ? 'center' : 'left';
-      x.fillText(t, o.right != null ? o.right : o.center != null ? o.center : px, y);
+      x.font = wf(font || F9); x.fillStyle = o.color || '#000'; x.textAlign = o.right != null ? 'right' : o.center != null ? 'center' : 'left';
+      const ax = o.right != null ? o.right : o.center != null ? o.center : px;
+      // (Arial, standing in for the Windows program's MS Sans Serif, is about a tenth wider: narrowed to its widths)
+      if (winOn()) { x.save(); x.translate(ax, 0); x.scale(WK, 1); x.fillText(t, 0, y); x.restore(); } else x.fillText(t, ax, y);
     },
-    width(t, font) { x.font = font || F9; return x.measureText(t).width; },
+    width(t, font) { x.font = wf(font || F9); return x.measureText(t).width * (winOn() ? WK : 1); },
     hline(x0, x1, y) { x.fillStyle = '#000'; x.fillRect(x0, y, x1 - x0, 1); },
     vline(x0, y0, y1) { x.fillStyle = '#000'; x.fillRect(x0, y0, 1, y1 - y0); },
     rect(l, t, r, b, col) { x.fillStyle = col; x.fillRect(l, t, r - l, b - t); },
@@ -743,13 +774,15 @@ const kvText = (box, key) => { const r = box && box.querySelector(`.kv[data-help
 // DrawVBarControl: the bars of a colony (kind 1) and of the technologies (kind 2): a rule up the left with ticks, each bar 18 wide with 9 before it
 function vbars(q, x0, y0, vals, kind, names, toPix, colors, geo) {
   const BW = (geo && geo.b) || 18, GP = (geo && geo.g) || 9, d5 = y0 + 50; q.vline(x0, y0, d5 + 1);
-  if (kind === 2) for (let v = 100; v <= 1000; v += 100) q.hline(x0 - 2, x0, d5 - toPix(v)); else for (let i = 1; i <= 10; i++) q.hline(x0 - 2, x0, d5 - Math.trunc(50 * i / 10));
+  // (the Windows program's ticks are one pixel, its names 12 below the bars and the technologies' second row 14 lower: measured)
+  const w = winOn(), tk = w ? 1 : 2, LY = w ? 12 : 11, LZ = w ? 14 : 8;
+  if (kind === 2) for (let v = 100; v <= 1000; v += 100) q.hline(x0 - tk, x0, d5 - toPix(v)); else for (let i = 1; i <= 10; i++) q.hline(x0 - tk, x0, d5 - Math.trunc(50 * i / 10));
   let d4 = x0;
   vals.forEach((v, i) => {
     q.hline(d4, d4 + GP + BW, d5 + 1); d4 += GP;
     const hpx = v <= 0 ? 0 : kind === 2 ? toPix(v) : Math.trunc(50 * v / 1000);
     q.rect(d4, d5 - hpx, d4 + BW, d5, colors[i % colors.length]);
-    q.text(names[i], d4 + Math.trunc((BW - q.width(names[i])) / 2), d5 + 11 + (kind === 2 ? 8 * (i % 2) : 0));
+    q.text(names[i], d4 + Math.trunc((BW - q.width(names[i])) / 2), d5 + LY + (kind === 2 ? LZ * (i % 2) : 0));
     d4 += BW;
   });
   q.hline(d4, d4 + GP, d5 + 1);
@@ -779,13 +812,18 @@ function colonyBars(s, p) {
 }
 function setColonyBars(s, v) { const terra = Math.max(0, v[0]), mine = Math.max(0, v[1]); s.ship = Math.max(0, v[2]) / 1000; if (terra + mine > 0) s.terra = terra / (terra + mine); }
 const BARC = ['#3000cf', '#3000cf', '#cf00ff']; // terraform and mine blue, ships magenta; the technologies' #6500cf
-// DrawPlanetRect: 240 x 74
+// (the Windows program in 16 colours shows them as the VGA screen has them: blue 0, 0, 170, ships and the technologies 170, 85, 170; in 256 colours the game's own: measured)
+const w16 = () => winOn() && !document.documentElement.classList.contains('w31-256');
+const barc = () => (w16() ? ['#0000aa', '#0000aa', '#aa55aa'] : BARC), techc = () => (w16() ? '#aa55aa' : '#6500cf');
+// DrawPlanetRect: 240 x 74. The Windows program's: 240 x 89, its lines 14 apart (measured on win20-orig-vga16-main.png: baselines 28, 42 ... 84, the labels
+// ending at 38, the double rule at 86 and 88); the bars where the DOS program has them
+const PGEO = { dos: { h: 74, cx: 48, lr: 40, y: [28, 38, 48, 58, 68], by: 40, rule: [71, 73], q: [14, 26, 12] }, win: { h: 89, cx: 47, lr: 38, y: [28, 42, 56, 70, 84], by: 42, rule: [86, 88], q: [14, 28, 14] } };
 function planetBoxDos(old) {
-  const a = window.HOAPI, H = window.HO, g = a.G, p = a.me(), s = a.UI.sel != null ? g.stars[a.UI.sel] : null, W = PWORDS();
-  const q = dq(240, 74, s ? s.name : '');
+  const a = window.HOAPI, H = window.HO, g = a.G, p = a.me(), s = a.UI.sel != null ? g.stars[a.UI.sel] : null, W = PWORDS(), G = PGEO[winOn() ? 'win' : 'dos'];
+  const q = dq(240, G.h, s ? s.name : '');
   if (s) {
-    q.text(s.name, 0, 14, C12, { center: 48 });
-    const R = (k) => kvText(old, k), L = (t, y) => q.text(t, 0, y, F9, { right: 40 });
+    q.text(s.name, 0, 14, C12, { center: G.cx });
+    const R = (k) => kvText(old, k), L = (t, y) => q.text(t, 0, y, F9, { right: G.lr });
     if (s.owner !== a.ME && R('temp') == null) q.text(W.noInfo || '', 3, 28, F9);
     else {
       const own = s.owner === a.ME;
@@ -794,32 +832,34 @@ function planetBoxDos(old) {
         const o = R('owner'), d = R('infodate');
         if (o) { L((W.owner || 'Owner:'), 28); q.text(o.value, 45, 28); }
         if (d) { q.text((W.infoDate || 'Info Date:'), 100, 28); q.text(d.value, 160, 28); }
-        const bt = R('battle'); if (bt) { q.text(WD().battle, 100, 40); q.text(bt.value, 160, 40); }
+        const bt = R('battle'); if (bt) { q.text(WD().battle, 100, G.by); q.text(bt.value, 160, G.by); }
       }
-      [['population', 38, W.pop || 'Pop:'], ['temp', 48, W.temp || 'Temp:'], ['gravity', 58, W.grav || 'Gravity:'], ['planetMetal', 68, W.metal || 'Metal:']].forEach(([k, y, lab]) => { const r = R(k); if (r) { L(lab, y); q.text(r.value, 45, y); } });
+      [['population', G.y[1], W.pop || 'Pop:'], ['temp', G.y[2], W.temp || 'Temp:'], ['gravity', G.y[3], W.grav || 'Gravity:'], ['planetMetal', G.y[4], W.metal || 'Metal:']].forEach(([k, y, lab]) => { const r = R(k); if (r) { L(lab, y); q.text(r.value, 45, y); } });
       if (own) {
         const vals = colonyBars(s, p), names = [W.terra || 'Terra', W.mine || 'Mine', W.prod || 'Ship'];
         if (vals[0] >= 0 || vals[1] >= 0) {
-          const draw = () => { q.rect(90, 0, 238, 70, '#fff'); vbars(q, 100, 2, colonyBars(s, p), 1, names, null, BARC); };
+          const draw = () => { q.rect(90, 0, 238, G.rule[0] - 1, '#fff'); vbars(q, 100, 2, colonyBars(s, p), 1, names, null, barc()); };
           draw(); dragBars(q, 100, 2, () => colonyBars(s, p), 1, (v, end) => { if (v) { setColonyBars(s, v); draw(); } if (end) { a.save(); a.renderPanel(); } });
         } else {
-          q.text(W.queued || 'Ships Queued:', 100, 14);
+          q.text(W.queued || 'Ships Queued:', 100, G.q[0]);
           const rs = H.rules(g), lines = (s.queue || []).map(it => { const d = H.getDesign(g, a.ME, it.did); return d && rs.shipsText ? rs.shipsText(g, d, it.n) : (d ? it.n + ' ' + d.name : null); }).filter(Boolean).slice(0, 3);
-          if (!lines.length) q.text(W.none || 'None.', 103, 26);
-          lines.forEach((t, i) => q.text(t, 103, 26 + 12 * i));
+          if (!lines.length) q.text(W.none || 'None.', 103, G.q[1]);
+          lines.forEach((t, i) => q.text(t, 103, G.q[1] + G.q[2] * i));
         }
       }
     }
   }
-  q.hline(0, 240, 71); q.hline(0, 240, 73);
+  q.hline(0, 240, G.rule[0]); q.hline(0, 240, G.rule[1]); if (winOn()) q.vline(239, 0, G.rule[0]);
   if (s && s.owner === a.ME) q.c.addEventListener('dblclick', () => a.openBuild(s.id));
   return q.c;
 }
-// DrawFleetRect: 240 x 79
+// DrawFleetRect: 240 x 79. The Windows program's: 240 x 90, the list of four rows 14 apart from 28 (the chosen one 15 high), Windows' scroll bar at 223,
+// the double rule at 87 and 89 (measured)
 let FLEET_TOP = 0;
+const FGEO = { dos: { h: 79, y2: 23, top: 25, row: 12, hi: 12, base: 10, sel: 230, bar: 232, rule: [78] }, win: { h: 90, y2: 25, top: 28, row: 14, hi: 15, base: 12, sel: 223, bar: 223, rule: [87, 89] } };
 function fleetBoxDos() {
-  const a = window.HOAPI, H = window.HO, g = a.G, rs = H.rules(g), s = a.UI.sel != null ? g.stars[a.UI.sel] : null, W = PWORDS(), r12 = RS12();
-  const q = dq(240, 79, 'Fleets');
+  const a = window.HOAPI, H = window.HO, g = a.G, rs = H.rules(g), s = a.UI.sel != null ? g.stars[a.UI.sel] : null, W = PWORDS(), r12 = RS12(), G = FGEO[winOn() ? 'win' : 'dos'];
+  const q = dq(240, G.h, 'Fleets');
   // (order: two captured games list the scouts first and the colony ship last, and pick the first; only that is known of the program's order, so colony ships are put after the rest, otherwise as the game has them)
   const isCol = (f) => H.fleetDesigns(g, f).some(d => d.type === 'colony');
   const list0 = s ? a.fleetOrder(g.fleets.filter(f => f.star === s.id && f.to == null && f.owner === a.ME)) : [];
@@ -830,37 +870,41 @@ function fleetBoxDos() {
   if (sel && r12) {
     const L = (rs.fleetInfo || r12.fleetInfo)(enView(g), sel), first = L[0] || '', m = /^(.*?:) (.*)$/.exec(first);
     if (m && !sel.scrap301 && !/ via /.test(first)) { q.text(fl(m[1] + ' x').replace(/ x$/, ''), 3, 11); q.text(m[2], 70, 11); } else q.text(fl(first), 3, 11);
-    if (L[1]) q.text(fl(L[1]), 3, 23); if (L[2]) q.text(fl(L[2]), 70, 23); if (L[3]) q.text(fl(L[3]), 127, 23);
+    if (L[1]) q.text(fl(L[1]), 3, G.y2); if (L[2]) q.text(fl(L[2]), 70, G.y2); if (L[3]) q.text(fl(L[3]), 127, G.y2);
   }
   if (!here.length) q.text(W.noFleets || 'There are no fleets at this planet.', 3, 36);
   here.slice(FLEET_TOP, FLEET_TOP + 4).forEach((f, i) => {
-    const top = 25 + 12 * i, ds = H.fleetDesigns(g, f), d = ds[0], n = H.fleetCount ? H.fleetCount(f) : Object.values(f.ships).reduce((x, y) => x + y, 0);
+    const top = G.top + G.row * i, ds = H.fleetDesigns(g, f), d = ds[0], n = H.fleetCount ? H.fleetCount(f) : Object.values(f.ships).reduce((x, y) => x + y, 0);
     const t = wl() === 'de' && d ? deRow(d, n) : rs.shipsText ? (d ? rs.shipsText(g, d, n) : '') : ds.length === 1 && r12 ? r12.shipsText(enView(g), d, n) : H.fleetLabel(g, f);
     const sl = f.id === a.UI.selFleet;
-    if (sl) q.rect(0, top, 230, top + 12, '#000');
-    q.text(t, 3, top + 10, f.dest != null ? F9B : F9, { color: sl ? '#fff' : '#000' });
+    if (sl) q.rect(0, top, G.sel, top + G.hi, '#000');
+    q.text(t, 3, top + G.base, f.dest != null ? F9B : F9, { color: sl ? '#fff' : '#000' });
   });
+  if (winOn()) { q.rect(G.sel, G.top, 240, G.top + 4 * G.row, '#fff'); wBar(q, G.bar, G.top, 4 * G.row + 3, true, here.length > 4 ? FLEET_TOP / (here.length - 4) : 0); q.hline(0, 240, G.rule[0]); q.hline(0, 240, G.rule[1]); q.vline(239, 0, G.rule[0]); }
+  else {
   q.rect(232, 25, 240, 73, '#aaa'); q.x.strokeStyle = '#000'; q.x.lineWidth = 1; q.x.strokeRect(232.5, 25.5, 7, 47);
   q.x.fillStyle = '#000'; q.x.beginPath(); q.x.moveTo(233, 33); q.x.lineTo(239, 33); q.x.lineTo(236, 28); q.x.fill(); q.x.beginPath(); q.x.moveTo(233, 65); q.x.lineTo(239, 65); q.x.lineTo(236, 70); q.x.fill();
   if (here.length > 4) { const hh = Math.max(6, 45 * 4 / here.length), y = 26 + (45 - hh) * FLEET_TOP / (here.length - 4); q.rect(233, y, 239, y + hh, '#555'); }
   q.hline(0, 240, 78);
-  q.c.addEventListener('click', (ev) => { const pt = q.at(ev); if (pt.v < 25 || pt.v > 73) return;
-    if (pt.h >= 232) { if (here.length > 4) { FLEET_TOP += pt.v < 49 ? -1 : 1; a.renderPanel(); } return; }
-    const f = here[FLEET_TOP + Math.floor((pt.v - 25) / 12)]; if (f) { a.UI.selFleet = f.id; a.renderPanel(); a.draw(); } });
+  }
+  q.c.addEventListener('click', (ev) => { const pt = q.at(ev); if (pt.v < G.top || pt.v > G.top + 4 * G.row) return;
+    if (pt.h >= G.bar) { if (here.length > 4) { FLEET_TOP += pt.v < G.top + 2 * G.row ? -1 : 1; a.renderPanel(); } return; }
+    const f = here[FLEET_TOP + Math.floor((pt.v - G.top) / G.row)]; if (f) { a.UI.selFleet = f.id; a.renderPanel(); a.draw(); } });
   q.c.addEventListener('wheel', (ev) => { if (here.length <= 4) return; ev.preventDefault(); FLEET_TOP += ev.deltaY > 0 ? 1 : -1; a.renderPanel(); }, { passive: false });
   return q.c;
 }
 // the totals: 240 x 43
+// (the Windows program's: 240 x 46, baselines 11, 25, 39, the names ending at 89, the rule at 45: measured)
 function totalsBoxDos(info) {
-  const q = dq(240, 43, 'Totals'), P = (RS12() || {}).panelInfo || { order: ['metal', 'savings', 'income'], words: { en: { metal: 'Reserve Metal:', savings: 'Total Money:', income: 'Total Income:' } } };
+  const w = winOn(), q = dq(240, w ? 46 : 43, 'Totals'), P = (RS12() || {}).panelInfo || { order: ['metal', 'savings', 'income'], words: { en: { metal: 'Reserve Metal:', savings: 'Total Money:', income: 'Total Income:' } } };
   const keyOf = { metal: 'metal', savings: 'savings', income: 'income' };
   P.order.filter(k => k !== 'interest').forEach((k, i) => {
     const row = info && Array.from(info.querySelectorAll('.kv')).find(r => (r.getAttribute('data-help') || '') .toLowerCase().includes(keyOf[k]));
     const t = row ? kvText(info, row.getAttribute('data-help')) : null; if (!t) return;
-    const y = 13 + 12 * i;
-    q.text(WD().totals[['metal', 'savings', 'income'].indexOf(k)], 0, y, F9B, { right: 91 }); q.text(t.value, 95, y, F9B); if (t.chg) q.text(t.chg, 0, y, F9, { right: 236 });
+    const y = w ? 11 + 14 * i : 13 + 12 * i;
+    q.text(WD().totals[['metal', 'savings', 'income'].indexOf(k)], 0, y, F9B, { right: w ? 89 : 91 }); q.text(t.value, w ? 94 : 95, y, F9B); if (t.chg) q.text(t.chg, 0, y, F9, { right: w ? 235 : 236 });
   });
-  q.hline(0, 240, 42);
+  q.hline(0, 240, w ? 45 : 42); if (w) q.vline(239, 0, 45);
   return q.c;
 }
 const TECHK = ['range', 'speed', 'weapons', 'shields', 'mini'], TECHN = ['Range', 'Speed', 'Weapons', 'Shields', 'Mini'];
@@ -868,17 +912,20 @@ function techBoxDos() {
   const a = window.HOAPI, H = window.HO, g = a.G, p = a.me();
   const rad = !H.feature(g, 'noRadical') && H.TECHS.includes('radical');
   const keys = rad ? TECHK.concat('radical') : TECHK, names = rad ? WD().tech.concat('Radical') : WD().tech;
-  const q = dq(240, 83, 'Tech Spending'), sc = H.barScale(g, 'tech');
+  // (the Windows program's is its own window, Tech Spending: a client 226 x 99, no heading, the levels' lines 14 apart, the bars from 5: measured)
+  const w = winOn(), TW = w ? 226 : 240, TH = w ? 99 : 83, y0 = w ? 5 : 13;
+  const q = dq(TW, TH, 'Tech Spending'), sc = H.barScale(g, 'tech');
   const toPix = (v) => Math.trunc(50 * sc.toX(v)), fromPix = (px) => sc.toValue(px / 50);
   const vals = () => { const t = keys.reduce((s, k) => s + (p.talloc[k] || 0), 0) || 1; return keys.map(k => Math.round(1000 * (p.talloc[k] || 0) / t)); };
   const draw = () => {
-    q.rect(0, 0, 240, 83, '#fff');
-    q.text(WD().head, 80, 11, F9B); q.text(WD().levels, 3, 24);
-    TECHK.forEach((k, i) => { q.text(WD().tech[i], 5, 36 + 11 * i); q.text(String(p.tech[k]), 54, 36 + 11 * i); });
-    vbars(q, 80, 13, vals(), 2, names, toPix, ['#6500cf'], rad ? { b: 14, g: 8 } : null);
+    q.rect(0, 0, TW, TH, '#fff');
+    if (!w) q.text(WD().head, 80, 11, F9B);
+    q.text(WD().levels, 3, w ? 16 : 24);
+    TECHK.forEach((k, i) => { const y = w ? 30 + 14 * i : 36 + 11 * i; q.text(WD().tech[i], 5, y); q.text(String(p.tech[k]), 54, y); });
+    vbars(q, 80, y0, vals(), 2, names, toPix, [techc()], rad ? { b: 14, g: 8 } : null);
   };
   draw();
-  dragBars(q, 80, 13, vals, 2, (v, end) => { if (v) { keys.forEach((k, i) => { p.talloc[k] = v[i] / 1000; }); draw(); } if (end) { a.save(); a.renderPanel(); } }, fromPix, rad ? { b: 14, g: 8 } : null);
+  dragBars(q, 80, y0, vals, 2, (v, end) => { if (v) { keys.forEach((k, i) => { p.talloc[k] = v[i] / 1000; }); draw(); } if (end) { a.save(); a.renderPanel(); } }, fromPix, rad ? { b: 14, g: 8 } : null);
   return q.c;
 }
 function rosterDos() {
@@ -896,9 +943,10 @@ function rosterDos() {
 function vScroll(target, l, t, h) {
   const a = window.HOAPI, bar = a.el('div', { class: 'dd-vs', 'aria-hidden': 'true' }), up = a.el('span', { class: 'a u' }), dn = a.el('span', { class: 'a d' }), th = a.el('span', { class: 'th' });
   bar.append(up, th, dn); bar.style.left = du(l); bar.style.top = du(t); bar.style.height = du(h);
-  const trk = h - 18, upd = () => {
-    const tot = target.scrollHeight, vis = target.clientHeight, max = Math.max(0, tot - vis), k = vis ? tot / vis : 1, th0 = Math.max(8, Math.min(trk, Math.round(trk / Math.max(1, k))));
-    th.style.height = du(th0); th.style.top = du(9 + (max ? Math.round(target.scrollTop / max * (trk - th0)) : 0));
+  // (the Windows program's: Windows' bar, 17 across, 16-pixel arrows with their black lines and a thumb of a fixed 15 + 1: wBar's, as boxes; js/skins/dos/win31/frame.css)
+  const w = winOn(), A = w ? 16 : 9, trk = h - 2 * A, upd = () => {
+    const tot = target.scrollHeight, vis = target.clientHeight, max = Math.max(0, tot - vis), k = vis ? tot / vis : 1, th0 = w ? 16 : Math.max(8, Math.min(trk, Math.round(trk / Math.max(1, k))));
+    th.style.height = du(th0); th.style.top = du(A + (max ? Math.round(target.scrollTop / max * (trk - th0)) : 0));
   };
   const step = (d) => { target.scrollTop += d; upd(); };
   up.addEventListener('pointerdown', (e) => { e.preventDefault(); step(-14); }); dn.addEventListener('pointerdown', (e) => { e.preventDefault(); step(14); });
@@ -913,7 +961,7 @@ function vScroll(target, l, t, h) {
 }
 function panelDos(panel, B) {
   if (!frameOn() || !window.HOAPI || !window.HOAPI.G) return;
-  const a = window.HOAPI; loadFonts();
+  const a = window.HOAPI, w = winOn(); loadFonts();
   const low = a.el('div', { class: 'doslow' }, rosterDos());
   if (B.budget) {
     const bx = B.budget, h = bx.querySelector('h3'), sc = a.budgetScale();
@@ -927,10 +975,18 @@ function panelDos(panel, B) {
     { const rr = Array.from(bx.querySelectorAll('.barrow')), ti = (B.ents || []).findIndex(e => e.key === 'tech'), si = (B.ents || []).findIndex(e => e.key === 'savings'); if (ti >= 0 && si >= 0 && rr[ti] && rr[si] && ti < si) rr[ti].before(rr[si]); }
     bx.classList.add('dosbudget'); low.append(bx); setTimeout(() => { const r = bx.querySelector('.barrow:has(.blabel[style*=underline])'); if (r && r.offsetTop + r.offsetHeight > bx.clientHeight) bx.scrollTop = r.offsetTop - 28; }, 0);
   }
-  low.append(vScroll(low.querySelector('.dosroster'), 80, 0, 169));
-  if (B.budget) low.append(vScroll(B.budget, 232, 0, 169));
+  // (the Windows program's players and budget pane, 240 x 85: the roster 75 wide, its bar at 75, the budget's at 223: measured)
+  low.append(vScroll(low.querySelector('.dosroster'), w ? 75 : 80, 0, w ? 85 : 169));
+  if (B.budget) low.append(vScroll(B.budget, w ? 223 : 232, 0, w ? 85 : 169));
   panel.innerHTML = '';
-  panel.append(planetBoxDos(B.planet), fleetBoxDos(), totalsBoxDos(B.info), low, techBoxDos());
+  panel.append(planetBoxDos(B.planet), fleetBoxDos(), totalsBoxDos(B.info), low);
+  if (w && window.HOWIN31 && window.HOWIN31.frame) window.HOWIN31.frame.panes(techBoxDos(), reportRows()); else panel.append(techBoxDos());
+}
+// the rows of the Windows program's Reports window (its picture, 32 x 32, and the words), the remake's reports of the turn as the DOS Reports window lists them
+function reportRows() {
+  const a = window.HOAPI, H = window.HO, g = a.G, p = a.me(), rs = H.rules(g);
+  const old = rs.reportHistory ? (p.reportLog || []) : [], ms = old.concat(p.inbox || []);
+  return ms.map((m, i) => { const t = a.el('span', { class: 'cap', translate: 'no' }); t.append(a.degText(H.say(g, m.text))); return { el: a.el('div', { class: 'w31rep', 'data-now': i === old.length ? '1' : null, tabindex: 0, role: 'option' }, a.msgIconEl(m), t), go: () => a.reportAction(m) }; });
 }
 
 // A finger on one of your fleets drags it, as a mouse does (the program has no other way to send a fleet; the classic skin's touch gestures only pan, and the

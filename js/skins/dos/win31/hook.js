@@ -1,12 +1,13 @@
 // Spaceward Ho! web remake — the DOS skin's "Windows 3.1" look: the one hook (loaded by js/skins/dos/ui.js). With the win31 look, a menu item
 // that opens a window the Windows program has a template for opens that dialog (HOWIN31.show, js/skins/dos/win31/dialog.js); every other
-// item, and every item in the dos look, does what it did. It loads the templates, the renderer and the dialogs, and adds the Windows Help
+// item, and every item in the dos look, does what it did. It loads the templates, the renderer, the dialogs and the screen (frame.js: the main window, Tech Spending and Reports), and adds the Windows Help
 // menu's About. ITEMS is what a chunk adds to: the DOS skin's menu label and the dialog's name in js/skins/dos/win31/dialogs.js.
 (function (root) {
 'use strict';
 if (!window.HOSKINS_INLINE) document.write('<script src="js/skins/dos/win31/templates.js' + (window.HO_BUILD || '') + '"><\/script>');
 if (!window.HOSKINS_INLINE) document.write('<script src="js/skins/dos/win31/dialog.js' + (window.HO_BUILD || '') + '"><\/script>');
 if (!window.HOSKINS_INLINE) document.write('<script src="js/skins/dos/win31/dialogs.js' + (window.HO_BUILD || '') + '"><\/script>');
+if (!window.HOSKINS_INLINE) document.write('<script src="js/skins/dos/win31/frame.js' + (window.HO_BUILD || '') + '"><\/script>');
 const ITEMS = { 'About Ho!…': 'about', 'Set Battle Speed…': 'battleSpeed' };
 const winOn = () => root.document.documentElement.classList.contains('os-win31') && !!root.HOWIN31 && !!root.HOWIN31.show;
 const T = root.HOTHEME, M = T && T.menuLayout;
