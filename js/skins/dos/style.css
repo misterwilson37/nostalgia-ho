@@ -220,3 +220,13 @@ html.dosframe .dosroster .rdone { margin-left: 0; padding: 0; position: absolute
 .dd-alertscrim { background: transparent; display: flex; align-items: center; justify-content: center; }
 .dd-alertpos { transform: translateY(calc(-7 * var(--du))); }
 .dd-alert .dd-t { white-space: pre; }
+
+html.os-dos .dropdown .mhot { color: #a00000; }
+html.os-dos .dropdown button:hover .mhot, html.os-dos .dropdown button:focus-visible .mhot { color: #a00000; }
+
+/* a caption longer than the cell wraps to a second line ("Your Buddies" in Send Message) */
+.dd-cell2 .cap { white-space: normal; line-height: calc(11 * var(--du)); overflow: hidden; }
+
+.dd-title.teal { background: #009a9a; border-bottom: 0; position: absolute; }
+.dd-sysbox { background: linear-gradient(#000 0 0) 3px 6px / 7px 1px no-repeat, linear-gradient(#000 0 0) 3px 9px / 7px 1px no-repeat, linear-gradient(#000 0 0) 3px 12px / 7px 1px no-repeat; border: 0; padding: 0; cursor: pointer; }
+.dd .dd-sysbox, html.os-dos .dd .dd-sysbox { background: linear-gradient(#000 0 0) calc(3 * var(--du)) calc(6 * var(--du)) / calc(7 * var(--du)) calc(1 * var(--du)) no-repeat, linear-gradient(#000 0 0) calc(3 * var(--du)) calc(9 * var(--du)) / calc(7 * var(--du)) calc(1 * var(--du)) no-repeat, linear-gradient(#000 0 0) calc(3 * var(--du)) calc(12 * var(--du)) / calc(7 * var(--du)) calc(1 * var(--du)) no-repeat !important; border: 0 !important; box-shadow: none !important; padding: 0 !important; min-width: 0; }

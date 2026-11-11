@@ -328,6 +328,24 @@ function menuLayoutDos() {
   return M;
 }
 
+// The program reds the hot letter of every enabled menu item, as of the menus (the pool's "~Scrap Current Fleet" marks it; read off the captured menus
+// v20dos-orig-menu-*.png and v20dos-orig-alert-force.png; a ghosted item shows none). The German program's strings carry no "~", so only the English words are marked.
+const MENU_HOT = { 'About Ho!…': 0, 'New Game…': 0, 'Open Game…': 0, 'Close': 0, 'End Turn': 0, 'Exit': 1,
+  'Force Turn Update': 0, 'Auto Play…': 0, 'I’ll Update Turns': 0, 'Set Polling Time…': 4, 'Set Battle Speed…': 4, 'Show Event Messages': 5, 'Review Announced Battles': 0, 'Give Overspending Warnings': 0, 'Sound': 0,
+  'List Ship Types…': 0, 'Create New Ship Type…': 7, 'List All Fleets…': 9, 'Organize Ships…': 0, 'Scrap Current Fleet': 0,
+  'Compare Players…': 0, 'List All Explored Stars…': 0, 'Send Message…': 5, 'Zoom In': 5, 'Zoom Out': 5, 'Fix Spending': 0, 'Reports': 0, 'Tech Spending': 0 };
+function hotMenus() {
+  const mark = (dd) => dd.querySelectorAll('button[role=menuitem]').forEach(b => {
+    if (b.dataset.hot || b.disabled || !frameOn()) return;
+    const n = b.firstChild; if (!n || n.nodeType !== 3) return;
+    const t = n.nodeValue; let i = MENU_HOT[t];
+    if (i == null && /^Build Ships at /.test(t)) i = 0;
+    if (i == null || i >= t.length) return;
+    b.dataset.hot = '1'; const sp = document.createElement('span'); sp.className = 'mhot'; sp.textContent = t[i];
+    const w = document.createElement('span'); w.setAttribute('translate', 'no'); w.append(t.slice(0, i), sp, t.slice(i + 1)); n.replaceWith(w);
+  });
+  new MutationObserver(() => document.querySelectorAll('.dropdown.open').forEach(mark)).observe(document.body, { subtree: true, childList: true, attributes: true, attributeFilter: ['class'] });
+}
 // ======== The original's screen: a 640 x 476 frame in a unit u (docs/dos20-findings.md, "Rebuilding the dos skin") ========
 // Measured on the running program (DOSBox, screenshots v20dos-orig-*.png): the window is 640 x 476, a 15-row teal title bar, a 13-row grey menu bar,
 // then the left column 240 wide (planet 74, fleets 79, totals 43, players and budget bars 169, Tech Spending 83 rows) and the map. Every length below is in
@@ -474,7 +492,10 @@ let FLEET_TOP = 0;
 function fleetBoxDos() {
   const a = window.HOAPI, H = window.HO, g = a.G, rs = H.rules(g), s = a.UI.sel != null ? g.stars[a.UI.sel] : null, W = PWORDS(), r12 = RS12();
   const q = dq(240, 79, 'Fleets');
-  const here = s ? a.fleetOrder(g.fleets.filter(f => f.star === s.id && f.to == null && f.owner === a.ME)) : [];
+  // (order: two captured games list the scouts first and the colony ship last, and pick the first; only that is known of the program's order, so colony ships are put after the rest, otherwise as the game has them)
+  const isCol = (f) => H.fleetDesigns(g, f).some(d => d.type === 'colony');
+  const list0 = s ? a.fleetOrder(g.fleets.filter(f => f.star === s.id && f.to == null && f.owner === a.ME)) : [];
+  const here = list0.filter(f => !isCol(f)).concat(list0.filter(isCol));
   let sel = here.find(f => f.id === a.UI.selFleet);
   if (!sel && here.length) { sel = here[0]; a.UI.selFleet = sel.id; } // (the program has the first fleet of the star picked)
   FLEET_TOP = Math.max(0, Math.min(FLEET_TOP, here.length - 4));
@@ -607,7 +628,7 @@ function frameSetup(de) {
   const sync = () => { de.classList.toggle('dosframe', frameOn()); setUnit(); };
   sync(); window.addEventListener('load', touchFleets); touchFleets(); window.addEventListener('resize', () => { const u0 = U; setUnit(); if (u0 !== U && window.HOAPI && window.HOAPI.G && frameOn()) { window.HOAPI.renderPanel(); window.dispatchEvent(new Event('hoframe')); } });
   new MutationObserver(sync).observe(de, { attributes: true, attributeFilter: ['class'] });
-  loadFonts();
+  loadFonts(); hotMenus();
 }
 
 // ======== The original's own windows (docs/dos20-findings.md; geometry measured on the running program, v20dos-orig-*.png) ========
@@ -650,6 +671,7 @@ function dDialog(w, h, title, kids, label) {
   d.style.width = du(w); d.style.height = du(h);
   if (title) d.append(dAt(a.el('div', { class: 'dd-title', translate: 'no' }, title), 5, 5, w - 10, 17));
   kids.forEach(k => k && d.append(k));
+  const bs = [...d.querySelectorAll('.dd-btn')], cb = bs.find(b => /^cancel$/i.test(b.textContent.trim())); if (cb && !d.querySelector('[data-esc-close]')) cb.setAttribute('data-esc-close', '1'); // (a window of the program closes by its Cancel)
   a.modal('', d, { cls: 'dosw', label: label || title || 'Spaceward Ho!' });
   return d;
 }
@@ -940,6 +962,7 @@ function alertDos(paras, btns) {
   const im = a.IMG['dos:d3520']; if (im) { const c = a.el('canvas', { class: 'dd-pic', 'aria-hidden': 'true' }); c.width = 74; c.height = 74; c.getContext('2d').drawImage(im, 0, 0); dAt(c, 22, pic, 74, 74); c.style.imageRendering = 'pixelated'; d.append(c); }
   const n = btns.length, bw = 72, gap = 16, x0 = Math.round(176 - (n - 1) * (bw + gap) / 2);
   btns.forEach((b, i) => d.append(dButton(b.label, x0 + i * (bw + gap), pic + 23, bw, 28, () => { done(); if (b.fn) b.fn(); }, { hot: 0, def: b.def })));
+  const cb = [...d.querySelectorAll('.dd-btn')].pop(); if (cb) cb.setAttribute('data-esc-close', '1');
   const back = a.el('div', { class: 'scrim dd-alertscrim', onkeydown: (e) => { if (e.key === 'Escape') { e.stopPropagation(); done(); } } }, a.el('div', { class: 'dd-alertpos' }, d));
   document.body.append(back); const f = d.querySelector('.dd-btn.def') || d.querySelector('.dd-btn'); if (f) f.focus();
   return back;
@@ -953,6 +976,8 @@ function reportsDos() {
   ms.forEach((m, i) => { const t = a.el('span', { class: 'cap', translate: 'no' }); t.append(a.degText(H.say(g, m.text)));
     box.append(a.el('div', { class: 'dd-rep', 'data-now': i === old.length ? '1' : null, tabindex: 0, role: 'option', onclick: () => { a.closeModal(); a.reportAction(m); } }, a.msgIconEl(m), t)); });
   const d = dDialog(321, 125, 'Reports', [box], 'Reports'); d.append(vScroll(box, 305, 21, 99));
+  // (the program's Reports window has a teal title bar like the main window's, and at its left the Windows control-menu mark of three bars; a click on it closes the window here)
+  const tb = d.querySelector('.dd-title'); if (tb) { tb.classList.add('teal'); const sb = a.el('button', { type: 'button', class: 'dd-sysbox', 'aria-label': 'Close', onclick: () => a.closeModal() }); dAt(sb, 8, 0, 14, 17); tb.append(sb); }
   const now = box.querySelector('[data-now]'); if (now) box.scrollTop = now.offsetTop - box.offsetTop;
   return true;
 }
@@ -997,7 +1022,7 @@ function dCells(l, t, w, h, cols, cw, chh) {
     box.textContent = '';
     cells.forEach((c, i) => { const d = dAt(a.el('div', { class: 'dd-cell2' + (c.icon ? ' has' : '') + (c.off ? ' off' : ''), role: 'option', tabindex: c.off ? -1 : 0 }), (i % cols) * cw + 2, Math.floor(i / cols) * chh + 3, cw - 2, chh - 3);
       const im = c.icon && a.IMG[c.icon]; if (im) d.append(dAt(a.el('img', { src: im.src, alt: '' }), (cw - 2 - 32) / 2, 4, 32, 32));
-      d.append(dAt(a.el('span', { class: 'cap', translate: 'no' }, c.name || ''), 0, 38, cw - 2, 14)); if (c.pick) { d.addEventListener('click', c.pick); d.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); c.pick(); } }); } box.append(d); });
+      d.append(dAt(a.el('span', { class: 'cap', translate: 'no' }, c.name || ''), 0, c.icon ? 36 : 38, cw - 2, c.icon ? 22 : 14)); if (c.pick) { d.addEventListener('click', c.pick); d.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); c.pick(); } }); } box.append(d); });
   } };
 }
 function chatDos() {

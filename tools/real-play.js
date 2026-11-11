@@ -151,7 +151,7 @@ async function playRun(browser, job, outDir, idx) {
   const checkText = async (what, sel) => { const o = await ev((s) => window.__rp.overflow(s), sel || '.win, .ios-gdlg, .ios-remake, #panel, .card, .hoscreen'); for (const m of o.slice(0, 3)) warn(`text overflow (${what}): ${m}`); const h = await ev(() => window.__rp.hscroll()); if (h) fail(`${what}: ${h}`);
     const bo = await ev(() => window.__rp.bounds('.win, .ios-gdlg, .ios-fd, .ios-fdl, .card, #msg, .toast, #panel > *, .ios-turn, .ios-col, .ios-btn, #routebar')); for (const m of bo.slice(0, 2)) warn(`runs off the screen (${what}): ${m}`); };
   // close the topmost dialog with its own button; returns how it closed
-  const CLOSE_SEL = '.close, .ios-gx, .am-close, [aria-label*=lose i], button.x, .wclose';
+  const CLOSE_SEL = '.close, .ios-gx, .am-close, [aria-label*=lose i], button.x, .wclose, .dd [data-esc-close]'; // (the DOS skin's windows have no close box, as the program's: their Cancel closes)
   const closeWith = async (how) => {
     const n0 = (await dialogs()).length; if (!n0) return 'none';
     if (how === 'esc') { await page.keyboard.press('Escape'); await sleep(180); }
@@ -368,7 +368,7 @@ async function playRun(browser, job, outDir, idx) {
       if (!src) { fail('no way to pick up the fleet: no row in a fleet dialog and no fleet dot on the map'); await shot('no-fleet-handle'); return; }
       const sh = await mapHit(src.x, src.y); if (src.dot && sh) fail(`the fleet's dot at ${Math.round(src.x)},${Math.round(src.y)} is ${sh}`);
       let tgt = null;
-      for (const id of cand) { const p = await starPoint(id); const m = await mapHit(p.x, p.y); const fd = await G(([x, y]) => { const e = document.querySelector('.ios-fd'); if (!e) return false; const r = e.getBoundingClientRect(); return x > r.left - 30 && x < r.right + 30 && y > r.top - 30 && y < r.bottom + 30; }, [p.x, p.y]); if (!m && !fd) { tgt = { id, ...p }; break; } }
+      for (const id of cand) { const p = await starPoint(id); const m = await mapHit(p.x, p.y); const fd = await G(([x, y]) => { const e = document.querySelector('.ios-fd'); if (!e) return false; const r = e.getBoundingClientRect(); return x > r.left - 30 && x < r.right + 30 && y > r.top - 30 && y < r.bottom + 30; }, [p.x, p.y]); if (!m && !fd && Math.hypot(p.x - src.x, p.y - src.y) >= 30) { tgt = { id, ...p }; break; } } // (a star under the fleet's own dot, a few pixels away, cannot be dragged to: the drag would not pass the click's slop; a person takes another star)
       if (!tgt) { fail('every star in reach is off-screen or covered by the interface: ' + cand.slice(0, 4).join(',')); await shot('no-target'); return; }
       await shot('fleet-before-drag');
       const pts = [[src.x, src.y], [src.x + (tgt.x - src.x) * 0.05, src.y + (tgt.y - src.y) * 0.05 - 6], ...lerp([src.x, src.y], [tgt.x, tgt.y], 14).slice(1)];
@@ -377,7 +377,7 @@ async function playRun(browser, job, outDir, idx) {
       else { await page.mouse.move(pts[0][0], pts[0][1]); await page.mouse.down(); for (const p of pts.slice(1)) { await page.mouse.move(p[0], p[1]); await sleep(15); } await sleep(200); await shot('fleet-dragging'); await page.mouse.up(); }
       await sleep(350);
       const dest = await G((fid) => { const x = HOAPI.G.fleets.find(f => f.id === fid); return x ? (x.dest != null ? x.dest : x.to) : null; }, f.id);
-      if (dest !== tgt.id) { fail(`dragging the fleet to star ${tgt.id} left its destination at ${dest}`); await shot('fleet-not-sent'); return; }
+      if (dest !== tgt.id) { const dbg = await G((fid) => ({ dots: (HOAPI.UI.dots || []).filter(d => d.f === fid), sel: HOAPI.UI.sel, drag: !!HOAPI.UI.drag, hover: HOAPI.UI.hover }), f.id).catch(() => null); fail(`dragging the fleet to star ${tgt.id} left its destination at ${dest} (from ${Math.round(src.x)},${Math.round(src.y)} to ${Math.round(tgt.x)},${Math.round(tgt.y)}; ${JSON.stringify(dbg)})`); await shot('fleet-not-sent'); return; }
       sent = { id: f.id, to: tgt.id }; note(`fleet ${f.id} sent to star ${tgt.id}${src.dot ? ' (dot)' : ' (dialog)'}`); await shot('fleet-sent');
     });
     // ============ 6. End Turn x N; the fleet moves and arrives ============
