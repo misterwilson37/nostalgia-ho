@@ -83,9 +83,10 @@ function staleName(G, w) {
 // ---------- the unofficial 2.0.1.1 patch (docs/fixes.md, "Mac 2.0.1") ----------
 // 2.0's list (rules-dos FIXES20) without the Windows build's own slips: the
 // average fuel counted over at most 11 fleets ('orgFuelCount') and the
-// attack rating in 16 bits ('attack16') are not in the Mac code.
+// attack rating in 16 bits ('attack16') are not in the Mac code, nor the DOS
+// program's Yes/No box keys ('yesNoKeys').
 const SCRAP_LIMBO_MAC = 'A fleet marked for scrapping while it was in hyperspace was reported “at” the star before the first one, which is part of the galaxy’s header: one stray character (the letter of the 18th home slot’s star number, or none), and no metal unless the 8th home slot’s star number happened to be yours. The patch reports it “at hyperspace” with no metal, as 3.0.1 does.';
-const FIXES = D.fixes.filter(f => f.id !== 'orgFuelCount' && f.id !== 'attack16').map(f => f.id === 'scrapLimbo' ? Object.assign({}, f, { text: SCRAP_LIMBO_MAC }) : f.id !== 'meteorReport' ? f
+const FIXES = D.fixes.filter(f => f.id !== 'orgFuelCount' && f.id !== 'attack16' && f.id !== 'yesNoKeys').map(f => f.id === 'scrapLimbo' ? Object.assign({}, f, { text: SCRAP_LIMBO_MAC }) : f.id !== 'meteorReport' ? f
   : Object.assign({}, f, { text: 'A colony wiped out by a meteor shower was reported as “… destroyed your colony”, naming whoever a report ten messages earlier happened to leave behind, or reading a name out of whatever memory lay past the game’s own data. The patch reports “A meteor shower destroyed your colony at …”.' }));
 
 // Mac 2.0.1 plays 2.0's turn (js/rules-dos.js), with the differences above

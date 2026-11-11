@@ -53,6 +53,7 @@ function backKey(doc) {
     const back = mk('div', 'scrim exitdialog'); back.append(win);
     back.addEventListener('click', (e) => { if (e.target === back) done(); });
     doc.body.append(back);
+    const A = doc.defaultView && doc.defaultView.HOAPI; if (A && A.markYesNo) A.markYesNo(win, yes, no); // (the typed yes or no of modern conveniences: js/skins/classic/ui.js markYesNo)
     no.focus();
   }
   doc.addEventListener('keydown', (e) => {

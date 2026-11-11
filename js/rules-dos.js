@@ -1837,6 +1837,8 @@ const FIXES20 = [
     text: 'In the Amiga’s English, the five reports of a message you send (“You send a message saying you like …”) lost the recipient and fill their one blank with the recipient’s name, so you seem to like the player you wrote to. The patch shows 2.0’s sentence, with both names. It matters only in the Amiga skin, in English.' },
   { id: 'amigaEndTurnEn', title: 'The Amiga English’s End Turn button is the German one',
     text: 'The Amiga game was only ever released in German, and its End Turn button, “Zug Ende / Amiga+Z”, is the one the English edition (2.1, which its author put out much later) shows too, as its pictures are the German disk’s. The patch shows an English button, “Do Turn / Amiga+Z”, with the word the Amiga English’s own menu uses for the command. It matters only in the Amiga skin, in English.' },
+  { id: 'yesNoKeys', title: 'The Yes and No boxes take the language’s own letters',
+    text: 'The DOS program answers a Yes/No box with the keys Y and N in every language, the German too, whose buttons say Ja and Nein. The patch also takes the first letters of Yes and No in the language you play in: O and N in French, J and N in German, E and H in Turkish, S and N in Spanish. It matters only in the DOS skin.' },
 ].concat(E.TRANSLATIONS_FIX); // (the Turkish 2.0's and Mac 2.0.1's corrections: js/languages.js turkish20)
 
 // ---------- set-up (FUN_1030_1299 @1030:19ae-1b32) ----------

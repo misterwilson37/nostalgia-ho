@@ -480,8 +480,9 @@ function list12(items, o) {
 function ask12(text, yes, labels) {
   if (!G() || own12Rules()) return false;
   const a = A(), el = a.el;
-  rwin('', el('div', null, text && text.nodeType ? text : el('p', { style: 'white-space: pre-line' }, text),
-    el('div', { class: 'btns right' }, btn(labels ? labels[1] : 'Cancel', () => a.closeModal(), { class: 'quiet' }), btn(labels ? labels[0] : 'OK', () => { a.closeModal(); yes(); }))), 'ask12w');
+  const no = btn(labels ? labels[1] : 'Cancel', () => a.closeModal(), { class: 'quiet' }), ok = btn(labels ? labels[0] : 'OK', () => { a.closeModal(); yes(); });
+  const w = rwin('', el('div', null, text && text.nodeType ? text : el('p', { style: 'white-space: pre-line' }, text), el('div', { class: 'btns right' }, no, ok)), 'ask12w');
+  a.markYesNo(w, ok, no); // (the typed yes or no of modern conveniences: js/skins/classic/ui.js markYesNo)
   return true;
 }
 

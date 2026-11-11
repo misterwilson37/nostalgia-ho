@@ -2296,11 +2296,12 @@ function openPlayersRemake() {
 // The remake's own question box: the app's message box with the check and the cross; a ruleset's own button words (labels: [go on, turn down], 3.0.1's Armageddon questions) are the app's text
 // buttons in their place
 function confirmRemake(text, yes, labels) {
-  if (!labels) { const sc = appMessage(text, yes); sc.setAttribute('data-remake', 'confirm'); const d = sc.querySelector('.ios-gdlg'); if (d) d.classList.add('ios-remake'); return sc; }
+  if (!labels) { const sc = appMessage(text, yes); sc.setAttribute('data-remake', 'confirm'); const d = sc.querySelector('.ios-gdlg'); if (d) d.classList.add('ios-remake'); A().markYesNo(sc, sc.querySelector('.ios-bcheck'), sc.querySelector('.ios-bcancel')); return sc; }
   const L = appDialog({ message: text, label: text, build(dlg, cw, ch, gd, L0) {
     L0.bx.style.display = L0.bk.style.display = 'none';
     const no = textButton(labels[1], 130, 34, 16, () => L0.close()), ok = textButton(labels[0], 130, 34, 16, () => { L0.close(); yes(); });
     dlg.append(put(no, cw / 2 - 140, gd.a80 * 4, 0, 0), put(ok, cw / 2 + 10, gd.a80 * 4, 0, 0));
+    A().markYesNo(dlg, ok, no); // (the typed yes or no of modern conveniences: js/skins/classic/ui.js markYesNo)
   } });
   remakeOwn(L, 'confirm'); return L.scrim;
 }

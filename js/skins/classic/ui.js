@@ -2477,9 +2477,44 @@ function confirmBox(text, yes, kind, labels) {
   // a skin's own alert for a kind of question ('underfunded': the colonies left short at End Turn): T.alert(kind, text, yes)
   if (kind && T.alert && T.alert(kind, text, yes)) return;
   if (!kind && T.confirm && T.confirm(text, yes, labels)) return; // (a skin's own question box for the plain "Are you sure?")
-  const w = modal('Are you sure?', el('div', null, text.nodeType ? text : el('p', null, text), el('div', { class: 'btns right' },
-    el('button', { class: 'quiet', onclick: closeModal }, labels ? labels[1] : 'Cancel'), el('button', { onclick: () => { closeModal(); yes(); } }, labels ? labels[0] : 'OK'))), { cls: 'small alert' });
+  const no = el('button', { class: 'quiet', onclick: closeModal }, labels ? labels[1] : 'Cancel'), ok = el('button', { onclick: () => { closeModal(); yes(); } }, labels ? labels[0] : 'OK');
+  const w = modal('Are you sure?', el('div', null, text.nodeType ? text : el('p', null, text), el('div', { class: 'btns right' }, no, ok)), { cls: 'small alert' });
+  markYesNo(w, ok, no);
 }
+// ----- the keys of a Yes/No box (docs/brief-dos-round2.md, 1) -----
+// A box that asks a question is marked with markYesNo(box, yes button, no button[, letters]): the shared confirm box above, and each skin's own
+// (the DOS look's alert box, the iOS app's message box, Mac 1.2's, the Amiga's, Android's Exit box ...).
+// - letters (only a box that is the program's own Yes/No box: DOS 2.0's MsgBox, whose window procedures FUN_b000_36f9 and FUN_b000_3656 compare
+//   the keys y and n whatever the language, the German build's Ja/Nein box too): Y and N press its buttons;
+// - with the unofficial patch's fix 'yesNoKeys' (docs/fixes.md, 2.0): in such a box also the first letters of the remake's own Yes and No in the
+//   page's language (js/ui-text.js: Oui/Non O and N, Ja/Nein J and N, Evet/Hayır E and H, Sí/No S and N);
+// - with modern conveniences, in every marked box: the whole words typed, in any of the five languages (MODERN_TEXT).
+// Not while a field of the box has the keyboard.
+const ynNorm = (s) => String(s).toLowerCase().replace(/ı/g, 'i').normalize('NFD').replace(/[̀-ͯ]/g, '');
+const YN_WORDS = { yes: ['yes', 'oui', 'ja', 'evet', 'si'], no: ['no', 'non', 'nein', 'hayir'] };
+function markYesNo(box, yesB, noB, letters) {
+  if (!box || !yesB || !noB) return box;
+  box.setAttribute('data-yesno', letters ? 'letters' : '1'); yesB.setAttribute('data-yn', 'yes'); noB.setAttribute('data-yn', 'no');
+  return box;
+}
+function ynLetters(own) {
+  const L = { yes: ['y'], no: ['n'] };
+  if (G && HO.fixed(G, 'yesNoKeys')) { L.yes.push(ynNorm(tl('Yes'))[0]); L.no.push(ynNorm(tl('No'))[0]); }
+  return own ? L : { yes: [], no: [] };
+}
+let ynBuf = '', ynAt = 0;
+window.addEventListener('keydown', (e) => {
+  if (e.ctrlKey || e.altKey || e.metaKey || !e.key || e.key.length !== 1 || e.defaultPrevented) return;
+  const box = [...document.querySelectorAll('[data-yesno]')].filter(b => b.isConnected && b.getClientRects().length).pop(); if (!box) return;
+  const t = e.target; if (t && (/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName) || t.isContentEditable)) return;
+  const press = (w) => { const b = box.querySelector(`[data-yn="${w}"]`); if (!b || b.disabled) return false; e.preventDefault(); e.stopPropagation(); ynBuf = ''; b.click(); return true; };
+  const k = ynNorm(e.key), L = ynLetters(box.getAttribute('data-yesno') === 'letters');
+  if (L.yes.includes(k) && press('yes')) return;
+  if (L.no.includes(k) && press('no')) return;
+  if (!G || !modern()) return;
+  const now = Date.now(); ynBuf = ((now - ynAt < 2000 ? ynBuf : '') + k).slice(-8); ynAt = now;
+  for (const w of ['yes', 'no']) if (YN_WORDS[w].some(x => ynBuf.endsWith(x)) && press(w)) return;
+}, true);
 // an alert of the program's own over what is open (the New Game window stays), in the language it is written in (lang: a French
 // edition's box is French whatever the page's language): its paragraphs and an OK
 function alertOver(paras, lang) {
@@ -4798,7 +4833,7 @@ const menuDim = (k) => { const D = G && HO.rules(G).menuDimmed; return !!(D && G
 // ----- the Ho menu: this version, skin, sounds, modern conveniences -----
 // Each version plays as it was released; the conveniences a player may add
 // are choices here, and can be changed in the middle of a game.
-const MODERN_TEXT = 'Modern conveniences: automatic routes, the map follows the news, battle speed, written battle reports, and in the games with map scroll bars dragging the map with the mouse and the wheel zoom (not in the original games)';
+const MODERN_TEXT = 'Modern conveniences: automatic routes, the map follows the news, battle speed, written battle reports, answering a question by typing yes or no, and in the games with map scroll bars dragging the map with the mouse and the wheel zoom (not in the original games)';
 function setModern(on) { if (!G) return; G.opts.modern = !!on; save(); renderPanel(); draw(); }
 // Full Hoedown (G.opts.hoedown, js/hoedown.js): Delta Tao's own jokes at
 // their most, never the play; chosen at New Game ("ho5.hoedown") and in the
@@ -6732,7 +6767,7 @@ window.addEventListener('DOMContentLoaded', () => {
   // what a skin's hooks may use (the Amiga skin builds windows of its own with these)
   T.api = {
     get G() { return G; }, get ME() { return ME; }, UI, IMG, A, el, $, me, money, fmt, degF, gravF, toC, degText, panelFig,
-    toast, modal, closeModal, confirmBox, alertOver, renderPanel, prefReview, budgetScale: () => HO.barScale(G, 'budget', barPick()), flipBarScale, renderMsg, draw, save, Sound, beep, guard,
+    toast, modal, closeModal, confirmBox, markYesNo, alertOver, renderPanel, prefReview, budgetScale: () => HO.barScale(G, 'budget', barPick()), flipBarScale, renderMsg, draw, save, Sound, beep, guard,
     shipPic, shipImgEl, starLook, fleetOrder, reportAction, msgIconEl, msgReportNo: (m) => { const l = originalLook(m); return l ? l.id : null; }, curFleet, centerOn, zoomAt, resize, map: () => ({ w: mapW, h: mapH, ready: !!cv }),
     fit() { UI.fitted = false; fit(); draw(); }, clampView,
     openBuild, openSplit, openOrganize, organizeStyle, openPlayers, openCompare, openSkills, openScrapTypes, openBattle, lastBattles, battleName, openReports, openAbout, openHelp,

@@ -268,7 +268,8 @@ window.HOTHEME = {
   alertBox(paras) { return frameOn() ? alertDos(paras, [{ label: 'OK', def: true }]) : null; },
   youWonLayout(kind, Y, done) { return frameOn() ? youWonDos(kind, Y, done) : false; },
   nameStarLayout(f, o) { return frameOn() ? nameStarDos(f, o) : false; },
-  confirm(text, yes, labels) { return frameOn() ? !!alertDos([typeof text === 'string' ? text : (text.textContent || '')], [{ label: labels ? labels[0] : 'OK', def: true, fn: yes }, { label: labels ? labels[1] : 'Cancel' }]) : false; },
+  // (a question whose caller asks for the program's Yes/No box: labels ['Yes', 'No'], the remake's own words before they are put in the page's language, or labels.yesNo)
+  confirm(text, yes, labels) { return frameOn() ? !!alertDos([typeof text === 'string' ? text : (text.textContent || '')], [{ label: labels ? tx(labels[0]) : 'OK', def: true, fn: yes }, { label: labels ? tx(labels[1]) : 'Cancel' }], { yesNo: !!labels && (!!labels.yesNo || (labels[0] === 'Yes' && labels[1] === 'No')) }) : false; },
   alert(kind, text, yes) { return frameOn() ? !!alertDos([typeof text === 'string' ? text : (text.textContent || '')], [{ label: 'OK', def: true, fn: yes }, { label: 'Cancel' }]) : false; },
   window(name) { if (!frameOn() || !window.HOAPI.G) return false; if (name === 'autoplay') return autoPlayDos(); if (name === 'fleets') return fleetsDos(); if (name === 'types') return shipTypesDos(arguments[1]); if (name === 'build') return buildDos(arguments[1]); if (name === 'stars') return starsDos(); if (name === 'compare') return compareDos(); if (name === 'reports') return reportsDos(); if (name === 'group') return organizeDos(arguments[1]); if (name === 'chat') return chatDos(); return false; },
   newGame(f) { createGalaxyDos(f); },
@@ -1258,7 +1259,7 @@ function skillsDos(under) {
 // The program's alert box (captured: the fuel alert, 352 x 210): the text in the screen font from 24 right and 13 down (40 characters a line, a blank line between paragraphs),
 // the mascot (d3520) under it at 23 / 6 below the text, the buttons beside it at 23 below the picture's top; the box is 19 under the picture, and sits 7 above the screen's middle.
 // Kept difference: only the fuel alert was captured, so the picture and the button words of other alerts, and the box's height for other lengths, follow the same rule.
-function alertDos(paras, btns) {
+function alertDos(paras, btns, o) {
   const a = window.HOAPI, wrap = (t) => { const out = []; String(t).split('\n').forEach(par => { let line = ''; par.split(' ').forEach(w => { if (line && (line + ' ' + w).length > 40) { out.push(line); line = w; } else line = line ? line + ' ' + w : w; }); out.push(line); }); return out; };
   const lines = []; paras.forEach((t, i) => { if (i) lines.push(''); wrap(t).forEach(l => lines.push(l)); });
   const pic = 13 + 14 * lines.length + 6, h = pic + 74 + 19, d = a.el('div', { class: 'dd dd-alert', role: 'alertdialog', 'aria-modal': 'true', 'aria-label': paras[0] });
@@ -1269,11 +1270,13 @@ function alertDos(paras, btns) {
   const n = btns.length, bw = 72, gap = 16, x0 = Math.round(176 - (n - 1) * (bw + gap) / 2);
   btns.forEach((b, i) => d.append(dButton(b.label, x0 + i * (bw + gap), pic + 23, bw, 28, () => { done(); if (b.fn) b.fn(); }, { hot: 0, def: b.def })));
   const cb = [...d.querySelectorAll('.dd-btn')].pop(); if (cb) cb.setAttribute('data-esc-close', '1');
-  // (the program's Yes/No boxes, FUN_9000_0000's types 0 and 1, take the keys Y and N as their first two buttons: their window procedures FUN_b000_36f9 and
-  // FUN_b000_3656 compare the keys y and n, whatever the language; here the same in a box whose first two buttons say Yes and No)
-  const yn = btns.length >= 2 && /^y/i.test(String(btns[0].label).trim()) && /^n/i.test(String(btns[1].label).trim());
-  const letter = (e) => { const k = e.key.toLowerCase(); if (!yn || e.ctrlKey || e.altKey || e.metaKey || (k !== 'y' && k !== 'n')) return false; e.preventDefault(); e.stopPropagation(); d.querySelectorAll('.dd-btn')[k === 'y' ? 0 : 1].click(); return true; };
-  const back = a.el('div', { class: 'scrim dd-alertscrim', onkeydown: (e) => { if (e.key === 'Escape') { e.stopPropagation(); done(); } else letter(e); } }, a.el('div', { class: 'dd-alertpos' }, d));
+  // (the program's Yes/No boxes, FUN_9000_0000's types 0 and 1 (" Yes ", " No "[, " Cancel "]: "The file %s already exists.  Overwrite?", "%s, do you want to save the
+  // changes ..."), take the keys Y and N as their first two buttons: their window procedures FUN_b000_36f9 and FUN_b000_3656 compare the keys y and n, whatever the
+  // language (the German build's buttons say Ja and Nein). The box is the Yes/No box because its caller says so (o.yesNo), not by its words; the keys, the patch's
+  // letters and the modern conveniences' typed words: markYesNo, js/skins/classic/ui.js. Every other question box takes the typed words only.)
+  const bs = d.querySelectorAll('.dd-btn');
+  if (btns.length >= 2 && a.markYesNo) a.markYesNo(d, bs[0], bs[1], !!(o && o.yesNo));
+  const back = a.el('div', { class: 'scrim dd-alertscrim', onkeydown: (e) => { if (e.key === 'Escape') { e.stopPropagation(); done(); } } }, a.el('div', { class: 'dd-alertpos' }, d));
   document.body.append(back); const f = d.querySelector('.dd-btn.def') || d.querySelector('.dd-btn'); if (f) f.focus();
   return back;
 }

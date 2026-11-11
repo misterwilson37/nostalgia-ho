@@ -47,7 +47,7 @@ their entries are below so the list is complete, but their rulesets list no fixe
 | Version | Obvious bug | Quirk or design | Unclear |
 |---|---|---|---|
 | Mac 1.2 | 3 | 8 | 2 |
-| 2.0 | 10 (7 + the Amiga skin's three) | 5 | 3 |
+| 2.0 | 11 (7 + the Amiga skin's three + the DOS skin's Yes/No keys) | 5 | 3 |
 | Mac 2.0.1 | 5 | 5 | 2 |
 | Mac 3.0.1 | 6 | 6 | 3 |
 | 4.0.5 | 11 fixed (+ 3 the remake already plays fixed, + 3 with nothing in the remake to fix) | 4 | 6 |
@@ -237,6 +237,13 @@ The program's own credits read "Version 2.0.1" (string 672), so its patch is 2.0
    the word the Amiga English's own menu uses for the command (string 842), drawn in the Amiga's
    lettering (`tools/skins/amiga_endturn.py`, `sprites/endturn.png`). German is untouched; French,
    Turkish and Spanish (never released for the Amiga) keep the remake's own buttons.
+11. **`yesNoKeys`: the Yes/No boxes' keys in the language.** DOSHO.EXE's Yes/No boxes (`FUN_9000_0000`
+   types 0 and 1, window procedures `FUN_b000_36f9` and `FUN_b000_3656`) compare the keys y and n
+   whatever the language, the German build's too, whose buttons say Ja and Nein; so a German player's
+   J does nothing. Played so by default in the DOS skin (a box its caller marks as the program's Yes/No
+   box, `markYesNo` in `js/skins/classic/ui.js`). Asked for by Jake (November 2026) rather than a slip of
+   the code. *Fix:* Y and N, and also the first letters of the remake's own Yes and No in the page's
+   language (`js/ui-text.js`): O/N French, J/N German, E/H Turkish, S/N Spanish. Only in the DOS skin.
 
 ### Quirk or design (left as released)
 
