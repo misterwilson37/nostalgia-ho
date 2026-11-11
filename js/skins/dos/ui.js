@@ -1400,11 +1400,101 @@ function reportsDos() {
   if (!ms.length) box.append(a.el('div', { class: 'dd-rep' }, a.el('span', { class: 'cap' }, tx('No reports this turn.'))));
   ms.forEach((m, i) => { const t = a.el('span', { class: 'cap', translate: 'no' }); t.append(a.degText(H.say(g, m.text)));
     box.append(a.el('div', { class: 'dd-rep', 'data-now': i === old.length ? '1' : null, tabindex: 0, role: 'option', onclick: () => { a.closeModal(); a.reportAction(m); } }, a.msgIconEl(m), t)); });
-  const d = dDialog(321, 125, 'Reports', [box], 'Reports'); d.append(vScroll(box, 305, 21, 99));
-  // (the program's Reports window has a teal title bar like the main window's, and at its left the Windows control-menu mark of three bars; a click on it closes the window here)
-  const tb = d.querySelector('.dd-title'); if (tb) { tb.classList.add('teal'); const sb = a.el('button', { type: 'button', class: 'dd-sysbox', 'aria-label': 'Close', onclick: () => a.closeModal() }); dAt(sb, 8, 0, 14, 17); tb.append(sb); }
+  const d = dDialog(321, 125, 'Reports', [box], 'Reports'); let vs = vScroll(box, 305, 21, 99); d.append(vs);
+  // (the program's Reports window has a teal title bar like the main window's, and at its left the control-menu box of three bars: its System Menu, sysMenuDos)
+  const tb = d.querySelector('.dd-title');
+  if (tb) {
+    tb.classList.add('teal');
+    sysMenuDos(d, tb, { minW: 160, minH: 70, resize: (w, h) => { box.style.width = du(w - 14); box.style.height = du(h - 26); vs.remove(); vs = vScroll(box, w - 16, 21, h - 26); d.append(vs); tb.style.width = du(w - 10); } });
+  }
   const now = box.querySelector('[data-now]'); if (now) box.scrollTop = now.offsetTop - box.offsetTop;
   return true;
+}
+// The System Menu of a window with a control-menu box (the Reports window; FUN_b000_ea30, its window procedure, sets the menu "System Menu" at 49c5:1362 when the
+// window is made: "~Move" (ID_SYSMOVE, 0x46), "~Size" (ID_SYSSIZE, 0x47), a rule, "~Close" (ID_SYSCLOSE, 0x48)). A click on the box opens it (FUN_1000_db96: a press on
+// the title row's third column sends the window the key Alt+Space, which opens it; Alt+Space opens it from the keyboard too). The commands (FUN_3000_054d):
+// - Move: the pointer goes to the window's top left corner and the window follows it; Size: the same with its bottom right corner. A press on the title bar starts
+//   a Move and a press on the bottom right cell a Size as well (FUN_3000_0a6a). The tracking (FUN_3000_03f3) goes by whole screen cells (8 x 14 pixels): the
+//   arrow keys move the corner a cell, Return ends it, Escape gives it up (FUN_3000_154f: no position is put back, so the window has not moved while it is
+//   tracked: an outline is moved and the window goes there at the end); the corner stays on the 80 x 34-cell screen;
+// - Close closes the window (message 8).
+// Mouse and touch the same: after Move or Size the outline follows the pointer (or the finger, from where it touches) and the release puts the window there.
+// THE REMAKE'S OWN: the menu's look is the menu bar's drop-down (the program's menus: grey, red letters, the green bar), and the smallest size (20 x 5 cells).
+function sysMenuDos(d, tb, o) {
+  const a = window.HOAPI, win = d.closest('.win'); if (!win) return;
+  const sz = { w: o.w || 321, h: o.h || 125 }; sz.x = 8 * Math.floor((80 - Math.round(sz.w / 8)) / 2); sz.y = 14 * Math.floor((34 - Math.round(sz.h / 14)) / 2);
+  const put = () => { win.style.transform = `translate(${du(sz.x - (640 - sz.w) / 2)}, ${du(sz.y - (476 - sz.h) / 2)})`; };
+  const sb = a.el('button', { type: 'button', class: 'dd-sysbox', 'aria-label': 'System Menu', 'aria-haspopup': 'menu' }); dAt(sb, 8, 0, 14, 17); tb.append(sb);
+  let menu = null, track = null;
+  const closeMenu = () => { if (menu) { menu.remove(); menu = null; sb.setAttribute('aria-expanded', 'false'); } };
+  const openMenu = () => {
+    if (menu) { closeMenu(); return; }
+    const items = [['Move', 0, () => startTrack('move')], ['Size', 0, () => startTrack('size')], '-', ['Close', 0, () => a.closeModal()]];
+    menu = a.el('div', { class: 'dd-sysmenu', role: 'menu', 'aria-label': 'System Menu' });
+    items.forEach(it => {
+      if (it === '-') { menu.append(a.el('div', { class: 'dd-sysrule', role: 'separator' })); return; }
+      const w = tx(it[0]), b = a.el('button', { type: 'button', role: 'menuitem', translate: 'no', onclick: (e) => { e.stopPropagation(); closeMenu(); it[2](); } }, a.el('span', { class: 'mhot' }, w[0]), w.slice(1));
+      menu.append(b);
+    });
+    menu.addEventListener('keydown', (e) => {
+      const bs = [...menu.querySelectorAll('button')], i = bs.indexOf(document.activeElement), k = e.key.toLowerCase();
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); bs[(i + (e.key === 'ArrowDown' ? 1 : bs.length - 1)) % bs.length].focus(); }
+      else if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); closeMenu(); sb.focus(); }
+      else if (k.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey) { const b = bs.find(x => x.textContent.trim()[0].toLowerCase() === k); if (b) { e.preventDefault(); b.click(); } }
+    });
+    dAt(menu, 13, 22); d.append(menu); sb.setAttribute('aria-expanded', 'true');
+    const f = menu.querySelector('button'); if (f) f.focus();
+    setTimeout(() => document.addEventListener('pointerdown', function off(e) { if (menu && !menu.contains(e.target) && e.target !== sb) closeMenu(); if (!menu) document.removeEventListener('pointerdown', off, true); }, true), 0);
+  };
+  sb.addEventListener('click', (e) => { e.stopPropagation(); openMenu(); });
+  // the tracking: an outline in the program's cells, the window put where it ends
+  function startTrack(kind, ev) {
+    if (track) return;
+    const k = () => d.getBoundingClientRect().width / sz.w; // (CSS pixels per program pixel)
+    const ol = a.el('div', { class: 'dd-track', 'aria-hidden': 'true' }), t = { kind, x: sz.x, y: sz.y, w: sz.w, h: sz.h, anchor: null, base: null };
+    const draw = () => { dAt(ol, t.x - sz.x, t.y - sz.y, t.w, t.h); };
+    const cellX = (v) => Math.round(v / 8) * 8, cellY = (v) => Math.round(v / 14) * 14;
+    const clamp = () => {
+      if (kind === 'move') { t.x = Math.max(0, Math.min(632, t.x)); t.y = Math.max(0, Math.min(462, t.y)); }
+      else { t.w = Math.max(o.minW, Math.min(640 - t.x, t.w)); t.h = Math.max(o.minH, Math.min(476 - t.y, t.h)); }
+    };
+    const at = (cx, cy) => {
+      if (!t.anchor) { t.anchor = [cx, cy]; t.base = [t.x, t.y, t.w, t.h]; return; }
+      const dx = cellX((cx - t.anchor[0]) / k()), dy = cellY((cy - t.anchor[1]) / k());
+      if (kind === 'move') { t.x = t.base[0] + dx; t.y = t.base[1] + dy; } else { t.w = t.base[2] + dx; t.h = t.base[3] + dy; }
+      clamp(); draw();
+    };
+    const end = (ok) => {
+      track = null; ol.remove(); layer.remove(); document.removeEventListener('keydown', key, true);
+      // (the click that ends it is the window's, not the map's under it)
+      const eat = (e) => { e.stopPropagation(); e.preventDefault(); }; window.addEventListener('click', eat, true); setTimeout(() => window.removeEventListener('click', eat, true), 0);
+      if (!ok) return;
+      if (kind === 'size' && (t.w !== sz.w || t.h !== sz.h)) { sz.w = t.w; sz.h = t.h; d.style.width = du(sz.w); d.style.height = du(sz.h); o.resize(sz.w, sz.h); }
+      sz.x = t.x; sz.y = t.y; put();
+    };
+    const key = (e) => {
+      const step = { ArrowLeft: [-8, 0], ArrowRight: [8, 0], ArrowUp: [0, -14], ArrowDown: [0, 14] }[e.key];
+      if (step) { e.preventDefault(); e.stopPropagation(); if (kind === 'move') { t.x += step[0]; t.y += step[1]; } else { t.w += step[0]; t.h += step[1]; } t.anchor = null; clamp(); draw(); }
+      else if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); end(true); }
+      else if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); end(false); }
+    };
+    // (a layer over the page takes the pointer while the window is tracked: a mouse moves the outline as it moves and a click puts the window there; a finger drags it)
+    const layer = a.el('div', { class: 'dd-tracklayer', 'aria-hidden': 'true' });
+    layer.addEventListener('pointerdown', (e) => { e.preventDefault(); if (!t.anchor || e.pointerType !== 'mouse') { t.anchor = null; at(e.clientX, e.clientY); } try { layer.setPointerCapture(e.pointerId); } catch (x) {} t.down = true; });
+    layer.addEventListener('pointermove', (e) => { if (e.pointerType === 'mouse' || t.down) at(e.clientX, e.clientY); });
+    layer.addEventListener('pointerup', (e) => { if (t.down || e.pointerType === 'mouse') { at(e.clientX, e.clientY); end(true); } });
+    track = t; draw(); d.append(ol); document.body.append(layer); document.addEventListener('keydown', key, true);
+    if (ev) { t.anchor = null; at(ev.clientX, ev.clientY); t.down = true; try { layer.setPointerCapture(ev.pointerId); } catch (x) {} }
+  }
+  // a press on the title bar moves the window, on the bottom right cell sizes it (FUN_3000_0a6a)
+  tb.addEventListener('pointerdown', (e) => { if (e.button || e.target === sb) return; e.preventDefault(); startTrack('move', e); });
+  tb.addEventListener('click', () => {}); // (a listener the browser counts, so a finger near the title bar is taken as the title bar's and not moved onto the list below)
+  const grip = a.el('div', { class: 'dd-grip', 'aria-hidden': 'true' }); d.append(grip);
+  const placeGrip = () => dAt(grip, sz.w - 8, sz.h - 14, 8, 14); placeGrip();
+  const r0 = o.resize; o.resize = (w, h) => { r0(w, h); placeGrip(); };
+  grip.addEventListener('pointerdown', (e) => { if (e.button) return; e.preventDefault(); startTrack('size', e); }); grip.addEventListener('click', () => {});
+  d.addEventListener('keydown', (e) => { if (e.altKey && (e.key === ' ' || e.code === 'Space')) { e.preventDefault(); openMenu(); } });
+  put();
 }
 
 // Ships, Organize Ships: 457 x 323 (the program's Organize Fleets window: the fleets of one design at the star as piles; click a pile, then another to move a ship, Shift-click moves the whole pile)

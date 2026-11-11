@@ -255,3 +255,14 @@ html.os-dos .dropdown button:hover .mhot, html.os-dos .dropdown button:focus-vis
 .dd-startscr { position: relative; }
 .dd-startup { position: relative; }
 .dd-startup .dd-t { overflow: hidden; }
+
+/* the System Menu of the Reports window (sysMenuDos in ui.js): the menu bar's drop-down; the tracking outline; the bottom right cell that sizes */
+.dd-sysmenu { position: absolute; z-index: 6; display: flex; flex-direction: column; min-width: calc(72 * var(--du)); background: #aaa; border: calc(2 * var(--du)) solid #000; padding: calc(2 * var(--du)) 0; }
+.dd-sysmenu button { display: block; text-align: left; background: none; border: 0; border-radius: 0; box-shadow: none; margin: 0; min-width: 0; color: #000; font: calc(14 * var(--du))/calc(14 * var(--du)) "DOS Bios", monospace; padding: calc(1 * var(--du)) calc(8 * var(--du)) calc(1 * var(--du)) calc(18 * var(--du)); white-space: pre; text-shadow: none; -webkit-font-smoothing: none; }
+.dd-sysmenu button:hover, .dd-sysmenu button:focus-visible { background: #00aa00; outline: 0; }
+.dd-sysmenu .mhot { color: #a00000; }
+.dd-sysrule { border-top: calc(1 * var(--du)) solid #000; margin: calc(3 * var(--du)) 0; }
+.dd-track { position: absolute; z-index: 7; box-sizing: border-box; border: calc(3 * var(--du)) solid #fff; mix-blend-mode: difference; pointer-events: none; }
+.dd-tracklayer { position: fixed; inset: 0; z-index: 100; cursor: move; touch-action: none; }
+.dd-grip { position: absolute; z-index: 2; cursor: nwse-resize; touch-action: none; }
+.dd .dd-title.teal { cursor: default; touch-action: none; }
