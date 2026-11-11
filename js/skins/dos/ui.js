@@ -134,6 +134,8 @@ window.HOTHEME = {
   marker: (f, mine) => (mine && !f.sat ? P + 's3114' : null),
   endTurnPic: P + 'd5000', // English; the other languages' own: German is the German DOS 2.0's (d5000-de), the rest drawn in its lettering (tools/skins/endturn_langs.py)
   endTurnPics: { de: P + 'd5000-de', fr: P + 'd5000-fr', tr: P + 'd5000-tr', es: P + 'd5000-es' },
+  // pressed (FUN_2000_9b03: on the press the program draws picture 5001, 5501 in German, and holds the mouse until it is let go); the drawn languages have none
+  endTurnPicDown: P + 'd5001', endTurnPicsDown: { de: P + 'd5001-de' },
   battlePlanet: P + 'i1004', // the planet in a battle: the DOS game's own plain planet (as the Mac skins built on this one)
   // stand-ins: an ally's halo over the planet (3.0.1's), the rank pictures
   allyPic: (IMG, small) => { const n = small ? 'p507' : 'p506', k = fillNames(n).map(x => P + x).find(x => IMG[x]); return k ? IMG[k] : null; }, // (always a stand-in: a skin's own is made see-through round the halo)
@@ -264,6 +266,8 @@ window.HOTHEME = {
   bgStars: document.documentElement.classList.contains('os-dos') ? false : undefined,
   mapFont(n) { return frameOn() ? "12px 'DOS Geneva 9'" : null; },
   alertBox(paras) { return frameOn() ? alertDos(paras, [{ label: 'OK', def: true }]) : null; },
+  youWonLayout(kind, Y, done) { return frameOn() ? youWonDos(kind, Y, done) : false; },
+  nameStarLayout(f, o) { return frameOn() ? nameStarDos(f, o) : false; },
   confirm(text, yes, labels) { return frameOn() ? !!alertDos([typeof text === 'string' ? text : (text.textContent || '')], [{ label: labels ? labels[0] : 'OK', def: true, fn: yes }, { label: labels ? labels[1] : 'Cancel' }]) : false; },
   alert(kind, text, yes) { return frameOn() ? !!alertDos([typeof text === 'string' ? text : (text.textContent || '')], [{ label: 'OK', def: true, fn: yes }, { label: 'Cancel' }]) : false; },
   window(name) { if (!frameOn() || !window.HOAPI.G) return false; if (name === 'autoplay') return autoPlayDos(); if (name === 'fleets') return fleetsDos(); if (name === 'types') return shipTypesDos(arguments[1]); if (name === 'build') return buildDos(arguments[1]); if (name === 'stars') return starsDos(); if (name === 'compare') return compareDos(); if (name === 'reports') return reportsDos(); if (name === 'group') return organizeDos(arguments[1]); if (name === 'chat') return chatDos(); return false; },
@@ -294,6 +298,7 @@ window.HOTHEME = {
 function menuLayoutDos() {
   const A = () => window.HOAPI, G = () => A() && A().G, H = () => window.HO;
   const noGame = () => !G(), off = () => true;
+  const orgGhost = () => { const f = noGame() ? null : A().curFleet && A().curFleet(); return !f || f.star == null || f.to != null || Object.keys(f.ships).length !== 1; };
   const it = (label, fn, o) => { o = o || {}; return [label, fn, o.shown || null, o.checked || null, o.ghost || null, o.key || null]; };
   const rs = () => (G() ? H().rules(G()) : {});
   const star = () => (G() && A().UI.sel != null ? G().stars[A().UI.sel] : null);
@@ -324,7 +329,8 @@ function menuLayoutDos() {
       ['List Ship Types…', 'Ships/Scrap ship types…'],
       it('Create New Ship Type…', () => (frameOn() ? newTypeDos() : A().openBuild(star().id)), { ghost: () => noGame() || (!frameOn() && !mine()), key: 'Ctrl+K' }), '-',
       ['List All Fleets…', 'Ships/List all fleets…'], // (its key [Ctrl+L] is put on the classic item in T.menus)
-      it('Organize Ships…', () => { const f = A().curFleet && A().curFleet(); if (f && f.star != null) organizeDos(f.star); }, { ghost: () => { const f = noGame() ? null : A().curFleet && A().curFleet(); return !f || f.star == null || f.to != null || Object.keys(f.ships).length !== 1; }, key: 'Ctrl+O' }),
+      // (the line changes with the selection, FUN_b000_2998: "~Organize Ships..." (358), dimmed "No ships to organize..." (359) when there is nothing to organize)
+      it(() => (orgGhost() ? A().tl('No ships to organize…') : A().tl('Organize Ships…')), () => { const f = A().curFleet && A().curFleet(); if (f && f.star != null) organizeDos(f.star); }, { ghost: orgGhost, key: 'Ctrl+O' }),
       it(() => (mine() ? A().tl('Build Ships at %s…', star().name) : A().tl('Can’t Build Ships Here…')), () => { if (mine()) A().openBuild(star().id); }, { ghost: () => noGame() || !mine(), key: 'Ctrl+B' }),
       ['Scrap Current Fleet', 'Ships/#3'], '-',
       // (captured: "Review Battle at <star>…" [Ctrl+R] shows the selected star's last battle; "No Battles here…" is dimmed)
@@ -371,6 +377,19 @@ function dosKeys() {
     for (const m in M) for (const it of M[m]) if (it[5] === k) { if (typeof it[1] !== 'function' || (it[2] && !it[2]()) || (it[4] && it[4]())) return; e.preventDefault(); it[1](); return; }
   });
 }
+// F10, the program's boss key (FUN_9000_7450, which its event loop FUN_2000_fd17 calls on the key code 0x10c4, at any time, over any window): the screen goes to
+// text mode and shows a DOS prompt, "C:\>" in grey at its top left, until a key is pressed, then the program sets its graphics mode again and redraws its screen
+// (captured over the licence window: v20dos-orig-bosskey.png). Here a black page with the prompt in the screen font; a key or a click brings the page back.
+function bossKey() {
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'F10' || e.ctrlKey || e.altKey || e.metaKey || e.shiftKey || !frameOn() || document.querySelector('.dd-boss')) return;
+    e.preventDefault(); e.stopPropagation();
+    const s = document.createElement('div'); s.className = 'dd-boss'; s.tabIndex = -1; s.setAttribute('role', 'dialog'); s.setAttribute('aria-label', 'C:\\>'); s.textContent = 'C:\\>';
+    const was = document.activeElement, back = (ev) => { ev.preventDefault(); ev.stopPropagation(); s.remove(); document.removeEventListener('keydown', back, true); if (was && was.isConnected && was.focus) was.focus(); };
+    setTimeout(() => document.addEventListener('keydown', back, true), 0); s.addEventListener('pointerdown', back);
+    document.body.append(s); s.focus();
+  }, true);
+}
 // A caption that is wider than its cell is drawn with the letters a pixel closer together (captured: a ship type named "wagon train 123" in the Ship Types list, whose words
 // ("wagon train 123 (6/6) Fighter") are squeezed into the cell; the Mac 1.2 program does the same at 120 pixels), and what still does not fit is cut at the cell. The Name
 // on the right is cut at its rectangle (captured: "wagon train" of "wagon train 123").
@@ -415,7 +434,7 @@ function battleDos(b, k) {
   const x = c.getContext('2d'); x.setTransform(U * dpr, 0, 0, U * dpr, 0, 0); x.imageSmoothingEnabled = false; x.textBaseline = 'alphabetic';
   let stop = false, skip = false, done = false;
   const btn = dButton('Skip', 202, 310, 52, 24, () => { if (done) a.closeModal(); else skip = true; }, { hot: -1 });
-  const d = dDialog(456, 364, null, [c, btn], 'Summary of battle'); d.classList.add('dd-black'); d.style.transform = `translateX(calc(-4.5 * var(--du)))`; // (the program's window sits 4.5 pixels left of the screen's middle: measured)
+  const d = dDialog(456, 364, null, [c, btn], 'Summary of battle'); d.classList.add('dd-black'); // (placed as every window, by placeDos: 88 from the screen's left, 4 left of its middle)
   const prevClose = () => { stop = true; };
   const mo = new MutationObserver(() => { if (!d.isConnected) { stop = true; mo.disconnect(); } }); mo.observe(document.body, { childList: true });
   const pat = (col) => { const p = document.createElement('canvas'); p.width = p.height = 2; const q = p.getContext('2d'); q.fillStyle = col; q.fillRect(0, 0, 1, 1); q.fillRect(1, 1, 1, 1); return x.createPattern(p, 'repeat'); };
@@ -906,7 +925,7 @@ function frameSetup(de) {
   const sync = () => { de.classList.toggle('dosframe', frameOn()); setUnit(); };
   sync(); window.addEventListener('load', touchFleets); touchFleets(); window.addEventListener('resize', () => { const u0 = U; setUnit(); if (u0 !== U && window.HOAPI && window.HOAPI.G && frameOn()) { window.HOAPI.renderPanel(); window.dispatchEvent(new Event('hoframe')); } });
   new MutationObserver(sync).observe(de, { attributes: true, attributeFilter: ['class'] });
-  loadFonts(); hotMenus(); dosKeys(); condenseCaps();
+  loadFonts(); hotMenus(); dosKeys(); bossKey(); condenseCaps();
 }
 
 // ======== The original's own windows (docs/dos20-findings.md; geometry measured on the running program, v20dos-orig-*.png) ========
@@ -950,8 +969,17 @@ function dDialog(w, h, title, kids, label) {
   if (title) d.append(dAt(a.el('div', { class: 'dd-title', translate: 'no' }, title), 5, 5, w - 10, 17));
   kids.forEach(k => k && d.append(k));
   const bs = [...d.querySelectorAll('.dd-btn')], cb = bs.find(b => /^cancel$/i.test(b.textContent.trim())); if (cb && !d.querySelector('[data-esc-close]')) cb.setAttribute('data-esc-close', '1'); // (a window of the program closes by its Cancel)
-  a.modal('', d, { cls: 'dosw', label: label || title || 'Spaceward Ho!' });
+  placeDos(a.modal('', d, { cls: 'dosw', label: label || title || 'Spaceward Ho!' }), w, h);
   return d;
+}
+// Where the program puts a window (its templates say x, y = -1: centred): on its 80 x 34-cell screen in whole cells, 8 * floor((80 - columns) / 2) from the left and
+// 14 * floor((34 - rows) / 2) from the top (measured on every captured window: Ship Types, 62 x 25 cells, at 72, 56; Battle Speed, 35 x 13, at 176, 140; Auto Play,
+// 47 x 19, at 128, 98; List of All Fleets, 68 x 23, at 48, 70; the fuel alert, 44 x 15, at 144, 126 ...). The page centres a window on the 640 x 476 frame; this moves
+// it by the difference (Ship Types 7 pixels up).
+function placeDos(win, w, h) {
+  if (!win) return;
+  const cols = Math.round(w / 8), rows = Math.round(h / 14), dx = 8 * Math.floor((80 - cols) / 2) - (640 - w) / 2, dy = 14 * Math.floor((34 - rows) / 2) - (476 - h) / 2;
+  win.style.transform = `translate(${du(dx)}, ${du(dy)})`;
 }
 const tx = (t) => (window.HOAPI && window.HOAPI.tl ? window.HOAPI.tl(t) : t);
 // Options, Set Battle Speed: 280 x 182 (DITL of Windows template 8; "Fully Animated Battles" is the DOS program's own check box)
@@ -1241,9 +1269,57 @@ function alertDos(paras, btns) {
   const n = btns.length, bw = 72, gap = 16, x0 = Math.round(176 - (n - 1) * (bw + gap) / 2);
   btns.forEach((b, i) => d.append(dButton(b.label, x0 + i * (bw + gap), pic + 23, bw, 28, () => { done(); if (b.fn) b.fn(); }, { hot: 0, def: b.def })));
   const cb = [...d.querySelectorAll('.dd-btn')].pop(); if (cb) cb.setAttribute('data-esc-close', '1');
-  const back = a.el('div', { class: 'scrim dd-alertscrim', onkeydown: (e) => { if (e.key === 'Escape') { e.stopPropagation(); done(); } } }, a.el('div', { class: 'dd-alertpos' }, d));
+  // (the program's Yes/No boxes, FUN_9000_0000's types 0 and 1, take the keys Y and N as their first two buttons: their window procedures FUN_b000_36f9 and
+  // FUN_b000_3656 compare the keys y and n, whatever the language; here the same in a box whose first two buttons say Yes and No)
+  const yn = btns.length >= 2 && /^y/i.test(String(btns[0].label).trim()) && /^n/i.test(String(btns[1].label).trim());
+  const letter = (e) => { const k = e.key.toLowerCase(); if (!yn || e.ctrlKey || e.altKey || e.metaKey || (k !== 'y' && k !== 'n')) return false; e.preventDefault(); e.stopPropagation(); d.querySelectorAll('.dd-btn')[k === 'y' ? 0 : 1].click(); return true; };
+  const back = a.el('div', { class: 'scrim dd-alertscrim', onkeydown: (e) => { if (e.key === 'Escape') { e.stopPropagation(); done(); } else letter(e); } }, a.el('div', { class: 'dd-alertpos' }, d));
   document.body.append(back); const f = d.querySelector('.dd-btn.def') || d.querySelector('.dd-btn'); if (f) f.focus();
   return back;
+}
+// ======== Windows read from the program's own dialog templates ========
+// DOSHO.EXE keeps its 32 windows as templates in a far data segment (40df:xxxx in the unpacked image, 0x430 bytes apart, from RegisterDlgBox to PatchDlgBox): a name,
+// the window's size in screen cells (8 x 14 pixels), then each item as x, y, height and width in cells, its control class (9 a button, 11 a line of words, 18 a picture
+// the window's procedure paints, 4 an edit field ...), its words and its id. An item at cell (x, y) sits at (8 + 8x, 14 + 14y) of the window: Battle Speed (35 x 13
+// cells, 280 x 182) and Auto Play (47 x 19) were measured so; a button is 8w + 6 by 26 from a pixel inside its cell (Battle Speed's OK: 21, 8, 8 wide -> 177, 127, 70 x 26).
+const cell = (x, y) => [8 + 8 * x, 14 + 14 * y];
+function tplButton(txt, x, y, w, fn, o) { const [l, t] = cell(x, y); return dButton(txt, l + 1, t + 1, 8 * w + 6, 26, fn, o); }
+function tplText(lines, x, y) { const [l, t] = cell(x, y); return lines.map((ln, i) => dText(ln, l, t + 14 * i)); }
+function tplPic(name, x, y, w, h) {
+  const a = window.HOAPI, im = a.IMG['dos:' + name], [l, t] = cell(x, y); if (!im) return null;
+  const c = a.el('canvas', { class: 'dd-pic', 'aria-hidden': 'true' }); c.width = im.width; c.height = im.height; c.getContext('2d').drawImage(im, 0, 0); // (painted at the item's corner at its own size, not fitted to the item: FUN_2000_2ac4)
+  return dAt(c, l, t, im.width, im.height);
+}
+// You Won and You Lost: YouWonDlgBox (21 x 20 cells, 168 x 280) and YouLostDlgBox (21 x 21, 168 x 294), opened by the turn's news (FUN_b000_88b3, alerts 5040 and 5050
+// through FUN_3000_8395) with the window procedure FUN_9000_76c0, which loads picture 5040 or 5050 and paints it in item 999 (cell 0, 0, 19 x 11); the words, item 100, at
+// cell 1, 11 (three lines, four for the lost one, left aligned as every line of words: FUN_b000_f240), and "   ~OK   " at cell 5, 15 (16), 8 wide. No title bar.
+function youWonDos(kind, Y, done) {
+  const a = window.HOAPI, won = kind === 'won', h = won ? 20 : 21, lines = String(Y.text).split('\n');
+  const d = a.el('div', { class: 'dd', role: 'dialog', 'aria-label': lines.join(' ') });
+  d.style.width = du(168); d.style.height = du(14 * h);
+  const ok = tplButton(Y.ok || 'OK', 5, won ? 15 : 16, 8, () => a.closeModal(), { hot: 0, def: true });
+  [tplPic(won ? 'd5040' : 'd5050', 0, 0, 19, 11), ...tplText(lines, 1, 11), ok].forEach(k => k && d.append(k));
+  placeDos(a.modal('', d, { cls: 'dosw', sticky: true, label: lines.join(' '), onClose: done }), 168, 14 * h);
+  ok.focus(); return true;
+}
+// Name a Star: NameStarBox (49 x 16 cells, 392 x 224), the window procedure FUN_a000_fa92: its words (cell 1, 1, six lines: the sentence, the rule and the hint, a blank
+// line between), picture 3500 painted in item 999 (cell 1, 8, 10 x 5), "New Star Name:" at cell 12, 9, the edit field (item 100, cell 27, 9, 8 wide, at most 7 letters:
+// message 0x4c with 7 on opening) and OK at cell 25, 11; no Cancel (OK with the field blank names no star, as its hint says). A taken name brings the program's alert
+// 3340 ("Sorry, there's already a star named ...") through FUN_3000_8395; here the alert box with those words.
+function nameStarDos(f, o) {
+  const a = window.HOAPI, NS = o.NS, wrap = (t, n) => { const out = []; let line = ''; String(t).split(' ').forEach(w => { if (line && (line + ' ' + w).length > n) { out.push(line); line = w; } else line = line ? line + ' ' + w : w; }); out.push(line); return out; };
+  const decline = f.querySelector('button[type=button]');
+  f.addEventListener('submit', (e) => { if (!o.inp.value.trim() && decline) { e.preventDefault(); e.stopImmediatePropagation(); decline.click(); } }, true);
+  new MutationObserver(() => { const t = o.err.textContent; if (t) { o.err.textContent = ''; alertDos([t], [{ label: 'OK', def: true, fn: () => o.inp.focus() }]); } }).observe(o.err, { childList: true, characterData: true, subtree: true });
+  // (the words fill the item's 45 columns; the template breaks the hint after "click", as a 40-column wrap does)
+  const lines = [...wrap(NS.text, 45), '', ...(NS.rule ? [...wrap(NS.rule, 45), ''] : []), ...(NS.hint ? wrap(NS.hint, 40) : [])];
+  f.innerHTML = ''; f.className = 'dd'; f.style.width = du(392); f.style.height = du(224);
+  o.inp.className = 'dd-field'; o.inp.setAttribute('spellcheck', 'false'); const [fl, ft] = cell(27, 9); dAt(o.inp, fl, ft, 64, 14);
+  o.err.style.display = 'none';
+  const ok = tplButton(NS.ok || 'OK', 25, 11, 8, null, { hot: 0, def: true }); ok.type = 'submit';
+  [...tplText(lines, 1, 1), tplPic('d3500', 1, 8, 10, 5), ...tplText([NS.label || 'New Star Name:'], 12, 9), o.inp, o.err, ok].forEach(k => k && f.append(k));
+  setTimeout(() => { placeDos(f.closest('.win'), 392, 224); o.inp.focus(); }, 0);
+  return 'dosw';
 }
 // Window, Reports: the program's report window, 321 x 125, a title bar and the reports, each its picture and its sentence, a scroll bar
 function reportsDos() {

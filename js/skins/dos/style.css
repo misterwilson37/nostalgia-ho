@@ -83,7 +83,7 @@ html.dosframe #panel .dosbudget .track { height: calc(9 * var(--du)); margin-lef
 html.dosframe #panel .dosbudget .fill, html.dosframe #panel .dosbudget .fill.tbar { background: #00ba00; height: 100%; }
 html.dosframe #panel .dosbudget .fill.tech, html.dosframe #panel .dosbudget .fill.sav { background: #000; }
 html.dosframe #panel .dosbudget .bval { display: none; }
-html.dosframe .clock.pic img { width: calc(51 * var(--du)); }
+html.dosframe .clock.pic img { width: auto; height: calc(33 * var(--du)); } /* (51 x 33; the pressed face d5001 is 52 wide) */
 html.dosframe #msg .clock.pic { padding: 0; }
 
 /* the program's dialogs (dDialog in ui.js): a 5-pixel frame, white inside, the screen font */
@@ -154,7 +154,7 @@ html.dosframe #panel .dosbudget h3.dosstrip { position: relative; border-bottom:
 html.dosframe #panel .dosbudget h3.dosstrip::after { content: ""; position: absolute; left: 0; bottom: calc(-1 * var(--du)); width: 100%; height: calc(4 * var(--du)); background: repeating-linear-gradient(to right, #000 0, #000 calc(1 * var(--du)), transparent calc(1 * var(--du)), transparent calc(7.7 * var(--du))); }
 
 .dd-field { box-sizing: border-box; background: #aaa; border: 0; border-radius: 0; box-shadow: none; padding: 0 calc(1 * var(--du)); font: inherit; color: #000; outline: 0; caret-color: #a00000; }
-.dd-field:focus { background: #aaa; }
+.dd-field:focus, .win.dosw input.dd-field { background: #aaa; border: 0; border-radius: 0; box-shadow: none; }
 .dd-btn.off, .dd-btn:disabled { color: #777; text-shadow: calc(1 * var(--du)) calc(1 * var(--du)) 0 #fff; }
 .dd-type { display: block; height: calc(56 * var(--du)); text-align: center; cursor: pointer; padding-top: calc(2 * var(--du)); box-sizing: border-box; }
 .dd-type img { display: block; margin: 0 auto; height: calc(40 * var(--du)); width: auto; image-rendering: pixelated; }
@@ -243,3 +243,5 @@ html.os-dos .dropdown button:hover .mhot, html.os-dos .dropdown button:focus-vis
 .dd.dd-black .dd-pic { position: absolute; }
 
 .dd-type .cap.cond, .dd-qcell .cap.cond, .dd-qtop .cap.cond { letter-spacing: calc(-1 * var(--du)); }
+/* F10, the boss key (bossKey in ui.js): the text screen with its DOS prompt */
+.dd-boss { position: fixed; inset: 0; z-index: 1000; background: #000; color: #aaa; font: calc(14 * var(--du))/calc(16 * var(--du)) "DOS Bios", monospace; white-space: pre; padding: 0; outline: 0; -webkit-font-smoothing: none; }

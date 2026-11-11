@@ -2010,6 +2010,14 @@ function renderMsg0() {
   const endPic = (T.endTurnPics && window.HOUI && T.endTurnPics[HOUI.lang]) || T.endTurnPic; // (a picture in the game's language, where the original has one: T.endTurnPics)
   if (endPic && A.img[endPic]) { // the theme's own End Turn button picture
     const btn = el('button', { class: 'clock pic', onclick: doEndTurn, 'aria-label': 'End turn', 'aria-keyshortcuts': 'T', 'data-help': 'endTurn', 'data-key': END_KEY() }, el('img', { src: A.img[endPic], alt: '' }));
+    // T.endTurnPicDown / T.endTurnPicsDown[lang]: the button's pressed face while the pointer holds it (DOS 2.0's d5001: FUN_2000_9b03 draws it on the press);
+    // a language whose own up face has no pressed one keeps its up face
+    const downPic = T.endTurnPics && window.HOUI && T.endTurnPics[HOUI.lang] ? (T.endTurnPicsDown || {})[HOUI.lang] : T.endTurnPicDown;
+    if (downPic && A.img[downPic]) {
+      const im = btn.firstChild, up = () => { im.src = A.img[endPic]; };
+      btn.addEventListener('pointerdown', () => { im.src = A.img[downPic]; });
+      ['pointerup', 'pointerleave', 'pointercancel'].forEach(t => btn.addEventListener(t, up));
+    }
     // T.endTurnYear [x, y, w, h, picture width]: the picture's window where
     // the original writes the year (4.0: p5500's black window, the Windows
     // 4.0.5's clock); placed in percent, so it follows the picture's size
@@ -4423,6 +4431,8 @@ function youWonWords() {
 function openYouWon(done) {
   const Y = youWonWords();
   if (!Y) { if (done) done(); return; }
+  // (T.youWonLayout('won' | 'lost', Y, done): a skin draws the window as its program's box; true: shown, done runs when it closes)
+  if (T.youWonLayout && T.youWonLayout('won', Y, done)) { Sound.play(7021); return; }
   const pic = A.img[Y.pic || 'p3030'], okPic = Y.okPic && A.img[(T.prefix || '') + Y.okPic];
   const ok = el('button', { class: okPic ? 'picbtn' : null, 'aria-label': okPic ? (Y.ok || 'OK') : null, onclick: () => closeModal() },
     okPic ? el('img', { src: okPic, alt: '' }) : (Y.ok || 'OK'));
@@ -4434,6 +4444,7 @@ function openYouWon(done) {
 function openYouLost(done) {
   const Y = youLostWords();
   if (!Y) { if (done) done(); return; }
+  if (T.youWonLayout && T.youWonLayout('lost', Y, done)) return;
   const pic = A.img[Y.pic || 'p3040'], okPic = Y.okPic && A.img[(T.prefix || '') + Y.okPic];
   const ok = el('button', { class: okPic ? 'picbtn' : null, 'aria-label': okPic ? (Y.ok || 'OK') : null, onclick: () => closeModal() },
     okPic ? el('img', { src: okPic, alt: '' }) : (Y.ok || 'OK'));
@@ -4478,7 +4489,8 @@ function openNameStar(done, cancelled) {
   } }, el('p', null, NS.text), NS.rule ? el('p', null, NS.rule) : null, el('label', null, el('span', null, NS.label || 'Star name'), inp), NS.hint ? el('p', { class: 'note' }, NS.hint) : null, err,
     el('div', { class: 'btns right' }, el('button', { type: 'button', class: 'quiet', onclick: () => { if (cancelled) cancelled(); finish(); } }, NS.cancel || 'Cancel'), el('button', { type: 'submit' }, NS.ok || 'OK')));
   // (T.nameStarLayout(form, { NS, inp, err }): a skin lays the window out as its version's dialog, in the same form; true: no title)
-  if (T.nameStarLayout && T.nameStarLayout(f, { NS, inp, err })) { modal('', f, { cls: 'small', sticky: true, label: NS.title || 'Name a Star' }); return; }
+  const lay = T.nameStarLayout && T.nameStarLayout(f, { NS, inp, err }); // (a string: the window's class, in place of 'small')
+  if (lay) { modal('', f, { cls: typeof lay === 'string' ? lay : 'small', sticky: true, label: NS.title || 'Name a Star' }); return; }
   modal(NS.title || 'Name a Star', f, { cls: 'small', sticky: true });
 }
 // Force End Turn (rs.forceEndTurn, Mac 2.0.1): with several players, marks
