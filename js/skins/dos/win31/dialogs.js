@@ -35,4 +35,18 @@ D.battleSpeed = function () {
     on: { 100: (n) => { v = n; }, 101: (on) => { full = on; }, 1: (_, dlg) => { P.battleSpeed = v; P.fullAnim = full; a.savePrefs(); dlg.close(); } },
   });
 };
+// #13 GameInfo (the remake's Window menu, Game Info…: the Player Entry window's Info... in the program): the picture 3520 (the DOS skin's d3520, the same picture),
+// painted at 17, 23 in its 120 x 120 control (measured on win20-orig-vga16-gameinfo.png), the sentence (control 100, wrapped by the static), "Human Players:",
+// the human players' names (list 101), OK. The sentence and names: js/skins/dos/ui.js gameInfo (T.gameInfo).
+D.gameInfo = function () {
+  const a = root.HOAPI, T = root.HOTHEME; if (!a.G || !T || !T.gameInfo) return false;
+  const I = T.gameInfo(true), img = a.IMG['dos:d3520'];
+  W.open(13, {
+    title: 'GameInfo', label: 'GameInfo',
+    text: { 100: I.text, '#3': 'Human Players:', 1: 'OK' },
+    lists: { 101: { items: I.names, sel: -1 } },
+    pics: { 999: (x, w, h) => { x.fillStyle = '#fff'; x.fillRect(0, 0, w, h); if (img && img.width) x.drawImage(img, 17, 23); } },
+    on: { 1: (_, dlg) => dlg.close() },
+  });
+};
 })(typeof window !== 'undefined' ? window : globalThis);

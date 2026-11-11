@@ -251,6 +251,7 @@ window.HOTHEME = {
   // Export, Import, Review battle, Next fleet ...) follow at the end of the last menu, as every layout does (docs/remake-controls.md).
   // The original writes "..." and its key equivalents as "[Ctrl+S]" (T.keyName).
   get menuLayout() { return menuLayoutDos(); },
+  gameInfo(win) { return gameInfo(win); },
   panel(panel, B) { panelDos(panel, B); },
   mapPixel() { return frameOn() ? [U, U] : null; },
   battleWindow(b, k) { battleDos(b, k); },
@@ -371,7 +372,8 @@ function menuLayoutDos() {
       it('Compare Players…', () => A().openCompare(), { shown: () => !!G() && !!rs().compare, key: 'Ctrl+Y' }), ['List All Explored Stars…', 'Galaxy/List explored stars…'], ['Send Message…', 'Galaxy/Send a message…'], '-',
       it('Zoom In', () => { const m = A().map(); A().zoomAt(m.w / 2, m.h / 2, 1.3); }, { ghost: () => noGame() || atZoomD(3), key: '+' }), it('Zoom Out', () => { const m = A().map(); A().zoomAt(m.w / 2, m.h / 2, 1 / 1.3); }, { ghost: () => noGame() || atZoomD(0), key: '-' }), '-',
       it('Fix Spending', () => A().openFixSpending(), { shown: () => !!G() && !!rs().fixSpending, ghost: noGame, key: 'Ctrl+F' })],
-    Window: [it('Tech Spending', () => {}, { checked: () => true, key: 'Alt+1' }), ['Reports', 'Galaxy/Report window…']] // (the program's Window menu: Tech Spending, checked while its window shows; the remake's panel always shows it)
+    Window: [it('Tech Spending', () => {}, { checked: () => true, key: 'Alt+1' }), ['Reports', 'Galaxy/Report window…'], '-',
+      it('Game Info…', () => ((winOn() && window.HOWIN31 && window.HOWIN31.show('gameInfo')) || gameInfoDos()), { ghost: noGame })] // (the remake's own place for the Player Entry window's Info..., gameInfo) // (the program's Window menu: Tech Spending, checked while its window shows; the remake's panel always shows it)
   };
   if (win === 'win31') M.Help = [['How to play', 'Help/How to play']];
   return M;
@@ -1581,6 +1583,33 @@ function sysMenuDos(d, tb, o) {
   grip.addEventListener('pointerdown', (e) => { if (e.button) return; e.preventDefault(); startTrack('size', e); }); grip.addEventListener('click', () => {});
   d.addEventListener('keydown', (e) => { if (e.altKey && (e.key === ' ' || e.code === 'Space')) { e.preventDefault(); openMenu(); } });
   put();
+}
+
+// The Game Info window (DOS GameInfoDlgBox, FUN_b000_562b; Windows template 13 GAMEINFO, GAMEINFODLGPROC 1108:1dda), opened in both programs by the Player Entry
+// window's Info... button. Both build the sentence the same way (read in the code): the galaxy's size, density and style (string ids 0x415, 0x40b, 0x40d plus the
+// game's own), "%d %s" of the computer players' count and intelligence (0x412 plus), or "no", then " computer player" and "s" unless there is one, "human" and "s"
+// unless there is one; DOS writes it "This game contains a\n%s, %s, %s\ngalaxy with %d %s and\n%s.\n\nThe current year is %d.", Windows "This is a %s, %s, %s galaxy
+// with %d %s and %s.\n\nThe current year is %d." (the static wraps it). Then the human players' names in a list. THE REMAKE'S OWN: the remake has no Player Entry
+// window, so Game Info opens from the Window menu (its last item); a double click on a name, which in the programs fills in Player Entry's name, does nothing.
+const SIZEW = { small: 'Small', medium: 'Medium', large: 'Large', xl: 'Extra Large', huge: 'Humongous' }, DENSW = { dense: 'Dense', sparse: 'Sparse', normal: 'Dense' },
+  SHAPEW = { circle: 'Circle', random: 'Random', ring: 'Ring', spiral: 'Spiral', grid: 'Grid' }, IQW = { dumb: 'Dumb', average: 'Average', smart: 'Smart' };
+function gameInfo(win) {
+  const a = window.HOAPI, g = a.G, o = g.opts || {}, hum = g.players.filter(p => p.human), comp = g.players.filter(p => !p.human), nc = comp.length, nh = hum.length;
+  const iq = IQW[o.iq] || IQW[(comp[0] || {}).iq] || 'Average';
+  const cw = nc === 0 ? tx('no computer players') : a.tl(nc === 1 ? '%d %s computer player' : '%d %s computer players', nc, tx(iq));
+  const hw = tx(nh === 1 ? 'human' : 'humans');
+  const t = a.tl(win ? 'This is a %s, %s, %s galaxy with %d %s and %s.\n\nThe current year is %d.' : 'This game contains a\n%s, %s, %s\ngalaxy with %d %s and\n%s.\n\nThe current year is %d.',
+    tx(SIZEW[o.size] || 'Medium'), tx(DENSW[o.density] || 'Dense'), tx(SHAPEW[o.shape] || 'Random'), nh, hw, cw, g.year);
+  return { text: t, names: hum.map(p => p.name) };
+}
+// DOS: GameInfoDlgBox, 51 x 24 cells (408 x 336): the picture 3520 at cell 1, 1 (painted at its corner), the words at 1, 10, "Human Players:" at 28, 1, the list at 29, 3
+// (18 x 15 cells), OK at 11, 18 (the template's cells; no capture of the DOS window)
+function gameInfoDos() {
+  const a = window.HOAPI; if (!a.G) return false;
+  const I = gameInfo(false), [lx, ly] = cell(29, 3), box = dListBox(8 * 18, 14 * 15, lx, ly); box.setAttribute('aria-label', tx('Human Players:'));
+  I.names.forEach(n => box.append(a.el('div', { class: 'dd-row', role: 'option', translate: 'no' }, n)));
+  dDialog(408, 336, null, [tplPic('d3520', 1, 1), ...tplText(I.text.split('\n'), 1, 10), ...tplText([tx('Human Players:')], 28, 1), box, tplButton('OK', 11, 18, 5, () => a.closeModal(), { hot: 0, def: true })], tx('GameInfo'));
+  return true;
 }
 
 // Ships, Organize Ships: 457 x 323 (the program's Organize Fleets window: the fleets of one design at the star as piles; click a pile, then another to move a ship, Shift-click moves the whole pile)
