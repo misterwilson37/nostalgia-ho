@@ -248,6 +248,8 @@ async function playRun(browser, job, outDir, idx) {
     const clickStar = async (id, what, soft) => {
       const p = await starPoint(id); let m = await mapHit(p.x, p.y);
       if (m === 'off-screen') { await G((id) => { HOAPI.centerOn(id); HOAPI.draw(); }, id); await sleep(150); const q = await starPoint(id); p.x = q.x; p.y = q.y; m = await mapHit(p.x, p.y); } // (a person pans the map)
+      // (the DOS skin's map is a window onto the galaxy, as the program's: a star in its top corner lies under the End Turn button; a person scrolls with the bars or zooms out with the key the Galaxy menu shows, "-")
+      for (let k = 0; k < 2 && m && /^covered/.test(m) && await ev(() => !!document.querySelector('.dosbar')); k++) { await page.keyboard.press('-'); await sleep(250); const q = await starPoint(id); p.x = q.x; p.y = q.y; m = await mapHit(p.x, p.y); }
       if (m) { (soft ? warn : fail)(`${what}: the star at ${Math.round(p.x)},${Math.round(p.y)} is ${m}${soft ? ' (a person picks another star)' : ''}`); return false; }
       await ptr.tap(p.x, p.y); await sleep(250); return true;
     };
@@ -364,7 +366,10 @@ async function playRun(browser, job, outDir, idx) {
       // where to pick the fleet up: iOS's dialog row, else the fleet's dot on the map
       let src = null; const tryRow = async () => { const r = await G(() => { const r = document.querySelector('.ios-fdl .frow'); if (!r || !window.__rp.vis(r)) return null; const b = r.getBoundingClientRect(); return { x: b.x + b.width / 2, y: b.y + b.height / 2, id: +r.dataset.fleet }; }); return r; };
       src = await tryRow();
-      if (!src) { src = await G((fid) => { document.getElementById('map').scrollIntoView({ block: 'center', inline: 'nearest' }); const UI = HOAPI.UI, c = document.getElementById('map').getBoundingClientRect(), v = HOVIEW(), kx = c.width / v.mapW, ky = c.height / v.mapH; const d = (UI.dots || []).find(d => d.f === fid); return d ? { x: c.left + (d.x + d.w / 2) * kx, y: c.top + (d.y + d.h / 2) * ky, id: fid, dot: true } : null; }, f.id); }
+      const dotSrc = () => G((fid) => { document.getElementById('map').scrollIntoView({ block: 'center', inline: 'nearest' }); const UI = HOAPI.UI, c = document.getElementById('map').getBoundingClientRect(), v = HOVIEW(), kx = c.width / v.mapW, ky = c.height / v.mapH; const d = (UI.dots || []).find(d => d.f === fid); return d ? { x: c.left + (d.x + d.w / 2) * kx, y: c.top + (d.y + d.h / 2) * ky, id: fid, dot: true } : null; }, f.id);
+      if (!src) { src = await dotSrc(); }
+      // (the DOS skin's map is a window onto the galaxy: a fleet's dot at the map's edge hangs outside it or under the menu bar; a person zooms out with the key the Galaxy menu shows, "-")
+      for (let k = 0; k < 2 && src && src.dot && (await mapHit(src.x, src.y)) && await ev(() => !!document.querySelector('.dosbar')); k++) { await page.keyboard.press('-'); await sleep(250); src = await dotSrc(); }
       if (!src) { fail('no way to pick up the fleet: no row in a fleet dialog and no fleet dot on the map'); await shot('no-fleet-handle'); return; }
       const sh = await mapHit(src.x, src.y); if (src.dot && sh) fail(`the fleet's dot at ${Math.round(src.x)},${Math.round(src.y)} is ${sh}`);
       let tgt = null;
@@ -437,7 +442,7 @@ async function playRun(browser, job, outDir, idx) {
           if (timedOut()) break;
           if (it.off || it.chk || !it.t || SKIP.test(it.t)) continue;
           const label = `${sf.name} > ${it.t}`; const idx = k++; tried++;
-          await closeAll(label); if (!await sf.open()) continue;
+          await closeAll(label); await ev(() => document.querySelector('.toast') ? new Promise(r => { const i = setInterval(() => { if (!document.querySelector('.toast')) { clearInterval(i); r(); } }, 100); setTimeout(r, 4500); }) : 0); /* (a person waits for a message that covers the menu to go) */ if (!await sf.open()) continue;
           const before = await state(); await mark();
           const ok = await press(sf.itemSel, { re: rx(it.t), what: `menu item "${label}"`, wait: 330 });
           if (!ok) { await ev(() => document.body.click()); continue; }

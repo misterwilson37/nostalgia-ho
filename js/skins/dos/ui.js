@@ -251,6 +251,15 @@ window.HOTHEME = {
   get menuLayout() { return menuLayoutDos(); },
   panel(panel, B) { panelDos(panel, B); },
   mapPixel() { return frameOn() ? [U, U] : null; },
+  battleWindow(b, k) { battleDos(b, k); },
+  mapInset() { return frameOn() ? [8 * U, 14 * U] : [0, 0] ; },
+  modernPan() { return frameOn(); },
+  planetPx(s) { return frameOn() ? Math.round(s * 12 / 17) : Math.max(18, Math.min(52, s * 0.9)); }, // (measured: a star's ball is about 24 pixels at the zoom of 17 and 15 at 12)
+  zoomTo(s, f) { return frameOn() ? dzoomTo(s, f) : Math.max(12, Math.min(140, s * f)); },
+  syncView(v, c) { dSync(v, c); },
+  centerOnStar(v, sid, c) { return dCenterOn(v, sid, c); },
+  fitView(v, c) { dMapFit(v, c); },
+  afterDraw() { dBars(); },
   mapBg: document.documentElement.classList.contains('os-dos') ? '#000' : undefined, // (the program's map is plain black)
   bgStars: document.documentElement.classList.contains('os-dos') ? false : undefined,
   mapFont(n) { return frameOn() ? "12px 'DOS Geneva 9'" : null; },
@@ -260,6 +269,7 @@ window.HOTHEME = {
   window(name) { if (!frameOn() || !window.HOAPI.G) return false; if (name === 'autoplay') return autoPlayDos(); if (name === 'fleets') return fleetsDos(); if (name === 'types') return shipTypesDos(arguments[1]); if (name === 'build') return buildDos(arguments[1]); if (name === 'stars') return starsDos(); if (name === 'compare') return compareDos(); if (name === 'reports') return reportsDos(); if (name === 'group') return organizeDos(arguments[1]); if (name === 'chat') return chatDos(); return false; },
   newGame(f) { createGalaxyDos(f); },
   keyName(k) { return '[' + k + ']'; },
+  menus(menus) { const k = (m, l, key) => { const f = (menus[m] || []).find(i => i[0] === l); if (f) f[5] = key; }; k('Ships', 'List all fleets…', 'Ctrl+L'); k('Galaxy', 'Report window…', 'Alt+2'); },
   // the DOS title screen: the two halves of its credits picture
   title(frame, IMG, Sound) {
     const top = IMG[P + 'd998'], bot = IMG[P + 'd999'];
@@ -312,17 +322,18 @@ function menuLayoutDos() {
       it('Sound', () => { A().Sound.on = !A().Sound.on; A().savePrefs(); }, { checked: () => A().Sound.on })],
     Ships: [
       ['List Ship Types…', 'Ships/Scrap ship types…'],
-      it('Create New Ship Type…', () => (frameOn() ? newTypeDos() : A().openBuild(star().id)), { ghost: () => noGame() || (!frameOn() && !mine()) }), '-',
-      ['List All Fleets…', 'Ships/List all fleets…'],
-      it('Organize Ships…', () => { const f = A().curFleet && A().curFleet(); if (f && f.star != null) organizeDos(f.star); }, { ghost: () => { const f = noGame() ? null : A().curFleet && A().curFleet(); return !f || f.star == null || f.to != null || Object.keys(f.ships).length !== 1; } }),
-      it(() => (mine() ? A().tl('Build Ships at %s…', star().name) : A().tl('Can’t Build Ships Here…')), () => { if (mine()) A().openBuild(star().id); }, { ghost: () => noGame() || !mine() }),
+      it('Create New Ship Type…', () => (frameOn() ? newTypeDos() : A().openBuild(star().id)), { ghost: () => noGame() || (!frameOn() && !mine()), key: 'Ctrl+K' }), '-',
+      ['List All Fleets…', 'Ships/List all fleets…'], // (its key [Ctrl+L] is put on the classic item in T.menus)
+      it('Organize Ships…', () => { const f = A().curFleet && A().curFleet(); if (f && f.star != null) organizeDos(f.star); }, { ghost: () => { const f = noGame() ? null : A().curFleet && A().curFleet(); return !f || f.star == null || f.to != null || Object.keys(f.ships).length !== 1; }, key: 'Ctrl+O' }),
+      it(() => (mine() ? A().tl('Build Ships at %s…', star().name) : A().tl('Can’t Build Ships Here…')), () => { if (mine()) A().openBuild(star().id); }, { ghost: () => noGame() || !mine(), key: 'Ctrl+B' }),
       ['Scrap Current Fleet', 'Ships/#3'], '-',
-      [null, 'Ships/Review battle…']],
+      // (captured: "Review Battle at <star>…" [Ctrl+R] shows the selected star's last battle; "No Battles here…" is dimmed)
+      it(() => { const bs = !noGame() && star() ? A().lastBattles(star().id) : []; return bs.length ? A().tl('Review Battle at %s…', star().name) : A().tl('No Battles here…'); }, () => { const bs = star() ? A().lastBattles(star().id) : []; if (bs.length) A().openBattle(bs[0].id); }, { ghost: () => noGame() || !star() || !A().lastBattles(star().id).length, key: 'Ctrl+R' })],
     Galaxy: [
       it('Compare Players…', () => A().openCompare(), { shown: () => !!G() && !!rs().compare, key: 'Ctrl+Y' }), ['List All Explored Stars…', 'Galaxy/List explored stars…'], ['Send Message…', 'Galaxy/Send a message…'], '-',
-      it('Zoom In', () => { const m = A().map(); A().zoomAt(m.w / 2, m.h / 2, 1.3); }, { ghost: noGame, key: '+' }), it('Zoom Out', () => { const m = A().map(); A().zoomAt(m.w / 2, m.h / 2, 1 / 1.3); }, { ghost: noGame, key: '-' }), '-',
+      it('Zoom In', () => { const m = A().map(); A().zoomAt(m.w / 2, m.h / 2, 1.3); }, { ghost: () => noGame() || atZoomD(3), key: '+' }), it('Zoom Out', () => { const m = A().map(); A().zoomAt(m.w / 2, m.h / 2, 1 / 1.3); }, { ghost: () => noGame() || atZoomD(0), key: '-' }), '-',
       it('Fix Spending', () => A().openFixSpending(), { shown: () => !!G() && !!rs().fixSpending, ghost: noGame, key: 'Ctrl+F' })],
-    Window: [['Reports', 'Galaxy/Report window…']]
+    Window: [it('Tech Spending', () => {}, { checked: () => true, key: 'Alt+1' }), ['Reports', 'Galaxy/Report window…']] // (the program's Window menu: Tech Spending, checked while its window shows; the remake's panel always shows it)
   };
   if (win === 'win31') M.Help = [['How to play', 'Help/How to play']];
   return M;
@@ -339,13 +350,270 @@ function hotMenus() {
     if (b.dataset.hot || b.disabled || !frameOn()) return;
     const n = b.firstChild; if (!n || n.nodeType !== 3) return;
     const t = n.nodeValue; let i = MENU_HOT[t];
-    if (i == null && /^Build Ships at /.test(t)) i = 0;
+    if (i == null && /^(Build Ships at|Review Battle at) /.test(t)) i = 0;
     if (i == null || i >= t.length) return;
     b.dataset.hot = '1'; const sp = document.createElement('span'); sp.className = 'mhot'; sp.textContent = t[i];
     const w = document.createElement('span'); w.setAttribute('translate', 'no'); w.append(t.slice(0, i), sp, t.slice(i + 1)); n.replaceWith(w);
   });
   new MutationObserver(() => document.querySelectorAll('.dropdown.open').forEach(mark)).observe(document.body, { subtree: true, childList: true, attributes: true, attributeFilter: ['class'] });
 }
+// The key equivalents the menus show ("[Ctrl+K]"): the keys the browser lets a page have. Ctrl+W, Ctrl+T and Ctrl+N belong to the browser (kept difference); the first letter T
+// of the classic skin ends the turn.
+function dosKeys() {
+  document.addEventListener('keydown', (e) => {
+    const a = window.HOAPI; if (!frameOn() || !a || !a.G || document.querySelector('.scrim') || /^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName)) return;
+    let k = null;
+    if ((e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey && e.key.length === 1) k = 'Ctrl+' + e.key.toUpperCase();
+    else if (e.altKey && !e.ctrlKey && /^[12]$/.test(e.key)) k = 'Alt+' + e.key;
+    else if (!e.ctrlKey && !e.altKey && !e.metaKey && (e.key === '+' || e.key === '-' || e.key === '=')) k = e.key === '=' ? '+' : e.key;
+    if (!k) return;
+    const M = menuLayoutDos();
+    for (const m in M) for (const it of M[m]) if (it[5] === k) { if (typeof it[1] !== 'function' || (it[2] && !it[2]()) || (it[4] && it[4]())) return; e.preventDefault(); it[1](); return; }
+  });
+}
+// ======== Review Battle: the program's battle window (Windows template 7, "Skip"; measured on the summary of a battle reviewed in DOSBox) ========
+// 456 x 364 with the program's frame (the interior black with 35 white stars): the two sides' faces (a red-brown cross over a side with nothing left), the viewer's group
+// pictures with a line of words under each (the Geneva 9, a lost group dimmed in a stipple), the title and the result in Geneva 9 Bold, the picture of the winner
+// (d3500) or the loser (d3510), "Round n" and the button, which says Skip while the shots are fired and OK after. What was measured is one group a side; the pitch
+// of further rows (53), the shots (as the Mac 1.2 program's DrawLaserBlast, 17 x 17 hits) and the other side's name being left out for the viewer are taken from the
+// Mac 1.2 window (js/skins/mac12) and are not measured on DOS.
+function battleDos(b, k) {
+  const a = window.HOAPI, g = a.G, H = window.HO, rs = H.rules(g), el = a.el, ME = a.ME, IMG = a.IMG;
+  const pic = (n) => { const im = IMG['dos:' + n]; return im && im.complete && im.naturalWidth ? im : null; };
+  const VB = k.verBattle(), speed = Math.max(1, Math.round(30 * VB.f)), TICK = 1000 / 60, S = 2;
+  const alive = b.start.map(() => true), hurt = []; let seq = 0, pop = b.pop0;
+  const st = () => ({ alive, hurt, pop, over: false, won: false });
+  const P0 = rs.battlePanel(g, b, st(), ME);
+  const leftSide = P0.leftSide, rightSide = b.sides.find(o => o !== leftSide);
+  const fAlive = b.start.map(() => true); let fPop = b.pop0;
+  for (const r of b.rounds) for (const ev of r) if (ev.k && !ev.p) fAlive[ev.ti] = false;
+  if (b.popR && b.popR.length) fPop = b.popR[b.popR.length - 1];
+  const viewer = b.sides.includes(ME) ? ME : b.sides[0], foe = (o) => o !== viewer && !H.isAllied(g, o, viewer);
+  const liveF = (pred) => b.start.some((u, i) => fAlive[i] && pred(u.o));
+  const won = (liveF(o => !foe(o)) || (b.planetOwner >= 0 && !foe(b.planetOwner) && fPop > 0.0005)) && !liveF(foe) && !(b.planetOwner >= 0 && foe(b.planetOwner) && fPop > 0.0005);
+  let sides;
+  if (b.grp) sides = b.grp.map(L => L.map(x => (x === -1 ? { planet: true, units: [] } : { units: x }))); else sides = [[], []], P0.cols.forEach((c, ci) => c.forEach(r => sides[ci].push({ planet: r.planet, units: r.units })));
+  const ownerOf = (L) => { const s = L.find(x => !x.planet && x.units.length); return s ? b.start[s.units[0]].o : b.planetOwner; };
+  if (b.grp && ownerOf(sides[0]) !== leftSide && ownerOf(sides[1]) === leftSide) sides.reverse();
+  const cols = sides.map((L, ci) => L.slice().sort((p, q) => (q.planet ? 1 : 0) - (p.planet ? 1 : 0)).map((x, row) => Object.assign(x, { o: x.planet ? b.planetOwner : b.start[x.units[0]] ? b.start[x.units[0]].o : -1, ci, row })));
+  const owners = [leftSide, rightSide], where = new Map(), planetAt = {};
+  cols.forEach(L => L.forEach(x => { x.units.forEach(i => where.set(i, x)); if (x.planet) planetAt[x.o] = x; }));
+  const hidden = [0, 1].map(ci => !won && b.rounds.length === 1 && owners[ci] !== ME && !(owners[ci] != null && H.isAllied(g, owners[ci], ME)));
+  // geometry (the canvas is the window's inside, 446 x 354, 5 in from its frame)
+  const W = 446, Hh = 354, FACE = [[28, 21], [302, 21]], SHIP = [[47, 57], [308, 56]], CAPC = [87.5, 362.5], PIT = 53;
+  const c = el('canvas', { class: 'dd-pic', 'aria-label': 'Summary of battle', role: 'img' }); const dpr = window.devicePixelRatio || 1;
+  c.width = Math.round(W * U * dpr * 1); c.height = Math.round(Hh * U * dpr); dAt(c, 5, 5, W, Hh);
+  const x = c.getContext('2d'); x.setTransform(U * dpr, 0, 0, U * dpr, 0, 0); x.imageSmoothingEnabled = false; x.textBaseline = 'alphabetic';
+  let stop = false, skip = false, done = false;
+  const btn = dButton('Skip', 202, 310, 52, 24, () => { if (done) a.closeModal(); else skip = true; }, { hot: -1 });
+  const d = dDialog(456, 364, null, [c, btn], 'Summary of battle'); d.classList.add('dd-black'); d.style.transform = `translateX(calc(-4.5 * var(--du)))`; // (the program's window sits 4.5 pixels left of the screen's middle: measured)
+  const prevClose = () => { stop = true; };
+  const mo = new MutationObserver(() => { if (!d.isConnected) { stop = true; mo.disconnect(); } }); mo.observe(document.body, { childList: true });
+  const pat = (col) => { const p = document.createElement('canvas'); p.width = p.height = 2; const q = p.getContext('2d'); q.fillStyle = col; q.fillRect(0, 0, 1, 1); q.fillRect(1, 1, 1, 1); return x.createPattern(p, 'repeat'); };
+  const grayPat = pat('#000'), whiteGray = pat('#fff');
+  const text = (t, h, v, bold, center) => { x.font = bold ? F9B : F9; x.fillStyle = '#fff'; x.textAlign = center ? 'center' : 'left'; x.fillText(t, h, v); };
+  let seed = (b.id | 0) * 7919 + 13; const rnd = (lo, hi) => { seed = (seed * 16807) % 2147483647; return lo + (seed % (hi - lo + 1)); };
+  const stars = Array.from({ length: 35 }, () => [rnd(5, 440), rnd(5, 348)]);
+  const drawStars = () => { x.fillStyle = '#fff'; for (const [h, v] of stars) x.fillRect(h, v, 1, 1); };
+  const face = (o, ci) => {
+    const p = g.players[o]; if (!p) return;
+    const id = o === ME ? (p.female ? 1500 : 1000) : (p.female ? 2500 : 2000) + ((p.face || 0) % 20), im = pic('i' + id);
+    if (im) x.drawImage(im, FACE[ci][0], FACE[ci][1], 32, 32);
+    if (o !== ME) text(p.name || '', FACE[ci][0] + 38 + (ci ? 0 : 0), FACE[ci][1] + 29, true);
+  };
+  const groupWords = (gr) => { if (gr.planet) return P0.planetWords(pop); const u = b.start[gr.units[0]], dd = H.getDesign(g, u.o, u.did) || { type: u.t, name: '', W: 1, S: 1 }; return P0.shipWords(dd, gr.units.filter(i => alive[i]).length, gr.units.length, u.o === ME); };
+  const drawGroup = (gr) => {
+    const [sx0, sy0] = SHIP[gr.ci], gy = sy0 + PIT * gr.row;
+    x.fillStyle = '#000'; x.fillRect(sx0 - 40, gy - 2, 200, PIT - 2);
+    let im = null, w = 97, h = 35;
+    if (gr.planet) { im = null; } else { const u = b.start[gr.units[0]], dd = H.getDesign(g, u.o, u.did) || { type: u.t, R: 1, V: 1, W: 1, S: 1 }; im = a.shipPic(dd, u.o); }
+    if (im) { w = Math.round(im.width * 35 / im.height); x.drawImage(im, sx0, gy, w, 35); }
+    const n = gr.units.filter(i => alive[i]).length;
+    if (!gr.planet) {
+      let f = 0, q = -1; for (const i of gr.units) { const hh = hurt[i]; if (hh && hh.n > q && alive[i]) { q = hh.n; f = hh.f; } }
+      let l = sx0, r = sx0 + w; if (n > 0) r = Math.min(sx0 + w, sx0 + Math.trunc(w * Math.max(0, Math.min(1, f))));
+      if (r > l) { x.fillStyle = grayPat; x.fillRect(l, gy, r - l, 35); }
+    }
+    text(groupWords(gr), CAPC[gr.ci], gy + 47, false, true); drawStars();
+  };
+  const paintHead = () => { x.fillStyle = '#000'; x.fillRect(0, 0, W, Hh); drawStars(); text(P0.head[0], 219, 34, true, true); text(P0.head[1], 219, 50, true, true); [0, 1].forEach(ci => { if (owners[ci] != null) face(owners[ci], ci); }); };
+  const roundLabel = (n) => { x.fillStyle = '#000'; x.fillRect(190, 266, 80, 18); text(tx('Round %d').replace('%d', n), 198, 280, true); };
+  paintHead();
+  [0, 1].forEach(ci => { if (hidden[ci]) { const L = rs.battleLines || {}; text(L.noInfo || '', 150, 100, true); text(L.destroyed || '', 150, 116, true); skip = true; } else cols[ci].forEach(drawGroup); });
+  const wait = (until) => new Promise(res => { const f = () => (stop || skip || performance.now() >= until ? res() : setTimeout(f, Math.min(TICK, until - performance.now()))); f(); });
+  const cellOf = (ev, shooter) => shooter ? (ev.si >= 0 ? where.get(ev.si) : planetAt[ev.a]) : (ev.p ? planetAt[b.planetOwner] : where.get(ev.ti));
+  async function laser(s, t) {
+    let x1 = SHIP[s.ci][0], y1 = SHIP[s.ci][1] + PIT * s.row + 18, x2 = SHIP[t.ci][0], y2 = SHIP[t.ci][1] + PIT * t.row + 18;
+    if (x2 > x1) { x1 += 121; x2 -= 1; } else { x2 += 121; x1 -= 1; }
+    const dx = Math.trunc((x2 - x1) / 5), dy = Math.trunc((y2 - y1) / 5);
+    const seg = (h0, v0, h1, v1, col) => { x.strokeStyle = col; x.lineWidth = 1; x.beginPath(); for (const o of [0, 1, -1, 2, -2]) { x.moveTo(h0 + 0.5, v0 + o + 0.5); x.lineTo(h1 + 0.5, v1 + o + 0.5); } x.stroke(); };
+    let h = x1, v = y1, ph = -1, pv = -1;
+    for (let i = 0; i < 5 && !stop && !skip; i++) { const t0 = performance.now(); seg(h, v, h + dx, v + dy, '#fff'); if (ph !== -1) seg(ph, pv, h, v, '#000'); ph = h; pv = v; h += dx; v += dy; await wait(t0 + TICK); }
+    seg(ph, pv, h, v, '#000');
+  }
+  async function explosion(t, ev) {
+    const dm = ev.dm | 0, im = pic('s' + (12000 + (dm % 3)));
+    if (ev.snd !== 3003) { if (im) x.drawImage(im, SHIP[t.ci][0] + (dm % 103), SHIP[t.ci][1] + PIT * t.row + (dm % 23), 17, 17); }
+  }
+  const apply = (ev) => { if (ev.p) { if (ev.php != null) pop = ev.php / 1000; } else { if (ev.f != null) hurt[ev.ti] = { n: ++seq, f: ev.f }; if (ev.k) alive[ev.ti] = false; } };
+  const finish = () => {
+    if (stop) return;
+    for (const r of b.rounds) for (const ev of r) apply(ev);
+    pop = fPop; done = true; paintHead(); roundLabel(Math.max(1, b.rounds.length));
+    [0, 1].forEach(ci => { if (!hidden[ci]) cols[ci].forEach(drawGroup); });
+    [0, 1].forEach(ci => { const o = owners[ci]; if (o == null) return; const left = b.start.some((u, i) => alive[i] && u.o === o) || (b.planetOwner === o && pop > 0.0005);
+      if (!left) { const [h, v] = FACE[ci]; x.strokeStyle = '#8a0000'; x.lineWidth = 2; x.beginPath(); x.moveTo(h + 1, v + 1); x.lineTo(h + 33, v + 32); x.moveTo(h + 1, v + 32); x.lineTo(h + 33, v + 1); x.stroke(); } });
+    const P = rs.battlePanel(g, b, { alive, hurt, pop, over: true, won }, ME);
+    (P.end || []).forEach((t, i) => text(t, 217.5, i ? 172 : 156, true, true));
+    const im = pic(won ? 'd3500' : 'd3510'); if (im) x.drawImage(im, 183, 184, 74, 74);
+    btn.querySelector('span').textContent = 'OK';
+  };
+  (async () => {
+    let deadline = performance.now() + speed * TICK;
+    for (let r = 0; r < b.rounds.length && !stop && !skip; r++) {
+      roundLabel(r + 1); const R = b.rounds[r];
+      for (let e = 0; e < R.length && !stop && !skip;) {
+        let n = 1; if (!VB.full) while (R[e + n] && R[e + n].si === R[e].si && R[e + n].a === R[e].a && !R[e + n - 1].k) n++;
+        for (let j = 0; j < n - 1; j++) apply(R[e + j]);
+        const ev = R[e + n - 1], s = cellOf(ev, true), t = cellOf(ev, false);
+        if (s && t && !hidden[t.ci] && !hidden[s.ci]) { await laser(s, t); if (stop || skip) break; a.Sound.play(k.shotSnd(ev, 3000)); apply(ev); drawGroup(t); deadline += speed * TICK; await explosion(t, ev); await wait(deadline); } else apply(ev);
+        e += n;
+      }
+      if (b.popR && b.popR[r] != null) pop = b.popR[r];
+    }
+    finish();
+  })();
+}
+// ======== The map's scroll bars and zoom (measured on the running program: v20dos-orig-*.png and DOSBox clicks) ========
+// The program's map is a window onto a galaxy of cells: the zoom's cell is 6, 9, 12 or 17 pixels (Zoom In at 17 is dimmed, measured: stars 410.7 apart at 17 and
+// 290.5 at 12, ratio 0.707 = 12/17); the galaxy is 2 x its size - 2 cells a side (a "small" galaxy, 14.5, scrolls 4 cells across and 2 down at 17, in a 392 x 434 pane:
+// 27 cells either way); an arrow scrolls one cell (17 pixels, measured), the thumb is a fixed 7 x 13 box and rests at the far end when nothing scrolls (measured at Zoom Out).
+// Not measured and taken from the Mac 1.2 program's rules (the same lineage; js/skins/mac12): a page is three quarters of the cells in view, a held arrow repeats every
+// 100 ms, CenterOnStar centres the selected star on a zoom (unless it is already inside the pane's margins), the opening view is Zoom In on your home star.
+const DZ = [6, 9, 12, 17].map(z => z * 2);
+const dzIdx = (s) => { let b = 0; DZ.forEach((z, i) => { if (Math.abs(Math.log(z / s)) < Math.abs(Math.log(DZ[b] / s))) b = i; }); return b; };
+function dzoomTo(s, f) { const cur = dzIdx(s); let i = dzIdx(s * f); if (i === cur && Math.abs(Math.log(f)) >= 0.13) i = cur + (f > 1 ? 1 : -1); return DZ[Math.max(0, Math.min(DZ.length - 1, i))]; }
+const DB = { H: 0, V: 0, maxH: 0, maxV: 0, pgH: 0, pgV: 0, s: 0, wrap: null, v: null, h: null, press: null, drag: null, shown: false };
+// the places run from 1 in on a DOS galaxy (a star's cell is 2 x its place - 2); a ruleset that places stars nearer the edge shifts the origin so that none is left outside
+const GEO = new WeakMap();
+function dgeo(g) {
+  let r = GEO.get(g); if (r && r.n === g.stars.length) return r;
+  const xs = g.stars.map(s => s.x), ys = g.stars.map(s => s.y), lo = Math.min(...xs, ...ys), mg = Math.min(1, Math.floor(lo * 2) / 2);
+  r = { n: g.stars.length, mg, cw: Math.max(Math.round(g.W * 2) - 2, Math.floor(2 * (Math.max(...xs) - mg)) + 1), ch: Math.max(Math.round(g.H * 2) - 2, Math.floor(2 * (Math.max(...ys) - mg)) + 1) };
+  GEO.set(g, r); return r;
+}
+const dcells = (g) => { const r = dgeo(g); return [r.cw, r.ch]; };
+let DMG = 1; // (the origin of the galaxy being shown)
+function dMetrics(s, mapW, mapH, g) {
+  DMG = dgeo(g).mg;
+  const z = s / 2, [cw, ch] = dcells(g), visH = Math.max(1, Math.floor(mapW / z + 1e-6)), visV = Math.max(1, Math.floor(mapH / z + 1e-6));
+  DB.maxH = visH < cw ? cw - visH : 0; DB.maxV = visV < ch ? ch - visV : 0; DB.pgH = Math.trunc(visH * 3 / 4); DB.pgV = Math.trunc(visV * 3 / 4);
+}
+const dCellOf = (v) => [(-(2 * DMG - 0.5) * (v.s / 2) - v.ox) / (v.s / 2), (-(2 * DMG - 0.5) * (v.s / 2) - v.oy) / (v.s / 2)];
+const dPut = (v, H, V) => { v.ox = (-(2 * DMG - 0.5) - H) * (v.s / 2); v.oy = (-(2 * DMG - 0.5) - V) * (v.s / 2); };
+const dClamp = (H, V) => [Math.max(0, Math.min(DB.maxH, H)), Math.max(0, Math.min(DB.maxV, V))];
+function dCenter(st, g) { const [cw, ch] = dcells(g); return dClamp(Math.round((st.x - DMG) * 2) - Math.trunc((cw - (DB.maxH - 1)) / 2), Math.round((st.y - DMG) * 2) - Math.trunc((ch - (DB.maxV - 1)) / 2)); }
+function dSync(v, c) {
+  if (!frameOn()) return;
+  v.s = DZ[dzIdx(v.s)]; dMetrics(v.s, c.mapW, c.mapH, c.G);
+  let [H, V] = dCellOf(v);
+  if (DB.s && DB.s !== v.s && c.sel != null && c.G.stars[c.sel]) [H, V] = dCenter(c.G.stars[c.sel], c.G); // (Zoom In / Zoom Out: the selected star is centred)
+  else if (!c.live) { H = Math.round(H); V = Math.round(V); }
+  [H, V] = dClamp(H, V); dPut(v, H, V); DB.H = H; DB.V = V; DB.s = v.s;
+}
+function dCenterOn(v, sid, c) {
+  if (!frameOn()) return false; const st = c.G.stars[sid]; if (!st) return false;
+  v.s = DZ[dzIdx(v.s)]; dMetrics(v.s, c.mapW, c.mapH, c.G);
+  const [H, V] = dCellOf(v), z = v.s / 2, px = (((st.x - DMG) * 2) - H + 0.5) * z, py = (((st.y - DMG) * 2) - V + 0.5) * z;
+  if (px > 40 && px < c.mapW - 40 && py > 40 && py < c.mapH - 85) return true;
+  const [h2, v2] = dCenter(st, c.G); dPut(v, h2, v2); return true;
+}
+const atZoomD = (k) => { const a = window.HOAPI; return !!a && !!a.UI.view && dzIdx(a.UI.view.s) === k; };
+// the bar's pixels (program pixels; the vertical bar is 7 x 433 at 393 right and 1 down of the map's corner, the horizontal 391 x 13 at 1 right and 435 down)
+function dBox(q, x, y, w, h) {
+  q.rect(x, y, x + w, y + h, '#aaa'); q.rect(x, y, x + w - 1, y + 1, '#fff'); q.rect(x, y + 1, x + 1, y + h - 1, '#fff');
+  q.rect(x + w - 1, y, x + w, y + h, '#555'); q.rect(x, y + h - 1, x + w, y + h, '#555');
+}
+const dGlyph = (q, x, y, rows) => rows.forEach(([r, c0, c1]) => q.rect(x + c0, y + r, x + c1 + 1, y + r + 1, '#000'));
+function dPaintBar(b, o) {
+  const q = b.q, L = b.L, v = b.vertical;
+  q.rect(0, 0, v ? 7 : L, v ? L : 13, '#000');
+  const full = o.max > 0 ? o.value / o.max : 1;
+  if (v) {
+    q.rect(0, 14, 6, L - 14, '#aaa');
+    dBox(q, 0, 0, 7, 14); dGlyph(q, 0, 0, [[3, 2, 3], [4, 1, 4], [5, 1, 4], [6, 2, 3], [7, 2, 3], [8, 2, 3], [9, 2, 3], [10, 2, 3]]);
+    dBox(q, 0, L - 14, 7, 14); dGlyph(q, 0, L - 14, [[3, 2, 3], [4, 2, 3], [5, 2, 3], [6, 2, 3], [7, 1, 4], [8, 1, 4], [9, 2, 3], [10, 2, 3]]);
+    const t = 14 + Math.round((L - 28 - 13) * full); dBox(q, 0, t, 7, 13); dGlyph(q, 0, t, [2, 3, 4, 5, 6, 7, 8, 9].map(r => [r, 2, 3]));
+  } else {
+    q.rect(8, 0, L - 8, 12, '#aaa');
+    dBox(q, 0, 0, 8, 13); dGlyph(q, 0, 0, [[2, 4, 4], [3, 3, 4], [4, 2, 4], [5, 1, 4], [6, 1, 4], [7, 2, 4], [8, 3, 4], [9, 4, 4]]);
+    dBox(q, L - 8, 0, 8, 13); dGlyph(q, L - 8, 0, [[2, 3, 3], [3, 3, 4], [4, 3, 5], [5, 3, 6], [6, 3, 6], [7, 3, 5], [8, 3, 4], [9, 3, 3]]);
+    const t = 8 + Math.round((L - 16 - 7) * full); dBox(q, t, 0, 7, 13);
+  }
+  if (o.press) { // (a held arrow: its box pressed in)
+    const r = o.press === 'lo' ? (v ? [0, 0, 7, 14] : [0, 0, 8, 13]) : (v ? [0, L - 14, 7, 14] : [L - 8, 0, 8, 13]);
+    q.x.globalCompositeOperation = 'difference'; q.rect(r[0] + 1, r[1] + 1, r[0] + r[2] - 1, r[1] + r[3] - 1, '#fff'); q.x.globalCompositeOperation = 'source-over';
+  }
+}
+const dVals = (b) => (b.vertical ? { value: DB.V, max: DB.maxV, page: DB.pgV } : { value: DB.H, max: DB.maxH, page: DB.pgH });
+const dActive = (b) => dVals(b).max > 0 && !document.querySelector('.scrim');
+function dSetCells(H, V) { const a = window.HOAPI, v = a.UI.view; if (!v) return; const [h2, v2] = dClamp(H, V); dPut(v, h2, v2); a.draw(); }
+function dScrollBy(b, d) { const cur = Math.round(b.vertical ? DB.V : DB.H), nv = Math.max(0, Math.min(dVals(b).max, cur + d)); if (nv === cur) return false; if (b.vertical) dSetCells(DB.H, nv); else dSetCells(nv, DB.V); return true; }
+function dPart(b, p) {
+  const { value, max } = dVals(b), L = b.L, e = b.vertical ? 14 : 8, th = b.vertical ? 13 : 7;
+  if (p < e) return 'lo'; if (p >= L - e) return 'hi';
+  const T = L - 2 * e - th, t = e + Math.round(T * value / max);
+  if (T >= 0 && p >= t && p < t + th) return 'thumb';
+  return p < t ? 'pagelo' : 'pagehi';
+}
+function dWire(b) {
+  const el = b.el, pos = (e) => { const r = b.q.c.getBoundingClientRect(); return ((b.vertical ? e.clientY - r.top : e.clientX - r.left) / (b.vertical ? r.height : r.width)) * b.L; };
+  el.style.touchAction = 'none';
+  el.addEventListener('pointerdown', (e) => {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    e.preventDefault(); el.focus({ preventScroll: true }); if (!dActive(b)) return;
+    try { el.setPointerCapture(e.pointerId); } catch (x) {}
+    const p = pos(e), part = dPart(b, p), { value, max } = dVals(b), e0 = b.vertical ? 14 : 8, th = b.vertical ? 13 : 7;
+    if (part === 'thumb') { DB.drag = { b, p0: p, t0: e0 + (b.L - 2 * e0 - th) * value / max, id: e.pointerId }; return; }
+    const st = { b, part, id: e.pointerId, p, timer: 0 }; DB.press = st;
+    const tick = () => { if (DB.press !== st) return; if (dPart(b, st.p) === part) { const g = dVals(b); dScrollBy(b, part === 'lo' ? -1 : part === 'hi' ? 1 : part === 'pagelo' ? -g.page : g.page); } dBars(); st.timer = setTimeout(tick, 100); };
+    tick();
+  });
+  el.addEventListener('pointermove', (e) => {
+    if (DB.press && DB.press.b === b && DB.press.id === e.pointerId) { DB.press.p = pos(e); dBars(); }
+    else if (DB.drag && DB.drag.b === b && DB.drag.id === e.pointerId) { // (the thumb: the map follows it a cell at a time)
+      const g = DB.drag, e0 = b.vertical ? 14 : 8, T = b.L - 2 * e0 - (b.vertical ? 13 : 7), t = Math.max(e0, Math.min(e0 + T, g.t0 + pos(e) - g.p0)), max = dVals(b).max;
+      const nv = Math.round(T > 0 ? (t - e0) / T * max : 0); if (nv !== Math.round(b.vertical ? DB.V : DB.H)) { if (b.vertical) dSetCells(DB.H, nv); else dSetCells(nv, DB.V); }
+    }
+  });
+  const up = (e) => { if (DB.press && DB.press.b === b && DB.press.id === e.pointerId) { clearTimeout(DB.press.timer); DB.press = null; dBars(); } else if (DB.drag && DB.drag.b === b && DB.drag.id === e.pointerId) { DB.drag = null; dBars(); } };
+  el.addEventListener('pointerup', up); el.addEventListener('pointercancel', up);
+  el.addEventListener('keydown', (e) => { // (from the keyboard, the remake's: arrows a cell, Page Up and Down a page)
+    const g = dVals(b); if (!dActive(b)) return;
+    const d = { ArrowUp: b.vertical && -1, ArrowLeft: !b.vertical && -1, ArrowDown: b.vertical && 1, ArrowRight: !b.vertical && 1, PageUp: -g.page, PageDown: g.page }[e.key];
+    if (d) { e.preventDefault(); dScrollBy(b, d); }
+  });
+}
+function dEnsureBars() {
+  if (DB.wrap && DB.wrap.isConnected) return true;
+  const a = window.HOAPI, host = document.getElementById('mapwrap'); if (!a || !host) return false;
+  const mk = (vertical) => {
+    const L = vertical ? 433 : 391, q = dq(vertical ? 7 : L, vertical ? L : 13, vertical ? 'Vertical scroll bar' : 'Horizontal scroll bar'), el = a.el('div', { class: 'dosbar ' + (vertical ? 'v' : 'h'), role: 'scrollbar', tabindex: 0, 'aria-orientation': vertical ? 'vertical' : 'horizontal', 'aria-controls': 'map', 'aria-label': vertical ? 'Map, up and down' : 'Map, left and right' }, q.c);
+    q.c.removeAttribute('role'); q.c.setAttribute('aria-hidden', 'true'); return { vertical, q, el, L, key: '' };
+  };
+  DB.v = mk(true); DB.h = mk(false); host.append(DB.v.el, DB.h.el); DB.wrap = host; [DB.v, DB.h].forEach(dWire); return true;
+}
+function dBars() {
+  const a = window.HOAPI; if (!a || !frameOn() || !a.G || !dEnsureBars()) { if (DB.v) { DB.v.el.style.display = DB.h.el.style.display = 'none'; } return; }
+  const g = a.G; DB.v.el.style.display = DB.h.el.style.display = '';
+  for (const b of [DB.v, DB.h]) {
+    const vals = dVals(b), act = dActive(b), press = DB.press && DB.press.b === b && /^(lo|hi)$/.test(DB.press.part) && dPart(b, DB.press.p) === DB.press.part ? DB.press.part : null;
+    const key = [vals.value, vals.max, press, U, window.devicePixelRatio].join();
+    b.el.setAttribute('aria-valuemin', '0'); b.el.setAttribute('aria-valuemax', String(vals.max)); b.el.setAttribute('aria-valuenow', String(Math.round(vals.value))); b.el.setAttribute('aria-disabled', vals.max > 0 ? 'false' : 'true');
+    if (b.key !== key) { b.key = key; dPaintBar(b, { value: vals.value, max: vals.max, press }); }
+  }
+}
+function dMapFit(v, c) { if (!frameOn()) return; const st = c.G.stars[c.sel != null ? c.sel : c.G.players[c.ME].homeStar]; v.s = DZ[3]; if (st) { dMetrics(v.s, c.mapW, c.mapH, c.G); const [H, V] = dCenter(st, c.G); dPut(v, H, V); } }
 // ======== The original's screen: a 640 x 476 frame in a unit u (docs/dos20-findings.md, "Rebuilding the dos skin") ========
 // Measured on the running program (DOSBox, screenshots v20dos-orig-*.png): the window is 640 x 476, a 15-row teal title bar, a 13-row grey menu bar,
 // then the left column 240 wide (planet 74, fleets 79, totals 43, players and budget bars 169, Tech Spending 83 rows) and the map. Every length below is in
@@ -628,7 +896,7 @@ function frameSetup(de) {
   const sync = () => { de.classList.toggle('dosframe', frameOn()); setUnit(); };
   sync(); window.addEventListener('load', touchFleets); touchFleets(); window.addEventListener('resize', () => { const u0 = U; setUnit(); if (u0 !== U && window.HOAPI && window.HOAPI.G && frameOn()) { window.HOAPI.renderPanel(); window.dispatchEvent(new Event('hoframe')); } });
   new MutationObserver(sync).observe(de, { attributes: true, attributeFilter: ['class'] });
-  loadFonts(); hotMenus();
+  loadFonts(); hotMenus(); dosKeys();
 }
 
 // ======== The original's own windows (docs/dos20-findings.md; geometry measured on the running program, v20dos-orig-*.png) ========
