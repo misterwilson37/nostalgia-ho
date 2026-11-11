@@ -158,7 +158,7 @@ def dialog(d, wide):
             kind = 'icon'
         elif c == 'STATIC' and (st & 0x1f) == 0xe:
             kind = 'bitmap'
-        out['items'].append({'id': cid, 'class': kind, 'text': t, 'frame': (cx, cy, cw, ch),
+        out['items'].append({'id': cid, 'class': kind, 'text': t, 'frame': (cx, cy, cw, ch), 'style': st, 'cls': c,
                              'disabled': bool(st & 0x08000000), 'hidden': not st & 0x10000000})
     return out
 

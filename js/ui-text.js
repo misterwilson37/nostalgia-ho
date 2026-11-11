@@ -1268,6 +1268,10 @@ root.HOUI.add([
 ['Edit', 'Edition', 'Bearbeiten', 'Düzen', 'Edición', { fr: '1.2F' }],
 ['About Spaceward Ho! 1.2…', 'A propos de Spaceward Ho! 1.2…', 'Über Spaceward Ho! 1.2…', 'Spaceward Ho! 1.2 hakkında…', 'Acerca de Spaceward Ho! 1.2…', { fr: '1.2F' }],
 ['About Spaceward Ho! 2.0…', 'A propos de Spaceward Ho! 2.0…', 'Über Spaceward Ho! 2.0…', 'Spaceward Ho! 2.0 hakkında…', 'Acerca de Spaceward Ho! 2.0…'],
+// the Windows 2.0's About box (its Help menu's item and the window's title, the licence line; js/skins/dos/win31/dialogs.js)
+['About Spaceward Ho!', 'A propos de Spaceward Ho!', 'Über Spaceward Ho!', 'Spaceward Ho! hakkında', 'Acerca de Spaceward Ho!'],
+['Licensed to:', 'Licence accordée à :', 'Lizenziert für:', 'Lisans sahibi:', 'Con licencia para:'],
+['Spaceward Ho! Version 2.0', 'Spaceward Ho! version 2.0', 'Spaceward Ho! Version 2.0', 'Spaceward Ho! Sürüm 2.0', 'Spaceward Ho! versión 2.0'],
 ['End Turn & Switch Players', 'Finir le tour et changer de joueur', 'Zug Ende & Spielerwechsel', 'Sırayı Bitir ve Oyuncu Değiştir', 'Terminar el turno y cambiar de jugador'],
 ['Page Setup…', 'Mise en page…', 'Seite einrichten…', 'Sayfa Yapısı…', 'Configurar página…'],
 ['Print Map…', 'Imprimer la carte…', 'Karte drucken…', 'Haritayı Yazdır…', 'Imprimir el mapa…'],

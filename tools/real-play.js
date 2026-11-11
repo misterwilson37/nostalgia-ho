@@ -1,7 +1,9 @@
 #!/usr/bin/env node
 // REAL PLAY: plays the game the way a person does, in every skin x ruleset x window size, and fails on what a person would hit. (docs/real-play.md)
 //   NODE_PATH=$(npm root -g) node tools/real-play.js [--quick] [--skin=a,b] [--rules=a,b] [--size=phone-l,desktop] [--browser=chromium|firefox] [--jobs=3]
-//        [--out=dir] [--port=8741] [--url=http://host/] [--strict] [--thorough] [--turns=5] [--no-contact] [--timeout=240]
+//        [--out=dir] [--port=8741] [--url=http://host/] [--strict] [--thorough] [--turns=5] [--no-contact] [--timeout=240] [--os=win31]
+// --os: the OS look, picked in the New game window (else the skin's own first); with the dos skin and --os=win31 it also opens the Windows
+// program's dialogs built so far from the menus (About, Battle Speed: js/skins/dos/win31/) and closes them as a person does.
 // Sizes: phone-p 390x844 (touch), phone-l 844x390 (touch), pad 1024x768 (touch), desktop 1920x1080 (mouse), 4k 3840x2160 (mouse); numeric WxH[:touch] also works.
 // Everything the tool DOES is done with real pointer input (mouse, or touch through CDP) aimed at the element's own point, after checking with
 // document.elementFromPoint that the intended element is what is there (not covered, not off-screen, not zero-size). HOAPI is READ to verify only.
@@ -14,7 +16,7 @@ const args = process.argv.slice(2), opt = (k, d) => { const a = args.find(x => x
 const ROOT = path.join(__dirname, '..');
 const SCRATCH = '/tmp/claude-0/-home-user/f4e25d25-7ae4-5644-8ddc-00cda7d3e23b/scratchpad/realplay';
 const OUT0 = opt('out', path.join(SCRATCH, 'run-' + new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19)));
-const BROWSER = opt('browser', 'chromium'), JOBS = +opt('jobs', 3), PORT = +opt('port', 8741), STRICT = flag('strict'), THOROUGH = flag('thorough'), TURNS = +opt('turns', 5), RUN_TIMEOUT = +opt('timeout', 240) * 1000;
+const OS = opt('os', ''), BROWSER = opt('browser', 'chromium'), JOBS = +opt('jobs', 3), PORT = +opt('port', 8741), STRICT = flag('strict'), THOROUGH = flag('thorough'), TURNS = +opt('turns', 5), RUN_TIMEOUT = +opt('timeout', 240) * 1000;
 
 // ---------- the matrix: skins and rulesets are read from the code, not listed here ----------
 const SKIN_IDS = [...fs.readFileSync(path.join(ROOT, 'js/skins.js'), 'utf8').match(/const SKINS = \[([\s\S]*?)\n\]\.map/)[1].matchAll(/\{ id: '(\w+)'/g)].map(m => m[1]);
@@ -227,6 +229,7 @@ async function playRun(browser, job, outDir, idx) {
       await setSel('rules', job.rules);
       if (await form.locator(`select[name=skin] option[value=${job.skin}]`).count()) await setSel('skin', job.skin); else if (await form.locator('select[name=skin]').count()) fail(`the New game window's skin list has no "${job.skin}"`);
       await setSel('computers', '2');
+      if (OS) { if (await form.locator(`select[name=os] option[value=${OS}]`).count()) await setSel('os', OS); else fail(`the New game window's OS look list has no "${OS}"`); }
       let sub = await ev(() => { const b = document.querySelector('form.newgame button[type=submit]'); return !!(b && window.__rp.vis(b)); }) ? await aim('form.newgame button[type=submit]', { what: 'New game start button', soft: true }) : null;
       if (!sub) sub = await aim('.scrim .win button, .win button, .ios-gdlg button, button', { re: /^(big bang|start|play|begin|ok|new galaxy)$/i, what: 'the skin\'s own start button', soft: true });
       if (sub) await ptr.tap(sub.x, sub.y); else { note('started through the hidden form'); await ev(() => document.querySelector('form.newgame button[type=submit]').click()); }
@@ -240,6 +243,20 @@ async function playRun(browser, job, outDir, idx) {
     if (!await G(() => !!(window.HOAPI && HOAPI.G))) { R.status = 'FAIL'; throw new Error('__done'); }
     const info = await G(() => { const a = HOAPI, G = a.G, home = G.stars.find(s => s.owner === a.ME); return { home: home && home.id, waypoints: !!HO.feature(G, 'waypoints'), queue: !!HO.feature(G, 'buildQueue'), techBars: 0 }; });
     await step('intro-cards', async () => { await shot('start'); await drain('intro'); await sleep(200); await shot('after-intro'); await checkText('start screen'); });
+    if (OS) await step('os-look', async () => { const o = await G(() => window.HOSKINS && HOSKINS.os); if (o !== OS) fail(`the game shows the look "${o}", not "${OS}"`); });
+    // the Windows program's own dialogs (the dos skin, win31 look): each from its menu, looked at, closed as a person does
+    if (OS === 'win31' && job.skin === 'dos') await step('win31-dialogs', async () => {
+      for (const [menu, item, name] of [['File', /^About Ho!/, 'about'], ['Options', /^Set Battle Speed/, 'battle-speed']]) {
+        if (await ev(() => !!document.querySelector('.scrim'))) await page.keyboard.press('Escape');
+        if (!await press('#menubar .mbtn', { re: new RegExp('^' + menu + '$'), what: menu + ' menu' })) continue;
+        if (!await press('.dropdown button', { re: item, what: menu + ' > ' + item.source })) continue;
+        await sleep(300);
+        if (!await ev(() => !!document.querySelector('.w31d'))) { fail(`${menu} > ${item.source} opened no Windows dialog`); continue; }
+        await shot('win31-' + name, true); await checkText('win31 ' + name, '.w31d');
+        if (name === 'about') await press('.w31d .w31pic', { what: 'the About box' }); else await press('.w31d button.w31b', { re: /^OK$/, what: 'Battle Speed OK' });
+        await sleep(300); if (await ev(() => !!document.querySelector('.w31d'))) fail(`the ${name} dialog did not close`);
+      }
+    });
 
     // ============ 2. select the colony on the map ============
     const starPoint = async (id) => G(async (id) => { document.getElementById('map').scrollIntoView({ block: 'center', inline: 'nearest' }); const v = HOVIEW(), c = document.getElementById('map').getBoundingClientRect(), s = HOAPI.G.stars[id], kx = c.width / v.mapW, ky = c.height / v.mapH; return { x: c.left + (v.view.ox + s.x * v.view.s) * kx, y: c.top + (v.view.oy + s.y * v.view.s) * ky }; }, id);

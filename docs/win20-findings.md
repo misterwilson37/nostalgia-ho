@@ -1,5 +1,7 @@
 # Windows 3.1 2.0: the display audit (November 2026, begun)
 
+**Progress (Windows dialogs):** foundation done (emulator `emulators/dosbox-win31`, renderer `js/skins/dos/win31/`); built 2 of 33 (About, Battle Speed); next: chunk 1, Start (below, "The chunk plan").
+
 *The same game as DOS 2.0 and Mac 2.0.1 (`docs/dos-findings.md`); this is what WINHO.EXE puts in front of the player.*
 
 ## The program (private repo: `extracted/win-2.0`, `win-2.0-floppy`, `win-2.x-patch`; `decompiled/win-2.0`, `win-2.0-floppy`, `win-2.x-patched`)
@@ -26,7 +28,7 @@ control to read from the dialog template and the decompile and build.
 
 ## The Windows dialogs (WINHO.EXE, 33 DIALOG templates; width x height in dialog units)
 
-None is built in the `dos` skin yet; the skin shows the DOS program's screens in the win31 frame. `extracted/win-2.0/resources/dialogs.txt` (private) has every control.
+Two are built (#1 About, #8 Battle Speed: "The Windows dialogs in the remake" below); the others show the DOS skin's windows in the win31 frame. `extracted/win-2.0/resources/dialogs.txt` (private) has every control.
 
 | # | Title | Size | Controls | Some words |
 |---|---|---|---|---|
@@ -63,3 +65,73 @@ None is built in the `dos` skin yet; the skin shows the DOS program's screens in
 | 31 | (none) | 224 x 163 | 29 | Name:; Class:; Development Cost:; Production Cost:; Metal Cost: |
 | 32 | Spaceward Ho! Startup | 152 x 189 | 8 | Open Game; New Game; Cancel; Text; Licensed to: |
 | 33 | Spaceward Ho! Status | 164 x 35 | 3 | Working... |
+
+## The Windows dialogs in the remake: the foundation (November 2026)
+
+**What runs.** Windows 3.1 retail (Jake's six disks, Custom Setup) in DOSBox 0.74 (`machine=svga_s3`) on Xvfb `:78`, with the SpcHo3x collection's WINHO.EXE
+(`ee1cf06d...`): private repo `emulators/dosbox-win31/` (`run.sh [vga|256]`, the `w31.py` driver; README there). Two displays, both 640 x 480:
+**VGA, 16 colours** (Windows' own driver, what is in the box; the reference for the window chrome) and **256 colours** through the S3 864 driver 1.41B5 of
+1995 from the collection's own `drivers/s3` (WINHO's README.TXT recommends "640x480 in the 256 color mode"; Windows 3.1 has no 256-colour driver for a card DOSBox
+0.74 emulates, nothing was downloaded). In 256 colours the game's palette takes the system colours (active caption and modal frames pale blue), and the S3 driver
+moves the cursor 0.41 px per mickey vertically (run.sh compensates). Captures: private `audit/win-2.0/captures/win20-orig-{vga16,s3-256}-*.png` (Startup,
+New Galaxy, Player Entry, Registration, main window, Options menu, About, Battle Speed). The licence lines read "eXo / Win3x0" (the collection's THE_HO!.PRF).
+
+**The templates' names.** WINHO.EXE's name table (RT_NAMETABLE) names the 33: 1 ABOUT, 2 ALERTBOX, 3 ALERT_CPIC, 4 ALERT_LLPIC, 5 ALERT_NOPIC, 6 AUTOPLAY,
+7 BATTLE, 8 BATTLESPEED, 9 BLDSHIP, 10 COMPPLAYERS, 11 CREATEGALAXY, 12 FILEOPEN, 13 GAMEINFO, 14 LICENSEE, 15 LISTFLEETS, 16 LISTSKILLS, 17 LISTSTARS,
+18 MODELESS, 19 NAMESTAR, 20 NAMETYPE, 21 NEWPLAYER, 22 NEWSHIP, 23 NOTIFY1, 24 ORGFLEETS, 25 PLAYERENTRY, 26 POLLSPEED, 27 PRTDLG, 28 REGISTER, 29 REPORT,
+30 SENDMSG, 31 SHIPTYPE, 32 STARTUP, 33 STATUS. Openers read in the decompile by these names: FILEOPEN `FUN_1058_017e`, AUTOPLAY `FUN_10a0_02c7`,
+POLLSPEED `FUN_10a0_03e8`, BATTLESPEED `FUN_10a0_0509`, REPORT `FUN_10c0_0344`, MODELESS `FUN_10f8_01f0`, STATUS `FUN_1100_05b4`, LISTSKILLS `FUN_1078_039c`,
+the alerts `FUN_1108_01fc` (through the generic `FUN_1108_0000`); the rest go through `FUN_1108_0000` with the name as a parameter (its callers name them).
+
+**The code** (`js/skins/dos/win31/`): `templates.js` (the 33 templates' geometry, control kinds, ids and style bits, no words; made by
+`tools/extract/win31-templates.py` from WINHO.EXE), `dialog.js` (the renderer), `dialogs.js` (the dialogs wired to the game), `hook.js` (the one hook: loaded by
+one line of `js/skins/dos/ui.js`; with the win31 look a menu item listed in its ITEMS opens the template's dialog, everything else is as before; it also adds
+About to the win31 Help menu). The About picture is HOCOLOR.DLL's own (a whole .BMP, resource 1000, 383 x 236): `assets/skins/dos/sprites/w1000.png`,
+written by `tools/extract/win31-art.py` (run it after `tools/extract/dos.py`, which rewrites the manifest). Words: `js/ui-text.js` (three new rows).
+
+**Measured, and built to it.** Dialog units to pixels by the System font's base units, 8 x 16 (x * 2, y * 2): Battle Speed's 134 x 87 du is a 268 x 174
+client, its scroll bar (23, 27, 74, 9) at (46, 54), 148 x 18. Frame: a black line and four navy pixels around the client; with a title: black, three navy, a
+white row, the 18-pixel caption (control-menu box 18 x 18 and its black line; the title centred right of it), a black line; the caption's white line runs down
+both its sides. Push button: black edge with its corner pixel cut, two pixels of white and of shade; the default one a two-pixel black edge. Check box 13 x 13,
+centred, its text 19 pixels in. Scroll bar: 17-pixel arrows and thumb with their black edges, thumb at 16 + MulDiv(pos - min, length - 49, max - min);
+Battle Speed's bar has **56 steps and opens 12 from Fast** (counted in the running program). The About picture is painted one pixel in (at 1, 0).
+Compared pixel by pixel (scratch `cmp.py`, the remake at --wu 1 and 2 against the captures): About's frame, caption and control-menu box match the VGA capture
+to the pixel; its picture matches the 256-colour capture to the pixel (100 %); Battle Speed's frame, scroll bar, check box and button geometry match the VGA
+capture except the text, the thumb (another value) and three pixels at each end of a button's bevel. What differs everywhere is the **font**: the System font
+(VGASYS.FON) is Microsoft's and is not in the repo; the renderer uses the win31 look's MS Sans Serif / Arial at 13/16 px.
+
+**The renderer covers** static text (left, centre, right, wrapping or not), owner-painted statics (a canvas the dialog paints), push and default push buttons,
+check boxes, radio buttons, group boxes, edit fields, list boxes, horizontal and vertical scroll bars, a combo box (a drop-down list), hidden and disabled
+controls, Return as IDOK, a scale of 1 or 2 CSS pixels per Windows pixel (less on a small phone). **Checked against captures:** frame, caption, static, push
+button, default button (Startup's Open Game), check box, horizontal scroll bar. **Built, not yet checked:** radio, group box, edit, list box, vertical scroll
+bar, combo box (their first chunk captures and fixes them). **Cannot yet:** the System font; the bevel's stepped ends; focus rectangles as Windows draws
+them; icons (STATIC SS_ICON); owner-drawn buttons (Create New Galaxy's pictures, the queue's ship cells) beyond a canvas the dialog paints itself; the
+dialog's own position (the remake centres it; the program puts Battle Speed at (152, 141) on the screen); the 256-colour palette's pale captions; tab order
+and mnemonics beyond the browser's; the Help menu's About shows only when the look is chosen before the page loads (the skin builds its menus once).
+
+**Cost of one dialog after the foundation:** About and Battle Speed are 12 and 14 lines in `dialogs.js` and one line each in `hook.js`' ITEMS; with a capture
+to compare, about a quarter of an hour each, most of it the comparison. A dialog with owner-drawn controls or lists costs more (the painting is the DOS
+skin's, reused: its `*Dos` functions already draw most of the pictures and rows).
+
+**Checks with this:** `test.js dos --digest` 10b0cd70aba2d434, notes-check, human-play, ui-lang-audit dos, skin-rules-check (dos) as before; real-play with
+`--os=win31` (new option; it also opens About and Battle Speed from the menus and closes them): both dialogs open, are looked at and close at phone-l and
+desktop; the win31 look's other failures (menus covered by the Organize Fleets and battle "Skip" windows, a fleet drag at phone-l) were there before this
+(the same run on the previous commit fails more).
+
+### The chunk plan (the other 31, about five a session)
+
+Each chunk: capture each dialog in the running original (`emulators/dosbox-win31`), add it to `dialogs.js` and `hook.js` ITEMS, compare, look at the shots.
+"DOS" names the DOS skin's window for the same thing (`js/skins/dos/ui.js`), whose game wiring and pictures a chunk reuses.
+
+1. **Start:** 11 CREATEGALAXY (owner-drawn pictures, a scroll bar; DOS `createGalaxyDos`), 12 FILEOPEN (edit, two list boxes; `FUN_1058_017e`; the remake's
+   saved games), 13 GAMEINFO, 21 NEWPLAYER (radios; the DOS skin has none: the classic New Game), 25 PLAYERENTRY, 32 STARTUP (owner-drawn picture: HOCOLOR
+   1002). Needs: list box and edit checked against captures (first to use them); the Startup and New Galaxy pictures extracted (win31-art.py).
+2. **Licence and registration:** 14 LICENSEE (radios, edits), 28 REGISTER (the password box). Small; can join chunk 1 or 5.
+3. **Ships:** 9 BLDSHIP (list box, owner-drawn queue cells; DOS `buildDos`), 22 NEWSHIP (29 controls, scroll bars; DOS `newTypeDos`), 31 SHIPTYPE (DOS
+   `shipTypesDos`), 20 NAMETYPE and 19 NAMESTAR (DOS `renameDos`), 24 ORGFLEETS (DOS `organizeDos`). Needs: owner-drawn ship pictures from HOCOLOR.
+4. **Lists:** 15 LISTFLEETS (DOS `fleetsDos`), 17 LISTSTARS (DOS `starsDos`), 10 COMPPLAYERS and 16 LISTSKILLS (`FUN_1078_039c`; DOS `compareDos`, `skillsDos`),
+   29 REPORT (`FUN_10c0_0344`; DOS `reportsDos`). Needs: list box (chunk 1), vertical scroll bar checked.
+5. **Small boxes:** 6 AUTOPLAY (`FUN_10a0_02c7`; radios, scroll bar; DOS `autoPlayDos`), 26 POLLSPEED (`FUN_10a0_03e8`), 2 ALERTBOX and 3-5 ALERT_* (icon,
+   `FUN_1108_01fc`; DOS `alertDos`), 23 NOTIFY1, 33 STATUS (`FUN_1100_05b4`), 27 PRTDLG (printing: nothing to print in a browser, its place noted), 18 MODELESS
+   (`FUN_10f8_01f0`), 7 BATTLE (the battle window's Skip; DOS `battleDos`), 30 SENDMSG (32 controls; DOS `chatDos`). Needs: radios and icons checked.
+   Probably two sessions (alerts and boxes; battle and messages).
