@@ -369,7 +369,8 @@ async function playRun(browser, job, outDir, idx) {
       const dotSrc = () => G((fid) => { document.getElementById('map').scrollIntoView({ block: 'center', inline: 'nearest' }); const UI = HOAPI.UI, c = document.getElementById('map').getBoundingClientRect(), v = HOVIEW(), kx = c.width / v.mapW, ky = c.height / v.mapH; const d = (UI.dots || []).find(d => d.f === fid); return d ? { x: c.left + (d.x + d.w / 2) * kx, y: c.top + (d.y + d.h / 2) * ky, id: fid, dot: true } : null; }, f.id);
       if (!src) { src = await dotSrc(); }
       // (the DOS skin's map is a window onto the galaxy: a fleet's dot at the map's edge hangs outside it or under the menu bar; a person zooms out with the key the Galaxy menu shows, "-")
-      for (let k = 0; k < 2 && src && src.dot && (await mapHit(src.x, src.y)) && await ev(() => !!document.querySelector('.dosbar')); k++) { await page.keyboard.press('-'); await sleep(250); src = await dotSrc(); }
+      const edge = () => ev(([x, y]) => { const c = document.getElementById('map').getBoundingClientRect(); return x > c.right - 22 || y > c.bottom - 22 || y < c.top + 8 || x < c.left + 8; }, [src.x, src.y]); // (a touch within a few pixels of the scroll bars goes to the bar, as a finger's would: a person brings the fleet in from the edge)
+      for (let k = 0; k < 3 && src && src.dot && ((await mapHit(src.x, src.y)) || await edge()) && await ev(() => !!document.querySelector('.dosbar')); k++) { await page.keyboard.press('-'); await sleep(250); src = await dotSrc(); }
       if (!src) { fail('no way to pick up the fleet: no row in a fleet dialog and no fleet dot on the map'); await shot('no-fleet-handle'); return; }
       const sh = await mapHit(src.x, src.y); if (src.dot && sh) fail(`the fleet's dot at ${Math.round(src.x)},${Math.round(src.y)} is ${sh}`);
       let tgt = null;
@@ -382,7 +383,7 @@ async function playRun(browser, job, outDir, idx) {
       else { await page.mouse.move(pts[0][0], pts[0][1]); await page.mouse.down(); for (const p of pts.slice(1)) { await page.mouse.move(p[0], p[1]); await sleep(15); } await sleep(200); await shot('fleet-dragging'); await page.mouse.up(); }
       await sleep(350);
       const dest = await G((fid) => { const x = HOAPI.G.fleets.find(f => f.id === fid); return x ? (x.dest != null ? x.dest : x.to) : null; }, f.id);
-      if (dest !== tgt.id) { const dbg = await G((fid) => ({ dots: (HOAPI.UI.dots || []).filter(d => d.f === fid), sel: HOAPI.UI.sel, drag: !!HOAPI.UI.drag, hover: HOAPI.UI.hover }), f.id).catch(() => null); fail(`dragging the fleet to star ${tgt.id} left its destination at ${dest} (from ${Math.round(src.x)},${Math.round(src.y)} to ${Math.round(tgt.x)},${Math.round(tgt.y)}; ${JSON.stringify(dbg)})`); await shot('fleet-not-sent'); return; }
+      if (dest !== tgt.id) { const dbg = await G(([fid, tid]) => { const x = HOAPI.G.fleets.find(q => q.id === fid); return { dots: (HOAPI.UI.dots || []).filter(d => d.f === fid), sel: HOAPI.UI.sel, drag: !!HOAPI.UI.drag, hover: HOAPI.UI.hover, dist: x && x.star != null ? HO.starDist(HOAPI.G, x.star, tid) : null, fuel: x && x.fuel, view: HOVIEW().view, mapW: HOVIEW().mapW, mapH: HOVIEW().mapH }; }, [f.id, tgt.id]).catch(() => null); fail(`dragging the fleet to star ${tgt.id} left its destination at ${dest} (from ${Math.round(src.x)},${Math.round(src.y)} to ${Math.round(tgt.x)},${Math.round(tgt.y)}; ${JSON.stringify(dbg)})`); await shot('fleet-not-sent'); return; }
       sent = { id: f.id, to: tgt.id }; note(`fleet ${f.id} sent to star ${tgt.id}${src.dot ? ' (dot)' : ' (dialog)'}`); await shot('fleet-sent');
     });
     // ============ 6. End Turn x N; the fleet moves and arrives ============
@@ -427,7 +428,7 @@ async function playRun(browser, job, outDir, idx) {
       await G(() => { const a = HOAPI, s = a.G.stars.find(x => x.owner === a.ME); if (s) { a.UI.sel = s.id; a.centerOn(s.id); a.renderPanel(); a.draw(); } });
       await closeAll('before the menus');
       const SKIP = /^(new game|exit|quit|import|export|open|revert|auto-play|autoplay|force end|end turn|manual|spaceward ho|close|save\b|how to play|main menu)/i;
-      const rx = (t) => new RegExp('^\\s*' + t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').slice(0, 40));
+      const rx = (t) => new RegExp('^\\s*' + t.slice(0, 32).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')); // (cut before escaping: a cut in the middle of an escape threw; the key text at the end is not part of the match)
       // the surfaces a person finds commands on: a menu bar's menus, or the iOS/Android gear's strip
       const surfaces = [];
       if (await menuBarOn()) { const names = await ev(() => [...document.querySelectorAll('#menubar .mbtn')].map(b => b.textContent.trim())); names.forEach((n, m) => surfaces.push({ name: n, itemSel: '#menubar .dropdown.open [role=menuitem]', list: () => ev(() => [...document.querySelectorAll('#menubar .dropdown.open [role=menuitem]')].map(x => ({ t: x.textContent.replace(/⌘.*/, '').trim(), off: x.disabled || x.getAttribute('aria-disabled') === 'true', chk: x.classList.contains('check') }))), open: async () => { await ev(() => document.body.click()); if (!await menuBarOn()) return false; return await press('#menubar .mbtn', { nth: m, what: 'menu ' + n, wait: 200 }); } })); }

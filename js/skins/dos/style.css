@@ -241,3 +241,5 @@ html.os-dos .dropdown button:hover .mhot, html.os-dos .dropdown button:focus-vis
 /* Review Battle: the program's black window (the frame is the same; the inside is black) */
 .dd.dd-black { background: #000; }
 .dd.dd-black .dd-pic { position: absolute; }
+
+.dd-type .cap.cond, .dd-qcell .cap.cond, .dd-qtop .cap.cond { letter-spacing: calc(-1 * var(--du)); }

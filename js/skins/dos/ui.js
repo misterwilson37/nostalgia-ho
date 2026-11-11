@@ -371,6 +371,15 @@ function dosKeys() {
     for (const m in M) for (const it of M[m]) if (it[5] === k) { if (typeof it[1] !== 'function' || (it[2] && !it[2]()) || (it[4] && it[4]())) return; e.preventDefault(); it[1](); return; }
   });
 }
+// A caption that is wider than its cell is drawn with the letters a pixel closer together (captured: a ship type named "wagon train 123" in the Ship Types list, whose words
+// ("wagon train 123 (6/6) Fighter") are squeezed into the cell; the Mac 1.2 program does the same at 120 pixels), and what still does not fit is cut at the cell. The Name
+// on the right is cut at its rectangle (captured: "wagon train" of "wagon train 123").
+function condenseCaps() {
+  const sel = '.dd-type .cap, .dd-qcell .cap, .dd-qtop .cap';
+  const fit = (c) => { c.classList.remove('cond'); if (c.scrollWidth > c.clientWidth + 0.5) c.classList.add('cond'); };
+  const all = (n) => (n.matches && n.matches(sel) ? [n] : []).concat([...(n.querySelectorAll ? n.querySelectorAll(sel) : [])]);
+  new MutationObserver((ms) => { if (!frameOn()) return; for (const m of ms) for (const n of m.addedNodes) if (n.nodeType === 1) all(n).forEach(fit); }).observe(document.body, { subtree: true, childList: true });
+}
 // ======== Review Battle: the program's battle window (Windows template 7, "Skip"; measured on the summary of a battle reviewed in DOSBox) ========
 // 456 x 364 with the program's frame (the interior black with 35 white stars): the two sides' faces (a red-brown cross over a side with nothing left), the viewer's group
 // pictures with a line of words under each (the Geneva 9, a lost group dimmed in a stipple), the title and the result in Geneva 9 Bold, the picture of the winner
@@ -486,20 +495,21 @@ function battleDos(b, k) {
 }
 // ======== The map's scroll bars and zoom (measured on the running program: v20dos-orig-*.png and DOSBox clicks) ========
 // The program's map is a window onto a galaxy of cells: the zoom's cell is 6, 9, 12 or 17 pixels (Zoom In at 17 is dimmed, measured: stars 410.7 apart at 17 and
-// 290.5 at 12, ratio 0.707 = 12/17); the galaxy is 2 x its size - 2 cells a side (a "small" galaxy, 14.5, scrolls 4 cells across and 2 down at 17, in a 392 x 434 pane:
-// 27 cells either way); an arrow scrolls one cell (17 pixels, measured), the thumb is a fixed 7 x 13 box and rests at the far end when nothing scrolls (measured at Zoom Out).
+// 290.5 at 12, ratio 0.707 = 12/17); the galaxy of the captured game was 27 cells a side (it scrolled 4 cells across and 2 down at 17, in a 392 x 434 pane); the remake's galaxies have their own sizes,
+// so a side is 2 x its size cells, with room after the last star; an arrow scrolls one cell (17 pixels, measured), the thumb is a fixed 7 x 13 box and rests at the far end when nothing scrolls (measured at Zoom Out).
 // Not measured and taken from the Mac 1.2 program's rules (the same lineage; js/skins/mac12): a page is three quarters of the cells in view, a held arrow repeats every
 // 100 ms, CenterOnStar centres the selected star on a zoom (unless it is already inside the pane's margins), the opening view is Zoom In on your home star.
 const DZ = [6, 9, 12, 17].map(z => z * 2);
 const dzIdx = (s) => { let b = 0; DZ.forEach((z, i) => { if (Math.abs(Math.log(z / s)) < Math.abs(Math.log(DZ[b] / s))) b = i; }); return b; };
 function dzoomTo(s, f) { const cur = dzIdx(s); let i = dzIdx(s * f); if (i === cur && Math.abs(Math.log(f)) >= 0.13) i = cur + (f > 1 ? 1 : -1); return DZ[Math.max(0, Math.min(DZ.length - 1, i))]; }
 const DB = { H: 0, V: 0, maxH: 0, maxV: 0, pgH: 0, pgV: 0, s: 0, wrap: null, v: null, h: null, press: null, drag: null, shown: false };
-// the places run from 1 in on a DOS galaxy (a star's cell is 2 x its place - 2); a ruleset that places stars nearer the edge shifts the origin so that none is left outside
 const GEO = new WeakMap();
 function dgeo(g) {
   let r = GEO.get(g); if (r && r.n === g.stars.length) return r;
-  const xs = g.stars.map(s => s.x), ys = g.stars.map(s => s.y), lo = Math.min(...xs, ...ys), mg = Math.min(1, Math.floor(lo * 2) / 2);
-  r = { n: g.stars.length, mg, cw: Math.max(Math.round(g.W * 2) - 2, Math.floor(2 * (Math.max(...xs) - mg)) + 1), ch: Math.max(Math.round(g.H * 2) - 2, Math.floor(2 * (Math.max(...ys) - mg)) + 1) };
+  const xs = g.stars.map(s => s.x), ys = g.stars.map(s => s.y);
+  // (the cell of a star is 2 x its place, so a star 1 in from the edge is 2 cells in, clear of the End Turn button; room is kept after the last star for its fleets' dots)
+  const mg = Math.min(0, Math.floor((Math.min(...xs, ...ys) - 1) * 2) / 2); // (a ruleset that places stars nearer than 1 to the edge gets room at the top and left)
+  r = { n: g.stars.length, mg, cw: Math.max(Math.round(g.W * 2), Math.floor(2 * (Math.max(...xs) - mg)) + 3), ch: Math.max(Math.round(g.H * 2), Math.floor(2 * (Math.max(...ys) - mg)) + 3) };
   GEO.set(g, r); return r;
 }
 const dcells = (g) => { const r = dgeo(g); return [r.cw, r.ch]; };
@@ -896,7 +906,7 @@ function frameSetup(de) {
   const sync = () => { de.classList.toggle('dosframe', frameOn()); setUnit(); };
   sync(); window.addEventListener('load', touchFleets); touchFleets(); window.addEventListener('resize', () => { const u0 = U; setUnit(); if (u0 !== U && window.HOAPI && window.HOAPI.G && frameOn()) { window.HOAPI.renderPanel(); window.dispatchEvent(new Event('hoframe')); } });
   new MutationObserver(sync).observe(de, { attributes: true, attributeFilter: ['class'] });
-  loadFonts(); hotMenus(); dosKeys();
+  loadFonts(); hotMenus(); dosKeys(); condenseCaps();
 }
 
 // ======== The original's own windows (docs/dos20-findings.md; geometry measured on the running program, v20dos-orig-*.png) ========
@@ -908,7 +918,7 @@ function dText(txt, l, t, o) {
   const a = window.HOAPI, e = a.el('span', { class: 'dd-t' + (o && o.cls ? ' ' + o.cls : ''), translate: 'no' });
   const w = String(txt), hot = o && o.hot != null ? o.hot : -1;
   if (hot >= 0) { e.append(w.slice(0, hot)); const h = a.el('span', { class: 'hot' }, w[hot]); e.append(h, w.slice(hot + 1)); } else e.textContent = w;
-  dAt(e, l, t, o && o.w, 14); if (o && o.color) e.style.color = o.color; return e;
+  dAt(e, l, t, o && o.w, 14); if (o && o.w) e.style.overflow = 'hidden'; if (o && o.color) e.style.color = o.color; return e;
 }
 function dButton(txt, l, t, w, h, fn, o) {
   const a = window.HOAPI, b = a.el('button', { type: 'button', class: 'dd-btn' + (o && o.def ? ' def' : ''), onclick: fn });
@@ -1090,9 +1100,9 @@ function shipTypesDos(selId) {
     box.textContent = ''; box.style.padding = '0';
     ds.forEach(d => { const it = a.el('div', { class: 'dd-type' + (d === cur ? ' sel' : ''), role: 'option', 'aria-selected': String(d === cur), onclick: () => { cur = d; draw(); } }, shipPicEl(d, 40), a.el('span', { class: 'cap', translate: 'no' }, caption(d))); box.append(it); });
     pane.splice(0).forEach(n => n.remove());
-    const c = H.designCost(g, cur), T = (t, l, y) => { const e = dText(String(t), l, y); pane.push(e); dlg.append(e); return e; };
+    const c = H.designCost(g, cur), T = (t, l, y, w) => { const e = dText(String(t), l, y, w ? { w } : undefined); pane.push(e); dlg.append(e); return e; };
     const pic = shipPicEl(cur, 76); dAt(pic, 235, 33); pane.push(pic); dlg.append(pic);
-    T(tx('Name:'), 232, 112); T(cur.name, 376, 112); T(tx('Class:'), 232, 126); T(className(cur), 376, 126);
+    T(tx('Name:'), 232, 112); T(cur.name, 376, 112, 93); T(tx('Class:'), 232, 126); T(className(cur), 376, 126, 93);
     T(tx('Development Cost:'), 232, 140); T('$' + nf(c.protoTotal != null ? c.protoTotal : c.money + (c.proto || 0)), 376, 140); T(tx('Production Cost:'), 232, 154); T('$' + nf(c.money), 376, 154); T(tx('Metal Cost:'), 232, 168); T(nf(c.metal), 376, 168);
     T(tx('Range') + ':', 232, 196); T(String(cur.R), 288, 196); T(tx('Speed') + ':', 232, 210); T(String(cur.V), 288, 210); T(tx('Weapons') + ':', 232, 224); T(String(cur.W), 304, 224); T(tx('Shields') + ':', 376, 196); T(String(cur.S), 440, 196); T(tx('Mini') + ':', 376, 210); T(String(cur.M), 440, 210);
     T('# Built:', 24, 265); T(nf(cur.built || 0), 120, 265); T('# Existing:', 24, 279); T(nf(shipCount(cur.id)), 120, 279);
