@@ -4836,7 +4836,7 @@ const menuDim = (k) => { const D = G && HO.rules(G).menuDimmed; return !!(D && G
 // ----- the Ho menu: this version, skin, sounds, modern conveniences -----
 // Each version plays as it was released; the conveniences a player may add
 // are choices here, and can be changed in the middle of a game.
-const MODERN_TEXT = 'Modern conveniences: automatic routes, the map follows the news, battle speed, written battle reports, answering a question by typing yes or no, and in the games with map scroll bars dragging the map with the mouse and the wheel zoom (not in the original games)';
+const MODERN_TEXT = 'Modern conveniences: automatic routes, the map follows the news, battle speed, written battle reports, Game Info in the DOS and Windows 3.1 Window menu, answering a question by typing yes or no, and in the games with map scroll bars dragging the map with the mouse and the wheel zoom (not in the original games)';
 function setModern(on) { if (!G) return; G.opts.modern = !!on; save(); renderPanel(); draw(); }
 // Full Hoedown (G.opts.hoedown, js/hoedown.js): Delta Tao's own jokes at
 // their most, never the play; chosen at New Game ("ho5.hoedown") and in the

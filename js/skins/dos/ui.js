@@ -373,8 +373,8 @@ function menuLayoutDos() {
       it('Compare Players…', () => A().openCompare(), { shown: () => !!G() && !!rs().compare, key: 'Ctrl+Y' }), ['List All Explored Stars…', 'Galaxy/List explored stars…'], ['Send Message…', 'Galaxy/Send a message…'], '-',
       it('Zoom In', () => { const m = A().map(); A().zoomAt(m.w / 2, m.h / 2, 1.3); }, { ghost: () => noGame() || atZoomD(3), key: '+' }), it('Zoom Out', () => { const m = A().map(); A().zoomAt(m.w / 2, m.h / 2, 1 / 1.3); }, { ghost: () => noGame() || atZoomD(0), key: '-' }), '-',
       it('Fix Spending', () => A().openFixSpending(), { shown: () => !!G() && !!rs().fixSpending, ghost: noGame, key: 'Ctrl+F' })],
-    Window: [it('Tech Spending', () => {}, { checked: () => true, key: 'Alt+1' }), ['Reports', 'Galaxy/Report window…'], '-',
-      it('Game Info…', () => ((winOn() && window.HOWIN31 && window.HOWIN31.show('gameInfo')) || gameInfoDos()), { ghost: noGame })] // (the remake's own place for the Player Entry window's Info..., gameInfo) // (the program's Window menu: Tech Spending, checked while its window shows; the remake's panel always shows it)
+    Window: [it('Tech Spending', () => {}, { checked: () => true, key: 'Alt+1' }), ['Reports', 'Galaxy/Report window…'],
+      it('Game Info…', () => ((winOn() && window.HOWIN31 && window.HOWIN31.show('gameInfo')) || gameInfoDos()), { ghost: noGame, shown: () => !!G() && !!G().opts.modern })] // (a modern convenience: not in either program's Window menu; the remake's own place for the Player Entry window's Info..., gameInfo) // (the program's Window menu: Tech Spending, checked while its window shows; the remake's panel always shows it)
   };
   if (win === 'win31') M.Help = [['How to play', 'Help/How to play']];
   return M;
