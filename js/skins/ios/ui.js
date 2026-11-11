@@ -390,6 +390,11 @@ function buildScreen(doc) {
   amEl = UIEl('div', 'ios-am', { hidden: '', role: 'menu', 'aria-label': 'Menu' });
   const ui = UIEl('div', 'ios-ui', null, hudEl, siEl, pbEl, fdEl, turnEl, amEl);
   app.append(ui); ui.id = 'ios-ui';
+  // the page's own menus ("More menus…") open upward from a bar in the middle of a phone held sideways: a long one ran off the top of the window.
+  // Each dropdown is kept inside the window (scrolling when it is taller than it) whenever it opens.
+  { const mb = doc.getElementById('menubar');
+    const fit = (dd) => { dd.style.maxHeight = ''; dd.style.overflowY = ''; dd.style.transform = ''; if (!dd.classList.contains('open')) return; const vh = window.innerHeight; dd.style.maxHeight = (vh - 8) + 'px'; dd.style.overflowY = 'auto'; const r = dd.getBoundingClientRect(); const dy = r.top < 4 ? 4 - r.top : r.bottom > vh - 4 ? (vh - 4) - r.bottom : 0; if (dy) dd.style.transform = 'translateY(' + dy + 'px)'; };
+    if (mb) new MutationObserver((ms) => { for (const m of ms) if (m.target.classList && m.target.classList.contains('dropdown')) fit(m.target); }).observe(mb, { subtree: true, attributes: true, attributeFilter: ['class'] }); }
   doc.addEventListener('click', (e) => { if (gearOpen && !e.target.closest('#menubar') && !e.target.closest('.ios-gear') && !e.target.closest('.ios-am')) setGear(false); else if (!gearOpen && document.documentElement.classList.contains('ios-menus') && !e.target.closest('#menubar') && !e.target.closest('.ios-gear') && !e.target.closest('.ios-amx')) { document.documentElement.classList.remove('ios-menus'); if (gearBtn) gearBtn.classList.remove('on'); } });
   // End Turn is the classic page's clock; it sits left of the gear (-[TurnMessageLayer init]: the menu's items in a row, padding a80)
   const msg = doc.getElementById('msg'); if (msg) app.append(msg);

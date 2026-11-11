@@ -303,7 +303,7 @@ html.skin-ios .ios-fdt { font-size: calc(10 * var(--pt)); }
 html.skin-ios.ios-pad .ios-fdt { font-size: calc(12 * var(--pt)); }
 
 /* the Organize Fleets screen (OrganizeFleetsLayer) */
-html.skin-ios .ios-omsg { position: absolute; color: #fff; text-align: center; font-family: var(--appfont, Arial, Helvetica, sans-serif); line-height: 1.15; }
+html.skin-ios .ios-omsg { pointer-events: none; /* a label: on a phone its box (the dialog's width) lay over the close button and took the press */ position: absolute; color: #fff; text-align: center; font-family: var(--appfont, Arial, Helvetica, sans-serif); line-height: 1.15; }
 html.skin-ios .ios-oc { position: absolute; left: 0; bottom: 0; width: 0; height: 0; transition: transform .2s linear; }
 html.skin-ios .ios-ocol { position: absolute; box-sizing: border-box; cursor: pointer; }
 html.skin-ios .ios-ocol.t { outline: calc(1 * var(--pt)) solid #393cd6; outline-offset: calc(-1 * var(--pt)); }
