@@ -1281,8 +1281,10 @@ function buildDos(sid) {
     cells.forEach((c, i) => { c.textContent = ''; const it = q[i]; c.classList.toggle('sel', i === sel && !!it); c.setAttribute('aria-selected', String(i === sel && !!it)); if (!it) return; const d = dsg(it.did); if (!d) return;
       c.append(dAt(shipPicEl(d, 28), 4, 4), dAt(a.el('span', { class: 'cap', translate: 'no' }, `${it.n} ${d.name}`), 4, 36, 112, 14)); });
     const it = q[sel], d = it && dsg(it.did);
+    // (the cost line, FUN_b000_be04 / b9f6: "$cost (D)" while no ship of the type has been built (its development cost is due), "$cost (P)" after; seen on the
+    // running Windows program, whose BLDSHIP writes the same: a new Fighter type "$4,000 (D)", the starting Scout "$1,960 (P)", win20-orig-vga16-build-{dev,prod}.png)
     if (d) { const pr = rs.yardProgress ? rs.yardProgress(g, p, s) : null, c = H.shipCostNow(g, p, d);
-      top.append(dAt(shipPicEl(d, 40), 8, 8), dAt(a.el('span', { class: 'dd-t', translate: 'no' }, '$' + nf(c.money)), 140, 14, 100, 14), dAt(a.el('span', { class: 'dd-t', translate: 'no' }, (sel === 0 && pr ? pr.pct : 0) + '% Done'), 140, 34, 100, 14), dAt(a.el('span', { class: 'cap', translate: 'no' }, caption(d)), 8, 56, 232, 14)); }
+      top.append(dAt(shipPicEl(d, 40), 8, 8), dAt(a.el('span', { class: 'dd-t', translate: 'no' }, '$' + nf(c.money) + (d.built === 0 && !d.free ? ' (D)' : ' (P)')), 140, 14, 100, 14), dAt(a.el('span', { class: 'dd-t', translate: 'no' }, (sel === 0 && pr ? pr.pct : 0) + '% Done'), 140, 34, 100, 14), dAt(a.el('span', { class: 'cap', translate: 'no' }, caption(d)), 8, 56, 232, 14)); }
   };
   const fill = () => { lst.textContent = ''; designs().forEach(d => { const it = a.el('div', { class: 'dd-type', role: 'option', tabindex: 0, 'aria-label': caption(d), onclick: () => add(d), onkeydown: (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); add(d); } } }, shipPicEl(d, 40), a.el('span', { class: 'cap', translate: 'no' }, caption(d))); lst.append(it); }); };
   cells.forEach((c, i) => { c.addEventListener('click', () => { if (q[i]) { sel = i; draw(); } }); c.addEventListener('dblclick', () => { if (q[i] && --q[i].n <= 0) q.splice(i, 1); draw(); });
