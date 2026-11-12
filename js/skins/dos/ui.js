@@ -252,6 +252,7 @@ window.HOTHEME = {
   // The original writes "..." and its key equivalents as "[Ctrl+S]" (T.keyName).
   get menuLayout() { return menuLayoutDos(); },
   gameInfo(win) { return gameInfo(win); },
+  licensee() { return licensee(); }, // (the licence lines' name and organisation: licensee below)
   fleetList() { return fleetList(); },
   // the words of a ship type and of a number of ships, as the panes and the DOS look's windows write them (for the Windows look's dialogs, js/skins/dos/win31/dialogs.js):
   // caption "Patton (2/2) Fighter"; ships "one Patton (2/2) Fighter", "2 Patton (2/2) Fighters" (the program's fleet rows and its queue cells, captured)
@@ -376,7 +377,7 @@ function menuLayoutDos() {
       it(() => { const bs = !noGame() && star() ? A().lastBattles(star().id) : []; return bs.length ? A().tl('Review Battle at %s…', star().name) : A().tl('No Battles here…'); }, () => { const bs = star() ? A().lastBattles(star().id) : []; if (bs.length) A().openBattle(bs[0].id); }, { ghost: () => noGame() || !star() || !A().lastBattles(star().id).length, key: 'Ctrl+R' })],
     Galaxy: [
       it('Compare Players…', () => A().openCompare(), { shown: () => !!G() && !!rs().compare, key: 'Ctrl+Y' }), ['List All Explored Stars…', 'Galaxy/List explored stars…'], ['Send Message…', 'Galaxy/Send a message…'], '-',
-      it('Zoom In', () => { const m = A().map(); A().zoomAt(m.w / 2, m.h / 2, 1.3); }, { ghost: () => noGame() || atZoomD(3), key: '+' }), it('Zoom Out', () => { const m = A().map(); A().zoomAt(m.w / 2, m.h / 2, 1 / 1.3); }, { ghost: () => noGame() || atZoomD(0), key: '-' }), '-',
+      it('Zoom In', () => { const m = A().map(); A().zoomAt(m.w / 2, m.h / 2, 1.3); }, { ghost: () => noGame() || atZoomD(dzs().length - 1), key: '+' }), it('Zoom Out', () => { const m = A().map(); A().zoomAt(m.w / 2, m.h / 2, 1 / 1.3); }, { ghost: () => noGame() || atZoomD(0), key: '-' }), '-',
       it('Fix Spending', () => A().openFixSpending(), { shown: () => !!G() && !!rs().fixSpending, ghost: noGame, key: 'Ctrl+F' })],
     Window: [it('Tech Spending', () => {}, { checked: () => true, key: 'Alt+1' }), ['Reports', 'Galaxy/Report window…'],
       it('Game Info…', () => ((winOn() && window.HOWIN31 && window.HOWIN31.show('gameInfo')) || gameInfoDos()), { ghost: noGame, shown: () => !!G() && !!G().opts.modern })] // (a modern convenience: not in either program's Window menu; the remake's own place for the Player Entry window's Info..., gameInfo) // (the program's Window menu: Tech Spending, checked while its window shows; the remake's panel always shows it)
@@ -559,8 +560,11 @@ function battleDos(b, k) {
 // Not measured and taken from the Mac 1.2 program's rules (the same lineage; js/skins/mac12): a page is three quarters of the cells in view, a held arrow repeats every
 // 100 ms, CenterOnStar centres the selected star on a zoom (unless it is already inside the pane's margins), the opening view is Zoom In on your home star.
 const DZ = [6, 9, 12, 17].map(z => z * 2);
-const dzIdx = (s) => { let b = 0; DZ.forEach((z, i) => { if (Math.abs(Math.log(z / s)) < Math.abs(Math.log(DZ[b] / s))) b = i; }); return b; };
-function dzoomTo(s, f) { const cur = dzIdx(s); let i = dzIdx(s * f); if (i === cur && Math.abs(Math.log(f)) >= 0.13) i = cur + (f > 1 ? 1 : -1); return DZ[Math.max(0, Math.min(DZ.length - 1, i))]; }
+// With modern conveniences, three closer zooms beyond the program's largest (the remake's, as the Mac skins'); the plain game keeps the four.
+const DZM = DZ.concat([24, 34, 48].map(z => z * 2));
+const dzs = () => { const a = window.HOAPI, g = a && a.G; return g && g.opts && g.opts.modern ? DZM : DZ; };
+const dzIdx = (s) => { const Z = dzs(); let b = 0; Z.forEach((z, i) => { if (Math.abs(Math.log(z / s)) < Math.abs(Math.log(Z[b] / s))) b = i; }); return b; };
+function dzoomTo(s, f) { const Z = dzs(), cur = dzIdx(s); let i = dzIdx(s * f); if (i === cur && Math.abs(Math.log(f)) >= 0.13) i = cur + (f > 1 ? 1 : -1); return Z[Math.max(0, Math.min(Z.length - 1, i))]; }
 const DB = { H: 0, V: 0, maxH: 0, maxV: 0, pgH: 0, pgV: 0, s: 0, wrap: null, v: null, h: null, press: null, drag: null, shown: false };
 const GEO = new WeakMap();
 function dgeo(g) {
@@ -584,7 +588,7 @@ const dClamp = (H, V) => [Math.max(0, Math.min(DB.maxH, H)), Math.max(0, Math.mi
 function dCenter(st, g) { const [cw, ch] = dcells(g); return dClamp(Math.round((st.x - DMG) * 2) - Math.trunc((cw - (DB.maxH - 1)) / 2), Math.round((st.y - DMG) * 2) - Math.trunc((ch - (DB.maxV - 1)) / 2)); }
 function dSync(v, c) {
   if (!frameOn()) return;
-  v.s = DZ[dzIdx(v.s)]; dMetrics(v.s, c.mapW, c.mapH, c.G);
+  v.s = dzs()[dzIdx(v.s)]; dMetrics(v.s, c.mapW, c.mapH, c.G);
   let [H, V] = dCellOf(v);
   if (DB.s && DB.s !== v.s && c.sel != null && c.G.stars[c.sel]) [H, V] = dCenter(c.G.stars[c.sel], c.G); // (Zoom In / Zoom Out: the selected star is centred)
   else if (!c.live) { H = Math.round(H); V = Math.round(V); }
@@ -592,7 +596,7 @@ function dSync(v, c) {
 }
 function dCenterOn(v, sid, c) {
   if (!frameOn()) return false; const st = c.G.stars[sid]; if (!st) return false;
-  v.s = DZ[dzIdx(v.s)]; dMetrics(v.s, c.mapW, c.mapH, c.G);
+  v.s = dzs()[dzIdx(v.s)]; dMetrics(v.s, c.mapW, c.mapH, c.G);
   const [H, V] = dCellOf(v), z = v.s / 2, px = (((st.x - DMG) * 2) - H + 0.5) * z, py = (((st.y - DMG) * 2) - V + 0.5) * z;
   if (px > 40 && px < c.mapW - 40 && py > 40 && py < c.mapH - 85) return true;
   const [h2, v2] = dCenter(st, c.G); dPut(v, h2, v2); return true;
@@ -1113,8 +1117,8 @@ function aboutDos() {
   const c = a.el('canvas', { class: 'dd-pic', width: 383, height: 236, role: 'img', 'aria-label': 'Spaceward Ho! 2.0: credits' });
   const x = c.getContext('2d'); x.fillStyle = '#000'; x.fillRect(0, 0, 383, 113); x.fillStyle = '#fff'; x.fillRect(0, 113, 383, 123); if (top) x.drawImage(top, 0, 0); if (bot) x.drawImage(bot, 0, 113);
   dAt(c, 4, 28, 383, 236);
-  const who = a.me() ? a.me().name : '';
-  dDialog(392, 364, 'About Spaceward Ho!', [c, dText('Licensed to:', 8, 266), dText(who, 112, 266), dText('Spaceward Ho! Version 2.0', 112, 294), dButton('OK', 152, 322, 71, 28, () => a.closeModal(), { hot: 0, def: true })], 'About Spaceward Ho!');
+  const L = licensee();
+  dDialog(392, 364, 'About Spaceward Ho!', [c, dText('Licensed to:', 8, 266), dText(L.name, 112, 266), dText(L.org, 112, 280), dText('Spaceward Ho! Version 2.0', 112, 294), dButton('OK', 152, 322, 71, 28, () => a.closeModal(), { hot: 0, def: true })], 'About Spaceward Ho!');
   return true;
 }
 
@@ -1429,6 +1433,19 @@ function closingGameDos(go) {
   setTimeout(() => { if (d.isConnected) a.closeModal(); go(); }, 1000);
   return true;
 }
+// The licensee, for every "Licensed to:" (About and Startup in both looks, the Windows program's licence window, template 14; Jake, November 2026: the
+// licensee is the signed-in player): the signed-in account's display name (HOCLOUD.user when it is not anonymous and has a name of its own: never the
+// e-mail address js/cloud.js describe() falls back to), else, while the account is not back yet this visit, the name this browser kept from it
+// ("ho5.cloud.name", unless it is an e-mail address), else the name last typed at New Game ("ho5.name"). The organisation is the one typed in the
+// licence window ("ho5.w31.org"; the program keeps both in THE_HO!.PRF). Read when a window opens; nothing waits for the account or is sent anywhere.
+function licensee() {
+  const ls = (k) => { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } };
+  const own = (n, u) => !!n && !/@/.test(n) && n !== 'Guest' && n !== 'Signed in' && (!u || n !== u.email);
+  const C = window.HOCLOUD, u = C && C.user;
+  let name = '';
+  if (u) { if (!u.anonymous && own(u.name, u)) name = u.name; } else if (!(C && C.known) && own(ls('ho5.cloud.name'))) name = ls('ho5.cloud.name');
+  return { name: name || ls('ho5.name'), org: ls('ho5.w31.org') };
+}
 // The Startup window: StartupDlgBox (40 x 29 cells, 320 x 406, title "Spaceward Ho! Startup"), made by FUN_b000_4130 when the program starts (captured,
 // v20dos-orig-startup.png, measured): item 999, the picture 1002 (304 x 200), painted by the window procedure; "Licensed to:" at
 // cell 0, 15 (the picture is painted from 8, 19, on black, and shows below the title bar from row 29: its rows 10 to 199, measured by the "2.0"); item 100 at cell 13, 15, three lines (the licensee's name, the organisation, "Spaceward Ho! Version 2.0"); "(C) 1993 New World Computing, Inc." at
@@ -1438,7 +1455,7 @@ function closingGameDos(go) {
 // than its button (the German "Spiel öffnen", the remake's translations) is drawn narrower to fit.
 // THE REMAKE'S OWN: it is shown FRAMED on the title page beside the remake's credits and options (as the iOS skin shows the app's title scene), at a size that
 // fits; its buttons go through the remake's own commands: Open Game the Saved Games list, New Game the New Game window, Cancel closes it (the program's Cancel
-// leaves the empty screen; the title page stays here). The licensee is the name last typed at New Game. Only in the DOS look.
+// leaves the empty screen; the title page stays here). The licensee: licensee() above. Only in the DOS look.
 function startupDos() {
   const a = window.HOAPI, ts = document.getElementById('titlescreen'); if (!a || !ts) return;
   const old = ts.querySelector('.dd-startframe'); if (old) old.remove();
@@ -1446,6 +1463,8 @@ function startupDos() {
   if (!frameOn()) return;
   // (the Windows look: the Windows program's Startup window, template 32, js/skins/dos/win31/dialogs.js HOWIN31.startup, in the same frame)
   if (winOn() && window.HOWIN31 && window.HOWIN31.startup && window.HOWIN31.templates) {
+    // (the program's licence window first, when no licensee is kept or the warranty answer was No: template 14, HOWIN31.licenceFirst; Startup after its OK)
+    if (window.HOWIN31.licenceFirst && !startupDos.lic && window.HOWIN31.licenceFirst(() => { startupDos.lic = true; startupDos(); })) return;
     const close = () => { fr.remove(); ts.classList.remove('dd-wel', 'dd-wide'); };
     const dlg = window.HOWIN31.startup({ close, wu: 1 }); if (!dlg) return;
     dlg.el.setAttribute('role', 'dialog'); dlg.el.setAttribute('aria-label', tx('Spaceward Ho! Startup'));
@@ -1468,14 +1487,14 @@ function startupDos() {
   d.style.width = du(320); d.style.height = du(406);
   d.append(dAt(a.el('div', { class: 'dd-title', translate: 'no' }, W.title), 5, 5, 310, 17));
   const pic = (name, l, t, label, top, bg) => { const im = a.IMG[P + name]; if (!im || !im.width) return null; const c = a.el('canvas', { class: 'dd-pic', role: label ? 'img' : null, 'aria-label': label || null, 'aria-hidden': label ? null : 'true' }); const y0 = top || 0; c.width = im.width; c.height = im.height - y0; const x = c.getContext('2d'); if (bg) { x.fillStyle = bg; x.fillRect(0, 0, c.width, c.height); } x.drawImage(im, 0, -y0); return dAt(c, l, t, c.width, c.height); };
-  let who = ''; try { who = localStorage.getItem('ho5.name') || ''; } catch (e) {}
+  const L = licensee();
   const [lx, ly] = cell(W.at, 15);
   // (a word wider than its place, in program pixels, is drawn narrower: measured once laid out, again when the window is fitted)
   const narrow = [], fitB = (e, px) => { const sp = e.matches('.dd-btn') ? e.querySelector('span') : e; narrow.push([sp, px]); return e; };
   const doNarrow = () => { const k = d.getBoundingClientRect().width / 320; if (!k) return; for (const [sp, px] of narrow) { sp.style.display = 'inline-block'; sp.style.transform = ''; sp.style.transformOrigin = sp.parentNode.matches('.dd-btn') ? '50% 50%' : '0 50%'; sp.style.margin = ''; const w = sp.getBoundingClientRect().width; if (w > px * k) { sp.style.transform = `scaleX(${(px * k / w).toFixed(3)})`; if (sp.parentNode.matches('.dd-btn')) sp.style.margin = `0 ${(-(w - px * k) / 2).toFixed(2)}px`; } } };
   const close = () => { fr.remove(); ts.classList.remove('dd-wel', 'dd-wide'); };
   const lic = tplText([W.lic], 0, 15)[0]; fitB(lic, 8 * W.at - 4);
-  [pic('d1002', 8, 29, 'Spaceward Ho! 2.0', 10, '#000'), lic, dText(who, lx, ly, { w: 304 - lx + 8 }), dText(tx('Spaceward Ho! Version 2.0'), lx, ly + 28),
+  [pic('d1002', 8, 29, 'Spaceward Ho! 2.0', 10, '#000'), lic, dText(L.name, lx, ly, { w: 304 - lx + 8 }), dText(L.org, lx, ly + 14, { w: 304 - lx + 8 }), dText(tx('Spaceward Ho! Version 2.0'), lx, ly + 28),
     ...tplText(['(C) 1993 New World Computing, Inc.'], 2, 19),
     fitB(tplButton(W.open, 2, 21, 11, () => a.openSavedGames(), { hot: 0, def: true }), 8 * 11 - 8),
     fitB(tplButton(W.neu, 15, 21, 10, () => { const b = document.getElementById('tnew'); if (b) b.click(); }, { hot: 0 }), 8 * 10 - 8),

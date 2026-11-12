@@ -1,6 +1,6 @@
 # Windows 3.1 2.0: the display audit (November 2026, begun)
 
-**Progress (Windows dialogs):** foundation done (emulator `emulators/dosbox-win31`, renderer `js/skins/dos/win31/`); chunk 1 done: the main window on the 640 x 480 screen at one scale, and 8 of 33 dialogs built (About, Battle Speed; Create New Galaxy, File Open, GameInfo, New Player Registration, Player Entry, Startup); Game Info also in the DOS look, the DOS look's build cost line "(D)" / "(P)"; chunk 3 done (Ships: Build Ships, Create New Ship Type, List Ship Types, Rename, Name a Star, Organize Fleets; 14 of 33 built); chunk 4 (Lists): done (List of All Fleets, List of All Explored Stars, Compare Players, Show Skills, Reports: 19 of 33); next: chunk 2 (Licence, Register: not started), then chunk 5 (below, "The chunk plan").
+**Progress (Windows dialogs):** foundation done (emulator `emulators/dosbox-win31`, renderer `js/skins/dos/win31/`); chunk 1 done: the main window on the 640 x 480 screen at one scale, and 8 of 33 dialogs built (About, Battle Speed; Create New Galaxy, File Open, GameInfo, New Player Registration, Player Entry, Startup); Game Info also in the DOS look, the DOS look's build cost line "(D)" / "(P)"; chunk 3 done (Ships: Build Ships, Create New Ship Type, List Ship Types, Rename, Name a Star, Organize Fleets; 14 of 33 built); chunk 4 (Lists): done (List of All Fleets, List of All Explored Stars, Compare Players, Show Skills, Reports: 19 of 33); chunk 5a (in progress, "Chunk 5a" below): the remake's own windows at the frame's unit in both looks; the licensee is the signed-in player; 14 LICENSEE built (20 of 33), 28 REGISTER not built (the copy protection: below); next: the alerts, Auto Play, Polling Time, Notify, Status; then chunk 5b (27 PRTDLG, 18 MODELESS, 7 BATTLE, 30 SENDMSG).
 
 *The same game as DOS 2.0 and Mac 2.0.1 (`docs/dos-findings.md`); this is what WINHO.EXE puts in front of the player.*
 
@@ -263,6 +263,35 @@ gives computers their starting skill (see above).
 
 **Cost:** the captures (a new 20-player game auto-played to 2140) about 20 minutes; the four list dialogs and the renderer's list box most of the session;
 Reports about half an hour; each run of the checks about 40 minutes (real-play the most).
+
+## Chunk 5a: Licence, small boxes, one scale for every window (November 2026)
+
+**One scale for every window (Jake: "Our windows should match the scale of the game").** The remake's own windows (Preferences, How to play, the online and
+account windows, the New game window with another ruleset ...: every `.win` in the modal layer that is not the program's) kept their CSS size beside the program's
+windows, in both looks (the DOS look too). Now (`js/skins/dos/style.css`) they are zoomed by the frame's unit --u, so their CSS pixels are the 640 x 480 screen's
+pixels, at most 624 x 464 of them, and what does not fit scrolls inside the window (How to play, the New game window); in the Windows 3.1 look in the chrome of the
+program's dialogs (a black line and four of the caption's navy around a white client, the caption with its white line and the control-menu box, no minimize
+or maximize) and the look's MS Sans Serif / Arial. Looked at at phone-l (u 0.8125), desktop (2) and 4k, 1x and 2x. Also fixed: How to play's tip line carried the
+pointer's tip box class (`.tip`, fixed at the window's foot); the renderer's check boxes and radio buttons took the looks' `.box` panel padding (js/os/base.css),
+16 pixels wide below one Windows pixel a CSS pixel (phone-l: the radio overlapped its words).
+
+**The licensee is the signed-in player (Jake).** One helper, `licensee()` in `js/skins/dos/ui.js` (T.licensee; `HOWIN31.licence` in dialogs.js): the signed-in
+account's display name (`HOCLOUD.user`, not anonymous, a name of its own: never the e-mail address `describe()` falls back to), else, while the account is not
+back yet, the name this browser kept from it (`ho5.cloud.name`, unless an e-mail address), else the name last typed at New Game (`ho5.name`); the organisation
+typed in the licence window (`ho5.w31.org`). Every "Licensed to:" uses it (About and Startup in both looks, LICENSEE): three lines as the program writes them
+(name, organisation, "Spaceward Ho! Version 2.0"). Nothing is sent anywhere.
+
+**14 LICENSEE** (LICENSEEDLGPROC; captured with THE_HO!.PRF moved away: `win20-orig-vga16-licensee`, `-licensee-name`, `-licensee-yes`): the program opens it at the
+start, before Startup, when no licensee is kept or the warranty question was answered No (`DAT_5bac` 1: it asks again at every start), centred on the screen
+(FUN_1108_0a3b). Name and Organization (80 letters, EM_LIMITTEXT), Yes / No / No, but I will (No when there is no name), Cancel (ends the program), OK (dimmed
+until a name is typed: captured). In the remake: on the title page with the Windows look, when the licensee has no name or the kept answer is No; OK keeps the
+name as the name last typed, the organisation and the answer (this browser only) and goes on to Startup; Cancel leaves the title page without Startup.
+Compared at one Windows pixel per CSS pixel (scratch `cmp-licensee.png`): frame, caption, fields, radios and buttons where the capture has them; the font differs.
+
+**28 REGISTER, not built.** It is the copy protection ("Please open your manual and turn to page %d, go to line %d, and enter word %d from that line.", three
+tries, then the program ends; REGISTERDLGPROC), asked when the PRF's check of WINHO.EXE (a CRC, FUN_1028_0182) fails, from FUN_1050_186f when a value of the
+game reaches 2500 (not reached in the emulator: not captured). Its answers are a table of the manual's words in the program; the remake asks no copy protection
+in any skin (the Amiga skin's is not shown either: docs/amiga-21.md), so there is nothing to wire it to.
 
 ### The chunk plan (the other 31, about five a session)
 

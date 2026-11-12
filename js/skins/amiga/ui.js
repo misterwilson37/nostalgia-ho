@@ -728,15 +728,18 @@ function setTitle() {
 //   name in HoFont 11.
 // The remake's map has 2 light years to its unit (LY_PER_UNIT in the rulesets).
 const LY = 2, ZOOMS = [6, 9, 12, 17].map(z => z * LY);
-const zoomIdx = (s) => { let b = 0; ZOOMS.forEach((z, i) => { if (Math.abs(Math.log(z / s)) < Math.abs(Math.log(ZOOMS[b] / s))) b = i; }); return b; };
+// With modern conveniences, three closer zooms beyond the largest (the remake's, as the Mac and DOS skins'); the plain game keeps the four.
+const ZOOMS_MODERN = ZOOMS.concat([24, 34, 48].map(z => z * LY));
+const zooms = () => { const a = window.HOAPI, g = a && a.G; return g && g.opts && g.opts.modern ? ZOOMS_MODERN : ZOOMS; };
+const zoomIdx = (s) => { const Z = zooms(); let b = 0; Z.forEach((z, i) => { if (Math.abs(Math.log(z / s)) < Math.abs(Math.log(Z[b] / s))) b = i; }); return b; };
 // a wheel turn or a menu steps a zoom; a pinch goes to the zoom nearest its factor
 function zoomTo(s, f) {
   const cur = zoomIdx(s);
   let i = zoomIdx(s * f);
   if (i === cur && Math.abs(Math.log(f)) >= 0.13) i = cur + (f > 1 ? 1 : -1);
-  return ZOOMS[Math.max(0, Math.min(ZOOMS.length - 1, i))];
+  const Z = zooms(); return Z[Math.max(0, Math.min(Z.length - 1, i))];
 }
-const zoomOf = (view) => ZOOMS[zoomIdx(view.s)] / LY; // 6, 9, 12 or 17
+const zoomOf = (view) => zooms()[zoomIdx(view.s)] / LY; // 6, 9, 12 or 17 (24, 34, 48: modern conveniences' closer zooms, drawn as 17)
 // DrawEllipse's pixels (graphics.library's midpoint ellipse), as sprites
 function ellipse(a, b, colour) {
   const c = document.createElement('canvas'); c.width = 2 * a + 1; c.height = 2 * b + 1;
@@ -768,7 +771,7 @@ function drawStar(cx, o) {
     cx.drawImage(S.circle, X - 4, Y - 3);
     return true;
   }
-  const big = z === 17, n = big ? 32 : 16, L = X - n / 2, T0 = Y - n / 2;
+  const big = z >= 17, n = big ? 32 : 16, L = X - n / 2, T0 = Y - n / 2;
   const ring = sel && IMG[P + (big ? 'd500' : 'd501')];
   if (ring) cx.drawImage(ring, L - (big ? 12 : 5), T0 - (big ? 9 : 5));
   const im = look.pic || IMG[big ? look.base : smallPic(look.base)] || IMG[look.base];
@@ -787,7 +790,7 @@ function drawStar(cx, o) {
 function allyAt({ x, y, view }) {
   const z = zoomOf(view), X = Math.round(x), Y = Math.round(y);
   if (z <= 6) return null;
-  const big = z === 17, n = big ? 32 : 16, L = X - n / 2, T0 = Y - n / 2;
+  const big = z >= 17, n = big ? 32 : 16, L = X - n / 2, T0 = Y - n / 2;
   return big ? { x: L - 12, y: T0 - 9, w: 56, h: 51, small: false } : { x: L - 5, y: T0 - 5, w: 26, h: 26, small: true };
 }
 // your fleets at a star: the one marker, where the Amiga puts it (T.markerAt);
@@ -795,7 +798,7 @@ function allyAt({ x, y, view }) {
 function markerAt(f, { x, y, view }) {
   const z = zoomOf(view), X = Math.round(x), Y = Math.round(y);
   if (z <= 6) return { x: X - 4, y: Y - 3, w: 9, hidden: true };
-  const big = z === 17, n = big ? 32 : 16;
+  const big = z >= 17, n = big ? 32 : 16;
   return { x: X - n / 2 + (big ? 28 : 12), y: Y - n / 2 - 6, w: 16 };
 }
 // the scroll bars follow the view (T.afterDraw)
@@ -1829,7 +1832,7 @@ function menus(M, ho) {
       [() => w('mCompare'), () => G0() && openCompare(), null, null, () => !G0(), 'C'],
       [() => w('mStarList'), () => G0() && openStarListAm(), null, null, () => !G0(), 'T'],
       [() => w('mMessage'), () => classicFn('Galaxy', 'Send a message…')(), () => !!(G0() && (HO.feature(G0(), 'chat') || HO.rules(G0()).chatCommand !== false) && classicItem('Galaxy', 'Send a message…')), null, () => !alive(), 'F'],
-      [() => w('mZoomIn'), () => classicFn('View', 'Zoom in') ? classicZoom(1) : null, null, null, () => zoomIdxNow() >= 3, '+'],
+      [() => w('mZoomIn'), () => classicFn('View', 'Zoom in') ? classicZoom(1) : null, null, null, () => zoomIdxNow() >= zooms().length - 1, '+'],
       [() => w('mZoomOut'), () => classicZoom(-1), null, null, () => zoomIdxNow() <= 0, '-'],
       [() => w('mFix'), () => classicFn('Galaxy', 'Fix spending')(), () => !!(G0() && HO.rules(G0()).fixSpending && classicItem('Galaxy', 'Fix spending')), null, () => !alive()],
     ],
@@ -1883,7 +1886,7 @@ window.HOTHEME_OVER = {
   mapBg: '#000', bgStars: false,
   mapPixel: () => [PX.x, PX.y],
   mapFont: () => '16px HoFont11, sans-serif',
-  planetPx: (s) => [9, 16, 16, 32][zoomIdx(s)],
+  planetPx: (s) => [9, 16, 16, 32, 32, 32, 32][zoomIdx(s)],
   drawStar, markerAt, allyAt, ownRings: true, zoomTo, compareMenu: false, afterDraw: syncMapBars, fitView,
   techBars: 'vertical', barGrid: false,
   panel, afterMsg, window: skinWindow, newGame, menus, lookOptions, page, title,

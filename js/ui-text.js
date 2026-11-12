@@ -1271,6 +1271,13 @@ root.HOUI.add([
 // the Windows 2.0's About box (its Help menu's item and the window's title, the licence line; js/skins/dos/win31/dialogs.js)
 ['About Spaceward Ho!', 'A propos de Spaceward Ho!', 'Über Spaceward Ho!', 'Spaceward Ho! hakkında', 'Acerca de Spaceward Ho!'],
 ['Licensed to:', 'Licence accordée à :', 'Lizenziert für:', 'Lisans sahibi:', 'Con licencia para:'],
+// the Windows 2.0's licence window (template 14; js/skins/dos/win31/dialogs.js licenceFirst)
+['Spaceward Ho! License', 'Licence de Spaceward Ho!', 'Spaceward Ho! Lizenz', 'Spaceward Ho! Lisansı', 'Licencia de Spaceward Ho!'],
+['Please Personalize Your Copy of Spaceward Ho! 2.0:', 'Personnalisez votre exemplaire de Spaceward Ho! 2.0 :', 'Bitte personalisieren Sie Ihre Kopie von Spaceward Ho! 2.0:', 'Lütfen Spaceward Ho! 2.0 kopyanızı kişiselleştirin:', 'Personalice su copia de Spaceward Ho! 2.0:'],
+['Organization:', 'Société :', 'Organisation:', 'Kuruluş:', 'Organización:'],
+['Have you sent in your Warranty Registration/Survey?', 'Avez-vous envoyé votre carte de garantie et le questionnaire ?', 'Haben Sie Ihre Garantiekarte und den Fragebogen eingeschickt?', 'Garanti kaydınızı ve anketinizi gönderdiniz mi?', '¿Ha enviado su registro de garantía y la encuesta?'],
+['No, but I will', 'Non, mais je le ferai', 'Nein, aber bald', 'Hayır, ama göndereceğim', 'No, pero lo haré'],
+['© 1992 New World Computing\nAll Rights Reserved', '© 1992 New World Computing\nTous droits réservés', '© 1992 New World Computing\nAlle Rechte vorbehalten', '© 1992 New World Computing\nTüm hakları saklıdır', '© 1992 New World Computing\nTodos los derechos reservados'],
 ['Windows 3.1 colours', 'Couleurs de Windows 3.1', 'Farben von Windows 3.1', 'Windows 3.1 renkleri', 'Colores de Windows 3.1'],
 ['16 colours (VGA)', '16 couleurs (VGA)', '16 Farben (VGA)', '16 renk (VGA)', '16 colores (VGA)'],
 ['256 colours', '256 couleurs', '256 Farben', '256 renk', '256 colores'],

@@ -7,14 +7,20 @@
 const W = root.HOWIN31 = root.HOWIN31 || {};
 const D = W.dialogs = W.dialogs || {};
 
+// The licence lines (control 100 of About and Startup): the licensee's name, the organisation and "Spaceward Ho! Version 2.0", as the program writes them (captured,
+// win20-orig-vga16-startup*.png); the remake's licensee: the DOS skin's T.licensee (js/skins/dos/ui.js licensee: the signed-in player, else the name last typed).
+W.licence = function () {
+  const a = root.HOAPI, T = root.HOTHEME, L = (T && T.licensee && T.licensee()) || { name: '', org: '' };
+  return { name: L.name, org: L.org, lines: L.name + '\n' + L.org + '\n' + (a.tl ? a.tl('Spaceward Ho! Version 2.0') : 'Spaceward Ho! Version 2.0') };
+};
 // #1 About Spaceward Ho! (Help, About Spaceward Ho!): the picture (HOCOLOR.DLL's 1000, 383 x 236, painted one pixel in, at 1, 0, of control 999: measured), "Licensed to:"
 // and the licence lines (control 100: the program shows the registered name, organisation and "Spaceward Ho! Version 2.0"; the remake, the
 // player's name). No button: Return closes it (captured); so does a click, for touch.
 D.about = function () {
-  const a = root.HOAPI, img = a.IMG['dos:w1000'], who = a.me ? (a.me() || {}).name || '' : '';
+  const a = root.HOAPI, img = a.IMG['dos:w1000'];
   W.open(1, {
     title: 'About Spaceward Ho!', label: 'About Spaceward Ho!',
-    text: { '#2': 'Licensed to:', 100: who + '\n\n' + (a.tl ? a.tl('Spaceward Ho! Version 2.0') : 'Spaceward Ho! Version 2.0') },
+    text: { '#2': 'Licensed to:', 100: W.licence().lines },
     pics: { 999: (x, w, h) => { x.fillStyle = '#fff'; x.fillRect(0, 0, w, h); if (img && img.width) x.drawImage(img, 1, 0); } },
     picLabel: { 999: 'Spaceward Ho! 2.0: credits' },
     onKey: (e, dlg) => { if (e.key === 'Enter' || e.key === ' ') { dlg.close(); return true; } return false; },
@@ -88,10 +94,9 @@ D.fileOpen = function (o) {
 // d9999, the same picture) centred in control 500 (measured on win20-orig-vga16-startup.png). Returns the dialog (HOWIN31.build) for the page to hold.
 W.startup = function (o) {
   const a = root.HOAPI, img = a.IMG['dos:d1002'], logo = a.IMG['dos:d9999'];
-  let who = ''; try { who = localStorage.getItem('ho5.name') || ''; } catch (e) {}
   return W.build(32, {
     title: 'Spaceward Ho! Startup', label: 'Spaceward Ho! Startup', wu: o.wu, close: o.close,
-    text: { '#5': 'Licensed to:', 100: who + '\n\n' + (a.tl ? a.tl('Spaceward Ho! Version 2.0') : 'Spaceward Ho! Version 2.0'), '#7': 'Copyright 1992 New World Computing, Inc.', 101: 'Open Game', 102: 'New Game', 2: 'Cancel' },
+    text: { '#5': 'Licensed to:', 100: W.licence().lines, '#7': 'Copyright 1992 New World Computing, Inc.', 101: 'Open Game', 102: 'New Game', 2: 'Cancel' },
     pics: {
       999: (x, w, h) => { x.fillStyle = '#000'; x.fillRect(0, 0, w, h); if (img && img.width) x.drawImage(img, 0, 0); }, // (on black, as the program shows it: the picture's own background)
       500: (x, w, h) => { x.fillStyle = '#fff'; x.fillRect(0, 0, w, h); if (logo && logo.width) x.drawImage(logo, Math.floor((w - logo.width) / 2), Math.floor((h - logo.height) / 2)); },
@@ -100,6 +105,38 @@ W.startup = function (o) {
     on: { 101: () => a.openSavedGames(), 102: () => { const b = document.getElementById('tnew'); if (b) b.click(); }, 2: () => o.close() },
     onKey: (e) => { if (e.key === 'Escape') { o.close(); return true; } return false; },
   });
+};
+// #14 LICENSEE ("Spaceward Ho! License", LICENSEEDLGPROC): the program opens it at the start, before Startup, when no licensee is kept (THE_HO!.PRF) or the
+// warranty question was answered No (FUN_1050_..., captured with the PRF moved away: win20-orig-vga16-licensee*.png); centred on the screen (FUN_1108_0a3b).
+// "Please Personalize Your Copy of Spaceward Ho! 2.0:", Name (100) and Organization (101), 80 letters each (EM_LIMITTEXT), "Have you sent in your Warranty
+// Registration/Survey?" Yes, No, No, but I will (200-202: No when there is no name, else the kept answer), the copyright, Cancel and OK (dimmed until a name is
+// typed, captured). OK keeps them; Cancel ends the program. THE REMAKE'S: on the title page with the Windows look, when the licensee (W.licence) has no name or
+// the answer kept in this browser is No; OK keeps the name as the name last typed ("ho5.name": the New game window's too), the organisation and the answer, in this
+// browser only, and goes on to Startup (o.next); Cancel leaves the title page without it, as Startup's Cancel. HOWIN31.licenceFirst(next): true when it opened.
+W.licenceFirst = function (next) {
+  const a = root.HOAPI, ls = (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } }, put = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
+  const L = W.licence(), kept = ls('ho5.w31.warranty');
+  if (!W.templates || (L.name && kept !== '1')) return false;
+  let ans = !L.name ? 1 : kept != null && /^[012]$/.test(kept) ? +kept : 0;
+  const radios = (d) => [200, 201, 202].forEach((id, i) => { const r = d.get(String(id)); if (r && r.w31) r.w31.set(i === ans); });
+  const on = {
+    100: (v, d) => { const b = d.get('1'); if (b) b.disabled = !String(v).trim(); },
+    2: (_, d) => d.close(),
+    1: (_, d) => { const n = String(d.value(100) || '').trim(); if (!n) return; put('ho5.name', n); put('ho5.w31.org', String(d.value(101) || '').trim()); put('ho5.w31.warranty', String(ans)); d.close(); if (next) next(); },
+  };
+  [200, 201, 202].forEach((id, i) => { on[id] = (_, d) => { ans = i; radios(d); }; });
+  const dlg = W.open(14, {
+    title: 'Spaceward Ho! License', label: 'Spaceward Ho! License',
+    text: { 100: L.name, 101: L.org, 200: 'Yes', 201: 'No', 202: 'No, but I will', 2: 'Cancel', 1: 'OK', '#7': 'Please Personalize Your Copy of Spaceward Ho! 2.0:', '#8': 'Name:',
+      '#9': 'Organization:', '#10': 'Have you sent in your Warranty Registration/Survey?', '#11': '© 1992 New World Computing\nAll Rights Reserved' },
+    on,
+  });
+  if (!dlg) return false;
+  radios(dlg);
+  for (const k of ['100', '101']) { const e = dlg.get(k); if (e) e.maxLength = 80; }
+  const ok = dlg.get('1'); if (ok) ok.disabled = !L.name;
+  const nm = dlg.get('100'); if (nm) { nm.focus(); nm.select(); }
+  return true;
 };
 // The New Game sequence (File, New Game…; the Startup window's New Game), as the Windows program runs it, in the remake's New game window (whose form keeps the
 // choices: js/skins/classic/ui.js; the dos skin's T.newGame hands it here under the win31 look):
