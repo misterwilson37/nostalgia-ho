@@ -40,6 +40,11 @@ sent anywhere. Not with Full Hoedown only: always.
 - **Where a dialog opens:** the program's own positions (File Open at 8, 66; Battle Speed at 152, 141) do not follow plainly from the templates: read how the program
   places them (CreateDialog's parent and the template's x, y; `DS_` styles) and place them so, or say why not.
 
+- From chunk 4: the Windows look's Galaxy menu shows the DOS key for Compare Players (Ctrl+Y); WINHO's menu resource says Ctrl+M: check, and show the Windows
+  program's own keys in the win31 look (every menu). The focus as Windows 3.1 draws it (the chosen row's dotted frame, the focused button's heavy edge), if small.
+- **Double clicks:** lists that redraw their rows on the first click must count the double click themselves (Firefox and Safari send no dblclick on the new row):
+  use the pattern `dblc` in `js/skins/dos/ui.js` (or `dbl12` in `js/skins/mac12/ui.js`). Check every new list.
+
 ## Rules (Jake's)
 
 - Unpatched = the original, bugs and all. Never guess: a capture or the code.
