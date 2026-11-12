@@ -1,6 +1,6 @@
 # Windows 3.1 2.0: the display audit (November 2026, begun)
 
-**Progress (Windows dialogs):** foundation done (emulator `emulators/dosbox-win31`, renderer `js/skins/dos/win31/`); chunk 1 done: the main window on the 640 x 480 screen at one scale, and 8 of 33 dialogs built (About, Battle Speed; Create New Galaxy, File Open, GameInfo, New Player Registration, Player Entry, Startup); Game Info also in the DOS look, the DOS look's build cost line "(D)" / "(P)"; chunk 3 done (Ships: Build Ships, Create New Ship Type, List Ship Types, Rename, Name a Star, Organize Fleets; 14 of 33 built); chunk 4 (Lists): done (List of All Fleets, List of All Explored Stars, Compare Players, Show Skills, Reports: 19 of 33); chunk 5a (in progress, "Chunk 5a" below): the remake's own windows at the frame's unit in both looks; the licensee is the signed-in player; 14 LICENSEE, 6 AUTOPLAY, 26 POLLSPEED, 4 ALERT_LLPIC built (23 of 33), 28 REGISTER not built (the copy protection: below); next: the other alert kinds (2, 3, 5), Notify, Status; then chunk 5b (27 PRTDLG, 18 MODELESS, 7 BATTLE, 30 SENDMSG).
+**Progress (Windows dialogs):** foundation done (emulator `emulators/dosbox-win31`, renderer `js/skins/dos/win31/`); chunk 1 done: the main window on the 640 x 480 screen at one scale, and 8 of 33 dialogs built (About, Battle Speed; Create New Galaxy, File Open, GameInfo, New Player Registration, Player Entry, Startup); Game Info also in the DOS look, the DOS look's build cost line "(D)" / "(P)"; chunk 3 done (Ships: Build Ships, Create New Ship Type, List Ship Types, Rename, Name a Star, Organize Fleets; 14 of 33 built); chunk 4 (Lists): done (List of All Fleets, List of All Explored Stars, Compare Players, Show Skills, Reports: 19 of 33); chunk 5a (in progress, "Chunk 5a" below): the remake's own windows at the frame's unit in both looks; the licensee is the signed-in player; 14 LICENSEE, 6 AUTOPLAY, 26 POLLSPEED, 4 ALERT_LLPIC, 33 STATUS, 23 NOTIFY1 built (25 of 33), 28 REGISTER not built (the copy protection: below); next: the other alert kinds (2, 3, 5); then chunk 5b (27 PRTDLG, 18 MODELESS, 7 BATTLE, 30 SENDMSG).
 
 *The same game as DOS 2.0 and Mac 2.0.1 (`docs/dos-findings.md`); this is what WINHO.EXE puts in front of the player.*
 
@@ -311,6 +311,14 @@ the rightmost with the focus): client 421 wide, 128 + 16 a line - 18 + 4 high, a
 (scratch `cmp-alert-fuel.png`): frame, picture, button where the capture has them, the font differs, and the button's underlined access letter and focus frame are not
 drawn. The remake's alerts keep their words and buttons (the DOS look's); the default button goes rightmost. **Not built:** kind 2 (ALERT_CPIC: the won and lost boxes,
 not captured), kind 3 (ALERT_NOPIC: event messages the remake shows as reports, not captured) and #2 ALERTBOX (its caller not found, not captured).
+
+**33 STATUS** (FUN_1100_05b4, modeless, while End Turn works the turn out and while a new galaxy is written; too quick for a screenshot in a small game: captured by
+grabbing the X screen 130 times a second during a 20-player Humongous game's End Turn, `win20-orig-vga16-status`, `-status-bar` ("Pass 1 for Player 11...", the bar
+50 of 254 pixels), `-status-write` ("Writing Game File...", 228)): the step (the program's strings 48-53) and its bar (static 101, painted: a black frame, the 16
+colours' green). In the remake (T.turnProgress, the Mac 1.2 skin's hook) every step shows 40 ms, the bar at step / steps (the program's own fraction not worked
+out). **23 NOTIFY1** (NOTIFYDLGPROC, FUN_1008_0788: "Closing Game..." while the game file closes; captured the same way, `win20-orig-vga16-closing`): WS_DLGFRAME
+with no caption, a black line, four of navy and a black line round a 224 x 44 client (measured; the renderer's frame and an inner line), the words centred: in the
+DOS look's Closing Game window's place (T.closingGame, a second). Both compared (scratch `cmp-status.png`, `cmp-closing.png`): frame, caption, words' and bar's places.
 
 (Commit 1b77792, the licence window, also carries the main Claude's closer zoom with modern conveniences for the DOS, Amiga and iOS skins: DZM / dzs() in
 js/skins/dos/ui.js, ZOOMS_MODERN / zooms() in js/skins/amiga/ui.js, the "modern ? 2 : 1" limit in js/skins/ios/ui.js; it was in the tree when that commit was made.)

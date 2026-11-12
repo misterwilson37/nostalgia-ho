@@ -252,7 +252,8 @@ window.HOTHEME = {
   // The original writes "..." and its key equivalents as "[Ctrl+S]" (T.keyName).
   get menuLayout() { return menuLayoutDos(); },
   gameInfo(win) { return gameInfo(win); },
-  licensee() { return licensee(); }, // (the licence lines' name and organisation: licensee below)
+  licensee() { return licensee(); },
+  turnProgress(g, go) { if (winOn() && window.HOWIN31 && window.HOWIN31.status) window.HOWIN31.status(g, go); else go(); }, // (the Windows program's Status window while the turn is worked out: template 33) // (the licence lines' name and organisation: licensee below)
   fleetList() { return fleetList(); },
   // the words of a ship type and of a number of ships, as the panes and the DOS look's windows write them (for the Windows look's dialogs, js/skins/dos/win31/dialogs.js):
   // caption "Patton (2/2) Fighter"; ships "one Patton (2/2) Fighter", "2 Patton (2/2) Fighters" (the program's fleet rows and its queue cells, captured)
@@ -1429,6 +1430,7 @@ function youWonDos(kind, Y, done) {
 // so the box stays about a second (no button: nothing to press) and then the title page comes, for Close, Exit and the quit question alike.
 function closingGameDos(go) {
   const a = window.HOAPI;
+  if (winOn() && window.HOWIN31 && window.HOWIN31.notify && window.HOWIN31.notify(tx('Closing Game...'), go)) return true; // (the Windows program's notice, template 23)
   const de = wl() === 'de', d = dDialog(176, 112, null, tplText([de ? 'Schließe Spiel...' : tx('Closing Game...')], de ? 1 : 4, 2), 'Closing Game...'); // (the German build's template: its words at cell 1, 2)
   d.setAttribute('aria-busy', 'true'); d.setAttribute('aria-live', 'polite');
   setTimeout(() => { if (d.isConnected) a.closeModal(); go(); }, 1000);

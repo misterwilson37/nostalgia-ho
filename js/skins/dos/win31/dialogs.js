@@ -612,6 +612,46 @@ W.alert = function (paras, btns, o) {
   document.body.append(back); const f = dlg.get('201'); if (f) f.focus(); else dlg.focus();
   return back;
 };
+// #33 STATUS ("Spaceward Ho! Status", FUN_1100_05b4: CreateDialog, modeless, while the turn is worked out (FUN_1040_0038, End Turn, unless the main window is an
+// icon) and while a new galaxy is written; captured with a 20-player Humongous galaxy, frames grabbed while it showed: win20-orig-vga16-status (empty bar),
+// -status-bar ("Pass 1 for Player 11...", 50 of the bar's 254 pixels), -status-write ("Writing Game File...", 228)): the step (static 100: the program's strings 48-53,
+// "Processing Turn...", "Pass 1 for Player %d...", "Battle Stage...", "Pass 2 for Player %d...", "Writing Game File...", "Removing Old Battles...") and the bar
+// (static 101, painted: a black frame, filled from the left in the 16 colours' green, 0, 170, 85). The remake works the turn out at once: the steps are shown one
+// after another (40 ms each, as the Mac 1.2 skin's status window, js/skins/mac12/ui.js turnProgress), the bar at step / steps (the program's own fraction was not
+// worked out: its two frames are a fifth and nine tenths), then the turn goes on (T.turnProgress, js/skins/dos/ui.js).
+W.status = function (g, go) {
+  const a = root.HOAPI, tl = (t) => (a.tl ? a.tl(t) : t), n = g.players.length, steps = ['Processing Turn...'];
+  if (!W.templates) return go();
+  for (let i = 1; i <= n; i++) steps.push(tl('Pass 1 for Player %d...').replace('%d', i));
+  steps.push('Battle Stage...');
+  for (let i = 1; i <= n; i++) steps.push(tl('Pass 2 for Player %d...').replace('%d', i));
+  steps.push('Writing Game File...', 'Removing Old Battles...');
+  let i = 0;
+  const bar = (x, w, h) => { x.fillStyle = '#fff'; x.fillRect(0, 0, w, h); x.fillStyle = document.documentElement.classList.contains('w31-256') ? '#008200' : '#00aa55'; x.fillRect(1, 1, Math.round((w - 2) * i / steps.length), h - 2); x.strokeStyle = '#000'; x.lineWidth = 1; x.strokeRect(0.5, 0.5, w - 1, h - 1); };
+  const dlg = W.open(33, { title: 'Spaceward Ho! Status', label: 'Spaceward Ho! Status', text: { 100: steps[0] }, pics: { 101: bar } });
+  if (!dlg) return go();
+  dlg.el.setAttribute('aria-busy', 'true');
+  const t = dlg.get('100'), b = dlg.get('101');
+  const step = () => {
+    if (!dlg.el.isConnected) return go();
+    if (++i >= steps.length) { a.closeModal(); go(); return; }
+    if (t) t.textContent = tl(steps[i]); if (b && b.w31) b.w31.repaint();
+    setTimeout(step, 40);
+  };
+  setTimeout(step, 40);
+};
+// #23 NOTIFY1 (NOTIFYDLGPROC; FUN_1008_0788: CreateDialog, modeless, with "Closing Game..." while the game file is closed, FUN_1050_0d02: File, Close and opening
+// another game; captured, frames grabbed while it showed: win20-orig-vga16-closing.png): WS_DLGFRAME without a caption: a black line, four of navy and a black line
+// round the 224 x 44 client (measured), the words centred (static 100). The remake: the DOS look's Closing Game window's place (js/skins/dos/ui.js closingGameDos,
+// T.closingGame: shown a second, then the game closes).
+W.notify = function (text, go) {
+  const a = root.HOAPI; if (!W.templates) return false;
+  const dlg = W.open(23, { label: text, text: { 100: text } }); if (!dlg) return false;
+  const c = dlg.el.querySelector('.w31client'); if (c) c.style.boxShadow = 'inset 0 0 0 var(--wu) #000';
+  dlg.el.setAttribute('aria-busy', 'true'); dlg.el.setAttribute('aria-live', 'polite');
+  setTimeout(() => { if (dlg.el.isConnected) a.closeModal(); go(); }, 1000);
+  return true;
+};
 D.fleets = function () {
   const a = root.HOAPI, g = a.G, T = root.HOTHEME; if (!g || !T || !T.fleetList) return false;
   const F = T.fleetList(), all = g.fleets.filter(f => f.owner === a.ME), shown = all.filter(f => !f.sat);
