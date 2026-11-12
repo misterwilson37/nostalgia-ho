@@ -68,7 +68,7 @@ h3.scaleflip { cursor: pointer; }
 .note { margin: 6px 0; }
 .phead { display: flex; gap: 10px; align-items: center; margin-bottom: 6px; }
 .ppic { position: relative; width: 56px; height: 56px; flex: none; }
-.ppic img { width: 56px; height: 56px; image-rendering: pixelated; }
+.ppic img, .ppic > canvas { width: 56px; height: 56px; image-rendering: pixelated; }
 .ppic .phat { position: absolute; left: -5px; top: -14px; width: 66px; height: auto; }
 .planet h3 { margin: 0; }
 .tm { display: grid; grid-template-columns: auto minmax(40px, 1fr) auto; gap: 6px; align-items: center; margin: 6px 0; }

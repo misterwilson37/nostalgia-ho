@@ -390,9 +390,17 @@ function planetBattlePic() {
   c.getContext('2d').drawImage(IMG.ships, 1, 222, 62, 62, 0, 0, 62, 62);
   return (shipCache.planet = c);
 }
+// A canvas shown as an <img> (its data URL); where the browser refuses to read the canvas back (Firefox: "The operation is insecure", for a
+// canvas it counts as tainted by a picture from another address, as on some preview hosts), a copy of the canvas itself, which shows the same.
+function canvasPic(c, alt) {
+  try { const i = new Image(); i.src = c.toDataURL(); i.alt = alt || ''; return i; } catch (e) {
+    const k = document.createElement('canvas'); k.width = c.width; k.height = c.height; k.getContext('2d').drawImage(c, 0, 0);
+    if (alt) { k.setAttribute('role', 'img'); k.setAttribute('aria-label', alt); } else k.setAttribute('aria-hidden', 'true');
+    return k;
+  }
+}
 function shipImgEl(d, h, owner) {
-  const c = shipPic(d, owner);
-  const i = new Image(); i.src = c.toDataURL(); i.style.height = (h || 28) + 'px'; i.alt = HO.TYPES[d.type].name; i.className = 'shippic';
+  const i = canvasPic(shipPic(d, owner), HO.TYPES[d.type].name); i.style.height = (h || 28) + 'px'; i.className = 'shippic';
   return i;
 }
 
@@ -1662,7 +1670,7 @@ function planetBox(sid) {
   const look = starLook(sid);
   const box = el('section', { class: 'box planet' });
   const pic = el('div', { class: 'ppic' });
-  pic.append(el('img', { src: look.pic ? look.pic.toDataURL() : A.img[look.base], alt: '' }));
+  pic.append(look.pic ? canvasPic(look.pic) : el('img', { src: A.img[look.base], alt: '' }));
   if (look.hat) pic.append(el('img', { src: A.img[look.hat], class: 'phat', alt: '', style: look.hatTint ? `filter:brightness(${look.hatTint / 255})` : null }));
   const ownerName = s.owner === ME ? 'You' : k.explored && k.owner >= 0 && k.owner !== ME ? G.players[k.owner].name : k.explored ? 'No one' : 'Unknown';
   box.append(el('div', { class: 'phead' }, pic, el('div', null, el('h3', null, s.name), (HO.rules(G).planetInfo && PW('pop')) ? null : el('div', { class: 'sub' }, ownerName + (k.explored && s.owner !== ME && k.seen >= 0 && k.seen < G.turn ? ` (seen ${2000 + k.seen * 10})` : '')))));

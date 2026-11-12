@@ -985,8 +985,10 @@ const frame = (cls, ...kids) => el('div', { class: 'am-frame ' + (cls || '') }, 
 function shipCanvas(d, owner) {
   const a = api(), c = a.shipPic(d, owner);
   if (!c) return el('span', { class: 'am-noimg' });
-  const im = el('img', { class: 'am-ship', alt: '', src: c.toDataURL ? c.toDataURL() : c.src, draggable: 'false' });
-  return im;
+  let src = c.src;
+  if (c.toDataURL) { try { src = c.toDataURL(); } catch (e) { // (a canvas the browser counts as tainted: shown as a copy of itself, as the classic skin's canvasPic)
+    const k = el('canvas', { class: 'am-ship', 'aria-hidden': 'true' }); k.width = c.width; k.height = c.height; k.getContext('2d').drawImage(c, 0, 0); return k; } }
+  return el('img', { class: 'am-ship', alt: '', src, draggable: 'false' });
 }
 
 // Schiffsbau (13.png; ho! FUN_00120e12, table data+0x2afa, the one for a
