@@ -306,8 +306,8 @@ DOS look's own alerts all come here). The program's ALERT resources (3010-5090) 
 FUN_1108_01fc picks the template. ALERTPICDLGPROC (disassembled: the jump tables Ghidra could not follow, scratch `ne.py`) formats the text into static 100, grows the
 window by what DrawText (DT_CALCRECT | DT_WORDBREAK) needs and centres it on the screen, makes each button (the longest word's letters, "&" counted, + 4) x 8 wide and at
 least the font's height + 8 high, 16 apart, the rightmost (201, the last of the resource's words, the default) at the middle between the picture's right edge and the
-window's, and hides the unused ones. Measured on two captures (`fleets-hyper`, chunk 4, two lines; `alert-fuel`, new, five): client 421 wide, 128 + 16 a line - 18 + 4
-high (the five-line one is a pixel taller), the mascot (HOCOLOR 3520 = the DOS skin's d3520) at 16, height - 87, the buttons 28 high at height - 68, OK at 218. Compared
+window's, and hides the unused ones. Measured on three captures (`fleets-hyper`, chunk 4, two lines; new: `alert-fuel`, five, and `alert-wait`, four, two buttons "Wait" and "Continue", Continue
+the rightmost with the focus): client 421 wide, 128 + 16 a line - 18 + 4 high, a pixel more when the words have a blank line, the buttons at the height without that pixel - 68, the mascot (HOCOLOR 3520 = the DOS skin's d3520) at 16, height - 87, the buttons 28 high, OK at 218, Wait and Continue at 132 and 255. With two buttons the leftmost (the first word, the safe one: Wait, Cancel) has the default button's heavy edge and takes Return, the rightmost the focus (captured). Compared
 (scratch `cmp-alert-fuel.png`): frame, picture, button where the capture has them, the font differs, and the button's underlined access letter and focus frame are not
 drawn. The remake's alerts keep their words and buttons (the DOS look's); the default button goes rightmost. **Not built:** kind 2 (ALERT_CPIC: the won and lost boxes,
 not captured), kind 3 (ALERT_NOPIC: event messages the remake shows as reports, not captured) and #2 ALERTBOX (its caller not found, not captured).

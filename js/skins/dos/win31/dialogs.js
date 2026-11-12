@@ -574,9 +574,9 @@ D.pollSpeed = function () {
   });
 };
 // #4 ALERT_LLPIC, the program's alert box (the ALERT resources 3010-5090: their kind 1, FUN_1108_01fc; ALERTPICDLGPROC, read in the disassembly; captured, the
-// hyperspace alert win20-orig-vga16-fleets-hyper.png and the fuel alert win20-orig-vga16-alert-fuel.png): no caption; the words (static 100 at 14, 12, wrapped)
+// hyperspace alert win20-orig-vga16-fleets-hyper.png, the fuel alert win20-orig-vga16-alert-fuel.png, the two-button wait alert win20-orig-vga16-alert-wait.png): no caption; the words (static 100 at 14, 12, wrapped)
 // measured by DrawText (DT_CALCRECT | DT_WORDBREAK) and the window grown by what they need, centred on the screen (measured: 421 wide for the template's 410, 146
-// high for two lines and 195 for five: 128 + 16 a line - 18 + 4, one pixel short at five); the mascot (HOCOLOR's 3520, the DOS skin's d3520, the same picture) at
+// high for two lines, 179 for four, 195 for five: 128 + 16 a line - 18 + 4, a pixel more with a blank line); the buttons at that height without the pixel - 68; the mascot (HOCOLOR's 3520, the DOS skin's d3520, the same picture) at
 // 16, height - 87; the buttons (one to three, 203 202 201 from the left, the last of the resource's words the rightmost, 201, the default push button) each
 // (letters + 4) x 8 wide (the longest word's; "&OK" 56), 28 high, 16 apart, at height - 68, the rightmost at (88 + width) / 2 + the row's width / 2 - one button and
 // its gap (the middle between the picture's right edge and the window's, measured: the hyperspace and fuel alerts' OK at 218). Every alert of the DOS look's
@@ -588,13 +588,13 @@ W.alert = function (paras, btns, o) {
   cx.font = "bold 13px 'MS Sans Serif', 'Microsoft Sans Serif', Arial, sans-serif";
   let n = 0;
   text.split('\n').forEach((par) => { let line = ''; par.split(' ').forEach((w) => { const t = line ? line + ' ' + w : w; if (line && cx.measureText(t).width > 387) { n++; line = w; } else line = t; }); n++; });
-  const CW = 421, CH = 128 + Math.max(0, 16 * n - 18) + 4;
+  const CW = 421, H0 = 128 + Math.max(0, 16 * n - 18) + 4, CH = H0 + (/\n\n/.test(text) ? 1 : 0); // (a pixel taller with a blank line: measured, the fuel and wait alerts)
   // (the default button the rightmost, 201, as the program's resources have it; the others to its left in their order)
   const order = btns.filter(b => !b.def).concat(btns.filter(b => b.def)).slice(-3), k = order.length;
   const bw = Math.max(...order.map(b => (String(b.label).length + 1 + 4) * 8)), step = bw + 16, xr = Math.floor((88 + CW) / 2) + Math.floor(k * step / 2) - step;
   const rects = { 100: [14, 12, 387, 16 * n], 999: [16, CH - 87, 74, 74] }, text0 = { 100: text }, on = {};
   let back = null; const done = () => { if (back) back.remove(); };
-  [201, 202, 203].forEach((id, i) => { rects[id] = [xr - i * step, CH - 68, bw, 28]; const b = order[k - 1 - i]; text0[id] = b ? b.label : ''; if (b) on[id] = () => { done(); if (b.fn) b.fn(); }; });
+  [201, 202, 203].forEach((id, i) => { rects[id] = [xr - i * step, H0 - 68, bw, 28]; const b = order[k - 1 - i]; text0[id] = b ? b.label : ''; if (b) on[id] = () => { done(); if (b.fn) b.fn(); }; });
   const img = a.IMG['dos:d3520'];
   const dlg = W.build(4, { label: paras[0], client: [CW, CH], rects, text: text0, on, close: done,
     pics: { 999: (x, w, h) => { x.fillStyle = '#fff'; x.fillRect(0, 0, w, h); if (img && img.width) x.drawImage(img, 0, 0); } } });
@@ -606,7 +606,10 @@ W.alert = function (paras, btns, o) {
   const bs = btns.map(b => shown[order.indexOf(b)]).filter(Boolean);
   if (btns.length >= 2 && a.markYesNo) a.markYesNo(dlg.el, bs[0], bs[1], !!(o && o.yesNo));
   back = a.el('div', { class: 'scrim dd-alertscrim w31alert', onkeydown: (e) => { if (e.key === 'Escape') { e.stopPropagation(); done(); } } }, dlg.el);
-  document.body.append(back); dlg.focus();
+  // (with two or three buttons the leftmost, the resource's first word, is drawn as the default button and takes Return, while the rightmost has the focus: captured,
+  // the wait alert's "Wait" with the heavy edge and "Continue" with the dotted frame; the first word is the safe one, Wait, Cancel)
+  if (k > 1) { const r = dlg.get('201'), l = dlg.get(String(200 + k)); if (r) r.classList.remove('def'); if (l) l.classList.add('def'); }
+  document.body.append(back); const f = dlg.get('201'); if (f) f.focus(); else dlg.focus();
   return back;
 };
 D.fleets = function () {
