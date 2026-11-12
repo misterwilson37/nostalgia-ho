@@ -24,6 +24,14 @@ Each: capture it in the running original (16 colours), build it from its templat
 frame's unit; check whether the program resizes it. Compare with the capture at one Windows pixel per CSS pixel and look at it; make the comparison image **after** the
 last change to the dialog. Commit and push after each item; keep the progress line in `docs/win20-findings.md`.
 
+## 2b. The licensee is the signed-in player (Jake's decision)
+
+Every "Licensed to:" (About and Startup in both looks, LICENSEE, REGISTER) shows, in this order: the signed-in account's display name (`HOCLOUD.user.name` when
+`HOCLOUD.user` is not anonymous and the account has a display name: the Google name; **never the email address**, which `describe()` in `js/cloud.js` falls back to:
+use the display name only), else the name last typed at New Game (as now). Read it when the window opens (the account comes back a moment after load: no waiting, no
+network call of its own; `localStorage` "ho5.cloud.name" holds the last one but may be an email: check). One helper in the DOS skin, used by every licence line. Nothing is
+sent anywhere. Not with Full Hoedown only: always.
+
 ## 3. Chunk 1's leftovers (small; do them when the dialog they touch is open in your work, or at the end)
 
 - The **Help** menu shows only when the look was chosen before the page loaded: make it follow the look when it changes.
@@ -37,7 +45,7 @@ last change to the dialog. Commit and push after each item; keep the progress li
 - Unpatched = the original, bugs and all. Never guess: a capture or the code.
 - Anything not in the original (an added menu item, a shortcut) goes under modern conveniences (`G.opts.modern`) and into `MODERN_TEXT` (five languages).
 - No originals, captures or decompiled code in the public repo (geometry tables and the game's own pictures as the skin already ships them are fine). Never quote 3.0.1F's
-  PICT 4010. The licence window: no real person's name or address (the original's licensee lines show whatever was registered: use the remake's own placeholder).
+  PICT 4010. The licence lines: never a stranger's real name or address (no names from the originals).
 - Interface text through `js/ui-text.js` (en fr de tr es). Never rewrite pushed history. Stop servers, Xvfb and DOSBox by PID, never `pkill -f`.
 - Mouse works as touch: no right-click, no hover-only. Look at your own screenshots.
 
