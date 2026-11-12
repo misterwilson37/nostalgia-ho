@@ -1,6 +1,6 @@
 # Windows 3.1 2.0: the display audit (November 2026, begun)
 
-**Progress (Windows dialogs):** foundation done (emulator `emulators/dosbox-win31`, renderer `js/skins/dos/win31/`); chunk 1 done: the main window on the 640 x 480 screen at one scale, and 8 of 33 dialogs built (About, Battle Speed; Create New Galaxy, File Open, GameInfo, New Player Registration, Player Entry, Startup); Game Info also in the DOS look, the DOS look's build cost line "(D)" / "(P)"; next: chunk 2 (Licence, Register: not started), then chunk 3, Ships (below, "The chunk plan").
+**Progress (Windows dialogs):** foundation done (emulator `emulators/dosbox-win31`, renderer `js/skins/dos/win31/`); chunk 1 done: the main window on the 640 x 480 screen at one scale, and 8 of 33 dialogs built (About, Battle Speed; Create New Galaxy, File Open, GameInfo, New Player Registration, Player Entry, Startup); Game Info also in the DOS look, the DOS look's build cost line "(D)" / "(P)"; chunk 3 done (Ships: Build Ships, Create New Ship Type, List Ship Types, Rename, Name a Star, Organize Fleets; 14 of 33 built); next: chunk 2 (Licence, Register: not started), then chunk 4, Lists (below, "The chunk plan").
 
 *The same game as DOS 2.0 and Mac 2.0.1 (`docs/dos-findings.md`); this is what WINHO.EXE puts in front of the player.*
 
@@ -181,6 +181,44 @@ opens on its own default look (DOS) rather than the one in use, as before.
 File Open, Startup), the three-window New Game sequence about an hour (the owner-drawn cells and Create New Galaxy's own dialog unit had to be measured).
 Captures in the running program cost about 2 minutes each with `w31.py` (keys work where the cursor finder does not: over a picture).
 
+## Chunk 3: Ships (November 2026)
+
+**Captured** (private `audit/win-2.0/captures/win20-orig-vga16-*.png`, new): `build-empty`, `build-two` (two kinds queued), `build-remove` (a queue cell
+clicked), `build-colony` (the second kind moved up), `newship` (Scout), `newship-class` (the Class list open), `newship-fighter`, `newship-sat`, `shiptype`,
+`nametype`, `orgfleets`, `orgfleets-group` (with chunk 1's `build-dev`, `build-prod`). Name a Star needs a won game: not captured.
+
+**The ship pictures.** HOCOLOR.DLL's 228 ship parts (12100-12926) are byte for byte the DOS program's (the DOS skin's d12100-d12926, compared pixel by pixel), so
+they are reused. FUN_10f0_0066 draws a ship as three parts side by side (engine 12100 + Range + Speed - 8, hull 12198 + Shields or 12250 for a colony pod, nose
+12350 + Weapons - 1; a satellite 12401 + Weapons - 1 in the middle part; the two special ships), big (81 x 76 a part) or small (40 x 40, ids + 500): `dialogs.js
+W.shipPic`. The 16-colour screen shows them in its 16 colours; the remake in their own.
+
+**Some windows are sized by the program, not by the System font's units** (measured): Build Ships' client is 524 x 332 for 258 x 160 units (every control where
+8.132 x 16.6 units put it, truncated; its list 367, 34, 142 x 218); List Ship Types keeps the units but lengthens its list to four whole rows of 54 (19, 13,
+140 x 218) and moves everything from 99 units down 11 pixels (client 448 x 337); Organize Fleets 452 x 316 for 223 x 151 (8.11 x 16.74). Create New Ship Type
+and Rename are at the System font's units. The renderer gained `baseY`, `floor`, `rects`, `client`, `moveBelow`.
+
+**Built** (`js/skins/dos/win31/dialogs.js`; each looked at beside its capture at one Windows pixel per CSS pixel):
+- **9 BLDSHIP** (Ships, Build Ships at ...; the remake's Build): owner-drawn list of types (rows of 54: small picture, caption in MS Sans Serif; chosen black), a
+  click queues one; three queue cells (121 x 55 framed, "one Patton (2/2) Fighter" / "2 Patton (2/2) Fighters", a caption too wide in the smaller font); a click
+  on a cell takes one ship away (captured) and unchooses the list; the big picture of the first kind with the part not built grey (FUN_10e8_18a8: PatBlt ROP
+  0xFA0089 from the right over (100 - done) %; in 16 colours each colour turns white or dark grey: a table of the 134 colours measured, the nearest for the
+  rest); the cost line and "n% Done", blank with nothing queued. OK sets the queue, Cancel leaves it.
+- **22 NEWSHIP** (Ctrl+K): name field, five levels "v / max" with scroll bars (a one-value bar keeps its thumb at the start: captured), Name It For Me, the big
+  picture in the white frame, Class drop-down (the combo box's own 17-pixel button now drawn, measured), costs, Cancel, OK dimmed until named (a dimmed default
+  button loses its heavy edge: captured). A Satellite's Range "0 / 0".
+- **31 SHIPTYPE**: the list (owner-drawn, a scroll bar past four), the chosen type's picture and numbers, Scrap This Type, Rename (opens 20), OK.
+- **20 NAMETYPE**: the sentence, the field, Name It, Cancel, OK dimmed while empty; back to List Ship Types.
+- **19 NAMESTAR** (when the player has won): from the template at the System font's units, in the remake's Name a Star form (T.nameStarLayout): the ruleset's
+  words, picture 3500 (74 x 74, the frame's size), "New Star Name:", the field, OK. Not captured.
+- **24 ORGFLEETS** (Ctrl+O): the words, the frame of piles (one a row, 45 apart; the number right-aligned at 35, the small picture at 16), Group All, Divide All,
+  Cancel, OK. Moves by drag or, for touch, a tap on a pile and on another (Shift: the whole pile); more than four piles in columns (not captured: the remake's).
+
+**Not done:** the 256-colour pattern for the unbuilt part (bitmap 0x22ce, not captured); the pictures in 16 colours; Name a Star and more than four piles not
+captured; the dialogs centred, not at the program's places.
+
+**Cost:** the six dialogs with their captures took most of one session; Build Ships (the program's own sizing, the grey table) about half of it. Captures in the
+running program: a new game, Create New Ship Type, List Ship Types, Rename, Build Ships, Organize Fleets, two turns: about 20 minutes.
+
 ### The chunk plan (the other 31, about five a session)
 
 Each chunk: capture each dialog in the running original (`emulators/dosbox-win31`), add it to `dialogs.js` and `hook.js` ITEMS, compare, look at the shots.
@@ -190,7 +228,7 @@ Each chunk: capture each dialog in the running original (`emulators/dosbox-win31
    saved games), 13 GAMEINFO, 21 NEWPLAYER (radios; the DOS skin has none: the classic New Game), 25 PLAYERENTRY, 32 STARTUP (owner-drawn picture: HOCOLOR
    1002). Needs: list box and edit checked against captures (first to use them); the Startup and New Galaxy pictures extracted (win31-art.py).
 2. **Licence and registration:** 14 LICENSEE (radios, edits), 28 REGISTER (the password box). Small; can join chunk 1 or 5.
-3. **Ships:** 9 BLDSHIP (list box, owner-drawn queue cells; DOS `buildDos`), 22 NEWSHIP (29 controls, scroll bars; DOS `newTypeDos`), 31 SHIPTYPE (DOS
+3. **Ships (done, above):** 9 BLDSHIP (list box, owner-drawn queue cells; DOS `buildDos`), 22 NEWSHIP (29 controls, scroll bars; DOS `newTypeDos`), 31 SHIPTYPE (DOS
    `shipTypesDos`), 20 NAMETYPE and 19 NAMESTAR (DOS `renameDos`), 24 ORGFLEETS (DOS `organizeDos`). Needs: owner-drawn ship pictures from HOCOLOR.
 4. **Lists:** 15 LISTFLEETS (DOS `fleetsDos`), 17 LISTSTARS (DOS `starsDos`), 10 COMPPLAYERS and 16 LISTSKILLS (`FUN_1078_039c`; DOS `compareDos`, `skillsDos`),
    29 REPORT (`FUN_10c0_0344`; DOS `reportsDos`). Needs: list box (chunk 1), vertical scroll bar checked.
