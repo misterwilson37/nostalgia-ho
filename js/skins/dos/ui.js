@@ -735,7 +735,7 @@ function loadFonts() {
 function dq(w, h, label) {
   const a = window.HOAPI, dpr = window.devicePixelRatio || 1;
   const c = a.el('canvas', { class: 'dq', width: Math.round(w * U * dpr), height: Math.round(h * U * dpr), role: 'img', 'aria-label': label || '' });
-  c.style.width = `calc(${w} * var(--u))`; c.style.height = `calc(${h} * var(--u))`;
+  c.style.width = `calc(${w} * var(--du))`; c.style.height = `calc(${h} * var(--du))`; // (--du, in px: --u alone has no unit, the size was dropped and a 2x screen drew the canvas at twice its size)
   const x = c.getContext('2d'); x.setTransform(U * dpr, 0, 0, U * dpr, 0, 0); x.fillStyle = '#fff'; x.fillRect(0, 0, w, h);
   x.textBaseline = 'alphabetic'; x.imageSmoothingEnabled = false;
   const api = {

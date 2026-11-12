@@ -289,7 +289,7 @@ function fleetsStatus() {
   };
   let cur = null;
   const list = el('div', { class: 'lb', role: 'listbox' });
-  const show = () => { list.innerHTML = ''; for (const f of order) list.append(raw('div', line(f), { class: 'li' + (f === cur ? ' sel' : ''), role: 'option', onclick: () => { cur = f; show(); }, ondblclick: go })); };
+  const show = () => { list.innerHTML = ''; for (const f of order) list.append(raw('div', line(f), { class: 'li' + (f === cur ? ' sel' : ''), role: 'option', onclick: dbl12(f, () => { cur = f; show(); }, go) })); };
   function go() {
     if (!cur) return;
     if (cur.to != null) { alertBox([W.hyper]); return; }
@@ -340,8 +340,8 @@ function buildShips(sid) {
   const dev = raw('span', ''), pro = raw('span', ''), done = raw('span', '');
   const show = () => {
     types.innerHTML = ''; queue.innerHTML = '';
-    for (const d of ds) types.append(raw('div', desc0(d), { class: 'li' + (d === pick ? ' sel' : ''), role: 'option', onclick: () => { pick = d; show(); }, ondblclick: () => add(d) }));
-    (s.queue || []).forEach((it, i) => { const d = H().getDesign(g, a.ME, it.did); if (d) queue.append(raw('div', descN(d, it.n), { class: 'li', role: 'option', ondblclick: () => { H().unqueueShip(g, a.ME, sid, i); show(); } })); });
+    for (const d of ds) types.append(raw('div', desc0(d), { class: 'li' + (d === pick ? ' sel' : ''), role: 'option', onclick: dbl12('t' + d.id, () => { pick = d; show(); }, () => add(d)) }));
+    (s.queue || []).forEach((it, i) => { const d = H().getDesign(g, a.ME, it.did); if (d) queue.append(raw('div', descN(d, it.n), { class: 'li', role: 'option', onclick: dbl12('q' + i, () => {}, () => { H().unqueueShip(g, a.ME, sid, i); show(); }) })); });
     const c = pick ? H().designCost(g, pick) : null;
     dev.textContent = c ? fill('$%s (D)', nice(c.protoTotal != null ? c.protoTotal : c.money)) : '';
     pro.textContent = c ? fill('$%s (P)', nice(c.money)) : '';
@@ -377,8 +377,8 @@ function buyShips(sid) {
   const manyText = (d) => (d.type === 'scout' ? H().DATA.alerts[35] : d.type === 'tanker' ? H().DATA.alerts[36] : null);
   const show = () => {
     types.innerHTML = ''; bought.innerHTML = '';
-    for (const d of ds) types.append(raw('div', desc0(d), { class: 'li' + (d === pick ? ' sel' : '') + (d.scrap301 && !rs.queueMarked ? ' dim12' : ''), role: 'option', 'aria-selected': d === pick ? 'true' : 'false', tabindex: 0, onclick: () => { pick = d; show(); }, ondblclick: () => add(d), onkeydown: (e) => { if (e.key === 'Enter') { e.preventDefault(); add(d); } } }));
-    for (const d of ds) if (session[d.id] > 0) bought.append(raw('div', descN(d, session[d.id]), { class: 'li', role: 'option', tabindex: 0, ondblclick: () => take(d), onkeydown: (e) => { if (e.key === 'Enter' || e.key === 'Delete') { e.preventDefault(); take(d); } } }));
+    for (const d of ds) types.append(raw('div', desc0(d), { class: 'li' + (d === pick ? ' sel' : '') + (d.scrap301 && !rs.queueMarked ? ' dim12' : ''), role: 'option', 'aria-selected': d === pick ? 'true' : 'false', tabindex: 0, onclick: dbl12('t' + d.id, () => { pick = d; show(); }, () => add(d)), onkeydown: (e) => { if (e.key === 'Enter') { e.preventDefault(); add(d); } } }));
+    for (const d of ds) if (session[d.id] > 0) bought.append(raw('div', descN(d, session[d.id]), { class: 'li', role: 'option', tabindex: 0, onclick: dbl12('b' + d.id, () => {}, () => take(d)), onkeydown: (e) => { if (e.key === 'Enter' || e.key === 'Delete') { e.preventDefault(); take(d); } } }));
     const c = pick ? H().shipCostNow(g, p, pick) : null;
     dev.textContent = c && c.proto ? fill('$%s (D)', nice(c.proto)) : '';
     pro.textContent = c ? fill('$%s (P)', nice(c.money)) : '';
@@ -455,6 +455,13 @@ function vbar12(o) {
   c.addEventListener('keydown', (e) => { const st = Math.max(step, Math.round(max / H0)), d = { ArrowUp: st, ArrowRight: st, ArrowDown: -st, ArrowLeft: -st, PageUp: Math.max(step, Math.round(max / 10)), PageDown: -Math.max(step, Math.round(max / 10)) }[e.key]; if (d != null) { e.preventDefault(); set(v + d); } else if (e.key === 'Home') { e.preventDefault(); set(0); } else if (e.key === 'End') { e.preventDefault(); set(max); } });
   draw();
   return { el: c, get: () => v, set };
+}
+// A double click counted by the window itself, for the lists that redraw their rows on the first click (Build Ships, the fleet list): the
+// second click then lands on a new row, and Firefox and Safari send no dblclick for it (Chrome does). Two clicks within 500 ms on the same item
+// (key) are a double click, as the Mac's own; the first click does what a click does. A mouse and a finger alike.
+let DBL12 = null;
+function dbl12(key, one, two) {
+  return () => { const t = Date.now(), hit = !!DBL12 && DBL12.k === key && t - DBL12.t < 500; DBL12 = hit ? null : { k: key, t }; if (hit) two(); else one(); };
 }
 // A list box, the chosen row in inverse: items [{ id, label, pic, disabled }] (a null item is a rule between rows); o { value, label, onpick, ondbl }
 function list12(items, o) {
