@@ -36,14 +36,18 @@ const noGame = () => !G();
 // step them and are dimmed at the ends); at the smallest a star is a dot, with no picture and no name (DrawOneBWStarSubProc @c38ce:
 // PaintOval), names from the second on
 const LY = 2, ZOOMS = [6, 9, 12, 17].map(z => z * LY);
-const zoomIdx = (s) => { let b = 0; ZOOMS.forEach((z, i) => { if (Math.abs(Math.log(z / s)) < Math.abs(Math.log(ZOOMS[b] / s))) b = i; }); return b; };
+// With modern conveniences, three closer zooms beyond the original's largest (the remake's: on a big screen 17 is small); the plain game keeps the four.
+const ZOOMS_MODERN = ZOOMS.concat([24, 34, 48].map(z => z * LY));
+const zooms = () => { const g = G(); return g && g.opts && g.opts.modern ? ZOOMS_MODERN : ZOOMS; };
+const zoomIdx = (s) => { const Z = zooms(); let b = 0; Z.forEach((z, i) => { if (Math.abs(Math.log(z / s)) < Math.abs(Math.log(Z[b] / s))) b = i; }); return b; };
+const snapZoom = (s) => zooms()[zoomIdx(s)];
 function zoomTo(s, f) {
-  const cur = zoomIdx(s);
+  const Z = zooms(), cur = zoomIdx(s);
   let i = zoomIdx(s * f);
   if (i === cur && Math.abs(Math.log(f)) >= 0.13) i = cur + (f > 1 ? 1 : -1);
-  return ZOOMS[Math.max(0, Math.min(ZOOMS.length - 1, i))];
+  return Z[Math.max(0, Math.min(Z.length - 1, i))];
 }
-const atZoom = (k) => { const a = A(); return !!a && zoomIdx(a.UI.view.s) === k; };
+const atZoom = (k) => { const a = A(); return !!a && zoomIdx(a.UI.view.s) === (k < 0 ? zooms().length + k : k); };
 
 // The menus, as 1.2's MENU resources 128-134 have them (SetMenuItems @e29aa: what is dimmed, the words that
 // change with the selection, the check marks). The Apple menu is the skin's "Ho! 1.2" menu.
@@ -150,7 +154,7 @@ function menuLayout12() {
     Galaxy: [
       it('List All Explored Stars…', () => A().openStarList(), { ghost: noGame }),
       '-',
-      it('Zoom In', () => { const m = A().map(); A().zoomAt(m.w / 2, m.h / 2, 1.3); }, { ghost: () => noGame() || atZoom(3), key: '=' }),
+      it('Zoom In', () => { const m = A().map(); A().zoomAt(m.w / 2, m.h / 2, 1.3); }, { ghost: () => noGame() || atZoom(-1), key: '=' }),
       it('Zoom Out', () => { const m = A().map(); A().zoomAt(m.w / 2, m.h / 2, 1 / 1.3); }, { ghost: () => noGame() || atZoom(0), key: '-' }),
       '-',
       // (dimmed while announcements are still to be read: SetMenuItems' message count)
@@ -1782,7 +1786,7 @@ const clampCell = (H, V) => [Math.max(0, Math.min(MB.maxH, H)), Math.max(0, Math
 function centerCells(st, g) { const [cw, ch] = cellsOf(g); return clampCell(Math.round(st.x * 2) - Math.trunc((cw - (MB.maxH - 1)) / 2), Math.round(st.y * 2) - Math.trunc((ch - (MB.maxV - 1)) / 2)); }
 function syncMapView(v, c) {
   if (!barsOn()) return;
-  v.s = ZOOMS[zoomIdx(v.s)];
+  v.s = snapZoom(v.s);
   barMetrics(v.s, c.mapW, c.mapH, c.G);
   let [H, V] = cellOf(v);
   if (MB.s && MB.s !== v.s && MB.centerSel && c.sel != null && c.G.stars[c.sel]) [H, V] = centerCells(c.G.stars[c.sel], c.G); // (Zoom In / Zoom Out: CenterOnStar, forced)
@@ -1794,7 +1798,7 @@ function syncMapView(v, c) {
 function centerOnStar12(v, sid, c) {
   if (!barsOn()) return false;
   const st = c.G.stars[sid]; if (!st) return false;
-  v.s = ZOOMS[zoomIdx(v.s)]; barMetrics(v.s, c.mapW, c.mapH, c.G);
+  v.s = snapZoom(v.s); barMetrics(v.s, c.mapW, c.mapH, c.G);
   const [H, V] = cellOf(v), z = v.s / 2, px = (st.x * 2 - H) * z - 6, py = (st.y * 2 - V) * z - 7;
   if (px > 40 && px < c.mapW - 40 && py > 40 && py < c.mapH - 85) return true; // (already in view: CenterOnStar leaves the map)
   const [h2, v2] = centerCells(st, c.G); putCell(v, h2, v2); return true;
@@ -1954,15 +1958,18 @@ window.HOMAC12 = {
   // 1057; 2001 for 1009, 1055, 1056; 3002 for 1011; none for 1000, 1001, 1033-1035; the system beep for every other report (1.2's table also had 1020, a fleet lost in a
   // wormhole, and 1059 at 2001)
   sysBeep: (g) => V2 && !!g && H().rules(g).id === 'mac20',
-  messageLook(m, cur) {
-    if (!V2 || !G() || H().rules(G()).id !== 'mac20') return null;
+  // The report pictures are the DOS skin's choices (1.2's and 2.0.1's icons are the DOS game's), from this skin's own folder: black and white in the
+  // black-and-white skins (HOTHEME.base is the DOS skin's; without it the reports showed 5.0.5's colour pictures, m9020 ...). 2.0.1's sounds below.
+  messageLook(m, cur, ctx) {
+    const B = window.HOTHEME && HOTHEME.base && HOTHEME.base.messageLook, look = B && ctx ? B.call(window.HOTHEME, m, cur, ctx) : null;
+    if (!V2 || !G() || H().rules(G()).id !== 'mac20') return look;
     const R = H().REPORTS20 || [];
     const t = String(m.text || '');
     if (!HOMAC_RE20) HOMAC_RE20 = R.map((x, i) => ({ i, re: new RegExp('^' + x.split(/(%(?:\.\*|\d*\.?\d*)?[sd]|%%)/).map((y, j) => j % 2 ? (y === '%%' ? '%' : '.*?') : y.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('')), len: x.length })).filter(o => o.len > 8).sort((a, b) => b.len - a.len);
     const hit = HOMAC_RE20.find(o => o.re.test(t));
     const code = hit ? 1000 + hit.i : 9999;
     const snd = [1002, 1003, 1004, 1005, 1006, 1010, 1028, 1032, 1054, 1057].includes(code) ? 2000 : [1009, 1055, 1056].includes(code) ? 2001 : code === 1011 ? 3002 : null;
-    return { icon: cur.icon, sound: snd };
+    return { icon: look ? look.icon : cur.icon, sound: snd };
   },
   // (the New Game window, for 2.0.1's own rules: its Create New Galaxy dialog over the form)
   newGame(f, ctx) { if (V2) createGalaxy20(f, ctx); },
