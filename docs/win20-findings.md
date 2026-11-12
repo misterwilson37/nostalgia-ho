@@ -253,7 +253,8 @@ none: the title centred across; Create New Galaxy was drawn with one before). No
   program's scroll range (the capture had its thumb at the end; the remake's steps are the rows).
 
 **real-play** (`--os=win31` also opens List All Fleets, List All Explored Stars and Compare Players and closes them with OK; with a ruleset whose list or chart is
-not the DOS program's, its own window is closed with Escape): see the hand-back numbers in the commit of this section.
+not the DOS program's, its own window is closed with Escape): both looks pass at phone-l, pad, desktop and 4k (48 of 48 runs each). A first run failed "the dialog did not close" in
+the 4.0.5 ruleset: the Reports window's scroll bar sat in a box of the dialogs' class `.w31d`, which the check looks for; it is a `.w31sbw` now.
 
 **Not done:** the focus as Windows shows it (a chosen row's dotted frame; the focused push button's heavy edge: Compare Players' Show Skills has the focus,
 not drawn); the dialogs centred, not at the program's places (List of All Fleets at 24, 40; Show Skills is placed over Compare Players as the program places it);

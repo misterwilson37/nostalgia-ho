@@ -90,12 +90,12 @@ ${B}.def:disabled { border-width: ${U(1)}; } /* (a dimmed default button loses i
 /* (the fixed-pitch System font, SYSTEM_FIXED_FONT, 8 x 15, its strokes two pixels wide: the lists of explored stars and of skills; stand-in Courier New bold at 8 pixels a letter) */
 .w31d .w31list.fixed { font: bold ${U(40 / 3)}/${U(15)} "Fixedsys", "Courier New", Courier, monospace; }
 .w31d .w31list.fixed .row { padding: 0 ${U(2)}; }
-.w31d .w31sb { background: var(--w31face); border: ${U(1)} solid #000; cursor: pointer; touch-action: none; }
-.w31d .w31sb .part { position: absolute; background: var(--w31face); box-shadow: inset ${U(-2)} ${U(-2)} 0 var(--w31shade), inset ${U(1)} ${U(1)} 0 #fff; } /* (the shade over the light at the corners: measured) */
-.w31d .w31sb .sep { position: absolute; background: #000; }
-.w31d .w31sb svg { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
-.w31d .w31sb:focus-visible { outline: none; }
-.w31d .w31sb:focus-visible .thumb { background: repeating-conic-gradient(var(--w31face) 0 25%, #fff 0 50%) 0 0 / ${U(2)} ${U(2)}; }
+:is(.w31d, .w31sbw) .w31sb { background: var(--w31face); border: ${U(1)} solid #000; cursor: pointer; touch-action: none; }
+:is(.w31d, .w31sbw) .w31sb .part { position: absolute; background: var(--w31face); box-shadow: inset ${U(-2)} ${U(-2)} 0 var(--w31shade), inset ${U(1)} ${U(1)} 0 #fff; } /* (the shade over the light at the corners: measured) */
+:is(.w31d, .w31sbw) .w31sb .sep { position: absolute; background: #000; }
+:is(.w31d, .w31sbw) .w31sb svg { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
+:is(.w31d, .w31sbw) .w31sb:focus-visible { outline: none; }
+:is(.w31d, .w31sbw) .w31sb:focus-visible .thumb { background: repeating-conic-gradient(var(--w31face) 0 25%, #fff 0 50%) 0 0 / ${U(2)} ${U(2)}; }
 `;
 function style() {
   if (document.getElementById('w31-dialog-css')) return;
@@ -299,7 +299,7 @@ function scale(ow, oh) {
   return fit >= 2 ? 2 : fit >= 1 ? 1 : Math.max(0.5, fit);
 }
 
-W.scrollBar = (...a) => { style(); return scrollBar(...a); }; // (the Reports window's, js/skins/dos/win31/frame.js; in a .w31d box with --wu set)
+W.scrollBar = (...a) => { style(); return scrollBar(...a); }; // (the Reports window's, js/skins/dos/win31/frame.js: in a .w31sbw box with --wu set, not a .w31d, which is a dialog)
 W.has = (id) => !!(W.templates && W.templates[id]);
 // HOWIN31.build(id, o): the dialog's element and its handle without opening it (for a window that lives in the page, as the Startup window on the title page);
 // o.wu: its scale in CSS pixels per Windows pixel (else the screen's). HOWIN31.open(id, o): built and opened in the remake's modal layer.

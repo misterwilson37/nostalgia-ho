@@ -96,6 +96,7 @@ ${S} #w31rep .w31pcl { left: ${u(3)}; top: ${u(22)}; width: ${u(250)}; height: $
 ${S} .w31rep { display: flex; align-items: flex-start; gap: ${u(6)}; padding: 0 ${u(2)} 0 0; min-height: ${u(32)}; box-sizing: border-box; cursor: pointer; }
 ${S} #w31rep .w31pcl.vs { width: ${u(234)}; }
 ${S} #w31rep .w31rsb { position: absolute; left: ${u(237)}; top: ${u(21)}; width: ${u(17)}; height: ${u(99)}; background: none; border: 0; --wu: var(--du); }
+${S} #w31rep .w31rsb * { box-sizing: border-box; } ${S} #w31rep .w31rsb .w31c { position: absolute; } /* (what a dialog's .w31d gives its controls: dialog.js) */
 ${S} .w31rep img, ${S} .w31rep canvas { width: ${u(32)}; height: ${u(32)}; flex: none; image-rendering: pixelated; }
 ${S} .w31rep .cap { padding-top: ${u(2)}; }
 ${S} .w31rep:focus-visible { outline: ${u(1)} dotted #000; outline-offset: ${u(-1)}; }
@@ -143,7 +144,7 @@ W.frame = {
         const rows = [...cl.children], tops = rows.map(e => e.offsetTop), need = cl.scrollHeight - cl.clientHeight, k = tops.findIndex(t => t >= need), max = k < 0 ? rows.length - 1 : k;
         const go = (p) => { cl.scrollTop = Math.min(tops[p] || 0, cl.scrollHeight - cl.clientHeight); };
         const now = cl.querySelector('[data-now]'), at = Math.min(max, now ? rows.indexOf(now) : Math.max(0, tops.findIndex(t => t >= keep)));
-        const box = document.createElement('div'); box.className = 'w31d w31rsb';
+        const box = document.createElement('div'); box.className = 'w31sbw w31rsb';
         const sb = W.scrollBar([0, 0, 17, 99], { min: 0, max, pos: at }, go, true); sb.tabIndex = -1; box.append(sb); r.append(box); go(at);
       } else { const now = cl.querySelector('[data-now]'); cl.scrollTop = now ? now.offsetTop : keep; }
     }
