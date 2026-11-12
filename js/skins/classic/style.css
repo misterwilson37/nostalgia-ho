@@ -136,7 +136,7 @@ h3.scaleflip { cursor: pointer; }
 .ptable tr.scrap td:not(:has(> button)) { opacity: .5; }
 .graph { width: 100%; height: auto; border: 1px solid #666; }
 .help p { margin: 0 0 8px; max-width: 70ch; }
-.help .tip { font-style: italic; }
+.help .tip { font-style: italic; position: static; z-index: auto; background: none; border: 0; box-shadow: none; padding: 0; font-size: inherit; line-height: inherit; pointer-events: auto; } /* (the help's tip line, not the pointer's tip box, .tip below: it showed fixed at the window's foot) */
 .toast { position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%); background: #222; color: #fff; padding: 8px 14px; border-radius: 4px; z-index: 80; max-width: 90vw; }
 /* title */
 #titlescreen { position: fixed; inset: 0; z-index: 40; overflow: auto; background: radial-gradient(ellipse at 50% 40%, #1c1840 0%, #04030c 70%); display: grid; place-items: center; place-items: safe center; padding: 16px; }

@@ -108,6 +108,20 @@ html.dosframe #msg .clock.pic { padding: 0; }
 .dd-slider .thumb { position: absolute; top: 0; bottom: 0; width: calc(8 * var(--du)); background: #aaa; box-shadow: inset calc(1 * var(--du)) calc(1 * var(--du)) 0 #fff, inset calc(-1 * var(--du)) calc(-1 * var(--du)) 0 #555; }
 .dd-slider:focus-visible, .dd-t:focus-visible { outline: 1px dotted #000; }
 .scrim:has(.win.dosw) { background: transparent; }
+/* One scale for every window (Jake, November 2026: "Our windows should match the scale of the game"): the remake's own windows, the ones neither program had
+   (Preferences, How to play, the online windows ...), are drawn at the frame's unit as the program's dialogs are: zoomed by --u, so their CSS pixels are the
+   640 x 480 screen's pixels, at most the screen's size, and what does not fit scrolls inside the window. */
+html.dosframe .scrim > .win:not(.dosw):not(.dosx):not(.w31dlg) { zoom: var(--u); max-width: 624px; max-height: 464px; }
+html.dosframe .scrim > .win:not(.dosw):not(.dosx):not(.w31dlg) .wbody { min-height: 0; overflow: auto; }
+/* (the Windows 3.1 look: in the chrome of the Windows program's dialogs, js/skins/dos/win31/dialog.js: a black line and four of the caption's navy around the
+   white client; the caption, its white line and the black line under it, the control-menu box, no minimize or maximize (a dialog has none); the stand-in font) */
+html.dosframe.os-win31 .scrim > .win:not(.dosw):not(.dosx):not(.w31dlg) { background: var(--w31cap); border: 1px solid #000; outline: 0; box-shadow: none; padding: 3px 4px 4px; font-family: "MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif; }
+html.dosframe.os-win31 .scrim > .win:not(.dosw):not(.dosx):not(.w31dlg) > .wtitle { height: 20px; border: 1px solid #fff; border-bottom: 1px solid #000; background: var(--w31cap); }
+html.dosframe.os-win31 .scrim > .win:not(.dosw):not(.dosx):not(.w31dlg) > .wtitle::after { display: none; }
+html.dosframe.os-win31 .scrim > .win:not(.dosw):not(.dosx):not(.w31dlg) > .wtitle .close { height: 18px; }
+html.dosframe.os-win31 .scrim > .win:not(.dosw):not(.dosx):not(.w31dlg) > .wtitle span { flex: 1; text-align: center; font-size: 13px; }
+html.dosframe.os-win31 .scrim > .win:not(.dosw):not(.dosx):not(.w31dlg) > .wbody { background: #fff; }
+html.dosframe.os-win31 .scrim > .win.notitle:not(.dosw):not(.dosx):not(.w31dlg) { padding-top: 4px; }
 
 .dd-list, .win.dosx .exlist { box-sizing: border-box; background: #fff; border: calc(1 * var(--du)) solid #000; box-shadow: inset 0 0 0 calc(1 * var(--du)) #fff, inset 0 0 0 calc(2 * var(--du)) #000; overflow-y: auto; padding: calc(8 * var(--du)) calc(3 * var(--du)) 0; }
 .dd-row, .win.dosx .exrow { height: calc(14 * var(--du)); line-height: calc(14 * var(--du)); white-space: pre; cursor: default; overflow: hidden; padding: 0; border: 0; background: none; }
