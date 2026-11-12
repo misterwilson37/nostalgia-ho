@@ -1146,7 +1146,7 @@ function fleetsDos() {
   const fs = g.fleets.filter(f => f.owner === a.ME && !f.sat), order = fs.filter(f => !stuck(f)).concat(fs.filter(stuck));
   let cur = order[0] || null;
   const box = dListBox(505, 214);
-  const show = () => { box.textContent = ''; order.forEach(f => { const r = a.el('div', { class: 'dd-row' + (f === cur ? ' sel' : ''), role: 'option', 'aria-selected': String(f === cur), translate: 'no', onclick: () => { cur = f; show(); }, ondblclick: go }, line(f)); box.append(r); }); };
+  const show = () => { box.textContent = ''; order.forEach(f => { const r = a.el('div', { class: 'dd-row' + (f === cur ? ' sel' : ''), role: 'option', 'aria-selected': String(f === cur), translate: 'no', onclick: dblc(f, () => { cur = f; show(); }, go) }, line(f)); box.append(r); }); };
   function go() {
     if (!cur) return;
     if (cur.to != null) { a.alertOver([W.hyper], 'en'); return; }
@@ -1282,6 +1282,12 @@ function newTypeDos() {
     dButton('Name It For Me', 64, 238, 136, 27, () => { st.name = H.designName(g, p, st.type); nameF.value = st.name; ok.disabled = false; ok.classList.remove('off'); }, { hot: 0 }), dButton('Cancel', 272, 238, 71, 27, () => a.closeModal(), { hot: 0 }), ok], 'Create New Ship Type');
   paintCls(); draw(); return true;
 }
+// A double click counted by the window itself, for lists that redraw on the first click: the second click lands on a new row, and Firefox and
+// Safari send no dblclick for it (Chrome does). Two clicks within 500 ms on the same item are a double click (as js/skins/mac12/ui.js dbl12).
+let DBLC = null;
+function dblc(key, one, two) {
+  return () => { const t = Date.now(), hit = !!DBLC && DBLC.k === key && t - DBLC.t < 500; DBLC = hit ? null : { k: key, t }; if (hit) two(); else one(); };
+}
 function buildDos(sid) {
   const a = window.HOAPI, H = window.HO, g = a.G, p = a.me(), s = g.stars[sid], rs = H.rules(g);
   if (!H.feature(g, 'buildQueue') || s.owner !== a.ME) return false;
@@ -1304,7 +1310,7 @@ function buildDos(sid) {
       top.append(dAt(shipPicEl(d, 40), 8, 8), dAt(a.el('span', { class: 'dd-t', translate: 'no' }, '$' + nf(c.money) + (d.built === 0 && !d.free ? ' (D)' : ' (P)')), 140, 14, 100, 14), dAt(a.el('span', { class: 'dd-t', translate: 'no' }, (sel === 0 && pr ? pr.pct : 0) + '% Done'), 140, 34, 100, 14), dAt(a.el('span', { class: 'cap', translate: 'no' }, caption(d)), 8, 56, 232, 14)); }
   };
   const fill = () => { lst.textContent = ''; designs().forEach(d => { const it = a.el('div', { class: 'dd-type', role: 'option', tabindex: 0, 'aria-label': caption(d), onclick: () => add(d), onkeydown: (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); add(d); } } }, shipPicEl(d, 40), a.el('span', { class: 'cap', translate: 'no' }, caption(d))); lst.append(it); }); };
-  cells.forEach((c, i) => { c.addEventListener('click', () => { if (q[i]) { sel = i; draw(); } }); c.addEventListener('dblclick', () => { if (q[i] && --q[i].n <= 0) q.splice(i, 1); draw(); });
+  cells.forEach((c, i) => { c.addEventListener('click', dblc('q' + i, () => { if (q[i]) { sel = i; draw(); } }, () => { if (q[i] && --q[i].n <= 0) q.splice(i, 1); draw(); }));
     c.addEventListener('keydown', (e) => { if (q[i] && (e.key === 'Delete' || e.key === 'Backspace')) { e.preventDefault(); if (--q[i].n <= 0) q.splice(i, 1); draw(); } }); });
   const commit = () => { const cur = () => (s.queue || []).slice();
     // take away what is no longer wanted (last first), then add what was

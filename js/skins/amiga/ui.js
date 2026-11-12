@@ -1248,13 +1248,19 @@ function openSplitter(f0) {
 // An item's place in a window table is in pixels inside the window's borders
 // (ho! FUN_0010c1e0); the window is that plus its borders and title bar.
 const at = (x, y, w2, h) => `left:calc(${x} * var(--u));top:calc(${y} * var(--v));` + (w2 ? `width:calc(${w2} * var(--u));` : '') + (h ? `height:calc(${h} * var(--v));` : '');
+// A double click counted by the window itself, for lists that redraw on the first click: the second click lands on a new row, and Firefox and
+// Safari send no dblclick for it (Chrome does). Two clicks within 500 ms on the same item are a double click (as js/skins/mac12/ui.js dbl12).
+let DBLC = null;
+function dblc(key, one, two) {
+  return () => { const t = Date.now(), hit = !!DBLC && DBLC.k === key && t - DBLC.t < 500; DBLC = hit ? null : { k: key, t }; if (hit) two(); else one(); };
+}
 // a list window: a frame of rows 20 pixels apart with a scroll bar, and buttons
 function listWin({ title, size: [W, H], frame: [fx, fy, fw, fh], rows: [rx, ry, rw], scroll: [sx, sy, sh], items, buttons, pick }) {
   const a = api();
   let sel = -1;
   const list = el('div', { class: 'am-lrows', style: at(rx - fx, ry - fy, rw, sh) });
   const paint = () => list.replaceChildren(...items.map((t, i) => el('div', { class: 'am-lrw' + (i === sel ? ' sel' : ''), role: 'option', tabindex: 0,
-    onclick: () => { sel = i; paint(); }, ondblclick: () => { sel = i; if (pick) pick(i); } }, ...(Array.isArray(t) ? t.map(c => el('span', null, c)) : [t]))));
+    onclick: dblc(i, () => { sel = i; paint(); }, () => { sel = i; if (pick) pick(i); }) }, ...(Array.isArray(t) ? t.map(c => el('span', null, c)) : [t]))));
   paint();
   const bar = scroller(list, true); bar.setAttribute('style', at(sx - fx, sy - fy, 16, sh));
   const body = el('div', { class: 'am-listwin' }, el('div', { class: 'am-frame', style: at(fx, fy, fw, fh) }, list, bar),
