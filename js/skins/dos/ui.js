@@ -252,6 +252,7 @@ window.HOTHEME = {
   // The original writes "..." and its key equivalents as "[Ctrl+S]" (T.keyName).
   get menuLayout() { return menuLayoutDos(); },
   gameInfo(win) { return gameInfo(win); },
+  fleetList() { return fleetList(); },
   // the words of a ship type and of a number of ships, as the panes and the DOS look's windows write them (for the Windows look's dialogs, js/skins/dos/win31/dialogs.js):
   // caption "Patton (2/2) Fighter"; ships "one Patton (2/2) Fighter", "2 Patton (2/2) Fighters" (the program's fleet rows and its queue cells, captured)
   shipWords: { caption: (d) => caption(d), ships: (d, n) => { const g = window.HOAPI.G, r12 = RS12(); return wl() === 'de' ? deRow(d, n) : r12 ? r12.shipsDesc(enView(g), d, n) : `${n} ${d.name}`; }, className: (d) => className(d) },
@@ -772,7 +773,7 @@ const DE_FLEET = [[/^Stationed at: (.*)$/, 'Stationiert auf: $1'], [/^Departing 
   [/^Fuel: (.*)$/, 'Tank: $1'], [/^Speed: (.*)$/, 'Tempo: $1'], [/^Full$/, 'Voll'], [/^Empty$/, 'Leer'], [/^Scrap: (.*)$/, 'Schrott: $1'], [/^Fleet to be scrapped for metal\.$/, 'Flotte zum Verschrotten.']];
 // the German build's fleet row (data pool: "Ein %Fs (%d/%d) %Fs", "%d %Fs (%d/%d) %Fs") with its class names (strings 368-371)
 // the remake's windows that the Windows look shows as the Windows program's dialogs (T.window's name: the dialog's in js/skins/dos/win31/dialogs.js)
-const W31WIN = { build: 'build', types: 'types', group: 'group' };
+const W31WIN = { build: 'build', types: 'types', group: 'group', fleets: 'fleets', stars: 'stars', compare: 'compare' };
 const DE_CLASS = { scout: 'Späher', fighter: 'Kampfschiff', colony: 'Kolonieschiff', satellite: 'Satellit' };
 const deRow = (d, n) => `${n === 1 ? 'Ein' : n} ${d.name} (${d.W}/${d.S}) ${DE_CLASS[d.type] || d.type}`;
 const fl = (t) => { if (wl() !== 'de') return t; for (const [re, to] of DE_FLEET) if (re.test(t)) return t.replace(re, to); return t; };
@@ -1123,20 +1124,26 @@ function dListBox(w, h, x, y) {
   const a = window.HOAPI, box = a.el('div', { class: 'dd-list', role: 'listbox', tabindex: 0 });
   dAt(box, x == null ? 19 : x, y == null ? 47 : y, w, h); return box;
 }
-function fleetsDos() {
+// the rows of List of All Fleets (DOS and Windows: the program's sentences, the German build's in German), and the hyperspace alert: fleetList().line(f), .stuck(f), .hyper
+function fleetList() {
   const a = window.HOAPI, H = window.HO, g = a.G, W = Object.assign({ at: '%s stationed at %s.', leave: '%s leaving %s for %s to arrive in %d.', fly: '%s to arrive at %s in %d.', stuck: '%s marooned at %s.',
     hyper: 'Sorry, but that fleet is currently in hyperspace and can’t be contacted until it arrives at its next location.' }, wl() === 'de' ? { at: '%s stationiert auf %s.', leave: '%s fliegt von %s nach %s. Ankunft: %d.', fly: '%s fliegt nach %s. Ankunft: %d.', stuck: '%s hängt auf %s fest.' } : {});
   const fill = (t, ...v) => { let i = 0; return t.replace(/%[sd]/g, () => String(v[i++])); };
   const stuck = (f) => f.star != null && g.stars[f.star].owner !== a.ME && !g.stars.some(s => s.id !== f.star && H.starDist(g, f.star, s.id) <= f.fuel + 1e-9);
-  const fs = g.fleets.filter(f => f.owner === a.ME && !f.sat), order = fs.filter(f => !stuck(f)).concat(fs.filter(stuck));
   const turns = (f) => Math.ceil((f.dist - (f.prog || 0)) / H.fleetSpeed(g, f) - 1e-9);
   const line = (f) => {
-    const d = wl() === 'de' && f.ships ? (() => { const ds = H.fleetDesigns(g, f); return ds.length === 1 ? deRow(ds[0], H.fleetCount ? H.fleetCount(f) : 1) : H.fleetText(g, f); })() : H.fleetText(g, f), st = (i) => g.stars[i].name;
+    // (a fleet of one type: the program's "one Weasel (1/1) Scout", captured in both programs, v20dos-orig-fleets.png, win20-orig-vga16-fleets.png; the German build's row in German)
+    const d = f.ships ? (() => { const ds = H.fleetDesigns(g, f); return ds.length === 1 ? window.HOTHEME.shipWords.ships(ds[0], H.fleetCount ? H.fleetCount(f) : 1) : H.fleetText(g, f); })() : H.fleetText(g, f), st = (i) => g.stars[i].name;
     if (stuck(f)) return fill(W.stuck, d, st(f.star));
     if (f.to != null) return fill(W.fly, d, st(f.to), H.arrivalYear(g, turns(f)));
     if (f.dest != null) return fill(W.leave, d, st(f.star), st(f.dest), H.arrivalYear(g, Math.ceil(H.starDist(g, f.star, f.dest) / H.fleetSpeed(g, f) - 1e-9)));
     return fill(W.at, d, st(f.star));
   };
+  return { line, stuck, hyper: W.hyper };
+}
+function fleetsDos() {
+  const a = window.HOAPI, g = a.G, F = fleetList(), W = { hyper: F.hyper }, stuck = F.stuck, line = F.line;
+  const fs = g.fleets.filter(f => f.owner === a.ME && !f.sat), order = fs.filter(f => !stuck(f)).concat(fs.filter(stuck));
   let cur = order[0] || null;
   const box = dListBox(505, 214);
   const show = () => { box.textContent = ''; order.forEach(f => { const r = a.el('div', { class: 'dd-row' + (f === cur ? ' sel' : ''), role: 'option', 'aria-selected': String(f === cur), translate: 'no', onclick: () => { cur = f; show(); }, ondblclick: go }, line(f)); box.append(r); }); };

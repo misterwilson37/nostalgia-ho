@@ -29,7 +29,7 @@ const dx = (n) => unit(n, BX, 4), dy = (n) => unit(n, BY, 8);
 const U = (n) => `calc(${n} * var(--wu))`;
 W.px = (r) => [dx(r[0]), dy(r[1]), dx(r[2]), dy(r[3])];
 
-const WS_CAPTION = 0xC00000, WS_BORDER = 0x800000, WS_VISIBLE = 0x10000000, WS_DISABLED = 0x8000000;
+const WS_CAPTION = 0xC00000, WS_SYSMENU = 0x80000, WS_BORDER = 0x800000, WS_VISIBLE = 0x10000000, WS_DISABLED = 0x8000000;
 // the window frame (measured): side, top without a title, top with one (black 1, navy 3, white 1, caption 18, black 1), bottom
 const FR = { side: 5, top: 5, capTop: 24, bottom: 5, cap: 18 };
 
@@ -87,6 +87,9 @@ ${B}.def:disabled { border-width: ${U(1)}; } /* (a dimmed default button loses i
 .w31d .w31list { background: #fff; border: ${U(1)} solid #000; overflow: hidden auto; font-weight: bold; }
 .w31d .w31list .row { height: ${U(16)}; padding: 0 ${U(2)}; white-space: pre; overflow: hidden; cursor: pointer; }
 .w31d .w31list .row.sel { background: var(--w31hi); color: #fff; }
+/* (the fixed-pitch System font, SYSTEM_FIXED_FONT, 8 x 15, its strokes two pixels wide: the lists of explored stars and of skills; stand-in Courier New bold at 8 pixels a letter) */
+.w31d .w31list.fixed { font: bold ${U(40 / 3)}/${U(15)} "Fixedsys", "Courier New", Courier, monospace; }
+.w31d .w31list.fixed .row { padding: 0 ${U(2)}; }
 .w31d .w31sb { background: var(--w31face); border: ${U(1)} solid #000; cursor: pointer; touch-action: none; }
 .w31d .w31sb .part { position: absolute; background: var(--w31face); box-shadow: inset ${U(-2)} ${U(-2)} 0 var(--w31shade), inset ${U(1)} ${U(1)} 0 #fff; } /* (the shade over the light at the corners: measured) */
 .w31d .w31sb .sep { position: absolute; background: #000; }
@@ -184,10 +187,46 @@ function ownerList(r, L, fire, vs) {
   return e;
 }
 
+// a list box of words: L = {items, sel, rowH (16, the System font's rows; 15 with L.fixed, the fixed-pitch font, SYSTEM_FIXED_FONT, a dialog sets), fixed, dbl(i) (a double
+// click)}; with WS_VSCROLL Windows' vertical scroll bar at the right when the rows do not fit (17 wide, over the list's right edge, from its top edge to its bottom
+// edge: measured on Show Skills, win20-orig-vga16-skills*.png), scrolling a row at a time; no bar when they fit (the program's lists have no LBS_DISABLENOSCROLL)
+function plainList(r, L, fire, vs) {
+  const [x, y, w, h] = r, rh = L.rowH || 16, e = at(mk('div', 'w31c w31list' + (L.fixed ? ' fixed' : '')), x, y, w, h); e.tabIndex = 0; e.setAttribute('role', 'listbox'); e.style.overflow = 'hidden';
+  const rows = mk('div'); rows.style.position = 'absolute'; rows.style.left = rows.style.top = '0'; e.append(rows);
+  let sel = L.sel == null ? -1 : L.sel, top = 0, bar = null;
+  const fit = Math.max(1, Math.floor((h - 2) / rh));
+  const draw = () => {
+    const n = L.items.length, more = vs && n > fit;
+    rows.textContent = ''; top = Math.max(0, Math.min(top, n - fit));
+    rows.style.width = U(w - 2 - (more ? 16 : 0));
+    for (let i = top; i < Math.min(n, top + fit); i++) {
+      const row = mk('div', 'row' + (i === sel ? ' sel' : ''), L.items[i]); row.style.height = U(rh); row.style.lineHeight = U(rh);
+      row.setAttribute('role', 'option'); row.setAttribute('aria-selected', String(i === sel));
+      row.addEventListener('click', () => { sel = i; draw(); fire(i); });
+      if (L.dbl) row.addEventListener('dblclick', () => L.dbl(i));
+      rows.append(row);
+    }
+    if (bar) { bar.remove(); bar = null; }
+    if (more) { bar = scrollBar([w - 18, -1, 17, h], { min: 0, max: n - fit, pos: top }, (p) => { top = p; draw(); }, true); bar.tabIndex = -1; e.append(bar); }
+  };
+  e.addEventListener('keydown', (ev) => { const d = { ArrowDown: 1, ArrowUp: -1, PageDown: fit, PageUp: -fit }[ev.key]; if (d && L.items.length) { ev.preventDefault(); sel = Math.max(0, Math.min(L.items.length - 1, sel + d)); if (sel < top) top = sel; if (sel >= top + fit) top = sel - fit + 1; draw(); fire(sel); } });
+  e.w31 = { get value() { return sel; }, set: (i) => { sel = i; draw(); }, items: (a) => { L.items = a; draw(); } };
+  draw();
+  return e;
+}
+
 function control(it, n, o, dlg) {
   const [id, kind, , , , , st] = it, key = id === 65535 ? '#' + n : String(id), r = (o.rects && o.rects[key]) || W.px(it.slice(2, 6));
   if (!(o.rects && o.rects[key]) && o.moveBelow && it[3] >= o.moveBelow[0]) r[1] += o.moveBelow[1]; // (the controls the program moves down under a list it lengthens)
   const txt = o.text && o.text[key] != null ? String(o.text[key]) : '';
+  // (a list box with WS_BORDER: Windows draws its border outside the template's rectangle, one pixel each side, and, without LBS_NOINTEGRALHEIGHT, cuts it to whole
+  // rows of its font: 16 for the System font, 15 for the fixed font a dialog sets (WM_SETFONT sizes it again). Measured: File Open's lists, 130 x 154 in the template,
+  // 132 x 146 on the screen; List of All Fleets' 510 x 258 at (30, 32), 512 x 258 at (29, 31); List of All Explored Stars' and Show Skills' (fixed font) 257 high)
+  if (kind === 'listbox' && !(o.rects && o.rects[key]) && !(o.lists && o.lists[key] && o.lists[key].draw) && (st & WS_BORDER)) {
+    const rh = (o.lists && o.lists[key] && o.lists[key].rowH) || 16;
+    r[0] -= 1; r[1] -= 1; r[2] += 2; r[3] += 2;
+    if (!(st & 0x100)) r[3] = Math.floor((r[3] - 2) / rh) * rh + 2;
+  }
   const fire = (v) => { const f = o.on && o.on[key]; if (f) f(v, dlg); };
   let e;
   if (o.pics && o.pics[key]) { // (an owner-painted static, or a frame the program paints a picture into: Startup's logo, control 500)
@@ -226,13 +265,7 @@ function control(it, n, o, dlg) {
   } else if (kind === 'listbox' && o.lists && o.lists[key] && o.lists[key].draw) {
     e = ownerList(r, o.lists[key], fire, !!(st & 0x200000));
   } else if (kind === 'listbox') {
-    e = at(mk('div', 'w31c w31list'), ...r); e.tabIndex = 0; e.setAttribute('role', 'listbox');
-    const L = (o.lists && o.lists[key]) || { items: [], sel: -1 };
-    let sel = L.sel == null ? -1 : L.sel;
-    const draw = () => { e.textContent = ''; L.items.forEach((t, i) => { const row = mk('div', 'row' + (i === sel ? ' sel' : ''), t); row.setAttribute('role', 'option'); row.addEventListener('click', () => { sel = i; draw(); fire(i); }); e.append(row); }); };
-    e.addEventListener('keydown', (ev) => { const d = { ArrowDown: 1, ArrowUp: -1 }[ev.key]; if (d && L.items.length) { ev.preventDefault(); sel = Math.max(0, Math.min(L.items.length - 1, sel + d)); draw(); fire(sel); } });
-    e.w31 = { get value() { return sel; }, set: (i) => { sel = i; draw(); }, items: (a) => { L.items = a; draw(); } };
-    draw();
+    e = plainList(r, (o.lists && o.lists[key]) || { items: [], sel: -1 }, fire, !!(st & 0x200000));
   } else if (kind === 'hscroll' || kind === 'vscroll') {
     e = scrollBar(r, (o.scroll && o.scroll[key]) || { min: 0, max: 0, pos: 0 }, fire, kind === 'vscroll');
   } else if (kind === 'combo' && (st & 3) === 1) {
@@ -286,7 +319,10 @@ W.build = function (id, o) {
   d.style.setProperty('--wu', (o.wu || scale(ow, oh)) + 'px'); d.style.width = U(ow); d.style.height = U(oh);
   if (cap) {
     const c = at(mk('div', 'w31cap'), FR.side - 1, FR.top - 2, cw, FR.cap + 2);
-    c.append(mk('span', 'w31sys'), mk('span', 't', o.title || '')); d.append(c);
+    // (the control-menu box only with WS_SYSMENU: the captions of List of All Fleets and Create New Galaxy have none, their title centred across: captured)
+    const tt = mk('span', 't', o.title || '');
+    if (t.style & WS_SYSMENU) c.append(mk('span', 'w31sys'), tt); else { tt.style.left = '0'; c.append(tt); }
+    d.append(c);
   }
   const client = at(mk('div', 'w31client'), FR.side - 1, top - 1, cw, ch); d.append(client);
   const dlg = { el: d, id, get: (k) => client.querySelector(`[data-w31="${k}"]`), value: (k) => { const e = dlg.get(k); return e && e.w31 ? e.w31.value : e && 'value' in e ? e.value : null; }, close: () => (o.close ? o.close() : a.closeModal()) };

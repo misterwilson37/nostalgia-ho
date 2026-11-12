@@ -1,6 +1,6 @@
 # Windows 3.1 2.0: the display audit (November 2026, begun)
 
-**Progress (Windows dialogs):** foundation done (emulator `emulators/dosbox-win31`, renderer `js/skins/dos/win31/`); chunk 1 done: the main window on the 640 x 480 screen at one scale, and 8 of 33 dialogs built (About, Battle Speed; Create New Galaxy, File Open, GameInfo, New Player Registration, Player Entry, Startup); Game Info also in the DOS look, the DOS look's build cost line "(D)" / "(P)"; chunk 3 done (Ships: Build Ships, Create New Ship Type, List Ship Types, Rename, Name a Star, Organize Fleets; 14 of 33 built); next: chunk 2 (Licence, Register: not started), then chunk 4, Lists (below, "The chunk plan").
+**Progress (Windows dialogs):** foundation done (emulator `emulators/dosbox-win31`, renderer `js/skins/dos/win31/`); chunk 1 done: the main window on the 640 x 480 screen at one scale, and 8 of 33 dialogs built (About, Battle Speed; Create New Galaxy, File Open, GameInfo, New Player Registration, Player Entry, Startup); Game Info also in the DOS look, the DOS look's build cost line "(D)" / "(P)"; chunk 3 done (Ships: Build Ships, Create New Ship Type, List Ship Types, Rename, Name a Star, Organize Fleets; 14 of 33 built); chunk 4 (Lists): List of All Fleets, List of All Explored Stars, Compare Players, Show Skills built (18 of 33), Reports (29) in progress; next: chunk 2 (Licence, Register: not started), then chunk 5 (below, "The chunk plan").
 
 *The same game as DOS 2.0 and Mac 2.0.1 (`docs/dos-findings.md`); this is what WINHO.EXE puts in front of the player.*
 
@@ -219,6 +219,34 @@ captured; the dialogs centred, not at the program's places.
 **Cost:** the six dialogs with their captures took most of one session; Build Ships (the program's own sizing, the grey table) about half of it. Captures in the
 running program: a new game, Create New Ship Type, List Ship Types, Rename, Build Ships, Organize Fleets, two turns: about 20 minutes.
 
+## Chunk 4: Lists (November 2026)
+
+**Captured** (private `audit/win-2.0/captures/win20-orig-vga16-*.png`, new; a Large galaxy with 19 Dumb computers, auto-played to 2140): `fleets` (2000), `fleets-sel`,
+`fleets-marooned` (2140: marooned fleets where they stand, not last), `fleets-hyper` (Go To Fleet on a fleet in flight: the alert), `stars` (2000), `stars-2140`,
+`stars-sel`, `compare-2000`, `compare` (2140, the chart), `skills` and `skills-scrolled` (20 players: the vertical scroll bar).
+
+**The list box, measured** (renderer fixed, so File Open's and GameInfo's lists change too): a list box with WS_BORDER has its border outside the template's
+rectangle (one pixel each side) and, without LBS_NOINTEGRALHEIGHT, is cut to whole rows of its font: File Open's lists, 130 x 154 in the template, are 132 x
+146; List of All Fleets' 510 x 258 at (30, 32) is 512 x 258 at (29, 31). A list given the fixed-pitch System font (SYSTEM_FIXED_FONT, 8 x 15, strokes two pixels
+wide: WM_SETFONT) has rows of 15 and is cut again (257 high). The vertical scroll bar (WS_VSCROLL) shows only when the rows do not fit (no
+LBS_DISABLENOSCROLL), 17 wide over the list's right edge, from its top edge to its bottom edge; checked on Show Skills scrolled to the end (thumb at the
+formula's place). **Captions:** the control-menu box only with WS_SYSMENU (List of All Fleets, List of All Explored Stars, Show Skills and Create New Galaxy have
+none: the title centred across; Create New Galaxy was drawn with one before). Not drawn: the chosen row's dotted focus frame; the focused push button's heavy edge.
+
+**Built** (`js/skins/dos/win31/dialogs.js`; each looked at beside its capture at one Windows pixel per CSS pixel; wired through `ui.js` W31WIN):
+- **15 LISTFLEETS** (LISTFLEETSDLGPROC): the caption "Spaceward Ho!", the player's fleets but satellites in the fleets' order, the four sentences (the fleet
+  as "one Eagle (1/1) Scout": the DOS look's rows now say so too, as `v20dos-orig-fleets.png` does; they said "one Scout"), nothing chosen, Go To Fleet dimmed
+  until a row is chosen, a double click is Go To Fleet. **The original's bug, kept:** Go To Fleet tests "in hyperspace" on the fleet at the chosen row's place
+  among ALL the player's fleets, satellites counted (the list skips them; the 1993 patch keeps it).
+- **17 LISTSTARS** (LISTSTARSDLGPROC, FUN_1070_0033): the fixed-pitch rows (name to 8, temperature to 18, gravity to 28, metal to 37; the rules' `cols.win`, the
+  classic list's order, now `exploredText` in `js/skins/classic/ui.js`), Go To Star dimmed until chosen, double click.
+- **10 COMPPLAYERS**: the title, the chart painted in the client (axes on the hidden frame 101's left and bottom edges, 76, 34 to 505, 258; one-pixel ticks at Best,
+  Average, Worst and every 43 for the nine columns; the words in the small font; the picture 16 left of each tick, down by place x trunc(192 / (players - 1))),
+  Show Skills (dimmed in 2000; else it has the focus at the opening, captured), OK.
+- **16 LISTSKILLS**: its own window over Compare Players at (12, 11) units of its client (measured), LBS_SORT (by name), the name padded to 18, the skill,
+  the vertical scroll bar, "Computer Intelligence:" and the computers'. A computer's skill reads **Novice** (its skill field is never set: captured, 19 Dumb
+  computers; the DOS look's Show Skills still shows the remake's starting skill, "Expert" for Dumb: not changed here, not captured in DOS).
+
 ### The chunk plan (the other 31, about five a session)
 
 Each chunk: capture each dialog in the running original (`emulators/dosbox-win31`), add it to `dialogs.js` and `hook.js` ITEMS, compare, look at the shots.
@@ -230,7 +258,7 @@ Each chunk: capture each dialog in the running original (`emulators/dosbox-win31
 2. **Licence and registration:** 14 LICENSEE (radios, edits), 28 REGISTER (the password box). Small; can join chunk 1 or 5.
 3. **Ships (done, above):** 9 BLDSHIP (list box, owner-drawn queue cells; DOS `buildDos`), 22 NEWSHIP (29 controls, scroll bars; DOS `newTypeDos`), 31 SHIPTYPE (DOS
    `shipTypesDos`), 20 NAMETYPE and 19 NAMESTAR (DOS `renameDos`), 24 ORGFLEETS (DOS `organizeDos`). Needs: owner-drawn ship pictures from HOCOLOR.
-4. **Lists:** 15 LISTFLEETS (DOS `fleetsDos`), 17 LISTSTARS (DOS `starsDos`), 10 COMPPLAYERS and 16 LISTSKILLS (`FUN_1078_039c`; DOS `compareDos`, `skillsDos`),
+4. **Lists (done but 29, above):** 15 LISTFLEETS (DOS `fleetsDos`), 17 LISTSTARS (DOS `starsDos`), 10 COMPPLAYERS and 16 LISTSKILLS (`FUN_1078_039c`; DOS `compareDos`, `skillsDos`),
    29 REPORT (`FUN_10c0_0344`; DOS `reportsDos`). Needs: list box (chunk 1), vertical scroll bar checked.
 5. **Small boxes:** 6 AUTOPLAY (`FUN_10a0_02c7`; radios, scroll bar; DOS `autoPlayDos`), 26 POLLSPEED (`FUN_10a0_03e8`), 2 ALERTBOX and 3-5 ALERT_* (icon,
    `FUN_1108_01fc`; DOS `alertDos`), 23 NOTIFY1, 33 STATUS (`FUN_1100_05b4`), 27 PRTDLG (printing: nothing to print in a browser, its place noted), 18 MODELESS

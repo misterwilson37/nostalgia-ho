@@ -492,6 +492,131 @@ D.group = function (sid) {
   return true;
 };
 
+// ---- Lists (chunk 4) ----
+// #15 LISTFLEETS, List of All Fleets (Ships, List All Fleets… [Ctrl+L]): LISTFLEETSDLGPROC. Captured (win20-orig-vga16-fleets{,-sel,-marooned,-hyper}.png; the System font's
+// units, the caption "Spaceward Ho!"): "List of All Fleets:", the list (100: every fleet of the player but the satellites, in the fleets' own order, a marooned one where
+// it stands: "%s stationed at %s.", "%s to arrive at %s in %d.", "%s leaving %s for %s to arrive in %d.", "%s marooned at %s."), nothing chosen at the opening, Go To
+// Fleet (101) dimmed until a row is chosen; a double click is Go To Fleet. Go To Fleet: the program tests "in hyperspace" on the fleet at the chosen row's place in
+// ALL the player's fleets, satellites counted (the list skips them: the original's bug, kept; the patch of 1993 keeps it too), and shows the alert, else it selects
+// the row's fleet, centres the map on it and closes. THE REMAKE'S: the order is the remake's fleets'; a fleet chosen in flight past that test is selected without
+// a star to centre on.
+D.fleets = function () {
+  const a = root.HOAPI, g = a.G, T = root.HOTHEME; if (!g || !T || !T.fleetList) return false;
+  const F = T.fleetList(), all = g.fleets.filter(f => f.owner === a.ME), shown = all.filter(f => !f.sat);
+  let sel = -1;
+  const go = (dlg) => {
+    if (sel < 0) return;
+    if (all[sel] && all[sel].to != null) { a.alertOver([F.hyper], 'en'); return; }
+    const f = shown[sel]; if (!f) return;
+    dlg.close(); a.UI.selFleet = f.id; if (f.star != null) { a.UI.sel = f.star; a.centerOn(f.star); } a.renderPanel(); a.draw();
+  };
+  let dlg = null;
+  dlg = W.open(15, {
+    title: 'Spaceward Ho!', label: 'List of All Fleets',
+    text: { '#1': 'List of All Fleets:', 101: 'Go To Fleet', 1: 'OK' },
+    lists: { 100: { items: shown.map(f => F.line(f)), sel: -1, dbl: () => go(dlg) } },
+    on: { 100: (i, d) => { sel = i; const b = d.get('101'); if (b) b.disabled = i < 0; }, 101: (_, d) => go(d), 1: (_, d) => d.close() },
+  });
+  if (!dlg) return false;
+  const b = dlg.get('101'); if (b) b.disabled = true;
+  const L = dlg.get('100'); if (L) L.setAttribute('translate', 'no');
+  return true;
+};
+// #17 LISTSTARS, List of All Explored Stars (Galaxy, List All Explored Stars…): LISTSTARSDLGPROC and FUN_1070_0033. Captured (win20-orig-vga16-stars{,-2140,-sel}.png):
+// as List of All Fleets' window, "List of All Explored Stars:", Go To Star (dimmed until a row is chosen; a double click is Go To Star: the star selected and centred);
+// the list in the fixed-pitch System font (SYSTEM_FIXED_FONT, rows of 15: WM_SETFONT makes the list 257 high), a row a line of text: the name padded to 8 letters, the
+// temperature to 18, the gravity to 28, the metal to 37 ("No Climate Info." in their place), then Own, Explored or Enemy; the unowned first by quality, then other
+// players' by quality, then the player's own by name (the ruleset's exploredList; js/skins/classic/ui.js exploredText).
+D.stars = function () {
+  const a = root.HOAPI, H = root.HO, g = a.G; if (!g || !a.exploredText) return false;
+  const L = H.rules(g).exploredList; if (!L || L.layout !== 'text' || !L.cols) return false; // (a ruleset with another list: its own window)
+  const cols = L.cols.win, rows = a.exploredText(cols);
+  let sel = -1, dlg = null;
+  const go = (d) => { const r = rows[sel]; if (!r) return; d.close(); a.UI.sel = r.id; a.centerOn(r.id); a.renderPanel(); a.draw(); };
+  dlg = W.open(17, {
+    title: 'Spaceward Ho!', label: 'List of All Explored Stars',
+    text: { '#1': 'List of All Explored Stars:', 101: 'Go To Star', 1: 'OK' },
+    lists: { 100: { items: rows.map(r => r.line), sel: -1, rowH: 15, fixed: true, dbl: () => go(dlg) } },
+    on: { 100: (i, d) => { sel = i; const b = d.get('101'); if (b) b.disabled = i < 0; }, 101: (_, d) => go(d), 1: (_, d) => d.close() },
+  });
+  if (!dlg) return false;
+  const b = dlg.get('101'); if (b) b.disabled = true;
+  const l = dlg.get('100'); if (l) l.setAttribute('translate', 'no');
+  return true;
+};
+// #10 COMPPLAYERS, Compare Players (Galaxy, Compare Players… [Ctrl+M]): COMPAREPLAYERSDLGPROC. Captured (win20-orig-vga16-compare{-2000,}.png; the System font's units):
+// the title (100: "Sorry, no comparisons until the year 2010." in 2000, with Show Skills dimmed; else "Your rankings among the %d remaining players in %d:"), the chart
+// (painted in the client, measured): the axes along the left and bottom edges of the hidden frame 101 (76, 34 to 505, 258), ticks of one pixel left of the axis at Best
+// (16 under the top), Average (the middle) and Worst (16 over the axis), and over the axis every 43 pixels for the nine columns (Income ... Mini), the words in the small
+// font (right-aligned 4 left of the axis; centred under the ticks, their baseline 13 under it); in each column the player's picture (32 x 32) 16 left of the tick and
+// down by (place among the players) x trunc((258 - 34 - 32) / (players - 1)), as the DOS program's chart; Show Skills (102), OK (1, the default). The hidden frame 103
+// shows nothing.
+D.compare = function () {
+  const a = root.HOAPI, H = root.HO, g = a.G, C = g && H.rules(g).compare; if (!C || C.style !== 'win' || !C.texts) return false; // (a ruleset with another chart: its own window)
+  const info = H.compareInfo(g, a.ME), me = a.me();
+  const title = info.kind === 'none' ? a.tl(C.texts.none) : info.kind === 'won' ? a.tl(C.texts.won, info.year) : info.kind === 'out' ? a.tl(C.texts.out, info.year) : a.tl(C.texts.ranks, info.n, info.year);
+  let skills = null;
+  const dlg = W.open(10, {
+    label: 'Compare Players',
+    text: { 100: title, 102: 'Show Skills', 1: 'OK' },
+    on: { 102: (_, d) => { if (!skills) skills = D.skills(d, () => { skills = null; }); }, 1: (_, d) => d.close() },
+  });
+  if (!dlg) return false;
+  const t = dlg.get('100'); if (t) t.setAttribute('translate', 'no'); // (the title, already in the game's language)
+  // (the focus on Show Skills, the first control that takes it, as Windows gives it at the opening: captured, its dotted frame and heavy edge; dimmed in 2000, OK has it)
+  const sk = dlg.get('102'); if (sk) { if (info.kind === 'none') sk.disabled = true; else sk.focus(); }
+  if (info.kind === 'ranks') {
+    const client = dlg.el.querySelector('.w31client'), cw = 534, ch = 318;
+    const cv = document.createElement('canvas'); cv.width = cw; cv.height = ch; cv.className = 'w31c w31pic'; cv.setAttribute('role', 'img'); cv.setAttribute('aria-label', title);
+    Object.assign(cv.style, { left: '0', top: '0', width: `calc(${cw} * var(--wu))`, height: `calc(${ch} * var(--wu))`, pointerEvents: 'none' });
+    const x = cv.getContext('2d'), words = a.compareWords && a.compareWords(), word = (i) => (words ? words[i] : a.tl(a.CMP_EN[i]));
+    const x0 = 76, top = 34, y0 = 258, right = 505, n = info.n, unit = n >= 2 ? Math.trunc((y0 - top - 32) / (n - 1)) : Math.trunc((y0 - top) / 2) - 16;
+    x.fillStyle = '#000';
+    x.fillRect(x0, top, 1, y0 - top + 1); x.fillRect(x0, y0, right - x0, 1);
+    const small = (s, px, py, align) => { x.save(); x.font = '11px ' + SANS; x.textBaseline = 'alphabetic'; const k = 0.92, w = x.measureText(s).width * k;
+      x.translate(Math.round(align === 'right' ? px - w : px - w / 2), py); x.scale(k, 1); x.textAlign = 'left'; x.fillText(s, 0, 0); x.restore(); };
+    [[top + 16, 9], [Math.trunc((top + y0) / 2), 10], [y0 - 16, 11]].forEach(([y, i]) => { x.fillRect(x0 - 1, y, 1, 1); small(word(i), x0 - 4, y + 4, 'right'); });
+    const im = a.IMG['white0_' + (me.female ? 1 : 0)] || a.IMG['dos:i' + (me.female ? 1500 : 1000)];
+    for (let k = 1; k <= 9; k++) {
+      const xx = x0 + 43 * k; x.fillRect(xx, y0 - 1, 1, 1); small(word(k - 1), xx, y0 + 13, 'center');
+      if (im && im.width) x.drawImage(im, xx - 16, top + Math.trunc(unit * info.scores[k - 1] / 10), 32, 32);
+    }
+    client.prepend(cv);
+  }
+  return true;
+};
+// #16 LISTSKILLS, Show Skills (Compare Players' Show Skills): LISTSKILLSDLGPROC and FUN_1070_2073. Captured (win20-orig-vga16-skills{,-scrolled}.png): a window of its own
+// over Compare Players (which stays), at (12, 11) units in its client, with the caption "Spaceward Ho!": "List of all players and their skill levels:", the list (100,
+// LBS_SORT: the players by name; the fixed-pitch font, rows of 15, 17 rows: the name padded to 18 letters, then the skill, Novice for a computer), the vertical scroll
+// bar when the players do not fit (20 players: scrolled by 3), "Computer Intelligence:" and the computers' (101), OK.
+D.skills = function (under, done) {
+  const a = root.HOAPI, H = root.HO, g = a.G, Lg = root.HOLANG, lang = (g.opts && g.opts.lang) || H.ownLanguage(H.ownRules(g)), tx = (t) => (a.tl ? a.tl(t) : t);
+  const SKK = ['novice', 'beginner', 'normal', 'advanced', 'expert'], IQK = ['dumb', 'average', 'smart', 'diabolical'], SK = ['Novice', 'Beginner', 'Normal', 'Advanced', 'Expert'], IQ = ['Dumb', 'Average', 'Smart', 'Diabolical'];
+  const off = Lg && lang === 'de' && Lg.dosDe && Lg.dosDe.s ? { sk: [96, 97, 98, 99, 100].map(i => Lg.dosDe.s[i]), iq: [16, 17, 18].map(i => Lg.dosDe.s[i]) } : null;
+  const skillName = (k) => { const i = SKK.indexOf(k) < 0 ? 2 : SKK.indexOf(k); return off && off.sk && off.sk[i] ? off.sk[i] : tx(SK[i]); };
+  const iqi = Math.max(0, IQK.indexOf((g.opts && g.opts.iq) || 'average')), iq = off && off.iq && off.iq[iqi] ? off.iq[iqi] : tx(IQ[iqi]);
+  const pad = (t, n) => t + ' '.repeat(Math.max(1, n - t.length));
+  // (a computer player's skill field is never set (the 0x2fa table: the player's choice at registration), so it reads Novice: captured, 19 Dumb computers all "Novice";
+  // the remake's computers keep their starting skill elsewhere, js/rules-dos.js COMPUTER_START)
+  const rows = g.players.map(q => pad(q.name, 18) + skillName(q.human ? q.skill : 'novice')).sort((p, q) => p.localeCompare(q, undefined, { sensitivity: 'base' }));
+  let dlg = null;
+  const close = () => { if (dlg) dlg.el.remove(); if (done) done(); const ok = under.get('1'); if (ok) ok.focus(); };
+  dlg = W.build(16, {
+    title: 'Spaceward Ho!', label: 'List of all players and their skill levels:', close,
+    text: { '#1': 'List of all players and their skill levels:', 1: 'OK', '#3': 'Computer Intelligence:', 101: iq },
+    lists: { 100: { items: rows, sel: -1, rowH: 15, fixed: true } },
+    on: { 1: () => close() },
+    onKey: (e) => { e.stopPropagation(); if (e.key === 'Escape' || e.key === 'Enter') { close(); return true; } return false; }, // (its keys stay in it: Compare Players' Return is its own OK)
+  });
+  if (!dlg) return null;
+  // (its frame's top left: the client of Compare Players (5, 5 in its frame) and (24, 22) for the template's 12, 11 units, less this window's own frame and caption, 5 and 24)
+  Object.assign(dlg.el.style, { position: 'absolute', left: 'calc(24 * var(--wu))', top: 'calc(3 * var(--wu))', zIndex: '1' });
+  dlg.el.setAttribute('role', 'dialog'); dlg.el.setAttribute('aria-label', tx('List of all players and their skill levels:'));
+  for (const k of ['100', '101']) { const e = dlg.get(k); if (e) e.setAttribute('translate', 'no'); }
+  under.el.append(dlg.el); dlg.focus();
+  return dlg;
+};
+
 // #19 NAMESTAR, Name a Star (when the player has won: the ruleset's nameAStar): NAMESTARDLGPROC, in the remake's Name a Star form (js/skins/classic/ui.js openNameStar
 // hands it to the skin, T.nameStarLayout). From the template (the System font's units, as the window is not one the program sizes; NOT CAPTURED: reaching it needs a
 // won game): the words (static #0, wrapped: the sentence, the rule and the hint, as the DOS program's NameStarBox has them), picture 3500 (the DOS skin's d3500,

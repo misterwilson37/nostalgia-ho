@@ -4019,7 +4019,9 @@ function openStarList() {
 // or Owner), Quality when the window opens.
 let exploredSort = null; // (the Sort By choice, kept while the page is open)
 let exploredSort505 = { col: 'quality', dir: -1 };
-function openExploredList() {
+// what the explored-stars windows show: the stars the player knows, the originals' order (without a Sort By menu: the unowned by quality, other players' by name
+// and then by quality, the player's own by name, each a swap sort), each star's climate and status, and (exploredText) a row as one line of fixed-pitch text
+function exploredData() {
   const R = HO.rules(G), L = R.exploredList, p = me();
   const rec = (s) => s.owner === ME ? { explored: true, owner: ME, g: s.g, t: s.t, metal: s.metal, seen: G.turn } : HO.know(G, p, s.id);
   const seen = G.stars.filter(s => { const k = rec(s); return k.explored || k.owner >= 0; });
@@ -4028,12 +4030,24 @@ function openExploredList() {
   // the original's sort: for each place, swap in any later one that should go first
   const swapSort = (a, before) => { for (let i = 0; i < a.length - 1; i++) for (let j = i + 1; j < a.length; j++) if (before(a[j], a[i])) { const t = a[i]; a[i] = a[j]; a[j] = t; } return a; };
   const byQ = (x, y) => q(x) > q(y), byName = (x, y) => x.name < y.name;
+  const plain = () => { const free = seen.filter(s => ownerOf(s) < 0), other = seen.filter(s => ownerOf(s) >= 0 && ownerOf(s) !== ME), mine = seen.filter(s => ownerOf(s) === ME);
+    return swapSort(free, byQ).concat(swapSort(swapSort(other, byName), byQ), swapSort(mine, byName)); };
+  const climate = (s) => { const k = rec(s); return k.explored ? { t: degF(72 + (k.t - p.homeT)), g: gravF(k.g, p.homeG), m: fmt(Math.max(0, k.metal || 0)) } : null; };
+  const status = (s) => { const o = ownerOf(s); return o === ME ? L.own : o < 0 ? L.free : L.enemy; };
+  return { R, L, p, rec, seen, ownerOf, q, swapSort, byQ, byName, plain, climate, status };
+}
+// the rows of the original's text list (layout 'text': rules-dos.js exploredList): each part padded with spaces to the next column (cols: [name, temperature, gravity, metal])
+function exploredText(cols) {
+  const X = exploredData(), padTo = (t, n) => t + ' '.repeat(Math.max(0, n - t.length));
+  return X.plain().map(s => { const c = X.climate(s); let line = padTo(s.name, cols[0]);
+    if (c) line = padTo(padTo(padTo(line + c.t, cols[1]) + c.g, cols[2]) + c.m, cols[3]); else line = padTo(line + tl(X.L.noClimate), cols[3]);
+    return { id: s.id, line: line + tl(X.status(s)) }; });
+}
+function openExploredList() {
+  const { L, p, rec, seen, ownerOf, q, swapSort, byName, plain, climate, status } = exploredData();
   let mode = L.sortKeep && exploredSort != null && L.sortBy && exploredSort < L.sortBy.length ? exploredSort : L.sortDefault; // (3.0.1 sets Quality at each opening; 4.0.5 keeps the choice)
   const order = () => {
-    if (!L.sortBy) {
-      const free = seen.filter(s => ownerOf(s) < 0), other = seen.filter(s => ownerOf(s) >= 0 && ownerOf(s) !== ME), mine = seen.filter(s => ownerOf(s) === ME);
-      return swapSort(free, byQ).concat(swapSort(swapSort(other, byName), byQ), swapSort(mine, byName));
-    }
+    if (!L.sortBy) return plain();
     // (3.0.1's InitStarsList @140192, 4.0.5's FUN_004540a8: not the stars gone nova; by name, then by the menu's choice, the unexplored last)
     const a = swapSort(seen.filter(s => !s.nova), byName), ex = (s) => !!rec(s).explored;
     const val = [(s) => ex(s) ? Math.max(0, rec(s).metal || 0) : -1, (s) => ex(s) ? q(s) : -1, (s) => ex(s) ? Math.round(rec(s).g * 100) : 0x7fff, (s) => ownerOf(s) < 0 ? 0x15 : ownerOf(s)][mode];
@@ -4041,8 +4055,6 @@ function openExploredList() {
   };
   let list = order();
   let pick = null;
-  const climate = (s) => { const k = rec(s); return k.explored ? { t: degF(72 + (k.t - p.homeT)), g: gravF(k.g, p.homeG), m: fmt(Math.max(0, k.metal || 0)) } : null; };
-  const status = (s) => { const o = ownerOf(s); return o === ME ? L.own : o < 0 ? L.free : L.enemy; };
   const rowsBox = el('div', { class: 'exlist ex' + (L.layout || 'mac'), role: 'listbox', 'aria-label': L.title.replace(/:$/, '') });
   const dosSkin = window.HOSKINS && HOSKINS.current === 'dos';
   const cols = L.layout === 'text' && L.cols ? (dosSkin ? L.cols.dos : L.cols.win) : null;
@@ -6789,7 +6801,7 @@ window.addEventListener('DOMContentLoaded', () => {
     // (and the windows tools/ui-lang-audit.js opens in every skin and language)
     openPrefs, openAccount, openHall, hasHall, openMasterList, openRanks, profile, rankOf, // (profile, rankOf: the rank window a skin draws itself)
     arrivesText, markedLine, hallTables, playAgain, openTemperature, compareWords, tl, CMP_EN, CMP_ICONS, openSkillsList: () => openSkills(), hasCloud: () => !!CLOUD, cloudHall: (kind, order) => CLOUD.hallTop(G.rules, kind, order), cloudError: (e) => CLOUD.errorText(e), cloudUser: () => cloudUser(), // (what the iOS skin's own fleet list, Hall and Master Point List need)
-    openGameCenter, openFleetList, openStarList, openGive, openChat, winWords, others, menuDim, chatLimitToast, openNameStar, findRoute, autoRoute, runAutoPlay, autoPlaySliders, autoPlayWhere, openAutoPlaySettings, // (what a skin's own Give, Message, Dip and Surrender windows need)
+    openGameCenter, openFleetList, openStarList, exploredText, openGive, openChat, winWords, others, menuDim, chatLimitToast, openNameStar, findRoute, autoRoute, runAutoPlay, autoPlaySliders, autoPlayWhere, openAutoPlaySettings, // (what a skin's own Give, Message, Dip and Surrender windows need)
     toggleArmageddon, openSkin, openSounds, openLanguage, openAutoPlay, openDip, openSurrender, openSavedGames, closeScreen, openPatchNotes,
     classic(name, fn, ...a) { skipSkinWin = name; try { return fn(...a); } finally { skipSkinWin = null; } },
   };

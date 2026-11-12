@@ -3,7 +3,7 @@
 //   NODE_PATH=$(npm root -g) node tools/real-play.js [--quick] [--skin=a,b] [--rules=a,b] [--size=phone-l,desktop] [--browser=chromium|firefox] [--jobs=3]
 //        [--out=dir] [--port=8741] [--url=http://host/] [--strict] [--thorough] [--turns=5] [--no-contact] [--timeout=240] [--os=win31]
 // --os: the OS look, picked in the New game window (else the skin's own first); with the dos skin and --os=win31 it also opens the Windows
-// program's dialogs built so far from the menus (About, Battle Speed: js/skins/dos/win31/) and closes them as a person does.
+// program's dialogs built so far from the menus (About, Battle Speed, List All Fleets, List All Explored Stars, Compare Players: js/skins/dos/win31/) and closes them as a person does.
 // Sizes: phone-p 390x844 (touch), phone-l 844x390 (touch), pad 1024x768 (touch), desktop 1920x1080 (mouse), 4k 3840x2160 (mouse); numeric WxH[:touch] also works.
 // Everything the tool DOES is done with real pointer input (mouse, or touch through CDP) aimed at the element's own point, after checking with
 // document.elementFromPoint that the intended element is what is there (not covered, not off-screen, not zero-size). HOAPI is READ to verify only.
@@ -246,14 +246,17 @@ async function playRun(browser, job, outDir, idx) {
     if (OS) await step('os-look', async () => { const o = await G(() => window.HOSKINS && HOSKINS.os); if (o !== OS) fail(`the game shows the look "${o}", not "${OS}"`); });
     // the Windows program's own dialogs (the dos skin, win31 look): each from its menu, looked at, closed as a person does
     if (OS === 'win31' && job.skin === 'dos') await step('win31-dialogs', async () => {
-      for (const [menu, item, name] of [['File', /^About Ho!/, 'about'], ['Options', /^Set Battle Speed/, 'battle-speed']]) {
+      for (const [menu, item, name] of [['File', /^About Ho!/, 'about'], ['Options', /^Set Battle Speed/, 'battle-speed'], ['Ships', /^List All Fleets/, 'fleets'], ['Galaxy', /^List All Explored Stars/, 'stars'], ['Galaxy', /^Compare Players/, 'compare']]) {
         if (await ev(() => !!document.querySelector('.scrim'))) await page.keyboard.press('Escape');
+        // (the lists are the Windows dialogs with the DOS 2.0 rules only: another ruleset's list and chart are its own windows, and some have no Compare Players)
+        const own = ['fleets', 'stars', 'compare'].includes(name) && !await ev((n) => { const r = HO.rules(HOAPI.G); return n === 'fleets' || (n === 'stars' ? !!(r.exploredList && r.exploredList.layout === 'text') : !!(r.compare && r.compare.style === 'win')); }, name);
         if (!await press('#menubar .mbtn', { re: new RegExp('^' + menu + '$'), what: menu + ' menu' })) continue;
-        if (!await press('.dropdown button', { re: item, what: menu + ' > ' + item.source })) continue;
+        if (!await press('.dropdown button', { re: item, what: menu + ' > ' + item.source, soft: own })) { if (own) await page.keyboard.press('Escape'); continue; }
         await sleep(300);
+        if (own) { for (let k = 0; k < 3 && await ev(() => !!document.querySelector('.scrim')); k++) { await page.keyboard.press('Escape'); await sleep(200); } continue; }
         if (!await ev(() => !!document.querySelector('.w31d'))) { fail(`${menu} > ${item.source} opened no Windows dialog`); continue; }
         await shot('win31-' + name, true); await checkText('win31 ' + name, '.w31d');
-        if (name === 'about') await press('.w31d .w31pic', { what: 'the About box' }); else await press('.w31d button.w31b', { re: /^OK$/, what: 'Battle Speed OK' });
+        if (name === 'about') await press('.w31d .w31pic', { what: 'the About box' }); else await press('.w31d button.w31b', { re: /^OK$/, what: name + ' OK' });
         await sleep(300); if (await ev(() => !!document.querySelector('.w31d'))) fail(`the ${name} dialog did not close`);
       }
     });
