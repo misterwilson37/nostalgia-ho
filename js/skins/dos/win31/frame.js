@@ -91,9 +91,13 @@ ${S} #w31tech .w31pcl { left: 0; top: ${u(19)}; width: ${u(226)}; height: ${u(99
 ${S} #w31rep { left: ${u(382)}; top: ${u(356)}; width: ${u(258)}; height: ${u(124)}; }
 ${S} #w31rep .w31pcap { left: ${u(3)}; top: ${u(3)}; width: ${u(250)}; }
 ${S} #w31rep .w31pcl { left: ${u(3)}; top: ${u(22)}; width: ${u(250)}; height: ${u(97)}; overflow-y: auto; scrollbar-width: none; }
-${S} .w31rep { display: flex; align-items: flex-start; gap: ${u(5)}; padding: ${u(1)} ${u(2)} ${u(1)} ${u(1)}; min-height: ${u(34)}; box-sizing: border-box; cursor: pointer; }
+/* (a row: the picture at its top left, the words 6 right of it and 4 down to their capitals, the row 32 high, more for words of three lines: measured on
+   win20-orig-vga16-main.png and -reports.png) */
+${S} .w31rep { display: flex; align-items: flex-start; gap: ${u(6)}; padding: 0 ${u(2)} 0 0; min-height: ${u(32)}; box-sizing: border-box; cursor: pointer; }
+${S} #w31rep .w31pcl.vs { width: ${u(234)}; }
+${S} #w31rep .w31rsb { position: absolute; left: ${u(237)}; top: ${u(21)}; width: ${u(17)}; height: ${u(99)}; background: none; border: 0; --wu: var(--du); }
 ${S} .w31rep img, ${S} .w31rep canvas { width: ${u(32)}; height: ${u(32)}; flex: none; image-rendering: pixelated; }
-${S} .w31rep .cap { padding-top: ${u(3)}; }
+${S} .w31rep .cap { padding-top: ${u(2)}; }
 ${S} .w31rep:focus-visible { outline: ${u(1)} dotted #000; outline-offset: ${u(-1)}; }
 `;
 function style() {
@@ -130,7 +134,18 @@ W.frame = {
     if (r) {
       const cl = r.querySelector('.w31pcl'), keep = cl.scrollTop; cl.textContent = ''; cl.setAttribute('role', 'listbox'); cl.setAttribute('aria-label', 'Reports');
       for (const x of reps) { x.el.addEventListener('click', x.go); x.el.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); x.go(); } }); cl.append(x.el); }
-      const now = cl.querySelector('[data-now]'); cl.scrollTop = now ? now.offsetTop : keep;
+      // the window's vertical scroll bar (WS_VSCROLL: from the caption's black line to the frame's, over the client's right 16 pixels) when the rows do not
+      // fit, a row a step; the words then wrap 16 pixels sooner (captured: win20-orig-vga16-reports.png, three reports of 2140). The rows' offsets are the steps.
+      const old = r.querySelector('.w31rsb'); if (old) old.remove();
+      cl.classList.remove('vs');
+      if (cl.scrollHeight > cl.clientHeight + 1 && W.scrollBar) {
+        cl.classList.add('vs');
+        const rows = [...cl.children], tops = rows.map(e => e.offsetTop), need = cl.scrollHeight - cl.clientHeight, k = tops.findIndex(t => t >= need), max = k < 0 ? rows.length - 1 : k;
+        const go = (p) => { cl.scrollTop = Math.min(tops[p] || 0, cl.scrollHeight - cl.clientHeight); };
+        const now = cl.querySelector('[data-now]'), at = Math.min(max, now ? rows.indexOf(now) : Math.max(0, tops.findIndex(t => t >= keep)));
+        const box = document.createElement('div'); box.className = 'w31d w31rsb';
+        const sb = W.scrollBar([0, 0, 17, 99], { min: 0, max, pos: at }, go, true); sb.tabIndex = -1; box.append(sb); r.append(box); go(at);
+      } else { const now = cl.querySelector('[data-now]'); cl.scrollTop = now ? now.offsetTop : keep; }
     }
   },
 };

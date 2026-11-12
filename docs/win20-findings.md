@@ -1,6 +1,6 @@
 # Windows 3.1 2.0: the display audit (November 2026, begun)
 
-**Progress (Windows dialogs):** foundation done (emulator `emulators/dosbox-win31`, renderer `js/skins/dos/win31/`); chunk 1 done: the main window on the 640 x 480 screen at one scale, and 8 of 33 dialogs built (About, Battle Speed; Create New Galaxy, File Open, GameInfo, New Player Registration, Player Entry, Startup); Game Info also in the DOS look, the DOS look's build cost line "(D)" / "(P)"; chunk 3 done (Ships: Build Ships, Create New Ship Type, List Ship Types, Rename, Name a Star, Organize Fleets; 14 of 33 built); chunk 4 (Lists): List of All Fleets, List of All Explored Stars, Compare Players, Show Skills built (18 of 33), Reports (29) in progress; next: chunk 2 (Licence, Register: not started), then chunk 5 (below, "The chunk plan").
+**Progress (Windows dialogs):** foundation done (emulator `emulators/dosbox-win31`, renderer `js/skins/dos/win31/`); chunk 1 done: the main window on the 640 x 480 screen at one scale, and 8 of 33 dialogs built (About, Battle Speed; Create New Galaxy, File Open, GameInfo, New Player Registration, Player Entry, Startup); Game Info also in the DOS look, the DOS look's build cost line "(D)" / "(P)"; chunk 3 done (Ships: Build Ships, Create New Ship Type, List Ship Types, Rename, Name a Star, Organize Fleets; 14 of 33 built); chunk 4 (Lists): done (List of All Fleets, List of All Explored Stars, Compare Players, Show Skills, Reports: 19 of 33); next: chunk 2 (Licence, Register: not started), then chunk 5 (below, "The chunk plan").
 
 *The same game as DOS 2.0 and Mac 2.0.1 (`docs/dos-findings.md`); this is what WINHO.EXE puts in front of the player.*
 
@@ -246,6 +246,22 @@ none: the title centred across; Create New Galaxy was drawn with one before). No
 - **16 LISTSKILLS**: its own window over Compare Players at (12, 11) units of its client (measured), LBS_SORT (by name), the name padded to 18, the skill,
   the vertical scroll bar, "Computer Intelligence:" and the computers'. A computer's skill reads **Novice** (its skill field is never set: captured, 19 Dumb
   computers; the DOS look's Show Skills still shows the remake's starting skill, "Expert" for Dumb: not changed here, not captured in DOS).
+- **29 REPORT** (FUN_10c0_0344: CreateDialog of the modeless Reports window, the one `frame.js` draws since part A; captured `reports`, three reports of 2140,
+  with the main window's of 2000): the rows now as measured (the picture at the row's top left, the words 6 right of it, 4 down to the capitals, rows 32 high:
+  they were 34, one pixel in and two lower), and the window's own vertical scroll bar when the rows do not fit (WS_VSCROLL: from the caption's black line to
+  the frame's, 17 wide over the client's right edge; the words wrap 16 pixels sooner), a row a step; the browser's hidden scrolling before. Not checked: the
+  program's scroll range (the capture had its thumb at the end; the remake's steps are the rows).
+
+**real-play** (`--os=win31` also opens List All Fleets, List All Explored Stars and Compare Players and closes them with OK; with a ruleset whose list or chart is
+not the DOS program's, its own window is closed with Escape): see the hand-back numbers in the commit of this section.
+
+**Not done:** the focus as Windows shows it (a chosen row's dotted frame; the focused push button's heavy edge: Compare Players' Show Skills has the focus,
+not drawn); the dialogs centred, not at the program's places (List of All Fleets at 24, 40; Show Skills is placed over Compare Players as the program places it);
+the win31 look's menu keys are the DOS ones (the Windows menu says Compare Players Ctrl+M, captured; the skin shows Ctrl+Y); the DOS look's Show Skills
+gives computers their starting skill (see above).
+
+**Cost:** the captures (a new 20-player game auto-played to 2140) about 20 minutes; the four list dialogs and the renderer's list box most of the session;
+Reports about half an hour; each run of the checks about 40 minutes (real-play the most).
 
 ### The chunk plan (the other 31, about five a session)
 
@@ -258,7 +274,7 @@ Each chunk: capture each dialog in the running original (`emulators/dosbox-win31
 2. **Licence and registration:** 14 LICENSEE (radios, edits), 28 REGISTER (the password box). Small; can join chunk 1 or 5.
 3. **Ships (done, above):** 9 BLDSHIP (list box, owner-drawn queue cells; DOS `buildDos`), 22 NEWSHIP (29 controls, scroll bars; DOS `newTypeDos`), 31 SHIPTYPE (DOS
    `shipTypesDos`), 20 NAMETYPE and 19 NAMESTAR (DOS `renameDos`), 24 ORGFLEETS (DOS `organizeDos`). Needs: owner-drawn ship pictures from HOCOLOR.
-4. **Lists (done but 29, above):** 15 LISTFLEETS (DOS `fleetsDos`), 17 LISTSTARS (DOS `starsDos`), 10 COMPPLAYERS and 16 LISTSKILLS (`FUN_1078_039c`; DOS `compareDos`, `skillsDos`),
+4. **Lists (done, above):** 15 LISTFLEETS (DOS `fleetsDos`), 17 LISTSTARS (DOS `starsDos`), 10 COMPPLAYERS and 16 LISTSKILLS (`FUN_1078_039c`; DOS `compareDos`, `skillsDos`),
    29 REPORT (`FUN_10c0_0344`; DOS `reportsDos`). Needs: list box (chunk 1), vertical scroll bar checked.
 5. **Small boxes:** 6 AUTOPLAY (`FUN_10a0_02c7`; radios, scroll bar; DOS `autoPlayDos`), 26 POLLSPEED (`FUN_10a0_03e8`), 2 ALERTBOX and 3-5 ALERT_* (icon,
    `FUN_1108_01fc`; DOS `alertDos`), 23 NOTIFY1, 33 STATUS (`FUN_1100_05b4`), 27 PRTDLG (printing: nothing to print in a browser, its place noted), 18 MODELESS

@@ -299,6 +299,7 @@ function scale(ow, oh) {
   return fit >= 2 ? 2 : fit >= 1 ? 1 : Math.max(0.5, fit);
 }
 
+W.scrollBar = (...a) => { style(); return scrollBar(...a); }; // (the Reports window's, js/skins/dos/win31/frame.js; in a .w31d box with --wu set)
 W.has = (id) => !!(W.templates && W.templates[id]);
 // HOWIN31.build(id, o): the dialog's element and its handle without opening it (for a window that lives in the page, as the Startup window on the title page);
 // o.wu: its scale in CSS pixels per Windows pixel (else the screen's). HOWIN31.open(id, o): built and opened in the remake's modal layer.
