@@ -413,6 +413,12 @@ function hotMenus() {
 // Players are on the classic skin's items the layout borrows, which carry no key here: not shown.)
 const WINKEY = { 'Ctrl+Y': 'Ctrl+M', '+': 'Ctrl+=', '-': 'Ctrl+-' }, WINKEY_DOS = { 'Ctrl+M': 'Ctrl+Y', 'Ctrl+=': '+', 'Ctrl+-': '-' };
 function dosKeys() {
+  // (Escape closes an open menu, as in both programs; found by real-play: a menu left open by Escape covered the map)
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape' || !frameOn()) return;
+    const open = document.querySelectorAll('#menubar .dropdown.open'); if (!open.length) return;
+    open.forEach(d => { d.classList.remove('open'); if (d.previousElementSibling) d.previousElementSibling.setAttribute('aria-expanded', 'false'); }); e.preventDefault();
+  });
   document.addEventListener('keydown', (e) => {
     const a = window.HOAPI; if (!frameOn() || !a || !a.G || document.querySelector('.scrim') || /^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName)) return;
     let k = null;
