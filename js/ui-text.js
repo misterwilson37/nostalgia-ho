@@ -1271,6 +1271,9 @@ root.HOUI.add([
 // the Windows 2.0's About box (its Help menu's item and the window's title, the licence line; js/skins/dos/win31/dialogs.js)
 ['About Spaceward Ho!', 'A propos de Spaceward Ho!', 'Über Spaceward Ho!', 'Spaceward Ho! hakkında', 'Acerca de Spaceward Ho!'],
 ['Licensed to:', 'Licence accordée à :', 'Lizenziert für:', 'Lisans sahibi:', 'Con licencia para:'],
+// the Windows 2.0's Auto Play window (template 6; js/skins/dos/win31/dialogs.js autoPlay): its one sentence, and its straight apostrophe
+['Under auto play, event messages should disappear after:', 'En jeu automatique, les messages doivent disparaître après :', 'Beim automatischen Spiel sollen Meldungen verschwinden nach:', 'Otomatik oyunda olay mesajları şu süreden sonra kaybolsun:', 'En juego automático, los mensajes deben desaparecer tras:'],
+["I'll play my own turns, thank you.", 'Je jouerai mes tours moi-même, merci.', 'Ich spiele meine Züge selbst, danke.', 'Turlarımı kendim oynayacağım, teşekkürler.', 'Jugaré mis propios turnos, gracias.'],
 // the Windows 2.0's licence window (template 14; js/skins/dos/win31/dialogs.js licenceFirst)
 ['Spaceward Ho! License', 'Licence de Spaceward Ho!', 'Spaceward Ho! Lizenz', 'Spaceward Ho! Lisansı', 'Licencia de Spaceward Ho!'],
 ['Please Personalize Your Copy of Spaceward Ho! 2.0:', 'Personnalisez votre exemplaire de Spaceward Ho! 2.0 :', 'Bitte personalisieren Sie Ihre Kopie von Spaceward Ho! 2.0:', 'Lütfen Spaceward Ho! 2.0 kopyanızı kişiselleştirin:', 'Personalice su copia de Spaceward Ho! 2.0:'],

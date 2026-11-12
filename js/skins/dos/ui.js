@@ -359,7 +359,7 @@ function menuLayoutDos() {
       it('Force Turn Update', () => A().forceEndTurn(), { ghost: () => noGame() || !rs().forceEndTurn || !A().hotSeat() }),
       ['Auto Play…', 'Game/Auto play…'],
       it('I’ll Update Turns', () => {}, { ghost: off }), '-',
-      it('Set Polling Time…', () => {}, { ghost: off }),
+      it('Set Polling Time…', () => {}, { ghost: () => !winOn() || noGame() }), // (enabled in the Windows program, captured: its window, template 26, js/skins/dos/win31/hook.js)
       it('Set Battle Speed…', () => (frameOn() ? battleSpeedDos() : A().openPrefs()), { ghost: noGame }), '-',
       it('Show Event Messages', () => { const P = A().Prefs; P.showMsgs = P.showMsgs === false; A().savePrefs(); }, { ghost: noGame, checked: () => A().Prefs.showMsgs !== false }),
       it('Review Announced Battles', () => { A().Prefs.review = !A().prefReview(); A().savePrefs(); }, { ghost: noGame, checked: () => A().prefReview() }),
@@ -777,7 +777,7 @@ const DE_FLEET = [[/^Stationed at: (.*)$/, 'Stationiert auf: $1'], [/^Departing 
   [/^Fuel: (.*)$/, 'Tank: $1'], [/^Speed: (.*)$/, 'Tempo: $1'], [/^Full$/, 'Voll'], [/^Empty$/, 'Leer'], [/^Scrap: (.*)$/, 'Schrott: $1'], [/^Fleet to be scrapped for metal\.$/, 'Flotte zum Verschrotten.']];
 // the German build's fleet row (data pool: "Ein %Fs (%d/%d) %Fs", "%d %Fs (%d/%d) %Fs") with its class names (strings 368-371)
 // the remake's windows that the Windows look shows as the Windows program's dialogs (T.window's name: the dialog's in js/skins/dos/win31/dialogs.js)
-const W31WIN = { build: 'build', types: 'types', group: 'group', fleets: 'fleets', stars: 'stars', compare: 'compare' };
+const W31WIN = { autoplay: 'autoPlay', build: 'build', types: 'types', group: 'group', fleets: 'fleets', stars: 'stars', compare: 'compare' };
 const DE_CLASS = { scout: 'Späher', fighter: 'Kampfschiff', colony: 'Kolonieschiff', satellite: 'Satellit' };
 const deRow = (d, n) => `${n === 1 ? 'Ein' : n} ${d.name} (${d.W}/${d.S}) ${DE_CLASS[d.type] || d.type}`;
 const fl = (t) => { if (wl() !== 'de') return t; for (const [re, to] of DE_FLEET) if (re.test(t)) return t.replace(re, to); return t; };

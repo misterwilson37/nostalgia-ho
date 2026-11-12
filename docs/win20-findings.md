@@ -1,6 +1,6 @@
 # Windows 3.1 2.0: the display audit (November 2026, begun)
 
-**Progress (Windows dialogs):** foundation done (emulator `emulators/dosbox-win31`, renderer `js/skins/dos/win31/`); chunk 1 done: the main window on the 640 x 480 screen at one scale, and 8 of 33 dialogs built (About, Battle Speed; Create New Galaxy, File Open, GameInfo, New Player Registration, Player Entry, Startup); Game Info also in the DOS look, the DOS look's build cost line "(D)" / "(P)"; chunk 3 done (Ships: Build Ships, Create New Ship Type, List Ship Types, Rename, Name a Star, Organize Fleets; 14 of 33 built); chunk 4 (Lists): done (List of All Fleets, List of All Explored Stars, Compare Players, Show Skills, Reports: 19 of 33); chunk 5a (in progress, "Chunk 5a" below): the remake's own windows at the frame's unit in both looks; the licensee is the signed-in player; 14 LICENSEE built (20 of 33), 28 REGISTER not built (the copy protection: below); next: the alerts, Auto Play, Polling Time, Notify, Status; then chunk 5b (27 PRTDLG, 18 MODELESS, 7 BATTLE, 30 SENDMSG).
+**Progress (Windows dialogs):** foundation done (emulator `emulators/dosbox-win31`, renderer `js/skins/dos/win31/`); chunk 1 done: the main window on the 640 x 480 screen at one scale, and 8 of 33 dialogs built (About, Battle Speed; Create New Galaxy, File Open, GameInfo, New Player Registration, Player Entry, Startup); Game Info also in the DOS look, the DOS look's build cost line "(D)" / "(P)"; chunk 3 done (Ships: Build Ships, Create New Ship Type, List Ship Types, Rename, Name a Star, Organize Fleets; 14 of 33 built); chunk 4 (Lists): done (List of All Fleets, List of All Explored Stars, Compare Players, Show Skills, Reports: 19 of 33); chunk 5a (in progress, "Chunk 5a" below): the remake's own windows at the frame's unit in both looks; the licensee is the signed-in player; 14 LICENSEE, 6 AUTOPLAY, 26 POLLSPEED built (22 of 33), 28 REGISTER not built (the copy protection: below); next: the alerts, Notify, Status; then chunk 5b (27 PRTDLG, 18 MODELESS, 7 BATTLE, 30 SENDMSG).
 
 *The same game as DOS 2.0 and Mac 2.0.1 (`docs/dos-findings.md`); this is what WINHO.EXE puts in front of the player.*
 
@@ -292,6 +292,17 @@ Compared at one Windows pixel per CSS pixel (scratch `cmp-licensee.png`): frame,
 tries, then the program ends; REGISTERDLGPROC), asked when the PRF's check of WINHO.EXE (a CRC, FUN_1028_0182) fails, from FUN_1050_186f when a value of the
 game reaches 2500 (not reached in the emulator: not captured). Its answers are a table of the manual's words in the program; the remake asks no copy protection
 in any skin (the Amiga skin's is not shown either: docs/amiga-21.md), so there is nothing to wire it to.
+
+**6 AUTOPLAY** (Options, Auto Play…; AUTOPLAYDLGPROC, read in the disassembly: the radios by the player's mode, 3 "Have computer play for me.", 2 "Just mark me
+done every turn.", else "I'll play my own turns, thank you."; the scroll bar SetScrollRange 0 to 15 at the preference / 60; OK the only way out; captured
+`win20-orig-vga16-autoplay`, 2 seconds): wired as the DOS look's window (js/skins/dos/ui.js autoPlayDos: opens on "I'll play my own turns", OK with another mode starts the
+auto play every n seconds). **26 POLLSPEED** (Options, Set Polling Time…, which the Windows program has enabled, captured: the win31 look's item is enabled now,
+the DOS look's stays dimmed as its program's; POLLSPEEDDLGPROC: SetScrollRange 1 to 30, at the preference / 60, 8; captured `win20-orig-vga16-pollspeed`): keeps the
+Preferences window's polling time (`Prefs.poll`; nothing in the remake polls). Both compared at one Windows pixel per CSS pixel (scratch `cmp-autoplay.png`,
+`cmp-pollspeed.png`): every control where the capture has it, the thumbs at the same place; the font differs; the focused radio's dotted frame is not drawn.
+
+(Commit 1b77792, the licence window, also carries the main Claude's closer zoom with modern conveniences for the DOS, Amiga and iOS skins: DZM / dzs() in
+js/skins/dos/ui.js, ZOOMS_MODERN / zooms() in js/skins/amiga/ui.js, the "modern ? 2 : 1" limit in js/skins/ios/ui.js; it was in the tree when that commit was made.)
 
 ### The chunk plan (the other 31, about five a session)
 

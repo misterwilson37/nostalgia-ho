@@ -537,6 +537,42 @@ D.group = function (sid) {
 // ALL the player's fleets, satellites counted (the list skips them: the original's bug, kept; the patch of 1993 keeps it too), and shows the alert, else it selects
 // the row's fleet, centres the map on it and closes. THE REMAKE'S: the order is the remake's fleets'; a fleet chosen in flight past that test is selected without
 // a star to centre on.
+// #6 AUTOPLAY (Options, Auto Play…; AUTOPLAYDLGPROC, opened by FUN_10a0_02c7; captured, win20-orig-vga16-autoplay.png): "Auto Play:", the three radio buttons
+// (100 "Have computer play for me." for the player's mode 3, 101 "Just mark me done every turn." for 2, 102 "I'll play my own turns, thank you." else), the sentence,
+// the seconds (static 201) and their scroll bar (200: SetScrollRange 0 to 15, at the preference / 60: 2 in the capture), OK (the only way out: no Cancel).
+// OK keeps the seconds and, when the mode changed, sets it. The remake's: the DOS look's window's wiring (js/skins/dos/ui.js autoPlayDos: the remake keeps no
+// mode between windows, so it opens on "I'll play my own turns"; OK with another starts the auto play, every n seconds).
+D.autoPlay = function () {
+  const a = root.HOAPI, P = a.Prefs; let secs = P.autoSecs != null ? Math.max(0, Math.min(15, P.autoSecs)) : 2, mode = 2;
+  const radios = (d) => [100, 101, 102].forEach((id, i) => { const r = d.get(String(id)); if (r && r.w31) r.w31.set(i === mode); });
+  const on = {
+    200: (n, d) => { secs = n; const t = d.get('201'); if (t) t.textContent = String(n); },
+    1: (_, d) => { P.autoSecs = secs; a.savePrefs(); d.close(); if (mode < 2) a.runAutoPlay({ turns: Infinity, computer: mode === 0, won: false, lost: false, news: false, every: secs }); },
+  };
+  [100, 101, 102].forEach((id, i) => { on[id] = (_, d) => { mode = i; radios(d); }; });
+  const dlg = W.open(6, {
+    label: 'Auto Play',
+    text: { '#0': 'Auto Play:', 100: 'Have computer play for me.', 101: 'Just mark me done every turn.', 102: "I'll play my own turns, thank you.",
+      '#4': 'Under auto play, event messages should disappear after:', 201: String(secs), '#6': 'Seconds', 1: 'OK' },
+    scroll: { 200: { min: 0, max: 15, pos: secs } }, on,
+  });
+  if (!dlg) return false;
+  radios(dlg); const r = dlg.get('102'); if (r) r.focus();
+  return true;
+};
+// #26 POLLSPEED (Options, Set Polling Time…, enabled in the Windows program: captured, win20-orig-vga16-optionsmenu.png; POLLSPEEDDLGPROC, opened by FUN_10a0_03e8;
+// captured, win20-orig-vga16-pollspeed.png): "Polling Time:", Fast, the scroll bar (100: SetScrollRange 1 to 30, at the preference / 60: 8), Slow, the seconds (101)
+// and "Seconds", the sentence, OK (the only way out). OK keeps the time. The remake keeps it (Prefs.poll, the Preferences window's), as the original had it: nothing
+// in the remake polls (the rules' note, js/rules-dos.js options.poll).
+D.pollSpeed = function () {
+  const a = root.HOAPI, P = a.Prefs; let v = P.poll != null ? Math.max(1, Math.min(30, P.poll)) : 8;
+  W.open(26, {
+    label: 'Polling Time',
+    text: { '#0': 'Polling Time:', '#2': 'Fast', '#3': 'Slow', 101: String(v), '#5': 'Seconds', '#6': 'A fast polling time will let you know about turn updates more quickly but may slow down the computer.', 1: 'OK' },
+    scroll: { 100: { min: 1, max: 30, pos: v } },
+    on: { 100: (n, d) => { v = n; const t = d.get('101'); if (t) t.textContent = String(n); }, 1: (_, d) => { P.poll = v; a.savePrefs(); d.close(); } },
+  });
+};
 D.fleets = function () {
   const a = root.HOAPI, g = a.G, T = root.HOTHEME; if (!g || !T || !T.fleetList) return false;
   const F = T.fleetList(), all = g.fleets.filter(f => f.owner === a.ME), shown = all.filter(f => !f.sat);
