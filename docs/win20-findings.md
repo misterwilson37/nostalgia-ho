@@ -1,6 +1,6 @@
 # Windows 3.1 2.0: the display audit (November 2026, begun)
 
-**Progress (Windows dialogs):** foundation done (emulator `emulators/dosbox-win31`, renderer `js/skins/dos/win31/`); chunk 1 done: the main window on the 640 x 480 screen at one scale, and 8 of 33 dialogs built (About, Battle Speed; Create New Galaxy, File Open, GameInfo, New Player Registration, Player Entry, Startup); Game Info also in the DOS look, the DOS look's build cost line "(D)" / "(P)"; chunk 3 done (Ships: Build Ships, Create New Ship Type, List Ship Types, Rename, Name a Star, Organize Fleets; 14 of 33 built); chunk 4 (Lists): done (List of All Fleets, List of All Explored Stars, Compare Players, Show Skills, Reports: 19 of 33); chunk 5a (in progress, "Chunk 5a" below): the remake's own windows at the frame's unit in both looks; the licensee is the signed-in player; 14 LICENSEE, 6 AUTOPLAY, 26 POLLSPEED built (22 of 33), 28 REGISTER not built (the copy protection: below); next: the alerts, Notify, Status; then chunk 5b (27 PRTDLG, 18 MODELESS, 7 BATTLE, 30 SENDMSG).
+**Progress (Windows dialogs):** foundation done (emulator `emulators/dosbox-win31`, renderer `js/skins/dos/win31/`); chunk 1 done: the main window on the 640 x 480 screen at one scale, and 8 of 33 dialogs built (About, Battle Speed; Create New Galaxy, File Open, GameInfo, New Player Registration, Player Entry, Startup); Game Info also in the DOS look, the DOS look's build cost line "(D)" / "(P)"; chunk 3 done (Ships: Build Ships, Create New Ship Type, List Ship Types, Rename, Name a Star, Organize Fleets; 14 of 33 built); chunk 4 (Lists): done (List of All Fleets, List of All Explored Stars, Compare Players, Show Skills, Reports: 19 of 33); chunk 5a (in progress, "Chunk 5a" below): the remake's own windows at the frame's unit in both looks; the licensee is the signed-in player; 14 LICENSEE, 6 AUTOPLAY, 26 POLLSPEED, 4 ALERT_LLPIC built (23 of 33), 28 REGISTER not built (the copy protection: below); next: the other alert kinds (2, 3, 5), Notify, Status; then chunk 5b (27 PRTDLG, 18 MODELESS, 7 BATTLE, 30 SENDMSG).
 
 *The same game as DOS 2.0 and Mac 2.0.1 (`docs/dos-findings.md`); this is what WINHO.EXE puts in front of the player.*
 
@@ -300,6 +300,17 @@ auto play every n seconds). **26 POLLSPEED** (Options, Set Polling Time…, whic
 the DOS look's stays dimmed as its program's; POLLSPEEDDLGPROC: SetScrollRange 1 to 30, at the preference / 60, 8; captured `win20-orig-vga16-pollspeed`): keeps the
 Preferences window's polling time (`Prefs.poll`; nothing in the remake polls). Both compared at one Windows pixel per CSS pixel (scratch `cmp-autoplay.png`,
 `cmp-pollspeed.png`): every control where the capture has it, the thumbs at the same place; the font differs; the focused radio's dotted frame is not drawn.
+
+**4 ALERT_LLPIC: every alert of the Windows look** (`HOWIN31.alert`, called by the DOS look's `alertDos` with the Windows look, so T.alertBox, T.confirm, T.alert and the
+DOS look's own alerts all come here). The program's ALERT resources (3010-5090) are a kind (1 ALERT_LLPIC, 2 ALERT_CPIC, 3 ALERT_NOPIC), their button words and the text;
+FUN_1108_01fc picks the template. ALERTPICDLGPROC (disassembled: the jump tables Ghidra could not follow, scratch `ne.py`) formats the text into static 100, grows the
+window by what DrawText (DT_CALCRECT | DT_WORDBREAK) needs and centres it on the screen, makes each button (the longest word's letters, "&" counted, + 4) x 8 wide and at
+least the font's height + 8 high, 16 apart, the rightmost (201, the last of the resource's words, the default) at the middle between the picture's right edge and the
+window's, and hides the unused ones. Measured on two captures (`fleets-hyper`, chunk 4, two lines; `alert-fuel`, new, five): client 421 wide, 128 + 16 a line - 18 + 4
+high (the five-line one is a pixel taller), the mascot (HOCOLOR 3520 = the DOS skin's d3520) at 16, height - 87, the buttons 28 high at height - 68, OK at 218. Compared
+(scratch `cmp-alert-fuel.png`): frame, picture, button where the capture has them, the font differs, and the button's underlined access letter and focus frame are not
+drawn. The remake's alerts keep their words and buttons (the DOS look's); the default button goes rightmost. **Not built:** kind 2 (ALERT_CPIC: the won and lost boxes,
+not captured), kind 3 (ALERT_NOPIC: event messages the remake shows as reports, not captured) and #2 ALERTBOX (its caller not found, not captured).
 
 (Commit 1b77792, the licence window, also carries the main Claude's closer zoom with modern conveniences for the DOS, Amiga and iOS skins: DZM / dzs() in
 js/skins/dos/ui.js, ZOOMS_MODERN / zooms() in js/skins/amiga/ui.js, the "modern ? 2 : 1" limit in js/skins/ios/ui.js; it was in the tree when that commit was made.)

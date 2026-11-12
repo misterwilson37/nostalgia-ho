@@ -1378,6 +1378,7 @@ function skillsDos(under) {
 // the mascot (d3520) under it at 23 / 6 below the text, the buttons beside it at 23 below the picture's top; the box is 19 under the picture, and sits 7 above the screen's middle.
 // Kept difference: only the fuel alert was captured, so the picture and the button words of other alerts, and the box's height for other lengths, follow the same rule.
 function alertDos(paras, btns, o) {
+  if (winOn() && window.HOWIN31 && window.HOWIN31.alert) { const w = window.HOWIN31.alert(paras, btns, o); if (w) return w; } // (the Windows program's alert box, template 4: js/skins/dos/win31/dialogs.js)
   const a = window.HOAPI, wrap = (t) => { const out = []; String(t).split('\n').forEach(par => { let line = ''; par.split(' ').forEach(w => { if (line && (line + ' ' + w).length > 40) { out.push(line); line = w; } else line = line ? line + ' ' + w : w; }); out.push(line); }); return out; };
   const lines = []; paras.forEach((t, i) => { if (i) lines.push(''); wrap(t).forEach(l => lines.push(l)); });
   const pic = 13 + 14 * lines.length + 6, h = pic + 74 + 19, d = a.el('div', { class: 'dd dd-alert', role: 'alertdialog', 'aria-modal': 'true', 'aria-label': paras[0] });
