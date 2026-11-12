@@ -1291,6 +1291,9 @@ root.HOUI.add([
 ['Directories', 'Répertoires', 'Verzeichnisse', 'Dizinler', 'Directorios'],
 ['Directory:', 'Répertoire :', 'Verzeichnis:', 'Dizin:', 'Directorio:'],
 ['this browser', 'ce navigateur', 'dieser Browser', 'bu tarayıcı', 'este navegador'],
+// the Windows Ships dialogs (templates 9, 22, 31, 20, 19, 24; js/skins/dos/win31/dialogs.js)
+['Shipbuilding queue at:', 'File de construction à :', 'Bauliste bei:', 'Gemi yapım sırası:', 'Cola de construcción en:'],
+['In The Queue:', 'En attente :', 'In der Bauliste:', 'Sırada:', 'En la cola:'],
 // the New Game sequence's windows (DOS look: js/skins/dos/ui.js createGalaxyDos; Windows look: js/skins/dos/win31/dialogs.js newGame, templates 11, 25, 21)
 ['Create New Galaxy', 'Créer une nouvelle galaxie', 'Neue Galaxie erzeugen', 'Yeni Galaksi Oluştur', 'Crear una galaxia nueva'],
 ['Galaxy Density', 'Densité de la galaxie', 'Dichte der Galaxie', 'Galaksi yoğunluğu', 'Densidad de la galaxia'],

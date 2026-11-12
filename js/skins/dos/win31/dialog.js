@@ -10,7 +10,10 @@
 //
 //   HOWIN31.open(id, o) opens template <id> in the remake's modal layer. o: title (the caption's English: put in the language by HOUI like
 //   all interface text), label; text {key: English}; pics {key: fn(ctx, w, h)} (an owner-painted static); checks {key: bool}; scroll
-//   {key: {min, max, pos}}; on {key: fn(value, dlg)} (a button pressed, a box ticked, a bar moved); onKey(e, dlg); closeOnClick.
+//   {key: {min, max, pos}}; on {key: fn(value, dlg)} (a button pressed, a box ticked, a bar moved; on an owner-painted control, a click); onKey(e, dlg);
+//   closeOnClick; lists {key: {items, sel}} or, owner-drawn, {items, sel, rowH, draw(ctx, i, w, h, chosen)}; baseX, baseY, floor (a dialog's own units,
+//   for the windows the program sizes itself); rects {key: [x, y, w, h]} and client [w, h] (in Windows pixels: a control or the client as measured);
+//   moveBelow [units, pixels]: every control whose top is at or below that many units moved down that many pixels (List Ship Types').
 //   A control's key is its id, or "#<n>" (its place in the template) for the ones with no id of their own (65535).
 //   It returns the dialog: {el, get(key) (the control's element), value(key), close()}.
 //   HOWIN31.show(name): runs the dialog registered as HOWIN31.dialogs[name] (js/skins/dos/win31/dialogs.js); false when there is none.
@@ -19,8 +22,10 @@
 const W = root.HOWIN31 = root.HOWIN31 || {};
 W.base = { x: 8, y: 16 };
 const mulDiv = (a, b, c) => Math.floor((a * b + c / 2) / c);
-let BX = 8; // (the horizontal base unit of the dialog being built: the System font's 8, or a dialog's own, o.baseX: Create New Galaxy's, measured)
-const dx = (n) => mulDiv(n, BX, 4), dy = (n) => mulDiv(n, W.base.y, 8);
+let BX = 8, BY = 16, FLOOR = false; // (the base units of the dialog being built: the System font's 8 x 16, or a dialog's own, o.baseX / o.baseY: Create New Galaxy's, the
+// Build Ships window's, measured; o.floor: its pixels truncated, as measured on those the program sizes itself)
+const unit = (n, b, d) => (FLOOR ? Math.floor(n * b / d) : mulDiv(n, b, d));
+const dx = (n) => unit(n, BX, 4), dy = (n) => unit(n, BY, 8);
 const U = (n) => `calc(${n} * var(--wu))`;
 W.px = (r) => [dx(r[0]), dy(r[1]), dx(r[2]), dy(r[3])];
 
@@ -34,6 +39,10 @@ const FR = { side: 5, top: 5, capTop: 24, bottom: 5, cap: 18 };
 // (B: the push button's selector, with the class repeated to outrank the looks' rule for every button, js/os/dos.css and win31.css;
 // the buttons also carry .quiet, which those rules' heavier variant leaves alone)
 const B = 'html .w31d button.w31b.w31b.w31b.w31b';
+// the drop-down button (16 x 22 inside the field's border: its black line, the face, white top and left, two of shade at the right and bottom, the arrow and its bar)
+const COMBO = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="22" viewBox="0 0 16 22" shape-rendering="crispEdges"><path fill="#c0c0c0" d="M1 0h15v22h-15z"/>` +
+  `<path fill="#fff" d="M1 0h14v1h-14zM1 1h1v19h-1z"/><path fill="#808080" d="M14 1h2v21h-2zM2 20h12v1h-12zM1 21h13v1h-13zM15 0h1v1h-1z"/><path d="M0 0h1v22h-1z` +
+  `M7 6h3v3h-3zM5 9h7v1h-7zM6 10h5v1h-5zM7 11h3v1h-3zM8 12h1v1h-1zM5 14h7v1h-7z"/></svg>`;
 const CSS = `
 :root { --w31cap: #000080; --w31captext: #fff; --w31face: #c0c0c0; --w31shade: #808080; --w31hi: #000080; }
 html.w31-256 { --w31cap: #a6caf0; --w31captext: #000; }
@@ -70,6 +79,10 @@ ${B}:focus-visible span, html .w31d .w31chk:focus-visible span.t { outline: ${U(
 .w31d .w31grp .t { position: absolute; left: ${U(8)}; top: ${U(-9)}; padding: 0 ${U(2)}; background: #fff; white-space: pre; line-height: ${U(16)}; }
 .w31d .w31edit { background: #fff; font: inherit; font-weight: bold; color: #000; padding: 0 ${U(2)}; margin: 0; border: 0; border-radius: 0; outline: none; }
 .w31d .w31edit.bd { border: ${U(1)} solid #000; }
+.w31d select.w31combo { appearance: none; -webkit-appearance: none; cursor: pointer; padding: 0 ${U(18)} 0 ${U(2)}; line-height: ${U(20)};
+  background: #fff url("data:image/svg+xml;utf8,${encodeURIComponent(COMBO)}") no-repeat right top / ${U(16)} ${U(22)}; }
+${B}:disabled { color: var(--w31shade); opacity: 1; cursor: default; border-color: #000; }
+${B}.def:disabled { border-width: ${U(1)}; } /* (a dimmed default button loses its heavy edge: captured, Create New Ship Type's OK) */
 /* (the edit fields and lists in the System font, bold, as the dialog's other words: measured on the File Open window, win20-orig-vga16-fileopen-sel.png) */
 .w31d .w31list { background: #fff; border: ${U(1)} solid #000; overflow: hidden auto; font-weight: bold; }
 .w31d .w31list .row { height: ${U(16)}; padding: 0 ${U(2)}; white-space: pre; overflow: hidden; cursor: pointer; }
@@ -120,7 +133,7 @@ function scrollBar(r, o, fire, vertical) {
     const off = max > min ? mulDiv(pos - min, L - 2 * (A - 1) - A, max - min) : 0, t = A - 2 + off; // (the thumb's left black edge, in the bar's face)
     const [px, py] = face(t + 1, 0); thumb.style[vertical ? 'top' : 'left'] = U(vertical ? py : px);
     tl.style[vertical ? 'top' : 'left'] = U(t); tr.style[vertical ? 'top' : 'left'] = U(t + A - 1);
-    thumb.style.display = tl.style.display = tr.style.display = max > min ? '' : 'none';
+    // (a bar whose range is one value keeps its thumb at the start: captured, Create New Ship Type's "0 / 0" and "1 / 1")
     sb.setAttribute('aria-valuemin', min); sb.setAttribute('aria-valuemax', max); sb.setAttribute('aria-valuenow', pos);
   };
   const set = (v) => { v = Math.max(min, Math.min(max, Math.round(v))); if (v === pos) return; pos = v; place(); fire(pos); };
@@ -145,8 +158,35 @@ function scrollBar(r, o, fire, vertical) {
   return sb;
 }
 
+// an owner-drawn list box (LBS_OWNERDRAWFIXED: Build Ships' and List Ship Types' ship pictures): L = {items (their words, for a screen reader), sel, rowH,
+// draw(ctx, i, w, h, chosen)}; rows of rowH pixels, and with WS_VSCROLL Windows' vertical scroll bar at the right when the rows do not fit (17 wide, over the
+// list's right edge), scrolling a row at a time
+function ownerList(r, L, fire, vs) {
+  const [x, y, w, h] = r, e = at(mk('div', 'w31c w31list w31olist'), x, y, w, h); e.tabIndex = 0; e.setAttribute('role', 'listbox'); e.style.overflow = 'hidden';
+  const rows = mk('div'); rows.style.position = 'absolute'; rows.style.left = rows.style.top = '0'; e.append(rows);
+  let sel = L.sel == null ? -1 : L.sel, top = 0, bar = null;
+  const fit = Math.max(1, Math.floor((h - 2) / L.rowH));
+  const draw = () => {
+    const n = L.items.length, more = vs && n > fit, rw = w - 2 - (more ? 16 : 0);
+    rows.textContent = ''; top = Math.max(0, Math.min(top, n - fit));
+    for (let i = top; i < Math.min(n, top + fit); i++) {
+      const c = at(mk('canvas', 'w31pic'), 0, (i - top) * L.rowH, rw, L.rowH); c.width = rw; c.height = L.rowH; c.setAttribute('role', 'option');
+      c.setAttribute('aria-label', L.items[i]); c.setAttribute('aria-selected', String(i === sel)); c.style.position = 'absolute'; c.style.cursor = 'pointer';
+      L.draw(c.getContext('2d'), i, rw, L.rowH, i === sel);
+      c.addEventListener('click', () => { sel = i; draw(); fire(i); }); rows.append(c);
+    }
+    if (bar) { bar.remove(); bar = null; }
+    if (more) { bar = scrollBar([w - 18, -1, 17, h], { min: 0, max: n - fit, pos: top }, (p) => { top = p; draw(); }, true); bar.tabIndex = -1; e.append(bar); }
+  };
+  e.addEventListener('keydown', (ev) => { const d = { ArrowDown: 1, ArrowUp: -1 }[ev.key]; if (d && L.items.length) { ev.preventDefault(); sel = Math.max(0, Math.min(L.items.length - 1, sel + d)); if (sel < top) top = sel; if (sel >= top + fit) top = sel - fit + 1; draw(); fire(sel); } });
+  e.w31 = { get value() { return sel; }, set: (i) => { sel = i; draw(); }, items: (a) => { L.items = a; draw(); }, redraw: () => draw() };
+  draw();
+  return e;
+}
+
 function control(it, n, o, dlg) {
-  const [id, kind, , , , , st] = it, r = W.px(it.slice(2, 6)), key = id === 65535 ? '#' + n : String(id);
+  const [id, kind, , , , , st] = it, key = id === 65535 ? '#' + n : String(id), r = (o.rects && o.rects[key]) || W.px(it.slice(2, 6));
+  if (!(o.rects && o.rects[key]) && o.moveBelow && it[3] >= o.moveBelow[0]) r[1] += o.moveBelow[1]; // (the controls the program moves down under a list it lengthens)
   const txt = o.text && o.text[key] != null ? String(o.text[key]) : '';
   const fire = (v) => { const f = o.on && o.on[key]; if (f) f(v, dlg); };
   let e;
@@ -154,6 +194,11 @@ function control(it, n, o, dlg) {
     e = at(mk('canvas', 'w31c w31pic'), r[0], r[1], r[2], r[3]); e.width = r[2]; e.height = r[3]; e.setAttribute('role', 'img');
     if (o.picLabel && o.picLabel[key]) e.setAttribute('aria-label', o.picLabel[key]);
     o.pics[key](e.getContext('2d'), r[2], r[3]);
+    if (o.on && o.on[key]) { // (an owner-drawn button: Build Ships' queue cells)
+      e.tabIndex = 0; e.setAttribute('role', 'button'); e.style.cursor = 'pointer';
+      e.addEventListener('click', () => fire(id)); e.addEventListener('keydown', (ev) => { if (ev.key === ' ' || ev.key === 'Enter') { ev.preventDefault(); ev.stopPropagation(); fire(id); } });
+    }
+    e.w31 = { repaint: () => o.pics[key](e.getContext('2d'), r[2], r[3]) };
   } else if (kind === 'static') {
     const a = st & 0x1f;
     e = at(mk('div', 'w31c w31s' + (a === 1 ? ' center' : a === 2 ? ' right' : '') + (a === 0xb || a === 0xc ? ' nowrap' : ''), txt), ...r);
@@ -178,6 +223,8 @@ function control(it, n, o, dlg) {
     e = at(mk('input', 'w31c w31edit' + (st & WS_BORDER ? ' bd' : '')), ...r); e.type = 'text'; e.value = txt;
     if (st & 0x20) e.type = 'password'; // (ES_PASSWORD)
     e.addEventListener('input', () => fire(e.value));
+  } else if (kind === 'listbox' && o.lists && o.lists[key] && o.lists[key].draw) {
+    e = ownerList(r, o.lists[key], fire, !!(st & 0x200000));
   } else if (kind === 'listbox') {
     e = at(mk('div', 'w31c w31list'), ...r); e.tabIndex = 0; e.setAttribute('role', 'listbox');
     const L = (o.lists && o.lists[key]) || { items: [], sel: -1 };
@@ -194,11 +241,13 @@ function control(it, n, o, dlg) {
   } else if (kind === 'blackframe') {
     e = at(mk('div', 'w31c'), ...r); e.style.border = U(1) + ' solid #000'; e.style.pointerEvents = 'none'; // (drawn over the controls it frames, as Windows paints it; it takes no clicks)
   } else if (kind === 'combo') {
-    // (a drop-down list: the field and its 17-pixel button; the list opens below)
-    e = at(mk('select', 'w31c w31edit bd'), r[0], r[1], r[2], 24);
+    // (a drop-down list, CBS_DROPDOWNLIST: the field 24 high and, inside its right edge, the 17-pixel button with its arrow and the bar under it: measured on
+    // Create New Ship Type's Class, win20-orig-vga16-newship.png; the list opens below, the browser's)
+    e = at(mk('select', 'w31c w31edit bd w31combo'), r[0], r[1], r[2], 24);
     const L = (o.lists && o.lists[key]) || { items: [], sel: 0 };
     L.items.forEach((t, i) => { const op = mk('option', null, t); op.value = i; e.append(op); }); e.value = String(L.sel || 0);
     e.addEventListener('change', () => fire(+e.value));
+    e.w31 = { get value() { return +e.value; }, set: (i) => { e.value = String(i); } };
   } else {
     e = at(mk('div', 'w31c'), ...r); // (icons, frames, rectangles and owner-drawn controls with nothing to draw: their place is kept)
   }
@@ -230,8 +279,8 @@ W.open = function (id, o) {
 W.build = function (id, o) {
   o = o || {};
   const t = W.templates[id], a = root.HOAPI; if (!t || !a) return null;
-  style(); BX = o.baseX || W.base.x;
-  const cap = !!(t.style & WS_CAPTION) && (t.style & WS_CAPTION) === WS_CAPTION, cw = dx(t.w), ch = dy(t.h);
+  style(); BX = o.baseX || W.base.x; BY = o.baseY || W.base.y; FLOOR = !!o.floor;
+  const cap = !!(t.style & WS_CAPTION) && (t.style & WS_CAPTION) === WS_CAPTION, cw = o.client ? o.client[0] : dx(t.w), ch = o.client ? o.client[1] : dy(t.h);
   const top = cap ? FR.capTop : FR.top, ow = cw + 2 * FR.side, oh = ch + top + FR.bottom;
   const d = mk('div', 'w31d'); d.setAttribute('translate', 'yes');
   d.style.setProperty('--wu', (o.wu || scale(ow, oh)) + 'px'); d.style.width = U(ow); d.style.height = U(oh);

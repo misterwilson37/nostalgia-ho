@@ -8,7 +8,7 @@ if (!window.HOSKINS_INLINE) document.write('<script src="js/skins/dos/win31/temp
 if (!window.HOSKINS_INLINE) document.write('<script src="js/skins/dos/win31/dialog.js' + (window.HO_BUILD || '') + '"><\/script>');
 if (!window.HOSKINS_INLINE) document.write('<script src="js/skins/dos/win31/dialogs.js' + (window.HO_BUILD || '') + '"><\/script>');
 if (!window.HOSKINS_INLINE) document.write('<script src="js/skins/dos/win31/frame.js' + (window.HO_BUILD || '') + '"><\/script>');
-const ITEMS = { 'About Ho!…': 'about', 'Set Battle Speed…': 'battleSpeed' };
+const ITEMS = { 'About Ho!…': 'about', 'Set Battle Speed…': 'battleSpeed', 'Create New Ship Type…': 'newShip' };
 const winOn = () => root.document.documentElement.classList.contains('os-win31') && !!root.HOWIN31 && !!root.HOWIN31.show;
 const T = root.HOTHEME, M = T && T.menuLayout;
 if (!M) return;

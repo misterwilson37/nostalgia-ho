@@ -252,6 +252,9 @@ window.HOTHEME = {
   // The original writes "..." and its key equivalents as "[Ctrl+S]" (T.keyName).
   get menuLayout() { return menuLayoutDos(); },
   gameInfo(win) { return gameInfo(win); },
+  // the words of a ship type and of a number of ships, as the panes and the DOS look's windows write them (for the Windows look's dialogs, js/skins/dos/win31/dialogs.js):
+  // caption "Patton (2/2) Fighter"; ships "one Patton (2/2) Fighter", "2 Patton (2/2) Fighters" (the program's fleet rows and its queue cells, captured)
+  shipWords: { caption: (d) => caption(d), ships: (d, n) => { const g = window.HOAPI.G, r12 = RS12(); return wl() === 'de' ? deRow(d, n) : r12 ? r12.shipsDesc(enView(g), d, n) : `${n} ${d.name}`; }, className: (d) => className(d) },
   panel(panel, B) { panelDos(panel, B); },
   mapPixel() { return frameOn() ? [U, U] : null; },
   battleWindow(b, k) { battleDos(b, k); },
@@ -268,12 +271,13 @@ window.HOTHEME = {
   mapFont(n) { return winOn() ? '11px ' + WSANS : frameOn() ? "12px 'DOS Geneva 9'" : null; },
   alertBox(paras) { return frameOn() ? alertDos(paras, [{ label: 'OK', def: true }]) : null; },
   youWonLayout(kind, Y, done) { return frameOn() ? youWonDos(kind, Y, done) : false; },
-  nameStarLayout(f, o) { return frameOn() ? nameStarDos(f, o) : false; },
+  nameStarLayout(f, o) { return winOn() && window.HOWIN31 && window.HOWIN31.nameStar ? window.HOWIN31.nameStar(f, o) : frameOn() ? nameStarDos(f, o) : false; },
   closingGame(go) { return frameOn() ? closingGameDos(go) : false; },
   // (a question whose caller asks for the program's Yes/No box: labels ['Yes', 'No'], the remake's own words before they are put in the page's language, or labels.yesNo)
   confirm(text, yes, labels) { return frameOn() ? !!alertDos([typeof text === 'string' ? text : (text.textContent || '')], [{ label: labels ? tx(labels[0]) : 'OK', def: true, fn: yes }, { label: labels ? tx(labels[1]) : 'Cancel' }], { yesNo: !!labels && (!!labels.yesNo || (labels[0] === 'Yes' && labels[1] === 'No')) }) : false; },
   alert(kind, text, yes) { return frameOn() ? !!alertDos([typeof text === 'string' ? text : (text.textContent || '')], [{ label: 'OK', def: true, fn: yes }, { label: 'Cancel' }]) : false; },
   window(name) { if (name === 'saved' && winOn() && window.HOWIN31 && window.HOWIN31.show('fileOpen', arguments[1])) return true; // (the Windows program's File Open window, template 12)
+    if (winOn() && window.HOAPI.G && window.HOWIN31 && W31WIN[name] && window.HOWIN31.show(W31WIN[name], arguments[1])) return true; // (the Windows program's own windows: js/skins/dos/win31/dialogs.js)
     if (!frameOn() || !window.HOAPI.G) return false; if (name === 'autoplay') return autoPlayDos(); if (name === 'fleets') return fleetsDos(); if (name === 'types') return shipTypesDos(arguments[1]); if (name === 'build') return buildDos(arguments[1]); if (name === 'stars') return starsDos(); if (name === 'compare') return compareDos(); if (name === 'reports') return reportsDos(); if (name === 'group') return organizeDos(arguments[1]); if (name === 'chat') return chatDos(); return false; },
   newGame(f) { createGalaxyDos(f); },
   keyName(k) { return '[' + k + ']'; },
@@ -364,7 +368,7 @@ function menuLayoutDos() {
       it('Create New Ship Type…', () => (frameOn() ? newTypeDos() : A().openBuild(star().id)), { ghost: () => noGame() || (!frameOn() && !mine()), key: 'Ctrl+K' }), '-',
       ['List All Fleets…', 'Ships/List all fleets…'], // (its key [Ctrl+L] is put on the classic item in T.menus)
       // (the line changes with the selection, FUN_b000_2998: "~Organize Ships..." (358), dimmed "No ships to organize..." (359) when there is nothing to organize)
-      it(() => (orgGhost() ? A().tl('No ships to organize…') : A().tl('Organize Ships…')), () => { const f = A().curFleet && A().curFleet(); if (f && f.star != null) organizeDos(f.star); }, { ghost: orgGhost, key: 'Ctrl+O' }),
+      it(() => (orgGhost() ? A().tl('No ships to organize…') : A().tl('Organize Ships…')), () => { const f = A().curFleet && A().curFleet(); if (f && f.star != null) ((winOn() && window.HOWIN31 && window.HOWIN31.show('group', f.star)) || organizeDos(f.star)); }, { ghost: orgGhost, key: 'Ctrl+O' }),
       it(() => (mine() ? A().tl('Build Ships at %s…', star().name) : A().tl('Can’t Build Ships Here…')), () => { if (mine()) A().openBuild(star().id); }, { ghost: () => noGame() || !mine(), key: 'Ctrl+B' }),
       ['Scrap Current Fleet', 'Ships/#3'], '-',
       // (captured: "Review Battle at <star>…" [Ctrl+R] shows the selected star's last battle; "No Battles here…" is dimmed)
@@ -767,6 +771,8 @@ const WD = () => DOSW[wl()];
 const DE_FLEET = [[/^Stationed at: (.*)$/, 'Stationiert auf: $1'], [/^Departing to: (.*?) \(Dist (\d+); Time (\d+)\)$/, 'Zielort: $1 (Entf. $2; Dauer $3)'], [/^Going to (.*?) \(D (\d+); T (\d+)\) via (.*)$/, 'Unterwegs nach $1 (E $2; D $3) via $4'],
   [/^Fuel: (.*)$/, 'Tank: $1'], [/^Speed: (.*)$/, 'Tempo: $1'], [/^Full$/, 'Voll'], [/^Empty$/, 'Leer'], [/^Scrap: (.*)$/, 'Schrott: $1'], [/^Fleet to be scrapped for metal\.$/, 'Flotte zum Verschrotten.']];
 // the German build's fleet row (data pool: "Ein %Fs (%d/%d) %Fs", "%d %Fs (%d/%d) %Fs") with its class names (strings 368-371)
+// the remake's windows that the Windows look shows as the Windows program's dialogs (T.window's name: the dialog's in js/skins/dos/win31/dialogs.js)
+const W31WIN = { build: 'build', types: 'types', group: 'group' };
 const DE_CLASS = { scout: 'Späher', fighter: 'Kampfschiff', colony: 'Kolonieschiff', satellite: 'Satellit' };
 const deRow = (d, n) => `${n === 1 ? 'Ein' : n} ${d.name} (${d.W}/${d.S}) ${DE_CLASS[d.type] || d.type}`;
 const fl = (t) => { if (wl() !== 'de') return t; for (const [re, to] of DE_FLEET) if (re.test(t)) return t.replace(re, to); return t; };
