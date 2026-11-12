@@ -111,6 +111,8 @@ html.dosframe #msg .clock.pic { padding: 0; }
 /* One scale for every window (Jake, November 2026: "Our windows should match the scale of the game"): the remake's own windows, the ones neither program had
    (Preferences, How to play, the online windows ...), are drawn at the frame's unit as the program's dialogs are: zoomed by --u, so their CSS pixels are the
    640 x 480 screen's pixels, at most the screen's size, and what does not fit scrolls inside the window. */
+/* (the Help menu, the last, is the Windows program's: not in the DOS look's bar; js/skins/dos/ui.js menuLayoutDos) */
+html.os-dos #menubar > .menu:last-child:not(:first-child) { display: none; }
 html.dosframe .scrim > .win:not(.dosw):not(.dosx):not(.w31dlg) { zoom: var(--u); max-width: 624px; max-height: 464px; }
 html.dosframe .scrim > .win:not(.dosw):not(.dosx):not(.w31dlg) .wbody { min-height: 0; overflow: auto; }
 /* (the Windows 3.1 look: in the chrome of the Windows program's dialogs, js/skins/dos/win31/dialog.js: a black line and four of the caption's navy around the

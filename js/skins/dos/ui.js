@@ -283,7 +283,7 @@ window.HOTHEME = {
     if (winOn() && window.HOAPI.G && window.HOWIN31 && W31WIN[name] && window.HOWIN31.show(W31WIN[name], arguments[1])) return true; // (the Windows program's own windows: js/skins/dos/win31/dialogs.js)
     if (!frameOn() || !window.HOAPI.G) return false; if (name === 'autoplay') return autoPlayDos(); if (name === 'fleets') return fleetsDos(); if (name === 'types') return shipTypesDos(arguments[1]); if (name === 'build') return buildDos(arguments[1]); if (name === 'stars') return starsDos(); if (name === 'compare') return compareDos(); if (name === 'reports') return reportsDos(); if (name === 'group') return organizeDos(arguments[1]); if (name === 'chat') return chatDos(); return false; },
   newGame(f) { createGalaxyDos(f); },
-  keyName(k) { return '[' + k + ']'; },
+  keyName(k) { return '[' + ((winOn() && WINKEY[k]) || k) + ']'; }, // (the Windows look: the Windows program's keys, WINKEY)
   menus(menus) { const k = (m, l, key) => { const f = (menus[m] || []).find(i => i[0] === l); if (f) f[5] = key; }; k('Ships', 'List all fleets…', 'Ctrl+L'); k('Galaxy', 'Report window…', 'Alt+2'); },
   // the DOS title screen: the two halves of its credits picture
   title(frame, IMG, Sound) {
@@ -344,7 +344,6 @@ function menuLayoutDos() {
   const rs = () => (G() ? H().rules(G()) : {});
   const star = () => (G() && A().UI.sel != null ? G().stars[A().UI.sel] : null);
   const mine = () => !!star() && star().owner === A().ME;
-  const win = (window.HOSKINS && HOSKINS.os) || '';
   const M = {
     File: [
       it('About Ho!…', () => (frameOn() ? aboutDos() : A().openAbout())), '-',
@@ -383,7 +382,9 @@ function menuLayoutDos() {
     Window: [it('Tech Spending', () => {}, { checked: () => true, key: 'Alt+1' }), ['Reports', 'Galaxy/Report window…'],
       it('Game Info…', () => ((winOn() && window.HOWIN31 && window.HOWIN31.show('gameInfo')) || gameInfoDos()), { ghost: noGame, shown: () => !!G() && !!G().opts.modern })] // (a modern convenience: not in either program's Window menu; the remake's own place for the Player Entry window's Info..., gameInfo) // (the program's Window menu: Tech Spending, checked while its window shows; the remake's panel always shows it)
   };
-  if (win === 'win31') M.Help = [['How to play', 'Help/How to play']];
+  // (the Windows program's Help menu, always laid out and shown only with the Windows look, so it follows the look when it changes: js/skins/dos/style.css hides it
+  // in the DOS look; the skin builds its menus once)
+  M.Help = [['How to play', 'Help/How to play']];
   return M;
 }
 
@@ -407,6 +408,10 @@ function hotMenus() {
 }
 // The key equivalents the menus show ("[Ctrl+K]"): the keys the browser lets a page have. Ctrl+W, Ctrl+T and Ctrl+N belong to the browser (kept difference); the first letter T
 // of the classic skin ends the turn.
+// The Windows program's own keys where they differ from the DOS program's (WINHO.EXE's MENU 1, extracted/win-2.0/resources/menus.txt in the private repo; captured
+// for Compare Players): shown and taken with the Windows look, the DOS ones with the DOS look. (Its Alt+2 for the Report Window and Ctrl+/ for End Turn & Switch
+// Players are on the classic skin's items the layout borrows, which carry no key here: not shown.)
+const WINKEY = { 'Ctrl+Y': 'Ctrl+M', '+': 'Ctrl+=', '-': 'Ctrl+-' }, WINKEY_DOS = { 'Ctrl+M': 'Ctrl+Y', 'Ctrl+=': '+', 'Ctrl+-': '-' };
 function dosKeys() {
   document.addEventListener('keydown', (e) => {
     const a = window.HOAPI; if (!frameOn() || !a || !a.G || document.querySelector('.scrim') || /^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName)) return;
@@ -415,6 +420,7 @@ function dosKeys() {
     else if (e.altKey && !e.ctrlKey && /^[12]$/.test(e.key)) k = 'Alt+' + e.key;
     else if (!e.ctrlKey && !e.altKey && !e.metaKey && (e.key === '+' || e.key === '-' || e.key === '=')) k = e.key === '=' ? '+' : e.key;
     if (!k) return;
+    if (winOn()) { if (WINKEY_DOS[k]) k = WINKEY_DOS[k]; else if (WINKEY[k]) return; } // (the Windows look takes the Windows program's keys, not the DOS ones)
     const M = menuLayoutDos();
     for (const m in M) for (const it of M[m]) if (it[5] === k) { if (typeof it[1] !== 'function' || (it[2] && !it[2]()) || (it[4] && it[4]())) return; e.preventDefault(); it[1](); return; }
   });

@@ -320,6 +320,14 @@ out). **23 NOTIFY1** (NOTIFYDLGPROC, FUN_1008_0788: "Closing Game..." while the 
 with no caption, a black line, four of navy and a black line round a 224 x 44 client (measured; the renderer's frame and an inner line), the words centred: in the
 DOS look's Closing Game window's place (T.closingGame, a second). Both compared (scratch `cmp-status.png`, `cmp-closing.png`): frame, caption, words' and bar's places.
 
+**Chunk 1's and 4's leftovers.** The Help menu follows the look when it changes (always laid out, hidden in the DOS look by js/skins/dos/style.css; the skin builds
+its menus once). The Windows look's menus show and take the Windows program's keys where they differ from the DOS program's (WINHO.EXE's MENU 1): Compare Players
+Ctrl+M (the DOS look Ctrl+Y), Zoom In Ctrl+=, Zoom Out Ctrl+- (the DOS look + and -); not shown: Alt+2 (Report Window) and Ctrl+/ (End Turn & Switch Players), on
+classic items the layout borrows. Not done: the underlined access letters and the focus as Windows draws it (the alerts' "&OK" and the focused button's dotted frame,
+captured, are not drawn); a GameInfo double click filling Player Entry's name (the remake opens GameInfo only from the Window menu: Player Entry's Info... is dimmed
+in a new game, as captured, and the remake has no Player Entry when a game is opened); the dialogs' own positions (centred: the alerts and the licence window are
+centred by the program too, FUN_1108_0a3b; Status and Closing Game sit where their templates put them over the main window, not worked out).
+
 (Commit 1b77792, the licence window, also carries the main Claude's closer zoom with modern conveniences for the DOS, Amiga and iOS skins: DZM / dzs() in
 js/skins/dos/ui.js, ZOOMS_MODERN / zooms() in js/skins/amiga/ui.js, the "modern ? 2 : 1" limit in js/skins/ios/ui.js; it was in the tree when that commit was made.)
 
