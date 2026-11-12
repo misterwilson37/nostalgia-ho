@@ -320,8 +320,9 @@ out). **23 NOTIFY1** (NOTIFYDLGPROC, FUN_1008_0788: "Closing Game..." while the 
 with no caption, a black line, four of navy and a black line round a 224 x 44 client (measured; the renderer's frame and an inner line), the words centred: in the
 DOS look's Closing Game window's place (T.closingGame, a second). Both compared (scratch `cmp-status.png`, `cmp-closing.png`): frame, caption, words' and bar's places.
 
-**Chunk 1's and 4's leftovers.** The Help menu follows the look when it changes (always laid out, hidden in the DOS look by js/skins/dos/style.css; the skin builds
-its menus once). The Windows look's menus show and take the Windows program's keys where they differ from the DOS program's (WINHO.EXE's MENU 1): Compare Players
+**Chunk 1's and 4's leftovers.** The Help menu still shows only when the look was chosen before the page loaded: laying it out always and hiding it in the DOS look (tried,
+b18fc28) hid the remake's own commands with it (they go at the end of the last menu: real-play found no Preferences in the DOS look at every size); undone. It needs
+the menus rebuilt when the look changes (js/skins/classic/ui.js setupMenus runs once). The Windows look's menus show and take the Windows program's keys where they differ from the DOS program's (WINHO.EXE's MENU 1): Compare Players
 Ctrl+M (the DOS look Ctrl+Y), Zoom In Ctrl+=, Zoom Out Ctrl+- (the DOS look + and -); not shown: Alt+2 (Report Window) and Ctrl+/ (End Turn & Switch Players), on
 classic items the layout borrows. Not done: the underlined access letters and the focus as Windows draws it (the alerts' "&OK" and the focused button's dotted frame,
 captured, are not drawn); a GameInfo double click filling Player Entry's name (the remake opens GameInfo only from the Window menu: Player Entry's Info... is dimmed

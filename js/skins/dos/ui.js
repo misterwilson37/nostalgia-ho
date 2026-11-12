@@ -344,6 +344,7 @@ function menuLayoutDos() {
   const rs = () => (G() ? H().rules(G()) : {});
   const star = () => (G() && A().UI.sel != null ? G().stars[A().UI.sel] : null);
   const mine = () => !!star() && star().owner === A().ME;
+  const win = (window.HOSKINS && HOSKINS.os) || '';
   const M = {
     File: [
       it('About Ho!…', () => (frameOn() ? aboutDos() : A().openAbout())), '-',
@@ -382,9 +383,8 @@ function menuLayoutDos() {
     Window: [it('Tech Spending', () => {}, { checked: () => true, key: 'Alt+1' }), ['Reports', 'Galaxy/Report window…'],
       it('Game Info…', () => ((winOn() && window.HOWIN31 && window.HOWIN31.show('gameInfo')) || gameInfoDos()), { ghost: noGame, shown: () => !!G() && !!G().opts.modern })] // (a modern convenience: not in either program's Window menu; the remake's own place for the Player Entry window's Info..., gameInfo) // (the program's Window menu: Tech Spending, checked while its window shows; the remake's panel always shows it)
   };
-  // (the Windows program's Help menu, always laid out and shown only with the Windows look, so it follows the look when it changes: js/skins/dos/style.css hides it
-  // in the DOS look; the skin builds its menus once)
-  M.Help = [['How to play', 'Help/How to play']];
+  if (win === 'win31') M.Help = [['How to play', 'Help/How to play']]; // (only when the look is the Windows one as the page loads: the skin builds its menus once, and the
+  // remake's own commands go at the end of the last menu, Help or Window: a Help menu hidden in the DOS look took them with it, so it does not follow a later change)
   return M;
 }
 
