@@ -317,7 +317,15 @@ W.open = function (id, o) {
   o = o || {};
   a.modal('', dlg.el, { cls: 'w31dlg', label: o.label || o.title || 'Spaceward Ho!', sticky: true, onClose: o.onClose });
   dlg.focus();
+  if (o.at) W.placeAt(dlg, o.at);
   return dlg;
+};
+// o.at: [x, y], the dialog's outer corner in the 640 x 480 screen's pixels (a window the program creates over its main window, not centred: Status, Closing Game)
+W.placeAt = function (dlg, at) {
+  const app = document.getElementById('app'), win = dlg.el.closest('.win'), scrim = win && win.parentElement; if (!app || !scrim) return;
+  const r = app.getBoundingClientRect(), wu = parseFloat(dlg.el.style.getPropertyValue('--wu')) || 1;
+  scrim.style.display = 'block'; win.style.position = 'absolute'; win.style.margin = '0';
+  win.style.left = (r.left + at[0] * wu) + 'px'; win.style.top = (r.top + at[1] * wu) + 'px';
 };
 W.build = function (id, o) {
   o = o || {};

@@ -628,7 +628,8 @@ W.status = function (g, go) {
   steps.push('Writing Game File...', 'Removing Old Battles...');
   let i = 0;
   const bar = (x, w, h) => { x.fillStyle = '#fff'; x.fillRect(0, 0, w, h); x.fillStyle = document.documentElement.classList.contains('w31-256') ? '#008200' : '#00aa55'; x.fillRect(1, 1, Math.round((w - 2) * i / steps.length), h - 2); x.strokeStyle = '#000'; x.lineWidth = 1; x.strokeRect(0.5, 0.5, w - 1, h - 1); };
-  const dlg = W.open(33, { title: 'Spaceward Ho! Status', label: 'Spaceward Ho! Status', text: { 100: steps[0] }, pics: { 101: bar } });
+  // (placed where the capture has its frame, 224, 54: the template's 113, 18 dialog units give 222, 54, two pixels left of it: win20-orig-vga16-status-bar.png)
+  const dlg = W.open(33, { title: 'Spaceward Ho! Status', label: 'Spaceward Ho! Status', text: { 100: steps[0] }, pics: { 101: bar }, at: [224, 54] });
   if (!dlg) return go();
   dlg.el.setAttribute('aria-busy', 'true');
   const t = dlg.get('100'), b = dlg.get('101');
@@ -646,7 +647,7 @@ W.status = function (g, go) {
 // T.closingGame: shown a second, then the game closes).
 W.notify = function (text, go) {
   const a = root.HOAPI; if (!W.templates) return false;
-  const dlg = W.open(23, { label: text, text: { 100: text } }); if (!dlg) return false;
+  const dlg = W.open(23, { label: text, text: { 100: text }, at: [32, 93] }); // (its client at the template's 18, 28 dialog units = 36, 56 pixels from the main window's client, whose corner is 1, 42: the frame's corner 32, 93, measured in win20-orig-vga16-closing.png) if (!dlg) return false;
   const c = dlg.el.querySelector('.w31client'); if (c) c.style.boxShadow = 'inset 0 0 0 var(--wu) #000';
   dlg.el.setAttribute('aria-busy', 'true'); dlg.el.setAttribute('aria-live', 'polite');
   setTimeout(() => { if (dlg.el.isConnected) a.closeModal(); go(); }, 1000);
