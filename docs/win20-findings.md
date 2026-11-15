@@ -1,6 +1,6 @@
 # Windows 3.1 2.0: the display audit (November 2026, begun)
 
-**Progress (Windows dialogs):** foundation done (emulator `emulators/dosbox-win31`, renderer `js/skins/dos/win31/`); chunk 1 done: the main window on the 640 x 480 screen at one scale, and 8 of 33 dialogs built (About, Battle Speed; Create New Galaxy, File Open, GameInfo, New Player Registration, Player Entry, Startup); Game Info also in the DOS look, the DOS look's build cost line "(D)" / "(P)"; chunk 3 done (Ships: Build Ships, Create New Ship Type, List Ship Types, Rename, Name a Star, Organize Fleets; 14 of 33 built); chunk 4 (Lists): done (List of All Fleets, List of All Explored Stars, Compare Players, Show Skills, Reports: 19 of 33); chunk 5a (in progress, "Chunk 5a" below): the remake's own windows at the frame's unit in both looks; the licensee is the signed-in player; 14 LICENSEE, 6 AUTOPLAY, 26 POLLSPEED, 4 ALERT_LLPIC, 33 STATUS, 23 NOTIFY1 built (25 of 33), 28 REGISTER not built (the copy protection: below); next: the other alert kinds (2, 3, 5); then chunk 5b (27 PRTDLG, 18 MODELESS, 7 BATTLE, 30 SENDMSG).
+**Progress (Windows dialogs):** foundation done (emulator `emulators/dosbox-win31`, renderer `js/skins/dos/win31/`); chunk 1 done: the main window on the 640 x 480 screen at one scale, and 8 of 33 dialogs built (About, Battle Speed; Create New Galaxy, File Open, GameInfo, New Player Registration, Player Entry, Startup); Game Info also in the DOS look, the DOS look's build cost line "(D)" / "(P)"; chunk 3 done (Ships: Build Ships, Create New Ship Type, List Ship Types, Rename, Name a Star, Organize Fleets; 14 of 33 built); chunk 4 (Lists): done (List of All Fleets, List of All Explored Stars, Compare Players, Show Skills, Reports: 19 of 33); chunk 5a (in progress, "Chunk 5a" below): the remake's own windows at the frame's unit in both looks; the licensee is the signed-in player; 14 LICENSEE, 6 AUTOPLAY, 26 POLLSPEED, 4 ALERT_LLPIC, 33 STATUS, 23 NOTIFY1 built (25 of 33), 28 REGISTER not built (the copy protection: below); chunk 5b (in progress, "Chunk 5b" below): 30 SENDMSG and 7 BATTLE built (27 of 33), 18 MODELESS found to be the Tech Spending window (already drawn, compared); 27 PRTDLG not captured (no Print command in the remake); not built: 3 ALERT_CPIC, 5 ALERT_NOPIC, 2 ALERTBOX, 28 REGISTER; the leftovers (access letters, focus, Help menu following the look, Status / Closing Game places, double clicks) not started.
 
 *The same game as DOS 2.0 and Mac 2.0.1 (`docs/dos-findings.md`); this is what WINHO.EXE puts in front of the player.*
 
@@ -331,6 +331,30 @@ centred by the program too, FUN_1108_0a3b; Status and Closing Game sit where the
 
 (Commit 1b77792, the licence window, also carries the main Claude's closer zoom with modern conveniences for the DOS, Amiga and iOS skins: DZM / dzs() in
 js/skins/dos/ui.js, ZOOMS_MODERN / zooms() in js/skins/amiga/ui.js, the "modern ? 2 : 1" limit in js/skins/ios/ui.js; it was in the tree when that commit was made.)
+
+## Chunk 5b: Send Message, the battle window, Tech Spending (November 2026)
+
+**30 SENDMSG** (Galaxy, Send Message…; captured with the DOS save of the Milky Way game opened in the Windows program, `win20-orig-vga16-sendmsg{,-what,-about,-which,-send}`): the program sizes it itself
+(559 x 333 outside, a 549 x 323 client): "Send Message:", the step's question, "To:" and "Content:" right-aligned, the left list (80 x 211: one picture 32 x 32 with its word under it per
+choice made, 48 apart; choosing one goes back to that step) and the choices (310 x 211: five columns of 57, rows of 48, the first choice with the focus's dotted frame), Cancel and Send (dimmed
+until the fourth step; the question goes blank then). `HOWIN31.dialogs.sendMsg` (js/skins/dos/win31/dialogs.js), wired as the DOS look's chatDos (rs.cannedChat, H.sendCanned), the
+DOS skin's pictures. Compared at one Windows pixel per CSS pixel (scratch `cmp-sendmsg.png`): frame, lists, cells, pictures, words and buttons at the capture's places; the font differs. Not done: the
+star pictures of the fourth step (the capture shows a planet picture by the star's owner and state; the DOS look shows words only, as before), the pressed look of a cell.
+
+**7 BATTLE** (Ships, Review Battle at …; `win20-orig-vga16-battle-{skip,mid,done}`): template 7 is a 446 x 358 client (456 x 368 with the frame) with one default button (Skip while the shots are
+fired, OK after) at 198, 316, 48 x 28, and the program places it by the template's x, y (19, 12 units: the frame's top left at 32, 19 on the 640 x 480 screen), not centred: it covers the
+menu bar except Help, as the program's modal window does (the Skip / OK button is the only way out; the remake closes it as the DOS look's). In the remake (`battleDos`, js/skins/dos/ui.js)
+the Windows look draws the same canvas as the DOS look's in that window: the words in the Windows fonts (bold 13 and 11), the pictures 3 to 5 left and everything 9 up (measured against
+the capture with band positions: faces and ships at the capture's pixel, title, result, mascot and Round line within 2), the button the renderer's. Compared with `cmp-battle.png`
+(a different battle: the groups differ, the layout is the same).
+
+**18 MODELESS** is the Tech Spending window (FUN_10f8_01f0: CreateDialog "MODELESS", "Error creating tech window", called at start with the Reports window's FUN_10c0_0344): the main window's
+Tech Spending pane `frame.js` has drawn since chunk 1; compared again with the capture (`cmp-modeless.png`): the same.
+
+**27 PRTDLG, not built.** The File menu of the Windows program has Page Setup… and Print Map… (Ctrl+P); the remake's win31 File menu has neither (the DOS look has no printing; the remake prints
+nothing). With no printer installed the program shows a message box, "Unable to create printer device context" (`win20-orig-vga16-print-noprinter`); with a printer driver put in (HPPCL.DRV and
+UNIDRV.DLL expanded from the install disks, a LaserJet on LPT1) the Print Manager says the printer is offline; the "Printing" box itself did not show in either, so it is not captured. The tree was
+put back as it was. **3 ALERT_CPIC, 5 ALERT_NOPIC, 2 ALERTBOX:** need a won or lost game or an event message in the emulator: not captured, not built.
 
 ### The chunk plan (the other 31, about five a session)
 
