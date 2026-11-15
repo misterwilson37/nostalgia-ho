@@ -278,6 +278,8 @@ root.HOSKINS = {
     if (!validOS(id)) return;
     currentOS = id; store.set('ho5.os.' + current, id);
     applyOS(id);
+    // (a skin whose menus differ by look rebuilds them: js/skins/classic/ui.js setupMenus)
+    try { root.document.dispatchEvent(new root.CustomEvent('ho-os', { detail: id })); } catch (e) {}
   },
   // true once, right after switchTo(): continue the saved game
   takeResume() {

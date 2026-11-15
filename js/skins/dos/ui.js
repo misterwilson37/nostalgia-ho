@@ -251,6 +251,7 @@ window.HOTHEME = {
   // Export, Import, Review battle, Next fleet ...) follow at the end of the last menu, as every layout does (docs/remake-controls.md).
   // The original writes "..." and its key equivalents as "[Ctrl+S]" (T.keyName).
   get menuLayout() { return menuLayoutDos(); },
+  menuLayoutNow() { return menuLayoutDos(); },
   gameInfo(win) { return gameInfo(win); },
   licensee() { return licensee(); },
   turnProgress(g, go) { if (winOn() && window.HOWIN31 && window.HOWIN31.status) window.HOWIN31.status(g, go); else go(); }, // (the Windows program's Status window while the turn is worked out: template 33) // (the licence lines' name and organisation: licensee below)
@@ -422,7 +423,7 @@ function dosKeys() {
     const k = e.key.toLowerCase(), open = document.querySelector('#menubar .dropdown.open');
     if (open && !e.altKey) { const b = [...open.querySelectorAll('button[role=menuitem]:not(:disabled)')].find(x => { const h = x.querySelector('.mhot'); return h && h.textContent.toLowerCase() === k; }); if (b) { e.preventDefault(); b.click(); } return; }
     if (!e.altKey || document.querySelector('.scrim')) return;
-    const m = [...document.querySelectorAll('#menubar .mbtn')].find(x => x.textContent.trim().charAt(0).toLowerCase() === k); if (m) { e.preventDefault(); m.click(); }
+    const m = [...document.querySelectorAll('#menubar .mbtn:not(.logo)')].find(x => x.textContent.trim().charAt(0).toLowerCase() === k); if (m) { e.preventDefault(); m.click(); }
   });
   // (Escape closes an open menu, as in both programs; found by real-play: a menu left open by Escape covered the map)
   document.addEventListener('keydown', (e) => {

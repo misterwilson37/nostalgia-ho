@@ -237,7 +237,7 @@ html.dosframe .dosroster .rdone { margin-left: 0; padding: 0; position: absolute
 
 html.os-dos .dropdown .mhot { color: #a00000; }
 html.os-win31 .dropdown .mhot, html.os-win31 .dropdown button:hover .mhot, html.os-win31 .dropdown button:focus-visible .mhot { color: inherit; text-decoration: underline; }
-html.os-win31 #menubar .mbtn::first-letter { text-decoration: underline; }
+html.os-win31 #menubar .mbtn:not(.logo)::first-letter { text-decoration: underline; }
 html.os-dos .dropdown button:hover .mhot, html.os-dos .dropdown button:focus-visible .mhot { color: #a00000; }
 
 /* a caption longer than the cell wraps to a second line ("Your Buddies" in Send Message) */

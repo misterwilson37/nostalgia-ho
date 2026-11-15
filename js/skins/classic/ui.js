@@ -6620,7 +6620,7 @@ function quitToTitleNow() {
   if (G && T.closingGame) { save(); closing = true; if (T.closingGame(go)) return; closing = false; }
   go();
 }
-function setupMenus() {
+function setupMenus(again) {
   const menus = {
     Game: [['New game…', newGameDialog], [() => (G && HO.rules(G).switchPlayers) || 'End turn and switch players', () => switchPlayers(), () => !!(G && HO.rules(G).switchPlayers && hotSeat())], ['Players and history', () => G && openPlayers()], ['Auto-play this turn', () => playOneTurn()], ['Auto play…', () => G && !G.over && (hotSeat() || G.online ? toast('Auto play is for one-player games.') : openAutoPlay())], ['Online game…', () => openOnlineInfo(), () => !!(G && G.online)], ['Preferences…', openPrefs], ['Saved games…', () => openSavedGames(), () => !!(screensOf(rulesId()) || {}).savedGames], ['Account saves…', () => openAccountSaves(), () => !!CLOUD], ['Export this game…', () => exportGame(), () => !!G], ['Import a game…', () => importGame()], ['Rank history…', openRanks, () => !G || hasRanks(G)], [() => ((HO.RULESETS[rulesId()] || {}).gameCenter || {}).menu || 'Rank and Game Center…', openGameCenter, () => !!(HO.RULESETS[rulesId()] || {}).gameCenter],
       ['Master Point List…', () => openMasterList(), () => hasHall(G) && HO.rules(G).hall.master !== false], ['Hall of Fame…', () => openHall('fame'), () => hasHall(G)], ['Hall of Shame…', () => openHall('shame'), () => hasHall(G)], ['-'], ['Quit to title', quitToTitle]],
@@ -6684,13 +6684,19 @@ function setupMenus() {
     }));
     return el('div', { class: 'menu' }, btn, dd);
   };
-  const logo = $('#menubar .logo');
+  const logo = again ? null : $('#menubar .logo');
   if (logo) { const at = el('span'); logo.replaceWith(at); at.replaceWith(menu(logo, ho)); }
   // T.menus(menus, ho): a skin adds its own items (its windows); it never drops one
   if (T.menus) T.menus(menus, ho);
-  const laid = T.menuLayout ? layoutMenus(menus, T.menuLayout) : menus;
+  // (T.menuLayoutNow(): the layout as the look is now; T.menuLayout was taken once, when the skin was installed)
+  const laid = T.menuLayout ? layoutMenus(menus, again && T.menuLayoutNow ? T.menuLayoutNow() : T.menuLayout) : menus;
   // (T.menuName(name): a skin's own name for a menu, as text or a node: the Amiga's, in the language)
-  for (const name in laid) bar.append(menu(el('button', { class: 'mbtn' }, T.menuName ? T.menuName(name) : name), laid[name]));
+  // (again: the look changed, so the menus are laid out again in place, the Ho! menu kept: the remake's own commands go to the end of the last menu in either look)
+  const old = again ? [...bar.querySelectorAll('.menu')].filter(m => m.querySelector('.mbtn:not(.logo)')) : [], ref = old.length ? old[old.length - 1].nextSibling : null;
+  old.forEach(m => m.remove());
+  for (const name in laid) { const m = menu(el('button', { class: 'mbtn' }, T.menuName ? T.menuName(name) : name), laid[name]); if (ref) bar.insertBefore(m, ref); else bar.append(m); }
+  if (again) return;
+  document.addEventListener('ho-os', () => { if (bar.isConnected) setupMenus(true); });
   document.addEventListener('click', () => document.querySelectorAll('.dropdown.open').forEach(d => { d.classList.remove('open'); d.previousElementSibling.setAttribute('aria-expanded', 'false'); }));
 }
 // A skin may lay these same items out as its original's menus did
