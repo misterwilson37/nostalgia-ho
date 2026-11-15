@@ -282,11 +282,14 @@ async function main() {
       const form = page.locator('form.newgame'); await form.waitFor();
       const knows = !FORM_AS[rules] || await page.evaluate(() => !!window.HONEWGAME_EDITIONS);
       if (!knows) await page.evaluate(() => { window.__hpEdition = true; });
-      await form.locator('select[name=rules]').selectOption(knows ? rules : FORM_AS[rules]);
-      { const sk = form.locator('select[name=skin]'); if (await sk.count() && await sk.locator(`option[value=${skin}]`).count()) await sk.selectOption(skin); }
+      // (a ruleset with its own New game window, the DOS one's Create New Galaxy in any skin, hides this form: its fields are then set directly, as real-play does)
+      const setSel = async (name, val) => { const l = form.locator(`select[name=${name}]`); if (!await l.count()) return; if (await l.isVisible().catch(() => false)) { try { await l.selectOption(val, { timeout: 3000 }); return; } catch (e) {} } await page.evaluate(([n, v]) => { const s = document.querySelector(`form.newgame select[name=${n}]`); if (s) { s.value = v; s.dispatchEvent(new Event('change', { bubbles: true })); } }, [name, val]); };
+      await setSel('rules', knows ? rules : FORM_AS[rules]);
+      { const sk = form.locator('select[name=skin]'); if (await sk.count() && await sk.locator(`option[value=${skin}]`).count()) await setSel('skin', skin); }
       { const lg = form.locator('select[name=lang]'); if (await lg.isVisible() && await lg.locator('option[value=en]').count()) await lg.selectOption('en'); }
-      if (rules !== '12') await form.locator('select[name=computers]').selectOption('3').catch(() => {});
-      await form.locator('button[type=submit]').click();
+      if (rules !== '12') await setSel('computers', '3').catch(() => {});
+      if (await form.locator('button[type=submit]').isVisible().catch(() => false)) await form.locator('button[type=submit]').click();
+      else await page.evaluate(() => document.querySelector('form.newgame button[type=submit]').click());
       await sleep(700);
       // (iOS and Android mark the page with a class; the Mac skins are told by HOSKINS)
       const skinNow = await page.evaluate((sk) => sk === 'ios' || sk === 'android' ? document.documentElement.classList.contains('skin-ios') : !!(window.HOSKINS && HOSKINS.current === sk), skin);
