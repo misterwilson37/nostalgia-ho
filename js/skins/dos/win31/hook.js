@@ -10,15 +10,21 @@ if (!window.HOSKINS_INLINE) document.write('<script src="js/skins/dos/win31/dial
 if (!window.HOSKINS_INLINE) document.write('<script src="js/skins/dos/win31/frame.js' + (window.HO_BUILD || '') + '"><\/script>');
 const ITEMS = { 'About Ho!…': 'about', 'Set Battle Speed…': 'battleSpeed', 'Create New Ship Type…': 'newShip', 'Set Polling Time…': 'pollSpeed' };
 const winOn = () => root.document.documentElement.classList.contains('os-win31') && !!root.HOWIN31 && !!root.HOWIN31.show;
-const T = root.HOTHEME, M = T && T.menuLayout;
-if (!M) return;
-for (const items of Object.values(M)) {
-  for (const it of items) {
-    if (!Array.isArray(it) || typeof it[1] !== 'function' || !ITEMS[it[0]]) continue;
-    const name = ITEMS[it[0]], orig = it[1];
-    it[1] = (...a) => (winOn() && root.HOWIN31.show(name)) || orig(...a);
+const T = root.HOTHEME;
+if (!T || !T.menuLayout) return;
+function patch(M) {
+  for (const items of Object.values(M)) {
+    for (const it of items) {
+      if (!Array.isArray(it) || typeof it[1] !== 'function' || !ITEMS[it[0]]) continue;
+      const name = ITEMS[it[0]], orig = it[1];
+      it[1] = (...a) => (winOn() && root.HOWIN31.show(name)) || orig(...a);
+    }
   }
+  // (the Windows program's Help menu: Help on Ho!, About Spaceward Ho!; the skin's win31 Help menu has How to play)
+  if (M.Help) M.Help.push('-', ['About Spaceward Ho!', () => winOn() && root.HOWIN31.show('about'), null, null, null, null]);
+  return M;
 }
-// (the Windows program's Help menu: Help on Ho!, About Spaceward Ho!; the skin's win31 Help menu has How to play)
-if (M.Help) M.Help.push('-', ['About Spaceward Ho!', () => winOn() && root.HOWIN31.show('about'), null, null, null, null]);
+patch(T.menuLayout);
+// (the menus laid out again when the look changes, js/skins/classic/ui.js setupMenus: the same changes on the new layout)
+if (T.menuLayoutNow) { const now = T.menuLayoutNow; T.menuLayoutNow = () => patch(now.call(T)); }
 })(window);
