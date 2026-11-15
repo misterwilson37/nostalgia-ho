@@ -291,6 +291,8 @@ async function main() {
       if (await form.locator('button[type=submit]').isVisible().catch(() => false)) await form.locator('button[type=submit]').click();
       else await page.evaluate(() => document.querySelector('form.newgame button[type=submit]').click());
       await sleep(700);
+      // (the DOS ruleset asks each player's name first, Player Entry, in the skin's own window: type one and press Return)
+      for (let i = 0; i < 4; i++) { const t = page.locator('input[type=text]:visible, input:not([type]):visible').filter({ hasNot: page.locator('xpath=ancestor::form[contains(@class,"newgame")]') }).first(); if (!await t.count() || await t.inputValue().catch(() => 'x')) break; await t.fill('Jake').catch(() => {}); await page.keyboard.press('Enter'); await sleep(500); }
       // (iOS and Android mark the page with a class; the Mac skins are told by HOSKINS)
       const skinNow = await page.evaluate((sk) => sk === 'ios' || sk === 'android' ? document.documentElement.classList.contains('skin-ios') : !!(window.HOSKINS && HOSKINS.current === sk), skin);
       if (!skinNow) { fails.push('the page is not in the ' + skin + ' skin'); }
