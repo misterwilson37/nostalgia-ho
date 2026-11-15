@@ -394,13 +394,16 @@ const MENU_HOT = { 'About Ho!…': 0, 'New Game…': 0, 'Open Game…': 0, 'Clos
   'Force Turn Update': 0, 'Auto Play…': 0, 'I’ll Update Turns': 0, 'Set Polling Time…': 4, 'Set Battle Speed…': 4, 'Show Event Messages': 5, 'Review Announced Battles': 0, 'Give Overspending Warnings': 0, 'Sound': 0,
   'List Ship Types…': 0, 'Create New Ship Type…': 7, 'List All Fleets…': 9, 'Organize Ships…': 0, 'Scrap Current Fleet': 0,
   'Compare Players…': 0, 'List All Explored Stars…': 0, 'Send Message…': 5, 'Zoom In': 5, 'Zoom Out': 5, 'Fix Spending': 0, 'Reports': 0, 'Tech Spending': 0 };
+// The Windows program's (MENU 1, the private repo's extracted/win-2.0/resources/menus.txt): its hot letters underlined, where they differ from the DOS program's
+const WIN_HOT = Object.assign({}, MENU_HOT, { 'Give Overspending Warnings': 5, 'End Turn & Switch Players': 'End Turn & Switch Players'.indexOf('Switch') + 2, 'No Battles Here…': 13, 'Review Battle at': -1 });
 function hotMenus() {
   const mark = (dd) => dd.querySelectorAll('button[role=menuitem]').forEach(b => {
     if (b.dataset.hot || b.disabled || !frameOn()) return;
     const n = b.firstChild; if (!n || n.nodeType !== 3) return;
-    const t = n.nodeValue; let i = MENU_HOT[t];
-    if (i == null && /^(Build Ships at|Review Battle at) /.test(t)) i = 0;
-    if (i == null || i >= t.length) return;
+    const t = n.nodeValue, W = winOn(); let i = (W ? WIN_HOT : MENU_HOT)[t];
+    if (i == null && /^Build Ships at /.test(t)) i = 0;
+    if (i == null && /^Review Battle at /.test(t) && !W) i = 0;
+    if (i == null || i < 0 || i >= t.length) return;
     b.dataset.hot = '1'; const sp = document.createElement('span'); sp.className = 'mhot'; sp.textContent = t[i];
     const w = document.createElement('span'); w.setAttribute('translate', 'no'); w.append(t.slice(0, i), sp, t.slice(i + 1)); n.replaceWith(w);
   });
@@ -413,6 +416,14 @@ function hotMenus() {
 // Players are on the classic skin's items the layout borrows, which carry no key here: not shown.)
 const WINKEY = { 'Ctrl+Y': 'Ctrl+M', '+': 'Ctrl+=', '-': 'Ctrl+-' }, WINKEY_DOS = { 'Ctrl+M': 'Ctrl+Y', 'Ctrl+=': '+', 'Ctrl+-': '-' };
 function dosKeys() {
+  // The Windows look's menu bar: Alt+letter opens the menu whose underlined first letter it is, and a letter chosen in an open menu presses the item with that underlined letter
+  document.addEventListener('keydown', (e) => {
+    if (!frameOn() || !winOn() || e.ctrlKey || e.metaKey || e.shiftKey || e.key.length !== 1 || !/[a-z]/i.test(e.key)) return;
+    const k = e.key.toLowerCase(), open = document.querySelector('#menubar .dropdown.open');
+    if (open && !e.altKey) { const b = [...open.querySelectorAll('button[role=menuitem]:not(:disabled)')].find(x => { const h = x.querySelector('.mhot'); return h && h.textContent.toLowerCase() === k; }); if (b) { e.preventDefault(); b.click(); } return; }
+    if (!e.altKey || document.querySelector('.scrim')) return;
+    const m = [...document.querySelectorAll('#menubar .mbtn')].find(x => x.textContent.trim().charAt(0).toLowerCase() === k); if (m) { e.preventDefault(); m.click(); }
+  });
   // (Escape closes an open menu, as in both programs; found by real-play: a menu left open by Escape covered the map)
   document.addEventListener('keydown', (e) => {
     if (e.key !== 'Escape' || !frameOn()) return;

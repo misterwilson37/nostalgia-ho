@@ -75,8 +75,8 @@ D.fileOpen = function (o) {
   };
   const dlg = W.open(12, {
     label: 'File name of galaxy to open:',
-    text: { 15: 'File name of galaxy to open:', '#6': 'Directories', '#7': 'Files', '#8': 'Directory:', 17: a.tl ? a.tl('this browser') : 'this browser', 16: '*.HO!', 1: 'OK', 2: 'Cancel' },
-    lists: { 18: { items: files.map(f => f.name), sel: -1 }, 19: { items: [], sel: -1 } },
+    text: { 15: 'File name of galaxy to open:', '#6': '&Directories', '#7': '&Files', '#8': 'Directory:', 17: a.tl ? a.tl('this browser') : 'this browser', 16: '*.HO!', 1: 'OK', 2: 'Cancel' },
+    lists: { 18: { items: files.map(f => f.name), sel: -1, dbl: () => { if (sel >= 0) openIt(dlg); } }, 19: { items: [], sel: -1 } },
     on: {
       18: (i, d) => { sel = i; const e = d.get('16'); if (e && files[i]) e.value = files[i].name; },
       16: () => { sel = -1; },
@@ -85,7 +85,6 @@ D.fileOpen = function (o) {
   });
   if (!dlg) return false;
   const ed = dlg.get('16'); if (ed) { ed.focus(); ed.select(); }
-  const lb = dlg.get('18'); if (lb) lb.addEventListener('dblclick', () => { if (sel >= 0) openIt(dlg); });
   return true;
 };
 // #32 STARTUP, on the title page (js/skins/dos/ui.js startupDos puts it in the title page's frame, as the DOS look's Startup window): HOCOLOR's 1002 (the DOS
@@ -594,7 +593,8 @@ W.alert = function (paras, btns, o) {
   const bw = Math.max(...order.map(b => (String(b.label).length + 1 + 4) * 8)), step = bw + 16, xr = Math.floor((88 + CW) / 2) + Math.floor(k * step / 2) - step;
   const rects = { 100: [14, 12, 387, 16 * n], 999: [16, CH - 87, 74, 74] }, text0 = { 100: text }, on = {};
   let back = null; const done = () => { if (back) back.remove(); };
-  [201, 202, 203].forEach((id, i) => { rects[id] = [xr - i * step, H0 - 68, bw, 28]; const b = order[k - 1 - i]; text0[id] = b ? b.label : ''; if (b) on[id] = () => { done(); if (b.fn) b.fn(); }; });
+  // (the resource's "&OK", "&Cancel", "&Yes", "&No": the first letter is the access letter, captured under the wait alert's Wait and Continue)
+  [201, 202, 203].forEach((id, i) => { rects[id] = [xr - i * step, H0 - 68, bw, 28]; const b = order[k - 1 - i]; text0[id] = b ? '&' + String(b.label).replace(/&/g, '&&') : ''; if (b) on[id] = () => { done(); if (b.fn) b.fn(); }; });
   const img = a.IMG['dos:d3520'];
   const dlg = W.build(4, { label: paras[0], client: [CW, CH], rects, text: text0, on, close: done,
     pics: { 999: (x, w, h) => { x.fillStyle = '#fff'; x.fillRect(0, 0, w, h); if (img && img.width) x.drawImage(img, 0, 0); } } });

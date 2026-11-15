@@ -87,6 +87,8 @@ ${B}.def:disabled { border-width: ${U(1)}; } /* (a dimmed default button loses i
 .w31d .w31list { background: #fff; border: ${U(1)} solid #000; overflow: hidden auto; font-weight: bold; }
 .w31d .w31list .row { height: ${U(16)}; padding: 0 ${U(2)}; white-space: pre; overflow: hidden; cursor: pointer; }
 .w31d .w31list .row.sel { background: var(--w31hi); color: #fff; }
+.w31d .w31list:focus { outline: none; }
+.w31d .w31list:focus .row.sel { outline: ${U(1)} dotted #ff0; outline-offset: ${U(-1)}; } /* (the chosen row's focus frame: yellow dots on the blue, captured, win20-orig-vga16-fleets-sel.png) */
 /* (the fixed-pitch System font, SYSTEM_FIXED_FONT, 8 x 15, its strokes two pixels wide: the lists of explored stars and of skills; stand-in Courier New bold at 8 pixels a letter) */
 .w31d .w31list.fixed { font: bold ${U(40 / 3)}/${U(15)} "Fixedsys", "Courier New", Courier, monospace; }
 .w31d .w31list.fixed .row { padding: 0 ${U(2)}; }
@@ -193,7 +195,7 @@ function ownerList(r, L, fire, vs) {
 function plainList(r, L, fire, vs) {
   const [x, y, w, h] = r, rh = L.rowH || 16, e = at(mk('div', 'w31c w31list' + (L.fixed ? ' fixed' : '')), x, y, w, h); e.tabIndex = 0; e.setAttribute('role', 'listbox'); e.style.overflow = 'hidden';
   const rows = mk('div'); rows.style.position = 'absolute'; rows.style.left = rows.style.top = '0'; e.append(rows);
-  let sel = L.sel == null ? -1 : L.sel, top = 0, bar = null;
+  let sel = L.sel == null ? -1 : L.sel, top = 0, bar = null, dbl = null;
   const fit = Math.max(1, Math.floor((h - 2) / rh));
   const draw = () => {
     const n = L.items.length, more = vs && n > fit;
@@ -202,8 +204,8 @@ function plainList(r, L, fire, vs) {
     for (let i = top; i < Math.min(n, top + fit); i++) {
       const row = mk('div', 'row' + (i === sel ? ' sel' : ''), L.items[i]); row.style.height = U(rh); row.style.lineHeight = U(rh);
       row.setAttribute('role', 'option'); row.setAttribute('aria-selected', String(i === sel));
-      row.addEventListener('click', () => { sel = i; draw(); fire(i); });
-      if (L.dbl) row.addEventListener('dblclick', () => L.dbl(i));
+      // (the rows are redrawn on the first click, so the second lands on a new row and Firefox and Safari send no dblclick: two clicks within 500 ms on one row are counted here)
+      row.addEventListener('click', () => { const t = Date.now(), hit = L.dbl && dbl && dbl.i === i && t - dbl.t < 500; dbl = hit ? null : { i, t }; sel = i; draw(); fire(i); if (hit) L.dbl(i); });
       rows.append(row);
     }
     if (bar) { bar.remove(); bar = null; }
@@ -215,6 +217,13 @@ function plainList(r, L, fire, vs) {
   return e;
 }
 
+// the access letter: "&Files" is drawn "Files" with its F underlined (Windows 3.1's DrawText), "&&" is an "&"; the letter is kept in data-acc for Alt+letter
+function acc(node) {
+  const t = node.textContent.replace(/&&/g, '\u0001'), m = /&([^&\s])/.exec(t), fix = (x) => x.replace(/\u0001/g, '&');
+  if (!m) { node.textContent = fix(t); return; }
+  const l = document.createElement('u'); l.textContent = m[1]; node.textContent = fix(t.slice(0, m.index)); node.append(l, fix(t.slice(m.index + 2)));
+  const c = node.closest('.w31c'); if (c) c.setAttribute('data-acc', m[1].toLowerCase());
+}
 function control(it, n, o, dlg) {
   const [id, kind, , , , , st] = it, key = id === 65535 ? '#' + n : String(id), r = (o.rects && o.rects[key]) || W.px(it.slice(2, 6));
   if (!(o.rects && o.rects[key]) && o.moveBelow && it[3] >= o.moveBelow[0]) r[1] += o.moveBelow[1]; // (the controls the program moves down under a list it lengthens)
@@ -240,15 +249,15 @@ function control(it, n, o, dlg) {
     e.w31 = { repaint: () => o.pics[key](e.getContext('2d'), r[2], r[3]) };
   } else if (kind === 'static') {
     const a = st & 0x1f;
-    e = at(mk('div', 'w31c w31s' + (a === 1 ? ' center' : a === 2 ? ' right' : '') + (a === 0xb || a === 0xc ? ' nowrap' : ''), txt), ...r);
+    e = at(mk('div', 'w31c w31s' + (a === 1 ? ' center' : a === 2 ? ' right' : '') + (a === 0xb || a === 0xc ? ' nowrap' : ''), txt), ...r); if (txt.indexOf('&') >= 0) { const h = mk('span'); h.textContent = txt; e.textContent = ''; e.append(h); acc(h); }
   } else if (kind === 'push' || kind === 'def') {
-    e = at(mk('button', 'w31c w31b quiet' + (kind === 'def' ? ' def' : '')), ...r); e.type = 'button'; e.append(mk('span', null, txt));
+    e = at(mk('button', 'w31c w31b quiet' + (kind === 'def' ? ' def' : '')), ...r); e.type = 'button'; e.append(mk('span', null, txt)); acc(e.firstChild);
     e.addEventListener('click', () => fire(id));
   } else if (kind === 'check' || kind === 'autocheck' || kind === 'radio' || kind === 'autoradio') {
     const radio = kind.endsWith('radio');
     e = at(mk('div', 'w31c w31chk' + (radio ? ' radio' : '')), ...r); e.tabIndex = 0; e.setAttribute('role', radio ? 'radio' : 'checkbox');
     const bs = radio ? 12 : 13, top = Math.floor((r[3] - bs) / 2);
-    e.append(at(mk('span', 'box'), 0, top, bs, bs), at(mk('span', 't', txt), 19, Math.floor((r[3] - 13) / 2)));
+    e.append(at(mk('span', 'box'), 0, top, bs, bs), at(mk('span', 't', txt), 19, Math.floor((r[3] - 13) / 2))); acc(e.querySelector('.t'));
     let on = !!(o.checks && o.checks[key]);
     const show = () => { e.classList.toggle('on', on); e.setAttribute('aria-checked', String(on)); };
     // (the program's own check boxes, BS_CHECKBOX, are ticked by it on BN_CLICKED; the remake ticks them and tells the dialog)
@@ -334,6 +343,13 @@ W.build = function (id, o) {
     if (e.key === 'Enter' && !(e.target && e.target.tagName === 'BUTTON')) { const b = client.querySelector('button.w31b.def') || dlg.get('1'); if (b) { e.preventDefault(); b.click(); } }
   });
   if (o.closeOnClick) d.addEventListener('click', () => dlg.close());
+  // Alt+letter: the button or box with that access letter is pressed or takes the focus; a label's letter moves the focus to the control after it
+  d.addEventListener('keydown', (e) => {
+    if (!e.altKey || e.ctrlKey || e.metaKey || e.key.length !== 1) return;
+    const all = [...client.querySelectorAll('.w31c')], k = e.key.toLowerCase(), from = all.findIndex((x) => x.dataset.acc === k && !x.disabled); if (from < 0) return;
+    e.preventDefault(); e.stopPropagation(); const x = all[from];
+    if (x.matches('button')) x.click(); else if (x.matches('.w31s')) { const nx = all.slice(from + 1).find((y) => y.tabIndex >= 0 && !y.disabled && y.style.display !== 'none'); if (nx) nx.focus(); } else { x.focus(); if (x.matches('.w31chk')) x.click(); }
+  });
   dlg.focus = () => { const f = client.querySelector('button.w31b.def') || client.querySelector('button.w31b, .w31chk, .w31sb, input, .w31list'); if (f) f.focus(); else { d.tabIndex = -1; d.focus(); } };
   return dlg;
 };
