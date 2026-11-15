@@ -482,18 +482,29 @@ function battleDos(b, k) {
   cols.forEach(L => L.forEach(x => { x.units.forEach(i => where.set(i, x)); if (x.planet) planetAt[x.o] = x; }));
   const hidden = [0, 1].map(ci => !won && b.rounds.length === 1 && owners[ci] !== ME && !(owners[ci] != null && H.isAllied(g, owners[ci], ME)));
   // geometry (the canvas is the window's inside, 446 x 354, 5 in from its frame)
-  const W = 446, Hh = 354, FACE = [[28, 21], [302, 21]], SHIP = [[47, 57], [308, 56]], CAPC = [87.5, 362.5], PIT = 53;
-  const c = el('canvas', { class: 'dd-pic', 'aria-label': 'Summary of battle', role: 'img' }); const dpr = window.devicePixelRatio || 1;
-  c.width = Math.round(W * U * dpr * 1); c.height = Math.round(Hh * U * dpr); dAt(c, 5, 5, W, Hh);
-  const x = c.getContext('2d'); x.setTransform(U * dpr, 0, 0, U * dpr, 0, 0); x.imageSmoothingEnabled = false; x.textBaseline = 'alphabetic';
-  let stop = false, skip = false, done = false;
-  const btn = dButton('Skip', 202, 310, 52, 24, () => { if (done) a.closeModal(); else skip = true; }, { hot: -1 });
-  const d = dDialog(456, 364, null, [c, btn], 'Summary of battle'); d.classList.add('dd-black'); // (placed as every window, by placeDos: 88 from the screen's left, 4 left of its middle)
+  const win0 = winOn() && window.HOWIN31 && window.HOWIN31.has && window.HOWIN31.has(7); // (the Windows window's pictures sit 3 to 5 further left: measured against the capture)
+  let Hh = 354; const W = 446, FACE = win0 ? [[25, 21], [297, 21]] : [[28, 21], [302, 21]], SHIP = win0 ? [[43, 57], [304, 56]] : [[47, 57], [308, 56]], CAPC = win0 ? [85, 360] : [87.5, 362.5], PIT = 53;
+  // (the Windows look: template 7 of WINHO.EXE, a 446 x 358 client with the navy modal frame, the program's own place, 32, 19 on the 640 x 480 screen, and its Skip / OK button
+  // (def, 198, 316, 48 x 28): captured, win20-orig-vga16-battle-{skip,mid,done}.png; the picture is the same canvas as the DOS look's)
+  const win = win0;
+  const c = el('canvas', { class: win ? 'w31c w31pic' : 'dd-pic', 'aria-label': 'Summary of battle', role: 'img' }); const dpr = window.devicePixelRatio || 1;
+  let stop = false, skip = false, done = false, btn, d, S1 = U;
+  const onBtn = () => { if (done) a.closeModal(); else skip = true; };
+  if (win) {
+    const dlg = window.HOWIN31.open(7, { label: 'Summary of battle', client: [446, 358], text: { 2: 'Skip' }, on: { 2: onBtn }, close: () => a.closeModal() });
+    d = dlg.el; btn = dlg.get('2'); S1 = parseFloat(getComputedStyle(d).getPropertyValue('--wu')) || U;
+    Object.assign(c.style, { background: '#000', position: 'absolute', left: '0', top: '0', width: 'calc(446 * var(--wu))', height: 'calc(358 * var(--wu))' }); Hh = 358;
+    d.querySelector('.w31client').prepend(c); d.style.transform = 'translate(calc(-60 * var(--wu)), calc(-37 * var(--wu)))'; // (placed by the template's x, y, not centred)
+  }
+  c.width = Math.round(W * S1 * dpr * 1); c.height = Math.round(Hh * S1 * dpr);
+  if (!win) dAt(c, 5, 5, W, Hh);
+  const x = c.getContext('2d'); x.setTransform(S1 * dpr, 0, 0, S1 * dpr, 0, win ? -9 * S1 * dpr : 0); x.imageSmoothingEnabled = false; x.textBaseline = 'alphabetic'; // (the Windows window's contents sit 9 higher: measured against the capture)
+  if (!win) { btn = dButton('Skip', 202, 310, 52, 24, onBtn, { hot: -1 }); d = dDialog(456, 364, null, [c, btn], 'Summary of battle'); d.classList.add('dd-black'); } // (placed as every window, by placeDos: 88 from the screen's left, 4 left of its middle)
   const prevClose = () => { stop = true; };
   const mo = new MutationObserver(() => { if (!d.isConnected) { stop = true; mo.disconnect(); } }); mo.observe(document.body, { childList: true });
   const pat = (col) => { const p = document.createElement('canvas'); p.width = p.height = 2; const q = p.getContext('2d'); q.fillStyle = col; q.fillRect(0, 0, 1, 1); q.fillRect(1, 1, 1, 1); return x.createPattern(p, 'repeat'); };
   const grayPat = pat('#000'), whiteGray = pat('#fff');
-  const text = (t, h, v, bold, center) => { x.font = bold ? F9B : F9; x.fillStyle = '#fff'; x.textAlign = center ? 'center' : 'left'; x.fillText(t, h, v); };
+  const text = (t, h, v, bold, center) => { x.font = win ? (bold ? "bold 13px 'MS Sans Serif', 'Microsoft Sans Serif', Arial, sans-serif" : "11px 'MS Sans Serif', 'Microsoft Sans Serif', Arial, sans-serif") : bold ? F9B : F9; x.fillStyle = '#fff'; x.textAlign = center ? 'center' : 'left'; x.fillText(t, h, v); };
   let seed = (b.id | 0) * 7919 + 13; const rnd = (lo, hi) => { seed = (seed * 16807) % 2147483647; return lo + (seed % (hi - lo + 1)); };
   const stars = Array.from({ length: 35 }, () => [rnd(5, 440), rnd(5, 348)]);
   const drawStars = () => { x.fillStyle = '#fff'; for (const [h, v] of stars) x.fillRect(h, v, 1, 1); };
@@ -790,7 +801,7 @@ const DE_FLEET = [[/^Stationed at: (.*)$/, 'Stationiert auf: $1'], [/^Departing 
   [/^Fuel: (.*)$/, 'Tank: $1'], [/^Speed: (.*)$/, 'Tempo: $1'], [/^Full$/, 'Voll'], [/^Empty$/, 'Leer'], [/^Scrap: (.*)$/, 'Schrott: $1'], [/^Fleet to be scrapped for metal\.$/, 'Flotte zum Verschrotten.']];
 // the German build's fleet row (data pool: "Ein %Fs (%d/%d) %Fs", "%d %Fs (%d/%d) %Fs") with its class names (strings 368-371)
 // the remake's windows that the Windows look shows as the Windows program's dialogs (T.window's name: the dialog's in js/skins/dos/win31/dialogs.js)
-const W31WIN = { autoplay: 'autoPlay', build: 'build', types: 'types', group: 'group', fleets: 'fleets', stars: 'stars', compare: 'compare' };
+const W31WIN = { chat: 'sendMsg', autoplay: 'autoPlay', build: 'build', types: 'types', group: 'group', fleets: 'fleets', stars: 'stars', compare: 'compare' };
 const DE_CLASS = { scout: 'Späher', fighter: 'Kampfschiff', colony: 'Kolonieschiff', satellite: 'Satellit' };
 const deRow = (d, n) => `${n === 1 ? 'Ein' : n} ${d.name} (${d.W}/${d.S}) ${DE_CLASS[d.type] || d.type}`;
 const fl = (t) => { if (wl() !== 'de') return t; for (const [re, to] of DE_FLEET) if (re.test(t)) return t.replace(re, to); return t; };

@@ -794,4 +794,58 @@ W.nameStar = function (f, o) {
   setTimeout(() => o.inp.focus(), 0);
   return 'w31dlg';
 };
+// #30 SENDMSG, Galaxy, Send Message… (the program's four-step window: who, saying what, about what, which one; the left list holds what is chosen, the right the choices;
+// the remake's rs.cannedChat and H.sendCanned as the DOS look's window, js/skins/dos/ui.js chatDos). The program sizes it itself (captured, win20-orig-vga16-sendmsg*.png,
+// the window 559 x 333 at 32, 65 with a 549 x 323 client): "Send Message:", the step's question (100), "To:" and "Content:" right-aligned at 95, the left list (a black frame, 80 x 211
+// at 103, 41; one cell of 48 under the last, the picture 32 x 32 2 under the cell's top, the word's baseline 41 under the picture's top, centred) and the choices (a black frame
+// 310 x 211 at 196, 41; five columns of 57 and rows of 48, cells 56 x 47 at 209, 49, the first with the focus's dotted frame), Cancel (2) and Send (1, dimmed until the fourth
+// step is chosen), both 99 x 31 at 259 and 409, 276. Choosing a thing in the left list goes back to that step. The pictures are the DOS skin's (the Windows program's are the same).
+D.sendMsg = function () {
+  const a = root.HOAPI, H = root.HO, g = a.G, ME = a.ME, C = g && H.rules(g).cannedChat; if (!C || !W.templates || !W.templates[30]) return false;
+  const tos = C.to(g, ME), ok = tos.filter(o => !o[2]);
+  if (!ok.length) { a.toast(H.say(g, H.DATA.alerts[6] || 'There is no one else to send something to.')); return true; }
+  const PR = ['Send Message To Who?', 'Saying What?', 'About What?', 'Which One?'];
+  const hat = (q) => 'dos:i' + (q.id === ME ? (q.female ? 1500 : 1000) : (q.female ? 2500 : 2000) + ((q.face || 0) % 20));
+  const pl = (id) => g.players[+id];
+  let step = 0; const ch = [null, null, null, null]; let right = [];
+  const rects = { '#26': [16, 17, 170, 16], 100: [196, 17, 340, 16], '#28': [196, 41, 310, 211], '#30': [16, 110, 79, 16], '#31': [16, 57, 79, 16], 2: [259, 276, 99, 31], 1: [409, 276, 99, 31] };
+  const pics = {}, on = {}, cells = {};
+  const paint = (c) => (x, w, h) => {
+    x.clearRect(0, 0, w, h); if (!c) return;
+    const im = c.icon && a.IMG[c.icon]; if (im && im.width) x.drawImage(im, Math.floor((w - 32) / 2), 2, 32, 32);
+    x.font = '11px ' + SANS; x.textAlign = 'center'; x.textBaseline = 'alphabetic'; x.fillStyle = c.off ? '#808080' : '#000';
+    x.fillText(c.name || '', Math.floor(w / 2), c.icon ? 43 : 28);
+  };
+  for (let k = 0; k < 4; k++) { rects[200 + k] = [104, 49 + 48 * k, 78, 48]; pics[200 + k] = (x, w, h) => paint(ch[k])(x, w, h); on[200 + k] = () => { if (ch[k]) { for (let j = k; j < 4; j++) ch[j] = null; step = k; refresh(); } }; }
+  for (let i = 0; i < 20; i++) { rects[300 + i] = [209 + 57 * (i % 5), 49 + 48 * Math.floor(i / 5), 56, 47]; pics[300 + i] = (x, w, h) => paint(right[i])(x, w, h); on[300 + i] = () => { const c = right[i]; if (c && !c.off) { ch[step] = { id: c.id, i: c.i, name: c.name, icon: c.icon, kind: c.kind }; step = ch[1] && ch[1].i === 2 && step === 1 ? 2 : step + 1; refresh(); } }; }
+  const choices = () => {
+    if (step === 0) return tos.map(o => ({ id: String(o[0]), name: o[1], icon: pl(o[0]) ? hat(pl(o[0])) : null, off: !!o[2] }));
+    if (step === 1) return C.actions.map((x, i) => ({ id: i, i, name: x.label, icon: 'dos:i' + (3000 + i) }));
+    if (step === 2) return C.actions[ch[1].i].parts[0][2].map((o, i) => ({ id: i, i, name: o[0], icon: 'dos:i' + (3010 + i), kind: o[1] }));
+    const kind = ch[2].kind; return C.list(g, ME, kind, a.UI.sel).map(o => ({ id: String(o[0]), name: o[1], icon: kind === 'players' && pl(o[0]) ? hat(pl(o[0])) : null, off: !!o[2] }));
+  };
+  let dlg;
+  const refresh = () => {
+    right = step > 3 ? [] : choices().slice(0, 20);
+    const q = dlg.get('100'); if (q) q.textContent = step > 3 ? '' : a.tl(PR[step]);
+    for (let k = 0; k < 4; k++) { const e = dlg.get(String(200 + k)); if (e) { e.w31.repaint(); e.style.cursor = ch[k] ? 'pointer' : 'default'; e.tabIndex = ch[k] ? 0 : -1; } }
+    for (let i = 0; i < 20; i++) { const e = dlg.get(String(300 + i)); if (e) { e.w31.repaint(); const c = right[i]; e.style.cursor = c && !c.off ? 'pointer' : 'default'; e.tabIndex = c && !c.off ? 0 : -1; e.setAttribute('aria-label', c ? c.name : ''); e.style.display = c ? '' : 'none'; } }
+    const s = dlg.get('1'); if (s) s.disabled = !(step > 3);
+    const f = right.length && dlg.get('300'); if (f && !a.noFocus) f.focus(); // (the first choice has the focus, its dotted frame: captured)
+  };
+  dlg = W.open(30, {
+    label: 'Send Message', client: [549, 323], rects, pics, on: Object.assign(on, {
+      2: (_, d) => d.close(),
+      1: (_, d) => { if (step <= 3) return; const r = H.sendCanned(g, ME, C.make(g, ME, isNaN(+ch[0].id) ? ch[0].id : +ch[0].id, ch[1].i, [ch[2].i, isNaN(+ch[3].id) ? ch[3].id : +ch[3].id]));
+        if (r === 'limit') { a.chatLimitToast(); return; } if (r !== 'ok') return; a.Sound.play(5000); d.close(); a.save(); } }),
+    text: { '#26': 'Send Message:', 100: PR[0], '#31': 'To:', '#30': 'Content:', 2: 'Cancel', 1: 'Send' },
+  });
+  if (!dlg) return false;
+  // (the template's left black frame shares id 100 with the question: put it where it was measured)
+  dlg.el.querySelectorAll('[data-w31="100"]').forEach((e) => { if (!e.classList.contains('w31s')) Object.assign(e.style, { left: 'calc(103 * var(--wu))', top: 'calc(41 * var(--wu))', width: 'calc(80 * var(--wu))', height: 'calc(211 * var(--wu))' }); });
+  dlg.el.querySelectorAll('canvas.w31pic').forEach((e) => { e.addEventListener('focus', () => { e.style.outline = 'calc(1 * var(--wu)) dotted #000'; e.style.outlineOffset = 'calc(-1 * var(--wu))'; }); e.addEventListener('blur', () => { e.style.outline = ''; }); });
+  const q = dlg.get('100'); if (q) q.setAttribute('translate', 'no');
+  refresh();
+  return true;
+};
 })(typeof window !== 'undefined' ? window : globalThis);
