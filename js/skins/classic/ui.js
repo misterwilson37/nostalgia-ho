@@ -6678,6 +6678,7 @@ function setupMenus(again) {
           onclick: () => { dd.classList.remove('open'); btn.setAttribute('aria-expanded', 'false'); fn(); } }, text, key ? el('span', { class: 'mkey', 'aria-hidden': 'true', translate: 'no' }, T.keyName ? T.keyName(key) : '⌘' + key) : null));
       }
       dd.classList.add('open'); btn.setAttribute('aria-expanded', 'true');
+      dd.scrollTop = 0; // (a long menu opens at its first item, not where it was last scrolled to)
       // a menu near the right edge opens leftward so it stays on screen
       dd.style.left = ''; dd.style.right = '';
       if (dd.getBoundingClientRect().right > window.innerWidth - 4) { dd.style.left = 'auto'; dd.style.right = '0'; }
@@ -6690,6 +6691,8 @@ function setupMenus(again) {
   if (T.menus) T.menus(menus, ho);
   // (T.menuLayoutNow(): the layout as the look is now; T.menuLayout was taken once, when the skin was installed)
   const laid = T.menuLayout ? layoutMenus(menus, again && T.menuLayoutNow ? T.menuLayoutNow() : T.menuLayout) : menus;
+  // (T.hoIntoLast(): the skin's look has no Ho! menu in its original: its items go to the end of the last menu, after a separator, and the Ho! button is hidden)
+  if (T.menuLayout && T.hoIntoLast && T.hoIntoLast()) { const ks = Object.keys(laid), lm = laid[ks[ks.length - 1]]; lm.push(['-'], ...ho); }
   // (T.menuName(name): a skin's own name for a menu, as text or a node: the Amiga's, in the language)
   // (again: the look changed, so the menus are laid out again in place, the Ho! menu kept: the remake's own commands go to the end of the last menu in either look)
   const old = again ? [...bar.querySelectorAll('.menu')].filter(m => m.querySelector('.mbtn:not(.logo)')) : [], ref = old.length ? old[old.length - 1].nextSibling : null;
@@ -6726,7 +6729,9 @@ function layoutMenus(menus, layout) {
     }
   }
   const last = out[Object.keys(out).pop()];
-  for (const m in menus) menus[m].forEach((it, i) => { if (it[0] !== '-' && !used.has(m + '#' + i)) last.push(it); });
+  // (a look with its own Help menu, T.hoIntoLast: the remake's own commands start after a separator)
+  let sep = !!(T.hoIntoLast && T.hoIntoLast());
+  for (const m in menus) menus[m].forEach((it, i) => { if (it[0] !== '-' && !used.has(m + '#' + i)) { if (sep) { last.push(['-']); sep = false; } last.push(it); } });
   return out;
 }
 function nextFleet() {
@@ -6815,7 +6820,7 @@ window.addEventListener('DOMContentLoaded', () => {
     // (and the windows tools/ui-lang-audit.js opens in every skin and language)
     openPrefs, openAccount, openHall, hasHall, openMasterList, openRanks, profile, rankOf, // (profile, rankOf: the rank window a skin draws itself)
     arrivesText, markedLine, hallTables, playAgain, openTemperature, compareWords, tl, CMP_EN, CMP_ICONS, openSkillsList: () => openSkills(), hasCloud: () => !!CLOUD, cloudHall: (kind, order) => CLOUD.hallTop(G.rules, kind, order), cloudError: (e) => CLOUD.errorText(e), cloudUser: () => cloudUser(), // (what the iOS skin's own fleet list, Hall and Master Point List need)
-    openGameCenter, openFleetList, openStarList, exploredText, openGive, openChat, winWords, others, menuDim, chatLimitToast, openNameStar, findRoute, autoRoute, runAutoPlay, autoPlaySliders, autoPlayWhere, openAutoPlaySettings, // (what a skin's own Give, Message, Dip and Surrender windows need)
+    openGameCenter, switchPlayers, openFleetList, openStarList, exploredText, openGive, openChat, winWords, others, menuDim, chatLimitToast, openNameStar, findRoute, autoRoute, runAutoPlay, autoPlaySliders, autoPlayWhere, openAutoPlaySettings, // (what a skin's own Give, Message, Dip and Surrender windows need)
     toggleArmageddon, openSkin, openSounds, openLanguage, openAutoPlay, openDip, openSurrender, openSavedGames, closeScreen, openPatchNotes,
     classic(name, fn, ...a) { skipSkinWin = name; try { return fn(...a); } finally { skipSkinWin = null; } },
   };

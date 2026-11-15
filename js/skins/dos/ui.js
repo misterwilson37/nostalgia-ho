@@ -284,7 +284,8 @@ window.HOTHEME = {
     if (winOn() && window.HOAPI.G && window.HOWIN31 && W31WIN[name] && window.HOWIN31.show(W31WIN[name], arguments[1])) return true; // (the Windows program's own windows: js/skins/dos/win31/dialogs.js)
     if (!frameOn() || !window.HOAPI.G) return false; if (name === 'autoplay') return autoPlayDos(); if (name === 'fleets') return fleetsDos(); if (name === 'types') return shipTypesDos(arguments[1]); if (name === 'build') return buildDos(arguments[1]); if (name === 'stars') return starsDos(); if (name === 'compare') return compareDos(); if (name === 'reports') return reportsDos(); if (name === 'group') return organizeDos(arguments[1]); if (name === 'chat') return chatDos(); return false; },
   newGame(f) { createGalaxyDos(f); },
-  keyName(k) { return '[' + ((winOn() && WINKEY[k]) || k) + ']'; }, // (the Windows look: the Windows program's keys, WINKEY)
+  keyName(k) { return winOn() ? ((WINKEY[k]) || k) : '[' + k + ']'; }, // (the Windows menus write the key plain, "Ctrl+S", as captured, win20-jake-vga16-shot0007.png)
+  hoIntoLast() { return winOn() && frameOn(); }, // (the Windows program has no Ho! item: the remake's own commands go to the end of Help) // (the Windows look: the Windows program's keys, WINKEY)
   menus(menus) { const k = (m, l, key) => { const f = (menus[m] || []).find(i => i[0] === l); if (f) f[5] = key; }; k('Ships', 'List all fleets…', 'Ctrl+L'); k('Galaxy', 'Report window…', 'Alt+2'); },
   // the DOS title screen: the two halves of its credits picture
   title(frame, IMG, Sound) {
@@ -384,8 +385,18 @@ function menuLayoutDos() {
     Window: [it('Tech Spending', () => {}, { checked: () => true, key: 'Alt+1' }), ['Reports', 'Galaxy/Report window…'],
       it('Game Info…', () => ((winOn() && window.HOWIN31 && window.HOWIN31.show('gameInfo')) || gameInfoDos()), { ghost: noGame, shown: () => !!G() && !!G().opts.modern })] // (a modern convenience: not in either program's Window menu; the remake's own place for the Player Entry window's Info..., gameInfo) // (the program's Window menu: Tech Spending, checked while its window shows; the remake's panel always shows it)
   };
-  if (win === 'win31') M.Help = [['How to play', 'Help/How to play']]; // (only when the look is the Windows one as the page loads: the skin builds its menus once, and the
-  // remake's own commands go at the end of the last menu, Help or Window: a Help menu hidden in the DOS look took them with it, so it does not follow a later change)
+  if (win === 'win31' && frameOn()) {
+    // The Windows program's menus as captured (Jake's game, win20-jake-vga16-shot0007 to 0011, 0054, 0059; MENU 1 in WINHO.EXE): the words, the order, the separators.
+    // Page Setup and Print Map: the program's Print Map says "Unable to create printer device context" when there is no printer (shot0067); the remake prints nothing, so
+    // it says that (T.printAlert); Page Setup is dimmed (its box was not captured).
+    const endTurn = M.File.find(i => i[0] === 'End Turn'), exit = M.File.find(i => i[0] === 'Exit');
+    M.File = [['New…', 'Game/New game…'], it('Open…', () => A().openSavedGames()), it('Save…', () => {}, { ghost: off, key: 'Ctrl+S' }), it('Revert to Saved…', () => {}, { ghost: off }),
+      it('Close…', () => A().quitToTitle(), { ghost: noGame, key: 'Ctrl+W' }), '-', endTurn,
+      it('End Turn & Switch Players', () => A().switchPlayers(), { ghost: () => noGame() || !rs().switchPlayers || !A().hotSeat(), key: 'Ctrl+/' }), '-',
+      it('Page Setup…', () => {}, { ghost: off }), it('Print Map…', () => printMapAlert(), { ghost: noGame, key: 'Ctrl+P' }), '-', exit];
+    M.Window = [it('Tech Spending Window', () => {}, { key: 'Alt+1' }), ['Report Window', 'Galaxy/Report window…'], '-', it('Clean Up Windows', () => {}, { ghost: off }), M.Window[2]];
+    M.Help = [['Help on Ho!', 'Help/How to play']];
+  } else if (win === 'win31') M.Help = [['How to play', 'Help/How to play']];
   return M;
 }
 
@@ -398,7 +409,10 @@ const MENU_HOT = { 'About Ho!…': 0, 'New Game…': 0, 'Open Game…': 0, 'Clos
 // The Windows program's (MENU 1, the private repo's extracted/win-2.0/resources/menus.txt): its hot letters underlined, where they differ from the DOS program's
 // (the Ships menu's List Ship Types, Organize, Build Ships at, Scrap Current Fleet and No Battles here carry no underline in the running program, captured
 // win20-orig-vga16-shipsmenu.png: it sets them from its strings, 354-361, which have no "&"; menus.txt's "&L", "&O", "&B", "&S", "He&re" never show)
-const WIN_HOT = Object.assign({}, MENU_HOT, { 'Give Overspending Warnings': 5, 'End Turn & Switch Players': 'End Turn & Switch Players'.indexOf('Switch') + 2, 'List Ship Types…': -1, 'Organize Ships…': -1, 'Scrap Current Fleet': -1, 'No Battles Here…': -1, 'Review Battle at': -1, 'Save Game': 0, 'Revert To Saved': 0 });
+const WIN_HOT = Object.assign({}, MENU_HOT, { 'Give Overspending Warnings': 5, 'End Turn & Switch Players': 'End Turn & Switch Players'.indexOf('Switch') + 2, 'List Ship Types…': -1, 'Organize Ships…': -1, 'Scrap Current Fleet': -1, 'No Battles Here…': -1, 'Review Battle at': -1, 'Save Game': 0, 'Revert To Saved': 0,
+  'New…': 0, 'Open…': 0, 'Save…': 0, 'Revert to Saved…': 0, 'Close…': 0, 'Page Setup…': 7, 'Print Map…': 0, 'Tech Spending Window': 0, 'Report Window': 0, 'Clean Up Windows': 0, 'Help on Ho!': 0 });
+// Print Map without a printer: the program's alert (captured, win20-jake-vga16-shot0067.png), the remake prints nothing
+function printMapAlert() { if (!(window.HOWIN31 && window.HOWIN31.printAlert && window.HOWIN31.printAlert())) window.HOAPI.toast('Unable to create printer device context'); }
 function hotMenus() {
   const mark = (dd) => dd.querySelectorAll('button[role=menuitem]').forEach(b => {
     if (b.dataset.hot || (b.disabled && !winOn()) || !frameOn()) return;

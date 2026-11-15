@@ -47,6 +47,14 @@ ${S} #menubar > .menu:first-child { top: ${u(19)}; }
 ${S} .dropdown { top: ${u(18)}; max-height: calc(100vh - ${u(42)} - 50vh + ${u(240)}); overflow-y: auto; }
 /* the menus' items 18 apart, their words 16 in, a separator 7 (measured on win20-orig-vga16-optionsmenu.png); a menu longer than the screen scrolls */
 ${S} .dropdown button { font: bold ${u(13)}/${u(18)} ${F}; padding: 0 ${u(16)}; }
+/* the key text in a column, left aligned, as Windows tabs it (captured: win20-jake-vga16-shot0007.png); the words never wrap (the Ships menu's keys wrapped at 640 pixels); the Ho! button is not in the program (its commands are at the end of Help) */
+${S} .dropdown.open { display: grid; grid-template-columns: auto auto; width: max-content; }
+${S} .dropdown.open > button { display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; white-space: nowrap; align-items: center; text-align: left; }
+${S} .dropdown.open > hr { grid-column: 1 / -1; width: 100%; box-sizing: border-box; }
+${S} .dropdown .mkey { margin-left: ${u(24)}; white-space: nowrap; }
+${S} #menubar > .menu:has(> .logo) { display: none; }
+${S} #menubar > .menu:last-child { position: absolute; right: 0; top: ${u(19)}; }
+${S} #menubar > .menu:last-child .dropdown { left: auto; right: 0; }
 ${S} .dropdown hr { margin: ${u(3)} 0; }
 /* a dialog does not dim the screen (Windows dims nothing): the DOS skin's windows' rule (style.css) for the templates' too */
 ${S} .scrim:has(.win.w31dlg) { background: transparent; }
@@ -55,6 +63,11 @@ ${S} #panel { width: ${u(240)}; }
 ${S} #mapwrap { left: ${u(240)}; width: ${u(392)}; right: auto; background: #fff; }
 ${S} #map { background: #000; }
 ${S} #msg .clock { left: ${u(3)}; top: ${u(2)}; }
+/* the End Turn button as the Windows program draws it (captured, win20-jake-vga16-main-endturn.png, measured): 51 x 33 at 3, 2 in the map; a light grey frame, the cyan line 2 pixels under its top edge, a teal face, a dark grey base 5 high, "End Turn" and "Ctrl+T" in two lines (the DOS look's picture stays in the DOS look) */
+${S} #msg .clock.pic { position: absolute; width: ${u(51)}; height: ${u(33)}; box-sizing: border-box; background: linear-gradient(#868a8e, #868a8e) 0 ${u(28)} / 100% ${u(5)} no-repeat, linear-gradient(#00ffff, #00ffff) ${u(2)} ${u(3)} / ${u(46)} ${u(2)} no-repeat, linear-gradient(#55aaaa, #55aaaa) ${u(2)} ${u(5)} / ${u(46)} ${u(23)} no-repeat, #c2c6ca; }
+${S} #msg .clock.pic img { visibility: hidden; }
+${S} #msg .clock.pic::after { content: attr(aria-label) "\\A Ctrl+T"; text-transform: capitalize; position: absolute; left: ${u(2)}; top: ${u(5)}; width: ${u(46)}; height: ${u(23)}; display: flex; align-items: center; justify-content: center; text-align: center; white-space: pre; font: ${u(10)}/${u(10)} ${F}; color: #000; pointer-events: none; }
+${S} #msg .clock.pic:active::after { transform: translate(${u(1)}, ${u(1)}); }
 ${S} .dosbar.v { left: ${u(375)}; top: 0; width: ${u(17)}; height: ${u(293)}; }
 ${S} .dosbar.h { left: 0; top: ${u(293)}; width: ${u(375)}; height: ${u(17)}; }
 ${S} #panel .doslow { height: ${u(85)}; border-bottom: 0; box-shadow: inset ${u(-1)} 0 0 #000; font: ${u(11)} ${F}; }

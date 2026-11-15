@@ -630,6 +630,22 @@ W.youWon = function (kind, Y, done) {
   dlg.el.setAttribute('role', 'alertdialog');
   return true;
 };
+// #2 ALERTBOX with the information icon: the message the program's Print Map gives when there is no printer ("Unable to create printer device context", captured, win20-jake-vga16-shot0067.png,
+// measured): the caption "Spaceward Ho!" with its control-menu box, a client 346 x 88; the icon (the system's information icon, drawn here: a navy ball with a white "i") 32 x 32 at 19, 21; the words at 69, 23; OK
+// 39 x 28 at 150, 51; the frame's corner at 141, 180. The remake prints nothing, so Print Map says this (js/skins/dos/ui.js printMapAlert).
+W.printAlert = function () {
+  const a = root.HOAPI; if (!W.templates || !W.templates[2]) return false;
+  const words = a.tl ? a.tl('Unable to create printer device context') : 'Unable to create printer device context';
+  const icon = (x, w, h) => { x.fillStyle = '#fff'; x.fillRect(0, 0, w, h); x.fillStyle = '#000'; x.beginPath(); x.arc(16, 16, 15.5, 0, 7); x.fill(); x.fillStyle = '#000080'; x.beginPath(); x.arc(16, 16, 14, 0, 7); x.fill();
+    x.fillStyle = '#fff'; x.fillRect(14, 12, 5, 12); x.fillRect(14, 6, 5, 4); };
+  const dlg = W.open(2, { title: 'Spaceward Ho!', label: words, client: [346, 88], at: [141, 180], rects: { 101: [19, 21, 32, 32], 100: [69, 23, 265, 20], 201: [150, 51, 39, 28], 202: [0, 0, 0, 0], 203: [0, 0, 0, 0], 204: [0, 0, 0, 0] },
+    text: { 100: words, 201: '&OK' }, pics: { 101: icon }, on: { 201: (_, d) => d.close() } });
+  if (!dlg) return false;
+  ['202', '203', '204'].forEach((k) => { const e = dlg.get(k); if (e) e.style.display = 'none'; });
+  const ok = dlg.get('201'); if (ok) { ok.classList.add('def'); ok.focus(); } // (the program's one button is the default one)
+  dlg.el.setAttribute('role', 'alertdialog');
+  return true;
+};
 // #33 STATUS ("Spaceward Ho! Status", FUN_1100_05b4: CreateDialog, modeless, while the turn is worked out (FUN_1040_0038, End Turn, unless the main window is an
 // icon) and while a new galaxy is written; captured with a 20-player Humongous galaxy, frames grabbed while it showed: win20-orig-vga16-status (empty bar),
 // -status-bar ("Pass 1 for Player 11...", 50 of the bar's 254 pixels), -status-write ("Writing Game File...", 228)): the step (static 100: the program's strings 48-53,
@@ -646,8 +662,8 @@ W.status = function (g, go) {
   steps.push('Writing Game File...', 'Removing Old Battles...');
   let i = 0;
   const bar = (x, w, h) => { x.fillStyle = '#fff'; x.fillRect(0, 0, w, h); x.fillStyle = document.documentElement.classList.contains('w31-256') ? '#008200' : '#00aa55'; x.fillRect(1, 1, Math.round((w - 2) * i / steps.length), h - 2); x.strokeStyle = '#000'; x.lineWidth = 1; x.strokeRect(0.5, 0.5, w - 1, h - 1); };
-  // (placed where the capture has its frame, 224, 54: the template's 113, 18 dialog units give 222, 54, two pixels left of it: win20-orig-vga16-status-bar.png)
-  const dlg = W.open(33, { title: 'Spaceward Ho! Status', label: 'Spaceward Ho! Status', text: { 100: steps[0] }, pics: { 101: bar }, at: [224, 54] });
+  // (the template's 113, 18 dialog units give 222, 54; Windows 3.1 byte-aligns a dialog's window at 16 colours (CS_BYTEALIGNWINDOW), its left edge a multiple of 8: 224, as captured twice, win20-orig-vga16-status-bar.png and win20-jake-vga16-status-pass.png)
+  const dlg = W.open(33, { title: 'Spaceward Ho! Status', label: 'Spaceward Ho! Status', text: { 100: steps[0] }, pics: { 101: bar }, at: [W.snap(222), 54] });
   if (!dlg) return go();
   dlg.el.setAttribute('aria-busy', 'true');
   const t = dlg.get('100'), b = dlg.get('101');

@@ -321,6 +321,8 @@ W.open = function (id, o) {
   return dlg;
 };
 // o.at: [x, y], the dialog's outer corner in the 640 x 480 screen's pixels (a window the program creates over its main window, not centred: Status, Closing Game)
+// Windows 3.1 byte-aligns a dialog's window at 16 colours: its left edge falls on a multiple of 8 (every captured placement is one: Closing Game 32, File Open 8, Battle Speed 152, Status 224)
+W.snap = (x) => Math.round(x / 8) * 8;
 W.placeAt = function (dlg, at) {
   const app = document.getElementById('app'), win = dlg.el.closest('.win'), scrim = win && win.parentElement; if (!app || !scrim) return;
   const r = app.getBoundingClientRect(), wu = parseFloat(dlg.el.style.getPropertyValue('--wu')) || 1;
