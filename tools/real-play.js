@@ -17,6 +17,8 @@ const ROOT = path.join(__dirname, '..');
 const SCRATCH = '/tmp/claude-0/-home-user/f4e25d25-7ae4-5644-8ddc-00cda7d3e23b/scratchpad/realplay';
 const OUT0 = opt('out', path.join(SCRATCH, 'run-' + new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19)));
 const OS = opt('os', ''), BROWSER = opt('browser', 'chromium'), JOBS = +opt('jobs', 3), PORT = +opt('port', 8741), STRICT = flag('strict'), THOROUGH = flag('thorough'), TURNS = +opt('turns', 5), RUN_TIMEOUT = +opt('timeout', 240) * 1000;
+// the zoom-out key: the DOS program's -, the Windows program's Ctrl+- (WINHO's menu; the skin takes only the look's own keys)
+const ZOOM_OUT = OS === 'win31' ? 'Control+-' : '-';
 
 // ---------- the matrix: skins and rulesets are read from the code, not listed here ----------
 const SKIN_IDS = [...fs.readFileSync(path.join(ROOT, 'js/skins.js'), 'utf8').match(/const SKINS = \[([\s\S]*?)\n\]\.map/)[1].matchAll(/\{ id: '(\w+)'/g)].map(m => m[1]);
@@ -269,7 +271,7 @@ async function playRun(browser, job, outDir, idx) {
       const p = await starPoint(id); let m = await mapHit(p.x, p.y);
       if (m === 'off-screen') { await G((id) => { HOAPI.centerOn(id); HOAPI.draw(); }, id); await sleep(150); const q = await starPoint(id); p.x = q.x; p.y = q.y; m = await mapHit(p.x, p.y); } // (a person pans the map)
       // (the DOS skin's map is a window onto the galaxy, as the program's: a star in its top corner lies under the End Turn button; a person scrolls with the bars or zooms out with the key the Galaxy menu shows, "-")
-      for (let k = 0; k < 2 && m && /^covered/.test(m) && await ev(() => !!document.querySelector('.dosbar')); k++) { await page.keyboard.press('-'); await sleep(250); const q = await starPoint(id); p.x = q.x; p.y = q.y; m = await mapHit(p.x, p.y); }
+      for (let k = 0; k < 2 && m && /^covered/.test(m) && await ev(() => !!document.querySelector('.dosbar')); k++) { await page.keyboard.press(ZOOM_OUT); await sleep(250); const q = await starPoint(id); p.x = q.x; p.y = q.y; m = await mapHit(p.x, p.y); }
       if (m) { (soft ? warn : fail)(`${what}: the star at ${Math.round(p.x)},${Math.round(p.y)} is ${m}${soft ? ' (a person picks another star)' : ''}`); return false; }
       await ptr.tap(p.x, p.y); await sleep(250); return true;
     };
@@ -390,7 +392,7 @@ async function playRun(browser, job, outDir, idx) {
       if (!src) { src = await dotSrc(); }
       // (the DOS skin's map is a window onto the galaxy: a fleet's dot at the map's edge hangs outside it or under the menu bar; a person zooms out with the key the Galaxy menu shows, "-")
       const edge = () => ev(([x, y]) => { const c = document.getElementById('map').getBoundingClientRect(); return x > c.right - 22 || y > c.bottom - 22 || y < c.top + 8 || x < c.left + 8; }, [src.x, src.y]); // (a touch within a few pixels of the scroll bars goes to the bar, as a finger's would: a person brings the fleet in from the edge)
-      for (let k = 0; k < 3 && src && src.dot && ((await mapHit(src.x, src.y)) || await edge()) && await ev(() => !!document.querySelector('.dosbar')); k++) { await page.keyboard.press('-'); await sleep(250); src = await dotSrc(); }
+      for (let k = 0; k < 3 && src && src.dot && ((await mapHit(src.x, src.y)) || await edge()) && await ev(() => !!document.querySelector('.dosbar')); k++) { await page.keyboard.press(ZOOM_OUT); await sleep(250); src = await dotSrc(); }
       if (!src) { fail('no way to pick up the fleet: no row in a fleet dialog and no fleet dot on the map'); await shot('no-fleet-handle'); return; }
       const sh = await mapHit(src.x, src.y); if (src.dot && sh) fail(`the fleet's dot at ${Math.round(src.x)},${Math.round(src.y)} is ${sh}`);
       let tgt = null;
