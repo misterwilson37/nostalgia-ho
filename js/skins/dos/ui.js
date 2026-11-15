@@ -1454,6 +1454,7 @@ function tplPic(name, x, y, w, h) {
 // through FUN_3000_8395) with the window procedure FUN_9000_76c0, which loads picture 5040 or 5050 and paints it in item 999 (cell 0, 0, 19 x 11); the words, item 100, at
 // cell 1, 11 (three lines, four for the lost one, left aligned as every line of words: FUN_b000_f240), and "   ~OK   " at cell 5, 15 (16), 8 wide. No title bar.
 function youWonDos(kind, Y, done) {
+  if (winOn() && window.HOWIN31 && window.HOWIN31.youWon && window.HOWIN31.youWon(kind, Y, done)) return true; // (the Windows program's box, template 3: js/skins/dos/win31/dialogs.js)
   const a = window.HOAPI, won = kind === 'won', h = won ? 20 : 21, lines = String(Y.text).split('\n');
   const d = a.el('div', { class: 'dd', role: 'dialog', 'aria-label': lines.join(' ') });
   d.style.width = du(168); d.style.height = du(14 * h);

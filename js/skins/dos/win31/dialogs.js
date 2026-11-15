@@ -579,7 +579,7 @@ D.pollSpeed = function () {
 // 16, height - 87; the buttons (one to three, 203 202 201 from the left, the last of the resource's words the rightmost, 201, the default push button) each
 // (letters + 4) x 8 wide (the longest word's; "&OK" 56), 28 high, 16 apart, at height - 68, the rightmost at (88 + width) / 2 + the row's width / 2 - one button and
 // its gap (the middle between the picture's right edge and the window's, measured: the hyperspace and fuel alerts' OK at 218). Every alert of the DOS look's
-// (js/skins/dos/ui.js alertDos: the remake's words and buttons) comes here with the Windows look. Not built: kind 2 (ALERT_CPIC, the won and lost boxes), kind 3
+// (js/skins/dos/ui.js alertDos: the remake's words and buttons) comes here with the Windows look. Not built: kind 2 (ALERT_CPIC: W.youWon below), kind 3
 // (ALERT_NOPIC) and #2 ALERTBOX (not captured).
 W.alert = function (paras, btns, o) {
   const a = root.HOAPI; if (!W.templates || !W.templates[4]) return null;
@@ -611,6 +611,24 @@ W.alert = function (paras, btns, o) {
   if (k > 1) { const r = dlg.get('201'), l = dlg.get(String(200 + k)); if (r) r.classList.remove('def'); if (l) l.classList.add('def'); }
   document.body.append(back); const f = dlg.get('201'); if (f) f.focus(); else dlg.focus();
   return back;
+};
+// #3 ALERT_CPIC, the won and lost boxes (alerts 5040 and 5050; captured in Jake's own game, win20-jake-vga16-won-galaxy.png and -lost-galaxy.png, measured): no caption, the
+// frame black, four navy, black; its client 258 x 277 (the template's 129 dialog units is 258 wide; the height is the program's, the template's 134 does not give it);
+// the words (static 100, bold, wrapped) at 12, 12, 234 wide; the picture (149 x 151, the won or lost picture) at 54, 76; the one button, 112 x 28, at 72, 242, the
+// default, its first letter the access letter (the O of "OK" and of "Oh Well..." is underlined in both captures). The words are the program's:
+// "Congratulations! You have conquered the galaxy!" with OK, "Unfortunately, you have been eliminated from the game..." with "Oh Well...". Used by the turn's news where
+// the DOS look shows its won and lost boxes (T.youWonLayout, js/skins/dos/ui.js).
+W.youWon = function (kind, Y, done) {
+  const a = root.HOAPI; if (!W.templates || !W.templates[3]) return false;
+  const won = kind === 'won', text = String(Y.text).replace(/\n/g, ' '), label = String(Y.ok || 'OK');
+  const img = a.IMG[won ? 'dos:d5040' : 'dos:d5050'];
+  // (the frame's corner at 168, 93 in the 640 x 480 screen, as captured: not centred)
+  const dlg = W.open(3, { label: text, client: [258, 277], rects: { 100: [13, 11, 234, 34], 999: [54, 76, 149, 151], 201: [72, 242, 112, 28] }, at: [168, 93], onClose: done,
+    text: { 100: text, 201: '&' + label.replace(/&/g, '&&') }, on: { 201: (_, d) => d.close() },
+    pics: { 999: (x, w, h) => { x.fillStyle = '#000'; x.fillRect(0, 0, w, h); if (img && img.width) x.drawImage(img, 0, 0); } } });
+  if (!dlg) return false;
+  dlg.el.setAttribute('role', 'alertdialog');
+  return true;
 };
 // #33 STATUS ("Spaceward Ho! Status", FUN_1100_05b4: CreateDialog, modeless, while the turn is worked out (FUN_1040_0038, End Turn, unless the main window is an
 // icon) and while a new galaxy is written; captured with a 20-player Humongous galaxy, frames grabbed while it showed: win20-orig-vga16-status (empty bar),
@@ -784,7 +802,8 @@ W.nameStar = function (f, o) {
   const dlg = W.build(19, {
     label: NS.label || 'New Star Name:',
     text: { '#0': words, '#2': NS.label || 'New Star Name:', 1: NS.ok || 'OK' },
-    pics: { 999: (x, w, h) => { x.fillStyle = '#fff'; x.fillRect(0, 0, w, h); if (img && img.width) x.drawImage(img, 0, 0); } },
+    pics: { 999: (x, w, h) => { x.fillStyle = '#000'; x.fillRect(0, 0, w, h); if (img && img.width) x.drawImage(img, 0, 0); } }, // (black behind the picture: captured, win20-jake-vga16-won-namestar.png)
+    rects: { '#0': [10, 10, 244, 142] }, // (the words wrap where the capture's do: our font is a little narrower)
     on: { 1: () => f.requestSubmit() },
   });
   if (!dlg) return false;
@@ -792,6 +811,7 @@ W.nameStar = function (f, o) {
   if (ed) { o.inp.className = ed.className; o.inp.style.cssText = ed.style.cssText; o.inp.dataset.w31 = '100'; o.inp.maxLength = NS.max || 7; o.inp.setAttribute('spellcheck', 'false'); ed.replaceWith(o.inp); }
   o.err.style.display = 'none';
   f.innerHTML = ''; f.className = 'w31-namestar'; f.append(dlg.el, o.err);
+  setTimeout(() => W.placeAt(dlg, [32, 74]), 0); // (the frame's corner at 32, 74 in the 640 x 480 screen, as captured)
   setTimeout(() => o.inp.focus(), 0);
   return 'w31dlg';
 };
