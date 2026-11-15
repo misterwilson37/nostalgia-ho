@@ -396,13 +396,15 @@ const MENU_HOT = { 'About Ho!…': 0, 'New Game…': 0, 'Open Game…': 0, 'Clos
   'List Ship Types…': 0, 'Create New Ship Type…': 7, 'List All Fleets…': 9, 'Organize Ships…': 0, 'Scrap Current Fleet': 0,
   'Compare Players…': 0, 'List All Explored Stars…': 0, 'Send Message…': 5, 'Zoom In': 5, 'Zoom Out': 5, 'Fix Spending': 0, 'Reports': 0, 'Tech Spending': 0 };
 // The Windows program's (MENU 1, the private repo's extracted/win-2.0/resources/menus.txt): its hot letters underlined, where they differ from the DOS program's
-const WIN_HOT = Object.assign({}, MENU_HOT, { 'Give Overspending Warnings': 5, 'End Turn & Switch Players': 'End Turn & Switch Players'.indexOf('Switch') + 2, 'No Battles Here…': 13, 'Review Battle at': -1 });
+// (the Ships menu's List Ship Types, Organize, Build Ships at, Scrap Current Fleet and No Battles here carry no underline in the running program, captured
+// win20-orig-vga16-shipsmenu.png: it sets them from its strings, 354-361, which have no "&"; menus.txt's "&L", "&O", "&B", "&S", "He&re" never show)
+const WIN_HOT = Object.assign({}, MENU_HOT, { 'Give Overspending Warnings': 5, 'End Turn & Switch Players': 'End Turn & Switch Players'.indexOf('Switch') + 2, 'List Ship Types…': -1, 'Organize Ships…': -1, 'Scrap Current Fleet': -1, 'No Battles Here…': -1, 'Review Battle at': -1, 'Save Game': 0, 'Revert To Saved': 0 });
 function hotMenus() {
   const mark = (dd) => dd.querySelectorAll('button[role=menuitem]').forEach(b => {
-    if (b.dataset.hot || b.disabled || !frameOn()) return;
+    if (b.dataset.hot || (b.disabled && !winOn()) || !frameOn()) return;
     const n = b.firstChild; if (!n || n.nodeType !== 3) return;
     const t = n.nodeValue, W = winOn(); let i = (W ? WIN_HOT : MENU_HOT)[t];
-    if (i == null && /^Build Ships at /.test(t)) i = 0;
+    if (i == null && /^Build Ships at /.test(t) && !W) i = 0;
     if (i == null && /^Review Battle at /.test(t) && !W) i = 0;
     if (i == null || i < 0 || i >= t.length) return;
     b.dataset.hot = '1'; const sp = document.createElement('span'); sp.className = 'mhot'; sp.textContent = t[i];
