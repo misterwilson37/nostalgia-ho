@@ -1,6 +1,6 @@
 # Mac 2.0.1: the display audit (November 2026, begun)
 
-**Progress (comparison with Jake's two real games): 1 fleet arrows done; 2 battle, 3 menus and windows, 4 elimination: not yet.**
+**Progress (comparison with Jake's two real games): 1 fleet arrows done; 2 battle animation done (colour); 3 menus and windows, 4 elimination: not yet.**
 
 **Provided by PC Games Vault (pcgamesvault.com) and digitized by Britt Dodd.** (Jake, November 2026: credit for everything that came, or could have come, from the Mac 2.0.1 disks, including copies of the same files from elsewhere.)
 
@@ -52,3 +52,11 @@ From `mac20-jake-shot010..047, 090` and the code (`MapLine @c6f7e`, `StarLine @c
 - **Single head**: one end, the far one, when the fleet can reach (fuel for one way). **Double head**: both ends, when it can also come back (`MapLine` passes the near-end flag only when the reach flag and the second flag are both set; ours: fuel for twice the distance). **Dashed (grey pattern), no head**: out of reach (shot090). The head: tip on the star's centre, barbs 13 out and 9 back; the line is 2 px; the same width everywhere (no thicker kind in the code; the thicker look in some shots is the head's barbs).
 - **The number by the line is the distance (the panel's "Dist"), not the turns**: shot029 line "5" for "Dist 5; Time 3", shot045/047 "4" for "Dist 4; Time 2". `StarLine`'s 3rd argument is the leg's distance record. Ours showed turns: fixed (Mac 2.0.1 skins only, `V2`).
 - The line is painted over the stars (PaintRgn): ours is now drawn after the stars (`T.routesOver`).
+
+## Jake's captures: the battle (item 2)
+
+`DoOneBattle`, `HaveGroupShoot`, `DrawLaserBlast`, `DrawExplosion` are 1.2F's code (only record offsets differ: `rdiffs.py`), so the 1.2 skin's window was right in layout; what the colour captures (`shot048..089`, `lost018..023`) add, and the code says, is the colour:
+- **The bolt**: a short bar (a fifth of the way) running in five steps, five lines: the centre HSV hue (weapons - 1) x 4000 mod 65535, saturation and value full; the pair beside it hue + 7500, value 45000/65535; the outer pair hue + 15000, value 25000/65535 (`DrawLaserBlast @d3e20`, Pack12). Captured: Sue's Sword (3/3) fighters yellow-orange over olive and green (hue 44 deg), Jake's Conan (5/5) lime over green and teal (88 deg). White in black and white. The step is put back, not painted over, so no ghost line stays.
+- **The ovals**: a ship lost (`HaveGroupShoot`: hit points gone gives sound 3003 / 0xbbb; ours had given it to a planet only, so a kill showed no oval): ovals from the middle out, HSV hue (59 - s) x 175, full saturation and value (red at the middle to yellow at the rim, as in shot048/053), then wiped in black the other way. `rules-dos` now gives a kill 3003; `rs.battleSounds` is on for Mac 2.0.1 (the sounds 3000-3003 by the hit's strength, as 1.2).
+- The pictures wait: ovals and bolts keep their ticks only while the battle speed's time for the shot lasts (`BattleWait` under `TickCount < deadline`), so at fast speeds they are not seen: Jake's captures were at a slow speed.
+- Order checked against the code: shot sound, laser, redraw of the target group, explosion; the planet's population counts down in steps with each hit (shot 090 onwards), "Round n" each round, Skip becomes OK at the end.

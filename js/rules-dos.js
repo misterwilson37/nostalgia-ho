@@ -678,7 +678,7 @@ function battle(G, sid, hooks) {
               t.dmg += hit;
               let k2 = 0, ti = t.idx[Math.max(0, t.n - 1)];
               if (t.dmg >= t.hp) { t.dmg = 0; t.n--; debris += t.debris; k2 = 1; } // no carry-over
-              if (ev.length < 80) ev.push({ a: u.o, si: id(si), t: t.o, k: k2, ti: id(ti), f: k2 ? 0 : t.dmg / t.hp, snd: ratio < 2 ? 3000 : ratio < 5 ? 3001 : 3002, dm: t.dmg });
+              if (ev.length < 80) ev.push({ a: u.o, si: id(si), t: t.o, k: k2, ti: id(ti), f: k2 ? 0 : t.dmg / t.hp, snd: k2 ? 3003 : ratio < 2 ? 3000 : ratio < 5 ? 3001 : 3002, dm: t.dmg }); // (a ship that dies is sound 3003 and DrawExplosion's ovals: HaveGroupShoot @d1746 makes it 0xbbb when its hit points are gone)
             }
           }
         }

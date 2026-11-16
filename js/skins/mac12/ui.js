@@ -1563,28 +1563,37 @@ function battleWindow(b, k) {
   // a shot
   const wait = (until) => new Promise(res => { const f = () => (stop || skip || performance.now() >= until ? res() : setTimeout(f, Math.min(TICK, until - performance.now()))); f(); });
   const cellOf = (ev, shooter) => shooter ? (ev.si >= 0 ? where.get(ev.si) : planetAt[ev.a]) : (ev.p ? planetAt[b.planetOwner] : where.get(ev.ti));
+  // Colour (DAT_00efff1e >= 4: the colour skin, Mac 2.0.1's colour window): the bolt's centre line is HSV hue (weapons - 1) x 4000 mod $ffff, full
+  // saturation and value; the pair beside it hue + 7500, value $afc8; the outer pair hue + 15000, value $61a8 (DrawLaserBlast @d3e20 through Pack12's
+  // HSV2RGB; in the captures, Sue's Sword (3/3) fighters' bolt is yellow-orange over olive and green, Jake's Conan (5/5) lime over green and teal)
+  const COL = !!window.HOMAC2_COLOUR && V2;
+  const hsv = (h, v) => { h = (h % 65535) / 65535 * 6; const i = Math.floor(h), f = h - i, q = v * (1 - f), t = v * f; const [r, gg, bb] = [[v, t, 0], [q, v, 0], [0, v, t], [0, q, v], [t, 0, v], [v, 0, q]][i % 6]; return 'rgb(' + [r, gg, bb].map(u => Math.round(u * 255)).join(',') + ')'; };
+  const weaponsOf = (gr) => { if (gr.planet) { const pl = g.players[gr.o]; return (pl && pl.tech && (pl.tech.weapons || pl.tech.W)) || 1; } const u = b.start[gr.units[0]], d = H().getDesign(g, u.o, u.did); return d && d.W ? d.W : 1; };
   async function laser(s, t) { // DrawLaserBlast @d3dea
     let x1 = colX[s.ci], y1 = 53 * s.row + 55, x2 = colX[t.ci], y2 = 53 * t.row + 55;
     if (x2 > x1) { x1 += 121; x2 -= 1; } else { x2 += 121; x1 -= 1; }
     const dx = Math.trunc((x2 - x1) / 5), dy = Math.trunc((y2 - y1) / 5);
-    const seg = (h0, v0, h1, v1, col) => { x.strokeStyle = col; x.lineWidth = 1; x.beginPath(); for (const o of [0, 1, -1, 2, -2]) { x.moveTo(h0 + 0.5, v0 + o + 0.5); x.lineTo(h1 + 0.5, v1 + o + 0.5); } x.stroke(); };
-    let h = x1, v = y1, ph = -1, pv = -1;
+    const h0 = ((weaponsOf(s) - 1) * 4000) % 65535, cols3 = COL ? [hsv(h0, 1), hsv(h0 + 7500, 45000 / 65535), hsv(h0 + 15000, 25000 / 65535)] : ['#fff', '#fff', '#fff'];
+    const snap = document.createElement('canvas'); snap.width = c.width; snap.height = c.height; snap.getContext('2d').drawImage(c, 0, 0); // (what the bolt is drawn over, put back where it was: the original paints its last step black)
+    const back = () => { x.save(); x.setTransform(1, 0, 0, 1, 0, 0); x.drawImage(snap, 0, 0); x.restore(); };
+    // (the lines are drawn at the pixel centres of the 2 x canvas, so a step's pixels are whole)
+    const seg = (h0_, v0, h1, v1) => { x.lineWidth = 1; for (const [o, ci] of [[0, 0], [1, 1], [-1, 1], [2, 2], [-2, 2]]) { x.strokeStyle = cols3[ci]; x.beginPath(); x.moveTo(h0_ + 0.25, v0 + o + 0.25); x.lineTo(h1 + 0.25, v1 + o + 0.25); x.stroke(); } };
+    let h = x1, v = y1;
     for (let i = 0; i < 5 && !stop && !skip; i++) {
       const t0 = performance.now();
-      seg(h, v, h + dx, v + dy, '#fff');
-      if (ph !== -1) seg(ph, pv, h, v, '#000');
-      ph = h; pv = v; h += dx; v += dy;
+      back(); seg(h, v, h + dx, v + dy);
+      h += dx; v += dy;
       await wait(t0 + TICK);
     }
-    seg(ph, pv, h, v, '#000');
+    back();
   }
   async function explosion(t, ev, until) { // DrawExplosion @d40f8
     const l = colX[t.ci], tp = 53 * t.row + 35, dm = ev.dm | 0;
     if (ev.snd !== 3003) { const im = pic('s' + (12000 + (dm % 3))); if (im) x.drawImage(im, l + (dm % 103), tp + (dm % 23), 17, 17); return; }
-    if (!VB.full) return;
-    const oval = (s, style) => { const r = { l: l + s, r: l + 120 - s, t: tp + Math.trunc(40 * s / 120), b: tp + 40 - Math.trunc(40 * s / 120) }; if (r.r <= r.l || r.b <= r.t) return; x.strokeStyle = style; x.lineWidth = 1; x.beginPath(); x.ellipse((r.l + r.r) / 2, (r.t + r.b) / 2, (r.r - r.l - 1) / 2, (r.b - r.t - 1) / 2, 0, 0, Math.PI * 2); x.stroke(); };
-    for (let s = 59; s > 0 && !stop && !skip; s--) { oval(s, whiteGray); if (s % 2 === 0 && performance.now() < until) await wait(performance.now() + TICK); }
-    for (let s = 1; s < 60 && !stop && !skip; s++) { oval(s, '#000'); if (s % 2 === 0 && performance.now() < until) await wait(performance.now() + TICK); }
+    if (!VB.full) return; // (in colour each oval is HSV hue (59 - s) x 175, full saturation and value: red at the middle to yellow at the rim, as captured)
+    const oval = (s, style, lw) => { const r = { l: l + s, r: l + 120 - s, t: tp + Math.trunc(40 * s / 120), b: tp + 40 - Math.trunc(40 * s / 120) }; if (r.r <= r.l || r.b <= r.t) return; x.strokeStyle = style; x.lineWidth = lw || 1; x.beginPath(); x.ellipse((r.l + r.r) / 2, (r.t + r.b) / 2, (r.r - r.l - 1) / 2, (r.b - r.t - 1) / 2, 0, 0, Math.PI * 2); x.stroke(); };
+    for (let s = 59; s > 0 && !stop && !skip; s--) { oval(s, COL ? hsv((59 - s) * 175, 1) : whiteGray); if (s % 2 === 0 && performance.now() < until) await wait(performance.now() + TICK); }
+    for (let s = 1; s < 60 && !stop && !skip; s++) { oval(s, '#000', 2); if (s % 2 === 0 && performance.now() < until) await wait(performance.now() + TICK); }
   }
   const apply = (ev) => {
     if (ev.p) { if (ev.php != null) pop = ev.php / 1000; }

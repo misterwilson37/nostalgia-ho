@@ -111,6 +111,7 @@ E.registerRules('mac20', Object.assign({}, D, {
   // cut names, "…"); the bars are 2.0's (linear budget bars a click above
   // them switches to the log scale, 'Stup' 1000 +0x2a = 0; log Technology bars)
   battlePanel: D.battlePanelMac,
+  battleSounds: true, // HaveGroupShoot @d1746 (the same code as 1.2F's): the sound by the hit's strength, 3003 and the ovals for a ship lost
   // doPollingTimeDialog @1227b4: the slider is set to 1 to 30 seconds (SetCtlMax $1e; CNTL 4060 says 15, the code changes it)
   options: Object.assign({}, D.options, { poll: Object.assign({}, D.options.poll, { max: 30 }) }),
   // CONFIRMED (DrawPlanetRect, DrawFleetRect, DrawSelectedFleetInfo: the literals 'Owner:', 'No One', 'Info Date:', 'Battle Date:', 'Ships Queued:', 'None.', 'There are no fleets at this planet.' and the A5 world's 'Pop:', 'Temp:', 'Gravity:', 'Metal:', 'Income:'): 1.2's English
