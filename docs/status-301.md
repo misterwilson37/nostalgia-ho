@@ -21,9 +21,8 @@ Sources (private repo `nostalgia-ho-sources`):
    Each pane not yet built is an empty box with a dotted edge (`data-todo` names its routine). Until item 2 is done the panel
    can't be used (no fleet rows, no budget bars): real-play fails on `mac3`/`mac3c` by design on this branch.
 2. Each changed pane from 3.0.1's own routine, one commit each, this table updated in the same commit: ~~`DrawIncomeRect`~~ (done),
-   ~~`DrawPlanetRect` + `DrawPieChart`~~ (done but for its picture: next, `DoGratuitousGraphics` @1571c2, the turning planet: PICT 6100-6130
-   by gravity, a terminator sweeping a 224-step cycle every 10 ticks, 14 twinkling stars, ice and desert overlays RGN/PICT 6150-6151 by
-   temperature; called from DrawPlanetRect and the idle loop), `DrawFleetRect` + `DrawSelectedFleetInfo`, `DrawBudgetRect` + `DrawHBarControl`
+   ~~`DrawPlanetRect` + `DrawPieChart`~~, ~~`DoGratuitousGraphics`'s turning planet~~ (done; its second part, the map's twinkling
+   stars, goes with the map), `DrawFleetRect` + `DrawSelectedFleetInfo`, `DrawBudgetRect` + `DrawHBarControl`
    (rewritten: five times the code), `DrawVBarControl`, the map (`DrawGalaxyMap`, `DrawOneStar`, the star sub-procs,
    `DrawOneFleet`, `DrawFleetPaths`), `UpdateReportWin` + `DrawMessage`, `DrawAnnounceBubble`.
 3. Until a pane is done, the skin must not show 2.0.1's version of it as if it were 3.0.1's: keep these on the session branch,
@@ -62,7 +61,7 @@ another version.
 | Arrangement of the windows | 012, 040 | `ResetWindows`, `SetWindowLocations` | same code | **done** (panes down the left: planet 68, fleets 65, money 34, players beside budget; Tech Spending and Reports under; the heights measured in shot012/040: rules at 105/107, 170/172, 205, 370) |
 | Map window: stars, names, fleets | 012-014, 066 | `UpdateMapWin`, `DrawGalaxyMap`, `DrawOneStar`, `DrawOneFleet` | differ | **wrong** |
 | Fleet paths on the map | 014, 066, 076 | `DrawFleetPaths` | new | ? |
-| Planet pane (with the pie chart) | 012, 042 | `DrawPlanetRect`, `DrawPieChart`, `DoPieClick`; `DoGratuitousGraphics` | differs, new | close (`planetBox301`, `pieChart301`): words (STR# 1005, 4000), places, grey and the pie's colours (XWinProc @180bae's colour table, as an 8-bit screen shows them) and B&W patterns (ltGray, dkGray), PICT 600's ring, the drag; matches shot042. Left: the turning planet on black once terraforming or mining is done (`DoGratuitousGraphics`, to do: a dotted circle marks it) |
+| Planet pane (with the pie chart) | 012, 042 | `DrawPlanetRect`, `DrawPieChart`, `DoPieClick`; `DoGratuitousGraphics` | differs, new | close (`planetBox301`, `pieChart301`): words (STR# 1005, 4000), places, grey and the pie's colours (XWinProc @180bae's colour table, as an 8-bit screen shows them) and B&W patterns (ltGray, dkGray), PICT 600's ring, the drag; matches shot042. and the turning planet on black once terraforming or mining is done (`gratuitous301`: the strip by gravity, the night side's 224-frame cycle, ice caps and desert by temperature, the 14 stars that cross as a column because the program never spreads them; every 10 ticks as IdleTheHo). **done** but for a frame-by-frame check against a capture of the turning (shot012/040 are single frames; they agree) |
 | Fleet pane | 012 | `DrawFleetRect`, `DrawSelectedFleetInfo` | differ | **wrong** |
 | Money pane (Reserve Metal, Ship Savings, Total Money) | 012, 040 | `DrawIncomeRect` | differs | **done** (`incomeBox301`: STR# 1005.2-.9, the program's "(Int: %s)"; bold labels right at 87, values at 90, changes right at 225; grey 0xBBBB in colour; Ship Savings red when below 0; the rules at 32 and 225. Fields: +0x1c `p.metal`, +0x10 `p.savings`, +8 `p.net301`, +0x14 `p.oInterest`, +0x24/+0xc `p.chg`) |
 | Players list and budget bars | 012 | `DrawBudgetRect`, `DrawHBarControl`, `DrawVBarControl` | differ | **wrong** |

@@ -1544,6 +1544,76 @@ function pieChart301(q, h, v, s, T, X) {
   q.text(S[17] || 'Mine', 0, v - 2, G9, { right: h, color: col ? mc : '#000' });
   if (!col) { x.strokeStyle = '#000'; x.lineWidth = 1; x.beginPath(); x.ellipse(cx, cy, 21.5, 21.5, 0, 0, Math.PI * 2); x.stroke(); }
 }
+// The turning planet (DoGratuitousGraphics @1571c2, its first part; the second twinkles the map's stars): called by DrawPlanetRect (1) and by the
+// idle loop (IdleTheHo, 0) at most every 10 ticks. Only for your colony with terraforming or mining finished, in the pane's black region (CreateMapWin:
+// the rect 96..224 x 0..65 less the planet's 56 x 56 oval at (132, 4)). Each call: the frame count (-$1006) goes on by 1 in 0..223 and the picture
+// slides by (count mod 112) pixels. Every fourth frame the 14 stars (-$a58: v, h, from 0, 0, never set first) are drawn out in black, moved a pixel
+// left by the idle call, put back at h 127, v RND(1, 64) once past the left edge, and drawn in white: so they cross together as a column, and only
+// in the region (behind the planet they don't show). The planet is a 168 x 56 picture strip by the planet's gravity against yours (bigger x 100 over
+// smaller): under 150 PICT 6100 + star mod 6, to 200 6110 + mod 3, to 256 6120 + mod 4, else 6130; black and white: the strip's PICT through the oval.
+// Colour (depth 4 or more): the strip (PPMp) into a 56 x 56 offscreen at -slide; a cold planet (your ideal temperature over the planet's, in tenths,
+// / 107, at most 22: n) gets its ice caps, PICT 6150 at (-slide, n - 22) through RGN 6150 and PICT 6151 at (-slide, 22 - n) through RGN 6151 at
+// (-slide, 48 - n); a hot one (the other way, at most 30) the desert strip PPMp 6140 through the square less RGN 6150 at (-slide, -n) and RGN 6151
+// at (-slide, 26 + n); then the night side, blended 0xBFFF of black over it (a quarter of the picture left), the region by the count: a half
+// (left under 112, right from it) less (count < 56, >= 168) or with (else) an oval as tall as the planet and as wide as how far the count is from 56,
+// 112 or 168 or 224; then through the oval into the window.
+const GRAT = { c: 0, stars: Array.from({ length: 14 }, () => ({ v: 0, h: 0 })), timer: null };
+const OVAL301 = { h: 132, v: 4, d: 56 }, inOval301 = (h, v) => { const r = OVAL301.d / 2, dx = h + 0.5 - (OVAL301.h + r), dy = v + 0.5 - (OVAL301.v + r); return dx * dx + dy * dy <= r * r; };
+function gratuitous301(x, s, idle) {
+  const a = A(), p = a.me(), col = COL301(), IMG = a.IMG;
+  GRAT.c = (GRAT.c + 1) % 224;
+  const c = GRAT.c, off = c % 112, sid = s.id;
+  if ((c & 3) === 3) GRAT.stars.forEach((st) => {
+    const put = (fill) => { const h = 96 + st.h, v = st.v; if (h >= 96 && h < 224 && v >= 0 && v < 65 && !inOval301(h, v)) { x.fillStyle = fill; x.fillRect(h, v, 1, 1); } };
+    put('#000');
+    if (idle) st.h -= 1;
+    if (st.h < 0) { st.h = 127; st.v = 1 + Math.floor(Math.random() * 64); }
+    put('#fff');
+  });
+  const r = Math.trunc(100 * Math.max(s.g, p.homeG) / Math.max(0.01, Math.min(s.g, p.homeG)));
+  const pic = r < 150 ? 6100 + sid % 6 : r <= 200 ? 6110 + sid % 3 : r <= 256 ? 6120 + sid % 4 : 6130;
+  const tex = IMG['dos:p' + pic]; if (!tex || !tex.width) return;
+  const D = OVAL301.d, o = document.createElement('canvas'); o.width = o.height = D;
+  const ox = o.getContext('2d'); ox.imageSmoothingEnabled = false;
+  ox.drawImage(tex, -off, 0);
+  if (col) {
+    // a picture at (ih, iv) through masks: inside the first (cap), or through the square less all of them (desert)
+    const through = (im, masks, ih, iv, minus) => {
+      if (!im || !im.width || masks.some(([m]) => !m || !m.width)) return;
+      const t = document.createElement('canvas'); t.width = t.height = D; const tx = t.getContext('2d');
+      tx.drawImage(im, ih, iv); tx.globalCompositeOperation = minus ? 'destination-out' : 'destination-in';
+      masks.forEach(([m, h, v]) => tx.drawImage(m, h, v));
+      ox.drawImage(t, 0, 0);
+    };
+    const d10 = Math.round(10 * (p.homeT - s.t)); // (your ideal less the planet's: above 0 it is colder)
+    if (d10 > 0) {
+      const n = Math.min(22, Math.trunc(d10 / 107));
+      through(IMG['dos:p6150'], [[IMG['dos:rgn6150'], -off, n - 22]], -off, n - 22, false);
+      through(IMG['dos:p6151'], [[IMG['dos:rgn6151'], -off, 48 - n]], -off, 22 - n, false);
+    } else if (d10 < 0) {
+      const n = Math.min(30, Math.trunc(-d10 / 107));
+      through(IMG['dos:p6140'], [[IMG['dos:rgn6150'], -off, -n], [IMG['dos:rgn6151'], -off, 26 + n]], -off, 0, true);
+    }
+    // the night side
+    const m = document.createElement('canvas'); m.width = m.height = D; const mx = m.getContext('2d');
+    const half = c < 112 ? [0, D / 2] : [D / 2, D], w = c < 56 ? 56 - c : c < 112 ? c - 56 : c < 168 ? 168 - c : c - 168, el = Math.trunc((D - w) / 2);
+    mx.fillStyle = '#000'; mx.fillRect(half[0], 0, half[1] - half[0], D);
+    mx.globalCompositeOperation = (c < 56 || c >= 168) ? 'destination-out' : 'source-over';
+    if (w > 0) { mx.beginPath(); mx.ellipse(el + w / 2, D / 2, w / 2, D / 2, 0, 0, Math.PI * 2); mx.fill(); }
+    mx.globalCompositeOperation = 'source-in'; mx.fillStyle = 'rgba(0,0,0,' + (0xbfff / 0xffff) + ')'; mx.fillRect(0, 0, D, D);
+    ox.drawImage(m, 0, 0);
+  }
+  x.save(); x.beginPath(); x.ellipse(OVAL301.h + D / 2, OVAL301.v + D / 2, D / 2, D / 2, 0, 0, Math.PI * 2); x.clip();
+  x.imageSmoothingEnabled = false; x.drawImage(o, OVAL301.h, OVAL301.v); x.restore();
+}
+// the idle loop's call, every 10 ticks, on the pane as it is now
+function gratuitousTick() {
+  const cv = document.querySelector('#panel .planet301 canvas[data-planet]');
+  const g = G(); if (!cv || !g) { clearInterval(GRAT.timer); GRAT.timer = null; return; }
+  const s = g.stars[+cv.dataset.planet]; if (!s) return;
+  const x = cv.getContext('2d'); x.setTransform(2, 0, 0, 2, 0, 0);
+  gratuitous301(x, s, true);
+}
 // The planet pane (DrawPlanetRect @15491e): 226 x 68. Erased, or on a colour screen painted grey (A5-$ba6) less its right column (and, for your colony
 // with terraforming or mining finished, less the 130 pixels at the right, which are black: the region -$10a8, CreateMapWin's rect round the planet's oval,
 // where DoGratuitousGraphics draws the turning planet). The star's name in Chicago 12 centred at 43, base line 11; then Geneva 9:
@@ -1580,7 +1650,7 @@ function planetBox301() {
         q.text(S[11] || 'Income:', 5, 22); at(fill(S[8] || '$%s', H().niceNum(Math.round(H().planetIncome(g, p, s)))), 22);
         at(H().niceNum(H().popNum(g, s.pop)), 32);
         if (!done) pieChart301(q, 130, 12, s, B[0], B[1]);
-        else { q.x.setLineDash([1, 2]); q.x.strokeStyle = '#888'; q.x.beginPath(); q.x.ellipse(160, 32, 28, 28, 0, 0, Math.PI * 2); q.x.stroke(); q.x.setLineDash([]); q.c.dataset.todo = 'DoGratuitousGraphics'; }
+        else { q.c.dataset.planet = String(s.id); gratuitous301(q.x, s, false); if (!GRAT.timer) GRAT.timer = setInterval(gratuitousTick, 1000 / 6); }
       } else {
         L(S4[4] || 'Owner:', 22); at(k.owner >= 0 ? g.players[k.owner].name : (S4[37] || 'No One'), 22);
         at(k.owner >= 0 ? (S[21] || 'Unknown') : (S[20] || 'Uninhabited'), 32);

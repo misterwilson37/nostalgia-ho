@@ -17,6 +17,7 @@ resource:
     ICN# n -> i<n>  32x32 icons with their masks (planets, faces, report
                     pictures), numbered like the DOS game's colour icons
     ics# n -> s<n>  16x16 icons with masks
+    RGN  n -> rgn<n> (the colour file's) a region as a mask: the ice caps' shapes
     PICT n -> p<n>  ship parts (2600-2926, 40x40, white on black), the
                     selection rings (502/503), title pictures (1001, 1003),
                     won/lost pictures (3530/3540), End Turn (5500/5501), ...
@@ -188,6 +189,39 @@ def colour_fork(path):
     sys.exit('No "Ho! 3.0 Color Picts" on that disk')
 
 
+# RGN n (the colour file's 6150 and 6151: the shapes of a cold planet's ice caps, DoGratuitousGraphics @1571c2) -> rgn<n>: the
+# QuickDraw region as a mask the size of its bounding box, opaque white inside. A region is its size, its bounding box (top, left,
+# bottom, right), then for each scan line where it changes the line's v and the h's where the inside flips, each list ending 0x7FFF
+# (a rectangle has no lists); a row is inside where an odd number of the lists so far cover it.
+def region(d):
+    top, left, bottom, right = struct.unpack('>4h', d[2:10])
+    im = Image.new('RGBA', (right - left, bottom - top), (0, 0, 0, 0))
+    if struct.unpack('>H', d[:2])[0] == 10:
+        im.paste((255, 255, 255, 255), (0, 0, im.width, im.height))
+        return im
+    p, flips, lines = 10, set(), []
+    while True:
+        v = struct.unpack('>h', d[p:p + 2])[0]; p += 2
+        if v == 0x7FFF:
+            break
+        xs = []
+        while True:
+            h = struct.unpack('>h', d[p:p + 2])[0]; p += 2
+            if h == 0x7FFF:
+                break
+            xs.append(h)
+        flips ^= set(xs)
+        lines.append((v, sorted(flips)))
+    px = im.load()
+    for k, (v, xs) in enumerate(lines):
+        v1 = lines[k + 1][0] if k + 1 < len(lines) else bottom
+        for a, b in zip(xs[0::2], xs[1::2]):
+            for y in range(v, v1):
+                for x in range(a, b):
+                    px[x - left, y - top] = (255, 255, 255, 255)
+    return im
+
+
 def save(out, images, sounds):
     os.makedirs(os.path.join(out, 'sprites'), exist_ok=True)
     os.makedirs(os.path.join(out, 'sounds'), exist_ok=True)
@@ -235,6 +269,8 @@ def main(src, colour=None, out=OUT):
             images['s%d' % i] = colour_icon(d, res.get(('ics#', i), (0, None))[1], 16, pal)
         elif t == 'PPMp':
             images['p%d' % (i - 10000 if i >= 12000 else i)] = ppmp(d, pal)
+        elif t == 'RGN ':
+            images['rgn%d' % i] = region(d)
         elif t == 'PICT':
             im = pict.decode(d).convert('RGBA')
             n = COLOUR_NAMES.get(i, i)
