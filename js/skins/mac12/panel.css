@@ -20,3 +20,12 @@
 #panel .box.planet301, #panel .box.fleets301, #panel .box.info301, #panel .box.low301 { margin: 0; border: 0; border-left: 1px solid #000; border-radius: 0; box-shadow: none; }
 #panel .box.planet301 { border-top: 1px solid #000; }
 #panel .box.low301 { border-bottom: 1px solid #000; margin-bottom: 8px; }
+/* (shared with 3.0.1: its map scrolls as 2.0.1's) */
+/* the map window's scroll bars (MapWinProc): 16 of the program's pixels (one CSS pixel each, as the map), at the window's right edge and foot, the map between them */
+.mapbar12, .mapcorner12 { position: absolute; z-index: 6; background: #fff; }
+.mapbar12.v { right: 0; top: 0; width: 16px; }
+.mapbar12.h { left: 0; bottom: 0; height: 16px; }
+.mapbar12 canvas { display: block; image-rendering: pixelated; }
+.mapbar12:focus-visible { outline: 1px dotted #fff; outline-offset: -3px; }
+.mapcorner12 { right: 0; bottom: 0; width: 16px; height: 16px; box-sizing: border-box; border-left: 1px solid #000; border-top: 1px solid #000; }
+html.bars12 #msg { bottom: 28px; }

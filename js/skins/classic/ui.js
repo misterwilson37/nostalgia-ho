@@ -597,6 +597,8 @@ function draw0() {
   const ps = planetPx();
   cx.imageSmoothingEnabled = ps < 40;
   UI.dots = [];
+  // T.mapUnder(cx, info): a skin's own drawing under the stars (the Mac 3.0.1 skin: its map in 2000, the stars' blinking points)
+  if (T.mapUnder) T.mapUnder(cx, { mapW, mapH, view: UI.view, G, ME, sx, sy, IMG });
   const drawRoutes = () => {
   // routes of my fleets
   if (T.appPaths) appFleetPaths();
@@ -691,7 +693,7 @@ function draw0() {
     drawDots(s, x, y, ps);
   }
   // in-transit dots
-  for (const f of T.dotLayout ? [] : G.fleets) { // (the app has no dot for a fleet on the way)
+  for (const f of T.dotLayout || T.transitDots === false ? [] : G.fleets) { // (the app has no dot for a fleet on the way; T.transitDots false: a skin draws them itself)
     if (f.owner !== ME || f.to == null) continue;
     const a = G.stars[f.from], b = G.stars[f.to], t = Math.min(1, f.prog / f.dist);
     const x = sx(a.x + (b.x - a.x) * t), y = sy(a.y + (b.y - a.y) * t);

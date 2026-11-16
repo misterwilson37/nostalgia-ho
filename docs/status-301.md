@@ -25,13 +25,8 @@ Sources (private repo `nostalgia-ho-sources`):
    ~~`DrawPlanetRect` + `DrawPieChart`~~, ~~`DoGratuitousGraphics`'s turning planet~~ (done; its second part, the map's twinkling
    stars, goes with the map), ~~`DrawFleetRect` + `DrawSelectedFleetInfo`~~ (done), ~~`DrawBudgetRect` + `DrawHBarControl`~~
    (done, with `DrawIconRect`), ~~`DrawVBarControl`~~ (done). Next:
-   - **The map** (`DrawGalaxyMap` @152d54, `DrawOneStar` @154132, `DrawOneColorStarSubProc` @1531a4, `DrawOneBWStarSubProc` @1539b0,
-     `DrawFleetPaths` @15466e, `CreateMapWin`/`GrowMapWin` for its scroll bars, and `DoGratuitousGraphics`' second part, the map's
-     stars: each star's two points flip black/white at 1 in 100 every 10 ticks). Already read: in 2000 (with the setup's +0x10
-     flag) the map is PICT 6000 tiled every 128 pixels (colour; 50% grey in B&W), a centred oval 8 units across blended in 32 grey
-     steps then painted, and "Map will be created in 2010." (1005.27) centred 15 above the foot, white (on a black strip in B&W);
-     else the map is painted (RGB in colour); then the stars (loop over the galaxy's +10 count). The panes' colour table, HSV
-     helpers and `STR301` are in `js/skins/mac12/ui.js` for reuse.
+   - ~~The map's stars~~ (done: see the table). Next: `DrawFleetPaths` @15466e (with the Options setting +0x5c), the drag line
+     (`FollowPathDrag`, `MapLine`: 3.0.1's own, with the distance), moving fleets, and the End Turn button's place.
    - `UpdateReportWin` + `DrawMessage` (the Report Window's contents; `ClickInReportWindow` differs too).
    - `DrawAnnounceBubble`.
    - Smaller leftovers in the done panes: "Sort" above the budget bars (`DoHBarClick`'s sort), the drag bar's resizing
@@ -70,7 +65,7 @@ another version.
 | Part | Captures | 3.0.1 code | Against 2.0.1 | Remake |
 |---|---|---|---|---|
 | Arrangement of the windows | 012, 040 | `ResetWindows`, `SetWindowLocations` | same code | **done** (panes down the left: planet 68, fleets 65, money 34, players beside budget; Tech Spending and Reports under; the heights measured in shot012/040: rules at 105/107, 170/172, 205, 370) |
-| Map window: stars, names, fleets | 012-014, 066 | `UpdateMapWin`, `DrawGalaxyMap`, `DrawOneStar`, `DrawOneFleet` | differ | **wrong** |
+| Map window: stars, names, fleets | 012-014, 066 | `DrawGalaxyMap`, `DrawOneColorStarSubProc`, `DrawOneBWStarSubProc`, `SetBlinkLocs`, `CalcFleetsAtAllStars`; zooms and scrolling as 2.0.1's (`ZoomIn`, `ZoomOut`, `ThumbMapWindow` same code) | differ | close (`drawStar301`, `mapUnder301`): black map, each star's blinking points, icons 32/16 or dots by zoom, halos (colour PICT 500/504/508 and smalls; B&W 502/503 and the ally's white cap), the abandoning pattern, ICN 3114 for your fleets and others', the satellites' ring, names white (condensed at 9); the Spiral/Cluster map of 2000 (PICT 6000, the disc, "Map will be created in 2010."); 2.0.1's zooms, cells and scroll bars; your selected fleet is dragged from its star. Left: zoom 6's dot colour (the star's colour index, +10, not read: white); a star gone nova is not blacked out; in the 2000 view only the picture is moved (a click on your home there misses); the End Turn button's place (PICT 5000 at (3, 2) on the map) |
 | Fleet paths on the map | 014, 066, 076 | `DrawFleetPaths` | new | ? |
 | Planet pane (with the pie chart) | 012, 042 | `DrawPlanetRect`, `DrawPieChart`, `DoPieClick`; `DoGratuitousGraphics` | differs, new | close (`planetBox301`, `pieChart301`): words (STR# 1005, 4000), places, grey and the pie's colours (XWinProc @180bae's colour table, as an 8-bit screen shows them) and B&W patterns (ltGray, dkGray), PICT 600's ring, the drag; matches shot042. and the turning planet on black once terraforming or mining is done (`gratuitous301`: the strip by gravity, the night side's 224-frame cycle, ice caps and desert by temperature, the 14 stars that cross as a column because the program never spreads them; every 10 ticks as IdleTheHo). **done** but for a frame-by-frame check against a capture of the turning (shot012/040 are single frames; they agree) |
 | Fleet pane | 012, 040 | `DrawFleetRect`, `DrawSelectedFleetInfo`, `DrawOneFleet`, `DrawOneOtherFleet`, `ClickInFleetRect`, `DrawDragBarRect` | differ | close (`fleetBox301`): the A5 world's rects (fleet 70..129, the black drag bar 130..132, the scroll bar 214..226 x 89..131), STR# 4000.11-.21, rows bold/italic/condensed, the selected row inverted, scrap's grey pattern, other players' rows (`rs.otherFleetRow`), a click selects. Left: the scroll bar is drawn plainly (an OS control); dragging the drag bar to resize the pane (`ClickInDragBar`) is not built |

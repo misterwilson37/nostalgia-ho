@@ -2459,11 +2459,115 @@ function updateBars() {
 // a dialog opening or closing activates or deactivates the map window (DeactivateMapWindow @c30a4 / ActivateMapWindow @c3012)
 new MutationObserver(() => { if (MB.wrap) updateBars(); }).observe(document.body, { childList: true });
 
+// ---------- Mac 3.0.1's map (DrawGalaxyMap @152d54, DrawOneColorStarSubProc @1531a4, DrawOneBWStarSubProc @1539b0) ----------
+// The map scrolls and zooms as 2.0.1's (ZoomIn, ZoomOut and ThumbMapWindow are the same code; ScrollMapWindow, CenterOnStar and InitDelta differ only
+// in what they keep: the same formulas), so 3.0.1 takes this file's zooms (6, 9, 12, 17 pixels a cell), cells and scroll bars. Its own drawing:
+//   the map painted black; then, under the stars, each star's blinking points (SetBlinkLocs @f21a0: one at a random cell 1..size - 2 that holds no
+//     star, a second for a sparse galaxy; each at its cell plus (the other coordinate mod the cell), white or black at random; the idle loop,
+//     DoGratuitousGraphics' second part, flips each at 1 in 100 every 10 ticks);
+//   on a Spiral or Cluster map in 2000 (galaxy +0x10: laid out in 2010) PICT 6000 tiled every 128 pixels (50% grey in black and white), a disc 8
+//     cells across at the middle, its edge blended in grey steps, "Map will be created in 2010." (1005.27) white, centred 15 above the foot (on a
+//     black strip in black and white), and only your home, at the middle;
+//   each star by its cell (h, v) and the zoom u: at 17 its 32 x 32 icon at (h - 7, v - 7), at 9 and 12 its 16 x 16 one at (h - 1, v - 1), at 6 a
+//     dot (PaintOval of the cell, white; a 50% pattern of white and the star's colour, not read: plain white here); the icon is the star's own
+//     (SetPlanetTypesForStar: js/skins/mac3/pictures.js starLook). Before it, the selected star's halo (colour PICT 500, 501 small: the extractor's
+//     p502, p503), an ally's (504, 505), both (508, 509), at (h - 19, v - 16) 56 x 51, or 26 x 26 round the small icon; in black and white the
+//     selected star's PICT 502 / 503 and for an ally a white oval cap (EraseOval: the icon's width less 2 each side, from u / 3 above its top to
+//     u / 6 below it). A colony being abandoned gets the 50% grey ORed over its icon's square grown by u / 2. At 6 the selected dot gets a white
+//     frame 2 out. Then, from zoom 9: ICN 3114 (a small ship) at the icon's top right (right - 9, top - 8; at 17 right - 5, top - 10) when one of
+//     your fleets other than satellites is there (the star's +0x2a, bit 0x4000: CalcFleetsAtAllStars); the same at its top left when another
+//     player has ships there and the star is yours or you have ships there; a white ring (FrameOval of the icon's square) round it when you have
+//     satellites there (+0x2a's count); the name in white, centred under the icon, base line 8 below it (condensed at 9).
+const BLINK = { key: null, pts: [], timer: null };
+function blinkPoints(g) {
+  const key = g.id + ':' + g.stars.length;
+  if (BLINK.key === key) return BLINK.pts;
+  const [cw] = cellsOf(g), taken = new Set(g.stars.map(s0 => Math.round(s0.x * 2) + ',' + Math.round(s0.y * 2))), sparse = g.opts && g.opts.density === 'sparse';
+  const rnd = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
+  const pick = () => { for (let n = 0; n < 200; n++) { const h = rnd(1, cw - 2), v = rnd(1, cw - 2); if (!taken.has(h + ',' + v)) return [h, v]; } return [1, 1]; };
+  BLINK.pts = g.stars.map(() => [pick(), sparse ? pick() : null].filter(Boolean).map(([h, v]) => ({ h, v, on: rnd(0, 1) === 1 })));
+  BLINK.key = key;
+  return BLINK.pts;
+}
+const in2000 = (g) => g.year === 2000 && g.opts && (g.opts.shape === 'spiral' || g.opts.shape === 'cluster');
+function mapUnder301(cx, i) {
+  const g = i.G, col = COL301(), u = i.view.s / 2;
+  if (in2000(g)) {
+    const tile = i.IMG['dos:p6000'];
+    if (col && tile && tile.width) { for (let y = 0; y < i.mapH; y += 128) for (let x = 0; x < i.mapW; x += 128) cx.drawImage(tile, x, y, 128, 128); }
+    else { cx.fillStyle = orPat(cx, GRAY, '#000'); cx.fillRect(0, 0, i.mapW, i.mapH); }
+    const mx = Math.trunc(i.mapW / 2), my = Math.trunc(i.mapH / 2), R = 4 * u;
+    if (col) { const steps = Math.trunc(2 * R / 4); for (let k = 0; k < steps; k++) { cx.strokeStyle = 'rgba(0,0,0,' + (k / steps) + ')'; cx.beginPath(); cx.ellipse(mx, my, R - k - 0.5, R - k - 0.5, 0, 0, Math.PI * 2); cx.stroke(); } }
+    cx.fillStyle = '#000'; cx.beginPath(); cx.ellipse(mx, my, R - (col ? Math.trunc(2 * R / 4) : 0), R - (col ? Math.trunc(2 * R / 4) : 0), 0, 0, Math.PI * 2); cx.fill();
+    const t = STR301(1005)[26] || 'Map will be created in 2010.';
+    cx.font = G9; cx.textAlign = 'left'; const w = cx.measureText(t).width, tx = Math.trunc((i.mapW - w) / 2);
+    if (!col) { cx.fillStyle = '#000'; cx.fillRect(tx - 2, i.mapH - 24, w, 12); }
+    cx.fillStyle = '#fff'; cx.fillText(t, tx, i.mapH - 15);
+    return;
+  }
+  blinkPoints(g).forEach((pts) => pts.forEach((pt) => {
+    const x = i.sx(0) + u * pt.h - u / 2 + (pt.v % Math.max(1, Math.round(u))), y = i.sy(0) + u * pt.v - u / 2 + (pt.h % Math.max(1, Math.round(u)));
+    if (x < 0 || y < 0 || x > i.mapW || y > i.mapH) return;
+    cx.fillStyle = pt.on ? '#fff' : '#000'; cx.fillRect(Math.round(x), Math.round(y), 1, 1);
+  }));
+  if (!BLINK.timer) BLINK.timer = setInterval(() => { // (the idle loop's flips; the map drawn again when one flipped)
+    const g2 = G(); if (!g2 || !window.HOMAC301) return;
+    let n = 0; blinkPoints(g2).forEach(pts => pts.forEach(pt => { if (Math.random() < 0.01) { pt.on = !pt.on; n++; } }));
+    if (n && !document.querySelector('.scrim')) A().draw();
+  }, 1000 / 6);
+}
+function drawStar301(cx, i) {
+  const a = A(), g = i.G, s = i.s, col = COL301(), ME = i.ME, IMG = i.IMG;
+  if (in2000(g)) { if (s.owner !== ME || s.id !== g.players[ME].homeStar) return 'all'; i = Object.assign({}, i, { x: a.map().w / 2, y: a.map().h / 2 }); }
+  const u = i.view.s / 2, z = u > 17 ? u / 17 : 1; // (a modern convenience's closer zooms: the largest's layout, bigger)
+  const h = i.x - u / 2, v = i.y - u / 2; // the star's cell
+  let r; // the icon's square
+  if (u >= 17) r = [h - 7 * z, v - 7 * z, h + 25 * z, v + 25 * z]; else if (u < 7) r = [h, v, h + u, v + u]; else r = [h - 1, v - 1, h + 15, v + 15];
+  const big = u >= 17, small = u > 6 && u < 17;
+  const ally = s.owner >= 0 && s.owner !== ME && H().isAllied(g, ME, s.owner) && H().know(g, g.players[ME], s.id).explored;
+  // the halos
+  if (big || small) {
+    const id = col ? (i.sel && ally ? 508 : i.sel ? 502 : ally ? 504 : 0) : (i.sel ? 502 : 0);
+    const pic = id && IMG['dos:p' + (small ? (id === 502 ? 503 : id + 1) : id)];
+    if (pic && pic.width) { if (big) cx.drawImage(pic, r[0] - 12 * z, r[1] - 9 * z, 56 * z, 51 * z); else cx.drawImage(pic, r[0] - 5, r[1] - 5, 26, 26); }
+    if (!col && ally) { cx.fillStyle = '#fff'; cx.beginPath(); const l = r[0] + 2, rr = r[2] - 2, t = r[1] - Math.trunc(u / 3), b = r[1] + Math.trunc(u / 6); cx.ellipse((l + rr) / 2, (t + b) / 2, (rr - l) / 2, (b - t) / 2, 0, 0, Math.PI * 2); cx.fill(); }
+  }
+  // the star
+  if (u < 7) { cx.fillStyle = '#fff'; cx.beginPath(); cx.ellipse((r[0] + r[2]) / 2, (r[1] + r[3]) / 2, u / 2, u / 2, 0, 0, Math.PI * 2); cx.fill(); }
+  else { const base = i.look && i.look.base, im = base && (small ? IMG[base.replace(/:i(\d+)$/, ':s$1')] : IMG[base]); if (im && im.width) cx.drawImage(im, r[0], r[1], r[2] - r[0], r[3] - r[1]); }
+  if (s.owner === ME && s.abandon301) { cx.fillStyle = orPat(cx, GRAY, '#000'); cx.fillRect(r[0] - u / 2, r[1] - u / 2, r[2] - r[0] + u, r[3] - r[1] + u); }
+  if (u < 7 && i.sel) { cx.strokeStyle = '#fff'; cx.lineWidth = 1; cx.strokeRect(r[0] - 2 + 0.5, r[1] - 2 + 0.5, r[2] - r[0] + 3, r[3] - r[1] + 3); }
+  if (u > 6) {
+    const here = g.fleets.filter(f => f.star === s.id && f.to == null), mine = here.filter(f => f.owner === ME);
+    const sats = mine.filter(f => f.sat).length, others = here.some(f => f.owner !== ME);
+    const ship = IMG['dos:s3114'], dy = u < 13 ? 8 : 10, dr = u < 13 ? 9 : 5;
+    if (ship && ship.width && mine.some(f => !f.sat)) cx.drawImage(ship, r[2] - dr * z, r[1] - dy * z, 16, 16);
+    if (ship && ship.width && others && (s.owner === ME || mine.length)) cx.drawImage(ship, r[0] + dr * z - 16, r[1] - dy * z, 16, 16);
+    if (sats) { cx.strokeStyle = '#fff'; cx.lineWidth = 1; cx.beginPath(); cx.ellipse((r[0] + r[2]) / 2, (r[1] + r[3]) / 2, (r[2] - r[0] - 1) / 2, (r[3] - r[1] - 1) / 2, 0, 0, Math.PI * 2); cx.stroke(); }
+    cx.font = G9; cx.textAlign = 'left'; cx.letterSpacing = u === 9 ? '-1px' : '0px';
+    const w = cx.measureText(s.name).width; cx.fillStyle = '#fff';
+    cx.fillText(s.name, Math.trunc((r[0] + r[2]) / 2) - Math.trunc(w / 2), r[3] + 8 * z); cx.letterSpacing = '0px';
+  }
+  return 'all';
+}
 // 3.0.1 (js/skins/mac3): only the arrangement and the shared windows, above; the rest of this file is 1.2's and 2.0.1's
 if (V3) {
   window.HOMAC301 = {
     get ownPanel() { return !!G() && own(); },
     panel(panel, B) { if (G() && own()) panel301(panel, B); },
+    // the map: 2.0.1's zooms, cells and scroll bars (the same code), 3.0.1's own drawing (above)
+    zoomTo: (s0, f) => (own() ? zoomTo(s0, f) : Math.max(12, Math.min(140, s0 * f))),
+    mapInset: () => (barsOn() ? [BAR12, BAR12] : [0, 0]),
+    modernPan: () => barsOn(),
+    syncView: syncMapView, afterDraw: updateBars, centerOnStar: centerOnStar12,
+    zoomed: (i) => { if (barsOn() && i.menu) MB.centerSel = true; },
+    fitView(v, c) { if (!own()) return; const st = c.G.stars[c.sel != null ? c.sel : c.G.players[c.ME].homeStar]; v.s = ZOOMS[3]; if (st) { barMetrics(v.s, c.mapW, c.mapH, c.G); const [h0, v0] = centerCells(st, c.G); putCell(v, h0, v0); } },
+    mapBg: '#000', bgStars: false, transitDots: false,
+    mapUnder: (cx, i) => { if (own()) mapUnder301(cx, i); },
+    drawStar: (cx, i) => (own() ? drawStar301(cx, i) : false),
+    // your selected fleet is picked up from its star, as FollowPathDrag does (an unseen handle over the star's icon); no markers are drawn
+    marker: () => 'none',
+    markerAt(f, i) { if (!own()) return null; if (!i.mine || f.id !== A().UI.selFleet) return null; const u = i.view.s / 2, d = u >= 17 ? 32 * Math.max(1, u / 17) : u < 7 ? u + 4 : 16; return { x: i.x - d / 2, y: i.y - d / 2, w: d, hidden: true }; },
   };
   return;
 }
