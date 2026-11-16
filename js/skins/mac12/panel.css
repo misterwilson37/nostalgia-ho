@@ -1,0 +1,19 @@
+/* Spaceward Ho! — the Mac map window's arrangement (1.2, 2.0.1 and 3.0.1: ResetWindows and SetWindowLocations, the same code in the
+   three programs): imported by js/skins/mac3/style.css, so every Mac skin built on it has it. The classes are put there only by
+   js/skins/mac12/ui.js (panel12 for 1.2 and 2.0.1, panel301 for 3.0.1). */
+/* the map window's boxes as 1.2 draws them (planet, fleets, totals, players | budget, the Tech Spending window): canvases the panel's width */
+#panel canvas.qd12 { display: block; width: 100%; height: auto; image-rendering: pixelated; }
+#panel .box.planet12, #panel .box.fleets12, #panel .box.info12, #panel .box.tech12 { padding: 0; }
+#panel .low12 { display: flex; gap: 0; align-items: flex-start; }
+#panel .low12 .rost12 { flex: 0 0 30%; }
+#panel .low12 .rost12 .box { margin: 0; }
+#panel .low12 > .box { flex: 1 1 auto; min-width: 0; margin: 0; }
+/* 3.0.1: a pane still to build from its own routine (js/skins/mac12/ui.js TODO301), and the players' column beside the budget */
+#panel .box.todo301 { padding: 0; }
+#panel .low12 > .rost301 { flex: 0 0 30%; }
+/* the Report Window under the Tech Spending window: 96 of its pixels high, 32 a report, the icon then the sentence from 35 */
+#panel .rep12box { padding: 0; }
+#panel ul.rep12 { list-style: none; margin: 0; padding: 0; height: calc(96 / 226 * (290px - 18px)); overflow-y: auto; position: relative; font: 10px/1.1 Geneva, Verdana, sans-serif; }
+#panel ul.rep12 li { display: flex; align-items: flex-start; gap: 4px; min-height: 36px; padding: 0; border: 0; }
+#panel ul.rep12 li img { width: 32px; height: 32px; flex: none; }
+#panel ul.rep12 li .rt { padding-top: 1px; }

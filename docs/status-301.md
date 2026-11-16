@@ -14,8 +14,12 @@ Sources (private repo `nostalgia-ho-sources`):
 
 ## Next (keep this list current)
 
-1. The main screen's arrangement: the Mac 3.0.1 skins load `js/skins/mac12/ui.js` (as `mac2` does) with `HOMAC_VERSION`
-   '3.0.1'. Only the arrangement and the shared windows (Tech Spending, the window framework) may come from it as they are.
+1. ~~The main screen's arrangement.~~ Done: `js/skins/mac3/ui.js` sets `window.HOMAC3` and loads `js/skins/mac12/ui.js`
+   (`HOMAC_VERSION` '3.0.1'), which gives 3.0.1 only `window.HOMAC301` (the panel's arrangement, `panel301`; the Tech Spending
+   window's words); then `js/skins/mac3/pictures.js` (the old `mac3/ui.js`). The arrangement's CSS is `js/skins/mac12/panel.css`.
+   2.0.1's map keys (KeyTheHo, KeyPlanet, TabThroughFleets) and report click are off in 3.0.1: their routines differ.
+   Each pane not yet built is an empty box with a dotted edge (`data-todo` names its routine). Until item 2 is done the panel
+   can't be used (no fleet rows, no budget bars): real-play fails on `mac3`/`mac3c` by design on this branch.
 2. Each changed pane from 3.0.1's own routine, one commit each, this table updated in the same commit: `DrawIncomeRect` (little
    changed), `DrawPlanetRect` + `DrawPieChart`, `DrawFleetRect` + `DrawSelectedFleetInfo`, `DrawBudgetRect` + `DrawHBarControl`
    (rewritten: five times the code), `DrawVBarControl`, the map (`DrawGalaxyMap`, `DrawOneStar`, the star sub-procs,
@@ -53,7 +57,7 @@ another version.
 
 | Part | Captures | 3.0.1 code | Against 2.0.1 | Remake |
 |---|---|---|---|---|
-| Arrangement of the windows | 012, 040 | `ResetWindows`, `SetWindowLocations` | same code | **wrong**: the 5.0.5 layout |
+| Arrangement of the windows | 012, 040 | `ResetWindows`, `SetWindowLocations` | same code | **done** (panes down the left: planet 68, fleets 65, money 34, players beside budget; Tech Spending and Reports under; the heights measured in shot012/040: rules at 105/107, 170/172, 205, 370) |
 | Map window: stars, names, fleets | 012-014, 066 | `UpdateMapWin`, `DrawGalaxyMap`, `DrawOneStar`, `DrawOneFleet` | differ | **wrong** |
 | Fleet paths on the map | 014, 066, 076 | `DrawFleetPaths` | new | ? |
 | Planet pane (with the pie chart) | 012, 042 | `DrawPlanetRect`, `DrawPieChart` | differs, new | **wrong** |
@@ -61,8 +65,8 @@ another version.
 | Money pane (Reserve Metal, Ship Savings, Total Money) | 012 | `DrawIncomeRect` | differs | **wrong** |
 | Players list and budget bars | 012 | `DrawBudgetRect`, `DrawHBarControl`, `DrawVBarControl` | differ | **wrong** |
 | End Turn button | 012, 031 | `DrawSpecial` (to confirm) | new | ? |
-| Tech Spending window | all | `CreateTechWin`, `UpdateTechWin` | same code | ? |
-| Reports window | all | `CreateReportWin` same code; `UpdateReportWin` | differs | ? |
+| Tech Spending window | all | `CreateTechWin`, `UpdateTechWin` | same code | close: frame, heading, "Current Levels:" and the five levels as 2.0.1's; the bars are `DrawVBarControl` (to do) |
+| Reports window | all | `CreateReportWin` same code; `UpdateReportWin` | differs | wrong: the window is placed, empty until `UpdateReportWin` + `DrawMessage` |
 | Report bubble on the map (--more--) | 016, 092, 108, 149 | `DrawAnnounceBubble` | differs | ? |
 
 ## Menus

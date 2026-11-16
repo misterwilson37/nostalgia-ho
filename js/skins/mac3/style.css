@@ -2,6 +2,7 @@
    game's black-and-white art. Its windows, menus and controls are the
    "System 7" OS look (js/os/system7.css). */
 @import url("../dos/style.css");
+@import url("../mac12/panel.css"); /* the map window's arrangement, shared by the Mac 1.2, 2.0.1 and 3.0.1 skins */
 :root {
   --hat: #000; --gold: #fff; --space: #000; --neg: #000;
   --west: Geneva, Chicago, Verdana, sans-serif;

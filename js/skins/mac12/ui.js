@@ -12,10 +12,12 @@
 // "English"); in French the interface puts them in 1.2F's own words (its
 // MENU, DITL and STR# lines, paired with 2.0.1's: js/languages.js windows12,
 // and the rows of js/ui-text.js marked 1.2F).
-window.HOMAC_VERSION = window.HOMAC2 ? '2.0.1' : '1.2'; // (the Mac 2.0.1 skins, js/skins/mac2, load this file: 2.0.1 is 1.2's program with additions)
+// The Mac 3.0.1 skins (js/skins/mac3, window.HOMAC3) load it too, and take from it only what 3.0.1 shares with 2.0.1: window.HOMAC301 below.
+window.HOMAC_VERSION = window.HOMAC3 ? '3.0.1' : window.HOMAC2 ? '2.0.1' : '1.2'; // (the Mac 2.0.1 skins, js/skins/mac2, load this file: 2.0.1 is 1.2's program with additions)
 (function () {
 'use strict';
 const V2 = window.HOMAC_VERSION === '2.0.1';
+const V3 = window.HOMAC_VERSION === '3.0.1';
 let HOMAC_RE20 = null;
 const A = () => window.HOAPI;
 const G = () => A() && A().G;
@@ -949,10 +951,11 @@ function organize(f0) {
 
 // keys on the map (KeyTheHo): letters pick a star by the first letters of its name (KeyPlanet @c6252: what was typed within a second, six
 // letters at most, a beep past them), Tab the next fleet of yours at the selected star (TabThroughFleets @c68c2); End Turn is ⌘T
+// (3.0.1's KeyTheHo, KeyPlanet and TabThroughFleets differ from 2.0.1's: not in the 3.0.1 skins until read)
 const typed = { s: '', t: 0 };
 document.addEventListener('keydown', (e) => {
   const a = A(), g = G();
-  if (!a || !g || !own() || a.UI.modal || document.querySelector('.scrim') || e.metaKey || e.ctrlKey || e.altKey || /^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName)) return;
+  if (V3 || !a || !g || !own() || a.UI.modal || document.querySelector('.scrim') || e.metaKey || e.ctrlKey || e.altKey || /^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName)) return;
   if (e.key === 'Tab') {
     const s = selStar(); if (!s) return;
     e.preventDefault(); e.stopImmediatePropagation();
@@ -1460,6 +1463,38 @@ function panel12(panel, B) {
   }
 }
 
+// ---------- Mac 3.0.1's main screen (js/skins/mac3, docs/status-301.md) ----------
+// The arrangement is 2.0.1's (ResetWindows and SetWindowLocations are the same code in 3.0.1; Jake's shot012 and shot040): down the
+// map window's left side the planet pane, the fleet pane, the money pane, then the players beside the budget bars; under it the Tech
+// Spending window and the Report Window (CreateTechWin, UpdateTechWin and CreateReportWin are the same code). A pane that 3.0.1 draws
+// with its own routine (DrawPlanetRect and DrawPieChart, DrawFleetRect, DrawIncomeRect, DrawIconRect, DrawBudgetRect and
+// DrawHBarControl, DrawVBarControl, UpdateReportWin) is built from that routine; until it is, its place is left empty (white, as
+// the window's background, with a dotted edge), never 2.0.1's drawing. data-todo names the routine still to read.
+const TODO301 = (w, h, what, cls) => {
+  const q = qdCanvas(w, h, '');
+  q.x.setLineDash([1, 2]); q.x.strokeStyle = '#888'; q.x.strokeRect(0.5, 0.5, w - 1, h - 1); q.x.setLineDash([]);
+  q.c.dataset.todo = what;
+  return A().el('section', { class: 'box todo301 ' + (cls || '') }, q.c);
+};
+// the Tech Spending window (UpdateTechWin, the same code as 2.0.1's): its heading, "Current Levels:" and the five levels; the bars
+// beside them are DrawVBarControl's, which 3.0.1 rewrote (to do)
+function techBox301() {
+  const a = A(), p = a.me(), W = BAR_WORDS[lang()], names = TECH_NAMES12[lang()];
+  const q = qdCanvas(228, 80, W.head);
+  q.text(W.head, 3, 10); q.text(W.levels, 3, 25);
+  TECH12.forEach((k, i) => { q.text(names[i], 5, 35 + 10 * i); q.text(String(p.tech[k]), 50, 35 + 10 * i); });
+  q.x.setLineDash([1, 2]); q.x.strokeStyle = '#888'; q.x.strokeRect(78.5, 2.5, 147, 75); q.x.setLineDash([]);
+  q.c.dataset.todo = 'DrawVBarControl';
+  return a.el('section', { class: 'box tech12', 'aria-label': W.head }, q.c);
+}
+function panel301(panel) {
+  const a = A(), el = a.el;
+  const low = el('div', { class: 'low12' }, TODO301(68, 164, 'DrawIconRect', 'rost301'), TODO301(158, 164, 'DrawBudgetRect DrawHBarControl'));
+  const rep = el('section', { class: 'box rep12box' }, el('ul', { class: 'reports rep12', 'data-todo': 'UpdateReportWin DrawMessage' }));
+  panel.innerHTML = '';
+  panel.append(TODO301(226, 68, 'DrawPlanetRect DrawPieChart'), TODO301(226, 65, 'DrawFleetRect DrawSelectedFleetInfo'), TODO301(226, 34, 'DrawIncomeRect'), low, techBox301(), rep);
+}
+
 // ---------- the battle window (DoOneBattle @d07d0, DLOG 7010: 445 x 310, black; drawn at twice the size) ----------
 // Everything here is read in the decompile (docs/display/12.json rows DoOneBattle, DrawAllGroups, DrawOneGroup, HaveGroupShoot,
 // DrawLaserBlast, DrawExplosion, DrawX, CalcBattleStars, DrawBattleStars, DrawShipPicture): the black-and-white program's drawing.
@@ -1674,7 +1709,7 @@ function battleWindow(b, k) {
 // (ClickInReportWindow @1304f8: the report clicked is inverted while the button is down and at least 5 ticks, then acted on)
 document.addEventListener('click', (ev) => {
   const li = ev.target && ev.target.closest && ev.target.closest('ul.reports li');
-  if (!li || li.dataset.inv12 === 'go' || !G() || !own()) return;
+  if (V3 || !li || li.dataset.inv12 === 'go' || !G() || !own()) return; // (3.0.1's ClickInReportWindow differs: not until read)
   ev.stopImmediatePropagation(); ev.preventDefault();
   li.classList.add('inv12');
   setTimeout(() => { li.classList.remove('inv12'); li.dataset.inv12 = 'go'; li.click(); delete li.dataset.inv12; }, 5000 / 60);
@@ -1969,6 +2004,14 @@ function updateBars() {
 // a dialog opening or closing activates or deactivates the map window (DeactivateMapWindow @c30a4 / ActivateMapWindow @c3012)
 new MutationObserver(() => { if (MB.wrap) updateBars(); }).observe(document.body, { childList: true });
 
+// 3.0.1 (js/skins/mac3): only the arrangement and the shared windows, above; the rest of this file is 1.2's and 2.0.1's
+if (V3) {
+  window.HOMAC301 = {
+    get ownPanel() { return !!G() && own(); },
+    panel(panel) { if (G() && own()) panel301(panel); },
+  };
+  return;
+}
 window.HOMAC12 = {
   alertBox: (paras) => { const b = V2 && G() && own12Rules() ? alert20(paras) : null; if (b) b.setAttribute('translate', 'no'); return b; },
   battleWindow,
@@ -2099,4 +2142,4 @@ document.addEventListener('keydown', (e) => {
   }
 });
 })();
-if (!window.HOSKINS_INLINE) document.write('<script src="js/skins/mac3/ui.js' + (window.HO_BUILD || '') + '"><\/script>');
+if (!window.HOSKINS_INLINE) document.write('<script src="js/skins/mac3/pictures.js' + (window.HO_BUILD || '') + '"><\/script>');
