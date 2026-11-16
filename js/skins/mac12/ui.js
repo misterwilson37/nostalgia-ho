@@ -1470,16 +1470,57 @@ function panel12(panel, B) {
 // with its own routine (DrawPlanetRect and DrawPieChart, DrawFleetRect, DrawIncomeRect, DrawIconRect, DrawBudgetRect and
 // DrawHBarControl, DrawVBarControl, UpdateReportWin) is built from that routine; until it is, its place is left empty (white, as
 // the window's background, with a dotted edge), never 2.0.1's drawing. data-todo names the routine still to read.
-// the Tech Spending window (UpdateTechWin, the same code as 2.0.1's): its heading, "Current Levels:" and the five levels; the bars
-// beside them are DrawVBarControl's, which 3.0.1 rewrote (to do)
+// the Tech Spending window (UpdateTechWin @1700f0, the same code as 2.0.1's: its heading, "Current Levels:" and the five levels; erased, grey on a
+// colour screen), and its bars: DrawVBarControl @d0164 (80, 15, 6 bars, technologies, depth): an axis down 80 from 15 to 65 with ten ticks to its
+// left at GetVPercBarAmt (the 50-pixel log table: x / 20.85); each bar a 22-pixel step from 80: a base line along 66, the bar from x + 7, 15 wide,
+// as high as GetVPercBarAmt of its share (player +0x4c), painted in hue (50 - height) x 0x1BA - 0x5655 at full saturation and value (black in black
+// and white), with two lines up its left and along its top at half saturation and two down its right at half value, the slot above it erased;
+// its name (STR# 1001.1-6) centred under it at 75, every other one at 85; a last base line 7 long. DoVBarClick: a drag sets the share, the others
+// spread in proportion over the rest.
+const VLOG = Array.from({ length: 51 }, (_, x) => x === 50 ? 1000 : Math.trunc(10 * (Math.exp(2.302 + x / 20.85) - 10)));
+const vPercBar = (pm) => { for (let x = 0; x < 51; x++) if (VLOG[x] >= pm) return Math.max(0, x - 1); return 50; };
 function techBox301() {
-  const a = A(), p = a.me(), W = BAR_WORDS[lang()], names = TECH_NAMES12[lang()];
-  const q = qdCanvas(228, 80, W.head);
-  q.text(W.head, 3, 10); q.text(W.levels, 3, 25);
-  TECH12.forEach((k, i) => { q.text(names[i], 5, 35 + 10 * i); q.text(String(p.tech[k]), 50, 35 + 10 * i); });
-  q.x.setLineDash([1, 2]); q.x.strokeStyle = '#888'; q.x.strokeRect(78.5, 2.5, 147, 75); q.x.setLineDash([]);
-  q.c.dataset.todo = 'DrawVBarControl';
-  return a.el('section', { class: 'box tech12', 'aria-label': W.head }, q.c);
+  const a = A(), p = a.me(), W = BAR_WORDS[lang()], names = TECH_NAMES12[lang()], S1 = STR301(1001), col = COL301();
+  const keys = ['range', 'speed', 'weapons', 'shields', 'mini', 'radical'];
+  const q = qdCanvas(228, 96, W.head), x = q.x, bg = col ? RGB301.grey : '#fff';
+  const vals = () => { const t = keys.reduce((s0, k) => s0 + (p.talloc[k] || 0), 0) || 1; return keys.map(k => Math.round(1000 * (p.talloc[k] || 0) / t)); };
+  const draw = () => {
+    q.rect(0, 0, 228, 96, bg);
+    q.text(S1[11] || W.head, 3, 10); q.text(S1[12] || W.levels, 3, 25);
+    TECH12.forEach((k, i) => { q.text(names[i], 5, 35 + 10 * i); q.text(String(p.tech[k]), 50, 35 + 10 * i); });
+    const X0 = 80, Yb = 66;
+    q.vline(X0, 15, 66); for (let k = 10; k <= 100; k += 10) q.hline(X0 - 2, X0, 65 - vPercBar(10 * k));
+    let x1 = X0;
+    vals().forEach((v, i) => {
+      q.hline(x1, x1 + 23, Yb);
+      const h = v < 1 ? 0 : vPercBar(v), l = x1 + 7, r = x1 + 22, t = Yb - h;
+      if (col) {
+        const hue = ((50 - h) * 0x1ba - 0x5655) & 0xffff;
+        q.rect(l, t, r, Yb, css16(hsv2rgb([hue, 0xffff, 0xffff])));
+        if (h > 0) {
+          const hi = css16(hsv2rgb([hue, 0x7fff, 0xffff])), lo = css16(hsv2rgb([hue, 0xffff, 0x7fff]));
+          q.rect(l - 2, t - 2, l - 1, Yb, hi); q.rect(l - 2, t - 2, r + 2, t - 1, hi); q.rect(l - 1, t - 1, l, Yb, hi); q.rect(l - 1, t - 1, r + 1, t, hi);
+          q.rect(r, t, r + 1, Yb, lo); q.rect(r + 1, t - 1, r + 2, Yb, lo);
+        }
+      } else q.rect(l, t, r, Yb, '#000');
+      const nm = S1[i] || names[i] || 'Radical', w = q.width(nm);
+      q.text(nm, l + Math.trunc((15 - w) / 2), 75 + (i % 2) * 10);
+      x1 += 22;
+    });
+    q.hline(x1, x1 + 8, Yb);
+  };
+  draw();
+  q.c.style.touchAction = 'none';
+  q.c.addEventListener('pointerdown', (ev) => {
+    const pt = q.at(ev), i = Math.floor((pt.h - 87) / 22), off = (pt.h - 87) - 22 * i;
+    if (i < 0 || i >= keys.length || off < 0 || off >= 15 || pt.v < 13 || pt.v > 68) return;
+    ev.preventDefault();
+    const start = vals(), sc = H().barScale(G(), 'tech');
+    const move = (e) => { const px = Math.max(0, Math.min(50, 66 - q.at(e).v)); const nv = spread(start, i, sc.toValue(px / 50)); keys.forEach((k, j) => { p.talloc[k] = nv[j] / 1000; }); draw(); };
+    const up = (e) => { window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); move(e); a.save(); a.renderPanel(); };
+    window.addEventListener('pointermove', move); window.addEventListener('pointerup', up); move(ev);
+  });
+  return a.el('section', { class: 'box tech12 tech301', 'aria-label': W.head }, q.c);
 }
 // 3.0.1's words: its STR# lists (English 3.0.1; in French 3.0.1F's), js/lang-data.js
 const STR301 = (id) => { const L = window.HOLANG && (lang() === 'fr' ? HOLANG.mac301Fr : HOLANG.mac301En); return (L && L[String(id)]) || []; };

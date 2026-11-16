@@ -23,7 +23,7 @@ Sources (private repo `nostalgia-ho-sources`):
 2. Each changed pane from 3.0.1's own routine, one commit each, this table updated in the same commit: ~~`DrawIncomeRect`~~ (done),
    ~~`DrawPlanetRect` + `DrawPieChart`~~, ~~`DoGratuitousGraphics`'s turning planet~~ (done; its second part, the map's twinkling
    stars, goes with the map), ~~`DrawFleetRect` + `DrawSelectedFleetInfo`~~ (done), ~~`DrawBudgetRect` + `DrawHBarControl`~~
-   (done, with `DrawIconRect`), `DrawVBarControl`, the map (`DrawGalaxyMap`, `DrawOneStar`, the star sub-procs,
+   (done, with `DrawIconRect`), ~~`DrawVBarControl`~~ (done), the map (`DrawGalaxyMap`, `DrawOneStar`, the star sub-procs,
    `DrawOneFleet`, `DrawFleetPaths`), `UpdateReportWin` + `DrawMessage`, `DrawAnnounceBubble`.
 3. Until a pane is done, the skin must not show 2.0.1's version of it as if it were 3.0.1's: keep these on the session branch,
    off staging and live, until the main screen is whole.
@@ -66,7 +66,7 @@ another version.
 | Money pane (Reserve Metal, Ship Savings, Total Money) | 012, 040 | `DrawIncomeRect` | differs | **done** (`incomeBox301`: STR# 1005.2-.9, the program's "(Int: %s)"; bold labels right at 87, values at 90, changes right at 225; grey 0xBBBB in colour; Ship Savings red when below 0; the rules at 32 and 225. Fields: +0x1c `p.metal`, +0x10 `p.savings`, +8 `p.net301`, +0x14 `p.oInterest`, +0x24/+0xc `p.chg`) |
 | Players list and budget bars | 012, 040 | `DrawIconRect`, `DrawBudgetRect`, `DrawHBarControl`, `DoHBarClick` | differ | close (`lowBox301`): rects (players 0..67, budget 79..214, their scroll bars), rows of 18 and 14, icons, halo, crosses, checks; the heading (Sort, 0%, Log/Linear, 100%, ticks by GetHPercBarAmt); bar colours from the colour table (Ships' oranges by share, Tech's hue by length, colonies blue/green/red by terraform and mine), HSV edges, label colours, "Abandoning", the income of a finished colony; B&W black and 50% grey; drag via `rs.dragShare`, the heading switches the scale; matches shot040. Left: "Sort" does nothing yet (DoHBarClick's sort not read); the order of the players is the remake's faces sorted (3.0.1 numbers them 0..n-1); the scroll bars are drawn plainly; colours are exact RGB, not the 8-bit palette's |
 | End Turn button | 012, 031 | `DrawSpecial` (to confirm) | new | ? |
-| Tech Spending window | all | `CreateTechWin`, `UpdateTechWin` | same code | close: frame, heading, "Current Levels:" and the five levels as 2.0.1's; the bars are `DrawVBarControl` (to do) |
+| Tech Spending window | all | `CreateTechWin`, `UpdateTechWin` (same code); `DrawVBarControl`, `DoVBarClick` | same code; differs | **done** (`techBox301`): the words as 2.0.1's (STR# 1001.12-13), grey in colour; the six bars, axis, ticks (the 50-pixel log table), the hue by height with its edges, the names alternating; a drag spreads the others; matches shot012 |
 | Reports window | all | `CreateReportWin` same code; `UpdateReportWin` | differs | wrong: the window is placed, empty until `UpdateReportWin` + `DrawMessage` |
 | Report bubble on the map (--more--) | 016, 092, 108, 149 | `DrawAnnounceBubble` | differs | ? |
 
