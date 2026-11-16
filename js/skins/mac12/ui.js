@@ -2624,8 +2624,25 @@ function dragLine301(cx, d) {
   cx.restore();
   return true;
 }
+// DrawAnnounceBubble @1618cc, from DrawGalaxyMap while reports are unread: the bubble's region (GrowMapWin: the map's bottom left, 3 in, 185 x 79)
+// filled with PICT 5030 (colour) or 5530 (black and white: the extractor's p5530 in either skin); the report's icon (GetIconID) 32 x 32 at (18, the
+// middle less 24), DrawSpecial over it; the sentence wrapped (MyTextBox) from (58, 8) to the right edge less 10; "more…" (STR# 4000.22) at (18, the
+// foot less 5) while more reports follow. EndTurnButtonShowing @151f36: once they are read and the turn is not ended, PICT 5000 / 5500 at (3, 2) on
+// the map. (The classic page's bubble and button, dressed: html.mac301, js/skins/mac12/panel.css.)
+function afterMsg301(box, info) {
+  const card = box.querySelector('.card:not(.end):not(.waiting)'), a = A();
+  box.classList.toggle('et301', !!box.querySelector('.clock'));
+  if (!card) return;
+  card.classList.add('bub301');
+  const bg = a.IMG['dos:p5530']; if (bg && bg.src) card.style.backgroundImage = `url("${bg.src}")`;
+  const c = card.querySelector('.count'); if (c) { c.textContent = info.idx + 1 < info.inbox.length ? (STR301(4000)[21] || 'more…') : ''; c.setAttribute('translate', 'no'); card.append(c); }
+  const m = info.inbox[info.idx], ic = card.querySelector('img.icon');
+  const sp = m && ic ? special301(String(m.text || '')) : null;
+  if (sp) { const w = a.el('span', { class: 'ric301' }); ic.replaceWith(w); w.append(ic); if (sp === 'cross') w.append(a.el('span', { class: 'x301' })); else { const im = a.IMG[sp]; if (im && im.src) w.append(a.el('img', { class: 'sp301', src: im.src, alt: '' })); } }
+}
 // 3.0.1 (js/skins/mac3): only the arrangement and the shared windows, above; the rest of this file is 1.2's and 2.0.1's
 if (V3) {
+  document.documentElement.classList.add('mac301');
   window.HOMAC301 = {
     get ownPanel() { return !!G() && own(); },
     panel(panel, B) { if (G() && own()) panel301(panel, B); },
@@ -2639,6 +2656,7 @@ if (V3) {
     mapBg: '#000', bgStars: false, transitDots: false,
     routes: false, routesOver: true,
     fleetPaths: (cx, i) => { if (own()) fleetPaths301(cx, i); },
+    afterMsg: (box, info) => { if (own()) afterMsg301(box, info); },
     dragRoute: (cx, d) => (own() ? dragLine301(cx, d) : false),
     mapUnder: (cx, i) => { if (own()) mapUnder301(cx, i); },
     drawStar: (cx, i) => (own() ? drawStar301(cx, i) : false),
