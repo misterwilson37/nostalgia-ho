@@ -18,13 +18,24 @@ Sources (private repo `nostalgia-ho-sources`):
    (`HOMAC_VERSION` '3.0.1'), which gives 3.0.1 only `window.HOMAC301` (the panel's arrangement, `panel301`; the Tech Spending
    window's words); then `js/skins/mac3/pictures.js` (the old `mac3/ui.js`). The arrangement's CSS is `js/skins/mac12/panel.css`.
    2.0.1's map keys (KeyTheHo, KeyPlanet, TabThroughFleets) and report click are off in 3.0.1: their routines differ.
-   Each pane not yet built is an empty box with a dotted edge (`data-todo` names its routine). Until item 2 is done the skin is
-   incomplete (the Tech Spending bars, the reports, the map): real-play on `mac3`/`mac3c` is not expected to pass on this branch.
+   Until item 2 is done the skin is incomplete (the map is still the classic one, the Report Window is empty): real-play on
+   `mac3`/`mac3c` is not expected to pass on this branch. The work is on branch `claude/sweet-gauss-eodehy` (from
+   `claude/pensive-hamilton-f2tm02`).
 2. Each changed pane from 3.0.1's own routine, one commit each, this table updated in the same commit: ~~`DrawIncomeRect`~~ (done),
    ~~`DrawPlanetRect` + `DrawPieChart`~~, ~~`DoGratuitousGraphics`'s turning planet~~ (done; its second part, the map's twinkling
    stars, goes with the map), ~~`DrawFleetRect` + `DrawSelectedFleetInfo`~~ (done), ~~`DrawBudgetRect` + `DrawHBarControl`~~
-   (done, with `DrawIconRect`), ~~`DrawVBarControl`~~ (done), the map (`DrawGalaxyMap`, `DrawOneStar`, the star sub-procs,
-   `DrawOneFleet`, `DrawFleetPaths`), `UpdateReportWin` + `DrawMessage`, `DrawAnnounceBubble`.
+   (done, with `DrawIconRect`), ~~`DrawVBarControl`~~ (done). Next:
+   - **The map** (`DrawGalaxyMap` @152d54, `DrawOneStar` @154132, `DrawOneColorStarSubProc` @1531a4, `DrawOneBWStarSubProc` @1539b0,
+     `DrawFleetPaths` @15466e, `CreateMapWin`/`GrowMapWin` for its scroll bars, and `DoGratuitousGraphics`' second part, the map's
+     stars: each star's two points flip black/white at 1 in 100 every 10 ticks). Already read: in 2000 (with the setup's +0x10
+     flag) the map is PICT 6000 tiled every 128 pixels (colour; 50% grey in B&W), a centred oval 8 units across blended in 32 grey
+     steps then painted, and "Map will be created in 2010." (1005.27) centred 15 above the foot, white (on a black strip in B&W);
+     else the map is painted (RGB in colour); then the stars (loop over the galaxy's +10 count). The panes' colour table, HSV
+     helpers and `STR301` are in `js/skins/mac12/ui.js` for reuse.
+   - `UpdateReportWin` + `DrawMessage` (the Report Window's contents; `ClickInReportWindow` differs too).
+   - `DrawAnnounceBubble`.
+   - Smaller leftovers in the done panes: "Sort" above the budget bars (`DoHBarClick`'s sort), the drag bar's resizing
+     (`ClickInDragBar`), and a real System 7 scroll bar for the three lists.
 3. Until a pane is done, the skin must not show 2.0.1's version of it as if it were 3.0.1's: keep these on the session branch,
    off staging and live, until the main screen is whole.
 
