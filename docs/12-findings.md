@@ -647,6 +647,21 @@ scale.
 - The names file, as 2.0's (`GetPrefNamesResource @12c5a`, `DoGameSolidificationStuff @a49d6`,
   `AddNewTypeNameToPrefs @112028`): `rs.namesFile` (inherited from rules-dos), kept as "ho5.names.12".
 
+## On System 6 and a Mac Plus (Jake's games, 16 November 2026)
+
+Jake played 1.2F twice: on a colour Mac II with System 7.5.5 at 640 x 480 (private repo `audit/mac-1.2F/captures/`, 168 shots, lost
+in 2870) and on a Mac Plus with System 6.0.8 at 512 x 342 (`captures-system6/`, 172 shots). Two findings:
+
+- **The End Turn button is invisible on a Mac Plus, and still works.** `DrawGalaxyMap @c31d6` draws PICT 5500 ("Fin Tour", 52 x 33)
+  at the map's top left when your turn is not done and no report is waiting; `ClickInGalaxyMap @c5f5e` ends the turn on a click in
+  its region (`GrowMapWin` sets it, whatever the screen). PICT 5500 and 5501 are version 2 pictures whose image is a direct-colour
+  pixel map (opcode 0x9A, DirectBitsRect), which only 32-bit QuickDraw can draw; a Mac Plus has none, so nothing is drawn. Jake
+  confirmed it: no button, but a click where it should be ends the turn. On the colour Mac it is drawn (his other game).
+  42 more of 1.2F's 242 pictures are version 2 (the ship parts 2100-2410, title PICT 1003); whether they draw on a Mac Plus is for
+  the System 6 captures to show.
+- **The small screen has its own window arrangement.** `ResetWindows @e2f0e` takes another branch when the screen is under 400
+  pixels high: the Tech Spending and Reports windows across the foot, over the left column (shot005 onwards).
+
 ## Still open
 
 See `docs/open-questions.md` (the 1.2 entries), and `docs/research-log.md`, section
