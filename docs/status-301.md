@@ -26,7 +26,7 @@ Sources (private repo `nostalgia-ho-sources`):
    stars, goes with the map), ~~`DrawFleetRect` + `DrawSelectedFleetInfo`~~ (done), ~~`DrawBudgetRect` + `DrawHBarControl`~~
    (done, with `DrawIconRect`), ~~`DrawVBarControl`~~ (done). Next:
    - ~~The map's stars~~, ~~fleet paths and the drag line~~ (done: see the table).
-   - `UpdateReportWin` + `DrawMessage` (the Report Window's contents; `ClickInReportWindow` differs too).
+   - ~~`UpdateReportWin` + `DrawMessage`~~ (done).
    - `DrawAnnounceBubble`, with the End Turn button's place (`EndTurnButtonShowing`: PICT 5000/5500 at (3, 2) on the map).
    - Smaller leftovers in the done panes: "Sort" above the budget bars (`DoHBarClick`'s sort), the drag bar's resizing
      (`ClickInDragBar`), and a real System 7 scroll bar for the three lists.
@@ -72,7 +72,7 @@ another version.
 | Players list and budget bars | 012, 040 | `DrawIconRect`, `DrawBudgetRect`, `DrawHBarControl`, `DoHBarClick` | differ | close (`lowBox301`): rects (players 0..67, budget 79..214, their scroll bars), rows of 18 and 14, icons, halo, crosses, checks; the heading (Sort, 0%, Log/Linear, 100%, ticks by GetHPercBarAmt); bar colours from the colour table (Ships' oranges by share, Tech's hue by length, colonies blue/green/red by terraform and mine), HSV edges, label colours, "Abandoning", the income of a finished colony; B&W black and 50% grey; drag via `rs.dragShare`, the heading switches the scale; matches shot040. Left: "Sort" does nothing yet (DoHBarClick's sort not read); the order of the players is the remake's faces sorted (3.0.1 numbers them 0..n-1); the scroll bars are drawn plainly; colours are exact RGB, not the 8-bit palette's |
 | End Turn button | 012, 031 | `DrawSpecial` (to confirm) | new | ? |
 | Tech Spending window | all | `CreateTechWin`, `UpdateTechWin` (same code); `DrawVBarControl`, `DoVBarClick` | same code; differs | **done** (`techBox301`): the words as 2.0.1's (STR# 1001.12-13), grey in colour; the six bars, axis, ticks (the 50-pixel log table), the hue by height with its edges, the names alternating; a drag spreads the others; matches shot012 |
-| Reports window | all | `CreateReportWin` same code; `UpdateReportWin` | differs | wrong: the window is placed, empty until `UpdateReportWin` + `DrawMessage` |
+| Reports window | all | `CreateReportWin` same code; `UpdateReportWin`, `DrawMessage`, `DrawSpecial`, `ClickInReportWindow`, `AddNewMessage` | differs | close (`reportsBox301`): 2.0.1's rows (32 a report, icon then the wrapped sentence from 35), with DrawSpecial's face or cross over the icon (the template found by matching STR# 1000); the click as 2.0.1's (InvertRect 5 ticks, then the action); the last 80 reports kept (`rs.reportHistory`, digest unchanged). Left: the scroll position by its own bar (the remake opens at the year's first, as 2.0.1's ScrollReportToCurrentDate; 3.0.1's differs slightly, not compared) |
 | Report bubble on the map (--more--) | 016, 092, 108, 149 | `DrawAnnounceBubble` | differs | ? |
 
 ## Menus

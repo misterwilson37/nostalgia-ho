@@ -29,3 +29,7 @@
 .mapbar12:focus-visible { outline: 1px dotted #fff; outline-offset: -3px; }
 .mapcorner12 { right: 0; bottom: 0; width: 16px; height: 16px; box-sizing: border-box; border-left: 1px solid #000; border-top: 1px solid #000; }
 html.bars12 #msg { bottom: 28px; }
+/* 3.0.1's DrawSpecial over a report's icon: a player's face 16 x 16 in its middle, or a cross */
+#panel ul.rep12 li .ric301 { position: relative; width: 32px; height: 32px; flex: none; display: block; }
+#panel ul.rep12 li .ric301 img.sp301 { position: absolute; left: 8px; top: 8px; width: 16px; height: 16px; image-rendering: pixelated; }
+#panel ul.rep12 li .ric301 .x301 { position: absolute; inset: 0; background: linear-gradient(45deg, transparent calc(50% - 1.4px), #000 calc(50% - 1.4px), #000 calc(50% + 1.4px), transparent calc(50% + 1.4px)), linear-gradient(-45deg, transparent calc(50% - 1.4px), #000 calc(50% - 1.4px), #000 calc(50% + 1.4px), transparent calc(50% + 1.4px)); }

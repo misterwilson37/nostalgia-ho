@@ -1942,10 +1942,45 @@ function lowBox301(B) {
   const box = a.el('section', { class: 'box low301' }, q.c);
   return box;
 }
+// The Report Window (CreateReportWin, the same code as 2.0.1's: 250 x 96 under the map window; UpdateReportWin @1603aa: a row every 32 pixels from
+// its scroll bar's value; DrawMessage @160620: the row erased, the report's sentence wrapped from (35, 1) (MyTextBox), its icon (GetIconID: the
+// skin's messageLook) 32 x 32 at the row's left, then DrawSpecial @160732 over it: for the chat reports (STR# 1000.35-62: "%.*s says, ...", "You told
+// %.*s ...") and the alliance ones (.78-.83) the player's face (2000 + face, +500 a woman) 16 x 16 in the icon's middle; for the two eliminations
+// (.66, .67) a cross 2 x 2 from corner to corner; none for the others. ClickInReportWindow: as 2.0.1's (the click handler above).
+let RE301 = null;
+function special301(t) {
+  const g = G(), L = STR301(1000);
+  if (!RE301 || RE301.L !== L) {
+    const esc = (x) => x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    RE301 = L.map((x, i) => ({ i, re: new RegExp('^' + String(x).split(/(%(?:\.\*|\d*\.?\d*)?[sdP]|%%)/).map((y, j) => j % 2 ? (y === '%%' ? '%' : '(.*?)') : esc(y)).join('') + '$'), len: String(x).length }))
+      .filter(o => (o.i >= 34 && o.i <= 82)).sort((a2, b) => b.len - a2.len);
+    RE301.L = L;
+  }
+  const hit = RE301.find(o => o.re.test(t)); if (!hit) return null;
+  const k = 1000 + hit.i;
+  if (k === 1065 || k === 1066) return 'cross';
+  if ((k >= 1034 && k <= 1061) || (k >= 1077 && k <= 1082)) {
+    const caps = hit.re.exec(t).slice(1), pl = g.players.find(p0 => caps.includes(p0.name));
+    if (pl) return 'dos:s' + ((pl.id === A().ME ? 1000 : 2000 + (pl.face || 0)) + (pl.female ? 500 : 0));
+  }
+  return null;
+}
+function reportsBox301() {
+  const box = reportsBox12();
+  const g = G(), list = box.querySelector('ul');
+  list.querySelectorAll('li').forEach((li) => {
+    const t = (li.querySelector('.rt') || {}).textContent || '', sp = special301(t), ic = li.querySelector('img');
+    if (!sp || !ic) return;
+    const wrap = A().el('span', { class: 'ric301' }); ic.replaceWith(wrap); wrap.append(ic);
+    if (sp === 'cross') wrap.append(A().el('span', { class: 'x301' }));
+    else { const im = A().IMG[sp]; if (im && im.src) wrap.append(A().el('img', { class: 'sp301', src: im.src, alt: '' })); }
+  });
+  return box;
+}
 function panel301(panel, B) {
   const a = A(), el = a.el;
   const low = lowBox301(B || {});
-  const rep = el('section', { class: 'box rep12box' }, el('ul', { class: 'reports rep12', 'data-todo': 'UpdateReportWin DrawMessage' }));
+  const rep = reportsBox301();
   panel.innerHTML = '';
   panel.append(planetBox301(), fleetBox301(), incomeBox301(), low, techBox301(), rep);
 }
@@ -2164,7 +2199,7 @@ function battleWindow(b, k) {
 // (ClickInReportWindow @1304f8: the report clicked is inverted while the button is down and at least 5 ticks, then acted on)
 document.addEventListener('click', (ev) => {
   const li = ev.target && ev.target.closest && ev.target.closest('ul.reports li');
-  if (V3 || !li || li.dataset.inv12 === 'go' || !G() || !own()) return; // (3.0.1's ClickInReportWindow differs: not until read)
+  if (!li || li.dataset.inv12 === 'go' || !G() || !own()) return; // (3.0.1's ClickInReportWindow @16049c does the same: InvertRect, 5 ticks, then the action)
   ev.stopImmediatePropagation(); ev.preventDefault();
   li.classList.add('inv12');
   setTimeout(() => { li.classList.remove('inv12'); li.dataset.inv12 = 'go'; li.click(); delete li.dataset.inv12; }, 5000 / 60);
