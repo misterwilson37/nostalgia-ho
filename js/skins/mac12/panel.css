@@ -8,12 +8,15 @@
 #panel .low12 .rost12 { flex: 0 0 30%; }
 #panel .low12 .rost12 .box { margin: 0; }
 #panel .low12 > .box { flex: 1 1 auto; min-width: 0; margin: 0; }
-/* 3.0.1: a pane still to build from its own routine (js/skins/mac12/ui.js TODO301), and the players' column beside the budget */
-#panel .box.todo301 { padding: 0; }
-#panel .low12 > .rost301 { flex: 0 0 30%; }
+/* 3.0.1: the players and the budget, one canvas (js/skins/mac12/ui.js lowBox301) */
+#panel .box.low301 { padding: 0; }
 /* the Report Window under the Tech Spending window: 96 of its pixels high, 32 a report, the icon then the sentence from 35 */
 #panel .rep12box { padding: 0; }
 #panel ul.rep12 { list-style: none; margin: 0; padding: 0; height: calc(96 / 226 * (290px - 18px)); overflow-y: auto; position: relative; font: 10px/1.1 Geneva, Verdana, sans-serif; }
 #panel ul.rep12 li { display: flex; align-items: flex-start; gap: 4px; min-height: 36px; padding: 0; border: 0; }
 #panel ul.rep12 li img { width: 32px; height: 32px; flex: none; }
 #panel ul.rep12 li .rt { padding-top: 1px; }
+/* 3.0.1's panes are one window's: edge to edge, no gaps, the window's frame round them (the Tech Spending and Report windows stay apart) */
+#panel .box.planet301, #panel .box.fleets301, #panel .box.info301, #panel .box.low301 { margin: 0; border: 0; border-left: 1px solid #000; border-radius: 0; box-shadow: none; }
+#panel .box.planet301 { border-top: 1px solid #000; }
+#panel .box.low301 { border-bottom: 1px solid #000; margin-bottom: 8px; }

@@ -18,12 +18,12 @@ Sources (private repo `nostalgia-ho-sources`):
    (`HOMAC_VERSION` '3.0.1'), which gives 3.0.1 only `window.HOMAC301` (the panel's arrangement, `panel301`; the Tech Spending
    window's words); then `js/skins/mac3/pictures.js` (the old `mac3/ui.js`). The arrangement's CSS is `js/skins/mac12/panel.css`.
    2.0.1's map keys (KeyTheHo, KeyPlanet, TabThroughFleets) and report click are off in 3.0.1: their routines differ.
-   Each pane not yet built is an empty box with a dotted edge (`data-todo` names its routine). Until item 2 is done the panel
-   can't be used (no fleet rows, no budget bars): real-play fails on `mac3`/`mac3c` by design on this branch.
+   Each pane not yet built is an empty box with a dotted edge (`data-todo` names its routine). Until item 2 is done the skin is
+   incomplete (the Tech Spending bars, the reports, the map): real-play on `mac3`/`mac3c` is not expected to pass on this branch.
 2. Each changed pane from 3.0.1's own routine, one commit each, this table updated in the same commit: ~~`DrawIncomeRect`~~ (done),
    ~~`DrawPlanetRect` + `DrawPieChart`~~, ~~`DoGratuitousGraphics`'s turning planet~~ (done; its second part, the map's twinkling
-   stars, goes with the map), ~~`DrawFleetRect` + `DrawSelectedFleetInfo`~~ (done), `DrawBudgetRect` + `DrawHBarControl`
-   (rewritten: five times the code), `DrawVBarControl`, the map (`DrawGalaxyMap`, `DrawOneStar`, the star sub-procs,
+   stars, goes with the map), ~~`DrawFleetRect` + `DrawSelectedFleetInfo`~~ (done), ~~`DrawBudgetRect` + `DrawHBarControl`~~
+   (done, with `DrawIconRect`), `DrawVBarControl`, the map (`DrawGalaxyMap`, `DrawOneStar`, the star sub-procs,
    `DrawOneFleet`, `DrawFleetPaths`), `UpdateReportWin` + `DrawMessage`, `DrawAnnounceBubble`.
 3. Until a pane is done, the skin must not show 2.0.1's version of it as if it were 3.0.1's: keep these on the session branch,
    off staging and live, until the main screen is whole.
@@ -64,7 +64,7 @@ another version.
 | Planet pane (with the pie chart) | 012, 042 | `DrawPlanetRect`, `DrawPieChart`, `DoPieClick`; `DoGratuitousGraphics` | differs, new | close (`planetBox301`, `pieChart301`): words (STR# 1005, 4000), places, grey and the pie's colours (XWinProc @180bae's colour table, as an 8-bit screen shows them) and B&W patterns (ltGray, dkGray), PICT 600's ring, the drag; matches shot042. and the turning planet on black once terraforming or mining is done (`gratuitous301`: the strip by gravity, the night side's 224-frame cycle, ice caps and desert by temperature, the 14 stars that cross as a column because the program never spreads them; every 10 ticks as IdleTheHo). **done** but for a frame-by-frame check against a capture of the turning (shot012/040 are single frames; they agree) |
 | Fleet pane | 012, 040 | `DrawFleetRect`, `DrawSelectedFleetInfo`, `DrawOneFleet`, `DrawOneOtherFleet`, `ClickInFleetRect`, `DrawDragBarRect` | differ | close (`fleetBox301`): the A5 world's rects (fleet 70..129, the black drag bar 130..132, the scroll bar 214..226 x 89..131), STR# 4000.11-.21, rows bold/italic/condensed, the selected row inverted, scrap's grey pattern, other players' rows (`rs.otherFleetRow`), a click selects. Left: the scroll bar is drawn plainly (an OS control); dragging the drag bar to resize the pane (`ClickInDragBar`) is not built |
 | Money pane (Reserve Metal, Ship Savings, Total Money) | 012, 040 | `DrawIncomeRect` | differs | **done** (`incomeBox301`: STR# 1005.2-.9, the program's "(Int: %s)"; bold labels right at 87, values at 90, changes right at 225; grey 0xBBBB in colour; Ship Savings red when below 0; the rules at 32 and 225. Fields: +0x1c `p.metal`, +0x10 `p.savings`, +8 `p.net301`, +0x14 `p.oInterest`, +0x24/+0xc `p.chg`) |
-| Players list and budget bars | 012 | `DrawBudgetRect`, `DrawHBarControl`, `DrawVBarControl` | differ | **wrong** |
+| Players list and budget bars | 012, 040 | `DrawIconRect`, `DrawBudgetRect`, `DrawHBarControl`, `DoHBarClick` | differ | close (`lowBox301`): rects (players 0..67, budget 79..214, their scroll bars), rows of 18 and 14, icons, halo, crosses, checks; the heading (Sort, 0%, Log/Linear, 100%, ticks by GetHPercBarAmt); bar colours from the colour table (Ships' oranges by share, Tech's hue by length, colonies blue/green/red by terraform and mine), HSV edges, label colours, "Abandoning", the income of a finished colony; B&W black and 50% grey; drag via `rs.dragShare`, the heading switches the scale; matches shot040. Left: "Sort" does nothing yet (DoHBarClick's sort not read); the order of the players is the remake's faces sorted (3.0.1 numbers them 0..n-1); the scroll bars are drawn plainly; colours are exact RGB, not the 8-bit palette's |
 | End Turn button | 012, 031 | `DrawSpecial` (to confirm) | new | ? |
 | Tech Spending window | all | `CreateTechWin`, `UpdateTechWin` | same code | close: frame, heading, "Current Levels:" and the five levels as 2.0.1's; the bars are `DrawVBarControl` (to do) |
 | Reports window | all | `CreateReportWin` same code; `UpdateReportWin` | differs | wrong: the window is placed, empty until `UpdateReportWin` + `DrawMessage` |

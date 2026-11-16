@@ -1470,12 +1470,6 @@ function panel12(panel, B) {
 // with its own routine (DrawPlanetRect and DrawPieChart, DrawFleetRect, DrawIncomeRect, DrawIconRect, DrawBudgetRect and
 // DrawHBarControl, DrawVBarControl, UpdateReportWin) is built from that routine; until it is, its place is left empty (white, as
 // the window's background, with a dotted edge), never 2.0.1's drawing. data-todo names the routine still to read.
-const TODO301 = (w, h, what, cls) => {
-  const q = qdCanvas(w, h, '');
-  q.x.setLineDash([1, 2]); q.x.strokeStyle = '#888'; q.x.strokeRect(0.5, 0.5, w - 1, h - 1); q.x.setLineDash([]);
-  q.c.dataset.todo = what;
-  return A().el('section', { class: 'box todo301 ' + (cls || '') }, q.c);
-};
 // the Tech Spending window (UpdateTechWin, the same code as 2.0.1's): its heading, "Current Levels:" and the five levels; the bars
 // beside them are DrawVBarControl's, which 3.0.1 rewrote (to do)
 function techBox301() {
@@ -1769,9 +1763,147 @@ function fleetBox301() {
   q.c.addEventListener('wheel', (ev) => { if (total <= 4) return; ev.preventDefault(); FLT301.top += ev.deltaY > 0 ? 1 : -1; a.renderPanel(); }, { passive: false });
   return a.el('section', { class: 'box fleets12 fleets301' }, q.c);
 }
-function panel301(panel) {
+// 3.0.1's colour table (XWinProc @180bae), all eighteen, as RGB 0..65535: the bars mix and shade them
+const CT301 = [[0x1F21, 0xB793, 0x1431], [0xDD6B, 0x08C2, 0x06A2], [0x7FFE, 0, 0], [0x7FFF, 0x8000, 0x7FFF], [0, 0, 0xD400], [0x0500, 0x0500, 0x0500],
+  [0x46E3, 0, 0xA53E], [0xFFFF, 0xFFFF, 0xFFFF], [0, 0x64AF, 0x11B0], [0, 0, 0], [0xF2D7, 0x0856, 0x84EC], [0x0FA0, 0x8FA7, 0x12DC], [0x7C00, 0x737E, 0],
+  [0xBBBB, 0xBBBB, 0xBBBB], [0x1F21, 0xB793, 0xD400], [0xFFFF, 0x85A6, 0x12CA], [0xFFFF, 0x557A, 0], [0xB1B1, 0x8D8D, 0xD9D9]];
+const css16 = (c) => '#' + c.map(v => Math.max(0, Math.min(255, Math.round(v / 257))).toString(16).padStart(2, '0')).join('');
+// the Color Picker's RGB2HSV and HSV2RGB (Pack12 selectors 8 and 7), in SmallFracts (0..65535)
+function rgb2hsv([r, g, b]) { const R = r / 65535, Gc = g / 65535, B = b / 65535, mx = Math.max(R, Gc, B), mn = Math.min(R, Gc, B), d = mx - mn; let h = 0;
+  if (d > 0) h = mx === R ? ((Gc - B) / d + 6) % 6 : mx === Gc ? (B - R) / d + 2 : (R - Gc) / d + 4; return [Math.round(h / 6 * 65535) & 0xffff, mx ? Math.round(d / mx * 65535) : 0, Math.round(mx * 65535)]; }
+function hsv2rgb([h, s, v]) { const H = (h & 0xffff) / 65536 * 6, S = s / 65535, V = v / 65535, i = Math.floor(H), f = H - i, p = V * (1 - S), q = V * (1 - S * f), t = V * (1 - S * (1 - f));
+  const [R, Gc, B] = [[V, t, p], [q, V, p], [p, V, t], [p, q, V], [t, p, V], [V, p, q]][i % 6]; return [R, Gc, B].map(x => Math.round(x * 65535)); }
+// GetHPercBarAmt @d0a30: a share's length on the 77-pixel log bar (InitHLogBarAmts: pixel x worth trunc(10 (e^(2.302 + x / 32.11) - 10)), the
+// last 1,000): the first pixel whose worth passes it, less one
+const HLOG = Array.from({ length: 78 }, (_, x) => x === 77 ? 1000 : Math.trunc(10 * (Math.exp(2.302 + x / 32.11) - 10)));
+const hPercBar = (pm) => { for (let x = 0; x < 78; x++) if (HLOG[x] >= pm) return Math.max(0, x - 1); return 77; };
+// The players and the budget, the panel's rows 166 to 330 (the map window's foot):
+//   DrawIconRect @155d9e: the players' rect (0..67 x 167..330), 18 pixels a row; each player on the row of its place in the order (the
+//     header's +0x2f4 bytes, which are also its face: CreateGalaxy numbers them, DoGameSolidificationStuff shuffles them; before 2010 only
+//     you, on the first); its 16 x 16 icon at (9, row + 3) (you: 1000, another 2000 + face; +500 a woman), the allies' halo icon 5000 over
+//     it, the name at (28, row + 16) (condensed when wider than 39), a cross (pen 2) over the icon of a player who is out (mode above 3)
+//     and a check mark at the left of one who has ended the turn. Its scroll bar 67..79 x 165..331.
+//   DrawBudgetRect @155c86: the budget rect (79..214 x 166..330) and the strip at its right erased or grey; DrawHBarControl @d0a7c (79, 166,
+//     10 rows, 100): the heading: a "Sort" button (FrameRoundRect 6) ending at 122, "0%" (STR# 1001.7) at 124, "100%" (.11) ending at 202,
+//     "Log" (1005.23) at 153 or "Linear" (.24) at 147 by the switch, a rule along 181 from 124 to 214 and ten ticks up from it; then a row
+//     every 14 from 181 for each slot (Ships, Tech, the colonies): a rule down 123, the bar from 124, as long as its share (log: GetHPercBarAmt;
+//     linear: the share x 77 / 1000 rounded up), 7 high at the row's foot, painted in its colour (Ships: the two oranges, 16 and 15 of the
+//     table, mixed by its share; Tech: hue -(200 x length + 1), full saturation and value; a colony: blue (4) for mining and green (0; red,
+//     1, on a planet of poor gravity) for terraforming, mixed by its two shares), with two lines above it in the colour at half saturation
+//     and two below and at its right at half value (black and white: black, a colony losing money 50% grey, a row higher and lower); the row
+//     past it erased to 203; the name right-aligned at 122 on the foot (underlined for the selected star), near black (5), or for a colony
+//     losing money red (1; 2 on a planet of poor gravity); "Abandoning" at 127 for a colony being abandoned, else "$" and the income
+//     there for a colony with both its parts finished. A rule down 123 to the foot. Its scroll bar 214..226 x 181..331.
+//   DoHBarClick: a drag on a bar sets its share (the ruleset's rs.dragShare, the others moved as it says); a click on the heading switches
+//     the scale. ("Sort" is not built.)
+const LOW301 = { pTop: 0, bTop: 0 };
+function scrollBar301(q, x, l, t, b, max, val) { // an OS scroll bar, drawn plainly: arrows at the ends, the grey track and its thumb when it scrolls
+  q.rect(l, t, l + 12, b, '#fff'); x.strokeStyle = '#000'; x.lineWidth = 1; x.strokeRect(l + 0.5, t + 0.5, 11, b - t - 1);
+  [[t, 1], [b - 12, -1]].forEach(([t0, d]) => { x.strokeRect(l + 0.5, t0 + 0.5, 11, 11); x.beginPath(); const cy = t0 + 6; x.moveTo(l + 3, cy + 2 * d); x.lineTo(l + 6, cy - 2 * d); x.lineTo(l + 9, cy + 2 * d); x.closePath(); x.stroke(); });
+  if (max > 0) { const tr = b - t - 24; x.fillStyle = orPat(x, GRAY, '#000'); x.fillRect(l + 1, t + 12, 10, tr); const ty = t + 12 + Math.round((tr - 8) * val / max); q.rect(l + 1, ty, l + 11, ty + 8, '#fff'); x.strokeRect(l + 0.5, ty + 0.5, 11, 7); }
+}
+function lowBox301(B) {
+  const a = A(), g = G(), p = a.me(), rs = H().rules(g), col = COL301(), S5 = STR301(1005), S1 = STR301(1001);
+  const Y0 = 166, q = qdCanvas(226, 165, ''), x = q.x, Y = (v) => v - Y0, bg = col ? RGB301.grey : '#fff';
+  // DrawIconRect
+  q.rect(0, Y(166), 67, Y(331), bg);
+  const prow = Math.trunc((330 - 167 - 3) / 18);
+  // (the remake's faces are picked from the twenty, not numbered 0 to n - 1 as 3.0.1's are: the order is the players sorted by face, a player with
+  // none, the human, after them)
+  const ranked = g.players.map((pl, i) => i).sort((i, j) => ((g.players[i].face ?? 99) - (g.players[j].face ?? 99)) || i - j);
+  const order = g.players.map((pl, i) => ({ pl, i, at: g.year < 2010 ? (i === a.ME ? 0 : -1) : ranked.indexOf(i) }));
+  const nP = g.year < 2010 ? 1 : g.players.length;
+  LOW301.pTop = Math.max(0, Math.min(LOW301.pTop, nP - prow));
+  order.forEach(({ pl, i, at }) => {
+    const r = at - (g.year < 2010 ? 0 : LOW301.pTop); if (at < 0 || r < 0 || r >= prow) return;
+    const top = Y(167 + 18 * r);
+    const ic = a.IMG['dos:s' + ((i === a.ME ? 1000 : 2000 + (pl.face || 0)) + (pl.female ? 500 : 0))];
+    if (ic && ic.width) x.drawImage(ic, 9, top + 3, 16, 16);
+    if (i !== a.ME && pl.alive && H().isAllied(g, a.ME, i)) { const h = a.IMG['dos:s5000']; if (h && h.width) x.drawImage(h, 9, top + 3, 16, 16); }
+    q.text(pl.name, 28, top + 16, G9, { cond: q.width(pl.name) > 39 });
+    if (!pl.alive || pl.surrendered) { x.strokeStyle = '#000'; x.lineWidth = 2; x.beginPath(); x.moveTo(10, top + 4); x.lineTo(25, top + 19); x.moveTo(25, top + 4); x.lineTo(10, top + 19); x.stroke(); x.lineWidth = 1; }
+    if (!pl.human || (g.done || []).includes(i)) { x.strokeStyle = '#000'; x.beginPath(); x.moveTo(1.5, top + 11.5); x.lineTo(3.5, top + 15.5); x.lineTo(7.5, top + 7.5); x.stroke(); }
+  });
+  scrollBar301(q, x, 67, Y(165), Y(331), Math.max(0, nP - prow), LOW301.pTop);
+  // DrawBudgetRect, DrawHBarControl
+  q.rect(79, Y(166), 214, Y(331), bg); q.rect(214, Y(181), 225, Y(331), bg);
+  const L = 79, x0 = L + 45, sc = a.budgetScale(), log = sc.id === 'log';
+  x.font = G9; const sw = q.width('Sort');
+  x.strokeStyle = '#000'; x.lineWidth = 1; x.beginPath(); x.roundRect(x0 - sw - 7 + 0.5, Y(169) + 0.5, (x0 - 2) - (x0 - sw - 7) - 1, 10, 3); x.stroke();
+  q.text('Sort', x0 - sw - 4, Y(178));
+  const pc100 = S1[10] || '100%'; q.text(pc100, L + 123 - q.width(pc100), Y(178)); q.text(S1[6] || '0%', x0, Y(178));
+  q.hline(x0, 215, Y(181));
+  q.text(log ? (S5[22] || 'Log') : (S5[23] || 'Linear'), log ? L + 74 : L + 68, Y(178));
+  for (let k = 1; k <= 10; k++) { const tx = x0 + (log ? hPercBar(100 * k) : Math.trunc(77 * k / 10)); q.vline(tx, Y(179), Y(181)); }
+  const ents = B.ents || [], brow = Math.trunc((330 - 167 - 15) / 14);
+  // 3.0.1's slots: Ships first, then Tech, then the colonies
+  const slots = ents.filter(e => e.key === 'savings').concat(ents.filter(e => e.key === 'tech'), ents.filter(e => e.star != null));
+  LOW301.bTop = Math.max(0, Math.min(LOW301.bTop, slots.length - brow));
+  const low = new Set((rs.underfunded ? rs.underfunded(g, p) : []).map(st => st.id));
+  const lenOf = (pm) => pm < 1 ? 0 : log ? hPercBar(pm) : Math.trunc((pm * 77 + 999) / 1000);
+  let y = Y(181);
+  slots.slice(LOW301.bTop, LOW301.bTop + brow).forEach((e) => {
+    const pm = Math.round(e.get() * 1000), len = Math.min(77, lenOf(pm)), st = e.star != null ? g.stars[e.star] : null;
+    const inc = st ? H().planetIncome(g, p, st) : 0, abandoning = !!(st && st.abandon301);
+    const ratio = st ? Math.trunc(100 * Math.max(st.g, p.homeG) / Math.max(0.01, Math.min(st.g, p.homeG))) : 0;
+    q.vline(123, y, y + 15);
+    let top = y + 7, bottom = y + 14;
+    if (!col) {
+      top -= 1; bottom += 1;
+      x.fillStyle = st && inc < 0 ? orPat(x, GRAY, '#000') : '#000'; x.fillRect(x0, top, len, bottom - top);
+    } else {
+      let rgb, hsv;
+      if (e.key === 'tech') { hsv = [(len * -200 - 1) & 0xffff, 0xffff, 0xffff]; rgb = hsv2rgb(hsv); }
+      else {
+        if (e.key === 'savings') rgb = [0, 1, 2].map(k => Math.trunc((CT301[16][k] * pm + CT301[15][k] * (1000 - pm)) / 1000));
+        else { const bb = rs.bars(st), T = bb[0], X = bb[1], tc = ratio <= 256 ? CT301[0] : CT301[1]; rgb = [0, 1, 2].map(k => Math.trunc((CT301[4][k] * X + tc[k] * T) / 1000)); }
+        hsv = rgb2hsv(rgb);
+      }
+      x.fillStyle = css16(rgb); x.fillRect(x0, top, len, bottom - top);
+      if (len > 0 && !abandoning) {
+        const hi = css16(hsv2rgb([hsv[0], hsv[1] >> 1, hsv[2]])), lo = css16(hsv2rgb([hsv[0], hsv[1], hsv[2] >> 1]));
+        q.rect(x0, top - 1, x0 + len + 1, top, hi); q.rect(x0, top - 2, x0 + len + 2, top - 1, hi);
+        q.rect(x0, bottom, x0 + len + 1, bottom + 1, lo); q.rect(x0 + len, top, x0 + len + 1, bottom + 1, lo);
+        q.rect(x0, bottom + 1, x0 + len + 2, bottom + 2, lo); q.rect(x0 + len + 1, top - 1, x0 + len + 2, bottom + 2, lo);
+      }
+    }
+    const name = e.key === 'savings' ? (S5[25] || 'Ships') : e.key === 'tech' ? (S5[24] || 'Tech') : st.name;
+    const lc = !col ? '#000' : !st || inc >= 0 ? css16(CT301[5]) : css16(ratio <= 256 ? CT301[1] : CT301[2]);
+    const w = q.text(name, 0, y + 14, G9, { right: L + 43, color: lc });
+    if (st && a.UI.sel === st.id) q.rect(L + 43 - w, y + 15, L + 43, y + 16, lc);
+    if (abandoning) q.text('Abandoning', L + 48, y + 14, G9, { color: lc });
+    else if (st) { const bb = rs.bars(st); if (bb[0] === -1 && bb[1] === -1) q.text('$' + H().niceNum(Math.round(inc)), L + 48, y + 14, G9, { color: lc }); }
+    y += 14;
+  });
+  q.vline(123, y, Y(331));
+  scrollBar301(q, x, 214, Y(181), Y(331), Math.max(0, slots.length - brow), LOW301.bTop);
+  // DoHBarClick: a drag on a bar, a click on the heading; the scroll bars; a click on a colony's name selects it (FollowStarNameClick)
+  q.c.style.touchAction = 'none';
+  q.c.addEventListener('pointerdown', (ev) => {
+    const pt = q.at(ev), v = pt.v + Y0;
+    if (pt.h >= 67 && pt.h < 79) { LOW301.pTop += v < (165 + 331) / 2 ? -1 : 1; a.renderPanel(); return; }
+    if (pt.h >= 214) { LOW301.bTop += v < (181 + 331) / 2 ? -1 : 1; a.renderPanel(); return; }
+    if (pt.h < 79) return;
+    if (v < 181) { if (pt.h >= x0 && a.flipBarScale) a.flipBarScale(); return; }
+    const e = slots[LOW301.bTop + Math.floor((v - 181) / 14)]; if (!e) return;
+    if (pt.h < x0 - 1) { if (e.star != null) { a.UI.sel = e.star; if (a.centerOn) a.centerOn(e.star); a.renderPanel(); a.draw(); } return; }
+    ev.preventDefault();
+    const lk = rs.barLocked ? rs.barLocked(g, p, e.key) : null; if (lk) { a.beep(); return; }
+    const start = JSON.stringify(p.budget);
+    const set = (e2) => { const h = q.at(e2).h, f = Math.max(0, Math.min(1, (h - x0) / 77)), pm = log ? sc.toValue(f) : Math.round(f * 1000);
+      if (rs.dragShare) { const b = p.budget, o = JSON.parse(start); b.tech = o.tech; b.savings = o.savings; b.col = o.col; const r = rs.dragShare(g, p, e.key, Math.max(0, Math.min(1000, Math.round(pm)))); if (r) { if (r.tech != null) b.tech = r.tech / 1000; if (r.savings != null) b.savings = r.savings / 1000; for (const k in r.col || {}) b.col[k] = r.col[k] / 1000; } }
+      else e.set(pm / 1000);
+      const c = lowBox301(B); box.replaceWith(c); };
+    const up = (e2) => { window.removeEventListener('pointermove', set); window.removeEventListener('pointerup', up); set(e2); a.save(); a.renderPanel(); };
+    window.addEventListener('pointermove', set); window.addEventListener('pointerup', up); set(ev);
+  });
+  q.c.addEventListener('wheel', (ev) => { ev.preventDefault(); const pt = q.at(ev); if (pt.h < 79) LOW301.pTop += ev.deltaY > 0 ? 1 : -1; else LOW301.bTop += ev.deltaY > 0 ? 1 : -1; a.renderPanel(); }, { passive: false });
+  const box = a.el('section', { class: 'box low301' }, q.c);
+  return box;
+}
+function panel301(panel, B) {
   const a = A(), el = a.el;
-  const low = el('div', { class: 'low12' }, TODO301(68, 164, 'DrawIconRect', 'rost301'), TODO301(158, 164, 'DrawBudgetRect DrawHBarControl'));
+  const low = lowBox301(B || {});
   const rep = el('section', { class: 'box rep12box' }, el('ul', { class: 'reports rep12', 'data-todo': 'UpdateReportWin DrawMessage' }));
   panel.innerHTML = '';
   panel.append(planetBox301(), fleetBox301(), incomeBox301(), low, techBox301(), rep);
@@ -2290,7 +2422,7 @@ new MutationObserver(() => { if (MB.wrap) updateBars(); }).observe(document.body
 if (V3) {
   window.HOMAC301 = {
     get ownPanel() { return !!G() && own(); },
-    panel(panel) { if (G() && own()) panel301(panel); },
+    panel(panel, B) { if (G() && own()) panel301(panel, B); },
   };
   return;
 }
