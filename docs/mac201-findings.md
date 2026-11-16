@@ -1,6 +1,6 @@
 # Mac 2.0.1: the display audit (November 2026, begun)
 
-**Progress (comparison with Jake's two real games): 1 fleet arrows done; 2 battle animation done (colour); 3 menus and windows partly done (see below), 4 elimination checked in the code: the original too brings an out player back, nothing to fix.**
+**Progress (comparison with Jake's two real games): 1 fleet arrows done; 2 battle animation done (colour); 3 menus and windows partly done (see below), 4 elimination checked in the code: the original too brings an out player back, nothing to fix. 5 (16 Nov, later) touch drag of a fleet fixed in the Mac skins (it only ran under the DOS frame); alerts and dialogs have the colour Mac's frame (K, L M D bevel, K), the default button's 3-pixel ring and the skin's Chicago 12; the status window (DLOG 7000) matches lost005; the planet's bolt hue is the star owner's weapons tech / 100 (DoBattleStage @d0004, psVar1[0x56] from player + 0x30), as guessed. Not built: the Identify and Join dialogs (Player Entry) and the personalise box (the remake takes names from the account).**
 
 **Provided by PC Games Vault (pcgamesvault.com) and digitized by Britt Dodd.** (Jake, November 2026: credit for everything that came, or could have come, from the Mac 2.0.1 disks, including copies of the same files from elsewhere.)
 

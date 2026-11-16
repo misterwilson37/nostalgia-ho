@@ -232,10 +232,15 @@ html .win a { color: #000; text-decoration: underline; }
 .mapcorner12 { right: 0; bottom: 0; width: 16px; height: 16px; box-sizing: border-box; border-left: 1px solid #000; border-top: 1px solid #000; }
 html.bars12 #msg { bottom: 28px; }
 
-/* An alert's frame on the colour Mac (shot104, lost027, the nested alert of shot002): a black line, three pixels of bevel (light blue-white, grey,
+/* An alert's and a dialog's frame on the colour Mac (shot104, lost027, the nested alert of shot002): a black line, three pixels of bevel (light blue-white, grey,
    slate on the top and left, the reverse at the bottom and right) and a black line; the items' origin is 3 pixels inside it. No drop shadow. */
-.win.dl20w.col20 { border: 1px solid #000; box-shadow:
+html.col20 .win.dl20w { border: 1px solid #000; box-shadow:
   inset 1px 1px 0 0 #ccf, inset 2px 2px 0 0 #bbb, inset 3px 3px 0 0 #669, inset 4px 4px 0 0 #000,
   inset -1px -1px 0 0 #669, inset -2px -2px 0 0 #bbb, inset -3px -3px 0 0 #ccf, inset -4px -4px 0 0 #000; background: #fff; }
-.win.dl20w.col20 .wbody { padding: 0; }
-.win.dl20w.col20 .dl20 { margin: 7px; }
+html.col20 .win.dl20w .wbody { padding: 0; }
+html.col20 .win.dl20w .wtitle { display: none; } /* (the program's dialogs have no title bar) */
+html.col20 .win.dl20w .dl20 { margin: 7px; }
+
+/* the status window's bar (shot031, lost003-007): a 200 x 16 black-lined box, filled with a one-pixel black and white checker */
+.bar20 { box-sizing: border-box; width: 200px; height: 16px; border: 1px solid #000; background: #fff; box-shadow: 1px 1px 0 #000; }
+.bar20 .fill20 { height: 100%; width: 0; background: repeating-conic-gradient(#000 0 25%, #fff 0 50%) 0 0 / 2px 2px; image-rendering: pixelated; }
