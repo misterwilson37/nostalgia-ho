@@ -600,6 +600,8 @@ function draw0() {
   // T.mapUnder(cx, info): a skin's own drawing under the stars (the Mac 3.0.1 skin: its map in 2000, the stars' blinking points)
   if (T.mapUnder) T.mapUnder(cx, { mapW, mapH, view: UI.view, G, ME, sx, sy, IMG });
   const drawRoutes = () => {
+  // T.fleetPaths(cx, info): a skin's own lines for the fleets' orders (the Mac 3.0.1 skin: DrawFleetPaths)
+  if (T.fleetPaths) T.fleetPaths(cx, { sx, sy, G, ME, view: UI.view });
   // routes of my fleets
   if (T.appPaths) appFleetPaths();
   for (const f of T.routes === false || T.appPaths || (T.routesDragOnly && !modern()) ? [] : G.fleets) { // (T.routes false: the Amiga draws a route only while it is dragged)

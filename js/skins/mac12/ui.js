@@ -2550,6 +2550,45 @@ function drawStar301(cx, i) {
   }
   return 'all';
 }
+// DrawFleetPaths @15466e (when the Preferences' "Show Fleets Paths" is on, 'Stup' 1000 +0x5c, on by default; the remake has no 3.0.1 Preferences
+// window, so always): for each of your fleets with a destination (+0xe) not marked for scrapping, a line 2 x 2 in the 50% grey pattern from where it
+// is (its star, or between the two stars by the turns left, +0x12, of the trip's turns, the distance (+0x10) over the speed rounded up) to the
+// destination star's middle: greenColor for colony ships, cyanColor for the others (0000 8000 11B0 and 0241 AB54 EAFF; black on a 1-bit screen,
+// where they don't show on the black map).
+function fleetPaths301(cx, i) {
+  const g = i.G, col = COL301(), u = i.view.s / 2;
+  cx.save(); cx.lineWidth = 2; cx.lineCap = 'butt';
+  for (const f of g.fleets) {
+    if (f.owner !== i.ME || f.scrap301) continue;
+    const dest = f.to != null ? f.to : f.dest; if (dest == null) continue;
+    const b = g.stars[dest]; let x1, y1;
+    if (f.to != null) { const a0 = g.stars[f.from], t = Math.min(1, (f.prog || 0) / (f.dist || 1)); x1 = i.sx(a0.x + (b.x - a0.x) * t); y1 = i.sy(a0.y + (b.y - a0.y) * t); }
+    else { x1 = i.sx(g.stars[f.star].x); y1 = i.sy(g.stars[f.star].y); }
+    const colony = H().fleetDesigns(g, f).some(d => d.type === 'colony');
+    cx.strokeStyle = col ? orPat(cx, GRAY, colony ? '#008011' : '#02abea') : 'rgba(0,0,0,0)';
+    cx.beginPath(); cx.moveTo(x1, y1); cx.lineTo(i.sx(b.x), i.sy(b.y)); cx.stroke();
+  }
+  cx.restore();
+}
+// MapLine @151ac6, drawn by FollowPathDrag while a fleet is dragged to a star: XORed (white on the black map), 2 x 2, solid when the fleet can go
+// (else the light grey pattern); an arrowhead at the star (DetermineArrowTips: (8, 14) and (8, -14) turned to the line, 16 long at 30 degrees), and
+// one at the fleet's star too for a round trip; the leg's distance (%d) in white on a black box beside its middle (left of it when the line runs
+// down to the left or up to the right, 5 pixels off; base line 5 above the middle).
+function dragLine301(cx, d) {
+  if (!d.star) return true;
+  cx.save(); cx.lineWidth = 2; cx.strokeStyle = d.ok ? '#fff' : orPat(cx, LTGRAY.map(r => r), '#fff');
+  cx.beginPath(); cx.moveTo(d.x1, d.y1); cx.lineTo(d.x2, d.y2); cx.stroke();
+  const head = (xa, ya, xb, yb) => { const ang = Math.atan2(ya - yb, xa - xb); cx.beginPath(); for (const sgn of [-1, 1]) { cx.moveTo(xb + 16 * Math.cos(ang + sgn * 0.52), yb + 16 * Math.sin(ang + sgn * 0.52)); cx.lineTo(xb, yb); } cx.stroke(); };
+  if (d.ok) head(d.x1, d.y1, d.x2, d.y2);
+  if (d.round) head(d.x2, d.y2, d.x1, d.y1);
+  if (d.dist != null) {
+    const t = String(d.dist); cx.font = G9; cx.textAlign = 'left'; const w = cx.measureText(t).width;
+    const mx = Math.trunc((d.x1 + d.x2) / 2), my = Math.trunc((d.y1 + d.y2) / 2), lx = (d.x2 - d.x1) * (d.y2 - d.y1) < 0 ? mx - 5 - w : mx + 5;
+    cx.fillStyle = '#000'; cx.fillRect(lx - 2, my - 14, w + 3, 10); cx.fillStyle = '#fff'; cx.fillText(t, lx, my - 5);
+  }
+  cx.restore();
+  return true;
+}
 // 3.0.1 (js/skins/mac3): only the arrangement and the shared windows, above; the rest of this file is 1.2's and 2.0.1's
 if (V3) {
   window.HOMAC301 = {
@@ -2563,6 +2602,9 @@ if (V3) {
     zoomed: (i) => { if (barsOn() && i.menu) MB.centerSel = true; },
     fitView(v, c) { if (!own()) return; const st = c.G.stars[c.sel != null ? c.sel : c.G.players[c.ME].homeStar]; v.s = ZOOMS[3]; if (st) { barMetrics(v.s, c.mapW, c.mapH, c.G); const [h0, v0] = centerCells(st, c.G); putCell(v, h0, v0); } },
     mapBg: '#000', bgStars: false, transitDots: false,
+    routes: false, routesOver: true,
+    fleetPaths: (cx, i) => { if (own()) fleetPaths301(cx, i); },
+    dragRoute: (cx, d) => (own() ? dragLine301(cx, d) : false),
     mapUnder: (cx, i) => { if (own()) mapUnder301(cx, i); },
     drawStar: (cx, i) => (own() ? drawStar301(cx, i) : false),
     // your selected fleet is picked up from its star, as FollowPathDrag does (an unseen handle over the star's icon); no markers are drawn
