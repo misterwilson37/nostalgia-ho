@@ -1,6 +1,6 @@
 # Mac 2.0.1: the display audit (November 2026, begun)
 
-**Progress (comparison with Jake's two real games): 1 fleet arrows done; 2 battle animation done (colour); 3 menus and windows, 4 elimination: not yet.**
+**Progress (comparison with Jake's two real games): 1 fleet arrows done; 2 battle animation done (colour); 3 menus and windows partly done (see below), 4 elimination: not yet.**
 
 **Provided by PC Games Vault (pcgamesvault.com) and digitized by Britt Dodd.** (Jake, November 2026: credit for everything that came, or could have come, from the Mac 2.0.1 disks, including copies of the same files from elsewhere.)
 
@@ -60,3 +60,11 @@ From `mac20-jake-shot010..047, 090` and the code (`MapLine @c6f7e`, `StarLine @c
 - **The ovals**: a ship lost (`HaveGroupShoot`: hit points gone gives sound 3003 / 0xbbb; ours had given it to a planet only, so a kill showed no oval): ovals from the middle out, HSV hue (59 - s) x 175, full saturation and value (red at the middle to yellow at the rim, as in shot048/053), then wiped in black the other way. `rules-dos` now gives a kill 3003; `rs.battleSounds` is on for Mac 2.0.1 (the sounds 3000-3003 by the hit's strength, as 1.2).
 - The pictures wait: ovals and bolts keep their ticks only while the battle speed's time for the shot lasts (`BattleWait` under `TickCount < deadline`), so at fast speeds they are not seen: Jake's captures were at a slow speed.
 - Order checked against the code: shot sound, laser, redraw of the target group, explosion; the planet's population counts down in steps with each hit (shot 090 onwards), "Round n" each round, Skip becomes OK at the end.
+
+## Jake's captures: menus and windows (item 3, first pass)
+
+Compared: File, Edit, Options, Ships, Galaxy, Window (`shot013..018`), the won and lost boxes (`shot103`, `lost027`), Name a Star (`shot105`).
+- Words, order and keys of every menu already matched. Differences found and fixed: **I'll Update Turns** is ticked (dimmed) in Options, and **Tech Spending Window** and **Report Window** are ticked in Window (`shot015`, `shot018`).
+- **The won and lost boxes** were the classic modal (small, with a close square); now ALRT 5040 / 5041 and 5050 / 5051 as the box of the program (227 x 249 / 235 x 244: the text at the top, the picture 3030 / 3040 (colour 3530 / 3540) in the middle, OK or "Oh, well…" at the foot), as `shot104` and `lost027`.
+- **Name a Star** gets its picture (DITL 4050 item 4, PICT 3500 at (118, 10)), which the colour game shows as the black and white sketch (the colour file has no 3500), `shot105`.
+- Not changed (left): the text face is Geneva 12 where the program has Chicago 12, so text wraps a little later; the "Review Announced Battles" tick in the captures is Jake's own setting (ours starts unticked, as 1.2's default); the Apple menu and the clock are the remake's (Ho! 2.0.1 title in the menu bar).
