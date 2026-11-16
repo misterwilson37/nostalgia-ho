@@ -9,6 +9,20 @@ Sources (private repo `nostalgia-ho-sources`):
 - Resources: `audit/mac-3.0.1/dialogs-301.tsv` (every dialog and alert, its size, words and verdict against 2.0.1 and 4.0.5).
 - Code: `audit/mac-3.0.1/routines-201-301.tsv` (every named routine against 2.0.1: `same`/`same-code` = provably the same code).
 
+- Decompile: `decompiled/mac-3.0.1/` (`all.c`, `c/<segment>/<address>-<routine>.c`, `asm/`, `index.tsv`; remade 16 Nov 2026).
+  Mac 2.0.1's is `decompiled/mac-2.0.1/`, for side-by-side reading of a routine that changed.
+
+## Next (keep this list current)
+
+1. The main screen's arrangement: the Mac 3.0.1 skins load `js/skins/mac12/ui.js` (as `mac2` does) with `HOMAC_VERSION`
+   '3.0.1'. Only the arrangement and the shared windows (Tech Spending, the window framework) may come from it as they are.
+2. Each changed pane from 3.0.1's own routine, one commit each, this table updated in the same commit: `DrawIncomeRect` (little
+   changed), `DrawPlanetRect` + `DrawPieChart`, `DrawFleetRect` + `DrawSelectedFleetInfo`, `DrawBudgetRect` + `DrawHBarControl`
+   (rewritten: five times the code), `DrawVBarControl`, the map (`DrawGalaxyMap`, `DrawOneStar`, the star sub-procs,
+   `DrawOneFleet`, `DrawFleetPaths`), `UpdateReportWin` + `DrawMessage`, `DrawAnnounceBubble`.
+3. Until a pane is done, the skin must not show 2.0.1's version of it as if it were 3.0.1's: keep these on the session branch,
+   off staging and live, until the main screen is whole.
+
 ## The rule
 
 The remake's Mac 2.0.1 code may be used for a 3.0.1 screen **only** where the tables above say the resource is the same and the
