@@ -81,6 +81,10 @@ window.HOTHEME_OVER = {
   cascadeReports: v12 || v2,
   // "End Turn ⌘T"; 1.2's own says "Fin Tour" (p5500), which a French game shows; the English one (endturn, 3.0.1's) any other language
   endTurnPic: P + (v12 ? 'endturn' : 'p5500'),
+  // 1.2F's End Turn button (PICT 5500, 5501) is a direct-colour picture (DirectBitsRect) that only 32-bit QuickDraw draws: on a
+  // Mac Plus it is invisible, and a click on its place still ends the turn (DrawGalaxyMap @c31d6, ClickInGalaxyMap @c5f5e; Jake's
+  // System 6 game, docs/12-findings.md). In the System 6 look the remake does the same; the patch (fix endTurnSeen) shows it.
+  endTurnUnseenOn: v12 ? ['system6'] : null,
   // 3.0.1 (and its colour skin): the other languages' buttons. French: the French 3.0.1's own, "Fin Tour" (PICT 5500, the same
   // picture as 1.2F's: tools/extract/mac3_fr.py) in black and white; its colour file's End Turn (PICT 5000) is the English one, so
   // the colour skin shows "End Turn" in French and the patch (fix endTurnFr) a "Fin Tour" drawn in its lettering (p5500-fr-patch).

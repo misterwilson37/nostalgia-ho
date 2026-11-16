@@ -123,6 +123,7 @@ root.HOVERSIONS = {
       'The power of the ships and planet at every star is worked out each turn and never used.',
       'Players who are out still play their turn: their money still earns interest and their research goes on.',
       { text: 'The computer’s colony bars go wrong when it gives a colony more than $2,147,483 for one part (the sum overflows). It takes a very rich computer to see it.', fix: 'colonyBars32' },
+      { text: 'The End Turn button is a picture in a colour format that a Mac Plus or SE can’t draw: on those Macs (the System 6 look here) it is invisible, though a click where it should be still ends the turn.', fix: 'endTurnSeen' },
     ],
     differs: [
       RANDOM,

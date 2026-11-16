@@ -244,3 +244,6 @@ html.col20 .win.dl20w .dl20 { margin: 7px; }
 /* the status window's bar (shot031, lost003-007): a 200 x 16 black-lined box, filled with a one-pixel black and white checker */
 .bar20 { box-sizing: border-box; width: 200px; height: 16px; border: 1px solid #000; background: #fff; box-shadow: 1px 1px 0 #000; }
 .bar20 .fill20 { height: 100%; width: 0; background: repeating-conic-gradient(#000 0 25%, #fff 0 50%) 0 0 / 2px 2px; image-rendering: pixelated; }
+
+/* 1.2F's End Turn button in the System 6 look: drawn as nothing, still clickable where it is (T.endTurnUnseenOn) */
+#msg .clock.pic.unseen img { visibility: hidden; }

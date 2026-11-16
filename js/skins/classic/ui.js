@@ -2038,6 +2038,9 @@ function renderMsg0() {
       const im = IMG[endPic], H = (im && im.height) || Y[4];
       btn.append(el('span', { class: 'clockyear', 'aria-hidden': 'true', style: `left:${Y[0] / Y[4] * 100}%;top:${Y[1] / H * 100}%;width:${Y[2] / Y[4] * 100}%;height:${Y[3] / H * 100}%` }, String(G.year)));
     }
+    // T.endTurnUnseenOn: the OS looks where the original's button drew nothing but still took the click (1.2F on a Mac Plus);
+    // the patch's endTurnSeen shows it
+    if (T.endTurnUnseenOn && T.endTurnUnseenOn.includes(osNow()) && !HO.fixed(G, 'endTurnSeen')) btn.classList.add('unseen');
     box.append(btn); clockTime(); maybeHallOffer();
     return;
   }

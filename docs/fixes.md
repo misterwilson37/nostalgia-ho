@@ -46,7 +46,7 @@ their entries are below so the list is complete, but their rulesets list no fixe
 
 | Version | Obvious bug | Quirk or design | Unclear |
 |---|---|---|---|
-| Mac 1.2 | 3 | 8 | 2 |
+| Mac 1.2 | 4 | 8 | 2 |
 | 2.0 | 11 (7 + the Amiga skin's three + the DOS skin's Yes/No keys) | 5 | 3 |
 | Mac 2.0.1 | 5 | 5 | 2 |
 | Mac 3.0.1 | 6 | 6 | 3 |
@@ -116,7 +116,11 @@ language update in the patch, never the default. So the patch carries them, in t
    works out each part's money × 1,000 in 32 bits (@9363c, @936a4, @936ec), so a part
    over $2,147,483 wraps and the bar comes out wrong. *Fix:* the same rounded-up per mille
    without the overflow (`js/rules-12.js` `setColonyBars12`).
-3. **`scrapLimbo`: a fleet scrapped in hyperspace is reported at a stray character.**
+3. **`endTurnSeen`: the End Turn button is invisible on a Mac Plus.** PICT 5500 and 5501 are version 2 pictures whose image is
+   a direct-colour pixel map (opcode 0x9A), which only 32-bit QuickDraw draws; `DrawGalaxyMap @c31d6` draws nothing on a Mac
+   Plus or SE, while `ClickInGalaxyMap @c5f5e` still ends the turn on a click in its region (Jake's System 6 game, November 2026).
+   The remake hides it in the System 6 look (`endTurnUnseenOn` in `js/skins/mac3/ui.js`). *Fix:* it is shown.
+4. **`scrapLimbo`: a fleet scrapped in hyperspace is reported at a stray character.**
    `ScrapFleetsAndTypes @a0e02` sends report 1016 with the fleet's star, −1 in
    hyperspace, and `GetReportString`'s case 1016 (@130838) prints star −1's name: the
    galaxy header's bytes from +0x31, the low byte of the 18th player slot's home star and
