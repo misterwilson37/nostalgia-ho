@@ -1130,7 +1130,14 @@ function dDialog(w, h, title, kids, label) {
   if (title) d.append(dAt(a.el('div', { class: 'dd-title', translate: 'no' }, title), 5, 5, w - 10, 17));
   kids.forEach(k => k && d.append(k));
   const bs = [...d.querySelectorAll('.dd-btn')], cb = bs.find(b => /^cancel$/i.test(b.textContent.trim())); if (cb && !d.querySelector('[data-esc-close]')) cb.setAttribute('data-esc-close', '1'); // (a window of the program closes by its Cancel)
-  placeDos(a.modal('', d, { cls: 'dosw', label: label || title || 'Spaceward Ho!' }), w, h);
+  const win = a.modal('', d, { cls: 'dosw', label: label || title || 'Spaceward Ho!' });
+  // --du is the DOS frame's scale (html.dosframe, js/skins/dos/style.css). Outside that frame (the Mac 3.0.1 skins use this window from their Ships menu)
+  // nothing defines it, every size computed to 0 and the window was an invisible 0 x 0 box under a scrim that nothing could close: the window's own scale,
+  // whole pixels, as large as the screen lets it be
+  if (win && !document.documentElement.classList.contains('dosframe')) {
+    const k = Math.max(0.5, Math.min(2, (window.innerWidth - 16) / w, (window.innerHeight - 16) / h)); win.style.setProperty('--du', (k >= 1 ? Math.floor(k * 4) / 4 : k) + 'px');
+  }
+  placeDos(win, w, h);
   return d;
 }
 // Where the program puts a window (its templates say x, y = -1: centred): on its 80 x 34-cell screen in whole cells, 8 * floor((80 - columns) / 2) from the left and

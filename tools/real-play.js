@@ -366,6 +366,8 @@ async function playRun(browser, job, outDir, idx) {
     const myFleet = () => G(() => { const a = HOAPI, G = a.G, h = G.stars.find(s => s.owner === a.ME); const f = G.fleets.find(f => f.owner === a.ME && f.star === h.id && f.dest == null && f.to == null && !f.sat && Object.values(f.ships || {}).some(n => n > 0)); return f ? { id: f.id, star: f.star, fuel: f.fuel } : null; });
     const endTurn = async (what) => {
       const t0 = await G(() => HOAPI.G.turn);
+      // a message that covers the End Turn button goes by itself in a few seconds, and a person waits for it (the route hint "Click the stars to visit..." at 844 x 390 in the Mac 3.0.1 skins covers it)
+      await ev(() => document.querySelector('.toast') ? new Promise(r => { const i = setInterval(() => { if (!document.querySelector('.toast')) { clearInterval(i); r(); } }, 100); setTimeout(r, 4500); }) : 0);
       // the clock, or the skin's own End Turn button (a person finds it on screen)
       let ok = false; for (const sel of ['button.clock', '.clock', '.ios-endt', '.ios-end']) { if (await press(sel, { soft: true, what: 'End Turn clock', wait: 100 })) { ok = true; break; } }
       if (!ok) ok = await press('button, [role=button]', { re: /^end\s*turn/i, soft: true, what: 'End Turn button', wait: 100 });
@@ -431,7 +433,8 @@ async function playRun(browser, job, outDir, idx) {
       await press('#panel .frow, .ios-fdl .frow, .ios-fd .frow', { soft: true, what: 'fleet row', wait: 250 });
       let sel = await G(() => HOAPI.UI.selFleet); if (sel !== f.id) { warn(`clicking the fleet's row selected fleet ${sel}, not ${f.id}`); await G((id) => { HOAPI.UI.selFleet = id; HOAPI.renderPanel(); HOAPI.draw(); }, f.id); }
       if (!await press('#panel button, .ios-pb button, .ios-fd button, .ios-fdl button, .win button', { re: /plan route|route/i, soft: true, what: 'Plan route button', wait: 300 })) { note(info.waypoints ? 'this skin offers no Plan route button' : 'no Plan route in this ruleset'); return; }
-      const cand = await G((fid) => { const G = HOAPI.G, f = G.fleets.find(x => x.id === fid); return G.stars.filter(s => s.id !== f.star && HO.starDist(G, f.star, s.id) <= HO.fleetMaxRange(G, f)).sort((x, y) => HO.starDist(G, f.star, x.id) - HO.starDist(G, f.star, y.id)).slice(0, 10).map(s => s.id); }, f.id);
+      const cand = await G((fid) => { const G = HOAPI.G, f = G.fleets.find(x => x.id === fid); return G.stars.filter(s => s.id !== f.star && HO.starDist(G, f.star, s.id) <= Math.min(HO.fleetMaxRange(G, f), f.fuel != null && f.fuel > 0 ? f.fuel : Infinity)).sort((x, y) => HO.starDist(G, f.star, x.id) - HO.starDist(G, f.star, y.id)).slice(0, 10).map(s => s.id); }, f.id);
+      if (!cand.length) { note('no star within the idle fleet\'s fuel: nothing to plan a route to'); await closeAll('plan route'); return; }
       let stops = 0; for (const id of cand) { if (stops >= 2) break; if (await clickStar(id, 'route stop', true)) stops++; }
       await shot('route-planned'); const r = await G(() => HOAPI.UI.route ? { n: HOAPI.UI.route.stops.length } : null);
       if (!r) { warn('Plan route did not start a route plan (no HOAPI.UI.route)'); return; }
