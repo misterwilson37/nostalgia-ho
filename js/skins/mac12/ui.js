@@ -1680,12 +1680,101 @@ function planetBox301() {
   }
   return box;
 }
+// The fleet pane, in the panel's rows 68 to 132 (A5 world: the fleet rect 70..129 x 0..226, the drag bar 130..132 under it; the fleet list's scroll
+// bar, GrowMapWin: 214..226 x 89..131; here drawn as a plain System 7 scroll bar).
+//   DrawSelectedFleetInfo @155826: the rect (1, 68)..(225, 89) erased or grey; for the star's selected fleet (one of yours there): "Fleet to be
+//     scrapped for metal." (4000.12) at (4, 76) if it is marked (fleet +7); else with no orders "Stationed at:" (4000.13) at (4, 76) and the star at
+//     (71, 76); with orders to its next stop "Departing to:" (.14) and "%s (Dist %d; Time %d)" (.15) at 71; on a route "Going to %s (D %d; T %d)
+//     via %s" (.16) at 4. Then "Fuel: %d/%d" (.17: the design's range less the fuel used, the range) at (4, 86), "Speed: %d" (.18) at 71 and at
+//     126 a colony fleet's "Full" or "Empty" (.19, .20; colonists aboard, +6), another's "Scrap: %s" (.21, LongToNiceString: what scrapping it
+//     returns you, ScrapFleetsAndTypes: three quarters of its metal; shot012's one Columbus (1/1) Scout 497 = 663 x 3 / 4).
+//   DrawFleetRect @1551a0: the list (0, 90)..(214, 130) erased or grey; four rows of 10 from 90: your fleets at the star from the scroll bar's
+//     value (DrawOneFleet @155516), then the other players' (DrawOneOtherFleet @155728: RecalcFleetsAtNewStar's "%P’s %P", the owner and the
+//     fleet, for a star you own or have a fleet at, fleets not built this turn; the ruleset's otherFleetRow), "There are no fleets at this planet."
+//     (4000.11) at (3, 99) when there are none; a rule along 89 and one down 225; the drag bar painted black. (A bracket joins a fleet to the
+//     one it will join, fleet +0x1a: 3.0.1 has no way to set one, so none is drawn.)
+//   DrawOneFleet: the row erased (grey in colour), the selected fleet's in black with the words in grey (white in black and white); bold with
+//     orders (+0x12), italic when built this turn (+9), condensed when wider than the row; at (3, row + 8) the fleet's description
+//     (MakeFleetDescription); a fleet marked for scrapping gets the 50% grey pattern ORed over its row in grey (black on the selected row; white
+//     in black and white).
+//   ClickInFleetRect @150f3c: a click on a row of your fleets selects it.
+const FLT301 = { top: 0 };
+const GRAY = [0xaa, 0x55, 0xaa, 0x55, 0xaa, 0x55, 0xaa, 0x55];
+const orPat = (x, rows, colour) => { const t = document.createElement('canvas'); t.width = t.height = 8; const c = t.getContext('2d'); c.fillStyle = colour; rows.forEach((r, v) => { for (let h = 0; h < 8; h++) if (r & (0x80 >> h)) c.fillRect(h, v, 1, 1); }); return x.createPattern(t, 'repeat'); };
+function fleetInfo301(g, f) {
+  const S = STR301(4000), star = (i) => g.stars[i].name, sp = H().fleetSpeed(g, f), L = [];
+  if (f.scrap301) L.push([S[11] || 'Fleet to be scrapped for metal.']);
+  else if (f.dest == null) L.push([S[12] || 'Stationed at:', star(f.star)]);
+  else {
+    const hops = [f.star, f.dest].concat(f.path || []);
+    let dist = 0, time = 0;
+    for (let i = 0; i + 1 < hops.length; i++) { const d = H().starDist(g, hops[i], hops[i + 1]); dist += d; time += Math.ceil(d / sp - 1e-9); }
+    const end = hops[hops.length - 1];
+    if (end === f.dest) L.push([S[13] || 'Departing to:', cfmt(S[14] || '%s (Dist %d; Time %d)', star(end), Math.round(dist), time)]);
+    else L.push([cfmt(S[15] || 'Going to %s (D %d; T %d) via %s', star(end), Math.round(dist), time, star(f.dest))]);
+  }
+  const ds = H().fleetDesigns(g, f), col = ds.some(d => d.type === 'colony');
+  let third;
+  if (col) third = (f.colonists || 0) > 0 ? (S[18] || 'Full') : (S[19] || 'Empty');
+  else { let m = 0; for (const k in f.ships) { const d = H().getDesign(g, f.owner, +k); if (d) m += f.ships[k] * H().designCost(g, d).metal; } third = cfmt(S[20] || 'Scrap: %s', H().niceNum(Math.trunc(m * 3 / 4))); }
+  L.push([cfmt(S[16] || 'Fuel: %d/%d', Math.round(f.fuel || 0), H().fleetMaxRange(g, f)), cfmt(S[17] || 'Speed: %d', sp), third]);
+  return L;
+}
+function fleetBox301() {
+  const a = A(), g = G(), rs = H().rules(g), sid = a.UI.sel, s = sid != null ? g.stars[sid] : null, S = STR301(4000), col = COL301();
+  const Y0 = 68, q = qdCanvas(226, 65, 'Fleets'), x = q.x, Y = (v) => v - Y0;
+  const here = s ? a.fleetOrder(g.fleets.filter(f => f.star === s.id && f.to == null && f.owner === a.ME)) : [];
+  const others = s && (s.owner === a.ME || here.length) ? g.fleets.filter(f => f.star === s.id && f.to == null && f.owner !== a.ME && !f.newThisTurn) : [];
+  const total = here.length + others.length;
+  FLT301.top = Math.max(0, Math.min(FLT301.top, total - 4));
+  const sel = here.find(f => f.id === a.UI.selFleet);
+  // DrawSelectedFleetInfo
+  q.rect(1, Y(68), 225, Y(89), col ? RGB301.grey : '#fff');
+  if (sel) {
+    const L = fleetInfo301(g, sel);
+    q.text(L[0][0], 4, Y(76)); if (L[0][1]) q.text(L[0][1], 71, Y(76));
+    q.text(L[1][0], 4, Y(86)); q.text(L[1][1], 71, Y(86)); q.text(L[1][2], 126, Y(86));
+  }
+  // DrawFleetRect: the list
+  q.rect(0, Y(90), 214, Y(130), col ? RGB301.grey : '#fff');
+  const rows = [];
+  here.forEach((f) => rows.push({ f }));
+  others.forEach((f) => rows.push({ f, other: true }));
+  rows.slice(FLT301.top, FLT301.top + 4).forEach((r, i) => {
+    const top = Y(90 + 10 * i), f = r.f, selRow = !r.other && sel && f.id === sel.id;
+    x.save(); x.beginPath(); x.rect(0, top, 214, 10); x.clip();
+    q.rect(0, top, 214, top + 10, selRow ? '#000' : col ? RGB301.grey : '#fff');
+    let t;
+    if (r.other) t = rs.otherFleetRow ? (rs.otherFleetRow(langView(g), f) || '') : '';
+    else t = H().fleetText(g, f);
+    const style = (r.other || f.newThisTurn ? 'italic ' : '') + (!r.other && f.dest != null ? 'bold ' : '') + '9px Geneva, Verdana, sans-serif';
+    q.text(t, 3, top + 8, style, { cond: q.width(t, style) > 214, color: selRow ? (col ? RGB301.grey : '#fff') : '#000' });
+    if (!r.other && f.scrap301) { x.fillStyle = orPat(x, GRAY, selRow ? (col ? '#000' : '#fff') : (col ? RGB301.grey : '#fff')); x.fillRect(0, top, 214, 10); }
+    x.restore();
+  });
+  if (!total) q.text(S[10] || 'There are no fleets at this planet.', 3, Y(99));
+  q.hline(0, 227, Y(89)); q.vline(225, 0, 65);
+  q.rect(0, Y(130), 226, Y(133), '#000'); // DrawDragBarRect
+  // the scroll bar (an OS control), 214..226 x 89..131: arrows at its ends, the thumb when there is more than fits
+  q.rect(214, Y(89), 226, Y(130), '#fff'); x.strokeStyle = '#000'; x.lineWidth = 1; x.strokeRect(214.5, Y(89) + 0.5, 11, 41);
+  [[Y(89), 1], [Y(119), -1]].forEach(([t0, d]) => { x.strokeRect(214.5, t0 + 0.5, 11, 11); x.beginPath(); const cy = t0 + 6; x.moveTo(217, cy + 2 * d); x.lineTo(220, cy - 2 * d); x.lineTo(223, cy + 2 * d); x.closePath(); x.stroke(); });
+  if (total > 4) { x.fillStyle = orPat(x, GRAY, '#000'); x.fillRect(215, Y(101), 10, 18); const ty = Y(101) + Math.round(10 * FLT301.top / (total - 4)); q.rect(215, ty, 225, ty + 8, '#fff'); x.strokeRect(214.5, ty + 0.5, 11, 7); }
+  q.c.addEventListener('click', (ev) => {
+    const pt = q.at(ev), v = pt.v + Y0;
+    if (pt.h >= 214) { if (v < 101) FLT301.top--; else if (v >= 119) FLT301.top++; else return; a.renderPanel(); return; }
+    if (v <= 89 || v >= 131) return;
+    const r = rows[FLT301.top + Math.floor((v - 90) / 10)];
+    if (r && !r.other && r.f.id !== a.UI.selFleet) { a.UI.selFleet = r.f.id; a.renderPanel(); a.draw(); }
+  });
+  q.c.addEventListener('wheel', (ev) => { if (total <= 4) return; ev.preventDefault(); FLT301.top += ev.deltaY > 0 ? 1 : -1; a.renderPanel(); }, { passive: false });
+  return a.el('section', { class: 'box fleets12 fleets301' }, q.c);
+}
 function panel301(panel) {
   const a = A(), el = a.el;
   const low = el('div', { class: 'low12' }, TODO301(68, 164, 'DrawIconRect', 'rost301'), TODO301(158, 164, 'DrawBudgetRect DrawHBarControl'));
   const rep = el('section', { class: 'box rep12box' }, el('ul', { class: 'reports rep12', 'data-todo': 'UpdateReportWin DrawMessage' }));
   panel.innerHTML = '';
-  panel.append(planetBox301(), TODO301(226, 65, 'DrawFleetRect DrawSelectedFleetInfo'), incomeBox301(), low, techBox301(), rep);
+  panel.append(planetBox301(), fleetBox301(), incomeBox301(), low, techBox301(), rep);
 }
 
 // ---------- the battle window (DoOneBattle @d07d0, DLOG 7010: 445 x 310, black; drawn at twice the size) ----------
