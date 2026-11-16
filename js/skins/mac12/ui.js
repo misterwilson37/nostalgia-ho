@@ -1185,7 +1185,7 @@ function starLine(cx, d) {
   else { const p = document.createElement('canvas'); p.width = 2 * k; p.height = 2 * k; const q = p.getContext('2d'); q.fillStyle = '#fff'; q.fillRect(0, 0, k, k); q.fillRect(k, k, k, k); cx.fillStyle = cx.createPattern(p, 'repeat'); }
   cx.fill();
   if (d.turns != null) {
-    const t = String(d.turns);
+    const t = String(V2 && d.dist != null ? d.dist : d.turns); // (the label is the leg's distance: Mac 2.0.1 captures, "Dist 5; Time 3" under a line marked 5)
     cx.font = (9 * k) + 'px Geneva, Verdana, sans-serif'; cx.textAlign = 'left'; cx.textBaseline = 'alphabetic';
     const tw = cx.measureText(t).width;
     cx.fillStyle = '#000'; cx.fillRect(mx, my - 11 * k, tw + 4 * k, 11 * k);
@@ -1984,8 +1984,11 @@ window.HOMAC12 = {
   // (DrawOneBWStarSubProc @c38ce: at the second zoom the names are drawn condensed, TextFace 0x20: a pixel less between letters)
   // (StarLine: the line while a fleet is dragged, and a fleet's orders)
   // (FollowPathDrag @c69d6: PickStar under the pointer, a line only to a star)
-  dragRoute(cx, d) { if (!own()) return false; if (!d.star) return true; return starLine(cx, { x1: d.x1, y1: d.y1, x2: d.x2, y2: d.y2, ok: d.ok, round: d.round, turns: d.turns }); },
-  routeLine(cx, d) { if (!own()) return false; return starLine(cx, { x1: d.x1, y1: d.y1, x2: d.x2, y2: d.y2, ok: true, round: d.round, turns: d.turns }); },
+  routesOver: true,
+  // MapLine @c6f7e is called only from FollowPathDrag @c69d6 (the same code in 1.2F and 2.0.1): a route line shows only while a fleet is dragged, and every capture of one has the pointer at its tip; a line that stays is a modern convenience
+  routesDragOnly: true,
+  dragRoute(cx, d) { if (!own()) return false; if (!d.star) return true; return starLine(cx, { x1: d.x1, y1: d.y1, x2: d.x2, y2: d.y2, ok: d.ok, round: d.round, turns: d.turns, dist: d.dist }); },
+  routeLine(cx, d) { if (!own()) return false; return starLine(cx, { x1: d.x1, y1: d.y1, x2: d.x2, y2: d.y2, ok: true, round: d.round, turns: d.turns, dist: d.dist }); },
   nameStarLayout,
   mapNameStyle(cx, s) { cx.letterSpacing = own() && zoomIdx(s) === 1 ? '-1px' : '0px'; },
   drawStar(cx, i) { if (!own() || zoomIdx(i.view.s) > 0) return false; cx.fillStyle = '#fff'; cx.beginPath(); cx.arc(i.x, i.y, 2.5, 0, Math.PI * 2); cx.fill(); return 'all'; },

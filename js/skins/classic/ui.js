@@ -597,9 +597,10 @@ function draw0() {
   const ps = planetPx();
   cx.imageSmoothingEnabled = ps < 40;
   UI.dots = [];
+  const drawRoutes = () => {
   // routes of my fleets
   if (T.appPaths) appFleetPaths();
-  for (const f of T.routes === false || T.appPaths ? [] : G.fleets) { // (T.routes false: the Amiga draws a route only while it is dragged)
+  for (const f of T.routes === false || T.appPaths || (T.routesDragOnly && !modern()) ? [] : G.fleets) { // (T.routes false: the Amiga draws a route only while it is dragged)
     if (f.owner !== ME) continue;
     if (f.to != null) {
       const a = G.stars[f.from], b = G.stars[f.to];
@@ -617,6 +618,8 @@ function draw0() {
     const f = G.fleets.find(x => x.id === UI.route.fleet);
     if (f) { let a = G.stars[f.star]; for (const sid of UI.route.stops) { const b = G.stars[sid]; drawRoute(a, b, HO.fleetSpeed(G, f), '#ffffff', 0); a = b; } }
   }
+  };
+  if (!T.routesOver) drawRoutes(); // (T.routesOver: the Mac skins paint a route over the stars, as StarLine's PaintRgn does)
   // a finger dragged from the selected star: a distance ruler (iOS StarNode)
   if (UI.ruler && T.fleetPath === 'ios' && G.stars[UI.ruler.from] && G.stars[UI.ruler.to]) iosLegs(G.stars[UI.ruler.from], [UI.ruler.to], true, null); // (the app's ruler is the route line: StarNode ccTouchMoved: -> updateFleetPath:fleet: -1)
   else if (UI.ruler && G.stars[UI.ruler.from] && G.stars[UI.ruler.to]) {
@@ -695,6 +698,7 @@ function draw0() {
     const w = 14, box = drawMarkers(f, x - w / 2, y - w / 2, w, 1);
     UI.dots.push({ x: box.x, y: y - w / 2, w: box.w, h: w, f: f.id, transit: true });
   }
+  if (T.routesOver) drawRoutes();
   // dragging (a skin with T.fleetPath 'ios' draws iOS's route line instead,
   // over a star, and for a finger over empty space nothing: iosFleetPath)
   const iosPath = T.fleetPath === 'ios' && UI.drag && UI.drag.fleet != null && UI.drag.moved && (UI.hover != null || UI.drag.touch);
@@ -713,7 +717,7 @@ function draw0() {
     // (the Amiga's double white line, its turns and its open chevrons)
     if (T.dragRoute) {
       const inReach = tgt != null && tgt !== f.star;
-      if (T.dragRoute(cx, { x1: sx(a.x), y1: sy(a.y), x2, y2, ok: inReach && ok, turns: inReach ? Math.ceil(HO.starDist(G, f.star, tgt) / HO.fleetSpeed(G, f) - 1e-9) : null, round: inReach && ok && round, star: inReach }) !== false) return;
+      if (T.dragRoute(cx, { x1: sx(a.x), y1: sy(a.y), x2, y2, ok: inReach && ok, turns: inReach ? Math.ceil(HO.starDist(G, f.star, tgt) / HO.fleetSpeed(G, f) - 1e-9) : null, dist: inReach ? Math.round(HO.starDist(G, f.star, tgt)) : null, round: inReach && ok && round, star: inReach }) !== false) return;
     }
     cx.save();
     // too far, but a route through your colonies exists (modern): show it
@@ -950,7 +954,7 @@ function appFleetPaths() {
 function drawRoute(a, b, speed, color, frac, round) {
   const x1 = sx(a.x), y1 = sy(a.y), x2 = sx(b.x), y2 = sy(b.y);
   // (T.routeLine(cx, { x1, y1, x2, y2, round, color, turns }): a skin's own line for a fleet's orders; true: drawn)
-  if (T.routeLine && T.routeLine(cx, { x1, y1, x2, y2, round: !!round, color, turns: a.id != null && b.id != null && speed ? Math.ceil(HO.starDist(G, a.id, b.id) / speed - 1e-9) : null })) return;
+  if (T.routeLine && T.routeLine(cx, { x1, y1, x2, y2, round: !!round, color, turns: a.id != null && b.id != null && speed ? Math.ceil(HO.starDist(G, a.id, b.id) / speed - 1e-9) : null, dist: a.id != null && b.id != null ? Math.round(HO.starDist(G, a.id, b.id)) : null })) return;
   cx.strokeStyle = color; cx.lineWidth = 1.6; cx.globalAlpha = 0.85;
   cx.beginPath(); cx.moveTo(x1, y1); cx.lineTo(x2, y2); cx.stroke();
   arrowHead(x1, y1, x2, y2, color);
@@ -4856,7 +4860,7 @@ const menuDim = (k) => { const D = G && HO.rules(G).menuDimmed; return !!(D && G
 // ----- the Ho menu: this version, skin, sounds, modern conveniences -----
 // Each version plays as it was released; the conveniences a player may add
 // are choices here, and can be changed in the middle of a game.
-const MODERN_TEXT = 'Modern conveniences: automatic routes, the map follows the news, battle speed, written battle reports, Game Info in the DOS and Windows 3.1 Window menu, answering a question by typing yes or no, and in the games with map scroll bars dragging the map with the mouse and the wheel zoom (not in the original games)';
+const MODERN_TEXT = 'Modern conveniences: automatic routes, fleet route lines kept on the map after you let go, the map follows the news, battle speed, written battle reports, Game Info in the DOS and Windows 3.1 Window menu, answering a question by typing yes or no, and in the games with map scroll bars dragging the map with the mouse and the wheel zoom (not in the original games)';
 function setModern(on) { if (!G) return; G.opts.modern = !!on; save(); renderPanel(); draw(); }
 // Full Hoedown (G.opts.hoedown, js/hoedown.js): Delta Tao's own jokes at
 // their most, never the play; chosen at New Game ("ho5.hoedown") and in the

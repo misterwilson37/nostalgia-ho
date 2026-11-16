@@ -1,5 +1,7 @@
 # Mac 2.0.1: the display audit (November 2026, begun)
 
+**Progress (comparison with Jake's two real games): 1 fleet arrows done; 2 battle, 3 menus and windows, 4 elimination: not yet.**
+
 **Provided by PC Games Vault (pcgamesvault.com) and digitized by Britt Dodd.** (Jake, November 2026: credit for everything that came, or could have come, from the Mac 2.0.1 disks, including copies of the same files from elsewhere.)
 
 *The rules of 2.0.1 are in `docs/dos-findings.md` ("Mac 2.0.1 differs") and `js/rules-mac20.js`. This is its display side.*
@@ -42,3 +44,11 @@ cannot do is there and dimmed: Page Setup and Print Map (a browser has no Mac pr
   (4000, 4010). They stay the classic page's windows (docs/remake-controls.md); their rows stay open.
 
 - **Fourth pass: 3 gaps left of 7.** Closed: the Explored Stars window (DLOG 6040, `rs.exploredList.dlg`), List Ship Types (DLOG 6000, `shipTypes20`), Organize Fleets (DLOG 6060), and the alerts (every ALRT's size and DITL rectangles, `alert20`, via `T.alertBox` in `alertOver`). Kept: the pictures of the stars' cells in Send Message's "Which One?" (`SetCellsToNearbyStars`, `SetCellsToOwnedStars`): each cell draws the icon whose id is a word of the star's record (+$e of the 0x32-byte table at -$1ce(a5)); which resource that id names was not traced (nothing found that writes it), so the skin lists the names without a picture rather than guess.
+
+## Jake's captures: fleet arrows (item 1)
+
+From `mac20-jake-shot010..047, 090` and the code (`MapLine @c6f7e`, `StarLine @c70a8`, `MakeArrowRegion @12d70`, the same code as 1.2F's):
+- **A route line is drawn only while a fleet is dragged.** `MapLine`'s only caller is `FollowPathDrag @c69ba`; in every capture of an arrow the pointer is at its tip, and after the drop (shot010/011, fleet panel "Departing to: ...") the map has no line. Ours drew every fleet's line all the time: now only while dragging (`T.routesDragOnly`); keeping them is a modern convenience (G.opts.modern, added to MODERN_TEXT in five languages).
+- **Single head**: one end, the far one, when the fleet can reach (fuel for one way). **Double head**: both ends, when it can also come back (`MapLine` passes the near-end flag only when the reach flag and the second flag are both set; ours: fuel for twice the distance). **Dashed (grey pattern), no head**: out of reach (shot090). The head: tip on the star's centre, barbs 13 out and 9 back; the line is 2 px; the same width everywhere (no thicker kind in the code; the thicker look in some shots is the head's barbs).
+- **The number by the line is the distance (the panel's "Dist"), not the turns**: shot029 line "5" for "Dist 5; Time 3", shot045/047 "4" for "Dist 4; Time 2". `StarLine`'s 3rd argument is the leg's distance record. Ours showed turns: fixed (Mac 2.0.1 skins only, `V2`).
+- The line is painted over the stars (PaintRgn): ours is now drawn after the stars (`T.routesOver`).
