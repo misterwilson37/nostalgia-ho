@@ -1238,7 +1238,7 @@ function qdCanvas(w, h, label) { // a box drawn at twice its pixels, as wide as 
   x.textBaseline = 'alphabetic'; x.fillStyle = '#000'; x.strokeStyle = '#000'; x.lineWidth = 1;
   const api = {
     c, x,
-    text(t, h0, v, font, o) { c.dataset.t = (c.dataset.t ? c.dataset.t + '\n' : '') + t; /* (what the box says, for a reader or a test: the canvas has no text of its own) */ x.font = font || G9; x.letterSpacing = o && o.cond ? '-1px' : '0px'; x.fillStyle = '#000'; const w0 = x.measureText(t).width; const at = o && o.right != null ? o.right - w0 : o && o.center != null ? o.center - Math.trunc(w0 / 2) : h0; x.fillText(t, at, v); x.letterSpacing = '0px'; return w0; },
+    text(t, h0, v, font, o) { c.dataset.t = (c.dataset.t ? c.dataset.t + '\n' : '') + t; /* (what the box says, for a reader or a test: the canvas has no text of its own) */ x.font = font || G9; x.letterSpacing = o && o.cond ? '-1px' : '0px'; x.fillStyle = (o && o.color) || '#000'; const w0 = x.measureText(t).width; const at = o && o.right != null ? o.right - w0 : o && o.center != null ? o.center - Math.trunc(w0 / 2) : h0; x.fillText(t, at, v); x.letterSpacing = '0px'; return w0; },
     width(t, font) { x.font = font || G9; return x.measureText(t).width; },
     hline(h0, h1, v) { x.fillStyle = '#000'; x.fillRect(h0, v, h1 - h0, 1); },
     vline(h0, v0, v1) { x.fillStyle = '#000'; x.fillRect(h0, v0, 1, v1 - v0); },
@@ -1487,12 +1487,42 @@ function techBox301() {
   q.c.dataset.todo = 'DrawVBarControl';
   return a.el('section', { class: 'box tech12', 'aria-label': W.head }, q.c);
 }
+// 3.0.1's words: its STR# lists (English 3.0.1; in French 3.0.1F's), js/lang-data.js
+const STR301 = (id) => { const L = window.HOLANG && (lang() === 'fr' ? HOLANG.mac301Fr : HOLANG.mac301En); return (L && L[String(id)]) || []; };
+const COL301 = () => !!window.HOMAC3_COLOUR;
+// The money pane (DrawIncomeRect @154294): the rect (the window's +0x70 + 4 down, 34 high, 226 wide) erased (black and white) or, on a
+// colour screen (the window's depth, +0xc2, 4 or more), painted in the panes' grey (RGBForeColor -$ba6: 0xBBBB, shot012) less its 2 bottom
+// rows. In bold, right-aligned at 87: "Reserve Metal:", "Ship Savings:", "Total Money:" (STR# 1005.4, .2, .3) on the base lines 10, 20, 30;
+// at 90 the reserve metal (player +0x1c, LongToNiceString), Ship Savings (+0x10, "$%s", 1005.9; red, ForeColor 205, when below 0) and
+// Total Money (+8, "$%s"). Then plain, right-aligned at the right edge less 1: the metal's change ((+0x24) "(up %s)" / "(down %s)", 1005.7
+// and .8, in full), the interest (+0x14, the program's own "(Int: %s)", LongToNiceShortString) and Total Money's change ((+0xc) "(up $%s)" /
+// "(down $%s)", 1005.5 and .6, short). A line along the bottom less 2, and one down the right edge less 1.
+function incomeBox301() {
+  const a = A(), g = G(), p = a.me(), rs = H().rules(g), S = STR301(1005), col = COL301();
+  const q = qdCanvas(226, 34, S[3] || 'Reserve Metal:');
+  if (col) q.rect(0, 0, 226, 32, '#bbb');
+  const L = (t, v) => q.text(t, 0, v, G9B, { right: 87 });
+  const V = (t, v, color) => q.text(t, 90, v, G9B, { color });
+  const R = (t, v) => q.text(t, 0, v, G9, { right: 225 });
+  const fmt = (t, x) => fill(t, x);
+  L(S[3] || 'Reserve Metal:', 10); L(S[1] || 'Ship Savings:', 20); L(S[2] || 'Total Money:', 30);
+  V(H().niceNum(Math.round(p.metal)), 10);
+  V(fmt(S[8] || '$%s', H().niceNum(Math.round(p.savings))), 20, p.savings < 0 && col ? '#dd0806' : null); // (redColor; black on a 1-bit screen)
+  V(fmt(S[8] || '$%s', H().niceNum(Math.round(p.net301 || 0))), 30);
+  const ch = (which) => { const c = (p.chg && p.chg[which]) || 0, up = c >= 0, n = Math.abs(Math.round(c));
+    return which === 'metal' ? fmt(S[up ? 6 : 7] || (up ? '(up %s)' : '(down %s)'), H().niceNum(n)) : fmt(S[up ? 4 : 5] || (up ? '(up $%s)' : '(down $%s)'), H().niceShort(n)); };
+  R(ch('metal'), 10);
+  R(rs.interestRow ? rs.interestRow(Math.round(p.oInterest || 0)) : '', 20);
+  R(ch('income'), 30);
+  q.hline(0, 227, 32); q.vline(225, 0, 34);
+  return a.el('section', { class: 'box info12 info301' }, q.c);
+}
 function panel301(panel) {
   const a = A(), el = a.el;
   const low = el('div', { class: 'low12' }, TODO301(68, 164, 'DrawIconRect', 'rost301'), TODO301(158, 164, 'DrawBudgetRect DrawHBarControl'));
   const rep = el('section', { class: 'box rep12box' }, el('ul', { class: 'reports rep12', 'data-todo': 'UpdateReportWin DrawMessage' }));
   panel.innerHTML = '';
-  panel.append(TODO301(226, 68, 'DrawPlanetRect DrawPieChart'), TODO301(226, 65, 'DrawFleetRect DrawSelectedFleetInfo'), TODO301(226, 34, 'DrawIncomeRect'), low, techBox301(), rep);
+  panel.append(TODO301(226, 68, 'DrawPlanetRect DrawPieChart'), TODO301(226, 65, 'DrawFleetRect DrawSelectedFleetInfo'), incomeBox301(), low, techBox301(), rep);
 }
 
 // ---------- the battle window (DoOneBattle @d07d0, DLOG 7010: 445 x 310, black; drawn at twice the size) ----------

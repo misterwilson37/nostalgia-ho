@@ -20,8 +20,8 @@ Sources (private repo `nostalgia-ho-sources`):
    2.0.1's map keys (KeyTheHo, KeyPlanet, TabThroughFleets) and report click are off in 3.0.1: their routines differ.
    Each pane not yet built is an empty box with a dotted edge (`data-todo` names its routine). Until item 2 is done the panel
    can't be used (no fleet rows, no budget bars): real-play fails on `mac3`/`mac3c` by design on this branch.
-2. Each changed pane from 3.0.1's own routine, one commit each, this table updated in the same commit: `DrawIncomeRect` (little
-   changed), `DrawPlanetRect` + `DrawPieChart`, `DrawFleetRect` + `DrawSelectedFleetInfo`, `DrawBudgetRect` + `DrawHBarControl`
+2. Each changed pane from 3.0.1's own routine, one commit each, this table updated in the same commit: ~~`DrawIncomeRect`~~ (done),
+   `DrawPlanetRect` + `DrawPieChart`, `DrawFleetRect` + `DrawSelectedFleetInfo`, `DrawBudgetRect` + `DrawHBarControl`
    (rewritten: five times the code), `DrawVBarControl`, the map (`DrawGalaxyMap`, `DrawOneStar`, the star sub-procs,
    `DrawOneFleet`, `DrawFleetPaths`), `UpdateReportWin` + `DrawMessage`, `DrawAnnounceBubble`.
 3. Until a pane is done, the skin must not show 2.0.1's version of it as if it were 3.0.1's: keep these on the session branch,
@@ -62,7 +62,7 @@ another version.
 | Fleet paths on the map | 014, 066, 076 | `DrawFleetPaths` | new | ? |
 | Planet pane (with the pie chart) | 012, 042 | `DrawPlanetRect`, `DrawPieChart` | differs, new | **wrong** |
 | Fleet pane | 012 | `DrawFleetRect`, `DrawSelectedFleetInfo` | differ | **wrong** |
-| Money pane (Reserve Metal, Ship Savings, Total Money) | 012 | `DrawIncomeRect` | differs | **wrong** |
+| Money pane (Reserve Metal, Ship Savings, Total Money) | 012, 040 | `DrawIncomeRect` | differs | **done** (`incomeBox301`: STR# 1005.2-.9, the program's "(Int: %s)"; bold labels right at 87, values at 90, changes right at 225; grey 0xBBBB in colour; Ship Savings red when below 0; the rules at 32 and 225. Fields: +0x1c `p.metal`, +0x10 `p.savings`, +8 `p.net301`, +0x14 `p.oInterest`, +0x24/+0xc `p.chg`) |
 | Players list and budget bars | 012 | `DrawBudgetRect`, `DrawHBarControl`, `DrawVBarControl` | differ | **wrong** |
 | End Turn button | 012, 031 | `DrawSpecial` (to confirm) | new | ? |
 | Tech Spending window | all | `CreateTechWin`, `UpdateTechWin` | same code | close: frame, heading, "Current Levels:" and the five levels as 2.0.1's; the bars are `DrawVBarControl` (to do) |
