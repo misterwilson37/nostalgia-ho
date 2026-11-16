@@ -1490,6 +1490,8 @@ function techBox301() {
 // 3.0.1's words: its STR# lists (English 3.0.1; in French 3.0.1F's), js/lang-data.js
 const STR301 = (id) => { const L = window.HOLANG && (lang() === 'fr' ? HOLANG.mac301Fr : HOLANG.mac301En); return (L && L[String(id)]) || []; };
 const COL301 = () => !!window.HOMAC3_COLOUR;
+// sprintf as 3.0.1's strings need it: %s, %d, %.*s and %N.Md (at least M digits: "%d.%1.1d°F", "%d.%2.2dG")
+const cfmt = (t, ...v) => { let i = 0; return t.replace(/%(\.\*)?(\d*)(?:\.(\d+))?([sd])|%%/g, (m, star, w, prec, c) => { if (m === '%%') return '%'; let x = String(v[i++]); if (c === 'd' && prec) { const neg = x.startsWith('-'); x = (neg ? '-' : '') + x.replace('-', '').padStart(+prec, '0'); } return w ? x.padStart(+w) : x; }); };
 // The money pane (DrawIncomeRect @154294): the rect (the window's +0x70 + 4 down, 34 high, 226 wide) erased (black and white) or, on a
 // colour screen (the window's depth, +0xc2, 4 or more), painted in the panes' grey (RGBForeColor -$ba6: 0xBBBB, shot012) less its 2 bottom
 // rows. In bold, right-aligned at 87: "Reserve Metal:", "Ship Savings:", "Total Money:" (STR# 1005.4, .2, .3) on the base lines 10, 20, 30;
@@ -1507,7 +1509,7 @@ function incomeBox301() {
   const fmt = (t, x) => fill(t, x);
   L(S[3] || 'Reserve Metal:', 10); L(S[1] || 'Ship Savings:', 20); L(S[2] || 'Total Money:', 30);
   V(H().niceNum(Math.round(p.metal)), 10);
-  V(fmt(S[8] || '$%s', H().niceNum(Math.round(p.savings))), 20, p.savings < 0 && col ? '#dd0806' : null); // (redColor; black on a 1-bit screen)
+  V(fmt(S[8] || '$%s', H().niceNum(Math.round(p.savings))), 20, p.savings < 0 && col ? '#dd0000' : null); // (redColor, as an 8-bit screen shows it; black on a 1-bit screen)
   V(fmt(S[8] || '$%s', H().niceNum(Math.round(p.net301 || 0))), 30);
   const ch = (which) => { const c = (p.chg && p.chg[which]) || 0, up = c >= 0, n = Math.abs(Math.round(c));
     return which === 'metal' ? fmt(S[up ? 6 : 7] || (up ? '(up %s)' : '(down %s)'), H().niceNum(n)) : fmt(S[up ? 4 : 5] || (up ? '(up $%s)' : '(down $%s)'), H().niceShort(n)); };
@@ -1517,12 +1519,103 @@ function incomeBox301() {
   q.hline(0, 227, 32); q.vline(225, 0, 34);
   return a.el('section', { class: 'box info12 info301' }, q.c);
 }
+// QuickDraw's ltGray and dkGray patterns (the QD globals' ltGray at A5-$485c, dkGray at -$4864: 88 22 88 22 ..., 77 DD 77 DD ...), as canvas patterns
+const qdPat = (x, rows) => { const t = document.createElement('canvas'); t.width = t.height = 8; const c = t.getContext('2d'); c.fillStyle = '#fff'; c.fillRect(0, 0, 8, 8); c.fillStyle = '#000';
+  rows.forEach((r, v) => { for (let h = 0; h < 8; h++) if (r & (0x80 >> h)) c.fillRect(h, v, 1, 1); }); return x.createPattern(t, 'repeat'); };
+const LTGRAY = [0x88, 0x22, 0x88, 0x22, 0x88, 0x22, 0x88, 0x22], DKGRAY = [0x77, 0xdd, 0x77, 0xdd, 0x77, 0xdd, 0x77, 0xdd];
+// 3.0.1's colour table (XWinProc @180bae: eighteen SetRGB at A5-$bf4..), as an 8-bit screen shows them (the system palette: Jake's shot012, shot042)
+const RGB301 = { terra: '#00bb00' /* 1F21 B793 1431 */, poor: '#dd0000' /* DD6B 08C2 06A2 */, mine: '#0000dd' /* 0000 0000 D400 */, grey: '#bbbbbb' /* BBBB BBBB BBBB */ };
+// DrawPieChart @d2da8 (h, v, depth, ring): a 44 x 44 oval at (h, v); on a colour screen PICT 600 (a bevelled ring) 3 pixels round it; then, unless
+// terraforming or mining is finished (-1), the terraform share (player's star slot +0, per mille of the two) as an arc from 12 o'clock clockwise,
+// green (A5-$bf4) or, when the planet's gravity is more than 2.56 times the player's either way, red (-$bee), ltGray in black and white; "Terra"
+// (1005.17) at (h + 44, v - 2) in the arc's colour; the rest, mine, blue (-$bdc; dkGray), "Mine" (1005.18) right-aligned at (h, v - 2); a frame
+// round the oval in black and white
+function pieChart301(q, h, v, s, T, X) {
+  const a = A(), p = a.me(), col = COL301(), S = STR301(1005), x = q.x;
+  if (col) { const ring = a.IMG['dos:p600']; if (ring && ring.width) x.drawImage(ring, h - 3, v - 3, 50, 50); }
+  if (T === -1 || X === -1) return;
+  const r = Math.max(s.g, p.homeG) / Math.max(0.01, Math.min(s.g, p.homeG));
+  const cx = h + 22, cy = v + 22, d6 = Math.trunc(360 * T / 1000);
+  const arc = (from, to, fill) => { x.fillStyle = fill; x.beginPath(); x.moveTo(cx, cy); x.arc(cx, cy, 22, (from - 90) * Math.PI / 180, (to - 90) * Math.PI / 180); x.closePath(); x.fill(); };
+  const tc = col ? (Math.trunc(100 * r) > 256 ? RGB301.poor : RGB301.terra) : qdPat(x, LTGRAY), mc = col ? RGB301.mine : qdPat(x, DKGRAY);
+  if (d6 > 0) arc(0, d6, tc);
+  q.text(S[16] || 'Terra', h + 44, v - 2, G9, { color: col ? tc : '#000' });
+  if (d6 < 360) arc(d6, 360, mc);
+  q.text(S[17] || 'Mine', 0, v - 2, G9, { right: h, color: col ? mc : '#000' });
+  if (!col) { x.strokeStyle = '#000'; x.lineWidth = 1; x.beginPath(); x.ellipse(cx, cy, 21.5, 21.5, 0, 0, Math.PI * 2); x.stroke(); }
+}
+// The planet pane (DrawPlanetRect @15491e): 226 x 68. Erased, or on a colour screen painted grey (A5-$ba6) less its right column (and, for your colony
+// with terraforming or mining finished, less the 130 pixels at the right, which are black: the region -$10a8, CreateMapWin's rect round the planet's oval,
+// where DoGratuitousGraphics draws the turning planet). The star's name in Chicago 12 centred at 43, base line 11; then Geneva 9:
+//   no information (its info year below 2000): "You have no information about this planet." (1005.20) at (3, 22);
+//   else "Pop:", "Temp:", "Gravity:", "Metal:" (1005.13-16) right-aligned at 40 on 32, 42, 52, 62; at 45 the temperature (720 less the player's
+//   ideal plus the star's, in tenths: "%d.%1.1d°F", 4000.3), the gravity (100 x the star's over the player's: "%d.%2.2dG", 4000.4) and the metal;
+//   yours: "Income:" (1005.12) at (5, 22), at 45 the colony's income ("$%s") and its population (on 32), then the pie chart at (130, 12) or the
+//     planet's picture;
+//   another's or nobody's: "Owner:" (4000.5) right-aligned at 40 on 22, at 45 the owner's name or "No One" (4000.38); at 45 on 32 "Uninhabited" or
+//     "Unknown" (1005.21, .22); "Info Date:" (4000.7) at (100, 22) and the year at 155; "Battle Date:" (4000.10) at (100, 32) and the year at 155
+//     when you know of a battle there.
+// Rules at 65 and 67 and down 225. A click on your colony's pane while one part is not finished is DoPieClick @d3028: the beep if the other is finished;
+// else, while the button is down, the angle round the pie (PtToAngle, 1 to 359; across 12 o'clock it stops at the end it came from) sets terraforming
+// to (angle - 1) x 1000 / 358 and mining to the rest, and the pie and the budget bars are drawn again.
+function planetBox301() {
+  const a = A(), g = G(), p = a.me(), rs = H().rules(g), sid = a.UI.sel, s = sid != null ? g.stars[sid] : null, S = STR301(1005), S4 = STR301(4000), col = COL301();
+  const q = qdCanvas(226, 68, s ? s.name : '');
+  const box = a.el('section', { class: 'box planet12 planet301' }, q.c);
+  const yours = !!s && s.owner === a.ME, B = yours && rs.bars ? rs.bars(s) : null, done = !!B && (B[0] === -1 || B[1] === -1);
+  if (col) q.rect(0, 0, done ? 96 : 225, 68, RGB301.grey);
+  if (done) q.rect(96, 0, 224, 65, '#000');
+  if (s) {
+    const k = H().know(g, p, sid);
+    q.text(s.name, 0, 11, SYS12, { center: 43 });
+    if (!yours && !(k && k.explored)) q.text(S[19] || 'You have no information about this planet.', 3, 22);
+    else {
+      const src = yours ? s : k, L = (t, v) => q.text(t, 0, v, G9, { right: 40 }), at = (t, v) => q.text(t, 45, v);
+      L(S[12] || 'Pop:', 32); L(S[13] || 'Temp:', 42); L(S[14] || 'Gravity:', 52); L(S[15] || 'Metal:', 62);
+      const t10 = Math.round(10 * (72 + (src.t - p.homeT))), gr = Math.trunc(100 * src.g / Math.max(0.01, p.homeG));
+      at(cfmt(S4[2] || '%d.%1.1d°F', Math.trunc(t10 / 10), Math.abs(t10 % 10)), 42);
+      at(cfmt(S4[3] || '%d.%2.2dG', Math.trunc(gr / 100), gr % 100), 52);
+      at(H().niceNum(Math.round(src.metal)), 62);
+      if (yours) {
+        q.text(S[11] || 'Income:', 5, 22); at(fill(S[8] || '$%s', H().niceNum(Math.round(H().planetIncome(g, p, s)))), 22);
+        at(H().niceNum(H().popNum(g, s.pop)), 32);
+        if (!done) pieChart301(q, 130, 12, s, B[0], B[1]);
+        else { q.x.setLineDash([1, 2]); q.x.strokeStyle = '#888'; q.x.beginPath(); q.x.ellipse(160, 32, 28, 28, 0, 0, Math.PI * 2); q.x.stroke(); q.x.setLineDash([]); q.c.dataset.todo = 'DoGratuitousGraphics'; }
+      } else {
+        L(S4[4] || 'Owner:', 22); at(k.owner >= 0 ? g.players[k.owner].name : (S4[37] || 'No One'), 22);
+        at(k.owner >= 0 ? (S[21] || 'Unknown') : (S[20] || 'Uninhabited'), 32);
+        q.text(S4[6] || 'Info Date:', 100, 22); q.text(String(2000 + Math.max(0, k.seen) * 10), 155, 22);
+        const bs = a.lastBattles(sid); if (bs.length) { q.text(S4[9] || 'Battle Date:', 100, 32); q.text(String(bs[bs.length - 1].year), 155, 32); }
+      }
+    }
+  }
+  q.hline(0, 226, 65); q.hline(0, 226, 67); q.vline(225, 0, 68);
+  if (yours && B && !(B[0] === -1 && B[1] === -1)) {
+    q.c.style.touchAction = 'none';
+    q.c.addEventListener('pointerdown', (ev) => {
+      ev.preventDefault();
+      if (done) { a.beep(); return; }
+      let last = Math.trunc(360 * B[0] / 1000) + 1, moved = false;
+      const move = (e) => {
+        const pt = q.at(e); let ang = Math.round(Math.atan2(pt.h - 152, -(pt.v - 34)) * 180 / Math.PI); if (ang < 0) ang += 360;
+        if (last < 20 && ang > 338 && moved) ang = 1; if (last > 339 && ang < 20 && moved) ang = 359;
+        ang = Math.max(1, Math.min(359, ang));
+        const t = Math.trunc((ang - 1) * 1000 / 358);
+        if (t !== rs.bars(s)[0]) { rs.setBars(s, t, 1000 - t); const c = planetBox301(); box.replaceWith(c); }
+        last = ang; moved = true;
+      };
+      const up = (e) => { window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); move(e); a.save(); a.renderPanel(); };
+      window.addEventListener('pointermove', move); window.addEventListener('pointerup', up); move(ev);
+    });
+  }
+  return box;
+}
 function panel301(panel) {
   const a = A(), el = a.el;
   const low = el('div', { class: 'low12' }, TODO301(68, 164, 'DrawIconRect', 'rost301'), TODO301(158, 164, 'DrawBudgetRect DrawHBarControl'));
   const rep = el('section', { class: 'box rep12box' }, el('ul', { class: 'reports rep12', 'data-todo': 'UpdateReportWin DrawMessage' }));
   panel.innerHTML = '';
-  panel.append(TODO301(226, 68, 'DrawPlanetRect DrawPieChart'), TODO301(226, 65, 'DrawFleetRect DrawSelectedFleetInfo'), incomeBox301(), low, techBox301(), rep);
+  panel.append(planetBox301(), TODO301(226, 65, 'DrawFleetRect DrawSelectedFleetInfo'), incomeBox301(), low, techBox301(), rep);
 }
 
 // ---------- the battle window (DoOneBattle @d07d0, DLOG 7010: 445 x 310, black; drawn at twice the size) ----------
