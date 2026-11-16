@@ -1058,22 +1058,27 @@ function reportRows() {
 // A finger on one of your fleets drags it, as a mouse does (the program has no other way to send a fleet; the classic skin's touch gestures only pan, and the
 // iOS ones send a fleet from a Move button). Everything else a finger does stays the classic gestures (pan, pinch, taps). The finger's events are handed to the
 // map as a mouse's, with the same pointer id.
+// the Mac skins (this file's, on the classic page): their programs send a fleet by dragging it, a finger as well
+const macLook = () => !!(window.HOSKINS && /^mac\d/.test(HOSKINS.current || ''));
 function touchFleets() {
-  const cv = document.getElementById('map'); if (!cv || cv._dosTouch) return; cv._dosTouch = true;
+  if (window._dosTouch) return; window._dosTouch = true; // (on the document, so it does not matter when the map is made)
+  const cv = document, isMap = (e) => e.target && e.target.id === 'map';
   let id = null;
   const mouse = (type, e) => new PointerEvent(type, { pointerId: e.pointerId, pointerType: 'mouse', isPrimary: true, button: 0, buttons: type === 'pointerup' ? 0 : 1, clientX: e.clientX, clientY: e.clientY, bubbles: true, cancelable: true });
   cv.addEventListener('pointerdown', (e) => {
-    const a = window.HOAPI; if (!frameOn() || e.pointerType !== 'touch' || !e.isTrusted || !a || !a.G || a.G.over) return;
-    const px = e.offsetX / U, py = e.offsetY / U, d = (a.UI.dots || []).slice().reverse().find(k => k.mine && !k.sat && !k.transit && px >= k.x - 6 && px <= k.x + k.w + 6 && py >= k.y - 6 && py <= k.y + k.h + 6);
+    const a = window.HOAPI; if (!isMap(e) || !(frameOn() || macLook()) || e.pointerType !== 'touch' || !e.isTrusted || !a || !a.G || a.G.over) return;
+    const k = frameOn() ? U : 1, px = e.offsetX / k, py = e.offsetY / k, // (the map's pixel in CSS pixels: the frame's unit, else 1 as the classic page draws it)
+    d = (a.UI.dots || []).slice().reverse().find(k => k.mine && !k.sat && !k.transit && px >= k.x - 6 && px <= k.x + k.w + 6 && py >= k.y - 6 && py <= k.y + k.h + 6);
     if (!d) return;
-    id = e.pointerId; e.stopImmediatePropagation(); e.preventDefault(); cv.dispatchEvent(mouse('pointerdown', e));
+    id = e.pointerId; e.stopImmediatePropagation(); e.preventDefault(); e.target.dispatchEvent(mouse('pointerdown', e));
   }, true);
   for (const t of ['pointermove', 'pointerup', 'pointercancel']) cv.addEventListener(t, (e) => {
-    if (id == null || e.pointerId !== id || e.pointerType !== 'touch' || !e.isTrusted) return;
-    e.stopImmediatePropagation(); e.preventDefault(); cv.dispatchEvent(mouse(t === 'pointercancel' ? 'pointerup' : t, e));
+    if (id == null || e.pointerId !== id || e.pointerType !== 'touch' || !e.isTrusted || !isMap(e)) return;
+    e.stopImmediatePropagation(); e.preventDefault(); e.target.dispatchEvent(mouse(t === 'pointercancel' ? 'pointerup' : t, e));
     if (t !== 'pointermove') id = null;
   }, true);
 }
+touchFleets(); // (at once: the Mac skins, which do not call frameSetup, need it too; the handler asks which look is on)
 function frameSetup(de) {
   const sync = () => {
     const was = de.classList.contains('dosframe'); de.classList.toggle('dosframe', frameOn()); setUnit();

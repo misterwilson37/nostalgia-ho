@@ -314,10 +314,10 @@ function alertById20(id, paras, ok, done) {
   const kids = items.map(it => {
     if (it[0] === 't') return raw('span', paras[ti++], { class: 'dt20', style: at20(it[1]) + ';white-space:pre-line' });
     if (it[0] === 'p') { const im = a.IMG['dos:p' + it[2]]; return im ? el('img', { src: im.src, alt: '', style: at20(it[1]) + ';image-rendering:pixelated' }) : null; }
-    return el('button', { type: 'button', class: 'ok20', style: at20(it[1]) + ';min-width:0;padding:0', onclick: close }, raw('span', ok || it[2]));
+    return el('button', { type: 'button', class: 'ok20' + (it === items.find(x => x[0] === 'b') ? ' def20' : ''), style: at20(it[1]) + ';min-width:0;padding:0', onclick: close }, raw('span', ok || it[2]));
   });
   const back = el('div', { class: 'scrim', onkeydown: (e) => { if (e.key === 'Escape' || e.key === 'Enter') { e.stopPropagation(); close(); } } },
-    el('div', { class: 'win small alert notitle mac12 dl20w', role: 'alertdialog', 'aria-modal': 'true', 'aria-label': paras[0] }, dlog20(w, h, ...kids)));
+    el('div', { class: 'win small alert notitle mac12 dl20w' + (window.HOMAC2_COLOUR ? ' col20' : ''), role: 'alertdialog', 'aria-modal': 'true', 'aria-label': paras[0] }, dlog20(w, h, ...kids)));
   document.body.append(back); const b = back.querySelector('button'); if (b) b.focus();
   return back;
 }
@@ -333,10 +333,10 @@ function alert20(paras) {
   const kids = items.map(it => {
     if (it[0] === 't') return raw('span', paras[ti] != null && items.filter(x => x[0] === 't').length === paras.length ? paras[ti++] : (ti++, it[2]), { class: 'dt20', style: at20(it[1]) + ';white-space:pre-line' });
     if (it[0] === 'p') { const im = a.IMG['dos:p' + it[2]]; return im ? el('img', { src: im.src, alt: '', style: at20(it[1]) + ';image-rendering:pixelated' }) : null; }
-    return el('button', { type: 'button', class: 'ok20', style: at20(it[1]) + ';min-width:0;padding:0', onclick: done }, raw('span', it[2]));
+    return el('button', { type: 'button', class: 'ok20' + (it === items.find(x => x[0] === 'b') ? ' def20' : ''), style: at20(it[1]) + ';min-width:0;padding:0', onclick: done }, raw('span', it[2]));
   });
   const back = el('div', { class: 'scrim', onclick: (e) => { if (e.target === back) done(); }, onkeydown: (e) => { if (e.key === 'Escape') { e.stopPropagation(); done(); } } },
-    el('div', { class: 'win small alert notitle mac12 dl20w', role: 'alertdialog', 'aria-modal': 'true', 'aria-label': paras[0] }, dlog20(w, h, ...kids)));
+    el('div', { class: 'win small alert notitle mac12 dl20w' + (window.HOMAC2_COLOUR ? ' col20' : ''), role: 'alertdialog', 'aria-modal': 'true', 'aria-label': paras[0] }, dlog20(w, h, ...kids)));
   document.body.append(back); const b = back.querySelector('button'); if (b) b.focus();
   return back;
 }

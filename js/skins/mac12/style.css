@@ -206,7 +206,11 @@ html #tacct { opacity: 1 !important; background: #fff !important; color: #000 !i
 html .win a { color: #000; text-decoration: underline; }
 
 /* ---- Mac 2.0.1's own dialogs (mac12/ui.js: dlog20): items at their DITL rectangles, Chicago-less system look as the other 1.2 dialogs ---- */
-.dl20 { font: 12px/1.2 Geneva, Verdana, sans-serif; color: #000; background: #fff; }
+.dl20 { font: 15px/1.2 'DOS Chicago 12', Chicago, Charcoal, Geneva, sans-serif; letter-spacing: .58px; color: #000; background: #fff; } /* (.58px: the program's lines are about 9% wider than this font's, measured on 'Congratulations! You have' in shot104) */ /* (the program's Chicago 12; the DOS skin ships the same face, as a 1500-unit font that is 12 pixels at 15px) */
+.dl20 button { font: 15px/1 'DOS Chicago 12', Chicago, Charcoal, Geneva, sans-serif !important; letter-spacing: .58px; }
+/* buttons as the program draws them (a 58 x 20 round rect, corner about 5) and the default one's ring: 3 pixels, a pixel apart (shot104, lost027) */
+.dl20 .ok20 { border-radius: 5px !important; }
+.dl20 .ok20.def20 { outline: 3px solid #000; outline-offset: 1px; }
 .dl20 .dt20 { display: block; overflow: hidden; }
 .dl20 input[type=range] { margin: 0; }
 .cl20 .c20 { cursor: default; font: 9px Geneva, Verdana, sans-serif; }
@@ -227,3 +231,11 @@ html .win a { color: #000; text-decoration: underline; }
 .mapbar12:focus-visible { outline: 1px dotted #fff; outline-offset: -3px; }
 .mapcorner12 { right: 0; bottom: 0; width: 16px; height: 16px; box-sizing: border-box; border-left: 1px solid #000; border-top: 1px solid #000; }
 html.bars12 #msg { bottom: 28px; }
+
+/* An alert's frame on the colour Mac (shot104, lost027, the nested alert of shot002): a black line, three pixels of bevel (light blue-white, grey,
+   slate on the top and left, the reverse at the bottom and right) and a black line; the items' origin is 3 pixels inside it. No drop shadow. */
+.win.dl20w.col20 { border: 1px solid #000; box-shadow:
+  inset 1px 1px 0 0 #ccf, inset 2px 2px 0 0 #bbb, inset 3px 3px 0 0 #669, inset 4px 4px 0 0 #000,
+  inset -1px -1px 0 0 #669, inset -2px -2px 0 0 #bbb, inset -3px -3px 0 0 #ccf, inset -4px -4px 0 0 #000; background: #fff; }
+.win.dl20w.col20 .wbody { padding: 0; }
+.win.dl20w.col20 .dl20 { margin: 7px; }
