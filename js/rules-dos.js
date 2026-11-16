@@ -826,7 +826,11 @@ function planetClass(G, gs) { return gs > 2.56 || gs < 1 / 2.56 ? 'inhospitable'
 // of the next turn they are out for good, and a colony founded in between
 // brings them back (state 1) (FUN_1040_3bd4). A player already out for good comes back the same way: every state of 4 and up becomes 1 when
 // the player has a colony again (CONFIRMED in Windows FUN_1040_3bd4 and Mac 2.0.1's DoGameEndStuff @a3b08, which EndTurn calls for every player each turn
-// with no test of the state before it: state 5 is dying, the year less 10 is out), so `!p.alive` reviving below is the original's, not a slip. From 2010 on, with more than one
+// with no test of the state before it: state 5 is dying, the year less 10 is out), so `!p.alive` reviving below is the original's, not a slip.
+// The state word is a HUMAN's Auto Play mode (1 = he plays, 2 = the computer plays when he is slow, 3 = the computer plays all his turns; ChangeAutoPlay
+// @1014f2 and doAutoPlayDialog @12243c in Mac 2.0.1), and 4 and up means out: it is not a human-or-computer flag. Who is a computer is the player's INDEX
+// (below the header's +6 word, the number of computers: EndTurn @a0280, FUN_1040_0038 @1040:02bb), and a computer's word is 1 from New Game on (FUN_1030_1299
+// sets every slot to 1). So a revived computer stays a computer, in the original too, and no turn waits for a human nobody plays. From 2010 on, with more than one
 // player, the only player who is neither out nor dying wins (FUN_1040_3fa6;
 // strings 728-729). Nothing removes an out player's fleets: they still fight,
 // and a computer's still move (FUN_1040_0038 runs the computer turn for every
