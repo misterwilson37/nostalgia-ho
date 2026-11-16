@@ -1,6 +1,6 @@
 # Mac 2.0.1: the display audit (November 2026, begun)
 
-**Progress (comparison with Jake's two real games): 1 fleet arrows done; 2 battle animation done (colour); 3 menus and windows partly done (see below), 4 elimination: not yet.**
+**Progress (comparison with Jake's two real games): 1 fleet arrows done; 2 battle animation done (colour); 3 menus and windows partly done (see below), 4 elimination checked in the code: the original too brings an out player back, nothing to fix.**
 
 **Provided by PC Games Vault (pcgamesvault.com) and digitized by Britt Dodd.** (Jake, November 2026: credit for everything that came, or could have come, from the Mac 2.0.1 disks, including copies of the same files from elsewhere.)
 
@@ -68,3 +68,11 @@ Compared: File, Edit, Options, Ships, Galaxy, Window (`shot013..018`), the won a
 - **The won and lost boxes** were the classic modal (small, with a close square); now ALRT 5040 / 5041 and 5050 / 5051 as the box of the program (227 x 249 / 235 x 244: the text at the top, the picture 3030 / 3040 (colour 3530 / 3540) in the middle, OK or "Oh, well…" at the foot), as `shot104` and `lost027`.
 - **Name a Star** gets its picture (DITL 4050 item 4, PICT 3500 at (118, 10)), which the colour game shows as the black and white sketch (the colour file has no 3500), `shot105`.
 - Not changed (left): the text face is Geneva 12 where the program has Chicago 12, so text wraps a little later; the "Review Announced Battles" tick in the captures is Jake's own setting (ours starts unticked, as 1.2's default); the Apple menu and the clock are the remake's (Ho! 2.0.1 title in the menu bar).
+
+## Elimination (item 4), from the code
+
+`DoGameEndStuff @a3b08` (Mac 2.0.1; the same as Windows `FUN_1040_3bd4`) is called by `EndTurn` for every player each turn, whatever the player's state (state is the word at +$282 of the game header: 1 human, 3 computer, 5 dying, a year less 10 for out; `CheckForWinner @a404a`, `DrawIconRect`, `ComparePlayers` read "under 4" as in the game):
+- fewer than 3 budget slots (no colony; two are Savings and Technology): state under 4 becomes 5 (dying); state 5 becomes the year less 10 (out); anything else stays;
+- 3 slots or more: **any state of 4 or more becomes 1.** So a dying player who founded a colony is back, and so is one already out (his fleets still move and fight, and a colony ship of his can still land). There is no test of "out" anywhere before it.
+
+So `checkElimination` in `js/rules-dos.js` (reviving a player with `!p.alive` who has a colony) matches the original, and is left; its comment now says so. One quirk the remake does not copy: the original sets state 1 (human) also for a revived computer (3 becomes 5 becomes 1); ours keeps `p.human`. Whether an out player coming back is a bug worth a `rs.fixes` entry is Jake's call: nothing was added.

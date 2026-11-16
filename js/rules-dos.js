@@ -824,7 +824,9 @@ function planetClass(G, gs) { return gs > 2.56 || gs < 1 / 2.56 ? 'inhospitable'
 // or not, and every player is told "%s has just been eliminated from the
 // game." (strings 726-727, FUN_1050_09e3); if they still have none at the end
 // of the next turn they are out for good, and a colony founded in between
-// brings them back (state 1) (FUN_1040_3bd4). From 2010 on, with more than one
+// brings them back (state 1) (FUN_1040_3bd4). A player already out for good comes back the same way: every state of 4 and up becomes 1 when
+// the player has a colony again (CONFIRMED in Windows FUN_1040_3bd4 and Mac 2.0.1's DoGameEndStuff @a3b08, which EndTurn calls for every player each turn
+// with no test of the state before it: state 5 is dying, the year less 10 is out), so `!p.alive` reviving below is the original's, not a slip. From 2010 on, with more than one
 // player, the only player who is neither out nor dying wins (FUN_1040_3fa6;
 // strings 728-729). Nothing removes an out player's fleets: they still fight,
 // and a computer's still move (FUN_1040_0038 runs the computer turn for every
