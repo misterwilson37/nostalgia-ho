@@ -1508,12 +1508,13 @@ function techBox301() {
       x1 += 22;
     });
     q.hline(x1, x1 + 8, Yb);
+    q.c.dataset.bars = JSON.stringify(vals().map((v, i) => ({ x: 87 + 22 * i, y: 16, w: 15, h: 50, vert: true, frac: (v < 1 ? 0 : vPercBar(v)) / 50, label: S1[i] || names[i] || 'Radical' }))); q.c.dataset.w = '228'; q.c.dataset.h = '96';
   };
   draw();
   q.c.style.touchAction = 'none';
   q.c.addEventListener('pointerdown', (ev) => {
     const pt = q.at(ev), i = Math.floor((pt.h - 87) / 22), off = (pt.h - 87) - 22 * i;
-    if (i < 0 || i >= keys.length || off < 0 || off >= 15 || pt.v < 13 || pt.v > 68) return;
+    if (i < 0 || i >= keys.length || off < 0 || off >= 15 || pt.v < 13 || pt.v > 74) return; // (to just above the names: a finger on a short bar lands under its base line)
     ev.preventDefault();
     const start = vals(), sc = H().barScale(G(), 'tech');
     const move = (e) => { const px = Math.max(0, Math.min(50, 66 - q.at(e).v)); const nv = spread(start, i, sc.toValue(px / 50)); keys.forEach((k, j) => { p.talloc[k] = nv[j] / 1000; }); draw(); };
@@ -1883,6 +1884,7 @@ function lowBox301(B) {
   const low = new Set((rs.underfunded ? rs.underfunded(g, p) : []).map(st => st.id));
   const lenOf = (pm) => pm < 1 ? 0 : log ? hPercBar(pm) : Math.trunc((pm * 77 + 999) / 1000);
   let y = Y(181);
+  const tb = []; // (where the bars are, in the canvas's pixels: for a test tool, data-bars)
   slots.slice(LOW301.bTop, LOW301.bTop + brow).forEach((e) => {
     const pm = Math.round(e.get() * 1000), len = Math.min(77, lenOf(pm)), st = e.star != null ? g.stars[e.star] : null;
     const inc = st ? H().planetIncome(g, p, st) : 0, abandoning = !!(st && st.abandon301);
@@ -1909,6 +1911,7 @@ function lowBox301(B) {
       }
     }
     const name = e.key === 'savings' ? (S5[25] || 'Ships') : e.key === 'tech' ? (S5[24] || 'Tech') : st.name;
+    tb.push({ x: x0, y: y + 3, w: 77, h: 13, vert: false, frac: len / 77, label: name });
     const lc = !col ? '#000' : !st || inc >= 0 ? css16(CT301[5]) : css16(ratio <= 256 ? CT301[1] : CT301[2]);
     const w = q.text(name, 0, y + 14, G9, { right: L + 43, color: lc });
     if (st && a.UI.sel === st.id) q.rect(L + 43 - w, y + 15, L + 43, y + 16, lc);
@@ -1917,6 +1920,7 @@ function lowBox301(B) {
     y += 14;
   });
   q.vline(123, y, Y(331));
+  q.c.dataset.bars = JSON.stringify(tb); q.c.dataset.w = '226'; q.c.dataset.h = '165';
   scrollBar301(q, x, 214, Y(181), Y(331), Math.max(0, slots.length - brow), LOW301.bTop);
   // DoHBarClick: a drag on a bar, a click on the heading; the scroll bars; a click on a colony's name selects it (FollowStarNameClick)
   q.c.style.touchAction = 'none';
@@ -2662,7 +2666,7 @@ if (V3) {
     drawStar: (cx, i) => (own() ? drawStar301(cx, i) : false),
     // your selected fleet is picked up from its star, as FollowPathDrag does (an unseen handle over the star's icon); no markers are drawn
     marker: () => 'none',
-    markerAt(f, i) { if (!own()) return null; if (!i.mine || f.id !== A().UI.selFleet) return null; const u = i.view.s / 2, d = u >= 17 ? 32 * Math.max(1, u / 17) : u < 7 ? u + 4 : 16; return { x: i.x - d / 2, y: i.y - d / 2, w: d, hidden: true }; },
+    markerAt(f, i) { if (!own() || !i.mine) return null; const a = A(), here = a.fleetOrder(a.G.fleets.filter(x => x.owner === a.ME && x.star === i.s.id && x.to == null)), cur = here.find(x => x.id === a.UI.selFleet) || here[0]; if (!cur || f.id !== cur.id) return null; const u = i.view.s / 2, d = u >= 17 ? 32 * Math.max(1, u / 17) : u < 7 ? u + 4 : 16; return { x: i.x - d / 2, y: i.y - d / 2, w: d, hidden: true }; },
   };
   return;
 }

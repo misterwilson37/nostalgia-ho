@@ -18,8 +18,7 @@ Sources (private repo `nostalgia-ho-sources`):
    (`HOMAC_VERSION` '3.0.1'), which gives 3.0.1 only `window.HOMAC301` (the panel's arrangement, `panel301`; the Tech Spending
    window's words); then `js/skins/mac3/pictures.js` (the old `mac3/ui.js`). The arrangement's CSS is `js/skins/mac12/panel.css`.
    2.0.1's map keys (KeyTheHo, KeyPlanet, TabThroughFleets) and report click are off in 3.0.1: their routines differ.
-   Until item 2 is done the skin is incomplete (the map is still the classic one, the Report Window is empty): real-play on
-   `mac3`/`mac3c` is not expected to pass on this branch. The work is on branch `claude/sweet-gauss-eodehy` (from
+   The work is on branch `claude/sweet-gauss-eodehy` (from
    `claude/pensive-hamilton-f2tm02`).
 2. Each changed pane from 3.0.1's own routine, one commit each, this table updated in the same commit: ~~`DrawIncomeRect`~~ (done),
    ~~`DrawPlanetRect` + `DrawPieChart`~~, ~~`DoGratuitousGraphics`'s turning planet~~ (done; its second part, the map's twinkling
@@ -28,7 +27,8 @@ Sources (private repo `nostalgia-ho-sources`):
    - ~~The map's stars~~, ~~fleet paths and the drag line~~ (done: see the table).
    - ~~`UpdateReportWin` + `DrawMessage`~~ (done).
    - ~~`DrawAnnounceBubble`~~ and the End Turn button's place (done).
-   - The main screen is now whole: before staging, the four-size checks (real-play `mac3`/`mac3c`) and Jake's look.
+   - The main screen is now whole. Real-play (17 Nov): `mac3c` and `mac3` pass at desktop and phone-l, 9/9 bars (the panes' canvases
+     list their bars in `data-bars` for the tool); `mac2c` still passes. Before staging: pad and 4k, and Jake's look.
    - Smaller leftovers in the done panes: "Sort" above the budget bars (`DoHBarClick`'s sort), the drag bar's resizing
      (`ClickInDragBar`), and a real System 7 scroll bar for the three lists.
 3. Until a pane is done, the skin must not show 2.0.1's version of it as if it were 3.0.1's: keep these on the session branch,

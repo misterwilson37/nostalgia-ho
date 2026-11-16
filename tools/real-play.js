@@ -304,6 +304,20 @@ async function playRun(browser, job, outDir, idx) {
         if (R.fails.length && /pageerror|console/.test([...errs].join())) break;
       }
       }
+      // (bars drawn on a canvas, the Mac 3.0.1 skin's panes: the canvas lists them in data-bars, in its own pixels, data-w x data-h)
+      if (!total) {
+        // (each bar found afresh, its canvas scrolled into view first, as a person scrolls the panel to it: a drag redraws the canvas)
+        const where = (k) => G((k) => { const cs = [...document.querySelectorAll('#panel canvas[data-bars]')].filter(window.__rp.vis); let n = k; for (const c of cs) { const L = JSON.parse(c.dataset.bars); if (n >= L.length) { n -= L.length; continue; } c.scrollIntoView({ block: 'center', inline: 'nearest' }); const r = c.getBoundingClientRect(), kx = r.width / +c.dataset.w, ky = r.height / +c.dataset.h, b = L[n]; return { x: r.left + (b.x + b.w / 2) * kx, y: r.top + (b.y + b.h / 2) * ky, half: (b.vert ? b.h * ky : b.w * kx) / 2, vert: b.vert, frac: b.frac, label: b.label }; } return null; }, k);
+        for (let k = 0; ; k++) {
+          const t = await where(k); if (!t) break; await sleep(100);
+          total++;
+          const c = [t.x, t.y], half = t.half, along = (f) => t.vert ? [c[0], c[1] + half - (f * 2 * half)] : [c[0] - half + f * 2 * half, c[1]];
+          const from = Math.max(0.05, Math.min(0.95, t.frac)), to = t.frac < 0.5 ? 0.85 : 0.15, s0 = await state();
+          await ptr.drag([along(from), ...lerp(along(from), along(to), 5).slice(1), along(to)]); await sleep(120);
+          const s1 = await state(); if (s1 !== s0) moved++; else { same++; warn(`dragging bar "${t.label}" changed nothing (it may be locked)`); }
+          await G(() => { const s = HOAPI.G.stars.find(s => s.owner === HOAPI.ME); if (s && !HOAPI.UI.sel) { HOAPI.UI.sel = s.id; HOAPI.renderPanel(); } });
+        }
+      }
       if (!total) { fail('no budget or tech bars are visible in the panel (and no button opens them)'); return; }
       if (!moved) fail(`none of the ${total} bars changed anything when dragged`);
       note(`${moved}/${total} bars moved`); await shot('bars-dragged'); await checkText('after dragging bars');
