@@ -57,3 +57,5 @@ html.macscale #panel, html.macscale #menubar, html.macscale #msg, html.macscale 
 html.macscale .scrim > .win, html.macscale .tcard, html.macscale .starmenu, html.macscale .toast, html.macscale .tip { zoom: var(--mac); }
 /* (a zoomed window still fits the page: its limits divided by the zoom, which multiplies them back) */
 html.macscale .scrim > .win { max-width: calc((100vw - 24px) / var(--mac)); max-height: calc((100vh - 34px) / var(--mac)); }
+/* 3.0.1's Window > Hide Information (ShowHideMapInfo @152b44): the info panes are taken off; Tech Spending and the reports stay */
+html.mac301noinfo #panel .box.planet301, html.mac301noinfo #panel .box.fleets301, html.mac301noinfo #panel .box.info301, html.mac301noinfo #panel .box.low301 { display: none; }

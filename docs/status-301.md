@@ -33,6 +33,9 @@ Sources (private repo `nostalgia-ho-sources`):
      screen is made as big as the window allows (`setMacScale` in `js/skins/mac12/ui.js`): x1.5 at 1280x960 and 1512x982, x2 at
      2560x1440, x3.5 at 4k; phones and the pad as before. Real-play passes `mac12`, `mac2`, `mac2c`, `mac3`, `mac3c` at all four
      sizes. Before staging: Jake's look.
+   - ~~The menus~~ (done 17 Nov: `menuLayout301`, the Menus table). Every Mac skin's menus now write their keys ⌘N, as the MENU
+     resources do (they wrote the DOS skin's "[N]").
+   - Next: the start-up and new game screens, then the windows from the menus, the battles, the end of the game.
    - Smaller leftovers in the done panes: "Sort" above the budget bars (`DoHBarClick`'s sort), the drag bar's resizing
      (`ClickInDragBar`), and a real System 7 scroll bar for the three lists.
 3. Until a pane is done, the skin must not show 2.0.1's version of it as if it were 3.0.1's: keep these on the session branch,
@@ -84,15 +87,15 @@ another version.
 
 | Menu | Capture | Resource | Against 2.0.1 | Remake |
 |---|---|---|---|---|
-| Apple | 031 | MENU 128 | differs | ? |
-| File | 032 | MENU 129 | differs | ? |
-| Edit | 033 | MENU 130 | same | ? |
-| Options | 034 | MENU 131 | differs | ? |
-| Ships | 035 | MENU 132 | differs | ? |
-| Galaxy | 036 | MENU 133 | differs | ? |
-| Window | 037 | MENU 134 | differs | ? |
-| Help (System 7's balloons) | 038 | system | n/a | ? |
-| Application menu (System 7) | 039 | system | n/a | ? |
+| Apple | 031 | MENU 128 | differs | close: the skin's "Ho! 3.0.1" menu holds the remake's own items; 3.0.1's "About Spaceward Ho! 3.0…" (DLOG 1100 / 1101) is not built, so it has no item yet (no other version's box under its name) |
+| File | 032 | MENU 129 | differs | **done** (`menuLayout301`): items, ⌘ keys (⌘† for End Turn & Switch Players) and dimming as `SetMenuItems` @f4492: Save and Revert dimmed (the remake saves every change), Force Turn Update for the first human with two humans or more, Page Setup and Print dimmed (no Mac printing in a browser) |
+| Edit | 033 | MENU 130 | same | **done**: every item enabled, as the capture and the MENU's flags have them (1.2's and 2.0.1's dim them) |
+| Options | 034 | MENU 131 | differs | **done**: Auto Play (dimmed for a player out of the game), Sound checked, I'll Update Turns checked and dimmed under two humans, Preferences, the two Halls (always enabled) |
+| Ships | 035 | MENU 132 | differs | **done**: the words of STR# 1010 by the selection (Build/Design Ships… / Can't Build Ships Here…, Organize Ships… / No ships to organize…, Scrap / Don't Scrap Current Fleet, Review Battle at %s… / No Battles here…), dimmed as `SetMenuItems`; the windows they open are the table below's |
+| Galaxy | 036 | MENU 133 | differs | **done**: Fix Spending dimmed while reports are unread; Abandon Planet on your colony ("Don't Abandon Planet" / "Abandon Planet", 1010.15/.16); Alliances, Give, Surrender, Send Message dimmed in 2000; Alliances, Surrender and Armageddon dimmed for a player out of the game; Armageddon checked while the switch is on. Graph History opens the remake's players-and-history window (3.0.1's Graph, DLOG 6055/6056, is not in Jake's games) |
+| Window | 037 | MENU 134 | differs | close: both windows checked; Zoom In / Out dimmed at 17 / 6; Hide / Show Information (⌘I, 1010.11/.12) takes the info panes off (`ShowHideMapInfo`: their width 226 or 0); the map window does not grow into their place yet. Clean Up Windows does nothing (the windows are always where `ResetWindows` puts them) |
+| Help (System 7's balloons) | 038 | system | n/a | not built (the system's, not the game's; the remake's hover help stands in) |
+| Application menu (System 7) | 039 | system | n/a | not built (the system's) |
 
 ## Battles
 

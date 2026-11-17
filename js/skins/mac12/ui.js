@@ -113,7 +113,95 @@ function fleetOrders12() {
       { shown: has('stances'), ghost: () => !f(), checked: () => !!f() && (f().stance || 'normal') === v })),
     it('Arrive late', () => { const x = f(); if (x) { x.delayed = !x.delayed; A().save(); } }, { shown: has('lateArrival'), ghost: () => !f(), checked: () => !!f() && !!f().delayed })];
 }
-function menuLayout() { const M = menuLayout12(); return V2 ? menuLayout20(M) : M; }
+function menuLayout() { if (V3) return menuLayout301(); const M = menuLayout12(); return V2 ? menuLayout20(M) : M; }
+// Mac 3.0.1's menus: MENU 128-134 in its words (HOLANG.mac301En.MENU; 3.0.1F's French through the interface), the words that change
+// from STR# 1010, and what is dimmed and checked as SetMenuItems @f4492 sets them:
+// - no game: Ships, Galaxy and Window dimmed whole; File's Save, Revert, Close, End Turn, End Turn & Switch Players, Page Setup, Print
+//   and Options' Auto Play, Sound, I'll Update Turns, Preferences dimmed (the Halls and Force Turn Update are not touched);
+// - Save and Revert only with unsaved changes (the remake saves every change: always dimmed); Force Turn Update for the player whose
+//   number is the header's +3 byte, with two humans or more (+2); I'll Update Turns dimmed with fewer than two humans;
+// - the selected star yours (GetPlayerStarNum): Ships 1 "Build/Design Ships…" (1010.3) and Galaxy's Abandon Planet ("Don't Abandon
+//   Planet" / "Abandon Planet", 1010.15/.16, by the colony's flag), else "Can't Build Ships Here…" (1010.4) and both dimmed;
+// - the star's selected fleet: Organize Ships… (1010.7) and Scrap Current Fleet / Don't (1010.9/.10), else "No ships to organize…" (.8)
+//   and both dimmed; the star's last battle in 2000 or later: "Review Battle at %s…" (.5), else "No Battles here…" (.6), dimmed;
+// - the year 2000 or less: Alliances, Give Money/Metal, Surrender To, Send Message dimmed; a player out of the game (mode 4 and up):
+//   Alliances, Surrender, Auto Play and Armageddon dimmed; Armageddon checked while the player's switch is on;
+// - Fix Spending dimmed while reports are unread; Zoom In dimmed at the largest zoom (17), Zoom Out at the smallest (6);
+//   Window 6 "Hide Information" / "Show Information" (1010.11/.12: ShowHideMapInfo, the info panes' width 226 or 0).
+// Print and Page Setup are there and dimmed (a browser has no Mac printing); Clean Up Windows does nothing here (the remake's windows
+// are always where ResetWindows puts them). The Apple menu is the skin's "Ho! 3.0.1" menu.
+let INFO301 = true;
+function menuLayout301() {
+  const P = () => A().Prefs, g = () => G(), me = () => A().me();
+  const cmd = (re) => () => { const k = Object.keys(ITEMS).find(n => re.test(n)); if (k) ITEMS[k][1](); };
+  const out = () => { const p = me(); return !p.alive || !!p.surrendered; };
+  const early = () => g().year <= 2000;
+  const humans = () => g().players.filter(p => p.human).length;
+  const gone = () => true;
+  const S = (i) => (STR301(1010)[i - 1] || '');
+  const fleetHere = () => { const s = selStar(), f = selFleet(); return s && f && f.star === s.id ? f : null; };
+  const abandonMarked = () => { const t = H().rules(g()).evacuateToggle, s = selStar(); return !!(t && s && t.marked(g(), s.id)); };
+  const hideInfo = () => { INFO301 = !INFO301; document.documentElement.classList.toggle('mac301noinfo', !INFO301); A().resize(); A().renderPanel(); A().draw(); };
+  return {
+    File: [
+      it('New…', () => A().newGameDialog(), { key: 'N' }),
+      it('Open…', () => A().openSavedGames(), { key: 'O' }),
+      it('Save', () => {}, { ghost: gone, key: 'S' }),
+      it('Revert To Saved…', () => {}, { ghost: gone }),
+      it('Close…', cmd(/^quit to title/i), { ghost: noGame, key: 'W' }),
+      '-',
+      it('End Turn', () => { const b = document.querySelector('#msg .clock'); if (b) b.click(); else if (G()) A().doEndTurn(); }, { ghost: noGame, key: 'T' }),
+      it('End Turn & Switch Players', () => { if (A().hotSeat()) A().switchPlayers(); else { const b = document.querySelector('#msg .clock'); if (b) b.click(); else A().doEndTurn(); } }, { ghost: noGame, key: '†' }),
+      it('Force Turn Update…', cmd(/force end turn/i), { ghost: () => noGame() || humans() < 2 || A().ME !== g().players.findIndex(p => p.human) }),
+      '-',
+      it('Page Setup…', () => {}, { ghost: gone }),
+      it('Print…', () => {}, { ghost: gone, key: 'P' }),
+      '-',
+      it('Quit', cmd(/^quit to title/i), { key: 'Q' })],
+    Edit: [it('Undo', () => {}, { key: 'Z' }), '-', it('Cut', () => {}, { key: 'X' }), it('Copy', () => {}, { key: 'C' }), it('Paste', () => {}, { key: 'V' }), it('Clear', () => {})],
+    Options: [
+      it('Auto Play…', cmd(/^auto play/i), { ghost: () => noGame() || out() }),
+      '-',
+      it('Sound', () => { A().Sound.on = !A().Sound.on; A().savePrefs(); }, { ghost: noGame, checked: () => A().Sound.on }),
+      it('I’ll Update Turns', () => {}, { ghost: () => noGame() || humans() < 2, checked: () => true }),
+      '-',
+      it('Preferences…', () => A().openPrefs(), { ghost: noGame }),
+      it('Hall Of Fame…', () => A().openHall('fame')),
+      it('Hall Of Shame…', () => A().openHall('shame'))],
+    Ships: [
+      it(() => (noGame() || mine() ? S(3) : S(4)), () => { if (mine()) A().openBuild(selStar().id); }, { ghost: () => noGame() || !mine(), key: 'B' }),
+      '-',
+      it('List All Fleets…', () => A().openFleetList(), { ghost: noGame, key: 'L' }),
+      it(() => (noGame() || fleetHere() ? S(7) : S(8)), () => { const s = selStar(); if (fleetHere()) A().openOrganize(s.id); }, { ghost: () => noGame() || !fleetHere(), key: 'G' }),
+      it(() => (fleetHere() && fleetHere().scrap301 ? S(10) : S(9)), () => { const f = fleetHere(); if (f) A().toggleScrapFleet(f); }, { ghost: () => noGame() || !fleetHere() }),
+      '-',
+      it(() => (lastBattle() ? S(5).replace('%s', selStar().name) : S(6)), () => { const b = lastBattle(); if (b) A().openBattle(b.id); }, { ghost: () => noGame() || !lastBattle(), key: 'R' })],
+    Galaxy: [
+      it('Compare Players…', () => A().openCompare(), { ghost: noGame }),
+      it('Graph History…', () => A().openPlayers(), { ghost: noGame }),
+      it('List All Explored Stars…', () => A().openStarList(), { ghost: noGame }),
+      '-',
+      it('Fix Spending', cmd(/^fix spending/i), { ghost: () => noGame() || A().UI.msgIdx < (A().UI.inbox || []).length, key: 'F' }),
+      it('Dip Into Savings…', () => A().openDip(), { ghost: noGame, key: 'D' }),
+      it(() => (mine() ? (abandonMarked() ? S(15) : S(16)) : 'Abandon Planet…'), () => { if (mine()) A().evacuateClick(selStar().id); }, { ghost: () => noGame() || !mine(), key: 'A' }),
+      '-',
+      it('Alliances…', () => A().openPlayers(), { ghost: () => noGame() || early() || out() }),
+      it('Give Money/Metal…', () => A().openGive(), { ghost: () => noGame() || early() }),
+      it('Surrender To…', () => A().openSurrender(), { ghost: () => noGame() || early() || out() }),
+      it('Send Message…', () => A().openChat(), { ghost: () => noGame() || early(), key: 'M' }),
+      '-',
+      it('Armageddon', () => A().toggleArmageddon(), { ghost: () => noGame() || out(), checked: () => !!G() && !!me().armageddon })],
+    Window: [
+      it('Tech Spending Window', () => { const t = document.querySelector('#panel .tech301'); if (t) t.scrollIntoView({ block: 'nearest' }); }, { ghost: noGame, key: '1', checked: () => true }),
+      it('Report Window', () => { const r = document.querySelector('#panel .rep12box'); if (r) r.scrollIntoView({ block: 'nearest' }); else A().openReports(); }, { ghost: noGame, key: '2', checked: () => true }),
+      '-',
+      it('Zoom In', () => { const m = A().map(); A().zoomAt(m.w / 2, m.h / 2, 1.3); }, { ghost: () => noGame() || atZoom(-1), key: '=' }),
+      it('Zoom Out', () => { const m = A().map(); A().zoomAt(m.w / 2, m.h / 2, 1 / 1.3); }, { ghost: () => noGame() || atZoom(0), key: '-' }),
+      it(() => (INFO301 ? S(11) : S(12)), hideInfo, { ghost: noGame, key: 'I' }),
+      '-',
+      it('Clean Up Windows', () => {}, { ghost: noGame })],
+  };
+}
 // Mac 2.0.1's menus: MENU 129 (File), 131 (Options) and 133 (Galaxy) as that program has them (the rest are 1.2's, in the same words), from the resource fork
 // (audit/mac-2.0.1/tools/menu.py in the private repo). What the remake has no command for is there and dimmed (printing: a browser has no Mac Page Setup or
 // Print Map; the network polling), and a command it has only in a hot-seat game is dimmed otherwise.
@@ -2679,6 +2767,30 @@ function afterMsg301(box, info) {
   const sp = m && ic ? special301(String(m.text || '')) : null;
   if (sp) { const w = a.el('span', { class: 'ric301' }); ic.replaceWith(w); w.append(ic); if (sp === 'cross') w.append(a.el('span', { class: 'x301' })); else { const im = a.IMG[sp]; if (im && im.src) w.append(a.el('img', { class: 'sp301', src: im.src, alt: '' })); } }
 }
+function menuName12(name) {
+  if (name !== 'Edit') return name;
+  const sp = document.createElement('span'), set = () => { sp.textContent = window.HOUI && HOUI.t ? HOUI.t('Edit') : 'Edit'; };
+  sp.setAttribute('translate', 'no'); set(); if (window.HOUI && HOUI.onChange) HOUI.onChange(set);
+  return sp;
+}
+// the remake's commands that 1.2 has no menu item for (Import, Export, the Halls, Auto play, Players ...) go to the Ho! menu
+function menus12(M, ho) {
+  ITEMS = {};
+  for (const k in M) for (const x of M[k]) if (x[0] !== '-' && typeof x[0] === 'string') ITEMS[x[0]] = x;
+  const own = new Set(['New game…', 'Quit to title', 'Build ships at selected colony…', 'Review battle…', 'List all fleets…', 'Scrap ship types…', 'Next fleet',
+    'List explored stars…', 'Fix spending', 'Report window…', 'Zoom in', 'Zoom out', ...(V2 || V3 ? ['Compare players…', 'Send a message…', 'Force end turn…', 'Auto play…', 'End turn and switch players'] : []),
+    ...(V3 ? ['Players and history', 'Players and alliances…', 'Give money or metal…', 'Dip into savings…', 'Preferences…', 'Hall of Fame…', 'Hall of Shame…'] : [])]);
+  const extra = [];
+  for (const k in M) { for (const x of M[k]) if (x[0] !== '-' && !(typeof x[0] === 'string' && own.has(x[0]))) extra.push(x); M[k].length = 0; }
+  // (View's sound and music, Help's How to play and the manual stay reachable)
+  // (3.0.1's About box, DLOG 1100 / 1101, is not built yet: no item rather than another version's box under its name)
+  if (!V3) ho.unshift([V2 ? 'About Spaceward Ho! 2.0…' : 'About Spaceward Ho! 1.2…', aboutBox], ['-']);
+  // (each command is the remake's own: a window it opens is tagged at once, which is what keeps 1.2's own windows out of the remake's look;
+  // the Ho! menu's own items too: Skin and OS look, Sounds, Language, Temperatures)
+  const tagged = (x) => { const f = x[1], y = x.slice(); y[1] = (...a) => { const r = f(...a); tagRemakeWindows(); return r; }; return y; };
+  for (let i = 0; i < ho.length; i++) if (ho[i][0] !== '-' && typeof ho[i][1] === 'function') ho[i] = tagged(ho[i]);
+  if (extra.length) ho.push(['-'], ...extra.filter(x => !(typeof x[0] === 'function' && (V3 ? /scrap|organize|organi|switch players|surrender|armageddon/i : /scrap|organize|organi|switch players/i).test(String(x[0]())))).map(tagged));
+}
 // 3.0.1 (js/skins/mac3): only the arrangement and the shared windows, above; the rest of this file is 1.2's and 2.0.1's
 if (V3) {
   document.documentElement.classList.add('mac301');
@@ -2702,20 +2814,24 @@ if (V3) {
     drawStar: (cx, i) => (own() ? drawStar301(cx, i) : false),
     // your selected fleet is picked up from its star, as FollowPathDrag does (an unseen handle over the star's icon); no markers are drawn
     marker: () => 'none',
+    // the menus (menuLayout301 above); the remake's commands that 3.0.1 has no item for go to the Ho! menu, as in 1.2's and 2.0.1's
+    menus: (M, ho) => menus12(M, ho),
+    get menuLayout() { return menuLayout(); },
+    menuLayoutNow() { return menuLayout(); },
+    menuName: (name) => menuName12(name),
+    // (a Mac menu's key equivalent is ⌘ and the key, as the MENU resources and every capture have it; the DOS skin under this one writes "[N]")
+    keyName: (k) => '⌘' + k,
     markerAt(f, i) { if (!own() || !i.mine) return null; const a = A(), here = a.fleetOrder(a.G.fleets.filter(x => x.owner === a.ME && x.star === i.s.id && x.to == null)), cur = here.find(x => x.id === a.UI.selFleet) || here[0]; if (!cur || f.id !== cur.id) return null; const u = i.view.s / 2, d = u >= 17 ? 32 * Math.max(1, u / 17) : u < 7 ? u + 4 : 16; return { x: i.x - d / 2, y: i.y - d / 2, w: d, hidden: true }; },
   };
+  document.addEventListener('keydown', keyEquiv);
   return;
 }
 window.HOMAC12 = {
   alertBox: (paras) => { const b = V2 && G() && own12Rules() ? alert20(paras) : null; if (b) b.setAttribute('translate', 'no'); return b; },
   battleWindow,
   // (the Edit menu's French title is 1.2F's "Edition", which the interface would take for its English word "Edition": written as it is)
-  menuName(name) {
-    if (name !== 'Edit') return name;
-    const sp = document.createElement('span'), set = () => { sp.textContent = window.HOUI && HOUI.t ? HOUI.t('Edit') : 'Edit'; };
-    sp.setAttribute('translate', 'no'); set(); if (window.HOUI && HOUI.onChange) HOUI.onChange(set);
-    return sp;
-  },
+  menuName: (name) => menuName12(name),
+  keyName: (k) => '⌘' + k,
   // (NewGame @100004: the status window "Ecriture nouveau fichier Jeu..." (STR# 4000.1; Mac 2.0.1 "Writing New Game File...") while the
   // galaxy file is written, its bar moving once a player)
   beforeFirstTurn(go) {
@@ -2810,29 +2926,14 @@ window.HOMAC12 = {
     if (name === 'build') return buildShips(x[0]);
     return false;
   },
-  // the remake's commands that 1.2 has no menu item for (Import, Export, the Halls, Auto play, Players ...) go to the Ho! menu
-  menus(M, ho) {
-    ITEMS = {};
-    for (const k in M) for (const x of M[k]) if (x[0] !== '-' && typeof x[0] === 'string') ITEMS[x[0]] = x;
-    const own = new Set(['New game…', 'Quit to title', 'Build ships at selected colony…', 'Review battle…', 'List all fleets…', 'Scrap ship types…', 'Next fleet',
-      'List explored stars…', 'Fix spending', 'Report window…', 'Zoom in', 'Zoom out', ...(V2 ? ['Compare players…', 'Send a message…', 'Force end turn…', 'Auto play…', 'End turn and switch players'] : [])]);
-    const extra = [];
-    for (const k in M) { for (const x of M[k]) if (x[0] !== '-' && !(typeof x[0] === 'string' && own.has(x[0]))) extra.push(x); M[k].length = 0; }
-    // (View's sound and music, Help's How to play and the manual stay reachable)
-    ho.unshift([V2 ? 'About Spaceward Ho! 2.0…' : 'About Spaceward Ho! 1.2…', aboutBox], ['-']);
-    // (each command is the remake's own: a window it opens is tagged at once, which is what keeps 1.2's own windows out of the remake's look;
-    // the Ho! menu's own items too: Skin and OS look, Sounds, Language, Temperatures)
-    const tagged = (x) => { const f = x[1], y = x.slice(); y[1] = (...a) => { const r = f(...a); tagRemakeWindows(); return r; }; return y; };
-    for (let i = 0; i < ho.length; i++) if (ho[i][0] !== '-' && typeof ho[i][1] === 'function') ho[i] = tagged(ho[i]);
-    if (extra.length) ho.push(['-'], ...extra.filter(x => !(typeof x[0] === 'function' && /scrap|organize|organi|switch players/i.test(String(x[0]())))).map(tagged));
-  },
+  menus: (M, ho) => menus12(M, ho),
   get menuLayout() { return menuLayout(); },
   // (the menus laid out again when the OS look changes ask for this: without it they took the DOS skin's, js/skins/dos/ui.js, with no New and no Edit
   // menu: Jake's 1.2 game in the System 7 look, 17 Nov 2026)
   menuLayoutNow() { return menuLayout(); },
 };
 // key equivalents: ⌘ or Ctrl and the item's key, as the menus show them (a browser keeps some of them, ⌘N, ⌘W, ⌘T, ⌘Q, for itself)
-document.addEventListener('keydown', (e) => {
+function keyEquiv(e) {
   if (!(e.metaKey || e.ctrlKey) || e.altKey || !A() || !G() || /^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName)) return;
   const L = menuLayout();
   for (const k in L) for (const x of L[k]) {
@@ -2840,6 +2941,7 @@ document.addEventListener('keydown', (e) => {
     if (x[4] && x[4]()) return;
     e.preventDefault(); x[1](); return;
   }
-});
+}
+document.addEventListener('keydown', keyEquiv);
 })();
 if (!window.HOSKINS_INLINE) document.write('<script src="js/skins/mac3/pictures.js' + (window.HO_BUILD || '') + '"><\/script>');
