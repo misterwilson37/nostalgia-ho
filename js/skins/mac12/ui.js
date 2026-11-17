@@ -185,7 +185,7 @@ function menuLayout301() {
       it('Dip Into Savings…', () => A().openDip(), { ghost: noGame, key: 'D' }),
       it(() => (mine() ? (abandonMarked() ? S(15) : S(16)) : 'Abandon Planet…'), () => { if (mine()) A().evacuateClick(selStar().id); }, { ghost: () => noGame() || !mine(), key: 'A' }),
       '-',
-      it('Alliances…', () => A().openPlayers(), { ghost: () => noGame() || early() || out() }),
+      it('Alliances…', () => alliances301(), { ghost: () => noGame() || early() || out() }),
       it('Give Money/Metal…', () => A().openGive(), { ghost: () => noGame() || early() }),
       it('Surrender To…', () => A().openSurrender(), { ghost: () => noGame() || early() || out() }),
       it('Send Message…', () => A().openChat(), { ghost: () => noGame() || early(), key: 'M' }),
@@ -1476,6 +1476,38 @@ function give301() {
     el('button', { type: 'button', class: 'ok20 def20', style: at20([168, 384, 188, 442]) + ';min-width:0;padding:0', onclick: go }, raw('span', 'Give'))),
     { cls: 'mac12 dl20w', label: 'Give Stuff' });
   setTimeout(() => { fm.focus(); fm.select(); }, 0);
+  return true;
+}
+
+// DLOG 6110 "Alliances" (DoAlliancesDlg @1432a4, InitAllianceLists @1434b6, SetAllianceLists @143600; 443 x 300, DITL 6110; Jake's capture
+// 073): the line "Click on a player's icon…" (5, 7), "I Like Them" (43, 97) and "I Don't Like Them" (43, 268) over the columns, "They Like
+// Me" (88, 8) and "They Don't Like Me" (171, 7) beside the rows; four lists (63, 52) (63, 236) (157, 52) (157, 236), each 182 x 92, four
+// cells across: the players still in the game in the players' order, yourself too (your icon 1000, + 500 a woman; another's 2000 + face),
+// each in the list of whether you like them and whether they like you. A click on another player moves them across (your like of them
+// turned over); on yourself, a beep. OK keeps it (the player's +0x1960 mask: the remake's allies), Cancel (261, 289) leaves it.
+function alliances301() {
+  const a = A(), el = a.el, g = G(), ME = a.ME, me = a.me();
+  const order = (H().rules(g).giveWindow && H().rules(g).giveWindow.order) ? H().rules(g).giveWindow.order(g) : g.players;
+  const ps = order.filter(q => q.alive && !q.surrendered);
+  const like = new Set(me.allies || []);
+  const theyLike = (q) => q.id === ME || (q.allies || []).includes(ME);
+  const hat = (q) => 'dos:i' + (q.id === ME ? (q.female ? 1500 : 1000) : (q.female ? 2500 : 2000) + ((q.face || 0) % 20));
+  const R = [[63, 52, 155, 234], [63, 236, 155, 418], [157, 52, 249, 234], [157, 236, 249, 418]];
+  const lists = R.map(r => { const c = cells20(4, 2, [], { pick: (x) => tap(x.id) }); c.el.setAttribute('style', c.el.getAttribute('style') + ';' + at20([r[0] + 1, r[1] + 1, r[2] - 1, r[3] - 1]) + ';overflow-y:auto'); return c; });
+  const draw = () => {
+    const by = [[], [], [], []];
+    for (const q of ps) by[((q.id === ME || like.has(q.id)) ? 0 : 1) + (theyLike(q) ? 0 : 2)].push({ icon: hat(q), name: q.name, id: q.id });
+    by.forEach((L, i) => lists[i].set(L, null));
+  };
+  function tap(id) { if (id === ME) { if (a.beep) a.beep(); return; } if (like.has(id)) like.delete(id); else like.add(id); draw(); }
+  const ok = () => { for (const q of g.players) if (q.id !== ME) H().setPact(g, ME, q.id, 'ally', like.has(q.id)); a.closeModal(); a.save(); a.renderPanel(); a.draw(); };
+  draw();
+  a.modal('', dlog20(443, 300, txt20('Click on a player’s icon to move it horizontally to specify whether you would or would not like to ally with that player.', [5, 7, 38, 428]),
+    txt20('I Like Them', [43, 97, 58, 176]), txt20('I Don’t Like Them', [43, 268, 58, 390]), txt20('They Like Me', [88, 8, 137, 42]), txt20('They Don’t Like Me', [171, 7, 239, 43]),
+    ...R.map(r => el('div', { style: at20(r) + ';border:1px solid #000;box-sizing:border-box' })), ...lists.map(c => c.el),
+    ok20('Cancel', [261, 289, 281, 347], () => a.closeModal()),
+    el('button', { type: 'button', class: 'ok20 def20', style: at20([261, 361, 281, 419]) + ';min-width:0;padding:0', onclick: ok }, raw('span', 'OK'))),
+    { cls: 'mac12 dl20w', label: 'Alliances' });
   return true;
 }
 
