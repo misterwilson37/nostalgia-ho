@@ -2604,6 +2604,8 @@ function panel301(panel, B) {
 // (DITL 7010: "Passe" at 193, 273, 58 x 20, which skips to the end) says "Bien". A viewer who lost a battle of one round sees
 // nothing of the other side (DrawAllGroups: STR# 1030.11 and .12 at (155, 85) and (155, 100)) and no shots.
 const SYS = '12px Chicago, Charcoal, Geneva, sans-serif', GEN9 = '9px Geneva, Verdana, sans-serif';
+// (3.0.1's battle window in the skins' bitmap Chicago 12 and Geneva 9, the sizes the dialogs use: js/skins/dos/style.css's faces)
+const SYS3 = "15px 'DOS Chicago 12', Chicago, Charcoal, Geneva, sans-serif", GEN93 = "12px 'DOS Geneva 9', Geneva, Verdana, sans-serif";
 function battleWindow(b, k) {
   const a = A(), g = G(), rs = H().rules(g), el = a.el, IMG = a.IMG, ME = a.ME;
   const fr = lang() === 'fr', W = 445, Hh = 310, S = 2, TICK = 1000 / 60;
@@ -2646,7 +2648,7 @@ function battleWindow(b, k) {
   // QuickDraw's qd.gray in patOr with black: every other pixel black
   const grayPat = (() => { const p = document.createElement('canvas'); p.width = 2; p.height = 2; const q = p.getContext('2d'); q.fillStyle = '#000'; q.fillRect(0, 0, 1, 1); q.fillRect(1, 1, 1, 1); return x.createPattern(p, 'repeat'); })();
   const whiteGray = (() => { const p = document.createElement('canvas'); p.width = 2; p.height = 2; const q = p.getContext('2d'); q.fillStyle = '#fff'; q.fillRect(0, 0, 1, 1); q.fillRect(1, 1, 1, 1); return x.createPattern(p, 'repeat'); })();
-  const text = (t, h, v, font, cond) => { x.font = font || SYS; x.letterSpacing = cond ? '-1px' : '0px'; x.fillStyle = '#fff'; x.textAlign = 'left'; x.textBaseline = 'alphabetic'; x.fillText(t, h, v); x.letterSpacing = '0px'; };
+  const text = (t, h, v, font, cond) => { x.font = (V3 && font !== GEN9 ? SYS3 : V3 ? GEN93 : null) || font || SYS; x.letterSpacing = cond ? '-1px' : '0px'; x.fillStyle = '#fff'; x.textAlign = 'left'; x.textBaseline = 'alphabetic'; x.fillText(t, h, v); x.letterSpacing = '0px'; };
   // DrawBattleStars: 35 points (CalcBattleStars, the record's seed: one field a battle)
   let seed = (b.id | 0) * 7919 + 13;
   const rnd = (lo, hi) => { seed = (seed * 16807) % 2147483647; return lo + (seed % (hi - lo + 1)); };
@@ -2656,7 +2658,10 @@ function battleWindow(b, k) {
     const p = g.players[o]; if (!p) return;
     const id = o === ME ? (p.female ? 1500 : 1000) : (p.female ? 2500 : 2000) + ((p.face || 0) % 20);
     const im = pic('i' + id); if (im) x.drawImage(im, colX[ci], 2, 32, 32);
-    text(p.name || '', colX[ci] + 35, 24);
+    // (3.0.1's DoOneBattle @e0aee: the side's luck, ICN# 3141 + luck (3140 bad, 3142 good, none for 0), 32 to the right of the face, and the
+    // name at +67; 1.2 and 2.0.1 have no luck and the name at +35)
+    if (V3) { const L = b.lk ? b.lk[b.sides.indexOf(o)] : 0, li = L ? pic('i' + (3141 + L)) : null; if (li) x.drawImage(li, colX[ci] + 32, 2, 32, 32); }
+    text(p.name || '', colX[ci] + (V3 ? 67 : 35), 24);
   };
   const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
   const tile = (gr, gx, gy) => { // DrawShipPicture, small, black and white
@@ -2682,8 +2687,8 @@ function battleWindow(b, k) {
     tile(gr, gx, gy);
     x.fillStyle = '#000'; x.fillRect(gx - 20, gy + 40, 160, 13);
     const t = groupWords(gr);
-    x.font = SYS; const cond = x.measureText(t).width > 120;
-    x.font = GEN9; x.letterSpacing = cond ? '-1px' : '0px';
+    x.font = V3 ? SYS3 : SYS; const cond = x.measureText(t).width > 120;
+    x.font = V3 ? GEN93 : GEN9; x.letterSpacing = cond ? '-1px' : '0px';
     const w = x.measureText(t).width; text(t, gx + 60 - Math.trunc(w / 2), gy + 50, GEN9, cond);
     if (!gr.planet) { // the shading: the whole cell when gone, else the front ship's damage from the left (a satellite: a third, from 40)
       const n = gr.units.filter(i => alive[i]).length;
@@ -2711,7 +2716,8 @@ function battleWindow(b, k) {
   // Colour (DAT_00efff1e >= 4: the colour skin, Mac 2.0.1's colour window): the bolt's centre line is HSV hue (weapons - 1) x 4000 mod $ffff, full
   // saturation and value; the pair beside it hue + 7500, value $afc8; the outer pair hue + 15000, value $61a8 (DrawLaserBlast @d3e20 through Pack12's
   // HSV2RGB; in the captures, Sue's Sword (3/3) fighters' bolt is yellow-orange over olive and green, Jake's Conan (5/5) lime over green and teal)
-  const COL = !!window.HOMAC2_COLOUR && V2;
+  // (3.0.1's DrawLaserBlast is the same size as 2.0.1's, 764 bytes, and its colour bolt the same in the captures: the colour skin's too)
+  const COL = (!!window.HOMAC2_COLOUR && V2) || (!!window.HOMAC3_COLOUR && V3);
   const hsv = (h, v) => { h = (h % 65535) / 65535 * 6; const i = Math.floor(h), f = h - i, q = v * (1 - f), t = v * f; const [r, gg, bb] = [[v, t, 0], [q, v, 0], [0, v, t], [0, q, v], [t, 0, v], [v, 0, q]][i % 6]; return 'rgb(' + [r, gg, bb].map(u => Math.round(u * 255)).join(',') + ')'; };
   // (the hue's value is word 2 of the shooting group's record, DrawLaserBlast's first argument at all three of HaveGroupShoot's calls. A ship group's is its design's weapons (CalcOneGroup); the planet's group gets
   // param_7 = *(short *)(battle + 0xac), which DoBattleStage @d0004 sets to the star owner's weapons tech / 100 (player + 0x30: SpendTechMoney's tech array at +0x2c is range, speed, weapons, shields, mini): the owner's weapons level)
@@ -2761,7 +2767,7 @@ function battleWindow(b, k) {
     const P = (rs.battlePanel || RS12().battlePanel)(rs.battlePanel ? g : langView(g), b, { alive, hurt, pop, over: true, won }, ME);
     (P.end || []).forEach((t, i) => text(t, 155, i ? 150 : 135));
     const im = pic(won ? 'p3500' : 'p3510'); if (im) x.drawImage(im, 180, 175, 74, 64);
-    setBtn(fr ? 'Bien' : 'OK');
+    setBtn(fr ? 'Bien' : 'OK'); btn.classList.add('done');
   };
   (async () => {
     let deadline = performance.now() + speed * TICK;
@@ -3263,10 +3269,14 @@ function menus12(M, ho) {
 // 3.0.1 (js/skins/mac3): only the arrangement and the shared windows, above; the rest of this file is 1.2's and 2.0.1's
 if (V3) {
   document.documentElement.classList.add('mac301');
+  // (the battle window's canvas text needs its bitmap faces loaded before its first frame)
+  try { if (document.fonts) { document.fonts.load(SYS3); document.fonts.load(GEN93); } } catch (e) { /* (an old browser draws with the fallbacks) */ }
   window.HOMAC301 = {
     get ownPanel() { return !!G() && own(); },
     // (the New Game window, for 3.0.1's own rules: its Create New Galaxy dialog over the form)
     newGame(f) { createGalaxy301(f); },
+    // the battle window: DLOG 7010 / 7011 are 2.0.1's and HaveGroupShoot the same code; 3.0.1's own drawing in battleWindow (V3)
+    battleWindow: (b, k) => (own() ? battleWindow(b, k) : false),
     // the windows 3.0.1 draws with its own routines (docs/status-301.md, "Windows from the menus")
     window(name, ...x) {
       if (!G() || !own()) return false;

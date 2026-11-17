@@ -39,7 +39,7 @@ Sources (private repo `nostalgia-ho-sources`):
      bar) moved to `js/skins/mac12/panel.css` for both. Real-play presses a dialog's default button after End Turn (the play-alone
      question); `mac3c`, `mac3` pass at desktop and phone-l.
    - ~~List of All Fleets, Explored Stars, Compare, Skills~~, ~~Organize Fleets~~ (done 17 Nov: the table).
-   - ~~Build / Design Ships~~ (done 18 Nov: the table). ~~Give~~, ~~Alliances~~, ~~Send Message~~ done: every window from the menus is built. Next: the battles (the plan's session 3).
+   - ~~Build / Design Ships~~ (done 18 Nov: the table). ~~Give~~, ~~Alliances~~, ~~Send Message~~ done: every window from the menus is built. ~~The battles~~ (close, 18 Nov: the table). Next: the end of the game (the plan's session 4).
    - Smaller leftovers in the done panes: "Sort" above the budget bars (`DoHBarClick`'s sort), the drag bar's resizing
      (`ClickInDragBar`), and a real System 7 scroll bar for the three lists.
 3. Until a pane is done, the skin must not show 2.0.1's version of it as if it were 3.0.1's: keep these on the session branch,
@@ -105,9 +105,9 @@ another version.
 
 | Screen | Captures | Resource / code | Against 2.0.1 | Remake |
 |---|---|---|---|---|
-| Battle window | 020-030, 043-064, 077-107, 110-148, 176-193 | DLOG 7010, 7011 | same | ? |
-| Shots, explosions, ships lost | same | `DrawLaserBlast`, `DrawExplosion`, `DrawShipPicture` | differ | ? |
-| Won / lost / destroyed at once (the words under the picture) | 041, 063, 047, 107 | code | ? | ? |
+| Battle window | 020-030, 043-064, 077-107, 110-148, 176-193 | DLOG 7010, 7011 | same | close: 2.0.1's `battleWindow` (the same DLOG; `HaveGroupShoot` the same code) with 3.0.1's `DoOneBattle` @e0aee differences: no title bar, Chicago and Geneva (the skins' bitmap faces), the name at the face + 67, each side's luck (ICN# 3141 + luck, 3140 bad, 3142 good, none for 0: rules-301 keeps it on the record as `lk`, display only, the digest unchanged), the Skip / OK button with OK's default ring. Left: `DrawOneGroup` and `DrawAllGroups` (DIFF) not compared line by line |
+| Shots, explosions, ships lost | same | `DrawLaserBlast`, `DrawExplosion`, `DrawShipPicture` | differ | close: 2.0.1's drawing, the colour bolt and ovals in the colour skin too (`DrawLaserBlast` is 764 bytes in both; `DrawExplosion` 594 / 586, `DrawShipPicture` 1416 / 1424: not compared line by line) |
+| Won / lost / destroyed at once (the words under the picture) | 041, 063, 047, 107 | code | ? | close: STR# 1030's lines at (155, 135) and (155, 150), PICT 3000 / 3500 (won) and 3010 / 3510 (lost) at (180, 175), as `DoOneBattle` draws them; the no-information lines at (155, 85) and (155, 100) |
 
 ## Windows from the menus
 
