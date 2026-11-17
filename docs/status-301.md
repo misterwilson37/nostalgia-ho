@@ -28,7 +28,8 @@ Sources (private repo `nostalgia-ho-sources`):
    - ~~`UpdateReportWin` + `DrawMessage`~~ (done).
    - ~~`DrawAnnounceBubble`~~ and the End Turn button's place (done).
    - The main screen is now whole. Real-play (17 Nov): `mac3c` and `mac3` pass at desktop and phone-l, 9/9 bars (the panes' canvases
-     list their bars in `data-bars` for the tool); `mac2c` still passes. Before staging: pad and 4k, and Jake's look.
+     list their bars in `data-bars` for the tool); `mac2c` still passes; pad and 4k pass too (both skins, 9/9 bars). At 4k the map is the original's size, one CSS pixel a pixel, so
+     the galaxy fills its top left, as in the 2.0.1 skins. Before staging: Jake's look.
    - Smaller leftovers in the done panes: "Sort" above the budget bars (`DoHBarClick`'s sort), the drag bar's resizing
      (`ClickInDragBar`), and a real System 7 scroll bar for the three lists.
 3. Until a pane is done, the skin must not show 2.0.1's version of it as if it were 3.0.1's: keep these on the session branch,
