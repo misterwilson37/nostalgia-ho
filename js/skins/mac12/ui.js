@@ -20,6 +20,32 @@ const V2 = window.HOMAC_VERSION === '2.0.1';
 const V3 = window.HOMAC_VERSION === '3.0.1';
 let HOMAC_RE20 = null;
 const A = () => window.HOAPI;
+// ---------- the Mac's screen, made as big as the window allows (Jake, 17 November 2026: "scale the whole Mac", every Mac skin) ----------
+// As the DOS look's frame (js/skins/dos/ui.js setUnit): S is how many times the program's 640 x 480 screen fits the window, in half steps, from
+// 1.5 (below it, a phone, the page is as it was). The map is drawn in the Mac's pixels, S CSS pixels each (T.mapPixel: its clicks and drags
+// follow), so its zooms are the program's 6, 9, 12 and 17 pixels a cell, S times bigger; the panel is the Mac's 226 pixels wide, and it, the
+// menu bar, the windows, the report bubble and the map's scroll bars are zoomed by S (html.macscale, --mac: js/skins/mac12/panel.css). A
+// window that big shows as much of the galaxy as the Mac's screen did, in the same proportion.
+// The remake's panel holds more than the program's (the Report Window under Tech Spending, where 3.0.1 put it under the map), so the screen
+// is fitted to the panel's height too: S is the largest half step at which the Mac's 640 pixels fit across and the menu bar and the whole
+// panel fit down (its height in the Mac's pixels, measured after each drawing; the zoom doesn't change it).
+const MACS = { s: 1, need: 480 };
+function macScale() { const u0 = Math.min(window.innerWidth / 640, window.innerHeight / Math.max(480, MACS.need)); return u0 >= 1.5 ? Math.floor(u0 * 2) / 2 : 1; }
+function measureMac() {
+  const p = document.getElementById('panel'), m = document.getElementById('menubar'); if (!p || !p.firstChild || MACS.s <= 1) return; // (only in the Mac's layout: the page's own panel is wider, so taller)
+  const z = MACS.s, pr = p.getBoundingClientRect(), last = p.lastElementChild.getBoundingClientRect();
+  const need = Math.ceil((last.bottom - pr.top + p.scrollTop * z) / z + 8 + (m ? m.getBoundingClientRect().height / z : 20)); // (the content's foot, its padding, the menu bar)
+  if (need !== MACS.need) { MACS.need = need; setMacScale(); }
+}
+function setMacScale() {
+  const s0 = MACS.s, de = document.documentElement; MACS.s = macScale();
+  de.style.setProperty('--mac', String(MACS.s)); de.classList.toggle('macscale', MACS.s > 1);
+  if (s0 !== MACS.s && A() && A().G) { A().UI.fitted = false; A().resize(); A().renderPanel(); }
+}
+setMacScale(); window.addEventListener('resize', setMacScale);
+const macPixel = () => (MACS.s > 1 ? [MACS.s, MACS.s] : null);
+// a pane's canvas has enough pixels for the zoom and the screen (twice the Mac's at the least)
+const QK = () => Math.max(2, Math.ceil(MACS.s * (window.devicePixelRatio || 1)));
 const G = () => A() && A().G;
 const H = () => window.HO;
 // the selected star and fleet
@@ -1232,9 +1258,9 @@ function starLine(cx, d) {
 // and a click on it the system beep; a drag sets the share and spreads the rest over the others in proportion. ----------
 const G9 = '9px Geneva, Verdana, sans-serif', G9B = 'bold 9px Geneva, Verdana, sans-serif', SYS12 = '12px Chicago, Charcoal, Geneva, sans-serif';
 function qdCanvas(w, h, label) { // a box drawn at twice its pixels, as wide as the panel
-  const c = A().el('canvas', { class: 'qd12', width: w * 2, height: h * 2, role: 'img', 'aria-label': label || '' });
-  c.style.aspectRatio = w + ' / ' + h;
-  const x = c.getContext('2d'); x.setTransform(2, 0, 0, 2, 0, 0); x.fillStyle = '#fff'; x.fillRect(0, 0, w, h);
+  const K = QK(), c = A().el('canvas', { class: 'qd12', width: w * K, height: h * K, role: 'img', 'aria-label': label || '' });
+  c.style.aspectRatio = w + ' / ' + h; c.dataset.k = String(K);
+  const x = c.getContext('2d'); x.setTransform(K, 0, 0, K, 0, 0); x.fillStyle = '#fff'; x.fillRect(0, 0, w, h);
   x.textBaseline = 'alphabetic'; x.fillStyle = '#000'; x.strokeStyle = '#000'; x.lineWidth = 1;
   const api = {
     c, x,
@@ -1647,7 +1673,7 @@ function gratuitousTick() {
   const cv = document.querySelector('#panel .planet301 canvas[data-planet]');
   const g = G(); if (!cv || !g) { clearInterval(GRAT.timer); GRAT.timer = null; return; }
   const s = g.stars[+cv.dataset.planet]; if (!s) return;
-  const x = cv.getContext('2d'); x.setTransform(2, 0, 0, 2, 0, 0);
+  const K = +cv.dataset.k || 2, x = cv.getContext('2d'); x.setTransform(K, 0, 0, K, 0, 0);
   gratuitous301(x, s, true);
 }
 // The planet pane (DrawPlanetRect @15491e): 226 x 68. Erased, or on a colour screen painted grey (A5-$ba6) less its right column (and, for your colony
@@ -2649,10 +2675,11 @@ if (V3) {
   document.documentElement.classList.add('mac301');
   window.HOMAC301 = {
     get ownPanel() { return !!G() && own(); },
-    panel(panel, B) { if (G() && own()) panel301(panel, B); },
+    panel(panel, B) { if (G() && own()) panel301(panel, B); requestAnimationFrame(measureMac); },
     // the map: 2.0.1's zooms, cells and scroll bars (the same code), 3.0.1's own drawing (above)
     zoomTo: (s0, f) => (own() ? zoomTo(s0, f) : Math.max(12, Math.min(140, s0 * f))),
-    mapInset: () => (barsOn() ? [BAR12, BAR12] : [0, 0]),
+    mapInset: () => (barsOn() ? [BAR12 * MACS.s, BAR12 * MACS.s] : [0, 0]),
+    mapPixel: macPixel,
     modernPan: () => barsOn(),
     syncView: syncMapView, afterDraw: updateBars, centerOnStar: centerOnStar12,
     zoomed: (i) => { if (barsOn() && i.menu) MB.centerSel = true; },
@@ -2711,7 +2738,8 @@ window.HOMAC12 = {
   newGame(f, ctx) { if (V2) createGalaxy20(f, ctx); },
   zoomTo: (s, f) => (own() ? zoomTo(s, f) : Math.max(12, Math.min(140, s * f))),
   // the map window's scroll bars and the whole-cell scrolling they give (above); dragging the map with a mouse and the wheel are modern conveniences
-  mapInset: () => (barsOn() ? [BAR12, BAR12] : [0, 0]),
+  mapInset: () => (barsOn() ? [BAR12 * MACS.s, BAR12 * MACS.s] : [0, 0]),
+  mapPixel: macPixel,
   modernPan: () => barsOn(),
   syncView: syncMapView, afterDraw: updateBars, centerOnStar: centerOnStar12,
   zoomed: (i) => { if (barsOn() && i.menu) MB.centerSel = true; },
@@ -2752,7 +2780,7 @@ window.HOMAC12 = {
     };
     next();
   },
-  panel(panel, B) { if (own()) panel12(panel, B || {}); },
+  panel(panel, B) { if (own()) panel12(panel, B || {}); requestAnimationFrame(measureMac); },
   // the program's own windows, in English and French (another language keeps the remake's)
   confirm: (text, yes, labels) => ask12(text, yes, labels),
   window(name, ...x) {

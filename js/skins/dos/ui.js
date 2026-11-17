@@ -1067,7 +1067,7 @@ function touchFleets() {
   const mouse = (type, e) => new PointerEvent(type, { pointerId: e.pointerId, pointerType: 'mouse', isPrimary: true, button: 0, buttons: type === 'pointerup' ? 0 : 1, clientX: e.clientX, clientY: e.clientY, bubbles: true, cancelable: true });
   cv.addEventListener('pointerdown', (e) => {
     const a = window.HOAPI; if (!isMap(e) || !(frameOn() || macLook()) || e.pointerType !== 'touch' || !e.isTrusted || !a || !a.G || a.G.over) return;
-    const k = frameOn() ? U : 1, px = e.offsetX / k, py = e.offsetY / k, // (the map's pixel in CSS pixels: the frame's unit, else 1 as the classic page draws it)
+    const mp = !frameOn() && window.HOTHEME && HOTHEME.mapPixel && HOTHEME.mapPixel(), k = frameOn() ? U : mp ? mp[0] : 1, px = e.offsetX / k, py = e.offsetY / k, // (the map's pixel in CSS pixels: the frame's unit, the Mac skins' scale (T.mapPixel), else 1)
     d = (a.UI.dots || []).slice().reverse().find(k => k.mine && !k.sat && !k.transit && px >= k.x - 6 && px <= k.x + k.w + 6 && py >= k.y - 6 && py <= k.y + k.h + 6);
     if (!d) return;
     id = e.pointerId; e.stopImmediatePropagation(); e.preventDefault(); e.target.dispatchEvent(mouse('pointerdown', e));

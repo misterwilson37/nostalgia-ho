@@ -48,3 +48,10 @@ html.mac301 #msg .card.bub301 .count { position: absolute; left: 18px; bottom: 3
 html.mac301 #msg.et301 { top: 2px; left: 3px; bottom: auto; }
 html.mac301 #msg .clock.pic { padding: 0; border: 0; background: none; box-shadow: none; min-width: 0; }
 html.mac301 #msg .clock.pic img { width: 52px; image-rendering: pixelated; }
+/* The Mac's screen made big (js/skins/mac12/ui.js setMacScale): the panel the Mac's 226 pixels and its padding, the panel, menu bar, windows,
+   report bubble and the map's scroll bars zoomed by --mac; the map draws itself at that scale (T.mapPixel) */
+html.macscale #main { grid-template-columns: calc((226px + 16px + 2px) * var(--mac)) 1fr; }
+html.macscale #panel, html.macscale #menubar, html.macscale #msg, html.macscale .mapbar12, html.macscale .mapcorner12,
+html.macscale .scrim > .win, html.macscale .tcard, html.macscale .starmenu, html.macscale .toast, html.macscale .tip { zoom: var(--mac); }
+/* (a zoomed window still fits the page: its limits divided by the zoom, which multiplies them back) */
+html.macscale .scrim > .win { max-width: calc((100vw - 24px) / var(--mac)); max-height: calc((100vh - 34px) / var(--mac)); }
