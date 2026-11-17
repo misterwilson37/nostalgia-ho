@@ -2675,9 +2675,13 @@ function showBug(e, where, o) {
 // what escapes everything else (a timer, a listener not made with el())
 window.addEventListener('error', (ev) => {
   if (!ev.error && /^Script error\.?$|ResizeObserver loop/.test(ev.message || '')) return;
+  if (autoplayRefused(ev.error || ev.message)) return;
   showBug(ev.error || ev.message, '');
 });
-window.addEventListener('unhandledrejection', (ev) => showBug(ev.reason, ''));
+// (a browser refusing to play a sound before the player has clicked anything, as a game started by a link (?rules=) does at once, is not a bug:
+// Firefox reports it so even where the play() is caught. The sound simply waits for the first click.)
+const autoplayRefused = (r) => !!r && (r.name === 'NotAllowedError' || /play method is not allowed|play\(\) failed because the user didn't interact|play\(\) request was interrupted/i.test(String(r.message || r)));
+window.addEventListener('unhandledrejection', (ev) => { if (autoplayRefused(ev.reason)) { ev.preventDefault(); return; } showBug(ev.reason, ''); });
 // End Turn (and auto play): the game saved just before is put back when the
 // turn throws, so a turn is never half played
 // (T.beforeTurn(G): a skin notes what it needs as the turn is played)
