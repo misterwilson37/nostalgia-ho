@@ -35,7 +35,10 @@ Sources (private repo `nostalgia-ho-sources`):
      sizes. Before staging: Jake's look.
    - ~~The menus~~ (done 17 Nov: `menuLayout301`, the Menus table). Every Mac skin's menus now write their keys ⌘N, as the MENU
      resources do (they wrote the DOS skin's "[N]").
-   - Next: the start-up and new game screens, then the windows from the menus, the battles, the end of the game.
+   - ~~The start-up and new game screens~~ (done 17 Nov: the table). The 2.0.1 dialogs' CSS (`.dl20`, the colour frame, the status
+     bar) moved to `js/skins/mac12/panel.css` for both. Real-play presses a dialog's default button after End Turn (the play-alone
+     question); `mac3c`, `mac3` pass at desktop and phone-l.
+   - Next: the windows from the menus, the battles, the end of the game.
    - Smaller leftovers in the done panes: "Sort" above the budget bars (`DoHBarClick`'s sort), the drag bar's resizing
      (`ClickInDragBar`), and a real System 7 scroll bar for the three lists.
 3. Until a pane is done, the skin must not show 2.0.1's version of it as if it were 3.0.1's: keep these on the session branch,
@@ -56,16 +59,16 @@ another version.
 
 | Screen | Captures | 3.0.1 resource | Against 2.0.1 | Remake |
 |---|---|---|---|---|
-| Personalize your copy | 002 | DLOG 4030 | differs | ? |
-| Startup window, B&W and colour | 003, 009 | DLOG 1200, 1201 | same | ? |
+| Personalize your copy | 002 | DLOG 4030 | differs | not built, as in the 2.0.1 skins: the remake takes the name from New Game and the account (a licence name is never a stranger's) |
+| Startup window, B&W and colour | 003, 009 | DLOG 1200, 1201 | same | close: PICT 1003 (colour 1002, the colour skin's p1003) over Open Game and New Game, framed as the 2.0.1 skins' (the same DLOG); the licensee's plate (PICT 4010, drawn by `GetLicensePict`) is not drawn |
 | Name the new galaxy (System 7's file box) | 004, 164 | system | n/a | ? |
 | Open a game (System 7's file box) | 010 | system | n/a | ? |
-| Create New Galaxy | 005, 006, 165 | DLOG 6080 | differs | ? |
-| Please Identify Yourself | 007, 011 | DLOG 4000 | same | ? |
-| New player: name, skill, sex | 008 | DLOG 4010 | differs | ? |
-| Play alone or wait for more humans | 015, 166 | ALRT 3230 | same window, items differ | ? |
-| Status box (Writing Game File, Pass N for Player N, Battle Stage) | 017-019, 169-174 | DLOG 7000 | items same, window differs | ? |
-| Years Per Turn | not seen | DLOG 4120 | new | ? |
+| Create New Galaxy | 005, 006, 165 | DLOG 6080 | differs | **done** (`createGalaxy301`): DITL 6080's rectangles; the four lists with Cluster and Diabolical, the computers' number and slider, Years Per Turn… and its years, Alliances, Cancel, Create; the remake's own choices under "More…" |
+| Please Identify Yourself | 007, 011 | DLOG 4000 | same | not built, as in the 2.0.1 skins (a game file shared between machines; the remake's players are set at New Game) |
+| New player: name, skill, sex | 008 | DLOG 4010 | differs | not built (as 4000): the skill is New Game's, the sex the Preferences' |
+| Play alone or wait for more humans | 015, 166 | ALRT 3230 | same window, items differ | **done** (`playAlone301`): asked at the year-2000 End Turn with one human until Continue (`EndTurnMenuCall` @120da4, the header's +6 byte); Wait leaves the turn unended, as `CheckTurnDone` does. ALRT 3070 (two humans or more) is not shown: the hot seat hands over instead |
+| Status box (Writing Game File, Pass N for Player N, Battle Stage) | 017-019, 169-174 | DLOG 7000 | items same, window differs | **done**: 2.0.1's `status20` (the same items) in the colour Mac's frame (`html.col20`), "Writing New Game File..." (STR# 4000.1) after Create, the passes at each End Turn |
+| Years Per Turn | not seen | DLOG 4120 | new | close (`yearsPerTurn301`, from DITL 4120 and `doYearsPerTurnDialog` @f0c28): the question, five radio buttons, Cancel, OK; user item 9 (74 x 74 at 80, 188) is drawn by a routine not read yet and is left empty |
 
 ## The main screen
 
@@ -87,7 +90,7 @@ another version.
 
 | Menu | Capture | Resource | Against 2.0.1 | Remake |
 |---|---|---|---|---|
-| Apple | 031 | MENU 128 | differs | close: the skin's "Ho! 3.0.1" menu holds the remake's own items; 3.0.1's "About Spaceward Ho! 3.0…" (DLOG 1100 / 1101) is not built, so it has no item yet (no other version's box under its name) |
+| Apple | 031 | MENU 128 | differs | close: "About Spaceward Ho! 3.0…" first in the skin's "Ho! 3.0.1" menu, then the remake's own items; the About box is PICT 1000 / 1001 (DLOG 1100 / 1101, `DoAppleMenu` @f3b48: sound 10000 in colour), without the licensee's plate |
 | File | 032 | MENU 129 | differs | **done** (`menuLayout301`): items, ⌘ keys (⌘† for End Turn & Switch Players) and dimming as `SetMenuItems` @f4492: Save and Revert dimmed (the remake saves every change), Force Turn Update for the first human with two humans or more, Page Setup and Print dimmed (no Mac printing in a browser) |
 | Edit | 033 | MENU 130 | same | **done**: every item enabled, as the capture and the MENU's flags have them (1.2's and 2.0.1's dim them) |
 | Options | 034 | MENU 131 | differs | **done**: Auto Play (dimmed for a player out of the game), Sound checked, I'll Update Turns checked and dimmed under two humans, Preferences, the two Halls (always enabled) |

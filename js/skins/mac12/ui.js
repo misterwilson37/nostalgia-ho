@@ -423,7 +423,7 @@ function fleetsStatus() {
 // an alert over what is open (the dialog stays under it), in the program's words; its picture 3020 is the skin's
 // Mac 2.0.1's alerts (ALRT size and DITL: text, picture and button rectangles, from the resource fork; made by audit/mac-2.0.1 of the private repo): an alert is drawn at those rectangles,
 // the words being the paragraphs the page gives (the same lines) in the order of the DITL's text items
-if (window.HOMAC2_COLOUR) document.documentElement.classList.add('col20'); // (the colour Mac's bevelled dialog frame: style.css, html.col20)
+if (window.HOMAC2_COLOUR || (V3 && window.HOMAC3_COLOUR)) document.documentElement.classList.add('col20'); // (the colour Mac's bevelled dialog frame: panel.css, html.col20; 3.0.1's too, Jake's captures 015, 018)
 const ALERTS20 = {"128":[432,160,[["b",[123,312,143,402],"OK"],["t",[13,84,45,406],"Sorry ^0 requires the follow things to be able to run:"],["t",[58,110,74,380],"• ^1 CPU or better"],["t",[74,110,90,380],"• System Software ^2 or later"],["t",[90,110,106,380],"• ^3"]]],"2000":[230,172,[["b",[143,91,163,220],"Return To Finder"],["t",[26,26,128,224],"Sorry, but this is a development version of Spaceward Ho! 2.0 that's past it's prime. To get a newer copy, call Delta Tao Software, Inc. at (408) 730-9336."]]],"2010":[282,200,[["b",[169,156,189,253],"Play in B/W"],["p",[117,26,191,100],3010],["t",[13,13,48,279],"Sorry, but Spaceward Ho! 2.0 requires 32-bit Color Quickdraw to run in color."],["t",[52,13,106,278],"You can obtain Color Quickdraw from any Apple dealer for a nominal charge."]]],"3000":[240,228,[["b",[195,169,215,227],"OK"],["t",[39,26,71,227],"^0"],["t",[117,26,149,226],"File: ^1"],["t",[78,26,110,227],"Error Type: ^2"],["t",[156,26,172,225],"Error Code: ^3"],["t",[13,91,29,166],"File Error"]]],"3001":[237,210,[["b",[182,169,202,227],"OK"],["t",[39,26,71,227],"^0"],["t",[78,26,110,227],"Error Type: ^2"],["t",[117,26,133,225],"Error Code: ^3"],["t",[13,78,30,200],"Memory Error"],["t",[143,26,175,226],"Please quit Spaceward Ho! and start again."]]],"3010":[235,159,[["b",[130,169,150,227],"OK"],["p",[78,13,152,87],3020],["t",[13,13,65,229],"Sorry, but that is not the correct password for “^0”. Please try again."]]],"3020":[240,149,[["b",[117,169,137,227],"OK"],["t",[13,13,48,236],"Sorry, but this galaxy is already full. No more players can join."],["p",[65,13,139,87],3020]]],"3030":[232,180,[["b",[143,156,163,214],"OK"],["p",[91,26,165,100],3010],["t",[13,26,77,223],"Sorry, but Spaceward Ho! 2.0 can't read galaxy files created with versions 1.0 - 1.1.2."]]],"3040":[218,150,[["b",[110,150,130,208],"OK"],["t",[10,10,49,212],"Please name your new ship type."],["p",[60,10,134,84],3020]]],"3050":[218,150,[["b",[110,150,130,208],"OK"],["t",[10,10,49,212],"Please set your new ship type’s tech levels."],["p",[60,10,134,84],3020]]],"3060":[301,206,[["b",[162,207,182,265],"OK"],["t",[13,13,80,290],"Sorry, but the name you just typed in doesn’t match any of those in this game. And since the game has  progressed past the year 2000, it’s too late to join…"],["p",[120,17,194,91],3020],["t",[92,13,112,284],"Maybe you typed your name in wrong?"]]],"3070":[335,210,[["b",[143,223,163,292],"Continue"],["b",[143,117,163,186],"Wait"],["p",[117,13,191,87],3020],["t",[13,13,46,327],"^0, all of the ^1 currently registered players have finished their first turn. "],["t",[52,13,92,328],"Should we continue with the game, or wait for more human players to join?"]]],"3080":[240,200,[["b",[156,169,176,227],"OK"],["p",[104,26,178,100],3020],["t",[13,26,98,232],"All currently registered players have ended their first turn. We’re waiting for the game administrator to give his okay to continue…"]]],"3090":[236,132,[["t",[10,14,74,223],"^0’s Star System “^1” has had a revolution, and is now under your control."],["b",[100,157,120,215],"OK"]]],"3100":[236,132,[["t",[10,14,74,223],"^0 has offerred ^1 units of metal for ^2 dollars."],["b",[100,157,120,215],"OK"]]],"3110":[236,132,[["t",[10,14,74,223],"You have found an additional ^0 units of metal on ^0."],["b",[100,157,120,215],"OK"]]],"3120":[236,132,[["t",[10,14,74,223],"Your fleet of ^0 ^1 unexpectedly disappeared in hyperspace on their way to ^2."],["b",[100,157,120,215],"OK"]]],"3130":[236,132,[["t",[10,14,74,223],"^0 has gone nova.  Everything there has been destroyed."],["b",[100,157,120,215],"OK"]]],"3140":[236,132,[["t",[10,14,74,223],"Your Terraforming Technology has reached level ^0."],["b",[100,157,120,215],"OK"]]],"3150":[236,132,[["t",[10,14,74,223],"^0 has turned all his planets over to your control.  "],["b",[100,157,120,215],"OK"]]],"3160":[236,132,[["t",[10,14,74,223],"You have destroyed the Star System ^0, previously owned by ^1."],["b",[100,157,120,215],"OK"]]],"3170":[236,132,[["t",[10,14,74,223],"You have stolen ^0 Technology from ^1.  Your Tech level is now ^2."],["b",[100,157,120,215],"OK"]]],"3180":[233,177,[["b",[143,143,163,210],"OK"],["t",[13,13,84,224],"Sorry, your turn can’t be saved. Although you are in the year ^0, the game has already been updated to ^1…"],["p",[91,13,165,87],3020]]],"3190":[237,161,[["b",[104,156,124,214],"OK"],["p",[65,26,139,100],3020],["t",[13,26,66,224],"The game has been updated to the year ^0. Click “OK” to go to the next turn…"]]],"3200":[234,185,[["b",[143,156,163,214],"OK"],["t",[13,13,93,232],"Sorry, but the file was busy and your new auto play setting was not changed. Please try again shortly."],["p",[104,13,178,87],3020]]],"3210":[335,210,[["b",[143,222,163,299],"Force End"],["b",[143,117,163,194],"Wait"],["p",[117,13,191,87],3020],["t",[13,13,46,327],"^0, ^1 of the ^2 players haven’t finished their turn yet. "],["t",[52,13,92,328],"Do you really want to force an end of turn, or do you want to wait for them to finish?"]]],"3220":[238,201,[["b",[154,156,174,214],"OK"],["p",[102,26,176,100],3020],["t",[13,26,84,230],"Sorry, but the file way busy and the turn could not be marked “done”. Please try again in a moment."]]],"3230":[286,190,[["b",[145,188,165,257],"Continue"],["b",[145,110,165,168],"Wait"],["p",[99,13,173,87],3020],["t",[13,13,52,268],"^0, do you want to play alone, or wait for more humans to join?"],["t",[64,13,84,264],"(Computer Opponents: ^1)"]]],"3240":[230,182,[["b",[125,156,145,214],"OK"],["t",[13,13,80,220],"Auto play has been turned off, but your current turn has already been marked “done.” Update may occur at any time."],["p",[86,13,160,87],3020]]],"3250":[216,137,[["b",[78,143,98,201],"OK"],["t",[13,26,45,211],"Please unlock this disk and try again."],["p",[52,26,126,100],3020]]],"3260":[228,159,[["b",[117,156,137,214],"OK"],["t",[13,13,65,222],"Please enter both your name and a company name or address."],["p",[65,13,139,87],3020]]],"3270":[227,184,[["b",[156,156,176,214],"OK"],["t",[13,13,102,223],"The game has been updated to the next turn. You made some changes since ending your turn that you didn’t save. These changes have now been lost."],["p",[104,13,178,87],3020]]],"3280":[329,258,[["b",[208,182,228,240],"OK"],["p",[182,26,256,100],3020],["t",[13,26,49,320],"Sorry, but Spaceward Ho! allows you to have only 20 ship types at one time. "],["t",[52,26,119,320],"If you would like to create another ship type, scrap an old type by checking the “Scrap” box for it in the “List Ship Types…” Dialog."],["t",[130,26,178,325],"The ship will be scrapped during the turn update and you can create a new type next turn…"]]],"3290":[231,174,[["b",[143,156,163,214],"OK"],["t",[13,13,81,227],"Sorry, but that fleet is currently in hyperspace and can’t be contacted until it arrives at its next location."],["p",[91,13,165,87],3020]]],"3300":[240,200,[["b",[156,156,176,214],"OK"],["t",[13,13,46,223],"There are no colonists aboard that colony ship."],["p",[117,26,191,100],3020],["t",[56,14,106,223],"To refill it, you must either wait one turn or abandon the colony."]]],"3310":[259,249,[["b",[192,156,212,214],"OK"],["t",[14,13,68,252],"Sorry, but the battle information on that battle is no longer available."],["p",[140,13,214,87],3020],["t",[70,13,134,251],"Battle reports that are more that 500 years old are automatically deleted to keep the game file size small."]]],"3320":[235,192,[["b",[156,156,176,214],"OK"],["t",[13,13,98,224],"Sorry, but the game file was busy, and the battle information could not be read for this battle. Please try again in a moment."],["p",[104,13,178,87],3020]]],"3330":[240,200,[["b",[171,156,191,214],"OK"],["p",[119,13,193,87],3020],["t",[13,13,61,234],"Sorry, but that fleet doesn’t have enough fuel to reach the selected destination. "],["t",[67,13,117,234],"You can tell this because there are no arrows on either end of the dragged line."]]],"3340":[240,200,[["b",[156,169,176,227],"OK"],["p",[104,26,178,100],3020],["t",[13,26,82,228],"Sorry, there’s already a star named  “^0.” Please pick another name."]]],"5000":[325,140,[["b",[104,247,124,305],"Save"],["b",[104,26,124,98],"Don't Save"],["b",[104,156,124,214],"Cancel"],["t",[13,78,86,306],"^0, do you want to save the changes you've made before closing the current game?"]]],"5010":[240,200,[["b",[156,156,176,214],"OK"],["p",[117,13,191,87],3020],["t",[13,13,107,230],"^0^1^2^3"]]],"5020":[325,140,[["b",[104,247,124,305],"Save"],["b",[104,78,124,150],"Don't Save"],["b",[200,200,220,258],"Cancel"],["t",[13,78,86,306],"^0, do you want to save the changes you've made before updating the turn?"]]],"5030":[305,234,[["b",[195,234,215,292],"OK"],["t",[13,13,99,297],"Oops! Something kinda funny has happened in TheHo 2.0. Please write down the following problem with as much information as you can on what you think led up to it. Then let us know. Thanks."],["t",[104,13,185,295],"^0^1^2^3"]]],"5040":[227,249,[["b",[216,91,236,149],"OK"],["t",[13,13,49,215],"Congratulations! You have conquered the galaxy!"],["p",[52,39,203,188],3030]]],"5041":[227,249,[["b",[216,91,236,149],"OK"],["t",[13,13,49,215],"Congratulations! You have conquered the galaxy!"],["p",[52,39,203,188],3530]]],"5050":[235,244,[["b",[212,78,232,149],"Oh, well…"],["p",[52,39,203,188],3040],["t",[13,13,47,222],"Unfortunately, you have been eliminated from the game…"]]],"5051":[235,244,[["b",[212,78,232,149],"Oh, well…"],["p",[52,39,204,188],3540],["t",[13,13,47,222],"Unfortunately, you have been eliminated from the game…"]]],"5060":[282,177,[["b",[143,193,163,272],"Let ’em Die"],["b",[143,104,163,181],"Cancel"],["p",[91,13,165,87],3020],["t",[13,13,83,263],"Warning! You are not spending enough money to support some of your colonies. Do you really want to abandon them?"]]],"5070":[232,153,[["b",[104,156,124,214],"OK"],["t",[13,13,64,224],"Sorry, but the file was busy. Please try again in a few seconds."],["p",[65,13,139,87],3020]]],"5080":[262,153,[["b",[104,182,124,240],"Revert"],["b",[104,117,124,175],"Cancel"],["p",[65,13,139,87],3020],["t",[13,13,62,254],"Do you really want to revert to the saved version of the game? All changes will be lost…"]]],"5090":[228,191,[["b",[143,143,163,201],"OK"],["p",[104,13,178,87],3020],["t",[13,13,72,219],"Sorry, but this game was created with a newer version of Spaceward Ho! "]]]};
 // (a box of ALERTS20 by its id, with its own words: the won and lost boxes, ALRT 5040 / 5041 and 5050 / 5051, in the captures `shot103`-`105`, `lost027`)
 function alertById20(id, paras, ok, done) {
@@ -990,7 +990,10 @@ function bars(panel, B) {
 function aboutBox() {
   const a = A(), el = a.el, im = a.IMG['dos:p1001'], pl = a.IMG['dos:p4010'];
   const body = el('div', { class: 'about12', onclick: () => a.closeModal() }, im ? el('img', { src: im.src, alt: 'Spaceward Ho!' }) : null, pl ? el('img', { src: pl.src, alt: '' }) : null);
-  a.modal('', body, { cls: 'mac12 about', label: V2 ? 'About Spaceward Ho! 2.0…' : 'About Spaceward Ho! 1.2…' });
+  a.modal('', body, { cls: 'mac12 about', label: V3 ? 'About Spaceward Ho! 3.0…' : V2 ? 'About Spaceward Ho! 2.0…' : 'About Spaceward Ho! 1.2…' });
+  // (3.0.1's DoAppleMenu @f3b48: the colour box, DLOG 1100, plays sound 10000, "Move 'em out!"; the black-and-white one, 1101, none. Its
+  // licensee's plate, PICT 4010, is drawn by the program (GetLicensePict) and isn't in the resources: not drawn here)
+  if (V3 && window.HOMAC3_COLOUR) a.Sound.play(10000);
 }
 
 // DLOG 6060 "Organize “<type>” Fleets…" (OrganizeFleets @113896): the fleets of the selected fleet's design at the star as piles of ship
@@ -1246,6 +1249,80 @@ function createGalaxy20(f, ctx) {
   const keep = (n) => n.classList && (n.classList.contains('picks') || n.classList.contains('langnote') || n.classList.contains('btns'));
   const rs = field('rules'), dress = () => { const on = !rs || rs.value === 'mac20'; box.style.display = on ? '' : 'none'; moreBtn.style.display = on ? '' : 'none'; for (const n of rest) if (n.style && !keep(n)) n.style.display = on && !opened ? 'none' : ''; };
   if (rs) rs.addEventListener('change', dress); dress();
+}
+
+// 3.0.1's Create New Galaxy (doCreateGalaxyDlg @f0550; DLOG 6080, 456 x 263, DITL 6080 read in the private repo's resource fork): the
+// four lists at their user items (Style 3020-3025 with Cluster, Density 3050-3051, Intelligence 3030-3033 with Diabolical, Size 3040-3044;
+// LDEF 1001's 45 x 45 cells, as 2.0.1's), "Number of Computer Players:" with its number (200, 10) and slider (CNTL 6080 at 200, 36),
+// "Years Per Turn…" (188, 220) and the years (190, 348), "Alliances" (230, 10), Cancel (228, 301) and Create (228, 379), the default ring
+// (user item 3). Jake's captures 005, 006, 165. The remake's own choices (version, skin, language, the rest) under "More…", as 2.0.1's.
+function createGalaxy301(f) {
+  const a = A(), el = a.el, win = f.closest('.win'); if (!win) return;
+  const field = (n) => f.querySelector(`[name="${n}"]`), fire = (n) => n.dispatchEvent(new Event('change', { bubbles: true }));
+  const LISTS = [
+    { sel: 'm_shape', rect: [40, 170, 87, 442], icons: [3020, 3021, 3022, 3023, 3024, 3025], names: ['Circle', 'Random', 'Ring', 'Spiral', 'Grid', 'Cluster'], label: ['Galaxy Style:', [20, 170, 38, 262]] },
+    { sel: 'm_density', rect: [40, 10, 87, 102], icons: [3050, 3051], names: ['Dense', 'Sparse'], label: ['Galaxy Density:', [20, 10, 38, 119]] },
+    { sel: 'm_iq', rect: [120, 10, 167, 192], icons: [3030, 3031, 3032, 3033], names: ['Dumb', 'Average', 'Smart', 'Diabolical'], label: ['Computer Intelligence:', [100, 10, 118, 190]] },
+    { sel: 'm_size', rect: [120, 220, 167, 447], icons: [3040, 3041, 3042, 3043, 3044], names: ['Small', 'Medium', 'Large', 'ExtraLarge', 'Humongous'], label: ['Galaxy Size:', [100, 220, 117, 342]] }];
+  const comp = field('computers'), years = field('m_years'), all = field('alliances'), parts = [];
+  const frame = (r) => el('div', { style: at20([r[0] - 1, r[1] - 1, r[2] + 1, r[3] + 1]) + ';border:1px solid #000;box-sizing:border-box' });
+  for (const L of LISTS) {
+    const sel = field(L.sel); if (!sel) continue;
+    const vals = [...sel.options].map(o => o.value);
+    const w = cells20(L.icons.length, 1, L.icons.map((n, i) => ({ icon: 'dos:i' + n, name: L.names[i], id: vals[i] })), { sel: Math.max(0, vals.indexOf(sel.value)), pick: (c) => { sel.value = c.id; fire(sel); } });
+    w.el.setAttribute('style', w.el.getAttribute('style') + ';' + at20([L.rect[0] + 1, L.rect[1] + 1, L.rect[2] - 1, L.rect[3] - 1]));
+    parts.push(frame(L.rect), txt20(L.label[0], L.label[1]), w.el);
+  }
+  const nums = comp ? [...comp.options].map(o => +o.value).filter(n => !isNaN(n)) : [0, 9];
+  const num = raw('span', comp ? comp.value : '', { class: 'dt20', style: at20([200, 10, 216, 35]) });
+  const sl = el('input', { type: 'range', min: Math.min(...nums), max: Math.max(...nums), value: comp && /^\d+$/.test(comp.value) ? comp.value : 4, style: at20([200, 36, 216, 166]), 'aria-label': 'Number of Computer Players',
+    oninput: (e) => { if (comp) { comp.value = e.target.value; fire(comp); } num.textContent = e.target.value; } });
+  const yrs = raw('span', years ? years.value : '10', { class: 'dt20', style: at20([190, 348, 206, 380]) });
+  const cb = el('input', { type: 'checkbox', checked: !all || all.checked ? 'checked' : false, onchange: (e) => { if (all) { all.checked = e.target.checked; fire(all); } } });
+  let opened = false;
+  const moreBtn = el('button', { type: 'button', class: 'ok20', style: 'position:absolute;left:10px;top:268px;min-width:0;padding:0 6px;height:20px', onclick: () => { opened = !opened; dress(); } }, raw('span', 'More… (the remake’s own)'));
+  const box = dlog20(456, 263, txt20('Create New Galaxy', [0, 143, 19, 284]), ...parts, txt20('Number of Computer Players:', [180, 10, 198, 211]), num, sl,
+    ok20('Years Per Turn…', [188, 220, 208, 343], () => yearsPerTurn301(years, (v) => { yrs.textContent = v; })), yrs,
+    el('label', { style: at20([230, 10, 248, 116]) + ';display:flex;align-items:center;gap:4px' }, cb, raw('span', 'Alliances')),
+    el('button', { type: 'button', class: 'ok20 def20', style: at20([228, 379, 248, 437]) + ';min-width:0;padding:0', onclick: () => f.requestSubmit() }, raw('span', 'Create')),
+    el('button', { type: 'button', class: 'ok20', style: at20([228, 301, 248, 359]) + ';min-width:0;padding:0', onclick: () => a.closeModal() }, raw('span', 'Cancel')), moreBtn);
+  box.style.marginBottom = '30px';
+  const holder = el('div', { class: 'cg20' }, box);
+  const rest = [...f.childNodes]; f.prepend(holder);
+  const keep = (n) => n.classList && (n.classList.contains('picks') || n.classList.contains('langnote') || n.classList.contains('btns'));
+  const rs = field('rules'), dress = () => { const on = !rs || /^301/.test(rs.value); box.style.display = on ? '' : 'none'; moreBtn.style.display = on ? '' : 'none'; for (const n of rest) if (n.style && !keep(n)) n.style.display = on && !opened ? 'none' : ''; };
+  if (rs) rs.addEventListener('change', dress); dress();
+}
+// DLOG 4120 (doYearsPerTurnDialog @f0c28, 293 x 228; DITL 4120): "How many years should go by every time the turn is ended?" (12, 12), five
+// radio buttons 10 (Normal), 20, 30, 50, 100 Years (56, 80, 104, 128, 152 at 12), Cancel (192, 144) and OK (192, 220, default ring);
+// user item 9 (80, 188, 154, 262) is drawn by a routine of the program not read yet: left empty. Not in Jake's games.
+function yearsPerTurn301(sel, done) {
+  const a = A(), el = a.el, V = ['10', '20', '30', '50', '100'], W = ['10 Years (Normal)', '20 Years', '30 Years', '50 Years', '100 Years'];
+  let pick = Math.max(0, V.indexOf(sel ? sel.value : '10'));
+  const radios = V.map((v, i) => el('label', { style: at20([56 + 24 * i, 12, 74 + 24 * i, i ? 118 : 160]) + ';display:flex;align-items:center;gap:4px' },
+    el('input', { type: 'radio', name: 'ypt301', checked: i === pick ? 'checked' : false, onchange: () => { pick = i; } }), raw('span', W[i])));
+  const dl = dlog20(293, 228, txt20('How many years should go by every time the turn is ended?', [12, 12, 44, 283]), ...radios,
+    ok20('Cancel', [192, 144, 212, 202], () => close()),
+    el('button', { type: 'button', class: 'ok20 def20', style: at20([192, 220, 212, 278]) + ';min-width:0;padding:0', onclick: () => { if (sel) { sel.value = V[pick]; sel.dispatchEvent(new Event('change', { bubbles: true })); } done(V[pick]); close(); } }, raw('span', 'OK')));
+  // (over the New Game window, which is a modal itself: a layer of its own)
+  const scrim = el('div', { class: 'yp301', style: 'position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0)' },
+    el('div', { class: 'win mac12 dl20w', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Years Per Turn', style: 'background:#fff;border:1px solid #000;box-shadow:2px 2px 0 #000;padding:0;zoom:var(--mac, 1)' }, dl));
+  const close = () => scrim.remove();
+  document.body.append(scrim);
+}
+
+// 3.0.1's ALRT 3230 (EndTurnMenuCall @120da4: 286 x 190; DITL 3230 "Continue" (145, 188, default), "Wait" (145, 110), PICT 3020 at
+// (99, 13), "^0, do you want to play alone, or wait for more humans to join?" (13, 13, 63, 278), "(Computer Opponents: ^1)" (64, 13)):
+// asked when the year-2000 turn is done, with fewer than two humans, until it is answered Continue (the header's +6 byte, -1 till then).
+// Wait leaves the game unupdated (CheckTurnDone's +6 test), so End Turn asks again. Jake's captures 015 and 166.
+// (With two humans or more the program asks ALRT 3070 instead, when the last one is done: the remake's hot seat has its own hand-over.)
+function playAlone301(g, go) {
+  const a = A(), el = a.el, im = a.IMG['dos:p3020'], me = a.me(), comps = g.players.filter(p => !p.human).length;
+  const pic = im ? el('img', { src: im.src, alt: '', style: at20([99, 13, 173, 87]) + ';image-rendering:pixelated' }) : null;
+  a.modal('', dlog20(286, 190, pic, txt20(`${me.name}, do you want to play alone, or wait for more humans to join?`, [13, 13, 63, 278]), txt20(`(Computer Opponents: ${comps})`, [64, 13, 84, 264]),
+    ok20('Wait', [145, 110, 165, 168], () => a.closeModal()),
+    el('button', { type: 'button', class: 'ok20 def20', style: at20([145, 188, 165, 257]) + ';min-width:0;padding:0', onclick: () => { g.alone301 = true; a.closeModal(); go(); } }, raw('span', 'Continue'))),
+    { cls: 'mac12 dl20w', label: 'Play alone?' });
 }
 
 // ALRT / DITL 3210 (ForceEndTurn @122382, 335 x 210): PICT 3020 at (117, 13), the two paragraphs at (13, 13) and (52, 13), "Wait" at (143, 117) and "Force End" (default) at (143, 222);
@@ -2783,8 +2860,8 @@ function menus12(M, ho) {
   const extra = [];
   for (const k in M) { for (const x of M[k]) if (x[0] !== '-' && !(typeof x[0] === 'string' && own.has(x[0]))) extra.push(x); M[k].length = 0; }
   // (View's sound and music, Help's How to play and the manual stay reachable)
-  // (3.0.1's About box, DLOG 1100 / 1101, is not built yet: no item rather than another version's box under its name)
-  if (!V3) ho.unshift([V2 ? 'About Spaceward Ho! 2.0…' : 'About Spaceward Ho! 1.2…', aboutBox], ['-']);
+  // (3.0.1's About box: DLOG 1100 / 1101, PICT 1000 / 1001, which the skins have as p1001)
+  ho.unshift([V3 ? 'About Spaceward Ho! 3.0…' : V2 ? 'About Spaceward Ho! 2.0…' : 'About Spaceward Ho! 1.2…', aboutBox], ['-']);
   // (each command is the remake's own: a window it opens is tagged at once, which is what keeps 1.2's own windows out of the remake's look;
   // the Ho! menu's own items too: Skin and OS look, Sounds, Language, Temperatures)
   const tagged = (x) => { const f = x[1], y = x.slice(); y[1] = (...a) => { const r = f(...a); tagRemakeWindows(); return r; }; return y; };
@@ -2796,6 +2873,22 @@ if (V3) {
   document.documentElement.classList.add('mac301');
   window.HOMAC301 = {
     get ownPanel() { return !!G() && own(); },
+    // (the New Game window, for 3.0.1's own rules: its Create New Galaxy dialog over the form)
+    newGame(f) { createGalaxy301(f); },
+    // the status window (DLOG 7000, the same items as 2.0.1's: "Writing New Game File..." (STR# 4000.1) while the new galaxy is written,
+    // then "Pass 1 for Player %d..." and the rest while a turn is worked out; Jake's captures 017-019, 169-174), and the play-alone question
+    beforeFirstTurn(go) {
+      if (!own()) return false;
+      const a = A(), n = G().players.length, txt = STR301(4000)[0] || 'Writing New Game File...', bar = status20(txt, n);
+      a.modal('', bar.box, { cls: 'small mac12 dl20w', label: txt });
+      let i = 0; const step = () => { if (++i > n) { a.closeModal(); go(); return; } bar.value = i; setTimeout(step, 60); }; setTimeout(step, 60);
+      return true;
+    },
+    turnProgress(g, go) {
+      if (!own()) return go();
+      if (g.year === 2000 && !g.alone301 && g.players.filter(p => p.human).length < 2 && H().rules(g).id === '301') return playAlone301(g, () => turnProgress(g, go));
+      turnProgress(g, go);
+    },
     panel(panel, B) { if (G() && own()) panel301(panel, B); requestAnimationFrame(measureMac); },
     // the map: 2.0.1's zooms, cells and scroll bars (the same code), 3.0.1's own drawing (above)
     zoomTo: (s0, f) => (own() ? zoomTo(s0, f) : Math.max(12, Math.min(140, s0 * f))),

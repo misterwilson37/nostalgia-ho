@@ -59,3 +59,44 @@ html.macscale .scrim > .win, html.macscale .tcard, html.macscale .starmenu, html
 html.macscale .scrim > .win { max-width: calc((100vw - 24px) / var(--mac)); max-height: calc((100vh - 34px) / var(--mac)); }
 /* 3.0.1's Window > Hide Information (ShowHideMapInfo @152b44): the info panes are taken off; Tech Spending and the reports stay */
 html.mac301noinfo #panel .box.planet301, html.mac301noinfo #panel .box.fleets301, html.mac301noinfo #panel .box.info301, html.mac301noinfo #panel .box.low301 { display: none; }
+/* 3.0.1's start-up window (DLOG 1200 / 1201, the same as 2.0.1's: js/skins/mac2/style.css): no title bar, the 304 x 200 splash,
+   then Open Game, New Game */
+html.mac301 #tframe { width: min(304px, 86vw); }
+html.mac301 .tsplash { box-shadow: 2px 2px 0 #000; border: 1px solid #000; }
+html.mac301 .tsplash .wtitle { display: none; }
+html.mac301 .tsplash .wbody { padding: 0 0 10px; gap: 10px; }
+html.mac301 .tsplash #tframe { background: #fff; }
+html.mac301 .tsplash .tbtns { margin: 0; gap: 26px; }
+html.mac301 .tsplash .tbtns button { font: 12px Chicago, Charcoal, Geneva, var(--ui) !important; padding: 2px 10px !important; min-width: 75px; }
+html.mac301 .tsplash .tbtns #tnew { outline: 3px solid #000; outline-offset: 1px; }
+html.mac301 .tcard .tskin:not([hidden]) { display: block; margin-top: 12px; }
+
+/* ---- Mac 2.0.1's and 3.0.1's own dialogs (mac12/ui.js: dlog20): items at their DITL rectangles, Chicago-less system look as the other 1.2 dialogs ---- */
+.dl20 { font: 15px/1.2 'DOS Chicago 12', Chicago, Charcoal, Geneva, sans-serif; letter-spacing: .58px; color: #000; background: #fff; } /* (.58px: the program's lines are about 9% wider than this font's, measured on 'Congratulations! You have' in shot104) */ /* (the program's Chicago 12; the DOS skin ships the same face, as a 1500-unit font that is 12 pixels at 15px) */
+.dl20 button { font: 15px/1 'DOS Chicago 12', Chicago, Charcoal, Geneva, sans-serif !important; letter-spacing: .58px; }
+/* buttons as the program draws them (a 58 x 20 round rect, corner about 5) and the default one's ring: 3 pixels, a pixel apart (shot104, lost027) */
+.dl20 .ok20 { border-radius: 5px !important; }
+.dl20 .ok20.def20 { outline: 3px solid #000; outline-offset: 1px; }
+.dl20 .dt20 { display: block; overflow: hidden; }
+.dl20 input[type=range] { margin: 0; }
+.cl20 .c20 { cursor: default; font: 9px Geneva, Verdana, sans-serif; }
+.cl20 .c20.sel { background: #000; color: #fff; }
+.cl20 .c20.sel img { filter: invert(1); }
+.cl20 .c20.off { opacity: .45; }
+.cl20 .n20 { font-size: 9px; letter-spacing: -.2px; }
+.cg20 .dl20 { margin: 0 auto; }
+.cg20more { margin-top: 8px; }
+.win.dl20w { max-width: none; width: max-content; }
+.win.dl20w .wbody { max-width: none; overflow: visible; }
+
+/* An alert's and a dialog's frame on the colour Mac (2.0.1's shot104, lost027, the nested alert of shot002; 3.0.1's 015, 018): a black line, three pixels of bevel (light blue-white, grey,
+   slate on the top and left, the reverse at the bottom and right) and a black line; the items' origin is 3 pixels inside it. No drop shadow. */
+html.col20 .win.dl20w { border: 1px solid #000; box-shadow:
+  inset 1px 1px 0 0 #ccf, inset 2px 2px 0 0 #bbb, inset 3px 3px 0 0 #669, inset 4px 4px 0 0 #000,
+  inset -1px -1px 0 0 #669, inset -2px -2px 0 0 #bbb, inset -3px -3px 0 0 #ccf, inset -4px -4px 0 0 #000; background: #fff; }
+html.col20 .win.dl20w .wbody { padding: 0; }
+html.col20 .win.dl20w .wtitle { display: none; } /* (the program's dialogs have no title bar) */
+html.col20 .win.dl20w .dl20 { margin: 7px; }
+/* the status window's bar (DLOG 7000: status20; 2.0.1's shot031, lost003-007, 3.0.1's 017-019): a 200 x 16 black-lined box, filled with a one-pixel black and white checker */
+.bar20 { box-sizing: border-box; width: 200px; height: 16px; border: 1px solid #000; background: #fff; box-shadow: 1px 1px 0 #000; }
+.bar20 .fill20 { height: 100%; width: 0; background: repeating-conic-gradient(#000 0 25%, #fff 0 50%) 0 0 / 2px 2px; image-rendering: pixelated; }
