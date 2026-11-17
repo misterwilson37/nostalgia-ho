@@ -6208,14 +6208,15 @@ function joinFromAddress() {
 
 // ?rules=ID (Jake, 17 November 2026: a link straight to a new game): a new game in that ruleset with its New Game window's defaults, the skin
 // being ?skin='s as always; ?rules=ID&form stops at the New Game window instead. ID is a ruleset's id (301, mac20, 12, dos, original, ios ...)
-// or its version, with or without the dots (3.0.1, 2.0.1, 1.2, 5.0.5). The address is tidied, so a reload doesn't start another.
+// or its version, with or without the dots (3.0.1, 2.0.1, 1.2, 5.0.5); any other parameter sets the New Game field of that name (&shape=ring
+// &size=small &computers=4 ...). The address is tidied, so a reload doesn't start another.
 function rulesFromAddress() {
-  let want = null, form = false;
-  try { const q = new URLSearchParams(location.search); want = q.get('rules'); form = q.has('form'); } catch (e) {}
+  let want = null, form = false, params = [];
+  try { const q = new URLSearchParams(location.search); want = q.get('rules'); form = q.has('form'); params = [...q.entries()]; } catch (e) {}
   if (!want) return false;
   const k = String(want).toLowerCase().replace(/[^a-z0-9]/g, ''), ids = Object.keys(HO.RULESETS);
   const id = ids.find(x => x.toLowerCase() === k) || ids.find(x => String(HO.RULESETS[x].version || '').replace(/[^0-9]/g, '') === k);
-  try { const u = new URL(location.href); u.searchParams.delete('rules'); u.searchParams.delete('form'); history.replaceState(null, '', u.toString()); } catch (e) {}
+  try { const u = new URL(location.href); for (const [k] of params) if (!/^(skin|os|join)$/.test(k)) u.searchParams.delete(k); history.replaceState(null, '', u.toString()); } catch (e) {}
   if (!id) { toast(`No ruleset "${want}"`); return false; }
   newGameDialog();
   const f = document.querySelector('form.newgame'), ed = f && f.querySelector('select[name=rules]');
@@ -6227,6 +6228,17 @@ function rulesFromAddress() {
   let named = null; try { named = new URLSearchParams(location.search).get('skin'); } catch (e) {}
   const sk = f.querySelector('select[name=skin]'), cur = window.HOSKINS && HOSKINS.current;
   if (named && sk && cur && sk.querySelector('option[value="' + cur + '"]')) { sk.value = cur; sk.dispatchEvent(new Event('change')); }
+  // any other parameter sets the New Game field of that name, the ruleset's own one first (shape=ring is 3.0.1's m_shape, DOS 2.0's d_shape ...):
+  // a select's value, a slider's number, a box's 1 or 0
+  // (every ruleset's field of that name is set, where the value is one of its choices: the game reads its own ruleset's)
+  for (const [k, v] of params) {
+    if (/^(skin|os|rules|form|join)$/.test(k)) continue;
+    for (const e of [...f.querySelectorAll('[name]')].filter(x => x.name === k || x.name.endsWith('_' + k))) {
+      if (e.tagName === 'SELECT' && ![...e.options].some(o => o.value === v)) continue;
+      if (e.type === 'checkbox') e.checked = !/^(0|false|no|off)$/i.test(v); else e.value = v;
+      e.dispatchEvent(new Event('input', { bubbles: true })); e.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+  }
   if (!form) setTimeout(() => { if (f.isConnected) f.requestSubmit(); }, 0);
   return true;
 }

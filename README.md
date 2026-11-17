@@ -590,7 +590,9 @@ Optional ruleset flags the skin reads (each is documented where it is read):
   Game window then offers it in the Skin menu; give it its own OS looks (`os`). `?skin=<name>` in the address
   also picks one, and `?rules=<id>` starts a new game in that ruleset at once (its id, `301`, `mac20`, `12`, `dos`, `original`,
   `405`, `mac405`, `ios` ..., or its version, `3.0.1`, `2.0.1`, `1.2`, `5.0.5`; with no `skin`, in the ruleset's own skin;
-  `&form` stops at the New Game window), e.g. `?skin=mac3&rules=3.0.1`.
+  `&form` stops at the New Game window; any other parameter sets the New Game field of that name, e.g. `&shape=ring&size=small
+  &computers=4`: 3.0.1 starts on a Cluster map, as its own Create New Galaxy window does, which shows only your home until 2010),
+  e.g. `?skin=mac3&rules=3.0.1&shape=ring`.
 - `assets/`: sprites, sounds, the 25 rank pictures (`assets/explore/`) and theme music, listed in `assets/manifest.json`
 - `docs/original-findings.md`: what the original program actually does
 - `docs/dos-findings.md`: what the DOS 2.0 program does differently, and how its art was read
