@@ -1552,6 +1552,14 @@ function techBox301() {
 // 3.0.1's words: its STR# lists (English 3.0.1; in French 3.0.1F's), js/lang-data.js
 const STR301 = (id) => { const L = window.HOLANG && (lang() === 'fr' ? HOLANG.mac301Fr : HOLANG.mac301En); return (L && L[String(id)]) || []; };
 const COL301 = () => !!window.HOMAC3_COLOUR;
+// The 3.0.1 skins draw these panes for any ruleset played in them: 3.0.1's own keeps a colony's terraform / mine split as rs.bars (per mille
+// of the two, -1 finished); any other the remake's s.terra, with a part finished as the 1.2 panes see it (colonyBars)
+function bars301(s) {
+  const rs = H().rules(G()); if (rs.bars) return rs.bars(s);
+  const v = colonyBars(s, A().me()); if (v[0] < 0 && v[1] < 0) return [-1, -1]; if (v[0] < 0) return [-1, 1000]; if (v[1] < 0) return [1000, -1];
+  const t = Math.round(1000 * (s.terra == null ? 0.5 : s.terra)); return [t, 1000 - t];
+}
+const setBars301 = (s, t, x) => { const rs = H().rules(G()); if (rs.setBars) rs.setBars(s, t, x); else s.terra = t / 1000; };
 // sprintf as 3.0.1's strings need it: %s, %d, %.*s and %N.Md (at least M digits: "%d.%1.1d°F", "%d.%2.2dG")
 const cfmt = (t, ...v) => { let i = 0; return t.replace(/%(\.\*)?(\d*)(?:\.(\d+))?([sd])|%%/g, (m, star, w, prec, c) => { if (m === '%%') return '%'; let x = String(v[i++]); if (c === 'd' && prec) { const neg = x.startsWith('-'); x = (neg ? '-' : '') + x.replace('-', '').padStart(+prec, '0'); } return w ? x.padStart(+w) : x; }); };
 // The money pane (DrawIncomeRect @154294): the rect (the window's +0x70 + 4 down, 34 high, 226 wide) erased (black and white) or, on a
@@ -1694,7 +1702,7 @@ function planetBox301() {
   const a = A(), g = G(), p = a.me(), rs = H().rules(g), sid = a.UI.sel, s = sid != null ? g.stars[sid] : null, S = STR301(1005), S4 = STR301(4000), col = COL301();
   const q = qdCanvas(226, 68, s ? s.name : '');
   const box = a.el('section', { class: 'box planet12 planet301' }, q.c);
-  const yours = !!s && s.owner === a.ME, B = yours && rs.bars ? rs.bars(s) : null, done = !!B && (B[0] === -1 || B[1] === -1);
+  const yours = !!s && s.owner === a.ME, B = yours ? bars301(s) : null, done = !!B && (B[0] === -1 || B[1] === -1);
   if (col) q.rect(0, 0, done ? 96 : 225, 68, RGB301.grey);
   if (done) q.rect(96, 0, 224, 65, '#000');
   if (s) {
@@ -1733,7 +1741,7 @@ function planetBox301() {
         if (last < 20 && ang > 338 && moved) ang = 1; if (last > 339 && ang < 20 && moved) ang = 359;
         ang = Math.max(1, Math.min(359, ang));
         const t = Math.trunc((ang - 1) * 1000 / 358);
-        if (t !== rs.bars(s)[0]) { rs.setBars(s, t, 1000 - t); const c = planetBox301(); box.replaceWith(c); }
+        if (t !== bars301(s)[0]) { setBars301(s, t, 1000 - t); const c = planetBox301(); box.replaceWith(c); }
         last = ang; moved = true;
       };
       const up = (e) => { window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); move(e); a.save(); a.renderPanel(); };
@@ -1925,7 +1933,7 @@ function lowBox301(B) {
       if (e.key === 'tech') { hsv = [(len * -200 - 1) & 0xffff, 0xffff, 0xffff]; rgb = hsv2rgb(hsv); }
       else {
         if (e.key === 'savings') rgb = [0, 1, 2].map(k => Math.trunc((CT301[16][k] * pm + CT301[15][k] * (1000 - pm)) / 1000));
-        else { const bb = rs.bars(st), T = bb[0], X = bb[1], tc = ratio <= 256 ? CT301[0] : CT301[1]; rgb = [0, 1, 2].map(k => Math.trunc((CT301[4][k] * X + tc[k] * T) / 1000)); }
+        else { const bb = bars301(st), T = bb[0], X = bb[1], tc = ratio <= 256 ? CT301[0] : CT301[1]; rgb = [0, 1, 2].map(k => Math.trunc((CT301[4][k] * X + tc[k] * T) / 1000)); }
         hsv = rgb2hsv(rgb);
       }
       x.fillStyle = css16(rgb); x.fillRect(x0, top, len, bottom - top);
@@ -1942,7 +1950,7 @@ function lowBox301(B) {
     const w = q.text(name, 0, y + 14, G9, { right: L + 43, color: lc });
     if (st && a.UI.sel === st.id) q.rect(L + 43 - w, y + 15, L + 43, y + 16, lc);
     if (abandoning) q.text('Abandoning', L + 48, y + 14, G9, { color: lc });
-    else if (st) { const bb = rs.bars(st); if (bb[0] === -1 && bb[1] === -1) q.text('$' + H().niceNum(Math.round(inc)), L + 48, y + 14, G9, { color: lc }); }
+    else if (st) { const bb = bars301(st); if (bb[0] === -1 && bb[1] === -1) q.text('$' + H().niceNum(Math.round(inc)), L + 48, y + 14, G9, { color: lc }); }
     y += 14;
   });
   q.vline(123, y, Y(331));
