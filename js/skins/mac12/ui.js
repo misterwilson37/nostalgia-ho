@@ -1511,6 +1511,66 @@ function alliances301() {
   return true;
 }
 
+// DLOG 6070 "Send Message" (SendMessage @140fa2, InitMessageLists @1421de (the same code as 2.0.1's), SetCellsToPlayers; 392 x 261, DITL
+// 6070; Jake's capture 075). "Send Message:" (7, 6), the step's prompt (7, 154; STR# 3002: "Send Message To Who?", "Saying What?", then the
+// message's own: "Which Star?", "Who?", "Where?"), "To:" and "Content:" beside the left list (33, 81: one column of four 45 cells, what is
+// chosen, a click on one taking the message back to that step) and the right list (33, 154: 5 x 4 cells, this step's choices: the players
+// still in and "Everyone"; the fourteen messages, ICN# 3000-3013; then the stars or players the message names). Erase (229, 164) clears it,
+// dimmed with nothing chosen; Send (228, 241, the default ring) is enabled once the message is whole and Done (228, 314) is dimmed then;
+// a message sent (rs.cannedChat, the engine's cannedSteps: 3.0.1's codes $40a-$417) plays sound 5000 and the window starts again for the next;
+// ten in a turn: ALRT 5010 with STR# 1020.17, and the window closes. Done closes it.
+function chat301() {
+  const a = A(), el = a.el, g = G(), ME = a.ME, C = H().rules(g).cannedChat, me = a.me();
+  const limitText = STR301(1020)[16] || 'Sorry, you can only send ten messages per turn.';
+  const lim = H().rules(g).chatLimit;
+  if (lim && (me.outbox || []).length >= lim) { alert5010(limitText); return true; }
+  const tos = C.to(g, ME);
+  const P = STR301(3002);
+  const hat = (q) => 'dos:i' + (q.id === ME ? (q.female ? 1500 : 1000) : (q.female ? 2500 : 2000) + ((q.face || 0) % 20));
+  const pl = (id) => g.players[+id];
+  let ch = [];
+  const act = () => (ch[1] ? C.actions[ch[1].i] : null);
+  const steps = () => 2 + (act() ? act().parts.length : 0);
+  const whole = () => !!act() && ch.length >= steps() && ch.slice(0, steps()).every(Boolean);
+  const prompt = raw('span', '', { class: 'dt20', style: at20([7, 154, 24, 355]) });
+  const left = cells20(1, 4, [], {}), right = cells20(5, 4, [], {});
+  const choices = (k) => {
+    if (k === 0) return tos.map(o => ({ id: String(o[0]), name: o[1], icon: pl(o[0]) && !isNaN(+o[0]) ? hat(pl(o[0])) : null, off: !!o[2] }));
+    if (k === 1) return C.actions.map((x, i) => ({ id: i, i, name: x.label, icon: 'dos:i' + (3000 + i) }));
+    const part = act().parts[k - 2], kind = part[1];
+    return C.list(g, ME, kind, a.UI.sel).map(o => ({ id: String(o[0]), name: o[1], icon: kind === 'players' && pl(o[0]) ? hat(pl(o[0])) : null, off: !!o[2] }));
+  };
+  const step = () => { for (let k = 0; k < steps(); k++) if (!ch[k]) return k; return steps(); };
+  const erase = ok20('Erase', [229, 164, 249, 222], () => { ch = []; refresh(); });
+  const done = ok20('Done', [228, 314, 248, 372], () => a.closeModal());
+  const send = el('button', { type: 'button', class: 'ok20 def20', style: at20([228, 241, 248, 299]) + ';min-width:0;padding:0', onclick: a.guard(() => {
+    if (!whole()) return;
+    const v = ch.slice(2).map(c => (isNaN(+c.id) ? c.id : +c.id));
+    const r = H().sendCanned(g, ME, C.make(g, ME, isNaN(+ch[0].id) ? ch[0].id : +ch[0].id, ch[1].i, v));
+    if (r === 'limit') { a.closeModal(); alert5010(limitText); return; }
+    if (r !== 'ok') return;
+    a.Sound.play(5000); a.save(); ch = []; refresh();
+    if (lim && (me.outbox || []).length >= lim) { a.closeModal(); alert5010(limitText); }
+  }) }, raw('span', 'Send'));
+  function refresh() {
+    const k = step();
+    prompt.textContent = k === 0 ? (P[0] || 'Send Message To Who?') : k === 1 ? (P[1] || 'Saying What?') : k < steps() ? act().parts[k - 2][0] : '';
+    left.set([0, 1, 2, 3].map(i => ch[i] ? { name: ch[i].name, icon: ch[i].icon } : { name: '' }), null);
+    const list = k < steps() ? choices(k) : [];
+    right.set(list, null);
+    right.el.querySelectorAll('.c20').forEach((d, i) => { const c = list[i]; if (c) d.onclick = () => { if (c.off) { if (a.beep) a.beep(); return; } ch[k] = c; ch.length = k + 1; refresh(); }; });
+    left.el.querySelectorAll('.c20').forEach((d, i) => { d.onclick = () => { if (!ch[i]) return; ch.length = i; refresh(); }; });
+    const w = whole();
+    send.disabled = !w; done.disabled = w; erase.disabled = !ch.some(Boolean);
+  }
+  const frame = (r) => el('div', { style: at20([r[0] - 1, r[1] - 1, r[2] + 1, r[3] + 1]) + ';border:1px solid #000;box-sizing:border-box' });
+  const put = (n, r) => { n.setAttribute('style', (n.getAttribute('style') || '') + ';' + at20(r)); return n; };
+  refresh();
+  a.modal('', dlog20(392, 261, txt20('Send Message:', [7, 6, 25, 137]), prompt, txt20('To:', [47, 44, 63, 74]), txt20('Content:', [85, 15, 101, 74]), frame([33, 81, 215, 128]), frame([33, 154, 215, 381]),
+    put(left.el, [34, 82, 214, 127]), put(right.el, [34, 155, 214, 380]), erase, send, done), { cls: 'mac12 dl20w', label: 'Send Message' });
+  return true;
+}
+
 // an ALRT of 3.0.1's (its DITL in HOLANG.mac301En: the static texts joined, OK), as the standard alert
 function alertById301(id) { const D = (window.HOLANG && HOLANG.mac301En.DITL[String(id)]) || []; std301(D.filter(x => x[0] === 'text').map(x => x[1]).join(' ')); }
 
@@ -3213,6 +3273,7 @@ if (V3) {
       if (name === 'fleets') return fleets301();
       if (name === 'build') return build301(x[0]);
       if (name === 'give') return give301();
+      if (name === 'chat') return chat301();
       if (name === 'organize' || name === 'group') return organize301(x[0]);
       return false;
     },

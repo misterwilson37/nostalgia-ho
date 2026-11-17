@@ -39,7 +39,7 @@ Sources (private repo `nostalgia-ho-sources`):
      bar) moved to `js/skins/mac12/panel.css` for both. Real-play presses a dialog's default button after End Turn (the play-alone
      question); `mac3c`, `mac3` pass at desktop and phone-l.
    - ~~List of All Fleets, Explored Stars, Compare, Skills~~, ~~Organize Fleets~~ (done 17 Nov: the table).
-   - ~~Build / Design Ships~~ (done 18 Nov: the table). ~~Give~~, ~~Alliances~~ done. Next: Send Message (DLOG 6070, `SendMessage` @140fa2, DIFF from 2.0.1's `chat20`: Erase / Send / Done, "Everyone", "Your Allies", "Your Buddies"), then the battles.
+   - ~~Build / Design Ships~~ (done 18 Nov: the table). ~~Give~~, ~~Alliances~~, ~~Send Message~~ done: every window from the menus is built. Next: the battles (the plan's session 3).
    - Smaller leftovers in the done panes: "Sort" above the budget bars (`DoHBarClick`'s sort), the drag bar's resizing
      (`ClickInDragBar`), and a real System 7 scroll bar for the three lists.
 3. Until a pane is done, the skin must not show 2.0.1's version of it as if it were 3.0.1's: keep these on the session branch,
@@ -121,7 +121,7 @@ another version.
 | List of All Explored Stars | 072 | DLOG 6040 | differs | **done**: the classic page's 3.0.1 list (`InitStarsList`'s order) with 3.0.1's rows (`MakeOneListedStar`: the star's icon, name, temperature, gravity, metal; no Own column; `rs.exploredList.icon`, `status: false`) at DITL 6040's rectangles with the Sort By menu |
 | Alliances | 073 | DLOG 6110 | new | **done** (`alliances301`, from `DoAlliancesDlg` @1432a4, `InitAllianceLists`, `SetAllianceLists`): DITL 6110's rectangles; the four lists by whether you like them and they like you, four cells across, the players still in (yourself too, icon 1000); a click moves a player across (on yourself a beep); OK keeps it (the remake's allies, `HO.setPact`) |
 | Give Stuff | 074 | DLOG 6120 | new | **done** (`give301`, from `DoGiveThingsDlg` @1437e0, `InitGTPlayerList`, `SetCellsToPlayers`): DITL 6120's rectangles; the other players still in, 5 x 4 cells of their icons and names, the first picked; the two fields kept between 0 and what you have; Give (default) under Cancel, sound 5000; three gifts a turn: ALRT 5010 with STR# 1020.21 |
-| Send Message | 075 | DLOG 6070 | differs | ? |
+| Send Message | 075 | DLOG 6070 | differs | close (`chat301`, from `SendMessage` @140fa2; the messages are the engine's `cannedSteps`, 3.0.1's codes $40a-$417): DITL 6070's rectangles; the steps' prompts (STR# 3002, then the message's own), the left list of what is chosen (a click takes it back), the right list's choices (the players still in and Everyone; ICN# 3000-3013; the stars or players named); Erase dimmed with nothing chosen, Send only with a whole message and Done dimmed then; a sent message (sound 5000) starts the window again; ten a turn: ALRT 5010 with STR# 1020.17. Left: Everyone's icon (the capture's grey ball; its ICN# not found yet) |
 
 ## End of the game
 
