@@ -38,7 +38,28 @@ Sources (private repo `nostalgia-ho-sources`):
    - ~~The start-up and new game screens~~ (done 17 Nov: the table). The 2.0.1 dialogs' CSS (`.dl20`, the colour frame, the status
      bar) moved to `js/skins/mac12/panel.css` for both. Real-play presses a dialog's default button after End Turn (the play-alone
      question); `mac3c`, `mac3` pass at desktop and phone-l.
-   - Next: the windows from the menus, the battles, the end of the game.
+   - ~~List of All Fleets, Explored Stars, Compare, Skills~~, ~~Organize Fleets~~ (done 17 Nov: the table).
+   - Next: **Build / Design Ships** (DLOG 6000, `BuildDesignShips` @131150), then Alliances, Give, Send Message (the plan's session 2).
+     Read so far (17 Nov), for whoever builds it:
+     - The window: DITL 6000 (492 x 285; dump it with a DITL reader over the 3.0.1 rfork); Jake's capture 065.
+     - Opening: the to-build counts (A5 -$452, one a type, 20) cleared; the selected type (A5 -$398) is the setup's +0x72 if valid,
+       else the last type; the type list (`InitShipTypesList`, rows in reverse: row r is type count-1-r); a new design's defaults
+       R 6, V 2, W 2, S 2, M 0, class 1 (fighter), its name from `GiveTypeCoolName`; `SetShipTypeAttrs`, `CopyInfoAndCalcCost`,
+       `SetButtonStates`; user items: 8 list border, 9 `DRAWSHIPTYPEPICTURE`, 27 `DRAWSHIPMONEYBAR`, 28 `DRAWMETALBAR`; 29 / 30 the
+       ship money and metal; 31 the star's name; 32 STR# 4000.40 "Building At:" or .41 "Viewing At:" (not your colony); the five tech
+       scroll bars (items 20-24) answer through `ListTypeTechSBResponse` while held.
+     - The item cases (jump table at $1313e4, items 4-24): 4 "+" and 5 "-" give a change of +1 / -1; 6 (the # To Build field) the
+       typed number less the type's count (a negative number is made 0 and the field selected); all three then go to $131884, which
+       applies the change (not read yet). 7 the Scrap / Don't Scrap button toggles the type's +0x88 flag; turning it on takes back the
+       ships ordered for the type this time (their money, +0x76 each, back to ship money; the development cost +0x6e back too if the
+       type was never built, +0x7e = 0) and redraws the list, both bars, the count and the two numbers. 8 a list click picks a type
+       (`SetShipTypeAttrs`, $132a24, $132bfe, the picture redrawn). 10 the name field ($1317ea) and 11 the class menu ($1316b2): not
+       read. 9 and 12-24 do nothing here.
+     - OK: every type's count is built at once, `BuildAShip` once a ship (3.0.1 builds when you press OK, no queue), then the fleets
+       and the money pane are redrawn. Cancel leaves everything.
+     - The remake's engine has the calls it needs: `HO.buildShips`, `HO.unbuildShip`, `HO.designCost`, `HO.designLimits`,
+       `HO.designMin`, `HO.designName`, `HO.findOrCreateDesign`, `HO.shipCostNow`, the ruleset's `flagScrapDesign` (see the classic
+       page's `openBuild`).
    - Smaller leftovers in the done panes: "Sort" above the budget bars (`DoHBarClick`'s sort), the drag bar's resizing
      (`ClickInDragBar`), and a real System 7 scroll bar for the three lists.
 3. Until a pane is done, the skin must not show 2.0.1's version of it as if it were 3.0.1's: keep these on the session branch,
@@ -112,7 +133,7 @@ another version.
 
 | Window | Captures | Resource | Against 2.0.1 | Remake |
 |---|---|---|---|---|
-| Build / List Ship Types | 065 | DLOG 6000 | differs | ? |
+| Build / List Ship Types | 065 | DLOG 6000 | differs | ? (being read: the Next list above) |
 | List of All Fleets | 068 | DLOG 6030 | differs | **done** (`fleets301`): DITL 6030's rectangles; the rows of STR# 4000.24-27 in `InitFleetsList`'s order (no satellites; swap-sorted by Ship Power, CalcShipPower, or Ship Class), the first row picked; Go To Fleet as `ListAllFleets` (the standard alert 4001.14 for a fleet in hyperspace, DLOG 6140 / 6141). Its arrival years count ten a turn, as the program does (patch: `listYears`) |
 | Organize Fleets | 069 | DLOG 6060 | differs | close (`organize301`, from `OrganizeFleets` @133d14 and `DrawOneOrgFleet`): DITL 6060's rectangles with Next Type; twelve 135 x 45 piles in three columns of four, the count at the left and the small ship picture 15 in; a drag moves one ship (Shift: the pile); Group All, Divide All (total / 12, the rest in the last; the assembly empties the other piles, which the decompile drops); OK with the ruleset's fuel / built-this-turn / colonists rule (`organized301`); Next Type opens the star's next design. Left: the ship picture's exact size inside the pile (the capture's looks narrower) |
 | Compare Players | 067, 070 | DLOG 6050 | differs | **done**: the classic page's chart at DITL 6050's rectangles (rules-301 `compare.layout`), now in the program's dress (no title bar, the colour frame, Chicago: `html.mac301 .origdlg`) |
