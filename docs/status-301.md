@@ -137,5 +137,9 @@ another version.
 
 About (DLOG 1100, 1101, 1150, 1151), Preferences (6150), Hall of Fame and Shame (4080, 4090, details 4100, 4110), Surrender (6130,
 ALRT 3380, 3390), Dip Into Savings (4070), Join Fleets (4060), Abandon a planet (ALRT 3410, 3420), Hope and Ship jokes (3020, 3030),
-Print (4040), Auto Play (4020, 4021), Graph (6055, 6056), Quick Help (3010), Spending warning (5060), Fleet can't reach (3330),
+Print (4040), Auto Play (4020, 4021), Graph (6055, 6056), Quick Help (3010), Fleet can't reach (3330),
 Too many ship types (3280), Save before closing (5000), Play a Game (3180).
+
+Not shown by 3.0.1 at all: the spending warning (ALRT 5060 is still in its resources, but 3.0.1 has no `GiveSpendingWarning`, the
+1.2 / 2.0.1 routine that asked it; the Windows 4.0.5 program has neither the routine nor its words, and Jake saw none in three turns of a
+colony at zero, 17 Nov). The rulesets say so already (`underfunded: undefined` in js/rules-301.js and js/rules-405.js).
