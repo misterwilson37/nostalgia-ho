@@ -117,3 +117,12 @@ html.mac301 .origdlg button.default { outline: 3px solid #000; outline-offset: 1
 .lst301 { overflow-y: auto; overflow-x: hidden; background: #fff; }
 .lst301 .li301 { height: 16px; line-height: 16px; padding: 0 3px; white-space: nowrap; overflow: hidden; cursor: default; }
 .lst301 .li301.sel { background: #000; color: #fff; }
+/* 3.0.1's Organize Fleets piles (DrawOneOrgFleet): the count at the pile's left, condensed past 99; the pile being dragged inverted */
+.org301 { background: #fff; overflow: hidden; }
+.org301 .pile301 { cursor: default; }
+.org301 .pile301.sel { filter: invert(1); background: #fff; }
+.org301 .n301.cond { letter-spacing: -1px; }
+/* 3.0.1's dialogs: this Chicago with no added spacing (as the 2.0.1 skins' end up), a word a pixel closer, and buttons on one line, so the
+   DITLs' words fit their rectangles as the program's do (Organize Fleets' heading is 129 wide, Jake's capture 069) */
+html.mac301 .dl20, html.mac301 .dl20 button { letter-spacing: 0 !important; word-spacing: -1px; }
+html.mac301 .dl20 .ok20 { white-space: nowrap; }

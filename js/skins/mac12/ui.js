@@ -172,7 +172,7 @@ function menuLayout301() {
       it(() => (noGame() || mine() ? S(3) : S(4)), () => { if (mine()) A().openBuild(selStar().id); }, { ghost: () => noGame() || !mine(), key: 'B' }),
       '-',
       it('List All Fleets…', () => A().openFleetList(), { ghost: noGame, key: 'L' }),
-      it(() => (noGame() || fleetHere() ? S(7) : S(8)), () => { const s = selStar(); if (fleetHere()) A().openOrganize(s.id); }, { ghost: () => noGame() || !fleetHere(), key: 'G' }),
+      it(() => (noGame() || fleetHere() ? S(7) : S(8)), () => { const s = selStar(); if (fleetHere()) organize301(s.id); }, { ghost: () => noGame() || !fleetHere(), key: 'G' }),
       it(() => (fleetHere() && fleetHere().scrap301 ? S(10) : S(9)), () => { const f = fleetHere(); if (f) A().toggleScrapFleet(f); }, { ghost: () => noGame() || !fleetHere() }),
       '-',
       it(() => (lastBattle() ? S(5).replace('%s', selStar().name) : S(6)), () => { const b = lastBattle(); if (b) A().openBattle(b.id); }, { ghost: () => noGame() || !lastBattle(), key: 'R' })],
@@ -1309,6 +1309,77 @@ function yearsPerTurn301(sel, done) {
     el('div', { class: 'win mac12 dl20w', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Years Per Turn', style: 'background:#fff;border:1px solid #000;box-shadow:2px 2px 0 #000;padding:0;zoom:var(--mac, 1)' }, dl));
   const close = () => scrim.remove();
   document.body.append(scrim);
+}
+
+// DLOG 6060 "Organize Fleets" (OrganizeFleets @133d14, DrawOneOrgFleet @13459a, DRAWORGFLEETS @134532; 427 x 283, DITL 6060: the heading
+// (0, 13), the two lines (18, 16) and (35, 16), the piles (56, 12, 236, 417), Next Type (249, 27), Group All (249, 107), Divide All (249, 187),
+// Cancel (249, 264), OK (249, 340, default)). The fleets of the selected fleet's design at the selected star, in the order of the fleet records,
+// one a pile (from the twelfth on, all in the last); twelve piles in three columns of four, a pile 135 x 45 (col = pile / 4, row = pile mod 4),
+// its ship count (condensed past 99) at its left and the small ship picture (120 x 40) 15 in, the pile being dragged inverted. A drag from a
+// pile to another moves one ship, with Shift the whole pile; an empty pile is a beep. Group All puts all in the first pile; Divide All gives
+// each of the first eleven the total / 12 (at least 1) while they last, the rest to the last. OK: the piles become the fleets in order (a
+// fleet beyond the piles is removed, a pile beyond the fleets is a new fleet), with the ruleset's rule for fuel, "built this turn" and colonists
+// (rules-301 organized301: the least fuel of them; a fleet whose count changed stops counting as built this turn unless all were, and its
+// colony ships are unloaded unless all were loaded; a new pile the same; the fleets kept keep their orders). Next Type does
+// OK, then opens the window again on the star's next fleet of another design (in record order, round), a beep when there is none.
+// Jake's capture 069.
+function organize301(sid) {
+  const a = A(), el = a.el, g = G(), me = a.me();
+  const at = g.fleets.filter(f => f.owner === a.ME && f.star === sid && !f.sat && Object.keys(f.ships).length === 1);
+  let f0 = at.find(f => f.id === a.UI.selFleet) || at[0];
+  if (!f0) { if (a.beep) a.beep(); return true; }
+  const did = +Object.keys(f0.ships)[0], d = me.designs.find(x => x.id === did);
+  const fleets = at.filter(f => +Object.keys(f.ships)[0] === did);
+  const piles = new Array(12).fill(0); fleets.forEach((f, i) => { piles[Math.min(i, 11)] += f.ships[did]; });
+  const fuel = Math.min(...fleets.map(f => f.fuel || 0)), allNew = fleets.every(f => !!f.newThisTurn), colony = d && d.type === 'colony', allLoaded = colony && fleets.every(f => (f.colonists || 0) > 0);
+  const flags = (f, changed) => { f.fuel = fuel; if (!changed) return; if (!allNew) f.newThisTurn = false; if (colony) f.colonists = allLoaded ? 10 * f.ships[did] : 0; };
+  const pic = a.shipPic ? a.shipPic(d, a.ME) : null;
+  const area = el('div', { class: 'org301', style: at20([56, 12, 236, 417]) + ';border:1px solid #000;box-sizing:border-box;touch-action:none' });
+  let drag = -1;
+  const draw = () => {
+    area.textContent = '';
+    piles.forEach((n, k) => {
+      const c = el('div', { class: 'pile301' + (k === drag ? ' sel' : ''), 'data-pile': k, style: `position:absolute;left:${Math.floor(k / 4) * 135}px;top:${(k % 4) * 45}px;width:135px;height:40px` });
+      if (n > 0) {
+        if (pic) { const cv = el('canvas', { width: 120, height: 40, style: 'position:absolute;left:15px;top:0;width:120px;height:40px' }); cv.getContext('2d').drawImage(pic, 0, 0, 120, 40); c.append(cv); }
+        c.append(raw('span', a.fmt ? a.fmt(n) : String(n), { class: 'n301' + (n > 99 ? ' cond' : ''), style: 'position:absolute;left:0;top:22px' }));
+      }
+      area.append(c);
+    });
+  };
+  const pileAt = (e) => { const r = area.getBoundingClientRect(), z = r.width / 405, x = (e.clientX - r.left) / z, y = (e.clientY - r.top) / z, k = Math.floor(x / 135) * 4 + Math.floor(y / 45); return x < 0 || y < 0 || k < 0 || k > 11 ? -1 : k; };
+  let shift = false;
+  area.addEventListener('pointerdown', (e) => { const k = pileAt(e); if (k < 0 || !piles[k]) { if (a.beep) a.beep(); return; } drag = k; shift = e.shiftKey; area.setPointerCapture(e.pointerId); draw(); });
+  area.addEventListener('pointerup', (e) => {
+    if (drag < 0) return;
+    const k = pileAt(e);
+    if (k >= 0 && k !== drag) { if (shift) { piles[k] += piles[drag]; piles[drag] = 0; } else { piles[drag]--; piles[k]++; } }
+    drag = -1; draw();
+  });
+  const total = () => piles.reduce((x, y) => x + y, 0);
+  const group = () => { const t = total(); piles.fill(0); piles[0] = t; draw(); };
+  const divide = () => { let t = total(); const per = Math.max(1, Math.floor(t / 12)); for (let k = 0; k < 11; k++) { piles[k] = Math.min(per, t); t -= piles[k]; } piles[11] = Math.max(0, t); draw(); };
+  const apply = () => {
+    fleets.forEach((f, i) => {
+      if (i < 12 && piles[i] > 0) { const ch = f.ships[did] !== piles[i]; f.ships[did] = piles[i]; flags(f, ch); }
+      else { const j = g.fleets.indexOf(f); if (j >= 0) g.fleets.splice(j, 1); if (a.UI.selFleet === f.id) a.UI.selFleet = null; }
+    });
+    for (let k = fleets.length; k < 12; k++) if (piles[k] > 0) { const nf = H().newFleet(g, a.ME, sid, false); nf.ships[did] = piles[k]; nf.newThisTurn = allNew; flags(nf, true); }
+    if (a.UI.selFleet == null) { const f = g.fleets.find(x => x.owner === a.ME && x.star === sid && x.ships[did]); if (f) a.UI.selFleet = f.id; }
+    a.save(); a.renderPanel(); a.draw();
+  };
+  const next = () => {
+    apply(); a.closeModal();
+    const mine = g.fleets.filter(f => f.owner === a.ME && !f.sat), i0 = mine.findIndex(f => f.ships[did] && f.star === sid);
+    for (let s = 1; s <= mine.length; s++) { const f = mine[(Math.max(0, i0) + s) % mine.length]; if (f.star === sid && f.to == null && Object.keys(f.ships).length === 1 && !f.ships[did]) { a.UI.selFleet = f.id; a.renderPanel(); organize301(sid); return; } }
+    if (a.beep) a.beep();
+  };
+  draw();
+  a.modal('', dlog20(427, 283, txt20('To Organize Fleets:', [0, 13, 16, 142]), txt20('• Click and drag fleets into desired number of piles', [18, 16, 35, 363]), txt20('• Shift-Click selects an entire pile', [35, 16, 51, 362]), area,
+    ok20('Next Type', [249, 27, 269, 92], next), ok20('Group All', [249, 107, 269, 172], group), ok20('Divide All', [249, 187, 269, 252], divide), ok20('Cancel', [249, 264, 269, 329], () => a.closeModal()),
+    el('button', { type: 'button', class: 'ok20 def20', style: at20([249, 340, 269, 412]) + ';min-width:0;padding:0', onclick: () => { apply(); a.closeModal(); } }, raw('span', 'OK'))),
+    { cls: 'mac12 dl20w', label: 'Organize Fleets' });
+  return true;
 }
 
 // 3.0.1's standard alert (StandardAlert @13030: DLOG 6140, colour 6141, 240 x 200; DITL: the line of STR# 4001 at (10, 10, 97, 230), OK at
@@ -2934,9 +3005,10 @@ if (V3) {
     // (the New Game window, for 3.0.1's own rules: its Create New Galaxy dialog over the form)
     newGame(f) { createGalaxy301(f); },
     // the windows 3.0.1 draws with its own routines (docs/status-301.md, "Windows from the menus")
-    window(name) {
+    window(name, ...x) {
       if (!G() || !own()) return false;
       if (name === 'fleets') return fleets301();
+      if (name === 'organize' || name === 'group') return organize301(x[0]);
       return false;
     },
     // the status window (DLOG 7000, the same items as 2.0.1's: "Writing New Game File..." (STR# 4000.1) while the new galaxy is written,
