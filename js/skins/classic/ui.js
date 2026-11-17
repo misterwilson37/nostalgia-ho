@@ -6206,6 +6206,30 @@ function joinFromAddress() {
   setTimeout(() => openJoin(code), 300);
 }
 
+// ?rules=ID (Jake, 17 November 2026: a link straight to a new game): a new game in that ruleset with its New Game window's defaults, the skin
+// being ?skin='s as always; ?rules=ID&form stops at the New Game window instead. ID is a ruleset's id (301, mac20, 12, dos, original, ios ...)
+// or its version, with or without the dots (3.0.1, 2.0.1, 1.2, 5.0.5). The address is tidied, so a reload doesn't start another.
+function rulesFromAddress() {
+  let want = null, form = false;
+  try { const q = new URLSearchParams(location.search); want = q.get('rules'); form = q.has('form'); } catch (e) {}
+  if (!want) return false;
+  const k = String(want).toLowerCase().replace(/[^a-z0-9]/g, ''), ids = Object.keys(HO.RULESETS);
+  const id = ids.find(x => x.toLowerCase() === k) || ids.find(x => String(HO.RULESETS[x].version || '').replace(/[^0-9]/g, '') === k);
+  try { const u = new URL(location.href); u.searchParams.delete('rules'); u.searchParams.delete('form'); history.replaceState(null, '', u.toString()); } catch (e) {}
+  if (!id) { toast(`No ruleset "${want}"`); return false; }
+  newGameDialog();
+  const f = document.querySelector('form.newgame'), ed = f && f.querySelector('select[name=rules]');
+  if (!f || !ed) return false;
+  const opt = ed.querySelector('option[value="' + id + '"]'), fs = f.querySelector('select[name=version]'); // (the Edition menu holds every edition; its family first)
+  if (fs && opt && opt.dataset.family) { fs.value = opt.dataset.family; fs.dispatchEvent(new Event('change')); }
+  ed.value = id; ed.dispatchEvent(new Event('change'));
+  // (the window offers the edition's own skin; a link that names one keeps it)
+  let named = null; try { named = new URLSearchParams(location.search).get('skin'); } catch (e) {}
+  const sk = f.querySelector('select[name=skin]'), cur = window.HOSKINS && HOSKINS.current;
+  if (named && sk && cur && sk.querySelector('option[value="' + cur + '"]')) { sk.value = cur; sk.dispatchEvent(new Event('change')); }
+  if (!form) setTimeout(() => { if (f.isConnected) f.requestSubmit(); }, 0);
+  return true;
+}
 // ----- new game / title -----
 function titleScreen() {
   const t = $('#titlescreen');
@@ -6851,6 +6875,7 @@ window.addEventListener('DOMContentLoaded', () => {
     ts.classList.remove('loading'); setupMap();
     if (resume) { ts.hidden = true; continueGame(true); } else titleScreen();
     joinFromAddress(); // ?join=CODE: an online game's invitation
+    if (!resume) rulesFromAddress(); // ?rules=ID: straight to a new game in that ruleset
   })));
 });
 })();
