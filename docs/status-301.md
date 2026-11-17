@@ -113,11 +113,11 @@ another version.
 | Window | Captures | Resource | Against 2.0.1 | Remake |
 |---|---|---|---|---|
 | Build / List Ship Types | 065 | DLOG 6000 | differs | ? |
-| List of All Fleets | 068 | DLOG 6030 | differs | ? |
+| List of All Fleets | 068 | DLOG 6030 | differs | **done** (`fleets301`): DITL 6030's rectangles; the rows of STR# 4000.24-27 in `InitFleetsList`'s order (no satellites; swap-sorted by Ship Power, CalcShipPower, or Ship Class), the first row picked; Go To Fleet as `ListAllFleets` (the standard alert 4001.14 for a fleet in hyperspace, DLOG 6140 / 6141). Its arrival years count ten a turn, as the program does (patch: `listYears`) |
 | Organize Fleets | 069 | DLOG 6060 | differs | ? (b055ec3 fixed a DOS window opening here; the 3.0.1 window is still to build) |
-| Compare Players | 067, 070 | DLOG 6050 | differs | ? |
-| Skill levels | 071 | DLOG 6100 | window differs, items same | ? |
-| List of All Explored Stars | 072 | DLOG 6040 | differs | ? |
+| Compare Players | 067, 070 | DLOG 6050 | differs | **done**: the classic page's chart at DITL 6050's rectangles (rules-301 `compare.layout`), now in the program's dress (no title bar, the colour frame, Chicago: `html.mac301 .origdlg`) |
+| Skill levels | 071 | DLOG 6100 | window differs, items same | **done**: the classic page's list at DITL 6100's rectangles, in the program's dress |
+| List of All Explored Stars | 072 | DLOG 6040 | differs | **done**: the classic page's 3.0.1 list (`InitStarsList`'s order) with 3.0.1's rows (`MakeOneListedStar`: the star's icon, name, temperature, gravity, metal; no Own column; `rs.exploredList.icon`, `status: false`) at DITL 6040's rectangles with the Sort By menu |
 | Alliances | 073 | DLOG 6110 | new | ? |
 | Give Stuff | 074 | DLOG 6120 | new | ? |
 | Send Message | 075 | DLOG 6070 | differs | ? |

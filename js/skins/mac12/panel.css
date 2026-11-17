@@ -100,3 +100,20 @@ html.col20 .win.dl20w .dl20 { margin: 7px; }
 /* the status window's bar (DLOG 7000: status20; 2.0.1's shot031, lost003-007, 3.0.1's 017-019): a 200 x 16 black-lined box, filled with a one-pixel black and white checker */
 .bar20 { box-sizing: border-box; width: 200px; height: 16px; border: 1px solid #000; background: #fff; box-shadow: 1px 1px 0 #000; }
 .bar20 .fill20 { height: 100%; width: 0; background: repeating-conic-gradient(#000 0 25%, #fff 0 50%) 0 0 / 2px 2px; image-rendering: pixelated; }
+/* 3.0.1: the classic page's windows laid out at a DITL's rectangles (origDialog: Compare Players, Show Skills, the explored stars ...) in the
+   program's own dress, as its dialogs (dl20): no title bar, the colour Mac's frame, Chicago, the 58 x 20 round buttons and the default's ring
+   (Jake's captures 067-075) */
+html.mac301 .win:has(.origdlg) .wtitle { display: none; }
+html.mac301 .win:has(.origdlg) .wbody { padding: 0; }
+html.mac301.col20 .win:has(.origdlg) { border: 1px solid #000; border-radius: 0; box-shadow:
+  inset 1px 1px 0 0 #ccf, inset 2px 2px 0 0 #bbb, inset 3px 3px 0 0 #669, inset 4px 4px 0 0 #000,
+  inset -1px -1px 0 0 #669, inset -2px -2px 0 0 #bbb, inset -3px -3px 0 0 #ccf, inset -4px -4px 0 0 #000; background: #fff; }
+html.mac301.col20 .win:has(.origdlg) .origdlg { margin: 7px; }
+html.mac301 .origdlg { font: 15px/1.2 'DOS Chicago 12', Chicago, Charcoal, Geneva, sans-serif; letter-spacing: .58px; color: #000; background: #fff; }
+html.mac301 .origdlg button, html.mac301 .origdlg select { font: 15px/1 'DOS Chicago 12', Chicago, Charcoal, Geneva, sans-serif !important; letter-spacing: .58px; }
+html.mac301 .origdlg button { border-radius: 5px !important; min-width: 0; padding: 0; letter-spacing: 0 !important; white-space: nowrap; }
+html.mac301 .origdlg button.default { outline: 3px solid #000; outline-offset: 1px; }
+/* 3.0.1's lists (List of All Fleets: a List Manager list in Chicago 12, the picked row inverted) */
+.lst301 { overflow-y: auto; overflow-x: hidden; background: #fff; }
+.lst301 .li301 { height: 16px; line-height: 16px; padding: 0 3px; white-space: nowrap; overflow: hidden; cursor: default; }
+.lst301 .li301.sel { background: #000; color: #fff; }

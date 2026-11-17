@@ -1311,6 +1311,64 @@ function yearsPerTurn301(sel, done) {
   document.body.append(scrim);
 }
 
+// 3.0.1's standard alert (StandardAlert @13030: DLOG 6140, colour 6141, 240 x 200; DITL: the line of STR# 4001 at (10, 10, 97, 230), OK at
+// (160, 160) with the default ring, PICT 3020 at (110, 10)); the system beep
+function std301(text, done) {
+  const a = A(), el = a.el, im = a.IMG['dos:p3020'];
+  const back = el('div', { class: 'scrim', onkeydown: (e) => { if (e.key === 'Escape' || e.key === 'Enter') { e.stopPropagation(); close(); } } },
+    el('div', { class: 'win small alert notitle mac12 dl20w', role: 'alertdialog', 'aria-modal': 'true', 'aria-label': text },
+      dlog20(240, 200, txt20(text, [10, 10, 97, 230]), im ? el('img', { src: im.src, alt: '', style: at20([110, 10, 184, 84]) + ';image-rendering:pixelated' }) : null,
+        el('button', { type: 'button', class: 'ok20 def20', style: at20([160, 160, 180, 218]) + ';min-width:0;padding:0', onclick: () => close() }, raw('span', 'OK')))));
+  const close = () => { back.remove(); if (done) done(); };
+  document.body.append(back); back.querySelector('button').focus();
+  if (a.beep) a.beep();
+}
+// DLOG 6030 "List of All Fleets" (ListAllFleets @13311a, InitFleetsList @133378, MakeListFleetsStr @1336e8; 486 x 296, DITL 6030: the heading at
+// (2, 13), the list at (26, 13, 252, 468) less its scroll bar, the Sort By menu CNTL 6030 (MENU 6030 "Ship Power", "Ship Class") at (265, 13),
+// Go To Fleet (264, 260), OK (264, 364, default)). Your fleets but satellites, in the order of the fleet records, then swap-sorted: Ship Power
+// (each fleet's ships times its design's power, CalcShipPower's +0x7a: rs.shipPower), the strongest first; Ship Class (scout, fighter, colony
+// ship), the lower first. Ship Power when it opens; the first row picked. A row: STR# 4000.24-27, "%s stationed at %s.", "%s leaving %s for %s
+// to arrive in %d.", "%s to arrive at %s in %d.", "%s marooned at %s." (FleetStuck), the year being this year plus ten a turn left (the patch:
+// the game's years per turn, 'listYears'). Go To Fleet: a fleet in hyperspace gets the standard alert 4001.14; else its star is selected,
+// the fleet made the star's fleet and the map centred on it. Jake's capture 068.
+function fleets301() {
+  const a = A(), el = a.el, g = G(), rs = H().rules(g), S4 = STR301(4000), CL = ['scout', 'fighter', 'colony', 'satellite'];
+  const mine = g.fleets.filter(f => f.owner === a.ME && !f.sat);
+  const design = (f) => { const k = Object.keys(f.ships || {}).find(x => f.ships[x] > 0); return a.me().designs.find(d => String(d.id) === k) || {}; };
+  const cls = (f) => { const i = CL.indexOf(design(f).type); return i < 0 ? 9 : i; };
+  const count = (f) => Object.values(f.ships || {}).reduce((x, y) => x + y, 0);
+  const power = (f) => count(f) * (rs.shipPower ? rs.shipPower(g, design(f)) : 0);
+  const list0 = mine.filter(f => cls(f) !== 3);
+  const sorted = (mode) => { const L = list0.slice(); for (let i = 0; i < L.length - 1; i++) for (let j = i + 1; j < L.length; j++) if (mode === 1 ? power(L[i]) < power(L[j]) : cls(L[j]) < cls(L[i])) { const t = L[i]; L[i] = L[j]; L[j] = t; } return L; };
+  const yr = (t) => H().fixed(g, 'listYears') ? H().arrivalYear(g, t) : g.year + t * 10;
+  const turns = (f) => Math.ceil((f.dist - (f.prog || 0)) / H().fleetSpeed(g, f) - 1e-9);
+  const line = (f) => {
+    const d = H().fleetText(g, f), st = (i) => g.stars[i].name;
+    if (stuck(f)) return fill(S4[26] || '%s marooned at %s.', d, st(f.star));
+    if (f.to != null) return fill(S4[25] || '%s to arrive at %s in %d.', d, st(f.to), yr(turns(f)));
+    if (f.dest != null) return fill(S4[24] || '%s leaving %s for %s to arrive in %d.', d, st(f.star), st(f.dest), yr(Math.ceil(H().starDist(g, f.star, f.dest) / H().fleetSpeed(g, f) - 1e-9)));
+    return fill(S4[23] || '%s stationed at %s.', d, st(f.star));
+  };
+  let mode = 1, list = sorted(mode), cur = 0;
+  const box = el('div', { class: 'lst301', role: 'listbox', 'aria-label': 'List of All Fleets', style: at20([27, 14, 251, 452]) });
+  const show = () => { box.textContent = ''; list.forEach((f, i) => box.append(raw('div', line(f), { class: 'li301' + (i === cur ? ' sel' : ''), role: 'option', 'aria-selected': i === cur ? 'true' : 'false', onclick: () => { cur = i; show(); }, ondblclick: () => { cur = i; go(); } }))); };
+  const go = () => {
+    const f = list[cur]; if (!f) return;
+    if (f.to != null || f.star == null) { std301(STR301(4001)[13] || FLEET_LINES.en.hyper); return; }
+    a.closeModal(); a.UI.sel = f.star; a.UI.selFleet = f.id; a.centerOn(f.star); a.renderPanel(); a.draw();
+  };
+  const M = (window.HOLANG && HOLANG.mac301En && HOLANG.mac301En.MENU && HOLANG.mac301En.MENU['6030']) || [0, 'Ship Power', 'Ship Class'];
+  // (the pop-up menu's title, "Sort By:", is drawn inside the control's rectangle at its left, as capture 068 shows)
+  const sel = el('select', { 'aria-label': 'Sort By', style: at20([265, 80, 285, 213]), onchange: (e) => { mode = +e.target.value; list = sorted(mode); cur = 0; show(); } },
+    el('option', { value: 1 }, M[1]), el('option', { value: 2 }, M[2]));
+  show();
+  a.modal('', dlog20(486, 296, txt20('List of All Fleets:', [2, 13, 22, 145]), txt20('Sort By:', [267, 13, 285, 78]), el('div', { style: at20([26, 13, 252, 468]) + ';border:1px solid #000;box-sizing:border-box' }), box, sel,
+    ok20('Go To Fleet', [264, 260, 284, 342], go),
+    el('button', { type: 'button', class: 'ok20 def20', style: at20([264, 364, 284, 446]) + ';min-width:0;padding:0', onclick: () => a.closeModal() }, raw('span', 'OK'))),
+    { cls: 'mac12 dl20w', label: 'List of All Fleets' });
+  return true;
+}
+
 // 3.0.1's ALRT 3230 (EndTurnMenuCall @120da4: 286 x 190; DITL 3230 "Continue" (145, 188, default), "Wait" (145, 110), PICT 3020 at
 // (99, 13), "^0, do you want to play alone, or wait for more humans to join?" (13, 13, 63, 278), "(Computer Opponents: ^1)" (64, 13)):
 // asked when the year-2000 turn is done, with fewer than two humans, until it is answered Continue (the header's +6 byte, -1 till then).
@@ -2875,6 +2933,12 @@ if (V3) {
     get ownPanel() { return !!G() && own(); },
     // (the New Game window, for 3.0.1's own rules: its Create New Galaxy dialog over the form)
     newGame(f) { createGalaxy301(f); },
+    // the windows 3.0.1 draws with its own routines (docs/status-301.md, "Windows from the menus")
+    window(name) {
+      if (!G() || !own()) return false;
+      if (name === 'fleets') return fleets301();
+      return false;
+    },
     // the status window (DLOG 7000, the same items as 2.0.1's: "Writing New Game File..." (STR# 4000.1) while the new galaxy is written,
     // then "Pass 1 for Player %d..." and the rest while a turn is worked out; Jake's captures 017-019, 169-174), and the play-alone question
     beforeFirstTurn(go) {

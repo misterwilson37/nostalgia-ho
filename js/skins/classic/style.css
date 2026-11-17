@@ -523,3 +523,8 @@ html.fleetdrag #panel .planet > .btns, html.fleetdrag.fleetdrag-pad #panel .plan
 .pwquote small, .pwask .note, .pwexport .note[role=alert] { color: var(--sub); }
 .pwexport .pwfields[hidden] { display: none; }
 .origdlg .xlistbox { overflow-y: auto; border: 1px solid currentColor; padding: 0; }
+/* a version whose explored-stars rows start with the star's icon (3.0.1, MakeOneListedStar: 20 pixels, then 100, 75, 75, 75) */
+.exmac .exrow.icon { grid-template-columns: 20fr 100fr 75fr 75fr 75fr; }
+.exmac .exrow.icon.noclimate { grid-template-columns: 20fr 100fr 150fr 35fr 40fr; }
+.exmac .exrow .exicon { width: 16px; height: 16px; image-rendering: pixelated; justify-self: start; }
+.origdlg .exsort { display: flex; align-items: center; gap: 6px; }

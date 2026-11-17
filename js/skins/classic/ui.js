@@ -4119,7 +4119,12 @@ function openExploredList() {
         let line = padTo(s.name, cols[0]);
         if (c) line = padTo(padTo(padTo(line + c.t, cols[1]) + c.g, cols[2]) + c.m, cols[3]); else line = padTo(line + tl(L.noClimate), cols[3]); // (a line of one piece of text: its words are said in the language here)
         tr.append(el('span', { class: 'exline' }, line + tl(status(s))));
-      } else tr.append(el('span', null, s.name), c ? el('span', null, c.t) : el('span', { class: 'exnone' }, L.noClimate), ...(c ? [el('span', null, c.g), el('span', null, c.m)] : [el('span'), el('span')]), el('span', null, status(s)));
+      } else {
+        // (L.icon: the star's picture first, as 3.0.1's rows; L.status false: no Own / Explored / Enemy column)
+        if (L.icon) { const look = starLook(s.id), im = look.pic || IMG[look.base], cv = el('canvas', { class: 'exicon', width: 32, height: 32, 'aria-hidden': 'true' }); if (im) cv.getContext('2d').drawImage(im, 0, 0, 32, 32); tr.append(cv); tr.classList.add('icon'); }
+        tr.append(el('span', null, s.name), c ? el('span', null, c.t) : el('span', { class: 'exnone' }, L.noClimate), ...(c ? [el('span', null, c.g), el('span', null, c.m)] : [el('span'), el('span')]));
+        if (L.status !== false) tr.append(el('span', null, status(s)));
+      }
       rowsBox.append(tr);
     }
   };
@@ -4131,10 +4136,10 @@ function openExploredList() {
     return;
   }
   // L.dlg: the window's own rectangles (a DITL: Mac 2.0.1's 6040, 486 x 296: the heading, the list, Go To Star, OK), as Compare Players is laid out
-  if (L.dlg && !sortBox) {
+  if (L.dlg && (!sortBox || L.dlg.sort)) {
     const D = L.dlg, ok = el('button', { type: 'button', class: 'default', onclick: closeModal }, 'OK');
     rowsBox.classList.add('xlistbox');
-    const box = origDialog(D.w, D.h, [1, 1], [[D.title, el('div', { class: 'cmptitle' }, L.title)], [D.list, rowsBox], [D.go, go], [D.ok, ok]], 'cmpwin xlist');
+    const box = origDialog(D.w, D.h, [1, 1], [[D.title, el('div', { class: 'cmptitle' }, L.title)], [D.list, rowsBox], ...(sortBox ? [[D.sort, sortBox]] : []), [D.go, go], [D.ok, ok]], 'cmpwin xlist');
     modal('', box, { cls: 'compare', label: L.title.replace(/:$/, '') });
     return;
   }

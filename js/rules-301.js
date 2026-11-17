@@ -2078,7 +2078,10 @@ E.registerRules('301', Object.assign({}, D, {
   // swap-sorted by the Sort By menu (Metal, Quality, Gravity, Owner), Quality when the window opens; a row is five fields in
   // pixel columns (100, 75, 75, 75, 75): name, temperature, gravity, metal, Own / Explored / Enemy, or "No Climate Info." over
   // the middle three. Unlike 1.2's and 2.0's list, with no groups.
-  exploredList: Object.assign({}, D.exploredList, { layout: 'mac', sortBy: ['Metal', 'Quality', 'Gravity', 'Owner'], sortLabel: 'Sort By:', sortDefault: 1, quality: (p, k) => O.starRating(p, k) }),
+  // (MakeOneListedStar @14073e: five fields, the star's icon (20 wide), the name (100), the temperature, gravity and metal (75 each); no Own /
+  // Explored / Enemy column, Jake's capture 072. DLOG / DITL 6040, 424 x 303: the heading, the list, the Sort By menu (CNTL 6040), Go To Star, OK)
+  exploredList: Object.assign({}, D.exploredList, { layout: 'mac', sortBy: ['Metal', 'Quality', 'Gravity', 'Owner'], sortLabel: 'Sort By:', sortDefault: 1, quality: (p, k) => O.starRating(p, k),
+    icon: true, status: false, dlg: { w: 424, h: 303, title: [13, 2, 178, 21], list: [13, 26, 362, 222], sort: [20, 264, 214, 20], go: [229, 264, 82, 20], ok: [321, 264, 82, 20] } }),
   // CONFIRMED (LongToNiceString @1206c): 2.0's numbers, "12,345K" from ten million (engine niceNum)
   // CONFIRMED (DrawIncomeRect @154294, the program's own "(Int: %s)", LongToNiceShortString of the
   // interest; the manual's picture reads "(Int: 3K)"): the Interest row's text
@@ -2119,6 +2122,8 @@ E.registerRules('301', Object.assign({}, D, {
       text: 'A computer’s fighter fleet low on fuel looked for a colony within reach, but the test of the answer read a flag cleared just before, so it always asked for a new colony where it was. The patch asks only when no colony is within the fuel it has left.' },
     { id: 'colonyBars32', title: 'The computers’ colony bars no longer overflow',
       text: 'When a computer gave a colony more than $2,147,483 for one part, the sum overflowed and the colony’s bars came out wrong. The patch works them out without overflowing.' },
+    { id: 'listYears', title: 'The list of all fleets gives arrival years at the game’s years per turn',
+      text: 'The List of All Fleets window (MakeListFleetsStr) works out a fleet’s arrival year as the year plus ten for every turn left, whatever the years per turn, so in a game of 20, 30, 50 or 100 years a turn its years are too early. The patch counts the game’s own years per turn.' },
     { id: 'scrapRange', title: 'Old ships sent home are routed with their own Range',
       text: 'When the computers sent old ships home, the program passed the fleet’s place in a list where the route finder wants its Range. It made no difference to play (the colony is always within reach); the patch passes the Range.' },
     { id: 'star0', title: 'A finished colony at the first star is locked like any other',
