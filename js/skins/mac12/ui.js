@@ -169,7 +169,7 @@ function menuLayout301() {
       it('Hall Of Fame…', () => A().openHall('fame')),
       it('Hall Of Shame…', () => A().openHall('shame'))],
     Ships: [
-      it(() => (noGame() || mine() ? S(3) : S(4)), () => { if (mine()) A().openBuild(selStar().id); }, { ghost: () => noGame() || !mine(), key: 'B' }),
+      it(() => (noGame() || mine() ? S(3) : S(4)), () => { if (mine()) build301(selStar().id); }, { ghost: () => noGame() || !mine(), key: 'B' }),
       '-',
       it('List All Fleets…', () => A().openFleetList(), { ghost: noGame, key: 'L' }),
       it(() => (noGame() || fleetHere() ? S(7) : S(8)), () => { const s = selStar(); if (fleetHere()) organize301(s.id); }, { ghost: () => noGame() || !fleetHere(), key: 'G' }),
@@ -1310,6 +1310,134 @@ function yearsPerTurn301(sel, done) {
   const close = () => scrim.remove();
   document.body.append(scrim);
 }
+
+// DLOG 6000 "Build / Design Ships" (BuildDesignShips @131150 and its helpers, read in the decompile and, for the item cases, the assembly's
+// jump table at $1313e4; 492 x 285, DITL 6000; Jake's capture 065). Left, the list of your types (InitShipTypesList), newest first: the
+// small picture and "Name (W/S) Class", "15 Name (W/S) Fighters" while 15 are ordered. Right: Ship Money and Metal with their bars
+// (DRAWSHIPMONEYBAR: 153 wide, nothing at its middle, 75 pixels either way for the money over 5 x the income, at least 10,000, green;
+// DRAWMETALBAR: 75 pixels for 100,000 metal), the big picture, # To Build with + and -, Name, the Class menu, Dev. Cost, Pro. Cost,
+// Metal Cost, # Built, #Existing, the five levels "n/most" with their scroll bars, "Building At:" (STR# 4000.40) or "Viewing At:" (.41,
+// not your colony: + dimmed) and the star, Scrap All / Don't Scrap, Cancel, OK.
+// - Picking a type shows it; moving the Class menu or a scroll bar shows the type with those levels if you have one (FindMatchingType),
+//   else a new design, with a new name; the Name field (15 letters at most, a beep past them) renames the type shown.
+// - + / - / the field: one ship at a time, each costing the development cost while the type has never been built (this visit's orders
+//   counted), else the production cost, and its metal; too little metal is the standard alert 4001.19, money past the borrowing limit
+//   4001.25. + on a new design first makes it a type: 4001.5 if it has no name, ALRT 3280 at 20 types.
+// - Scrap All marks the type to be scrapped (Don't Scrap unmarks it) and takes back this visit's orders of it; - and Scrap are dimmed
+//   as SetButtonStates has them.
+// - OK builds every type's count at once (BuildAShip a ship: 3.0.1 builds when OK is pressed); Cancel builds nothing (a type made stays).
+let BUILD301 = null; // (the setup's +0x72: the type last shown)
+function build301(sid) {
+  const a = A(), el = a.el, g = G(), p = a.me(), rs = H().rules(g), star = g.stars[sid], S4 = STR301(4000), S41 = STR301(4001);
+  const mine = star && star.owner === a.ME;
+  const live = () => p.designs.filter(d => !d.scrapped);
+  const counts = {};
+  let money = p.savings, metal = p.metal;
+  let sel = (live().find(d => d.id === BUILD301) || live()[live().length - 1] || null);
+  const spec = sel ? { type: sel.type, R: sel.R, V: sel.V, W: sel.W, S: sel.S, M: sel.M, name: sel.name } : { type: 'fighter', R: 6, V: 2, W: 2, S: 2, M: 0, name: H().designName(g, p, 'fighter') };
+  const K = ['R', 'V', 'W', 'S', 'M'], KW = ['Range', 'Speed', 'Weapons', 'Shields', 'Mini'];
+  const clampSpec = () => { const L = H().designLimits(g, p, spec.type); for (const k of K) { const lo = H().designMin(g, k, spec.type); spec[k] = Math.max(lo, Math.min(Math.max(lo, L[k] || lo), spec[k])); } return L; };
+  clampSpec();
+  const beep = () => { if (a.beep) a.beep(); };
+  const cost1 = (d) => { const c = H().designCost(g, d), first = d.built === 0 && !(counts[d.id] > 0) && !d.free && rs.paysPrototype(g, p, d); return { money: c.money + (first ? c.proto : 0), metal: c.metal, first }; };
+  const picOf = (d) => (a.shipPic ? a.shipPic(d, a.ME) : null);
+  const drawPic = (cv, d) => { const x = cv.getContext('2d'); x.clearRect(0, 0, cv.width, cv.height); x.fillStyle = '#000'; x.fillRect(0, 0, cv.width, cv.height); const im = picOf(d); if (im) x.drawImage(im, 0, 0, cv.width, cv.height); };
+  // the list
+  const list = el('div', { class: 'lst301 types301', role: 'listbox', 'aria-label': 'Ship types', style: at20([5, 5, 217, 125]) });
+  const drawList = () => {
+    list.textContent = '';
+    for (const d of live().slice().reverse()) {
+      const n = counts[d.id] || 0, row = el('div', { class: 'tr301' + (sel && d.id === sel.id ? ' sel' : '') + (d.scrap301 ? ' scrap' : ''), role: 'option', onclick: () => pick(d) });
+      const cv = el('canvas', { width: 120, height: 40, style: 'display:block;margin:0 auto;width:120px;height:40px' }); drawPic(cv, d);
+      row.append(cv, raw('div', n > 0 ? descN(d, n) : desc0(d), { class: 'tl301' }));
+      list.append(row);
+    }
+    // (a name wider than the row is drawn condensed, as the program's lists do: squeezed to fit)
+    requestAnimationFrame(() => { for (const t of list.querySelectorAll('.tl301')) { t.style.transform = ''; const w = t.scrollWidth, c = t.clientWidth; if (w > c && c) { t.style.overflow = 'visible'; t.style.transform = `scaleX(${(c - 1) / w})`; t.style.transformOrigin = 'center'; } } });
+  };
+  // the right side
+  const big = el('canvas', { width: 240, height: 80, style: at20([42, 222, 82, 342]) });
+  const shown = () => sel || Object.assign({ id: null, built: 0, free: false }, spec);
+  const numIn = el('input', { type: 'text', inputmode: 'numeric', style: at20([56, 432, 72, 459]), 'aria-label': '# To Build' });
+  const nameIn = el('input', { type: 'text', maxlength: 40, style: at20([88, 224, 104, 364]), 'aria-label': 'Name' });
+  const clsSel = el('select', { style: at20([112, 202, 132, 358]), 'aria-label': 'Class' }, ...CLASSES().map(t => el('option', { value: t }, cls(t))));
+  const T = {}; const tx = (k, r, right) => (T[k] = raw('span', '', { class: 'dt20', style: at20(r) + (right ? ';text-align:right' : '') }));
+  const bars = K.map((k, i) => el('input', { type: 'range', 'aria-label': KW[i], style: at20([136 + 20 * i, 417, 152 + 20 * i, 487]) }));
+  const mBar = el('canvas', { width: 153, height: 12, style: at20([23, 161, 35, 314]) }), tBar = el('canvas', { width: 77, height: 12, style: at20([22, 370, 34, 447]) });
+  const plus = ok20('+', [44, 464, 64, 484], () => change(1)), minus = ok20('-', [68, 464, 88, 484], () => change(-1));
+  const scrapB = ok20('Scrap All', [247, 224, 267, 300], () => toggleScrap());
+  const colour = !!window.HOMAC3_COLOUR;
+  const drawBars = () => {
+    const scale = Math.max(10000, p.oInc || 0) * 5, x = mBar.getContext('2d'); x.clearRect(0, 0, 153, 12); x.fillStyle = '#fff'; x.fillRect(0, 0, 153, 12); x.strokeStyle = '#000'; x.strokeRect(0.5, 0.5, 152, 11);
+    const w = Math.max(-75, Math.min(75, Math.trunc(money * 75 / scale)));
+    x.fillStyle = w >= 0 ? (colour ? '#090' : '#000') : (colour ? '#d00' : '#000'); if (w > 0) x.fillRect(76, 1, w, 10); else if (w < 0) x.fillRect(76 + w, 1, -w, 10);
+    const y = tBar.getContext('2d'), mw = Math.max(0, Math.min(75, Math.trunc(metal * 75 / 100000))); y.fillStyle = '#fff'; y.fillRect(0, 0, 77, 12); y.strokeStyle = '#000'; y.strokeRect(0.5, 0.5, 76, 11); y.fillStyle = '#000'; y.fillRect(1, 1, mw, 10);
+  };
+  const refresh = () => {
+    const d = shown(), c = H().designCost(g, d), L = clampSpec();
+    drawPic(big, d);
+    T.money.textContent = String(money); T.metal.textContent = String(metal);
+    T.dev.textContent = '$' + nice(c.money + (c.proto || 0)); T.pro.textContent = '$' + nice(c.money); T.mc.textContent = nice(c.metal);
+    T.built.textContent = String(sel ? sel.built || 0 : 0); T.exist.textContent = String(sel ? shipCount(sel.id) : 0);
+    K.forEach((k, i) => { T['l' + k].textContent = `${spec[k]}/${Math.max(H().designMin(g, k, spec.type), L[k] || 0)}`; const lo = H().designMin(g, k, spec.type); bars[i].min = lo; bars[i].max = Math.max(lo, L[k] || lo); bars[i].value = spec[k]; bars[i].disabled = bars[i].max == lo; });
+    numIn.value = String(sel ? counts[sel.id] || 0 : 0); nameIn.value = spec.name; clsSel.value = spec.type;
+    plus.disabled = !mine || !!(sel && sel.scrap301); minus.disabled = !sel || !(counts[sel.id] > 0);
+    scrapB.disabled = !sel; scrapB.firstChild.textContent = sel && sel.scrap301 ? 'Don’t Scrap' : 'Scrap All';
+    drawBars(); drawList();
+  };
+  const pick = (d) => { sel = d; BUILD301 = d.id; Object.assign(spec, { type: d.type, R: d.R, V: d.V, W: d.W, S: d.S, M: d.M, name: d.name }); refresh(); };
+  const rematch = () => {
+    const had = sel, m = live().find(d => d.type === spec.type && K.every(k => d[k] === spec[k]));
+    if (m) { pick(m); return; }
+    sel = null; if (had || !spec.name) spec.name = H().designName(g, p, spec.type); refresh();
+  };
+  clsSel.addEventListener('change', () => { spec.type = clsSel.value; clampSpec(); rematch(); });
+  bars.forEach((b, i) => b.addEventListener('input', () => { spec[K[i]] = +b.value; rematch(); }));
+  nameIn.addEventListener('input', () => { let v = nameIn.value; if (v.length > 15) { beep(); v = v.slice(0, 15); nameIn.value = v; } spec.name = v; if (sel) { sel.name = v; drawList(); } });
+  numIn.addEventListener('change', () => { let v = parseInt(numIn.value, 10); if (!(v >= 0)) v = 0; change(v - (sel ? counts[sel.id] || 0 : 0)); });
+  function change(dn) {
+    if (dn > 0 && !sel) {
+      if (live().length >= 20) { alertById301(3280); refresh(); return; }
+      if (!spec.name.trim()) { std301(S41[4] || 'Please name your new ship type.'); refresh(); return; }
+      sel = H().findOrCreateDesign(g, p, Object.assign({}, spec)); BUILD301 = sel.id;
+    }
+    if (!sel) return;
+    for (; dn > 0; dn--) {
+      const c = cost1(sel);
+      if (c.metal > metal) { std301(S41[18] || 'Sorry, but you don’t have any metal to build more ships.'); break; }
+      if (money - c.money < H().borrowLimit(g, p)) { std301(S41[24] || 'You can’t build that ship because you can’t go any further into debt!'); break; }
+      money -= c.money; metal -= c.metal; counts[sel.id] = (counts[sel.id] || 0) + 1;
+    }
+    for (; dn < 0 && counts[sel.id] > 0; dn++) { counts[sel.id]--; const c = cost1(sel); money += c.money; metal += c.metal; }
+    refresh();
+  }
+  function toggleScrap() {
+    if (!sel) return;
+    const on = rs.flagScrapDesign ? rs.flagScrapDesign(g, p, sel, 'command') : (sel.scrap301 = !sel.scrap301);
+    if (on) while (counts[sel.id] > 0) { counts[sel.id]--; const c = cost1(sel); money += c.money; metal += c.metal; }
+    refresh();
+  }
+  const ok = () => {
+    for (const [did, n] of Object.entries(counts)) if (n > 0) H().buildShips(g, a.ME, sid, +did, n);
+    a.closeModal(); a.save(); a.renderPanel(); a.draw();
+  };
+  const L = (t, r) => txt20(t, r);
+  const box = dlog20(492, 285, el('div', { style: at20([4, 4, 218, 141]) + ';border:1px solid #000;box-sizing:border-box' }), list,
+    L('Ship Money:', [4, 144, 20, 234]), tx('money', [4, 236, 20, 337]), mBar, L('Metal:', [4, 347, 20, 393]), tx('metal', [4, 396, 20, 492]), tBar,
+    big, L('# To Build:', [56, 352, 72, 427]), numIn, plus, minus,
+    L('Name:', [88, 144, 104, 200]), nameIn, L('Class:', [114, 144, 130, 200]), clsSel,
+    L('Dev. Cost:', [136, 144, 152, 223]), tx('dev', [136, 224, 152, 306]), L('Pro. Cost:', [156, 144, 172, 223]), tx('pro', [156, 224, 172, 306]),
+    L('Metal Cost:', [176, 144, 192, 222]), tx('mc', [176, 224, 192, 306]), L('# Built:', [196, 144, 212, 216]), tx('built', [196, 224, 212, 263]), L('#Existing:', [216, 144, 232, 217]), tx('exist', [216, 224, 232, 263]),
+    ...KW.map((w, i) => L(w, [136 + 20 * i, 309, 152 + 20 * i, 370])), ...K.map((k, i) => tx('l' + k, [136 + 20 * i, 372, 152 + 20 * i, 414])), ...bars,
+    L(mine ? (S4[39] || 'Building At:') : (S4[40] || 'Viewing At:'), [249, 15, 265, 93]), L(star ? star.name : '', [249, 96, 265, 171]),
+    scrapB, ok20('Cancel', [247, 354, 267, 412], () => a.closeModal()),
+    el('button', { type: 'button', class: 'ok20 def20', style: at20([246, 426, 266, 484]) + ';min-width:0;padding:0', onclick: ok }, raw('span', 'OK')));
+  a.modal('', box, { cls: 'mac12 dl20w', label: 'Build / Design Ships' });
+  refresh();
+  return true;
+}
+// an ALRT of 3.0.1's (its DITL in HOLANG.mac301En: the static texts joined, OK), as the standard alert
+function alertById301(id) { const D = (window.HOLANG && HOLANG.mac301En.DITL[String(id)]) || []; std301(D.filter(x => x[0] === 'text').map(x => x[1]).join(' ')); }
 
 // DLOG 6060 "Organize Fleets" (OrganizeFleets @133d14, DrawOneOrgFleet @13459a, DRAWORGFLEETS @134532; 427 x 283, DITL 6060: the heading
 // (0, 13), the two lines (18, 16) and (35, 16), the piles (56, 12, 236, 417), Next Type (249, 27), Group All (249, 107), Divide All (249, 187),
@@ -3008,6 +3136,7 @@ if (V3) {
     window(name, ...x) {
       if (!G() || !own()) return false;
       if (name === 'fleets') return fleets301();
+      if (name === 'build') return build301(x[0]);
       if (name === 'organize' || name === 'group') return organize301(x[0]);
       return false;
     },

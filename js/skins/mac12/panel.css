@@ -111,7 +111,7 @@ html.mac301.col20 .win:has(.origdlg) { border: 1px solid #000; border-radius: 0;
 html.mac301.col20 .win:has(.origdlg) .origdlg { margin: 7px; }
 html.mac301 .origdlg { font: 15px/1.2 'DOS Chicago 12', Chicago, Charcoal, Geneva, sans-serif; letter-spacing: .58px; color: #000; background: #fff; }
 html.mac301 .origdlg button, html.mac301 .origdlg select { font: 15px/1 'DOS Chicago 12', Chicago, Charcoal, Geneva, sans-serif !important; letter-spacing: .58px; }
-html.mac301 .origdlg button { border-radius: 5px !important; min-width: 0; padding: 0; letter-spacing: 0 !important; white-space: nowrap; }
+html.mac301 .origdlg button { border-radius: 5px !important; border-width: 1px !important; min-width: 0; padding: 0; letter-spacing: 0 !important; word-spacing: -1px; white-space: nowrap; }
 html.mac301 .origdlg button.default { outline: 3px solid #000; outline-offset: 1px; }
 /* 3.0.1's lists (List of All Fleets: a List Manager list in Chicago 12, the picked row inverted) */
 .lst301 { overflow-y: auto; overflow-x: hidden; background: #fff; }
@@ -126,3 +126,9 @@ html.mac301 .origdlg button.default { outline: 3px solid #000; outline-offset: 1
    DITLs' words fit their rectangles as the program's do (Organize Fleets' heading is 129 wide, Jake's capture 069) */
 html.mac301 .dl20, html.mac301 .dl20 button { letter-spacing: 0 !important; word-spacing: -1px; }
 html.mac301 .dl20 .ok20 { white-space: nowrap; }
+/* 3.0.1's Build / Design Ships: the type list's rows (the picture over its words), the picked one inverted, a marked one in the grey */
+.types301 .tr301 { padding: 2px 0 1px; text-align: center; cursor: default; }
+.types301 .tr301 .tl301 { font: 10px Geneva, Verdana, sans-serif; white-space: nowrap; overflow: hidden; }
+.types301 .tr301.sel { background: #000; color: #fff; }
+.types301 .tr301.scrap .tl301 { color: #888; }
+.dl20 input[type=text] { box-sizing: border-box; font: inherit; padding: 0 2px; border: 1px solid #000; }
