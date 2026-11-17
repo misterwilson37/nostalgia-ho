@@ -1436,6 +1436,49 @@ function build301(sid) {
   refresh();
   return true;
 }
+// ALRT 5010 (3.0.1: 240 x 200; "^0^1^2^3" at (8, 12, 116, 236), PICT 3020 at (117, 13), OK at (156, 156)): the program's alert of a line
+function alert5010(text) {
+  const a = A(), el = a.el, im = a.IMG['dos:p3020'];
+  const back = el('div', { class: 'scrim', onkeydown: (e) => { if (e.key === 'Escape' || e.key === 'Enter') { e.stopPropagation(); back.remove(); } } },
+    el('div', { class: 'win small alert notitle mac12 dl20w', role: 'alertdialog', 'aria-modal': 'true', 'aria-label': text },
+      dlog20(240, 200, txt20(text, [8, 12, 116, 236]), im ? el('img', { src: im.src, alt: '', style: at20([117, 13, 191, 87]) + ';image-rendering:pixelated' }) : null,
+        el('button', { type: 'button', class: 'ok20 def20', style: at20([156, 156, 176, 214]) + ';min-width:0;padding:0', onclick: () => back.remove() }, raw('span', 'OK')))));
+  document.body.append(back); back.querySelector('button').focus();
+}
+// DLOG 6120 "Give Stuff" (DoGiveThingsDlg @1437e0, InitGTPlayerList @143b00, SetCellsToPlayers @141776; 463 x 214, DITL 6120; Jake's capture
+// 074): with three gifts given this turn, ALRT 5010 with STR# 1020.21 and no window. "Give Stuff To:" (0, 20) over the players' cells (20,
+// 20, 202, 247: 5 x 4 cells of 45, the icon 2000 + face, + 500 a woman, and the name; the other players still in the game, in the players'
+// order; the first picked); "Give How Much Money?" (20, 260) and its field (40, 263), "Give How Much Metal?" (80, 260) and its field
+// (100, 263), each put back between 0 and the Ship Savings (the metal) as it is typed; Cancel (140, 384) above Give (168, 384, default).
+// Give with both 0 or no cell gives nothing; else the gift is recorded and taken at once (rules: HO.give), sound 5000.
+function give301() {
+  const a = A(), el = a.el, g = G(), me = a.me(), ME = a.ME;
+  if ((me.giftsThisTurn || 0) >= 3) { alert5010(STR301(1020)[20] || 'Sorry, you can only give three gifts per turn.'); return true; }
+  const hat = (q) => 'dos:i' + ((q.female ? 2500 : 2000) + ((q.face || 0) % 20));
+  const order = (H().rules(g).giveWindow && H().rules(g).giveWindow.order) ? H().rules(g).giveWindow.order(g) : g.players;
+  const ps = order.filter(q => q.id !== ME && q.alive && !q.surrendered);
+  let pick = ps.length ? 0 : null;
+  const cl = cells20(5, 4, ps.map((q, i) => ({ icon: hat(q), name: q.name, id: i })), { sel: pick, pick: (c) => { pick = c.id; } });
+  cl.el.setAttribute('style', cl.el.getAttribute('style') + ';' + at20([21, 21, 201, 246]));
+  const maxM = Math.max(0, me.savings), maxT = Math.max(0, me.metal);
+  const field = (r, max, label) => { const f = el('input', { type: 'text', inputmode: 'numeric', value: '0', 'aria-label': label, style: at20(r) });
+    f.addEventListener('input', () => { let v = parseInt(f.value, 10); if (!(v >= 0)) v = 0; if (v > max) v = max; if (String(v) !== f.value && f.value !== '') f.value = String(v); }); return f; };
+  const fm = field([40, 263, 56, 335], maxM, 'Give How Much Money?'), ft = field([100, 263, 116, 335], maxT, 'Give How Much Metal?');
+  const go = () => {
+    const m = Math.min(maxM, parseInt(fm.value, 10) || 0), t = Math.min(maxT, parseInt(ft.value, 10) || 0);
+    a.closeModal();
+    if (pick == null || (m <= 0 && t <= 0)) return;
+    if (H().give(g, ME, ps[pick].id, m, t) === 'ok') { a.Sound.play(5000); a.save(); a.renderPanel(); }
+  };
+  a.modal('', dlog20(463, 214, txt20('Give Stuff To:', [0, 20, 18, 173]), el('div', { style: at20([20, 20, 202, 247]) + ';border:1px solid #000;box-sizing:border-box' }), cl.el,
+    txt20('Give How Much Money?', [20, 260, 36, 423]), fm, txt20('Give How Much Metal?', [80, 260, 95, 422]), ft,
+    ok20('Cancel', [140, 384, 160, 442], () => a.closeModal()),
+    el('button', { type: 'button', class: 'ok20 def20', style: at20([168, 384, 188, 442]) + ';min-width:0;padding:0', onclick: go }, raw('span', 'Give'))),
+    { cls: 'mac12 dl20w', label: 'Give Stuff' });
+  setTimeout(() => { fm.focus(); fm.select(); }, 0);
+  return true;
+}
+
 // an ALRT of 3.0.1's (its DITL in HOLANG.mac301En: the static texts joined, OK), as the standard alert
 function alertById301(id) { const D = (window.HOLANG && HOLANG.mac301En.DITL[String(id)]) || []; std301(D.filter(x => x[0] === 'text').map(x => x[1]).join(' ')); }
 
@@ -3137,6 +3180,7 @@ if (V3) {
       if (!G() || !own()) return false;
       if (name === 'fleets') return fleets301();
       if (name === 'build') return build301(x[0]);
+      if (name === 'give') return give301();
       if (name === 'organize' || name === 'group') return organize301(x[0]);
       return false;
     },

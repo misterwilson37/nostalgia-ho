@@ -39,7 +39,7 @@ Sources (private repo `nostalgia-ho-sources`):
      bar) moved to `js/skins/mac12/panel.css` for both. Real-play presses a dialog's default button after End Turn (the play-alone
      question); `mac3c`, `mac3` pass at desktop and phone-l.
    - ~~List of All Fleets, Explored Stars, Compare, Skills~~, ~~Organize Fleets~~ (done 17 Nov: the table).
-   - ~~Build / Design Ships~~ (done 18 Nov: the table). Next: Alliances, Give, Send Message (the plan's session 2).
+   - ~~Build / Design Ships~~ (done 18 Nov: the table). Next: Alliances, Send Message (the plan's session 2); ~~Give~~ done.
    - Smaller leftovers in the done panes: "Sort" above the budget bars (`DoHBarClick`'s sort), the drag bar's resizing
      (`ClickInDragBar`), and a real System 7 scroll bar for the three lists.
 3. Until a pane is done, the skin must not show 2.0.1's version of it as if it were 3.0.1's: keep these on the session branch,
@@ -120,7 +120,7 @@ another version.
 | Skill levels | 071 | DLOG 6100 | window differs, items same | **done**: the classic page's list at DITL 6100's rectangles, in the program's dress |
 | List of All Explored Stars | 072 | DLOG 6040 | differs | **done**: the classic page's 3.0.1 list (`InitStarsList`'s order) with 3.0.1's rows (`MakeOneListedStar`: the star's icon, name, temperature, gravity, metal; no Own column; `rs.exploredList.icon`, `status: false`) at DITL 6040's rectangles with the Sort By menu |
 | Alliances | 073 | DLOG 6110 | new | ? |
-| Give Stuff | 074 | DLOG 6120 | new | ? |
+| Give Stuff | 074 | DLOG 6120 | new | **done** (`give301`, from `DoGiveThingsDlg` @1437e0, `InitGTPlayerList`, `SetCellsToPlayers`): DITL 6120's rectangles; the other players still in, 5 x 4 cells of their icons and names, the first picked; the two fields kept between 0 and what you have; Give (default) under Cancel, sound 5000; three gifts a turn: ALRT 5010 with STR# 1020.21 |
 | Send Message | 075 | DLOG 6070 | differs | ? |
 
 ## End of the game
