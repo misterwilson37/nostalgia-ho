@@ -43,6 +43,7 @@ function setMacScale() {
   if (s0 !== MACS.s && A() && A().G) { A().UI.fitted = false; A().resize(); A().renderPanel(); }
 }
 setMacScale(); window.addEventListener('resize', setMacScale);
+document.documentElement.classList.add('macfam'); // (the Mac 1.2, 2.0.1 and 3.0.1 skins: their End Turn's place, js/skins/mac12/panel.css)
 const macPixel = () => (MACS.s > 1 ? [MACS.s, MACS.s] : null);
 // a pane's canvas has enough pixels for the zoom and the screen (twice the Mac's at the least)
 const QK = () => Math.max(2, Math.ceil(MACS.s * (window.devicePixelRatio || 1)));
@@ -2789,6 +2790,8 @@ window.HOMAC12 = {
     next();
   },
   panel(panel, B) { if (own()) panel12(panel, B || {}); requestAnimationFrame(measureMac); },
+  // End Turn at the map's top left (as the 3.0.1 skins: html.macfam #msg.et301)
+  afterMsg: (box) => { box.classList.toggle('et301', !!box.querySelector('.clock')); },
   // the program's own windows, in English and French (another language keeps the remake's)
   confirm: (text, yes, labels) => ask12(text, yes, labels),
   window(name, ...x) {
@@ -2824,6 +2827,9 @@ window.HOMAC12 = {
     if (extra.length) ho.push(['-'], ...extra.filter(x => !(typeof x[0] === 'function' && /scrap|organize|organi|switch players/i.test(String(x[0]())))).map(tagged));
   },
   get menuLayout() { return menuLayout(); },
+  // (the menus laid out again when the OS look changes ask for this: without it they took the DOS skin's, js/skins/dos/ui.js, with no New and no Edit
+  // menu: Jake's 1.2 game in the System 7 look, 17 Nov 2026)
+  menuLayoutNow() { return menuLayout(); },
 };
 // key equivalents: ⌘ or Ctrl and the item's key, as the menus show them (a browser keeps some of them, ⌘N, ⌘W, ⌘T, ⌘Q, for itself)
 document.addEventListener('keydown', (e) => {
