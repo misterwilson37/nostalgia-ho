@@ -75,7 +75,7 @@ html.w95win, html.w95win body { background: #c0c0c0; }
 html.w95win #app { box-sizing: border-box; height: 100%; padding: 3px; grid-template-rows: auto auto 1fr;
   box-shadow: inset 1px 1px 0 #dfdfdf, inset 2px 2px 0 #fff, inset -1px -1px 0 #000, inset -2px -2px 0 #808080; }
 html.w95win #w95cap { display: flex; align-items: center; height: 18px; background: #000080; color: #fff; padding: 0 2px; gap: 3px; }
-html.w95win #w95cap .w95icon { width: 16px; height: 16px; flex: none; background: center / 16px 16px no-repeat; image-rendering: pixelated; } /* (the picture: screen.js, from the loaded art) */
+html.w95win #w95cap .w95icon { width: 16px; height: 16px; flex: none; background: url("../../../assets/skins/w95/sprites/appicon.png") center / 16px 16px no-repeat; image-rendering: pixelated; } /* (the program's icon, group 2 of SPACEHO.EXE, 32 x 32 shown at 16 as Windows 95 does: tools/extract/win95.py) */
 html.w95win #w95cap #title { display: block; flex: 1 1 auto; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: clip; font: bold 11px/18px "MS Sans Serif", "Microsoft Sans Serif", Tahoma, Arial, sans-serif; color: #fff; margin: 0; padding: 0; text-align: left; }
 html.w95win #w95cap .w95boxes { display: flex; flex: none; gap: 0; }
 html.w95win #w95cap .w95boxes i { display: block; width: 16px; height: 14px; box-sizing: border-box; background: #c0c0c0 center no-repeat;

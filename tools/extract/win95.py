@@ -69,7 +69,7 @@ ON_BLACK = [(2600, 2926), (7728, 7758), (7260, 7274), (114, 133), (3000, 3010)]
 def main(exe):
     pe = pefile.PE(exe)
     data = pe.get_memory_mapped_image()
-    bmps, waves, strings = {}, {}, {}
+    bmps, waves, strings, icons, groups = {}, {}, {}, {}, {}
     for t in pe.DIRECTORY_ENTRY_RESOURCE.entries:
         tn = str(t.name) if t.name else pefile.RESOURCE_TYPE.get(t.id, t.id)
         for e in t.directory.entries:
@@ -77,6 +77,10 @@ def main(exe):
                 raw = data[l.data.struct.OffsetToData:l.data.struct.OffsetToData + l.data.struct.Size]
                 if tn == 'RT_BITMAP' and e.id is not None:
                     bmps[e.id] = dib(raw)
+                elif tn == 'RT_ICON' and e.id is not None:
+                    icons[e.id] = raw
+                elif tn == 'RT_GROUP_ICON' and e.id is not None:
+                    groups[e.id] = raw
                 elif tn == 'WAVE':
                     waves[str(e.name).lower()] = raw
                 elif tn == 'RT_STRING':
@@ -121,6 +125,14 @@ def main(exe):
         for key, box in (('selbig', (15, 0, 15 + 56, 51)), ('selsmall', (15, 156, 15 + 26, 156 + 26))):
             edges_clear(sheet.crop(box)).save(os.path.join(OUT, 'sprites', key + '.png'), optimize=True)
             sprites.append(key)
+    # the program's icon (group 2, 32x32; Windows 95 shows it at 16x16 in the caption): appicon.png
+    if 2 in groups:
+        g = groups[2]
+        w, h, cc, _, pl, bc, sz, iid = struct.unpack_from('<BBBBHHIH', g, 6)
+        if iid in icons:
+            raw = icons[iid]
+            hdr = struct.pack('<HHH', 0, 1, 1) + struct.pack('<BBBBHHII', w, h, cc, 0, pl, bc, len(raw), 22)
+            Image.open(io.BytesIO(hdr + raw)).convert('RGBA').save(os.path.join(OUT, 'sprites', 'appicon.png'), optimize=True)
     for name, raw in waves.items():
         open(os.path.join(OUT, 'sounds', name + '.wav'), 'wb').write(raw)
     json.dump(strings, open(os.path.join(OUT, 'strings.json'), 'w'), ensure_ascii=False, indent=0)
