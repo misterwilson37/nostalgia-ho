@@ -655,9 +655,43 @@ function allianceDialog() {
   });
   draw(); showDlg(dl, 'Alliances');
 }
+
+// Give Stuff (dialog 362, shot 083): "Give Stuff To:", the white box (group box 1148) with the other players' faces and names, the one
+// picked in black; "Give How Much Money?" (field 1145) and "Give How Much Metal?" (1146); Cancel, Give. The ruleset's give rules as the
+// classic page's (rs.giveWindow: three gifts a turn, the order, the one remembered; engine give).
+function giveDialog() {
+  const a = A(), g = a.G, p = a.me(), W = H().rules(g).giveWindow || {};
+  if ((p.giftsThisTurn || 0) >= 3) { a.toast(H().say(g, W.limit || H().DATA.alerts[5] || 'Sorry, but you may only give 3 gifts per turn.')); return true; }
+  const order = W.order ? W.order(g) : g.players, can = order.filter(q => q.id !== a.ME && q.alive !== false && !q.surrendered);
+  const dl = W95DLG(362); if (!dl) return false;
+  const last = W.remember ? p[W.remember] : null; let pick = can.some(q => q.id === last) ? last : can.length ? can[0].id : null;
+  const gb = dl.by[1148], grid = document.createElement('div'); grid.className = 'sgrid'; gb.classList.add('sbox'); gb.append(grid);
+  const cells = [];
+  can.forEach(q => {
+    const n = q.human ? (q.female ? 1905 : 1405) : (q.female ? 2500 : 2000) + (q.face || 0) % 20, im = a.IMG['w95:b' + n];
+    const c = document.createElement('div'); c.className = 'sc gv' + (q.id === pick ? ' on' : ''); c.setAttribute('role', 'option'); c.tabIndex = 0;
+    const f = document.createElement('i'); f.className = 'sf'; if (im && im.src) f.style.backgroundImage = `url("${im.src}")`;
+    c.append(f, span('sn', q.name)); c.addEventListener('click', () => { pick = q.id; cells.forEach(x => x.classList.toggle('on', x === c)); });
+    cells.push(c); grid.append(c);
+  });
+  if (dl.by['Give Stuff To:']) dl.by['Give Stuff To:'].textContent = 'Give Stuff'; // (shot 083's words, not the template's)
+  const mf = dl.by[1145], xf = dl.by[1146]; mf.value = '0'; xf.value = '0'; mf.inputMode = xf.inputMode = 'numeric';
+  dl.by[2].addEventListener('click', () => a.closeModal());
+  dl.by[1].addEventListener('click', () => {
+    if (pick == null) { a.toast(H().say(g, W.none || H().DATA.alerts[6] || 'Sorry, but there is no one else alive to give or send something to.')); return; }
+    const num = (v) => Math.max(0, Math.round(+String(v).replace(/[^0-9]/g, '') || 0));
+    const r = H().give(g, a.ME, pick, Math.min(num(mf.value), Math.max(0, p.savings)), Math.min(num(xf.value), Math.max(0, p.metal)));
+    if (r === 'limit') { a.toast(H().say(g, W.limit || H().DATA.alerts[5])); return; }
+    if (r !== 'ok') return;
+    if (W.remember) p[W.remember] = pick;
+    a.Sound.play(5000); a.closeModal(); a.renderPanel(); a.save();
+  });
+  showDlg(dl, 'Give Stuff'); mf.focus(); mf.select();
+  return true;
+}
 const prevWindow = T.window;
 T.window = (name, ...args) => {
-  if (W95ON()) { if (name === 'fleets') return fleetsDialog(); if (name === 'stars') return starsDialog(); if (name === 'surrender' && surrenderDialog()) return true; }
+  if (W95ON()) { if (name === 'fleets') return fleetsDialog(); if (name === 'stars') return starsDialog(); if (name === 'surrender' && surrenderDialog()) return true; if (name === 'give') return giveDialog(); }
   return prevWindow ? prevWindow(name, ...args) : false;
 };
 
