@@ -47,7 +47,7 @@ T.menuLayout = {
   Edit: [['Undo', () => {}, null, null, dim, 'Z'], '-', ['Cut', () => {}, null, null, dim, 'X'], ['Copy', () => {}, null, null, dim, 'C'], ['Paste', () => {}, null, null, dim, 'V']],
   Options: [['Auto Play...', 'Game/Auto play…'], '-', [null, 'View/#4'], '-',
     ['Master Point List...', 'Game/Master Point List…'], ['Hall of Fame...', 'Game/Hall of Fame…'], ['Hall of Shame...', 'Game/Hall of Shame…'], '-',
-    ['Preferences...', 'Game/Preferences…']],
+    ['Preferences...', () => (W95ON() ? prefsDialog() : HOAPI.openPrefs()), null, null, noGame]],
   Ships: [['Build/Design Ships...', 'Ships/Build ships at selected colony…'], '-',
     ['List All Fleets', 'Ships/List all fleets…'], [null, 'Ships/#4'], [null, 'Ships/#3'], '-',
     // (the last item names the selected star's battle, or reads "No Battles here..." dimmed: shot 042)
@@ -688,6 +688,31 @@ function giveDialog() {
   });
   showDlg(dl, 'Give Stuff'); mf.focus(); mf.select();
   return true;
+}
+
+// Preferences (dialog 350, shot 040), wired to the remake's settings: Show Event Messages, But Only The Most Important Ones, Review Event
+// Battles, Give Helpful Game Play Hints, Battle Speed (Fast 10 to Slow 60, 30 as it came), Fully Animated Battles, Polling Time (1 to 15
+// seconds, 8 as it came), Temp. in Celsius. Kept as chosen with nothing in the remake to act on: Automatically Sort Planet List, Groups
+// Shoot Together, Show Fleet Paths (all on as they came, shot 040). Your Password is dimmed (the remake keeps no password). OK applies.
+function prefsDialog() {
+  const a = A(), P = a.Prefs, O = (a.verOpts && a.verOpts()) || {}, dl = W95DLG(350); if (!dl) { if (a.openPrefs) a.openPrefs(); return; }
+  const ck = (id, on) => { const i = dl.by[id] && dl.by[id].querySelector('input'); if (i) i.checked = !!on; return i; };
+  const sort = ck(1092, P.sortPlanets !== false), show = ck(1093, P.showMsgs !== false), imp = ck(1094, !!P.important), rev = ck(1095, a.prefReview ? a.prefReview() : !!P.review);
+  const hint = ck(1096, !!P.hints), full = ck(1097, P.fullAnim !== false), grp = ck(1098, P.groupsTogether !== false), paths = ck(1100, P.fleetPaths !== false), cel = ck(1101, !!P.celsius);
+  const sl = (id, C, k) => { const r = dl.by[id]; const c = C || { min: 1, max: 10, def: 5 }; r.min = c.min; r.max = c.max; r.step = 1; r.value = P[k] != null ? P[k] : c.def; return r; };
+  const bs = sl(1103, O.battleSpeed, 'battleSpeed'), po = sl(1104, O.poll, 'poll'), pv = dl.by[1099];
+  const showPoll = () => { if (pv) pv.textContent = String(po.value); }; po.addEventListener('input', showPoll); showPoll();
+  const sync = () => { imp.disabled = rev.disabled = !show.checked; }; show.addEventListener('change', sync); sync();
+  const pw = dl.by[1102]; if (pw) { pw.disabled = true; pw.title = 'The remake keeps no password'; }
+  dl.by[2].addEventListener('click', () => a.closeModal());
+  dl.by[1].addEventListener('click', () => {
+    P.sortPlanets = sort.checked; P.showMsgs = show.checked; P.important = imp.checked; P.review = rev.checked; P.hints = hint.checked;
+    P.fullAnim = full.checked; P.groupsTogether = grp.checked; P.fleetPaths = paths.checked;
+    const bsv = +bs.value, pov = +po.value; P.battleSpeed = O.battleSpeed && bsv === O.battleSpeed.def ? null : bsv; P.poll = O.poll && pov === O.poll.def ? null : pov;
+    if (cel.checked !== !!P.celsius) { P.celsius = cel.checked; P.temp = null; }
+    a.savePrefs(); a.closeModal(); a.renderPanel(); a.draw();
+  });
+  showDlg(dl, 'Preferences');
 }
 const prevWindow = T.window;
 T.window = (name, ...args) => {

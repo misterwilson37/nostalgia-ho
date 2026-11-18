@@ -303,3 +303,5 @@ html.w95win .w95dlg .agrid .ac { width: 30px; overflow: visible; display: flex; 
 html.w95win .w95dlg .agrid .af { width: 32px; height: 32px; background: center / 32px 32px no-repeat; image-rendering: pixelated; }
 html.w95win .w95dlg .agrid .an { font-size: 9px; line-height: 11px; white-space: nowrap; }
 html.w95win .w95dlg .sgrid .sc.gv.on { outline: 0; background: #000; color: #fff; }
+html.w95win .w95dlg label.ck { display: flex; align-items: center; gap: 3px; white-space: nowrap; }
+html.w95win .w95dlg input.sb { margin: 0; }

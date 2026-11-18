@@ -70,6 +70,8 @@ To compare: serve the repo (`python3 -m http.server 8765 --bind 127.0.0.1` from 
 - Dip Into Savings: 4.0.5 for Windows takes a sum once (dialog 358, shot 080: "You currently have $128,885 in savings. You can take out
   up to $390,110. How much would you like?"); the 405 ruleset has a standing share of savings each turn (classic `openDip`). Check the code
   (Galaxy menu, Ctrl+D) and change the ruleset if it is wrong.
+- Preferences' defaults: Jake's new Windows game (shot 040, year 2000) shows Review Event Battles ticked, Battle Speed at Fast and
+  Polling Time 1 second; the 405 options (verOpts) start unticked, 30 and 8. Check the program's defaults (its setup) before changing.
 - Statistics (Galaxy menu; dialog 355, shot 079: population gained / killed, enemy population killed, ships built / destroyed / enemy
   destroyed) needs counters the engine doesn't keep (`G.stat` has battles, captures, colonized).
 - Its starting designs are named Weasel, Santa Maria...; the Windows program's are Rudolph (scout), Hardy (colony ship), Chevron
