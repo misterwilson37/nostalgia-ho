@@ -60,12 +60,12 @@
 .hall-sum .hl { text-align: right; }
 .hall-sum .hpic { width: 87px; height: 86px; margin: 0 0 0 auto; border: 2px solid; border-color: #808080 #fff #fff #808080; background: #c0c0c0; }
 .hall-sum .btns { position: absolute; left: 280px; top: 205px; margin: 0; }
-@media (max-width: 640px) {
-  .hall-list, .hall-master, .hall-sum { width: auto; height: auto; padding-bottom: 8px; }
-  .hall-list .lbhead, .hall-list .lb, .hall-list .btns, .hall-master .lb, .hall-master .btns { width: auto; }
-  .hall-list .lbhead, .hall-list .lb .lbrow { grid-template-columns: 92fr 117fr 71fr; }
-  .hall-master .lbhead, .hall-master .lbrow { grid-template-columns: 6fr 136fr 136fr 101fr; }
-  .hall-sum .btns { position: static; margin-top: 8px; }
+@media (max-width: 640px) { /* (a phone: not the program's own 640 x 480 window, html.w95win) */
+  html:not(.w95win) .hall-list, html:not(.w95win) .hall-master, html:not(.w95win) .hall-sum { width: auto; height: auto; padding-bottom: 8px; }
+  html:not(.w95win) .hall-list .lbhead, html:not(.w95win) .hall-list .lb, html:not(.w95win) .hall-list .btns, html:not(.w95win) .hall-master .lb, html:not(.w95win) .hall-master .btns { width: auto; }
+  html:not(.w95win) .hall-list .lbhead, html:not(.w95win) .hall-list .lb .lbrow { grid-template-columns: 92fr 117fr 71fr; }
+  html:not(.w95win) .hall-master .lbhead, html:not(.w95win) .hall-master .lbrow { grid-template-columns: 6fr 136fr 136fr 101fr; }
+  html:not(.w95win) .hall-sum .btns { position: static; margin-top: 8px; }
 }
 /* ---------- The program's main window (js/skins/w95/screen.js; docs/status-w95.md, unit 1) ----------
    At 640 x 480 as Jake's captures (shot 010): the window's 3-pixel frame, the caption 18 high (y 3-20), the menu bar
