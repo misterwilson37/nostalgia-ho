@@ -73,11 +73,12 @@ Units 1-4 are the big ones (one session might do two). 6-9 are quicker. 10 is lo
 4. ~~Second turn: End Turn's clock shrank while the report bubbles were up~~: done. The clock the skin shows beside a report
    (`extraClock`, #w95clk) wasn't in the list zoomed by --w95, so it stayed at x1 (64 x 61 against 96 x 92 at x1.5). Now the same
    size and place either way.
-5. ~~A ship dragged past its fuel: it routes around, but the path isn't shown~~: done. The route is the modern conveniences' automatic
-   route through your colonies (findRoute; 4.0.5 itself has none, no rs.route), and the skin's drag line (T.dragRoute) took over before
-   the classic page's route preview was drawn. The classic page now passes that route as `via` (legs with their distances; only a skin
-   that uses it changes), and the w95 line follows it, each leg's distance, the arrow on the last; after the drop the order line goes
-   on, 1 px, through f.path's later stops (FUN_0048e811's 2 px line still to the next one).
+5. ~~A ship dragged past its fuel: it routes around, but the path isn't shown~~: done, redone from the code (19 Nov). The route is
+   4.0.5's own (the 405 ruleset's rs.route; the classic page passes its legs while dragging). FUN_004148a7 draws it leg by leg: from
+   each stop to the next, the leg's distance beside its middle (5 to the side, 5 up), the end's arrowhead when reachable (+0x1a), the
+   start's too for a round trip (+0x18); the w95 line ignored the legs and drew one straight line. After the drop FUN_0048e811 draws
+   one 2-pixel line a fleet, to its next stop only: kept so (the first pass's thinner lines through the later stops were the
+   remake's own, taken out, as was the classic page's `via` hand-off of the modern automatic route, which 4.0.5's rules never use).
 6. ~~Abandon Planet: no way to find it~~: done. Galaxy > Abandon Planet (Ctrl+A), "Don't Abandon Planet" while the selected colony
    is marked (shots 047, 074, 075), dimmed without a colony of yours selected; the rules' evacuate405 (FUN_00469b1d: marked, given up
    at End Turn), asking first as FUN_00469b1d does: the Hope / Ship jokes, else "Do you really want to abandon a profitable planet?"

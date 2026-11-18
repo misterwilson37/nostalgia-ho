@@ -1644,8 +1644,6 @@ T.fleetPaths = (cx, c) => {
     else continue;
     const colony = H().fleetDesigns(c.G, f).some(d => d.type === 'colony');
     cx.save(); cx.strokeStyle = colony ? '#00ff00' : '#00ffff'; cx.lineWidth = 2; cx.beginPath(); cx.moveTo(x1, y1); cx.lineTo(c.sx(to.x), c.sy(to.y)); cx.stroke();
-    // (the rest of a route through your colonies, f.path: thinner, so the next stop stays the one FUN_0048e811 draws)
-    if (f.path && f.path.length) { cx.lineWidth = 1; cx.beginPath(); cx.moveTo(c.sx(to.x), c.sy(to.y)); for (const sid of f.path) { const s2 = c.G.stars[sid]; if (s2) cx.lineTo(c.sx(s2.x), c.sy(s2.y)); } cx.stroke(); }
     cx.restore();
   }
 };
@@ -1654,22 +1652,22 @@ T.fleetPaths = (cx, c) => {
 T.dragRoute = (cx, o) => {
   if (!W95ON()) return false;
   cx.save(); cx.globalCompositeOperation = 'difference'; cx.strokeStyle = '#fff'; cx.lineWidth = 1;
-  // (a route through your colonies, rs.route: the line follows its legs, each with its distance, the arrow on the last; Jake 18 Nov: the
-  // straight line hid the path the fleet would take)
-  if (o.via && o.via.length > 2 && !o.ok) o = Object.assign({}, o, { legs: o.via, ok: true }); // (modern conveniences' automatic route)
+  const head = (xa, ya, xb, yb) => { const ang = Math.atan2(yb - ya, xb - xa), L = 8; cx.beginPath();
+    cx.moveTo(xb - L * Math.cos(ang - 0.45), yb - L * Math.sin(ang - 0.45)); cx.lineTo(xb, yb); cx.lineTo(xb - L * Math.cos(ang + 0.45), yb - L * Math.sin(ang + 0.45)); cx.stroke(); };
+  // (a route through your colonies, rs.route: FUN_004148a7 draws it leg by leg, from each stop to the next, each leg with its distance
+  // beside its middle and its arrowheads (the end's when reachable, +0x1a; the start's too for a round trip, +0x18))
   if (o.legs && o.legs.length > 2) {
-    const L = o.legs; cx.beginPath(); cx.moveTo(L[0].x, L[0].y); for (let i = 1; i < L.length; i++) cx.lineTo(L[i].x, L[i].y); cx.stroke();
-    o = Object.assign({}, o, { x1: L[L.length - 2].x, y1: L[L.length - 2].y, x2: L[L.length - 1].x, y2: L[L.length - 1].y, dist: L[L.length - 1].dist });
+    const L = o.legs;
+    cx.beginPath(); cx.moveTo(L[0].x, L[0].y); for (let i = 1; i < L.length; i++) cx.lineTo(L[i].x, L[i].y); cx.stroke();
+    for (let i = 1; i < L.length; i++) { if (o.ok) head(L[i - 1].x, L[i - 1].y, L[i].x, L[i].y); if (o.round) head(L[i].x, L[i].y, L[i - 1].x, L[i - 1].y); }
     cx.globalCompositeOperation = 'source-over'; cx.font = '11px "MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif'; cx.fillStyle = '#fff'; cx.textBaseline = 'top';
-    for (let i = 1; i < L.length - 1; i++) { const t = String(L[i].dist), mx = (L[i - 1].x + L[i].x) / 2, my = (L[i - 1].y + L[i].y) / 2, w = cx.measureText(t).width;
+    for (let i = 1; i < L.length; i++) { const t = String(L[i].dist), mx = (L[i - 1].x + L[i].x) / 2, my = (L[i - 1].y + L[i].y) / 2, w = cx.measureText(t).width;
       cx.fillText(t, (L[i].y - L[i - 1].y) * (L[i].x - L[i - 1].x) < 0 ? mx - 5 - w : mx + 5, my - 5 - 11); }
-    cx.globalCompositeOperation = 'difference';
+    cx.restore(); return true;
   } else {
     if (!o.ok) cx.setLineDash([1, 2]);
     cx.beginPath(); cx.moveTo(o.x1, o.y1); cx.lineTo(o.x2, o.y2); cx.stroke(); cx.setLineDash([]);
   }
-  const head = (xa, ya, xb, yb) => { const ang = Math.atan2(yb - ya, xb - xa), L = 8; cx.beginPath();
-    cx.moveTo(xb - L * Math.cos(ang - 0.45), yb - L * Math.sin(ang - 0.45)); cx.lineTo(xb, yb); cx.lineTo(xb - L * Math.cos(ang + 0.45), yb - L * Math.sin(ang + 0.45)); cx.stroke(); };
   if (o.ok) head(o.x1, o.y1, o.x2, o.y2);
   if (o.round) head(o.x2, o.y2, o.x1, o.y1); // (and at the start when it can come back)
   cx.globalCompositeOperation = 'source-over';

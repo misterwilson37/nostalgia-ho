@@ -754,11 +754,8 @@ function draw0() {
       // as 3.0.1's FollowPathDrag @15118e does, calling DeterminePath for each new star; a copy of the fleet, as route() marks the fleet)
       let legs = null;
       const RS = HO.rules(G);
-      // (via: the modern conveniences' automatic route when the star is too far, findRoute, as legs; a skin that draws it says so by using it)
-      const viaLegs = () => { if (!inReach || ok || legs || RS.route || f.sat || !modern() || !HO.feature(G, 'waypoints')) return null; const r = findRoute(f, tgt); if (!r || !r.length) return null;
-        const ids = [f.star].concat(r); return ids.map((sid, i) => ({ x: sx(G.stars[sid].x), y: sy(G.stars[sid].y), dist: i ? Math.round(HO.starDist(G, ids[i - 1], sid)) : null })); };
       if (inReach && !ok && RS.route && !f.sat) { const pth = RS.route(G, Object.assign({}, f), tgt); if (pth && pth.length) { ok = true; legs = [[sx(a.x), sy(a.y), f.star]].concat(pth.map(i => [sx(G.stars[i].x), sy(G.stars[i].y), i])); } }
-      if (T.dragRoute(cx, { x1: sx(a.x), y1: sy(a.y), x2, y2, ok: inReach && ok, turns: inReach ? Math.ceil(HO.starDist(G, f.star, tgt) / HO.fleetSpeed(G, f) - 1e-9) : null, dist: inReach ? Math.round(HO.starDist(G, f.star, tgt)) : null, round: inReach && ok && round, star: inReach, legs: legs && legs.map((L, i) => i ? { x: L[0], y: L[1], dist: Math.round(HO.starDist(G, legs[i - 1][2], L[2])) } : { x: L[0], y: L[1] }), via: viaLegs() }) !== false) return;
+      if (T.dragRoute(cx, { x1: sx(a.x), y1: sy(a.y), x2, y2, ok: inReach && ok, turns: inReach ? Math.ceil(HO.starDist(G, f.star, tgt) / HO.fleetSpeed(G, f) - 1e-9) : null, dist: inReach ? Math.round(HO.starDist(G, f.star, tgt)) : null, round: inReach && ok && round, star: inReach, legs: legs && legs.map((L, i) => i ? { x: L[0], y: L[1], dist: Math.round(HO.starDist(G, legs[i - 1][2], L[2])) } : { x: L[0], y: L[1] }) }) !== false) return;
     }
     cx.save();
     // too far, but a route through your colonies exists (modern): show it
