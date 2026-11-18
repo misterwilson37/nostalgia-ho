@@ -1,0 +1,62 @@
+# Windows 95 4.0.5: status, screen by screen
+
+**Read this first when working on the `w95` skin.** It works like `docs/status-301.md`: each line is one screen of the original.
+A line is done only when the remake matches Jake's capture (a few pixels off is fine) and **Evidence** says where every part
+came from. Update the line in the same commit as the work, so the next session starts here, not from a handoff.
+
+## How a session runs
+
+1. `git pull --no-rebase` in both repos (branch `claude/eager-lovelace-ovw5uv`), read **Next** below, take the first open unit.
+2. Work the unit. Commit and push after each screen, not each unit, so a cut-off loses at most one screen.
+3. Tick the unit, move **Next**, push. If time is left, take the next unit; never start a unit you can't finish its first screen of.
+
+Files this work may touch (the 3.0.1 session isn't using them): `js/skins/w95/*`, `assets/skins/w95/*`, `js/os/win95.css`,
+this file, new `tools/skins/w95-*` scripts, and the `w95` line of `js/skins.js`. Anything shared (`js/skins/classic/*`,
+`js/ui-text.js`, `js/engine.js`, rules files) is not edited here: if a screen needs it, note it under **Needs a shared file**.
+
+Sources (private repo `nostalgia-ho-sources`):
+- Captures: `audit/win-4.0.5/captures/win405-jake-shotNNN.png` (3420 x 2214 Mac screens; the game is 1280 x 960 at +1072+598,
+  Retina 2x). Crops: `audit/win-4.0.5/crops/NNN.png` (640 x 480, made in unit 0).
+- Index: `audit/win-4.0.5/shots.tsv` (shot, screen, notes; made in unit 0).
+- Resources: `docs/405-windows.md` (the Windows dialogs, menu, DLGINIT, from `tools/extract/windlg.py`).
+- Code: `docs/coverage-405.md` names every routine; **the decompile itself is not in either repo** (see Open questions).
+
+## Where it stands (18 Nov)
+
+The `w95` skin is the classic skin's layout (left sidebar, map, Game/Ships/Galaxy/View/Help menus) dressed with 4.0.5's
+pictures and sounds. The original's screen is quite different: a captioned window ("Juko in Milky Way in 2306"), the menu bar
+File/Edit/View/Options/Fleets/Galaxy/Players/Window/Help (to confirm from the crops), a star pane and fleet list at the top
+left, money and budget bars below, the players list at the bottom left, the map on the right, and floating report windows.
+So, as with 3.0.1, the main screen is rebuilt first, then the windows from the menus, start-up, battles and the end.
+
+## Units (each stands alone; in order)
+
+| # | Unit | Shots | Done |
+|---|------|-------|------|
+| 0 | Ground truth: crops, `shots.tsv`, dialog table, a side-by-side tool (`tools/skins/w95-compare.js`: our screen beside the crop) | all | |
+| 1 | Main screen frame: caption, menu bar, pane arrangement at 640 x 480, scaled like `setMacScale` | 007-031 | |
+| 2 | Star pane (picture, name, stats) and the fleet list above the money | 007-073 | |
+| 3 | Money pane and budget bars (Metal, Earnings, Net Income, the four bars) | 007-073 | |
+| 4 | Players list and the map (stars, names, fleets, paths, drag line, selection, End Turn clock) | 007-073, 287-310 | |
+| 5 | Report windows and bubbles ("Click here to make the message go away", the Year windows) | 008-031, 087-091, 293-310 | |
+| 6 | The menus, each one dropped down, ticks, dimmed items, shortcuts | 036, 046, 047, 050, 074, 075, 282 | |
+| 7 | Menu windows A: ship design/Build, List of Fleets, Organize, explored stars, planet info | 041-044, 053, 081, 093, 291 | |
+| 8 | Menu windows B: Compare/Graph, Alliances, Send money/metal, Preferences, Auto Play, Dip, About, Help | 040, 076-085, 283-284, 292 | |
+| 9 | Start-up: splash, Create New Galaxy, Open, password, waiting for players | 001-006, 312-313 | |
+| 10 | Battles: the window and its rows, then the animation (bolts, bursts, rounds, Stop/Done) | 092-281, 319-320 | |
+| 11 | End of game: won, lost, armageddon, surrender alerts; Hall of Fame/Shame and their details | 033-039, 286, 295-299, 311, 314-327 | |
+| 12 | Wrap-up: real-play `--skin=w95` at four sizes, digests, ui-lang-audit, notes-check; screenshots beside captures for Jake | | |
+
+Units 1-4 are the big ones (one session might do two). 6-9 are quicker. 10 is long but mechanical.
+
+## Next
+
+Unit 0.
+
+## Needs a shared file
+
+(None yet.)
+
+## Open questions
+
+(Kept in step with what Jake answers.)
