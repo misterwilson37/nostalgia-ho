@@ -798,7 +798,7 @@ function buildDialog(sid) {
   const fresh = (type) => { spec = { type }; clampSpec(); const d = live().find(same); name = d ? d.name : H().designName(g, p, type); };
   const L0 = live(); if (L0.length) pickDesign(L0[L0.length - 1]); else fresh(types[0]);
   const lb = dl.by[1016], pic = dl.by[1020], nm = dl.by[1021], cb = dl.by[1022], n = dl.by[1043];
-  types.forEach(t => { const o = document.createElement('option'); o.value = t; o.textContent = H().TYPES[t].name; cb.append(o); });
+  types.forEach(t => { const o = document.createElement('option'); o.value = t; o.textContent = TL(H().TYPES[t].name); cb.append(o); });
   n.value = '0'; n.inputMode = 'numeric';
   const shipCanvas = (d, w, h) => { const c = document.createElement('canvas'); c.width = w; c.height = h; const im = shipPicClean(d, a.IMG); if (im) { const sc = Math.min(1, w / im.width, h / im.height); c.getContext('2d').drawImage(im, (w - im.width * sc) / 2, (h - im.height * sc) / 2, im.width * sc, im.height * sc); } return c; };
   const pile = (el, coin, count) => {
@@ -810,7 +810,7 @@ function buildDialog(sid) {
     [[n1, 0, 0], [n2, 12, 3], [n3, 23, 6]].forEach(([k, dx, dy]) => { for (let i = 0; i < k; i++) x.drawImage(im, dx, base + dy - 2 * i); });
   };
   const inService = (did) => g.fleets.filter(f => f.owner === a.ME).reduce((t, f) => t + (f.ships[did] || 0), 0);
-  const label = (d) => `${d.name} (${d.W}/${d.S}) ${H().TYPES[d.type].name}`;
+  const label = (d) => `${d.name} (${d.W}/${d.S}) ${TL(H().TYPES[d.type].name)}`;
   const draw = () => {
     const ds = live(), cur = ds.find(same) || null;
     lb.innerHTML = ''; lb.classList.add('blist');

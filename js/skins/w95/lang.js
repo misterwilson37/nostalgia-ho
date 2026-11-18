@@ -135,6 +135,8 @@ window.HOUI.add([
 ['•  Shift-Click selects an entire pile', '•  Maj-clic choisit une pile entière', '•  Umschalt-Klick wählt einen ganzen Stapel', '•  Shift-tıklama bütün bir yığını seçer', '•  Mayús-clic selecciona una pila entera'],
 ['Select an icon to see recent recorded history:', 'Choisissez une icône pour voir l’historique récent :', 'Wählen Sie ein Symbol, um den jüngsten Verlauf zu sehen:', 'Son kaydedilen geçmişi görmek için bir simge seçin:', 'Seleccione un icono para ver la historia reciente:'],
 ['Ship Money', 'Placements', 'Schiffsgeld', 'Gemi Parası', 'Dinero para naves'],
+['Send Message\nTo Whom?', 'Envoyer un message\nÀ qui ?', 'Nachricht senden\nAn wen?', 'Mesaj Gönder\nKime?', 'Enviar mensaje\n¿A quién?'],
+['MessageText:', 'Texte du message :', 'Nachrichtentext:', 'Mesaj Metni:', 'Texto del mensaje:'],
 [CREDITS.en, CREDITS.fr, CREDITS.de, CREDITS.tr, CREDITS.es],
 [about('en'), about('fr'), about('de'), about('tr'), about('es')],
 ]);
