@@ -5,7 +5,7 @@
 //   node tools/skins/w95-compare.js <crop numbers, comma-separated> ['<js run in the page first>']
 //   env: BASE (a server already serving the repo, default http://127.0.0.1:8765), CROPS (the private repo's
 //   audit/win-4.0.5/crops, default ../nostalgia-ho-sources/audit/win-4.0.5/crops), OUT (default the temp folder),
-//   W, H (viewport, default 640 x 480), SEED (the galaxy, default 1)
+//   W, H (viewport, default 640 x 480), SEED (the galaxy, default 1), SKILL (your skill, default novice: Jake's games are Novice)
 const { chromium } = require('playwright'); const fs = require('fs'); const path = require('path');
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const BASE = process.env.BASE || 'http://127.0.0.1:8765';
@@ -19,7 +19,7 @@ const snippet = process.argv[3] || '';
   const page = await (await b.newContext({ viewport: { width: W, height: H } })).newPage();
   const errs = []; page.on('pageerror', e => errs.push(e.message)); page.on('dialog', d => d.accept());
   await page.addInitScript(() => { try { localStorage.clear(); } catch (e) {} });
-  await page.goto(`${BASE}/index.html?skin=w95&rules=405&computers=3${process.env.SEED ? '&seed=' + process.env.SEED : ''}`);
+  await page.goto(`${BASE}/index.html?skin=w95&rules=405&computers=3&skill=${process.env.SKILL || 'novice'}${process.env.SEED ? '&seed=' + process.env.SEED : ''}`);
   await page.waitForFunction(() => window.HOAPI && HOAPI.G, null, { timeout: 20000 }); await sleep(800);
   for (let n = 0; n < 30 && await page.locator('.card:not(.end):not(.waiting)').count(); n++) {
     if (await page.locator('.scrim').count()) { await page.keyboard.press('Escape'); await sleep(60); continue; }

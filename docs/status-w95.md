@@ -57,7 +57,7 @@ Units 1-4 are the big ones (one session might do two). 6-9 are quicker. 10 is lo
 
 All twelve units have had a pass. What is left, in order of value:
 1. Jake's look at `audit/win-4.0.5/remake-compare/` (private repo) and the preview; fix what he reports.
-2. The rules questions under "Needs a shared file" (starting money and ships, fleet wording in reports, design names, Dip Into
+2. The rules questions under "Needs a shared file" (fleet wording in reports, design names, Dip Into
    Savings, Preferences' defaults, Organize, Statistics, Turn Time Limit and Base Difficulty Rating): for the main session or Jake.
 3. Each unit's "Left" notes:
    none of the units' own; the shared-file questions below.
@@ -76,10 +76,9 @@ To compare: serve the repo (`python3 -m http.server 8765 --bind 127.0.0.1` from 
 - Graph History (dialog 354): 4.0.5 records Ship Power each turn (FUN_0043b47f, FUN_0041adc6's strength of your fleets); the remake's
   history (`js/engine.js` recordHistory) keeps no such number, so the w95 window's Ship Power line stays empty. Income is the record's
   player +8, which the money pane shows as Net Income (FUN_00489ebe); the history's `inc` is gross: the record wants net.
-- The 405 ruleset starts a game with $25,000 savings and 5,000 metal; Jake's Windows game (shot 010) starts with $100,000 and
-  20,000 (Income $51,000, Pop 750,000). Check the New Game options and `js/rules-405.js` / `rules-mac405.js` against the
-  Windows code before changing anything (rules files are shared).
-- The 405 ruleset starts a player with no fleets; Jake's game starts with two scouts (Rudolph) and a colony ship (Hardy) at home (shot 010).
+- Starting money and ships: answered, not a bug. Jake's game (shots 010 on: $100,000, 20,000 metal, Income $51,0xx, Pop 750,000, two
+  Scouts and a Colony Ship) is a Novice game; FUN_004427a4 gives each skill its start, and `js/rules-405.js` SKILLS already has them
+  (the remake's default is Normal: $25,000, 5,000). `tools/skins/w95-compare.js` now starts Novice games (`&skill=novice`).
 - The 405 ruleset has no `rs.fleetDesc`, so reports and every skin write "one Scout"; 4.0.5 writes "one Rudolph (1/1) Scout",
   "32 Storm (8/8) Fighters" (as `fleetDesc301`). The w95 skin words its own fleet rows meanwhile (screen.js `fleetRow`).
 - Dip Into Savings: 4.0.5 for Windows takes a sum once (dialog 358, shot 080: "You currently have $128,885 in savings. You can take out

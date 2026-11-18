@@ -34,7 +34,7 @@ T.w95 = W95;
 // As the captures show them (shots 032, 035, 036, 042, 046, 047, 050, 074, 075, 282): the program rewrites some of menu 2's
 // words when it runs (Build/Design Ships..., Organize Ships..., Zoom Out Ctrl+-), and the captures win. Items the remake
 // hasn't got are left out; the remake's own commands not placed here go at the end of Help (layoutMenus).
-const clickEndTurn = () => { const b = document.querySelector('#msg .clock'); if (b) b.click(); };
+const clickEndTurn = () => { const b = document.querySelector('#msg .clock') || document.querySelector('#w95clk .clock'); if (b) b.click(); };
 const dim = () => true, noGame = () => !(window.HOAPI && HOAPI.G);
 const battleHere = () => { const a = window.HOAPI; return !!(a && a.G && a.UI.sel != null && a.lastBattles(a.UI.sel).length); };
 // Hide Information (shot 050, Alt+I): the information column goes and the map takes the window
@@ -1524,7 +1524,7 @@ T.dragRoute = (cx, o) => {
 const CLK = { t: 0, key: '', timer: null };
 const clockKey = () => { const a = A(); return a && a.G ? 'ho5.w95.clock.' + (a.G.gameId || 'g') + '.' + a.ME : ''; };
 function clockPaint() {
-  const btn = document.querySelector('#msg .clock'); if (!btn || !W95ON()) return;
+  const btn = document.querySelector('#msg .clock') || document.querySelector('#w95clk .clock'); if (!btn || !W95ON()) return;
   const yr = btn.querySelector('.clockyear'); const a = A(); if (!yr || (a.G && a.G.opts && a.G.opts.timeLimit > 0)) return;
   const k = clockKey(); if (k !== CLK.key) { CLK.key = k; try { CLK.t = +localStorage.getItem(k) || 0; } catch (e) { CLK.t = 0; } }
   const m = Math.floor(CLK.t / 60); yr.textContent = Math.floor(m / 60) + ':' + String(m % 60).padStart(2, '0'); yr.classList.add('w95time');
@@ -1539,7 +1539,24 @@ function clockTick() {
 }
 if (!CLK.timer) CLK.timer = setInterval(clockTick, 1000);
 const prevAfterMsg2 = T.afterMsg;
-T.afterMsg = (box, info) => { if (prevAfterMsg2) prevAfterMsg2(box, info); clockPaint(); };
+// 4.0.5 shows the clock and the report bubble together (shots 008, 010): while a report is up the remake's message box holds only the
+// bubble, so the skin puts a clock of its own at the clock's place (#w95clk, the same pictures and End Turn).
+function extraClock(box) {
+  const wrap = document.getElementById('mapwrap'); let host = document.getElementById('w95clk');
+  const want = W95ON() && box && box.querySelector('.card:not(.end):not(.waiting)') && !box.querySelector('.clock');
+  if (!want) { if (host) host.remove(); return; }
+  if (host && host.isConnected) return;
+  const a = A(), up = a.IMG['w95:b367'], down = a.IMG['w95:b368']; if (!wrap || !up || !up.src) return;
+  host = document.createElement('div'); host.id = 'w95clk';
+  const btn = document.createElement('button'); btn.className = 'clock pic'; btn.setAttribute('aria-label', 'End turn');
+  const im = document.createElement('img'); im.src = up.src; im.alt = ''; btn.append(im);
+  if (down && down.src) { btn.addEventListener('pointerdown', () => { im.src = down.src; }); ['pointerup', 'pointerleave', 'pointercancel'].forEach(t => btn.addEventListener(t, () => { im.src = up.src; })); }
+  const Y = T.endTurnYear, Hh = up.height || 61, yr = document.createElement('span'); yr.className = 'clockyear'; yr.setAttribute('aria-hidden', 'true');
+  yr.style.cssText = `left:${Y[0] / Y[4] * 100}%;top:${Y[1] / Hh * 100}%;width:${Y[2] / Y[4] * 100}%;height:${Y[3] / Hh * 100}%`; btn.append(yr);
+  btn.addEventListener('click', () => { try { a.doEndTurn(); } catch (e) {} });
+  host.append(btn); wrap.append(host);
+}
+T.afterMsg = (box, info) => { if (prevAfterMsg2) prevAfterMsg2(box, info); extraClock(box); clockPaint(); };
 
 
 // ---------- the selection ring and the pact halos (FUN_00493baa) ----------
