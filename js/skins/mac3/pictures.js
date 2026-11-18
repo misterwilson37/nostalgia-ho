@@ -140,9 +140,12 @@ window.HOTHEME_OVER = {
     if (n) return Object.assign({}, look, { icon: P + 'i' + n });
     return look;
   },
-  // the title screen: 3.0.1's credits picture
+  // the title screen: 1.2's credits picture; 3.0.1's start-up window (DLOG 1201, colour 1200: the same as 2.0.1's, dialogs-301.tsv):
+  // the splash (PICT 1003, colour 1002, which the colour skin has as p1003: "Version 3.0" / "3.0" and the cowboy on the space shark,
+  // Jake's captures 003 and 009) over Open Game, New Game and Quit; the licensee's plate under it (PICT 4010) is drawn by the
+  // program and isn't in the resources. 3.0.1's About box has the credits picture (p1001)
   title(frame, IMG, Sound) {
-    const t = IMG[P + 'p1001'];
+    const t = IMG[P + (window.HOMAC301 ? 'p1003' : 'p1001')];
     if (!t || !t.width) return false;
     frame.width = t.width; frame.height = t.height;
     frame.getContext('2d').drawImage(t, 0, 0);
@@ -159,6 +162,14 @@ window.HOTHEME_OVER = {
     const c = doc.querySelector('#titlescreen .credit');
     if (c) c.textContent = 'With the art and sounds of Spaceward Ho! 3.0.1 for the Macintosh (Delta Tao, 1993): written by Peter Commons, art by Howard Vives and Bob Van de walle, sounds by Mark Madeley.';
     const l = doc.querySelector('#menubar .logo'); if (l) l.textContent = 'Ho! 3.0.1';
+    if (!window.HOMAC301) return;
+    // the start-up window's buttons (DITL 1200 / 1201): Open Game, New Game, inside the window under the splash (as the 2.0.1 skin's)
+    const n = doc.querySelector('#tnew'), o = doc.querySelector('#tcont');
+    if (n) n.textContent = 'New Game';
+    if (o && n) { o.textContent = 'Open Game'; n.before(o); }
+    const im = doc.querySelector('#timport'); if (im) im.textContent = 'Import a Game…';
+    const b = doc.querySelector('#titlescreen .tbtns'), w = doc.querySelector('#titlescreen .tsplash .wbody');
+    if (b && w) w.append(b);
   },
 };
 if (v12) { delete window.HOTHEME_OVER.starLook; delete window.HOTHEME_OVER.messageLook; if (window.HOMAC12) Object.assign(window.HOTHEME_OVER, window.HOMAC12); } // 1.2 has only the DOS game's icons (and stand-ins: js/skins/dos)

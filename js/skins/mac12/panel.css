@@ -57,3 +57,91 @@ html.macscale #panel, html.macscale #menubar, html.macscale #msg, html.macscale 
 html.macscale .scrim > .win, html.macscale .tcard, html.macscale .starmenu, html.macscale .toast, html.macscale .tip { zoom: var(--mac); }
 /* (a zoomed window still fits the page: its limits divided by the zoom, which multiplies them back) */
 html.macscale .scrim > .win { max-width: calc((100vw - 24px) / var(--mac)); max-height: calc((100vh - 34px) / var(--mac)); }
+/* 3.0.1's Window > Hide Information (ShowHideMapInfo @152b44): the info panes are taken off; Tech Spending and the reports stay */
+html.mac301noinfo #panel .box.planet301, html.mac301noinfo #panel .box.fleets301, html.mac301noinfo #panel .box.info301, html.mac301noinfo #panel .box.low301 { display: none; }
+/* 3.0.1's start-up window (DLOG 1200 / 1201, the same as 2.0.1's: js/skins/mac2/style.css): no title bar, the 304 x 200 splash,
+   then Open Game, New Game */
+html.mac301 #tframe { width: min(304px, 86vw); }
+html.mac301 .tsplash { box-shadow: 2px 2px 0 #000; border: 1px solid #000; }
+html.mac301 .tsplash .wtitle { display: none; }
+html.mac301 .tsplash .wbody { padding: 0 0 10px; gap: 10px; }
+html.mac301 .tsplash #tframe { background: #fff; }
+html.mac301 .tsplash .tbtns { margin: 0; gap: 26px; }
+html.mac301 .tsplash .tbtns button { font: 12px Chicago, Charcoal, Geneva, var(--ui) !important; padding: 2px 10px !important; min-width: 75px; }
+html.mac301 .tsplash .tbtns #tnew { outline: 3px solid #000; outline-offset: 1px; }
+html.mac301 .tcard .tskin:not([hidden]) { display: block; margin-top: 12px; }
+
+/* ---- Mac 2.0.1's and 3.0.1's own dialogs (mac12/ui.js: dlog20): items at their DITL rectangles, Chicago-less system look as the other 1.2 dialogs ---- */
+.dl20 { font: 15px/1.2 'DOS Chicago 12', Chicago, Charcoal, Geneva, sans-serif; letter-spacing: .58px; color: #000; background: #fff; } /* (.58px: the program's lines are about 9% wider than this font's, measured on 'Congratulations! You have' in shot104) */ /* (the program's Chicago 12; the DOS skin ships the same face, as a 1500-unit font that is 12 pixels at 15px) */
+.dl20 button { font: 15px/1 'DOS Chicago 12', Chicago, Charcoal, Geneva, sans-serif !important; letter-spacing: .58px; }
+/* buttons as the program draws them (a 58 x 20 round rect, corner about 5) and the default one's ring: 3 pixels, a pixel apart (shot104, lost027) */
+.dl20 .ok20 { border-radius: 5px !important; }
+.dl20 .ok20.def20 { outline: 3px solid #000; outline-offset: 1px; }
+.dl20 .dt20 { display: block; overflow: hidden; }
+.dl20 input[type=range] { margin: 0; }
+.cl20 .c20 { cursor: default; font: 9px Geneva, Verdana, sans-serif; }
+.cl20 .c20.sel { background: #000; color: #fff; }
+.cl20 .c20.sel img { filter: invert(1); }
+.cl20 .c20.off { opacity: .45; }
+.cl20 .n20 { font-size: 9px; letter-spacing: -.2px; }
+.cg20 .dl20 { margin: 0 auto; }
+.cg20more { margin-top: 8px; }
+.win.dl20w { max-width: none; width: max-content; }
+.win.dl20w .wbody { max-width: none; overflow: visible; }
+
+/* An alert's and a dialog's frame on the colour Mac (2.0.1's shot104, lost027, the nested alert of shot002; 3.0.1's 015, 018): a black line, three pixels of bevel (light blue-white, grey,
+   slate on the top and left, the reverse at the bottom and right) and a black line; the items' origin is 3 pixels inside it. No drop shadow. */
+html.col20 .win.dl20w { border: 1px solid #000; box-shadow:
+  inset 1px 1px 0 0 #ccf, inset 2px 2px 0 0 #bbb, inset 3px 3px 0 0 #669, inset 4px 4px 0 0 #000,
+  inset -1px -1px 0 0 #669, inset -2px -2px 0 0 #bbb, inset -3px -3px 0 0 #ccf, inset -4px -4px 0 0 #000; background: #fff; }
+html.col20 .win.dl20w .wbody { padding: 0; }
+html.col20 .win.dl20w .wtitle { display: none; } /* (the program's dialogs have no title bar) */
+html.col20 .win.dl20w .dl20 { margin: 7px; }
+/* the status window's bar (DLOG 7000: status20; 2.0.1's shot031, lost003-007, 3.0.1's 017-019): a 200 x 16 black-lined box, filled with a one-pixel black and white checker */
+.bar20 { box-sizing: border-box; width: 200px; height: 16px; border: 1px solid #000; background: #fff; box-shadow: 1px 1px 0 #000; }
+.bar20 .fill20 { height: 100%; width: 0; background: repeating-conic-gradient(#000 0 25%, #fff 0 50%) 0 0 / 2px 2px; image-rendering: pixelated; }
+/* 3.0.1: the classic page's windows laid out at a DITL's rectangles (origDialog: Compare Players, Show Skills, the explored stars ...) in the
+   program's own dress, as its dialogs (dl20): no title bar, the colour Mac's frame, Chicago, the 58 x 20 round buttons and the default's ring
+   (Jake's captures 067-075) */
+html.mac301 .win:has(.origdlg) .wtitle { display: none; }
+html.mac301 .win:has(.origdlg) .wbody { padding: 0; }
+html.mac301.col20 .win:has(.origdlg) { border: 1px solid #000; border-radius: 0; box-shadow:
+  inset 1px 1px 0 0 #ccf, inset 2px 2px 0 0 #bbb, inset 3px 3px 0 0 #669, inset 4px 4px 0 0 #000,
+  inset -1px -1px 0 0 #669, inset -2px -2px 0 0 #bbb, inset -3px -3px 0 0 #ccf, inset -4px -4px 0 0 #000; background: #fff; }
+html.mac301.col20 .win:has(.origdlg) .origdlg { margin: 7px; }
+html.mac301 .origdlg { font: 15px/1.2 'DOS Chicago 12', Chicago, Charcoal, Geneva, sans-serif; letter-spacing: .58px; color: #000; background: #fff; }
+html.mac301 .origdlg button, html.mac301 .origdlg select { font: 15px/1 'DOS Chicago 12', Chicago, Charcoal, Geneva, sans-serif !important; letter-spacing: .58px; }
+html.mac301 .origdlg button { border-radius: 5px !important; border-width: 1px !important; min-width: 0; padding: 0; letter-spacing: 0 !important; word-spacing: -1px; white-space: nowrap; }
+html.mac301 .origdlg button.default { outline: 3px solid #000; outline-offset: 1px; }
+/* 3.0.1's lists (List of All Fleets: a List Manager list in Chicago 12, the picked row inverted) */
+.lst301 { overflow-y: auto; overflow-x: hidden; background: #fff; }
+.lst301 .li301 { height: 16px; line-height: 16px; padding: 0 3px; white-space: nowrap; overflow: hidden; cursor: default; }
+.lst301 .li301.sel { background: #000; color: #fff; }
+/* 3.0.1's Organize Fleets piles (DrawOneOrgFleet): the count at the pile's left, condensed past 99; the pile being dragged inverted */
+.org301 { background: #fff; overflow: hidden; }
+.org301 .pile301 { cursor: default; }
+.org301 .pile301.sel { filter: invert(1); background: #fff; }
+.org301 .n301.cond { letter-spacing: -1px; }
+/* 3.0.1's dialogs: this Chicago with no added spacing (as the 2.0.1 skins' end up), a word a pixel closer, and buttons on one line, so the
+   DITLs' words fit their rectangles as the program's do (Organize Fleets' heading is 129 wide, Jake's capture 069) */
+html.mac301 .dl20, html.mac301 .dl20 button { letter-spacing: 0 !important; word-spacing: -1px; }
+html.mac301 .dl20 .ok20 { white-space: nowrap; }
+/* 3.0.1's Build / Design Ships: the type list's rows (the picture over its words), the picked one inverted, a marked one in the grey */
+.types301 .tr301 { padding: 2px 0 1px; text-align: center; cursor: default; }
+.types301 .tr301 .tl301 { font: 10px Geneva, Verdana, sans-serif; white-space: nowrap; overflow: hidden; }
+.types301 .tr301.sel { background: #000; color: #fff; }
+.types301 .tr301.scrap .tl301 { color: #888; }
+.dl20 input[type=text] { box-sizing: border-box; font: inherit; padding: 0 2px; border: 1px solid #000; }
+
+/* the battle window (DLOG 7010, 445 x 310, drawn at twice the size): the canvas and its one button where DITL 7010 puts it */
+.win.bw12m { width: auto; max-width: calc(100vw - 16px); }
+.bw12w { position: relative; width: 890px; max-width: 100%; aspect-ratio: 445 / 310; }
+.bw12w canvas.bw12 { display: block; width: 100%; height: 100%; image-rendering: pixelated; }
+.bw12w .bw12b { position: absolute; left: calc(193 / 445 * 100%); top: calc(273 / 310 * 100%); width: calc(58 / 445 * 100%); height: calc(20 / 310 * 100%); min-width: 0; padding: 0; }
+/* 3.0.1's battle window has no title bar (Jake's captures 020-030) */
+html.mac301 .win.bw12m .wtitle { display: none; }
+html.mac301 .win.bw12m .wbody { padding: 0; }
+/* 3.0.1's battle window button (DITL 7010): a Mac push button in Chicago, the default ring once it says OK */
+html.mac301 .win .bw12w button.bw12b { container-type: normal; font: 30px/1 'DOS Chicago 12', Chicago, Charcoal, Geneva, sans-serif !important; background: #fff !important; color: #000 !important; border: 1px solid #000 !important; border-radius: 5px !important; box-shadow: none !important; }
+html.mac301 .win .bw12w button.bw12b.done { outline: 6px solid #fff; outline-offset: 2px; } /* (the default ring, white on the black window, at twice the size) */
+@media (max-width: 900px) { html.mac301 .win .bw12w button.bw12b { font-size: 3.4vw !important; } }

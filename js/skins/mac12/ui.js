@@ -27,14 +27,15 @@ const A = () => window.HOAPI;
 // menu bar, the windows, the report bubble and the map's scroll bars are zoomed by S (html.macscale, --mac: js/skins/mac12/panel.css). A
 // window that big shows as much of the galaxy as the Mac's screen did, in the same proportion.
 // The remake's panel holds more than the program's (the Report Window under Tech Spending, where 3.0.1 put it under the map), so the screen
-// is fitted to the panel's height too: S is the largest half step at which the Mac's 640 pixels fit across and the menu bar and the whole
+// is fitted to the panel's height too: S is the largest quarter step at which the Mac's 640 pixels fit across and the menu bar and the whole
 // panel fit down (its height in the Mac's pixels, measured after each drawing; the zoom doesn't change it).
 const MACS = { s: 1, need: 480 };
-function macScale() { const u0 = Math.min(window.innerWidth / 640, window.innerHeight / Math.max(480, MACS.need)); return u0 >= 1.5 ? Math.floor(u0 * 2) / 2 : 1; }
+// (quarter steps since 18 Nov: 3.0.1's panel is the tallest, and in half steps a laptop's screen left it at x1.5 with a band to spare, Jake's report)
+function macScale() { const u0 = Math.min(window.innerWidth / 640, window.innerHeight / Math.max(480, MACS.need)); return u0 >= 1.25 ? Math.floor(u0 * 4) / 4 : 1; }
 function measureMac() {
   const p = document.getElementById('panel'), m = document.getElementById('menubar'); if (!p || !p.firstChild || MACS.s <= 1) return; // (only in the Mac's layout: the page's own panel is wider, so taller)
   const z = MACS.s, pr = p.getBoundingClientRect(), last = p.lastElementChild.getBoundingClientRect();
-  const need = Math.ceil((last.bottom - pr.top + p.scrollTop * z) / z + 8 + (m ? m.getBoundingClientRect().height / z : 20)); // (the content's foot, its padding, the menu bar)
+  const need = Math.ceil((last.bottom - pr.top + p.scrollTop * z) / z + 16 + (m ? m.getBoundingClientRect().height / z : 20)); // (the content's foot, the panel's padding above and below, the menu bar)
   if (need !== MACS.need) { MACS.need = need; setMacScale(); }
 }
 function setMacScale() {
@@ -113,7 +114,95 @@ function fleetOrders12() {
       { shown: has('stances'), ghost: () => !f(), checked: () => !!f() && (f().stance || 'normal') === v })),
     it('Arrive late', () => { const x = f(); if (x) { x.delayed = !x.delayed; A().save(); } }, { shown: has('lateArrival'), ghost: () => !f(), checked: () => !!f() && !!f().delayed })];
 }
-function menuLayout() { const M = menuLayout12(); return V2 ? menuLayout20(M) : M; }
+function menuLayout() { if (V3) return menuLayout301(); const M = menuLayout12(); return V2 ? menuLayout20(M) : M; }
+// Mac 3.0.1's menus: MENU 128-134 in its words (HOLANG.mac301En.MENU; 3.0.1F's French through the interface), the words that change
+// from STR# 1010, and what is dimmed and checked as SetMenuItems @f4492 sets them:
+// - no game: Ships, Galaxy and Window dimmed whole; File's Save, Revert, Close, End Turn, End Turn & Switch Players, Page Setup, Print
+//   and Options' Auto Play, Sound, I'll Update Turns, Preferences dimmed (the Halls and Force Turn Update are not touched);
+// - Save and Revert only with unsaved changes (the remake saves every change: always dimmed); Force Turn Update for the player whose
+//   number is the header's +3 byte, with two humans or more (+2); I'll Update Turns dimmed with fewer than two humans;
+// - the selected star yours (GetPlayerStarNum): Ships 1 "Build/Design Ships…" (1010.3) and Galaxy's Abandon Planet ("Don't Abandon
+//   Planet" / "Abandon Planet", 1010.15/.16, by the colony's flag), else "Can't Build Ships Here…" (1010.4) and both dimmed;
+// - the star's selected fleet: Organize Ships… (1010.7) and Scrap Current Fleet / Don't (1010.9/.10), else "No ships to organize…" (.8)
+//   and both dimmed; the star's last battle in 2000 or later: "Review Battle at %s…" (.5), else "No Battles here…" (.6), dimmed;
+// - the year 2000 or less: Alliances, Give Money/Metal, Surrender To, Send Message dimmed; a player out of the game (mode 4 and up):
+//   Alliances, Surrender, Auto Play and Armageddon dimmed; Armageddon checked while the player's switch is on;
+// - Fix Spending dimmed while reports are unread; Zoom In dimmed at the largest zoom (17), Zoom Out at the smallest (6);
+//   Window 6 "Hide Information" / "Show Information" (1010.11/.12: ShowHideMapInfo, the info panes' width 226 or 0).
+// Print and Page Setup are there and dimmed (a browser has no Mac printing); Clean Up Windows does nothing here (the remake's windows
+// are always where ResetWindows puts them). The Apple menu is the skin's "Ho! 3.0.1" menu.
+let INFO301 = true;
+function menuLayout301() {
+  const P = () => A().Prefs, g = () => G(), me = () => A().me();
+  const cmd = (re) => () => { const k = Object.keys(ITEMS).find(n => re.test(n)); if (k) ITEMS[k][1](); };
+  const out = () => { const p = me(); return !p.alive || !!p.surrendered; };
+  const early = () => g().year <= 2000;
+  const humans = () => g().players.filter(p => p.human).length;
+  const gone = () => true;
+  const S = (i) => (STR301(1010)[i - 1] || '');
+  const fleetHere = () => { const s = selStar(), f = selFleet(); return s && f && f.star === s.id ? f : null; };
+  const abandonMarked = () => { const t = H().rules(g()).evacuateToggle, s = selStar(); return !!(t && s && t.marked(g(), s.id)); };
+  const hideInfo = () => { INFO301 = !INFO301; document.documentElement.classList.toggle('mac301noinfo', !INFO301); A().resize(); A().renderPanel(); A().draw(); };
+  return {
+    File: [
+      it('New…', () => A().newGameDialog(), { key: 'N' }),
+      it('Open…', () => A().openSavedGames(), { key: 'O' }),
+      it('Save', () => {}, { ghost: gone, key: 'S' }),
+      it('Revert To Saved…', () => {}, { ghost: gone }),
+      it('Close…', cmd(/^quit to title/i), { ghost: noGame, key: 'W' }),
+      '-',
+      it('End Turn', () => { const b = document.querySelector('#msg .clock'); if (b) b.click(); else if (G()) A().doEndTurn(); }, { ghost: noGame, key: 'T' }),
+      it('End Turn & Switch Players', () => { if (A().hotSeat()) A().switchPlayers(); else { const b = document.querySelector('#msg .clock'); if (b) b.click(); else A().doEndTurn(); } }, { ghost: noGame, key: '†' }),
+      it('Force Turn Update…', cmd(/force end turn/i), { ghost: () => noGame() || humans() < 2 || A().ME !== g().players.findIndex(p => p.human) }),
+      '-',
+      it('Page Setup…', () => {}, { ghost: gone }),
+      it('Print…', () => {}, { ghost: gone, key: 'P' }),
+      '-',
+      it('Quit', cmd(/^quit to title/i), { key: 'Q' })],
+    Edit: [it('Undo', () => {}, { key: 'Z' }), '-', it('Cut', () => {}, { key: 'X' }), it('Copy', () => {}, { key: 'C' }), it('Paste', () => {}, { key: 'V' }), it('Clear', () => {})],
+    Options: [
+      it('Auto Play…', cmd(/^auto play/i), { ghost: () => noGame() || out() }),
+      '-',
+      it('Sound', () => { A().Sound.on = !A().Sound.on; A().savePrefs(); }, { ghost: noGame, checked: () => A().Sound.on }),
+      it('I’ll Update Turns', () => {}, { ghost: () => noGame() || humans() < 2, checked: () => true }),
+      '-',
+      it('Preferences…', () => A().openPrefs(), { ghost: noGame }),
+      it('Hall Of Fame…', () => A().openHall('fame')),
+      it('Hall Of Shame…', () => A().openHall('shame'))],
+    Ships: [
+      it(() => (noGame() || mine() ? S(3) : S(4)), () => { if (mine()) build301(selStar().id); }, { ghost: () => noGame() || !mine(), key: 'B' }),
+      '-',
+      it('List All Fleets…', () => A().openFleetList(), { ghost: noGame, key: 'L' }),
+      it(() => (noGame() || fleetHere() ? S(7) : S(8)), () => { const s = selStar(); if (fleetHere()) organize301(s.id); }, { ghost: () => noGame() || !fleetHere(), key: 'G' }),
+      it(() => (fleetHere() && fleetHere().scrap301 ? S(10) : S(9)), () => { const f = fleetHere(); if (f) A().toggleScrapFleet(f); }, { ghost: () => noGame() || !fleetHere() }),
+      '-',
+      it(() => (lastBattle() ? S(5).replace('%s', selStar().name) : S(6)), () => { const b = lastBattle(); if (b) A().openBattle(b.id); }, { ghost: () => noGame() || !lastBattle(), key: 'R' })],
+    Galaxy: [
+      it('Compare Players…', () => A().openCompare(), { ghost: noGame }),
+      it('Graph History…', () => A().openPlayers(), { ghost: noGame }),
+      it('List All Explored Stars…', () => A().openStarList(), { ghost: noGame }),
+      '-',
+      it('Fix Spending', cmd(/^fix spending/i), { ghost: () => noGame() || A().UI.msgIdx < (A().UI.inbox || []).length, key: 'F' }),
+      it('Dip Into Savings…', () => A().openDip(), { ghost: noGame, key: 'D' }),
+      it(() => (mine() ? (abandonMarked() ? S(15) : S(16)) : 'Abandon Planet…'), () => { if (mine()) A().evacuateClick(selStar().id); }, { ghost: () => noGame() || !mine(), key: 'A' }),
+      '-',
+      it('Alliances…', () => alliances301(), { ghost: () => noGame() || early() || out() }),
+      it('Give Money/Metal…', () => A().openGive(), { ghost: () => noGame() || early() }),
+      it('Surrender To…', () => A().openSurrender(), { ghost: () => noGame() || early() || out() }),
+      it('Send Message…', () => A().openChat(), { ghost: () => noGame() || early(), key: 'M' }),
+      '-',
+      it('Armageddon', () => A().toggleArmageddon(), { ghost: () => noGame() || out(), checked: () => !!G() && !!me().armageddon })],
+    Window: [
+      it('Tech Spending Window', () => { const t = document.querySelector('#panel .tech301'); if (t) t.scrollIntoView({ block: 'nearest' }); }, { ghost: noGame, key: '1', checked: () => true }),
+      it('Report Window', () => { const r = document.querySelector('#panel .rep12box'); if (r) r.scrollIntoView({ block: 'nearest' }); else A().openReports(); }, { ghost: noGame, key: '2', checked: () => true }),
+      '-',
+      it('Zoom In', () => { const m = A().map(); A().zoomAt(m.w / 2, m.h / 2, 1.3); }, { ghost: () => noGame() || atZoom(-1), key: '=' }),
+      it('Zoom Out', () => { const m = A().map(); A().zoomAt(m.w / 2, m.h / 2, 1 / 1.3); }, { ghost: () => noGame() || atZoom(0), key: '-' }),
+      it(() => (INFO301 ? S(11) : S(12)), hideInfo, { ghost: noGame, key: 'I' }),
+      '-',
+      it('Clean Up Windows', () => {}, { ghost: noGame })],
+  };
+}
 // Mac 2.0.1's menus: MENU 129 (File), 131 (Options) and 133 (Galaxy) as that program has them (the rest are 1.2's, in the same words), from the resource fork
 // (audit/mac-2.0.1/tools/menu.py in the private repo). What the remake has no command for is there and dimmed (printing: a browser has no Mac Page Setup or
 // Print Map; the network polling), and a command it has only in a hot-seat game is dimmed otherwise.
@@ -335,7 +424,7 @@ function fleetsStatus() {
 // an alert over what is open (the dialog stays under it), in the program's words; its picture 3020 is the skin's
 // Mac 2.0.1's alerts (ALRT size and DITL: text, picture and button rectangles, from the resource fork; made by audit/mac-2.0.1 of the private repo): an alert is drawn at those rectangles,
 // the words being the paragraphs the page gives (the same lines) in the order of the DITL's text items
-if (window.HOMAC2_COLOUR) document.documentElement.classList.add('col20'); // (the colour Mac's bevelled dialog frame: style.css, html.col20)
+if (window.HOMAC2_COLOUR || (V3 && window.HOMAC3_COLOUR)) document.documentElement.classList.add('col20'); // (the colour Mac's bevelled dialog frame: panel.css, html.col20; 3.0.1's too, Jake's captures 015, 018)
 const ALERTS20 = {"128":[432,160,[["b",[123,312,143,402],"OK"],["t",[13,84,45,406],"Sorry ^0 requires the follow things to be able to run:"],["t",[58,110,74,380],"• ^1 CPU or better"],["t",[74,110,90,380],"• System Software ^2 or later"],["t",[90,110,106,380],"• ^3"]]],"2000":[230,172,[["b",[143,91,163,220],"Return To Finder"],["t",[26,26,128,224],"Sorry, but this is a development version of Spaceward Ho! 2.0 that's past it's prime. To get a newer copy, call Delta Tao Software, Inc. at (408) 730-9336."]]],"2010":[282,200,[["b",[169,156,189,253],"Play in B/W"],["p",[117,26,191,100],3010],["t",[13,13,48,279],"Sorry, but Spaceward Ho! 2.0 requires 32-bit Color Quickdraw to run in color."],["t",[52,13,106,278],"You can obtain Color Quickdraw from any Apple dealer for a nominal charge."]]],"3000":[240,228,[["b",[195,169,215,227],"OK"],["t",[39,26,71,227],"^0"],["t",[117,26,149,226],"File: ^1"],["t",[78,26,110,227],"Error Type: ^2"],["t",[156,26,172,225],"Error Code: ^3"],["t",[13,91,29,166],"File Error"]]],"3001":[237,210,[["b",[182,169,202,227],"OK"],["t",[39,26,71,227],"^0"],["t",[78,26,110,227],"Error Type: ^2"],["t",[117,26,133,225],"Error Code: ^3"],["t",[13,78,30,200],"Memory Error"],["t",[143,26,175,226],"Please quit Spaceward Ho! and start again."]]],"3010":[235,159,[["b",[130,169,150,227],"OK"],["p",[78,13,152,87],3020],["t",[13,13,65,229],"Sorry, but that is not the correct password for “^0”. Please try again."]]],"3020":[240,149,[["b",[117,169,137,227],"OK"],["t",[13,13,48,236],"Sorry, but this galaxy is already full. No more players can join."],["p",[65,13,139,87],3020]]],"3030":[232,180,[["b",[143,156,163,214],"OK"],["p",[91,26,165,100],3010],["t",[13,26,77,223],"Sorry, but Spaceward Ho! 2.0 can't read galaxy files created with versions 1.0 - 1.1.2."]]],"3040":[218,150,[["b",[110,150,130,208],"OK"],["t",[10,10,49,212],"Please name your new ship type."],["p",[60,10,134,84],3020]]],"3050":[218,150,[["b",[110,150,130,208],"OK"],["t",[10,10,49,212],"Please set your new ship type’s tech levels."],["p",[60,10,134,84],3020]]],"3060":[301,206,[["b",[162,207,182,265],"OK"],["t",[13,13,80,290],"Sorry, but the name you just typed in doesn’t match any of those in this game. And since the game has  progressed past the year 2000, it’s too late to join…"],["p",[120,17,194,91],3020],["t",[92,13,112,284],"Maybe you typed your name in wrong?"]]],"3070":[335,210,[["b",[143,223,163,292],"Continue"],["b",[143,117,163,186],"Wait"],["p",[117,13,191,87],3020],["t",[13,13,46,327],"^0, all of the ^1 currently registered players have finished their first turn. "],["t",[52,13,92,328],"Should we continue with the game, or wait for more human players to join?"]]],"3080":[240,200,[["b",[156,169,176,227],"OK"],["p",[104,26,178,100],3020],["t",[13,26,98,232],"All currently registered players have ended their first turn. We’re waiting for the game administrator to give his okay to continue…"]]],"3090":[236,132,[["t",[10,14,74,223],"^0’s Star System “^1” has had a revolution, and is now under your control."],["b",[100,157,120,215],"OK"]]],"3100":[236,132,[["t",[10,14,74,223],"^0 has offerred ^1 units of metal for ^2 dollars."],["b",[100,157,120,215],"OK"]]],"3110":[236,132,[["t",[10,14,74,223],"You have found an additional ^0 units of metal on ^0."],["b",[100,157,120,215],"OK"]]],"3120":[236,132,[["t",[10,14,74,223],"Your fleet of ^0 ^1 unexpectedly disappeared in hyperspace on their way to ^2."],["b",[100,157,120,215],"OK"]]],"3130":[236,132,[["t",[10,14,74,223],"^0 has gone nova.  Everything there has been destroyed."],["b",[100,157,120,215],"OK"]]],"3140":[236,132,[["t",[10,14,74,223],"Your Terraforming Technology has reached level ^0."],["b",[100,157,120,215],"OK"]]],"3150":[236,132,[["t",[10,14,74,223],"^0 has turned all his planets over to your control.  "],["b",[100,157,120,215],"OK"]]],"3160":[236,132,[["t",[10,14,74,223],"You have destroyed the Star System ^0, previously owned by ^1."],["b",[100,157,120,215],"OK"]]],"3170":[236,132,[["t",[10,14,74,223],"You have stolen ^0 Technology from ^1.  Your Tech level is now ^2."],["b",[100,157,120,215],"OK"]]],"3180":[233,177,[["b",[143,143,163,210],"OK"],["t",[13,13,84,224],"Sorry, your turn can’t be saved. Although you are in the year ^0, the game has already been updated to ^1…"],["p",[91,13,165,87],3020]]],"3190":[237,161,[["b",[104,156,124,214],"OK"],["p",[65,26,139,100],3020],["t",[13,26,66,224],"The game has been updated to the year ^0. Click “OK” to go to the next turn…"]]],"3200":[234,185,[["b",[143,156,163,214],"OK"],["t",[13,13,93,232],"Sorry, but the file was busy and your new auto play setting was not changed. Please try again shortly."],["p",[104,13,178,87],3020]]],"3210":[335,210,[["b",[143,222,163,299],"Force End"],["b",[143,117,163,194],"Wait"],["p",[117,13,191,87],3020],["t",[13,13,46,327],"^0, ^1 of the ^2 players haven’t finished their turn yet. "],["t",[52,13,92,328],"Do you really want to force an end of turn, or do you want to wait for them to finish?"]]],"3220":[238,201,[["b",[154,156,174,214],"OK"],["p",[102,26,176,100],3020],["t",[13,26,84,230],"Sorry, but the file way busy and the turn could not be marked “done”. Please try again in a moment."]]],"3230":[286,190,[["b",[145,188,165,257],"Continue"],["b",[145,110,165,168],"Wait"],["p",[99,13,173,87],3020],["t",[13,13,52,268],"^0, do you want to play alone, or wait for more humans to join?"],["t",[64,13,84,264],"(Computer Opponents: ^1)"]]],"3240":[230,182,[["b",[125,156,145,214],"OK"],["t",[13,13,80,220],"Auto play has been turned off, but your current turn has already been marked “done.” Update may occur at any time."],["p",[86,13,160,87],3020]]],"3250":[216,137,[["b",[78,143,98,201],"OK"],["t",[13,26,45,211],"Please unlock this disk and try again."],["p",[52,26,126,100],3020]]],"3260":[228,159,[["b",[117,156,137,214],"OK"],["t",[13,13,65,222],"Please enter both your name and a company name or address."],["p",[65,13,139,87],3020]]],"3270":[227,184,[["b",[156,156,176,214],"OK"],["t",[13,13,102,223],"The game has been updated to the next turn. You made some changes since ending your turn that you didn’t save. These changes have now been lost."],["p",[104,13,178,87],3020]]],"3280":[329,258,[["b",[208,182,228,240],"OK"],["p",[182,26,256,100],3020],["t",[13,26,49,320],"Sorry, but Spaceward Ho! allows you to have only 20 ship types at one time. "],["t",[52,26,119,320],"If you would like to create another ship type, scrap an old type by checking the “Scrap” box for it in the “List Ship Types…” Dialog."],["t",[130,26,178,325],"The ship will be scrapped during the turn update and you can create a new type next turn…"]]],"3290":[231,174,[["b",[143,156,163,214],"OK"],["t",[13,13,81,227],"Sorry, but that fleet is currently in hyperspace and can’t be contacted until it arrives at its next location."],["p",[91,13,165,87],3020]]],"3300":[240,200,[["b",[156,156,176,214],"OK"],["t",[13,13,46,223],"There are no colonists aboard that colony ship."],["p",[117,26,191,100],3020],["t",[56,14,106,223],"To refill it, you must either wait one turn or abandon the colony."]]],"3310":[259,249,[["b",[192,156,212,214],"OK"],["t",[14,13,68,252],"Sorry, but the battle information on that battle is no longer available."],["p",[140,13,214,87],3020],["t",[70,13,134,251],"Battle reports that are more that 500 years old are automatically deleted to keep the game file size small."]]],"3320":[235,192,[["b",[156,156,176,214],"OK"],["t",[13,13,98,224],"Sorry, but the game file was busy, and the battle information could not be read for this battle. Please try again in a moment."],["p",[104,13,178,87],3020]]],"3330":[240,200,[["b",[171,156,191,214],"OK"],["p",[119,13,193,87],3020],["t",[13,13,61,234],"Sorry, but that fleet doesn’t have enough fuel to reach the selected destination. "],["t",[67,13,117,234],"You can tell this because there are no arrows on either end of the dragged line."]]],"3340":[240,200,[["b",[156,169,176,227],"OK"],["p",[104,26,178,100],3020],["t",[13,26,82,228],"Sorry, there’s already a star named  “^0.” Please pick another name."]]],"5000":[325,140,[["b",[104,247,124,305],"Save"],["b",[104,26,124,98],"Don't Save"],["b",[104,156,124,214],"Cancel"],["t",[13,78,86,306],"^0, do you want to save the changes you've made before closing the current game?"]]],"5010":[240,200,[["b",[156,156,176,214],"OK"],["p",[117,13,191,87],3020],["t",[13,13,107,230],"^0^1^2^3"]]],"5020":[325,140,[["b",[104,247,124,305],"Save"],["b",[104,78,124,150],"Don't Save"],["b",[200,200,220,258],"Cancel"],["t",[13,78,86,306],"^0, do you want to save the changes you've made before updating the turn?"]]],"5030":[305,234,[["b",[195,234,215,292],"OK"],["t",[13,13,99,297],"Oops! Something kinda funny has happened in TheHo 2.0. Please write down the following problem with as much information as you can on what you think led up to it. Then let us know. Thanks."],["t",[104,13,185,295],"^0^1^2^3"]]],"5040":[227,249,[["b",[216,91,236,149],"OK"],["t",[13,13,49,215],"Congratulations! You have conquered the galaxy!"],["p",[52,39,203,188],3030]]],"5041":[227,249,[["b",[216,91,236,149],"OK"],["t",[13,13,49,215],"Congratulations! You have conquered the galaxy!"],["p",[52,39,203,188],3530]]],"5050":[235,244,[["b",[212,78,232,149],"Oh, well…"],["p",[52,39,203,188],3040],["t",[13,13,47,222],"Unfortunately, you have been eliminated from the game…"]]],"5051":[235,244,[["b",[212,78,232,149],"Oh, well…"],["p",[52,39,204,188],3540],["t",[13,13,47,222],"Unfortunately, you have been eliminated from the game…"]]],"5060":[282,177,[["b",[143,193,163,272],"Let ’em Die"],["b",[143,104,163,181],"Cancel"],["p",[91,13,165,87],3020],["t",[13,13,83,263],"Warning! You are not spending enough money to support some of your colonies. Do you really want to abandon them?"]]],"5070":[232,153,[["b",[104,156,124,214],"OK"],["t",[13,13,64,224],"Sorry, but the file was busy. Please try again in a few seconds."],["p",[65,13,139,87],3020]]],"5080":[262,153,[["b",[104,182,124,240],"Revert"],["b",[104,117,124,175],"Cancel"],["p",[65,13,139,87],3020],["t",[13,13,62,254],"Do you really want to revert to the saved version of the game? All changes will be lost…"]]],"5090":[228,191,[["b",[143,143,163,201],"OK"],["p",[104,13,178,87],3020],["t",[13,13,72,219],"Sorry, but this game was created with a newer version of Spaceward Ho! "]]]};
 // (a box of ALERTS20 by its id, with its own words: the won and lost boxes, ALRT 5040 / 5041 and 5050 / 5051, in the captures `shot103`-`105`, `lost027`)
 function alertById20(id, paras, ok, done) {
@@ -902,7 +991,10 @@ function bars(panel, B) {
 function aboutBox() {
   const a = A(), el = a.el, im = a.IMG['dos:p1001'], pl = a.IMG['dos:p4010'];
   const body = el('div', { class: 'about12', onclick: () => a.closeModal() }, im ? el('img', { src: im.src, alt: 'Spaceward Ho!' }) : null, pl ? el('img', { src: pl.src, alt: '' }) : null);
-  a.modal('', body, { cls: 'mac12 about', label: V2 ? 'About Spaceward Ho! 2.0…' : 'About Spaceward Ho! 1.2…' });
+  a.modal('', body, { cls: 'mac12 about', label: V3 ? 'About Spaceward Ho! 3.0…' : V2 ? 'About Spaceward Ho! 2.0…' : 'About Spaceward Ho! 1.2…' });
+  // (3.0.1's DoAppleMenu @f3b48: the colour box, DLOG 1100, plays sound 10000, "Move 'em out!"; the black-and-white one, 1101, none. Its
+  // licensee's plate, PICT 4010, is drawn by the program (GetLicensePict) and isn't in the resources: not drawn here)
+  if (V3 && window.HOMAC3_COLOUR) a.Sound.play(10000);
 }
 
 // DLOG 6060 "Organize “<type>” Fleets…" (OrganizeFleets @113896): the fleets of the selected fleet's design at the star as piles of ship
@@ -1160,6 +1252,474 @@ function createGalaxy20(f, ctx) {
   if (rs) rs.addEventListener('change', dress); dress();
 }
 
+// 3.0.1's Create New Galaxy (doCreateGalaxyDlg @f0550; DLOG 6080, 456 x 263, DITL 6080 read in the private repo's resource fork): the
+// four lists at their user items (Style 3020-3025 with Cluster, Density 3050-3051, Intelligence 3030-3033 with Diabolical, Size 3040-3044;
+// LDEF 1001's 45 x 45 cells, as 2.0.1's), "Number of Computer Players:" with its number (200, 10) and slider (CNTL 6080 at 200, 36),
+// "Years Per Turn…" (188, 220) and the years (190, 348), "Alliances" (230, 10), Cancel (228, 301) and Create (228, 379), the default ring
+// (user item 3). Jake's captures 005, 006, 165. The remake's own choices (version, skin, language, the rest) under "More…", as 2.0.1's.
+function createGalaxy301(f) {
+  const a = A(), el = a.el, win = f.closest('.win'); if (!win) return;
+  const field = (n) => f.querySelector(`[name="${n}"]`), fire = (n) => n.dispatchEvent(new Event('change', { bubbles: true }));
+  const LISTS = [
+    { sel: 'm_shape', rect: [40, 170, 87, 442], icons: [3020, 3021, 3022, 3023, 3024, 3025], names: ['Circle', 'Random', 'Ring', 'Spiral', 'Grid', 'Cluster'], label: ['Galaxy Style:', [20, 170, 38, 262]] },
+    { sel: 'm_density', rect: [40, 10, 87, 102], icons: [3050, 3051], names: ['Dense', 'Sparse'], label: ['Galaxy Density:', [20, 10, 38, 119]] },
+    { sel: 'm_iq', rect: [120, 10, 167, 192], icons: [3030, 3031, 3032, 3033], names: ['Dumb', 'Average', 'Smart', 'Diabolical'], label: ['Computer Intelligence:', [100, 10, 118, 190]] },
+    { sel: 'm_size', rect: [120, 220, 167, 447], icons: [3040, 3041, 3042, 3043, 3044], names: ['Small', 'Medium', 'Large', 'ExtraLarge', 'Humongous'], label: ['Galaxy Size:', [100, 220, 117, 342]] }];
+  const comp = field('computers'), years = field('m_years'), all = field('alliances'), parts = [];
+  const frame = (r) => el('div', { style: at20([r[0] - 1, r[1] - 1, r[2] + 1, r[3] + 1]) + ';border:1px solid #000;box-sizing:border-box' });
+  for (const L of LISTS) {
+    const sel = field(L.sel); if (!sel) continue;
+    const vals = [...sel.options].map(o => o.value);
+    const w = cells20(L.icons.length, 1, L.icons.map((n, i) => ({ icon: 'dos:i' + n, name: L.names[i], id: vals[i] })), { sel: Math.max(0, vals.indexOf(sel.value)), pick: (c) => { sel.value = c.id; fire(sel); } });
+    w.el.setAttribute('style', w.el.getAttribute('style') + ';' + at20([L.rect[0] + 1, L.rect[1] + 1, L.rect[2] - 1, L.rect[3] - 1]));
+    parts.push(frame(L.rect), txt20(L.label[0], L.label[1]), w.el);
+  }
+  const nums = comp ? [...comp.options].map(o => +o.value).filter(n => !isNaN(n)) : [0, 9];
+  const num = raw('span', comp ? comp.value : '', { class: 'dt20', style: at20([200, 10, 216, 35]) });
+  const sl = el('input', { type: 'range', min: Math.min(...nums), max: Math.max(...nums), value: comp && /^\d+$/.test(comp.value) ? comp.value : 4, style: at20([200, 36, 216, 166]), 'aria-label': 'Number of Computer Players',
+    oninput: (e) => { if (comp) { comp.value = e.target.value; fire(comp); } num.textContent = e.target.value; } });
+  const yrs = raw('span', years ? years.value : '10', { class: 'dt20', style: at20([190, 348, 206, 380]) });
+  const cb = el('input', { type: 'checkbox', checked: !all || all.checked ? 'checked' : false, onchange: (e) => { if (all) { all.checked = e.target.checked; fire(all); } } });
+  let opened = false;
+  const moreBtn = el('button', { type: 'button', class: 'ok20', style: 'position:absolute;left:10px;top:268px;min-width:0;padding:0 6px;height:20px', onclick: () => { opened = !opened; dress(); } }, raw('span', 'More… (the remake’s own)'));
+  const box = dlog20(456, 263, txt20('Create New Galaxy', [0, 143, 19, 284]), ...parts, txt20('Number of Computer Players:', [180, 10, 198, 211]), num, sl,
+    ok20('Years Per Turn…', [188, 220, 208, 343], () => yearsPerTurn301(years, (v) => { yrs.textContent = v; })), yrs,
+    el('label', { style: at20([230, 10, 248, 116]) + ';display:flex;align-items:center;gap:4px' }, cb, raw('span', 'Alliances')),
+    el('button', { type: 'button', class: 'ok20 def20', style: at20([228, 379, 248, 437]) + ';min-width:0;padding:0', onclick: () => f.requestSubmit() }, raw('span', 'Create')),
+    el('button', { type: 'button', class: 'ok20', style: at20([228, 301, 248, 359]) + ';min-width:0;padding:0', onclick: () => a.closeModal() }, raw('span', 'Cancel')), moreBtn);
+  box.style.marginBottom = '30px';
+  const holder = el('div', { class: 'cg20' }, box);
+  const rest = [...f.childNodes]; f.prepend(holder);
+  const keep = (n) => n.classList && (n.classList.contains('picks') || n.classList.contains('langnote') || n.classList.contains('btns'));
+  const rs = field('rules'), dress = () => { const on = !rs || /^301/.test(rs.value); box.style.display = on ? '' : 'none'; moreBtn.style.display = on ? '' : 'none'; for (const n of rest) if (n.style && !keep(n)) n.style.display = on && !opened ? 'none' : ''; };
+  if (rs) rs.addEventListener('change', dress); dress();
+}
+// DLOG 4120 (doYearsPerTurnDialog @f0c28, 293 x 228; DITL 4120): "How many years should go by every time the turn is ended?" (12, 12), five
+// radio buttons 10 (Normal), 20, 30, 50, 100 Years (56, 80, 104, 128, 152 at 12), Cancel (192, 144) and OK (192, 220, default ring);
+// user item 9 (80, 188, 154, 262) is drawn by a routine of the program not read yet: left empty. Not in Jake's games.
+function yearsPerTurn301(sel, done) {
+  const a = A(), el = a.el, V = ['10', '20', '30', '50', '100'], W = ['10 Years (Normal)', '20 Years', '30 Years', '50 Years', '100 Years'];
+  let pick = Math.max(0, V.indexOf(sel ? sel.value : '10'));
+  const radios = V.map((v, i) => el('label', { style: at20([56 + 24 * i, 12, 74 + 24 * i, i ? 118 : 160]) + ';display:flex;align-items:center;gap:4px' },
+    el('input', { type: 'radio', name: 'ypt301', checked: i === pick ? 'checked' : false, onchange: () => { pick = i; } }), raw('span', W[i])));
+  const dl = dlog20(293, 228, txt20('How many years should go by every time the turn is ended?', [12, 12, 44, 283]), ...radios,
+    ok20('Cancel', [192, 144, 212, 202], () => close()),
+    el('button', { type: 'button', class: 'ok20 def20', style: at20([192, 220, 212, 278]) + ';min-width:0;padding:0', onclick: () => { if (sel) { sel.value = V[pick]; sel.dispatchEvent(new Event('change', { bubbles: true })); } done(V[pick]); close(); } }, raw('span', 'OK')));
+  // (over the New Game window, which is a modal itself: a layer of its own)
+  const scrim = el('div', { class: 'yp301', style: 'position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0)' },
+    el('div', { class: 'win mac12 dl20w', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Years Per Turn', style: 'background:#fff;border:1px solid #000;box-shadow:2px 2px 0 #000;padding:0;zoom:var(--mac, 1)' }, dl));
+  const close = () => scrim.remove();
+  document.body.append(scrim);
+}
+
+// DLOG 6000 "Build / Design Ships" (BuildDesignShips @131150 and its helpers, read in the decompile and, for the item cases, the assembly's
+// jump table at $1313e4; 492 x 285, DITL 6000; Jake's capture 065). Left, the list of your types (InitShipTypesList), newest first: the
+// small picture and "Name (W/S) Class", "15 Name (W/S) Fighters" while 15 are ordered. Right: Ship Money and Metal with their bars
+// (DRAWSHIPMONEYBAR: 153 wide, nothing at its middle, 75 pixels either way for the money over 5 x the income, at least 10,000, green;
+// DRAWMETALBAR: 75 pixels for 100,000 metal), the big picture, # To Build with + and -, Name, the Class menu, Dev. Cost, Pro. Cost,
+// Metal Cost, # Built, #Existing, the five levels "n/most" with their scroll bars, "Building At:" (STR# 4000.40) or "Viewing At:" (.41,
+// not your colony: + dimmed) and the star, Scrap All / Don't Scrap, Cancel, OK.
+// - Picking a type shows it; moving the Class menu or a scroll bar shows the type with those levels if you have one (FindMatchingType),
+//   else a new design, with a new name; the Name field (15 letters at most, a beep past them) renames the type shown.
+// - + / - / the field: one ship at a time, each costing the development cost while the type has never been built (this visit's orders
+//   counted), else the production cost, and its metal; too little metal is the standard alert 4001.19, money past the borrowing limit
+//   4001.25. + on a new design first makes it a type: 4001.5 if it has no name, ALRT 3280 at 20 types.
+// - Scrap All marks the type to be scrapped (Don't Scrap unmarks it) and takes back this visit's orders of it; - and Scrap are dimmed
+//   as SetButtonStates has them.
+// - OK builds every type's count at once (BuildAShip a ship: 3.0.1 builds when OK is pressed); Cancel builds nothing (a type made stays).
+let BUILD301 = null; // (the setup's +0x72: the type last shown)
+function build301(sid) {
+  const a = A(), el = a.el, g = G(), p = a.me(), rs = H().rules(g), star = g.stars[sid], S4 = STR301(4000), S41 = STR301(4001);
+  const mine = star && star.owner === a.ME;
+  const live = () => p.designs.filter(d => !d.scrapped);
+  const counts = {};
+  let money = p.savings, metal = p.metal;
+  let sel = (live().find(d => d.id === BUILD301) || live()[live().length - 1] || null);
+  const spec = sel ? { type: sel.type, R: sel.R, V: sel.V, W: sel.W, S: sel.S, M: sel.M, name: sel.name } : { type: 'fighter', R: 6, V: 2, W: 2, S: 2, M: 0, name: H().designName(g, p, 'fighter') };
+  const K = ['R', 'V', 'W', 'S', 'M'], KW = ['Range', 'Speed', 'Weapons', 'Shields', 'Mini'];
+  const clampSpec = () => { const L = H().designLimits(g, p, spec.type); for (const k of K) { const lo = H().designMin(g, k, spec.type); spec[k] = Math.max(lo, Math.min(Math.max(lo, L[k] || lo), spec[k])); } return L; };
+  clampSpec();
+  const beep = () => { if (a.beep) a.beep(); };
+  const cost1 = (d) => { const c = H().designCost(g, d), first = d.built === 0 && !(counts[d.id] > 0) && !d.free && rs.paysPrototype(g, p, d); return { money: c.money + (first ? c.proto : 0), metal: c.metal, first }; };
+  const picOf = (d) => (a.shipPic ? a.shipPic(d, a.ME) : null);
+  // (the picture keeps its shape: a ship's three parts fill the 120 x 40, a satellite's one square part is drawn 40 high in the middle, as
+  // DrawShipPicture does, Jake's report of a stretched satellite)
+  const drawPic = (cv, d) => { const x = cv.getContext('2d'); x.clearRect(0, 0, cv.width, cv.height); x.fillStyle = '#000'; x.fillRect(0, 0, cv.width, cv.height); const im = picOf(d); if (!im) return; const k = Math.min(cv.width / im.width, cv.height / im.height), w = im.width * k, h = im.height * k; x.drawImage(im, (cv.width - w) / 2, (cv.height - h) / 2, w, h); };
+  // the list
+  const list = el('div', { class: 'lst301 types301', role: 'listbox', 'aria-label': 'Ship types', style: at20([5, 5, 217, 125]) });
+  const drawList = () => {
+    list.textContent = '';
+    for (const d of live().slice().reverse()) {
+      const n = counts[d.id] || 0, row = el('div', { class: 'tr301' + (sel && d.id === sel.id ? ' sel' : '') + (d.scrap301 ? ' scrap' : ''), role: 'option', onclick: () => pick(d) });
+      const cv = el('canvas', { width: 120, height: 40, style: 'display:block;margin:0 auto;width:120px;height:40px' }); drawPic(cv, d);
+      row.append(cv, raw('div', n > 0 ? descN(d, n) : desc0(d), { class: 'tl301' }));
+      list.append(row);
+    }
+    // (a name wider than the row is drawn condensed, as the program's lists do: squeezed to fit)
+    requestAnimationFrame(() => { for (const t of list.querySelectorAll('.tl301')) { t.style.transform = ''; const w = t.scrollWidth, c = t.clientWidth; if (w > c && c) { t.style.overflow = 'visible'; t.style.transform = `scaleX(${(c - 1) / w})`; t.style.transformOrigin = 'center'; } } });
+  };
+  // the right side
+  const big = el('canvas', { width: 240, height: 80, style: at20([42, 222, 82, 342]) });
+  const shown = () => sel || Object.assign({ id: null, built: 0, free: false }, spec);
+  const numIn = el('input', { type: 'text', inputmode: 'numeric', style: at20([56, 432, 72, 459]), 'aria-label': '# To Build' });
+  const nameIn = el('input', { type: 'text', maxlength: 40, style: at20([88, 224, 104, 364]), 'aria-label': 'Name' });
+  const clsSel = el('select', { style: at20([112, 202, 132, 358]), 'aria-label': 'Class' }, ...CLASSES().map(t => el('option', { value: t }, cls(t))));
+  const T = {}; const tx = (k, r, right) => (T[k] = raw('span', '', { class: 'dt20', style: at20(r) + (right ? ';text-align:right' : '') }));
+  const bars = K.map((k, i) => el('input', { type: 'range', 'aria-label': KW[i], style: at20([136 + 20 * i, 417, 152 + 20 * i, 487]) }));
+  const mBar = el('canvas', { width: 153, height: 12, style: at20([23, 161, 35, 314]) }), tBar = el('canvas', { width: 77, height: 12, style: at20([22, 370, 34, 447]) });
+  const plus = ok20('+', [44, 464, 64, 484], () => change(1)), minus = ok20('-', [68, 464, 88, 484], () => change(-1));
+  const scrapB = ok20('Scrap All', [247, 224, 267, 300], () => toggleScrap());
+  const colour = !!window.HOMAC3_COLOUR;
+  const drawBars = () => {
+    const scale = Math.max(10000, p.oInc || 0) * 5, x = mBar.getContext('2d'); x.clearRect(0, 0, 153, 12); x.fillStyle = '#fff'; x.fillRect(0, 0, 153, 12); x.strokeStyle = '#000'; x.strokeRect(0.5, 0.5, 152, 11);
+    const w = Math.max(-75, Math.min(75, Math.trunc(money * 75 / scale)));
+    x.fillStyle = w >= 0 ? (colour ? '#090' : '#000') : (colour ? '#d00' : '#000'); if (w > 0) x.fillRect(76, 1, w, 10); else if (w < 0) x.fillRect(76 + w, 1, -w, 10);
+    const y = tBar.getContext('2d'), mw = Math.max(0, Math.min(75, Math.trunc(metal * 75 / 100000))); y.fillStyle = '#fff'; y.fillRect(0, 0, 77, 12); y.strokeStyle = '#000'; y.strokeRect(0.5, 0.5, 76, 11); y.fillStyle = '#000'; y.fillRect(1, 1, mw, 10);
+  };
+  const refresh = () => {
+    const d = shown(), c = H().designCost(g, d), L = clampSpec();
+    drawPic(big, d);
+    T.money.textContent = String(money); T.metal.textContent = String(metal);
+    T.dev.textContent = '$' + nice(c.money + (c.proto || 0)); T.pro.textContent = '$' + nice(c.money); T.mc.textContent = nice(c.metal);
+    T.built.textContent = String(sel ? sel.built || 0 : 0); T.exist.textContent = String(sel ? shipCount(sel.id) : 0);
+    K.forEach((k, i) => { T['l' + k].textContent = `${spec[k]}/${Math.max(H().designMin(g, k, spec.type), L[k] || 0)}`; const lo = H().designMin(g, k, spec.type); bars[i].min = lo; bars[i].max = Math.max(lo, L[k] || lo); bars[i].value = spec[k]; bars[i].disabled = bars[i].max == lo; });
+    numIn.value = String(sel ? counts[sel.id] || 0 : 0); nameIn.value = spec.name; clsSel.value = spec.type;
+    plus.disabled = !mine || !!(sel && sel.scrap301); minus.disabled = !sel || !(counts[sel.id] > 0);
+    scrapB.disabled = !sel; scrapB.firstChild.textContent = sel && sel.scrap301 ? 'Don’t Scrap' : 'Scrap All';
+    drawBars(); drawList();
+  };
+  const pick = (d) => { sel = d; BUILD301 = d.id; Object.assign(spec, { type: d.type, R: d.R, V: d.V, W: d.W, S: d.S, M: d.M, name: d.name }); refresh(); };
+  const rematch = () => {
+    const had = sel, m = live().find(d => d.type === spec.type && K.every(k => d[k] === spec[k]));
+    if (m) { pick(m); return; }
+    sel = null; if (had || !spec.name) spec.name = H().designName(g, p, spec.type); refresh();
+  };
+  clsSel.addEventListener('change', () => { spec.type = clsSel.value; clampSpec(); rematch(); });
+  bars.forEach((b, i) => b.addEventListener('input', () => { spec[K[i]] = +b.value; rematch(); }));
+  nameIn.addEventListener('input', () => { let v = nameIn.value; if (v.length > 15) { beep(); v = v.slice(0, 15); nameIn.value = v; } spec.name = v; if (sel) { sel.name = v; drawList(); } });
+  numIn.addEventListener('change', () => { let v = parseInt(numIn.value, 10); if (!(v >= 0)) v = 0; change(v - (sel ? counts[sel.id] || 0 : 0)); });
+  function change(dn) {
+    if (dn > 0 && !sel) {
+      if (live().length >= 20) { alertById301(3280); refresh(); return; }
+      if (!spec.name.trim()) { std301(S41[4] || 'Please name your new ship type.'); refresh(); return; }
+      sel = H().findOrCreateDesign(g, p, Object.assign({}, spec)); BUILD301 = sel.id;
+    }
+    if (!sel) return;
+    for (; dn > 0; dn--) {
+      const c = cost1(sel);
+      if (c.metal > metal) { std301(S41[18] || 'Sorry, but you don’t have any metal to build more ships.'); break; }
+      if (money - c.money < H().borrowLimit(g, p)) { std301(S41[24] || 'You can’t build that ship because you can’t go any further into debt!'); break; }
+      money -= c.money; metal -= c.metal; counts[sel.id] = (counts[sel.id] || 0) + 1;
+    }
+    for (; dn < 0 && counts[sel.id] > 0; dn++) { counts[sel.id]--; const c = cost1(sel); money += c.money; metal += c.metal; }
+    refresh();
+  }
+  function toggleScrap() {
+    if (!sel) return;
+    const on = rs.flagScrapDesign ? rs.flagScrapDesign(g, p, sel, 'command') : (sel.scrap301 = !sel.scrap301);
+    if (on) while (counts[sel.id] > 0) { counts[sel.id]--; const c = cost1(sel); money += c.money; metal += c.metal; }
+    refresh();
+  }
+  const ok = () => {
+    for (const [did, n] of Object.entries(counts)) if (n > 0) H().buildShips(g, a.ME, sid, +did, n);
+    a.closeModal(); a.save(); a.renderPanel(); a.draw();
+  };
+  const L = (t, r) => txt20(t, r);
+  const box = dlog20(492, 285, el('div', { style: at20([4, 4, 218, 141]) + ';border:1px solid #000;box-sizing:border-box' }), list,
+    L('Ship Money:', [4, 144, 20, 234]), tx('money', [4, 236, 20, 337]), mBar, L('Metal:', [4, 347, 20, 393]), tx('metal', [4, 396, 20, 492]), tBar,
+    big, L('# To Build:', [56, 352, 72, 427]), numIn, plus, minus,
+    L('Name:', [88, 144, 104, 200]), nameIn, L('Class:', [114, 144, 130, 200]), clsSel,
+    L('Dev. Cost:', [136, 144, 152, 223]), tx('dev', [136, 224, 152, 306]), L('Pro. Cost:', [156, 144, 172, 223]), tx('pro', [156, 224, 172, 306]),
+    L('Metal Cost:', [176, 144, 192, 222]), tx('mc', [176, 224, 192, 306]), L('# Built:', [196, 144, 212, 216]), tx('built', [196, 224, 212, 263]), L('#Existing:', [216, 144, 232, 217]), tx('exist', [216, 224, 232, 263]),
+    ...KW.map((w, i) => L(w, [136 + 20 * i, 309, 152 + 20 * i, 370])), ...K.map((k, i) => tx('l' + k, [136 + 20 * i, 372, 152 + 20 * i, 414])), ...bars,
+    L(mine ? (S4[39] || 'Building At:') : (S4[40] || 'Viewing At:'), [249, 15, 265, 93]), L(star ? star.name : '', [249, 96, 265, 171]),
+    scrapB, ok20('Cancel', [247, 354, 267, 412], () => a.closeModal()),
+    el('button', { type: 'button', class: 'ok20 def20', style: at20([246, 426, 266, 484]) + ';min-width:0;padding:0', onclick: ok }, raw('span', 'OK')));
+  a.modal('', box, { cls: 'mac12 dl20w', label: 'Build / Design Ships' });
+  refresh();
+  return true;
+}
+// ALRT 5010 (3.0.1: 240 x 200; "^0^1^2^3" at (8, 12, 116, 236), PICT 3020 at (117, 13), OK at (156, 156)): the program's alert of a line
+function alert5010(text) {
+  const a = A(), el = a.el, im = a.IMG['dos:p3020'];
+  const back = el('div', { class: 'scrim', onkeydown: (e) => { if (e.key === 'Escape' || e.key === 'Enter') { e.stopPropagation(); back.remove(); } } },
+    el('div', { class: 'win small alert notitle mac12 dl20w', role: 'alertdialog', 'aria-modal': 'true', 'aria-label': text },
+      dlog20(240, 200, txt20(text, [8, 12, 116, 236]), im ? el('img', { src: im.src, alt: '', style: at20([117, 13, 191, 87]) + ';image-rendering:pixelated' }) : null,
+        el('button', { type: 'button', class: 'ok20 def20', style: at20([156, 156, 176, 214]) + ';min-width:0;padding:0', onclick: () => back.remove() }, raw('span', 'OK')))));
+  document.body.append(back); back.querySelector('button').focus();
+}
+// DLOG 6120 "Give Stuff" (DoGiveThingsDlg @1437e0, InitGTPlayerList @143b00, SetCellsToPlayers @141776; 463 x 214, DITL 6120; Jake's capture
+// 074): with three gifts given this turn, ALRT 5010 with STR# 1020.21 and no window. "Give Stuff To:" (0, 20) over the players' cells (20,
+// 20, 202, 247: 5 x 4 cells of 45, the icon 2000 + face, + 500 a woman, and the name; the other players still in the game, in the players'
+// order; the first picked); "Give How Much Money?" (20, 260) and its field (40, 263), "Give How Much Metal?" (80, 260) and its field
+// (100, 263), each put back between 0 and the Ship Savings (the metal) as it is typed; Cancel (140, 384) above Give (168, 384, default).
+// Give with both 0 or no cell gives nothing; else the gift is recorded and taken at once (rules: HO.give), sound 5000.
+function give301() {
+  const a = A(), el = a.el, g = G(), me = a.me(), ME = a.ME;
+  if ((me.giftsThisTurn || 0) >= 3) { alert5010(STR301(1020)[20] || 'Sorry, you can only give three gifts per turn.'); return true; }
+  const hat = (q) => 'dos:i' + ((q.female ? 2500 : 2000) + ((q.face || 0) % 20));
+  const order = (H().rules(g).giveWindow && H().rules(g).giveWindow.order) ? H().rules(g).giveWindow.order(g) : g.players;
+  const ps = order.filter(q => q.id !== ME && q.alive && !q.surrendered);
+  let pick = ps.length ? 0 : null;
+  const cl = cells20(5, 4, ps.map((q, i) => ({ icon: hat(q), name: q.name, id: i })), { sel: pick, pick: (c) => { pick = c.id; } });
+  cl.el.setAttribute('style', cl.el.getAttribute('style') + ';' + at20([21, 21, 201, 246]));
+  const maxM = Math.max(0, me.savings), maxT = Math.max(0, me.metal);
+  const field = (r, max, label) => { const f = el('input', { type: 'text', inputmode: 'numeric', value: '0', 'aria-label': label, style: at20(r) });
+    f.addEventListener('input', () => { let v = parseInt(f.value, 10); if (!(v >= 0)) v = 0; if (v > max) v = max; if (String(v) !== f.value && f.value !== '') f.value = String(v); }); return f; };
+  const fm = field([40, 263, 56, 335], maxM, 'Give How Much Money?'), ft = field([100, 263, 116, 335], maxT, 'Give How Much Metal?');
+  const go = () => {
+    const m = Math.min(maxM, parseInt(fm.value, 10) || 0), t = Math.min(maxT, parseInt(ft.value, 10) || 0);
+    a.closeModal();
+    if (pick == null || (m <= 0 && t <= 0)) return;
+    if (H().give(g, ME, ps[pick].id, m, t) === 'ok') { a.Sound.play(5000); a.save(); a.renderPanel(); }
+  };
+  a.modal('', dlog20(463, 214, txt20('Give Stuff To:', [0, 20, 18, 173]), el('div', { style: at20([20, 20, 202, 247]) + ';border:1px solid #000;box-sizing:border-box' }), cl.el,
+    txt20('Give How Much Money?', [20, 260, 36, 423]), fm, txt20('Give How Much Metal?', [80, 260, 95, 422]), ft,
+    ok20('Cancel', [140, 384, 160, 442], () => a.closeModal()),
+    el('button', { type: 'button', class: 'ok20 def20', style: at20([168, 384, 188, 442]) + ';min-width:0;padding:0', onclick: go }, raw('span', 'Give'))),
+    { cls: 'mac12 dl20w', label: 'Give Stuff' });
+  setTimeout(() => { fm.focus(); fm.select(); }, 0);
+  return true;
+}
+
+// DLOG 6110 "Alliances" (DoAlliancesDlg @1432a4, InitAllianceLists @1434b6, SetAllianceLists @143600; 443 x 300, DITL 6110; Jake's capture
+// 073): the line "Click on a player's icon…" (5, 7), "I Like Them" (43, 97) and "I Don't Like Them" (43, 268) over the columns, "They Like
+// Me" (88, 8) and "They Don't Like Me" (171, 7) beside the rows; four lists (63, 52) (63, 236) (157, 52) (157, 236), each 182 x 92, four
+// cells across: the players still in the game in the players' order, yourself too (your icon 1000, + 500 a woman; another's 2000 + face),
+// each in the list of whether you like them and whether they like you. A click on another player moves them across (your like of them
+// turned over); on yourself, a beep. OK keeps it (the player's +0x1960 mask: the remake's allies), Cancel (261, 289) leaves it.
+function alliances301() {
+  const a = A(), el = a.el, g = G(), ME = a.ME, me = a.me();
+  const order = (H().rules(g).giveWindow && H().rules(g).giveWindow.order) ? H().rules(g).giveWindow.order(g) : g.players;
+  const ps = order.filter(q => q.alive && !q.surrendered);
+  const like = new Set(me.allies || []);
+  const theyLike = (q) => q.id === ME || (q.allies || []).includes(ME);
+  const hat = (q) => 'dos:i' + (q.id === ME ? (q.female ? 1500 : 1000) : (q.female ? 2500 : 2000) + ((q.face || 0) % 20));
+  const R = [[63, 52, 155, 234], [63, 236, 155, 418], [157, 52, 249, 234], [157, 236, 249, 418]];
+  const lists = R.map(r => { const c = cells20(4, 2, [], { pick: (x) => tap(x.id) }); c.el.setAttribute('style', c.el.getAttribute('style') + ';' + at20([r[0] + 1, r[1] + 1, r[2] - 1, r[3] - 1]) + ';overflow-y:auto'); return c; });
+  const draw = () => {
+    const by = [[], [], [], []];
+    for (const q of ps) by[((q.id === ME || like.has(q.id)) ? 0 : 1) + (theyLike(q) ? 0 : 2)].push({ icon: hat(q), name: q.name, id: q.id });
+    by.forEach((L, i) => lists[i].set(L, null));
+  };
+  function tap(id) { if (id === ME) { if (a.beep) a.beep(); return; } if (like.has(id)) like.delete(id); else like.add(id); draw(); }
+  const ok = () => { for (const q of g.players) if (q.id !== ME) H().setPact(g, ME, q.id, 'ally', like.has(q.id)); a.closeModal(); a.save(); a.renderPanel(); a.draw(); };
+  draw();
+  a.modal('', dlog20(443, 300, txt20('Click on a player’s icon to move it horizontally to specify whether you would or would not like to ally with that player.', [5, 7, 38, 428]),
+    txt20('I Like Them', [43, 97, 58, 176]), txt20('I Don’t Like Them', [43, 268, 58, 390]), txt20('They Like Me', [88, 8, 137, 42]), txt20('They Don’t Like Me', [171, 7, 239, 43]),
+    ...R.map(r => el('div', { style: at20(r) + ';border:1px solid #000;box-sizing:border-box' })), ...lists.map(c => c.el),
+    ok20('Cancel', [261, 289, 281, 347], () => a.closeModal()),
+    el('button', { type: 'button', class: 'ok20 def20', style: at20([261, 361, 281, 419]) + ';min-width:0;padding:0', onclick: ok }, raw('span', 'OK'))),
+    { cls: 'mac12 dl20w', label: 'Alliances' });
+  return true;
+}
+
+// DLOG 6070 "Send Message" (SendMessage @140fa2, InitMessageLists @1421de (the same code as 2.0.1's), SetCellsToPlayers; 392 x 261, DITL
+// 6070; Jake's capture 075). "Send Message:" (7, 6), the step's prompt (7, 154; STR# 3002: "Send Message To Who?", "Saying What?", then the
+// message's own: "Which Star?", "Who?", "Where?"), "To:" and "Content:" beside the left list (33, 81: one column of four 45 cells, what is
+// chosen, a click on one taking the message back to that step) and the right list (33, 154: 5 x 4 cells, this step's choices: the players
+// still in and "Everyone"; the fourteen messages, ICN# 3000-3013; then the stars or players the message names). Erase (229, 164) clears it,
+// dimmed with nothing chosen; Send (228, 241, the default ring) is enabled once the message is whole and Done (228, 314) is dimmed then;
+// a message sent (rs.cannedChat, the engine's cannedSteps: 3.0.1's codes $40a-$417) plays sound 5000 and the window starts again for the next;
+// ten in a turn: ALRT 5010 with STR# 1020.17, and the window closes. Done closes it.
+function chat301() {
+  const a = A(), el = a.el, g = G(), ME = a.ME, C = H().rules(g).cannedChat, me = a.me();
+  const limitText = STR301(1020)[16] || 'Sorry, you can only send ten messages per turn.';
+  const lim = H().rules(g).chatLimit;
+  if (lim && (me.outbox || []).length >= lim) { alert5010(limitText); return true; }
+  const tos = C.to(g, ME);
+  const P = STR301(3002);
+  const hat = (q) => 'dos:i' + (q.id === ME ? (q.female ? 1500 : 1000) : (q.female ? 2500 : 2000) + ((q.face || 0) % 20));
+  const pl = (id) => g.players[+id];
+  let ch = [];
+  const act = () => (ch[1] ? C.actions[ch[1].i] : null);
+  const steps = () => 2 + (act() ? act().parts.length : 0);
+  const whole = () => !!act() && ch.length >= steps() && ch.slice(0, steps()).every(Boolean);
+  const prompt = raw('span', '', { class: 'dt20', style: at20([7, 154, 24, 355]) });
+  const left = cells20(1, 4, [], {}), right = cells20(5, 4, [], {});
+  const choices = (k) => {
+    if (k === 0) return tos.map(o => ({ id: String(o[0]), name: o[1], icon: pl(o[0]) && !isNaN(+o[0]) ? hat(pl(o[0])) : null, off: !!o[2] }));
+    if (k === 1) return C.actions.map((x, i) => ({ id: i, i, name: x.label, icon: 'dos:i' + (3000 + i) }));
+    const part = act().parts[k - 2], kind = part[1];
+    return C.list(g, ME, kind, a.UI.sel).map(o => ({ id: String(o[0]), name: o[1], icon: kind === 'players' && pl(o[0]) ? hat(pl(o[0])) : null, off: !!o[2] }));
+  };
+  const step = () => { for (let k = 0; k < steps(); k++) if (!ch[k]) return k; return steps(); };
+  const erase = ok20('Erase', [229, 164, 249, 222], () => { ch = []; refresh(); });
+  const done = ok20('Done', [228, 314, 248, 372], () => a.closeModal());
+  const send = el('button', { type: 'button', class: 'ok20 def20', style: at20([228, 241, 248, 299]) + ';min-width:0;padding:0', onclick: a.guard(() => {
+    if (!whole()) return;
+    const v = ch.slice(2).map(c => (isNaN(+c.id) ? c.id : +c.id));
+    const r = H().sendCanned(g, ME, C.make(g, ME, isNaN(+ch[0].id) ? ch[0].id : +ch[0].id, ch[1].i, v));
+    if (r === 'limit') { a.closeModal(); alert5010(limitText); return; }
+    if (r !== 'ok') return;
+    a.Sound.play(5000); a.save(); ch = []; refresh();
+    if (lim && (me.outbox || []).length >= lim) { a.closeModal(); alert5010(limitText); }
+  }) }, raw('span', 'Send'));
+  function refresh() {
+    const k = step();
+    prompt.textContent = k === 0 ? (P[0] || 'Send Message To Who?') : k === 1 ? (P[1] || 'Saying What?') : k < steps() ? act().parts[k - 2][0] : '';
+    left.set([0, 1, 2, 3].map(i => ch[i] ? { name: ch[i].name, icon: ch[i].icon } : { name: '' }), null);
+    const list = k < steps() ? choices(k) : [];
+    right.set(list, null);
+    right.el.querySelectorAll('.c20').forEach((d, i) => { const c = list[i]; if (c) d.onclick = () => { if (c.off) { if (a.beep) a.beep(); return; } ch[k] = c; ch.length = k + 1; refresh(); }; });
+    left.el.querySelectorAll('.c20').forEach((d, i) => { d.onclick = () => { if (!ch[i]) return; ch.length = i; refresh(); }; });
+    const w = whole();
+    send.disabled = !w; done.disabled = w; erase.disabled = !ch.some(Boolean);
+  }
+  const frame = (r) => el('div', { style: at20([r[0] - 1, r[1] - 1, r[2] + 1, r[3] + 1]) + ';border:1px solid #000;box-sizing:border-box' });
+  const put = (n, r) => { n.setAttribute('style', (n.getAttribute('style') || '') + ';' + at20(r)); return n; };
+  refresh();
+  a.modal('', dlog20(392, 261, txt20('Send Message:', [7, 6, 25, 137]), prompt, txt20('To:', [47, 44, 63, 74]), txt20('Content:', [85, 15, 101, 74]), frame([33, 81, 215, 128]), frame([33, 154, 215, 381]),
+    put(left.el, [34, 82, 214, 127]), put(right.el, [34, 155, 214, 380]), erase, send, done), { cls: 'mac12 dl20w', label: 'Send Message' });
+  return true;
+}
+
+// an ALRT of 3.0.1's (its DITL in HOLANG.mac301En: the static texts joined, OK), as the standard alert
+function alertById301(id) { const D = (window.HOLANG && HOLANG.mac301En.DITL[String(id)]) || []; std301(D.filter(x => x[0] === 'text').map(x => x[1]).join(' ')); }
+
+// DLOG 6060 "Organize Fleets" (OrganizeFleets @133d14, DrawOneOrgFleet @13459a, DRAWORGFLEETS @134532; 427 x 283, DITL 6060: the heading
+// (0, 13), the two lines (18, 16) and (35, 16), the piles (56, 12, 236, 417), Next Type (249, 27), Group All (249, 107), Divide All (249, 187),
+// Cancel (249, 264), OK (249, 340, default)). The fleets of the selected fleet's design at the selected star, in the order of the fleet records,
+// one a pile (from the twelfth on, all in the last); twelve piles in three columns of four, a pile 135 x 45 (col = pile / 4, row = pile mod 4),
+// its ship count (condensed past 99) at its left and the small ship picture (120 x 40) 15 in, the pile being dragged inverted. A drag from a
+// pile to another moves one ship, with Shift the whole pile; an empty pile is a beep. Group All puts all in the first pile; Divide All gives
+// each of the first eleven the total / 12 (at least 1) while they last, the rest to the last. OK: the piles become the fleets in order (a
+// fleet beyond the piles is removed, a pile beyond the fleets is a new fleet), with the ruleset's rule for fuel, "built this turn" and colonists
+// (rules-301 organized301: the least fuel of them; a fleet whose count changed stops counting as built this turn unless all were, and its
+// colony ships are unloaded unless all were loaded; a new pile the same; the fleets kept keep their orders). Next Type does
+// OK, then opens the window again on the star's next fleet of another design (in record order, round), a beep when there is none.
+// Jake's capture 069.
+function organize301(sid) {
+  const a = A(), el = a.el, g = G(), me = a.me();
+  const at = g.fleets.filter(f => f.owner === a.ME && f.star === sid && !f.sat && Object.keys(f.ships).length === 1);
+  let f0 = at.find(f => f.id === a.UI.selFleet) || at[0];
+  if (!f0) { if (a.beep) a.beep(); return true; }
+  const did = +Object.keys(f0.ships)[0], d = me.designs.find(x => x.id === did);
+  const fleets = at.filter(f => +Object.keys(f.ships)[0] === did);
+  const piles = new Array(12).fill(0); fleets.forEach((f, i) => { piles[Math.min(i, 11)] += f.ships[did]; });
+  const fuel = Math.min(...fleets.map(f => f.fuel || 0)), allNew = fleets.every(f => !!f.newThisTurn), colony = d && d.type === 'colony', allLoaded = colony && fleets.every(f => (f.colonists || 0) > 0);
+  const flags = (f, changed) => { f.fuel = fuel; if (!changed) return; if (!allNew) f.newThisTurn = false; if (colony) f.colonists = allLoaded ? 10 * f.ships[did] : 0; };
+  const pic = a.shipPic ? a.shipPic(d, a.ME) : null;
+  const area = el('div', { class: 'org301', style: at20([56, 12, 236, 417]) + ';border:1px solid #000;box-sizing:border-box;touch-action:none' });
+  let drag = -1;
+  const draw = () => {
+    area.textContent = '';
+    piles.forEach((n, k) => {
+      const c = el('div', { class: 'pile301' + (k === drag ? ' sel' : ''), 'data-pile': k, style: `position:absolute;left:${Math.floor(k / 4) * 135}px;top:${(k % 4) * 45}px;width:135px;height:40px` });
+      if (n > 0) {
+        if (pic) { const cv = el('canvas', { width: 120, height: 40, style: 'position:absolute;left:15px;top:0;width:120px;height:40px' }); cv.getContext('2d').drawImage(pic, 0, 0, 120, 40); c.append(cv); }
+        c.append(raw('span', a.fmt ? a.fmt(n) : String(n), { class: 'n301' + (n > 99 ? ' cond' : ''), style: 'position:absolute;left:0;top:22px' }));
+      }
+      area.append(c);
+    });
+  };
+  const pileAt = (e) => { const r = area.getBoundingClientRect(), z = r.width / 405, x = (e.clientX - r.left) / z, y = (e.clientY - r.top) / z, k = Math.floor(x / 135) * 4 + Math.floor(y / 45); return x < 0 || y < 0 || k < 0 || k > 11 ? -1 : k; };
+  let shift = false;
+  area.addEventListener('pointerdown', (e) => { const k = pileAt(e); if (k < 0 || !piles[k]) { if (a.beep) a.beep(); return; } drag = k; shift = e.shiftKey; area.setPointerCapture(e.pointerId); draw(); });
+  area.addEventListener('pointerup', (e) => {
+    if (drag < 0) return;
+    const k = pileAt(e);
+    if (k >= 0 && k !== drag) { if (shift) { piles[k] += piles[drag]; piles[drag] = 0; } else { piles[drag]--; piles[k]++; } }
+    drag = -1; draw();
+  });
+  const total = () => piles.reduce((x, y) => x + y, 0);
+  const group = () => { const t = total(); piles.fill(0); piles[0] = t; draw(); };
+  const divide = () => { let t = total(); const per = Math.max(1, Math.floor(t / 12)); for (let k = 0; k < 11; k++) { piles[k] = Math.min(per, t); t -= piles[k]; } piles[11] = Math.max(0, t); draw(); };
+  const apply = () => {
+    fleets.forEach((f, i) => {
+      if (i < 12 && piles[i] > 0) { const ch = f.ships[did] !== piles[i]; f.ships[did] = piles[i]; flags(f, ch); }
+      else { const j = g.fleets.indexOf(f); if (j >= 0) g.fleets.splice(j, 1); if (a.UI.selFleet === f.id) a.UI.selFleet = null; }
+    });
+    for (let k = fleets.length; k < 12; k++) if (piles[k] > 0) { const nf = H().newFleet(g, a.ME, sid, false); nf.ships[did] = piles[k]; nf.newThisTurn = allNew; flags(nf, true); }
+    if (a.UI.selFleet == null) { const f = g.fleets.find(x => x.owner === a.ME && x.star === sid && x.ships[did]); if (f) a.UI.selFleet = f.id; }
+    a.save(); a.renderPanel(); a.draw();
+  };
+  const next = () => {
+    apply(); a.closeModal();
+    const mine = g.fleets.filter(f => f.owner === a.ME && !f.sat), i0 = mine.findIndex(f => f.ships[did] && f.star === sid);
+    for (let s = 1; s <= mine.length; s++) { const f = mine[(Math.max(0, i0) + s) % mine.length]; if (f.star === sid && f.to == null && Object.keys(f.ships).length === 1 && !f.ships[did]) { a.UI.selFleet = f.id; a.renderPanel(); organize301(sid); return; } }
+    if (a.beep) a.beep();
+  };
+  draw();
+  a.modal('', dlog20(427, 283, txt20('To Organize Fleets:', [0, 13, 16, 142]), txt20('• Click and drag fleets into desired number of piles', [18, 16, 35, 363]), txt20('• Shift-Click selects an entire pile', [35, 16, 51, 362]), area,
+    ok20('Next Type', [249, 27, 269, 92], next), ok20('Group All', [249, 107, 269, 172], group), ok20('Divide All', [249, 187, 269, 252], divide), ok20('Cancel', [249, 264, 269, 329], () => a.closeModal()),
+    el('button', { type: 'button', class: 'ok20 def20', style: at20([249, 340, 269, 412]) + ';min-width:0;padding:0', onclick: () => { apply(); a.closeModal(); } }, raw('span', 'OK'))),
+    { cls: 'mac12 dl20w', label: 'Organize Fleets' });
+  return true;
+}
+
+// 3.0.1's standard alert (StandardAlert @13030: DLOG 6140, colour 6141, 240 x 200; DITL: the line of STR# 4001 at (10, 10, 97, 230), OK at
+// (160, 160) with the default ring, PICT 3020 at (110, 10)); the system beep
+function std301(text, done) {
+  const a = A(), el = a.el, im = a.IMG['dos:p3020'];
+  const back = el('div', { class: 'scrim', onkeydown: (e) => { if (e.key === 'Escape' || e.key === 'Enter') { e.stopPropagation(); close(); } } },
+    el('div', { class: 'win small alert notitle mac12 dl20w', role: 'alertdialog', 'aria-modal': 'true', 'aria-label': text },
+      dlog20(240, 200, txt20(text, [10, 10, 97, 230]), im ? el('img', { src: im.src, alt: '', style: at20([110, 10, 184, 84]) + ';image-rendering:pixelated' }) : null,
+        el('button', { type: 'button', class: 'ok20 def20', style: at20([160, 160, 180, 218]) + ';min-width:0;padding:0', onclick: () => close() }, raw('span', 'OK')))));
+  const close = () => { back.remove(); if (done) done(); };
+  document.body.append(back); back.querySelector('button').focus();
+  if (a.beep) a.beep();
+}
+// DLOG 6030 "List of All Fleets" (ListAllFleets @13311a, InitFleetsList @133378, MakeListFleetsStr @1336e8; 486 x 296, DITL 6030: the heading at
+// (2, 13), the list at (26, 13, 252, 468) less its scroll bar, the Sort By menu CNTL 6030 (MENU 6030 "Ship Power", "Ship Class") at (265, 13),
+// Go To Fleet (264, 260), OK (264, 364, default)). Your fleets but satellites, in the order of the fleet records, then swap-sorted: Ship Power
+// (each fleet's ships times its design's power, CalcShipPower's +0x7a: rs.shipPower), the strongest first; Ship Class (scout, fighter, colony
+// ship), the lower first. Ship Power when it opens; the first row picked. A row: STR# 4000.24-27, "%s stationed at %s.", "%s leaving %s for %s
+// to arrive in %d.", "%s to arrive at %s in %d.", "%s marooned at %s." (FleetStuck), the year being this year plus ten a turn left (the patch:
+// the game's years per turn, 'listYears'). Go To Fleet: a fleet in hyperspace gets the standard alert 4001.14; else its star is selected,
+// the fleet made the star's fleet and the map centred on it. Jake's capture 068.
+function fleets301() {
+  const a = A(), el = a.el, g = G(), rs = H().rules(g), S4 = STR301(4000), CL = ['scout', 'fighter', 'colony', 'satellite'];
+  const mine = g.fleets.filter(f => f.owner === a.ME && !f.sat);
+  const design = (f) => { const k = Object.keys(f.ships || {}).find(x => f.ships[x] > 0); return a.me().designs.find(d => String(d.id) === k) || {}; };
+  const cls = (f) => { const i = CL.indexOf(design(f).type); return i < 0 ? 9 : i; };
+  const count = (f) => Object.values(f.ships || {}).reduce((x, y) => x + y, 0);
+  const power = (f) => count(f) * (rs.shipPower ? rs.shipPower(g, design(f)) : 0);
+  const list0 = mine.filter(f => cls(f) !== 3);
+  const sorted = (mode) => { const L = list0.slice(); for (let i = 0; i < L.length - 1; i++) for (let j = i + 1; j < L.length; j++) if (mode === 1 ? power(L[i]) < power(L[j]) : cls(L[j]) < cls(L[i])) { const t = L[i]; L[i] = L[j]; L[j] = t; } return L; };
+  const yr = (t) => H().fixed(g, 'listYears') ? H().arrivalYear(g, t) : g.year + t * 10;
+  const turns = (f) => Math.ceil((f.dist - (f.prog || 0)) / H().fleetSpeed(g, f) - 1e-9);
+  const line = (f) => {
+    const d = H().fleetText(g, f), st = (i) => g.stars[i].name;
+    if (stuck(f)) return fill(S4[26] || '%s marooned at %s.', d, st(f.star));
+    if (f.to != null) return fill(S4[25] || '%s to arrive at %s in %d.', d, st(f.to), yr(turns(f)));
+    if (f.dest != null) return fill(S4[24] || '%s leaving %s for %s to arrive in %d.', d, st(f.star), st(f.dest), yr(Math.ceil(H().starDist(g, f.star, f.dest) / H().fleetSpeed(g, f) - 1e-9)));
+    return fill(S4[23] || '%s stationed at %s.', d, st(f.star));
+  };
+  let mode = 1, list = sorted(mode), cur = 0;
+  const box = el('div', { class: 'lst301', role: 'listbox', 'aria-label': 'List of All Fleets', style: at20([27, 14, 251, 452]) });
+  const show = () => { box.textContent = ''; list.forEach((f, i) => box.append(raw('div', line(f), { class: 'li301' + (i === cur ? ' sel' : ''), role: 'option', 'aria-selected': i === cur ? 'true' : 'false', onclick: () => { cur = i; show(); }, ondblclick: () => { cur = i; go(); } }))); };
+  const go = () => {
+    const f = list[cur]; if (!f) return;
+    if (f.to != null || f.star == null) { std301(STR301(4001)[13] || FLEET_LINES.en.hyper); return; }
+    a.closeModal(); a.UI.sel = f.star; a.UI.selFleet = f.id; a.centerOn(f.star); a.renderPanel(); a.draw();
+  };
+  const M = (window.HOLANG && HOLANG.mac301En && HOLANG.mac301En.MENU && HOLANG.mac301En.MENU['6030']) || [0, 'Ship Power', 'Ship Class'];
+  // (the pop-up menu's title, "Sort By:", is drawn inside the control's rectangle at its left, as capture 068 shows)
+  const sel = el('select', { 'aria-label': 'Sort By', style: at20([265, 80, 285, 213]), onchange: (e) => { mode = +e.target.value; list = sorted(mode); cur = 0; show(); } },
+    el('option', { value: 1 }, M[1]), el('option', { value: 2 }, M[2]));
+  show();
+  a.modal('', dlog20(486, 296, txt20('List of All Fleets:', [2, 13, 22, 145]), txt20('Sort By:', [267, 13, 285, 78]), el('div', { style: at20([26, 13, 252, 468]) + ';border:1px solid #000;box-sizing:border-box' }), box, sel,
+    ok20('Go To Fleet', [264, 260, 284, 342], go),
+    el('button', { type: 'button', class: 'ok20 def20', style: at20([264, 364, 284, 446]) + ';min-width:0;padding:0', onclick: () => a.closeModal() }, raw('span', 'OK'))),
+    { cls: 'mac12 dl20w', label: 'List of All Fleets' });
+  return true;
+}
+
+// 3.0.1's ALRT 3230 (EndTurnMenuCall @120da4: 286 x 190; DITL 3230 "Continue" (145, 188, default), "Wait" (145, 110), PICT 3020 at
+// (99, 13), "^0, do you want to play alone, or wait for more humans to join?" (13, 13, 63, 278), "(Computer Opponents: ^1)" (64, 13)):
+// asked when the year-2000 turn is done, with fewer than two humans, until it is answered Continue (the header's +6 byte, -1 till then).
+// Wait leaves the game unupdated (CheckTurnDone's +6 test), so End Turn asks again. Jake's captures 015 and 166.
+// (With two humans or more the program asks ALRT 3070 instead, when the last one is done: the remake's hot seat has its own hand-over.)
+function playAlone301(g, go) {
+  const a = A(), el = a.el, im = a.IMG['dos:p3020'], me = a.me(), comps = g.players.filter(p => !p.human).length;
+  const pic = im ? el('img', { src: im.src, alt: '', style: at20([99, 13, 173, 87]) + ';image-rendering:pixelated' }) : null;
+  a.modal('', dlog20(286, 190, pic, txt20(`${me.name}, do you want to play alone, or wait for more humans to join?`, [13, 13, 63, 278]), txt20(`(Computer Opponents: ${comps})`, [64, 13, 84, 264]),
+    ok20('Wait', [145, 110, 165, 168], () => a.closeModal()),
+    el('button', { type: 'button', class: 'ok20 def20', style: at20([145, 188, 165, 257]) + ';min-width:0;padding:0', onclick: () => { g.alone301 = true; a.closeModal(); go(); } }, raw('span', 'Continue'))),
+    { cls: 'mac12 dl20w', label: 'Play alone?' });
+}
+
 // ALRT / DITL 3210 (ForceEndTurn @122382, 335 x 210): PICT 3020 at (117, 13), the two paragraphs at (13, 13) and (52, 13), "Wait" at (143, 117) and "Force End" (default) at (143, 222);
 // the words are the ruleset's (rs.forceEndTurn.ask, the paragraphs split at the blank line). The second alert (3220, "the file was busy") has no cause in a page.
 function forceEnd20(text, go) {
@@ -1259,6 +1819,7 @@ function starLine(cx, d) {
 // and a click on it the system beep; a drag sets the share and spreads the rest over the others in proportion. ----------
 const G9 = '9px Geneva, Verdana, sans-serif', G9B = 'bold 9px Geneva, Verdana, sans-serif', SYS12 = '12px Chicago, Charcoal, Geneva, sans-serif';
 function qdCanvas(w, h, label) { // a box drawn at twice its pixels, as wide as the panel
+  let lastR = null;
   const K = QK(), c = A().el('canvas', { class: 'qd12', width: w * K, height: h * K, role: 'img', 'aria-label': label || '' });
   c.style.aspectRatio = w + ' / ' + h; c.dataset.k = String(K);
   const x = c.getContext('2d'); x.setTransform(K, 0, 0, K, 0, 0); x.fillStyle = '#fff'; x.fillRect(0, 0, w, h);
@@ -1271,7 +1832,9 @@ function qdCanvas(w, h, label) { // a box drawn at twice its pixels, as wide as 
     vline(h0, v0, v1) { x.fillStyle = '#000'; x.fillRect(h0, v0, 1, v1 - v0); },
     rect(l, t, r, b, col) { x.fillStyle = col; x.fillRect(l, t, r - l, b - t); },
     // pointer position in the box's pixels
-    at(ev) { const r = c.getBoundingClientRect(); return { h: (ev.clientX - r.left) * w / r.width, v: (ev.clientY - r.top) * h / r.height }; },
+    // (a drag that redraws its pane replaces this canvas with a new one: the pointer is then measured against where this one last was, not
+    // against the detached canvas, whose box is empty and put every move at the far right: Jake, 18 Nov, a click on a budget bar gave it all)
+    at(ev) { const r = c.isConnected || !lastR ? (lastR = c.getBoundingClientRect()) : lastR; return { h: (ev.clientX - r.left) * w / r.width, v: (ev.clientY - r.top) * h / r.height }; },
   };
   return api;
 }
@@ -1974,8 +2537,11 @@ function lowBox301(B) {
       if (rs.dragShare) { const b = p.budget, o = JSON.parse(start); b.tech = o.tech; b.savings = o.savings; b.col = o.col; const r = rs.dragShare(g, p, e.key, Math.max(0, Math.min(1000, Math.round(pm)))); if (r) { if (r.tech != null) b.tech = r.tech / 1000; if (r.savings != null) b.savings = r.savings / 1000; for (const k in r.col || {}) b.col[k] = r.col[k] / 1000; } }
       else e.set(pm / 1000);
       const c = lowBox301(B); box.replaceWith(c); };
-    const up = (e2) => { window.removeEventListener('pointermove', set); window.removeEventListener('pointerup', up); set(e2); a.save(); a.renderPanel(); };
-    window.addEventListener('pointermove', set); window.addEventListener('pointerup', up); set(ev);
+    // (a move redraws the whole pane: at most once a frame, the last position, so a drag keeps up with the pointer, Jake's report, Firefox, 18 Nov)
+    let pend = null, raf = 0;
+    const later = (e2) => { pend = e2; if (!raf) raf = requestAnimationFrame(() => { raf = 0; if (pend) { const e3 = pend; pend = null; set(e3); } }); };
+    const up = (e2) => { window.removeEventListener('pointermove', later); window.removeEventListener('pointerup', up); if (raf) { cancelAnimationFrame(raf); raf = 0; } pend = null; set(e2); a.save(); a.renderPanel(); };
+    window.addEventListener('pointermove', later); window.addEventListener('pointerup', up); set(ev);
   });
   q.c.addEventListener('wheel', (ev) => { ev.preventDefault(); const pt = q.at(ev); if (pt.h < 79) LOW301.pTop += ev.deltaY > 0 ? 1 : -1; else LOW301.bTop += ev.deltaY > 0 ? 1 : -1; a.renderPanel(); }, { passive: false });
   const box = a.el('section', { class: 'box low301' }, q.c);
@@ -2047,6 +2613,8 @@ function panel301(panel, B) {
 // (DITL 7010: "Passe" at 193, 273, 58 x 20, which skips to the end) says "Bien". A viewer who lost a battle of one round sees
 // nothing of the other side (DrawAllGroups: STR# 1030.11 and .12 at (155, 85) and (155, 100)) and no shots.
 const SYS = '12px Chicago, Charcoal, Geneva, sans-serif', GEN9 = '9px Geneva, Verdana, sans-serif';
+// (3.0.1's battle window in the skins' bitmap Chicago 12 and Geneva 9, the sizes the dialogs use: js/skins/dos/style.css's faces)
+const SYS3 = "15px 'DOS Chicago 12', Chicago, Charcoal, Geneva, sans-serif", GEN93 = "12px 'DOS Geneva 9', Geneva, Verdana, sans-serif";
 function battleWindow(b, k) {
   const a = A(), g = G(), rs = H().rules(g), el = a.el, IMG = a.IMG, ME = a.ME;
   const fr = lang() === 'fr', W = 445, Hh = 310, S = 2, TICK = 1000 / 60;
@@ -2089,7 +2657,7 @@ function battleWindow(b, k) {
   // QuickDraw's qd.gray in patOr with black: every other pixel black
   const grayPat = (() => { const p = document.createElement('canvas'); p.width = 2; p.height = 2; const q = p.getContext('2d'); q.fillStyle = '#000'; q.fillRect(0, 0, 1, 1); q.fillRect(1, 1, 1, 1); return x.createPattern(p, 'repeat'); })();
   const whiteGray = (() => { const p = document.createElement('canvas'); p.width = 2; p.height = 2; const q = p.getContext('2d'); q.fillStyle = '#fff'; q.fillRect(0, 0, 1, 1); q.fillRect(1, 1, 1, 1); return x.createPattern(p, 'repeat'); })();
-  const text = (t, h, v, font, cond) => { x.font = font || SYS; x.letterSpacing = cond ? '-1px' : '0px'; x.fillStyle = '#fff'; x.textAlign = 'left'; x.textBaseline = 'alphabetic'; x.fillText(t, h, v); x.letterSpacing = '0px'; };
+  const text = (t, h, v, font, cond) => { x.font = (V3 && font !== GEN9 ? SYS3 : V3 ? GEN93 : null) || font || SYS; x.letterSpacing = cond ? '-1px' : '0px'; x.fillStyle = '#fff'; x.textAlign = 'left'; x.textBaseline = 'alphabetic'; x.fillText(t, h, v); x.letterSpacing = '0px'; };
   // DrawBattleStars: 35 points (CalcBattleStars, the record's seed: one field a battle)
   let seed = (b.id | 0) * 7919 + 13;
   const rnd = (lo, hi) => { seed = (seed * 16807) % 2147483647; return lo + (seed % (hi - lo + 1)); };
@@ -2099,7 +2667,10 @@ function battleWindow(b, k) {
     const p = g.players[o]; if (!p) return;
     const id = o === ME ? (p.female ? 1500 : 1000) : (p.female ? 2500 : 2000) + ((p.face || 0) % 20);
     const im = pic('i' + id); if (im) x.drawImage(im, colX[ci], 2, 32, 32);
-    text(p.name || '', colX[ci] + 35, 24);
+    // (3.0.1's DoOneBattle @e0aee: the side's luck, ICN# 3141 + luck (3140 bad, 3142 good, none for 0), 32 to the right of the face, and the
+    // name at +67; 1.2 and 2.0.1 have no luck and the name at +35)
+    if (V3) { const L = b.lk ? b.lk[b.sides.indexOf(o)] : 0, li = L ? pic('i' + (3141 + L)) : null; if (li) x.drawImage(li, colX[ci] + 32, 2, 32, 32); }
+    text(p.name || '', colX[ci] + (V3 ? 67 : 35), 24);
   };
   const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
   const tile = (gr, gx, gy) => { // DrawShipPicture, small, black and white
@@ -2125,8 +2696,8 @@ function battleWindow(b, k) {
     tile(gr, gx, gy);
     x.fillStyle = '#000'; x.fillRect(gx - 20, gy + 40, 160, 13);
     const t = groupWords(gr);
-    x.font = SYS; const cond = x.measureText(t).width > 120;
-    x.font = GEN9; x.letterSpacing = cond ? '-1px' : '0px';
+    x.font = V3 ? SYS3 : SYS; const cond = x.measureText(t).width > 120;
+    x.font = V3 ? GEN93 : GEN9; x.letterSpacing = cond ? '-1px' : '0px';
     const w = x.measureText(t).width; text(t, gx + 60 - Math.trunc(w / 2), gy + 50, GEN9, cond);
     if (!gr.planet) { // the shading: the whole cell when gone, else the front ship's damage from the left (a satellite: a third, from 40)
       const n = gr.units.filter(i => alive[i]).length;
@@ -2154,7 +2725,8 @@ function battleWindow(b, k) {
   // Colour (DAT_00efff1e >= 4: the colour skin, Mac 2.0.1's colour window): the bolt's centre line is HSV hue (weapons - 1) x 4000 mod $ffff, full
   // saturation and value; the pair beside it hue + 7500, value $afc8; the outer pair hue + 15000, value $61a8 (DrawLaserBlast @d3e20 through Pack12's
   // HSV2RGB; in the captures, Sue's Sword (3/3) fighters' bolt is yellow-orange over olive and green, Jake's Conan (5/5) lime over green and teal)
-  const COL = !!window.HOMAC2_COLOUR && V2;
+  // (3.0.1's DrawLaserBlast is the same size as 2.0.1's, 764 bytes, and its colour bolt the same in the captures: the colour skin's too)
+  const COL = (!!window.HOMAC2_COLOUR && V2) || (!!window.HOMAC3_COLOUR && V3);
   const hsv = (h, v) => { h = (h % 65535) / 65535 * 6; const i = Math.floor(h), f = h - i, q = v * (1 - f), t = v * f; const [r, gg, bb] = [[v, t, 0], [q, v, 0], [0, v, t], [0, q, v], [t, 0, v], [v, 0, q]][i % 6]; return 'rgb(' + [r, gg, bb].map(u => Math.round(u * 255)).join(',') + ')'; };
   // (the hue's value is word 2 of the shooting group's record, DrawLaserBlast's first argument at all three of HaveGroupShoot's calls. A ship group's is its design's weapons (CalcOneGroup); the planet's group gets
   // param_7 = *(short *)(battle + 0xac), which DoBattleStage @d0004 sets to the star owner's weapons tech / 100 (player + 0x30: SpendTechMoney's tech array at +0x2c is range, speed, weapons, shields, mini): the owner's weapons level)
@@ -2204,7 +2776,7 @@ function battleWindow(b, k) {
     const P = (rs.battlePanel || RS12().battlePanel)(rs.battlePanel ? g : langView(g), b, { alive, hurt, pop, over: true, won }, ME);
     (P.end || []).forEach((t, i) => text(t, 155, i ? 150 : 135));
     const im = pic(won ? 'p3500' : 'p3510'); if (im) x.drawImage(im, 180, 175, 74, 64);
-    setBtn(fr ? 'Bien' : 'OK');
+    setBtn(fr ? 'Bien' : 'OK'); btn.classList.add('done');
   };
   (async () => {
     let deadline = performance.now() + speed * TICK;
@@ -2650,10 +3222,16 @@ function fleetPaths301(cx, i) {
 // down to the left or up to the right, 5 pixels off; base line 5 above the middle).
 function dragLine301(cx, d) {
   if (!d.star) return true;
+  // (a route through your colonies, DeterminePath: MapLine draws each leg with its distance, the arrowhead at the destination)
+  if (d.legs && d.legs.length > 2) {
+    let r = true;
+    for (let i = 1; i < d.legs.length; i++) { const A0 = d.legs[i - 1], B0 = d.legs[i], last = i === d.legs.length - 1; r = dragLine301(cx, { star: true, ok: true, x1: A0.x, y1: A0.y, x2: B0.x, y2: B0.y, dist: B0.dist, round: false, noHead: !last }) && r; }
+    return r;
+  }
   cx.save(); cx.lineWidth = 2; cx.strokeStyle = d.ok ? '#fff' : orPat(cx, LTGRAY.map(r => r), '#fff');
   cx.beginPath(); cx.moveTo(d.x1, d.y1); cx.lineTo(d.x2, d.y2); cx.stroke();
   const head = (xa, ya, xb, yb) => { const ang = Math.atan2(ya - yb, xa - xb); cx.beginPath(); for (const sgn of [-1, 1]) { cx.moveTo(xb + 16 * Math.cos(ang + sgn * 0.52), yb + 16 * Math.sin(ang + sgn * 0.52)); cx.lineTo(xb, yb); } cx.stroke(); };
-  if (d.ok) head(d.x1, d.y1, d.x2, d.y2);
+  if (d.ok && !d.noHead) head(d.x1, d.y1, d.x2, d.y2);
   if (d.round) head(d.x2, d.y2, d.x1, d.y1);
   if (d.dist != null) {
     const t = String(d.dist); cx.font = G9; cx.textAlign = 'left'; const w = cx.measureText(t).width;
@@ -2679,11 +3257,82 @@ function afterMsg301(box, info) {
   const sp = m && ic ? special301(String(m.text || '')) : null;
   if (sp) { const w = a.el('span', { class: 'ric301' }); ic.replaceWith(w); w.append(ic); if (sp === 'cross') w.append(a.el('span', { class: 'x301' })); else { const im = a.IMG[sp]; if (im && im.src) w.append(a.el('img', { class: 'sp301', src: im.src, alt: '' })); } }
 }
+function menuName12(name) {
+  if (name !== 'Edit') return name;
+  const sp = document.createElement('span'), set = () => { sp.textContent = window.HOUI && HOUI.t ? HOUI.t('Edit') : 'Edit'; };
+  sp.setAttribute('translate', 'no'); set(); if (window.HOUI && HOUI.onChange) HOUI.onChange(set);
+  return sp;
+}
+// the remake's commands that 1.2 has no menu item for (Import, Export, the Halls, Auto play, Players ...) go to the Ho! menu
+function menus12(M, ho) {
+  ITEMS = {};
+  for (const k in M) for (const x of M[k]) if (x[0] !== '-' && typeof x[0] === 'string') ITEMS[x[0]] = x;
+  const own = new Set(['New game…', 'Quit to title', 'Build ships at selected colony…', 'Review battle…', 'List all fleets…', 'Scrap ship types…', 'Next fleet',
+    'List explored stars…', 'Fix spending', 'Report window…', 'Zoom in', 'Zoom out', ...(V2 || V3 ? ['Compare players…', 'Send a message…', 'Force end turn…', 'Auto play…', 'End turn and switch players'] : []),
+    ...(V3 ? ['Players and history', 'Players and alliances…', 'Give money or metal…', 'Dip into savings…', 'Preferences…', 'Hall of Fame…', 'Hall of Shame…'] : [])]);
+  const extra = [];
+  for (const k in M) { for (const x of M[k]) if (x[0] !== '-' && !(typeof x[0] === 'string' && own.has(x[0]))) extra.push(x); M[k].length = 0; }
+  // (View's sound and music, Help's How to play and the manual stay reachable)
+  // (3.0.1's About box: DLOG 1100 / 1101, PICT 1000 / 1001, which the skins have as p1001)
+  ho.unshift([V3 ? 'About Spaceward Ho! 3.0…' : V2 ? 'About Spaceward Ho! 2.0…' : 'About Spaceward Ho! 1.2…', aboutBox], ['-']);
+  // (each command is the remake's own: a window it opens is tagged at once, which is what keeps 1.2's own windows out of the remake's look;
+  // the Ho! menu's own items too: Skin and OS look, Sounds, Language, Temperatures)
+  const tagged = (x) => { const f = x[1], y = x.slice(); y[1] = (...a) => { const r = f(...a); tagRemakeWindows(); return r; }; return y; };
+  for (let i = 0; i < ho.length; i++) if (ho[i][0] !== '-' && typeof ho[i][1] === 'function') ho[i] = tagged(ho[i]);
+  if (extra.length) ho.push(['-'], ...extra.filter(x => !(typeof x[0] === 'function' && (V3 ? /scrap|organize|organi|switch players|surrender|armageddon/i : /scrap|organize|organi|switch players/i).test(String(x[0]())))).map(tagged));
+}
+// (DoBattleStage: with Review Event Battles on, the battles you were in are shown during the update, before the reports: 1.2, 2.0.1 and 3.0.1)
+function afterTurn12(go) {
+  const a = A(), g = G();
+  if (!own() || !a.prefReview()) return go();
+  const list = g.battles.slice(LASTB).filter(b => b.sides.includes(a.ME));
+  for (const m of a.me().inbox || []) if (m.battle && list.some(b => b.id === m.battle)) m._reviewed = true;
+  const next = () => {
+    const b = list.shift(); if (!b) return go();
+    a.openBattle(b.id);
+    const wait = setInterval(() => { if (!document.querySelector('.scrim')) { clearInterval(wait); next(); } }, 200);
+  };
+  next();
+}
 // 3.0.1 (js/skins/mac3): only the arrangement and the shared windows, above; the rest of this file is 1.2's and 2.0.1's
 if (V3) {
   document.documentElement.classList.add('mac301');
+  // (the battle window's canvas text needs its bitmap faces loaded before its first frame)
+  try { if (document.fonts) { document.fonts.load(SYS3); document.fonts.load(GEN93); } } catch (e) { /* (an old browser draws with the fallbacks) */ }
   window.HOMAC301 = {
     get ownPanel() { return !!G() && own(); },
+    // (the New Game window, for 3.0.1's own rules: its Create New Galaxy dialog over the form)
+    newGame(f) { createGalaxy301(f); },
+    // the battle window: DLOG 7010 / 7011 are 2.0.1's and HaveGroupShoot the same code; 3.0.1's own drawing in battleWindow (V3)
+    battleWindow: (b, k) => (own() ? battleWindow(b, k) : false),
+    // (the program's own battle window with modern conveniences on too: Jake, 18 Nov, the remake's looked wrong in this skin)
+    battleWindowAlways: true,
+    afterTurn: (go) => afterTurn12(go),
+    // the windows 3.0.1 draws with its own routines (docs/status-301.md, "Windows from the menus")
+    window(name, ...x) {
+      if (!G() || !own()) return false;
+      if (name === 'fleets') return fleets301();
+      if (name === 'build') return build301(x[0]);
+      if (name === 'give') return give301();
+      if (name === 'chat') return chat301();
+      if (name === 'organize' || name === 'group') return organize301(x[0]);
+      return false;
+    },
+    // the status window (DLOG 7000, the same items as 2.0.1's: "Writing New Game File..." (STR# 4000.1) while the new galaxy is written,
+    // then "Pass 1 for Player %d..." and the rest while a turn is worked out; Jake's captures 017-019, 169-174), and the play-alone question
+    beforeFirstTurn(go) {
+      if (!own()) return false;
+      const a = A(), n = G().players.length, txt = STR301(4000)[0] || 'Writing New Game File...', bar = status20(txt, n);
+      a.modal('', bar.box, { cls: 'small mac12 dl20w', label: txt });
+      let i = 0; const step = () => { if (++i > n) { a.closeModal(); go(); return; } bar.value = i; setTimeout(step, 60); }; setTimeout(step, 60);
+      return true;
+    },
+    turnProgress(g, go) {
+      LASTB = g.battles.length;
+      if (!own()) return go();
+      if (g.year === 2000 && !g.alone301 && g.players.filter(p => p.human).length < 2 && H().rules(g).id === '301') return playAlone301(g, () => turnProgress(g, go));
+      turnProgress(g, go);
+    },
     panel(panel, B) { if (G() && own()) panel301(panel, B); requestAnimationFrame(measureMac); },
     // the map: 2.0.1's zooms, cells and scroll bars (the same code), 3.0.1's own drawing (above)
     zoomTo: (s0, f) => (own() ? zoomTo(s0, f) : Math.max(12, Math.min(140, s0 * f))),
@@ -2702,20 +3351,25 @@ if (V3) {
     drawStar: (cx, i) => (own() ? drawStar301(cx, i) : false),
     // your selected fleet is picked up from its star, as FollowPathDrag does (an unseen handle over the star's icon); no markers are drawn
     marker: () => 'none',
+    // the menus (menuLayout301 above); the remake's commands that 3.0.1 has no item for go to the Ho! menu, as in 1.2's and 2.0.1's
+    menus: (M, ho) => menus12(M, ho),
+    get menuLayout() { return menuLayout(); },
+    menuLayoutNow() { return menuLayout(); },
+    menuName: (name) => menuName12(name),
+    // (a Mac menu's key equivalent is ⌘ and the key, as the MENU resources and every capture have it; the DOS skin under this one writes "[N]")
+    keyName: (k) => '⌘' + k,
     markerAt(f, i) { if (!own() || !i.mine) return null; const a = A(), here = a.fleetOrder(a.G.fleets.filter(x => x.owner === a.ME && x.star === i.s.id && x.to == null)), cur = here.find(x => x.id === a.UI.selFleet) || here[0]; if (!cur || f.id !== cur.id) return null; const u = i.view.s / 2, d = u >= 17 ? 32 * Math.max(1, u / 17) : u < 7 ? u + 4 : 16; return { x: i.x - d / 2, y: i.y - d / 2, w: d, hidden: true }; },
   };
+  document.addEventListener('keydown', keyEquiv);
   return;
 }
 window.HOMAC12 = {
   alertBox: (paras) => { const b = V2 && G() && own12Rules() ? alert20(paras) : null; if (b) b.setAttribute('translate', 'no'); return b; },
   battleWindow,
+  battleWindowAlways: true,
   // (the Edit menu's French title is 1.2F's "Edition", which the interface would take for its English word "Edition": written as it is)
-  menuName(name) {
-    if (name !== 'Edit') return name;
-    const sp = document.createElement('span'), set = () => { sp.textContent = window.HOUI && HOUI.t ? HOUI.t('Edit') : 'Edit'; };
-    sp.setAttribute('translate', 'no'); set(); if (window.HOUI && HOUI.onChange) HOUI.onChange(set);
-    return sp;
-  },
+  menuName: (name) => menuName12(name),
+  keyName: (k) => '⌘' + k,
   // (NewGame @100004: the status window "Ecriture nouveau fichier Jeu..." (STR# 4000.1; Mac 2.0.1 "Writing New Game File...") while the
   // galaxy file is written, its bar moving once a player)
   beforeFirstTurn(go) {
@@ -2777,18 +3431,7 @@ window.HOMAC12 = {
   ownPanel: true,
   turnProgress(g, go) { LASTB = g.battles.length; if (!own()) return go(); turnProgress(g, go); },
   // (DoBattleStage @d0004: with Voir batailles on, the battles you were in are shown during the update, before the reports)
-  afterTurn(go) {
-    const a = A(), g = G();
-    if (!own() || !a.prefReview()) return go();
-    const list = g.battles.slice(LASTB).filter(b => b.sides.includes(a.ME));
-    for (const m of a.me().inbox || []) if (m.battle && list.some(b => b.id === m.battle)) m._reviewed = true;
-    const next = () => {
-      const b = list.shift(); if (!b) return go();
-      a.openBattle(b.id);
-      const wait = setInterval(() => { if (!document.querySelector('.scrim')) { clearInterval(wait); next(); } }, 200);
-    };
-    next();
-  },
+  afterTurn: (go) => afterTurn12(go),
   panel(panel, B) { if (own()) panel12(panel, B || {}); requestAnimationFrame(measureMac); },
   // End Turn at the map's top left (as the 3.0.1 skins: html.macfam #msg.et301)
   afterMsg: (box) => { box.classList.toggle('et301', !!box.querySelector('.clock')); },
@@ -2810,29 +3453,14 @@ window.HOMAC12 = {
     if (name === 'build') return buildShips(x[0]);
     return false;
   },
-  // the remake's commands that 1.2 has no menu item for (Import, Export, the Halls, Auto play, Players ...) go to the Ho! menu
-  menus(M, ho) {
-    ITEMS = {};
-    for (const k in M) for (const x of M[k]) if (x[0] !== '-' && typeof x[0] === 'string') ITEMS[x[0]] = x;
-    const own = new Set(['New game…', 'Quit to title', 'Build ships at selected colony…', 'Review battle…', 'List all fleets…', 'Scrap ship types…', 'Next fleet',
-      'List explored stars…', 'Fix spending', 'Report window…', 'Zoom in', 'Zoom out', ...(V2 ? ['Compare players…', 'Send a message…', 'Force end turn…', 'Auto play…', 'End turn and switch players'] : [])]);
-    const extra = [];
-    for (const k in M) { for (const x of M[k]) if (x[0] !== '-' && !(typeof x[0] === 'string' && own.has(x[0]))) extra.push(x); M[k].length = 0; }
-    // (View's sound and music, Help's How to play and the manual stay reachable)
-    ho.unshift([V2 ? 'About Spaceward Ho! 2.0…' : 'About Spaceward Ho! 1.2…', aboutBox], ['-']);
-    // (each command is the remake's own: a window it opens is tagged at once, which is what keeps 1.2's own windows out of the remake's look;
-    // the Ho! menu's own items too: Skin and OS look, Sounds, Language, Temperatures)
-    const tagged = (x) => { const f = x[1], y = x.slice(); y[1] = (...a) => { const r = f(...a); tagRemakeWindows(); return r; }; return y; };
-    for (let i = 0; i < ho.length; i++) if (ho[i][0] !== '-' && typeof ho[i][1] === 'function') ho[i] = tagged(ho[i]);
-    if (extra.length) ho.push(['-'], ...extra.filter(x => !(typeof x[0] === 'function' && /scrap|organize|organi|switch players/i.test(String(x[0]())))).map(tagged));
-  },
+  menus: (M, ho) => menus12(M, ho),
   get menuLayout() { return menuLayout(); },
   // (the menus laid out again when the OS look changes ask for this: without it they took the DOS skin's, js/skins/dos/ui.js, with no New and no Edit
   // menu: Jake's 1.2 game in the System 7 look, 17 Nov 2026)
   menuLayoutNow() { return menuLayout(); },
 };
 // key equivalents: ⌘ or Ctrl and the item's key, as the menus show them (a browser keeps some of them, ⌘N, ⌘W, ⌘T, ⌘Q, for itself)
-document.addEventListener('keydown', (e) => {
+function keyEquiv(e) {
   if (!(e.metaKey || e.ctrlKey) || e.altKey || !A() || !G() || /^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName)) return;
   const L = menuLayout();
   for (const k in L) for (const x of L[k]) {
@@ -2840,6 +3468,7 @@ document.addEventListener('keydown', (e) => {
     if (x[4] && x[4]()) return;
     e.preventDefault(); x[1](); return;
   }
-});
+}
+document.addEventListener('keydown', keyEquiv);
 })();
 if (!window.HOSKINS_INLINE) document.write('<script src="js/skins/mac3/pictures.js' + (window.HO_BUILD || '') + '"><\/script>');
