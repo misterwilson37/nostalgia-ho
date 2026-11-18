@@ -1275,8 +1275,8 @@ function battleWindow95(b, k) {
     let im = null;
     if (gr.planet) im = pic(1003);
     else { const u = b.start[gr.units[0]], d = H().getDesign(g, gr.o, u.did) || { type: u.t, R: 1, V: 1, W: 1, S: 1 }; im = shipPicClean(d, IMG); }
-    x.fillStyle = '#000'; x.fillRect(gx, gy, 128, 40);
-    if (im) { const w = im.width, h = im.height, sc = Math.min(1, 128 / w, 40 / h), dx = gx + (128 - w * sc) / 2, dy = gy + (40 - h * sc) / 2;
+    x.fillStyle = '#000'; x.fillRect(gx, gy, 120, 40); // (a group's box is 120 x 40: FUN_004251cd)
+    if (im) { const w = im.width, h = im.height, sc = Math.min(1, 120 / w, 40 / h), dx = gx + (120 - w * sc) / 2, dy = gy + (40 - h * sc) / 2;
       // (the right-hand side's ships face left, towards the other side: shots 094-099)
       if (gr.ci === 1 && !gr.planet) { x.save(); x.translate(dx + w * sc, dy); x.scale(-1, 1); x.drawImage(im, 0, 0, w * sc, h * sc); x.restore(); } else x.drawImage(im, dx, dy, w * sc, h * sc); }
   };
@@ -1291,12 +1291,12 @@ function battleWindow95(b, k) {
     tile(gr, gx, gy);
     x.fillStyle = '#000'; x.fillRect(gx - 20, gy + 40, 170, 13);
     const t = groupWords(gr); x.font = BAT_SMALL; const w = x.measureText(t).width;
-    text(t, gx + 64 - Math.trunc(w / 2), gy + 42, BAT_SMALL);
+    text(t, gx + 60 - Math.trunc(w / 2), gy + 41, BAT_SMALL); // (centred on the box, under it: FUN_004251cd)
     if (!gr.planet) {
       const n = gr.units.filter(i => alive[i]).length;
       let f = 0, q = -1; for (const i of gr.units) { const h = hurt[i]; if (h && h.n > q && alive[i]) { q = h.n; f = h.f; } }
-      let l = gx, r = gx + 128;
-      if (n > 0) r = Math.min(gx + 128, gx + Math.trunc(128 * clamp(f, 0, 1)));
+      let l = gx, r = gx + 120;
+      if (n > 0) r = Math.min(gx + 120, gx + Math.trunc(120 * clamp(f, 0, 1)));
       if (r > l) { x.fillStyle = grayPat; x.fillRect(l, gy, r - l, 40); }
     }
     drawStars();
@@ -1326,13 +1326,18 @@ function battleWindow95(b, k) {
     for (let i = 0; i < 5 && !stop && !skip; i++) { const t0 = performance.now(); back(); seg(h, v, h + dx, v + dy); h += dx; v += dy; await wait(t0 + TICK); }
     back();
   }
+  // a hit and a kill as FUN_00428118: a hit stamps picture 12000 + n % 3 (17 x 17) at (n % 103, n % 23) in the target's box; a kill (sound
+  // 3003, with Fully Animated Battles) fills 59 ovals from the middle out (inset i across, i * 40 / 120 down, i from 59 to 1), each the
+  // colour of hue (59 - i) * 175 of 65535 at full saturation and value (red to yellow), a tick every second one, then fills them black
+  // from the largest in.
   async function explosion(tg, ev, until) {
-    const l = colX[tg.ci], tp = GY(tg.row), dm = ev.dm | 0;
-    if (ev.snd !== 3003) { const im = pic(12000 + (dm % 3)); if (im) x.drawImage(im, l + (dm % 111), tp + (dm % 23), 17, 17); return; }
+    const l = colX[tg.ci], tp = GY(tg.row), dm = ev.dm | 0, W0 = 120, H0 = 40;
+    if (ev.snd !== 3003) { const im = pic(12000 + (dm % 3)); if (im) x.drawImage(im, l + (dm % 103), tp + (dm % 23), 17, 17); return; }
     if (!VB.full) return;
-    const oval = (sz, style, lw) => { const r = { l: l + sz, r: l + 128 - sz, t: tp + Math.trunc(40 * sz / 128), b: tp + 40 - Math.trunc(40 * sz / 128) }; if (r.r <= r.l || r.b <= r.t) return; x.strokeStyle = style; x.lineWidth = lw || 1; x.beginPath(); x.ellipse((r.l + r.r) / 2, (r.t + r.b) / 2, (r.r - r.l - 1) / 2, (r.b - r.t - 1) / 2, 0, 0, Math.PI * 2); x.stroke(); };
-    for (let sz = 63; sz > 0 && !stop && !skip; sz--) { oval(sz, hsv((63 - sz) * 175, 1)); if (sz % 2 === 0 && performance.now() < until) await wait(performance.now() + TICK); }
-    for (let sz = 1; sz < 64 && !stop && !skip; sz++) { oval(sz, '#000', 2); if (sz % 2 === 0 && performance.now() < until) await wait(performance.now() + TICK); }
+    const oval = (i, style) => { const a = l + i, b2 = l + W0 - i, t = tp + Math.trunc(i * 40 / 120), bt = tp + H0 - Math.trunc(i * 40 / 120); if (b2 <= a || bt <= t) return;
+      x.fillStyle = style; x.beginPath(); x.ellipse((a + b2) / 2, (t + bt) / 2, (b2 - a) / 2, (bt - t) / 2, 0, 0, Math.PI * 2); x.fill(); };
+    for (let i = 59; i > 0 && !stop && !skip; i--) { oval(i, hsv((59 - i) * 175, 1)); if (i % 2 === 0 && performance.now() < until) await wait(performance.now() + TICK); }
+    for (let i = 1; i < 60 && !stop && !skip; i++) { oval(i, '#000'); if (i % 2 === 0 && performance.now() < until) await wait(performance.now() + TICK); }
   }
   const apply = (ev) => { if (ev.p) { if (ev.php != null) pop = ev.php / 1000; } else { if (ev.f != null) hurt[ev.ti] = { n: ++seq, f: ev.f }; if (ev.k) alive[ev.ti] = false; } };
   const finish = () => {
