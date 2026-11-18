@@ -276,17 +276,26 @@ function moneyPane() {
 }
 // The players (the list at the bottom left, 105 x 174 at (5, 271)): rows 24 high, a tick for a player whose turn is done, the small face
 // (8405 / 8905 for you, 9000 + face / 9500 + face for the computer players: the 32 x 32 faces' numbers + 7000), the name; a cross over the
-// face of one who is out. (The order is the players' own, you first: how the program sorts them is not read yet.)
+// face of one who is out. The order (FUN_00489232, a selection sort each time it draws): the players still in, the one with the larger first
+// figure of his record (+0, beside Net Income's +8: gross income, the remake's lastGross) first; then those out, the latest out first. A
+// mutual ally's face carries badge 13000, a best buddy's 13001.
 function playersPane() {
   const a = A(), g = a.G, IMG = a.IMG;
   const box = document.createElement('section'); box.className = 'w95players'; box.setAttribute('aria-label', 'Players');
-  const list = [a.me()].concat(g.players.filter(q => q.id !== a.ME));
+  const inP = (q) => q.alive !== false && !q.surrendered, outY = (q) => (q.outYear != null ? q.outYear : g.year);
+  const list = g.players.slice();
+  for (let i = 0; i < list.length - 1; i++) for (let j = i + 1; j < list.length; j++) {
+    const A1 = list[i], B1 = list[j], ai = inP(A1), bi = inP(B1);
+    if ((ai && bi && (A1.lastGross || 0) < (B1.lastGross || 0)) || (!ai && bi) || (!ai && !bi && outY(A1) < outY(B1))) { list[i] = B1; list[j] = A1; }
+  }
   list.forEach((q) => {
     const r = document.createElement('div'); r.className = 'prow' + (q.alive === false ? ' out' : '');
     const done = !q.human || (g.done || []).includes(q.id);
     r.append(span('tick', done && q.id !== a.ME ? '√' : ''));
     const n = q.human ? (q.female ? 8905 : 8405) : (q.female ? 9500 : 9000) + (q.face || 0) % 20, im = IMG['w95:b' + n];
     const f = document.createElement('i'); f.className = 'face'; if (im && im.src) f.style.backgroundImage = `url("${im.src}")`; r.append(f);
+    const lv = q.id === a.ME ? 0 : pactLevel(g, a.ME, q.id), bd = lv && IMG['w95:b' + (lv === 2 ? 13001 : 13000)];
+    if (bd && bd.width) { const k = document.createElement('canvas'); k.width = k.height = 16; k.className = 'pact'; k.getContext('2d').drawImage(whiteClear(bd) || bd, 0, 0); f.append(k); }
     r.append(span('pn', q.name));
     box.append(r);
   });
