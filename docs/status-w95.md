@@ -57,8 +57,8 @@ Units 1-4 are the big ones (one session might do two). 6-9 are quicker. 10 is lo
 
 All twelve units have had a pass. What is left, in order of value:
 1. Jake's look at `audit/win-4.0.5/remake-compare/` (private repo) and the preview; fix what he reports.
-2. The rules questions under "Needs a shared file" (fleet wording in reports, design names, Dip Into
-   Savings, Preferences' defaults, Organize, Statistics, Turn Time Limit and Base Difficulty Rating): for the main session or Jake.
+2. The rules questions under "Needs a shared file" (fleet wording in reports, design names, Dip Into Savings, the program's
+   defaults, Organize, Statistics, Battle Speed's range, battle luck, rivals' home stats, Ship Power): for the main session or Jake.
 3. Each unit's "Left" notes:
    none of the units' own; the shared-file questions below.
 4. Merging: the work is on `claude/eager-lovelace-ovw5uv` in both repos; staging and live are the main session's.
