@@ -33,7 +33,7 @@ So, as with 3.0.1, the main screen is rebuilt first, then the windows from the m
 
 | # | Unit | Shots | Done |
 |---|------|-------|------|
-| 0 | Ground truth: crops, `shots.tsv`, dialog table, a side-by-side tool (`tools/skins/w95-compare.js`: our screen beside the crop) | all | |
+| 0 | Ground truth: crops, `shots.tsv`, a side-by-side tool (`tools/skins/w95-compare.js`: our screen beside the crop) | all | done 18 Nov |
 | 1 | Main screen frame: caption, menu bar, pane arrangement at 640 x 480, scaled like `setMacScale` | 007-031 | |
 | 2 | Star pane (picture, name, stats) and the fleet list above the money | 007-073 | |
 | 3 | Money pane and budget bars (Metal, Earnings, Net Income, the four bars) | 007-073 | |
@@ -47,15 +47,23 @@ So, as with 3.0.1, the main screen is rebuilt first, then the windows from the m
 | 11 | End of game: won, lost, armageddon, surrender alerts; Hall of Fame/Shame and their details | 033-039, 286, 295-299, 311, 314-327 | |
 | 12 | Wrap-up: real-play `--skin=w95` at four sizes, digests, ui-lang-audit, notes-check; screenshots beside captures for Jake | | |
 
+The menu bar in the captures is File/Edit/Options/Ships/Galaxy/Window/Help (shot 010); the program rewrites some item
+words at run time ("Build/Design Ships... Ctrl+B", "Organize Ships...", "Zoom Out Ctrl+-"), so the captures, not menu 2, give the words.
+
 Units 1-4 are the big ones (one session might do two). 6-9 are quicker. 10 is long but mechanical.
 
 ## Next
 
-Unit 0.
+Unit 1. (Unit 0's dialog table was dropped: the Windows dialogs are already listed in `docs/405-windows.md`, "Windows 95: SPACEHO.EXE"; each unit maps its windows to them.)
+
+To compare: serve the repo (`python3 -m http.server 8765 --bind 127.0.0.1` from the repo, in the background), then
+`OUT=<folder> node tools/skins/w95-compare.js 010,052 '<js to run first>'` writes `w95-side-NNN.png` (ours left, the capture right).
 
 ## Needs a shared file
 
-(None yet.)
+- The 405 ruleset starts a game with $25,000 savings and 5,000 metal; Jake's Windows game (shot 010) starts with $100,000 and
+  20,000 (Income $51,000, Pop 750,000). Check the New Game options and `js/rules-405.js` / `rules-mac405.js` against the
+  Windows code before changing anything (rules files are shared).
 
 ## Open questions
 
