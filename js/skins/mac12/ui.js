@@ -34,16 +34,7 @@ const MACS = { s: 1, need: 480 };
 function macScale() { const u0 = Math.min(window.innerWidth / 640, window.innerHeight / Math.max(480, MACS.need)); return u0 >= 1.25 ? Math.floor(u0 * 4) / 4 : 1; }
 function measureMac() {
   const p = document.getElementById('panel'), m = document.getElementById('menubar'); if (!p || !p.firstChild || MACS.s <= 1) return; // (only in the Mac's layout: the page's own panel is wider, so taller)
-  // (3.0.1: the Report Window beside Tech Spending at the screen's foot, as SetWindowLocations puts it, x 390, 250 wide (Jake's captures 012,
-  // 040), not under it: placed here, over the map's foot, and left out of the panel's height)
-  if (V3) {
-    const t = p.querySelector('.tech301'), r = p.querySelector('.rep12box');
-    if (t && r) { const tr = t.getBoundingClientRect(), z0 = MACS.s; Object.assign(r.style, { position: 'fixed', left: '390px', top: Math.round(tr.top / z0) + 'px', width: '250px', height: Math.round(tr.height / z0) + 'px', margin: '0', zIndex: '5', boxSizing: 'border-box' }); r.classList.add('rep301beside');
-      // (and the report bubble at the map window's foot, which in 3.0.1 ends above the two windows: lifted to sit above them)
-      // (a CSS variable: html.mac301 #msg:not(.et301) in panel.css, so the End Turn button, which takes the bubble's place at the map's top left, isn't moved)
-      const mg = document.getElementById('msg'), de = document.documentElement; if (mg) { de.style.setProperty('--lift301', '0px'); const mr = mg.getBoundingClientRect(), mapB = (document.getElementById('mapwrap') || mg).getBoundingClientRect().bottom, d = Math.min(mr.bottom, mapB) - tr.top + 4 * z0; if (d > 0 && !mg.classList.contains('et301')) de.style.setProperty('--lift301', -Math.round(d / z0) + 'px'); } }
-  }
-  const z = MACS.s, pr = p.getBoundingClientRect(), kids = [...p.children].filter(k => getComputedStyle(k).position !== 'fixed'), last = (kids[kids.length - 1] || p.lastElementChild).getBoundingClientRect();
+  const z = MACS.s, pr = p.getBoundingClientRect(), last = p.lastElementChild.getBoundingClientRect();
   const need = Math.ceil((last.bottom - pr.top + p.scrollTop * z) / z + 16 + (m ? m.getBoundingClientRect().height / z : 20)); // (the content's foot, the panel's padding above and below, the menu bar)
   if (need !== MACS.need) { MACS.need = need; setMacScale(); }
 }
