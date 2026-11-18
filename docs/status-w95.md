@@ -54,7 +54,12 @@ words at run time ("Build/Design Ships... Ctrl+B", "Organize Ships...", "Zoom Ou
 Units 1-4 are the big ones (one session might do two). 6-9 are quicker. 10 is long but mechanical.
 
 ## Jake's play-test (18 Nov, evening; live `main` a0d88e0, Firefox, Retina MacBook Air), to do in order of what blocks play
-1. A battle didn't open unless he pressed Review Battle; a destroyed ship had no explosion.
+1. ~~A battle didn't open unless he pressed Review Battle; a destroyed ship had no explosion.~~ Done: the 405 ruleset (and Mac 4.0.5,
+   built on it) starts Review Announced Battles on (`options.reviewDefault`; the profile's fallback reviewBattles 1, shot 040); its
+   `shoot` records what FUN_00424088 draws with groupBattleShots / graphicBattles on (as rules-301: drawn shots with snd, dm, php;
+   kills between them as `q` events), so a kill gets FUN_00428118's ovals; the w95 window counts `q` kills, gives a kill the time
+   again (+0x90) and redraws the group after. The game is the same (digest without the shot lists equal, patched and not); with them
+   405 is now a2373d0f6c4bd7b4, mac405 aa5282296ab6c4da.
 2. The Radical Research report came up, but no window to pick a project.
 3. Build window: the money and metal left don't go down as ships are queued; only after OK (no way to see the cost first).
 4. Second turn: End Turn's clock shrank to nothing while the report bubbles were up; back when they went.

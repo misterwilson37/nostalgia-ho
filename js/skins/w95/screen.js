@@ -1429,10 +1429,14 @@ function battleWindow95(b, k) {
         if (!VB.full) while (R[e + n] && R[e + n].si === R[e].si && R[e + n].a === R[e].a && !R[e + n - 1].k) n++;
         for (let j = 0; j < n - 1; j++) apply(R[e + j]);
         const ev = R[e + n - 1], sg = cellOf(ev, true), tg = cellOf(ev, false);
-        if (sg && tg && !hidden[tg.ci] && !hidden[sg.ci]) {
+        if (ev.q) apply(ev); // (a ship killed between the drawn shots: counted, not drawn; rules-405 shoot)
+        else if (sg && tg && !hidden[tg.ci] && !hidden[sg.ci]) {
           await laser(sg, tg); if (stop || skip) break;
           a.Sound.play(k.shotSnd(ev, 3000)); apply(ev); drawGroup(tg);
+          const kill = ev.snd === 3003 && VB.full; // (FUN_00424088: the time again, preferences +0x90, for a ship or the planet destroyed)
+          if (kill) deadline += speed * TICK;
           deadline += speed * TICK; await explosion(tg, ev, deadline); await wait(deadline);
+          if (kill && !stop && !skip) drawGroup(tg); // (then the group again, the ovals gone)
         } else apply(ev);
         e += n;
       }

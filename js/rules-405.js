@@ -1231,23 +1231,36 @@ function pickTarget(G, T) {
 // reaches its hit points (what is left over is lost), a fifth of its metal
 // becoming debris
 function shoot(G, g, T, k, tgt, ev, addDebris) {
+  // (display only, for the battle windows: what FUN_00424088 draws with the program's defaults, graphicBattles 1 and groupBattleShots
+  // 1, as 3.0.1's HaveGroupShoot (rules-301 shoot): a shot is drawn when it empties its target group (sound 3003, FUN_00428118's
+  // ovals) and at the volley's last shot (3003 when that shot killed a ship or emptied the planet; 3002 at the planet; else by the
+  // damage since the last drawn shot x 10 / hit points: under 2 3000, under 5 3001, else 3002), with dm (the group's damage so far:
+  // the burst's place) and php (the planet's people); ships killed between drawn shots are events marked q, counted, not drawn.
+  // The game is the same: only these fields and the q events are new.)
+  let vol = 0;
   for (let i = 0; i < g.n0; i++) for (let j = 0; j < g.shots; j++) {
     if (tgt[k] < 0) tgt[k] = pickTarget(G, T);
     if (tgt[k] < 0) continue;
     const t = T[tgt[k]], h = HIT[clamp(g.W + 25 - t.S, 0, 50)];
     const si = g.planet ? -1 : g.ids[i % Math.max(1, g.ids.length)];
+    const last = i === g.n0 - 1 && j === g.shots - 1;
     if (t.planet) {
       const dmg = Math.min(t.hp, (RI(G, 0, 20) + g.W * 5 + 10) * h * 4);
-      t.hp -= dmg;
+      t.hp -= dmg; t.pdm = (t.pdm || 0) + dmg;
       if (t.hp === 0) t.n = 0;
-      if (ev.length < 80) ev.push({ a: g.o, si, p: 1 });
+      if ((t.n === 0 || last) && ev.length < 80) ev.push({ a: g.o, si, p: 1, snd: t.n === 0 ? 3003 : 3002, dm: t.pdm, php: t.hp });
+      if (t.n === 0) vol = 0;
     } else {
       const dmg = Math.max(1, trunc((RI(G, 0, 20) + g.W * 5 + 10) * h / 6));
-      t.dmg += dmg;
+      t.dmg += dmg; vol += dmg;
       let killed = 0;
       const ti = t.ids[Math.max(0, t.n - 1)];
       if (t.hp <= t.dmg) { t.dmg = 0; t.n--; addDebris(t.debris); killed = 1; }
-      if (ev.length < 80) ev.push({ a: g.o, si, t: t.o, k: killed, ti, f: killed ? 0 : t.dmg / t.hp });
+      if (t.n === 0 || last) {
+        const r = trunc(vol * 10 / t.hp), snd = killed ? 3003 : r > 4 ? 3002 : r < 2 ? 3000 : 3001;
+        if (ev.length < 80) ev.push({ a: g.o, si, t: t.o, k: killed, ti, f: killed ? 0 : t.dmg / t.hp, snd, dm: t.dmg });
+        vol = 0;
+      } else if (killed && ev.length < 80) ev.push({ a: g.o, si, t: t.o, k: 1, ti, f: 0, q: 1 });
     }
     if (t.n === 0) tgt[k] = -1;
   }
@@ -2436,6 +2449,9 @@ const TIME_LIMIT_405 = {
   },
 };
 E.registerRules('405', Object.assign({}, D, {
+  // CONFIRMED (the profile's fallbacks at FUN_0047d8e8's callers: reviewBattles 1; shot 040 has Review ticked): Review Announced
+  // Battles starts on, so a battle opens as its report is announced (it had started off, DOS 2.0's). Jake, 18 Nov.
+  options: Object.assign({}, D.options || {}, { reviewDefault: true }),
   label: 'Windows 95 4.0.5 (1996)',
   // CONFIRMED (Windows FUN_004540a8 / FUN_0045470f, the dialog 356 "List of All Explored Stars:" with the Sort By box; Mac ListExploredStars,
   // InitStarsList @1001a2, MakeOneListedStar; MENU 6040): 3.0.1's list again (js/rules-301.js): Sort By Metal, Quality, Gravity or
