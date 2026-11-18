@@ -370,3 +370,5 @@ html.w95win .w95dlg .sgrid .scell .sp { position: absolute; left: 14px; top: 2px
 html.w95win .w95dlg .sgrid .scell .sl { position: absolute; left: -6px; right: -6px; top: 32px; font-size: 10px; text-align: center; white-space: nowrap; overflow: visible; }
 html.w95win .w95dlg .st.dim { color: #808080; text-shadow: 1px 1px 0 #fff; }
 html.w95win #panel .w95players .face canvas.pact { position: absolute; left: 0; top: 0; width: 16px; height: 16px; image-rendering: pixelated; }
+html.w95win #w95tech .vt { position: absolute; left: 84px; top: 5px; width: 1px; height: 52px; pointer-events: none; }
+html.w95win #w95tech .vt i { position: absolute; left: 0; width: 1px; height: 1px; background: #000; }

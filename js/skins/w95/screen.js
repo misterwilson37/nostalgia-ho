@@ -398,12 +398,17 @@ function techWindow(B) {
   lv.append(span('cl', TL('Current Levels:')));
   ['range', 'speed', 'weapons', 'shields', 'mini'].forEach((k, i) => { const r = document.createElement('div'); r.className = 'lr'; r.append(span('', TL({ range: 'Range', speed: 'Speed', weapons: 'Weapons', shields: 'Shields', mini: 'Mini' }[k])), span('n', String(p.tech[k]))); lv.append(r); });
   const bars = document.createElement('div'); bars.className = 'vb';
+  // the upright scale's ticks (shot 008: one pixel left of the axis, 15 23 29 34 38 41 44 46 49 51 pixels above its foot on the log scale,
+  // the budget's ticks on a 51-pixel scale; i * 51 / 10 on the linear one)
+  const vt = document.createElement('div'); vt.className = 'vt'; vt.setAttribute('aria-hidden', 'true');
+  let tlog = true; try { tlog = H().barScale(a.G, 'tech').id === 'log'; } catch (e) {}
+  (tlog ? [15, 23, 29, 34, 38, 41, 44, 46, 49, 51] : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(i => Math.trunc(i * 51 / 10))).forEach(y => { const t = document.createElement('i'); t.style.bottom = y + 'px'; vt.append(t); });
   const tb = B && B.tech, rows = tb ? [...tb.querySelectorAll('.barrow')] : [];
   rows.forEach((r, i) => { r.classList.add('w95vbar'); bars.append(r); });
   const names = ['Range', 'Speed', 'Weapons', 'Shields', 'Mini', 'Radical'].slice(0, rows.length);
   const nm = document.createElement('div'); nm.className = 'vn';
   names.forEach((t, i) => nm.append(span(i % 2 ? 'lo' : 'hi', TL(t), `left:${11 + 22 * i}px`)));
-  body.append(lv, bars, nm);
+  body.append(lv, bars, vt, nm);
   if (tb) tb.remove();
 }
 
