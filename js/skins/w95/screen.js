@@ -470,6 +470,80 @@ T.afterMsg = (box, info) => {
   const c = card.querySelector('.count'); if (c) c.textContent = 'more...';
 };
 
+
+// ---------- the dialogs (unit 7): SPACEHO.EXE's templates (js/skins/w95/dialogs.js) drawn at their dialog units ----------
+// W95DLG(id): the dialog's controls placed at 1.5 x 1.625 pixels a unit (MS Sans Serif 8): STATIC words, push buttons (the default one
+// ringed), list boxes (white, sunken, their own scroll bar), combo boxes (a <select>), edit fields, check boxes, group boxes, horizontal
+// scroll bars (an <input type=range>); hidden controls left out. Returns the dialog's element and its controls by id (a STATIC's by its
+// words). It opens through the remake's own window (A().modal), so Escape and the remake's window rules hold.
+const DU = (x, y) => [x * 1.5, y * 1.625];
+function W95DLG(id) {
+  const D = (window.W95DLGS || {})[id]; if (!D) return null;
+  const root = document.createElement('div'); root.className = 'w95dlg'; const [W, Hh] = DU(D.w, D.h);
+  root.style.width = W + 'px'; root.style.height = Hh + 'px';
+  const by = {};
+  for (const [cid, kind, text, x, y, w, h, flags] of D.c) {
+    if (/hidden/.test(flags)) continue;
+    const [l, t] = DU(x, y), [ww, hh] = DU(w, h); let e;
+    if (kind === 'STATIC') { e = document.createElement('div'); e.className = 'st'; e.textContent = text; }
+    else if (/push/.test(kind)) { e = document.createElement('button'); e.type = 'button'; e.className = 'pb' + (/default/.test(kind) ? ' def' : ''); e.textContent = text.replace(/&/g, ''); }
+    else if (kind === 'LISTBOX') { e = document.createElement('div'); e.className = 'lbx'; e.setAttribute('role', 'listbox'); e.tabIndex = 0; }
+    else if (kind === 'COMBOBOX') { e = document.createElement('select'); e.className = 'cbx'; hh0(e); }
+    else if (kind === 'EDIT') { e = document.createElement('input'); e.className = 'ed'; }
+    else if (/check box/.test(kind)) { e = document.createElement('label'); e.className = 'ck'; const i = document.createElement('input'); i.type = 'checkbox'; e.append(i, document.createTextNode(text)); }
+    else if (/radio/.test(kind)) { e = document.createElement('label'); e.className = 'rb'; const i = document.createElement('input'); i.type = 'radio'; i.name = 'w95r' + id; e.append(i, document.createTextNode(text)); }
+    else if (kind === 'group box') { e = document.createElement('fieldset'); e.className = 'gb'; if (text) { const lg = document.createElement('legend'); lg.textContent = text; e.append(lg); } }
+    else if (/scroll bar/.test(kind)) { e = document.createElement('input'); e.type = 'range'; e.className = 'sb'; }
+    else { e = document.createElement('div'); e.className = 'od'; }
+    e.style.left = l + 'px'; e.style.top = t + 'px'; e.style.width = ww + 'px';
+    if (kind !== 'COMBOBOX') e.style.height = hh + 'px';
+    e.dataset.cid = String(cid); root.append(e);
+    if (cid !== 65535) by[cid] = e; else if (text) by[text] = e;
+  }
+  return { el: root, by, D };
+  function hh0(e) { e.style.height = '21px'; } // (a combo box's height is its list's; the field is one line)
+}
+function showDlg(dl, label) { const w = A().modal('', dl.el, { cls: 'w95dlgwin', label }); return w; }
+// List of All Fleets (dialog 384, shot 043): "List of All Fleets:", the list (your fleets, one a line: "%s stationed at %s.", "%s leaving %s
+// for %s to arrive in %d.", "%s to arrive at %s in %d.", "%s marooned at %s", 1350-1353), Sort By "Ship Power" / "Ship Class" (its
+// DLGINIT), Go To Fleet and OK. The selected line in navy; a double click goes to the fleet.
+const FLT = { sort: 0 };
+function fleetsDialog() {
+  const a = A(), g = a.G, rs = H().rules(g), dl = W95DLG(384); if (!dl) return false;
+  const lb = dl.by[1175], cb = dl.by[1177];
+  ['Ship Power', 'Ship Class'].forEach((t, i) => { const o = document.createElement('option'); o.value = String(i); o.textContent = t; cb.append(o); });
+  cb.value = String(FLT.sort);
+  const power = (f) => { let n = 0; for (const k in f.ships) { const d = H().getDesign(g, f.owner, +k); if (d) n += f.ships[k] * (rs.shipPower ? rs.shipPower(g, d) : 1); } return n; };
+  const TYPE_ORDER = ['dread', 'fighter', 'bio', 'satellite', 'tanker', 'colony', 'scout'];
+  const klass = (f) => { const ds = H().fleetDesigns(g, f); return Math.min(...ds.map(d => { const i = TYPE_ORDER.indexOf(d.type); return i < 0 ? 99 : i; })); };
+  const line = (f) => {
+    const t = fleetRow(g, f), star = (i) => g.stars[i].name;
+    if (f.to != null) return cfmt('%s to arrive at %s in %d.', t, star(f.to), H().arrivalYear ? H().arrivalYear(g, Math.ceil((f.dist - f.prog) / H().fleetSpeed(g, f))) : g.year);
+    if (f.dest != null) { const d = H().starDist(g, f.star, f.dest), turns = Math.ceil(d / H().fleetSpeed(g, f) - 1e-9); return cfmt('%s leaving %s for %s to arrive in %d.', t, star(f.star), star(f.dest), g.year + turns * ((rs.yearsPerTurn) || 10)); }
+    return cfmt('%s stationed at %s.', t, star(f.star));
+  };
+  let sel = null;
+  const fill = () => {
+    let fs = g.fleets.filter(f => f.owner === a.ME && !f.sat);
+    fs = fs.slice().sort((x, y) => FLT.sort ? klass(x) - klass(y) || power(y) - power(x) : power(y) - power(x));
+    lb.innerHTML = '';
+    fs.forEach((f) => { const r = span('li' + (sel === f.id ? ' sel' : ''), line(f)); r.setAttribute('role', 'option');
+      r.addEventListener('click', () => { sel = f.id; fill(); }); r.addEventListener('dblclick', () => go(f)); lb.append(r); });
+    if (sel == null && fs[0]) { sel = fs[0].id; fill(); }
+  };
+  const go = (f) => { a.closeModal(); const st = f.to != null ? f.from : f.star; if (st != null) { a.UI.sel = st; if (f.to == null) a.UI.selFleet = f.id; a.centerOn(st); } a.renderPanel(); a.draw(); };
+  cb.addEventListener('change', () => { FLT.sort = +cb.value; fill(); });
+  dl.by[1176].addEventListener('click', () => { const f = g.fleets.find(x => x.id === sel); if (f) go(f); });
+  dl.by[1].addEventListener('click', () => a.closeModal());
+  fill(); showDlg(dl, 'List of All Fleets');
+  return true;
+}
+const prevWindow = T.window;
+T.window = (name, ...args) => {
+  if (W95ON()) { if (name === 'fleets') return fleetsDialog(); }
+  return prevWindow ? prevWindow(name, ...args) : false;
+};
+
 // ---------- the caption bar ----------
 // The window's own: the program's icon, the title (#title, written by the classic page), and the minimise, maximise and
 // close boxes (drawn only: the remake has no window to shrink).

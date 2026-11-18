@@ -238,3 +238,17 @@ html.w95win .scrim > .win button:not(.close):not(.tbtn):not([role=menuitem]) { m
 html.w95win .scrim > .win table { font: inherit; border-collapse: collapse; }
 html.w95win .scrim > .win th { font-weight: normal; text-align: left; }
 html.w95win .scrim > .win ul.reports, html.w95win .scrim > .win .lb, html.w95win .scrim > .win .list { background: #fff; border: 2px solid; border-color: #808080 #fff #fff #808080; box-shadow: inset 1px 1px 0 #000; }
+/* the dialogs drawn from SPACEHO.EXE's templates (screen.js W95DLG) */
+html.w95win .scrim > .win.w95dlgwin { padding: 3px; width: auto; max-width: none; max-height: none; overflow: visible; }
+html.w95win .scrim > .win.w95dlgwin > .wtitle { display: none; }
+html.w95win .scrim > .win.w95dlgwin .wbody { padding: 0; overflow: visible; margin: 2px; border: 2px solid; border-color: #808080 #fff #fff #808080; } /* (shot 043: a sunken edge inside the frame) */
+html.w95win .w95dlg { position: relative; font: 11px/13px "MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif; color: #000; }
+html.w95win .w95dlg > * { position: absolute; box-sizing: border-box; margin: 0; }
+html.w95win .w95dlg .st { white-space: pre-wrap; overflow: visible; }
+html.w95win .w95dlg button.pb { min-width: 0 !important; min-height: 0 !important; padding: 0 !important; }
+html.w95win .w95dlg button.pb.def { outline: 1px solid #000; outline-offset: 0; }
+html.w95win .w95dlg .lbx { background: #fff; overflow-y: scroll; overflow-x: hidden; border: 2px solid; border-color: #808080 #fff #fff #808080; box-shadow: inset 1px 1px 0 #000; padding: 1px; }
+html.w95win .w95dlg .lbx .li { display: block; white-space: nowrap; overflow: hidden; height: 13px; padding: 0 2px; cursor: default; }
+html.w95win .w95dlg .lbx .li.sel { background: #000080; color: #fff; }
+html.w95win .w95dlg select.cbx { padding: 1px 18px 1px 3px; font: inherit; }
+html.w95win .w95dlg .gb { border: 2px groove #fff; padding: 0; }
