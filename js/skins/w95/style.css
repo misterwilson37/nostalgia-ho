@@ -114,7 +114,7 @@ html.w95win #panel .w95star .noinfo { left: 3px; top: 15px; }
 html.w95win #panel .w95star canvas.pic { position: absolute; top: 0; height: 85px; image-rendering: pixelated; }
 html.w95win #panel .w95star .gauge { position: absolute; left: 118px; top: 0; width: 10px; height: 85px; background: #c0c0c0; touch-action: none; cursor: ns-resize; }
 html.w95win #panel .w95star .gauge canvas { display: block; width: 10px; height: 67px; image-rendering: pixelated; }
-html.w95win #panel .w95star .gauge i { position: absolute; left: 1px; width: 8px; height: 6px; box-sizing: border-box; background: #c0c0c0; box-shadow: inset -1px -1px 0 #000, inset 1px 1px 0 #fff; }
+html.w95win #panel .w95star .gauge canvas.gth { position: absolute; left: 1px; width: 8px; height: 6px; }
 /* the rules between the panes (the captures: grey at 128, black at 129-130; 154 black; 221 grey, 222-223 black) */
 html.w95win #panel .w95star { border-bottom: 1px solid #c0c0c0; box-shadow: 0 1px 0 #c0c0c0; }
 html.w95win #panel .w95fhead { height: 23px; border-top: 2px solid #000; margin-top: 1px; }

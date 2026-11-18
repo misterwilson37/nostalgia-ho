@@ -139,8 +139,10 @@ function gaugeOf(s, p) {
   const rs = H().rules(A().G);
   const share = () => { if (rs.bars) { const b = rs.bars(s); return b[0] < 0 ? 0 : b[1] < 0 ? 1000 : b[0]; } return tf ? 0 : mf ? 1000 : Math.round(1000 * (s.terra == null ? 0.5 : s.terra)); };
   const g = document.createElement('div'); g.className = 'gauge'; g.setAttribute('role', 'slider'); g.setAttribute('aria-label', 'Terraform / mine'); g.tabIndex = 0;
-  const im = A().IMG['w95:b1410']; if (im) { const c = document.createElement('canvas'); c.width = 10; c.height = 67; c.getContext('2d').drawImage(im, 0, 0, 10, 67, 0, 0, 10, 67); g.append(c); }
-  const th = document.createElement('i'); g.append(th);
+  const im = A().IMG['w95:b1410']; if (im) { const c = document.createElement('canvas'); c.width = 10; c.height = 67; c.getContext('2d').drawImage(im, 6, 0, 10, 67, 0, 0, 10, 67); g.append(c); } // (picture 1410 from its column 6: FUN_0048ada8)
+  // the thumb: picture 1411's 8 x 6 at (width - 9, height - 7) (FUN_0048ada8, this+0x2cc), at 1 + share * 58 / 1000 (FUN_0048f855)
+  const th = document.createElement('canvas'); th.width = 8; th.height = 6; th.className = 'gth'; const t1 = A().IMG['w95:b1411'];
+  if (t1 && t1.width) th.getContext('2d').drawImage(t1, t1.width - 9, t1.height - 7, 8, 6, 0, 0, 8, 6); g.append(th);
   const put = () => { const v = share(); th.style.top = (1 + Math.trunc(v * 58 / 1000)) + 'px'; g.setAttribute('aria-valuenow', String(v)); };
   put();
   if (!tf && !mf) {
@@ -164,6 +166,15 @@ function texFor(s, p) {
   const r = Math.trunc(100 * Math.max(s.g, p.homeG) / Math.max(0.01, Math.min(s.g, p.homeG)));
   return r < 150 ? 6100 + s.id % 6 : r < 201 ? 6110 + s.id % 3 : r < 257 ? 6120 + s.id % 4 : 6130;
 }
+// the ice caps' white is see-through: the program loads each cap twice, a mask (all but white black) ANDed in and a copy with white made
+// black ORed over it (FUN_00492c58's loader, FUN_00492ccb's 0x8800c6 / 0xee0086 blits)
+const WCLR = new Map();
+function whiteClear(im) {
+  if (!im || !im.width) return null; if (WCLR.has(im)) return WCLR.get(im);
+  const c = document.createElement('canvas'); c.width = im.width; c.height = im.height; const x = c.getContext('2d'); x.drawImage(im, 0, 0);
+  try { const d = x.getImageData(0, 0, c.width, c.height), p = d.data; for (let i = 0; i < p.length; i += 4) if (p[i] === 255 && p[i + 1] === 255 && p[i + 2] === 255) p[i + 3] = 0; x.putImageData(d, 0, 0); } catch (e) { return im; }
+  WCLR.set(im, c); return c;
+}
 function drawPlanet(cv, step) {
   const a = A(), g = a.G, p = a.me(), s = g && g.stars[+cv.dataset.star]; if (!s) return;
   const K = +cv.dataset.k, L = +cv.dataset.left, x = cv.getContext('2d'); x.setTransform(K, 0, 0, K, 0, 0); x.imageSmoothingEnabled = false;
@@ -177,7 +188,7 @@ function drawPlanet(cv, step) {
   const strip = document.createElement('canvas'); strip.width = 167; strip.height = D; const sx = strip.getContext('2d'); sx.imageSmoothingEnabled = false;
   sx.drawImage(tex, 0, 0, 167, D, 0, 0, 167, D);
   const d10 = Math.round(10 * (p.homeT - (s.owner === a.ME ? s.t : (H().know(g, p, s.id) || s).t)));
-  if (d10 > 0) { const n = Math.min(22, Math.trunc(d10 / 107)) + 6, c1 = a.IMG['w95:b6150'], c2 = a.IMG['w95:b6151'];
+  if (d10 > 0) { const n = Math.min(22, Math.trunc(d10 / 107)) + 6, c1 = whiteClear(a.IMG['w95:b6150']), c2 = whiteClear(a.IMG['w95:b6151']);
     if (c1 && c1.width) sx.drawImage(c1, 0, 0, 167, D, 0, n - 28, 167, D); if (c2 && c2.width) sx.drawImage(c2, 0, 0, 167, D, 0, 28 - n, 167, D); }
   const o = document.createElement('canvas'); o.width = o.height = D; const ox = o.getContext('2d'); ox.imageSmoothingEnabled = false;
   ox.drawImage(strip, off, 0, 167 - off, D, 0, 0, 167 - off, D); if (off) ox.drawImage(strip, 0, 0, off, D, 167 - off, 0, off, D);
