@@ -45,7 +45,7 @@ T.menuLayout = {
     ['Exit', 'Game/Quit to title']],
   // (4.0.5's Edit menu has nothing the remake does: shown dimmed, as in shot 035)
   Edit: [['Undo', () => {}, null, null, dim, 'Z'], '-', ['Cut', () => {}, null, null, dim, 'X'], ['Copy', () => {}, null, null, dim, 'C'], ['Paste', () => {}, null, null, dim, 'V']],
-  Options: [['Auto Play...', 'Game/Auto play…'], '-', [null, 'View/#4'], '-',
+  Options: [['Auto Play...', () => (W95ON() ? autoPlayDialog() : HOAPI.openAutoPlay()), null, null, () => noGame() || !!(HOAPI.G && HOAPI.G.over)], '-', [null, 'View/#4'], '-',
     ['Master Point List...', 'Game/Master Point List…'], ['Hall of Fame...', 'Game/Hall of Fame…'], ['Hall of Shame...', 'Game/Hall of Shame…'], '-',
     ['Preferences...', () => (W95ON() ? prefsDialog() : HOAPI.openPrefs()), null, null, noGame]],
   Ships: [['Build/Design Ships...', 'Ships/Build ships at selected colony…'], '-',
@@ -713,6 +713,29 @@ function prefsDialog() {
     a.savePrefs(); a.closeModal(); a.renderPanel(); a.draw();
   });
   showDlg(dl, 'Preferences');
+}
+
+// Auto Play Options (dialog 379, shot 292): "Have Computer play for me." / "Just mark me done every turn." / "Mark me done until something
+// interesting happens." / "I'll play my own turns, thank you." (the default), "Under auto play, event messages disappear after:" the
+// seconds (shot 292: 2) and the bar; Config... (the remake's auto play settings, in place of dialog 380); OK starts it (runAutoPlay).
+const AP = { mode: 3, every: 2 };
+function autoPlayDialog() {
+  const a = A(), dl = W95DLG(379); if (!dl) { a.openAutoPlay(); return; }
+  const R = [1163, 1164, 1165, 1166].map(id => dl.by[id] && dl.by[id].querySelector('input'));
+  R.forEach((r, i) => { if (r) { r.name = 'w95ap'; r.checked = i === AP.mode; } });
+  // (Config... only for the computer's play: dimmed otherwise, shot 292)
+  const cfg = () => { dl.by[1168].disabled = !(R[0] && R[0].checked); }; R.forEach(r => r && r.addEventListener('change', cfg)); cfg();
+  const bar = dl.by[1167], out = dl.by[1170]; bar.min = 0; bar.max = 10; bar.step = 1; bar.value = AP.every;
+  const show = () => { out.textContent = String(bar.value); }; bar.addEventListener('input', show); show();
+  dl.by[1168].addEventListener('click', () => { a.closeModal(); if (a.openAutoPlaySettings) a.openAutoPlaySettings(() => autoPlayDialog()); });
+  dl.by[1].addEventListener('click', () => {
+    AP.mode = Math.max(0, R.findIndex(r => r && r.checked)); AP.every = +bar.value;
+    a.closeModal();
+    if (AP.mode === 3 || !a.G || a.G.over) return;
+    const stop = AP.mode === 2;
+    a.runAutoPlay({ turns: Infinity, computer: AP.mode === 0, won: stop, lost: stop, news: stop, every: AP.every, stopButton: true });
+  });
+  showDlg(dl, 'Auto Play Options');
 }
 const prevWindow = T.window;
 T.window = (name, ...args) => {
