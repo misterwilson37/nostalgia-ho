@@ -2211,6 +2211,22 @@ function openRanks() {
 // (the Game menu, in each skin's style; 4.0.5's Options menu).
 const hasHall = (g) => !!(g && HO.rules(g).hall);
 const hallKey = (g) => 'ho5.hall.' + g.rules;
+// Every edition's Hall in one window (Jake, 18 Nov 2026): each entry keeps the ruleset and skin it was played in (e.rules, e.skin;
+// older entries take their Hall's ruleset), and the window's Edition list shows this edition's (the version's own Hall, as it kept
+// it), every edition's, or another one's. Each entry is drawn by its own edition's Hall (its date, Details and Play Again).
+const hallRulesets = () => Object.keys(HO.RULESETS).filter(r => HO.RULESETS[r].hall && !HO.RULESETS[r].hidden);
+function hallLocal(rules, kind) {
+  const L = [];
+  for (const r of rules === '*' ? hallRulesets() : [rules]) {
+    let T = {}; try { T = JSON.parse(localStorage.getItem('ho5.hall.' + r) || '{}') || {}; } catch (e) { T = {}; }
+    for (const e of T[kind] || []) L.push(Object.assign({}, e, { rules: e.rules || r }));
+  }
+  return rules === '*' ? L.sort((a, b) => (b.time || 0) - (a.time || 0)) : L;
+}
+const hallOf = (e) => (e && e.rules && e.rules !== G.rules && HO.RULESETS[e.rules] && HO.RULESETS[e.rules].hall) || HO.rules(G).hall;
+// (another edition's entry: its date as that edition writes it, with this game's patch and language: 4.0.5's unpatched year is 126)
+const hallDate = (e) => hallOf(e).date(e.time, e.rules && e.rules !== G.rules ? { rules: e.rules, opts: { patch: G.opts.patch, lang: G.opts.lang } } : G);
+const hallEdition = (r) => { const rs = HO.RULESETS[r] || {}, v = (rs.edition || {}).version || rs.version; return v ? `${editionName(r)} ${v}` : editionName(r); };
 function hallTables(g) {
   let T = {};
   try { T = JSON.parse(localStorage.getItem(hallKey(g)) || '{}') || {}; } catch (e) { T = {}; }
@@ -2226,6 +2242,7 @@ function recordHall() {
     if (!won && !H.out(G, p)) continue;
     const e = H.entry(G, p, won);
     e.time = Math.floor(Date.now() / 1000);
+    e.rules = G.rules; e.skin = (window.HOSKINS && HOSKINS.current) || null; // (the edition and skin it was played in; this computer's Hall only: js/cloud.js keeps its own fields)
     // (a copy: hall.record keeps the entry it is given)
     const shared = Object.assign({}, e);
     try { localStorage.setItem(hallKey(G), JSON.stringify(H.record(hallTables(G), e, won))); } catch (err) {}
@@ -2259,28 +2276,36 @@ const hallHeads = (names, cols) => el('div', { class: 'lbhead', style: `--cols: 
 function openHall(kind, at, everyone) {
   if (!hasHall(G)) return;
   if (skinWindow('hall', kind, at, everyone)) return;
-  const H = HO.rules(G).hall, local = hallTables(G)[kind === 'shame' ? 'shame' : 'fame'], W = H.words || {};
+  const H = HO.rules(G).hall, W = H.words || {}, which = kind === 'shame' ? 'shame' : 'fame';
+  // (the Edition list: this game's own by default, '*' every edition's)
+  const eds = hallRulesets(), ed = UI.hallRules === '*' || eds.includes(UI.hallRules) ? UI.hallRules : G.rules, all = ed === '*';
+  const local = hallLocal(ed, which);
   // hall.words (3.0.1): the version's own titles and heads; hall.again: Play Again's New Game options
-  const title = (kind === 'shame' ? W.shame : W.fame) || (kind === 'shame' ? 'Hall of Shame' : 'Hall of Fame'), cols = '92fr 117fr 71fr';
+  const title = (kind === 'shame' ? W.shame : W.fame) || (kind === 'shame' ? 'Hall of Shame' : 'Hall of Fame'), cols = all ? '92fr 117fr 71fr 110fr' : '92fr 117fr 71fr';
   everyone = !!(everyone && CLOUD);
   let list = everyone ? [] : local;
   let sel = Math.min(at | 0, Math.max(0, list.length - 1));
   const details = () => { const i = sel; if (list[i]) openHallSummary(list[i], kind, () => openHall(kind, everyone ? 0 : i, everyone)); };
   const detailsBtn = el('button', { class: 'quiet', disabled: !list.length, onclick: details }, 'Details');
-  const again = H.again && !everyone && el('button', { class: 'quiet', disabled: !list.length, onclick: () => { const o = list[sel] && H.again(list[sel]); if (o) closeModal(), playAgain(o); } }, W.playAgain || 'Play Again');
+  const again = H.again && !everyone && el('button', { class: 'quiet', disabled: !list.length, onclick: () => { const e = list[sel], A0 = hallOf(e); const o = e && A0.again && A0.again(e); if (o) closeModal(), playAgain(o); } }, W.playAgain || 'Play Again');
+  const edSel = eds.length > 1 ? el('label', { class: 'hed' }, el('span', null, 'Edition'), ' ', el('select', { 'aria-label': 'Edition', onchange: (e) => { UI.hallRules = e.target.value; openHall(kind, 0, everyone); } },
+    el('option', { value: G.rules, selected: ed === G.rules ? 'selected' : false }, editionLabel(G.rules)),
+    el('option', { value: '*', selected: all ? 'selected' : false }, 'All editions'),
+    ...eds.filter(r => r !== G.rules).map(r => el('option', { value: r, selected: ed === r ? 'selected' : false }, editionLabel(r))))) : null;
   // online (js/cloud.js): this computer's Hall, as the version kept it, or
-  // the one everyone shares for this ruleset (newest or best 25)
+  // the one everyone shares for the edition (newest or best 25)
   const radio = (label, on, go) => el('label', { class: 'chk' }, el('input', { type: 'radio', name: 'hallwhere', checked: on ? 'checked' : false, onchange: go }), el('span', null, label));
   const order = everyone ? el('select', { 'aria-label': 'Which games', onchange: (e) => { UI.hallOrder = e.target.value; openHall(kind, 0, true); } },
     el('option', { value: 'new', selected: UI.hallOrder !== 'top' ? 'selected' : false }, 'Newest'), el('option', { value: 'top', selected: UI.hallOrder === 'top' ? 'selected' : false }, 'Best (highest difficulty)')) : null;
   const where = CLOUD ? el('div', { class: 'hwhere', role: 'radiogroup', 'aria-label': 'Whose games' },
     radio('This computer', !everyone, () => openHall(kind, 0, false)), radio('Everyone', everyone, () => openHall(kind, 0, true)), order) : null;
   const box = el('div', { class: 'hbox' });
-  if (everyone) hallEveryone(kind, H, cols, box, UI.hallOrder === 'top' ? 'top' : 'new', (L, i, open) => { list = L; sel = i | 0; detailsBtn.disabled = !L.length; if (open) details(); });
-  else box.append(hallListBox(list.map(e => [e.name, H.date(e.time, G), String(e.difficulty)]), cols, sel, (i) => { sel = i; }, (i) => { sel = i; details(); }));
+  const cells = (e) => [e.name + (e.mine ? ' (you)' : ''), hallDate(e), String(e.difficulty)].concat(all ? [e.rules ? hallEdition(e.rules) : ''] : []);
+  if (everyone) hallEveryone(kind, ed, cells, cols, box, UI.hallOrder === 'top' ? 'top' : 'new', (L, i, open) => { list = L; sel = i | 0; detailsBtn.disabled = !L.length; if (open) details(); });
+  else box.append(hallListBox(list.map(cells), cols, sel, (i) => { sel = i; }, (i) => { sel = i; details(); }));
   const body = el('div', { class: 'hall hall-list' },
-    el('div', { class: 'htitle' }, title), where,
-    hallHeads(W.heads || ['Name', 'When', 'Difficulty'], cols),
+    el('div', { class: 'htitle' }, title), edSel, where,
+    hallHeads((W.heads || ['Name', 'When', 'Difficulty']).concat(all ? ['Edition'] : []), cols),
     box,
     el('div', { class: 'btns' }, detailsBtn, again, el('button', { onclick: closeModal }, 'OK')));
   modal((kind === 'shame' ? W.shameTitle : W.fameTitle) || title, body, { cls: 'mid hallwin' });
@@ -2300,7 +2325,7 @@ function playAgain(o) {
 // reads "Loser" (no colon, as 4.0.5). The picture box (static 1194) is left
 // empty: the summary never gives it a picture.
 function openHallSummary(e, kind, back) {
-  const H = HO.rules(G).hall, N = H.names, shame = kind === 'shame', W = H.words || {};
+  const H = hallOf(e), N = H.names, shame = kind === 'shame', W = H.words || {};
   const row = (label, ...vals) => [el('span', { class: 'hl' }, label), el('span', { class: 'hv' }, ...vals.map(v => el('span', null, v)))];
   const heading = (shame ? W.loss : W.win) || (shame ? 'Summary of Game Defeat' : 'Summary of Game Victory');
   const body = el('div', { class: 'hall hall-sum' },
@@ -2308,7 +2333,7 @@ function openHallSummary(e, kind, back) {
     el('div', { class: 'hsum' },
       // hall.summary (3.0.1): the version's own rows, [label, ...values]
       H.summary ? el('div', { class: 'hgrid' }, ...H.summary(G, e, shame).flatMap(r => row(...r))) : el('div', { class: 'hgrid' },
-        ...row(shame ? (H.loser ? H.loser(G) : 'Loser') : 'Winner:', e.name), ...row('Date:', H.date(e.time, G)), ...row('Difficulty:', String(e.difficulty)),
+        ...row(shame ? (H.loser ? H.loser(G) : 'Loser') : 'Winner:', e.name), ...row('Date:', hallDate(e)), ...row('Difficulty:', String(e.difficulty)),
         ...row('# Humans:', String(e.humans)), ...row('# of Computers:', String(e.computers)), ...row('# Allies:', String(e.allies)),
         ...row('Computer Intelligence:', N.iq[e.iq] || ''), ...row('Game Date:', String(e.year)),
         ...row('Galaxy Size:', N.size[e.size] || '', N.density[e.density] || '', N.shape[e.shape] || ''),
@@ -5841,13 +5866,17 @@ if (CLOUD) CLOUD.onChange((u) => { if (u) cloudPrefsSync(); });
 
 // The Hall window's Everyone list: the 25 newest or best entries of this
 // ruleset's shared Hall, in the version's own columns
-function hallEveryone(kind, H, cols, box, order, onRows) {
+function hallEveryone(kind, ed, cells, cols, box, order, onRows) {
   box.innerHTML = '';
   box.append(el('p', { class: 'sub' }, 'Loading the Hall everyone shares…'));
-  CLOUD.hallTop(G.rules, kind, order).then((L) => {
+  // (every edition's: each edition's 25, newest or best of them all first; js/cloud.js keeps a Hall per ruleset)
+  const eds = ed === '*' ? hallRulesets() : [ed];
+  Promise.all(eds.map(r => CLOUD.hallTop(r, kind, order).then(L => L.map(e => Object.assign({ rules: r }, e))))).then((Ls) => {
+    const key = (e) => order === 'top' ? (e.difficulty || 0) : (e.time || 0);
+    const L = Ls.flat().sort((a, b) => key(b) - key(a)).slice(0, 25);
     box.innerHTML = '';
     onRows(L);
-    box.append(hallListBox(L.map(e => [e.name + (e.mine ? ' (you)' : ''), H.date(e.time, G), String(e.difficulty)]), cols, 0, (i) => onRows(L, i), (i) => onRows(L, i, true)));
+    box.append(hallListBox(L.map(cells), cols, 0, (i) => onRows(L, i), (i) => onRows(L, i, true)));
     if (!L.length) box.append(el('p', { class: 'sub' }, 'Nobody is in it yet.'));
     if (!cloudUser()) box.append(el('p', { class: 'sub' }, 'Sign in, or play as a guest, to add your games here.'));
   }, (e) => { box.innerHTML = ''; box.append(el('p', { class: 'sub' }, CLOUD.errorText(e))); onRows([]); });

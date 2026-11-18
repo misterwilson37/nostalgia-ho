@@ -55,7 +55,12 @@ Sources (private repo `nostalgia-ho-sources`):
         the panes, the Report Window 253 wide at the screen's right under the map, white between): grid cells, not fixed boxes, so the
         Mac is 480 high and scales x1.5 at 1470 x 832 and 1280 x 720, x2.25 at 1920 x 1080. The opening zoom stays the original's 17
         (now x1.5); the modern conveniences' closer zooms are unchanged. A page 760 wide or less keeps them in the panel's column.
-     5. Hall of Fame / Shame by ruleset: to do.
+     5. ~~Hall of Fame / Shame by ruleset~~: done. Each entry this computer writes keeps its ruleset and skin (`e.rules`, `e.skin`;
+        older entries take their Hall's ruleset). The Hall window (classic `openHall`, which the Mac and Windows skins dress) has an
+        Edition list: this game's edition (the default: the version's own Hall, as it kept it), All editions (newest first, with an
+        Edition column), or another edition with a Hall (3.0.1, 4.0.5, Mac 4.0.5). Each row's date, Details and Play Again are its own
+        edition's. "Everyone" (the shared Hall) follows the same list: the cloud keeps a Hall per ruleset already. Not done: the skin on
+        the shared Hall (it would need firestore.rules changed and deployed); the iOS skin's own Hall window has no Edition list.
    - Smaller leftovers in the done panes: "Sort" above the budget bars (`DoHBarClick`'s sort), the drag bar's resizing
      (`ClickInDragBar`), and a real System 7 scroll bar for the three lists.
 3. Until a pane is done, the skin must not show 2.0.1's version of it as if it were 3.0.1's: keep these on the session branch,

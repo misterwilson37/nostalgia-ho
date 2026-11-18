@@ -448,6 +448,10 @@ html.fleetdrag #panel .planet > .btns, html.fleetdrag.fleetdrag-pad #panel .plan
 .hall .hwhere { display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: center; margin: 0 0 6px; }
 .hall .hwhere label.chk { display: inline-flex; gap: 4px; align-items: center; }
 .hall .hbox > .sub { margin: 4px 0; }
+.hall .hed { display: flex; gap: 6px; align-items: center; margin: 0 0 6px; }
+.hall .hed select { font: inherit; max-width: 100%; }
+/* (the Edition list's row too) */
+.hall-list:has(> .hed) { height: auto; padding-bottom: 10px; }
 /* a skin that draws the Hall at its original's fixed size (w95) grows it by the switch's row */
 .hall-list:has(> .hwhere) { height: auto; padding-bottom: 10px; }
 /* online play (ui.js "online play"): the lobby's code, its list of players,
