@@ -403,3 +403,23 @@ html.w95win #panel ::-webkit-scrollbar-button:vertical:start:increment, html.w95
 html.w95win .w95tool ::-webkit-scrollbar-button:vertical:start:increment, html.w95win .w95tool ::-webkit-scrollbar-button:vertical:end:decrement,
 html.w95win .w95dlg ::-webkit-scrollbar-button:horizontal:start:increment, html.w95win .w95dlg ::-webkit-scrollbar-button:horizontal:end:decrement { display: none; }
 html.w95win .w95dlg ::-webkit-scrollbar-corner, html.w95win #panel ::-webkit-scrollbar-corner { background: #c0c0c0; }
+/* Help Topics (screen.js helpTopics; shot 284): Windows Help's window, its tabs, the books and pages */
+html.w95win .scrim > .win.w95helpwin { max-width: none; }
+html.w95win .w95help { width: 424px; font: 11px/13px "MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif; color: #000; background: #c0c0c0; }
+html.w95win .w95help .mcap .q { width: 16px; height: 14px; margin-right: 2px; background: #c0c0c0; color: #000; font: bold 10px/14px Arial, sans-serif; text-align: center; font-style: normal; box-shadow: inset -1px -1px 0 #000, inset 1px 1px 0 #fff, inset -2px -2px 0 #808080; }
+html.w95win .w95help .htabs { display: flex; padding: 8px 8px 0; gap: 0; }
+html.w95win .scrim > .win .w95help .htab { min-width: 0 !important; min-height: 0 !important; width: auto; height: auto; line-height: 13px; font: inherit; padding: 2px 6px 3px !important; margin: 2px 0 0; background: #c0c0c0; border: 0; border-radius: 3px 3px 0 0; box-shadow: inset 1px 1px 0 #fff, inset -1px 0 0 #000, inset -2px 0 0 #808080; cursor: default; }
+html.w95win .w95help .htab.on { margin-top: 0; padding-bottom: 5px; position: relative; z-index: 1; }
+html.w95win .w95help .hpane { margin: 0 8px; padding: 10px 14px 8px; box-shadow: inset 1px 1px 0 #fff, inset -1px -1px 0 #000, inset -2px -2px 0 #808080; }
+html.w95win .w95help .hlead { margin: 6px 0 10px; }
+html.w95win .w95help .hin input { width: 100%; box-sizing: border-box; margin-bottom: 8px; font: inherit; border: 2px solid; border-color: #808080 #fff #fff #808080; box-shadow: inset 1px 1px 0 #000; padding: 2px 3px; }
+html.w95win .w95help .hlist { height: 270px; overflow-y: auto; background: #fff; border: 2px solid; border-color: #808080 #fff #fff #808080; box-shadow: inset 1px 1px 0 #000; padding: 2px; }
+html.w95win .w95help .hrow { display: flex; align-items: center; gap: 4px; height: 18px; white-space: nowrap; cursor: default; }
+html.w95win .w95help .hrow .ht { padding: 0 2px; }
+html.w95win .w95help .hrow.sel .ht { background: #000080; color: #fff; outline: 1px dotted #ff0; }
+html.w95win .w95help .hic { width: 16px; height: 16px; flex: none; background: center no-repeat; }
+html.w95win .w95help .bk .hic { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M3 2h10l-1 2v9H2V3z' fill='%23800080' stroke='%23000'/%3E%3Cpath d='M3 13h9v2H3z' fill='%23fff' stroke='%23000'/%3E%3C/svg%3E"); }
+html.w95win .w95help .bk.open .hic { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M1 4l7 2 7-2v9l-7 2-7-2z' fill='%23fff' stroke='%23000'/%3E%3Cpath d='M8 6v9' stroke='%23800080'/%3E%3C/svg%3E"); }
+html.w95win .w95help .pg .hic { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M3 1h7l3 3v11H3z' fill='%23fff' stroke='%23000'/%3E%3Ctext x='5' y='12' font-size='8' font-family='Arial' font-weight='bold' fill='%23000080'%3E%3F%3C/text%3E%3C/svg%3E"); }
+html.w95win .w95help .hbtns { display: flex; justify-content: flex-end; gap: 6px; padding: 10px 8px 8px; }
+html.w95win .w95help .hbtns .pb { min-width: 75px; height: 23px; }

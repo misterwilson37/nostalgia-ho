@@ -70,7 +70,7 @@ T.menuLayout = {
     [null, 'View/#0'], [null, 'View/#1'], [lab('Fit Galaxy'), 'View/Fit galaxy'], // (by place: T.menus has renamed them)
     [() => (infoOff() ? 'Show Information' : 'Hide Information'), () => setInfo(infoOff()), null, null, noGame, 'Alt+I'], '-',
     [lab('Clean Up Windows'), () => cleanUp(), null, null, noGame]],
-  Help: [[lab('About Spaceho...'), () => aboutDialog(), null, null, () => !W95ON()], [lab('Help Topics'), 'Help/How to play'], [null, 'Help/#1']],
+  Help: [[lab('About Spaceho...'), () => aboutDialog(), null, null, () => !W95ON()], [lab('Help Topics'), () => (W95ON() ? helpTopics() : HOAPI.openHelp && HOAPI.openHelp())], [null, 'Help/#1']],
 };
 // the key equivalents the captures show, by the remake's item (its English label)
 const KEYS = { 'New game…': 'N', 'Saved games…': 'O', 'Export this game…': 'S', 'Quit to title': 'Q', 'Build ships at selected colony…': 'B', 'List all fleets…': 'L',
@@ -1184,6 +1184,64 @@ function sendDialog() {
   return true;
 }
 const w95Note = (t) => { const a = A(); if (a.toast) a.toast(t); else window.alert(t); };
+
+
+// Help Topics (shot 284): Windows Help's own window over HOHELP.HLP, "Help Topics: HoHelp". Contents: "Click a book, and then click Open.
+// Or click another tab, such as Index." over the books of HOHELP.CNT (a closed book opens to its topics, an open one closes; a topic opens
+// its page), Open / Print... / Cancel. Index: every topic, A to Z, narrowed as you type its first letters. Find: the topics whose words
+// hold all you type. The pages are the remake's copy of HOHELP.HLP (assets/manuals/4.0.5, tools/extract/hlp.py) in the game's
+// language; the list is read from that copy's own contents page, so it follows its language. Print... is dimmed.
+const HELPT = { cache: {}, text: {} };
+function helpBase() { const M = window.HOMANUALS || {}, e = M['405'] || {}, lang = (window.HOUI && HOUI.lang) || 'en', u = (e[lang] || e.en || ['assets/manuals/4.0.5/index.html'])[0]; return u.replace(/index\.html$/, ''); }
+async function helpBooks(base) {
+  if (HELPT.cache[base]) return HELPT.cache[base];
+  const html = await (await fetch(base + 'index.html')).text(), d = new DOMParser().parseFromString(html, 'text/html');
+  const books = [...d.querySelectorAll('ul.contents > li')].map(li => ({ t: (li.querySelector(':scope > b') || li).textContent.trim(), topics: [...li.querySelectorAll('a')].map(x => ({ t: x.textContent.trim(), u: base + x.getAttribute('href') })) }));
+  return (HELPT.cache[base] = books);
+}
+function helpTopics() {
+  const a = A(), base = helpBase();
+  const box = document.createElement('div'); box.className = 'w95msg w95help';
+  box.innerHTML = '<div class="mcap"><span></span><i class="q">?</i><i class="x"></i></div><div class="htabs" role="tablist"></div><div class="hpane"><p class="hlead"></p><div class="hin"></div><div class="hlist" role="tree" tabindex="0"></div></div><div class="hbtns"></div>';
+  box.querySelector('.mcap span').textContent = TL('Help Topics: HoHelp');
+  const tabs = box.querySelector('.htabs'), lead = box.querySelector('.hlead'), list = box.querySelector('.hlist'), inp = box.querySelector('.hin');
+  const mk = (t, fn, cls) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'pb' + (cls ? ' ' + cls : ''); b.textContent = TL(t); if (fn) b.addEventListener('click', fn); return b; };
+  let tab = 'contents', open = {}, sel = null, books = [];
+  const go = (u) => { try { window.open(u, '_blank', 'noopener'); } catch (e) {} a.closeModal(); };
+  const openSel = () => { if (!sel) return; if (sel.book != null) { open[sel.book] = !open[sel.book]; draw(); } else go(sel.u); };
+  const row = (cls, text, data, depth) => { const r = document.createElement('div'); r.className = 'hrow ' + cls + (sel && sel.key === data.key ? ' sel' : ''); r.style.paddingLeft = (2 + 18 * depth) + 'px'; r.setAttribute('role', 'treeitem');
+    const i = document.createElement('i'); i.className = 'hic'; r.append(i, span('ht', text));
+    r.addEventListener('click', () => { sel = data; draw(); }); r.addEventListener('dblclick', () => { sel = data; openSel(); }); list.append(r); };
+  const all = () => books.flatMap(b => b.topics);
+  const draw = () => {
+    [...tabs.children].forEach(c => c.classList.toggle('on', c.dataset.t === tab));
+    list.innerHTML = '';
+    if (tab === 'contents') {
+      lead.textContent = TL('Click a book, and then click Open. Or click another tab, such as Index.'); inp.hidden = true;
+      books.forEach((b, i) => { row(open[i] ? 'bk open' : 'bk', b.t, { key: 'b' + i, book: i }, 0); if (open[i]) b.topics.forEach((t, j) => row('pg', t.t, { key: 'p' + i + '.' + j, u: t.u }, 1)); });
+    } else {
+      inp.hidden = false; const q = (inp.querySelector('input').value || '').toLowerCase().trim();
+      lead.textContent = tab === 'index' ? TL('Type the first few letters of the word you\'re looking for.') : TL('Type the word(s) you want to find.');
+      let ts = all().slice().sort((x, y) => x.t.localeCompare(y.t));
+      if (tab === 'index' && q) ts = ts.filter(t => t.t.toLowerCase().startsWith(q) || t.t.toLowerCase().split(/\W+/).some(w => w.startsWith(q)));
+      if (tab === 'find' && q) { const ws = q.split(/\s+/); ts = ts.filter(t => { const tx = (HELPT.text[t.u] || '') + ' ' + t.t.toLowerCase(); return ws.every(w => tx.includes(w)); }); }
+      ts.forEach((t, k) => row('pg', t.t, { key: 'i' + k + t.u, u: t.u }, 0));
+    }
+    const ob = box.querySelector('.hbtns .op'); if (ob) ob.textContent = TL(sel && sel.book != null && open[sel.book] ? 'Close' : sel && sel.book == null ? 'Display' : 'Open');
+  };
+  ['Contents', 'Index', 'Find'].forEach(t => { const b = document.createElement('button'); b.type = 'button'; b.className = 'htab'; b.dataset.t = t.toLowerCase(); b.textContent = TL(t); b.setAttribute('role', 'tab');
+    b.addEventListener('click', async () => { tab = t.toLowerCase(); sel = null; if (tab === 'find') await helpText(); draw(); inp.querySelector('input').focus(); }); tabs.append(b); });
+  const fi = document.createElement('input'); fi.type = 'text'; inp.append(fi); fi.addEventListener('input', () => { sel = null; draw(); });
+  const helpText = async () => { await Promise.all(all().filter(t => HELPT.text[t.u] == null).map(async t => { try { const h = await (await fetch(t.u)).text(); HELPT.text[t.u] = new DOMParser().parseFromString(h, 'text/html').body.textContent.toLowerCase(); } catch (e) { HELPT.text[t.u] = ''; } })); };
+  const pr = mk('Print...'); pr.disabled = true;
+  box.querySelector('.hbtns').append(mk('Open', openSel, 'op def'), pr, mk('Cancel', () => a.closeModal()));
+  box.querySelector('.x').addEventListener('click', () => a.closeModal());
+  list.addEventListener('keydown', (ev) => { if (ev.key === 'Enter') { ev.preventDefault(); openSel(); } });
+  a.modal('', box, { cls: 'w95msgwin w95helpwin', label: 'Help Topics' });
+  helpBooks(base).then(b => { books = b; draw(); }).catch(() => { lead.textContent = TL('The help could not be read.'); });
+  draw();
+  return true;
+}
 
 T.window = (name, ...args) => {
   if (W95ON()) { if (name === 'fleets') return fleetsDialog(); if (name === 'stars') return starsDialog(); if (name === 'surrender' && surrenderDialog()) return true; if (name === 'give') return giveDialog(); if (name === 'players') return graphDialog(); if (name === 'chat' && sendDialog()) return true; if (name === 'build' && buildDialog(args[0])) return true; }
