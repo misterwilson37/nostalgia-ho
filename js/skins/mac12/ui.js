@@ -1342,7 +1342,9 @@ function build301(sid) {
   const beep = () => { if (a.beep) a.beep(); };
   const cost1 = (d) => { const c = H().designCost(g, d), first = d.built === 0 && !(counts[d.id] > 0) && !d.free && rs.paysPrototype(g, p, d); return { money: c.money + (first ? c.proto : 0), metal: c.metal, first }; };
   const picOf = (d) => (a.shipPic ? a.shipPic(d, a.ME) : null);
-  const drawPic = (cv, d) => { const x = cv.getContext('2d'); x.clearRect(0, 0, cv.width, cv.height); x.fillStyle = '#000'; x.fillRect(0, 0, cv.width, cv.height); const im = picOf(d); if (im) x.drawImage(im, 0, 0, cv.width, cv.height); };
+  // (the picture keeps its shape: a ship's three parts fill the 120 x 40, a satellite's one square part is drawn 40 high in the middle, as
+  // DrawShipPicture does, Jake's report of a stretched satellite)
+  const drawPic = (cv, d) => { const x = cv.getContext('2d'); x.clearRect(0, 0, cv.width, cv.height); x.fillStyle = '#000'; x.fillRect(0, 0, cv.width, cv.height); const im = picOf(d); if (!im) return; const k = Math.min(cv.width / im.width, cv.height / im.height), w = im.width * k, h = im.height * k; x.drawImage(im, (cv.width - w) / 2, (cv.height - h) / 2, w, h); };
   // the list
   const list = el('div', { class: 'lst301 types301', role: 'listbox', 'aria-label': 'Ship types', style: at20([5, 5, 217, 125]) });
   const drawList = () => {
@@ -2535,8 +2537,11 @@ function lowBox301(B) {
       if (rs.dragShare) { const b = p.budget, o = JSON.parse(start); b.tech = o.tech; b.savings = o.savings; b.col = o.col; const r = rs.dragShare(g, p, e.key, Math.max(0, Math.min(1000, Math.round(pm)))); if (r) { if (r.tech != null) b.tech = r.tech / 1000; if (r.savings != null) b.savings = r.savings / 1000; for (const k in r.col || {}) b.col[k] = r.col[k] / 1000; } }
       else e.set(pm / 1000);
       const c = lowBox301(B); box.replaceWith(c); };
-    const up = (e2) => { window.removeEventListener('pointermove', set); window.removeEventListener('pointerup', up); set(e2); a.save(); a.renderPanel(); };
-    window.addEventListener('pointermove', set); window.addEventListener('pointerup', up); set(ev);
+    // (a move redraws the whole pane: at most once a frame, the last position, so a drag keeps up with the pointer, Jake's report, Firefox, 18 Nov)
+    let pend = null, raf = 0;
+    const later = (e2) => { pend = e2; if (!raf) raf = requestAnimationFrame(() => { raf = 0; if (pend) { const e3 = pend; pend = null; set(e3); } }); };
+    const up = (e2) => { window.removeEventListener('pointermove', later); window.removeEventListener('pointerup', up); if (raf) { cancelAnimationFrame(raf); raf = 0; } pend = null; set(e2); a.save(); a.renderPanel(); };
+    window.addEventListener('pointermove', later); window.addEventListener('pointerup', up); set(ev);
   });
   q.c.addEventListener('wheel', (ev) => { ev.preventDefault(); const pt = q.at(ev); if (pt.h < 79) LOW301.pTop += ev.deltaY > 0 ? 1 : -1; else LOW301.bTop += ev.deltaY > 0 ? 1 : -1; a.renderPanel(); }, { passive: false });
   const box = a.el('section', { class: 'box low301' }, q.c);
@@ -3217,10 +3222,16 @@ function fleetPaths301(cx, i) {
 // down to the left or up to the right, 5 pixels off; base line 5 above the middle).
 function dragLine301(cx, d) {
   if (!d.star) return true;
+  // (a route through your colonies, DeterminePath: MapLine draws each leg with its distance, the arrowhead at the destination)
+  if (d.legs && d.legs.length > 2) {
+    let r = true;
+    for (let i = 1; i < d.legs.length; i++) { const A0 = d.legs[i - 1], B0 = d.legs[i], last = i === d.legs.length - 1; r = dragLine301(cx, { star: true, ok: true, x1: A0.x, y1: A0.y, x2: B0.x, y2: B0.y, dist: B0.dist, round: false, noHead: !last }) && r; }
+    return r;
+  }
   cx.save(); cx.lineWidth = 2; cx.strokeStyle = d.ok ? '#fff' : orPat(cx, LTGRAY.map(r => r), '#fff');
   cx.beginPath(); cx.moveTo(d.x1, d.y1); cx.lineTo(d.x2, d.y2); cx.stroke();
   const head = (xa, ya, xb, yb) => { const ang = Math.atan2(ya - yb, xa - xb); cx.beginPath(); for (const sgn of [-1, 1]) { cx.moveTo(xb + 16 * Math.cos(ang + sgn * 0.52), yb + 16 * Math.sin(ang + sgn * 0.52)); cx.lineTo(xb, yb); } cx.stroke(); };
-  if (d.ok) head(d.x1, d.y1, d.x2, d.y2);
+  if (d.ok && !d.noHead) head(d.x1, d.y1, d.x2, d.y2);
   if (d.round) head(d.x2, d.y2, d.x1, d.y1);
   if (d.dist != null) {
     const t = String(d.dist); cx.font = G9; cx.textAlign = 'left'; const w = cx.measureText(t).width;
@@ -3270,6 +3281,19 @@ function menus12(M, ho) {
   for (let i = 0; i < ho.length; i++) if (ho[i][0] !== '-' && typeof ho[i][1] === 'function') ho[i] = tagged(ho[i]);
   if (extra.length) ho.push(['-'], ...extra.filter(x => !(typeof x[0] === 'function' && (V3 ? /scrap|organize|organi|switch players|surrender|armageddon/i : /scrap|organize|organi|switch players/i).test(String(x[0]())))).map(tagged));
 }
+// (DoBattleStage: with Review Event Battles on, the battles you were in are shown during the update, before the reports: 1.2, 2.0.1 and 3.0.1)
+function afterTurn12(go) {
+  const a = A(), g = G();
+  if (!own() || !a.prefReview()) return go();
+  const list = g.battles.slice(LASTB).filter(b => b.sides.includes(a.ME));
+  for (const m of a.me().inbox || []) if (m.battle && list.some(b => b.id === m.battle)) m._reviewed = true;
+  const next = () => {
+    const b = list.shift(); if (!b) return go();
+    a.openBattle(b.id);
+    const wait = setInterval(() => { if (!document.querySelector('.scrim')) { clearInterval(wait); next(); } }, 200);
+  };
+  next();
+}
 // 3.0.1 (js/skins/mac3): only the arrangement and the shared windows, above; the rest of this file is 1.2's and 2.0.1's
 if (V3) {
   document.documentElement.classList.add('mac301');
@@ -3281,6 +3305,9 @@ if (V3) {
     newGame(f) { createGalaxy301(f); },
     // the battle window: DLOG 7010 / 7011 are 2.0.1's and HaveGroupShoot the same code; 3.0.1's own drawing in battleWindow (V3)
     battleWindow: (b, k) => (own() ? battleWindow(b, k) : false),
+    // (the program's own battle window with modern conveniences on too: Jake, 18 Nov, the remake's looked wrong in this skin)
+    battleWindowAlways: true,
+    afterTurn: (go) => afterTurn12(go),
     // the windows 3.0.1 draws with its own routines (docs/status-301.md, "Windows from the menus")
     window(name, ...x) {
       if (!G() || !own()) return false;
@@ -3301,6 +3328,7 @@ if (V3) {
       return true;
     },
     turnProgress(g, go) {
+      LASTB = g.battles.length;
       if (!own()) return go();
       if (g.year === 2000 && !g.alone301 && g.players.filter(p => p.human).length < 2 && H().rules(g).id === '301') return playAlone301(g, () => turnProgress(g, go));
       turnProgress(g, go);
@@ -3338,6 +3366,7 @@ if (V3) {
 window.HOMAC12 = {
   alertBox: (paras) => { const b = V2 && G() && own12Rules() ? alert20(paras) : null; if (b) b.setAttribute('translate', 'no'); return b; },
   battleWindow,
+  battleWindowAlways: true,
   // (the Edit menu's French title is 1.2F's "Edition", which the interface would take for its English word "Edition": written as it is)
   menuName: (name) => menuName12(name),
   keyName: (k) => '⌘' + k,
@@ -3402,18 +3431,7 @@ window.HOMAC12 = {
   ownPanel: true,
   turnProgress(g, go) { LASTB = g.battles.length; if (!own()) return go(); turnProgress(g, go); },
   // (DoBattleStage @d0004: with Voir batailles on, the battles you were in are shown during the update, before the reports)
-  afterTurn(go) {
-    const a = A(), g = G();
-    if (!own() || !a.prefReview()) return go();
-    const list = g.battles.slice(LASTB).filter(b => b.sides.includes(a.ME));
-    for (const m of a.me().inbox || []) if (m.battle && list.some(b => b.id === m.battle)) m._reviewed = true;
-    const next = () => {
-      const b = list.shift(); if (!b) return go();
-      a.openBattle(b.id);
-      const wait = setInterval(() => { if (!document.querySelector('.scrim')) { clearInterval(wait); next(); } }, 200);
-    };
-    next();
-  },
+  afterTurn: (go) => afterTurn12(go),
   panel(panel, B) { if (own()) panel12(panel, B || {}); requestAnimationFrame(measureMac); },
   // End Turn at the map's top left (as the 3.0.1 skins: html.macfam #msg.et301)
   afterMsg: (box) => { box.classList.toggle('et301', !!box.querySelector('.clock')); },

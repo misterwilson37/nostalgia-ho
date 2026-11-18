@@ -721,7 +721,12 @@ function draw0() {
     // (the Amiga's double white line, its turns and its open chevrons)
     if (T.dragRoute) {
       const inReach = tgt != null && tgt !== f.star;
-      if (T.dragRoute(cx, { x1: sx(a.x), y1: sy(a.y), x2, y2, ok: inReach && ok, turns: inReach ? Math.ceil(HO.starDist(G, f.star, tgt) / HO.fleetSpeed(G, f) - 1e-9) : null, dist: inReach ? Math.round(HO.starDist(G, f.star, tgt)) : null, round: inReach && ok && round, star: inReach }) !== false) return;
+      // (a ruleset that routes a fleet through its colonies, rs.route: the line follows that route while dragging and is drawn as reachable,
+      // as 3.0.1's FollowPathDrag @15118e does, calling DeterminePath for each new star; a copy of the fleet, as route() marks the fleet)
+      let legs = null;
+      const RS = HO.rules(G);
+      if (inReach && !ok && RS.route && !f.sat) { const pth = RS.route(G, Object.assign({}, f), tgt); if (pth && pth.length) { ok = true; legs = [[sx(a.x), sy(a.y), f.star]].concat(pth.map(i => [sx(G.stars[i].x), sy(G.stars[i].y), i])); } }
+      if (T.dragRoute(cx, { x1: sx(a.x), y1: sy(a.y), x2, y2, ok: inReach && ok, turns: inReach ? Math.ceil(HO.starDist(G, f.star, tgt) / HO.fleetSpeed(G, f) - 1e-9) : null, dist: inReach ? Math.round(HO.starDist(G, f.star, tgt)) : null, round: inReach && ok && round, star: inReach, legs: legs && legs.map((L, i) => i ? { x: L[0], y: L[1], dist: Math.round(HO.starDist(G, legs[i - 1][2], L[2])) } : { x: L[0], y: L[1] }) }) !== false) return;
     }
     cx.save();
     // too far, but a route through your colonies exists (modern): show it
@@ -3235,7 +3240,8 @@ function openBattle(bid) {
 // conveniences' speed control and account are kept.
 function openBattlePanel(b) {
   // a skin's own battle window, drawn as its version draws it (T.battleWindow: the Mac 1.2 skin's, DoOneBattle @d07d0)
-  if (T.battleWindow && !modern()) { T.battleWindow(b, { verBattle, shotSnd, tl }); return; }
+  // (T.battleWindowAlways: a skin whose program's own window stays with modern conveniences on: the Mac 1.2, 2.0.1 and 3.0.1 skins)
+  if (T.battleWindow && (!modern() || T.battleWindowAlways)) { T.battleWindow(b, { verBattle, shotSnd, tl }); return; }
   const rs = HO.rules(G), viewer = b.sides.includes(ME) ? ME : b.sides[0];
   const alive = b.start.map(() => true), hurt = [];
   let seq = 0;

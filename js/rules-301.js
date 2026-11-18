@@ -2146,6 +2146,9 @@ E.registerRules('301', Object.assign({}, D, {
   // +0x2a), as in 2.0; the Technology bars always on the log scale
   // (InitVLogBarAmts @d0004, DoVBarClick @d0582 with 2)
   barScale: { budget: 'log', tech: 'log', toggle: true },
+  // CONFIRMED ('Stup' 1000 "Default Setup" +0x46 = 1, as 1.2's; Jake's capture 197, a new game's Preferences: Review Event Battles checked):
+  // the battles you were in are shown with each turn by default
+  options: Object.assign({}, D.options || {}, { reviewDefault: true }),
   // CONFIRMED (AddNewMessage @161796: the player's +0x58a count, 50-byte reports from +0x58c; at 80 the oldest 10 go; UpdateReportWin @1603aa
   // shows them all from its scroll bar's value): the Report Window keeps the reports of past years (p.reportLog, as 1.2's 50; not in the digest)
   reportHistory: 80,
