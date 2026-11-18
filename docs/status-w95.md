@@ -19,7 +19,8 @@ Sources (private repo `nostalgia-ho-sources`):
   Retina 2x). Crops: `audit/win-4.0.5/crops/NNN.png` (640 x 480, made in unit 0).
 - Index: `audit/win-4.0.5/shots.tsv` (shot, screen, notes; made in unit 0).
 - Resources: `docs/405-windows.md` (the Windows dialogs, menu, DLGINIT, from `tools/extract/windlg.py`).
-- Code: `docs/coverage-405.md` names every routine; **the decompile itself is not in either repo** (see Open questions).
+- Code: `docs/coverage-405.md` names every routine; the decompile is in the private repo, `decompiled/win-4.0.5` (all.c, one file a
+  routine under c/, HOW.md; the program is `extracted/win-2.0/SpcHo3x/CD/SPACEHO.EXE`, whose MFC message maps lead to each window's code).
 
 ## Where it stands (18 Nov)
 
