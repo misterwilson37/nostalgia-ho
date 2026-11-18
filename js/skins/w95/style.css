@@ -217,3 +217,10 @@ html.w95win #w95report .rl { list-style: none; margin: 0; padding: 0; height: 10
 html.w95win #w95report .rl li { display: flex; align-items: flex-start; gap: 3px; min-height: 32px; cursor: default; }
 html.w95win #w95report .rl li img { width: 32px; height: 32px; flex: none; image-rendering: pixelated; }
 html.w95win #w95report .rl li .rt { padding-top: 1px; }
+/* unit 6: the menus (shots 032-050): the key equivalents in a column at the right; Hide Information takes the column away */
+html.w95win #menubar .dropdown button { display: flex; align-items: baseline; gap: 0; }
+html.w95win #menubar .dropdown .mkey { float: none; order: 2; margin-left: auto; padding-left: 22px; min-width: 40px; text-align: left; }
+html.w95win #menubar .dropdown button.check::before { position: absolute; left: 6px; margin: 0; width: auto; }
+html.w95win #menubar .dropdown button { position: relative; }
+html.w95win.w95noinfo #main { grid-template-columns: 0 1fr; }
+html.w95win.w95noinfo #panel { visibility: hidden; }

@@ -32,7 +32,11 @@ T.w95 = W95;
 // words when it runs (Build/Design Ships..., Organize Ships..., Zoom Out Ctrl+-), and the captures win. Items the remake
 // hasn't got are left out; the remake's own commands not placed here go at the end of Help (layoutMenus).
 const clickEndTurn = () => { const b = document.querySelector('#msg .clock'); if (b) b.click(); };
-const dim = () => true;
+const dim = () => true, noGame = () => !(window.HOAPI && HOAPI.G);
+const battleHere = () => { const a = window.HOAPI; return !!(a && a.G && a.UI.sel != null && a.lastBattles(a.UI.sel).length); };
+// Hide Information (shot 050, Alt+I): the information column goes and the map takes the window
+const infoOff = () => de.classList.contains('w95noinfo');
+const setInfo = (on) => { de.classList.toggle('w95noinfo', !on); const a = window.HOAPI; if (a && a.G) { a.resize(); a.draw(); } };
 T.menuLayout = {
   File: [['New Game', 'Game/New game…'], ['Open Game...', 'Game/Saved games…'], '-',
     ['Save Game', 'Game/Export this game…'], '-',
@@ -46,21 +50,37 @@ T.menuLayout = {
     ['Preferences...', 'Game/Preferences…']],
   Ships: [['Build/Design Ships...', 'Ships/Build ships at selected colony…'], '-',
     ['List All Fleets', 'Ships/List all fleets…'], [null, 'Ships/#4'], [null, 'Ships/#3'], '-',
-    ['Review Battle', 'Ships/Review battle…']],
+    // (the last item names the selected star's battle, or reads "No Battles here..." dimmed: shot 042)
+    [null, 'Ships/#1']],
   Galaxy: [['Compare Players...', 'Galaxy/Compare players…'], ['Graph History...', 'Game/Players and history'], ['List All Explored Stars...', 'Galaxy/List explored stars…'], '-',
     ['Dip Into Savings', 'Galaxy/Dip into savings…'], '-',
     ['Alliances...', 'Galaxy/Players and alliances…'], ['Give Money/Metal...', 'Galaxy/Give money or metal…'], [null, 'Galaxy/#9'], ['Send Message...', 'Galaxy/Send a message…'], '-',
     [null, 'Galaxy/#10']],
-  Window: [['Tech Spending Window', () => setWin('tech', !winOpen('tech')), null, () => winOpen('tech'), () => !(window.HOAPI && HOAPI.G), '1'],
-    ['Report Window', () => setWin('report', !winOpen('report')), null, () => winOpen('report'), () => !(window.HOAPI && HOAPI.G), '2'], '-', ['Zoom In', 'View/Zoom in'], ['Zoom Out', 'View/Zoom out'], ['Fit Galaxy', 'View/Fit galaxy'], '-',
-    ['Clean Up Windows', () => cleanUp(), null, null, () => !(window.HOAPI && HOAPI.G)]],
+  // (shot 050: no ticks; Chat Window is dimmed out of a network game; Zoom In dimmed at the closest zoom)
+  Window: [['Tech Spending Window', () => setWin('tech', !winOpen('tech')), null, null, noGame, '1'],
+    ['Report Window', () => setWin('report', !winOpen('report')), null, null, noGame, '2'],
+    ['Chat Window', () => {}, null, null, dim, '3'], '-',
+    [null, 'View/#0'], [null, 'View/#1'], ['Fit Galaxy', 'View/Fit galaxy'], // (by place: T.menus has renamed them)
+    [() => (infoOff() ? 'Show Information' : 'Hide Information'), () => setInfo(infoOff()), null, null, noGame, 'Alt+I'], '-',
+    ['Clean Up Windows', () => cleanUp(), null, null, noGame]],
   Help: [['Help Topics', 'Help/How to play'], [null, 'Help/#1']],
 };
 // the key equivalents the captures show, by the remake's item (its English label)
 const KEYS = { 'New game…': 'N', 'Saved games…': 'O', 'Export this game…': 'S', 'Quit to title': 'Q', 'Build ships at selected colony…': 'B', 'List all fleets…': 'L',
-  'Compare players…': 'Y', 'Players and history': 'H', 'Dip into savings…': 'D', 'Send a message…': 'M', 'Zoom out': '-' };
-T.menus = (menus) => { for (const m in menus) for (const it of menus[m]) if (typeof it[0] === 'string' && KEYS[it[0]]) it[5] = KEYS[it[0]]; };
-T.keyName = (k) => 'Ctrl+' + k;
+  'Compare players…': 'Y', 'Players and history': 'H', 'Dip into savings…': 'D', 'Send a message…': 'M' };
+T.menus = (menus) => {
+  for (const m in menus) for (const it of menus[m]) if (typeof it[0] === 'string' && KEYS[it[0]]) it[5] = KEYS[it[0]];
+  // Ships' last item (shot 042): "Review Battle", or "No Battles here..." dimmed when the selected star has had none; Window's zooms
+  // dimmed at their ends, Ctrl+I and Ctrl+J (menu 2)
+  for (const it of menus.Ships || []) if (it[0] === 'Review battle…') { it[0] = () => (battleHere() ? 'Review Battle' : 'No Battles here...'); it[4] = () => !battleHere(); it[5] = null; } // (shot 042: no key shown)
+  for (const it of menus.View || []) {
+    if (it[0] === 'Zoom in') { it[0] = 'Zoom In'; it[4] = () => noGame() || zoomIdx(HOAPI.UI.view.s) >= zooms().length - 1; it[5] = 'I'; }
+    if (it[0] === 'Zoom out') { it[0] = 'Zoom Out'; it[4] = () => noGame() || zoomIdx(HOAPI.UI.view.s) <= 0; it[5] = 'J'; }
+  }
+  // Options' "Sound", ticked while on (shot 036), in place of the remake's "Turn sound off / on"
+  for (const it of menus.View || []) if (typeof it[0] === 'function') { let t = ''; try { t = it[0](); } catch (e) {} if (/sound/i.test(t)) { it[0] = 'Sound'; it[3] = () => !!(window.HOAPI && HOAPI.Sound.on); } }
+};
+T.keyName = (k) => (/^Alt/.test(k) ? k : 'Ctrl+' + k);
 T.hoIntoLast = () => true;
 T.menuName = (name) => { const n = document.createElement('span'); n.innerHTML = '<u>' + name[0] + '</u>' + name.slice(1); return n; };
 
