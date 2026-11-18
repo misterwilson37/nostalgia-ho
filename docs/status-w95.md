@@ -65,7 +65,12 @@ Units 1-4 are the big ones (one session might do two). 6-9 are quicker. 10 is lo
    opens as the report is announced (with four programs in the hand; fewer, nothing) and when the report is clicked in Report
    Messages. `rs.radicalHand.announce` (405, so Mac 4.0.5 too), the classic card and `reportAction`. Checked in w95: dialog 348
    with the four programs, 2010.
-3. Build window: the money and metal left don't go down as ships are queued; only after OK (no way to see the cost first).
+3. ~~Build window: the money and metal left don't go down as ships are queued~~: done as a modern convenience. Whether 4.0.5 updates
+   Savings / Metal while "# To Build" changes isn't settled: shot 093 (5 to build) is the only capture with a count and the pane from
+   that moment isn't in view; the Mac 3.0.1 BuildDesignShips' item handling is a jump table the decompile didn't unpack. With modern
+   conveniences on, `buildDialog` shows Savings and Metal less what "# To Build" would cost (the prototype's price with the first of a
+   new type; red below 0; the piles follow), updated on +, - and typing. Plain game: as before. Jake can check the real 4.0.5 in his
+   Windows 95 emulator; if it updates them, make this always on.
 4. Second turn: End Turn's clock shrank to nothing while the report bubbles were up; back when they went.
 5. A ship with range 6 dragged to a star 9 away: the line says it can go, and it routes around, but the path isn't shown.
 6. Abandon Planet: no way to find it (the Window/Planet menus; the 405 ruleset hides it, unit 6's "Left").

@@ -859,6 +859,12 @@ function buildDialog(sid) {
   };
   const inService = (did) => g.fleets.filter(f => f.owner === a.ME).reduce((t, f) => t + (f.ships[did] || 0), 0);
   const label = (d) => `${d.name} (${d.W}/${d.S}) ${TL(H().TYPES[d.type].name)}`;
+  const queued = () => { // (what "# To Build" would cost: the type you have, or the new one with its prototype)
+    const want = Math.max(0, Math.trunc(+String(n.value).replace(/[^0-9]/g, '') || 0)); if (!want || !a.modern()) return { money: 0, metal: 0 };
+    const d = live().find(same) || Object.assign({ built: 0, free: false }, spec), c = H().designCost(g, d);
+    const proto = d.built === 0 && !d.free && H().rules(g).paysPrototype(g, p, d) ? c.proto : 0;
+    return { money: want * c.money + proto, metal: want * c.metal };
+  };
   const draw = () => {
     const ds = live(), cur = ds.find(same) || null;
     lb.innerHTML = ''; lb.classList.add('blist');
@@ -876,18 +882,23 @@ function buildDialog(sid) {
     K.forEach((k, i) => { const lo = H().designMin(g, k, spec.type), hi = Math.max(lo, L[k] || lo), bar = dl.by[1034 + i];
       const sat = k === 'R' && spec.type === 'satellite';
       dl.by[1029 + i].textContent = sat ? '0/0' : `${spec[k]}/${hi}`; bar.min = lo; bar.max = hi; bar.value = spec[k]; bar.disabled = sat || hi <= lo; });
-    dl.by[1039].textContent = a.fmt(Math.round(p.savings)); dl.by[1040].textContent = a.fmt(Math.round(p.metal));
+    // (modern conveniences, Jake 18 Nov: Savings and Metal less what "# To Build" would cost, the prototype's price with the first of a new
+    // type; not seen in 4.0.5's captures or code, so the plain game shows them as they stand, as 4.0.5's may)
+    const q = queued(), sv = p.savings - q.money, mt = p.metal - q.metal;
+    dl.by[1039].textContent = a.fmt(Math.round(sv)); dl.by[1040].textContent = a.fmt(Math.round(mt));
+    dl.by[1039].style.color = q.money && sv < 0 ? '#c00' : ''; dl.by[1040].style.color = q.metal && mt < 0 ? '#c00' : '';
     const inc = Math.max(50000, Math.round(H().projected(g, p).income || 0)) * 5;
-    pile(dl.by[1047], p.savings < 0 ? 312 : 311, Math.trunc(Math.abs(p.savings) / Math.trunc((inc + 35) / 36)) + 1);
-    pile(dl.by[1048], 313, Math.trunc(Math.max(0, p.metal) / 2778) + 1);
+    pile(dl.by[1047], sv < 0 ? 312 : 311, Math.trunc(Math.abs(sv) / Math.trunc((inc + 35) / 36)) + 1);
+    pile(dl.by[1048], 313, Math.trunc(Math.max(0, mt) / 2778) + 1);
     dl.by[1041].textContent = cur ? String(cur.built || 0) : '0'; dl.by[1042].textContent = cur ? String(inService(cur.id)) : '0';
     dl.by[1018].textContent = cur && cur.scrap301 ? "Don't Scrap" : 'Scrap All'; dl.by[1018].disabled = !cur;
   };
   K.forEach((k, i) => dl.by[1034 + i].addEventListener('input', (e) => { spec[k] = +e.target.value; const d = live().find(same); name = d ? d.name : (nm.disabled ? H().designName(g, p, spec.type) : nm.value || H().designName(g, p, spec.type)); draw(); }));
   cb.addEventListener('change', () => { fresh(cb.value); n.value = '0'; draw(); });
   nm.addEventListener('input', () => { name = nm.value.slice(0, 15); });
-  dl.by[1045].addEventListener('click', () => { n.value = String(Math.min(999, (+n.value || 0) + 1)); });
-  dl.by[1046].addEventListener('click', () => { n.value = String(Math.max(0, (+n.value || 0) - 1)); });
+  dl.by[1045].addEventListener('click', () => { n.value = String(Math.min(999, (+n.value || 0) + 1)); draw(); });
+  dl.by[1046].addEventListener('click', () => { n.value = String(Math.max(0, (+n.value || 0) - 1)); draw(); });
+  n.addEventListener('input', () => draw());
   dl.by[1017].addEventListener('click', () => { const L = H().designLimits(g, p, spec.type); K.forEach(k => { spec[k] = L[k]; }); clampSpec(); const d = live().find(same); name = d ? d.name : H().designName(g, p, spec.type); draw(); });
   dl.by[1018].addEventListener('click', () => { const d = live().find(same); if (!d) return; const rs = H().rules(g); if (rs.flagScrapDesign) rs.flagScrapDesign(g, p, d, 'command'); a.save(); a.renderPanel(); draw(); });
   const buy = () => {
