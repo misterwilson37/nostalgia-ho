@@ -527,6 +527,9 @@ function wheelZoom(e) {
   zoomAt(ox(e), oy(e), wheelSt.acc < 0 ? 1.15 : 1 / 1.15);
   wheelSt.acc = 0; wheelSt.stepT = now; wheelSt.locked = true;
 }
+// (Firefox, 18 Nov: a press on a report card's or End Turn's picture that moved a pixel started dragging the picture, and the click was
+// lost; CSS can't stop that in Firefox, so the drag is cancelled here, over the map, its report card and the panes)
+document.addEventListener('dragstart', (e) => { if (e.target && e.target.closest && e.target.closest('#mapwrap, #panel, .p301x')) e.preventDefault(); });
 function resize() {
   const r = cv.parentElement.getBoundingClientRect();
   dpr = window.devicePixelRatio || 1;

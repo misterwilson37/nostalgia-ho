@@ -2735,7 +2735,7 @@ function battleWindow(b, k) {
   [0, 1].forEach(ci => { if (owners[ci] != null) face(owners[ci], ci); });
   [0, 1].forEach(ci => {
     if (hidden[ci]) { const L = rs.battleLines || {}; text(L.noInfo || '', 155, 85); text(L.destroyed || '', 155, 100); skip = true; }
-    else cols[ci].forEach(drawGroup);
+    else cols[ci].forEach(gr => drawGroup(gr));
   });
   // a shot
   const wait = (until) => new Promise(res => { const f = () => (stop || skip || performance.now() >= until ? res() : setTimeout(f, Math.min(TICK, until - performance.now()))); f(); });
@@ -2784,7 +2784,7 @@ function battleWindow(b, k) {
     for (const r of b.rounds) for (const ev of r) apply(ev); // (skipped: every shot counted)
     pop = fPop;
     done = true;
-    [0, 1].forEach(ci => { if (!hidden[ci]) cols[ci].forEach(drawGroup); });
+    [0, 1].forEach(ci => { if (!hidden[ci]) cols[ci].forEach(gr => drawGroup(gr)); });
     // DrawX over a side with nothing left
     [0, 1].forEach(ci => {
       const o = owners[ci]; if (o == null) return;

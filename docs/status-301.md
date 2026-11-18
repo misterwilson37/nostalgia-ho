@@ -60,6 +60,9 @@ Sources (private repo `nostalgia-ho-sources`):
         The window under the Mac's scale is now the program's 445 pixels zoomed with the Mac (it was 890 zoomed again: taller than a
         laptop's page, its heading off the top). The game is the same (the digest without the shot lists is unchanged, patched and
         not); the 3.0.1 digest with them is now 4f210f392b431993.
+        Jake's look (18 Nov, Firefox): a battle with more than one group a side drew only the first row's picture (drawGroup's new
+        picture flag was filled by forEach's index): fixed. The report card and End Turn showed Firefox's selection tint and a click
+        on them could be lost to a drag: #mapwrap and #msg are now unselectable, and a picture's drag is cancelled there.
      3. ~~The modern conveniences' battle speed~~: done. The classic battle windows' Speed list (Slow / Normal / Fast / Skip to the end,
         `openBattle`, `openBattlePanel`) is gone, and "battle speed" is out of the modern conveniences' words (five languages). The
         programs' own battle speed settings (1.2's, 2.0.1's, DOS's, Windows', 5.0.5's Battle Review Speed) stay: they are the originals'.
