@@ -842,7 +842,9 @@ function buildDialog(sid) {
   const pickDesign = (d) => { spec = { type: d.type, R: d.R, V: d.V, W: d.W, S: d.S, M: d.M }; name = d.name; };
   const clampSpec = () => { const L = H().designLimits(g, p, spec.type); for (const k of K) { const lo = H().designMin(g, k, spec.type), hi = Math.max(lo, L[k] || lo); spec[k] = Math.max(lo, Math.min(hi, spec[k] == null ? hi : spec[k])); } if (spec.type === 'satellite') spec.R = 0; };
   const fresh = (type) => { spec = { type }; clampSpec(); const d = live().find(same); name = d ? d.name : H().designName(g, p, type); };
-  const L0 = live(); if (L0.length) pickDesign(L0[L0.length - 1]); else fresh(types[0]);
+  // (FUN_0044ce36: the list runs newest design first and opens on the player's current design, the first one at the start: shot 041's
+  // Rudolph at the foot; the remake keeps no current design, so it opens on the first)
+  const L0 = live(); if (L0.length) pickDesign(L0[0]); else fresh(types[0]);
   const lb = dl.by[1016], pic = dl.by[1020], nm = dl.by[1021], cb = dl.by[1022], n = dl.by[1043];
   types.forEach(t => { const o = document.createElement('option'); o.value = t; o.textContent = TL(H().TYPES[t].name); cb.append(o); });
   n.value = '0'; n.inputMode = 'numeric';
@@ -860,8 +862,9 @@ function buildDialog(sid) {
   const draw = () => {
     const ds = live(), cur = ds.find(same) || null;
     lb.innerHTML = ''; lb.classList.add('blist');
-    ds.forEach(d => { const r = document.createElement('div'); r.className = 'br' + (cur && cur.id === d.id ? ' sel' : '') + (d.scrap301 ? ' scrap' : ''); r.setAttribute('role', 'option');
+    ds.slice().reverse().forEach(d => { const r = document.createElement('div'); r.className = 'br' + (cur && cur.id === d.id ? ' sel' : '') + (d.scrap301 ? ' scrap' : ''); r.setAttribute('role', 'option');
       r.append(shipCanvas(d, 128, 40), span('bl', label(d))); r.addEventListener('click', () => { pickDesign(d); n.value = '0'; draw(); }); lb.append(r); });
+    { const s0 = lb.querySelector(".br.sel"); if (s0 && s0.scrollIntoView) s0.scrollIntoView({ block: "nearest" }); }
     { const sl = lb.querySelector('.br.sel'); if (sl) sl.scrollIntoView({ block: 'nearest' }); }
     pic.innerHTML = ''; const pc = shipCanvas(Object.assign({ name }, spec), 98, 39); pc.style.background = '#000'; pic.append(pc); // (on black: shot 041)
     if (document.activeElement !== nm) nm.value = cur ? cur.name : name; nm.disabled = !!cur;
