@@ -310,6 +310,12 @@ function budgetPane(B) {
   const a = A(), g = a.G, p = a.me();
   const box = document.createElement('section'); box.className = 'w95budget';
   box.append(span('pct', TL('100%')));
+  // the scale's ticks under "100%" (FUN_0045aae1): 2 pixels up from the scale's line, at i * 77 / 10 on the linear scale; on the log
+  // scale at 10% ... 100% (the place of each measured from shot 010: the program's log table lost in the decompile)
+  const tk = document.createElement('div'); tk.className = 'w95ticks'; tk.setAttribute('aria-hidden', 'true');
+  let lg = false; try { const sc = A().budgetScale && A().budgetScale(); lg = !!(sc && sc.id === 'log'); } catch (e) {}
+  (lg ? [22, 35, 45, 52, 57, 62, 66, 70, 73, 77] : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(i => Math.trunc(i * 77 / 10))).forEach(x => { const t = document.createElement('i'); t.style.left = x + 'px'; tk.append(t); });
+  box.append(tk);
   const bb = B && B.budget; if (!bb) return box;
   const rows = [...bb.querySelectorAll('.barrow')], ents = B.ents || [];
   const top = document.createElement('div'), cols = document.createElement('div'); top.className = 'btop'; cols.className = 'bcols';
@@ -326,7 +332,16 @@ function budgetPane(B) {
     else if (tf && mf) { r.classList.add('note'); if (inc < 0) r.classList.add('red'); if (bv) bv.textContent = '$' + H().niceNum(inc); }
     else {
       const t = tf ? 0 : mf ? 1 : (st.terra == null ? 0.5 : st.terra), mix = (c1, c2) => c1.map((v, k) => Math.round(v * t + c2[k] * (1 - t)));
-      const fill = mix([0x52, 0x98, 0x40], [0x00, 0x00, 0xc6]), edge = mix([0x38, 0x80, 0x22], [0x00, 0x00, 0xf5]), dark = mix([0x22, 0x54, 0x13], [0x00, 0x00, 0x61]), light = mix([0x8c, 0xc4, 0x80], [0x65, 0x65, 0xc8]);
+      // heavy gravity (FUN_0045aae1: more than 2.56 times your home's, or under 1 / 2.56) terraforms in red (DAT_005b19bc #dd0807) instead of
+      // green; the shades as FUN_00446afe / FUN_004468c0 make them: the lines above at half saturation, below and right at half value
+      // (red as 256-colour Windows showed #dd0807: shot 078's Metal line)
+      const gr = Math.trunc(100 * Math.max(st.g, p.homeG) / Math.max(0.01, Math.min(st.g, p.homeG))) > 256;
+      const hsvSet = (c) => { const [r0, g0, b0] = c.map(v => v / 255), mx = Math.max(r0, g0, b0), mn = Math.min(r0, g0, b0), v = mx, sat = mx ? (mx - mn) / mx : 0;
+        let h = 0; if (mx !== mn) { const d = mx - mn; h = mx === r0 ? (g0 - b0) / d + (g0 < b0 ? 6 : 0) : mx === g0 ? (b0 - r0) / d + 2 : (r0 - g0) / d + 4; h /= 6; }
+        const back = (hh, ss, vv) => { const i = Math.floor(hh * 6), f = hh * 6 - i, P = vv * (1 - ss), Q = vv * (1 - f * ss), Tt = vv * (1 - (1 - f) * ss); const m = [[vv, Tt, P], [Q, vv, P], [P, vv, Tt], [P, Q, vv], [Tt, P, vv], [vv, P, Q]][i % 6]; return m.map(x => Math.round(x * 255)); };
+        return { light: back(h, sat / 2, v), dark: back(h, sat, v / 2) }; };
+      const T0 = gr ? (() => { const b = [234, 51, 35], d = hsvSet(b); return { fill: b, edge: b, dark: d.dark, light: d.light }; })() : { fill: [0x52, 0x98, 0x40], edge: [0x38, 0x80, 0x22], dark: [0x22, 0x54, 0x13], light: [0x8c, 0xc4, 0x80] };
+      const fill = mix(T0.fill, [0x00, 0x00, 0xc6]), edge = mix(T0.edge, [0x00, 0x00, 0xf5]), dark = mix(T0.dark, [0x00, 0x00, 0x61]), light = mix(T0.light, [0x65, 0x65, 0xc8]);
       const css = (c) => `rgb(${c.join(',')})`;
       r.style.setProperty('--bf', css(fill)); r.style.setProperty('--be', css(edge)); r.style.setProperty('--bd', css(dark)); r.style.setProperty('--bl', css(light));
       if (inc < 0) r.classList.add('red');

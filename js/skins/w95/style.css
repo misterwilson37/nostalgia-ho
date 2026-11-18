@@ -138,7 +138,9 @@ html.w95win #panel .w95players .face { position: absolute; left: 14px; top: 4px;
 html.w95win #panel .w95players .prow.out .face::after { content: ''; position: absolute; inset: -2px; background: linear-gradient(45deg, transparent 44%, #000 44% 56%, transparent 56%), linear-gradient(-45deg, transparent 44%, #000 44% 56%, transparent 56%); }
 html.w95win #panel .w95players .pn { position: absolute; left: 33px; top: 6px; }
 html.w95win #panel .w95budget { flex: 1 1 auto; position: relative; min-width: 0; }
-html.w95win #panel .w95budget .pct { position: absolute; right: 26px; top: 8px; }
+html.w95win #panel .w95budget .pct { position: absolute; right: 21px; top: 8px; }
+html.w95win #panel .w95budget .w95ticks { position: absolute; z-index: 2; left: 44px; top: 22px; width: 80px; height: 1px; pointer-events: none; }
+html.w95win #panel .w95budget .w95ticks i { position: absolute; top: 0; width: 1px; height: 1px; background: #000; }
 html.w95win #panel .w95budget .btop { position: absolute; left: 0; right: 0; top: 23px; height: 36px; padding: 4px 0 0 44px; box-sizing: border-box; background: linear-gradient(#000, #000) 43px 0 / calc(100% - 43px) 1px no-repeat, linear-gradient(#000, #000) 43px 0 / 1px 100% no-repeat; }
 html.w95win #panel .w95budget .bcols { position: absolute; left: 0; right: 0; top: 59px; bottom: 0; overflow-y: scroll; overflow-x: hidden; padding: 3px 0 0 44px; box-sizing: border-box; background: linear-gradient(#000, #000) 43px 0 / calc(100% - 43px) 1px no-repeat, linear-gradient(#000, #000) 43px 0 / 1px 100% no-repeat local; }
 html.w95win #panel .w95bar { display: flex; align-items: center; height: 14px; margin: 0; padding: 0; gap: 0; position: relative; }
