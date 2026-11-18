@@ -145,3 +145,5 @@ html.mac301 .win.bw12m .wbody { padding: 0; }
 html.mac301 .win .bw12w button.bw12b { container-type: normal; font: 30px/1 'DOS Chicago 12', Chicago, Charcoal, Geneva, sans-serif !important; background: #fff !important; color: #000 !important; border: 1px solid #000 !important; border-radius: 5px !important; box-shadow: none !important; }
 html.mac301 .win .bw12w button.bw12b.done { outline: 6px solid #fff; outline-offset: 2px; } /* (the default ring, white on the black window, at twice the size) */
 @media (max-width: 900px) { html.mac301 .win .bw12w button.bw12b { font-size: 3.4vw !important; } }
+/* 3.0.1 with the Mac scaled: the report bubble lifted above the Report Window and Tech Spending at the screen's foot (measureMac sets --lift301) */
+html.mac301.macscale #msg:not(.et301) { transform: translateY(var(--lift301, 0px)); }

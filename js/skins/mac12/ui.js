@@ -27,14 +27,24 @@ const A = () => window.HOAPI;
 // menu bar, the windows, the report bubble and the map's scroll bars are zoomed by S (html.macscale, --mac: js/skins/mac12/panel.css). A
 // window that big shows as much of the galaxy as the Mac's screen did, in the same proportion.
 // The remake's panel holds more than the program's (the Report Window under Tech Spending, where 3.0.1 put it under the map), so the screen
-// is fitted to the panel's height too: S is the largest half step at which the Mac's 640 pixels fit across and the menu bar and the whole
+// is fitted to the panel's height too: S is the largest quarter step at which the Mac's 640 pixels fit across and the menu bar and the whole
 // panel fit down (its height in the Mac's pixels, measured after each drawing; the zoom doesn't change it).
 const MACS = { s: 1, need: 480 };
-function macScale() { const u0 = Math.min(window.innerWidth / 640, window.innerHeight / Math.max(480, MACS.need)); return u0 >= 1.5 ? Math.floor(u0 * 2) / 2 : 1; }
+// (quarter steps since 18 Nov: 3.0.1's panel is the tallest, and in half steps a laptop's screen left it at x1.5 with a band to spare, Jake's report)
+function macScale() { const u0 = Math.min(window.innerWidth / 640, window.innerHeight / Math.max(480, MACS.need)); return u0 >= 1.25 ? Math.floor(u0 * 4) / 4 : 1; }
 function measureMac() {
   const p = document.getElementById('panel'), m = document.getElementById('menubar'); if (!p || !p.firstChild || MACS.s <= 1) return; // (only in the Mac's layout: the page's own panel is wider, so taller)
-  const z = MACS.s, pr = p.getBoundingClientRect(), last = p.lastElementChild.getBoundingClientRect();
-  const need = Math.ceil((last.bottom - pr.top + p.scrollTop * z) / z + 8 + (m ? m.getBoundingClientRect().height / z : 20)); // (the content's foot, its padding, the menu bar)
+  // (3.0.1: the Report Window beside Tech Spending at the screen's foot, as SetWindowLocations puts it, x 390, 250 wide (Jake's captures 012,
+  // 040), not under it: placed here, over the map's foot, and left out of the panel's height)
+  if (V3) {
+    const t = p.querySelector('.tech301'), r = p.querySelector('.rep12box');
+    if (t && r) { const tr = t.getBoundingClientRect(), z0 = MACS.s; Object.assign(r.style, { position: 'fixed', left: '390px', top: Math.round(tr.top / z0) + 'px', width: '250px', height: Math.round(tr.height / z0) + 'px', margin: '0', zIndex: '5', boxSizing: 'border-box' }); r.classList.add('rep301beside');
+      // (and the report bubble at the map window's foot, which in 3.0.1 ends above the two windows: lifted to sit above them)
+      // (a CSS variable: html.mac301 #msg:not(.et301) in panel.css, so the End Turn button, which takes the bubble's place at the map's top left, isn't moved)
+      const mg = document.getElementById('msg'), de = document.documentElement; if (mg) { de.style.setProperty('--lift301', '0px'); const mr = mg.getBoundingClientRect(), mapB = (document.getElementById('mapwrap') || mg).getBoundingClientRect().bottom, d = Math.min(mr.bottom, mapB) - tr.top + 4 * z0; if (d > 0 && !mg.classList.contains('et301')) de.style.setProperty('--lift301', -Math.round(d / z0) + 'px'); } }
+  }
+  const z = MACS.s, pr = p.getBoundingClientRect(), kids = [...p.children].filter(k => getComputedStyle(k).position !== 'fixed'), last = (kids[kids.length - 1] || p.lastElementChild).getBoundingClientRect();
+  const need = Math.ceil((last.bottom - pr.top + p.scrollTop * z) / z + 16 + (m ? m.getBoundingClientRect().height / z : 20)); // (the content's foot, the panel's padding above and below, the menu bar)
   if (need !== MACS.need) { MACS.need = need; setMacScale(); }
 }
 function setMacScale() {
@@ -1816,6 +1826,7 @@ function starLine(cx, d) {
 // and a click on it the system beep; a drag sets the share and spreads the rest over the others in proportion. ----------
 const G9 = '9px Geneva, Verdana, sans-serif', G9B = 'bold 9px Geneva, Verdana, sans-serif', SYS12 = '12px Chicago, Charcoal, Geneva, sans-serif';
 function qdCanvas(w, h, label) { // a box drawn at twice its pixels, as wide as the panel
+  let lastR = null;
   const K = QK(), c = A().el('canvas', { class: 'qd12', width: w * K, height: h * K, role: 'img', 'aria-label': label || '' });
   c.style.aspectRatio = w + ' / ' + h; c.dataset.k = String(K);
   const x = c.getContext('2d'); x.setTransform(K, 0, 0, K, 0, 0); x.fillStyle = '#fff'; x.fillRect(0, 0, w, h);
@@ -1828,7 +1839,9 @@ function qdCanvas(w, h, label) { // a box drawn at twice its pixels, as wide as 
     vline(h0, v0, v1) { x.fillStyle = '#000'; x.fillRect(h0, v0, 1, v1 - v0); },
     rect(l, t, r, b, col) { x.fillStyle = col; x.fillRect(l, t, r - l, b - t); },
     // pointer position in the box's pixels
-    at(ev) { const r = c.getBoundingClientRect(); return { h: (ev.clientX - r.left) * w / r.width, v: (ev.clientY - r.top) * h / r.height }; },
+    // (a drag that redraws its pane replaces this canvas with a new one: the pointer is then measured against where this one last was, not
+    // against the detached canvas, whose box is empty and put every move at the far right: Jake, 18 Nov, a click on a budget bar gave it all)
+    at(ev) { const r = c.isConnected || !lastR ? (lastR = c.getBoundingClientRect()) : lastR; return { h: (ev.clientX - r.left) * w / r.width, v: (ev.clientY - r.top) * h / r.height }; },
   };
   return api;
 }
