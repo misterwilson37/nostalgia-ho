@@ -12,6 +12,9 @@
 const T = window.HOTHEME;
 const de = document.documentElement;
 de.classList.add('w95fam');
+// Every word the skin writes goes through the remake's interface languages (js/ui-text.js, js/ui-lang.js: HOAPI.tl), the program's
+// English being the key; a filled template is translated first, then filled. (Jake's rule: interface text through js/ui-text.js.)
+const TL = (s) => { const a = window.HOAPI; try { return a && a.tl ? a.tl(s) : s; } catch (e) { return s; } };
 // ---------- the screen made big ----------
 const W95 = { s: 1 };
 function w95Scale() { const u = Math.min(window.innerWidth / 640, window.innerHeight / 480); return u >= 1.5 ? Math.floor(u * 2) / 2 : u >= 1 ? 1 : 0; }
@@ -37,33 +40,35 @@ const battleHere = () => { const a = window.HOAPI; return !!(a && a.G && a.UI.se
 // Hide Information (shot 050, Alt+I): the information column goes and the map takes the window
 const infoOff = () => de.classList.contains('w95noinfo');
 const setInfo = (on) => { de.classList.toggle('w95noinfo', !on); const a = window.HOAPI; if (a && a.G) { a.resize(); a.draw(); } };
+// (each item's words a function: the menus follow a change of language)
+const lab = (w) => () => TL(w);
 T.menuLayout = {
-  File: [['New Game', 'Game/New game…'], ['Open Game...', 'Game/Saved games…'], '-',
-    ['Save Game', 'Game/Export this game…'], '-',
-    ['End Turn', clickEndTurn, null, null, () => !(window.HOAPI && HOAPI.G), 'T'], '-',
-    ['Recent File', () => {}, null, null, dim], '-',
-    ['Exit', 'Game/Quit to title']],
+  File: [[lab('New Game'), 'Game/New game…'], [lab('Open Game...'), 'Game/Saved games…'], '-',
+    [lab('Save Game'), 'Game/Export this game…'], '-',
+    [lab('End Turn'), clickEndTurn, null, null, () => !(window.HOAPI && HOAPI.G), 'T'], '-',
+    [lab('Recent File'), () => {}, null, null, dim], '-',
+    [lab('Exit'), 'Game/Quit to title']],
   // (4.0.5's Edit menu has nothing the remake does: shown dimmed, as in shot 035)
-  Edit: [['Undo', () => {}, null, null, dim, 'Z'], '-', ['Cut', () => {}, null, null, dim, 'X'], ['Copy', () => {}, null, null, dim, 'C'], ['Paste', () => {}, null, null, dim, 'V']],
-  Options: [['Auto Play...', () => (W95ON() ? autoPlayDialog() : HOAPI.openAutoPlay()), null, null, () => noGame() || !!(HOAPI.G && HOAPI.G.over)], '-', [null, 'View/#4'], '-',
-    ['Master Point List...', 'Game/Master Point List…'], ['Hall of Fame...', 'Game/Hall of Fame…'], ['Hall of Shame...', 'Game/Hall of Shame…'], '-',
-    ['Preferences...', () => (W95ON() ? prefsDialog() : HOAPI.openPrefs()), null, null, noGame]],
-  Ships: [['Build/Design Ships...', 'Ships/Build ships at selected colony…'], '-',
-    ['List All Fleets', 'Ships/List all fleets…'], ['Organize Ships...', () => { const a = HOAPI; if (a && a.G && a.UI.sel != null) (W95ON() ? organizeDialog(a.UI.sel) : a.openOrganize(a.UI.sel)); }, null, null, () => noGame() || HOAPI.UI.sel == null], [null, 'Ships/#3'], '-',
+  Edit: [[lab('Undo'), () => {}, null, null, dim, 'Z'], '-', [lab('Cut'), () => {}, null, null, dim, 'X'], [lab('Copy'), () => {}, null, null, dim, 'C'], [lab('Paste'), () => {}, null, null, dim, 'V']],
+  Options: [[lab('Auto Play...'), () => (W95ON() ? autoPlayDialog() : HOAPI.openAutoPlay()), null, null, () => noGame() || !!(HOAPI.G && HOAPI.G.over)], '-', [null, 'View/#4'], '-',
+    [lab('Master Point List...'), 'Game/Master Point List…'], [lab('Hall of Fame...'), 'Game/Hall of Fame…'], [lab('Hall of Shame...'), 'Game/Hall of Shame…'], '-',
+    [lab('Preferences...'), () => (W95ON() ? prefsDialog() : HOAPI.openPrefs()), null, null, noGame]],
+  Ships: [[lab('Build/Design Ships...'), 'Ships/Build ships at selected colony…'], '-',
+    [lab('List All Fleets'), 'Ships/List all fleets…'], [lab('Organize Ships...'), () => { const a = HOAPI; if (a && a.G && a.UI.sel != null) (W95ON() ? organizeDialog(a.UI.sel) : a.openOrganize(a.UI.sel)); }, null, null, () => noGame() || HOAPI.UI.sel == null], [null, 'Ships/#3'], '-',
     // (the last item names the selected star's battle, or reads "No Battles here..." dimmed: shot 042)
     [null, 'Ships/#1']],
-  Galaxy: [['Compare Players...', 'Galaxy/Compare players…'], ['Graph History...', 'Game/Players and history'], ['List All Explored Stars...', 'Galaxy/List explored stars…'], '-',
-    ['Dip Into Savings', 'Galaxy/Dip into savings…'], '-',
-    ['Alliances...', () => (W95ON() ? allianceDialog() : HOAPI.openPlayers()), null, null, noGame], ['Give Money/Metal...', 'Galaxy/Give money or metal…'], [null, 'Galaxy/#9'], ['Send Message...', 'Galaxy/Send a message…'], '-',
+  Galaxy: [[lab('Compare Players...'), 'Galaxy/Compare players…'], [lab('Graph History...'), 'Game/Players and history'], [lab('List All Explored Stars...'), 'Galaxy/List explored stars…'], '-',
+    [lab('Dip Into Savings'), 'Galaxy/Dip into savings…'], '-',
+    [lab('Alliances...'), () => (W95ON() ? allianceDialog() : HOAPI.openPlayers()), null, null, noGame], [lab('Give Money/Metal...'), 'Galaxy/Give money or metal…'], [null, 'Galaxy/#9'], [lab('Send Message...'), 'Galaxy/Send a message…'], '-',
     [null, 'Galaxy/#10']],
   // (shot 050: no ticks; Chat Window is dimmed out of a network game; Zoom In dimmed at the closest zoom)
-  Window: [['Tech Spending Window', () => setWin('tech', !winOpen('tech')), null, null, noGame, '1'],
-    ['Report Window', () => setWin('report', !winOpen('report')), null, null, noGame, '2'],
-    ['Chat Window', () => {}, null, null, dim, '3'], '-',
-    [null, 'View/#0'], [null, 'View/#1'], ['Fit Galaxy', 'View/Fit galaxy'], // (by place: T.menus has renamed them)
+  Window: [[lab('Tech Spending Window'), () => setWin('tech', !winOpen('tech')), null, null, noGame, '1'],
+    [lab('Report Window'), () => setWin('report', !winOpen('report')), null, null, noGame, '2'],
+    [lab('Chat Window'), () => {}, null, null, dim, '3'], '-',
+    [null, 'View/#0'], [null, 'View/#1'], [lab('Fit Galaxy'), 'View/Fit galaxy'], // (by place: T.menus has renamed them)
     [() => (infoOff() ? 'Show Information' : 'Hide Information'), () => setInfo(infoOff()), null, null, noGame, 'Alt+I'], '-',
-    ['Clean Up Windows', () => cleanUp(), null, null, noGame]],
-  Help: [['About Spaceho...', () => aboutDialog(), null, null, () => !W95ON()], ['Help Topics', 'Help/How to play'], [null, 'Help/#1']],
+    [lab('Clean Up Windows'), () => cleanUp(), null, null, noGame]],
+  Help: [[lab('About Spaceho...'), () => aboutDialog(), null, null, () => !W95ON()], [lab('Help Topics'), 'Help/How to play'], [null, 'Help/#1']],
 };
 // the key equivalents the captures show, by the remake's item (its English label)
 const KEYS = { 'New game…': 'N', 'Saved games…': 'O', 'Export this game…': 'S', 'Quit to title': 'Q', 'Build ships at selected colony…': 'B', 'List all fleets…': 'L',
@@ -72,17 +77,18 @@ T.menus = (menus) => {
   for (const m in menus) for (const it of menus[m]) if (typeof it[0] === 'string' && KEYS[it[0]]) it[5] = KEYS[it[0]];
   // Ships' last item (shot 042): "Review Battle", or "No Battles here..." dimmed when the selected star has had none; Window's zooms
   // dimmed at their ends, Ctrl+I and Ctrl+J (menu 2)
-  for (const it of menus.Ships || []) if (it[0] === 'Review battle…') { it[0] = () => (battleHere() ? 'Review Battle' : 'No Battles here...'); it[4] = () => !battleHere(); it[5] = null; } // (shot 042: no key shown)
+  for (const it of menus.Ships || []) if (it[0] === 'Review battle…') { it[0] = () => TL(battleHere() ? 'Review Battle' : 'No Battles here...'); it[4] = () => !battleHere(); it[5] = null; } // (shot 042: no key shown)
   for (const it of menus.View || []) {
-    if (it[0] === 'Zoom in') { it[0] = 'Zoom In'; it[4] = () => noGame() || zoomIdx(HOAPI.UI.view.s) >= zooms().length - 1; it[5] = 'I'; }
-    if (it[0] === 'Zoom out') { it[0] = 'Zoom Out'; it[4] = () => noGame() || zoomIdx(HOAPI.UI.view.s) <= 0; it[5] = 'J'; }
+    if (it[0] === 'Zoom in') { it[0] = lab('Zoom In'); it[4] = () => noGame() || zoomIdx(HOAPI.UI.view.s) >= zooms().length - 1; it[5] = 'I'; }
+    if (it[0] === 'Zoom out') { it[0] = lab('Zoom Out'); it[4] = () => noGame() || zoomIdx(HOAPI.UI.view.s) <= 0; it[5] = 'J'; }
   }
   // Options' "Sound", ticked while on (shot 036), in place of the remake's "Turn sound off / on"
-  for (const it of menus.View || []) if (typeof it[0] === 'function') { let t = ''; try { t = it[0](); } catch (e) {} if (/sound/i.test(t)) { it[0] = 'Sound'; it[3] = () => !!(window.HOAPI && HOAPI.Sound.on); } }
+  for (const it of menus.View || []) if (typeof it[0] === 'function') { let t = ''; try { t = it[0](); } catch (e) {} if (/sound/i.test(t)) { it[0] = lab('Sound'); it[3] = () => !!(window.HOAPI && HOAPI.Sound.on); } }
 };
 T.keyName = (k) => (/^Alt/.test(k) ? k : 'Ctrl+' + k);
 T.hoIntoLast = () => true;
-T.menuName = (name) => { const n = document.createElement('span'); n.innerHTML = '<u>' + name[0] + '</u>' + name.slice(1); return n; };
+// (the menu's name as one text, so that the page's languages can swap it; its first letter underlined by the CSS, as Windows marks its key)
+T.menuName = (name) => TL(name);
 
 // ---------- the panes (unit 2: the star pane, the fleet header and the fleet list) ----------
 // Words from SPACEHO.EXE's string table (the numbers below); places measured on Jake's captures (shots 010, 052, 285, 287, 294).
@@ -102,15 +108,15 @@ function starPane() {
   box.append(span('nm', s.name));
   const row = (i, label, value) => { box.append(span('lb', label, `top:${15 + 13 * i}px`)); box.append(span('vl', value, `top:${15 + 13 * i}px`)); };
   let gauge = null;
-  if (!yours && !(k && k.explored)) box.append(span('noinfo', 'You have no information about this planet.'));
+  if (!yours && !(k && k.explored)) box.append(span('noinfo', TL('You have no information about this planet.')));
   else {
     const src = yours ? s : k;
     const t10 = Math.round(10 * (72 + (src.t - p.homeT))), gr = Math.trunc(100 * src.g / Math.max(0.01, p.homeG));
-    if (yours) { row(0, 'Income:', '$' + H().niceNum(Math.round(H().planetIncome(g, p, s)))); row(1, 'Pop:', H().niceNum(H().popNum(g, s.pop))); }
-    else { row(0, 'Owner', k.owner >= 0 ? g.players[k.owner].name : 'No One'); row(1, 'Pop:', k.owner >= 0 ? 'Unknown' : 'Uninhabited'); }
-    row(2, 'Temp:', cfmt('%d.%1.1d°F', Math.trunc(t10 / 10), Math.abs(t10 % 10)));
-    row(3, 'Gravity:', cfmt('%d.%2.2dG', Math.trunc(gr / 100), gr % 100));
-    row(4, 'Metal:', H().niceNum(Math.round(src.metal)));
+    if (yours) { row(0, TL('Income:'), '$' + H().niceNum(Math.round(H().planetIncome(g, p, s)))); row(1, TL('Pop:'), H().niceNum(H().popNum(g, s.pop))); }
+    else { row(0, TL('Owner'), k.owner >= 0 ? g.players[k.owner].name : TL('No One')); row(1, TL('Pop:'), k.owner >= 0 ? TL('Unknown') : TL('Uninhabited')); }
+    row(2, TL('Temp:'), cfmt('%d.%1.1d°F', Math.trunc(t10 / 10), Math.abs(t10 % 10)));
+    row(3, TL('Gravity:'), cfmt('%d.%2.2dG', Math.trunc(gr / 100), gr % 100));
+    row(4, TL('Metal:'), H().niceNum(Math.round(src.metal)));
     if (yours) gauge = gaugeOf(s, p);
   }
   // the picture (none for a star you know nothing of: shot 315's pane is grey across)
@@ -193,19 +199,19 @@ function planetTick() {
 // "Scrap: %s" (1347: three quarters of its metal). "There are no fleets at this planet." (1337) when there are none.
 function fleetLines(g, f) {
   const star = (i) => g.stars[i].name, sp = H().fleetSpeed(g, f), L = [];
-  if (f.scrap301) L.push(['Fleet to be scrapped for metal.']);
-  else if (f.dest == null) L.push(['Stationed at:', star(f.star)]);
+  if (f.scrap301) L.push([TL('Fleet to be scrapped for metal.')]);
+  else if (f.dest == null) L.push([TL('Stationed at:'), star(f.star)]);
   else {
     const hops = [f.star, f.dest].concat(f.path || []); let dist = 0, time = 0;
     for (let i = 0; i + 1 < hops.length; i++) { const d = H().starDist(g, hops[i], hops[i + 1]); dist += d; time += Math.ceil(d / sp - 1e-9); }
     const end = hops[hops.length - 1];
-    if (end === f.dest) L.push(['Departing To:', cfmt('%s (Dist %d; Time %d)', star(end), Math.round(dist), time)]);
-    else L.push([cfmt('Going to %s (D %d; T %d) via %s', star(end), Math.round(dist), time, star(f.dest))]);
+    if (end === f.dest) L.push([TL('Departing To:'), cfmt(TL('%s (Dist %d; Time %d)'), star(end), Math.round(dist), time)]);
+    else L.push([cfmt(TL('Going to %s (D %d; T %d) via %s'), star(end), Math.round(dist), time, star(f.dest))]);
   }
   const ds = H().fleetDesigns(g, f); let third;
-  if (ds.some(d => d.type === 'colony')) third = (f.colonists || 0) > 0 ? 'Full' : 'Empty';
-  else { let m = 0; for (const k in f.ships) { const d = H().getDesign(g, f.owner, +k); if (d) m += f.ships[k] * H().designCost(g, d).metal; } third = cfmt('Scrap: %s', H().niceNum(Math.trunc(m * 3 / 4))); }
-  L.push([cfmt('Fuel: %d/%d', Math.round(f.fuel || 0), H().fleetMaxRange(g, f)), cfmt('Speed: %d', sp), third]);
+  if (ds.some(d => d.type === 'colony')) third = (f.colonists || 0) > 0 ? TL('Full') : TL('Empty');
+  else { let m = 0; for (const k in f.ships) { const d = H().getDesign(g, f.owner, +k); if (d) m += f.ships[k] * H().designCost(g, d).metal; } third = cfmt(TL('Scrap: %s'), H().niceNum(Math.trunc(m * 3 / 4))); }
+  L.push([cfmt(TL('Fuel: %d/%d'), Math.round(f.fuel || 0), H().fleetMaxRange(g, f)), cfmt(TL('Speed: %d'), sp), third]);
   return L;
 }
 // The fleet list (an owner-drawn list box), 249 x 66 at (5, 155): white, rows 13 high, the selected fleet in black with white words;
@@ -229,12 +235,12 @@ function fleetPanes() {
   if (sel) { const L = fleetLines(g, sel);
     head.append(span('', L[0][0], 'left:3px;top:1px')); if (L[0][1]) head.append(span('', L[0][1], 'left:70px;top:1px'));
     head.append(span('', L[1][0], 'left:3px;top:11px')); head.append(span('', L[1][1], 'left:70px;top:11px')); head.append(span('', L[1][2], 'left:125px;top:11px')); }
-  else if (s && !here.length && !others.length) head.append(span('', 'There are no fleets at this planet.', 'left:3px;top:1px'));
+  else if (s && !here.length && !others.length) head.append(span('', TL('There are no fleets at this planet.'), 'left:3px;top:1px'));
   const list = document.createElement('section'); list.className = 'w95pane w95flist'; list.setAttribute('role', 'listbox'); list.setAttribute('aria-label', 'Fleets');
   const rs = H().rules(g);
   here.forEach(f => { const r = span('row' + (sel && f.id === sel.id ? ' sel' : '') + (f.dest != null ? ' go' : '') + (f.newThisTurn ? ' new' : '') + (f.scrap301 ? ' scrap' : ''), fleetRow(g, f));
     r.setAttribute('role', 'option'); r.addEventListener('click', () => { if (a.UI.selFleet !== f.id) { a.UI.selFleet = f.id; a.renderPanel(); a.draw(); } }); list.append(r); });
-  others.forEach(f => { const own = g.players[f.owner]; list.append(span('row other', rs.otherFleetRow ? (rs.otherFleetRow(null, f) || '') : cfmt("%s's %s", own ? own.name : '?', fleetRow(g, f)))); });
+  others.forEach(f => { const own = g.players[f.owner]; list.append(span('row other', rs.otherFleetRow ? (rs.otherFleetRow(null, f) || '') : cfmt(TL("%s's %s"), own ? own.name : '?', fleetRow(g, f)))); });
   return [head, list];
 }
 
@@ -249,9 +255,9 @@ function moneyPane() {
   const box = document.createElement('section'); box.className = 'w95pane w95money';
   const row = (i, label, value, right, red) => { box.append(span('lb', label, `top:${13 * i}px`)); const v = span('vl', value, `top:${13 * i}px`); if (red) v.style.color = '#f00'; box.append(v); box.append(span('rt', right, `top:${13 * i}px`)); };
   const cm = Math.round(ch.metal || 0), ci = Math.round(ch.income || 0);
-  row(0, 'Metal:', H().niceNum(Math.round(p.metal)), cm < 0 ? `(down ${H().niceNum(-cm)})` : `(up ${H().niceNum(cm)})`);
-  row(1, 'Savings:', '$' + H().niceNum(Math.round(p.savings)), `(Int: ${kfmt(Math.round(pr.interest || 0))})`, p.savings < 0);
-  row(2, 'Net Income:', '$' + H().niceNum(Math.round(pr.net)), ci < 0 ? `(down $${kfmt(-ci)})` : `(up $${kfmt(ci)})`);
+  row(0, TL('Metal:'), H().niceNum(Math.round(p.metal)), cm < 0 ? `(down ${H().niceNum(-cm)})` : `(up ${H().niceNum(cm)})`);
+  row(1, TL('Savings:'), '$' + H().niceNum(Math.round(p.savings)), `(Int: ${kfmt(Math.round(pr.interest || 0))})`, p.savings < 0);
+  row(2, TL('Net Income:'), '$' + H().niceNum(Math.round(pr.net)), ci < 0 ? `(down $${kfmt(-ci)})` : `(up $${kfmt(ci)})`);
   return box;
 }
 // The players (the list at the bottom left, 105 x 174 at (5, 271)): rows 24 high, a tick for a player whose turn is done, the small face
@@ -280,7 +286,7 @@ function playersPane() {
 function budgetPane(B) {
   const a = A(), g = a.G, p = a.me();
   const box = document.createElement('section'); box.className = 'w95budget';
-  box.append(span('pct', '100%'));
+  box.append(span('pct', TL('100%')));
   const bb = B && B.budget; if (!bb) return box;
   const rows = [...bb.querySelectorAll('.barrow')], ents = B.ents || [];
   const top = document.createElement('div'), cols = document.createElement('div'); top.className = 'btop'; cols.className = 'bcols';
@@ -293,7 +299,7 @@ function budgetPane(B) {
     if (a.UI.sel === st.id) r.classList.add('selrow');
     const tf = Math.abs(H().seenT(p, st) - 72) <= 0.5, mf = !(st.metal > 0), inc = Math.round(H().planetIncome(g, p, st));
     const bv = r.querySelector('.bval');
-    if (st.abandon || p.abandon === st.id) { r.classList.add('note', 'red'); if (bv) bv.textContent = 'Abandoning'; }
+    if (st.abandon || p.abandon === st.id) { r.classList.add('note', 'red'); if (bv) bv.textContent = TL('Abandoning'); }
     else if (tf && mf) { r.classList.add('note'); if (inc < 0) r.classList.add('red'); if (bv) bv.textContent = '$' + H().niceNum(inc); }
     else {
       const t = tf ? 0 : mf ? 1 : (st.terra == null ? 0.5 : st.terra), mix = (c1, c2) => c1.map((v, k) => Math.round(v * t + c2[k] * (1 - t)));
@@ -348,17 +354,17 @@ function cleanUp() { for (const k in WIN_HOME) { WS[k] = Object.assign(WS[k] || 
 // ("Range Weapons Mini" / "Speed Shields Radical"). The bars are the classic page's own (T.techBars 'vertical': dragged up and down).
 T.techBars = 'vertical';
 function techWindow(B) {
-  const a = A(), p = a.me(), w = toolWin('tech', 'Tech Spending'), body = w.querySelector('.tbody');
+  const a = A(), p = a.me(), w = toolWin('tech', TL('Tech Spending')), body = w.querySelector('.tbody');
   body.innerHTML = '';
   const lv = document.createElement('div'); lv.className = 'lv';
-  lv.append(span('cl', 'Current Levels:'));
-  ['range', 'speed', 'weapons', 'shields', 'mini'].forEach((k, i) => { const r = document.createElement('div'); r.className = 'lr'; r.append(span('', { range: 'Range', speed: 'Speed', weapons: 'Weapons', shields: 'Shields', mini: 'Mini' }[k]), span('n', String(p.tech[k]))); lv.append(r); });
+  lv.append(span('cl', TL('Current Levels:')));
+  ['range', 'speed', 'weapons', 'shields', 'mini'].forEach((k, i) => { const r = document.createElement('div'); r.className = 'lr'; r.append(span('', TL({ range: 'Range', speed: 'Speed', weapons: 'Weapons', shields: 'Shields', mini: 'Mini' }[k])), span('n', String(p.tech[k]))); lv.append(r); });
   const bars = document.createElement('div'); bars.className = 'vb';
   const tb = B && B.tech, rows = tb ? [...tb.querySelectorAll('.barrow')] : [];
   rows.forEach((r, i) => { r.classList.add('w95vbar'); bars.append(r); });
   const names = ['Range', 'Speed', 'Weapons', 'Shields', 'Mini', 'Radical'].slice(0, rows.length);
   const nm = document.createElement('div'); nm.className = 'vn';
-  names.forEach((t, i) => nm.append(span(i % 2 ? 'lo' : 'hi', t, `left:${11 + 22 * i}px`)));
+  names.forEach((t, i) => nm.append(span(i % 2 ? 'lo' : 'hi', TL(t), `left:${11 + 22 * i}px`)));
   body.append(lv, bars, nm);
   if (tb) tb.remove();
 }
@@ -366,7 +372,7 @@ function techWindow(B) {
 // Report Messages (dialog 351, drawn by the program; shots 008, 087, 090): this turn's reports, 32 pixels a row, the picture then the words,
 // on white with the list's scroll bar; a click on a row acts on its report (the remake's reportAction: a battle's replay, a star shown).
 function reportWindow() {
-  const a = A(), w = toolWin('report', 'Report Messages'), body = w.querySelector('.tbody'), list = document.createElement('ul');
+  const a = A(), w = toolWin('report', TL('Report Messages')), body = w.querySelector('.tbody'), list = document.createElement('ul');
   list.className = 'rl'; list.setAttribute('role', 'list');
   (a.me().inbox || []).forEach((m) => {
     const li = document.createElement('li'); li.append(a.msgIconEl(m), span('rt', H().say ? H().say(a.G, m.text) : m.text));
@@ -469,7 +475,7 @@ T.afterMsg = (box, info) => {
   const card = box.querySelector('.card:not(.end):not(.waiting)'); if (!card) return;
   card.classList.add('bub95');
   const im = A().IMG['w95:b345']; if (im && im.src) card.style.backgroundImage = `url("${im.src}")`;
-  const c = card.querySelector('.count'); if (c) c.textContent = 'more...';
+  const c = card.querySelector('.count'); if (c) c.textContent = TL('more...');
 };
 
 
@@ -508,13 +514,13 @@ function W95DLG(id) {
   for (const [cid, kind, text, x, y, w, h, flags] of D.c) {
     if (/hidden/.test(flags)) continue;
     const [l, t] = DU(x, y), [ww, hh] = DU(w, h); let e;
-    if (kind === 'STATIC') { e = document.createElement('div'); e.className = 'st' + (/\n/.test(text) || h > 10 ? ' ml' : ''); e.textContent = text; }
-    else if (/push/.test(kind)) { e = document.createElement('button'); e.type = 'button'; e.className = 'pb' + (/default/.test(kind) ? ' def' : ''); e.textContent = text.replace(/&/g, ''); }
+    if (kind === 'STATIC') { e = document.createElement('div'); e.className = 'st' + (/\n/.test(text) || h > 10 ? ' ml' : ''); e.textContent = text ? TL(text) : ''; }
+    else if (/push/.test(kind)) { e = document.createElement('button'); e.type = 'button'; e.className = 'pb' + (/default/.test(kind) ? ' def' : ''); e.textContent = TL(text.replace(/&/g, '')); }
     else if (kind === 'LISTBOX') { e = document.createElement('div'); e.className = 'lbx'; e.setAttribute('role', 'listbox'); e.tabIndex = 0; }
     else if (kind === 'COMBOBOX') { e = document.createElement('select'); e.className = 'cbx'; hh0(e); }
     else if (kind === 'EDIT') { e = document.createElement('input'); e.className = 'ed'; }
-    else if (/check box/.test(kind)) { e = document.createElement('label'); e.className = 'ck'; const i = document.createElement('input'); i.type = 'checkbox'; e.append(i, document.createTextNode(text)); }
-    else if (/radio/.test(kind)) { e = document.createElement('label'); e.className = 'rb'; const i = document.createElement('input'); i.type = 'radio'; i.name = 'w95r' + id; e.append(i, document.createTextNode(text)); }
+    else if (/check box/.test(kind)) { e = document.createElement('label'); e.className = 'ck'; const i = document.createElement('input'); i.type = 'checkbox'; e.append(i, document.createTextNode(TL(text))); }
+    else if (/radio/.test(kind)) { e = document.createElement('label'); e.className = 'rb'; const i = document.createElement('input'); i.type = 'radio'; i.name = 'w95r' + id; e.append(i, document.createTextNode(TL(text))); }
     else if (kind === 'group box') { e = document.createElement('fieldset'); e.className = 'gb'; if (text) { const lg = document.createElement('legend'); lg.textContent = text; e.append(lg); } }
     else if (/scroll bar/.test(kind)) { // a Windows scroll bar: the arrows step it by one (the bar itself is the control the callers get)
       const w = document.createElement('div'); w.className = 'sbw'; const r = document.createElement('input'); r.type = 'range'; r.className = 'sb';
@@ -538,16 +544,16 @@ const FLT = { sort: 0 };
 function fleetsDialog() {
   const a = A(), g = a.G, rs = H().rules(g), dl = W95DLG(384); if (!dl) return false;
   const lb = dl.by[1175], cb = dl.by[1177];
-  ['Ship Power', 'Ship Class'].forEach((t, i) => { const o = document.createElement('option'); o.value = String(i); o.textContent = t; cb.append(o); });
+  ['Ship Power', 'Ship Class'].forEach((t, i) => { const o = document.createElement('option'); o.value = String(i); o.textContent = TL(t); cb.append(o); });
   cb.value = String(FLT.sort);
   const power = (f) => { let n = 0; for (const k in f.ships) { const d = H().getDesign(g, f.owner, +k); if (d) n += f.ships[k] * (rs.shipPower ? rs.shipPower(g, d) : 1); } return n; };
   const TYPE_ORDER = ['dread', 'fighter', 'bio', 'satellite', 'tanker', 'colony', 'scout'];
   const klass = (f) => { const ds = H().fleetDesigns(g, f); return Math.min(...ds.map(d => { const i = TYPE_ORDER.indexOf(d.type); return i < 0 ? 99 : i; })); };
   const line = (f) => {
     const t = fleetRow(g, f), star = (i) => g.stars[i].name;
-    if (f.to != null) return cfmt('%s to arrive at %s in %d.', t, star(f.to), H().arrivalYear ? H().arrivalYear(g, Math.ceil((f.dist - f.prog) / H().fleetSpeed(g, f))) : g.year);
-    if (f.dest != null) { const d = H().starDist(g, f.star, f.dest), turns = Math.ceil(d / H().fleetSpeed(g, f) - 1e-9); return cfmt('%s leaving %s for %s to arrive in %d.', t, star(f.star), star(f.dest), g.year + turns * ((rs.yearsPerTurn) || 10)); }
-    return cfmt('%s stationed at %s.', t, star(f.star));
+    if (f.to != null) return cfmt(TL('%s to arrive at %s in %d.'), t, star(f.to), H().arrivalYear ? H().arrivalYear(g, Math.ceil((f.dist - f.prog) / H().fleetSpeed(g, f))) : g.year);
+    if (f.dest != null) { const d = H().starDist(g, f.star, f.dest), turns = Math.ceil(d / H().fleetSpeed(g, f) - 1e-9); return cfmt(TL('%s leaving %s for %s to arrive in %d.'), t, star(f.star), star(f.dest), g.year + turns * ((rs.yearsPerTurn) || 10)); }
+    return cfmt(TL('%s stationed at %s.'), t, star(f.star));
   };
   let sel = null;
   const fill = () => {
@@ -574,7 +580,7 @@ const EXS = { mode: 1 };
 function starsDialog() {
   const a = A(), g = a.G, p = a.me(), L = H().rules(g).exploredList || {}, dl = W95DLG(356); if (!dl) return false;
   const lb = dl.by[1131], cb = dl.by[1132];
-  ['Metal', 'Quality', 'Gravity', 'Owner'].forEach((t, i) => { const o = document.createElement('option'); o.value = String(i); o.textContent = t; cb.append(o); });
+  ['Metal', 'Quality', 'Gravity', 'Owner'].forEach((t, i) => { const o = document.createElement('option'); o.value = String(i); o.textContent = TL(t); cb.append(o); });
   cb.value = String(EXS.mode);
   const rec = (st) => st.owner === a.ME ? { explored: true, owner: a.ME, g: st.g, t: st.t, metal: st.metal } : H().know(g, p, st.id);
   const ex = (st) => !!rec(st).explored, ownerOf = (st) => rec(st).owner;
@@ -668,8 +674,8 @@ function allianceDialog() {
     });
   };
   // (the headings as the captures show them, shorter than the template's)
-  if (dl.by['I Really Like Them']) dl.by['I Really Like Them'].textContent = 'I Really Like';
-  if (dl.by["I Don't Like Them"]) dl.by["I Don't Like Them"].textContent = "I Don't Like";
+  if (dl.by['I Really Like Them']) dl.by['I Really Like Them'].textContent = TL('I Really Like');
+  if (dl.by["I Don't Like Them"]) dl.by["I Don't Like Them"].textContent = TL("I Don't Like");
   dl.by[2].addEventListener('click', () => a.closeModal());
   dl.by[1].addEventListener('click', () => {
     for (const id in want) {
@@ -701,7 +707,7 @@ function giveDialog() {
     c.append(f, span('sn', q.name)); c.addEventListener('click', () => { pick = q.id; cells.forEach(x => x.classList.toggle('on', x === c)); });
     cells.push(c); grid.append(c);
   });
-  if (dl.by['Give Stuff To:']) dl.by['Give Stuff To:'].textContent = 'Give Stuff'; // (shot 083's words, not the template's)
+  if (dl.by['Give Stuff To:']) dl.by['Give Stuff To:'].textContent = TL('Give Stuff'); // (shot 083's words, not the template's)
   const mf = dl.by[1145], xf = dl.by[1146]; mf.value = '0'; xf.value = '0'; mf.inputMode = xf.inputMode = 'numeric';
   dl.by[2].addEventListener('click', () => a.closeModal());
   dl.by[1].addEventListener('click', () => {
@@ -943,7 +949,7 @@ function aboutDialog() {
   const lg = dl.by[1174], li = a.IMG['w95:b383']; if (lg && li && li.src) { lg.style.background = `url("${edgeURL(li)}") left top / 80px 121px no-repeat`; lg.style.overflow = 'visible'; lg.style.width = '80px'; lg.style.height = '121px'; }
   const L = licensee95(), lic = dl.by[1173];
   if (lic) { lic.innerHTML = ''; lic.classList.add('lic');
-    lic.append(span('ll', 'Licensed to:'), span('lv', [L.name || 'Unknown', L.org || 'Unknown', 'Spaceward Ho! V4.0.5'].join('\n'))); }
+    lic.append(span('ll', TL('Licensed to:')), span('lv', [L.name || 'Unknown', L.org || 'Unknown', 'Spaceward Ho! V4.0.5'].join('\n'))); }
   // (no button: a click closes it, shot 283; the credits are cut at the box's foot, not wrapped)
   const cr = dl.el.querySelector('.st.ml'); if (cr) { cr.style.whiteSpace = 'pre'; cr.style.overflow = 'hidden'; }
   dl.el.addEventListener('click', () => a.closeModal()); dl.el.style.cursor = 'default';
@@ -964,12 +970,12 @@ const CREDITS = 'Written by Peter Commons\nArt by Howard Vives and Bob Van de Wa
 function splash315(doc) {
   const sp = doc.querySelector('#titlescreen .tsplash'), body = sp && sp.querySelector('.wbody'); if (!body || sp.classList.contains('w95splash')) return;
   sp.classList.add('w95splash');
-  const cred = doc.createElement('div'); cred.className = 'w95cred'; cred.textContent = CREDITS;
+  const cred = doc.createElement('div'); cred.className = 'w95cred'; cred.textContent = TL(CREDITS);
   const logo = doc.createElement('i'); logo.className = 'w95logo';
   const row = doc.createElement('div'); row.className = 'w95btns';
   const o = doc.querySelector('#tcont'), n = doc.querySelector('#tnew');
-  const q = doc.createElement('button'); q.type = 'button'; q.className = 'w95quit'; q.textContent = 'Quit'; q.disabled = true; q.title = 'A web page can’t close itself';
-  if (o) { o.textContent = 'Open Game'; row.append(o); } if (n) { n.textContent = 'New Game'; row.append(n); } row.append(q);
+  const q = doc.createElement('button'); q.type = 'button'; q.className = 'w95quit'; q.textContent = TL('Quit'); q.disabled = true; q.title = 'A web page can’t close itself';
+  if (o) { o.textContent = TL('Open Game'); row.append(o); } if (n) { n.textContent = TL('New Game'); row.append(n); } row.append(q);
   body.append(cred, logo, row);
 }
 const prevTitle = T.title;
@@ -1019,7 +1025,7 @@ function battleWindow95(b, k) {
   const hidden = [0, 1].map(ci => !won && b.rounds.length === 1 && owners[ci] !== ME && !(owners[ci] != null && H().isAllied(g, owners[ci], ME)));
   const c = document.createElement('canvas'); c.className = 'bw95'; c.width = W * S; c.height = Hh * S; c.setAttribute('aria-label', 'Summary of battle');
   const x = c.getContext('2d'); x.setTransform(S, 0, 0, S, 0, 0); x.imageSmoothingEnabled = false;
-  const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'bw95b'; btn.textContent = 'Skip';
+  const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'bw95b'; btn.textContent = TL('Skip');
   const box = document.createElement('div'); box.className = 'bw95w'; box.append(c, btn);
   let stop = false, skip = false, done = false;
   btn.addEventListener('click', () => { if (done) a.closeModal(); else skip = true; });
@@ -1067,13 +1073,13 @@ function battleWindow95(b, k) {
     }
     drawStars();
   };
-  const roundLabel = (n) => { x.fillStyle = '#000'; x.fillRect(190, 254, 110, 18); text(cfmt('Round %d', n), 194, 256); };
+  const roundLabel = (n) => { x.fillStyle = '#000'; x.fillRect(190, 254, 110, 18); text(cfmt(TL('Round %d'), n), 194, 256); };
   x.fillStyle = '#000'; x.fillRect(0, 0, W, Hh);
   drawStars();
   P0.head.forEach((t, i) => text(t, 155, i ? 18 : 1));
   [0, 1].forEach(ci => { if (owners[ci] != null) face(owners[ci], ci); });
   [0, 1].forEach(ci => {
-    if (hidden[ci]) { const L = rs.battleLines || {}; text(L.noInfo || 'You have no information.', 145, 85); text(L.destroyed || 'You were destroyed immediately.', 145, 100); skip = true; }
+    if (hidden[ci]) { const L = rs.battleLines || {}; text(L.noInfo || TL('You have no information.'), 145, 85); text(L.destroyed || TL('You were destroyed immediately.'), 145, 100); skip = true; }
     else cols[ci].forEach(drawGroup);
   });
   const wait = (until) => new Promise(res => { const f = () => (stop || skip || performance.now() >= until ? res() : setTimeout(f, Math.min(TICK, until - performance.now()))); f(); });
@@ -1114,7 +1120,7 @@ function battleWindow95(b, k) {
     const P = rs.battlePanel(g, b, { alive, hurt, pop, over: true, won }, ME);
     (P.end || []).forEach((t, i) => text(t, 155, i ? 147 : 130));
     const im = pic(won ? 3000 : 3010); if (im) x.drawImage(im, 185, 164, 74, 74);
-    btn.textContent = 'Done';
+    btn.textContent = TL('Done');
   };
   (async () => {
     let deadline = performance.now() + speed * TICK;
@@ -1169,7 +1175,7 @@ T.nameStarLayout = (f, o) => {
   const im = a.IMG['w95:b3000'], pc = dl.by[1159]; if (im && im.src) pc.style.background = `#000 url("${im.src}") center / contain no-repeat`;
   const ed = dl.by[1162]; o.inp.className = 'ed'; o.inp.setAttribute('style', ed.getAttribute('style')); ed.replaceWith(o.inp);
   o.err.setAttribute('style', 'position:absolute;left:129px;top:160px;width:140px;margin:0;font-size:10px');
-  const ok = dl.by[1]; const sub = document.createElement('button'); sub.type = 'submit'; sub.className = ok.className; sub.setAttribute('style', ok.getAttribute('style')); sub.textContent = 'OK'; ok.replaceWith(sub);
+  const ok = dl.by[1]; const sub = document.createElement('button'); sub.type = 'submit'; sub.className = ok.className; sub.setAttribute('style', ok.getAttribute('style')); sub.textContent = TL('OK'); ok.replaceWith(sub);
   f.innerHTML = ''; f.append(dl.el); dl.el.append(o.err);
   return 'w95dlgwin';
 };
@@ -1224,33 +1230,33 @@ function createGalaxy95(f) {
   const field = (n) => f.querySelector(`[name="${n}"]`), fire = (n) => n.dispatchEvent(new Event('change', { bubbles: true }));
   const dl = W95DLG(111); if (!dl) return;
   dl.el.classList.add('w95cng');
-  const title = span('cngt', 'Create New Galaxy'); dl.el.append(title);
+  const title = span('cngt', TL('Create New Galaxy')); dl.el.append(title);
   const IMG = () => (window.HOAPI && HOAPI.IMG) || {};
   const boxes = CNG.map((B) => {
     const sel = field(B.f); if (!sel) return null;
-    const lab = span('cngl', B.label, `left:${B.at[0]}px;top:${B.at[1] - 13}px`); dl.el.append(lab);
+    const lab = span('cngl', TL(B.label), `left:${B.at[0]}px;top:${B.at[1] - 13}px`); dl.el.append(lab);
     const box = document.createElement('div'); box.className = 'cngb'; box.style.left = B.at[0] + 'px'; box.style.top = B.at[1] + 'px';
     const draw = () => { box.innerHTML = ''; [...sel.options].forEach(o => { if (!(o.value in B.pics)) return; const c = document.createElement('div'); c.className = 'cc' + (sel.value === o.value ? ' on' : ''); c.setAttribute('role', 'option');
-      const im = IMG()['w95:b' + B.pics[o.value]], i = document.createElement('i'); if (im && im.src) i.style.backgroundImage = `url("${im.src}")`; c.append(i, span('', o.textContent));
+      const im = IMG()['w95:b' + B.pics[o.value]], i = document.createElement('i'); if (im && im.src) i.style.backgroundImage = `url("${im.src}")`; c.append(i, span('', TL(o.textContent)));
       c.addEventListener('click', () => { sel.value = o.value; fire(sel); draw(); }); box.append(c); }); };
     draw(); dl.el.append(box); return draw;
   });
   // the computer players (0 to 19) and the rest
   const comp = field('computers'), bar = dl.by[1012], num = span('cngn', '', 'left:196px;top:196px');
-  dl.el.append(span('cngl', 'Number of Computer Players:', 'left:18px;top:196px'), num);
+  dl.el.append(span('cngl', TL('Number of Computer Players:'), 'left:18px;top:196px'), num);
   if (comp && bar) { bar.min = 0; bar.max = 19; bar.value = /^\d+$/.test(comp.value) ? comp.value : 4; const sh = () => { num.textContent = String(bar.value); }; sh();
     bar.addEventListener('input', () => { comp.value = String(bar.value); fire(comp); sh(); }); }
   const ck = (id, name, text) => { const l = dl.by[id], fi = field(name); if (!l) return; l.querySelector('input').remove(); if (!fi) { l.style.display = 'none'; return; } const c = fi.cloneNode(); c.checked = fi.checked; c.removeAttribute('name');
-    c.addEventListener('change', () => { fi.checked = c.checked; fire(fi); }); l.prepend(c); l.append(document.createTextNode(' ' + text)); l.style.width = 'auto'; };
+    c.addEventListener('change', () => { fi.checked = c.checked; fire(fi); }); l.prepend(c); l.append(document.createTextNode(' ' + TL(text))); l.style.width = 'auto'; };
   ck(1015, 'alliances', 'Alliances'); ck(1203, 'luck', 'Luck in Battles'); ck(1204, 'autoend', 'Automatically end turn for unconnected players');
   const mirror = (id, name, label, lx) => { const c = dl.by[id], fi = field(name); if (!c) return; if (!fi || !fi.options.length) { c.style.display = 'none'; return; }
     [...fi.options].forEach(o => { const n = document.createElement('option'); n.value = o.value; n.textContent = o.textContent; c.append(n); }); c.value = fi.value;
-    c.addEventListener('change', () => { fi.value = c.value; fire(fi); }); dl.el.append(span('cngl', label, `left:${lx}px;top:${parseFloat(c.style.top) + 3}px`)); };
+    c.addEventListener('change', () => { fi.value = c.value; fire(fi); }); dl.el.append(span('cngl', TL(label), `left:${lx}px;top:${parseFloat(c.style.top) + 3}px`)); };
   mirror(1013, 'timelimit', 'Turn Time Limit:', 252); mirror(1014, 'w_years', 'Years Per Turn:', 252);
   dl.by[2].addEventListener('click', () => a.closeModal());
   dl.by[1].addEventListener('click', () => f.requestSubmit());
   let opened = false;
-  const more = document.createElement('button'); more.type = 'button'; more.className = 'pb cngmore'; more.textContent = 'More… (the remake’s own)'; dl.el.append(more);
+  const more = document.createElement('button'); more.type = 'button'; more.className = 'pb cngmore'; more.textContent = TL('More… (the remake’s own)'); dl.el.append(more);
   const holder = document.createElement('div'); holder.className = 'w95cngh'; holder.append(dl.el);
   const rest = [...f.childNodes]; f.prepend(holder);
   const keep = (n) => n.classList && (n.classList.contains('picks') || n.classList.contains('langnote'));

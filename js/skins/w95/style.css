@@ -346,3 +346,5 @@ html.w95win .win.w95cngw { width: auto; max-width: none; }
 html.w95win .w95cng .cngt { font: 600 13px Arial, sans-serif; }
 html.w95win .w95cng .cngl, html.w95win .w95cng .cngn, html.w95win .w95cng label.ck { font: 600 12px/14px Arial, sans-serif; }
 html.w95win .w95cng .cngb .cc i { background-color: #000; }
+html.w95win #menubar .mbtn { display: inline-block; }
+html.w95win #menubar .mbtn::first-letter { text-decoration: underline; }
