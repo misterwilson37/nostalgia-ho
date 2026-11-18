@@ -902,8 +902,8 @@ function buildDialog(sid) {
 }
 
 // Organize Ships (dialog 347, shot 044; FLTORGCL.CPP, OrganizeFleets as 3.0.1's: FUN_0042b278). Twelve piles of one ship type at the star,
-// each its count and the type's picture, in two columns of six on black; click a pile to take one ship (Shift: the whole pile) and click
-// another pile to put them there. Group All (FUN_0042aca6): everything into the first pile. Split All (FUN_0042ad1d): each pile of more than
+// each its count and the type's picture, three columns of four on black (FUN_0042b05d); drag a pile onto another to move one ship (Shift:
+// the whole pile). Group All (FUN_0042aca6): everything into the first pile. Split All (FUN_0042ad1d): each pile of more than
 // one that was there gives half to the next empty pile. Divide All (FUN_0042abad): the total over the twelve, a twelfth each (at least one),
 // the last pile the rest. Next Type (FUN_0042b921): applies, then the next type at the star. OK applies (the piles become fleets: engine
 // splitFleet / mergeFleets, as the Mac 3.0.1 skin's organize), Cancel leaves them.
@@ -917,19 +917,36 @@ function organizeDialog(sid, did0) {
   const piles = Array.from({ length: 12 }, (_, i) => fleets[i] ? { f: fleets[i], n: fleets[i].ships[did] } : { f: null, n: 0 });
   const dl = W95DLG(347); if (!dl) return;
   const field = dl.by[1065]; field.className = 'od opile';
-  let sel = null;
+  // the piles (FUN_0042b05d): twelve cells of 135 x 40 on a 45-pixel pitch, three columns of four (pile i at column i / 4, row i % 4);
+  // the ship picture 15 in, the count over the cell's left, centred, smaller from 100 up. A pile is dragged onto another (FUN_0042bcb1 /
+  // FUN_0042b952: an outline follows the pointer): one ship moves, the whole pile with Shift (MK_SHIFT). A click on one pile and then
+  // another does the same, for fingers.
+  let sel = null, drag = null;
+  const at = (ev) => { const r = field.getBoundingClientRect(), z = r.width / field.offsetWidth || 1, x = (ev.clientX - r.left) / z, y = (ev.clientY - r.top) / z;
+    const c = Math.floor(x / 135), rw = Math.floor(y / 45), i = c * 4 + rw; return x >= 0 && y >= 0 && c < 3 && rw < 4 ? i : -1; };
+  const move = (from, to, all) => { if (from === to || to < 0 || to > 11 || !(piles[from].n > 0)) return; const n = all ? piles[from].n : 1; piles[from].n -= n; piles[to].n += n; };
   const draw = () => {
     field.innerHTML = '';
     piles.forEach((p, i) => {
-      const c = document.createElement('div'); c.className = 'pl' + (sel && sel.pile === i ? ' on' : ''); c.style.left = (i < 6 ? 8 : 213) + 'px'; c.style.top = (8 + 40 * (i % 6)) + 'px';
-      if (p.n > 0) { c.append(span('pn', String(p.n))); const cv = document.createElement('canvas'); cv.width = 128; cv.height = 40; const im = shipPicClean(d, a.IMG); if (im) { const sc = Math.min(1, 128 / im.width, 40 / im.height); cv.getContext('2d').drawImage(im, 0, (40 - im.height * sc) / 2, im.width * sc, im.height * sc); } c.append(cv); }
-      c.addEventListener('click', (e) => {
-        if (sel && sel.pile !== i) { const from = piles[sel.pile], n = sel.all ? from.n : 1; from.n -= n; p.n += n; sel = null; draw(); return; }
-        if (p.n > 0) { sel = sel && sel.pile === i && !e.shiftKey ? null : { pile: i, all: e.shiftKey }; draw(); }
-      });
+      const c = document.createElement('div'); c.className = 'pl' + (sel && sel.pile === i ? ' on' : ''); c.style.left = (Math.trunc(i / 4) * 135) + 'px'; c.style.top = ((i % 4) * 45) + 'px';
+      if (p.n > 0) { const cv = document.createElement('canvas'); cv.width = 120; cv.height = 40; const im = shipPicClean(d, a.IMG); if (im) { const sc = Math.min(1, 120 / im.width, 40 / im.height); cv.getContext('2d').drawImage(im, 0, (40 - im.height * sc) / 2, im.width * sc, im.height * sc); } c.append(cv, span('pn' + (p.n >= 100 ? ' sm' : ''), H().niceNum ? H().niceNum(p.n) : String(p.n))); }
       field.append(c);
     });
   };
+  field.addEventListener('pointerdown', (ev) => {
+    const i = at(ev); if (i < 0) return;
+    if (sel && sel.pile !== i) { move(sel.pile, i, sel.all); sel = null; draw(); return; }
+    if (!(piles[i].n > 0)) { sel = null; draw(); return; }
+    ev.preventDefault(); try { field.setPointerCapture(ev.pointerId); } catch (e) {}
+    const r = field.getBoundingClientRect(), z = r.width / field.offsetWidth || 1;
+    const box = document.createElement('i'); box.className = 'pdrag'; box.style.left = (Math.trunc(i / 4) * 135) + 'px'; box.style.top = ((i % 4) * 45) + 'px'; field.append(box);
+    drag = { i, all: ev.shiftKey, x0: ev.clientX, y0: ev.clientY, l: Math.trunc(i / 4) * 135, t: (i % 4) * 45, z, box, moved: false };
+  });
+  field.addEventListener('pointermove', (ev) => { if (!drag) return; const dx = (ev.clientX - drag.x0) / drag.z, dy = (ev.clientY - drag.y0) / drag.z; if (Math.abs(dx) + Math.abs(dy) > 3) drag.moved = true; drag.box.style.left = (drag.l + dx) + 'px'; drag.box.style.top = (drag.t + dy) + 'px'; });
+  const end = (ev) => { if (!drag) return; const g0 = drag; drag = null; g0.box.remove();
+    if (g0.moved) { move(g0.i, at(ev), g0.all); sel = null; } else sel = sel && sel.pile === g0.i && !g0.all ? null : { pile: g0.i, all: g0.all };
+    draw(); };
+  field.addEventListener('pointerup', end); field.addEventListener('pointercancel', () => { if (drag) { drag.box.remove(); drag = null; } });
   const total = () => piles.reduce((t, p) => t + p.n, 0);
   dl.by[1066].addEventListener('click', () => { const t = total(); piles.forEach((p, i) => { p.n = i ? 0 : t; }); sel = null; draw(); });
   dl.by[1067].addEventListener('click', () => { const had = piles.map(p => p.n > 0); for (let i = 0; i <= 10; i++) { if (piles[i].n > 1 && had[i]) { let j = i + 1; while (j <= 11 && piles[j].n !== 0) j++; if (j > 11) continue; piles[j].n = Math.trunc(piles[i].n / 2); piles[i].n -= piles[j].n; } } sel = null; draw(); });

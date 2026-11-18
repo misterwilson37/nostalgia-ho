@@ -328,10 +328,12 @@ html.w95win .w95dlg .sbw input.sb:disabled { opacity: 1; }
 html.w95win .w95dlg .sbw input.sb:disabled::-webkit-slider-thumb { visibility: hidden; }
 /* Organize Ships (screen.js organizeDialog; shot 044): twelve piles in two columns of six on black, the count at the left */
 html.w95win .w95dlg .od.opile { background: #000; border: 2px solid; border-color: #808080 #fff #fff #808080; box-shadow: inset 1px 1px 0 #000; overflow: hidden; }
-html.w95win .w95dlg .opile .pl { position: absolute; width: 190px; height: 40px; cursor: default; }
+html.w95win .w95dlg .opile .pl { position: absolute; width: 135px; height: 40px; cursor: default; }
 html.w95win .w95dlg .opile .pl.on { outline: 1px dotted #fff; }
-html.w95win .w95dlg .opile .pl .pn { position: absolute; left: 0; top: 12px; color: #fff; }
-html.w95win .w95dlg .opile .pl canvas { position: absolute; left: 14px; top: 0; width: 128px; height: 40px; image-rendering: pixelated; }
+html.w95win .w95dlg .opile .pl .pn { position: absolute; left: 0; top: 0; height: 40px; display: flex; align-items: center; color: #fff; }
+html.w95win .w95dlg .opile .pl .pn.sm { font-size: 9px; }
+html.w95win .w95dlg .opile .pdrag { position: absolute; width: 135px; height: 40px; outline: 1px solid #c4c4c4; mix-blend-mode: difference; pointer-events: none; }
+html.w95win .w95dlg .opile .pl canvas { position: absolute; left: 15px; top: 0; width: 120px; height: 40px; image-rendering: pixelated; }
 /* About (screen.js aboutDialog; shot 283): "Licensed to:" and its three lines in red */
 html.w95win .w95dlg .od.lic, html.w95win .w95dlg .st.lic { display: flex; gap: 6px; white-space: pre; font: bold 12px/14px Arial, sans-serif; overflow: visible; }
 html.w95win .w95dlg .lic .ll { color: #000; padding-left: 12px; } html.w95win .w95dlg .lic .lv { color: #f00; }
