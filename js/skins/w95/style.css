@@ -173,3 +173,30 @@ html.w95win .w95sb.h .th { top: 0; bottom: 0; width: max(8px, calc(var(--z, .5) 
 html.w95win .w95sb.v .th { left: 0; right: 0; height: max(8px, calc(var(--z, .5) * 100%)); top: calc(var(--f, 0) * (100% - max(8px, calc(var(--z, .5) * 100%)))); }
 html.w95win .w95corner { position: absolute; z-index: 6; right: 0; bottom: 0; width: 16px; height: 16px; background: #c0c0c0; }
 html.w95win #msg { left: 17px; top: 15px; bottom: auto; }
+/* unit 5: the floating tool windows (screen.js toolWin): 238 x 112 for Tech Spending (shot 010), an inactive caption 18 high */
+html.w95win .w95tool { position: absolute; z-index: 30; box-sizing: border-box; padding: 3px; background: #c0c0c0; color: #000;
+  font: 11px/13px "MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif;
+  box-shadow: inset -1px -1px 0 #000, inset 1px 1px 0 #dfdfdf, inset -2px -2px 0 #808080, inset 2px 2px 0 #fff; }
+html.w95win .w95tool[hidden] { display: none; }
+html.w95win .w95tool .tcap { display: flex; align-items: center; gap: 3px; height: 18px; padding: 0 2px; background: #808080; color: #c0c0c0; font-weight: bold; cursor: default; touch-action: none; }
+html.w95win .w95tool .tcap span { flex: 1 1 auto; white-space: nowrap; overflow: hidden; }
+html.w95win .w95tool .tcap .flag { width: 16px; height: 16px; flex: none; }
+html.w95win .w95tool .tcap .x { width: 16px; height: 14px; flex: none; box-sizing: border-box; background: #c0c0c0 center no-repeat; cursor: pointer;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='7'><path d='M0 0h2v1h1v1h2V1h1V0h2v1H7v1H6v1H5v1h1v1h1v1h1v1H6V6H5V5H3v1H2v1H0V6h1V5h1V4h1V3H2V2H1V1H0z'/></svg>");
+  box-shadow: inset -1px -1px 0 #000, inset 1px 1px 0 #fff, inset -2px -2px 0 #808080, inset 2px 2px 0 #dfdfdf; }
+html.w95win #w95tech { width: 238px; height: 112px; }
+html.w95win .w95tool .tbody { position: relative; height: calc(100% - 18px); }
+html.w95win #w95tech .lv { position: absolute; left: 1px; top: 2px; width: 70px; }
+html.w95win #w95tech .lv .cl { white-space: nowrap; }
+html.w95win #w95tech .lv .lr { display: flex; justify-content: space-between; padding-left: 4px; }
+html.w95win #w95tech .vb { position: absolute; left: 85px; top: 5px; width: 140px; height: 52px; box-sizing: border-box; border-left: 1px solid #000; border-bottom: 1px solid #000;
+  display: flex; align-items: flex-end; gap: 4px; padding-left: 4px; }
+html.w95win #w95tech .w95vbar { display: block; position: relative; flex: none; width: 18px; height: 50px; margin: 0; padding: 0; }
+html.w95win #w95tech .w95vbar .blabel, html.w95win #w95tech .w95vbar .bval, html.w95win #w95tech .w95vbar .grid { display: none; }
+html.w95win #w95tech .w95vbar .track { position: absolute; inset: 0; width: 18px; height: 50px; margin: 0; padding: 0; border: 0; background: none; box-shadow: none; border-radius: 0; cursor: ns-resize; }
+html.w95win #w95tech .w95vbar .fill { position: absolute; left: 0; bottom: 0; top: auto !important; width: 16px !important; max-height: 50px; box-sizing: border-box; border: 1px solid #ea33f7; border-radius: 0;
+  background: #ea33c9; box-shadow: inset 1px 1px 0 #ed6fcb, 2px 0 0 #5c0e61; }
+html.w95win #w95tech .vn { position: absolute; left: 87px; top: 60px; right: 0; height: 28px; }
+html.w95win #w95tech .vn span { position: absolute; transform: translateX(-50%); white-space: nowrap; }
+html.w95win #w95tech .vn .hi { top: 0; } html.w95win #w95tech .vn .lo { top: 12px; }
+html.w95scale .w95tool { zoom: var(--w95); }

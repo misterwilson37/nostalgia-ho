@@ -22,6 +22,7 @@ function setW95Scale() {
   de.classList.toggle('w95scale', W95.s > 1);
   const a = window.HOAPI;
   if (s0 !== W95.s && a && a.G) { a.UI.fitted = false; a.resize(); a.renderPanel(); }
+  document.querySelectorAll('.w95tool').forEach(w => { if (W95.s < 1) w.hidden = true; });
 }
 setW95Scale(); window.addEventListener('resize', setW95Scale);
 T.w95 = W95;
@@ -50,7 +51,9 @@ T.menuLayout = {
     ['Dip Into Savings', 'Galaxy/Dip into savings…'], '-',
     ['Alliances...', 'Galaxy/Players and alliances…'], ['Give Money/Metal...', 'Galaxy/Give money or metal…'], [null, 'Galaxy/#9'], ['Send Message...', 'Galaxy/Send a message…'], '-',
     [null, 'Galaxy/#10']],
-  Window: [['Report Window', 'Galaxy/Report window…'], '-', ['Zoom In', 'View/Zoom in'], ['Zoom Out', 'View/Zoom out'], ['Fit Galaxy', 'View/Fit galaxy']],
+  Window: [['Tech Spending Window', () => setWin('tech', !winOpen('tech')), null, () => winOpen('tech'), () => !(window.HOAPI && HOAPI.G), '1'],
+    ['Report Window', 'Galaxy/Report window…'], '-', ['Zoom In', 'View/Zoom in'], ['Zoom Out', 'View/Zoom out'], ['Fit Galaxy', 'View/Fit galaxy'], '-',
+    ['Clean Up Windows', () => cleanUp(), null, null, () => !(window.HOAPI && HOAPI.G)]],
   Help: [['Help Topics', 'Help/How to play'], [null, 'Help/#1']],
 };
 // the key equivalents the captures show, by the remake's item (its English label)
@@ -282,6 +285,61 @@ function budgetPane(B) {
   box.append(top, cols);
   return box;
 }
+
+// ---------- the floating windows (unit 5: Tech Spending; the Report window and the bubble follow) ----------
+// Tool windows over the whole screen, as the captures show them (shots 008, 010, 051): a grey (inactive) caption 18 high with the
+// Windows flag, the title in bold and a close box; Clean Up's places along the screen's foot: Tech Spending at (87, 349), the Report
+// window at (338, 349). Dragged by the caption; where each is and whether it is open is kept ("ho5.win.w95").
+const WIN_KEY = 'ho5.win.w95', WIN_HOME = { tech: [87, 349], report: [338, 349] };
+const WS = (() => { try { return JSON.parse(localStorage.getItem(WIN_KEY)) || {}; } catch (e) { return {}; } })();
+const saveWS = () => { try { localStorage.setItem(WIN_KEY, JSON.stringify(WS)); } catch (e) {} };
+const winOpen = (k) => !(WS[k] && WS[k].closed);
+function toolWin(k, title) {
+  let w = document.getElementById('w95' + k);
+  if (!w) {
+    w = document.createElement('div'); w.id = 'w95' + k; w.className = 'w95tool'; w.setAttribute('role', 'dialog'); w.setAttribute('aria-label', title);
+    w.innerHTML = '<div class="tcap"><i class="flag"></i><span></span><i class="x" role="button" aria-label="Close"></i></div><div class="tbody"></div>';
+    w.querySelector('.tcap span').textContent = title;
+    w.querySelector('.x').addEventListener('click', () => { setWin(k, false); });
+    const cap = w.querySelector('.tcap');
+    cap.addEventListener('pointerdown', (e) => {
+      if (e.target.classList.contains('x')) return; e.preventDefault();
+      const z = W95.s || 1, x0 = e.clientX, y0 = e.clientY, p0 = (WS[k] && WS[k].at) || WIN_HOME[k];
+      const mv = (ev) => { const at = [Math.round(p0[0] + (ev.clientX - x0) / z), Math.round(p0[1] + (ev.clientY - y0) / z)]; WS[k] = Object.assign(WS[k] || {}, { at }); placeWin(w, k); };
+      const up = () => { window.removeEventListener('pointermove', mv); window.removeEventListener('pointerup', up); saveWS(); };
+      window.addEventListener('pointermove', mv); window.addEventListener('pointerup', up);
+    });
+    document.getElementById('app').append(w);
+  }
+  placeWin(w, k);
+  return w;
+}
+function placeWin(w, k) {
+  const at = (WS[k] && WS[k].at) || WIN_HOME[k], z = W95.s || 1;
+  const x = Math.max(0, Math.min(at[0], window.innerWidth / z - 40)), y = Math.max(0, Math.min(at[1], window.innerHeight / z - 20));
+  w.style.left = x + 'px'; w.style.top = y + 'px'; w.hidden = !(W95ON() && winOpen(k));
+}
+function setWin(k, on) { WS[k] = Object.assign(WS[k] || {}, { closed: !on }); saveWS(); const w = document.getElementById('w95' + k); if (w) placeWin(w, k); if (on && A()) A().renderPanel(); }
+function cleanUp() { for (const k in WIN_HOME) { WS[k] = Object.assign(WS[k] || {}, { at: null }); delete WS[k].at; } saveWS(); for (const k in WIN_HOME) { const w = document.getElementById('w95' + k); if (w) placeWin(w, k); } }
+// Tech Spending (dialog 102, drawn by the program): "Current Levels:" and the five levels at the left (the names left, the levels right at
+// 69); the six bars standing on an axis at the right, 18 wide, 22 apart, magenta; their names under them in two staggered rows
+// ("Range Weapons Mini" / "Speed Shields Radical"). The bars are the classic page's own (T.techBars 'vertical': dragged up and down).
+T.techBars = 'vertical';
+function techWindow(B) {
+  const a = A(), p = a.me(), w = toolWin('tech', 'Tech Spending'), body = w.querySelector('.tbody');
+  body.innerHTML = '';
+  const lv = document.createElement('div'); lv.className = 'lv';
+  lv.append(span('cl', 'Current Levels:'));
+  ['range', 'speed', 'weapons', 'shields', 'mini'].forEach((k, i) => { const r = document.createElement('div'); r.className = 'lr'; r.append(span('', { range: 'Range', speed: 'Speed', weapons: 'Weapons', shields: 'Shields', mini: 'Mini' }[k]), span('n', String(p.tech[k]))); lv.append(r); });
+  const bars = document.createElement('div'); bars.className = 'vb';
+  const tb = B && B.tech, rows = tb ? [...tb.querySelectorAll('.barrow')] : [];
+  rows.forEach((r, i) => { r.classList.add('w95vbar'); bars.append(r); });
+  const names = ['Range', 'Speed', 'Weapons', 'Shields', 'Mini', 'Radical'].slice(0, rows.length);
+  const nm = document.createElement('div'); nm.className = 'vn';
+  names.forEach((t, i) => nm.append(span(i % 2 ? 'lo' : 'hi', t, `left:${11 + 22 * i}px`)));
+  body.append(lv, bars, nm);
+  if (tb) tb.remove();
+}
 T.panel = (panel, B) => {
   if (!W95ON()) return;
   if (B && B.planet) B.planet.remove();
@@ -290,8 +348,8 @@ T.panel = (panel, B) => {
   low.append(playersPane(), budgetPane(B));
   if (B && B.info) B.info.remove();
   if (B && B.budget) B.budget.remove();
-  // (the Technology box goes to the Tech Spending window: unit 5; meanwhile it stays under the panes)
   panel.prepend(starPane(), head, list, moneyPane(), low);
+  techWindow(B);
 };
 
 
