@@ -1336,6 +1336,48 @@ if (!CLK.timer) CLK.timer = setInterval(clockTick, 1000);
 const prevAfterMsg2 = T.afterMsg;
 T.afterMsg = (box, info) => { if (prevAfterMsg2) prevAfterMsg2(box, info); clockPaint(); };
 
+
+// ---------- the selection ring and the pact halos (FUN_00493baa) ----------
+// Planets are the original's star rectangles (FUN_0048c169): 32 pixels at zoom 17, 16 at 9 and 12, the zoom itself at 6 (the
+// pictures are drawn 1.3 times planetPx, starLook's scale). Under each star (T.mapUnder, as the original copies the sprite into the
+// star's buffer first) picture 175: the selected star gets the green ring, one of five frames, the next one each tick of the frame
+// window's 500 ms timer (FUN_0040a6f2 / FUN_0040aa02); its owner in a mutual pact adds a halo over it, yellow for allies (players
+// +0x238 both ways), cyan for best buddies (+0x288 both ways). Another player's star in a mutual pact gets the halo alone. Big
+// frames 56 x 51 at (star - 12, star - 9), source x 15 + 58 * frame, rows 0 / 52 / 104, halos (159 | 244, 156); small 26 x 26 at
+// (star - 5, star - 5), 15 + 29 * frame, rows 156 / 183 / 210, halos (217, 156 | 183). Nothing at zoom 6. The opaque black of the
+// sprite covers the sky's points, as there. (The star's owner as the program reads it, +0x2a: a mutual ally's stars are no secret.)
+const zoomOf = (v) => Math.round(v.s / 2);
+const prevPlanetPx = T.planetPx;
+T.planetPx = (sc) => { if (!W95ON()) return prevPlanetPx ? prevPlanetPx(sc) : Math.max(18, Math.min(52, sc * 0.9)); const z = Math.round(sc / 2); return (z >= 17 ? 32 : z >= 7 ? 16 : z) / 1.3; };
+T.selectScale = () => (W95ON() ? 0 : 1); // (the classic picture drawn at nothing: the ring is drawn below)
+const SEL = { f: 0 };
+const pactLevel = (g, me, o) => {
+  if (o == null || o < 0 || o === me) return 0;
+  const p = g.players[me], q = g.players[o]; if (!p || !q) return 0;
+  const both = (k) => (p[k] || []).includes(o) && (q[k] || []).includes(me);
+  return both('buddies') ? 2 : both('allies') || both('buddies') ? 1 : 0;
+};
+const prevMapUnder = T.mapUnder;
+T.mapUnder = (cx, i) => {
+  if (prevMapUnder) prevMapUnder(cx, i);
+  if (!W95ON()) return;
+  const a = A(), sheet = a.IMG['w95:b175'], z = zoomOf(i.view);
+  if (!sheet || !sheet.width || z < 7) return;
+  const big = z >= 17;
+  for (const st of i.G.stars) {
+    const x = i.sx(st.x), y = i.sy(st.y);
+    if (x < -40 || y < -40 || x > i.mapW + 40 || y > i.mapH + 40) continue;
+    const lv = pactLevel(i.G, i.ME, st.owner), sel = a.UI.sel === st.id;
+    let sxy = null;
+    if (sel) sxy = big ? [15 + 58 * SEL.f, [0, 52, 104][lv]] : [15 + 29 * SEL.f, [156, 183, 210][lv]];
+    else if (lv) sxy = big ? [lv === 2 ? 244 : 159, 156] : [217, lv === 2 ? 183 : 156];
+    if (!sxy) continue;
+    const w = big ? 56 : 26, h = big ? 51 : 26, l = big ? x - 16 - 12 : x - 8 - 5, t = big ? y - 16 - 9 : y - 8 - 5;
+    cx.drawImage(sheet, sxy[0], sxy[1], w, h, Math.round(l), Math.round(t), w, h);
+  }
+};
+setInterval(() => { const a = A(); if (!W95ON() || a.UI.sel == null || document.visibilityState !== 'visible' || zoomOf(a.UI.view) < 7) return; SEL.f = (SEL.f + 1) % 5; a.draw(); }, 500);
+
 // ---------- the caption bar ----------
 // The window's own: the program's icon, the title (#title, written by the classic page), and the minimise, maximise and
 // close boxes (drawn only: the remake has no window to shrink).
