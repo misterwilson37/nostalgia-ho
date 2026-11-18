@@ -429,3 +429,6 @@ html.w95win #panel ::-webkit-scrollbar-button:vertical:decrement:disabled, html.
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M4 1h1v1h1v1h1v1h1v1H1V4h1V3h1V2h1z' fill='%23fff'/%3E%3Cpath d='M3 0h1v1h1v1h1v1h1v1H0V3h1V2h1V1h1z' fill='%23808080'/%3E%3C/svg%3E"); }
 html.w95win #panel ::-webkit-scrollbar-button:vertical:increment:disabled, html.w95win .w95dlg ::-webkit-scrollbar-button:vertical:increment:disabled {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M1 1h7v1H7v1H6v1H5v1H4V4H3V3H2V2H1z' fill='%23fff'/%3E%3Cpath d='M0 0h7v1H6v1H5v1H4v1H3V3H2V2H1V1H0z' fill='%23808080'/%3E%3C/svg%3E"); }
+/* a static control paints its own background in the dialog's colour (WM_CTLCOLORSTATIC): over the program's frame lines, as shot 044's
+   "To Organize Fleets:" (a picture or the program's own drawing set inline keeps its own) */
+html.w95win .w95dlg > .st { background-color: #c0c0c0; }
