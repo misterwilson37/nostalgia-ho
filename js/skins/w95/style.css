@@ -349,6 +349,8 @@ html.w95win .w95cng .cngb .cc i { background-color: #000; }
 html.w95win #menubar .mbtn { display: inline-block; }
 html.w95win #menubar .mbtn::first-letter { text-decoration: underline; }
 /* End Turn's clock (screen.js clockPaint; shots 010, 054): the playing time in green in its black window, the orange seconds hand */
-html.w95win #msg .clock.pic { position: relative; }
+html.w95win #msg .clock.pic { position: relative; left: -4px; } /* (its window starts at the picture's column 4) */
+/* FUN_004903ea copies the picture from its column 4: columns 0-3 (white) never show */
+html.w95win #msg .clock.pic > img { clip-path: inset(0 0 0 4px); }
 html.w95win #msg .clock .clockyear.w95time { color: #80ff40; font: 13px/1 Arial, sans-serif; display: flex; align-items: center; justify-content: center; }
 html.w95win #msg .clock .w95hand { position: absolute; left: 33px; top: 30px; width: 21px; height: 2px; margin-top: -1px; background: #f7a040; transform-origin: 0 50%; pointer-events: none; }
