@@ -498,8 +498,34 @@ function setupMap() {
   cv.addEventListener('contextmenu', guard((e) => { if (!G) return; e.preventDefault(); if (lastPointer === 'touch') return; const s = starAt(ox(e), oy(e)); if (s != null) starMenu(s, e.clientX, e.clientY); }));
   // T.modernPan(): the skin's map is scrolled by its scroll bars (the Mac 1.2 / 2.0.1 skins); dragging it with a mouse and zooming by the wheel are then
   // modern conveniences (1.2, 1992, had neither), a finger always drags (and pinches)
-  cv.addEventListener('wheel', guard((e) => { e.preventDefault(); if (noMousePan()) return; zoomAt(ox(e), oy(e), e.deltaY < 0 ? 1.15 : 1 / 1.15); }), { passive: false });
+  cv.addEventListener('wheel', guard((e) => { e.preventDefault(); if (noMousePan()) return; wheelZoom(e); }), { passive: false });
   resize();
+}
+// The wheel's zoom. A trackpad (a MacBook's) sends dozens of small wheel events for one swipe, and a pinch on it comes as wheel events
+// with ctrlKey; one event a step made the zoom far too quick to control (Jake, 18 Nov 2026). So the deltas are added up: a skin with
+// zoom levels of its own (steppedZoom: the Mac and Amiga skins, the DOS skin's frame) steps one level when they pass WHEEL.STEP, then waits for the swipe to
+// end (a pause of WHEEL.GAP ms) or WHEEL.HOLD ms before the next step, so a trackpad's coasting doesn't run through every level; any
+// other skin zooms smoothly by the delta's size. (deltaMode 1 is lines, as Firefox's mouse wheel sends; 2 is pages.)
+// (stepped: T.zoomTo keeps the scale for a 1% zoom either way; iOS's and the DOS skin's unframed zoomTo are smooth, only bounded)
+const steppedZoom = (s0) => !!T.zoomTo && T.zoomTo(s0, 1.01) === s0 && T.zoomTo(s0, 0.99) === s0;
+const WHEEL = { STEP: 40, GAP: 220, HOLD: 900, K: 0.0025, PINCH: 4 };
+const wheelSt = { acc: 0, t: 0, stepT: 0, locked: false };
+function wheelZoom(e) {
+  const now = performance.now(), gap = now - wheelSt.t;
+  wheelSt.t = now;
+  let d = e.deltaY * (e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? 400 : 1);
+  if (e.ctrlKey) d *= WHEEL.PINCH;
+  if (!d) return;
+  if (!steppedZoom(UI.view.s)) { zoomAt(ox(e), oy(e), Math.exp(-Math.max(-150, Math.min(150, d)) * WHEEL.K)); return; }
+  if (wheelSt.locked) {
+    if (gap < WHEEL.GAP && now - wheelSt.stepT < WHEEL.HOLD) return;
+    wheelSt.locked = false; wheelSt.acc = 0;
+  }
+  if (gap > WHEEL.GAP || Math.sign(d) !== Math.sign(wheelSt.acc)) wheelSt.acc = 0;
+  wheelSt.acc += d;
+  if (Math.abs(wheelSt.acc) < WHEEL.STEP) return;
+  zoomAt(ox(e), oy(e), wheelSt.acc < 0 ? 1.15 : 1 / 1.15);
+  wheelSt.acc = 0; wheelSt.stepT = now; wheelSt.locked = true;
 }
 function resize() {
   const r = cv.parentElement.getBoundingClientRect();
@@ -1208,7 +1234,8 @@ const Touch = {
       const [a, b] = [...this.pts.values()], v = UI.view, [lo, hi] = zoomRange();
       const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
       const pf = Math.hypot(a.x - b.x, a.y - b.y) / this.d0;
-      v.s = T.zoomTo ? T.zoomTo(this.s0, pf) : Math.max(lo, Math.min(hi, this.s0 * pf));
+      // (a skin's own zoom levels: a level for each 0.35 of the pinch's log, about a 40% spread, so the levels don't flicker under the fingers)
+      v.s = steppedZoom(this.s0) ? (Math.abs(Math.log(pf)) < 0.35 ? this.s0 : T.zoomTo(this.s0, Math.exp(Math.trunc(Math.log(pf) / 0.35) * 0.35))) : T.zoomTo ? T.zoomTo(this.s0, pf) : Math.max(lo, Math.min(hi, this.s0 * pf));
       v.ox = mx - this.wx * v.s; v.oy = my - this.wy * v.s; // about the fingers' midpoint, panning with it
       clampView(); draw(); return;
     }

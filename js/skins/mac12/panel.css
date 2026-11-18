@@ -2,24 +2,24 @@
    three programs): imported by js/skins/mac3/style.css, so every Mac skin built on it has it. The classes are put there only by
    js/skins/mac12/ui.js (panel12 for 1.2 and 2.0.1, panel301 for 3.0.1). */
 /* the map window's boxes as 1.2 draws them (planet, fleets, totals, players | budget, the Tech Spending window): canvases the panel's width */
-#panel canvas.qd12 { display: block; width: 100%; height: auto; image-rendering: pixelated; }
-#panel .box.planet12, #panel .box.fleets12, #panel .box.info12, #panel .box.tech12 { padding: 0; }
-#panel .low12 { display: flex; gap: 0; align-items: flex-start; }
-#panel .low12 .rost12 { flex: 0 0 30%; }
-#panel .low12 .rost12 .box { margin: 0; }
-#panel .low12 > .box { flex: 1 1 auto; min-width: 0; margin: 0; }
+:is(#panel, .p301x) canvas.qd12 { display: block; width: 100%; height: auto; image-rendering: pixelated; }
+:is(#panel, .p301x) .box.planet12, :is(#panel, .p301x) .box.fleets12, :is(#panel, .p301x) .box.info12, :is(#panel, .p301x) .box.tech12 { padding: 0; }
+:is(#panel, .p301x) .low12 { display: flex; gap: 0; align-items: flex-start; }
+:is(#panel, .p301x) .low12 .rost12 { flex: 0 0 30%; }
+:is(#panel, .p301x) .low12 .rost12 .box { margin: 0; }
+:is(#panel, .p301x) .low12 > .box { flex: 1 1 auto; min-width: 0; margin: 0; }
 /* 3.0.1: the players and the budget, one canvas (js/skins/mac12/ui.js lowBox301) */
-#panel .box.low301 { padding: 0; }
+:is(#panel, .p301x) .box.low301 { padding: 0; }
 /* the Report Window under the Tech Spending window: 96 of its pixels high, 32 a report, the icon then the sentence from 35 */
-#panel .rep12box { padding: 0; }
-#panel ul.rep12 { list-style: none; margin: 0; padding: 0; height: calc(96 / 226 * (290px - 18px)); overflow-y: auto; position: relative; font: 10px/1.1 Geneva, Verdana, sans-serif; }
-#panel ul.rep12 li { display: flex; align-items: flex-start; gap: 4px; min-height: 36px; padding: 0; border: 0; }
-#panel ul.rep12 li img { width: 32px; height: 32px; flex: none; }
-#panel ul.rep12 li .rt { padding-top: 1px; }
+:is(#panel, .p301x) .rep12box { padding: 0; }
+:is(#panel, .p301x) ul.rep12 { list-style: none; margin: 0; padding: 0; height: calc(96 / 226 * (290px - 18px)); overflow-y: auto; position: relative; font: 10px/1.1 Geneva, Verdana, sans-serif; }
+:is(#panel, .p301x) ul.rep12 li { display: flex; align-items: flex-start; gap: 4px; min-height: 36px; padding: 0; border: 0; }
+:is(#panel, .p301x) ul.rep12 li img { width: 32px; height: 32px; flex: none; }
+:is(#panel, .p301x) ul.rep12 li .rt { padding-top: 1px; }
 /* 3.0.1's panes are one window's: edge to edge, no gaps, the window's frame round them (the Tech Spending and Report windows stay apart) */
-#panel .box.planet301, #panel .box.fleets301, #panel .box.info301, #panel .box.low301 { margin: 0; border: 0; border-left: 1px solid #000; border-radius: 0; box-shadow: none; }
-#panel .box.planet301 { border-top: 1px solid #000; }
-#panel .box.low301 { border-bottom: 1px solid #000; margin-bottom: 8px; }
+:is(#panel, .p301x) .box.planet301, :is(#panel, .p301x) .box.fleets301, :is(#panel, .p301x) .box.info301, :is(#panel, .p301x) .box.low301 { margin: 0; border: 0; border-left: 1px solid #000; border-radius: 0; box-shadow: none; }
+:is(#panel, .p301x) .box.planet301 { border-top: 1px solid #000; }
+:is(#panel, .p301x) .box.low301 { border-bottom: 1px solid #000; margin-bottom: 8px; }
 /* (shared with 3.0.1: its map scrolls as 2.0.1's) */
 /* the map window's scroll bars (MapWinProc): 16 of the program's pixels (one CSS pixel each, as the map), at the window's right edge and foot, the map between them */
 .mapbar12, .mapcorner12 { position: absolute; z-index: 6; background: #fff; }
@@ -30,10 +30,23 @@
 .mapcorner12 { right: 0; bottom: 0; width: 16px; height: 16px; box-sizing: border-box; border-left: 1px solid #000; border-top: 1px solid #000; }
 html.bars12 #msg { bottom: 28px; }
 /* 3.0.1's DrawSpecial over a report's icon: a player's face 16 x 16 in its middle, or a cross */
-#panel ul.rep12 li .ric301 { position: relative; width: 32px; height: 32px; flex: none; display: block; }
-#panel ul.rep12 li .ric301 img.sp301 { position: absolute; left: 8px; top: 8px; width: 16px; height: 16px; image-rendering: pixelated; }
-#panel ul.rep12 li .ric301 .x301 { position: absolute; inset: 0; background: linear-gradient(45deg, transparent calc(50% - 1.4px), #000 calc(50% - 1.4px), #000 calc(50% + 1.4px), transparent calc(50% + 1.4px)), linear-gradient(-45deg, transparent calc(50% - 1.4px), #000 calc(50% - 1.4px), #000 calc(50% + 1.4px), transparent calc(50% + 1.4px)); }
+:is(#panel, .p301x) ul.rep12 li .ric301 { position: relative; width: 32px; height: 32px; flex: none; display: block; }
+:is(#panel, .p301x) ul.rep12 li .ric301 img.sp301 { position: absolute; left: 8px; top: 8px; width: 16px; height: 16px; image-rendering: pixelated; }
+:is(#panel, .p301x) ul.rep12 li .ric301 .x301 { position: absolute; inset: 0; background: linear-gradient(45deg, transparent calc(50% - 1.4px), #000 calc(50% - 1.4px), #000 calc(50% + 1.4px), transparent calc(50% + 1.4px)), linear-gradient(-45deg, transparent calc(50% - 1.4px), #000 calc(50% - 1.4px), #000 calc(50% + 1.4px), transparent calc(50% + 1.4px)); }
 /* 3.0.1's report bubble (DrawAnnounceBubble) at the map's bottom left, 185 x 79, and its End Turn button at (3, 2) (EndTurnButtonShowing) */
+/* 3.0.1's windows below the panes as the original's 640 x 480 screen has them (shot040; ResetWindows / SetWindowLocations): Tech Spending
+   under the panes, the Report Window (253 wide) under the map at the screen's right, white between. Grid cells of #main, not fixed boxes
+   (a fixed box went wrong in Firefox), so the whole Mac fits 480 high and setMacScale can make it big on a laptop. A narrow page keeps
+   them in the panel's column. */
+html.mac301lay #main { grid-template-rows: minmax(0, 1fr) auto; }
+html.mac301lay #panel { grid-row: 1; grid-column: 1; }
+html.mac301lay #mapwrap { grid-row: 1; grid-column: 2; }
+html.mac301lay #tech301 { grid-row: 2; grid-column: 1; padding: 0 8px 0 9px; min-width: 0; }
+html.mac301lay #tech301 .box { margin: 0; }
+html.mac301lay #rep301 { grid-row: 2; grid-column: 2; position: relative; background: #fff; border-top: 1px solid #000; min-width: 0; }
+html.mac301lay #rep301 .rep12box { position: absolute; top: 0; right: 0; bottom: 0; width: 253px; margin: 0; border: 0; border-left: 1px solid #000; border-radius: 0; box-shadow: none; }
+html.mac301lay #rep301 ul.rep12 { height: 100%; }
+html.macscale #tech301, html.macscale #rep301 { zoom: var(--mac); }
 html.mac301 #msg { left: 3px; bottom: 3px; max-width: none; }
 html.mac301.bars12 #msg { bottom: 19px; }
 html.mac301 #msg .card.bub301 { position: relative; width: 185px; height: 79px; box-sizing: border-box; padding: 0; margin: 0; border: 0; outline: 0; box-shadow: none; border-radius: 0; background: #fff 0 0 / 185px 79px no-repeat; color: #000; display: block; image-rendering: pixelated; }

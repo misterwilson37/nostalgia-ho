@@ -22,7 +22,7 @@
 .piles12 .ship.sel { outline: 2px solid; }
 .reports li img.ricon { vertical-align: middle; margin-right: 6px; image-rendering: pixelated; }
 /* DrawHBarControl and DrawVBarControl draw no amounts beside the bars */
-#panel .barrow .bval { visibility: hidden; }
+:is(#panel, .p301x) .barrow .bval { visibility: hidden; }
 /* (the battle window, DLOG 7010: in panel.css, shared with 3.0.1) */
 /* a report clicked, inverted for 5 ticks (ClickInReportWindow) */
 ul.reports li.inv12 { filter: invert(1); background: #fff; }
@@ -69,8 +69,8 @@ ul.reports li.inv12 { filter: invert(1); background: #fff; }
 .players12 .btns .fill { flex: 1; }
 
 /* the players' strip, in a later ruleset: it opens the Players window (the remake's own), and an ally wears 1.2's halo picture */
-#panel .roster12.rclick { cursor: pointer; }
-#panel .roster12.rclick:focus-visible { outline: 1px dotted #000; outline-offset: -2px; }
+:is(#panel, .p301x) .roster12.rclick { cursor: pointer; }
+:is(#panel, .p301x) .roster12.rclick:focus-visible { outline: 1px dotted #000; outline-offset: -2px; }
 /* an ally's ring (the remake's own, 1 bit: the idea of 3.0.1's halo, whose picture is only the top of a planet's ring); double for a best buddy */
 .roster12 .rface { display: inline-block; flex: none; box-sizing: border-box; width: 20px; height: 20px; margin: -2px; padding: 1px; border: 1px solid #000; border-radius: 50%; line-height: 0; }
 .roster12 .rface.buddy { border: 3px double #000; padding: 0; }

@@ -35,7 +35,8 @@ function macScale() { const u0 = Math.min(window.innerWidth / 640, window.innerH
 function measureMac() {
   const p = document.getElementById('panel'), m = document.getElementById('menubar'); if (!p || !p.firstChild || MACS.s <= 1) return; // (only in the Mac's layout: the page's own panel is wider, so taller)
   const z = MACS.s, pr = p.getBoundingClientRect(), last = p.lastElementChild.getBoundingClientRect();
-  const need = Math.ceil((last.bottom - pr.top + p.scrollTop * z) / z + 16 + (m ? m.getBoundingClientRect().height / z : 20)); // (the content's foot, the panel's padding above and below, the menu bar)
+  const t3 = document.documentElement.classList.contains('mac301lay') && document.getElementById('tech301'); // (3.0.1's bottom row: Tech Spending's height too)
+  const need = Math.ceil((last.bottom - pr.top + p.scrollTop * z) / z + 16 + (m ? m.getBoundingClientRect().height / z : 20) + (t3 ? t3.getBoundingClientRect().height / z : 0)); // (the content's foot, the panel's padding above and below, the menu bar)
   if (need !== MACS.need) { MACS.need = need; setMacScale(); }
 }
 function setMacScale() {
@@ -2587,8 +2588,22 @@ function panel301(panel, B) {
   const low = lowBox301(B || {});
   const rep = reportsBox301();
   panel.innerHTML = '';
-  panel.append(planetBox301(), fleetBox301(), incomeBox301(), low, techBox301(), rep);
+  const tech = techBox301();
+  // (a page wide enough for the panel beside the map: Tech Spending and the Report Window in #main's bottom row, as the original's screen; js/skins/mac12/panel.css)
+  const main = document.getElementById('main'), wide = !NARROW301.matches;
+  let t3 = document.getElementById('tech301'), r3 = document.getElementById('rep301');
+  document.documentElement.classList.toggle('mac301lay', wide && !!main);
+  if (wide && main) {
+    if (!t3) { t3 = el('div', { id: 'tech301', class: 'p301x' }); r3 = el('div', { id: 'rep301', class: 'p301x' }); main.append(t3, r3); }
+    t3.replaceChildren(tech); r3.replaceChildren(rep);
+    panel.append(planetBox301(), fleetBox301(), incomeBox301(), low);
+  } else {
+    if (t3) t3.remove(); if (r3) r3.remove();
+    panel.append(planetBox301(), fleetBox301(), incomeBox301(), low, tech, rep);
+  }
 }
+const NARROW301 = window.matchMedia('(max-width: 760px)');
+NARROW301.addEventListener('change', () => { if (window.HOMAC301 && A() && A().G) { A().renderPanel(); A().resize(); } });
 
 // ---------- the battle window (DoOneBattle @d07d0, DLOG 7010: 445 x 310, black; drawn at twice the size) ----------
 // Everything here is read in the decompile (docs/display/12.json rows DoOneBattle, DrawAllGroups, DrawOneGroup, HaveGroupShoot,
