@@ -72,6 +72,9 @@ To compare: serve the repo (`python3 -m http.server 8765 --bind 127.0.0.1` from 
   (Galaxy menu, Ctrl+D) and change the ruleset if it is wrong.
 - Preferences' defaults: Jake's new Windows game (shot 040, year 2000) shows Review Event Battles ticked, Battle Speed at Fast and
   Polling Time 1 second; the 405 options (verOpts) start unticked, 30 and 8. Check the program's defaults (its setup) before changing.
+- Organize Ships: 4.0.5 has it (shots 042, 044; FUN_0042b278 is 3.0.1's OrganizeFleets), the 405 ruleset has no `organizeFleets`, so the
+  classic page offers none; the w95 skin's own Organize (screen.js `organizeDialog`, engine splitFleet / mergeFleets) is in its Ships
+  menu. Give the ruleset `organizeFleets` if the other skins should have it too.
 - Statistics (Galaxy menu; dialog 355, shot 079: population gained / killed, enemy population killed, ships built / destroyed / enemy
   destroyed) needs counters the engine doesn't keep (`G.stat` has battles, captures, colonized).
 - Its starting designs are named Weasel, Santa Maria...; the Windows program's are Rudolph (scout), Hardy (colony ship), Chevron

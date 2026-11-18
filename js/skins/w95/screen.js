@@ -49,7 +49,7 @@ T.menuLayout = {
     ['Master Point List...', 'Game/Master Point List…'], ['Hall of Fame...', 'Game/Hall of Fame…'], ['Hall of Shame...', 'Game/Hall of Shame…'], '-',
     ['Preferences...', () => (W95ON() ? prefsDialog() : HOAPI.openPrefs()), null, null, noGame]],
   Ships: [['Build/Design Ships...', 'Ships/Build ships at selected colony…'], '-',
-    ['List All Fleets', 'Ships/List all fleets…'], [null, 'Ships/#4'], [null, 'Ships/#3'], '-',
+    ['List All Fleets', 'Ships/List all fleets…'], ['Organize Ships...', () => { const a = HOAPI; if (a && a.G && a.UI.sel != null) (W95ON() ? organizeDialog(a.UI.sel) : a.openOrganize(a.UI.sel)); }, null, null, () => noGame() || HOAPI.UI.sel == null], [null, 'Ships/#3'], '-',
     // (the last item names the selected star's battle, or reads "No Battles here..." dimmed: shot 042)
     [null, 'Ships/#1']],
   Galaxy: [['Compare Players...', 'Galaxy/Compare players…'], ['Graph History...', 'Game/Players and history'], ['List All Explored Stars...', 'Galaxy/List explored stars…'], '-',
@@ -471,6 +471,25 @@ T.afterMsg = (box, info) => {
 };
 
 
+
+// A ship's picture with the white that touches its edges made see-through (some extracted bitmaps, the basic scout's 2762 among them, keep
+// a white margin the program masks away); cached by the picture.
+const SHIPC = new WeakMap();
+function shipPicClean(d, IMG) {
+  const im = T.shipPic ? T.shipPic(d, IMG) : null; if (!im || !im.width) return im;
+  if (SHIPC.has(im)) return SHIPC.get(im);
+  const c = document.createElement('canvas'); c.width = im.width; c.height = im.height; const x = c.getContext('2d'); x.drawImage(im, 0, 0);
+  try {
+    const W = c.width, Hh = c.height, D = x.getImageData(0, 0, W, Hh), px = D.data, seen = new Uint8Array(W * Hh), q = [];
+    const white = (i) => px[i * 4] > 245 && px[i * 4 + 1] > 245 && px[i * 4 + 2] > 245 && px[i * 4 + 3] > 0;
+    for (let xx = 0; xx < W; xx++) q.push(xx, (Hh - 1) * W + xx); for (let yy = 0; yy < Hh; yy++) q.push(yy * W, yy * W + W - 1);
+    while (q.length) { const i = q.pop(); if (seen[i] || !white(i)) continue; seen[i] = 1; px[i * 4 + 3] = 0; const xx = i % W, yy = (i / W) | 0;
+      if (xx > 0) q.push(i - 1); if (xx < W - 1) q.push(i + 1); if (yy > 0) q.push(i - W); if (yy < Hh - 1) q.push(i + W); }
+    x.putImageData(D, 0, 0);
+  } catch (e) {}
+  SHIPC.set(im, c); return c;
+}
+
 // ---------- the dialogs (unit 7): SPACEHO.EXE's templates (js/skins/w95/dialogs.js) drawn at their dialog units ----------
 // W95DLG(id): the dialog's controls placed at 1.5 x 1.625 pixels a unit (MS Sans Serif 8): STATIC words, push buttons (the default one
 // ringed), list boxes (white, sunken, their own scroll bar), combo boxes (a <select>), edit fields, check boxes, group boxes, horizontal
@@ -766,7 +785,7 @@ function buildDialog(sid) {
   const lb = dl.by[1016], pic = dl.by[1020], nm = dl.by[1021], cb = dl.by[1022], n = dl.by[1043];
   types.forEach(t => { const o = document.createElement('option'); o.value = t; o.textContent = H().TYPES[t].name; cb.append(o); });
   n.value = '0'; n.inputMode = 'numeric';
-  const shipCanvas = (d, w, h) => { const c = document.createElement('canvas'); c.width = w; c.height = h; const im = T.shipPic ? T.shipPic(d, a.IMG) : null; if (im) { const sc = Math.min(1, w / im.width, h / im.height); c.getContext('2d').drawImage(im, (w - im.width * sc) / 2, (h - im.height * sc) / 2, im.width * sc, im.height * sc); } return c; };
+  const shipCanvas = (d, w, h) => { const c = document.createElement('canvas'); c.width = w; c.height = h; const im = shipPicClean(d, a.IMG); if (im) { const sc = Math.min(1, w / im.width, h / im.height); c.getContext('2d').drawImage(im, (w - im.width * sc) / 2, (h - im.height * sc) / 2, im.width * sc, im.height * sc); } return c; };
   const pile = (el, coin, count) => {
     el.innerHTML = ''; const c = document.createElement('canvas'); c.width = 60; c.height = 52; el.append(c); const x = c.getContext('2d'), im0 = a.IMG['w95:b' + coin]; if (!im0 || !im0.width) return;
     // (the program draws these through a mask; the extracted bitmaps have none, so their white is made see-through here)
@@ -822,6 +841,53 @@ function buildDialog(sid) {
   dl.by[2].addEventListener('click', () => a.closeModal());
   draw(); showDlg(dl, 'Build/Design Ships');
   return true;
+}
+
+// Organize Ships (dialog 347, shot 044; FLTORGCL.CPP, OrganizeFleets as 3.0.1's: FUN_0042b278). Twelve piles of one ship type at the star,
+// each its count and the type's picture, in two columns of six on black; click a pile to take one ship (Shift: the whole pile) and click
+// another pile to put them there. Group All (FUN_0042aca6): everything into the first pile. Split All (FUN_0042ad1d): each pile of more than
+// one that was there gives half to the next empty pile. Divide All (FUN_0042abad): the total over the twelve, a twelfth each (at least one),
+// the last pile the rest. Next Type (FUN_0042b921): applies, then the next type at the star. OK applies (the piles become fleets: engine
+// splitFleet / mergeFleets, as the Mac 3.0.1 skin's organize), Cancel leaves them.
+function organizeDialog(sid, did0) {
+  const a = A(), g = a.G;
+  const single = (f) => f.owner === a.ME && f.star === sid && f.to == null && !f.sat && Object.keys(f.ships).length === 1;
+  const dids = [...new Set(g.fleets.filter(single).map(f => +Object.keys(f.ships)[0]))];
+  if (!dids.length) { a.toast('There are no fleets of yours here to organize.'); return; }
+  const cf = a.curFleet && a.curFleet(), did = did0 != null && dids.includes(did0) ? did0 : cf && single(cf) ? +Object.keys(cf.ships)[0] : dids[0];
+  const d = H().getDesign(g, a.ME, did), fleets = g.fleets.filter(f => single(f) && +Object.keys(f.ships)[0] === did).slice(0, 12);
+  const piles = Array.from({ length: 12 }, (_, i) => fleets[i] ? { f: fleets[i], n: fleets[i].ships[did] } : { f: null, n: 0 });
+  const dl = W95DLG(347); if (!dl) return;
+  const field = dl.by[1065]; field.className = 'od opile';
+  let sel = null;
+  const draw = () => {
+    field.innerHTML = '';
+    piles.forEach((p, i) => {
+      const c = document.createElement('div'); c.className = 'pl' + (sel && sel.pile === i ? ' on' : ''); c.style.left = (i < 6 ? 8 : 213) + 'px'; c.style.top = (8 + 40 * (i % 6)) + 'px';
+      if (p.n > 0) { c.append(span('pn', String(p.n))); const cv = document.createElement('canvas'); cv.width = 128; cv.height = 40; const im = shipPicClean(d, a.IMG); if (im) { const sc = Math.min(1, 128 / im.width, 40 / im.height); cv.getContext('2d').drawImage(im, 0, (40 - im.height * sc) / 2, im.width * sc, im.height * sc); } c.append(cv); }
+      c.addEventListener('click', (e) => {
+        if (sel && sel.pile !== i) { const from = piles[sel.pile], n = sel.all ? from.n : 1; from.n -= n; p.n += n; sel = null; draw(); return; }
+        if (p.n > 0) { sel = sel && sel.pile === i && !e.shiftKey ? null : { pile: i, all: e.shiftKey }; draw(); }
+      });
+      field.append(c);
+    });
+  };
+  const total = () => piles.reduce((t, p) => t + p.n, 0);
+  dl.by[1066].addEventListener('click', () => { const t = total(); piles.forEach((p, i) => { p.n = i ? 0 : t; }); sel = null; draw(); });
+  dl.by[1067].addEventListener('click', () => { const had = piles.map(p => p.n > 0); for (let i = 0; i <= 10; i++) { if (piles[i].n > 1 && had[i]) { let j = i + 1; while (j <= 11 && piles[j].n !== 0) j++; if (j > 11) continue; piles[j].n = Math.trunc(piles[i].n / 2); piles[i].n -= piles[j].n; } } sel = null; draw(); });
+  dl.by[1068].addEventListener('click', () => { let t = total(); const per = Math.max(1, Math.trunc(t / 12)); for (let i = 0; i < 11; i++) { piles[i].n = Math.min(per, t); t -= piles[i].n; } piles[11].n = Math.max(0, t); sel = null; draw(); });
+  const apply = () => {
+    const temps = [];
+    for (const p of piles) if (p.f && p.n < p.f.ships[did]) { if (p.n === 0) temps.push(p.f); else { const t = H().splitFleet(g, p.f, { [did]: p.f.ships[did] - p.n }); if (t) temps.push(t); } }
+    const take = (need) => { let got = null; while (need > 0 && temps.length) { let t = temps[0]; if (t.ships[did] > need) t = H().splitFleet(g, t, { [did]: need }); else temps.shift(); need -= t.ships[did]; if (got) H().mergeFleets(g, got, t); else got = t; } return got; };
+    for (const p of piles) if (p.f && p.n > (p.f.ships[did] || 0)) { const t = take(p.n - p.f.ships[did]); if (t) H().mergeFleets(g, p.f, t); }
+    for (const p of piles) if (!p.f && p.n > 0) take(p.n);
+    a.save(); a.renderPanel(); a.draw();
+  };
+  dl.by[1].addEventListener('click', () => { apply(); a.closeModal(); });
+  dl.by[2].addEventListener('click', () => a.closeModal());
+  dl.by[1069].addEventListener('click', () => { apply(); a.closeModal(); const k = dids.indexOf(did); organizeDialog(sid, dids[(k + 1) % dids.length]); });
+  draw(); showDlg(dl, 'Organize Ships');
 }
 const prevWindow = T.window;
 T.window = (name, ...args) => {
@@ -914,7 +980,7 @@ function battleWindow95(b, k) {
   const tile = (gr, gx, gy) => {
     let im = null;
     if (gr.planet) im = pic(1003);
-    else { const u = b.start[gr.units[0]], d = H().getDesign(g, gr.o, u.did) || { type: u.t, R: 1, V: 1, W: 1, S: 1 }; im = T.shipPic ? T.shipPic(d, IMG) : null; }
+    else { const u = b.start[gr.units[0]], d = H().getDesign(g, gr.o, u.did) || { type: u.t, R: 1, V: 1, W: 1, S: 1 }; im = shipPicClean(d, IMG); }
     x.fillStyle = '#000'; x.fillRect(gx, gy, 128, 40);
     if (im) { const w = im.width, h = im.height, sc = Math.min(1, 128 / w, 40 / h), dx = gx + (128 - w * sc) / 2, dy = gy + (40 - h * sc) / 2;
       // (the right-hand side's ships face left, towards the other side: shots 094-099)
