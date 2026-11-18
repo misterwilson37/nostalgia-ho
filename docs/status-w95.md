@@ -83,9 +83,11 @@ To compare: serve the repo (`python3 -m http.server 8765 --bind 127.0.0.1` from 
   (the remake's default is Normal: $25,000, 5,000). `tools/skins/w95-compare.js` now starts Novice games (`&skill=novice`).
 - The 405 ruleset has no `rs.fleetDesc`, so reports and every skin write "one Scout"; 4.0.5 writes "one Rudolph (1/1) Scout",
   "32 Storm (8/8) Fighters" (as `fleetDesc301`). The w95 skin words its own fleet rows meanwhile (screen.js `fleetRow`).
-- Dip Into Savings: 4.0.5 for Windows takes a sum once (dialog 358, shot 080: "You currently have $128,885 in savings. You can take out
-  up to $390,110. How much would you like?"); the 405 ruleset has a standing share of savings each turn (classic `openDip`). Check the code
-  (Galaxy menu, Ctrl+D) and change the ruleset if it is wrong.
+- Dip Into Savings, confirmed (FUN_00469757, Galaxy menu Ctrl+D): one sum, once. Dialog 358 asks "You currently have $%s in savings.
+  You can take out up to $%s. How much would you like?" (the most is savings less the borrowing limit, player +0x10 - +0x18, which is
+  negative, so a dip can go into debt; the field starts at that most); OK takes the sum from savings (+0x10) and adds it to this turn's
+  money (Total Money +0 and Net Income +8), the interest (+0x14) worked again. The 405 ruleset's standing share (classic `openDip`) is
+  not 4.0.5's.
 - Preferences' and New Game's defaults, now read from the code (the profile reads at FUN_0047d8e8's callers, keys under "prefs", with
   these fallbacks): reviewBattles 1, shipShootDelay 10 (Battle Speed, ticks), pollTicks 60 (1 second), graphicBattles 1,
   groupBattleShots 1, showMessages 1, showFleetPaths 1, autoSortPlanets 1 (sortPlanetMethod 2), useLogScale 1, mapScale 17, sound 1,
