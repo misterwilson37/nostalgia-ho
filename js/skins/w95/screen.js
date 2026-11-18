@@ -1311,6 +1311,31 @@ T.dragRoute = (cx, o) => {
   cx.restore(); return true;
 };
 
+
+// End Turn's clock (FUN_004903ea): with no time limit, its window shows the time you have played this game, "%1.1ld:%2.2ld" (hours,
+// minutes: shot 010 "0:00", 054 "0:32"), and its orange hand turns with the seconds, 6 degrees a second, from the clock's middle. The
+// remake keeps the time per game and player in this browser ("ho5.w95.clock.<game>.<player>"), counting while the page is shown and the
+// game goes on. (With a time limit the classic page's countdown stays.)
+const CLK = { t: 0, key: '', timer: null };
+const clockKey = () => { const a = A(); return a && a.G ? 'ho5.w95.clock.' + (a.G.gameId || 'g') + '.' + a.ME : ''; };
+function clockPaint() {
+  const btn = document.querySelector('#msg .clock'); if (!btn || !W95ON()) return;
+  const yr = btn.querySelector('.clockyear'); const a = A(); if (!yr || (a.G && a.G.opts && a.G.opts.timeLimit > 0)) return;
+  const k = clockKey(); if (k !== CLK.key) { CLK.key = k; try { CLK.t = +localStorage.getItem(k) || 0; } catch (e) { CLK.t = 0; } }
+  const m = Math.floor(CLK.t / 60); yr.textContent = Math.floor(m / 60) + ':' + String(m % 60).padStart(2, '0'); yr.classList.add('w95time');
+  let h = btn.querySelector('.w95hand'); if (!h) { h = document.createElement('i'); h.className = 'w95hand'; btn.append(h); }
+  h.style.transform = `rotate(${(CLK.t % 60) * 6 - 90}deg)`;
+}
+function clockTick() {
+  const a = A(); if (!W95ON() || !a.G || a.G.over || document.visibilityState !== 'visible') return;
+  const k = clockKey(); if (k !== CLK.key) { CLK.key = k; try { CLK.t = +localStorage.getItem(k) || 0; } catch (e) { CLK.t = 0; } }
+  CLK.t++; if (CLK.t % 10 === 0) try { localStorage.setItem(k, String(CLK.t)); } catch (e) {}
+  clockPaint();
+}
+if (!CLK.timer) CLK.timer = setInterval(clockTick, 1000);
+const prevAfterMsg2 = T.afterMsg;
+T.afterMsg = (box, info) => { if (prevAfterMsg2) prevAfterMsg2(box, info); clockPaint(); };
+
 // ---------- the caption bar ----------
 // The window's own: the program's icon, the title (#title, written by the classic page), and the minimise, maximise and
 // close boxes (drawn only: the remake has no window to shrink).

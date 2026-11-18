@@ -30,7 +30,8 @@ window.HOTHEME = {
   satRing: '#ffffff', // your satellites: a white circle (FUN_0048dea0)
   // fleets sitting at a star: icon 10114 (FUN_0048e55e); nothing for satellites
   marker: (f) => (f.sat ? null : B(10114)),
-  endTurnPic: B(368), // the End Turn clock (FUN_004903ea)
+  // the End Turn clock (FUN_004903ea draws picture 0x170 - !param_3): 367 is the face every capture shows (010, 054...); 368, darker, when pressed
+  endTurnPic: B(367), endTurnPicDown: B(368),
   endTurnYear: [21, 33, 27, 15, 64], // the clock's black window, where it writes the year
   battlePlanet: B(1003),
   // Planets (FUN_00438f47). Size by gravity against your home's; yours with
