@@ -1050,8 +1050,76 @@ function graphDialog() {
   return true;
 }
 
+
+// Send Message (dialog 365, shot 085; FUN_0049a4b0's class: Erase FUN_0049a77d, Send FUN_0049a7cb, the steps FUN_0049b001 /
+// FUN_0049a8e1, clicks FUN_0049b64a). The message is built a step at a time, the remake's own steps (rules.cannedChat, 'steps'):
+// To Whom? (the other players still in, their faces, then Everyone (picture 1402) and, with alliances, Your Allies and Your Buddies
+// (2021)), Saying What? (pictures 10000-10014), then what the line needs (Which Star? / Who? / Where?: stars as the map draws them,
+// players' faces). The heading (1156) is list 771's line for the step, written as the program writes it ("Send MessageTo Whom?",
+// shot 085). The choices sit in the big box (control 1148), 60-pixel cells five a row, the picture at (14, 2), the name centred
+// under it at 30, the cell black with white words while pressed; what is chosen stacks in the narrow box (1154): a click there goes
+// back to that step. Text Msg. shows MessageText (25 letters, a beep beyond). Send sends and starts again; Erase starts again;
+// Done closes. Erase is dimmed until a step is taken, Send until the message is whole.
+function sendDialog() {
+  const a = A(), g = a.G, C = H().rules(g).cannedChat; if (!C || C.style !== 'steps') return false;
+  const dl = W95DLG(365); if (!dl) return false;
+  const big = dl.by[1148], col = dl.by[1154], head = dl.by[1156], txt = dl.by[1158], txtL = dl.by[1157];
+  [big, col].forEach(b => { b.classList.add('sgrid'); b.textContent = ''; });
+  const facePic = (o) => { const p = g.players[o]; if (!p) return 1402; return o === a.ME ? (p.female ? 1905 : 1405) : (p.female ? 2500 : 2000) + ((p.face || 0) % 20); };
+  const starPic = (sid) => { try { const l = a.starLook(sid); const im = l && (l.pic || a.IMG[l.base]); return im && im.src ? im.src : null; } catch (e) { return null; } };
+  const picSrc = (n) => { const im = a.IMG['w95:b' + n]; return im && im.src ? im.src : null; };
+  let to = null, act = null, parts = [];
+  const steps = () => { const ps = act != null ? C.actions[act].parts : []; return 2 + ps.length; };
+  const stepNow = () => (to == null ? 0 : act == null ? 1 : 2 + parts.length);
+  const done = () => to != null && act != null && parts.length >= C.actions[act].parts.filter(q => q[1] !== 'text').length;
+  const isText = () => act != null && C.actions[act].parts.some(q => q[1] === 'text');
+  const items = (k) => {
+    if (k === 0) return C.to(g, a.ME).filter(o => !o[2]).map(([v, l]) => ({ v, l: typeof v === 'number' ? l : TL(l), src: typeof v === 'number' ? picSrc(facePic(v)) : picSrc(v === 'all' ? 1402 : 2021) }));
+    if (k === 1) return C.actions.map((x, i) => ({ v: i, l: TL(x.label), src: picSrc(10000 + i) }));
+    const pt = C.actions[act].parts[k - 2]; if (!pt || pt[1] === 'text') return [];
+    return C.list(g, a.ME, pt[1], a.UI.sel).filter(o => !o[2]).map(([v, l]) => ({ v, l, src: pt[1] === 'players' ? picSrc(facePic(v)) : starPic(v) }));
+  };
+  const cell = (it, onPick) => {
+    const c = document.createElement('div'); c.className = 'scell'; c.setAttribute('role', 'button'); c.tabIndex = 0; c.title = it.l;
+    const i = document.createElement('i'); i.className = 'sp'; if (it.src) i.style.backgroundImage = `url("${it.src}")`;
+    c.append(i, span('sl', it.l));
+    c.addEventListener('pointerdown', () => c.classList.add('down'));
+    ['pointerleave', 'pointercancel'].forEach(t => c.addEventListener(t, () => c.classList.remove('down')));
+    c.addEventListener('click', () => { c.classList.remove('down'); onPick(); });
+    c.addEventListener('keydown', (ev) => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); onPick(); } });
+    return c;
+  };
+  const chosen = () => { const out = []; if (to != null) out.push(items(0).find(x => x.v === to)); if (act != null) out.push(items(1)[act]); parts.forEach((v, j) => { const it = items(2 + j).find(x => x.v === v); out.push(it || { v, l: String(v) }); }); return out.filter(Boolean); };
+  const back = (k) => { if (k <= 0) { to = null; act = null; parts = []; } else if (k === 1) { act = null; parts = []; } else parts = parts.slice(0, k - 2); draw(); };
+  const draw = () => {
+    const k = stepNow(), whole = done();
+    big.textContent = ''; col.textContent = '';
+    if (!whole) items(k).slice(0, 20).forEach(it => big.append(cell(it, () => { if (k === 0) to = it.v; else if (k === 1) act = it.v; else parts.push(it.v); draw(); })));
+    chosen().forEach((it, j) => col.append(cell(it, () => back(j))));
+    const P = k === 0 ? C.prompts[0] : k === 1 ? C.prompts[1] : !whole && act != null ? C.actions[act].parts[k - 2][0] : '';
+    head.textContent = TL(P).replace(/\n/g, '');
+    const t = whole && isText(); txt.style.visibility = t ? 'visible' : 'hidden'; txtL.classList.toggle('dim', !t);
+    dl.by[1151].disabled = k === 0; dl.by[1150].disabled = !whole;
+    if (t) txt.focus();
+  };
+  txt.maxLength = 80; txt.addEventListener('input', () => { if (txt.value.length > 25) { txt.value = txt.value.slice(0, 25); try { a.beep(); } catch (e) {} } });
+  dl.by[1151].addEventListener('click', () => back(0));
+  dl.by[1150].addEventListener('click', () => {
+    if (!done()) return;
+    const v = parts.slice(); if (isText()) v.text = txt.value;
+    const r = H().sendCanned(g, a.ME, C.make(g, a.ME, to, act, v));
+    if (r === 'limit') { w95Note(TL('Sorry, you can only send ten messages per turn.')); return; }
+    if (r === 'ok') { try { a.Sound.play(5000); } catch (e) {} a.save(); }
+    txt.value = ''; back(0);
+  });
+  dl.by[1].addEventListener('click', () => a.closeModal());
+  showDlg(dl, TL('Send Message')); draw();
+  return true;
+}
+const w95Note = (t) => { const a = A(); if (a.toast) a.toast(t); else window.alert(t); };
+
 T.window = (name, ...args) => {
-  if (W95ON()) { if (name === 'fleets') return fleetsDialog(); if (name === 'stars') return starsDialog(); if (name === 'surrender' && surrenderDialog()) return true; if (name === 'give') return giveDialog(); if (name === 'players') return graphDialog(); if (name === 'build' && buildDialog(args[0])) return true; }
+  if (W95ON()) { if (name === 'fleets') return fleetsDialog(); if (name === 'stars') return starsDialog(); if (name === 'surrender' && surrenderDialog()) return true; if (name === 'give') return giveDialog(); if (name === 'players') return graphDialog(); if (name === 'chat' && sendDialog()) return true; if (name === 'build' && buildDialog(args[0])) return true; }
   return prevWindow ? prevWindow(name, ...args) : false;
 };
 

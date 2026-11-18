@@ -360,3 +360,10 @@ html.w95win .w95dlg .st.gi { background: #c4c4c4; box-shadow: inset -1px -1px 0 
 html.w95win .w95dlg .st.gi.on { background: #000; color: #fff; }
 html.w95win .w95dlg .st.gi .gp { position: absolute; left: calc(50% - 16px); top: 0; width: 32px; height: 32px; background: center / 32px 32px no-repeat; image-rendering: pixelated; }
 html.w95win .w95dlg .st.gi .gn { position: absolute; left: 0; right: 0; top: 34px; text-align: center; font-size: 10px; line-height: 12px; letter-spacing: -0.2px; white-space: nowrap; }
+/* Send Message (dialog 365, screen.js sendDialog; shot 085): the two boxes of 60-pixel cells (FUN_00499473) */
+html.w95win .w95dlg .gb.sgrid { background: #fff; border: 1px solid #000; margin: 0; padding: 2px; box-sizing: border-box; display: flex; flex-wrap: wrap; align-content: flex-start; overflow: auto; min-width: 0; }
+html.w95win .w95dlg .sgrid .scell { position: relative; width: 60px; height: 60px; flex: none; cursor: pointer; }
+html.w95win .w95dlg .sgrid .scell.down { background: #000; color: #fff; }
+html.w95win .w95dlg .sgrid .scell .sp { position: absolute; left: 14px; top: 2px; width: 32px; height: 32px; background: center / contain no-repeat; image-rendering: pixelated; }
+html.w95win .w95dlg .sgrid .scell .sl { position: absolute; left: -6px; right: -6px; top: 32px; font-size: 10px; text-align: center; white-space: nowrap; overflow: visible; }
+html.w95win .w95dlg .st.dim { color: #808080; text-shadow: 1px 1px 0 #fff; }
