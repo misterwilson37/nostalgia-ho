@@ -738,6 +738,11 @@ function prefsDialog() {
   const sync = () => { imp.disabled = rev.disabled = !show.checked; }; show.addEventListener('change', sync); sync();
   const pw = dl.by[1102]; if (pw) { pw.disabled = true; pw.title = 'The remake keeps no password'; }
   dl.by[2].addEventListener('click', () => a.closeModal());
+  // the remake's own options (Modern conveniences, the tips, temperatures, sounds...): the classic page's window, as the iOS skin's
+  // "Remake options…" (the class is the one the test tools know that button by)
+  const more = document.createElement('button'); more.type = 'button'; more.className = 'pb ios-bremake'; more.textContent = TL('Remake options…');
+  more.setAttribute('style', 'position:absolute;left:12px;top:' + (198 * 1.625) + 'px;width:auto;padding:0 8px;height:23px'); dl.el.append(more);
+  more.addEventListener('click', () => { a.closeModal(); a.openPrefs(); });
   dl.by[1].addEventListener('click', () => {
     P.sortPlanets = sort.checked; P.showMsgs = show.checked; P.important = imp.checked; P.review = rev.checked; P.hints = hint.checked;
     P.fullAnim = full.checked; P.groupsTogether = grp.checked; P.fleetPaths = paths.checked;
