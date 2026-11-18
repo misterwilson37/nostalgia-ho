@@ -772,6 +772,39 @@ function battleWindow95(b, k) {
 // (a getter: the classic page uses any T.battleWindow it finds, so it exists only while the window layout is on and the ruleset has the words)
 Object.defineProperty(T, 'battleWindow', { configurable: true, get: () => (W95ON() && H().rules(A().G).battlePanel ? battleWindow95 : undefined) });
 
+
+// ---------- end of the game (unit 11) ----------
+// You won / you lost (dialog 377, shots 295, 323): the words (control 1161) at (25, 9), the picture (1160: 3000 won, 3010 lost) at (31, 34),
+// OK at the foot. The words are the ruleset's (rs.youWon / rs.youLost).
+const prevWonLayout = T.youWonLayout;
+T.youWonLayout = (kind, Y, done) => {
+  if (!W95ON()) return prevWonLayout ? prevWonLayout(kind, Y, done) : false;
+  const a = A(), dl = W95DLG(377); if (!dl) return false;
+  dl.by[1161].textContent = Y.text || dl.by[1161].textContent; dl.by[1161].classList.add('ml');
+  const im = a.IMG['w95:b' + (kind === 'lost' ? 3010 : 3000)], pc = dl.by[1160];
+  if (im && im.src) { pc.style.background = `#000 url("${im.src}") center / contain no-repeat`; pc.style.imageRendering = 'pixelated'; } // (on black: shots 295, 323)
+  dl.by[1].addEventListener('click', () => a.closeModal());
+  a.modal('', dl.el, { cls: 'w95dlgwin', sticky: true, label: kind === 'lost' ? 'You lost' : 'You won', onClose: done });
+  return true;
+};
+// Name a Star (dialog 378, shot 297): the words at (6, 6), the won picture (control 1159) at (9, 61), "New Star Name:" at (88, 71), the
+// field at (86, 84), OK at (111, 116); no Cancel: OK with the name blank names none (as the dialog says). The remake's own form and field.
+const prevNameStar = T.nameStarLayout;
+T.nameStarLayout = (f, o) => {
+  if (!W95ON()) return prevNameStar ? prevNameStar(f, o) : false;
+  const a = A(), dl = W95DLG(378); if (!dl) return false;
+  const decline = f.querySelector('button[type=button]');
+  f.addEventListener('submit', (e) => { if (!o.inp.value.trim() && decline) { e.preventDefault(); e.stopImmediatePropagation(); decline.click(); } }, true);
+  const NS = o.NS, words = [NS.text, NS.rule, NS.hint].filter(Boolean).join('\n\n');
+  const st = dl.el.querySelector('.st.ml'); if (st && words && (NS.rule || NS.hint)) st.textContent = words; // (else the dialog's own three paragraphs)
+  const im = a.IMG['w95:b3000'], pc = dl.by[1159]; if (im && im.src) pc.style.background = `#000 url("${im.src}") center / contain no-repeat`;
+  const ed = dl.by[1162]; o.inp.className = 'ed'; o.inp.setAttribute('style', ed.getAttribute('style')); ed.replaceWith(o.inp);
+  o.err.setAttribute('style', 'position:absolute;left:129px;top:160px;width:140px;margin:0;font-size:10px');
+  const ok = dl.by[1]; const sub = document.createElement('button'); sub.type = 'submit'; sub.className = ok.className; sub.setAttribute('style', ok.getAttribute('style')); sub.textContent = 'OK'; ok.replaceWith(sub);
+  f.innerHTML = ''; f.append(dl.el); dl.el.append(o.err);
+  return 'w95dlgwin';
+};
+
 // ---------- the caption bar ----------
 // The window's own: the program's icon, the title (#title, written by the classic page), and the minimise, maximise and
 // close boxes (drawn only: the remake has no window to shrink).
