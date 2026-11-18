@@ -92,7 +92,11 @@ Units 1-4 are the big ones (one session might do two). 6-9 are quicker. 10 is lo
    rest was grey, seen once Tech Spending was moved; it now fills the column (#panel a flex column, .w95low grows). Tech Spending's
    place over the map on turn 1 was Jake's own from an earlier game: places are kept between games ("ho5.win.w95"; Window > Clean Up
    Windows puts them back).
-9. The yellow box beside the selected star (shot: Nihal with two fleets' squares) looks wrong.
+9. ~~The yellow box beside the selected star~~: done. FUN_0048e55e draws at most two fleet pictures a star, 10114 (a 6-pixel cyan dot in
+   a 16-pixel box): yours at the planet rectangle's top right (right - 9, top - 8 at zooms 9 and 12; right - 5, top - 10 at 17), other
+   players' at its top left; none at zoom 6; no frame for the selected fleet (shot 054). The classic page's row of markers with its
+   yellow box is replaced in w95 by `markerAt95` (T.markerAt, a getter on while the window layout is); the other fleets at the star
+   stay pickable where the dot is.
 10. The remake's own commands sit at the end of Help; everywhere else they are the "Ho!" menu. Jake suggests the window icon at the
     top left (the system menu's place) opens them.
 

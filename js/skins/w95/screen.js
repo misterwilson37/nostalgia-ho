@@ -495,6 +495,21 @@ T.mapInset = () => (W95LAY() ? [BAR * (W95.s || 1), BAR * (W95.s || 1)] : [0, 0]
 T.mapPixel = () => (W95LAY() && W95.s > 1 ? [W95.s, W95.s] : null);
 T.mapBg = '#000';
 T.mapNames = (sc) => (W95ON() ? zoomIdx(sc) > 0 : sc > 18);
+// Fleets at a star (FUN_0048e55e): one picture 10114 (0x2782, a 6-pixel cyan dot in a 16-pixel box) for yours, at the planet's top
+// right (its rectangle's right - 9, top - 8 at zooms 9 and 12; right - 5, top - 10 at 17 and closer), and one for other players'
+// fleets there at its top left (left + 9 - 16, or left + 5 - 16); none at zoom 6. One a star however many fleets, and no frame for
+// the selected one (the classic page's row of markers and its yellow box: Jake 18 Nov). The others at the star are kept where the
+// first is drawn (hidden), so a drag there still picks one up.
+function markerAt95(f, { s, x, y, ps, mine, view }) {
+  const a = A(), g = a && a.G; if (!g) return null;
+  const z = view.s / LY, top = y - ps / 2;
+  if (z <= 6) return { x: Math.round(x - 4), y: Math.round(y - 3), w: 9, hidden: true };
+  const near = z < 13, dy = near ? 8 : 10, dx = near ? 9 : 5;
+  const first = g.fleets.find(q => q.star === s.id && q.to == null && !q.sat && (mine ? q.owner === a.ME : q.owner !== a.ME));
+  const at = mine ? { x: x + ps / 2 - dx, y: top - dy } : { x: x - ps / 2 + dx - 16, y: top - dy };
+  return { x: Math.round(at.x), y: Math.round(at.y), w: 16, hidden: first !== f };
+}
+Object.defineProperty(T, 'markerAt', { configurable: true, get: () => (W95ON() ? markerAt95 : undefined) });
 T.mapNameStyle = (cx) => { if (W95ON()) { cx.fillStyle = '#fff'; cx.font = '11px "MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif'; } };
 // the scroll bars: a Windows 95 bar each, its thumb where the view is between the limits; an arrow moves a cell, the track a page,
 // the thumb drags the map
