@@ -1205,6 +1205,64 @@ T.confirm = (text, yes, labels) => {
   ok.focus(); return true;
 };
 
+
+// ---------- Create New Galaxy (unit 9): the remake's New Game form dressed as dialog 111 (shot 002) while the 405 ruleset is chosen ----------
+// The program draws the four choices itself (not in the template): boxes of 48-pixel cells, each its picture over its name, the chosen one
+// black: Galaxy Density (Dense 114, Sparse 115) at (18, 58), Galaxy Style (Circle 116, Random 117, Ring 118, Spiral 119, Grid 120, Cluster
+// 121) at (179, 58), Computer Intelligence (Dumb 122, Average 123, Smart 125, Diabolical 127) at (18, 138), Galaxy Size (Small 129 ...
+// Humongous 133) at (228, 138) (measured on shot 002; the pictures matched on it). From the template: the computer players' bar (1012), the
+// check boxes Alliances (1015), Luck in Battles (1203) and Automatically end turn for unconnected players (1204), Turn Time Limit (1013) and
+// Years Per Turn (1014), Cancel and Create. They set the form's own fields (w_density, w_shape, w_iq, w_size, computers, alliances, luck,
+// autoend, timelimit, w_years); the remake's other choices (name, the version, skin, language...) stay under "More…".
+const CNG = [
+  { f: 'w_density', at: [18, 58], label: 'Galaxy Density:', pics: { dense: 114, sparse: 115 } },
+  { f: 'w_shape', at: [179, 58], label: 'Galaxy Style:', pics: { circle: 116, random: 117, ring: 118, spiral: 119, grid: 120, cluster: 121 } },
+  { f: 'w_iq', at: [18, 138], label: 'Computer Intelligence:', pics: { dumb: 122, average: 123, smart: 125, diabolical: 127 } },
+  { f: 'w_size', at: [228, 138], label: 'Galaxy Size:', pics: { small: 129, medium: 130, large: 131, xl: 132, huge: 133 } }];
+function createGalaxy95(f) {
+  const a = A(), win = f.closest('.win'); if (!win || f.querySelector('.w95cng')) return;
+  const field = (n) => f.querySelector(`[name="${n}"]`), fire = (n) => n.dispatchEvent(new Event('change', { bubbles: true }));
+  const dl = W95DLG(111); if (!dl) return;
+  dl.el.classList.add('w95cng');
+  const title = span('cngt', 'Create New Galaxy'); dl.el.append(title);
+  const IMG = () => (window.HOAPI && HOAPI.IMG) || {};
+  const boxes = CNG.map((B) => {
+    const sel = field(B.f); if (!sel) return null;
+    const lab = span('cngl', B.label, `left:${B.at[0]}px;top:${B.at[1] - 13}px`); dl.el.append(lab);
+    const box = document.createElement('div'); box.className = 'cngb'; box.style.left = B.at[0] + 'px'; box.style.top = B.at[1] + 'px';
+    const draw = () => { box.innerHTML = ''; [...sel.options].forEach(o => { if (!(o.value in B.pics)) return; const c = document.createElement('div'); c.className = 'cc' + (sel.value === o.value ? ' on' : ''); c.setAttribute('role', 'option');
+      const im = IMG()['w95:b' + B.pics[o.value]], i = document.createElement('i'); if (im && im.src) i.style.backgroundImage = `url("${im.src}")`; c.append(i, span('', o.textContent));
+      c.addEventListener('click', () => { sel.value = o.value; fire(sel); draw(); }); box.append(c); }); };
+    draw(); dl.el.append(box); return draw;
+  });
+  // the computer players (0 to 19) and the rest
+  const comp = field('computers'), bar = dl.by[1012], num = span('cngn', '', 'left:196px;top:196px');
+  dl.el.append(span('cngl', 'Number of Computer Players:', 'left:18px;top:196px'), num);
+  if (comp && bar) { bar.min = 0; bar.max = 19; bar.value = /^\d+$/.test(comp.value) ? comp.value : 4; const sh = () => { num.textContent = String(bar.value); }; sh();
+    bar.addEventListener('input', () => { comp.value = String(bar.value); fire(comp); sh(); }); }
+  const ck = (id, name, text) => { const l = dl.by[id], fi = field(name); if (!l) return; l.querySelector('input').remove(); if (!fi) { l.style.display = 'none'; return; } const c = fi.cloneNode(); c.checked = fi.checked; c.removeAttribute('name');
+    c.addEventListener('change', () => { fi.checked = c.checked; fire(fi); }); l.prepend(c); l.append(document.createTextNode(' ' + text)); l.style.width = 'auto'; };
+  ck(1015, 'alliances', 'Alliances'); ck(1203, 'luck', 'Luck in Battles'); ck(1204, 'autoend', 'Automatically end turn for unconnected players');
+  const mirror = (id, name, label, lx) => { const c = dl.by[id], fi = field(name); if (!c) return; if (!fi || !fi.options.length) { c.style.display = 'none'; return; }
+    [...fi.options].forEach(o => { const n = document.createElement('option'); n.value = o.value; n.textContent = o.textContent; c.append(n); }); c.value = fi.value;
+    c.addEventListener('change', () => { fi.value = c.value; fire(fi); }); dl.el.append(span('cngl', label, `left:${lx}px;top:${parseFloat(c.style.top) + 3}px`)); };
+  mirror(1013, 'timelimit', 'Turn Time Limit:', 252); mirror(1014, 'w_years', 'Years Per Turn:', 252);
+  dl.by[2].addEventListener('click', () => a.closeModal());
+  dl.by[1].addEventListener('click', () => f.requestSubmit());
+  let opened = false;
+  const more = document.createElement('button'); more.type = 'button'; more.className = 'pb cngmore'; more.textContent = 'More… (the remake’s own)'; dl.el.append(more);
+  const holder = document.createElement('div'); holder.className = 'w95cngh'; holder.append(dl.el);
+  const rest = [...f.childNodes]; f.prepend(holder);
+  const keep = (n) => n.classList && (n.classList.contains('picks') || n.classList.contains('langnote'));
+  const rs = field('rules');
+  const dress = () => { const on = !rs || rs.value === '405'; holder.style.display = on ? '' : 'none'; win.classList.toggle('w95cngw', on);
+    for (const n of rest) if (n.style && !keep(n)) n.style.display = on && !opened ? 'none' : ''; boxes.forEach(d => d && d()); };
+  more.addEventListener('click', () => { opened = !opened; dress(); });
+  if (rs) rs.addEventListener('change', dress); dress();
+}
+const prevNewGame = T.newGame;
+T.newGame = (f, ctx) => { if (prevNewGame) prevNewGame(f, ctx); if (de.classList.contains('w95win')) createGalaxy95(f); };
+
 // ---------- the caption bar ----------
 // The window's own: the program's icon, the title (#title, written by the classic page), and the minimise, maximise and
 // close boxes (drawn only: the remake has no window to shrink).
