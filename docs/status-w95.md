@@ -65,12 +65,11 @@ Units 1-4 are the big ones (one session might do two). 6-9 are quicker. 10 is lo
    opens as the report is announced (with four programs in the hand; fewer, nothing) and when the report is clicked in Report
    Messages. `rs.radicalHand.announce` (405, so Mac 4.0.5 too), the classic card and `reportAction`. Checked in w95: dialog 348
    with the four programs, 2010.
-3. ~~Build window: the money and metal left don't go down as ships are queued~~: done as a modern convenience. Whether 4.0.5 updates
-   Savings / Metal while "# To Build" changes isn't settled: shot 093 (5 to build) is the only capture with a count and the pane from
-   that moment isn't in view; the Mac 3.0.1 BuildDesignShips' item handling is a jump table the decompile didn't unpack. With modern
-   conveniences on, `buildDialog` shows Savings and Metal less what "# To Build" would cost (the prototype's price with the first of a
-   new type; red below 0; the piles follow), updated on +, - and typing. Plain game: as before. Jake can check the real 4.0.5 in his
-   Windows 95 emulator; if it updates them, make this always on.
+3. ~~Build window: the money and metal left don't go down as ships are queued~~: done, always (not a modern convenience). Evidence:
+   Mac 4.0.5's BuildSomeShips / UnbuildSomeShips (@f1552 / @f1870, called by BuildDesignShips and SwitchToNewType) take each ship's
+   price (+0x78, the prototype's, for the first of a type none is built of; else +0x7c) and metal (+0x80) off the window's money and
+   metal (DAT_00efdc52 / DAT_00efdc4e) as "# To Build" changes, and DRAWSHIPMONEYCHIPS redraws the piles; 3.0.1 did it too (Jake).
+   `buildDialog`'s Savings / Metal and piles follow + , - and typing; red below 0.
 4. ~~Second turn: End Turn's clock shrank while the report bubbles were up~~: done. The clock the skin shows beside a report
    (`extraClock`, #w95clk) wasn't in the list zoomed by --w95, so it stayed at x1 (64 x 61 against 96 x 92 at x1.5). Now the same
    size and place either way.

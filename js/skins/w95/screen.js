@@ -894,7 +894,7 @@ function buildDialog(sid) {
   const inService = (did) => g.fleets.filter(f => f.owner === a.ME).reduce((t, f) => t + (f.ships[did] || 0), 0);
   const label = (d) => `${d.name} (${d.W}/${d.S}) ${TL(H().TYPES[d.type].name)}`;
   const queued = () => { // (what "# To Build" would cost: the type you have, or the new one with its prototype)
-    const want = Math.max(0, Math.trunc(+String(n.value).replace(/[^0-9]/g, '') || 0)); if (!want || !a.modern()) return { money: 0, metal: 0 };
+    const want = Math.max(0, Math.trunc(+String(n.value).replace(/[^0-9]/g, '') || 0)); if (!want) return { money: 0, metal: 0 };
     const d = live().find(same) || Object.assign({ built: 0, free: false }, spec), c = H().designCost(g, d);
     const proto = d.built === 0 && !d.free && H().rules(g).paysPrototype(g, p, d) ? c.proto : 0;
     return { money: want * c.money + proto, metal: want * c.metal };
@@ -916,8 +916,10 @@ function buildDialog(sid) {
     K.forEach((k, i) => { const lo = H().designMin(g, k, spec.type), hi = Math.max(lo, L[k] || lo), bar = dl.by[1034 + i];
       const sat = k === 'R' && spec.type === 'satellite';
       dl.by[1029 + i].textContent = sat ? '0/0' : `${spec[k]}/${hi}`; bar.min = lo; bar.max = hi; bar.value = spec[k]; bar.disabled = sat || hi <= lo; });
-    // (modern conveniences, Jake 18 Nov: Savings and Metal less what "# To Build" would cost, the prototype's price with the first of a new
-    // type; not seen in 4.0.5's captures or code, so the plain game shows them as they stand, as 4.0.5's may)
+    // (Savings and Metal less what "# To Build" will cost, the prototype's price with the first of a type none is built of: Mac 4.0.5's
+    // BuildSomeShips / UnbuildSomeShips @f1552 / @f1870 take each ship's price (+0x78 for the first of an unbuilt type, else +0x7c) and
+    // metal (+0x80) off the window's money and metal (DAT_00efdc52 / DAT_00efdc4e) as the count changes, and DRAWSHIPMONEYCHIPS redraws
+    // the piles; Windows 4.0.5 is the same program)
     const q = queued(), sv = p.savings - q.money, mt = p.metal - q.metal;
     dl.by[1039].textContent = a.fmt(Math.round(sv)); dl.by[1040].textContent = a.fmt(Math.round(mt));
     dl.by[1039].style.color = q.money && sv < 0 ? '#c00' : ''; dl.by[1040].style.color = q.metal && mt < 0 ? '#c00' : '';
