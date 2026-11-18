@@ -67,3 +67,34 @@
   .hall-master .lbhead, .hall-master .lbrow { grid-template-columns: 6fr 136fr 136fr 101fr; }
   .hall-sum .btns { position: static; margin-top: 8px; }
 }
+/* ---------- The program's main window (js/skins/w95/screen.js; docs/status-w95.md, unit 1) ----------
+   At 640 x 480 as Jake's captures (shot 010): the window's 3-pixel frame, the caption 18 high (y 3-20), the menu bar
+   (y 21-40), the client edge 2 pixels (y 41-42, x 3-4), then the information column x 5-253 (249 wide, the panes stacked
+   from y 43) and the map from x 255 with its scroll bars. html.w95scale zooms the whole by --w95 (S x 640 x 480). */
+html.w95win, html.w95win body { background: #c0c0c0; }
+html.w95win #app { box-sizing: border-box; height: 100%; padding: 3px; grid-template-rows: auto auto 1fr;
+  box-shadow: inset 1px 1px 0 #dfdfdf, inset 2px 2px 0 #fff, inset -1px -1px 0 #000, inset -2px -2px 0 #808080; }
+html.w95win #w95cap { display: flex; align-items: center; height: 18px; background: #000080; color: #fff; padding: 0 2px; gap: 3px; }
+html.w95win #w95cap .w95icon { width: 16px; height: 16px; flex: none; background: center / 16px 16px no-repeat; image-rendering: pixelated; } /* (the picture: screen.js, from the loaded art) */
+html.w95win #w95cap #title { display: block; flex: 1 1 auto; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: clip; font: bold 11px/18px "MS Sans Serif", "Microsoft Sans Serif", Tahoma, Arial, sans-serif; color: #fff; margin: 0; padding: 0; text-align: left; }
+html.w95win #w95cap .w95boxes { display: flex; flex: none; gap: 0; }
+html.w95win #w95cap .w95boxes i { display: block; width: 16px; height: 14px; box-sizing: border-box; background: #c0c0c0 center no-repeat;
+  box-shadow: inset -1px -1px 0 #000, inset 1px 1px 0 #fff, inset -2px -2px 0 #808080, inset 2px 2px 0 #dfdfdf; }
+html.w95win #w95cap .w95boxes i.cl { margin-left: 2px; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='7'><path d='M0 0h2v1h1v1h2V1h1V0h2v1H7v1H6v1H5v1h1v1h1v1h1v1H6V6H5V5H3v1H2v1H0V6h1V5h1V4h1V3H2V2H1V1H0z'/></svg>"); }
+html.w95win #w95cap .w95boxes i.mn { background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='6' height='2'><path d='M0 0h6v2H0z'/></svg>"); background-position: 4px 8px; }
+html.w95win #w95cap .w95boxes i.mx { background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='9' height='9'><path fill-rule='evenodd' d='M0 0h9v9H0zM1 2v6h7V2z'/></svg>"); }
+html.w95win #menubar { height: 20px; padding: 0; gap: 0; background: #c0c0c0; border: 0; box-shadow: none; }
+html.w95win #menubar .menu:has(> .logo) { display: none; }
+html.w95win #menubar .mbtn { font: 11px "MS Sans Serif", "Microsoft Sans Serif", Tahoma, Arial, sans-serif; color: #000; padding: 0 6px; height: 18px; line-height: 18px; background: none; border: 0; }
+html.w95win #menubar .mbtn[aria-expanded=true] { background: #000080; color: #fff; }
+html.w95win #menubar .dropdown { font: 11px "MS Sans Serif", "Microsoft Sans Serif", Tahoma, Arial, sans-serif; padding: 2px; min-width: 0; border-radius: 0; }
+html.w95win #menubar .dropdown button { font: inherit; padding: 2px 20px 2px 20px; white-space: nowrap; border-radius: 0; }
+html.w95win #menubar .dropdown button:disabled { color: #808080; text-shadow: 1px 1px 0 #fff; background: none; }
+html.w95win #menubar .dropdown hr { border: 0; border-top: 1px solid #808080; border-bottom: 1px solid #fff; margin: 3px 0; }
+html.w95win #main { grid-template-columns: 250px 1fr; grid-template-rows: minmax(0, 1fr); overflow: hidden; min-height: 0;
+  border: 2px solid; border-color: #808080 #dfdfdf #dfdfdf #808080; box-shadow: inset 1px 1px 0 #000; }
+html.w95win #panel { order: 0; padding: 0; border: 0; background: #c0c0c0; overflow: hidden; }
+html.w95win #mapwrap { order: 1; }
+html.w95win body { overflow: hidden; }
+html.w95win #mapwrap { background: #000; }
+html.w95scale #app { zoom: var(--w95); height: calc(100% / var(--w95)); }

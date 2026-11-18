@@ -34,7 +34,7 @@ So, as with 3.0.1, the main screen is rebuilt first, then the windows from the m
 | # | Unit | Shots | Done |
 |---|------|-------|------|
 | 0 | Ground truth: crops, `shots.tsv`, a side-by-side tool (`tools/skins/w95-compare.js`: our screen beside the crop) | all | done 18 Nov |
-| 1 | Main screen frame: caption, menu bar, pane arrangement at 640 x 480, scaled like `setMacScale` | 007-031 | |
+| 1 | Main screen frame: caption, menu bar, pane arrangement at 640 x 480, scaled like `setMacScale` | 007-031 | done 18 Nov: `js/skins/w95/screen.js` (scale `--w95`, `html.w95win`/`w95scale`; the menus as the captures word them, Ctrl+ keys; the caption bar `#w95cap` holding `#title`); CSS at the end of `js/skins/w95/style.css`. The caption's icon is left blank (the program's RT_ICON isn't extracted yet). |
 | 2 | Star pane (picture, name, stats) and the fleet list above the money | 007-073 | |
 | 3 | Money pane and budget bars (Metal, Earnings, Net Income, the four bars) | 007-073 | |
 | 4 | Players list and the map (stars, names, fleets, paths, drag line, selection, End Turn clock) | 007-073, 287-310 | |
@@ -54,7 +54,7 @@ Units 1-4 are the big ones (one session might do two). 6-9 are quicker. 10 is lo
 
 ## Next
 
-Unit 1. (Unit 0's dialog table was dropped: the Windows dialogs are already listed in `docs/405-windows.md`, "Windows 95: SPACEHO.EXE"; each unit maps its windows to them.)
+Unit 2. (Unit 0's dialog table was dropped: the Windows dialogs are already listed in `docs/405-windows.md`, "Windows 95: SPACEHO.EXE"; each unit maps its windows to them.)
 
 To compare: serve the repo (`python3 -m http.server 8765 --bind 127.0.0.1` from the repo, in the background), then
 `OUT=<folder> node tools/skins/w95-compare.js 010,052 '<js to run first>'` writes `w95-side-NNN.png` (ours left, the capture right).
