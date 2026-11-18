@@ -60,7 +60,7 @@ T.menuLayout = {
     // (the last item names the selected star's battle, or reads "No Battles here..." dimmed: shot 042)
     [null, 'Ships/#1']],
   Galaxy: [[lab('Compare Players...'), 'Galaxy/Compare players…'], [lab('Graph History...'), 'Game/Players and history'], [lab('List All Explored Stars...'), 'Galaxy/List explored stars…'], '-',
-    [lab('Dip Into Savings'), 'Galaxy/Dip into savings…'], '-',
+    [lab('Dip Into Savings'), 'Galaxy/Dip into savings…'], [() => (abandonMarked() ? TL("Don't Abandon Planet") : TL('Abandon Planet')), () => abandonPlanet(), null, null, () => !abandonable(), 'A'], '-',
     [lab('Alliances...'), () => (W95ON() ? allianceDialog() : HOAPI.openPlayers()), null, null, noGame], [lab('Give Money/Metal...'), 'Galaxy/Give money or metal…'], [null, 'Galaxy/#9'], [lab('Send Message...'), 'Galaxy/Send a message…'], '-',
     [null, 'Galaxy/#10']],
   // (shot 050: no ticks; Chat Window is dimmed out of a network game; Zoom In dimmed at the closest zoom)
@@ -72,6 +72,23 @@ T.menuLayout = {
     [lab('Clean Up Windows'), () => cleanUp(), null, null, noGame]],
   Help: [[lab('About Spaceho...'), () => aboutDialog(), null, null, () => !W95ON()], [lab('Help Topics'), () => (W95ON() ? helpTopics() : HOAPI.openHelp && HOAPI.openHelp())], [null, 'Help/#1']],
 };
+// Abandon Planet (Galaxy menu, Ctrl+A; shots 047, 074, 075: "Don't Abandon Planet" while the selected colony is marked; FUN_00469b1d): a
+// toggle on the selected colony of yours (rules-405 evacuate405), given up at End Turn. Turning it on asks first: a joke for a star
+// named "Hope" or "Ship" (strings 661-662, rs.evacuateJoke), else "Do you really want to abandon a profitable planet?" when its income
+// is 0 or more, "... a planet that will be profitable very soon?" between -$7,500 and 0, nothing below; ABANDON plays (the remake's
+// 7002), turning it off WHOA (4000).
+const abandonStar = () => { const a = HOAPI; if (!a || !a.G || a.G.over || a.UI.sel == null) return null; const s = a.G.stars[a.UI.sel]; return s && s.owner === a.ME && s.pop > 0 ? s : null; };
+const abandonable = () => !!abandonStar();
+const abandonMarked = () => { const s = abandonStar(); return !!(s && s.abandon301); };
+function abandonPlanet() {
+  const a = HOAPI, s = abandonStar(); if (!s) return;
+  const on = !s.abandon301, g = a.G, rs = H().rules(g);
+  const go = () => { H().evacuate(g, a.ME, s.id); a.Sound.play(on ? 7002 : 4000); a.renderPanel(); a.draw(); a.save(); };
+  if (!on) return go();
+  const joke = rs.evacuateJoke && rs.evacuateJoke(g, s), inc = s.oInc != null ? s.oInc : H().planetIncome(g, a.me(), s);
+  const ask = joke || (inc >= 0 ? 'Do you really want to abandon a profitable planet?' : inc > -7500 ? 'Do you really want to abandon a planet that will be profitable very soon?' : null);
+  if (ask) a.confirmBox(joke ? H().say(g, ask) : TL(ask), go); else go();
+}
 // the key equivalents the captures show, by the remake's item (its English label)
 const KEYS = { 'New game…': 'N', 'Saved games…': 'O', 'Export this game…': 'S', 'Quit to title': 'Q', 'Build ships at selected colony…': 'B', 'List all fleets…': 'L',
   'Compare players…': 'Y', 'Players and history': 'H', 'Dip into savings…': 'D', 'Send a message…': 'M' };

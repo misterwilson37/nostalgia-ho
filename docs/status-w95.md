@@ -79,7 +79,11 @@ Units 1-4 are the big ones (one session might do two). 6-9 are quicker. 10 is lo
    the classic page's route preview was drawn. The classic page now passes that route as `via` (legs with their distances; only a skin
    that uses it changes), and the w95 line follows it, each leg's distance, the arrow on the last; after the drop the order line goes
    on, 1 px, through f.path's later stops (FUN_0048e811's 2 px line still to the next one).
-6. Abandon Planet: no way to find it (the Window/Planet menus; the 405 ruleset hides it, unit 6's "Left").
+6. ~~Abandon Planet: no way to find it~~: done. Galaxy > Abandon Planet (Ctrl+A), "Don't Abandon Planet" while the selected colony
+   is marked (shots 047, 074, 075), dimmed without a colony of yours selected; the rules' evacuate405 (FUN_00469b1d: marked, given up
+   at End Turn), asking first as FUN_00469b1d does: the Hope / Ship jokes, else "Do you really want to abandon a profitable planet?"
+   (income 0 or more) or "... a planet that will be profitable very soon?" (-$7,500 to 0); ABANDON on, WHOA off. Words in
+   js/skins/w95/lang.js (five languages).
 7. The floating windows' captions stay grey (inactive) while dragged; Windows 95 shows the dragged one active (blue).
 8. Turn 1: Tech Spending floats over the map at its Clean Up place; from turn 2 it sits at the bottom left, and before that the
    bottom left is an empty grey area. Check against the captures where 4.0.5 opens it.
