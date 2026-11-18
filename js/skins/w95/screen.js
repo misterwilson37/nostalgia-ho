@@ -34,6 +34,8 @@ T.w95 = W95;
 // As the captures show them (shots 032, 035, 036, 042, 046, 047, 050, 074, 075, 282): the program rewrites some of menu 2's
 // words when it runs (Build/Design Ships..., Organize Ships..., Zoom Out Ctrl+-), and the captures win. Items the remake
 // hasn't got are left out; the remake's own commands not placed here go at the end of Help (layoutMenus).
+// 4.0.5's own Yes / No questions (AfxMessageBox MB_YESNO: shot 034) before New Game, Open Game and Exit while a game is on
+const askFirst = (q, go) => { const a = window.HOAPI; if (!a || !a.G || a.G.over || !W95ON() || !a.confirmBox) return go(); a.confirmBox(TL(q), go, null, [TL('Yes'), TL('No')]); };
 const clickEndTurn = () => { const b = document.querySelector('#msg .clock') || document.querySelector('#w95clk .clock'); if (b) b.click(); };
 const dim = () => true, noGame = () => !(window.HOAPI && HOAPI.G);
 const battleHere = () => { const a = window.HOAPI; return !!(a && a.G && a.UI.sel != null && a.lastBattles(a.UI.sel).length); };
@@ -43,11 +45,11 @@ const setInfo = (on) => { de.classList.toggle('w95noinfo', !on); const a = windo
 // (each item's words a function: the menus follow a change of language)
 const lab = (w) => () => TL(w);
 T.menuLayout = {
-  File: [[lab('New Game'), 'Game/New game…'], [lab('Open Game...'), 'Game/Saved games…'], '-',
+  File: [[lab('New Game'), () => askFirst('Are you sure you want to start a new game?', () => HOAPI.newGameDialog())], [lab('Open Game...'), () => askFirst('Are you sure you want to open a game?', () => HOAPI.openSavedGames())], '-',
     [lab('Save Game'), 'Game/Export this game…'], '-',
     [lab('End Turn'), clickEndTurn, null, null, () => !(window.HOAPI && HOAPI.G), 'T'], '-',
     [lab('Recent File'), () => {}, null, null, dim], '-',
-    [lab('Exit'), 'Game/Quit to title']],
+    [lab('Exit'), () => askFirst('Are you sure you want to leave Spaceward Ho?', () => HOAPI.quitToTitle())]],
   // (4.0.5's Edit menu has nothing the remake does: shown dimmed, as in shot 035)
   Edit: [[lab('Undo'), () => {}, null, null, dim, 'Z'], '-', [lab('Cut'), () => {}, null, null, dim, 'X'], [lab('Copy'), () => {}, null, null, dim, 'C'], [lab('Paste'), () => {}, null, null, dim, 'V']],
   Options: [[lab('Auto Play...'), () => (W95ON() ? autoPlayDialog() : HOAPI.openAutoPlay()), null, null, () => noGame() || !!(HOAPI.G && HOAPI.G.over)], '-', [null, 'View/#4'], '-',
@@ -1419,7 +1421,7 @@ T.nameStarLayout = (f, o) => {
 // the words (control 1106) at (7, 3), the picture (1138: bitmap 3520) at (7, 46), Cancel at (83, 79), OK at (151, 79); shot 299's question
 // has Abort and Party Pooper); every other one as the program's message box (shots 033, 034, 311): the caption "V4.0.5", the warning
 // sign, the words, the buttons centred.
-const CAPTURED_BUTTONS = { "Are you just doing this because you think you'll win but it's really late and so you want to go to bed?": ['Party Pooper', 'Abort'] };
+const CAPTURED_BUTTONS = { 'Are you sure you want to start a new game?': ['Yes', 'No'], 'Are you sure you want to open a game?': ['Yes', 'No'], 'Are you sure you want to leave Spaceward Ho?': ['Yes', 'No'], "Are you just doing this because you think you'll win but it's really late and so you want to go to bed?": ['Party Pooper', 'Abort'] };
 const prevConfirm = T.confirm;
 T.confirm = (text, yes, labels) => {
   if (!W95ON() || (text && text.nodeType)) return prevConfirm ? prevConfirm(text, yes, labels) : false;
