@@ -864,7 +864,8 @@ function buildDialog(sid) {
     if (document.activeElement !== nm) nm.value = cur ? cur.name : name; nm.disabled = !!cur;
     cb.value = spec.type;
     const c = H().designCost(g, spec);
-    dl.by[1026].textContent = a.money(c.protoTotal != null ? c.protoTotal : (c.proto || 0)); // (Dev. Cost is the prototype's whole price: shot 041, $7,959 for a $1,989 Scout) dl.by[1027].textContent = a.money(c.money); dl.by[1028].textContent = a.fmt(c.metal);
+    // (Dev. Cost is the prototype's whole price: shot 041, $7,959 for a $1,989 Scout)
+    dl.by[1026].textContent = a.money(c.protoTotal != null ? c.protoTotal : (c.proto || 0)); dl.by[1027].textContent = a.money(c.money); dl.by[1028].textContent = a.fmt(c.metal);
     const L = H().designLimits(g, p, spec.type);
     K.forEach((k, i) => { const lo = H().designMin(g, k, spec.type), hi = Math.max(lo, L[k] || lo), bar = dl.by[1034 + i];
       const sat = k === 'R' && spec.type === 'satellite';
