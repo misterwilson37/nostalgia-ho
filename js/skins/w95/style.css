@@ -342,7 +342,7 @@ html.w95win .w95dlg .lic .ll { color: #000; padding-left: 12px; } html.w95win .w
 /* Create New Galaxy (screen.js createGalaxy95; shot 002): the four choices' boxes of 48-pixel cells, the chosen one black */
 html.w95win .w95cng { margin: 0 auto; }
 html.w95win .w95cng .cngt { position: absolute; left: 0; right: 0; top: 4px; text-align: center; font-weight: bold; }
-html.w95win .w95cng .cngl, html.w95win .w95cng .cngn { position: absolute; white-space: nowrap; }
+html.w95win .w95cng .cngl, html.w95win .w95cng .cngn { position: absolute; white-space: nowrap; z-index: 1; }
 html.w95win .w95cng .cngb { position: absolute; display: flex; height: 48px; background: #fff; border: 1px solid #000; box-sizing: content-box; }
 html.w95win .w95cng .cngb .cc { width: 48px; height: 48px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; cursor: default; font-size: 10px; line-height: 12px; white-space: nowrap; overflow: hidden; }
 html.w95win .w95cng .cngb .cc i { width: 32px; height: 32px; margin-top: 2px; background: center / 32px 32px no-repeat; image-rendering: pixelated; }
@@ -350,7 +350,7 @@ html.w95win .w95cng .cngb .cc.on { background: #000; color: #fff; }
 html.w95win .w95cng .cngmore { position: absolute; left: 232px; top: 318px; width: auto; padding: 0 8px; height: 23px; } /* (the remake's own, right of Base Difficulty Rating) */
 html.w95win .win.w95cngw { width: auto; max-width: none; }
 html.w95win .w95cng .cngt { font: 600 13px Arial, sans-serif; }
-html.w95win .w95cng .cngl, html.w95win .w95cng .cngn, html.w95win .w95cng label.ck { font: 600 12px/14px Arial, sans-serif; }
+html.w95win .w95cng .cngl, html.w95win .w95cng .cngn, html.w95win .w95cng label.ck { font: 400 15px/17px Arial, sans-serif; /* (shot 002: "Galaxy Density:" 105 pixels wide, regular 15-pixel Arial) */ }
 html.w95win .w95cng .cngb .cc i { background-color: #000; }
 html.w95win #menubar .mbtn { display: inline-block; }
 html.w95win #menubar .mbtn::first-letter { text-decoration: underline; }

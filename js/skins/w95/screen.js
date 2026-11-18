@@ -1531,7 +1531,8 @@ function createGalaxy95(f) {
   const IMG = () => (window.HOAPI && HOAPI.IMG) || {};
   const boxes = CNG.map((B) => {
     const sel = field(B.f); if (!sel) return null;
-    const lab = span('cngl', TL(B.label), `left:${B.at[0]}px;top:${B.at[1] - 13}px`); dl.el.append(lab);
+    // (shot 002: the titles in 15-pixel Arial, their tops 43 down)
+    const lab = span('cngl', TL(B.label), `left:${B.at[0]}px;top:${B.at[1] - 18}px`); dl.el.append(lab);
     const box = document.createElement('div'); box.className = 'cngb'; box.style.left = B.at[0] + 'px'; box.style.top = B.at[1] + 'px';
     const draw = () => { box.innerHTML = ''; [...sel.options].forEach(o => { if (!(o.value in B.pics)) return; const c = document.createElement('div'); c.className = 'cc' + (sel.value === o.value ? ' on' : ''); c.setAttribute('role', 'option');
       const im = IMG()['w95:b' + B.pics[o.value]], i = document.createElement('i'); if (im && im.src) i.style.backgroundImage = `url("${im.src}")`; c.append(i, span('', TL(o.textContent)));
@@ -1539,27 +1540,27 @@ function createGalaxy95(f) {
     draw(); dl.el.append(box); return draw;
   });
   // the computer players (0 to 19) and the rest
-  const comp = field('computers'), bar = dl.by[1012], num = span('cngn', '', 'left:196px;top:196px');
-  dl.el.append(span('cngl', TL('Number of Computer Players:'), 'left:18px;top:196px'), num);
+  const comp = field('computers'), bar = dl.by[1012], num = span('cngn', '', 'left:229px;top:200px');
+  dl.el.append(span('cngl', TL('Number of Computer Players:'), 'left:18px;top:200px'), num);
   if (comp && bar) { bar.min = 0; bar.max = 19; bar.value = /^\d+$/.test(comp.value) ? comp.value : 4; const sh = () => { num.textContent = String(bar.value); }; sh();
     bar.addEventListener('input', () => { comp.value = String(bar.value); fire(comp); sh(); }); }
   const ck = (id, name, text) => { const l = dl.by[id], fi = field(name); if (!l) return; l.querySelector('input').remove(); if (!fi) { l.style.display = 'none'; return; } const c = fi.cloneNode(); c.checked = fi.checked; c.removeAttribute('name');
     c.addEventListener('change', () => { fi.checked = c.checked; fire(fi); }); l.prepend(c); l.append(document.createTextNode(' ' + TL(text))); l.style.width = 'auto'; };
   ck(1015, 'alliances', 'Alliances'); ck(1203, 'luck', 'Luck in Battles'); ck(1204, 'autoend', 'Automatically end turn for unconnected players');
   // a combo box of the template showing a field of the classic form, kept in step with it (the form fills some lists only on a refresh)
-  const mirror = (id, name, label, lx) => { const c = dl.by[id], fi = field(name); if (!c || !fi) { if (c) c.style.display = 'none'; return; }
-    const lab = span('cngl', TL(label), `left:${lx}px;top:${parseFloat(c.style.top) + 3}px`); dl.el.append(lab);
+  const mirror = (id, name, label, lx, dy) => { const c = dl.by[id], fi = field(name); if (!c || !fi) { if (c) c.style.display = 'none'; return; }
+    const lab = span('cngl', TL(label), `left:${lx}px;top:${parseFloat(c.style.top) + (dy || 0)}px`); dl.el.append(lab);
     const sync = () => { const row = fi.closest('label'), on = fi.options.length > 0 && !(row && row.hidden);
       c.innerHTML = ''; [...fi.options].forEach(o => { const n = document.createElement('option'); n.value = o.value; n.textContent = TL(o.textContent); c.append(n); }); c.value = fi.value;
       c.style.display = on ? '' : 'none'; lab.style.display = on ? '' : 'none'; };
     c.addEventListener('change', () => { fi.value = c.value; fire(fi); });
     try { const mo = new MutationObserver(sync); mo.observe(fi, { childList: true }); if (fi.closest('label')) mo.observe(fi.closest('label'), { attributes: true, attributeFilter: ['hidden'] }); } catch (e) {}
     sync(); };
-  mirror(1013, 'timelimit', 'Turn Time Limit:', 252); mirror(1014, 'w_years', 'Years Per Turn:', 252);
+  mirror(1013, 'timelimit', 'Turn Time Limit:', 223, 0); mirror(1014, 'w_years', 'Years Per Turn:', 226, -2); // (shot 002's places)
   // Base Difficulty Rating (shot 002: "Base Difficulty Rating:  52" at the foot, beside Cancel): the classic form's own rating, kept in step
-  { const rb = f.querySelector('.rating b'), top = parseFloat(dl.by[2].style.top) + 3, lab = span('cngl cngrate', '', `left:22px;top:${top}px`);
-    const put = () => { const v = rb ? rb.textContent.trim() : ''; lab.textContent = v ? TL('Base Difficulty Rating:') + '\u2002' + v : ''; };
-    dl.el.append(lab); put(); if (rb) try { new MutationObserver(put).observe(rb, { childList: true, characterData: true, subtree: true }); } catch (e) {} }
+  { const rb = f.querySelector('.rating b'), top = parseFloat(dl.by[2].style.top) - 1, lab = span('cngl cngrate', TL('Base Difficulty Rating:'), `left:17px;top:${top}px`), val = span('cngl cngrate', '', `left:178px;top:${top}px`);
+    const put = () => { const v = rb ? rb.textContent.trim() : ''; val.textContent = v; lab.style.display = val.style.display = v ? '' : 'none'; };
+    dl.el.append(lab, val); put(); if (rb) try { new MutationObserver(put).observe(rb, { childList: true, characterData: true, subtree: true }); } catch (e) {} }
   setTimeout(() => { try { f.dispatchEvent(new Event('change')); } catch (e) {} }, 0);
   dl.by[2].addEventListener('click', () => a.closeModal());
   dl.by[1].addEventListener('click', () => f.requestSubmit());
