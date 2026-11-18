@@ -224,3 +224,17 @@ html.w95win #menubar .dropdown button.check::before { position: absolute; left: 
 html.w95win #menubar .dropdown button { position: relative; }
 html.w95win.w95noinfo #main { grid-template-columns: 0 1fr; }
 html.w95win.w95noinfo #panel { visibility: hidden; }
+/* unit 7: every window as a Windows 95 dialog of SPACEHO.EXE (shots 037-044, 076-085): no caption (the program's dialogs have
+   none), the 3-D dialog frame, MS Sans Serif 8, push buttons 75 x 23 with the default one ringed; lists white and sunken. A window
+   that has no button of its own keeps its caption, for its close box. The skin's own replicas (screen.js W95DLG) are drawn inside
+   this frame at their dialog units. */
+html.w95win .scrim { background: transparent; }
+html.w95win .scrim > .win { border: 0; border-radius: 0; padding: 3px; background: #c0c0c0; color: #000; font: 11px/13px "MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif;
+  box-shadow: inset -1px -1px 0 #000, inset 1px 1px 0 #dfdfdf, inset -2px -2px 0 #808080, inset 2px 2px 0 #fff, 2px 2px 0 rgba(0,0,0,.25); }
+html.w95win .scrim > .win:has(.wbody button:not(.close)) > .wtitle { display: none; }
+html.w95win .scrim > .win .wbody { font: inherit; color: #000; }
+html.w95win .scrim > .win h3, html.w95win .scrim > .win h4 { font: inherit; font-weight: normal; color: #000; margin: 4px 0; }
+html.w95win .scrim > .win button:not(.close):not(.tbtn):not([role=menuitem]) { min-width: 75px; min-height: 23px; padding: 0 8px; font: 11px "MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif; color: #000; }
+html.w95win .scrim > .win table { font: inherit; border-collapse: collapse; }
+html.w95win .scrim > .win th { font-weight: normal; text-align: left; }
+html.w95win .scrim > .win ul.reports, html.w95win .scrim > .win .lb, html.w95win .scrim > .win .list { background: #fff; border: 2px solid; border-color: #808080 #fff #fff #808080; box-shadow: inset 1px 1px 0 #000; }
