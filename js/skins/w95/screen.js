@@ -45,32 +45,33 @@ const setInfo = (on) => { de.classList.toggle('w95noinfo', !on); const a = windo
 // (each item's words a function: the menus follow a change of language)
 const lab = (w) => () => TL(w);
 T.menuLayout = {
-  File: [[lab('New Game'), () => askFirst('Are you sure you want to start a new game?', () => HOAPI.newGameDialog())], [lab('Open Game...'), () => askFirst('Are you sure you want to open a game?', () => HOAPI.openSavedGames())], '-',
+  File: [[lab('New Game'), () => askFirst('Are you sure you want to start a new game?', () => HOAPI.newGameDialog()), null, null, null, 'N'], [lab('Open Game...'), () => askFirst('Are you sure you want to open a game?', () => HOAPI.openSavedGames()), null, null, null, 'O'], '-',
     [lab('Save Game'), 'Game/Export this game…'], '-',
     [lab('End Turn'), clickEndTurn, null, null, () => !(window.HOAPI && HOAPI.G), 'T'], '-',
     [lab('Recent File'), () => {}, null, null, dim], '-',
-    [lab('Exit'), () => askFirst('Are you sure you want to leave Spaceward Ho?', () => HOAPI.quitToTitle())]],
+    [lab('Exit'), () => askFirst('Are you sure you want to leave Spaceward Ho?', () => HOAPI.quitToTitle()), null, null, null, 'Q']],
   // (4.0.5's Edit menu has nothing the remake does: shown dimmed, as in shot 035)
   Edit: [[lab('Undo'), () => {}, null, null, dim, 'Z'], '-', [lab('Cut'), () => {}, null, null, dim, 'X'], [lab('Copy'), () => {}, null, null, dim, 'C'], [lab('Paste'), () => {}, null, null, dim, 'V']],
   Options: [[lab('Auto Play...'), () => (W95ON() ? autoPlayDialog() : HOAPI.openAutoPlay()), null, null, () => noGame() || !!(HOAPI.G && HOAPI.G.over)], '-', [null, 'View/#4'], '-',
     [lab('Master Point List...'), 'Game/Master Point List…'], [lab('Hall of Fame...'), 'Game/Hall of Fame…'], [lab('Hall of Shame...'), 'Game/Hall of Shame…'], '-',
     [lab('Preferences...'), () => (W95ON() ? prefsDialog() : HOAPI.openPrefs()), null, null, noGame]],
   Ships: [[lab('Build/Design Ships...'), 'Ships/Build ships at selected colony…'], '-',
-    [lab('List All Fleets'), 'Ships/List all fleets…'], [lab('Organize Ships...'), () => { const a = HOAPI; if (a && a.G && a.UI.sel != null) (W95ON() ? organizeDialog(a.UI.sel) : a.openOrganize(a.UI.sel)); }, null, null, () => noGame() || HOAPI.UI.sel == null], [null, 'Ships/#3'], '-',
+    [lab('List All Fleets'), 'Ships/List all fleets…'], [lab('Organize Ships...'), () => { const a = HOAPI; if (a && a.G && a.UI.sel != null) (W95ON() ? organizeDialog(a.UI.sel) : a.openOrganize(a.UI.sel)); }, null, null, () => noGame() || HOAPI.UI.sel == null], [() => { const f = HOAPI.curFleet && HOAPI.curFleet(); return TL(f && f.scrap301 ? "Don't Scrap Current Fleet" : 'Scrap current fleet'); }, 'Ships/#3'], '-', // (shots 042 / 046)
     // (the last item names the selected star's battle, or reads "No Battles here..." dimmed: shot 042)
     [null, 'Ships/#1']],
-  Galaxy: [[lab('Compare Players...'), 'Galaxy/Compare players…'], [lab('Graph History...'), 'Game/Players and history'], [lab('List All Explored Stars...'), 'Galaxy/List explored stars…'], '-',
+  Galaxy: [[lab('Compare Players...'), 'Galaxy/Compare players…'], [lab('Graph History...'), 'Game/Players and history'], [lab('Statistics...'), () => {}, null, null, dim], // (shot 047; dialog 355 needs counters the engine doesn't keep yet: dimmed)
+     [lab('List All Explored Stars...'), 'Galaxy/List explored stars…'], '-',
     [lab('Dip Into Savings'), 'Galaxy/Dip into savings…'], [() => (abandonMarked() ? TL("Don't Abandon Planet") : TL('Abandon Planet')), () => abandonPlanet(), null, null, () => !abandonable(), 'A'], '-',
-    [lab('Alliances...'), () => (W95ON() ? allianceDialog() : HOAPI.openPlayers()), null, null, noGame], [lab('Give Money/Metal...'), 'Galaxy/Give money or metal…'], [null, 'Galaxy/#9'], [lab('Send Message...'), 'Galaxy/Send a message…'], '-',
-    [null, 'Galaxy/#10']],
+    [lab('Alliances...'), () => (W95ON() ? allianceDialog() : HOAPI.openPlayers()), null, null, noGame], [lab('Give Money/Metal...'), 'Galaxy/Give money or metal…'], [lab('Surrender To...'), 'Galaxy/#9'], [lab('Send Message...'), 'Galaxy/Send a message…'], '-',
+    [lab('Armageddon'), 'Galaxy/#10']],
   // (shot 050: no ticks; Chat Window is dimmed out of a network game; Zoom In dimmed at the closest zoom)
   Window: [[lab('Tech Spending Window'), () => setWin('tech', !winOpen('tech')), null, null, noGame, '1'],
     [lab('Report Window'), () => setWin('report', !winOpen('report')), null, null, noGame, '2'],
     [lab('Chat Window'), () => {}, null, null, dim, '3'], '-',
-    [null, 'View/#0'], [null, 'View/#1'], [lab('Fit Galaxy'), 'View/Fit galaxy'], // (by place: T.menus has renamed them)
+    [null, 'View/#0'], [null, 'View/#1'], // (by place: T.menus has renamed them; the remake's Fit Galaxy is no 4.0.5 item: in the Ho! menu)
     [() => (infoOff() ? 'Show Information' : 'Hide Information'), () => setInfo(infoOff()), null, null, noGame, 'Alt+I'], '-',
     [lab('Clean Up Windows'), () => cleanUp(), null, null, noGame]],
-  Help: [[lab('About Spaceho...'), () => aboutDialog(), null, null, () => !W95ON()], [lab('Help Topics'), () => (W95ON() ? helpTopics() : HOAPI.openHelp && HOAPI.openHelp())], [null, 'Help/#1']],
+  Help: [[lab('About Spaceho...'), () => aboutDialog(), null, null, () => !W95ON()], [lab('Help Topics'), () => (W95ON() ? helpTopics() : HOAPI.openHelp && HOAPI.openHelp())]], // (shot 282: those two only)
 };
 // Abandon Planet (Galaxy menu, Ctrl+A; shots 047, 074, 075: "Don't Abandon Planet" while the selected colony is marked; FUN_00469b1d): a
 // toggle on the selected colony of yours (rules-405 evacuate405), given up at End Turn. Turning it on asks first: a joke for a star
@@ -108,6 +109,7 @@ T.keyName = (k) => (/^Alt/.test(k) ? k : 'Ctrl+' + k);
 // (the remake's own commands: no longer at the end of Help; the Ho! menu is opened from the window's icon at the caption's left, where
 // Windows 95 keeps a window's own menu: Jake 18 Nov. style.css puts the Ho! button over the icon)
 T.hoIntoLast = () => false;
+T.leftoversIntoHo = () => true; // (the remake's commands with no place in 4.0.5's menus: in the Ho! menu too, Help keeps shot 282's two items)
 // (the menu's name as one text, so that the page's languages can swap it; its first letter underlined by the CSS, as Windows marks its key)
 T.menuName = (name) => TL(name);
 

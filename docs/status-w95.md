@@ -103,6 +103,14 @@ Units 1-4 are the big ones (one session might do two). 6-9 are quicker. 10 is lo
     commands without a place in 4.0.5's menus (New game, Auto-play this turn, Account saves, Import, Quit to title, ...) stay at the end
     of Help.
 
+## Menus checked against the captures (19 Nov, after Jake asked)
+Each menu read off the page beside shots 032 (File), 035 (Edit), 036 (Options), 042 / 046 (Ships), 047 / 074 / 075 (Galaxy), 050
+(Window), 282 (Help). Fixed: File's Ctrl+N, Ctrl+O, Ctrl+Q; Ships' "Scrap current fleet" (042) / "Don't Scrap Current Fleet" (046);
+Galaxy's Statistics... (in place, dimmed: dialog 355 needs counters the engine doesn't keep), "Surrender To...", "Armageddon"; the
+remake's Fit Galaxy out of Window; Help only About Spaceho... and Help Topics (282). The remake's commands without a place in 4.0.5's
+menus are in the Ho! menu (the window icon), after a rule (`T.leftoversIntoHo`). Window's keys were already the capture's (050:
+Ctrl+1/2/3, Zoom In Ctrl+I, Zoom Out Ctrl+J, Hide Information Alt+I; shots.tsv's description of 050 had them wrong). Left: Statistics.
+
 ## Next
 
 All twelve units have had a pass. What is left, in order of value:

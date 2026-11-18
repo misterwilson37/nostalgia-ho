@@ -6816,7 +6816,11 @@ function setupMenus(again) {
   // T.menus(menus, ho): a skin adds its own items (its windows); it never drops one
   if (T.menus) T.menus(menus, ho);
   // (T.menuLayoutNow(): the layout as the look is now; T.menuLayout was taken once, when the skin was installed)
-  const laid = T.menuLayout ? layoutMenus(menus, again && T.menuLayoutNow ? T.menuLayoutNow() : T.menuLayout) : menus;
+  // (T.leftoversIntoHo(): the commands the skin's layout leaves out go to the Ho! menu, after a rule, not to its last menu: w95, whose Help
+  // is 4.0.5's own two items)
+  const extra = T.menuLayout && T.leftoversIntoHo && T.leftoversIntoHo() && !again ? [] : null;
+  const laid = T.menuLayout ? layoutMenus(menus, again && T.menuLayoutNow ? T.menuLayoutNow() : T.menuLayout, extra) : menus;
+  if (extra && extra.length) ho.push(['-'], ...extra);
   // (T.hoIntoLast(): the skin's look has no Ho! menu in its original: its items go to the end of the last menu, after a separator, and the Ho! button is hidden)
   if (T.menuLayout && T.hoIntoLast && T.hoIntoLast()) { const ks = Object.keys(laid), lm = laid[ks[ks.length - 1]]; lm.push(['-'], ...ho); }
   // (T.menuName(name): a skin's own name for a menu, as text or a node: the Amiga's, in the language)
@@ -6836,7 +6840,7 @@ function setupMenus(again) {
 // [label, fn] is the skin's own item, for a control already on the page
 // (End Turn). Every item it leaves out goes at the end of its last menu, so
 // a skin can move and rename controls but never drop one.
-function layoutMenus(menus, layout) {
+function layoutMenus(menus, layout, extra) { // (extra: an array: the commands the layout leaves out go there, not to the last menu)
   const out = {}, used = new Set();
   const find = (ref) => {
     const [m, k] = ref.split('/'), items = menus[m] || [];
@@ -6857,7 +6861,7 @@ function layoutMenus(menus, layout) {
   const last = out[Object.keys(out).pop()];
   // (a look with its own Help menu, T.hoIntoLast: the remake's own commands start after a separator)
   let sep = !!(T.hoIntoLast && T.hoIntoLast());
-  for (const m in menus) menus[m].forEach((it, i) => { if (it[0] !== '-' && !used.has(m + '#' + i)) { if (sep) { last.push(['-']); sep = false; } last.push(it); } });
+  for (const m in menus) menus[m].forEach((it, i) => { if (it[0] !== '-' && !used.has(m + '#' + i)) { if (extra) { extra.push(it); return; } if (sep) { last.push(['-']); sep = false; } last.push(it); } });
   return out;
 }
 function nextFleet() {

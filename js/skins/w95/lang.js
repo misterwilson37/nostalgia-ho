@@ -30,6 +30,8 @@ window.HOUI.add([
 ['%s stationed at %s.', '%s stationné à %s.', '%s stationiert bei %s.', '%s, %s yıldızında konuşlu.', '%s estacionado en %s.'],
 ['%s to arrive at %s in %d.', '%s arrivera à %s en %d.', '%s erreicht %s im Jahr %d.', '%s, %s yıldızına varacak; yıl %d.', '%s llegará a %s en %d.'],
 ['Abandoning', 'Abandon', 'Wird aufgegeben', 'Terk ediliyor', 'Abandonando'],
+['Statistics...', 'Statistiques...', 'Statistik...', 'İstatistikler...', 'Estadísticas...'],
+['Scrap current fleet', 'Mettre la flotte actuelle à la casse', 'Aktuelle Flotte verschrotten', 'Şimdiki filoyu hurdaya çıkar', 'Desguazar la flota actual'],
 ["Don't Abandon Planet", 'Ne pas abandonner la planète', 'Planet nicht aufgeben', 'Gezegeni terk etme', 'No abandonar el planeta'],
 ['Do you really want to abandon a profitable planet?', 'Voulez-vous vraiment abandonner une planète rentable ?', 'Wollen Sie wirklich einen gewinnbringenden Planeten aufgeben?', 'Kâr getiren bir gezegeni gerçekten terk etmek istiyor musun?', '¿De verdad quieres abandonar un planeta rentable?'],
 ['Do you really want to abandon a planet that will be profitable very soon?', 'Voulez-vous vraiment abandonner une planète qui sera bientôt rentable ?', 'Wollen Sie wirklich einen Planeten aufgeben, der bald gewinnbringend sein wird?', 'Çok yakında kâr getirecek bir gezegeni gerçekten terk etmek istiyor musun?', '¿De verdad quieres abandonar un planeta que será rentable muy pronto?'],
