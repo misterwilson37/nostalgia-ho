@@ -304,8 +304,6 @@ button[data-help] { cursor: pointer; }
 .starmenu { position: fixed; top: 0; left: 0; z-index: 60; min-width: 190px; }
 .starmenu .mhead { padding: 3px 12px 4px; font-weight: bold; border-bottom: 1px solid #bbb; margin-bottom: 2px; }
 /* modern: battle speed and written report */
-.bctl { display: flex; gap: 12px; align-items: center; margin: 6px 0; }
-.bctl select { font: inherit; }
 .breport-box { margin-top: 6px; }
 .breport-box summary { cursor: pointer; }
 .breport { max-height: 220px; overflow: auto; margin: 6px 0 0; padding-left: 26px; }

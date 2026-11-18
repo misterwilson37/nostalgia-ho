@@ -40,6 +40,14 @@ Sources (private repo `nostalgia-ho-sources`):
      question); `mac3c`, `mac3` pass at desktop and phone-l.
    - ~~List of All Fleets, Explored Stars, Compare, Skills~~, ~~Organize Fleets~~ (done 17 Nov: the table).
    - ~~Build / Design Ships~~ (done 18 Nov: the table). ~~Give~~, ~~Alliances~~, ~~Send Message~~ done: every window from the menus is built. ~~The battles~~ (close, 18 Nov: the table). Next: the end of the game (the plan's session 4).
+   - **Jake's 18 Nov play-test** (Retina MacBook Air, Firefox), one commit each:
+     1. Battle timing (open each battle as its report is announced, as 3.0.1's Review Event Battles does): to do.
+     2. Battle drawing (the destruction flare, a hit on the planet's explosion and population, rays reaching the planet): to do.
+     3. ~~The modern conveniences' battle speed~~: done. The classic battle windows' Speed list (Slow / Normal / Fast / Skip to the end,
+        `openBattle`, `openBattlePanel`) is gone, and "battle speed" is out of the modern conveniences' words (five languages). The
+        programs' own battle speed settings (1.2's, 2.0.1's, DOS's, Windows', 5.0.5's Battle Review Speed) stay: they are the originals'.
+     4. Zoom: to do.
+     5. Hall of Fame / Shame by ruleset: to do.
    - Smaller leftovers in the done panes: "Sort" above the budget bars (`DoHBarClick`'s sort), the drag bar's resizing
      (`ClickInDragBar`), and a real System 7 scroll bar for the three lists.
 3. Until a pane is done, the skin must not show 2.0.1's version of it as if it were 3.0.1's: keep these on the session branch,

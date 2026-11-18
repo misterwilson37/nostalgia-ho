@@ -3132,13 +3132,10 @@ function openBattle(bid) {
   const c = el('canvas', { class: 'bcv', width: 760, height: 380 });
   const status = el('p', { class: 'sub' }, '');
   const body = el('div', null, c, status);
-  // modern: a speed control and a written account of the battle
-  let speed = 1;
+  // modern: a written account of the battle (the remake's own speed control is gone: Jake, 18 Nov 2026)
   const VB = verBattle();
   if (modern()) {
-    const sp = el('select', { 'aria-label': 'Battle speed', onchange: (e) => { speed = +e.target.value; if (speed === 0) finish(); } },
-      ...[['0.5', 'Slow'], ['1', 'Normal'], ['3', 'Fast'], ['0', 'Skip to the end']].map(([v, t]) => el('option', { value: v, selected: v === '1' ? 'selected' : false }, t)));
-    body.append(el('div', { class: 'bctl' }, el('label', null, 'Speed ', sp)), battleReport(b));
+    body.append(battleReport(b));
   }
   b._stop = false;
   modal(`Battle at ${G.stars[b.star].name}, ${b.year}` + (b.duel != null ? `, duel ${b.duel + 1}` : ''), body, { cls: 'wide', onClose: () => { b._stop = true; } });
@@ -3206,7 +3203,7 @@ function openBattle(bid) {
       return;
     }
     const ev = b.rounds[r][e];
-    if (!ev) { r++; e = 0; if (b.popR) pop = b.popR[r - 1]; status.textContent = tl('Round %s', r + 1); setTimeout(step, 160 / speed * VB.f); return; }
+    if (!ev) { r++; e = 0; if (b.popR) pop = b.popR[r - 1]; status.textContent = tl('Round %s', r + 1); setTimeout(step, 160 * VB.f); return; }
     const evs = pileShots(b.rounds[r], e, VB);
     const shots = evs.map((ev, j) => {
       const a = center(ev.si), q = e + j;
@@ -3218,7 +3215,7 @@ function openBattle(bid) {
     drawAll(shots);
     if (VB.full && ev.k && !ev.p) { const P = pos[ev.ti]; x.drawImage(IMG.debris, 0, 0, 288, 138, P.x - 6, P.y - 4, P.w + 12, P.h + 8); }
     e += evs.length;
-    setTimeout(step, Math.max(18, 110 - b.rounds[r].length * 2) / speed * VB.f);
+    setTimeout(step, Math.max(18, 110 - b.rounds[r].length * 2) * VB.f);
   };
   // skip to the end: apply every remaining shot at once
   const finish = () => {
@@ -3237,7 +3234,7 @@ function openBattle(bid) {
 // them, a picture (5.0.5: a pile) with the group's words under it, updated as
 // ships die; the version's own heading and closing lines. The skin styles it
 // (T.battleBg: its own background, black words; T.battleFont). The modern
-// conveniences' speed control and account are kept.
+// conveniences' written account is kept.
 function openBattlePanel(b) {
   // a skin's own battle window, drawn as its version draws it (T.battleWindow: the Mac 1.2 skin's, DoOneBattle @d07d0)
   // (T.battleWindowAlways: a skin whose program's own window stays with modern conveniences on: the Mac 1.2, 2.0.1 and 3.0.1 skins)
@@ -3264,12 +3261,9 @@ function openBattlePanel(b) {
   const c = el('canvas', { class: 'bcv', width: W, height: H });
   const status = el('p', { class: 'sub' }, '');
   const body = el('div', null, c, status);
-  let speed = 1;
   const VB = verBattle();
   if (modern()) {
-    const sp = el('select', { 'aria-label': 'Battle speed', onchange: (e) => { speed = +e.target.value; if (speed === 0) finish(); } },
-      ...[['0.5', 'Slow'], ['1', 'Normal'], ['3', 'Fast'], ['0', 'Skip to the end']].map(([v, t]) => el('option', { value: v, selected: v === '1' ? 'selected' : false }, t)));
-    body.append(el('div', { class: 'bctl' }, el('label', null, 'Speed ', sp)), battleReport(b));
+    body.append(battleReport(b));
   }
   // (rs.battleFaces, 1.2's DLOG 7010: no title, one button, "Skip", which ends the shooting, and closes the window once it is over)
   if (rs.battleFaces && !modern()) body.append(el('div', { class: 'btns right' }, el('button', { onclick: () => { if (over) closeModal(); else finish(); } }, 'Skip')));
@@ -3365,7 +3359,7 @@ function openBattlePanel(b) {
       return;
     }
     const ev = b.rounds[r][e];
-    if (!ev) { r++; e = 0; if (b.popR) pop = b.popR[r - 1]; status.textContent = tl('Round %s', r + 1); setTimeout(step, 160 / speed * VB.f); return; }
+    if (!ev) { r++; e = 0; if (b.popR) pop = b.popR[r - 1]; status.textContent = tl('Round %s', r + 1); setTimeout(step, 160 * VB.f); return; }
     const evs = pileShots(b.rounds[r], e, VB);
     let t;
     const shots = evs.map((ev, j) => {
@@ -3377,7 +3371,7 @@ function openBattlePanel(b) {
     drawAll(shots);
     if (VB.full && ev.k && !ev.p) x.drawImage(IMG.debris, 0, 0, 288, 138, t.x - 30, t.y - 18, 60, 36);
     e += evs.length;
-    setTimeout(step, Math.max(18, 110 - b.rounds[r].length * 2) / speed * VB.f);
+    setTimeout(step, Math.max(18, 110 - b.rounds[r].length * 2) * VB.f);
   };
   const finish = () => {
     for (; r < b.rounds.length; r++, e = 0) {
@@ -4646,7 +4640,7 @@ function openPrefs() {
     hints ? box('hints', 'Give helpful game play hints') : null,
     tempChoice(),
     G ? el('label', { class: 'chk' }, el('input', { type: 'checkbox', checked: modern() ? 'checked' : false, onchange: (e) => setModern(e.target.checked) }),
-      el('span', null, 'Modern conveniences in this game (automatic routes, the map follows the news, battle speed and written reports)')) : null,
+      el('span', null, 'Modern conveniences in this game (automatic routes, the map follows the news and written reports)')) : null,
     sizeChoice(), // (Interface size: the iOS and Android skins, with modern conveniences on; this window had left it out)
     lookOptions('prefs'), // (a skin's look options: the DOS skin's Windows 3.1 colours)
     box('tips', 'Explain things when the pointer rests on them (text from the original manual)'),
@@ -4680,7 +4674,7 @@ function prefs505(W) {
   };
   const remake = [
     el('label', { class: 'chk' }, el('input', { type: 'checkbox', checked: Sound.on ? 'checked' : false, onchange: (e) => { Sound.on = e.target.checked; savePrefs(); } }), el('span', null, 'Sound effects')),
-    el('label', { class: 'chk' }, el('input', { type: 'checkbox', checked: modern() ? 'checked' : false, onchange: (e) => setModern(e.target.checked) }), el('span', null, 'Modern conveniences in this game (automatic routes, the map follows the news, battle speed and written reports)')),
+    el('label', { class: 'chk' }, el('input', { type: 'checkbox', checked: modern() ? 'checked' : false, onchange: (e) => setModern(e.target.checked) }), el('span', null, 'Modern conveniences in this game (automatic routes, the map follows the news and written reports)')),
     sizeChoice(), // (Interface size: the iOS and Android skins, with modern conveniences on)
     lookOptions('prefs'),
     el('label', { class: 'chk' }, el('input', { type: 'checkbox', checked: Prefs.tips ? 'checked' : false, onchange: (e) => { Prefs.tips = e.target.checked; savePrefs(); } }), el('span', null, 'Explain things when the pointer rests on them (text from the original manual)')),
@@ -4726,7 +4720,7 @@ function remakeOptions(sound) {
   const chk = (on, fn, label) => el('label', { class: 'chk' }, el('input', { type: 'checkbox', checked: on ? 'checked' : false, onchange: fn }), el('span', null, label));
   return [el('hr', { class: 'ngline' }), el('fieldset', { class: 'opts' }, el('legend', null, 'Remake options'),
     sound ? null : chk(Sound.on, (e) => { Sound.on = e.target.checked; savePrefs(); }, 'Sound effects'),
-    chk(modern(), (e) => setModern(e.target.checked), 'Modern conveniences in this game (automatic routes, the map follows the news, battle speed and written reports)'),
+    chk(modern(), (e) => setModern(e.target.checked), 'Modern conveniences in this game (automatic routes, the map follows the news and written reports)'),
     sizeChoice(),
     lookOptions('prefs'),
     chk(Prefs.tips, (e) => { Prefs.tips = e.target.checked; savePrefs(); }, 'Explain things when the pointer rests on them (text from the original manual)'),
@@ -4882,7 +4876,7 @@ const menuDim = (k) => { const D = G && HO.rules(G).menuDimmed; return !!(D && G
 // ----- the Ho menu: this version, skin, sounds, modern conveniences -----
 // Each version plays as it was released; the conveniences a player may add
 // are choices here, and can be changed in the middle of a game.
-const MODERN_TEXT = 'Modern conveniences: automatic routes, fleet route lines kept on the map after you let go, the map follows the news, battle speed, written battle reports, Game Info in the DOS and Windows 3.1 Window menu, answering a question by typing yes or no, and in the games with map scroll bars dragging the map with the mouse and the wheel zoom (not in the original games)';
+const MODERN_TEXT = 'Modern conveniences: automatic routes, fleet route lines kept on the map after you let go, the map follows the news, written battle reports, Game Info in the DOS and Windows 3.1 Window menu, answering a question by typing yes or no, and in the games with map scroll bars dragging the map with the mouse and the wheel zoom (not in the original games)';
 function setModern(on) { if (!G) return; G.opts.modern = !!on; save(); renderPanel(); draw(); }
 // Full Hoedown (G.opts.hoedown, js/hoedown.js): Delta Tao's own jokes at
 // their most, never the play; chosen at New Game ("ho5.hoedown") and in the
