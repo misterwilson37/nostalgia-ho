@@ -961,8 +961,97 @@ function aboutDialog() {
   showDlg(dl, 'About Spaceho');
 }
 const prevWindow = T.window;
+
+// Graph History (dialog 354, shot 078; FUN_0045630d, its icons FUN_0043093f, its graph FUN_00430686 / FUN_004567c8, the record
+// FUN_0043b47f). Ten icons (pictures 3110, 3162, 3117, 4011, 4017, 3100-3104; list 646's names), black when chosen, grey c4c4c4
+// when not, a white edge right and below, the name at y 34; a click flips one (the choice kept as the preferences' +0xae, none to
+// start). Under each a 2-pixel line in its colour (the table at 0x5b1c58); a frame 3 pixels round the row. The graph: white, a 2-pixel
+// black frame from 80 in, the axis at a sixth up from the foot, a tick at (74-78, 13); the years every max(100, span / 4) rounded
+// to tens, in the text colour last set (the last chosen money line's: shot 078's purple); a line per chosen series, a white one a
+// pixel lower first, one point a turn, x = right - 19 - (turns + 1 - turn) * ((width - 80) / 100), y = axis - v * (axis - 13) / max.
+// The five money series are bytes against a maximum (100,000 / 50,000 / 100,000 / 10,000 / 1,000,000 to start, raised to the next
+// 50,000 above any value, a negative value counting five times), their legends "$%s" "%sM" "$%s" "%sP" "%s" right-aligned at 72,
+// a row of 10 each; the techs are the player's standing (6 for each living rival behind, 3 for each level with him, of 6 per
+// rival), which is the remake's history's `hx.tr` in hundredths. Income: the record's player +8, the remake's `inc`; Metal `hx.met`;
+// Ship Money (+0x10, the savings) `hx.sav`; Population `pop`. Ship Power (FUN_0041adc6) isn't in the remake's history: its line
+// stays empty (docs/status-w95.md, needs a shared file).
+const GRAPH = {
+  pics: [3110, 3162, 3117, 4011, 4017, 3100, 3101, 3102, 3103, 3104],
+  names: ['Income', 'Metal', 'Ship Money', 'Ship Power', 'Population', 'Range', 'Speed', 'Weapons', 'Shields', 'Mini'],
+  ids: [1111, 1084, 1112, 1113, 1088, 1114, 1115, 1116, 1117, 1118],
+  colors: ['#91713a', '#de0806', '#4600a6', '#1fb814', '#562c05', '#800000', '#ff6402', '#0000d5', '#404040', '#000000'],
+  fmt: ['$%s', '%sM', '$%s', '%sP', '%s'], start: [100000, 50000, 100000, 10000, 1000000],
+  get mask() { try { return +localStorage.getItem('ho5.w95.graph') || 0; } catch (e) { return 0; } },
+  set mask(v) { try { localStorage.setItem('ho5.w95.graph', String(v)); } catch (e) {} },
+};
+function graphSeries(g, p) {
+  const h = (p.hist || []).filter(e => e && e.y != null); if (!h.length) return null;
+  const end = h[h.length - 1].y, first = Math.max(h[0].y, end - 990);
+  const rows = h.filter(e => e.y >= first);
+  const val = [(e) => e.inc, (e) => e.hx && e.hx.met, (e) => e.hx && e.hx.sav, () => null, (e) => e.pop];
+  const max = GRAPH.start.slice();
+  val.forEach((f, i) => rows.forEach(e => { const v = f(e); if (v == null) return; const m = v < 1 ? v * -5 : v; if (m > max[i]) max[i] = Math.ceil(m / 50000) * 50000; }));
+  const pts = [];
+  for (let i = 0; i < 10; i++) pts.push(rows.map(e => {
+    const b = Math.round((e.y - first) / 10);
+    if (i < 5) { const v = val[i](e), q = Math.trunc(max[i] / 127); return [b, v == null || !q ? 0 : Math.max(-128, Math.min(127, Math.trunc(v / q)))]; }
+    const t = e.hx && e.hx.tr ? e.hx.tr[i - 5] : null; return [b, t == null ? 0 : t * 127 / 100];
+  }));
+  return { first, end, n: Math.round((end - first) / 10), max, pts };
+}
+function graphDialog() {
+  const a = A(), g = a.G, dl = W95DLG(354); if (!dl) return false;
+  const kfmt = (n) => Math.round(n).toLocaleString('en-US');
+  const sr = graphSeries(g, a.me());
+  const icons = GRAPH.ids.map((id, i) => {
+    const box = dl.by[id]; box.classList.add('gi'); box.setAttribute('role', 'button'); box.tabIndex = 0; box.title = TL(GRAPH.names[i]);
+    const im = a.IMG['w95:b' + GRAPH.pics[i]]; const pic = document.createElement('i'); pic.className = 'gp'; if (im && im.src) pic.style.backgroundImage = `url("${im.src}")`;
+    box.append(pic, span('gn', TL(GRAPH.names[i])));
+    const flip = () => { GRAPH.mask = GRAPH.mask ^ (1 << i); paint(); };
+    box.addEventListener('click', flip); box.addEventListener('keydown', (ev) => { if (ev.key === ' ' || ev.key === 'Enter') { ev.preventDefault(); flip(); } });
+    return box;
+  });
+  const gc = dl.by[1119], cv = document.createElement('canvas'); cv.className = 'gcv'; dl.el.append(cv);
+  const paint = () => {
+    const m = GRAPH.mask; icons.forEach((b, i) => { b.classList.toggle('on', !!(m & (1 << i))); b.setAttribute('aria-pressed', m & (1 << i) ? 'true' : 'false'); });
+    const dpr = window.devicePixelRatio || 1, cw = parseFloat(dl.el.style.width), ch = parseFloat(dl.el.style.height);
+    cv.width = Math.round(cw * dpr); cv.height = Math.round(ch * dpr); cv.style.width = cw + 'px'; cv.style.height = ch + 'px';
+    const x = cv.getContext('2d'); x.setTransform(dpr, 0, 0, dpr, 0, 0); x.clearRect(0, 0, cw, ch);
+    const ox = parseFloat(gc.style.left), oy = parseFloat(gc.style.top), w = parseFloat(gc.style.width), h = parseFloat(gc.style.height);
+    const L = ox, T0 = oy, R = ox + w, B = oy + h;
+    // the frame round the icons, their lines
+    const r0 = icons[0], r9 = icons[9], rx = (e) => parseFloat(e.style.left), ry = (e) => parseFloat(e.style.top);
+    x.strokeStyle = '#000'; x.lineWidth = 1; x.strokeRect(Math.round(rx(r0)) - 3 + 0.5, Math.round(ry(r0)) - 3 + 0.5, Math.round(rx(r9) + parseFloat(r9.style.width) - rx(r0)) + 5, Math.round(parseFloat(r0.style.height)) + 5);
+    icons.forEach((b, i) => { const l = rx(b), t = ry(b) + parseFloat(b.style.height); x.strokeStyle = GRAPH.colors[i]; x.lineWidth = 2; x.beginPath(); x.moveTo(Math.round(l) + 2, Math.round(t) + 6); x.lineTo(Math.round(l + parseFloat(b.style.width)) - 2, Math.round(t) + 6); x.stroke(); });
+    // the graph
+    x.fillStyle = '#fff'; x.fillRect(L + 80, T0, w - 80, h); x.strokeStyle = '#000'; x.lineWidth = 2; x.strokeRect(L + 81, T0 + 1, w - 82, h - 2);
+    const d0 = Math.round(B - h / 6), cH = d0 - T0 - 13, col = Math.trunc((w - 80) / 100);
+    x.beginPath(); x.moveTo(L + 80, d0); x.lineTo(R, d0); x.moveTo(L + 78, T0 + 13); x.lineTo(L + 74, T0 + 13); x.stroke();
+    x.font = '11px "MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif'; x.textBaseline = 'top';
+    let ink = '#000';
+    if (sr) for (let e = 0; e < 5; e++) if (m & (1 << e)) { ink = GRAPH.colors[e]; x.fillStyle = ink; x.textAlign = 'right'; x.fillText(cfmt(TL(GRAPH.fmt[e]), kfmt(sr.max[e])), L + 72, T0 + e * 10 - 5); }
+    if (sr) {
+      let step = Math.trunc((sr.end - sr.first) / 4); if (step < 101) step = 100; step -= step % 10;
+      x.fillStyle = ink; x.strokeStyle = '#000'; x.lineWidth = 1; x.textAlign = 'center';
+      for (let y = sr.first; y <= sr.end; y += step) { const px = R - 20 - (Math.trunc((sr.end - y) / 10) + 1) * col; x.beginPath(); x.moveTo(px + 0.5, d0 - 2); x.lineTo(px + 0.5, d0 + 2); x.stroke(); x.fillText(String(y), px, d0 + 4); }
+      for (let i = 0; i < 10; i++) {
+        if (!(m & (1 << i))) continue;
+        const mx = 127; // (the techs kept in hundredths of 127: their own maximum is the whole span)
+        for (const [pen, dy] of [['#fff', 1], [GRAPH.colors[i], 0]]) {
+          x.strokeStyle = pen; x.lineWidth = 2; x.beginPath(); let on = false;
+          for (const [b, v] of sr.pts[i]) { if (!(v > 0)) continue; const px = R - (sr.n + 1 - b) * col - 19, py = d0 - Math.trunc(v * cH / mx) + dy; if (!on) { x.moveTo(px, py); on = true; } else x.lineTo(px, py); }
+          x.stroke();
+        }
+      }
+    }
+  };
+  dl.by[1].addEventListener('click', () => a.closeModal());
+  showDlg(dl, TL('Graph History...').replace(/\.\.\.$/, '')); paint();
+  return true;
+}
+
 T.window = (name, ...args) => {
-  if (W95ON()) { if (name === 'fleets') return fleetsDialog(); if (name === 'stars') return starsDialog(); if (name === 'surrender' && surrenderDialog()) return true; if (name === 'give') return giveDialog(); if (name === 'build' && buildDialog(args[0])) return true; }
+  if (W95ON()) { if (name === 'fleets') return fleetsDialog(); if (name === 'stars') return starsDialog(); if (name === 'surrender' && surrenderDialog()) return true; if (name === 'give') return giveDialog(); if (name === 'players') return graphDialog(); if (name === 'build' && buildDialog(args[0])) return true; }
   return prevWindow ? prevWindow(name, ...args) : false;
 };
 

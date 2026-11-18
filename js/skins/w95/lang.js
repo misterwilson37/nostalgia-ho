@@ -133,6 +133,8 @@ window.HOUI.add([
 ['Your Password:', 'Votre mot de passe :', 'Ihr Passwort:', 'Parolan:', 'Tu contraseña:'],
 ['•  Click and drag fleets into desired number of piles', '•  Cliquez et faites glisser les flottes en autant de piles que voulu', '•  Flotten anklicken und auf die gewünschte Zahl von Stapeln ziehen', '•  Filoları tıklayıp istediğin sayıda yığına sürükle', '•  Haz clic y arrastra las flotas al número de pilas que quieras'],
 ['•  Shift-Click selects an entire pile', '•  Maj-clic choisit une pile entière', '•  Umschalt-Klick wählt einen ganzen Stapel', '•  Shift-tıklama bütün bir yığını seçer', '•  Mayús-clic selecciona una pila entera'],
+['Select an icon to see recent recorded history:', 'Choisissez une icône pour voir l’historique récent :', 'Wählen Sie ein Symbol, um den jüngsten Verlauf zu sehen:', 'Son kaydedilen geçmişi görmek için bir simge seçin:', 'Seleccione un icono para ver la historia reciente:'],
+['Ship Money', 'Placements', 'Schiffsgeld', 'Gemi Parası', 'Dinero para naves'],
 [CREDITS.en, CREDITS.fr, CREDITS.de, CREDITS.tr, CREDITS.es],
 [about('en'), about('fr'), about('de'), about('tr'), about('es')],
 ]);
