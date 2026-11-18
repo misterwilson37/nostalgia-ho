@@ -58,7 +58,7 @@ All twelve units have had a pass. What is left, in order of value:
 1. Jake's look at `audit/win-4.0.5/remake-compare/` (private repo) and the preview; fix what he reports.
 2. The rules questions under "Needs a shared file" (starting money and ships, fleet wording in reports, design names, Dip Into
    Savings, Preferences' defaults, Organize, Statistics, Turn Time Limit and Base Difficulty Rating): for the main session or Jake.
-3. Each unit's "Left" notes: the map's fleet paths and drag line (unit 4), the selection ring (4),
+3. Each unit's "Left" notes: the sky's points (4),
    Graph History 354 and Send Message 365 (8), the battle's mood pictures (10).
 4. Merging: the work is on `claude/eager-lovelace-ovw5uv` in both repos; staging and live are the main session's.
 
