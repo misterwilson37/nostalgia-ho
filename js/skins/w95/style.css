@@ -275,3 +275,17 @@ html.w95win .scrim > .win.bw95m .wbody { border: 0; margin: 0; }
 html.w95win .bw95w { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 5px 5px 8px; }
 html.w95win canvas.bw95 { display: block; width: 499px; height: 302px; image-rendering: pixelated; }
 html.w95win .bw95w .bw95b { width: 75px; height: 23px; min-width: 0 !important; }
+/* the program's message box (screen.js T.confirm; shots 033, 034, 311): caption "V4.0.5" in navy, the warning sign, the words, the buttons */
+html.w95win .scrim > .win.w95msgwin { padding: 3px; min-width: 0; width: auto; max-width: 420px; }
+html.w95win .scrim > .win.w95msgwin > .wtitle { display: none; }
+html.w95win .scrim > .win.w95msgwin .wbody { padding: 0; border: 0; margin: 0; }
+html.w95win .w95msg .mcap { display: flex; align-items: center; height: 18px; padding: 0 2px 0 3px; background: #000080; color: #fff; font: bold 11px "MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif; }
+html.w95win .w95msg .mcap span { flex: 1; }
+html.w95win .w95msg .mcap .x { width: 16px; height: 14px; box-sizing: border-box; background: #c0c0c0 center no-repeat;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='7'><path d='M0 0h2v1h1v1h2V1h1V0h2v1H7v1H6v1H5v1h1v1h1v1h1v1H6V6H5V5H3v1H2v1H0V6h1V5h1V4h1V3H2V2H1V1H0z'/></svg>");
+  box-shadow: inset -1px -1px 0 #000, inset 1px 1px 0 #fff, inset -2px -2px 0 #808080, inset 2px 2px 0 #dfdfdf; }
+html.w95win .w95msg .mbody { display: flex; align-items: flex-start; gap: 16px; padding: 12px 18px 6px 12px; font: 11px/13px "MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif; color: #000; }
+html.w95win .w95msg .mbody p { margin: 8px 0 0; max-width: 300px; }
+html.w95win .w95msg .warn { flex: none; width: 32px; height: 32px; background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32'><path d='M16 2 31 29H1z' fill='%23ffff00' stroke='%23000' stroke-width='1.5'/><path d='M14.5 10h3l-.6 11h-1.8zM14.5 23h3v3h-3z'/></svg>") no-repeat; }
+html.w95win .w95msg .mbtns { display: flex; justify-content: center; gap: 6px; padding: 6px 12px 10px; }
+html.w95win .w95msg .mbtns button { width: 75px; height: 23px; min-width: 0 !important; }

@@ -805,6 +805,37 @@ T.nameStarLayout = (f, o) => {
   return 'w95dlgwin';
 };
 
+
+// The remake's plain questions (T.confirm): the armageddon device's (4.0.5's two lists, rs.armageddonAsk) as dialog 376 (shots 086, 298, 299:
+// the words (control 1106) at (7, 3), the picture (1138: bitmap 3520) at (7, 46), Cancel at (83, 79), OK at (151, 79); shot 299's question
+// has Abort and Party Pooper); every other one as the program's message box (shots 033, 034, 311): the caption "V4.0.5", the warning
+// sign, the words, the buttons centred.
+const CAPTURED_BUTTONS = { "Are you just doing this because you think you'll win but it's really late and so you want to go to bed?": ['Party Pooper', 'Abort'] };
+const prevConfirm = T.confirm;
+T.confirm = (text, yes, labels) => {
+  if (!W95ON() || (text && text.nodeType)) return prevConfirm ? prevConfirm(text, yes, labels) : false;
+  const a = A(), t = String(text), AA = H().rules(a.G).armageddonAsk || [];
+  const norm = (u) => String(u).replace(/\s+/g, ' ').trim();
+  const arm = AA.some(L => L.some(q => norm(H().say(a.G, q)) === norm(t)));
+  const L2 = labels || CAPTURED_BUTTONS[norm(t)] || null;
+  if (arm) {
+    const dl = W95DLG(376); if (!dl) return false;
+    dl.by[1106].textContent = t; dl.by[1106].classList.add('ml');
+    const im = a.IMG['w95:b3520']; if (im && im.src) dl.by[1138].style.background = `url("${im.src}") left top / 80px 74px no-repeat`;
+    dl.by[1].textContent = L2 ? L2[0] : 'OK'; dl.by[2].textContent = L2 ? L2[1] : 'Cancel';
+    dl.by[1].addEventListener('click', () => { a.closeModal(); yes(); }); dl.by[2].addEventListener('click', () => a.closeModal());
+    showDlg(dl, 'Armageddon'); return true;
+  }
+  const box = document.createElement('div'); box.className = 'w95msg';
+  box.innerHTML = '<div class="mcap"><span>V4.0.5</span><i class="x"></i></div><div class="mbody"><i class="warn"></i><p></p></div><div class="mbtns"></div>';
+  box.querySelector('p').textContent = t;
+  const mk = (label, fn) => { const b = document.createElement('button'); b.type = 'button'; b.textContent = label; b.addEventListener('click', fn); return b; };
+  const ok = mk(L2 ? L2[0] : 'OK', () => { a.closeModal(); yes(); }), no = mk(L2 ? L2[1] : 'Cancel', () => a.closeModal());
+  box.querySelector('.mbtns').append(ok, no); box.querySelector('.x').addEventListener('click', () => a.closeModal());
+  const w = a.modal('', box, { cls: 'w95msgwin', label: 'V4.0.5' }); if (a.markYesNo) try { a.markYesNo(w, ok, no); } catch (e) {}
+  ok.focus(); return true;
+};
+
 // ---------- the caption bar ----------
 // The window's own: the program's icon, the title (#title, written by the classic page), and the minimise, maximise and
 // close boxes (drawn only: the remake has no window to shrink).
