@@ -63,7 +63,7 @@ T.menuLayout = {
     [null, 'View/#0'], [null, 'View/#1'], ['Fit Galaxy', 'View/Fit galaxy'], // (by place: T.menus has renamed them)
     [() => (infoOff() ? 'Show Information' : 'Hide Information'), () => setInfo(infoOff()), null, null, noGame, 'Alt+I'], '-',
     ['Clean Up Windows', () => cleanUp(), null, null, noGame]],
-  Help: [['Help Topics', 'Help/How to play'], [null, 'Help/#1']],
+  Help: [['About Spaceho...', () => aboutDialog(), null, null, () => !W95ON()], ['Help Topics', 'Help/How to play'], [null, 'Help/#1']],
 };
 // the key equivalents the captures show, by the remake's item (its English label)
 const KEYS = { 'New game…': 'N', 'Saved games…': 'O', 'Export this game…': 'S', 'Quit to title': 'Q', 'Build ships at selected colony…': 'B', 'List all fleets…': 'L',
@@ -477,8 +477,8 @@ T.afterMsg = (box, info) => {
 // A ship's picture with the white that touches its edges made see-through (some extracted bitmaps, the basic scout's 2762 among them, keep
 // a white margin the program masks away); cached by the picture.
 const SHIPC = new WeakMap();
-function shipPicClean(d, IMG) {
-  const im = T.shipPic ? T.shipPic(d, IMG) : null; if (!im || !im.width) return im;
+function edgeClear(im) { // a canvas of the picture with the white touching its edges made see-through (cached)
+  if (!im || !im.width) return im;
   if (SHIPC.has(im)) return SHIPC.get(im);
   const c = document.createElement('canvas'); c.width = im.width; c.height = im.height; const x = c.getContext('2d'); x.drawImage(im, 0, 0);
   try {
@@ -491,6 +491,8 @@ function shipPicClean(d, IMG) {
   } catch (e) {}
   SHIPC.set(im, c); return c;
 }
+const edgeURL = (im) => { const c = edgeClear(im); try { return c && c.toDataURL ? c.toDataURL() : im && im.src; } catch (e) { return im && im.src; } };
+function shipPicClean(d, IMG) { return edgeClear(T.shipPic ? T.shipPic(d, IMG) : null); }
 
 // ---------- the dialogs (unit 7): SPACEHO.EXE's templates (js/skins/w95/dialogs.js) drawn at their dialog units ----------
 // W95DLG(id): the dialog's controls placed at 1.5 x 1.625 pixels a unit (MS Sans Serif 8): STATIC words, push buttons (the default one
@@ -921,6 +923,32 @@ function planetInfoDialog(sid) {
   dl.by[1].addEventListener('click', () => a.closeModal());
   showDlg(dl, 'Planet Info');
 }
+
+// About Spaceho (dialog 108, shot 283): the "Version 4" picture in the group box (1007) at the top, the credits (its STATIC at (3, 154)),
+// New World Computing's logo (1174 at (152, 155): bitmap 383) and "Licensed to:" (1173 at (4, 226)) in red: the licensee's name, the
+// organisation ("Unknown" where there is none, as the program writes it) and "Spaceward Ho! V4.0.5". The licensee as the DOS skin's
+// (js/skins/dos/ui.js licensee, Jake's rule): the signed-in account's display name, else the name this browser kept from it, else the
+// New Game name; never an e-mail address or a stranger's name.
+function licensee95() {
+  const ls = (k) => { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } };
+  const own = (n, u) => !!n && !/@/.test(n) && n !== 'Guest' && n !== 'Signed in' && (!u || n !== u.email);
+  const C = window.HOCLOUD, u = C && C.user; let name = '';
+  if (u) { if (!u.anonymous && own(u.name, u)) name = u.name; } else if (!(C && C.known) && own(ls('ho5.cloud.name'))) name = ls('ho5.cloud.name');
+  return { name: name || ls('ho5.name'), org: ls('ho5.w31.org') };
+}
+function aboutDialog() {
+  const a = A(), dl = W95DLG(108); if (!dl) { a.openAbout(); return; }
+  const gb = dl.by[1007], im = a.IMG['w95:b316'];
+  if (gb && im && im.src) { gb.style.background = `#fff url("${im.src}") center / 100% 100% no-repeat`; gb.style.border = '0'; gb.style.imageRendering = 'pixelated'; }
+  const lg = dl.by[1174], li = a.IMG['w95:b383']; if (lg && li && li.src) { lg.style.background = `url("${edgeURL(li)}") left top / 80px 121px no-repeat`; lg.style.overflow = 'visible'; lg.style.width = '80px'; lg.style.height = '121px'; }
+  const L = licensee95(), lic = dl.by[1173];
+  if (lic) { lic.innerHTML = ''; lic.classList.add('lic');
+    lic.append(span('ll', 'Licensed to:'), span('lv', [L.name || 'Unknown', L.org || 'Unknown', 'Spaceward Ho! V4.0.5'].join('\n'))); }
+  // (no button: a click closes it, shot 283; the credits are cut at the box's foot, not wrapped)
+  const cr = dl.el.querySelector('.st.ml'); if (cr) { cr.style.whiteSpace = 'pre'; cr.style.overflow = 'hidden'; }
+  dl.el.addEventListener('click', () => a.closeModal()); dl.el.style.cursor = 'default';
+  showDlg(dl, 'About Spaceho');
+}
 const prevWindow = T.window;
 T.window = (name, ...args) => {
   if (W95ON()) { if (name === 'fleets') return fleetsDialog(); if (name === 'stars') return starsDialog(); if (name === 'surrender' && surrenderDialog()) return true; if (name === 'give') return giveDialog(); if (name === 'build' && buildDialog(args[0])) return true; }
@@ -948,7 +976,7 @@ const prevTitle = T.title;
 T.title = (frame, IMG, Sound) => {
   const r = prevTitle ? prevTitle(frame, IMG, Sound) : false;
   const lg = document.querySelector('#titlescreen .w95logo'), im = IMG && IMG['w95:b383'];
-  if (lg && im && im.src) lg.style.backgroundImage = `url("${im.src}")`;
+  if (lg && im && im.src) lg.style.backgroundImage = `url("${edgeURL(im)}")`;
   return r;
 };
 
@@ -1162,7 +1190,7 @@ T.confirm = (text, yes, labels) => {
   if (arm) {
     const dl = W95DLG(376); if (!dl) return false;
     dl.by[1106].textContent = t; dl.by[1106].classList.add('ml');
-    const im = a.IMG['w95:b3520']; if (im && im.src) dl.by[1138].style.background = `url("${im.src}") left top / 80px 74px no-repeat`;
+    const im = a.IMG['w95:b3520']; if (im && im.src) dl.by[1138].style.background = `url("${edgeURL(im)}") left top / 80px 74px no-repeat`;
     dl.by[1].textContent = L2 ? L2[0] : 'OK'; dl.by[2].textContent = L2 ? L2[1] : 'Cancel';
     dl.by[1].addEventListener('click', () => { a.closeModal(); yes(); }); dl.by[2].addEventListener('click', () => a.closeModal());
     showDlg(dl, 'Armageddon'); return true;
