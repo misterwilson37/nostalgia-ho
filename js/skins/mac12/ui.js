@@ -3322,7 +3322,12 @@ if (V3) {
     battleWindow: (b, k) => (own() ? battleWindow(b, k) : false),
     // (the program's own battle window with modern conveniences on too: Jake, 18 Nov, the remake's looked wrong in this skin)
     battleWindowAlways: true,
-    afterTurn: (go) => afterTurn12(go),
+    // (3.0.1 works the battles out during the update without showing them: DoBattleStage passes 0 to DoOneBattle; each is shown as its
+    // report is announced, GoToNextAnnouncement @161bc8 -> DoMessageAction @161e44 -> ReviewBattle, with Review Event Battles on (Stup
+    // +0x46, default 1). Jake, 18 Nov: "Year XXXX", then the battle as its card comes up. 1.2 and 2.0.1 keep afterTurn12.)
+    // (Object.assign copies these onto the theme: functions, so they ask at the time)
+    battleBeforeCard: () => own(),
+    afterTurn: (go) => go(),
     // the windows 3.0.1 draws with its own routines (docs/status-301.md, "Windows from the menus")
     window(name, ...x) {
       if (!G() || !own()) return false;

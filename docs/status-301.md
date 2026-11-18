@@ -41,7 +41,12 @@ Sources (private repo `nostalgia-ho-sources`):
    - ~~List of All Fleets, Explored Stars, Compare, Skills~~, ~~Organize Fleets~~ (done 17 Nov: the table).
    - ~~Build / Design Ships~~ (done 18 Nov: the table). ~~Give~~, ~~Alliances~~, ~~Send Message~~ done: every window from the menus is built. ~~The battles~~ (close, 18 Nov: the table). Next: the end of the game (the plan's session 4).
    - **Jake's 18 Nov play-test** (Retina MacBook Air, Firefox), one commit each:
-     1. Battle timing (open each battle as its report is announced, as 3.0.1's Review Event Battles does): to do.
+     1. ~~Battle timing~~: done. 3.0.1 works the battles out in the update without showing them (DoBattleStage passes 0 to
+        DoOneBattle); `GoToNextAnnouncement` @161bc8 calls `DoMessageAction(report, 0)` @161e44 for each report as it is announced,
+        before it selects the star and draws the bubble, and for a battle report (0x407 / 0x408) with Review Event Battles on (Stup
+        +0x46) that is `ReviewBattle` @e2d36. The 3.0.1 skins no longer play every battle before the reports (`afterTurn12`, kept for
+        1.2 and 2.0.1); `T.battleBeforeCard` has the report card open the battle first, the previous bubble left under it, then draw
+        its own card. Checked with a staged battle at the home star: "Year 2010:" card, the battle, its report, the metal report.
      2. Battle drawing (the destruction flare, a hit on the planet's explosion and population, rays reaching the planet): to do.
      3. ~~The modern conveniences' battle speed~~: done. The classic battle windows' Speed list (Slow / Normal / Fast / Skip to the end,
         `openBattle`, `openBattlePanel`) is gone, and "battle speed" is out of the modern conveniences' words (five languages). The

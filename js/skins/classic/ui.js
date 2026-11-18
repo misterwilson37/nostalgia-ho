@@ -1997,6 +1997,14 @@ function renderMsg() {
 }
 function renderMsg0() {
   const box = $('#msg');
+  // T.battleBeforeCard (Mac 3.0.1: GoToNextAnnouncement @161bc8 calls DoMessageAction(report, 0) before it selects the star and draws
+  // the bubble, and for a battle report, with Review Event Battles on, that is ReviewBattle): the battle first, then its card
+  const m0 = UI.msgIdx < UI.inbox.length ? UI.inbox[UI.msgIdx] : null;
+  if (m0 && T.battleBeforeCard && T.battleBeforeCard() && prefReview() && m0.battle && !m0._reviewed) {
+    m0._reviewed = true; openBattle(m0.battle); // (the bubble before stays under it, as the program leaves it)
+    const wait = setInterval(() => { if (!document.querySelector('.scrim')) { clearInterval(wait); if (G && UI.inbox[UI.msgIdx] === m0) renderMsg(); } }, 200);
+    return;
+  }
   box.innerHTML = '';
   if (G.over && UI.msgIdx >= UI.inbox.length) {
     box.append(el('div', { class: 'card end' }, el('img', { src: A.img[G.winner === ME ? 'p3030' : 'p3040'], alt: '' }),
