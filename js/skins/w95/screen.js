@@ -1201,6 +1201,11 @@ function battleWindow95(b, k) {
     const p = g.players[o]; if (!p) return;
     const id = o === ME ? (p.female ? 1905 : 1405) : (p.female ? 2500 : 2000) + ((p.face || 0) % 20);
     const im = pic(id); if (im) x.drawImage(im, colX[ci], 2, 32, 32);
+    // the side's luck (FUN_00422339: picture 3141 + the record's +0x104 / +0x106, beside the face, 32 to the right, none at 0; the
+    // record keeps rand(-1, 1) with Luck in Battles on, FUN_00421430). The remake's battle record keeps it as b.luck when the rules
+    // write it (docs/status-w95.md, needs a shared file).
+    const lk = b.luck ? b.luck[b.sides ? b.sides.indexOf(o) : ci] : 0;
+    if (lk) { const mp = pic(3141 + lk); if (mp) x.drawImage(mp, colX[ci] + 32, 2); }
     text(p.name || '', colX[ci] + 67, p.name && p.name.length > 7 ? 24 : 20, p.name && p.name.length > 7 ? '600 11px Arial, sans-serif' : BAT_FONT);
   };
   const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
