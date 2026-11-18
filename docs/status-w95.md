@@ -71,7 +71,9 @@ Units 1-4 are the big ones (one session might do two). 6-9 are quicker. 10 is lo
    conveniences on, `buildDialog` shows Savings and Metal less what "# To Build" would cost (the prototype's price with the first of a
    new type; red below 0; the piles follow), updated on +, - and typing. Plain game: as before. Jake can check the real 4.0.5 in his
    Windows 95 emulator; if it updates them, make this always on.
-4. Second turn: End Turn's clock shrank to nothing while the report bubbles were up; back when they went.
+4. ~~Second turn: End Turn's clock shrank while the report bubbles were up~~: done. The clock the skin shows beside a report
+   (`extraClock`, #w95clk) wasn't in the list zoomed by --w95, so it stayed at x1 (64 x 61 against 96 x 92 at x1.5). Now the same
+   size and place either way.
 5. A ship with range 6 dragged to a star 9 away: the line says it can go, and it routes around, but the path isn't shown.
 6. Abandon Planet: no way to find it (the Window/Planet menus; the 405 ruleset hides it, unit 6's "Left").
 7. The floating windows' captions stay grey (inactive) while dragged; Windows 95 shows the dragged one active (blue).

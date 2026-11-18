@@ -99,7 +99,7 @@ html.w95win body { overflow: hidden; }
 html.w95win #mapwrap { background: #000; }
 /* made big (screen.js setW95Scale): the caption, menus, panes and windows zoomed by --w95, the map drawn S pixels a program pixel (T.mapPixel) */
 html.w95scale #main { grid-template-columns: calc(250px * var(--w95)) 1fr; }
-html.w95scale #w95cap, html.w95scale #menubar, html.w95scale #panel, html.w95scale #msg, html.w95scale .w95sb, html.w95scale .w95corner,
+html.w95scale #w95cap, html.w95scale #menubar, html.w95scale #panel, html.w95scale #msg, html.w95scale #w95clk, html.w95scale .w95sb, html.w95scale .w95corner,
 html.w95scale .scrim > .win, html.w95scale .starmenu, html.w95scale .toast, html.w95scale .tip { zoom: var(--w95); }
 html.w95scale .scrim > .win { max-width: calc((100vw - 24px) / var(--w95)); max-height: calc((100vh - 34px) / var(--w95)); }
 /* the panes (screen.js, unit 2): absolutely placed words in the program's font, MS Sans Serif 8 (Arial where it is missing) */
