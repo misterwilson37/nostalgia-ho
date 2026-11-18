@@ -154,7 +154,10 @@ function gaugeOf(s, p) {
 // and your home's is under 1.5 times the smaller, 6110 + % 3 to 2.00, 6120 + % 4 to 2.56, else 6130) wraps round every 167 pixels, a pixel a
 // step; for a planet colder than your home the ice caps (6150 at the top, 6151 at the bottom) come in 6 + (difference in tenths / 107, at
 // most 22) pixels; the night side, a darkened copy, sweeps across over 224 steps (0x38, 0x70, 0xa8: the 3.0.1 program's phases); every 10th
-// step the 14 stars behind it move a pixel left. (The Windows timer's rate is not read yet: PLANET_MS is 3.0.1's six a second.)
+// step the 14 stars behind it move a pixel left. The step's rate: the program steps the planet, the selection ring and the sky together
+// (FUN_00468e55 -> FUN_0040aa02 -> FUN_0048bd31 / FUN_00492ccb) from the application's idle loop (FUN_0047d666), when time() has moved on
+// by more than 0.1 second (so each new second) and on every 200th idle pass within one: a rate set by the machine's speed, not a timer.
+// PLANET_MS keeps 3.0.1's six a second for all three.
 const PLANET = { c: 0, n: 0, star: null, timer: null, stars: Array.from({ length: 14 }, () => ({ h: Math.floor(Math.random() * 116), v: 1 + Math.floor(Math.random() * 81) })) };
 const PLANET_MS = 1000 / 6;
 function texFor(s, p) {
@@ -183,7 +186,7 @@ function drawPlanet(cv, step) {
   mx.fillStyle = '#000'; mx.fillRect(half[0], 0, half[1] - half[0], D);
   mx.globalCompositeOperation = (c < 56 || c >= 168) ? 'destination-out' : 'source-over';
   if (w > 0) { mx.beginPath(); mx.ellipse(el + w / 2, D / 2, w / 2, D / 2, 0, 0, Math.PI * 2); mx.fill(); }
-  mx.globalCompositeOperation = 'source-in'; mx.fillStyle = 'rgba(0,0,0,0.75)'; mx.fillRect(0, 0, D, D);
+  mx.globalCompositeOperation = 'source-in'; mx.fillStyle = 'rgba(0,0,0,0.5)'; mx.fillRect(0, 0, D, D); // (the dark copy: every channel halved, FUN_004926df)
   ox.drawImage(m, 0, 0);
   const ph = 156 - L, pv = 10;
   x.save(); x.beginPath(); x.ellipse(ph + D / 2, pv + D / 2, D / 2, D / 2, 0, 0, Math.PI * 2); x.clip(); x.drawImage(o, ph, pv); x.restore();
@@ -1503,7 +1506,7 @@ T.afterMsg = (box, info) => { if (prevAfterMsg2) prevAfterMsg2(box, info); clock
 // Planets are the original's star rectangles (FUN_0048c169): 32 pixels at zoom 17, 16 at 9 and 12, the zoom itself at 6 (the
 // pictures are drawn 1.3 times planetPx, starLook's scale). Under each star (T.mapUnder, as the original copies the sprite into the
 // star's buffer first) picture 175: the selected star gets the green ring, one of five frames, the next one each tick of the frame
-// window's 500 ms timer (FUN_0040a6f2 / FUN_0040aa02); its owner in a mutual pact adds a halo over it, yellow for allies (players
+// idle step (PLANET_MS, see the turning planet); its owner in a mutual pact adds a halo over it, yellow for allies (players
 // +0x238 both ways), cyan for best buddies (+0x288 both ways). Another player's star in a mutual pact gets the halo alone. Big
 // frames 56 x 51 at (star - 12, star - 9), source x 15 + 58 * frame, rows 0 / 52 / 104, halos (159 | 244, 156); small 26 x 26 at
 // (star - 5, star - 5), 15 + 29 * frame, rows 156 / 183 / 210, halos (217, 156 | 183). Nothing at zoom 6. The opaque black of the
@@ -1549,12 +1552,12 @@ T.mapUnder = (cx, i) => {
     cx.drawImage(sheet, sxy[0], sxy[1], w, h, Math.round(l), Math.round(t), w, h);
   }
 };
-setInterval(() => { // the sky's points flip (2% each a tick)
-  const a = A(); if (!W95ON() || document.visibilityState !== 'visible') return;
+setInterval(() => { // one idle step (FUN_0048bd31): the sky's points flip (2% each), the selection ring's next frame
+  const a = A(); if (!W95ON() || document.visibilityState !== 'visible' || a.UI.drag) return;
   let ch = false; a.G.stars.forEach((st, n) => { if (Math.random() < 0.02) { SKY.off[n] = !SKY.off[n]; ch = true; } });
-  if (ch && a.UI.sel == null) a.draw();
-}, 500);
-setInterval(() => { const a = A(); if (!W95ON() || a.UI.sel == null || document.visibilityState !== 'visible' || zoomOf(a.UI.view) < 7) return; SEL.f = (SEL.f + 1) % 5; a.draw(); }, 500);
+  if (a.UI.sel != null && zoomOf(a.UI.view) >= 7) { SEL.f = (SEL.f + 1) % 5; ch = true; }
+  if (ch) a.draw();
+}, PLANET_MS);
 
 // ---------- the caption bar ----------
 // The window's own: the program's icon, the title (#title, written by the classic page), and the minimise, maximise and
