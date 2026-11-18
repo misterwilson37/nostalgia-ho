@@ -57,7 +57,7 @@ Units 1-4 are the big ones (one session might do two). 6-9 are quicker. 10 is lo
 
 All twelve units have had a pass. What is left, in order of value:
 1. Jake's look at `audit/win-4.0.5/remake-compare/` (private repo) and the preview; fix what he reports.
-2. The rules questions under "Needs a shared file" (fleet wording in reports, design names, Dip Into Savings, the program's
+2. The rules questions under "Needs a shared file" (fleet wording in reports, Dip Into Savings, the program's
    defaults, Organize, Statistics, Battle Speed's range, battle luck, rivals' home stats, Ship Power): for the main session or Jake.
 3. Each unit's "Left" notes:
    none of the units' own; the shared-file questions below.
@@ -99,8 +99,8 @@ To compare: serve the repo (`python3 -m http.server 8765 --bind 127.0.0.1` from 
   menu. Give the ruleset `organizeFleets` if the other skins should have it too.
 - Statistics (Galaxy menu; dialog 355, shot 079: population gained / killed, enemy population killed, ships built / destroyed / enemy
   destroyed) needs counters the engine doesn't keep (`G.stat` has battles, captures, colonized).
-- Its starting designs are named Weasel, Santa Maria...; the Windows program's are Rudolph (scout), Hardy (colony ship), Chevron
-  (tanker), Talon (fighter), Apple (satellite) (shots 041, 053).
+- Design names: answered, not a bug. A design is named at random from its class's list (FUN_0046472b; `js/rules-405.js` SHIP_NAMES,
+  nameFor), and Jake's Rudolph, Hardy, Chevron, Talon and Apple are all in those lists.
 
 ## Open questions
 
