@@ -289,3 +289,11 @@ html.w95win .w95msg .mbody p { margin: 8px 0 0; max-width: 300px; }
 html.w95win .w95msg .warn { flex: none; width: 32px; height: 32px; background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32'><path d='M16 2 31 29H1z' fill='%23ffff00' stroke='%23000' stroke-width='1.5'/><path d='M14.5 10h3l-.6 11h-1.8zM14.5 23h3v3h-3z'/></svg>") no-repeat; }
 html.w95win .w95msg .mbtns { display: flex; justify-content: center; gap: 6px; padding: 6px 12px 10px; }
 html.w95win .w95msg .mbtns button { width: 75px; height: 23px; min-width: 0 !important; }
+/* Surrender To (screen.js surrenderDialog; shot 084): the faces in rows inside the group box, the name under each */
+html.w95win .w95dlg .gb.sbox { background: #fff; border: 2px solid; border-color: #808080 #fff #fff #808080; box-shadow: inset 1px 1px 0 #000; }
+html.w95win .w95dlg .gb .sgrid { position: absolute; inset: 4px 2px; display: flex; flex-wrap: wrap; align-content: flex-start; gap: 4px 0; }
+html.w95win .w95dlg .sgrid .sc { width: 58px; margin: 0 1px; display: flex; flex-direction: column; align-items: center; cursor: default; padding: 1px; }
+html.w95win .w95dlg .sgrid .sc.on { outline: 1px dotted #000; }
+html.w95win .w95dlg .sgrid .sf { width: 32px; height: 32px; background: center / 32px 32px no-repeat; image-rendering: pixelated; }
+html.w95win .w95dlg .sgrid .sf.none { background: radial-gradient(circle at 40% 35%, #555 0 20%, #222 60%, transparent 62%); }
+html.w95win .w95dlg .sgrid .sn { white-space: nowrap; font-size: 10px; line-height: 12px; }

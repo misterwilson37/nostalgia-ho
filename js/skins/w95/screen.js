@@ -580,9 +580,42 @@ function starsDialog() {
   fill(); showDlg(dl, 'List of All Explored Stars');
   return true;
 }
+
+// Surrender To (dialog 363, shot 084): "Surrender To:", the group box (control 1148) holding a face for each other player still in, its
+// name under it, then "No One"; a click picks one (outlined); OK asks dialog 364 ("Do you really, REALLY want to surrender?", Really /
+// Cancel) and surrenders (engine surrender) at the end of the turn. While you are surrendering, the classic page's question takes it back.
+// ("No One"'s dark planet is a stand-in: its bitmap is not identified.)
+function surrenderDialog() {
+  const a = A(), g = a.G, p = a.me(); if (p.surrenderTo != null) return false;
+  const dl = W95DLG(363); if (!dl) return false;
+  const gb = dl.by[1148], grid = document.createElement('div'); grid.className = 'sgrid'; gb.classList.add('sbox'); gb.append(grid);
+  let pick = null;
+  const cell = (id, name, src) => {
+    const c = document.createElement('div'); c.className = 'sc'; c.setAttribute('role', 'option'); c.tabIndex = 0;
+    const f = document.createElement('i'); f.className = 'sf'; if (src) f.style.backgroundImage = `url("${src}")`; else f.classList.add('none');
+    c.append(f, span('sn', name));
+    c.addEventListener('click', () => { pick = id; grid.querySelectorAll('.sc').forEach(x => x.classList.toggle('on', x === c)); });
+    grid.append(c);
+  };
+  g.players.filter(q => q.id !== a.ME && q.alive !== false && !q.surrendered).forEach(q => {
+    const n = q.human ? (q.female ? 1905 : 1405) : (q.female ? 2500 : 2000) + (q.face || 0) % 20, im = a.IMG['w95:b' + n];
+    cell(q.id, q.name, im && im.src);
+  });
+  cell(-1, 'No One', null);
+  dl.by[2].addEventListener('click', () => a.closeModal());
+  dl.by[1].addEventListener('click', () => {
+    if (pick == null) return;
+    const q = W95DLG(364); if (!q) return;
+    q.by[1].addEventListener('click', () => { a.closeModal(); H().surrender(g, a.ME, pick); a.save(); a.renderPanel(); });
+    q.by[2].addEventListener('click', () => a.closeModal());
+    showDlg(q, 'Surrender');
+  });
+  showDlg(dl, 'Surrender To');
+  return true;
+}
 const prevWindow = T.window;
 T.window = (name, ...args) => {
-  if (W95ON()) { if (name === 'fleets') return fleetsDialog(); if (name === 'stars') return starsDialog(); }
+  if (W95ON()) { if (name === 'fleets') return fleetsDialog(); if (name === 'stars') return starsDialog(); if (name === 'surrender' && surrenderDialog()) return true; }
   return prevWindow ? prevWindow(name, ...args) : false;
 };
 
