@@ -337,7 +337,8 @@ async function playOne(browser, rules, url) {
     if (Math.abs(sh.A.metal - sh.B.metal) > 50 + Math.abs(sh.B.metal) * 0.005) bad.push(`metal ${Math.round(sh.A.metal)} vs ${Math.round(sh.B.metal)}`);
     for (const c of sh.B.cols) { const a = sh.A.cols.find(x => x.id === c.id); if (a && Math.abs(a.t - c.t) > 0.3) bad.push(`${c.name} temperature ${a.t} vs ${c.t}`); }
     if (bad.length) { shadowBad++; fail(`turn ${turn}: the skin's units and the computers' give different turns (${sh.converted ? 'research shares converted to per mille' : 'same units'}): ${bad.join('; ')}`); }
-    // End Turn: the clock
+    // End Turn: the clock (after a window a report opens a moment after its card, as 4.0.5's radical research window does: dismissed too)
+    await sleep(150); await dismiss(page);
     await page.locator('#msg .clock').click();
     await sleep(120);
     const conf = page.locator('.scrim button', { hasText: /^OK$/ });
