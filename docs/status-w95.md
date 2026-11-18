@@ -74,7 +74,11 @@ Units 1-4 are the big ones (one session might do two). 6-9 are quicker. 10 is lo
 4. ~~Second turn: End Turn's clock shrank while the report bubbles were up~~: done. The clock the skin shows beside a report
    (`extraClock`, #w95clk) wasn't in the list zoomed by --w95, so it stayed at x1 (64 x 61 against 96 x 92 at x1.5). Now the same
    size and place either way.
-5. A ship with range 6 dragged to a star 9 away: the line says it can go, and it routes around, but the path isn't shown.
+5. ~~A ship dragged past its fuel: it routes around, but the path isn't shown~~: done. The route is the modern conveniences' automatic
+   route through your colonies (findRoute; 4.0.5 itself has none, no rs.route), and the skin's drag line (T.dragRoute) took over before
+   the classic page's route preview was drawn. The classic page now passes that route as `via` (legs with their distances; only a skin
+   that uses it changes), and the w95 line follows it, each leg's distance, the arrow on the last; after the drop the order line goes
+   on, 1 px, through f.path's later stops (FUN_0048e811's 2 px line still to the next one).
 6. Abandon Planet: no way to find it (the Window/Planet menus; the 405 ruleset hides it, unit 6's "Left").
 7. The floating windows' captions stay grey (inactive) while dragged; Windows 95 shows the dragged one active (blue).
 8. Turn 1: Tech Spending floats over the map at its Clean Up place; from turn 2 it sits at the bottom left, and before that the
