@@ -586,12 +586,38 @@ T.window = (name, ...args) => {
   return prevWindow ? prevWindow(name, ...args) : false;
 };
 
+
+// ---------- start-up (unit 9): the splash as dialog 315 (shot 001) ----------
+// 231 x 251 units: the picture (control 1051, 231 x 149 at the top: the "Version 4" animation, js/skins/w95/ui.js title), the credits
+// (its STATIC at (4, 154)), New World Computing's logo (control 1174 at (159, 152): bitmap 383), and Open Game, New Game and Quit along
+// the foot (Quit, the default, can't close a web page: dimmed). The remake's own title-screen choices stay outside it.
+const CREDITS = 'Written by Peter Commons\nArt by Howard Vives and Bob Van de Walle\nSounds by Mark Madeley and Guy Vardaman\nWindows programming by Paul Toth\nCopyright 1991-1996 by Delta Tao Software, Inc.\n760 Harvard Avenue Sunnyvale, CA 94087';
+function splash315(doc) {
+  const sp = doc.querySelector('#titlescreen .tsplash'), body = sp && sp.querySelector('.wbody'); if (!body || sp.classList.contains('w95splash')) return;
+  sp.classList.add('w95splash');
+  const cred = doc.createElement('div'); cred.className = 'w95cred'; cred.textContent = CREDITS;
+  const logo = doc.createElement('i'); logo.className = 'w95logo';
+  const row = doc.createElement('div'); row.className = 'w95btns';
+  const o = doc.querySelector('#tcont'), n = doc.querySelector('#tnew');
+  const q = doc.createElement('button'); q.type = 'button'; q.className = 'w95quit'; q.textContent = 'Quit'; q.disabled = true; q.title = 'A web page can’t close itself';
+  if (o) { o.textContent = 'Open Game'; row.append(o); } if (n) { n.textContent = 'New Game'; row.append(n); } row.append(q);
+  body.append(cred, logo, row);
+}
+const prevTitle = T.title;
+T.title = (frame, IMG, Sound) => {
+  const r = prevTitle ? prevTitle(frame, IMG, Sound) : false;
+  const lg = document.querySelector('#titlescreen .w95logo'), im = IMG && IMG['w95:b383'];
+  if (lg && im && im.src) lg.style.backgroundImage = `url("${im.src}")`;
+  return r;
+};
+
 // ---------- the caption bar ----------
 // The window's own: the program's icon, the title (#title, written by the classic page), and the minimise, maximise and
 // close boxes (drawn only: the remake has no window to shrink).
 const page0 = T.page;
 T.page = (doc) => {
   if (page0) page0(doc);
+  splash315(doc);
   const bar = doc.getElementById('menubar'), title = doc.getElementById('title');
   if (!bar || !title || doc.getElementById('w95cap')) return;
   const cap = doc.createElement('div'); cap.id = 'w95cap'; cap.setAttribute('aria-hidden', 'true');

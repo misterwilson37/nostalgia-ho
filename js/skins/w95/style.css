@@ -259,3 +259,14 @@ html.w95win .w95dlg .lbx .xr > * { position: absolute; top: 3px; }
 html.w95win .w95dlg .lbx .xr .xi { left: 2px; top: 2px; width: 16px; height: 16px; background: center / 16px 16px no-repeat; image-rendering: pixelated; }
 html.w95win .w95dlg .lbx .xr .xn { left: 19px; } html.w95win .w95dlg .lbx .xr .xt { left: 119px; }
 html.w95win .w95dlg .lbx .xr .xg { left: 194px; } html.w95win .w95dlg .lbx .xr .xm { left: 269px; }
+/* unit 9: the splash as dialog 315 (screen.js splash315; shot 001): 346 x 408, no caption, the picture 346 x 242 at the top */
+.tsplash.w95splash { padding: 3px; border: 0; border-radius: 0; background: #c0c0c0; box-shadow: inset -1px -1px 0 #000, inset 1px 1px 0 #dfdfdf, inset -2px -2px 0 #808080, inset 2px 2px 0 #fff; }
+.tsplash.w95splash > .wtitle { display: none; }
+.tsplash.w95splash .wbody { position: relative; display: block; width: 346px; height: 408px; padding: 0; }
+.tsplash.w95splash #tframe { position: absolute; left: 0; top: 2px; width: 346px; height: 242px; border: 0; box-sizing: border-box; image-rendering: pixelated; }
+.tsplash.w95splash .w95cred { position: absolute; left: 6px; top: 250px; width: 236px; white-space: pre; font: 11px/13px "MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif; color: #000; }
+.tsplash.w95splash .w95logo { position: absolute; left: 238px; top: 248px; width: 80px; height: 121px; background: center / 80px 121px no-repeat; image-rendering: pixelated; }
+.tsplash.w95splash .w95btns { position: absolute; left: 0; right: 0; top: 374px; height: 23px; }
+.tsplash.w95splash .w95btns button { position: absolute; top: 0; width: 75px; height: 23px; min-width: 0; padding: 0 !important; font: 11px "MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif !important; }
+.tsplash.w95splash .w95btns #tcont { left: 43px; } .tsplash.w95splash .w95btns #tnew { left: 135px; }
+.tsplash.w95splash .w95btns .w95quit { left: 226px; outline: 1px solid #000; }
