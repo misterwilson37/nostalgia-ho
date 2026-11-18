@@ -47,7 +47,19 @@ Sources (private repo `nostalgia-ho-sources`):
         +0x46) that is `ReviewBattle` @e2d36. The 3.0.1 skins no longer play every battle before the reports (`afterTurn12`, kept for
         1.2 and 2.0.1); `T.battleBeforeCard` has the report card open the battle first, the previous bubble left under it, then draw
         its own card. Checked with a staged battle at the home star: "Year 2010:" card, the battle, its report, the metal report.
-     2. Battle drawing (the destruction flare, a hit on the planet's explosion and population, rays reaching the planet): to do.
+     2. ~~Battle drawing~~: done. rules-301's `shoot` wrote no sound, damage or people on its shots, so a ship destroyed never got
+        DrawExplosion's ovals, the planet's people changed only at a round's end, and every burst fell at the cell's corner. Now it
+        records what `HaveGroupShoot` @e1cc2 draws with 3.0.1's 'Stup' 1000 defaults (+0x48 = 1 full animation, +0x4a = 1 groups shoot
+        together): a shot that empties a group (3003) and each volley's last shot (3003 if it killed, 3002 at the planet, else by the
+        damage since the last drawn shot x 10 / hit points), each with `dm` (the group's damage so far: the burst at dm mod 103, dm mod
+        23) and the planet's people (`php`); ships killed between drawn shots are events marked `q`, counted, not drawn. The window
+        (`battleWindow`, V3): 10 ticks a drawn shot (long +0x50; 2.0.1's 30), the time again for a kill; after a hit the picture is not
+        redrawn (DrawOneGroup @e274e's picture flag 0), so the bursts build up on it as in shots 043, 130-134; after a kill's ovals the
+        group is drawn whole again. The rays: shot 130 shows the original's bolt ending at the planet cell's edge (x 299), 40 pixels
+        short of the planet in the cell's middle, as DrawLaserBlast @e4730 aims it; the remake already did the same: left as it is.
+        The window under the Mac's scale is now the program's 445 pixels zoomed with the Mac (it was 890 zoomed again: taller than a
+        laptop's page, its heading off the top). The game is the same (the digest without the shot lists is unchanged, patched and
+        not); the 3.0.1 digest with them is now 4f210f392b431993.
      3. ~~The modern conveniences' battle speed~~: done. The classic battle windows' Speed list (Slow / Normal / Fast / Skip to the end,
         `openBattle`, `openBattlePanel`) is gone, and "battle speed" is out of the modern conveniences' words (five languages). The
         programs' own battle speed settings (1.2's, 2.0.1's, DOS's, Windows', 5.0.5's Battle Review Speed) stay: they are the originals'.

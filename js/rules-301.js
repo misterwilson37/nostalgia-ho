@@ -1093,23 +1093,37 @@ function pickTarget(G, T) {
 // reaches its hit points (what is left over is lost), a fifth of its metal
 // becoming debris
 function shoot(G, g, T, k, tgt, ev, addDebris) {
+  // (display only, for the battle window: what HaveGroupShoot draws with 3.0.1's defaults, Stup 1000 +0x48 = 1 "full animation" and
+  // +0x4a = 1 "groups shoot together": a shot is drawn when it empties the target group (sound 3003, DrawExplosion's ovals) and at the
+  // volley's last shot (3003 when that shot killed a ship or emptied the planet; 3002 at the planet; else by the damage since the last
+  // drawn shot x 10 / the target's hit points: under 2 3000, under 5 3001, else 3002). Each drawn shot carries the ships killed since the
+  // last one, each as an event of its own marked q (not drawn: the window counts it), the front ship's damage (f), the planet's people
+  // (php) and the target group's damage so far (dm: DrawExplosion puts its burst at (dm mod 103, dm mod 23) in the group's cell). The
+  // game is the same: only these fields and the q events are new.)
+  let vol = 0;
   for (let i = 0; i < g.n0; i++) {
     if (tgt[k] < 0) tgt[k] = pickTarget(G, T);
     if (tgt[k] < 0) continue;
     const t = T[tgt[k]], h = HIT[clamp(g.W + 25 - t.S, 0, 50)];
     const si = g.planet ? -1 : g.ids[i % Math.max(1, g.ids.length)];
+    const last = i === g.n0 - 1;
     if (t.planet) {
       const dmg = Math.min(t.hp, h * (RI(G, 0, 20) + 10 + g.W * 5) * 4);
-      t.hp -= dmg;
+      t.hp -= dmg; t.pdm = (t.pdm || 0) + dmg; vol += dmg;
       if (t.hp === 0) t.n = 0;
-      if (ev.length < 80) ev.push({ a: g.o, si, p: 1 });
+      if ((t.n === 0 || last) && ev.length < 80) ev.push({ a: g.o, si, p: 1, snd: t.n === 0 ? 3003 : 3002, dm: t.pdm, php: t.hp });
+      if (t.n === 0) vol = 0;
     } else {
       const dmg = Math.max(1, trunc(h * (RI(G, 0, 20) + 10 + g.W * 5) / 6));
-      t.dmg += dmg;
+      t.dmg += dmg; vol += dmg;
       let killed = 0;
       const ti = t.ids[Math.max(0, t.n - 1)];
       if (t.hp <= t.dmg) { t.dmg = 0; t.n--; addDebris(t.debris); killed = 1; }
-      if (ev.length < 80) ev.push({ a: g.o, si, t: t.o, k: killed, ti, f: killed ? 0 : t.dmg / t.hp });
+      if (t.n === 0 || last) {
+        const r = trunc(vol * 10 / t.hp), snd = killed ? 3003 : r > 4 ? 3002 : r < 2 ? 3000 : 3001;
+        if (ev.length < 80) ev.push({ a: g.o, si, t: t.o, k: killed, ti, f: killed ? 0 : t.dmg / t.hp, snd, dm: t.dmg });
+        vol = 0;
+      } else if (killed && ev.length < 80) ev.push({ a: g.o, si, t: t.o, k: 1, ti, f: 0, q: 1 });
     }
     if (t.n === 0) tgt[k] = -1;
   }

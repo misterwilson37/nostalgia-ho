@@ -2634,7 +2634,9 @@ function battleWindow(b, k) {
   const a = A(), g = G(), rs = H().rules(g), el = a.el, IMG = a.IMG, ME = a.ME;
   const fr = lang() === 'fr', W = 445, Hh = 310, S = 2, TICK = 1000 / 60;
   const pic = (n) => { const im = IMG['dos:' + n]; return im && im.complete && im.naturalWidth ? im : null; };
-  const VB = k.verBattle(), speed = Math.max(1, Math.round(30 * VB.f));
+  // (the pace: 2.0.1's 30 ticks a shot; 3.0.1's 'Stup' 1000 has long +0x50 = 10 ticks, which HaveGroupShoot adds to the deadline after each
+  // drawn shot and again for each ship or planet destroyed)
+  const VB = k.verBattle(), speed = Math.max(1, Math.round((V3 ? 10 : 30) * VB.f));
   // the state as the shots go
   const alive = b.start.map(() => true), hurt = []; let seq = 0, pop = b.pop0;
   const st = () => ({ alive, hurt, pop, over: false, won: false });
@@ -2706,9 +2708,10 @@ function battleWindow(b, k) {
     const n = gr.units.filter(i => alive[i]).length;
     return P0.shipWords(d, n, gr.units.length, u.o === ME);
   };
-  const drawGroup = (gr) => { // DrawOneGroup @d214e
+  const drawGroup = (gr, keepPic) => { // DrawOneGroup @d214e (keepPic: 3.0.1's DrawOneGroup @e274e called with its picture flag 0, as
+    // HaveGroupShoot does after a hit: the words and the damage again, the picture and the bursts on it left as they are)
     const gx = colX[gr.ci], gy = 53 * gr.row + 35;
-    tile(gr, gx, gy);
+    if (!keepPic) tile(gr, gx, gy);
     x.fillStyle = '#000'; x.fillRect(gx - 20, gy + 40, 160, 13);
     const t = groupWords(gr);
     x.font = V3 ? SYS3 : SYS; const cond = x.measureText(t).width > 120;
@@ -2804,15 +2807,19 @@ function battleWindow(b, k) {
         if (!VB.full) while (R[e + n] && R[e + n].si === R[e].si && R[e + n].a === R[e].a && !R[e + n - 1].k) n++;
         for (let j = 0; j < n - 1; j++) apply(R[e + j]);
         const ev = R[e + n - 1], s = cellOf(ev, true), t = cellOf(ev, false);
-        if (s && t && !hidden[t.ci] && !hidden[s.ci]) {
+        if (ev.q) apply(ev); // (3.0.1: a ship killed between the drawn shots, counted, not drawn: rules-301 shoot)
+        else if (s && t && !hidden[t.ci] && !hidden[s.ci]) {
           await laser(s, t);
           if (stop || skip) break;
           a.Sound.play(k.shotSnd(ev, 3000));
           apply(ev);
-          drawGroup(t);
+          const kill = V3 && ev.snd === 3003;
+          drawGroup(t, V3);
+          if (kill && VB.full) deadline += speed * TICK; // (HaveGroupShoot: the time again for a ship or the planet destroyed)
           deadline += speed * TICK;
           await explosion(t, ev, deadline);
           await wait(deadline);
+          if (kill && VB.full && !stop && !skip) drawGroup(t); // (then the whole group again: the ovals and bursts gone)
         } else apply(ev);
         e += n;
       }
