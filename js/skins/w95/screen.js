@@ -1274,6 +1274,43 @@ function createGalaxy95(f) {
 const prevNewGame = T.newGame;
 T.newGame = (f, ctx) => { if (prevNewGame) prevNewGame(f, ctx); if (de.classList.contains('w95win')) createGalaxy95(f); };
 
+
+// The fleets' orders (FUN_0048e811): for each of your fleets with a next stop, a line 2 wide from where it is (a fleet on its way: part way
+// along, by its progress) to that stop: green (0x00FF00) for a colony fleet, cyan (0xFFFF00 in Windows' BGR) for any other; no arrow. The
+// classic page's own arrows are off meanwhile (T.routes).
+Object.defineProperty(T, 'routes', { configurable: true, get: () => (W95ON() ? false : undefined) });
+T.fleetPaths = (cx, c) => {
+  if (!W95ON()) return;
+  for (const f of c.G.fleets) {
+    if (f.owner !== c.ME || f.sat) continue;
+    let x1, y1, to;
+    if (f.to != null) { const a = c.G.stars[f.from], b = c.G.stars[f.to], t = Math.max(0, Math.min(1, f.dist ? f.prog / f.dist : 0)); x1 = c.sx(a.x + (b.x - a.x) * t); y1 = c.sy(a.y + (b.y - a.y) * t); to = b; }
+    else if (f.dest != null && f.star != null) { const a = c.G.stars[f.star]; x1 = c.sx(a.x); y1 = c.sy(a.y); to = c.G.stars[f.dest]; }
+    else continue;
+    const colony = H().fleetDesigns(c.G, f).some(d => d.type === 'colony');
+    cx.save(); cx.strokeStyle = colony ? '#00ff00' : '#00ffff'; cx.lineWidth = 2; cx.beginPath(); cx.moveTo(x1, y1); cx.lineTo(c.sx(to.x), c.sy(to.y)); cx.stroke(); cx.restore();
+  }
+};
+// The drag line (FUN_004148a7, MAPCLICK.CPP): XOR-ed in white (R2_XORPEN), solid to a star in reach, dotted to one beyond it; an arrow
+// head at the end it can reach; the distance (shot 048: "7") beside the middle, 5 to the side the line leans away from and 5 up.
+T.dragRoute = (cx, o) => {
+  if (!W95ON()) return false;
+  cx.save(); cx.globalCompositeOperation = 'difference'; cx.strokeStyle = '#fff'; cx.lineWidth = 1;
+  if (!o.ok) cx.setLineDash([1, 2]);
+  cx.beginPath(); cx.moveTo(o.x1, o.y1); cx.lineTo(o.x2, o.y2); cx.stroke(); cx.setLineDash([]);
+  const head = (xa, ya, xb, yb) => { const ang = Math.atan2(yb - ya, xb - xa), L = 8; cx.beginPath();
+    cx.moveTo(xb - L * Math.cos(ang - 0.45), yb - L * Math.sin(ang - 0.45)); cx.lineTo(xb, yb); cx.lineTo(xb - L * Math.cos(ang + 0.45), yb - L * Math.sin(ang + 0.45)); cx.stroke(); };
+  if (o.ok) head(o.x1, o.y1, o.x2, o.y2);
+  if (o.round) head(o.x2, o.y2, o.x1, o.y1); // (and at the start when it can come back)
+  cx.globalCompositeOperation = 'source-over';
+  if (o.dist != null) {
+    const t = String(o.dist); cx.font = '11px "MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif'; cx.fillStyle = '#fff'; cx.textBaseline = 'top';
+    const mx = (o.x1 + o.x2) / 2, my = (o.y1 + o.y2) / 2, w = cx.measureText(t).width;
+    cx.fillText(t, (o.y2 - o.y1) * (o.x2 - o.x1) < 0 ? mx - 5 - w : mx + 5, my - 5 - 11);
+  }
+  cx.restore(); return true;
+};
+
 // ---------- the caption bar ----------
 // The window's own: the program's icon, the title (#title, written by the classic page), and the minimise, maximise and
 // close boxes (drawn only: the remake has no window to shrink).
