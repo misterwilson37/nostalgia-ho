@@ -241,9 +241,11 @@ html.w95win .scrim > .win table { font: inherit; border-collapse: collapse; }
 html.w95win .scrim > .win th { font-weight: normal; text-align: left; }
 html.w95win .scrim > .win ul.reports, html.w95win .scrim > .win .lb, html.w95win .scrim > .win .list { background: #fff; border: 2px solid; border-color: #808080 #fff #fff #808080; box-shadow: inset 1px 1px 0 #000; }
 /* the dialogs drawn from SPACEHO.EXE's templates (screen.js W95DLG) */
-html.w95win .scrim > .win.w95dlgwin { padding: 3px; width: auto; max-width: none; max-height: none; overflow: visible; }
+html.w95win .scrim > .win.w95dlgwin { padding: 0; width: auto; max-width: none; max-height: none; overflow: visible; border: 1px solid #000; box-shadow: none; border-radius: 0; }
 html.w95win .scrim > .win.w95dlgwin > .wtitle { display: none; }
-html.w95win .scrim > .win.w95dlgwin .wbody { padding: 0; overflow: visible; margin: 2px; border: 2px solid; border-color: #808080 #fff #fff #808080; } /* (shot 043: a sunken edge inside the frame) */
+/* the program's own frame (FUN_00411866, every dialog's paint): a 1-pixel black window edge, then five lines inside the client area, black,
+   grey, white, grey, black (shots 038, 078: 0 0 130 255 130 0 from the outside); the controls keep their places from the client's corner */
+html.w95win .scrim > .win.w95dlgwin .wbody { padding: 0; overflow: visible; margin: 0; border: 0; box-shadow: inset 0 0 0 1px #000, inset 0 0 0 2px #828282, inset 0 0 0 3px #fff, inset 0 0 0 4px #828282, inset 0 0 0 5px #000; }
 html.w95win .w95dlg { position: relative; font: 11px/13px "MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif; color: #000; }
 html.w95win .w95dlg > * { position: absolute; box-sizing: border-box; margin: 0; }
 html.w95win .w95dlg .st { white-space: nowrap; overflow: visible; }
@@ -375,3 +377,6 @@ html.w95win #panel .w95players .face canvas.pact { position: absolute; left: 0; 
 html.w95win #w95tech .vt { position: absolute; left: 84px; top: 5px; width: 1px; height: 52px; pointer-events: none; }
 html.w95win #w95tech .vt i { position: absolute; left: 0; width: 1px; height: 1px; background: #000; }
 html.w95win #w95clk { position: absolute; left: 17px; top: 15px; z-index: 5; }
+/* the Halls (shot 038): the same frame as the program's other dialogs */
+html.w95win .scrim > .win.hallwin { padding: 0; max-height: none; border: 1px solid #000; box-shadow: none; border-radius: 0; }
+html.w95win .scrim > .win.hallwin .wbody { margin: 0; border: 0; padding: 5px; box-shadow: inset 0 0 0 1px #000, inset 0 0 0 2px #828282, inset 0 0 0 3px #fff, inset 0 0 0 4px #828282, inset 0 0 0 5px #000; }
