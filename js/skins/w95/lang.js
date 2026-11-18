@@ -143,6 +143,8 @@ window.HOUI.add([
 ['Are you sure you want to start a new game?', 'Voulez-vous vraiment commencer une nouvelle partie ?', 'Wollen Sie wirklich ein neues Spiel beginnen?', 'Yeni bir oyun başlatmak istediğinizden emin misiniz?', '¿Seguro que quiere empezar una partida nueva?'],
 ['Are you sure you want to open a game?', 'Voulez-vous vraiment ouvrir une partie ?', 'Wollen Sie wirklich ein Spiel öffnen?', 'Bir oyun açmak istediğinizden emin misiniz?', '¿Seguro que quiere abrir una partida?'],
 ['Are you sure you want to leave Spaceward Ho?', 'Voulez-vous vraiment quitter Spaceward Ho ?', 'Wollen Sie Spaceward Ho wirklich verlassen?', "Spaceward Ho'dan çıkmak istediğinizden emin misiniz?", '¿Seguro que quiere salir de Spaceward Ho?'],
+['Base Difficulty Rating:', 'Difficulté de base :', 'Grundschwierigkeit:', 'Temel Zorluk Derecesi:', 'Dificultad base:'],
+['More…', 'Plus…', 'Mehr…', 'Daha…', 'Más…'],
 [CREDITS.en, CREDITS.fr, CREDITS.de, CREDITS.tr, CREDITS.es],
 [about('en'), about('fr'), about('de'), about('tr'), about('es')],
 ]);

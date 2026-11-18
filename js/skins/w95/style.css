@@ -347,7 +347,7 @@ html.w95win .w95cng .cngb { position: absolute; display: flex; height: 48px; bac
 html.w95win .w95cng .cngb .cc { width: 48px; height: 48px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; cursor: default; font-size: 10px; line-height: 12px; white-space: nowrap; overflow: hidden; }
 html.w95win .w95cng .cngb .cc i { width: 32px; height: 32px; margin-top: 2px; background: center / 32px 32px no-repeat; image-rendering: pixelated; }
 html.w95win .w95cng .cngb .cc.on { background: #000; color: #fff; }
-html.w95win .w95cng .cngmore { position: absolute; left: 18px; top: 318px; width: auto; padding: 0 8px; height: 23px; }
+html.w95win .w95cng .cngmore { position: absolute; left: 232px; top: 318px; width: auto; padding: 0 8px; height: 23px; } /* (the remake's own, right of Base Difficulty Rating) */
 html.w95win .win.w95cngw { width: auto; max-width: none; }
 html.w95win .w95cng .cngt { font: 600 13px Arial, sans-serif; }
 html.w95win .w95cng .cngl, html.w95win .w95cng .cngn, html.w95win .w95cng label.ck { font: 600 12px/14px Arial, sans-serif; }

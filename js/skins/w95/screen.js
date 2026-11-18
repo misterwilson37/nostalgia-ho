@@ -1488,14 +1488,25 @@ function createGalaxy95(f) {
   const ck = (id, name, text) => { const l = dl.by[id], fi = field(name); if (!l) return; l.querySelector('input').remove(); if (!fi) { l.style.display = 'none'; return; } const c = fi.cloneNode(); c.checked = fi.checked; c.removeAttribute('name');
     c.addEventListener('change', () => { fi.checked = c.checked; fire(fi); }); l.prepend(c); l.append(document.createTextNode(' ' + TL(text))); l.style.width = 'auto'; };
   ck(1015, 'alliances', 'Alliances'); ck(1203, 'luck', 'Luck in Battles'); ck(1204, 'autoend', 'Automatically end turn for unconnected players');
-  const mirror = (id, name, label, lx) => { const c = dl.by[id], fi = field(name); if (!c) return; if (!fi || !fi.options.length) { c.style.display = 'none'; return; }
-    [...fi.options].forEach(o => { const n = document.createElement('option'); n.value = o.value; n.textContent = o.textContent; c.append(n); }); c.value = fi.value;
-    c.addEventListener('change', () => { fi.value = c.value; fire(fi); }); dl.el.append(span('cngl', TL(label), `left:${lx}px;top:${parseFloat(c.style.top) + 3}px`)); };
+  // a combo box of the template showing a field of the classic form, kept in step with it (the form fills some lists only on a refresh)
+  const mirror = (id, name, label, lx) => { const c = dl.by[id], fi = field(name); if (!c || !fi) { if (c) c.style.display = 'none'; return; }
+    const lab = span('cngl', TL(label), `left:${lx}px;top:${parseFloat(c.style.top) + 3}px`); dl.el.append(lab);
+    const sync = () => { const row = fi.closest('label'), on = fi.options.length > 0 && !(row && row.hidden);
+      c.innerHTML = ''; [...fi.options].forEach(o => { const n = document.createElement('option'); n.value = o.value; n.textContent = TL(o.textContent); c.append(n); }); c.value = fi.value;
+      c.style.display = on ? '' : 'none'; lab.style.display = on ? '' : 'none'; };
+    c.addEventListener('change', () => { fi.value = c.value; fire(fi); });
+    try { const mo = new MutationObserver(sync); mo.observe(fi, { childList: true }); if (fi.closest('label')) mo.observe(fi.closest('label'), { attributes: true, attributeFilter: ['hidden'] }); } catch (e) {}
+    sync(); };
   mirror(1013, 'timelimit', 'Turn Time Limit:', 252); mirror(1014, 'w_years', 'Years Per Turn:', 252);
+  // Base Difficulty Rating (shot 002: "Base Difficulty Rating:  52" at the foot, beside Cancel): the classic form's own rating, kept in step
+  { const rb = f.querySelector('.rating b'), top = parseFloat(dl.by[2].style.top) + 3, lab = span('cngl cngrate', '', `left:22px;top:${top}px`);
+    const put = () => { const v = rb ? rb.textContent.trim() : ''; lab.textContent = v ? TL('Base Difficulty Rating:') + '\u2002' + v : ''; };
+    dl.el.append(lab); put(); if (rb) try { new MutationObserver(put).observe(rb, { childList: true, characterData: true, subtree: true }); } catch (e) {} }
+  setTimeout(() => { try { f.dispatchEvent(new Event('change')); } catch (e) {} }, 0);
   dl.by[2].addEventListener('click', () => a.closeModal());
   dl.by[1].addEventListener('click', () => f.requestSubmit());
   let opened = false;
-  const more = document.createElement('button'); more.type = 'button'; more.className = 'pb cngmore'; more.textContent = TL('More… (the remake’s own)'); dl.el.append(more);
+  const more = document.createElement('button'); more.type = 'button'; more.className = 'pb cngmore'; more.textContent = TL('More…'); more.title = TL('More… (the remake’s own)'); dl.el.append(more);
   const holder = document.createElement('div'); holder.className = 'w95cngh'; holder.append(dl.el);
   const rest = [...f.childNodes]; f.prepend(holder);
   const keep = (n) => n.classList && (n.classList.contains('picks') || n.classList.contains('langnote'));
