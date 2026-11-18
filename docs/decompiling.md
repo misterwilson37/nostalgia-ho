@@ -222,3 +222,26 @@ audit's working tables and scripts). `tools/decompile/split-dump.py` makes the s
 encoding; `NameDump.java` (Ghidra headless, AARCH64:LE:64:v8A) names each function from that list and decompiles all of them to one C file;
 `split-objc.py` splits it into one file per routine with `index.tsv`. A FairPlay-encrypted page (`LC_ENCRYPTION_INFO_64`) is zeroed in the copy given to
 Ghidra. The commands and counts are in the private repo's `decompiled/ios-1.2.9/HOW.md`. About four minutes for 5,044 routines.
+
+## The PowerPC programs (4.0 EXPO, 4.0.1, 4.0.5's data fork; 5.0.4 and 5.0.5)
+
+Ghidra loads a PEF directly ("Preferred Executable Format" loader). Its analysis alone misses about half the routines of 5.0.5
+(2,666 of 5,388: those reached only through virtual tables), and with the Aggressive Instruction Finder it still does.
+`tools/decompile/PefFunctions.java`, run after the analysis, makes a function after every `blr`/`bctr`, at every
+`mflr r0` / `stwu r1,-n(r1)` prologue, and at every code address stored in the data, then re-analyses:
+
+```sh
+analyzeHeadless proj p -import "Spaceward Ho!" -scriptPath tools/decompile \
+  -postScript PefFunctions.java -postScript DumpAll.java ho505.c
+```
+
+For 5.0.5 that gives 6,476 functions: every routine `docs/coverage-505.md` cites except four, whose code is inside the
+routine before them in the dump (`FUN_10055b30`, `FUN_10055c70`, `FUN_10060eb0`, `FUN_10061800`). It finds more than the
+5,388 of the first decompile: the extra ones are switch-case blocks and starts inside routines; read a routine's
+neighbours when one looks cut short. Saved decompiles and their exact counts: the private repo's `decompiled/*/HOW.md`.
+
+## Save every decompile
+
+A decompile made in a session's container is lost when the container goes. The first decompiles of Windows 95 4.0.5,
+Mac 3.0.1, 4.0.5, Palm and Amiga were, and had to be made again (16-18 Nov 2026). Commit the output, with a `HOW.md`,
+to the private repo's `decompiled/<version>/` before using it.
