@@ -54,7 +54,7 @@ Units 1-4 are the big ones (one session might do two). 6-9 are quicker. 10 is lo
 
 ## Next
 
-Unit 7's last three (Build/Design, Organize, Planet Info), then unit 8 with `W95DLG`: Compare 352, Skills 353, Graph 354, Alliances 361, Give 362, Surrender 363 / 364, Send Message 365, Preferences 350, Auto Play 379 / 380, Halls 386-388 (their CSS exists: `.hall`). Then 9 (start-up: dialogs 315, 111, 317, 318), 10, 11. (Unit 0's dialog table was dropped: the Windows dialogs are already listed in `docs/405-windows.md`, "Windows 95: SPACEHO.EXE"; each unit maps its windows to them.)
+Unit 7's last three (Build/Design 176, Organize 347, Planet Info 349), then unit 8 with `W95DLG`: Graph 354, Alliances 361, Give 362, Surrender 363 / 364, Send Message 365, Preferences 350, Auto Play 379 / 380 (Compare 352 and Skills 353 are already drawn from the ruleset's layouts by the classic page; the Halls are done). Then unit 9's Create New Galaxy (111), and unit 12. (Unit 0's dialog table was dropped: the Windows dialogs are already listed in `docs/405-windows.md`, "Windows 95: SPACEHO.EXE"; each unit maps its windows to them.)
 
 To compare: serve the repo (`python3 -m http.server 8765 --bind 127.0.0.1` from the repo, in the background), then
 `OUT=<folder> node tools/skins/w95-compare.js 010,052 '<js to run first>'` writes `w95-side-NNN.png` (ours left, the capture right).
