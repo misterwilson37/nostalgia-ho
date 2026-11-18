@@ -54,7 +54,7 @@ T.menuLayout = {
     [null, 'Ships/#1']],
   Galaxy: [['Compare Players...', 'Galaxy/Compare players…'], ['Graph History...', 'Game/Players and history'], ['List All Explored Stars...', 'Galaxy/List explored stars…'], '-',
     ['Dip Into Savings', 'Galaxy/Dip into savings…'], '-',
-    ['Alliances...', 'Galaxy/Players and alliances…'], ['Give Money/Metal...', 'Galaxy/Give money or metal…'], [null, 'Galaxy/#9'], ['Send Message...', 'Galaxy/Send a message…'], '-',
+    ['Alliances...', () => (W95ON() ? allianceDialog() : HOAPI.openPlayers()), null, null, noGame], ['Give Money/Metal...', 'Galaxy/Give money or metal…'], [null, 'Galaxy/#9'], ['Send Message...', 'Galaxy/Send a message…'], '-',
     [null, 'Galaxy/#10']],
   // (shot 050: no ticks; Chat Window is dimmed out of a network game; Zoom In dimmed at the closest zoom)
   Window: [['Tech Spending Window', () => setWin('tech', !winOpen('tech')), null, null, noGame, '1'],
@@ -612,6 +612,48 @@ function surrenderDialog() {
   });
   showDlg(dl, 'Surrender To');
   return true;
+}
+
+// Alliances (dialog 361, shot 082): three lists, "I Really Like Them" (control 1141), "I Like Them" (1142), "I Don't Like Them" (1143), each
+// player's face in the column of your wish for them, 30 pixels apart with the name under. The columns are the three steps of strings
+// 1016-1027: best buddies (and allies), allies, neither ("...no longer wants to be your best buddy. He just wants to be allies."). A click
+// on a face moves it one column to the right, round to the first (the program's direction is not read yet). OK sets the pacts (engine
+// setPact), Cancel leaves them.
+function allianceDialog() {
+  const a = A(), g = a.G, me = a.me();
+  if (a.menuDim && a.menuDim('alliances')) return;
+  const dl = W95DLG(361); if (!dl) return;
+  const L = [dl.by[1141], dl.by[1142], dl.by[1143]];
+  const want = {};
+  g.players.filter(q => q.id !== a.ME && q.alive !== false).forEach(q => { want[q.id] = (me.buddies || []).includes(q.id) ? 0 : (me.allies || []).includes(q.id) ? 1 : 2; });
+  // each picture is that player's own wish for you (shot 082: 4021 smiling for a best buddy, 4020 for an ally, 4019 frowning for neither);
+  // you stand in the first list, smiling, and don't move
+  const opinion = (q) => (q.id === a.ME ? 4021 : (q.buddies || []).includes(a.ME) ? 4021 : (q.allies || []).includes(a.ME) ? 4020 : 4019);
+  const draw = () => {
+    L.forEach(l => { l.innerHTML = ''; l.classList.add('agrid'); });
+    [me].concat(g.players.filter(q => want[q.id] != null)).forEach(q => {
+      const im = a.IMG['w95:b' + opinion(q)];
+      const c = document.createElement('div'); c.className = 'ac'; c.setAttribute('role', 'button'); c.tabIndex = 0; c.title = q.name;
+      const f = document.createElement('i'); f.className = 'af'; if (im && im.src) f.style.backgroundImage = `url("${im.src}")`;
+      c.append(f, span('an', q.name));
+      if (q.id !== a.ME) c.addEventListener('click', () => { want[q.id] = (want[q.id] + 1) % 3; draw(); });
+      L[q.id === a.ME ? 0 : want[q.id]].append(c);
+    });
+  };
+  // (the headings as the captures show them, shorter than the template's)
+  if (dl.by['I Really Like Them']) dl.by['I Really Like Them'].textContent = 'I Really Like';
+  if (dl.by["I Don't Like Them"]) dl.by["I Don't Like Them"].textContent = "I Don't Like";
+  dl.by[2].addEventListener('click', () => a.closeModal());
+  dl.by[1].addEventListener('click', () => {
+    for (const id in want) {
+      const w = want[id], q = +id;
+      if (w > 0) H().setPact(g, a.ME, q, 'buddy', false);
+      H().setPact(g, a.ME, q, 'ally', w <= 1);
+      if (w === 0) H().setPact(g, a.ME, q, 'buddy', true);
+    }
+    a.save(); a.closeModal(); a.renderPanel();
+  });
+  draw(); showDlg(dl, 'Alliances');
 }
 const prevWindow = T.window;
 T.window = (name, ...args) => {
