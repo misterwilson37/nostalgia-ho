@@ -270,3 +270,8 @@ html.w95win .w95dlg .lbx .xr .xg { left: 194px; } html.w95win .w95dlg .lbx .xr .
 .tsplash.w95splash .w95btns button { position: absolute; top: 0; width: 75px; height: 23px; min-width: 0; padding: 0 !important; font: 11px "MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif !important; }
 .tsplash.w95splash .w95btns #tcont { left: 43px; } .tsplash.w95splash .w95btns #tnew { left: 135px; }
 .tsplash.w95splash .w95btns .w95quit { left: 226px; outline: 1px solid #000; }
+/* unit 10: the battle window (screen.js battleWindow95): the field 499 x 302, Skip / Done 75 x 23 centred under it */
+html.w95win .scrim > .win.bw95m .wbody { border: 0; margin: 0; }
+html.w95win .bw95w { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 5px 5px 8px; }
+html.w95win canvas.bw95 { display: block; width: 499px; height: 302px; image-rendering: pixelated; }
+html.w95win .bw95w .bw95b { width: 75px; height: 23px; min-width: 0 !important; }

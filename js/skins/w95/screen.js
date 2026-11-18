@@ -611,6 +611,167 @@ T.title = (frame, IMG, Sound) => {
   return r;
 };
 
+
+// ---------- battles (unit 10): DoOneBattle's window (FUN_00422339 with its "show" flag; the dialog FUN_00418b96 makes, template 346) ----------
+// As shots 094-281 show it and the code draws it, the Mac 3.0.1 window's layout (the same program, ported: js/skins/mac12/ui.js battleWindow
+// is this one's model): a black field 499 x 302; in white Arial semibold (FUN_00488fc9) "Summary of battle" / "at %s in %d:" (the 0x439 list,
+// items 2 and 3) at (155, 1) and the line under; each side's face (yours 1405 / 1905, a computer's 2000 / 2500 + face) at (25, 2) for you and
+// (300, 2) for the other, the name at (x + 67, 22); the groups (CalcOneGroup's) in a column under each, 53 apart, the ship's picture
+// (T.shipPic) and the group's words under it; "Round %d" (item 4) at (194, 256); the bolts and bursts in colour; at the end the won / lost
+// words and picture (3000 / 3010) in the middle. Skip, then Done, under the field. (The mood picture beside each face, 3141 + a mood the
+// record doesn't keep, is left out.)
+const BAT_FONT = '600 14px Arial, sans-serif', BAT_SMALL = '10px Arial, sans-serif';
+function battleWindow95(b, k) {
+  const a = A(), g = a.G, rs = H().rules(g), IMG = a.IMG, ME = a.ME;
+  const W = 499, Hh = 302, S = 2, TICK = 1000 / 60;
+  const pic = (n) => { const im = IMG['w95:b' + n]; return im && im.complete && im.naturalWidth ? im : null; };
+  const VB = k.verBattle(), speed = Math.max(1, Math.round(30 * VB.f));
+  const alive = b.start.map(() => true), hurt = []; let seq = 0, pop = b.pop0;
+  const P0 = rs.battlePanel(g, b, { alive, hurt, pop, over: false, won: false }, ME);
+  const leftSide = P0.leftSide, rightSide = b.sides.find(o => o !== leftSide);
+  const fAlive = b.start.map(() => true); let fPop = b.pop0;
+  for (const r of b.rounds) for (const ev of r) if (ev.k && !ev.p) fAlive[ev.ti] = false;
+  if (b.popR && b.popR.length) fPop = b.popR[b.popR.length - 1];
+  const viewer = b.sides.includes(ME) ? ME : b.sides[0];
+  const foe = (o) => o !== viewer && !H().isAllied(g, o, viewer);
+  const liveF = (pred) => b.start.some((u, i) => fAlive[i] && pred(u.o));
+  const won = (liveF(o => !foe(o)) || (b.planetOwner >= 0 && !foe(b.planetOwner) && fPop > 0.0005)) && !liveF(foe) && !(b.planetOwner >= 0 && foe(b.planetOwner) && fPop > 0.0005);
+  let sides;
+  if (b.grp) sides = b.grp.map(L => L.map(x => (x === -1 ? { planet: true, units: [] } : { units: x })));
+  else { sides = [[], []]; P0.cols.forEach((c, ci) => c.forEach(r => sides[ci].push({ planet: r.planet, units: r.units }))); }
+  const ownerOf = (L) => { const q = L.find(x => !x.planet && x.units.length); return q ? b.start[q.units[0]].o : b.planetOwner; };
+  if (b.grp && ownerOf(sides[0]) !== leftSide && ownerOf(sides[1]) === leftSide) sides.reverse();
+  const cols = sides.map((L, ci) => L.slice().sort((p, q) => (q.planet ? 1 : 0) - (p.planet ? 1 : 0)).map((x, row) => Object.assign(x, { o: x.planet ? b.planetOwner : b.start[x.units[0]] ? b.start[x.units[0]].o : -1, ci, row })));
+  const colX = [25, 300], owners = [leftSide, rightSide];
+  const where = new Map(), planetAt = {};
+  cols.forEach(L => L.forEach(x => { x.units.forEach(i => where.set(i, x)); if (x.planet) planetAt[x.o] = x; }));
+  // a viewer who lost a battle of one round sees nothing of the other side: "You have no information." / "You were destroyed immediately."
+  // at (145, 85) and (145, 100) (FUN_00424ce5, items 10 and 11)
+  const hidden = [0, 1].map(ci => !won && b.rounds.length === 1 && owners[ci] !== ME && !(owners[ci] != null && H().isAllied(g, owners[ci], ME)));
+  const c = document.createElement('canvas'); c.className = 'bw95'; c.width = W * S; c.height = Hh * S; c.setAttribute('aria-label', 'Summary of battle');
+  const x = c.getContext('2d'); x.setTransform(S, 0, 0, S, 0, 0); x.imageSmoothingEnabled = false;
+  const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'bw95b'; btn.textContent = 'Skip';
+  const box = document.createElement('div'); box.className = 'bw95w'; box.append(c, btn);
+  let stop = false, skip = false, done = false;
+  btn.addEventListener('click', () => { if (done) a.closeModal(); else skip = true; });
+  a.modal('', box, { cls: 'w95dlgwin bw95m', label: 'Summary of battle', onClose: () => { stop = true; } });
+  const text = (t, h, v, font) => { x.font = font || BAT_FONT; x.fillStyle = '#fff'; x.textAlign = 'left'; x.textBaseline = 'top'; x.fillText(t, h, v); };
+  let seed = (b.id | 0) * 7919 + 13;
+  const rnd = (lo, hi) => { seed = (seed * 16807) % 2147483647; return lo + (seed % (hi - lo + 1)); };
+  const stars = Array.from({ length: 35 }, () => [rnd(10, W - 10), rnd(35, Hh - 12)]);
+  const drawStars = () => { x.fillStyle = '#fff'; for (const [h, v] of stars) x.fillRect(h, v, 1, 1); };
+  const face = (o, ci) => {
+    const p = g.players[o]; if (!p) return;
+    const id = o === ME ? (p.female ? 1905 : 1405) : (p.female ? 2500 : 2000) + ((p.face || 0) % 20);
+    const im = pic(id); if (im) x.drawImage(im, colX[ci], 2, 32, 32);
+    text(p.name || '', colX[ci] + 67, p.name && p.name.length > 7 ? 24 : 20, p.name && p.name.length > 7 ? '600 11px Arial, sans-serif' : BAT_FONT);
+  };
+  const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+  const GY = (row) => 53 * row + 38;
+  const tile = (gr, gx, gy) => {
+    let im = null;
+    if (gr.planet) im = pic(1003);
+    else { const u = b.start[gr.units[0]], d = H().getDesign(g, gr.o, u.did) || { type: u.t, R: 1, V: 1, W: 1, S: 1 }; im = T.shipPic ? T.shipPic(d, IMG) : null; }
+    x.fillStyle = '#000'; x.fillRect(gx, gy, 128, 40);
+    if (im) { const w = im.width, h = im.height, sc = Math.min(1, 128 / w, 40 / h), dx = gx + (128 - w * sc) / 2, dy = gy + (40 - h * sc) / 2;
+      // (the right-hand side's ships face left, towards the other side: shots 094-099)
+      if (gr.ci === 1 && !gr.planet) { x.save(); x.translate(dx + w * sc, dy); x.scale(-1, 1); x.drawImage(im, 0, 0, w * sc, h * sc); x.restore(); } else x.drawImage(im, dx, dy, w * sc, h * sc); }
+  };
+  const groupWords = (gr) => {
+    if (gr.planet) return P0.planetWords(pop);
+    const u = b.start[gr.units[0]], d = H().getDesign(g, u.o, u.did) || { type: u.t, name: '', W: 1, S: 1 };
+    return P0.shipWords(d, gr.units.filter(i => alive[i]).length, gr.units.length, u.o === ME);
+  };
+  const grayPat = (() => { const p = document.createElement('canvas'); p.width = 2; p.height = 2; const q = p.getContext('2d'); q.fillStyle = '#000'; q.fillRect(0, 0, 1, 1); q.fillRect(1, 1, 1, 1); return x.createPattern(p, 'repeat'); })();
+  const drawGroup = (gr) => {
+    const gx = colX[gr.ci], gy = GY(gr.row);
+    tile(gr, gx, gy);
+    x.fillStyle = '#000'; x.fillRect(gx - 20, gy + 40, 170, 13);
+    const t = groupWords(gr); x.font = BAT_SMALL; const w = x.measureText(t).width;
+    text(t, gx + 64 - Math.trunc(w / 2), gy + 42, BAT_SMALL);
+    if (!gr.planet) {
+      const n = gr.units.filter(i => alive[i]).length;
+      let f = 0, q = -1; for (const i of gr.units) { const h = hurt[i]; if (h && h.n > q && alive[i]) { q = h.n; f = h.f; } }
+      let l = gx, r = gx + 128;
+      if (n > 0) r = Math.min(gx + 128, gx + Math.trunc(128 * clamp(f, 0, 1)));
+      if (r > l) { x.fillStyle = grayPat; x.fillRect(l, gy, r - l, 40); }
+    }
+    drawStars();
+  };
+  const roundLabel = (n) => { x.fillStyle = '#000'; x.fillRect(190, 254, 110, 18); text(cfmt('Round %d', n), 194, 256); };
+  x.fillStyle = '#000'; x.fillRect(0, 0, W, Hh);
+  drawStars();
+  P0.head.forEach((t, i) => text(t, 155, i ? 18 : 1));
+  [0, 1].forEach(ci => { if (owners[ci] != null) face(owners[ci], ci); });
+  [0, 1].forEach(ci => {
+    if (hidden[ci]) { const L = rs.battleLines || {}; text(L.noInfo || 'You have no information.', 145, 85); text(L.destroyed || 'You were destroyed immediately.', 145, 100); skip = true; }
+    else cols[ci].forEach(drawGroup);
+  });
+  const wait = (until) => new Promise(res => { const f = () => (stop || skip || performance.now() >= until ? res() : setTimeout(f, Math.min(TICK, until - performance.now()))); f(); });
+  const cellOf = (ev, shooter) => shooter ? (ev.si >= 0 ? where.get(ev.si) : planetAt[ev.a]) : (ev.p ? planetAt[b.planetOwner] : where.get(ev.ti));
+  const hsv = (h, v) => { h = (h % 65535) / 65535 * 6; const i = Math.floor(h), f = h - i, q = v * (1 - f), t = v * f; const [r, gg, bb] = [[v, t, 0], [q, v, 0], [0, v, t], [0, q, v], [t, 0, v], [v, 0, q]][i % 6]; return 'rgb(' + [r, gg, bb].map(u => Math.round(u * 255)).join(',') + ')'; };
+  const weaponsOf = (gr) => { if (gr.planet) { const pl = g.players[gr.o]; return (pl && pl.tech && pl.tech.weapons) || 1; } const u = b.start[gr.units[0]], d = H().getDesign(g, u.o, u.did); return d && d.W ? d.W : 1; };
+  async function laser(sg, tg) {
+    let x1 = colX[sg.ci], y1 = GY(sg.row) + 20, x2 = colX[tg.ci], y2 = GY(tg.row) + 20;
+    if (x2 > x1) { x1 += 129; x2 -= 1; } else { x2 += 129; x1 -= 1; }
+    const dx = Math.trunc((x2 - x1) / 5), dy = Math.trunc((y2 - y1) / 5);
+    const h0 = ((weaponsOf(sg) - 1) * 4000) % 65535, cols3 = [hsv(h0, 1), hsv(h0 + 7500, 45000 / 65535), hsv(h0 + 15000, 25000 / 65535)];
+    const snap = document.createElement('canvas'); snap.width = c.width; snap.height = c.height; snap.getContext('2d').drawImage(c, 0, 0);
+    const back = () => { x.save(); x.setTransform(1, 0, 0, 1, 0, 0); x.drawImage(snap, 0, 0); x.restore(); };
+    const seg = (h0_, v0, h1, v1) => { x.lineWidth = 1; for (const [o, ci] of [[0, 0], [1, 1], [-1, 1], [2, 2], [-2, 2]]) { x.strokeStyle = cols3[ci]; x.beginPath(); x.moveTo(h0_ + 0.25, v0 + o + 0.25); x.lineTo(h1 + 0.25, v1 + o + 0.25); x.stroke(); } };
+    let h = x1, v = y1;
+    for (let i = 0; i < 5 && !stop && !skip; i++) { const t0 = performance.now(); back(); seg(h, v, h + dx, v + dy); h += dx; v += dy; await wait(t0 + TICK); }
+    back();
+  }
+  async function explosion(tg, ev, until) {
+    const l = colX[tg.ci], tp = GY(tg.row), dm = ev.dm | 0;
+    if (ev.snd !== 3003) { const im = pic(12000 + (dm % 3)); if (im) x.drawImage(im, l + (dm % 111), tp + (dm % 23), 17, 17); return; }
+    if (!VB.full) return;
+    const oval = (sz, style, lw) => { const r = { l: l + sz, r: l + 128 - sz, t: tp + Math.trunc(40 * sz / 128), b: tp + 40 - Math.trunc(40 * sz / 128) }; if (r.r <= r.l || r.b <= r.t) return; x.strokeStyle = style; x.lineWidth = lw || 1; x.beginPath(); x.ellipse((r.l + r.r) / 2, (r.t + r.b) / 2, (r.r - r.l - 1) / 2, (r.b - r.t - 1) / 2, 0, 0, Math.PI * 2); x.stroke(); };
+    for (let sz = 63; sz > 0 && !stop && !skip; sz--) { oval(sz, hsv((63 - sz) * 175, 1)); if (sz % 2 === 0 && performance.now() < until) await wait(performance.now() + TICK); }
+    for (let sz = 1; sz < 64 && !stop && !skip; sz++) { oval(sz, '#000', 2); if (sz % 2 === 0 && performance.now() < until) await wait(performance.now() + TICK); }
+  }
+  const apply = (ev) => { if (ev.p) { if (ev.php != null) pop = ev.php / 1000; } else { if (ev.f != null) hurt[ev.ti] = { n: ++seq, f: ev.f }; if (ev.k) alive[ev.ti] = false; } };
+  const finish = () => {
+    if (stop) return;
+    for (const r of b.rounds) for (const ev of r) apply(ev);
+    pop = fPop; done = true;
+    [0, 1].forEach(ci => { if (!hidden[ci]) cols[ci].forEach(drawGroup); });
+    [0, 1].forEach(ci => {
+      const o = owners[ci]; if (o == null) return;
+      const left = b.start.some((u, i) => alive[i] && u.o === o) || (b.planetOwner === o && pop > 0.0005);
+      if (!left) { const h = colX[ci]; x.strokeStyle = '#f00'; x.lineWidth = 2; x.beginPath(); x.moveTo(h + 1, 3); x.lineTo(h + 33, 35); x.moveTo(h + 1, 35); x.lineTo(h + 33, 3); x.stroke(); }
+    });
+    const P = rs.battlePanel(g, b, { alive, hurt, pop, over: true, won }, ME);
+    (P.end || []).forEach((t, i) => text(t, 155, i ? 147 : 130));
+    const im = pic(won ? 3000 : 3010); if (im) x.drawImage(im, 185, 164, 74, 74);
+    btn.textContent = 'Done';
+  };
+  (async () => {
+    let deadline = performance.now() + speed * TICK;
+    for (let r = 0; r < b.rounds.length && !stop && !skip; r++) {
+      roundLabel(r + 1);
+      const R = b.rounds[r];
+      for (let e = 0; e < R.length && !stop && !skip;) {
+        let n = 1;
+        if (!VB.full) while (R[e + n] && R[e + n].si === R[e].si && R[e + n].a === R[e].a && !R[e + n - 1].k) n++;
+        for (let j = 0; j < n - 1; j++) apply(R[e + j]);
+        const ev = R[e + n - 1], sg = cellOf(ev, true), tg = cellOf(ev, false);
+        if (sg && tg && !hidden[tg.ci] && !hidden[sg.ci]) {
+          await laser(sg, tg); if (stop || skip) break;
+          a.Sound.play(k.shotSnd(ev, 3000)); apply(ev); drawGroup(tg);
+          deadline += speed * TICK; await explosion(tg, ev, deadline); await wait(deadline);
+        } else apply(ev);
+        e += n;
+      }
+      if (b.popR && b.popR[r] != null) pop = b.popR[r];
+    }
+    finish();
+  })();
+}
+// (a getter: the classic page uses any T.battleWindow it finds, so it exists only while the window layout is on and the ruleset has the words)
+Object.defineProperty(T, 'battleWindow', { configurable: true, get: () => (W95ON() && H().rules(A().G).battlePanel ? battleWindow95 : undefined) });
+
 // ---------- the caption bar ----------
 // The window's own: the program's icon, the title (#title, written by the classic page), and the minimise, maximise and
 // close boxes (drawn only: the remake has no window to shrink).
