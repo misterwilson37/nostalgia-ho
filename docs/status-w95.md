@@ -35,7 +35,7 @@ So, as with 3.0.1, the main screen is rebuilt first, then the windows from the m
 |---|------|-------|------|
 | 0 | Ground truth: crops, `shots.tsv`, a side-by-side tool (`tools/skins/w95-compare.js`: our screen beside the crop) | all | done 18 Nov |
 | 1 | Main screen frame: caption, menu bar, pane arrangement at 640 x 480, scaled like `setMacScale` | 007-031 | done 18 Nov: `js/skins/w95/screen.js` (scale `--w95`, `html.w95win`/`w95scale`; the menus as the captures word them, Ctrl+ keys; the caption bar `#w95cap` holding `#title`); CSS at the end of `js/skins/w95/style.css`. The caption's icon is left blank (the program's RT_ICON isn't extracted yet). |
-| 2 | Star pane (picture, name, stats) and the fleet list above the money | 007-073 | |
+| 2 | Star pane (picture, name, stats) and the fleet list above the money | 007-073 | done 18 Nov (screen.js `starPane`, `gaugeOf`, `drawPlanet`, `fleetPanes`): words from the string table (711-721, 1336-1365), places from shots 010/052/287/315 and FUN_0048eb07 / FUN_0048fe0f (row 1 at y 1, row 2 at 11; x 3, 70, 125); the turning planet from FUN_00492ccb (56 x 56 oval at (156, 10), texture 6100-6130 wrapping every 167 px, caps 6150/6151 at 6 + d/107, night side over 224 steps); the terraform / mine gauge (FUN_0048f855, bitmap 1410, thumb at 1 + 58 x share) only while both are unfinished. Left: the night side is drawn as 3.0.1's (75% black), the program makes a darker copy of the texture in code (this+0x23c, not read); the timer's rate is 3.0.1's six a second, not read from the Windows code; the list box's scroll bar shows only where the browser draws one; the gauge thumb is a plain raised box (its bitmap, this+0x2cc, not identified). |
 | 3 | Money pane and budget bars (Metal, Earnings, Net Income, the four bars) | 007-073 | |
 | 4 | Players list and the map (stars, names, fleets, paths, drag line, selection, End Turn clock) | 007-073, 287-310 | |
 | 5 | Report windows and bubbles ("Click here to make the message go away", the Year windows) | 008-031, 087-091, 293-310 | |
@@ -54,7 +54,7 @@ Units 1-4 are the big ones (one session might do two). 6-9 are quicker. 10 is lo
 
 ## Next
 
-Unit 2. (Unit 0's dialog table was dropped: the Windows dialogs are already listed in `docs/405-windows.md`, "Windows 95: SPACEHO.EXE"; each unit maps its windows to them.)
+Unit 3. (Unit 0's dialog table was dropped: the Windows dialogs are already listed in `docs/405-windows.md`, "Windows 95: SPACEHO.EXE"; each unit maps its windows to them.)
 
 To compare: serve the repo (`python3 -m http.server 8765 --bind 127.0.0.1` from the repo, in the background), then
 `OUT=<folder> node tools/skins/w95-compare.js 010,052 '<js to run first>'` writes `w95-side-NNN.png` (ours left, the capture right).
@@ -64,6 +64,11 @@ To compare: serve the repo (`python3 -m http.server 8765 --bind 127.0.0.1` from 
 - The 405 ruleset starts a game with $25,000 savings and 5,000 metal; Jake's Windows game (shot 010) starts with $100,000 and
   20,000 (Income $51,000, Pop 750,000). Check the New Game options and `js/rules-405.js` / `rules-mac405.js` against the
   Windows code before changing anything (rules files are shared).
+- The 405 ruleset starts a player with no fleets; Jake's game starts with two scouts (Rudolph) and a colony ship (Hardy) at home (shot 010).
+- The 405 ruleset has no `rs.fleetDesc`, so reports and every skin write "one Scout"; 4.0.5 writes "one Rudolph (1/1) Scout",
+  "32 Storm (8/8) Fighters" (as `fleetDesc301`). The w95 skin words its own fleet rows meanwhile (screen.js `fleetRow`).
+- Its starting designs are named Weasel, Santa Maria...; the Windows program's are Rudolph (scout), Hardy (colony ship), Chevron
+  (tanker), Talon (fighter), Apple (satellite) (shots 041, 053).
 
 ## Open questions
 

@@ -98,3 +98,26 @@ html.w95win #mapwrap { order: 1; }
 html.w95win body { overflow: hidden; }
 html.w95win #mapwrap { background: #000; }
 html.w95scale #app { zoom: var(--w95); height: calc(100% / var(--w95)); }
+/* the panes (screen.js, unit 2): absolutely placed words in the program's font, MS Sans Serif 8 (Arial where it is missing) */
+html.w95win #panel .w95pane { position: relative; margin: 0; padding: 0; border: 0; border-radius: 0; box-shadow: none; overflow: hidden;
+  font: 11px/13px "MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif; color: #000; background: #c0c0c0; }
+html.w95win #panel .w95pane > span { position: absolute; white-space: nowrap; }
+html.w95win #panel .w95star { height: 85px; }
+html.w95win #panel .w95star .nm { left: 0; width: 84px; top: 0; text-align: center; font: bold 13px/15px "MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif; }
+html.w95win #panel .w95star .lb { right: calc(249px - 44px); text-align: right; }
+html.w95win #panel .w95star .vl { left: 47px; }
+html.w95win #panel .w95star .noinfo { left: 3px; top: 15px; }
+html.w95win #panel .w95star canvas.pic { position: absolute; top: 0; height: 85px; image-rendering: pixelated; }
+html.w95win #panel .w95star .gauge { position: absolute; left: 118px; top: 0; width: 10px; height: 85px; background: #c0c0c0; touch-action: none; cursor: ns-resize; }
+html.w95win #panel .w95star .gauge canvas { display: block; width: 10px; height: 67px; image-rendering: pixelated; }
+html.w95win #panel .w95star .gauge i { position: absolute; left: 1px; width: 8px; height: 6px; box-sizing: border-box; background: #c0c0c0; box-shadow: inset -1px -1px 0 #000, inset 1px 1px 0 #fff; }
+/* the rules between the panes (the captures: grey at 128, black at 129-130; 154 black; 221 grey, 222-223 black) */
+html.w95win #panel .w95star { border-bottom: 1px solid #c0c0c0; box-shadow: 0 1px 0 #c0c0c0; }
+html.w95win #panel .w95fhead { height: 23px; border-top: 2px solid #000; margin-top: 1px; }
+html.w95win #panel .w95fhead > span { line-height: 10px; }
+html.w95win #panel .w95flist { height: 66px; border-top: 1px solid #000; background: #fff; overflow-y: scroll; display: flex; flex-direction: column; }
+html.w95win #panel .w95flist .row { position: static; display: block; flex: none; height: 13px; padding-left: 4px; cursor: default; }
+html.w95win #panel .w95flist .row.sel { background: #000; color: #fff; }
+html.w95win #panel .w95flist .row.new { font-style: italic; }
+html.w95win #panel .w95flist .row.go { font-weight: bold; }
+html.w95win #panel .w95flist::-webkit-scrollbar-button:single-button { width: 16px; height: 16px; }
