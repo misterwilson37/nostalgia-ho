@@ -305,7 +305,7 @@ const zooms = () => { const g = A() && A().G; return g && g.opts && g.opts.moder
 const zoomIdx = (sc) => { const Z = zooms(); let b = 0; Z.forEach((z, i) => { if (Math.abs(Math.log(z / sc)) < Math.abs(Math.log(Z[b] / sc))) b = i; }); return b; };
 const BAR = 16, MARGIN = 2; // the scroll bars' width; cells of black round the galaxy
 const SB = { h: null, v: null };
-function mapBox() { const a = A(), m = a && a.map(); return m ? [m.w - BAR, m.h - BAR] : [0, 0]; }
+function mapBox() { const a = A(), m = a && a.map(); return m ? [m.w, m.h] : [0, 0]; } // (the page's mapW / mapH: program pixels, the scroll bars already left out by T.mapInset)
 function limits(v, g, w, h) { // the view's ox, oy between these keep the galaxy (and MARGIN cells round it) in reach
   const m = MARGIN * v.s, gw = g.W * v.s + 2 * m, gh = g.H * v.s + 2 * m;
   const x = gw <= w ? [(w - g.W * v.s) / 2, (w - g.W * v.s) / 2] : [w - g.W * v.s - m, m];
@@ -320,15 +320,17 @@ T.zoomTo = (s0, f) => {
 T.fitView = (v, c) => {
   if (!W95ON()) { if (prevFit) prevFit(v, c); return; }
   const st = c.G.stars[c.sel != null ? c.sel : c.G.players[c.ME].homeStar]; v.s = ZOOMS[3];
-  const w = c.mapW - BAR, h = c.mapH - BAR; if (st) { v.ox = w / 2 - st.x * v.s; v.oy = h / 2 - st.y * v.s; }
+  const w = c.mapW, h = c.mapH; if (st) { v.ox = w / 2 - st.x * v.s; v.oy = h / 2 - st.y * v.s; }
   const L = limits(v, c.G, w, h); v.ox = Math.max(L.x[0], Math.min(L.x[1], v.ox)); v.oy = Math.max(L.y[0], Math.min(L.y[1], v.oy));
 };
 T.clampView = (v, c) => {
   if (!W95ON()) { if (prevClamp) prevClamp(v, c); return; }
-  const L = limits(v, c.G, c.mapW - BAR, c.mapH - BAR); v.ox = Math.max(L.x[0], Math.min(L.x[1], v.ox)); v.oy = Math.max(L.y[0], Math.min(L.y[1], v.oy));
+  const L = limits(v, c.G, c.mapW, c.mapH); v.ox = Math.max(L.x[0], Math.min(L.x[1], v.ox)); v.oy = Math.max(L.y[0], Math.min(L.y[1], v.oy));
 };
-T.mapInset = () => (W95ON() ? [BAR * (W95.s || 1), BAR * (W95.s || 1)] : [0, 0]);
-T.mapPixel = () => (W95ON() && W95.s > 1 ? [W95.s, W95.s] : null);
+// (on whenever the window layout is, game or not: the page measures the map before a game starts)
+const W95LAY = () => de.classList.contains('w95win');
+T.mapInset = () => (W95LAY() ? [BAR * (W95.s || 1), BAR * (W95.s || 1)] : [0, 0]);
+T.mapPixel = () => (W95LAY() && W95.s > 1 ? [W95.s, W95.s] : null);
 T.mapBg = '#000';
 T.mapNames = (sc) => (W95ON() ? zoomIdx(sc) > 0 : sc > 18);
 T.mapNameStyle = (cx) => { if (W95ON()) { cx.fillStyle = '#fff'; cx.font = '11px "MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif'; } };
@@ -338,7 +340,7 @@ function scrollBar(vertical) {
   const b = document.createElement('div'); b.className = 'w95sb ' + (vertical ? 'v' : 'h'); b.setAttribute('aria-hidden', 'true');
   b.innerHTML = '<i class="ar a0"></i><i class="tr"><i class="th"></i></i><i class="ar a1"></i>';
   const step = (d, page) => { const a = A(), v = a.UI.view, [w, h] = mapBox(); const n = page ? (vertical ? h : w) * 0.9 : v.s;
-    if (vertical) v.oy -= d * n; else v.ox -= d * n; T.clampView(v, { G: a.G, mapW: w + BAR, mapH: h + BAR }); a.draw(); };
+    if (vertical) v.oy -= d * n; else v.ox -= d * n; T.clampView(v, { G: a.G, mapW: w, mapH: h }); a.draw(); };
   b.querySelector('.a0').addEventListener('pointerdown', (e) => { e.preventDefault(); step(-1); });
   b.querySelector('.a1').addEventListener('pointerdown', (e) => { e.preventDefault(); step(1); });
   const tr = b.querySelector('.tr'), th = b.querySelector('.th');
@@ -346,7 +348,7 @@ function scrollBar(vertical) {
   th.addEventListener('pointerdown', (e) => {
     e.preventDefault(); e.stopPropagation(); const a = A(), v = a.UI.view, [w, h] = mapBox(), L = limits(v, a.G, w, h), R = tr.getBoundingClientRect(), T0 = th.getBoundingClientRect();
     const span0 = (vertical ? R.height - T0.height : R.width - T0.width) || 1, lim = vertical ? L.y : L.x, p0 = vertical ? e.clientY : e.clientX, o0 = vertical ? v.oy : v.ox;
-    const mv = (ev) => { const d = ((vertical ? ev.clientY : ev.clientX) - p0) / span0 * (lim[1] - lim[0]); if (vertical) v.oy = o0 - d; else v.ox = o0 - d; T.clampView(v, { G: a.G, mapW: w + BAR, mapH: h + BAR }); a.draw(); };
+    const mv = (ev) => { const d = ((vertical ? ev.clientY : ev.clientX) - p0) / span0 * (lim[1] - lim[0]); if (vertical) v.oy = o0 - d; else v.ox = o0 - d; T.clampView(v, { G: a.G, mapW: w, mapH: h }); a.draw(); };
     const up = () => { window.removeEventListener('pointermove', mv); window.removeEventListener('pointerup', up); };
     window.addEventListener('pointermove', mv); window.addEventListener('pointerup', up);
   });
