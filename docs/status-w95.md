@@ -97,8 +97,11 @@ Units 1-4 are the big ones (one session might do two). 6-9 are quicker. 10 is lo
    players' at its top left; none at zoom 6; no frame for the selected fleet (shot 054). The classic page's row of markers with its
    yellow box is replaced in w95 by `markerAt95` (T.markerAt, a getter on while the window layout is); the other fleets at the star
    stay pickable where the dot is.
-10. The remake's own commands sit at the end of Help; everywhere else they are the "Ho!" menu. Jake suggests the window icon at the
-    top left (the system menu's place) opens them.
+10. ~~The Ho! menu's items at the end of Help~~: done. The window's icon at the caption's left (where Windows 95 opens a window's own
+    menu) now opens the Ho! menu (About this version, Account, Skin and OS look, Sounds, Language, Temperatures, Modern conveniences,
+    Full Hoedown, Suggestion box): `T.hoIntoLast` is false, and style.css lays the Ho! button, unseen, over the icon. The remake's other
+    commands without a place in 4.0.5's menus (New game, Auto-play this turn, Account saves, Import, Quit to title, ...) stay at the end
+    of Help.
 
 ## Next
 

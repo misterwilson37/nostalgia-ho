@@ -105,7 +105,9 @@ T.menus = (menus) => {
   for (const it of menus.View || []) if (typeof it[0] === 'function') { let t = ''; try { t = it[0](); } catch (e) {} if (/sound/i.test(t)) { it[0] = lab('Sound'); it[3] = () => !!(window.HOAPI && HOAPI.Sound.on); } }
 };
 T.keyName = (k) => (/^Alt/.test(k) ? k : 'Ctrl+' + k);
-T.hoIntoLast = () => true;
+// (the remake's own commands: no longer at the end of Help; the Ho! menu is opened from the window's icon at the caption's left, where
+// Windows 95 keeps a window's own menu: Jake 18 Nov. style.css puts the Ho! button over the icon)
+T.hoIntoLast = () => false;
 // (the menu's name as one text, so that the page's languages can swap it; its first letter underlined by the CSS, as Windows marks its key)
 T.menuName = (name) => TL(name);
 

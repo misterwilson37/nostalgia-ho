@@ -84,7 +84,13 @@ html.w95win #w95cap .w95boxes i.cl { margin-left: 2px; background-image: url("da
 html.w95win #w95cap .w95boxes i.mn { background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='6' height='2'><path d='M0 0h6v2H0z'/></svg>"); background-position: 4px 8px; }
 html.w95win #w95cap .w95boxes i.mx { background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='9' height='9'><path fill-rule='evenodd' d='M0 0h9v9H0zM1 2v6h7V2z'/></svg>"); }
 html.w95win #menubar { height: 20px; padding: 0; gap: 0; background: #c0c0c0; border: 0; box-shadow: none; }
-html.w95win #menubar .menu:has(> .logo) { display: none; }
+/* the Ho! menu (the remake's own commands) opens from the caption's icon (#w95cap .w95icon, 18 above the menu bar), as Windows 95's
+   window menu does: its button lies, unseen, over the icon; the menu drops below it, over the menu bar (Jake, 18 Nov) */
+html.w95win #menubar { position: relative; overflow: visible; }
+html.w95win #menubar .menu:has(> .logo) { position: absolute; left: 2px; top: -18px; width: 16px; height: 18px; z-index: 40; }
+html.w95win #menubar .menu > .mbtn.logo { display: block; width: 16px; height: 18px; padding: 0; margin: 0; border: 0; background: transparent; color: transparent; font-size: 0; min-width: 0; box-shadow: none; cursor: default; }
+html.w95win #menubar .menu > .mbtn.logo[aria-expanded=true] { background: transparent; color: transparent; }
+html.w95win #menubar .menu:has(> .logo) > .dropdown { left: -2px; top: 18px; }
 html.w95win #menubar .mbtn { font: 11px "MS Sans Serif", "Microsoft Sans Serif", Tahoma, Arial, sans-serif; color: #000; padding: 0 6px; height: 18px; line-height: 18px; background: none; border: 0; }
 html.w95win #menubar .mbtn[aria-expanded=true] { background: #000080; color: #fff; }
 html.w95win #menubar .dropdown { font: 11px "MS Sans Serif", "Microsoft Sans Serif", Tahoma, Arial, sans-serif; padding: 2px; min-width: 0; border-radius: 0; }
