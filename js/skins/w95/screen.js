@@ -121,6 +121,8 @@ function starPane() {
   pic.dataset.star = String(s.id); pic.dataset.k = String(K); pic.dataset.left = String(L);
   box.append(pic);
   if (gauge) box.append(gauge);
+  // (a click on the pane, but on the gauge, opens Planet Info: FUN_0048b262)
+  box.addEventListener('click', (e) => { if (e.target.closest('.gauge')) return; planetInfoDialog(s.id); });
   { PLANET.star = s.id; drawPlanet(pic, false); if (!PLANET.timer) PLANET.timer = setInterval(planetTick, PLANET_MS); }
   return box;
 }
@@ -888,6 +890,36 @@ function organizeDialog(sid, did0) {
   dl.by[2].addEventListener('click', () => a.closeModal());
   dl.by[1069].addEventListener('click', () => { apply(); a.closeModal(); const k = dids.indexOf(did); organizeDialog(sid, dids[(k + 1) % dids.length]); });
   draw(); showDlg(dl, 'Organize Ships');
+}
+
+// Planet Info (dialog 349, shot 291; FUN_0041e140 fills it, FUN_0041e5b1 draws the picture): a click on the star pane (but on the gauge,
+// FUN_0048b262) opens it. The landscape by the planet's warmth against your home's, in tenths of a degree: 1501 and up 1300, 751 up 1301,
+// 1 up 1302, -749 up 1303, -1499 up 1304, else 1305 (drawn from 2 pixels in); Gravity, Temperature, Metal and Owner ("you", the owner or
+// "No One") under it; at the right Planet Info For:, Info Date: (the year, "Never Explored."), Population:, Battle Date: ("No battles."),
+// Ships Built This Turn:, Income:; "unknown" for what you don't know.
+function planetInfoDialog(sid) {
+  const a = A(), g = a.G, p = a.me(), s = g.stars[sid]; if (!s) return;
+  const dl = W95DLG(349); if (!dl) return;
+  const yours = s.owner === a.ME, k = yours ? { explored: true, owner: a.ME, g: s.g, t: s.t, metal: s.metal, seen: g.turn } : H().know(g, p, sid);
+  const set = (id, t) => { if (dl.by[id]) dl.by[id].textContent = t; };
+  ['1082', '1083', '1084', '1085', '1088', '1091'].forEach(id => set(+id, 'unknown'));
+  set(1086, s.name); set(1087, 'Never Explored.'); set(1089, 'No battles.'); set(1090, '');
+  if (k && k.explored) {
+    const t10 = Math.round(10 * (72 + (k.t - p.homeT))), gr = Math.trunc(100 * k.g / Math.max(0.01, p.homeG));
+    set(1082, cfmt('%d.%2.2dG', Math.trunc(gr / 100), gr % 100)); set(1083, cfmt('%d.%1.1d°F', Math.trunc(t10 / 10), Math.abs(t10 % 10))); set(1084, H().niceNum(Math.max(0, Math.round(k.metal || 0))));
+    set(1087, String(yours ? g.year : g.year - 10 * Math.max(0, g.turn - (k.seen != null ? k.seen : g.turn))));
+    if (k.owner < 0) { set(1085, 'No One'); set(1088, ''); set(1091, ''); }
+    else if (k.owner === a.ME) {
+      set(1085, 'you'); set(1088, H().niceNum(H().popNum(g, s.pop))); set(1091, '$' + H().niceNum(Math.round(H().planetIncome(g, p, s))));
+      set(1090, String((p.spentThisTurn || []).filter(e => e.sid === sid).length));
+    } else set(1085, g.players[k.owner] ? g.players[k.owner].name : 'unknown');
+    const d10 = Math.round(10 * (k.t - p.homeT)), n = d10 >= 1501 ? 0 : d10 >= 751 ? 1 : d10 >= 1 ? 2 : d10 >= -749 ? 3 : d10 >= -1499 ? 4 : 5;
+    const im = a.IMG['w95:b' + (1300 + n)], pc = dl.by[1081];
+    if (im && im.src && pc) { pc.style.background = `url("${im.src}") -2px 0 no-repeat`; pc.style.imageRendering = 'pixelated'; }
+  }
+  const bs = a.lastBattles(sid); if (bs.length) set(1089, String(bs[bs.length - 1].year));
+  dl.by[1].addEventListener('click', () => a.closeModal());
+  showDlg(dl, 'Planet Info');
 }
 const prevWindow = T.window;
 T.window = (name, ...args) => {
