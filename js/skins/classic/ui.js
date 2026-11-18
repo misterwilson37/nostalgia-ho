@@ -2032,6 +2032,8 @@ function renderMsg0() {
     else if (sysBeep && !(sound && A.snd[sound])) beep();
     else if (sound) Sound.play(sound);
     if (prefReview() && m.battle && !m._reviewed) { m._reviewed = true; setTimeout(() => openBattle(m.battle), 50); }
+    // (rs.radicalHand.announce, 4.0.5: the radical card window opens as its report is announced, FUN_00470dec case 0x461)
+    { const RH = HO.rules(G).radicalHand; if (RH && RH.announce && radicalReport(m) && !m._radical && !G.over && RH.cards(G, me()).length >= (RH.full || 1)) { m._radical = true; setTimeout(openRadicalHand, 50); } }
     const card = el('div', { class: 'card', tabindex: 0, role: 'button', 'aria-label': 'Next message' });
     const big = m.big || (m.jpg != null ? 'jpg' : null);
     if (m.jpg != null) card.append(el('img', { class: 'jpg', src: A.jpg[m.jpg], alt: '' }));
@@ -4905,6 +4907,7 @@ function reportAction(m) {
   if (winReport(m) && youWonWords()) { openYouWon(); return; }
   if (lostReport(m)) { openYouLost(); return; }
   if (m.battle) { openBattle(m.battle); return; }
+  if (radicalReport(m) && (HO.rules(G).radicalHand || {}).announce && !G.over) { openRadicalHand(); return; } // (4.0.5's FUN_00470dec case 0x461: a click on the report opens the radical window)
   if (m.star != null) { UI.sel = m.star; centerOn(m.star); renderPanel(); draw(); }
 }
 function openReports() {

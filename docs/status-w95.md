@@ -60,7 +60,11 @@ Units 1-4 are the big ones (one session might do two). 6-9 are quicker. 10 is lo
    kills between them as `q` events), so a kill gets FUN_00428118's ovals; the w95 window counts `q` kills, gives a kill the time
    again (+0x90) and redraws the group after. The game is the same (digest without the shot lists equal, patched and not); with them
    405 is now a2373d0f6c4bd7b4, mac405 aa5282296ab6c4da.
-2. The Radical Research report came up, but no window to pick a project.
+2. ~~The Radical Research report came up, but no window to pick a project.~~ Done: FUN_00470dec's case 0x461 (report 1121, "Your
+   radical researchers are hard at work on another discovery!") calls FUN_00471587 with no test of the click flag, so the window
+   opens as the report is announced (with four programs in the hand; fewer, nothing) and when the report is clicked in Report
+   Messages. `rs.radicalHand.announce` (405, so Mac 4.0.5 too), the classic card and `reportAction`. Checked in w95: dialog 348
+   with the four programs, 2010.
 3. Build window: the money and metal left don't go down as ships are queued; only after OK (no way to see the cost first).
 4. Second turn: End Turn's clock shrank to nothing while the report bubbles were up; back when they went.
 5. A ship with range 6 dragged to a star 9 away: the line says it can go, and it routes around, but the path isn't shown.

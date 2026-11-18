@@ -2630,8 +2630,10 @@ E.registerRules('405', Object.assign({}, D, {
   // clicked, nothing is. (A timed network game's deadline, a short at +0x82
   // / +0x52 of the game's settings, replaces the 5 minutes there; the remake
   // keeps the 5 minutes: its turn clock ends the turn first.)
+  // CONFIRMED (FUN_00470dec, case 0x461, the report 1121 above): FUN_00471587 is called with no test of param_3, so the window opens
+  // when the report is announced as well as when it is clicked (the cases around it act only on a click, param_3 != 0)
   radicalHand: {
-    full: 4, timeout: 300,
+    full: 4, timeout: 300, announce: true,
     cards: (G, p) => RADICAL.map((k, i) => i).filter(i => p.hand405 & (1 << i)).map(i => ({ id: i, text: RADICAL_TEXT[i] })),
     discard(G, p, id) { p.hand405 &= ~(1 << id); },
     words: { title: '', prompt: 'You can cancel one research program:', ok: 'OK', pic: 'm9010' },
