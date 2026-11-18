@@ -169,6 +169,7 @@ function texFor(s, p) {
 // the ice caps' white is see-through: the program loads each cap twice, a mask (all but white black) ANDed in and a copy with white made
 // black ORed over it (FUN_00492c58's loader, FUN_00492ccb's 0x8800c6 / 0xee0086 blits)
 const WCLR = new Map();
+const whiteURL = (im) => { const c = whiteClear(im); try { return c && c.toDataURL ? c.toDataURL() : im && im.src; } catch (e) { return im && im.src; } };
 function whiteClear(im) {
   if (!im || !im.width) return null; if (WCLR.has(im)) return WCLR.get(im);
   const c = document.createElement('canvas'); c.width = im.width; c.height = im.height; const x = c.getContext('2d'); x.drawImage(im, 0, 0);
@@ -1012,7 +1013,7 @@ function aboutDialog() {
   const a = A(), dl = W95DLG(108); if (!dl) { a.openAbout(); return; }
   const gb = dl.by[1007], im = a.IMG['w95:b316'];
   if (gb && im && im.src) { gb.style.background = `#fff url("${im.src}") center / 100% 100% no-repeat`; gb.style.border = '0'; gb.style.imageRendering = 'pixelated'; }
-  const lg = dl.by[1174], li = a.IMG['w95:b383']; if (lg && li && li.src) { lg.style.background = `url("${edgeURL(li)}") left top / 80px 121px no-repeat`; lg.style.overflow = 'visible'; lg.style.width = '80px'; lg.style.height = '121px'; }
+  const lg = dl.by[1174], li = a.IMG['w95:b383']; if (lg && li && li.src) { lg.style.background = `url("${whiteURL(li)}") left top / 80px 121px no-repeat`; lg.style.overflow = 'visible'; lg.style.width = '80px'; lg.style.height = '121px'; }
   const L = licensee95(), lic = dl.by[1173];
   if (lic) { lic.innerHTML = ''; lic.classList.add('lic');
     lic.append(span('ll', TL('Licensed to:')), span('lv', [L.name || 'Unknown', L.org || 'Unknown', 'Spaceward Ho! V4.0.5'].join('\n'))); }
@@ -1205,7 +1206,7 @@ const prevTitle = T.title;
 T.title = (frame, IMG, Sound) => {
   const r = prevTitle ? prevTitle(frame, IMG, Sound) : false;
   const lg = document.querySelector('#titlescreen .w95logo'), im = IMG && IMG['w95:b383'];
-  if (lg && im && im.src) lg.style.backgroundImage = `url("${edgeURL(im)}")`;
+  if (lg && im && im.src) lg.style.backgroundImage = `url("${whiteURL(im)}")`; // (all its white see-through: shot 001's globe shows the grey)
   return r;
 };
 
