@@ -1350,7 +1350,8 @@ const zoomOf = (v) => Math.round(v.s / 2);
 const prevPlanetPx = T.planetPx;
 T.planetPx = (sc) => { if (!W95ON()) return prevPlanetPx ? prevPlanetPx(sc) : Math.max(18, Math.min(52, sc * 0.9)); const z = Math.round(sc / 2); return (z >= 17 ? 32 : z >= 7 ? 16 : z) / 1.3; };
 T.selectScale = () => (W95ON() ? 0 : 1); // (the classic picture drawn at nothing: the ring is drawn below)
-const SEL = { f: 0 };
+const SEL = { f: 0 }, SKY = { off: [], seed: (g) => { const t = String(g.gameId || '') + g.W + 'x' + g.H; let h = 2166136261; for (const c of t) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return h >>> 0; } };
+Object.defineProperty(T, 'bgStars', { configurable: true, get: () => !W95ON() }); // (not the classic page's blue points)
 const pactLevel = (g, me, o) => {
   if (o == null || o < 0 || o === me) return 0;
   const p = g.players[me], q = g.players[o]; if (!p || !q) return 0;
@@ -1362,6 +1363,16 @@ T.mapUnder = (cx, i) => {
   if (prevMapUnder) prevMapUnder(cx, i);
   if (!W95ON()) return;
   const a = A(), sheet = a.IMG['w95:b175'], z = zoomOf(i.view);
+  // the sky (FUN_0048bd31): every star keeps a white point somewhere in the galaxy (its +0x2a / +0x2c cell), dark while its flag is
+  // set, the flag flipping with a 2% chance each tick; the second point's colour (7 or 9, near black) doesn't show. The remake puts the
+  // points by the galaxy's seed and the star's number, so they keep their places as the map scrolls.
+  cx.fillStyle = '#fff';
+  i.G.stars.forEach((st, n) => {
+    let h = (SKY.seed(i.G) ^ Math.imul(n + 1, 2654435761)) >>> 0; const r = () => { h = (Math.imul(h ^ (h >>> 15), 2246822507) + 0x9e3779b9) >>> 0; return h / 4294967296; };
+    if (SKY.off[n]) return;
+    const x = Math.floor(i.sx(r() * i.G.W)), y = Math.floor(i.sy(r() * i.G.H));
+    if (x >= 0 && y >= 0 && x < i.mapW && y < i.mapH) cx.fillRect(x, y, 1, 1);
+  });
   if (!sheet || !sheet.width || z < 7) return;
   const big = z >= 17;
   for (const st of i.G.stars) {
@@ -1376,6 +1387,11 @@ T.mapUnder = (cx, i) => {
     cx.drawImage(sheet, sxy[0], sxy[1], w, h, Math.round(l), Math.round(t), w, h);
   }
 };
+setInterval(() => { // the sky's points flip (2% each a tick)
+  const a = A(); if (!W95ON() || document.visibilityState !== 'visible') return;
+  let ch = false; a.G.stars.forEach((st, n) => { if (Math.random() < 0.02) { SKY.off[n] = !SKY.off[n]; ch = true; } });
+  if (ch && a.UI.sel == null) a.draw();
+}, 500);
 setInterval(() => { const a = A(); if (!W95ON() || a.UI.sel == null || document.visibilityState !== 'visible' || zoomOf(a.UI.view) < 7) return; SEL.f = (SEL.f + 1) % 5; a.draw(); }, 500);
 
 // ---------- the caption bar ----------
