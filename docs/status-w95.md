@@ -53,6 +53,20 @@ words at run time ("Build/Design Ships... Ctrl+B", "Organize Ships...", "Zoom Ou
 
 Units 1-4 are the big ones (one session might do two). 6-9 are quicker. 10 is long but mechanical.
 
+## Jake's play-test (18 Nov, evening; live `main` a0d88e0, Firefox, Retina MacBook Air), to do in order of what blocks play
+1. A battle didn't open unless he pressed Review Battle; a destroyed ship had no explosion.
+2. The Radical Research report came up, but no window to pick a project.
+3. Build window: the money and metal left don't go down as ships are queued; only after OK (no way to see the cost first).
+4. Second turn: End Turn's clock shrank to nothing while the report bubbles were up; back when they went.
+5. A ship with range 6 dragged to a star 9 away: the line says it can go, and it routes around, but the path isn't shown.
+6. Abandon Planet: no way to find it (the Window/Planet menus; the 405 ruleset hides it, unit 6's "Left").
+7. The floating windows' captions stay grey (inactive) while dragged; Windows 95 shows the dragged one active (blue).
+8. Turn 1: Tech Spending floats over the map at its Clean Up place; from turn 2 it sits at the bottom left, and before that the
+   bottom left is an empty grey area. Check against the captures where 4.0.5 opens it.
+9. The yellow box beside the selected star (shot: Nihal with two fleets' squares) looks wrong.
+10. The remake's own commands sit at the end of Help; everywhere else they are the "Ho!" menu. Jake suggests the window icon at the
+    top left (the system menu's place) opens them.
+
 ## Next
 
 All twelve units have had a pass. What is left, in order of value:
