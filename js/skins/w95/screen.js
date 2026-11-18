@@ -737,9 +737,88 @@ function autoPlayDialog() {
   });
   showDlg(dl, 'Auto Play Options');
 }
+
+// Build / Design Ships (dialog 176, shots 041, 053, 093; BuildDesignShips: FUN_0044d00c sets it up, FUN_00468f83 is its OK). At the left the
+// types you have (the owner-drawn list 1016: each type's picture with "Rudolph (1/1) Scout" under it, the one chosen on black); at the top
+// the chosen type's picture (1020), its name (1021) and class (1022), "Dev. Cost:", "Pro. Cost:", "Metal Cost:"; then Range, Speed,
+// Weapons, Shields and Mini, each "n/max" and its scroll bar (to your technology); a changed design is a new type, its name suggested. At
+// the right Savings and Metal with their piles (FUN_00450042: up to 36 coins of bitmap 311, 312 when in debt, in three stacks, one coin
+// for each 36th of five times your income, at least $250,000; FUN_00450681: bars of 313, one for each 2,778 metal), Built, In Service,
+// "# To Build:" with + and -; Build and Continue, Scap All (the template's spelling: marks the type for scrapping, "Don't Scrap" then),
+// Max Out (every bar to its limit), Cancel, OK. Ships are bought at OK or Build and Continue (engine buildShips), not before; Cancel
+// buys nothing and makes no type.
+function buildDialog(sid) {
+  const a = A(), g = a.G, p = a.me(), st = g.stars[sid]; if (!st || st.owner !== a.ME) return false;
+  if (H().feature(g, 'buildQueue')) return false; // (the DOS 2.0 queue: the classic window)
+  const dl = W95DLG(176); if (!dl) return false;
+  const types = ['scout', 'fighter', 'colony', 'satellite', 'tanker', 'dread', 'bio', 'decoy'].filter(t => H().canBuildType(g, p, t));
+  const K = ['R', 'V', 'W', 'S', 'M'], live = () => p.designs.filter(d => !d.scrapped && types.includes(d.type));
+  let spec = null, name = '';
+  const same = (d) => d.type === spec.type && d.R === spec.R && d.V === spec.V && d.W === spec.W && d.S === spec.S && d.M === spec.M;
+  const pickDesign = (d) => { spec = { type: d.type, R: d.R, V: d.V, W: d.W, S: d.S, M: d.M }; name = d.name; };
+  const clampSpec = () => { const L = H().designLimits(g, p, spec.type); for (const k of K) { const lo = H().designMin(g, k, spec.type), hi = Math.max(lo, L[k] || lo); spec[k] = Math.max(lo, Math.min(hi, spec[k] == null ? hi : spec[k])); } if (spec.type === 'satellite') spec.R = 0; };
+  const fresh = (type) => { spec = { type }; clampSpec(); const d = live().find(same); name = d ? d.name : H().designName(g, p, type); };
+  const L0 = live(); if (L0.length) pickDesign(L0[L0.length - 1]); else fresh(types[0]);
+  const lb = dl.by[1016], pic = dl.by[1020], nm = dl.by[1021], cb = dl.by[1022], n = dl.by[1043];
+  types.forEach(t => { const o = document.createElement('option'); o.value = t; o.textContent = H().TYPES[t].name; cb.append(o); });
+  n.value = '0'; n.inputMode = 'numeric';
+  const shipCanvas = (d, w, h) => { const c = document.createElement('canvas'); c.width = w; c.height = h; const im = T.shipPic ? T.shipPic(d, a.IMG) : null; if (im) { const sc = Math.min(1, w / im.width, h / im.height); c.getContext('2d').drawImage(im, (w - im.width * sc) / 2, (h - im.height * sc) / 2, im.width * sc, im.height * sc); } return c; };
+  const pile = (el, coin, count) => {
+    el.innerHTML = ''; const c = document.createElement('canvas'); c.width = 60; c.height = 52; el.append(c); const x = c.getContext('2d'), im = a.IMG['w95:b' + coin]; if (!im || !im.width) return;
+    const nAll = Math.min(36, count), n1 = Math.trunc(nAll / 2), n2 = Math.trunc(nAll / 3), n3 = nAll - n1 - n2, base = 52 - im.height - 9;
+    [[n1, 0, 0], [n2, 12, 3], [n3, 23, 6]].forEach(([k, dx, dy]) => { for (let i = 0; i < k; i++) x.drawImage(im, dx, base + dy - 2 * i); });
+  };
+  const inService = (did) => g.fleets.filter(f => f.owner === a.ME).reduce((t, f) => t + (f.ships[did] || 0), 0);
+  const label = (d) => `${d.name} (${d.W}/${d.S}) ${H().TYPES[d.type].name}`;
+  const draw = () => {
+    const ds = live(), cur = ds.find(same) || null;
+    lb.innerHTML = ''; lb.classList.add('blist');
+    ds.forEach(d => { const r = document.createElement('div'); r.className = 'br' + (cur && cur.id === d.id ? ' sel' : '') + (d.scrap301 ? ' scrap' : ''); r.setAttribute('role', 'option');
+      r.append(shipCanvas(d, 128, 40), span('bl', label(d))); r.addEventListener('click', () => { pickDesign(d); n.value = '0'; draw(); }); lb.append(r); });
+    { const sl = lb.querySelector('.br.sel'); if (sl) sl.scrollIntoView({ block: 'nearest' }); }
+    pic.innerHTML = ''; const pc = shipCanvas(Object.assign({ name }, spec), 98, 39); pc.style.background = '#000'; pic.append(pc); // (on black: shot 041)
+    if (document.activeElement !== nm) nm.value = cur ? cur.name : name; nm.disabled = !!cur;
+    cb.value = spec.type;
+    const c = H().designCost(g, spec);
+    dl.by[1026].textContent = a.money(c.proto || 0); dl.by[1027].textContent = a.money(c.money); dl.by[1028].textContent = a.fmt(c.metal);
+    const L = H().designLimits(g, p, spec.type);
+    K.forEach((k, i) => { const lo = H().designMin(g, k, spec.type), hi = Math.max(lo, L[k] || lo), bar = dl.by[1034 + i];
+      const sat = k === 'R' && spec.type === 'satellite';
+      dl.by[1029 + i].textContent = sat ? '0/0' : `${spec[k]}/${hi}`; bar.min = lo; bar.max = hi; bar.value = spec[k]; bar.disabled = sat || hi <= lo; });
+    dl.by[1039].textContent = a.fmt(Math.round(p.savings)); dl.by[1040].textContent = a.fmt(Math.round(p.metal));
+    const inc = Math.max(50000, Math.round(H().projected(g, p).income || 0)) * 5;
+    pile(dl.by[1047], p.savings < 0 ? 312 : 311, Math.trunc(Math.abs(p.savings) / Math.trunc((inc + 35) / 36)) + 1);
+    pile(dl.by[1048], 313, Math.trunc(Math.max(0, p.metal) / 2778) + 1);
+    dl.by[1041].textContent = cur ? String(cur.built || 0) : '0'; dl.by[1042].textContent = cur ? String(inService(cur.id)) : '0';
+    dl.by[1018].textContent = cur && cur.scrap301 ? "Don't Scrap" : 'Scrap All'; dl.by[1018].disabled = !cur;
+  };
+  K.forEach((k, i) => dl.by[1034 + i].addEventListener('input', (e) => { spec[k] = +e.target.value; const d = live().find(same); name = d ? d.name : (nm.disabled ? H().designName(g, p, spec.type) : nm.value || H().designName(g, p, spec.type)); draw(); }));
+  cb.addEventListener('change', () => { fresh(cb.value); n.value = '0'; draw(); });
+  nm.addEventListener('input', () => { name = nm.value.slice(0, 15); });
+  dl.by[1045].addEventListener('click', () => { n.value = String(Math.min(999, (+n.value || 0) + 1)); });
+  dl.by[1046].addEventListener('click', () => { n.value = String(Math.max(0, (+n.value || 0) - 1)); });
+  dl.by[1017].addEventListener('click', () => { const L = H().designLimits(g, p, spec.type); K.forEach(k => { spec[k] = L[k]; }); clampSpec(); const d = live().find(same); name = d ? d.name : H().designName(g, p, spec.type); draw(); });
+  dl.by[1018].addEventListener('click', () => { const d = live().find(same); if (!d) return; const rs = H().rules(g); if (rs.flagScrapDesign) rs.flagScrapDesign(g, p, d, 'command'); a.save(); a.renderPanel(); draw(); });
+  const buy = () => {
+    const want = Math.max(0, Math.trunc(+String(n.value).replace(/[^0-9]/g, '') || 0)); if (!want) return true;
+    let d = live().find(same);
+    if (!d) { const lim = H().rules(g).maxDesigns; if (lim && H().liveDesigns(p) >= lim) { a.toast(H().say(g, H().DATA.alerts[15] || 'Your assembly lines are full.')); return false; }
+      const sp = Object.assign({}, spec); if (name && name.trim()) sp.name = name.trim(); d = H().findOrCreateDesign(g, p, sp); }
+    if (d.scrap301) { a.toast(`${d.name} is marked for scrapping.`); return false; }
+    let made = 0; for (let i = 0; i < want; i++) { if (H().buildShips(g, a.ME, sid, d.id, 1)) made++; else break; }
+    if (made) a.Sound.play(7006);
+    if (made < want) a.toast(made ? `Built ${made} of ${want}: not enough money, metal or people.` : 'Not enough money or metal.');
+    n.value = '0'; a.save(); a.renderPanel(); a.draw(); return made === want;
+  };
+  dl.by[1205].addEventListener('click', () => { buy(); draw(); });
+  dl.by[1].addEventListener('click', () => { if (buy()) a.closeModal(); else draw(); });
+  dl.by[2].addEventListener('click', () => a.closeModal());
+  draw(); showDlg(dl, 'Build/Design Ships');
+  return true;
+}
 const prevWindow = T.window;
 T.window = (name, ...args) => {
-  if (W95ON()) { if (name === 'fleets') return fleetsDialog(); if (name === 'stars') return starsDialog(); if (name === 'surrender' && surrenderDialog()) return true; if (name === 'give') return giveDialog(); }
+  if (W95ON()) { if (name === 'fleets') return fleetsDialog(); if (name === 'stars') return starsDialog(); if (name === 'surrender' && surrenderDialog()) return true; if (name === 'give') return giveDialog(); if (name === 'build' && buildDialog(args[0])) return true; }
   return prevWindow ? prevWindow(name, ...args) : false;
 };
 

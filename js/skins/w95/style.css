@@ -306,3 +306,10 @@ html.w95win .w95dlg .sgrid .sc.gv.on { outline: 0; background: #000; color: #fff
 html.w95win .w95dlg label.ck { display: flex; align-items: center; gap: 3px; white-space: nowrap; }
 html.w95win .w95dlg input.sb { margin: 0; }
 html.w95win .w95dlg label.rb { display: flex; align-items: center; gap: 4px; white-space: nowrap; }
+/* Build / Design Ships (screen.js buildDialog; shot 041): the types' list, each its picture with its words under it, the chosen one black */
+html.w95win .w95dlg .lbx.blist .br { display: flex; flex-direction: column; align-items: center; padding: 2px 0 3px; cursor: default; }
+html.w95win .w95dlg .lbx.blist .br canvas { width: 128px; height: 40px; image-rendering: pixelated; }
+html.w95win .w95dlg .lbx.blist .br .bl { white-space: nowrap; }
+html.w95win .w95dlg .lbx.blist .br.sel { background: #000; color: #fff; }
+html.w95win .w95dlg .lbx.blist .br.scrap .bl { text-decoration: line-through; }
+html.w95win .w95dlg .od canvas { display: block; image-rendering: pixelated; }
