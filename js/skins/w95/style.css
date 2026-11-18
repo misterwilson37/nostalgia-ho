@@ -313,3 +313,14 @@ html.w95win .w95dlg .lbx.blist .br .bl { white-space: nowrap; }
 html.w95win .w95dlg .lbx.blist .br.sel { background: #000; color: #fff; }
 html.w95win .w95dlg .lbx.blist .br.scrap .bl { text-decoration: line-through; }
 html.w95win .w95dlg .od canvas { display: block; image-rendering: pixelated; }
+/* the dialogs' scroll bars (W95DLG): arrows at the ends, the dotted track, a raised thumb (shots 040, 041, 292) */
+html.w95win .w95dlg .sbw { display: flex; align-items: stretch; }
+html.w95win .w95dlg .sbw .sba { flex: none; width: 16px; box-sizing: border-box; background: #c0c0c0 center no-repeat; box-shadow: inset -1px -1px 0 #000, inset 1px 1px 0 #dfdfdf, inset -2px -2px 0 #808080, inset 2px 2px 0 #fff; }
+html.w95win .w95dlg .sbw .sba.l { background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='4' height='7'><path d='M4 0v7L0 3.5z'/></svg>"); }
+html.w95win .w95dlg .sbw .sba.r { background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='4' height='7'><path d='M0 0v7l4-3.5z'/></svg>"); }
+html.w95win .w95dlg .sbw input.sb { flex: 1 1 auto; height: auto; min-width: 0; margin: 0; border: 0; box-shadow: none; -webkit-appearance: none; appearance: none;
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='2' height='2'><path fill='%23c0c0c0' d='M0 0h1v1H0zM1 1h1v1H1z'/></svg>") 0 0 / 2px 2px, #fff; }
+html.w95win .w95dlg .sbw input.sb::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 17px; border: 0; background: #c0c0c0; box-shadow: inset -1px -1px 0 #000, inset 1px 1px 0 #dfdfdf, inset -2px -2px 0 #808080, inset 2px 2px 0 #fff; }
+html.w95win .w95dlg .sbw input.sb::-moz-range-thumb { width: 16px; height: 17px; border: 0; border-radius: 0; background: #c0c0c0; box-shadow: inset -1px -1px 0 #000, inset 1px 1px 0 #dfdfdf, inset -2px -2px 0 #808080, inset 2px 2px 0 #fff; }
+html.w95win .w95dlg .sbw input.sb:disabled { opacity: 1; }
+html.w95win .w95dlg .sbw input.sb:disabled::-webkit-slider-thumb { visibility: hidden; }

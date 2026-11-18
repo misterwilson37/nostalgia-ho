@@ -493,7 +493,11 @@ function W95DLG(id) {
     else if (/check box/.test(kind)) { e = document.createElement('label'); e.className = 'ck'; const i = document.createElement('input'); i.type = 'checkbox'; e.append(i, document.createTextNode(text)); }
     else if (/radio/.test(kind)) { e = document.createElement('label'); e.className = 'rb'; const i = document.createElement('input'); i.type = 'radio'; i.name = 'w95r' + id; e.append(i, document.createTextNode(text)); }
     else if (kind === 'group box') { e = document.createElement('fieldset'); e.className = 'gb'; if (text) { const lg = document.createElement('legend'); lg.textContent = text; e.append(lg); } }
-    else if (/scroll bar/.test(kind)) { e = document.createElement('input'); e.type = 'range'; e.className = 'sb'; }
+    else if (/scroll bar/.test(kind)) { // a Windows scroll bar: the arrows step it by one (the bar itself is the control the callers get)
+      const w = document.createElement('div'); w.className = 'sbw'; const r = document.createElement('input'); r.type = 'range'; r.className = 'sb';
+      const arrow = (cls, d) => { const b = document.createElement('i'); b.className = 'sba ' + cls; b.addEventListener('pointerdown', (ev) => { ev.preventDefault(); if (r.disabled) return; const v = Math.max(+r.min, Math.min(+r.max, (+r.value) + d)); if (v !== +r.value) { r.value = v; r.dispatchEvent(new Event('input', { bubbles: true })); } }); return b; };
+      w.append(arrow('l', -1), r, arrow('r', 1)); e = w; e.dataset.cid = String(cid);
+      e.style.left = l + 'px'; e.style.top = t + 'px'; e.style.width = ww + 'px'; e.style.height = hh + 'px'; root.append(e); if (cid !== 65535) by[cid] = r; continue; }
     else { e = document.createElement('div'); e.className = 'od'; }
     e.style.left = l + 'px'; e.style.top = t + 'px'; e.style.width = ww + 'px';
     if (kind !== 'COMBOBOX') e.style.height = hh + 'px';
@@ -764,7 +768,10 @@ function buildDialog(sid) {
   n.value = '0'; n.inputMode = 'numeric';
   const shipCanvas = (d, w, h) => { const c = document.createElement('canvas'); c.width = w; c.height = h; const im = T.shipPic ? T.shipPic(d, a.IMG) : null; if (im) { const sc = Math.min(1, w / im.width, h / im.height); c.getContext('2d').drawImage(im, (w - im.width * sc) / 2, (h - im.height * sc) / 2, im.width * sc, im.height * sc); } return c; };
   const pile = (el, coin, count) => {
-    el.innerHTML = ''; const c = document.createElement('canvas'); c.width = 60; c.height = 52; el.append(c); const x = c.getContext('2d'), im = a.IMG['w95:b' + coin]; if (!im || !im.width) return;
+    el.innerHTML = ''; const c = document.createElement('canvas'); c.width = 60; c.height = 52; el.append(c); const x = c.getContext('2d'), im0 = a.IMG['w95:b' + coin]; if (!im0 || !im0.width) return;
+    // (the program draws these through a mask; the extracted bitmaps have none, so their white is made see-through here)
+    const im = document.createElement('canvas'); im.width = im0.width; im.height = im0.height; const ix = im.getContext('2d'); ix.drawImage(im0, 0, 0);
+    try { const d = ix.getImageData(0, 0, im.width, im.height); for (let i = 0; i < d.data.length; i += 4) if (d.data[i] > 245 && d.data[i + 1] > 245 && d.data[i + 2] > 245) d.data[i + 3] = 0; ix.putImageData(d, 0, 0); } catch (e) {}
     const nAll = Math.min(36, count), n1 = Math.trunc(nAll / 2), n2 = Math.trunc(nAll / 3), n3 = nAll - n1 - n2, base = 52 - im.height - 9;
     [[n1, 0, 0], [n2, 12, 3], [n3, 23, 6]].forEach(([k, dx, dy]) => { for (let i = 0; i < k; i++) x.drawImage(im, dx, base + dy - 2 * i); });
   };
