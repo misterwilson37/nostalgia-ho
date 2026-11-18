@@ -97,7 +97,11 @@ html.w95win #panel { order: 0; padding: 0; border: 0; background: #c0c0c0; overf
 html.w95win #mapwrap { order: 1; }
 html.w95win body { overflow: hidden; }
 html.w95win #mapwrap { background: #000; }
-html.w95scale #app { zoom: var(--w95); height: calc(100% / var(--w95)); }
+/* made big (screen.js setW95Scale): the caption, menus, panes and windows zoomed by --w95, the map drawn S pixels a program pixel (T.mapPixel) */
+html.w95scale #main { grid-template-columns: calc(250px * var(--w95)) 1fr; }
+html.w95scale #w95cap, html.w95scale #menubar, html.w95scale #panel, html.w95scale #msg, html.w95scale .w95sb, html.w95scale .w95corner,
+html.w95scale .scrim > .win, html.w95scale .starmenu, html.w95scale .toast, html.w95scale .tip { zoom: var(--w95); }
+html.w95scale .scrim > .win { max-width: calc((100vw - 24px) / var(--w95)); max-height: calc((100vh - 34px) / var(--w95)); }
 /* the panes (screen.js, unit 2): absolutely placed words in the program's font, MS Sans Serif 8 (Arial where it is missing) */
 html.w95win #panel .w95pane { position: relative; margin: 0; padding: 0; border: 0; border-radius: 0; box-shadow: none; overflow: hidden;
   font: 11px/13px "MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif; color: #000; background: #c0c0c0; }
@@ -151,3 +155,21 @@ html.w95win #panel .w95bar.note .bval { display: block; position: static; margin
 html.w95win #panel .w95bar.sav { --bf: #ed6f2d; --be: #ea3323; --bl: #f19f9d; --bd: #5e330e; }
 html.w95win #panel .w95bar.tech { --bf: #ea33c9; --be: #ea33f7; --bl: #ed6fcb; --bd: #5c0e61; }
 html.w95win #panel .w95bar .fill { --bf: inherit; }
+/* unit 4: the map's scroll bars (screen.js scrollBar), the corner between them, and End Turn's clock at the map's top left (17, 15) */
+html.w95win .w95sb { position: absolute; z-index: 6; display: flex; background: #c0c0c0; }
+html.w95win .w95sb.h { left: 0; right: 16px; bottom: 0; height: 16px; flex-direction: row; }
+html.w95win .w95sb.v { top: 0; bottom: 16px; right: 0; width: 16px; flex-direction: column; }
+html.w95win .w95sb .ar { flex: none; width: 16px; height: 16px; box-sizing: border-box; background: #c0c0c0 center no-repeat;
+  box-shadow: inset -1px -1px 0 #000, inset 1px 1px 0 #dfdfdf, inset -2px -2px 0 #808080, inset 2px 2px 0 #fff; }
+html.w95win .w95sb .ar:active { box-shadow: inset 0 0 0 1px #808080; background-position: calc(50% + 1px) calc(50% + 1px); }
+html.w95win .w95sb.h .a0 { background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='4' height='7'><path d='M4 0v7L0 3.5z'/></svg>"); }
+html.w95win .w95sb.h .a1 { background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='4' height='7'><path d='M0 0v7l4-3.5z'/></svg>"); }
+html.w95win .w95sb.v .a0 { background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='7' height='4'><path d='M0 4h7L3.5 0z'/></svg>"); }
+html.w95win .w95sb.v .a1 { background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='7' height='4'><path d='M0 0h7L3.5 4z'/></svg>"); }
+html.w95win .w95sb .tr { position: relative; flex: 1 1 auto; background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='2' height='2'><path fill='%23c0c0c0' d='M0 0h1v1H0zM1 1h1v1H1z'/></svg>") 0 0 / 2px 2px, #fff; }
+html.w95win .w95sb .th { position: absolute; display: block; box-sizing: border-box; background: #c0c0c0;
+  box-shadow: inset -1px -1px 0 #000, inset 1px 1px 0 #dfdfdf, inset -2px -2px 0 #808080, inset 2px 2px 0 #fff; }
+html.w95win .w95sb.h .th { top: 0; bottom: 0; width: max(8px, calc(var(--z, .5) * 100%)); left: calc(var(--f, 0) * (100% - max(8px, calc(var(--z, .5) * 100%)))); }
+html.w95win .w95sb.v .th { left: 0; right: 0; height: max(8px, calc(var(--z, .5) * 100%)); top: calc(var(--f, 0) * (100% - max(8px, calc(var(--z, .5) * 100%)))); }
+html.w95win .w95corner { position: absolute; z-index: 6; right: 0; bottom: 0; width: 16px; height: 16px; background: #c0c0c0; }
+html.w95win #msg { left: 17px; top: 15px; bottom: auto; }

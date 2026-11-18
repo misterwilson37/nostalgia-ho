@@ -294,6 +294,75 @@ T.panel = (panel, B) => {
   panel.prepend(starPane(), head, list, moneyPane(), low);
 };
 
+
+// ---------- the map (unit 4) ----------
+// Zoom In / Zoom Out (FUN_00455f49, FUN_00455fc8, the menu's 0x8020 / 0x8021 through the message map) step the map's cell through 6, 9,
+// 12 and 17 pixels, 17 to start, as the Mac's: a cell is two light years (shot 054: Alshain to Wazn, "Dist 7", 111 pixels). The map
+// opens centred on your home. Windows scroll bars, 16 pixels, at its right and foot; the stars' names in white under them; End Turn's
+// clock at the map's top left (17, 15). With modern conveniences the remake's closer zooms follow the program's.
+const LY = 2, ZOOMS = [6, 9, 12, 17].map(z => z * LY), ZOOMS_MODERN = ZOOMS.concat([24, 34, 48].map(z => z * LY));
+const zooms = () => { const g = A() && A().G; return g && g.opts && g.opts.modern ? ZOOMS_MODERN : ZOOMS; };
+const zoomIdx = (sc) => { const Z = zooms(); let b = 0; Z.forEach((z, i) => { if (Math.abs(Math.log(z / sc)) < Math.abs(Math.log(Z[b] / sc))) b = i; }); return b; };
+const BAR = 16, MARGIN = 2; // the scroll bars' width; cells of black round the galaxy
+const SB = { h: null, v: null };
+function mapBox() { const a = A(), m = a && a.map(); return m ? [m.w - BAR, m.h - BAR] : [0, 0]; }
+function limits(v, g, w, h) { // the view's ox, oy between these keep the galaxy (and MARGIN cells round it) in reach
+  const m = MARGIN * v.s, gw = g.W * v.s + 2 * m, gh = g.H * v.s + 2 * m;
+  const x = gw <= w ? [(w - g.W * v.s) / 2, (w - g.W * v.s) / 2] : [w - g.W * v.s - m, m];
+  const y = gh <= h ? [(h - g.H * v.s) / 2, (h - g.H * v.s) / 2] : [h - g.H * v.s - m, m];
+  return { x, y };
+}
+const prevZoom = T.zoomTo, prevFit = T.fitView, prevClamp = T.clampView;
+T.zoomTo = (s0, f) => {
+  if (!W95ON()) return prevZoom ? prevZoom(s0, f) : Math.max(12, Math.min(140, s0 * f));
+  const Z = zooms(), cur = zoomIdx(s0); let i = cur + (f > 1 ? 1 : f < 1 ? -1 : 0); return Z[Math.max(0, Math.min(Z.length - 1, i))];
+};
+T.fitView = (v, c) => {
+  if (!W95ON()) { if (prevFit) prevFit(v, c); return; }
+  const st = c.G.stars[c.sel != null ? c.sel : c.G.players[c.ME].homeStar]; v.s = ZOOMS[3];
+  const w = c.mapW - BAR, h = c.mapH - BAR; if (st) { v.ox = w / 2 - st.x * v.s; v.oy = h / 2 - st.y * v.s; }
+  const L = limits(v, c.G, w, h); v.ox = Math.max(L.x[0], Math.min(L.x[1], v.ox)); v.oy = Math.max(L.y[0], Math.min(L.y[1], v.oy));
+};
+T.clampView = (v, c) => {
+  if (!W95ON()) { if (prevClamp) prevClamp(v, c); return; }
+  const L = limits(v, c.G, c.mapW - BAR, c.mapH - BAR); v.ox = Math.max(L.x[0], Math.min(L.x[1], v.ox)); v.oy = Math.max(L.y[0], Math.min(L.y[1], v.oy));
+};
+T.mapInset = () => (W95ON() ? [BAR * (W95.s || 1), BAR * (W95.s || 1)] : [0, 0]);
+T.mapPixel = () => (W95ON() && W95.s > 1 ? [W95.s, W95.s] : null);
+T.mapBg = '#000';
+T.mapNames = (sc) => (W95ON() ? zoomIdx(sc) > 0 : sc > 18);
+T.mapNameStyle = (cx) => { if (W95ON()) { cx.fillStyle = '#fff'; cx.font = '11px "MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif'; } };
+// the scroll bars: a Windows 95 bar each, its thumb where the view is between the limits; an arrow moves a cell, the track a page,
+// the thumb drags the map
+function scrollBar(vertical) {
+  const b = document.createElement('div'); b.className = 'w95sb ' + (vertical ? 'v' : 'h'); b.setAttribute('aria-hidden', 'true');
+  b.innerHTML = '<i class="ar a0"></i><i class="tr"><i class="th"></i></i><i class="ar a1"></i>';
+  const step = (d, page) => { const a = A(), v = a.UI.view, [w, h] = mapBox(); const n = page ? (vertical ? h : w) * 0.9 : v.s;
+    if (vertical) v.oy -= d * n; else v.ox -= d * n; T.clampView(v, { G: a.G, mapW: w + BAR, mapH: h + BAR }); a.draw(); };
+  b.querySelector('.a0').addEventListener('pointerdown', (e) => { e.preventDefault(); step(-1); });
+  b.querySelector('.a1').addEventListener('pointerdown', (e) => { e.preventDefault(); step(1); });
+  const tr = b.querySelector('.tr'), th = b.querySelector('.th');
+  tr.addEventListener('pointerdown', (e) => { if (e.target !== tr) return; e.preventDefault(); const r = th.getBoundingClientRect(); step((vertical ? e.clientY < r.top : e.clientX < r.left) ? -1 : 1, true); });
+  th.addEventListener('pointerdown', (e) => {
+    e.preventDefault(); e.stopPropagation(); const a = A(), v = a.UI.view, [w, h] = mapBox(), L = limits(v, a.G, w, h), R = tr.getBoundingClientRect(), T0 = th.getBoundingClientRect();
+    const span0 = (vertical ? R.height - T0.height : R.width - T0.width) || 1, lim = vertical ? L.y : L.x, p0 = vertical ? e.clientY : e.clientX, o0 = vertical ? v.oy : v.ox;
+    const mv = (ev) => { const d = ((vertical ? ev.clientY : ev.clientX) - p0) / span0 * (lim[1] - lim[0]); if (vertical) v.oy = o0 - d; else v.ox = o0 - d; T.clampView(v, { G: a.G, mapW: w + BAR, mapH: h + BAR }); a.draw(); };
+    const up = () => { window.removeEventListener('pointermove', mv); window.removeEventListener('pointerup', up); };
+    window.addEventListener('pointermove', mv); window.addEventListener('pointerup', up);
+  });
+  return b;
+}
+const prevAfterDraw = T.afterDraw;
+T.afterDraw = () => {
+  if (prevAfterDraw) prevAfterDraw();
+  const wrap = document.getElementById('mapwrap'); if (!wrap) return;
+  if (!W95ON()) { wrap.querySelectorAll('.w95sb, .w95corner').forEach(x => x.remove()); SB.h = SB.v = null; return; }
+  if (!SB.h || !SB.h.isConnected) { SB.h = scrollBar(false); SB.v = scrollBar(true); const c = document.createElement('i'); c.className = 'w95corner'; wrap.append(SB.h, SB.v, c); }
+  const a = A(), v = a.UI.view, [w, h] = mapBox(), L = limits(v, a.G, w, h);
+  const put = (bar, lim, o, vis, tot) => { const th = bar.querySelector('.th'), f = lim[1] > lim[0] ? (lim[1] - o) / (lim[1] - lim[0]) : 0; th.style.setProperty('--f', String(Math.max(0, Math.min(1, f)))); th.style.setProperty('--z', String(Math.max(0.08, Math.min(1, vis / tot)))); };
+  put(SB.h, L.x, v.ox, w, a.G.W * v.s + 2 * MARGIN * v.s); put(SB.v, L.y, v.oy, h, a.G.H * v.s + 2 * MARGIN * v.s);
+};
+
 // ---------- the caption bar ----------
 // The window's own: the program's icon, the title (#title, written by the classic page), and the minimise, maximise and
 // close boxes (drawn only: the remake has no window to shrink).
