@@ -200,3 +200,12 @@ html.w95win #w95tech .vn { position: absolute; left: 87px; top: 60px; right: 0; 
 html.w95win #w95tech .vn span { position: absolute; transform: translateX(-50%); white-space: nowrap; }
 html.w95win #w95tech .vn .hi { top: 0; } html.w95win #w95tech .vn .lo { top: 12px; }
 html.w95scale .w95tool { zoom: var(--w95); }
+/* the report bubble (screen.js T.afterMsg): bitmap 345 at the map's bottom left */
+html.w95win #msg.w95bub { left: 3px; top: auto; bottom: 31px; max-width: none; }
+html.w95win #msg .card.bub95 { position: relative; display: block; width: 185px; height: 79px; box-sizing: border-box; margin: 0; padding: 0; border: 0; outline: 0; border-radius: 0; box-shadow: none;
+  background: #fff 0 0 / 192px 79px no-repeat; color: #000; image-rendering: pixelated; cursor: default; }
+html.w95win #msg .card.bub95 > img.icon { position: absolute; left: 12px; top: 13px; width: 32px; height: 32px; margin: 0; image-rendering: pixelated; }
+html.w95win #msg .card.bub95 .mtext { position: absolute; left: 50px; top: 6px; right: 6px; bottom: 4px; margin: 0; padding: 0; overflow: hidden; }
+html.w95win #msg .card.bub95 .mtext p { margin: 0; font: 11px/13px "MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif; color: #000; }
+html.w95win #msg .card.bub95 .mbtns { display: none; }
+html.w95win #msg .card.bub95 .count { position: absolute; left: 0; top: 55px; margin: 0; font: 11px/13px "MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif; color: #000; opacity: 1; }

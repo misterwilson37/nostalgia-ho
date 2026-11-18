@@ -423,6 +423,20 @@ T.afterDraw = () => {
   put(SB.h, L.x, v.ox, w, a.G.W * v.s + 2 * MARGIN * v.s); put(SB.v, L.y, v.oy, h, a.G.H * v.s + 2 * MARGIN * v.s);
 };
 
+
+// The report bubble (shots 010, 051, 293): bitmap 345 at the map's bottom left (3 in, its foot 31 above the map's), the report's picture
+// at (12, 13), the words from (50, 6), "more..." (1348) at (50, 61). Click it for the next report, as everywhere in the remake.
+const prevAfterMsg = T.afterMsg;
+T.afterMsg = (box, info) => {
+  if (prevAfterMsg) prevAfterMsg(box, info);
+  box.classList.toggle('w95bub', !!box.querySelector('.card:not(.end):not(.waiting)'));
+  if (!W95ON()) return;
+  const card = box.querySelector('.card:not(.end):not(.waiting)'); if (!card) return;
+  card.classList.add('bub95');
+  const im = A().IMG['w95:b345']; if (im && im.src) card.style.backgroundImage = `url("${im.src}")`;
+  const c = card.querySelector('.count'); if (c) c.textContent = 'more...';
+};
+
 // ---------- the caption bar ----------
 // The window's own: the program's icon, the title (#title, written by the classic page), and the minimise, maximise and
 // close boxes (drawn only: the remake has no window to shrink).
