@@ -209,3 +209,11 @@ html.w95win #msg .card.bub95 .mtext { position: absolute; left: 50px; top: 6px; 
 html.w95win #msg .card.bub95 .mtext p { margin: 0; font: 11px/13px "MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif; color: #000; }
 html.w95win #msg .card.bub95 .mbtns { display: none; }
 html.w95win #msg .card.bub95 .count { position: absolute; left: 0; top: 55px; margin: 0; font: 11px/13px "MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif; color: #000; opacity: 1; }
+/* Report Messages (screen.js reportWindow): 230 x 112, the reports on white, 32 a row */
+html.w95win #w95report { width: 230px; height: 112px; }
+html.w95win #w95report .tbody { margin: 1px 0 0; }
+html.w95win #w95report .rl { list-style: none; margin: 0; padding: 0; height: 100%; box-sizing: border-box; overflow-y: scroll; background: #fff;
+  border: 1px solid; border-color: #808080 #fff #fff #808080; }
+html.w95win #w95report .rl li { display: flex; align-items: flex-start; gap: 3px; min-height: 32px; cursor: default; }
+html.w95win #w95report .rl li img { width: 32px; height: 32px; flex: none; image-rendering: pixelated; }
+html.w95win #w95report .rl li .rt { padding-top: 1px; }

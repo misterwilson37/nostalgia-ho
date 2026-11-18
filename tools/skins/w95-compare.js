@@ -23,7 +23,7 @@ const snippet = process.argv[3] || '';
   await page.waitForFunction(() => window.HOAPI && HOAPI.G, null, { timeout: 20000 }); await sleep(800);
   for (let n = 0; n < 30 && await page.locator('.card:not(.end):not(.waiting)').count(); n++) {
     if (await page.locator('.scrim').count()) { await page.keyboard.press('Escape'); await sleep(60); continue; }
-    await page.locator('.card').first().click().catch(() => {}); await sleep(40);
+    await page.evaluate(() => { const c = document.querySelector('.card'); if (c) c.click(); }); await sleep(40); // (a floating window may cover the bubble, as in the original)
   }
   if (snippet) { await page.evaluate(snippet); await sleep(600); }
   const ours = path.join(OUT, `w95-ours.png`); await page.screenshot({ path: ours });

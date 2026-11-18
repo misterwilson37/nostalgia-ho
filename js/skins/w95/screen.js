@@ -52,7 +52,7 @@ T.menuLayout = {
     ['Alliances...', 'Galaxy/Players and alliances…'], ['Give Money/Metal...', 'Galaxy/Give money or metal…'], [null, 'Galaxy/#9'], ['Send Message...', 'Galaxy/Send a message…'], '-',
     [null, 'Galaxy/#10']],
   Window: [['Tech Spending Window', () => setWin('tech', !winOpen('tech')), null, () => winOpen('tech'), () => !(window.HOAPI && HOAPI.G), '1'],
-    ['Report Window', 'Galaxy/Report window…'], '-', ['Zoom In', 'View/Zoom in'], ['Zoom Out', 'View/Zoom out'], ['Fit Galaxy', 'View/Fit galaxy'], '-',
+    ['Report Window', () => setWin('report', !winOpen('report')), null, () => winOpen('report'), () => !(window.HOAPI && HOAPI.G), '2'], '-', ['Zoom In', 'View/Zoom in'], ['Zoom Out', 'View/Zoom out'], ['Fit Galaxy', 'View/Fit galaxy'], '-',
     ['Clean Up Windows', () => cleanUp(), null, null, () => !(window.HOAPI && HOAPI.G)]],
   Help: [['Help Topics', 'Help/How to play'], [null, 'Help/#1']],
 };
@@ -340,6 +340,18 @@ function techWindow(B) {
   body.append(lv, bars, nm);
   if (tb) tb.remove();
 }
+
+// Report Messages (dialog 351, drawn by the program; shots 008, 087, 090): this turn's reports, 32 pixels a row, the picture then the words,
+// on white with the list's scroll bar; a click on a row acts on its report (the remake's reportAction: a battle's replay, a star shown).
+function reportWindow() {
+  const a = A(), w = toolWin('report', 'Report Messages'), body = w.querySelector('.tbody'), list = document.createElement('ul');
+  list.className = 'rl'; list.setAttribute('role', 'list');
+  (a.me().inbox || []).forEach((m) => {
+    const li = document.createElement('li'); li.append(a.msgIconEl(m), span('rt', H().say ? H().say(a.G, m.text) : m.text));
+    li.addEventListener('click', () => a.reportAction(m)); list.append(li);
+  });
+  body.innerHTML = ''; body.append(list);
+}
 T.panel = (panel, B) => {
   if (!W95ON()) return;
   if (B && B.planet) B.planet.remove();
@@ -350,6 +362,7 @@ T.panel = (panel, B) => {
   if (B && B.budget) B.budget.remove();
   panel.prepend(starPane(), head, list, moneyPane(), low);
   techWindow(B);
+  reportWindow();
 };
 
 
