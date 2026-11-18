@@ -103,7 +103,7 @@ html.w95win #panel .w95pane { position: relative; margin: 0; padding: 0; border:
   font: 11px/13px "MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif; color: #000; background: #c0c0c0; }
 html.w95win #panel .w95pane > span { position: absolute; white-space: nowrap; }
 html.w95win #panel .w95star { height: 85px; }
-html.w95win #panel .w95star .nm { left: 0; width: 84px; top: 0; text-align: center; font: bold 13px/15px "MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif; }
+html.w95win #panel .w95star .nm { left: 0; width: 84px; top: 0; text-align: center; font: 600 14px/16px Arial, sans-serif; } /* (FUN_00488fc9: Arial, cell height 16, weight 600) */
 html.w95win #panel .w95star .lb { right: calc(249px - 44px); text-align: right; }
 html.w95win #panel .w95star .vl { left: 47px; }
 html.w95win #panel .w95star .noinfo { left: 3px; top: 15px; }
@@ -121,3 +121,33 @@ html.w95win #panel .w95flist .row.sel { background: #000; color: #fff; }
 html.w95win #panel .w95flist .row.new { font-style: italic; }
 html.w95win #panel .w95flist .row.go { font-weight: bold; }
 html.w95win #panel .w95flist::-webkit-scrollbar-button:single-button { width: 16px; height: 16px; }
+/* unit 3: the money pane (FUN_00489ebe), the players and the budget (FUN_0045aae1) */
+html.w95win #panel .w95money { height: 44px; border-top: 2px solid #000; margin-top: 1px; font: 600 12px/13px "MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif; }
+html.w95win #panel .w95money .lb { right: calc(249px - 85px); text-align: right; top: 1px; }
+html.w95win #panel .w95money .vl { left: 90px; }
+html.w95win #panel .w95money .rt { right: 3px; text-align: right; }
+html.w95win #panel .w95low { display: flex; height: 174px; border-top: 3px solid #000; margin-top: 0; overflow: hidden; font: 11px/13px "MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif; }
+html.w95win #panel .w95players { flex: 0 0 105px; padding-top: 5px; box-sizing: border-box; border-right: 1px solid #000; overflow-y: scroll; overflow-x: hidden; }
+html.w95win #panel .w95players .prow { position: relative; height: 24px; }
+html.w95win #panel .w95players .tick { position: absolute; left: 2px; top: 6px; font-size: 11px; }
+html.w95win #panel .w95players .face { position: absolute; left: 14px; top: 4px; width: 16px; height: 16px; background: center / 16px 16px no-repeat; image-rendering: pixelated; }
+html.w95win #panel .w95players .prow.out .face::after { content: ''; position: absolute; inset: -2px; background: linear-gradient(45deg, transparent 44%, #000 44% 56%, transparent 56%), linear-gradient(-45deg, transparent 44%, #000 44% 56%, transparent 56%); }
+html.w95win #panel .w95players .pn { position: absolute; left: 33px; top: 6px; }
+html.w95win #panel .w95budget { flex: 1 1 auto; position: relative; min-width: 0; }
+html.w95win #panel .w95budget .pct { position: absolute; right: 26px; top: 8px; }
+html.w95win #panel .w95budget .btop { position: absolute; left: 0; right: 0; top: 23px; height: 36px; padding: 4px 0 0 44px; box-sizing: border-box; background: linear-gradient(#000, #000) 43px 0 / calc(100% - 43px) 1px no-repeat, linear-gradient(#000, #000) 43px 0 / 1px 100% no-repeat; }
+html.w95win #panel .w95budget .bcols { position: absolute; left: 0; right: 0; top: 59px; bottom: 0; overflow-y: scroll; overflow-x: hidden; padding: 3px 0 0 44px; box-sizing: border-box; background: linear-gradient(#000, #000) 43px 0 / calc(100% - 43px) 1px no-repeat, linear-gradient(#000, #000) 43px 0 / 1px 100% no-repeat local; }
+html.w95win #panel .w95bar { display: flex; align-items: center; height: 14px; margin: 0; padding: 0; gap: 0; position: relative; }
+html.w95win #panel .w95bar .blabel { position: absolute; left: -44px; width: 42px; text-align: right; font: 11px/14px "MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif; color: #000; white-space: nowrap; overflow: visible; }
+html.w95win #panel .w95bar.selrow .blabel { text-decoration: underline; }
+html.w95win #panel .w95bar.red .blabel, html.w95win #panel .w95bar.red .bval { color: #f00; }
+html.w95win #panel .w95bar .track { flex: none; width: 81px; height: 11px; margin: 0; padding: 0; border: 0; border-radius: 0; background: none; box-shadow: none; position: relative; overflow: visible; }
+html.w95win #panel .w95bar .track .grid { display: none; }
+html.w95win #panel .w95bar .track .fill { position: absolute; left: 0; top: 2px; height: 7px; max-width: 77px; box-sizing: border-box; border: 1px solid var(--be); background: var(--bf); border-radius: 0;
+  box-shadow: 0 -1px 0 var(--bl), 0 -2px 0 var(--bl), 1px 1px 0 var(--bd), 2px 2px 0 var(--bd); }
+html.w95win #panel .w95bar .bval { display: none; }
+html.w95win #panel .w95bar.note .track { display: none; }
+html.w95win #panel .w95bar.note .bval { display: block; position: static; margin-left: 2px; font: 11px/14px "MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif; color: #000; }
+html.w95win #panel .w95bar.sav { --bf: #ed6f2d; --be: #ea3323; --bl: #f19f9d; --bd: #5e330e; }
+html.w95win #panel .w95bar.tech { --bf: #ea33c9; --be: #ea33f7; --bl: #ed6fcb; --bd: #5c0e61; }
+html.w95win #panel .w95bar .fill { --bf: inherit; }

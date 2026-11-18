@@ -212,11 +212,86 @@ function fleetPanes() {
   others.forEach(f => { const own = g.players[f.owner]; list.append(span('row other', rs.otherFleetRow ? (rs.otherFleetRow(null, f) || '') : cfmt("%s's %s", own ? own.name : '?', fleetRow(g, f)))); });
   return [head, list];
 }
+
+// ---------- the panes (unit 3: the money pane, the players, the budget bars) ----------
+// FUN_0042e6fc: a figure rounded to millions ("%dM") from 500,000, else to thousands ("%dK") from 500, else whole
+const kfmt = (v) => { const a = Math.abs(v), sg = v < 0 ? -1 : 1, M = Math.trunc((a + 500000) / 1000000), K = Math.trunc((a + 500) / 1000); return M ? (sg * M) + 'M' : K ? (sg * K) + 'K' : String(Math.round(v)); };
+// The money pane (FUN_00489ebe), 249 x 44 at (5, 224), in the semibold font: "Metal:", "Savings:", "Net Income:" (703, 701, 702) right-aligned
+// at 87 on rows one line apart, the figures from 90 (savings in red below zero), and right-aligned at the pane's right "(up %s)" / "(down %s)"
+// (706, 707: the metal's change), "(Int: %s)" (the interest, rounded), "(up $%s)" / "(down $%s)" (704, 705: the income's change, rounded).
+function moneyPane() {
+  const a = A(), g = a.G, p = a.me(), pr = H().projected(g, p), ch = p.chg || {};
+  const box = document.createElement('section'); box.className = 'w95pane w95money';
+  const row = (i, label, value, right, red) => { box.append(span('lb', label, `top:${13 * i}px`)); const v = span('vl', value, `top:${13 * i}px`); if (red) v.style.color = '#f00'; box.append(v); box.append(span('rt', right, `top:${13 * i}px`)); };
+  const cm = Math.round(ch.metal || 0), ci = Math.round(ch.income || 0);
+  row(0, 'Metal:', H().niceNum(Math.round(p.metal)), cm < 0 ? `(down ${H().niceNum(-cm)})` : `(up ${H().niceNum(cm)})`);
+  row(1, 'Savings:', '$' + H().niceNum(Math.round(p.savings)), `(Int: ${kfmt(Math.round(pr.interest || 0))})`, p.savings < 0);
+  row(2, 'Net Income:', '$' + H().niceNum(Math.round(pr.net)), ci < 0 ? `(down $${kfmt(-ci)})` : `(up $${kfmt(ci)})`);
+  return box;
+}
+// The players (the list at the bottom left, 105 x 174 at (5, 271)): rows 24 high, a tick for a player whose turn is done, the small face
+// (8405 / 8905 for you, 9000 + face / 9500 + face for the computer players: the 32 x 32 faces' numbers + 7000), the name; a cross over the
+// face of one who is out. (The order is the players' own, you first: how the program sorts them is not read yet.)
+function playersPane() {
+  const a = A(), g = a.G, IMG = a.IMG;
+  const box = document.createElement('section'); box.className = 'w95players'; box.setAttribute('aria-label', 'Players');
+  const list = [a.me()].concat(g.players.filter(q => q.id !== a.ME));
+  list.forEach((q) => {
+    const r = document.createElement('div'); r.className = 'prow' + (q.alive === false ? ' out' : '');
+    const done = !q.human || (g.done || []).includes(q.id);
+    r.append(span('tick', done && q.id !== a.ME ? '√' : ''));
+    const n = q.human ? (q.female ? 8905 : 8405) : (q.female ? 9500 : 9000) + (q.face || 0) % 20, im = IMG['w95:b' + n];
+    const f = document.createElement('i'); f.className = 'face'; if (im && im.src) f.style.backgroundImage = `url("${im.src}")`; r.append(f);
+    r.append(span('pn', q.name));
+    box.append(r);
+  });
+  return box;
+}
+// The budget (FUN_0045aae1): "100%" over the scale, then Savings and Tech, then a rule and your colonies, 14 a row, labels right-aligned
+// at 153, the bars from 155: at most 77 long and 7 high, a one-pixel edge, two lighter lines above and two darker below and at the right.
+// Savings orange, Tech magenta; a colony's bar mixes the terraforming colour (green) and the mining colour (blue) by its shares; a colony
+// with nothing left to terraform or mine shows its income instead ("$%s", red when it loses money); one being abandoned "Abandoning".
+// The bars are the classic page's own (dragged as there), laid out here; the selected star's name underlined.
+function budgetPane(B) {
+  const a = A(), g = a.G, p = a.me();
+  const box = document.createElement('section'); box.className = 'w95budget';
+  box.append(span('pct', '100%'));
+  const bb = B && B.budget; if (!bb) return box;
+  const rows = [...bb.querySelectorAll('.barrow')], ents = B.ents || [];
+  const top = document.createElement('div'), cols = document.createElement('div'); top.className = 'btop'; cols.className = 'bcols';
+  rows.forEach((r, i) => {
+    const e = ents[i]; if (!e) return;
+    r.classList.add('w95bar');
+    if (e.key === 'savings') { r.classList.add('sav'); top.prepend(r); return; }
+    if (e.key === 'tech') { r.classList.add('tech'); top.append(r); return; }
+    const st = g.stars[e.star]; if (!st) return;
+    if (a.UI.sel === st.id) r.classList.add('selrow');
+    const tf = Math.abs(H().seenT(p, st) - 72) <= 0.5, mf = !(st.metal > 0), inc = Math.round(H().planetIncome(g, p, st));
+    const bv = r.querySelector('.bval');
+    if (st.abandon || p.abandon === st.id) { r.classList.add('note', 'red'); if (bv) bv.textContent = 'Abandoning'; }
+    else if (tf && mf) { r.classList.add('note'); if (inc < 0) r.classList.add('red'); if (bv) bv.textContent = '$' + H().niceNum(inc); }
+    else {
+      const t = tf ? 0 : mf ? 1 : (st.terra == null ? 0.5 : st.terra), mix = (c1, c2) => c1.map((v, k) => Math.round(v * t + c2[k] * (1 - t)));
+      const fill = mix([0x52, 0x98, 0x40], [0x00, 0x00, 0xc6]), edge = mix([0x38, 0x80, 0x22], [0x00, 0x00, 0xf5]), dark = mix([0x22, 0x54, 0x13], [0x00, 0x00, 0x61]), light = mix([0x8c, 0xc4, 0x80], [0x65, 0x65, 0xc8]);
+      const css = (c) => `rgb(${c.join(',')})`;
+      r.style.setProperty('--bf', css(fill)); r.style.setProperty('--be', css(edge)); r.style.setProperty('--bd', css(dark)); r.style.setProperty('--bl', css(light));
+      if (inc < 0) r.classList.add('red');
+    }
+    cols.append(r);
+  });
+  box.append(top, cols);
+  return box;
+}
 T.panel = (panel, B) => {
   if (!W95ON()) return;
   if (B && B.planet) B.planet.remove();
   const [head, list] = fleetPanes();
-  panel.prepend(starPane(), head, list);
+  const low = document.createElement('div'); low.className = 'w95low';
+  low.append(playersPane(), budgetPane(B));
+  if (B && B.info) B.info.remove();
+  if (B && B.budget) B.budget.remove();
+  // (the Technology box goes to the Tech Spending window: unit 5; meanwhile it stays under the panes)
+  panel.prepend(starPane(), head, list, moneyPane(), low);
 };
 
 // ---------- the caption bar ----------
