@@ -94,6 +94,11 @@ html.w95win #menubar .dropdown hr { border: 0; border-top: 1px solid #808080; bo
 html.w95win #main { grid-template-columns: 250px 1fr; grid-template-rows: minmax(0, 1fr); overflow: hidden; min-height: 0;
   border: 2px solid; border-color: #808080 #dfdfdf #dfdfdf #808080; box-shadow: inset 1px 1px 0 #000; }
 html.w95win #panel { order: 0; padding: 0; border: 0; background: #c0c0c0; overflow: hidden; }
+/* (the players list and budget bars run to the foot of the column, as in shot 007 behind Tech Spending; at a page taller than 4:3 the
+   fixed 174 left the rest grey, seen once Tech Spending was moved away: Jake 18 Nov) */
+html.w95win:not(.w95noinfo) #panel { display: flex; flex-direction: column; }
+html.w95win:not(.w95noinfo) #panel > * { flex: 0 0 auto; }
+html.w95win #panel > .w95low { flex: 1 0 174px; height: auto; min-height: 174px; }
 html.w95win #mapwrap { order: 1; }
 html.w95win body { overflow: hidden; }
 html.w95win #mapwrap { background: #000; }

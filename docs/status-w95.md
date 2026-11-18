@@ -84,9 +84,14 @@ Units 1-4 are the big ones (one session might do two). 6-9 are quicker. 10 is lo
    at End Turn), asking first as FUN_00469b1d does: the Hope / Ship jokes, else "Do you really want to abandon a profitable planet?"
    (income 0 or more) or "... a planet that will be profitable very soon?" (-$7,500 to 0); ABANDON on, WHOA off. Words in
    js/skins/w95/lang.js (five languages).
-7. The floating windows' captions stay grey (inactive) while dragged; Windows 95 shows the dragged one active (blue).
-8. Turn 1: Tech Spending floats over the map at its Clean Up place; from turn 2 it sits at the bottom left, and before that the
-   bottom left is an empty grey area. Check against the captures where 4.0.5 opens it.
+7. The floating windows' captions stay grey while dragged: as 4.0.5. Shot 007 has Jake's pointer on Report Messages' caption with both
+   tool windows' captions grey and the main window's blue; no capture shows a blue tool caption. Left as it is (a still can't show a
+   drag; a modern-conveniences highlight if Jake wants one).
+8. ~~The empty grey area at the bottom left~~: done. Shot 007: the players list and budget bars run to the window's foot, behind Tech
+   Spending at its Clean Up place (87, 349). The remake's low pane was a fixed 174 high, so on a page taller than the panes need the
+   rest was grey, seen once Tech Spending was moved; it now fills the column (#panel a flex column, .w95low grows). Tech Spending's
+   place over the map on turn 1 was Jake's own from an earlier game: places are kept between games ("ho5.win.w95"; Window > Clean Up
+   Windows puts them back).
 9. The yellow box beside the selected star (shot: Nihal with two fleets' squares) looks wrong.
 10. The remake's own commands sit at the end of Help; everywhere else they are the "Ho!" menu. Jake suggests the window icon at the
     top left (the system menu's place) opens them.
