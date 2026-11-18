@@ -485,7 +485,7 @@ function W95DLG(id) {
   for (const [cid, kind, text, x, y, w, h, flags] of D.c) {
     if (/hidden/.test(flags)) continue;
     const [l, t] = DU(x, y), [ww, hh] = DU(w, h); let e;
-    if (kind === 'STATIC') { e = document.createElement('div'); e.className = 'st'; e.textContent = text; }
+    if (kind === 'STATIC') { e = document.createElement('div'); e.className = 'st' + (/\n/.test(text) || h > 10 ? ' ml' : ''); e.textContent = text; }
     else if (/push/.test(kind)) { e = document.createElement('button'); e.type = 'button'; e.className = 'pb' + (/default/.test(kind) ? ' def' : ''); e.textContent = text.replace(/&/g, ''); }
     else if (kind === 'LISTBOX') { e = document.createElement('div'); e.className = 'lbx'; e.setAttribute('role', 'listbox'); e.tabIndex = 0; }
     else if (kind === 'COMBOBOX') { e = document.createElement('select'); e.className = 'cbx'; hh0(e); }
@@ -538,9 +538,51 @@ function fleetsDialog() {
   fill(); showDlg(dl, 'List of All Fleets');
   return true;
 }
+
+// List of All Explored Stars (dialog 356, shot 081): the stars you know (explored or owned; not those gone nova), sorted by name, then by
+// Sort By (its DLGINIT: Metal, Quality, Gravity, Owner; Quality at first, the choice kept), the original's swap sort as FUN_004540a8 and the
+// classic page's openExploredList: metal and quality down, gravity and owner up, the unexplored last. A row 20 high: the star's small
+// picture (its map picture + 7000), the name at 21, the temperature at 121, the gravity at 196, the metal at 271; the selected row black.
+const EXS = { mode: 1 };
+function starsDialog() {
+  const a = A(), g = a.G, p = a.me(), L = H().rules(g).exploredList || {}, dl = W95DLG(356); if (!dl) return false;
+  const lb = dl.by[1131], cb = dl.by[1132];
+  ['Metal', 'Quality', 'Gravity', 'Owner'].forEach((t, i) => { const o = document.createElement('option'); o.value = String(i); o.textContent = t; cb.append(o); });
+  cb.value = String(EXS.mode);
+  const rec = (st) => st.owner === a.ME ? { explored: true, owner: a.ME, g: st.g, t: st.t, metal: st.metal } : H().know(g, p, st.id);
+  const ex = (st) => !!rec(st).explored, ownerOf = (st) => rec(st).owner;
+  const q = (st) => ex(st) && L.quality ? L.quality(p, rec(st)) : 0;
+  const swapSort = (arr, before) => { for (let i = 0; i < arr.length - 1; i++) for (let j = i + 1; j < arr.length; j++) if (before(arr[j], arr[i])) { const t = arr[i]; arr[i] = arr[j]; arr[j] = t; } return arr; };
+  const order = () => {
+    const seen = g.stars.filter(st => { const k = rec(st); return (k.explored || k.owner >= 0) && !st.nova; });
+    const arr = swapSort(seen, (x, y) => x.name < y.name), m = EXS.mode;
+    const val = [(st) => ex(st) ? Math.max(0, rec(st).metal || 0) : -1, (st) => ex(st) ? q(st) : -1, (st) => ex(st) ? Math.round(rec(st).g * 100) : 0x7fff, (st) => ownerOf(st) < 0 ? 0x15 : ownerOf(st)][m];
+    return swapSort(arr, m >= 2 ? (x, y) => val(x) < val(y) : (x, y) => val(x) > val(y));
+  };
+  let sel = null;
+  const fill = () => {
+    lb.innerHTML = '';
+    order().forEach((st) => {
+      const r = document.createElement('div'); r.className = 'xr' + (sel === st.id ? ' sel' : ''); r.setAttribute('role', 'option');
+      const look = a.starLook(st.id), base = look && look.base, small = base && /^w95:b\d+$/.test(base) ? a.IMG['w95:b' + (+base.slice(5) + 7000)] : null, im = small || (base && a.IMG[base]);
+      const ic = document.createElement('i'); ic.className = 'xi'; if (im && im.src) ic.style.backgroundImage = `url("${im.src}")`; r.append(ic);
+      r.append(span('xn', st.name));
+      if (ex(st)) { const k = rec(st), t10 = Math.round(10 * (72 + (k.t - p.homeT))), gr = Math.trunc(100 * k.g / Math.max(0.01, p.homeG));
+        r.append(span('xt', cfmt('%d.%1.1d°F', Math.trunc(t10 / 10), Math.abs(t10 % 10))), span('xg', cfmt('%d.%2.2dG', Math.trunc(gr / 100), gr % 100)), span('xm', H().niceNum(Math.max(0, Math.round(k.metal || 0))))); }
+      r.addEventListener('click', () => { sel = st.id; fill(); }); r.addEventListener('dblclick', () => go(st.id));
+      lb.append(r);
+    });
+  };
+  const go = (sid) => { a.closeModal(); a.UI.sel = sid; a.UI.selFleet = null; a.centerOn(sid); a.renderPanel(); a.draw(); };
+  cb.addEventListener('change', () => { EXS.mode = +cb.value; fill(); });
+  dl.by[1].addEventListener('click', () => { if (sel != null) go(sel); });
+  dl.by[2].addEventListener('click', () => a.closeModal());
+  fill(); showDlg(dl, 'List of All Explored Stars');
+  return true;
+}
 const prevWindow = T.window;
 T.window = (name, ...args) => {
-  if (W95ON()) { if (name === 'fleets') return fleetsDialog(); }
+  if (W95ON()) { if (name === 'fleets') return fleetsDialog(); if (name === 'stars') return starsDialog(); }
   return prevWindow ? prevWindow(name, ...args) : false;
 };
 
