@@ -137,6 +137,9 @@ window.HOUI.add([
 ['Ship Money', 'Placements', 'Schiffsgeld', 'Gemi Parası', 'Dinero para naves'],
 ['Send Message\nTo Whom?', 'Envoyer un message\nÀ qui ?', 'Nachricht senden\nAn wen?', 'Mesaj Gönder\nKime?', 'Enviar mensaje\n¿A quién?'],
 ['MessageText:', 'Texte du message :', 'Nachrichtentext:', 'Mesaj Metni:', 'Texto del mensaje:'],
+['Erase', 'Effacer', 'Löschen', 'Sil', 'Borrar'],
+['To:', 'À :', 'An:', 'Kime:', 'Para:'],
+['Content:', 'Contenu :', 'Inhalt:', 'İçerik:', 'Contenido:'],
 [CREDITS.en, CREDITS.fr, CREDITS.de, CREDITS.tr, CREDITS.es],
 [about('en'), about('fr'), about('de'), about('tr'), about('es')],
 ]);
