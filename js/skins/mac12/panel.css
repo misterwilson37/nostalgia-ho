@@ -182,3 +182,8 @@ html.macscale.mac301 .win .bw12w button.bw12b.done { outline-width: 3px; outline
 .nosb12::-webkit-scrollbar { display: none; }
 /* the players and budget pane, one canvas (js/skins/mac12/ui.js lowBox12) */
 :is(#panel, .p301x) .box.low12c { padding: 0; margin: 0; }
+/* the map window's panes (planet, fleets, totals, players and budget) touch, as in the window they are: no gaps, no shadows, one frame
+   round them (Jake's shot010); Tech Spending and the Report Window stay windows of their own below */
+:is(#panel, .p301x) .box.planet12, :is(#panel, .p301x) .box.fleets12, :is(#panel, .p301x) .box.info12, :is(#panel, .p301x) .box.low12c { margin: 0; border: 0; border-left: 1px solid #000; border-radius: 0; box-shadow: none; }
+:is(#panel, .p301x) .box.planet12 { border-top: 1px solid #000; }
+:is(#panel, .p301x) .box.low12c { border-bottom: 1px solid #000; margin-bottom: 8px; }

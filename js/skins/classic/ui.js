@@ -1727,7 +1727,7 @@ function planetBox(sid) {
     const src = s.owner === ME ? s : k;
     const gs = src.g / p.homeG, ts = 72 + (src.t - p.homeT);
     // (1.2's order, DrawPlanetRect: yours: Revenu, Pop, Temp, Gravité, Métal; another's: Contrôle, Date info, Pop, Temp, Gravité, Métal)
-    const own12 = PI && s.owner === ME, inc0 = own12 ? HO.planetIncome(G, p, s) : 0;
+    const own12 = PI && s.owner === ME, inc0 = own12 ? (s.oInc != null ? s.oInc : s.id === p.homeStar && p.lastIncome != null ? p.lastIncome : HO.planetIncome(G, p, s)) : 0; // (DrawPlanetRect prints the colony's income as the last turn left it, its slot's +0xefa: $30 000 at home in 2000, Jake's shot010; the remake had this year's)
     if (own12) box.append(row(PW('income', 'Income'), panelFig('planetIncome', inc0, true), inc0 < 0 ? 'neg' : '', 'planetIncome'), row(PW('pop', 'Population'), fmt(HO.popNum(G, s.pop)), '', 'population'));
     else if (PI) box.append(row(PW('pop', 'Population'), PW(k.owner >= 0 ? 'popUnknown' : 'popNone', k.owner >= 0 ? 'Unknown' : 'Uninhabited'), '', 'population'));
     box.append(row(PW('temp', 'Temp'), degF(ts), '', 'temp'), row(PW('grav', 'Gravity'), gravF(src.g, p.homeG) + (PI ? '' : classNote(gs)), '', 'gravity'), row(PW('metal', 'Metal'), panelFig('planetMetal', src.metal, false), '', 'planetMetal'));

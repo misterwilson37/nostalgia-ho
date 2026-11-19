@@ -1097,5 +1097,11 @@ routine and resources and checked pixel by pixel against `captures/` (640 x 480)
   drawn with black outside their mask (shot015), the heading and ticks, 14-pixel rows in the slot order (new colonies first,
   then Epargne, Tech, home: shot015), grey bars and the least-share tick for colonies losing money, italic and underlined names.
   Not built: the blinking of a losing colony's name (DrawHBarControl's last argument).
-- Still to compare: the planet, fleet and totals panes, Tech Spending and the Report Window, then the windows
+- **The left column** (planet, fleets, totals, players and budget, Tech Spending): diffed row by row against shot010 and
+  shot015 and now the same pixels, words apart (the comparisons ran in English): the Mac's bitmap Geneva 9, Geneva 9 Bold and
+  Chicago 12 (the DOS program's, `assets/skins/dos/fonts/`) in place of the browser's Geneva/Verdana; the fleet pane two rows lower
+  (the window's 68 to 132, it was 2 short) with its 12-pixel scroll bar from the rule to 129; the panes edge to edge with one frame.
+- **The planet's income** is the one the last turn left (DrawPlanetRect prints the slot's +0xefa: $30 000 at home in 2000, shot010);
+  the remake showed this year's projection ($30,664).
+- Still to compare: the Report Window, then the windows
   (6000, 6020, 6030, 6040, 6060, 6090, 6100, 7000-7011).

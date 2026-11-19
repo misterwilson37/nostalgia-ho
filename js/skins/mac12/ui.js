@@ -1901,7 +1901,10 @@ function starLine(cx, d) {
 // @c0446: an axis 50 high with ten ticks (linear for a colony, the log table for the technologies), bars 18 wide 27 apart
 // on a base line, each name centred under its bar (the technologies' every other one 10 lower), a finished part's bar empty
 // and a click on it the system beep; a drag sets the share and spreads the rest over the others in proportion. ----------
-const G9 = '9px Geneva, Verdana, sans-serif', G9B = 'bold 9px Geneva, Verdana, sans-serif', SYS12 = '12px Chicago, Charcoal, Geneva, sans-serif';
+// (the Mac's own bitmap Geneva 9, Geneva 9 Bold and Chicago 12, as the DOS 2.0 program carries them: js/skins/dos/style.css's faces, 12 and 15
+// pixels to the em for one font pixel to one of the Mac's; a browser without them draws with the fallbacks)
+const G9 = "12px 'DOS Geneva 9', Geneva, Verdana, sans-serif", G9B = "12px 'DOS Geneva 9 Bold', Geneva, Verdana, sans-serif", SYS12 = "15px 'DOS Chicago 12', Chicago, Charcoal, Geneva, sans-serif";
+try { if (document.fonts) Promise.all([G9, G9B, SYS12].map(f => document.fonts.load(f))).then(() => { const a = A(); if (a && a.G && a.renderPanel) a.renderPanel(); }).catch(() => {}); } catch (e) { /* (the fallbacks) */ }
 function qdCanvas(w, h, label) { // a box drawn at twice its pixels, as wide as the panel
   let lastR = null;
   const K = QK(), c = A().el('canvas', { class: 'qd12', width: w * K, height: h * K, role: 'img', 'aria-label': label || '' });
@@ -2029,32 +2032,34 @@ const langView = (g) => Object.assign(Object.create(g), { opts: Object.assign({}
 const planetWords = (g) => { const rs = H().rules(g), r12 = RS12(); return ((rs.planetInfo || (r12 && r12.planetInfo)) || {})[lang()] || {}; };
 function fleetBox12() {
   const a = A(), g = G(), rs = H().rules(g), s = a.UI.sel != null ? g.stars[a.UI.sel] : null, W = planetWords(g), r12 = RS12();
-  const q = qdCanvas(226, 62, 'Fleets');
+  const q = qdCanvas(226, 64, 'Fleets'); // (the window's 68 to 132: the fleet rect starts two rows under the planet's, Jake's shot015)
   const here = s ? a.fleetOrder(g.fleets.filter(f => f.star === s.id && f.to == null && f.owner === a.ME)) : [];
   const sel = here.find(f => f.id === a.UI.selFleet);
   FLEET_TOP = Math.max(0, Math.min(FLEET_TOP, here.length - 4));
   if (sel) {
     const L = rs.fleetInfo ? rs.fleetInfo(g, sel) : r12 ? r12.fleetInfo(langView(g), sel) : [];
     const first = L[0] || '', m = /^(.*?:) (.*)$/.exec(first);
-    if (m && !sel.scrap301 && !/ via /.test(first)) { q.text(m[1], 3, 6); q.text(m[2], 70, 6); } else q.text(first, 3, 6);
-    if (L[1]) q.text(L[1], 3, 16); if (L[2]) q.text(L[2], 70, 16); if (L[3]) q.text(L[3], 125, 16);
+    if (m && !sel.scrap301 && !/ via /.test(first)) { q.text(m[1], 3, 8); q.text(m[2], 70, 8); } else q.text(first, 3, 8);
+    if (L[1]) q.text(L[1], 3, 18); if (L[2]) q.text(L[2], 70, 18); if (L[3]) q.text(L[3], 125, 18);
   }
-  q.hline(0, 214, 18);
-  if (!here.length) q.text(W.noFleets || '', 3, 28);
+  q.hline(0, 214, 20);
+  if (!here.length) q.text(W.noFleets || '', 3, 30);
   here.slice(FLEET_TOP, FLEET_TOP + 4).forEach((f, i) => {
-    const top = 19 + 10 * i, ds = H().fleetDesigns(g, f), d = ds[0], n = H().fleetCount ? H().fleetCount(f) : Object.values(f.ships).reduce((x, y) => x + y, 0);
+    const top = 21 + 10 * i, ds = H().fleetDesigns(g, f), d = ds[0], n = H().fleetCount ? H().fleetCount(f) : Object.values(f.ships).reduce((x, y) => x + y, 0);
     // (a ruleset without shipsText: 1.2's line for a fleet of one design; the engine's own label, "6 ships", for a mixed fleet)
     const t = rs.shipsText ? (d ? rs.shipsText(g, d, n) : '') : ds.length === 1 && r12 ? r12.shipsText(langView(g), d, n) : H().fleetLabel(g, f);
     const font = f.dest != null ? G9B : G9, cond = q.width(t, font) > 214 - 3;
     q.text(t, 3, top + 8, font, { cond });
     if (f.id === a.UI.selFleet) { q.x.globalCompositeOperation = 'difference'; q.rect(0, top, 214, top + 10, '#fff'); q.x.globalCompositeOperation = 'source-over'; }
   });
-  // the scroll bar (an OS control: drawn plainly), 12 wide, from the rule to the foot
-  q.x.strokeStyle = '#000'; q.x.strokeRect(214.5, 18.5, 11, 41); if (here.length > 4) { const h = Math.max(6, 41 * 4 / here.length), y = 18.5 + (41 - h) * FLEET_TOP / (here.length - 4); q.rect(215, y, 225, y + h, '#888'); }
-  q.hline(0, 226, 59); q.hline(0, 226, 61); q.vline(225, 0, 62);
+  // the list's scroll bar, 12 wide, from the rule (the window's 88) to the first of the two rules under it (129, 131): shot015
+  drawBar(q.x, 214, 20, true, 42, 12, { on: true, value: FLEET_TOP, max: Math.max(0, here.length - 4) });
+  q.hline(0, 226, 61); q.hline(0, 226, 63); q.vline(225, 0, 64);
   q.c.addEventListener('click', (ev) => { // ClickInFleetRect @c67d0: a row selects its fleet
-    const pt = q.at(ev); if (pt.h >= 214 || pt.v < 19) return;
-    const f = here[FLEET_TOP + Math.floor((pt.v - 19) / 10)]; if (f) { a.UI.selFleet = f.id; a.renderPanel(); a.draw(); }
+    const pt = q.at(ev);
+    if (pt.h >= 214) { if (here.length > 4 && pt.v >= 20 && pt.v < 62) { FLEET_TOP += pt.v < 41 ? -1 : 1; a.renderPanel(); } return; } // (the bar: a row up or down)
+    if (pt.v < 21) return;
+    const f = here[FLEET_TOP + Math.floor((pt.v - 21) / 10)]; if (f) { a.UI.selFleet = f.id; a.renderPanel(); a.draw(); }
   });
   q.c.addEventListener('wheel', (ev) => { if (here.length <= 4) return; ev.preventDefault(); FLEET_TOP += ev.deltaY > 0 ? 1 : -1; a.renderPanel(); }, { passive: false });
   return a.el('section', { class: 'box fleets12' }, q.c);
@@ -2158,7 +2163,7 @@ function lowBox12(B) {
   drawBar(x, 67, 0, true, HT, 12, { on: true, value: LOW12.pTop, max: Math.max(0, order.length - prow) });
   // DrawHBarControl
   const x0 = 124, sc = a.budgetScale(), log = sc.id === 'log';
-  q.text('0%', x0, 13, G9); q.text(log ? Wd.log : Wd.lin, 146, 13, G9); q.text('100%', 0, 13, G9, { right: 202 });
+  q.text('0%', x0, 13, G9); q.text(log ? Wd.log : Wd.lin, log && lang() !== 'fr' ? 153 : 147, 13, G9); q.text('100%', 0, 13, G9, { right: 203 }); // ("Lin" at 147 and "100%" ending at 202 in shot010; English "Linear" / "Log" at 2.0.1's 147 / 153, as the 3.0.1 skin has them)
   for (let k = 1; k <= 10; k++) { const tx = x0 + (log ? hPercBar(100 * k) : Math.trunc(77 * k / 10)); q.vline(tx, 14, 16); }
   q.hline(123, 226, 16);
   const ents = B.ents || [], brow = Math.trunc((FOOT - 16) / 14);
@@ -2174,7 +2179,7 @@ function lowBox12(B) {
   let y = 16; const tb = [];
   slots.slice(LOW12.bTop, LOW12.bTop + brow).forEach((e) => {
     const pm = Math.round(e.get() * 1000), len = Math.min(77, lenOf(pm)), st = e.star != null ? g.stars[e.star] : null;
-    const losing = !!(st && H().planetIncome(g, p, st) < 0);
+    const losing = !!(st && (st.oInc != null ? st.oInc : H().planetIncome(g, p, st)) < 0); // (the slot's +0x3c1, set from the income the last turn left)
     q.vline(123, y, y + 14);
     x.fillStyle = losing ? orPat(x, GRAY, '#000') : '#000'; x.fillRect(x0, y + 5, len, 9);
     if (losing) { const mn = rs.minShare ? rs.minShare(g, p, st.id) : 0; const tx = mn > 1000 ? 202 : x0 + Math.min(78, lenOf(mn)); q.vline(tx, y + 3, y + 15); }
