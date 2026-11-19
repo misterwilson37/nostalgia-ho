@@ -3872,6 +3872,11 @@ window.HOMAC12 = {
   // the map window's scroll bars and the whole-cell scrolling they give (above); dragging the map with a mouse and the wheel are modern conveniences
   mapInset: () => (barsOn() ? [BAR12 * MACS.s, BAR12 * MACS.s] : [0, 0]),
   mapPixel: macPixel,
+  // no fleet markers on the map, as 1.2 and 2.0.1 draw none (Jake's captures: fleets at Gemini, nothing beside it; the remake's markers boxed the
+  // selected fleet's ship in yellow): the selected fleet is picked up from its star by an unseen handle, as FollowPathDrag does (3.0.1's markerAt)
+  // (getters: under a later version's rules this skin keeps the remake's markers)
+  get marker() { return own() ? () => 'none' : undefined; },
+  get markerAt() { return own() ? (f, i) => { if (!i.mine) return null; const a = A(), here = a.fleetOrder(a.G.fleets.filter(x => x.owner === a.ME && x.star === i.s.id && x.to == null)), cur = here.find(x => x.id === a.UI.selFleet) || here[0]; if (!cur || f.id !== cur.id) return null; const u = i.view.s / 2, d = u >= 17 ? 32 * Math.max(1, u / 17) : u < 7 ? u + 4 : 16; return { x: i.x - d / 2, y: i.y - d / 2, w: d, hidden: true }; } : undefined; },
   modernPan: () => barsOn(),
   syncView: syncMapView, afterDraw: updateBars, centerOnStar: centerOnStar12,
   zoomed: (i) => { if (barsOn() && i.menu) MB.centerSel = true; },

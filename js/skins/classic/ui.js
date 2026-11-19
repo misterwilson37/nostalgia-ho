@@ -868,12 +868,11 @@ function drawMarkers(f, dx, dy, w, dir) {
   if (T.marker) { // the theme draws one picture per fleet
     const k = T.marker(f, f.owner === ME), im = k && IMG[k];
     if (im) cx.drawImage(im, dx, dy, w, w);
-    if (im && UI.selFleet === f.id) { cx.strokeStyle = '#ffe066'; cx.lineWidth = 2; cx.strokeRect(dx - 1, dy - 1, w + 2, w + 2); }
     return { x: dx, w: im ? w : 0 };
   }
   const ims = fleetMarkers(f), n = Math.max(1, ims.length), span = n * w + (n - 1) * 2;
   const left = dir < 0 ? dx + w - span : dx;
-  cx.fillStyle = UI.selFleet === f.id ? '#ffe066' : (f.owner === ME ? '#f4f7ff' : '#ffe3f1');
+  cx.fillStyle = f.owner === ME ? '#f4f7ff' : '#ffe3f1'; // (no yellow box for the selected fleet: no original drew one, Jake 19 Nov; the fleet pane shows which is selected)
   cx.beginPath(); cx.roundRect(left - 2, dy - 2, span + 4, w + 4, 3); cx.fill();
   ims.forEach((im, i) => { if (im) cx.drawImage(im, dir < 0 ? dx - i * (w + 2) : dx + i * (w + 2), dy, w, w); });
   return { x: left, w: span };
@@ -901,7 +900,6 @@ function drawDots(s, x, y, ps) {
     if (f.sat) { dx = x - ps / 2 - w - 1; dy = y - ps / 2 + li * (w + 2); li++; dir = -1; }
     else { dx = x + ps / 2 + 1; dy = y - ps / 2 + ri * (w + 2); ri++; }
     const box = drawMarkers(f, dx, dy, w, dir);
-    if (f.dest != null && mine) { cx.fillStyle = '#ffe066'; cx.fillRect(box.x + box.w - 4, dy, 4, 4); }
     UI.dots.push({ x: box.x, y: dy, w: box.w, h: w, f: f.id, star: s.id, mine, sat: f.sat });
   }
 }
