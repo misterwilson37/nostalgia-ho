@@ -58,6 +58,20 @@ const MAX_DESIGNS = 30; // CONFIRMED (string 540; FUN_004639ba: 0x1e)
 // ship classes by number: 0 Scout, 1 Dreadnought, 2 Fighter, 3 Tanker, 4
 // Colony Ship, 5 Satellite, 6 Biological. A decoy is a Fighter with Mini -1.
 const CLASS = { scout: 0, dread: 1, fighter: 2, decoy: 2, tanker: 3, colony: 4, satellite: 5, bio: 6 };
+// CONFIRMED (Windows FUN_00401b6e's sprintf at 59c48c / 59c49c / 59c4b0; Mac MakeFleetDescription @f0c26, the same three formats in its
+// data): a fleet is named by its design, as 3.0.1's: "%s (%d/%d) %s" (no ships), "%s %s (%d/%d) %s" with "one" (Windows string 1364,
+// Mac STR# 6170.35), "%d %s (%d/%d) %ss": the design's name, its weapons and shields, the class from the table of class names (STR# 6080:
+// Scout, Dreadnought, Fighter, Tanker, Colony Ship, Satellite, Biological, Decoy) by the class number, so a decoy is a "Fighter" (class 2),
+// except where the caller passes 1 and the design is a decoy (+0x22 == 1): then "Decoy". The callers that pass 1 are the owner's own
+// views (the arrival, scrap, colonize and destination reports, the fleet rows, List All Fleets, the ship types); the battles and other
+// players' rows pass 0. The remake's fleetLabel names your own fleets, so the description here is the owner's. The Mac cuts it at 39
+// characters (@f0d50, cmpi.b #$27); Windows keeps it whole (a CString): rs.fleetDescAt(39) is the Mac's (js/rules-mac405.js).
+const CLASS_NAMES = ['Scout', 'Dreadnought', 'Fighter', 'Tanker', 'Colony Ship', 'Satellite', 'Biological', 'Decoy'];
+const fleetDescAt = (cut, owner = true) => (G, f, d, n) => {
+  const T = owner && d.type === 'decoy' ? 'Decoy' : CLASS_NAMES[CLASS[d.type]] || (E.TYPES[d.type] || {}).name || d.type;
+  const t = n < 1 ? `${d.name} (${d.W}/${d.S}) ${T}` : n === 1 ? `one ${d.name} (${d.W}/${d.S}) ${T}` : `${n} ${d.name} (${d.W}/${d.S}) ${T}s`;
+  return cut ? t.slice(0, cut) : t;
+};
 // 4.0.5's own text tables (SPACEHO.EXE strings). TECHNAMES[k][L - 1] is the
 // name shown for level L: string base + L (bases 841, 861, 881, 1892, 911 in
 // the table at 0x59d2ac, read by FUN_0046ec5a), which is the next level's
@@ -2563,6 +2577,7 @@ E.registerRules('405', Object.assign({}, D, {
   starNames: STAR_NAMES, maleNames: MALE_NAMES, femaleNames: FEMALE_NAMES,
   femaleComputers: 0.5,    // CONFIRMED (FUN_004768cc): each computer is a man or a woman at rand(0, 1)
   shipNames: SHIP_NAMES, designName, welcome: WELCOME,
+  fleetDesc: fleetDescAt(0), fleetDescAt, // (Windows' whole; the Mac's cut: js/rules-mac405.js)
   SKILLS, HIT, hit, SHAPES, SIZES, RANKS, CLASS, interestOn, techLevelCost, research, aiSpec, techMsg, radical, dealHand,
   setupPlayer, defaultDesigns, afterSetup, computerSetup, makeGalaxy, distance, galaxySizes: O.galaxySizes,
   designCost, designLimits, designMin, paysPrototype, shotsPerShip, planetShots, borrowLimit,
