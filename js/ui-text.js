@@ -1339,6 +1339,7 @@ root.HOUI.add([
 ['Revert To Saved…', 'Ouvrir Précédent…', 'Letzte Version…', 'Kaydedilene dön…', 'Volver a lo guardado…', { fr: '1.2F' }],
 // Mac 3.0.1's menus (MENU 128-133, STR# 1010; js/skins/mac12/ui.js menuLayout301): the French is 3.0.1F's own
 ['About Spaceward Ho! 3.0…', 'A propos de Spaceward Ho! 3.0…', 'Über Spaceward Ho! 3.0…', 'Spaceward Ho! 3.0 hakkında…', 'Acerca de Spaceward Ho! 3.0…', { fr: '3.0.1F' }],
+['About Spaceward Ho! 4.0…', 'A propos de Spaceward Ho! 4.0…', 'Über Spaceward Ho! 4.0…', 'Spaceward Ho! 4.0 hakkında…', 'Acerca de Spaceward Ho! 4.0…'], // (the Mac 4.0.5 skins' Ho! menu, as 3.0.1's above: 4.0.5 had no French edition)
 ['Save', 'Enregistrer...', 'Sichern', 'Kaydet', 'Guardar', { fr: '3.0.1F' }],
 ['Print…', 'Imprimer…', 'Drucken…', 'Yazdır…', 'Imprimir…', { fr: '3.0.1F' }],
 ['Hall Of Fame…', 'Pour les meilleurs…', 'Ruhmeshalle…', 'Şeref Listesi…', 'Salón de la Fama…', { fr: '3.0.1F' }],
