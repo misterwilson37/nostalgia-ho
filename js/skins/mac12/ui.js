@@ -2374,8 +2374,11 @@ function planetBox301() {
 const FLT301 = { top: 0 };
 const GRAY = [0xaa, 0x55, 0xaa, 0x55, 0xaa, 0x55, 0xaa, 0x55];
 const orPat = (x, rows, colour) => { const t = document.createElement('canvas'); t.width = t.height = 8; const c = t.getContext('2d'); c.fillStyle = colour; rows.forEach((r, v) => { for (let h = 0; h < 8; h++) if (r & (0x80 >> h)) c.fillRect(h, v, 1, 1); }); return x.createPattern(t, 'repeat'); };
+// (4.0.5's STR# 6170 has 3.0.1's STR# 4000 lines at four places less: "There are no fleets at this planet." 6170.7 = 4000.11 ... "Scrap: %s"
+// 6170.17 = 4000.21, the same words; DrawSelectedFleetInfo @114c12 reads them there)
+const FLEETWORDS = () => (V4 ? [0, 0, 0, 0].concat(STR405(6170)) : STR301(4000));
 function fleetInfo301(g, f) {
-  const S = STR301(4000), star = (i) => g.stars[i].name, sp = H().fleetSpeed(g, f), L = [];
+  const S = FLEETWORDS(), star = (i) => g.stars[i].name, sp = H().fleetSpeed(g, f), L = [];
   if (f.scrap301) L.push([S[11] || 'Fleet to be scrapped for metal.']);
   else if (f.dest == null) L.push([S[12] || 'Stationed at:', star(f.star)]);
   else {
@@ -2389,43 +2392,54 @@ function fleetInfo301(g, f) {
   const ds = H().fleetDesigns(g, f), col = ds.some(d => d.type === 'colony');
   let third;
   if (col) third = (f.colonists || 0) > 0 ? (S[18] || 'Full') : (S[19] || 'Empty');
-  else { let m = 0; for (const k in f.ships) { const d = H().getDesign(g, f.owner, +k); if (d) m += f.ships[k] * H().designCost(g, d).metal; } third = cfmt(S[20] || 'Scrap: %s', H().niceNum(Math.trunc(m * 3 / 4))); }
+  else {
+    let m = 0; for (const k in f.ships) { const d = H().getDesign(g, f.owner, +k); if (d) m += f.ships[k] * H().designCost(g, d).metal; }
+    // (4.0.5, DrawSelectedFleetInfo @114c12: 7/8 once the player has improved the recycling program, player +0x5c bit 0x10; else 3/4)
+    const own = g.players[f.owner], rec = V4 && own && own.flags && own.flags.recycle;
+    third = cfmt(S[20] || 'Scrap: %s', H().niceNum(rec ? Math.trunc(m * 7 / 8) : Math.trunc(m * 3 / 4)));
+  }
   L.push([cfmt(S[16] || 'Fuel: %d/%d', Math.round(f.fuel || 0), H().fleetMaxRange(g, f)), cfmt(S[17] || 'Speed: %d', sp), third]);
   return L;
 }
 function fleetBox301() {
-  const a = A(), g = G(), rs = H().rules(g), sid = a.UI.sel, s = sid != null ? g.stars[sid] : null, S = STR301(4000), col = COL301();
+  const a = A(), g = G(), rs = H().rules(g), sid = a.UI.sel, s = sid != null ? g.stars[sid] : null, S = FLEETWORDS(), col = COL301();
+  // (4.0.5 draws every line of the pane twice, white one pixel down and right, then black, on its grey (DrawSelectedFleetInfo @114c12,
+  // DrawOneFleet @1148d6), in the Mac's Geneva 9)
+  const T4 = V4 ? { shadow: '#fff' } : null, F9 = V4 ? G9M : G9, BG = col ? (V4 ? '#ccc' : RGB301.grey) : '#fff';
   const Y0 = 68, q = qdCanvas(226, 65, 'Fleets'), x = q.x, Y = (v) => v - Y0;
   const here = s ? a.fleetOrder(g.fleets.filter(f => f.star === s.id && f.to == null && f.owner === a.ME)) : [];
   const others = s && (s.owner === a.ME || here.length) ? g.fleets.filter(f => f.star === s.id && f.to == null && f.owner !== a.ME && !f.newThisTurn) : [];
   const total = here.length + others.length;
   FLT301.top = Math.max(0, Math.min(FLT301.top, total - 4));
+  // RecalcFleetsAtNewStar (3.0.1 @15078c, 4.0.5 @110644, the same start): the selected fleet is dropped when it isn't at the star, and the
+  // first of yours there becomes the selected one (Jake's 4.0.5 shots 008, 027, 065: the star's first fleet highlighted)
+  if (here.length && !here.some(f => f.id === a.UI.selFleet)) a.UI.selFleet = here[0].id;
   const sel = here.find(f => f.id === a.UI.selFleet);
   // DrawSelectedFleetInfo
-  q.rect(1, Y(68), 225, Y(89), col ? RGB301.grey : '#fff');
+  q.rect(1, Y(68), 225, Y(89), BG);
   if (sel) {
-    const L = fleetInfo301(g, sel);
-    q.text(L[0][0], 4, Y(76)); if (L[0][1]) q.text(L[0][1], 71, Y(76));
-    q.text(L[1][0], 4, Y(86)); q.text(L[1][1], 71, Y(86)); q.text(L[1][2], 126, Y(86));
+    const L = fleetInfo301(g, sel), t = (w, h0, v) => q.text(w, h0, v, F9, T4);
+    t(L[0][0], 4, Y(76)); if (L[0][1]) t(L[0][1], 71, Y(76));
+    t(L[1][0], 4, Y(86)); t(L[1][1], 71, Y(86)); t(L[1][2], 126, Y(86));
   }
   // DrawFleetRect: the list
-  q.rect(0, Y(90), 214, Y(130), col ? RGB301.grey : '#fff');
+  q.rect(0, Y(90), 214, Y(130), BG);
   const rows = [];
   here.forEach((f) => rows.push({ f }));
   others.forEach((f) => rows.push({ f, other: true }));
   rows.slice(FLT301.top, FLT301.top + 4).forEach((r, i) => {
     const top = Y(90 + 10 * i), f = r.f, selRow = !r.other && sel && f.id === sel.id;
     x.save(); x.beginPath(); x.rect(0, top, 214, 10); x.clip();
-    q.rect(0, top, 214, top + 10, selRow ? '#000' : col ? RGB301.grey : '#fff');
+    q.rect(0, top, 214, top + 10, selRow ? '#000' : BG);
     let t;
     if (r.other) t = rs.otherFleetRow ? (rs.otherFleetRow(langView(g), f) || '') : '';
     else t = H().fleetText(g, f);
-    const style = (r.other || f.newThisTurn ? 'italic ' : '') + (!r.other && f.dest != null ? 'bold ' : '') + '9px Geneva, Verdana, sans-serif';
-    q.text(t, 3, top + 8, style, { cond: q.width(t, style) > 214, color: selRow ? (col ? RGB301.grey : '#fff') : '#000' });
+    const style = (r.other || f.newThisTurn ? 'italic ' : '') + (!r.other && f.dest != null ? 'bold ' : '') + (V4 ? (!r.other && f.dest != null ? G9MB : G9M) : '9px Geneva, Verdana, sans-serif');
+    q.text(t, 3, top + 8, style, Object.assign({ cond: q.width(t, style) > 214, color: selRow ? (col ? BG : '#fff') : '#000' }, V4 && !selRow ? T4 : null));
     if (!r.other && f.scrap301) { x.fillStyle = orPat(x, GRAY, selRow ? (col ? '#000' : '#fff') : (col ? RGB301.grey : '#fff')); x.fillRect(0, top, 214, 10); }
     x.restore();
   });
-  if (!total) q.text(S[10] || 'There are no fleets at this planet.', 3, Y(99));
+  if (!total) q.text(S[10] || 'There are no fleets at this planet.', 3, Y(99), F9, T4);
   q.hline(0, 227, Y(89)); q.vline(225, 0, 65);
   q.rect(0, Y(130), 226, Y(133), '#000'); // DrawDragBarRect
   // the scroll bar (an OS control), 214..226 x 89..131: arrows at its ends, the thumb when there is more than fits
