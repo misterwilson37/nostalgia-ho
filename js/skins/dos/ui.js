@@ -462,7 +462,7 @@ function dosKeys() {
 }
 // F10, the program's boss key (FUN_9000_7450, which its event loop FUN_2000_fd17 calls on the key code 0x10c4, at any time, over any window): the screen goes to
 // text mode and shows a DOS prompt, "C:\>" in grey at its top left, until a key is pressed, then the program sets its graphics mode again and redraws its screen
-// (captured over the licence window: v20dos-orig-bosskey.png). Here a black page with the prompt in the screen font; a key or a click brings the page back.
+// (captured over the licence window: v20dos-orig-bosskey.png). Here a black page with the prompt in the VGA text mode's own 9 x 16 font (IBM VGA 9x16, int10h.org, CC BY-SA 4.0); a key or a click brings the page back.
 function bossKey() {
   document.addEventListener('keydown', (e) => {
     if (e.key !== 'F10' || e.ctrlKey || e.altKey || e.metaKey || e.shiftKey || !frameOn() || document.querySelector('.dd-boss')) return;

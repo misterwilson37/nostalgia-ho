@@ -14,3 +14,9 @@ Ho*.woff2              the Amiga skin's bitmap fonts: the Amiga game's own HoFon
                        tools/amiga-font.py (HoFont13.woff2 square pixels, HoFont13Tall.woff2
                        tall ones, and so on). They come with the game, like its art and
                        sounds in assets/skins/amiga/.
+
+In assets/skins/dos/fonts/ (the DOS skin):
+ibmvga9x16.woff        IBM VGA 9x16 (code page 437), "Web437_IBM_VGA_9x16" from the Ultimate Oldschool PC Font Pack v2.2
+                       by VileR, https://int10h.org/oldschool-pc-fonts/ , licensed CC BY-SA 4.0
+                       (LICENSE-int10h-CC-BY-SA-4.0.txt beside it). Used only for the text-mode DOS prompt (F10).
+                       The game's own screens use the program's own fonts (bios8x14, geneva9, chicago12: HO.PRS).
