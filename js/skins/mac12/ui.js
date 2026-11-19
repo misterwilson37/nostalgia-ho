@@ -2378,7 +2378,7 @@ function lowBox12(B) {
   drawBar(x, 67, 0, true, HT, 12, { on: true, value: LOW12.pTop, max: Math.max(0, order.length - prow) });
   // DrawHBarControl
   const x0 = 124, sc = a.budgetScale(), log = sc.id === 'log';
-  q.text('0%', x0, 13, G9); q.text(log ? Wd.log : Wd.lin, log && lang() !== 'fr' ? 153 : 147, 13, G9); q.text('100%', 0, 13, G9, { right: 203 }); // ("Lin" at 147 and "100%" ending at 202 in shot010; English "Linear" / "Log" at 2.0.1's 147 / 153, as the 3.0.1 skin has them)
+  q.text('0%', x0, 13, G9); q.text(log ? Wd.log : Wd.lin, log ? 153 : 147, 13, G9); q.text('100%', 0, 13, G9, { right: 203 }); // ("Lin" at 147 and "100%" ending at 202 in shot010; English "Linear" / "Log" at 2.0.1's 147 / 153, as the 3.0.1 skin has them)
   for (let k = 1; k <= 10; k++) { const tx = x0 + (log ? hPercBar(100 * k) : Math.trunc(77 * k / 10)); q.vline(tx, 14, 16); }
   q.hline(123, 226, 16);
   const ents = B.ents || [], brow = Math.trunc((FOOT - 16) / 14);
