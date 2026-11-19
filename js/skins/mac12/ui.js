@@ -1235,23 +1235,45 @@ function organize(f0) {
   const fleets = g.fleets.filter(f => f.owner === a.ME && f.star === f0.star && f.to == null && Object.keys(f.ships).length === 1 && +Object.keys(f.ships)[0] === did);
   const piles = fleets.map(f => ({ f, n: f.ships[did] }));
   let sel = null; // { pile, all }
-  const box = el('div', { class: 'piles12' });
+  // OrganizeFleets @113896 / DRAWORGFLEETS @113ea8, DrawOneOrgFleet @113f10 (Jake's captures organize-*): each pile one cell, the small picture
+  // (120 x 40) with its count at the left, the piles down the box 50 pixels apart (3 to a column, the next column 135 to the right); the chosen
+  // pile inverted; a drag carries a dotted outline of the cell, and dropping it on a pile moves one ship there (Shift: the whole pile), below
+  // the piles makes a new one. A click alone chooses the pile.
+  const box = el('div', { class: 'org12', style: 'position:relative;overflow:hidden;background:#fff' });
+  const cellAt = (i) => [16 + 135 * Math.floor(i / 3), 1 + 50 * (i % 3)];
+  const shown = () => piles.map((p, i) => ({ p, i })).filter(o => o.p.n || o.p.f);
   const show = () => {
     box.innerHTML = '';
-    piles.forEach((p, i) => {
-      if (!p.n && !p.f) return;
-      const col = el('div', { class: 'pile', ondragover: (e) => e.preventDefault(), ondrop: (e) => { e.preventDefault(); moveTo(i); }, onclick: (e) => { if (sel && sel.pile !== i && e.target === col) moveTo(i); } });
-      for (let k = 0; k < p.n; k++) {
-        const sh = el('div', { class: 'ship' + (sel && sel.pile === i && (sel.all || k === p.n - 1) ? ' sel' : ''), draggable: 'true',
-          onclick: (e) => { e.stopPropagation(); if (sel && sel.pile !== i) { moveTo(i); return; } sel = { pile: i, all: e.shiftKey }; show(); },
-          ondragstart: (e) => { sel = { pile: i, all: e.shiftKey || (sel && sel.pile === i && sel.all) }; try { e.dataTransfer.setData('text/plain', 'ship'); } catch (x) {} } },
-          a.shipImgEl(d, 24));
-        col.append(sh);
-      }
-      box.append(col);
+    shown().forEach(({ p, i }, k) => {
+      if (!p.n) return;
+      const [x, y] = cellAt(k), on = sel && sel.pile === i;
+      const cell = el('div', { class: 'opile' + (on ? ' sel' : ''), 'data-pile': i, role: 'button', tabindex: 0, 'aria-label': `${p.n} × ${d.name}`, style: `position:absolute;left:${x}px;top:${y}px;width:128px;height:43px` },
+        raw('span', String(p.n), { class: 'ocount' }), a.shipImgEl(d, 40));
+      box.append(cell);
     });
-    box.append(el('div', { class: 'pile new', ondragover: (e) => e.preventDefault(), ondrop: (e) => { e.preventDefault(); moveTo(-1); }, onclick: () => { if (sel) moveTo(-1); } }));
   };
+  // the drag: pointer events (a mouse and a finger alike), the outline following the pointer
+  let drag = null;
+  box.addEventListener('pointerdown', (e) => {
+    const cell = e.target.closest('.opile'); if (!cell) return;
+    e.preventDefault(); const i = +cell.dataset.pile, r = box.getBoundingClientRect(), z = r.width / box.offsetWidth || 1;
+    sel = { pile: i, all: e.shiftKey }; show();
+    const ghost = el('div', { class: 'oghost', style: `position:absolute;width:128px;height:43px;left:${cell.offsetLeft}px;top:${cell.offsetTop}px` });
+    drag = { i, ghost, dx: (e.clientX - r.left) / z - cell.offsetLeft, dy: (e.clientY - r.top) / z - cell.offsetTop, moved: false, z };
+    try { box.setPointerCapture(e.pointerId); } catch (x) {}
+  });
+  box.addEventListener('pointermove', (e) => {
+    if (!drag) return; const r = box.getBoundingClientRect(), x = (e.clientX - r.left) / drag.z - drag.dx, y = (e.clientY - r.top) / drag.z - drag.dy;
+    if (!drag.moved && Math.hypot(x - drag.ghost.offsetLeft, y - drag.ghost.offsetTop) > 3) { drag.moved = true; box.append(drag.ghost); }
+    drag.ghost.style.left = x + 'px'; drag.ghost.style.top = y + 'px';
+  });
+  const drop = (e) => {
+    if (!drag) return; const g0 = drag; drag = null; g0.ghost.remove(); if (!g0.moved || e.type === 'pointercancel') return;
+    const r = box.getBoundingClientRect(), x = (e.clientX - r.left) / g0.z, y = (e.clientY - r.top) / g0.z;
+    const hit = shown().filter(o => o.p.n).map(({ i }, k) => ({ i, at: cellAt(k) })).find(o => x >= o.at[0] && x < o.at[0] + 128 && y >= o.at[1] && y < o.at[1] + 43);
+    moveTo(hit ? hit.i : -1);
+  };
+  box.addEventListener('pointerup', drop); box.addEventListener('pointercancel', drop);
   const moveTo = (i) => {
     if (!sel) return;
     const from = piles[sel.pile], n = sel.all ? from.n : 1;
@@ -1280,7 +1302,18 @@ function organize(f0) {
     for (const p of piles) if (!p.f && p.n > 0) take(p.n);
     a.closeModal(); a.save(); a.renderPanel(); a.draw();
   };
-  if (V2) { // DLOG 6060 (439 x 285, DITL 6060): the heading (0, 13), the two lines (18, 16) and (35, 16), the piles (56, 12, 405 x 180), the buttons at y 249: Group All (45), Divide All (131), Cancel (232), OK (340)
+  if (!V2 && lang() === 'fr') { // 1.2F's DITL 6060 (439 x 285): the heading (13, 5), the two lines (16, 21) and (16, 35), the piles (12, 56, 405 x 180), Tout regrouper (11, 249), Tout diviser (126, 249), Annuler (263, 249), OK (340, 249)
+    const b2 = (t, fn, r, def) => put20(el('button', { type: 'button', class: 'ok20' + (def ? ' def20' : ''), onclick: fn }, raw('span', t)), r);
+    const grp = () => { const t = piles.reduce((x, p) => x + p.n, 0); piles.forEach((p, i) => { p.n = i ? 0 : t; }); sel = null; show(); };
+    const dvd = () => { const t = piles.reduce((x, p) => x + p.n, 0); piles.forEach(p => { p.n = 0; }); for (let k = 0; k < t; k++) { if (k < piles.length) piles[k].n = 1; else piles.push({ f: null, n: 1 }); } sel = null; show(); };
+    box.style.border = '1px solid #000'; box.style.boxSizing = 'border-box';
+    const T = (t, r) => { const n = txt20(t, r); n.style.whiteSpace = 'nowrap'; n.style.overflow = 'visible'; return n; };
+    a.modal('', dlog20(439, 285, T('Pour organiser les flottes:', [5, 13, 20, 207]), T('•\u00a0Cliquer et tirer chaque vaisseau vers le groupe final.', [21, 16, 37, 427]), T('•\u00a0Shift-Clic sélectionne un groupe de vaisseaux.', [35, 16, 51, 362]),
+      put20(box, [56, 12, 236, 417]), b2('Tout regrouper', grp, [249, 11, 271, 117]), b2('Tout diviser', dvd, [249, 126, 271, 214]), b2('Annuler', () => a.closeModal(), [249, 263, 271, 328]), b2('OK', apply, [249, 340, 269, 412], true)), { cls: 'mac12 dl20w dlg6010', label: 'Pour organiser les flottes' });
+    return;
+  }
+  if (V2 || lang() !== 'fr') { // DLOG 6060 (439 x 285, DITL 6060): the heading (0, 13), the two lines (18, 16) and (35, 16), the piles (56, 12, 405 x 180), the buttons at y 249: Group All (45), Divide All (131), Cancel (232), OK (340)
+    box.style.border = '1px solid #000'; box.style.boxSizing = 'border-box';
     const b2 = (t, fn, r) => put20(el('button', { type: 'button', class: 'ok20', onclick: fn }, raw('span', t)), r);
     const grp = () => { const t = piles.reduce((x, p) => x + p.n, 0); piles.forEach((p, i) => { p.n = i ? 0 : t; }); sel = null; show(); };
     const dvd = () => { const t = piles.reduce((x, p) => x + p.n, 0); piles.forEach(p => { p.n = 0; }); for (let k = 0; k < t; k++) { if (k < piles.length) piles[k].n = 1; else piles.push({ f: null, n: 1 }); } sel = null; show(); };

@@ -200,3 +200,9 @@ html:not(.mac301lay) :is(#panel, .p301x) .rep12box .rbar12 canvas { display: blo
 html:not(.mac301lay) :is(#panel, .p301x) .rep12box canvas.grow12 { position: absolute; right: 0; bottom: 0; width: 16px; height: 16px; image-rendering: pixelated; }
 /* a dialog's edit text: the selection inverted, as TextEdit draws it in black and white (Jake's rename capture) */
 .ct6010 input[type=text]::selection { background: #000; color: #fff; }
+/* Organize Ships' piles (organize: DRAWORGFLEETS): the count at the cell's left, the picture, the chosen pile inverted, the dotted outline of a drag */
+.org12 .opile { display: flex; align-items: flex-end; gap: 0; cursor: default; touch-action: none; user-select: none; }
+.org12 .opile .ocount { width: 14px; padding-left: 0; margin-left: -12px; font: 15px/1 'DOS Chicago 12', Chicago, sans-serif; text-align: left; }
+.org12 .opile img { display: block; height: 40px; width: auto; image-rendering: pixelated; }
+.org12 .opile.sel { background: #000; } .org12 .opile.sel img { filter: invert(1); }
+.org12 .oghost { border: 1px dotted #000; pointer-events: none; box-sizing: border-box; }
