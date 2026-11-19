@@ -1831,7 +1831,7 @@ function qdCanvas(w, h, label) { // a box drawn at twice its pixels, as wide as 
   x.textBaseline = 'alphabetic'; x.fillStyle = '#000'; x.strokeStyle = '#000'; x.lineWidth = 1;
   const api = {
     c, x,
-    text(t, h0, v, font, o) { c.dataset.t = (c.dataset.t ? c.dataset.t + '\n' : '') + t; /* (what the box says, for a reader or a test: the canvas has no text of its own) */ x.font = font || G9; x.letterSpacing = o && o.cond ? '-1px' : '0px'; x.fillStyle = (o && o.color) || '#000'; const w0 = x.measureText(t).width; const at = o && o.right != null ? o.right - w0 : o && o.center != null ? o.center - Math.trunc(w0 / 2) : h0; x.fillText(t, at, v); x.letterSpacing = '0px'; return w0; },
+    text(t, h0, v, font, o) { c.dataset.t = (c.dataset.t ? c.dataset.t + '\n' : '') + t; /* (what the box says, for a reader or a test: the canvas has no text of its own) */ x.font = font || G9; x.letterSpacing = o && o.cond ? '-1px' : '0px'; x.fillStyle = (o && o.color) || '#000'; const w0 = x.measureText(t).width; const at = o && o.right != null ? o.right - w0 : o && o.center != null ? o.center - Math.trunc(w0 / 2) : h0; if (o && o.shadow) { /* (drawn first one pixel down and right in the shadow's colour, then in its own: 4.0.5's panes) */ x.fillStyle = o.shadow; x.fillText(t, at + 1, v + 1); x.fillStyle = o.color || '#000'; } x.fillText(t, at, v); x.letterSpacing = '0px'; return w0; },
     width(t, font) { x.font = font || G9; return x.measureText(t).width; },
     hline(h0, h1, v) { x.fillStyle = '#000'; x.fillRect(h0, v, h1 - h0, 1); },
     vline(h0, v0, v1) { x.fillStyle = '#000'; x.fillRect(h0, v0, 1, v1 - v0); },
@@ -2138,7 +2138,41 @@ const cfmt = (t, ...v) => { let i = 0; return t.replace(/%(\.\*)?(\d*)(?:\.(\d+)
 // Total Money (+8, "$%s"). Then plain, right-aligned at the right edge less 1: the metal's change ((+0x24) "(up %s)" / "(down %s)", 1005.7
 // and .8, in full), the interest (+0x14, the program's own "(Int: %s)", LongToNiceShortString) and Total Money's change ((+0xc) "(up $%s)" /
 // "(down $%s)", 1005.5 and .6, short). A line along the bottom less 2, and one down the right edge less 1.
+// 4.0.5's words (HOLANG.mac405En: its STR# lists by number; English only, as the program is)
+const STR405 = (id) => { const L = window.HOLANG && HOLANG.mac405En; return (L && L[String(id)]) || []; };
+// Mac 4.0.5's DrawIncomeRect @113340, the same three rows as 3.0.1's in its own words and look: Geneva (TextFont 3) bold, on a colour
+// screen (depth 4 or more) the pane painted grey first (RGBForeColor, #cccccc in Jake's shot 012) and on a 1-bit one erased; every
+// string drawn twice, white (ForeColor 30) one pixel down and right, then black (33) on it. Left, right-aligned at 87: "Metal:",
+// "Savings:", "Net Income:" (STR# 6070.4, .2, .3) on baselines 10, 20, 30; at 90 the metal (player +0x1c, LongToNiceString), the savings
+// (+0x10, "$%s" 6070.9; ForeColor 205, red, below zero) and the net income (+8, "$%s"). Then plain (TextFace 0), right-aligned at the
+// pane's right less 1: the metal's change ("(up %s)" / "(down %s)", .7 / .8, in full), the interest (+0x14, "(Int: $%s)" .10,
+// LongToNiceShortString) and the net income's change ("(up $%s)" / "(down $%s)", .5 / .6, short). A line along the bottom less 2 and one
+// down the right edge less 1, as 3.0.1's. (The remake's p.net301 is the +8 the rules keep: equal to HO.projected's net each turn.)
+// (4.0.5's panes in the Mac's own Geneva 9, plain and bold: the bitmap faces the DOS skin carries, js/skins/dos/style.css, at 12 CSS pixels a 9-point
+// line as the battle window's GEN93; the 3.0.1 panes' G9 / G9B fall back to the system's Geneva or Verdana)
+const G9M = "12px 'DOS Geneva 9', Geneva, Verdana, sans-serif", G9MB = "12px 'DOS Geneva 9 Bold', Geneva, Verdana, sans-serif";
+function incomeBox405() {
+  const a = A(), g = G(), p = a.me(), S = STR405(6070), col = COL301();
+  const q = qdCanvas(226, 34, S[3] || 'Metal:');
+  if (col) q.rect(0, 0, 226, 32, '#ccc');
+  const sh = { shadow: '#fff' };
+  const L = (t, v) => q.text(t, 0, v, G9MB, Object.assign({ right: 87 }, sh));
+  const V = (t, v, color) => q.text(t, 90, v, G9MB, Object.assign({ color }, sh));
+  const R = (t, v) => q.text(t, 0, v, G9M, Object.assign({ right: 225 }, sh));
+  L(S[3] || 'Metal:', 10); L(S[1] || 'Savings:', 20); L(S[2] || 'Net Income:', 30);
+  V(H().niceNum(Math.round(p.metal)), 10);
+  V(fill(S[8] || '$%s', H().niceNum(Math.round(p.savings))), 20, p.savings < 0 && col ? '#dd0000' : null);
+  V(fill(S[8] || '$%s', H().niceNum(Math.round(p.net301 || 0))), 30);
+  const ch = (which) => { const c = (p.chg && p.chg[which]) || 0, up = c >= 0, n = Math.abs(Math.round(c));
+    return which === 'metal' ? fill(S[up ? 6 : 7] || (up ? '(up %s)' : '(down %s)'), H().niceNum(n)) : fill(S[up ? 4 : 5] || (up ? '(up $%s)' : '(down $%s)'), H().niceShort(n)); };
+  R(ch('metal'), 10);
+  R(fill(S[9] || '(Int: $%s)', H().niceShort(Math.round(p.oInterest || 0))), 20);
+  R(ch('income'), 30);
+  q.hline(0, 227, 32); q.vline(225, 0, 34);
+  return a.el('section', { class: 'box info12 info301 info405' }, q.c);
+}
 function incomeBox301() {
+  if (V4) return incomeBox405();
   const a = A(), g = G(), p = a.me(), rs = H().rules(g), S = STR301(1005), col = COL301();
   const q = qdCanvas(226, 34, S[3] || 'Reserve Metal:');
   if (col) q.rect(0, 0, 226, 32, '#bbb');
@@ -3324,7 +3358,7 @@ function afterTurn12(go) {
 if (V3) {
   document.documentElement.classList.add('mac301');
   // (the battle window's canvas text needs its bitmap faces loaded before its first frame)
-  try { if (document.fonts) { document.fonts.load(SYS3); document.fonts.load(GEN93); } } catch (e) { /* (an old browser draws with the fallbacks) */ }
+  try { if (document.fonts) { document.fonts.load(SYS3); document.fonts.load(GEN93); if (V4) { document.fonts.load("12px 'DOS Geneva 9 Bold'"); document.fonts.load("12px 'DOS Geneva 9'").then(() => { const a = A(); if (a && a.G) a.renderPanel(); }); } } } catch (e) { /* (an old browser draws with the fallbacks) */ }
   window.HOMAC301 = {
     get ownPanel() { return !!G() && own(); },
     // (the New Game window, for 3.0.1's own rules: its Create New Galaxy dialog over the form)
