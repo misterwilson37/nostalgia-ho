@@ -58,3 +58,11 @@ Run `tools/real-play.js --skin=mac12,mac2,mac3,dos --size=desktop,phone-l` after
 - **DOS 8x14 punctuation:** curly quotes, en and em dashes, the ellipsis, the euro, oe, A-grave and a few symbols now come from the Oldschool PC Font Pack's Plus 8x14 face (the same VGA design) instead of a smoothed face.
 - **Palm OS Turkish:** the six letters from the Turkish Interpilot language database (Interpilot 2.5 by Sergey Menshikov, discontinued; free to download, no licence text: private repo `originals/fonts/palm/SOURCE.md`),
   `assets/skins/palm/fonts/palmos-turkish.ttf` and `palmos-bold-turkish.ttf`.
+
+## Done, 19 Nov 2026 (fourth pass: sizes; regression)
+- **Sizes:** `js/os/pixel-sizes.css` puts the remake's own screens (title, New Game, About, Help, the lists) at each font's native size or a whole multiple (Chicago and Geneva 12px, the 8x14 14px, MS Sans Serif and Palm
+  11px; the title 3x, the difficulty number 2x). Left as they are: the game panels of each skin (the 4.0.5 Mac panel's 9 to 14px Geneva, the 4.0.5 Windows panel's 12px weight-600 labels, the Palm 12 to 14px sums), and
+  the DOS frame's 1.5x zoom (19.5px = 13 x 1.5).
+- **Regression, 19 Nov:** tests 405, dos, 301, original, 12, palm, mac20, mac405 run clean; notes-check ok; human-play ok; ui-lang-audit over mac12, mac2, mac3, mac4, dos, w95, palm, amiga: 4 findings, all
+  in the w95 skin's wording (a French word in the English and Spanish New Game, "Product." and "Maximum" untranslated in Build Ships): not font findings; real-play (each skin with its ruleset at desktop and phone-l, and the Windows 3.1
+  look at desktop): all pass except w95 and palm at phone-l (the known finger-drag send-fleet failure) and Amiga, which does not start under the harness on `main` either. Firefox not tested here (Chromium only).
