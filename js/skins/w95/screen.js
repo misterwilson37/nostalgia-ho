@@ -501,19 +501,25 @@ T.mapBg = '#000';
 T.mapNames = (sc) => (W95ON() ? zoomIdx(sc) > 0 : sc > 18);
 // Fleets at a star (FUN_0048e55e): one picture 10114 (0x2782, a 6-pixel cyan dot in a 16-pixel box) for yours, at the planet's top
 // right (its rectangle's right - 9, top - 8 at zooms 9 and 12; right - 5, top - 10 at 17 and closer), and one for other players'
-// fleets there at its top left (left + 9 - 16, or left + 5 - 16); none at zoom 6. One a star however many fleets, and no frame for
-// the selected one (the classic page's row of markers and its yellow box: Jake 18 Nov). The others at the star are kept where the
-// first is drawn (hidden), so a drag there still picks one up.
+// fleets there at its top left (left + 9 - 16, or left + 5 - 16); none at zoom 6. One a star however many fleets (shots 054, 065-073,
+// 287-290), and no frame for the selected fleet. You choose the fleet in the fleet list (the star pane's rows), then drag from the
+// star: the dot stands for the selected fleet when it is at that star, else the first there (Jake 19 Nov: it always took the first,
+// so only one fleet could be sent from a star). The other fleets at the star get no dot of their own.
 function markerAt95(f, { s, x, y, ps, mine, view }) {
   const a = A(), g = a && a.G; if (!g) return null;
   const z = view.s / LY, top = y - ps / 2;
+  const here = g.fleets.filter(q => q.star === s.id && q.to == null && !q.sat && (mine ? q.owner === a.ME : q.owner !== a.ME));
+  const sel = mine && here.find(q => q.id === a.UI.selFleet), pick = sel || here[0];
+  if (f !== pick) return null;
   if (z <= 6) return { x: Math.round(x - 4), y: Math.round(y - 3), w: 9, hidden: true };
   const near = z < 13, dy = near ? 8 : 10, dx = near ? 9 : 5;
-  const first = g.fleets.find(q => q.star === s.id && q.to == null && !q.sat && (mine ? q.owner === a.ME : q.owner !== a.ME));
   const at = mine ? { x: x + ps / 2 - dx, y: top - dy } : { x: x - ps / 2 + dx - 16, y: top - dy };
-  return { x: Math.round(at.x), y: Math.round(at.y), w: 16, hidden: first !== f };
+  return { x: Math.round(at.x), y: Math.round(at.y), w: 16 };
 }
 Object.defineProperty(T, 'markerAt', { configurable: true, get: () => (W95ON() ? markerAt95 : undefined) });
+// (a fleet on its way has no picture in 4.0.5, only its line (FUN_0048e811; shots 065-073): the classic page's transit markers, and their
+// yellow box for the selected one, are off while the window layout is; such a fleet is chosen from List All Fleets)
+Object.defineProperty(T, 'transitDots', { configurable: true, get: () => (W95ON() ? false : undefined) });
 T.mapNameStyle = (cx) => { if (W95ON()) { cx.fillStyle = '#fff'; cx.font = '11px "MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif'; } };
 // the scroll bars: a Windows 95 bar each, its thumb where the view is between the limits; an arrow moves a cell, the track a page,
 // the thumb drags the map
@@ -878,9 +884,14 @@ function buildDialog(sid) {
   const pickDesign = (d) => { spec = { type: d.type, R: d.R, V: d.V, W: d.W, S: d.S, M: d.M }; name = d.name; };
   const clampSpec = () => { const L = H().designLimits(g, p, spec.type); for (const k of K) { const lo = H().designMin(g, k, spec.type), hi = Math.max(lo, L[k] || lo); spec[k] = Math.max(lo, Math.min(hi, spec[k] == null ? hi : spec[k])); } if (spec.type === 'satellite') spec.R = 0; };
   const fresh = (type) => { spec = { type }; clampSpec(); const d = live().find(same); name = d ? d.name : H().designName(g, p, type); };
-  // (FUN_0044ce36: the list runs newest design first and opens on the player's current design, the first one at the start: shot 041's
-  // Rudolph at the foot; the remake keeps no current design, so it opens on the first)
-  const L0 = live(); if (L0.length) pickDesign(L0[0]); else fresh(types[0]);
+  // (the list runs newest design first. It opens on the design the window last showed when closed with OK or Build and Continue (Mac
+  // 4.0.5's BuildDesignShips @f0d8e: the preferences' +0x82, written at OK / Build and Continue, read at the start), else on the newest
+  // design (the design count - 1); Windows 4.0.5 the same (FUN_0044ce36 sets the list to it). Kept in this browser, as the program kept
+  // it in its preferences file: "ho5.w95.buildType", the design's index in your list. Jake 19 Nov: it had always opened on the first.)
+  const L0 = live(); let bt = -1; try { bt = +(localStorage.getItem('ho5.w95.buildType') || -1); } catch (e) {}
+  const d0 = p.designs[bt] && L0.includes(p.designs[bt]) ? p.designs[bt] : L0[L0.length - 1];
+  if (d0) pickDesign(d0); else fresh(types[0]);
+  const keepType = () => { const d = live().find(same); if (d) try { localStorage.setItem('ho5.w95.buildType', String(p.designs.indexOf(d))); } catch (e) {} };
   const lb = dl.by[1016], pic = dl.by[1020], nm = dl.by[1021], cb = dl.by[1022], n = dl.by[1043];
   types.forEach(t => { const o = document.createElement('option'); o.value = t; o.textContent = TL(H().TYPES[t].name); cb.append(o); });
   n.value = '0'; n.inputMode = 'numeric';
@@ -950,8 +961,8 @@ function buildDialog(sid) {
     if (made < want) a.toast(made ? `Built ${made} of ${want}: not enough money, metal or people.` : 'Not enough money or metal.');
     n.value = '0'; a.save(); a.renderPanel(); a.draw(); return made === want;
   };
-  dl.by[1205].addEventListener('click', () => { buy(); draw(); });
-  dl.by[1].addEventListener('click', () => { if (buy()) a.closeModal(); else draw(); });
+  dl.by[1205].addEventListener('click', () => { buy(); keepType(); draw(); });
+  dl.by[1].addEventListener('click', () => { if (buy()) { keepType(); a.closeModal(); } else draw(); });
   dl.by[2].addEventListener('click', () => a.closeModal());
   draw(); showDlg(dl, 'Build/Design Ships');
   return true;

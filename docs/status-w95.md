@@ -103,6 +103,14 @@ Units 1-4 are the big ones (one session might do two). 6-9 are quicker. 10 is lo
     commands without a place in 4.0.5's menus (New game, Auto-play this turn, Account saves, Import, Quit to title, ...) stay at the end
     of Help.
 
+## Jake's second look (19 Nov)
+- Fleets on the map, from the captures (054, 065-073, 287-290): one cyan dot a star (yours top right, others' top left), whatever the
+  number of fleets; a fleet on its way has no picture, only its line; satellites a white ring round the planet (already so). The dot
+  now stands for the fleet selected in the star pane's list when it is at that star, else the first (it always took the first: one
+  fleet a star could be sent); the classic page's transit markers and their yellow box are off (T.transitDots).
+- Build opens on the design last shown at OK / Build and Continue (Mac 4.0.5 BuildDesignShips @f0d8e: preferences +0x82), else the
+  newest; kept in this browser ("ho5.w95.buildType"). It opened on the first.
+
 ## Menus checked against the captures (19 Nov, after Jake asked)
 Each menu read off the page beside shots 032 (File), 035 (Edit), 036 (Options), 042 / 046 (Ships), 047 / 074 / 075 (Galaxy), 050
 (Window), 282 (Help). Fixed: File's Ctrl+N, Ctrl+O, Ctrl+Q; Ships' "Scrap current fleet" (042) / "Don't Scrap Current Fleet" (046);
