@@ -1410,9 +1410,11 @@ function battleWindow95(b, k) {
     return P0.shipWords(d, gr.units.filter(i => alive[i]).length, gr.units.length, u.o === ME);
   };
   const grayPat = (() => { const p = document.createElement('canvas'); p.width = 2; p.height = 2; const q = p.getContext('2d'); q.fillStyle = '#000'; q.fillRect(0, 0, 1, 1); q.fillRect(1, 1, 1, 1); return x.createPattern(p, 'repeat'); })();
-  const drawGroup = (gr) => {
+  // (keepPic: FUN_004251cd with its picture flag 0, as FUN_00424088 calls it after a hit: the words and damage again, the picture and the
+  // bursts on it left as they are, so they build up; flag 1, the whole group, only after a kill's flare and at the start and end)
+  const drawGroup = (gr, keepPic) => {
     const gx = colX[gr.ci], gy = GY(gr.row);
-    tile(gr, gx, gy);
+    if (!keepPic) tile(gr, gx, gy);
     x.fillStyle = '#000'; x.fillRect(gx - 20, gy + 40, 170, 13);
     const t = groupWords(gr); x.font = BAT_SMALL; const w = x.measureText(t).width;
     text(t, gx + 60 - Math.trunc(w / 2), gy + 41, BAT_SMALL); // (centred on the box, under it: FUN_004251cd)
@@ -1432,7 +1434,7 @@ function battleWindow95(b, k) {
   [0, 1].forEach(ci => { if (owners[ci] != null) face(owners[ci], ci); });
   [0, 1].forEach(ci => {
     if (hidden[ci]) { const L = rs.battleLines || {}; text(L.noInfo || TL('You have no information.'), 145, 85); text(L.destroyed || TL('You were destroyed immediately.'), 145, 100); skip = true; }
-    else cols[ci].forEach(drawGroup);
+    else cols[ci].forEach(gr => drawGroup(gr));
   });
   const wait = (until) => new Promise(res => { const f = () => (stop || skip || performance.now() >= until ? res() : setTimeout(f, Math.min(TICK, until - performance.now()))); f(); });
   const cellOf = (ev, shooter) => shooter ? (ev.si >= 0 ? where.get(ev.si) : planetAt[ev.a]) : (ev.p ? planetAt[b.planetOwner] : where.get(ev.ti));
@@ -1468,7 +1470,7 @@ function battleWindow95(b, k) {
     if (stop) return;
     for (const r of b.rounds) for (const ev of r) apply(ev);
     pop = fPop; done = true;
-    [0, 1].forEach(ci => { if (!hidden[ci]) cols[ci].forEach(drawGroup); });
+    [0, 1].forEach(ci => { if (!hidden[ci]) cols[ci].forEach(gr => drawGroup(gr)); });
     [0, 1].forEach(ci => {
       const o = owners[ci]; if (o == null) return;
       const left = b.start.some((u, i) => alive[i] && u.o === o) || (b.planetOwner === o && pop > 0.0005);
@@ -1492,7 +1494,7 @@ function battleWindow95(b, k) {
         if (ev.q) apply(ev); // (a ship killed between the drawn shots: counted, not drawn; rules-405 shoot)
         else if (sg && tg && !hidden[tg.ci] && !hidden[sg.ci]) {
           await laser(sg, tg); if (stop || skip) break;
-          a.Sound.play(k.shotSnd(ev, 3000)); apply(ev); drawGroup(tg);
+          a.Sound.play(k.shotSnd(ev, 3000)); apply(ev); drawGroup(tg, true);
           const kill = ev.snd === 3003 && VB.full; // (FUN_00424088: the time again, preferences +0x90, for a ship or the planet destroyed)
           if (kill) deadline += speed * TICK;
           deadline += speed * TICK; await explosion(tg, ev, deadline); await wait(deadline);

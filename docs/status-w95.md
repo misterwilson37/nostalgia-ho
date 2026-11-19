@@ -111,6 +111,11 @@ Units 1-4 are the big ones (one session might do two). 6-9 are quicker. 10 is lo
 - Build opens on the design last shown at OK / Build and Continue (Mac 4.0.5 BuildDesignShips @f0d8e: preferences +0x82), else the
   newest; kept in this browser ("ho5.w95.buildType"). It opened on the first.
 
+## Battle bursts (19 Nov, Jake)
+The bursts on a group (the planet's too) faded after each hit: the w95 window redrew the whole group. FUN_00424088 calls FUN_004251cd
+with its picture flag 0 after a hit (the words and damage only, so the bursts build up on the picture) and with 1 only after a kill's
+flare; `battleWindow95`'s drawGroup now does the same (keepPic), as 3.0.1's (rules-301 / mac12) already did.
+
 ## Menus checked against the captures (19 Nov, after Jake asked)
 Each menu read off the page beside shots 032 (File), 035 (Edit), 036 (Options), 042 / 046 (Ships), 047 / 074 / 075 (Galaxy), 050
 (Window), 282 (Help). Fixed: File's Ctrl+N, Ctrl+O, Ctrl+Q; Ships' "Scrap current fleet" (042) / "Don't Scrap Current Fleet" (046);
