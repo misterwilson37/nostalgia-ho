@@ -2231,16 +2231,18 @@ function pieChart301(q, h, v, s, T, X) {
 // (left under 112, right from it) less (count < 56, >= 168) or with (else) an oval as tall as the planet and as wide as how far the count is from 56,
 // 112 or 168 or 224; then through the oval into the window.
 const GRAT = { c: 0, stars: Array.from({ length: 14 }, () => ({ v: 0, h: 0 })), timer: null };
-const OVAL301 = { h: 132, v: 4, d: 56 }, inOval301 = (h, v) => { const r = OVAL301.d / 2, dx = h + 0.5 - (OVAL301.h + r), dy = v + 0.5 - (OVAL301.v + r); return dx * dx + dy * dy <= r * r; };
+// (4.0.5's region starts at 108 and its planet at 139, 4: Jake's shots 008, 027, 158; 3.0.1's at 96 and 132)
+const GREG = { l: V4 ? 108 : 96, r: V4 ? 226 : 224 };
+const OVAL301 = { h: V4 ? 139 : 132, v: 4, d: 56 }, inOval301 = (h, v) => { const r = OVAL301.d / 2, dx = h + 0.5 - (OVAL301.h + r), dy = v + 0.5 - (OVAL301.v + r); return dx * dx + dy * dy <= r * r; };
 function gratuitous301(x, s, idle) {
   const a = A(), p = a.me(), col = COL301(), IMG = a.IMG;
   GRAT.c = (GRAT.c + 1) % 224;
   const c = GRAT.c, off = c % 112, sid = s.id;
   if ((c & 3) === 3) GRAT.stars.forEach((st) => {
-    const put = (fill) => { const h = 96 + st.h, v = st.v; if (h >= 96 && h < 224 && v >= 0 && v < 65 && !inOval301(h, v)) { x.fillStyle = fill; x.fillRect(h, v, 1, 1); } };
+    const put = (fill) => { const h = GREG.l + st.h, v = st.v; if (h >= GREG.l && h < GREG.r && v >= 0 && v < 65 && !inOval301(h, v)) { x.fillStyle = fill; x.fillRect(h, v, 1, 1); } };
     put('#000');
     if (idle) st.h -= 1;
-    if (st.h < 0) { st.h = 127; st.v = 1 + Math.floor(Math.random() * 64); }
+    if (st.h < 0) { st.h = GREG.r - GREG.l - 1; st.v = 1 + Math.floor(Math.random() * 64); }
     put('#fff');
   });
   const r = Math.trunc(100 * Math.max(s.g, p.homeG) / Math.max(0.01, Math.min(s.g, p.homeG)));
@@ -2301,7 +2303,60 @@ function gratuitousTick() {
 // Rules at 65 and 67 and down 225. A click on your colony's pane while one part is not finished is DoPieClick @d3028: the beep if the other is finished;
 // else, while the button is down, the angle round the pie (PtToAngle, 1 to 359; across 12 o'clock it stops at the end it came from) sets terraforming
 // to (angle - 1) x 1000 / 358 and mining to the rest, and the pie and the budget bars are drawn again.
+// Mac 4.0.5's DrawPlanetRect @113ab0: 226 x 68, erased or on a colour screen painted grey (#cccccc) to 108, or to the whole width when you have
+// no information (the info year below 2000), or to 98 when your colony's slider is there; the rest black, DoGratuitousGraphics' stars and the
+// planet's picture (3.0.1's routine, as gratuitous301: here for every star you know, not only your finished colonies). Every string twice, white
+// one pixel down and right, then black: the star's name in Chicago 12 centred at 43 on 11; then Geneva 9: "You have no information about this
+// planet." at (3, 22); else "Pop:", "Temp:", "Gravity:", "Metal:" (STR# 6070.13-16) right-aligned at 40 on 32, 42, 52, 62 and at 45 the figures
+// (the temperature by CreateTempString, °F or °C); yours: "Income:" (6070.12) at (5, 22) and the colony's income at 45 ("$%s"), its people on 32;
+// another's or nobody's: "Owner:" (6170.6) right-aligned at 40 on 22, the owner or "No One" (6170.30) at 45, "Uninhabited" / "Unknown" (6070.21,
+// .22) at 45 on 32. No Info Date or Battle Date (3.0.1's). Three rules along the bottom (65, 66, 67) and one down the right. Your colony with
+// both terraforming and mining unfinished (star +0x18f0, +0x18f2 not -1) has DrawVSliderBar @11448c at (98, 0): PICT 900 (colour 901, 10 x 67)
+// and the thumb PICT 902 (903, 8 x 4) at (99, 1 + terraforming x 62 / 1000); ClickVSliderControl @110180 sets terraforming to
+// clamp(v - 2, 0, 62) x 1000 / 62 and mining to the rest while the button is down, and draws the budget bars again.
+function planetBox405() {
+  const a = A(), g = G(), p = a.me(), sid = a.UI.sel, s = sid != null ? g.stars[sid] : null, S = STR405(6070), S7 = STR405(6170), col = COL301();
+  const q = qdCanvas(226, 68, s ? s.name : '');
+  const box = a.el('section', { class: 'box planet12 planet301 planet405' }, q.c);
+  const yours = !!s && s.owner === a.ME, k = s ? H().know(g, p, sid) : null, info = !!s && (yours || !!(k && k.explored));
+  const B = yours ? bars301(s) : null, slider = !!B && B[0] !== -1 && B[1] !== -1;
+  const sh = { shadow: '#fff' }, T = (t, h0, v, o) => q.text(t, h0, v, (o && o.font) || G9M, Object.assign({}, sh, o));
+  if (col) q.rect(0, 0, !info ? 225 : slider ? 98 : 108, 65, '#ccc');
+  if (s) {
+    T(s.name, 0, 11, { font: SYS3, center: 43 }); // (Chicago 12: the battle window's bitmap face)
+    if (!info) T(S[19] || 'You have no information about this planet.', 3, 22);
+    else {
+      const src = yours ? s : k, L = (t, v) => T(t, 0, v, { right: 40 }), at = (t, v) => T(t, 45, v);
+      L(S[12] || 'Pop:', 32); L(S[13] || 'Temp:', 42); L(S[14] || 'Gravity:', 52); L(S[15] || 'Metal:', 62);
+      const t10 = Math.round(10 * (72 + (src.t - p.homeT))), gr = Math.trunc(100 * src.g / Math.max(0.01, p.homeG));
+      at(cfmt(S7[2] || '%d.%1.1d°F', Math.trunc(t10 / 10), Math.abs(t10 % 10)), 42);
+      at(cfmt(S7[4] || '%d.%2.2dG', Math.trunc(gr / 100), gr % 100), 52);
+      at(H().niceNum(Math.round(src.metal)), 62);
+      if (yours) { T(S[11] || 'Income:', 5, 22); at(fill(S[8] || '$%s', H().niceNum(Math.round(H().planetIncome(g, p, s)))), 22); at(H().niceNum(H().popNum(g, s.pop)), 32); }
+      else { L(S7[5] || 'Owner:', 22); at(k.owner >= 0 ? g.players[k.owner].name : (S7[29] || 'No One'), 22); at(k.owner >= 0 ? (S[21] || 'Unknown') : (S[20] || 'Uninhabited'), 32); }
+      q.rect(108, 0, 226, 65, '#000');
+      q.c.dataset.planet = String(s.id); gratuitous301(q.x, s, false); if (!GRAT.timer) GRAT.timer = setInterval(gratuitousTick, 1000 / 6);
+      if (slider) {
+        const IMG = a.IMG, bar = IMG['dos:p901'], th = IMG['dos:p903'], off = Math.max(0, Math.min(62, Math.trunc(B[0] * 62 / 1000)));
+        q.x.imageSmoothingEnabled = false;
+        if (bar && bar.width) q.x.drawImage(bar, 98, 0); else q.rect(98, 0, 108, 67, '#888');
+        if (th && th.width) q.x.drawImage(th, 99, 1 + off); else q.rect(99, 1 + off, 107, 5 + off, '#fff');
+        q.c.style.touchAction = 'none';
+        q.c.addEventListener('pointerdown', (ev) => {
+          const pt0 = q.at(ev); if (pt0.h < 98 || pt0.h >= 108) return;
+          ev.preventDefault();
+          const move = (e) => { const v = q.at(e).v, t = Math.trunc(Math.max(0, Math.min(62, Math.trunc(v) - 2)) * 1000 / 62); if (t !== bars301(s)[0]) { setBars301(s, t, 1000 - t); const c = planetBox405(); box.replaceWith(c); } };
+          const up = (e) => { window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); move(e); a.save(); a.renderPanel(); };
+          window.addEventListener('pointermove', move); window.addEventListener('pointerup', up); move(ev);
+        });
+      }
+    }
+  }
+  q.hline(0, 226, 65); q.hline(0, 226, 66); q.hline(0, 226, 67); q.vline(225, 0, 68);
+  return box;
+}
 function planetBox301() {
+  if (V4) return planetBox405();
   const a = A(), g = G(), p = a.me(), rs = H().rules(g), sid = a.UI.sel, s = sid != null ? g.stars[sid] : null, S = STR301(1005), S4 = STR301(4000), col = COL301();
   const q = qdCanvas(226, 68, s ? s.name : '');
   const box = a.el('section', { class: 'box planet12 planet301' }, q.c);
