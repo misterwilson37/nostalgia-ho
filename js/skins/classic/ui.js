@@ -6950,7 +6950,7 @@ window.addEventListener('DOMContentLoaded', () => {
     // (and the windows tools/ui-lang-audit.js opens in every skin and language)
     openPrefs, openAccount, openHall, hasHall, openMasterList, openRanks, profile, rankOf, // (profile, rankOf: the rank window a skin draws itself)
     arrivesText, markedLine, hallTables, playAgain, openTemperature, compareWords, tl, CMP_EN, CMP_ICONS, openSkillsList: () => openSkills(), hasCloud: () => !!CLOUD, cloudHall: (kind, order) => CLOUD.hallTop(G.rules, kind, order), cloudError: (e) => CLOUD.errorText(e), cloudUser: () => cloudUser(), // (what the iOS skin's own fleet list, Hall and Master Point List need)
-    openGameCenter, switchPlayers, openFleetList, openStarList, exploredText, openGive, openChat, winWords, others, menuDim, chatLimitToast, openNameStar, findRoute, autoRoute, runAutoPlay, autoPlaySliders, autoPlayWhere, openAutoPlaySettings, // (what a skin's own Give, Message, Dip and Surrender windows need)
+    openGameCenter, switchPlayers, openFleetList, openStarList, exploredText, exploredData, openGive, openChat, winWords, others, menuDim, chatLimitToast, openNameStar, findRoute, autoRoute, runAutoPlay, autoPlaySliders, autoPlayWhere, openAutoPlaySettings, // (what a skin's own Give, Message, Dip and Surrender windows need)
     toggleArmageddon, openSkin, openSounds, openLanguage, openAutoPlay, openDip, openSurrender, openSavedGames, closeScreen, openPatchNotes,
     classic(name, fn, ...a) { skipSkinWin = name; try { return fn(...a); } finally { skipSkinWin = null; } },
   };

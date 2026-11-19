@@ -426,7 +426,7 @@ function stuck(f) {
   return !G().stars.some(s => s.id !== f.star && H().starDist(G(), f.star, s.id) <= f.fuel + 1e-9);
 }
 function fleetsStatus() {
-  const a = A(), el = a.el, W = FLEET_LINES[lang()], g = G();
+  const a = A(), W = FLEET_LINES[lang()], g = G();
   const fs = g.fleets.filter(f => f.owner === a.ME && !f.sat);
   const order = fs.filter(f => !stuck(f)).concat(fs.filter(stuck));
   const turns = (f) => Math.ceil((f.dist - (f.prog || 0)) / H().fleetSpeed(g, f) - 1e-9);
@@ -438,16 +438,59 @@ function fleetsStatus() {
     return fill(W.at, d, st(f.star));
   };
   let cur = null;
-  const list = el('div', { class: 'lb', role: 'listbox' });
-  const show = () => { list.innerHTML = ''; for (const f of order) list.append(raw('div', line(f), { class: 'li' + (f === cur ? ' sel' : ''), role: 'option', onclick: dbl12(f, () => { cur = f; show(); }, go) })); };
   function go() {
     if (!cur) return;
     if (cur.to != null) { alertBox([W.hyper]); return; }
     a.UI.selFleet = cur.id; a.UI.sel = cur.star; a.closeModal(); a.centerOn(cur.star); a.renderPanel(); a.draw();
   }
-  show();
-  win(el('div', null, el('p', null, 'List of All Fleets:'), list, el('div', { class: 'btns right' }, btn('Go To Fleet', go, { class: 'quiet' }), btn('OK', () => a.closeModal()))));
+  const fr = lang() === 'fr';
+  return list6030(fr ? 'Statut des flottes:' : 'List of All Fleets:', order.map(f => ({ id: f, cells: [[0, line(f)]] })), fr ? 'Rejoindre flotte' : 'Go To Fleet',
+    (f) => { cur = f; go(); }, { head: fr ? [5, 12, 24, 210] : [2, 13, 18, 200], go: fr ? [264, 238, 283, 352] : [264, 255, 284, 352], first: false });
+}
+// DLOG 6030 and 6040 (ListAllFleets @1120dc, ListExploredStars @120004; 486 x 296, DITL 6030 / 6040: the line at (12, 5) / (13, 2), the list user item
+// (13, 26, 455 x 225), "Rejoindre flotte" (238, 264, 114 x 19) / "Rejoindre planète" (229, 264, 124 x 19), OK (364, 264, 82 x 20) with the default ring):
+// a List Manager list in Chicago 12, 16 pixels a row, the text a pixel in from the cell, the fields at 1, 101, 176, 251, 326 (Jake's shot078, read
+// pixel by pixel: the frame at the window's 90, 60), its 16-pixel scroll bar inside the frame at the right, the chosen row inverted (the explored
+// stars open with the first chosen, shot078); a double click is the button. rows: [{ id, cells: [[x, text]] }]
+function list6030(title, rows, goWord, onGo, o) {
+  const a = A(), el = a.el, LW = 455, LH = 226, n = Math.floor((LH - 2) / 16);
+  let pick = o.first && rows.length ? 0 : -1, top = 0;
+  const lq = qdCanvas(LW, LH, title), lb = el('div', { role: 'listbox', 'aria-label': title, style: at20([27, 14, 25 + LH, 13 + LW - 16]) });
+  const draw = () => {
+    top = Math.max(0, Math.min(top, rows.length - n));
+    lq.rect(0, 0, LW, LH, '#fff'); lq.x.strokeStyle = '#000'; lq.x.lineWidth = 1; lq.x.strokeRect(0.5, 0.5, LW - 1, LH - 1);
+    lq.x.save(); lq.x.beginPath(); lq.x.rect(1, 1, LW - 17, LH - 2); lq.x.clip();
+    lb.innerHTML = '';
+    rows.slice(top, top + n).forEach((r, i) => {
+      const y = 1 + 16 * i;
+      r.cells.forEach(([cx, t]) => lq.text(t, 1 + cx, y + 13, SYS12));
+      if (top + i === pick) { lq.x.globalCompositeOperation = 'difference'; lq.rect(1, y, LW - 16, y + 16, '#fff'); lq.x.globalCompositeOperation = 'source-over'; }
+      const k = top + i;
+      lb.append(el('div', { class: 'li', role: 'option', tabindex: 0, 'aria-selected': k === pick ? 'true' : 'false', 'aria-label': r.cells.map(c => c[1]).join(' '),
+        style: `position:absolute;left:0;right:0;top:${16 * i}px;height:16px;cursor:default`,
+        onclick: dbl12('l' + k, () => { pick = k; draw(); }, () => { pick = k; onGo(rows[k].id); }), onkeydown: (e) => { if (e.key === 'Enter') { e.preventDefault(); pick = k; onGo(rows[k].id); } } }));
+    });
+    lq.x.restore();
+    drawBar(lq.x, LW - 16, 0, true, LH, 16, { on: true, value: top, max: Math.max(0, rows.length - n) });
+  };
+  lq.c.style.cssText = at20([26, 13, 26 + LH, 13 + LW]);
+  lq.c.addEventListener('click', (ev) => { const pt = lq.at(ev); if (pt.h < LW - 16 || rows.length <= n) return; top += pt.v < 16 ? -1 : pt.v >= LH - 16 ? 1 : pt.v < LH / 2 ? -(n - 1) : n - 1; draw(); });
+  lq.c.addEventListener('wheel', (ev) => { if (rows.length <= n) return; ev.preventDefault(); top += ev.deltaY > 0 ? 1 : -1; draw(); }, { passive: false });
+  draw();
+  const B = (t, r, fn, def) => put20(el('button', { type: 'button', class: 'ok20' + (def ? ' def20' : ''), onclick: fn }, raw('span', t)), r);
+  const head = txt20(title, o.head); head.style.overflow = 'visible'; head.style.whiteSpace = 'nowrap';
+  a.modal('', dlog20(486, 296, head, lq.c, lb, B(goWord, o.go, () => { if (pick >= 0) onGo(rows[pick].id); }), B('OK', [264, 364, 284, 446], () => a.closeModal(), true)), { cls: 'mac12 dl20w dlg6010', label: title });
   return true;
+}
+// the explored stars (ListExploredStars @120004, DITL 6040; rs.exploredList and the classic code's exploredData: 1.2's order and its words)
+function stars6040() {
+  const a = A(), X = a.exploredData ? a.exploredData() : null; if (!X) return false;
+  const L = X.L, rows = X.plain().map(s => { const c = X.climate(s), cells = [[0, s.name]];
+    if (c) cells.push([100, c.t], [175, c.g], [250, c.m]); else cells.push([100, L.noClimate]);
+    cells.push([325, X.status(s)]); return { id: s.id, cells }; });
+  const fr = lang() === 'fr';
+  return list6030(L.title, rows, L.go, (sid) => { a.closeModal(); a.UI.sel = sid; a.centerOn(sid); a.renderPanel(); a.draw(); },
+    { head: fr ? [2, 13, 22, 299] : [2, 13, 18, 300], go: fr ? [264, 229, 283, 353] : [264, 255, 284, 352], first: true });
 }
 // an alert over what is open (the dialog stays under it), in the program's words; its picture 3020 is the skin's
 // Mac 2.0.1's alerts (ALRT size and DITL: text, picture and button rectangles, from the resource fork; made by audit/mac-2.0.1 of the private repo): an alert is drawn at those rectangles,
@@ -3781,6 +3824,7 @@ window.HOMAC12 = {
     if (!G() || !own()) return false;
     if (name === 'types') return V2 ? shipTypes20() : shipTypes();
     if (name === 'fleets') return fleetsStatus();
+    if (name === 'stars' && H().rules(G()).exploredList && H().rules(G()).exploredList.layout === 'mac') return stars6040();
     if (name === 'build') return buildShips(x[0]);
     return false;
   },

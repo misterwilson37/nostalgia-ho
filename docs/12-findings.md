@@ -1112,5 +1112,8 @@ routine and resources and checked pixel by pixel against `captures/` (640 x 480)
   the three queue slots with picture and MakeFleetDescription; the types as 53-pixel picture cells with their scroll bar, none
   chosen at first. 92% of pixels agree with shot035 at the Mac's own size, the rest being the two games' different ships.
 - English, which 1.2 never had, uses 2.0.1's English layout of the same dialog (Create New Ship Type, Build Ships).
-- Still to compare: the windows (6000, 6030, 6040, 6060, 6090, 6100, the battle window, the alerts)
+- **Fleet Status and the explored planets** (DLOG 6030, 6040, `list6030`): the List Manager list in Chicago 12, 16-pixel rows, fields at
+  1, 101, 176, 251, 326 (read in shot078), its scroll bar, the go button and OK; the explored stars open with the first chosen.
+  95% of pixels agree with shot078 at 1:1, the rest being the two games' different planets.
+- Still to compare: List Ship Types (6000), Organize Ships (6060), Rename (6090), 6100, the battle window, the alerts
   (6000, 6020, 6030, 6040, 6060, 6090, 6100, 7000-7011).
