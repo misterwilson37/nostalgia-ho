@@ -216,3 +216,8 @@ html:not(.mac301lay) :is(#panel, .p301x) .rep12box canvas.grow12 { position: abs
 /* (with the Mac's screen zoomed, html.macscale, the window is 445 CSS pixels wide: the button's Chicago at its own 15, the ring 3) */
 html.macscale .win .bw12w button.bw12b { font-size: 15px !important; }
 html.macscale .win .bw12w button.bw12b.done { outline-width: 3px; outline-offset: 1px; }
+/* the menu bar and menus in the Mac's own bitmap Chicago 12 (the DOS program's copy, as the dialogs and panes), in the Mac skins' System 6 and
+   System 7 looks: the same pixels as the game's windows, as on the Mac itself (Jake, 19 Nov); the bitmap is Chicago's own weight, so no bold */
+html.macfam:is(.os-system6, .os-system7) :is(#menubar, #menubar .logo, #menubar #title, .mbtn, .dropdown button) { font: 15px/1 'DOS Chicago 12', Chicago, Charcoal, Geneva, sans-serif; font-weight: normal; font-synthesis: none; letter-spacing: .58px; -webkit-font-smoothing: none; }
+html.macfam:is(.os-system6, .os-system7) .dropdown { width: max-content; min-width: 0; max-width: none; }
+html.macfam:is(.os-system6, .os-system7) .dropdown button { white-space: nowrap; }
