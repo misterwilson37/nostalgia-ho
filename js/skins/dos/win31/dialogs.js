@@ -255,8 +255,8 @@ W.shipPic = function (d, small) {
 const SANS = "'MS Sans Serif', 'Microsoft Sans Serif', Arial, sans-serif";
 function caption(x, t, w, y, colour) {
   x.save(); x.fillStyle = colour; x.textBaseline = 'alphabetic'; x.textAlign = 'left';
-  x.font = '11px ' + SANS; let k = 0.92, tw = x.measureText(t).width * k;
-  if (tw > w - 2) { x.font = '9px ' + SANS; k = 0.92; tw = x.measureText(t).width * k; }
+  x.font = '11px ' + SANS; let k = 1, tw = x.measureText(t).width * k;
+  if (tw > w - 2) { x.font = '9px ' + SANS; k = 1; tw = x.measureText(t).width * k; }
   x.translate(Math.round((w - tw) / 2), y); x.scale(k, 1); x.fillText(t, 0, 0); x.restore();
 }
 // The part of the queue's ship not yet built (FUN_10e8_18a8): from the right, (100 - done) % of the picture's width, PatBlt'ed with ROP 0xFA0089 (pattern OR
@@ -760,7 +760,7 @@ D.compare = function () {
     const x0 = 76, top = 34, y0 = 258, right = 505, n = info.n, unit = n >= 2 ? Math.trunc((y0 - top - 32) / (n - 1)) : Math.trunc((y0 - top) / 2) - 16;
     x.fillStyle = '#000';
     x.fillRect(x0, top, 1, y0 - top + 1); x.fillRect(x0, y0, right - x0, 1);
-    const small = (s, px, py, align) => { x.save(); x.font = '11px ' + SANS; x.textBaseline = 'alphabetic'; const k = 0.92, w = x.measureText(s).width * k;
+    const small = (s, px, py, align) => { x.save(); x.font = '11px ' + SANS; x.textBaseline = 'alphabetic'; const k = 1, w = x.measureText(s).width * k;
       x.translate(Math.round(align === 'right' ? px - w : px - w / 2), py); x.scale(k, 1); x.textAlign = 'left'; x.fillText(s, 0, 0); x.restore(); };
     [[top + 16, 9], [Math.trunc((top + y0) / 2), 10], [y0 - 16, 11]].forEach(([y, i]) => { x.fillRect(x0 - 1, y, 1, 1); small(word(i), x0 - 4, y + 4, 'right'); });
     const im = a.IMG['white0_' + (me.female ? 1 : 0)] || a.IMG['dos:i' + (me.female ? 1500 : 1000)];

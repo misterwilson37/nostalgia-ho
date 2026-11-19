@@ -4,12 +4,12 @@
 @import url("../classic/style.css");
 :root {
   --hat: #000; --gold: #fc0; --space: #000; --neg: #c00;
-  --west: Verdana, Arial, sans-serif;
+  --west: "Palm OS", sans-serif;
 }
-.box h3 { font: bold 12px var(--ui); color: #000; }
+.box h3 { font: bold 11px var(--ui); color: #000; }
 .card { background: #fff; border: 1px solid #000; border-radius: 3px; box-shadow: 2px 2px 0 rgba(0,0,0,.5); }
 /* the End Turn button: a Palm push button */
-.clock { background: #fff; color: #000; border: 1px solid #000; border-radius: 6px; box-shadow: none; font: bold 12px var(--ui); }
+.clock { background: #fff; color: #000; border: 1px solid #000; border-radius: 6px; box-shadow: none; font: bold 11px var(--ui); }
 .clock:hover { background: #000; color: #fff; }
 .clock .face svg circle { fill: #fff; }
 #titlescreen { background: #fff; }

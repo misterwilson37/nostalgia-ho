@@ -120,7 +120,7 @@ const UIL = window.HOUI || { t: (s, ...a) => { let i = 0; return s.replace(/%(?:
 const tl = (s, ...a) => (a.length ? UIL.t(s, ...a) : UIL.tr(s));
 const TL_ATTRS = ['title', 'aria-label', 'placeholder', 'alt'];
 // the minus sign: U+2212, but the Mac and DOS pixel fonts (js/os/pixel-fonts.css, system7.css) have no such glyph, so under those looks a hyphen, as the originals drew
-const MINUS = () => /\bos-(system6|system7|system75|dos)\b/.test(document.documentElement.className) ? '-' : '\u2212';
+const MINUS = () => /\bos-(system6|system7|system75|dos|win31|win95|palmos)\b/.test(document.documentElement.className) ? '-' : '\u2212';
 const el = (tag, attrs, ...kids) => {
   const e = document.createElement(tag);
   if (attrs) for (const k in attrs) {

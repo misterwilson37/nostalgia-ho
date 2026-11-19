@@ -6,6 +6,18 @@
    rounded black corners. The DOS skin's second look. */
 @import url("dos.css");
 :root { --ui: "MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif; }
+/* ---------- Windows 3.1's own bitmap fonts, from its setup disks (tools/extract/winfon.py; docs/brief-bitmap-fonts.md): MS Sans Serif 8 (11px, the bold as GDI
+   drew it) answers to the name "MS Sans Serif" wherever the skin or its dialogs use it, the System font (13px, already bold: SYSTEM = VGASYS.FON) is the menus', titles'
+   and buttons', Fixedsys (the lists') is "Win31 Fixedsys". ---------- */
+@font-face { font-family: "MS Sans Serif"; src: url("../../assets/skins/dos/fonts/win31-mssansserif8.ttf") format("truetype"); font-weight: 400; font-display: block; }
+@font-face { font-family: "MS Sans Serif"; src: url("../../assets/skins/dos/fonts/win31-mssansserif8-bold.ttf") format("truetype"); font-weight: 700; font-display: block; }
+@font-face { font-family: "Microsoft Sans Serif"; src: url("../../assets/skins/dos/fonts/win31-mssansserif8.ttf") format("truetype"); font-weight: 400; font-display: block; }
+@font-face { font-family: "Microsoft Sans Serif"; src: url("../../assets/skins/dos/fonts/win31-mssansserif8-bold.ttf") format("truetype"); font-weight: 700; font-display: block; }
+@font-face { font-family: "Win31 System"; src: url("../../assets/skins/dos/fonts/win31-system.ttf") format("truetype"); font-display: block; }
+@font-face { font-family: "Win31 Fixedsys"; src: url("../../assets/skins/dos/fonts/win31-fixedsys.ttf") format("truetype"); font-display: block; }
+html { font-synthesis: none; -webkit-font-smoothing: none; -moz-osx-font-smoothing: grayscale; font-smooth: never; text-rendering: optimizeSpeed; }
+body { font-size: 11px; }
+#menubar, .mbtn, .dropdown button, #menubar .logo, .wtitle span, button:not(.quiet) { font-family: "Win31 System", "MS Sans Serif", sans-serif; font-size: 13px; font-weight: normal; }
 /* The display: 16 colours (VGA, Windows' own driver: what Windows 3.1 shipped with, the default) or 256 colours (html.w31-256: the look's option, the DOS
    skin's lookOptions). Captured on the running Windows program (docs/win20-findings.md; private audit/win-2.0/captures/win20-orig-{vga16,s3-256}-*.png):
    in 256 colours the game's palette takes the system colours, so the active title bar and the modal frames are pale blue (166, 203, 243 through the
@@ -13,11 +25,10 @@
    are Windows' own (navy #000080 shows as 0, 0, 170 through the VGA DAC). js/skins/dos/win31/dialog.js draws its dialogs in these. */
 :root { --w31cap: #000080; --w31captext: #fff; --w31face: #c0c0c0; --w31shade: #808080; --w31work: #c0c0c0; }
 html.w31-256 { --w31cap: #a6caf0; --w31captext: #000; --w31work: #a4a0a0; }
-#menubar, .mbtn, .dropdown button, #menubar .logo { font-weight: bold; }
 #menubar { border-bottom: 1px solid #000; }
 .win { border: 4px solid #c0c0c0; outline: 1px solid #000; box-shadow: inset 0 0 0 1px #000; }
 .wtitle { background: var(--w31cap); border-bottom: 1px solid #000; height: 20px; padding: 0; gap: 0; }
-.wtitle span { color: var(--w31captext); font-weight: bold; }
+.wtitle span { color: var(--w31captext); }
 /* the control-menu box: a grey square with its bar */
 .close { width: 19px; height: 19px; flex: none; border: 0; border-right: 1px solid #000; border-radius: 0;
   background: linear-gradient(#fff, #fff) center / 11px 3px no-repeat, linear-gradient(#000, #000) 5px 9px / 11px 3px no-repeat, var(--w31face); }

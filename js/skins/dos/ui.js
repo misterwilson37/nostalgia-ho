@@ -533,7 +533,7 @@ function battleDos(b, k) {
   const mo = new MutationObserver(() => { if (!d.isConnected) { stop = true; mo.disconnect(); } }); mo.observe(document.body, { childList: true });
   const pat = (col) => { const p = document.createElement('canvas'); p.width = p.height = 2; const q = p.getContext('2d'); q.fillStyle = col; q.fillRect(0, 0, 1, 1); q.fillRect(1, 1, 1, 1); return x.createPattern(p, 'repeat'); };
   const grayPat = pat('#000'), whiteGray = pat('#fff');
-  const text = (t, h, v, bold, center) => { x.font = win ? (bold ? "bold 13px 'MS Sans Serif', 'Microsoft Sans Serif', Arial, sans-serif" : "11px 'MS Sans Serif', 'Microsoft Sans Serif', Arial, sans-serif") : bold ? F9B : F9; x.fillStyle = '#fff'; x.textAlign = center ? 'center' : 'left'; x.fillText(t, h, v); };
+  const text = (t, h, v, bold, center) => { x.font = win ? (bold ? "13px 'Win31 System', 'MS Sans Serif', 'Microsoft Sans Serif', Arial, sans-serif" : "11px 'MS Sans Serif', 'Microsoft Sans Serif', Arial, sans-serif") : bold ? F9B : F9; x.fillStyle = '#fff'; x.textAlign = center ? 'center' : 'left'; x.fillText(t, h, v); };
   let seed = (b.id | 0) * 7919 + 13; const rnd = (lo, hi) => { seed = (seed * 16807) % 2147483647; return lo + (seed % (hi - lo + 1)); };
   const stars = Array.from({ length: 35 }, () => [rnd(5, 440), rnd(5, 348)]);
   const drawStars = () => { x.fillStyle = '#fff'; for (const [h, v] of stars) x.fillRect(h, v, 1, 1); };
@@ -779,8 +779,8 @@ function setUnit() {
 const F9 = "12px 'DOS Geneva 9'", F9B = "12px 'DOS Geneva 9 Bold'", C12 = "15px 'DOS Chicago 12'";
 // the Windows program's panels are in MS Sans Serif 8 (measured: capitals 8 pixels, lines 14 apart) and the planet's name in the bold System font
 // (capitals 10); neither font is in the repo, so the look's MS Sans Serif / Arial at those sizes (docs/win20-findings.md)
-const WSANS = "'MS Sans Serif', 'Microsoft Sans Serif', Arial, sans-serif", WFONT = { [F9]: '11px ' + WSANS, [F9B]: 'bold 11px ' + WSANS, [C12]: 'bold 14px ' + WSANS };
-const wf = (f) => (winOn() && WFONT[f]) || f, WK = 0.92;
+const WSANS = "'MS Sans Serif', 'Microsoft Sans Serif', Arial, sans-serif", WFONT = { [F9]: '11px ' + WSANS, [F9B]: 'bold 11px ' + WSANS, [C12]: "13px 'Win31 System', " + WSANS };
+const wf = (f) => (winOn() && WFONT[f]) || f, WK = 1; // (the real MS Sans Serif bitmap, from Windows 3.1's disks: js/os/win31.css, needs no narrowing)
 let fontsReady = false;
 function loadFonts() {
   if (fontsReady || !document.fonts) return;

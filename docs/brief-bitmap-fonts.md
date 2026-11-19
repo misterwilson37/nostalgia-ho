@@ -38,3 +38,15 @@ Run `tools/real-play.js --skin=mac12,mac2,mac3,dos --size=desktop,phone-l` after
   `assets/skins/dos/fonts/turkish-*.ttf`), VGA ones from the Oldschool PC Font Pack's "Plus" faces, added by `unicode-range`. Other glyphs not in the fonts (× − ½ ✕ ▲ ▼ ◂ ▸) fall back to a smoothed face;
   the Split window's minus is now a hyphen under these looks.
 - **Not done:** the Amiga skin (Topaz is there; the audit script didn't run on its own title and New Game), Windows 3.1 and 95, Palm, iOS, Android, Platinum / OS 9 / Aqua looks.
+
+## Done, 19 Nov 2026 (second pass: Windows 3.1, Windows 95, Palm OS)
+- **Windows 3.1** (`js/os/win31.css`): MS Sans Serif 8 (11px, bold as GDI drew it), the System font (13px; menus, titles, buttons) and Fixedsys (the lists), all the real bitmaps from the Windows 3.1
+  setup disks (`tools/extract/winfon.py` -> `assets/skins/dos/fonts/win31-*.ttf`); the name "MS Sans Serif" now means that bitmap wherever the skin or its canvas dialogs ask for it, so the 0.92 "narrowing" of the
+  Arial stand-in is gone (`WK = 1`, `k = 1`).
+- **Windows 95** (`js/os/win95.css`): the real MS Sans Serif 8 from the Windows 95 setup disks (`assets/skins/w95/fonts/`), regular and generated bold; Tahoma is no longer first in the stack (Windows 95 had none).
+- **Palm OS** (`js/os/palmos.css`): the Palm OS standard (11px), bold and large fonts from a Windows .FON of them (`assets/skins/palm/fonts/`); the title buttons too (`--west`). Provenance of that .FON is not stated: ask before publishing.
+- **Turkish** in the Windows looks: the six letters from the Turkish Windows 3.11's own fonts (private repo `originals/win31-turkish/`). Palm has none (the originals had none).
+- **Left on Arial on purpose** (the Windows program itself draws them in Arial; docs/405-windows.md, win20-findings): the player names and the clock in the w95 skin, the budget strip's "0% Linear 100%" in the
+  Windows 3.1 look, the Windows 95 New Game window's labels (15px Arial from shot 002).
+- Smoothing off where a browser allows it: `-webkit-font-smoothing: none` (Mac WebKit only), `text-rendering: optimizeSpeed`; the fonts are squares, so at their native size they are crisp anyway.
+- The pixel fonts work only when the page loads the look's own CSS; the single-file build (tools/bundle.py) inlines only assets/fonts/*.woff2, so its looks still fall back to system fonts.
