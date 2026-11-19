@@ -1,0 +1,19 @@
+/* Spaceward Ho! — the pixel fonts of the old looks, declared once for every skin that runs under them
+   (docs/brief-bitmap-fonts.md). They are the Mac's Chicago 12 and Geneva 9 and the DOS program's own 8x14 face, as
+   Spaceward Ho! 2.0 for DOS carries them (assets/skins/dos/fonts/). Imported by dos.css and system7.css (system6.css and
+   system75.css build on that), so whichever skin is shown under such a look has the faces. No synthesised bold: the
+   bitmaps carry their own weight. */
+@font-face { font-family: "DOS Bios"; src: url("../../assets/skins/dos/fonts/bios8x14.ttf") format("truetype"); font-display: block; }
+@font-face { font-family: "DOS Chicago 12"; src: url("../../assets/skins/dos/fonts/chicago12.ttf") format("truetype"); font-display: block; }
+@font-face { font-family: "DOS Geneva 9"; src: url("../../assets/skins/dos/fonts/geneva9.ttf") format("truetype"); font-weight: 400; font-display: block; }
+@font-face { font-family: "DOS Geneva 9"; src: url("../../assets/skins/dos/fonts/geneva9bold.ttf") format("truetype"); font-weight: 700; font-display: block; }
+@font-face { font-family: "DOS Geneva 9 Bold"; src: url("../../assets/skins/dos/fonts/geneva9bold.ttf") format("truetype"); font-display: block; }
+/* ---------- the Turkish letters (Ğ ğ İ ı Ş ş), which the DOS program's fonts lack: from the Turkish Apple system disks for the Mac faces
+   (tools/extract/macturkish.py), from the Oldschool PC Font Pack's "Plus" VGA face for the 8x14 and 9x16 (CC BY-SA 4.0), each added to its own
+   family for those code points only ---------- */
+@font-face { font-family: "DOS Bios"; src: url("../../assets/skins/dos/fonts/ibmvga8x14plus.woff") format("woff"); unicode-range: U+011E-011F, U+0130-0131, U+015E-015F; font-display: block; }
+@font-face { font-family: "IBM VGA 9x16"; src: url("../../assets/skins/dos/fonts/ibmvga9x16plus.woff") format("woff"); unicode-range: U+011E-011F, U+0130-0131, U+015E-015F; font-display: block; }
+@font-face { font-family: "DOS Chicago 12"; src: url("../../assets/skins/dos/fonts/turkish-chicago12.ttf") format("truetype"); unicode-range: U+011E-011F, U+0130-0131, U+015E-015F; font-display: block; }
+@font-face { font-family: "DOS Geneva 9"; src: url("../../assets/skins/dos/fonts/turkish-geneva9.ttf") format("truetype"); font-weight: 400; unicode-range: U+011E-011F, U+0130-0131, U+015E-015F; font-display: block; }
+@font-face { font-family: "DOS Geneva 9"; src: url("../../assets/skins/dos/fonts/turkish-geneva9bold.ttf") format("truetype"); font-weight: 700; unicode-range: U+011E-011F, U+0130-0131, U+015E-015F; font-display: block; }
+@font-face { font-family: "DOS Geneva 9 Bold"; src: url("../../assets/skins/dos/fonts/turkish-geneva9bold.ttf") format("truetype"); unicode-range: U+011E-011F, U+0130-0131, U+015E-015F; font-display: block; }

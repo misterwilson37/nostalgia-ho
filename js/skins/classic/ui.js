@@ -119,6 +119,8 @@ const $ = (s, el) => (el || document).querySelector(s);
 const UIL = window.HOUI || { t: (s, ...a) => { let i = 0; return s.replace(/%(?:\d+\$)?[sd]/g, () => String(a[i++])); }, tr: (s) => s, text: (d, s) => d.createTextNode(s), en: (n) => n.textContent, set: () => false, pref: { get: () => null, at: () => 0, set: () => false }, onChange() {}, lang: 'en' };
 const tl = (s, ...a) => (a.length ? UIL.t(s, ...a) : UIL.tr(s));
 const TL_ATTRS = ['title', 'aria-label', 'placeholder', 'alt'];
+// the minus sign: U+2212, but the Mac and DOS pixel fonts (js/os/pixel-fonts.css, system7.css) have no such glyph, so under those looks a hyphen, as the originals drew
+const MINUS = () => /\bos-(system6|system7|system75|dos)\b/.test(document.documentElement.className) ? '-' : '\u2212';
 const el = (tag, attrs, ...kids) => {
   const e = document.createElement(tag);
   if (attrs) for (const k in attrs) {
@@ -2874,7 +2876,7 @@ function openBuild(sid) {
             }
             render(); renderPanel(); draw(); save();
           } }, scrapWords('type')[d.scrap301 ? 1 : 0]) : null,
-          el('button', { class: 'quiet', disabled: !n, 'aria-label': 'Remove one', onclick: () => { if (queue) { const i = (s.queue || []).map(it => it.did).lastIndexOf(d.id); if (i >= 0) HO.unqueueShip(G, ME, sid, i); } else if (HO.unbuildShip(G, ME, sid, d.id) && session[d.id] > 0) session[d.id]--; render(); renderPanel(); draw(); } }, '−'),
+          el('button', { class: 'quiet', disabled: !n, 'aria-label': 'Remove one', onclick: () => { if (queue) { const i = (s.queue || []).map(it => it.did).lastIndexOf(d.id); if (i >= 0) HO.unqueueShip(G, ME, sid, i); } else if (HO.unbuildShip(G, ME, sid, d.id) && session[d.id] > 0) session[d.id]--; render(); renderPanel(); draw(); } }, MINUS()),
           el('span', { class: 'n' }, String(n)),
           el('button', { disabled: !can, 'aria-label': queue ? 'Queue one' : 'Build one', onclick: () => { manyAsk(d, () => { if (queue ? HO.queueShips(G, ME, sid, d.id, 1) : HO.buildShips(G, ME, sid, d.id, 1)) { Sound.play(7006); session[d.id] = (session[d.id] || 0) + 1; } render(); renderPanel(); draw(); }); } }, '+'))));
     }
@@ -2936,7 +2938,7 @@ function openSplit(f) {
     const d = HO.getDesign(G, f.owner, +k); take[k] = 0;
     const n = el('b', null, '0');
     body.append(el('div', { class: 'drow' }, shipImgEl(d, 22, f.owner), el('div', { class: 'dtext' }, `${d.name} (${f.ships[k]})`),
-      el('div', { class: 'pm' }, el('button', { class: 'quiet', onclick: () => { take[k] = Math.max(0, take[k] - 1); n.textContent = take[k]; } }, '−'), n,
+      el('div', { class: 'pm' }, el('button', { class: 'quiet', onclick: () => { take[k] = Math.max(0, take[k] - 1); n.textContent = take[k]; } }, MINUS()), n,
         el('button', { class: 'quiet', onclick: () => { take[k] = Math.min(f.ships[k], take[k] + 1); n.textContent = take[k]; } }, '+'))));
   }
   body.append(el('div', { class: 'btns right' }, el('button', { onclick: () => { const nf = HO.splitFleet(G, f, take); if (nf) UI.selFleet = nf.id; closeModal(); renderPanel(); draw(); save(); } }, 'Split fleet')));

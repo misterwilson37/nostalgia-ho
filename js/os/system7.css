@@ -3,6 +3,16 @@
    Mac skins' default; their colour editions kept black-and-white windows).
    On the DOS look's form controls, redrawn in black and white. */
 @import url("dos.css");
+/* ---------- the Mac's pixel fonts: every "Chicago" and "Geneva" in the skins' rules is the Mac's own bitmap, not a smoothed system
+   font (docs/brief-bitmap-fonts.md). Chicago 12 is drawn at 15 CSS pixels a font pixel's worth, so a request for 12px is scaled by
+   size-adjust; the bitmaps carry their own bold. System 6, 7 and 7.5 all share them (what System 6 and 7 had to draw with). ---------- */
+@font-face { font-family: Chicago; src: url("../../assets/skins/dos/fonts/chicago12.ttf") format("truetype"); font-weight: 400 700; size-adjust: 125%; font-display: block; }
+@font-face { font-family: Geneva; src: url("../../assets/skins/dos/fonts/geneva9.ttf") format("truetype"); font-weight: 400; font-display: block; }
+@font-face { font-family: Geneva; src: url("../../assets/skins/dos/fonts/geneva9bold.ttf") format("truetype"); font-weight: 700; font-display: block; }
+@font-face { font-family: Chicago; src: url("../../assets/skins/dos/fonts/turkish-chicago12.ttf") format("truetype"); font-weight: 400 700; size-adjust: 125%; unicode-range: U+011E-011F, U+0130-0131, U+015E-015F; font-display: block; }
+@font-face { font-family: Geneva; src: url("../../assets/skins/dos/fonts/turkish-geneva9.ttf") format("truetype"); font-weight: 400; unicode-range: U+011E-011F, U+0130-0131, U+015E-015F; font-display: block; }
+@font-face { font-family: Geneva; src: url("../../assets/skins/dos/fonts/turkish-geneva9bold.ttf") format("truetype"); font-weight: 700; unicode-range: U+011E-011F, U+0130-0131, U+015E-015F; font-display: block; }
+html { font-synthesis: none; }
 /* ---------- the Mac Plus and SE look (moved from js/skins/mac3/style.css):
    white windows with black edges and a drop shadow, striped title bars,
    square buttons with round corners ---------- */
