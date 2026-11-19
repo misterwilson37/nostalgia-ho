@@ -65,3 +65,33 @@ if len(sys.argv) > 2:
     faces = {(f.point_size, f.weight): f for f in monobit.load(fon)}
     save(os.path.join(PALM, 'palmos.ttf'), 'Palm OS', faces[(8, 'regular')], False)
     save(os.path.join(PALM, 'palmos-bold.ttf'), 'Palm OS Bold', faces[(8, 'bold')], False)
+
+# Palm OS's Turkish letters, from the Turkish Interpilot language database (Interpilot 2.5 by Sergey Menshikov, a Palm localisation add-on, long discontinued, files free to download
+# from sergem.net): its FONT resources 0 (standard) and 1 (bold) carry Palm's Latin set with the six Turkish letters at the Windows-1254 places. Only those six are taken, as
+# palmos-turkish.ttf and palmos-bold-turkish.ttf (the Palm OS look adds them by unicode-range).
+#     python3 tools/extract/winfon.py <fonts/windows> <fonts/palm FON folder> <turkish-win-25.prc>
+if len(sys.argv) > 3:
+    import struct
+    d = open(sys.argv[3], 'rb').read(); n = struct.unpack('>H', d[76:78])[0]; ents = [struct.unpack('>4sHI', d[78 + 10 * i:88 + 10 * i]) for i in range(n)]
+    res = {i: d[o:(ents[k + 1][2] if k + 1 < n else len(d))] for k, (t, i, o) in enumerate(ents) if t == b'FONT'}
+    def palmfont(b):  # a Palm FONT resource: the Mac FONT layout (header, strike, location table, offset/width table)
+        ft, first, last, wmax, kern, nd, frw, h, owt, asc, desc, lead, rw = struct.unpack('>hhhhhhhhHhhhh', b[:26]); m = last - first + 3
+        bits = b[26:26 + rw * 2 * h]; loc = struct.unpack('>%dH' % m, b[26 + rw * 2 * h:26 + rw * 2 * h + m * 2]); ow = struct.unpack('>%dH' % m, b[16 + owt * 2:16 + owt * 2 + m * 2])
+        g = {}
+        for c in range(first, last + 1):
+            i = c - first
+            if ow[i] == 0xFFFF: continue
+            px = {(x - loc[i] + (ow[i] >> 8) + kern, asc - 1 - y) for y in range(h) for x in range(loc[i], loc[i + 1]) if bits[y * rw * 2 + (x >> 3)] & (0x80 >> (x & 7))}
+            g[c] = (px, ow[i] & 255)
+        return asc, desc, g
+    for fid, fn, fam in ((0, 'palmos-turkish.ttf', 'Palm OS Turkish'), (1, 'palmos-bold-turkish.ttf', 'Palm OS Bold Turkish')):
+        asc, desc, g = palmfont(res[fid]); cmap, glyphs, metrics, names = {}, {}, {}, ['.notdef']
+        for cp, uni in TURKISH.items():
+            px, adv = g[cp]; pen = TTGlyphPen(None)
+            for (x, y) in sorted(px, key=lambda p: (-p[1], p[0])):
+                x0, y0 = x * U, y * U; pen.moveTo((x0, y0)); pen.lineTo((x0, y0 + U)); pen.lineTo((x0 + U, y0 + U)); pen.lineTo((x0 + U, y0)); pen.closePath()
+            nm = 'u%04X' % uni; names.append(nm); glyphs[nm] = pen.glyph(); metrics[nm] = (adv * U, 0); cmap[uni] = nm
+        pen = TTGlyphPen(None); glyphs['.notdef'] = pen.glyph(); metrics['.notdef'] = (6 * U, 0)
+        fb = FontBuilder((asc + desc) * U, isTTF=True); fb.setupGlyphOrder(names); fb.setupCharacterMap(cmap); fb.setupGlyf(glyphs); fb.setupHorizontalMetrics(metrics)
+        fb.setupHorizontalHeader(ascent=asc * U, descent=-desc * U); fb.setupNameTable({'familyName': fam, 'styleName': 'Regular'})
+        fb.setupOS2(sTypoAscender=asc * U, sTypoDescender=-desc * U, usWinAscent=asc * U, usWinDescent=desc * U); fb.setupPost(); fb.save(os.path.join(PALM, fn)); print(fn, os.path.getsize(os.path.join(PALM, fn)))

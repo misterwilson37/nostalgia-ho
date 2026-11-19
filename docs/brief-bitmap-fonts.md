@@ -50,3 +50,11 @@ Run `tools/real-play.js --skin=mac12,mac2,mac3,dos --size=desktop,phone-l` after
   Windows 3.1 look, the Windows 95 New Game window's labels (15px Arial from shot 002).
 - Smoothing off where a browser allows it: `-webkit-font-smoothing: none` (Mac WebKit only), `text-rendering: optimizeSpeed`; the fonts are squares, so at their native size they are crisp anyway.
 - The pixel fonts work only when the page loads the look's own CSS; the single-file build (tools/bundle.py) inlines only assets/fonts/*.woff2, so its looks still fall back to system fonts.
+
+## Done, 19 Nov 2026 (third pass: symbols, punctuation, Palm Turkish)
+- **Symbols none of the pixel fonts has** (minus U+2212, multiplication sign, a small X U+2715, the solid triangles) are drawn in pixels at each font's scale (`tools/extract/pixelextras.py` ->
+  `assets/skins/dos/fonts/extras-*.ttf`), added by unicode-range to the Mac aliases (`system7.css`) and the DOS names (`pixel-fonts.css`). Not drawn: the one-half sign for the Mac fonts.
+  The fan fonts ChiKareGo2 and FindersKeepers (Giles Booth, CC BY) were checked and add only a multiplication sign here, so they are not used (kept in the private repo).
+- **DOS 8x14 punctuation:** curly quotes, en and em dashes, the ellipsis, the euro, oe, A-grave and a few symbols now come from the Oldschool PC Font Pack's Plus 8x14 face (the same VGA design) instead of a smoothed face.
+- **Palm OS Turkish:** the six letters from the Turkish Interpilot language database (Interpilot 2.5 by Sergey Menshikov, discontinued; free to download, no licence text: private repo `originals/fonts/palm/SOURCE.md`),
+  `assets/skins/palm/fonts/palmos-turkish.ttf` and `palmos-bold-turkish.ttf`.
