@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """The few symbols the Mac pixel fonts (Chicago 12, Geneva 9) and the DOS 8x14 lack, drawn in pixels at the fonts' own scale, so no look falls back to a smoothed face for them:
-U+2212 minus (the font's own hyphen), U+00D7 multiplication sign and U+2715 (a small X), the solid triangles U+25B2 U+25BC U+25C2 U+25B8 and U+25C0 U+25B6.
+U+2212 minus (the font's own hyphen), U+00D7 multiplication sign and U+2715 (a small X), the solid triangles U+25B2 U+25BC U+25C2 U+25B8 and U+25C0 U+25B6 and U+00BD one half (drawn 8 x 9).
 Writes assets/skins/dos/fonts/extras-{chicago12,geneva9,geneva9bold,bios}.ttf; js/os/pixel-fonts.css and system7.css add them by unicode-range.
 (The fan fonts ChiKareGo2 and FindersKeepers by Giles Booth, CC BY, in the private repo, add only a multiplication sign for these: not used.)   pip install fonttools"""
 import os
@@ -22,10 +22,13 @@ def tri(k, up):  # a solid isosceles triangle, base 2k+1, height k+1, apex up or
 def side(k, right):  # pointing left / right
     return {(x if right else k - x, y) for x in range(k + 1) for y in range(k - x, k + x + 1)}
 def shape(px, dx=0, dy=0): return {(x + dx, y + dy) for x, y in px}
+HALF = ['.#....#.', '##...#..', '.#...#..', '.#..#...', '###.#.##', '...#..#.', '..#..#.#', '..#...#.', '.#...###']  # the one-half sign, 8 x 9, drawn here (top row first)
+def half(): return {(x, 8 - y) for y, r in enumerate(HALF) for x, c in enumerate(r) if c == '#'}
 def build(name, base, asc, desc, k, xh):  # xh: the font's x-height in pixels, where the symbols sit
     hy, hadv, f = pixels(base, '-'); g = {}
     cross = {(i, i) for i in range(5)} | {(i, 4 - i) for i in range(5)}
     g[0x2212] = (hy, hadv); g[0xD7] = (shape(cross, 0, max(0, (xh - 5) // 2 + 0)), 7); g[0x2715] = (shape(cross, 0, max(0, (xh - 5) // 2)), 7)
+    g[0xBD] = (half(), 10)
     t = tri(k, True); w = 2 * k + 1; g[0x25B2] = (shape(t, 0, 0), w + 2); g[0x25BC] = (shape(tri(k, False), 0, 0), w + 2)
     s = side(k, False); g[0x25C2] = (s, k + 3); g[0x25C0] = (s, k + 3); r = side(k, True); g[0x25B8] = (r, k + 3); g[0x25B6] = (r, k + 3)
     cmap, glyphs, metrics, names = {}, {}, {}, ['.notdef']
