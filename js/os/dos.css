@@ -4,6 +4,7 @@
    here from js/skins/dos/style.css; the DOS skin's default look.) */
 @import url("base.css");
 @import url("pixel-fonts.css");
+@import url("pixel-sizes.css");
 :root {
   --plat: #c0c0c0; --plat2: #c0c0c0; --edge: #808080; --ink: #000; --sub: #404040;
   --hi: #000080;

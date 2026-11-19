@@ -3,6 +3,8 @@
    buttons and small bold type. (Moved here from js/skins/palm/style.css;
    the Palm OS skin's default.) */
 @import url("base.css");
+@import url("pixel-fonts.css");
+@import url("pixel-sizes.css");
 :root {
   --plat: #fff; --plat2: #fff; --edge: #000; --ink: #000; --sub: #333; --hi: #000;
   --ui: "Palm OS", "Palm OS Std", sans-serif;

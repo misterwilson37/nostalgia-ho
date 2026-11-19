@@ -2,6 +2,8 @@
    bars with the close box at the right, Tahoma / MS Sans Serif. (Moved
    here from js/skins/w95/style.css; the 4.0.5 Windows 95 skin's default.) */
 @import url("base.css");
+@import url("pixel-fonts.css");
+@import url("pixel-sizes.css");
 :root {
   --plat: #c0c0c0; --plat2: #c0c0c0; --edge: #808080; --ink: #000; --sub: #333;
   --hi: #000080;
