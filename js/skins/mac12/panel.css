@@ -165,3 +165,18 @@ html.macscale .win.bw12m { width: min(445px, calc((100vw - 24px) / var(--mac)), 
 .win.bw12m .bw12w { width: 100%; }
 html.macscale.mac301 .win .bw12w button.bw12b { font-size: 15px !important; }
 html.macscale.mac301 .win .bw12w button.bw12b.done { outline-width: 3px; outline-offset: 1px; }
+/* DLOG 6010 Create New Ship Type (js/skins/mac12/ui.js createType): the program's own dialog, DITL 6010's rectangles; no title bar (a dBoxProc
+   window), its scroll bars drawn as the map's (paintBar), the Class pop-up as the System's pop-up menu control: a framed box with a 1-pixel
+   shadow at its right and foot and a black triangle at its right */
+.win.dlg6010 .wtitle { display: none; }
+.win.dlg6010 .wbody { padding: 0; }
+.win.dlg6010 .dl20 { margin: 8px; }
+.ct6010 .dbar12 { cursor: default; touch-action: none; }
+.ct6010 .dbar12 canvas { display: block; }
+.ct6010 input[type=text] { box-sizing: border-box; font: inherit; padding: 0 3px; border: 1px solid #000; border-radius: 0; background: #fff; color: #000; outline: none; }
+.ct6010 select.pop12 { appearance: none; -webkit-appearance: none; box-sizing: border-box; border: 1px solid #000; border-radius: 0; box-shadow: 1px 1px 0 #000; padding: 0 22px 0 14px;
+  font: 15px/1 'DOS Chicago 12', Chicago, Charcoal, Geneva, sans-serif; letter-spacing: .58px; color: #000; cursor: default;
+  background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='6' shape-rendering='crispEdges'%3E%3Cpath d='M0 0h11L5.5 6z'/%3E%3C/svg%3E") no-repeat right 6px center; }
+/* the budget bars' box scrolls with the wheel, never with the browser's own scroll bar (it showed under the bars on a Mac set to always show them) */
+.nosb12 { scrollbar-width: none; }
+.nosb12::-webkit-scrollbar { display: none; }

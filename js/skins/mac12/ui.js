@@ -69,7 +69,34 @@ const noGame = () => !G();
 const LY = 2, ZOOMS = [6, 9, 12, 17].map(z => z * LY);
 // With modern conveniences, three closer zooms beyond the original's largest (the remake's: on a big screen 17 is small); the plain game keeps the four.
 const ZOOMS_MODERN = ZOOMS.concat([24, 34, 48].map(z => z * LY));
-const zooms = () => { const g = G(); return g && g.opts && g.opts.modern ? ZOOMS_MODERN : ZOOMS; };
+const zoomsBase = () => { const g = G(); return g && g.opts && g.opts.modern ? ZOOMS_MODERN : ZOOMS; };
+// The window filled (Jake, 19 Nov 2026, the remake's own: on a big screen the whole galaxy shows at 17 with a wide empty band at the right or
+// the foot): when every star fits at the largest zoom with room to spare, that zoom becomes the one that fills the window, the stars and their
+// names as far from the top as from the foot (or from the left as from the right, whichever binds); the smaller zooms are the program's, and a
+// galaxy that doesn't fit at 17 is shown as the program shows it. The edge round the stars: half a planet's picture, and its name under it.
+const FILL = { key: '', s: 0 };
+const planetPx12 = (s) => Math.max(18, Math.min(52, s * 0.9)); // (the classic map's planet size, js/skins/classic/ui.js planetPx)
+function starBox(g, s) { // the stars' extent at scale s, in map pixels, with each one's picture and name
+  let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
+  for (const st of g.stars) { x0 = Math.min(x0, st.x); x1 = Math.max(x1, st.x); y0 = Math.min(y0, st.y); y1 = Math.max(y1, st.y); }
+  const ps = planetPx12(s), side = Math.max(ps / 2, 30), top = ps / 2 + 2, foot = ps / 2 + 15;
+  return { x0: x0 * s - side, x1: x1 * s + side, y0: y0 * s - top, y1: y1 * s + foot };
+}
+function fillZoom() {
+  const g = G(), a = A(); if (!g || !a || !g.stars || !g.stars.length) return 0;
+  const [w, h] = mapSize(); if (!w || !h) return 0;
+  const key = [w, h, g.stars.length, g.W, g.H, g.stars[0].x, g.stars[0].y].join();
+  if (FILL.key === key) return FILL.s;
+  const GAP = 16; let s = ZOOMS[3];
+  let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9; for (const st of g.stars) { x0 = Math.min(x0, st.x); x1 = Math.max(x1, st.x); y0 = Math.min(y0, st.y); y1 = Math.max(y1, st.y); }
+  for (let i = 0; i < 6; i++) { // (the edge grows with the zoom until the planets are their largest: a few rounds settle it)
+    const ps = planetPx12(s), padX = 2 * Math.max(ps / 2, 30), padY = ps + 17;
+    s = Math.min((w - 2 * GAP - padX) / Math.max(1, x1 - x0), (h - 2 * GAP - padY) / Math.max(1, y1 - y0));
+  }
+  FILL.key = key; FILL.s = s > ZOOMS[3] * 1.02 ? Math.floor(s * 100) / 100 : 0;
+  return FILL.s;
+}
+const zooms = () => { const Z = zoomsBase(), f = own() ? fillZoom() : 0; return f ? ZOOMS.slice(0, 3).concat([f], Z.slice(4).filter(z => z > f * 1.1)) : Z; };
 const zoomIdx = (s) => { const Z = zooms(); let b = 0; Z.forEach((z, i) => { if (Math.abs(Math.log(z / s)) < Math.abs(Math.log(Z[b] / s))) b = i; }); return b; };
 const snapZoom = (s) => zooms()[zoomIdx(s)];
 function zoomTo(s, f) {
@@ -851,48 +878,104 @@ const ALERT_TYPES = {
   fr: { full: ['Désolé, mais Spaceward Ho! vous autorise seulement 20 modèles de vaisseaux simultanés. ', 'Pour créer ce nouveau modèle, recyclez-en d\'abord un ancien en cochant la case correspondante de la boîte de dialogue.', 'Ce modèle sera détruit lors de la mise à jour du tour, et vous pourrez en créer un autre au prochain tour.'],
     name: ['Merci de baptiser votre nouveau modèle de vaisseau.'], tech: ['Merci d\'affecter un minimum technologique à votre nouveau modèle.'] },
 };
+// The dialog as DITL 6010 lays it out (1.2F's, read in its resource fork; 2.0.1's is the same dialog, 458 x 270, a few items a pixel or two
+// apart and in English), Jake's System 6 capture of 1.2F (19 Nov 2026): "Nom du nouveau modèle:" (10, 40), the field (13, 70, 174 x 16),
+// the ship's picture in user item 4 (210, 20, 243 x 76: DRAWNEWSHIPTYPEPICTURE, DrawShipPicture of the levels set), the five rows: the
+// level's name (7, 110 ...), "%d/%d" (its level / the most, 80, 110 ...: CreateShipType's sprintf) and its scroll bar (CNTL 6010-6014, 70 x 16
+// at 123, 110 ...: the standard bar, empty when the level can't move), the Class pop-up (CNTL 6015, 214 x 20 at 221, 114, its title 90
+// wide), "CT Dév:" / "CT Prod:" / "CT Métal:" (220, 140 ...) and their values (310), "Donner un nom" (76, 220), Annuler (280, 220), Créer
+// (360, 221) with the default's ring (user item 3). SetSBMinMax @111c3c sets the bars' ranges: rs.designLimits / designMin.
+const DITL6010 = {
+  12: { title: [40, 10, 57, 190], field: [70, 13, 86, 187], pic: [20, 210, 96, 453], rows: [110, 130, 150, 170, 190], lab: [7, 74], num: 80, bar: 123,
+    pop: [114, 221, 134, 435], popW: 90, costL: [220, 85], costV: [310, 104], costY: [140, 160, 180], name: [220, 76, 240, 194], cancel: [220, 280, 240, 338], ok: [221, 360, 241, 418] },
+  20: { title: [40, 10, 58, 179], field: [70, 13, 86, 187], pic: [20, 210, 96, 453], rows: [110, 130, 150, 170, 190], lab: [10, 66], num: 80, bar: 123,
+    pop: [110, 220, 130, 434], popW: 90, costL: [220, 85], costV: [310, 104], costY: [140, 160, 180], name: [220, 85, 240, 195], cancel: [220, 280, 240, 338], ok: [220, 360, 240, 418] },
+};
+const WORDS6010 = {
+  fr: { title: 'Nom du nouveau modèle:', rows: ['Distance', 'Vitesse', 'Armes', 'Boucliers', 'Mini'], cls: 'Classe:', costs: ['CT Dév:', 'CT Prod:', 'CT Métal:'], name: 'Donner un nom', cancel: 'Annuler', ok: 'Créer' },
+  en: { title: 'Name of New Ship Type:', rows: ['Range', 'Speed', 'Weapons', 'Shields', 'Mini'], cls: 'Class:', costs: ['Dev. Cost:', 'Prod. Cost:', 'Metal Cost:'], name: 'Name It For Me', cancel: 'Cancel', ok: 'Create' },
+};
+// a dialog's scroll bar (the standard control, drawn as the map's: paintBar), horizontal, L long; arrows a step, the grey a step towards the
+// pointer, the thumb dragged and let go; the keyboard's arrows (the remake's)
+function dlgBar(L, get, set) {
+  const a = A(), c = a.el('canvas', { class: 'cv12' }), b = { c, L };
+  const el = a.el('div', { class: 'dbar12', role: 'scrollbar', tabindex: 0, 'aria-orientation': 'horizontal' }, c);
+  let press = null, ghost = null;
+  const paint = () => { const g = get(), span = g.max - g.min; el.setAttribute('aria-valuemin', g.min); el.setAttribute('aria-valuemax', g.max); el.setAttribute('aria-valuenow', g.v);
+    el.setAttribute('aria-disabled', span > 0 ? 'false' : 'true'); paintBar(b, false, L, { active: span > 0, value: g.v - g.min, max: Math.max(1, span), press, ghost }); };
+  const pos = (e) => { const r = c.getBoundingClientRect(); return (e.clientX - r.left) / r.width * L; };
+  const thumbAt = () => { const g = get(); return 15 + Math.round((L - 46) * (g.v - g.min) / Math.max(1, g.max - g.min)); };
+  const step = (d) => { const g = get(), n = Math.max(g.min, Math.min(g.max, g.v + d)); if (n !== g.v) set(n); paint(); };
+  let timer = 0, drag = null;
+  el.addEventListener('pointerdown', (e) => {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    e.preventDefault(); el.focus({ preventScroll: true });
+    const g = get(); if (g.max <= g.min) return;
+    try { el.setPointerCapture(e.pointerId); } catch (x) {}
+    const p = pos(e), t = thumbAt();
+    if (p >= t && p < t + 16 && p >= 16 && p < L - 16) { drag = { p0: p, t0: t }; ghost = t; paint(); return; }
+    const d = p < 16 ? -1 : p >= L - 16 ? 1 : p < t ? -1 : 1;
+    press = p < 16 ? 'lo' : p >= L - 16 ? 'hi' : null;
+    const tick = () => { step(d); timer = setTimeout(tick, 100); }; tick();
+  });
+  el.addEventListener('pointermove', (e) => { if (drag) { ghost = Math.max(15, Math.min(L - 31, drag.t0 + pos(e) - drag.p0)); paint(); } });
+  const up = (e) => {
+    clearTimeout(timer); press = null;
+    if (drag) { const g = get(), T = L - 46, n = g.min + Math.round(Math.max(0, Math.min(1, T > 0 ? (ghost - 15) / T : 0)) * (g.max - g.min)); drag = null; ghost = null; if (e.type !== 'pointercancel' && n !== g.v) set(n); }
+    paint();
+  };
+  el.addEventListener('pointerup', up); el.addEventListener('pointercancel', up);
+  el.addEventListener('keydown', (e) => { const d = { ArrowLeft: -1, ArrowDown: -1, ArrowRight: 1, ArrowUp: 1 }[e.key]; if (d) { e.preventDefault(); step(d); } });
+  return { el, paint };
+}
 function createType() {
   const a = A(), el = a.el, g = G(), p = a.me(), W = ALERT_TYPES[lang()];
   if (p.designs.filter(d => !d.scrapped).length >= (H().rules(g).maxDesigns || 20)) { alertBox(W.full); return; }
-  const types = CLASSES();
-  const st = { type: 'scout', R: 0, V: 0, W: 0, S: 0, M: 0, name: '' };
+  const types = CLASSES(), D = DITL6010[V2 ? 20 : 12], Wd = WORDS6010[lang()] || WORDS6010.en, K = ['R', 'V', 'W', 'S', 'M'];
+  const st = { type: types[0] || 'scout', R: 0, V: 0, W: 0, S: 0, M: 0, name: '' };
   let named = false, moved = false;
-  const box = el('div', { class: 'create12' });
-  const name = el('input', { maxlength: 15, value: '', 'aria-label': 'Name of New Ship Type:', oninput: () => { st.name = name.value.trim(); named = !!st.name; },
-    onkeydown: (e) => { if (e.key.length === 1 && name.value.length >= 15 && name.selectionStart === name.selectionEnd && a.beep) a.beep(); } });
+  const lim = (k) => { const L = H().designLimits(g, p, st.type), min = k === 'R' && st.type === 'satellite' ? 0 : H().designMin(g, k, st.type); return { min, max: k === 'R' && st.type === 'satellite' ? 0 : Math.max(min, L[k] || min) }; };
+  const clamp = () => { for (const k of K) { const l = lim(k); st[k] = Math.max(l.min, Math.min(l.max, st[k])); } };
+  clamp();
+  // the field: its frame 3 pixels outside the text's rectangle, as a dialog's edit text item is drawn
+  const fr = D.field, name = el('input', { type: 'text', maxlength: 15, value: '', 'aria-label': Wd.title, style: at20([fr[0] - 3, fr[1] - 3, fr[2] + 3, fr[3] + 3]),
+    oninput: () => { st.name = name.value.trim(); named = !!st.name; },
+    onkeydown: (e) => { if (e.key === 'Enter') { e.preventDefault(); create(); } else if (e.key.length === 1 && name.value.length >= 15 && name.selectionStart === name.selectionEnd && a.beep) a.beep(); } });
   name.setAttribute('translate', 'no');
-  const sel = el('select', { 'aria-label': 'Class', onchange: () => { st.type = sel.value; render(); } }, ...types.map(t => raw('option', cls(t), { value: t })));
-  const sliders = el('div'), costs = el('div');
-  const render = () => {
-    const L = H().designLimits(g, p, st.type);
-    sliders.innerHTML = '';
-    for (const [k, lab] of [['R', 'Range'], ['V', 'Speed'], ['W', 'Weapons'], ['S', 'Shields'], ['M', 'Mini']]) {
-      const min = k === 'R' && st.type === 'satellite' ? 0 : H().designMin(g, k, st.type), max = k === 'R' && st.type === 'satellite' ? 0 : Math.max(min, L[k] || min);
-      st[k] = Math.max(min, Math.min(max, st[k]));
-      const out = raw('b', `${st[k]}/${max}`);
-      sliders.append(el('label', { class: 'slide' }, el('span', null, lab), el('input', { type: 'range', min, max, value: st[k], disabled: max <= min,
-        oninput: (e) => { st[k] = +e.target.value; moved = true; out.textContent = `${st[k]}/${max}`; showCost(); } }), out));
-    }
-    showCost();
-  };
-  const showCost = () => {
+  const pr = D.pic, picBox = el('div', { style: at20(pr) + ';display:flex;justify-content:center;align-items:center;overflow:hidden', 'aria-hidden': 'true' });
+  const drawPic = () => { picBox.innerHTML = ''; const im = a.shipImgEl({ type: st.type, R: st.R, V: st.V, W: st.W, S: st.S, M: st.M, name: st.name }, pr[2] - pr[0]); im.style.maxWidth = '100%'; im.style.width = 'auto'; im.style.imageRendering = 'pixelated'; picBox.append(im); };
+  const nums = [], bars = [], parts = [];
+  K.forEach((k, i) => {
+    const y = D.rows[i];
+    parts.push(txt20(Wd.rows[i], [y, D.lab[0], y + 16, D.lab[0] + D.lab[1]]));
+    const n = raw('span', '', { class: 'dt20', style: at20([y, D.num, y + 16, D.num + 43]) }); nums.push(n); parts.push(n);
+    const b = dlgBar(70, () => Object.assign({ v: st[k] }, lim(k)), (v) => { st[k] = v; moved = true; show(); });
+    b.el.setAttribute('aria-label', Wd.rows[i]); b.el.setAttribute('style', at20([y, D.bar, y + 16, D.bar + 70])); bars.push(b); parts.push(b.el);
+  });
+  // the Class pop-up (CNTL 6015, the standard pop-up menu control): its title, then the box with its shadow and the black triangle; the menu the system's
+  const pp = D.pop, sel = el('select', { class: 'pop12', 'aria-label': Wd.cls, style: at20([pp[0], pp[1] + D.popW, pp[2] - 1, pp[3] - 1]),
+    onchange: () => { st.type = sel.value; clamp(); show(); } }, ...types.map(t => raw('option', cls(t), { value: t })));
+  const costs = D.costY.map((y, i) => { parts.push(txt20(Wd.costs[i], [y, D.costL[0], y + 16, D.costL[0] + D.costL[1]])); const v = raw('span', '', { class: 'dt20', style: at20([y, D.costV[0], y + 16, D.costV[0] + D.costV[1]]) }); parts.push(v); return v; });
+  const show = () => {
+    K.forEach((k, i) => { nums[i].textContent = `${st[k]}/${lim(k).max}`; bars[i].paint(); });
     const c = H().designCost(g, st);
-    costs.innerHTML = '';
-    costs.append(el('div', { class: 'kv' }, el('span', null, 'Dev. Cost:'), raw('b', '$' + nice(c.protoTotal != null ? c.protoTotal : c.money))),
-      el('div', { class: 'kv' }, el('span', null, 'Prod. Cost:'), raw('b', '$' + nice(c.money))),
-      el('div', { class: 'kv' }, lang() === 'fr' ? raw('span', 'CT Métal:') : el('span', null, 'Metal Cost:'), raw('b', nice(c.metal))));
+    costs[0].textContent = '$' + nice(c.protoTotal != null ? c.protoTotal : c.money); costs[1].textContent = '$' + nice(c.money); costs[2].textContent = nice(c.metal);
+    drawPic();
   };
-  render();
-  box.append(el('p', null, 'Name of New Ship Type:'), name, sel, sliders, costs,
-    el('div', { class: 'btns' }, btn('Name It For Me', () => { st.name = H().designName(g, p, st.type); name.value = st.name; named = true; }, { class: 'quiet' }),
-      btn('Cancel', () => a.closeModal(), { class: 'quiet' }),
-      btn('Create', () => {
-        if (!named || !st.name) { alertBox(W.name); return; }
-        if (!moved) { alertBox(W.tech); return; }
-        H().findOrCreateDesign(g, p, { type: st.type, R: st.R, V: st.V, W: st.W, S: st.S, M: st.M, name: st.name });
-        a.closeModal(); a.save(); a.renderPanel();
-      })));
-  win(box);
+  const create = () => {
+    if (!named || !st.name) { alertBox(W.name); return; }
+    if (!moved) { alertBox(W.tech); return; }
+    H().findOrCreateDesign(g, p, { type: st.type, R: st.R, V: st.V, W: st.W, S: st.S, M: st.M, name: st.name });
+    a.closeModal(); a.save(); a.renderPanel();
+  };
+  const B = (t, r, fn, def) => put20(el('button', { type: 'button', class: 'ok20' + (def ? ' def20' : ''), onclick: fn }, raw('span', t)), r);
+  const box = dlog20(458, 270, txt20(Wd.title, D.title), name, picBox, ...parts, txt20(Wd.cls, [pp[0] + 1, pp[1], pp[2], pp[1] + D.popW]), sel, ...[],
+    B(Wd.name, D.name, () => { st.name = H().designName(g, p, st.type); name.value = st.name; named = true; }),
+    B(Wd.cancel, D.cancel, () => a.closeModal()), B(Wd.ok, D.ok, create, true));
+  box.classList.add('ct6010');
+  show();
+  a.modal('', box, { cls: 'mac12 dl20w dlg6010', label: Wd.title });
+  setTimeout(() => name.focus(), 0);
 }
 
 // the players' strip at the foot of the map window (DrawIconRect @c5452): each player's face (your own planet for you), the name, a cross
@@ -2048,7 +2131,7 @@ function panel12(panel, B) {
   // scrolls them to the selected colony's row)
   if (B.budget) {
     const k = (panel.clientWidth || 226) / 226, bx = B.budget;
-    bx.style.maxHeight = Math.round(136 * k) + 'px'; bx.style.overflowY = 'auto'; bx.style.position = 'relative';
+    bx.style.maxHeight = Math.round(136 * k) + 'px'; bx.style.overflowY = 'auto'; bx.style.overflowX = 'hidden'; bx.style.position = 'relative'; bx.classList.add('nosb12'); // (never the browser's own scroll bar: Jake, 19 Nov, a modern grey bar under Proxima on a Mac set to always show them; the wheel and a drag still scroll it)
     const r = bx.querySelector('.barrow.hl');
     if (r && (r.offsetTop < bx.scrollTop || r.offsetTop + r.offsetHeight > bx.scrollTop + bx.clientHeight)) bx.scrollTop = Math.max(0, r.offsetTop - bx.clientHeight / 2);
   }
@@ -2981,6 +3064,8 @@ function syncMapView(v, c) {
   if (!barsOn()) return;
   v.s = snapZoom(v.s);
   barMetrics(v.s, c.mapW, c.mapH, c.G);
+  if (FILL.s && v.s === FILL.s) MB.maxH = MB.maxV = 0; // (the window filled: the stars all show, the bars have nothing to scroll)
+  if (!MB.maxH && !MB.maxV) { centreStars(v, c); MB.H = 0; MB.V = 0; MB.s = v.s; MB.centerSel = false; return; }
   let [H, V] = cellOf(v);
   if (MB.s && MB.s !== v.s && MB.centerSel && c.sel != null && c.G.stars[c.sel]) [H, V] = centerCells(c.G.stars[c.sel], c.G); // (Zoom In / Zoom Out: CenterOnStar, forced)
   else if (!c.live) { H = Math.round(H); V = Math.round(V); } // (whole cells; while a drag or a throw is on, the map follows it and settles at its end)
@@ -2988,10 +3073,14 @@ function syncMapView(v, c) {
   putCell(v, H, V);
   MB.H = H; MB.V = V; MB.s = v.s; MB.centerSel = false;
 }
+// the whole galaxy in view: the stars in the middle of the window, as far from the top as from the foot and from the left as from the right
+// (the remake's: the program put cell 0 at the window's top left and left the rest empty)
+function centreStars(v, c) { const b = starBox(c.G, v.s); v.ox = (c.mapW - (b.x1 - b.x0)) / 2 - b.x0; v.oy = (c.mapH - (b.y1 - b.y0)) / 2 - b.y0; }
 function centerOnStar12(v, sid, c) {
   if (!barsOn()) return false;
   const st = c.G.stars[sid]; if (!st) return false;
   v.s = snapZoom(v.s); barMetrics(v.s, c.mapW, c.mapH, c.G);
+  if ((FILL.s && v.s === FILL.s) || (!MB.maxH && !MB.maxV)) { centreStars(v, c); return true; } // (all of it in view: nothing to bring nearer)
   const [H, V] = cellOf(v), z = v.s / 2, px = (st.x * 2 - H) * z - 6, py = (st.y * 2 - V) * z - 7;
   if (px > 40 && px < c.mapW - 40 && py > 40 && py < c.mapH - 85) return true; // (already in view: CenterOnStar leaves the map)
   const [h2, v2] = centerCells(st, c.G); putCell(v, h2, v2); return true;
@@ -3012,11 +3101,15 @@ function paintBar(b, vertical, L, o) {
   const pat = x.createPattern(barTile(), 'repeat'); x.fillStyle = pat;
   if (vertical) x.fillRect(1, 16, 14, L - 32); else x.fillRect(16, 1, L - 32, 14);
   R(1, 15, BAR12 - 2, 1, '#000'); R(1, L - 16, BAR12 - 2, 1, '#000');
-  // the arrows: a 7 x 4 triangle (js/os/system7.css has the same) in each box
+  // the arrows: the Mac's outline arrow (Jake's System 6 captures of 1.2F: the map's bars and DITL 6010's), a head 11 wide and 6 deep on a
+  // stem 5 wide, 11 rows from the box's 3rd pixel, drawn black while it is held (the box stays white)
+  const OUT = [[[7, 7]], [[6, 6], [8, 8]], [[5, 5], [9, 9]], [[4, 4], [10, 10]], [[3, 3], [11, 11]], [[2, 2], [12, 12]], [[2, 5], [9, 12]], [[5, 5], [9, 9]], [[5, 5], [9, 9]], [[5, 5], [9, 9]], [[5, 9]]];
+  const FILL = [[7, 7], [6, 8], [5, 9], [4, 10], [3, 11], [2, 12], [2, 12], [5, 9], [5, 9], [5, 9], [5, 9]];
   const arrow = (end, dir, inv) => {
-    const p0 = end ? L - 15 : 1; // the box: 14 along, between the frame and the divider
-    if (inv) R(1, p0, BAR12 - 2, 14, '#000');
-    for (let r = 0; r < 4; r++) { const w = dir < 0 ? 1 + 2 * r : 7 - 2 * r; R(7 - (w - 1) / 2, p0 + 5 + r, w, 1, inv ? '#fff' : '#000'); }
+    for (let i = 0; i < 11; i++) {
+      const p = end ? L - 4 - i : 3 + i;
+      for (const [a0, a1] of inv ? [FILL[i]] : OUT[i]) R(a0, p, a1 - a0 + 1, 1, '#000');
+    }
   };
   arrow(0, -1, o.press === 'lo'); arrow(1, 1, o.press === 'hi');
   // the thumb
@@ -3368,7 +3461,7 @@ if (V3) {
     modernPan: () => barsOn(),
     syncView: syncMapView, afterDraw: updateBars, centerOnStar: centerOnStar12,
     zoomed: (i) => { if (barsOn() && i.menu) MB.centerSel = true; },
-    fitView(v, c) { if (!own()) return; const st = c.G.stars[c.sel != null ? c.sel : c.G.players[c.ME].homeStar]; v.s = ZOOMS[3]; if (st) { barMetrics(v.s, c.mapW, c.mapH, c.G); const [h0, v0] = centerCells(st, c.G); putCell(v, h0, v0); } },
+    fitView(v, c) { if (!own()) return; const st = c.G.stars[c.sel != null ? c.sel : c.G.players[c.ME].homeStar]; v.s = zooms()[3]; if (st) { barMetrics(v.s, c.mapW, c.mapH, c.G); const [h0, v0] = centerCells(st, c.G); putCell(v, h0, v0); } },
     mapBg: '#000', bgStars: false, transitDots: false,
     routes: false, routesOver: true,
     fleetPaths: (cx, i) => { if (own()) fleetPaths301(cx, i); },
@@ -3433,7 +3526,7 @@ window.HOMAC12 = {
   modernPan: () => barsOn(),
   syncView: syncMapView, afterDraw: updateBars, centerOnStar: centerOnStar12,
   zoomed: (i) => { if (barsOn() && i.menu) MB.centerSel = true; },
-  fitView(v, c) { if (!own()) return; const st = c.G.stars[c.sel != null ? c.sel : c.G.players[c.ME].homeStar]; v.s = ZOOMS[3]; if (st) { barMetrics(v.s, c.mapW, c.mapH, c.G); const [H, V] = centerCells(st, c.G); putCell(v, H, V); } },
+  fitView(v, c) { if (!own()) return; const st = c.G.stars[c.sel != null ? c.sel : c.G.players[c.ME].homeStar]; v.s = zooms()[3]; if (st) { barMetrics(v.s, c.mapW, c.mapH, c.G); const [H, V] = centerCells(st, c.G); putCell(v, H, V); } },
   mapNames: (s) => (own() ? zoomIdx(s) > 0 : s > 18),
   // (DrawOneBWStarSubProc @c38ce: at the second zoom the names are drawn condensed, TextFace 0x20: a pixel less between letters)
   // (StarLine: the line while a fleet is dragged, and a fleet's orders)
