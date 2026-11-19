@@ -206,3 +206,13 @@ html:not(.mac301lay) :is(#panel, .p301x) .rep12box canvas.grow12 { position: abs
 .org12 .opile img { display: block; height: 40px; width: auto; image-rendering: pixelated; }
 .org12 .opile.sel { background: #000; } .org12 .opile.sel img { filter: invert(1); }
 .org12 .oghost { border: 1px dotted #000; pointer-events: none; box-sizing: border-box; }
+/* 1.2's and 2.0.1's battle window too (DLOG 7010: a plain box, no title bar; Jake's 1.2F captures 037-074): the 3.0.1 rules above for every Mac skin */
+.win.bw12m .wtitle { display: none; }
+.win.bw12m .wbody { padding: 0; }
+.win.bw12m { border: 1px solid #000; border-radius: 0; box-shadow: none; padding: 0; background: #000; }
+.win .bw12w button.bw12b { container-type: normal; font: 30px/1 'DOS Chicago 12', Chicago, Charcoal, Geneva, sans-serif !important; background: #fff !important; color: #000 !important; border: 1px solid #000 !important; border-radius: 5px !important; box-shadow: none !important; }
+.win .bw12w button.bw12b.done { outline: 6px solid #fff; outline-offset: 2px; }
+@media (max-width: 900px) { .win .bw12w button.bw12b { font-size: 3.4vw !important; } }
+/* (with the Mac's screen zoomed, html.macscale, the window is 445 CSS pixels wide: the button's Chicago at its own 15, the ring 3) */
+html.macscale .win .bw12w button.bw12b { font-size: 15px !important; }
+html.macscale .win .bw12w button.bw12b.done { outline-width: 3px; outline-offset: 1px; }

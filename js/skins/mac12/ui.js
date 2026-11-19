@@ -3024,9 +3024,10 @@ NARROW301.addEventListener('change', () => { if (window.HOMAC301 && A() && A().G
 // 1030.6-7 or .8-9 at (155, 135) and (155, 150) with PICT 3500 (won) or 3510 at (180, 175, 254, 239), and the button
 // (DITL 7010: "Passe" at 193, 273, 58 x 20, which skips to the end) says "Bien". A viewer who lost a battle of one round sees
 // nothing of the other side (DrawAllGroups: STR# 1030.11 and .12 at (155, 85) and (155, 100)) and no shots.
-const SYS = '12px Chicago, Charcoal, Geneva, sans-serif', GEN9 = '9px Geneva, Verdana, sans-serif';
+// (the battle window's text in the Mac's own bitmap Chicago 12 and Geneva 9, as the panes: Jake's battle captures; they were the browser's Chicago / Geneva)
+const SYS = "15px 'DOS Chicago 12', Chicago, Charcoal, Geneva, sans-serif", GEN9 = "12px 'DOS Geneva 9', Geneva, Verdana, sans-serif";
 // (3.0.1's battle window in the skins' bitmap Chicago 12 and Geneva 9, the sizes the dialogs use: js/skins/dos/style.css's faces)
-const SYS3 = "15px 'DOS Chicago 12', Chicago, Charcoal, Geneva, sans-serif", GEN93 = "12px 'DOS Geneva 9', Geneva, Verdana, sans-serif";
+const SYS3 = SYS, GEN93 = GEN9;
 function battleWindow(b, k) {
   const a = A(), g = G(), rs = H().rules(g), el = a.el, IMG = a.IMG, ME = a.ME;
   const fr = lang() === 'fr', W = 445, Hh = 310, S = 2, TICK = 1000 / 60;
