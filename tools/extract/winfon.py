@@ -59,10 +59,9 @@ save(os.path.join(DOS, 'win31-mssansserif8.ttf'), 'Win31 MS Sans Serif 8', s31, 
 save(os.path.join(DOS, 'win31-system.ttf'), 'Win31 System', load('win31-fon/vgasys.fon', 10), False, t('vgasys.fon', 10))
 save(os.path.join(DOS, 'win31-fixedsys.ttf'), 'Win31 Fixedsys', load('win31-fon/vgafix.fon', 12), False, t('vgafix.fon', 12))
 
-# Palm OS's fonts (a Windows .FON of the Palm OS fonts, CP1252): the standard (11 px) and bold (11 px) and large (14 px) faces; no Turkish letters in them
+# Palm OS's fonts (a Windows .FON of the Palm OS fonts, CP1252): the standard (11 px) and bold (11 px) faces; no Turkish letters in them
 if len(sys.argv) > 2:
     PALM = os.path.join(ROOT, 'assets', 'skins', 'palm', 'fonts'); fon = os.path.join(sys.argv[2], 'PalmOS-CP1252.FON')
     faces = {(f.point_size, f.weight): f for f in monobit.load(fon)}
     save(os.path.join(PALM, 'palmos.ttf'), 'Palm OS', faces[(8, 'regular')], False)
     save(os.path.join(PALM, 'palmos-bold.ttf'), 'Palm OS Bold', faces[(8, 'bold')], False)
-    save(os.path.join(PALM, 'palmos-large.ttf'), 'Palm OS Large', faces[(11, 'regular')], False)

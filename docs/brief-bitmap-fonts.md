@@ -44,7 +44,7 @@ Run `tools/real-play.js --skin=mac12,mac2,mac3,dos --size=desktop,phone-l` after
   setup disks (`tools/extract/winfon.py` -> `assets/skins/dos/fonts/win31-*.ttf`); the name "MS Sans Serif" now means that bitmap wherever the skin or its canvas dialogs ask for it, so the 0.92 "narrowing" of the
   Arial stand-in is gone (`WK = 1`, `k = 1`).
 - **Windows 95** (`js/os/win95.css`): the real MS Sans Serif 8 from the Windows 95 setup disks (`assets/skins/w95/fonts/`), regular and generated bold; Tahoma is no longer first in the stack (Windows 95 had none).
-- **Palm OS** (`js/os/palmos.css`): the Palm OS standard (11px), bold and large fonts from a Windows .FON of them (`assets/skins/palm/fonts/`); the title buttons too (`--west`). Provenance of that .FON is not stated: ask before publishing.
+- **Palm OS** (`js/os/palmos.css`): the Palm OS standard (11px) and bold fonts from a Windows .FON of them (`assets/skins/palm/fonts/`); the title buttons too (`--west`). They are Damien Guard's FontStructions "Palm OS" and "Palm OS Bold" (CC BY-SA 3.0; attribution beside the files, assets/skins/palm/fonts/README.txt).
 - **Turkish** in the Windows looks: the six letters from the Turkish Windows 3.11's own fonts (private repo `originals/win31-turkish/`). Palm has none (the originals had none).
 - **Left on Arial on purpose** (the Windows program itself draws them in Arial; docs/405-windows.md, win20-findings): the player names and the clock in the w95 skin, the budget strip's "0% Linear 100%" in the
   Windows 3.1 look, the Windows 95 New Game window's labels (15px Arial from shot 002).

@@ -7,11 +7,11 @@
   --plat: #fff; --plat2: #fff; --edge: #000; --ink: #000; --sub: #333; --hi: #000;
   --ui: "Palm OS", "Palm OS Std", sans-serif;
 }
-/* Palm OS's own fonts (a Windows .FON of them, CP1252; tools/extract/winfon.py, docs/brief-bitmap-fonts.md): the standard and bold faces are 11 px, the large one 14 px;
+/* Palm OS's own fonts (a Windows .FON of them, CP1252; tools/extract/winfon.py, docs/brief-bitmap-fonts.md): the standard and bold faces are 11 px (Damien Guard's FontStructions, CC BY-SA 3.0: assets/skins/palm/fonts/README.txt);
    the bold is the real bold face, not drawn heavier. The Turkish letters aren't in them (Palm OS had none) and fall back to the next font. */
 @font-face { font-family: "Palm OS"; src: url("../../assets/skins/palm/fonts/palmos.ttf") format("truetype"); font-weight: 400; font-display: block; }
 @font-face { font-family: "Palm OS"; src: url("../../assets/skins/palm/fonts/palmos-bold.ttf") format("truetype"); font-weight: 700; font-display: block; }
-@font-face { font-family: "Palm OS Large"; src: url("../../assets/skins/palm/fonts/palmos-large.ttf") format("truetype"); font-display: block; }
+
 html { font-synthesis: none; -webkit-font-smoothing: none; -moz-osx-font-smoothing: grayscale; font-smooth: never; text-rendering: optimizeSpeed; }
 body { font-size: 11px; }
 #menubar { background: #fff; border-bottom: 2px solid #000; }
