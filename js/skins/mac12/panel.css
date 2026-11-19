@@ -180,3 +180,5 @@ html.macscale.mac301 .win .bw12w button.bw12b.done { outline-width: 3px; outline
 /* the budget bars' box scrolls with the wheel, never with the browser's own scroll bar (it showed under the bars on a Mac set to always show them) */
 .nosb12 { scrollbar-width: none; }
 .nosb12::-webkit-scrollbar { display: none; }
+/* the players and budget pane, one canvas (js/skins/mac12/ui.js lowBox12) */
+:is(#panel, .p301x) .box.low12c { padding: 0; margin: 0; }

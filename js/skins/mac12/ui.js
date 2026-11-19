@@ -902,7 +902,7 @@ function dlgBar(L, get, set) {
   const el = a.el('div', { class: 'dbar12', role: 'scrollbar', tabindex: 0, 'aria-orientation': 'horizontal' }, c);
   let press = null, ghost = null;
   const paint = () => { const g = get(), span = g.max - g.min; el.setAttribute('aria-valuemin', g.min); el.setAttribute('aria-valuemax', g.max); el.setAttribute('aria-valuenow', g.v);
-    el.setAttribute('aria-disabled', span > 0 ? 'false' : 'true'); paintBar(b, false, L, { active: span > 0, value: g.v - g.min, max: Math.max(1, span), press, ghost }); };
+    el.setAttribute('aria-disabled', span > 0 ? 'false' : 'true'); paintBar(b, false, L, { on: true, value: g.v - g.min, max: span, press, ghost }); };
   const pos = (e) => { const r = c.getBoundingClientRect(); return (e.clientX - r.left) / r.width * L; };
   const thumbAt = () => { const g = get(); return 15 + Math.round((L - 46) * (g.v - g.min) / Math.max(1, g.max - g.min)); };
   const step = (d) => { const g = get(), n = Math.max(g.min, Math.min(g.max, g.v + d)); if (n !== g.v) set(n); paint(); };
@@ -2060,13 +2060,13 @@ function fleetBox12() {
   return a.el('section', { class: 'box fleets12' }, q.c);
 }
 function incomeBox12(old) {
-  const a = A(), q = qdCanvas(226, 34, 'Totals');
+  const a = A(), q = qdCanvas(226, 32, 'Totals'); // (its rule, the window's 164, is the first row of the players and budget pane below: lowBox12)
   const rows = old ? Array.from(old.querySelectorAll('.kv')) : [];
   rows.slice(0, 3).forEach((r, i) => {
     const t = kvText(old, r.getAttribute('data-help')) || { label: r.querySelector('span').textContent, value: '', chg: '' }, v = 10 + 10 * i;
     q.text(t.label, 0, v, G9B, { right: 87 }); q.text(t.value, 90, v, G9B); if (t.chg) q.text(t.chg, 0, v, G9, { right: 225 });
   });
-  q.hline(0, 226, 32); q.vline(225, 0, 34);
+  q.vline(225, 0, 32);
   return a.el('section', { class: 'box info12' }, q.c);
 }
 const TECH12 = ['range', 'speed', 'weapons', 'shields', 'mini'];
@@ -2115,6 +2115,109 @@ function reportsBox12() {
   return box;
 }
 
+// The players and the budget bars under the totals, as 1.2 draws them (the same code in 2.0.1), one canvas from the totals' rule (R, the map
+// window's 164) to the window's foot (R + 166 at 640 x 480), each pixel placed as Jake's captures show it (captures/shot010, captures-system6/):
+//   DrawIconRect @c5452: the players' rect 0..67 from R + 2, 18 pixels a row; each player's 16 x 16 icon at (9, row + 3) (you 1000, the
+//     others 2000 + their face), the name at (28, row + 16) clipped at 67, a cross (pen 2) from (9, row + 3) to (25, row + 19) over a player
+//     who is out, and a check mark (1, row + 11) (3, row + 15) (7, row + 7) by one who has ended the turn; before 2010 only you, on the first
+//     row. Its scroll bar, 12 wide, 67..79 from R to the foot. ClickInIconRect @c745a does nothing.
+//   DrawBudgetRect @c53bc, DrawHBarControl @c091e (79, R + 1): the heading "0%" at 124, "Lin" or "Log" at 146 and "100%" ending at 202 on
+//     R + 13, ten ticks 2 high above a rule along R + 16 from 123 (linear: every 77 / 10 pixels; log: GetHPercBarAmt of 100, 200 ...);
+//     then a row every 14 pixels from R + 16, Savings ("Epargne"), Tech, then the colonies: a rule down 123, the bar from 124 as long as
+//     the share (77 at most), 9 high from the row's 5th pixel, black, or 50% grey for a colony losing money (its slot's +0x3c1, set by
+//     ComputeIncomeAndPopulation when its income is below 0); for such a colony a tick 12 high from the row's 3rd pixel at its least share
+//     (ComputeMinPercent; at 202 when it can't be met); the name right-aligned at 122 on the row's 13th pixel, italic below its least share,
+//     underlined for the selected star. A rule down 123 to the foot. Its scroll bar, 12 wide, 214..226 from R + 16 to the foot.
+//   DoHBarClick @c1002: a drag on a bar sets its share (rs.dragShare), a click above the bars switches the scale; a click on a colony's name
+//     selects it (FollowStarNameClick); the bars' arrows scroll a row.
+// The remake's own, for a later ruleset: a ring round an ally's icon (double for a best buddy), and a click on the players opens the Players window.
+const LOW12 = { pTop: 0, bTop: 0 };
+function lowBox12(B) {
+  const a = A(), g = G(), p = a.me(), rs = H().rules(g), Wd = BAR_WORDS[lang()], later = rs.id !== (V2 ? 'mac20' : '12');
+  const HT = 167, q = qdCanvas(226, HT, ''), x = q.x, FOOT = HT - 1;
+  q.hline(0, 226, 0); // (the totals' rule, R)
+  // DrawIconRect
+  const prow = Math.trunc((FOOT - 2) / 18), early = g.year < 2010;
+  const order = early ? [a.ME] : g.players.map((pl, i) => i);
+  LOW12.pTop = early ? 0 : Math.max(0, Math.min(LOW12.pTop, order.length - prow));
+  x.save(); x.beginPath(); x.rect(0, 2, 67, FOOT - 2); x.clip();
+  order.slice(LOW12.pTop, LOW12.pTop + prow).forEach((i, r) => {
+    const pl = g.players[i], top = 2 + 18 * r;
+    // (LoadDrawBWIcon: the icon's own pixels inside its mask and black outside it, so on the pane it reads as a black square: shot015)
+    const im = a.IMG['dos:s' + (i === a.ME ? 1000 : 2000 + (pl.face || 0))] || a.IMG[i === a.ME ? 'white0_0' : 'bad' + (pl.face || 0) + '_0'];
+    q.rect(9, top + 3, 25, top + 19, '#000'); if (im && im.width) x.drawImage(im, 9, top + 3, 16, 16);
+    if (later && i !== a.ME && pl.alive && H().isAllied(g, a.ME, i)) { // (the remake's ring for an ally, double for a best buddy)
+      x.strokeStyle = '#000'; x.lineWidth = 1; x.beginPath(); x.arc(17, top + 11, 10.5, 0, Math.PI * 2); x.stroke();
+      if (H().isBuddy(g, a.ME, i)) { x.beginPath(); x.arc(17, top + 11, 12.5, 0, Math.PI * 2); x.stroke(); }
+    }
+    q.text(pl.name, 28, top + 16, G9);
+    if (!pl.alive || pl.surrendered) { x.strokeStyle = '#000'; x.lineWidth = 2; x.beginPath(); x.moveTo(10, top + 4); x.lineTo(26, top + 20); x.moveTo(26, top + 4); x.lineTo(10, top + 20); x.stroke(); x.lineWidth = 1; }
+    if (!pl.human || (g.done || []).includes(i)) { x.strokeStyle = '#000'; x.lineWidth = 1; x.beginPath(); x.moveTo(1.5, top + 11.5); x.lineTo(3.5, top + 15.5); x.lineTo(7.5, top + 7.5); x.stroke(); }
+  });
+  x.restore();
+  drawBar(x, 67, 0, true, HT, 12, { on: true, value: LOW12.pTop, max: Math.max(0, order.length - prow) });
+  // DrawHBarControl
+  const x0 = 124, sc = a.budgetScale(), log = sc.id === 'log';
+  q.text('0%', x0, 13, G9); q.text(log ? Wd.log : Wd.lin, 146, 13, G9); q.text('100%', 0, 13, G9, { right: 202 });
+  for (let k = 1; k <= 10; k++) { const tx = x0 + (log ? hPercBar(100 * k) : Math.trunc(77 * k / 10)); q.vline(tx, 14, 16); }
+  q.hline(123, 226, 16);
+  const ents = B.ents || [], brow = Math.trunc((FOOT - 16) / 14);
+  // the slots in the player's order (CreatePlayer: Savings, Tech, home; ColonizeStar puts each new colony's slot in front: shot015, Regor
+  // above Epargne): the newer colonies newest first (rs colOrder, p.colOrder), Savings, Tech, then the home star
+  const cols = ents.filter(e => e.star != null), ord = p.colOrder || [], home = p.homeStar;
+  if (ord.length) cols.sort((e1, e2) => { const i1 = ord.indexOf(e1.star), i2 = ord.indexOf(e2.star); return (i1 < 0 ? 1e9 : i1) - (i2 < 0 ? 1e9 : i2); });
+  const first = cols.filter(e => e.star !== home), last = cols.filter(e => e.star === home);
+  const slots = first.concat(ents.filter(e => e.key === 'savings'), ents.filter(e => e.key === 'tech'), last);
+  LOW12.bTop = Math.max(0, Math.min(LOW12.bTop, slots.length - brow));
+  const low = new Set((rs.underfunded ? rs.underfunded(g, p) : []).map(st => st.id));
+  const lenOf = (pm) => pm < 1 ? 0 : log ? hPercBar(pm) : Math.trunc((pm * 77 + 999) / 1000);
+  let y = 16; const tb = [];
+  slots.slice(LOW12.bTop, LOW12.bTop + brow).forEach((e) => {
+    const pm = Math.round(e.get() * 1000), len = Math.min(77, lenOf(pm)), st = e.star != null ? g.stars[e.star] : null;
+    const losing = !!(st && H().planetIncome(g, p, st) < 0);
+    q.vline(123, y, y + 14);
+    x.fillStyle = losing ? orPat(x, GRAY, '#000') : '#000'; x.fillRect(x0, y + 5, len, 9);
+    if (losing) { const mn = rs.minShare ? rs.minShare(g, p, st.id) : 0; const tx = mn > 1000 ? 202 : x0 + Math.min(78, lenOf(mn)); q.vline(tx, y + 3, y + 15); }
+    const name = e.key === 'savings' ? Wd.sav : e.key === 'tech' ? Wd.tech : st.name;
+    tb.push({ x: x0, y: y + 3, w: 77, h: 12, vert: false, frac: len / 77, label: name });
+    const font = st && low.has(st.id) ? 'italic ' + G9 : G9;
+    const w = q.text(name, 0, y + 13, font, { right: 122 });
+    if (st && a.UI.sel === st.id) q.hline(122 - Math.ceil(w), 122, y + 14);
+    y += 14;
+  });
+  q.vline(123, y, FOOT);
+  drawBar(x, 214, 16, true, HT - 16, 12, { on: true, value: LOW12.bTop, max: Math.max(0, slots.length - brow) });
+  q.c.dataset.bars = JSON.stringify(tb); q.c.dataset.w = '226'; q.c.dataset.h = String(HT);
+  q.c.setAttribute('aria-label', (W => W)(lang() === 'fr' ? 'Joueurs et budget' : 'Players and budget'));
+  // the clicks
+  q.c.style.touchAction = 'none';
+  const scroll = (k, d) => { LOW12[k] += d; a.renderPanel(); };
+  q.c.addEventListener('pointerdown', (ev) => {
+    const pt = q.at(ev), v = pt.v;
+    if (pt.h >= 67 && pt.h < 79) { if (v < 12) scroll('pTop', -1); else if (v >= HT - 12) scroll('pTop', 1); return; }
+    if (pt.h >= 214) { if (v >= 16 && v < 28) scroll('bTop', -1); else if (v >= HT - 12) scroll('bTop', 1); return; }
+    if (pt.h < 67) { if (later && a.openPlayers) a.openPlayers(); return; } // (ClickInIconRect: nothing in 1.2; the remake's Players window for a later ruleset)
+    if (pt.h < 79) return;
+    if (v < 16) { if (pt.h >= 123 && a.flipBarScale) a.flipBarScale(); return; }
+    const e = slots[LOW12.bTop + Math.floor((v - 16) / 14)]; if (!e) return;
+    if (pt.h < 123) { if (e.star != null) { a.UI.sel = e.star; if (a.centerOn) a.centerOn(e.star); a.renderPanel(); a.draw(); } return; }
+    ev.preventDefault();
+    const lk = rs.barLocked ? rs.barLocked(g, p, e.key) : null; if (lk) { a.beep(); return; }
+    const start = JSON.stringify(p.budget);
+    const set = (e2) => { const h = q.at(e2).h, f = Math.max(0, Math.min(1, (h - x0) / 77)), pm = log ? sc.toValue(f) : Math.round(f * 1000);
+      if (rs.dragShare) { const b = p.budget, o = JSON.parse(start); b.tech = o.tech; b.savings = o.savings; b.col = o.col; const r = rs.dragShare(g, p, e.key, Math.max(0, Math.min(1000, Math.round(pm)))); if (r) { if (r.tech != null) b.tech = r.tech / 1000; if (r.savings != null) b.savings = r.savings / 1000; for (const k in r.col || {}) b.col[k] = r.col[k] / 1000; } }
+      else e.set(pm / 1000);
+      const c = lowBox12(B); box.replaceWith(c); box = c; };
+    let pend = null, raf = 0;
+    const later2 = (e2) => { pend = e2; if (!raf) raf = requestAnimationFrame(() => { raf = 0; if (pend) { const e3 = pend; pend = null; set(e3); } }); };
+    const up = (e2) => { window.removeEventListener('pointermove', later2); window.removeEventListener('pointerup', up); if (raf) { cancelAnimationFrame(raf); raf = 0; } pend = null; set(e2); a.save(); a.renderPanel(); };
+    window.addEventListener('pointermove', later2); window.addEventListener('pointerup', up); set(ev);
+  });
+  q.c.addEventListener('wheel', (ev) => { ev.preventDefault(); const pt = q.at(ev); scroll(pt.h < 79 ? 'pTop' : 'bTop', ev.deltaY > 0 ? 1 : -1); }, { passive: false });
+  let box = a.el('section', { class: 'box low12c' }, q.c);
+  return box;
+}
+
 function panel12(panel, B) {
   const a = A(), el = a.el;
   bars(panel, B);
@@ -2122,19 +2225,10 @@ function panel12(panel, B) {
   const pb = planetBox12(old);
   const fb = fleetBox12();
   const ib = incomeBox12(B.info);
-  const rost = el('div', { class: 'rost12' }); roster(rost);
-  const low = el('div', { class: 'low12' }, rost, B.budget);
+  const low = lowBox12(B);
   const tb = techBox12();
   panel.innerHTML = '';
   panel.append(pb, fb, ib, low, tb, reportsBox12());
-  // (the budget bars go down to the map window's foot, 136 of its pixels under the totals, and scroll; CenterOnStarBar @c5c26
-  // scrolls them to the selected colony's row)
-  if (B.budget) {
-    const k = (panel.clientWidth || 226) / 226, bx = B.budget;
-    bx.style.maxHeight = Math.round(136 * k) + 'px'; bx.style.overflowY = 'auto'; bx.style.overflowX = 'hidden'; bx.style.position = 'relative'; bx.classList.add('nosb12'); // (never the browser's own scroll bar: Jake, 19 Nov, a modern grey bar under Proxima on a Mac set to always show them; the wheel and a drag still scroll it)
-    const r = bx.querySelector('.barrow.hl');
-    if (r && (r.offsetTop < bx.scrollTop || r.offsetTop + r.offsetHeight > bx.scrollTop + bx.clientHeight)) bx.scrollTop = Math.max(0, r.offsetTop - bx.clientHeight / 2);
-  }
 }
 
 // ---------- Mac 3.0.1's main screen (js/skins/mac3, docs/status-301.md) ----------
@@ -3087,40 +3181,49 @@ function centerOnStar12(v, sid, c) {
 }
 let BAR_TILE = null;
 const barTile = () => BAR_TILE || (() => { const t = document.createElement('canvas'); t.width = t.height = 2; const x = t.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, 2, 2); x.fillStyle = '#000'; x.fillRect(0, 0, 1, 1); x.fillRect(1, 1, 1, 1); return (BAR_TILE = t); })();
-// one bar, drawn as the standard scroll bar of System 6 and 7 in black and white: a frame, an arrow box at each end (a black arrow, inverted while
-// it is held), a grey page area (the 50% pattern), the thumb a white square with a frame; inactive (no room to scroll, or a dialog is up): an empty bar
+// one bar, drawn as the standard scroll bar of System 6 in black and white, read pixel by pixel in Jake's System 6 captures of 1.2F
+// (captures-system6/, the map window's bars and the panes' narrow ones): a frame; an arrow box at each end, its outline arrow (filled black
+// while it is held); between them the light grey (QuickDraw's ltGray: every fourth pixel, two along on the next row) and the thumb, a white
+// square with a frame. With nothing to scroll the arrows stay and the track is white, with no thumb (the players' bar in shot010, a level
+// that can't move in DITL 6010); an inactive bar (a dialog is up) is an empty frame. t: the bar's thickness, 16 (the map, the dialogs)
+// or 12 (the panes' bars: GrowMapWin's 67..79 and 214..226).
+const ARROW = {
+  16: { out: [[], [], [[7, 7]], [[6, 6], [8, 8]], [[5, 5], [9, 9]], [[4, 4], [10, 10]], [[3, 3], [11, 11]], [[2, 2], [12, 12]], [[1, 4], [10, 13]], [[4, 4], [10, 10]], [[4, 4], [10, 10]], [[4, 4], [10, 10]], [[4, 10]]],
+    fill: [[], [], [[7, 7]], [[6, 8]], [[5, 9]], [[4, 10]], [[3, 11]], [[2, 12]], [[1, 13]], [[4, 10]], [[4, 10]], [[4, 10]], [[4, 10]]] },
+  12: { out: [[], [[5, 5]], [[4, 4], [6, 6]], [[4, 4], [7, 7]], [[2, 3], [7, 8]], [[1, 1], [9, 9]], [[1, 3], [7, 10]], [[3, 3], [7, 7]], [[3, 3], [7, 7]], [[3, 7]]],
+    fill: [[], [[5, 5]], [[4, 6]], [[4, 7]], [[2, 8]], [[1, 9]], [[1, 10]], [[3, 7]], [[3, 7]], [[3, 7]]] },
+};
+function drawBar(x, ox, oy, vertical, L, t, o) {
+  // (a, p, w, h): a across the bar, p along it
+  const R = (a0, p0, w, h, col) => { x.fillStyle = col; if (vertical) x.fillRect(ox + a0, oy + p0, w, h); else x.fillRect(ox + p0, oy + a0, h, w); };
+  R(0, 0, t, L, '#000'); R(1, 1, t - 2, L - 2, '#fff');
+  if (o.on === false) return;
+  const box = t; // an arrow box: the frame, the arrow, the divider (16 rows for the 16-pixel bar, 12 for the narrow one)
+  R(1, box - 1, t - 2, 1, '#000'); R(1, L - box, t - 2, 1, '#000');
+  const A0 = ARROW[t] || ARROW[16];
+  const arrow = (end, inv) => (inv ? A0.fill : A0.out).forEach((segs, i) => { for (const [a0, a1] of segs) R(a0, end ? L - 1 - i : i, a1 - a0 + 1, 1, '#000'); });
+  arrow(0, o.press === 'lo'); arrow(1, o.press === 'hi');
+  if (!(o.max > 0)) return;
+  // the light grey, aligned to the window's pixels
+  for (let p0 = box; p0 < L - box; p0++) for (let a0 = 1; a0 < t - 1; a0++) {
+    const gx = vertical ? ox + a0 : ox + p0, gy = vertical ? oy + p0 : oy + a0;
+    if ((gy & 1) ? (gx & 3) === 2 : (gx & 3) === 0) R(a0, p0, 1, 1, '#000');
+  }
+  const T = L - 3 * box + 2; // the thumb's travel: from the first divider to the last, less its own size
+  if (T >= 0) {
+    const tp = box - 1 + Math.round(T * Math.max(0, Math.min(1, o.value / o.max)));
+    R(0, tp, t, t, '#000'); R(1, tp + 1, t - 2, t - 2, '#fff');
+    if (o.ghost != null) { // the outline that is dragged
+      for (let i = 0; i < t; i++) for (let j = 0; j < t; j++) if ((i === 0 || j === 0 || i === t - 1 || j === t - 1) && (i + j) % 2 === 0) R(i, o.ghost + j, 1, 1, '#000');
+    }
+  }
+}
 function paintBar(b, vertical, L, o) {
   const k = Math.max(1, Math.round(window.devicePixelRatio || 1)), cw = vertical ? BAR12 : L, ch = vertical ? L : BAR12, c = b.c;
   if (c.width !== cw * k || c.height !== ch * k) { c.width = cw * k; c.height = ch * k; }
   c.style.width = cw + 'px'; c.style.height = ch + 'px';
   const x = c.getContext('2d'); x.setTransform(k, 0, 0, k, 0, 0); x.imageSmoothingEnabled = false;
-  // (a, b, w, h): a across the bar, b along it
-  const R = (a, p, w, h, col) => { x.fillStyle = col; if (vertical) x.fillRect(a, p, w, h); else x.fillRect(p, a, h, w); };
-  R(0, 0, BAR12, L, '#000'); R(1, 1, BAR12 - 2, L - 2, '#fff');
-  if (!o.active) return;
-  const pat = x.createPattern(barTile(), 'repeat'); x.fillStyle = pat;
-  if (vertical) x.fillRect(1, 16, 14, L - 32); else x.fillRect(16, 1, L - 32, 14);
-  R(1, 15, BAR12 - 2, 1, '#000'); R(1, L - 16, BAR12 - 2, 1, '#000');
-  // the arrows: the Mac's outline arrow (Jake's System 6 captures of 1.2F: the map's bars and DITL 6010's), a head 11 wide and 6 deep on a
-  // stem 5 wide, 11 rows from the box's 3rd pixel, drawn black while it is held (the box stays white)
-  const OUT = [[[7, 7]], [[6, 6], [8, 8]], [[5, 5], [9, 9]], [[4, 4], [10, 10]], [[3, 3], [11, 11]], [[2, 2], [12, 12]], [[2, 5], [9, 12]], [[5, 5], [9, 9]], [[5, 5], [9, 9]], [[5, 5], [9, 9]], [[5, 9]]];
-  const FILL = [[7, 7], [6, 8], [5, 9], [4, 10], [3, 11], [2, 12], [2, 12], [5, 9], [5, 9], [5, 9], [5, 9]];
-  const arrow = (end, dir, inv) => {
-    for (let i = 0; i < 11; i++) {
-      const p = end ? L - 4 - i : 3 + i;
-      for (const [a0, a1] of inv ? [FILL[i]] : OUT[i]) R(a0, p, a1 - a0 + 1, 1, '#000');
-    }
-  };
-  arrow(0, -1, o.press === 'lo'); arrow(1, 1, o.press === 'hi');
-  // the thumb
-  const T = L - 46;
-  if (T >= 0) {
-    const t = 15 + Math.round(T * Math.max(0, Math.min(1, o.value / o.max)));
-    R(0, t, BAR12, 16, '#000'); R(1, t + 1, BAR12 - 2, 14, '#fff');
-    if (o.ghost != null) { // the outline that is dragged (the map moves when it is let go)
-      for (let i = 0; i < 16; i++) for (let j = 0; j < 16; j++) if ((i === 0 || j === 0 || i === 15 || j === 15) && (i + j) % 2 === 0) R(i, o.ghost + j, 1, 1, '#000');
-    }
-  }
+  drawBar(x, 0, 0, vertical, L, BAR12, o);
 }
 function ensureBars() {
   if (MB.wrap && MB.wrap.isConnected) return true;
@@ -3212,7 +3315,7 @@ function updateBars() {
     const key = [b.L, vals.value, vals.max, act, press, ghost, window.devicePixelRatio].join();
     b.el.setAttribute('aria-valuemin', '0'); b.el.setAttribute('aria-valuemax', String(vals.max)); b.el.setAttribute('aria-valuenow', String(Math.round(vals.value)));
     b.el.setAttribute('aria-disabled', act ? 'false' : 'true');
-    if (b.key !== key) { b.key = key; paintBar(b, b.vertical, b.L, { active: act, value: vals.value, max: Math.max(1, vals.max), press, ghost }); }
+    if (b.key !== key) { b.key = key; paintBar(b, b.vertical, b.L, { on: !document.querySelector('.scrim'), value: vals.value, max: vals.max, press, ghost }); }
   }
   MB.v.el.style.height = MB.v.L + 'px'; MB.h.el.style.width = MB.h.L + 'px';
   MB.v.el.dataset.value = String(MB.V); MB.h.el.dataset.value = String(MB.H);

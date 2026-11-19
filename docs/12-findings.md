@@ -1082,3 +1082,20 @@ Jake's decision: if the original had scroll bars, so do the skins; dragging the 
 - **Built** (`js/skins/mac12/ui.js`, hooks in `js/skins/classic/ui.js`): the bars (the System 6/7 black and white look), whole-cell scrolling, the first view by CenterOnStar on the home star, Zoom as above, inactive bars while a dialog is up. A star's coordinates in the remake are half cells (2 light years to its unit, so a cell is half a unit), so the galaxy is `round(2 x G.W)` cells. Dragging with a mouse and the wheel work only with modern conveniences on (the map follows the pointer and settles on a whole cell at the end); a finger and a pinch always do.
 - **Kept differences:** the grow box is not built (the map's pane is the page's remaining area; the browser window sizes it, and shrinking it would only hide cells; the corner is a blank square); only the map's two bars dim (the left column's fleet-box bar does not, and no window stacking exists, so "inactive" means a dialog is open); the thumb's snap-back when the pointer strays is left out (a finger drifts); the arrow glyph and page pattern are the OS's, drawn as `js/os/system7.css` has them (the OS's CDEF is not in the program); the remake's keyboard (arrows, Page Up/Down on a focused bar) and the bars' accessible names (`js/ui-text.js`) are additions.
 - **Side by side:** no emulator or Mac ROM is in the sources, so the figure is the code's rectangles and star pixels against the skin (`mapbars-sidebyside.png`): the stars and the bars' rects coincide at V 4/7, H 1/1.
+
+## Rebuilt against Jake's captures (19 November 2026)
+
+Jake compared the skin with his System 6 captures and found it far from them. The November note above ("Windows dressed, not
+rebuilt") had judged Create New Ship Type and the others close enough; they were not. Each piece is now rebuilt from 1.2F's own
+routine and resources and checked pixel by pixel against `captures/` (640 x 480) and `captures-system6/` (512 x 342):
+
+- **Scroll bars** (`drawBar`): the 16-pixel bar's outline arrow, the panes' 12-pixel bar with its own arrow, the light grey
+  (ltGray) track, arrows on a white track when there is nothing to scroll, an empty frame only when inactive. All copied from the
+  captures' pixels.
+- **Create New Ship Type** (`createType`): DITL 6010 item by item (2.0.1's DITL for that skin).
+- **Players and budget pane** (`lowBox12`): DrawIconRect, DrawBudgetRect and DrawHBarControl: the rects of GrowMapWin, icons
+  drawn with black outside their mask (shot015), the heading and ticks, 14-pixel rows in the slot order (new colonies first,
+  then Epargne, Tech, home: shot015), grey bars and the least-share tick for colonies losing money, italic and underlined names.
+  Not built: the blinking of a losing colony's name (DrawHBarControl's last argument).
+- Still to compare: the planet, fleet and totals panes, Tech Spending and the Report Window, then the windows
+  (6000, 6020, 6030, 6040, 6060, 6090, 6100, 7000-7011).
