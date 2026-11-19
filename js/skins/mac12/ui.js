@@ -2074,6 +2074,15 @@ function incomeBox12(old) {
   q.vline(225, 0, 32);
   return a.el('section', { class: 'box info12' }, q.c);
 }
+// The small windows' title bar (Tech Spending, the Report Window: Jake's shot010, rows 371-381): 11 rows, the frame, then four rows dotted on
+// every other pixel round a 7 x 7 close box at 7..13 (two white pixels either side of it), and a rule; no title.
+function titleBar12(w) {
+  const q = qdCanvas(w, 11, ''); q.c.setAttribute('aria-hidden', 'true'); q.c.classList.add('tbar12');
+  q.hline(0, w, 0); q.hline(0, w, 10);
+  for (let r = 2; r <= 8; r += 2) for (let h = 0; h < w; h += 2) if (h < 5 || h > 15) q.rect(h, r, h + 1, r + 1, '#000');
+  q.x.strokeStyle = '#000'; q.x.lineWidth = 1; q.x.strokeRect(7.5, 2.5, 6, 6);
+  return q.c;
+}
 const TECH12 = ['range', 'speed', 'weapons', 'shields', 'mini'];
 const TECH_NAMES12 = { fr: ['Distance', 'Vitesse', 'Armes', 'Boucliers', 'Mini'], en: ['Range', 'Speed', 'Weapons', 'Shields', 'Mini'] };
 // (the remake's own, in 1.2's drawing: a later ruleset's sixth bar, Radical research (5.0.5 and the Palm; 1.2's rules have none: noRadical).
@@ -2084,11 +2093,11 @@ function techBox12() {
   const rad = !H().feature(g, 'noRadical') && H().TECHS.includes('radical');
   const keys = rad ? TECH12.concat('radical') : TECH12, names = rad ? names0.concat('Radical') : names0;
   const bw = 228, x0 = 80, geo = rad ? { b: 14, g: 8 } : null;
-  const q = qdCanvas(bw, 80, W.head), sc = H().barScale(g, 'tech');
+  const q = qdCanvas(bw, 96, W.head), sc = H().barScale(g, 'tech'); // (96 high, its second row of names at 85: shot010's window 382..477)
   const toPix = (v) => Math.trunc(50 * sc.toX(v)), fromPix = (px) => sc.toValue(px / 50);
   const vals = () => { const t = keys.reduce((s, k) => s + (p.talloc[k] || 0), 0) || 1; return keys.map(k => Math.round(1000 * (p.talloc[k] || 0) / t)); };
   const draw = () => {
-    q.rect(0, 0, bw, 80, '#fff');
+    q.rect(0, 0, bw, 96, '#fff');
     q.text(W.head, 3, 10); q.text(W.levels, 3, 25);
     TECH12.forEach((k, i) => { q.text(names[i], 5, 35 + 10 * i); q.text(String(p.tech[k]), 50, 35 + 10 * i); });
     vbars(q, x0, 15, vals(), 2, names, toPix, geo);
@@ -2096,7 +2105,7 @@ function techBox12() {
   draw();
   dragBars(q, x0, 15, vals, 2, (v, end) => { if (v) { keys.forEach((k, i) => { p.talloc[k] = v[i] / 1000; }); draw(); } if (end) { a.save(); a.renderPanel(); } }, fromPix, geo);
   if (rad) q.c.classList.add('remake12');
-  return a.el('section', { class: 'box tech12', 'aria-label': W.head }, q.c);
+  return a.el('section', { class: 'box tech12', 'aria-label': W.head }, titleBar12(bw), q.c);
 }
 // the Report Window (CreateReportWin @1300b8: 250 x 96 under the map window, Stup +0x12, beside the Tech Spending window;
 // UpdateReportWin @130370, DrawMessage @130652): the last 50 reports, 32 a row, each its icon (GetIconID) at the row's left and its
@@ -2112,11 +2121,42 @@ function reportsBox12() {
     const t = el('span', { class: 'rt' }); t.append(a.degText(H().say(g, m.text))); li.append(t);
     list.append(li);
   });
-  const box = el('section', { class: 'box rep12box' }, list);
+  if (V3) { // (3.0.1's layout gives the list its own window: js/skins/mac12/panel.css #rep301)
+    const box3 = el('section', { class: 'box rep12box' }, list), key3 = g.turn + ':' + ms.length;
+    setTimeout(() => { if (REP12.key === key3 && REP12.top != null) list.scrollTop = REP12.top; else { const now = list.querySelector('li[data-now]'); if (now) list.scrollTop = now.offsetTop - list.offsetTop; } REP12.key = key3; }, 0);
+    list.addEventListener('scroll', () => { REP12.top = list.scrollTop; });
+    return box3;
+  }
+  // its scroll bar (16 wide, the window's right edge, above the grow box: shot010) over the list's rows of 32 pixels (InitDelta: an arrow a row,
+  // the grey a window less a row), and the grow box (16 x 16, its two squares); the browser's own scroll bar never shows
+  list.classList.add('nosb12');
+  const bc = el('canvas', { class: 'cv12' }), bar = el('div', { class: 'rbar12', role: 'scrollbar', 'aria-orientation': 'vertical', 'aria-controls': 'reports', tabindex: 0 }, bc), bb = { c: bc };
+  const grow = qdCanvas(16, 16, ''); grow.c.classList.add('grow12'); grow.c.setAttribute('aria-hidden', 'true');
+  grow.rect(0, 0, 16, 16, '#000'); grow.rect(1, 1, 15, 15, '#fff'); grow.x.strokeStyle = '#000'; grow.x.strokeRect(3.5, 3.5, 6, 6); grow.x.strokeRect(5.5, 5.5, 7, 7); grow.rect(6, 6, 12, 12, '#fff'); grow.x.strokeRect(5.5, 5.5, 7, 7);
+  const vals = () => { const max = Math.max(0, Math.ceil((list.scrollHeight - list.clientHeight) / 32)); return { v: Math.min(max, Math.round(list.scrollTop / 32)), max }; };
+  let press = null, ghost = null, timer = 0, drag = null;
+  const L = () => Math.max(34, Math.round(list.clientHeight) - 15);
+  const paint = () => { const o = vals(); bar.setAttribute('aria-valuenow', o.v); bar.setAttribute('aria-valuemax', o.max); paintBar(bb, true, L(), { on: true, value: o.v, max: o.max, press, ghost }); };
+  const go = (d) => { list.scrollTop = Math.max(0, list.scrollTop + d); paint(); };
+  bar.addEventListener('pointerdown', (e) => {
+    const o = vals(); if (!o.max) return; e.preventDefault();
+    try { bar.setPointerCapture(e.pointerId); } catch (x) {}
+    const r = bc.getBoundingClientRect(), p0 = (e.clientY - r.top) / r.height * L(), t = 15 + Math.round((L() - 46) * o.v / o.max);
+    if (p0 >= t && p0 < t + 16 && p0 >= 16 && p0 < L() - 16) { drag = { p0, t0: t, r }; ghost = t; paint(); return; }
+    const page = Math.max(32, list.clientHeight - 32), d = p0 < 16 ? -32 : p0 >= L() - 16 ? 32 : p0 < t ? -page : page;
+    press = p0 < 16 ? 'lo' : p0 >= L() - 16 ? 'hi' : null;
+    const tick = () => { go(d); timer = setTimeout(tick, 100); }; tick();
+  });
+  bar.addEventListener('pointermove', (e) => { if (drag) { ghost = Math.max(15, Math.min(L() - 31, drag.t0 + (e.clientY - drag.r.top) / drag.r.height * L() - drag.p0)); paint(); } });
+  const up = () => { clearTimeout(timer); press = null; if (drag) { const o = vals(), T = L() - 46; list.scrollTop = Math.round(Math.max(0, Math.min(1, T > 0 ? (ghost - 15) / T : 0)) * o.max) * 32; drag = null; ghost = null; } paint(); };
+  bar.addEventListener('pointerup', up); bar.addEventListener('pointercancel', up);
+  bar.addEventListener('keydown', (e) => { const d = { ArrowUp: -32, ArrowDown: 32, PageUp: -64, PageDown: 64 }[e.key]; if (d) { e.preventDefault(); go(d); } });
+  const body = el('div', { class: 'rep12body' }, list, bar, grow.c);
+  const box = el('section', { class: 'box rep12box' }, titleBar12(226), body);
   // (kept where the player scrolled it while the reports are the same; a new turn opens it at the current year's first)
   const key = g.turn + ':' + ms.length;
-  setTimeout(() => { if (REP12.key === key && REP12.top != null) list.scrollTop = REP12.top; else { const now = list.querySelector('li[data-now]'); if (now) list.scrollTop = now.offsetTop - list.offsetTop; } REP12.key = key; }, 0);
-  list.addEventListener('scroll', () => { REP12.top = list.scrollTop; });
+  setTimeout(() => { if (REP12.key === key && REP12.top != null) list.scrollTop = REP12.top; else { const now = list.querySelector('li[data-now]'); if (now) list.scrollTop = now.offsetTop - list.offsetTop; } REP12.key = key; paint(); }, 0);
+  list.addEventListener('scroll', () => { REP12.top = list.scrollTop; paint(); });
   return box;
 }
 

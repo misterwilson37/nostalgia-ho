@@ -1103,5 +1103,9 @@ routine and resources and checked pixel by pixel against `captures/` (640 x 480)
   (the window's 68 to 132, it was 2 short) with its 12-pixel scroll bar from the rule to 129; the panes edge to edge with one frame.
 - **The planet's income** is the one the last turn left (DrawPlanetRect prints the slot's +0xefa: $30 000 at home in 2000, shot010);
   the remake showed this year's projection ($30,664).
-- Still to compare: the Report Window, then the windows
+- **Tech Spending and the Report Window** are small windows again: the title bar of shot010 (dotted rows round a 7 x 7 close
+  box, no title), Tech Spending 96 rows high (its second row of names was cut at 80), the Report Window's text in Geneva 9 on
+  11-pixel lines with its 16-pixel scroll bar and grow box. The credit reports get 1.2's own icons (GetIconID @130db0: 1000 is
+  ICON 3115, 1001 "Graphismes de Howard Vives" 3116; the DOS skin's table only knew DOS 2.0's "Click here…").
+- Still to compare: the windows
   (6000, 6020, 6030, 6040, 6060, 6090, 6100, 7000-7011).

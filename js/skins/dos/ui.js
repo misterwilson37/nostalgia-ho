@@ -181,8 +181,9 @@ window.HOTHEME = {
     const own = 'i' + (me.female ? 1500 : 1000);
     const tech = ['Range', 'Speed', 'Weapon', 'Shield', 'Miniaturization'].findIndex(n => new RegExp('Your ' + n + 's? Technology').test(t));
     const R = (icon, sound) => ({ icon: icon && (P + icon), sound });
-    if (/^Spaceward Ho! (Version [\d.]+ )?by/.test(t)) return R('i3115', null); // 1.2 says "Version 1.2 by"
-    if (/^Click here/.test(t)) return R('i3116', null);
+    if (/^Spaceward Ho! (Version [\d.]+ )?(by|par)\b/.test(t)) return R('i3115', null); // 1.2 says "Version 1.2 by" (French "par")
+    // (DOS 2.0's second report is "Click here…"; 1.2's is its artwork credit, report 1001, ICON 3116 in 1.2's GetIconID @130db0: Jake's shot010)
+    if (/^Click here|^Artwork by Howard Vives|^Graphismes de Howard Vives/.test(t)) return R('i3116', null);
     if (tech >= 0) return R('i' + (3100 + tech), 2000);
     if (/^Year \d+|updated to the year/.test(t)) return R('i3111', 2000);
     // 1.2's blank meteor report (the 1009 report with no player's name):

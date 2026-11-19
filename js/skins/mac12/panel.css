@@ -187,3 +187,14 @@ html.macscale.mac301 .win .bw12w button.bw12b.done { outline-width: 3px; outline
 :is(#panel, .p301x) .box.planet12, :is(#panel, .p301x) .box.fleets12, :is(#panel, .p301x) .box.info12, :is(#panel, .p301x) .box.low12c { margin: 0; border: 0; border-left: 1px solid #000; border-radius: 0; box-shadow: none; }
 :is(#panel, .p301x) .box.planet12 { border-top: 1px solid #000; }
 :is(#panel, .p301x) .box.low12c { border-bottom: 1px solid #000; margin-bottom: 8px; }
+/* the small windows (Tech Spending, the Report Window) as 1.2 has them (shot010): the title bar, then the content; the Report Window's text in
+   the bitmap Geneva 9 on 11-pixel lines from x 35, rows of 32 with the icon at the left, its 16-pixel scroll bar above the grow box */
+:is(#panel, .p301x) canvas.tbar12 { display: block; width: 100%; height: auto; image-rendering: pixelated; }
+html:not(.mac301lay) :is(#panel, .p301x) .box.tech12, html:not(.mac301lay) :is(#panel, .p301x) .rep12box { border: 1px solid #000; border-radius: 0; box-shadow: 1px 1px 0 #000; }
+html:not(.mac301lay) :is(#panel, .p301x) .rep12box .rep12body { position: relative; height: 96px; }
+html:not(.mac301lay) :is(#panel, .p301x) .rep12box ul.rep12 { position: absolute; left: 0; top: 0; right: 16px; height: 96px; font: 12px/11px 'DOS Geneva 9', Geneva, Verdana, sans-serif; }
+html:not(.mac301lay) :is(#panel, .p301x) .rep12box ul.rep12 li { gap: 3px; min-height: 32px; }
+html:not(.mac301lay) :is(#panel, .p301x) .rep12box ul.rep12 li .rt { padding-top: 0; }
+html:not(.mac301lay) :is(#panel, .p301x) .rep12box .rbar12 { position: absolute; right: 0; top: 0; width: 16px; line-height: 0; touch-action: none; }
+html:not(.mac301lay) :is(#panel, .p301x) .rep12box .rbar12 canvas { display: block; }
+html:not(.mac301lay) :is(#panel, .p301x) .rep12box canvas.grow12 { position: absolute; right: 0; bottom: 0; width: 16px; height: 16px; image-rendering: pixelated; }
