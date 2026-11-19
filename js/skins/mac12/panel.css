@@ -198,3 +198,5 @@ html:not(.mac301lay) :is(#panel, .p301x) .rep12box ul.rep12 li .rt { padding-top
 html:not(.mac301lay) :is(#panel, .p301x) .rep12box .rbar12 { position: absolute; right: 0; top: 0; width: 16px; line-height: 0; touch-action: none; }
 html:not(.mac301lay) :is(#panel, .p301x) .rep12box .rbar12 canvas { display: block; }
 html:not(.mac301lay) :is(#panel, .p301x) .rep12box canvas.grow12 { position: absolute; right: 0; bottom: 0; width: 16px; height: 16px; image-rendering: pixelated; }
+/* a dialog's edit text: the selection inverted, as TextEdit draws it in black and white (Jake's rename capture) */
+.ct6010 input[type=text]::selection { background: #000; color: #fff; }

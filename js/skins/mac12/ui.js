@@ -342,31 +342,57 @@ const shipCount = (did) => G().fleets.filter(f => f.owner === A().ME).reduce((a,
 function win(body, cls2) { A().modal('', body, { cls: 'mid mac12 ' + (cls2 || ''), label: 'Spaceward Ho!' }); }
 const btn = (t, fn, o) => A().el('button', Object.assign({ onclick: fn }, o || {}), t);
 
-// DLOG 6000 "List Ship Types…" (ListShipTypes @110fc0, InitShipTypesList, SetShipTypeAttrs @11153c, doRenameTypeDialog @11170e)
+// DLOG 6000 "Modèles existants…" (ListShipTypes @110fc0, InitShipTypesList, DRAWSHIPTYPEPICTURE @1114ae, SetShipTypeAttrs @11153c; 430 x 301,
+// DITL 6000 read in 1.2F's resource fork; Jake's capture list-ship-types): the types at the left (3, 3, 137 x 214) as 53-pixel cells, each the
+// small picture over "Classe Nom (A/B)", the chosen one inverted, with the list's scroll bar; the chosen type's big picture (149, 3, 243 x 76);
+// "Nom du modèle:", "Classe:", the three costs, the five levels in two columns, "Construits:" and "En service:", the check box "Modèle à
+// recycler", Renommer (253, 271) and OK. English has no 1.2: 2.0.1's English window (shipTypes20).
+const R6000 = { name: [[87, 148, 102, 261], [87, 311, 103, 419]], cls: [[107, 148, 123, 203], [105, 311, 120, 419]],
+  costs: [[[132, 148, 148, 309], [132, 311, 148, 415]], [[150, 148, 166, 296], [150, 311, 166, 415]], [[167, 148, 183, 276], [167, 311, 183, 415]]],
+  lv: [[[196, 151, 211, 236], [195, 258, 211, 278]], [[215, 151, 231, 206], [215, 258, 231, 279]], [[235, 151, 251, 217], [235, 258, 251, 280]], [[196, 311, 212, 375], [196, 388, 212, 412]], [[215, 311, 231, 365], [215, 388, 231, 414]]],
+  built: [[226, 14, 242, 91], [226, 94, 242, 133]], exist: [[246, 14, 262, 87], [246, 94, 262, 133]], chk: [270, 14, 288, 188], ren: [271, 253, 290, 329], ok: [271, 343, 291, 401] };
+let L6000 = { top: 0 };
 function shipTypes(selId) {
-  const a = A(), el = a.el, p = a.me(), rs = H().rules(G());
-  const ds = p.designs.filter(d => !d.scrapped);
+  if (lang() !== 'fr') return shipTypes20(selId);
+  const a = A(), el = a.el, g = G(), p = a.me(), rs = H().rules(g);
+  const ds = p.designs.filter(d => !d.scrapped).reverse();
   if (!ds.length) return true;
-  let cur = ds.find(d => d.id === selId) || ds[ds.length - 1];
-  const list = el('div', { class: 'lb', role: 'listbox' }), info = el('div', { class: 'tinfo' });
+  let cur = ds.find(d => d.id === selId) || ds[0];
+  const pane = el('div', { style: 'position:absolute;left:0;top:0;width:430px;height:301px' });
+  const picOf = (d) => (a.shipPic ? a.shipPic(d, a.ME) : null);
+  const putPic = (q, d, l, t, w, h) => { const im = picOf(d); if (!im || !im.width) return; const k = Math.min(w / im.width, h / im.height), pw = Math.round(im.width * k), ph = Math.round(im.height * k); q.x.imageSmoothingEnabled = false; q.x.drawImage(im, l + Math.round((w - pw) / 2), t + Math.round((h - ph) / 2), pw, ph); };
+  const T = (t, r) => { const n = txt20(String(t), r); n.style.overflow = 'visible'; n.style.whiteSpace = 'nowrap'; return n; };
   const show = () => {
-    list.innerHTML = '';
-    for (const d of ds.slice().reverse()) list.append(raw('div', desc0(d), { class: 'li' + (d === cur ? ' sel' : ''), role: 'option', onclick: () => { cur = d; show(); } }));
-    const c = H().designCost(G(), cur);
-    info.innerHTML = '';
-    const pic = a.shipImgEl(cur, 48);
-    const r = (label, v) => el('div', { class: 'kv' }, el('span', null, label), raw('b', String(v)));
-    info.append(pic, r('Name:', cur.name), r('Class:', cls(cur.type)), r('Development Cost:', '$' + nice(c.protoTotal != null ? c.protoTotal : c.money + (c.proto || 0))),
-      r('Production Cost:', '$' + nice(c.money)), r(lang() === 'fr' ? raw('span', 'Coût en métal:') : 'Metal Cost:', nice(c.metal)),
-      r('Range', cur.R), r('Speed', cur.V), r('Weapons', cur.W), r('Shields', cur.S), r('Mini', cur.M),
-      r('# Built:', nice(cur.built || 0)), r('#Existing:', nice(shipCount(cur.id))),
-      el('label', { class: 'chk' }, el('input', { type: 'checkbox', checked: cur.scrap301 ? 'checked' : false, onchange: (e) => { if (rs.flagScrapDesign) { rs.flagScrapDesign(G(), p, cur, 'command'); a.save(); show(); return; }
-          // (a ruleset that marks nothing, Gemini: scrapped at once, after the question the classic window asks)
-          e.target.checked = false; const n = shipCount(cur.id); a.confirmBox(`Scrap this ship type and all ${n} existing ship${n === 1 ? '' : 's'} of it?`, () => { const m = H().scrapDesign(G(), a.ME, cur.id); a.Sound.play(7003); a.toast(`Scrapped 1 type for ${a.fmt(m)} metal.`); a.renderPanel(); a.draw(); a.save(); show(); }); } }), el('span', null, 'Scrap This Type')),
-      el('div', { class: 'btns' }, btn('Rename', () => renameType(cur))));
+    pane.innerHTML = '';
+    // the list
+    const LW = 137, LH = 214, rows = Math.floor((LH - 2) / 53), maxTop = Math.max(0, ds.length - rows);
+    const ci = ds.indexOf(cur); if (ci < L6000.top) L6000.top = ci; if (ci >= L6000.top + rows) L6000.top = ci - rows + 1;
+    L6000.top = Math.max(0, Math.min(L6000.top, maxTop));
+    const lq = qdCanvas(LW, LH, 'Modèles'); lq.c.style.cssText = at20([3, 3, 3 + LH, 3 + LW]); lq.x.strokeStyle = '#000'; lq.x.strokeRect(0.5, 0.5, LW - 1, LH - 1);
+    const lb = el('div', { role: 'listbox', 'aria-label': 'Modèles existants', style: at20([4, 4, 2 + LH, 3 + LW - 16]) });
+    ds.slice(L6000.top, L6000.top + rows).forEach((d, i) => {
+      const t = 1 + 53 * i; putPic(lq, d, 1, t + 2, LW - 18, 40);
+      const lab = desc0(d); lq.text(lab, 0, t + 50, G9, { center: (LW - 16) / 2, cond: lq.width(lab, G9) > LW - 18 });
+      if (d === cur) { lq.x.globalCompositeOperation = 'difference'; lq.rect(1, t, LW - 16, t + 53, '#fff'); lq.x.globalCompositeOperation = 'source-over'; }
+      lb.append(el('div', { class: 'li', role: 'option', tabindex: 0, 'aria-selected': d === cur ? 'true' : 'false', 'aria-label': lab, style: `position:absolute;left:0;right:0;top:${53 * i}px;height:53px;cursor:default`, onclick: () => { cur = d; show(); } }));
+    });
+    drawBar(lq.x, LW - 16, 0, true, LH, 16, { on: true, value: L6000.top, max: maxTop });
+    lq.c.addEventListener('click', (ev) => { const pt = lq.at(ev); if (pt.h < LW - 16 || !maxTop) return; L6000.top += pt.v < 16 ? -1 : pt.v >= LH - 16 ? 1 : pt.v < LH / 2 ? -rows : rows; show(); });
+    lq.c.addEventListener('wheel', (ev) => { if (!maxTop) return; ev.preventDefault(); L6000.top += ev.deltaY > 0 ? 1 : -1; show(); }, { passive: false });
+    // the chosen type
+    const bq = qdCanvas(243, 76, cur.name); bq.c.style.cssText = at20([3, 149, 79, 392]); putPic(bq, cur, 0, 0, 243, 76);
+    const c = H().designCost(g, cur), R = R6000;
+    pane.append(lq.c, lb, bq.c, T('Nom du modèle:', R.name[0]), T(cur.name, R.name[1]), T('Classe:', R.cls[0]), T(cls(cur.type), R.cls[1]),
+      ...[['Coût de développement:', '$' + nice(c.protoTotal != null ? c.protoTotal : c.money + (c.proto || 0))], ['Coût de production:', '$' + nice(c.money)], ['Coût en métal:', nice(c.metal)]].flatMap(([l, v], i) => [T(l, R.costs[i][0]), T(v, R.costs[i][1])]),
+      ...[['Distance', cur.R], ['Vitesse', cur.V], ['Armes', cur.W], ['Boucliers', cur.S], ['Mini', cur.M]].flatMap(([l, v], i) => [T(l, R.lv[i][0]), T(v, R.lv[i][1])]),
+      T('Construits:', R.built[0]), T(nice(cur.built || 0), R.built[1]), T('En service:', R.exist[0]), T(nice(shipCount(cur.id)), R.exist[1]),
+      put20(el('label', { class: 'chk', style: 'display:flex;align-items:center;gap:6px' }, el('input', { type: 'checkbox', checked: cur.scrap301 ? 'checked' : false, onchange: (e) => {
+        if (rs.flagScrapDesign) { rs.flagScrapDesign(g, p, cur, 'command'); a.save(); show(); return; }
+        e.target.checked = false; } }), raw('span', 'Modèle à recycler')), R.chk));
   };
   show();
-  win(el('div', { class: 'types12' }, list, info, el('div', { class: 'btns right' }, btn('OK', () => a.closeModal()))));
+  const B = (t, r, fn, def) => put20(el('button', { type: 'button', class: 'ok20' + (def ? ' def20' : ''), onclick: fn }, raw('span', t)), r);
+  a.modal('', dlog20(430, 301, pane, B('Renommer', R6000.ren, () => renameType(cur, show)), B('OK', R6000.ok, () => a.closeModal(), true)), { cls: 'mac12 dl20w dlg6010', label: 'Modèles existants' });
   return true;
 }
 // DLOG 6000 "List Ship Types" (ListShipTypes @111b0c; 430 x 301, DITL 6000): the list of types at (3, 3, 137 x 214), the ship picture at (3, 149, 243 x 76), then the lines at their rectangles: Name (87), Class (107),
@@ -398,19 +424,27 @@ function shipTypes20(selId) {
           // (a ruleset that marks nothing, Gemini: scrapped at once, after the question the classic window asks)
           e.target.checked = false; const n = shipCount(cur.id); a.confirmBox(`Scrap this ship type and all ${n} existing ship${n === 1 ? '' : 's'} of it?`, () => { const m = H().scrapDesign(G(), a.ME, cur.id); a.Sound.play(7003); a.toast(`Scrapped 1 type for ${a.fmt(m)} metal.`); a.renderPanel(); a.draw(); a.save(); show(); }); } }), el('span', null, 'Scrap This Type'));
   show();
-  a.modal('', dlog20(430, 301, list, pane, put20(el('button', { type: 'button', class: 'ok20', onclick: () => renameType(cur) }, raw('span', 'Rename')), [271, 253, 291, 311]),
+  a.modal('', dlog20(430, 301, list, pane, put20(el('button', { type: 'button', class: 'ok20', onclick: () => renameType(cur, show) }, raw('span', 'Rename')), [271, 253, 291, 311]),
     put20(el('button', { type: 'button', class: 'ok20', onclick: () => a.closeModal() }, raw('span', 'OK')), [271, 343, 291, 401])), { cls: 'mac12 dl20w', label: 'List Ship Types' });
   return true;
 }
 const put20 = (n, r) => { n.setAttribute('style', (n.getAttribute('style') || '') + ';' + at20(r) + ';min-width:0;padding:0'); return n; };
 // DLOG 6090: a type's new name, 15 letters at most (a beep past them), "Name It" draws one from the list
-function renameType(d) {
-  const a = A(), el = a.el;
-  const inp = el('input', { maxlength: 15, value: d.name, 'aria-label': 'New Ship Name', onkeydown: (e) => { if (e.key.length === 1 && inp.value.length >= 15 && inp.selectionStart === inp.selectionEnd) { a.beep && a.beep(); } } });
+// DLOG 6090 (doRenameTypeDialog @11170e; 236 x 143, DITL 6090, the same rects in 1.2F and 2.0.1; Jake's captures rename-type*): the line
+// (13, 13, 211 x 48), the field (16, 68, 205 x 20; its frame 3 outside), Idée / Name It (13, 104), Annuler (91, 104), OK (156, 104) with the
+// default ring; over the List Ship Types window, which shows the new name when it closes. 15 letters at most, a beep past them.
+function renameType(d, back) {
+  const a = A(), el = a.el, fr = lang() === 'fr';
+  const W = fr ? ['Entrez le nouveau nom du vaisseau ou cliquez sur Idée:', 'Idée', 'Annuler', 'OK'] : ['Type your new ship name or click on “Name It” for a suggestion:', 'Name It', 'Cancel', 'OK'];
+  const close = (ok) => { if (ok) { const n = inp.value.trim(); if (n) { d.name = n.slice(0, 15); a.save(); a.renderPanel(); } } scr.remove(); if (back) back(); };
+  const inp = el('input', { type: 'text', maxlength: 15, value: d.name, 'aria-label': W[0], style: at20([65, 13, 91, 224]),
+    onkeydown: (e) => { if (e.key === 'Enter') { e.preventDefault(); close(true); } else if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); close(false); } else if (e.key.length === 1 && inp.value.length >= 15 && inp.selectionStart === inp.selectionEnd && a.beep) a.beep(); } });
   inp.setAttribute('translate', 'no');
-  win(el('div', null, el('p', null, 'Type your new ship name or click on “Name It” for a suggestion:'), inp,
-    el('div', { class: 'btns' }, btn('Name It', () => { inp.value = H().designName(G(), a.me(), d.type); }), btn('Cancel', () => shipTypes(d.id), { class: 'quiet' }),
-      btn('OK', () => { const n = inp.value.trim(); if (n) { d.name = n.slice(0, 15); a.save(); a.renderPanel(); } shipTypes(d.id); }))), 'small');
+  const B = (t, r, fn, def) => put20(el('button', { type: 'button', class: 'ok20' + (def ? ' def20' : ''), onclick: fn }, raw('span', t)), r);
+  const txt = txt20(W[0], [13, 13, 61, 224]); txt.style.whiteSpace = 'normal';
+  const scr = el('div', { class: 'scrim' }, el('div', { class: 'win small notitle mac12 dl20w dlg6010 ct6010', role: 'dialog', 'aria-modal': 'true', 'aria-label': W[0] },
+    dlog20(236, 143, txt, inp, B(W[1], [104, 13, 124, 71], () => { inp.value = H().designName(G(), a.me(), d.type); inp.focus(); }), B(W[2], [104, 91, 124, 149], () => close(false)), B(W[3], [104, 156, 124, 214], () => close(true), true))));
+  document.body.append(scr); inp.focus(); inp.select();
 }
 
 // DLOG 6030 "List All Fleets…" (ListAllFleets @1120dc, InitFleetsList @1123a0): every fleet of yours but satellites, one line each
@@ -437,7 +471,7 @@ function fleetsStatus() {
     if (f.dest != null) return fill(W.leave, d, st(f.star), st(f.dest), H().arrivalYear(g, Math.ceil(H().starDist(g, f.star, f.dest) / H().fleetSpeed(g, f) - 1e-9)));
     return fill(W.at, d, st(f.star));
   };
-  let cur = null;
+  let cur = order[0] || null;
   function go() {
     if (!cur) return;
     if (cur.to != null) { alertBox([W.hyper]); return; }
@@ -445,7 +479,7 @@ function fleetsStatus() {
   }
   const fr = lang() === 'fr';
   return list6030(fr ? 'Statut des flottes:' : 'List of All Fleets:', order.map(f => ({ id: f, cells: [[0, line(f)]] })), fr ? 'Rejoindre flotte' : 'Go To Fleet',
-    (f) => { cur = f; go(); }, { head: fr ? [5, 12, 24, 210] : [2, 13, 18, 200], go: fr ? [264, 238, 283, 352] : [264, 255, 284, 352], first: false });
+    (f) => { cur = f; go(); }, { head: fr ? [5, 12, 24, 210] : [2, 13, 18, 200], go: fr ? [264, 238, 283, 352] : [264, 255, 284, 352], first: true }); // (the first fleet chosen when it opens: Jake's capture)
 }
 // DLOG 6030 and 6040 (ListAllFleets @1120dc, ListExploredStars @120004; 486 x 296, DITL 6030 / 6040: the line at (12, 5) / (13, 2), the list user item
 // (13, 26, 455 x 225), "Rejoindre flotte" (238, 264, 114 x 19) / "Rejoindre planète" (229, 264, 124 x 19), OK (364, 264, 82 x 20) with the default ring):
@@ -546,8 +580,8 @@ function buildShips(sid) {
 }
 // DLOG 6020 drawn as BuildShips @112946 draws it (476 x 304; DITL 6020, 1.2F's, 2.0.1's for that skin; Jake's shot035 and shot077):
 // "En production à:" and the star; the production box (item 5, 245 x 78, DRAWBUILDSHIPTYPEPICTURE @1132e4): framed, the first queued type's
-// picture, and over the part not yet built (the lower (100 - done)% of the box) the 50% grey painted white (PenMode patOr, ForeColor white:
-// GUESS, the mode read but not seen in a capture), "$x (D)" while the type has never been built, else "$x (P)" (STR# 4000.28-29), and
+// picture, and over the part not yet built (the right (100 - done)% of the box) the 50% grey painted white (PenMode patOr, ForeColor white),
+// so it shows as a dotted sketch (Jake's captures at 0, 44, 67 and 89%), "$x (D)" while the type has never been built, else "$x (P)" (STR# 4000.28-29), and
 // "%d%% finition" (.30) under it; "En attente:" and the queue's three slots (items 6-8, 124 x 55, DRAWBUILDLISTSHIPBORDER @112f7c: framed,
 // the type's small picture, MakeFleetDescription of the type and count in Geneva 9, condensed when wider, centred); "Modèles disponibles:"
 // and the types (item 4, 137 x 214: a list of 53-pixel cells, each the small picture over its description, with its scroll bar), Annuler,
@@ -583,8 +617,10 @@ function build6020(sid, before) {
       devT = fill(never ? '$%s (D)' : '$%s (P)', nice(never ? (c.protoTotal != null ? c.protoTotal : c.money) : c.money));
       const yp = H().rules(g).yardProgress ? H().rules(g).yardProgress(g, p, s) : null, pct = yp ? Math.max(0, Math.min(100, Math.round(yp.pct))) : 0;
       pctT = fill(DONE[lang()], pct);
-      const top = Math.round((ph - 1) - (100 - pct) * (ph - 2) / 100);
-      for (let y = top; y < ph - 1; y++) for (let x = 1; x < pw - 1; x++) if ((x + y) % 2 === 0) q.rect(x, y, x + 1, y + 1, '#fff');
+      // (the part not yet built: the right (100 - done)% of the box, drawn over in white every other pixel, so it shows as a dotted sketch:
+      // Jake's captures at 0, 44, 67 and 89%; the asm moves the rect's left to right - (100 - done) x width / 100)
+      const left = Math.round((pw - 1) - (100 - pct) * (pw - 2) / 100);
+      for (let y = 1; y < ph - 1; y++) for (let x = left; x < pw - 1; x++) if ((x + y) % 2 === 0) q.rect(x, y, x + 1, y + 1, '#fff');
     }
     q.c.setAttribute('aria-label', first ? descN(first, Q[0].n) : '');
     const lab = (t, r) => { const n = txt20(t, r); n.style.overflow = 'visible'; n.style.whiteSpace = 'nowrap'; return n; }; // (a static text item draws past its rectangle: TextBox wraps, it doesn't clip a word that fits the line)
