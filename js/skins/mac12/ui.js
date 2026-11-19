@@ -495,30 +495,93 @@ function alertBox(paras) { const b = (V2 && alert20(paras)) || A().alertOver(par
 // (AddTypeToQueue: a beep when it can't), on a queued line takes one off (RemoveTypeFromQueue). OK keeps the queue, Cancel puts it back.
 const DONE = { en: '%d%% Done', fr: '%d%% finition' };
 function buildShips(sid) {
-  const a = A(), el = a.el, g = G(), p = a.me(), s = g.stars[sid];
+  const a = A(), g = G(), s = g.stars[sid];
   if (!s || s.owner !== a.ME) return false;
   if (!H().feature(g, 'buildQueue')) return buyShips(sid); // (a later ruleset buys ships at once, as its own window does; only 1.2's and DOS 2.0's queue)
   const before = JSON.stringify(s.queue || []);
+  return build6020(sid, before);
+}
+// DLOG 6020 drawn as BuildShips @112946 draws it (476 x 304; DITL 6020, 1.2F's, 2.0.1's for that skin; Jake's shot035 and shot077):
+// "En production à:" and the star; the production box (item 5, 245 x 78, DRAWBUILDSHIPTYPEPICTURE @1132e4): framed, the first queued type's
+// picture, and over the part not yet built (the lower (100 - done)% of the box) the 50% grey painted white (PenMode patOr, ForeColor white:
+// GUESS, the mode read but not seen in a capture), "$x (D)" while the type has never been built, else "$x (P)" (STR# 4000.28-29), and
+// "%d%% finition" (.30) under it; "En attente:" and the queue's three slots (items 6-8, 124 x 55, DRAWBUILDLISTSHIPBORDER @112f7c: framed,
+// the type's small picture, MakeFleetDescription of the type and count in Geneva 9, condensed when wider, centred); "Modèles disponibles:"
+// and the types (item 4, 137 x 214: a list of 53-pixel cells, each the small picture over its description, with its scroll bar), Annuler,
+// OK with the default ring. A double click on a type queues one (AddTypeToQueue: its slot, or the first free of three; a beep when none);
+// a click on a slot takes one off (RemoveTypeFromQueue, the slot inverted meanwhile). Annuler puts the queue back.
+const D6020 = {
+  12: { head: [0, 39, 15, 150], star: [0, 156, 16, 231], prod: [26, 39, 104, 284], dev: [107, 39, 124, 136], pct: [107, 159, 124, 274], wait: [129, 39, 145, 132],
+    slots: [[130, 143, 185, 267], [186, 143, 241, 267], [242, 143, 297, 267]], avail: [2, 323, 17, 468], list: [28, 323, 242, 460], cancel: [250, 286, 270, 344], ok: [250, 366, 270, 424] },
+  20: { head: [0, 0, 16, 150], star: [0, 156, 16, 231], prod: [26, 39, 104, 284], dev: [107, 65, 124, 162], pct: [107, 182, 125, 265], wait: [143, 39, 159, 132],
+    slots: [[130, 143, 185, 267], [186, 143, 241, 267], [242, 143, 297, 267]], avail: [2, 323, 18, 430], list: [28, 323, 242, 460], cancel: [250, 286, 270, 344], ok: [250, 366, 270, 424] },
+};
+const W6020 = { fr: { head: 'En production à:', wait: 'En attente:', avail: 'Modèles disponibles:', cancel: 'Annuler', ok: 'OK' },
+  en: { head: 'Shipbuilding Queue at:', wait: 'In The Queue:', avail: 'Available Types', cancel: 'Cancel', ok: 'OK' } };
+let B6020 = { top: 0 };
+function build6020(sid, before) {
+  const a = A(), el = a.el, g = G(), p = a.me(), s = g.stars[sid], D = D6020[V2 || lang() !== 'fr' ? 20 : 12], Wd = W6020[lang()] || W6020.en; // (English has no 1.2 of its own: 2.0.1's English dialog)
   const ds = p.designs.filter(d => !d.scrapped).reverse(); // (InitBuildShipsTypesList: every type, the newest first)
-  let pick = ds[0] || null;
-  const types = el('div', { class: 'lb', role: 'listbox' }), queue = el('div', { class: 'lb', role: 'listbox' });
-  const dev = raw('span', ''), pro = raw('span', ''), done = raw('span', '');
-  const show = () => {
-    types.innerHTML = ''; queue.innerHTML = '';
-    for (const d of ds) types.append(raw('div', desc0(d), { class: 'li' + (d === pick ? ' sel' : ''), role: 'option', onclick: dbl12('t' + d.id, () => { pick = d; show(); }, () => add(d)) }));
-    (s.queue || []).forEach((it, i) => { const d = H().getDesign(g, a.ME, it.did); if (d) queue.append(raw('div', descN(d, it.n), { class: 'li', role: 'option', onclick: dbl12('q' + i, () => {}, () => { H().unqueueShip(g, a.ME, sid, i); show(); }) })); });
-    const c = pick ? H().designCost(g, pick) : null;
-    dev.textContent = c ? fill('$%s (D)', nice(c.protoTotal != null ? c.protoTotal : c.money)) : '';
-    pro.textContent = c ? fill('$%s (P)', nice(c.money)) : '';
-    const pr = (s.queue || []).length ? H().rules(g).yardProgress(g, p, s) : null;
-    done.textContent = pr ? fill(DONE[lang()], pr.pct) : '';
+  let pick = null; // (none chosen when it opens: shot035)
+  const picOf = (d) => (a.shipPic ? a.shipPic(d, a.ME) : null);
+  const putPic = (q, d, l, t, w, h) => { const im = picOf(d); if (!im || !im.width) return; const k = Math.min(w / im.width, h / im.height), pw = Math.round(im.width * k), ph = Math.round(im.height * k); q.x.imageSmoothingEnabled = false; q.x.drawImage(im, l + Math.round((w - pw) / 2), t + Math.round((h - ph) / 2), pw, ph); };
+  const centre = (q, t, w, v) => { const cond = q.width(t, G9) > w - 2; q.text(t, 0, v, G9, { center: w / 2, cond }); };
+  const box = el('div', { style: 'position:absolute;left:0;top:0;width:476px;height:304px' });
+  const draw = () => {
+    box.innerHTML = '';
+    const Q = s.queue || [], first = Q[0] ? H().getDesign(g, a.ME, Q[0].did) : null;
+    // the production box
+    const pr = D.prod, pw = pr[3] - pr[1], ph = pr[2] - pr[0], q = qdCanvas(pw, ph, ''); q.c.style.cssText = at20(pr);
+    q.x.strokeStyle = '#000'; q.x.strokeRect(0.5, 0.5, pw - 1, ph - 1);
+    let devT = '', pctT = '';
+    if (first) {
+      putPic(q, first, 1, 1, pw - 2, ph - 2);
+      const c = H().designCost(g, first), never = first.built === 0 && !first.free;
+      devT = fill(never ? '$%s (D)' : '$%s (P)', nice(never ? (c.protoTotal != null ? c.protoTotal : c.money) : c.money));
+      const yp = H().rules(g).yardProgress ? H().rules(g).yardProgress(g, p, s) : null, pct = yp ? Math.max(0, Math.min(100, Math.round(yp.pct))) : 0;
+      pctT = fill(DONE[lang()], pct);
+      const top = Math.round((ph - 1) - (100 - pct) * (ph - 2) / 100);
+      for (let y = top; y < ph - 1; y++) for (let x = 1; x < pw - 1; x++) if ((x + y) % 2 === 0) q.rect(x, y, x + 1, y + 1, '#fff');
+    }
+    q.c.setAttribute('aria-label', first ? descN(first, Q[0].n) : '');
+    const lab = (t, r) => { const n = txt20(t, r); n.style.overflow = 'visible'; n.style.whiteSpace = 'nowrap'; return n; }; // (a static text item draws past its rectangle: TextBox wraps, it doesn't clip a word that fits the line)
+    box.append(lab(Wd.head, D.head), lab(s.name, D.star), q.c, lab(devT, D.dev), lab(pctT, D.pct), lab(Wd.wait, D.wait), lab(Wd.avail, D.avail));
+    // the queue's three slots
+    D.slots.forEach((r, i) => {
+      const w = r[3] - r[1], h = r[2] - r[0], qs = qdCanvas(w, h, ''), it = Q[i], d = it ? H().getDesign(g, a.ME, it.did) : null;
+      qs.c.style.cssText = at20(r) + ';cursor:default'; qs.x.strokeStyle = '#000'; qs.x.strokeRect(0.5, 0.5, w - 1, h - 1);
+      if (d) { putPic(qs, d, 2, 2, w - 4, 40); centre(qs, descN(d, it.n), w, h - 4); qs.c.setAttribute('aria-label', descN(d, it.n)); }
+      qs.c.addEventListener('click', () => { if (!d) return; qs.x.globalCompositeOperation = 'difference'; qs.rect(0, 0, w, h, '#fff'); qs.x.globalCompositeOperation = 'source-over';
+        setTimeout(() => { H().unqueueShip(g, a.ME, sid, i); draw(); }, 120); });
+      box.append(qs.c);
+    });
+    // the types: 53-pixel cells, 121 wide, the scroll bar at the right
+    const L = D.list, lw = L[3] - L[1], lh = L[2] - L[0], rows = Math.floor((lh - 2) / 53), maxTop = Math.max(0, ds.length - rows);
+    B6020.top = Math.max(0, Math.min(B6020.top, maxTop));
+    const lq = qdCanvas(lw, lh, Wd.avail); lq.c.style.cssText = at20(L); lq.x.strokeStyle = '#000'; lq.x.strokeRect(0.5, 0.5, lw - 1, lh - 1);
+    ds.slice(B6020.top, B6020.top + rows).forEach((d, i) => {
+      const t = 1 + 53 * i; putPic(lq, d, 1, t + 2, lw - 18, 40); centre(lq, desc0(d), lw - 16, t + 50);
+      if (d === pick) { lq.x.globalCompositeOperation = 'difference'; lq.rect(1, t, lw - 16, t + 53, '#fff'); lq.x.globalCompositeOperation = 'source-over'; }
+    });
+    drawBar(lq.x, lw - 16, 0, true, lh, 16, { on: true, value: B6020.top, max: maxTop });
+    lq.c.addEventListener('click', (ev) => {
+      const pt = lq.at(ev);
+      if (pt.h >= lw - 16) { if (maxTop) { B6020.top += pt.v < 16 ? -1 : pt.v >= lh - 16 ? 1 : pt.v < lh / 2 ? -rows : rows; draw(); } return; }
+    });
+    // each cell an option over the picture (a reader, the keyboard and the test tools have something to click; the drawing is the canvas's)
+    const lb = el('div', { role: 'listbox', 'aria-label': Wd.avail, style: at20([L[0] + 1, L[1] + 1, L[2] - 1, L[3] - 16]) });
+    ds.slice(B6020.top, B6020.top + rows).forEach((d, i) => {
+      const queueOne = () => { pick = d; if (d.scrap301 || !H().canBuildType(g, p, d.type) || !H().queueShips(g, a.ME, sid, d.id, 1)) { if (a.beep) a.beep(); } draw(); };
+      lb.append(el('div', { class: 'li', role: 'option', tabindex: 0, 'aria-selected': d === pick ? 'true' : 'false', 'aria-label': desc0(d), style: `position:absolute;left:0;right:0;top:${53 * i}px;height:53px;cursor:default`,
+        onclick: dbl12('b' + d.id, () => { pick = d; draw(); }, queueOne), onkeydown: (e) => { if (e.key === 'Enter') { e.preventDefault(); queueOne(); } } }));
+    });
+    lq.c.addEventListener('wheel', (ev) => { if (!maxTop) return; ev.preventDefault(); B6020.top += ev.deltaY > 0 ? 1 : -1; draw(); }, { passive: false });
+    box.append(lq.c, lb);
   };
-  const add = (d) => { if (d.scrap301 || !H().canBuildType(g, p, d.type) || !H().queueShips(g, a.ME, sid, d.id, 1)) { if (a.beep) a.beep(); } show(); };
-  show();
-  win(el('div', { class: 'build12' },
-    el('div', { class: 'kv' }, el('span', null, 'Shipbuilding Queue at:'), raw('b', s.name)),
-    el('div', { class: 'cols' }, el('div', null, el('p', null, 'In The Queue:'), queue, dev, ' ', pro, el('br'), done), el('div', null, el('p', null, 'Available Types'), types)),
-    el('div', { class: 'btns right' }, btn('Cancel', () => { s.queue = JSON.parse(before); a.closeModal(); a.renderPanel(); }, { class: 'quiet' }), btn('OK', () => { a.closeModal(); a.save(); a.renderPanel(); }))));
+  draw();
+  const B = (t, r, fn, def) => put20(el('button', { type: 'button', class: 'ok20' + (def ? ' def20' : ''), onclick: fn }, raw('span', t)), r);
+  const dl = dlog20(476, 304, box, B(Wd.cancel, D.cancel, () => { s.queue = JSON.parse(before); a.closeModal(); a.renderPanel(); }), B(Wd.ok, D.ok, () => { a.closeModal(); a.save(); a.renderPanel(); }, true));
+  a.modal('', dl, { cls: 'mac12 dl20w dlg6010', label: Wd.head + ' ' + s.name });
   return true;
 }
 
@@ -931,7 +994,7 @@ function dlgBar(L, get, set) {
 function createType() {
   const a = A(), el = a.el, g = G(), p = a.me(), W = ALERT_TYPES[lang()];
   if (p.designs.filter(d => !d.scrapped).length >= (H().rules(g).maxDesigns || 20)) { alertBox(W.full); return; }
-  const types = CLASSES(), D = DITL6010[V2 ? 20 : 12], Wd = WORDS6010[lang()] || WORDS6010.en, K = ['R', 'V', 'W', 'S', 'M'];
+  const types = CLASSES(), D = DITL6010[V2 || lang() !== 'fr' ? 20 : 12], /* (English has no 1.2 of its own: 2.0.1's English dialog) */ Wd = WORDS6010[lang()] || WORDS6010.en, K = ['R', 'V', 'W', 'S', 'M'];
   const st = { type: types[0] || 'scout', R: 0, V: 0, W: 0, S: 0, M: 0, name: '' };
   let named = false, moved = false;
   const lim = (k) => { const L = H().designLimits(g, p, st.type), min = k === 'R' && st.type === 'satellite' ? 0 : H().designMin(g, k, st.type); return { min, max: k === 'R' && st.type === 'satellite' ? 0 : Math.max(min, L[k] || min) }; };

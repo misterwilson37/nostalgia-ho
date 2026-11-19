@@ -1107,5 +1107,10 @@ routine and resources and checked pixel by pixel against `captures/` (640 x 480)
   box, no title), Tech Spending 96 rows high (its second row of names was cut at 80), the Report Window's text in Geneva 9 on
   11-pixel lines with its 16-pixel scroll bar and grow box. The credit reports get 1.2's own icons (GetIconID @130db0: 1000 is
   ICON 3115, 1001 "Graphismes de Howard Vives" 3116; the DOS skin's table only knew DOS 2.0's "Click here…").
-- Still to compare: the windows
+- **Build Ships** (DLOG 6020, `build6020`): BuildShips and its item procs: the production box with the first queued type's picture,
+  its cost "(D)" or "(P)", "%d%% finition" and the unbuilt part veiled (the veil's pen mode read, not yet seen in a capture: GUESS);
+  the three queue slots with picture and MakeFleetDescription; the types as 53-pixel picture cells with their scroll bar, none
+  chosen at first. 92% of pixels agree with shot035 at the Mac's own size, the rest being the two games' different ships.
+- English, which 1.2 never had, uses 2.0.1's English layout of the same dialog (Create New Ship Type, Build Ships).
+- Still to compare: the windows (6000, 6030, 6040, 6060, 6090, 6100, the battle window, the alerts)
   (6000, 6020, 6030, 6040, 6060, 6090, 6100, 7000-7011).
