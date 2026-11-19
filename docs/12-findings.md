@@ -1115,5 +1115,12 @@ routine and resources and checked pixel by pixel against `captures/` (640 x 480)
 - **Fleet Status and the explored planets** (DLOG 6030, 6040, `list6030`): the List Manager list in Chicago 12, 16-pixel rows, fields at
   1, 101, 176, 251, 326 (read in shot078), its scroll bar, the go button and OK; the explored stars open with the first chosen.
   95% of pixels agree with shot078 at 1:1, the rest being the two games' different planets.
-- Still to compare: List Ship Types (6000), Organize Ships (6060), Rename (6090), 6100, the battle window, the alerts
+- **List Ship Types, Rename, Organize Ships** (DLOG 6000, 6090, 6060) from Jake's second set of System 6 captures
+  (`captures-system6-jake2/`): picture cells in the list, Rename over it, one picture and its count a pile in Organize.
+- **The battle window**: a plain black box, no title bar, the bitmap Chicago and Geneva (shots 037-074).
+- **The alerts**: `ALERTS12`, every ALRT of 1.2F's resource fork (size, rectangles, French words, pictures), drawn for the 1.2 skin
+  in French: the abandon question (5060, "Qu'elles meurent!" answers yes), "Merci de baptiser…" (3040), eliminated and won as
+  5051 / 5041 (PICT 3540 / 3530: 5050 and 5040 name 3040 and 3030 of the lost colour file). English takes 2.0.1's.
+- Not in 1.2's menus, so not built: 6100 ("Synthèse des niveaux des Joueurs", no item opens it). Still to see: the budget bars
+  with 11 or more colonies, the win screen.
   (6000, 6020, 6030, 6040, 6060, 6090, 6100, 7000-7011).
