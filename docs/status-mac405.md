@@ -97,8 +97,9 @@ won (163-165), armageddon (167-187), lost (247-251). The 3.0.1 skin's versions s
 - real-play, Mac skins (mac4c, mac4, mac3c, mac3 x mac405, 301 x desktop, phone-l, pad, 4k): 32 of 32 pass after the 4k refit (two
   earlier failures at 4k were the opening view; one pad run threw in the test's End Turn step once and passed again).
 - real-play, the 5.0.5 family (classic with every ruleset, palm; desktop and phone-l): desktop all pass; **phone-l fails send-fleet in every
-  run** (the finger drag leaves no destination). The same on 925cc53 without tonight's fit change (classic 405 and original checked), so it
-  comes from main (the handoff's known finger-drag failure, w95 / palm, now in classic too). Not fixed.
+  run** (the finger drag leaves no destination). Long-standing: the same on 925cc53 without tonight's fit change and on 2789149 with its
+  own real-play.js (classic 405 checked): the handoff's known finger-drag failure, which reaches every skin on the classic code at phone-l,
+  not only w95 and palm. Not fixed.
 
 ## Checks (19 Nov)
 
