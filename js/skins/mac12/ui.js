@@ -3719,6 +3719,88 @@ function scrollBar75s(q, x, l, t, b, max, val, ox, oy) {
   R(l + 1, tp, 10, 12, '#aaaaaa'); R(l + 1, tp, 10, 1, '#555555'); R(l + 1, tp + 1, 1, 10, '#ccccff'); R(l + 10, tp + 1, 1, 10, '#333366'); R(l + 1, tp + 11, 10, 1, '#333366');
   R(l + 4, tp + 2, 4, 1, '#9999cc'); [3, 6, 9].forEach(k => R(l + 4, tp + k, 4, 1, '#ccccff')); [4, 5, 7, 8].forEach(k => R(l + 4, tp + k, 4, 1, '#666699'));
 }
+// 4.0.5's map effects for the armageddon and supernova reports (DoMessageAction @1523c2, before the bubble is drawn: Jake's shots 176-186):
+// - 1128 "Oh No! It's armageddon!": DoArmageddonGraphic @116e68 shakes the map: ScrollRect by (2, 2), (0, -2), (-2, 2), (0, -2), 6 ticks
+//   after each, twice, the uncovered strip black, the End Turn clock and the bubble left out of it; then the map is drawn again;
+// - 1130 "The armageddon device has caused half of the stars to supernova!" (the stars gone this step) and 1081 "%s has just gone supernova."
+//   (that star): DoSupernovaGraphic @1168b8 centres the map on the first, then in colour at zoom 17 draws on each star the colour icons 728
+//   to 741 (32 x 32 about its centre, 6 ticks each), fades the screen out and back (DoFadeAndBack), and draws PICT 750 to 758 (64 x 64, 6 ticks
+//   each); otherwise (black and white, or another zoom) it frames ovals growing a pixel a tick to 3 x the zoom, red going to yellow
+//   (RGBForeColor 65535, r x zoom x 2000, 0). Then the map is drawn again. The remake draws them on a canvas laid over the map.
+function beforeCard405(m, again) {
+  const g = G(), t = String(m.text || '');
+  if (/armageddon!\s*$/i.test(t) && /^Oh No!/.test(t)) { shake405(again); return true; }
+  let ids = null;
+  if (/armageddon device has caused half of the stars to supernova/i.test(t)) ids = (g.novaNow301 || []).slice();
+  else if (/has just gone supernova/.test(t) && m.star != null) ids = [m.star];
+  if (!ids || !ids.length) return false;
+  nova405(ids, again);
+  return true;
+}
+function mapBox405() { const c = document.getElementById('map'); return c ? { c, r: c.getBoundingClientRect() } : null; }
+function shake405(done) {
+  const M = mapBox405(); if (!M) return false;
+  const px = MACS.s || 1; // (a Mac pixel in the page's)
+  const at = [[2, 2], [2, 0], [0, 2], [0, 0], [2, 2], [2, 0], [0, 2], [0, 0]]; // (where the picture stands after each ScrollRect)
+  const bg = M.c.parentElement; const was = bg ? bg.style.background : '';
+  if (bg) bg.style.background = '#000';
+  let i = 0;
+  const step = () => {
+    if (i >= at.length) { M.c.style.transform = ''; if (bg) bg.style.background = was; A().draw(); done(); return; }
+    M.c.style.transform = `translate(${at[i][0] * px}px, ${at[i][1] * px}px)`; i++; setTimeout(step, 100);
+  };
+  step();
+  return true;
+}
+function nova405(ids, done) {
+  const a = A(), g = G(); a.centerOn(ids[0]); a.draw();
+  const M = mapBox405(); if (!M || !window.HOVIEW) { done(); return; }
+  const v = HOVIEW(), kx = M.r.width / v.mapW, ky = M.r.height / v.mapH;
+  const ov = a.el('canvas', { width: Math.round(M.r.width), height: Math.round(M.r.height), 'aria-hidden': 'true',
+    style: `position:fixed;left:${M.r.left}px;top:${M.r.top}px;width:${M.r.width}px;height:${M.r.height}px;pointer-events:none;z-index:50;image-rendering:pixelated` });
+  document.body.append(ov);
+  const x = ov.getContext('2d'); x.imageSmoothingEnabled = false;
+  // (the clip: the map less the End Turn clock and the bubble, as the program's DiffRgn of both)
+  x.beginPath(); x.rect(0, 0, ov.width, ov.height);
+  for (const e of document.querySelectorAll('.bub301, #map ~ .clock, .clock')) { const b = e.getBoundingClientRect(); if (b.width && b.height) x.rect(b.left - M.r.left, b.top - M.r.top, b.width, b.height); }
+  x.clip('evenodd');
+  const at = (id) => { const s = g.stars[id]; return [(v.view.ox + s.x * v.view.s) * kx, (v.view.oy + s.y * v.view.s) * ky]; };
+  const unit = kx; // (one Mac pixel of the map in the page's pixels)
+  // (4.0.5's zooms are 6, 9, 12 and 17 (ZoomIn @102346; ZOOMS, stored x LY); 17 is the top one, which the remake's fill zoom stands in for)
+  const top = v.view.s >= ZOOMS[3] - 0.5, zoom = top ? 17 : Math.round(v.view.s / LY), icons = COLOUR3 && top;
+  const end = () => { ov.remove(); a.draw(); done(); };
+  const frames = [];
+  if (icons) {
+    for (let n = 728; n <= 741; n++) frames.push({ im: a.IMG['dos:i' + n], half: 16 });
+    frames.push({ fade: true });
+    for (let n = 750; n <= 758; n++) frames.push({ im: a.IMG['dos:p' + n], half: 32 });
+  }
+  let i = 0;
+  const pic = () => {
+    if (i >= frames.length) { end(); return; }
+    const f = frames[i++];
+    if (f.fade) { // DoFadeAndBack: the screen to black and back
+      const fd = a.el('div', { 'aria-hidden': 'true', style: 'position:fixed;inset:0;background:#000;opacity:0;z-index:60;pointer-events:none;transition:opacity 250ms' });
+      document.body.append(fd); requestAnimationFrame(() => { fd.style.opacity = '1'; });
+      setTimeout(() => { fd.style.opacity = '0'; setTimeout(() => { fd.remove(); pic(); }, 260); }, 260);
+      return;
+    }
+    x.clearRect(0, 0, ov.width, ov.height);
+    if (f.im && f.im.width) for (const id of ids) { const [cx, cy] = at(id); x.drawImage(f.im, cx - f.half * unit, cy - f.half * unit, 2 * f.half * unit, 2 * f.half * unit); }
+    setTimeout(pic, 100);
+  };
+  const rings = () => {
+    const R = 3 * Math.max(1, zoom); let r = 0;
+    const one = () => {
+      if (r >= R) { end(); return; }
+      x.strokeStyle = COLOUR3 ? `rgb(255, ${((r * zoom * 2000) & 0xffff) >> 8}, 0)` : '#000'; x.lineWidth = unit; // (the green a 16-bit word: it wraps)
+      for (const id of ids) { const [cx, cy] = at(id); x.beginPath(); x.ellipse(cx, cy, Math.max(0.5, r * unit), Math.max(0.5, r * unit), 0, 0, 2 * Math.PI); x.stroke(); }
+      r++; setTimeout(one, 17);
+    };
+    one();
+  };
+  setTimeout(icons ? pic : rings, 400); // (the stars marked and drawn again, then 24 ticks before the graphic)
+}
 // 4.0.5's order of the players' pane (DrawIconRect @11537c, its first loops): a swap sort over the players, the ones still in first, by Total
 // Money (the player record's +0: last turn's income, rules-405 p.tm) from the most down, then the ones out (the galaxy's +0x2dc: the year out, 1
 // for this year) from the latest out; the values carried with a swap as the program does. So the list starts with the richest player, not
@@ -4816,6 +4898,8 @@ if (V3) {
     battleWindow: (b, k) => (own() ? battleWindow(b, k) : false),
     // (the program's own battle window with modern conveniences on too: Jake, 18 Nov, the remake's looked wrong in this skin)
     battleWindowAlways: true,
+    // (4.0.5's DoMessageAction for the armageddon and supernova reports: the shake and the supernova graphic before the card)
+    beforeCard: (m, again) => (V4 && own() && G() ? beforeCard405(m, again) : false),
     // (Compare Players' chart: its words in Geneva 9, as Jake's System 7 capture 8 of 4.0.5 shows them; the bitmap face, 12 CSS pixels to its 9)
     chartFont: G9,
     // (3.0.1 works the battles out during the update without showing them: DoBattleStage passes 0 to DoOneBattle; each is shown as its

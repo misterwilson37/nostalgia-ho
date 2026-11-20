@@ -2010,6 +2010,9 @@ function renderMsg0() {
     const wait = setInterval(() => { if (!document.querySelector('.scrim')) { clearInterval(wait); if (G && UI.inbox[UI.msgIdx] === m0) renderMsg(); } }, 200);
     return;
   }
+  // T.beforeCard(m, again): a skin's own action for a report before its card is drawn (Mac 4.0.5's DoMessageAction: the armageddon shake,
+  // the supernova graphic); true when it has taken the turn, and it calls again() when it is done
+  if (m0 && T.beforeCard && !m0._acted) { m0._acted = true; if (T.beforeCard(m0, () => { if (G && UI.inbox[UI.msgIdx] === m0) renderMsg(); })) return; }
   box.innerHTML = '';
   if (G.over && UI.msgIdx >= UI.inbox.length) {
     box.append(el('div', { class: 'card end' }, el('img', { src: A.img[G.winner === ME ? 'p3030' : 'p3040'], alt: '' }),
