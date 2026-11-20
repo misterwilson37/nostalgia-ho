@@ -3658,7 +3658,16 @@ function openSkills() {
     : L && lang === 'de' && L.dosDe && L.dosDe.s ? { sk: [96, 97, 98, 99, 100].map(i => L.dosDe.s[i]), iq: [16, 17, 18].map(i => L.dosDe.s[i]) } : null;
   const skillName = (k) => { const i = SKK.indexOf(k) < 0 ? 2 : SKK.indexOf(k); return off && off.sk && off.sk[i] ? off.sk[i] : tl(SK[i]); };
   const iqi = Math.max(0, IQK.indexOf((G.opts && G.opts.iq) || 'average')), iq = off && off.iq && off.iq[iqi] ? off.iq[iqi] : tl(IQ[iqi]);
-  const list = el('div', { class: 'skillist', role: 'list' }, ...G.players.map(q => el('div', { class: 'skillrow', role: 'listitem' }, el('span', { translate: 'no' }, q.name), el('span', { translate: 'no' }, skillName(q.skill)))));
+  // (C.dealt, Mac 4.0.5: InitSkillsList puts player i in row galaxy +0x318[i], an order DoGameSolidificationStuff deals once a game, each place
+  // swapped with a random one; the remake deals it the first time the list is shown, from the browser's random numbers, not the game's, and
+  // keeps it with the game: G.deal318)
+  let rows = G.players;
+  if (C.dealt) {
+    const n = G.players.length;
+    if (!Array.isArray(G.deal318) || G.deal318.length !== n) { const d = G.players.map((q, i) => i); for (let i = 0; i < n; i++) { const j = Math.floor(Math.random() * n), t = d[i]; d[i] = d[j]; d[j] = t; } G.deal318 = d; save(); }
+    rows = G.players.slice().sort((x, y) => G.deal318[x.id] - G.deal318[y.id]);
+  }
+  const list = el('div', { class: 'skillist', role: 'list' }, ...rows.map(q => el('div', { class: 'skillrow', role: 'listitem' }, el('span', { translate: 'no' }, q.name), el('span', { translate: 'no' }, skillName(q.skill)))));
   const S = C.skillsLayout, U = C.units;
   const box = origDialog(S.w, S.h, U, [[S.title, el('div', { class: 'cmptitle' }, tl('List of all players and their skill levels:'))], [S.list, list],
     [S.label, el('div', { class: 'cmptitle' }, tl('Computer Intelligence:'))], [S.iq, el('div', { class: 'cmptitle', translate: 'no' }, iq)],

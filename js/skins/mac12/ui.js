@@ -2159,7 +2159,8 @@ function hall405(kind) {
   };
   const details = () => { if (L[cur]) summary405(L[cur], shame, () => hall405(kind)); };
   const det = ok20('Details', shame ? [212, 104, 232, 162] : [212, 20, 232, 78], details); if (!L.length) det.disabled = true;
-  const more = ok20('', [212, 168, 232, 260], () => { a.closeModal(); a.classic('hall', a.openHall, kind); }); more.textContent = ''; more.append(el('span', null, 'All editions…'));
+  // (the remake's every-edition window, always offered (Jake, 21 Nov), opening on this game's edition each time)
+  const more = ok20('', [212, 168, 232, 260], () => { a.closeModal(); a.UI.hallRules = null; a.classic('hall', a.openHall, kind); }); more.textContent = ''; more.append(el('span', null, 'All editions…'));
   show();
   a.modal('', dlog20(344, 247, el('button', { type: 'button', class: 'ok20 def20', style: at20([212, 268, 232, 326]) + ';min-width:0;padding:0', onclick: () => a.closeModal() }, raw('span', 'OK')), /* (first: the window's focus, the default button) */ txt20(shame ? 'Hall Of Shame' : 'Hall Of Fame', [8, 16, 24, 128]), txt20('Name', [32, 16, 46, 66]), txt20('When', [32, 116, 47, 176]), txt20('Difficulty', [32, 216, 48, 316]),
     el('div', { style: at20([48, 16, 200, 333]) + ';border:1px solid #000;box-sizing:border-box;background:#fff' }), box, listBar20(box, [48, 317, 200, 333], 15),

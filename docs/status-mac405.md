@@ -115,10 +115,11 @@ labels from 12 on were a few places off (from thumbnails): corrected in the priv
   the seconds on a System 7.5 scroll bar (`sbar405`, shared with Preferences).
 - **Compare Players and the skills list:** placed as the other dialogs (place405 now takes the classic page's origDialog windows), no
   dimming; the chart's words in Geneva 9 (they were 9 CSS pixels of Chicago: a theme `chartFont`); the skills list's rows 16 high, the
-  skill at 150 (InitSkillsList). Left: its scroll bar; its order is the galaxy's +0x318 table (a random order dealt at the start,
-  DoGameSolidificationStuff, which also picks each computer's face), which the remake does not keep.
+  skill at 150 (InitSkillsList). Left: its scroll bar. Its order is the galaxy's +0x318 table (a random order dealt once a game,
+  DoGameSolidificationStuff): the remake now deals one the first time the list is shown (the browser's random numbers, not the game's,
+  so the digests stay) and keeps it with the game (`G.deal318`; Jake, 21 Nov: "give them a random number at the start").
 - Checked the same: Master Points, Hall of Fame / Shame (empty), Preferences, Surrender, Organize, List All Fleets, You won (5041), Name a
-  Star (4050), the eliminated and won bubbles. Left: the Hall's "All editions…" (the remake's own, not in the capture: a question for Jake),
+  Star (4050), the eliminated and won bubbles. The Hall's "All editions…" stays (Jake, 21 Nov: always), opening on this game's edition each time. Left:
   Surrender's names look a size smaller, the battle frames (12-59) and the filled Halls / Summary not yet compared.
 - **Shot 204's players list without Jake: answered.** DrawIconRect @11537c sorts the players before drawing: those still in by Total
   Money (the player record's +0, last turn's income) from the most down, then those out from the latest out (+0x2dc). Jake, losing, is
