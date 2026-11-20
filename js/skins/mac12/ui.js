@@ -1815,7 +1815,7 @@ function build405(sid) {
   const drawList = () => {
     list.textContent = ''; const c = cur();
     for (const d of live().slice().reverse()) {
-      const on = c && d.id === c.id, row = el('div', { class: 'tr405' + (on ? ' sel' : '') + (d.scrap301 ? ' scrap' : ''), role: 'option', 'aria-selected': on ? 'true' : 'false', style: `padding:2px 0 3px;text-align:center;background:${on ? '#000' : '#fff'};color:${on ? '#fff' : '#000'};font:12px 'DOS Geneva 9',Geneva,sans-serif;cursor:pointer`, onclick: () => { pickD(d); want = 0; refresh(); } });
+      const on = c && d.id === c.id, row = el('div', { class: 'tr405' + (on ? ' sel' : '') + (d.scrap301 ? ' scrap' : ''), role: 'option', 'aria-selected': on ? 'true' : 'false', style: `padding:2px 0 3px;text-align:center;background:${on ? '#000' : '#fff'};color:${on ? '#fff' : '#000'};font:12px 'Mac Geneva 9',Geneva,sans-serif;cursor:pointer`, onclick: () => { pickD(d); want = 0; refresh(); } });
       const pc = picCv(d, 120, 40); if (!on) unBlack(pc); pc.style.margin = '0 auto'; /* (on white, but the type shown on black: shot 015) */ row.append(pc, raw('div', desc0(d), { style: 'white-space:nowrap;overflow:hidden' })); list.append(row);
     }
     const sel = list.querySelector('.sel'); requestAnimationFrame(() => { if (sel) sel.scrollIntoView({ block: 'nearest' }); drawLbar(); });
@@ -2025,7 +2025,7 @@ function graph405() {
   const W = 484, Hh = 223, K = 2, cv = el('canvas', { width: W * K, height: Hh * K, style: at20([20, 4, 243, 488]), 'aria-label': 'History graph', role: 'img' });
   const icons = GRAPH405.pics.map((pic, i) => {
     const im = a.IMG['dos:i' + pic];
-    const c = el('div', { role: 'button', tabindex: 0, 'aria-label': GRAPH405.names[i], style: `position:absolute;left:${4 + 45 * i}px;top:248px;width:45px;height:46px;cursor:pointer;text-align:center;font:12px 'DOS Geneva 9',Geneva,sans-serif;line-height:10px;overflow:hidden` },
+    const c = el('div', { role: 'button', tabindex: 0, 'aria-label': GRAPH405.names[i], style: `position:absolute;left:${4 + 45 * i}px;top:248px;width:45px;height:46px;cursor:pointer;text-align:center;font:12px 'Mac Geneva 9',Geneva,sans-serif;line-height:10px;overflow:hidden` },
       im ? el('img', { src: im.src, alt: '', style: 'display:block;margin:1px auto 0;width:32px;height:32px;image-rendering:pixelated' }) : null, raw('span', GRAPH405.names[i], { style: 'display:inline-block;white-space:nowrap;transform-origin:center' }));
     const flip = () => { GRAPH405.mask = GRAPH405.mask ^ (1 << i); paint(); };
     c.addEventListener('click', flip); c.addEventListener('keydown', (e) => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); flip(); } });
@@ -2443,7 +2443,7 @@ function starLine(cx, d) {
 // and a click on it the system beep; a drag sets the share and spreads the rest over the others in proportion. ----------
 // (the Mac's own bitmap Geneva 9, Geneva 9 Bold and Chicago 12, as the DOS 2.0 program carries them: js/skins/dos/style.css's faces, 12 and 15
 // pixels to the em for one font pixel to one of the Mac's; a browser without them draws with the fallbacks)
-const G9 = "12px 'DOS Geneva 9', Geneva, Verdana, sans-serif", G9B = "12px 'DOS Geneva 9 Bold', Geneva, Verdana, sans-serif", SYS12 = "15px 'DOS Chicago 12', Chicago, Charcoal, Geneva, sans-serif";
+const G9 = "12px 'Mac Geneva 9', Geneva, Verdana, sans-serif", G9B = "12px 'Mac Geneva 9 Bold', Geneva, Verdana, sans-serif", SYS12 = "15px 'Mac Chicago 12', Chicago, Charcoal, Geneva, sans-serif";
 try { if (document.fonts) Promise.all([G9, G9B, SYS12].map(f => document.fonts.load(f))).then(() => { const a = A(); if (a && a.G && a.renderPanel) a.renderPanel(); }).catch(() => {}); } catch (e) { /* (the fallbacks) */ }
 function qdCanvas(w, h, label) { // a box drawn at twice its pixels, as wide as the panel
   let lastR = null;
@@ -2836,7 +2836,7 @@ const vPercBar = (pm) => { for (let x = 0; x < 51; x++) if (VLOG[x] >= pm) retur
 function techBox301() {
   const a = A(), p = a.me(), W = BAR_WORDS[lang()], names = TECH_NAMES12[lang()], S1 = STR301(1001), col = COL301();
   const keys = ['range', 'speed', 'weapons', 'shields', 'mini', 'radical'];
-  const q = qdCanvas(228, 96, W.head), x = q.x, bg = col ? RGB301.grey : '#fff';
+  const q = qdCanvas(228, 96, W.head), x = q.x, bg = col ? (V4 ? '#cccccc' /* (4.0.5's window grey, shot 008) */ : RGB301.grey) : '#fff';
   const vals = () => { const t = keys.reduce((s0, k) => s0 + (p.talloc[k] || 0), 0) || 1; return keys.map(k => Math.round(1000 * (p.talloc[k] || 0) / t)); };
   const draw = () => {
     q.rect(0, 0, 228, 96, bg);
@@ -2850,9 +2850,9 @@ function techBox301() {
       const h = v < 1 ? 0 : vPercBar(v), l = x1 + 7, r = x1 + 22, t = Yb - h;
       if (col) {
         const hue = ((50 - h) * 0x1ba - 0x5655) & 0xffff;
-        q.rect(l, t, r, Yb, css16(hsv2rgb([hue, 0xffff, 0xffff])));
+        q.rect(l, t, r, Yb, css8(hsv2rgb([hue, 0xffff, 0xffff])));
         if (h > 0) {
-          const hi = css16(hsv2rgb([hue, 0x7fff, 0xffff])), lo = css16(hsv2rgb([hue, 0xffff, 0x7fff]));
+          const hi = css8(hsv2rgb([hue, 0x7fff, 0xffff])), lo = css8(hsv2rgb([hue, 0xffff, 0x7fff]));
           q.rect(l - 2, t - 2, l - 1, Yb, hi); q.rect(l - 2, t - 2, r + 2, t - 1, hi); q.rect(l - 1, t - 1, l, Yb, hi); q.rect(l - 1, t - 1, r + 1, t, hi);
           q.rect(r, t, r + 1, Yb, lo); q.rect(r + 1, t - 1, r + 2, Yb, lo);
         }
@@ -2909,10 +2909,11 @@ const STR405 = (id) => { const L = window.HOLANG && HOLANG.mac405En; return (L &
 // down the right edge less 1, as 3.0.1's. (The remake's p.net301 is the +8 the rules keep: equal to HO.projected's net each turn.)
 // (4.0.5's panes in the Mac's own Geneva 9, plain and bold: the bitmap faces the DOS skin carries, js/skins/dos/style.css, at 12 CSS pixels a 9-point
 // line as the battle window's GEN93; the 3.0.1 panes' G9 / G9B fall back to the system's Geneva or Verdana)
-const G9M = "12px 'DOS Geneva 9', Geneva, Verdana, sans-serif", G9MB = "12px 'DOS Geneva 9 Bold', Geneva, Verdana, sans-serif";
+const G9M = "12px 'Mac Geneva 9', Geneva, Verdana, sans-serif", G9MB = "12px 'Mac Geneva 9 Bold', Geneva, Verdana, sans-serif";
 function incomeBox405() {
   const a = A(), g = G(), p = a.me(), S = STR405(6070), col = COL301();
-  const q = qdCanvas(226, 34, S[3] || 'Metal:');
+  // (33 rows: its rule, the window's 165, is the last; the players' and budget's pane starts under it at 166, shot 008's 206)
+  const q = qdCanvas(226, 33, S[3] || 'Metal:');
   if (col) q.rect(0, 0, 226, 32, '#ccc');
   const sh = { shadow: '#fff' };
   const L = (t, v) => q.text(t, 0, v, G9MB, Object.assign({ right: 87 }, sh));
@@ -2927,13 +2928,14 @@ function incomeBox405() {
   R(ch('metal'), 10);
   R(fill(S[9] || '(Int: $%s)', H().niceShort(Math.round(p.oInterest || 0))), 20);
   R(ch('income'), 30);
-  q.hline(0, 227, 32); q.vline(225, 0, 34);
+  q.hline(0, 227, 32); q.vline(225, 0, 33);
   return a.el('section', { class: 'box info12 info301 info405' }, q.c);
 }
 function incomeBox301() {
   if (V4) return incomeBox405();
   const a = A(), g = G(), p = a.me(), rs = H().rules(g), S = STR301(1005), col = COL301();
-  const q = qdCanvas(226, 34, S[3] || 'Reserve Metal:');
+  // (33 rows: its rule, the window's 165, is the last; the players' and budget's pane starts under it at 166, shot 012's 206)
+  const q = qdCanvas(226, 33, S[3] || 'Reserve Metal:');
   if (col) q.rect(0, 0, 226, 32, '#bbb');
   const L = (t, v) => q.text(t, 0, v, G9B, { right: 87 });
   const V = (t, v, color) => q.text(t, 90, v, G9B, { color });
@@ -2948,7 +2950,7 @@ function incomeBox301() {
   R(ch('metal'), 10);
   R(rs.interestRow ? rs.interestRow(Math.round(p.oInterest || 0)) : '', 20);
   R(ch('income'), 30);
-  q.hline(0, 227, 32); q.vline(225, 0, 34);
+  q.hline(0, 227, 32); q.vline(225, 0, 33);
   return a.el('section', { class: 'box info12 info301' }, q.c);
 }
 // QuickDraw's ltGray and dkGray patterns (the QD globals' ltGray at A5-$485c, dkGray at -$4864: 88 22 88 22 ..., 77 DD 77 DD ...), as canvas patterns
@@ -3252,7 +3254,7 @@ function fleetBox301() {
     let t;
     if (r.other) t = rs.otherFleetRow ? (rs.otherFleetRow(langView(g), f) || '') : '';
     else t = H().fleetText(g, f);
-    const style = (r.other || f.newThisTurn ? 'italic ' : '') + (!r.other && f.dest != null ? 'bold ' : '') + (V4 ? (!r.other && f.dest != null ? G9MB : G9M) : '9px Geneva, Verdana, sans-serif');
+    const style = (r.other || f.newThisTurn ? 'italic ' : '') + (!r.other && f.dest != null ? G9MB : G9M); // (the bitmap Geneva 9 and its bold face, no synthetic bold over it; 3.0.1's list too, shot 012)
     q.text(t, 3, top + 8, style, Object.assign({ cond: q.width(t, style) > 214, color: selRow ? (col ? BG : '#fff') : '#000' }, V4 && !selRow ? T4 : null));
     if (!r.other && f.scrap301) { x.fillStyle = orPat(x, GRAY, selRow ? (col ? '#000' : '#fff') : (col ? RGB301.grey : '#fff')); x.fillRect(0, top, 214, 10); }
     x.restore();
@@ -3261,7 +3263,7 @@ function fleetBox301() {
   q.hline(0, 227, Y(89)); q.vline(225, 0, 65);
   q.rect(0, Y(130), 226, Y(133), '#000'); // DrawDragBarRect
   // the scroll bar (an OS control), 214..226 x 89..131: arrows at its ends, the thumb when there is more than fits
-  if (V4 && COLOUR3) scrollBar75s(q, x, 215, Y(89), Y(131), Math.max(0, total - 4), FLT301.top, 1, 108); // (4.0.5's: 216..227 x 129..170 on the screen, shot 008)
+  if (BAR75()) scrollBar75s(q, x, 214, Y(89), Y(131), Math.max(0, total - 4), FLT301.top, 2, 108); // (216..227 x 129..170 on the screen, the last column under the divider: shots 008, 012)
   else {
   q.rect(214, Y(89), 226, Y(130), '#fff'); x.strokeStyle = '#000'; x.lineWidth = 1; x.strokeRect(214.5, Y(89) + 0.5, 11, 41);
   [[Y(89), 1], [Y(119), -1]].forEach(([t0, d]) => { x.strokeRect(214.5, t0 + 0.5, 11, 11); x.beginPath(); const cy = t0 + 6; x.moveTo(217, cy + 2 * d); x.lineTo(220, cy - 2 * d); x.lineTo(223, cy + 2 * d); x.closePath(); x.stroke(); });
@@ -3281,7 +3283,14 @@ function fleetBox301() {
 const CT301 = [[0x1F21, 0xB793, 0x1431], [0xDD6B, 0x08C2, 0x06A2], [0x7FFE, 0, 0], [0x7FFF, 0x8000, 0x7FFF], [0, 0, 0xD400], [0x0500, 0x0500, 0x0500],
   [0x46E3, 0, 0xA53E], [0xFFFF, 0xFFFF, 0xFFFF], [0, 0x64AF, 0x11B0], [0, 0, 0], [0xF2D7, 0x0856, 0x84EC], [0x0FA0, 0x8FA7, 0x12DC], [0x7C00, 0x737E, 0],
   [0xBBBB, 0xBBBB, 0xBBBB], [0x1F21, 0xB793, 0xD400], [0xFFFF, 0x85A6, 0x12CA], [0xFFFF, 0x557A, 0], [0xB1B1, 0x8D8D, 0xD9D9]];
-const css16 = (c) => '#' + c.map(v => Math.max(0, Math.min(255, Math.round(v / 257))).toString(16).padStart(2, '0')).join('');
+// The 8-bit screen's colour (the Mac's standard 256-colour clut 8: the 6 x 6 x 6 cube, ten-step red, green, blue and grey ramps, black) that
+// the Color Manager gives an RGBForeColor: its inverse table at 4 bits a component, each cell the entry nearest the cell's colour. The 3.0.1
+// and 4.0.5 shots (008, 012) were taken on such a screen: the bars' (255,128,231) shows as (255,153,255), (255,178,131) as (255,204,153).
+const CLUT8 = (() => { const o = [], c = [255, 204, 153, 102, 51, 0], r = [238, 221, 187, 170, 136, 119, 85, 68, 34, 17];
+  c.forEach(R => c.forEach(G => c.forEach(B => o.push([R, G, B])))); r.forEach(v => o.push([v, 0, 0])); r.forEach(v => o.push([0, v, 0])); r.forEach(v => o.push([0, 0, v])); r.forEach(v => o.push([v, v, v])); return o; })();
+const css8 = (c) => { const q = c.map(v => 17 * (Math.max(0, Math.min(65535, Math.round(v))) >> 12)); let best = null, bd = 1e9;
+  CLUT8.forEach(e => { const d = (e[0] - q[0]) ** 2 + (e[1] - q[1]) ** 2 + (e[2] - q[2]) ** 2; if (d < bd) { bd = d; best = e; } });
+  return '#' + best.map(v => v.toString(16).padStart(2, '0')).join(''); };
 // the Color Picker's RGB2HSV and HSV2RGB (Pack12 selectors 8 and 7), in SmallFracts (0..65535)
 function rgb2hsv([r, g, b]) { const R = r / 65535, Gc = g / 65535, B = b / 65535, mx = Math.max(R, Gc, B), mn = Math.min(R, Gc, B), d = mx - mn; let h = 0;
   if (d > 0) h = mx === R ? ((Gc - B) / d + 6) % 6 : mx === Gc ? (B - R) / d + 2 : (R - Gc) / d + 4; return [Math.round(h / 6 * 65535) & 0xffff, mx ? Math.round(d / mx * 65535) : 0, Math.round(mx * 65535)]; }
@@ -3311,8 +3320,9 @@ const hPercBar = (pm) => { for (let x = 0; x < 78; x++) if (HLOG[x] >= pm) retur
 //   DoHBarClick: a drag on a bar sets its share (the ruleset's rs.dragShare, the others moved as it says); a click on the heading switches
 //     the scale. ("Sort" is not built.)
 const LOW301 = { pTop: 0, bTop: 0 };
+// (System 7.5's colour bars wherever the panes are on its screen in colour, BAR75: 4.0.5's shot 008 and 3.0.1's shot 012 both show them)
 function scrollBar301(q, x, l, t, b, max, val, oy) { // an OS scroll bar, drawn plainly: arrows at the ends, the grey track and its thumb when it scrolls
-  if (V4 && COLOUR3) return scrollBar75s(q, x, l, t, b, max, val, 1, oy == null ? 206 : oy); // (the canvas's place on the 640 x 480 screen: its dots as the screen's; the players and budget pane's from (1, 206))
+  if (BAR75()) return scrollBar75s(q, x, l, t, b, max, val, 2, oy == null ? 206 : oy); // (the canvas's place on the 640 x 480 screen: its dots as the screen's; the players and budget pane's from (2, 206))
   q.rect(l, t, l + 12, b, '#fff'); x.strokeStyle = '#000'; x.lineWidth = 1; x.strokeRect(l + 0.5, t + 0.5, 11, b - t - 1);
   [[t, 1], [b - 12, -1]].forEach(([t0, d]) => { x.strokeRect(l + 0.5, t0 + 0.5, 11, 11); x.beginPath(); const cy = t0 + 6; x.moveTo(l + 3, cy + 2 * d); x.lineTo(l + 6, cy - 2 * d); x.lineTo(l + 9, cy + 2 * d); x.closePath(); x.stroke(); });
   if (max > 0) { const tr = b - t - 24; x.fillStyle = orPat(x, GRAY, '#000'); x.fillRect(l + 1, t + 12, 10, tr); const ty = t + 12 + Math.round((tr - 8) * val / max); q.rect(l + 1, ty, l + 11, ty + 8, '#fff'); x.strokeRect(l + 0.5, ty + 0.5, 11, 7); }
@@ -3343,10 +3353,10 @@ function lowBox301(B) {
   // map window's foot, eff60c (4.0.5 @120306), so the pane grows with the window: html.mac75)
   const pnl = document.getElementById('panel'), FT = document.documentElement.classList.contains('mac75') && pnl ? Math.max(331, Math.floor(pnl.getBoundingClientRect().height / (MACS.s || 1))) : 331;
   const Y0 = 166, q = qdCanvas(226, FT - 166, ''), x = q.x, Y = (v) => v - Y0, bg = col ? (V4 ? '#ccc' : RGB301.grey) : '#fff'; // (4.0.5's grey: #cccccc, shot 008)
-  // 4.0.5 (Jake's shot 008, at 640 x 480): the players' rect 0..78 with its scroll bar 78..90, 22 pixels a row from 166, the icon at (10, row + 7),
+  // 4.0.5 (Jake's shot 008, at 640 x 480): the players' rect 0..77 with its scroll bar 77..89, 22 pixels a row from 166, the icon at (10, row + 7),
   // the name at (29, row + 19), the check mark (2, row + 15) (4, row + 19) (7, row + 12), every player from the start (2000 shows all seven);
-  // the budget from 90 (DrawBudgetRect @115252: DrawHBarControl at the rect's left - 1)
-  const PW = V4 ? 78 : 67, RH = V4 ? 22 : 18, BL = V4 ? 90 : 79, SH = V4 ? { shadow: '#fff' } : null;
+  // the budget from 89 (DrawBudgetRect @115252: DrawHBarControl at the rect's left - 1)
+  const PW = V4 ? 77 : 67, RH = V4 ? 22 : 18, BL = V4 ? 89 : 79, SH = V4 ? { shadow: '#fff' } : null;
   // DrawIconRect
   q.rect(0, Y(166), PW, Y(FT), bg);
   const prow = V4 ? Math.trunc((FT - 1 - 166) / RH) : Math.trunc((FT - 1 - 167 - 3) / 18);
@@ -3372,7 +3382,7 @@ function lowBox301(B) {
   });
   scrollBar301(q, x, PW, Y(165), Y(FT), Math.max(0, nP - prow), LOW301.pTop);
   // DrawBudgetRect, DrawHBarControl
-  q.rect(BL, Y(166), 214, Y(FT), bg); q.rect(214, Y(V4 ? 166 : 181), 225, Y(FT), bg); if (V4 && col) q.rect(225, Y(166), 226, Y(FT), '#fff');
+  q.rect(BL, Y(166), 214, Y(FT), bg); q.rect(214, Y(V4 ? 166 : 181), 225, Y(FT), bg); if (V4 && col) q.rect(224, Y(166), 225, Y(FT), '#fff');
   const L = BL, x0 = L + 45, sc = a.budgetScale(), log = sc.id === 'log';
   x.font = G9;
   const pc100 = S1[10] || '100%';
@@ -3417,9 +3427,9 @@ function lowBox301(B) {
         else { const bb = bars301(st), T = bb[0], X = bb[1], tc = ratio <= 256 ? CT301[0] : CT301[1]; rgb = [0, 1, 2].map(k => Math.trunc((CT301[4][k] * X + tc[k] * T) / 1000)); }
         hsv = rgb2hsv(rgb);
       }
-      x.fillStyle = css16(rgb); x.fillRect(x0, top, len, bottom - top);
+      x.fillStyle = css8(rgb); x.fillRect(x0, top, len, bottom - top);
       if (len > 0 && !abandoning) {
-        const hi = css16(hsv2rgb([hsv[0], hsv[1] >> 1, hsv[2]])), lo = css16(hsv2rgb([hsv[0], hsv[1], hsv[2] >> 1]));
+        const hi = css8(hsv2rgb([hsv[0], hsv[1] >> 1, hsv[2]])), lo = css8(hsv2rgb([hsv[0], hsv[1], hsv[2] >> 1]));
         q.rect(x0, top - 1, x0 + len + 1, top, hi); q.rect(x0, top - 2, x0 + len + 2, top - 1, hi);
         q.rect(x0, bottom, x0 + len + 1, bottom + 1, lo); q.rect(x0 + len, top, x0 + len + 1, bottom + 1, lo);
         q.rect(x0, bottom + 1, x0 + len + 2, bottom + 2, lo); q.rect(x0 + len + 1, top - 1, x0 + len + 2, bottom + 2, lo);
@@ -3427,7 +3437,7 @@ function lowBox301(B) {
     }
     const name = e.key === 'savings' ? (S5[25] || 'Ships') : e.key === 'tech' ? (S5[24] || 'Tech') : st.name;
     tb.push({ x: x0, y: y + 3, w: 77, h: 13, vert: false, frac: len / 77, label: name });
-    const lc = !col ? '#000' : !st || inc >= 0 ? css16(CT301[5]) : css16(ratio <= 256 ? CT301[1] : CT301[2]);
+    const lc = !col ? '#000' : !st || inc >= 0 ? css8(CT301[5]) : css8(ratio <= 256 ? CT301[1] : CT301[2]);
     const w = q.text(name, 0, y + 14, G9, Object.assign({ right: L + 43, color: lc }, SH));
     if (st && a.UI.sel === st.id) q.rect(L + 43 - w, y + 15, L + 43, y + 16, lc);
     if (abandoning) q.text('Abandoning', L + 48, y + 14, G9, { color: lc });
@@ -3437,14 +3447,14 @@ function lowBox301(B) {
   q.vline(L + 44, y, Y(FT));
   if (V4 && sepY == null) { q.vline(L + 44, y, y + 14); y += 7; q.hline(L + 44, 226, y); sepY = y; }
   q.c.dataset.bars = JSON.stringify(tb); q.c.dataset.w = '226'; q.c.dataset.h = String(FT - 166);
-  if (V4) scrollBar301(q, x, 213, sepY + 1, Y(FT), Math.max(0, slots.length - 2 - (brow - 2)), LOW301.bTop);
+  if (V4) scrollBar301(q, x, 214, sepY + 1, Y(FT), Math.max(0, slots.length - 2 - (brow - 2)), LOW301.bTop);
   else scrollBar301(q, x, 214, Y(181), Y(FT), Math.max(0, slots.length - brow), LOW301.bTop);
   // DoHBarClick: a drag on a bar, a click on the heading; the scroll bars; a click on a colony's name selects it (FollowStarNameClick)
   q.c.style.touchAction = 'none';
   q.c.addEventListener('pointerdown', (ev) => {
     const pt = q.at(ev), v = pt.v + Y0;
     if (pt.h >= PW && pt.h < PW + 12) { LOW301.pTop += v < (165 + FT) / 2 ? -1 : 1; a.renderPanel(); return; }
-    if (pt.h >= (V4 ? 213 : 214) && (!V4 || v > 181 + 35)) { LOW301.bTop += v < (V4 ? (181 + 35 + FT) / 2 : (181 + FT) / 2) ? -1 : 1; a.renderPanel(); return; }
+    if (pt.h >= 214 && (!V4 || v > 181 + 35)) { LOW301.bTop += v < (V4 ? (181 + 35 + FT) / 2 : (181 + FT) / 2) ? -1 : 1; a.renderPanel(); return; }
     if (pt.h < BL) return;
     if (v < 181) { if (pt.h >= x0 && a.flipBarScale) a.flipBarScale(); return; }
     const e = V4 ? (v < 181 + 28 ? slots[Math.floor((v - 181) / 14)] : v >= 181 + 35 ? slots[2 + LOW301.bTop + Math.floor((v - 181 - 35) / 14)] : null) : slots[LOW301.bTop + Math.floor((v - 181) / 14)]; if (!e) return;
@@ -3633,7 +3643,7 @@ NARROW301.addEventListener('change', () => { if (window.HOMAC301 && A() && A().G
 // (DITL 7010: "Passe" at 193, 273, 58 x 20, which skips to the end) says "Bien". A viewer who lost a battle of one round sees
 // nothing of the other side (DrawAllGroups: STR# 1030.11 and .12 at (155, 85) and (155, 100)) and no shots.
 // (the battle window's text in the Mac's own bitmap Chicago 12 and Geneva 9, as the panes: Jake's battle captures; they were the browser's Chicago / Geneva)
-const SYS = "15px 'DOS Chicago 12', Chicago, Charcoal, Geneva, sans-serif", GEN9 = "12px 'DOS Geneva 9', Geneva, Verdana, sans-serif";
+const SYS = "15px 'Mac Chicago 12', Chicago, Charcoal, Geneva, sans-serif", GEN9 = "12px 'Mac Geneva 9', Geneva, Verdana, sans-serif";
 // (3.0.1's battle window in the skins' bitmap Chicago 12 and Geneva 9, the sizes the dialogs use: js/skins/dos/style.css's faces)
 const SYS3 = SYS, GEN93 = GEN9;
 function battleWindow(b, k) {
@@ -4384,7 +4394,7 @@ function afterTurn12(go) {
 if (V3) {
   document.documentElement.classList.add('mac301'); if (V4) document.documentElement.classList.add('mac405');
   // (the battle window's canvas text needs its bitmap faces loaded before its first frame)
-  try { if (document.fonts) { document.fonts.load(SYS3); document.fonts.load(GEN93); if (V4) { document.fonts.load("12px 'DOS Geneva 9 Bold'"); document.fonts.load("12px 'DOS Geneva 9'").then(() => { const a = A(); if (a && a.G) a.renderPanel(); }); } } } catch (e) { /* (an old browser draws with the fallbacks) */ }
+  try { if (document.fonts) { document.fonts.load(SYS3); document.fonts.load(GEN93); if (V4) { document.fonts.load("12px 'Mac Geneva 9 Bold'"); document.fonts.load("12px 'Mac Geneva 9'").then(() => { const a = A(); if (a && a.G) a.renderPanel(); }); } } } catch (e) { /* (an old browser draws with the fallbacks) */ }
   window.HOMAC301 = {
     get ownPanel() { return !!G() && own(); },
     // (the New Game window, for 3.0.1's own rules: its Create New Galaxy dialog over the form)

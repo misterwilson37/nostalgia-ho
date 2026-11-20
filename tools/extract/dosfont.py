@@ -5,6 +5,7 @@ top bit the left pixel). Each lit pixel is a square outline, so the font is exac
     python3 tools/extract/dosfont.py <folder with HO.PRS>      (needs fontTools: pip install fonttools)
 
 Writes assets/skins/dos/fonts/bios8x14.ttf. (The game's menus and dialogs are set in it, js/skins/dos/style.css.)"""
+import sys as _s, os as _o; _s.path.insert(0, _o.path.dirname(_o.path.abspath(__file__))); from fontlsb import fix as lsbfix  # (side-bearings = the ink's left edge: fontlsb.py)
 import os, struct, sys
 from fontTools.fontBuilder import FontBuilder
 from fontTools.pens.ttGlyphPen import TTGlyphPen
@@ -40,5 +41,5 @@ fb.setupNameTable({'familyName': 'DOS Bios 8x14', 'styleName': 'Regular'})
 fb.setupOS2(sTypoAscender=1100, sTypoDescender=-300, usWinAscent=1100, usWinDescent=300)
 fb.setupPost()
 out = os.path.join(ROOT, 'assets', 'skins', 'dos', 'fonts'); os.makedirs(out, exist_ok=True)
-fb.save(os.path.join(out, 'bios8x14.ttf'))
+fb.save(os.path.join(out, 'bios8x14.ttf')); lsbfix(os.path.join(out, 'bios8x14.ttf'))
 print('ok', os.path.getsize(os.path.join(out, 'bios8x14.ttf')))

@@ -3,6 +3,7 @@
 U+2212 minus (the font's own hyphen), U+00D7 multiplication sign and U+2715 (a small X), the solid triangles U+25B2 U+25BC U+25C2 U+25B8 and U+25C0 U+25B6 and U+00BD one half (drawn 8 x 9).
 Writes assets/skins/dos/fonts/extras-{chicago12,geneva9,geneva9bold,bios}.ttf; js/os/pixel-fonts.css and system7.css add them by unicode-range.
 (The fan fonts ChiKareGo2 and FindersKeepers by Giles Booth, CC BY, in the private repo, add only a multiplication sign for these: not used.)   pip install fonttools"""
+import sys as _s, os as _o; _s.path.insert(0, _o.path.dirname(_o.path.abspath(__file__))); from fontlsb import fix as lsbfix  # (side-bearings = the ink's left edge: fontlsb.py)
 import os
 from fontTools.ttLib import TTFont
 from fontTools.fontBuilder import FontBuilder
@@ -41,7 +42,7 @@ def build(name, base, asc, desc, k, xh):  # xh: the font's x-height in pixels, w
     fb = FontBuilder((asc + desc) * U, isTTF=True); fb.setupGlyphOrder(names); fb.setupCharacterMap(cmap); fb.setupGlyf(glyphs); fb.setupHorizontalMetrics(metrics)
     fb.setupHorizontalHeader(ascent=asc * U, descent=-desc * U); fb.setupNameTable({'familyName': name, 'styleName': 'Regular'})
     fb.setupOS2(sTypoAscender=asc * U, sTypoDescender=-desc * U, usWinAscent=asc * U, usWinDescent=desc * U); fb.setupPost()
-    fb.save(os.path.join(D, 'extras-' + name + '.ttf')); print('extras-' + name + '.ttf')
+    fb.save(os.path.join(D, 'extras-' + name + '.ttf')); lsbfix(os.path.join(D, 'extras-' + name + '.ttf')); print('extras-' + name + '.ttf')
 # (name, base font, ascent, descent, triangle size, x-height)
 build('chicago12', 'chicago12.ttf', 12, 3, 3, 7); build('geneva9', 'geneva9.ttf', 10, 2, 3, 5); build('geneva9bold', 'geneva9bold.ttf', 10, 2, 3, 5)
 bf = TTFont(os.path.join(D, 'bios8x14.ttf')); build('bios', 'bios8x14.ttf', bf['hhea'].ascent // U, -bf['hhea'].descent // U, 3, 7)

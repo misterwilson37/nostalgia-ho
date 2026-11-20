@@ -76,3 +76,21 @@ Run `tools/real-play.js --skin=mac12,mac2,mac3,dos --size=desktop,phone-l` after
   Liberation Sans for Geneva (Mac OS 9 look); licences beside the files in `assets/fonts/`. Luxi's licence forbids modification, so its TTFs ship as released.
 - **Mac OS 8 look (and Netscape Mac):** Charcoal, then the Mac's own Chicago 12 bitmap (`"Charcoal Stand-in"`, js/os/macos8.css; ChiKareGo2 is not needed for it). Mac OS 9's smooth Charcoal has no stand-in.
 - The single-file build does not inline these (24 looks would each carry them); a build's looks fall back to system fonts.
+
+## 20 Nov 2026: side-bearings, the Mac's own Chicago and Geneva, spacing
+- **The gap after narrow letters** ("Gal axy", "Wi ndows", "201 0", "$1 00,000", Jake, 20 Nov): every generated font had each glyph's left
+  side-bearing (hmtx lsb) at 0 while its ink started further in, and renderers place a glyph by its lsb, so they pulled the ink left and
+  left the gap after it. `tools/extract/fontlsb.py` sets lsb to the glyph's xMin. Each generator (dosfont, dospfn, macturkish, pixelextras,
+  winfon, macfonts) now calls it after saving, and every shipped pixel font was rewritten with it: bios8x14, chicago12, geneva9(-bold),
+  the turkish- and extras- files, the win31 faces, the Palm faces and the w95 MS Sans Serif.
+- **The Mac skins draw with the Mac's own bitmaps.** `tools/extract/macfonts.py` reads System 7.5.3's Chicago 12 (Fonts:Chicago NFNT 1025) and
+  Geneva 9 (System FONT 393). It places each glyph by the offset/width table (owTLoc's high word in nDescent; the truncated Geneva table
+  padded). The output is `mac-chicago12.ttf`, `mac-geneva9.ttf` and `mac-geneva9bold.ttf`; the bold is QuickDraw's: the glyph drawn twice
+  1 px apart, advance +1, since FOND 3 has no bold 9. These are the families "Mac Chicago 12" and "Mac Geneva 9 (Bold)" in
+  js/skins/mac12/panel.css, and system7.css's Chicago and Geneva aliases. The DOS copies (geneva9.ttf etc.) stay with the DOS skin. The
+  DOS program packs glyphs at the cell's left, and some advances differ (Chicago's 'o' is 8 on the Mac and 7 in the DOS copy). Checked
+  against shots 008 and 194 ("2010", "$100,000") and the 3.0.1 menu bar in shot 012 (every title's width exact).
+- **Spacing:** the `letter-spacing: .58px` and `word-spacing: -1px` that made the DOS copy's Chicago as wide as the program's lines are
+  gone: the real font carries the advances. The menu titles are 15 px apart, as in shot 012.
+- **DOS buttons:** the program's buttons are in its Chicago 12, plain. v20dos-orig-newgame's "Cancel" and v20dos-orig-skills's "OK" match
+  pixel for pixel. The remake had them in the BIOS face, made bold with a 1 px text-shadow.

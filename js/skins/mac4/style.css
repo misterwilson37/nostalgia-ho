@@ -35,9 +35,9 @@
 .tcard .thelp405 { display: block; margin: 10px auto 0; }
 /* the licence lines (shot 001): the band under the rule, 55 rows to the buttons; "Licensed to:" at 2, the signed-in name in red at 76 on the
    first line (Chicago), Sign out small under it; empty with no one signed in */
-#titlescreen .tsplash .lic405 { position: relative; height: 55px; width: 304px; align-self: center; font: 15px 'DOS Chicago 12', Chicago, var(--ui); color: #000; }
+#titlescreen .tsplash .lic405 { position: relative; height: 55px; width: 304px; align-self: center; font: 15px 'Mac Chicago 12', Chicago, var(--ui); color: #000; }
 #titlescreen .tsplash .lic405 > * { visibility: hidden; }
 #titlescreen .tsplash .lic405.on > * { visibility: visible; }
 #titlescreen .tsplash .lic405l { position: absolute; left: 2px; top: 3px; }
 #titlescreen .tsplash .lic405n { position: absolute; left: 80px; top: 3px; right: 2px; color: #d00000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-#titlescreen .tsplash .lic405o { position: absolute; left: 80px; top: 22px; padding: 0 !important; border: 0 !important; background: none !important; box-shadow: none !important; min-width: 0 !important; font: 12px 'DOS Geneva 9', Geneva, var(--ui) !important; color: #555; text-decoration: underline; cursor: pointer; }
+#titlescreen .tsplash .lic405o { position: absolute; left: 80px; top: 22px; padding: 0 !important; border: 0 !important; background: none !important; box-shadow: none !important; min-width: 0 !important; font: 12px 'Mac Geneva 9', Geneva, var(--ui) !important; color: #555; text-decoration: underline; cursor: pointer; }

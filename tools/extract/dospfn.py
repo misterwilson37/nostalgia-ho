@@ -16,6 +16,7 @@ draws its panels in). The format, worked out from the records and checked agains
     python3 tools/extract/dospfn.py <folder with HO.PRS>      (needs fontTools: pip install fonttools)
 
 Writes assets/skins/dos/fonts/geneva9.ttf, geneva9bold.ttf, chicago12.ttf (one square per ink pixel; font-size = the cell height in px: 12 / 12 / 15)."""
+import sys as _s, os as _o; _s.path.insert(0, _o.path.dirname(_o.path.abspath(__file__))); from fontlsb import fix as lsbfix  # (side-bearings = the ink's left edge: fontlsb.py)
 import os, struct, sys
 from fontTools.fontBuilder import FontBuilder
 from fontTools.pens.ttGlyphPen import TTGlyphPen
@@ -52,4 +53,4 @@ for rec, fn, fam, S, rows, stride, dx, r0, gr, asc, *bold in FONTS:
     fb = FontBuilder(gr * U, isTTF=True); fb.setupGlyphOrder(names); fb.setupCharacterMap(cmap); fb.setupGlyf(glyphs); fb.setupHorizontalMetrics(metrics)
     fb.setupHorizontalHeader(ascent=asc * U, descent=-(gr - asc) * U)
     fb.setupNameTable({'familyName': fam, 'styleName': 'Regular'}); fb.setupOS2(sTypoAscender=asc * U, sTypoDescender=-(gr - asc) * U, usWinAscent=asc * U, usWinDescent=(gr - asc) * U); fb.setupPost()
-    fb.save(os.path.join(OUT, fn)); print(fn, os.path.getsize(os.path.join(OUT, fn)))
+    fb.save(os.path.join(OUT, fn)); lsbfix(os.path.join(OUT, fn)); print(fn, os.path.getsize(os.path.join(OUT, fn)))

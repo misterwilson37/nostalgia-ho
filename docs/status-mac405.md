@@ -64,6 +64,23 @@ against. "close" lists what is still off.
 - **New Game:** opens on the skin's own rules (SKIN_RULES, every skin) and has its Create button above the line ("Create", 3.0.1's and
   4.0.5's DITL 6080), so a game starts without scrolling to the remake's choices.
 
+## Pixel alignment against shot 008 (20 Nov, late)
+Every pane now sits on the shot's own pixels: each 20-row strip of the left panel matches best with no shift. What still differs is the
+game itself (another galaxy, other players). Fixed on the way:
+- The title bar canvas used border-box sizing, so its black bottom row squeezed 17 drawn rows into 16, and every pane below sat a row off.
+  The first pane also had its own top line under the title bar's.
+- The pane canvases (226 drawn) were squeezed into 225, which dropped a column partway across every glyph ("Stationed at:"). They now show
+  at their own size and are clipped by the divider at 227, as the program's are. Tech Spending: 228 drawn, 225 shown, clipped the same way.
+- The money pane is 33 rows: the players' and budget pane starts under its rule (the same in 3.0.1, shot 012).
+- The players' pane is 0..77 with its scroll bar 77..89, and the budget runs from 89. The colonies' bar is at 214, the fleets' at 214, the
+  white column at 224. The track dots line up with the screen's (x offset 2).
+- Tech Spending's window grey is #cccccc (3.0.1's stays #bbbbbb).
+- The bars' colours are the 8-bit screen's: the Color Manager's inverse table (4 bits a component) into the standard 256-colour clut, so
+  (255,128,231) shows as (255,153,255) and (255,178,131) as (255,204,153). Both 3.0.1's and 4.0.5's shots show this.
+- 3.0.1 found on the way: its fleet list asked for "9px Geneva" (tiny), so it now uses the bitmap Geneva 9 as the shot does. A moving
+  fleet's bold is the bold face, no longer the browser's synthetic bold over it. Its scroll bars are System 7.5's colour bars, as shot 012
+  shows.
+
 ## Seen in the lost game's shots, not built yet (20 Nov)
 
 - **The turn's progress windows:** done (20 Nov): DLOG 7000's "Processing Year 2010..." for each ten years, then "Seeing What

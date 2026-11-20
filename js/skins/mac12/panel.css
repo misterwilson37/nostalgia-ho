@@ -1,6 +1,22 @@
 /* Spaceward Ho! — the Mac map window's arrangement (1.2, 2.0.1 and 3.0.1: ResetWindows and SetWindowLocations, the same code in the
    three programs): imported by js/skins/mac3/style.css, so every Mac skin built on it has it. The classes are put there only by
    js/skins/mac12/ui.js (panel12 for 1.2 and 2.0.1, panel301 for 3.0.1). */
+/* The Mac's own Chicago 12 and Geneva 9 (tools/extract/macfonts.py, from System 7.5.3's FONT / NFNT resources, each character where
+   its offset puts it: the DOS program's copies pack them at their cells' left, and some are drawn differently), for every Mac skin; the
+   Turkish letters and the extra symbols as for the DOS families (js/os/pixel-fonts.css). Jake, 20 Nov 2026: "201 0" was not the original. */
+@font-face { font-family: "Mac Chicago 12"; src: url("../../../assets/skins/dos/fonts/mac-chicago12.ttf") format("truetype"); font-display: block; }
+@font-face { font-family: "Mac Geneva 9"; src: url("../../../assets/skins/dos/fonts/mac-geneva9.ttf") format("truetype"); font-weight: 400; font-display: block; }
+@font-face { font-family: "Mac Geneva 9"; src: url("../../../assets/skins/dos/fonts/mac-geneva9bold.ttf") format("truetype"); font-weight: 700; font-display: block; }
+@font-face { font-family: "Mac Geneva 9 Bold"; src: url("../../../assets/skins/dos/fonts/mac-geneva9bold.ttf") format("truetype"); font-display: block; }
+@font-face { font-family: "Mac Chicago 12"; src: url("../../../assets/skins/dos/fonts/turkish-chicago12.ttf") format("truetype"); unicode-range: U+011E-011F, U+0130-0131, U+015E-015F; font-display: block; }
+@font-face { font-family: "Mac Geneva 9"; src: url("../../../assets/skins/dos/fonts/turkish-geneva9.ttf") format("truetype"); font-weight: 400; unicode-range: U+011E-011F, U+0130-0131, U+015E-015F; font-display: block; }
+@font-face { font-family: "Mac Geneva 9"; src: url("../../../assets/skins/dos/fonts/turkish-geneva9bold.ttf") format("truetype"); font-weight: 700; unicode-range: U+011E-011F, U+0130-0131, U+015E-015F; font-display: block; }
+@font-face { font-family: "Mac Geneva 9 Bold"; src: url("../../../assets/skins/dos/fonts/turkish-geneva9bold.ttf") format("truetype"); unicode-range: U+011E-011F, U+0130-0131, U+015E-015F; font-display: block; }
+@font-face { font-family: "Mac Chicago 12"; src: url("../../../assets/skins/dos/fonts/extras-chicago12.ttf") format("truetype"); unicode-range: U+2212, U+00BD, U+00D7, U+2715, U+25B2, U+25BC, U+25C0, U+25C2, U+25B6, U+25B8; font-display: block; }
+@font-face { font-family: "Mac Geneva 9"; src: url("../../../assets/skins/dos/fonts/extras-geneva9.ttf") format("truetype"); font-weight: 400; unicode-range: U+2212, U+00BD, U+00D7, U+2715, U+25B2, U+25BC, U+25C0, U+25C2, U+25B6, U+25B8; font-display: block; }
+@font-face { font-family: "Mac Geneva 9"; src: url("../../../assets/skins/dos/fonts/extras-geneva9bold.ttf") format("truetype"); font-weight: 700; unicode-range: U+2212, U+00BD, U+00D7, U+2715, U+25B2, U+25BC, U+25C0, U+25C2, U+25B6, U+25B8; font-display: block; }
+@font-face { font-family: "Mac Geneva 9 Bold"; src: url("../../../assets/skins/dos/fonts/extras-geneva9bold.ttf") format("truetype"); unicode-range: U+2212, U+00BD, U+00D7, U+2715, U+25B2, U+25BC, U+25C0, U+25C2, U+25B6, U+25B8; font-display: block; }
+
 /* the map window's boxes as 1.2 draws them (planet, fleets, totals, players | budget, the Tech Spending window): canvases the panel's width */
 :is(#panel, .p301x) canvas.qd12 { display: block; width: 100%; height: auto; image-rendering: pixelated; }
 :is(#panel, .p301x) .box.planet12, :is(#panel, .p301x) .box.fleets12, :is(#panel, .p301x) .box.info12, :is(#panel, .p301x) .box.tech12 { padding: 0; }
@@ -85,8 +101,8 @@ html.mac301 .tsplash .tbtns #tnew { outline: 3px solid #000; outline-offset: 1px
 html.mac301 .tcard .tskin:not([hidden]) { display: block; margin-top: 12px; }
 
 /* ---- Mac 2.0.1's and 3.0.1's own dialogs (mac12/ui.js: dlog20): items at their DITL rectangles, Chicago-less system look as the other 1.2 dialogs ---- */
-.dl20 { font: 15px/1.2 'DOS Chicago 12', Chicago, Charcoal, Geneva, sans-serif; letter-spacing: .58px; color: #000; background: #fff; } /* (.58px: the program's lines are about 9% wider than this font's, measured on 'Congratulations! You have' in shot104) */ /* (the program's Chicago 12; the DOS skin ships the same face, as a 1500-unit font that is 12 pixels at 15px) */
-.dl20 button { font: 15px/1 'DOS Chicago 12', Chicago, Charcoal, Geneva, sans-serif !important; letter-spacing: .58px; }
+.dl20 { font: 15px/1.2 'Mac Chicago 12', Chicago, Charcoal, Geneva, sans-serif; color: #000; background: #fff; } /* (no letter-spacing: the Mac's own Chicago carries the program's advances; the .58px that stood here made up for the DOS copy's narrower ones) */ /* (the program's Chicago 12; the DOS skin ships the same face, as a 1500-unit font that is 12 pixels at 15px) */
+.dl20 button { font: 15px/1 'Mac Chicago 12', Chicago, Charcoal, Geneva, sans-serif !important; letter-spacing: 0; }
 /* buttons as the program draws them (a 58 x 20 round rect, corner about 5) and the default one's ring: 3 pixels, a pixel apart (shot104, lost027) */
 .dl20 .ok20 { border-radius: 5px !important; }
 .dl20 .ok20.def20 { outline: 3px solid #000; outline-offset: 1px; }
@@ -122,9 +138,9 @@ html.mac301.col20 .win:has(.origdlg) { border: 1px solid #000; border-radius: 0;
   inset 1px 1px 0 0 #ccf, inset 2px 2px 0 0 #bbb, inset 3px 3px 0 0 #669, inset 4px 4px 0 0 #000,
   inset -1px -1px 0 0 #669, inset -2px -2px 0 0 #bbb, inset -3px -3px 0 0 #ccf, inset -4px -4px 0 0 #000; background: #fff; }
 html.mac301.col20 .win:has(.origdlg) .origdlg { margin: 7px; }
-html.mac301 .origdlg { font: 15px/1.2 'DOS Chicago 12', Chicago, Charcoal, Geneva, sans-serif; letter-spacing: .58px; color: #000; background: #fff; }
-html.mac301 .origdlg button, html.mac301 .origdlg select { font: 15px/1 'DOS Chicago 12', Chicago, Charcoal, Geneva, sans-serif !important; letter-spacing: .58px; }
-html.mac301 .origdlg button { border-radius: 5px !important; border-width: 1px !important; min-width: 0; padding: 0; letter-spacing: 0 !important; word-spacing: -1px; white-space: nowrap; }
+html.mac301 .origdlg { font: 15px/1.2 'Mac Chicago 12', Chicago, Charcoal, Geneva, sans-serif; letter-spacing: 0; color: #000; background: #fff; }
+html.mac301 .origdlg button, html.mac301 .origdlg select { font: 15px/1 'Mac Chicago 12', Chicago, Charcoal, Geneva, sans-serif !important; letter-spacing: 0; }
+html.mac301 .origdlg button { border-radius: 5px !important; border-width: 1px !important; min-width: 0; padding: 0; letter-spacing: 0 !important; white-space: nowrap; }
 html.mac301 .origdlg button.default { outline: 3px solid #000; outline-offset: 1px; }
 /* 3.0.1's lists (List of All Fleets: a List Manager list in Chicago 12, the picked row inverted) */
 .lst301 { overflow-y: auto; overflow-x: hidden; background: #fff; }
@@ -137,7 +153,7 @@ html.mac301 .origdlg button.default { outline: 3px solid #000; outline-offset: 1
 .org301 .n301.cond { letter-spacing: -1px; }
 /* 3.0.1's dialogs: this Chicago with no added spacing (as the 2.0.1 skins' end up), a word a pixel closer, and buttons on one line, so the
    DITLs' words fit their rectangles as the program's do (Organize Fleets' heading is 129 wide, Jake's capture 069) */
-html.mac301 .dl20, html.mac301 .dl20 button { letter-spacing: 0 !important; word-spacing: -1px; }
+html.mac301 .dl20, html.mac301 .dl20 button { letter-spacing: 0 !important; }
 html.mac301 .dl20 .ok20 { white-space: nowrap; }
 /* 3.0.1's Build / Design Ships: the type list's rows (the picture over its words), the picked one inverted, a marked one in the grey */
 .types301 .tr301 { padding: 2px 0 1px; text-align: center; cursor: default; }
@@ -155,7 +171,7 @@ html.mac301 .dl20 .ok20 { white-space: nowrap; }
 html.mac301 .win.bw12m .wtitle { display: none; }
 html.mac301 .win.bw12m .wbody { padding: 0; }
 /* 3.0.1's battle window button (DITL 7010): a Mac push button in Chicago, the default ring once it says OK */
-html.mac301 .win .bw12w button.bw12b { container-type: normal; font: 30px/1 'DOS Chicago 12', Chicago, Charcoal, Geneva, sans-serif !important; background: #fff !important; color: #000 !important; border: 1px solid #000 !important; border-radius: 5px !important; box-shadow: none !important; }
+html.mac301 .win .bw12w button.bw12b { container-type: normal; font: 30px/1 'Mac Chicago 12', Chicago, Charcoal, Geneva, sans-serif !important; background: #fff !important; color: #000 !important; border: 1px solid #000 !important; border-radius: 5px !important; box-shadow: none !important; }
 html.mac301 .win .bw12w button.bw12b.done { outline: 6px solid #fff; outline-offset: 2px; } /* (the default ring, white on the black window, at twice the size) */
 @media (max-width: 900px) { html.mac301 .win .bw12w button.bw12b { font-size: 3.4vw !important; } }
 /* (the Mac's screen made big, html.macscale: the window is zoomed with it, so it is the program's 445 pixels, as every other window; any page:
@@ -175,7 +191,7 @@ html.macscale.mac301 .win .bw12w button.bw12b.done { outline-width: 3px; outline
 .ct6010 .dbar12 canvas { display: block; }
 .ct6010 input[type=text] { box-sizing: border-box; font: inherit; padding: 0 3px; border: 1px solid #000; border-radius: 0; background: #fff; color: #000; outline: none; }
 .ct6010 select.pop12 { appearance: none; -webkit-appearance: none; box-sizing: border-box; border: 1px solid #000; border-radius: 0; box-shadow: 1px 1px 0 #000; padding: 0 22px 0 14px;
-  font: 15px/1 'DOS Chicago 12', Chicago, Charcoal, Geneva, sans-serif; letter-spacing: .58px; color: #000; cursor: default;
+  font: 15px/1 'Mac Chicago 12', Chicago, Charcoal, Geneva, sans-serif; letter-spacing: 0; color: #000; cursor: default;
   background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='6' shape-rendering='crispEdges'%3E%3Cpath d='M0 0h11L5.5 6z'/%3E%3C/svg%3E") no-repeat right 6px center; }
 /* the budget bars' box scrolls with the wheel, never with the browser's own scroll bar (it showed under the bars on a Mac set to always show them) */
 .nosb12 { scrollbar-width: none; }
@@ -192,7 +208,7 @@ html.macscale.mac301 .win .bw12w button.bw12b.done { outline-width: 3px; outline
 :is(#panel, .p301x) canvas.tbar12 { display: block; width: 100%; height: auto; image-rendering: pixelated; }
 html:not(.mac301lay) :is(#panel, .p301x) .box.tech12, html:not(.mac301lay) :is(#panel, .p301x) .rep12box { border: 1px solid #000; border-radius: 0; box-shadow: 1px 1px 0 #000; }
 html:not(.mac301lay) :is(#panel, .p301x) .rep12box .rep12body { position: relative; height: 96px; }
-html:not(.mac301lay) :is(#panel, .p301x) .rep12box ul.rep12 { position: absolute; left: 0; top: 0; right: 16px; height: 96px; font: 12px/11px 'DOS Geneva 9', Geneva, Verdana, sans-serif; }
+html:not(.mac301lay) :is(#panel, .p301x) .rep12box ul.rep12 { position: absolute; left: 0; top: 0; right: 16px; height: 96px; font: 12px/11px 'Mac Geneva 9', Geneva, Verdana, sans-serif; }
 html:not(.mac301lay) :is(#panel, .p301x) .rep12box ul.rep12 li { gap: 3px; min-height: 32px; }
 html:not(.mac301lay) :is(#panel, .p301x) .rep12box ul.rep12 li .rt { padding-top: 0; }
 html:not(.mac301lay) :is(#panel, .p301x) .rep12box .rbar12 { position: absolute; right: 0; top: 0; width: 16px; line-height: 0; touch-action: none; }
@@ -202,7 +218,7 @@ html:not(.mac301lay) :is(#panel, .p301x) .rep12box canvas.grow12 { position: abs
 .ct6010 input[type=text]::selection { background: #000; color: #fff; }
 /* Organize Ships' piles (organize: DRAWORGFLEETS): the count at the cell's left, the picture, the chosen pile inverted, the dotted outline of a drag */
 .org12 .opile { display: flex; align-items: flex-end; gap: 0; cursor: default; touch-action: none; user-select: none; }
-.org12 .opile .ocount { width: 14px; padding-left: 0; margin-left: -12px; font: 15px/1 'DOS Chicago 12', Chicago, sans-serif; text-align: left; }
+.org12 .opile .ocount { width: 14px; padding-left: 0; margin-left: -12px; font: 15px/1 'Mac Chicago 12', Chicago, sans-serif; text-align: left; }
 .org12 .opile img { display: block; height: 40px; width: auto; image-rendering: pixelated; }
 .org12 .opile.sel { background: #000; } .org12 .opile.sel img { filter: invert(1); }
 .org12 .oghost { border: 1px dotted #000; pointer-events: none; box-sizing: border-box; }
@@ -210,7 +226,7 @@ html:not(.mac301lay) :is(#panel, .p301x) .rep12box canvas.grow12 { position: abs
 .win.bw12m .wtitle { display: none; }
 .win.bw12m .wbody { padding: 0; }
 .win.bw12m { border: 1px solid #000; border-radius: 0; box-shadow: none; padding: 0; background: #000; }
-.win .bw12w button.bw12b { container-type: normal; font: 30px/1 'DOS Chicago 12', Chicago, Charcoal, Geneva, sans-serif !important; background: #fff !important; color: #000 !important; border: 1px solid #000 !important; border-radius: 5px !important; box-shadow: none !important; }
+.win .bw12w button.bw12b { container-type: normal; font: 30px/1 'Mac Chicago 12', Chicago, Charcoal, Geneva, sans-serif !important; background: #fff !important; color: #000 !important; border: 1px solid #000 !important; border-radius: 5px !important; box-shadow: none !important; }
 .win .bw12w button.bw12b.done { outline: 6px solid #fff; outline-offset: 2px; }
 @media (max-width: 900px) { .win .bw12w button.bw12b { font-size: 3.4vw !important; } }
 /* (with the Mac's screen zoomed, html.macscale, the window is 445 CSS pixels wide: the button's Chicago at its own 15, the ring 3) */
@@ -218,7 +234,10 @@ html.macscale .win .bw12w button.bw12b { font-size: 15px !important; }
 html.macscale .win .bw12w button.bw12b.done { outline-width: 3px; outline-offset: 1px; }
 /* the menu bar and menus in the Mac's own bitmap Chicago 12 (the DOS program's copy, as the dialogs and panes), in the Mac skins' System 6 and
    System 7 looks: the same pixels as the game's windows, as on the Mac itself (Jake, 19 Nov); the bitmap is Chicago's own weight, so no bold */
-html.macfam:is(.os-system6, .os-system7) :is(#menubar, #menubar .logo, #menubar #title, .mbtn, .dropdown button) { font: 15px/1 'DOS Chicago 12', Chicago, Charcoal, Geneva, sans-serif; font-weight: normal; font-synthesis: none; letter-spacing: .58px; -webkit-font-smoothing: none; }
+html.macfam:is(.os-system6, .os-system7) :is(#menubar, #menubar .logo, #menubar #title, .mbtn, .dropdown button) { font: 15px/1 'Mac Chicago 12', Chicago, Charcoal, Geneva, sans-serif; font-weight: normal; font-synthesis: none; letter-spacing: 0; -webkit-font-smoothing: none; }
+/* (the menu titles' text 15 pixels apart, the System's spacing: 3.0.1's shot 012, File 43-63, Edit from 79) */
+html.macfam:is(.os-system6, .os-system7) #menubar { gap: 1px; }
+html.macfam:is(.os-system6, .os-system7) #menubar .mbtn { padding-left: 6px; padding-right: 6px; }
 html.macfam:is(.os-system6, .os-system7) .dropdown { width: max-content; min-width: 0; max-width: none; }
 html.macfam:is(.os-system6, .os-system7) .dropdown button { white-space: nowrap; }
 /* 3.0.1 and 4.0.5 as the original's 640 x 480 System 7.5 screen (html.mac75: js/skins/mac12/ui.js frame75), measured in Jake's 4.0.5 shot 008
@@ -230,10 +249,15 @@ html.macfam:is(.os-system6, .os-system7) .dropdown button { white-space: nowrap;
 html.mac75 { --m: calc(var(--mac, 1) * 1px); }
 html.mac301lay.mac75 #main { display: block; position: relative; overflow: hidden; background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='2' shape-rendering='crispEdges'%3E%3Crect width='4' height='2' fill='%23fff'/%3E%3Crect width='1' height='1'/%3E%3Crect x='2' y='1' width='1' height='1'/%3E%3C/svg%3E") 0 0 / calc(4 * var(--m)) calc(2 * var(--m)); image-rendering: pixelated; }
 html.mac75 #mapwin301 { position: absolute; left: calc(1 * var(--m)); top: calc(1 * var(--m)); right: calc(1 * var(--m)); bottom: calc(109 * var(--m)); box-sizing: border-box; border: var(--m) solid #000; box-shadow: var(--m) var(--m) 0 #000; background: #000; }
-html.mac75 #mapwin301 canvas.tb75 { display: block; width: 100%; height: calc(17 * var(--m)); border-bottom: var(--m) solid #000; image-rendering: pixelated; }
+html.mac75 #mapwin301 canvas.tb75 { display: block; box-sizing: content-box; width: 100%; height: calc(17 * var(--m)); border-bottom: var(--m) solid #000; image-rendering: pixelated; }
 html.mac301lay.mac75 #panel { position: absolute; left: 1px; top: 20px; width: 226px; bottom: 110px; padding: 0; margin: 0; overflow: hidden; border: 0; background: #000; }
 /* (the map's scroll bars share their outer frames with the window's: the map's box runs from the divider's second column, 228, and the title
    bar's black row, 39, to the frame's 638 and 370) */
+/* (the title bar's black row is the panes' top line: the first pane starts below it, at 40, as shot 008) */
+html.mac301lay.mac75 #panel .box.planet301 { border-top: 0; }
+/* (each pane draws 226 wide from the frame's next column, 2; the divider, 227, covers its last: the canvases at their own size, clipped, never
+   squeezed into the 225 left them, which dropped a column of every glyph: shot 008's "Stationed at:") */
+html.mac301lay.mac75 #panel canvas.qd12 { width: 226px; height: auto; }
 html.mac301lay.mac75 #mapwrap { position: absolute; left: calc(228 * var(--m)); top: calc(19 * var(--m)); right: calc(1 * var(--m)); bottom: calc(109 * var(--m)); }
 html.mac301lay.mac75 #msg { left: 4px; }
 html.mac75 .mapcorner12 canvas { display: block; width: 16px; height: 16px; image-rendering: pixelated; }
@@ -241,9 +265,11 @@ html.mac75 .mapcorner12:has(canvas) { border: 0; }
 html.mac301lay.mac75 #tech301, html.mac301lay.mac75 #rep301 { position: absolute; bottom: 1px; height: 108px; box-sizing: border-box; border: 1px solid #000; box-shadow: 1px 1px 0 #000; padding: 0; overflow: hidden; }
 html.mac301lay.mac75 #tech301 { left: 1px; width: 227px; background: #ccc; }
 html.mac301lay.mac75 #rep301 { right: 1px; width: 252px; background: #fff; }
-html.mac75 canvas.wd75 { display: block; width: 100%; height: 9px; border-bottom: 1px solid #000; image-rendering: pixelated; }
+html.mac75 canvas.wd75 { display: block; box-sizing: content-box; width: 100%; height: 9px; border-bottom: 1px solid #000; image-rendering: pixelated; }
 html.mac301lay.mac75 #rep301 .rep12box { position: absolute; top: 10px; left: 0; right: 0; bottom: 0; width: auto; border: 0; }
 html.mac301lay.mac75 #tech301 .box { margin: 0; border: 0; box-shadow: none; }
+/* (the window draws 228 wide, UpdateTechWin's rect, and the windoid shows 225 of it: the canvas at its own size, clipped, never squeezed; shot 008) */
+html.mac301lay.mac75 #tech301 canvas.qd12 { width: 228px; height: 96px; }
 html.mac75 #menubar #title { display: none; }
 /* 4.0.5's clock (DrawTimeClock @115af2): GrowMapWin puts its region at the map's top left + 1, 61 x 62; always there while the turn is open */
 html.mac75 #clock405 { position: absolute; left: 2px; top: 2px; width: 60px; height: 61px; z-index: 7; padding: 0; margin: 0; border: 0; background: none; cursor: pointer; }
@@ -254,11 +280,11 @@ html.mac75.mac405 #msg .clock { display: none; }
    12 CSS pixels, 10-pixel lines) from (50, 6) to the right edge less 8, "more…" at (50, the foot less 5) */
 html.mac405 #msg .card.bub301 > img.icon, html.mac405 #msg .card.bub301 > .ric301 { left: 12px; top: 12px; }
 html.mac405 #msg .card.bub301 .mtext { left: 50px; top: 6px; right: 8px; }
-html.mac405 #msg .card.bub301 .mtext p { font: 12px/10px 'DOS Geneva 9', Geneva, sans-serif; }
-html.mac405 #msg .card.bub301 .count { left: 50px; bottom: 3px; font: 12px/10px 'DOS Geneva 9', Geneva, sans-serif; }
+html.mac405 #msg .card.bub301 .mtext p { font: 12px/10px 'Mac Geneva 9', Geneva, sans-serif; }
+html.mac405 #msg .card.bub301 .count { left: 50px; bottom: 3px; font: 12px/10px 'Mac Geneva 9', Geneva, sans-serif; }
 /* 4.0.5's Report Window (UpdateReportWin @15039c, DrawMessage @150616): 32-row reports, the icon at the row's left, the sentence from 35,
    Geneva 9 on 10-pixel lines; its scroll bar at the right (16 wide) */
-html.mac301lay.mac75 #rep301 ul.rep12 { position: absolute; left: 0; top: 0; right: 16px; bottom: 0; height: auto; font: 12px/10px 'DOS Geneva 9', Geneva, sans-serif; background: #fff; }
+html.mac301lay.mac75 #rep301 ul.rep12 { position: absolute; left: 0; top: 0; right: 16px; bottom: 0; height: auto; font: 12px/10px 'Mac Geneva 9', Geneva, sans-serif; background: #fff; }
 html.mac301lay.mac75 #rep301 ul.rep12 li { gap: 3px; height: 32px; min-height: 32px; overflow: hidden; align-items: flex-start; }
 html.mac301lay.mac75 #rep301 ul.rep12 li .rt { padding-top: 0; }
 html.mac301lay.mac75 #rep301 .rep12box .rbar12 { position: absolute; right: -1px; top: -1px; width: 16px; line-height: 0; touch-action: none; }

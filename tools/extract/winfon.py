@@ -10,6 +10,7 @@ the same fonts with those six letters at their Windows-1254 places), so Turkish 
     pip install fonttools; pip install --no-deps monobit
 
 Writes assets/skins/w95/fonts/mssansserif8[-bold].ttf (Windows 95's) and assets/skins/dos/fonts/win31-{mssansserif8,mssansserif8-bold,system,fixedsys}.ttf."""
+import sys as _s, os as _o; _s.path.insert(0, _o.path.dirname(_o.path.abspath(__file__))); from fontlsb import fix as lsbfix  # (side-bearings = the ink's left edge: fontlsb.py)
 import os, sys
 import monobit
 from fontTools.fontBuilder import FontBuilder
@@ -50,7 +51,7 @@ def save(path, fam, face, bold, trface=None):
     fb = FontBuilder((asc + desc) * U, isTTF=True); fb.setupGlyphOrder(names); fb.setupCharacterMap(cmap); fb.setupGlyf(glyphs); fb.setupHorizontalMetrics(metrics)
     fb.setupHorizontalHeader(ascent=asc * U, descent=-desc * U)
     fb.setupNameTable({'familyName': fam, 'styleName': 'Bold' if bold else 'Regular'}); fb.setupOS2(sTypoAscender=asc * U, sTypoDescender=-desc * U, usWinAscent=asc * U, usWinDescent=desc * U); fb.setupPost()
-    os.makedirs(os.path.dirname(path), exist_ok=True); fb.save(path); print(os.path.relpath(path, ROOT), os.path.getsize(path), 'cell', asc + desc)
+    os.makedirs(os.path.dirname(path), exist_ok=True); fb.save(path); lsbfix(path); print(os.path.relpath(path, ROOT), os.path.getsize(path), 'cell', asc + desc)
 W95 = os.path.join(ROOT, 'assets', 'skins', 'w95', 'fonts'); DOS = os.path.join(ROOT, 'assets', 'skins', 'dos', 'fonts')
 t = lambda fon, pt: load("win31-turkish-fon/" + fon, pt)
 s95 = load('win95-fon/sserife.fon', 8); s31 = load('win31-fon/sserife.fon', 8)
@@ -94,4 +95,4 @@ if len(sys.argv) > 3:
         pen = TTGlyphPen(None); glyphs['.notdef'] = pen.glyph(); metrics['.notdef'] = (6 * U, 0)
         fb = FontBuilder((asc + desc) * U, isTTF=True); fb.setupGlyphOrder(names); fb.setupCharacterMap(cmap); fb.setupGlyf(glyphs); fb.setupHorizontalMetrics(metrics)
         fb.setupHorizontalHeader(ascent=asc * U, descent=-desc * U); fb.setupNameTable({'familyName': fam, 'styleName': 'Regular'})
-        fb.setupOS2(sTypoAscender=asc * U, sTypoDescender=-desc * U, usWinAscent=asc * U, usWinDescent=desc * U); fb.setupPost(); fb.save(os.path.join(PALM, fn)); print(fn, os.path.getsize(os.path.join(PALM, fn)))
+        fb.setupOS2(sTypoAscender=asc * U, sTypoDescender=-desc * U, usWinAscent=asc * U, usWinDescent=desc * U); fb.setupPost(); fb.save(os.path.join(PALM, fn)); lsbfix(os.path.join(PALM, fn)); print(fn, os.path.getsize(os.path.join(PALM, fn)))

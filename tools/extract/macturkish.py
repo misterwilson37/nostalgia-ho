@@ -7,6 +7,7 @@ js/os/pixel-fonts.css and system7.css add them to the families with unicode-rang
 
     python3 tools/extract/macturkish.py <System Tools.img of the 6.0.3 Turkish disk, or any Turkish HFS image with a System file>
     (needs fonttools, machfs, macresources: pip install fonttools machfs macresources)"""
+import sys as _s, os as _o; _s.path.insert(0, _o.path.dirname(_o.path.abspath(__file__))); from fontlsb import fix as lsbfix  # (side-bearings = the ink's left edge: fontlsb.py)
 import os, struct, sys
 import machfs, macresources
 from fontTools.fontBuilder import FontBuilder
@@ -53,4 +54,4 @@ for fn, fam, rid, bold in (('turkish-chicago12.ttf', 'DOS Chicago 12 Turkish', 1
     fb = FontBuilder(h * U, isTTF=True); fb.setupGlyphOrder(names); fb.setupCharacterMap(cmap); fb.setupGlyf(glyphs); fb.setupHorizontalMetrics(metrics)
     fb.setupHorizontalHeader(ascent=asc * U, descent=-(h - asc) * U)
     fb.setupNameTable({'familyName': fam, 'styleName': 'Regular'}); fb.setupOS2(sTypoAscender=asc * U, sTypoDescender=-(h - asc) * U, usWinAscent=asc * U, usWinDescent=(h - asc) * U); fb.setupPost()
-    fb.save(os.path.join(OUT, fn)); print(fn, os.path.getsize(os.path.join(OUT, fn)))
+    fb.save(os.path.join(OUT, fn)); lsbfix(os.path.join(OUT, fn)); print(fn, os.path.getsize(os.path.join(OUT, fn)))
