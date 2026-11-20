@@ -138,7 +138,7 @@ battle window (181843 onward). A draw-order fault of the port (GUESS: the iOS bu
 - Patch: the android skin draws its windows above the panel and map lines, always. (Unpatched could keep the
   look as released; Jake to decide whether "as released" should reproduce this.)
 
-### A2. Battle windows taller than the screen (SEEN 182047, 182310, 182316, 183017)
+### A2. Battle windows taller than the screen (SEEN 182047, 182310, 182316, 183017; not tested on iOS)
 
 With many groups on one side the window grows past the screen: the title, the close X and the round line go
 off the top/bottom (182310 shows four dead groups stacked down the right, no X), so Back is the only way out.
@@ -159,6 +159,37 @@ group 183610). Android's timing and drawing are in the iOS decompile (`CBattleSt
 
 - 181523: the message history slid out over the panel.
 - 182211, 182244: the planet line is just "10" / "90" (the people left), not "x/y".
+
+## iOS 1.2.9 (the iPad app on Jake's Mac): the control (20 Nov)
+
+Jake played iOS 1.2.9 on his Mac (Apple Silicon runs the iPad app; same program as on an iPad), 379 shots:
+`nostalgia-ho-sources/audit/ios-1.2.9/captures-mac/`, numbered by time in `captures-mac-ORDER.txt` (cited
+here as i001-i379). Jake: **scrapping works, splitting fleets works, battles work, no see-through windows**;
+he never had enough groups in one battle to test A2.
+
+What the shots settle:
+
+- **A1 is Android's own fault.** Every iOS window (Radical Research i007, Dip Into Savings i009, Auto Play
+  i010, Armageddon i011, Give i012, Scrap i013/i234, Preferences i014, Build i020, Evacuate i158, battles)
+  is drawn cleanly above the panel and the map lines. So the patch can fix Android's draw order without
+  changing "the game as designed".
+- **iOS Build (i020) fills its numbers**: Satellite "Stopper", Dev $8,000, Pro $2,000, Metal 666, "0/0 In
+  Service", totals and savings. No placeholder state, unlike Mac M1. Its window is a different one (the
+  tabbed phone layout), so this says M1 is in the Mac window's code, not in the shared rules.
+- **Scrapping (M3):** iOS has Scrap Ship Types (i013, i234) **and a Scrap button on the fleet window**
+  ("Tap the ship you wish to move": Scrap, Group, Split, New Fleet, i339), which Mac Group Fleets lacks.
+  Jake says it worked. Since the rule core is shared, the Mac failure is most likely in the Mac's Scrap Ship
+  Types / Dismantle window code or how its mark is passed to the End Turn, not in the dismantling rule.
+  No shot shows the next turn's "dismantled for %s metal" report; not needed unless the code is unclear.
+- **Battle animation (A4): fully covered.** Whole battles shot near frame by frame: Kathoon 2180 (i023-i034),
+  Krikkit 2160 (i035-i048), Spica 2280 rounds 2-7 (i061-i108), Ferenginar 2380 (i124-i144), Arrakis 2430
+  rounds 1-8 (i159-i228), Shadow 2660 and 2710 (i236-i324). They show the beam as a thin line from shooter
+  to target, the starburst on the target, the "x/y" planet count dropping hit by hit, "one dead ..." and the
+  winner's line. Enough to check `CBattleStagePhone` (including the encrypted page) against the real thing.
+- End of game and Armageddon: conquest (i341), Armageddon and its "Are you sure" (i342, i344), the novas
+  (i345-i378) and the message log (i235, i379).
+- Fleet labels on the map with fuel (i005, i022: "1 Col (2/2)", "1 Sat (4/4)" with "Fuel: n"), the model
+  for M5.
 
 ## What I'd like from Jake
 
