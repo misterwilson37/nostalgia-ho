@@ -51,6 +51,7 @@ root.HOUI.add([
 ['New Game', 'Nouveau Jeu', 'Neues Spiel', 'Yeni Oyn', 'Nueva partida', { fr: 'iOS', de: 'Amiga', tr: 'iOS' }, {tr: 'Yeni Oyun'}],
 ['Open Game', 'Ouvrir une partie', 'Spiel öffnen', 'Oyun Aç', 'Abrir partida', { de: 'Amiga' }],
 ['Import a Game…', 'Importer une partie…', 'Spiel importieren…', 'Oyun İçe Aktar…', 'Importar una partida…'],
+['Import…', 'Importer…', 'Importieren…', 'İçe aktar…', 'Importar…'],
 // ---------- the menus ----------
 ['Game', 'Partie', 'Spiel', 'Oyun', 'Partida'],
 ['Ships', 'Vaisseaux', 'Schiffe', 'Gemiler', 'Naves', { de: 'Amiga' }],

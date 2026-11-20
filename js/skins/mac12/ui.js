@@ -2891,7 +2891,11 @@ function fleetBox301() {
   FLT301.top = Math.max(0, Math.min(FLT301.top, total - 4));
   // RecalcFleetsAtNewStar (3.0.1 @15078c, 4.0.5 @110644, the same start): the selected fleet is dropped when it isn't at the star, and the
   // first of yours there becomes the selected one (Jake's 4.0.5 shots 008, 027, 065: the star's first fleet highlighted)
-  if (here.length && !here.some(f => f.id === a.UI.selFleet)) a.UI.selFleet = here[0].id;
+  // (the patch's firstShip, Jake 20 Nov 2026: a ship that can move first, Scout, Fighter, Dreadnought, Tanker, Colony Ship, then the rest,
+  // the satellites last; ties keep the list's order)
+  const SHIP_FIRST = { scout: 0, fighter: 1, dread: 2, tanker: 3, colony: 4, bio: 5, decoy: 6 };
+  const firstOf = (list) => { if (!H().fixed(g, 'firstShip')) return list[0]; const k = (f) => { if (f.sat) return 99; const d = H().fleetDesigns(g, f)[0]; return d && d.type === 'satellite' ? 99 : d && SHIP_FIRST[d.type] != null ? SHIP_FIRST[d.type] : 50; }; return list.map((f, i) => [f, i]).sort((p, q) => k(p[0]) - k(q[0]) || p[1] - q[1])[0][0]; };
+  if (here.length && !here.some(f => f.id === a.UI.selFleet)) a.UI.selFleet = firstOf(here).id;
   const sel = here.find(f => f.id === a.UI.selFleet);
   // DrawSelectedFleetInfo
   q.rect(1, Y(68), 225, Y(89), BG);
@@ -2999,14 +3003,17 @@ function scrollBar75s(q, x, l, t, b, max, val, ox, oy) {
 }
 function lowBox301(B) {
   const a = A(), g = G(), p = a.me(), rs = H().rules(g), col = COL301(), S5 = STR301(1005), S1 = STR301(1001);
-  const Y0 = 166, q = qdCanvas(226, 165, ''), x = q.x, Y = (v) => v - Y0, bg = col ? (V4 ? '#ccc' : RGB301.grey) : '#fff'; // (4.0.5's grey: #cccccc, shot 008)
+  // (the window's foot: 331 on the 640 x 480 screen; on a taller one GrowMapWin runs the players' and budget's rects and scroll bars to the
+  // map window's foot, eff60c (4.0.5 @120306), so the pane grows with the window: html.mac75)
+  const pnl = document.getElementById('panel'), FT = document.documentElement.classList.contains('mac75') && pnl ? Math.max(331, Math.floor(pnl.getBoundingClientRect().height / (MACS.s || 1))) : 331;
+  const Y0 = 166, q = qdCanvas(226, FT - 166, ''), x = q.x, Y = (v) => v - Y0, bg = col ? (V4 ? '#ccc' : RGB301.grey) : '#fff'; // (4.0.5's grey: #cccccc, shot 008)
   // 4.0.5 (Jake's shot 008, at 640 x 480): the players' rect 0..78 with its scroll bar 78..90, 22 pixels a row from 166, the icon at (10, row + 7),
   // the name at (29, row + 19), the check mark (2, row + 15) (4, row + 19) (7, row + 12), every player from the start (2000 shows all seven);
   // the budget from 90 (DrawBudgetRect @115252: DrawHBarControl at the rect's left - 1)
   const PW = V4 ? 78 : 67, RH = V4 ? 22 : 18, BL = V4 ? 90 : 79, SH = V4 ? { shadow: '#fff' } : null;
   // DrawIconRect
-  q.rect(0, Y(166), PW, Y(331), bg);
-  const prow = V4 ? Math.trunc((330 - 166) / RH) : Math.trunc((330 - 167 - 3) / 18);
+  q.rect(0, Y(166), PW, Y(FT), bg);
+  const prow = V4 ? Math.trunc((FT - 1 - 166) / RH) : Math.trunc((FT - 1 - 167 - 3) / 18);
   // (the remake's faces are picked from the twenty, not numbered 0 to n - 1 as 3.0.1's are: the order is the players sorted by face, a player with
   // none, the human, after them)
   const ranked = g.players.map((pl, i) => i).sort((i, j) => ((g.players[i].face ?? 99) - (g.players[j].face ?? 99)) || i - j);
@@ -3027,9 +3034,9 @@ function lowBox301(B) {
       else { x.strokeStyle = '#000'; x.beginPath(); x.moveTo(1.5, top + 11.5); x.lineTo(3.5, top + 15.5); x.lineTo(7.5, top + 7.5); x.stroke(); }
     }
   });
-  scrollBar301(q, x, PW, Y(165), Y(331), Math.max(0, nP - prow), LOW301.pTop);
+  scrollBar301(q, x, PW, Y(165), Y(FT), Math.max(0, nP - prow), LOW301.pTop);
   // DrawBudgetRect, DrawHBarControl
-  q.rect(BL, Y(166), 214, Y(331), bg); q.rect(214, Y(V4 ? 166 : 181), 225, Y(331), bg); if (V4 && col) q.rect(225, Y(166), 226, Y(331), '#fff');
+  q.rect(BL, Y(166), 214, Y(FT), bg); q.rect(214, Y(V4 ? 166 : 181), 225, Y(FT), bg); if (V4 && col) q.rect(225, Y(166), 226, Y(FT), '#fff');
   const L = BL, x0 = L + 45, sc = a.budgetScale(), log = sc.id === 'log';
   x.font = G9;
   const pc100 = S1[10] || '100%';
@@ -3044,7 +3051,7 @@ function lowBox301(B) {
     q.text(log ? (S5[22] || 'Log') : (S5[23] || 'Linear'), log ? L + 74 : L + 68, Y(178));
   }
   for (let k = 1; k <= 10; k++) { const tx = x0 + (log ? hPercBar(100 * k) : Math.trunc(77 * k / 10)); q.vline(tx, Y(179), Y(181)); }
-  const ents = B.ents || [], brow = Math.trunc((330 - 167 - 15) / 14);
+  const ents = B.ents || [], brow = Math.trunc((FT - 1 - 167 - 15) / 14);
   // 3.0.1's slots: Ships first, then Tech, then the colonies
   const slots = ents.filter(e => e.key === 'savings').concat(ents.filter(e => e.key === 'tech'), ents.filter(e => e.star != null));
   LOW301.bTop = Math.max(0, Math.min(LOW301.bTop, slots.length - brow));
@@ -3091,17 +3098,17 @@ function lowBox301(B) {
     else if (st) { const bb = bars301(st); if (bb[0] === -1 && bb[1] === -1) q.text('$' + H().niceNum(Math.round(inc)), L + 48, y + 14, G9, { color: lc }); }
     y += 14;
   });
-  q.vline(L + 44, y, Y(331));
+  q.vline(L + 44, y, Y(FT));
   if (V4 && sepY == null) { q.vline(L + 44, y, y + 14); y += 7; q.hline(L + 44, 226, y); sepY = y; }
-  q.c.dataset.bars = JSON.stringify(tb); q.c.dataset.w = '226'; q.c.dataset.h = '165';
-  if (V4) scrollBar301(q, x, 213, sepY + 1, Y(331), Math.max(0, slots.length - 2 - (brow - 2)), LOW301.bTop);
-  else scrollBar301(q, x, 214, Y(181), Y(331), Math.max(0, slots.length - brow), LOW301.bTop);
+  q.c.dataset.bars = JSON.stringify(tb); q.c.dataset.w = '226'; q.c.dataset.h = String(FT - 166);
+  if (V4) scrollBar301(q, x, 213, sepY + 1, Y(FT), Math.max(0, slots.length - 2 - (brow - 2)), LOW301.bTop);
+  else scrollBar301(q, x, 214, Y(181), Y(FT), Math.max(0, slots.length - brow), LOW301.bTop);
   // DoHBarClick: a drag on a bar, a click on the heading; the scroll bars; a click on a colony's name selects it (FollowStarNameClick)
   q.c.style.touchAction = 'none';
   q.c.addEventListener('pointerdown', (ev) => {
     const pt = q.at(ev), v = pt.v + Y0;
-    if (pt.h >= PW && pt.h < PW + 12) { LOW301.pTop += v < (165 + 331) / 2 ? -1 : 1; a.renderPanel(); return; }
-    if (pt.h >= (V4 ? 213 : 214) && (!V4 || v > 181 + 35)) { LOW301.bTop += v < (V4 ? (181 + 35 + 331) / 2 : (181 + 331) / 2) ? -1 : 1; a.renderPanel(); return; }
+    if (pt.h >= PW && pt.h < PW + 12) { LOW301.pTop += v < (165 + FT) / 2 ? -1 : 1; a.renderPanel(); return; }
+    if (pt.h >= (V4 ? 213 : 214) && (!V4 || v > 181 + 35)) { LOW301.bTop += v < (V4 ? (181 + 35 + FT) / 2 : (181 + FT) / 2) ? -1 : 1; a.renderPanel(); return; }
     if (pt.h < BL) return;
     if (v < 181) { if (pt.h >= x0 && a.flipBarScale) a.flipBarScale(); return; }
     const e = V4 ? (v < 181 + 28 ? slots[Math.floor((v - 181) / 14)] : v >= 181 + 35 ? slots[2 + LOW301.bTop + Math.floor((v - 181 - 35) / 14)] : null) : slots[LOW301.bTop + Math.floor((v - 181) / 14)]; if (!e) return;
@@ -3217,7 +3224,7 @@ function frame75() {
   de.classList.toggle('mac75', on); de.classList.toggle('mac405', V4);
   // (the frame changes the map's box: the first view, fitted before it, is fitted again once it is in place, so a home star near the foot
   // isn't left under the windows there: real-play's 4k select-colony failures, 19-20 Nov)
-  if (TB75.on !== on) { TB75.on = on; requestAnimationFrame(() => { const a = A(); if (a && a.G) { a.UI.fitted = false; a.resize(); } }); }
+  if (TB75.on !== on) { TB75.on = on; requestAnimationFrame(() => { const a = A(); if (a && a.G) { a.UI.fitted = false; a.resize(); a.renderPanel(); } }); }
   const main = document.getElementById('main'); let mw = document.getElementById('mapwin301');
   if (!on) { if (mw) mw.remove(); const ck = document.getElementById('clock405'); if (ck) ck.remove(); return; }
   if (!mw) { mw = A().el('div', { id: 'mapwin301', 'aria-hidden': 'true' }, A().el('canvas', { class: 'tb75' })); main.prepend(mw); }
@@ -3263,7 +3270,7 @@ function clock405() {
   const n = Math.max(Math.abs(ex - 28), Math.abs(ey - 30)); for (let i = 0; i <= n; i++) { const px = Math.round(28 + (ex - 28) * i / n), py = Math.round(30 + (ey - 30) * i / n); x.fillRect(px, py, 2, 2); }
 }
 if (V4) setInterval(() => { if (document.getElementById('clock405') || (G() && document.documentElement.classList.contains('mac75'))) clock405(); }, 250);
-window.addEventListener('resize', () => { if (V3 && G()) frame75(); });
+window.addEventListener('resize', () => { if (V3 && G()) { frame75(); if (document.documentElement.classList.contains('mac75')) A().renderPanel(); } }); // (the players and budget pane follows the window's height)
 const NARROW301 = window.matchMedia('(max-width: 760px)');
 NARROW301.addEventListener('change', () => { if (window.HOMAC301 && A() && A().G) { A().renderPanel(); A().resize(); } });
 

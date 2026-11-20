@@ -195,6 +195,9 @@ const hall = Object.assign({}, W.hall, { rank, date, loser: () => 'Loser:' });
 // the missing colon and the technology names are right on the Mac (above).
 const MAC_SLIPS = ['poorestOut', 'designs30', 'refuelCheck', 'scrapRange', 'star0', 'keptStarNames', 'translations', 'iosFillings'];
 const FIXES = W.fixes.filter(f => MAC_SLIPS.includes(f.id)).concat([
+  // (Jake, 20 Nov 2026: RecalcFleetsAtNewStar @110644 takes the star's first fleet, often a satellite; js/skins/mac12/ui.js fleetBox301)
+  { id: 'firstShip', title: 'Choosing a star selects a ship, not its satellite',
+    text: 'Choosing a star selected the first fleet in its list, often a satellite, which can’t move, so it took another click to get a ship that could. The patch selects a ship first: a Scout, then a Fighter, Dreadnought, Tanker or Colony Ship, the satellite last. A click on a fleet’s row still selects that fleet.' },
   { id: 'welcomeVersion', title: 'The welcome report gives the right version',
     text: 'The first report of a game said “Spaceward Ho! Version 4.0.3”: the string was never updated for 4.0.5. The patch says 4.0.5.' },
 ]);

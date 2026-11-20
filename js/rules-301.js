@@ -2132,6 +2132,9 @@ E.registerRules('301', Object.assign({}, D, {
   // computers ask for each in js/ai-301.js
   patchVersion: null, // its own (3.0.1.1), not 2.0's
   fixes: [
+    // (Jake, 20 Nov 2026: RecalcFleetsAtNewStar takes the star's first fleet, often a satellite; js/skins/mac12/ui.js fleetBox301)
+    { id: 'firstShip', title: 'Choosing a star selects a ship, not its satellite',
+      text: 'Choosing a star selected the first fleet in its list, often a satellite, which can’t move, so it took another click to get a ship that could. The patch selects a ship first: a Scout, then a Fighter, Dreadnought, Tanker or Colony Ship, the satellite last. A click on a fleet’s row still selects that fleet.' },
     { id: 'skip2010', title: 'The computers play their first turn on Spiral and Cluster maps',
       text: 'On Spiral and Cluster maps the computers did nothing in 2010: a mark set so the map would be laid out in 2010 was never cleared. The patch lets them plan from the first turn, as 4.0.5 does.' },
     { id: 'refuelCheck', title: 'Stranded fighters ask for a colony only when they are stranded',

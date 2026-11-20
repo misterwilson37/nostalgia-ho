@@ -217,7 +217,7 @@ window.HOMAC4 = {
     const n = doc.querySelector('#tnew'), o = doc.querySelector('#tcont');
     if (n) n.textContent = 'New Game';
     if (o) { o.textContent = 'Open Game'; n.before(o); }
-    const im = doc.querySelector('#timport'); if (im) im.textContent = 'Import a Game…';
+    const im = doc.querySelector('#timport'); if (im) im.textContent = 'Import…'; // (short: it takes Quit's 74-pixel place in DITL 1200's row, Jake 20 Nov)
     // inside the start-up window, under the splash
     const b = doc.querySelector('#titlescreen .tbtns'), w = doc.querySelector('#titlescreen .tsplash .wbody');
     if (b && w) w.append(b);
