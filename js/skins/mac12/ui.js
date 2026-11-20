@@ -2161,6 +2161,20 @@ function config405(back) {
     txt20('No Defense', [70, 10, 86, 85]), s2, txt20('Dig In', [70, 250, 86, 325]), ok20('Cancel', [114, 190, 134, 248], () => done(false))),
     { cls: 'mac12 dl20w', label: 'Configure Computer’s Auto Play Style' });
 }
+// 4.0.5's end of the game (DLOG 5041 / 5051 in colour, 5040 / 5050 in black and white, 226 x 262; shot 163): "Congratulations! You have conquered
+// the galaxy!" (13, 13, 215, 49), PICT 3530 (39, 52), OK (92, 220); "Unfortunately, you have been eliminated from the game…" (13, 13, 222, 47),
+// PICT 3540 (39, 52), "Oh, well…" (80, 220). The pictures 3030 / 3040 in black and white.
+function youWon405(kind, Y, done) {
+  const a = A(), el = a.el, won = kind === 'won', col = COLOUR3, im = a.IMG['dos:p' + (won ? (col ? 3530 : 3030) : (col ? 3540 : 3040))] || a.IMG['dos:p' + (won ? 3530 : 3540)];
+  const close = () => { back.remove(); if (done) done(); };
+  const back = el('div', { class: 'scrim', onkeydown: (e) => { if (e.key === 'Escape' || e.key === 'Enter') { e.stopPropagation(); close(); } } },
+    el('div', { class: 'win small alert notitle mac12 dl20w', role: 'alertdialog', 'aria-modal': 'true', 'aria-label': Y.text },
+      dlog20(226, 262, el('button', { type: 'button', class: 'ok20 def20', style: at20(won ? [220, 92, 240, 150] : [220, 80, 240, 151]) + ';min-width:0;padding:0', onclick: close }, raw('span', won ? 'OK' : 'Oh, well…')),
+        txt20(won ? 'Congratulations! You have conquered the galaxy!' : 'Unfortunately, you have been eliminated from the game…', won ? [13, 13, 49, 215] : [13, 13, 47, 222]),
+        im ? el('img', { src: im.src, alt: '', style: at20(won ? [52, 39, 203, 188] : [52, 39, 204, 188]) + ';image-rendering:pixelated' }) : null)));
+  document.body.append(back); back.querySelector('button').focus();
+  return true;
+}
 // 4.0.5's Graph History (GraphHistory @102922: DLOG 6055 in colour, 6056 in black and white; 531 x 303; DRAWGHBARGRAPH @102f46,
 // SetGraphIconList @102d14; Jake's shot 018). "Select an icon to see recent recorded history:" (1, 4); the graph (20, 4, 243, 488): the
 // legends of the chosen money series right-aligned at 76, a row of 10 each, in their colours; the plot from 84, grey (#cccccc) in a
@@ -2566,13 +2580,20 @@ function nameStarLayout(f, o) {
   f.addEventListener('submit', (e) => { if (!o.inp.value.trim() && decline) { e.preventDefault(); e.stopImmediatePropagation(); decline.click(); } }, true);
   f.innerHTML = '';
   f.setAttribute('style', 'position:relative;width:281px;height:217px');
-  f.append(raw('p', NS.text, { style: at(9, 6, 265, 35) + ';margin:0' }), raw('p', NS.rule || '', { style: at(9, 45, 263, 34) + ';margin:0' }),
-    raw('p', NS.hint || '', { style: at(9, 82, 263, 34) + ';margin:0' }),
-    V2 ? el('img', { src: window.HOMAC2_COLOUR ? 'assets/skins/mac2/sprites/p3500.png' : (a.IMG['dos:p3500'] || {}).src, // (the colour game shows the black and white sketch too: the colour pictures' file has no 3500, shot105)
+  // (4.0.5's DITL 4050 words: its rules give none of their own)
+  const T4 = V4 ? ['You won the game, so you get to name a star.', 'Star names must be 2 to 7 characters long. ', '(If you’d rather not name a star, click “OK” with the name blank.)', 'New Star Name:'] : null;
+  if (V4) f.classList.add('dl20');
+  f.append(raw('p', T4 ? T4[0] : NS.text, { style: at(9, 6, 265, 35) + ';margin:0' }), raw('p', T4 ? T4[1] : NS.rule || '', { style: at(9, 45, 263, 34) + ';margin:0' }),
+    raw('p', T4 ? T4[2] : NS.hint || '', { style: at(9, 82, 263, 34) + ';margin:0' }),
+    V2 || V4 ? el('img', { src: V4 ? (a.IMG['dos:p3500'] || {}).src : window.HOMAC2_COLOUR ? 'assets/skins/mac2/sprites/p3500.png' : (a.IMG['dos:p3500'] || {}).src, // (4.0.5: PICT 3500 drawn by DRAWBWCOLORGOODGUY, shot 164) // (the colour game shows the black and white sketch too: the colour pictures' file has no 3500, shot105)
        alt: '', style: at(10, 118, 74, 74) + ';image-rendering:pixelated' }) : null, // (2.0.1's DITL 4050 item 4: PICT 3500 at (118, 10, 192, 84))
-    raw('span', NS.label || '', { style: at(95, 119, 150, 16) }), o.inp, o.err,
-    el('button', { type: 'submit', style: at(196, 179, 58, 20) + ';min-width:0;padding:0' }, raw('span', NS.ok || 'OK')));
-  return true;
+    raw('span', T4 ? T4[3] : NS.label || '', { style: at(95, 119, 150, 16) }), o.inp, o.err,
+    el('button', { type: 'submit', class: V4 ? 'ok20 def20' : null, style: at(196, 179, 58, 20) + ';min-width:0;padding:0' }, raw('span', NS.ok || 'OK')));
+  if (V4) { // (Chicago 12 with its 16-pixel lines; the field a plain box 3 pixels round its DITL rect (97, 144, 187, 160): shot 164)
+    f.querySelectorAll('p, span').forEach(q => { q.style.font = "15px/16px 'Mac Chicago 12', Chicago, sans-serif"; });
+    o.inp.setAttribute('style', at(94, 141, 96, 22) + ";box-sizing:border-box;padding:0 3px;border:1px solid #000;border-radius:0;background:#fff;color:#000;font:15px/16px 'Mac Chicago 12', Chicago, sans-serif;outline:none");
+  }
+  return V4 ? 'mac12 dl20w' : true; // (4.0.5: the dialog frame and place of every 4.0.5 dialog)
 }
 
 // ---------- a route line (StarLine @c70c4, MakeArrowRegion @12da0) ----------
@@ -4569,12 +4590,26 @@ function afterTurn12(go) {
   };
   next();
 }
+// 4.0.5's dialogs where System 7 puts them (every DLOG's position word is 0x300A, alertPositionMainScreen): the window with its 8-pixel frame
+// centred across the screen, a fifth of the height left under the menu bar above it, both rounded down; shots 033 (89, 48), 163 (top 56),
+// 164 (171, 65). No dimming behind them (the shots). The remake's own windows stay as they are.
+function place405(win) {
+  const m = document.getElementById('main'), d = win && win.querySelector(':scope > .wbody > .dl20, :scope > .dl20, .dl20, .bw12w');
+  if (!m || !d || !document.documentElement.classList.contains('mac75')) return;
+  const k = MACS.s || 1, r = m.getBoundingClientRect(), W = r.width / k, H = r.height / k + 20, top0 = r.top / k - 20;
+  const w = win.offsetWidth, h = win.offsetHeight; // (the frame included: 8 a side)
+  const sc = win.closest('.scrim'); if (sc) { sc.style.placeItems = 'start'; sc.style.padding = '0'; sc.style.background = 'none'; }
+  win.style.position = 'fixed'; win.style.margin = '0';
+  win.style.left = (r.left / k + Math.trunc((W - w) / 2)) + 'px'; win.style.top = (top0 + 20 + Math.trunc((H - 20 - h) / 5)) + 'px';
+}
+if (V4) new MutationObserver((ms) => { for (const mu of ms) for (const n of mu.addedNodes) if (n.nodeType === 1) { const w = n.matches('.win.dl20w') ? n : n.querySelector && n.querySelector('.win.dl20w'); if (w) requestAnimationFrame(() => place405(w)); } }).observe(document.body, { childList: true, subtree: true });
 // 3.0.1 (js/skins/mac3): only the arrangement and the shared windows, above; the rest of this file is 1.2's and 2.0.1's
 if (V3) {
   document.documentElement.classList.add('mac301'); if (V4) document.documentElement.classList.add('mac405');
   // (the battle window's canvas text needs its bitmap faces loaded before its first frame)
   try { if (document.fonts) { document.fonts.load(SYS3); document.fonts.load(GEN93); if (V4) { document.fonts.load("12px 'Mac Geneva 9 Bold'"); document.fonts.load("12px 'Mac Geneva 9'").then(() => { const a = A(); if (a && a.G) a.renderPanel(); }); } } } catch (e) { /* (an old browser draws with the fallbacks) */ }
   window.HOMAC301 = {
+    ...(V4 ? { youWonLayout: (kind, Y, done) => (own() && G() ? youWon405(kind, Y, done) : false), nameStarLayout } : {}),
     get ownPanel() { return !!G() && own(); },
     // (the New Game window, for 3.0.1's own rules: its Create New Galaxy dialog over the form)
     newGame(f) { createGalaxy301(f); },
