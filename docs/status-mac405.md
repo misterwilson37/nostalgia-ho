@@ -103,7 +103,10 @@ capture).
 - **The turn's progress windows:** done (20 Nov): DLOG 7000's "Processing Year 2010..." for each ten years, then "Seeing What
   Happened..." (PerformEndTurn @c000c, DoOneTurn; shots 194-201), the same checker bar as before. Seen on the way: the bitmap fonts draw
   the digit 1 with a gap after it ("201 0", "$1 00,000"); the shots don't (a font matter, js/os/pixel-fonts.css: for Jake).
-- **The players list's second line** (shot 204): read in `DrawIconRect` @11537c: for a rival whose home you know (the header's +0x77c,
+- **The players list's second line: done (20 Nov, late)**, beside shot 204: known once best buddies (rules-405 `p.knows405`) or all of them
+  when you are out or the game is over. Report 0x419 (a rival telling you) is not modelled. Open: shot 204's list starts with Willy, not
+  you; why (scrolled, or you left out once out of colonies?) is unchecked.
+- (the original note) **The players list's second line** (shot 204): read in `DrawIconRect` @11537c: for a rival whose home you know (the header's +0x77c,
   -1 until then, set by `SetCompAttrs`), the name 4 higher and under it "%d.%d, %d°": their home's gravity relative to yours (x 100 / your
   +0x32, rounded to tenths) and its temperature (`CalcDisplayTemp`, F or C). Known when you become best buddies (`ConformPlayerAlliances`
   @c2ce4), when they tell you (report 0x419, `DoOneTurn`), or all at once (`ExploreEverything` @8464a). Needs a rules record of which
