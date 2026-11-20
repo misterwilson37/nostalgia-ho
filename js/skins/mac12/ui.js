@@ -1679,6 +1679,109 @@ function createGalaxy301(f) {
   const rs = field('rules'), dress = () => { const on = !rs || /^301/.test(rs.value); box.style.display = on ? '' : 'none'; moreBtn.style.display = on ? '' : 'none'; for (const n of rest) if (n.style && !keep(n)) n.style.display = on && !opened ? 'none' : ''; };
   if (rs) rs.addEventListener('change', dress); dress();
 }
+// 4.0.5's Create New Galaxy (doCreateGalaxyDlg @10f5e; DLOG / DITL 6080, 437 x 305, Jake's captures 002, 003, 188): the four lists at their
+// user items (Density 3050-3051 at (8, 40), Style 3020-3025 with Cluster at (160, 40), Intelligence 3030-3033 with Diabolical at (8, 116), Size
+// 3040-3044 with Humongous at (204, 116); LDEF 1001's 45 x 45 cells), "Number of Computer Players:" with its number (212, 172) and scroll bar
+// (CNTL 6080 at (232, 172), SetCtlMin 0, SetCtlMax 19), Alliances (8, 196), Luck in Battles (8, 220), "Automatically end turn for unconnected
+// players" (8, 244), the Turn Time Limit and Years Per Turn pop-ups (CNTL 6050 at (172, 196), 6060 at (172, 220): titles 106 wide, MENU 6050
+// No Time Limit / Fast (30/120) / Medium (60/180) / Slow (90/180), MENU 6060 10 / 20 / 30 / 50), "Base Difficulty Rating:" and its number
+// (AdjustDifficulty: the remake's 405 rating, which leaves the skill out: shot 002's Dumb, 3 computers, gives its 49), Cancel and Create.
+// Create goes on as the program does: Please Identify Yourself (4000), then the Join window (4010), and the game. The remake's own choices
+// (version, skin, language, the rest) under "More…", as 3.0.1's.
+function createGalaxy405(f) {
+  const a = A(), el = a.el, win = f.closest('.win'); if (!win) return;
+  const field = (n) => f.querySelector(`[name="${n}"]`), fire = (n) => n.dispatchEvent(new Event('change', { bubbles: true }));
+  const LISTS = [
+    { sel: 'w_density', rect: [40, 8, 87, 100], icons: [3050, 3051], names: ['Dense', 'Sparse'] },
+    { sel: 'w_shape', rect: [40, 160, 87, 432], icons: [3020, 3021, 3022, 3023, 3024, 3025], names: ['Circle', 'Random', 'Ring', 'Spiral', 'Grid', 'Cluster'] },
+    { sel: 'w_iq', rect: [116, 8, 163, 190], icons: [3030, 3031, 3032, 3033], names: ['Dumb', 'Average', 'Smart', 'Diabolical'] },
+    { sel: 'w_size', rect: [116, 204, 163, 431], icons: [3040, 3041, 3042, 3043, 3044], names: ['Small', 'Medium', 'Large', 'ExtraLarge', 'Humongous'] }];
+  const parts = [];
+  const frame = (r) => el('div', { style: at20([r[0] - 1, r[1] - 1, r[2] + 1, r[3] + 1]) + ';border:1px solid #000;box-sizing:border-box' });
+  for (const L of LISTS) {
+    const sel = field(L.sel); if (!sel) continue;
+    const vals = [...sel.options].map(o => o.value);
+    const w = cells20(L.icons.length, 1, L.icons.map((n, i) => ({ icon: 'dos:i' + n, name: L.names[i], id: vals[i] })), { sel: Math.max(0, vals.indexOf(sel.value)), pick: (c) => { sel.value = c.id; fire(sel); } });
+    w.el.setAttribute('style', w.el.getAttribute('style') + ';' + at20([L.rect[0] + 1, L.rect[1] + 1, L.rect[2] - 1, L.rect[3] - 1]));
+    parts.push(frame(L.rect), w.el);
+  }
+  const comp = field('computers'), num = raw('span', '', { class: 'dt20', style: at20([172, 212, 187, 231]) });
+  const c0 = comp && /^\d+$/.test(comp.value) ? +comp.value : 4, sb = sbar405([172, 232, 188, 362], { min: 0, max: 19 }, c0);
+  sb.cv.setAttribute('aria-label', 'Number of Computer Players');
+  sb.onset = () => { num.textContent = String(sb.v); if (comp && comp.value !== String(sb.v)) { comp.value = String(sb.v); fire(comp); } };
+  const check = (name, r, t) => { const n = field(name), cb = el('input', { type: 'checkbox', checked: n && n.checked ? 'checked' : false, onchange: (e) => { if (n) { n.checked = e.target.checked; fire(n); } } });
+    return el('label', { style: at20(r) + ';display:flex;align-items:center;gap:4px;white-space:nowrap' }, cb, raw('span', t)); };
+  const pop = (name, r, title, words) => { const n = field(name), vals = n ? [...n.options].map(o => o.value) : [];
+    const sel = el('select', { 'aria-label': title, style: at20([r[0], r[1] + 106, r[2] - 1, r[3] - 1]) + (r[3] - r[1] - 106 < 60 ? ';padding:0 17px 0 12px' : ''), onchange: (e) => { if (n) { n.value = e.target.value; fire(n); } } },
+      ...words.map((t, i) => el('option', { value: vals[i] != null ? vals[i] : t, selected: n && vals[i] === n.value ? 'selected' : false }, t)));
+    return [txt20(title, [r[0] + 1, r[1], r[2], r[1] + 106]), sel]; };
+  const rating = f.querySelector('.rating b'), diff = raw('span', rating ? rating.textContent : '', { class: 'dt20', style: at20([276, 160, 292, 188]) });
+  if (rating) new MutationObserver(() => { diff.textContent = rating.textContent; }).observe(rating, { childList: true, characterData: true, subtree: true });
+  let opened = false;
+  const moreBtn = el('button', { type: 'button', class: 'ok20', style: 'position:absolute;left:8px;top:312px;min-width:0;padding:0 6px;height:20px', onclick: () => { opened = !opened; dress(); } }, raw('span', 'More… (the remake’s own)'));
+  const box = dlog20(437, 305, txt20('Create New Galaxy', [0, 160, 16, 300]), txt20('Galaxy Style:', [20, 160, 38, 252]), txt20('Galaxy Density:', [20, 8, 38, 117]),
+    txt20('Computer Intelligence:', [96, 8, 114, 188]), txt20('Galaxy Size:', [96, 204, 113, 326]), ...parts,
+    txt20('Number of Computer Players:', [172, 8, 188, 209]), num, sb.cv,
+    check('alliances', [196, 8, 214, 106], 'Alliances'), check('luck', [220, 8, 238, 132], 'Luck in Battles'), check('autoend', [244, 8, 262, 425], 'Automatically end turn for unconnected players'),
+    ...pop('timelimit', [196, 172, 216, 427], 'Turn Time Limit:', ['No Time Limit', 'Fast (30/120)', 'Medium (60/180)', 'Slow (90/180)']),
+    ...pop('w_years', [220, 172, 240, 328], 'Years Per Turn:', ['10', '20', '30', '50']),
+    txt20('Base Difficulty Rating:', [276, 8, 292, 158]), diff,
+    el('button', { type: 'button', class: 'ok20 def20', style: at20([272, 366, 292, 424]) + ';min-width:0;padding:0', onclick: () => identify405(f) }, raw('span', 'Create')),
+    ok20('Cancel', [272, 288, 292, 346], () => a.closeModal()), moreBtn);
+  box.style.marginBottom = '30px';
+  const holder = el('div', { class: 'cg20' }, box);
+  const rest = [...f.childNodes]; f.prepend(holder);
+  const keep = (n) => n.classList && (n.classList.contains('picks') || n.classList.contains('langnote') || n.classList.contains('btns'));
+  const rs = field('rules'), dress = () => { const on = !rs || rs.value === '405' || rs.value === 'mac405'; box.style.display = on ? '' : 'none'; moreBtn.style.display = on ? '' : 'none'; for (const n of rest) if (n.style && !keep(n)) n.style.display = on && !opened ? 'none' : ''; };
+  if (rs) rs.addEventListener('change', dress); dress();
+  sb.draw();
+}
+// a 4.0.5 dialog over the New Game window (itself a modal): a layer of its own, placed as the program's (place405); close() takes it away
+function layer405(dl, label) {
+  const a = A(), el = a.el;
+  const back = el('div', { class: 'yp301', style: 'position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0)' },
+    el('div', { class: 'win mac12 dl20w', role: 'dialog', 'aria-modal': 'true', 'aria-label': label, style: 'background:#fff;zoom:var(--mac, 1)' }, dl));
+  document.body.append(back);
+  return { el: back, close: () => back.remove() };
+}
+// DLOG / DITL 4000 (201 x 197; Jake's captures 005, 189): "Please Identify Yourself:" (13, 13), "Player Name:" (13, 39) and its field (13, 65,
+// 160, 81: the New Game window's name, all of it selected), "Player Password:" (13, 91) and its field (13, 117: the remake keeps no password,
+// so it takes nothing), Cancel (39, 160), OK (117, 160, default). A name is needed (the remake's rule: a blank name keeps the one there was).
+function identify405(f) {
+  const a = A(), el = a.el, nm = f.querySelector('[name="name"]');
+  const name = el('input', { type: 'text', value: nm ? nm.value : '', maxlength: 31, 'aria-label': 'Player Name', style: at20([65, 13, 81, 160]) });
+  const pw = el('input', { type: 'password', disabled: 'disabled', title: 'The remake keeps no password', 'aria-label': 'Player Password', style: at20([117, 13, 133, 160]) });
+  const ok = () => { const v = name.value.trim(); if (nm && v) { nm.value = v; nm.dispatchEvent(new Event('change', { bubbles: true })); } L.close(); join405(f); };
+  const L = layer405(dlog20(201, 197, txt20('Please Identify Yourself:', [13, 13, 29, 193]), txt20('Player Name:', [39, 13, 55, 109]), name,
+    txt20('Player Password:', [91, 13, 108, 133]), pw, ok20('Cancel', [160, 39, 180, 97], () => L.close()),
+    el('button', { type: 'button', class: 'ok20 def20', style: at20([160, 117, 180, 175]) + ';min-width:0;padding:0', onclick: ok }, raw('span', 'OK'))), 'Please Identify Yourself');
+  name.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); ok(); } if (e.key === 'Escape') { e.preventDefault(); L.close(); } });
+  setTimeout(() => { name.focus(); name.select(); allSel405(name); }, 0);
+}
+// DLOG / DITL 4010, the Join window (DoNewPlayerDlg @144696: 360 x 223; Jake's captures 006, 191): "Your Name:" (8, 4) and the name (116, 4),
+// "Password:" (8, 24) and nothing after it, the picture (user item 13 at (13, 80), 74 x 74: PICT 3020, the shot's), "Skill Level:" (117, 54)
+// over five radio buttons, Novice to Expert (130, 72 .. 148), "Sex:" (260, 54) over Male (273, 80) and Female (273, 106), Cancel (208, 180),
+// Join (284, 180, default). Novice chosen when it opens (both shots). Join starts the game.
+function join405(f) {
+  const a = A(), el = a.el, field = (n) => f.querySelector(`[name="${n}"]`), nm = field('name'), sk = field('w_skill'), fe = field('female');
+  const SK = [['novice', 'Novice'], ['beginner', 'Beginner'], ['normal', 'Normal'], ['advanced', 'Advanced'], ['expert', 'Expert']];
+  let skill = 'novice', female = fe && fe.value === '1';
+  const radios = SK.map(([v, t], i) => el('label', { style: at20([72 + 19 * i, 130, 90 + 19 * i, 236]) + ';display:flex;align-items:center;gap:4px;white-space:nowrap' },
+    el('input', { type: 'radio', name: 'sk405', checked: v === skill ? 'checked' : false, onchange: () => { skill = v; } }), raw('span', t)));
+  const sex = [['Male', [80, 273, 98, 328], false], ['Female', [106, 273, 124, 345], true]].map(([t, r, w]) => el('label', { style: at20(r) + ';display:flex;align-items:center;gap:4px;white-space:nowrap' },
+    el('input', { type: 'radio', name: 'sx405', checked: w === female ? 'checked' : false, onchange: () => { female = w; } }), raw('span', t)));
+  const im = a.IMG['dos:p3020'], pic = im ? el('img', { src: im.src, alt: '', style: at20([80, 13, 154, 87]) + ';image-rendering:pixelated' }) : null;
+  const go = () => {
+    if (sk) { sk.value = skill; sk.dispatchEvent(new Event('change', { bubbles: true })); }
+    if (fe) { fe.value = female ? '1' : '0'; fe.dispatchEvent(new Event('change', { bubbles: true })); }
+    L.close(); f.requestSubmit();
+  };
+  const L = layer405(dlog20(360, 223, txt20('Your Name:', [4, 8, 19, 104]), txt20(nm ? nm.value : '', [4, 116, 22, 315]), txt20('Password:', [24, 8, 40, 83]),
+    pic, txt20('Skill Level:', [54, 117, 70, 202]), ...radios, txt20('Sex:', [54, 260, 70, 335]), ...sex,
+    ok20('Cancel', [180, 208, 200, 266], () => L.close()),
+    el('button', { type: 'button', class: 'ok20 def20', style: at20([180, 284, 200, 342]) + ';min-width:0;padding:0', onclick: go }, raw('span', 'Join'))), 'Join');
+  setTimeout(() => { const b = L.el.querySelector('.def20'); if (b) b.focus(); }, 0);
+}
 // DLOG 4120 (doYearsPerTurnDialog @f0c28, 293 x 228; DITL 4120): "How many years should go by every time the turn is ended?" (12, 12), five
 // radio buttons 10 (Normal), 20, 30, 50, 100 Years (56, 80, 104, 128, 152 at 12), Cancel (192, 144) and OK (192, 220, default ring);
 // user item 9 (80, 188, 154, 262) is drawn by a routine of the program not read yet: left empty. Not in Jake's games.
@@ -4708,7 +4811,7 @@ if (V3) {
     ...(V4 ? { youWonLayout: (kind, Y, done) => (own() && G() ? youWon405(kind, Y, done) : false), nameStarLayout, confirm: (text, yes) => (own() && /armageddon device\?/.test(String(text)) ? armAsk405(text, yes) : false) } : {}),
     get ownPanel() { return !!G() && own(); },
     // (the New Game window, for 3.0.1's own rules: its Create New Galaxy dialog over the form)
-    newGame(f) { createGalaxy301(f); },
+    newGame(f) { if (V4) createGalaxy405(f); else createGalaxy301(f); },
     // the battle window: DLOG 7010 / 7011 are 2.0.1's and HaveGroupShoot the same code; 3.0.1's own drawing in battleWindow (V3)
     battleWindow: (b, k) => (own() ? battleWindow(b, k) : false),
     // (the program's own battle window with modern conveniences on too: Jake, 18 Nov, the remake's looked wrong in this skin)
