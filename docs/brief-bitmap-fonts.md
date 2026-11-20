@@ -70,3 +70,10 @@ Run `tools/real-play.js --skin=mac12,mac2,mac3,dos --size=desktop,phone-l` after
 ## 20 Nov 2026: Amiga
 - The Amiga skin's Topaz (`assets/fonts/Topaz.woff2`, `TopazTall.woff2`) is now the real Topaz (Kickstart 2.x, Latin-1) from the Multi Platform Amiga Fonts pack, which its README releases under the GPL with the font
   exception ("Topaz is (c) AmigaInc"): source and notice in `assets/skins/amiga/fonts/`; checked against Jake's requester capture (shot017). Turkish: none in Topaz (the Amiga had none); falls back.
+
+## 20 Nov 2026: free fallbacks for Apple's and Microsoft's outline fonts
+- **Not shipped, still:** Charcoal, Lucida Grande, Geneva (TrueType), Verdana: Apple's and Microsoft's (the Apple font position: private repo HANDOFF, 20 Nov). The looks name them first, so a visitor who has them sees them.
+- **Fallbacks, after the names** (`js/os/open-fonts.css`, imported by `base.css`; fetched only where a look's stack reaches them): Luxi Sans for Lucida Grande (Aqua look), Bitstream Vera Sans for Verdana (base stack, Workbench),
+  Liberation Sans for Geneva (Mac OS 9 look); licences beside the files in `assets/fonts/`. Luxi's licence forbids modification, so its TTFs ship as released.
+- **Mac OS 8 look (and Netscape Mac):** Charcoal, then the Mac's own Chicago 12 bitmap (`"Charcoal Stand-in"`, js/os/macos8.css; ChiKareGo2 is not needed for it). Mac OS 9's smooth Charcoal has no stand-in.
+- The single-file build does not inline these (24 looks would each carry them); a build's looks fall back to system fonts.

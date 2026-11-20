@@ -5,7 +5,7 @@
 @import url("dos.css");
 :root {
   --plat: #aaaaaa; --plat2: #aaaaaa; --edge: #000; --sub: #222; --hi: #6688bb;
-  --ui: Verdana, "DejaVu Sans", Arial, sans-serif;
+  --ui: Verdana, "Bitstream Vera Sans", "DejaVu Sans", Arial, sans-serif;
 }
 .box, .designer { border-color: #fff #000 #000 #fff; }
 #menubar { background: #fff; }

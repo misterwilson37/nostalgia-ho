@@ -41,12 +41,12 @@ def skin_css(path, inline_pixel=True):
     # the local fonts (assets/fonts, and the looks' pixel fonts in assets/skins/*/fonts) go in as data: URIs, relative to the file they are named in
     MIME = {'woff2': 'font/woff2', 'woff': 'font/woff', 'ttf': 'font/ttf'}
     font = lambda m: 'url("' + uri(os.path.normpath(os.path.join(os.path.dirname(path), m.group(1))), MIME[m.group(2)]) + '")'
-    return re.sub(r'url\("((?!https?:|data:)[^"]*(?:assets/fonts|' + (r'assets/skins/[a-z0-9]+/fonts' if inline_pixel else r'(?!)') + r')/[^"]+\.(woff2|woff|ttf))"\)', font, css)
+    return re.sub(r'url\("((?!https?:|data:)[^"]*(?:assets/fonts(?=/[^"/]+\.woff2)|' + (r'assets/skins/[a-z0-9]+/fonts' if inline_pixel else r'(?!)') + r')/[^"]+\.(woff2|woff|ttf))"\)', font, css)
 
 css = skin_css(P('js', 'skins', skin, 'style.css'))
 # every OS look (js/os), each in a <style data-os> that js/skins.js turns on
 # or off (media), ahead of the skin's CSS as the separate files load
-looks = sorted(f[:-4] for f in os.listdir(P('js', 'os')) if f.endswith('.css') and f not in ('base.css', 'roboto.css', 'pixel-fonts.css', 'pixel-sizes.css'))
+looks = sorted(f[:-4] for f in os.listdir(P('js', 'os')) if f.endswith('.css') and f not in ('base.css', 'roboto.css', 'pixel-fonts.css', 'pixel-sizes.css', 'open-fonts.css'))
 os_css = ''.join(f'<style data-os="{k}" media="not all">\n' + skin_css(P('js', 'os', k + '.css'), k in OWN_LOOKS) + '</style>\n' for k in looks)
 js = open(P('js', 'skins', skin, 'ui.js')).read()
 # a skin built on another one loads that one's ui.js after its own

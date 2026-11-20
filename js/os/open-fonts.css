@@ -1,0 +1,10 @@
+/* Spaceward Ho! — free fonts as fallbacks for the system fonts some looks name (docs/brief-bitmap-fonts.md): a visitor without Lucida Grande, Verdana or Geneva gets a close free face instead of
+   the browser's default. Each is declared under its own name and listed after the Apple / Microsoft names in a look's font stack, so a system font that is there still wins, and a file is
+   fetched only where a look uses it. Left exactly as released (no subsetting or format change: the Luxi licence forbids modifying it). Licences beside the files in assets/fonts/:
+   Luxi Sans (Bigelow & Holmes, for Lucida Grande), Bitstream Vera Sans (Bitstream, for Verdana), Liberation Sans (SIL OFL 1.1, for Geneva and Arial). All three have the Turkish letters. */
+@font-face { font-family: "Luxi Sans"; src: url("../../assets/fonts/luxisr.ttf") format("truetype"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Luxi Sans"; src: url("../../assets/fonts/luxisb.ttf") format("truetype"); font-weight: 700; font-display: swap; }
+@font-face { font-family: "Bitstream Vera Sans"; src: url("../../assets/fonts/Vera.ttf") format("truetype"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Bitstream Vera Sans"; src: url("../../assets/fonts/Vera-Bold.ttf") format("truetype"); font-weight: 700; font-display: swap; }
+@font-face { font-family: "Liberation Sans"; src: url("../../assets/fonts/LiberationSans-Regular.ttf") format("truetype"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Liberation Sans"; src: url("../../assets/fonts/LiberationSans-Bold.ttf") format("truetype"); font-weight: 700; font-display: swap; }

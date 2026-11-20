@@ -9,10 +9,11 @@
    one of its windows (4.0.5's Hall of Fame, a start-up window).
    This file is the classic skin's own chrome as it was before looks were
    split out; every look starts from it. */
+@import url("open-fonts.css");
 :root {
   --plat: #dedede; --plat2: #cfcfcf; --edge: #8e8e8e; --ink: #1d1b22; --sub: #57545f;
   --hi: #2f4fb8;
-  --ui: Geneva, "Lucida Grande", Verdana, sans-serif;
+  --ui: Geneva, "Lucida Grande", Verdana, "Bitstream Vera Sans", sans-serif;
 }
 body { font: 12px/1.4 var(--ui); }
 #menubar { background: linear-gradient(#f4f4f4, #d6d6d6); border-bottom: 1px solid #777; padding: 0 8px; height: 26px; }
